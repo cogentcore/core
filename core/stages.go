@@ -29,7 +29,7 @@ type Stages struct { //types:add
 
 	// render window to which we are rendering.
 	// rely on the RenderContext wherever possible.
-	RenderWindow *RenderWindow
+	RenderWindow *renderWindow
 
 	// growing stack of viewing history of all stages.
 	History []*Stage `set:"-"`

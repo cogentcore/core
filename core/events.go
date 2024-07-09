@@ -149,7 +149,7 @@ func (em *Events) mains() *Stages {
 
 // RenderWindow returns the overall render window in which we reside,
 // which could be nil.
-func (em *Events) RenderWindow() *RenderWindow {
+func (em *Events) RenderWindow() *renderWindow {
 	mgr := em.mains()
 	if mgr == nil {
 		return nil
@@ -837,7 +837,7 @@ func (em *Events) setCursor(cur cursors.Cursor) {
 	if win == nil {
 		return
 	}
-	if !win.IsVisible() {
+	if !win.isVisible() {
 		return
 	}
 	errors.Log(system.TheApp.Cursor(win.SystemWindow).Set(cur))
@@ -1090,10 +1090,10 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		}
 		e.SetHandled()
 	case keymap.ZoomIn:
-		win.StepZoom(1)
+		win.stepZoom(1)
 		e.SetHandled()
 	case keymap.ZoomOut:
-		win.StepZoom(-1)
+		win.stepZoom(-1)
 		e.SetHandled()
 	case keymap.Refresh:
 		e.SetHandled()

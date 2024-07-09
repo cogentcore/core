@@ -291,7 +291,7 @@ func (ss *Sprites) ConfigSprites(drw system.Drawer) {
 	sa := &ss.SzAlloc
 	for gpi, ga := range sa.GpAllocs {
 		gsz := sa.GpSizes[gpi]
-		imgidx := SpriteStart + gpi
+		imgidx := spriteStart + gpi
 		drw.ConfigImageDefaultFormat(imgidx, gsz.X, gsz.Y, len(ga))
 		for ii, spi := range ga {
 			if err := ss.Names.IndexIsValid(spi); err != nil {
@@ -310,7 +310,7 @@ func (ss *Sprites) DrawSprites(drw system.Drawer) {
 	// fmt.Println("draw sprites")
 	sa := &ss.SzAlloc
 	for gpi, ga := range sa.GpAllocs {
-		imgidx := SpriteStart + gpi
+		imgidx := spriteStart + gpi
 		for ii, spi := range ga {
 			if ss.Names.IndexIsValid(spi) != nil {
 				continue

@@ -25,8 +25,8 @@ const (
 func (wb *WidgetBase) SizeClass() SizeClasses {
 	dots := float32(wb.Scene.SceneGeom.Size.X)
 	if wb.Scene.prefSizing {
-		if CurrentRenderWindow != nil {
-			rg := CurrentRenderWindow.SystemWindow.RenderGeom()
+		if currentRenderWindow != nil {
+			rg := currentRenderWindow.SystemWindow.RenderGeom()
 			dots = float32(rg.Size.X)
 		}
 	}

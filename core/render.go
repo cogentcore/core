@@ -231,14 +231,14 @@ func (sc *Scene) doUpdate() bool {
 		sc.sceneNeedsRender = false
 		sc.imageUpdated = true
 		pr.End()
-	case sc.lastRender.NeedsRestyle(rc):
+	case sc.lastRender.needsRestyle(rc):
 		pr := profile.Start("restyle")
 		sc.applyStyleScene()
 		sc.layoutRenderScene()
 		sc.needsLayout = false
 		sc.sceneNeedsRender = false
 		sc.imageUpdated = true
-		sc.lastRender.SaveRender(rc)
+		sc.lastRender.saveRender(rc)
 		pr.End()
 	case sc.needsLayout:
 		pr := profile.Start("layout")

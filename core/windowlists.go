@@ -14,31 +14,31 @@ import (
 )
 
 // RenderWindowList is a list of windows.
-type RenderWindowList []*RenderWindow
+type RenderWindowList []*renderWindow
 
 // Add adds a window to the list.
-func (wl *RenderWindowList) Add(w *RenderWindow) {
-	RenderWindowGlobalMu.Lock()
+func (wl *RenderWindowList) Add(w *renderWindow) {
+	renderWindowGlobalMu.Lock()
 	*wl = append(*wl, w)
-	RenderWindowGlobalMu.Unlock()
+	renderWindowGlobalMu.Unlock()
 }
 
 // Delete removes a window from the list.
-func (wl *RenderWindowList) Delete(w *RenderWindow) {
-	RenderWindowGlobalMu.Lock()
-	defer RenderWindowGlobalMu.Unlock()
-	*wl = slices.DeleteFunc(*wl, func(rw *RenderWindow) bool {
+func (wl *RenderWindowList) Delete(w *renderWindow) {
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
+	*wl = slices.DeleteFunc(*wl, func(rw *renderWindow) bool {
 		return rw == w
 	})
 }
 
 // FindName finds window with given name on list (case sensitive) -- returns
 // window and true if found, nil, false otherwise.
-func (wl *RenderWindowList) FindName(name string) (*RenderWindow, bool) {
-	RenderWindowGlobalMu.Lock()
-	defer RenderWindowGlobalMu.Unlock()
+func (wl *RenderWindowList) FindName(name string) (*renderWindow, bool) {
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
 	for _, wi := range *wl {
-		if wi.Name == name {
+		if wi.name == name {
 			return wi, true
 		}
 	}
@@ -48,7 +48,7 @@ func (wl *RenderWindowList) FindName(name string) (*RenderWindow, bool) {
 // FindData finds window with given Data on list -- returns
 // window and true if found, nil, false otherwise.
 // data of type string works fine -- does equality comparison on string contents.
-func (wl *RenderWindowList) FindData(data any) (*RenderWindow, bool) {
+func (wl *RenderWindowList) FindData(data any) (*renderWindow, bool) {
 	if reflectx.AnyIsNil(data) {
 		return nil, false
 	}
@@ -57,8 +57,8 @@ func (wl *RenderWindowList) FindData(data any) (*RenderWindow, bool) {
 		fmt.Printf("programmer error in RenderWinList.FindData: Scene.Data type %s not comparable (value: %v)\n", typ.String(), data)
 		return nil, false
 	}
-	RenderWindowGlobalMu.Lock()
-	defer RenderWindowGlobalMu.Unlock()
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
 	for _, wi := range *wl {
 		msc := wi.MainScene()
 		if msc == nil {
@@ -73,9 +73,9 @@ func (wl *RenderWindowList) FindData(data any) (*RenderWindow, bool) {
 
 // FindRenderWindow finds window with given system.RenderWindow on list -- returns
 // window and true if found, nil, false otherwise.
-func (wl *RenderWindowList) FindRenderWindow(osw system.Window) (*RenderWindow, bool) {
-	RenderWindowGlobalMu.Lock()
-	defer RenderWindowGlobalMu.Unlock()
+func (wl *RenderWindowList) FindRenderWindow(osw system.Window) (*renderWindow, bool) {
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
 	for _, wi := range *wl {
 		if wi.SystemWindow == osw {
 			return wi, true
@@ -86,15 +86,15 @@ func (wl *RenderWindowList) FindRenderWindow(osw system.Window) (*RenderWindow, 
 
 // Len returns the length of the list, concurrent-safe
 func (wl *RenderWindowList) Len() int {
-	RenderWindowGlobalMu.Lock()
-	defer RenderWindowGlobalMu.Unlock()
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
 	return len(*wl)
 }
 
 // Win gets window at given index, concurrent-safe
-func (wl *RenderWindowList) Win(idx int) *RenderWindow {
-	RenderWindowGlobalMu.Lock()
-	defer RenderWindowGlobalMu.Unlock()
+func (wl *RenderWindowList) Win(idx int) *renderWindow {
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
 	if idx >= len(*wl) || idx < 0 {
 		return nil
 	}
@@ -103,9 +103,9 @@ func (wl *RenderWindowList) Win(idx int) *RenderWindow {
 
 // Focused returns the (first) window in this list that has the WinGotFocus flag set
 // and the index in the list (nil, -1 if not present)
-func (wl *RenderWindowList) Focused() (*RenderWindow, int) {
-	RenderWindowGlobalMu.Lock()
-	defer RenderWindowGlobalMu.Unlock()
+func (wl *RenderWindowList) Focused() (*renderWindow, int) {
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
 
 	for i, fw := range *wl {
 		if fw.gotFocus {
@@ -117,13 +117,13 @@ func (wl *RenderWindowList) Focused() (*RenderWindow, int) {
 
 // FocusNext focuses on the next window in the list, after the current Focused() one
 // skips minimized windows
-func (wl *RenderWindowList) FocusNext() (*RenderWindow, int) {
+func (wl *RenderWindowList) FocusNext() (*renderWindow, int) {
 	fw, i := wl.Focused()
 	if fw == nil {
 		return nil, -1
 	}
-	RenderWindowGlobalMu.Lock()
-	defer RenderWindowGlobalMu.Unlock()
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
 	sz := len(*wl)
 	if sz == 1 {
 		return nil, -1

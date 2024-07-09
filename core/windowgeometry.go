@@ -231,37 +231,37 @@ func (mgr *WindowGeometrySaver) SettingEnd() {
 }
 
 // RecordPref records current state of window as preference
-func (mgr *WindowGeometrySaver) RecordPref(win *RenderWindow) {
-	if !win.IsVisible() {
+func (mgr *WindowGeometrySaver) RecordPref(win *renderWindow) {
+	if !win.isVisible() {
 		return
 	}
 	wsz := win.SystemWindow.Size()
 	if wsz == (image.Point{}) {
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: RecordPref: NOT storing null size for win: %v\n", win.Name)
+			log.Printf("WindowGeometry: RecordPref: NOT storing null size for win: %v\n", win.name)
 		}
 		return
 	}
 	pos := win.SystemWindow.Position()
 	if pos.X == -32000 || pos.Y == -32000 { // windows badness
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: RecordPref: NOT storing very negative pos: %v for win: %v\n", pos, win.Name)
+			log.Printf("WindowGeometry: RecordPref: NOT storing very negative pos: %v for win: %v\n", pos, win.name)
 		}
 		return
 	}
 	mgr.Mu.Lock()
 	if mgr.SettingNoSave {
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: RecordPref: SettingNoSave so NOT storing for win: %v\n", win.Name)
+			log.Printf("WindowGeometry: RecordPref: SettingNoSave so NOT storing for win: %v\n", win.name)
 		}
 		mgr.Mu.Unlock()
 		return
 	}
 	mgr.Init()
 
-	winName := mgr.WinName(win.Title)
+	winName := mgr.WinName(win.title)
 	sc := win.SystemWindow.Screen()
-	wgr := WindowGeometry{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.SystemWindow.Is(system.Fullscreen)}
+	wgr := WindowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.SystemWindow.Is(system.Fullscreen)}
 	wgr.SetPos(pos)
 	wgr.SetSize(wsz)
 
@@ -382,17 +382,17 @@ func (mgr *WindowGeometrySaver) DeleteAll() {
 // RestoreAll restores size and position of all windows, for current screen.
 // Called when screen changes.
 func (mgr *WindowGeometrySaver) RestoreAll() {
-	RenderWindowGlobalMu.Lock()
-	defer RenderWindowGlobalMu.Unlock()
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
 	if DebugSettings.WinGeomTrace {
 		log.Printf("WindowGeometry: RestoreAll: starting\n")
 	}
 	mgr.SettingStart()
 	for _, w := range AllRenderWindows {
-		wgp := mgr.Pref(w.Title, w.SystemWindow.Screen())
+		wgp := mgr.Pref(w.title, w.SystemWindow.Screen())
 		if wgp != nil {
 			if DebugSettings.WinGeomTrace {
-				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
+				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v\n", w.name, wgp.Pos(), wgp.Size())
 			}
 			w.SystemWindow.SetGeom(wgp.Pos(), wgp.Size())
 		}

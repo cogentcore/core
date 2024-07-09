@@ -114,7 +114,7 @@ func makeStandardAppBar(p *tree.Plan) {
 			}
 			if wlen := len(AllRenderWindows); wlen > 1 {
 				if w.Scene.Stage.CloseOnBack {
-					CurrentRenderWindow.CloseReq()
+					currentRenderWindow.closeReq()
 				}
 				AllRenderWindows[wlen-2].Raise()
 			}
@@ -151,7 +151,7 @@ func makeStandardAppBar(p *tree.Plan) {
 
 		w.AddItemsFunc(func() {
 			for _, rw := range AllRenderWindows {
-				for _, kv := range rw.Mains.Stack.Order {
+				for _, kv := range rw.mains.Stack.Order {
 					st := kv.Value
 					// we do not include ourself
 					if st == w.Scene.Stage {
@@ -241,7 +241,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 			OnClick(func(e events.Event) {
 				win := tb.Scene.RenderWindow()
 				if win != nil {
-					win.Minimize()
+					win.minimize()
 				}
 			})
 		NewSeparator(m)
@@ -249,7 +249,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 			OnClick(func(e events.Event) {
 				win := tb.Scene.RenderWindow()
 				if win != nil {
-					win.CloseReq()
+					win.closeReq()
 				}
 			})
 		quit := NewButton(m).SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q")
@@ -260,7 +260,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 		NewSeparator(m)
 		for _, w := range MainRenderWindows {
 			if w != nil {
-				NewButton(m).SetText(w.Title).OnClick(func(e events.Event) {
+				NewButton(m).SetText(w.title).OnClick(func(e events.Event) {
 					w.Raise()
 				})
 			}
@@ -269,7 +269,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 			NewSeparator(m)
 			for _, w := range DialogRenderWindows {
 				if w != nil {
-					NewButton(m).SetText(w.Title).OnClick(func(e events.Event) {
+					NewButton(m).SetText(w.title).OnClick(func(e events.Event) {
 						w.Raise()
 					})
 				}

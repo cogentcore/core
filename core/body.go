@@ -58,7 +58,7 @@ func (bd *Body) Init() {
 	})
 }
 
-// SetTitle sets the title in the [Body], [Scene], [Stage], [RenderWindow],
+// SetTitle sets the title in the [Body], [Scene], [Stage], [renderWindow],
 // and title widget. This is the one place to change the title for everything.
 func (bd *Body) SetTitle(title string) *Body {
 	bd.Name = title
@@ -68,8 +68,8 @@ func (bd *Body) SetTitle(title string) *Body {
 		bd.Scene.Stage.Title = title
 		win := bd.Scene.RenderWindow()
 		if win != nil {
-			win.SetName(title)
-			win.SetTitle(title)
+			win.setName(title)
+			win.setTitle(title)
 		}
 	}
 	if lb, ok := bd.ChildByName("body-title", 0).(*Text); ok {

@@ -85,7 +85,7 @@ type Scene struct { //core:no-new
 
 	// lastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
-	lastRender RenderParams
+	lastRender renderParams
 
 	// showIter counts up at start of showing a Scene
 	// to trigger Show event and other steps at start of first show
@@ -174,7 +174,7 @@ func (sc *Scene) Init() {
 		s.Padding.Set(units.Dp(8))
 	})
 	sc.OnShow(func(e events.Event) {
-		CurrentRenderWindow.SetStageTitle(sc.Stage.Title)
+		currentRenderWindow.SetStageTitle(sc.Stage.Title)
 	})
 	sc.OnClose(func(e events.Event) {
 		sm := sc.Stage.Mains
@@ -189,7 +189,7 @@ func (sc *Scene) Init() {
 		}
 		// the stage that will be visible next
 		st := sm.Stack.ValueByIndex(sm.Stack.Len() - 2)
-		CurrentRenderWindow.SetStageTitle(st.Title)
+		currentRenderWindow.SetStageTitle(st.Title)
 	})
 	if TheApp.SceneConfig != nil {
 		TheApp.SceneConfig(sc)
@@ -212,7 +212,7 @@ func (sc *Scene) RenderContext() *RenderContext {
 // RenderWindow returns the current render window for this scene.
 // In general it is best to go through RenderContext instead of the window.
 // This will be nil prior to actual rendering.
-func (sc *Scene) RenderWindow() *RenderWindow {
+func (sc *Scene) RenderWindow() *renderWindow {
 	if sc.Stage == nil {
 		return nil
 	}
@@ -296,19 +296,19 @@ func (sc *Scene) Close() bool {
 	}
 	mm.DeleteStage(sc.Stage)
 	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWindow.closing && !mm.RenderWindow.stopEventLoop && !TheApp.IsQuitting() {
-		mm.RenderWindow.CloseReq()
+		mm.RenderWindow.closeReq()
 	}
 	return true
 }
 
 // UpdateTitle updates the title of the Scene's associated [Stage],
-// [RenderWindow], and [Body], if applicable.
+// [renderWindow], and [Body], if applicable.
 func (sc *Scene) UpdateTitle(title string) {
 	if sc.Scene != nil {
 		sc.Stage.Title = title
 	}
 	if rw := sc.RenderWindow(); rw != nil {
-		rw.SetTitle(title)
+		rw.setTitle(title)
 	}
 	if sc.Body != nil {
 		sc.Body.Title = title

@@ -165,12 +165,12 @@ func (st *Stage) configMainStage() {
 // runWindow runs a Window with current settings.
 func (st *Stage) runWindow() *Stage {
 	sc := st.Scene
-	if CurrentRenderWindow == nil {
+	if currentRenderWindow == nil {
 		// If we have no current render window, we need to be in a new window,
 		// and we need a *temporary* Mains to get initial pref size
 		st.SetMains(st.firstWindowStages())
 	} else {
-		st.SetMains(&CurrentRenderWindow.Mains)
+		st.SetMains(&currentRenderWindow.mains)
 	}
 	st.configMainStage()
 
@@ -182,15 +182,15 @@ func (st *Stage) runWindow() *Stage {
 	// desktop new windows and non-full windows can pref size
 	if TheApp.Platform() == system.Offscreen ||
 		(!TheApp.Platform().IsMobile() &&
-			(st.NewWindow || !st.FullWindow || CurrentRenderWindow == nil)) {
+			(st.NewWindow || !st.FullWindow || currentRenderWindow == nil)) {
 		sz = sc.prefSize(sz)
 		// on offscreen, we don't want any extra space, as we want the smallest
 		// possible representation of the content
 		// also, on offscreen, if the new size is bigger than the current size,
 		// we need to resize the window
 		if TheApp.Platform() == system.Offscreen {
-			if CurrentRenderWindow != nil {
-				csz := CurrentRenderWindow.SystemWindow.Size()
+			if currentRenderWindow != nil {
+				csz := currentRenderWindow.SystemWindow.Size()
 				nsz := csz
 				if sz.X > csz.X {
 					nsz.X = sz.X
@@ -199,7 +199,7 @@ func (st *Stage) runWindow() *Stage {
 					nsz.Y = sz.Y
 				}
 				if nsz != csz {
-					CurrentRenderWindow.SystemWindow.SetSize(nsz)
+					currentRenderWindow.SystemWindow.SetSize(nsz)
 					system.TheApp.GetScreens()
 				}
 			}
@@ -218,12 +218,12 @@ func (st *Stage) runWindow() *Stage {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
 
-	if st.NewWindow || CurrentRenderWindow == nil {
+	if st.NewWindow || currentRenderWindow == nil {
 		sc.Resize(math32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
 		win := st.newRenderWindow()
 		MainRenderWindows.Add(win)
-		CurrentRenderWindow = win
-		win.GoStartEventLoop()
+		currentRenderWindow = win
+		win.goStartEventLoop()
 		return st
 	}
 	if st.Context != nil {
@@ -234,7 +234,7 @@ func (st *Stage) runWindow() *Stage {
 		ms.Push(st)
 		st.SetMains(ms)
 	} else {
-		ms := &CurrentRenderWindow.Mains
+		ms := &currentRenderWindow.mains
 		msc := ms.Top().Scene
 		sc.SceneGeom.Size = sz
 		sc.FitInWindow(msc.SceneGeom) // does resize
@@ -250,11 +250,11 @@ func (st *Stage) runWindow() *Stage {
 // the calling function must bail.
 func (st *Stage) getValidContext() bool {
 	if st.Context == nil || st.Context.AsTree().This == nil || st.Context.AsWidget().Scene == nil {
-		if CurrentRenderWindow == nil {
+		if currentRenderWindow == nil {
 			slog.Error("Stage.Run: Context is nil and CurrentRenderWindow is nil, so cannot Run", "Name", st.Name, "Title", st.Title)
 			return false
 		}
-		st.Context = CurrentRenderWindow.Mains.Top().Scene
+		st.Context = currentRenderWindow.mains.Top().Scene
 	}
 	return true
 }
@@ -300,8 +300,8 @@ func (st *Stage) runDialog() *Stage {
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.newRenderWindow()
 		DialogRenderWindows.Add(win)
-		CurrentRenderWindow = win
-		win.GoStartEventLoop()
+		currentRenderWindow = win
+		win.goStartEventLoop()
 		return st
 	}
 	sc.SceneGeom.Size = sz
@@ -311,7 +311,7 @@ func (st *Stage) runDialog() *Stage {
 	return st
 }
 
-func (st *Stage) newRenderWindow() *RenderWindow {
+func (st *Stage) newRenderWindow() *renderWindow {
 	name := st.Name
 	title := st.Title
 	opts := &system.NewWindowOptions{
@@ -334,19 +334,19 @@ func (st *Stage) newRenderWindow() *RenderWindow {
 			opts.SetFullscreen()
 		}
 	}
-	win := NewRenderWindow(name, title, opts)
+	win := newRenderWindow(name, title, opts)
 	TheWindowGeometrySaver.SettingEnd()
 	if win == nil {
 		return nil
 	}
 	AllRenderWindows.Add(win)
 	// initialize Mains
-	win.Mains.RenderWindow = win
-	win.Mains.RenderContext = NewRenderContext() // sets defaults according to Screen
+	win.mains.RenderWindow = win
+	win.mains.RenderContext = NewRenderContext() // sets defaults according to Screen
 	// note: win is not yet created by the OS and we don't yet know its actual size
 	// or dpi.
-	win.Mains.Push(st)
-	st.SetMains(&win.Mains)
+	win.mains.Push(st)
+	st.SetMains(&win.mains)
 	return win
 }
 

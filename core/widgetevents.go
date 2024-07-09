@@ -446,11 +446,11 @@ func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 	})
 }
 
-// HandleWidgetMagnifyEvent calls [RenderWindow.StepZoom] on [events.Magnify]
+// HandleWidgetMagnifyEvent calls [renderWindow.StepZoom] on [events.Magnify]
 func (wb *WidgetBase) HandleWidgetMagnify() {
 	wb.On(events.Magnify, func(e events.Event) {
 		ev := e.(*events.TouchMagnify)
-		wb.Events().RenderWindow().StepZoom(ev.ScaleFactor - 1)
+		wb.Events().RenderWindow().stepZoom(ev.ScaleFactor - 1)
 	})
 }
 

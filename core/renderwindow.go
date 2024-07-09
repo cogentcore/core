@@ -22,10 +22,10 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// WindowWait is a wait group for waiting for all the open window event
-// loops to finish. It is incremented by [RenderWindow.GoStartEventLoop]
+// windowWait is a wait group for waiting for all the open window event
+// loops to finish. It is incremented by [renderWindow.GoStartEventLoop]
 // and decremented when the event loop terminates.
-var WindowWait sync.WaitGroup
+var windowWait sync.WaitGroup
 
 // Wait waits for all windows to close and runs the main app loop.
 // This should be put at the end of the main function, and is typically
@@ -34,53 +34,53 @@ func Wait() {
 	defer func() { system.HandleRecover(recover()) }()
 	go func() {
 		defer func() { system.HandleRecover(recover()) }()
-		WindowWait.Wait()
+		windowWait.Wait()
 		system.TheApp.Quit()
 	}()
 	system.TheApp.MainLoop()
 }
 
-// CurrentRenderWindow is the current [RenderWindow].
+// currentRenderWindow is the current [renderWindow].
 // On single window platforms (mobile, web, and offscreen),
-// this is the sonly render window.
-var CurrentRenderWindow *RenderWindow
+// this is the only render window.
+var currentRenderWindow *renderWindow
 
-// RenderWindowGlobalMu is a mutex for any global state associated with windows
-var RenderWindowGlobalMu sync.Mutex
+// renderWindowGlobalMu is a mutex for any global state associated with windows
+var renderWindowGlobalMu sync.Mutex
 
-// RenderWindow provides an outer "actual" window where everything is rendered,
+// renderWindow provides an outer "actual" window where everything is rendered,
 // and is the point of entry for all events coming in from user actions.
 //
-// RenderWindow contents are all managed by the [Stages] stack that
+// renderWindow contents are all managed by the [Stages] stack that
 // handles main [Stage] elements such as [WindowStage] and [DialogStage], which in
 // turn manage their own stack of popup stage elements such as menus and tooltips.
 // The contents of each Stage is provided by a Scene, containing Widgets,
-// and the Stage Pixels image is drawn to the RenderWindow in the RenderWindow method.
+// and the Stage Pixels image is drawn to the renderWindow in the renderWindow method.
 //
 // Rendering is handled by the [system.Drawer]. It is akin to a window manager overlaying Go image bitmaps
 // on top of each other in the proper order, based on the [Stages] stacking order.
 // Sprites are managed by the main stage, as layered textures of the same size,
 // to enable unlimited number packed into a few descriptors for standard sizes.
-type RenderWindow struct {
+type renderWindow struct {
 
-	// Name is the name of the window.
-	Name string
+	// name is the name of the window.
+	name string
 
-	// Title is the displayed name of window, for window manager etc.
+	// title is the displayed name of window, for window manager etc.
 	// Window object name is the internal handle and is used for tracking property info etc
-	Title string
+	title string
 
 	// SystemWindow is the OS-specific window interface, which handles
 	// all the os-specific functions, including delivering events etc
 	SystemWindow system.Window `json:"-" xml:"-"`
 
-	// Mains is the stack of main stages in this render window.
+	// mains is the stack of main stages in this render window.
 	// The [RenderContext] in this manager is the original source for all Stages.
-	Mains Stages
+	mains Stages
 
-	// RenderScenes are the Scene elements that draw directly to the window,
+	// renderScenes are the Scene elements that draw directly to the window,
 	// arranged in order, and continuously updated during Render.
-	RenderScenes RenderScenes
+	renderScenes RenderScenes
 
 	// noEventsChan is a channel on which a signal is sent when there are
 	// no events left in the window [events.Deque]. It is used internally
@@ -97,13 +97,13 @@ type RenderWindow struct {
 	stopEventLoop bool
 }
 
-// NewRenderWindow creates a new window with given internal name handle,
-// display name, and options.  This is called by Stage.NewRenderWindow
+// newRenderWindow creates a new window with given internal name handle,
+// display name, and options.  This is called by Stage.newRenderWindow
 // which handles setting the opts and other infrastructure.
-func NewRenderWindow(name, title string, opts *system.NewWindowOptions) *RenderWindow {
-	w := &RenderWindow{}
-	w.Name = name
-	w.Title = title
+func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderWindow {
+	w := &renderWindow{}
+	w.name = name
+	w.title = title
 	var err error
 	w.SystemWindow, err = system.TheApp.NewWindow(opts)
 	if err != nil {
@@ -118,7 +118,7 @@ func NewRenderWindow(name, title string, opts *system.NewWindowOptions) *RenderW
 		defer rc.Unlock()
 		w.closing = true
 		// ensure that everyone is closed first
-		for _, kv := range w.Mains.Stack.Order {
+		for _, kv := range w.mains.Stack.Order {
 			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This == nil {
 				continue
 			}
@@ -132,7 +132,7 @@ func NewRenderWindow(name, title string, opts *system.NewWindowOptions) *RenderW
 
 	drw := w.SystemWindow.Drawer()
 	drw.SetMaxTextures(system.MaxTexturesPerSet * 3)       // use 3 sets
-	w.RenderScenes.MaxIndex = system.MaxTexturesPerSet * 2 // reserve last for sprites
+	w.renderScenes.MaxIndex = system.MaxTexturesPerSet * 2 // reserve last for sprites
 
 	// win.SystemWin.SetDestroyGPUResourcesFunc(func() {
 	// 	for _, ph := range win.Phongs {
@@ -145,10 +145,10 @@ func NewRenderWindow(name, title string, opts *system.NewWindowOptions) *RenderW
 	return w
 }
 
-// MainScene returns the current [RenderWindow.Mains] top Scene,
+// MainScene returns the current [renderWindow.mains] top Scene,
 // which is the current window or full window dialog occupying the RenderWindow.
-func (w *RenderWindow) MainScene() *Scene {
-	top := w.Mains.Top()
+func (w *renderWindow) MainScene() *Scene {
+	top := w.mains.Top()
 	if top == nil {
 		return nil
 	}
@@ -167,28 +167,28 @@ func RecycleMainWindow(data any) bool {
 		return false
 	}
 	if DebugSettings.WinEventTrace {
-		fmt.Printf("Win: %v getting recycled based on data match\n", ew.Name)
+		fmt.Printf("Win: %v getting recycled based on data match\n", ew.name)
 	}
 	ew.Raise()
 	return true
 }
 
-// SetName sets name of this window and also the RenderWindow, and applies any window
+// setName sets name of this window and also the RenderWindow, and applies any window
 // geometry settings associated with the new name if it is different from before
-func (w *RenderWindow) SetName(name string) {
-	curnm := w.Name
+func (w *renderWindow) setName(name string) {
+	curnm := w.name
 	isdif := curnm != name
-	w.Name = name
+	w.name = name
 	if w.SystemWindow != nil {
 		w.SystemWindow.SetName(name)
 	}
 	if isdif && w.SystemWindow != nil {
-		wgp := TheWindowGeometrySaver.Pref(w.Title, w.SystemWindow.Screen())
+		wgp := TheWindowGeometrySaver.Pref(w.title, w.SystemWindow.Screen())
 		if wgp != nil {
 			TheWindowGeometrySaver.SettingStart()
 			if w.SystemWindow.Size() != wgp.Size() || w.SystemWindow.Position() != wgp.Pos() {
 				if DebugSettings.WinGeomTrace {
-					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
+					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.Pos(), wgp.Size())
 				}
 				w.SystemWindow.SetGeom(wgp.Pos(), wgp.Size())
 				system.TheApp.SendEmptyEvent()
@@ -198,27 +198,27 @@ func (w *RenderWindow) SetName(name string) {
 	}
 }
 
-// SetTitle sets title of this window and its underlying SystemWin.
-func (w *RenderWindow) SetTitle(title string) {
-	w.Title = title
+// setTitle sets title of this window and its underlying SystemWin.
+func (w *renderWindow) setTitle(title string) {
+	w.title = title
 	if w.SystemWindow != nil {
 		w.SystemWindow.SetTitle(title)
 	}
 }
 
-// SetStageTitle sets the title of the underlying SystemWin to the given stage title
-// combined with the RenderWindow title.
-func (w *RenderWindow) SetStageTitle(title string) {
-	if title != w.Title {
-		title = title + " • " + w.Title
+// SetStageTitle sets the title of the underlying [system.Window] to the given stage title
+// combined with the [renderWindow] title.
+func (w *renderWindow) SetStageTitle(title string) {
+	if title != w.title {
+		title = title + " • " + w.title
 	}
 	w.SystemWindow.SetTitle(title)
 }
 
-// LogicalDPI returns the current logical dots-per-inch resolution of the
+// logicalDPI returns the current logical dots-per-inch resolution of the
 // window, which should be used for most conversion of standard units --
 // physical DPI can be found in the Screen
-func (w *RenderWindow) LogicalDPI() float32 {
+func (w *renderWindow) logicalDPI() float32 {
 	if w.SystemWindow == nil {
 		sc := system.TheApp.Screen(0)
 		if sc == nil {
@@ -229,14 +229,14 @@ func (w *RenderWindow) LogicalDPI() float32 {
 	return w.SystemWindow.LogicalDPI()
 }
 
-// StepZoom calls [SetZoom] with the current zoom plus 10 times the given number of steps.
-func (w *RenderWindow) StepZoom(steps float32) {
-	w.SetZoom(AppearanceSettings.Zoom + 10*steps)
+// stepZoom calls [SetZoom] with the current zoom plus 10 times the given number of steps.
+func (w *renderWindow) stepZoom(steps float32) {
+	w.setZoom(AppearanceSettings.Zoom + 10*steps)
 }
 
-// SetZoom sets [AppearanceSettingsData.Zoom] to the given value and then triggers
+// setZoom sets [AppearanceSettingsData.Zoom] to the given value and then triggers
 // necessary updating and makes a snackbar.
-func (w *RenderWindow) SetZoom(zoom float32) {
+func (w *renderWindow) setZoom(zoom float32) {
 	AppearanceSettings.Zoom = math32.Clamp(zoom, 10, 500)
 	AppearanceSettings.Apply()
 	UpdateAll()
@@ -246,39 +246,23 @@ func (w *RenderWindow) SetZoom(zoom float32) {
 		b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", AppearanceSettings.Zoom))
 		NewStretch(b)
 		b.AddSnackbarIcon(icons.Remove, func(e events.Event) {
-			w.StepZoom(-1)
+			w.stepZoom(-1)
 		})
 		b.AddSnackbarIcon(icons.Add, func(e events.Event) {
-			w.StepZoom(1)
+			w.stepZoom(1)
 		})
 		b.AddSnackbarButton("Reset", func(e events.Event) {
-			w.SetZoom(100)
+			w.setZoom(100)
 		})
 		b.DeleteChildByName("stretch")
 		b.NewSnackbar(ms).Run()
 	}
 }
 
-// SetWinSize requests that the window be resized to the given size
-// in OS window manager specific coordinates, which may be different
-// from the underlying pixel-level resolution of the window.
-// This will trigger a resize event and be processed
-// that way when it occurs.
-func (w *RenderWindow) SetWinSize(sz image.Point) {
-	w.SystemWindow.SetWinSize(sz)
-}
-
-// SetSize requests that the window be resized to the given size
-// in underlying pixel coordinates, which means that the requested
-// size is divided by the screen's DevicePixelRatio
-func (w *RenderWindow) SetSize(sz image.Point) {
-	w.SystemWindow.SetSize(sz)
-}
-
-// Resized updates internal buffers after a window has been resized.
-func (w *RenderWindow) Resized() {
+// resized updates internal buffers after a window has been resized.
+func (w *renderWindow) resized() {
 	rc := w.RenderContext()
-	if !w.IsVisible() {
+	if !w.isVisible() {
 		rc.Visible = false
 		return
 	}
@@ -290,10 +274,10 @@ func (w *RenderWindow) Resized() {
 	curRg := rc.Geom
 	if curRg == rg {
 		if DebugSettings.WinEventTrace {
-			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Name, curRg)
+			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.name, curRg)
 		}
 		// still need to apply style even if size is same
-		for _, kv := range w.Mains.Stack.Order {
+		for _, kv := range w.mains.Stack.Order {
 			sc := kv.Value.Scene
 			sc.applyStyleScene()
 		}
@@ -304,21 +288,21 @@ func (w *RenderWindow) Resized() {
 	}
 	// w.FocusInactivate()
 	// w.InactivateAllSprites()
-	if !w.IsVisible() {
+	if !w.isVisible() {
 		rc.Visible = false
 		if DebugSettings.WinEventTrace {
-			fmt.Printf("Win: %v Resized already closed\n", w.Name)
+			fmt.Printf("Win: %v Resized already closed\n", w.name)
 		}
 		return
 	}
 	if DebugSettings.WinEventTrace {
-		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curRg, rg)
+		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.name, curRg, rg)
 	}
 	rc.Geom = rg
 	rc.Visible = true
-	rc.LogicalDPI = w.LogicalDPI()
+	rc.LogicalDPI = w.logicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
-	w.Mains.Resize(rg)
+	w.mains.Resize(rg)
 	if DebugSettings.WinGeomTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
 	}
@@ -326,119 +310,86 @@ func (w *RenderWindow) Resized() {
 }
 
 // Raise requests that the window be at the top of the stack of windows,
-// and receive focus.  If it is iconified, it will be de-iconified.  This
-// is the only supported mechanism for de-iconifying. This also sets
-// CurrentRenderWindow to the window.
-func (w *RenderWindow) Raise() {
+// and receive focus. If it is minimized, it will be un-minimized. This
+// is the only supported mechanism for un-minimizing. This also sets
+// [currentRenderWindow] to the window.
+func (w *renderWindow) Raise() {
 	w.SystemWindow.Raise()
-	CurrentRenderWindow = w
+	currentRenderWindow = w
 }
 
-// Minimize requests that the window be iconified, making it no longer
-// visible or active -- rendering should not occur for minimized windows.
-func (w *RenderWindow) Minimize() {
+// minimize requests that the window be minimized, making it no longer
+// visible or active; rendering should not occur for minimized windows.
+func (w *renderWindow) minimize() {
 	w.SystemWindow.Minimize()
 }
 
-// CloseReq requests that the window be closed, which could be rejected.
+// closeReq requests that the window be closed, which could be rejected.
 // It firsts unlocks and then locks the [RenderContext] to prevent deadlocks.
 // If this is called asynchronously outside of the main event loop,
-// [RenderWindow.SystemWin.CloseReq] should be called directly instead.
-func (w *RenderWindow) CloseReq() {
+// [renderWindow.SystemWin.closeReq] should be called directly instead.
+func (w *renderWindow) closeReq() {
 	rc := w.RenderContext()
 	rc.Unlock()
 	w.SystemWindow.CloseReq()
 	rc.Lock()
 }
 
-// Closed frees any resources after the window has been closed.
-func (w *RenderWindow) Closed() {
+// closed frees any resources after the window has been closed.
+func (w *renderWindow) closed() {
 	AllRenderWindows.Delete(w)
 	MainRenderWindows.Delete(w)
 	DialogRenderWindows.Delete(w)
 	if DebugSettings.WinEventTrace {
-		fmt.Printf("Win: %v Closed\n", w.Name)
+		fmt.Printf("Win: %v Closed\n", w.name)
 	}
 	if len(AllRenderWindows) > 0 {
 		pfw := AllRenderWindows[len(AllRenderWindows)-1]
 		if DebugSettings.WinEventTrace {
-			fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.Name, w.Name)
+			fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.name, w.name)
 		}
 		pfw.Raise()
 	}
 	// these are managed by the window itself
 	// w.Sprites.Reset()
 
-	w.RenderScenes.Reset()
+	w.renderScenes.Reset()
 	// todo: delete the contents of the window here??
 }
 
-// IsClosed reports if the window has been closed
-func (w *RenderWindow) IsClosed() bool {
-	return w.SystemWindow.IsClosed() || w.Mains.Stack.Len() == 0
+// isClosed reports if the window has been closed
+func (w *renderWindow) isClosed() bool {
+	return w.SystemWindow.IsClosed() || w.mains.Stack.Len() == 0
 }
 
-// SetCloseReqFunc sets the function that is called whenever there is a
-// request to close the window (via a OS or a call to CloseReq() method).  That
-// function can then adjudicate whether and when to actually call Close.
-func (w *RenderWindow) SetCloseReqFunc(fun func(win *RenderWindow)) {
-	w.SystemWindow.SetCloseReqFunc(func(owin system.Window) {
-		fun(w)
-	})
-}
-
-// SetCloseCleanFunc sets the function that is called whenever window is
-// actually about to close (irrevocably) -- can do any necessary
-// last-minute cleanup here.
-func (w *RenderWindow) SetCloseCleanFunc(fun func(win *RenderWindow)) {
-	w.SystemWindow.SetCloseCleanFunc(func(owin system.Window) {
-		fun(w)
-	})
-}
-
-// IsVisible is the main visibility check -- don't do any window updates if not visible!
-func (w *RenderWindow) IsVisible() bool {
-	if w == nil || w.SystemWindow == nil || w.IsClosed() || w.closing || !w.SystemWindow.IsVisible() {
+// isVisible is the main visibility check; don't do any window updates if not visible!
+func (w *renderWindow) isVisible() bool {
+	if w == nil || w.SystemWindow == nil || w.isClosed() || w.closing || !w.SystemWindow.IsVisible() {
 		return false
 	}
 	return true
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//                   Event Loop
-
-// GoStartEventLoop starts the event processing loop for this window in a new
+// goStartEventLoop starts the event processing loop for this window in a new
 // goroutine, and returns immediately.  Adds to WindowWait wait group so a main
 // thread can wait on that for all windows to close.
-func (w *RenderWindow) GoStartEventLoop() {
-	WindowWait.Add(1)
-	go w.EventLoop()
-}
-
-// SendCustomEvent sends a custom event with given data to this window -- widgets can connect
-// to receive CustomEventTypes events to receive them.  Sometimes it is useful
-// to send a custom event just to trigger a pass through the event loop, even
-// if nobody is listening (e.g., if a popup is posted without a surrounding
-// event, as in Complete.ShowCompletions
-func (w *RenderWindow) SendCustomEvent(data any) {
-	w.SystemWindow.Events().Custom(data)
+func (w *renderWindow) goStartEventLoop() {
+	windowWait.Add(1)
+	go w.eventLoop()
 }
 
 // todo: fix or remove
-// SendWinFocusEvent sends the RenderWinFocusEvent to widgets
-func (w *RenderWindow) SendWinFocusEvent(act events.WinActions) {
+// sendWinFocusEvent sends the RenderWinFocusEvent to widgets
+func (w *renderWindow) sendWinFocusEvent(act events.WinActions) {
 	// se := window.NewEvent(act)
 	// se.Init()
 	// w.Mains.HandleEvent(se)
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//                   Main Method: EventLoop
-
-// EventLoop runs the event processing loop for the RenderWindow -- grabs system
+// eventLoop runs the event processing loop for the RenderWindow -- grabs system
 // events for the window and dispatches them to receiving nodes, and manages
 // other state etc (popups, etc).
-func (w *RenderWindow) EventLoop() {
+func (w *renderWindow) eventLoop() {
 	defer func() { system.HandleRecover(recover()) }()
 
 	d := &w.SystemWindow.Events().Deque
@@ -453,26 +404,26 @@ func (w *RenderWindow) EventLoop() {
 			w.stopEventLoop = false
 			break
 		}
-		w.HandleEvent(e)
+		w.handleEvent(e)
 		if w.noEventsChan != nil && len(d.Back) == 0 && len(d.Front) == 0 {
 			w.noEventsChan <- struct{}{}
 		}
 	}
 	if DebugSettings.WinEventTrace {
-		fmt.Printf("Win: %v out of event loop\n", w.Name)
+		fmt.Printf("Win: %v out of event loop\n", w.name)
 	}
-	WindowWait.Done()
+	windowWait.Done()
 	// our last act must be self destruction!
-	w.Mains.DeleteAll()
+	w.mains.DeleteAll()
 }
 
-// HandleEvent processes given events.Event.
+// handleEvent processes given events.Event.
 // All event processing operates under a RenderContext.Lock
 // so that no rendering update can occur during event-driven updates.
 // Because rendering itself is event driven, this extra level of safety
 // is redundant in this case, but other non-event-driven updates require
 // the lock protection.
-func (w *RenderWindow) HandleEvent(e events.Event) {
+func (w *renderWindow) handleEvent(e events.Event) {
 	rc := w.RenderContext()
 	rc.Lock()
 	// we manually handle Unlock's in this function instead of deferring
@@ -485,16 +436,16 @@ func (w *RenderWindow) HandleEvent(e events.Event) {
 		fmt.Println("Window got event", e)
 	}
 	if et >= events.Window && et <= events.WindowPaint {
-		w.HandleWindowEvents(e)
+		w.handleWindowEvents(e)
 		rc.Unlock()
 		return
 	}
 	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
-	w.Mains.mainHandleEvent(e)
+	w.mains.mainHandleEvent(e)
 	rc.Unlock()
 }
 
-func (w *RenderWindow) HandleWindowEvents(e events.Event) {
+func (w *renderWindow) handleWindowEvents(e events.Event) {
 	et := e.Type()
 	switch et {
 	case events.WindowPaint:
@@ -503,11 +454,11 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 		rc.Unlock() // one case where we need to break lock
 		w.RenderWindow()
 		rc.Lock()
-		w.Mains.SendShowEvents()
+		w.mains.SendShowEvents()
 
 	case events.WindowResize:
 		e.SetHandled()
-		w.Resized()
+		w.resized()
 
 	case events.Window:
 		ev := e.(*events.WindowEvent)
@@ -516,7 +467,7 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			e.SetHandled()
 			w.stopEventLoop = true
-			w.Closed()
+			w.closed()
 		case events.WinMinimize:
 			e.SetHandled()
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
@@ -528,7 +479,7 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 			e.SetHandled()
 			// note that this is sent delayed by driver
 			if DebugSettings.WinEventTrace {
-				fmt.Printf("Win: %v got show event\n", w.Name)
+				fmt.Printf("Win: %v got show event\n", w.name)
 			}
 		case events.WinMove:
 			e.SetHandled()
@@ -546,24 +497,24 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 			}
 			if !w.gotFocus {
 				w.gotFocus = true
-				w.SendWinFocusEvent(events.WinFocus)
+				w.sendWinFocusEvent(events.WinFocus)
 				if DebugSettings.WinEventTrace {
-					fmt.Printf("Win: %v got focus\n", w.Name)
+					fmt.Printf("Win: %v got focus\n", w.name)
 				}
 			} else {
 				if DebugSettings.WinEventTrace {
-					fmt.Printf("Win: %v got extra focus\n", w.Name)
+					fmt.Printf("Win: %v got extra focus\n", w.name)
 				}
 			}
-			CurrentRenderWindow = w
+			currentRenderWindow = w
 		case events.WinFocusLost:
 			if DebugSettings.WinEventTrace {
-				fmt.Printf("Win: %v lost focus\n", w.Name)
+				fmt.Printf("Win: %v lost focus\n", w.name)
 			}
 			w.gotFocus = false
-			w.SendWinFocusEvent(events.WinFocusLost)
+			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
-			w.Resized()
+			w.resized()
 			// TODO: figure out how to restore this stuff without breaking window size on mobile
 
 			// TheWindowGeometryaver.AbortSave() // anything just prior to this is sus
@@ -581,36 +532,30 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 const (
 	// Sprites are stored as arrays of same-sized textures,
 	// allocated by size in Set 2, starting at 32
-	SpriteStart = system.MaxTexturesPerSet * 2
-
-	// Full set of sprite textures in set = 2
-	MaxSpriteTextures = system.MaxTexturesPerSet
-
-	// Allocate 128 layers within each sprite size
-	MaxSpritesPerTexture = 128
+	spriteStart = system.MaxTexturesPerSet * 2
 )
 
-// RenderParams are the key RenderWindow params that determine if
+// renderParams are the key [renderWindow] params that determine if
 // a scene needs to be restyled since last render, if these params change.
-type RenderParams struct {
-	// LogicalDPI is the current logical dots-per-inch resolution of the
+type renderParams struct {
+	// logicalDPI is the current logical dots-per-inch resolution of the
 	// window, which should be used for most conversion of standard units.
-	LogicalDPI float32
+	logicalDPI float32
 
 	// Geometry of the rendering window, in actual "dot" pixels used for rendering.
-	Geom math32.Geom2DInt
+	geom math32.Geom2DInt
 }
 
-// NeedsRestyle returns true if the current render context
+// needsRestyle returns true if the current render context
 // params differ from those used in last render.
-func (rp *RenderParams) NeedsRestyle(rc *RenderContext) bool {
-	return rp.LogicalDPI != rc.LogicalDPI || rp.Geom != rc.Geom
+func (rp *renderParams) needsRestyle(rc *RenderContext) bool {
+	return rp.logicalDPI != rc.LogicalDPI || rp.geom != rc.Geom
 }
 
-// SaveRender grabs current render context params
-func (rp *RenderParams) SaveRender(rc *RenderContext) {
-	rp.LogicalDPI = rc.LogicalDPI
-	rp.Geom = rc.Geom
+// saveRender grabs current render context params
+func (rp *renderParams) saveRender(rc *RenderContext) {
+	rp.logicalDPI = rc.LogicalDPI
+	rp.geom = rc.Geom
 }
 
 // RenderContext provides rendering context from outer RenderWindow
@@ -803,15 +748,15 @@ func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 //////////////////////////////////////////////////////////////////////
 //  RenderWindow methods
 
-func (w *RenderWindow) RenderContext() *RenderContext {
-	return w.Mains.RenderContext
+func (w *renderWindow) RenderContext() *RenderContext {
+	return w.mains.RenderContext
 }
 
 // RenderWindow performs all rendering based on current Stages config.
 // It sets the Write lock on RenderContext Mutex, so nothing else can update
 // during this time.  All other updates are done with a Read lock so they
 // won't interfere with each other.
-func (w *RenderWindow) RenderWindow() {
+func (w *renderWindow) RenderWindow() {
 	rc := w.RenderContext()
 	rc.Lock()
 	defer func() {
@@ -820,8 +765,8 @@ func (w *RenderWindow) RenderWindow() {
 	}()
 	rebuild := rc.Rebuild
 
-	stageMods, sceneMods := w.Mains.UpdateAll() // handles all Scene / Widget updates!
-	top := w.Mains.Top()
+	stageMods, sceneMods := w.mains.UpdateAll() // handles all Scene / Widget updates!
+	top := w.mains.Top()
 	if top == nil {
 		return
 	}
@@ -831,7 +776,7 @@ func (w *RenderWindow) RenderWindow() {
 	}
 
 	if DebugSettings.WinRenderTrace {
-		fmt.Println("RenderWindow: doing render:", w.Name)
+		fmt.Println("RenderWindow: doing render:", w.name)
 		fmt.Println("rebuild:", rebuild, "stageMods:", stageMods, "sceneMods:", sceneMods)
 	}
 
@@ -845,10 +790,10 @@ func (w *RenderWindow) RenderWindow() {
 }
 
 // DrawScenes does the drawing of RenderScenes to the window.
-func (w *RenderWindow) DrawScenes() {
-	if !w.IsVisible() || w.SystemWindow.Is(system.Minimized) {
+func (w *renderWindow) DrawScenes() {
+	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
 		if DebugSettings.WinRenderTrace {
-			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.Name)
+			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
 		}
 		return
 	}
@@ -857,7 +802,7 @@ func (w *RenderWindow) DrawScenes() {
 	// }
 	if !w.SystemWindow.Lock() {
 		if DebugSettings.WinRenderTrace {
-			fmt.Printf("RenderWindow: window was closed: %v\n", w.Name)
+			fmt.Printf("RenderWindow: window was closed: %v\n", w.name)
 		}
 		return
 	}
@@ -866,11 +811,11 @@ func (w *RenderWindow) DrawScenes() {
 	// pr := profile.Start("win.DrawScenes")
 
 	drw := w.SystemWindow.Drawer()
-	rs := &w.RenderScenes
+	rs := &w.renderScenes
 
 	rs.SetImages(drw) // ensure all updated images copied
 
-	top := w.Mains.Top()
+	top := w.mains.Top()
 	if top.Sprites.Modified {
 		top.Sprites.ConfigSprites(drw)
 	}
@@ -892,7 +837,7 @@ func (w *RenderWindow) DrawScenes() {
 }
 
 // FillInsets fills the window insets, if any, with [colors.Scheme.Background].
-func (w *RenderWindow) FillInsets() {
+func (w *renderWindow) FillInsets() {
 	// render geom and window geom
 	rg := w.SystemWindow.RenderGeom()
 	wg := math32.Geom2DInt{Size: w.SystemWindow.Size()}
@@ -927,12 +872,12 @@ func (w *RenderWindow) FillInsets() {
 
 // GatherScenes finds all the Scene elements that drive rendering
 // into the RenderScenes list.  Returns false on failure / nothing to render.
-func (w *RenderWindow) GatherScenes() bool {
-	rs := &w.RenderScenes
+func (w *renderWindow) GatherScenes() bool {
+	rs := &w.renderScenes
 	rs.Reset()
 	scIndex := make(map[Widget]int)
 
-	sm := &w.Mains
+	sm := &w.mains
 	n := sm.Stack.Len()
 	if n == 0 {
 		slog.Error("GatherScenes stack empty")
