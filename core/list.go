@@ -37,26 +37,23 @@ import (
 type List struct {
 	ListBase
 
-	// StyleFunc is an optional styling function.
-	StyleFunc ListStyleFunc `copier:"-" display:"-" json:"-" xml:"-"`
+	// ListStyler is an optional styler for list items.
+	ListStyler ListStyler `copier:"-" json:"-" xml:"-"`
 }
 
-// ListStyleFunc is a styling function for custom styling and
+// ListStyler is a styling function for custom styling and
 // configuration of elements in the list.
-type ListStyleFunc func(w Widget, s *styles.Style, row int)
+type ListStyler func(w Widget, s *styles.Style, row int)
 
-func (ls *List) HasStyleFunc() bool {
-	return ls.StyleFunc != nil
+func (ls *List) HasStyler() bool {
+	return ls.ListStyler != nil
 }
 
 func (ls *List) StyleRow(w Widget, idx, fidx int) {
-	if ls.StyleFunc != nil {
-		ls.StyleFunc(w, &w.AsWidget().Styles, idx)
+	if ls.ListStyler != nil {
+		ls.ListStyler(w, &w.AsWidget().Styles, idx)
 	}
 }
-
-////////////////////////////////////////////////////////
-//  ListBase
 
 // note on implementation:
 // * ListGrid handles all the layout logic to start with a minimum number of
@@ -106,8 +103,8 @@ type Lister interface {
 	// StyleValue performs additional value widget styling
 	StyleValue(w Widget, s *styles.Style, row, col int)
 
-	// HasStyleFunc returns whether there is a custom style function.
-	HasStyleFunc() bool
+	// HasStyler returns whether there is a custom style function.
+	HasStyler() bool
 
 	// StyleRow calls a custom style function on given row (and field)
 	StyleRow(w Widget, idx, fidx int)
@@ -149,6 +146,8 @@ type Lister interface {
 	DropFinalize(de *events.DragDrop)
 	DropDeleteSource(e events.Event)
 }
+
+var _ Lister = &List{}
 
 // ListBase is the base for [List] and [Table] and any other displays
 // of array-like data. It automatically computes the number of rows that fit
@@ -621,7 +620,7 @@ func (lb *ListBase) MakeRow(p *tree.Plan, i int) {
 			Bind(val.Addr().Interface(), w)
 			wb.SetReadOnly(lb.IsReadOnly())
 			wb.SetState(invis, states.Invisible)
-			if lb.This.(Lister).HasStyleFunc() {
+			if lb.This.(Lister).HasStyler() {
 				w.Style()
 			}
 			if invis {

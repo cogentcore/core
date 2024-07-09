@@ -34,8 +34,8 @@ import (
 type Table struct {
 	ListBase
 
-	// StyleFunc is an optional styling function.
-	StyleFunc TableStyleFunc `copier:"-" display:"-" json:"-" xml:"-"`
+	// TableStyler is an optional styling function for table items.
+	TableStyler TableStyler `copier:"-" json:"-" xml:"-"`
 
 	// SelectedField is the current selection field; initially select value in this field.
 	SelectedField string `copier:"-" display:"-" json:"-" xml:"-"`
@@ -59,9 +59,9 @@ type Table struct {
 	colMaxWidths []int
 }
 
-// TableStyleFunc is a styling function for custom styling and
+// TableStyler is a styling function for custom styling and
 // configuration of elements in the table.
-type TableStyleFunc func(w Widget, s *styles.Style, row, col int)
+type TableStyler func(w Widget, s *styles.Style, row, col int)
 
 func (tb *Table) Init() {
 	tb.ListBase.Init()
@@ -336,7 +336,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 				wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
 				wb.SetReadOnly(tb.IsReadOnly() || readOnlyTag)
 				wb.SetState(invis, states.Invisible)
-				if svi.HasStyleFunc() {
+				if svi.HasStyler() {
 					w.Style()
 				}
 				if invis {
@@ -347,13 +347,13 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	}
 }
 
-func (tb *Table) HasStyleFunc() bool {
-	return tb.StyleFunc != nil
+func (tb *Table) HasStyler() bool {
+	return tb.TableStyler != nil
 }
 
 func (tb *Table) StyleRow(w Widget, idx, fidx int) {
-	if tb.StyleFunc != nil {
-		tb.StyleFunc(w, &w.AsWidget().Styles, idx, fidx)
+	if tb.TableStyler != nil {
+		tb.TableStyler(w, &w.AsWidget().Styles, idx, fidx)
 	}
 }
 

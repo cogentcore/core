@@ -331,7 +331,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 					}
 					wb.SetReadOnly(tb.IsReadOnly())
 					wb.SetState(invis, states.Invisible)
-					if svi.HasStyleFunc() {
+					if svi.HasStyler() {
 						w.Style()
 					}
 					if invis {
@@ -480,7 +480,7 @@ func (tb *Table) TensorDisplayAction(fldIndex int) {
 	tb.NeedsRender()
 }
 
-func (tb *Table) HasStyleFunc() bool { return false }
+func (tb *Table) HasStyler() bool { return false }
 
 func (tb *Table) StyleRow(w core.Widget, idx, fidx int) {}
 

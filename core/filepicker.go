@@ -309,7 +309,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 		if SystemSettings.FilePickerSort != "" {
 			w.SetSortFieldName(SystemSettings.FilePickerSort)
 		}
-		w.StyleFunc = func(w Widget, s *styles.Style, row, col int) {
+		w.TableStyler = func(w Widget, s *styles.Style, row, col int) {
 			fn := fp.files[row].Name
 			ext := strings.ToLower(filepath.Ext(fn))
 			if _, has := fp.extensionMap[ext]; has {
