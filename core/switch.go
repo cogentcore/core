@@ -29,13 +29,13 @@ type Switch struct {
 	Text string
 
 	// IconOn is the icon to use for the on, checked state of the switch.
-	IconOn icons.Icon `display:"show-name"`
+	IconOn icons.Icon
 
 	// Iconoff is the icon to use for the off, unchecked state of the switch.
-	IconOff icons.Icon `display:"show-name"`
+	IconOff icons.Icon
 
 	// IconIndeterminate is the icon to use for the indeterminate (unknown) state.
-	IconIndeterminate icons.Icon `display:"show-name"`
+	IconIndeterminate icons.Icon
 }
 
 // SwitchTypes contains the different types of [Switch]es

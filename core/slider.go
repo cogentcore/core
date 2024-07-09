@@ -68,7 +68,7 @@ type Slider struct {
 	PageStep float32
 
 	// Icon is an optional icon to use for the dragging knob.
-	Icon icons.Icon `display:"show-name"`
+	Icon icons.Icon
 
 	// For Scrollbar type only: proportion (1 max) of the full range of scrolled data
 	// that is currently visible.  This determines the thumb size and range of motion:

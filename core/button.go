@@ -37,21 +37,21 @@ type Button struct { //core:embedder
 
 	// Icon is the icon for the button.
 	// If it is "" or [icons.None], no icon is shown.
-	Icon icons.Icon `xml:"icon" display:"show-name"`
+	Icon icons.Icon
 
 	// Indicator is the menu indicator icon to present.
 	// If it is "" or [icons.None],, no indicator is shown.
 	// It is automatically set to [icons.KeyboardArrowDown]
 	// when there is a Menu elements present unless it is
 	// set to [icons.None].
-	Indicator icons.Icon `xml:"indicator" display:"show-name"`
+	Indicator icons.Icon
 
 	// Shortcut is an optional shortcut keyboard chord to trigger this button,
 	// active in window-wide scope. Avoid conflicts with other shortcuts
 	// (a log message will be emitted if so). Shortcuts are processed after
 	// all other processing of keyboard input. Command is automatically translated
 	// into Meta on macOS and Control on all other platforms. Also see [Button.SetKey].
-	Shortcut key.Chord `xml:"shortcut"`
+	Shortcut key.Chord
 
 	// Menu is a menu constructor function used to build and display
 	// a menu whenever the button is clicked. There will be no menu

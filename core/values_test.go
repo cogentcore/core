@@ -34,7 +34,6 @@ func TestValues(t *testing.T) {
 		{"rune-slice", []rune("hello"), ""},
 		{"nil", (*int)(nil), ""},
 		{"icon", icons.Add, ""},
-		{"icon-show-name", icons.Add, `display:"show-name"`},
 		{"font", AppearanceSettings.Font, ""},
 		{"file", Filename("README.md"), ""},
 		{"func", SettingsWindow, ""},

@@ -132,7 +132,7 @@ type IconButton struct {
 
 func (ib *IconButton) WidgetValue() any { return &ib.Icon }
 
-func (ib *IconButton) Init() { // TODO(config): display:"show-name"
+func (ib *IconButton) Init() {
 	ib.Button.Init()
 	ib.Updater(func() {
 		if !ib.Icon.IsSet() {
