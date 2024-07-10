@@ -17,7 +17,7 @@ import (
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
 // It automatically moves items that do not fit into an overflow menu, and
 // manages additional items that are always placed onto this overflow menu.
-// Use [Body.AddAppBar] to add to the default toolbar at the top of an app.
+// Use [Body.AddAppBar] to add to the default toolbar at the top of the app.
 type Toolbar struct {
 	Frame
 
@@ -57,7 +57,7 @@ func (tb *Toolbar) Init() {
 			w.Updater(func() {
 				tb, ok := w.Parent.(*Toolbar)
 				if ok {
-					w.Menu = tb.OverflowMenu
+					w.Menu = tb.overflowMenu
 				}
 			})
 		})
@@ -70,7 +70,7 @@ func (tb *Toolbar) IsVisible() bool {
 }
 
 func (tb *Toolbar) SizeUp() {
-	tb.AllItemsToChildren()
+	tb.allItemsToChildren()
 	tb.Frame.SizeUp()
 }
 
@@ -80,7 +80,7 @@ func (tb *Toolbar) SizeDown(iter int) bool {
 		return true // ensure a second pass
 	}
 	if tb.Scene.showIter > 0 {
-		tb.MoveToOverflow()
+		tb.moveToOverflow()
 	}
 	return redo
 }
@@ -99,11 +99,11 @@ func (tb *Toolbar) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 
 	return csz
 }
 
-// AllItemsToChildren moves the overflow items back to the children,
+// allItemsToChildren moves the overflow items back to the children,
 // so the full set is considered for the next layout round,
 // and ensures the overflow button is made and moves it
 // to the end of the list.
-func (tb *Toolbar) AllItemsToChildren() {
+func (tb *Toolbar) allItemsToChildren() {
 	tb.overflowItems = nil
 	tb.allItemsPlan = &tree.Plan{Parent: tb.This}
 	tb.Make(tb.allItemsPlan)
@@ -114,20 +114,20 @@ func (tb *Toolbar) AllItemsToChildren() {
 	}
 }
 
-func (tb *Toolbar) ParentSize() float32 {
+func (tb *Toolbar) parentSize() float32 {
 	ma := tb.Styles.Direction.Dim()
 	psz := tb.ParentWidget().Geom.Size.Alloc.Content.Sub(tb.Geom.Size.Space)
 	avail := psz.Dim(ma)
 	return avail
 }
 
-// MoveToOverflow moves overflow out of children to the OverflowItems list
-func (tb *Toolbar) MoveToOverflow() {
+// moveToOverflow moves overflow out of children to the OverflowItems list
+func (tb *Toolbar) moveToOverflow() {
 	if !tb.HasChildren() {
 		return
 	}
 	ma := tb.Styles.Direction.Dim()
-	avail := tb.ParentSize()
+	avail := tb.parentSize()
 	li := tb.Children[tb.NumChildren()-1]
 	tb.overflowButton = nil
 	if li != nil {
@@ -178,8 +178,8 @@ func (tb *Toolbar) MoveToOverflow() {
 	}
 }
 
-// OverflowMenu adds the overflow menu to the given Scene.
-func (tb *Toolbar) OverflowMenu(m *Scene) {
+// overflowMenu adds the overflow menu to the given Scene.
+func (tb *Toolbar) overflowMenu(m *Scene) {
 	nm := len(tb.OverflowMenus)
 	ni := len(tb.overflowItems)
 	if ni > 0 {
