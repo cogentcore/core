@@ -233,7 +233,7 @@ func (fm *Form) Init() {
 					wb.SetReadOnly(fm.IsReadOnly() || readOnlyTag)
 					if i < len(fm.structFields) {
 						Bind(reflectx.UnderlyingPointer(fm.structFields[i].value).Interface(), w)
-						vc := JoinValueTitle(fm.ValueTitle, label)
+						vc := joinValueTitle(fm.ValueTitle, label)
 						if vc != wb.ValueTitle {
 							wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
 						}

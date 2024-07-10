@@ -325,7 +325,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 					if lblr, ok := tb.Slice.(labels.SliceLabeler); ok {
 						slbl := lblr.ElemLabel(si)
 						if slbl != "" {
-							vc = JoinValueTitle(tb.ValueTitle, slbl)
+							vc = joinValueTitle(tb.ValueTitle, slbl)
 						}
 					}
 				}

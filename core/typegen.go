@@ -1270,7 +1270,7 @@ func (t *WidgetBase) SetValueTitle(v string) *WidgetBase { t.ValueTitle = v; ret
 // SetValueNewWindow sets the [WidgetBase.ValueNewWindow]:
 // ValueNewWindow indicates that the dialog of a [Value] should be opened
 // as a new window, instead of a typical full window in the same current window.
-// This is set by [InitValueButton] and handled by [OpenValueDialog].
+// This is set by [InitValueButton] and handled by [openValueDialog].
 // This is triggered by holding down the Shift key while clicking on a
 // [Value] button. Certain values such as [FileButton] may set this to true
 // in their [InitValueButton] function.
