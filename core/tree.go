@@ -168,6 +168,9 @@ type Tree struct {
 
 	// inOpen is set in the Open method to prevent recursive opening for lazy-open nodes.
 	inOpen bool
+
+	// Branch is the branch widget that is used to open and close the tree node.
+	Branch *Switch `json:"-" xml:"-" copier:"-" set:"-"`
 }
 
 // NewTreeFrame adds a new [Tree] to a new [Frame] with the given
@@ -420,6 +423,7 @@ func (tr *Tree) Init() {
 		tr.ShowContextMenu(e)
 	})
 	tree.AddChildAt(parts, "branch", func(w *Switch) {
+		tr.Branch = w
 		w.SetType(SwitchCheckbox)
 		w.SetIconOn(tr.IconOpen).SetIconOff(tr.IconClosed).SetIconIndeterminate(tr.IconLeaf)
 		w.Styler(func(s *styles.Style) {
@@ -451,7 +455,7 @@ func (tr *Tree) Init() {
 		})
 		w.Updater(func() {
 			if tr.This.(Treer).CanOpen() {
-				tr.SetBranchState()
+				tr.setBranchState()
 			}
 		})
 	})
@@ -504,20 +508,6 @@ func (tr *Tree) rootIsReadOnly() bool {
 	return tr.root.IsReadOnly()
 }
 
-// qt calls the open / close thing a "branch"
-// http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtree
-
-// Branch returns the branch widget in parts, if it exists
-func (tr *Tree) Branch() (*Switch, bool) {
-	if tr.Parts == nil {
-		return nil, false
-	}
-	if icc := tr.Parts.ChildByName("branch", 0); icc != nil {
-		return icc.(*Switch), true
-	}
-	return nil, false
-}
-
 func (tr *Tree) Style() {
 	if !tr.HasChildren() {
 		tr.SetClosed(true)
@@ -526,9 +516,9 @@ func (tr *Tree) Style() {
 	tr.Indent.ToDots(&tr.Styles.UnitContext)
 }
 
-func (tr *Tree) SetBranchState() {
-	br, ok := tr.Branch()
-	if !ok {
+func (tr *Tree) setBranchState() {
+	br := tr.Branch
+	if br == nil {
 		return
 	}
 	switch {
@@ -589,7 +579,7 @@ func (tr *Tree) Position() {
 		slog.Error("core.Tree: RootView is nil", "in node:", tr)
 		return
 	}
-	tr.SetBranchState()
+	tr.setBranchState()
 	tr.Geom.Size.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tr.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
 	tr.widgetSize.X = tr.Geom.Size.Actual.Total.X
 
@@ -1116,7 +1106,7 @@ func (tr *Tree) Close() {
 		return
 	}
 	tr.SetClosed(true)
-	tr.SetBranchState()
+	tr.setBranchState()
 	tr.This.(Treer).OnClose()
 	tr.SetKidsVisibility(true) // parent closed
 	tr.NeedsLayout()
@@ -1143,7 +1133,7 @@ func (tr *Tree) Open() {
 	tr.inOpen = true
 	if tr.This.(Treer).CanOpen() {
 		tr.SetClosed(false)
-		tr.SetBranchState()
+		tr.setBranchState()
 		tr.SetKidsVisibility(false)
 		tr.This.(Treer).OnOpen()
 	}

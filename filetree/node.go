@@ -347,10 +347,10 @@ func (fn *Node) SetFileIcon() {
 		ic = icons.Blank
 	}
 	fn.IconLeaf = ic
-	if bp, ok := fn.Branch(); ok {
-		if bp.IconIndeterminate != ic {
-			bp.SetIconOn(icons.FolderOpen).SetIconOff(icons.Folder).SetIconIndeterminate(ic)
-			bp.UpdateTree()
+	if br := fn.Branch; br != nil {
+		if br.IconIndeterminate != ic {
+			br.SetIconOn(icons.FolderOpen).SetIconOff(icons.Folder).SetIconIndeterminate(ic)
+			br.UpdateTree()
 		}
 	}
 }
