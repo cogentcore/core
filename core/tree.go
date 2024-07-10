@@ -210,7 +210,7 @@ func (tr *Tree) RootSetViewIndex() int {
 
 func (tr *Tree) Init() {
 	tr.WidgetBase.Init()
-	tr.AddContextMenu(tr.ContextMenu)
+	tr.AddContextMenu(tr.contextMenu)
 	tr.IconOpen = icons.KeyboardArrowDown
 	tr.IconClosed = icons.KeyboardArrowRight
 	tr.IconLeaf = icons.Blank
@@ -1202,7 +1202,7 @@ func (tr *Tree) ContextMenuPos(e events.Event) (pos image.Point) {
 	return
 }
 
-func (tr *Tree) ContextMenuReadOnly(m *Scene) {
+func (tr *Tree) contextMenuReadOnly(m *Scene) {
 	tri := tr.This.(Treer)
 	NewFuncButton(m).SetFunc(tri.Copy).SetKey(keymap.Copy).SetEnabled(tr.HasSelection())
 	NewFuncButton(m).SetFunc(tr.EditNode).SetText("View").SetIcon(icons.Visibility).SetEnabled(tr.HasSelection())
@@ -1212,9 +1212,9 @@ func (tr *Tree) ContextMenuReadOnly(m *Scene) {
 	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).SetEnabled(tr.HasSelection())
 }
 
-func (tr *Tree) ContextMenu(m *Scene) {
+func (tr *Tree) contextMenu(m *Scene) {
 	if tr.IsReadOnly() || tr.rootIsReadOnly() {
-		tr.ContextMenuReadOnly(m)
+		tr.contextMenuReadOnly(m)
 		return
 	}
 	tri := tr.This.(Treer)
@@ -1241,11 +1241,12 @@ func (tr *Tree) ContextMenu(m *Scene) {
 	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).SetEnabled(tr.HasSelection())
 }
 
-// IsRoot returns true if given node is the root of the tree.
-func (tr *Tree) IsRoot(op string) bool {
+// IsRoot returns true if given node is the root of the tree,
+// creating an error snackbar if it is and action is non-empty.
+func (tr *Tree) IsRoot(action string) bool {
 	if tr.This == tr.root.This {
-		if op != "" {
-			MessageSnackbar(tr, fmt.Sprintf("Cannot %v the root of the tree", op))
+		if action != "" {
+			MessageSnackbar(tr, fmt.Sprintf("Cannot %v the root of the tree", action))
 		}
 		return true
 	}
@@ -1271,9 +1272,9 @@ func (tr *Tree) MimeData(md *mimedata.Mimes) {
 	}
 }
 
-// NodesFromMimeData returns a slice of tree nodes for
+// nodesFromMimeData returns a slice of tree nodes for
 // the Tree nodes and paths from mime data.
-func (tr *Tree) NodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
+func (tr *Tree) nodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 	ni := len(md) / 2
 	sl := make([]tree.Node, 0, ni)
 	pl := make([]string, 0, ni)
@@ -1308,7 +1309,7 @@ func (tr *Tree) Copy() { //types:add
 	tr.Clipboard().Write(md)
 }
 
-// Cut copies to system.Clipboard and deletes selected items.
+// Cut copies to [system.Clipboard] and deletes selected items.
 func (tr *Tree) Cut() { //types:add
 	if tr.IsRoot("Cut") {
 		return
@@ -1332,13 +1333,13 @@ func (tr *Tree) Cut() { //types:add
 func (tr *Tree) Paste() { //types:add
 	md := tr.Clipboard().Read([]string{fileinfo.DataJson})
 	if md != nil {
-		tr.PasteMenu(md)
+		tr.pasteMenu(md)
 	}
 }
 
-// PasteMenu performs a paste from the clipboard using given data,
+// pasteMenu performs a paste from the clipboard using given data,
 // by popping up a menu to determine what specifically to do.
-func (tr *Tree) PasteMenu(md mimedata.Mimes) {
+func (tr *Tree) pasteMenu(md mimedata.Mimes) {
 	tr.UnselectAll()
 	mf := func(m *Scene) {
 		tr.This.(Treer).MakePasteMenu(m, md, nil)
@@ -1348,30 +1349,30 @@ func (tr *Tree) PasteMenu(md mimedata.Mimes) {
 }
 
 // MakePasteMenu makes the menu of options for paste events
-// optional function is typically the DropFinalize but could also be other actions
+// Optional function is typically the DropFinalize but could also be other actions
 // to take after each optional action.
 func (tr *Tree) MakePasteMenu(m *Scene, md mimedata.Mimes, fun func()) {
 	NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
-		tr.PasteAssign(md)
+		tr.pasteAssign(md)
 		if fun != nil {
 			fun()
 		}
 	})
 	NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
-		tr.PasteChildren(md, events.DropCopy)
+		tr.pasteChildren(md, events.DropCopy)
 		if fun != nil {
 			fun()
 		}
 	})
 	if !tr.IsRoot("") && tr.root.This != tr.This {
 		NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
-			tr.PasteBefore(md, events.DropCopy)
+			tr.pasteBefore(md, events.DropCopy)
 			if fun != nil {
 				fun()
 			}
 		})
 		NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
-			tr.PasteAfter(md, events.DropCopy)
+			tr.pasteAfter(md, events.DropCopy)
 			if fun != nil {
 				fun()
 			}
@@ -1380,13 +1381,13 @@ func (tr *Tree) MakePasteMenu(m *Scene, md mimedata.Mimes, fun func()) {
 	NewButton(m).SetText("Cancel")
 }
 
-// PasteAssign assigns mime data (only the first one!) to this node
-func (tr *Tree) PasteAssign(md mimedata.Mimes) {
+// pasteAssign assigns mime data (only the first one!) to this node
+func (tr *Tree) pasteAssign(md mimedata.Mimes) {
 	if tr.SyncNode != nil {
 		tr.PasteAssignSync(md)
 		return
 	}
-	sl, _ := tr.NodesFromMimeData(md)
+	sl, _ := tr.nodesFromMimeData(md)
 	if len(sl) == 0 {
 		return
 	}
@@ -1397,30 +1398,30 @@ func (tr *Tree) PasteAssign(md mimedata.Mimes) {
 	tr.treeChanged()
 }
 
-// PasteBefore inserts object(s) from mime data before this node.
+// pasteBefore inserts object(s) from mime data before this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tr *Tree) PasteBefore(md mimedata.Mimes, mod events.DropMods) {
-	tr.PasteAt(md, mod, 0, "Paste Before")
+func (tr *Tree) pasteBefore(md mimedata.Mimes, mod events.DropMods) {
+	tr.pasteAt(md, mod, 0, "Paste before")
 }
 
-// PasteAfter inserts object(s) from mime data after this node.
+// pasteAfter inserts object(s) from mime data after this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tr *Tree) PasteAfter(md mimedata.Mimes, mod events.DropMods) {
-	tr.PasteAt(md, mod, 1, "Paste After")
+func (tr *Tree) pasteAfter(md mimedata.Mimes, mod events.DropMods) {
+	tr.pasteAt(md, mod, 1, "Paste after")
 }
 
-// TreeTempMovedTag is a kind of hack to prevent moved items from being deleted, using DND
-const TreeTempMovedTag = `_\&MOVED\&`
+// treeTempMovedTag is a kind of hack to prevent moved items from being deleted, using DND
+const treeTempMovedTag = `_\&MOVED\&`
 
 // todo: these methods require an interface to work for descended
 // nodes, based on base code
 
-// PasteAt inserts object(s) from mime data at rel position to this node.
+// pasteAt inserts object(s) from mime data at rel position to this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tr *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
+func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
 	if tr.Parent == nil {
 		return
 	}
@@ -1433,7 +1434,7 @@ func (tr *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 		tr.PasteAtSync(md, mod, rel, actNm)
 		return
 	}
-	sl, pl := tr.NodesFromMimeData(md)
+	sl, pl := tr.nodesFromMimeData(md)
 
 	myidx := tr.IndexInParent()
 	if myidx < 0 {
@@ -1457,7 +1458,7 @@ func (tr *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 		nwb.Update() // incl children
 		npath := ns.AsTree().PathFrom(tr.root)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-			ns.AsTree().SetName(ns.AsTree().Name + TreeTempMovedTag) // special keyword :)
+			ns.AsTree().SetName(ns.AsTree().Name + treeTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
 			selTv = ntv
@@ -1470,14 +1471,14 @@ func (tr *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 	}
 }
 
-// PasteChildren inserts object(s) from mime data
+// pasteChildren inserts object(s) from mime data
 // at end of children of this node
-func (tr *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
+func (tr *Tree) pasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	if tr.SyncNode != nil {
 		tr.PasteChildrenSync(md, mod)
 		return
 	}
-	sl, _ := tr.NodesFromMimeData(md)
+	sl, _ := tr.nodesFromMimeData(md)
 
 	for _, ns := range sl {
 		tr.AddChild(ns)
@@ -1511,13 +1512,13 @@ func (tr *Tree) DragStart(e events.Event) {
 	tr.Scene.Events.dragStart(tr.This.(Widget), md, e)
 }
 
-// DropExternal is not handled by base case but could be in derived
-func (tr *Tree) DropExternal(md mimedata.Mimes, mod events.DropMods) {
+// dropExternal is not handled by base case but could be in derived
+func (tr *Tree) dropExternal(md mimedata.Mimes, mod events.DropMods) {
 	// todo: not yet implemented
 }
 
-// DragClearStates clears the drag-drop related states for this widget
-func (tr *Tree) DragClearStates() {
+// dragClearStates clears the drag-drop related states for this widget
+func (tr *Tree) dragClearStates() {
 	tr.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
 	tr.Parts.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
 	tr.Style()
@@ -1532,7 +1533,7 @@ func (tr *Tree) DragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
 	stv := AsTree(de.Source.(Widget))
 	if stv != nil {
-		stv.DragClearStates()
+		stv.dragClearStates()
 	}
 	md := de.Data.(mimedata.Mimes)
 	mf := func(m *Scene) {
@@ -1549,7 +1550,7 @@ func (tr *Tree) DragDrop(e events.Event) {
 // Only relevant for DropMod == DropMove.
 func (tr *Tree) DropFinalize(de *events.DragDrop) {
 	tr.UnselectAll()
-	tr.DragClearStates()
+	tr.dragClearStates()
 	tr.Scene.Events.dropFinalize(de) // sends DropDeleteSource to Source
 }
 
@@ -1572,7 +1573,7 @@ func (tr *Tree) DropDeleteSource(e events.Event) {
 		if sn != nil {
 			sn.AsTree().Delete()
 		}
-		sn = root.FindPath(path + TreeTempMovedTag)
+		sn = root.FindPath(path + treeTempMovedTag)
 		if sn != nil {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]

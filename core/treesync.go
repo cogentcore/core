@@ -446,7 +446,7 @@ func (tr *Tree) PasteAssignSync(md mimedata.Mimes) {
 // append _Copy on the name of the inserted objects
 func (tr *Tree) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
 	sn := tr.SyncNode
-	sl, pl := tr.NodesFromMimeData(md)
+	sl, pl := tr.nodesFromMimeData(md)
 	tvparent := AsTree(tr.Parent)
 	parent := sn.AsTree().Parent
 	myidx := sn.AsTree().IndexInParent()
@@ -467,7 +467,7 @@ func (tr *Tree) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, act
 		parent.AsTree().InsertChild(ns, myidx+i)
 		npath := ns.AsTree().PathFrom(sroot)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-			ns.AsTree().SetName(ns.AsTree().Name + TreeTempMovedTag) // special keyword :)
+			ns.AsTree().SetName(ns.AsTree().Name + treeTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
 			seln = ns
@@ -485,7 +485,7 @@ func (tr *Tree) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, act
 // PasteChildrenSync inserts object(s) from mime data at
 // end of children of this node
 func (tr *Tree) PasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
-	sl, _ := tr.NodesFromMimeData(md)
+	sl, _ := tr.nodesFromMimeData(md)
 	sk := tr.SyncNode
 	for _, ns := range sl {
 		sk.AsTree().AddChild(ns)
@@ -517,7 +517,7 @@ func (tr *Tree) DropDeleteSourceSync(de *events.DragDrop) {
 		if sn != nil {
 			sn.AsTree().Delete()
 		}
-		sn = sroot.AsTree().FindPath(path + TreeTempMovedTag)
+		sn = sroot.AsTree().FindPath(path + treeTempMovedTag)
 		if sn != nil {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
