@@ -208,7 +208,6 @@ func init() {
 		"ThemeLight":                reflect.ValueOf(core.ThemeLight),
 		"ThemesN":                   reflect.ValueOf(core.ThemesN),
 		"ThemesValues":              reflect.ValueOf(core.ThemesValues),
-		"ToValue":                   reflect.ValueOf(core.ToValue),
 		"ToolbarStyles":             reflect.ValueOf(core.ToolbarStyles),
 		"TooltipStage":              reflect.ValueOf(core.TooltipStage),
 		"TreeTempMovedTag":          reflect.ValueOf(constant.MakeFromLiteral("\"_\\\\&MOVED\\\\&\"", token.STRING, 0)),

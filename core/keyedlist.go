@@ -72,7 +72,7 @@ func (kl *KeyedList) Init() {
 			valnm := "value-" + keytxt
 
 			tree.AddNew(p, keynm, func() Value {
-				return ToValue(key.Interface(), "")
+				return toValue(key.Interface(), "")
 			}, func(w Value) {
 				bindMapKey(mapv, key, w)
 				wb := w.AsWidget()
@@ -98,7 +98,7 @@ func (kl *KeyedList) Init() {
 			})
 			tree.AddNew(p, valnm, func() Value {
 				val := mapv.MapIndex(key).Interface()
-				w := ToValue(val, "")
+				w := toValue(val, "")
 				return bindMapValue(mapv, key, w)
 			}, func(w Value) {
 				wb := w.AsWidget()
