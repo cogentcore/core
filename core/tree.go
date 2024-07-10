@@ -103,7 +103,8 @@ type Tree struct {
 	WidgetBase
 
 	// SyncNode, if non-nil, is the [tree.Node] that this widget is
-	// viewing in the tree (the source).
+	// viewing in the tree (the source). It should be set using
+	// [Tree.SyncTree].
 	SyncNode tree.Node `set:"-" copier:"-" json:"-" xml:"-"`
 
 	// text is the text to display for the tree item label, which automatically
@@ -843,7 +844,7 @@ func (tr *Tree) treeChanged(original ...events.Event) {
 func (tr *Tree) sendChangeEventReSync(original ...events.Event) {
 	tr.root.SendChange(original...)
 	if tr.root.SyncNode != nil {
-		tr.root.ReSync()
+		tr.root.Resync()
 	}
 }
 
@@ -1205,7 +1206,7 @@ func (tr *Tree) ContextMenuPos(e events.Event) (pos image.Point) {
 func (tr *Tree) contextMenuReadOnly(m *Scene) {
 	tri := tr.This.(Treer)
 	NewFuncButton(m).SetFunc(tri.Copy).SetKey(keymap.Copy).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.EditNode).SetText("View").SetIcon(icons.Visibility).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.editNode).SetText("View").SetIcon(icons.Visibility).SetEnabled(tr.HasSelection())
 	NewSeparator(m)
 
 	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).SetEnabled(tr.HasSelection())
@@ -1233,8 +1234,8 @@ func (tr *Tree) contextMenu(m *Scene) {
 		paste.SetState(cb.IsEmpty(), states.Disabled)
 	}
 	NewSeparator(m)
-	NewFuncButton(m).SetFunc(tr.EditNode).SetText("Edit").SetIcon(icons.Edit).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.InspectNode).SetText("Inspect").SetIcon(icons.EditDocument).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.editNode).SetText("Edit").SetIcon(icons.Edit).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.inspectNode).SetText("Inspect").SetIcon(icons.EditDocument).SetEnabled(tr.HasSelection())
 	NewSeparator(m)
 
 	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).SetEnabled(tr.HasSelection())
@@ -1259,7 +1260,7 @@ func (tr *Tree) IsRoot(action string) bool {
 // MimeData adds mimedata for this node: a text/plain of the Path.
 func (tr *Tree) MimeData(md *mimedata.Mimes) {
 	if tr.SyncNode != nil {
-		tr.MimeDataSync(md)
+		tr.mimeDataSync(md)
 		return
 	}
 	*md = append(*md, mimedata.NewTextData(tr.PathFrom(tr.root)))
@@ -1315,7 +1316,7 @@ func (tr *Tree) Cut() { //types:add
 		return
 	}
 	if tr.SyncNode != nil {
-		tr.CutSync()
+		tr.cutSync()
 		return
 	}
 	tr.Copy()
@@ -1384,7 +1385,7 @@ func (tr *Tree) MakePasteMenu(m *Scene, md mimedata.Mimes, fun func()) {
 // pasteAssign assigns mime data (only the first one!) to this node
 func (tr *Tree) pasteAssign(md mimedata.Mimes) {
 	if tr.SyncNode != nil {
-		tr.PasteAssignSync(md)
+		tr.pasteAssignSync(md)
 		return
 	}
 	sl, _ := tr.nodesFromMimeData(md)
@@ -1431,7 +1432,7 @@ func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 		return
 	}
 	if tr.SyncNode != nil {
-		tr.PasteAtSync(md, mod, rel, actNm)
+		tr.pasteAtSync(md, mod, rel, actNm)
 		return
 	}
 	sl, pl := tr.nodesFromMimeData(md)
@@ -1475,7 +1476,7 @@ func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 // at end of children of this node
 func (tr *Tree) pasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	if tr.SyncNode != nil {
-		tr.PasteChildrenSync(md, mod)
+		tr.pasteChildrenSync(md, mod)
 		return
 	}
 	sl, _ := tr.nodesFromMimeData(md)
@@ -1559,7 +1560,7 @@ func (tr *Tree) DropDeleteSource(e events.Event) {
 	de := e.(*events.DragDrop)
 	tr.UnselectAll()
 	if tr.SyncNode != nil {
-		tr.DropDeleteSourceSync(de)
+		tr.dropDeleteSourceSync(de)
 		return
 	}
 	md := de.Data.(mimedata.Mimes)
