@@ -21,6 +21,9 @@ import (
 
 // InitSpell ensures that the spell.Spell spell checker is setup
 func InitSpell() error {
+	if core.TheApp.Platform().IsMobile() { // todo: too slow -- fix with aspell
+		return nil
+	}
 	if spell.Spell != nil {
 		return nil
 	}
@@ -69,6 +72,9 @@ func NewSpell() *Spell {
 // bool is true if known, false otherwise. If not known,
 // returns suggestions for close matching words.
 func (sp *Spell) CheckWord(word string) ([]string, bool) {
+	if spell.Spell == nil {
+		return nil, false
+	}
 	return spell.Spell.CheckWord(word)
 }
 
