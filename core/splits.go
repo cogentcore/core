@@ -94,7 +94,7 @@ func (sl *Splits) Init() {
 		for i := range len(sl.Children) - 1 { // one fewer handle than children
 			tree.AddAt(p, "handle-"+strconv.Itoa(i), func(w *Handle) {
 				w.OnChange(func(e events.Event) {
-					sl.setSplitAction(w.IndexInParent(), w.Value())
+					sl.setSplit(w.IndexInParent(), w.Value())
 				})
 				w.Styler(func(s *styles.Style) {
 					s.Direction = sl.Styles.Direction
@@ -201,12 +201,12 @@ func (sl *Splits) isCollapsed(idx int) bool {
 	return false
 }
 
-// setSplitAction sets the new splitter value, for given splitter.
+// setSplit sets the new splitter value, for given splitter.
 // New value is 0..1 value of position of that splitter.
 // It is a sum of all the positions up to that point.
 // Splitters are updated to ensure that selected position is achieved,
 // while dividing remainder appropriately.
-func (sl *Splits) setSplitAction(idx int, nwval float32) {
+func (sl *Splits) setSplit(idx int, nwval float32) {
 	sz := len(sl.Splits)
 	oldsum := float32(0)
 	for i := 0; i <= idx; i++ {

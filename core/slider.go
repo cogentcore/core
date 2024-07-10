@@ -208,23 +208,23 @@ func (sr *Slider) Init() {
 
 	sr.On(events.MouseDown, func(e events.Event) {
 		pos := sr.pointToRelPos(e.Pos())
-		sr.setSliderPosAction(pos)
+		sr.setSliderPosEvent(pos)
 		sr.slideStartPos = sr.pos
 	})
 	// note: not doing anything in particular on SlideStart
 	sr.On(events.SlideMove, func(e events.Event) {
 		del := e.StartDelta()
 		if sr.Styles.Direction == styles.Row {
-			sr.setSliderPosAction(sr.slideStartPos + float32(del.X))
+			sr.setSliderPosEvent(sr.slideStartPos + float32(del.X))
 		} else {
-			sr.setSliderPosAction(sr.slideStartPos + float32(del.Y))
+			sr.setSliderPosEvent(sr.slideStartPos + float32(del.Y))
 		}
 	})
 	// we need to send change events for both SlideStop and Click
 	// to handle the no-slide click case
 	change := func(e events.Event) {
 		pos := sr.pointToRelPos(e.Pos())
-		sr.setSliderPosAction(pos)
+		sr.setSliderPosEvent(pos)
 		sr.sendChange()
 	}
 	sr.On(events.SlideStop, change)
@@ -244,7 +244,7 @@ func (sr *Slider) Init() {
 			del = -del // invert for "natural" scroll
 		}
 		edel := sr.scrollScale(del)
-		sr.setValueAction(sr.Value + edel)
+		sr.setValueEvent(sr.Value + edel)
 		sr.sendChange()
 	})
 	sr.OnKeyChord(func(e events.Event) {
@@ -254,34 +254,34 @@ func (sr *Slider) Init() {
 		}
 		switch kf {
 		case keymap.MoveUp:
-			sr.setValueAction(sr.Value - sr.Step)
+			sr.setValueEvent(sr.Value - sr.Step)
 			e.SetHandled()
 		case keymap.MoveLeft:
-			sr.setValueAction(sr.Value - sr.Step)
+			sr.setValueEvent(sr.Value - sr.Step)
 			e.SetHandled()
 		case keymap.MoveDown:
-			sr.setValueAction(sr.Value + sr.Step)
+			sr.setValueEvent(sr.Value + sr.Step)
 			e.SetHandled()
 		case keymap.MoveRight:
-			sr.setValueAction(sr.Value + sr.Step)
+			sr.setValueEvent(sr.Value + sr.Step)
 			e.SetHandled()
 		case keymap.PageUp:
 			if sr.PageStep < sr.Step {
 				sr.PageStep = 2 * sr.Step
 			}
-			sr.setValueAction(sr.Value - sr.PageStep)
+			sr.setValueEvent(sr.Value - sr.PageStep)
 			e.SetHandled()
 		case keymap.PageDown:
 			if sr.PageStep < sr.Step {
 				sr.PageStep = 2 * sr.Step
 			}
-			sr.setValueAction(sr.Value + sr.PageStep)
+			sr.setValueEvent(sr.Value + sr.PageStep)
 			e.SetHandled()
 		case keymap.Home:
-			sr.setValueAction(sr.Min)
+			sr.setValueEvent(sr.Min)
 			e.SetHandled()
 		case keymap.End:
-			sr.setValueAction(sr.Max)
+			sr.setValueEvent(sr.Max)
 			e.SetHandled()
 		}
 	})
@@ -391,10 +391,10 @@ func (sr *Slider) setSliderPos(pos float32) {
 	sr.NeedsRender()
 }
 
-// setSliderPosAction sets the position of the slider at the given position in pixels,
+// setSliderPosEvent sets the position of the slider at the given position in pixels,
 // and updates the corresponding Value based on that position.
 // This version sends input events.
-func (sr *Slider) setSliderPosAction(pos float32) {
+func (sr *Slider) setSliderPosEvent(pos float32) {
 	sr.setSliderPos(pos)
 	if math32.Abs(sr.prevSlide-sr.Value) > sr.InputThreshold {
 		sr.prevSlide = sr.Value
@@ -440,9 +440,9 @@ func (sr *Slider) SetValue(value float32) *Slider {
 	return sr
 }
 
-// setValueAction sets the value and updates the slider representation, and
+// setValueEvent sets the value and updates the slider representation, and
 // emits an input and change event
-func (sr *Slider) setValueAction(val float32) {
+func (sr *Slider) setValueEvent(val float32) {
 	if sr.Value == val {
 		return
 	}

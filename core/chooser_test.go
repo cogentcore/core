@@ -144,7 +144,7 @@ func TestChooserChange(t *testing.T) {
 		item = ch.CurrentItem
 	})
 	b.AssertRender(t, "chooser/change", func() {
-		ch.selectItemAction(1)
+		ch.selectItemEvent(1)
 		assert.Equal(t, 1, index)
 		assert.Equal(t, ChooserItem{Value: "Oldest"}, item)
 	})

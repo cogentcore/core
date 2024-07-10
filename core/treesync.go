@@ -341,7 +341,7 @@ func (tr *Tree) Duplicate() { //types:add
 	ntv.Update()
 	parent.Update()
 	parent.treeChanged(nil)
-	// ntv.SelectAction(events.SelectOne)
+	// ntv.SelectEvent(events.SelectOne)
 }
 
 func (tr *Tree) DuplicateSync() {

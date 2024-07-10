@@ -211,8 +211,8 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 	return sp
 }
 
-// setValueAction calls SetValue and also sends a change event.
-func (sp *Spinner) setValueAction(val float32) *Spinner {
+// setValueEvent calls SetValue and also sends a change event.
+func (sp *Spinner) setValueEvent(val float32) *Spinner {
 	sp.SetValue(val)
 	sp.SendChange()
 	return sp
@@ -227,7 +227,7 @@ func (sp *Spinner) incrementValue(steps float32) *Spinner {
 	}
 	val := sp.Value + steps*sp.Step
 	val = sp.wrapAround(val)
-	return sp.setValueAction(val)
+	return sp.setValueEvent(val)
 }
 
 // pageIncrementValue increments the value by given number of page steps (+ or -),
@@ -242,7 +242,7 @@ func (sp *Spinner) pageIncrementValue(steps float32) *Spinner {
 	}
 	val := sp.Value + steps*sp.PageStep
 	val = sp.wrapAround(val)
-	return sp.setValueAction(val)
+	return sp.setValueEvent(val)
 }
 
 // wrapAround, if the spinner has a min and a max, converts values less

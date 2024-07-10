@@ -222,7 +222,7 @@ func (fp *FilePicker) selectFile() bool {
 			fp.directory = filepath.Join(fp.directory, fi.Name)
 			fp.selectedFilename = ""
 			fp.selectedIndex = -1
-			fp.updateFilesAction()
+			fp.updateFilesEvent()
 			return false
 		}
 		return true
@@ -241,7 +241,7 @@ func (fp *FilePicker) MakeToolbar(p *tree.Plan) {
 		w.SetFunc(fp.addPathToFavorites).SetIcon(icons.Favorite).SetText("Favorite")
 	})
 	tree.Add(p, func(w *FuncButton) {
-		w.SetFunc(fp.updateFilesAction).SetIcon(icons.Refresh).SetText("Update")
+		w.SetFunc(fp.updateFilesEvent).SetIcon(icons.Refresh).SetText("Update")
 	})
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.newFolder).SetIcon(icons.CreateNewFolder)
@@ -257,7 +257,7 @@ func (fp *FilePicker) addChooserPaths(ch *Chooser) {
 				Icon:  icons.Folder,
 				Func: func() {
 					fp.directory = sp
-					fp.updateFilesAction()
+					fp.updateFilesEvent()
 				},
 			})
 		}
@@ -349,7 +349,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 				OnClick(func(e events.Event) {
 					fn := fp.files[w.SelectedIndex]
 					fn.Duplicate()
-					fp.updateFilesAction()
+					fp.updateFilesEvent()
 				})
 			tip := "Delete moves the selected file to the trash / recycling bin"
 			if TheApp.Platform().IsMobile() {
@@ -359,7 +359,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 				SetTooltip(tip).
 				OnClick(func(e events.Event) {
 					fn := fp.files[w.SelectedIndex]
-					fb := NewSoloFuncButton(w).SetFunc(fn.Delete).SetConfirm(true).SetAfterFunc(fp.updateFilesAction)
+					fb := NewSoloFuncButton(w).SetFunc(fn.Delete).SetConfirm(true).SetAfterFunc(fp.updateFilesEvent)
 					fb.SetTooltip(tip)
 					fb.CallFunc()
 				})
@@ -367,7 +367,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 				SetTooltip("Rename the selected file").
 				OnClick(func(e events.Event) {
 					fn := fp.files[w.SelectedIndex]
-					NewSoloFuncButton(w).SetFunc(fn.Rename).SetAfterFunc(fp.updateFilesAction).CallFunc()
+					NewSoloFuncButton(w).SetFunc(fn.Rename).SetAfterFunc(fp.updateFilesEvent).CallFunc()
 				})
 			NewButton(m).SetText("Info").SetIcon(icons.Info).
 				SetTooltip("View information about the selected file").
@@ -472,8 +472,8 @@ func (fp *FilePicker) watchWatcher() {
 	}()
 }
 
-// updateFilesAction updates the list of files and other views for the current path.
-func (fp *FilePicker) updateFilesAction() { //types:add
+// updateFilesEvent updates the list of files and other views for the current path.
+func (fp *FilePicker) updateFilesEvent() { //types:add
 	fp.readFiles()
 	fp.Update()
 	// sf := fv.SelectField()
@@ -560,7 +560,7 @@ func (fp *FilePicker) directoryUp() { //types:add
 		return
 	}
 	fp.directory = pdr
-	fp.updateFilesAction()
+	fp.updateFilesEvent()
 }
 
 // newFolder creates a new folder with the given name in the current directory.
@@ -574,7 +574,7 @@ func (fp *FilePicker) newFolder(name string) error { //types:add
 	if err != nil {
 		return err
 	}
-	fp.updateFilesAction()
+	fp.updateFilesEvent()
 	return nil
 }
 
@@ -645,7 +645,7 @@ func (fp *FilePicker) favoritesSelect(idx int) {
 	}
 	fi := SystemSettings.FavPaths[idx]
 	fp.directory, _ = homedir.Expand(fi.Path)
-	fp.updateFilesAction()
+	fp.updateFilesEvent()
 }
 
 // saveSortSettings saves current sorting preferences

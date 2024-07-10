@@ -414,7 +414,7 @@ func (tb *Table) NewAt(idx int) {
 
 	tb.Table.InsertRows(idx, 1)
 
-	tb.SelectIndexAction(idx, events.SelectOne)
+	tb.SelectIndexEvent(idx, events.SelectOne)
 	tb.Update()
 	tb.IndexGrabFocus(idx)
 }
@@ -726,6 +726,6 @@ func (tb *Table) PasteAtIndex(md mimedata.Mimes, idx int) {
 		tb.Table.Table.ReadCSVRow(rec, rw)
 	}
 	tb.SendChange()
-	tb.SelectIndexAction(idx, events.SelectOne)
+	tb.SelectIndexEvent(idx, events.SelectOne)
 	tb.Update()
 }

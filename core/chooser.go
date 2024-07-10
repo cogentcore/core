@@ -222,7 +222,7 @@ func (ch *Chooser) Init() {
 				if index < 0 {
 					index += len(ch.Items)
 				}
-				ch.selectItemAction(index)
+				ch.selectItemEvent(index)
 			}
 		case kf == keymap.MoveDown:
 			e.SetHandled()
@@ -231,7 +231,7 @@ func (ch *Chooser) Init() {
 				if index >= len(ch.Items) {
 					index -= len(ch.Items)
 				}
-				ch.selectItemAction(index)
+				ch.selectItemEvent(index)
 			}
 		case kf == keymap.PageUp:
 			e.SetHandled()
@@ -240,7 +240,7 @@ func (ch *Chooser) Init() {
 				for index < 0 {
 					index += len(ch.Items)
 				}
-				ch.selectItemAction(index)
+				ch.selectItemEvent(index)
 			}
 		case kf == keymap.PageDown:
 			e.SetHandled()
@@ -249,7 +249,7 @@ func (ch *Chooser) Init() {
 				for index >= len(ch.Items) {
 					index -= len(ch.Items)
 				}
-				ch.selectItemAction(index)
+				ch.selectItemEvent(index)
 			}
 		case kf == keymap.Enter || (!ch.Editable && e.KeyRune() == ' '):
 			// if !(kt.Rune == ' ' && chb.Sc.Type == ScCompleter) {
@@ -539,9 +539,9 @@ func (ch *Chooser) selectItem(index int) *Chooser {
 	return ch
 }
 
-// selectItemAction selects the item at the given index and updates the chooser to display it.
+// selectItemEvent selects the item at the given index and updates the chooser to display it.
 // It also sends an [events.Change] event to indicate that the value has changed.
-func (ch *Chooser) selectItemAction(index int) *Chooser {
+func (ch *Chooser) selectItemEvent(index int) *Chooser {
 	if ch.This == nil {
 		return ch
 	}
@@ -570,7 +570,7 @@ func (ch *Chooser) makeItemsMenu(m *Scene) {
 		bt := NewButton(m).SetText(it.GetText()).SetIcon(it.Icon).SetTooltip(it.Tooltip)
 		bt.SetSelected(i == ch.CurrentIndex)
 		bt.OnClick(func(e events.Event) {
-			ch.selectItemAction(i)
+			ch.selectItemEvent(i)
 		})
 	}
 	if ch.AllowNew {
@@ -584,7 +584,7 @@ func (ch *Chooser) makeItemsMenu(m *Scene) {
 					d.AddCancel(parent)
 					d.AddOK(parent).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
 						ch.Items = append(ch.Items, ChooserItem{Value: tf.Text()})
-						ch.selectItemAction(len(ch.Items) - 1)
+						ch.selectItemEvent(len(ch.Items) - 1)
 					})
 				})
 				d.RunDialog(ch)

@@ -774,7 +774,7 @@ func (lb *ListBase) NewAt(idx int) {
 
 	lb.This.(Lister).UpdateSliceSize()
 
-	lb.SelectIndexAction(idx, events.SelectOne)
+	lb.SelectIndexEvent(idx, events.SelectOne)
 	lb.UpdateChange()
 	lb.IndexGrabFocus(idx)
 }
@@ -1000,14 +1000,14 @@ func (lb *ListBase) moveDown(selMode events.SelectModes) int {
 		return -1
 	}
 	lb.SelectedIndex++
-	lb.SelectIndexAction(lb.SelectedIndex, selMode)
+	lb.SelectIndexEvent(lb.SelectedIndex, selMode)
 	return lb.SelectedIndex
 }
 
-// moveDownAction moves the selection down to next row, using given select
+// moveDownEvent moves the selection down to next row, using given select
 // mode (from keyboard modifiers) -- and emits select event for newly selected
 // row
-func (lb *ListBase) moveDownAction(selMode events.SelectModes) int {
+func (lb *ListBase) moveDownEvent(selMode events.SelectModes) int {
 	nidx := lb.moveDown(selMode)
 	if nidx >= 0 {
 		lb.ScrollToIndex(nidx)
@@ -1024,13 +1024,13 @@ func (lb *ListBase) moveUp(selMode events.SelectModes) int {
 		return -1
 	}
 	lb.SelectedIndex--
-	lb.SelectIndexAction(lb.SelectedIndex, selMode)
+	lb.SelectIndexEvent(lb.SelectedIndex, selMode)
 	return lb.SelectedIndex
 }
 
-// moveUpAction moves the selection up to previous idx, using given select
+// moveUpEvent moves the selection up to previous idx, using given select
 // mode (from keyboard modifiers) -- and emits select event for newly selected idx
-func (lb *ListBase) moveUpAction(selMode events.SelectModes) int {
+func (lb *ListBase) moveUpEvent(selMode events.SelectModes) int {
 	nidx := lb.moveUp(selMode)
 	if nidx >= 0 {
 		lb.ScrollToIndex(nidx)
@@ -1048,13 +1048,13 @@ func (lb *ListBase) movePageDown(selMode events.SelectModes) int {
 	}
 	lb.SelectedIndex += lb.VisibleRows
 	lb.SelectedIndex = min(lb.SelectedIndex, lb.SliceSize-1)
-	lb.SelectIndexAction(lb.SelectedIndex, selMode)
+	lb.SelectIndexEvent(lb.SelectedIndex, selMode)
 	return lb.SelectedIndex
 }
 
-// movePageDownAction moves the selection down to next page, using given select
+// movePageDownEvent moves the selection down to next page, using given select
 // mode (from keyboard modifiers) -- and emits select event for newly selected idx
-func (lb *ListBase) movePageDownAction(selMode events.SelectModes) int {
+func (lb *ListBase) movePageDownEvent(selMode events.SelectModes) int {
 	nidx := lb.movePageDown(selMode)
 	if nidx >= 0 {
 		lb.ScrollToIndex(nidx)
@@ -1072,13 +1072,13 @@ func (lb *ListBase) movePageUp(selMode events.SelectModes) int {
 	}
 	lb.SelectedIndex -= lb.VisibleRows
 	lb.SelectedIndex = max(0, lb.SelectedIndex)
-	lb.SelectIndexAction(lb.SelectedIndex, selMode)
+	lb.SelectIndexEvent(lb.SelectedIndex, selMode)
 	return lb.SelectedIndex
 }
 
-// movePageUpAction moves the selection up to previous page, using given select
+// movePageUpEvent moves the selection up to previous page, using given select
 // mode (from keyboard modifiers) -- and emits select event for newly selected idx
-func (lb *ListBase) movePageUpAction(selMode events.SelectModes) int {
+func (lb *ListBase) movePageUpEvent(selMode events.SelectModes) int {
 	nidx := lb.movePageUp(selMode)
 	if nidx >= 0 {
 		lb.ScrollToIndex(nidx)
@@ -1111,7 +1111,7 @@ func (lb *ListBase) updateSelectIndex(idx int, sel bool, selMode events.SelectMo
 		lb.Send(events.Select)
 		lb.Restyle()
 	} else {
-		lb.SelectIndexAction(idx, selMode)
+		lb.SelectIndexEvent(idx, selMode)
 	}
 }
 
@@ -1182,10 +1182,10 @@ func (lb *ListBase) selectAllIndexes() {
 	lb.NeedsRender()
 }
 
-// SelectIndexAction is called when a select action has been received (e.g., a
+// SelectIndexEvent is called when a select event has been received (e.g., a
 // mouse click) -- translates into selection updates -- gets selection mode
 // from mouse event (ExtendContinuous, ExtendOne)
-func (lb *ListBase) SelectIndexAction(idx int, mode events.SelectModes) {
+func (lb *ListBase) SelectIndexEvent(idx int, mode events.SelectModes) {
 	if mode == events.NoSelect {
 		return
 	}
@@ -1248,7 +1248,7 @@ func (lb *ListBase) SelectIndexAction(idx int, mode events.SelectModes) {
 		}
 	case events.ExtendOne:
 		if lb.indexIsSelected(idx) {
-			lb.unselectIndexAction(idx)
+			lb.unselectIndexEvent(idx)
 			lb.Send(events.Select) //  sv.SelectedIndex)
 		} else {
 			lb.SelectedIndex = idx
@@ -1258,7 +1258,7 @@ func (lb *ListBase) SelectIndexAction(idx int, mode events.SelectModes) {
 		}
 	case events.Unselect:
 		lb.SelectedIndex = idx
-		lb.unselectIndexAction(idx)
+		lb.unselectIndexEvent(idx)
 	case events.SelectQuiet:
 		lb.SelectedIndex = idx
 		lb.SelectIndex(idx)
@@ -1269,8 +1269,8 @@ func (lb *ListBase) SelectIndexAction(idx int, mode events.SelectModes) {
 	lb.Restyle()
 }
 
-// unselectIndexAction unselects this idx (if selected) -- and emits a signal
-func (lb *ListBase) unselectIndexAction(idx int) {
+// unselectIndexEvent unselects this idx (if selected) -- and emits a signal
+func (lb *ListBase) unselectIndexEvent(idx int) {
 	if lb.indexIsSelected(idx) {
 		lb.unselectIndex(idx)
 	}
@@ -1357,7 +1357,7 @@ func (lb *ListBase) cutIndexes() { //types:add
 		lb.This.(Lister).DeleteAt(i)
 	}
 	lb.SendChange()
-	lb.SelectIndexAction(idx, events.SelectOne)
+	lb.SelectIndexEvent(idx, events.SelectOne)
 	lb.Update()
 }
 
@@ -1443,7 +1443,7 @@ func (lb *ListBase) PasteAtIndex(md mimedata.Mimes, idx int) {
 	lb.sliceUnderlying = reflectx.NonPointerValue(reflect.ValueOf(lb.Slice)) // need to update after changes
 
 	lb.SendChange()
-	lb.SelectIndexAction(idx, events.SelectOne)
+	lb.SelectIndexEvent(idx, events.SelectOne)
 	lb.Update()
 }
 
@@ -1547,7 +1547,7 @@ func (lb *ListBase) DropDeleteSource(e events.Event) {
 		lb.This.(Lister).DeleteAt(i)
 	}
 	lb.draggedIndexes = nil
-	lb.SelectIndexAction(idx, events.SelectOne)
+	lb.SelectIndexEvent(idx, events.SelectOne)
 }
 
 // saveDraggedIndexes saves selectedindexes into dragged indexes
@@ -1622,16 +1622,16 @@ func (lb *ListBase) keyInputNav(kt events.Event) {
 		lb.SelectMode = false
 		kt.SetHandled()
 	case keymap.MoveDown:
-		lb.moveDownAction(selMode)
+		lb.moveDownEvent(selMode)
 		kt.SetHandled()
 	case keymap.MoveUp:
-		lb.moveUpAction(selMode)
+		lb.moveUpEvent(selMode)
 		kt.SetHandled()
 	case keymap.PageDown:
-		lb.movePageDownAction(selMode)
+		lb.movePageDownEvent(selMode)
 		kt.SetHandled()
 	case keymap.PageUp:
-		lb.movePageUpAction(selMode)
+		lb.movePageUpEvent(selMode)
 		kt.SetHandled()
 	case keymap.SelectMode:
 		lb.SelectMode = !lb.SelectMode
@@ -1657,29 +1657,29 @@ func (lb *ListBase) keyInputEditable(kt events.Event) {
 	// case keymap.Delete: // too dangerous
 	// 	sv.This.(Lister).SliceDeleteAt(sv.SelectedIndex)
 	// 	sv.SelectMode = false
-	// 	sv.SelectIndexAction(idx, events.SelectOne)
+	// 	sv.SelectIndexEvent(idx, events.SelectOne)
 	// 	kt.SetHandled()
 	case keymap.Duplicate:
 		nidx := lb.duplicate()
 		lb.SelectMode = false
 		if nidx >= 0 {
-			lb.SelectIndexAction(nidx, events.SelectOne)
+			lb.SelectIndexEvent(nidx, events.SelectOne)
 		}
 		kt.SetHandled()
 	case keymap.Insert:
 		lb.This.(Lister).NewAt(idx)
 		lb.SelectMode = false
-		lb.SelectIndexAction(idx+1, events.SelectOne) // todo: somehow nidx not working
+		lb.SelectIndexEvent(idx+1, events.SelectOne) // todo: somehow nidx not working
 		kt.SetHandled()
 	case keymap.InsertAfter:
 		lb.This.(Lister).NewAt(idx + 1)
 		lb.SelectMode = false
-		lb.SelectIndexAction(idx+1, events.SelectOne)
+		lb.SelectIndexEvent(idx+1, events.SelectOne)
 		kt.SetHandled()
 	case keymap.Copy:
 		lb.copyIndexes(true)
 		lb.SelectMode = false
-		lb.SelectIndexAction(idx, events.SelectOne)
+		lb.SelectIndexEvent(idx, events.SelectOne)
 		kt.SetHandled()
 	case keymap.Cut:
 		lb.cutIndexes()

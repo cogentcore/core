@@ -363,7 +363,7 @@ func (tb *Table) NewAt(idx int) {
 	}
 
 	tb.This.(Lister).UpdateSliceSize()
-	tb.SelectIndexAction(idx, events.SelectOne)
+	tb.SelectIndexEvent(idx, events.SelectOne)
 	tb.UpdateChange()
 	tb.IndexGrabFocus(idx)
 }

@@ -114,7 +114,7 @@ func (fr *Frame) ScrollUpdateFromGeom(d math32.Dims) {
 	}
 	sb := fr.scrolls[d]
 	cv := fr.Geom.Scroll.Dim(d)
-	sb.setValueAction(-cv)
+	sb.setValueEvent(-cv)
 	fr.This.(Layouter).ApplyScenePos() // computes updated positions
 	fr.NeedsRender()
 }
@@ -202,7 +202,7 @@ func (fr *Frame) scrollActionDelta(d math32.Dims, delta float32) {
 	if fr.HasScroll[d] && fr.scrolls[d] != nil {
 		sb := fr.scrolls[d]
 		nval := sb.Value + sb.scrollScale(delta)
-		sb.setValueAction(nval)
+		sb.setValueEvent(nval)
 		fr.NeedsRender() // only render needed -- scroll updates pos
 	}
 }
@@ -290,14 +290,14 @@ func (fr *Frame) autoScrollDim(d math32.Dims, pos float32) bool {
 		pct := mind / ssz
 		if pct < .1 && sb.Value > 0 {
 			dst = min(dst, sb.Value)
-			sb.setValueAction(sb.Value - dst)
+			sb.setValueEvent(sb.Value - dst)
 			return true
 		}
 	} else {
 		pct := maxd / ssz
 		if pct < .1 && sb.Value < smax {
 			dst = min(dst, (smax - sb.Value))
-			sb.setValueAction(sb.Value + dst)
+			sb.setValueEvent(sb.Value + dst)
 			return true
 		}
 	}
@@ -350,12 +350,12 @@ func (fr *Frame) scrollToBoxDim(d math32.Dims, tmini, tmaxi int) bool {
 		if trg < 0 {
 			trg = 0
 		}
-		sb.setValueAction(trg)
+		sb.setValueEvent(trg)
 		return true
 	} else {
 		if (tmax - tmin) < sb.scrollThumbValue() { // only if whole thing fits
 			trg := sb.Value + float32(tmax-cmax) + h
-			sb.setValueAction(trg)
+			sb.setValueEvent(trg)
 			return true
 		}
 	}
@@ -394,7 +394,7 @@ func (fr *Frame) ScrollDimToStart(d math32.Dims, posi int) bool {
 	}
 	sb := fr.scrolls[d]
 	trg := math32.Clamp(sb.Value+(pos-cmin), 0, sb.effectiveMax())
-	sb.setValueAction(trg)
+	sb.setValueEvent(trg)
 	return true
 }
 
@@ -412,7 +412,7 @@ func (fr *Frame) ScrollDimToEnd(d math32.Dims, posi int) bool {
 	}
 	sb := fr.scrolls[d]
 	trg := math32.Clamp(sb.Value+(pos-cmax), 0, sb.effectiveMax())
-	sb.setValueAction(trg)
+	sb.setValueEvent(trg)
 	return true
 }
 
@@ -438,6 +438,6 @@ func (fr *Frame) ScrollDimToCenter(d math32.Dims, posi int) bool {
 	}
 	sb := fr.scrolls[d]
 	trg := math32.Clamp(sb.Value+(pos-mid), 0, sb.effectiveMax())
-	sb.setValueAction(trg)
+	sb.setValueEvent(trg)
 	return true
 }
