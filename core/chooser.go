@@ -305,7 +305,7 @@ func (ch *Chooser) Init() {
 				})
 				w.OnClick(func(e events.Event) {
 					ch.CallItemsFuncs()
-					w.OfferComplete()
+					w.offerComplete()
 				})
 				w.OnKeyChord(func(e events.Event) {
 					kf := keymap.Of(e.KeyChord())

@@ -56,7 +56,7 @@ func TestTextFieldPasswordClick(t *testing.T) {
 	b := NewBody()
 	tf := NewTextField(b).SetTypePassword().SetText("my password")
 	b.AssertRender(t, "text-field/password-click", func() {
-		tf.TrailingIconButton().Send(events.Click)
+		tf.trailingIconButton.Send(events.Click)
 	})
 }
 
@@ -70,7 +70,7 @@ func TestTextFieldClearClick(t *testing.T) {
 	b := NewBody()
 	tf := NewTextField(b).AddClearButton().SetText("Hello, world!")
 	b.AssertRender(t, "text-field/clear-click", func() {
-		tf.TrailingIconButton().Send(events.Click)
+		tf.trailingIconButton.Send(events.Click)
 		assert.Equal(t, "", tf.Text())
 	})
 }
@@ -82,7 +82,7 @@ func TestTextFieldIcons(t *testing.T) {
 		clicked = true
 	})
 	b.AssertRender(t, "text-field/icons", func() {
-		tf.LeadingIconButton().Send(events.Click)
+		tf.leadingIconButton.Send(events.Click)
 		assert.True(t, clicked)
 	})
 }

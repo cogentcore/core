@@ -49,7 +49,7 @@ func TestKeyedListChange(t *testing.T) {
 	})
 	b.AssertRender(t, "keyed-list/change", func() {
 		// [3] is value of second row, which is "Go" since it is sorted alphabetically
-		mv.Child(3).(*Spinner).TrailingIconButton().Send(events.Click)
+		mv.Child(3).(*Spinner).trailingIconButton.Send(events.Click)
 		assert.Equal(t, 1, n)
 		assert.Equal(t, m, value)
 		assert.Equal(t, map[string]int{"Go": 2, "C++": 3, "Python": 5}, m)

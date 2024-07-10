@@ -55,7 +55,7 @@ func TestFormChange(t *testing.T) {
 	})
 	b.AssertRender(t, "form/change", func() {
 		// [3] is value of second row, which is Age
-		sv.Child(3).(*Spinner).LeadingIconButton().Send(events.Click)
+		sv.Child(3).(*Spinner).leadingIconButton.Send(events.Click)
 		assert.Equal(t, 1, n)
 		assert.Equal(t, p, value)
 		assert.Equal(t, person{Name: "Go", Age: 34}, p)
