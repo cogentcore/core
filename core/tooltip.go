@@ -12,8 +12,8 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// DefaultTooltipPos returns the default position for the tooltip,
-// in Window coordinates, using the Window bounding box.
+// DefaultTooltipPos returns the default position for the tooltip
+// for this widget in window coordinates using the window bounding box.
 func (wb *WidgetBase) DefaultTooltipPos() image.Point {
 	bb := wb.winBBox()
 	pos := bb.Min
@@ -22,31 +22,31 @@ func (wb *WidgetBase) DefaultTooltipPos() image.Point {
 	return pos
 }
 
-// NewTooltipFromScene returns a new Tooltip stage with given scene contents,
+// newTooltipFromScene returns a new Tooltip stage with given scene contents,
 // in connection with given widget (which provides key context).
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewTooltipFromScene(sc *Scene, ctx Widget) *Stage {
+func newTooltipFromScene(sc *Scene, ctx Widget) *Stage {
 	return NewPopupStage(TooltipStage, sc, ctx)
 }
 
-// NewTooltip returns a new tooltip stage displaying the given tooltip text
+// newTooltip returns a new tooltip stage displaying the given tooltip text
 // for the given widget based at the given window-level position, with the size
 // defaulting to the size of the widget.
-func NewTooltip(w Widget, tooltip string, pos image.Point) *Stage {
-	return NewTooltipTextSize(w, tooltip, pos, w.AsWidget().winBBox().Size())
+func newTooltip(w Widget, tooltip string, pos image.Point) *Stage {
+	return newTooltipTextSize(w, tooltip, pos, w.AsWidget().winBBox().Size())
 }
 
-// NewTooltipTextSize returns a new tooltip stage displaying the given tooltip text
+// newTooltipTextSize returns a new tooltip stage displaying the given tooltip text
 // for the given widget at the given window-level position with the given size.
-func NewTooltipTextSize(w Widget, tooltip string, pos, sz image.Point) *Stage {
-	return NewTooltipFromScene(NewTooltipScene(w, tooltip, pos, sz), w)
+func newTooltipTextSize(w Widget, tooltip string, pos, sz image.Point) *Stage {
+	return newTooltipFromScene(newTooltipScene(w, tooltip, pos, sz), w)
 }
 
-// NewTooltipScene returns a new tooltip scene for the given widget with the
+// newTooltipScene returns a new tooltip scene for the given widget with the
 // given tooltip based on the given context position and context size.
-func NewTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
+func newTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
 	sc := NewScene(w.AsTree().Name + "-tooltip")
 	// tooltip positioning uses the original scene geom as the context values
 	sc.sceneGeom.Pos = pos

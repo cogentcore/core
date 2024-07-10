@@ -400,7 +400,7 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 			return
 		}
 		e.SetHandled()
-		NewTooltip(wi, tt, pos).Run()
+		newTooltip(wi, tt, pos).Run()
 	})
 	wb.On(events.LongHoverEnd, func(e events.Event) {
 		if wb.Scene.Stage != nil {
@@ -416,7 +416,7 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 			return
 		}
 		e.SetHandled()
-		NewTooltip(wi, tt, pos).Run()
+		newTooltip(wi, tt, pos).Run()
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
 		if wb.Scene.Stage != nil {
