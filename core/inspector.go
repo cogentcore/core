@@ -231,7 +231,7 @@ func (is *Inspector) selectionMonitor() {
 	}
 	is.AsyncLock() // coming from other tree
 	tv.OpenParents()
-	tv.SelectAction(events.SelectOne)
+	tv.SelectEvent(events.SelectOne)
 	tv.ScrollToThis()
 	is.AsyncUnlock()
 	is.Scene.Stage.raise()

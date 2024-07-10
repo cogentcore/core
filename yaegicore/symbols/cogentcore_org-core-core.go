@@ -213,7 +213,6 @@ func init() {
 		"ToValue":                   reflect.ValueOf(core.ToValue),
 		"ToolbarStyles":             reflect.ValueOf(core.ToolbarStyles),
 		"TooltipStage":              reflect.ValueOf(core.TooltipStage),
-		"TreePageSteps":             reflect.ValueOf(&core.TreePageSteps).Elem(),
 		"TreeTempMovedTag":          reflect.ValueOf(constant.MakeFromLiteral("\"_\\\\&MOVED\\\\&\"", token.STRING, 0)),
 		"UpdateAll":                 reflect.ValueOf(core.UpdateAll),
 		"UpdateSettings":            reflect.ValueOf(core.UpdateSettings),

@@ -285,22 +285,22 @@ func (tr *Tree) Init() {
 			tr.Close()
 			e.SetHandled()
 		case keymap.MoveDown:
-			tr.MoveDownAction(selMode)
+			tr.moveDownEvent(selMode)
 			e.SetHandled()
 		case keymap.MoveUp:
-			tr.MoveUpAction(selMode)
+			tr.moveUpEvent(selMode)
 			e.SetHandled()
 		case keymap.PageUp:
-			tr.MovePageUpAction(selMode)
+			tr.movePageUpEvent(selMode)
 			e.SetHandled()
 		case keymap.PageDown:
-			tr.MovePageDownAction(selMode)
+			tr.movePageDownEvent(selMode)
 			e.SetHandled()
 		case keymap.Home:
-			tr.MoveHomeAction(selMode)
+			tr.moveHomeEvent(selMode)
 			e.SetHandled()
 		case keymap.End:
-			tr.MoveEndAction(selMode)
+			tr.moveEndEvent(selMode)
 			e.SetHandled()
 		case keymap.SelectMode:
 			tr.SelectMode = !tr.SelectMode
@@ -384,7 +384,7 @@ func (tr *Tree) Init() {
 		e.SetHandled()
 	})
 	parts.OnClick(func(e events.Event) {
-		tr.SelectAction(e.SelectMode())
+		tr.SelectEvent(e.SelectMode())
 		e.SetHandled()
 	})
 	parts.AsWidget().OnDoubleClick(func(e events.Event) {
@@ -418,7 +418,7 @@ func (tr *Tree) Init() {
 	parts.On(events.ContextMenu, func(e events.Event) {
 		sels := tr.SelectedViews()
 		if len(sels) == 0 {
-			tr.SelectAction(e.SelectMode())
+			tr.SelectEvent(e.SelectMode())
 		}
 		tr.ShowContextMenu(e)
 	})
@@ -665,20 +665,20 @@ func (tr *Tree) SelectedViews() []Treer {
 	return slices.Clone(sels)
 }
 
-// SetSelectedViews updates the selected views to given list
+// SetSelectedViews updates the selected nodes on the root node to the given list.
 func (tr *Tree) SetSelectedViews(sl []Treer) {
 	if tr.root != nil {
 		tr.root.SelectedNodes = sl
 	}
 }
 
-// HasSelection returns true if there are currently selected items
+// HasSelection returns whether there are currently selected items.
 func (tr *Tree) HasSelection() bool {
 	return len(tr.SelectedViews()) > 0
 }
 
 // Select selects this node (if not already selected).
-// Must use this method to update global selection list
+// You must use this method to update global selection list.
 func (tr *Tree) Select() {
 	if !tr.StateIs(states.Selected) {
 		tr.SetSelected(true)
@@ -691,7 +691,7 @@ func (tr *Tree) Select() {
 }
 
 // Unselect unselects this node (if selected).
-// Must use this method to update global selection list.
+// You must use this method to update global selection list.
 func (tr *Tree) Unselect() {
 	if tr.StateIs(states.Selected) {
 		tr.SetSelected(false)
@@ -709,7 +709,7 @@ func (tr *Tree) Unselect() {
 	}
 }
 
-// UnselectAll unselects all selected items in the view
+// UnselectAll unselects all selected items in the tree.
 func (tr *Tree) UnselectAll() {
 	if tr.Scene == nil {
 		return
@@ -728,7 +728,7 @@ func (tr *Tree) UnselectAll() {
 	tr.NeedsRender()
 }
 
-// SelectAll all items in view
+// SelectAll selects all items in the tree.
 func (tr *Tree) SelectAll() {
 	if tr.Scene == nil {
 		return
@@ -737,15 +737,15 @@ func (tr *Tree) SelectAll() {
 	nn := tr.root
 	nn.Select()
 	for nn != nil {
-		nn = nn.MoveDown(events.SelectQuiet)
+		nn = nn.moveDown(events.SelectQuiet)
 	}
 	tr.NeedsRender()
 }
 
-// SelectUpdate updates selection to include this node,
+// selectUpdate updates selection to include this node,
 // using selectmode from mouse event (ExtendContinuous, ExtendOne).
-// Returns true if this node selected
-func (tr *Tree) SelectUpdate(mode events.SelectModes) bool {
+// Returns true if this node selected.
+func (tr *Tree) selectUpdate(mode events.SelectModes) bool {
 	if mode == events.NoSelect {
 		return false
 	}
@@ -790,19 +790,19 @@ func (tr *Tree) SelectUpdate(mode events.SelectModes) bool {
 			tr.Select()
 			if tr.viewIndex < minIndex {
 				for cidx < minIndex {
-					nn = nn.MoveDown(events.SelectQuiet) // just select
+					nn = nn.moveDown(events.SelectQuiet) // just select
 					cidx = nn.viewIndex
 				}
 			} else if tr.viewIndex > maxIndex {
 				for cidx > maxIndex {
-					nn = nn.MoveUp(events.SelectQuiet) // just select
+					nn = nn.moveUp(events.SelectQuiet) // just select
 					cidx = nn.viewIndex
 				}
 			}
 		}
 	case events.ExtendOne:
 		if tr.StateIs(states.Selected) {
-			tr.UnselectAction()
+			tr.UnselectEvent()
 		} else {
 			tr.Select()
 			tr.SetFocus()
@@ -819,72 +819,71 @@ func (tr *Tree) SelectUpdate(mode events.SelectModes) bool {
 	return sel
 }
 
-// SendSelectEvent sends an [events.Select] event on the RootView node.
-func (tr *Tree) SendSelectEvent(original ...events.Event) {
-	// fmt.Println("root:", &tv.RootView, tv.RootView.Listeners)
+// sendSelectEvent sends an [events.Select] event on the root node.
+func (tr *Tree) sendSelectEvent(original ...events.Event) {
 	tr.root.Send(events.Select, original...)
 }
 
-// SendChangeEvent sends an [events.Change] event on the RootView node.
-func (tr *Tree) SendChangeEvent(original ...events.Event) {
+// sendChangeEvent sends an [events.Change] event on the root node.
+func (tr *Tree) sendChangeEvent(original ...events.Event) {
 	tr.root.SendChange(original...)
 }
 
-// TreeChanged must be called after any structural
-// change to the Tree (adding or deleting nodes).
+// treeChanged must be called after any structural
+// change to the [Tree] (adding or deleting nodes).
 // It calls RootSetViewIndex to update indexes and
 // SendChangeEvent to notify of changes.
-func (tr *Tree) TreeChanged(original ...events.Event) {
+func (tr *Tree) treeChanged(original ...events.Event) {
 	tr.root.RootSetViewIndex()
-	tr.SendChangeEvent(original...)
+	tr.sendChangeEvent(original...)
 }
 
-// SendChangeEventReSync sends an [events.Change] event on the RootView node.
+// sendChangeEventReSync sends an [events.Change] event on the RootView node.
 // If SyncNode != nil, it also does a re-sync from root.
-func (tr *Tree) SendChangeEventReSync(original ...events.Event) {
+func (tr *Tree) sendChangeEventReSync(original ...events.Event) {
 	tr.root.SendChange(original...)
 	if tr.root.SyncNode != nil {
 		tr.root.ReSync()
 	}
 }
 
-// SelectAction updates selection to include this node,
+// SelectEvent updates selection to include this node,
 // using selectmode from mouse event (ExtendContinuous, ExtendOne),
-// and Root sends selection event.  Returns true if signal emitted.
-func (tr *Tree) SelectAction(mode events.SelectModes) bool {
-	sel := tr.SelectUpdate(mode)
+// and root sends selection event. Returns true if event sent.
+func (tr *Tree) SelectEvent(mode events.SelectModes) bool {
+	sel := tr.selectUpdate(mode)
 	if sel {
-		tr.SendSelectEvent()
+		tr.sendSelectEvent()
 	}
 	return sel
 }
 
-// UnselectAction unselects this node (if selected),
-// and Root sends a selection event.
-func (tr *Tree) UnselectAction() {
+// UnselectEvent unselects this node (if selected),
+// and root sends a selection event.
+func (tr *Tree) UnselectEvent() {
 	if tr.StateIs(states.Selected) {
 		tr.Unselect()
-		tr.SendSelectEvent()
+		tr.sendSelectEvent()
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 //    Moving
 
-// MoveDown moves the selection down to next element in the tree,
+// moveDown moves the selection down to next element in the tree,
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node.
-func (tr *Tree) MoveDown(selMode events.SelectModes) *Tree {
+func (tr *Tree) moveDown(selMode events.SelectModes) *Tree {
 	if tr.Parent == nil {
 		return nil
 	}
 	if tr.Closed || !tr.HasChildren() { // next sibling
-		return tr.MoveDownSibling(selMode)
+		return tr.moveDownSibling(selMode)
 	} else {
 		if tr.HasChildren() {
 			nn := AsTree(tr.Child(0))
 			if nn != nil {
-				nn.SelectUpdate(selMode)
+				nn.selectUpdate(selMode)
 				return nn
 			}
 		}
@@ -892,22 +891,22 @@ func (tr *Tree) MoveDown(selMode events.SelectModes) *Tree {
 	return nil
 }
 
-// MoveDownAction moves the selection down to next element in the tree,
+// moveDownEvent moves the selection down to next element in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tr *Tree) MoveDownAction(selMode events.SelectModes) *Tree {
-	nn := tr.MoveDown(selMode)
+func (tr *Tree) moveDownEvent(selMode events.SelectModes) *Tree {
+	nn := tr.moveDown(selMode)
 	if nn != nil && nn != tr {
 		nn.SetFocus()
 		nn.ScrollToThis()
-		tr.SendSelectEvent()
+		tr.sendSelectEvent()
 	}
 	return nn
 }
 
-// MoveDownSibling moves down only to siblings, not down into children,
+// moveDownSibling moves down only to siblings, not down into children,
 // using given select mode (from keyboard modifiers)
-func (tr *Tree) MoveDownSibling(selMode events.SelectModes) *Tree {
+func (tr *Tree) moveDownSibling(selMode events.SelectModes) *Tree {
 	if tr.Parent == nil {
 		return nil
 	}
@@ -918,19 +917,19 @@ func (tr *Tree) MoveDownSibling(selMode events.SelectModes) *Tree {
 	if myidx < len(tr.Parent.AsTree().Children)-1 {
 		nn := AsTree(tr.Parent.AsTree().Child(myidx + 1))
 		if nn != nil {
-			nn.SelectUpdate(selMode)
+			nn.selectUpdate(selMode)
 			return nn
 		}
 	} else {
-		return AsTree(tr.Parent).MoveDownSibling(selMode) // try up
+		return AsTree(tr.Parent).moveDownSibling(selMode) // try up
 	}
 	return nil
 }
 
-// MoveUp moves selection up to previous element in the tree,
+// moveUp moves selection up to previous element in the tree,
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node
-func (tr *Tree) MoveUp(selMode events.SelectModes) *Tree {
+func (tr *Tree) moveUp(selMode events.SelectModes) *Tree {
 	if tr.Parent == nil || tr == tr.root {
 		return nil
 	}
@@ -938,13 +937,13 @@ func (tr *Tree) MoveUp(selMode events.SelectModes) *Tree {
 	if myidx > 0 {
 		nn := AsTree(tr.Parent.AsTree().Child(myidx - 1))
 		if nn != nil {
-			return nn.MoveToLastChild(selMode)
+			return nn.moveToLastChild(selMode)
 		}
 	} else {
 		if tr.Parent != nil {
 			nn := AsTree(tr.Parent)
 			if nn != nil {
-				nn.SelectUpdate(selMode)
+				nn.selectUpdate(selMode)
 				return nn
 			}
 		}
@@ -952,142 +951,142 @@ func (tr *Tree) MoveUp(selMode events.SelectModes) *Tree {
 	return nil
 }
 
-// MoveUpAction moves the selection up to previous element in the tree,
+// moveUpEvent moves the selection up to previous element in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tr *Tree) MoveUpAction(selMode events.SelectModes) *Tree {
-	nn := tr.MoveUp(selMode)
+func (tr *Tree) moveUpEvent(selMode events.SelectModes) *Tree {
+	nn := tr.moveUp(selMode)
 	if nn != nil && nn != tr {
 		nn.SetFocus()
 		nn.ScrollToThis()
-		tr.SendSelectEvent()
+		tr.sendSelectEvent()
 	}
 	return nn
 }
 
-// TreePageSteps is the number of steps to take in PageUp / Down events
-var TreePageSteps = 10
+// treePageSteps is the number of steps to take in PageUp / Down events
+const treePageSteps = 10
 
-// MovePageUpAction moves the selection up to previous
+// movePageUpEvent moves the selection up to previous
 // TreePageSteps elements in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tr *Tree) MovePageUpAction(selMode events.SelectModes) *Tree {
+func (tr *Tree) movePageUpEvent(selMode events.SelectModes) *Tree {
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
 	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
 		mvMode = events.SelectQuiet
 	}
-	fnn := tr.MoveUp(mvMode)
+	fnn := tr.moveUp(mvMode)
 	if fnn != nil && fnn != tr {
-		for i := 1; i < TreePageSteps; i++ {
-			nn := fnn.MoveUp(mvMode)
+		for i := 1; i < treePageSteps; i++ {
+			nn := fnn.moveUp(mvMode)
 			if nn == nil || nn == fnn {
 				break
 			}
 			fnn = nn
 		}
 		if selMode == events.SelectOne {
-			fnn.SelectUpdate(selMode)
+			fnn.selectUpdate(selMode)
 		}
 		fnn.SetFocus()
 		fnn.ScrollToThis()
-		tr.SendSelectEvent()
+		tr.sendSelectEvent()
 	}
 	tr.NeedsRender()
 	return fnn
 }
 
-// MovePageDownAction moves the selection up to
+// movePageDownEvent moves the selection up to
 // previous TreePageSteps elements in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tr *Tree) MovePageDownAction(selMode events.SelectModes) *Tree {
+func (tr *Tree) movePageDownEvent(selMode events.SelectModes) *Tree {
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
 	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
 		mvMode = events.SelectQuiet
 	}
-	fnn := tr.MoveDown(mvMode)
+	fnn := tr.moveDown(mvMode)
 	if fnn != nil && fnn != tr {
-		for i := 1; i < TreePageSteps; i++ {
-			nn := fnn.MoveDown(mvMode)
+		for i := 1; i < treePageSteps; i++ {
+			nn := fnn.moveDown(mvMode)
 			if nn == nil || nn == fnn {
 				break
 			}
 			fnn = nn
 		}
 		if selMode == events.SelectOne {
-			fnn.SelectUpdate(selMode)
+			fnn.selectUpdate(selMode)
 		}
 		fnn.SetFocus()
 		fnn.ScrollToThis()
-		tr.SendSelectEvent()
+		tr.sendSelectEvent()
 	}
 	tr.NeedsRender()
 	return fnn
 }
 
-// MoveToLastChild moves to the last child under me, using given select mode
+// moveToLastChild moves to the last child under me, using given select mode
 // (from keyboard modifiers)
-func (tr *Tree) MoveToLastChild(selMode events.SelectModes) *Tree {
+func (tr *Tree) moveToLastChild(selMode events.SelectModes) *Tree {
 	if tr.Parent == nil || tr == tr.root {
 		return nil
 	}
 	if !tr.Closed && tr.HasChildren() {
 		nn := AsTree(tr.Child(tr.NumChildren() - 1))
-		return nn.MoveToLastChild(selMode)
+		return nn.moveToLastChild(selMode)
 	} else {
-		tr.SelectUpdate(selMode)
+		tr.selectUpdate(selMode)
 		return tr
 	}
 }
 
-// MoveHomeAction moves the selection up to top of the tree,
+// moveHomeEvent moves the selection up to top of the tree,
 // using given select mode (from keyboard modifiers)
 // and emits select event for newly selected item
-func (tr *Tree) MoveHomeAction(selMode events.SelectModes) *Tree {
-	tr.root.SelectUpdate(selMode)
+func (tr *Tree) moveHomeEvent(selMode events.SelectModes) *Tree {
+	tr.root.selectUpdate(selMode)
 	tr.root.SetFocus()
 	tr.root.ScrollToThis()
-	tr.root.SendSelectEvent()
+	tr.root.sendSelectEvent()
 	return tr.root
 }
 
-// MoveEndAction moves the selection to the very last node in the tree,
+// moveEndEvent moves the selection to the very last node in the tree,
 // using given select mode (from keyboard modifiers)
 // Sends select event for newly selected item.
-func (tr *Tree) MoveEndAction(selMode events.SelectModes) *Tree {
+func (tr *Tree) moveEndEvent(selMode events.SelectModes) *Tree {
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
 	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
 		mvMode = events.SelectQuiet
 	}
-	fnn := tr.MoveDown(mvMode)
+	fnn := tr.moveDown(mvMode)
 	if fnn != nil && fnn != tr {
 		for {
-			nn := fnn.MoveDown(mvMode)
+			nn := fnn.moveDown(mvMode)
 			if nn == nil || nn == fnn {
 				break
 			}
 			fnn = nn
 		}
 		if selMode == events.SelectOne {
-			fnn.SelectUpdate(selMode)
+			fnn.selectUpdate(selMode)
 		}
 		fnn.SetFocus()
 		fnn.ScrollToThis()
-		tr.SendSelectEvent()
+		tr.sendSelectEvent()
 	}
 	return fnn
 }
 
-func (tr *Tree) SetKidsVisibility(parentClosed bool) {
-	for _, k := range tr.Children {
-		tvn := AsTree(k)
+func (tr *Tree) setChildrenVisibility(parentClosed bool) {
+	for _, c := range tr.Children {
+		tvn := AsTree(c)
 		if tvn != nil {
 			tvn.SetState(parentClosed, states.Invisible)
 		}
@@ -1098,9 +1097,9 @@ func (tr *Tree) SetKidsVisibility(parentClosed bool) {
 // The base version does nothing.
 func (tr *Tree) OnClose() {}
 
-// Close closes the given node and updates the view accordingly
-// (if it is not already closed).
-// Calls OnClose in Treer interface for extensible actions.
+// Close closes the given node and updates the tree accordingly
+// (if it is not already closed). It calls OnClose in the [Treer]
+// interface for extensible actions.
 func (tr *Tree) Close() {
 	if tr.Closed {
 		return
@@ -1108,7 +1107,7 @@ func (tr *Tree) Close() {
 	tr.SetClosed(true)
 	tr.setBranchState()
 	tr.This.(Treer).OnClose()
-	tr.SetKidsVisibility(true) // parent closed
+	tr.setChildrenVisibility(true) // parent closed
 	tr.NeedsLayout()
 }
 
@@ -1123,9 +1122,9 @@ func (tr *Tree) CanOpen() bool {
 	return tr.HasChildren()
 }
 
-// Open opens the given node and updates the view accordingly
-// (if it is not already opened).
-// Calls OnOpen in Treer interface for extensible actions.
+// Open opens the given node and updates the tree accordingly
+// (if it is not already opened). It calls OnOpen in the [Treer]
+// interface for extensible actions.
 func (tr *Tree) Open() {
 	if !tr.Closed || tr.inOpen || tr.This == nil {
 		return
@@ -1134,14 +1133,14 @@ func (tr *Tree) Open() {
 	if tr.This.(Treer).CanOpen() {
 		tr.SetClosed(false)
 		tr.setBranchState()
-		tr.SetKidsVisibility(false)
+		tr.setChildrenVisibility(false)
 		tr.This.(Treer).OnOpen()
 	}
 	tr.inOpen = false
 	tr.NeedsLayout()
 }
 
-// ToggleClose toggles the close / open status: if closed, opens, and vice-versa
+// ToggleClose toggles the close / open status: if closed, opens, and vice-versa.
 func (tr *Tree) ToggleClose() {
 	if tr.Closed {
 		tr.Open()
@@ -1150,7 +1149,7 @@ func (tr *Tree) ToggleClose() {
 	}
 }
 
-// OpenAll opens the given node and all of its sub-nodes
+// OpenAll opens the node and all of its sub-nodes.
 func (tr *Tree) OpenAll() { //types:add
 	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		tvn := AsTree(wi)
@@ -1163,7 +1162,7 @@ func (tr *Tree) OpenAll() { //types:add
 	tr.NeedsLayout()
 }
 
-// CloseAll closes the given node and all of its sub-nodes.
+// CloseAll closes the node and all of its sub-nodes.
 func (tr *Tree) CloseAll() { //types:add
 	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		tvn := AsTree(wi)
@@ -1176,7 +1175,7 @@ func (tr *Tree) CloseAll() { //types:add
 	tr.NeedsLayout()
 }
 
-// OpenParents opens all the parents of this node,
+// OpenParents opens all the parents of this node
 // so that it will be visible.
 func (tr *Tree) OpenParents() {
 	tr.WalkUpParent(func(k tree.Node) bool {
@@ -1326,7 +1325,7 @@ func (tr *Tree) Cut() { //types:add
 		sn.AsTree().Delete()
 	}
 	root.Update()
-	root.TreeChanged()
+	root.treeChanged()
 }
 
 // Paste pastes clipboard at given node.
@@ -1395,7 +1394,7 @@ func (tr *Tree) PasteAssign(md mimedata.Mimes) {
 	tr.SetScene(tr.Scene) // ensure children have scene
 	tr.Update()           // could have children
 	tr.Open()
-	tr.TreeChanged()
+	tr.treeChanged()
 }
 
 // PasteBefore inserts object(s) from mime data before this node.
@@ -1464,10 +1463,10 @@ func (tr *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 			selTv = ntv
 		}
 	}
-	tr.TreeChanged()
+	tr.treeChanged()
 	parent.NeedsLayout()
 	if selTv != nil {
-		selTv.SelectAction(events.SelectOne)
+		selTv.SelectEvent(events.SelectOne)
 	}
 }
 
@@ -1489,7 +1488,7 @@ func (tr *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	}
 	tr.Update()
 	tr.Open()
-	tr.TreeChanged()
+	tr.treeChanged()
 }
 
 //////////////////////////////////////////////////////////////////////////////

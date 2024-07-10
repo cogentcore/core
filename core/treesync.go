@@ -187,9 +187,9 @@ func (tr *Tree) AddTreeNodes(rel, myidx int, typ *types.Type, n int) {
 	}
 	tr.Update()
 	tr.Open()
-	tr.TreeChanged(nil)
+	tr.treeChanged(nil)
 	if stv != nil {
-		stv.SelectAction(events.SelectOne)
+		stv.SelectEvent(events.SelectOne)
 	}
 }
 
@@ -204,11 +204,11 @@ func (tr *Tree) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
 			sn = nn
 		}
 	}
-	tr.SendChangeEventReSync(nil)
+	tr.sendChangeEventReSync(nil)
 	if sn != nil {
 		if tvk := tr.ChildByName("tv_"+sn.AsTree().Name, 0); tvk != nil {
 			stv := AsTree(tvk)
-			stv.SelectAction(events.SelectOne)
+			stv.SelectEvent(events.SelectOne)
 		}
 	}
 }
@@ -298,17 +298,17 @@ func (tr *Tree) DeleteNode() { //types:add
 		return
 	}
 	tr.Close()
-	if tr.MoveDown(events.SelectOne) == nil {
-		tr.MoveUp(events.SelectOne)
+	if tr.moveDown(events.SelectOne) == nil {
+		tr.moveUp(events.SelectOne)
 	}
 	if tr.SyncNode != nil {
 		tr.SyncNode.AsTree().Delete()
-		tr.SendChangeEventReSync(nil)
+		tr.sendChangeEventReSync(nil)
 	} else {
 		parent := AsTree(tr.Parent)
 		tr.Delete()
 		parent.Update()
-		parent.TreeChanged(nil)
+		parent.treeChanged(nil)
 	}
 }
 
@@ -340,7 +340,7 @@ func (tr *Tree) Duplicate() { //types:add
 	parent.InsertChild(nwkid, myidx+1)
 	ntv.Update()
 	parent.Update()
-	parent.TreeChanged(nil)
+	parent.treeChanged(nil)
 	// ntv.SelectAction(events.SelectOne)
 }
 
@@ -360,10 +360,10 @@ func (tr *Tree) DuplicateSync() {
 	nwkid := sn.AsTree().Clone()
 	nwkid.AsTree().SetName(nm)
 	parent.AsTree().InsertChild(nwkid, myidx+1)
-	tvparent.SendChangeEventReSync(nil)
+	tvparent.sendChangeEventReSync(nil)
 	if tvk := tvparent.ChildByName("tv_"+nm, 0); tvk != nil {
 		stv := AsTree(tvk)
-		stv.SelectAction(events.SelectOne)
+		stv.SelectEvent(events.SelectOne)
 	}
 }
 
@@ -438,7 +438,7 @@ func (tr *Tree) PasteAssignSync(md mimedata.Mimes) {
 	}
 	tr.SyncNode.AsTree().CopyFrom(sl[0])
 	tr.NeedsLayout()
-	tr.SendChangeEvent(nil)
+	tr.sendChangeEvent(nil)
 }
 
 // PasteAtSync inserts object(s) from mime data at rel position to this node.
@@ -473,11 +473,11 @@ func (tr *Tree) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, act
 			seln = ns
 		}
 	}
-	tvparent.SendChangeEventReSync(nil)
+	tvparent.sendChangeEventReSync(nil)
 	if seln != nil {
 		if tvk := tvparent.ChildByName("tv_"+seln.AsTree().Name, myidx); tvk != nil {
 			stv := AsTree(tvk)
-			stv.SelectAction(events.SelectOne)
+			stv.SelectEvent(events.SelectOne)
 		}
 	}
 }
@@ -490,7 +490,7 @@ func (tr *Tree) PasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
 	for _, ns := range sl {
 		sk.AsTree().AddChild(ns)
 	}
-	tr.SendChangeEventReSync(nil)
+	tr.sendChangeEventReSync(nil)
 }
 
 // CutSync copies to system.Clipboard and deletes selected items.
@@ -501,7 +501,7 @@ func (tr *Tree) CutSync() {
 	for _, sn := range sels {
 		sn.AsTree().Delete()
 	}
-	tr.SendChangeEventReSync(nil)
+	tr.sendChangeEventReSync(nil)
 }
 
 // DropDeleteSourceSync handles delete source event for DropMove case, for Sync
@@ -526,5 +526,5 @@ func (tr *Tree) DropDeleteSourceSync(de *events.DragDrop) {
 			swb.NeedsRender()
 		}
 	}
-	tr.SendChangeEventReSync(nil)
+	tr.sendChangeEventReSync(nil)
 }
