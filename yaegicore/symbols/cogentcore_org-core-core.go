@@ -212,13 +212,6 @@ func init() {
 		"UpdateSettings":            reflect.ValueOf(core.UpdateSettings),
 		"ValueTypes":                reflect.ValueOf(&core.ValueTypes).Elem(),
 		"Wait":                      reflect.ValueOf(core.Wait),
-		"WidgetLastChild":           reflect.ValueOf(core.WidgetLastChild),
-		"WidgetLastChildParts":      reflect.ValueOf(core.WidgetLastChildParts),
-		"WidgetNext":                reflect.ValueOf(core.WidgetNext),
-		"WidgetNextFunc":            reflect.ValueOf(core.WidgetNextFunc),
-		"WidgetNextSibling":         reflect.ValueOf(core.WidgetNextSibling),
-		"WidgetPrev":                reflect.ValueOf(core.WidgetPrev),
-		"WidgetPrevFunc":            reflect.ValueOf(core.WidgetPrevFunc),
 		"WindowStage":               reflect.ValueOf(core.WindowStage),
 
 		// type definitions

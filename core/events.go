@@ -941,7 +941,7 @@ func (em *Events) focusNext() bool {
 // that can accept focus after the given item.
 // It returns true if a focus item is found.
 func (em *Events) FocusNextFrom(from Widget) bool {
-	next := WidgetNextFunc(from, func(w Widget) bool {
+	next := widgetNextFunc(from, func(w Widget) bool {
 		return w.IsVisible() && !w.AsWidget().StateIs(states.Disabled) && w.AsWidget().AbilityIs(abilities.Focusable)
 	})
 	em.setFocusEvent(next)
@@ -996,7 +996,7 @@ func (em *Events) focusPrev() bool {
 // focusPrevFrom sets the focus on the previous item before the given item
 // (can be nil).
 func (em *Events) focusPrevFrom(from Widget) bool {
-	prev := WidgetPrevFunc(from, func(w Widget) bool {
+	prev := widgetPrevFunc(from, func(w Widget) bool {
 		return w.IsVisible() && !w.AsWidget().StateIs(states.Disabled) && w.AsWidget().AbilityIs(abilities.Focusable)
 	})
 	em.setFocusEvent(prev)

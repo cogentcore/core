@@ -472,26 +472,26 @@ func (wb *WidgetBase) WidgetWalkDown(fun func(kwi Widget, kwb *WidgetBase) bool)
 	})
 }
 
-// WidgetNext returns the next widget in the tree,
+// widgetNext returns the next widget in the tree,
 // including Parts, which are considered to come after Children.
 // returns nil if no more.
-func WidgetNext(w Widget) Widget {
+func widgetNext(w Widget) Widget {
 	wb := w.AsWidget()
 	if !wb.HasChildren() && wb.Parts == nil {
-		return WidgetNextSibling(w)
+		return widgetNextSibling(w)
 	}
 	if wb.HasChildren() {
 		return wb.Child(0).(Widget)
 	}
 	if wb.Parts != nil {
-		return WidgetNext(wb.Parts.This.(Widget))
+		return widgetNext(wb.Parts.This.(Widget))
 	}
 	return nil
 }
 
-// WidgetNextSibling returns next sibling or nil if none,
+// widgetNextSibling returns next sibling or nil if none,
 // including Parts, which are considered to come after Children.
-func WidgetNextSibling(w Widget) Widget {
+func widgetNextSibling(w Widget) Widget {
 	wb := w.AsWidget()
 	if wb.Parent == nil {
 		return nil
@@ -501,13 +501,13 @@ func WidgetNextSibling(w Widget) Widget {
 	if myidx >= 0 && myidx < wb.Parent.AsTree().NumChildren()-1 {
 		return parent.AsTree().Child(myidx + 1).(Widget)
 	}
-	return WidgetNextSibling(parent)
+	return widgetNextSibling(parent)
 }
 
-// WidgetPrev returns the previous widget in the tree,
+// widgetPrev returns the previous widget in the tree,
 // including Parts, which are considered to come after Children.
 // nil if no more.
-func WidgetPrev(w Widget) Widget {
+func widgetPrev(w Widget) Widget {
 	wb := w.AsWidget()
 	if wb.Parent == nil {
 		return nil
@@ -516,42 +516,32 @@ func WidgetPrev(w Widget) Widget {
 	myidx := wb.IndexInParent()
 	if myidx > 0 {
 		nn := parent.AsTree().Child(myidx - 1).(Widget)
-		return WidgetLastChildParts(nn) // go to parts
+		return widgetLastChildParts(nn) // go to parts
 	}
 	// we were children, done
 	return parent
 }
 
-// WidgetLastChildParts returns the last child under given node,
+// widgetLastChildParts returns the last child under given node,
 // or node itself if no children.  Starts with Parts,
-func WidgetLastChildParts(w Widget) Widget {
+func widgetLastChildParts(w Widget) Widget {
 	wb := w.AsWidget()
 	if wb.Parts != nil && wb.Parts.HasChildren() {
-		return WidgetLastChildParts(wb.Parts.Child(wb.Parts.NumChildren() - 1).(Widget))
+		return widgetLastChildParts(wb.Parts.Child(wb.Parts.NumChildren() - 1).(Widget))
 	}
 	if wb.HasChildren() {
-		return WidgetLastChildParts(wb.Child(wb.NumChildren() - 1).(Widget))
+		return widgetLastChildParts(wb.Child(wb.NumChildren() - 1).(Widget))
 	}
 	return w
 }
 
-// WidgetLastChild returns the last child under given node,
-// or node itself if no children. Starts with Children, not Parts
-func WidgetLastChild(w Widget) Widget {
-	wb := w.AsWidget()
-	if wb.HasChildren() {
-		return WidgetLastChildParts(wb.Child(wb.NumChildren() - 1).(Widget))
-	}
-	return w
-}
-
-// WidgetNextFunc returns the next widget in the tree,
+// widgetNextFunc returns the next widget in the tree,
 // including Parts, which are considered to come after children,
 // continuing until the given function returns true.
 // nil if no more.
-func WidgetNextFunc(w Widget, fun func(w Widget) bool) Widget {
+func widgetNextFunc(w Widget, fun func(w Widget) bool) Widget {
 	for {
-		nw := WidgetNext(w)
+		nw := widgetNext(w)
 		if nw == nil {
 			return nil
 		}
@@ -566,13 +556,13 @@ func WidgetNextFunc(w Widget, fun func(w Widget) bool) Widget {
 	}
 }
 
-// WidgetPrevFunc returns the previous widget in the tree,
+// widgetPrevFunc returns the previous widget in the tree,
 // including Parts, which are considered to come after children,
 // continuing until the given function returns true.
 // nil if no more.
-func WidgetPrevFunc(w Widget, fun func(w Widget) bool) Widget {
+func widgetPrevFunc(w Widget, fun func(w Widget) bool) Widget {
 	for {
-		pw := WidgetPrev(w)
+		pw := widgetPrev(w)
 		if pw == nil {
 			return nil
 		}

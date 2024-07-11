@@ -98,7 +98,7 @@ func TestWidgetPrev(t *testing.T) {
 		"/body scene",
 	}
 	i := 0
-	WidgetPrevFunc(lt, func(w Widget) bool {
+	widgetPrevFunc(lt, func(w Widget) bool {
 		have := w.AsTree().Path()
 		want := paths[i]
 		if have != want {
@@ -126,7 +126,7 @@ func TestWidgetNext(t *testing.T) {
 		"/body scene/body/text-field-2",
 	}
 	i := 0
-	WidgetNextFunc(ft, func(w Widget) bool {
+	widgetNextFunc(ft, func(w Widget) bool {
 		have := w.AsTree().Path()
 		want := paths[i]
 		if have != want {
