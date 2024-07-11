@@ -222,7 +222,7 @@ func (st *Stage) runWindow() *Stage {
 	if st.NewWindow || currentRenderWindow == nil {
 		sc.resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		win := st.newRenderWindow()
-		MainRenderWindows.Add(win)
+		mainRenderWindows.add(win)
 		currentRenderWindow = win
 		win.goStartEventLoop()
 		return st
@@ -300,7 +300,7 @@ func (st *Stage) runDialog() *Stage {
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.sceneGeom.Pos = image.Point{} // ignore pos
 		win := st.newRenderWindow()
-		DialogRenderWindows.Add(win)
+		dialogRenderWindows.add(win)
 		currentRenderWindow = win
 		win.goStartEventLoop()
 		return st
@@ -327,7 +327,7 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		opts.Size = wgp.size()
 		opts.Pos = wgp.pos()
 		opts.StdPixels = false
-		if _, found := AllRenderWindows.FindName(name); found { // offset from existing
+		if w := AllRenderWindows.FindName(name); w != nil { // offset from existing
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}
@@ -340,7 +340,7 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	if win == nil {
 		return nil
 	}
-	AllRenderWindows.Add(win)
+	AllRenderWindows.add(win)
 	// initialize Mains
 	win.mains.renderWindow = win
 	win.mains.renderContext = newRenderContext() // sets defaults according to Screen

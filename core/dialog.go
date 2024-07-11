@@ -79,7 +79,7 @@ func (bd *Body) NewWindowDialog(ctx Widget) *Stage {
 // finds it, it shows it and returns true. Otherwise, it returns false.
 // See [RecycleMainWindow] for a non-dialog window version.
 func RecycleDialog(data any) bool {
-	rw, got := DialogRenderWindows.FindData(data)
+	rw, got := dialogRenderWindows.findData(data)
 	if !got {
 		return false
 	}

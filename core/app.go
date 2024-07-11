@@ -235,7 +235,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
 		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong).
 			SetKey(keymap.WinFocusNext).OnClick(func(e events.Event) {
-			AllRenderWindows.FocusNext()
+			AllRenderWindows.focusNext()
 		})
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
 			OnClick(func(e events.Event) {
@@ -258,16 +258,16 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 		})
 		quit.SetName("quit-app")
 		NewSeparator(m)
-		for _, w := range MainRenderWindows {
+		for _, w := range mainRenderWindows {
 			if w != nil {
 				NewButton(m).SetText(w.title).OnClick(func(e events.Event) {
 					w.Raise()
 				})
 			}
 		}
-		if len(DialogRenderWindows) > 0 {
+		if len(dialogRenderWindows) > 0 {
 			NewSeparator(m)
-			for _, w := range DialogRenderWindows {
+			for _, w := range dialogRenderWindows {
 				if w != nil {
 					NewButton(m).SetText(w.title).OnClick(func(e events.Event) {
 						w.Raise()

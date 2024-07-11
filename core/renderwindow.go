@@ -162,7 +162,7 @@ func RecycleMainWindow(data any) bool {
 	if data == nil {
 		return false
 	}
-	ew, got := MainRenderWindows.FindData(data)
+	ew, got := mainRenderWindows.findData(data)
 	if !got {
 		return false
 	}
@@ -337,9 +337,9 @@ func (w *renderWindow) closeReq() {
 
 // closed frees any resources after the window has been closed.
 func (w *renderWindow) closed() {
-	AllRenderWindows.Delete(w)
-	MainRenderWindows.Delete(w)
-	DialogRenderWindows.Delete(w)
+	AllRenderWindows.delete(w)
+	mainRenderWindows.delete(w)
+	dialogRenderWindows.delete(w)
 	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v Closed\n", w.name)
 	}
@@ -492,8 +492,8 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			// if we are not already the last in AllRenderWins, we go there,
 			// as this allows focus to be restored to us in the future
 			if len(AllRenderWindows) > 0 && AllRenderWindows[len(AllRenderWindows)-1] != w {
-				AllRenderWindows.Delete(w)
-				AllRenderWindows.Add(w)
+				AllRenderWindows.delete(w)
+				AllRenderWindows.add(w)
 			}
 			if !w.gotFocus {
 				w.gotFocus = true

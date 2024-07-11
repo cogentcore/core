@@ -1106,7 +1106,7 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		// w.SetSize(sz)
 	case keymap.WinFocusNext:
 		e.SetHandled()
-		AllRenderWindows.FocusNext()
+		AllRenderWindows.focusNext()
 	}
 	if !e.IsHandled() {
 		em.triggerShortcut(cs)

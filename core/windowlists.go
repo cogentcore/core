@@ -13,18 +13,18 @@ import (
 	"cogentcore.org/core/system"
 )
 
-// RenderWindowList is a list of windows.
-type RenderWindowList []*renderWindow
+// renderWindowList is a list of [renderWindow]s.
+type renderWindowList []*renderWindow
 
-// Add adds a window to the list.
-func (wl *RenderWindowList) Add(w *renderWindow) {
+// add adds a window to the list.
+func (wl *renderWindowList) add(w *renderWindow) {
 	renderWindowGlobalMu.Lock()
 	*wl = append(*wl, w)
 	renderWindowGlobalMu.Unlock()
 }
 
-// Delete removes a window from the list.
-func (wl *RenderWindowList) Delete(w *renderWindow) {
+// delete removes a window from the list.
+func (wl *renderWindowList) delete(w *renderWindow) {
 	renderWindowGlobalMu.Lock()
 	defer renderWindowGlobalMu.Unlock()
 	*wl = slices.DeleteFunc(*wl, func(rw *renderWindow) bool {
@@ -32,23 +32,23 @@ func (wl *RenderWindowList) Delete(w *renderWindow) {
 	})
 }
 
-// FindName finds window with given name on list (case sensitive) -- returns
-// window and true if found, nil, false otherwise.
-func (wl *RenderWindowList) FindName(name string) (*renderWindow, bool) {
+// FindName finds the window with the given name on the list (case sensitive).
+// It returns the window if found and nil otherwise.
+func (wl *renderWindowList) FindName(name string) *renderWindow {
 	renderWindowGlobalMu.Lock()
 	defer renderWindowGlobalMu.Unlock()
-	for _, wi := range *wl {
-		if wi.name == name {
-			return wi, true
+	for _, w := range *wl {
+		if w.name == name {
+			return w
 		}
 	}
-	return nil, false
+	return nil
 }
 
-// FindData finds window with given Data on list -- returns
+// findData finds window with given Data on list -- returns
 // window and true if found, nil, false otherwise.
 // data of type string works fine -- does equality comparison on string contents.
-func (wl *RenderWindowList) FindData(data any) (*renderWindow, bool) {
+func (wl *renderWindowList) findData(data any) (*renderWindow, bool) {
 	if reflectx.AnyIsNil(data) {
 		return nil, false
 	}
@@ -71,39 +71,9 @@ func (wl *RenderWindowList) FindData(data any) (*renderWindow, bool) {
 	return nil, false
 }
 
-// FindRenderWindow finds window with given system.RenderWindow on list -- returns
-// window and true if found, nil, false otherwise.
-func (wl *RenderWindowList) FindRenderWindow(osw system.Window) (*renderWindow, bool) {
-	renderWindowGlobalMu.Lock()
-	defer renderWindowGlobalMu.Unlock()
-	for _, wi := range *wl {
-		if wi.SystemWindow == osw {
-			return wi, true
-		}
-	}
-	return nil, false
-}
-
-// Len returns the length of the list, concurrent-safe
-func (wl *RenderWindowList) Len() int {
-	renderWindowGlobalMu.Lock()
-	defer renderWindowGlobalMu.Unlock()
-	return len(*wl)
-}
-
-// Win gets window at given index, concurrent-safe
-func (wl *RenderWindowList) Win(idx int) *renderWindow {
-	renderWindowGlobalMu.Lock()
-	defer renderWindowGlobalMu.Unlock()
-	if idx >= len(*wl) || idx < 0 {
-		return nil
-	}
-	return (*wl)[idx]
-}
-
-// Focused returns the (first) window in this list that has the WinGotFocus flag set
+// focused returns the (first) window in this list that has the WinGotFocus flag set
 // and the index in the list (nil, -1 if not present)
-func (wl *RenderWindowList) Focused() (*renderWindow, int) {
+func (wl *renderWindowList) focused() (*renderWindow, int) {
 	renderWindowGlobalMu.Lock()
 	defer renderWindowGlobalMu.Unlock()
 
@@ -115,10 +85,10 @@ func (wl *RenderWindowList) Focused() (*renderWindow, int) {
 	return nil, -1
 }
 
-// FocusNext focuses on the next window in the list, after the current Focused() one
-// skips minimized windows
-func (wl *RenderWindowList) FocusNext() (*renderWindow, int) {
-	fw, i := wl.Focused()
+// focusNext focuses on the next window in the list, after the current Focused() one.
+// It skips minimized windows.
+func (wl *renderWindowList) focusNext() (*renderWindow, int) {
+	fw, i := wl.focused()
 	if fw == nil {
 		return nil, -1
 	}
@@ -144,14 +114,14 @@ func (wl *RenderWindowList) FocusNext() (*renderWindow, int) {
 	return fw, i
 }
 
-// AllRenderWindows is the list of all windows that have been created
+// AllRenderWindows is the list of all [renderWindow]s that have been created
 // (dialogs, main windows, etc).
-var AllRenderWindows RenderWindowList
+var AllRenderWindows renderWindowList
 
-// DialogRenderWindows is the list of only dialog windows that
+// dialogRenderWindows is the list of only dialog [renderWindow]s that
 // have been created.
-var DialogRenderWindows RenderWindowList
+var dialogRenderWindows renderWindowList
 
-// MainRenderWindows is the list of main windows (non-dialogs) that
+// mainRenderWindows is the list of main [renderWindow]s (non-dialogs) that
 // have been created.
-var MainRenderWindows RenderWindowList
+var mainRenderWindows renderWindowList
