@@ -64,11 +64,6 @@ func (tb *Toolbar) Init() {
 	})
 }
 
-func (tb *Toolbar) IsVisible() bool {
-	// do not render toolbars with no buttons
-	return tb.WidgetBase.IsVisible() && len(tb.Children) > 0
-}
-
 func (tb *Toolbar) SizeUp() {
 	tb.allItemsToChildren()
 	tb.Frame.SizeUp()
@@ -206,13 +201,20 @@ func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) {
 
 // ToolbarStyles styles the given widget to have standard toolbar styling.
 func ToolbarStyles(w Widget) {
-	w.AsWidget().Styler(func(s *styles.Style) {
+	wb := w.AsWidget()
+	wb.Styler(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.Scheme.SurfaceContainer
 		s.Gap.Zero()
 		s.Align.Items = styles.Center
+		if len(wb.Children) == 0 {
+			// we must not render toolbars with no children
+			s.Display = styles.DisplayNone
+		} else {
+			s.Display = styles.Flex
+		}
 	})
-	w.AsWidget().FinalStyler(func(s *styles.Style) {
+	wb.FinalStyler(func(s *styles.Style) {
 		if s.Direction == styles.Row {
 			s.Grow.Set(1, 0)
 			s.Padding.SetHorizontal(units.Dp(ConstantSpacing(16)))
@@ -221,14 +223,14 @@ func ToolbarStyles(w Widget) {
 			s.Padding.SetVertical(units.Dp(ConstantSpacing(16)))
 		}
 	})
-	w.AsWidget().OnWidgetAdded(func(w Widget) {
+	wb.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
 			bt.Type = ButtonAction
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
 			sp.Styler(func(s *styles.Style) {
-				s.Direction = w.AsWidget().Styles.Direction.Other()
+				s.Direction = wb.Styles.Direction.Other()
 			})
 		}
 	})
