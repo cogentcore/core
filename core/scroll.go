@@ -258,6 +258,9 @@ func (wb *WidgetBase) parentScrollFrame() *Frame {
 // ScrollToThis tells this widget's parent frame to scroll to keep
 // this widget in view. It returns whether any scrolling was done.
 func (wb *WidgetBase) ScrollToThis() bool {
+	if wb.This == nil {
+		return false
+	}
 	fr := wb.parentScrollFrame()
 	if fr == nil {
 		return false
