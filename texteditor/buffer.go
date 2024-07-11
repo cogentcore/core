@@ -122,7 +122,7 @@ type Buffer struct { //types:add
 	Complete *core.Complete `json:"-" xml:"-"`
 
 	// Spell is the functions and data for spelling correction.
-	Spell *Spell `json:"-" xml:"-"`
+	Spell *spellCheck `json:"-" xml:"-"`
 
 	// CurrentEditor is the current text editor, such as the one that initiated the Complete or Correct process. The cursor position in this view is updated, and it is reset to nil after usage.
 	CurrentEditor *Editor `json:"-" xml:"-"`
@@ -2606,10 +2606,10 @@ func (tb *Buffer) SetSpell() {
 	if tb.Spell != nil {
 		return
 	}
-	InitSpell()
-	tb.Spell = NewSpell()
-	tb.Spell.OnSelect(func(e events.Event) {
-		tb.CorrectText(tb.Spell.Correction)
+	initSpell()
+	tb.Spell = newSpell()
+	tb.Spell.onSelect(func(e events.Event) {
+		tb.CorrectText(tb.Spell.correction)
 	})
 }
 
@@ -2623,10 +2623,10 @@ func (tb *Buffer) DeleteSpell() {
 
 // CorrectText edits the text using the string chosen from the correction menu
 func (tb *Buffer) CorrectText(s string) {
-	st := lexer.Pos{tb.Spell.SrcLn, tb.Spell.SrcCh} // start of word
+	st := lexer.Pos{tb.Spell.srcLn, tb.Spell.srcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 	oend := st
-	oend.Ch += len(tb.Spell.Word)
+	oend.Ch += len(tb.Spell.word)
 	tb.ReplaceText(st, oend, st, s, EditSignal, ReplaceNoMatchCase)
 	if tb.CurrentEditor != nil {
 		ep := st
@@ -2638,7 +2638,7 @@ func (tb *Buffer) CorrectText(s string) {
 
 // CorrectClear clears the TextSpellErr tag for given word
 func (tb *Buffer) CorrectClear(s string) {
-	st := lexer.Pos{tb.Spell.SrcLn, tb.Spell.SrcCh} // start of word
+	st := lexer.Pos{tb.Spell.srcLn, tb.Spell.srcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 }
 

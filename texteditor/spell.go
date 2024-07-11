@@ -213,13 +213,13 @@ func (ed *Editor) SpellCheck(reg *textbuf.Edit) bool {
 	reg.Reg.Start.Ch += widx
 	reg.Reg.End.Ch += widx - ld
 
-	sugs, knwn := ed.Buffer.Spell.CheckWord(lwb)
+	sugs, knwn := ed.Buffer.Spell.checkWord(lwb)
 	if knwn {
 		ed.Buffer.RemoveTag(reg.Reg.Start, token.TextSpellErr)
 		return false
 	}
 	// fmt.Printf("spell err: %s\n", wb)
-	ed.Buffer.Spell.SetWord(wb, sugs, reg.Reg.Start.Ln, reg.Reg.Start.Ch)
+	ed.Buffer.Spell.setWord(wb, sugs, reg.Reg.Start.Ln, reg.Reg.Start.Ch)
 	ed.Buffer.RemoveTag(reg.Reg.Start, token.TextSpellErr)
 	ed.Buffer.AddTagEdit(reg, token.TextSpellErr)
 	return true
@@ -248,17 +248,17 @@ func (ed *Editor) OfferCorrect() bool {
 	if len(wb) != len(wbn) {
 		return false // SelectWord captures leading whitespace - don't offer if there is leading whitespace
 	}
-	sugs, knwn := ed.Buffer.Spell.CheckWord(wb)
-	if knwn && !ed.Buffer.Spell.IsLastLearned(wb) {
+	sugs, knwn := ed.Buffer.Spell.checkWord(wb)
+	if knwn && !ed.Buffer.Spell.isLastLearned(wb) {
 		return false
 	}
-	ed.Buffer.Spell.SetWord(wb, sugs, tbe.Reg.Start.Ln, tbe.Reg.Start.Ch)
+	ed.Buffer.Spell.setWord(wb, sugs, tbe.Reg.Start.Ln, tbe.Reg.Start.Ch)
 
 	cpos := ed.CharStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
 	ed.Buffer.CurrentEditor = ed
-	ed.Buffer.Spell.Show(wb, ed.Scene, cpos)
+	ed.Buffer.Spell.show(wb, ed.Scene, cpos)
 	return true
 }
 
@@ -272,5 +272,5 @@ func (ed *Editor) CancelCorrect() {
 		return
 	}
 	ed.Buffer.CurrentEditor = nil
-	ed.Buffer.Spell.Cancel()
+	ed.Buffer.Spell.cancel()
 }

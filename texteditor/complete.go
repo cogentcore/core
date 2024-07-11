@@ -98,7 +98,7 @@ func LookupParse(data any, text string, posLine, posChar int) (ld complete.Looku
 
 // CompleteText does completion for text files.
 func CompleteText(data any, text string, posLine, posChar int) (md complete.Matches) {
-	err := InitSpell() // text completion uses the spell code to generate completions and suggestions
+	err := initSpell() // text completion uses the spell code to generate completions and suggestions
 	if err != nil {
 		fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
 		return md

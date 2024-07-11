@@ -40,7 +40,6 @@ func init() {
 		"EditorSpriteName":         reflect.ValueOf(&texteditor.EditorSpriteName).Elem(),
 		"HTMLEscapeBytes":          reflect.ValueOf(texteditor.HTMLEscapeBytes),
 		"HTMLEscapeRunes":          reflect.ValueOf(texteditor.HTMLEscapeRunes),
-		"InitSpell":                reflect.ValueOf(texteditor.InitSpell),
 		"LookupParse":              reflect.ValueOf(texteditor.LookupParse),
 		"MarkupDelay":              reflect.ValueOf(&texteditor.MarkupDelay).Elem(),
 		"MaxLineLen":               reflect.ValueOf(constant.MakeFromLiteral("67108864", token.INT, 0)),
@@ -51,7 +50,6 @@ func init() {
 		"NewDiffTextEditor":        reflect.ValueOf(texteditor.NewDiffTextEditor),
 		"NewEditor":                reflect.ValueOf(texteditor.NewEditor),
 		"NewSoloEditor":            reflect.ValueOf(texteditor.NewSoloEditor),
-		"NewSpell":                 reflect.ValueOf(texteditor.NewSpell),
 		"NewTwinEditors":           reflect.ValueOf(texteditor.NewTwinEditors),
 		"PrevISearchString":        reflect.ValueOf(&texteditor.PrevISearchString).Elem(),
 		"PrevQReplaceFinds":        reflect.ValueOf(&texteditor.PrevQReplaceFinds).Elem(),
@@ -79,7 +77,6 @@ func init() {
 		"OutputBuffer":           reflect.ValueOf((*texteditor.OutputBuffer)(nil)),
 		"OutputBufferMarkupFunc": reflect.ValueOf((*texteditor.OutputBufferMarkupFunc)(nil)),
 		"QReplace":               reflect.ValueOf((*texteditor.QReplace)(nil)),
-		"Spell":                  reflect.ValueOf((*texteditor.Spell)(nil)),
 		"TwinEditors":            reflect.ValueOf((*texteditor.TwinEditors)(nil)),
 
 		// interface wrapper definitions
