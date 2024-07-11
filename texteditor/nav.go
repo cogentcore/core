@@ -61,7 +61,7 @@ func (ed *Editor) SetCursor(pos lexer.Pos) {
 	ed.ClearScopelights()
 	ed.CursorPos = ed.Buffer.ValidPos(pos)
 	ed.CursorMovedSig()
-	txt := ed.Buffer.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.line(ed.CursorPos.Ln)
 	ch := ed.CursorPos.Ch
 	if ch < len(txt) {
 		r := txt[ch]
@@ -193,12 +193,12 @@ func (ed *Editor) CursorForward(steps int) {
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
 		ed.CursorPos.Ch++
-		if ed.CursorPos.Ch > ed.Buffer.LineLen(ed.CursorPos.Ln) {
+		if ed.CursorPos.Ch > ed.Buffer.lineLen(ed.CursorPos.Ln) {
 			if ed.CursorPos.Ln < ed.NLines-1 {
 				ed.CursorPos.Ch = 0
 				ed.CursorPos.Ln++
 			} else {
-				ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
+				ed.CursorPos.Ch = ed.Buffer.lineLen(ed.CursorPos.Ln)
 			}
 		}
 	}
@@ -213,7 +213,7 @@ func (ed *Editor) CursorForwardWord(steps int) {
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
-		txt := ed.Buffer.Line(ed.CursorPos.Ln)
+		txt := ed.Buffer.line(ed.CursorPos.Ln)
 		sz := len(txt)
 		if sz > 0 && ed.CursorPos.Ch < sz {
 			ch := ed.CursorPos.Ch
@@ -249,7 +249,7 @@ func (ed *Editor) CursorForwardWord(steps int) {
 				ed.CursorPos.Ch = 0
 				ed.CursorPos.Ln++
 			} else {
-				ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
+				ed.CursorPos.Ch = ed.Buffer.lineLen(ed.CursorPos.Ln)
 			}
 		}
 	}
@@ -288,7 +288,7 @@ func (ed *Editor) CursorDown(steps int) {
 				pos.Ln = ed.NLines - 1
 				break
 			}
-			mxlen := min(ed.Buffer.LineLen(pos.Ln), ed.CursorCol)
+			mxlen := min(ed.Buffer.lineLen(pos.Ln), ed.CursorCol)
 			if ed.CursorCol < mxlen {
 				pos.Ch = ed.CursorCol
 			} else {
@@ -312,7 +312,7 @@ func (ed *Editor) CursorPageDown(steps int) {
 		if ed.CursorPos.Ln >= ed.NLines {
 			ed.CursorPos.Ln = ed.NLines - 1
 		}
-		ed.CursorPos.Ch = min(ed.Buffer.LineLen(ed.CursorPos.Ln), ed.CursorCol)
+		ed.CursorPos.Ch = min(ed.Buffer.lineLen(ed.CursorPos.Ln), ed.CursorCol)
 		ed.ScrollCursorToTop()
 		ed.RenderCursor(true)
 	}
@@ -330,7 +330,7 @@ func (ed *Editor) CursorBackward(steps int) {
 		if ed.CursorPos.Ch < 0 {
 			if ed.CursorPos.Ln > 0 {
 				ed.CursorPos.Ln--
-				ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
+				ed.CursorPos.Ch = ed.Buffer.lineLen(ed.CursorPos.Ln)
 			} else {
 				ed.CursorPos.Ch = 0
 			}
@@ -347,7 +347,7 @@ func (ed *Editor) CursorBackwardWord(steps int) {
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
-		txt := ed.Buffer.Line(ed.CursorPos.Ln)
+		txt := ed.Buffer.line(ed.CursorPos.Ln)
 		sz := len(txt)
 		if sz > 0 && ed.CursorPos.Ch > 0 {
 			ch := min(ed.CursorPos.Ch, sz-1)
@@ -384,7 +384,7 @@ func (ed *Editor) CursorBackwardWord(steps int) {
 		} else {
 			if ed.CursorPos.Ln > 0 {
 				ed.CursorPos.Ln--
-				ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
+				ed.CursorPos.Ch = ed.Buffer.lineLen(ed.CursorPos.Ln)
 			} else {
 				ed.CursorPos.Ch = 0
 			}
@@ -429,7 +429,7 @@ func (ed *Editor) CursorUp(steps int) {
 				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
 				pos.Ch = nwc
 			} else {
-				mxlen := min(ed.Buffer.LineLen(pos.Ln), ed.CursorCol)
+				mxlen := min(ed.Buffer.lineLen(pos.Ln), ed.CursorCol)
 				if ed.CursorCol < mxlen {
 					pos.Ch = ed.CursorCol
 				} else {
@@ -454,7 +454,7 @@ func (ed *Editor) CursorPageUp(steps int) {
 		if ed.CursorPos.Ln <= 0 {
 			ed.CursorPos.Ln = 0
 		}
-		ed.CursorPos.Ch = min(ed.Buffer.LineLen(ed.CursorPos.Ln), ed.CursorCol)
+		ed.CursorPos.Ch = min(ed.Buffer.lineLen(ed.CursorPos.Ln), ed.CursorCol)
 		ed.ScrollCursorToBottom()
 		ed.RenderCursor(true)
 	}
@@ -547,7 +547,7 @@ func (ed *Editor) CursorEndLine() {
 		gotwrap = true
 	}
 	if !gotwrap {
-		ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
+		ed.CursorPos.Ch = ed.Buffer.lineLen(ed.CursorPos.Ln)
 		ed.CursorCol = ed.CursorPos.Ch
 	}
 	ed.SetCursor(ed.CursorPos)
@@ -563,7 +563,7 @@ func (ed *Editor) CursorEndDoc() {
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	ed.CursorPos.Ln = max(ed.NLines-1, 0)
-	ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
+	ed.CursorPos.Ch = ed.Buffer.lineLen(ed.CursorPos.Ln)
 	ed.CursorCol = ed.CursorPos.Ch
 	ed.SetCursor(ed.CursorPos)
 	ed.ScrollCursorToBottom()
@@ -656,7 +656,7 @@ func (ed *Editor) CursorKill() {
 		}
 		atEnd = (ri == llen)
 	} else {
-		llen := ed.Buffer.LineLen(pos.Ln)
+		llen := ed.Buffer.lineLen(pos.Ln)
 		atEnd = (ed.CursorPos.Ch == llen)
 	}
 	if atEnd {
@@ -761,10 +761,10 @@ func (ed *Editor) FindPrevLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) 
 	for ln := pos.Ln - 1; ln >= 0; ln-- {
 		if len(ed.Renders[ln].Links) == 0 {
 			if ln-1 >= 0 {
-				pos.Ch = ed.Buffer.LineLen(ln-1) - 2
+				pos.Ch = ed.Buffer.lineLen(ln-1) - 2
 			} else {
 				ln = ed.NLines
-				pos.Ch = ed.Buffer.LineLen(ln - 2)
+				pos.Ch = ed.Buffer.lineLen(ln - 2)
 			}
 			continue
 		}

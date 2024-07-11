@@ -78,14 +78,14 @@ func (ed *Editor) LayoutAllLines() {
 	if ed.lineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
-	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.numLines() == 0 {
 		ed.NLines = 0
 		return
 	}
 	ed.lastFilename = ed.Buffer.Filename
 
 	ed.Buffer.Hi.TabSize = ed.Styles.Text.TabSize
-	ed.NLines = ed.Buffer.NumLines()
+	ed.NLines = ed.Buffer.numLines()
 	buf := ed.Buffer
 	buf.markupMu.RLock()
 
@@ -140,7 +140,7 @@ func (ed *Editor) ReLayoutAllLines() {
 	if ed.lineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
-	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.numLines() == 0 {
 		return
 	}
 	if ed.lastlineLayoutSize == ed.lineLayoutSize {
@@ -183,7 +183,7 @@ func (ed *Editor) ApplyScenePos() {
 // lines (e.g., from word-wrap) is different, then NeedsLayout is called
 // and it returns true.
 func (ed *Editor) LayoutLine(ln int) bool {
-	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 || ln >= len(ed.Renders) {
+	if ed.Buffer == nil || ed.Buffer.numLines() == 0 || ln >= len(ed.Renders) {
 		return false
 	}
 	sty := &ed.Styles

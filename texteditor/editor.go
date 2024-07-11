@@ -285,7 +285,7 @@ func (ed *Editor) Destroy() {
 // called when the return key is pressed or goes out of focus
 func (ed *Editor) EditDone() {
 	if ed.Buffer != nil {
-		ed.Buffer.EditDone()
+		ed.Buffer.editDone()
 	}
 	ed.ClearSelected()
 	ed.ClearCursor()
@@ -345,12 +345,12 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 	// had := false
 	if ed.Buffer != nil {
 		// had = true
-		ed.Buffer.DeleteView(ed)
+		ed.Buffer.deleteEditor(ed)
 	}
 	ed.Buffer = buf
 	ed.ResetState()
 	if buf != nil {
-		buf.AddView(ed)
+		buf.addEditor(ed)
 		bhl := len(buf.posHistory)
 		if bhl > 0 {
 			cp := buf.posHistory[bhl-1]
@@ -415,16 +415,16 @@ func (ed *Editor) LinesDeleted(tbe *textbuf.Edit) {
 
 // BufferSignal receives a signal from the Buffer when the underlying text
 // is changed.
-func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
+func (ed *Editor) BufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 	switch sig {
-	case BufferDone:
-	case BufferNew:
+	case bufferDone:
+	case bufferNew:
 		ed.ResetState()
 		ed.SetCursorShow(ed.CursorPos)
 		ed.NeedsLayout()
-	case BufferMods:
+	case bufferMods:
 		ed.NeedsLayout()
-	case BufferInsert:
+	case bufferInsert:
 		if ed == nil || ed.This == nil || !ed.This.(core.Widget).IsVisible() {
 			return
 		}
@@ -439,7 +439,7 @@ func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
 		if ndup {
 			ed.Update()
 		}
-	case BufferDelete:
+	case bufferDelete:
 		if ed == nil || ed.This == nil || !ed.This.(core.Widget).IsVisible() {
 			return
 		}
@@ -452,9 +452,9 @@ func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
 		if ndup {
 			ed.Update()
 		}
-	case BufferMarkupUpdated:
+	case bufferMarkupUpdated:
 		ed.NeedsLayout() // comes from another goroutine
-	case BufferClosed:
+	case bufferClosed:
 		ed.SetBuffer(nil)
 	}
 }

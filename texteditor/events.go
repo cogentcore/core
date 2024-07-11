@@ -80,7 +80,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 	if kt.IsHandled() {
 		return
 	}
-	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.numLines() == 0 {
 		return
 	}
 
@@ -337,7 +337,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 					tbe, _, _ := ed.Buffer.AutoIndent(ed.CursorPos.Ln) // reindent current line
 					if tbe != nil {
 						// go back to end of line!
-						npos := lexer.Pos{Ln: ed.CursorPos.Ln, Ch: ed.Buffer.LineLen(ed.CursorPos.Ln)}
+						npos := lexer.Pos{Ln: ed.CursorPos.Ln, Ch: ed.Buffer.lineLen(ed.CursorPos.Ln)}
 						ed.SetCursor(npos)
 					}
 				}
@@ -373,7 +373,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
 			if ed.CursorPos.Ch > 0 {
-				ind, _ := lexer.LineIndent(ed.Buffer.Line(ed.CursorPos.Ln), ed.Styles.Text.TabSize)
+				ind, _ := lexer.LineIndent(ed.Buffer.line(ed.CursorPos.Ln), ed.Styles.Text.TabSize)
 				if ind > 0 {
 					ed.Buffer.IndentLine(ed.CursorPos.Ln, ind-1)
 					intxt := indent.Bytes(ed.Buffer.Options.IndentChar(), ind-1, ed.Styles.Text.TabSize)
@@ -399,7 +399,7 @@ func (ed *Editor) KeyInputInsertBra(kt events.Event) {
 	pos := ed.CursorPos
 	match := true
 	newLine := false
-	curLn := ed.Buffer.Line(pos.Ln)
+	curLn := ed.Buffer.line(pos.Ln)
 	lnLen := len(curLn)
 	lp, _ := parse.LangSupport.Properties(ed.Buffer.ParseState.Sup)
 	if lp != nil && lp.Lang != nil {
@@ -454,7 +454,7 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 	} else {
 		if kt.KeyRune() == '{' || kt.KeyRune() == '(' || kt.KeyRune() == '[' {
 			ed.KeyInputInsertBra(kt)
-		} else if kt.KeyRune() == '}' && ed.Buffer.Options.AutoIndent && ed.CursorPos.Ch == ed.Buffer.LineLen(ed.CursorPos.Ln) {
+		} else if kt.KeyRune() == '}' && ed.Buffer.Options.AutoIndent && ed.CursorPos.Ch == ed.Buffer.lineLen(ed.CursorPos.Ln) {
 			ed.CancelComplete()
 			ed.lastAutoInsert = 0
 			ed.InsertAtCursor([]byte(string(kt.KeyRune())))
@@ -588,7 +588,7 @@ func (ed *Editor) HandleMouse() {
 			ed.Send(events.Focus, e) // sets focused flag
 		}
 		e.SetHandled()
-		sz := ed.Buffer.LineLen(ed.CursorPos.Ln)
+		sz := ed.Buffer.lineLen(ed.CursorPos.Ln)
 		if sz > 0 {
 			ed.SelectRegion.Start.Ln = ed.CursorPos.Ln
 			ed.SelectRegion.Start.Ch = 0

@@ -581,7 +581,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lexer.Pos {
 	if cln >= len(ed.Renders) {
 		return lexer.Pos{Ln: cln, Ch: 0}
 	}
-	lnsz := ed.Buffer.LineLen(cln)
+	lnsz := ed.Buffer.lineLen(cln)
 	if lnsz == 0 || sty.Font.Face == nil {
 		return lexer.Pos{Ln: cln, Ch: 0}
 	}

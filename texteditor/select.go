@@ -81,14 +81,14 @@ func (ed *Editor) SelectModeToggle() {
 // SelectAll selects all the text
 func (ed *Editor) SelectAll() {
 	ed.SelectRegion.Start = lexer.PosZero
-	ed.SelectRegion.End = ed.Buffer.EndPos()
+	ed.SelectRegion.End = ed.Buffer.endPos()
 	ed.NeedsRender()
 }
 
 // WordBefore returns the word before the lexer.Pos
 // uses IsWordBreak to determine the bounds of the word
 func (ed *Editor) WordBefore(tp lexer.Pos) *textbuf.Edit {
-	txt := ed.Buffer.Line(tp.Ln)
+	txt := ed.Buffer.line(tp.Ln)
 	ch := tp.Ch
 	ch = min(ch, len(txt))
 	st := ch
@@ -113,7 +113,7 @@ func (ed *Editor) WordBefore(tp lexer.Pos) *textbuf.Edit {
 // IsWordStart returns true if the cursor is just before the start of a word
 // word is a string of characters none of which are classified as a word break
 func (ed *Editor) IsWordStart(tp lexer.Pos) bool {
-	txt := ed.Buffer.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return false
@@ -136,7 +136,7 @@ func (ed *Editor) IsWordStart(tp lexer.Pos) bool {
 // IsWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
 func (ed *Editor) IsWordEnd(tp lexer.Pos) bool {
-	txt := ed.Buffer.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return false
@@ -164,7 +164,7 @@ func (ed *Editor) IsWordEnd(tp lexer.Pos) bool {
 // i.e. the character before the cursor and the one after the cursor
 // are not classified as word break characters
 func (ed *Editor) IsWordMiddle(tp lexer.Pos) bool {
-	txt := ed.Buffer.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz < 2 {
 		return false
@@ -186,7 +186,7 @@ func (ed *Editor) SelectWord() bool {
 	if ed.Buffer == nil {
 		return false
 	}
-	txt := ed.Buffer.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return false
@@ -201,7 +201,7 @@ func (ed *Editor) SelectWord() bool {
 func (ed *Editor) WordAt() (reg textbuf.Region) {
 	reg.Start = ed.CursorPos
 	reg.End = ed.CursorPos
-	txt := ed.Buffer.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return reg

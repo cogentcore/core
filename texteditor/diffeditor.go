@@ -418,8 +418,8 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 			absln += di
 		}
 	}
-	dv.BufA.SetTextLines(ab, false) // don't copy
-	dv.BufB.SetTextLines(bb, false) // don't copy
+	dv.BufA.setTextLines(ab, false) // don't copy
+	dv.BufB.setTextLines(bb, false) // don't copy
 	dv.TagWordDiffs()
 	dv.BufA.ReMarkup()
 	dv.BufB.ReMarkup()

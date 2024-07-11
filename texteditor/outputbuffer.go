@@ -117,7 +117,7 @@ func (ob *OutputBuffer) OutputToBuffer() {
 	ob.Buffer.Undos.Off = true
 	ob.Buffer.AppendTextMarkup(tlns, mlns, EditSignal)
 	// ob.Buf.AppendText(mlns, EditSignal) // todo: trying to allow markup according to styles
-	ob.Buffer.AutoScrollViews()
+	ob.Buffer.AutoScrollEditors()
 	ob.CurrentOutputLines = make([][]byte, 0, 100)
 	ob.CurrentOutputMarkupLines = make([][]byte, 0, 100)
 }

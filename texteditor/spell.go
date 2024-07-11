@@ -144,12 +144,12 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 			if isDoc {
 				ed.Buffer.SpellCheckLineTag(tp.Ln) // redo prior line
 			}
-			tp.Ch = ed.Buffer.LineLen(tp.Ln)
+			tp.Ch = ed.Buffer.lineLen(tp.Ln)
 			reg := ed.WordBefore(tp)
 			ed.SpellCheck(reg)
 			break
 		}
-		txt := ed.Buffer.Line(tp.Ln)
+		txt := ed.Buffer.line(tp.Ln)
 		var r rune
 		atend := false
 		if tp.Ch >= len(txt) {
@@ -168,7 +168,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 		if isDoc {
 			ed.Buffer.SpellCheckLineTag(tp.Ln) // redo prior line
 		}
-		tp.Ch = ed.Buffer.LineLen(tp.Ln)
+		tp.Ch = ed.Buffer.lineLen(tp.Ln)
 		reg := ed.WordBefore(tp)
 		ed.SpellCheck(reg)
 	case keymap.FocusNext:

@@ -13,15 +13,6 @@ func init() {
 	Symbols["cogentcore.org/core/texteditor/texteditor"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AsEditor":                 reflect.ValueOf(texteditor.AsEditor),
-		"BufferClosed":             reflect.ValueOf(texteditor.BufferClosed),
-		"BufferDelete":             reflect.ValueOf(texteditor.BufferDelete),
-		"BufferDone":               reflect.ValueOf(texteditor.BufferDone),
-		"BufferInsert":             reflect.ValueOf(texteditor.BufferInsert),
-		"BufferMarkupUpdated":      reflect.ValueOf(texteditor.BufferMarkupUpdated),
-		"BufferMods":               reflect.ValueOf(texteditor.BufferMods),
-		"BufferNew":                reflect.ValueOf(texteditor.BufferNew),
-		"BufferSignalsN":           reflect.ValueOf(texteditor.BufferSignalsN),
-		"BufferSignalsValues":      reflect.ValueOf(texteditor.BufferSignalsValues),
 		"ChromaTagsForLine":        reflect.ValueOf(texteditor.ChromaTagsForLine),
 		"ChromaTagsLine":           reflect.ValueOf(texteditor.ChromaTagsLine),
 		"ClipHistMax":              reflect.ValueOf(&texteditor.ClipHistMax).Elem(),
@@ -67,7 +58,6 @@ func init() {
 
 		// type definitions
 		"Buffer":                 reflect.ValueOf((*texteditor.Buffer)(nil)),
-		"BufferSignals":          reflect.ValueOf((*texteditor.BufferSignals)(nil)),
 		"DiffEditor":             reflect.ValueOf((*texteditor.DiffEditor)(nil)),
 		"DiffTextEditor":         reflect.ValueOf((*texteditor.DiffTextEditor)(nil)),
 		"Editor":                 reflect.ValueOf((*texteditor.Editor)(nil)),
