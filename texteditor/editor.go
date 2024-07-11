@@ -299,7 +299,7 @@ func (ed *Editor) ReMarkup() {
 	if ed.Buffer == nil {
 		return
 	}
-	ed.Buffer.ReMarkup()
+	ed.Buffer.reMarkup()
 }
 
 // IsChanged returns true if buffer was changed (edited) since last EditDone
@@ -464,7 +464,7 @@ func (ed *Editor) BufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 
 // Undo undoes previous action
 func (ed *Editor) Undo() {
-	tbe := ed.Buffer.Undo()
+	tbe := ed.Buffer.undo()
 	if tbe != nil {
 		if tbe.Delete { // now an insert
 			ed.SetCursorShow(tbe.Reg.End)
@@ -481,7 +481,7 @@ func (ed *Editor) Undo() {
 
 // Redo redoes previously undone action
 func (ed *Editor) Redo() {
-	tbe := ed.Buffer.Redo()
+	tbe := ed.Buffer.redo()
 	if tbe != nil {
 		if tbe.Delete {
 			ed.SetCursorShow(tbe.Reg.Start)

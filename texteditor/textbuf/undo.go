@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
-	"cogentcore.org/core/parse/lexer"
 )
 
 // UndoTrace; set to true to get a report of undo actions
@@ -193,30 +191,11 @@ func (un *Undo) RedoNextIfGroup(gp int) *Edit {
 	return tbe
 }
 
-// AdjustPos adjusts given text position, which was recorded at given time
-// for any edits that have taken place since that time (using the Undo stack).
-// del determines what to do with positions within a deleted region -- either move
-// to start or end of the region, or return an error
-func (un *Undo) AdjustPos(pos lexer.Pos, t time.Time, del AdjustPosDel) lexer.Pos {
-	if un.Off {
-		return pos
-	}
-	un.Mu.Lock()
-	defer un.Mu.Unlock()
-	for _, utbe := range un.Stack {
-		pos = utbe.AdjustPosIfAfterTime(pos, t, del)
-		if pos == lexer.PosErr {
-			return pos
-		}
-	}
-	return pos
-}
-
-// AdjustReg adjusts given text region for any edits that
+// AdjustRegion adjusts given text region for any edits that
 // have taken place since time stamp on region (using the Undo stack).
 // If region was wholly within a deleted region, then RegionNil will be
 // returned -- otherwise it is clipped appropriately as function of deletes.
-func (un *Undo) AdjustReg(reg Region) Region {
+func (un *Undo) AdjustRegion(reg Region) Region {
 	if un.Off {
 		return reg
 	}

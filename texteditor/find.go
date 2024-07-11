@@ -46,7 +46,7 @@ func (ed *Editor) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Ma
 // MatchFromPos finds the match at or after the given text position -- returns 0, false if none
 func (ed *Editor) MatchFromPos(matches []textbuf.Match, cpos lexer.Pos) (int, bool) {
 	for i, m := range matches {
-		reg := ed.Buffer.AdjustReg(m.Reg)
+		reg := ed.Buffer.AdjustRegion(m.Reg)
 		if reg.Start == cpos || cpos.IsLess(reg.Start) {
 			return i, true
 		}
@@ -112,7 +112,7 @@ func (ed *Editor) ISearchSelectMatch(midx int) {
 		return
 	}
 	m := ed.ISearch.Matches[midx]
-	reg := ed.Buffer.AdjustReg(m.Reg)
+	reg := ed.Buffer.AdjustRegion(m.Reg)
 	pos := reg.Start
 	ed.SelectRegion = reg
 	ed.SetCursor(pos)
@@ -378,7 +378,7 @@ func (ed *Editor) QReplaceSelectMatch(midx int) {
 		return
 	}
 	m := ed.QReplace.Matches[midx]
-	reg := ed.Buffer.AdjustReg(m.Reg)
+	reg := ed.Buffer.AdjustRegion(m.Reg)
 	pos := reg.Start
 	ed.SelectRegion = reg
 	ed.SetCursor(pos)
@@ -395,7 +395,7 @@ func (ed *Editor) QReplaceReplace(midx int) {
 	}
 	m := ed.QReplace.Matches[midx]
 	rep := ed.QReplace.Replace
-	reg := ed.Buffer.AdjustReg(m.Reg)
+	reg := ed.Buffer.AdjustRegion(m.Reg)
 	pos := reg.Start
 	// last arg is matchCase, only if not using case to match and rep is also lower case
 	matchCase := !ed.QReplace.UseCase && !lexer.HasUpperCase(rep)

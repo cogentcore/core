@@ -421,8 +421,8 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 	dv.BufA.setTextLines(ab, false) // don't copy
 	dv.BufB.setTextLines(bb, false) // don't copy
 	dv.TagWordDiffs()
-	dv.BufA.ReMarkup()
-	dv.BufB.ReMarkup()
+	dv.BufA.reMarkup()
+	dv.BufB.reMarkup()
 }
 
 // TagWordDiffs goes through replace diffs and tags differences at the
@@ -455,18 +455,18 @@ func (dv *DiffEditor) TagWordDiffs() {
 				case 'r':
 					sla := lna[ld.I1]
 					ela := lna[ld.I2-1]
-					dv.BufA.AddTag(ln, sla.St, ela.Ed, token.TextStyleError)
+					dv.BufA.addTag(ln, sla.St, ela.Ed, token.TextStyleError)
 					slb := lnb[ld.J1]
 					elb := lnb[ld.J2-1]
-					dv.BufB.AddTag(ln, slb.St, elb.Ed, token.TextStyleError)
+					dv.BufB.addTag(ln, slb.St, elb.Ed, token.TextStyleError)
 				case 'd':
 					sla := lna[ld.I1]
 					ela := lna[ld.I2-1]
-					dv.BufA.AddTag(ln, sla.St, ela.Ed, token.TextStyleDeleted)
+					dv.BufA.addTag(ln, sla.St, ela.Ed, token.TextStyleDeleted)
 				case 'i':
 					slb := lnb[ld.J1]
 					elb := lnb[ld.J2-1]
-					dv.BufB.AddTag(ln, slb.St, elb.Ed, token.TextStyleDeleted)
+					dv.BufB.addTag(ln, slb.St, elb.Ed, token.TextStyleDeleted)
 				}
 			}
 		}
@@ -496,7 +496,7 @@ func (dv *DiffEditor) ApplyDiff(ab int, line int) bool {
 		epos := lexer.Pos{Ln: df.I2, Ch: 0}
 		src := dv.BufB.Region(spos, epos)
 		dv.BufA.DeleteText(spos, epos, true)
-		dv.BufA.InsertText(spos, src.ToBytes(), true) // we always just copy, is blank for delete..
+		dv.BufA.insertText(spos, src.ToBytes(), true) // we always just copy, is blank for delete..
 		dv.Diffs.BtoA(di)
 	} else {
 		dv.BufB.Undos.Off = false
@@ -504,7 +504,7 @@ func (dv *DiffEditor) ApplyDiff(ab int, line int) bool {
 		epos := lexer.Pos{Ln: df.J2, Ch: 0}
 		src := dv.BufA.Region(spos, epos)
 		dv.BufB.DeleteText(spos, epos, true)
-		dv.BufB.InsertText(spos, src.ToBytes(), true)
+		dv.BufB.insertText(spos, src.ToBytes(), true)
 		dv.Diffs.AtoB(di)
 	}
 	dv.updateToolbar()

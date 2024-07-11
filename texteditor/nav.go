@@ -26,7 +26,7 @@ func (ed *Editor) CursorMovedSig() {
 // ValidateCursor sets current cursor to a valid cursor position
 func (ed *Editor) ValidateCursor() {
 	if ed.Buffer != nil {
-		ed.CursorPos = ed.Buffer.ValidPos(ed.CursorPos)
+		ed.CursorPos = ed.Buffer.validPos(ed.CursorPos)
 	} else {
 		ed.CursorPos = lexer.PosZero
 	}
@@ -59,14 +59,14 @@ func (ed *Editor) SetCursor(pos lexer.Pos) {
 	}
 
 	ed.ClearScopelights()
-	ed.CursorPos = ed.Buffer.ValidPos(pos)
+	ed.CursorPos = ed.Buffer.validPos(pos)
 	ed.CursorMovedSig()
 	txt := ed.Buffer.line(ed.CursorPos.Ln)
 	ch := ed.CursorPos.Ch
 	if ch < len(txt) {
 		r := txt[ch]
 		if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
-			tp, found := ed.Buffer.BraceMatch(txt[ch], ed.CursorPos)
+			tp, found := ed.Buffer.braceMatch(txt[ch], ed.CursorPos)
 			if found {
 				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(ed.CursorPos, lexer.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch + 1}))
 				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
@@ -113,7 +113,7 @@ func (ed *Editor) SavePosHistory(pos lexer.Pos) {
 	if ed.Buffer == nil {
 		return
 	}
-	ed.Buffer.SavePosHistory(pos)
+	ed.Buffer.savePosHistory(pos)
 	ed.PosHistIndex = len(ed.Buffer.posHistory) - 1
 }
 
@@ -135,7 +135,7 @@ func (ed *Editor) CursorToHistPrev() bool {
 	}
 	ed.PosHistIndex = min(sz-1, ed.PosHistIndex)
 	pos := ed.Buffer.posHistory[ed.PosHistIndex]
-	ed.CursorPos = ed.Buffer.ValidPos(pos)
+	ed.CursorPos = ed.Buffer.validPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
 	ed.RenderCursor(true)
@@ -159,7 +159,7 @@ func (ed *Editor) CursorToHistNext() bool {
 		return false
 	}
 	pos := ed.Buffer.posHistory[ed.PosHistIndex]
-	ed.CursorPos = ed.Buffer.ValidPos(pos)
+	ed.CursorPos = ed.Buffer.validPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
 	ed.RenderCursor(true)

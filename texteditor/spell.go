@@ -29,7 +29,7 @@ func (ed *Editor) OfferComplete() {
 	if !ed.Buffer.Options.Completion {
 		return
 	}
-	if ed.Buffer.InComment(ed.CursorPos) || ed.Buffer.InLitString(ed.CursorPos) {
+	if ed.Buffer.inComment(ed.CursorPos) || ed.Buffer.inLitString(ed.CursorPos) {
 		return
 	}
 
@@ -48,7 +48,7 @@ func (ed *Editor) OfferComplete() {
 	cpos := ed.CharStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
-	ed.Buffer.SetByteOffs() // make sure the pos offset is updated!!
+	ed.Buffer.setByteOffs() // make sure the pos offset is updated!!
 	ed.Buffer.currentEditor = ed
 	ed.Buffer.Complete.SrcLn = ed.CursorPos.Ln
 	ed.Buffer.Complete.SrcCh = ed.CursorPos.Ch
@@ -108,7 +108,7 @@ func (ed *Editor) Lookup() { //types:add
 	cpos := ed.CharStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
-	ed.Buffer.SetByteOffs() // make sure the pos offset is updated!!
+	ed.Buffer.setByteOffs() // make sure the pos offset is updated!!
 	ed.Buffer.currentEditor = ed
 	ed.Buffer.Complete.Lookup(s, ed.CursorPos.Ln, ed.CursorPos.Ch, ed.Scene, cpos)
 }
@@ -116,7 +116,7 @@ func (ed *Editor) Lookup() { //types:add
 // ISpellKeyInput locates the word to spell check based on cursor position and
 // the key input, then passes the text region to SpellCheck
 func (ed *Editor) ISpellKeyInput(kt events.Event) {
-	if !ed.Buffer.IsSpellEnabled(ed.CursorPos) {
+	if !ed.Buffer.isSpellEnabled(ed.CursorPos) {
 		return
 	}
 
@@ -127,11 +127,11 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 	switch kf {
 	case keymap.MoveUp:
 		if isDoc {
-			ed.Buffer.SpellCheckLineTag(tp.Ln)
+			ed.Buffer.spellCheckLineTag(tp.Ln)
 		}
 	case keymap.MoveDown:
 		if isDoc {
-			ed.Buffer.SpellCheckLineTag(tp.Ln)
+			ed.Buffer.spellCheckLineTag(tp.Ln)
 		}
 	case keymap.MoveRight:
 		if ed.IsWordEnd(tp) {
@@ -142,7 +142,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 		if tp.Ch == 0 { // end of line
 			tp.Ln--
 			if isDoc {
-				ed.Buffer.SpellCheckLineTag(tp.Ln) // redo prior line
+				ed.Buffer.spellCheckLineTag(tp.Ln) // redo prior line
 			}
 			tp.Ch = ed.Buffer.lineLen(tp.Ln)
 			reg := ed.WordBefore(tp)
@@ -166,7 +166,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 	case keymap.Enter:
 		tp.Ln--
 		if isDoc {
-			ed.Buffer.SpellCheckLineTag(tp.Ln) // redo prior line
+			ed.Buffer.spellCheckLineTag(tp.Ln) // redo prior line
 		}
 		tp.Ch = ed.Buffer.lineLen(tp.Ln)
 		reg := ed.WordBefore(tp)
@@ -215,13 +215,13 @@ func (ed *Editor) SpellCheck(reg *textbuf.Edit) bool {
 
 	sugs, knwn := ed.Buffer.spell.checkWord(lwb)
 	if knwn {
-		ed.Buffer.RemoveTag(reg.Reg.Start, token.TextSpellErr)
+		ed.Buffer.removeTag(reg.Reg.Start, token.TextSpellErr)
 		return false
 	}
 	// fmt.Printf("spell err: %s\n", wb)
 	ed.Buffer.spell.setWord(wb, sugs, reg.Reg.Start.Ln, reg.Reg.Start.Ch)
-	ed.Buffer.RemoveTag(reg.Reg.Start, token.TextSpellErr)
-	ed.Buffer.AddTagEdit(reg, token.TextSpellErr)
+	ed.Buffer.removeTag(reg.Reg.Start, token.TextSpellErr)
+	ed.Buffer.addTagEdit(reg, token.TextSpellErr)
 	return true
 }
 

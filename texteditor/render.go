@@ -267,7 +267,7 @@ func (ed *Editor) RenderSelect() {
 // highlighted background color.
 func (ed *Editor) RenderHighlights(stln, edln int) {
 	for _, reg := range ed.Highlights {
-		reg := ed.Buffer.AdjustReg(reg)
+		reg := ed.Buffer.AdjustRegion(reg)
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
 			continue
 		}
@@ -279,7 +279,7 @@ func (ed *Editor) RenderHighlights(stln, edln int) {
 // in the Scopelights list.
 func (ed *Editor) RenderScopelights(stln, edln int) {
 	for _, reg := range ed.Scopelights {
-		reg := ed.Buffer.AdjustReg(reg)
+		reg := ed.Buffer.AdjustRegion(reg)
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
 			continue
 		}

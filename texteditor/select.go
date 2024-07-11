@@ -395,7 +395,7 @@ func (ed *Editor) InsertAtCursor(txt []byte) {
 		tbe := ed.DeleteSelection()
 		ed.CursorPos = tbe.AdjustPos(ed.CursorPos, textbuf.AdjustPosDelStart) // move to start if in reg
 	}
-	tbe := ed.Buffer.InsertText(ed.CursorPos, txt, EditSignal)
+	tbe := ed.Buffer.insertText(ed.CursorPos, txt, EditSignal)
 	if tbe == nil {
 		return
 	}
@@ -423,7 +423,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 		return nil
 	}
 	npos := lexer.Pos{Ln: ed.SelectRegion.End.Ln, Ch: ed.SelectRegion.Start.Ch}
-	cut := ed.Buffer.DeleteTextRect(ed.SelectRegion.Start, ed.SelectRegion.End, EditSignal)
+	cut := ed.Buffer.deleteTextRect(ed.SelectRegion.Start, ed.SelectRegion.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
 		ed.Clipboard().Write(mimedata.NewTextBytes(cb))
@@ -438,7 +438,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 // CopyRect copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
 func (ed *Editor) CopyRect(reset bool) *textbuf.Edit {
-	tbe := ed.Buffer.RegionRect(ed.SelectRegion.Start, ed.SelectRegion.End)
+	tbe := ed.Buffer.regionRect(ed.SelectRegion.Start, ed.SelectRegion.End)
 	if tbe == nil {
 		return nil
 	}
@@ -465,7 +465,7 @@ func (ed *Editor) PasteRect() {
 	ce.Reg.End.Ln = ed.CursorPos.Ln + nl
 	ce.Reg.Start.Ch = ed.CursorPos.Ch
 	ce.Reg.End.Ch = ed.CursorPos.Ch + nch
-	tbe := ed.Buffer.InsertTextRect(ce, EditSignal)
+	tbe := ed.Buffer.insertTextRect(ce, EditSignal)
 
 	pos := tbe.Reg.End
 	ed.SetCursorShow(pos)
