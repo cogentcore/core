@@ -197,7 +197,7 @@ func (ch *Chooser) Init() {
 		}
 	})
 
-	ch.HandleSelectToggle()
+	ch.handleSelectToggle()
 	ch.OnClick(func(e events.Event) {
 		if ch.openMenu(e) {
 			e.SetHandled()

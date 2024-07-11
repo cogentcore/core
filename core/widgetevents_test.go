@@ -50,7 +50,7 @@ func TestHandleWidgetState(t *testing.T) {
 	test(abilities.Focusable, states.Focused, events.Focus, events.FocusLost)
 	test(abilities.Checkable, states.Checked, events.Click, events.Click)
 
-	w.HandleSelectToggle()
+	w.handleSelectToggle()
 	test(abilities.Selectable, states.Selected, events.Select, events.Select)
 }
 

@@ -485,7 +485,7 @@ func (lb *ListBase) BindSelect(val *int) *ListBase {
 	lb.OnDoubleClick(func(e events.Event) {
 		if lb.clickSelectEvent(e) {
 			*val = lb.SelectedIndex
-			lb.Scene.SendKey(keymap.Accept, e) // activate OK button
+			lb.Scene.sendKey(keymap.Accept, e) // activate OK button
 			if lb.Scene.Stage.Type == DialogStage {
 				lb.Scene.Close() // also directly close dialog for value dialogs without OK button
 			}

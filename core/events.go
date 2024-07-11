@@ -667,7 +667,7 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 		if !kwb.IsVisible() {
 			return tree.Break
 		}
-		if !kwb.PosInScBBox(pos) {
+		if !kwb.posInScBBox(pos) {
 			return tree.Break
 		}
 		em.mouseInBBox = append(em.mouseInBBox, kwi)

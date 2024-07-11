@@ -329,7 +329,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 				if !fp.selectFile() {
 					e.SetHandled() // don't pass along; keep dialog open
 				} else {
-					fp.Scene.SendKey(keymap.Accept, e) // activates Ok button code
+					fp.Scene.sendKey(keymap.Accept, e) // activates Ok button code
 				}
 			}
 		})

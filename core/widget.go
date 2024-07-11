@@ -274,13 +274,13 @@ func (wb *WidgetBase) Init() {
 	})
 
 	// TODO(kai): maybe move all of these event handling functions into one function
-	wb.HandleWidgetClick()
-	wb.HandleWidgetStateFromMouse()
-	wb.HandleLongHoverTooltip()
-	wb.HandleWidgetStateFromFocus()
+	wb.handleWidgetClick()
+	wb.handleWidgetStateFromMouse()
+	wb.handleLongHoverTooltip()
+	wb.handleWidgetStateFromFocus()
 	wb.handleWidgetContextMenu()
-	wb.HandleWidgetMagnify()
-	wb.HandleValueOnChange()
+	wb.handleWidgetMagnify()
+	wb.handleValueOnChange()
 
 	wb.Updater(wb.UpdateFromMake)
 }

@@ -281,7 +281,7 @@ func (tf *TextField) Init() {
 	})
 
 	tf.handleKeyEvents()
-	tf.HandleSelectToggle()
+	tf.handleSelectToggle()
 	tf.OnFirst(events.Change, func(e events.Event) {
 		tf.validate()
 		if tf.error != nil {
@@ -1707,7 +1707,7 @@ func (tf *TextField) handleKeyEvents() {
 			e.SetHandled()
 			tf.cancelComplete()
 			tf.editDone()
-			tf.FocusNext()
+			tf.focusNext()
 		case keymap.Accept: // ctrl+enter
 			e.SetHandled()
 			tf.cancelComplete()
@@ -1716,7 +1716,7 @@ func (tf *TextField) handleKeyEvents() {
 			e.SetHandled()
 			tf.cancelComplete()
 			tf.editDone()
-			tf.FocusPrev()
+			tf.focusPrev()
 		case keymap.Abort: // esc
 			e.SetHandled()
 			tf.cancelComplete()
