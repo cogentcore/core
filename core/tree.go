@@ -84,7 +84,8 @@ func AsTree(n tree.Node) *Tree {
 // providing full navigation and manipulation abilities.
 //
 // It does not handle layout by itself, so if you want it to scroll
-// separately from the rest of the surrounding context, use [NewTreeFrame].
+// separately from the rest of the surrounding context, you must
+// place it in a [Frame].
 //
 // If the [Tree.SyncNode] field is non-nil, typically via the
 // [Tree.SyncTree] method, then the Tree mirrors another
@@ -172,17 +173,6 @@ type Tree struct {
 
 	// Branch is the branch widget that is used to open and close the tree node.
 	Branch *Switch `json:"-" xml:"-" copier:"-" set:"-"`
-}
-
-// NewTreeFrame adds a new [Tree] to a new [Frame] with the given
-// optional parent that ensures that the tree scrolls
-// separately from the surrounding context.
-func NewTreeFrame(parent ...tree.Node) *Tree {
-	fr := NewFrame(parent...)
-	fr.Styler(func(s *styles.Style) {
-		s.Overflow.Set(styles.OverflowAuto)
-	})
-	return NewTree(fr)
 }
 
 // AsCoreTree satisfies the [Treer] interface.

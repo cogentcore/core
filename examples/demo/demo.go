@@ -393,7 +393,7 @@ func collections(ts *core.Tabs) {
 	core.NewTable(vts.NewTab("Tables")).SetSlice(&tbl)
 
 	sp := core.NewSplits(vts.NewTab("Trees")).SetSplits(0.3, 0.7)
-	tr := core.NewTreeFrame(sp).SetText("Root")
+	tr := core.NewTree(core.NewFrame(sp)).SetText("Root")
 	makeTree(tr, 0)
 	tr.RootSetViewIndex()
 

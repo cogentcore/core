@@ -139,7 +139,6 @@ func init() {
 		"NewToolbar":                reflect.ValueOf(core.NewToolbar),
 		"NewTree":                   reflect.ValueOf(core.NewTree),
 		"NewTreeButton":             reflect.ValueOf(core.NewTreeButton),
-		"NewTreeFrame":              reflect.ValueOf(core.NewTreeFrame),
 		"NewTypeChooser":            reflect.ValueOf(core.NewTypeChooser),
 		"NewValue":                  reflect.ValueOf(core.NewValue),
 		"NewWidgetBase":             reflect.ValueOf(core.NewWidgetBase),
