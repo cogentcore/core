@@ -181,6 +181,14 @@ func (dv *DiffEditor) Init() {
 	f("text-b", dv.BufB)
 }
 
+func (dv *DiffEditor) updateToolbar() {
+	tb := dv.Scene.GetTopAppBar()
+	if tb == nil {
+		return
+	}
+	tb.Restyle()
+}
+
 // SetFilenames sets the filenames and updates markup accordingly.
 // Called in DiffStrings
 func (dv *DiffEditor) SetFilenames() {
@@ -301,13 +309,13 @@ func (dv *DiffEditor) SaveFile(ab bool, filename core.Filename) error {
 // SaveFileA saves the current state of file A to given filename
 func (dv *DiffEditor) SaveFileA(fname core.Filename) { //types:add
 	dv.SaveAs(false, fname)
-	// dv.UpdateToolbar()
+	dv.updateToolbar()
 }
 
 // SaveFileB saves the current state of file B to given filename
 func (dv *DiffEditor) SaveFileB(fname core.Filename) { //types:add
 	dv.SaveAs(true, fname)
-	// dv.UpdateToolbar()
+	dv.updateToolbar()
 }
 
 // DiffStrings computes differences between two lines-of-strings and displays in
@@ -499,7 +507,7 @@ func (dv *DiffEditor) ApplyDiff(ab int, line int) bool {
 		dv.BufB.InsertText(spos, src.ToBytes(), true)
 		dv.Diffs.AtoB(di)
 	}
-	// dv.UpdateToolbar()
+	dv.updateToolbar()
 	return true
 }
 
@@ -573,7 +581,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText("Save").SetIcon(icons.Save).SetTooltip("save edited version of file with the given; prompts for filename")
 		w.OnClick(func(e events.Event) {
 			fb := core.NewSoloFuncButton(w).SetFunc(dv.SaveFileA)
-			fb.Args[0].SetValue(dv.FileA)
+			fb.Args[0].SetValue(core.Filename(dv.FileA))
 			fb.CallFunc()
 		})
 		w.Styler(func(s *styles.Style) {
@@ -631,7 +639,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText("Save").SetIcon(icons.Save).SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function")
 		w.OnClick(func(e events.Event) {
 			fb := core.NewSoloFuncButton(w).SetFunc(dv.SaveFileB)
-			fb.Args[0].SetValue(dv.FileB)
+			fb.Args[0].SetValue(core.Filename(dv.FileB))
 			fb.CallFunc()
 		})
 		w.Styler(func(s *styles.Style) {
