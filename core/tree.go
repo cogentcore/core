@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"image"
 	"log/slog"
-	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/fileinfo"
@@ -157,7 +156,8 @@ type Tree struct {
 	root *Tree
 
 	// SelectedNodes holds the currently selected nodes.
-	// It is only set on the root node.
+	// It is only set on the root node. See [Tree.GetSelectedNodes]
+	// for a version that also works on non-root nodes.
 	SelectedNodes []Treer `copier:"-" json:"-" xml:"-" edit:"-" set:"-"`
 
 	// actStateLayer is the actual state layer of the tree, which
@@ -417,7 +417,7 @@ func (tr *Tree) Init() {
 	// the context menu events will get sent to the parts, so it
 	// needs to intercept them and send them up
 	parts.On(events.ContextMenu, func(e events.Event) {
-		sels := tr.SelectedViews()
+		sels := tr.GetSelectedNodes()
 		if len(sels) == 0 {
 			tr.SelectEvent(e.SelectMode())
 		}
@@ -652,22 +652,21 @@ func (tr *Tree) RenderWidget() {
 //////////////////////////////////////////////////////////////////////////////
 //    Selection
 
-// SelectedViews returns a slice of the currently selected
+// GetSelectedNodes returns a slice of the currently selected
 // Trees within the entire tree, using a list maintained
-// by the root node
-func (tr *Tree) SelectedViews() []Treer {
+// by the root node.
+func (tr *Tree) GetSelectedNodes() []Treer {
 	if tr.root == nil {
 		return nil
 	}
 	if len(tr.root.SelectedNodes) == 0 {
 		return tr.root.SelectedNodes
 	}
-	sels := tr.root.SelectedNodes
-	return slices.Clone(sels)
+	return tr.root.SelectedNodes
 }
 
-// SetSelectedViews updates the selected nodes on the root node to the given list.
-func (tr *Tree) SetSelectedViews(sl []Treer) {
+// SetSelectedNodes updates the selected nodes on the root node to the given list.
+func (tr *Tree) SetSelectedNodes(sl []Treer) {
 	if tr.root != nil {
 		tr.root.SelectedNodes = sl
 	}
@@ -675,7 +674,7 @@ func (tr *Tree) SetSelectedViews(sl []Treer) {
 
 // HasSelection returns whether there are currently selected items.
 func (tr *Tree) HasSelection() bool {
-	return len(tr.SelectedViews()) > 0
+	return len(tr.GetSelectedNodes()) > 0
 }
 
 // Select selects this node (if not already selected).
@@ -684,9 +683,9 @@ func (tr *Tree) Select() {
 	if !tr.StateIs(states.Selected) {
 		tr.SetSelected(true)
 		tr.Style()
-		sl := tr.SelectedViews()
+		sl := tr.GetSelectedNodes()
 		sl = append(sl, tr.This.(Treer))
-		tr.SetSelectedViews(sl)
+		tr.SetSelectedNodes(sl)
 		tr.NeedsRender()
 	}
 }
@@ -697,7 +696,7 @@ func (tr *Tree) Unselect() {
 	if tr.StateIs(states.Selected) {
 		tr.SetSelected(false)
 		tr.Style()
-		sl := tr.SelectedViews()
+		sl := tr.GetSelectedNodes()
 		sz := len(sl)
 		for i := 0; i < sz; i++ {
 			if sl[i] == tr {
@@ -705,7 +704,7 @@ func (tr *Tree) Unselect() {
 				break
 			}
 		}
-		tr.SetSelectedViews(sl)
+		tr.SetSelectedNodes(sl)
 		tr.NeedsRender()
 	}
 }
@@ -715,8 +714,8 @@ func (tr *Tree) UnselectAll() {
 	if tr.Scene == nil {
 		return
 	}
-	sl := tr.SelectedViews()
-	tr.SetSelectedViews(nil) // clear in advance
+	sl := tr.GetSelectedNodes()
+	tr.SetSelectedNodes(nil) // clear in advance
 	for _, v := range sl {
 		vt := v.AsCoreTree()
 		if vt == nil || vt.This == nil {
@@ -754,7 +753,7 @@ func (tr *Tree) selectUpdate(mode events.SelectModes) bool {
 	switch mode {
 	case events.SelectOne:
 		if tr.StateIs(states.Selected) {
-			sl := tr.SelectedViews()
+			sl := tr.GetSelectedNodes()
 			if len(sl) > 1 {
 				tr.UnselectAll()
 				tr.Select()
@@ -768,7 +767,7 @@ func (tr *Tree) selectUpdate(mode events.SelectModes) bool {
 			sel = true
 		}
 	case events.ExtendContinuous:
-		sl := tr.SelectedViews()
+		sl := tr.GetSelectedNodes()
 		if len(sl) == 0 {
 			tr.Select()
 			tr.SetFocus()
@@ -1296,7 +1295,7 @@ func (tr *Tree) nodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 
 // Copy copies the tree to the clipboard.
 func (tr *Tree) Copy() { //types:add
-	sels := tr.SelectedViews()
+	sels := tr.GetSelectedNodes()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
 	tr.This.(Treer).MimeData(&md) // source is always first..
@@ -1320,7 +1319,7 @@ func (tr *Tree) Cut() { //types:add
 		return
 	}
 	tr.Copy()
-	sels := tr.SelectedViews()
+	sels := tr.GetSelectedNodes()
 	root := tr.root
 	tr.UnselectAll()
 	for _, sn := range sels {
@@ -1499,7 +1498,7 @@ func (tr *Tree) pasteChildren(md mimedata.Mimes, mod events.DropMods) {
 // DragStart starts a drag-n-drop on this node -- it includes any other
 // selected nodes as well, each as additional records in mimedata.
 func (tr *Tree) DragStart(e events.Event) {
-	sels := tr.SelectedViews()
+	sels := tr.GetSelectedNodes()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
 	tr.This.(Treer).MimeData(&md) // source is always first..

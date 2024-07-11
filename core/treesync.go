@@ -112,7 +112,7 @@ func (tr *Tree) Label() string {
 // sync source nodes in the entire tree
 func (tr *Tree) selectedSyncNodes() []tree.Node {
 	var res []tree.Node
-	sl := tr.SelectedViews()
+	sl := tr.GetSelectedNodes()
 	for _, v := range sl {
 		res = append(res, v.AsCoreTree().SyncNode)
 	}
