@@ -330,7 +330,7 @@ func (tr *Tree) Init() {
 		}
 	})
 
-	parts := tr.NewParts()
+	parts := tr.newParts()
 	tri := tr.This.(Treer)
 	parts.Styler(func(s *styles.Style) {
 		s.Cursor = cursors.Pointer
@@ -1382,7 +1382,7 @@ func (tr *Tree) pasteAssign(md mimedata.Mimes) {
 		return
 	}
 	tr.CopyFrom(sl[0])    // nodes with data copy here
-	tr.SetScene(tr.Scene) // ensure children have scene
+	tr.setScene(tr.Scene) // ensure children have scene
 	tr.Update()           // could have children
 	tr.Open()
 	tr.treeChanged()
@@ -1444,7 +1444,7 @@ func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 		_, nwb := AsWidget(ns)
 		ntv := AsTree(ns)
 		ntv.root = tr.root
-		nwb.SetScene(tr.Scene)
+		nwb.setScene(tr.Scene)
 		nwb.Update() // incl children
 		npath := ns.AsTree().PathFrom(tr.root)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
@@ -1475,7 +1475,7 @@ func (tr *Tree) pasteChildren(md mimedata.Mimes, mod events.DropMods) {
 		_, nwb := AsWidget(ns)
 		ntv := AsTree(ns)
 		ntv.root = tr.root
-		nwb.SetScene(tr.Scene)
+		nwb.setScene(tr.Scene)
 	}
 	tr.Update()
 	tr.Open()

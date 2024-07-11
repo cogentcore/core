@@ -89,7 +89,7 @@ func (sl *Splits) Init() {
 	sl.Updater(func() {
 		sl.updateSplits()
 	})
-	parts := sl.NewParts()
+	parts := sl.newParts()
 	parts.Maker(func(p *tree.Plan) {
 		for i := range len(sl.Children) - 1 { // one fewer handle than children
 			tree.AddAt(p, "handle-"+strconv.Itoa(i), func(w *Handle) {

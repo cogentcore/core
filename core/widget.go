@@ -23,7 +23,7 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Widget is the interface that all Cogent Core satisfy.
+// Widget is the interface that all Cogent Core widgets satisfy.
 // The core widget functionality is defined on [WidgetBase],
 // and all higher-level widget types must embed it. This
 // interface only contains the methods that higher-level
@@ -158,23 +158,22 @@ type WidgetBase struct {
 
 	// Parts are a separate tree of sub-widgets that can be used to store
 	// orthogonal parts of a widget when necessary to separate them from children.
-	// For example, trees use parts to separate their internal parts from
+	// For example, [Tree]s use parts to separate their internal parts from
 	// the other child tree nodes. Composite widgets like buttons should
 	// NOT use parts to store their components; parts should only be used when
-	// absolutely necessary. Use [WidgetBase.NewParts] to make the parts.
+	// absolutely necessary. Use [WidgetBase.newParts] to make the parts.
 	Parts *Frame `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// Geom has the full layout geometry for size and position of this Widget
+	// Geom has the full layout geometry for size and position of this widget.
 	Geom geomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
-	// If true, override the computed styles and allow directly editing Styles.
+	// OverrideStyle, if true, indicates override the computed styles of the widget
+	// and allow directly editing [WidgetBase.Styles]. It is typically only set in
+	// the inspector.
 	OverrideStyle bool `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// Styles are styling settings for this widget.
-	// These are set in SetApplyStyle which should be called after any Config
-	// change (e.g., as done by the Update method).  See Stylers for functions
-	// that set all of the styles, ordered from initial base defaults to later
-	// added overrides.
+	// Styles are styling settings for this widget. They are set by
+	// [WidgetBase.Stylers] in [WidgetBase.Style].
 	Styles styles.Style `json:"-" xml:"-" set:"-"`
 
 	// Stylers is a tiered set of functions that are called in sequential
@@ -209,25 +208,25 @@ type WidgetBase struct {
 	// by widgets whenever they are added to another widget parent.
 	Scene *Scene `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// ValueUpdate is a function set by [Bind] that is called in
+	// valueUpdate is a function set by [Bind] that is called in
 	// [WidgetBase.UpdateWidget] to update the widget's value from the bound value.
-	ValueUpdate func() `copier:"-" json:"-" xml:"-" set:"-"`
+	valueUpdate func()
 
-	// ValueOnChange is a function set by [Bind] that is called when
+	// valueOnChange is a function set by [Bind] that is called when
 	// the widget receives an [events.Change] event to update the bound value
 	// from the widget's value.
-	ValueOnChange func() `copier:"-" json:"-" xml:"-" set:"-"`
+	valueOnChange func()
 
 	// ValueTitle is the title to display for a dialog for this [Value].
 	ValueTitle string
 
-	// ValueNewWindow indicates that the dialog of a [Value] should be opened
+	// valueNewWindow indicates that the dialog of a [Value] should be opened
 	// as a new window, instead of a typical full window in the same current window.
-	// This is set by [InitValueButton] and handled by [OpenValueDialog].
+	// This is set by [InitValueButton] and handled by [openValueDialog].
 	// This is triggered by holding down the Shift key while clicking on a
 	// [Value] button. Certain values such as [FileButton] may set this to true
 	// in their [InitValueButton] function.
-	ValueNewWindow bool `copier:"-" json:"-" xml:"-"`
+	valueNewWindow bool
 
 	// needsRender is whether the widget needs to be rendered on the next render iteration.
 	needsRender bool
@@ -237,7 +236,7 @@ type WidgetBase struct {
 	firstRender bool
 }
 
-// Init should be called by every Widget type in its custom
+// Init should be called by every [Widget] type in its custom
 // Init if it has one to establish all the default styling
 // and event handling that applies to all widgets.
 func (wb *WidgetBase) Init() {
@@ -291,7 +290,7 @@ func (wb *WidgetBase) Init() {
 // It should be called by all other OnAdd functions defined
 // by widget types.
 func (wb *WidgetBase) OnAdd() {
-	if pwb := wb.ParentWidget(); pwb != nil {
+	if pwb := wb.parentWidget(); pwb != nil {
 		wb.Scene = pwb.Scene
 	}
 	if wb.Parts != nil {
@@ -300,10 +299,10 @@ func (wb *WidgetBase) OnAdd() {
 	}
 }
 
-// SetScene sets the Scene pointer for this widget and all of its children.
-// This can be necessary when creating widgets outside the usual "NewWidget" paradigm,
+// setScene sets the Scene pointer for this widget and all of its children.
+// This can be necessary when creating widgets outside the usual New* paradigm,
 // e.g., when reading from a JSON file.
-func (wb *WidgetBase) SetScene(sc *Scene) {
+func (wb *WidgetBase) setScene(sc *Scene) {
 	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
 		kwb.Scene = sc
 		return tree.Continue
@@ -358,21 +357,21 @@ func (wb *WidgetBase) CopyFieldsFrom(from tree.Node) {
 }
 
 func (wb *WidgetBase) Destroy() {
-	wb.DeleteParts()
+	wb.deleteParts()
 	wb.NodeBase.Destroy()
 }
 
-// DeleteParts deletes the widget's parts (and the children of the parts).
-func (wb *WidgetBase) DeleteParts() {
+// deleteParts deletes the widget's parts (and the children of the parts).
+func (wb *WidgetBase) deleteParts() {
 	if wb.Parts != nil {
 		wb.Parts.Destroy()
 	}
 	wb.Parts = nil
 }
 
-// NewParts makes the [WidgetBase.Parts] if they don't already exist.
+// newParts makes the [WidgetBase.Parts] if they don't already exist.
 // It returns the parts regardless.
-func (wb *WidgetBase) NewParts() *Frame {
+func (wb *WidgetBase) newParts() *Frame {
 	if wb.Parts != nil {
 		return wb.Parts
 	}
@@ -386,42 +385,20 @@ func (wb *WidgetBase) NewParts() *Frame {
 	return wb.Parts
 }
 
-// ParentWidget returns the parent as a [WidgetBase] or nil
+// parentWidget returns the parent as a [WidgetBase] or nil
 // if this is the root and has no parent.
-func (wb *WidgetBase) ParentWidget() *WidgetBase {
+func (wb *WidgetBase) parentWidget() *WidgetBase {
 	if wb.Parent == nil {
 		return nil
 	}
 	return wb.Parent.(Widget).AsWidget()
 }
 
-// ParentWidgetIf returns the nearest widget parent
-// of the widget for which the given function returns true.
-// It returns nil if no such parent is found.
-func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) *WidgetBase {
-	cur := wb
-	for {
-		parent := cur.Parent
-		if parent == nil {
-			return nil
-		}
-		pwi, ok := parent.(Widget)
-		if !ok {
-			return nil
-		}
-		pwb := pwi.AsWidget()
-		if fun(pwb) {
-			return pwb
-		}
-		cur = pwb
-	}
-}
-
-// IsVisible returns true if a node is visible for rendering according
+// IsVisible returns true if a widget is visible for rendering according
 // to the [states.Invisible] flag on it or any of its parents.
-// This flag is also set by [styles.DisplayNone] during [ApplyStyle].
+// This flag is also set by [styles.DisplayNone] during [WidgetBase.Style].
 // This does *not* check for an empty TotalBBox, indicating that the widget
-// is out of render range -- that is done by [PushBounds] prior to rendering.
+// is out of render range; that is done by [WidgetBase.PushBounds] prior to rendering.
 // Non-visible nodes are automatically not rendered and do not get
 // window events.
 // This call recursively calls the parent, which is typically a short path.

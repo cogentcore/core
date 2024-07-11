@@ -84,7 +84,7 @@ func (st *Stage) addDialogParts() *Stage {
 		return st
 	}
 	sc := st.Scene
-	parts := sc.NewParts()
+	parts := sc.newParts()
 	parts.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(0, 1)

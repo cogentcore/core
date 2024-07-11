@@ -727,7 +727,7 @@ func (fb *FileButton) Init() {
 	InitValueButton(fb, false, func(d *Body) {
 		// ext, _ := v.Tag("ext") // TODO(config) (also rename to extension)
 		fp = NewFilePicker(d).SetFilename(fb.Filename)
-		fb.ValueNewWindow = true
+		fb.valueNewWindow = true
 		d.AddAppBar(fp.MakeToolbar)
 	}, func() {
 		fb.Filename = fp.SelectedFile()

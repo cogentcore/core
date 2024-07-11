@@ -1693,7 +1693,7 @@ func (wb *WidgetBase) setContentPosFromPos() {
 }
 
 func (wb *WidgetBase) setPosFromParent() {
-	pwb := wb.ParentWidget()
+	pwb := wb.parentWidget()
 	var parPos math32.Vector2
 	if pwb != nil {
 		parPos = pwb.Geom.Pos.Content.Add(pwb.Geom.Scroll) // critical that parent adds here but not to self
@@ -1714,7 +1714,7 @@ func (wb *WidgetBase) setBBoxesFromAllocs() {
 }
 
 func (wb *WidgetBase) setBBoxes() {
-	pwb := wb.ParentWidget()
+	pwb := wb.parentWidget()
 	var parBB image.Rectangle
 	if pwb == nil { // scene
 		sz := &wb.Geom.Size

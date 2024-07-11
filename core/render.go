@@ -346,7 +346,7 @@ func (wb *WidgetBase) PushBounds() bool {
 	if false && len(pc.BoundsStack) == 0 && wb.Parent != nil { // TODO: fix firstRender for [Tree]
 		wb.firstRender = true
 		// push our parent's bounds if we are the first to render
-		pw := wb.ParentWidget()
+		pw := wb.parentWidget()
 		pc.PushBoundsGeom(pw.Geom.TotalBBox, pw.Styles.Border.Radius.Dots())
 	} else {
 		wb.firstRender = false

@@ -1264,7 +1264,7 @@ func (t *WidgetBase) SetValueTitle(v string) *WidgetBase { t.ValueTitle = v; ret
 // This is triggered by holding down the Shift key while clicking on a
 // [Value] button. Certain values such as [FileButton] may set this to true
 // in their [InitValueButton] function.
-func (t *WidgetBase) SetValueNewWindow(v bool) *WidgetBase { t.ValueNewWindow = v; return t }
+func (t *WidgetBase) SetValueNewWindow(v bool) *WidgetBase { t.valueNewWindow = v; return t }
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.ProfileToggle", Doc: "ProfileToggle turns profiling on or off, which does both\ntargeted profiling and global CPU and memory profiling.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}})
 

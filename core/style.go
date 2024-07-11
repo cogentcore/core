@@ -48,7 +48,7 @@ func (wb *WidgetBase) Style() {
 		return
 	}
 
-	pw := wb.ParentWidget()
+	pw := wb.parentWidget()
 
 	// we do these things even if we are overriding the style
 	defer func() {
@@ -196,7 +196,7 @@ func (wb *WidgetBase) ChildBackground(child Widget) image.Image {
 // parentActualBackground returns the actual background of
 // the parent of the widget. If it has no parent, it returns nil.
 func (wb *WidgetBase) parentActualBackground() image.Image {
-	pwb := wb.ParentWidget()
+	pwb := wb.parentWidget()
 	if pwb == nil {
 		return nil
 	}
