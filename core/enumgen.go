@@ -389,16 +389,16 @@ func (i *SwitchTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "SwitchTypes")
 }
 
-var _TabTypesValues = []TabTypes{0, 1, 2, 3, 4, 5}
+var _TabTypesValues = []TabTypes{0, 1, 2, 3, 4}
 
 // TabTypesN is the highest valid value for type TabTypes, plus one.
-const TabTypesN TabTypes = 6
+const TabTypesN TabTypes = 5
 
-var _TabTypesValueMap = map[string]TabTypes{`StandardTabs`: 0, `FunctionalTabs`: 1, `NavigationAuto`: 2, `NavigationBar`: 3, `NavigationRail`: 4, `NavigationDrawer`: 5}
+var _TabTypesValueMap = map[string]TabTypes{`StandardTabs`: 0, `FunctionalTabs`: 1, `NavigationAuto`: 2, `NavigationBar`: 3, `NavigationDrawer`: 4}
 
-var _TabTypesDescMap = map[TabTypes]string{0: `StandardTabs indicates to render the standard type of Material Design style tabs.`, 1: `FunctionalTabs indicates to render functional tabs like those in Google Chrome. These tabs take up less space and are the only kind that can be closed. They can also be moved.`, 2: `NavigationAuto indicates to render the tabs as either [NavigationBar], [NavigationRail], or [NavigationDrawer], if [WidgetBase.SizeClass] is [SizeCompact], [SizeMedium], or [SizeExpanded], respectively. NavigationAuto should typically be used instead of one of the specific navigation types for better cross-platform compatability.`, 3: `NavigationBar indicates to render the tabs as a bottom navigation bar with text and icons.`, 4: `NavigationRail indicates to render the tabs as a side navigation rail, which only has icons.`, 5: `NavigationDrawer indicates to render the tabs as a side navigation drawer, which has full text and icons.`}
+var _TabTypesDescMap = map[TabTypes]string{0: `StandardTabs indicates to render the standard type of Material Design style tabs.`, 1: `FunctionalTabs indicates to render functional tabs like those in Google Chrome. These tabs take up less space and are the only kind that can be closed. They will also support being moved at some point.`, 2: `NavigationAuto indicates to render the tabs as either [NavigationBar] or [NavigationDrawer] if [WidgetBase.SizeClass] is [SizeCompact] or not, respectively. NavigationAuto should typically be used instead of one of the specific navigation types for better cross-platform compatability.`, 3: `NavigationBar indicates to render the tabs as a bottom navigation bar with text and icons.`, 4: `NavigationDrawer indicates to render the tabs as a side navigation drawer with text and icons.`}
 
-var _TabTypesMap = map[TabTypes]string{0: `StandardTabs`, 1: `FunctionalTabs`, 2: `NavigationAuto`, 3: `NavigationBar`, 4: `NavigationRail`, 5: `NavigationDrawer`}
+var _TabTypesMap = map[TabTypes]string{0: `StandardTabs`, 1: `FunctionalTabs`, 2: `NavigationAuto`, 3: `NavigationBar`, 4: `NavigationDrawer`}
 
 // String returns the string representation of this TabTypes value.
 func (i TabTypes) String() string { return enums.String(i, _TabTypesMap) }
@@ -480,7 +480,7 @@ const TextFieldTypesN TextFieldTypes = 2
 
 var _TextFieldTypesValueMap = map[string]TextFieldTypes{`Filled`: 0, `Outlined`: 1}
 
-var _TextFieldTypesDescMap = map[TextFieldTypes]string{0: `TextFieldFilled represents a filled TextField with a background color and a bottom border`, 1: `TextFieldOutlined represents an outlined TextField with a border on all sides and no background color`}
+var _TextFieldTypesDescMap = map[TextFieldTypes]string{0: `TextFieldFilled represents a filled [TextField] with a background color and a bottom border.`, 1: `TextFieldOutlined represents an outlined [TextField] with a border on all sides and no background color.`}
 
 var _TextFieldTypesMap = map[TextFieldTypes]string{0: `Filled`, 1: `Outlined`}
 

@@ -85,7 +85,6 @@ func init() {
 		"NavigationAuto":            reflect.ValueOf(core.NavigationAuto),
 		"NavigationBar":             reflect.ValueOf(core.NavigationBar),
 		"NavigationDrawer":          reflect.ValueOf(core.NavigationDrawer),
-		"NavigationRail":            reflect.ValueOf(core.NavigationRail),
 		"NewBody":                   reflect.ValueOf(core.NewBody),
 		"NewButton":                 reflect.ValueOf(core.NewButton),
 		"NewCanvas":                 reflect.ValueOf(core.NewCanvas),

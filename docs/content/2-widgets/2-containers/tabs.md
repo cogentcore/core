@@ -47,7 +47,7 @@ ts.NewTab("Second")
 ts.NewTab("Third")
 ```
 
-You can make navigation tabs, which dynamically serve as a bottom navigation bar, side navigation rail, or side navigation drawer depending on the size of the screen:
+You can make navigation tabs, which dynamically serve as a bottom navigation bar or side navigation drawer depending on the size of the screen:
 
 ```Go
 ts := core.NewTabs(parent).SetType(core.NavigationAuto)

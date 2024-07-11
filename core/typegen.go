@@ -215,7 +215,7 @@ func (t *Complete) SetSeed(v string) *Complete { t.Seed = v; return t }
 // the user's completion selection
 func (t *Complete) SetCompletion(v string) *Complete { t.Completion = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FilePicker", IDName: "file-picker", Doc: "FilePicker is a widget for selecting files.", Methods: []types.Method{{Name: "updateFilesAction", Doc: "updateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "addPathToFavorites", Doc: "addPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "directoryUp", Doc: "directoryUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "newFolder", Doc: "newFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Filterer", Doc: "Filterer is an optional filtering function for which files to display."}, {Name: "directory", Doc: "directory is the absolute path to the directory of files to display."}, {Name: "selectedFilename", Doc: "selectedFilename is the name of the currently selected file,\nnot including the directory. See [FilePicker.SelectedFile]\nfor the full path."}, {Name: "extensions", Doc: "extensions is a list of the target file extensions.\nIf there are multiple, they must be comma separated.\nThe extensions must include the dot (\".\") at the start.\nThey must be set using [FilePicker.SetExtensions]."}, {Name: "extensionMap", Doc: "extensionMap is a map of lower-cased extensions from Extensions.\nIt used for highlighting files with one of these extensions;\nmaps onto original Extensions value."}, {Name: "files", Doc: "files for current directory"}, {Name: "selectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "watcher", Doc: "change notify for current dir"}, {Name: "doneWatcher", Doc: "channel to close watcher watcher"}, {Name: "prevPath", Doc: "Previous path that was processed via UpdateFiles"}, {Name: "favoritesTable"}, {Name: "filesTable"}, {Name: "selectField"}, {Name: "extensionField"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FilePicker", IDName: "file-picker", Doc: "FilePicker is a widget for selecting files.", Methods: []types.Method{{Name: "updateFilesEvent", Doc: "updateFilesEvent updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "addPathToFavorites", Doc: "addPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "directoryUp", Doc: "directoryUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "newFolder", Doc: "newFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Filterer", Doc: "Filterer is an optional filtering function for which files to display."}, {Name: "directory", Doc: "directory is the absolute path to the directory of files to display."}, {Name: "selectedFilename", Doc: "selectedFilename is the name of the currently selected file,\nnot including the directory. See [FilePicker.SelectedFile]\nfor the full path."}, {Name: "extensions", Doc: "extensions is a list of the target file extensions.\nIf there are multiple, they must be comma separated.\nThe extensions must include the dot (\".\") at the start.\nThey must be set using [FilePicker.SetExtensions]."}, {Name: "extensionMap", Doc: "extensionMap is a map of lower-cased extensions from Extensions.\nIt used for highlighting files with one of these extensions;\nmaps onto original Extensions value."}, {Name: "files", Doc: "files for current directory"}, {Name: "selectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "watcher", Doc: "change notify for current dir"}, {Name: "doneWatcher", Doc: "channel to close watcher watcher"}, {Name: "prevPath", Doc: "Previous path that was processed via UpdateFiles"}, {Name: "favoritesTable"}, {Name: "filesTable"}, {Name: "selectField"}, {Name: "extensionField"}}})
 
 // NewFilePicker returns a new [FilePicker] with the given optional parent:
 // FilePicker is a widget for selecting files.
@@ -814,7 +814,7 @@ func (t *Stage) SetTimeout(v time.Duration) *Stage { t.Timeout = v; return t }
 // the surrounding window.
 func (t *Stage) SetPos(v image.Point) *Stage { t.Pos = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.SVG", IDName: "svg", Doc: "SVG is a Widget that renders an [svg.SVG] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the display.\nBy default, it is [states.ReadOnly].", Methods: []types.Method{{Name: "Open", Doc: "Open opens an XML-formatted SVG file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SaveSVG", Doc: "SaveSVG saves the current SVG to an XML-encoded standard SVG file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SavePNG", Doc: "SavePNG saves the current rendered SVG image to an PNG image file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SVG", Doc: "SVG is the SVG drawing to display in this widget"}, {Name: "prevSize", Doc: "prevSize is the cached allocated size for the last rendered image."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.SVG", IDName: "svg", Doc: "SVG is a Widget that renders an [svg.SVG] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the display.\nBy default, it is [states.ReadOnly].", Methods: []types.Method{{Name: "Open", Doc: "Open opens an XML-formatted SVG file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SaveSVG", Doc: "SaveSVG saves the current SVG to an XML-encoded standard SVG file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SavePNG", Doc: "SavePNG saves the current rendered SVG image to an PNG image file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SVG", Doc: "SVG is the SVG drawing to display."}, {Name: "prevSize", Doc: "prevSize is the cached allocated size for the last rendered image."}}})
 
 // NewSVG returns a new [SVG] with the given optional parent:
 // SVG is a Widget that renders an [svg.SVG] object.
@@ -822,15 +822,16 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.SVG", IDName: 
 // By default, it is [states.ReadOnly].
 func NewSVG(parent ...tree.Node) *SVG { return tree.New[SVG](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switch", IDName: "switch", Doc: "Switch is a widget that can toggle between an on and off state.\nIt can be displayed as a switch, checkbox, or radio button.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of switch."}, {Name: "Text", Doc: "Text is the text for the switch."}, {Name: "IconOn", Doc: "IconOn is the icon to use for the on, checked state of the switch."}, {Name: "IconOff", Doc: "Iconoff is the icon to use for the off, unchecked state of the switch."}, {Name: "IconIndeterminate", Doc: "IconIndeterminate is the icon to use for the indeterminate (unknown) state."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switch", IDName: "switch", Doc: "Switch is a widget that can toggle between an on and off state.\nIt can be displayed as a switch, chip, checkbox, radio button,\nor segmented button.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of switch."}, {Name: "Text", Doc: "Text is the optional text of the switch."}, {Name: "IconOn", Doc: "IconOn is the icon to use for the on, checked state of the switch."}, {Name: "IconOff", Doc: "Iconoff is the icon to use for the off, unchecked state of the switch."}, {Name: "IconIndeterminate", Doc: "IconIndeterminate is the icon to use for the indeterminate (unknown) state."}}})
 
 // NewSwitch returns a new [Switch] with the given optional parent:
 // Switch is a widget that can toggle between an on and off state.
-// It can be displayed as a switch, checkbox, or radio button.
+// It can be displayed as a switch, chip, checkbox, radio button,
+// or segmented button.
 func NewSwitch(parent ...tree.Node) *Switch { return tree.New[Switch](parent...) }
 
 // SetText sets the [Switch.Text]:
-// Text is the text for the switch.
+// Text is the optional text of the switch.
 func (t *Switch) SetText(v string) *Switch { t.Text = v; return t }
 
 // SetIconOn sets the [Switch.IconOn]:
@@ -845,7 +846,7 @@ func (t *Switch) SetIconOff(v icons.Icon) *Switch { t.IconOff = v; return t }
 // IconIndeterminate is the icon to use for the indeterminate (unknown) state.
 func (t *Switch) SetIconIndeterminate(v icons.Icon) *Switch { t.IconIndeterminate = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switches", IDName: "switches", Doc: "Switches is a widget for containing a set of [Switch]es.\nIt can optionally enforce mutual exclusivity (ie: radio buttons)\nthrough the [Switches.Mutex] field. It supports binding to\n[enums.Enum] and [enums.BitFlag] values with appropriate properties\nautomatically set.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of switches that will be made."}, {Name: "Items", Doc: "Items are the items displayed to the user."}, {Name: "Mutex", Doc: "Mutex is whether to make the items mutually exclusive\n(checking one turns off all the others)."}, {Name: "AllowNone", Doc: "AllowNone is whether to allow the user to deselect all items.\nIt is on by default."}, {Name: "SelectedIndexes", Doc: "SelectedIndexes are the indexes in [Switches.Items] of the currently\nselected switch items."}, {Name: "bitFlagValue", Doc: "bitFlagValue is the associated bit flag value if non-nil (for [Value])."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switches", IDName: "switches", Doc: "Switches is a widget for containing a set of [Switch]es.\nIt can optionally enforce mutual exclusivity (ie: radio buttons)\nthrough the [Switches.Mutex] field. It supports binding to\n[enums.Enum] and [enums.BitFlag] values with appropriate properties\nautomatically set.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of switches that will be made."}, {Name: "Items", Doc: "Items are the items displayed to the user."}, {Name: "Mutex", Doc: "Mutex is whether to make the items mutually exclusive\n(checking one turns off all the others)."}, {Name: "AllowNone", Doc: "AllowNone is whether to allow the user to deselect all items.\nIt is on by default."}, {Name: "selectedIndexes", Doc: "selectedIndexes are the indexes in [Switches.Items] of the currently\nselected switch items."}, {Name: "bitFlagValue", Doc: "bitFlagValue is the associated bit flag value if non-nil (for [Value])."}}})
 
 // NewSwitches returns a new [Switches] with the given optional parent:
 // Switches is a widget for containing a set of [Switch]es.
@@ -873,7 +874,7 @@ func (t *Switches) SetMutex(v bool) *Switches { t.Mutex = v; return t }
 // It is on by default.
 func (t *Switches) SetAllowNone(v bool) *Switches { t.AllowNone = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Table", IDName: "table", Doc: "Table represents a slice of structs as a table, where the fields are\nthe columns and the elements are the rows. It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nUse [ListBase.BindSelect] to make the table designed for item selection.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "TableStyler", Doc: "TableStyler is an optional styling function for table items."}, {Name: "SelectedField", Doc: "SelectedField is the current selection field; initially select value in this field."}, {Name: "SortIndex", Doc: "SortIndex is the current sort index."}, {Name: "SortDescending", Doc: "SortDescending is whether the current sort order is descending."}, {Name: "visibleFields", Doc: "visibleFields are the visible fields."}, {Name: "numVisibleFields", Doc: "numVisibleFields is the number of visible fields."}, {Name: "headerWidths", Doc: "headerWidths has the number of characters in each header, per visibleFields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Table", IDName: "table", Doc: "Table represents a slice of structs as a table, where the fields are\nthe columns and the elements are the rows. It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nUse [ListBase.BindSelect] to make the table designed for item selection.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "TableStyler", Doc: "TableStyler is an optional styling function for table items."}, {Name: "SelectedField", Doc: "SelectedField is the current selection field; initially select value in this field."}, {Name: "sortIndex", Doc: "sortIndex is the current sort index."}, {Name: "sortDescending", Doc: "sortDescending is whether the current sort order is descending."}, {Name: "visibleFields", Doc: "visibleFields are the visible fields."}, {Name: "numVisibleFields", Doc: "numVisibleFields is the number of visible fields."}, {Name: "headerWidths", Doc: "headerWidths has the number of characters in each header, per visibleFields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}, {Name: "header"}}})
 
 // NewTable returns a new [Table] with the given optional parent:
 // Table represents a slice of structs as a table, where the fields are
@@ -890,15 +891,7 @@ func (t *Table) SetTableStyler(v TableStyler) *Table { t.TableStyler = v; return
 // SelectedField is the current selection field; initially select value in this field.
 func (t *Table) SetSelectedField(v string) *Table { t.SelectedField = v; return t }
 
-// SetSortIndex sets the [Table.SortIndex]:
-// SortIndex is the current sort index.
-func (t *Table) SetSortIndex(v int) *Table { t.sortIndex = v; return t }
-
-// SetSortDescending sets the [Table.SortDescending]:
-// SortDescending is whether the current sort order is descending.
-func (t *Table) SetSortDescending(v bool) *Table { t.sortDescending = v; return t }
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", IDName: "tabs", Doc: "Tabs divide widgets into logical groups and give users the ability\nto freely navigate between them using tab buttons.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab text.\nIt elides text that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", IDName: "tabs", Doc: "Tabs divide widgets into logical groups and give users the ability\nto freely navigate between them using tab buttons.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab text.\nIt elides text that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "mu", Doc: "mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}, {Name: "tabs"}, {Name: "frame"}}})
 
 // NewTabs returns a new [Tabs] with the given optional parent:
 // Tabs divide widgets into logical groups and give users the ability
@@ -928,7 +921,7 @@ func (t *Tabs) SetMaxChars(v int) *Tabs { t.MaxChars = v; return t }
 // tabs will not render a close button and can not be closed.
 func (t *Tabs) SetCloseIcon(v icons.Icon) *Tabs { t.CloseIcon = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tab", IDName: "tab", Doc: "Tab is a tab button that contains any, all, or none of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly."}, {Name: "Text", Doc: "Text is the text for the tab.\nIf it is nil, no text is shown.\nText is never shown for [NavigationRail] tabs."}, {Name: "Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in tab text.\nIt elides text that is longer than that."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tab", IDName: "tab", Doc: "Tab is a tab button that contains one or more of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly."}, {Name: "Text", Doc: "Text is the text for the tab. If it is blank, no text is shown.\nText is never shown for [NavigationRail] tabs."}, {Name: "Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in tab text.\nIt elides text that is longer than that."}}})
 
 // SetType sets the [Tab.Type]:
 // Type is the styling type of the tab. This property
@@ -936,8 +929,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tab", IDName: 
 func (t *Tab) SetType(v TabTypes) *Tab { t.Type = v; return t }
 
 // SetText sets the [Tab.Text]:
-// Text is the text for the tab.
-// If it is nil, no text is shown.
+// Text is the text for the tab. If it is blank, no text is shown.
 // Text is never shown for [NavigationRail] tabs.
 func (t *Tab) SetText(v string) *Tab { t.Text = v; return t }
 
@@ -959,7 +951,7 @@ func (t *Tab) SetCloseIcon(v icons.Icon) *Tab { t.CloseIcon = v; return t }
 // It elides text that is longer than that.
 func (t *Tab) SetMaxChars(v int) *Tab { t.MaxChars = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Text", IDName: "text", Doc: "Text is a widget for rendering text. It supports full HTML styling,\nincluding links. By default, text wraps and collapses whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "Text is the text to display."}, {Name: "Type", Doc: "Type is the styling type of text to use."}, {Name: "paintText", Doc: "paintText is the [paint.Text] for the text."}, {Name: "normalCursor", Doc: "normalCursor is the cached cursor to display when there\nis no link being hovered."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Text", IDName: "text", Doc: "Text is a widget for rendering text. It supports full HTML styling,\nincluding links. By default, text wraps and collapses whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "Text is the text to display."}, {Name: "Type", Doc: "Type is the styling type of text to use.\nIt defaults to [TextBodyLarge]."}, {Name: "paintText", Doc: "paintText is the [paint.Text] for the text."}, {Name: "normalCursor", Doc: "normalCursor is the cached cursor to display when there\nis no link being hovered."}}})
 
 // NewText returns a new [Text] with the given optional parent:
 // Text is a widget for rendering text. It supports full HTML styling,
@@ -973,18 +965,19 @@ func (t *Text) SetText(v string) *Text { t.Text = v; return t }
 
 // SetType sets the [Text.Type]:
 // Type is the styling type of text to use.
+// It defaults to [TextBodyLarge].
 func (t *Text) SetType(v TextTypes) *Text { t.Type = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text.\nWith the default WhiteSpaceNormal style setting,\ntext will wrap onto multiple lines as needed.\nSet to WhiteSpaceNowrap (e.g., styles.Style.SetTextWrap(false)) to\nforce everything to be on a single line.\nWith multi-line wrapped text, the text is still treated as a single\ncontiguous line of wrapped text.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "Cut", Doc: "Cut cuts any selected text and adds it to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies any selected text to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Paste", Doc: "Paste inserts text from the clipboard at current cursor position; if\ncursor is within a current selection, that selection is replaced.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the text field."}, {Name: "Placeholder", Doc: "Placeholder is the text that is displayed\nwhen the text field is empty."}, {Name: "Validator", Doc: "Validator is a function used to validate the input\nof the text field. If it returns a non-nil error,\nthen an error color, icon, and tooltip will be displayed."}, {Name: "LeadingIcon", Doc: "LeadingIcon, if specified, indicates to add a button\nat the start of the text field with this icon."}, {Name: "LeadingIconOnClick", Doc: "LeadingIconOnClick, if specified, is the function to call when\nthe LeadingIcon is clicked. If this is nil, the leading icon\nwill not be interactive."}, {Name: "TrailingIcon", Doc: "TrailingIcon, if specified, indicates to add a button\nat the end of the text field with this icon."}, {Name: "TrailingIconOnClick", Doc: "TrailingIconOnClick, if specified, is the function to call when\nthe TrailingIcon is clicked. If this is nil, the trailing icon\nwill not be interactive."}, {Name: "NoEcho", Doc: "NoEcho is whether replace displayed characters with bullets to conceal text\n(for example, for a password input)."}, {Name: "CursorWidth", Doc: "CursorWidth is the width of the text field cursor.\nIt should be set in Style like all other style properties.\nBy default, it is 1dp."}, {Name: "CursorColor", Doc: "CursorColor is the color used for the text field cursor (caret).\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Primary.Base]."}, {Name: "PlaceholderColor", Doc: "PlaceholderColor is the color used for the Placeholder text.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.OnSurfaceVariant]."}, {Name: "SelectColor", Doc: "SelectColor is the color used for the text selection background color.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Select.Container]"}, {Name: "Complete", Doc: "Complete contains functions and data for text field completion.\nIt must be set using [TextField.SetCompleter]."}, {Name: "Txt", Doc: "Txt is the last saved value of the text string being edited."}, {Name: "Edited", Doc: "Edited is whether the text has been edited relative to the original."}, {Name: "EditTxt", Doc: "EditTxt is the live text string being edited, with the latest modifications."}, {Name: "Error", Doc: "Error is the current validation error of the text field."}, {Name: "EffPos", Doc: "EffPos is the effective position with any leading icon space added."}, {Name: "EffSize", Doc: "EffSize is the effective size, subtracting any leading and trailing icon space."}, {Name: "StartPos", Doc: "StartPos is the starting display position in the string."}, {Name: "EndPos", Doc: "EndPos is the ending display position in the string."}, {Name: "CursorPos", Doc: "CursorPos is the current cursor position."}, {Name: "CursorLine", Doc: "CursorLine is the current cursor line position."}, {Name: "CharWidth", Doc: "CharWidth is the approximate number of chars that can be\ndisplayed at any time, which is computed from the font size."}, {Name: "SelectStart", Doc: "SelectStart is the starting position of selection in the string."}, {Name: "SelectEnd", Doc: "SelectEnd is the ending position of selection in the string."}, {Name: "SelectInit", Doc: "SelectInit is the initial selection position (where it started)."}, {Name: "SelectMode", Doc: "SelectMode is whether to select text as the cursor moves."}, {Name: "RenderAll", Doc: "RenderAll is the render version of entire text, for sizing."}, {Name: "RenderVis", Doc: "RenderVis is the render version of just the visible text."}, {Name: "NLines", Doc: "number of lines from last render update, for word-wrap version"}, {Name: "FontHeight", Doc: "FontHeight is the font height cached during styling."}, {Name: "BlinkOn", Doc: "BlinkOn oscillates between on and off for blinking."}, {Name: "CursorMu", Doc: "CursorMu is the mutex for updating the cursor between blinker and field."}, {Name: "Undos", Doc: "Undos is the undo manager for the text field."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text.\n\nWith the default [styles.WhiteSpaceNormal] setting,\ntext will wrap onto multiple lines as needed. You can\ncall [styles.Style.SetTextWrap](false) to force everything\nto be rendered on a single line. With multi-line wrapped text,\nthe text is still treated as a single contiguous line of wrapped text.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "cut", Doc: "cut cuts any selected text and adds it to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "copy", Doc: "copy copies any selected text to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "paste", Doc: "paste inserts text from the clipboard at current cursor position; if\ncursor is within a current selection, that selection is replaced.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the text field."}, {Name: "Placeholder", Doc: "Placeholder is the text that is displayed\nwhen the text field is empty."}, {Name: "Validator", Doc: "Validator is a function used to validate the input\nof the text field. If it returns a non-nil error,\nthen an error color, icon, and tooltip will be displayed."}, {Name: "LeadingIcon", Doc: "LeadingIcon, if specified, indicates to add a button\nat the start of the text field with this icon.\nSee [TextField.SetLeadingIcon]."}, {Name: "LeadingIconOnClick", Doc: "LeadingIconOnClick, if specified, is the function to call when\nthe LeadingIcon is clicked. If this is nil, the leading icon\nwill not be interactive. See [TextField.SetLeadingIcon]."}, {Name: "TrailingIcon", Doc: "TrailingIcon, if specified, indicates to add a button\nat the end of the text field with this icon.\nSee [TextField.SetTrailingIcon]."}, {Name: "TrailingIconOnClick", Doc: "TrailingIconOnClick, if specified, is the function to call when\nthe TrailingIcon is clicked. If this is nil, the trailing icon\nwill not be interactive. See [TextField.SetTrailingIcon]."}, {Name: "NoEcho", Doc: "NoEcho is whether replace displayed characters with bullets\nto conceal text (for example, for a password input). Also\nsee [TextField.SetTypePassword]."}, {Name: "CursorWidth", Doc: "CursorWidth is the width of the text field cursor.\nIt should be set in a Styler like all other style properties.\nBy default, it is 1dp."}, {Name: "CursorColor", Doc: "CursorColor is the color used for the text field cursor (caret).\nIt should be set in a Styler like all other style properties.\nBy default, it is [colors.Scheme.Primary.Base]."}, {Name: "PlaceholderColor", Doc: "PlaceholderColor is the color used for the [TextField.Placeholder] text.\nIt should be set in a Styler like all other style properties.\nBy default, it is [colors.Scheme.OnSurfaceVariant]."}, {Name: "SelectColor", Doc: "SelectColor is the color used for the text selection background color.\nIt should be set in a Styler like all other style properties.\nBy default, it is [colors.Scheme.Select.Container]."}, {Name: "complete", Doc: "complete contains functions and data for text field completion.\nIt must be set using [TextField.SetCompleter]."}, {Name: "text", Doc: "text is the last saved value of the text string being edited."}, {Name: "edited", Doc: "edited is whether the text has been edited relative to the original."}, {Name: "editText", Doc: "editText is the live text string being edited, with the latest modifications."}, {Name: "error", Doc: "error is the current validation error of the text field."}, {Name: "effPos", Doc: "effPos is the effective position with any leading icon space added."}, {Name: "effSize", Doc: "effSize is the effective size, subtracting any leading and trailing icon space."}, {Name: "startPos", Doc: "startPos is the starting display position in the string."}, {Name: "endPos", Doc: "endPos is the ending display position in the string."}, {Name: "cursorPos", Doc: "cursorPos is the current cursor position."}, {Name: "cursorLine", Doc: "cursorLine is the current cursor line position."}, {Name: "charWidth", Doc: "charWidth is the approximate number of chars that can be\ndisplayed at any time, which is computed from the font size."}, {Name: "selectStart", Doc: "selectStart is the starting position of selection in the string."}, {Name: "selectEnd", Doc: "selectEnd is the ending position of selection in the string."}, {Name: "selectInit", Doc: "selectInit is the initial selection position (where it started)."}, {Name: "selectMode", Doc: "selectMode is whether to select text as the cursor moves."}, {Name: "renderAll", Doc: "renderAll is the render version of entire text, for sizing."}, {Name: "renderVisible", Doc: "renderVisible is the render version of just the visible text."}, {Name: "numLines", Doc: "number of lines from last render update, for word-wrap version"}, {Name: "fontHeight", Doc: "fontHeight is the font height cached during styling."}, {Name: "blinkOn", Doc: "blinkOn oscillates between on and off for blinking."}, {Name: "cursorMu", Doc: "cursorMu is the mutex for updating the cursor between blinker and field."}, {Name: "undos", Doc: "undos is the undo manager for the text field."}, {Name: "leadingIconButton"}, {Name: "trailingIconButton"}}})
 
 // NewTextField returns a new [TextField] with the given optional parent:
 // TextField is a widget for editing a line of text.
-// With the default WhiteSpaceNormal style setting,
-// text will wrap onto multiple lines as needed.
-// Set to WhiteSpaceNowrap (e.g., styles.Style.SetTextWrap(false)) to
-// force everything to be on a single line.
-// With multi-line wrapped text, the text is still treated as a single
-// contiguous line of wrapped text.
+//
+// With the default [styles.WhiteSpaceNormal] setting,
+// text will wrap onto multiple lines as needed. You can
+// call [styles.Style.SetTextWrap](false) to force everything
+// to be rendered on a single line. With multi-line wrapped text,
+// the text is still treated as a single contiguous line of wrapped text.
 func NewTextField(parent ...tree.Node) *TextField { return tree.New[TextField](parent...) }
 
 // TextFieldEmbedder is an interface that all types that embed TextField satisfy
@@ -1022,7 +1015,7 @@ func (t *TextField) SetValidator(v func() error) *TextField { t.Validator = v; r
 // SetLeadingIconOnClick sets the [TextField.LeadingIconOnClick]:
 // LeadingIconOnClick, if specified, is the function to call when
 // the LeadingIcon is clicked. If this is nil, the leading icon
-// will not be interactive.
+// will not be interactive. See [TextField.SetLeadingIcon].
 func (t *TextField) SetLeadingIconOnClick(v func(e events.Event)) *TextField {
 	t.LeadingIconOnClick = v
 	return t
@@ -1031,53 +1024,50 @@ func (t *TextField) SetLeadingIconOnClick(v func(e events.Event)) *TextField {
 // SetTrailingIconOnClick sets the [TextField.TrailingIconOnClick]:
 // TrailingIconOnClick, if specified, is the function to call when
 // the TrailingIcon is clicked. If this is nil, the trailing icon
-// will not be interactive.
+// will not be interactive. See [TextField.SetTrailingIcon].
 func (t *TextField) SetTrailingIconOnClick(v func(e events.Event)) *TextField {
 	t.TrailingIconOnClick = v
 	return t
 }
 
 // SetNoEcho sets the [TextField.NoEcho]:
-// NoEcho is whether replace displayed characters with bullets to conceal text
-// (for example, for a password input).
+// NoEcho is whether replace displayed characters with bullets
+// to conceal text (for example, for a password input). Also
+// see [TextField.SetTypePassword].
 func (t *TextField) SetNoEcho(v bool) *TextField { t.NoEcho = v; return t }
 
 // SetCursorWidth sets the [TextField.CursorWidth]:
 // CursorWidth is the width of the text field cursor.
-// It should be set in Style like all other style properties.
+// It should be set in a Styler like all other style properties.
 // By default, it is 1dp.
 func (t *TextField) SetCursorWidth(v units.Value) *TextField { t.CursorWidth = v; return t }
 
 // SetCursorColor sets the [TextField.CursorColor]:
 // CursorColor is the color used for the text field cursor (caret).
-// It should be set in Style like all other style properties.
+// It should be set in a Styler like all other style properties.
 // By default, it is [colors.Scheme.Primary.Base].
 func (t *TextField) SetCursorColor(v image.Image) *TextField { t.CursorColor = v; return t }
 
 // SetPlaceholderColor sets the [TextField.PlaceholderColor]:
-// PlaceholderColor is the color used for the Placeholder text.
-// It should be set in Style like all other style properties.
+// PlaceholderColor is the color used for the [TextField.Placeholder] text.
+// It should be set in a Styler like all other style properties.
 // By default, it is [colors.Scheme.OnSurfaceVariant].
 func (t *TextField) SetPlaceholderColor(v image.Image) *TextField { t.PlaceholderColor = v; return t }
 
 // SetSelectColor sets the [TextField.SelectColor]:
 // SelectColor is the color used for the text selection background color.
-// It should be set in Style like all other style properties.
-// By default, it is [colors.Scheme.Select.Container]
+// It should be set in a Styler like all other style properties.
+// By default, it is [colors.Scheme.Select.Container].
 func (t *TextField) SetSelectColor(v image.Image) *TextField { t.SelectColor = v; return t }
 
-// SetSelectMode sets the [TextField.SelectMode]:
-// SelectMode is whether to select text as the cursor moves.
-func (t *TextField) SetSelectMode(v bool) *TextField { t.selectMode = v; return t }
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TimePicker", IDName: "time-picker", Doc: "TimePicker is a widget for picking a time.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TimePicker", IDName: "time-picker", Doc: "TimePicker is a widget for picking a time.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing."}, {Name: "hour", Doc: "the raw input hour"}, {Name: "pm", Doc: "whether we are in pm mode (so we have to add 12h to everything)"}}})
 
 // NewTimePicker returns a new [TimePicker] with the given optional parent:
 // TimePicker is a widget for picking a time.
 func NewTimePicker(parent ...tree.Node) *TimePicker { return tree.New[TimePicker](parent...) }
 
 // SetTime sets the [TimePicker.Time]:
-// Time is the time that we are viewing
+// Time is the time that we are viewing.
 func (t *TimePicker) SetTime(v time.Time) *TimePicker { t.Time = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.DatePicker", IDName: "date-picker", Doc: "DatePicker is a widget for picking a date.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing."}}})
@@ -1113,18 +1103,18 @@ func (t *DurationInput) SetDuration(v time.Duration) *DurationInput { t.Duration
 // Unit is the unit of time.
 func (t *DurationInput) SetUnit(v string) *DurationInput { t.Unit = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Toolbar", IDName: "toolbar", Doc: "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nUse [Body.AddAppBar] to add to the default toolbar at the top of an app.", Methods: []types.Method{{Name: "standardOverflowMenu", Doc: "standardOverflowMenu adds standard overflow menu items for an app bar.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"m"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "OverflowMenus", Doc: "OverflowMenus are functions for configuring the overflow menu of the\ntoolbar. You can use [Toolbar.AddOverflowMenu] to add them.\nThese are processed in reverse order (last in, first called)\nso that the default items are added last."}, {Name: "allItemsPlan", Doc: "allItemsPlan has all the items, during layout sizing"}, {Name: "overflowItems", Doc: "overflowItems are items moved from the main toolbar that will be\nshown in the overflow menu."}, {Name: "overflowButton", Doc: "overflowButton is the widget to pull up the overflow menu."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Toolbar", IDName: "toolbar", Doc: "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nUse [Body.AddAppBar] to add to the default toolbar at the top of the app.", Methods: []types.Method{{Name: "standardOverflowMenu", Doc: "standardOverflowMenu adds standard overflow menu items for an app bar.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"m"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "OverflowMenus", Doc: "OverflowMenus are functions for configuring the overflow menu of the\ntoolbar. You can use [Toolbar.AddOverflowMenu] to add them.\nThese are processed in reverse order (last in, first called)\nso that the default items are added last."}, {Name: "allItemsPlan", Doc: "allItemsPlan has all the items, during layout sizing"}, {Name: "overflowItems", Doc: "overflowItems are items moved from the main toolbar that will be\nshown in the overflow menu."}, {Name: "overflowButton", Doc: "overflowButton is the widget to pull up the overflow menu."}}})
 
 // NewToolbar returns a new [Toolbar] with the given optional parent:
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
 // It automatically moves items that do not fit into an overflow menu, and
 // manages additional items that are always placed onto this overflow menu.
-// Use [Body.AddAppBar] to add to the default toolbar at the top of an app.
+// Use [Body.AddAppBar] to add to the default toolbar at the top of the app.
 func NewToolbar(parent ...tree.Node) *Toolbar { return tree.New[Toolbar](parent...) }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Treer", IDName: "treer", Doc: "Treer is an interface for [Tree] types\nproviding access to the base [Tree] and\noverridable method hooks for actions taken on the [Tree],\nincluding OnOpen, OnClose, etc.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "AsCoreTree", Doc: "AsTree returns the base [Tree] for this node.", Returns: []string{"Tree"}}, {Name: "CanOpen", Doc: "CanOpen returns true if the node is able to open.\nBy default it checks HasChildren(), but could check other properties\nto perform lazy building of the tree.", Returns: []string{"bool"}}, {Name: "OnOpen", Doc: "OnOpen is called when a node is opened.\nThe base version does nothing."}, {Name: "OnClose", Doc: "OnClose is called when a node is closed\nThe base version does nothing."}, {Name: "DeleteNode"}, {Name: "Duplicate"}, {Name: "AddChildNode"}, {Name: "InsertBefore"}, {Name: "InsertAfter"}, {Name: "MimeData", Args: []string{"md"}}, {Name: "Cut"}, {Name: "Copy"}, {Name: "Paste"}, {Name: "DragStart", Args: []string{"e"}}, {Name: "DragDrop", Args: []string{"e"}}, {Name: "DropFinalize", Args: []string{"de"}}, {Name: "DropDeleteSource", Args: []string{"e"}}, {Name: "MakePasteMenu", Args: []string{"m", "md", "fun"}}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tree", IDName: "tree", Doc: "Tree provides a graphical representation of a tree structure,\nproviding full navigation and manipulation abilities.\n\nIt does not handle layout by itself, so if you want it to scroll\nseparately from the rest of the surrounding context, use [NewTreeFrame].\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the Tree mirrors another\ntree structure, and tree editing functions apply to\nthe source tree first, and then to the Tree by sync.\n\nOtherwise, data can be directly encoded in a Tree\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard [events.Event]s are sent to any listeners, including\nSelect, Change, and DoubleClick. The selected nodes\nare in the root SelectedNodes list.", Methods: []types.Method{{Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies the tree to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Cut", Doc: "Cut copies to system.Clipboard and deletes selected items.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "EditNode", Doc: "EditNode pulls up a [Form] dialog for the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InspectNode", Doc: "InspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SyncNode", Doc: "If non-nil, the [tree.Node] that this widget is viewing in the tree (the source)"}, {Name: "Text", Doc: "The text to display for the tree item label, which automatically\ndefaults to the [tree.Node.Name] of the tree node. It has no effect\nif [Tree.SyncNode] is non-nil."}, {Name: "Icon", Doc: "optional icon, displayed to the the left of the text label"}, {Name: "IconOpen", Doc: "icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]"}, {Name: "IconClosed", Doc: "icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]"}, {Name: "IconLeaf", Doc: "icon to use for a terminal node branch that has no children; defaults to [icons.Blank]"}, {Name: "Indent", Doc: "amount to indent children relative to this node"}, {Name: "OpenDepth", Doc: "OpenDepth is the depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "Closed", Doc: "Closed is whether this tree node is currently toggled closed (children not visible)."}, {Name: "SelectMode", Doc: "SelectMode, when set on the root node, determines whether keyboard movements should update selection."}, {Name: "viewIndex", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "widgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "Root", Doc: "Root is the cached root of the tree. It is automatically set and does not need to be\nset by the end user."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently selected nodes, on the\nRootView node only."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree\n(other trees) do not inherit its stateful background color, as\nthat does not look good."}, {Name: "inOpen", Doc: "inOpen is set in the Open method to prevent recursive opening for lazy-open nodes."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tree", IDName: "tree", Doc: "Tree provides a graphical representation of a tree structure,\nproviding full navigation and manipulation abilities.\n\nIt does not handle layout by itself, so if you want it to scroll\nseparately from the rest of the surrounding context, use [NewTreeFrame].\n\nIf the [Tree.SyncNode] field is non-nil, typically via the\n[Tree.SyncTree] method, then the Tree mirrors another\ntree structure, and tree editing functions apply to\nthe source tree first, and then to the Tree by sync.\n\nOtherwise, data can be directly encoded in a Tree\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard [events.Event]s are sent to any listeners, including\n[events.Select], [events.Change], and [events.DoubleClick].\nThe selected nodes are in the root [Tree.SelectedNodes] list.", Methods: []types.Method{{Name: "OpenAll", Doc: "OpenAll opens the node and all of its sub-nodes.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the node and all of its sub-nodes.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies the tree to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Cut", Doc: "Cut copies to [system.Clipboard] and deletes selected items.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "editNode", Doc: "editNode pulls up a [Form] dialog for the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "inspectNode", Doc: "inspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SyncNode", Doc: "SyncNode, if non-nil, is the [tree.Node] that this widget is\nviewing in the tree (the source). It should be set using\n[Tree.SyncTree]."}, {Name: "Text", Doc: "text is the text to display for the tree item label, which automatically\ndefaults to the [tree.Node.Name] of the tree node. It has no effect\nif [Tree.SyncNode] is non-nil."}, {Name: "Icon", Doc: "Icon is an optional icon displayed to the the left of the text label."}, {Name: "IconOpen", Doc: "IconOpen is the icon to use for an open (expanded) branch;\nit defaults to [icons.KeyboardArrowDown]."}, {Name: "IconClosed", Doc: "IconClosed is the icon to use for a closed (collapsed) branch;\nit defaults to [icons.KeyboardArrowRight]."}, {Name: "IconLeaf", Doc: "IconLeaf is the icon to use for a terminal node branch that has no children;\nit defaults to [icons.Blank]."}, {Name: "Indent", Doc: "Indent is the amount to indent children relative to this node.\nIt should be set in a Styler like all other style properties."}, {Name: "OpenDepth", Doc: "OpenDepth is the depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "Closed", Doc: "Closed is whether this tree node is currently toggled closed\n(children not visible)."}, {Name: "SelectMode", Doc: "SelectMode, when set on the root node, determines whether keyboard movements should update selection."}, {Name: "viewIndex", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "widgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "root", Doc: "root is the cached root of the tree. It is automatically set."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently selected nodes.\nIt is only set on the root node."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree\n(other trees) do not inherit its stateful background color, as\nthat does not look good."}, {Name: "inOpen", Doc: "inOpen is set in the Open method to prevent recursive opening for lazy-open nodes."}, {Name: "Branch", Doc: "Branch is the branch widget that is used to open and close the tree node."}}})
 
 // NewTree returns a new [Tree] with the given optional parent:
 // Tree provides a graphical representation of a tree structure,
@@ -1133,8 +1123,8 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tree", IDName:
 // It does not handle layout by itself, so if you want it to scroll
 // separately from the rest of the surrounding context, use [NewTreeFrame].
 //
-// If the SyncNode field is non-nil, typically via
-// SyncRootNode method, then the Tree mirrors another
+// If the [Tree.SyncNode] field is non-nil, typically via the
+// [Tree.SyncTree] method, then the Tree mirrors another
 // tree structure, and tree editing functions apply to
 // the source tree first, and then to the Tree by sync.
 //
@@ -1143,34 +1133,38 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tree", IDName:
 // and associated data.
 //
 // Standard [events.Event]s are sent to any listeners, including
-// Select, Change, and DoubleClick. The selected nodes
-// are in the root SelectedNodes list.
+// [events.Select], [events.Change], and [events.DoubleClick].
+// The selected nodes are in the root [Tree.SelectedNodes] list.
 func NewTree(parent ...tree.Node) *Tree { return tree.New[Tree](parent...) }
 
 // SetText sets the [Tree.Text]:
-// The text to display for the tree item label, which automatically
+// text is the text to display for the tree item label, which automatically
 // defaults to the [tree.Node.Name] of the tree node. It has no effect
 // if [Tree.SyncNode] is non-nil.
 func (t *Tree) SetText(v string) *Tree { t.Text = v; return t }
 
 // SetIcon sets the [Tree.Icon]:
-// optional icon, displayed to the the left of the text label
+// Icon is an optional icon displayed to the the left of the text label.
 func (t *Tree) SetIcon(v icons.Icon) *Tree { t.Icon = v; return t }
 
 // SetIconOpen sets the [Tree.IconOpen]:
-// icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]
+// IconOpen is the icon to use for an open (expanded) branch;
+// it defaults to [icons.KeyboardArrowDown].
 func (t *Tree) SetIconOpen(v icons.Icon) *Tree { t.IconOpen = v; return t }
 
 // SetIconClosed sets the [Tree.IconClosed]:
-// icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]
+// IconClosed is the icon to use for a closed (collapsed) branch;
+// it defaults to [icons.KeyboardArrowRight].
 func (t *Tree) SetIconClosed(v icons.Icon) *Tree { t.IconClosed = v; return t }
 
 // SetIconLeaf sets the [Tree.IconLeaf]:
-// icon to use for a terminal node branch that has no children; defaults to [icons.Blank]
+// IconLeaf is the icon to use for a terminal node branch that has no children;
+// it defaults to [icons.Blank].
 func (t *Tree) SetIconLeaf(v icons.Icon) *Tree { t.IconLeaf = v; return t }
 
 // SetIndent sets the [Tree.Indent]:
-// amount to indent children relative to this node
+// Indent is the amount to indent children relative to this node.
+// It should be set in a Styler like all other style properties.
 func (t *Tree) SetIndent(v units.Value) *Tree { t.Indent = v; return t }
 
 // SetOpenDepth sets the [Tree.OpenDepth]:
@@ -1179,17 +1173,13 @@ func (t *Tree) SetIndent(v units.Value) *Tree { t.Indent = v; return t }
 func (t *Tree) SetOpenDepth(v int) *Tree { t.OpenDepth = v; return t }
 
 // SetClosed sets the [Tree.Closed]:
-// Closed is whether this tree node is currently toggled closed (children not visible).
+// Closed is whether this tree node is currently toggled closed
+// (children not visible).
 func (t *Tree) SetClosed(v bool) *Tree { t.Closed = v; return t }
 
 // SetSelectMode sets the [Tree.SelectMode]:
 // SelectMode, when set on the root node, determines whether keyboard movements should update selection.
 func (t *Tree) SetSelectMode(v bool) *Tree { t.SelectMode = v; return t }
-
-// SetSelectedNodes sets the [Tree.SelectedNodes]:
-// SelectedNodes holds the currently selected nodes, on the
-// RootView node only.
-func (t *Tree) SetSelectedNodes(v ...Treer) *Tree { t.SelectedNodes = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ListButton", IDName: "list-button", Doc: "ListButton represents a slice or array value with a button that opens a [List].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Slice"}}})
 
@@ -1270,7 +1260,7 @@ func (t *WidgetBase) SetValueTitle(v string) *WidgetBase { t.ValueTitle = v; ret
 // SetValueNewWindow sets the [WidgetBase.ValueNewWindow]:
 // ValueNewWindow indicates that the dialog of a [Value] should be opened
 // as a new window, instead of a typical full window in the same current window.
-// This is set by [InitValueButton] and handled by [openValueDialog].
+// This is set by [InitValueButton] and handled by [OpenValueDialog].
 // This is triggered by holding down the Shift key while clicking on a
 // [Value] button. Certain values such as [FileButton] may set this to true
 // in their [InitValueButton] function.

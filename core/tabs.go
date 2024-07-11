@@ -66,23 +66,18 @@ const (
 	FunctionalTabs
 
 	// NavigationAuto indicates to render the tabs as either
-	// [NavigationBar], [NavigationRail], or [NavigationDrawer],
-	// if [WidgetBase.SizeClass] is [SizeCompact], [SizeMedium],
-	// or [SizeExpanded], respectively. NavigationAuto should
-	// typically be used instead of one of the specific navigation
-	// types for better cross-platform compatability.
+	// [NavigationBar] or [NavigationDrawer] if
+	// [WidgetBase.SizeClass] is [SizeCompact] or not, respectively.
+	// NavigationAuto should typically be used instead of one of the
+	// specific navigation types for better cross-platform compatability.
 	NavigationAuto
 
 	// NavigationBar indicates to render the tabs as a
 	// bottom navigation bar with text and icons.
 	NavigationBar
 
-	// NavigationRail indicates to render the tabs as a
-	// side navigation rail, which only has icons.
-	NavigationRail
-
 	// NavigationDrawer indicates to render the tabs as a
-	// side navigation drawer, which has full text and icons.
+	// side navigation drawer with text and icons.
 	NavigationDrawer
 )
 
@@ -96,8 +91,6 @@ func (tt TabTypes) effective(w Widget) TabTypes {
 	switch w.AsWidget().SizeClass() {
 	case SizeCompact:
 		return NavigationBar
-	case SizeMedium:
-		return NavigationRail
 	default:
 		return NavigationDrawer
 	}
@@ -105,7 +98,7 @@ func (tt TabTypes) effective(w Widget) TabTypes {
 
 // isColumn returns whether the tabs should be arranged in a column.
 func (tt TabTypes) isColumn() bool {
-	return tt == NavigationRail || tt == NavigationDrawer
+	return tt == NavigationDrawer
 }
 
 func (ts *Tabs) Init() {
