@@ -48,21 +48,6 @@ func AddValueType[T any, W tree.NodeValue]() {
 	}
 }
 
-// ValueConverters is a slice of functions that return a [Value]
-// for a value, using optional tags context to inform the selection.
-// It is used by [toValue]. If a function returns nil,
-// it falls back on the next function in the slice, and if all functions return nil,
-// it falls back on the default bindings. These functions must NOT call [Bind].
-// These functions are called in sequential order, so you can insert
-// a function at the start to take precedence over others.
-// You can add to this using the [AddValueConverter] helper function.
-var ValueConverters []func(value any, tags reflect.StructTag) Value
-
-// AddValueConverter adds a converter function to [ValueConverters].
-func AddValueConverter(f func(value any, tags reflect.StructTag) Value) {
-	ValueConverters = append(ValueConverters, f)
-}
-
 // NewValue converts the given value into an appropriate [Value]
 // whose associated value is bound to the given value. The given value must
 // be a pointer. It uses the given optional struct tags for additional context
@@ -86,9 +71,9 @@ func NewValue(value any, tags reflect.StructTag, parent ...tree.Node) Value {
 // using the given optional struct tags for additional context.
 // The given value should typically be a pointer. It does NOT call [Bind];
 // see [NewValue] for a version that does. It first checks the
-// [Valuer] interface, then the [ValueTypes], then
-// the [ValueConverters], and finally it falls back on a set of default
-// bindings. If any step results in nil, it falls back on the next step.
+// [Valuer] interface, then the [ValueTypes], and finally it falls
+// back on a set of default bindings. If any step results in nil,
+// it falls back on the next step.
 func toValue(value any, tags reflect.StructTag) Value {
 	if vwr, ok := value.(Valuer); ok {
 		if vw := vwr.Value(); vw != nil {
@@ -106,11 +91,6 @@ func toValue(value any, tags reflect.StructTag) Value {
 	typ := uv.Type()
 	if vwt, ok := ValueTypes[types.TypeName(typ)]; ok {
 		if vw := vwt(value); vw != nil {
-			return vw
-		}
-	}
-	for _, converter := range ValueConverters {
-		if vw := converter(value, tags); vw != nil {
 			return vw
 		}
 	}

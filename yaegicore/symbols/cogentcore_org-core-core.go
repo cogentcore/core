@@ -20,7 +20,6 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/core/core"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"AddValueConverter":         reflect.ValueOf(core.AddValueConverter),
 		"AllRenderWindows":          reflect.ValueOf(&core.AllRenderWindows).Elem(),
 		"AllSettings":               reflect.ValueOf(&core.AllSettings).Elem(),
 		"AppAbout":                  reflect.ValueOf(&core.AppAbout).Elem(),
@@ -212,7 +211,6 @@ func init() {
 		"TreeTempMovedTag":          reflect.ValueOf(constant.MakeFromLiteral("\"_\\\\&MOVED\\\\&\"", token.STRING, 0)),
 		"UpdateAll":                 reflect.ValueOf(core.UpdateAll),
 		"UpdateSettings":            reflect.ValueOf(core.UpdateSettings),
-		"ValueConverters":           reflect.ValueOf(&core.ValueConverters).Elem(),
 		"ValueTypes":                reflect.ValueOf(&core.ValueTypes).Elem(),
 		"Wait":                      reflect.ValueOf(core.Wait),
 		"WidgetLastChild":           reflect.ValueOf(core.WidgetLastChild),
