@@ -780,7 +780,11 @@ func (tb *Buffer) autoSave() error {
 // AutoSaveDelete deletes any existing autosave file
 func (tb *Buffer) AutoSaveDelete() {
 	asfn := tb.AutoSaveFilename()
-	errors.Log(os.Remove(asfn))
+	err := os.Remove(asfn)
+	// the file may not exist, which is fine
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		errors.Log(err)
+	}
 }
 
 // AutoSaveCheck checks if an autosave file exists; logic for dealing with
