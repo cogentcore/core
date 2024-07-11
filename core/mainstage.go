@@ -321,11 +321,11 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		Size:      st.Scene.sceneGeom.Size,
 		StdPixels: false,
 	}
-	wgp := TheWindowGeometrySaver.Pref(title, nil)
+	wgp := theWindowGeometrySaver.pref(title, nil)
 	if TheApp.Platform() != system.Offscreen && wgp != nil {
-		TheWindowGeometrySaver.SettingStart()
-		opts.Size = wgp.Size()
-		opts.Pos = wgp.Pos()
+		theWindowGeometrySaver.settingStart()
+		opts.Size = wgp.size()
+		opts.Pos = wgp.pos()
 		opts.StdPixels = false
 		if _, found := AllRenderWindows.FindName(name); found { // offset from existing
 			opts.Pos.X += 20
@@ -336,7 +336,7 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		}
 	}
 	win := newRenderWindow(name, title, opts)
-	TheWindowGeometrySaver.SettingEnd()
+	theWindowGeometrySaver.settingEnd()
 	if win == nil {
 		return nil
 	}

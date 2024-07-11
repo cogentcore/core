@@ -199,7 +199,6 @@ func init() {
 		"TextTypesN":                reflect.ValueOf(core.TextTypesN),
 		"TextTypesValues":           reflect.ValueOf(core.TextTypesValues),
 		"TheApp":                    reflect.ValueOf(&core.TheApp).Elem(),
-		"TheWindowGeometrySaver":    reflect.ValueOf(&core.TheWindowGeometrySaver).Elem(),
 		"ThemeAuto":                 reflect.ValueOf(core.ThemeAuto),
 		"ThemeDark":                 reflect.ValueOf(core.ThemeDark),
 		"ThemeLight":                reflect.ValueOf(core.ThemeLight),
@@ -323,9 +322,6 @@ func init() {
 		"Valuer":                 reflect.ValueOf((*core.Valuer)(nil)),
 		"Widget":                 reflect.ValueOf((*core.Widget)(nil)),
 		"WidgetBase":             reflect.ValueOf((*core.WidgetBase)(nil)),
-		"WindowGeometries":       reflect.ValueOf((*core.WindowGeometries)(nil)),
-		"WindowGeometry":         reflect.ValueOf((*core.WindowGeometry)(nil)),
-		"WindowGeometrySaver":    reflect.ValueOf((*core.WindowGeometrySaver)(nil)),
 
 		// interface wrapper definitions
 		"_ButtonEmbedder":    reflect.ValueOf((*_cogentcore_org_core_core_ButtonEmbedder)(nil)),

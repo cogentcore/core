@@ -1099,7 +1099,7 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 		system.TheApp.GetScreens()
 		UpdateAll()
-		TheWindowGeometrySaver.RestoreAll()
+		theWindowGeometrySaver.restoreAll()
 		// w.FocusInactivate()
 		// w.FullReRender()
 		// sz := w.SystemWin.Size()

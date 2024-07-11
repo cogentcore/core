@@ -6,7 +6,6 @@ package core
 
 import (
 	"encoding/json"
-	"errors"
 	"image"
 	"log"
 	"log/slog"
@@ -16,68 +15,69 @@ import (
 	"sync"
 	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/system"
 )
 
-// TheWindowGeometrySaver is the manager of window geometry settings
-var TheWindowGeometrySaver = WindowGeometrySaver{}
+// theWindowGeometrySaver is the manager of window geometry settings
+var theWindowGeometrySaver = windowGeometrySaver{}
 
-// WindowGeometries is the data structure for recording the window
+// windowGeometries is the data structure for recording the window
 // geometries by window name and screen name.
-type WindowGeometries map[string]map[string]WindowGeometry
+type windowGeometries map[string]map[string]windowGeometry
 
-// WindowGeometrySaver records window geometries in a persistent file,
+// windowGeometrySaver records window geometries in a persistent file,
 // which is then used when opening new windows to restore.
-type WindowGeometrySaver struct {
+type windowGeometrySaver struct {
 
 	// the full set of window geometries
-	Geometries WindowGeometries
+	geometries windowGeometries
 
 	// temporary cached geometries -- saved to Geometries after SaveDelay
-	Cache WindowGeometries
+	cache windowGeometries
 
 	// base name of the settings file in Cogent Core settings directory
-	Filename string
+	filename string
 
 	// when settings were last saved -- if we weren't the last to save, then we need to re-open before modifying
-	LastSave time.Time
+	lastSave time.Time
 
 	// if true, we are setting geometry so don't save -- caller must call SettingStart() SettingEnd() to block
-	SettingNoSave bool
+	settingNoSave bool
 
 	// read-write mutex that protects updating of WindowGeometry
-	Mu sync.RWMutex
+	mu sync.RWMutex
 
 	// wait time before trying to lock file again
-	LockSleep time.Duration
+	lockSleep time.Duration
 
 	// wait time before saving the Cache into Geometries
-	SaveDelay time.Duration
+	saveDelay time.Duration
 
 	// timer for delayed save
 	saveTimer *time.Timer
 }
 
-// Init does initialization if not yet initialized
-func (mgr *WindowGeometrySaver) Init() {
-	if mgr.Geometries == nil {
-		mgr.Geometries = make(WindowGeometries, 1000)
-		mgr.ResetCache()
-		mgr.Filename = "window-geometry"
-		mgr.LockSleep = 100 * time.Millisecond
-		mgr.SaveDelay = 1 * time.Second
+// init does initialization if not yet initialized
+func (ws *windowGeometrySaver) init() {
+	if ws.geometries == nil {
+		ws.geometries = make(windowGeometries, 1000)
+		ws.resetCache()
+		ws.filename = "window-geometry"
+		ws.lockSleep = 100 * time.Millisecond
+		ws.saveDelay = 1 * time.Second
 	}
 }
 
-// ResetCache resets the cache -- call under mutex
-func (mgr *WindowGeometrySaver) ResetCache() {
-	mgr.Cache = make(WindowGeometries)
+// resetCache resets the cache; call under mutex
+func (ws *windowGeometrySaver) resetCache() {
+	ws.cache = make(windowGeometries)
 }
 
-// LockFile attempts to create the window geometry lock file
-func (mgr *WindowGeometrySaver) LockFile() error {
+// lockFile attempts to create the window geometry lock file
+func (ws *windowGeometrySaver) lockFile() error {
 	pdir := TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, mgr.Filename+".lck")
+	pnm := filepath.Join(pdir, ws.filename+".lck")
 	for rep := 0; rep < 10; rep++ {
 		if _, err := os.Stat(pnm); os.IsNotExist(err) {
 			b, _ := time.Now().MarshalJSON()
@@ -88,13 +88,13 @@ func (mgr *WindowGeometrySaver) LockFile() error {
 		}
 		b, err := os.ReadFile(pnm)
 		if err != nil {
-			time.Sleep(mgr.LockSleep)
+			time.Sleep(ws.lockSleep)
 			continue
 		}
 		var lts time.Time
 		err = lts.UnmarshalJSON(b)
 		if err != nil {
-			time.Sleep(mgr.LockSleep)
+			time.Sleep(ws.lockSleep)
 			continue
 		}
 		if time.Since(lts) > 1*time.Second {
@@ -103,23 +103,23 @@ func (mgr *WindowGeometrySaver) LockFile() error {
 			continue
 		}
 		// log.Printf("WindowGeometry: waiting for lock file: %v\n", lts.String())
-		time.Sleep(mgr.LockSleep)
+		time.Sleep(ws.lockSleep)
 	}
 	return errors.New("WinGeom could not lock lock file")
 }
 
 // UnLockFile unlocks the window geometry lock file (just removes it)
-func (mgr *WindowGeometrySaver) UnlockFile() {
+func (ws *windowGeometrySaver) unlockFile() {
 	pdir := TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, mgr.Filename+".lck")
+	pnm := filepath.Join(pdir, ws.filename+".lck")
 	os.Remove(pnm)
 }
 
-// NeedToReload returns true if the last save time of settings file is more recent than
+// needToReload returns true if the last save time of settings file is more recent than
 // when we last saved.  Called under mutex.
-func (mgr *WindowGeometrySaver) NeedToReload() bool {
+func (ws *windowGeometrySaver) needToReload() bool {
 	pdir := TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, mgr.Filename+".lst")
+	pnm := filepath.Join(pdir, ws.filename+".lst")
 	if _, err := os.Stat(pnm); os.IsNotExist(err) {
 		return false
 	}
@@ -132,41 +132,40 @@ func (mgr *WindowGeometrySaver) NeedToReload() bool {
 	if err != nil {
 		return false
 	}
-	eq := lts.Equal(mgr.LastSave)
+	eq := lts.Equal(ws.lastSave)
 	if !eq {
 		// fmt.Printf("settings file saved more recently: %v than our last save: %v\n", lts.String(),
 		// 	mgr.LastSave.String())
-		mgr.LastSave = lts
+		ws.lastSave = lts
 	}
 	return !eq
 }
 
-// SaveLastSave saves timestamp (now) of last save to win geom
-func (mgr *WindowGeometrySaver) SaveLastSave() {
+// saveLastSave saves timestamp (now) of last save to win geom
+func (ws *windowGeometrySaver) saveLastSave() {
 	pdir := TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, mgr.Filename+".lst")
-	mgr.LastSave = time.Now()
-	b, _ := mgr.LastSave.MarshalJSON()
+	pnm := filepath.Join(pdir, ws.filename+".lst")
+	ws.lastSave = time.Now()
+	b, _ := ws.lastSave.MarshalJSON()
 	os.WriteFile(pnm, b, 0644)
 }
 
-// Open RenderWindow Geom settings from Cogent Core standard settings directory
+// open RenderWindow Geom settings from Cogent Core standard settings directory
 // called under mutex or at start
-func (mgr *WindowGeometrySaver) Open() error {
-	mgr.Init()
+func (ws *windowGeometrySaver) open() error {
+	ws.init()
 	pdir := TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, mgr.Filename+".json")
+	pnm := filepath.Join(pdir, ws.filename+".json")
 	b, err := os.ReadFile(pnm)
 	if err != nil {
-		// slog.Error(err.Error())rror())
-		return err
+		return errors.Log(err)
 	}
-	err = json.Unmarshal(b, &mgr.Geometries)
+	err = json.Unmarshal(b, &ws.geometries)
 	if err != nil {
-		slog.Error(err.Error())
+		return errors.Log(err)
 	}
 	oldFmt := false
-	for _, wps := range mgr.Geometries {
+	for _, wps := range ws.geometries {
 		for _, wp := range wps {
 			if wp.DPI == 0 && wp.DPR == 0 {
 				oldFmt = true
@@ -177,21 +176,21 @@ func (mgr *WindowGeometrySaver) Open() error {
 	}
 	if oldFmt {
 		log.Printf("WindowGeometry: resetting prefs for new format\n")
-		mgr.Geometries = make(WindowGeometries, 1000)
-		mgr.Save() // overwrite
+		ws.geometries = make(windowGeometries, 1000)
+		ws.save() // overwrite
 	}
 	return err
 }
 
-// Save RenderWindow Geom Settings to Cogent Core standard prefs directory
+// save RenderWindow Geom Settings to Cogent Core standard prefs directory
 // assumed to be under mutex and lock still
-func (mgr *WindowGeometrySaver) Save() error {
-	if mgr.Geometries == nil {
+func (ws *windowGeometrySaver) save() error {
+	if ws.geometries == nil {
 		return nil
 	}
 	pdir := TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, mgr.Filename+".json")
-	b, err := json.MarshalIndent(mgr.Geometries, "", "\t")
+	pnm := filepath.Join(pdir, ws.filename+".json")
+	b, err := json.MarshalIndent(ws.geometries, "", "\t")
 	if err != nil {
 		slog.Error(err.Error())
 		return err
@@ -200,38 +199,38 @@ func (mgr *WindowGeometrySaver) Save() error {
 	if err != nil {
 		slog.Error(err.Error())
 	} else {
-		mgr.SaveLastSave()
+		ws.saveLastSave()
 	}
 	return err
 }
 
-// WinName returns window name before first colon, if exists.
+// windowName returns window name before first colon, if exists.
 // This is the part of the name used to record settings
-func (mgr *WindowGeometrySaver) WinName(winName string) string {
+func (ws *windowGeometrySaver) windowName(winName string) string {
 	if ci := strings.Index(winName, ":"); ci > 0 {
 		return winName[:ci]
 	}
 	return winName
 }
 
-// SettingStart turns on SettingNoSave to prevent subsequent redundant calls to
+// settingStart turns on SettingNoSave to prevent subsequent redundant calls to
 // save a geometry that was being set from already-saved settings.
 // Must call SettingEnd to turn off (safe to call even if Start not called).
-func (mgr *WindowGeometrySaver) SettingStart() {
-	mgr.Mu.Lock()
-	mgr.SettingNoSave = true
-	mgr.Mu.Unlock()
+func (ws *windowGeometrySaver) settingStart() {
+	ws.mu.Lock()
+	ws.settingNoSave = true
+	ws.mu.Unlock()
 }
 
-// SettingEnd turns off SettingNoSave -- safe to call even if Start not called.
-func (mgr *WindowGeometrySaver) SettingEnd() {
-	mgr.Mu.Lock()
-	mgr.SettingNoSave = false
-	mgr.Mu.Unlock()
+// settingEnd turns off SettingNoSave -- safe to call even if Start not called.
+func (ws *windowGeometrySaver) settingEnd() {
+	ws.mu.Lock()
+	ws.settingNoSave = false
+	ws.mu.Unlock()
 }
 
-// RecordPref records current state of window as preference
-func (mgr *WindowGeometrySaver) RecordPref(win *renderWindow) {
+// recordPref records current state of window as preference
+func (ws *windowGeometrySaver) recordPref(win *renderWindow) {
 	if !win.isVisible() {
 		return
 	}
@@ -249,101 +248,78 @@ func (mgr *WindowGeometrySaver) RecordPref(win *renderWindow) {
 		}
 		return
 	}
-	mgr.Mu.Lock()
-	if mgr.SettingNoSave {
+	ws.mu.Lock()
+	if ws.settingNoSave {
 		if DebugSettings.WinGeomTrace {
 			log.Printf("WindowGeometry: RecordPref: SettingNoSave so NOT storing for win: %v\n", win.name)
 		}
-		mgr.Mu.Unlock()
+		ws.mu.Unlock()
 		return
 	}
-	mgr.Init()
+	ws.init()
 
-	winName := mgr.WinName(win.title)
+	winName := ws.windowName(win.title)
 	sc := win.SystemWindow.Screen()
-	wgr := WindowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.SystemWindow.Is(system.Fullscreen)}
-	wgr.SetPos(pos)
-	wgr.SetSize(wsz)
+	wgr := windowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.SystemWindow.Is(system.Fullscreen)}
+	wgr.setPos(pos)
+	wgr.setSize(wsz)
 
-	if mgr.Cache[winName] == nil {
-		mgr.Cache[winName] = make(map[string]WindowGeometry)
+	if ws.cache[winName] == nil {
+		ws.cache[winName] = make(map[string]windowGeometry)
 	}
-	mgr.Cache[winName][sc.Name] = wgr
-	if mgr.saveTimer == nil {
-		mgr.saveTimer = time.AfterFunc(time.Duration(mgr.SaveDelay), func() {
-			mgr.Mu.Lock()
-			mgr.SaveCached()
-			mgr.saveTimer = nil
-			mgr.Mu.Unlock()
+	ws.cache[winName][sc.Name] = wgr
+	if ws.saveTimer == nil {
+		ws.saveTimer = time.AfterFunc(time.Duration(ws.saveDelay), func() {
+			ws.mu.Lock()
+			ws.saveCached()
+			ws.saveTimer = nil
+			ws.mu.Unlock()
 		})
 	}
-	mgr.Mu.Unlock()
+	ws.mu.Unlock()
 }
 
-// AbortSave cancels any pending saving of the currently cached info.
-// this is called if a screen event occured
-func (mgr *WindowGeometrySaver) AbortSave() {
-	mgr.Mu.Lock()
-	defer mgr.Mu.Unlock()
-	if mgr.saveTimer != nil {
-		mgr.saveTimer.Stop()
-		mgr.saveTimer = nil
-		if DebugSettings.WinGeomTrace {
-			if len(mgr.Cache) == 0 {
-				log.Printf("WindowGeometry: AbortSave: no cached geometries but timer was != nil -- probably already saved\n")
-			} else {
-				log.Printf("WindowGeometry: AbortSave: there are cached geometries -- aborted in time!\n")
-			}
-		}
-	} else {
-		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: AbortSave: no saveTimer -- already happened or nothing to save\n")
-		}
-	}
-	mgr.ResetCache()
-}
-
-// SaveCached saves the cached prefs -- called after timer delay,
+// saveCached saves the cached prefs -- called after timer delay,
 // under the Mu.Lock
-func (mgr *WindowGeometrySaver) SaveCached() {
-	mgr.LockFile() // not going to change our behavior if we can't lock!
-	if mgr.NeedToReload() {
-		mgr.Open()
+func (ws *windowGeometrySaver) saveCached() {
+	ws.lockFile() // not going to change our behavior if we can't lock!
+	if ws.needToReload() {
+		ws.open()
 	}
-	for winName, scmap := range mgr.Cache {
+	for winName, scmap := range ws.cache {
 		for scName, wgr := range scmap {
 			sc := system.TheApp.ScreenByName(scName)
 			if sc == nil {
 				continue
 			}
-			if mgr.Geometries[winName] == nil {
-				mgr.Geometries[winName] = make(map[string]WindowGeometry)
+			if ws.geometries[winName] == nil {
+				ws.geometries[winName] = make(map[string]windowGeometry)
 			}
-			mgr.Geometries[winName][sc.Name] = wgr
+			ws.geometries[winName][sc.Name] = wgr
 			if DebugSettings.WinGeomTrace {
-				log.Printf("WindowGeometry: RecordPref: Saving for window: %v pos: %v size: %v  screen: %v  dpi: %v  device pixel ratio: %v\n", winName, wgr.Pos(), wgr.Size(), sc.Name, sc.LogicalDPI, sc.DevicePixelRatio)
+				log.Printf("WindowGeometry: RecordPref: Saving for window: %v pos: %v size: %v  screen: %v  dpi: %v  device pixel ratio: %v\n", winName, wgr.pos(), wgr.size(), sc.Name, sc.LogicalDPI, sc.DevicePixelRatio)
 			}
 		}
 	}
-	mgr.ResetCache()
-	mgr.Save()
-	mgr.UnlockFile()
+	ws.resetCache()
+	ws.save()
+	ws.unlockFile()
 }
 
-// Pref returns an existing preference for given window name, for given screen.
+// pref returns an existing preference for given window name, for given screen.
 // if the window name has a colon, only the part prior to the colon is used.
 // if no saved pref is available for that screen, nil is returned.
-func (mgr *WindowGeometrySaver) Pref(winName string, scrn *system.Screen) *WindowGeometry {
-	mgr.Mu.RLock()
-	defer mgr.Mu.RUnlock()
+func (ws *windowGeometrySaver) pref(winName string, scrn *system.Screen) *windowGeometry {
+	ws.mu.RLock()
+	defer ws.mu.RUnlock()
 
-	if mgr.Geometries == nil {
+	if ws.geometries == nil {
 		return nil
 	}
-	winName = mgr.WinName(winName)
-	wps, ok := mgr.Cache[winName]
+	winName = ws.windowName(winName)
+	wps, ok := ws.cache[winName]
 	if !ok {
-		wps, ok = mgr.Geometries[winName]
+		wps, ok = ws.geometries[winName]
 		if !ok {
 			return nil
 		}
@@ -357,54 +333,54 @@ func (mgr *WindowGeometrySaver) Pref(winName string, scrn *system.Screen) *Windo
 	}
 	wp, ok := wps[scrn.Name]
 	if ok {
-		wp.ConstrainGeom(scrn)
+		wp.constrainGeom(scrn)
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: Pref: Setting geom for window: %v pos: %v size: %v  screen: %v  dpi: %v  device pixel ratio: %v\n", winName, wp.Pos(), wp.Size(), scrn.Name, scrn.LogicalDPI, scrn.DevicePixelRatio)
+			log.Printf("WindowGeometry: Pref: Setting geom for window: %v pos: %v size: %v  screen: %v  dpi: %v  device pixel ratio: %v\n", winName, wp.pos(), wp.size(), scrn.Name, scrn.LogicalDPI, scrn.DevicePixelRatio)
 		}
 		return &wp
 	}
 	return nil
 }
 
-// DeleteAll deletes the file that saves the position and size of each window,
+// deleteAll deletes the file that saves the position and size of each window,
 // by screen, and clear current in-memory cache.  You shouldn't need to use
 // this but sometimes useful for testing.
-func (mgr *WindowGeometrySaver) DeleteAll() {
-	mgr.Mu.Lock()
-	defer mgr.Mu.Unlock()
+func (ws *windowGeometrySaver) deleteAll() {
+	ws.mu.Lock()
+	defer ws.mu.Unlock()
 
 	pdir := TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, mgr.Filename+".json")
-	os.Remove(pnm)
-	mgr.Geometries = make(WindowGeometries, 1000)
+	pnm := filepath.Join(pdir, ws.filename+".json")
+	errors.Log(os.Remove(pnm))
+	ws.geometries = make(windowGeometries, 1000)
 }
 
-// RestoreAll restores size and position of all windows, for current screen.
+// restoreAll restores size and position of all windows, for current screen.
 // Called when screen changes.
-func (mgr *WindowGeometrySaver) RestoreAll() {
+func (ws *windowGeometrySaver) restoreAll() {
 	renderWindowGlobalMu.Lock()
 	defer renderWindowGlobalMu.Unlock()
 	if DebugSettings.WinGeomTrace {
 		log.Printf("WindowGeometry: RestoreAll: starting\n")
 	}
-	mgr.SettingStart()
+	ws.settingStart()
 	for _, w := range AllRenderWindows {
-		wgp := mgr.Pref(w.title, w.SystemWindow.Screen())
+		wgp := ws.pref(w.title, w.SystemWindow.Screen())
 		if wgp != nil {
 			if DebugSettings.WinGeomTrace {
-				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v\n", w.name, wgp.Pos(), wgp.Size())
+				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v\n", w.name, wgp.pos(), wgp.size())
 			}
-			w.SystemWindow.SetGeom(wgp.Pos(), wgp.Size())
+			w.SystemWindow.SetGeom(wgp.pos(), wgp.size())
 		}
 	}
-	mgr.SettingEnd()
+	ws.settingEnd()
 	if DebugSettings.WinGeomTrace {
 		log.Printf("WindowGeometry: RestoreAll: done\n")
 	}
 }
 
-// WindowGeometry records the geometry settings used for a given window
-type WindowGeometry struct {
+// windowGeometry records the geometry settings used for a given window
+type windowGeometry struct {
 	DPI        float32
 	DPR        float32
 	SX         int
@@ -414,26 +390,26 @@ type WindowGeometry struct {
 	Fullscreen bool
 }
 
-func (wg *WindowGeometry) Size() image.Point {
+func (wg *windowGeometry) size() image.Point {
 	return image.Point{wg.SX, wg.SY}
 }
 
-func (wg *WindowGeometry) SetSize(sz image.Point) {
+func (wg *windowGeometry) setSize(sz image.Point) {
 	wg.SX = sz.X
 	wg.SY = sz.Y
 }
 
-func (wg *WindowGeometry) Pos() image.Point {
+func (wg *windowGeometry) pos() image.Point {
 	return image.Point{wg.PX, wg.PY}
 }
 
-func (wg *WindowGeometry) SetPos(ps image.Point) {
+func (wg *windowGeometry) setPos(ps image.Point) {
 	wg.PX = ps.X
 	wg.PY = ps.Y
 }
 
-// ConstrainGeom constrains geometry based on screen params
-func (wg *WindowGeometry) ConstrainGeom(sc *system.Screen) {
+// constrainGeom constrains geometry based on screen params
+func (wg *windowGeometry) constrainGeom(sc *system.Screen) {
 	sz, pos := sc.ConstrainWinGeom(image.Point{wg.SX, wg.SY}, image.Point{wg.PX, wg.PY})
 	wg.SX = sz.X
 	wg.SY = sz.Y

@@ -183,17 +183,17 @@ func (w *renderWindow) setName(name string) {
 		w.SystemWindow.SetName(name)
 	}
 	if isdif && w.SystemWindow != nil {
-		wgp := TheWindowGeometrySaver.Pref(w.title, w.SystemWindow.Screen())
+		wgp := theWindowGeometrySaver.pref(w.title, w.SystemWindow.Screen())
 		if wgp != nil {
-			TheWindowGeometrySaver.SettingStart()
-			if w.SystemWindow.Size() != wgp.Size() || w.SystemWindow.Position() != wgp.Pos() {
+			theWindowGeometrySaver.settingStart()
+			if w.SystemWindow.Size() != wgp.size() || w.SystemWindow.Position() != wgp.pos() {
 				if DebugSettings.WinGeomTrace {
-					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.Pos(), wgp.Size())
+					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.pos(), wgp.size())
 				}
-				w.SystemWindow.SetGeom(wgp.Pos(), wgp.Size())
+				w.SystemWindow.SetGeom(wgp.pos(), wgp.size())
 				system.TheApp.SendEmptyEvent()
 			}
-			TheWindowGeometrySaver.SettingEnd()
+			theWindowGeometrySaver.settingEnd()
 		}
 	}
 }
@@ -306,7 +306,7 @@ func (w *renderWindow) resized() {
 	if DebugSettings.WinGeomTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
 	}
-	TheWindowGeometrySaver.RecordPref(w)
+	theWindowGeometrySaver.recordPref(w)
 }
 
 // Raise requests that the window be at the top of the stack of windows,
@@ -487,7 +487,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if DebugSettings.WinGeomTrace {
 				log.Printf("WindowGeometry: recording from Move\n")
 			}
-			TheWindowGeometrySaver.RecordPref(w)
+			theWindowGeometrySaver.recordPref(w)
 		case events.WinFocus:
 			// if we are not already the last in AllRenderWins, we go there,
 			// as this allows focus to be restored to us in the future

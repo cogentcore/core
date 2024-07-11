@@ -15,8 +15,8 @@ func init() {
 	system.HandleRecover = handleRecover
 	system.InitScreenLogicalDPIFunc = AppearanceSettings.applyDPI // called when screens are initialized
 	TheApp.CogentCoreDataDir()                                    // ensure it exists
-	TheWindowGeometrySaver.NeedToReload()                         // gets time stamp associated with open, so it doesn't re-open
-	TheWindowGeometrySaver.Open()
+	theWindowGeometrySaver.needToReload()                         // gets time stamp associated with open, so it doesn't re-open
+	theWindowGeometrySaver.open()
 	styles.SettingsFont = (*string)(&AppearanceSettings.Font)
 	styles.SettingsMonoFont = (*string)(&AppearanceSettings.MonoFont)
 
