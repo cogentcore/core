@@ -389,7 +389,7 @@ func (tf *TextField) Init() {
 		} else {
 			tf.leadingIconButton = nil
 		}
-		if tf.TrailingIcon.IsSet() {
+		if tf.TrailingIcon.IsSet() || tf.error != nil {
 			tree.AddAt(p, "trail-icon-stretch", func(w *Stretch) {
 				w.Styler(func(s *styles.Style) {
 					s.Grow.Set(1, 0)
@@ -426,6 +426,9 @@ func (tf *TextField) Init() {
 				})
 				w.Updater(func() {
 					w.SetIcon(tf.TrailingIcon)
+					if tf.error != nil {
+						w.SetIcon(icons.Error)
+					}
 				})
 			})
 		} else {
@@ -551,7 +554,7 @@ func (tf *TextField) clear() {
 // clearError clears any existing validation error.
 func (tf *TextField) clearError() {
 	tf.error = nil
-	tf.NeedsRender()
+	tf.Update()
 }
 
 // validate runs [TextField.Validator] and takes any necessary actions
@@ -566,14 +569,11 @@ func (tf *TextField) validate() {
 			return
 		}
 		tf.error = nil
-		tf.trailingIconButton.SetIcon(tf.TrailingIcon).Update()
+		tf.Update()
 		return
 	}
 	tf.error = err
-	if tf.trailingIconButton == nil {
-		tf.SetTrailingIcon(icons.Blank).Update()
-	}
-	tf.trailingIconButton.SetIcon(icons.Error).Update()
+	tf.Update()
 	// show the error tooltip immediately
 	tf.Send(events.LongHoverStart)
 }
