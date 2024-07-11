@@ -3533,7 +3533,6 @@ func init() {
 		"SupportFill":                               reflect.ValueOf(&icons.SupportFill).Elem(),
 		"SurroundSound":                             reflect.ValueOf(&icons.SurroundSound).Elem(),
 		"SurroundSoundFill":                         reflect.ValueOf(&icons.SurroundSoundFill).Elem(),
-		"Svg":                                       reflect.ValueOf(&icons.Svg).Elem(),
 		"SwapHoriz":                                 reflect.ValueOf(&icons.SwapHoriz).Elem(),
 		"SwapHorizFill":                             reflect.ValueOf(&icons.SwapHorizFill).Elem(),
 		"SwapHorizontalCircle":                      reflect.ValueOf(&icons.SwapHorizontalCircle).Elem(),

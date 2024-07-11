@@ -110,7 +110,7 @@ var Icons = map[Known]icons.Icon{
 	Gif:        icons.Image,
 	Jpeg:       icons.Image,
 	Png:        icons.Image,
-	Svg:        icons.Svg,
+	Svg:        icons.Shapes,
 	Tiff:       icons.Image,
 	Pnm:        icons.Image,
 	Pbm:        icons.Image,
