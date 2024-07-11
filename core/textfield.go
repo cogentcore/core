@@ -553,6 +553,9 @@ func (tf *TextField) clear() {
 
 // clearError clears any existing validation error.
 func (tf *TextField) clearError() {
+	if tf.error == nil {
+		return
+	}
 	tf.error = nil
 	tf.Update()
 }
@@ -565,11 +568,7 @@ func (tf *TextField) validate() {
 	}
 	err := tf.Validator()
 	if err == nil {
-		if tf.error == nil {
-			return
-		}
-		tf.error = nil
-		tf.Update()
+		tf.clearError()
 		return
 	}
 	tf.error = err
