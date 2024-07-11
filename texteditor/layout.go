@@ -87,7 +87,7 @@ func (ed *Editor) LayoutAllLines() {
 	ed.Buffer.Hi.TabSize = ed.Styles.Text.TabSize
 	ed.NLines = ed.Buffer.NumLines()
 	buf := ed.Buffer
-	buf.MarkupMu.RLock()
+	buf.markupMu.RLock()
 
 	nln := ed.NLines
 	if nln >= len(buf.Markup) {
@@ -128,7 +128,7 @@ func (ed *Editor) LayoutAllLines() {
 		off += lsz
 		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
 	}
-	buf.MarkupMu.RUnlock()
+	buf.markupMu.RUnlock()
 	ed.linesSize = math32.Vec2(mxwd, off)
 	ed.lastlineLayoutSize = ed.lineLayoutSize
 	ed.InternalSizeFromLines()
@@ -192,7 +192,7 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	mxwd := float32(ed.linesSize.X)
 	needLay := false
 
-	ed.Buffer.MarkupMu.RLock()
+	ed.Buffer.markupMu.RLock()
 	rn := &ed.Renders[ln]
 	curspans := len(rn.Spans)
 	rn.SetHTMLPre(ed.Buffer.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
@@ -207,7 +207,7 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	if rn.BBox.Size().X > mxwd {
 		needLay = true
 	}
-	ed.Buffer.MarkupMu.RUnlock()
+	ed.Buffer.markupMu.RUnlock()
 
 	if needLay {
 		ed.NeedsLayout()

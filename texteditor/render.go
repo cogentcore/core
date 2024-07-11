@@ -204,8 +204,8 @@ func (ed *Editor) RenderDepthBackground(stln, edln int) {
 		return
 	}
 	buf := ed.Buffer
-	buf.MarkupMu.RLock() // needed for HiTags access
-	defer buf.MarkupMu.RUnlock()
+	buf.markupMu.RLock() // needed for HiTags access
+	defer buf.markupMu.RUnlock()
 
 	bb := ed.RenderBBox()
 	sty := &ed.Styles
@@ -221,10 +221,10 @@ func (ed *Editor) RenderDepthBackground(stln, edln int) {
 		if int(math32.Floor(lst)) > bb.Max.Y {
 			continue
 		}
-		if ln >= len(buf.HiTags) { // may be out of sync
+		if ln >= len(buf.hiTags) { // may be out of sync
 			continue
 		}
-		ht := buf.HiTags[ln]
+		ht := buf.hiTags[ln]
 		lsted := 0
 		for ti := range ht {
 			lx := &ht[ti]

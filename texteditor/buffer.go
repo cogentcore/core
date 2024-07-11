@@ -38,27 +38,31 @@ import (
 // It holds the raw text lines (in original string and rune formats,
 // and marked-up from syntax highlighting), and sends signals for making
 // edits to the text and coordinating those edits across multiple views.
-// Views always only view a single buffer, so they directly call methods
+// Editors always only view a single buffer, so they directly call methods
 // on the buffer to drive updates, which are then broadcast.
 // It also has methods for loading and saving buffers to files.
-// Unlike GUI Widgets, its methods generally send events, without an
-// explicit Action suffix.
+// Unlike GUI widgets, its methods generally send events, without an
+// explicit Event suffix.
 // Internally, the buffer represents new lines using \n = LF, but saving
 // and loading can deal with Windows/DOS CRLF format.
-type Buffer struct { //types:add
-	// Filename is the filename of the file that was last loaded or saved. It is used when highlighting code.
+type Buffer struct {
+
+	// Filename is the filename of the file that was last loaded or saved.
+	// It is used when highlighting code.
 	Filename core.Filename `json:"-" xml:"-"`
 
-	// Txt is the current value of the entire text being edited, represented as a byte slice for efficiency.
-	Txt []byte `json:"-" xml:"text"`
+	// text is the current value of the entire text being edited,
+	// represented as a byte slice for efficiency.
+	text []byte
 
-	// Autosave specifies whether the file should be automatically saved after changes are made.
+	// Autosave specifies whether the file should be automatically
+	// saved after changes are made.
 	Autosave bool
 
 	// Options are the options for how text editing and viewing works.
 	Options textbuf.Options
 
-	// Info is the full information about the file.
+	// Info is the full information about the current file.
 	Info fileinfo.FileInfo
 
 	// ParseState is the parsing state information for the file.
@@ -70,65 +74,81 @@ type Buffer struct { //types:add
 	// NLines is the number of lines in the buffer.
 	NLines int `json:"-" xml:"-"`
 
-	// LineColors are the colors to use for rendering circles next to the line numbers of certain lines.
+	// LineColors are the colors to use for rendering circles
+	// next to the line numbers of certain lines.
 	LineColors map[int]image.Image
 
-	// Lines are the live lines of text being edited, with the latest modifications. They are encoded as runes per line, which is necessary for one-to-one rune/glyph rendering correspondence. All TextPos positions are in rune indexes, not byte indexes.
+	// Lines are the live lines of text being edited, with the latest modifications.
+	// They are encoded as runes per line, which is necessary for one-to-one rune/glyph
+	// rendering correspondence. All TextPos positions are in rune indexes, not byte
+	// indexes.
 	Lines [][]rune `json:"-" xml:"-"`
 
-	// LineBytes are the live lines of text being edited, with the latest modifications. They are encoded in bytes per line, translated from Lines, and used for input to markup. It is essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes.
-	LineBytes [][]byte `json:"-" xml:"-"`
+	// lineBytes are the live lines of text being edited, with the latest modifications.
+	// They are encoded in bytes per line, translated from Lines, and used for input to
+	// markup. It is essential to use Lines and not lineBytes when dealing with TextPos
+	// positions, which are in runes.
+	lineBytes [][]byte
 
-	// Tags are the extra custom tagged regions for each line.
-	Tags []lexer.Line `json:"-" xml:"-"`
+	// tags are the extra custom tagged regions for each line.
+	tags []lexer.Line
 
-	// HiTags are the syntax highlighting tags, which are auto-generated.
-	HiTags []lexer.Line `json:"-" xml:"-"`
+	// hiTags are the syntax highlighting tags, which are auto-generated.
+	hiTags []lexer.Line
 
-	// Markup is the marked-up version of the edited text lines, after being run through the syntax highlighting process. This is what is actually rendered.
+	// Markup is the marked-up version of the edited text lines, after being run
+	// through the syntax highlighting process. This is what is actually rendered.
 	Markup [][]byte `json:"-" xml:"-"`
 
-	// MarkupEdits are the edits that have been made since the last full markup.
-	MarkupEdits []*textbuf.Edit `json:"-" xml:"-"`
+	// markupEdits are the edits that have been made since the last full markup.
+	markupEdits []*textbuf.Edit
 
-	// ByteOffs are the offsets for the start of each line in the Txt byte slice. This is not updated with edits. Call SetByteOffs to set it when needed. It is used for re-generating the Txt in LinesToBytes and set on initial open in BytesToLines.
-	ByteOffs []int `json:"-" xml:"-"`
+	// byteOffsets are the offsets for the start of each line in the [Buffer.text] byte
+	// slice. This is not updated with edits. Call SetByteOffs to set it when needed.
+	// It is used for re-generating the text in LinesToBytes and set on initial open in
+	// BytesToLines.
+	byteOffsets []int
 
-	// TotalBytes is the total number of bytes in the document. See ByteOffs for when it is updated.
-	TotalBytes int `json:"-" xml:"-"`
+	// totalBytes is the total number of bytes in the document.
+	// See byteOffsets for when it is updated.
+	totalBytes int
 
 	// LinesMu is the mutex for updating lines.
 	LinesMu sync.RWMutex `json:"-" xml:"-"`
 
-	// MarkupMu is the mutex for updating markup.
-	MarkupMu sync.RWMutex `json:"-" xml:"-"`
+	// markupMu is the mutex for updating markup.
+	markupMu sync.RWMutex
 
-	// MarkupDelayTimer is the markup delay timer.
-	MarkupDelayTimer *time.Timer `json:"-" xml:"-"`
+	// markupDelayTimer is the markup delay timer.
+	markupDelayTimer *time.Timer
 
-	// MarkupDelayMu is the mutex for updating the markup delay timer.
-	MarkupDelayMu sync.Mutex `json:"-" xml:"-"`
+	// markupDelayMu is the mutex for updating the markup delay timer.
+	markupDelayMu sync.Mutex
 
-	// Editors are the editors that are currently viewing this buffer.
-	Editors []*Editor `json:"-" xml:"-"`
+	// editors are the editors that are currently viewing this buffer.
+	editors []*Editor
 
 	// Undos is the undo manager.
 	Undos textbuf.Undo `json:"-" xml:"-"`
 
-	// PosHistory is the history of cursor positions. It can be used to move back through them.
-	PosHistory []lexer.Pos `json:"-" xml:"-"`
+	// posHistory is the history of cursor positions.
+	// It can be used to move back through them.
+	posHistory []lexer.Pos
 
 	// Complete is the functions and data for text completion.
 	Complete *core.Complete `json:"-" xml:"-"`
 
-	// Spell is the functions and data for spelling correction.
-	Spell *spellCheck `json:"-" xml:"-"`
+	// spell is the functions and data for spelling correction.
+	spell *spellCheck
 
-	// CurrentEditor is the current text editor, such as the one that initiated the Complete or Correct process. The cursor position in this view is updated, and it is reset to nil after usage.
-	CurrentEditor *Editor `json:"-" xml:"-"`
+	// currentEditor is the current text editor, such as the one that initiated the
+	// Complete or Correct process. The cursor position in this view is updated, and
+	// it is reset to nil after usage.
+	currentEditor *Editor
 
-	// Listeners is used for sending standard system events. Change is sent for BufDone, BufInsert, and BufDelete.
-	Listeners events.Listeners
+	// listeners is used for sending standard system events.
+	// Change is sent for BufferDone, BufferInsert, and BufferDelete.
+	listeners events.Listeners
 
 	// Bool flags:
 
@@ -199,28 +219,28 @@ const (
 // SignalEditors sends the given signal and optional edit info
 // to all the [Editor]s for this [Buffer]
 func (tb *Buffer) SignalEditors(sig BufferSignals, edit *textbuf.Edit) {
-	for _, vw := range tb.Editors {
+	for _, vw := range tb.editors {
 		vw.BufferSignal(sig, edit)
 	}
 	if sig == BufferDone {
 		e := &events.Base{Typ: events.Change}
 		e.Init()
-		tb.Listeners.Call(e)
+		tb.listeners.Call(e)
 	} else if sig == BufferInsert || sig == BufferDelete {
 		e := &events.Base{Typ: events.Input}
 		e.Init()
-		tb.Listeners.Call(e)
+		tb.listeners.Call(e)
 	}
 }
 
 // OnChange adds an event listener function for the [events.Change] event
 func (tb *Buffer) OnChange(fun func(e events.Event)) {
-	tb.Listeners.Add(events.Change, fun)
+	tb.listeners.Add(events.Change, fun)
 }
 
 // OnInput adds an event listener function for the [events.Input] event
 func (tb *Buffer) OnInput(fun func(e events.Event)) {
-	tb.Listeners.Add(events.Input, fun)
+	tb.listeners.Add(events.Input, fun)
 }
 
 // clearNotSaved sets Changed and NotSaved to false.
@@ -237,7 +257,7 @@ func (tb *Buffer) setChanged() {
 
 // SetText sets the text to the given bytes.
 func (tb *Buffer) SetText(txt []byte) *Buffer {
-	tb.Txt = txt
+	tb.text = txt
 	tb.BytesToLines()
 	tb.InitialMarkup()
 	tb.SignalEditors(BufferNew, nil)
@@ -264,18 +284,18 @@ func (tb *Buffer) SetTextLines(lns [][]byte, cpy bool) {
 	tb.LinesMu.Lock()
 	bo := 0
 	for ln, txt := range lns {
-		tb.ByteOffs[ln] = bo
+		tb.byteOffsets[ln] = bo
 		tb.Lines[ln] = bytes.Runes(txt)
 		if cpy {
-			tb.LineBytes[ln] = make([]byte, len(txt))
-			copy(tb.LineBytes[ln], txt)
+			tb.lineBytes[ln] = make([]byte, len(txt))
+			copy(tb.lineBytes[ln], txt)
 		} else {
-			tb.LineBytes[ln] = txt
+			tb.lineBytes[ln] = txt
 		}
 		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
 		bo += len(txt) + 1 // lf
 	}
-	tb.TotalBytes = bo
+	tb.totalBytes = bo
 	tb.LinesMu.Unlock()
 	tb.LinesToBytes()
 	tb.InitialMarkup()
@@ -296,7 +316,7 @@ func (tb *Buffer) EditDone() {
 // changes.
 func (tb *Buffer) Text() []byte {
 	tb.EditDone()
-	return tb.Txt
+	return tb.text
 }
 
 // String returns the current text as a string, applying all current
@@ -352,7 +372,7 @@ func (tb *Buffer) BytesLine(ln int) []byte {
 	if ln >= tb.NLines || ln < 0 {
 		return nil
 	}
-	return tb.LineBytes[ln]
+	return tb.lineBytes[ln]
 }
 
 // SetLang sets the language for highlighting and updates
@@ -360,15 +380,15 @@ func (tb *Buffer) BytesLine(ln int) []byte {
 func (tb *Buffer) SetLang(lang string) *Buffer {
 	lang = strings.ToLower(lang)
 	tb.SetFilename("_placeholder." + lang)
-	tb.SetText(tb.Txt) // to update it
+	tb.SetText(tb.text) // to update it
 	return tb
 }
 
 // SetHiStyle sets the highlighting style -- needs to be protected by mutex
 func (tb *Buffer) SetHiStyle(style core.HiStyleName) *Buffer {
-	tb.MarkupMu.Lock()
+	tb.markupMu.Lock()
 	tb.Hi.SetHiStyle(style)
-	tb.MarkupMu.Unlock()
+	tb.markupMu.Unlock()
 	return tb
 }
 
@@ -401,24 +421,24 @@ func (tb *Buffer) SetFilename(fn string) *Buffer {
 func (tb *Buffer) NewBuffer(nlines int) {
 	nlines = max(nlines, 1)
 	tb.LinesMu.Lock()
-	tb.MarkupMu.Lock()
+	tb.markupMu.Lock()
 	tb.Undos.Reset()
 	tb.Lines = make([][]rune, nlines)
-	tb.LineBytes = make([][]byte, nlines)
-	tb.Tags = make([]lexer.Line, nlines)
-	tb.HiTags = make([]lexer.Line, nlines)
+	tb.lineBytes = make([][]byte, nlines)
+	tb.tags = make([]lexer.Line, nlines)
+	tb.hiTags = make([]lexer.Line, nlines)
 	tb.Markup = make([][]byte, nlines)
 
-	if cap(tb.ByteOffs) >= nlines {
-		tb.ByteOffs = tb.ByteOffs[:nlines]
+	if cap(tb.byteOffsets) >= nlines {
+		tb.byteOffsets = tb.byteOffsets[:nlines]
 	} else {
-		tb.ByteOffs = make([]int, nlines)
+		tb.byteOffsets = make([]int, nlines)
 	}
 
 	if nlines == 1 { // this is used for a new blank doc
-		tb.ByteOffs[0] = 0 // by definition
+		tb.byteOffsets[0] = 0 // by definition
 		tb.Lines[0] = []rune("")
-		tb.LineBytes[0] = []byte("")
+		tb.lineBytes[0] = []byte("")
 		tb.Markup[0] = []byte("")
 	}
 
@@ -427,7 +447,7 @@ func (tb *Buffer) NewBuffer(nlines int) {
 	tb.ParseState.SetSrc(string(tb.Filename), "", tb.Info.Known)
 	tb.Hi.Init(&tb.Info, &tb.ParseState)
 
-	tb.MarkupMu.Unlock()
+	tb.markupMu.Unlock()
 	tb.LinesMu.Unlock()
 	tb.SignalEditors(BufferNew, nil)
 }
@@ -444,7 +464,7 @@ func (tb *Buffer) Stat() error {
 // Returns true if supported.
 func (tb *Buffer) ConfigKnown() bool {
 	if tb.Info.Known != fileinfo.Unknown {
-		if tb.Spell == nil {
+		if tb.spell == nil {
 			tb.SetSpell()
 		}
 		if tb.Complete == nil {
@@ -512,7 +532,7 @@ func (tb *Buffer) OpenFS(fsys fs.FS, filename string) error {
 	if err != nil {
 		return err
 	}
-	tb.Txt = txt
+	tb.text = txt
 	tb.SetFilename(filename)
 	tb.BytesToLines()
 	tb.InitialMarkup()
@@ -529,7 +549,7 @@ func (tb *Buffer) OpenFile(filename core.Filename) error {
 	if err != nil {
 		return err
 	}
-	tb.Txt = txt
+	tb.text = txt
 	tb.SetFilename(string(filename))
 	tb.BytesToLines()
 	return nil
@@ -616,7 +636,7 @@ func (tb *Buffer) SaveAs(filename core.Filename) { //types:add
 
 // SaveFile writes current buffer to file, with no prompting, etc
 func (tb *Buffer) SaveFile(filename core.Filename) error {
-	err := os.WriteFile(string(filename), tb.Txt, 0644)
+	err := os.WriteFile(string(filename), tb.text, 0644)
 	if err != nil {
 		core.ErrorSnackbar(tb.SceneFromView(), err)
 		slog.Error(err.Error())
@@ -886,22 +906,22 @@ func (tb *Buffer) AppendTextLineMarkup(text []byte, markup []byte, signal bool) 
 
 // AddView adds a viewer of this buffer -- connects our signals to the viewer
 func (tb *Buffer) AddView(vw *Editor) {
-	tb.Editors = append(tb.Editors, vw)
+	tb.editors = append(tb.editors, vw)
 	// tb.BufSig.Connect(vw.This, ViewBufSigRecv)
 }
 
 // DeleteView removes given viewer from our buffer
 func (tb *Buffer) DeleteView(vw *Editor) {
-	tb.MarkupMu.Lock()
+	tb.markupMu.Lock()
 	tb.LinesMu.Lock()
 	defer func() {
 		tb.LinesMu.Unlock()
-		tb.MarkupMu.Unlock()
+		tb.markupMu.Unlock()
 	}()
 
-	for i, ede := range tb.Editors {
+	for i, ede := range tb.editors {
 		if ede == vw {
-			tb.Editors = append(tb.Editors[:i], tb.Editors[i+1:]...)
+			tb.editors = append(tb.editors[:i], tb.editors[i+1:]...)
 			break
 		}
 	}
@@ -909,15 +929,15 @@ func (tb *Buffer) DeleteView(vw *Editor) {
 
 // SceneFromView returns Scene from text editor, if avail
 func (tb *Buffer) SceneFromView() *core.Scene {
-	if len(tb.Editors) > 0 {
-		return tb.Editors[0].Scene
+	if len(tb.editors) > 0 {
+		return tb.editors[0].Scene
 	}
 	return nil
 }
 
 // AutoscrollViews ensures that views are always viewing the end of the buffer
 func (tb *Buffer) AutoScrollViews() {
-	for _, ed := range tb.Editors {
+	for _, ed := range tb.editors {
 		if ed != nil && ed.This != nil {
 			ed.RenderLayout()
 			ed.SetCursorTarget(tb.EndPos())
@@ -945,11 +965,11 @@ func (tb *Buffer) BatchUpdateEnd(autoSave bool) {
 // SetByteOffs sets the byte offsets for each line into the raw text
 func (tb *Buffer) SetByteOffs() {
 	bo := 0
-	for ln, txt := range tb.LineBytes {
-		tb.ByteOffs[ln] = bo
+	for ln, txt := range tb.lineBytes {
+		tb.byteOffsets[ln] = bo
 		bo += len(txt) + 1 // lf
 	}
-	tb.TotalBytes = bo
+	tb.totalBytes = bo
 }
 
 // LinesToBytes converts current Lines back to the Txt slice of bytes.
@@ -958,15 +978,15 @@ func (tb *Buffer) LinesToBytes() {
 	defer tb.LinesMu.RUnlock()
 
 	if tb.NLines == 0 {
-		if tb.Txt != nil {
-			tb.Txt = tb.Txt[:0]
+		if tb.text != nil {
+			tb.text = tb.text[:0]
 		}
 		return
 	}
 
-	txt := bytes.Join(tb.LineBytes, []byte("\n"))
+	txt := bytes.Join(tb.lineBytes, []byte("\n"))
 	txt = append(txt, '\n')
-	tb.Txt = txt
+	tb.text = txt
 }
 
 // LinesToBytesCopy converts current Lines into a separate text byte copy --
@@ -976,7 +996,7 @@ func (tb *Buffer) LinesToBytesCopy() []byte {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 
-	txt := bytes.Join(tb.LineBytes, []byte("\n"))
+	txt := bytes.Join(tb.lineBytes, []byte("\n"))
 	txt = append(txt, '\n')
 	return txt
 }
@@ -984,12 +1004,12 @@ func (tb *Buffer) LinesToBytesCopy() []byte {
 // BytesToLines converts current Txt bytes into lines, and initializes markup
 // with raw text
 func (tb *Buffer) BytesToLines() {
-	if len(tb.Txt) == 0 {
+	if len(tb.text) == 0 {
 		tb.NewBuffer(1)
 		return
 	}
 	tb.LinesMu.Lock()
-	lns := bytes.Split(tb.Txt, []byte("\n"))
+	lns := bytes.Split(tb.text, []byte("\n"))
 	tb.NLines = len(lns)
 	if len(lns[tb.NLines-1]) == 0 { // lines have lf at end typically
 		tb.NLines--
@@ -1000,14 +1020,14 @@ func (tb *Buffer) BytesToLines() {
 	tb.LinesMu.Lock()
 	bo := 0
 	for ln, txt := range lns {
-		tb.ByteOffs[ln] = bo
+		tb.byteOffsets[ln] = bo
 		tb.Lines[ln] = bytes.Runes(txt)
-		tb.LineBytes[ln] = make([]byte, len(txt))
-		copy(tb.LineBytes[ln], txt)
+		tb.lineBytes[ln] = make([]byte, len(txt))
+		copy(tb.lineBytes[ln], txt)
 		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
 		bo += len(txt) + 1 // lf
 	}
-	tb.TotalBytes = bo
+	tb.totalBytes = bo
 	tb.LinesMu.Unlock()
 }
 
@@ -1033,9 +1053,9 @@ func (tb *Buffer) Search(find []byte, ignoreCase, lexItems bool) (int, []textbuf
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 	if lexItems {
-		tb.MarkupMu.RLock()
-		defer tb.MarkupMu.RUnlock()
-		return textbuf.SearchLexItems(tb.Lines, tb.HiTags, find, ignoreCase)
+		tb.markupMu.RLock()
+		defer tb.markupMu.RUnlock()
+		return textbuf.SearchLexItems(tb.Lines, tb.hiTags, find, ignoreCase)
 	} else {
 		return textbuf.SearchRuneLines(tb.Lines, find, ignoreCase)
 	}
@@ -1047,7 +1067,7 @@ func (tb *Buffer) Search(find []byte, ignoreCase, lexItems bool) (int, []textbuf
 func (tb *Buffer) SearchRegexp(re *regexp.Regexp) (int, []textbuf.Match) {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	return textbuf.SearchByteLinesRegexp(tb.LineBytes, re)
+	return textbuf.SearchByteLinesRegexp(tb.lineBytes, re)
 }
 
 // BraceMatch finds the brace, bracket, or parens that is the partner
@@ -1055,9 +1075,9 @@ func (tb *Buffer) SearchRegexp(re *regexp.Regexp) (int, []textbuf.Match) {
 func (tb *Buffer) BraceMatch(r rune, st lexer.Pos) (en lexer.Pos, found bool) {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	tb.MarkupMu.RLock()
-	defer tb.MarkupMu.RUnlock()
-	return lexer.BraceMatch(tb.Lines, tb.HiTags, r, st, MaxScopeLines)
+	tb.markupMu.RLock()
+	defer tb.markupMu.RUnlock()
+	return lexer.BraceMatch(tb.Lines, tb.hiTags, r, st, MaxScopeLines)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1511,16 +1531,16 @@ func (tb *Buffer) ReplaceText(delSt, delEd, insPos lexer.Pos, insTxt string, sig
 // SavePosHistory saves the cursor position in history stack of cursor positions --
 // tracks across views -- returns false if position was on same line as last one saved
 func (tb *Buffer) SavePosHistory(pos lexer.Pos) bool {
-	if tb.PosHistory == nil {
-		tb.PosHistory = make([]lexer.Pos, 0, 1000)
+	if tb.posHistory == nil {
+		tb.posHistory = make([]lexer.Pos, 0, 1000)
 	}
-	sz := len(tb.PosHistory)
+	sz := len(tb.posHistory)
 	if sz > 0 {
-		if tb.PosHistory[sz-1].Ln == pos.Ln {
+		if tb.posHistory[sz-1].Ln == pos.Ln {
 			return false
 		}
 	}
-	tb.PosHistory = append(tb.PosHistory, pos)
+	tb.posHistory = append(tb.posHistory, pos)
 	// fmt.Printf("saved pos hist: %v\n", pos)
 	return true
 }
@@ -1531,14 +1551,14 @@ func (tb *Buffer) SavePosHistory(pos lexer.Pos) bool {
 // LinesEdited re-marks-up lines in edit (typically only 1).  Locks and
 // unlocks the Markup mutex.  Must be called under Lines mutex lock.
 func (tb *Buffer) LinesEdited(tbe *textbuf.Edit) {
-	tb.MarkupMu.Lock()
+	tb.markupMu.Lock()
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
 	for ln := st; ln <= ed; ln++ {
-		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
+		tb.lineBytes[ln] = []byte(string(tb.Lines[ln]))
 		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
 	}
 	tb.MarkupLines(st, ed)
-	tb.MarkupMu.Unlock()
+	tb.markupMu.Unlock()
 	tb.StartDelayedReMarkup()
 }
 
@@ -1549,15 +1569,15 @@ func (tb *Buffer) LinesInserted(tbe *textbuf.Edit) {
 	stln := tbe.Reg.Start.Ln + 1
 	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
 
-	tb.MarkupMu.Lock()
-	tb.MarkupEdits = append(tb.MarkupEdits, tbe)
+	tb.markupMu.Lock()
+	tb.markupEdits = append(tb.markupEdits, tbe)
 
 	// LineBytes
 	tmplb := make([][]byte, nsz)
-	nlb := append(tb.LineBytes, tmplb...)
+	nlb := append(tb.lineBytes, tmplb...)
 	copy(nlb[stln+nsz:], nlb[stln:])
 	copy(nlb[stln:], tmplb)
-	tb.LineBytes = nlb
+	tb.lineBytes = nlb
 
 	// Markup
 	tmpmu := make([][]byte, nsz)
@@ -1568,24 +1588,24 @@ func (tb *Buffer) LinesInserted(tbe *textbuf.Edit) {
 
 	// Tags
 	tmptg := make([]lexer.Line, nsz)
-	ntg := append(tb.Tags, tmptg...)
+	ntg := append(tb.tags, tmptg...)
 	copy(ntg[stln+nsz:], ntg[stln:])
 	copy(ntg[stln:], tmptg)
-	tb.Tags = ntg
+	tb.tags = ntg
 
 	// HiTags
 	tmpht := make([]lexer.Line, nsz)
-	nht := append(tb.HiTags, tmpht...)
+	nht := append(tb.hiTags, tmpht...)
 	copy(nht[stln+nsz:], nht[stln:])
 	copy(nht[stln:], tmpht)
-	tb.HiTags = nht
+	tb.hiTags = nht
 
 	// ByteOffs -- maintain mem update
 	tmpof := make([]int, nsz)
-	nof := append(tb.ByteOffs, tmpof...)
+	nof := append(tb.byteOffsets, tmpof...)
 	copy(nof[stln+nsz:], nof[stln:])
 	copy(nof[stln:], tmpof)
-	tb.ByteOffs = nof
+	tb.byteOffsets = nof
 
 	if tb.Hi.UsingParse() {
 		pfs := tb.ParseState.Done()
@@ -1593,15 +1613,15 @@ func (tb *Buffer) LinesInserted(tbe *textbuf.Edit) {
 	}
 
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
-	bo := tb.ByteOffs[st]
+	bo := tb.byteOffsets[st]
 	for ln := st; ln <= ed; ln++ {
-		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
+		tb.lineBytes[ln] = []byte(string(tb.Lines[ln]))
 		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
-		tb.ByteOffs[ln] = bo
-		bo += len(tb.LineBytes[ln]) + 1
+		tb.byteOffsets[ln] = bo
+		bo += len(tb.lineBytes[ln]) + 1
 	}
 	tb.MarkupLines(st, ed)
-	tb.MarkupMu.Unlock()
+	tb.markupMu.Unlock()
 	tb.StartDelayedReMarkup()
 }
 
@@ -1609,18 +1629,18 @@ func (tb *Buffer) LinesInserted(tbe *textbuf.Edit) {
 // deleted in Lines text.  Locks and unlocks the Markup mutex, and
 // must be called under lines mutex.
 func (tb *Buffer) LinesDeleted(tbe *textbuf.Edit) {
-	tb.MarkupMu.Lock()
+	tb.markupMu.Lock()
 
-	tb.MarkupEdits = append(tb.MarkupEdits, tbe)
+	tb.markupEdits = append(tb.markupEdits, tbe)
 
 	stln := tbe.Reg.Start.Ln
 	edln := tbe.Reg.End.Ln
 
-	tb.LineBytes = append(tb.LineBytes[:stln], tb.LineBytes[edln:]...)
+	tb.lineBytes = append(tb.lineBytes[:stln], tb.lineBytes[edln:]...)
 	tb.Markup = append(tb.Markup[:stln], tb.Markup[edln:]...)
-	tb.Tags = append(tb.Tags[:stln], tb.Tags[edln:]...)
-	tb.HiTags = append(tb.HiTags[:stln], tb.HiTags[edln:]...)
-	tb.ByteOffs = append(tb.ByteOffs[:stln], tb.ByteOffs[edln:]...)
+	tb.tags = append(tb.tags[:stln], tb.tags[edln:]...)
+	tb.hiTags = append(tb.hiTags[:stln], tb.hiTags[edln:]...)
+	tb.byteOffsets = append(tb.byteOffsets[:stln], tb.byteOffsets[edln:]...)
 
 	if tb.Hi.UsingParse() {
 		pfs := tb.ParseState.Done()
@@ -1628,10 +1648,10 @@ func (tb *Buffer) LinesDeleted(tbe *textbuf.Edit) {
 	}
 
 	st := tbe.Reg.Start.Ln
-	tb.LineBytes[st] = []byte(string(tb.Lines[st]))
+	tb.lineBytes[st] = []byte(string(tb.Lines[st]))
 	tb.Markup[st] = HTMLEscapeRunes(tb.Lines[st])
 	tb.MarkupLines(st, st)
-	tb.MarkupMu.Unlock()
+	tb.markupMu.Unlock()
 	tb.StartDelayedReMarkup()
 }
 
@@ -1641,14 +1661,14 @@ func (tb *Buffer) LinesDeleted(tbe *textbuf.Edit) {
 // MarkupLine does markup on a single line
 func (tb *Buffer) MarkupLine(ln int) {
 	tb.LinesMu.Lock()
-	tb.MarkupMu.Lock()
+	tb.markupMu.Lock()
 
 	if ln >= 0 && ln < len(tb.Markup) {
-		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
+		tb.lineBytes[ln] = []byte(string(tb.Lines[ln]))
 		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
 		tb.MarkupLines(ln, ln)
 	}
-	tb.MarkupMu.Unlock()
+	tb.markupMu.Unlock()
 	tb.LinesMu.Unlock()
 }
 
@@ -1656,7 +1676,7 @@ func (tb *Buffer) MarkupLine(ln int) {
 func (tb *Buffer) InitialMarkup() {
 	if tb.Hi.UsingParse() {
 		fs := tb.ParseState.Done() // initialize
-		fs.Src.SetBytes(tb.Txt)
+		fs.Src.SetBytes(tb.text)
 	}
 	mxhi := min(100, tb.NLines-1)
 	tb.MarkupAllLines(mxhi)
@@ -1664,14 +1684,14 @@ func (tb *Buffer) InitialMarkup() {
 
 // StartDelayedReMarkup starts a timer for doing markup after an interval
 func (tb *Buffer) StartDelayedReMarkup() {
-	tb.MarkupDelayMu.Lock()
-	defer tb.MarkupDelayMu.Unlock()
+	tb.markupDelayMu.Lock()
+	defer tb.markupDelayMu.Unlock()
 	if !tb.Hi.HasHi() || tb.NLines == 0 {
 		return
 	}
-	if tb.MarkupDelayTimer != nil {
-		tb.MarkupDelayTimer.Stop()
-		tb.MarkupDelayTimer = nil
+	if tb.markupDelayTimer != nil {
+		tb.markupDelayTimer.Stop()
+		tb.markupDelayTimer = nil
 	}
 	sc := tb.SceneFromView()
 	_ = sc
@@ -1684,20 +1704,20 @@ func (tb *Buffer) StartDelayedReMarkup() {
 	if tb.Complete != nil && tb.Complete.IsAboutToShow() {
 		return
 	}
-	tb.MarkupDelayTimer = time.AfterFunc(MarkupDelay, func() {
+	tb.markupDelayTimer = time.AfterFunc(MarkupDelay, func() {
 		// fmt.Printf("delayed remarkup\n")
-		tb.MarkupDelayTimer = nil
+		tb.markupDelayTimer = nil
 		tb.ReMarkup()
 	})
 }
 
 // StopDelayedReMarkup stops timer for doing markup after an interval
 func (tb *Buffer) StopDelayedReMarkup() {
-	tb.MarkupDelayMu.Lock()
-	defer tb.MarkupDelayMu.Unlock()
-	if tb.MarkupDelayTimer != nil {
-		tb.MarkupDelayTimer.Stop()
-		tb.MarkupDelayTimer = nil
+	tb.markupDelayMu.Lock()
+	defer tb.markupDelayMu.Unlock()
+	if tb.markupDelayTimer != nil {
+		tb.markupDelayTimer.Stop()
+		tb.markupDelayTimer = nil
 	}
 }
 
@@ -1715,7 +1735,7 @@ func (tb *Buffer) ReMarkup() {
 // AdjustedTags updates tag positions for edits
 // must be called under MarkupMu lock
 func (tb *Buffer) AdjustedTags(ln int) lexer.Line {
-	return tb.AdjustedTagsImpl(tb.Tags[ln], ln)
+	return tb.AdjustedTagsImpl(tb.tags[ln], ln)
 }
 
 // AdjustedTagsImpl updates tag positions for edits, for given list of tags
@@ -1751,15 +1771,15 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 	}
 	tb.markingUp = true
 
-	tb.MarkupMu.Lock()
-	tb.MarkupEdits = nil
-	tb.MarkupMu.Unlock()
+	tb.markupMu.Lock()
+	tb.markupEdits = nil
+	tb.markupMu.Unlock()
 
 	var txt []byte
 	if maxLines > 0 {
 		tb.LinesMu.RLock()
-		mln := min(maxLines, len(tb.LineBytes))
-		txt = bytes.Join(tb.LineBytes[:mln], []byte("\n"))
+		mln := min(maxLines, len(tb.lineBytes))
+		txt = bytes.Join(tb.lineBytes[:mln], []byte("\n"))
 		txt = append(txt, '\n')
 		tb.LinesMu.RUnlock()
 	} else {
@@ -1773,7 +1793,7 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 
 	// by this point mtags could be out of sync with deletes that have happened
 	tb.LinesMu.Lock()
-	tb.MarkupMu.Lock()
+	tb.markupMu.Lock()
 
 	maxln := min(len(tb.Markup), tb.NLines)
 	if maxLines > 0 {
@@ -1783,7 +1803,7 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 	if tb.Hi.UsingParse() {
 		pfs := tb.ParseState.Done()
 		// first update mtags with any changes since it was generated
-		for _, tbe := range tb.MarkupEdits {
+		for _, tbe := range tb.markupEdits {
 			if tbe.Delete {
 				stln := tbe.Reg.Start.Ln
 				edln := tbe.Reg.End.Ln
@@ -1794,16 +1814,16 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 				pfs.Src.LinesInserted(stln, nlns)
 			}
 		}
-		tb.MarkupEdits = nil
+		tb.markupEdits = nil
 		// if maxln > 1 && len(pfs.Src.Lexs)-1 != maxln {
 		// 	fmt.Printf("error: markup out of sync: %v != %v len(Lexs)\n", maxln, len(pfs.Src.Lexs)-1)
 		// }
 		for ln := 0; ln < maxln; ln++ {
-			tb.HiTags[ln] = pfs.LexLine(ln) // does clone, combines comments too
+			tb.hiTags[ln] = pfs.LexLine(ln) // does clone, combines comments too
 		}
 	} else {
 		// first update mtags with any changes since it was generated
-		for _, tbe := range tb.MarkupEdits {
+		for _, tbe := range tb.markupEdits {
 			if tbe.Delete {
 				stln := tbe.Reg.Start.Ln
 				edln := tbe.Reg.End.Ln
@@ -1818,20 +1838,20 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 				mtags = nht
 			}
 		}
-		tb.MarkupEdits = nil
+		tb.markupEdits = nil
 		// if maxln > 0 && len(mtags) != maxln {
 		// 	fmt.Printf("error: markup out of sync: %v != %v len(mtags)\n", maxln, len(mtags))
 		// }
 		maxln = min(maxln, len(mtags))
 		for ln := 0; ln < maxln; ln++ {
-			tb.HiTags[ln] = mtags[ln] // chroma tags are freshly allocated
+			tb.hiTags[ln] = mtags[ln] // chroma tags are freshly allocated
 		}
 	}
 	for ln := 0; ln < maxln; ln++ {
-		tb.Tags[ln] = tb.AdjustedTags(ln)
-		tb.Markup[ln] = tb.Hi.MarkupLine(tb.Lines[ln], tb.HiTags[ln], tb.Tags[ln])
+		tb.tags[ln] = tb.AdjustedTags(ln)
+		tb.Markup[ln] = tb.Hi.MarkupLine(tb.Lines[ln], tb.hiTags[ln], tb.tags[ln])
 	}
-	tb.MarkupMu.Unlock()
+	tb.markupMu.Unlock()
 	tb.LinesMu.Unlock()
 	tb.markingUp = false
 	tb.SignalEditors(BufferMarkupUpdated, nil)
@@ -1841,15 +1861,15 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 // running new tagging -- for special case where tagging is under external
 // control
 func (tb *Buffer) MarkupFromTags() {
-	tb.MarkupMu.Lock()
+	tb.markupMu.Lock()
 	// getting the lock means we are in control of the flag
 	tb.markingUp = true
 
-	maxln := min(len(tb.HiTags), tb.NLines)
+	maxln := min(len(tb.hiTags), tb.NLines)
 	for ln := 0; ln < maxln; ln++ {
-		tb.Markup[ln] = tb.Hi.MarkupLine(tb.Lines[ln], tb.HiTags[ln], nil)
+		tb.Markup[ln] = tb.Hi.MarkupLine(tb.Lines[ln], tb.hiTags[ln], nil)
 	}
-	tb.MarkupMu.Unlock()
+	tb.markupMu.Unlock()
 	tb.markingUp = false
 	tb.SignalEditors(BufferMarkupUpdated, nil)
 }
@@ -1870,7 +1890,7 @@ func (tb *Buffer) MarkupLines(st, ed int) bool {
 		ltxt := tb.Lines[ln]
 		mt, err := tb.Hi.MarkupTagsLine(ln, ltxt)
 		if err == nil {
-			tb.HiTags[ln] = mt
+			tb.hiTags[ln] = mt
 			tb.Markup[ln] = tb.Hi.MarkupLine(ltxt, mt, tb.AdjustedTags(ln))
 		} else {
 			tb.Markup[ln] = HTMLEscapeRunes(ltxt)
@@ -1884,8 +1904,8 @@ func (tb *Buffer) MarkupLines(st, ed int) bool {
 
 // MarkupLinesLock does MarkupLines and gets the mutex lock first
 func (tb *Buffer) MarkupLinesLock(st, ed int) bool {
-	tb.MarkupMu.Lock()
-	defer tb.MarkupMu.Unlock()
+	tb.markupMu.Lock()
+	defer tb.markupMu.Unlock()
 	return tb.MarkupLines(st, ed)
 }
 
@@ -2044,16 +2064,16 @@ func (tb *Buffer) AddTag(ln, st, ed int, tag token.Tokens) {
 	if !tb.IsValidLine(ln) {
 		return
 	}
-	tb.MarkupMu.Lock()
+	tb.markupMu.Lock()
 	tr := lexer.NewLex(token.KeyToken{Token: tag}, st, ed)
 	tr.Time.Now()
-	if len(tb.Tags[ln]) == 0 {
-		tb.Tags[ln] = append(tb.Tags[ln], tr)
+	if len(tb.tags[ln]) == 0 {
+		tb.tags[ln] = append(tb.tags[ln], tr)
 	} else {
-		tb.Tags[ln] = tb.AdjustedTags(ln) // must re-adjust before adding new ones!
-		tb.Tags[ln].AddSort(tr)
+		tb.tags[ln] = tb.AdjustedTags(ln) // must re-adjust before adding new ones!
+		tb.tags[ln].AddSort(tr)
 	}
-	tb.MarkupMu.Unlock()
+	tb.markupMu.Unlock()
 	tb.MarkupLinesLock(ln, ln)
 }
 
@@ -2064,13 +2084,13 @@ func (tb *Buffer) AddTagEdit(tbe *textbuf.Edit, tag token.Tokens) {
 
 // TagAt returns tag at given text position, if one exists -- returns false if not
 func (tb *Buffer) TagAt(pos lexer.Pos) (reg lexer.Lex, ok bool) {
-	tb.MarkupMu.Lock()
-	defer tb.MarkupMu.Unlock()
+	tb.markupMu.Lock()
+	defer tb.markupMu.Unlock()
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
-	tb.Tags[pos.Ln] = tb.AdjustedTags(pos.Ln) // re-adjust for current info
-	for _, t := range tb.Tags[pos.Ln] {
+	tb.tags[pos.Ln] = tb.AdjustedTags(pos.Ln) // re-adjust for current info
+	for _, t := range tb.tags[pos.Ln] {
 		if t.St >= pos.Ch && t.Ed < pos.Ch {
 			return t, true
 		}
@@ -2084,20 +2104,20 @@ func (tb *Buffer) RemoveTag(pos lexer.Pos, tag token.Tokens) (reg lexer.Lex, ok 
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
-	tb.MarkupMu.Lock()
-	tb.Tags[pos.Ln] = tb.AdjustedTags(pos.Ln) // re-adjust for current info
-	for i, t := range tb.Tags[pos.Ln] {
+	tb.markupMu.Lock()
+	tb.tags[pos.Ln] = tb.AdjustedTags(pos.Ln) // re-adjust for current info
+	for i, t := range tb.tags[pos.Ln] {
 		if t.ContainsPos(pos.Ch) {
 			if tag > 0 && t.Token.Token != tag {
 				continue
 			}
-			tb.Tags[pos.Ln].DeleteIndex(i)
+			tb.tags[pos.Ln].DeleteIndex(i)
 			reg = t
 			ok = true
 			break
 		}
 	}
-	tb.MarkupMu.Unlock()
+	tb.markupMu.Unlock()
 	if ok {
 		tb.MarkupLinesLock(pos.Ln, pos.Ln)
 	}
@@ -2107,12 +2127,12 @@ func (tb *Buffer) RemoveTag(pos lexer.Pos, tag token.Tokens) (reg lexer.Lex, ok 
 // HiTagAtPos returns the highlighting (markup) lexical tag at given position
 // using current Markup tags, and index, -- could be nil if none or out of range
 func (tb *Buffer) HiTagAtPos(pos lexer.Pos) (*lexer.Lex, int) {
-	tb.MarkupMu.Lock()
-	defer tb.MarkupMu.Unlock()
+	tb.markupMu.Lock()
+	defer tb.markupMu.Unlock()
 	if !tb.IsValidLine(pos.Ln) {
 		return nil, -1
 	}
-	return tb.HiTags[pos.Ln].AtPos(pos.Ch)
+	return tb.hiTags[pos.Ln].AtPos(pos.Ch)
 }
 
 // LexString returns the string associated with given Lex (Tag) at given line
@@ -2136,7 +2156,7 @@ func (tb *Buffer) LexObjPathString(ln int, lx *lexer.Lex) string {
 	if !tb.IsValidLine(ln) {
 		return ""
 	}
-	stlx := lexer.ObjPathAt(tb.HiTags[ln], lx)
+	stlx := lexer.ObjPathAt(tb.hiTags[ln], lx)
 	rns := tb.Lines[ln][stlx.St:lx.Ed]
 	return string(rns)
 }
@@ -2245,15 +2265,15 @@ func (tb *Buffer) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 	tabSz := tb.Options.TabSize
 
 	tb.LinesMu.RLock()
-	tb.MarkupMu.RLock()
+	tb.markupMu.RLock()
 	lp, _ := parse.LangSupport.Properties(tb.ParseState.Sup)
 	var pInd, delInd int
 	if lp != nil && lp.Lang != nil {
-		pInd, delInd, _, _ = lp.Lang.IndentLine(&tb.ParseState, tb.Lines, tb.HiTags, ln, tabSz)
+		pInd, delInd, _, _ = lp.Lang.IndentLine(&tb.ParseState, tb.Lines, tb.hiTags, ln, tabSz)
 	} else {
-		pInd, delInd, _, _ = lexer.BracketIndentLine(tb.Lines, tb.HiTags, ln, tabSz)
+		pInd, delInd, _, _ = lexer.BracketIndentLine(tb.Lines, tb.hiTags, ln, tabSz)
 	}
-	tb.MarkupMu.RUnlock()
+	tb.markupMu.RUnlock()
 	tb.LinesMu.RUnlock()
 	ichr := tb.Options.IndentChar()
 
@@ -2303,9 +2323,9 @@ func (tb *Buffer) InComment(pos lexer.Pos) bool {
 
 // LineCommented returns true if the given line is a full-comment line (i.e., starts with a comment)
 func (tb *Buffer) LineCommented(ln int) bool {
-	tb.MarkupMu.RLock()
-	defer tb.MarkupMu.RUnlock()
-	tags := tb.HiTags[ln]
+	tb.markupMu.RLock()
+	defer tb.markupMu.RUnlock()
+	tags := tb.hiTags[ln]
 	if len(tags) == 0 {
 		return false
 	}
@@ -2382,7 +2402,7 @@ func (tb *Buffer) JoinParaLines(stLn, edLn int) {
 
 	curEd := edLn                      // current end of region being joined == last blank line
 	for ln := edLn; ln >= stLn; ln-- { // reverse order
-		lb := tb.LineBytes[ln]
+		lb := tb.lineBytes[ln]
 		lbt := bytes.TrimSpace(lb)
 		if len(lbt) == 0 || ln == stLn {
 			if ln < curEd-1 {
@@ -2396,7 +2416,7 @@ func (tb *Buffer) JoinParaLines(stLn, edLn int) {
 				}
 				eln := tb.Lines[ep.Ln]
 				ep.Ch = len(eln)
-				tlb := bytes.Join(tb.LineBytes[stp.Ln:ep.Ln+1], []byte(" "))
+				tlb := bytes.Join(tb.lineBytes[stp.Ln:ep.Ln+1], []byte(" "))
 				tb.ReplaceText(stp, ep, stp, string(tlb), EditSignal, ReplaceNoMatchCase)
 			}
 			curEd = ln
@@ -2558,11 +2578,11 @@ func (tb *Buffer) CompleteText(s string) {
 	st = pos
 	st.Ch -= len(tb.Complete.Seed)
 	tb.ReplaceText(st, pos, st, ed.NewText, EditSignal, ReplaceNoMatchCase)
-	if tb.CurrentEditor != nil {
+	if tb.currentEditor != nil {
 		ep := st
 		ep.Ch += len(ed.NewText) + ed.CursorAdjust
-		tb.CurrentEditor.SetCursorShow(ep)
-		tb.CurrentEditor = nil
+		tb.currentEditor.SetCursorShow(ep)
+		tb.currentEditor = nil
 	}
 }
 
@@ -2575,11 +2595,11 @@ func (tb *Buffer) CompleteExtend(s string) {
 	st := pos
 	st.Ch -= len(tb.Complete.Seed)
 	tb.ReplaceText(st, pos, st, s, EditSignal, ReplaceNoMatchCase)
-	if tb.CurrentEditor != nil {
+	if tb.currentEditor != nil {
 		ep := st
 		ep.Ch += len(s)
-		tb.CurrentEditor.SetCursorShow(ep)
-		tb.CurrentEditor = nil
+		tb.currentEditor.SetCursorShow(ep)
+		tb.currentEditor = nil
 	}
 }
 
@@ -2587,7 +2607,7 @@ func (tb *Buffer) CompleteExtend(s string) {
 // taking into account given position in text if it is relevant for cases
 // where it is only conditionally enabled
 func (tb *Buffer) IsSpellEnabled(pos lexer.Pos) bool {
-	if tb.Spell == nil || !tb.Options.SpellCorrect {
+	if tb.spell == nil || !tb.Options.SpellCorrect {
 		return false
 	}
 	switch tb.Info.Cat {
@@ -2603,42 +2623,42 @@ func (tb *Buffer) IsSpellEnabled(pos lexer.Pos) bool {
 // SetSpell sets spell correct functions so that spell correct will
 // automatically be offered as the user types
 func (tb *Buffer) SetSpell() {
-	if tb.Spell != nil {
+	if tb.spell != nil {
 		return
 	}
 	initSpell()
-	tb.Spell = newSpell()
-	tb.Spell.onSelect(func(e events.Event) {
-		tb.CorrectText(tb.Spell.correction)
+	tb.spell = newSpell()
+	tb.spell.onSelect(func(e events.Event) {
+		tb.CorrectText(tb.spell.correction)
 	})
 }
 
 // DeleteSpell deletes any existing spell object
 func (tb *Buffer) DeleteSpell() {
-	if tb.Spell == nil {
+	if tb.spell == nil {
 		return
 	}
-	tb.Spell = nil
+	tb.spell = nil
 }
 
 // CorrectText edits the text using the string chosen from the correction menu
 func (tb *Buffer) CorrectText(s string) {
-	st := lexer.Pos{tb.Spell.srcLn, tb.Spell.srcCh} // start of word
+	st := lexer.Pos{tb.spell.srcLn, tb.spell.srcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 	oend := st
-	oend.Ch += len(tb.Spell.word)
+	oend.Ch += len(tb.spell.word)
 	tb.ReplaceText(st, oend, st, s, EditSignal, ReplaceNoMatchCase)
-	if tb.CurrentEditor != nil {
+	if tb.currentEditor != nil {
 		ep := st
 		ep.Ch += len(s)
-		tb.CurrentEditor.SetCursorShow(ep)
-		tb.CurrentEditor = nil
+		tb.currentEditor.SetCursorShow(ep)
+		tb.currentEditor = nil
 	}
 }
 
 // CorrectClear clears the TextSpellErr tag for given word
 func (tb *Buffer) CorrectClear(s string) {
-	st := lexer.Pos{tb.Spell.srcLn, tb.Spell.srcCh} // start of word
+	st := lexer.Pos{tb.spell.srcLn, tb.spell.srcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 }
 
@@ -2650,9 +2670,9 @@ func (tb *Buffer) SpellCheckLineErrs(ln int) lexer.Line {
 	}
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	tb.MarkupMu.RLock()
-	defer tb.MarkupMu.RUnlock()
-	return spell.CheckLexLine(tb.Lines[ln], tb.HiTags[ln])
+	tb.markupMu.RLock()
+	defer tb.markupMu.RUnlock()
+	return spell.CheckLexLine(tb.Lines[ln], tb.hiTags[ln])
 }
 
 // SpellCheckLineTag runs spell check on given line, and sets Tags for any
@@ -2662,14 +2682,14 @@ func (tb *Buffer) SpellCheckLineTag(ln int) {
 		return
 	}
 	ser := tb.SpellCheckLineErrs(ln)
-	tb.MarkupMu.Lock()
+	tb.markupMu.Lock()
 	ntgs := tb.AdjustedTags(ln)
 	ntgs.DeleteToken(token.TextSpellErr)
 	for _, t := range ser {
 		ntgs.AddSort(t)
 	}
-	tb.Tags[ln] = ntgs
-	tb.MarkupMu.Unlock()
+	tb.tags[ln] = ntgs
+	tb.markupMu.Unlock()
 	tb.MarkupLinesLock(ln, ln)
 	tb.StartDelayedReMarkup()
 }

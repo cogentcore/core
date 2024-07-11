@@ -223,7 +223,7 @@ func (ed *Editor) SetNewBuffer() *Editor {
 	return ed
 }
 
-func (ed *Editor) WidgetValue() any { return &ed.Buffer.Txt }
+func (ed *Editor) WidgetValue() any { return &ed.Buffer.text }
 
 func (ed *Editor) Init() {
 	ed.Frame.Init()
@@ -351,9 +351,9 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 	ed.ResetState()
 	if buf != nil {
 		buf.AddView(ed)
-		bhl := len(buf.PosHistory)
+		bhl := len(buf.posHistory)
 		if bhl > 0 {
-			cp := buf.PosHistory[bhl-1]
+			cp := buf.posHistory[bhl-1]
 			ed.PosHistIndex = bhl - 1
 			ed.SetCursorShow(cp)
 		} else {

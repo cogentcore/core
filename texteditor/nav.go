@@ -114,7 +114,7 @@ func (ed *Editor) SavePosHistory(pos lexer.Pos) {
 		return
 	}
 	ed.Buffer.SavePosHistory(pos)
-	ed.PosHistIndex = len(ed.Buffer.PosHistory) - 1
+	ed.PosHistIndex = len(ed.Buffer.posHistory) - 1
 }
 
 // CursorToHistPrev moves cursor to previous position on history list --
@@ -124,7 +124,7 @@ func (ed *Editor) CursorToHistPrev() bool {
 		ed.CursorPos = lexer.PosZero
 		return false
 	}
-	sz := len(ed.Buffer.PosHistory)
+	sz := len(ed.Buffer.posHistory)
 	if sz == 0 {
 		return false
 	}
@@ -134,7 +134,7 @@ func (ed *Editor) CursorToHistPrev() bool {
 		return false
 	}
 	ed.PosHistIndex = min(sz-1, ed.PosHistIndex)
-	pos := ed.Buffer.PosHistory[ed.PosHistIndex]
+	pos := ed.Buffer.posHistory[ed.PosHistIndex]
 	ed.CursorPos = ed.Buffer.ValidPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
@@ -149,7 +149,7 @@ func (ed *Editor) CursorToHistNext() bool {
 		ed.CursorPos = lexer.PosZero
 		return false
 	}
-	sz := len(ed.Buffer.PosHistory)
+	sz := len(ed.Buffer.posHistory)
 	if sz == 0 {
 		return false
 	}
@@ -158,7 +158,7 @@ func (ed *Editor) CursorToHistNext() bool {
 		ed.PosHistIndex = sz - 1
 		return false
 	}
-	pos := ed.Buffer.PosHistory[ed.PosHistIndex]
+	pos := ed.Buffer.posHistory[ed.PosHistIndex]
 	ed.CursorPos = ed.Buffer.ValidPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
