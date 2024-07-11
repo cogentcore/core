@@ -118,16 +118,6 @@ type Widget interface {
 	// ContextMenuPos.
 	ShowContextMenu(e events.Event)
 
-	// IsVisible returns true if a node is visible for rendering according
-	// to the [states.Invisible] flag on it or any of its parents.
-	// This flag is also set by [styles.DisplayNone] during [ApplyStyle].
-	// This does *not* check for an empty TotalBBox, indicating that the widget
-	// is out of render range -- that is done by [PushBounds] prior to rendering.
-	// Non-visible nodes are automatically not rendered and do not get
-	// window events.
-	// This call recursively calls the parent, which is typically a short path.
-	IsVisible() bool
-
 	// ChildBackground returns the background color (Image) for given child Widget.
 	// By default, this is just our [Styles.Actualbackground] but it can be computed
 	// specifically for the child (e.g., for zebra stripes in [ListGrid])
@@ -409,7 +399,7 @@ func (wb *WidgetBase) IsVisible() bool {
 	if wb.Parent == nil {
 		return true
 	}
-	return wb.Parent.(Widget).IsVisible()
+	return wb.parentWidget().IsVisible()
 }
 
 // DirectRenderImage uploads image directly into given system.Drawer at given index

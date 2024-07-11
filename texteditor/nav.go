@@ -850,7 +850,7 @@ func (ed *Editor) ScrollCursorInView() bool {
 	if ed == nil || ed.This == nil {
 		return false
 	}
-	if ed.This.(core.Widget).IsVisible() {
+	if ed.IsVisible() {
 		curBBox := ed.CursorBBox(ed.CursorPos)
 		return ed.ScrollInView(curBBox)
 	}

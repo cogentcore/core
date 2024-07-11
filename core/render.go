@@ -328,8 +328,8 @@ func (wb *WidgetBase) PushBounds() bool {
 	if wb == nil || wb.This == nil {
 		return false
 	}
-	wb.needsRender = false             // done!
-	if !wb.This.(Widget).IsVisible() { // checks deleted etc
+	wb.needsRender = false // done!
+	if !wb.IsVisible() {   // checks deleted etc
 		return false
 	}
 	if wb.Geom.TotalBBox.Empty() {

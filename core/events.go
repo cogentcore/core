@@ -704,7 +704,7 @@ func (em *Events) cancelRepeatClick() {
 }
 
 func (em *Events) startRepeatClickTimer() {
-	if em.repeatClick == nil || !em.repeatClick.IsVisible() {
+	if em.repeatClick == nil || !em.repeatClick.AsWidget().IsVisible() {
 		return
 	}
 	delay := DeviceSettings.RepeatClickTime
@@ -712,7 +712,7 @@ func (em *Events) startRepeatClickTimer() {
 		delay *= 8
 	}
 	em.repeatClickTimer = time.AfterFunc(delay, func() {
-		if em.repeatClick == nil || !em.repeatClick.IsVisible() {
+		if em.repeatClick == nil || !em.repeatClick.AsWidget().IsVisible() {
 			return
 		}
 		em.repeatClick.AsWidget().Send(events.Click)
@@ -942,7 +942,8 @@ func (em *Events) focusNext() bool {
 // It returns true if a focus item is found.
 func (em *Events) FocusNextFrom(from Widget) bool {
 	next := widgetNextFunc(from, func(w Widget) bool {
-		return w.IsVisible() && !w.AsWidget().StateIs(states.Disabled) && w.AsWidget().AbilityIs(abilities.Focusable)
+		wb := w.AsWidget()
+		return wb.IsVisible() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
 	})
 	em.setFocusEvent(next)
 	return next != nil
@@ -997,7 +998,8 @@ func (em *Events) focusPrev() bool {
 // (can be nil).
 func (em *Events) focusPrevFrom(from Widget) bool {
 	prev := widgetPrevFunc(from, func(w Widget) bool {
-		return w.IsVisible() && !w.AsWidget().StateIs(states.Disabled) && w.AsWidget().AbilityIs(abilities.Focusable)
+		wb := w.AsWidget()
+		return wb.IsVisible() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
 	})
 	em.setFocusEvent(prev)
 	return prev != nil

@@ -425,7 +425,7 @@ func (ed *Editor) BufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 	case bufferMods:
 		ed.NeedsLayout()
 	case bufferInsert:
-		if ed == nil || ed.This == nil || !ed.This.(core.Widget).IsVisible() {
+		if ed == nil || ed.This == nil || !ed.IsVisible() {
 			return
 		}
 		ndup := ed.Renders == nil
@@ -440,7 +440,7 @@ func (ed *Editor) BufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 			ed.Update()
 		}
 	case bufferDelete:
-		if ed == nil || ed.This == nil || !ed.This.(core.Widget).IsVisible() {
+		if ed == nil || ed.This == nil || !ed.IsVisible() {
 			return
 		}
 		ndup := ed.Renders == nil
