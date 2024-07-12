@@ -71,6 +71,7 @@ func init() {
 type _cogentcore_org_core_filetree_Filer struct {
 	IValue             interface{}
 	WAddChildNode      func()
+	WApplyScenePos     func()
 	WAsCoreTree        func() *core.Tree
 	WAsFileNode        func() *filetree.Node
 	WAsTree            func() *tree.NodeBase
@@ -99,7 +100,6 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WInit              func()
 	WInsertAfter       func()
 	WInsertBefore      func()
-	WIsVisible         func() bool
 	WMakePasteMenu     func(m *core.Scene, md mimedata.Mimes, fun func())
 	WMimeData          func(md *mimedata.Mimes)
 	WNewFile           func(filename string, addToVCS bool)
@@ -122,7 +122,6 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WRenameFiles       func()
 	WRender            func()
 	WRenderWidget      func()
-	WScenePos          func()
 	WShowContextMenu   func(e events.Event)
 	WShowFileInfo      func()
 	WSizeDown          func(iter int) bool
@@ -133,6 +132,7 @@ type _cogentcore_org_core_filetree_Filer struct {
 }
 
 func (W _cogentcore_org_core_filetree_Filer) AddChildNode()              { W.WAddChildNode() }
+func (W _cogentcore_org_core_filetree_Filer) ApplyScenePos()             { W.WApplyScenePos() }
 func (W _cogentcore_org_core_filetree_Filer) AsCoreTree() *core.Tree     { return W.WAsCoreTree() }
 func (W _cogentcore_org_core_filetree_Filer) AsFileNode() *filetree.Node { return W.WAsFileNode() }
 func (W _cogentcore_org_core_filetree_Filer) AsTree() *tree.NodeBase     { return W.WAsTree() }
@@ -171,7 +171,6 @@ func (W _cogentcore_org_core_filetree_Filer) DuplicateFiles()                  {
 func (W _cogentcore_org_core_filetree_Filer) Init()                            { W.WInit() }
 func (W _cogentcore_org_core_filetree_Filer) InsertAfter()                     { W.WInsertAfter() }
 func (W _cogentcore_org_core_filetree_Filer) InsertBefore()                    { W.WInsertBefore() }
-func (W _cogentcore_org_core_filetree_Filer) IsVisible() bool                  { return W.WIsVisible() }
 func (W _cogentcore_org_core_filetree_Filer) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) {
 	W.WMakePasteMenu(m, md, fun)
 }
@@ -206,7 +205,6 @@ func (W _cogentcore_org_core_filetree_Filer) RenameFile(newpath string) error {
 func (W _cogentcore_org_core_filetree_Filer) RenameFiles()                   { W.WRenameFiles() }
 func (W _cogentcore_org_core_filetree_Filer) Render()                        { W.WRender() }
 func (W _cogentcore_org_core_filetree_Filer) RenderWidget()                  { W.WRenderWidget() }
-func (W _cogentcore_org_core_filetree_Filer) ScenePos()                      { W.WScenePos() }
 func (W _cogentcore_org_core_filetree_Filer) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
 func (W _cogentcore_org_core_filetree_Filer) ShowFileInfo()                  { W.WShowFileInfo() }
 func (W _cogentcore_org_core_filetree_Filer) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
