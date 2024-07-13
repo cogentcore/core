@@ -5,7 +5,7 @@ Cogent Core provides interactive video players for playing video and audio media
 You can make a new video widget, open a video file, and play it:
 
 ```go
-v := video.NewVideo(parent)
+v := video.NewVideo(b)
 errors.Log(v.Open("video.mp4"))
 v.OnShow(func(e events.Event) {
     v.Play(0, 0)

@@ -35,7 +35,7 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 		in := interp.New(interp.Options{})
 		rparent := reflect.ValueOf(parent)
 		symbols.Symbols["cogentcore.org/core/core/core"]["ExternalParent"].Set(rparent)
-		symbols.Symbols["."]["parent"] = rparent
+		symbols.Symbols["."]["b"] = rparent
 		errors.Log(in.Use(stdlib.Symbols))
 		errors.Log(in.Use(symbols.Symbols))
 		in.ImportUsed()

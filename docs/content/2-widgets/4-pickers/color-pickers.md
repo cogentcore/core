@@ -5,13 +5,13 @@ Cogent Core provides interactive color pickers that allow users to input colors 
 You can make a color picker and set its starting color to any color:
 
 ```Go
-core.NewColorPicker(parent).SetColor(colors.Orange)
+core.NewColorPicker(b).SetColor(colors.Orange)
 ```
 
 You can detect when the user changes the color:
 
 ```Go
-cp := core.NewColorPicker(parent).SetColor(colors.Green)
+cp := core.NewColorPicker(b).SetColor(colors.Green)
 cp.OnChange(func(e events.Event) {
     core.MessageSnackbar(cp, colors.AsHex(cp.Color))
 })
@@ -20,13 +20,13 @@ cp.OnChange(func(e events.Event) {
 You can make a button that opens a color picker dialog:
 
 ```Go
-core.NewColorButton(parent).SetColor(colors.Purple)
+core.NewColorButton(b).SetColor(colors.Purple)
 ```
 
 You can detect when the user changes the color using the dialog:
 
 ```Go
-cb := core.NewColorButton(parent).SetColor(colors.Gold)
+cb := core.NewColorButton(b).SetColor(colors.Gold)
 cb.OnChange(func(e events.Event) {
     core.MessageSnackbar(cb, colors.AsHex(cb.Color))
 })

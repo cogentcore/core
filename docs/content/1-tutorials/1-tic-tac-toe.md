@@ -5,7 +5,7 @@ This tutorial shows how to make a simple tic-tac-toe game using Cogent Core.
 First, we will make a 3x3 grid of action buttons with borders:
 
 ```Go
-grid := core.NewFrame(parent)
+grid := core.NewFrame(b)
 grid.Styler(func(s *styles.Style) {
     s.Display = styles.Grid
     s.Columns = 3
@@ -28,7 +28,7 @@ Then, we will make a `squares` array that keeps track of the value of each squar
 ```Go
 current := "X"
 squares := [9]string{}
-grid := core.NewFrame(parent)
+grid := core.NewFrame(b)
 grid.Styler(func(s *styles.Style) {
     s.Display = styles.Grid
     s.Columns = 3
@@ -60,7 +60,7 @@ for i := range 9 {
         bt.SetText(squares[i])
     })
 }
-core.NewButton(parent).SetText("Reset").OnClick(func(e events.Event) {
+core.NewButton(b).SetText("Reset").OnClick(func(e events.Event) {
     squares = [9]string{}
     current = "X"
     grid.Update()
@@ -72,7 +72,7 @@ Finally, we will add status text that updates according to the current state of 
 ```Go
 current := "X"
 squares := [9]string{}
-status := core.NewText(parent)
+status := core.NewText(b)
 status.Updater(func() {
     sets := [][3]int{ // possible sets of three that result in a win
         {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, {0, 4, 8}, {2, 4, 6},
@@ -87,7 +87,7 @@ status.Updater(func() {
     }
     status.SetText("Next player: "+current)
 })
-grid := core.NewFrame(parent)
+grid := core.NewFrame(b)
 grid.Styler(func(s *styles.Style) {
     s.Display = styles.Grid
     s.Columns = 3
@@ -120,7 +120,7 @@ for i := range 9 {
         bt.SetText(squares[i])
     })
 }
-core.NewButton(parent).SetText("Reset").OnClick(func(e events.Event) {
+core.NewButton(b).SetText("Reset").OnClick(func(e events.Event) {
     squares = [9]string{}
     current = "X"
     grid.Update()

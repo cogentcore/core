@@ -6,8 +6,8 @@ For example, the example in the [previous updating page](updating) can also be w
 
 ```Go
 count := 0
-text := core.Bind(&count, core.NewText(parent))
-core.NewButton(parent).SetText("Increment").OnClick(func(e events.Event) {
+text := core.Bind(&count, core.NewText(b))
+core.NewButton(b).SetText("Increment").OnClick(func(e events.Event) {
     count++
     text.Update()
 })
@@ -19,8 +19,8 @@ You can use value binding with more than just text widgets; most widgets impleme
 
 ```Go
 on := true
-core.Bind(&on, core.NewSwitch(parent)).OnChange(func(e events.Event) {
-    core.MessageSnackbar(parent, "The switch is now "+strconv.FormatBool(on))
+core.Bind(&on, core.NewSwitch(b)).OnChange(func(e events.Event) {
+    core.MessageSnackbar(b, "The switch is now "+strconv.FormatBool(on))
 })
 ```
 

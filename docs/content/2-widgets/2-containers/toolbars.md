@@ -7,7 +7,7 @@ All toolbars use the [[tree.Plan]] system through [[core.WidgetBase.Maker]]. Thi
 You can make a standalone toolbar and add elements to it:
 
 ```Go
-tb := core.NewToolbar(parent)
+tb := core.NewToolbar(b)
 tb.Maker(func(p *tree.Plan) {
     tree.Add(p, func(w *core.Button) {
         w.SetText("Build")
@@ -21,7 +21,7 @@ tb.Maker(func(p *tree.Plan) {
 You can add any types of widgets to toolbars, although [buttons](../basic/buttons) and [func buttons](../other/func-buttons) are the most common:
 
 ```Go
-tb := core.NewToolbar(parent)
+tb := core.NewToolbar(b)
 tb.Maker(func(p *tree.Plan) {
     tree.Add(p, func(w *core.FuncButton) {
         w.SetFunc(core.AppearanceSettings.SaveScreenZoom)
@@ -35,7 +35,7 @@ tb.Maker(func(p *tree.Plan) {
 When you add more items to a toolbar than can fit on the screen, it places them in an overflow menu:
 
 ```Go
-tb := core.NewToolbar(parent)
+tb := core.NewToolbar(b)
 tb.Maker(func(p *tree.Plan) {
     for i := range 30 {
         tree.AddAt(p, strconv.Itoa(i), func(w *core.Button) {
@@ -48,7 +48,7 @@ tb.Maker(func(p *tree.Plan) {
 You can also directly add items to the overflow menu of a toolbar:
 
 ```Go
-tb := core.NewToolbar(parent)
+tb := core.NewToolbar(b)
 tb.Maker(func(p *tree.Plan) {
     tree.Add(p, func(w *core.Button) {
         w.SetText("Build")

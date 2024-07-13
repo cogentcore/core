@@ -6,8 +6,8 @@ For example, this code uses [[tree.Plan]] through [[core.WidgetBase.Maker]] to d
 
 ```Go
 number := 3
-spinner := core.Bind(&number, core.NewSpinner(parent)).SetMin(0)
-buttons := core.NewFrame(parent)
+spinner := core.Bind(&number, core.NewSpinner(b)).SetMin(0)
+buttons := core.NewFrame(b)
 buttons.Maker(func(p *tree.Plan) {
     for i := range number {
         tree.AddAt(p, strconv.Itoa(i), func(w *core.Button) {

@@ -16,7 +16,7 @@ data := []Data{
     {3, 1400},
 }
 dt := errors.Log1(table.NewSliceTable(data))
-pe := plotcore.NewPlotEditor(parent).SetTable(dt)
+pe := plotcore.NewPlotEditor(b).SetTable(dt)
 pe.Options.XAxisColumn = "Time"
 pe.ColumnOptions("Population").On = true
 ```

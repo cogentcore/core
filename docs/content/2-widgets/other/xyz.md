@@ -5,5 +5,5 @@ Cogent Core provides interactive 3D viewing and editing widgets through package 
 You can make a 3D scene editor:
 
 ```go
-xyzcore.NewSceneEditor(parent)
+xyzcore.NewSceneEditor(b)
 ```

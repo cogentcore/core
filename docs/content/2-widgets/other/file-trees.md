@@ -5,13 +5,13 @@ Cogent Core provides powerful file trees that allow users to view directories as
 You can make a file tree and open it at any filepath:
 
 ```Go
-filetree.NewTree(parent).OpenPath(".")
+filetree.NewTree(b).OpenPath(".")
 ```
 
 You can detect when the user selects files:
 
 ```Go
-ft := filetree.NewTree(parent).OpenPath(".")
+ft := filetree.NewTree(b).OpenPath(".")
 ft.OnSelect(func(e events.Event) {
     selected := []string{}
     ft.SelectedFunc(func(n *filetree.Node) {
