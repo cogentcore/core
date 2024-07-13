@@ -129,7 +129,7 @@ func (nb *NodeBase) RunUpdaters() {
 // is called. The name of the node is automatically generated based
 // on the file and line number of the calling function.
 func Add[T NodeValue](p *Plan, init func(w *T)) { //yaegi:add
-	AddAt(p, AutoPlanName(2), init)
+	AddAt[T](p, AutoPlanName(2), init)
 }
 
 // AutoPlanName returns the dir-filename of [runtime.Caller](level),
@@ -193,7 +193,7 @@ func AddInit[T NodeValue](p *Plan, name string, init func(w *T)) { //yaegi:add
 func AddChild[T NodeValue](parent Node, init func(w *T)) { //yaegi:add
 	name := AutoPlanName(2) // must get here to get correct name
 	parent.AsTree().Maker(func(p *Plan) {
-		AddAt(p, name, init)
+		AddAt[T](p, name, init)
 	})
 }
 
@@ -202,7 +202,7 @@ func AddChild[T NodeValue](parent Node, init func(w *T)) { //yaegi:add
 // words, this adds a maker that will add a child to the given parent.
 func AddChildAt[T NodeValue](parent Node, name string, init func(w *T)) { //yaegi:add
 	parent.AsTree().Maker(func(p *Plan) {
-		AddAt(p, name, init)
+		AddAt[T](p, name, init)
 	})
 }
 
@@ -214,7 +214,7 @@ func AddChildAt[T NodeValue](parent Node, name string, init func(w *T)) { //yaeg
 // called in sequential ascending order.
 func AddChildInit[T NodeValue](parent Node, name string, init func(w *T)) { //yaegi:add
 	parent.AsTree().Maker(func(p *Plan) {
-		AddInit(p, name, init)
+		AddInit[T](p, name, init)
 	})
 }
 

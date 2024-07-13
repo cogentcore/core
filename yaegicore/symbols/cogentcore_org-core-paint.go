@@ -33,6 +33,7 @@ func init() {
 		"OpenFontFace":         reflect.ValueOf(paint.OpenFontFace),
 		"SetHTMLSimpleTag":     reflect.ValueOf(paint.SetHTMLSimpleTag),
 		"TextFontRenderMu":     reflect.ValueOf(&paint.TextFontRenderMu).Elem(),
+		"TextWrapSizeEstimate": reflect.ValueOf(paint.TextWrapSizeEstimate),
 
 		// type definitions
 		"Context":  reflect.ValueOf((*paint.Context)(nil)),
