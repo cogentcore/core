@@ -14,7 +14,7 @@ import (
 
 // maxGrowLines is the maximum number of lines to grow to
 // (subject to other styling constraints).
-const maxGrowLines = 50
+const maxGrowLines = 25
 
 // StyleSizes gets the size info based on Style settings.
 func (ed *Editor) StyleSizes() {
