@@ -5,6 +5,8 @@
 package core
 
 import (
+	"log/slog"
+
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
@@ -104,9 +106,11 @@ func MessageDialog(ctx Widget, message string, title ...string) {
 // "There was an error". If the given error is nil, no dialog
 // is created.
 func ErrorDialog(ctx Widget, err error, title ...string) {
-	if errors.Log(err) == nil {
+	if err == nil {
 		return
 	}
+	// we need to get [errors.CallerInfo] at this level.
+	slog.Error(err.Error() + " | " + errors.CallerInfo())
 	ttl := "There was an error"
 	if len(title) > 0 {
 		ttl = title[0]

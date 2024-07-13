@@ -5,6 +5,8 @@
 package core
 
 import (
+	"log/slog"
+
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
@@ -43,9 +45,11 @@ func MessageSnackbar(ctx Widget, message string) {
 // provided; if it is not, the label text will default to "Error".
 // If the given error is nil, no snackbar is created.
 func ErrorSnackbar(ctx Widget, err error, label ...string) {
-	if errors.Log(err) == nil {
+	if err == nil {
 		return
 	}
+	// we need to get [errors.CallerInfo] at this level
+	slog.Error(err.Error() + " | " + errors.CallerInfo())
 	lbl := "Error"
 	if len(label) > 0 {
 		lbl = label[0]
