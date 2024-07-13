@@ -6,8 +6,6 @@
 // hosted at https://cogentcore.org/core.
 package main
 
-//go:generate core generate
-
 import (
 	"embed"
 	"io/fs"
