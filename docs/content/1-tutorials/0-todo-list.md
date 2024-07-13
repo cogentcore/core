@@ -4,7 +4,7 @@ This tutorial shows how to make a todo list app using Cogent Core. You should re
 
 We will represent todo list items using an `item` struct type:
 
-```go
+```Go
 type item struct {
     Done bool
     Task string
