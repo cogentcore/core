@@ -30,7 +30,7 @@ func Log(err error) error {
 // if the error is non-nil. The intended usage is:
 //
 //	a := errors.Log1(MyFunc(v))
-func Log1[T any](v T, err error) T {
+func Log1[T any](v T, err error) T { //yaegi:add
 	if err != nil {
 		slog.Error(err.Error() + " | " + CallerInfo())
 	}
