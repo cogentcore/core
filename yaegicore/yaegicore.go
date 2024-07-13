@@ -7,8 +7,10 @@
 package yaegicore
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
+	"sync/atomic"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
@@ -19,6 +21,8 @@ import (
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
 )
+
+var autoPlanNameCounter uint64
 
 func init() {
 	htmlcore.BindTextEditor = BindTextEditor
@@ -36,6 +40,10 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 		rparent := reflect.ValueOf(parent)
 		symbols.Symbols["cogentcore.org/core/core/core"]["ExternalParent"].Set(rparent)
 		symbols.Symbols["."]["b"] = rparent
+		// the normal AutoPlanName cannot be used because the stack trace in yaegi is not helpful
+		symbols.Symbols["cogentcore.org/core/tree/tree"]["AutoPlanName"] = reflect.ValueOf(func(int) string {
+			return fmt.Sprintf("yaegi-%v", atomic.AddUint64(&autoPlanNameCounter, 1))
+		})
 		errors.Log(in.Use(stdlib.Symbols))
 		errors.Log(in.Use(symbols.Symbols))
 		in.ImportUsed()
