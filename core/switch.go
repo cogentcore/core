@@ -81,7 +81,8 @@ func (sw *Switch) Init() {
 		}
 		s.Text.Align = styles.Start
 		s.Text.AlignV = styles.Center
-		s.Padding.Set(units.Dp(ConstantSpacing(4)))
+		s.Padding.SetVertical(units.Dp(4))
+		s.Padding.SetHorizontal(units.Dp(ConstantSpacing(4))) // needed for layout issues
 		s.Border.Radius = styles.BorderRadiusSmall
 		s.Gap.Zero()
 
