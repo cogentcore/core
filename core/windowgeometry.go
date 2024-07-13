@@ -158,7 +158,7 @@ func (ws *windowGeometrySaver) open() error {
 	pnm := filepath.Join(pdir, ws.filename+".json")
 	b, err := os.ReadFile(pnm)
 	if err != nil {
-		return errors.Log(err)
+		return err
 	}
 	err = json.Unmarshal(b, &ws.geometries)
 	if err != nil {
