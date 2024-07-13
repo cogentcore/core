@@ -13,6 +13,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"reflect"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
@@ -27,6 +28,7 @@ import (
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/yaegicore"
+	"cogentcore.org/core/yaegicore/symbols"
 )
 
 //go:embed content
@@ -65,6 +67,10 @@ func main() {
 			})
 		})
 	})
+
+	symbols.Symbols["."]["myImage"] = reflect.ValueOf(myImage)
+	symbols.Symbols["."]["mySVG"] = reflect.ValueOf(mySVG)
+	symbols.Symbols["."]["myFile"] = reflect.ValueOf(myFile)
 
 	htmlcore.ElementHandlers["home-page"] = homePage
 	htmlcore.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
