@@ -394,7 +394,7 @@ func (fn *Node) InitFileInfo() error {
 	return nil
 }
 
-// SelectedFunc runsthe given function on all selected nodes in reverse order.
+// SelectedFunc runs the given function on all selected nodes in reverse order.
 func (fn *Node) SelectedFunc(fun func(n *Node)) {
 	sels := fn.GetSelectedNodes()
 	for i := len(sels) - 1; i >= 0; i-- {

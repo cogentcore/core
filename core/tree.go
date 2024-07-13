@@ -191,7 +191,6 @@ func (tr *Tree) RootSetViewIndex() int {
 		if tvn != nil {
 			tvn.viewIndex = idx
 			tvn.root = tr
-			// fmt.Println(idx, tvn, "root:", tv, &tv)
 			idx++
 		}
 		return tree.Continue
@@ -534,6 +533,9 @@ func (tr *Tree) SizeUp() {
 	tr.widgetSize = tr.Geom.Size.Actual.Total
 	h := tr.widgetSize.Y
 	w := tr.widgetSize.X
+	if tr.root.This == tr.This { // do it every time on root
+		tr.root.RootSetViewIndex()
+	}
 
 	if !tr.Closed {
 		// we layout children under us
@@ -821,10 +823,8 @@ func (tr *Tree) sendChangeEvent(original ...events.Event) {
 
 // treeChanged must be called after any structural
 // change to the [Tree] (adding or deleting nodes).
-// It calls RootSetViewIndex to update indexes and
-// SendChangeEvent to notify of changes.
+// It calls SendChangeEvent to notify of changes.
 func (tr *Tree) treeChanged(original ...events.Event) {
-	tr.root.RootSetViewIndex()
 	tr.sendChangeEvent(original...)
 }
 
