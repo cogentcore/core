@@ -22,7 +22,8 @@ import (
 
 func init() {
 	htmlcore.BindTextEditor = BindTextEditor
-	delete(stdlib.Symbols, "errors/errors") // we have our own errors package
+	delete(stdlib.Symbols, "errors/errors")           // we have our own errors package
+	symbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
 }
 
 // BindTextEditor binds the given text editor to a yaegi interpreter
@@ -32,14 +33,11 @@ func init() {
 func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 	oc := func() {
 		in := interp.New(interp.Options{})
-		symbols.Symbols["cogentcore.org/core/core/core"]["ExternalParent"].Set(reflect.ValueOf(parent))
+		rparent := reflect.ValueOf(parent)
+		symbols.Symbols["cogentcore.org/core/core/core"]["ExternalParent"].Set(rparent)
+		symbols.Symbols["."]["parent"] = rparent
 		errors.Log(in.Use(stdlib.Symbols))
 		errors.Log(in.Use(symbols.Symbols))
-		errors.Log(in.Use(interp.Exports{
-			".": map[string]reflect.Value{
-				"parent": reflect.ValueOf(parent),
-			},
-		}))
 		in.ImportUsed()
 
 		parent.AsTree().DeleteChildren()
