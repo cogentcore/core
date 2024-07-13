@@ -8,7 +8,7 @@ Then, after adding content to your body, you can create and start a window from 
 
 Therefore, the standard structure of a Cogent Core app looks like this:
 
-```go
+```Go
 package main
 
 import "cogentcore.org/core/core"
