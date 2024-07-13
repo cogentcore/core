@@ -182,13 +182,7 @@ func (fn *Node) Init() {
 	})
 
 	fn.Maker(func(p *tree.Plan) {
-		if fn.Filepath == "" || fn.IsIrregular() {
-			return
-		}
-		if !fn.IsDir() {
-			return
-		}
-		if !((fn.FileRoot.inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot.IsDirOpen(fn.Filepath)) {
+		if fn.Filepath == "" {
 			return
 		}
 		if fn.Name == ExternalFilesName {
@@ -205,6 +199,12 @@ func (fn *Node) Init() {
 					w.Info.VCS = vcs.Stored
 				})
 			}
+			return
+		}
+		if !fn.IsDir() || fn.IsIrregular() {
+			return
+		}
+		if !((fn.FileRoot.inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot.IsDirOpen(fn.Filepath)) {
 			return
 		}
 		repo, _ := fn.Repo()
