@@ -14,8 +14,8 @@ core.NewButton(parent).SetText("Click me!").SetIcon(icons.Add)
 
 You can always assign a widget to a variable and then get information from it or make further calls on it at any point. For example:
 
-```go
+```Go
 bt := core.NewButton(parent).SetText("Click me!")
 // Later...
-fmt.Println(bt.Text)
+bt.SetText("New text")
 ```

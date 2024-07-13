@@ -15,6 +15,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
@@ -136,6 +137,13 @@ func HandleElement(ctx *Context) {
 				BindTextEditor(ed, parent)
 			} else {
 				ed.SetReadOnly(true)
+				ed.Buffer.Options.LineNumbers = false
+				ed.Styler(func(s *styles.Style) {
+					s.Border.Width.Zero()
+					s.MaxBorder.Width.Zero()
+					s.StateLayer = 0
+					s.Background = colors.Scheme.SurfaceContainer
+				})
 			}
 		} else {
 			HandleText(ctx).Styler(func(s *styles.Style) {
