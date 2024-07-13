@@ -100,7 +100,7 @@ func MessageDialog(ctx Widget, message string, title ...string) {
 	b.RunDialog(ctx)
 }
 
-// ErrorDialog opens a new Dialog displaying the given error
+// ErrorDialog opens a new dialog displaying the given error
 // in the context of the given widget. An optional title can
 // be provided; if it is not, the title will default to
 // "There was an error". If the given error is nil, no dialog
@@ -109,12 +109,12 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 	if err == nil {
 		return
 	}
-	// we need to get [errors.CallerInfo] at this level
-	slog.Error(err.Error() + " | " + errors.CallerInfo())
 	ttl := "There was an error"
 	if len(title) > 0 {
 		ttl = title[0]
 	}
+	// we need to get [errors.CallerInfo] at this level
+	slog.Error(ttl + ": " + err.Error() + " | " + errors.CallerInfo())
 	NewBody(ctx.AsTree().Name + "-error-dialog").AddTitle(ttl).AddText(err.Error()).
 		AddOKOnly().RunDialog(ctx)
 }

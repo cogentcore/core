@@ -48,13 +48,14 @@ func ErrorSnackbar(ctx Widget, err error, label ...string) {
 	if err == nil {
 		return
 	}
-	// we need to get [errors.CallerInfo] at this level
-	slog.Error(err.Error() + " | " + errors.CallerInfo())
 	lbl := "Error"
 	if len(label) > 0 {
 		lbl = label[0]
 	}
-	MessageSnackbar(ctx, lbl+": "+err.Error())
+	text := lbl + ": " + err.Error()
+	// we need to get [errors.CallerInfo] at this level
+	slog.Error(text + " | " + errors.CallerInfo())
+	MessageSnackbar(ctx, text)
 }
 
 // snackbarStyles sets default stylers for snackbar bodies.
