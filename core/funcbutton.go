@@ -232,7 +232,8 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 
 func isAnonymousFunction(fnm string) bool {
 	// FuncName.funcN indicates that a function was defined anonymously
-	return len(fnm) > 0 && unicode.IsDigit(rune(fnm[len(fnm)-1])) && strings.Contains(fnm, ".func")
+	funcN := len(fnm) > 0 && unicode.IsDigit(rune(fnm[len(fnm)-1])) && strings.Contains(fnm, ".func")
+	return funcN || fnm == "reflect.makeFuncStub" // used for anonymous functions in yaegi
 }
 
 // setFuncImpl is the underlying implementation of [FuncButton.SetFunc].
@@ -246,7 +247,10 @@ func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 	// get name without package
 	li := strings.LastIndex(snm, ".")
 	isAnonymous := isAnonymousFunction(snm)
-	if isAnonymous {
+	if snm == "reflect.makeFuncStub" { // used for anonymous functions in yaegi
+		snm = "Anonymous function"
+		li = -1
+	} else if isAnonymous {
 		snm = strings.TrimRightFunc(snm, func(r rune) bool {
 			return unicode.IsDigit(r) || r == '.'
 		})
