@@ -557,8 +557,8 @@ func (ss *SystemSettingsData) Apply() { //types:add
 
 	np := len(ss.FavPaths)
 	for i := 0; i < np; i++ {
-		if ss.FavPaths[i].Icon == "" {
-			ss.FavPaths[i].Icon = "folder"
+		if ss.FavPaths[i].Icon == "" || ss.FavPaths[i].Icon == "folder" {
+			ss.FavPaths[i].Icon = icons.Folder
 		}
 	}
 }
