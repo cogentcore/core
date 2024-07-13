@@ -19,3 +19,5 @@ func main() {
 	b.RunMainWindow()
 }
 ```
+
+For most of the code examples on this website, we will omit the outer structure of the app so that you can focus on the app content.
