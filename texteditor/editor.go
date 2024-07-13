@@ -244,7 +244,7 @@ func (ed *Editor) Init() {
 			s.Text.WhiteSpace = styles.WhiteSpacePre
 		}
 		s.SetMono(true)
-		s.Grow.Set(1, 1)
+		s.Grow.Set(1, 0)
 		s.Overflow.Set(styles.OverflowAuto) // absorbs all
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Margin.Zero()

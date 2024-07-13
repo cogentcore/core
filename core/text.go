@@ -318,44 +318,11 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	return rsz
 }
 
-// textWrapSizeEstimate is the size to use for layout during the SizeUp pass,
-// for word wrap case, where the sizing actually matters,
-// based on trying to fit the given number of characters into the given content size
-// with given font height.
-func textWrapSizeEstimate(csz math32.Vector2, nChars int, fs *styles.Font) math32.Vector2 {
-	chars := float32(nChars)
-	fht := float32(16)
-	if fs.Face != nil {
-		fht = fs.Face.Metrics.Height
-	}
-	area := chars * fht * fht
-	ratio := float32(1.618) // default to golden
-	if csz.X > 0 && csz.Y > 0 {
-		ratio = csz.X / csz.Y
-		// fmt.Println(lb, "content size ratio:", ratio)
-	}
-	// w = ratio * h
-	// w^2 + h^2 = a
-	// (ratio*h)^2 + h^2 = a
-	h := math32.Sqrt(area) / math32.Sqrt(ratio+1)
-	w := ratio * h
-	if w < csz.X { // must be at least this
-		w = csz.X
-		h = area / w
-		h = max(h, csz.Y)
-	}
-	sz := math32.Vec2(w, h)
-	if DebugSettings.LayoutTrace {
-		fmt.Println("TextWrapSizeEstimate chars:", chars, "area:", area, "sz:", sz)
-	}
-	return sz
-}
-
 func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
 	if tx.Styles.Text.HasWordWrap() {
-		tx.configTextSize(textWrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), &tx.Styles.Font))
+		tx.configTextSize(paint.TextWrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), &tx.Styles.Font))
 	} else {
 		tx.configTextSize(sz.Actual.Content)
 	}
@@ -363,7 +330,7 @@ func (tx *Text) SizeUp() {
 	sz.fitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {
-		fmt.Println(tx, "Label SizeUp:", rsz, "Actual:", sz.Actual.Content)
+		fmt.Println(tx, "Text SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
 }
 
