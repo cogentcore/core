@@ -256,8 +256,8 @@ func (tb *Buffer) setChanged() {
 }
 
 // SetText sets the text to the given bytes.
-func (tb *Buffer) SetText(txt []byte) *Buffer {
-	tb.text = txt
+func (tb *Buffer) SetText(text []byte) *Buffer {
+	tb.text = text
 	tb.bytesToLines()
 	tb.initialMarkup()
 	tb.signalEditors(bufferNew, nil)
