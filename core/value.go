@@ -44,15 +44,15 @@ type OnBinder interface {
 // and during [WidgetBase.UpdateWidget]. It returns the widget to enable method chaining.
 func Bind[T Value](value any, vw T) T { //yaegi:add
 	wb := vw.AsWidget()
-	alreadyBound := wb.valueUpdate != nil
-	wb.valueUpdate = func() {
+	alreadyBound := wb.ValueUpdate != nil
+	wb.ValueUpdate = func() {
 		if vws, ok := any(vw).(ValueSetter); ok {
 			ErrorSnackbar(vw, vws.SetWidgetValue(value))
 		} else {
 			ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))
 		}
 	}
-	wb.valueOnChange = func() {
+	wb.ValueOnChange = func() {
 		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
 	}
 	if alreadyBound {
@@ -62,7 +62,7 @@ func Bind[T Value](value any, vw T) T { //yaegi:add
 	if ob, ok := any(vw).(OnBinder); ok {
 		ob.OnBind(value)
 	}
-	wb.valueUpdate() // we update it with the initial value immediately
+	wb.ValueUpdate() // we update it with the initial value immediately
 	return vw
 }
 

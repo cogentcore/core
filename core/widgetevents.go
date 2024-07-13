@@ -457,8 +457,8 @@ func (wb *WidgetBase) handleWidgetMagnify() {
 func (wb *WidgetBase) handleValueOnChange() {
 	// need to go before end-user OnChange handlers
 	wb.OnFirst(events.Change, func(e events.Event) {
-		if wb.valueOnChange != nil {
-			wb.valueOnChange()
+		if wb.ValueOnChange != nil {
+			wb.ValueOnChange()
 		}
 	})
 }

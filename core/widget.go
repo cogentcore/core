@@ -198,14 +198,15 @@ type WidgetBase struct {
 	// by widgets whenever they are added to another widget parent.
 	Scene *Scene `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// valueUpdate is a function set by [Bind] that is called in
+	// ValueUpdate is a function set by [Bind] that is called in
 	// [WidgetBase.UpdateWidget] to update the widget's value from the bound value.
-	valueUpdate func()
+	// It should not be accessed by end users.
+	ValueUpdate func() `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// valueOnChange is a function set by [Bind] that is called when
+	// ValueOnChange is a function set by [Bind] that is called when
 	// the widget receives an [events.Change] event to update the bound value
-	// from the widget's value.
-	valueOnChange func()
+	// from the widget's value. It should not be accessed by end users.
+	ValueOnChange func() `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// ValueTitle is the title to display for a dialog for this [Value].
 	ValueTitle string

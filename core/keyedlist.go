@@ -229,15 +229,15 @@ func (kl *KeyedList) MakeToolbar(p *tree.Plan) {
 // bindMapKey is a version of [Bind] that works for keys in a map.
 func bindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	wb := vw.AsWidget()
-	alreadyBound := wb.valueUpdate != nil
-	wb.valueUpdate = func() {
+	alreadyBound := wb.ValueUpdate != nil
+	wb.ValueUpdate = func() {
 		if vws, ok := any(vw).(ValueSetter); ok {
 			ErrorSnackbar(vw, vws.SetWidgetValue(key.Interface()))
 		} else {
 			ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), key.Interface()))
 		}
 	}
-	wb.valueOnChange = func() {
+	wb.ValueOnChange = func() {
 		newKey := reflect.New(key.Type())
 		ErrorSnackbar(vw, reflectx.SetRobust(newKey.Interface(), vw.WidgetValue()))
 		newKey = newKey.Elem()
@@ -263,15 +263,15 @@ func bindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	if ob, ok := any(vw).(OnBinder); ok {
 		ob.OnBind(key.Interface())
 	}
-	wb.valueUpdate() // we update it with the initial value immediately
+	wb.ValueUpdate() // we update it with the initial value immediately
 	return vw
 }
 
 // bindMapValue is a version of [Bind] that works for values in a map.
 func bindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	wb := vw.AsWidget()
-	alreadyBound := wb.valueUpdate != nil
-	wb.valueUpdate = func() {
+	alreadyBound := wb.ValueUpdate != nil
+	wb.ValueUpdate = func() {
 		value := mapv.MapIndex(key).Interface()
 		if vws, ok := any(vw).(ValueSetter); ok {
 			ErrorSnackbar(vw, vws.SetWidgetValue(value))
@@ -279,7 +279,7 @@ func bindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 			ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))
 		}
 	}
-	wb.valueOnChange = func() {
+	wb.ValueOnChange = func() {
 		value := reflect.New(mapv.Type().Elem())
 		ErrorSnackbar(vw, reflectx.SetRobust(value.Interface(), vw.WidgetValue()))
 		mapv.SetMapIndex(key, value.Elem())
@@ -291,6 +291,6 @@ func bindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 		value := mapv.MapIndex(key).Interface()
 		ob.OnBind(value)
 	}
-	wb.valueUpdate() // we update it with the initial value immediately
+	wb.ValueUpdate() // we update it with the initial value immediately
 	return vw
 }

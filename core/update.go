@@ -19,8 +19,8 @@ import (
 // a new layout pass, while [WidgetBase.Update] does. End-user code should typically
 // call [WidgetBase.Update], not UpdateWidget.
 func (wb *WidgetBase) UpdateWidget() *WidgetBase {
-	if wb.valueUpdate != nil {
-		wb.valueUpdate()
+	if wb.ValueUpdate != nil {
+		wb.ValueUpdate()
 	}
 	wb.RunUpdaters()
 	return wb
