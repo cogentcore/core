@@ -63,21 +63,21 @@ func TestEditorMulti(t *testing.T) {
 
 func TestEditorInput(t *testing.T) {
 	b := core.NewBody()
-	te := NewSoloEditor(b)
+	ed := NewSoloEditor(b)
 	n := 0
 	text := ""
-	te.OnInput(func(e events.Event) {
+	ed.OnInput(func(e events.Event) {
 		n++
-		text = te.Buffer.String()
+		text = ed.Buffer.String()
 	})
 	b.AssertRender(t, "input", func() {
-		te.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
+		ed.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
 		assert.Equal(t, 1, n)
 		assert.Equal(t, "G\n", text)
-		te.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
+		ed.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
 		assert.Equal(t, 2, n)
 		assert.Equal(t, "Go\n", text)
-		te.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
+		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
 		assert.Equal(t, 3, n)
 		assert.Equal(t, "Go\n\n", text)
 	})
