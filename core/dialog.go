@@ -109,7 +109,7 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 	if err == nil {
 		return
 	}
-	// we need to get [errors.CallerInfo] at this level.
+	// we need to get [errors.CallerInfo] at this level
 	slog.Error(err.Error() + " | " + errors.CallerInfo())
 	ttl := "There was an error"
 	if len(title) > 0 {
