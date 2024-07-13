@@ -52,6 +52,15 @@ texteditor.NewEditor(b).SetBuffer(tb)
 texteditor.NewEditor(b).SetBuffer(tb)
 ```
 
+You can detect when the user changes the content of a text editor and then exits it:
+
+```Go
+te := texteditor.NewSoloEditor(b)
+te.OnChange(func(e events.Event) {
+    core.MessageSnackbar(b, "OnChange: "+te.Buffer.String())
+})
+```
+
 You can detect when the user makes any changes to the content of a text editor as they type:
 
 ```Go
