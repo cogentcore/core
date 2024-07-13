@@ -41,7 +41,6 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 			},
 		}))
 		in.ImportUsed()
-		errors.Log1(in.Eval("parent := core.ExternalParent"))
 
 		parent.AsTree().DeleteChildren()
 		str := ed.Buffer.String()
