@@ -30,6 +30,7 @@ func init() {
 // It is used as the default value of [htmlcore.BindTextEditor].
 func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 	symbols.Symbols["cogentcore.org/core/core/core"]["ExternalParent"].Set(reflect.ValueOf(parent))
+	delete(stdlib.Symbols, "errors/errors") // we have our own errors package
 
 	in := interp.New(interp.Options{})
 	errors.Log(in.Use(stdlib.Symbols))
