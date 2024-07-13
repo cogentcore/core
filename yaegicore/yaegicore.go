@@ -22,6 +22,7 @@ import (
 
 func init() {
 	htmlcore.BindTextEditor = BindTextEditor
+	delete(stdlib.Symbols, "errors/errors") // we have our own errors package
 }
 
 // BindTextEditor binds the given text editor to a yaegi interpreter
@@ -29,15 +30,14 @@ func init() {
 // code, which is run in the context of the given parent widget.
 // It is used as the default value of [htmlcore.BindTextEditor].
 func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
-	symbols.Symbols["cogentcore.org/core/core/core"]["ExternalParent"].Set(reflect.ValueOf(parent))
-	delete(stdlib.Symbols, "errors/errors") // we have our own errors package
-
-	in := interp.New(interp.Options{})
-	errors.Log(in.Use(stdlib.Symbols))
-	errors.Log(in.Use(symbols.Symbols))
-	in.ImportUsed()
-	errors.Log1(in.Eval("parent := core.ExternalParent"))
 	oc := func() {
+		in := interp.New(interp.Options{})
+		symbols.Symbols["cogentcore.org/core/core/core"]["ExternalParent"].Set(reflect.ValueOf(parent))
+		errors.Log(in.Use(stdlib.Symbols))
+		errors.Log(in.Use(symbols.Symbols))
+		in.ImportUsed()
+		errors.Log1(in.Eval("parent := core.ExternalParent"))
+
 		parent.AsTree().DeleteChildren()
 		str := ed.Buffer.String()
 		// all code must be in a function for declarations to be handled correctly
