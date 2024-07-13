@@ -382,7 +382,11 @@ func (wb *WidgetBase) parentWidget() *WidgetBase {
 	if wb.Parent == nil {
 		return nil
 	}
-	return wb.Parent.(Widget).AsWidget()
+	pw, ok := wb.Parent.(Widget)
+	if ok {
+		return pw.AsWidget()
+	}
+	return nil // the parent may be a non-widget in [tree.UnmarshalRootJSON]
 }
 
 // IsVisible returns true if a widget is visible for rendering according
