@@ -254,7 +254,7 @@ func (ed *Editor) Init() {
 		s.Text.Align = styles.Start
 		s.Text.TabSize = core.SystemSettings.Editor.TabSize
 		s.Color = colors.Scheme.OnSurface
-		s.Min.Set(units.Em(10), units.Em(5)) // TODO: remove after #900 is fixed
+		s.Min.X.Em(10)
 
 		s.MaxBorder.Width.Set(units.Dp(2))
 		s.Background = colors.Scheme.SurfaceContainerLow

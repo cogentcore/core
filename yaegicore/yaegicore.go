@@ -30,11 +30,17 @@ func init() {
 // code, which is run in the context of the given parent widget.
 // It is used as the default value of [htmlcore.BindTextEditor].
 func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
+	in.ImportUsed()
 	oc := func() {
 		in := interp.New(interp.Options{})
 		symbols.Symbols["cogentcore.org/core/core/core"]["ExternalParent"].Set(reflect.ValueOf(parent))
 		errors.Log(in.Use(stdlib.Symbols))
 		errors.Log(in.Use(symbols.Symbols))
+		errors.Log(in.Use(interp.Exports{
+			".": map[string]reflect.Value{
+				"parent": reflect.ValueOf(parent),
+			},
+		}))
 		in.ImportUsed()
 		errors.Log1(in.Eval("parent := core.ExternalParent"))
 
