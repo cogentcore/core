@@ -562,7 +562,7 @@ func (tb *Buffer) Revert() bool { //types:add
 	}
 
 	didDiff := false
-	if tb.NLines < DiffRevertLines {
+	if tb.NLines < diffRevertLines {
 		ob := NewBuffer()
 		err := ob.openFile(tb.Filename)
 		if errors.Log(err) != nil {
@@ -573,9 +573,9 @@ func (tb *Buffer) Revert() bool { //types:add
 			return false
 		}
 		tb.Stat() // "own" the new file..
-		if ob.NLines < DiffRevertLines {
+		if ob.NLines < diffRevertLines {
 			diffs := tb.diffBuffers(ob)
-			if len(diffs) < DiffRevertDiffs {
+			if len(diffs) < diffRevertDiffs {
 				tb.patchFromBuffer(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
 				didDiff = true
 			}
@@ -1043,7 +1043,7 @@ func (tb *Buffer) braceMatch(r rune, st lexer.Pos) (en lexer.Pos, found bool) {
 	defer tb.LinesMu.RUnlock()
 	tb.markupMu.RLock()
 	defer tb.markupMu.RUnlock()
-	return lexer.BraceMatch(tb.Lines, tb.hiTags, r, st, MaxScopeLines)
+	return lexer.BraceMatch(tb.Lines, tb.hiTags, r, st, maxScopeLines)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1656,7 +1656,7 @@ func (tb *Buffer) StartDelayedReMarkup() {
 	if tb.Complete != nil && tb.Complete.IsAboutToShow() {
 		return
 	}
-	tb.markupDelayTimer = time.AfterFunc(MarkupDelay, func() {
+	tb.markupDelayTimer = time.AfterFunc(markupDelay, func() {
 		// fmt.Printf("delayed remarkup\n")
 		tb.markupDelayTimer = nil
 		tb.reMarkup()

@@ -34,12 +34,12 @@ func (ed *Editor) ClearHighlights() {
 
 // ClearScopelights clears the Highlights slice of all regions
 func (ed *Editor) ClearScopelights() {
-	if len(ed.Scopelights) == 0 {
+	if len(ed.scopelights) == 0 {
 		return
 	}
-	sl := make([]textbuf.Region, len(ed.Scopelights))
-	copy(sl, ed.Scopelights)
-	ed.Scopelights = ed.Scopelights[:0]
+	sl := make([]textbuf.Region, len(ed.scopelights))
+	copy(sl, ed.scopelights)
+	ed.scopelights = ed.scopelights[:0]
 	ed.NeedsRender()
 }
 
@@ -72,7 +72,7 @@ func (ed *Editor) SelectModeToggle() {
 		ed.selectMode = false
 	} else {
 		ed.selectMode = true
-		ed.SelectStart = ed.CursorPos
+		ed.selectStart = ed.CursorPos
 		ed.SelectRegUpdate(ed.CursorPos)
 	}
 	ed.SavePosHistory(ed.CursorPos)
@@ -193,7 +193,7 @@ func (ed *Editor) SelectWord() bool {
 	}
 	reg := ed.WordAt()
 	ed.SelectRegion = reg
-	ed.SelectStart = ed.SelectRegion.Start
+	ed.selectStart = ed.SelectRegion.Start
 	return true
 }
 
@@ -261,12 +261,12 @@ func (ed *Editor) SelectReset() {
 		return
 	}
 	ed.SelectRegion = textbuf.RegionNil
-	ed.PreviousSelectRegion = textbuf.RegionNil
+	ed.previousSelectRegion = textbuf.RegionNil
 }
 
 // RenderSelectLines renders the lines within the current selection region
 func (ed *Editor) RenderSelectLines() {
-	ed.PreviousSelectRegion = ed.SelectRegion
+	ed.previousSelectRegion = ed.SelectRegion
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -277,7 +277,7 @@ var ViewClipHistory [][]byte
 
 // ViewClipHistAdd adds the given clipboard bytes to top of history stack
 func ViewClipHistAdd(clip []byte) {
-	max := ClipHistMax
+	max := clipboardHistoryMax
 	if ViewClipHistory == nil {
 		ViewClipHistory = make([][]byte, 0, max)
 	}

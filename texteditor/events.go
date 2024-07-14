@@ -54,7 +54,7 @@ func (ed *Editor) ShiftSelect(kt events.Event) {
 	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
 		if ed.SelectRegion == textbuf.RegionNil {
-			ed.SelectStart = ed.CursorPos
+			ed.selectStart = ed.CursorPos
 		}
 	} else {
 		ed.SelectRegion = textbuf.RegionNil
@@ -481,8 +481,8 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 			np.Ch--
 			tp, found := ed.Buffer.braceMatch(kt.KeyRune(), np)
 			if found {
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(np, lexer.Pos{cp.Ln, cp.Ch}))
+				ed.scopelights = append(ed.scopelights, textbuf.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
+				ed.scopelights = append(ed.scopelights, textbuf.NewRegionPos(np, lexer.Pos{cp.Ln, cp.Ch}))
 			}
 		}
 	}
@@ -503,14 +503,14 @@ func (ed *Editor) OpenLink(tl *paint.TextLink) {
 // LinkAt returns link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise
 func (ed *Editor) LinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
-	if !(pos.Ln < len(ed.Renders) && len(ed.Renders[pos.Ln].Links) > 0) {
+	if !(pos.Ln < len(ed.renders) && len(ed.renders[pos.Ln].Links) > 0) {
 		return nil, false
 	}
 	cpos := ed.CharStartPos(pos).ToPointCeil()
 	cpos.Y += 2
 	cpos.X += 2
 	lpos := ed.CharStartPos(lexer.Pos{Ln: pos.Ln})
-	rend := &ed.Renders[pos.Ln]
+	rend := &ed.renders[pos.Ln]
 	for ti := range rend.Links {
 		tl := &rend.Links[ti]
 		tlb := tl.Bounds(rend, lpos)
@@ -526,7 +526,7 @@ func (ed *Editor) LinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 func (ed *Editor) OpenLinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 	tl, ok := ed.LinkAt(pos)
 	if ok {
-		rend := &ed.Renders[pos.Ln]
+		rend := &ed.renders[pos.Ln]
 		st, _ := rend.SpanPosToRuneIndex(tl.StartSpan, tl.StartIndex)
 		end, _ := rend.SpanPosToRuneIndex(tl.EndSpan, tl.EndIndex)
 		reg := textbuf.NewRegion(pos.Ln, st, pos.Ln, end)
@@ -615,13 +615,13 @@ func (ed *Editor) HandleLinkCursor() {
 		}
 		pt := ed.PointToRelPos(e.Pos())
 		mpos := ed.PixelToCursor(pt)
-		if mpos.Ln >= ed.NLines {
+		if mpos.Ln >= ed.NumLines {
 			return
 		}
 		pos := ed.RenderStartPos()
-		pos.Y += ed.Offsets[mpos.Ln]
+		pos.Y += ed.offsets[mpos.Ln]
 		pos.X += ed.LineNumberOffset
-		rend := &ed.Renders[mpos.Ln]
+		rend := &ed.renders[mpos.Ln]
 		inLink := false
 		for _, tl := range rend.Links {
 			tlb := tl.Bounds(rend, pos)
@@ -650,7 +650,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 
 	if !ed.selectMode && selMode == events.ExtendContinuous {
 		if ed.SelectRegion == textbuf.RegionNil {
-			ed.SelectStart = ed.CursorPos
+			ed.selectStart = ed.CursorPos
 		}
 		ed.SetCursor(newPos)
 		ed.SelectRegUpdate(ed.CursorPos)
@@ -662,7 +662,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 	if ed.selectMode || selMode != events.SelectOne {
 		if !ed.selectMode && selMode != events.SelectOne {
 			ed.selectMode = true
-			ed.SelectStart = newPos
+			ed.selectStart = newPos
 			ed.SelectRegUpdate(ed.CursorPos)
 		}
 		if !ed.StateIs(states.Sliding) && selMode == events.SelectOne {

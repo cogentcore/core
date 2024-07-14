@@ -102,7 +102,7 @@ func (ed *Editor) renderCursor(on bool) {
 	if !ed.IsVisible() {
 		return
 	}
-	if ed.Renders == nil {
+	if ed.renders == nil {
 		return
 	}
 	ed.cursorMu.Lock()

@@ -34,26 +34,26 @@ func (ed *Editor) ValidateCursor() {
 
 // WrappedLines returns the number of wrapped lines (spans) for given line number
 func (ed *Editor) WrappedLines(ln int) int {
-	if ln >= len(ed.Renders) {
+	if ln >= len(ed.renders) {
 		return 0
 	}
-	return len(ed.Renders[ln].Spans)
+	return len(ed.renders[ln].Spans)
 }
 
 // WrappedLineNumber returns the wrapped line number (span index) and rune index
 // within that span of the given character position within line in position,
 // and false if out of range (last valid position returned in that case -- still usable).
 func (ed *Editor) WrappedLineNumber(pos lexer.Pos) (si, ri int, ok bool) {
-	if pos.Ln >= len(ed.Renders) {
+	if pos.Ln >= len(ed.renders) {
 		return 0, 0, false
 	}
-	return ed.Renders[pos.Ln].RuneSpanPos(pos.Ch)
+	return ed.renders[pos.Ln].RuneSpanPos(pos.Ch)
 }
 
 // SetCursor sets a new cursor position, enforcing it in range.
 // This is the main final pathway for all cursor movement.
 func (ed *Editor) SetCursor(pos lexer.Pos) {
-	if ed.NLines == 0 || ed.Buffer == nil {
+	if ed.NumLines == 0 || ed.Buffer == nil {
 		ed.CursorPos = lexer.PosZero
 		return
 	}
@@ -68,8 +68,8 @@ func (ed *Editor) SetCursor(pos lexer.Pos) {
 		if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
 			tp, found := ed.Buffer.braceMatch(txt[ch], ed.CursorPos)
 			if found {
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(ed.CursorPos, lexer.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch + 1}))
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
+				ed.scopelights = append(ed.scopelights, textbuf.NewRegionPos(ed.CursorPos, lexer.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch + 1}))
+				ed.scopelights = append(ed.scopelights, textbuf.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
 			}
 		}
 	}
@@ -87,7 +87,7 @@ func (ed *Editor) SetCursorShow(pos lexer.Pos) {
 // SetCursorTarget sets a new cursor target position, ensures that it is visible
 func (ed *Editor) SetCursorTarget(pos lexer.Pos) {
 	ed.targetSet = true
-	ed.CursorTarget = pos
+	ed.cursorTarget = pos
 	ed.SetCursorShow(pos)
 	ed.NeedsRender()
 	// fmt.Println(ed, "set target:", ed.CursorTarg)
@@ -99,12 +99,12 @@ func (ed *Editor) SetCursorCol(pos lexer.Pos) {
 	if wln := ed.WrappedLines(pos.Ln); wln > 1 {
 		si, ri, ok := ed.WrappedLineNumber(pos)
 		if ok && si > 0 {
-			ed.CursorCol = ri
+			ed.cursorColumn = ri
 		} else {
-			ed.CursorCol = pos.Ch
+			ed.cursorColumn = pos.Ch
 		}
 	} else {
-		ed.CursorCol = pos.Ch
+		ed.cursorColumn = pos.Ch
 	}
 }
 
@@ -114,13 +114,13 @@ func (ed *Editor) SavePosHistory(pos lexer.Pos) {
 		return
 	}
 	ed.Buffer.savePosHistory(pos)
-	ed.PosHistIndex = len(ed.Buffer.posHistory) - 1
+	ed.posHistoryIndex = len(ed.Buffer.posHistory) - 1
 }
 
 // CursorToHistPrev moves cursor to previous position on history list --
 // returns true if moved
 func (ed *Editor) CursorToHistPrev() bool {
-	if ed.NLines == 0 || ed.Buffer == nil {
+	if ed.NumLines == 0 || ed.Buffer == nil {
 		ed.CursorPos = lexer.PosZero
 		return false
 	}
@@ -128,13 +128,13 @@ func (ed *Editor) CursorToHistPrev() bool {
 	if sz == 0 {
 		return false
 	}
-	ed.PosHistIndex--
-	if ed.PosHistIndex < 0 {
-		ed.PosHistIndex = 0
+	ed.posHistoryIndex--
+	if ed.posHistoryIndex < 0 {
+		ed.posHistoryIndex = 0
 		return false
 	}
-	ed.PosHistIndex = min(sz-1, ed.PosHistIndex)
-	pos := ed.Buffer.posHistory[ed.PosHistIndex]
+	ed.posHistoryIndex = min(sz-1, ed.posHistoryIndex)
+	pos := ed.Buffer.posHistory[ed.posHistoryIndex]
 	ed.CursorPos = ed.Buffer.validPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
@@ -145,7 +145,7 @@ func (ed *Editor) CursorToHistPrev() bool {
 // CursorToHistNext moves cursor to previous position on history list --
 // returns true if moved
 func (ed *Editor) CursorToHistNext() bool {
-	if ed.NLines == 0 || ed.Buffer == nil {
+	if ed.NumLines == 0 || ed.Buffer == nil {
 		ed.CursorPos = lexer.PosZero
 		return false
 	}
@@ -153,12 +153,12 @@ func (ed *Editor) CursorToHistNext() bool {
 	if sz == 0 {
 		return false
 	}
-	ed.PosHistIndex++
-	if ed.PosHistIndex >= sz-1 {
-		ed.PosHistIndex = sz - 1
+	ed.posHistoryIndex++
+	if ed.posHistoryIndex >= sz-1 {
+		ed.posHistoryIndex = sz - 1
 		return false
 	}
-	pos := ed.Buffer.posHistory[ed.PosHistIndex]
+	pos := ed.Buffer.posHistory[ed.posHistoryIndex]
 	ed.CursorPos = ed.Buffer.validPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
@@ -169,11 +169,11 @@ func (ed *Editor) CursorToHistNext() bool {
 // SelectRegUpdate updates current select region based on given cursor position
 // relative to SelectStart position
 func (ed *Editor) SelectRegUpdate(pos lexer.Pos) {
-	if pos.IsLess(ed.SelectStart) {
+	if pos.IsLess(ed.selectStart) {
 		ed.SelectRegion.Start = pos
-		ed.SelectRegion.End = ed.SelectStart
+		ed.SelectRegion.End = ed.selectStart
 	} else {
-		ed.SelectRegion.Start = ed.SelectStart
+		ed.SelectRegion.Start = ed.selectStart
 		ed.SelectRegion.End = pos
 	}
 }
@@ -194,7 +194,7 @@ func (ed *Editor) CursorForward(steps int) {
 	for i := 0; i < steps; i++ {
 		ed.CursorPos.Ch++
 		if ed.CursorPos.Ch > ed.Buffer.lineLen(ed.CursorPos.Ln) {
-			if ed.CursorPos.Ln < ed.NLines-1 {
+			if ed.CursorPos.Ln < ed.NumLines-1 {
 				ed.CursorPos.Ch = 0
 				ed.CursorPos.Ln++
 			} else {
@@ -245,7 +245,7 @@ func (ed *Editor) CursorForwardWord(steps int) {
 			}
 			ed.CursorPos.Ch = ch
 		} else {
-			if ed.CursorPos.Ln < ed.NLines-1 {
+			if ed.CursorPos.Ln < ed.NumLines-1 {
 				ed.CursorPos.Ch = 0
 				ed.CursorPos.Ln++
 			} else {
@@ -270,13 +270,13 @@ func (ed *Editor) CursorDown(steps int) {
 			si, ri, _ := ed.WrappedLineNumber(pos)
 			if si < wln-1 {
 				si++
-				mxlen := min(len(ed.Renders[pos.Ln].Spans[si].Text), ed.CursorCol)
-				if ed.CursorCol < mxlen {
-					ri = ed.CursorCol
+				mxlen := min(len(ed.renders[pos.Ln].Spans[si].Text), ed.cursorColumn)
+				if ed.cursorColumn < mxlen {
+					ri = ed.cursorColumn
 				} else {
 					ri = mxlen
 				}
-				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
+				nwc, _ := ed.renders[pos.Ln].SpanPosToRuneIndex(si, ri)
 				pos.Ch = nwc
 				gotwrap = true
 
@@ -284,13 +284,13 @@ func (ed *Editor) CursorDown(steps int) {
 		}
 		if !gotwrap {
 			pos.Ln++
-			if pos.Ln >= ed.NLines {
-				pos.Ln = ed.NLines - 1
+			if pos.Ln >= ed.NumLines {
+				pos.Ln = ed.NumLines - 1
 				break
 			}
-			mxlen := min(ed.Buffer.lineLen(pos.Ln), ed.CursorCol)
-			if ed.CursorCol < mxlen {
-				pos.Ch = ed.CursorCol
+			mxlen := min(ed.Buffer.lineLen(pos.Ln), ed.cursorColumn)
+			if ed.cursorColumn < mxlen {
+				pos.Ch = ed.cursorColumn
 			} else {
 				pos.Ch = mxlen
 			}
@@ -309,10 +309,10 @@ func (ed *Editor) CursorPageDown(steps int) {
 	for i := 0; i < steps; i++ {
 		lvln := ed.LastVisibleLine(ed.CursorPos.Ln)
 		ed.CursorPos.Ln = lvln
-		if ed.CursorPos.Ln >= ed.NLines {
-			ed.CursorPos.Ln = ed.NLines - 1
+		if ed.CursorPos.Ln >= ed.NumLines {
+			ed.CursorPos.Ln = ed.NumLines - 1
 		}
-		ed.CursorPos.Ch = min(ed.Buffer.lineLen(ed.CursorPos.Ln), ed.CursorCol)
+		ed.CursorPos.Ch = min(ed.Buffer.lineLen(ed.CursorPos.Ln), ed.cursorColumn)
 		ed.ScrollCursorToTop()
 		ed.renderCursor(true)
 	}
@@ -406,12 +406,12 @@ func (ed *Editor) CursorUp(steps int) {
 		if wln := ed.WrappedLines(pos.Ln); wln > 1 {
 			si, ri, _ := ed.WrappedLineNumber(pos)
 			if si > 0 {
-				ri = ed.CursorCol
-				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si-1, ri)
+				ri = ed.cursorColumn
+				nwc, _ := ed.renders[pos.Ln].SpanPosToRuneIndex(si-1, ri)
 				if nwc == pos.Ch {
-					ed.CursorCol = 0
+					ed.cursorColumn = 0
 					ri = 0
-					nwc, _ = ed.Renders[pos.Ln].SpanPosToRuneIndex(si-1, ri)
+					nwc, _ = ed.renders[pos.Ln].SpanPosToRuneIndex(si-1, ri)
 				}
 				pos.Ch = nwc
 				gotwrap = true
@@ -425,13 +425,13 @@ func (ed *Editor) CursorUp(steps int) {
 			}
 			if wln := ed.WrappedLines(pos.Ln); wln > 1 { // just entered end of wrapped line
 				si := wln - 1
-				ri := ed.CursorCol
-				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
+				ri := ed.cursorColumn
+				nwc, _ := ed.renders[pos.Ln].SpanPosToRuneIndex(si, ri)
 				pos.Ch = nwc
 			} else {
-				mxlen := min(ed.Buffer.lineLen(pos.Ln), ed.CursorCol)
-				if ed.CursorCol < mxlen {
-					pos.Ch = ed.CursorCol
+				mxlen := min(ed.Buffer.lineLen(pos.Ln), ed.cursorColumn)
+				if ed.cursorColumn < mxlen {
+					pos.Ch = ed.cursorColumn
 				} else {
 					pos.Ch = mxlen
 				}
@@ -454,7 +454,7 @@ func (ed *Editor) CursorPageUp(steps int) {
 		if ed.CursorPos.Ln <= 0 {
 			ed.CursorPos.Ln = 0
 		}
-		ed.CursorPos.Ch = min(ed.Buffer.lineLen(ed.CursorPos.Ln), ed.CursorCol)
+		ed.CursorPos.Ch = min(ed.Buffer.lineLen(ed.CursorPos.Ln), ed.cursorColumn)
 		ed.ScrollCursorToBottom()
 		ed.renderCursor(true)
 	}
@@ -492,16 +492,16 @@ func (ed *Editor) CursorStartLine() {
 		si, ri, _ := ed.WrappedLineNumber(pos)
 		if si > 0 {
 			ri = 0
-			nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
+			nwc, _ := ed.renders[pos.Ln].SpanPosToRuneIndex(si, ri)
 			pos.Ch = nwc
 			ed.CursorPos = pos
-			ed.CursorCol = ri
+			ed.cursorColumn = ri
 			gotwrap = true
 		}
 	}
 	if !gotwrap {
 		ed.CursorPos.Ch = 0
-		ed.CursorCol = ed.CursorPos.Ch
+		ed.cursorColumn = ed.CursorPos.Ch
 	}
 	// fmt.Printf("sol cursorcol: %v\n", ed.CursorCol)
 	ed.SetCursor(ed.CursorPos)
@@ -518,7 +518,7 @@ func (ed *Editor) CursorStartDoc() {
 	org := ed.CursorPos
 	ed.CursorPos.Ln = 0
 	ed.CursorPos.Ch = 0
-	ed.CursorCol = ed.CursorPos.Ch
+	ed.cursorColumn = ed.CursorPos.Ch
 	ed.SetCursor(ed.CursorPos)
 	ed.ScrollCursorToTop()
 	ed.renderCursor(true)
@@ -535,20 +535,20 @@ func (ed *Editor) CursorEndLine() {
 	gotwrap := false
 	if wln := ed.WrappedLines(pos.Ln); wln > 1 {
 		si, ri, _ := ed.WrappedLineNumber(pos)
-		ri = len(ed.Renders[pos.Ln].Spans[si].Text) - 1
-		nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
-		if si == len(ed.Renders[pos.Ln].Spans)-1 { // last span
+		ri = len(ed.renders[pos.Ln].Spans[si].Text) - 1
+		nwc, _ := ed.renders[pos.Ln].SpanPosToRuneIndex(si, ri)
+		if si == len(ed.renders[pos.Ln].Spans)-1 { // last span
 			ri++
 			nwc++
 		}
-		ed.CursorCol = ri
+		ed.cursorColumn = ri
 		pos.Ch = nwc
 		ed.CursorPos = pos
 		gotwrap = true
 	}
 	if !gotwrap {
 		ed.CursorPos.Ch = ed.Buffer.lineLen(ed.CursorPos.Ln)
-		ed.CursorCol = ed.CursorPos.Ch
+		ed.cursorColumn = ed.CursorPos.Ch
 	}
 	ed.SetCursor(ed.CursorPos)
 	ed.ScrollCursorToRight()
@@ -562,9 +562,9 @@ func (ed *Editor) CursorEndLine() {
 func (ed *Editor) CursorEndDoc() {
 	ed.ValidateCursor()
 	org := ed.CursorPos
-	ed.CursorPos.Ln = max(ed.NLines-1, 0)
+	ed.CursorPos.Ln = max(ed.NumLines-1, 0)
 	ed.CursorPos.Ch = ed.Buffer.lineLen(ed.CursorPos.Ln)
-	ed.CursorCol = ed.CursorPos.Ch
+	ed.cursorColumn = ed.CursorPos.Ch
 	ed.SetCursor(ed.CursorPos)
 	ed.ScrollCursorToBottom()
 	ed.renderCursor(true)
@@ -650,7 +650,7 @@ func (ed *Editor) CursorKill() {
 	atEnd := false
 	if wln := ed.WrappedLines(pos.Ln); wln > 1 {
 		si, ri, _ := ed.WrappedLineNumber(pos)
-		llen := len(ed.Renders[pos.Ln].Spans[si].Text)
+		llen := len(ed.renders[pos.Ln].Spans[si].Text)
 		if si == wln-1 {
 			llen--
 		}
@@ -732,13 +732,13 @@ func (ed *Editor) JumpToLine(ln int) {
 
 // FindNextLink finds next link after given position, returns false if no such links
 func (ed *Editor) FindNextLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) {
-	for ln := pos.Ln; ln < ed.NLines; ln++ {
-		if len(ed.Renders[ln].Links) == 0 {
+	for ln := pos.Ln; ln < ed.NumLines; ln++ {
+		if len(ed.renders[ln].Links) == 0 {
 			pos.Ch = 0
 			pos.Ln = ln + 1
 			continue
 		}
-		rend := &ed.Renders[ln]
+		rend := &ed.renders[ln]
 		si, ri, _ := rend.RuneSpanPos(pos.Ch)
 		for ti := range rend.Links {
 			tl := &rend.Links[ti]
@@ -759,16 +759,16 @@ func (ed *Editor) FindNextLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) 
 // FindPrevLink finds previous link before given position, returns false if no such links
 func (ed *Editor) FindPrevLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) {
 	for ln := pos.Ln - 1; ln >= 0; ln-- {
-		if len(ed.Renders[ln].Links) == 0 {
+		if len(ed.renders[ln].Links) == 0 {
 			if ln-1 >= 0 {
 				pos.Ch = ed.Buffer.lineLen(ln-1) - 2
 			} else {
-				ln = ed.NLines
+				ln = ed.NumLines
 				pos.Ch = ed.Buffer.lineLen(ln - 2)
 			}
 			continue
 		}
-		rend := &ed.Renders[ln]
+		rend := &ed.renders[ln]
 		si, ri, _ := rend.RuneSpanPos(pos.Ch)
 		nl := len(rend.Links)
 		for ti := nl - 1; ti >= 0; ti-- {
@@ -789,7 +789,7 @@ func (ed *Editor) FindPrevLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) 
 // CursorNextLink moves cursor to next link. wraparound wraps around to top of
 // buffer if none found -- returns true if found
 func (ed *Editor) CursorNextLink(wraparound bool) bool {
-	if ed.NLines == 0 {
+	if ed.NumLines == 0 {
 		return false
 	}
 	ed.ValidateCursor()
@@ -813,7 +813,7 @@ func (ed *Editor) CursorNextLink(wraparound bool) bool {
 // CursorPrevLink moves cursor to previous link. wraparound wraps around to
 // bottom of buffer if none found. returns true if found
 func (ed *Editor) CursorPrevLink(wraparound bool) bool {
-	if ed.NLines == 0 {
+	if ed.NumLines == 0 {
 		return false
 	}
 	ed.ValidateCursor()
@@ -937,7 +937,7 @@ func (ed *Editor) ScrollCursorToVertCenter() bool {
 
 func (ed *Editor) ScrollCursorToTarget() {
 	// fmt.Println(ed, "to target:", ed.CursorTarg)
-	ed.CursorPos = ed.CursorTarget
+	ed.CursorPos = ed.cursorTarget
 	ed.ScrollCursorToVertCenter()
 	ed.targetSet = false
 }

@@ -27,21 +27,22 @@ import (
 	"cogentcore.org/core/tree"
 )
 
+// TODO: move these into an editor settings object
 var (
 	// Maximum amount of clipboard history to retain
-	ClipHistMax = 100 // `default:"100" min:"0" max:"1000" step:"5"`
+	clipboardHistoryMax = 100 // `default:"100" min:"0" max:"1000" step:"5"`
 
 	// maximum number of lines to look for matching scope syntax (parens, brackets)
-	MaxScopeLines = 100 // `default:"100" min:"10" step:"10"`
+	maxScopeLines = 100 // `default:"100" min:"10" step:"10"`
 
 	// text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted
-	DiffRevertLines = 10000 // `default:"10000" min:"0" step:"1000"`
+	diffRevertLines = 10000 // `default:"10000" min:"0" step:"1000"`
 
 	// text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert
-	DiffRevertDiffs = 20 // `default:"20" min:"0" step:"1"`
+	diffRevertDiffs = 20 // `default:"20" min:"0" step:"1"`
 
 	// amount of time to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
-	MarkupDelay = 1000 * time.Millisecond // `default:"1000" min:"100" step:"100"`
+	markupDelay = 1000 * time.Millisecond // `default:"1000" min:"100" step:"100"`
 )
 
 // Editor is a widget for editing multiple lines of complicated text (as compared to
@@ -65,6 +66,7 @@ type Editor struct { //core:embedder
 	Buffer *Buffer `set:"-" json:"-" xml:"-"`
 
 	// CursorWidth is the width of the cursor.
+	// This should be set in Stylers like all other style properties.
 	CursorWidth units.Value
 
 	// LineNumberColor is the color used for the side bar containing the line numbers.
@@ -83,56 +85,56 @@ type Editor struct { //core:embedder
 	// This should be set in Stylers like all other style properties.
 	CursorColor image.Image
 
-	// NLines is the number of lines in the view, synced with the Buf after edits,
-	// but always reflects the storage size of Renders etc.
-	NLines int `set:"-" display:"-" json:"-" xml:"-"`
+	// NumLines is the number of lines in the view, synced with the [Buffer] after edits,
+	// but always reflects the storage size of renders etc.
+	NumLines int `set:"-" display:"-" json:"-" xml:"-"`
 
-	// Renders is a slice of paint.Text representing the renders of the text lines,
+	// renders is a slice of paint.Text representing the renders of the text lines,
 	// with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines).
-	Renders []paint.Text `set:"-" json:"-" xml:"-"`
+	renders []paint.Text
 
-	// Offsets is a slice of float32 representing the starting render offsets for the top of each line.
-	Offsets []float32 `set:"-" display:"-" json:"-" xml:"-"`
+	// offsets is a slice of float32 representing the starting render offsets for the top of each line.
+	offsets []float32
 
-	// LineNumberDigits is the number of line number digits needed.
-	LineNumberDigits int `set:"-" display:"-" json:"-" xml:"-"`
+	// lineNumberDigits is the number of line number digits needed.
+	lineNumberDigits int
 
 	// LineNumberOffset is the horizontal offset for the start of text after line numbers.
 	LineNumberOffset float32 `set:"-" display:"-" json:"-" xml:"-"`
 
-	// LineNumberRender is the render for line numbers.
-	LineNumberRender paint.Text `set:"-" display:"-" json:"-" xml:"-"`
+	// lineNumberRender is the render for line numbers.
+	lineNumberRender paint.Text
 
 	// CursorPos is the current cursor position.
 	CursorPos lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// CursorTarget is the target cursor position for externally set targets.
+	// cursorTarget is the target cursor position for externally set targets.
 	// It ensures that the target position is visible.
-	CursorTarget lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+	cursorTarget lexer.Pos
 
-	// CursorCol is the desired cursor column, where the cursor was last when moved using left / right arrows.
+	// cursorColumn is the desired cursor column, where the cursor was last when moved using left / right arrows.
 	// It is used when doing up / down to not always go to short line columns.
-	CursorCol int `set:"-" edit:"-" json:"-" xml:"-"`
+	cursorColumn int
 
-	// PosHistIndex is the current index within PosHistory.
-	PosHistIndex int `set:"-" edit:"-" json:"-" xml:"-"`
+	// posHistoryIndex is the current index within PosHistory.
+	posHistoryIndex int
 
-	// SelectStart is the starting point for selection, which will either be the start or end of selected region
+	// selectStart is the starting point for selection, which will either be the start or end of selected region
 	// depending on subsequent selection.
-	SelectStart lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+	selectStart lexer.Pos
 
 	// SelectRegion is the current selection region.
 	SelectRegion textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// PreviousSelectRegion is the previous selection region that was actually rendered.
+	// previousSelectRegion is the previous selection region that was actually rendered.
 	// It is needed to update the render.
-	PreviousSelectRegion textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
+	previousSelectRegion textbuf.Region
 
 	// Highlights is a slice of regions representing the highlighted regions, e.g., for search results.
 	Highlights []textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// Scopelights is a slice of regions representing the highlighted regions specific to scope markers.
-	Scopelights []textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
+	// scopelights is a slice of regions representing the highlighted regions specific to scope markers.
+	scopelights []textbuf.Region
 
 	// LinkHandler handles link clicks.
 	// If it is nil, they are sent to the standard web URL handler.
@@ -354,7 +356,7 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 		bhl := len(buf.posHistory)
 		if bhl > 0 {
 			cp := buf.posHistory[bhl-1]
-			ed.PosHistIndex = bhl - 1
+			ed.posHistoryIndex = bhl - 1
 			ed.SetCursorShow(cp)
 		} else {
 			ed.SetCursorShow(lexer.Pos{})
@@ -369,34 +371,34 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 func (ed *Editor) LinesInserted(tbe *textbuf.Edit) {
 	stln := tbe.Reg.Start.Ln + 1
 	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
-	if stln > len(ed.Renders) { // invalid
+	if stln > len(ed.renders) { // invalid
 		return
 	}
 
 	// Renders
 	tmprn := make([]paint.Text, nsz)
-	nrn := append(ed.Renders, tmprn...)
+	nrn := append(ed.renders, tmprn...)
 	copy(nrn[stln+nsz:], nrn[stln:])
 	copy(nrn[stln:], tmprn)
-	ed.Renders = nrn
+	ed.renders = nrn
 
 	// Offs
 	tmpof := make([]float32, nsz)
 	ov := float32(0)
-	if stln < len(ed.Offsets) {
-		ov = ed.Offsets[stln]
+	if stln < len(ed.offsets) {
+		ov = ed.offsets[stln]
 	} else {
-		ov = ed.Offsets[len(ed.Offsets)-1]
+		ov = ed.offsets[len(ed.offsets)-1]
 	}
 	for i := range tmpof {
 		tmpof[i] = ov
 	}
-	nof := append(ed.Offsets, tmpof...)
+	nof := append(ed.offsets, tmpof...)
 	copy(nof[stln+nsz:], nof[stln:])
 	copy(nof[stln:], tmpof)
-	ed.Offsets = nof
+	ed.offsets = nof
 
-	ed.NLines += nsz
+	ed.NumLines += nsz
 	ed.NeedsLayout()
 }
 
@@ -406,10 +408,10 @@ func (ed *Editor) LinesDeleted(tbe *textbuf.Edit) {
 	edln := tbe.Reg.End.Ln
 	dsz := edln - stln
 
-	ed.Renders = append(ed.Renders[:stln], ed.Renders[edln:]...)
-	ed.Offsets = append(ed.Offsets[:stln], ed.Offsets[edln:]...)
+	ed.renders = append(ed.renders[:stln], ed.renders[edln:]...)
+	ed.offsets = append(ed.offsets[:stln], ed.offsets[edln:]...)
 
-	ed.NLines -= dsz
+	ed.NumLines -= dsz
 	ed.NeedsLayout()
 }
 
@@ -428,7 +430,7 @@ func (ed *Editor) BufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 		if ed == nil || ed.This == nil || !ed.IsVisible() {
 			return
 		}
-		ndup := ed.Renders == nil
+		ndup := ed.renders == nil
 		// fmt.Printf("ed %v got %v\n", ed.Nm, tbe.Reg.Start)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			// fmt.Printf("ed %v lines insert %v - %v\n", ed.Nm, tbe.Reg.Start, tbe.Reg.End)
@@ -443,7 +445,7 @@ func (ed *Editor) BufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 		if ed == nil || ed.This == nil || !ed.IsVisible() {
 			return
 		}
-		ndup := ed.Renders == nil
+		ndup := ed.renders == nil
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			ed.LinesDeleted(tbe) // triggers full layout
 		} else {

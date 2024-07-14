@@ -25,14 +25,14 @@ func (ed *Editor) StyleSizes() {
 	ed.lineHeight = sty.Text.EffLineHeight(ed.fontHeight)
 	ed.fontDescent = math32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
 	ed.fontAscent = math32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Ascent)
-	ed.LineNumberDigits = max(1+int(math32.Log10(float32(ed.NLines))), 3)
+	ed.lineNumberDigits = max(1+int(math32.Log10(float32(ed.NumLines))), 3)
 	lno := true
 	if ed.Buffer != nil {
 		lno = ed.Buffer.Options.LineNumbers
 	}
 	if lno {
 		ed.hasLineNumbers = true
-		ed.LineNumberOffset = float32(ed.LineNumberDigits+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
+		ed.LineNumberOffset = float32(ed.lineNumberDigits+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
 	} else {
 		ed.hasLineNumbers = false
 		ed.LineNumberOffset = 0
@@ -81,29 +81,29 @@ func (ed *Editor) LayoutAllLines() {
 		return
 	}
 	if ed.Buffer == nil || ed.Buffer.numLines() == 0 {
-		ed.NLines = 0
+		ed.NumLines = 0
 		return
 	}
 	ed.lastFilename = ed.Buffer.Filename
 
 	ed.Buffer.Hi.TabSize = ed.Styles.Text.TabSize
-	ed.NLines = ed.Buffer.numLines()
+	ed.NumLines = ed.Buffer.numLines()
 	buf := ed.Buffer
 	buf.markupMu.RLock()
 
-	nln := ed.NLines
+	nln := ed.NumLines
 	if nln >= len(buf.Markup) {
 		nln = len(buf.Markup)
 	}
-	if cap(ed.Renders) >= nln {
-		ed.Renders = ed.Renders[:nln]
+	if cap(ed.renders) >= nln {
+		ed.renders = ed.renders[:nln]
 	} else {
-		ed.Renders = make([]paint.Text, nln)
+		ed.renders = make([]paint.Text, nln)
 	}
-	if cap(ed.Offsets) >= nln {
-		ed.Offsets = ed.Offsets[:nln]
+	if cap(ed.offsets) >= nln {
+		ed.offsets = ed.offsets[:nln]
 	} else {
-		ed.Offsets = make([]float32, nln)
+		ed.offsets = make([]float32, nln)
 	}
 
 	sz := ed.lineLayoutSize
@@ -116,16 +116,16 @@ func (ed *Editor) LayoutAllLines() {
 
 	ed.hasLinks = false
 	for ln := 0; ln < nln; ln++ {
-		if ln >= len(ed.Renders) || ln >= len(buf.Markup) {
+		if ln >= len(ed.renders) || ln >= len(buf.Markup) {
 			break
 		}
-		rn := &ed.Renders[ln]
+		rn := &ed.renders[ln]
 		rn.SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
 		rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
 		if !ed.hasLinks && len(rn.Links) > 0 {
 			ed.hasLinks = true
 		}
-		ed.Offsets[ln] = off
+		ed.offsets[ln] = off
 		lsz := math32.Ceil(math32.Max(rn.BBox.Size().Y, ed.lineHeight))
 		off += lsz
 		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
@@ -218,7 +218,7 @@ func (ed *Editor) ApplyScenePos() {
 // lines (e.g., from word-wrap) is different, then NeedsLayout is called
 // and it returns true.
 func (ed *Editor) LayoutLine(ln int) bool {
-	if ed.Buffer == nil || ed.Buffer.numLines() == 0 || ln >= len(ed.Renders) {
+	if ed.Buffer == nil || ed.Buffer.numLines() == 0 || ln >= len(ed.renders) {
 		return false
 	}
 	sty := &ed.Styles
@@ -228,7 +228,7 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	needLay := false
 
 	ed.Buffer.markupMu.RLock()
-	rn := &ed.Renders[ln]
+	rn := &ed.renders[ln]
 	curspans := len(rn.Spans)
 	rn.SetHTMLPre(ed.Buffer.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
 	rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, ed.lineLayoutSize)
