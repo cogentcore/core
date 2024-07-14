@@ -457,10 +457,10 @@ func (ed *Editor) undo() {
 			ed.SetCursorShow(tbe.Reg.Start)
 		}
 	} else {
-		ed.CursorMovedSig() // updates status..
-		ed.ScrollCursorToCenterIfHidden()
+		ed.cursorMovedEvent() // updates status..
+		ed.scrollCursorToCenterIfHidden()
 	}
-	ed.SavePosHistory(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 	ed.NeedsRender()
 }
 
@@ -474,9 +474,9 @@ func (ed *Editor) redo() {
 			ed.SetCursorShow(tbe.Reg.End)
 		}
 	} else {
-		ed.ScrollCursorToCenterIfHidden()
+		ed.scrollCursorToCenterIfHidden()
 	}
-	ed.SavePosHistory(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 	ed.NeedsRender()
 }
 

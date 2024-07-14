@@ -73,9 +73,9 @@ func (ed *Editor) SelectModeToggle() {
 	} else {
 		ed.selectMode = true
 		ed.selectStart = ed.CursorPos
-		ed.SelectRegUpdate(ed.CursorPos)
+		ed.selectRegionUpdate(ed.CursorPos)
 	}
-	ed.SavePosHistory(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 }
 
 // SelectAll selects all the text
@@ -328,7 +328,7 @@ func (ed *Editor) PasteHist() {
 		if clip != nil {
 			ed.Clipboard().Write(mimedata.NewTextBytes(clip))
 			ed.InsertAtCursor(clip)
-			ed.SavePosHistory(ed.CursorPos)
+			ed.savePosHistory(ed.CursorPos)
 			ed.NeedsRender()
 		}
 	})
@@ -348,7 +348,7 @@ func (ed *Editor) Cut() *textbuf.Edit {
 		ViewClipHistAdd(cb)
 	}
 	ed.SetCursorShow(org)
-	ed.SavePosHistory(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 	ed.NeedsRender()
 	return cut
 }
@@ -374,7 +374,7 @@ func (ed *Editor) Copy(reset bool) *textbuf.Edit {
 	if reset {
 		ed.SelectReset()
 	}
-	ed.SavePosHistory(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 	ed.NeedsRender()
 	return tbe
 }
@@ -384,7 +384,7 @@ func (ed *Editor) Paste() {
 	data := ed.Clipboard().Read([]string{fileinfo.TextPlain})
 	if data != nil {
 		ed.InsertAtCursor(data.TypeData(fileinfo.TextPlain))
-		ed.SavePosHistory(ed.CursorPos)
+		ed.savePosHistory(ed.CursorPos)
 	}
 	ed.NeedsRender()
 }
@@ -404,7 +404,7 @@ func (ed *Editor) InsertAtCursor(txt []byte) {
 		pos.Ch = 0 // sometimes it doesn't go to the start..
 	}
 	ed.SetCursorShow(pos)
-	ed.SetCursorCol(ed.CursorPos)
+	ed.setCursorColumn(ed.CursorPos)
 	ed.NeedsRender()
 }
 
@@ -430,7 +430,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 		ViewClipRect = cut
 	}
 	ed.SetCursorShow(npos)
-	ed.SavePosHistory(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 	ed.NeedsRender()
 	return cut
 }
@@ -448,7 +448,7 @@ func (ed *Editor) CopyRect(reset bool) *textbuf.Edit {
 	if reset {
 		ed.SelectReset()
 	}
-	ed.SavePosHistory(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 	ed.NeedsRender()
 	return tbe
 }
@@ -469,8 +469,8 @@ func (ed *Editor) PasteRect() {
 
 	pos := tbe.Reg.End
 	ed.SetCursorShow(pos)
-	ed.SetCursorCol(ed.CursorPos)
-	ed.SavePosHistory(ed.CursorPos)
+	ed.setCursorColumn(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 	ed.NeedsRender()
 }
 

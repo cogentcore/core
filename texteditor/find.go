@@ -112,9 +112,9 @@ func (ed *Editor) iSearchSelectMatch(midx int) {
 	reg := ed.Buffer.AdjustRegion(m.Reg)
 	pos := reg.Start
 	ed.SelectRegion = reg
-	ed.SetCursor(pos)
-	ed.SavePosHistory(ed.CursorPos)
-	ed.ScrollCursorToCenterIfHidden()
+	ed.setCursor(pos)
+	ed.savePosHistory(ed.CursorPos)
+	ed.scrollCursorToCenterIfHidden()
 	ed.iSearchEvent()
 }
 
@@ -227,7 +227,7 @@ func (ed *Editor) iSearchCancel() {
 	ed.ISearch.pos = -1
 	ed.ISearch.Matches = nil
 	ed.Highlights = nil
-	ed.SavePosHistory(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 	ed.SelectReset()
 	ed.iSearchEvent()
 	ed.NeedsRender()
@@ -372,9 +372,9 @@ func (ed *Editor) qReplaceSelectMatch(midx int) {
 	reg := ed.Buffer.AdjustRegion(m.Reg)
 	pos := reg.Start
 	ed.SelectRegion = reg
-	ed.SetCursor(pos)
-	ed.SavePosHistory(ed.CursorPos)
-	ed.ScrollCursorToCenterIfHidden()
+	ed.setCursor(pos)
+	ed.savePosHistory(ed.CursorPos)
+	ed.scrollCursorToCenterIfHidden()
 	ed.qReplaceEvent()
 }
 
@@ -392,9 +392,9 @@ func (ed *Editor) qReplaceReplace(midx int) {
 	matchCase := !ed.QReplace.useCase && !lexer.HasUpperCase(rep)
 	ed.Buffer.ReplaceText(reg.Start, reg.End, pos, rep, EditSignal, matchCase)
 	ed.Highlights[midx] = textbuf.RegionNil
-	ed.SetCursor(pos)
-	ed.SavePosHistory(ed.CursorPos)
-	ed.ScrollCursorToCenterIfHidden()
+	ed.setCursor(pos)
+	ed.savePosHistory(ed.CursorPos)
+	ed.scrollCursorToCenterIfHidden()
 	ed.qReplaceEvent()
 }
 
@@ -441,7 +441,7 @@ func (ed *Editor) qReplaceCancel() {
 	ed.QReplace.pos = -1
 	ed.QReplace.Matches = nil
 	ed.Highlights = nil
-	ed.SavePosHistory(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 	ed.SelectReset()
 	ed.qReplaceEvent()
 	ed.NeedsRender()

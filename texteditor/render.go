@@ -44,7 +44,7 @@ func (ed *Editor) RenderWidget() {
 			ed.needsLayout = false
 		}
 		if ed.targetSet {
-			ed.ScrollCursorToTarget()
+			ed.scrollCursorToTarget()
 		}
 		ed.PositionScrolls()
 		ed.RenderAllLines()
@@ -310,8 +310,8 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bg i
 	}
 
 	pc := &ed.Scene.PaintContext
-	stsi, _, _ := ed.WrappedLineNumber(st)
-	edsi, _, _ := ed.WrappedLineNumber(end)
+	stsi, _, _ := ed.wrappedLineNumber(st)
+	edsi, _, _ := ed.wrappedLineNumber(end)
 	if st.Ln == end.Ln && stsi == edsi {
 		pc.FillBox(spos, epos.Sub(spos), bg) // same line, done
 		return

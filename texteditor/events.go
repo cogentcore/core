@@ -63,7 +63,7 @@ func (ed *Editor) shiftSelect(kt events.Event) {
 func (ed *Editor) shiftSelectExtend(kt events.Event) {
 	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
-		ed.SelectRegUpdate(ed.CursorPos)
+		ed.selectRegionUpdate(ed.CursorPos)
 	}
 }
 
@@ -107,64 +107,64 @@ func (ed *Editor) keyInput(e events.Event) {
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.CursorForward(1)
+		ed.cursorForward(1)
 		ed.shiftSelectExtend(e)
 		ed.ISpellKeyInput(e)
 	case keymap.WordRight:
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.CursorForwardWord(1)
+		ed.cursorForwardWord(1)
 		ed.shiftSelectExtend(e)
 	case keymap.MoveLeft:
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.CursorBackward(1)
+		ed.cursorBackward(1)
 		ed.shiftSelectExtend(e)
 	case keymap.WordLeft:
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.CursorBackwardWord(1)
+		ed.cursorBackwardWord(1)
 		ed.shiftSelectExtend(e)
 	case keymap.MoveUp:
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.CursorUp(1)
+		ed.cursorUp(1)
 		ed.shiftSelectExtend(e)
 		ed.ISpellKeyInput(e)
 	case keymap.MoveDown:
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.CursorDown(1)
+		ed.cursorDown(1)
 		ed.shiftSelectExtend(e)
 		ed.ISpellKeyInput(e)
 	case keymap.PageUp:
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.CursorPageUp(1)
+		ed.cursorPageUp(1)
 		ed.shiftSelectExtend(e)
 	case keymap.PageDown:
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.CursorPageDown(1)
+		ed.cursorPageDown(1)
 		ed.shiftSelectExtend(e)
 	case keymap.Home:
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.CursorStartLine()
+		ed.cursorStartLine()
 		ed.shiftSelectExtend(e)
 	case keymap.End:
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.CursorEndLine()
+		ed.cursorEndLine()
 		ed.shiftSelectExtend(e)
 	case keymap.DocHome:
 		cancelAll()
@@ -176,13 +176,13 @@ func (ed *Editor) keyInput(e events.Event) {
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.CursorEndDoc()
+		ed.cursorEndDoc()
 		ed.shiftSelectExtend(e)
 	case keymap.Recenter:
 		cancelAll()
 		e.SetHandled()
 		ed.reMarkup()
-		ed.CursorRecenter()
+		ed.cursorRecenter()
 	case keymap.SelectMode:
 		cancelAll()
 		e.SetHandled()
@@ -215,11 +215,11 @@ func (ed *Editor) keyInput(e events.Event) {
 	case keymap.HistPrev:
 		cancelAll()
 		e.SetHandled()
-		ed.CursorToHistPrev()
+		ed.CursorToHistoryPrev()
 	case keymap.HistNext:
 		cancelAll()
 		e.SetHandled()
-		ed.CursorToHistNext()
+		ed.CursorToHistoryNext()
 	case keymap.Lookup:
 		cancelAll()
 		e.SetHandled()
@@ -261,27 +261,27 @@ func (ed *Editor) keyInput(e events.Event) {
 			ed.iSearchBackspace()
 		} else {
 			e.SetHandled()
-			ed.CursorBackspace(1)
+			ed.cursorBackspace(1)
 			ed.ISpellKeyInput(e)
 			ed.OfferComplete()
 		}
 	case keymap.Kill:
 		cancelAll()
 		e.SetHandled()
-		ed.CursorKill()
+		ed.cursorKill()
 	case keymap.Delete:
 		cancelAll()
 		e.SetHandled()
-		ed.CursorDelete(1)
+		ed.cursorDelete(1)
 		ed.ISpellKeyInput(e)
 	case keymap.BackspaceWord:
 		cancelAll()
 		e.SetHandled()
-		ed.CursorBackspaceWord(1)
+		ed.cursorBackspaceWord(1)
 	case keymap.DeleteWord:
 		cancelAll()
 		e.SetHandled()
-		ed.CursorDeleteWord(1)
+		ed.cursorDeleteWord(1)
 	case keymap.Cut:
 		cancelAll()
 		e.SetHandled()
@@ -293,11 +293,11 @@ func (ed *Editor) keyInput(e events.Event) {
 	case keymap.Transpose:
 		cancelAll()
 		e.SetHandled()
-		ed.CursorTranspose()
+		ed.cursorTranspose()
 	case keymap.TransposeWord:
 		cancelAll()
 		e.SetHandled()
-		ed.CursorTransposeWord()
+		ed.cursorTransposeWord()
 	case keymap.PasteHist:
 		cancelAll()
 		e.SetHandled()
@@ -335,7 +335,7 @@ func (ed *Editor) keyInput(e events.Event) {
 					if tbe != nil {
 						// go back to end of line!
 						npos := lexer.Pos{Ln: ed.CursorPos.Ln, Ch: ed.Buffer.lineLen(ed.CursorPos.Ln)}
-						ed.SetCursor(npos)
+						ed.setCursor(npos)
 					}
 				}
 				ed.InsertAtCursor([]byte("\n"))
@@ -437,7 +437,7 @@ func (ed *Editor) keyInputInsertBracket(kt events.Event) {
 		pos.Ch++
 	}
 	ed.SetCursorShow(pos)
-	ed.SetCursorCol(ed.CursorPos)
+	ed.setCursorColumn(ed.CursorPos)
 }
 
 // keyInputInsertRune handles the insertion of a typed character
@@ -531,7 +531,7 @@ func (ed *Editor) OpenLinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 		_ = reg
 		ed.HighlightRegion(reg)
 		ed.SetCursorTarget(pos)
-		ed.SavePosHistory(ed.CursorPos)
+		ed.savePosHistory(ed.CursorPos)
 		ed.openLink(tl)
 	}
 	return tl, ok
@@ -549,11 +549,11 @@ func (ed *Editor) handleMouse() {
 		case events.Left:
 			ed.SetState(true, states.Focused)
 			ed.setCursorFromMouse(pt, newPos, e.SelectMode())
-			ed.SavePosHistory(ed.CursorPos)
+			ed.savePosHistory(ed.CursorPos)
 		case events.Middle:
 			if !ed.IsReadOnly() {
 				ed.setCursorFromMouse(pt, newPos, e.SelectMode())
-				ed.SavePosHistory(ed.CursorPos)
+				ed.savePosHistory(ed.CursorPos)
 			}
 		}
 	})
@@ -650,18 +650,18 @@ func (ed *Editor) setCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 		if ed.SelectRegion == textbuf.RegionNil {
 			ed.selectStart = ed.CursorPos
 		}
-		ed.SetCursor(newPos)
-		ed.SelectRegUpdate(ed.CursorPos)
+		ed.setCursor(newPos)
+		ed.selectRegionUpdate(ed.CursorPos)
 		ed.renderCursor(true)
 		return
 	}
 
-	ed.SetCursor(newPos)
+	ed.setCursor(newPos)
 	if ed.selectMode || selMode != events.SelectOne {
 		if !ed.selectMode && selMode != events.SelectOne {
 			ed.selectMode = true
 			ed.selectStart = newPos
-			ed.SelectRegUpdate(ed.CursorPos)
+			ed.selectRegionUpdate(ed.CursorPos)
 		}
 		if !ed.StateIs(states.Sliding) && selMode == events.SelectOne {
 			ln := ed.CursorPos.Ln
@@ -670,12 +670,12 @@ func (ed *Editor) setCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 				ed.SelectReset()
 			}
 		} else {
-			ed.SelectRegUpdate(ed.CursorPos)
+			ed.selectRegionUpdate(ed.CursorPos)
 		}
 		if ed.StateIs(states.Sliding) {
 			ed.AutoScroll(math32.Vector2FromPoint(pt).Sub(ed.Geom.Scroll))
 		} else {
-			ed.ScrollCursorToCenterIfHidden()
+			ed.scrollCursorToCenterIfHidden()
 		}
 	} else if ed.HasSelection() {
 		ln := ed.CursorPos.Ln
