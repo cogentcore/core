@@ -52,14 +52,6 @@ type OutputBuffer struct { //types:add -setters
 	afterTimer *time.Timer
 }
 
-// Init sets the various params and prepares for running.
-func (ob *OutputBuffer) Init(out io.Reader, buf *Buffer, batch time.Duration, markup OutputBufferMarkupFunc) {
-	ob.Output = out
-	ob.Buffer = buf
-	ob.MarkupFunc = markup
-	ob.Batch = batch
-}
-
 // MonitorOutput monitors the output and updates the [Buffer].
 func (ob *OutputBuffer) MonitorOutput() {
 	if ob.Batch == 0 {
