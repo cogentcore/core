@@ -31,7 +31,7 @@ func init() {
 		"DataRanger":     reflect.ValueOf((*plot.DataRanger)(nil)),
 		"DefaultTicks":   reflect.ValueOf((*plot.DefaultTicks)(nil)),
 		"InvertedScale":  reflect.ValueOf((*plot.InvertedScale)(nil)),
-		"Labeller":       reflect.ValueOf((*plot.Labeller)(nil)),
+		"Labeller":       reflect.ValueOf((*plot.Labeler)(nil)),
 		"Legend":         reflect.ValueOf((*plot.Legend)(nil)),
 		"LegendEntry":    reflect.ValueOf((*plot.LegendEntry)(nil)),
 		"LegendPosition": reflect.ValueOf((*plot.LegendPosition)(nil)),

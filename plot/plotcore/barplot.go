@@ -47,7 +47,7 @@ func (pl *PlotEditor) genPlotBar() {
 		}
 	}
 
-	var firstXY *TableXY
+	var firstXY *tableXY
 	var strCols []*ColumnOptions
 	nys := 0
 	for _, cp := range pl.Columns {
@@ -104,7 +104,7 @@ func (pl *PlotEditor) genPlotBar() {
 			}
 			for ii := 0; ii < nidx; ii++ {
 				idx := stidx + ii
-				xy, _ := NewTableXYName(lview, xi, xp.TensorIndex, cp.Column, idx, cp.Range)
+				xy, _ := newTableXYName(lview, xi, xp.TensorIndex, cp.Column, idx, cp.Range)
 				if xy == nil {
 					continue
 				}
@@ -131,7 +131,7 @@ func (pl *PlotEditor) genPlotBar() {
 				}
 				var bar *plots.BarChart
 				if ec >= 0 {
-					exy, _ := NewTableXY(lview, ec, 0, ec, 0, minmax.Range32{})
+					exy, _ := newTableXY(lview, ec, 0, ec, 0, minmax.Range32{})
 					bar, err = plots.NewBarChart(xy, exy)
 					if err != nil {
 						log.Println(err)
@@ -161,13 +161,13 @@ func (pl *PlotEditor) genPlotBar() {
 		mid = (stride - 2) / 2
 	}
 	if firstXY != nil && len(strCols) > 0 {
-		firstXY.Table = xview
+		firstXY.table = xview
 		n := xview.Len()
 		for _, cp := range strCols {
-			xy, _ := NewTableXYName(xview, xi, xp.TensorIndex, cp.Column, cp.TensorIndex, firstXY.YRange)
-			xy.LabelColumn = xy.YColumn
-			xy.YColumn = firstXY.YColumn
-			xy.YIndex = firstXY.YIndex
+			xy, _ := newTableXYName(xview, xi, xp.TensorIndex, cp.Column, cp.TensorIndex, firstXY.yRange)
+			xy.labelColumn = xy.yColumn
+			xy.yColumn = firstXY.yColumn
+			xy.yIndex = firstXY.yIndex
 
 			xyl := plots.XYLabels{}
 			xyl.XYs = make(plot.XYs, n)

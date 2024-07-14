@@ -263,10 +263,10 @@ func (xy XYValues) XY(i int) (float32, float32) {
 }
 
 //////////////////////////////////////////////////
-// 	Labeller
+// 	Labeler
 
-// Labeller provides an interface for a list of string labels
-type Labeller interface {
+// Labeler provides an interface for a list of string labels
+type Labeler interface {
 	// Label returns a label.
 	Label(i int) string
 }

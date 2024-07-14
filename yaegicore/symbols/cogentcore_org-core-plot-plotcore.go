@@ -20,8 +20,6 @@ func init() {
 		"NewPlot":            reflect.ValueOf(plotcore.NewPlot),
 		"NewPlotEditor":      reflect.ValueOf(plotcore.NewPlotEditor),
 		"NewSubPlot":         reflect.ValueOf(plotcore.NewSubPlot),
-		"NewTableXY":         reflect.ValueOf(plotcore.NewTableXY),
-		"NewTableXYName":     reflect.ValueOf(plotcore.NewTableXYName),
 		"Off":                reflect.ValueOf(plotcore.Off),
 		"On":                 reflect.ValueOf(plotcore.On),
 		"PlotColumnsHeaderN": reflect.ValueOf(constant.MakeFromLiteral("2", token.INT, 0)),
@@ -35,6 +33,5 @@ func init() {
 		"PlotEditor":    reflect.ValueOf((*plotcore.PlotEditor)(nil)),
 		"PlotOptions":   reflect.ValueOf((*plotcore.PlotOptions)(nil)),
 		"PlotTypes":     reflect.ValueOf((*plotcore.PlotTypes)(nil)),
-		"TableXY":       reflect.ValueOf((*plotcore.TableXY)(nil)),
 	}
 }

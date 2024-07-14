@@ -60,7 +60,7 @@ func init() {
 		"XErrorBars": reflect.ValueOf((*plots.XErrorBars)(nil)),
 		"XErrorer":   reflect.ValueOf((*plots.XErrorer)(nil)),
 		"XErrors":    reflect.ValueOf((*plots.XErrors)(nil)),
-		"XYLabeller": reflect.ValueOf((*plots.XYLabeller)(nil)),
+		"XYLabeller": reflect.ValueOf((*plots.XYLabeler)(nil)),
 		"XYLabels":   reflect.ValueOf((*plots.XYLabels)(nil)),
 		"YErrorBars": reflect.ValueOf((*plots.YErrorBars)(nil)),
 		"YErrorer":   reflect.ValueOf((*plots.YErrorer)(nil)),

@@ -41,7 +41,7 @@ func (pl *PlotEditor) GenPlotXY() {
 		}
 	}
 
-	var firstXY *TableXY
+	var firstXY *tableXY
 	var strCols []*ColumnOptions
 	nys := 0
 	for _, cp := range pl.Columns {
@@ -92,7 +92,7 @@ func (pl *PlotEditor) GenPlotXY() {
 			for ii := 0; ii < nidx; ii++ {
 				idx := stidx + ii
 				tix := lview.Clone()
-				xy, _ := NewTableXYName(tix, xi, xp.TensorIndex, cp.Column, idx, cp.Range)
+				xy, _ := newTableXYName(tix, xi, xp.TensorIndex, cp.Column, idx, cp.Range)
 				if xy == nil {
 					continue
 				}
@@ -145,7 +145,7 @@ func (pl *PlotEditor) GenPlotXY() {
 				if cp.ErrColumn != "" {
 					ec := pl.table.Table.ColumnIndex(cp.ErrColumn)
 					if ec >= 0 {
-						xy.ErrColumn = ec
+						xy.errColumn = ec
 						eb, _ := plots.NewYErrorBars(xy)
 						eb.LineStyle.Color = clr
 						plt.Add(eb)
@@ -157,10 +157,10 @@ func (pl *PlotEditor) GenPlotXY() {
 	}
 	if firstXY != nil && len(strCols) > 0 {
 		for _, cp := range strCols {
-			xy, _ := NewTableXYName(xview, xi, xp.TensorIndex, cp.Column, cp.TensorIndex, firstXY.YRange)
-			xy.LabelColumn = xy.YColumn
-			xy.YColumn = firstXY.YColumn
-			xy.YIndex = firstXY.YIndex
+			xy, _ := newTableXYName(xview, xi, xp.TensorIndex, cp.Column, cp.TensorIndex, firstXY.yRange)
+			xy.labelColumn = xy.yColumn
+			xy.yColumn = firstXY.yColumn
+			xy.yIndex = firstXY.yIndex
 			lbls, _ := plots.NewLabels(xy)
 			if lbls != nil {
 				plt.Add(lbls)

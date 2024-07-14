@@ -38,7 +38,7 @@ type Labels struct {
 }
 
 // NewLabels returns a new Labels using defaults
-func NewLabels(d XYLabeller) (*Labels, error) {
+func NewLabels(d XYLabeler) (*Labels, error) {
 	xys, err := plot.CopyXYs(d)
 	if err != nil {
 		return nil, err
@@ -104,11 +104,10 @@ func (l *Labels) DataRange() (xmin, xmax, ymin, ymax float32) {
 	return plot.XYRange(l)
 }
 
-// XYLabeller combines the XYer and Labeller types.
-// this is
-type XYLabeller interface {
+// XYLabeler combines the [plot.XYer] and [plot.Labeler] types.
+type XYLabeler interface {
 	plot.XYer
-	plot.Labeller
+	plot.Labeler
 }
 
 // XYLabels holds XY data with labels.
@@ -123,4 +122,4 @@ func (l XYLabels) Label(i int) string {
 	return l.Labels[i]
 }
 
-var _ XYLabeller = (*XYLabels)(nil)
+var _ XYLabeler = (*XYLabels)(nil)
