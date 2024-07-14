@@ -14,15 +14,15 @@ import (
 )
 
 // OutputBufferMarkupFunc is a function that returns a marked-up version of a given line of
-// output text by adding html tags.  It is essential that it ONLY adds tags,
+// output text by adding html tags. It is essential that it ONLY adds tags,
 // and otherwise has the exact same visible bytes as the input
 type OutputBufferMarkupFunc func(line []byte) []byte
 
-// OutputBuffer is a [Buffer] that records the output from an io.Reader using
-// bufio.Scanner -- optimized to combine fast chunks of output into
-// large blocks of updating.  Also supports arbitrary markup function
+// OutputBuffer is a [Buffer] that records the output from an [io.Reader] using
+// [bufio.Scanner]. It is optimized to combine fast chunks of output into
+// large blocks of updating. It also supports an arbitrary markup function
 // that operates on each line of output bytes.
-type OutputBuffer struct {
+type OutputBuffer struct { //types:add -setters
 
 	// the output that we are reading from, as an io.Reader
 	Output io.Reader
@@ -57,15 +57,14 @@ func (ob *OutputBuffer) Init(out io.Reader, buf *Buffer, batch time.Duration, ma
 	ob.Output = out
 	ob.Buffer = buf
 	ob.MarkupFunc = markup
-	if batch == 0 {
-		ob.Batch = 200 * time.Millisecond
-	} else {
-		ob.Batch = batch
-	}
+	ob.Batch = batch
 }
 
 // MonitorOutput monitors the output and updates the [Buffer].
 func (ob *OutputBuffer) MonitorOutput() {
+	if ob.Batch == 0 {
+		ob.Batch = 200 * time.Millisecond
+	}
 	outscan := bufio.NewScanner(ob.Output) // line at a time
 	ob.currentOutputLines = make([][]byte, 0, 100)
 	ob.currentOutputMarkupLines = make([][]byte, 0, 100)
