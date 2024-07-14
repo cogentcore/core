@@ -160,7 +160,7 @@ func (st *Stage) configMainStage() {
 	}
 	sc := st.Scene
 	sc.makeSceneBars()
-	sc.makeSceneWidgets()
+	sc.updateScene()
 }
 
 // runWindow runs a Window with current settings.

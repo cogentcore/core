@@ -267,11 +267,13 @@ func (sc *Scene) doUpdate() bool {
 	return true
 }
 
-// makeSceneWidgets calls UpdateWidget on all widgets in the Scene,
-// which will set NeedsLayout to drive subsequent layout and render.
+// updateScene calls UpdateTree on the Scene, which calls
+// UpdateWidget on all widgets in the Scene.  This will set
+// NeedsLayout to drive subsequent layout and render.
 // This is a top-level call, typically only done when the window
-// is first drawn, once the full sizing information is available.
-func (sc *Scene) makeSceneWidgets() {
+// is first drawn or resized, or during rebuild,
+// once the full sizing information is available.
+func (sc *Scene) updateScene() {
 	sc.updating = true // prevent rendering
 	defer func() { sc.updating = false }()
 
@@ -293,7 +295,7 @@ func (sc *Scene) applyStyleScene() {
 // should be used by Widgets to rebuild things that are otherwise
 // cached (e.g., Icon, TextCursor).
 func (sc *Scene) doRebuild() {
-	sc.makeSceneWidgets()
+	sc.updateScene()
 	sc.applyStyleScene()
 	sc.layoutRenderScene()
 }
@@ -306,7 +308,7 @@ func (sc *Scene) prefSize(initSz image.Point) image.Point {
 	defer func() { sc.updating = false }()
 
 	sc.prefSizing = true
-	sc.makeSceneWidgets()
+	sc.updateScene()
 	sc.applyStyleScene()
 	sc.layoutScene()
 	sz := &sc.Geom.Size
