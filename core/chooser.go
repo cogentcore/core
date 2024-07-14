@@ -174,6 +174,7 @@ func (ch *Chooser) Init() {
 		s.Text.Align = styles.Center
 		s.Border.Radius = styles.BorderRadiusSmall
 		s.Padding.Set(units.Dp(8), units.Dp(16))
+		s.CenterAll()
 		switch ch.Type {
 		case ChooserFilled:
 			s.Background = colors.Scheme.Secondary.Container
