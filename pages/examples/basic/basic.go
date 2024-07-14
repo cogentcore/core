@@ -7,7 +7,6 @@ package main
 import (
 	"embed"
 
-	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/pages"
 )
@@ -17,7 +16,7 @@ var content embed.FS
 
 func main() {
 	b := core.NewBody("Pages Example")
-	pg := pages.NewPage(b).SetSource(fsx.Sub(content, "content"))
+	pg := pages.NewPage(b).SetContent(content)
 	b.AddAppBar(pg.MakeToolbar)
 	b.RunMainWindow()
 }

@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
@@ -174,6 +175,12 @@ func (pg *Page) setStageTitle() {
 	if rw := pg.Scene.RenderWindow(); rw != nil {
 		rw.SetStageTitle(wpath.Label(pg.Context.PageURL, core.TheApp.Name()))
 	}
+}
+
+// SetContent is a helper function that calls [Page.SetSource]
+// with the "content" subdirectory of the given filesystem.
+func (pg *Page) SetContent(content fs.FS) *Page {
+	return pg.SetSource(fsx.Sub(content, "content"))
 }
 
 // OpenURL sets the content of the page from the given url. If the given URL

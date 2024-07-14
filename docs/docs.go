@@ -14,7 +14,6 @@ import (
 	"reflect"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -54,7 +53,7 @@ func main() {
 
 func main() {
 	b := core.NewBody("Cogent Core Docs")
-	pg := pages.NewPage(b).SetSource(fsx.Sub(content, "content"))
+	pg := pages.NewPage(b).SetContent(content)
 	pg.Context.WikilinkResolver = htmlcore.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.MakeToolbar)
 	b.AddAppBar(func(p *tree.Plan) {
