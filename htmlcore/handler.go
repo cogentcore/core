@@ -28,7 +28,7 @@ import (
 // ElementHandlers is a map of handler functions for each HTML element
 // type (eg: "button", "input", "p"). It is empty by default, but can be
 // used by anyone in need of behavior different than the default behavior
-// defined in [HandleElement] (for example, for custom elements).
+// defined in [handleElement] (for example, for custom elements).
 // If the handler for an element returns false, then the default behavior
 // for an element is used.
 var ElementHandlers = map[string]func(ctx *Context) bool{}
@@ -47,10 +47,10 @@ func New[T tree.NodeValue](ctx *Context) *T {
 	return w
 }
 
-// HandleElement calls the handler in [ElementHandlers] associated with the current node
+// handleElement calls the handler in [ElementHandlers] associated with the current node
 // using the given context. If there is no handler associated with it, it uses default
 // hardcoded configuration code.
-func HandleElement(ctx *Context) {
+func handleElement(ctx *Context) {
 	tag := ctx.Node.Data
 	h, ok := ElementHandlers[tag]
 	if ok {
@@ -60,7 +60,7 @@ func HandleElement(ctx *Context) {
 	}
 
 	if slices.Contains(TextTags, tag) {
-		HandleTextTag(ctx)
+		handleTextTag(ctx)
 		return
 	}
 
@@ -68,7 +68,7 @@ func HandleElement(ctx *Context) {
 	case "script", "title", "meta":
 		// we don't render anything
 	case "link":
-		rel := GetAttr(ctx.Node, "rel")
+		rel := getAttr(ctx.Node, "rel")
 		// TODO(kai/htmlcore): maybe handle preload
 		if rel == "preload" {
 			return
@@ -77,7 +77,7 @@ func HandleElement(ctx *Context) {
 		if rel != "stylesheet" {
 			return
 		}
-		resp, err := Get(ctx, GetAttr(ctx.Node, "href"))
+		resp, err := Get(ctx, getAttr(ctx.Node, "href"))
 		if errors.Log(err) != nil {
 			return
 		}
@@ -105,26 +105,26 @@ func HandleElement(ctx *Context) {
 	case "button":
 		New[core.Button](ctx).SetText(ExtractText(ctx))
 	case "h1":
-		HandleText(ctx).SetType(core.TextHeadlineLarge)
+		handleText(ctx).SetType(core.TextHeadlineLarge)
 	case "h2":
-		HandleText(ctx).SetType(core.TextHeadlineSmall)
+		handleText(ctx).SetType(core.TextHeadlineSmall)
 	case "h3":
-		HandleText(ctx).SetType(core.TextTitleLarge)
+		handleText(ctx).SetType(core.TextTitleLarge)
 	case "h4":
-		HandleText(ctx).SetType(core.TextTitleMedium)
+		handleText(ctx).SetType(core.TextTitleMedium)
 	case "h5":
-		HandleText(ctx).SetType(core.TextTitleSmall)
+		handleText(ctx).SetType(core.TextTitleSmall)
 	case "h6":
-		HandleText(ctx).SetType(core.TextLabelSmall)
+		handleText(ctx).SetType(core.TextLabelSmall)
 	case "p":
-		HandleText(ctx)
+		handleText(ctx)
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
 			ed := New[texteditor.Editor](ctx)
 			ctx.Node = ctx.Node.FirstChild // go to the code element
 			ed.Buffer.SetString(ExtractText(ctx))
-			lang := getLanguage(GetAttr(ctx.Node, "class"))
+			lang := getLanguage(getAttr(ctx.Node, "class"))
 			if lang != "" {
 				ed.Buffer.SetLanguage(lang)
 			}
@@ -161,7 +161,7 @@ func HandleElement(ctx *Context) {
 				})
 			}
 		} else {
-			HandleText(ctx).Styler(func(s *styles.Style) {
+			handleText(ctx).Styler(func(s *styles.Style) {
 				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			})
 		}
@@ -175,7 +175,7 @@ func HandleElement(ctx *Context) {
 			ctx.Node = ctx.Node.FirstChild.NextSibling
 		}
 
-		text := HandleText(ctx)
+		text := handleText(ctx)
 		start := ""
 		if pw, ok := text.Parent.(core.Widget); ok {
 			switch pw.AsTree().Property("tag") {
@@ -199,7 +199,7 @@ func HandleElement(ctx *Context) {
 		img := New[core.Image](ctx)
 		n := ctx.Node
 		go func() {
-			src := GetAttr(n, "src")
+			src := getAttr(n, "src")
 			resp, err := Get(ctx, src)
 			if errors.Log(err) != nil {
 				return
@@ -218,18 +218,18 @@ func HandleElement(ctx *Context) {
 			}
 		}()
 	case "input":
-		ityp := GetAttr(ctx.Node, "type")
-		val := GetAttr(ctx.Node, "value")
+		ityp := getAttr(ctx.Node, "type")
+		val := getAttr(ctx.Node, "value")
 		switch ityp {
 		case "number":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
 			New[core.Spinner](ctx).SetValue(fval)
 		case "checkbox":
 			New[core.Switch](ctx).SetType(core.SwitchCheckbox).
-				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
+				SetState(hasAttr(ctx.Node, "checked"), states.Checked)
 		case "radio":
 			New[core.Switch](ctx).SetType(core.SwitchRadioButton).
-				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
+				SetState(hasAttr(ctx.Node, "checked"), states.Checked)
 		case "range":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
 			New[core.Slider](ctx).SetValue(fval)
@@ -253,9 +253,9 @@ func HandleElement(ctx *Context) {
 	}
 }
 
-// HandleText creates a new [core.Text] from the given information, setting the text and
+// handleText creates a new [core.Text] from the given information, setting the text and
 // the text click function so that URLs are opened according to [Context.OpenURL].
-func HandleText(ctx *Context) *core.Text {
+func handleText(ctx *Context) *core.Text {
 	lb := New[core.Text](ctx).SetText(ExtractText(ctx))
 	lb.HandleTextClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
@@ -263,12 +263,12 @@ func HandleText(ctx *Context) *core.Text {
 	return lb
 }
 
-// HandleTextTag creates a new [core.Text] from the given information, setting the text and
+// handleTextTag creates a new [core.Text] from the given information, setting the text and
 // the text click function so that URLs are opened according to [Context.OpenURL]. Also,
 // it wraps the text with the [NodeString] of the given node, meaning that it
 // should be used for standalone elements that are meant to only exist in text
 // (eg: a, span, b, code, etc).
-func HandleTextTag(ctx *Context) *core.Text {
+func handleTextTag(ctx *Context) *core.Text {
 	start, end := NodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
 	lb := New[core.Text](ctx).SetText(str)
@@ -278,9 +278,9 @@ func HandleTextTag(ctx *Context) *core.Text {
 	return lb
 }
 
-// GetAttr gets the given attribute from the given node, returning ""
+// getAttr gets the given attribute from the given node, returning ""
 // if the attribute is not found.
-func GetAttr(n *html.Node, attr string) string {
+func getAttr(n *html.Node, attr string) string {
 	res := ""
 	for _, a := range n.Attr {
 		if a.Key == attr {
@@ -290,8 +290,8 @@ func GetAttr(n *html.Node, attr string) string {
 	return res
 }
 
-// HasAttr returns whether the given node has the given attribute defined.
-func HasAttr(n *html.Node, attr string) bool {
+// hasAttr returns whether the given node has the given attribute defined.
+func hasAttr(n *html.Node, attr string) bool {
 	return slices.ContainsFunc(n.Attr, func(a html.Attribute) bool {
 		return a.Key == attr
 	})

@@ -52,7 +52,7 @@ func ReadHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
 		ctx.BlockParent = parent
 		ctx.NewParent = nil
 
-		HandleElement(ctx)
+		handleElement(ctx)
 	default:
 		ctx.NewParent = parent
 	}
