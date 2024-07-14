@@ -178,6 +178,34 @@ func TestRenderElementCutOff(t *testing.T) {
 		s.Max.X.Zero()
 	})
 	NewButton(fr).SetIcon(icons.Send)
-	b.AssertRender(t, "render/element-cut-off", func() {
+	b.AssertRender(t, "render/element-cut-off")
+}
+
+// For https://github.com/cogentcore/core/issues/1012
+func TestRenderGridCenteredFrame(t *testing.T) {
+	b := NewBody()
+	grid := NewFrame(b)
+	grid.Styler(func(s *styles.Style) {
+		s.Display = styles.Grid
+		s.Columns = 2
 	})
+	nameLabel := NewText(grid).SetText("Name")
+	nameLabel.Styler(func(s *styles.Style) {
+		s.SetTextWrap(false)
+	})
+	NewTextField(grid).SetText("widget-base")
+	label := NewText(grid).SetText("Children")
+	label.Styler(func(s *styles.Style) {
+		s.SetTextWrap(false)
+	})
+	fr := NewFrame(grid)
+	fr.Styler(func(s *styles.Style) {
+		s.CenterAll()
+		s.Background = colors.Scheme.Select.Container
+	})
+	tx := NewText(fr).SetText("0 nodes").SetType(TextLabelLarge)
+	tx.Styler(func(s *styles.Style) {
+		s.SetTextWrap(false)
+	})
+	b.AssertRender(t, "render/grid-centered-frame")
 }
