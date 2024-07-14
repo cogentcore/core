@@ -629,9 +629,6 @@ func (fr *Frame) StackTopWidget() (Widget, *WidgetBase) {
 // absorbing the extra content size within their own scrolling zone
 // (full size recorded in Internal).
 func (fr *Frame) laySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses) {
-	// todo: potentially the diff between Visible & Hidden is
-	// that Hidden also does Not expand beyond Alloc?
-	// can expt with that.
 	sz := &fr.Geom.Size
 	asz := &sz.Actual.Content
 	isz := &sz.Internal
@@ -639,14 +636,19 @@ func (fr *Frame) laySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 	*isz = nsz                   // internal is always accurate!
 	oflow := &fr.Styles.Overflow
 	nosz := pass == SizeUpPass && fr.Styles.IsFlexWrap()
+	mx := sz.Max
 	for d := math32.X; d <= math32.Y; d++ {
-		if (nosz || (!(fr.Scene != nil && fr.Scene.prefSizing) && oflow.Dim(d) >= styles.OverflowAuto)) && fr.Parent != nil {
+		if nosz {
 			continue
 		}
-		asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
+		if !(fr.Scene != nil && fr.Scene.prefSizing) && oflow.Dim(d) >= styles.OverflowAuto && fr.Parent != nil {
+			if mx.Dim(d) > 0 {
+				asz.SetDim(d, styles.ClampMax(styles.ClampMin(asz.Dim(d), nsz.Dim(d)), mx.Dim(d)))
+			}
+		} else {
+			asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
+		}
 	}
-	mx := sz.Max
-	styles.SetClampMaxVector(isz, mx)
 	styles.SetClampMaxVector(asz, mx)
 	sz.setTotalFromContent(&sz.Actual)
 }

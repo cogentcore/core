@@ -445,15 +445,11 @@ var (
 )
 
 func TestLayoutScrollLabel(t *testing.T) {
-	// TODO(#808)
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Max.Set(units.Dp(50))
-	})
-	fr := NewFrame(b)
-	fr.Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
-	NewText(fr).SetText(LongText)
+	NewText(b).SetText(LongText)
 	b.AssertRender(t, "layout/scroll/label")
 }
