@@ -150,7 +150,7 @@ func (c *Context) addStyle(style string) {
 		return
 	}
 
-	root := RootNode(c.Node)
+	root := rootNode(c.Node)
 
 	for _, rule := range ss.Rules {
 		var sel *selcss.Selector

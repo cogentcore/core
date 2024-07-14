@@ -23,11 +23,9 @@ func init() {
 		"ParseURL":         reflect.ValueOf(htmlcore.ParseURL),
 		"PkgGoDevWikilink": reflect.ValueOf(htmlcore.PkgGoDevWikilink),
 		"ReadHTML":         reflect.ValueOf(htmlcore.ReadHTML),
-		"ReadHTMLNode":     reflect.ValueOf(htmlcore.ReadHTMLNode),
 		"ReadHTMLString":   reflect.ValueOf(htmlcore.ReadHTMLString),
 		"ReadMD":           reflect.ValueOf(htmlcore.ReadMD),
 		"ReadMDString":     reflect.ValueOf(htmlcore.ReadMDString),
-		"RootNode":         reflect.ValueOf(htmlcore.RootNode),
 		"TextTags":         reflect.ValueOf(&htmlcore.TextTags).Elem(),
 		"UserAgentStyles":  reflect.ValueOf(&htmlcore.UserAgentStyles).Elem(),
 

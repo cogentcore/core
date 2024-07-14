@@ -13,7 +13,7 @@ import (
 // ExtractText recursively extracts all of the text from the children
 // of the given [*html.Node], adding any appropriate inline markup for
 // formatted text. It adds any non-text elements to the given [core.Widget]
-// using [ReadHTMLNode]. It should not be called on text nodes themselves;
+// using [readHTMLNode]. It should not be called on text nodes themselves;
 // for that, you can directly access the [html.Node.Data] field. It uses
 // the given page URL for context when resolving URLs, but it can be
 // omitted if not available.
@@ -31,7 +31,7 @@ func extractTextImpl(ctx *Context, n *html.Node) string {
 	}
 	it := IsText(n)
 	if !it {
-		ReadHTMLNode(ctx, ctx.Parent(), n)
+		readHTMLNode(ctx, ctx.Parent(), n)
 	}
 	if it && n.FirstChild != nil {
 		start, end := NodeString(n)
