@@ -28,7 +28,7 @@ func (pl *PlotEditor) genPlotBar() {
 	}
 
 	// process xaxis first
-	xi, xview, err := pl.PlotXAxis(plt, pl.Table)
+	xi, xview, err := pl.plotXAxis(plt, pl.table)
 	if err != nil {
 		return
 	}
@@ -37,7 +37,7 @@ func (pl *PlotEditor) genPlotBar() {
 	var lsplit *table.Splits
 	nleg := 1
 	if pl.Options.LegendColumn != "" {
-		_, err = pl.Table.Table.ColumnIndexTry(pl.Options.LegendColumn)
+		_, err = pl.table.Table.ColumnIndexTry(pl.Options.LegendColumn)
 		if err != nil {
 			log.Println("plot.LegendColumn: " + err.Error())
 		} else {
@@ -59,7 +59,7 @@ func (pl *PlotEditor) genPlotBar() {
 			continue
 		}
 		if cp.TensorIndex < 0 {
-			yc := pl.Table.Table.ColumnByName(cp.Column)
+			yc := pl.table.Table.ColumnByName(cp.Column)
 			_, sz := yc.RowCellSize()
 			nys += sz
 		} else {
@@ -97,7 +97,7 @@ func (pl *PlotEditor) genPlotBar() {
 			nidx := 1
 			stidx := cp.TensorIndex
 			if cp.TensorIndex < 0 { // do all
-				yc := pl.Table.Table.ColumnByName(cp.Column)
+				yc := pl.table.Table.ColumnByName(cp.Column)
 				_, sz := yc.RowCellSize()
 				nidx = sz
 				stidx = 0
@@ -127,7 +127,7 @@ func (pl *PlotEditor) genPlotBar() {
 				}
 				ec := -1
 				if cp.ErrColumn != "" {
-					ec = pl.Table.Table.ColumnIndex(cp.ErrColumn)
+					ec = pl.table.Table.ColumnIndex(cp.ErrColumn)
 				}
 				var bar *plots.BarChart
 				if ec >= 0 {
@@ -186,10 +186,10 @@ func (pl *PlotEditor) genPlotBar() {
 		}
 	}
 
-	netn := pl.Table.Len() * stride
-	xc := pl.Table.Table.Columns[xi]
+	netn := pl.table.Len() * stride
+	xc := pl.table.Table.Columns[xi]
 	vals := make([]string, netn)
-	for i, dx := range pl.Table.Indexes {
+	for i, dx := range pl.table.Indexes {
 		pi := mid + i*stride
 		if pi < netn && dx < xc.Len() {
 			vals[pi] = xc.String1D(dx)
@@ -197,9 +197,6 @@ func (pl *PlotEditor) genPlotBar() {
 	}
 	plt.NominalX(vals...)
 
-	pl.ConfigPlot(plt)
-	pl.Plot = plt
-	if pl.ConfigPlotFunc != nil {
-		pl.ConfigPlotFunc()
-	}
+	pl.configPlot(plt)
+	pl.plot = plt
 }

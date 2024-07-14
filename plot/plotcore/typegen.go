@@ -40,17 +40,10 @@ func NewPlotEditor(parent ...tree.Node) *PlotEditor { return tree.New[PlotEditor
 // Options are the overall plot options.
 func (t *PlotEditor) SetOptions(v PlotOptions) *PlotEditor { t.Options = v; return t }
 
-// SetConfigPlotFunc sets the [PlotEditor.ConfigPlotFunc]:
-// ConfigPlotFunc is a function to call to configure [PlotEditor.Plot], the plot.Plot that
-// actually does the plotting. It is called after [Plot] is generated, and properties
-// of [Plot] can be modified in it. Properties of [Plot] should not be modified outside
-// of this function, as doing so will have no effect.
-func (t *PlotEditor) SetConfigPlotFunc(v func()) *PlotEditor { t.ConfigPlotFunc = v; return t }
-
 // SetSVGFile sets the [PlotEditor.SVGFile]:
 // current svg file
-func (t *PlotEditor) SetSVGFile(v core.Filename) *PlotEditor { t.SVGFile = v; return t }
+func (t *PlotEditor) SetSVGFile(v core.Filename) *PlotEditor { t.svgFile = v; return t }
 
 // SetDataFile sets the [PlotEditor.DataFile]:
 // current csv data file
-func (t *PlotEditor) SetDataFile(v core.Filename) *PlotEditor { t.DataFile = v; return t }
+func (t *PlotEditor) SetDataFile(v core.Filename) *PlotEditor { t.dataFile = v; return t }

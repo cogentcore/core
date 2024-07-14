@@ -22,7 +22,7 @@ func (pl *PlotEditor) GenPlotXY() {
 	plt := plot.New()
 
 	// process xaxis first
-	xi, xview, err := pl.PlotXAxis(plt, pl.Table)
+	xi, xview, err := pl.plotXAxis(plt, pl.table)
 	if err != nil {
 		return
 	}
@@ -31,7 +31,7 @@ func (pl *PlotEditor) GenPlotXY() {
 	var lsplit *table.Splits
 	nleg := 1
 	if pl.Options.LegendColumn != "" {
-		_, err = pl.Table.Table.ColumnIndexTry(pl.Options.LegendColumn)
+		_, err = pl.table.Table.ColumnIndexTry(pl.Options.LegendColumn)
 		if err != nil {
 			slog.Error("plot.LegendColumn", "err", err.Error())
 		} else {
@@ -53,7 +53,7 @@ func (pl *PlotEditor) GenPlotXY() {
 			continue
 		}
 		if cp.TensorIndex < 0 {
-			yc := pl.Table.Table.ColumnByName(cp.Column)
+			yc := pl.table.Table.ColumnByName(cp.Column)
 			_, sz := yc.RowCellSize()
 			nys += sz
 		} else {
@@ -84,7 +84,7 @@ func (pl *PlotEditor) GenPlotXY() {
 			nidx := 1
 			stidx := cp.TensorIndex
 			if cp.TensorIndex < 0 { // do all
-				yc := pl.Table.Table.ColumnByName(cp.Column)
+				yc := pl.table.Table.ColumnByName(cp.Column)
 				_, sz := yc.RowCellSize()
 				nidx = sz
 				stidx = 0
@@ -143,7 +143,7 @@ func (pl *PlotEditor) GenPlotXY() {
 					}
 				}
 				if cp.ErrColumn != "" {
-					ec := pl.Table.Table.ColumnIndex(cp.ErrColumn)
+					ec := pl.table.Table.ColumnIndex(cp.ErrColumn)
 					if ec >= 0 {
 						xy.ErrColumn = ec
 						eb, _ := plots.NewYErrorBars(xy)
@@ -169,19 +169,16 @@ func (pl *PlotEditor) GenPlotXY() {
 	}
 
 	// Use string labels for X axis if X is a string
-	xc := pl.Table.Table.Columns[xi]
+	xc := pl.table.Table.Columns[xi]
 	if xc.IsString() {
 		xcs := xc.(*tensor.String)
-		vals := make([]string, pl.Table.Len())
-		for i, dx := range pl.Table.Indexes {
+		vals := make([]string, pl.table.Len())
+		for i, dx := range pl.table.Indexes {
 			vals[i] = xcs.Values[dx]
 		}
 		plt.NominalX(vals...)
 	}
 
-	pl.ConfigPlot(plt)
-	pl.Plot = plt
-	if pl.ConfigPlotFunc != nil {
-		pl.ConfigPlotFunc()
-	}
+	pl.configPlot(plt)
+	pl.plot = plt
 }
