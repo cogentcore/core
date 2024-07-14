@@ -11,11 +11,11 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/tree/tree"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"Add":               reflect.ValueOf(interp.GenericFunc("func Add[T NodeValue](p *Plan, init func(w *T)) { //yaegi:add\n\tAddAt[T](p, AutoPlanName(2), init)\n}")),
+		"Add":               reflect.ValueOf(interp.GenericFunc("func Add[T NodeValue](p *Plan, init func(w *T)) { //yaegi:add\n\tAddAt(p, AutoPlanName(2), init)\n}")),
 		"AddAt":             reflect.ValueOf(interp.GenericFunc("func AddAt[T NodeValue](p *Plan, name string, init func(w *T)) { //yaegi:add\n\tp.Add(name, func() Node {\n\t\treturn any(New[T]()).(Node)\n\t}, func(n Node) {\n\t\tinit(any(n).(*T))\n\t})\n}")),
-		"AddChild":          reflect.ValueOf(interp.GenericFunc("func AddChild[T NodeValue](parent Node, init func(w *T)) { //yaegi:add\n\tname := AutoPlanName(2) // must get here to get correct name\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddAt[T](p, name, init)\n\t})\n}")),
-		"AddChildAt":        reflect.ValueOf(interp.GenericFunc("func AddChildAt[T NodeValue](parent Node, name string, init func(w *T)) { //yaegi:add\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddAt[T](p, name, init)\n\t})\n}")),
-		"AddChildInit":      reflect.ValueOf(interp.GenericFunc("func AddChildInit[T NodeValue](parent Node, name string, init func(w *T)) { //yaegi:add\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddInit[T](p, name, init)\n\t})\n}")),
+		"AddChild":          reflect.ValueOf(interp.GenericFunc("func AddChild[T NodeValue](parent Node, init func(w *T)) { //yaegi:add\n\tname := AutoPlanName(2) // must get here to get correct name\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddAt(p, name, init)\n\t})\n}")),
+		"AddChildAt":        reflect.ValueOf(interp.GenericFunc("func AddChildAt[T NodeValue](parent Node, name string, init func(w *T)) { //yaegi:add\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddAt(p, name, init)\n\t})\n}")),
+		"AddChildInit":      reflect.ValueOf(interp.GenericFunc("func AddChildInit[T NodeValue](parent Node, name string, init func(w *T)) { //yaegi:add\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddInit(p, name, init)\n\t})\n}")),
 		"AddInit":           reflect.ValueOf(interp.GenericFunc("func AddInit[T NodeValue](p *Plan, name string, init func(w *T)) { //yaegi:add\n\tfor _, child := range p.Children {\n\t\tif child.Name == name {\n\t\t\tchild.Init = append(child.Init, func(n Node) {\n\t\t\t\tinit(any(n).(*T))\n\t\t\t})\n\t\t\treturn\n\t\t}\n\t}\n\tslog.Error(\"AddInit: child not found\", \"name\", name)\n}")),
 		"AddNew":            reflect.ValueOf(interp.GenericFunc("func AddNew[T Node](p *Plan, name string, new func() T, init func(w T)) { //yaegi:add\n\tp.Add(name, func() Node {\n\t\treturn new()\n\t}, func(n Node) {\n\t\tinit(n.(T))\n\t})\n}")),
 		"AutoPlanName":      reflect.ValueOf(tree.AutoPlanName),
