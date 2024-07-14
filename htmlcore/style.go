@@ -8,7 +8,7 @@ import (
 	_ "embed"
 )
 
-// UserAgentStyles contains the default user agent styles.
+// userAgentStyles contains the default user agent styles.
 //
 //go:embed html.css
-var UserAgentStyles string
+var userAgentStyles string

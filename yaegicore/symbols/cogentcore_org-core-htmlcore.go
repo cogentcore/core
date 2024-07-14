@@ -27,7 +27,6 @@ func init() {
 		"ReadMD":           reflect.ValueOf(htmlcore.ReadMD),
 		"ReadMDString":     reflect.ValueOf(htmlcore.ReadMDString),
 		"TextTags":         reflect.ValueOf(&htmlcore.TextTags).Elem(),
-		"UserAgentStyles":  reflect.ValueOf(&htmlcore.UserAgentStyles).Elem(),
 
 		// type definitions
 		"Context": reflect.ValueOf((*htmlcore.Context)(nil)),

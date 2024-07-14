@@ -38,7 +38,7 @@ func readHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
 	// nil parent means we are root, so we add user agent styles here
 	if n.Parent == nil {
 		ctx.Node = n
-		ctx.addStyle(UserAgentStyles)
+		ctx.addStyle(userAgentStyles)
 	}
 
 	switch n.Type {
