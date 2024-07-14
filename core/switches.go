@@ -194,7 +194,9 @@ func (sw *Switches) Init() {
 				})
 				w.Updater(func() {
 					w.SetType(sw.Type).SetText(item.getText()).SetTooltip(item.Tooltip)
-					w.SetChecked(slices.Contains(sw.selectedIndexes, i))
+					if !w.StateIs(states.Indeterminate) {
+						w.SetChecked(slices.Contains(sw.selectedIndexes, i))
+					}
 				})
 			})
 		}
