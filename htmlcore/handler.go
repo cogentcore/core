@@ -315,7 +315,7 @@ func getLanguage(class string) string {
 // it is not [http.StatusOK]. If the error is nil, then the response body is
 // not closed and must be closed by the caller.
 func Get(ctx *Context, url string) (*http.Response, error) {
-	u, err := ParseRelativeURL(url, ctx.PageURL)
+	u, err := parseRelativeURL(url, ctx.PageURL)
 	if err != nil {
 		return nil, err
 	}
