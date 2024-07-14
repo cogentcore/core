@@ -34,29 +34,29 @@ type OutputBuffer struct {
 	Batch time.Duration
 
 	// optional markup function that adds html tags to given line of output -- essential that it ONLY adds tags, and otherwise has the exact same visible bytes as the input
-	MarkupFun OutputBufferMarkupFunc
+	MarkupFunc OutputBufferMarkupFunc
 
 	// current buffered output raw lines, which are not yet sent to the Buffer
-	CurrentOutputLines [][]byte
+	currentOutputLines [][]byte
 
 	// current buffered output markup lines, which are not yet sent to the Buffer
-	CurrentOutputMarkupLines [][]byte
+	currentOutputMarkupLines [][]byte
 
 	// mutex protecting updating of CurrentOutputLines and Buffer, and timer
-	Mu sync.Mutex
+	mu sync.Mutex
 
 	// time when last output was sent to buffer
-	LastOut time.Time
+	lastOutput time.Time
 
 	// time.AfterFunc that is started after new input is received and not immediately output -- ensures that it will get output if no further burst happens
-	AfterTimer *time.Timer
+	afterTimer *time.Timer
 }
 
 // Init sets the various params and prepares for running.
 func (ob *OutputBuffer) Init(out io.Reader, buf *Buffer, batch time.Duration, markup OutputBufferMarkupFunc) {
 	ob.Output = out
 	ob.Buffer = buf
-	ob.MarkupFun = markup
+	ob.MarkupFunc = markup
 	if batch == 0 {
 		ob.Batch = 200 * time.Millisecond
 	} else {
@@ -67,57 +67,57 @@ func (ob *OutputBuffer) Init(out io.Reader, buf *Buffer, batch time.Duration, ma
 // MonitorOutput monitors the output and updates the [Buffer].
 func (ob *OutputBuffer) MonitorOutput() {
 	outscan := bufio.NewScanner(ob.Output) // line at a time
-	ob.CurrentOutputLines = make([][]byte, 0, 100)
-	ob.CurrentOutputMarkupLines = make([][]byte, 0, 100)
+	ob.currentOutputLines = make([][]byte, 0, 100)
+	ob.currentOutputMarkupLines = make([][]byte, 0, 100)
 	for outscan.Scan() {
 		b := outscan.Bytes()
 		bc := slices.Clone(b) // outscan bytes are temp
 		bec := htmlEscapeBytes(bc)
 
-		ob.Mu.Lock()
-		if ob.AfterTimer != nil {
-			ob.AfterTimer.Stop()
-			ob.AfterTimer = nil
+		ob.mu.Lock()
+		if ob.afterTimer != nil {
+			ob.afterTimer.Stop()
+			ob.afterTimer = nil
 		}
-		ob.CurrentOutputLines = append(ob.CurrentOutputLines, bc)
+		ob.currentOutputLines = append(ob.currentOutputLines, bc)
 		mup := bec
-		if ob.MarkupFun != nil {
-			mup = ob.MarkupFun(bec)
+		if ob.MarkupFunc != nil {
+			mup = ob.MarkupFunc(bec)
 		}
-		ob.CurrentOutputMarkupLines = append(ob.CurrentOutputMarkupLines, mup)
-		lag := time.Since(ob.LastOut)
+		ob.currentOutputMarkupLines = append(ob.currentOutputMarkupLines, mup)
+		lag := time.Since(ob.lastOutput)
 		if lag > ob.Batch {
-			ob.LastOut = time.Now()
-			ob.OutputToBuffer()
+			ob.lastOutput = time.Now()
+			ob.outputToBuffer()
 		} else {
-			ob.AfterTimer = time.AfterFunc(ob.Batch*2, func() {
-				ob.Mu.Lock()
-				ob.LastOut = time.Now()
-				ob.OutputToBuffer()
-				ob.AfterTimer = nil
-				ob.Mu.Unlock()
+			ob.afterTimer = time.AfterFunc(ob.Batch*2, func() {
+				ob.mu.Lock()
+				ob.lastOutput = time.Now()
+				ob.outputToBuffer()
+				ob.afterTimer = nil
+				ob.mu.Unlock()
 			})
 		}
-		ob.Mu.Unlock()
+		ob.mu.Unlock()
 	}
-	ob.OutputToBuffer()
+	ob.outputToBuffer()
 }
 
-// OutputToBuffer sends the current output to Buf.
+// outputToBuffer sends the current output to Buffer.
 // MUST be called under mutex protection
-func (ob *OutputBuffer) OutputToBuffer() {
+func (ob *OutputBuffer) outputToBuffer() {
 	lfb := []byte("\n")
-	if len(ob.CurrentOutputLines) == 0 {
+	if len(ob.currentOutputLines) == 0 {
 		return
 	}
-	tlns := bytes.Join(ob.CurrentOutputLines, lfb)
-	mlns := bytes.Join(ob.CurrentOutputMarkupLines, lfb)
+	tlns := bytes.Join(ob.currentOutputLines, lfb)
+	mlns := bytes.Join(ob.currentOutputMarkupLines, lfb)
 	tlns = append(tlns, lfb...)
 	mlns = append(mlns, lfb...)
 	ob.Buffer.Undos.Off = true
 	ob.Buffer.AppendTextMarkup(tlns, mlns, EditSignal)
 	// ob.Buf.AppendText(mlns, EditSignal) // todo: trying to allow markup according to styles
 	ob.Buffer.AutoScrollEditors()
-	ob.CurrentOutputLines = make([][]byte, 0, 100)
-	ob.CurrentOutputMarkupLines = make([][]byte, 0, 100)
+	ob.currentOutputLines = make([][]byte, 0, 100)
+	ob.currentOutputMarkupLines = make([][]byte, 0, 100)
 }
