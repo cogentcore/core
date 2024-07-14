@@ -21,15 +21,15 @@ import (
 	"github.com/alecthomas/chroma/v2/lexers"
 )
 
-// HiMarkup manages the syntax highlighting state for [Buffer].
+// Highlighting manages the syntax highlighting state for [Buffer].
 // It uses [parse] if available, otherwise falls back on chroma.
-type HiMarkup struct {
+type Highlighting struct {
 
 	// full info about the file including category etc
-	Info *fileinfo.FileInfo
+	info *fileinfo.FileInfo
 
 	// syntax highlighting style
-	Style core.HiStyleName
+	Style core.HighlightingName
 
 	// chroma-based language name for syntax highlighting the code
 	Lang string
@@ -55,29 +55,29 @@ type HiMarkup struct {
 	// external toggle to turn off automatic highlighting
 	Off       bool
 	lastLang  string
-	lastStyle core.HiStyleName
+	lastStyle core.HighlightingName
 	lexer     chroma.Lexer
 	formatter *html.Formatter
 }
 
 // HasHi returns true if there are highlighting parameters set (only valid after Init)
-func (hm *HiMarkup) HasHi() bool {
+func (hm *Highlighting) HasHi() bool {
 	return hm.Has
 }
 
 // UsingParse returns true if markup is using parse lexer / parser, which affects
 // use of results
-func (hm *HiMarkup) UsingParse() bool {
+func (hm *Highlighting) UsingParse() bool {
 	return hm.ParseLang != nil
 }
 
 // Init initializes the syntax highlighting for current params
-func (hm *HiMarkup) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
-	hm.Info = info
+func (hm *Highlighting) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
+	hm.info = info
 	hm.ParseState = pist
 
-	if hm.Info.Known != fileinfo.Unknown {
-		if lp, err := parse.LangSupport.Properties(hm.Info.Known); err == nil {
+	if hm.info.Known != fileinfo.Unknown {
+		if lp, err := parse.LangSupport.Properties(hm.info.Known); err == nil {
 			if lp.Lang != nil {
 				hm.lexer = nil
 				hm.ParseLang = lp.Lang
@@ -88,9 +88,9 @@ func (hm *HiMarkup) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 	}
 
 	if hm.ParseLang == nil {
-		lexer := lexers.MatchMimeType(hm.Info.Mime)
+		lexer := lexers.MatchMimeType(hm.info.Mime)
 		if lexer == nil {
-			lexer = lexers.Match(hm.Info.Name)
+			lexer = lexers.Match(hm.info.Name)
 		}
 		if lexer != nil {
 			hm.Lang = lexer.Config().Name
@@ -118,7 +118,7 @@ func (hm *HiMarkup) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 }
 
 // SetHiStyle sets the highlighting style and updates corresponding settings
-func (hm *HiMarkup) SetHiStyle(style core.HiStyleName) {
+func (hm *Highlighting) SetHiStyle(style core.HighlightingName) {
 	if style == "" {
 		return
 	}
@@ -135,7 +135,7 @@ func (hm *HiMarkup) SetHiStyle(style core.HiStyleName) {
 
 // MarkupTagsAll returns all the markup tags according to current
 // syntax highlighting settings
-func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lexer.Line, error) {
+func (hm *Highlighting) MarkupTagsAll(txt []byte) ([]lexer.Line, error) {
 	if hm.Off {
 		return nil, nil
 	}
@@ -150,7 +150,7 @@ func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lexer.Line, error) {
 
 // MarkupTagsLine returns tags for one line according to current
 // syntax highlighting settings
-func (hm *HiMarkup) MarkupTagsLine(ln int, txt []rune) (lexer.Line, error) {
+func (hm *Highlighting) MarkupTagsLine(ln int, txt []rune) (lexer.Line, error) {
 	if hm.Off {
 		return nil, nil
 	}
@@ -187,7 +187,7 @@ func ChromaTagsForLine(tags *lexer.Line, toks []chroma.Token) {
 
 // ChromaTagsAll returns all the markup tags according to current
 // syntax highlighting settings
-func (hm *HiMarkup) ChromaTagsAll(txt []byte) ([]lexer.Line, error) {
+func (hm *Highlighting) ChromaTagsAll(txt []byte) ([]lexer.Line, error) {
 	txtstr := string(txt) // expensive!
 	iterator, err := hm.lexer.Tokenise(nil, txtstr)
 	if err != nil {
@@ -205,7 +205,7 @@ func (hm *HiMarkup) ChromaTagsAll(txt []byte) ([]lexer.Line, error) {
 
 // ChromaTagsLine returns tags for one line according to current
 // syntax highlighting settings
-func (hm *HiMarkup) ChromaTagsLine(txt []rune) (lexer.Line, error) {
+func (hm *Highlighting) ChromaTagsLine(txt []rune) (lexer.Line, error) {
 	return ChromaTagsLine(hm.lexer, txt)
 }
 
@@ -233,7 +233,7 @@ const (
 // MarkupLine returns the line with html class tags added for each tag
 // takes both the hi tags and extra tags.  Only fully nested tags are supported --
 // any dangling ends are truncated.
-func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
+func (hm *Highlighting) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 	if len(txt) > MaxLineLen { // avoid overflow
 		return nil
 	}
@@ -322,29 +322,11 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 	return mu
 }
 
-///////////////////////////////////////////////////////////////////////////
-// HTMLEscapeBytes
-
-// var htmlEscaper = bytereplacer.New(
-// 	`&`, "&amp;",
-// 	`'`, "&#39;", // "&#39;" is shorter than "&apos;" and apos was not in HTML until HTML5.
-// 	`<`, "&lt;",
-// 	`>`, "&gt;",
-// 	`"`, "&#34;", // "&#34;" is shorter than "&quot;".
-// )
-//
-
 // HTMLEscapeBytes escapes special characters like "<" to become "&lt;". It
 // escapes only five such characters: <, >, &, ' and ".
 // It operates on a *copy* of the byte string and does not modify the input!
 // otherwise it causes major problems..
 func HTMLEscapeBytes(b []byte) []byte {
-	// note: because we absolutely need to make copies, it is not clear
-	// that this is any faster, and requiring the extra dependency likely
-	// not worth it..
-	// bc := make([]byte, len(b), len(b)+10)
-	// copy(bc, b)
-	// return htmlEscaper.Replace(bc)
 	return []byte(stdhtml.EscapeString(string(b)))
 }
 

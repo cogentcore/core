@@ -197,6 +197,6 @@ func (fb *FontButton) Init() {
 	})
 }
 
-// HiStyleName is a highlighting style name.
+// HighlightingName is a highlighting style name.
 // TODO(config): figure out a better location for this.
-type HiStyleName string
+type HighlightingName string

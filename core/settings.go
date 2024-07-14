@@ -249,7 +249,7 @@ type AppearanceSettingsData struct { //types:add
 	Screens map[string]ScreenSettings
 
 	// text highlighting style / theme
-	HiStyle HiStyleName `default:"emacs"`
+	Highlighting HighlightingName `default:"emacs"`
 
 	// Font is the default font family to use.
 	Font FontName `default:"Roboto"`
@@ -313,8 +313,8 @@ func (as *AppearanceSettingsData) Apply() { //types:add
 	case ThemeAuto:
 		colors.SetScheme(system.TheApp.IsDark())
 	}
-	if as.HiStyle == "" {
-		as.HiStyle = "emacs" // todo: need light / dark versions
+	if as.Highlighting == "" {
+		as.Highlighting = "emacs" // todo: need light / dark versions
 	}
 
 	// TODO(kai): move HiStyle to a separate text editor settings

@@ -63,10 +63,10 @@ func (ed *Editor) RenderWidget() {
 
 // TextStyleProperties returns the styling properties for text based on HiStyle Markup
 func (ed *Editor) TextStyleProperties() map[string]any {
-	if ed.Buffer == nil || !ed.Buffer.Hi.HasHi() {
+	if ed.Buffer == nil || !ed.Buffer.Highlighting.HasHi() {
 		return nil
 	}
-	return ed.Buffer.Hi.CSSProperties
+	return ed.Buffer.Highlighting.CSSProperties
 }
 
 // RenderStartPos is absolute rendering start position from our content pos with scroll

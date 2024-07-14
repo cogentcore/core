@@ -244,7 +244,7 @@ func init() {
 		"FuncArg":                reflect.ValueOf((*core.FuncArg)(nil)),
 		"FuncButton":             reflect.ValueOf((*core.FuncButton)(nil)),
 		"Handle":                 reflect.ValueOf((*core.Handle)(nil)),
-		"HiStyleName":            reflect.ValueOf((*core.HiStyleName)(nil)),
+		"HiStyleName":            reflect.ValueOf((*core.HighlightingName)(nil)),
 		"Icon":                   reflect.ValueOf((*core.Icon)(nil)),
 		"IconButton":             reflect.ValueOf((*core.IconButton)(nil)),
 		"Image":                  reflect.ValueOf((*core.Image)(nil)),

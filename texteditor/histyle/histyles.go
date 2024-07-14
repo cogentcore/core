@@ -33,7 +33,7 @@ var CustomStyles = Styles{}
 var AvailableStyles Styles
 
 // StyleDefault is the default highlighting style name
-var StyleDefault = core.HiStyleName("emacs")
+var StyleDefault = core.HighlightingName("emacs")
 
 // StyleNames are all the names of all the available highlighting styles
 var StyleNames []string
@@ -50,7 +50,7 @@ func UpdateFromTheme() {
 
 // AvailableStyle returns a style by name from the AvailStyles list -- if not found
 // default is used as a fallback
-func AvailableStyle(nm core.HiStyleName) *Style {
+func AvailableStyle(nm core.HighlightingName) *Style {
 	if AvailableStyles == nil {
 		Init()
 	}

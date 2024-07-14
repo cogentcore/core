@@ -472,7 +472,7 @@ func (fn *Node) OpenBuf() (bool, error) {
 			}
 		})
 	}
-	fn.Buffer.Hi.Style = NodeHiStyle
+	fn.Buffer.Highlighting.Style = NodeHiStyle
 	return true, fn.Buffer.Open(fn.Filepath)
 }
 
