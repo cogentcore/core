@@ -131,8 +131,7 @@ func (bt *Button) Init() {
 			}
 		}
 		s.Gap.Zero()
-		// s.Justify.Content = styles.Center TODO(config): fix layout
-		s.Align.Items = styles.Center
+		s.CenterAll()
 
 		s.MaxBoxShadow = styles.BoxShadow1()
 		switch bt.Type {
@@ -160,7 +159,6 @@ func (bt *Button) Init() {
 			s.Color = colors.Scheme.Primary.Base
 		case ButtonAction:
 			s.MaxBoxShadow = styles.BoxShadow0()
-			s.Justify.Content = styles.Start
 		case ButtonMenu:
 			s.Grow.Set(1, 0) // need to go to edge of menu
 			s.Justify.Content = styles.Start
