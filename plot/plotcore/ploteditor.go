@@ -69,11 +69,11 @@ type PlotEditor struct { //types:add
 func (pl *PlotEditor) CopyFieldsFrom(frm tree.Node) {
 	fr := frm.(*PlotEditor)
 	pl.Frame.CopyFieldsFrom(&fr.Frame)
-	pl.Options.CopyFrom(&fr.Options)
+	pl.Options = fr.Options
 	pl.SetIndexView(fr.Table)
 	mx := min(len(pl.Columns), len(fr.Columns))
 	for i := 0; i < mx; i++ {
-		pl.Columns[i].CopyFrom(fr.Columns[i])
+		*pl.Columns[i] = *fr.Columns[i]
 	}
 }
 
@@ -94,8 +94,7 @@ func NewSubPlot(parent ...tree.Node) *PlotEditor {
 func (pl *PlotEditor) Init() {
 	pl.Frame.Init()
 
-	pl.Options.Plot = pl
-	pl.Options.Defaults()
+	pl.Options.defaults()
 	pl.Styler(func(s *styles.Style) {
 		s.Direction = styles.Row
 		s.Grow.Set(1, 1)
@@ -106,7 +105,7 @@ func (pl *PlotEditor) Init() {
 	})
 
 	pl.Updater(func() {
-		pl.Options.FromMeta(pl.Table.Table)
+		pl.Options.fromMeta(pl.Table.Table)
 	})
 	tree.AddChildAt(pl, "cols", func(w *core.Frame) {
 		w.Styler(func(s *styles.Style) {
@@ -246,7 +245,7 @@ func (pl *PlotEditor) YLabel() string {
 	}
 	for _, cp := range pl.Columns {
 		if cp.On {
-			return cp.GetLabel()
+			return cp.getLabel()
 		}
 	}
 	return "Y"
@@ -260,7 +259,7 @@ func (pl *PlotEditor) XLabel() string {
 	if pl.Options.XAxisColumn != "" {
 		cp := pl.ColumnOptions(pl.Options.XAxisColumn)
 		if cp != nil {
-			return cp.GetLabel()
+			return cp.getLabel()
 		}
 		return pl.Options.XAxisColumn
 	}
@@ -328,7 +327,7 @@ func (pl *PlotEditor) GenPlot() {
 	case XY:
 		pl.GenPlotXY()
 	case Bar:
-		pl.GenPlotBar()
+		pl.genPlotBar()
 	}
 	pl.PlotChild().Scale = pl.Options.Scale
 	pl.PlotChild().SetPlot(pl.Plot) // redraws etc
@@ -410,14 +409,14 @@ func (pl *PlotEditor) ColumnsListUpdate() {
 	for ci := range dt.NumColumns() {
 		cn := dt.ColumnName(ci)
 		cp := &ColumnOptions{Column: cn}
-		cp.Defaults()
+		cp.defaults()
 		tcol := dt.Columns[ci]
 		if tcol.IsString() {
 			cp.IsString = true
 		} else {
 			cp.IsString = false
 		}
-		cp.FromMetaMap(pl.Table.Table.MetaData)
+		cp.fromMetaMap(pl.Table.Table.MetaData)
 		inc := 1
 		if cn == pl.Options.XAxisColumn || tcol.IsString() || tcol.DataType() == reflect.Int || tcol.DataType() == reflect.Int64 || tcol.DataType() == reflect.Int32 || tcol.DataType() == reflect.Uint8 {
 			inc = 0
@@ -431,7 +430,7 @@ func (pl *PlotEditor) ColumnsListUpdate() {
 // ColumnsFromMetaMap updates all the column settings from given meta map
 func (pl *PlotEditor) ColumnsFromMetaMap(meta map[string]string) {
 	for _, cp := range pl.Columns {
-		cp.FromMetaMap(meta)
+		cp.fromMetaMap(meta)
 	}
 }
 
@@ -505,7 +504,6 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 	})
 	tree.Add(p, func(w *core.Separator) {})
 	for _, cp := range pl.Columns {
-		cp.Plot = pl
 		tree.AddAt(p, cp.Column, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Row

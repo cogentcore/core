@@ -76,13 +76,10 @@ type PlotOptions struct { //types:add
 
 	// optional label to use for YAxis -- if empty, first column name is used
 	YAxisLabel string
-
-	// our plot, for update method
-	Plot *PlotEditor `copier:"-" json:"-" xml:"-" display:"-"`
 }
 
-// Defaults sets defaults if unset values are present.
-func (po *PlotOptions) Defaults() {
+// defaults sets defaults if unset values are present.
+func (po *PlotOptions) defaults() {
 	if po.LineWidth == 0 {
 		po.LineWidth = 1
 		po.Lines = true
@@ -96,20 +93,13 @@ func (po *PlotOptions) Defaults() {
 	}
 }
 
-// CopyFrom copies from other plot options.
-func (po *PlotOptions) CopyFrom(fr *PlotOptions) {
-	pl := po.Plot
-	*po = *fr
-	po.Plot = pl
+// fromMeta sets plot options from meta data.
+func (po *PlotOptions) fromMeta(dt *table.Table) {
+	po.fromMetaMap(dt.MetaData)
 }
 
-// FromMeta sets plot options from meta data.
-func (po *PlotOptions) FromMeta(dt *table.Table) {
-	po.FromMetaMap(dt.MetaData)
-}
-
-// MetaMapLower tries meta data access by lower-case version of key too
-func MetaMapLower(meta map[string]string, key string) (string, bool) {
+// metaMapLower tries meta data access by lower-case version of key too
+func metaMapLower(meta map[string]string, key string) (string, bool) {
 	vl, has := meta[key]
 	if has {
 		return vl, has
@@ -118,57 +108,57 @@ func MetaMapLower(meta map[string]string, key string) (string, bool) {
 	return vl, has
 }
 
-// FromMetaMap sets plot options from meta data map.
-func (po *PlotOptions) FromMetaMap(meta map[string]string) {
-	if typ, has := MetaMapLower(meta, "Type"); has {
+// fromMetaMap sets plot options from meta data map.
+func (po *PlotOptions) fromMetaMap(meta map[string]string) {
+	if typ, has := metaMapLower(meta, "Type"); has {
 		po.Type.SetString(typ)
 	}
-	if op, has := MetaMapLower(meta, "Lines"); has {
+	if op, has := metaMapLower(meta, "Lines"); has {
 		if op == "+" || op == "true" {
 			po.Lines = true
 		} else {
 			po.Lines = false
 		}
 	}
-	if op, has := MetaMapLower(meta, "Points"); has {
+	if op, has := metaMapLower(meta, "Points"); has {
 		if op == "+" || op == "true" {
 			po.Points = true
 		} else {
 			po.Points = false
 		}
 	}
-	if lw, has := MetaMapLower(meta, "LineWidth"); has {
+	if lw, has := metaMapLower(meta, "LineWidth"); has {
 		po.LineWidth, _ = reflectx.ToFloat32(lw)
 	}
-	if ps, has := MetaMapLower(meta, "PointSize"); has {
+	if ps, has := metaMapLower(meta, "PointSize"); has {
 		po.PointSize, _ = reflectx.ToFloat32(ps)
 	}
-	if bw, has := MetaMapLower(meta, "BarWidth"); has {
+	if bw, has := metaMapLower(meta, "BarWidth"); has {
 		po.BarWidth, _ = reflectx.ToFloat32(bw)
 	}
-	if op, has := MetaMapLower(meta, "NegativeXDraw"); has {
+	if op, has := metaMapLower(meta, "NegativeXDraw"); has {
 		if op == "+" || op == "true" {
 			po.NegativeXDraw = true
 		} else {
 			po.NegativeXDraw = false
 		}
 	}
-	if scl, has := MetaMapLower(meta, "Scale"); has {
+	if scl, has := metaMapLower(meta, "Scale"); has {
 		po.Scale, _ = reflectx.ToFloat32(scl)
 	}
-	if xc, has := MetaMapLower(meta, "XAxisColumn"); has {
+	if xc, has := metaMapLower(meta, "XAxisColumn"); has {
 		po.XAxisColumn = xc
 	}
-	if lc, has := MetaMapLower(meta, "LegendColumn"); has {
+	if lc, has := metaMapLower(meta, "LegendColumn"); has {
 		po.LegendColumn = lc
 	}
-	if xrot, has := MetaMapLower(meta, "XAxisRotation"); has {
+	if xrot, has := metaMapLower(meta, "XAxisRotation"); has {
 		po.XAxisRotation, _ = reflectx.ToFloat32(xrot)
 	}
-	if lb, has := MetaMapLower(meta, "XAxisLabel"); has {
+	if lb, has := metaMapLower(meta, "XAxisLabel"); has {
 		po.XAxisLabel = lb
 	}
-	if lb, has := MetaMapLower(meta, "YAxisLabel"); has {
+	if lb, has := metaMapLower(meta, "YAxisLabel"); has {
 		po.YAxisLabel = lb
 	}
 }
@@ -220,90 +210,80 @@ type ColumnOptions struct { //types:add
 
 	// if true this is a string column -- plots as labels
 	IsString bool `edit:"-"`
-
-	// our plot, for update method
-	Plot *PlotEditor `copier:"-" json:"-" xml:"-" display:"-"`
 }
 
-// Defaults sets defaults if unset values are present.
-func (co *ColumnOptions) Defaults() {
+// defaults sets defaults if unset values are present.
+func (co *ColumnOptions) defaults() {
 	if co.NTicks == 0 {
 		co.NTicks = 10
 	}
 }
 
-// CopyFrom copies from other column options.
-func (co *ColumnOptions) CopyFrom(fr *ColumnOptions) {
-	pl := co.Plot
-	*co = *fr
-	co.Plot = pl
-}
-
-// GetLabel returns the effective label of the column.
-func (co *ColumnOptions) GetLabel() string {
+// getLabel returns the effective label of the column.
+func (co *ColumnOptions) getLabel() string {
 	if co.Label != "" {
 		return co.Label
 	}
 	return co.Column
 }
 
-// FromMetaMap sets column options from meta data map.
-func (co *ColumnOptions) FromMetaMap(meta map[string]string) {
-	if op, has := MetaMapLower(meta, co.Column+":On"); has {
+// fromMetaMap sets column options from meta data map.
+func (co *ColumnOptions) fromMetaMap(meta map[string]string) {
+	if op, has := metaMapLower(meta, co.Column+":On"); has {
 		if op == "+" || op == "true" || op == "" {
 			co.On = true
 		} else {
 			co.On = false
 		}
 	}
-	if op, has := MetaMapLower(meta, co.Column+":Off"); has {
+	if op, has := metaMapLower(meta, co.Column+":Off"); has {
 		if op == "+" || op == "true" || op == "" {
 			co.On = false
 		} else {
 			co.On = true
 		}
 	}
-	if op, has := MetaMapLower(meta, co.Column+":FixMin"); has {
+	if op, has := metaMapLower(meta, co.Column+":FixMin"); has {
 		if op == "+" || op == "true" {
 			co.Range.FixMin = true
 		} else {
 			co.Range.FixMin = false
 		}
 	}
-	if op, has := MetaMapLower(meta, co.Column+":FixMax"); has {
+	if op, has := metaMapLower(meta, co.Column+":FixMax"); has {
 		if op == "+" || op == "true" {
 			co.Range.FixMax = true
 		} else {
 			co.Range.FixMax = false
 		}
 	}
-	if op, has := MetaMapLower(meta, co.Column+":FloatMin"); has {
+	if op, has := metaMapLower(meta, co.Column+":FloatMin"); has {
 		if op == "+" || op == "true" {
 			co.Range.FixMin = false
 		} else {
 			co.Range.FixMin = true
 		}
 	}
-	if op, has := MetaMapLower(meta, co.Column+":FloatMax"); has {
+	if op, has := metaMapLower(meta, co.Column+":FloatMax"); has {
 		if op == "+" || op == "true" {
 			co.Range.FixMax = false
 		} else {
 			co.Range.FixMax = true
 		}
 	}
-	if vl, has := MetaMapLower(meta, co.Column+":Max"); has {
+	if vl, has := metaMapLower(meta, co.Column+":Max"); has {
 		co.Range.Max, _ = reflectx.ToFloat32(vl)
 	}
-	if vl, has := MetaMapLower(meta, co.Column+":Min"); has {
+	if vl, has := metaMapLower(meta, co.Column+":Min"); has {
 		co.Range.Min, _ = reflectx.ToFloat32(vl)
 	}
-	if lb, has := MetaMapLower(meta, co.Column+":Label"); has {
+	if lb, has := metaMapLower(meta, co.Column+":Label"); has {
 		co.Label = lb
 	}
-	if lb, has := MetaMapLower(meta, co.Column+":ErrColumn"); has {
+	if lb, has := metaMapLower(meta, co.Column+":ErrColumn"); has {
 		co.ErrColumn = lb
 	}
-	if vl, has := MetaMapLower(meta, co.Column+":TensorIndex"); has {
+	if vl, has := metaMapLower(meta, co.Column+":TensorIndex"); has {
 		iv, _ := reflectx.ToInt(vl)
 		co.TensorIndex = int(iv)
 	}

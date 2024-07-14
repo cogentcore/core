@@ -17,7 +17,6 @@ func init() {
 		"FixMin":             reflect.ValueOf(plotcore.FixMin),
 		"FloatMax":           reflect.ValueOf(plotcore.FloatMax),
 		"FloatMin":           reflect.ValueOf(plotcore.FloatMin),
-		"MetaMapLower":       reflect.ValueOf(plotcore.MetaMapLower),
 		"NewPlot":            reflect.ValueOf(plotcore.NewPlot),
 		"NewPlotEditor":      reflect.ValueOf(plotcore.NewPlotEditor),
 		"NewSubPlot":         reflect.ValueOf(plotcore.NewSubPlot),

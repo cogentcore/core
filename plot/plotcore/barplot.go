@@ -20,8 +20,8 @@ import (
 // bar plot is on integer positions, with different Y values and / or
 // legend values interleaved
 
-// GenPlotBar generates a Bar plot, setting GPlot variable
-func (pl *PlotEditor) GenPlotBar() {
+// genPlotBar generates a Bar plot, setting GPlot variable
+func (pl *PlotEditor) genPlotBar() {
 	plt := plot.New() // note: not clear how to re-use, due to newtablexynames
 	if pl.Options.BarWidth > 1 {
 		pl.Options.BarWidth = .8
@@ -112,7 +112,7 @@ func (pl *PlotEditor) GenPlotBar() {
 				if firstXY == nil {
 					firstXY = xy
 				}
-				lbl := cp.GetLabel()
+				lbl := cp.getLabel()
 				clr := cp.Color
 				if leg != "" {
 					lbl = leg + " " + lbl

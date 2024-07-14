@@ -101,7 +101,7 @@ func (pl *PlotEditor) GenPlotXY() {
 				}
 				var pts *plots.Scatter
 				var lns *plots.Line
-				lbl := cp.GetLabel()
+				lbl := cp.getLabel()
 				clr := cp.Color
 				if leg != "" {
 					lbl = leg + " " + lbl
