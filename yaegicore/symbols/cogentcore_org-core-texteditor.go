@@ -32,8 +32,6 @@ func init() {
 		"NewEditor":                reflect.ValueOf(texteditor.NewEditor),
 		"NewTwinEditors":           reflect.ValueOf(texteditor.NewTwinEditors),
 		"PrevISearchString":        reflect.ValueOf(&texteditor.PrevISearchString).Elem(),
-		"PrevQReplaceFinds":        reflect.ValueOf(&texteditor.PrevQReplaceFinds).Elem(),
-		"PrevQReplaceRepls":        reflect.ValueOf(&texteditor.PrevQReplaceRepls).Elem(),
 		"ReplaceMatchCase":         reflect.ValueOf(texteditor.ReplaceMatchCase),
 		"ReplaceNoMatchCase":       reflect.ValueOf(texteditor.ReplaceNoMatchCase),
 		"TextDialog":               reflect.ValueOf(texteditor.TextDialog),
@@ -43,7 +41,6 @@ func init() {
 		"ViewClipHistory":          reflect.ValueOf(&texteditor.ViewClipHistory).Elem(),
 		"ViewClipRect":             reflect.ValueOf(&texteditor.ViewClipRect).Elem(),
 		"ViewDepthColors":          reflect.ValueOf(&texteditor.ViewDepthColors).Elem(),
-		"ViewMaxFindHighlights":    reflect.ValueOf(&texteditor.ViewMaxFindHighlights).Elem(),
 
 		// type definitions
 		"Buffer":                 reflect.ValueOf((*texteditor.Buffer)(nil)),

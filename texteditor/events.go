@@ -85,8 +85,8 @@ func (ed *Editor) keyInput(e events.Event) {
 	cancelAll := func() {
 		ed.CancelComplete()
 		ed.CancelCorrect()
-		ed.ISearchCancel()
-		ed.QReplaceCancel()
+		ed.iSearchCancel()
+		ed.qReplaceCancel()
 		ed.lastAutoInsert = 0
 	}
 
@@ -190,7 +190,7 @@ func (ed *Editor) keyInput(e events.Event) {
 	case keymap.CancelSelect:
 		ed.CancelComplete()
 		e.SetHandled()
-		ed.EscPressed() // generic cancel
+		ed.escPressed() // generic cancel
 	case keymap.SelectAll:
 		cancelAll()
 		e.SetHandled()
@@ -201,13 +201,13 @@ func (ed *Editor) keyInput(e events.Event) {
 		ed.Copy(true) // reset
 	case keymap.Search:
 		e.SetHandled()
-		ed.QReplaceCancel()
+		ed.qReplaceCancel()
 		ed.CancelComplete()
-		ed.ISearchStart()
+		ed.iSearchStart()
 	case keymap.Abort:
 		cancelAll()
 		e.SetHandled()
-		ed.EscPressed()
+		ed.escPressed()
 	case keymap.Jump:
 		cancelAll()
 		e.SetHandled()
@@ -235,7 +235,7 @@ func (ed *Editor) keyInput(e events.Event) {
 			ed.CursorPrevLink(true)
 		case kf == keymap.None && ed.ISearch.On:
 			if unicode.IsPrint(e.KeyRune()) && !e.HasAnyModifier(key.Control, key.Meta) {
-				ed.ISearchKeyInput(e)
+				ed.iSearchKeyInput(e)
 			}
 		case e.KeyRune() == ' ' || kf == keymap.Accept || kf == keymap.Enter:
 			e.SetHandled()
@@ -253,12 +253,12 @@ func (ed *Editor) keyInput(e events.Event) {
 	case keymap.Replace:
 		e.SetHandled()
 		ed.CancelComplete()
-		ed.ISearchCancel()
+		ed.iSearchCancel()
 		ed.QReplacePrompt()
 	case keymap.Backspace:
 		// todo: previous item in qreplace
 		if ed.ISearch.On {
-			ed.ISearchBackspace()
+			ed.iSearchBackspace()
 		} else {
 			e.SetHandled()
 			ed.CursorBackspace(1)
@@ -316,7 +316,7 @@ func (ed *Editor) keyInput(e events.Event) {
 		e.SetHandled()
 		ed.redo()
 	case keymap.Complete:
-		ed.ISearchCancel()
+		ed.iSearchCancel()
 		e.SetHandled()
 		if ed.Buffer.isSpellEnabled(ed.CursorPos) {
 			ed.OfferCorrect()
@@ -445,10 +445,10 @@ func (ed *Editor) keyInputInsertRune(kt events.Event) {
 	kt.SetHandled()
 	if ed.ISearch.On {
 		ed.CancelComplete()
-		ed.ISearchKeyInput(kt)
+		ed.iSearchKeyInput(kt)
 	} else if ed.QReplace.On {
 		ed.CancelComplete()
-		ed.QReplaceKeyInput(kt)
+		ed.qReplaceKeyInput(kt)
 	} else {
 		if kt.KeyRune() == '{' || kt.KeyRune() == '(' || kt.KeyRune() == '[' {
 			ed.keyInputInsertBracket(kt)
