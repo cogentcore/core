@@ -1,8 +1,6 @@
 package main
 
-import (
-	"cogentcore.org/core/core"
-)
+import "cogentcore.org/core/core"
 
 func main() {
 	b := core.NewBody("Hello")
