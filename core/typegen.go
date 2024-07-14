@@ -32,12 +32,12 @@ func (t *App) SetSceneConfig(v func(sc *Scene)) *App { t.SceneConfig = v; return
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Body", IDName: "body", Doc: "Body holds the primary content of a [Scene].\nIt is the main container for app content.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Title", Doc: "Title is the title of the body, which is also\nused for the window title where relevant."}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Button", IDName: "button", Doc: "Button is an interactive button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event handler with\nOnClick.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of button."}, {Name: "Text", Doc: "Text is the text for the button.\nIf it is blank, no text is shown."}, {Name: "Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "Indicator", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None]."}, {Name: "Shortcut", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Command is automatically translated\ninto Meta on macOS and Control on all other platforms."}, {Name: "Menu", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Button", IDName: "button", Doc: "Button is an interactive button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event handler with\n[WidgetBase.OnClick].", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of button."}, {Name: "Text", Doc: "Text is the text for the button.\nIf it is blank, no text is shown."}, {Name: "Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "Indicator", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None]."}, {Name: "Shortcut", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Command is automatically translated\ninto Meta on macOS and Control on all other platforms. Also see [Button.SetKey]."}, {Name: "Menu", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed."}}})
 
 // NewButton returns a new [Button] with the given optional parent:
 // Button is an interactive button with text, an icon, an indicator, a shortcut,
 // and/or a menu. The standard behavior is to register a click event handler with
-// OnClick.
+// [WidgetBase.OnClick].
 func NewButton(parent ...tree.Node) *Button { return tree.New[Button](parent...) }
 
 // ButtonEmbedder is an interface that all types that embed Button satisfy
@@ -84,7 +84,7 @@ func (t *Button) SetIndicator(v icons.Icon) *Button { t.Indicator = v; return t 
 // active in window-wide scope. Avoid conflicts with other shortcuts
 // (a log message will be emitted if so). Shortcuts are processed after
 // all other processing of keyboard input. Command is automatically translated
-// into Meta on macOS and Control on all other platforms.
+// into Meta on macOS and Control on all other platforms. Also see [Button.SetKey].
 func (t *Button) SetShortcut(v key.Chord) *Button { t.Shortcut = v; return t }
 
 // SetMenu sets the [Button.Menu]:
@@ -94,7 +94,7 @@ func (t *Button) SetShortcut(v key.Chord) *Button { t.Shortcut = v; return t }
 // to the Scene that it is passed.
 func (t *Button) SetMenu(v func(m *Scene)) *Button { t.Menu = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to by setting\nits Draw function using [Canvas.SetDraw].", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Draw", Doc: "Draw is the function used to draw the content of the\ncanvas every time that it is rendered. The paint context\nis automatically normalized to the size of the canvas,\nso you should specify points on a 0-1 scale."}, {Name: "Context", Doc: "Context is the paint context used for drawing."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to by setting\nits Draw function using [Canvas.SetDraw].", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Draw", Doc: "Draw is the function used to draw the content of the\ncanvas every time that it is rendered. The paint context\nis automatically normalized to the size of the canvas,\nso you should specify points on a 0-1 scale."}, {Name: "context", Doc: "context is the paint context used for drawing."}}})
 
 // NewCanvas returns a new [Canvas] with the given optional parent:
 // Canvas is a widget that can be arbitrarily drawn to by setting
@@ -108,10 +108,10 @@ func NewCanvas(parent ...tree.Node) *Canvas { return tree.New[Canvas](parent...)
 // so you should specify points on a 0-1 scale.
 func (t *Canvas) SetDraw(v func(pc *paint.Context)) *Canvas { t.Draw = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Chooser", IDName: "chooser", Doc: "Chooser is a drop down selection widget that allows users to choose\none option among a list of items.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the chooser."}, {Name: "Items", Doc: "Items are the chooser items available for selection."}, {Name: "Icon", Doc: "Icon is an optional icon displayed on the left side of the chooser."}, {Name: "Indicator", Doc: "Indicator is the icon to use for the indicator displayed on the\nright side of the chooser."}, {Name: "Editable", Doc: "Editable is whether provide a text field for editing the value,\nor just a button for selecting items."}, {Name: "AllowNew", Doc: "AllowNew is whether to allow the user to add new items to the\nchooser through the editable textfield (if Editable is set to\ntrue) and a button at the end of the chooser menu. See also [DefaultNew]."}, {Name: "DefaultNew", Doc: "DefaultNew configures the chooser to accept new items, as in\n[AllowNew], and also turns off completion popups and always\nadds new items to the list of items, without prompting.\nUse this for cases where the typical use-case is to enter new values,\nbut the history of prior values can also be useful."}, {Name: "Placeholder", Doc: "Placeholder, if Editable is set to true, is the text that is\ndisplayed in the text field when it is empty. It must be set\nusing [Chooser.SetPlaceholder]."}, {Name: "ItemsFuncs", Doc: "ItemsFuncs is a slice of functions to call before showing the items\nof the chooser, which is typically used to configure them\n(eg: if they are based on dynamic data). The functions are called\nin ascending order such that the items added in the first function\nwill appear before those added in the last function. Use\n[Chooser.AddItemsFunc] to add a new items function. If at least\none ItemsFunc is specified, the items of the chooser will be\ncleared before calling the functions."}, {Name: "CurrentItem", Doc: "CurrentItem is the currently selected item."}, {Name: "CurrentIndex", Doc: "CurrentIndex is the index of the currently selected item\nin [Chooser.Items]."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Chooser", IDName: "chooser", Doc: "Chooser is a dropdown selection widget that allows users to choose\none option among a list of items.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the chooser."}, {Name: "Items", Doc: "Items are the chooser items available for selection."}, {Name: "Icon", Doc: "Icon is an optional icon displayed on the left side of the chooser."}, {Name: "Indicator", Doc: "Indicator is the icon to use for the indicator displayed on the\nright side of the chooser."}, {Name: "Editable", Doc: "Editable is whether provide a text field for editing the value,\nor just a button for selecting items."}, {Name: "AllowNew", Doc: "AllowNew is whether to allow the user to add new items to the\nchooser through the editable textfield (if Editable is set to\ntrue) and a button at the end of the chooser menu. See also [DefaultNew]."}, {Name: "DefaultNew", Doc: "DefaultNew configures the chooser to accept new items, as in\n[AllowNew], and also turns off completion popups and always\nadds new items to the list of items, without prompting.\nUse this for cases where the typical use-case is to enter new values,\nbut the history of prior values can also be useful."}, {Name: "placeholder", Doc: "placeholder, if Editable is set to true, is the text that is\ndisplayed in the text field when it is empty. It must be set\nusing [Chooser.SetPlaceholder]."}, {Name: "ItemsFuncs", Doc: "ItemsFuncs is a slice of functions to call before showing the items\nof the chooser, which is typically used to configure them\n(eg: if they are based on dynamic data). The functions are called\nin ascending order such that the items added in the first function\nwill appear before those added in the last function. Use\n[Chooser.AddItemsFunc] to add a new items function. If at least\none ItemsFunc is specified, the items of the chooser will be\ncleared before calling the functions."}, {Name: "CurrentItem", Doc: "CurrentItem is the currently selected item."}, {Name: "CurrentIndex", Doc: "CurrentIndex is the index of the currently selected item\nin [Chooser.Items]."}, {Name: "text"}, {Name: "textField"}}})
 
 // NewChooser returns a new [Chooser] with the given optional parent:
-// Chooser is a drop down selection widget that allows users to choose
+// Chooser is a dropdown selection widget that allows users to choose
 // one option among a list of items.
 func NewChooser(parent ...tree.Node) *Chooser { return tree.New[Chooser](parent...) }
 
@@ -151,10 +151,10 @@ func (t *Chooser) SetAllowNew(v bool) *Chooser { t.AllowNew = v; return t }
 // but the history of prior values can also be useful.
 func (t *Chooser) SetDefaultNew(v bool) *Chooser { t.DefaultNew = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorMapButton", IDName: "color-map-button", Doc: "ColorMapButton displays a color map spectrum and can be clicked on\nto display a dialog for selecting different color map options.\nIt represents a [ColorMapName] value.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "MapName"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorMapButton", IDName: "color-map-button", Doc: "ColorMapButton displays a [colormap.Map] and can be clicked on\nto display a dialog for selecting different color map options.\nIt represents a [ColorMapName] value.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "MapName"}}})
 
 // NewColorMapButton returns a new [ColorMapButton] with the given optional parent:
-// ColorMapButton displays a color map spectrum and can be clicked on
+// ColorMapButton displays a [colormap.Map] and can be clicked on
 // to display a dialog for selecting different color map options.
 // It represents a [ColorMapName] value.
 func NewColorMapButton(parent ...tree.Node) *ColorMapButton {
@@ -172,16 +172,16 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorPicker", 
 // named color buttons.
 func NewColorPicker(parent ...tree.Node) *ColorPicker { return tree.New[ColorPicker](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorButton", IDName: "color-button", Doc: "ColorButton represents a color value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Color"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorButton", IDName: "color-button", Doc: "ColorButton represents a color value with a button that opens a [ColorPicker].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Color"}}})
 
 // NewColorButton returns a new [ColorButton] with the given optional parent:
-// ColorButton represents a color value with a button.
+// ColorButton represents a color value with a button that opens a [ColorPicker].
 func NewColorButton(parent ...tree.Node) *ColorButton { return tree.New[ColorButton](parent...) }
 
 // SetColor sets the [ColorButton.Color]
 func (t *ColorButton) SetColor(v color.RGBA) *ColorButton { t.Color = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Complete", IDName: "complete", Doc: "Complete holds the current completion data and functions to call for building\nthe list of possible completions and for editing text after a completion is selected.\nIt also holds the [PopupStage] associated with it.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "MatchFunc", Doc: "function to get the list of possible completions"}, {Name: "LookupFunc", Doc: "function to get the text to show for lookup"}, {Name: "EditFunc", Doc: "function to edit text using the selected completion"}, {Name: "Context", Doc: "the object that implements complete.Func"}, {Name: "SrcLn", Doc: "line number in source that completion is operating on, if relevant"}, {Name: "SrcCh", Doc: "character position in source that completion is operating on"}, {Name: "Completions", Doc: "the list of potential completions"}, {Name: "Seed", Doc: "current completion seed"}, {Name: "Completion", Doc: "the user's completion selection"}, {Name: "Listeners", Doc: "the event listeners for the completer (it sends Select events)"}, {Name: "Stage", Doc: "Stage is the [PopupStage] associated with the [Complete]"}, {Name: "DelayTimer"}, {Name: "DelayMu"}, {Name: "ShowMu"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Complete", IDName: "complete", Doc: "Complete holds the current completion data and functions to call for building\nthe list of possible completions and for editing text after a completion is selected.\nIt also holds the popup [Stage] associated with it.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "MatchFunc", Doc: "function to get the list of possible completions"}, {Name: "LookupFunc", Doc: "function to get the text to show for lookup"}, {Name: "EditFunc", Doc: "function to edit text using the selected completion"}, {Name: "Context", Doc: "the context object that implements the completion functions"}, {Name: "SrcLn", Doc: "line number in source that completion is operating on, if relevant"}, {Name: "SrcCh", Doc: "character position in source that completion is operating on"}, {Name: "completions", Doc: "the list of potential completions"}, {Name: "Seed", Doc: "current completion seed"}, {Name: "Completion", Doc: "the user's completion selection"}, {Name: "listeners", Doc: "the event listeners for the completer (it sends [events.Select] events)"}, {Name: "stage", Doc: "stage is the popup [Stage] associated with the [Complete]."}, {Name: "delayTimer"}, {Name: "delayMu"}, {Name: "showMu"}}})
 
 // SetMatchFunc sets the [Complete.MatchFunc]:
 // function to get the list of possible completions
@@ -196,7 +196,7 @@ func (t *Complete) SetLookupFunc(v complete.LookupFunc) *Complete { t.LookupFunc
 func (t *Complete) SetEditFunc(v complete.EditFunc) *Complete { t.EditFunc = v; return t }
 
 // SetContext sets the [Complete.Context]:
-// the object that implements complete.Func
+// the context object that implements the completion functions
 func (t *Complete) SetContext(v any) *Complete { t.Context = v; return t }
 
 // SetSrcLn sets the [Complete.SrcLn]:
@@ -207,10 +207,6 @@ func (t *Complete) SetSrcLn(v int) *Complete { t.SrcLn = v; return t }
 // character position in source that completion is operating on
 func (t *Complete) SetSrcCh(v int) *Complete { t.SrcCh = v; return t }
 
-// SetCompletions sets the [Complete.Completions]:
-// the list of potential completions
-func (t *Complete) SetCompletions(v complete.Completions) *Complete { t.Completions = v; return t }
-
 // SetSeed sets the [Complete.Seed]:
 // current completion seed
 func (t *Complete) SetSeed(v string) *Complete { t.Seed = v; return t }
@@ -219,11 +215,7 @@ func (t *Complete) SetSeed(v string) *Complete { t.Seed = v; return t }
 // the user's completion selection
 func (t *Complete) SetCompletion(v string) *Complete { t.Completion = v; return t }
 
-// SetStage sets the [Complete.Stage]:
-// Stage is the [PopupStage] associated with the [Complete]
-func (t *Complete) SetStage(v *Stage) *Complete { t.Stage = v; return t }
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FilePicker", IDName: "file-picker", Doc: "FilePicker is a widget for selecting files.", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFavorites", Doc: "AddPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirectoryUp", Doc: "DirectoryUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Directory", Doc: "Directory is the absolute path to the directory of files to display."}, {Name: "SelectedFilename", Doc: "SelectedFilename is the name of the currently selected file, not including the directory.\nSee [FilePicker.SelectedFile] for the full path."}, {Name: "Extensions", Doc: "Extensions is a list of the target file extensions.\nIf there are multiple, they must be comma separated.\nThe extensions must include the dot (\".\") at the start.\nThey must be set using [FilePicker.SetExtensions]."}, {Name: "Filterer", Doc: "Filterer is an optional filtering function for which files to display."}, {Name: "extensionMap", Doc: "extensionMap is a map of lower-cased extensions from Extensions.\nIt used for highlighting files with one of these extensions;\nmaps onto original Extensions value."}, {Name: "files", Doc: "files for current directory"}, {Name: "selectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "watcher", Doc: "change notify for current dir"}, {Name: "doneWatcher", Doc: "channel to close watcher watcher"}, {Name: "prevPath", Doc: "Previous path that was processed via UpdateFiles"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FilePicker", IDName: "file-picker", Doc: "FilePicker is a widget for selecting files.", Methods: []types.Method{{Name: "updateFilesEvent", Doc: "updateFilesEvent updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "addPathToFavorites", Doc: "addPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "directoryUp", Doc: "directoryUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "newFolder", Doc: "newFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Filterer", Doc: "Filterer is an optional filtering function for which files to display."}, {Name: "directory", Doc: "directory is the absolute path to the directory of files to display."}, {Name: "selectedFilename", Doc: "selectedFilename is the name of the currently selected file,\nnot including the directory. See [FilePicker.SelectedFile]\nfor the full path."}, {Name: "extensions", Doc: "extensions is a list of the target file extensions.\nIf there are multiple, they must be comma separated.\nThe extensions must include the dot (\".\") at the start.\nThey must be set using [FilePicker.SetExtensions]."}, {Name: "extensionMap", Doc: "extensionMap is a map of lower-cased extensions from Extensions.\nIt used for highlighting files with one of these extensions;\nmaps onto original Extensions value."}, {Name: "files", Doc: "files for current directory"}, {Name: "selectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "watcher", Doc: "change notify for current dir"}, {Name: "doneWatcher", Doc: "channel to close watcher watcher"}, {Name: "prevPath", Doc: "Previous path that was processed via UpdateFiles"}, {Name: "favoritesTable"}, {Name: "filesTable"}, {Name: "selectField"}, {Name: "extensionField"}}})
 
 // NewFilePicker returns a new [FilePicker] with the given optional parent:
 // FilePicker is a widget for selecting files.
@@ -243,7 +235,7 @@ func NewFileButton(parent ...tree.Node) *FileButton { return tree.New[FileButton
 // SetFilename sets the [FileButton.Filename]
 func (t *FileButton) SetFilename(v string) *FileButton { t.Filename = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Form", IDName: "form", Doc: "Form represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the form in one line."}, {Name: "structFields", Doc: "structFields are the fields of the current struct."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [ShouldShower], which results\nin additional updating being done at certain points."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Form", IDName: "form", Doc: "Form represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the form in one line."}, {Name: "structFields", Doc: "structFields are the fields of the current struct."}, {Name: "isShouldDisplayer", Doc: "isShouldDisplayer is whether the struct implements [ShouldDisplayer], which results\nin additional updating being done at certain points."}}})
 
 // NewForm returns a new [Form] with the given optional parent:
 // Form represents a struct with rows of field names and editable values.
@@ -257,7 +249,7 @@ func (t *Form) SetStruct(v any) *Form { t.Struct = v; return t }
 // Inline is whether to display the form in one line.
 func (t *Form) SetInline(v bool) *Form { t.Inline = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Frame", IDName: "frame", Doc: "Frame is the primary node type responsible for organizing the sizes\nand positions of child widgets. It also renders the standard box model.\nAll collections of widgets should generally be contained within a [Frame];\notherwise, the parent widget must take over responsibility for positioning.\nFrames automatically can add scrollbars depending on the [styles.Style.Overflow].\n\nFor a [styles.Grid] frame, the [styles.Style.Columns] property should\ngenerally be set to the desired number of columns, from which the number of rows\nis computed; otherwise, it uses the square root of number of\nelements.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "StackTop", Doc: "StackTop, for a [styles.Stacked] frame, is the index of the node to use as the top of the stack.\nOnly the node at this index is rendered; if not a valid index, nothing is rendered."}, {Name: "LayoutStackTopOnly", Doc: "LayoutStackTopOnly is whether to only layout the top widget (specified by [Frame.StackTop])\nfor a [styles.Stacked] frame. This is appropriate for e.g., [Tabs], which do a full\nredraw on stack changes, but not for e.g., [Switch]es which don't."}, {Name: "Layout", Doc: "Layout contains implementation state info for doing layout"}, {Name: "HasScroll", Doc: "HasScroll is whether scrollbar is used for given dim."}, {Name: "Scrolls", Doc: "Scrolls are the scroll bars, which are fully managed as needed."}, {Name: "focusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "focusNameTime", Doc: "time of last focus name event; for timeout"}, {Name: "focusNameLast", Doc: "last element focused on; used as a starting point if name is the same"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Frame", IDName: "frame", Doc: "Frame is the primary node type responsible for organizing the sizes\nand positions of child widgets. It also renders the standard box model.\nAll collections of widgets should generally be contained within a [Frame];\notherwise, the parent widget must take over responsibility for positioning.\nFrames automatically can add scrollbars depending on the [styles.Style.Overflow].\n\nFor a [styles.Grid] frame, the [styles.Style.Columns] property should\ngenerally be set to the desired number of columns, from which the number of rows\nis computed; otherwise, it uses the square root of number of\nelements.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "StackTop", Doc: "StackTop, for a [styles.Stacked] frame, is the index of the node to use\nas the top of the stack. Only the node at this index is rendered; if it is\nnot a valid index, nothing is rendered."}, {Name: "LayoutStackTopOnly", Doc: "LayoutStackTopOnly is whether to only layout the top widget\n(specified by [Frame.StackTop]) for a [styles.Stacked] frame.\nThis is appropriate for widgets such as [Tabs], which do a full\nredraw on stack changes, but not for widgets such as [Switch]es\nwhich don't."}, {Name: "layout", Doc: "layout contains implementation state info for doing layout"}, {Name: "HasScroll", Doc: "HasScroll is whether scrollbars exist for each dimension."}, {Name: "scrolls", Doc: "scrolls are the scroll bars, which are fully managed as needed."}, {Name: "focusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "focusNameTime", Doc: "time of last focus name event; for timeout"}, {Name: "focusNameLast", Doc: "last element focused on; used as a starting point if name is the same"}}})
 
 // NewFrame returns a new [Frame] with the given optional parent:
 // Frame is the primary node type responsible for organizing the sizes
@@ -273,14 +265,17 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Frame", IDName
 func NewFrame(parent ...tree.Node) *Frame { return tree.New[Frame](parent...) }
 
 // SetStackTop sets the [Frame.StackTop]:
-// StackTop, for a [styles.Stacked] frame, is the index of the node to use as the top of the stack.
-// Only the node at this index is rendered; if not a valid index, nothing is rendered.
+// StackTop, for a [styles.Stacked] frame, is the index of the node to use
+// as the top of the stack. Only the node at this index is rendered; if it is
+// not a valid index, nothing is rendered.
 func (t *Frame) SetStackTop(v int) *Frame { t.StackTop = v; return t }
 
 // SetLayoutStackTopOnly sets the [Frame.LayoutStackTopOnly]:
-// LayoutStackTopOnly is whether to only layout the top widget (specified by [Frame.StackTop])
-// for a [styles.Stacked] frame. This is appropriate for e.g., [Tabs], which do a full
-// redraw on stack changes, but not for e.g., [Switch]es which don't.
+// LayoutStackTopOnly is whether to only layout the top widget
+// (specified by [Frame.StackTop]) for a [styles.Stacked] frame.
+// This is appropriate for widgets such as [Tabs], which do a full
+// redraw on stack changes, but not for widgets such as [Switch]es
+// which don't.
 func (t *Frame) SetLayoutStackTopOnly(v bool) *Frame { t.LayoutStackTopOnly = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stretch", IDName: "stretch", Doc: "Stretch adds a stretchy element that grows to fill all\navailable space. You can set [styles.Style.Grow] to change\nhow much it grows relative to other growing elements.\nIt does not render anything.", Embeds: []types.Field{{Name: "WidgetBase"}}})
@@ -301,18 +296,19 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Space", IDName
 // It does not render anything.
 func NewSpace(parent ...tree.Node) *Space { return tree.New[Space](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FuncButton", IDName: "func-button", Doc: "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe name, text, tooltip, and icon based on the properties of the\nfunction, using [reflect] and [types]. The function must be registered\nwith [types] to get documentation information, but that is not\nrequired; add a `//types:add` comment directive and run `core generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to [types] to get documentation.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Func", Doc: "Func is the [types.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [types.Func] first. It should typically\nbe set using [FuncButton.SetFunc]."}, {Name: "ReflectFunc", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc]."}, {Name: "Args", Doc: "Args are the [FuncArg] objects associated with the\narguments of the function. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options."}, {Name: "Returns", Doc: "Returns are the [FuncArg] objects associated with the\nreturn values of the function. They are automatically\nset in [SetFunc], but they can be customized to configure\noptions. The [FuncArg.Value]s are not set until the\nfunction is called, and are thus not typically applicable\nto access."}, {Name: "Confirm", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function."}, {Name: "ShowReturn", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. Non-nil error return values will\nalways be shown, even if ShowReturn is set to false."}, {Name: "ShowReturnAsDialog", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true."}, {Name: "NewWindow", Doc: "NewWindow makes the ReturnDialog a NewWindow dialog\n(if supported by platform)."}, {Name: "WarnUnadded", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to [types] is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect. Warnings are never logged for anonymous functions."}, {Name: "Context", Doc: "Context is used for opening Dialogs if non-nil."}, {Name: "AfterFunc", Doc: "AfterFunc is an optional function called after the func button\nfunction is executed"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FuncButton", IDName: "func-button", Doc: "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe text and tooltip based on the properties of the function,\nusing [reflect] and [types]. The function must be registered\nwith [types] to get documentation information, but that is not\nrequired; add a `//types:add` comment directive and run `core generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to [types] to get documentation.\nThe main function to call first is [FuncButton.SetFunc].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "typesFunc", Doc: "typesFunc is the [types.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [types.Func] first. It should typically\nbe set using [FuncButton.SetFunc]."}, {Name: "reflectFunc", Doc: "reflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc]."}, {Name: "Args", Doc: "Args are the [FuncArg] objects associated with the\narguments of the function. They are automatically set in\n[FuncButton.SetFunc], but they can be customized to configure\ndefault values and other options."}, {Name: "Returns", Doc: "Returns are the [FuncArg] objects associated with the\nreturn values of the function. They are automatically\nset in [FuncButton.SetFunc], but they can be customized\nto configure options. The [FuncArg.Value]s are not set until\nthe function is called, and are thus not typically applicable\nto access."}, {Name: "Confirm", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function."}, {Name: "ShowReturn", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. Non-nil error return values will\nalways be shown, even if ShowReturn is set to false."}, {Name: "ShowReturnAsDialog", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true."}, {Name: "NewWindow", Doc: "NewWindow makes the return value dialog a NewWindow dialog."}, {Name: "WarnUnadded", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to [types] is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect. Warnings are never logged for anonymous functions."}, {Name: "Context", Doc: "Context is used for opening dialogs if non-nil."}, {Name: "AfterFunc", Doc: "AfterFunc is an optional function called after the func button\nfunction is executed."}}})
 
 // NewFuncButton returns a new [FuncButton] with the given optional parent:
 // FuncButton is a button that is set up to call a function when it
 // is pressed, using a dialog to prompt the user for any arguments.
 // Also, it automatically sets various properties of the button like
-// the name, text, tooltip, and icon based on the properties of the
-// function, using [reflect] and [types]. The function must be registered
+// the text and tooltip based on the properties of the function,
+// using [reflect] and [types]. The function must be registered
 // with [types] to get documentation information, but that is not
 // required; add a `//types:add` comment directive and run `core generate`
 // if you want tooltips. If the function is a method, both the method and
 // its receiver type must be added to [types] to get documentation.
+// The main function to call first is [FuncButton.SetFunc].
 func NewFuncButton(parent ...tree.Node) *FuncButton { return tree.New[FuncButton](parent...) }
 
 // SetConfirm sets the [FuncButton.Confirm]:
@@ -339,8 +335,7 @@ func (t *FuncButton) SetShowReturn(v bool) *FuncButton { t.ShowReturn = v; retur
 func (t *FuncButton) SetShowReturnAsDialog(v bool) *FuncButton { t.ShowReturnAsDialog = v; return t }
 
 // SetNewWindow sets the [FuncButton.NewWindow]:
-// NewWindow makes the ReturnDialog a NewWindow dialog
-// (if supported by platform).
+// NewWindow makes the return value dialog a NewWindow dialog.
 func (t *FuncButton) SetNewWindow(v bool) *FuncButton { t.NewWindow = v; return t }
 
 // SetWarnUnadded sets the [FuncButton.WarnUnadded]:
@@ -351,12 +346,12 @@ func (t *FuncButton) SetNewWindow(v bool) *FuncButton { t.NewWindow = v; return 
 func (t *FuncButton) SetWarnUnadded(v bool) *FuncButton { t.WarnUnadded = v; return t }
 
 // SetContext sets the [FuncButton.Context]:
-// Context is used for opening Dialogs if non-nil.
+// Context is used for opening dialogs if non-nil.
 func (t *FuncButton) SetContext(v Widget) *FuncButton { t.Context = v; return t }
 
 // SetAfterFunc sets the [FuncButton.AfterFunc]:
 // AfterFunc is an optional function called after the func button
-// function is executed
+// function is executed.
 func (t *FuncButton) SetAfterFunc(v func()) *FuncButton { t.AfterFunc = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FuncArg", IDName: "func-arg", Doc: "FuncArg represents one argument or return value of a function\nin the context of a [FuncButton].", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the argument or return value."}, {Name: "Tag", Doc: "Tag contains any tags associated with the argument or return value,\nwhich can be added programmatically to customize [Value] behavior."}, {Name: "Value", Doc: "Value is the actual value of the function argument or return value.\nIt can be modified when creating a [FuncButton] to set a default value."}}})
@@ -375,11 +370,11 @@ func (t *FuncArg) SetTag(v reflect.StructTag) *FuncArg { t.Tag = v; return t }
 // It can be modified when creating a [FuncButton] to set a default value.
 func (t *FuncArg) SetValue(v any) *FuncArg { t.Value = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Handle", IDName: "handle", Doc: "Handle represents a draggable handle that can be used to\ncontrol the size of an element. The [Handle.Styles.Direction]\ncontrols the direction in which the handle moves.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Min", Doc: "Min is the minimum value that the handle can go to\n(typically the lower bound of the dialog/splits)"}, {Name: "Max", Doc: "Max is the maximum value that the handle can go to\n(typically the upper bound of the dialog/splits)"}, {Name: "Pos", Doc: "Pos is the current position of the handle on the\nscale of [Handle.Min] to [Handle.Max]"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Handle", IDName: "handle", Doc: "Handle represents a draggable handle that can be used to\ncontrol the size of an element. The [styles.Style.Direction]\ncontrols the direction in which the handle moves.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Min", Doc: "Min is the minimum value that the handle can go to\n(typically the lower bound of the dialog/splits)"}, {Name: "Max", Doc: "Max is the maximum value that the handle can go to\n(typically the upper bound of the dialog/splits)"}, {Name: "Pos", Doc: "Pos is the current position of the handle on the\nscale of [Handle.Min] to [Handle.Max]."}}})
 
 // NewHandle returns a new [Handle] with the given optional parent:
 // Handle represents a draggable handle that can be used to
-// control the size of an element. The [Handle.Styles.Direction]
+// control the size of an element. The [styles.Style.Direction]
 // controls the direction in which the handle moves.
 func NewHandle(parent ...tree.Node) *Handle { return tree.New[Handle](parent...) }
 
@@ -395,26 +390,34 @@ func (t *Handle) SetMax(v float32) *Handle { t.Max = v; return t }
 
 // SetPos sets the [Handle.Pos]:
 // Pos is the current position of the handle on the
-// scale of [Handle.Min] to [Handle.Max]
+// scale of [Handle.Min] to [Handle.Max].
 func (t *Handle) SetPos(v float32) *Handle { t.Pos = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Icon", IDName: "icon", Doc: "Icon renders an [svg.SVG] icon.\nThe rendered version is cached for a given size.\nIcons do not render a background or border independent of their SVG object.\nThe size of on Icon is determined by the [styles.Font.Size] property.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Icon", Doc: "icon name that has been set."}, {Name: "Filename", Doc: "file name for the loaded icon, if loaded"}, {Name: "SVG", Doc: "SVG drawing of the icon"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Icon", IDName: "icon", Doc: "Icon renders an [icons.Icon].\nThe rendered version is cached for the current size.\nIcons do not render a background or border independent of their SVG object.\nThe size of an Icon is determined by the [styles.Font.Size] property.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Icon", Doc: "Icon is the [icons.Icon] used to render the [Icon]."}, {Name: "prevIcon", Doc: "prevIcon is the previously rendered icon."}, {Name: "svg", Doc: "svg drawing of the icon"}}})
 
 // NewIcon returns a new [Icon] with the given optional parent:
-// Icon renders an [svg.SVG] icon.
-// The rendered version is cached for a given size.
+// Icon renders an [icons.Icon].
+// The rendered version is cached for the current size.
 // Icons do not render a background or border independent of their SVG object.
-// The size of on Icon is determined by the [styles.Font.Size] property.
+// The size of an Icon is determined by the [styles.Font.Size] property.
 func NewIcon(parent ...tree.Node) *Icon { return tree.New[Icon](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Image", IDName: "image", Doc: "Image is a widget that renders a static bitmap image.\nSee [styles.ObjectFits] for how to control the image rendering within\nthe allocated size. The default minimum requested size is the pixel\nsize in [units.Dp] units (1/160th of an inch).", Methods: []types.Method{{Name: "Open", Doc: "Open sets the image to the image located at the given filename.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Image", Doc: "Image is the bitmap image."}, {Name: "prevPixels", Doc: "prevPixels is the cached last rendered image."}, {Name: "prevObjectFit", Doc: "prevObjectFit is the cached [styles.Style.ObjectFit] of the last rendered image."}, {Name: "prevSize", Doc: "prevSize is the cached allocated size for the last rendered image."}}})
+// SetIcon sets the [Icon.Icon]:
+// Icon is the [icons.Icon] used to render the [Icon].
+func (t *Icon) SetIcon(v icons.Icon) *Icon { t.Icon = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Image", IDName: "image", Doc: "Image is a widget that renders an [image.Image].\nSee [styles.Style.ObjectFit] to control the image rendering within\nthe allocated size. The default minimum requested size is the pixel\nsize in [units.Dp] units (1/160th of an inch).", Methods: []types.Method{{Name: "Open", Doc: "Open sets the image to the image located at the given filename.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Image", Doc: "Image is the [image.Image]."}, {Name: "prevImage", Doc: "prevImage is the cached last [Image.Image]."}, {Name: "prevRenderImage", Doc: "prevRenderImage is the cached last rendered image with any transformations applied."}, {Name: "prevObjectFit", Doc: "prevObjectFit is the cached [styles.Style.ObjectFit] of the last rendered image."}, {Name: "prevSize", Doc: "prevSize is the cached allocated size for the last rendered image."}}})
 
 // NewImage returns a new [Image] with the given optional parent:
-// Image is a widget that renders a static bitmap image.
-// See [styles.ObjectFits] for how to control the image rendering within
+// Image is a widget that renders an [image.Image].
+// See [styles.Style.ObjectFit] to control the image rendering within
 // the allocated size. The default minimum requested size is the pixel
 // size in [units.Dp] units (1/160th of an inch).
 func NewImage(parent ...tree.Node) *Image { return tree.New[Image](parent...) }
+
+// SetImage sets the [Image.Image]:
+// Image is the [image.Image].
+func (t *Image) SetImage(v image.Image) *Image { t.Image = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.InlineList", IDName: "inline-list", Doc: "InlineList represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}}})
 
@@ -423,13 +426,10 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.InlineList", I
 // This is typically used for smaller slices.
 func NewInlineList(parent ...tree.Node) *InlineList { return tree.New[InlineList](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Inspector", IDName: "inspector", Doc: "Inspector represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame with an optional title, and a button\nbox at the bottom where methods can be invoked", Methods: []types.Method{{Name: "Save", Doc: "Save saves tree to current filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}}, {Name: "SaveAs", Doc: "SaveAs saves tree to given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "Open", Doc: "Open opens tree from given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicking on a Widget pulls it up in the inspector.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InspectApp", Doc: "InspectApp displays the underlying operating system app", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Root", Doc: "Root is the root of the tree being edited."}, {Name: "CurrentNode", Doc: "CurrentNode is the currently selected node in the tree."}, {Name: "Filename", Doc: "Filename is the current filename for saving / loading"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Inspector", IDName: "inspector", Doc: "Inspector represents a [tree.Node] with a [Tree] and a [Form].", Methods: []types.Method{{Name: "save", Doc: "save saves the tree to current filename, in a standard JSON-formatted file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}}, {Name: "saveAs", Doc: "saveAs saves tree to given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "open", Doc: "open opens tree from given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "toggleSelectionMode", Doc: "toggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicking on a Widget pulls it up in the inspector.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "inspectApp", Doc: "inspectApp displays the underlying operating system app", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Root", Doc: "Root is the root of the tree being edited."}, {Name: "currentNode", Doc: "currentNode is the currently selected node in the tree."}, {Name: "filename", Doc: "filename is the current filename for saving / loading"}, {Name: "treeWidget"}}})
 
 // NewInspector returns a new [Inspector] with the given optional parent:
-// Inspector represents a struct, creating a property editor of the fields --
-// constructs Children widgets to show the field names and editor fields for
-// each field, within an overall frame with an optional title, and a button
-// box at the bottom where methods can be invoked
+// Inspector represents a [tree.Node] with a [Tree] and a [Form].
 func NewInspector(parent ...tree.Node) *Inspector { return tree.New[Inspector](parent...) }
 
 // SetRoot sets the [Inspector.Root]:
@@ -456,7 +456,7 @@ func NewKeyChordButton(parent ...tree.Node) *KeyChordButton {
 // SetChord sets the [KeyChordButton.Chord]
 func (t *KeyChordButton) SetChord(v key.Chord) *KeyChordButton { t.Chord = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.KeyedList", IDName: "keyed-list", Doc: "KeyedList represents a map value using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the keyed list is not inline."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.KeyedList", IDName: "keyed-list", Doc: "KeyedList represents a map value using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortByValues", Doc: "SortByValues is whether to sort by values instead of keys."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the keyed list is not inline."}}})
 
 // NewKeyedList returns a new [KeyedList] with the given optional parent:
 // KeyedList represents a map value using two columns of editable key and value widgets.
@@ -470,36 +470,22 @@ func (t *KeyedList) SetMap(v any) *KeyedList { t.Map = v; return t }
 // Inline is whether to display the map in one line.
 func (t *KeyedList) SetInline(v bool) *KeyedList { t.Inline = v; return t }
 
-// SetSortValues sets the [KeyedList.SortValues]:
-// SortValue is whether to sort by values instead of keys.
-func (t *KeyedList) SetSortValues(v bool) *KeyedList { t.SortValues = v; return t }
+// SetSortByValues sets the [KeyedList.SortByValues]:
+// SortByValues is whether to sort by values instead of keys.
+func (t *KeyedList) SetSortByValues(v bool) *KeyedList { t.SortByValues = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.GeomCT", IDName: "geom-ct", Doc: "GeomCT has core layout elements: Content and Total", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Content", Doc: "Content is for the contents (children, parts) of the widget,\nexcluding the Space (margin, padding, scrollbars).\nThis content includes the InnerSpace factor (Gaps in Layout)\nwhich must therefore be subtracted when allocating down to children."}, {Name: "Total", Doc: "Total is for the total exterior of the widget: Content + Space"}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.GeomSize", IDName: "geom-size", Doc: "GeomSize has all of the relevant Layout sizes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Actual", Doc: "Actual is the actual size for the purposes of rendering, representing\nthe \"external\" demands of the widget for space from its parent.\nThis is initially the bottom-up constraint computed by SizeUp,\nand only changes during SizeDown when wrapping elements are reshaped\nbased on allocated size, or when scrollbars are added.\nFor elements with scrollbars (OverflowAuto), the Actual size remains\nat the initial style minimums, \"absorbing\" is internal size,\nwhile Internal records the true size of the contents.\nFor SizeFinal, Actual size can Grow up to the final Alloc size,\nwhile Internal records the actual bottom-up contents size."}, {Name: "Alloc", Doc: "Alloc is the top-down allocated size, based on available visible space,\nstarting from the Scene geometry and working downward, attempting to\naccommodate the Actual contents, and allocating extra space based on\nGrow factors.  When Actual < Alloc, alignment factors determine positioning\nwithin the allocated space."}, {Name: "Internal", Doc: "Internal is the internal size representing the true size of all contents\nof the widget.  This can be less than Actual.Content if widget has Grow\nfactors but its internal contents did not grow accordingly, or it can\nbe more than Actual.Content if it has scrollbars (OverflowAuto).\nNote that this includes InnerSpace (Gap)."}, {Name: "Space", Doc: "Space is the padding, total effective margin (border, shadow, etc),\nand scrollbars that subtracts from Total size to get Content size."}, {Name: "InnerSpace", Doc: "InnerSpace is total extra space that is included within the Content Size region\nand must be subtracted from Content when passing sizes down to children."}, {Name: "Min", Doc: "Min is the Styles.Min.Dots() (Ceil int) that constrains the Actual.Content size"}, {Name: "Max", Doc: "Max is the Styles.Max.Dots() (Ceil int) that constrains the Actual.Content size"}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.GeomState", IDName: "geom-state", Doc: "GeomState contains the the layout geometry state for each widget.\nSet by the parent Layout during the Layout process.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Size", Doc: "Size has sizing data for the widget: use Actual for rendering.\nAlloc shows the potentially larger space top-down allocated."}, {Name: "Pos", Doc: "Pos is position within the overall Scene that we render into,\nincluding effects of scroll offset, for both Total outer dimension\nand inner Content dimension."}, {Name: "Cell", Doc: "Cell is the logical X, Y index coordinates (col, row) of element\nwithin its parent layout"}, {Name: "RelPos", Doc: "RelPos is top, left position relative to parent Content size space"}, {Name: "Scroll", Doc: "Scroll is additional scrolling offset within our parent layout"}, {Name: "TotalBBox", Doc: "2D bounding box for Actual.Total size occupied within parent Scene\nthat we render onto, starting at Pos.Total and ending at Pos.Total + Size.Total.\nThese are the pixels we can draw into, intersected with parent bounding boxes\n(empty for invisible). Used for render Bounds clipping.\nThis includes all space (margin, padding etc)."}, {Name: "ContentBBox", Doc: "2D bounding box for our Content, which excludes our padding, margin, etc.\nstarting at Pos.Content and ending at Pos.Content + Size.Content.\nIt is intersected with parent bounding boxes."}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.List", IDName: "list", Doc: "List represents a slice value with a list of value widgets and optional index widgets.\nUse [ListBase.BindSelect] to make the list designed for item selection.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.List", IDName: "list", Doc: "List represents a slice value with a list of value widgets and optional index widgets.\nUse [ListBase.BindSelect] to make the list designed for item selection.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "ListStyler", Doc: "ListStyler is an optional styler for list items."}}})
 
 // NewList returns a new [List] with the given optional parent:
 // List represents a slice value with a list of value widgets and optional index widgets.
 // Use [ListBase.BindSelect] to make the list designed for item selection.
 func NewList(parent ...tree.Node) *List { return tree.New[List](parent...) }
 
-// SetStyleFunc sets the [List.StyleFunc]:
-// StyleFunc is an optional styling function.
-func (t *List) SetStyleFunc(v ListStyleFunc) *List { t.StyleFunc = v; return t }
+// SetListStyler sets the [List.ListStyler]:
+// ListStyler is an optional styler for list items.
+func (t *List) SetListStyler(v ListStyler) *List { t.ListStyler = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ListBase", IDName: "list-base", Doc: "ListBase is the base for [List] and [Table] and any other displays\nof array-like data. It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nUse [ListBase.BindSelect] to make the list designed for item selection.", Methods: []types.Method{{Name: "CopyIndexes", Doc: "CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIndexes", Doc: "DeleteIndexes deletes all selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CutIndexes", Doc: "CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "PasteIndex", Doc: "PasteIndex pastes clipboard at given idx", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the pointer to the slice that we are viewing."}, {Name: "ShowIndexes", Doc: "ShowIndexes is whether to show the indexes of rows or not (default false)."}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "SelectedValue", Doc: "SelectedValue is the current selection value; initially select this value if set."}, {Name: "SelectedIndex", Doc: "index of currently selected item"}, {Name: "InitSelectedIndex", Doc: "index of row to select at start"}, {Name: "SelectedIndexes", Doc: "list of currently selected slice indexes"}, {Name: "lastClick", Doc: "lastClick is the last row that has been clicked on.\nThis is used to prevent erroneous double click events\nfrom being sent when the user clicks on multiple different\nrows in quick succession."}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no row being hovered."}, {Name: "CurrentCursor", Doc: "CurrentCursor is the cached cursor that should currently be\ndisplayed."}, {Name: "SliceUnderlying", Doc: "SliceUnderlying is the underlying slice value."}, {Name: "hoverRow", Doc: "currently hovered row"}, {Name: "DraggedIndexes", Doc: "list of currently dragged indexes"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIndex", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "MakeIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "tmpIndex", Doc: "temp idx state for e.g., dnd"}, {Name: "ElementValue", Doc: "ElementValue is a [reflect.Value] representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "maxWidth", Doc: "maximum width of value column in chars, if string"}, {Name: "ReadOnlyKeyNav", Doc: "ReadOnlyKeyNav is whether support key navigation when ReadOnly (default true).\nIt uses a capture of up / down events to manipulate selection, not focus."}, {Name: "SelectMode", Doc: "SelectMode is whether to be in select rows mode or editing mode."}, {Name: "ReadOnlyMultiSelect", Doc: "ReadOnlyMultiSelect: if view is ReadOnly, default selection mode is to choose one row only.\nIf this is true, standard multiple selection logic with modifier keys is instead supported."}, {Name: "InFocusGrab", Doc: "InFocusGrab is a guard for recursive focus grabbing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}}})
-
-// NewListBase returns a new [ListBase] with the given optional parent:
-// ListBase is the base for [List] and [Table] and any other displays
-// of array-like data. It automatically computes the number of rows that fit
-// within its allocated space, and manages the offset view window into the full
-// list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
-// Use [ListBase.BindSelect] to make the list designed for item selection.
-func NewListBase(parent ...tree.Node) *ListBase { return tree.New[ListBase](parent...) }
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ListBase", IDName: "list-base", Doc: "ListBase is the base for [List] and [Table] and any other displays\nof array-like data. It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nUse [ListBase.BindSelect] to make the list designed for item selection.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Methods: []types.Method{{Name: "copyIndexes", Doc: "copyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "cutIndexes", Doc: "cutIndexes copies selected indexes to system.Clipboard and deletes selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "pasteIndex", Doc: "pasteIndex pastes clipboard at given idx", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"idx"}}, {Name: "duplicate", Doc: "duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the pointer to the slice that we are viewing."}, {Name: "ShowIndexes", Doc: "ShowIndexes is whether to show the indexes of rows or not (default false)."}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "SelectedValue", Doc: "SelectedValue is the current selection value.\nIf it is set, it is used as the initially selected value."}, {Name: "SelectedIndex", Doc: "SelectedIndex is the index of the currently selected item."}, {Name: "InitSelectedIndex", Doc: "InitSelectedIndex is the index of the row to select at the start."}, {Name: "SelectedIndexes", Doc: "SelectedIndexes is a list of currently selected slice indexes."}, {Name: "lastClick", Doc: "lastClick is the last row that has been clicked on.\nThis is used to prevent erroneous double click events\nfrom being sent when the user clicks on multiple different\nrows in quick succession."}, {Name: "normalCursor", Doc: "normalCursor is the cached cursor to display when there\nis no row being hovered."}, {Name: "currentCursor", Doc: "currentCursor is the cached cursor that should currently be\ndisplayed."}, {Name: "sliceUnderlying", Doc: "sliceUnderlying is the underlying slice value."}, {Name: "hoverRow", Doc: "currently hovered row"}, {Name: "draggedIndexes", Doc: "list of currently dragged indexes"}, {Name: "VisibleRows", Doc: "VisibleRows is the total number of rows visible in allocated display size."}, {Name: "StartIndex", Doc: "StartIndex is the starting slice index of visible rows."}, {Name: "SliceSize", Doc: "SliceSize is the size of the slice."}, {Name: "MakeIter", Doc: "MakeIter is the iteration through the configuration process,\nwhich is reset when a new slice type is set."}, {Name: "tmpIndex", Doc: "temp idx state for e.g., dnd"}, {Name: "elementValue", Doc: "elementValue is a [reflect.Value] representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "maxWidth", Doc: "maximum width of value column in chars, if string"}, {Name: "ReadOnlyKeyNav", Doc: "ReadOnlyKeyNav is whether support key navigation when ReadOnly (default true).\nIt uses a capture of up / down events to manipulate selection, not focus."}, {Name: "SelectMode", Doc: "SelectMode is whether to be in select rows mode or editing mode."}, {Name: "ReadOnlyMultiSelect", Doc: "ReadOnlyMultiSelect: if list is ReadOnly, default selection mode is to\nchoose one row only. If this is true, standard multiple selection logic\nwith modifier keys is instead supported."}, {Name: "InFocusGrab", Doc: "InFocusGrab is a guard for recursive focus grabbing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}, {Name: "ListGrid", Doc: "ListGrid is the [ListGrid] widget."}}})
 
 // SetShowIndexes sets the [ListBase.ShowIndexes]:
 // ShowIndexes is whether to show the indexes of rows or not (default false).
@@ -511,15 +497,16 @@ func (t *ListBase) SetShowIndexes(v bool) *ListBase { t.ShowIndexes = v; return 
 func (t *ListBase) SetMinRows(v int) *ListBase { t.MinRows = v; return t }
 
 // SetSelectedValue sets the [ListBase.SelectedValue]:
-// SelectedValue is the current selection value; initially select this value if set.
+// SelectedValue is the current selection value.
+// If it is set, it is used as the initially selected value.
 func (t *ListBase) SetSelectedValue(v any) *ListBase { t.SelectedValue = v; return t }
 
 // SetSelectedIndex sets the [ListBase.SelectedIndex]:
-// index of currently selected item
+// SelectedIndex is the index of the currently selected item.
 func (t *ListBase) SetSelectedIndex(v int) *ListBase { t.SelectedIndex = v; return t }
 
 // SetInitSelectedIndex sets the [ListBase.InitSelectedIndex]:
-// index of row to select at start
+// InitSelectedIndex is the index of the row to select at the start.
 func (t *ListBase) SetInitSelectedIndex(v int) *ListBase { t.InitSelectedIndex = v; return t }
 
 // SetReadOnlyKeyNav sets the [ListBase.ReadOnlyKeyNav]:
@@ -528,26 +515,19 @@ func (t *ListBase) SetInitSelectedIndex(v int) *ListBase { t.InitSelectedIndex =
 func (t *ListBase) SetReadOnlyKeyNav(v bool) *ListBase { t.ReadOnlyKeyNav = v; return t }
 
 // SetReadOnlyMultiSelect sets the [ListBase.ReadOnlyMultiSelect]:
-// ReadOnlyMultiSelect: if view is ReadOnly, default selection mode is to choose one row only.
-// If this is true, standard multiple selection logic with modifier keys is instead supported.
+// ReadOnlyMultiSelect: if list is ReadOnly, default selection mode is to
+// choose one row only. If this is true, standard multiple selection logic
+// with modifier keys is instead supported.
 func (t *ListBase) SetReadOnlyMultiSelect(v bool) *ListBase { t.ReadOnlyMultiSelect = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ListGrid", IDName: "list-grid", Doc: "ListGrid handles the resizing logic for [List], [Table].", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "MinRows", Doc: "MinRows is set from parent SV"}, {Name: "RowHeight", Doc: "height of a single row, computed during layout"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "BgStripe", Doc: "Various computed backgrounds"}, {Name: "BgSelect", Doc: "Various computed backgrounds"}, {Name: "BgSelectStripe", Doc: "Various computed backgrounds"}, {Name: "BgHover", Doc: "Various computed backgrounds"}, {Name: "BgHoverStripe", Doc: "Various computed backgrounds"}, {Name: "BgHoverSelect", Doc: "Various computed backgrounds"}, {Name: "BgHoverSelectStripe", Doc: "Various computed backgrounds"}, {Name: "LastBackground", Doc: "LastBackground is the background for which modified\nbackgrounds were computed -- don't update if same"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ListGrid", IDName: "list-grid", Doc: "ListGrid handles the resizing logic for all [Lister]s.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "minRows", Doc: "minRows is set from parent [List]"}, {Name: "rowHeight", Doc: "height of a single row, computed during layout"}, {Name: "visibleRows", Doc: "total number of rows visible in allocated display size"}, {Name: "bgStripe", Doc: "Various computed backgrounds"}, {Name: "bgSelect", Doc: "Various computed backgrounds"}, {Name: "bgSelectStripe", Doc: "Various computed backgrounds"}, {Name: "bgHover", Doc: "Various computed backgrounds"}, {Name: "bgHoverStripe", Doc: "Various computed backgrounds"}, {Name: "bgHoverSelect", Doc: "Various computed backgrounds"}, {Name: "bgHoverSelectStripe", Doc: "Various computed backgrounds"}, {Name: "lastBackground", Doc: "lastBackground is the background for which modified\nbackgrounds were computed -- don't update if same"}}})
 
-// NewListGrid returns a new [ListGrid] with the given optional parent:
-// ListGrid handles the resizing logic for [List], [Table].
-func NewListGrid(parent ...tree.Node) *ListGrid { return tree.New[ListGrid](parent...) }
-
-// SetLastBackground sets the [ListGrid.LastBackground]:
-// LastBackground is the background for which modified
-// backgrounds were computed -- don't update if same
-func (t *ListGrid) SetLastBackground(v image.Image) *ListGrid { t.LastBackground = v; return t }
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled\nbar/semicircle relative to a minimum and maximum potential value.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the meter."}, {Name: "Value", Doc: "Value is the current value of the meter.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value of the meter.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum possible value of the meter.\nIt defaults to 1."}, {Name: "Text", Doc: "Text, for [MeterCircle] and [MeterSemicircle], is the\ntext to render inside of the circle/semicircle."}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}, {Name: "Width", Doc: "Width, for [MeterCircle] and [MeterSemicircle], is the\nwidth of the circle/semicircle. It should be set in Style."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled\nbar/circle/semicircle relative to a minimum and maximum potential\nvalue.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the meter."}, {Name: "Value", Doc: "Value is the current value of the meter.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value of the meter.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum possible value of the meter.\nIt defaults to 1."}, {Name: "Text", Doc: "Text, for [MeterCircle] and [MeterSemicircle], is the\ntext to render inside of the circle/semicircle."}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in a Styler."}, {Name: "Width", Doc: "Width, for [MeterCircle] and [MeterSemicircle], is the\nwidth of the circle/semicircle. It should be set in a Styler."}}})
 
 // NewMeter returns a new [Meter] with the given optional parent:
 // Meter is a widget that renders a current value on as a filled
-// bar/semicircle relative to a minimum and maximum potential value.
+// bar/circle/semicircle relative to a minimum and maximum potential
+// value.
 func NewMeter(parent ...tree.Node) *Meter { return tree.New[Meter](parent...) }
 
 // SetType sets the [Meter.Type]:
@@ -576,17 +556,17 @@ func (t *Meter) SetText(v string) *Meter { t.Text = v; return t }
 
 // SetValueColor sets the [Meter.ValueColor]:
 // ValueColor is the image color that will be used to
-// render the filled value bar. It should be set in Style.
+// render the filled value bar. It should be set in a Styler.
 func (t *Meter) SetValueColor(v image.Image) *Meter { t.ValueColor = v; return t }
 
 // SetWidth sets the [Meter.Width]:
 // Width, for [MeterCircle] and [MeterSemicircle], is the
-// width of the circle/semicircle. It should be set in Style.
+// width of the circle/semicircle. It should be set in a Styler.
 func (t *Meter) SetWidth(v units.Value) *Meter { t.Width = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Scrim", IDName: "scrim", Doc: "A Scrim is just a dummy Widget used for rendering a Scrim.\nOnly used for its type. Everything else managed by RenderWindow.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "WidgetBase"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.scrim", IDName: "scrim", Doc: "A scrim is just a dummy Widget used for rendering a scrim.\nOnly used for its type. Everything else managed by [renderWindow].", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "WidgetBase"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Scene", IDName: "scene", Doc: "Scene contains a [Widget] tree, rooted in an embedded [Frame] layout,\nwhich renders into its [Scene.Pixels] image. The [Scene] is set in a\n[Stage], which the [Scene] has a pointer to.\n\nEach [Scene] contains state specific to its particular usage\nwithin a given [Stage] and overall rendering context, representing the unit\nof rendering in the Cogent Core framework.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Bars", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first."}, {Name: "BarsInherit", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs"}, {Name: "AppBars", Doc: "AppBars contains functions for making the plan for the top app bar."}, {Name: "Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions."}, {Name: "Data", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one."}, {Name: "SceneGeom", Doc: "Size and position relative to overall rendering context."}, {Name: "PaintContext", Doc: "paint context for rendering"}, {Name: "Pixels", Doc: "live pixels that we render into"}, {Name: "Events", Doc: "event manager for this scene"}, {Name: "Stage", Doc: "current stage in which this Scene is set"}, {Name: "renderBBoxes", Doc: "renderBBoxes indicates to render colored bounding boxes for all of the widgets\nin the scene. This is enabled by the [Inspector] in select element mode."}, {Name: "renderBBoxHue", Doc: "renderBBoxHue is current hue for rendering bounding box in [Scene.RenderBBoxes] mode."}, {Name: "selectedWidget", Doc: "selectedWidget is the currently selected/hovered widget through the [Inspector] selection mode\nthat should be highlighted with a background color."}, {Name: "selectedWidgetChan", Doc: "selectedWidgetChan is the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting."}, {Name: "lastRender", Doc: "lastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed."}, {Name: "showIter", Doc: "showIter counts up at start of showing a Scene\nto trigger Show event and other steps at start of first show"}, {Name: "directRenders", Doc: "directRenders are widgets that render directly to the RenderWin\ninstead of rendering into the Scene Pixels image."}, {Name: "HasShown", Doc: "HasShown is whether this scene has been shown.\nThis is used to ensure that [events.Show] is only sent once."}, {Name: "updating", Doc: "updating means the Scene is in the process of updating.\nIt is set for any kind of tree-level update.\nSkip any further update passes until it goes off."}, {Name: "sceneNeedsRender", Doc: "sceneNeedsRender is whether anything in the Scene needs to be re-rendered\n(but not necessarily the whole scene itself)."}, {Name: "needsLayout", Doc: "needsLayout is whether the Scene needs a new layout pass."}, {Name: "imageUpdated", Doc: "imageUpdated indicates that the Scene's image has been updated\ne.g., due to a render or a resize. This is reset by the\nglobal [RenderWindow] rendering pass, so it knows whether it needs to\ncopy the image up to the GPU or not."}, {Name: "prefSizing", Doc: "prefSizing means that this scene is currently doing a\nPrefSize computation to compute the size of the scene\n(for sizing window for example); affects layout size computation\nonly for Over"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Scene", IDName: "scene", Doc: "Scene contains a [Widget] tree, rooted in an embedded [Frame] layout,\nwhich renders into its [Scene.Pixels] image. The [Scene] is set in a\n[Stage], which the [Scene] has a pointer to.\n\nEach [Scene] contains state specific to its particular usage\nwithin a given [Stage] and overall rendering context, representing the unit\nof rendering in the Cogent Core framework.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Bars", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first."}, {Name: "BarsInherit", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs"}, {Name: "AppBars", Doc: "AppBars contains functions for making the plan for the top app bar."}, {Name: "Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions."}, {Name: "Data", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one."}, {Name: "sceneGeom", Doc: "Size and position relative to overall rendering context."}, {Name: "PaintContext", Doc: "paint context for rendering"}, {Name: "Pixels", Doc: "live pixels that we render into"}, {Name: "Events", Doc: "event manager for this scene"}, {Name: "Stage", Doc: "current stage in which this Scene is set"}, {Name: "renderBBoxes", Doc: "renderBBoxes indicates to render colored bounding boxes for all of the widgets\nin the scene. This is enabled by the [Inspector] in select element mode."}, {Name: "renderBBoxHue", Doc: "renderBBoxHue is current hue for rendering bounding box in [Scene.RenderBBoxes] mode."}, {Name: "selectedWidget", Doc: "selectedWidget is the currently selected/hovered widget through the [Inspector] selection mode\nthat should be highlighted with a background color."}, {Name: "selectedWidgetChan", Doc: "selectedWidgetChan is the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting."}, {Name: "lastRender", Doc: "lastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed."}, {Name: "showIter", Doc: "showIter counts up at start of showing a Scene\nto trigger Show event and other steps at start of first show"}, {Name: "directRenders", Doc: "directRenders are widgets that render directly to the RenderWin\ninstead of rendering into the Scene Pixels image."}, {Name: "hasShown", Doc: "hasShown is whether this scene has been shown.\nThis is used to ensure that [events.Show] is only sent once."}, {Name: "updating", Doc: "updating means the Scene is in the process of updating.\nIt is set for any kind of tree-level update.\nSkip any further update passes until it goes off."}, {Name: "sceneNeedsRender", Doc: "sceneNeedsRender is whether anything in the Scene needs to be re-rendered\n(but not necessarily the whole scene itself)."}, {Name: "needsLayout", Doc: "needsLayout is whether the Scene needs a new layout pass."}, {Name: "imageUpdated", Doc: "imageUpdated indicates that the Scene's image has been updated\ne.g., due to a render or a resize. This is reset by the\nglobal [RenderWindow] rendering pass, so it knows whether it needs to\ncopy the image up to the GPU or not."}, {Name: "prefSizing", Doc: "prefSizing means that this scene is currently doing a\nPrefSize computation to compute the size of the scene\n(for sizing window for example); affects layout size computation\nonly for Over"}}})
 
 // SetBars sets the [Scene.Bars]:
 // Bars contains functions for constructing the control bars for this Scene,
@@ -617,14 +597,14 @@ func (t *Scene) SetBody(v *Body) *Scene { t.Body = v; return t }
 // Used e.g., for recycling views of a given item instead of creating new one.
 func (t *Scene) SetData(v any) *Scene { t.Data = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Separator", IDName: "separator", Doc: "Separator draws a separator line. It goes in the direction\nspecified by [style.Style.Direction].", Embeds: []types.Field{{Name: "WidgetBase"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Separator", IDName: "separator", Doc: "Separator draws a separator line. It goes in the direction\nspecified by [styles.Style.Direction].", Embeds: []types.Field{{Name: "WidgetBase"}}})
 
 // NewSeparator returns a new [Separator] with the given optional parent:
 // Separator draws a separator line. It goes in the direction
-// specified by [style.Style.Direction].
+// specified by [styles.Style.Direction].
 func NewSeparator(parent ...tree.Node) *Separator { return tree.New[Separator](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.AppearanceSettingsData", IDName: "appearance-settings-data", Doc: "AppearanceSettingsData is the data type for the global Cogent Core appearance settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "Apply", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DeleteSavedWindowGeoms", Doc: "DeleteSavedWindowGeoms deletes the file that saves the position and size of\neach window, by screen, and clear current in-memory cache. You shouldn't generally\nneed to do this, but sometimes it is useful for testing or windows that are\nshowing up in bad places that you can't recover from.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "SaveScreenZoom", Doc: "SaveScreenZoom saves the current zoom factor for the current screen.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "SettingsBase"}}, Fields: []types.Field{{Name: "Theme", Doc: "the color theme"}, {Name: "Color", Doc: "the primary color used to generate the color scheme"}, {Name: "Zoom", Doc: "overall zoom factor as a percentage of the default zoom"}, {Name: "Spacing", Doc: "the overall spacing factor as a percentage of the default amount of spacing\n(higher numbers lead to more space and lower numbers lead to higher density)"}, {Name: "FontSize", Doc: "the overall font size factor applied to all text as a percentage\nof the default font size (higher numbers lead to larger text)"}, {Name: "ZebraStripes", Doc: "the amount that alternating rows are highlighted when showing tabular data (set to 0 to disable zebra striping)"}, {Name: "Screens", Doc: "screen-specific settings, which will override overall defaults if set"}, {Name: "HiStyle", Doc: "text highlighting style / theme"}, {Name: "Font", Doc: "Font is the default font family to use."}, {Name: "MonoFont", Doc: "MonoFont is the default mono-spaced font family to use."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.AppearanceSettingsData", IDName: "appearance-settings-data", Doc: "AppearanceSettingsData is the data type for the global Cogent Core appearance settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "Apply", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "deleteSavedWindowGeoms", Doc: "deleteSavedWindowGeoms deletes the file that saves the position and size of\neach window, by screen, and clear current in-memory cache. You shouldn't generally\nneed to do this, but sometimes it is useful for testing or windows that are\nshowing up in bad places that you can't recover from.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "SaveScreenZoom", Doc: "SaveScreenZoom saves the current zoom factor for the current screen.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "SettingsBase"}}, Fields: []types.Field{{Name: "Theme", Doc: "the color theme"}, {Name: "Color", Doc: "the primary color used to generate the color scheme"}, {Name: "Zoom", Doc: "overall zoom factor as a percentage of the default zoom"}, {Name: "Spacing", Doc: "the overall spacing factor as a percentage of the default amount of spacing\n(higher numbers lead to more space and lower numbers lead to higher density)"}, {Name: "FontSize", Doc: "the overall font size factor applied to all text as a percentage\nof the default font size (higher numbers lead to larger text)"}, {Name: "ZebraStripes", Doc: "the amount that alternating rows are highlighted when showing tabular data (set to 0 to disable zebra striping)"}, {Name: "Screens", Doc: "screen-specific settings, which will override overall defaults if set"}, {Name: "HiStyle", Doc: "text highlighting style / theme"}, {Name: "Font", Doc: "Font is the default font family to use."}, {Name: "MonoFont", Doc: "MonoFont is the default mono-spaced font family to use."}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.DeviceSettingsData", IDName: "device-settings-data", Doc: "DeviceSettingsData is the data type for the device settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "SettingsBase"}}, Fields: []types.Field{{Name: "KeyMap", Doc: "The keyboard shortcut map to use"}, {Name: "KeyMaps", Doc: "The keyboard shortcut maps available as options for Key map.\nIf you do not want to have custom key maps, you should leave\nthis unset so that you always have the latest standard key maps."}, {Name: "DoubleClickInterval", Doc: "The maximum time interval between button press events to count as a double-click"}, {Name: "ScrollWheelSpeed", Doc: "How fast the scroll wheel moves, which is typically pixels per wheel step\nbut units can be arbitrary. It is generally impossible to standardize speed\nand variable across devices, and we don't have access to the system settings,\nso unfortunately you have to set it here."}, {Name: "SlideStartTime", Doc: "The amount of time to wait before initiating a slide event\n(as opposed to a basic press event)"}, {Name: "DragStartTime", Doc: "The amount of time to wait before initiating a drag (drag and drop) event\n(as opposed to a basic press or slide event)"}, {Name: "RepeatClickTime", Doc: "The amount of time to wait between each repeat click event,\nwhen the mouse is pressed down.  The first click is 8x this."}, {Name: "DragStartDistance", Doc: "The number of pixels that must be moved before initiating a slide/drag\nevent (as opposed to a basic press event)"}, {Name: "LongHoverTime", Doc: "The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)"}, {Name: "LongHoverStopDistance", Doc: "The maximum number of pixels that mouse can move and still register a long hover event"}, {Name: "LongPressTime", Doc: "The amount of time to wait before initiating a long press event (e.g., for opening a tooltip)"}, {Name: "LongPressStopDistance", Doc: "The maximum number of pixels that mouse/finger can move and still register a long press event"}}})
 
@@ -636,23 +616,16 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.User", IDName:
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.EditorSettings", IDName: "editor-settings", Doc: "EditorSettings contains text editor settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "TabSize", Doc: "size of a tab, in chars; also determines indent level for space indent"}, {Name: "SpaceIndent", Doc: "use spaces for indentation, otherwise tabs"}, {Name: "WordWrap", Doc: "wrap lines at word boundaries; otherwise long lines scroll off the end"}, {Name: "LineNumbers", Doc: "whether to show line numbers"}, {Name: "Completion", Doc: "use the completion system to suggest options while typing"}, {Name: "SpellCorrect", Doc: "suggest corrections for unknown words while typing"}, {Name: "AutoIndent", Doc: "automatically indent lines when enter, tab, }, etc pressed"}, {Name: "EmacsUndo", Doc: "use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"}, {Name: "DepthColor", Doc: "colorize the background according to nesting depth"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FavPathItem", IDName: "fav-path-item", Doc: "FavPathItem represents one item in a favorite path list, for display of\nfavorites.  Is an ordered list instead of a map because user can organize\nin order", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Ic", Doc: "icon for item"}, {Name: "Name", Doc: "name of the favorite item"}, {Name: "Path", Doc: "the path of the favorite item"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.favoritePathItem", IDName: "favorite-path-item", Doc: "favoritePathItem represents one item in a favorite path list, for display of\nfavorites. Is an ordered list instead of a map because user can organize\nin order", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Icon", Doc: "icon for item"}, {Name: "Name", Doc: "name of the favorite item"}, {Name: "Path", Doc: "the path of the favorite item"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.DebugSettingsData", IDName: "debug-settings-data", Doc: "DebugSettingsData is the data type for debugging settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "SettingsBase"}}, Fields: []types.Field{{Name: "UpdateTrace", Doc: "Print a trace of updates that trigger re-rendering"}, {Name: "RenderTrace", Doc: "Print a trace of the nodes rendering"}, {Name: "LayoutTrace", Doc: "Print a trace of all layouts"}, {Name: "LayoutTraceDetail", Doc: "Print more detailed info about the underlying layout computations"}, {Name: "WinEventTrace", Doc: "Print a trace of window events"}, {Name: "WinRenderTrace", Doc: "Print the stack trace leading up to win publish events\nwhich are expensive"}, {Name: "WinGeomTrace", Doc: "Print a trace of window geometry saving / loading functions"}, {Name: "KeyEventTrace", Doc: "Print a trace of keyboard events"}, {Name: "EventTrace", Doc: "Print a trace of event handling"}, {Name: "FocusTrace", Doc: "Print a trace of focus changes"}, {Name: "DNDTrace", Doc: "Print a trace of DND event handling"}, {Name: "GoCompleteTrace", Doc: "Print a trace of Go language completion and lookup process"}, {Name: "GoTypeTrace", Doc: "Print a trace of Go language type parsing and inference process"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.\nThe [styles.Style.Direction] determines the direction in which the slider slides.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of the slider, which determines its visual\nand functional properties. The default type, [SliderSlider],\nshould work for most end-user use cases."}, {Name: "Value", Doc: "Value is the current value, represented by the position of the thumb.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum value supported.\nIt defaults to 1."}, {Name: "Step", Doc: "Step is the amount that the arrow keys increment/decrement the value by.\nIt defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value is always\na multiple of [Slider.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Slider.Step]."}, {Name: "Icon", Doc: "Icon is an optional icon to use for the dragging knob."}, {Name: "VisiblePct", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)"}, {Name: "InputThreshold", Doc: "threshold for amount of change in scroll value before emitting an input event"}, {Name: "Prec", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions."}, {Name: "ValueColor", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider."}, {Name: "StayInView", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "Pos", Doc: "logical position of the slider relative to Size"}, {Name: "LastValue", Doc: "previous Change event emitted value - don't re-emit Change if it is the same"}, {Name: "PrevSlide", Doc: "previous sliding value - for computing the Input change"}, {Name: "Size", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation."}, {Name: "SlideStartPos", Doc: "underlying drag position of slider -- not subject to snapping"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality with a draggable\nthumb and a clickable track. The [styles.Style.Direction] determines the direction\nin which the slider slides.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of the slider, which determines its visual\nand functional properties. The default type, [SliderSlider],\nshould work for most end-user use cases."}, {Name: "Value", Doc: "Value is the current value, represented by the position of the thumb.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum value supported.\nIt defaults to 1."}, {Name: "Step", Doc: "Step is the amount that the arrow keys increment/decrement the value by.\nIt defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value is always\na multiple of [Slider.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Slider.Step]."}, {Name: "Icon", Doc: "Icon is an optional icon to use for the dragging thumb."}, {Name: "visiblePercent", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "ThumbSize is the size of the thumb as a proportion of the slider thickness,\nwhich is the content size (inside the padding)."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the [SliderSlider] type. It is often thinner than the thumb, achieved\nby values less than 1 (0.5 default)."}, {Name: "InputThreshold", Doc: "InputThreshold is the threshold for the amount of change in scroll\nvalue before emitting an input event."}, {Name: "Precision", Doc: "Precision specifies the precision of decimal places (total, not after the decimal\npoint) to use in representing the number. This helps to truncate small weird\nfloating point values."}, {Name: "ValueColor", Doc: "ValueColor is the background color that is used for styling the selected value\nsection of the slider. It should be set in a Styler, just like the main style\nobject is. If it is set to transparent, no value is rendered, so the value\nsection of the slider just looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "ThumbColor is the background color that is used for styling the thumb (handle)\nof the slider. It should be set in a Styler, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the\nslider just looks like the rest of the slider."}, {Name: "StayInView", Doc: "StayInView is whether to keep the slider (typically a [SliderScrollbar]) within\nthe parent [Scene] bounding box, if the parent is in view. This is the default\nbehavior for [Frame] scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "pos", Doc: "logical position of the slider relative to Size"}, {Name: "lastValue", Doc: "previous Change event emitted value; don't re-emit Change if it is the same"}, {Name: "prevSlide", Doc: "previous sliding value (for computing the Input change)"}, {Name: "slideStartPos", Doc: "underlying drag position of slider; not subject to snapping"}}})
 
 // NewSlider returns a new [Slider] with the given optional parent:
-// Slider is a slideable widget that provides slider functionality for two Types:
-// Slider type provides a movable thumb that represents Value as the center of thumb
-// Pos position, with room reserved at ends for 1/2 of the thumb size.
-// Scrollbar has a VisiblePct factor that specifies the percent of the content
-// currently visible, which determines the size of the thumb, and thus the range of motion
-// remaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining
-// range of motion).
-// The Content size (inside the margin and padding) determines the outer bounds of
-// the rendered area.
-// The [styles.Style.Direction] determines the direction in which the slider slides.
+// Slider is a slideable widget that provides slider functionality with a draggable
+// thumb and a clickable track. The [styles.Style.Direction] determines the direction
+// in which the slider slides.
 func NewSlider(parent ...tree.Node) *Slider { return tree.New[Slider](parent...) }
 
 // SetType sets the [Slider.Type]:
@@ -688,53 +661,53 @@ func (t *Slider) SetEnforceStep(v bool) *Slider { t.EnforceStep = v; return t }
 func (t *Slider) SetPageStep(v float32) *Slider { t.PageStep = v; return t }
 
 // SetIcon sets the [Slider.Icon]:
-// Icon is an optional icon to use for the dragging knob.
+// Icon is an optional icon to use for the dragging thumb.
 func (t *Slider) SetIcon(v icons.Icon) *Slider { t.Icon = v; return t }
 
 // SetThumbSize sets the [Slider.ThumbSize]:
-// Size of the thumb as a proportion of the slider thickness, which is
-// Content size (inside the padding).  This is for actual X,Y dimensions,
-// so must be sensitive to Dim dimension alignment.
+// ThumbSize is the size of the thumb as a proportion of the slider thickness,
+// which is the content size (inside the padding).
 func (t *Slider) SetThumbSize(v math32.Vector2) *Slider { t.ThumbSize = v; return t }
 
 // SetTrackSize sets the [Slider.TrackSize]:
 // TrackSize is the proportion of slider thickness for the visible track
-// for the Slider type.  It is often thinner than the thumb, achieved by
-// values < 1 (.5 default)
+// for the [SliderSlider] type. It is often thinner than the thumb, achieved
+// by values less than 1 (0.5 default).
 func (t *Slider) SetTrackSize(v float32) *Slider { t.TrackSize = v; return t }
 
 // SetInputThreshold sets the [Slider.InputThreshold]:
-// threshold for amount of change in scroll value before emitting an input event
+// InputThreshold is the threshold for the amount of change in scroll
+// value before emitting an input event.
 func (t *Slider) SetInputThreshold(v float32) *Slider { t.InputThreshold = v; return t }
 
-// SetPrec sets the [Slider.Prec]:
-// specifies the precision of decimal places (total, not after the decimal point)
-// to use in representing the number. This helps to truncate small weird floating
-// point values in the nether regions.
-func (t *Slider) SetPrec(v int) *Slider { t.Prec = v; return t }
+// SetPrecision sets the [Slider.Precision]:
+// Precision specifies the precision of decimal places (total, not after the decimal
+// point) to use in representing the number. This helps to truncate small weird
+// floating point values.
+func (t *Slider) SetPrecision(v int) *Slider { t.Precision = v; return t }
 
 // SetValueColor sets the [Slider.ValueColor]:
-// The background color that is used for styling the selected value section of the slider.
-// It should be set in the StyleFuncs, just like the main style object is.
-// If it is set to transparent, no value is rendered, so the value section of the slider
-// just looks like the rest of the slider.
+// ValueColor is the background color that is used for styling the selected value
+// section of the slider. It should be set in a Styler, just like the main style
+// object is. If it is set to transparent, no value is rendered, so the value
+// section of the slider just looks like the rest of the slider.
 func (t *Slider) SetValueColor(v image.Image) *Slider { t.ValueColor = v; return t }
 
 // SetThumbColor sets the [Slider.ThumbColor]:
-// The background color that is used for styling the thumb (handle) of the slider.
-// It should be set in the StyleFuncs, just like the main style object is.
-// If it is set to transparent, no thumb is rendered, so the thumb section of the slider
-// just looks like the rest of the slider.
+// ThumbColor is the background color that is used for styling the thumb (handle)
+// of the slider. It should be set in a Styler, just like the main style object is.
+// If it is set to transparent, no thumb is rendered, so the thumb section of the
+// slider just looks like the rest of the slider.
 func (t *Slider) SetThumbColor(v image.Image) *Slider { t.ThumbColor = v; return t }
 
 // SetStayInView sets the [Slider.StayInView]:
-// If true, keep the slider (typically a Scrollbar) within the parent Scene
-// bounding box, if the parent is in view.  This is the default behavior
-// for Layout scrollbars, and setting this flag replicates that behavior
+// StayInView is whether to keep the slider (typically a [SliderScrollbar]) within
+// the parent [Scene] bounding box, if the parent is in view. This is the default
+// behavior for [Frame] scrollbars, and setting this flag replicates that behavior
 // in other scrollbars.
 func (t *Slider) SetStayInView(v bool) *Slider { t.StayInView = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Spinner", IDName: "spinner", Doc: "Spinner is a [TextField] for editing numerical values. It comes with\nfields, methods, buttons, and shortcuts to enhance numerical value editing.", Embeds: []types.Field{{Name: "TextField"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce."}, {Name: "Min", Doc: "Min, if HasMin is true, is the the minimum value in range."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce."}, {Name: "Max", Doc: "Max, if HasMax is true, is the maximum value in range."}, {Name: "Step", Doc: "Step is the amount that the up and down buttons and arrow keys\nincrement/decrement the value by. It defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Spinner.Step]."}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Spinner", IDName: "spinner", Doc: "Spinner is a [TextField] for editing numerical values. It comes with\nfields, methods, buttons, and shortcuts to enhance numerical value editing.", Embeds: []types.Field{{Name: "TextField"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce.\nIt should be set using [Spinner.SetMin]."}, {Name: "Min", Doc: "Min, if [Spinner.HasMin] is true, is the the minimum value in range.\nIt should be set using [Spinner.SetMin]."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce.\nIt should be set using [Spinner.SetMax]."}, {Name: "Max", Doc: "Max, if [Spinner.HasMax] is true, is the maximum value in range.\nIt should be set using [Spinner.SetMax]."}, {Name: "Step", Doc: "Step is the amount that the up and down buttons and arrow keys\nincrement/decrement the value by. It defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Spinner.Step]."}, {Name: "Precision", Doc: "Precision specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}})
 
 // NewSpinner returns a new [Spinner] with the given optional parent:
 // Spinner is a [TextField] for editing numerical values. It comes with
@@ -757,12 +730,12 @@ func (t *Spinner) SetEnforceStep(v bool) *Spinner { t.EnforceStep = v; return t 
 // It defaults to 0.2, and will be at least as big as [Spinner.Step].
 func (t *Spinner) SetPageStep(v float32) *Spinner { t.PageStep = v; return t }
 
-// SetPrec sets the [Spinner.Prec]:
-// Prec specifies the precision of decimal places
+// SetPrecision sets the [Spinner.Precision]:
+// Precision specifies the precision of decimal places
 // (total, not after the decimal point) to use in
 // representing the number. This helps to truncate
 // small weird floating point values.
-func (t *Spinner) SetPrec(v int) *Spinner { t.Prec = v; return t }
+func (t *Spinner) SetPrecision(v int) *Spinner { t.Precision = v; return t }
 
 // SetFormat sets the [Spinner.Format]:
 // Format is the format string to use for printing the value.
@@ -771,7 +744,7 @@ func (t *Spinner) SetPrec(v int) *Spinner { t.Prec = v; return t }
 // converted to decimal prior to printing.
 func (t *Spinner) SetFormat(v string) *Spinner { t.Format = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Splits", IDName: "splits", Doc: "Splits allocates a certain proportion of its space to each of its children\nalong [styles.Style.Direction]. It adds [Handle] widgets to its parts that\nallow the user to customize the amount of space allocated to each child.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Splits", Doc: "Splits is the proportion (0-1 normalized, enforced) of space\nallocated to each element. 0 indicates that an element should\nbe completely collapsed. By default, each element gets the\nsame amount of space."}, {Name: "SavedSplits", Doc: "SavedSplits is a saved version of the splits that can be restored\nfor dynamic collapse/expand operations."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Splits", IDName: "splits", Doc: "Splits allocates a certain proportion of its space to each of its children\nalong [styles.Style.Direction]. It adds [Handle] widgets to its parts that\nallow the user to customize the amount of space allocated to each child.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Splits", Doc: "Splits is the proportion (0-1 normalized, enforced) of space\nallocated to each element. 0 indicates that an element should\nbe completely collapsed. By default, each element gets the\nsame amount of space."}, {Name: "savedSplits", Doc: "savedSplits is a saved version of the splits that can be restored\nfor dynamic collapse/expand operations."}}})
 
 // NewSplits returns a new [Splits] with the given optional parent:
 // Splits allocates a certain proportion of its space to each of its children
@@ -786,105 +759,62 @@ func NewSplits(parent ...tree.Node) *Splits { return tree.New[Splits](parent...)
 // same amount of space.
 func (t *Splits) SetSplits(v ...float32) *Splits { t.Splits = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stage", IDName: "stage", Doc: "Stage is a container and manager for displaying a Scene\nin different functional ways, defined by StageTypes, in two categories:\nMain types (WindowStage and DialogStage) and Popup types\n(Menu, Tooltip, Snackbar, Chooser).", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Type", Doc: "type of Stage: determines behavior and Styling"}, {Name: "Scene", Doc: "Scene contents of this Stage (what it displays)."}, {Name: "Context", Doc: "widget in another scene that requested this stage to be created\nand provides context (stage)"}, {Name: "Name", Doc: "Name is the name of the Stage, which is generally auto-set\nbased on the Scene Name."}, {Name: "Title", Doc: "Title is the title of the Stage, which is generally auto-set\nbased on the Scene Title. Used for title of WindowStage and\nDialogStage types."}, {Name: "Modal", Doc: "Modal, if true, blocks input to all other stages."}, {Name: "Scrim", Doc: "Scrim, if true, places a darkening scrim over other stages,\nif not a full window."}, {Name: "ClickOff", Doc: "ClickOff, if true, dismisses the Stage if user clicks anywhere\noff the Stage."}, {Name: "IgnoreEvents", Doc: "IgnoreEvents is whether to send no events to the stage and\njust pass them down to lower stages."}, {Name: "NewWindow", Doc: "NewWindow, if true, opens a WindowStage or DialogStage in its own\nseparate operating system window (RenderWindow).  This is true by\ndefault for WindowStage on non-mobile platforms, otherwise false."}, {Name: "FullWindow", Doc: "FullWindow, if NewWindow is false, makes DialogStages and\nWindowStages take up the entire window they are created in."}, {Name: "CloseOnBack", Doc: "CloseOnBack is whether to close the stage when the back button\nis pressed in the app bar. Otherwise, it goes back to the next\nstage but keeps this one open. This is on by default for\nDialogStages and off for WindowStages."}, {Name: "Closeable", Doc: "Closeable, if true, includes a close button for closing dialogs."}, {Name: "Movable", Doc: "Movable, if true, adds a handle titlebar Decor for moving dialogs."}, {Name: "Resizable", Doc: "Resizable, if true, adds a resize handle Decor for resizing dialogs."}, {Name: "Timeout", Doc: "Timeout, if greater than 0, results in a popup stages disappearing\nafter a timeout duration."}, {Name: "Pos", Doc: "Pos is the target position for Scene to be placed within RenderWindow."}, {Name: "Data", Doc: "Data is item represented by this main stage; used for recycling windows"}, {Name: "Main", Doc: "If a popup stage, this is the main stage that owns it (via its Popups).\nIf a main stage, it points to itself."}, {Name: "Popups", Doc: "For main stages, this is the stack of the popups within it\n(created specifically for the main stage).\nFor popups, this is the pointer to the Popups within the\nmain stage managing it."}, {Name: "Mains", Doc: "For all stages, this is the main [Stages] that lives in a [RenderWindow]\nand manages the main stages."}, {Name: "RenderContext", Doc: "rendering context which has info about the RenderWindow onto which we render.\nThis should be used instead of the RenderWindow itself for all relevant\nrendering information.  This is only available once a Stage is Run,\nand must always be checked for nil."}, {Name: "Sprites", Doc: "sprites are named images that are rendered last overlaying everything else."}, {Name: "SpriteDragging", Doc: "name of sprite that is being dragged -- sprite event function is responsible for setting this."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stage", IDName: "stage", Doc: "Stage is a container and manager for displaying a [Scene]\nin different functional ways, defined by [StageTypes].", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of [Stage], which determines behavior and styling."}, {Name: "Scene", Doc: "Scene contents of this [Stage] (what it displays)."}, {Name: "Context", Doc: "Context is a widget in another scene that requested this stage to be created\nand provides context."}, {Name: "Name", Doc: "Name is the name of the Stage, which is generally auto-set\nbased on the [Scene.Name]."}, {Name: "Title", Doc: "Title is the title of the Stage, which is generally auto-set\nbased on the [Body.Title]. It used for the title of [WindowStage]\nand [DialogStage] types."}, {Name: "Modal", Doc: "Modal, if true, blocks input to all other stages."}, {Name: "Scrim", Doc: "Scrim, if true, places a darkening scrim over other stages."}, {Name: "ClickOff", Doc: "ClickOff, if true, dismisses the [Stage] if the user clicks anywhere\noff of the [Stage]."}, {Name: "ignoreEvents", Doc: "ignoreEvents is whether to send no events to the stage and\njust pass them down to lower stages."}, {Name: "NewWindow", Doc: "NewWindow, if true, opens a [WindowStage] or [DialogStage] in its own\nseparate operating system window ([renderWindow]). This is true by\ndefault for [WindowStage] on non-mobile platforms, otherwise false."}, {Name: "FullWindow", Doc: "FullWindow, if [Stage.NewWindow] is false, makes [DialogStage]s and\n[WindowStage]s take up the entire window they are created in."}, {Name: "CloseOnBack", Doc: "CloseOnBack is whether to close the stage when the back button\nis pressed in the app bar. Otherwise, it goes back to the next\nstage but keeps this one open. This is on by default for\n[DialogStage]s and off for [WindowStage]s."}, {Name: "Timeout", Doc: "Timeout, if greater than 0, results in a popup stages disappearing\nafter this timeout duration."}, {Name: "Pos", Doc: "Pos is the target position for the [Stage] to be placed within\nthe surrounding window."}, {Name: "Main", Doc: "If a popup stage, this is the main stage that owns it (via its [Stage.popups]).\nIf a main stage, it points to itself."}, {Name: "popups", Doc: "For main stages, this is the stack of the popups within it\n(created specifically for the main stage).\nFor popups, this is the pointer to the popups within the\nmain stage managing it."}, {Name: "Mains", Doc: "For all stages, this is the main [Stages] that lives in a [renderWindow]\nand manages the main stages."}, {Name: "renderContext", Doc: "rendering context which has info about the RenderWindow onto which we render.\nThis should be used instead of the RenderWindow itself for all relevant\nrendering information. This is only available once a Stage is Run,\nand must always be checked for nil."}, {Name: "Sprites", Doc: "Sprites are named images that are rendered last overlaying everything else."}}})
 
 // SetContext sets the [Stage.Context]:
-// widget in another scene that requested this stage to be created
-// and provides context (stage)
+// Context is a widget in another scene that requested this stage to be created
+// and provides context.
 func (t *Stage) SetContext(v Widget) *Stage { t.Context = v; return t }
 
 // SetName sets the [Stage.Name]:
 // Name is the name of the Stage, which is generally auto-set
-// based on the Scene Name.
+// based on the [Scene.Name].
 func (t *Stage) SetName(v string) *Stage { t.Name = v; return t }
 
 // SetTitle sets the [Stage.Title]:
 // Title is the title of the Stage, which is generally auto-set
-// based on the Scene Title. Used for title of WindowStage and
-// DialogStage types.
+// based on the [Body.Title]. It used for the title of [WindowStage]
+// and [DialogStage] types.
 func (t *Stage) SetTitle(v string) *Stage { t.Title = v; return t }
 
 // SetScrim sets the [Stage.Scrim]:
-// Scrim, if true, places a darkening scrim over other stages,
-// if not a full window.
+// Scrim, if true, places a darkening scrim over other stages.
 func (t *Stage) SetScrim(v bool) *Stage { t.Scrim = v; return t }
 
 // SetClickOff sets the [Stage.ClickOff]:
-// ClickOff, if true, dismisses the Stage if user clicks anywhere
-// off the Stage.
+// ClickOff, if true, dismisses the [Stage] if the user clicks anywhere
+// off of the [Stage].
 func (t *Stage) SetClickOff(v bool) *Stage { t.ClickOff = v; return t }
 
-// SetIgnoreEvents sets the [Stage.IgnoreEvents]:
-// IgnoreEvents is whether to send no events to the stage and
-// just pass them down to lower stages.
-func (t *Stage) SetIgnoreEvents(v bool) *Stage { t.IgnoreEvents = v; return t }
-
 // SetNewWindow sets the [Stage.NewWindow]:
-// NewWindow, if true, opens a WindowStage or DialogStage in its own
-// separate operating system window (RenderWindow).  This is true by
-// default for WindowStage on non-mobile platforms, otherwise false.
+// NewWindow, if true, opens a [WindowStage] or [DialogStage] in its own
+// separate operating system window ([renderWindow]). This is true by
+// default for [WindowStage] on non-mobile platforms, otherwise false.
 func (t *Stage) SetNewWindow(v bool) *Stage { t.NewWindow = v; return t }
 
 // SetFullWindow sets the [Stage.FullWindow]:
-// FullWindow, if NewWindow is false, makes DialogStages and
-// WindowStages take up the entire window they are created in.
+// FullWindow, if [Stage.NewWindow] is false, makes [DialogStage]s and
+// [WindowStage]s take up the entire window they are created in.
 func (t *Stage) SetFullWindow(v bool) *Stage { t.FullWindow = v; return t }
 
 // SetCloseOnBack sets the [Stage.CloseOnBack]:
 // CloseOnBack is whether to close the stage when the back button
 // is pressed in the app bar. Otherwise, it goes back to the next
 // stage but keeps this one open. This is on by default for
-// DialogStages and off for WindowStages.
+// [DialogStage]s and off for [WindowStage]s.
 func (t *Stage) SetCloseOnBack(v bool) *Stage { t.CloseOnBack = v; return t }
-
-// SetCloseable sets the [Stage.Closeable]:
-// Closeable, if true, includes a close button for closing dialogs.
-func (t *Stage) SetCloseable(v bool) *Stage { t.Closeable = v; return t }
-
-// SetMovable sets the [Stage.Movable]:
-// Movable, if true, adds a handle titlebar Decor for moving dialogs.
-func (t *Stage) SetMovable(v bool) *Stage { t.Movable = v; return t }
-
-// SetResizable sets the [Stage.Resizable]:
-// Resizable, if true, adds a resize handle Decor for resizing dialogs.
-func (t *Stage) SetResizable(v bool) *Stage { t.Resizable = v; return t }
 
 // SetTimeout sets the [Stage.Timeout]:
 // Timeout, if greater than 0, results in a popup stages disappearing
-// after a timeout duration.
+// after this timeout duration.
 func (t *Stage) SetTimeout(v time.Duration) *Stage { t.Timeout = v; return t }
 
 // SetPos sets the [Stage.Pos]:
-// Pos is the target position for Scene to be placed within RenderWindow.
+// Pos is the target position for the [Stage] to be placed within
+// the surrounding window.
 func (t *Stage) SetPos(v image.Point) *Stage { t.Pos = v; return t }
 
-// SetData sets the [Stage.Data]:
-// Data is item represented by this main stage; used for recycling windows
-func (t *Stage) SetData(v any) *Stage { t.Data = v; return t }
-
-// SetMain sets the [Stage.Main]:
-// If a popup stage, this is the main stage that owns it (via its Popups).
-// If a main stage, it points to itself.
-func (t *Stage) SetMain(v *Stage) *Stage { t.Main = v; return t }
-
-// SetRenderContext sets the [Stage.RenderContext]:
-// rendering context which has info about the RenderWindow onto which we render.
-// This should be used instead of the RenderWindow itself for all relevant
-// rendering information.  This is only available once a Stage is Run,
-// and must always be checked for nil.
-func (t *Stage) SetRenderContext(v *RenderContext) *Stage { t.RenderContext = v; return t }
-
-// SetSprites sets the [Stage.Sprites]:
-// sprites are named images that are rendered last overlaying everything else.
-func (t *Stage) SetSprites(v Sprites) *Stage { t.Sprites = v; return t }
-
-// SetSpriteDragging sets the [Stage.SpriteDragging]:
-// name of sprite that is being dragged -- sprite event function is responsible for setting this.
-func (t *Stage) SetSpriteDragging(v string) *Stage { t.SpriteDragging = v; return t }
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stages", IDName: "stages", Doc: "Stages manages a stack of [Stages].", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Stack", Doc: "stack of stages managed by this stage manager."}, {Name: "Modified", Doc: "Modified is set to true whenever the stack has been modified.\nThis is cleared by the RenderWindow each render cycle."}, {Name: "RenderContext", Doc: "rendering context provides key rendering information and locking\nfor the RenderWindow in which the stages are running."}, {Name: "RenderWindow", Doc: "render window to which we are rendering.\nrely on the RenderContext wherever possible."}, {Name: "History", Doc: "growing stack of viewing history of all stages."}, {Name: "Main", Doc: "Main is the main stage that owns this [Stages].\nThis is only set for popup stages."}, {Name: "Mu", Doc: "mutex protecting reading / updating of the Stack.\nDestructive stack updating gets a Write lock, else Read."}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.SVG", IDName: "svg", Doc: "SVG is a Widget that renders an [svg.SVG] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the display.\nBy default, it is [states.ReadOnly].", Methods: []types.Method{{Name: "Open", Doc: "Open opens an XML-formatted SVG file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SaveSVG", Doc: "SaveSVG saves the current SVG to an XML-encoded standard SVG file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SavePNG", Doc: "SavePNG saves the current rendered SVG image to an PNG image file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SVG", Doc: "SVG is the SVG drawing to display in this widget"}, {Name: "prevSize", Doc: "prevSize is the cached allocated size for the last rendered image."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.SVG", IDName: "svg", Doc: "SVG is a Widget that renders an [svg.SVG] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the display.\nBy default, it is [states.ReadOnly].", Methods: []types.Method{{Name: "Open", Doc: "Open opens an XML-formatted SVG file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SaveSVG", Doc: "SaveSVG saves the current SVG to an XML-encoded standard SVG file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SavePNG", Doc: "SavePNG saves the current rendered SVG image to an PNG image file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SVG", Doc: "SVG is the SVG drawing to display."}, {Name: "prevSize", Doc: "prevSize is the cached allocated size for the last rendered image."}}})
 
 // NewSVG returns a new [SVG] with the given optional parent:
 // SVG is a Widget that renders an [svg.SVG] object.
@@ -892,15 +822,16 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.SVG", IDName: 
 // By default, it is [states.ReadOnly].
 func NewSVG(parent ...tree.Node) *SVG { return tree.New[SVG](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switch", IDName: "switch", Doc: "Switch is a widget that can toggle between an on and off state.\nIt can be displayed as a switch, checkbox, or radio button.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of switch."}, {Name: "Text", Doc: "Text is the text for the switch."}, {Name: "IconOn", Doc: "IconOn is the icon to use for the on, checked state of the switch."}, {Name: "IconOff", Doc: "Iconoff is the icon to use for the off, unchecked state of the switch."}, {Name: "IconIndeterminate", Doc: "IconIndeterminate is the icon to use for the indeterminate (unknown) state."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switch", IDName: "switch", Doc: "Switch is a widget that can toggle between an on and off state.\nIt can be displayed as a switch, chip, checkbox, radio button,\nor segmented button.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of switch."}, {Name: "Text", Doc: "Text is the optional text of the switch."}, {Name: "IconOn", Doc: "IconOn is the icon to use for the on, checked state of the switch."}, {Name: "IconOff", Doc: "Iconoff is the icon to use for the off, unchecked state of the switch."}, {Name: "IconIndeterminate", Doc: "IconIndeterminate is the icon to use for the indeterminate (unknown) state."}}})
 
 // NewSwitch returns a new [Switch] with the given optional parent:
 // Switch is a widget that can toggle between an on and off state.
-// It can be displayed as a switch, checkbox, or radio button.
+// It can be displayed as a switch, chip, checkbox, radio button,
+// or segmented button.
 func NewSwitch(parent ...tree.Node) *Switch { return tree.New[Switch](parent...) }
 
 // SetText sets the [Switch.Text]:
-// Text is the text for the switch.
+// Text is the optional text of the switch.
 func (t *Switch) SetText(v string) *Switch { t.Text = v; return t }
 
 // SetIconOn sets the [Switch.IconOn]:
@@ -915,7 +846,7 @@ func (t *Switch) SetIconOff(v icons.Icon) *Switch { t.IconOff = v; return t }
 // IconIndeterminate is the icon to use for the indeterminate (unknown) state.
 func (t *Switch) SetIconIndeterminate(v icons.Icon) *Switch { t.IconIndeterminate = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switches", IDName: "switches", Doc: "Switches is a widget for containing a set of [Switch]es.\nIt can optionally enforce mutual exclusivity (ie: radio buttons)\nthrough the [Switches.Mutex] field. It supports binding to\n[enums.Enum] and [enums.BitFlag] values with appropriate properties\nautomatically set.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of switches that will be made."}, {Name: "Items", Doc: "Items are the items displayed to the user."}, {Name: "Mutex", Doc: "Mutex is whether to make the items mutually exclusive\n(checking one turns off all the others)."}, {Name: "AllowNone", Doc: "AllowNone is whether to allow the user to deselect all items.\nIt is on by default."}, {Name: "SelectedIndexes", Doc: "SelectedIndexes are the indexes in [Switches.Items] of the currently\nselected switch items."}, {Name: "bitFlagValue", Doc: "bitFlagValue is the associated bit flag value if non-nil (for [Value])."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switches", IDName: "switches", Doc: "Switches is a widget for containing a set of [Switch]es.\nIt can optionally enforce mutual exclusivity (ie: radio buttons)\nthrough the [Switches.Mutex] field. It supports binding to\n[enums.Enum] and [enums.BitFlag] values with appropriate properties\nautomatically set.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of switches that will be made."}, {Name: "Items", Doc: "Items are the items displayed to the user."}, {Name: "Mutex", Doc: "Mutex is whether to make the items mutually exclusive\n(checking one turns off all the others)."}, {Name: "AllowNone", Doc: "AllowNone is whether to allow the user to deselect all items.\nIt is on by default."}, {Name: "selectedIndexes", Doc: "selectedIndexes are the indexes in [Switches.Items] of the currently\nselected switch items."}, {Name: "bitFlagValue", Doc: "bitFlagValue is the associated bit flag value if non-nil (for [Value])."}}})
 
 // NewSwitches returns a new [Switches] with the given optional parent:
 // Switches is a widget for containing a set of [Switch]es.
@@ -943,7 +874,7 @@ func (t *Switches) SetMutex(v bool) *Switches { t.Mutex = v; return t }
 // It is on by default.
 func (t *Switches) SetAllowNone(v bool) *Switches { t.AllowNone = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Table", IDName: "table", Doc: "Table represents a slice of structs as a table, where the fields are\nthe columns and the elements are the rows. It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nUse [ListBase.BindSelect] to make the table designed for item selection.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}, {Name: "SelectedField", Doc: "SelectedField is the current selection field; initially select value in this field."}, {Name: "SortIndex", Doc: "SortIndex is the current sort index."}, {Name: "SortDescending", Doc: "SortDescending is whether the current sort order is descending."}, {Name: "visibleFields", Doc: "visibleFields are the visible fields."}, {Name: "numVisibleFields", Doc: "numVisibleFields is the number of visible fields."}, {Name: "headerWidths", Doc: "headerWidths has the number of characters in each header, per visibleFields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Table", IDName: "table", Doc: "Table represents a slice of structs as a table, where the fields are\nthe columns and the elements are the rows. It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nUse [ListBase.BindSelect] to make the table designed for item selection.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "TableStyler", Doc: "TableStyler is an optional styling function for table items."}, {Name: "SelectedField", Doc: "SelectedField is the current selection field; initially select value in this field."}, {Name: "sortIndex", Doc: "sortIndex is the current sort index."}, {Name: "sortDescending", Doc: "sortDescending is whether the current sort order is descending."}, {Name: "visibleFields", Doc: "visibleFields are the visible fields."}, {Name: "numVisibleFields", Doc: "numVisibleFields is the number of visible fields."}, {Name: "headerWidths", Doc: "headerWidths has the number of characters in each header, per visibleFields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}, {Name: "header"}}})
 
 // NewTable returns a new [Table] with the given optional parent:
 // Table represents a slice of structs as a table, where the fields are
@@ -952,23 +883,15 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Table", IDName
 // Use [ListBase.BindSelect] to make the table designed for item selection.
 func NewTable(parent ...tree.Node) *Table { return tree.New[Table](parent...) }
 
-// SetStyleFunc sets the [Table.StyleFunc]:
-// StyleFunc is an optional styling function.
-func (t *Table) SetStyleFunc(v TableStyleFunc) *Table { t.StyleFunc = v; return t }
+// SetTableStyler sets the [Table.TableStyler]:
+// TableStyler is an optional styling function for table items.
+func (t *Table) SetTableStyler(v TableStyler) *Table { t.TableStyler = v; return t }
 
 // SetSelectedField sets the [Table.SelectedField]:
 // SelectedField is the current selection field; initially select value in this field.
 func (t *Table) SetSelectedField(v string) *Table { t.SelectedField = v; return t }
 
-// SetSortIndex sets the [Table.SortIndex]:
-// SortIndex is the current sort index.
-func (t *Table) SetSortIndex(v int) *Table { t.SortIndex = v; return t }
-
-// SetSortDescending sets the [Table.SortDescending]:
-// SortDescending is whether the current sort order is descending.
-func (t *Table) SetSortDescending(v bool) *Table { t.SortDescending = v; return t }
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", IDName: "tabs", Doc: "Tabs divide widgets into logical groups and give users the ability\nto freely navigate between them using tab buttons.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab text.\nIt elides text that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", IDName: "tabs", Doc: "Tabs divide widgets into logical groups and give users the ability\nto freely navigate between them using tab buttons.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab text.\nIt elides text that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "mu", Doc: "mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}, {Name: "tabs"}, {Name: "frame"}}})
 
 // NewTabs returns a new [Tabs] with the given optional parent:
 // Tabs divide widgets into logical groups and give users the ability
@@ -998,7 +921,7 @@ func (t *Tabs) SetMaxChars(v int) *Tabs { t.MaxChars = v; return t }
 // tabs will not render a close button and can not be closed.
 func (t *Tabs) SetCloseIcon(v icons.Icon) *Tabs { t.CloseIcon = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tab", IDName: "tab", Doc: "Tab is a tab button that contains any, all, or none of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly."}, {Name: "Text", Doc: "Text is the text for the tab.\nIf it is nil, no text is shown.\nText is never shown for [NavigationRail] tabs."}, {Name: "Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in tab text.\nIt elides text that is longer than that."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tab", IDName: "tab", Doc: "Tab is a tab button that contains one or more of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly."}, {Name: "Text", Doc: "Text is the text for the tab. If it is blank, no text is shown.\nText is never shown for [NavigationRail] tabs."}, {Name: "Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in tab text.\nIt elides text that is longer than that."}}})
 
 // SetType sets the [Tab.Type]:
 // Type is the styling type of the tab. This property
@@ -1006,8 +929,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tab", IDName: 
 func (t *Tab) SetType(v TabTypes) *Tab { t.Type = v; return t }
 
 // SetText sets the [Tab.Text]:
-// Text is the text for the tab.
-// If it is nil, no text is shown.
+// Text is the text for the tab. If it is blank, no text is shown.
 // Text is never shown for [NavigationRail] tabs.
 func (t *Tab) SetText(v string) *Tab { t.Text = v; return t }
 
@@ -1029,7 +951,7 @@ func (t *Tab) SetCloseIcon(v icons.Icon) *Tab { t.CloseIcon = v; return t }
 // It elides text that is longer than that.
 func (t *Tab) SetMaxChars(v int) *Tab { t.MaxChars = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Text", IDName: "text", Doc: "Text is a widget for rendering text. It supports full HTML styling,\nincluding links. By default, text wraps and collapses whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "Text is the text to display."}, {Name: "Type", Doc: "Type is the styling type of text to use."}, {Name: "paintText", Doc: "paintText is the [paint.Text] for the text."}, {Name: "normalCursor", Doc: "normalCursor is the cached cursor to display when there\nis no link being hovered."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Text", IDName: "text", Doc: "Text is a widget for rendering text. It supports full HTML styling,\nincluding links. By default, text wraps and collapses whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "Text is the text to display."}, {Name: "Type", Doc: "Type is the styling type of text to use.\nIt defaults to [TextBodyLarge]."}, {Name: "paintText", Doc: "paintText is the [paint.Text] for the text."}, {Name: "normalCursor", Doc: "normalCursor is the cached cursor to display when there\nis no link being hovered."}}})
 
 // NewText returns a new [Text] with the given optional parent:
 // Text is a widget for rendering text. It supports full HTML styling,
@@ -1043,18 +965,19 @@ func (t *Text) SetText(v string) *Text { t.Text = v; return t }
 
 // SetType sets the [Text.Type]:
 // Type is the styling type of text to use.
+// It defaults to [TextBodyLarge].
 func (t *Text) SetType(v TextTypes) *Text { t.Type = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text.\nWith the default WhiteSpaceNormal style setting,\ntext will wrap onto multiple lines as needed.\nSet to WhiteSpaceNowrap (e.g., styles.Style.SetTextWrap(false)) to\nforce everything to be on a single line.\nWith multi-line wrapped text, the text is still treated as a single\ncontiguous line of wrapped text.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "Cut", Doc: "Cut cuts any selected text and adds it to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies any selected text to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Paste", Doc: "Paste inserts text from the clipboard at current cursor position; if\ncursor is within a current selection, that selection is replaced.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the text field."}, {Name: "Placeholder", Doc: "Placeholder is the text that is displayed\nwhen the text field is empty."}, {Name: "Validator", Doc: "Validator is a function used to validate the input\nof the text field. If it returns a non-nil error,\nthen an error color, icon, and tooltip will be displayed."}, {Name: "LeadingIcon", Doc: "LeadingIcon, if specified, indicates to add a button\nat the start of the text field with this icon."}, {Name: "LeadingIconOnClick", Doc: "LeadingIconOnClick, if specified, is the function to call when\nthe LeadingIcon is clicked. If this is nil, the leading icon\nwill not be interactive."}, {Name: "TrailingIcon", Doc: "TrailingIcon, if specified, indicates to add a button\nat the end of the text field with this icon."}, {Name: "TrailingIconOnClick", Doc: "TrailingIconOnClick, if specified, is the function to call when\nthe TrailingIcon is clicked. If this is nil, the trailing icon\nwill not be interactive."}, {Name: "NoEcho", Doc: "NoEcho is whether replace displayed characters with bullets to conceal text\n(for example, for a password input)."}, {Name: "CursorWidth", Doc: "CursorWidth is the width of the text field cursor.\nIt should be set in Style like all other style properties.\nBy default, it is 1dp."}, {Name: "CursorColor", Doc: "CursorColor is the color used for the text field cursor (caret).\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Primary.Base]."}, {Name: "PlaceholderColor", Doc: "PlaceholderColor is the color used for the Placeholder text.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.OnSurfaceVariant]."}, {Name: "SelectColor", Doc: "SelectColor is the color used for the text selection background color.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Select.Container]"}, {Name: "Complete", Doc: "Complete contains functions and data for text field completion.\nIt must be set using [TextField.SetCompleter]."}, {Name: "Txt", Doc: "Txt is the last saved value of the text string being edited."}, {Name: "Edited", Doc: "Edited is whether the text has been edited relative to the original."}, {Name: "EditTxt", Doc: "EditTxt is the live text string being edited, with the latest modifications."}, {Name: "Error", Doc: "Error is the current validation error of the text field."}, {Name: "EffPos", Doc: "EffPos is the effective position with any leading icon space added."}, {Name: "EffSize", Doc: "EffSize is the effective size, subtracting any leading and trailing icon space."}, {Name: "StartPos", Doc: "StartPos is the starting display position in the string."}, {Name: "EndPos", Doc: "EndPos is the ending display position in the string."}, {Name: "CursorPos", Doc: "CursorPos is the current cursor position."}, {Name: "CursorLine", Doc: "CursorLine is the current cursor line position."}, {Name: "CharWidth", Doc: "CharWidth is the approximate number of chars that can be\ndisplayed at any time, which is computed from the font size."}, {Name: "SelectStart", Doc: "SelectStart is the starting position of selection in the string."}, {Name: "SelectEnd", Doc: "SelectEnd is the ending position of selection in the string."}, {Name: "SelectInit", Doc: "SelectInit is the initial selection position (where it started)."}, {Name: "SelectMode", Doc: "SelectMode is whether to select text as the cursor moves."}, {Name: "RenderAll", Doc: "RenderAll is the render version of entire text, for sizing."}, {Name: "RenderVis", Doc: "RenderVis is the render version of just the visible text."}, {Name: "NLines", Doc: "number of lines from last render update, for word-wrap version"}, {Name: "FontHeight", Doc: "FontHeight is the font height cached during styling."}, {Name: "BlinkOn", Doc: "BlinkOn oscillates between on and off for blinking."}, {Name: "CursorMu", Doc: "CursorMu is the mutex for updating the cursor between blinker and field."}, {Name: "Undos", Doc: "Undos is the undo manager for the text field."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text.\n\nWith the default [styles.WhiteSpaceNormal] setting,\ntext will wrap onto multiple lines as needed. You can\ncall [styles.Style.SetTextWrap](false) to force everything\nto be rendered on a single line. With multi-line wrapped text,\nthe text is still treated as a single contiguous line of wrapped text.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "cut", Doc: "cut cuts any selected text and adds it to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "copy", Doc: "copy copies any selected text to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "paste", Doc: "paste inserts text from the clipboard at current cursor position; if\ncursor is within a current selection, that selection is replaced.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the text field."}, {Name: "Placeholder", Doc: "Placeholder is the text that is displayed\nwhen the text field is empty."}, {Name: "Validator", Doc: "Validator is a function used to validate the input\nof the text field. If it returns a non-nil error,\nthen an error color, icon, and tooltip will be displayed."}, {Name: "LeadingIcon", Doc: "LeadingIcon, if specified, indicates to add a button\nat the start of the text field with this icon.\nSee [TextField.SetLeadingIcon]."}, {Name: "LeadingIconOnClick", Doc: "LeadingIconOnClick, if specified, is the function to call when\nthe LeadingIcon is clicked. If this is nil, the leading icon\nwill not be interactive. See [TextField.SetLeadingIcon]."}, {Name: "TrailingIcon", Doc: "TrailingIcon, if specified, indicates to add a button\nat the end of the text field with this icon.\nSee [TextField.SetTrailingIcon]."}, {Name: "TrailingIconOnClick", Doc: "TrailingIconOnClick, if specified, is the function to call when\nthe TrailingIcon is clicked. If this is nil, the trailing icon\nwill not be interactive. See [TextField.SetTrailingIcon]."}, {Name: "NoEcho", Doc: "NoEcho is whether replace displayed characters with bullets\nto conceal text (for example, for a password input). Also\nsee [TextField.SetTypePassword]."}, {Name: "CursorWidth", Doc: "CursorWidth is the width of the text field cursor.\nIt should be set in a Styler like all other style properties.\nBy default, it is 1dp."}, {Name: "CursorColor", Doc: "CursorColor is the color used for the text field cursor (caret).\nIt should be set in a Styler like all other style properties.\nBy default, it is [colors.Scheme.Primary.Base]."}, {Name: "PlaceholderColor", Doc: "PlaceholderColor is the color used for the [TextField.Placeholder] text.\nIt should be set in a Styler like all other style properties.\nBy default, it is [colors.Scheme.OnSurfaceVariant]."}, {Name: "SelectColor", Doc: "SelectColor is the color used for the text selection background color.\nIt should be set in a Styler like all other style properties.\nBy default, it is [colors.Scheme.Select.Container]."}, {Name: "complete", Doc: "complete contains functions and data for text field completion.\nIt must be set using [TextField.SetCompleter]."}, {Name: "text", Doc: "text is the last saved value of the text string being edited."}, {Name: "edited", Doc: "edited is whether the text has been edited relative to the original."}, {Name: "editText", Doc: "editText is the live text string being edited, with the latest modifications."}, {Name: "error", Doc: "error is the current validation error of the text field."}, {Name: "effPos", Doc: "effPos is the effective position with any leading icon space added."}, {Name: "effSize", Doc: "effSize is the effective size, subtracting any leading and trailing icon space."}, {Name: "startPos", Doc: "startPos is the starting display position in the string."}, {Name: "endPos", Doc: "endPos is the ending display position in the string."}, {Name: "cursorPos", Doc: "cursorPos is the current cursor position."}, {Name: "cursorLine", Doc: "cursorLine is the current cursor line position."}, {Name: "charWidth", Doc: "charWidth is the approximate number of chars that can be\ndisplayed at any time, which is computed from the font size."}, {Name: "selectStart", Doc: "selectStart is the starting position of selection in the string."}, {Name: "selectEnd", Doc: "selectEnd is the ending position of selection in the string."}, {Name: "selectInit", Doc: "selectInit is the initial selection position (where it started)."}, {Name: "selectMode", Doc: "selectMode is whether to select text as the cursor moves."}, {Name: "renderAll", Doc: "renderAll is the render version of entire text, for sizing."}, {Name: "renderVisible", Doc: "renderVisible is the render version of just the visible text."}, {Name: "numLines", Doc: "number of lines from last render update, for word-wrap version"}, {Name: "fontHeight", Doc: "fontHeight is the font height cached during styling."}, {Name: "blinkOn", Doc: "blinkOn oscillates between on and off for blinking."}, {Name: "cursorMu", Doc: "cursorMu is the mutex for updating the cursor between blinker and field."}, {Name: "undos", Doc: "undos is the undo manager for the text field."}, {Name: "leadingIconButton"}, {Name: "trailingIconButton"}}})
 
 // NewTextField returns a new [TextField] with the given optional parent:
 // TextField is a widget for editing a line of text.
-// With the default WhiteSpaceNormal style setting,
-// text will wrap onto multiple lines as needed.
-// Set to WhiteSpaceNowrap (e.g., styles.Style.SetTextWrap(false)) to
-// force everything to be on a single line.
-// With multi-line wrapped text, the text is still treated as a single
-// contiguous line of wrapped text.
+//
+// With the default [styles.WhiteSpaceNormal] setting,
+// text will wrap onto multiple lines as needed. You can
+// call [styles.Style.SetTextWrap](false) to force everything
+// to be rendered on a single line. With multi-line wrapped text,
+// the text is still treated as a single contiguous line of wrapped text.
 func NewTextField(parent ...tree.Node) *TextField { return tree.New[TextField](parent...) }
 
 // TextFieldEmbedder is an interface that all types that embed TextField satisfy
@@ -1092,7 +1015,7 @@ func (t *TextField) SetValidator(v func() error) *TextField { t.Validator = v; r
 // SetLeadingIconOnClick sets the [TextField.LeadingIconOnClick]:
 // LeadingIconOnClick, if specified, is the function to call when
 // the LeadingIcon is clicked. If this is nil, the leading icon
-// will not be interactive.
+// will not be interactive. See [TextField.SetLeadingIcon].
 func (t *TextField) SetLeadingIconOnClick(v func(e events.Event)) *TextField {
 	t.LeadingIconOnClick = v
 	return t
@@ -1101,53 +1024,50 @@ func (t *TextField) SetLeadingIconOnClick(v func(e events.Event)) *TextField {
 // SetTrailingIconOnClick sets the [TextField.TrailingIconOnClick]:
 // TrailingIconOnClick, if specified, is the function to call when
 // the TrailingIcon is clicked. If this is nil, the trailing icon
-// will not be interactive.
+// will not be interactive. See [TextField.SetTrailingIcon].
 func (t *TextField) SetTrailingIconOnClick(v func(e events.Event)) *TextField {
 	t.TrailingIconOnClick = v
 	return t
 }
 
 // SetNoEcho sets the [TextField.NoEcho]:
-// NoEcho is whether replace displayed characters with bullets to conceal text
-// (for example, for a password input).
+// NoEcho is whether replace displayed characters with bullets
+// to conceal text (for example, for a password input). Also
+// see [TextField.SetTypePassword].
 func (t *TextField) SetNoEcho(v bool) *TextField { t.NoEcho = v; return t }
 
 // SetCursorWidth sets the [TextField.CursorWidth]:
 // CursorWidth is the width of the text field cursor.
-// It should be set in Style like all other style properties.
+// It should be set in a Styler like all other style properties.
 // By default, it is 1dp.
 func (t *TextField) SetCursorWidth(v units.Value) *TextField { t.CursorWidth = v; return t }
 
 // SetCursorColor sets the [TextField.CursorColor]:
 // CursorColor is the color used for the text field cursor (caret).
-// It should be set in Style like all other style properties.
+// It should be set in a Styler like all other style properties.
 // By default, it is [colors.Scheme.Primary.Base].
 func (t *TextField) SetCursorColor(v image.Image) *TextField { t.CursorColor = v; return t }
 
 // SetPlaceholderColor sets the [TextField.PlaceholderColor]:
-// PlaceholderColor is the color used for the Placeholder text.
-// It should be set in Style like all other style properties.
+// PlaceholderColor is the color used for the [TextField.Placeholder] text.
+// It should be set in a Styler like all other style properties.
 // By default, it is [colors.Scheme.OnSurfaceVariant].
 func (t *TextField) SetPlaceholderColor(v image.Image) *TextField { t.PlaceholderColor = v; return t }
 
 // SetSelectColor sets the [TextField.SelectColor]:
 // SelectColor is the color used for the text selection background color.
-// It should be set in Style like all other style properties.
-// By default, it is [colors.Scheme.Select.Container]
+// It should be set in a Styler like all other style properties.
+// By default, it is [colors.Scheme.Select.Container].
 func (t *TextField) SetSelectColor(v image.Image) *TextField { t.SelectColor = v; return t }
 
-// SetSelectMode sets the [TextField.SelectMode]:
-// SelectMode is whether to select text as the cursor moves.
-func (t *TextField) SetSelectMode(v bool) *TextField { t.SelectMode = v; return t }
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TimePicker", IDName: "time-picker", Doc: "TimePicker is a widget for picking a time.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TimePicker", IDName: "time-picker", Doc: "TimePicker is a widget for picking a time.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing."}, {Name: "hour", Doc: "the raw input hour"}, {Name: "pm", Doc: "whether we are in pm mode (so we have to add 12h to everything)"}}})
 
 // NewTimePicker returns a new [TimePicker] with the given optional parent:
 // TimePicker is a widget for picking a time.
 func NewTimePicker(parent ...tree.Node) *TimePicker { return tree.New[TimePicker](parent...) }
 
 // SetTime sets the [TimePicker.Time]:
-// Time is the time that we are viewing
+// Time is the time that we are viewing.
 func (t *TimePicker) SetTime(v time.Time) *TimePicker { t.Time = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.DatePicker", IDName: "date-picker", Doc: "DatePicker is a widget for picking a date.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing."}}})
@@ -1183,18 +1103,18 @@ func (t *DurationInput) SetDuration(v time.Duration) *DurationInput { t.Duration
 // Unit is the unit of time.
 func (t *DurationInput) SetUnit(v string) *DurationInput { t.Unit = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Toolbar", IDName: "toolbar", Doc: "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nUse [Body.AddAppBar] to add to the default toolbar at the top of an app.", Methods: []types.Method{{Name: "standardOverflowMenu", Doc: "standardOverflowMenu adds standard overflow menu items for an app bar.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"m"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "OverflowMenus", Doc: "OverflowMenus are functions for configuring the overflow menu of the\ntoolbar. You can use [Toolbar.AddOverflowMenu] to add them.\nThese are processed in reverse order (last in, first called)\nso that the default items are added last."}, {Name: "allItemsPlan", Doc: "allItemsPlan has all the items, during layout sizing"}, {Name: "overflowItems", Doc: "overflowItems are items moved from the main toolbar that will be\nshown in the overflow menu."}, {Name: "overflowButton", Doc: "overflowButton is the widget to pull up the overflow menu."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Toolbar", IDName: "toolbar", Doc: "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nUse [Body.AddAppBar] to add to the default toolbar at the top of the app.", Methods: []types.Method{{Name: "standardOverflowMenu", Doc: "standardOverflowMenu adds standard overflow menu items for an app bar.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"m"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "OverflowMenus", Doc: "OverflowMenus are functions for configuring the overflow menu of the\ntoolbar. You can use [Toolbar.AddOverflowMenu] to add them.\nThese are processed in reverse order (last in, first called)\nso that the default items are added last."}, {Name: "allItemsPlan", Doc: "allItemsPlan has all the items, during layout sizing"}, {Name: "overflowItems", Doc: "overflowItems are items moved from the main toolbar that will be\nshown in the overflow menu."}, {Name: "overflowButton", Doc: "overflowButton is the widget to pull up the overflow menu."}}})
 
 // NewToolbar returns a new [Toolbar] with the given optional parent:
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
 // It automatically moves items that do not fit into an overflow menu, and
 // manages additional items that are always placed onto this overflow menu.
-// Use [Body.AddAppBar] to add to the default toolbar at the top of an app.
+// Use [Body.AddAppBar] to add to the default toolbar at the top of the app.
 func NewToolbar(parent ...tree.Node) *Toolbar { return tree.New[Toolbar](parent...) }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Treer", IDName: "treer", Doc: "Treer is an interface for [Tree] types\nproviding access to the base [Tree] and\noverridable method hooks for actions taken on the [Tree],\nincluding OnOpen, OnClose, etc.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "AsCoreTree", Doc: "AsTree returns the base [Tree] for this node.", Returns: []string{"Tree"}}, {Name: "CanOpen", Doc: "CanOpen returns true if the node is able to open.\nBy default it checks HasChildren(), but could check other properties\nto perform lazy building of the tree.", Returns: []string{"bool"}}, {Name: "OnOpen", Doc: "OnOpen is called when a node is opened.\nThe base version does nothing."}, {Name: "OnClose", Doc: "OnClose is called when a node is closed\nThe base version does nothing."}, {Name: "DeleteNode"}, {Name: "Duplicate"}, {Name: "AddChildNode"}, {Name: "InsertBefore"}, {Name: "InsertAfter"}, {Name: "MimeData", Args: []string{"md"}}, {Name: "Cut"}, {Name: "Copy"}, {Name: "Paste"}, {Name: "DragStart", Args: []string{"e"}}, {Name: "DragDrop", Args: []string{"e"}}, {Name: "DropFinalize", Args: []string{"de"}}, {Name: "DropDeleteSource", Args: []string{"e"}}, {Name: "MakePasteMenu", Args: []string{"m", "md", "fun"}}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tree", IDName: "tree", Doc: "Tree provides a graphical representation of a tree structure,\nproviding full navigation and manipulation abilities.\n\nIt does not handle layout by itself, so if you want it to scroll\nseparately from the rest of the surrounding context, use [NewTreeFrame].\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the Tree mirrors another\ntree structure, and tree editing functions apply to\nthe source tree first, and then to the Tree by sync.\n\nOtherwise, data can be directly encoded in a Tree\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard [events.Event]s are sent to any listeners, including\nSelect, Change, and DoubleClick. The selected nodes\nare in the root SelectedNodes list.", Methods: []types.Method{{Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies the tree to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Cut", Doc: "Cut copies to system.Clipboard and deletes selected items.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "EditNode", Doc: "EditNode pulls up a [Form] dialog for the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InspectNode", Doc: "InspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SyncNode", Doc: "If non-nil, the [tree.Node] that this widget is viewing in the tree (the source)"}, {Name: "Text", Doc: "The text to display for the tree item label, which automatically\ndefaults to the [tree.Node.Name] of the tree node. It has no effect\nif [Tree.SyncNode] is non-nil."}, {Name: "Icon", Doc: "optional icon, displayed to the the left of the text label"}, {Name: "IconOpen", Doc: "icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]"}, {Name: "IconClosed", Doc: "icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]"}, {Name: "IconLeaf", Doc: "icon to use for a terminal node branch that has no children; defaults to [icons.Blank]"}, {Name: "Indent", Doc: "amount to indent children relative to this node"}, {Name: "OpenDepth", Doc: "OpenDepth is the depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "Closed", Doc: "Closed is whether this tree node is currently toggled closed (children not visible)."}, {Name: "SelectMode", Doc: "SelectMode, when set on the root node, determines whether keyboard movements should update selection."}, {Name: "viewIndex", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "widgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "Root", Doc: "Root is the cached root of the tree. It is automatically set and does not need to be\nset by the end user."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently selected nodes, on the\nRootView node only."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree\n(other trees) do not inherit its stateful background color, as\nthat does not look good."}, {Name: "inOpen", Doc: "inOpen is set in the Open method to prevent recursive opening for lazy-open nodes."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tree", IDName: "tree", Doc: "Tree provides a graphical representation of a tree structure,\nproviding full navigation and manipulation abilities.\n\nIt does not handle layout by itself, so if you want it to scroll\nseparately from the rest of the surrounding context, use [NewTreeFrame].\n\nIf the [Tree.SyncNode] field is non-nil, typically via the\n[Tree.SyncTree] method, then the Tree mirrors another\ntree structure, and tree editing functions apply to\nthe source tree first, and then to the Tree by sync.\n\nOtherwise, data can be directly encoded in a Tree\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard [events.Event]s are sent to any listeners, including\n[events.Select], [events.Change], and [events.DoubleClick].\nThe selected nodes are in the root [Tree.SelectedNodes] list.", Methods: []types.Method{{Name: "OpenAll", Doc: "OpenAll opens the node and all of its sub-nodes.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the node and all of its sub-nodes.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies the tree to the clipboard.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Cut", Doc: "Cut copies to [system.Clipboard] and deletes selected items.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "editNode", Doc: "editNode pulls up a [Form] dialog for the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "inspectNode", Doc: "inspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SyncNode", Doc: "SyncNode, if non-nil, is the [tree.Node] that this widget is\nviewing in the tree (the source). It should be set using\n[Tree.SyncTree]."}, {Name: "Text", Doc: "text is the text to display for the tree item label, which automatically\ndefaults to the [tree.Node.Name] of the tree node. It has no effect\nif [Tree.SyncNode] is non-nil."}, {Name: "Icon", Doc: "Icon is an optional icon displayed to the the left of the text label."}, {Name: "IconOpen", Doc: "IconOpen is the icon to use for an open (expanded) branch;\nit defaults to [icons.KeyboardArrowDown]."}, {Name: "IconClosed", Doc: "IconClosed is the icon to use for a closed (collapsed) branch;\nit defaults to [icons.KeyboardArrowRight]."}, {Name: "IconLeaf", Doc: "IconLeaf is the icon to use for a terminal node branch that has no children;\nit defaults to [icons.Blank]."}, {Name: "Indent", Doc: "Indent is the amount to indent children relative to this node.\nIt should be set in a Styler like all other style properties."}, {Name: "OpenDepth", Doc: "OpenDepth is the depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "Closed", Doc: "Closed is whether this tree node is currently toggled closed\n(children not visible)."}, {Name: "SelectMode", Doc: "SelectMode, when set on the root node, determines whether keyboard movements should update selection."}, {Name: "viewIndex", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "widgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "root", Doc: "root is the cached root of the tree. It is automatically set."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently selected nodes.\nIt is only set on the root node."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree\n(other trees) do not inherit its stateful background color, as\nthat does not look good."}, {Name: "inOpen", Doc: "inOpen is set in the Open method to prevent recursive opening for lazy-open nodes."}, {Name: "Branch", Doc: "Branch is the branch widget that is used to open and close the tree node."}}})
 
 // NewTree returns a new [Tree] with the given optional parent:
 // Tree provides a graphical representation of a tree structure,
@@ -1203,8 +1123,8 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tree", IDName:
 // It does not handle layout by itself, so if you want it to scroll
 // separately from the rest of the surrounding context, use [NewTreeFrame].
 //
-// If the SyncNode field is non-nil, typically via
-// SyncRootNode method, then the Tree mirrors another
+// If the [Tree.SyncNode] field is non-nil, typically via the
+// [Tree.SyncTree] method, then the Tree mirrors another
 // tree structure, and tree editing functions apply to
 // the source tree first, and then to the Tree by sync.
 //
@@ -1213,34 +1133,38 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tree", IDName:
 // and associated data.
 //
 // Standard [events.Event]s are sent to any listeners, including
-// Select, Change, and DoubleClick. The selected nodes
-// are in the root SelectedNodes list.
+// [events.Select], [events.Change], and [events.DoubleClick].
+// The selected nodes are in the root [Tree.SelectedNodes] list.
 func NewTree(parent ...tree.Node) *Tree { return tree.New[Tree](parent...) }
 
 // SetText sets the [Tree.Text]:
-// The text to display for the tree item label, which automatically
+// text is the text to display for the tree item label, which automatically
 // defaults to the [tree.Node.Name] of the tree node. It has no effect
 // if [Tree.SyncNode] is non-nil.
 func (t *Tree) SetText(v string) *Tree { t.Text = v; return t }
 
 // SetIcon sets the [Tree.Icon]:
-// optional icon, displayed to the the left of the text label
+// Icon is an optional icon displayed to the the left of the text label.
 func (t *Tree) SetIcon(v icons.Icon) *Tree { t.Icon = v; return t }
 
 // SetIconOpen sets the [Tree.IconOpen]:
-// icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]
+// IconOpen is the icon to use for an open (expanded) branch;
+// it defaults to [icons.KeyboardArrowDown].
 func (t *Tree) SetIconOpen(v icons.Icon) *Tree { t.IconOpen = v; return t }
 
 // SetIconClosed sets the [Tree.IconClosed]:
-// icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]
+// IconClosed is the icon to use for a closed (collapsed) branch;
+// it defaults to [icons.KeyboardArrowRight].
 func (t *Tree) SetIconClosed(v icons.Icon) *Tree { t.IconClosed = v; return t }
 
 // SetIconLeaf sets the [Tree.IconLeaf]:
-// icon to use for a terminal node branch that has no children; defaults to [icons.Blank]
+// IconLeaf is the icon to use for a terminal node branch that has no children;
+// it defaults to [icons.Blank].
 func (t *Tree) SetIconLeaf(v icons.Icon) *Tree { t.IconLeaf = v; return t }
 
 // SetIndent sets the [Tree.Indent]:
-// amount to indent children relative to this node
+// Indent is the amount to indent children relative to this node.
+// It should be set in a Styler like all other style properties.
 func (t *Tree) SetIndent(v units.Value) *Tree { t.Indent = v; return t }
 
 // SetOpenDepth sets the [Tree.OpenDepth]:
@@ -1249,17 +1173,13 @@ func (t *Tree) SetIndent(v units.Value) *Tree { t.Indent = v; return t }
 func (t *Tree) SetOpenDepth(v int) *Tree { t.OpenDepth = v; return t }
 
 // SetClosed sets the [Tree.Closed]:
-// Closed is whether this tree node is currently toggled closed (children not visible).
+// Closed is whether this tree node is currently toggled closed
+// (children not visible).
 func (t *Tree) SetClosed(v bool) *Tree { t.Closed = v; return t }
 
 // SetSelectMode sets the [Tree.SelectMode]:
 // SelectMode, when set on the root node, determines whether keyboard movements should update selection.
 func (t *Tree) SetSelectMode(v bool) *Tree { t.SelectMode = v; return t }
-
-// SetSelectedNodes sets the [Tree.SelectedNodes]:
-// SelectedNodes holds the currently selected nodes, on the
-// RootView node only.
-func (t *Tree) SetSelectedNodes(v ...Treer) *Tree { t.SelectedNodes = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ListButton", IDName: "list-button", Doc: "ListButton represents a slice or array value with a button that opens a [List].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Slice"}}})
 
@@ -1319,7 +1239,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FontButton", I
 // a dialog for selecting the font family.
 func NewFontButton(parent ...tree.Node) *FontButton { return tree.New[FontButton](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.WidgetBase", IDName: "widget-base", Doc: "WidgetBase implements the [Widget] interface and provides the core functionality\nof a widget. You must use WidgetBase as an embedded struct in all higher-level\nwidget types. It renders the standard box model, but does not layout or render\nany children; see [Frame] for that.", Methods: []types.Method{{Name: "Update", Doc: "Update updates the widget and all of its children by running [WidgetBase.UpdateWidget]\nand [WidgetBase.Style] on each one, and triggering a new layout pass with\n[WidgetBase.NeedsLayout]. It is the main way that end users should trigger widget\nupdates, and it is guaranteed to fully update a widget to the current state.\nFor example, it should be called after making any changes to the core properties\nof a widget, such as the text of [Text], the icon of a [Button], or the slice\nof a [Table].\n\nUpdate differs from [WidgetBase.UpdateWidget] in that it updates the widget and all\nof its children down the tree, whereas [WidgetBase.UpdateWidget] only updates the widget\nitself. Also, Update also calls [WidgetBase.Style] and [WidgetBase.NeedsLayout],\nwhereas [WidgetBase.UpdateWidget] does not. End-user code should typically call Update,\nnot [WidgetBase.UpdateWidget].\n\nIf you are calling this in a separate goroutine outside of the main\nconfiguration, rendering, and event handling structure, you need to\ncall [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and\nafter this, respectively.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Tooltip", Doc: "Tooltip is the text for the tooltip for this widget,\nwhich can use HTML formatting."}, {Name: "Parts", Doc: "Parts are a separate tree of sub-widgets that can be used to store\northogonal parts of a widget when necessary to separate them from children.\nFor example, trees use parts to separate their internal parts from\nthe other child tree nodes. Composite widgets like buttons should\nNOT use parts to store their components; parts should only be used when\nabsolutely necessary. Use [WidgetBase.NewParts] to make the parts."}, {Name: "Geom", Doc: "Geom has the full layout geometry for size and position of this Widget"}, {Name: "OverrideStyle", Doc: "If true, override the computed styles and allow directly editing Styles."}, {Name: "Styles", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides."}, {Name: "Stylers", Doc: "Stylers is a tiered set of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus can override all other stylers) to style the element.\nThese should be set using the [WidgetBase.Styler], [WidgetBase.FirstStyler],\nand [WidgetBase.FinalStyler] functions."}, {Name: "Listeners", Doc: "Listeners is a tiered set of event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the [WidgetBase.On], [WidgetBase.OnFirst],\nand [WidgetBase.OnFinal] functions, or any of the various On{EventType} helper functions."}, {Name: "OnWidgetAdders", Doc: "OnWidgetAdders is a slice of functions called on widgets that are added as\ndirect children of this widget. These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\n[WidgetBase.OnWidgetAdded]."}, {Name: "ContextMenus", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [WidgetBase.AddContextMenu].\nSeparators will be added between each context menu function."}, {Name: "Scene", Doc: "Scene is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent."}, {Name: "ValueUpdate", Doc: "ValueUpdate is a function set by [Bind] that is called in\n[WidgetBase.UpdateWidget] to update the widget's value from the bound value."}, {Name: "ValueOnChange", Doc: "ValueOnChange is a function set by [Bind] that is called when\nthe widget receives an [events.Change] event to update the bound value\nfrom the widget's value."}, {Name: "ValueTitle", Doc: "ValueTitle is the title to display for a dialog for this [Value]."}, {Name: "ValueNewWindow", Doc: "ValueNewWindow indicates that the dialog of a [Value] should be opened\nas a new window, instead of a typical full window in the same current window.\nThis is set by [InitValueButton] and handled by [OpenValueDialog].\nThis is triggered by holding down the Shift key while clicking on a\n[Value] button. Certain values such as [FileButton] may set this to true\nin their [InitValueButton] function."}, {Name: "needsRender", Doc: "needsRender is whether the widget needs to be rendered on the next render iteration."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.WidgetBase", IDName: "widget-base", Doc: "WidgetBase implements the [Widget] interface and provides the core functionality\nof a widget. You must use WidgetBase as an embedded struct in all higher-level\nwidget types. It renders the standard box model, but does not layout or render\nany children; see [Frame] for that.", Methods: []types.Method{{Name: "Update", Doc: "Update updates the widget and all of its children by running [WidgetBase.UpdateWidget]\nand [WidgetBase.Style] on each one, and triggering a new layout pass with\n[WidgetBase.NeedsLayout]. It is the main way that end users should trigger widget\nupdates, and it is guaranteed to fully update a widget to the current state.\nFor example, it should be called after making any changes to the core properties\nof a widget, such as the text of [Text], the icon of a [Button], or the slice\nof a [Table].\n\nUpdate differs from [WidgetBase.UpdateWidget] in that it updates the widget and all\nof its children down the tree, whereas [WidgetBase.UpdateWidget] only updates the widget\nitself. Also, Update also calls [WidgetBase.Style] and [WidgetBase.NeedsLayout],\nwhereas [WidgetBase.UpdateWidget] does not. End-user code should typically call Update,\nnot [WidgetBase.UpdateWidget].\n\nIf you are calling this in a separate goroutine outside of the main\nconfiguration, rendering, and event handling structure, you need to\ncall [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and\nafter this, respectively.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Tooltip", Doc: "Tooltip is the text for the tooltip for this widget,\nwhich can use HTML formatting."}, {Name: "Parts", Doc: "Parts are a separate tree of sub-widgets that can be used to store\northogonal parts of a widget when necessary to separate them from children.\nFor example, trees use parts to separate their internal parts from\nthe other child tree nodes. Composite widgets like buttons should\nNOT use parts to store their components; parts should only be used when\nabsolutely necessary. Use [WidgetBase.NewParts] to make the parts."}, {Name: "Geom", Doc: "Geom has the full layout geometry for size and position of this Widget"}, {Name: "OverrideStyle", Doc: "If true, override the computed styles and allow directly editing Styles."}, {Name: "Styles", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides."}, {Name: "Stylers", Doc: "Stylers is a tiered set of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus can override all other stylers) to style the element.\nThese should be set using the [WidgetBase.Styler], [WidgetBase.FirstStyler],\nand [WidgetBase.FinalStyler] functions."}, {Name: "Listeners", Doc: "Listeners is a tiered set of event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the [WidgetBase.On], [WidgetBase.OnFirst],\nand [WidgetBase.OnFinal] functions, or any of the various On{EventType} helper functions."}, {Name: "OnWidgetAdders", Doc: "OnWidgetAdders is a slice of functions called on widgets that are added as\ndirect children of this widget. These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\n[WidgetBase.OnWidgetAdded]."}, {Name: "ContextMenus", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [WidgetBase.AddContextMenu].\nSeparators will be added between each context menu function."}, {Name: "Scene", Doc: "Scene is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent."}, {Name: "ValueUpdate", Doc: "ValueUpdate is a function set by [Bind] that is called in\n[WidgetBase.UpdateWidget] to update the widget's value from the bound value."}, {Name: "ValueOnChange", Doc: "ValueOnChange is a function set by [Bind] that is called when\nthe widget receives an [events.Change] event to update the bound value\nfrom the widget's value."}, {Name: "ValueTitle", Doc: "ValueTitle is the title to display for a dialog for this [Value]."}, {Name: "ValueNewWindow", Doc: "ValueNewWindow indicates that the dialog of a [Value] should be opened\nas a new window, instead of a typical full window in the same current window.\nThis is set by [InitValueButton] and handled by [OpenValueDialog].\nThis is triggered by holding down the Shift key while clicking on a\n[Value] button. Certain values such as [FileButton] may set this to true\nin their [InitValueButton] function."}, {Name: "needsRender", Doc: "needsRender is whether the widget needs to be rendered on the next render iteration."}, {Name: "firstRender", Doc: "firstRender indicates that we were the first to render, and pushed our parent's\nbounds, which then need to be popped."}}})
 
 // NewWidgetBase returns a new [WidgetBase] with the given optional parent:
 // WidgetBase implements the [Widget] interface and provides the core functionality
@@ -1344,11 +1264,11 @@ func (t *WidgetBase) SetValueTitle(v string) *WidgetBase { t.ValueTitle = v; ret
 // This is triggered by holding down the Shift key while clicking on a
 // [Value] button. Certain values such as [FileButton] may set this to true
 // in their [InitValueButton] function.
-func (t *WidgetBase) SetValueNewWindow(v bool) *WidgetBase { t.ValueNewWindow = v; return t }
+func (t *WidgetBase) SetValueNewWindow(v bool) *WidgetBase { t.valueNewWindow = v; return t }
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.ProfileToggle", Doc: "ProfileToggle turns profiling on or off, which does both\ntargeted profiling and global CPU and memory profiling.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}})
 
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.ResetAllSettings", Doc: "ResetAllSettings resets all of the settings to their default values.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.resetAllSettings", Doc: "resetAllSettings resets all of the settings to their default values.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.UpdateAll", Doc: "UpdateAll updates all windows and triggers a full render rebuild.\nIt is typically called when user settings are changed.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}})
 

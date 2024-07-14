@@ -6,10 +6,12 @@
 // hosted at https://cogentcore.org/core.
 package main
 
-//go:generate core generate
-
 import (
 	"embed"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"reflect"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
@@ -23,6 +25,8 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/yaegicore"
+	"cogentcore.org/core/yaegicore/symbols"
 )
 
 //go:embed content
@@ -40,13 +44,58 @@ var mySVG embed.FS
 //go:embed file.go
 var myFile embed.FS
 
+const defaultPlaygroundCode = `package main
+
+func main() {
+	b := core.NewBody("Hello")
+	core.NewButton(b).SetText("Hello, World!")
+	b.RunMainWindow()
+}`
+
 func main() {
 	b := core.NewBody("Cogent Core Docs")
 	pg := pages.NewPage(b).SetSource(fsx.Sub(content, "content"))
 	pg.Context.WikilinkResolver = htmlcore.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.MakeToolbar)
+	b.AddAppBar(func(p *tree.Plan) {
+		tree.Add(p, func(w *core.Button) {
+			w.SetText("Playground").SetIcon(icons.PlayCircle)
+			w.OnClick(func(e events.Event) {
+				pg.Context.OpenURL("/playground")
+			})
+		})
+	})
+
+	symbols.Symbols["."]["content"] = reflect.ValueOf(content)
+	symbols.Symbols["."]["myImage"] = reflect.ValueOf(myImage)
+	symbols.Symbols["."]["mySVG"] = reflect.ValueOf(mySVG)
+	symbols.Symbols["."]["myFile"] = reflect.ValueOf(myFile)
 
 	htmlcore.ElementHandlers["home-page"] = homePage
+	htmlcore.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
+		splits := core.NewSplits(ctx.BlockParent)
+		ed := texteditor.NewSoloEditor(splits)
+		playgroundFile := filepath.Join(core.TheApp.AppDataDir(), "playground.go")
+		err := ed.Buffer.Open(core.Filename(playgroundFile))
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				err := os.WriteFile(playgroundFile, []byte(defaultPlaygroundCode), 0666)
+				core.ErrorSnackbar(ed, err, "Error creating code file")
+				if err == nil {
+					err := ed.Buffer.Open(core.Filename(playgroundFile))
+					core.ErrorSnackbar(ed, err, "Error loading code")
+				}
+			} else {
+				core.ErrorSnackbar(ed, err, "Error loading code")
+			}
+		}
+		ed.OnChange(func(e events.Event) {
+			core.ErrorSnackbar(ed, ed.Buffer.Save(), "Error saving code")
+		})
+		parent := core.NewFrame(splits)
+		yaegicore.BindTextEditor(ed, parent)
+		return true
+	}
 
 	b.RunMainWindow()
 }
@@ -119,7 +168,7 @@ func homePage(ctx *htmlcore.Context) bool {
 	tree.AddChild(home, func(w *core.Button) {
 		w.SetText("Get started")
 		w.OnClick(func(e events.Event) {
-			ctx.OpenURL("getting-started")
+			ctx.OpenURL("basics")
 		})
 	})
 
@@ -138,10 +187,10 @@ func homePage(ctx *htmlcore.Context) bool {
 	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.", func(w *texteditor.Editor) {
 		w.SetNewBuffer()
 		w.Buffer.SetLang("go").SetTextString(`func main() {
-			b := core.NewBody("Hello")
-			core.NewButton(b).SetText("Hello, World!")
-			b.RunMainWindow()
-		}`)
+	b := core.NewBody("Hello")
+	core.NewButton(b).SetText("Hello, World!")
+	b.RunMainWindow()
+}`)
 		w.Styler(func(s *styles.Style) {
 			s.Min.X.Pw(50)
 		})
@@ -229,7 +278,7 @@ func homePage(ctx *htmlcore.Context) bool {
 	tree.AddChild(home, func(w *core.Button) {
 		w.SetText("Get started")
 		w.OnClick(func(e events.Event) {
-			ctx.OpenURL("getting-started")
+			ctx.OpenURL("basics")
 		})
 	})
 

@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/base/option"
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/stringsx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
@@ -35,7 +36,8 @@ import (
 // app settings.
 var AllSettings = []Settings{AppearanceSettings, SystemSettings, DeviceSettings, DebugSettings}
 
-// Settings is the interface that describes the functionality common to all settings data types.
+// Settings is the interface that describes the functionality common
+// to all settings data types.
 type Settings interface {
 
 	// Label returns the label text for the settings.
@@ -57,7 +59,7 @@ type Settings interface {
 }
 
 // SettingsOpener is an optional additional interface that
-// [Settings] can satisfy to customize the behavior of [OpenSettings].
+// [Settings] can satisfy to customize the behavior of [openSettings].
 type SettingsOpener interface {
 	Settings
 
@@ -103,11 +105,11 @@ func (sb *SettingsBase) Apply() {}
 // MakeToolbar does nothing by default and can be extended by other settings data types.
 func (sb *SettingsBase) MakeToolbar(p *tree.Plan) {}
 
-// OpenSettings opens the given settings from their [Settings.Filename].
+// openSettings opens the given settings from their [Settings.Filename].
 // The settings are assumed to be in TOML unless they have a .json file
 // extension. If they satisfy the [SettingsOpener] interface,
 // [SettingsOpener.Open] will be used instead.
-func OpenSettings(se Settings) error {
+func openSettings(se Settings) error {
 	if so, ok := se.(SettingsOpener); ok {
 		return so.Open()
 	}
@@ -135,8 +137,8 @@ func SaveSettings(se Settings) error {
 	return tomlx.Save(ndf, fnm)
 }
 
-// ResetSettings resets the given settings to their default values.
-func ResetSettings(se Settings) error {
+// resetSettings resets the given settings to their default values.
+func resetSettings(se Settings) error {
 	err := os.RemoveAll(se.Filename())
 	if err != nil {
 		return err
@@ -149,13 +151,13 @@ func ResetSettings(se Settings) error {
 		rf := npv.FieldByName(f)
 		rf.Set(reflect.Zero(rf.Type()))
 	}
-	return LoadSettings(se)
+	return loadSettings(se)
 }
 
-// ResetAllSettings resets all of the settings to their default values.
-func ResetAllSettings() error { //types:add
+// resetAllSettings resets all of the settings to their default values.
+func resetAllSettings() error { //types:add
 	for _, se := range AllSettings {
-		err := ResetSettings(se)
+		err := resetSettings(se)
 		if err != nil {
 			return err
 		}
@@ -164,13 +166,13 @@ func ResetAllSettings() error { //types:add
 	return nil
 }
 
-// LoadSettings sets the defaults of, opens, and applies the given settings.
+// loadSettings sets the defaults of, opens, and applies the given settings.
 // If they are not already saved, it saves them. It process their `default:` struct
 // tags in addition to calling their [Settings.Default] method.
-func LoadSettings(se Settings) error {
+func loadSettings(se Settings) error {
 	errors.Log(reflectx.SetFromDefaultTags(se))
 	se.Defaults()
-	err := OpenSettings(se)
+	err := openSettings(se)
 	// we always apply the settings even if we can't open them
 	// to apply at least the default values
 	se.Apply()
@@ -184,19 +186,7 @@ func LoadSettings(se Settings) error {
 func LoadAllSettings() error {
 	errs := []error{}
 	for _, se := range AllSettings {
-		err := LoadSettings(se)
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-	return errors.Join(errs...)
-}
-
-// SaveAllSettings saves [AllSettings].
-func SaveAllSettings() error {
-	errs := []error{}
-	for _, se := range AllSettings {
-		err := SaveSettings(se)
+		err := loadSettings(se)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -217,9 +207,9 @@ func UpdateSettings(ctx Widget, se Settings) {
 func UpdateAll() { //types:add
 	gradient.Cache = nil // the cache is invalid now
 	for _, w := range AllRenderWindows {
-		rc := w.Mains.RenderContext
-		rc.LogicalDPI = w.LogicalDPI()
-		rc.Rebuild = true // trigger full rebuild
+		rc := w.mains.renderContext
+		rc.logicalDPI = w.logicalDPI()
+		rc.rebuild = true // trigger full rebuild
 	}
 }
 
@@ -268,6 +258,13 @@ type AppearanceSettingsData struct { //types:add
 	MonoFont FontName `default:"Roboto Mono"`
 }
 
+// ConstantSpacing returns a spacing value (padding, margin, gap)
+// that will remain constant regardless of changes in the
+// [AppearanceSettings.Spacing] setting.
+func ConstantSpacing(value float32) float32 {
+	return value * 100 / AppearanceSettings.Spacing
+}
+
 // Themes are the different possible themes that a user can select in their settings.
 type Themes int32 //enums:enum -trim-prefix Theme
 
@@ -282,7 +279,7 @@ const (
 	ThemeDark
 )
 
-func (as *AppearanceSettingsData) ShouldShow(field string) bool {
+func (as *AppearanceSettingsData) ShouldDisplay(field string) bool {
 	switch field {
 	case "Color":
 		return !ForceAppColor
@@ -325,12 +322,12 @@ func (as *AppearanceSettingsData) Apply() { //types:add
 	// 	TheViewInterface.SetHiStyleDefault(as.HiStyle)
 	// }
 
-	as.ApplyDPI()
+	as.applyDPI()
 }
 
-// ApplyDPI updates the screen LogicalDPI values according to current
+// applyDPI updates the screen LogicalDPI values according to current
 // settings and zoom factor, and then updates all open windows as well.
-func (as *AppearanceSettingsData) ApplyDPI() {
+func (as *AppearanceSettingsData) applyDPI() {
 	// zoom is percentage, but LogicalDPIScale is multiplier
 	system.LogicalDPIScale = as.Zoom / 100
 	// fmt.Println("system ldpi:", system.LogicalDPIScale)
@@ -353,12 +350,12 @@ func (as *AppearanceSettingsData) ApplyDPI() {
 	}
 }
 
-// DeleteSavedWindowGeoms deletes the file that saves the position and size of
+// deleteSavedWindowGeoms deletes the file that saves the position and size of
 // each window, by screen, and clear current in-memory cache. You shouldn't generally
 // need to do this, but sometimes it is useful for testing or windows that are
 // showing up in bad places that you can't recover from.
-func (as *AppearanceSettingsData) DeleteSavedWindowGeoms() { //types:add
-	TheWindowGeometrySaver.DeleteAll()
+func (as *AppearanceSettingsData) deleteSavedWindowGeoms() { //types:add
+	theWindowGeometrySaver.deleteAll()
 }
 
 // ZebraStripesWeight returns a 0 to 0.2 alpha opacity factor to use in computing
@@ -502,7 +499,7 @@ type SystemSettingsData struct { //types:add
 	User User
 
 	// favorite paths, shown in FilePickerer and also editable there
-	FavPaths FavPaths
+	FavPaths favoritePaths
 
 	// column to sort by in FilePicker, and :up or :down for direction -- updated automatically via FilePicker
 	FilePickerSort string `display:"-"`
@@ -545,8 +542,8 @@ type SystemSettingsData struct { //types:add
 }
 
 func (ss *SystemSettingsData) Defaults() {
-	ss.FavPaths.SetToDefaults()
-	ss.UpdateUser()
+	ss.FavPaths.setToDefaults()
+	ss.updateUser()
 }
 
 // Apply detailed settings to all the relevant settings.
@@ -560,8 +557,8 @@ func (ss *SystemSettingsData) Apply() { //types:add
 
 	np := len(ss.FavPaths)
 	for i := 0; i < np; i++ {
-		if ss.FavPaths[i].Ic == "" {
-			ss.FavPaths[i].Ic = "folder"
+		if ss.FavPaths[i].Icon == "" || ss.FavPaths[i].Icon == "folder" {
+			ss.FavPaths[i].Icon = icons.Folder
 		}
 	}
 }
@@ -570,7 +567,7 @@ func (ss *SystemSettingsData) Open() error {
 	fnm := ss.Filename()
 	err := tomlx.Open(ss, fnm)
 	if len(ss.FavPaths) == 0 {
-		ss.FavPaths.SetToDefaults()
+		ss.FavPaths.setToDefaults()
 	}
 	return err
 }
@@ -585,8 +582,8 @@ func (ss *SystemSettingsData) TimeFormat() string {
 	return "3:04 PM"
 }
 
-// UpdateUser gets the user info from the OS
-func (ss *SystemSettingsData) UpdateUser() {
+// updateUser gets the user info from the OS
+func (ss *SystemSettingsData) updateUser() {
 	usr, err := user.Current()
 	if err == nil {
 		ss.User.User = *usr
@@ -635,13 +632,13 @@ type EditorSettings struct { //types:add
 //////////////////////////////////////////////////////////////////
 //  FavoritePaths
 
-// FavPathItem represents one item in a favorite path list, for display of
-// favorites.  Is an ordered list instead of a map because user can organize
+// favoritePathItem represents one item in a favorite path list, for display of
+// favorites. Is an ordered list instead of a map because user can organize
 // in order
-type FavPathItem struct { //types:add
+type favoritePathItem struct { //types:add
 
 	// icon for item
-	Ic icons.Icon
+	Icon icons.Icon
 
 	// name of the favorite item
 	Name string `width:"20"`
@@ -651,21 +648,21 @@ type FavPathItem struct { //types:add
 }
 
 // Label satisfies the Labeler interface
-func (fi FavPathItem) Label() string {
+func (fi favoritePathItem) Label() string {
 	return fi.Name
 }
 
-// FavPaths is a list (slice) of favorite path items
-type FavPaths []FavPathItem
+// favoritePaths is a list (slice) of favorite path items
+type favoritePaths []favoritePathItem
 
-// SetToDefaults sets the paths to default values
-func (pf *FavPaths) SetToDefaults() {
-	*pf = make(FavPaths, len(DefaultPaths))
-	copy(*pf, DefaultPaths)
+// setToDefaults sets the paths to default values
+func (pf *favoritePaths) setToDefaults() {
+	*pf = make(favoritePaths, len(defaultPaths))
+	copy(*pf, defaultPaths)
 }
 
-// FindPath returns index of path on list, or -1, false if not found
-func (pf *FavPaths) FindPath(path string) (int, bool) {
+// findPath returns index of path on list, or -1, false if not found
+func (pf *favoritePaths) findPath(path string) (int, bool) {
 	for i, fi := range *pf {
 		if fi.Path == path {
 			return i, true
@@ -674,8 +671,8 @@ func (pf *FavPaths) FindPath(path string) (int, bool) {
 	return -1, false
 }
 
-// DefaultPaths are default favorite paths
-var DefaultPaths = FavPaths{
+// defaultPaths are default favorite paths
+var defaultPaths = favoritePaths{
 	{icons.Home, "home", "~"},
 	{icons.DesktopMac, "Desktop", "~/Desktop"},
 	{icons.Document, "Documents", "~/Documents"},
@@ -689,8 +686,8 @@ var DefaultPaths = FavPaths{
 // FilePaths represents a set of file paths.
 type FilePaths []string
 
-// RecentPaths are the recently opened paths in the file picker.
-var RecentPaths FilePaths
+// recentPaths are the recently opened paths in the file picker.
+var recentPaths FilePaths
 
 // Open file paths from a json-formatted file.
 func (fp *FilePaths) Open(filename string) error { //types:add
@@ -709,25 +706,25 @@ func (fp *FilePaths) Save(filename string) error { //types:add
 // AddPath inserts a path to the file paths (at the start), subject to max
 // length -- if path is already on the list then it is moved to the start.
 func (fp *FilePaths) AddPath(path string, max int) {
-	StringsInsertFirstUnique((*[]string)(fp), path, max)
+	stringsx.InsertFirstUnique((*[]string)(fp), path, max)
 }
 
-// SavedPathsFilename is the name of the saved file paths file in
+// savedPathsFilename is the name of the saved file paths file in
 // the Cogent Core data directory.
-var SavedPathsFilename = "saved-paths.json"
+const savedPathsFilename = "saved-paths.json"
 
-// SaveRecentPaths saves the active RecentPaths to data dir
-func SaveRecentPaths() {
+// saveRecentPaths saves the active RecentPaths to data dir
+func saveRecentPaths() {
 	pdir := TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, SavedPathsFilename)
-	errors.Log(RecentPaths.Save(pnm))
+	pnm := filepath.Join(pdir, savedPathsFilename)
+	errors.Log(recentPaths.Save(pnm))
 }
 
-// OpenRecentPaths loads the active RecentPaths from data dir
-func OpenRecentPaths() {
+// openRecentPaths loads the active RecentPaths from data dir
+func openRecentPaths() {
 	pdir := TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, SavedPathsFilename)
-	err := RecentPaths.Open(pnm)
+	pnm := filepath.Join(pdir, savedPathsFilename)
+	err := recentPaths.Open(pnm)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		errors.Log(err)
 	}

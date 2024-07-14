@@ -204,8 +204,8 @@ func (ed *Editor) RenderDepthBackground(stln, edln int) {
 		return
 	}
 	buf := ed.Buffer
-	buf.MarkupMu.RLock() // needed for HiTags access
-	defer buf.MarkupMu.RUnlock()
+	buf.markupMu.RLock() // needed for HiTags access
+	defer buf.markupMu.RUnlock()
 
 	bb := ed.RenderBBox()
 	sty := &ed.Styles
@@ -221,10 +221,10 @@ func (ed *Editor) RenderDepthBackground(stln, edln int) {
 		if int(math32.Floor(lst)) > bb.Max.Y {
 			continue
 		}
-		if ln >= len(buf.HiTags) { // may be out of sync
+		if ln >= len(buf.hiTags) { // may be out of sync
 			continue
 		}
-		ht := buf.HiTags[ln]
+		ht := buf.hiTags[ln]
 		lsted := 0
 		for ti := range ht {
 			lx := &ht[ti]
@@ -267,7 +267,7 @@ func (ed *Editor) RenderSelect() {
 // highlighted background color.
 func (ed *Editor) RenderHighlights(stln, edln int) {
 	for _, reg := range ed.Highlights {
-		reg := ed.Buffer.AdjustReg(reg)
+		reg := ed.Buffer.AdjustRegion(reg)
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
 			continue
 		}
@@ -279,7 +279,7 @@ func (ed *Editor) RenderHighlights(stln, edln int) {
 // in the Scopelights list.
 func (ed *Editor) RenderScopelights(stln, edln int) {
 	for _, reg := range ed.Scopelights {
-		reg := ed.Buffer.AdjustReg(reg)
+		reg := ed.Buffer.AdjustRegion(reg)
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
 			continue
 		}
@@ -581,7 +581,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lexer.Pos {
 	if cln >= len(ed.Renders) {
 		return lexer.Pos{Ln: cln, Ch: 0}
 	}
-	lnsz := ed.Buffer.LineLen(cln)
+	lnsz := ed.Buffer.lineLen(cln)
 	if lnsz == 0 || sty.Font.Face == nil {
 		return lexer.Pos{Ln: cln, Ch: 0}
 	}

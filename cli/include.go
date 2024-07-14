@@ -18,30 +18,29 @@ import (
 
 // TODO(kai): this seems bad
 
-// Includer is an interface that facilitates processing
-// include files in configuration objects. It typically
-// should not be used by end-user code.
-type Includer interface {
+// includer is an interface that facilitates processing
+// include files in configuration objects.
+type includer interface {
 	// IncludesPtr returns a pointer to the "Includes []string"
 	// field containing file(s) to include before processing
 	// the current config file.
 	IncludesPtr() *[]string
 }
 
-// IncludeStack returns the stack of include files in the natural
+// includeStack returns the stack of include files in the natural
 // order in which they are encountered (nil if none).
 // Files should then be read in reverse order of the slice.
 // Returns an error if any of the include files cannot be found on IncludePath.
-// Does not alter cfg. It typically should not be used by end-user code.
-func IncludeStack(opts *Options, cfg Includer) ([]string, error) {
-	clone := reflect.New(reflectx.NonPointerType(reflect.TypeOf(cfg))).Interface().(Includer)
+// Does not alter cfg.
+func includeStack(opts *Options, cfg includer) ([]string, error) {
+	clone := reflect.New(reflectx.NonPointerType(reflect.TypeOf(cfg))).Interface().(includer)
 	*clone.IncludesPtr() = *cfg.IncludesPtr()
 	return includeStackImpl(opts, clone, nil)
 }
 
 // includeStackImpl implements IncludeStack, operating on cloned cfg
 // todo: could use a more efficient method to just extract the include field..
-func includeStackImpl(opts *Options, clone Includer, includes []string) ([]string, error) {
+func includeStackImpl(opts *Options, clone includer, includes []string) ([]string, error) {
 	incs := *clone.IncludesPtr()
 	ni := len(incs)
 	if ni == 0 {

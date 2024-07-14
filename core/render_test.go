@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 )
 
 // For https://github.com/cogentcore/core/issues/614
@@ -32,6 +33,50 @@ func TestRenderParentBorderRadius(t *testing.T) {
 		s.Padding.Zero()
 	})
 	b.AssertRender(t, "render/parent-border-radius")
+}
+
+// For https://github.com/cogentcore/core/issues/989
+func TestRenderParentBorderRadiusVerticalToolbar(t *testing.T) {
+	b := NewBody()
+	b.Scene.renderBBoxes = true
+	b.Styler(func(s *styles.Style) {
+		s.Min.Y.Em(10)
+	})
+	tb := NewToolbar(b)
+	tb.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Background = colors.Scheme.Select.Container
+	})
+	tree.AddChild(tb, func(w *Button) {
+		w.SetIcon(icons.Close)
+		w.Styler(func(s *styles.Style) {
+			s.Background = colors.Scheme.Error.Base
+			s.Border.Radius.Zero()
+		})
+	})
+	b.AssertRender(t, "render/parent-border-radius-vertical-toolbar")
+}
+
+// For https://github.com/cogentcore/core/issues/989
+func TestRenderParentBorderRadiusHorizontalToolbar(t *testing.T) {
+	b := NewBody()
+	b.Scene.renderBBoxes = true
+	b.Styler(func(s *styles.Style) {
+		s.Min.X.Em(10)
+	})
+	tb := NewToolbar(b)
+	tb.Styler(func(s *styles.Style) {
+		s.Direction = styles.Row
+		s.Background = colors.Scheme.Select.Container
+	})
+	tree.AddChild(tb, func(w *Button) {
+		w.SetIcon(icons.Close)
+		w.Styler(func(s *styles.Style) {
+			s.Background = colors.Scheme.Error.Base
+			s.Border.Radius.Zero()
+		})
+	})
+	b.AssertRender(t, "render/parent-border-radius-horizontal-toolbar")
 }
 
 // For https://github.com/cogentcore/core/issues/810

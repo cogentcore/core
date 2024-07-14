@@ -144,8 +144,6 @@ func (fn *Node) Init() {
 		}
 	})
 	tree.AddChildInit(fn.Parts, "branch", func(w *core.Switch) {
-		w.SetType(core.SwitchCheckbox)
-		w.SetIcons(fn.IconOpen, fn.IconClosed, fn.IconLeaf)
 		tree.AddChildInit(w, "stack", func(w *core.Frame) {
 			f := func(name string) {
 				tree.AddChildInit(w, name, func(w *core.Icon) {
@@ -184,13 +182,7 @@ func (fn *Node) Init() {
 	})
 
 	fn.Maker(func(p *tree.Plan) {
-		if fn.Filepath == "" || fn.IsIrregular() {
-			return
-		}
-		if !fn.IsDir() {
-			return
-		}
-		if !((fn.FileRoot.inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot.IsDirOpen(fn.Filepath)) {
+		if fn.Filepath == "" {
 			return
 		}
 		if fn.Name == ExternalFilesName {
@@ -207,6 +199,12 @@ func (fn *Node) Init() {
 					w.Info.VCS = vcs.Stored
 				})
 			}
+			return
+		}
+		if !fn.IsDir() || fn.IsIrregular() {
+			return
+		}
+		if !((fn.FileRoot.inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot.IsDirOpen(fn.Filepath)) {
 			return
 		}
 		repo, _ := fn.Repo()
@@ -349,10 +347,10 @@ func (fn *Node) SetFileIcon() {
 		ic = icons.Blank
 	}
 	fn.IconLeaf = ic
-	if bp, ok := fn.Branch(); ok {
-		if bp.IconIndeterminate != ic {
-			bp.SetIcons(icons.FolderOpen, icons.Folder, ic)
-			bp.UpdateTree()
+	if br := fn.Branch; br != nil {
+		if br.IconIndeterminate != ic {
+			br.SetIconOn(icons.FolderOpen).SetIconOff(icons.Folder).SetIconIndeterminate(ic)
+			br.UpdateTree()
 		}
 	}
 }
@@ -396,9 +394,9 @@ func (fn *Node) InitFileInfo() error {
 	return nil
 }
 
-// SelectedFunc runsthe given function on all selected nodes in reverse order.
+// SelectedFunc runs the given function on all selected nodes in reverse order.
 func (fn *Node) SelectedFunc(fun func(n *Node)) {
-	sels := fn.SelectedViews()
+	sels := fn.GetSelectedNodes()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i])
 		if sn == nil {

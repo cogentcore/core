@@ -19,7 +19,7 @@ func TestWriter(t *testing.T) {
 		t.Skip("skipping on linux-amd64-androidemu builder; see golang.org/issue/40290")
 	}
 
-	block, _ := pem.Decode([]byte(DebugCert))
+	block, _ := pem.Decode([]byte(debugCert))
 	if block == nil {
 		t.Fatal("no cert")
 	}
@@ -42,7 +42,7 @@ func TestWriter(t *testing.T) {
 	}
 	defer os.Remove(apkPath)
 
-	apkw := NewWriter(f, privKey)
+	apkw := newWriter(f, privKey)
 
 	w, err := apkw.Create("AndroidManifest.xml")
 	if err != nil {

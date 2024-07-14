@@ -543,7 +543,7 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 							})
 						})
 					})
-					d.NewFullDialog(pl).SetNewWindow(true).Run()
+					d.RunWindowDialog(pl)
 				})
 			})
 		})
@@ -588,7 +588,7 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 					OnChange(func(e events.Event) {
 						pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
 					})
-				d.NewFullDialog(pl).SetNewWindow(true).Run()
+				d.RunWindowDialog(pl)
 			})
 	})
 	tree.Add(p, func(w *core.Button) {
@@ -598,7 +598,7 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 				d := core.NewBody().AddTitle(pl.Name + " Data")
 				tv := tensorcore.NewTable(d).SetTable(pl.Table.Table)
 				d.AddAppBar(tv.MakeToolbar)
-				d.NewFullDialog(pl).SetNewWindow(true).Run()
+				d.RunWindowDialog(pl)
 			})
 	})
 	tree.Add(p, func(w *core.Separator) {})

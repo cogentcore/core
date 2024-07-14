@@ -5,7 +5,7 @@ Most of the time, updating happens synchronously through event handlers, stylers
 For example, this code utilizes a goroutine to update the text of a button to the current time every second:
 
 ```Go
-text := core.NewText(parent)
+text := core.NewText(b)
 text.Updater(func() {
     text.SetText(time.Now().Format("15:04:05"))
 })

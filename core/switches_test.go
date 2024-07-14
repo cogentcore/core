@@ -36,7 +36,7 @@ func TestSwitchesMutex(t *testing.T) {
 		sw.Child(0).(Widget).AsWidget().Send(events.Click)
 		sw.Child(1).(Widget).AsWidget().Send(events.Click)
 		assert.Equal(t, "Python", sw.SelectedItem().Value)
-		assert.Equal(t, "Python", sw.SelectedItem().GetText())
+		assert.Equal(t, "Python", sw.SelectedItem().getText())
 		assert.Equal(t, []SwitchItem{{Value: "Python"}}, sw.SelectedItems())
 	})
 }

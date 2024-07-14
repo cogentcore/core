@@ -26,8 +26,8 @@ type KeyedList struct {
 	// Inline is whether to display the map in one line.
 	Inline bool
 
-	// SortValue is whether to sort by values instead of keys.
-	SortValues bool
+	// SortByValues is whether to sort by values instead of keys.
+	SortByValues bool
 
 	// ncols is the number of columns to display if the keyed list is not inline.
 	ncols int
@@ -65,16 +65,16 @@ func (kl *KeyedList) Init() {
 
 		builtinTypes := types.BuiltinTypes()
 
-		keys := reflectx.MapSort(kl.Map, !kl.SortValues, true)
+		keys := reflectx.MapSort(kl.Map, !kl.SortByValues, true)
 		for _, key := range keys {
 			keytxt := reflectx.ToString(key.Interface())
 			keynm := "key-" + keytxt
 			valnm := "value-" + keytxt
 
 			tree.AddNew(p, keynm, func() Value {
-				return ToValue(key.Interface(), "")
+				return toValue(key.Interface(), "")
 			}, func(w Value) {
-				BindMapKey(mapv, key, w)
+				bindMapKey(mapv, key, w)
 				wb := w.AsWidget()
 				wb.SetReadOnly(kl.IsReadOnly())
 				wb.Styler(func(s *styles.Style) {
@@ -88,18 +88,18 @@ func (kl *KeyedList) Init() {
 				wb.OnInput(kl.HandleEvent)
 				if !kl.IsReadOnly() {
 					wb.AddContextMenu(func(m *Scene) {
-						kl.ContextMenu(m, key)
+						kl.contextMenu(m, key)
 					})
 				}
 				wb.Updater(func() {
-					BindMapKey(mapv, key, w)
+					bindMapKey(mapv, key, w)
 					wb.SetReadOnly(kl.IsReadOnly())
 				})
 			})
 			tree.AddNew(p, valnm, func() Value {
 				val := mapv.MapIndex(key).Interface()
-				w := ToValue(val, "")
-				return BindMapValue(mapv, key, w)
+				w := toValue(val, "")
+				return bindMapValue(mapv, key, w)
 			}, func(w Value) {
 				wb := w.AsWidget()
 				wb.SetReadOnly(kl.IsReadOnly())
@@ -111,11 +111,11 @@ func (kl *KeyedList) Init() {
 				})
 				if !kl.IsReadOnly() {
 					wb.AddContextMenu(func(m *Scene) {
-						kl.ContextMenu(m, key)
+						kl.contextMenu(m, key)
 					})
 				}
 				wb.Updater(func() {
-					BindMapValue(mapv, key, w)
+					bindMapValue(mapv, key, w)
 					wb.SetReadOnly(kl.IsReadOnly())
 				})
 			})
@@ -170,7 +170,7 @@ func (kl *KeyedList) Init() {
 	})
 }
 
-func (kl *KeyedList) ContextMenu(m *Scene, keyv reflect.Value) {
+func (kl *KeyedList) contextMenu(m *Scene, keyv reflect.Value) {
 	if kl.IsReadOnly() {
 		return
 	}
@@ -182,9 +182,9 @@ func (kl *KeyedList) ContextMenu(m *Scene, keyv reflect.Value) {
 	})
 }
 
-// ToggleSort toggles sorting by values vs. keys
-func (kl *KeyedList) ToggleSort() {
-	kl.SortValues = !kl.SortValues
+// toggleSort toggles sorting by values vs. keys
+func (kl *KeyedList) toggleSort() {
+	kl.SortByValues = !kl.SortByValues
 	kl.Update()
 }
 
@@ -206,7 +206,6 @@ func (kl *KeyedList) DeleteItem(key reflect.Value) {
 	kl.UpdateChange()
 }
 
-// MakeToolbar configures a [Toolbar] for this view
 func (kl *KeyedList) MakeToolbar(p *tree.Plan) {
 	if reflectx.AnyIsNil(kl.Map) {
 		return
@@ -214,7 +213,7 @@ func (kl *KeyedList) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *Button) {
 		w.SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys and the values").
 			OnClick(func(e events.Event) {
-				kl.ToggleSort()
+				kl.toggleSort()
 			})
 	})
 	if !kl.IsReadOnly() {
@@ -227,8 +226,8 @@ func (kl *KeyedList) MakeToolbar(p *tree.Plan) {
 	}
 }
 
-// BindMapKey is a version of [Bind] that works for keys in a map.
-func BindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
+// bindMapKey is a version of [Bind] that works for keys in a map.
+func bindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	wb := vw.AsWidget()
 	alreadyBound := wb.ValueUpdate != nil
 	wb.ValueUpdate = func() {
@@ -259,7 +258,7 @@ func BindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 		d.RunDialog(vw)
 	}
 	if alreadyBound {
-		resetWidgetValue(vw)
+		ResetWidgetValue(vw)
 	}
 	if ob, ok := any(vw).(OnBinder); ok {
 		ob.OnBind(key.Interface())
@@ -268,8 +267,8 @@ func BindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	return vw
 }
 
-// BindMapValue is a version of [Bind] that works for values in a map.
-func BindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
+// bindMapValue is a version of [Bind] that works for values in a map.
+func bindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	wb := vw.AsWidget()
 	alreadyBound := wb.ValueUpdate != nil
 	wb.ValueUpdate = func() {
@@ -286,7 +285,7 @@ func BindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 		mapv.SetMapIndex(key, value.Elem())
 	}
 	if alreadyBound {
-		resetWidgetValue(vw)
+		ResetWidgetValue(vw)
 	}
 	if ob, ok := any(vw).(OnBinder); ok {
 		value := mapv.MapIndex(key).Interface()

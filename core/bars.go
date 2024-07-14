@@ -47,12 +47,12 @@ func (bf *BarFuncs) Inherit(obf BarFuncs) {
 	*bf = nbf
 }
 
-// MakeSceneBars configures the side control bars, for main scenes
-func (sc *Scene) MakeSceneBars() {
+// makeSceneBars configures the side control bars, for main scenes.
+func (sc *Scene) makeSceneBars() {
 	// at last possible moment, add app-specific app bar config
-	if sc.Stage.Type.IsMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
+	if sc.Stage.Type.isMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
 		if sc.Bars.Top.IsEmpty() && !testing.Testing() { // no app bar while testing
-			sc.Bars.Top.Add(MakeAppBar) // put in the top by default
+			sc.Bars.Top.Add(makeAppBar) // put in the top by default
 		}
 	}
 	if !sc.Bars.Top.IsEmpty() {
@@ -126,9 +126,9 @@ func (sc *Scene) GetTopAppBar() *Toolbar {
 	return tree.ChildByType[*Toolbar](tb)
 }
 
-// InheritBarsWidget inherits Bar functions based on a source widget
+// inheritBarsWidget inherits Bar functions based on a source widget
 // (e.g., Context of dialog)
-func (sc *Scene) InheritBarsWidget(w Widget) {
+func (sc *Scene) inheritBarsWidget(w Widget) {
 	if w == nil {
 		return
 	}
@@ -136,12 +136,12 @@ func (sc *Scene) InheritBarsWidget(w Widget) {
 	if wb.Scene == nil {
 		return
 	}
-	sc.InheritBars(wb.Scene)
+	sc.inheritBars(wb.Scene)
 }
 
-// InheritBars inherits Bars functions from given other scene
+// inheritBars inherits Bars functions from given other scene
 // for each side that the other scene marks as inherited.
-func (sc *Scene) InheritBars(osc *Scene) {
+func (sc *Scene) inheritBars(osc *Scene) {
 	if osc == nil {
 		return
 	}

@@ -11,7 +11,7 @@ package cicons
 Then, once you run `go generate`, you can access your icons through your cicons package:
 
 ```go
-core.NewButton(parent).SetIcon(cicons.MyIconName)
+core.NewButton(b).SetIcon(cicons.MyIconName)
 ```
 
 Although only SVG files are supported for icons, you can easily embed a bitmap image file in an SVG file. Cogent Core provides an `svg` command line tool that can do this for you. To install it, run:

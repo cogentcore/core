@@ -34,6 +34,6 @@ func TestMakeAppBar(t *testing.T) {
 	b.Styler(func(s *styles.Style) {
 		s.Min.X.Dp(500)
 	})
-	MakeAppBar(b)
+	makeAppBar(b)
 	b.AssertRender(t, "app/make-app-bar")
 }

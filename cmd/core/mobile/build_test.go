@@ -41,7 +41,7 @@ func TestRFC1034Label(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		if got := RFC1034Label(tc.in); got != tc.want {
+		if got := rfc1034Label(tc.in); got != tc.want {
 			t.Errorf("rfc1034Label(%q) = %q, want %q", tc.in, got, tc.want)
 		}
 	}
@@ -68,7 +68,7 @@ func TestAndroidPkgName(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		if got := AndroidPkgName(tc.in); got != tc.want {
+		if got := androidPkgName(tc.in); got != tc.want {
 			t.Errorf("len %d", len(tc.in))
 			t.Errorf("androidPkgName(%q) = %q, want %q", tc.in, got, tc.want)
 		}
@@ -91,8 +91,8 @@ func TestAndroidBuild(t *testing.T) {
 		exec.SetMajor(nil)
 	}()
 	c.Build.Target = []config.Platform{{OS: "android", Arch: "arm"}}
-	gopath = filepath.ToSlash(filepath.SplitList(GoEnv("GOPATH"))[0])
-	if GOOS == "windows" {
+	gopath = filepath.ToSlash(filepath.SplitList(goEnv("GOPATH"))[0])
+	if goos == "windows" {
 		os.Setenv("HOMEDRIVE", "C:")
 	}
 	c.ID = "org.golang.todo"
@@ -210,7 +210,7 @@ func TestRegexImportGolangXPackage(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		res := NmRE.FindStringSubmatch(tc.in)
+		res := nmRE.FindStringSubmatch(tc.in)
 		if len(res) != tc.wantLen {
 			t.Errorf("nmRE returned unexpected result for %q: want len(res) = %d, got %d",
 				tc.in, tc.wantLen, len(res))
@@ -248,11 +248,11 @@ func TestBuildWithGoModules(t *testing.T) {
 		t.Run(target, func(t *testing.T) {
 			switch target {
 			case "android":
-				if _, err := sdkpath.AndroidAPIPath(MinAndroidSDK); err != nil {
+				if _, err := sdkpath.AndroidAPIPath(minAndroidSDK); err != nil {
 					t.Skip("No compatible android API platform found, skipping bind")
 				}
 			case "ios":
-				if !XCodeAvailable() {
+				if !xCodeAvailable() {
 					t.Skip("Xcode is missing")
 				}
 			}

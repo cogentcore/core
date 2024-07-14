@@ -58,8 +58,8 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	options.Stderr = in.Shell.StdIOWrappers.Err
 	options.Stdin = in.Shell.StdIOWrappers.In
 	in.Interp = interp.New(options)
-	in.Interp.Use(stdlib.Symbols)
-	in.Interp.Use(Symbols)
+	errors.Log(in.Interp.Use(stdlib.Symbols))
+	errors.Log(in.Interp.Use(Symbols))
 	in.ImportShell()
 	go in.MonitorSignals()
 	return in

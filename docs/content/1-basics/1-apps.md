@@ -8,7 +8,7 @@ Then, after adding content to your body, you can create and start a window from 
 
 Therefore, the standard structure of a Cogent Core app looks like this:
 
-```go
+```Go
 package main
 
 import "cogentcore.org/core/core"
@@ -19,3 +19,5 @@ func main() {
 	b.RunMainWindow()
 }
 ```
+
+For most of the code examples on this website, we will omit the outer structure of the app so that you can focus on the app content.

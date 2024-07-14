@@ -3,10 +3,8 @@
 // license that can be found in the LICENSE file.
 
 // Package timer provides a simple wall-clock duration timer based on standard
-// time.  Accumulates total and average over multiple Start / Stop intervals.
+// [time]. It accumulates total and average over multiple Start / Stop intervals.
 package timer
-
-//go:generate core generate -add-types
 
 import "time"
 

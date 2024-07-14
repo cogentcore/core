@@ -31,17 +31,17 @@ func Pack(c *config.Config) error { //types:add
 		case "android", "ios", "web": // build already packages
 			continue
 		case "linux":
-			err := PackLinux(c)
+			err := packLinux(c)
 			if err != nil {
 				return err
 			}
 		case "darwin":
-			err := PackDarwin(c)
+			err := packDarwin(c)
 			if err != nil {
 				return err
 			}
 		case "windows":
-			err := PackWindows(c)
+			err := packWindows(c)
 			if err != nil {
 				return err
 			}
@@ -50,8 +50,8 @@ func Pack(c *config.Config) error { //types:add
 	return nil
 }
 
-// PackLinux packages the app for Linux by generating a .deb file.
-func PackLinux(c *config.Config) error {
+// packLinux packages the app for Linux by generating a .deb file.
+func packLinux(c *config.Config) error {
 	// based on https://ubuntuforums.org/showthread.php?t=910717
 
 	anm := strcase.ToKebab(c.Name)
@@ -113,12 +113,12 @@ func PackLinux(c *config.Config) error {
 		return err
 	}
 	defer fapp.Close()
-	dfd := &DesktopFileData{
+	dfd := &desktopFileData{
 		Name: c.Name,
 		Desc: c.About,
 		Exec: anm,
 	}
-	err = DesktopFileTmpl.Execute(fapp, dfd)
+	err = desktopFileTmpl.Execute(fapp, dfd)
 	if err != nil {
 		return err
 	}
@@ -132,20 +132,20 @@ func PackLinux(c *config.Config) error {
 		return err
 	}
 	defer fctrl.Close()
-	dcd := &DebianControlData{
+	dcd := &debianControlData{
 		Name:    anm,
 		Version: vnm,
 		Desc:    c.About,
 	}
-	err = DebianControlTmpl.Execute(fctrl, dcd)
+	err = debianControlTmpl.Execute(fctrl, dcd)
 	if err != nil {
 		return err
 	}
 	return exec.Run("dpkg-deb", "--build", apath)
 }
 
-// DesktopFileData is the data passed to [DesktopFileTmpl]
-type DesktopFileData struct {
+// desktopFileData is the data passed to [desktopFileTmpl]
+type desktopFileData struct {
 	Name string
 	Desc string
 	Exec string
@@ -153,8 +153,8 @@ type DesktopFileData struct {
 
 // TODO(kai): project website
 
-// DesktopFileTmpl is the template for the Linux .desktop file
-var DesktopFileTmpl = template.Must(template.New("DesktopFileTmpl").Parse(
+// desktopFileTmpl is the template for the Linux .desktop file
+var desktopFileTmpl = template.Must(template.New("desktopFileTmpl").Parse(
 	`[Desktop Entry]
 Type=Application
 Version=1.0
@@ -165,8 +165,8 @@ Icon={{.Exec}}
 Terminal=false
 `))
 
-// DebianControlData is the data passed to [DebianControlTmpl]
-type DebianControlData struct {
+// debianControlData is the data passed to [debianControlTmpl]
+type debianControlData struct {
 	Name    string
 	Version string
 	Desc    string
@@ -174,8 +174,8 @@ type DebianControlData struct {
 
 // TODO(kai): architecture, maintainer, dependencies
 
-// DebianControlTmpl is the template for the Linux DEBIAN/control file
-var DebianControlTmpl = template.Must(template.New("DebianControlTmpl").Parse(
+// debianControlTmpl is the template for the Linux DEBIAN/control file
+var debianControlTmpl = template.Must(template.New("debianControlTmpl").Parse(
 	`Package: {{.Name}}
 Version: {{.Version}}
 Section: base
@@ -185,8 +185,8 @@ Maintainer: Your Name <you@email.com>
 Description: {{.Desc}}
 `))
 
-// PackDarwin packages the app for macOS by generating a .app and .dmg file.
-func PackDarwin(c *config.Config) error {
+// packDarwin packages the app for macOS by generating a .app and .dmg file.
+func packDarwin(c *config.Config) error {
 	// based on https://github.com/machinebox/appify
 
 	anm := c.Name + ".app"
@@ -236,7 +236,7 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 	defer fplist.Close()
-	ipd := &InfoPlistData{
+	ipd := &infoPlistData{
 		Name:               c.Name,
 		Executable:         filepath.Join("MacOS", anm),
 		Identifier:         c.ID,
@@ -245,7 +245,7 @@ func PackDarwin(c *config.Config) error {
 		ShortVersionString: c.Version,
 		IconFile:           filepath.Join("Contents", "Resources", "icon.icns"),
 	}
-	err = InfoPlistTmpl.Execute(fplist, ipd)
+	err = infoPlistTmpl.Execute(fplist, ipd)
 	if err != nil {
 		return err
 	}
@@ -266,12 +266,12 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 	defer fdmg.Close()
-	dmgbd := &DmgBuildData{
+	dmgbd := &dmgBuildData{
 		AppPath:  apath,
 		AppName:  anm,
 		IconPath: inm,
 	}
-	err = DmgBuildTmpl.Execute(fdmg, dmgbd)
+	err = dmgBuildTmpl.Execute(fdmg, dmgbd)
 	if err != nil {
 		return err
 	}
@@ -284,8 +284,8 @@ func PackDarwin(c *config.Config) error {
 	return os.Remove(dmgsnm)
 }
 
-// InfoPlistData is the data passed to [InfoPlistTmpl]
-type InfoPlistData struct {
+// infoPlistData is the data passed to [infoPlistTmpl]
+type infoPlistData struct {
 	Name               string
 	Executable         string
 	Identifier         string
@@ -295,8 +295,8 @@ type InfoPlistData struct {
 	IconFile           string
 }
 
-// InfoPlistTmpl is the template for the macOS .app Info.plist
-var InfoPlistTmpl = template.Must(template.New("InfoPlistTmpl").Parse(
+// infoPlistTmpl is the template for the macOS .app Info.plist
+var infoPlistTmpl = template.Must(template.New("infoPlistTmpl").Parse(
 	`<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -323,15 +323,15 @@ var InfoPlistTmpl = template.Must(template.New("InfoPlistTmpl").Parse(
 </plist>
 `))
 
-// DmgBuildData is the data passed to [DmgBuildTmpl]
-type DmgBuildData struct {
+// dmgBuildData is the data passed to [dmgBuildTmpl]
+type dmgBuildData struct {
 	AppPath  string
 	AppName  string
 	IconPath string
 }
 
-// DmgBuildTmpl is the template for the dmgbuild python settings file
-var DmgBuildTmpl = template.Must(template.New("DmgBuildTmpl").Parse(
+// dmgBuildTmpl is the template for the dmgbuild python settings file
+var dmgBuildTmpl = template.Must(template.New("dmgBuildTmpl").Parse(
 	`files = ['{{.AppPath}}']
 symlinks = {"Applications": "/Applications"}
 icon = '{{.IconPath}}'
@@ -339,8 +339,8 @@ icon_locations = {'{{.AppName}}': (140, 120), "Applications": (500, 120)}
 background = "builtin-arrow"
 `))
 
-// PackWindows packages the app for Windows by generating a .msi file.
-func PackWindows(c *config.Config) error {
+// packWindows packages the app for Windows by generating a .msi file.
+func packWindows(c *config.Config) error {
 	opath := filepath.Join("bin", "windows")
 	ipath := filepath.Join(opath, "tempWindowsInstaller")
 	gpath := filepath.Join(ipath, "installer.go")
@@ -355,11 +355,11 @@ func PackWindows(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	wmd := &WindowsInstallerData{
+	wmd := &windowsInstallerData{
 		Name: c.Name,
 		Desc: c.About,
 	}
-	err = WindowsInstallerTmpl.Execute(fman, wmd)
+	err = windowsInstallerTmpl.Execute(fman, wmd)
 	fman.Close()
 	if err != nil {
 		return err
@@ -382,8 +382,8 @@ func PackWindows(c *config.Config) error {
 	return os.RemoveAll(ipath)
 }
 
-// WindowsInstallerData is the data passed to [WindowsInstallerTmpl]
-type WindowsInstallerData struct {
+// windowsInstallerData is the data passed to [windowsInstallerTmpl]
+type windowsInstallerData struct {
 	Name string
 	Desc string
 }
@@ -391,5 +391,5 @@ type WindowsInstallerData struct {
 //go:embed windowsinstaller.go.tmpl
 var windowsInstallerTmplString string
 
-// WindowsInstallerTmpl is the template for the Windows installer Go file
-var WindowsInstallerTmpl = template.Must(template.New("WindowsInstallerTmpl").Parse(windowsInstallerTmplString))
+// windowsInstallerTmpl is the template for the Windows installer Go file
+var windowsInstallerTmpl = template.Must(template.New("windowsInstallerTmpl").Parse(windowsInstallerTmplString))

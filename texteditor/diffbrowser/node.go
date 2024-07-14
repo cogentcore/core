@@ -56,7 +56,7 @@ func (tn *Node) Init() {
 		if br == nil {
 			return
 		}
-		sels := tn.SelectedViews()
+		sels := tn.GetSelectedNodes()
 		if sels != nil {
 			br.ViewDiff(tn)
 		}
@@ -95,7 +95,7 @@ func (tn *Node) ContextMenu(m *core.Scene) {
 		if br == nil {
 			return
 		}
-		sels := tn.SelectedViews()
+		sels := tn.GetSelectedNodes()
 		sn := sels[len(sels)-1].(*Node)
 		br.ViewDiff(sn)
 	})

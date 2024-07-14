@@ -1,0 +1,9 @@
+#!/usr/bin/env cosh
+
+command extract {
+    for _, pkg := range args {
+        yaegi extract {"cogentcore.org/core/"+pkg}
+    }
+}
+
+extract core icons events styles styles/states styles/abilities styles/units tree keymap colors colors/gradient filetree texteditor htmlcore pages paint math32 plot plot/plots plot/plotcore tensor/table base/errors base/fsx base/reflectx base/labels

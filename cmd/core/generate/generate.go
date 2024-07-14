@@ -23,14 +23,14 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// TreeMethodsTmpl is a template that contains the methods
+// treeMethodsTmpl is a template that contains the methods
 // and functions specific to [tree.Node] types.
-var TreeMethodsTmpl = template.Must(template.New("TreeMethods").
+var treeMethodsTmpl = template.Must(template.New("TreeMethods").
 	Funcs(template.FuncMap{
-		"HasEmbedDirective": HasEmbedDirective,
-		"HasNoNewDirective": HasNoNewDirective,
+		"HasEmbedDirective": hasEmbedDirective,
+		"HasNoNewDirective": hasNoNewDirective,
 		"DocToComment":      typegen.DocToComment,
-		"TreePkg":           TreePkg,
+		"TreePkg":           treePkg,
 	}).Parse(
 	`
 	{{if not (HasNoNewDirective .)}}
@@ -60,27 +60,27 @@ var TreeMethodsTmpl = template.Must(template.New("TreeMethods").
 	`,
 ))
 
-// TreePkg returns the package identifier for the tree package in
+// treePkg returns the package identifier for the tree package in
 // the context of the given type ("" if it is already in the tree
 // package, and "tree." otherwise)
-func TreePkg(typ *typegen.Type) string {
+func treePkg(typ *typegen.Type) string {
 	if typ.Pkg == "tree" { // we are already in tree
 		return ""
 	}
 	return "tree."
 }
 
-// HasEmbedDirective returns whether the given [typegen.Type] has a "core:embedder"
-// comment directive. This function is used in [TreeMethodsTmpl].
-func HasEmbedDirective(typ *typegen.Type) bool {
+// hasEmbedDirective returns whether the given [typegen.Type] has a "core:embedder"
+// comment directive. This function is used in [treeMethodsTmpl].
+func hasEmbedDirective(typ *typegen.Type) bool {
 	return slices.ContainsFunc(typ.Directives, func(d types.Directive) bool {
 		return d.Tool == "core" && d.Directive == "embedder"
 	})
 }
 
-// HasNoNewDirective returns whether the given [typegen.Type] has a "core:no-new"
-// comment directive. This function is used in [TreeMethodsTmpl].
-func HasNoNewDirective(typ *typegen.Type) bool {
+// hasNoNewDirective returns whether the given [typegen.Type] has a "core:no-new"
+// comment directive. This function is used in [treeMethodsTmpl].
+func hasNoNewDirective(typ *typegen.Type) bool {
 	return slices.ContainsFunc(typ.Directives, func(d types.Directive) bool {
 		return d.Tool == "core" && d.Directive == "no-new"
 	})
@@ -96,10 +96,10 @@ func Generate(c *config.Config) error { //types:add
 	c.Generate.Typegen.InterfaceConfigs.Add("cogentcore.org/core/tree.Node", &typegen.Config{
 		AddTypes:  true,
 		Setters:   true,
-		Templates: []*template.Template{TreeMethodsTmpl},
+		Templates: []*template.Template{treeMethodsTmpl},
 	})
 
-	pkgs, err := ParsePackages(c)
+	pkgs, err := parsePackages(c)
 	if err != nil {
 		return fmt.Errorf("Generate: error parsing package: %w", err)
 	}
@@ -123,8 +123,8 @@ func Generate(c *config.Config) error { //types:add
 	return nil
 }
 
-// ParsePackages parses the package(s) based on the given config info.
-func ParsePackages(cfg *config.Config) ([]*packages.Package, error) {
+// parsePackages parses the package(s) based on the given config info.
+func parsePackages(cfg *config.Config) ([]*packages.Package, error) {
 	pcfg := &packages.Config{
 		Mode: enumgen.PackageModes() | typegen.PackageModes(&cfg.Generate.Typegen), // need superset of both
 		// TODO: Need to think about constants in test files. Maybe write type_string_test.go

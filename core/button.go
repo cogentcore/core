@@ -24,7 +24,7 @@ import (
 
 // Button is an interactive button with text, an icon, an indicator, a shortcut,
 // and/or a menu. The standard behavior is to register a click event handler with
-// OnClick.
+// [WidgetBase.OnClick].
 type Button struct { //core:embedder
 	Frame
 
@@ -37,21 +37,21 @@ type Button struct { //core:embedder
 
 	// Icon is the icon for the button.
 	// If it is "" or [icons.None], no icon is shown.
-	Icon icons.Icon `xml:"icon" display:"show-name"`
+	Icon icons.Icon
 
 	// Indicator is the menu indicator icon to present.
 	// If it is "" or [icons.None],, no indicator is shown.
 	// It is automatically set to [icons.KeyboardArrowDown]
 	// when there is a Menu elements present unless it is
 	// set to [icons.None].
-	Indicator icons.Icon `xml:"indicator" display:"show-name"`
+	Indicator icons.Icon
 
 	// Shortcut is an optional shortcut keyboard chord to trigger this button,
 	// active in window-wide scope. Avoid conflicts with other shortcuts
 	// (a log message will be emitted if so). Shortcuts are processed after
 	// all other processing of keyboard input. Command is automatically translated
-	// into Meta on macOS and Control on all other platforms.
-	Shortcut key.Chord `xml:"shortcut"`
+	// into Meta on macOS and Control on all other platforms. Also see [Button.SetKey].
+	Shortcut key.Chord
 
 	// Menu is a menu constructor function used to build and display
 	// a menu whenever the button is clicked. There will be no menu
@@ -179,7 +179,7 @@ func (bt *Button) Init() {
 
 	bt.HandleClickOnEnterSpace()
 	bt.OnClick(func(e events.Event) {
-		if bt.OpenMenu(e) {
+		if bt.openMenu(e) {
 			e.SetHandled()
 		}
 	})
@@ -286,12 +286,13 @@ func (bt *Button) Init() {
 	})
 }
 
-// SetKey sets the shortcut of the button from the given [keymap.Functions]
+// SetKey sets the shortcut of the button from the given [keymap.Functions].
 func (bt *Button) SetKey(kf keymap.Functions) *Button {
 	bt.SetShortcut(kf.Chord())
 	return bt
 }
 
+// Label returns the text of the button if it is set; otherwise it returns the name.
 func (bt *Button) Label() string {
 	if bt.Text != "" {
 		return bt.Text
@@ -305,9 +306,9 @@ func (bt *Button) HasMenu() bool {
 	return bt.Menu != nil
 }
 
-// OpenMenu will open any menu associated with this element.
-// Returns true if menu opened, false if not.
-func (bt *Button) OpenMenu(e events.Event) bool {
+// openMenu opens any menu associated with this element.
+// It returns whether any menu was opened.
+func (bt *Button) openMenu(e events.Event) bool {
 	if !bt.HasMenu() {
 		return false
 	}
@@ -326,7 +327,7 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 func (bt *Button) handleClickDismissMenu() {
 	// note: must be called last so widgets aren't deleted when the click arrives
 	bt.OnFinal(events.Click, func(e events.Event) {
-		bt.Scene.Stage.ClosePopupAndBelow()
+		bt.Scene.Stage.closePopupAndBelow()
 	})
 }
 

@@ -223,7 +223,7 @@ func (ed *Editor) SetNewBuffer() *Editor {
 	return ed
 }
 
-func (ed *Editor) WidgetValue() any { return &ed.Buffer.Txt }
+func (ed *Editor) WidgetValue() any { return &ed.Buffer.text }
 
 func (ed *Editor) Init() {
 	ed.Frame.Init()
@@ -244,7 +244,7 @@ func (ed *Editor) Init() {
 			s.Text.WhiteSpace = styles.WhiteSpacePre
 		}
 		s.SetMono(true)
-		s.Grow.Set(1, 1)
+		s.Grow.Set(1, 0)
 		s.Overflow.Set(styles.OverflowAuto) // absorbs all
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Margin.Zero()
@@ -254,7 +254,7 @@ func (ed *Editor) Init() {
 		s.Text.Align = styles.Start
 		s.Text.TabSize = core.SystemSettings.Editor.TabSize
 		s.Color = colors.Scheme.OnSurface
-		s.Min.Set(units.Em(10), units.Em(5)) // TODO: remove after #900 is fixed
+		s.Min.X.Em(10)
 
 		s.MaxBorder.Width.Set(units.Dp(2))
 		s.Background = colors.Scheme.SurfaceContainerLow
@@ -285,7 +285,7 @@ func (ed *Editor) Destroy() {
 // called when the return key is pressed or goes out of focus
 func (ed *Editor) EditDone() {
 	if ed.Buffer != nil {
-		ed.Buffer.EditDone()
+		ed.Buffer.editDone()
 	}
 	ed.ClearSelected()
 	ed.ClearCursor()
@@ -299,7 +299,7 @@ func (ed *Editor) ReMarkup() {
 	if ed.Buffer == nil {
 		return
 	}
-	ed.Buffer.ReMarkup()
+	ed.Buffer.reMarkup()
 }
 
 // IsChanged returns true if buffer was changed (edited) since last EditDone
@@ -345,15 +345,15 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 	// had := false
 	if ed.Buffer != nil {
 		// had = true
-		ed.Buffer.DeleteView(ed)
+		ed.Buffer.deleteEditor(ed)
 	}
 	ed.Buffer = buf
 	ed.ResetState()
 	if buf != nil {
-		buf.AddView(ed)
-		bhl := len(buf.PosHistory)
+		buf.addEditor(ed)
+		bhl := len(buf.posHistory)
 		if bhl > 0 {
-			cp := buf.PosHistory[bhl-1]
+			cp := buf.posHistory[bhl-1]
 			ed.PosHistIndex = bhl - 1
 			ed.SetCursorShow(cp)
 		} else {
@@ -415,17 +415,17 @@ func (ed *Editor) LinesDeleted(tbe *textbuf.Edit) {
 
 // BufferSignal receives a signal from the Buffer when the underlying text
 // is changed.
-func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
+func (ed *Editor) BufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 	switch sig {
-	case BufferDone:
-	case BufferNew:
+	case bufferDone:
+	case bufferNew:
 		ed.ResetState()
 		ed.SetCursorShow(ed.CursorPos)
 		ed.NeedsLayout()
-	case BufferMods:
+	case bufferMods:
 		ed.NeedsLayout()
-	case BufferInsert:
-		if ed == nil || ed.This == nil || !ed.This.(core.Widget).IsVisible() {
+	case bufferInsert:
+		if ed == nil || ed.This == nil || !ed.IsVisible() {
 			return
 		}
 		ndup := ed.Renders == nil
@@ -439,8 +439,8 @@ func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
 		if ndup {
 			ed.Update()
 		}
-	case BufferDelete:
-		if ed == nil || ed.This == nil || !ed.This.(core.Widget).IsVisible() {
+	case bufferDelete:
+		if ed == nil || ed.This == nil || !ed.IsVisible() {
 			return
 		}
 		ndup := ed.Renders == nil
@@ -452,9 +452,9 @@ func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
 		if ndup {
 			ed.Update()
 		}
-	case BufferMarkupUpdated:
+	case bufferMarkupUpdated:
 		ed.NeedsLayout() // comes from another goroutine
-	case BufferClosed:
+	case bufferClosed:
 		ed.SetBuffer(nil)
 	}
 }
@@ -464,7 +464,7 @@ func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
 
 // Undo undoes previous action
 func (ed *Editor) Undo() {
-	tbe := ed.Buffer.Undo()
+	tbe := ed.Buffer.undo()
 	if tbe != nil {
 		if tbe.Delete { // now an insert
 			ed.SetCursorShow(tbe.Reg.End)
@@ -481,7 +481,7 @@ func (ed *Editor) Undo() {
 
 // Redo redoes previously undone action
 func (ed *Editor) Redo() {
-	tbe := ed.Buffer.Redo()
+	tbe := ed.Buffer.redo()
 	if tbe != nil {
 		if tbe.Delete {
 			ed.SetCursorShow(tbe.Reg.Start)

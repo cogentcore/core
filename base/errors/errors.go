@@ -30,7 +30,7 @@ func Log(err error) error {
 // if the error is non-nil. The intended usage is:
 //
 //	a := errors.Log1(MyFunc(v))
-func Log1[T any](v T, err error) T {
+func Log1[T any](v T, err error) T { //yaegi:add
 	if err != nil {
 		slog.Error(err.Error() + " | " + CallerInfo())
 	}
@@ -99,7 +99,8 @@ func Ignore2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 	return v1, v2
 }
 
-// CallerInfo returns string information about the caller of the function that called CallerInfo.
+// CallerInfo returns string information about the caller
+// of the function that called CallerInfo.
 func CallerInfo() string {
 	pc, file, line, _ := runtime.Caller(2)
 	return runtime.FuncForPC(pc).Name() + " " + file + ":" + strconv.Itoa(line)

@@ -303,7 +303,7 @@ func findPathChild(n Node, child string) int {
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
 func (n *NodeBase) AddChild(kid Node) {
-	initNode(kid)
+	InitNode(kid)
 	n.Children = append(n.Children, kid)
 	SetParent(kid, n) // key to set new parent before deleting: indicates move instead of delete
 }
@@ -313,7 +313,7 @@ func (n *NodeBase) AddChild(kid Node) {
 // of the type, plus the [Node.NumLifetimeChildren] of the parent.
 func (n *NodeBase) NewChild(typ *types.Type) Node {
 	kid := newOfType(typ)
-	initNode(kid)
+	InitNode(kid)
 	n.Children = append(n.Children, kid)
 	SetParent(kid, n)
 	return kid
@@ -323,7 +323,7 @@ func (n *NodeBase) NewChild(typ *types.Type) Node {
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
 func (n *NodeBase) InsertChild(kid Node, index int) {
-	initNode(kid)
+	InitNode(kid)
 	n.Children = slices.Insert(n.Children, index, kid)
 	SetParent(kid, n)
 }
@@ -692,7 +692,7 @@ func copyFrom(to, from Node) {
 // cloned tree (see [Node.CopyFrom] for more information).
 func (n *NodeBase) Clone() Node {
 	nc := n.NewInstance()
-	initNode(nc)
+	InitNode(nc)
 	nc.AsTree().SetName(n.Name)
 	nc.AsTree().CopyFrom(n.This)
 	return nc

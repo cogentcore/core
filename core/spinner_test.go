@@ -49,11 +49,11 @@ func TestSpinnerButtons(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b)
 	b.AssertRender(t, "spinner/buttons", func() {
-		sp.LeadingIconButton().Send(events.Click)
+		sp.leadingIconButton.Send(events.Click)
 		assert.Equal(t, float32(-0.1), sp.Value)
-		sp.TrailingIconButton().Send(events.Click)
+		sp.trailingIconButton.Send(events.Click)
 		assert.Equal(t, float32(0), sp.Value)
-		sp.TrailingIconButton().Send(events.Click)
+		sp.trailingIconButton.Send(events.Click)
 		assert.Equal(t, float32(0.1), sp.Value)
 	})
 }
@@ -79,7 +79,7 @@ func TestSpinnerStep(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b).SetStep(0.3)
 	b.AssertRender(t, "spinner/step", func() {
-		sp.LeadingIconButton().Send(events.Click)
+		sp.leadingIconButton.Send(events.Click)
 		assert.Equal(t, float32(-0.3), sp.Value)
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageUp, 0))
 		assert.Equal(t, float32(0.3), sp.Value)
@@ -102,7 +102,7 @@ func TestSpinnerOutlined(t *testing.T) {
 func TestSpinnerFormat(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b).SetFormat("%X").SetStep(1).SetValue(44)
-	assert.Equal(t, "2C", sp.Txt)
+	assert.Equal(t, "2C", sp.text)
 	b.AssertRender(t, "spinner/format")
 }
 
@@ -114,7 +114,7 @@ func TestSpinnerChangeButton(t *testing.T) {
 		value = sp.Value
 	})
 	b.AssertRender(t, "spinner/change-button", func() {
-		sp.TrailingIconButton().Send(events.Click)
+		sp.trailingIconButton.Send(events.Click)
 		tolassert.Equal(t, 0.1, value)
 	})
 }

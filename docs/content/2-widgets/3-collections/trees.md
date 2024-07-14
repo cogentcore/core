@@ -5,7 +5,7 @@ Cogent Core provides interactive trees that allow you to display a nested tree s
 You can make a tree and add tree child nodes directly to it:
 
 ```Go
-tr := core.NewTree(parent).SetText("Root")
+tr := core.NewTree(b).SetText("Root")
 core.NewTree(tr)
 c2 := core.NewTree(tr)
 core.NewTree(c2)
@@ -18,7 +18,7 @@ n := tree.NewNodeBase()
 tree.NewNodeBase(n)
 c2 := tree.NewNodeBase(n)
 tree.NewNodeBase(c2)
-core.NewTree(parent).SyncTree(n)
+core.NewTree(b).SyncTree(n)
 ```
 
 You can detect when the user changes the value of a tree:
@@ -28,8 +28,8 @@ n := tree.NewNodeBase()
 tree.NewNodeBase(n)
 c2 := tree.NewNodeBase(n)
 tree.NewNodeBase(c2)
-core.NewTree(parent).SyncTree(n).OnChange(func(e events.Event) {
-    core.MessageSnackbar(parent, "Tree changed")
+core.NewTree(b).SyncTree(n).OnChange(func(e events.Event) {
+    core.MessageSnackbar(b, "Tree changed")
 })
 ```
 
@@ -40,7 +40,7 @@ n := tree.NewNodeBase()
 tree.NewNodeBase(n)
 c2 := tree.NewNodeBase(n)
 tree.NewNodeBase(c2)
-core.NewTree(parent).SyncTree(n).SetReadOnly(true)
+core.NewTree(b).SyncTree(n).SetReadOnly(true)
 ```
 
 You can make a button that opens an interactive inspector of a tree:
@@ -50,5 +50,5 @@ n := tree.NewNodeBase()
 tree.NewNodeBase(n)
 c2 := tree.NewNodeBase(n)
 tree.NewNodeBase(c2)
-core.NewTreeButton(parent).SetTree(n)
+core.NewTreeButton(b).SetTree(n)
 ```

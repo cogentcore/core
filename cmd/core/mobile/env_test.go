@@ -64,7 +64,7 @@ func TestNdkRoot(t *testing.T) {
 	t.Run("no NDK in the default location", func(t *testing.T) {
 		os.Setenv("ANDROID_HOME", home)
 		defer os.Unsetenv("ANDROID_HOME")
-		if ndk, err := NDKRoot(c); err == nil {
+		if ndk, err := ndkRoot(c); err == nil {
 			t.Errorf("expected error but got %q", ndk)
 		}
 	})
@@ -72,7 +72,7 @@ func TestNdkRoot(t *testing.T) {
 	t.Run("NDK location is set but is wrong", func(t *testing.T) {
 		os.Setenv("ANDROID_NDK_HOME", filepath.Join(home, "no-such-path"))
 		defer os.Unsetenv("ANDROID_NDK_HOME")
-		if ndk, err := NDKRoot(c); err == nil {
+		if ndk, err := ndkRoot(c); err == nil {
 			t.Errorf("expected error but got %q", ndk)
 		}
 	})
@@ -86,32 +86,32 @@ func TestNdkRoot(t *testing.T) {
 
 		// ANDROID_NDK_HOME is sufficient.
 		os.Setenv("ANDROID_NDK_HOME", envNDK)
-		if ndk, err := NDKRoot(c); ndk != envNDK {
+		if ndk, err := ndkRoot(c); ndk != envNDK {
 			t.Errorf("got (%q, %v) want (%q, nil)", ndk, err, envNDK)
 		}
 
 		// ANDROID_NDK_HOME takes precedence over ANDROID_HOME.
 		os.Setenv("ANDROID_HOME", home)
-		if ndk, err := NDKRoot(c); ndk != envNDK {
+		if ndk, err := ndkRoot(c); ndk != envNDK {
 			t.Errorf("got (%q, %v) want (%q, nil)", ndk, err, envNDK)
 		}
 
 		// ANDROID_NDK_HOME is respected even if there is no NDK there.
 		os.RemoveAll(envNDK)
-		if ndk, err := NDKRoot(c); err == nil {
+		if ndk, err := ndkRoot(c); err == nil {
 			t.Errorf("expected error but got %q", ndk)
 		}
 
 		// ANDROID_HOME is used if ANDROID_NDK_HOME is not set.
 		os.Unsetenv("ANDROID_NDK_HOME")
-		if ndk, err := NDKRoot(c); ndk != sdkNDK {
+		if ndk, err := ndkRoot(c); ndk != sdkNDK {
 			t.Errorf("got (%q, %v) want (%q, nil)", ndk, err, envNDK)
 		}
 	})
 
 	t.Run("Modern 'side-by-side' NDK selection", func(t *testing.T) {
 		defer func() {
-			c.Build.AndroidMinSDK = MinAndroidSDK
+			c.Build.AndroidMinSDK = minAndroidSDK
 		}()
 
 		ndkForest := filepath.Join(home, "ndk")
@@ -152,7 +152,7 @@ func TestNdkRoot(t *testing.T) {
 		for i, tc := range testCases {
 			t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 				c.Build.AndroidMinSDK = tc.api
-				ndk, err := NDKRoot(c, tc.targets...)
+				ndk, err := ndkRoot(c, tc.targets...)
 				if len(tc.wantNDKRoot) != 0 {
 					if ndk != tc.wantNDKRoot || err != nil {
 						t.Errorf("got (%q, %v), want (%q, nil)", ndk, err, tc.wantNDKRoot)

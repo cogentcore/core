@@ -49,7 +49,7 @@ func (il *InlineList) Init() {
 					wb.SetReadOnly(true)
 				} else {
 					wb.AddContextMenu(func(m *Scene) {
-						il.ContextMenu(m, i)
+						il.contextMenu(m, i)
 					})
 				}
 				wb.Updater(func() {
@@ -82,7 +82,8 @@ func (il *InlineList) Init() {
 	})
 }
 
-// SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
+// SetSlice sets the source slice that we are viewing.
+// It rebuilds the children to represent this slice.
 func (il *InlineList) SetSlice(sl any) *InlineList {
 	if reflectx.AnyIsNil(sl) {
 		il.Slice = nil
@@ -121,7 +122,7 @@ func (il *InlineList) DeleteAt(idx int) {
 	il.UpdateChange()
 }
 
-func (il *InlineList) ContextMenu(m *Scene, idx int) {
+func (il *InlineList) contextMenu(m *Scene, idx int) {
 	if il.IsReadOnly() || il.isArray {
 		return
 	}

@@ -42,37 +42,36 @@ const (
 // It is recommended that the [ErrNotFound] and [NoErrNotFound]
 // constants be used for the value of errNotFound for clearer code.
 func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T]) (string, error) {
-	bf := BoolFlags(cfg)
+	bf := boolFlags(cfg)
 	// if we are not already a meta config object, we have to add
 	// all of the bool flags of the meta config object so that we
 	// correctly handle the short (no value) versions of things like
 	// verbose and quiet.
-	if _, ok := any(cfg).(*MetaConfig); !ok {
-		mcf := BoolFlags(&metaConfigFields{})
+	if _, ok := any(cfg).(*metaConfig); !ok {
+		mcf := boolFlags(&metaConfigFields{})
 		maps.Copy(bf, mcf)
 	}
-	nfargs, flags, err := GetArgs(args, bf)
+	nfargs, flags, err := getArgs(args, bf)
 	if err != nil {
 		return "", err
 	}
-	cmd, allFlags, err := ParseArgs(cfg, nfargs, flags, cmds...)
+	cmd, allFlags, err := parseArgs(cfg, nfargs, flags, cmds...)
 	if err != nil {
 		return "", err
 	}
-	err = ParseFlags(flags, allFlags, errNotFound)
+	err = parseFlags(flags, allFlags, errNotFound)
 	if err != nil {
 		return "", err
 	}
 	return cmd, nil
 }
 
-// BoolFlags returns a map with a true value for every flag name
+// boolFlags returns a map with a true value for every flag name
 // that maps to a boolean field. This is needed so that bool
 // flags can be properly set with their shorthand syntax.
-// It should only be needed for internal use and not end-user code.
-func BoolFlags(obj any) map[string]bool {
-	fields := &Fields{}
-	AddFields(obj, fields, AddAllFields)
+func boolFlags(obj any) map[string]bool {
+	fields := &fields{}
+	addFields(obj, fields, addAllFields)
 
 	res := map[string]bool{}
 
@@ -85,10 +84,10 @@ func BoolFlags(obj any) map[string]bool {
 
 		// we need all cases of both normal and "no" version for all names
 		for _, name := range f.Names {
-			for _, cnms := range AllCases(name) {
+			for _, cnms := range allCases(name) {
 				res[cnms] = true
 			}
-			for _, cnms := range AllCases("No" + name) {
+			for _, cnms := range allCases("No" + name) {
 				res[cnms] = true
 			}
 		}
@@ -96,10 +95,10 @@ func BoolFlags(obj any) map[string]bool {
 	return res
 }
 
-// GetArgs processes the given args using the given map of bool flags,
-// which should be obtained through [BoolFlags]. It returns the leftover
+// getArgs processes the given args using the given map of bool flags,
+// which should be obtained through [boolFlags]. It returns the leftover
 // (positional) args, the flags, and any error.
-func GetArgs(args []string, boolFlags map[string]bool) ([]string, map[string]string, error) {
+func getArgs(args []string, boolFlags map[string]bool) ([]string, map[string]string, error) {
 	var nonFlags []string
 	flags := map[string]string{}
 	for len(args) > 0 {
@@ -115,7 +114,7 @@ func GetArgs(args []string, boolFlags map[string]bool) ([]string, map[string]str
 			nonFlags = append(nonFlags, args...)
 			break
 		}
-		name, value, nargs, err := GetFlag(s, args, boolFlags)
+		name, value, nargs, err := getFlag(s, args, boolFlags)
 		if err != nil {
 			return nonFlags, flags, err
 		}
@@ -128,12 +127,11 @@ func GetArgs(args []string, boolFlags map[string]bool) ([]string, map[string]str
 	return nonFlags, flags, nil
 }
 
-// GetFlag parses the given flag arg string in the context of the given
+// getFlag parses the given flag arg string in the context of the given
 // remaining arguments and bool flags. It returns the name of the flag,
 // the value of the flag, the remaining arguments updated with any changes
-// caused by getting this flag, and any error. It is designed for use in [GetArgs]
-// and should typically not be used by end-user code.
-func GetFlag(s string, args []string, boolFlags map[string]bool) (name, value string, a []string, err error) {
+// caused by getting this flag, and any error.
+func getFlag(s string, args []string, boolFlags map[string]bool) (name, value string, a []string, err error) {
 	// we start out with the remaining args we were passed
 	a = args
 	// we know the first character is a dash, so we can trim it directly
@@ -174,13 +172,13 @@ func GetFlag(s string, args []string, boolFlags map[string]bool) (name, value st
 	return
 }
 
-// ParseArgs parses the given non-flag arguments in the context of the given
+// parseArgs parses the given non-flag arguments in the context of the given
 // configuration struct, flags, and commands. The non-flag arguments and flags
-// should be gotten through [GetArgs] first. It returns the command specified by
+// should be gotten through [getArgs] first. It returns the command specified by
 // the arguments, an ordered map of all of the flag names and their associated
 // field objects, and any error.
-func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cmd[T]) (cmd string, allFlags *Fields, err error) {
-	newArgs, newCmd, err := ParseArgsImpl(cfg, args, "", cmds...)
+func parseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cmd[T]) (cmd string, allFlags *fields, err error) {
+	newArgs, newCmd, err := parseArgsImpl(cfg, args, "", cmds...)
 	if err != nil {
 		return newCmd, allFlags, err
 	}
@@ -195,12 +193,12 @@ func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cm
 		}
 	}
 
-	allFields := &Fields{}
-	AddMetaConfigFields(allFields)
-	AddFields(cfg, allFields, newCmd)
+	allFields := &fields{}
+	addMetaConfigFields(allFields)
+	addFields(cfg, allFields, newCmd)
 
-	allFlags = &Fields{}
-	newArgs, err = AddFlags(allFields, allFlags, newArgs, flags)
+	allFlags = &fields{}
+	newArgs, err = addFlags(allFields, allFlags, newArgs, flags)
 	if err != nil {
 		return newCmd, allFields, err
 	}
@@ -210,11 +208,10 @@ func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cm
 	return newCmd, allFlags, nil
 }
 
-// ParseArgsImpl is the underlying implementation of [ParseArgs] that is called
-// recursively and takes most of what [ParseArgs] does, plus the current command state,
-// and returns most of what [ParseArgs] does, plus the args state. It should typically
-// not be used by end-user code.
-func ParseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd[T]) (args []string, cmd string, err error) {
+// parseArgsImpl is the underlying implementation of [parseArgs] that is called
+// recursively and takes most of what [parseArgs] does, plus the current command state,
+// and returns most of what [parseArgs] does, plus the args state.
+func parseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd[T]) (args []string, cmd string, err error) {
 	// we start with our base args and command
 	args = baseArgs
 	cmd = baseCmd
@@ -262,7 +259,7 @@ func ParseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd
 		// we have consumed our next arg, so we get rid of it
 		args = args[1:]
 		// then, we recursively parse again with our new command as context
-		oargs, ocmd, err := ParseArgsImpl(cfg, args, cmd, cmds...)
+		oargs, ocmd, err := parseArgsImpl(cfg, args, cmd, cmds...)
 		if err != nil {
 			return nil, "", err
 		}
@@ -275,17 +272,17 @@ func ParseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd
 	return
 }
 
-// ParseFlags parses the given flags using the given ordered map of all of the
+// parseFlags parses the given flags using the given ordered map of all of the
 // available flags, setting the values from that map accordingly.
 // Setting errNotFound to true causes flags that are not in allFlags to
 // trigger an error; otherwise, it just skips those. It is recommended
 // that the [ErrNotFound] and [NoErrNotFound] constants be used for the
 // value of errNotFound for clearer code. Also, the flags should be
-// gotten through [GetArgs] first, and the map of available flags should
-// be gotten through [ParseArgs] first.
-func ParseFlags(flags map[string]string, allFlags *Fields, errNotFound bool) error {
+// gotten through [getArgs] first, and the map of available flags should
+// be gotten through [parseArgs] first.
+func parseFlags(flags map[string]string, allFlags *fields, errNotFound bool) error {
 	for name, value := range flags {
-		err := ParseFlag(name, value, allFlags, errNotFound)
+		err := parseFlag(name, value, allFlags, errNotFound)
 		if err != nil {
 			return err
 		}
@@ -293,16 +290,14 @@ func ParseFlags(flags map[string]string, allFlags *Fields, errNotFound bool) err
 	return nil
 }
 
-// ParseFlag parses the flag with the given name and the given value
+// parseFlag parses the flag with the given name and the given value
 // using the given map of all of the available flags, setting the value
 // in that map corresponding to the flag name accordingly. Setting
 // errNotFound = true causes passing a flag name that is not in allFlags
 // to trigger an error; otherwise, it just does nothing and returns no error.
 // It is recommended that the [ErrNotFound] and [NoErrNotFound]
 // constants be used for the value of errNotFound for clearer code.
-// ParseFlag is designed for use in [ParseFlags] and should typically
-// not be used by end-user code.
-func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) error {
+func parseFlag(name string, value string, allFlags *fields, errNotFound bool) error {
 	f, exists := allFlags.ValueByKeyTry(name)
 	if !exists {
 		if errNotFound {
@@ -349,12 +344,12 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 		return fmt.Errorf("flag %q needs an argument", name)
 	}
 
-	return SetFieldValue(f, value)
+	return setFieldValue(f, value)
 }
 
-// SetFieldValue sets the value of the given configuration field
+// setFieldValue sets the value of the given configuration field
 // to the given string argument value.
-func SetFieldValue(f *Field, value string) error {
+func setFieldValue(f *field, value string) error {
 	nptyp := reflectx.NonPointerType(f.Value.Type())
 	vk := nptyp.Kind()
 	switch {
@@ -392,40 +387,40 @@ func SetFieldValue(f *Field, value string) error {
 	return nil
 }
 
-// AddAllCases adds all string cases (kebab-case, snake_case, etc)
+// addAllCases adds all string cases (kebab-case, snake_case, etc)
 // of the given field with the given name to the given set of flags.
-func AddAllCases(nm string, field *Field, allFlags *Fields) {
+func addAllCases(nm string, field *field, allFlags *fields) {
 	if nm == "Includes" {
 		return // skip Includes
 	}
-	for _, nm := range AllCases(nm) {
+	for _, nm := range allCases(nm) {
 		allFlags.Add(nm, field)
 	}
 }
 
-// AllCases returns all of the string cases (kebab-case,
+// allCases returns all of the string cases (kebab-case,
 // snake_case, etc) of the given name.
-func AllCases(nm string) []string {
+func allCases(nm string) []string {
 	return []string{nm, strings.ToLower(nm), strcase.ToKebab(nm), strcase.ToSnake(nm), strcase.ToSNAKE(nm)}
 }
 
-// AddFlags adds to given the given ordered flags map all of the different ways
+// addFlags adds to given the given ordered flags map all of the different ways
 // all of the given fields can can be specified as flags. It also uses the given
 // positional arguments to set the values of the object based on any posarg struct
 // tags that fields have. The posarg struct tag must either be "all", "leftover",
 // or a valid uint. Finally, it also uses the given map of flags passed to the
 // command as context.
-func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[string]string) ([]string, error) {
+func addFlags(allFields *fields, allFlags *fields, args []string, flags map[string]string) ([]string, error) {
 	consumed := map[int]bool{} // which args we have consumed via pos args
-	var leftoverField *Field
+	var leftoverField *field
 	for _, kv := range allFields.Order {
 		v := kv.Value
 		f := v.Field
 
 		for _, name := range v.Names {
-			AddAllCases(name, v, allFlags)
+			addAllCases(name, v, allFlags)
 			if f.Type.Kind() == reflect.Bool {
-				AddAllCases("No"+name, v, allFlags)
+				addAllCases("No"+name, v, allFlags)
 			}
 		}
 
@@ -461,7 +456,7 @@ func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[stri
 					// but otherwise there is an error
 					got := false
 					for _, fnm := range v.Names { // TODO: is there a more efficient way to do this?
-						for _, cnm := range AllCases(fnm) {
+						for _, cnm := range allCases(fnm) {
 							_, ok := flags[cnm]
 							if ok {
 								got = true
@@ -478,7 +473,7 @@ func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[stri
 						return nil, fmt.Errorf("missing positional argument %d (%s)", ui, strcase.ToKebab(v.Names[0]))
 					}
 				}
-				err = SetFieldValue(v, args[ui]) // must be pointer to be settable
+				err = setFieldValue(v, args[ui]) // must be pointer to be settable
 				if err != nil {
 					return nil, fmt.Errorf("error setting field %q to positional argument %d (%q): %w", f.Name, ui, args[ui], err)
 				}

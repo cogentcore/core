@@ -7041,8 +7041,6 @@ var (
 	SurroundSoundFill Icon
 	//go:embed svg/surround_sound.svg
 	SurroundSound Icon
-	//go:embed svg/svg.svg
-	Svg Icon
 	//go:embed svg/swap_horiz-fill.svg
 	SwapHorizFill Icon
 	//go:embed svg/swap_horiz.svg

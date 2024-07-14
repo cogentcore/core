@@ -48,7 +48,7 @@ func (wb *WidgetBase) Style() {
 		return
 	}
 
-	pw := wb.ParentWidget()
+	pw := wb.parentWidget()
 
 	// we do these things even if we are overriding the style
 	defer func() {
@@ -167,15 +167,15 @@ func (wb *WidgetBase) Restyle() {
 // Zero values for element and parent size are ignored.
 func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	rebuild := false
-	var rc *RenderContext
+	var rc *renderContext
 	sz := image.Point{1920, 1280}
 	if sc != nil {
 		rebuild = sc.NeedsRebuild()
-		rc = sc.RenderContext()
-		sz = sc.SceneGeom.Size
+		rc = sc.renderContext()
+		sz = sc.sceneGeom.Size
 	}
 	if rc != nil {
-		st.UnitContext.DPI = rc.LogicalDPI
+		st.UnitContext.DPI = rc.logicalDPI
 	} else {
 		st.UnitContext.DPI = 160
 	}
@@ -193,20 +193,20 @@ func (wb *WidgetBase) ChildBackground(child Widget) image.Image {
 	return wb.Styles.ActualBackground
 }
 
-// ParentActualBackground returns the actual background of
+// parentActualBackground returns the actual background of
 // the parent of the widget. If it has no parent, it returns nil.
-func (wb *WidgetBase) ParentActualBackground() image.Image {
-	pwb := wb.ParentWidget()
+func (wb *WidgetBase) parentActualBackground() image.Image {
+	pwb := wb.parentWidget()
 	if pwb == nil {
 		return nil
 	}
 	return pwb.This.(Widget).ChildBackground(wb.This.(Widget))
 }
 
-// StyleFromTags adds a [WidgetBase.Styler] to the given widget
+// styleFromTags adds a [WidgetBase.Styler] to the given widget
 // to set its style properties based on the given [reflect.StructTag].
 // Width, height, and grow properties are supported.
-func StyleFromTags(w Widget, tags reflect.StructTag) {
+func styleFromTags(w Widget, tags reflect.StructTag) {
 	style := func(tag string, set func(v float32)) {
 		if v, ok := tags.Lookup(tag); ok {
 			f, err := reflectx.ToFloat32(v)

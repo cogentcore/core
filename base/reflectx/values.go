@@ -930,14 +930,43 @@ func ToStringPrec(v any, prec int) string {
 // Note that maps are not reset prior to setting, whereas slices are
 // set to be fully equivalent to the source slice.
 func SetRobust(to, from any) error {
-	if sa, ok := to.(SetAnyer); ok {
+	if AnyIsNil(to) {
+		return fmt.Errorf("got nil destination value")
+	}
+	v := reflect.ValueOf(to)
+	pointer := UnderlyingPointer(v)
+	ti := pointer.Interface()
+
+	typ := pointer.Elem().Type()
+	kind := typ.Kind()
+	if !pointer.Elem().CanSet() {
+		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pointer, pointer)
+	}
+
+	// first we do the generic AssignableTo case
+	if v.Kind() == reflect.Pointer {
+		fv := reflect.ValueOf(from)
+		if fv.IsValid() {
+			if fv.Type().AssignableTo(typ) {
+				pointer.Elem().Set(fv)
+				return nil
+			}
+			ufv := Underlying(fv)
+			if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
+				pointer.Elem().Set(ufv)
+				return nil
+			}
+		}
+	}
+
+	if sa, ok := ti.(SetAnyer); ok {
 		err := sa.SetAny(from)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
-	if ss, ok := to.(SetStringer); ok {
+	if ss, ok := ti.(SetStringer); ok {
 		if s, ok := from.(string); ok {
 			err := ss.SetString(s)
 			if err != nil {
@@ -946,7 +975,7 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 	}
-	if es, ok := to.(enums.EnumSetter); ok {
+	if es, ok := ti.(enums.EnumSetter); ok {
 		if en, ok := from.(enums.Enum); ok {
 			es.SetInt64(en.Int64())
 			return nil
@@ -962,7 +991,7 @@ func SetRobust(to, from any) error {
 		return nil
 	}
 
-	if bv, ok := to.(bools.BoolSetter); ok {
+	if bv, ok := ti.(bools.BoolSetter); ok {
 		fb, err := ToBool(from)
 		if err != nil {
 			return err
@@ -970,7 +999,7 @@ func SetRobust(to, from any) error {
 		bv.SetBool(fb)
 		return nil
 	}
-	if td, ok := to.(*time.Duration); ok {
+	if td, ok := ti.(*time.Duration); ok {
 		if fs, ok := from.(string); ok {
 			fd, err := time.ParseDuration(fs)
 			if err != nil {
@@ -980,12 +1009,9 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 	}
-	if _, ok := to.(color.Color); ok {
-		fc, err := colors.FromAny(from)
-		if err != nil {
-			return err
-		}
-		switch c := to.(type) {
+
+	if fc, err := colors.FromAny(from); err == nil {
+		switch c := ti.(type) {
 		case *color.RGBA:
 			*c = fc
 			return nil
@@ -995,32 +1021,9 @@ func SetRobust(to, from any) error {
 		case SetColorer:
 			c.SetColor(fc)
 			return nil
-		}
-	}
-
-	if AnyIsNil(to) {
-		return fmt.Errorf("got nil destination value")
-	}
-	v := reflect.ValueOf(to)
-	pointer := UnderlyingPointer(v)
-	typ := pointer.Elem().Type()
-	kind := typ.Kind()
-	if !pointer.Elem().CanSet() {
-		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pointer, pointer)
-	}
-
-	if v.Kind() == reflect.Pointer {
-		fv := reflect.ValueOf(from)
-		if fv.IsValid() {
-			if fv.Type().AssignableTo(typ) {
-				pointer.Elem().Set(fv)
-				return nil
-			}
-			ufv := Underlying(fv)
-			if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
-				pointer.Elem().Set(ufv)
-				return nil
-			}
+		case *image.Image:
+			*c = colors.Uniform(fc)
+			return nil
 		}
 	}
 

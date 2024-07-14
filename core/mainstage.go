@@ -15,21 +15,27 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/tree"
 )
 
-// NewMainStage returns a new MainStage with given type and scene contents.
+// newMainStage returns a new MainStage with given type and scene contents.
 // Make further configuration choices using Set* methods, which
-// can be chained directly after the NewMainStage call.
+// can be chained directly after the newMainStage call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewMainStage(typ StageTypes, sc *Scene) *Stage {
+func newMainStage(typ StageTypes, sc *Scene) *Stage {
 	st := &Stage{}
-	st.SetType(typ)
-	st.SetScene(sc)
-	st.Popups = &Stages{}
-	st.Popups.Main = st
+	st.setType(typ)
+	st.setScene(sc)
+	st.popups = &stages{}
+	st.popups.main = st
 	st.Main = st
 	return st
 }
+
+// ExternalParent is a parent widget external to this program.
+// If it is set, [Body.RunMainWindow] will add the [Body] to this
+// parent instead of creating a new window and starting the app loop.
+var ExternalParent Widget
 
 // RunMainWindow creates a new main window from the body,
 // runs it, starts the app's main loop, and waits for all windows
@@ -37,7 +43,21 @@ func NewMainStage(typ StageTypes, sc *Scene) *Stage {
 // the end of their main function. It can not be called more than
 // once for one app. For secondary windows, see [Body.RunWindow].
 func (bd *Body) RunMainWindow() {
-	bd.RunWindow().Wait()
+	if ExternalParent != nil {
+		ExternalParent.AsWidget().AddChild(bd)
+		// we must set the correct scene for each node
+		bd.WalkDown(func(n tree.Node) bool {
+			n.(Widget).AsWidget().Scene = bd.Scene
+			return tree.Continue
+		})
+		// we must not get additional scrollbars here
+		bd.Styler(func(s *styles.Style) {
+			s.Overflow.Set(styles.OverflowVisible)
+		})
+		return
+	}
+	bd.RunWindow()
+	Wait()
 }
 
 // RunWindow returns and runs a new [WindowStage] that is placed in
@@ -54,7 +74,7 @@ func (bd *Body) RunWindow() *Stage {
 // You must call [Stage.Run] to run the window; see [Body.RunWindow]
 // for a version that automatically runs it.
 func (bd *Body) NewWindow() *Stage {
-	ms := NewMainStage(WindowStage, bd.Scene)
+	ms := newMainStage(WindowStage, bd.Scene)
 	ms.SetNewWindow(true)
 	return ms
 }
@@ -64,7 +84,7 @@ func (st *Stage) addDialogParts() *Stage {
 		return st
 	}
 	sc := st.Scene
-	parts := sc.NewParts()
+	parts := sc.newParts()
 	parts.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(0, 1)
@@ -81,16 +101,16 @@ func (st *Stage) addDialogParts() *Stage {
 	mv.OnChange(func(e events.Event) {
 		e.SetHandled()
 		pd := e.PrevDelta()
-		np := sc.SceneGeom.Pos.Add(pd)
+		np := sc.sceneGeom.Pos.Add(pd)
 		np.X = max(np.X, 0)
 		np.Y = max(np.Y, 0)
 		rw := sc.RenderWindow()
 		sz := rw.SystemWindow.Size()
-		mx := sz.X - int(sc.SceneGeom.Size.X)
-		my := sz.Y - int(sc.SceneGeom.Size.Y)
+		mx := sz.X - int(sc.sceneGeom.Size.X)
+		my := sz.Y - int(sc.sceneGeom.Size.Y)
 		np.X = min(np.X, mx)
 		np.Y = min(np.Y, my)
-		sc.SceneGeom.Pos = np
+		sc.sceneGeom.Pos = np
 		sc.NeedsRender()
 	})
 	rsz := NewHandle(parts)
@@ -106,32 +126,28 @@ func (st *Stage) addDialogParts() *Stage {
 	rsz.OnChange(func(e events.Event) {
 		e.SetHandled()
 		pd := e.PrevDelta()
-		np := sc.SceneGeom.Size.Add(pd)
+		np := sc.sceneGeom.Size.Add(pd)
 		minsz := 100
 		np.X = max(np.X, minsz)
 		np.Y = max(np.Y, minsz)
-		ng := sc.SceneGeom
+		ng := sc.sceneGeom
 		ng.Size = np
-		sc.Resize(ng)
+		sc.resize(ng)
 	})
 	return st
 }
 
-func (st *Stage) InheritBars() {
-	st.Scene.InheritBarsWidget(st.Context)
-}
-
-// FirstWindowStages creates a temporary [Stages] for the first window
+// firstWindowStages creates a temporary [stages] for the first window
 // to be able to get sizing information prior to having a RenderWindow,
 // based on the system App Screen Size. Only adds a RenderContext.
-func (st *Stage) FirstWindowStages() *Stages {
-	ms := &Stages{}
-	ms.RenderContext = NewRenderContext()
+func (st *Stage) firstWindowStages() *stages {
+	ms := &stages{}
+	ms.renderContext = newRenderContext()
 	return ms
 }
 
-// ConfigMainStage does main-stage configuration steps
-func (st *Stage) ConfigMainStage() {
+// configMainStage does main-stage configuration steps
+func (st *Stage) configMainStage() {
 	if st.NewWindow {
 		st.FullWindow = true
 	}
@@ -143,23 +159,23 @@ func (st *Stage) ConfigMainStage() {
 		st.Scrim = false
 	}
 	sc := st.Scene
-	sc.MakeSceneBars()
-	sc.MakeSceneWidgets()
+	sc.makeSceneBars()
+	sc.makeSceneWidgets()
 }
 
-// RunWindow runs a Window with current settings.
-func (st *Stage) RunWindow() *Stage {
+// runWindow runs a Window with current settings.
+func (st *Stage) runWindow() *Stage {
 	sc := st.Scene
-	if CurrentRenderWindow == nil {
+	if currentRenderWindow == nil {
 		// If we have no current render window, we need to be in a new window,
 		// and we need a *temporary* Mains to get initial pref size
-		st.SetMains(st.FirstWindowStages())
+		st.setMains(st.firstWindowStages())
 	} else {
-		st.SetMains(&CurrentRenderWindow.Mains)
+		st.setMains(&currentRenderWindow.mains)
 	}
-	st.ConfigMainStage()
+	st.configMainStage()
 
-	sz := st.RenderContext.Geom.Size
+	sz := st.renderContext.geom.Size
 	// offscreen windows always consider pref size because
 	// they must be unbounded by any previous window sizes
 	// non-offscreen mobile windows must take up the whole window
@@ -167,15 +183,15 @@ func (st *Stage) RunWindow() *Stage {
 	// desktop new windows and non-full windows can pref size
 	if TheApp.Platform() == system.Offscreen ||
 		(!TheApp.Platform().IsMobile() &&
-			(st.NewWindow || !st.FullWindow || CurrentRenderWindow == nil)) {
-		sz = sc.PrefSize(sz)
+			(st.NewWindow || !st.FullWindow || currentRenderWindow == nil)) {
+		sz = sc.prefSize(sz)
 		// on offscreen, we don't want any extra space, as we want the smallest
 		// possible representation of the content
 		// also, on offscreen, if the new size is bigger than the current size,
 		// we need to resize the window
 		if TheApp.Platform() == system.Offscreen {
-			if CurrentRenderWindow != nil {
-				csz := CurrentRenderWindow.SystemWindow.Size()
+			if currentRenderWindow != nil {
+				csz := currentRenderWindow.SystemWindow.Size()
 				nsz := csz
 				if sz.X > csz.X {
 					nsz.X = sz.X
@@ -184,7 +200,7 @@ func (st *Stage) RunWindow() *Stage {
 					nsz.Y = sz.Y
 				}
 				if nsz != csz {
-					CurrentRenderWindow.SystemWindow.SetSize(nsz)
+					currentRenderWindow.SystemWindow.SetSize(nsz)
 					system.TheApp.GetScreens()
 				}
 			}
@@ -203,50 +219,50 @@ func (st *Stage) RunWindow() *Stage {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
 
-	if st.NewWindow || CurrentRenderWindow == nil {
-		sc.Resize(math32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
-		win := st.NewRenderWindow()
-		MainRenderWindows.Add(win)
-		CurrentRenderWindow = win
-		win.GoStartEventLoop()
+	if st.NewWindow || currentRenderWindow == nil {
+		sc.resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
+		win := st.newRenderWindow()
+		mainRenderWindows.add(win)
+		currentRenderWindow = win
+		win.goStartEventLoop()
 		return st
 	}
 	if st.Context != nil {
 		ms := st.Context.AsWidget().Scene.Stage.Mains
-		msc := ms.Top().Scene
-		sc.SceneGeom.Size = sz
-		sc.FitInWindow(msc.SceneGeom) // does resize
-		ms.Push(st)
-		st.SetMains(ms)
+		msc := ms.top().Scene
+		sc.sceneGeom.Size = sz
+		sc.fitInWindow(msc.sceneGeom) // does resize
+		ms.push(st)
+		st.setMains(ms)
 	} else {
-		ms := &CurrentRenderWindow.Mains
-		msc := ms.Top().Scene
-		sc.SceneGeom.Size = sz
-		sc.FitInWindow(msc.SceneGeom) // does resize
-		ms.Push(st)
-		st.SetMains(ms)
+		ms := &currentRenderWindow.mains
+		msc := ms.top().Scene
+		sc.sceneGeom.Size = sz
+		sc.fitInWindow(msc.sceneGeom) // does resize
+		ms.push(st)
+		st.setMains(ms)
 	}
 	return st
 }
 
-// GetValidContext ensures that the Context is non-nil and has a valid
+// getValidContext ensures that the Context is non-nil and has a valid
 // Scene pointer, using CurrentRenderWindow if the current Context is not valid.
 // If CurrentRenderWindow is nil (should not happen), then it returns false and
 // the calling function must bail.
-func (st *Stage) GetValidContext() bool {
+func (st *Stage) getValidContext() bool {
 	if st.Context == nil || st.Context.AsTree().This == nil || st.Context.AsWidget().Scene == nil {
-		if CurrentRenderWindow == nil {
+		if currentRenderWindow == nil {
 			slog.Error("Stage.Run: Context is nil and CurrentRenderWindow is nil, so cannot Run", "Name", st.Name, "Title", st.Title)
 			return false
 		}
-		st.Context = CurrentRenderWindow.Mains.Top().Scene
+		st.Context = currentRenderWindow.mains.top().Scene
 	}
 	return true
 }
 
-// RunDialog runs a Dialog with current settings.
-func (st *Stage) RunDialog() *Stage {
-	if !st.GetValidContext() {
+// runDialog runs a Dialog with current settings.
+func (st *Stage) runDialog() *Stage {
+	if !st.getValidContext() {
 		return st
 	}
 	ctx := st.Context.AsWidget()
@@ -254,7 +270,7 @@ func (st *Stage) RunDialog() *Stage {
 	// if our main stages are nil, we wait until our context is shown and then try again
 	if ctx.Scene.Stage == nil || ctx.Scene.Stage.Mains == nil {
 		ctx.OnShow(func(e events.Event) {
-			st.RunDialog()
+			st.runDialog()
 		})
 		return st
 	}
@@ -262,17 +278,17 @@ func (st *Stage) RunDialog() *Stage {
 	ms := ctx.Scene.Stage.Mains
 
 	sc := st.Scene
-	st.ConfigMainStage()
+	st.configMainStage()
 	st.addDialogParts()
-	sc.SceneGeom.Pos = st.Pos
+	sc.sceneGeom.Pos = st.Pos
 
-	st.SetMains(ms) // temporary for prefs
+	st.setMains(ms) // temporary for prefs
 
-	sz := ms.RenderContext.Geom.Size
+	sz := ms.renderContext.geom.Size
 	if !st.FullWindow || st.NewWindow {
-		sz = sc.PrefSize(sz)
+		sz = sc.prefSize(sz)
 		sz = sz.Add(image.Point{50, 50})
-		sc.Events.StartFocusFirst = true // popup dialogs always need focus
+		sc.Events.startFocusFirst = true // popup dialogs always need focus
 	}
 	if DebugSettings.WinRenderTrace {
 		slog.Info("MainStage.RunDialog", "size", sz)
@@ -280,39 +296,38 @@ func (st *Stage) RunDialog() *Stage {
 
 	if st.NewWindow {
 		st.Mains = nil
-		sc.Resize(math32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
+		sc.resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
-		sc.SceneGeom.Pos = image.Point{} // ignore pos
-		win := st.NewRenderWindow()
-		DialogRenderWindows.Add(win)
-		CurrentRenderWindow = win
-		win.GoStartEventLoop()
+		sc.sceneGeom.Pos = image.Point{} // ignore pos
+		win := st.newRenderWindow()
+		dialogRenderWindows.add(win)
+		currentRenderWindow = win
+		win.goStartEventLoop()
 		return st
 	}
-	sc.SceneGeom.Size = sz
-	// fmt.Println("dlg:", sc.SceneGeom, "win:", winGeom)
-	sc.FitInWindow(st.RenderContext.Geom) // does resize
-	ms.Push(st)
+	sc.sceneGeom.Size = sz
+	sc.fitInWindow(st.renderContext.geom) // does resize
+	ms.push(st)
 	// st.SetMains(ms) // already set
 	return st
 }
 
-func (st *Stage) NewRenderWindow() *RenderWindow {
+func (st *Stage) newRenderWindow() *renderWindow {
 	name := st.Name
 	title := st.Title
 	opts := &system.NewWindowOptions{
 		Title:     title,
-		Icon:      AppIconImages(),
-		Size:      st.Scene.SceneGeom.Size,
+		Icon:      appIconImages(),
+		Size:      st.Scene.sceneGeom.Size,
 		StdPixels: false,
 	}
-	wgp := TheWindowGeometrySaver.Pref(title, nil)
+	wgp := theWindowGeometrySaver.pref(title, nil)
 	if TheApp.Platform() != system.Offscreen && wgp != nil {
-		TheWindowGeometrySaver.SettingStart()
-		opts.Size = wgp.Size()
-		opts.Pos = wgp.Pos()
+		theWindowGeometrySaver.settingStart()
+		opts.Size = wgp.size()
+		opts.Pos = wgp.pos()
 		opts.StdPixels = false
-		if _, found := AllRenderWindows.FindName(name); found { // offset from existing
+		if w := AllRenderWindows.FindName(name); w != nil { // offset from existing
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}
@@ -320,44 +335,44 @@ func (st *Stage) NewRenderWindow() *RenderWindow {
 			opts.SetFullscreen()
 		}
 	}
-	win := NewRenderWindow(name, title, opts)
-	TheWindowGeometrySaver.SettingEnd()
+	win := newRenderWindow(name, title, opts)
+	theWindowGeometrySaver.settingEnd()
 	if win == nil {
 		return nil
 	}
-	AllRenderWindows.Add(win)
+	AllRenderWindows.add(win)
 	// initialize Mains
-	win.Mains.RenderWindow = win
-	win.Mains.RenderContext = NewRenderContext() // sets defaults according to Screen
+	win.mains.renderWindow = win
+	win.mains.renderContext = newRenderContext() // sets defaults according to Screen
 	// note: win is not yet created by the OS and we don't yet know its actual size
 	// or dpi.
-	win.Mains.Push(st)
-	st.SetMains(&win.Mains)
+	win.mains.push(st)
+	st.setMains(&win.mains)
 	return win
 }
 
-// MainHandleEvent handles main stage events
-func (st *Stage) MainHandleEvent(e events.Event) {
+// mainHandleEvent handles main stage events
+func (st *Stage) mainHandleEvent(e events.Event) {
 	if st.Scene == nil {
 		return
 	}
-	st.Popups.PopupHandleEvent(e)
-	if e.IsHandled() || (st.Popups != nil && st.Popups.TopIsModal()) {
+	st.popups.popupHandleEvent(e)
+	if e.IsHandled() || (st.popups != nil && st.popups.topIsModal()) {
 		if DebugSettings.EventTrace && e.Type() != events.MouseMove {
 			fmt.Println("Event handled by popup:", e)
 		}
 		return
 	}
-	e.SetLocalOff(st.Scene.SceneGeom.Pos)
-	st.Scene.Events.HandleEvent(e)
+	e.SetLocalOff(st.Scene.sceneGeom.Pos)
+	st.Scene.Events.handleEvent(e)
 }
 
-// MainHandleEvent calls MainHandleEvent on relevant stages in reverse order.
-func (sm *Stages) MainHandleEvent(e events.Event) {
-	n := sm.Stack.Len()
+// mainHandleEvent calls mainHandleEvent on relevant stages in reverse order.
+func (sm *stages) mainHandleEvent(e events.Event) {
+	n := sm.stack.Len()
 	for i := n - 1; i >= 0; i-- {
-		st := sm.Stack.ValueByIndex(i)
-		st.MainHandleEvent(e)
+		st := sm.stack.ValueByIndex(i)
+		st.mainHandleEvent(e)
 		if e.IsHandled() || st.Modal || st.Type == WindowStage || st.FullWindow {
 			break
 		}

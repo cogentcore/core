@@ -5,6 +5,8 @@
 package core
 
 import (
+	"log/slog"
+
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
@@ -12,7 +14,6 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/types"
 )
 
 // RunDialog returns and runs a new [DialogStage] that does not take up
@@ -28,8 +29,8 @@ func (bd *Body) RunDialog(ctx Widget) *Stage {
 // for a version that automatically runs it.
 func (bd *Body) NewDialog(ctx Widget) *Stage {
 	ctx = nonNilContext(ctx)
-	bd.DialogStyles()
-	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
+	bd.dialogStyles()
+	bd.Scene.Stage = newMainStage(DialogStage, bd.Scene)
 	bd.Scene.Stage.SetModal(true)
 	bd.Scene.Stage.SetContext(ctx)
 	bd.Scene.Stage.Pos = ctx.ContextMenuPos(nil)
@@ -48,13 +49,13 @@ func (bd *Body) RunFullDialog(ctx Widget) *Stage {
 // You must call [Stage.Run] to run the dialog; see [Body.RunFullDialog]
 // for a version that automatically runs it.
 func (bd *Body) NewFullDialog(ctx Widget) *Stage {
-	bd.DialogStyles()
-	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
+	bd.dialogStyles()
+	bd.Scene.Stage = newMainStage(DialogStage, bd.Scene)
 	bd.Scene.Stage.SetModal(true)
 	bd.Scene.Stage.SetContext(ctx)
 	bd.Scene.Stage.SetFullWindow(true)
 	if ctx != nil {
-		bd.Scene.InheritBarsWidget(ctx)
+		bd.Scene.inheritBarsWidget(ctx)
 	}
 	return bd.Scene.Stage
 }
@@ -80,7 +81,7 @@ func (bd *Body) NewWindowDialog(ctx Widget) *Stage {
 // finds it, it shows it and returns true. Otherwise, it returns false.
 // See [RecycleMainWindow] for a non-dialog window version.
 func RecycleDialog(data any) bool {
-	rw, got := DialogRenderWindows.FindData(data)
+	rw, got := dialogRenderWindows.findData(data)
 	if !got {
 		return false
 	}
@@ -99,32 +100,34 @@ func MessageDialog(ctx Widget, message string, title ...string) {
 	b.RunDialog(ctx)
 }
 
-// ErrorDialog opens a new Dialog displaying the given error
+// ErrorDialog opens a new dialog displaying the given error
 // in the context of the given widget. An optional title can
 // be provided; if it is not, the title will default to
 // "There was an error". If the given error is nil, no dialog
 // is created.
 func ErrorDialog(ctx Widget, err error, title ...string) {
-	if errors.Log(err) == nil {
+	if err == nil {
 		return
 	}
 	ttl := "There was an error"
 	if len(title) > 0 {
 		ttl = title[0]
 	}
+	// we need to get [errors.CallerInfo] at this level
+	slog.Error(ttl + ": " + err.Error() + " | " + errors.CallerInfo())
 	NewBody(ctx.AsTree().Name + "-error-dialog").AddTitle(ttl).AddText(err.Error()).
 		AddOKOnly().RunDialog(ctx)
 }
 
-// AddOK adds an OK button to given parent Widget (typically in Bottom
-// Bar function), connecting to Close method the Ctrl+Enter keychord event.
-// Close sends a Change event to the Scene for listeners there.
-// Should add an OnClick listener to this button to perform additional
-// specific actions needed beyond Close.
+// AddOK adds an OK button to the given parent widget (typically in
+// [Body.AddBottomBar]), connecting to [keymap.Accept]. Clicking on
+// the OK button automatically results in the dialog being closed;
+// you can add your own [WidgetBase.OnClick] listener to do things
+// beyond that. Also see [Body.AddOKOnly].
 func (bd *Body) AddOK(parent Widget) *Button {
 	bt := NewButton(parent).SetText("OK")
 	bt.OnFirst(events.Click, func(e events.Event) { // first de-focus any active editors
-		bt.FocusClear()
+		bt.focusClear()
 	})
 	bt.OnFinal(events.Click, func(e events.Event) { // then close
 		e.SetHandled() // otherwise propagates to dead elements
@@ -140,52 +143,47 @@ func (bd *Body) AddOK(parent Widget) *Button {
 	return bt
 }
 
-// AddOKOnly just adds an OK button in the BottomBar
-// for simple popup dialogs that just need that one button
+// AddOKOnly adds an OK button to the bottom bar of the [Body] through
+// [Body.AddBottomBar], connecting to [keymap.Accept]. Clicking on the
+// OK button automatically results in the dialog being closed. Also see
+// [Body.AddOK].
 func (bd *Body) AddOKOnly() *Body {
 	bd.AddBottomBar(func(parent Widget) { bd.AddOK(parent) })
 	return bd
 }
 
-// AddCancel adds Cancel button to given parent Widget
-// (typically in Bottom Bar function),
-// connecting to Close method and the Esc keychord event.
-// Close sends a Change event to the Scene for listeners there.
-// Should add an OnClick listener to this button to perform additional
-// specific actions needed beyond Close.
+// AddCancel adds a cancel button to the given parent widget
+// (typically in [Body.AddBottomBar]), connecting to [keymap.Abort].
+// Clicking on the cancel button automatically results in the dialog
+// being closed; you can add your own [WidgetBase.OnClick] listener
+// to do things beyond that.
 func (bd *Body) AddCancel(parent Widget) *Button {
 	bt := NewButton(parent).SetType(ButtonOutlined).SetText("Cancel")
 	bt.OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		bd.Close()
 	})
-	bd.OnFirst(events.KeyChord, func(e events.Event) {
+	abort := func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
 		if kf == keymap.Abort {
 			e.SetHandled()
 			bt.Send(events.Click, e)
 			bd.Close()
 		}
-	})
-	bt.OnFirst(events.KeyChord, func(e events.Event) {
-		kf := keymap.Of(e.KeyChord())
-		if kf == keymap.Abort {
-			e.SetHandled()
-			bt.Send(events.Click, e)
-			bd.Close()
-		}
-	})
+	}
+	bd.OnFirst(events.KeyChord, abort)
+	bt.OnFirst(events.KeyChord, abort)
 	return bt
 }
 
-// Close closes the stage associated with this Body (typically for dialogs)
+// Close closes the [Stage] associated with this [Body] (typically for dialogs).
 func (bd *Body) Close() {
 	bd.Scene.Close()
 }
 
-// DialogStyles sets default stylers for dialog bodies.
+// dialogStyles sets default stylers for dialog bodies.
 // It is automatically called in [Body.NewDialog].
-func (bd *Body) DialogStyles() {
+func (bd *Body) dialogStyles() {
 	bd.Scene.BarsInherit.Top = true
 	bd.Scene.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -199,21 +197,11 @@ func (bd *Body) DialogStyles() {
 	})
 }
 
-// NewItemsData contains the data necessary to make a certain
-// number of items of a certain type, which can be used with a
-// Form in new item dialogs.
-type NewItemsData struct {
-	// Number is the number of elements to create
-	Number int
-	// Type is the type of elements to create
-	Type *types.Type
-}
-
 // nonNilContext returns a non-nil context widget, falling back on the top
 // scene of the current window.
 func nonNilContext(ctx Widget) Widget {
 	if !reflectx.AnyIsNil(ctx) {
 		return ctx
 	}
-	return CurrentRenderWindow.Mains.Top().Scene
+	return currentRenderWindow.mains.top().Scene
 }

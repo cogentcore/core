@@ -20,31 +20,6 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// NoSentenceCaseFor indicates to not transform field names in
-// [Form]s into "Sentence case" for types whose full,
-// package-path-qualified name contains any of these strings.
-// For example, this can be used to disable sentence casing
-// for types with scientific abbreviations in field names,
-// which are more readable when not sentence cased. However,
-// this should not be needed in most circumstances.
-var NoSentenceCaseFor []string
-
-// NoSentenceCaseForType returns whether the given fully
-// package-path-qualified name contains anything in the
-// [NoSentenceCaseFor] list.
-func NoSentenceCaseForType(tnm string) bool {
-	return slices.ContainsFunc(NoSentenceCaseFor, func(s string) bool {
-		return strings.Contains(tnm, s)
-	})
-}
-
-// structField represents the values of one struct field being viewed.
-type structField struct {
-	path          string
-	field         reflect.StructField
-	value, parent reflect.Value
-}
-
 // Form represents a struct with rows of field names and editable values.
 type Form struct {
 	Frame
@@ -58,18 +33,42 @@ type Form struct {
 	// structFields are the fields of the current struct.
 	structFields []*structField
 
-	// isShouldShower is whether the struct implements [ShouldShower], which results
+	// isShouldDisplayer is whether the struct implements [ShouldDisplayer], which results
 	// in additional updating being done at certain points.
-	isShouldShower bool
+	isShouldDisplayer bool
 }
 
-// ShouldShower is an interface determining when you should take a shower.
-// Actually, it determines whether a named field should be displayed
-// in [Form].
-type ShouldShower interface {
+// structField represents the values of one struct field being viewed.
+type structField struct {
+	path          string
+	field         reflect.StructField
+	value, parent reflect.Value
+}
 
-	// ShouldShow returns whether the given named field should be displayed.
-	ShouldShow(field string) bool
+// NoSentenceCaseFor indicates to not transform field names in
+// [Form]s into "Sentence case" for types whose full,
+// package-path-qualified name contains any of these strings.
+// For example, this can be used to disable sentence casing
+// for types with scientific abbreviations in field names,
+// which are more readable when not sentence cased. However,
+// this should not be needed in most circumstances.
+var NoSentenceCaseFor []string
+
+// noSentenceCaseForType returns whether the given fully
+// package-path-qualified name contains anything in the
+// [NoSentenceCaseFor] list.
+func noSentenceCaseForType(tnm string) bool {
+	return slices.ContainsFunc(NoSentenceCaseFor, func(s string) bool {
+		return strings.Contains(tnm, s)
+	})
+}
+
+// ShouldDisplayer is an interface that determines whether a named field
+// should be displayed in [Form].
+type ShouldDisplayer interface {
+
+	// ShouldDisplay returns whether the given named field should be displayed.
+	ShouldDisplay(field string) bool
 }
 
 func (fm *Form) WidgetValue() any { return &fm.Struct }
@@ -81,9 +80,9 @@ func (fm *Form) getStructFields() {
 		if field.Tag.Get("display") == "-" {
 			return false
 		}
-		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(ShouldShower); ok {
-			fm.isShouldShower = true
-			if !ss.ShouldShow(field.Name) {
+		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(ShouldDisplayer); ok {
+			fm.isShouldDisplayer = true
+			if !ss.ShouldDisplay(field.Name) {
 				return false
 			}
 		}
@@ -134,7 +133,7 @@ func (fm *Form) Init() {
 
 		sc := true
 		if len(NoSentenceCaseFor) > 0 {
-			sc = !NoSentenceCaseForType(types.TypeNameValue(fm.Struct))
+			sc = !noSentenceCaseForType(types.TypeNameValue(fm.Struct))
 		}
 
 		for i, f := range fm.structFields {
@@ -186,7 +185,8 @@ func (fm *Form) Init() {
 							ErrorSnackbar(w, err, "Error setting default value")
 						} else {
 							w.Update()
-							valueWidget.AsWidget().UpdateChange(e)
+							valueWidget.AsWidget().Update()
+							valueWidget.AsWidget().SendChange(e)
 						}
 					})
 				}
@@ -224,7 +224,7 @@ func (fm *Form) Init() {
 						if hasDef {
 							labelWidget.Update()
 						}
-						if fm.isShouldShower {
+						if fm.isShouldDisplayer {
 							fm.Update()
 						}
 					})
@@ -233,7 +233,7 @@ func (fm *Form) Init() {
 					wb.SetReadOnly(fm.IsReadOnly() || readOnlyTag)
 					if i < len(fm.structFields) {
 						Bind(reflectx.UnderlyingPointer(fm.structFields[i].value).Interface(), w)
-						vc := JoinValueTitle(fm.ValueTitle, label)
+						vc := joinValueTitle(fm.ValueTitle, label)
 						if vc != wb.ValueTitle {
 							wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
 						}
@@ -242,19 +242,4 @@ func (fm *Form) Init() {
 			})
 		}
 	})
-}
-
-// FormDialog opens a dialog (optionally in a new, separate window)
-// for viewing / editing the given struct object, in the context of given ctx widget
-func FormDialog(ctx Widget, stru any, title string, newWindow bool) {
-	d := NewBody().AddTitle(title)
-	NewForm(d).SetStruct(stru)
-	if tb, ok := stru.(ToolbarMaker); ok {
-		d.AddAppBar(tb.MakeToolbar)
-	}
-	ds := d.NewFullDialog(ctx)
-	if newWindow {
-		ds.SetNewWindow(true)
-	}
-	ds.Run()
 }

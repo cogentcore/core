@@ -31,15 +31,19 @@ type Spinner struct {
 	Value float32 `set:"-"`
 
 	// HasMin is whether there is a minimum value to enforce.
+	// It should be set using [Spinner.SetMin].
 	HasMin bool `set:"-"`
 
-	// Min, if HasMin is true, is the the minimum value in range.
+	// Min, if [Spinner.HasMin] is true, is the the minimum value in range.
+	// It should be set using [Spinner.SetMin].
 	Min float32 `set:"-"`
 
 	// HaxMax is whether there is a maximum value to enforce.
+	// It should be set using [Spinner.SetMax].
 	HasMax bool `set:"-"`
 
-	// Max, if HasMax is true, is the maximum value in range.
+	// Max, if [Spinner.HasMax] is true, is the maximum value in range.
+	// It should be set using [Spinner.SetMax].
 	Max float32 `set:"-"`
 
 	// Step is the amount that the up and down buttons and arrow keys
@@ -55,11 +59,11 @@ type Spinner struct {
 	// It defaults to 0.2, and will be at least as big as [Spinner.Step].
 	PageStep float32
 
-	// Prec specifies the precision of decimal places
+	// Precision specifies the precision of decimal places
 	// (total, not after the decimal point) to use in
 	// representing the number. This helps to truncate
 	// small weird floating point values.
-	Prec int
+	Precision int
 
 	// Format is the format string to use for printing the value.
 	// If it unset, %g is used. If it is decimal based
@@ -94,12 +98,13 @@ func (sp *Spinner) Init() {
 	sp.Step = 0.1
 	sp.PageStep = 0.2
 	sp.Max = 1.0
-	sp.Prec = 6
+	sp.Precision = 6
 	sp.SetLeadingIcon(icons.Remove, func(e events.Event) {
-		sp.IncrementValue(-1)
+		sp.incrementValue(-1)
 	}).SetTrailingIcon(icons.Add, func(e events.Event) {
-		sp.IncrementValue(1)
+		sp.incrementValue(1)
 	})
+	sp.Updater(sp.setTextToValue)
 	sp.Styler(func(s *styles.Style) {
 		s.VirtualKeyboard = styles.KeyboardNumber
 		if sp.IsReadOnly() {
@@ -118,11 +123,11 @@ func (sp *Spinner) Init() {
 		}
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
-		sp.IncrementValue(float32(se.Delta.Y))
+		sp.incrementValue(float32(se.Delta.Y))
 	})
 	sp.SetValidator(func() error {
 		text := sp.Text()
-		val, err := sp.StringToValue(text)
+		val, err := sp.stringToValue(text)
 		if err != nil {
 			return err
 		}
@@ -140,16 +145,16 @@ func (sp *Spinner) Init() {
 		switch {
 		case kf == keymap.MoveUp:
 			e.SetHandled()
-			sp.IncrementValue(1)
+			sp.incrementValue(1)
 		case kf == keymap.MoveDown:
 			e.SetHandled()
-			sp.IncrementValue(-1)
+			sp.incrementValue(-1)
 		case kf == keymap.PageUp:
 			e.SetHandled()
-			sp.PageIncrementValue(1)
+			sp.pageIncrementValue(1)
 		case kf == keymap.PageDown:
 			e.SetHandled()
-			sp.PageIncrementValue(-1)
+			sp.pageIncrementValue(-1)
 		}
 	})
 
@@ -170,13 +175,8 @@ func (sp *Spinner) Init() {
 	})
 }
 
-func (sp *Spinner) SetTextToValue() {
-	sp.SetText(sp.ValueToString(sp.Value))
-}
-
-func (sp *Spinner) SizeUp() {
-	sp.SetTextToValue()
-	sp.TextField.SizeUp()
+func (sp *Spinner) setTextToValue() {
+	sp.SetText(sp.valueToString(sp.Value))
 }
 
 // SetMin sets the minimum bound on the value.
@@ -201,39 +201,39 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 	} else if sp.HasMin && sp.Value < sp.Min {
 		sp.Value = sp.Min
 	}
-	sp.Value = math32.Truncate(sp.Value, sp.Prec)
+	sp.Value = math32.Truncate(sp.Value, sp.Precision)
 	if sp.EnforceStep {
 		// round to the nearest step
 		sp.Value = sp.Step * math32.Round(sp.Value/sp.Step)
 	}
-	sp.SetTextToValue()
+	sp.setTextToValue()
 	sp.NeedsRender()
 	return sp
 }
 
-// SetValueAction calls SetValue and also sends a change event.
-func (sp *Spinner) SetValueAction(val float32) *Spinner {
+// setValueEvent calls SetValue and also sends a change event.
+func (sp *Spinner) setValueEvent(val float32) *Spinner {
 	sp.SetValue(val)
 	sp.SendChange()
 	return sp
 }
 
-// IncrementValue increments the value by given number of steps (+ or -),
+// incrementValue increments the value by given number of steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and sends a change event.
-func (sp *Spinner) IncrementValue(steps float32) *Spinner {
+func (sp *Spinner) incrementValue(steps float32) *Spinner {
 	if sp.IsReadOnly() {
 		return sp
 	}
 	val := sp.Value + steps*sp.Step
-	val = sp.WrapAround(val)
-	return sp.SetValueAction(val)
+	val = sp.wrapAround(val)
+	return sp.setValueEvent(val)
 }
 
-// PageIncrementValue increments the value by given number of page steps (+ or -),
+// pageIncrementValue increments the value by given number of page steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and sends a change event.
-func (sp *Spinner) PageIncrementValue(steps float32) *Spinner {
+func (sp *Spinner) pageIncrementValue(steps float32) *Spinner {
 	if sp.IsReadOnly() {
 		return sp
 	}
@@ -241,13 +241,13 @@ func (sp *Spinner) PageIncrementValue(steps float32) *Spinner {
 		sp.PageStep = 2 * sp.Step
 	}
 	val := sp.Value + steps*sp.PageStep
-	val = sp.WrapAround(val)
-	return sp.SetValueAction(val)
+	val = sp.wrapAround(val)
+	return sp.setValueEvent(val)
 }
 
-// WrapAround, if the spinner has a min and a max, converts values less
+// wrapAround, if the spinner has a min and a max, converts values less
 // than min to max and values greater than max to min.
-func (sp *Spinner) WrapAround(val float32) float32 {
+func (sp *Spinner) wrapAround(val float32) float32 {
 	if !sp.HasMin || !sp.HasMax {
 		return val
 	}
@@ -260,8 +260,8 @@ func (sp *Spinner) WrapAround(val float32) float32 {
 	return val
 }
 
-// FormatIsInt returns true if the format string requires an integer value
-func (sp *Spinner) FormatIsInt() bool {
+// formatIsInt returns true if the format string requires an integer value
+func (sp *Spinner) formatIsInt() bool {
 	if sp.Format == "" {
 		return false
 	}
@@ -273,26 +273,26 @@ func (sp *Spinner) FormatIsInt() bool {
 	return false
 }
 
-// ValueToString converts the value to the string representation thereof
-func (sp *Spinner) ValueToString(val float32) string {
+// valueToString converts the value to the string representation thereof
+func (sp *Spinner) valueToString(val float32) string {
 	if sp.Format == "" {
 		return fmt.Sprintf("%g", val)
 	}
-	if sp.FormatIsInt() {
+	if sp.formatIsInt() {
 		return fmt.Sprintf(sp.Format, int64(val))
 	}
 	return fmt.Sprintf(sp.Format, val)
 }
 
-// StringToValue converts the string field back to float value
-func (sp *Spinner) StringToValue(str string) (float32, error) {
+// stringToValue converts the string field back to float value
+func (sp *Spinner) stringToValue(str string) (float32, error) {
 	if sp.Format == "" {
 		f64, err := strconv.ParseFloat(str, 32)
 		return float32(f64), err
 	}
 
 	var err error
-	if sp.FormatIsInt() {
+	if sp.formatIsInt() {
 		var ival int
 		_, err = fmt.Sscanf(str, sp.Format, &ival)
 		if err == nil {
@@ -318,14 +318,14 @@ func (sp *Spinner) StringToValue(str string) (float32, error) {
 
 func (sp *Spinner) WidgetTooltip(pos image.Point) (string, image.Point) {
 	res, rpos := sp.TextField.WidgetTooltip(pos)
-	if sp.Error != nil {
+	if sp.error != nil {
 		return res, rpos
 	}
 	if sp.HasMin {
 		if res != "" {
 			res += " "
 		}
-		res += "(minimum: " + sp.ValueToString(sp.Min)
+		res += "(minimum: " + sp.valueToString(sp.Min)
 		if !sp.HasMax {
 			res += ")"
 		}
@@ -338,7 +338,7 @@ func (sp *Spinner) WidgetTooltip(pos image.Point) (string, image.Point) {
 		} else {
 			res += "("
 		}
-		res += "maximum: " + sp.ValueToString(sp.Max) + ")"
+		res += "maximum: " + sp.valueToString(sp.Max) + ")"
 	}
 	return res, rpos
 }

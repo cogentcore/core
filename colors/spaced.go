@@ -16,13 +16,13 @@ import (
 // This is useful, for example, for assigning colors in graphs.
 func Spaced(idx int) color.RGBA {
 	if matcolor.SchemeIsDark {
-		return SpacedDark(idx)
+		return spacedDark(idx)
 	}
-	return SpacedLight(idx)
+	return spacedLight(idx)
 }
 
-// SpacedLight is the Light mode version of Spaced
-func SpacedLight(idx int) color.RGBA {
+// spacedLight is the light mode version of [Spaced].
+func spacedLight(idx int) color.RGBA {
 	// red, blue, green, yellow, violet, aqua, orange, blueviolet
 	// hues := []float32{30, 280, 140, 110, 330, 200, 70, 305}
 	hues := []float32{25, 255, 150, 105, 340, 210, 60, 300}
@@ -41,8 +41,8 @@ func SpacedLight(idx int) color.RGBA {
 	return hct.New(hue, float32(chroma), tone).AsRGBA()
 }
 
-// SpacedDark is the Dark mode version of Spaced
-func SpacedDark(idx int) color.RGBA {
+// spacedDark is the dark mode version of [Spaced].
+func spacedDark(idx int) color.RGBA {
 	// red, blue, green, yellow, violet, aqua, orange, blueviolet
 	// hues := []float32{30, 280, 140, 110, 330, 200, 70, 305}
 	hues := []float32{25, 255, 150, 105, 340, 210, 60, 300}

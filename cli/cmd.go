@@ -44,10 +44,10 @@ type CmdOrFunc[T any] interface {
 	*Cmd[T] | func(T) error
 }
 
-// CmdFromFunc returns a new [Cmd] object from the given function
+// cmdFromFunc returns a new [Cmd] object from the given function
 // and any information specified on it using comment directives,
 // which requires the use of [types].
-func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
+func cmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 	cmd := &Cmd[T]{
 		Func: fun,
 	}
@@ -79,41 +79,26 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 	return cmd, nil
 }
 
-// CmdFromCmdOrFunc returns a new [Cmd] object from the given
-// [CmdOrFunc] object, using [CmdFromFunc] if it is a function.
-func CmdFromCmdOrFunc[T any, C CmdOrFunc[T]](cmd C) (*Cmd[T], error) {
+// cmdFromCmdOrFunc returns a new [Cmd] object from the given
+// [CmdOrFunc] object, using [cmdFromFunc] if it is a function.
+func cmdFromCmdOrFunc[T any, C CmdOrFunc[T]](cmd C) (*Cmd[T], error) {
 	switch c := any(cmd).(type) {
 	case *Cmd[T]:
 		return c, nil
 	case func(T) error:
-		return CmdFromFunc(c)
+		return cmdFromFunc(c)
 	default:
 		panic(fmt.Errorf("internal/programmer error: cli.CmdFromCmdOrFunc: impossible type %T for command %v", cmd, cmd))
 	}
 }
 
-// CmdsFromFuncs is a helper function that returns a slice
-// of command objects from the given slice of command functions,
-// using [CmdFromFunc].
-func CmdsFromFuncs[T any](funcs []func(T) error) ([]*Cmd[T], error) {
-	res := make([]*Cmd[T], len(funcs))
-	for i, fun := range funcs {
-		cmd, err := CmdFromFunc(fun)
-		if err != nil {
-			return nil, err
-		}
-		res[i] = cmd
-	}
-	return res, nil
-}
-
 // CmdsFromCmdOrFuncs is a helper function that returns a slice
 // of command objects from the given slice of [CmdOrFunc] objects,
-// using [CmdFromCmdOrFunc].
+// using [cmdFromCmdOrFunc].
 func CmdsFromCmdOrFuncs[T any, C CmdOrFunc[T]](cmds []C) ([]*Cmd[T], error) {
 	res := make([]*Cmd[T], len(cmds))
 	for i, cmd := range cmds {
-		cmd, err := CmdFromCmdOrFunc[T, C](cmd)
+		cmd, err := cmdFromCmdOrFunc[T, C](cmd)
 		if err != nil {
 			return nil, err
 		}

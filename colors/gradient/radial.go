@@ -65,7 +65,7 @@ func (r *Radial) AddStop(color color.RGBA, pos float32, opacity ...float32) *Rad
 func (r *Radial) Update(opacity float32, box math32.Box2, objTransform math32.Matrix2) {
 	r.Box = box
 	r.Opacity = opacity
-	r.UpdateBase()
+	r.updateBase()
 
 	c, f, rs := r.Center, r.Focal, r.Radius
 	sz := r.Box.Size()
@@ -87,7 +87,7 @@ func (r *Radial) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 		df := f.Sub(c)
 		if df.X*df.X+df.Y*df.Y > 1 { // Focus outside of circle; use intersection
 			// point of line from center to focus and circle as per SVG specs.
-			nf, intersects := RayCircleIntersectionF(f, c, c, 1-epsilonF)
+			nf, intersects := rayCircleIntersectionF(f, c, c, 1-epsilonF)
 			f = nf
 			if !intersects {
 				f.Set(0, 0)
@@ -117,7 +117,7 @@ func (r *Radial) At(x, y int) color.Color {
 		}
 		d := pt.Sub(r.rCenter)
 		pos := math32.Sqrt(d.X*d.X/(r.rRadius.X*r.rRadius.X) + (d.Y*d.Y)/(r.rRadius.Y*r.rRadius.Y))
-		return r.GetColor(pos)
+		return r.getColor(pos)
 	}
 	if r.rFocal == math32.Vec2(0, 0) {
 		return color.RGBA{} // should not happen
@@ -129,7 +129,7 @@ func (r *Radial) At(x, y int) color.Color {
 	}
 	e := pt.Div(r.rRadius)
 
-	t1, intersects := RayCircleIntersectionF(e, r.rFocal, r.rCenter, 1)
+	t1, intersects := rayCircleIntersectionF(e, r.rFocal, r.rCenter, 1)
 	if !intersects { // In this case, use the last stop color
 		s := r.Stops[len(r.Stops)-1]
 		return s.Color
@@ -143,14 +143,14 @@ func (r *Radial) At(x, y int) color.Color {
 	}
 
 	pos := math32.Sqrt(d.X*d.X+d.Y*d.Y) / math32.Sqrt(td.X*td.X+td.Y*td.Y)
-	return r.GetColor(pos)
+	return r.getColor(pos)
 }
 
-// RayCircleIntersectionF calculates in floating point the points of intersection of
+// rayCircleIntersectionF calculates in floating point the points of intersection of
 // a ray starting at s2 passing through s1 and a circle in fixed point.
 // Returns intersects == false if no solution is possible. If two
-// solutions are possible, the point closest to s2 is returned
-func RayCircleIntersectionF(s1, s2, c math32.Vector2, r float32) (pt math32.Vector2, intersects bool) {
+// solutions are possible, the point closest to s2 is returned.
+func rayCircleIntersectionF(s1, s2, c math32.Vector2, r float32) (pt math32.Vector2, intersects bool) {
 	n := s2.X - c.X // Calculating using 64* rather than divide
 	m := s2.Y - c.Y
 

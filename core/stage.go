@@ -13,164 +13,147 @@ import (
 	"cogentcore.org/core/system"
 )
 
-// StageTypes are the types of Stage containers.
+// StageTypes are the types of [Stage] containers.
 // There are two main categories: MainStage and PopupStage.
-// MainStage are WindowStage and DialogStage: large and potentially
-// complex Scenes that persist until dismissed, and can have
-// Decor widgets that control display.
-// PopupStage are Menu, Tooltip, Snackbar, Chooser that are transitory
-// and simple, without additional decor.
-// MainStages live in a [Stages] associated with a RenderWindow window,
-// and manage their own set of PopupStages via another [Stages].
+// MainStages are [WindowStage] and [DialogStage], which are
+// large and potentially complex [Scene]s that persist until
+// dismissed. PopupStages are [MenuStage], [TooltipStage],
+// [SnackbarStage], and [CompleterStage], which are transitory
+// and simple, without additional decorations. MainStages live
+// in a [stages] associated with a [renderWindow] and manage
+// their own set of PopupStages via another [stages].
 type StageTypes int32 //enums:enum
 
 const (
-	// WindowStage is a MainStage that displays a Scene in a full window.
-	// One of these must be created first, as the primary App contents,
-	// and it typically persists throughout.  It fills the RenderWindow window.
-	// Additional Windows can be created either within the same RenderWin
-	// (Mobile) or in separate RenderWindow windows (Desktop, NewWindow).
+	// WindowStage is a MainStage that displays a [Scene] in a full window.
+	// One of these must be created first, as the primary app content,
+	// and it typically persists throughout. It fills the [renderWindow].
+	// Additional windows can be created either within the same [renderWindow]
+	// on all platforms or in separate [renderWindow]s on desktop platforms.
 	WindowStage StageTypes = iota
 
-	// DialogStage is a MainStage that displays Scene in a smaller dialog window
-	// on top of a Window, or in its own RenderWindow (on Desktop only).
-	// It can be Modal or not.
+	// DialogStage is a MainStage that displays a [Scene] in a smaller dialog
+	// window on top of a [WindowStage], or in a full or separate window.
+	// It can be [Stage.Modal] or not.
 	DialogStage
 
-	// MenuStage is a PopupStage that displays a Scene with Action Widgets
-	// overlaid on a MainStage.
-	// It is typically Modal and ClickOff, and closes when
-	// an Action is selected.
+	// MenuStage is a PopupStage that displays a [Scene] typically containing
+	// [Button]s overlaid on a MainStage. It is typically [Stage.Modal] and
+	// [Stage.ClickOff], and closes when an button is clicked.
 	MenuStage
 
-	// TooltipStage is a PopupStage that displays a Scene with extra info
-	// overlaid on a MainStage.
-	// It is typically ClickOff and not Modal.
+	// TooltipStage is a PopupStage that displays a [Scene] with extra text
+	// info for a widget overlaid on a MainStage. It is typically [Stage.ClickOff]
+	// and not [Stage.Modal].
 	TooltipStage
 
-	// SnackbarStage is a PopupStage displays a Scene with info and typically
-	// an additional optional Action, usually displayed at the bottom.
-	// It is typically not ClickOff or Modal, but has a timeout.
+	// SnackbarStage is a PopupStage that displays a [Scene] with text info
+	// and an optional additional button. It is displayed at the bottom of the
+	// screen. It is typically not [Stage.ClickOff] or [Stage.Modal], but has a
+	// [Stage.Timeout].
 	SnackbarStage
 
-	// CompleterStage is a PopupStage that displays a Scene with text completions,
-	// spelling corrections, or other such dynamic info.
-	// It is typically ClickOff, not Modal, dynamically updating,
-	// and closes when something is selected or typing renders
-	// it no longer relevant.
+	// CompleterStage is a PopupStage that displays a [Scene] with text completion
+	// options, spelling corrections, or other such dynamic info. It is typically
+	// [Stage.ClickOff], not [Stage.Modal], dynamically updating, and closes when
+	// something is selected or typing renders it no longer relevant.
 	CompleterStage
 )
 
-// IsMain returns true if this type of Stage is a Main stage that manages
+// isMain returns true if this type of Stage is a Main stage that manages
 // its own set of popups
-func (st StageTypes) IsMain() bool {
+func (st StageTypes) isMain() bool {
 	return st <= DialogStage
 }
 
-// IsPopup returns true if this type of Stage is a Popup, managed by another
+// isPopup returns true if this type of Stage is a Popup, managed by another
 // Main stage.
-func (st StageTypes) IsPopup() bool {
-	return !st.IsMain()
+func (st StageTypes) isPopup() bool {
+	return !st.isMain()
 }
 
-// Stage is a container and manager for displaying a Scene
-// in different functional ways, defined by StageTypes, in two categories:
-// Main types (WindowStage and DialogStage) and Popup types
-// (Menu, Tooltip, Snackbar, Chooser).
+// Stage is a container and manager for displaying a [Scene]
+// in different functional ways, defined by [StageTypes].
 type Stage struct { //types:add -setters
-	// type of Stage: determines behavior and Styling
+
+	// Type is the type of [Stage], which determines behavior and styling.
 	Type StageTypes `set:"-"`
 
-	// Scene contents of this Stage (what it displays).
+	// Scene contents of this [Stage] (what it displays).
 	Scene *Scene `set:"-"`
 
-	// widget in another scene that requested this stage to be created
-	// and provides context (stage)
+	// Context is a widget in another scene that requested this stage to be created
+	// and provides context.
 	Context Widget
 
 	// Name is the name of the Stage, which is generally auto-set
-	// based on the Scene Name.
+	// based on the [Scene.Name].
 	Name string
 
 	// Title is the title of the Stage, which is generally auto-set
-	// based on the Scene Title. Used for title of WindowStage and
-	// DialogStage types.
+	// based on the [Body.Title]. It used for the title of [WindowStage]
+	// and [DialogStage] types.
 	Title string
 
 	// Modal, if true, blocks input to all other stages.
 	Modal bool `set:"-"`
 
-	// Scrim, if true, places a darkening scrim over other stages,
-	// if not a full window.
+	// Scrim, if true, places a darkening scrim over other stages.
 	Scrim bool
 
-	// ClickOff, if true, dismisses the Stage if user clicks anywhere
-	// off the Stage.
+	// ClickOff, if true, dismisses the [Stage] if the user clicks anywhere
+	// off of the [Stage].
 	ClickOff bool
 
-	// IgnoreEvents is whether to send no events to the stage and
+	// ignoreEvents is whether to send no events to the stage and
 	// just pass them down to lower stages.
-	IgnoreEvents bool
+	ignoreEvents bool
 
-	// NewWindow, if true, opens a WindowStage or DialogStage in its own
-	// separate operating system window (RenderWindow).  This is true by
-	// default for WindowStage on non-mobile platforms, otherwise false.
+	// NewWindow, if true, opens a [WindowStage] or [DialogStage] in its own
+	// separate operating system window ([renderWindow]). This is true by
+	// default for [WindowStage] on non-mobile platforms, otherwise false.
 	NewWindow bool
 
-	// FullWindow, if NewWindow is false, makes DialogStages and
-	// WindowStages take up the entire window they are created in.
+	// FullWindow, if [Stage.NewWindow] is false, makes [DialogStage]s and
+	// [WindowStage]s take up the entire window they are created in.
 	FullWindow bool
 
 	// CloseOnBack is whether to close the stage when the back button
 	// is pressed in the app bar. Otherwise, it goes back to the next
 	// stage but keeps this one open. This is on by default for
-	// DialogStages and off for WindowStages.
+	// [DialogStage]s and off for [WindowStage]s.
 	CloseOnBack bool
 
-	// Closeable, if true, includes a close button for closing dialogs.
-	Closeable bool
-
-	// Movable, if true, adds a handle titlebar Decor for moving dialogs.
-	Movable bool
-
-	// Resizable, if true, adds a resize handle Decor for resizing dialogs.
-	Resizable bool
-
 	// Timeout, if greater than 0, results in a popup stages disappearing
-	// after a timeout duration.
+	// after this timeout duration.
 	Timeout time.Duration
 
-	// Pos is the target position for Scene to be placed within RenderWindow.
+	// Pos is the target position for the [Stage] to be placed within
+	// the surrounding window.
 	Pos image.Point
 
-	// Data is item represented by this main stage; used for recycling windows
-	Data any
-
-	// If a popup stage, this is the main stage that owns it (via its Popups).
+	// If a popup stage, this is the main stage that owns it (via its [Stage.popups]).
 	// If a main stage, it points to itself.
-	Main *Stage
+	Main *Stage `set:"-"`
 
 	// For main stages, this is the stack of the popups within it
 	// (created specifically for the main stage).
-	// For popups, this is the pointer to the Popups within the
+	// For popups, this is the pointer to the popups within the
 	// main stage managing it.
-	Popups *Stages `set:"-"`
+	popups *stages
 
-	// For all stages, this is the main [Stages] that lives in a [RenderWindow]
+	// For all stages, this is the main [Stages] that lives in a [renderWindow]
 	// and manages the main stages.
-	Mains *Stages `set:"-"`
+	Mains *stages `set:"-"`
 
 	// rendering context which has info about the RenderWindow onto which we render.
 	// This should be used instead of the RenderWindow itself for all relevant
-	// rendering information.  This is only available once a Stage is Run,
+	// rendering information. This is only available once a Stage is Run,
 	// and must always be checked for nil.
-	RenderContext *RenderContext
+	renderContext *renderContext
 
-	// sprites are named images that are rendered last overlaying everything else.
-	Sprites Sprites `json:"-" xml:"-"`
-
-	// name of sprite that is being dragged -- sprite event function is responsible for setting this.
-	SpriteDragging string `json:"-" xml:"-"`
+	// Sprites are named images that are rendered last overlaying everything else.
+	Sprites Sprites `json:"-" xml:"-" set:"-"`
 }
 
 func (st *Stage) String() string {
@@ -178,19 +161,16 @@ func (st *Stage) String() string {
 	if st.Scene != nil {
 		str += "  Scene: " + st.Scene.Name
 	}
-	rc := st.RenderContext
+	rc := st.renderContext
 	if rc != nil {
 		str += "  Rc: " + rc.String()
 	}
 	return str
 }
 
-// Note: Set* methods are designed to be called in sequence to efficiently set
-// desired properties.
-
-// SetNameFromString sets the name of this Stage based on existing
+// setNameFromScene sets the name of this Stage based on existing
 // Scene and Type settings.
-func (st *Stage) SetNameFromScene() *Stage {
+func (st *Stage) setNameFromScene() *Stage {
 	if st.Scene == nil {
 		return nil
 	}
@@ -202,35 +182,35 @@ func (st *Stage) SetNameFromScene() *Stage {
 	return st
 }
 
-func (st *Stage) SetScene(sc *Scene) *Stage {
+func (st *Stage) setScene(sc *Scene) *Stage {
 	st.Scene = sc
 	if sc != nil {
 		sc.Stage = st
-		st.SetNameFromScene()
+		st.setNameFromScene()
 	}
 	return st
 }
 
-// SetMains sets the [Stage.Mains] to the given stack of main stages,
+// setMains sets the [Stage.Mains] to the given stack of main stages,
 // and also sets the RenderContext from that.
-func (st *Stage) SetMains(sm *Stages) *Stage {
+func (st *Stage) setMains(sm *stages) *Stage {
 	st.Mains = sm
-	st.RenderContext = sm.RenderContext
+	st.renderContext = sm.renderContext
 	return st
 }
 
-// SetPopups sets the [Stage.Popups] and [Stage.Mains] from the given main
+// setPopups sets the [Stage.Popups] and [Stage.Mains] from the given main
 // stage to which this popup stage belongs.
-func (st *Stage) SetPopups(mainSt *Stage) *Stage {
+func (st *Stage) setPopups(mainSt *Stage) *Stage {
 	st.Main = mainSt
 	st.Mains = mainSt.Mains
-	st.Popups = mainSt.Popups
-	st.RenderContext = st.Mains.RenderContext
+	st.popups = mainSt.popups
+	st.renderContext = st.Mains.renderContext
 	return st
 }
 
-// SetType sets the type and also sets default parameters based on that type
-func (st *Stage) SetType(typ StageTypes) *Stage {
+// setType sets the type and also sets default parameters based on that type
+func (st *Stage) setType(typ StageTypes) *Stage {
 	st.Type = typ
 	switch st.Type {
 	case WindowStage:
@@ -252,7 +232,7 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 		st.Modal = false
 		st.ClickOff = true
 		st.Scrim = false
-		st.IgnoreEvents = true
+		st.ignoreEvents = true
 	case SnackbarStage:
 		st.Modal = false
 	case CompleterStage:
@@ -264,7 +244,7 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 }
 
 // SetModal sets modal flag for blocking other input (for dialogs).
-// Also updates Scrim accordingly if not modal.
+// Also updates [Stage.Scrim] accordingly if not modal.
 func (st *Stage) SetModal(modal bool) *Stage {
 	st.Modal = modal
 	if !st.Modal {
@@ -276,52 +256,46 @@ func (st *Stage) SetModal(modal bool) *Stage {
 // Run runs the stage using the default run behavior based on the type of stage.
 func (st *Stage) Run() *Stage {
 	if system.OnSystemWindowCreated == nil {
-		return st.RunImpl()
+		return st.run()
 	}
 	// need to prevent premature quitting by ensuring
 	// that WinWait is not done until we run the Stage
-	WindowWait.Add(1)
+	windowWait.Add(1)
 	go func() {
 		<-system.OnSystemWindowCreated
 		system.OnSystemWindowCreated = nil // no longer applicable
-		st.RunImpl()
+		st.run()
 		// now that we have run the Stage, WinWait is accurate and
 		// we no longer need to prevent it from being done
-		WindowWait.Done()
+		windowWait.Done()
 	}()
 	return st
 }
 
-// RunImpl is the implementation of [Stage.Run]; it should not typically be called by end-users.
-func (st *Stage) RunImpl() *Stage {
-	// defer func() { system.HandleRecover(recover()) }()
+// run is the implementation of [Stage.Run].
+func (st *Stage) run() *Stage {
+	defer func() { system.HandleRecover(recover()) }()
 	switch st.Type {
 	case WindowStage:
-		return st.RunWindow()
+		return st.runWindow()
 	case DialogStage:
-		return st.RunDialog()
+		return st.runDialog()
 	default:
-		return st.RunPopup()
+		return st.runPopup()
 	}
 }
 
-// Wait waits for all windows to close and runs the main app loop.
-// This should be put at the end of the main function.
-func (st *Stage) Wait() {
-	Wait()
-}
-
-// DoUpdate calls DoUpdate on our Scene and UpdateAll on our Popups for Main types.
+// doUpdate calls doUpdate on our Scene and UpdateAll on our Popups for Main types.
 // returns stageMods = true if any Popup Stages have been modified
 // and sceneMods = true if any Scenes have been modified.
-func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
+func (st *Stage) doUpdate() (stageMods, sceneMods bool) {
 	if st.Scene == nil {
 		return
 	}
-	if st.Type.IsMain() && st.Popups != nil {
-		stageMods, sceneMods = st.Popups.UpdateAll()
+	if st.Type.isMain() && st.popups != nil {
+		stageMods, sceneMods = st.popups.updateAll()
 	}
-	scMods := st.Scene.DoUpdate()
+	scMods := st.Scene.doUpdate()
 	sceneMods = sceneMods || scMods
 	// if scMods {
 	// 	fmt.Println("scene mod", st.Scene.Name)
@@ -329,27 +303,27 @@ func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
 	return
 }
 
-// Raise moves the Stage to the top of its main [Stages]
-// and raises the [RenderWindow] it is in if necessary.
-func (st *Stage) Raise() {
-	if st.Mains.RenderWindow != CurrentRenderWindow {
-		st.Mains.RenderWindow.Raise()
+// raise moves the Stage to the top of its main [stages]
+// and raises the [renderWindow] it is in if necessary.
+func (st *Stage) raise() {
+	if st.Mains.renderWindow != currentRenderWindow {
+		st.Mains.renderWindow.Raise()
 	}
-	st.Mains.MoveToTop(st)
-	CurrentRenderWindow.SetStageTitle(st.Title)
+	st.Mains.moveToTop(st)
+	currentRenderWindow.SetStageTitle(st.Title)
 }
 
-func (st *Stage) Delete() {
-	if st.Type.IsMain() && st.Popups != nil {
-		st.Popups.DeleteAll()
-		st.Sprites.Reset()
+func (st *Stage) delete() {
+	if st.Type.isMain() && st.popups != nil {
+		st.popups.deleteAll()
+		st.Sprites.reset()
 	}
 	if st.Scene != nil {
 		st.Scene.DeleteChildren()
 	}
 	st.Scene = nil
 	st.Main = nil
-	st.Popups = nil
+	st.popups = nil
 	st.Mains = nil
-	st.RenderContext = nil
+	st.renderContext = nil
 }

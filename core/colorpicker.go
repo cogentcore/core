@@ -48,7 +48,7 @@ func (cp *ColorPicker) Init() {
 	colorButton := func(w *Button, c color.Color) {
 		w.Styler(func(s *styles.Style) {
 			s.Background = colors.Uniform(c)
-			s.Padding.Set(units.Dp(16))
+			s.Padding.Set(units.Dp(ConstantSpacing(16)))
 		})
 		w.OnClick(func(e events.Event) {
 			cp.SetColor(c).UpdateChange()
@@ -185,7 +185,7 @@ func (cp *ColorPicker) Init() {
 	})
 }
 
-// ColorButton represents a color value with a button.
+// ColorButton represents a color value with a button that opens a [ColorPicker].
 type ColorButton struct {
 	Button
 	Color color.RGBA

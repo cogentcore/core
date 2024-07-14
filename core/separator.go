@@ -11,7 +11,7 @@ import (
 )
 
 // Separator draws a separator line. It goes in the direction
-// specified by [style.Style.Direction].
+// specified by [styles.Style.Direction].
 type Separator struct {
 	WidgetBase
 }

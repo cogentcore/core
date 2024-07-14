@@ -16,10 +16,10 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// MenuSceneConfigStyles configures the default styles
+// StyleMenuScene configures the default styles
 // for the given pop-up menu frame with the given parent.
 // It should be called on menu frames when they are created.
-func MenuSceneConfigStyles(msc *Scene) {
+func StyleMenuScene(msc *Scene) {
 	msc.Styler(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 		s.Padding.Set(units.Dp(2))
@@ -35,7 +35,7 @@ func MenuSceneConfigStyles(msc *Scene) {
 				kf := keymap.Of(e.KeyChord())
 				switch kf {
 				case keymap.MoveRight:
-					if bt.OpenMenu(e) {
+					if bt.openMenu(e) {
 						e.SetHandled()
 					}
 				case keymap.MoveLeft:
@@ -56,16 +56,16 @@ func MenuSceneConfigStyles(msc *Scene) {
 	})
 }
 
-// NewMenuScene constructs a [Scene] for displaying a menu, using the
+// newMenuScene constructs a [Scene] for displaying a menu, using the
 // given menu constructor function. If no name is provided, it defaults
 // to "menu".  If no menu items added, returns nil.
-func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
+func newMenuScene(menu func(m *Scene), name ...string) *Scene {
 	nm := "menu"
 	if len(name) > 0 {
 		nm = name[0] + "-menu"
 	}
 	msc := NewScene(nm)
-	MenuSceneConfigStyles(msc)
+	StyleMenuScene(msc)
 	menu(msc)
 	if !msc.HasChildren() {
 		return nil
@@ -121,7 +121,7 @@ func NewMenuStage(sc *Scene, ctx Widget, pos image.Point) *Stage {
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
 func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *Stage {
-	return NewMenuStage(NewMenuScene(menu, ctx.AsTree().Name), ctx, pos)
+	return NewMenuStage(newMenuScene(menu, ctx.AsTree().Name), ctx, pos)
 }
 
 // AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].
@@ -132,9 +132,9 @@ func (wb *WidgetBase) AddContextMenu(menu func(m *Scene)) {
 	wb.ContextMenus = append(wb.ContextMenus, menu)
 }
 
-// ApplyContextMenus adds the [Widget.ContextMenus] to the given menu scene
+// applyContextMenus adds the [Widget.ContextMenus] to the given menu scene
 // in reverse order. It also adds separators between each context menu function.
-func (wb *WidgetBase) ApplyContextMenus(m *Scene) {
+func (wb *WidgetBase) applyContextMenus(m *Scene) {
 	for i := len(wb.ContextMenus) - 1; i >= 0; i-- {
 		wb.ContextMenus[i](m)
 
@@ -158,10 +158,10 @@ func (wb *WidgetBase) ContextMenuPos(e events.Event) image.Point {
 	if e != nil {
 		return e.WindowPos()
 	}
-	return wb.WinPos(.5, .5) // center
+	return wb.winPos(.5, .5) // center
 }
 
-func (wb *WidgetBase) HandleWidgetContextMenu() {
+func (wb *WidgetBase) handleWidgetContextMenu() {
 	wb.On(events.ContextMenu, func(e events.Event) {
 		wi := wb.This.(Widget)
 		wi.ShowContextMenu(e)
@@ -171,7 +171,7 @@ func (wb *WidgetBase) HandleWidgetContextMenu() {
 func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 	e.SetHandled() // always
 	wi := wb.This.(Widget)
-	nm := NewMenu(wi.AsWidget().ApplyContextMenus, wi, wi.ContextMenuPos(e))
+	nm := NewMenu(wi.AsWidget().applyContextMenus, wi, wi.ContextMenuPos(e))
 	if nm == nil { // no items
 		return
 	}
@@ -182,7 +182,7 @@ func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 // calling the given function with the index of the selected string.
 // if string == sel, that menu item is selected initially.
 func NewMenuFromStrings(strs []string, sel string, fun func(idx int)) *Scene {
-	return NewMenuScene(func(m *Scene) {
+	return newMenuScene(func(m *Scene) {
 		for i, s := range strs {
 			b := NewButton(m).SetText(s)
 			b.OnClick(func(e events.Event) {

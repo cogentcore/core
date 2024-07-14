@@ -28,9 +28,9 @@ type Splits struct {
 	// same amount of space.
 	Splits []float32
 
-	// SavedSplits is a saved version of the splits that can be restored
+	// savedSplits is a saved version of the splits that can be restored
 	// for dynamic collapse/expand operations.
-	SavedSplits []float32 `set:"-"`
+	savedSplits []float32
 }
 
 func (sl *Splits) Init() {
@@ -75,26 +75,26 @@ func (sl *Splits) Init() {
 		kn := int(knc)
 		if kn == 0 {
 			e.SetHandled()
-			sl.EvenSplits()
+			sl.evenSplits()
 		} else if kn <= len(sl.Children) {
 			e.SetHandled()
 			if sl.Splits[kn-1] <= 0.01 {
-				sl.RestoreChild(kn - 1)
+				sl.restoreChild(kn - 1)
 			} else {
-				sl.CollapseChild(true, kn-1)
+				sl.collapseChild(true, kn-1)
 			}
 		}
 	})
 
 	sl.Updater(func() {
-		sl.UpdateSplits()
+		sl.updateSplits()
 	})
-	parts := sl.NewParts()
+	parts := sl.newParts()
 	parts.Maker(func(p *tree.Plan) {
 		for i := range len(sl.Children) - 1 { // one fewer handle than children
 			tree.AddAt(p, "handle-"+strconv.Itoa(i), func(w *Handle) {
 				w.OnChange(func(e events.Event) {
-					sl.SetSplitAction(w.IndexInParent(), w.Value())
+					sl.setSplit(w.IndexInParent(), w.Value())
 				})
 				w.Styler(func(s *styles.Style) {
 					s.Direction = sl.Styles.Direction
@@ -104,9 +104,9 @@ func (sl *Splits) Init() {
 	})
 }
 
-// UpdateSplits normalizes the splits and ensures that there are as
+// updateSplits normalizes the splits and ensures that there are as
 // many split proportions as children.
-func (sl *Splits) UpdateSplits() *Splits {
+func (sl *Splits) updateSplits() *Splits {
 	sz := len(sl.Children)
 	if sz == 0 {
 		return sl
@@ -119,7 +119,7 @@ func (sl *Splits) UpdateSplits() *Splits {
 		sum += sp
 	}
 	if sum == 0 { // set default even splits
-		sl.EvenSplits()
+		sl.evenSplits()
 		sum = 1
 	} else {
 		norm := 1 / sum
@@ -130,8 +130,8 @@ func (sl *Splits) UpdateSplits() *Splits {
 	return sl
 }
 
-// EvenSplits splits space evenly across all panels
-func (sl *Splits) EvenSplits() {
+// evenSplits splits space evenly across all panels
+func (sl *Splits) evenSplits() {
 	sz := len(sl.Children)
 	if sz == 0 {
 		return
@@ -143,32 +143,32 @@ func (sl *Splits) EvenSplits() {
 	sl.NeedsLayout()
 }
 
-// SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
-func (sl *Splits) SaveSplits() {
+// saveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
+func (sl *Splits) saveSplits() {
 	sz := len(sl.Splits)
 	if sz == 0 {
 		return
 	}
-	if sl.SavedSplits == nil || len(sl.SavedSplits) != sz {
-		sl.SavedSplits = make([]float32, sz)
+	if sl.savedSplits == nil || len(sl.savedSplits) != sz {
+		sl.savedSplits = make([]float32, sz)
 	}
-	copy(sl.SavedSplits, sl.Splits)
+	copy(sl.savedSplits, sl.Splits)
 }
 
-// RestoreSplits restores a previously saved set of splits (if it exists), does an update
-func (sl *Splits) RestoreSplits() {
-	if sl.SavedSplits == nil {
+// restoreSplits restores a previously saved set of splits (if it exists), does an update
+func (sl *Splits) restoreSplits() {
+	if sl.savedSplits == nil {
 		return
 	}
-	sl.SetSplits(sl.SavedSplits...).NeedsLayout()
+	sl.SetSplits(sl.savedSplits...).NeedsLayout()
 }
 
-// CollapseChild collapses given child(ren) (sets split proportion to 0),
+// collapseChild collapses given child(ren) (sets split proportion to 0),
 // optionally saving the prior splits for later Restore function -- does an
 // Update -- triggered by double-click of splitter
-func (sl *Splits) CollapseChild(save bool, idxs ...int) {
+func (sl *Splits) collapseChild(save bool, idxs ...int) {
 	if save {
-		sl.SaveSplits()
+		sl.saveSplits()
 	}
 	sz := len(sl.Children)
 	for _, idx := range idxs {
@@ -176,24 +176,24 @@ func (sl *Splits) CollapseChild(save bool, idxs ...int) {
 			sl.Splits[idx] = 0
 		}
 	}
-	sl.UpdateSplits()
+	sl.updateSplits()
 	sl.NeedsLayout()
 }
 
-// RestoreChild restores given child(ren) -- does an Update
-func (sl *Splits) RestoreChild(idxs ...int) {
+// restoreChild restores given child(ren) -- does an Update
+func (sl *Splits) restoreChild(idxs ...int) {
 	sz := len(sl.Children)
 	for _, idx := range idxs {
 		if idx >= 0 && idx < sz {
 			sl.Splits[idx] = 1.0 / float32(sz)
 		}
 	}
-	sl.UpdateSplits()
+	sl.updateSplits()
 	sl.NeedsLayout()
 }
 
-// IsCollapsed returns true if given split number is collapsed
-func (sl *Splits) IsCollapsed(idx int) bool {
+// isCollapsed returns true if given split number is collapsed
+func (sl *Splits) isCollapsed(idx int) bool {
 	sz := len(sl.Children)
 	if idx >= 0 && idx < sz {
 		return sl.Splits[idx] < 0.01
@@ -201,12 +201,12 @@ func (sl *Splits) IsCollapsed(idx int) bool {
 	return false
 }
 
-// SetSplitAction sets the new splitter value, for given splitter.
+// setSplit sets the new splitter value, for given splitter.
 // New value is 0..1 value of position of that splitter.
 // It is a sum of all the positions up to that point.
 // Splitters are updated to ensure that selected position is achieved,
 // while dividing remainder appropriately.
-func (sl *Splits) SetSplitAction(idx int, nwval float32) {
+func (sl *Splits) setSplit(idx int, nwval float32) {
 	sz := len(sl.Splits)
 	oldsum := float32(0)
 	for i := 0; i <= idx; i++ {
@@ -238,7 +238,7 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 		}
 	}
 	sl.Splits[idx] = uval
-	sl.UpdateSplits()
+	sl.updateSplits()
 	sl.NeedsLayout()
 }
 
@@ -249,13 +249,13 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 	od := dim.Other()
 	cszd := csz.Dim(dim)
 	cszod := csz.Dim(od)
-	sl.UpdateSplits()
+	sl.updateSplits()
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		sw := math32.Round(sl.Splits[i] * cszd)
 		ksz := &kwb.Geom.Size
 		ksz.Alloc.Total.SetDim(dim, sw)
 		ksz.Alloc.Total.SetDim(od, cszod)
-		ksz.SetContentFromTotal(&ksz.Alloc)
+		ksz.setContentFromTotal(&ksz.Alloc)
 		// ksz.Actual = ksz.Alloc
 		return tree.Continue
 	})
@@ -266,13 +266,13 @@ func (sl *Splits) Position() {
 		sl.Frame.Position()
 		return
 	}
-	sl.UpdateSplits()
+	sl.updateSplits()
 	sl.ConfigScrolls()
-	sl.PositionSplits()
-	sl.PositionChildren()
+	sl.positionSplits()
+	sl.positionChildren()
 }
 
-func (sl *Splits) PositionSplits() {
+func (sl *Splits) positionSplits() {
 	if sl.NumChildren() <= 1 {
 		return
 	}
@@ -320,7 +320,7 @@ func (sl *Splits) RenderWidget() {
 			kwi.RenderWidget()
 			return tree.Continue
 		})
-		sl.RenderParts()
+		sl.renderParts()
 		sl.PopBounds()
 	}
 }

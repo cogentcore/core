@@ -9,7 +9,6 @@ import (
 
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/paint"
@@ -110,7 +109,7 @@ func (tb *TreeButton) Init() {
 		tb.SetText(path)
 	})
 	InitValueButton(tb, true, func(d *Body) {
-		InspectorView(d, tb.Tree)
+		makeInspector(d, tb.Tree)
 	})
 }
 
@@ -132,7 +131,7 @@ type IconButton struct {
 
 func (ib *IconButton) WidgetValue() any { return &ib.Icon }
 
-func (ib *IconButton) Init() { // TODO(config): display:"show-name"
+func (ib *IconButton) Init() {
 	ib.Button.Init()
 	ib.Updater(func() {
 		if !ib.Icon.IsSet() {
@@ -153,12 +152,9 @@ func (ib *IconButton) Init() { // TODO(config): display:"show-name"
 		d.SetTitle("Select an icon")
 		si := 0
 		used := maps.Keys(icons.Used)
-		sv := NewList(d)
-		sv.SetSlice(&used).SetSelectedValue(ib.Icon).BindSelect(&si)
-		sv.SetStyleFunc(func(w Widget, s *styles.Style, row int) {
-			w.(*IconButton).SetText(strcase.ToSentence(string(used[row])))
-		})
-		sv.OnChange(func(e events.Event) {
+		ls := NewList(d)
+		ls.SetSlice(&used).SetSelectedValue(ib.Icon).BindSelect(&si)
+		ls.OnChange(func(e events.Event) {
 			ib.Icon = used[si]
 		})
 	})
@@ -185,7 +181,7 @@ func (fb *FontButton) Init() {
 		fi := paint.FontLibrary.FontInfo
 		tb := NewTable(d)
 		tb.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
-		tb.SetStyleFunc(func(w Widget, s *styles.Style, row, col int) {
+		tb.SetTableStyler(func(w Widget, s *styles.Style, row, col int) {
 			if col != 4 {
 				return
 			}

@@ -5,9 +5,16 @@
 package texteditor
 
 import (
+	"fmt"
+
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 )
+
+// maxGrowLines is the maximum number of lines to grow to
+// (subject to other styling constraints).
+const maxGrowLines = 25
 
 // StyleSizes gets the size info based on Style settings.
 func (ed *Editor) StyleSizes() {
@@ -40,9 +47,7 @@ func (ed *Editor) UpdateFromAlloc() {
 	spsz := sty.BoxSpace().Size()
 	asz.SetSub(spsz)
 	sbw := math32.Ceil(ed.Styles.ScrollBarWidth.Dots)
-	// if ed.HasScroll[math32.Y] {
 	asz.X -= sbw
-	// }
 	if ed.HasScroll[math32.X] {
 		asz.Y -= sbw
 	}
@@ -61,13 +66,10 @@ func (ed *Editor) UpdateFromAlloc() {
 }
 
 func (ed *Editor) InternalSizeFromLines() {
-	// sty := &ed.Styles
-	// spc := sty.BoxSpace()
-	ed.totalSize = ed.linesSize // .Add(spc.Size())
+	ed.totalSize = ed.linesSize
 	ed.totalSize.X += ed.LineNumberOffset
 	ed.Geom.Size.Internal = ed.totalSize
 	ed.Geom.Size.Internal.Y += ed.lineHeight
-	// fmt.Println(ed, "total:", ed.TotalSize)
 }
 
 // LayoutAllLines generates paint.Text Renders of lines
@@ -78,16 +80,16 @@ func (ed *Editor) LayoutAllLines() {
 	if ed.lineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
-	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.numLines() == 0 {
 		ed.NLines = 0
 		return
 	}
 	ed.lastFilename = ed.Buffer.Filename
 
 	ed.Buffer.Hi.TabSize = ed.Styles.Text.TabSize
-	ed.NLines = ed.Buffer.NumLines()
+	ed.NLines = ed.Buffer.numLines()
 	buf := ed.Buffer
-	buf.MarkupMu.RLock()
+	buf.markupMu.RLock()
 
 	nln := ed.NLines
 	if nln >= len(buf.Markup) {
@@ -128,7 +130,7 @@ func (ed *Editor) LayoutAllLines() {
 		off += lsz
 		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
 	}
-	buf.MarkupMu.RUnlock()
+	buf.markupMu.RUnlock()
 	ed.linesSize = math32.Vec2(mxwd, off)
 	ed.lastlineLayoutSize = ed.lineLayoutSize
 	ed.InternalSizeFromLines()
@@ -140,7 +142,7 @@ func (ed *Editor) ReLayoutAllLines() {
 	if ed.lineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
-	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.numLines() == 0 {
 		return
 	}
 	if ed.lastlineLayoutSize == ed.lineLayoutSize {
@@ -152,12 +154,45 @@ func (ed *Editor) ReLayoutAllLines() {
 
 // note: Layout reverts to basic Widget behavior for layout if no kids, like us..
 
+func (ed *Editor) SizeUp() {
+	ed.Frame.SizeUp() // sets Actual size based on styles
+	sz := &ed.Geom.Size
+	if ed.Buffer == nil {
+		return
+	}
+	nln := len(ed.Buffer.Lines)
+	if nln == 0 {
+		return
+	}
+	maxh := maxGrowLines * ed.lineHeight
+	ty := min(float32(nln+1)*ed.lineHeight, maxh)
+	if sz.Max.Y > 0 {
+		ty = min(sz.Max.Y, ty)
+	}
+	sz.Actual.Content.Y = ty
+	if core.DebugSettings.LayoutTrace {
+		fmt.Println(ed, "texteditor SizeUp targ:", ty, "nln:", nln, "Actual:", sz.Actual.Content)
+	}
+}
+
 func (ed *Editor) SizeDown(iter int) bool {
 	if iter == 0 {
 		ed.LayoutAllLines()
+		sz := &ed.Geom.Size
+		maxh := maxGrowLines * ed.lineHeight
+		ty := ed.linesSize.Y + 2*ed.lineHeight
+		ty = min(ty, maxh)
+		if sz.Max.Y > 0 {
+			ty = min(sz.Max.Y, ty)
+		}
+		sz.Actual.Content.Y = ty
+		if core.DebugSettings.LayoutTrace {
+			fmt.Println(ed, "texteditor SizeDown iter0 targ:", ty, "linesSize:", ed.linesSize.Y, "Actual:", sz.Actual.Content)
+		}
 	} else {
 		ed.ReLayoutAllLines()
 	}
+
 	redo := ed.Frame.SizeDown(iter)
 	chg := ed.ManageOverflow(iter, true) // this must go first.
 	return redo || chg
@@ -173,8 +208,8 @@ func (ed *Editor) Position() {
 	ed.ConfigScrolls()
 }
 
-func (ed *Editor) ScenePos() {
-	ed.Frame.ScenePos()
+func (ed *Editor) ApplyScenePos() {
+	ed.Frame.ApplyScenePos()
 	ed.PositionScrolls()
 }
 
@@ -183,7 +218,7 @@ func (ed *Editor) ScenePos() {
 // lines (e.g., from word-wrap) is different, then NeedsLayout is called
 // and it returns true.
 func (ed *Editor) LayoutLine(ln int) bool {
-	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 || ln >= len(ed.Renders) {
+	if ed.Buffer == nil || ed.Buffer.numLines() == 0 || ln >= len(ed.Renders) {
 		return false
 	}
 	sty := &ed.Styles
@@ -192,7 +227,7 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	mxwd := float32(ed.linesSize.X)
 	needLay := false
 
-	ed.Buffer.MarkupMu.RLock()
+	ed.Buffer.markupMu.RLock()
 	rn := &ed.Renders[ln]
 	curspans := len(rn.Spans)
 	rn.SetHTMLPre(ed.Buffer.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
@@ -207,7 +242,7 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	if rn.BBox.Size().X > mxwd {
 		needLay = true
 	}
-	ed.Buffer.MarkupMu.RUnlock()
+	ed.Buffer.markupMu.RUnlock()
 
 	if needLay {
 		ed.NeedsLayout()

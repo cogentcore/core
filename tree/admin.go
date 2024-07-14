@@ -19,10 +19,10 @@ import (
 // New returns a new node of the given type with the given optional parent.
 // If the name is unspecified, it defaults to the ID (kebab-case) name of
 // the type, plus the [Node.NumLifetimeChildren] of the parent.
-func New[T NodeValue](parent ...Node) *T {
+func New[T NodeValue](parent ...Node) *T { //yaegi:add
 	n := new(T)
 	ni := any(n).(Node)
-	initNode(ni)
+	InitNode(ni)
 	if len(parent) == 0 {
 		ni.AsTree().SetName(ni.AsTree().NodeType().IDName)
 		return n
@@ -39,15 +39,15 @@ func New[T NodeValue](parent ...Node) *T {
 func NewOfType(typ *types.Type, parent ...Node) Node {
 	if len(parent) == 0 {
 		n := newOfType(typ)
-		initNode(n)
+		InitNode(n)
 		n.AsTree().SetName(n.AsTree().NodeType().IDName)
 		return n
 	}
 	return parent[0].AsTree().NewChild(typ)
 }
 
-// initNode initializes the node.
-func initNode(n Node) {
+// InitNode initializes the node. It should not be called by end-user code.
+func InitNode(n Node) {
 	nb := n.AsTree()
 	if nb.This != n {
 		nb.This = n

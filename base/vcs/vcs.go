@@ -9,7 +9,6 @@ package vcs
 //go:generate core generate
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -17,16 +16,10 @@ import (
 	"github.com/Masterminds/vcs"
 )
 
-var (
-	// ErrUnknownVCS is returned when VCS cannot be determined from the vcs Repo
-	ErrUnknownVCS = errors.New("unknown VCS")
-)
-
-// Repo provides an interface extending vcs.Repo
+// Repo provides an interface extending [vcs.Repo]
 // (https://github.com/Masterminds/vcs)
 // with support for file status information and operations.
 type Repo interface {
-	// vcs.Repo includes those interface functions
 	vcs.Repo
 
 	// Files returns a map of the current files and their status.
@@ -126,8 +119,8 @@ func DetectRepo(path string) vcs.Type {
 	return vcs.NoVCS
 }
 
-// RelPath return the path relative to the repository LocalPath()
-func RelPath(repo Repo, path string) string {
+// relPath return the path relative to the repository LocalPath()
+func relPath(repo Repo, path string) string {
 	relpath, _ := filepath.Rel(repo.LocalPath(), path)
 	return relpath
 }

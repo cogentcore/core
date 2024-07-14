@@ -6,9 +6,9 @@ package core
 
 import (
 	"image"
-	"log/slog"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -17,88 +17,78 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// Icon renders an [svg.SVG] icon.
-// The rendered version is cached for a given size.
+// Icon renders an [icons.Icon].
+// The rendered version is cached for the current size.
 // Icons do not render a background or border independent of their SVG object.
-// The size of on Icon is determined by the [styles.Font.Size] property.
+// The size of an Icon is determined by the [styles.Font.Size] property.
 type Icon struct {
 	WidgetBase
 
-	// icon name that has been set.
-	Icon icons.Icon `set:"-"`
+	// Icon is the [icons.Icon] used to render the [Icon].
+	Icon icons.Icon
 
-	// file name for the loaded icon, if loaded
-	Filename string `set:"-"`
+	// prevIcon is the previously rendered icon.
+	prevIcon icons.Icon
 
-	// SVG drawing of the icon
-	SVG svg.SVG `set:"-" copier:"-"`
+	// svg drawing of the icon
+	svg svg.SVG
 }
 
 func (ic *Icon) WidgetValue() any { return &ic.Icon }
 
 func (ic *Icon) Init() {
 	ic.WidgetBase.Init()
-	ic.SVG.Scale = 1
+	ic.svg.Scale = 1
+
+	ic.Updater(ic.readIcon)
 	ic.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(1))
 	})
 	ic.FinalStyler(func(s *styles.Style) {
-		if ic.SVG.Root != nil {
-			ic.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
+		if ic.svg.Root != nil {
+			ic.svg.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
 		}
 	})
 }
 
-// SetIcon sets the icon, logging error if not found.
-// Does nothing if Icon is already equal to the given icon.
-func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
-	_, err := ic.SetIconTry(icon)
-	if err != nil {
-		slog.Error("error opening icon named", "name", icon, "err", err)
+// readIcon reads the [Icon.Icon] if necessary.
+func (ic *Icon) readIcon() {
+	if ic.Icon == ic.prevIcon {
+		// if nothing has changed, we don't need to read it
+		return
 	}
-	return ic
+	if !ic.Icon.IsSet() {
+		ic.svg.Pixels = nil
+		ic.svg.DeleteAll()
+		ic.prevIcon = ic.Icon
+		return
+	}
+
+	ic.svg.Config(2, 2)
+	err := ic.svg.ReadXML(strings.NewReader(string(ic.Icon)))
+	if errors.Log(err) != nil {
+		return
+	}
+	icons.Used[ic.Icon] = true
+	ic.prevIcon = ic.Icon
 }
 
-// SetIconTry sets the icon, returning error message if not found etc,
-// and returning true if a new icon was actually set.
-// Does nothing and returns false if Icon is already equal to the given icon.
-func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
-	if !icon.IsSet() {
-		ic.Icon = icon
-		ic.SVG.DeleteAll()
-		return false, nil
+// renderSVG renders the [Icon.svg] if necessary.
+func (ic *Icon) renderSVG() {
+	if ic.svg.Root == nil || !ic.svg.Root.HasChildren() {
+		return
 	}
-	if ic.SVG.Root != nil && ic.SVG.Root.HasChildren() && ic.Icon == icon {
-		// fmt.Println("icon already set:", icon)
-		return false, nil
-	}
-	icons.Used[icon] = true
-	ic.SVG.Config(2, 2)
-	err := ic.SVG.ReadXML(strings.NewReader(string(icon)))
-	if err != nil {
-		ic.UpdateWidget()
-		return false, err
-	}
-	ic.Icon = icon
-	// fmt.Println("icon set:", icon)
-	return true, nil
 
-}
-
-// RenderSVG renders the [Icon.SVG] to the [Icon.Pixels] if they need to be updated.
-func (ic *Icon) RenderSVG() {
-	rc := ic.Scene.RenderContext()
-	sv := &ic.SVG
+	sv := &ic.svg
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
-	if !rc.Rebuild && sv.Pixels != nil { // if rebuilding rebuild..
+	if !ic.NeedsRebuild() && sv.Pixels != nil { // if rebuilding then rebuild
 		isz := sv.Pixels.Bounds().Size()
 		// if nothing has changed, we don't need to re-render
 		if isz == sz && sv.Name == string(ic.Icon) && sv.Color == clr {
 			return
 		}
 	}
-	// todo: units context from us to SVG??
 
 	if sz == (image.Point{}) {
 		return
@@ -119,12 +109,12 @@ func (ic *Icon) RenderSVG() {
 }
 
 func (ic *Icon) Render() {
-	ic.RenderSVG()
+	ic.renderSVG()
 
-	if ic.SVG.Pixels == nil {
+	if ic.svg.Pixels == nil {
 		return
 	}
 	r := ic.Geom.ContentBBox
 	sp := ic.Geom.ScrollOffset()
-	draw.Draw(ic.Scene.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
+	draw.Draw(ic.Scene.Pixels, r, ic.svg.Pixels, sp, draw.Over)
 }

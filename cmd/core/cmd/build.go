@@ -47,7 +47,7 @@ func Build(c *config.Config) error { //types:add
 			}
 			return web.Build(c)
 		}
-		err = BuildDesktop(c, platform)
+		err = buildDesktop(c, platform)
 		if err != nil {
 			return fmt.Errorf("build: %w", err)
 		}
@@ -55,9 +55,8 @@ func Build(c *config.Config) error { //types:add
 	return nil
 }
 
-// BuildDesktop builds an executable for the config package for the given desktop platform.
-// BuildDesktop does not check whether platforms are valid, so it should be called through Build in almost all cases.
-func BuildDesktop(c *config.Config, platform config.Platform) error {
+// buildDesktop builds an executable for the config package for the given desktop platform.
+func buildDesktop(c *config.Config, platform config.Platform) error {
 	xc := exec.Major()
 	xc.Env["GOOS"] = platform.OS
 	xc.Env["GOARCH"] = platform.Arch

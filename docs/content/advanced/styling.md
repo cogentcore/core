@@ -11,7 +11,7 @@ As with event handlers, there are three levels of stylers: `First`, regular, and
 You can style all direct children of a container at once using [[core.Widget.OnWidgetAdded]]:
 
 ```Go
-fr := core.NewFrame(parent)
+fr := core.NewFrame(b)
 fr.OnWidgetAdded(func(w core.Widget) {
     w.AsWidget().Styler(func(s *styles.Style) {
         s.Color = colors.Scheme.Error.Base
@@ -25,7 +25,7 @@ core.NewTextField(fr).SetText("Text field")
 You can style all direct children of a certain type in a container:
 
 ```Go
-fr := core.NewFrame(parent)
+fr := core.NewFrame(b)
 fr.OnWidgetAdded(func(w core.Widget) {
     switch w := w.(type) {
     case *core.Button:

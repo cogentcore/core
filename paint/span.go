@@ -518,7 +518,7 @@ func (sr *Span) SetRunePosTBRot(letterSpace, wordSpace, chsz float32, tabSize in
 	sr.LastPos.X = 0
 }
 
-// FindWrapPosLR finds a position to do word wrapping to fit within trgSize --
+// FindWrapPosLR finds a position to do word wrapping to fit within trgSize.
 // RelPos positions must have already been set (e.g., SetRunePosLR)
 func (sr *Span) FindWrapPosLR(trgSize, curSize float32) int {
 	sz := len(sr.Text)
@@ -548,6 +548,7 @@ func (sr *Span) FindWrapPosLR(trgSize, curSize float32) int {
 			idx++
 		}
 	}
+	fitIdx := idx
 	if unicode.IsSpace(sr.Text[idx]) {
 		idx++
 		for idx < sz && unicode.IsSpace(sr.Text[idx]) { // break at END of whitespace
@@ -562,18 +563,8 @@ func (sr *Span) FindWrapPosLR(trgSize, curSize float32) int {
 	if idx > 0 {
 		return idx
 	}
-	// no spaces within size -- find next break going up
-	for idx < sz && !unicode.IsSpace(sr.Text[idx]) {
-		idx++
-	}
-	if idx == sz-1 { // unbreakable
-		return -1
-	}
-	idx++
-	for idx < sz && unicode.IsSpace(sr.Text[idx]) { // break at END of whitespace
-		idx++
-	}
-	return idx
+	// no spaces within size: do a hard break at point
+	return fitIdx
 }
 
 // ZeroPos ensures that the positions start at 0, for LR direction

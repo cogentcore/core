@@ -232,7 +232,7 @@ func TestHCT(t *testing.T) {
 	idx := 0
 	for pct := float32(0); pct <= 1.01; pct += 0.1 {
 		// lc := lin.GetColor(pct)
-		hc := hct.GetColor(pct)
+		hc := hct.getColor(pct)
 		oc := orig[idx]
 		if oc != hc {
 			t.Errorf("original: %#v != %#v\n", oc, hc)

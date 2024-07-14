@@ -17,7 +17,7 @@ import (
 
 func TestAppleBuild(t *testing.T) {
 	t.Skip("TODO: not working and not worth it")
-	if !XCodeAvailable() {
+	if !xCodeAvailable() {
 		t.Skip("Xcode is missing")
 	}
 	c := &config.Config{}
@@ -27,7 +27,7 @@ func TestAppleBuild(t *testing.T) {
 	}()
 	c.Build.Target = []config.Platform{{OS: "ios", Arch: "arm64"}}
 	c.ID = "org.golang.todo"
-	gopath = filepath.SplitList(GoEnv("GOPATH"))[0]
+	gopath = filepath.SplitList(goEnv("GOPATH"))[0]
 	tests := []struct {
 		pkg  string
 		main bool
@@ -49,7 +49,7 @@ func TestAppleBuild(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		teamID, err := DetectTeamID()
+		teamID, err := detectTeamID()
 		if err != nil {
 			t.Fatalf("detecting team ID failed: %v", err)
 		}
@@ -90,7 +90,7 @@ func TestAppleBuild(t *testing.T) {
 	}
 }
 
-var appleMainBuildTmpl = template.Must(InfoplistTmpl.New("output").Parse(`GOMOBILE={{.GOPATH}}/pkg/gomobile
+var appleMainBuildTmpl = template.Must(infoPlistTmpl.New("output").Parse(`GOMOBILE={{.GOPATH}}/pkg/gomobile
 WORK=$WORK
 mkdir -p $WORK/main.xcodeproj
 echo "{{.Xproj}}" > $WORK/main.xcodeproj/project.pbxproj
@@ -106,7 +106,7 @@ xcrun xcodebuild -configuration Release -project $WORK/main.xcodeproj -allowProv
 mv $WORK/build/Release-iphoneos/main.app {{.BuildO}}
 `))
 
-var appleOtherBuildTmpl = template.Must(InfoplistTmpl.New("output").Parse(`GOMOBILE={{.GOPATH}}/pkg/gomobile
+var appleOtherBuildTmpl = template.Must(infoPlistTmpl.New("output").Parse(`GOMOBILE={{.GOPATH}}/pkg/gomobile
 WORK=$WORK
 GOMODCACHE=$GOPATH/pkg/mod GOOS=ios GOARCH=arm64 GOFLAGS=-tags=ios CC=iphoneos-clang CXX=iphoneos-clang++ CGO_CFLAGS=-isysroot iphoneos -miphoneos-version-min=13.0  -arch arm64 CGO_CXXFLAGS=-isysroot iphoneos -miphoneos-version-min=13.0  -arch arm64 CGO_LDFLAGS=-isysroot iphoneos -miphoneos-version-min=13.0  -arch arm64 CGO_ENABLED=1 DARWIN_SDK=iphoneos go build -tags tag1 -x {{.Pkg}}
 GOMODCACHE=$GOPATH/pkg/mod GOOS=ios GOARCH=arm64 GOFLAGS=-tags=ios CC=iphonesimulator-clang CXX=iphonesimulator-clang++ CGO_CFLAGS=-isysroot iphonesimulator -mios-simulator-version-min=13.0  -arch arm64 CGO_CXXFLAGS=-isysroot iphonesimulator -mios-simulator-version-min=13.0  -arch arm64 CGO_LDFLAGS=-isysroot iphonesimulator -mios-simulator-version-min=13.0  -arch arm64 CGO_ENABLED=1 DARWIN_SDK=iphonesimulator go build -tags tag1 -x {{.Pkg}}

@@ -49,14 +49,14 @@ type App struct { //types:add -setters
 	SceneConfig func(sc *Scene)
 }
 
-// appIconImagesCache is a cached version of [AppIconImages].
+// appIconImagesCache is a cached version of [appIconImages].
 var appIconImagesCache []image.Image
 
-// AppIconImages returns a slice of images of sizes 16x16, 32x32, and 48x48
+// appIconImages returns a slice of images of sizes 16x16, 32x32, and 48x48
 // rendered from [AppIcon]. It returns nil if [AppIcon] is "" or if there is
 // an error. It automatically logs any errors. It caches the result for future
 // calls.
-func AppIconImages() []image.Image {
+func appIconImages() []image.Image {
 	if appIconImagesCache != nil {
 		return appIconImagesCache
 	}
@@ -87,10 +87,10 @@ func AppIconImages() []image.Image {
 	return res
 }
 
-// MakeAppBar configures a new top app bar in the given parent.
+// makeAppBar configures a new top app bar in the given parent.
 // It adds a back navigation button and an app chooser,
 // followed by standard overflow menu items.
-func MakeAppBar(parent Widget) {
+func makeAppBar(parent Widget) {
 	tb := NewToolbar(parent)
 	tb.Maker(makeStandardAppBar)
 	if len(tb.Scene.AppBars) > 0 {
@@ -104,17 +104,17 @@ func makeStandardAppBar(p *tree.Plan) {
 	tree.AddAt(p, "back", func(w *Button) {
 		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev).SetTooltip("Back")
 		w.OnClick(func(e events.Event) {
-			if slen := w.Scene.Stage.Mains.Stack.Len(); slen > 1 {
+			if slen := w.Scene.Stage.Mains.stack.Len(); slen > 1 {
 				if w.Scene.Stage.CloseOnBack {
 					w.Scene.Close()
 				} else {
-					w.Scene.Stage.Mains.Stack.ValueByIndex(slen - 2).Raise()
+					w.Scene.Stage.Mains.stack.ValueByIndex(slen - 2).raise()
 				}
 				return
 			}
 			if wlen := len(AllRenderWindows); wlen > 1 {
 				if w.Scene.Stage.CloseOnBack {
-					CurrentRenderWindow.CloseReq()
+					currentRenderWindow.closeReq()
 				}
 				AllRenderWindows[wlen-2].Raise()
 			}
@@ -138,7 +138,7 @@ func makeStandardAppBar(p *tree.Plan) {
 		tree.AddChildInit(w, "text-field", func(w *TextField) {
 			w.Styler(func(s *styles.Style) {
 				s.Background = colors.Scheme.SurfaceContainerHighest
-				if !s.Is(states.Focused) && w.Error == nil {
+				if !s.Is(states.Focused) && w.error == nil {
 					s.Border = styles.Border{}
 				}
 				s.Border.Radius = styles.BorderRadiusFull
@@ -151,7 +151,7 @@ func makeStandardAppBar(p *tree.Plan) {
 
 		w.AddItemsFunc(func() {
 			for _, rw := range AllRenderWindows {
-				for _, kv := range rw.Mains.Stack.Order {
+				for _, kv := range rw.mains.stack.Order {
 					st := kv.Value
 					// we do not include ourself
 					if st == w.Scene.Stage {
@@ -161,7 +161,7 @@ func makeStandardAppBar(p *tree.Plan) {
 						Text:    st.Title,
 						Icon:    icons.Toolbar,
 						Tooltip: "Show " + st.Title,
-						Func:    st.Raise,
+						Func:    st.raise,
 					})
 				}
 			}
@@ -175,7 +175,7 @@ func makeStandardAppBar(p *tree.Plan) {
 			// always displays the search placeholder
 			w.CurrentIndex = -1
 			w.CurrentItem = ChooserItem{}
-			w.ShowCurrentItem()
+			w.showCurrentItem()
 		})
 	})
 }
@@ -235,13 +235,13 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
 		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong).
 			SetKey(keymap.WinFocusNext).OnClick(func(e events.Event) {
-			AllRenderWindows.FocusNext()
+			AllRenderWindows.focusNext()
 		})
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
 			OnClick(func(e events.Event) {
 				win := tb.Scene.RenderWindow()
 				if win != nil {
-					win.Minimize()
+					win.minimize()
 				}
 			})
 		NewSeparator(m)
@@ -249,7 +249,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 			OnClick(func(e events.Event) {
 				win := tb.Scene.RenderWindow()
 				if win != nil {
-					win.CloseReq()
+					win.closeReq()
 				}
 			})
 		quit := NewButton(m).SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q")
@@ -258,18 +258,18 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 		})
 		quit.SetName("quit-app")
 		NewSeparator(m)
-		for _, w := range MainRenderWindows {
+		for _, w := range mainRenderWindows {
 			if w != nil {
-				NewButton(m).SetText(w.Title).OnClick(func(e events.Event) {
+				NewButton(m).SetText(w.title).OnClick(func(e events.Event) {
 					w.Raise()
 				})
 			}
 		}
-		if len(DialogRenderWindows) > 0 {
+		if len(dialogRenderWindows) > 0 {
 			NewSeparator(m)
-			for _, w := range DialogRenderWindows {
+			for _, w := range dialogRenderWindows {
 				if w != nil {
-					NewButton(m).SetText(w.Title).OnClick(func(e events.Event) {
+					NewButton(m).SetText(w.title).OnClick(func(e events.Event) {
 						w.Raise()
 					})
 				}

@@ -13,29 +13,33 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
-	"github.com/anthonynsimon/bild/clone"
 	"golang.org/x/image/draw"
 )
 
-// Image is a widget that renders a static bitmap image.
-// See [styles.ObjectFits] for how to control the image rendering within
+// Image is a widget that renders an [image.Image].
+// See [styles.Style.ObjectFit] to control the image rendering within
 // the allocated size. The default minimum requested size is the pixel
 // size in [units.Dp] units (1/160th of an inch).
 type Image struct {
 	WidgetBase
 
-	// Image is the bitmap image.
-	Image *image.RGBA `xml:"-" json:"-" set:"-"`
+	// Image is the [image.Image].
+	Image image.Image `xml:"-" json:"-"`
 
-	// prevPixels is the cached last rendered image.
-	prevPixels image.Image `xml:"-" json:"-" set:"-"`
+	// prevImage is the cached last [Image.Image].
+	prevImage image.Image
+
+	// prevRenderImage is the cached last rendered image with any transformations applied.
+	prevRenderImage image.Image
 
 	// prevObjectFit is the cached [styles.Style.ObjectFit] of the last rendered image.
-	prevObjectFit styles.ObjectFits `xml:"-" json:"-" set:"-"`
+	prevObjectFit styles.ObjectFits
 
 	// prevSize is the cached allocated size for the last rendered image.
-	prevSize math32.Vector2 `xml:"-" json:"-" set:"-"`
+	prevSize math32.Vector2
 }
+
+func (im *Image) WidgetValue() any { return &im.Image }
 
 func (im *Image) Init() {
 	im.WidgetBase.Init()
@@ -68,15 +72,6 @@ func (im *Image) OpenFS(fsys fs.FS, filename string) error {
 	return nil
 }
 
-// SetImage sets the image to the given image.
-// It copies from the given image into an internal image.
-func (im *Image) SetImage(img image.Image) *Image {
-	im.Image = clone.AsRGBA(img)
-	im.prevPixels = nil
-	im.NeedsRender()
-	return im
-}
-
 func (im *Image) Render() {
 	im.WidgetBase.Render()
 
@@ -87,13 +82,14 @@ func (im *Image) Render() {
 	sp := im.Geom.ScrollOffset()
 
 	var rimg image.Image
-	if im.prevPixels != nil && im.Styles.ObjectFit == im.prevObjectFit && im.Geom.Size.Actual.Content == im.prevSize {
-		rimg = im.prevPixels
+	if im.prevImage == im.Image && im.Styles.ObjectFit == im.prevObjectFit && im.Geom.Size.Actual.Content == im.prevSize {
+		rimg = im.prevRenderImage
 	} else {
-		rimg = im.Styles.ResizeImage(im.Image, im.Geom.Size.Actual.Content)
-		im.prevPixels = rimg
+		im.prevImage = im.Image
 		im.prevObjectFit = im.Styles.ObjectFit
 		im.prevSize = im.Geom.Size.Actual.Content
+		rimg = im.Styles.ResizeImage(im.Image, im.Geom.Size.Actual.Content)
+		im.prevRenderImage = rimg
 	}
 	draw.Draw(im.Scene.Pixels, r, rimg, sp, draw.Over)
 }

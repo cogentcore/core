@@ -26,22 +26,22 @@ func newBodyForSnackbar() *Body {
 func TestSnackbarCustom(t *testing.T) {
 	b := newBodyForSnackbar()
 	b.AssertRenderScreen(t, filepath.Join("snackbar", "text"), func() {
-		NewBody().AddSnackbarText("Files updated").NewSnackbar(b).Run()
+		NewBody().AddSnackbarText("Files updated").RunSnackbar(b)
 	})
 
 	b = newBodyForSnackbar()
 	b.AssertRenderScreen(t, filepath.Join("snackbar", "button"), func() {
-		NewBody().AddSnackbarText("Files updated").AddSnackbarButton("Refresh").NewSnackbar(b).Run()
+		NewBody().AddSnackbarText("Files updated").AddSnackbarButton("Refresh").RunSnackbar(b)
 	})
 
 	b = newBodyForSnackbar()
 	b.AssertRenderScreen(t, filepath.Join("snackbar", "icon"), func() {
-		NewBody().AddSnackbarText("Files updated").AddSnackbarIcon(icons.Close).NewSnackbar(b).Run()
+		NewBody().AddSnackbarText("Files updated").AddSnackbarIcon(icons.Close).RunSnackbar(b)
 	})
 
 	b = newBodyForSnackbar()
 	b.AssertRenderScreen(t, filepath.Join("snackbar", "button-icon"), func() {
-		NewBody().AddSnackbarText("Files updated").AddSnackbarButton("Refresh").AddSnackbarIcon(icons.Close).NewSnackbar(b).Run()
+		NewBody().AddSnackbarText("Files updated").AddSnackbarButton("Refresh").AddSnackbarIcon(icons.Close).RunSnackbar(b)
 	})
 }
 

@@ -20,14 +20,14 @@ import (
 type TimePicker struct {
 	Frame
 
-	// Time is the time that we are viewing
+	// Time is the time that we are viewing.
 	Time time.Time
 
 	// the raw input hour
-	Hour int `set:"-"`
+	hour int
 
-	// whether we are in PM mode (so we have to add 12h to everything)
-	PM bool `set:"-"`
+	// whether we are in pm mode (so we have to add 12h to everything)
+	pm bool
 }
 
 func (tp *TimePicker) WidgetValue() any { return &tp.Time }
@@ -38,16 +38,16 @@ func (tp *TimePicker) Init() {
 		w.SetStep(1).SetEnforceStep(true)
 		w.Updater(func() {
 			if SystemSettings.Clock24 {
-				tp.Hour = tp.Time.Hour()
+				tp.hour = tp.Time.Hour()
 				w.SetMax(24).SetMin(0)
 			} else {
-				tp.Hour = tp.Time.Hour() % 12
-				if tp.Hour == 0 {
-					tp.Hour = 12
+				tp.hour = tp.Time.Hour() % 12
+				if tp.hour == 0 {
+					tp.hour = 12
 				}
 				w.SetMax(12).SetMin(1)
 			}
-			w.SetValue(float32(tp.Hour))
+			w.SetValue(float32(tp.hour))
 		})
 		w.Styler(func(s *styles.Style) {
 			s.Font.Size.Dp(57)
@@ -58,8 +58,8 @@ func (tp *TimePicker) Init() {
 			if hr == 12 && !SystemSettings.Clock24 {
 				hr = 0
 			}
-			tp.Hour = hr
-			if tp.PM {
+			tp.hour = hr
+			if tp.pm {
 				// only add to local variable
 				hr += 12
 			}
@@ -97,12 +97,12 @@ func (tp *TimePicker) Init() {
 		if !SystemSettings.Clock24 {
 			tree.Add(p, func(w *Switches) {
 				w.SetMutex(true).SetAllowNone(false).SetType(SwitchSegmentedButton).SetItems(SwitchItem{Value: "AM"}, SwitchItem{Value: "PM"})
-				tp.PM = tp.Time.Hour() >= 12
+				tp.pm = tp.Time.Hour() >= 12
 				w.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column
 				})
 				w.Updater(func() {
-					if tp.PM {
+					if tp.pm {
 						w.SelectValue("PM")
 					} else {
 						w.SelectValue("AM")
@@ -111,16 +111,16 @@ func (tp *TimePicker) Init() {
 				w.OnChange(func(e events.Event) {
 					si := w.SelectedItem()
 					tt := tp.Time
-					if tp.Hour == 12 {
-						tp.Hour = 0
+					if tp.hour == 12 {
+						tp.hour = 0
 					}
 					switch si.Value {
 					case "AM":
-						tp.PM = false
-						tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tp.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+						tp.pm = false
+						tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tp.hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 					case "PM":
-						tp.PM = true
-						tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tp.Hour+12, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+						tp.pm = true
+						tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tp.hour+12, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 					}
 					tp.SendChange()
 				})
@@ -140,9 +140,8 @@ type DatePicker struct {
 }
 
 // setTime sets the source time and updates the picker.
-func (dp *DatePicker) setTime(tim time.Time) *DatePicker { // TODO(config)
+func (dp *DatePicker) setTime(tim time.Time) {
 	dp.SetTime(tim).UpdateChange()
-	return dp
 }
 
 func (dp *DatePicker) Init() {
@@ -382,7 +381,7 @@ func (di *DurationInput) Init() {
 		w.SetTooltip("The value of time")
 		w.Updater(func() {
 			if di.Unit == "" {
-				di.SetAutoUnit()
+				di.setAutoUnit()
 			}
 			w.SetValue(float32(di.Duration) / float32(durationUnitsMap[di.Unit]))
 		})
@@ -407,8 +406,8 @@ func (di *DurationInput) Init() {
 	})
 }
 
-// SetAutoUnit sets the [DurationInput.Unit] automatically based on the current duration.
-func (di *DurationInput) SetAutoUnit() {
+// setAutoUnit sets the [DurationInput.Unit] automatically based on the current duration.
+func (di *DurationInput) setAutoUnit() {
 	di.Unit = durationUnits[0]
 	for _, u := range durationUnits {
 		if durationUnitsMap[u] > di.Duration {

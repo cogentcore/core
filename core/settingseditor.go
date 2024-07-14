@@ -10,8 +10,9 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// SettingsEditorToolbarBase is the base toolbar configuration function used in [SettingsEditor].
-func SettingsEditorToolbarBase(p *tree.Plan) {
+// settingsEditorToolbarBase is the base toolbar configuration
+// function used in [SettingsEditor].
+func settingsEditorToolbarBase(p *tree.Plan) {
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(AppearanceSettings.SaveScreenZoom).SetIcon(icons.ZoomIn)
 		w.SetAfterFunc(func() {
@@ -20,9 +21,9 @@ func SettingsEditorToolbarBase(p *tree.Plan) {
 		})
 
 		p.Parent.(*Toolbar).AddOverflowMenu(func(m *Scene) {
-			NewFuncButton(m).SetFunc(ResetAllSettings).SetConfirm(true).SetText("Reset settings").SetIcon(icons.Delete)
+			NewFuncButton(m).SetFunc(resetAllSettings).SetConfirm(true).SetText("Reset settings").SetIcon(icons.Delete)
 
-			NewFuncButton(m).SetFunc(AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+			NewFuncButton(m).SetFunc(AppearanceSettings.deleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 			NewFuncButton(m).SetFunc(ProfileToggle).SetShortcut("Control+Alt+R").SetText("Profile performance").SetIcon(icons.Analytics)
 			NewSeparator(m)
 		})
@@ -42,7 +43,7 @@ func SettingsWindow() { //types:add
 // SettingsEditor adds to the given body an editor of user settings.
 func SettingsEditor(b *Body) {
 	b.AddAppBar(func(p *tree.Plan) {
-		SettingsEditorToolbarBase(p)
+		settingsEditorToolbarBase(p)
 		for _, se := range AllSettings {
 			se.MakeToolbar(p)
 		}

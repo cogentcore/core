@@ -31,7 +31,7 @@ func init() {
 			return
 		}
 		ed := AsEditor(w)
-		if !w.AsWidget().StateIs(states.Focused) || !w.IsVisible() {
+		if !w.AsWidget().StateIs(states.Focused) || !w.AsWidget().IsVisible() {
 			ed.blinkOn = false
 			ed.RenderCursor(false)
 		} else {
@@ -46,7 +46,7 @@ func (ed *Editor) StartCursor() {
 	if ed == nil || ed.This == nil {
 		return
 	}
-	if !ed.This.(core.Widget).IsVisible() {
+	if !ed.IsVisible() {
 		return
 	}
 	ed.blinkOn = true
@@ -99,7 +99,7 @@ func (ed *Editor) RenderCursor(on bool) {
 		ms.Sprites.InactivateSprite(spnm)
 		return
 	}
-	if !ed.This.(core.Widget).IsVisible() {
+	if !ed.IsVisible() {
 		return
 	}
 	if ed.Renders == nil {

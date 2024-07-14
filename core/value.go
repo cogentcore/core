@@ -41,8 +41,8 @@ type OnBinder interface {
 
 // Bind binds the given value to the given [Value] such that the values of
 // the two will be linked and updated appropriately after [events.Change] events
-// and during [Widget.UpdateWidget]. It returns the widget to enable method chaining.
-func Bind[T Value](value any, vw T) T {
+// and during [WidgetBase.UpdateWidget]. It returns the widget to enable method chaining.
+func Bind[T Value](value any, vw T) T { //yaegi:add
 	wb := vw.AsWidget()
 	alreadyBound := wb.ValueUpdate != nil
 	wb.ValueUpdate = func() {
@@ -56,7 +56,7 @@ func Bind[T Value](value any, vw T) T {
 		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
 	}
 	if alreadyBound {
-		resetWidgetValue(vw)
+		ResetWidgetValue(vw)
 	}
 	wb.ValueTitle = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))
 	if ob, ok := any(vw).(OnBinder); ok {
@@ -66,21 +66,23 @@ func Bind[T Value](value any, vw T) T {
 	return vw
 }
 
-// If we were already bound to another value previously, we first need to
-// reset the widget value to zero to avoid any issues with the pointer from
-// the old value persisting and being updated. For example, that issue happened
+// ResetWidgetValue resets the [Value] if it was already bound to another value previously.
+// We first need to reset the widget value to zero to avoid any issues with the pointer
+// from the old value persisting and being updated. For example, that issue happened
 // with slice and map pointers persisting in forms when a new struct was set.
-func resetWidgetValue(vw Value) {
+// It should not be called by end-user code; it must be exported since it is referenced
+// in a generic function added to yaegi ([Bind]).
+func ResetWidgetValue(vw Value) {
 	rv := reflect.ValueOf(vw.WidgetValue())
 	if rv.IsValid() && rv.Type().Kind() == reflect.Pointer {
 		rv.Elem().SetZero()
 	}
 }
 
-// JoinValueTitle returns a [WidgetBase.ValueTitle] string composed
+// joinValueTitle returns a [WidgetBase.ValueTitle] string composed
 // of two elements, with a • separator, handling the cases where
 // either or both can be empty.
-func JoinValueTitle(a, b string) string {
+func joinValueTitle(a, b string) string {
 	switch {
 	case a == "":
 		return b
@@ -106,16 +108,16 @@ func InitValueButton(v Value, allowReadOnly bool, make func(d *Body), after ...f
 	}
 	wb.OnClick(func(e events.Event) {
 		if allowReadOnly || !wb.IsReadOnly() {
-			wb.ValueNewWindow = e.HasAnyModifier(key.Shift)
-			OpenValueDialog(v, make, after...)
+			wb.valueNewWindow = e.HasAnyModifier(key.Shift)
+			openValueDialog(v, make, after...)
 		}
 	})
 }
 
-// OpenValueDialog opens a new value dialog for the given [Value] using the
+// openValueDialog opens a new value dialog for the given [Value] using the
 // given function for constructing the dialog and the optional given function
 // to call after the dialog is accepted.
-func OpenValueDialog(v Value, make func(d *Body), after ...func()) {
+func openValueDialog(v Value, make func(d *Body), after ...func()) {
 	opv := reflectx.UnderlyingPointer(reflect.ValueOf(v.WidgetValue()))
 	if !opv.IsValid() {
 		return
@@ -149,7 +151,7 @@ func OpenValueDialog(v Value, make func(d *Body), after ...func()) {
 		})
 	}
 
-	if wb.ValueNewWindow {
+	if wb.valueNewWindow {
 		d.RunWindowDialog(v)
 	} else {
 		d.RunFullDialog(v)

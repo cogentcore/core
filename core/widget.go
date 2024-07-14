@@ -23,7 +23,7 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Widget is the interface that all Cogent Core satisfy.
+// Widget is the interface that all Cogent Core widgets satisfy.
 // The core widget functionality is defined on [WidgetBase],
 // and all higher-level widget types must embed it. This
 // interface only contains the methods that higher-level
@@ -72,11 +72,11 @@ type Widget interface {
 	// Alloc size per Styles settings and widget-specific behavior.
 	Position()
 
-	// ScenePos computes scene-based absolute positions and final BBox
+	// ApplyScenePos computes scene-based absolute positions and final BBox
 	// bounding boxes for rendering, based on relative positions from
 	// Position step and parents accumulated position and scroll offset.
 	// This is the only step needed when scrolling (very fast).
-	ScenePos()
+	ApplyScenePos()
 
 	// Render is the method that widgets should implement to define their
 	// custom rendering steps. It should not typically be called outside of
@@ -118,16 +118,6 @@ type Widget interface {
 	// ContextMenuPos.
 	ShowContextMenu(e events.Event)
 
-	// IsVisible returns true if a node is visible for rendering according
-	// to the [states.Invisible] flag on it or any of its parents.
-	// This flag is also set by [styles.DisplayNone] during [ApplyStyle].
-	// This does *not* check for an empty TotalBBox, indicating that the widget
-	// is out of render range -- that is done by [PushBounds] prior to rendering.
-	// Non-visible nodes are automatically not rendered and do not get
-	// window events.
-	// This call recursively calls the parent, which is typically a short path.
-	IsVisible() bool
-
 	// ChildBackground returns the background color (Image) for given child Widget.
 	// By default, this is just our [Styles.Actualbackground] but it can be computed
 	// specifically for the child (e.g., for zebra stripes in [ListGrid])
@@ -158,23 +148,22 @@ type WidgetBase struct {
 
 	// Parts are a separate tree of sub-widgets that can be used to store
 	// orthogonal parts of a widget when necessary to separate them from children.
-	// For example, trees use parts to separate their internal parts from
+	// For example, [Tree]s use parts to separate their internal parts from
 	// the other child tree nodes. Composite widgets like buttons should
 	// NOT use parts to store their components; parts should only be used when
-	// absolutely necessary. Use [WidgetBase.NewParts] to make the parts.
+	// absolutely necessary. Use [WidgetBase.newParts] to make the parts.
 	Parts *Frame `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// Geom has the full layout geometry for size and position of this Widget
-	Geom GeomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+	// Geom has the full layout geometry for size and position of this widget.
+	Geom geomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
-	// If true, override the computed styles and allow directly editing Styles.
+	// OverrideStyle, if true, indicates override the computed styles of the widget
+	// and allow directly editing [WidgetBase.Styles]. It is typically only set in
+	// the inspector.
 	OverrideStyle bool `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// Styles are styling settings for this widget.
-	// These are set in SetApplyStyle which should be called after any Config
-	// change (e.g., as done by the Update method).  See Stylers for functions
-	// that set all of the styles, ordered from initial base defaults to later
-	// added overrides.
+	// Styles are styling settings for this widget. They are set by
+	// [WidgetBase.Stylers] in [WidgetBase.Style].
 	Styles styles.Style `json:"-" xml:"-" set:"-"`
 
 	// Stylers is a tiered set of functions that are called in sequential
@@ -211,29 +200,34 @@ type WidgetBase struct {
 
 	// ValueUpdate is a function set by [Bind] that is called in
 	// [WidgetBase.UpdateWidget] to update the widget's value from the bound value.
+	// It should not be accessed by end users.
 	ValueUpdate func() `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// ValueOnChange is a function set by [Bind] that is called when
 	// the widget receives an [events.Change] event to update the bound value
-	// from the widget's value.
+	// from the widget's value. It should not be accessed by end users.
 	ValueOnChange func() `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// ValueTitle is the title to display for a dialog for this [Value].
 	ValueTitle string
 
-	// ValueNewWindow indicates that the dialog of a [Value] should be opened
+	// valueNewWindow indicates that the dialog of a [Value] should be opened
 	// as a new window, instead of a typical full window in the same current window.
-	// This is set by [InitValueButton] and handled by [OpenValueDialog].
+	// This is set by [InitValueButton] and handled by [openValueDialog].
 	// This is triggered by holding down the Shift key while clicking on a
 	// [Value] button. Certain values such as [FileButton] may set this to true
 	// in their [InitValueButton] function.
-	ValueNewWindow bool `copier:"-" json:"-" xml:"-"`
+	valueNewWindow bool
 
 	// needsRender is whether the widget needs to be rendered on the next render iteration.
 	needsRender bool
+
+	// firstRender indicates that we were the first to render, and pushed our parent's
+	// bounds, which then need to be popped.
+	firstRender bool
 }
 
-// Init should be called by every Widget type in its custom
+// Init should be called by every [Widget] type in its custom
 // Init if it has one to establish all the default styling
 // and event handling that applies to all widgets.
 func (wb *WidgetBase) Init() {
@@ -271,13 +265,13 @@ func (wb *WidgetBase) Init() {
 	})
 
 	// TODO(kai): maybe move all of these event handling functions into one function
-	wb.HandleWidgetClick()
-	wb.HandleWidgetStateFromMouse()
-	wb.HandleLongHoverTooltip()
-	wb.HandleWidgetStateFromFocus()
-	wb.HandleWidgetContextMenu()
-	wb.HandleWidgetMagnify()
-	wb.HandleValueOnChange()
+	wb.handleWidgetClick()
+	wb.handleWidgetStateFromMouse()
+	wb.handleLongHoverTooltip()
+	wb.handleWidgetStateFromFocus()
+	wb.handleWidgetContextMenu()
+	wb.handleWidgetMagnify()
+	wb.handleValueOnChange()
 
 	wb.Updater(wb.UpdateFromMake)
 }
@@ -287,7 +281,7 @@ func (wb *WidgetBase) Init() {
 // It should be called by all other OnAdd functions defined
 // by widget types.
 func (wb *WidgetBase) OnAdd() {
-	if pwb := wb.ParentWidget(); pwb != nil {
+	if pwb := wb.parentWidget(); pwb != nil {
 		wb.Scene = pwb.Scene
 	}
 	if wb.Parts != nil {
@@ -296,10 +290,10 @@ func (wb *WidgetBase) OnAdd() {
 	}
 }
 
-// SetScene sets the Scene pointer for this widget and all of its children.
-// This can be necessary when creating widgets outside the usual "NewWidget" paradigm,
+// setScene sets the Scene pointer for this widget and all of its children.
+// This can be necessary when creating widgets outside the usual New* paradigm,
 // e.g., when reading from a JSON file.
-func (wb *WidgetBase) SetScene(sc *Scene) {
+func (wb *WidgetBase) setScene(sc *Scene) {
 	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
 		kwb.Scene = sc
 		return tree.Continue
@@ -354,21 +348,21 @@ func (wb *WidgetBase) CopyFieldsFrom(from tree.Node) {
 }
 
 func (wb *WidgetBase) Destroy() {
-	wb.DeleteParts()
+	wb.deleteParts()
 	wb.NodeBase.Destroy()
 }
 
-// DeleteParts deletes the widget's parts (and the children of the parts).
-func (wb *WidgetBase) DeleteParts() {
+// deleteParts deletes the widget's parts (and the children of the parts).
+func (wb *WidgetBase) deleteParts() {
 	if wb.Parts != nil {
 		wb.Parts.Destroy()
 	}
 	wb.Parts = nil
 }
 
-// NewParts makes the [WidgetBase.Parts] if they don't already exist.
+// newParts makes the [WidgetBase.Parts] if they don't already exist.
 // It returns the parts regardless.
-func (wb *WidgetBase) NewParts() *Frame {
+func (wb *WidgetBase) newParts() *Frame {
 	if wb.Parts != nil {
 		return wb.Parts
 	}
@@ -382,42 +376,24 @@ func (wb *WidgetBase) NewParts() *Frame {
 	return wb.Parts
 }
 
-// ParentWidget returns the parent as a [WidgetBase] or nil
+// parentWidget returns the parent as a [WidgetBase] or nil
 // if this is the root and has no parent.
-func (wb *WidgetBase) ParentWidget() *WidgetBase {
+func (wb *WidgetBase) parentWidget() *WidgetBase {
 	if wb.Parent == nil {
 		return nil
 	}
-	return wb.Parent.(Widget).AsWidget()
-}
-
-// ParentWidgetIf returns the nearest widget parent
-// of the widget for which the given function returns true.
-// It returns nil if no such parent is found.
-func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) *WidgetBase {
-	cur := wb
-	for {
-		parent := cur.Parent
-		if parent == nil {
-			return nil
-		}
-		pwi, ok := parent.(Widget)
-		if !ok {
-			return nil
-		}
-		pwb := pwi.AsWidget()
-		if fun(pwb) {
-			return pwb
-		}
-		cur = pwb
+	pw, ok := wb.Parent.(Widget)
+	if ok {
+		return pw.AsWidget()
 	}
+	return nil // the parent may be a non-widget in [tree.UnmarshalRootJSON]
 }
 
-// IsVisible returns true if a node is visible for rendering according
+// IsVisible returns true if a widget is visible for rendering according
 // to the [states.Invisible] flag on it or any of its parents.
-// This flag is also set by [styles.DisplayNone] during [ApplyStyle].
+// This flag is also set by [styles.DisplayNone] during [WidgetBase.Style].
 // This does *not* check for an empty TotalBBox, indicating that the widget
-// is out of render range -- that is done by [PushBounds] prior to rendering.
+// is out of render range; that is done by [WidgetBase.PushBounds] prior to rendering.
 // Non-visible nodes are automatically not rendered and do not get
 // window events.
 // This call recursively calls the parent, which is typically a short path.
@@ -428,7 +404,7 @@ func (wb *WidgetBase) IsVisible() bool {
 	if wb.Parent == nil {
 		return true
 	}
-	return wb.Parent.(Widget).IsVisible()
+	return wb.parentWidget().IsVisible()
 }
 
 // DirectRenderImage uploads image directly into given system.Drawer at given index
@@ -491,26 +467,26 @@ func (wb *WidgetBase) WidgetWalkDown(fun func(kwi Widget, kwb *WidgetBase) bool)
 	})
 }
 
-// WidgetNext returns the next widget in the tree,
+// widgetNext returns the next widget in the tree,
 // including Parts, which are considered to come after Children.
 // returns nil if no more.
-func WidgetNext(w Widget) Widget {
+func widgetNext(w Widget) Widget {
 	wb := w.AsWidget()
 	if !wb.HasChildren() && wb.Parts == nil {
-		return WidgetNextSibling(w)
+		return widgetNextSibling(w)
 	}
 	if wb.HasChildren() {
 		return wb.Child(0).(Widget)
 	}
 	if wb.Parts != nil {
-		return WidgetNext(wb.Parts.This.(Widget))
+		return widgetNext(wb.Parts.This.(Widget))
 	}
 	return nil
 }
 
-// WidgetNextSibling returns next sibling or nil if none,
+// widgetNextSibling returns next sibling or nil if none,
 // including Parts, which are considered to come after Children.
-func WidgetNextSibling(w Widget) Widget {
+func widgetNextSibling(w Widget) Widget {
 	wb := w.AsWidget()
 	if wb.Parent == nil {
 		return nil
@@ -520,13 +496,13 @@ func WidgetNextSibling(w Widget) Widget {
 	if myidx >= 0 && myidx < wb.Parent.AsTree().NumChildren()-1 {
 		return parent.AsTree().Child(myidx + 1).(Widget)
 	}
-	return WidgetNextSibling(parent)
+	return widgetNextSibling(parent)
 }
 
-// WidgetPrev returns the previous widget in the tree,
+// widgetPrev returns the previous widget in the tree,
 // including Parts, which are considered to come after Children.
 // nil if no more.
-func WidgetPrev(w Widget) Widget {
+func widgetPrev(w Widget) Widget {
 	wb := w.AsWidget()
 	if wb.Parent == nil {
 		return nil
@@ -535,42 +511,32 @@ func WidgetPrev(w Widget) Widget {
 	myidx := wb.IndexInParent()
 	if myidx > 0 {
 		nn := parent.AsTree().Child(myidx - 1).(Widget)
-		return WidgetLastChildParts(nn) // go to parts
+		return widgetLastChildParts(nn) // go to parts
 	}
 	// we were children, done
 	return parent
 }
 
-// WidgetLastChildParts returns the last child under given node,
+// widgetLastChildParts returns the last child under given node,
 // or node itself if no children.  Starts with Parts,
-func WidgetLastChildParts(w Widget) Widget {
+func widgetLastChildParts(w Widget) Widget {
 	wb := w.AsWidget()
 	if wb.Parts != nil && wb.Parts.HasChildren() {
-		return WidgetLastChildParts(wb.Parts.Child(wb.Parts.NumChildren() - 1).(Widget))
+		return widgetLastChildParts(wb.Parts.Child(wb.Parts.NumChildren() - 1).(Widget))
 	}
 	if wb.HasChildren() {
-		return WidgetLastChildParts(wb.Child(wb.NumChildren() - 1).(Widget))
+		return widgetLastChildParts(wb.Child(wb.NumChildren() - 1).(Widget))
 	}
 	return w
 }
 
-// WidgetLastChild returns the last child under given node,
-// or node itself if no children. Starts with Children, not Parts
-func WidgetLastChild(w Widget) Widget {
-	wb := w.AsWidget()
-	if wb.HasChildren() {
-		return WidgetLastChildParts(wb.Child(wb.NumChildren() - 1).(Widget))
-	}
-	return w
-}
-
-// WidgetNextFunc returns the next widget in the tree,
+// widgetNextFunc returns the next widget in the tree,
 // including Parts, which are considered to come after children,
 // continuing until the given function returns true.
 // nil if no more.
-func WidgetNextFunc(w Widget, fun func(w Widget) bool) Widget {
+func widgetNextFunc(w Widget, fun func(w Widget) bool) Widget {
 	for {
-		nw := WidgetNext(w)
+		nw := widgetNext(w)
 		if nw == nil {
 			return nil
 		}
@@ -585,13 +551,13 @@ func WidgetNextFunc(w Widget, fun func(w Widget) bool) Widget {
 	}
 }
 
-// WidgetPrevFunc returns the previous widget in the tree,
+// widgetPrevFunc returns the previous widget in the tree,
 // including Parts, which are considered to come after children,
 // continuing until the given function returns true.
 // nil if no more.
-func WidgetPrevFunc(w Widget, fun func(w Widget) bool) Widget {
+func widgetPrevFunc(w Widget, fun func(w Widget) bool) Widget {
 	for {
-		pw := WidgetPrev(w)
+		pw := widgetPrev(w)
 		if pw == nil {
 			return nil
 		}

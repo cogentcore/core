@@ -5,7 +5,7 @@ Cogent Core provides various different types of customizable dialogs with suppor
 You can make a dialog with a text message:
 
 ```Go
-bt := core.NewButton(parent).SetText("Message")
+bt := core.NewButton(b).SetText("Message")
 bt.OnClick(func(e events.Event) {
     core.MessageDialog(bt, "Something happened", "Message")
 })
@@ -14,7 +14,7 @@ bt.OnClick(func(e events.Event) {
 You can make a dialog with an error:
 
 ```Go
-bt := core.NewButton(parent).SetText("Error")
+bt := core.NewButton(b).SetText("Error")
 bt.OnClick(func(e events.Event) {
     core.ErrorDialog(bt, errors.New("invalid encoding format"), "Error loading file")
 })
@@ -23,14 +23,14 @@ bt.OnClick(func(e events.Event) {
 You can also construct a dialog with any content you want. For example, you can make a confirmation dialog:
 
 ```Go
-bt := core.NewButton(parent).SetText("Confirm")
+bt := core.NewButton(b).SetText("Confirm")
 bt.OnClick(func(e events.Event) {
     d := core.NewBody().AddTitle("Confirm").AddText("Send message?")
-    d.AddBottomBar(func(parent core.Widget) {
-        d.AddCancel(parent).OnClick(func(e events.Event) {
+    d.AddBottomBar(func(b core.Widget) {
+        d.AddCancel(b).OnClick(func(e events.Event) {
             core.MessageSnackbar(bt, "Dialog canceled")
         })
-        d.AddOK(parent).OnClick(func(e events.Event) {
+        d.AddOK(b).OnClick(func(e events.Event) {
             core.MessageSnackbar(bt, "Dialog accepted")
         })
     })
@@ -41,13 +41,13 @@ bt.OnClick(func(e events.Event) {
 You can make an input dialog:
 
 ```Go
-bt := core.NewButton(parent).SetText("Input")
+bt := core.NewButton(b).SetText("Input")
 bt.OnClick(func(e events.Event) {
     d := core.NewBody().AddTitle("Input").AddText("What is your name?")
     tf := core.NewTextField(d)
-    d.AddBottomBar(func(parent core.Widget) {
-        d.AddCancel(parent)
-        d.AddOK(parent).OnClick(func(e events.Event) {
+    d.AddBottomBar(func(b core.Widget) {
+        d.AddCancel(b)
+        d.AddOK(b).OnClick(func(e events.Event) {
             core.MessageSnackbar(bt, "Your name is "+tf.Text())
         })
     })
@@ -58,7 +58,7 @@ bt.OnClick(func(e events.Event) {
 You can make a dialog that takes up the entire window:
 
 ```Go
-bt := core.NewButton(parent).SetText("Full window")
+bt := core.NewButton(b).SetText("Full window")
 bt.OnClick(func(e events.Event) {
     d := core.NewBody().AddTitle("Full window dialog")
     d.RunFullDialog(bt)
@@ -68,7 +68,7 @@ bt.OnClick(func(e events.Event) {
 You can make a dialog that opens in a new window on multi-window platforms (not mobile and web):
 
 ```Go
-bt := core.NewButton(parent).SetText("New window")
+bt := core.NewButton(b).SetText("New window")
 bt.OnClick(func(e events.Event) {
     d := core.NewBody().AddTitle("New window dialog")
     d.RunWindowDialog(bt)
@@ -80,8 +80,8 @@ You can confirm that the user wants to close a scene when they try to close it:
 ```go
 b.AddCloseDialog(func(d *core.Body) bool {
     d.AddTitle("Are you sure?").AddText("Are you sure you want to close the Cogent Core Demo?")
-    d.AddBottomBar(func(parent core.Widget) {
-        d.AddOK(parent).SetText("Close").OnClick(func(e events.Event) {
+    d.AddBottomBar(func(b core.Widget) {
+        d.AddOK(b).SetText("Close").OnClick(func(e events.Event) {
             b.Scene.Close()
         })
     })

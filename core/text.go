@@ -30,6 +30,7 @@ type Text struct {
 	Text string
 
 	// Type is the styling type of text to use.
+	// It defaults to [TextBodyLarge].
 	Type TextTypes
 
 	// paintText is the [paint.Text] for the text.
@@ -212,11 +213,11 @@ func (tx *Text) Init() {
 		kf := keymap.Of(e.KeyChord())
 		if kf == keymap.Copy {
 			e.SetHandled()
-			tx.Copy(true)
+			tx.copy()
 		}
 	})
 	tx.On(events.MouseMove, func(e events.Event) {
-		tl, _ := tx.FindLink(e.Pos())
+		tl, _ := tx.findLink(e.Pos())
 		if tl != nil {
 			tx.Styles.Cursor = cursors.Pointer
 		} else {
@@ -233,9 +234,9 @@ func (tx *Text) Init() {
 	})
 }
 
-// FindLink finds the text link at the given scene-local position. If it
+// findLink finds the text link at the given scene-local position. If it
 // finds it, it returns it and its bounds; otherwise, it returns nil.
-func (tx *Text) FindLink(pos image.Point) (*paint.TextLink, image.Rectangle) {
+func (tx *Text) findLink(pos image.Point) (*paint.TextLink, image.Rectangle) {
 	for _, tl := range tx.paintText.Links {
 		// TODO(kai/link): is there a better way to be safe here?
 		if tl.Label == "" {
@@ -253,7 +254,7 @@ func (tx *Text) FindLink(pos image.Point) (*paint.TextLink, image.Rectangle) {
 // on any links that are clicked on.
 func (tx *Text) HandleTextClick(openLink func(tl *paint.TextLink)) {
 	tx.OnClick(func(e events.Event) {
-		tl, _ := tx.FindLink(e.Pos())
+		tl, _ := tx.findLink(e.Pos())
 		if tl == nil {
 			return
 		}
@@ -266,14 +267,14 @@ func (tx *Text) WidgetTooltip(pos image.Point) (string, image.Point) {
 	if pos == image.Pt(-1, -1) {
 		return tx.Tooltip, image.Point{}
 	}
-	tl, bounds := tx.FindLink(pos)
+	tl, bounds := tx.findLink(pos)
 	if tl == nil {
 		return tx.Tooltip, tx.DefaultTooltipPos()
 	}
 	return tl.URL, bounds.Min
 }
 
-func (tx *Text) Copy(reset bool) {
+func (tx *Text) copy() {
 	md := mimedata.NewText(tx.Text)
 	em := tx.Events()
 	if em != nil {
@@ -317,52 +318,19 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	return rsz
 }
 
-// textWrapSizeEstimate is the size to use for layout during the SizeUp pass,
-// for word wrap case, where the sizing actually matters,
-// based on trying to fit the given number of characters into the given content size
-// with given font height.
-func textWrapSizeEstimate(csz math32.Vector2, nChars int, fs *styles.Font) math32.Vector2 {
-	chars := float32(nChars)
-	fht := float32(16)
-	if fs.Face != nil {
-		fht = fs.Face.Metrics.Height
-	}
-	area := chars * fht * fht
-	ratio := float32(1.618) // default to golden
-	if csz.X > 0 && csz.Y > 0 {
-		ratio = csz.X / csz.Y
-		// fmt.Println(lb, "content size ratio:", ratio)
-	}
-	// w = ratio * h
-	// w^2 + h^2 = a
-	// (ratio*h)^2 + h^2 = a
-	h := math32.Sqrt(area) / math32.Sqrt(ratio+1)
-	w := ratio * h
-	if w < csz.X { // must be at least this
-		w = csz.X
-		h = area / w
-		h = max(h, csz.Y)
-	}
-	sz := math32.Vec2(w, h)
-	if DebugSettings.LayoutTrace {
-		fmt.Println("TextWrapSizeEstimate chars:", chars, "area:", area, "sz:", sz)
-	}
-	return sz
-}
-
 func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
 	if tx.Styles.Text.HasWordWrap() {
-		tx.configTextSize(textWrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), &tx.Styles.Font))
+		tx.configTextSize(paint.TextWrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), &tx.Styles.Font))
 	} else {
 		tx.configTextSize(sz.Actual.Content)
 	}
 	rsz := tx.paintText.BBox.Size().Ceil()
-	sz.FitSizeMax(&sz.Actual.Content, rsz)
-	sz.SetTotalFromContent(&sz.Actual)
+	sz.fitSizeMax(&sz.Actual.Content, rsz)
+	sz.setTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {
-		fmt.Println(tx, "Label SizeUp:", rsz, "Actual:", sz.Actual.Content)
+		fmt.Println(tx, "Text SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
 }
 
@@ -374,9 +342,9 @@ func (tx *Text) SizeDown(iter int) bool {
 	rsz := tx.configTextAlloc(sz.Alloc.Content) // use allocation
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
-	sz.SetInitContentMin(tx.Styles.Min.Dots().Ceil())
-	sz.FitSizeMax(&sz.Actual.Content, rsz)
-	sz.SetTotalFromContent(&sz.Actual)
+	sz.setInitContentMin(tx.Styles.Min.Dots().Ceil())
+	sz.fitSizeMax(&sz.Actual.Content, rsz)
+	sz.setTotalFromContent(&sz.Actual)
 	chg := prevContent != sz.Actual.Content
 	if chg {
 		if DebugSettings.LayoutTrace {

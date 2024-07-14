@@ -32,7 +32,7 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// Chooser is a drop down selection widget that allows users to choose
+// Chooser is a dropdown selection widget that allows users to choose
 // one option among a list of items.
 type Chooser struct {
 	Frame
@@ -44,11 +44,11 @@ type Chooser struct {
 	Items []ChooserItem
 
 	// Icon is an optional icon displayed on the left side of the chooser.
-	Icon icons.Icon `display:"show-name"`
+	Icon icons.Icon
 
 	// Indicator is the icon to use for the indicator displayed on the
 	// right side of the chooser.
-	Indicator icons.Icon `display:"show-name"`
+	Indicator icons.Icon
 
 	// Editable is whether provide a text field for editing the value,
 	// or just a button for selecting items.
@@ -66,10 +66,10 @@ type Chooser struct {
 	// but the history of prior values can also be useful.
 	DefaultNew bool
 
-	// Placeholder, if Editable is set to true, is the text that is
+	// placeholder, if Editable is set to true, is the text that is
 	// displayed in the text field when it is empty. It must be set
 	// using [Chooser.SetPlaceholder].
-	Placeholder string `set:"-"`
+	placeholder string `set:"-"`
 
 	// ItemsFuncs is a slice of functions to call before showing the items
 	// of the chooser, which is typically used to configure them
@@ -87,6 +87,9 @@ type Chooser struct {
 	// CurrentIndex is the index of the currently selected item
 	// in [Chooser.Items].
 	CurrentIndex int `json:"-" xml:"-" set:"-"`
+
+	text      *Text
+	textField *TextField
 }
 
 // ChooserItem is an item that can be used in a [Chooser].
@@ -194,9 +197,9 @@ func (ch *Chooser) Init() {
 		}
 	})
 
-	ch.HandleSelectToggle()
+	ch.handleSelectToggle()
 	ch.OnClick(func(e events.Event) {
-		if ch.OpenMenu(e) {
+		if ch.openMenu(e) {
 			e.SetHandled()
 		}
 	})
@@ -206,7 +209,7 @@ func (ch *Chooser) Init() {
 		}
 	})
 	ch.OnFinal(events.KeyChord, func(e events.Event) {
-		tf := ch.TextField()
+		tf := ch.textField
 		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
 			slog.Info("Chooser KeyChordEvent", "widget", ch, "keyFunction", kf)
@@ -219,7 +222,7 @@ func (ch *Chooser) Init() {
 				if index < 0 {
 					index += len(ch.Items)
 				}
-				ch.SelectItemAction(index)
+				ch.selectItemEvent(index)
 			}
 		case kf == keymap.MoveDown:
 			e.SetHandled()
@@ -228,7 +231,7 @@ func (ch *Chooser) Init() {
 				if index >= len(ch.Items) {
 					index -= len(ch.Items)
 				}
-				ch.SelectItemAction(index)
+				ch.selectItemEvent(index)
 			}
 		case kf == keymap.PageUp:
 			e.SetHandled()
@@ -237,7 +240,7 @@ func (ch *Chooser) Init() {
 				for index < 0 {
 					index += len(ch.Items)
 				}
-				ch.SelectItemAction(index)
+				ch.selectItemEvent(index)
 			}
 		case kf == keymap.PageDown:
 			e.SetHandled()
@@ -246,7 +249,7 @@ func (ch *Chooser) Init() {
 				for index >= len(ch.Items) {
 					index -= len(ch.Items)
 				}
-				ch.SelectItemAction(index)
+				ch.selectItemEvent(index)
 			}
 		case kf == keymap.Enter || (!ch.Editable && e.KeyRune() == ' '):
 			// if !(kt.Rune == ' ' && chb.Sc.Type == ScCompleter) {
@@ -279,14 +282,16 @@ func (ch *Chooser) Init() {
 		}
 		if ch.Editable {
 			tree.AddAt(p, "text-field", func(w *TextField) {
-				w.SetPlaceholder(ch.Placeholder)
+				ch.textField = w
+				ch.text = nil
+				w.SetPlaceholder(ch.placeholder)
 				w.Styler(func(s *styles.Style) {
 					s.Grow = ch.Styles.Grow // we grow like our parent
 					s.Max.X.Zero()          // constrained by parent
 					s.SetTextWrap(false)
 				})
 				w.SetValidator(func() error {
-					err := ch.SetCurrentText(w.Text())
+					err := ch.setCurrentText(w.Text())
 					if err == nil {
 						ch.SendChange()
 					}
@@ -300,14 +305,14 @@ func (ch *Chooser) Init() {
 				})
 				w.OnClick(func(e events.Event) {
 					ch.CallItemsFuncs()
-					w.OfferComplete()
+					w.offerComplete()
 				})
 				w.OnKeyChord(func(e events.Event) {
 					kf := keymap.Of(e.KeyChord())
 					if kf == keymap.Abort {
-						if w.Error != nil {
-							w.Clear()
-							w.ClearError()
+						if w.error != nil {
+							w.clear()
+							w.clearError()
 							e.SetHandled()
 						}
 					}
@@ -315,17 +320,17 @@ func (ch *Chooser) Init() {
 				w.Updater(func() {
 					w.SetText(ch.CurrentItem.GetText()).SetLeadingIcon(ch.Icon).
 						SetTrailingIcon(ch.Indicator, func(e events.Event) {
-							ch.OpenMenu(e)
+							ch.openMenu(e)
 						})
 					if ch.Type == ChooserFilled {
 						w.SetType(TextFieldFilled)
 					} else {
 						w.SetType(TextFieldOutlined)
 					}
-					if ch.DefaultNew && w.Complete != nil {
-						w.Complete = nil
-					} else if !ch.DefaultNew && w.Complete == nil {
-						w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
+					if ch.DefaultNew && w.complete != nil {
+						w.complete = nil
+					} else if !ch.DefaultNew && w.complete == nil {
+						w.SetCompleter(w, ch.completeMatch, ch.completeEdit)
 					}
 				})
 				w.Maker(func(p *tree.Plan) {
@@ -339,6 +344,8 @@ func (ch *Chooser) Init() {
 			})
 		} else {
 			tree.AddAt(p, "text", func(w *Text) {
+				ch.text = w
+				ch.textField = nil
 				w.Styler(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
@@ -363,18 +370,6 @@ func (ch *Chooser) Init() {
 			})
 		}
 	})
-}
-
-// TextWidget returns the text widget if present.
-func (ch *Chooser) TextWidget() *Text {
-	text, _ := ch.ChildByName("text").(*Text)
-	return text
-}
-
-// TextField returns the text field widget of an editable Chooser if present.
-func (ch *Chooser) TextField() *TextField {
-	tf, _ := ch.ChildByName("text-field").(*TextField)
-	return tf
 }
 
 // AddItemsFunc adds the given function to [Chooser.ItemsFuncs].
@@ -444,8 +439,8 @@ func (ch *Chooser) SetEnum(enum enums.Enum) *Chooser {
 	return ch.SetEnums(enum.Values()...)
 }
 
-// FindItem finds the given item value on the list of items and returns its index
-func (ch *Chooser) FindItem(it any) int {
+// findItem finds the given item value on the list of items and returns its index.
+func (ch *Chooser) findItem(it any) int {
 	for i, v := range ch.Items {
 		if it == v.Value {
 			return i
@@ -457,10 +452,10 @@ func (ch *Chooser) FindItem(it any) int {
 // SetPlaceholder sets the given placeholder text and
 // indicates that nothing has been selected.
 func (ch *Chooser) SetPlaceholder(text string) *Chooser {
-	ch.Placeholder = text
+	ch.placeholder = text
 	if !ch.Editable {
 		ch.CurrentItem.Text = text
-		ch.ShowCurrentItem()
+		ch.showCurrentItem()
 	}
 	ch.CurrentIndex = -1
 	return ch
@@ -470,7 +465,7 @@ func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 // If the given item is not found, it adds it to the items list if it is not "". It also
 // sets the text of the chooser to the label of the item.
 func (ch *Chooser) SetCurrentValue(value any) *Chooser {
-	ch.CurrentIndex = ch.FindItem(value)
+	ch.CurrentIndex = ch.findItem(value)
 	if value != "" && ch.CurrentIndex < 0 { // add to list if not found
 		ch.CurrentIndex = len(ch.Items)
 		ch.Items = append(ch.Items, ChooserItem{Value: value})
@@ -478,7 +473,7 @@ func (ch *Chooser) SetCurrentValue(value any) *Chooser {
 	if ch.CurrentIndex >= 0 {
 		ch.CurrentItem = ch.Items[ch.CurrentIndex]
 	}
-	ch.ShowCurrentItem()
+	ch.showCurrentItem()
 	return ch
 }
 
@@ -489,13 +484,13 @@ func (ch *Chooser) SetCurrentIndex(index int) *Chooser {
 	}
 	ch.CurrentIndex = index
 	ch.CurrentItem = ch.Items[index]
-	ch.ShowCurrentItem()
+	ch.showCurrentItem()
 	return ch
 }
 
-// SetCurrentText sets the current index and item based on the given text string.
+// setCurrentText sets the current index and item based on the given text string.
 // It can only be used for editable choosers.
-func (ch *Chooser) SetCurrentText(text string) error {
+func (ch *Chooser) setCurrentText(text string) error {
 	for i, item := range ch.Items {
 		if text == item.GetText() {
 			ch.SetCurrentIndex(i)
@@ -510,15 +505,15 @@ func (ch *Chooser) SetCurrentText(text string) error {
 	return nil
 }
 
-// ShowCurrentItem updates the display to present the current item.
-func (ch *Chooser) ShowCurrentItem() *Chooser {
+// showCurrentItem updates the display to present the current item.
+func (ch *Chooser) showCurrentItem() *Chooser {
 	if ch.Editable {
-		tf := ch.TextField()
+		tf := ch.textField
 		if tf != nil {
 			tf.SetText(ch.CurrentItem.GetText())
 		}
 	} else {
-		text := ch.TextWidget()
+		text := ch.text
 		if text != nil {
 			text.SetText(ch.CurrentItem.GetText()).UpdateWidget()
 		}
@@ -534,8 +529,8 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 	return ch
 }
 
-// SelectItem selects the item at the given index and updates the chooser to display it.
-func (ch *Chooser) SelectItem(index int) *Chooser {
+// selectItem selects the item at the given index and updates the chooser to display it.
+func (ch *Chooser) selectItem(index int) *Chooser {
 	if ch.This == nil {
 		return ch
 	}
@@ -544,38 +539,29 @@ func (ch *Chooser) SelectItem(index int) *Chooser {
 	return ch
 }
 
-// SelectItemAction selects the item at the given index and updates the chooser to display it.
+// selectItemEvent selects the item at the given index and updates the chooser to display it.
 // It also sends an [events.Change] event to indicate that the value has changed.
-func (ch *Chooser) SelectItemAction(index int) *Chooser {
+func (ch *Chooser) selectItemEvent(index int) *Chooser {
 	if ch.This == nil {
 		return ch
 	}
-	ch.SelectItem(index)
+	ch.selectItem(index)
 	ch.SendChange()
 	return ch
 }
 
-// ClearText clears the text field, for editable choosers.  Also clears any errors.
-func (ch *Chooser) ClearText() {
-	tf := ch.TextField()
-	if tf == nil {
-		return
-	}
-	tf.ClearError()
-	tf.Clear()
-}
-
-// ClearError clears any existing validation error, for editable choosers.
+// ClearError clears any existing validation error for an editable chooser.
 func (ch *Chooser) ClearError() {
-	tf := ch.TextField()
+	tf := ch.textField
 	if tf == nil {
 		return
 	}
-	tf.ClearError()
+	tf.clearError()
 }
 
-// MakeItemsMenu constructs a menu of all the items. It is used when the chooser is clicked.
-func (ch *Chooser) MakeItemsMenu(m *Scene) {
+// makeItemsMenu constructs a menu of all the items.
+// It is used when the chooser is clicked.
+func (ch *Chooser) makeItemsMenu(m *Scene) {
 	ch.CallItemsFuncs()
 	for i, it := range ch.Items {
 		if it.SeparatorBefore {
@@ -584,7 +570,7 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 		bt := NewButton(m).SetText(it.GetText()).SetIcon(it.Icon).SetTooltip(it.Tooltip)
 		bt.SetSelected(i == ch.CurrentIndex)
 		bt.OnClick(func(e events.Event) {
-			ch.SelectItemAction(i)
+			ch.selectItemEvent(i)
 		})
 	}
 	if ch.AllowNew {
@@ -598,7 +584,7 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 					d.AddCancel(parent)
 					d.AddOK(parent).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
 						ch.Items = append(ch.Items, ChooserItem{Value: tf.Text()})
-						ch.SelectItemAction(len(ch.Items) - 1)
+						ch.selectItemEvent(len(ch.Items) - 1)
 					})
 				})
 				d.RunDialog(ch)
@@ -606,14 +592,14 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	}
 }
 
-// OpenMenu opens the chooser menu that displays all of the items.
+// openMenu opens the chooser menu that displays all of the items.
 // It returns false if there are no items.
-func (ch *Chooser) OpenMenu(e events.Event) bool {
+func (ch *Chooser) openMenu(e events.Event) bool {
 	pos := ch.ContextMenuPos(e)
 	if indicator, ok := ch.ChildByName("indicator").(Widget); ok {
 		pos = indicator.ContextMenuPos(nil) // use the pos
 	}
-	m := NewMenu(ch.MakeItemsMenu, ch.This.(Widget), pos)
+	m := NewMenu(ch.makeItemsMenu, ch.This.(Widget), pos)
 	if m == nil {
 		return false
 	}
@@ -628,9 +614,9 @@ func (ch *Chooser) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return ch.Tooltip, ch.DefaultTooltipPos()
 }
 
-// CompleteMatch is the [complete.MatchFunc] used for the
+// completeMatch is the [complete.MatchFunc] used for the
 // editable text field part of the Chooser (if it exists).
-func (ch *Chooser) CompleteMatch(data any, text string, posLine, posChar int) (md complete.Matches) {
+func (ch *Chooser) completeMatch(data any, text string, posLine, posChar int) (md complete.Matches) {
 	md.Seed = text
 	comps := make(complete.Completions, len(ch.Items))
 	for i, item := range ch.Items {
@@ -654,9 +640,9 @@ func (ch *Chooser) CompleteMatch(data any, text string, posLine, posChar int) (m
 	return md
 }
 
-// CompleteEdit is the [complete.EditFunc] used for the
+// completeEdit is the [complete.EditFunc] used for the
 // editable textfield part of the Chooser (if it exists).
-func (ch *Chooser) CompleteEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
+func (ch *Chooser) completeEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
 	return complete.Edit{
 		NewText:       completion.Text,
 		ForwardDelete: len([]rune(text)),

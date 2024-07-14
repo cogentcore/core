@@ -4,7 +4,7 @@ This tutorial shows how to make a todo list app using Cogent Core. You should re
 
 We will represent todo list items using an `item` struct type:
 
-```go
+```Go
 type item struct {
     Done bool
     Task string
@@ -19,7 +19,7 @@ type item struct {
     Task string
 }
 items := []item{{Task: "Code"}, {Task: "Eat"}}
-core.NewTable(parent).SetSlice(&items)
+core.NewTable(b).SetSlice(&items)
 ```
 
 We can add a button for adding a new todo list item:
@@ -31,8 +31,8 @@ type item struct {
 }
 items := []item{{Task: "Code"}, {Task: "Eat"}}
 var table *core.Table
-core.NewButton(parent).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+core.NewButton(b).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
     table.NewAt(0)
 })
-table = core.NewTable(parent).SetSlice(&items)
+table = core.NewTable(b).SetSlice(&items)
 ```

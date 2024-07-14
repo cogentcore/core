@@ -5,58 +5,58 @@ Cogent Core provides highly customizable text fields with powerful selection, na
 You can make a text field without any custom options:
 
 ```Go
-core.NewTextField(parent)
+core.NewTextField(b)
 ```
 
 You can set the placeholder of a text field and add label text before it:
 
 ```Go
-core.NewText(parent).SetText("Name:")
-core.NewTextField(parent).SetPlaceholder("Jane Doe")
+core.NewText(b).SetText("Name:")
+core.NewTextField(b).SetPlaceholder("Jane Doe")
 ```
 
 You can set the text of a text field:
 
 ```Go
-core.NewTextField(parent).SetText("Hello, world!")
+core.NewTextField(b).SetText("Hello, world!")
 ```
 
 Text field content can overflow onto multiple lines:
 
 ```Go
-core.NewTextField(parent).SetText("This is a long sentence that demonstrates how text field content can overflow onto multiple lines")
+core.NewTextField(b).SetText("This is a long sentence that demonstrates how text field content can overflow onto multiple lines")
 ```
 
 You can make a text field outlined instead of filled:
 
 ```Go
-core.NewTextField(parent).SetType(core.TextFieldOutlined)
+core.NewTextField(b).SetType(core.TextFieldOutlined)
 ```
 
 You can make a text field designed for password input:
 
 ```Go
-core.NewTextField(parent).SetTypePassword()
+core.NewTextField(b).SetTypePassword()
 ```
 
 You can add a clear button to a text field:
 
 ```Go
-core.NewTextField(parent).AddClearButton()
+core.NewTextField(b).AddClearButton()
 ```
 
 You can set any custom leading and trailing icons you want:
 
 ```Go
-core.NewTextField(parent).SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew, func(e events.Event) {
-    core.MessageSnackbar(parent, "Opening shopping cart")
+core.NewTextField(b).SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew, func(e events.Event) {
+    core.MessageSnackbar(b, "Opening shopping cart")
 })
 ```
 
 You can add a validation function that ensures the value of a text field is valid:
 
 ```Go
-tf := core.NewTextField(parent)
+tf := core.NewTextField(b)
 tf.SetValidator(func() error {
     if !strings.Contains(tf.Text(), "Go") {
         return errors.New("Must contain Go")
@@ -68,17 +68,17 @@ tf.SetValidator(func() error {
 You can detect when the user changes the content of a text field and then exits it:
 
 ```Go
-tf := core.NewTextField(parent)
+tf := core.NewTextField(b)
 tf.OnChange(func(e events.Event) {
-    core.MessageSnackbar(parent, "OnChange: "+tf.Text())
+    core.MessageSnackbar(b, "OnChange: "+tf.Text())
 })
 ```
 
 You can detect when the user makes any changes to the content of a text field as they type:
 
 ```Go
-tf := core.NewTextField(parent)
+tf := core.NewTextField(b)
 tf.OnInput(func(e events.Event) {
-    core.MessageSnackbar(parent, "OnInput: "+tf.Text())
+    core.MessageSnackbar(b, "OnInput: "+tf.Text())
 })
 ```

@@ -231,8 +231,9 @@ func (ev *Env) GrabEyeImg() { //types:add
 // ViewDepth updates depth bitmap with depth data
 func (ev *Env) ViewDepth(depth []float32) {
 	cmap := colormap.AvailableMaps[string(ev.DepthMap)]
-	ev.DepthImage.Image = image.NewRGBA(image.Rectangle{Max: ev.Camera.Size})
-	world.DepthImage(ev.DepthImage.Image, depth, cmap, &ev.Camera)
+	img := image.NewRGBA(image.Rectangle{Max: ev.Camera.Size})
+	ev.DepthImage.SetImage(img)
+	world.DepthImage(img, depth, cmap, &ev.Camera)
 	ev.DepthImage.NeedsRender()
 }
 

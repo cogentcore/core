@@ -5,11 +5,13 @@
 package filetree
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"syscall"
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fsx"
@@ -245,6 +247,9 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 		err = repo.Move(string(orgpath), newpath)
 	} else {
 		err = os.Rename(string(orgpath), newpath)
+		if err != nil && errors.Is(err, syscall.ENOENT) { // some kind of bogus error it seems?
+			err = nil
+		}
 	}
 	if err == nil {
 		err = fn.Info.InitFile(newpath)

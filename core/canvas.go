@@ -23,8 +23,8 @@ type Canvas struct {
 	// so you should specify points on a 0-1 scale.
 	Draw func(pc *paint.Context)
 
-	// Context is the paint context used for drawing.
-	Context *paint.Context `set:"-"`
+	// context is the paint context used for drawing.
+	context *paint.Context
 }
 
 func (c *Canvas) Init() {
@@ -39,12 +39,12 @@ func (c *Canvas) Render() {
 
 	sz := c.Geom.Size.Actual.Content
 	szp := c.Geom.Size.Actual.Content.ToPoint()
-	c.Context = paint.NewContext(szp.X, szp.Y)
-	c.Context.UnitContext = c.Styles.UnitContext
-	c.Context.ToDots()
-	c.Context.PushTransform(math32.Scale2D(sz.X, sz.Y))
-	c.Context.VectorEffect = styles.VectorEffectNonScalingStroke
-	c.Draw(c.Context)
+	c.context = paint.NewContext(szp.X, szp.Y)
+	c.context.UnitContext = c.Styles.UnitContext
+	c.context.ToDots()
+	c.context.PushTransform(math32.Scale2D(sz.X, sz.Y))
+	c.context.VectorEffect = styles.VectorEffectNonScalingStroke
+	c.Draw(c.context)
 
-	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.Context.Image, c.Geom.ScrollOffset(), draw.Over)
+	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.context.Image, c.Geom.ScrollOffset(), draw.Over)
 }

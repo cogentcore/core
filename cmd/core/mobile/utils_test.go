@@ -38,27 +38,27 @@ type outputData struct {
 	EXE       string // .extension for executables. (ex. ".exe" for windows)
 	Xproj     string
 	Xcontents string
-	Xinfo     InfoplistTmplData
+	Xinfo     infoPlistTmplData
 }
 
 func defaultOutputData(teamID string) (outputData, error) {
 	projPbxproj := new(bytes.Buffer)
-	if err := ProjPbxprojTmpl.Execute(projPbxproj, ProjPbxprojTmplData{
+	if err := projPbxprojTmpl.Execute(projPbxproj, projPbxprojTmplData{
 		TeamID: teamID,
 	}); err != nil {
 		return outputData{}, err
 	}
 
 	data := outputData{
-		GOOS:      GOOS,
-		GOARCH:    GOARCH,
+		GOOS:      goos,
+		GOARCH:    goarch,
 		GOPATH:    gopath,
-		NDKARCH:   ArchNDK(),
+		NDKARCH:   archNDK(),
 		Xproj:     projPbxproj.String(),
-		Xcontents: ContentsJSON,
-		Xinfo:     InfoplistTmplData{BundleID: "org.golang.todo.basic", Name: "Basic"},
+		Xcontents: contentsJSON,
+		Xinfo:     infoPlistTmplData{BundleID: "org.golang.todo.basic", Name: "Basic"},
 	}
-	if GOOS == "windows" {
+	if goos == "windows" {
 		data.EXE = ".exe"
 	}
 	return data, nil

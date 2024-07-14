@@ -27,17 +27,17 @@ import (
 )
 
 const (
-	MinAndroidSDK           = 23
-	DefaultAndroidTargetSDK = 29
+	minAndroidSDK           = 23
+	defaultAndroidTargetSDK = 29
 )
 
-// GoAndroidBuild builds the given package for the given Android targets.
-func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Platform) (map[string]bool, error) {
-	ndkRoot, err := NDKRoot(c, targets...)
+// goAndroidBuild builds the given package for the given Android targets.
+func goAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Platform) (map[string]bool, error) {
+	ndkRoot, err := ndkRoot(c, targets...)
 	if err != nil {
 		return nil, err
 	}
-	libName := AndroidPkgName(c.Name)
+	libName := androidPkgName(c.Name)
 
 	// TODO(hajimehoshi): This works only with Go tools that assume all source files are in one directory.
 	// Fix this to work with other Go tools.
@@ -52,7 +52,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 
 		buf := new(bytes.Buffer)
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
-		err := ManifestTmpl.Execute(buf, ManifestTmplData{
+		err := manifestTmpl.Execute(buf, manifestTmplData{
 			JavaPkgPath: c.ID,
 			Name:        c.Name,
 			LibName:     libName,
@@ -63,7 +63,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		manifestData = buf.Bytes()
 		logx.PrintfDebug("generated AndroidManifest.xml:\n%s\n", manifestData)
 	} else {
-		libName, err = ManifestLibName(manifestData)
+		libName, err = manifestLibName(manifestData)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing %s: %v", manifestPath, err)
 		}
@@ -73,16 +73,16 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	nmpkgs := make(map[string]map[string]bool) // map: arch -> extractPkgs' output
 
 	for _, t := range targets {
-		toolchain := NDK.Toolchain(t.Arch)
+		toolchain := ndk.toolchain(t.Arch)
 		libPath := "lib/" + toolchain.ABI + "/lib" + libName + ".so"
-		libAbsPath := filepath.Join(TmpDir, libPath)
+		libAbsPath := filepath.Join(tmpDir, libPath)
 		if err := exec.MkdirAll(filepath.Dir(libAbsPath), 0755); err != nil {
 			return nil, err
 		}
-		err = GoBuild(
+		err = goBuild(
 			c,
 			pkg.PkgPath,
-			AndroidEnv[t.Arch],
+			androidEnv[t.Arch],
 			"-buildmode=c-shared",
 			"-ldflags", config.LinkerFlags(c),
 			"-o", libAbsPath,
@@ -90,14 +90,14 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		if err != nil {
 			return nil, err
 		}
-		nmpkgs[t.Arch], err = ExtractPkgs(c, toolchain.Path(c, ndkRoot, "nm"), libAbsPath)
+		nmpkgs[t.Arch], err = extractPkgs(toolchain.path(c, ndkRoot, "nm"), libAbsPath)
 		if err != nil {
 			return nil, err
 		}
 		libFiles = append(libFiles, libPath)
 	}
 
-	block, _ := pem.Decode([]byte(DebugCert))
+	block, _ := pem.Decode([]byte(debugCert))
 	if block == nil {
 		return nil, errors.New("no debug cert")
 	}
@@ -122,8 +122,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	}()
 	out = f
 
-	var apkw *Writer
-	apkw = NewWriter(out, privKey)
+	apkw := newWriter(out, privKey)
 	apkwCreate := func(name string) (io.Writer, error) {
 		logx.PrintfInfo("apk: %s\n", name)
 		return apkw.Create(name)
@@ -158,17 +157,17 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	}
 
 	for _, libFile := range libFiles {
-		if err := apkwWriteFile(libFile, filepath.Join(TmpDir, libFile)); err != nil {
+		if err := apkwWriteFile(libFile, filepath.Join(tmpDir, libFile)); err != nil {
 			return nil, err
 		}
 	}
 
 	// TODO: what should we do about OpenAL?
 	for _, t := range targets {
-		toolchain := NDK.Toolchain(t.Arch)
+		toolchain := ndk.toolchain(t.Arch)
 		if nmpkgs[t.Arch]["cogentcore.org/core/mobile/exp/audio/al"] {
 			dst := "lib/" + toolchain.ABI + "/libopenal.so"
-			src := filepath.Join(GoMobilePath, dst)
+			src := filepath.Join(goMobilePath, dst)
 			if _, err := os.Stat(src); err != nil {
 				return nil, errors.New("the Android requires the golang.org/x/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal flag pointing to an OpenAL source directory")
 			}
@@ -238,12 +237,12 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	return nmpkgs[targets[0].Arch], nil
 }
 
-// AndroidPkgName sanitizes the go package name to be acceptable as a android
+// androidPkgName sanitizes the go package name to be acceptable as a android
 // package name part. The android package name convention is similar to the
 // java package name convention described in
 // https://docs.oracle.com/javase/specs/jls/se8/html/jls-6.html#jls-6.5.3.1
 // but not exactly same.
-func AndroidPkgName(name string) string {
+func androidPkgName(name string) string {
 	var res []rune
 	for _, r := range name {
 		switch {
@@ -280,7 +279,7 @@ func AndroidPkgName(name string) string {
 
 // A random uninteresting private key.
 // Must be consistent across builds so newer app versions can be installed.
-const DebugCert = `
+const debugCert = `
 -----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAy6ItnWZJ8DpX9R5FdWbS9Kr1U8Z7mKgqNByGU7No99JUnmyu
 NQ6Uy6Nj0Gz3o3c0BXESECblOC13WdzjsH1Pi7/L9QV8jXOXX8cvkG5SJAyj6hcO

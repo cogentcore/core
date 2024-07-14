@@ -181,6 +181,14 @@ func (dv *DiffEditor) Init() {
 	f("text-b", dv.BufB)
 }
 
+func (dv *DiffEditor) updateToolbar() {
+	tb := dv.Scene.GetTopAppBar()
+	if tb == nil {
+		return
+	}
+	tb.Restyle()
+}
+
 // SetFilenames sets the filenames and updates markup accordingly.
 // Called in DiffStrings
 func (dv *DiffEditor) SetFilenames() {
@@ -301,13 +309,13 @@ func (dv *DiffEditor) SaveFile(ab bool, filename core.Filename) error {
 // SaveFileA saves the current state of file A to given filename
 func (dv *DiffEditor) SaveFileA(fname core.Filename) { //types:add
 	dv.SaveAs(false, fname)
-	// dv.UpdateToolbar()
+	dv.updateToolbar()
 }
 
 // SaveFileB saves the current state of file B to given filename
 func (dv *DiffEditor) SaveFileB(fname core.Filename) { //types:add
 	dv.SaveAs(true, fname)
-	// dv.UpdateToolbar()
+	dv.updateToolbar()
 }
 
 // DiffStrings computes differences between two lines-of-strings and displays in
@@ -410,11 +418,11 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 			absln += di
 		}
 	}
-	dv.BufA.SetTextLines(ab, false) // don't copy
-	dv.BufB.SetTextLines(bb, false) // don't copy
+	dv.BufA.setTextLines(ab, false) // don't copy
+	dv.BufB.setTextLines(bb, false) // don't copy
 	dv.TagWordDiffs()
-	dv.BufA.ReMarkup()
-	dv.BufB.ReMarkup()
+	dv.BufA.reMarkup()
+	dv.BufB.reMarkup()
 }
 
 // TagWordDiffs goes through replace diffs and tags differences at the
@@ -447,18 +455,18 @@ func (dv *DiffEditor) TagWordDiffs() {
 				case 'r':
 					sla := lna[ld.I1]
 					ela := lna[ld.I2-1]
-					dv.BufA.AddTag(ln, sla.St, ela.Ed, token.TextStyleError)
+					dv.BufA.addTag(ln, sla.St, ela.Ed, token.TextStyleError)
 					slb := lnb[ld.J1]
 					elb := lnb[ld.J2-1]
-					dv.BufB.AddTag(ln, slb.St, elb.Ed, token.TextStyleError)
+					dv.BufB.addTag(ln, slb.St, elb.Ed, token.TextStyleError)
 				case 'd':
 					sla := lna[ld.I1]
 					ela := lna[ld.I2-1]
-					dv.BufA.AddTag(ln, sla.St, ela.Ed, token.TextStyleDeleted)
+					dv.BufA.addTag(ln, sla.St, ela.Ed, token.TextStyleDeleted)
 				case 'i':
 					slb := lnb[ld.J1]
 					elb := lnb[ld.J2-1]
-					dv.BufB.AddTag(ln, slb.St, elb.Ed, token.TextStyleDeleted)
+					dv.BufB.addTag(ln, slb.St, elb.Ed, token.TextStyleDeleted)
 				}
 			}
 		}
@@ -488,7 +496,7 @@ func (dv *DiffEditor) ApplyDiff(ab int, line int) bool {
 		epos := lexer.Pos{Ln: df.I2, Ch: 0}
 		src := dv.BufB.Region(spos, epos)
 		dv.BufA.DeleteText(spos, epos, true)
-		dv.BufA.InsertText(spos, src.ToBytes(), true) // we always just copy, is blank for delete..
+		dv.BufA.insertText(spos, src.ToBytes(), true) // we always just copy, is blank for delete..
 		dv.Diffs.BtoA(di)
 	} else {
 		dv.BufB.Undos.Off = false
@@ -496,10 +504,10 @@ func (dv *DiffEditor) ApplyDiff(ab int, line int) bool {
 		epos := lexer.Pos{Ln: df.J2, Ch: 0}
 		src := dv.BufA.Region(spos, epos)
 		dv.BufB.DeleteText(spos, epos, true)
-		dv.BufB.InsertText(spos, src.ToBytes(), true)
+		dv.BufB.insertText(spos, src.ToBytes(), true)
 		dv.Diffs.AtoB(di)
 	}
-	// dv.UpdateToolbar()
+	dv.updateToolbar()
 	return true
 }
 
@@ -573,7 +581,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText("Save").SetIcon(icons.Save).SetTooltip("save edited version of file with the given; prompts for filename")
 		w.OnClick(func(e events.Event) {
 			fb := core.NewSoloFuncButton(w).SetFunc(dv.SaveFileA)
-			fb.Args[0].SetValue(dv.FileA)
+			fb.Args[0].SetValue(core.Filename(dv.FileA))
 			fb.CallFunc()
 		})
 		w.Styler(func(s *styles.Style) {
@@ -631,7 +639,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText("Save").SetIcon(icons.Save).SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function")
 		w.OnClick(func(e events.Event) {
 			fb := core.NewSoloFuncButton(w).SetFunc(dv.SaveFileB)
-			fb.Args[0].SetValue(dv.FileB)
+			fb.Args[0].SetValue(core.Filename(dv.FileB))
 			fb.CallFunc()
 		})
 		w.Styler(func(s *styles.Style) {

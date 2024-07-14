@@ -48,11 +48,11 @@ func Build(c *config.Config) error {
 			return err
 		}
 	}
-	return MakeFiles(c)
+	return makeFiles(c)
 }
 
-// MakeFiles makes the necessary static web files based on the given configuration information.
-func MakeFiles(c *config.Config) error {
+// makeFiles makes the necessary static web files based on the given configuration information.
+func makeFiles(c *config.Config) error {
 	odir := filepath.Join("bin", "web")
 
 	if c.Web.RandomVersion {
@@ -113,7 +113,7 @@ func MakeFiles(c *config.Config) error {
 	}
 
 	if c.Pages != "" {
-		err := MakePages(c)
+		err := makePages(c)
 		if err != nil {
 			return err
 		}
@@ -142,9 +142,9 @@ func MakeFiles(c *config.Config) error {
 	return nil
 }
 
-// MakePages makes a directory structure of pages for
+// makePages makes a directory structure of pages for
 // the core pages located at [config.Config.Pages].
-func MakePages(c *config.Config) error {
+func makePages(c *config.Config) error {
 	return filepath.WalkDir(c.Pages, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err

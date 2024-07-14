@@ -17,11 +17,8 @@ import (
 	"cogentcore.org/core/base/strcase"
 )
 
-// Field represents a struct field in a configuration struct.
-// It is passed around in flag parsing functions, but it should
-// not typically be used by end-user code going through the
-// standard Run/Config/SetFromArgs API.
-type Field struct {
+// field represents a struct field in a configuration struct.
+type field struct {
 	// Field is the reflect struct field object for this field
 	Field reflect.StructField
 	// Value is the reflect value of the settable pointer to this field
@@ -37,33 +34,32 @@ type Field struct {
 	Names []string
 }
 
-// Fields is a simple type alias for an ordered map of [Field] objects.
-type Fields = ordmap.Map[string, *Field]
+// fields is a simple type alias for an ordered map of [field] objects.
+type fields = ordmap.Map[string, *field]
 
-// AddAllFields, when passed as the command to [AddFields], indicates
+// addAllFields, when passed as the command to [addFields], indicates
 // to add all fields, regardless of their command association.
-const AddAllFields = "*"
+const addAllFields = "*"
 
-// AddFields adds to the given fields map all of the fields of the given
-// object, in the context of the given command name. A value of [AddAllFields]
+// addFields adds to the given fields map all of the fields of the given
+// object, in the context of the given command name. A value of [addAllFields]
 // for cmd indicates to add all fields, regardless of their command association.
-func AddFields(obj any, allFields *Fields, cmd string) {
-	AddFieldsImpl(obj, "", "", allFields, map[string]*Field{}, cmd)
+func addFields(obj any, allFields *fields, cmd string) {
+	addFieldsImpl(obj, "", "", allFields, map[string]*field{}, cmd)
 }
 
-// AddFieldsImpl is the underlying implementation of [AddFields].
-// AddFieldsImpl should almost never be called by end-user code;
-// see [AddFields] instead. The path is the current path state,
-// the cmdPath is the current path state without command-associated names,
+// addFieldsImpl is the underlying implementation of [addFields].
+// The path is the current path state, the cmdPath is the
+// current path state without command-associated names,
 // and usedNames is a map keyed by used CamelCase names with values
 // of their associated fields, used to track naming conflicts. The
-// [Field.Name]s of the fields are set based on the path, whereas the
+// [field.Name]s of the fields are set based on the path, whereas the
 // names of the flags are set based on the command path. The difference
 // between the two is that the path is always fully qualified, whereas the
 // command path omits the names of structs associated with commands via
 // the "cmd" struct tag, as the user already knows what command they are
 // running, so they do not need that duplicated specificity for every flag.
-func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, usedNames map[string]*Field, cmd string) {
+func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, usedNames map[string]*field, cmd string) {
 	if reflectx.AnyIsNil(obj) {
 		return
 	}
@@ -80,7 +76,7 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 		pval := reflectx.PointerValue(fv)
 		cmdTag, hct := f.Tag.Lookup("cmd")
 		cmds := strings.Split(cmdTag, ",")
-		if hct && !slices.Contains(cmds, cmd) && !slices.Contains(cmds, AddAllFields) { // if we are associated with a different command, skip
+		if hct && !slices.Contains(cmds, cmd) && !slices.Contains(cmds, addAllFields) { // if we are associated with a different command, skip
 			continue
 		}
 		if reflectx.NonPointerType(f.Type).Kind() == reflect.Struct {
@@ -98,7 +94,7 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 				nwCmdPath = cmdPath + "." + nwCmdPath
 			}
 
-			AddFieldsImpl(reflectx.PointerValue(fv).Interface(), nwPath, nwCmdPath, allFields, usedNames, cmd)
+			addFieldsImpl(reflectx.PointerValue(fv).Interface(), nwPath, nwCmdPath, allFields, usedNames, cmd)
 			// we still add ourself if we are a struct, so we keep going,
 			// unless we are associated with a command, in which case there
 			// is no point in adding ourself
@@ -126,7 +122,7 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 			}
 		}
 
-		nf := &Field{
+		nf := &field{
 			Field:  f,
 			Value:  pval,
 			Struct: ov,
@@ -177,24 +173,24 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 					os.Exit(1)
 				} else if !nfn && !ofn {
 					// neither one gets it, so we replace both with fully qualified name
-					ApplyShortestUniqueName(nf, i, usedNames)
+					applyShortestUniqueName(nf, i, usedNames)
 					for i, on := range of.Names {
 						if on == name {
-							ApplyShortestUniqueName(of, i, usedNames)
+							applyShortestUniqueName(of, i, usedNames)
 						}
 					}
 				} else if nfn && !ofn {
 					// we get it, so we keep ours as is and replace them with fully qualified name
 					for i, on := range of.Names {
 						if on == name {
-							ApplyShortestUniqueName(of, i, usedNames)
+							applyShortestUniqueName(of, i, usedNames)
 						}
 					}
 					// we also need to update the field for our name to us
 					usedNames[name] = nf
 				} else if !nfn && ofn {
 					// they get it, so we replace ours with fully qualified name
-					ApplyShortestUniqueName(nf, i, usedNames)
+					applyShortestUniqueName(nf, i, usedNames)
 				}
 			} else {
 				// if no conflict, we get the name
@@ -205,12 +201,11 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 	}
 }
 
-// ApplyShortestUniqueName uses [ShortestUniqueName] to apply the shortest
+// applyShortestUniqueName uses [shortestUniqueName] to apply the shortest
 // unique name for the given field, in the context of the given
-// used names, at the given index. It should not typically be used by
-// end-user code.
-func ApplyShortestUniqueName(field *Field, idx int, usedNames map[string]*Field) {
-	nm := ShortestUniqueName(field.Name, usedNames)
+// used names, at the given index.
+func applyShortestUniqueName(field *field, idx int, usedNames map[string]*field) {
+	nm := shortestUniqueName(field.Name, usedNames)
 	// if we already have this name, we don't need to add it, so we just delete this entry
 	if slices.Contains(field.Names, nm) {
 		field.Names = slices.Delete(field.Names, idx, idx+1)
@@ -220,12 +215,11 @@ func ApplyShortestUniqueName(field *Field, idx int, usedNames map[string]*Field)
 	}
 }
 
-// ShortestUniqueName returns the shortest unique camel-case name for
+// shortestUniqueName returns the shortest unique camel-case name for
 // the given fully qualified nest name of a field, using the given
 // map of used names. It works backwards, so, for example, if given "A.B.C.D",
 // it would check "D", then "C.D", then "B.C.D", and finally "A.B.C.D".
-// It should not typically be used by end-user code.
-func ShortestUniqueName(name string, usedNames map[string]*Field) string {
+func shortestUniqueName(name string, usedNames map[string]*field) string {
 	strs := strings.Split(name, ".")
 	cur := ""
 	for i := len(strs) - 1; i >= 0; i-- {

@@ -20,17 +20,17 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// GoAppleBuild builds the given package with the given bundle ID for the given iOS targets.
-func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Platform) (map[string]bool, error) {
+// goAppleBuild builds the given package with the given bundle ID for the given iOS targets.
+func goAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Platform) (map[string]bool, error) {
 	src := pkg.PkgPath
 
-	err := SetupMoltenFramework()
+	err := setupMoltenFramework()
 	if err != nil {
 		return nil, err
 	}
 
 	infoplist := new(bytes.Buffer)
-	if err := InfoplistTmpl.Execute(infoplist, InfoplistTmplData{
+	if err := infoPlistTmpl.Execute(infoplist, infoPlistTmplData{
 		BundleID:           c.ID,
 		Name:               c.Name,
 		Version:            c.Version,
@@ -42,13 +42,13 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 	}
 
 	// Detect the team ID
-	teamID, err := DetectTeamID()
+	teamID, err := detectTeamID()
 	if err != nil {
 		return nil, err
 	}
 
 	projPbxproj := new(bytes.Buffer)
-	if err := ProjPbxprojTmpl.Execute(projPbxproj, ProjPbxprojTmplData{
+	if err := projPbxprojTmpl.Execute(projPbxproj, projPbxprojTmplData{
 		TeamID: teamID,
 	}); err != nil {
 		return nil, err
@@ -58,9 +58,9 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		name     string
 		contents []byte
 	}{
-		{TmpDir + "/main.xcodeproj/project.pbxproj", projPbxproj.Bytes()},
-		{TmpDir + "/main/Info.plist", infoplist.Bytes()},
-		{TmpDir + "/main/Images.xcassets/AppIcon.appiconset/Contents.json", []byte(ContentsJSON)},
+		{tmpDir + "/main.xcodeproj/project.pbxproj", projPbxproj.Bytes()},
+		{tmpDir + "/main/Info.plist", infoplist.Bytes()},
+		{tmpDir + "/main/Images.xcassets/AppIcon.appiconset/Contents.json", []byte(contentsJSON)},
 	}
 
 	for _, file := range files {
@@ -74,7 +74,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 	}
 
 	// We are using lipo tool to build multiarchitecture binaries.
-	args := []string{"lipo", "-o", filepath.Join(TmpDir, "main/main"), "-create"}
+	args := []string{"lipo", "-o", filepath.Join(tmpDir, "main/main"), "-create"}
 
 	var nmpkgs map[string]bool
 	builtArch := map[string]bool{}
@@ -86,15 +86,15 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		}
 		builtArch[t.Arch] = true
 
-		path := filepath.Join(TmpDir, t.OS, t.Arch)
+		path := filepath.Join(tmpDir, t.OS, t.Arch)
 
 		// Disable DWARF; see golang.org/issues/25148.
-		if err := GoBuild(c, src, AppleEnv[t.String()], "-ldflags", "-w "+config.LinkerFlags(c), "-o="+path); err != nil {
+		if err := goBuild(c, src, appleEnv[t.String()], "-ldflags", "-w "+config.LinkerFlags(c), "-o="+path); err != nil {
 			return nil, err
 		}
 		if nmpkgs == nil {
 			var err error
-			nmpkgs, err = ExtractPkgs(c, AppleNM, path)
+			nmpkgs, err = extractPkgs(appleNM, path)
 			if err != nil {
 				return nil, err
 			}
@@ -107,21 +107,21 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		return nil, err
 	}
 
-	if err := AppleCopyAssets(c, pkg, TmpDir); err != nil {
+	if err := appleCopyAssets(tmpDir); err != nil {
 		return nil, err
 	}
 
 	// Build and move the release build to the output directory.
 	err = exec.Run("xcrun", "xcodebuild",
 		"-configuration", "Release",
-		"-project", TmpDir+"/main.xcodeproj",
+		"-project", tmpDir+"/main.xcodeproj",
 		"-allowProvisioningUpdates",
 		"DEVELOPMENT_TEAM="+teamID)
 	if err != nil {
 		return nil, err
 	}
 
-	inm := filepath.Join(TmpDir+"/build/Release-iphoneos/main.app", "icon.icns")
+	inm := filepath.Join(tmpDir+"/build/Release-iphoneos/main.app", "icon.icns")
 	fdsi, err := os.Create(inm)
 	if err != nil {
 		return nil, err
@@ -144,12 +144,12 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		return nil, err
 	}
 	output := filepath.Join("bin", "ios", c.Name+".app")
-	exec.PrintCmd(fmt.Sprintf("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", output), nil)
+	exec.PrintCmd(fmt.Sprintf("mv %s %s", tmpDir+"/build/Release-iphoneos/main.app", output), nil)
 	// if output already exists, remove.
 	if err := exec.RemoveAll(output); err != nil {
 		return nil, err
 	}
-	if err := os.Rename(TmpDir+"/build/Release-iphoneos/main.app", output); err != nil {
+	if err := os.Rename(tmpDir+"/build/Release-iphoneos/main.app", output); err != nil {
 		return nil, err
 	}
 
@@ -162,9 +162,9 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 	return nmpkgs, nil
 }
 
-// SetupMoltenFramework creates the MoltenVK.framework file in the
+// setupMoltenFramework creates the MoltenVK.framework file in the
 // user's library if it doesn't already exist.
-func SetupMoltenFramework() error {
+func setupMoltenFramework() error {
 	hdir, err := os.UserHomeDir()
 	if err != nil {
 		return fmt.Errorf("error getting user home directory: %w", err)
@@ -196,8 +196,8 @@ func SetupMoltenFramework() error {
 	return exec.RemoveAll(tmp)
 }
 
-// DetectTeamID determines the Apple Development Team ID on the system.
-func DetectTeamID() (string, error) {
+// detectTeamID determines the Apple Development Team ID on the system.
+func detectTeamID() (string, error) {
 	// Grabs the first certificate for "Apple Development"; will not work if there
 	// are multiple certificates and the first is not desired.
 	pemString, err := exec.Output(
@@ -229,12 +229,12 @@ func DetectTeamID() (string, error) {
 	return cert.Subject.OrganizationalUnit[0], nil
 }
 
-func AppleCopyAssets(c *config.Config, pkg *packages.Package, xcodeProjDir string) error {
+func appleCopyAssets(xcodeProjDir string) error {
 	dstAssets := xcodeProjDir + "/main/assets"
 	return exec.MkdirAll(dstAssets, 0755)
 }
 
-type InfoplistTmplData struct {
+type infoPlistTmplData struct {
 	BundleID           string
 	Name               string
 	Version            string
@@ -243,7 +243,7 @@ type InfoplistTmplData struct {
 	IconFile           string
 }
 
-var InfoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version="1.0" encoding="UTF-8"?>
+var infoPlistTmpl = template.Must(template.New("infoPlist").Parse(`<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -294,11 +294,11 @@ var InfoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
 </plist>
 `))
 
-type ProjPbxprojTmplData struct {
+type projPbxprojTmplData struct {
 	TeamID string
 }
 
-var ProjPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF8*$!
+var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF8*$!
 {
 	archiveVersion = 1;
 	classes = {
@@ -496,7 +496,7 @@ var ProjPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
 }
 `))
 
-const ContentsJSON = `{
+const contentsJSON = `{
 	"images" : [
 		{
 			"idiom" : "iphone",
@@ -566,10 +566,10 @@ const ContentsJSON = `{
 }
 `
 
-// RFC1034Label sanitizes the name to be usable in a uniform type identifier.
+// rfc1034Label sanitizes the name to be usable in a uniform type identifier.
 // The sanitization is similar to xcode's rfc1034identifier macro that
 // replaces illegal characters (not conforming the rfc1034 label rule) with '-'.
-func RFC1034Label(name string) string {
+func rfc1034Label(name string) string {
 	// * Uniform type identifier:
 	//
 	// According to
