@@ -294,7 +294,7 @@ func (pl *PlotEditor) genPlot() {
 	pl.plot = nil
 	switch pl.Options.Type {
 	case XY:
-		pl.GenPlotXY()
+		pl.genPlotXY()
 	case Bar:
 		pl.genPlotBar()
 	}

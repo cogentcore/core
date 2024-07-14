@@ -17,8 +17,8 @@ import (
 	"cogentcore.org/core/tensor/table"
 )
 
-// GenPlotXY generates an XY (lines, points) plot, setting Plot variable
-func (pl *PlotEditor) GenPlotXY() {
+// genPlotXY generates an XY (lines, points) plot, setting Plot variable
+func (pl *PlotEditor) genPlotXY() {
 	plt := plot.New()
 
 	// process xaxis first
