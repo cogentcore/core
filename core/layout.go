@@ -1668,11 +1668,11 @@ func (ly *Frame) positionCellsMainX() {
 	gap := ly.layout.Gap
 	sz := &ly.Geom.Size
 	if DebugSettings.LayoutTraceDetail {
-		fmt.Println(ly, "PositionCells Main X, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
+		fmt.Println(ly, "PositionCells Main X, actual:", sz.Actual.Content, "internal:", sz.Internal)
 	}
 	var stPos math32.Vector2
-	stPos.X = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.X, sz.Alloc.Content.X)
-	stPos.Y = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.Y, sz.Alloc.Content.Y)
+	stPos.X = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.X, sz.Actual.Content.X)
+	stPos.Y = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.Y, sz.Actual.Content.Y)
 	pos := stPos
 	var lastSz math32.Vector2
 	idx := 0
@@ -1696,12 +1696,12 @@ func (ly *Frame) positionCellsMainY() {
 	gap := ly.layout.Gap
 	sz := &ly.Geom.Size
 	if DebugSettings.LayoutTraceDetail {
-		fmt.Println(ly, "PositionCells, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
+		fmt.Println(ly, "PositionCells, actual", sz.Actual.Content, "internal:", sz.Internal)
 	}
 	var lastSz math32.Vector2
 	var stPos math32.Vector2
-	stPos.Y = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.Y, sz.Alloc.Content.Y)
-	stPos.X = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.X, sz.Alloc.Content.X)
+	stPos.Y = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.Y, sz.Actual.Content.Y)
+	stPos.X = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.X, sz.Actual.Content.X)
 	pos := stPos
 	idx := 0
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
