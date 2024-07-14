@@ -164,3 +164,19 @@ func TestRenderNestedScroll(t *testing.T) {
 	})
 	b.AssertRender(t, "render/nested-scroll")
 }
+
+// For https://github.com/cogentcore/core/issues/1011
+func TestRenderElementCutOff(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.X.Em(50)
+	})
+	sp := NewSplits(b)
+	NewFrame(sp)
+	fr := NewFrame(sp)
+	NewTextField(fr).Styler(func(s *styles.Style) {
+		s.Max.X.Zero()
+	})
+	NewButton(fr).SetIcon(icons.Send)
+	b.AssertRender(t, "render/element-cut-off")
+}
