@@ -215,7 +215,8 @@ func (tr *Tree) Init() {
 		// s.Border.Width.Left.SetDp(1)
 		// s.Border.Color.Left = colors.Scheme.OutlineVariant
 		s.Margin.Zero()
-		s.Padding.Set(units.Dp(4))
+		s.Padding.Left.Dp(ConstantSpacing(4))
+		s.Padding.SetVertical(units.Dp(4))
 		s.Padding.Right.Zero()
 		s.Text.Align = styles.Start
 
