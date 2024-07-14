@@ -464,7 +464,7 @@ func (tb *Buffer) ConfigKnown() bool {
 			tb.setSpell()
 		}
 		if tb.Complete == nil {
-			tb.setCompleter(&tb.ParseState, CompleteParse, CompleteEditParse, LookupParse)
+			tb.setCompleter(&tb.ParseState, completeParse, completeEditParse, lookupParse)
 		}
 		return tb.Options.ConfigKnown(tb.Info.Known)
 	}

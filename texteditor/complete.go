@@ -7,7 +7,6 @@ package texteditor
 import (
 	"fmt"
 
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/parse/lexer"
@@ -15,10 +14,10 @@ import (
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
-// CompleteParse uses [parse] symbols and language; the string is a line of text
+// completeParse uses [parse] symbols and language; the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func CompleteParse(data any, text string, posLine, posChar int) (md complete.Matches) {
+func completeParse(data any, text string, posLine, posChar int) (md complete.Matches) {
 	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("CompletePi: data is nil not FileStates or is nil - can't complete\n")
@@ -41,8 +40,8 @@ func CompleteParse(data any, text string, posLine, posChar int) (md complete.Mat
 	return md
 }
 
-// CompleteEditParse uses the selected completion to edit the text.
-func CompleteEditParse(data any, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.Edit) {
+// completeEditParse uses the selected completion to edit the text.
+func completeEditParse(data any, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.Edit) {
 	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("CompleteEditPi: data is nil not FileStates or is nil - can't complete\n")
@@ -59,10 +58,10 @@ func CompleteEditParse(data any, text string, cursorPos int, comp complete.Compl
 	return lp.Lang.CompleteEdit(sfs, text, cursorPos, comp, seed)
 }
 
-// LookupParse uses [parse] symbols and language; the string is a line of text
+// lookupParse uses [parse] symbols and language; the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func LookupParse(data any, text string, posLine, posChar int) (ld complete.Lookup) {
+func lookupParse(data any, text string, posLine, posChar int) (ld complete.Lookup) {
 	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("LookupPi: data is nil not FileStates or is nil - can't lookup\n")
@@ -94,33 +93,4 @@ func LookupParse(data any, text string, posLine, posChar int) (ld complete.Looku
 	}
 
 	return ld
-}
-
-// CompleteText does completion for text files.
-func CompleteText(data any, text string, posLine, posChar int) (md complete.Matches) {
-	err := initSpell() // text completion uses the spell code to generate completions and suggestions
-	if err != nil {
-		fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
-		return md
-	}
-
-	md.Seed = complete.SeedSpace(text)
-	if md.Seed == "" {
-		return md
-	}
-	// todo: is this used? fix or remove
-	// result := spell.Complete(md.Seed)
-	result := []string{}
-	possibles := complete.MatchSeedString(result, md.Seed)
-	for _, p := range possibles {
-		m := complete.Completion{Text: p}
-		md.Matches = append(md.Matches, m)
-	}
-	return md
-}
-
-// CompleteTextEdit uses the selected completion to edit the text
-func CompleteTextEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
-	ed = core.CompleteEditText(text, cursorPos, completion.Text, seed)
-	return ed
 }
