@@ -86,10 +86,10 @@ func (ed *Editor) Lookup() { //types:add
 		ch = ed.SelectRegion.End.Ch
 	} else {
 		ln = ed.CursorPos.Ln
-		if ed.IsWordEnd(ed.CursorPos) {
+		if ed.isWordEnd(ed.CursorPos) {
 			ch = ed.CursorPos.Ch
 		} else {
-			ch = ed.WordAt().End.Ch
+			ch = ed.wordAt().End.Ch
 		}
 	}
 	ed.Buffer.Complete.SrcLn = ln
@@ -134,8 +134,8 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 			ed.Buffer.spellCheckLineTag(tp.Ln)
 		}
 	case keymap.MoveRight:
-		if ed.IsWordEnd(tp) {
-			reg := ed.WordBefore(tp)
+		if ed.isWordEnd(tp) {
+			reg := ed.wordBefore(tp)
 			ed.SpellCheck(reg)
 			break
 		}
@@ -145,7 +145,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 				ed.Buffer.spellCheckLineTag(tp.Ln) // redo prior line
 			}
 			tp.Ch = ed.Buffer.lineLen(tp.Ln)
-			reg := ed.WordBefore(tp)
+			reg := ed.wordBefore(tp)
 			ed.SpellCheck(reg)
 			break
 		}
@@ -160,7 +160,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 		}
 		if atend || core.IsWordBreak(r, rune(-1)) {
 			tp.Ch-- // we are one past the end of word
-			reg := ed.WordBefore(tp)
+			reg := ed.wordBefore(tp)
 			ed.SpellCheck(reg)
 		}
 	case keymap.Enter:
@@ -169,28 +169,28 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 			ed.Buffer.spellCheckLineTag(tp.Ln) // redo prior line
 		}
 		tp.Ch = ed.Buffer.lineLen(tp.Ln)
-		reg := ed.WordBefore(tp)
+		reg := ed.wordBefore(tp)
 		ed.SpellCheck(reg)
 	case keymap.FocusNext:
 		tp.Ch-- // we are one past the end of word
-		reg := ed.WordBefore(tp)
+		reg := ed.wordBefore(tp)
 		ed.SpellCheck(reg)
 	case keymap.Backspace, keymap.Delete:
-		if ed.IsWordMiddle(ed.CursorPos) {
-			reg := ed.WordAt()
+		if ed.isWordMiddle(ed.CursorPos) {
+			reg := ed.wordAt()
 			ed.SpellCheck(ed.Buffer.Region(reg.Start, reg.End))
 		} else {
-			reg := ed.WordBefore(tp)
+			reg := ed.wordBefore(tp)
 			ed.SpellCheck(reg)
 		}
 	case keymap.None:
 		if unicode.IsSpace(kt.KeyRune()) || unicode.IsPunct(kt.KeyRune()) && kt.KeyRune() != '\'' { // contractions!
 			tp.Ch-- // we are one past the end of word
-			reg := ed.WordBefore(tp)
+			reg := ed.wordBefore(tp)
 			ed.SpellCheck(reg)
 		} else {
-			if ed.IsWordMiddle(ed.CursorPos) {
-				reg := ed.WordAt()
+			if ed.isWordMiddle(ed.CursorPos) {
+				reg := ed.wordAt()
 				ed.SpellCheck(ed.Buffer.Region(reg.Start, reg.End))
 			}
 		}
@@ -233,7 +233,7 @@ func (ed *Editor) OfferCorrect() bool {
 		return false
 	}
 	sel := ed.SelectRegion
-	if !ed.SelectWord() {
+	if !ed.selectWord() {
 		ed.SelectRegion = sel
 		return false
 	}

@@ -32,8 +32,8 @@ func (ed *Editor) ClearHighlights() {
 	ed.NeedsRender()
 }
 
-// ClearScopelights clears the Highlights slice of all regions
-func (ed *Editor) ClearScopelights() {
+// clearScopelights clears the scopelights slice of all regions
+func (ed *Editor) clearScopelights() {
 	if len(ed.scopelights) == 0 {
 		return
 	}
@@ -46,8 +46,8 @@ func (ed *Editor) ClearScopelights() {
 //////////////////////////////////////////////////////////
 // 	Selection
 
-// ClearSelected resets both the global selected flag and any current selection
-func (ed *Editor) ClearSelected() {
+// clearSelected resets both the global selected flag and any current selection
+func (ed *Editor) clearSelected() {
 	// ed.WidgetBase.ClearSelected()
 	ed.SelectReset()
 }
@@ -66,8 +66,8 @@ func (ed *Editor) Selection() *textbuf.Edit {
 	return nil
 }
 
-// SelectModeToggle toggles the SelectMode, updating selection with cursor movement
-func (ed *Editor) SelectModeToggle() {
+// selectModeToggle toggles the SelectMode, updating selection with cursor movement
+func (ed *Editor) selectModeToggle() {
 	if ed.selectMode {
 		ed.selectMode = false
 	} else {
@@ -78,16 +78,16 @@ func (ed *Editor) SelectModeToggle() {
 	ed.savePosHistory(ed.CursorPos)
 }
 
-// SelectAll selects all the text
-func (ed *Editor) SelectAll() {
+// selectAll selects all the text
+func (ed *Editor) selectAll() {
 	ed.SelectRegion.Start = lexer.PosZero
 	ed.SelectRegion.End = ed.Buffer.endPos()
 	ed.NeedsRender()
 }
 
-// WordBefore returns the word before the lexer.Pos
+// wordBefore returns the word before the lexer.Pos
 // uses IsWordBreak to determine the bounds of the word
-func (ed *Editor) WordBefore(tp lexer.Pos) *textbuf.Edit {
+func (ed *Editor) wordBefore(tp lexer.Pos) *textbuf.Edit {
 	txt := ed.Buffer.line(tp.Ln)
 	ch := tp.Ch
 	ch = min(ch, len(txt))
@@ -110,32 +110,9 @@ func (ed *Editor) WordBefore(tp lexer.Pos) *textbuf.Edit {
 	return nil
 }
 
-// IsWordStart returns true if the cursor is just before the start of a word
+// isWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
-func (ed *Editor) IsWordStart(tp lexer.Pos) bool {
-	txt := ed.Buffer.line(ed.CursorPos.Ln)
-	sz := len(txt)
-	if sz == 0 {
-		return false
-	}
-	if tp.Ch >= len(txt) { // end of line
-		return false
-	}
-	if tp.Ch == 0 { // start of line
-		r := txt[0]
-		if core.IsWordBreak(r, rune(-1)) {
-			return false
-		}
-		return true
-	}
-	r1 := txt[tp.Ch-1]
-	r2 := txt[tp.Ch]
-	return core.IsWordBreak(r1, rune(-1)) && !core.IsWordBreak(r2, rune(-1))
-}
-
-// IsWordEnd returns true if the cursor is just past the last letter of a word
-// word is a string of characters none of which are classified as a word break
-func (ed *Editor) IsWordEnd(tp lexer.Pos) bool {
+func (ed *Editor) isWordEnd(tp lexer.Pos) bool {
 	txt := ed.Buffer.line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -143,27 +120,21 @@ func (ed *Editor) IsWordEnd(tp lexer.Pos) bool {
 	}
 	if tp.Ch >= len(txt) { // end of line
 		r := txt[len(txt)-1]
-		if core.IsWordBreak(r, rune(-1)) {
-			return true
-		}
-		return false
+		return core.IsWordBreak(r, -1)
 	}
 	if tp.Ch == 0 { // start of line
 		r := txt[0]
-		if core.IsWordBreak(r, rune(-1)) {
-			return false
-		}
-		return true
+		return !core.IsWordBreak(r, -1)
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
 	return !core.IsWordBreak(r1, rune(-1)) && core.IsWordBreak(r2, rune(-1))
 }
 
-// IsWordMiddle - returns true if the cursor is anywhere inside a word,
+// isWordMiddle - returns true if the cursor is anywhere inside a word,
 // i.e. the character before the cursor and the one after the cursor
 // are not classified as word break characters
-func (ed *Editor) IsWordMiddle(tp lexer.Pos) bool {
+func (ed *Editor) isWordMiddle(tp lexer.Pos) bool {
 	txt := ed.Buffer.line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz < 2 {
@@ -180,9 +151,9 @@ func (ed *Editor) IsWordMiddle(tp lexer.Pos) bool {
 	return !core.IsWordBreak(r1, rune(-1)) && !core.IsWordBreak(r2, rune(-1))
 }
 
-// SelectWord selects the word (whitespace, punctuation delimited) that the cursor is on
+// selectWord selects the word (whitespace, punctuation delimited) that the cursor is on
 // returns true if word selected
-func (ed *Editor) SelectWord() bool {
+func (ed *Editor) selectWord() bool {
 	if ed.Buffer == nil {
 		return false
 	}
@@ -191,14 +162,14 @@ func (ed *Editor) SelectWord() bool {
 	if sz == 0 {
 		return false
 	}
-	reg := ed.WordAt()
+	reg := ed.wordAt()
 	ed.SelectRegion = reg
 	ed.selectStart = ed.SelectRegion.Start
 	return true
 }
 
-// WordAt finds the region of the word at the current cursor position
-func (ed *Editor) WordAt() (reg textbuf.Region) {
+// wordAt finds the region of the word at the current cursor position
+func (ed *Editor) wordAt() (reg textbuf.Region) {
 	reg.Start = ed.CursorPos
 	reg.End = ed.CursorPos
 	txt := ed.Buffer.line(ed.CursorPos.Ln)
@@ -264,25 +235,20 @@ func (ed *Editor) SelectReset() {
 	ed.previousSelectRegion = textbuf.RegionNil
 }
 
-// RenderSelectLines renders the lines within the current selection region
-func (ed *Editor) RenderSelectLines() {
-	ed.previousSelectRegion = ed.SelectRegion
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 //    Cut / Copy / Paste
 
-// ViewClipHistory is the text view clipboard history -- everything that has been copied
-var ViewClipHistory [][]byte
+// editorClipboardHistory is the [Editor] clipboard history; everything that has been copied
+var editorClipboardHistory [][]byte
 
-// ViewClipHistAdd adds the given clipboard bytes to top of history stack
-func ViewClipHistAdd(clip []byte) {
+// addEditorClipboardHistory adds the given clipboard bytes to top of history stack
+func addEditorClipboardHistory(clip []byte) {
 	max := clipboardHistoryMax
-	if ViewClipHistory == nil {
-		ViewClipHistory = make([][]byte, 0, max)
+	if editorClipboardHistory == nil {
+		editorClipboardHistory = make([][]byte, 0, max)
 	}
 
-	ch := &ViewClipHistory
+	ch := &editorClipboardHistory
 
 	sz := len(*ch)
 	if sz > max {
@@ -300,16 +266,16 @@ func ViewClipHistAdd(clip []byte) {
 	}
 }
 
-// ViewClipHistChooseLen is the max length of clip history to show in chooser
-var ViewClipHistChooseLen = 40
+// editorClipHistoryChooserLength is the max length of clip history to show in chooser
+var editorClipHistoryChooserLength = 40
 
-// ViewClipHistChooseList returns a string slice of length-limited clip history, for chooser
-func ViewClipHistChooseList() []string {
-	cl := make([]string, len(ViewClipHistory))
-	for i, hc := range ViewClipHistory {
+// editorClipHistoryChooserList returns a string slice of length-limited clip history, for chooser
+func editorClipHistoryChooserList() []string {
+	cl := make([]string, len(editorClipboardHistory))
+	for i, hc := range editorClipboardHistory {
 		szl := len(hc)
-		if szl > ViewClipHistChooseLen {
-			cl[i] = string(hc[:ViewClipHistChooseLen])
+		if szl > editorClipHistoryChooserLength {
+			cl[i] = string(hc[:editorClipHistoryChooserLength])
 		} else {
 			cl[i] = string(hc)
 		}
@@ -317,14 +283,14 @@ func ViewClipHistChooseList() []string {
 	return cl
 }
 
-// PasteHist presents a chooser of clip history items, pastes into text if selected
-func (ed *Editor) PasteHist() {
-	if ViewClipHistory == nil {
+// pasteHistory presents a chooser of clip history items, pastes into text if selected
+func (ed *Editor) pasteHistory() {
+	if editorClipboardHistory == nil {
 		return
 	}
-	cl := ViewClipHistChooseList()
+	cl := editorClipHistoryChooserList()
 	m := core.NewMenuFromStrings(cl, "", func(idx int) {
-		clip := ViewClipHistory[idx]
+		clip := editorClipboardHistory[idx]
 		if clip != nil {
 			ed.Clipboard().Write(mimedata.NewTextBytes(clip))
 			ed.InsertAtCursor(clip)
@@ -341,11 +307,11 @@ func (ed *Editor) Cut() *textbuf.Edit {
 		return nil
 	}
 	org := ed.SelectRegion.Start
-	cut := ed.DeleteSelection()
+	cut := ed.deleteSelection()
 	if cut != nil {
 		cb := cut.ToBytes()
 		ed.Clipboard().Write(mimedata.NewTextBytes(cb))
-		ViewClipHistAdd(cb)
+		addEditorClipboardHistory(cb)
 	}
 	ed.SetCursorShow(org)
 	ed.savePosHistory(ed.CursorPos)
@@ -353,9 +319,9 @@ func (ed *Editor) Cut() *textbuf.Edit {
 	return cut
 }
 
-// DeleteSelection deletes any selected text, without adding to clipboard --
+// deleteSelection deletes any selected text, without adding to clipboard --
 // returns text deleted as textbuf.Edit (nil if none)
-func (ed *Editor) DeleteSelection() *textbuf.Edit {
+func (ed *Editor) deleteSelection() *textbuf.Edit {
 	tbe := ed.Buffer.DeleteText(ed.SelectRegion.Start, ed.SelectRegion.End, EditSignal)
 	ed.SelectReset()
 	return tbe
@@ -369,7 +335,7 @@ func (ed *Editor) Copy(reset bool) *textbuf.Edit {
 		return nil
 	}
 	cb := tbe.ToBytes()
-	ViewClipHistAdd(cb)
+	addEditorClipboardHistory(cb)
 	ed.Clipboard().Write(mimedata.NewTextBytes(cb))
 	if reset {
 		ed.SelectReset()
@@ -392,7 +358,7 @@ func (ed *Editor) Paste() {
 // InsertAtCursor inserts given text at current cursor position
 func (ed *Editor) InsertAtCursor(txt []byte) {
 	if ed.HasSelection() {
-		tbe := ed.DeleteSelection()
+		tbe := ed.deleteSelection()
 		ed.CursorPos = tbe.AdjustPos(ed.CursorPos, textbuf.AdjustPosDelStart) // move to start if in reg
 	}
 	tbe := ed.Buffer.insertText(ed.CursorPos, txt, EditSignal)
@@ -411,10 +377,10 @@ func (ed *Editor) InsertAtCursor(txt []byte) {
 ///////////////////////////////////////////////////////////
 //  Rectangular regions
 
-// ViewClipRect is the internal clipboard for Rect rectangle-based
+// editorClipboardRect is the internal clipboard for Rect rectangle-based
 // regions -- the raw text is posted on the system clipboard but the
 // rect information is in a special format.
-var ViewClipRect *textbuf.Edit
+var editorClipboardRect *textbuf.Edit
 
 // CutRect cuts rectangle defined by selected text (upper left to lower right)
 // and adds it to the clipboard, also returns cut text.
@@ -427,7 +393,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 	if cut != nil {
 		cb := cut.ToBytes()
 		ed.Clipboard().Write(mimedata.NewTextBytes(cb))
-		ViewClipRect = cut
+		editorClipboardRect = cut
 	}
 	ed.SetCursorShow(npos)
 	ed.savePosHistory(ed.CursorPos)
@@ -444,7 +410,7 @@ func (ed *Editor) CopyRect(reset bool) *textbuf.Edit {
 	}
 	cb := tbe.ToBytes()
 	ed.Clipboard().Write(mimedata.NewTextBytes(cb))
-	ViewClipRect = tbe
+	editorClipboardRect = tbe
 	if reset {
 		ed.SelectReset()
 	}
@@ -455,10 +421,10 @@ func (ed *Editor) CopyRect(reset bool) *textbuf.Edit {
 
 // PasteRect inserts text from the clipboard at current cursor position
 func (ed *Editor) PasteRect() {
-	if ViewClipRect == nil {
+	if editorClipboardRect == nil {
 		return
 	}
-	ce := ViewClipRect.Clone()
+	ce := editorClipboardRect.Clone()
 	nl := ce.Reg.End.Ln - ce.Reg.Start.Ln
 	nch := ce.Reg.End.Ch - ce.Reg.Start.Ch
 	ce.Reg.Start.Ln = ed.CursorPos.Ln
@@ -475,7 +441,7 @@ func (ed *Editor) PasteRect() {
 }
 
 // ReCaseSelection changes the case of the currently selected text.
-// Returns the new text -- empty if nothing selected.
+// Returns the new text; empty if nothing selected.
 func (ed *Editor) ReCaseSelection(c strcase.Cases) string {
 	if !ed.HasSelection() {
 		return ""

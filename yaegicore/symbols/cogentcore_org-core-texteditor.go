@@ -29,11 +29,6 @@ func init() {
 		"ReplaceMatchCase":         reflect.ValueOf(texteditor.ReplaceMatchCase),
 		"ReplaceNoMatchCase":       reflect.ValueOf(texteditor.ReplaceNoMatchCase),
 		"TextDialog":               reflect.ValueOf(texteditor.TextDialog),
-		"ViewClipHistAdd":          reflect.ValueOf(texteditor.ViewClipHistAdd),
-		"ViewClipHistChooseLen":    reflect.ValueOf(&texteditor.ViewClipHistChooseLen).Elem(),
-		"ViewClipHistChooseList":   reflect.ValueOf(texteditor.ViewClipHistChooseList),
-		"ViewClipHistory":          reflect.ValueOf(&texteditor.ViewClipHistory).Elem(),
-		"ViewClipRect":             reflect.ValueOf(&texteditor.ViewClipRect).Elem(),
 
 		// type definitions
 		"Buffer":                 reflect.ValueOf((*texteditor.Buffer)(nil)),

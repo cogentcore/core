@@ -277,7 +277,7 @@ func (ed *Editor) editDone() {
 	if ed.Buffer != nil {
 		ed.Buffer.editDone()
 	}
-	ed.ClearSelected()
+	ed.clearSelected()
 	ed.clearCursor()
 	ed.SendChange()
 }

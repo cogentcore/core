@@ -58,7 +58,7 @@ func (ed *Editor) setCursor(pos lexer.Pos) {
 		return
 	}
 
-	ed.ClearScopelights()
+	ed.clearScopelights()
 	ed.CursorPos = ed.Buffer.validPos(pos)
 	ed.cursorMovedEvent()
 	txt := ed.Buffer.line(ed.CursorPos.Ln)
@@ -582,7 +582,7 @@ func (ed *Editor) cursorBackspace(steps int) {
 	org := ed.CursorPos
 	if ed.HasSelection() {
 		org = ed.SelectRegion.Start
-		ed.DeleteSelection()
+		ed.deleteSelection()
 		ed.SetCursorShow(org)
 		return
 	}
@@ -598,7 +598,7 @@ func (ed *Editor) cursorBackspace(steps int) {
 func (ed *Editor) cursorDelete(steps int) {
 	ed.validateCursor()
 	if ed.HasSelection() {
-		ed.DeleteSelection()
+		ed.deleteSelection()
 		return
 	}
 	// note: no update b/c signal from buf will drive update
@@ -614,7 +614,7 @@ func (ed *Editor) cursorBackspaceWord(steps int) {
 	ed.validateCursor()
 	org := ed.CursorPos
 	if ed.HasSelection() {
-		ed.DeleteSelection()
+		ed.deleteSelection()
 		ed.SetCursorShow(org)
 		return
 	}
@@ -630,7 +630,7 @@ func (ed *Editor) cursorBackspaceWord(steps int) {
 func (ed *Editor) cursorDeleteWord(steps int) {
 	ed.validateCursor()
 	if ed.HasSelection() {
-		ed.DeleteSelection()
+		ed.deleteSelection()
 		return
 	}
 	// note: no update b/c signal from buf will drive update

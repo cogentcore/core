@@ -186,7 +186,7 @@ func (ed *Editor) keyInput(e events.Event) {
 	case keymap.SelectMode:
 		cancelAll()
 		e.SetHandled()
-		ed.SelectModeToggle()
+		ed.selectModeToggle()
 	case keymap.CancelSelect:
 		ed.CancelComplete()
 		e.SetHandled()
@@ -194,7 +194,7 @@ func (ed *Editor) keyInput(e events.Event) {
 	case keymap.SelectAll:
 		cancelAll()
 		e.SetHandled()
-		ed.SelectAll()
+		ed.selectAll()
 	case keymap.Copy:
 		cancelAll()
 		e.SetHandled()
@@ -301,7 +301,7 @@ func (ed *Editor) keyInput(e events.Event) {
 	case keymap.PasteHist:
 		cancelAll()
 		e.SetHandled()
-		ed.PasteHist()
+		ed.pasteHistory()
 	case keymap.Accept:
 		cancelAll()
 		e.SetHandled()
@@ -575,7 +575,7 @@ func (ed *Editor) handleMouse() {
 			ed.Send(events.Focus, e) // sets focused flag
 		}
 		e.SetHandled()
-		if ed.SelectWord() {
+		if ed.selectWord() {
 			ed.CursorPos = ed.SelectRegion.Start
 		}
 		ed.NeedsRender()
@@ -598,7 +598,7 @@ func (ed *Editor) handleMouse() {
 	ed.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
 		if !ed.selectMode {
-			ed.SelectModeToggle()
+			ed.selectModeToggle()
 		}
 		pt := ed.PointToRelPos(e.Pos())
 		newPos := ed.PixelToCursor(pt)
