@@ -47,6 +47,7 @@ func NewOfType(typ *types.Type, parent ...Node) Node {
 }
 
 // InitNode initializes the node. It should not be called by end-user code.
+// It must be exported since it is referenced in generic functions included in yaegi.
 func InitNode(n Node) {
 	nb := n.AsTree()
 	if nb.This != n {

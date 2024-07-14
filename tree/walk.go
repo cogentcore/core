@@ -12,7 +12,7 @@ package tree
 
 // Last returns the last node in the tree.
 func Last(n Node) Node {
-	n = LastChild(n)
+	n = lastChild(n)
 	last := n
 	n.AsTree().WalkDown(func(k Node) bool {
 		last = k
@@ -21,12 +21,12 @@ func Last(n Node) Node {
 	return last
 }
 
-// LastChild returns the last child under the given node,
+// lastChild returns the last child under the given node,
 // or the node itself if it has no children.
-func LastChild(n Node) Node {
+func lastChild(n Node) Node {
 	nb := n.AsTree()
 	if nb.HasChildren() {
-		return LastChild(nb.Child(nb.NumChildren() - 1))
+		return lastChild(nb.Child(nb.NumChildren() - 1))
 	}
 	return n
 }
@@ -41,7 +41,7 @@ func Previous(n Node) Node {
 	myidx := n.AsTree().IndexInParent()
 	if myidx > 0 {
 		nn := nb.Parent.AsTree().Child(myidx - 1)
-		return LastChild(nn)
+		return lastChild(nn)
 	}
 	return nb.Parent
 }

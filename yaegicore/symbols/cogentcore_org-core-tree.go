@@ -29,7 +29,6 @@ func init() {
 		"IsNode":            reflect.ValueOf(tree.IsNode),
 		"IsRoot":            reflect.ValueOf(tree.IsRoot),
 		"Last":              reflect.ValueOf(tree.Last),
-		"LastChild":         reflect.ValueOf(tree.LastChild),
 		"MoveToParent":      reflect.ValueOf(tree.MoveToParent),
 		"New":               reflect.ValueOf(interp.GenericFunc("func New[T NodeValue](parent ...Node) *T { //yaegi:add\n\tn := new(T)\n\tni := any(n).(Node)\n\tInitNode(ni)\n\tif len(parent) == 0 {\n\t\tni.AsTree().SetName(ni.AsTree().NodeType().IDName)\n\t\treturn n\n\t}\n\tp := parent[0]\n\tp.AsTree().Children = append(p.AsTree().Children, ni)\n\tSetParent(ni, p)\n\treturn n\n}")),
 		"NewNodeBase":       reflect.ValueOf(tree.NewNodeBase),

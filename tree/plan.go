@@ -218,7 +218,7 @@ func AddChildInit[T NodeValue](parent Node, name string, init func(w *T)) { //ya
 	})
 }
 
-// Add adds a new [PlanItem with the given name and functions to the [Plan].
+// Add adds a new [PlanItem] with the given name and functions to the [Plan].
 // It should typically not be called by end-user code; see the generic
 // [Add], [AddAt], [AddNew], [AddChild], [AddChildAt], [AddInit], and [AddChildInit]
 // functions instead.
