@@ -55,7 +55,7 @@ type LangProperties struct {
 	Flags []LangFlags
 
 	// Lang interface for this language
-	Lang Lang `json:"-" xml:"-"`
+	Lang Language `json:"-" xml:"-"`
 
 	// parser for this language -- initialized in OpenStandard
 	Parser *Parser `json:"-" xml:"-"`

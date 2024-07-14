@@ -144,7 +144,7 @@ func (ml *MarkdownLang) CompleteEdit(fs *parse.FileStates, text string, cp int, 
 	return ed
 }
 
-func (ml *MarkdownLang) ParseDir(fs *parse.FileState, path string, opts parse.LangDirOpts) *syms.Symbol {
+func (ml *MarkdownLang) ParseDir(fs *parse.FileState, path string, opts parse.LanguageDirOptions) *syms.Symbol {
 	// n/a
 	return nil
 }

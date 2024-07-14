@@ -86,7 +86,7 @@ func (ed *Editor) LayoutAllLines() {
 	}
 	ed.lastFilename = ed.Buffer.Filename
 
-	ed.Buffer.Highlighting.TabSize = ed.Styles.Text.TabSize
+	ed.Buffer.Highlighting.tabSize = ed.Styles.Text.TabSize
 	ed.NumLines = ed.Buffer.numLines()
 	buf := ed.Buffer
 	buf.markupMu.RLock()

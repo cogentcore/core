@@ -72,7 +72,7 @@ func (ob *OutputBuffer) MonitorOutput() {
 	for outscan.Scan() {
 		b := outscan.Bytes()
 		bc := slices.Clone(b) // outscan bytes are temp
-		bec := HTMLEscapeBytes(bc)
+		bec := htmlEscapeBytes(bc)
 
 		ob.Mu.Lock()
 		if ob.AfterTimer != nil {

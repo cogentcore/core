@@ -82,7 +82,7 @@ func (tl *TexLang) HiLine(fss *parse.FileStates, line int, txt []rune) lexer.Lin
 	return tl.LexLine(fs, line, txt)
 }
 
-func (tl *TexLang) ParseDir(fs *parse.FileState, path string, opts parse.LangDirOpts) *syms.Symbol {
+func (tl *TexLang) ParseDir(fs *parse.FileState, path string, opts parse.LanguageDirOptions) *syms.Symbol {
 	// n/a
 	return nil
 }

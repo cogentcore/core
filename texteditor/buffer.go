@@ -292,7 +292,7 @@ func (tb *Buffer) setTextLines(lns [][]byte, cpy bool) {
 		} else {
 			tb.lineBytes[ln] = txt
 		}
-		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
+		tb.Markup[ln] = htmlEscapeRunes(tb.Lines[ln])
 		bo += len(txt) + 1 // lf
 	}
 	tb.totalBytes = bo
@@ -384,7 +384,7 @@ func (tb *Buffer) SetLanguage(language string) *Buffer {
 // SetHighlighting sets the highlighting style of the buffer.
 func (tb *Buffer) SetHighlighting(style core.HighlightingName) *Buffer {
 	tb.markupMu.Lock()
-	tb.Highlighting.SetHiStyle(style)
+	tb.Highlighting.setStyle(style)
 	tb.markupMu.Unlock()
 	return tb
 }
@@ -406,7 +406,7 @@ func (tb *Buffer) SetReadOnly(readonly bool) *Buffer {
 func (tb *Buffer) SetFilename(fn string) *Buffer {
 	tb.Filename = core.Filename(fn)
 	tb.Stat()
-	tb.Highlighting.Init(&tb.Info, &tb.ParseState)
+	tb.Highlighting.init(&tb.Info, &tb.ParseState)
 	return tb
 }
 
@@ -441,7 +441,7 @@ func (tb *Buffer) NewBuffer(nlines int) {
 	tb.NumLines = nlines
 
 	tb.ParseState.SetSrc(string(tb.Filename), "", tb.Info.Known)
-	tb.Highlighting.Init(&tb.Info, &tb.ParseState)
+	tb.Highlighting.init(&tb.Info, &tb.ParseState)
 
 	tb.markupMu.Unlock()
 	tb.LinesMu.Unlock()
@@ -990,7 +990,7 @@ func (tb *Buffer) bytesToLines() {
 		tb.Lines[ln] = bytes.Runes(txt)
 		tb.lineBytes[ln] = make([]byte, len(txt))
 		copy(tb.lineBytes[ln], txt)
-		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
+		tb.Markup[ln] = htmlEscapeRunes(tb.Lines[ln])
 		bo += len(txt) + 1 // lf
 	}
 	tb.totalBytes = bo
@@ -1521,7 +1521,7 @@ func (tb *Buffer) linesEdited(tbe *textbuf.Edit) {
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
 	for ln := st; ln <= ed; ln++ {
 		tb.lineBytes[ln] = []byte(string(tb.Lines[ln]))
-		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
+		tb.Markup[ln] = htmlEscapeRunes(tb.Lines[ln])
 	}
 	tb.markupLines(st, ed)
 	tb.markupMu.Unlock()
@@ -1582,7 +1582,7 @@ func (tb *Buffer) linesInserted(tbe *textbuf.Edit) {
 	bo := tb.byteOffsets[st]
 	for ln := st; ln <= ed; ln++ {
 		tb.lineBytes[ln] = []byte(string(tb.Lines[ln]))
-		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
+		tb.Markup[ln] = htmlEscapeRunes(tb.Lines[ln])
 		tb.byteOffsets[ln] = bo
 		bo += len(tb.lineBytes[ln]) + 1
 	}
@@ -1615,7 +1615,7 @@ func (tb *Buffer) linesDeleted(tbe *textbuf.Edit) {
 
 	st := tbe.Reg.Start.Ln
 	tb.lineBytes[st] = []byte(string(tb.Lines[st]))
-	tb.Markup[st] = HTMLEscapeRunes(tb.Lines[st])
+	tb.Markup[st] = htmlEscapeRunes(tb.Lines[st])
 	tb.markupLines(st, st)
 	tb.markupMu.Unlock()
 	tb.StartDelayedReMarkup()
@@ -1638,7 +1638,7 @@ func (tb *Buffer) initialMarkup() {
 func (tb *Buffer) StartDelayedReMarkup() {
 	tb.markupDelayMu.Lock()
 	defer tb.markupDelayMu.Unlock()
-	if !tb.Highlighting.HasHi() || tb.NumLines == 0 {
+	if !tb.Highlighting.Has || tb.NumLines == 0 {
 		return
 	}
 	if tb.markupDelayTimer != nil {
@@ -1675,7 +1675,7 @@ func (tb *Buffer) stopDelayedReMarkup() {
 
 // reMarkup runs re-markup on text in background
 func (tb *Buffer) reMarkup() {
-	if !tb.Highlighting.HasHi() || tb.NumLines == 0 {
+	if !tb.Highlighting.Has || tb.NumLines == 0 {
 		return
 	}
 	if tb.markingUp {
@@ -1715,7 +1715,7 @@ func (tb *Buffer) AdjustedTagsImpl(tags lexer.Line, ln int) lexer.Line {
 // designed to be called in a separate goroutine.
 // if maxLines > 0 then it specifies a maximum number of lines (for InitialMarkup)
 func (tb *Buffer) markupAllLines(maxLines int) {
-	if !tb.Highlighting.HasHi() || tb.NumLines == 0 {
+	if !tb.Highlighting.Has || tb.NumLines == 0 {
 		return
 	}
 	if tb.markingUp {
@@ -1737,7 +1737,7 @@ func (tb *Buffer) markupAllLines(maxLines int) {
 	} else {
 		txt = tb.linesToBytesCopy()
 	}
-	mtags, err := tb.Highlighting.MarkupTagsAll(txt) // does full parse, outside of markup lock
+	mtags, err := tb.Highlighting.markupTagsAll(txt) // does full parse, outside of markup lock
 	if err != nil {
 		tb.markingUp = false
 		return
@@ -1801,7 +1801,7 @@ func (tb *Buffer) markupAllLines(maxLines int) {
 	}
 	for ln := 0; ln < maxln; ln++ {
 		tb.tags[ln] = tb.adjustedTags(ln)
-		tb.Markup[ln] = tb.Highlighting.MarkupLine(tb.Lines[ln], tb.hiTags[ln], tb.tags[ln])
+		tb.Markup[ln] = tb.Highlighting.markupLine(tb.Lines[ln], tb.hiTags[ln], tb.tags[ln])
 	}
 	tb.markupMu.Unlock()
 	tb.LinesMu.Unlock()
@@ -1813,7 +1813,7 @@ func (tb *Buffer) markupAllLines(maxLines int) {
 // line.  returns true if all lines were marked up successfully.  This does
 // NOT lock the MarkupMu mutex (done at outer loop)
 func (tb *Buffer) markupLines(st, ed int) bool {
-	if !tb.Highlighting.HasHi() || tb.NumLines == 0 {
+	if !tb.Highlighting.Has || tb.NumLines == 0 {
 		return false
 	}
 	if ed >= tb.NumLines {
@@ -1823,12 +1823,12 @@ func (tb *Buffer) markupLines(st, ed int) bool {
 	allgood := true
 	for ln := st; ln <= ed; ln++ {
 		ltxt := tb.Lines[ln]
-		mt, err := tb.Highlighting.MarkupTagsLine(ln, ltxt)
+		mt, err := tb.Highlighting.markupTagsLine(ln, ltxt)
 		if err == nil {
 			tb.hiTags[ln] = mt
-			tb.Markup[ln] = tb.Highlighting.MarkupLine(ltxt, mt, tb.adjustedTags(ln))
+			tb.Markup[ln] = tb.Highlighting.markupLine(ltxt, mt, tb.adjustedTags(ln))
 		} else {
-			tb.Markup[ln] = HTMLEscapeRunes(ltxt)
+			tb.Markup[ln] = htmlEscapeRunes(ltxt)
 			allgood = false
 		}
 	}

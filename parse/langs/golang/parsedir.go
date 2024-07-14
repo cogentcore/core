@@ -55,7 +55,7 @@ var TheParseDirs ParseDirLocks
 // used when integrating any external symbols back into another filestate.
 // As long as all the symbol resolution etc is all happening outside of the
 // external syms linking, then it does not need to be protected.
-func (pd *ParseDirLocks) ParseDir(gl *GoLang, fs *parse.FileState, path string, opts parse.LangDirOpts) *syms.Symbol {
+func (pd *ParseDirLocks) ParseDir(gl *GoLang, fs *parse.FileState, path string, opts parse.LanguageDirOptions) *syms.Symbol {
 	pfld := strings.Fields(path)
 	if len(pfld) > 1 { // remove first alias
 		path = pfld[1]
@@ -93,7 +93,7 @@ var ParseDirExcludes = []string{
 }
 
 // ParseDir is the interface call for parsing a directory
-func (gl *GoLang) ParseDir(fs *parse.FileState, path string, opts parse.LangDirOpts) *syms.Symbol {
+func (gl *GoLang) ParseDir(fs *parse.FileState, path string, opts parse.LanguageDirOptions) *syms.Symbol {
 	if path == "" || path == "C" || path[0] == '_' {
 		return nil
 	}
@@ -102,7 +102,7 @@ func (gl *GoLang) ParseDir(fs *parse.FileState, path string, opts parse.LangDirO
 
 // ParseDirImpl does the actual work of parsing a directory.
 // Path is assumed to be a package import path or a local file name
-func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.LangDirOpts) *syms.Symbol {
+func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.LanguageDirOptions) *syms.Symbol {
 	var files []string
 	var pkgPathAbs string
 	gm := os.Getenv("GO111MODULE")
@@ -378,7 +378,7 @@ reset:
 // assumed to be called as a separate goroutine
 func (gl *GoLang) AddImportToExts(fs *parse.FileState, im string, lock bool) {
 	im, _, pkg := gl.ImportPathPkg(im)
-	psym := gl.ParseDir(fs, im, parse.LangDirOpts{})
+	psym := gl.ParseDir(fs, im, parse.LanguageDirOptions{})
 	if psym != nil {
 		psym.Name = pkg
 		if lock {
@@ -397,7 +397,7 @@ func (gl *GoLang) AddImportToExts(fs *parse.FileState, im string, lock bool) {
 // AddPathToSyms adds given path into parse.FileState.Syms list
 // Is called as a separate goroutine in ParseFile with WaitGp
 func (gl *GoLang) AddPathToSyms(fs *parse.FileState, path string) {
-	psym := gl.ParseDir(fs, path, parse.LangDirOpts{})
+	psym := gl.ParseDir(fs, path, parse.LanguageDirOptions{})
 	if psym != nil {
 		gl.AddPkgToSyms(fs, psym)
 	}
@@ -427,7 +427,7 @@ func (gl *GoLang) AddPkgToSyms(fs *parse.FileState, pkg *syms.Symbol) bool {
 // AddPathToExts adds given path into parse.FileState.ExtSyms list
 // assumed to be called as a separate goroutine
 func (gl *GoLang) AddPathToExts(fs *parse.FileState, path string) {
-	psym := gl.ParseDir(fs, path, parse.LangDirOpts{})
+	psym := gl.ParseDir(fs, path, parse.LanguageDirOptions{})
 	if psym != nil {
 		gl.AddPkgToExts(fs, psym)
 	}

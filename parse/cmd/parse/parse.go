@@ -61,7 +61,7 @@ func DoGoPath(path string) {
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 	fs := parse.NewFileState()
-	pkgsym := lp.Lang.ParseDir(fs, path, parse.LangDirOpts{Rebuild: true})
+	pkgsym := lp.Lang.ParseDir(fs, path, parse.LanguageDirOptions{Rebuild: true})
 	if pkgsym != nil {
 		syms.SaveSymDoc(pkgsym, fileinfo.Go, path)
 	}

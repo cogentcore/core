@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/parse/syms"
 )
 
-// Lang provides a general interface for language-specific management
+// Language provides a general interface for language-specific management
 // of the lexing, parsing, and symbol lookup process.
 // The parse lexer and parser machinery is entirely language-general
 // but specific languages may need specific ways of managing these
@@ -24,14 +24,14 @@ import (
 // own implementation of the interface and any other associated
 // functionality.
 //
-// The Lang is responsible for accessing the appropriate [Parser] for this
+// The Language is responsible for accessing the appropriate [Parser] for this
 // language (initialized and managed via LangSupport.OpenStandard() etc)
 // and the [FileState] structure contains all the input and output
 // state information for a given file.
 //
 // This interface is likely to evolve as we expand the range of supported
 // languages.
-type Lang interface {
+type Language interface {
 	// Parser returns the [Parser] for this language
 	Parser() *Parser
 
@@ -90,7 +90,7 @@ type Lang interface {
 	// have a more recent modification date than the cache file.  This returns the
 	// language-appropriate set of symbols for the directory(s), which could then provide
 	// the symbols for a given package, library, or module at that path.
-	ParseDir(fs *FileState, path string, opts LangDirOpts) *syms.Symbol
+	ParseDir(fs *FileState, path string, opts LanguageDirOptions) *syms.Symbol
 
 	// LexLine is a lower-level call (mostly used internally to the language) that
 	// does just the lexing of a given line of the file, using existing context
@@ -109,8 +109,8 @@ type Lang interface {
 	ParseLine(fs *FileState, line int) *FileState
 }
 
-// LangDirOpts provides options for Lang ParseDir method
-type LangDirOpts struct {
+// LanguageDirOptions provides options for the [Language.ParseDir] method
+type LanguageDirOptions struct {
 
 	// process subdirectories -- otherwise not
 	Subdirs bool

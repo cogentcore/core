@@ -32,139 +32,135 @@ type Highlighting struct {
 	Style core.HighlightingName
 
 	// chroma-based language name for syntax highlighting the code
-	Lang string
+	language string
 
-	// true if both lang and style are set
+	// Has is whether there are highlighting parameters set
+	// (only valid after [Highlighting.init] has been called).
 	Has bool
 
 	// tab size, in chars
-	TabSize int
+	tabSize int
 
 	// Commpiled CSS properties for given highlighting style
-	CSSProperties map[string]any `json:"-" xml:"-"`
+	cssProperties map[string]any
 
 	// parser state info
-	ParseState *parse.FileStates
+	parseState *parse.FileStates
 
-	// if supported, this is the [parse.Lang] support for parsing
-	ParseLang parse.Lang
+	// if supported, this is the [parse.Language] support for parsing
+	parseLanguage parse.Language
 
 	// current highlighting style
 	style *highlighting.Style
 
 	// external toggle to turn off automatic highlighting
-	Off       bool
-	lastLang  string
-	lastStyle core.HighlightingName
-	lexer     chroma.Lexer
-	formatter *html.Formatter
-}
-
-// HasHi returns true if there are highlighting parameters set (only valid after Init)
-func (hm *Highlighting) HasHi() bool {
-	return hm.Has
+	off          bool
+	lastLanguage string
+	lastStyle    core.HighlightingName
+	lexer        chroma.Lexer
+	formatter    *html.Formatter
 }
 
 // UsingParse returns true if markup is using parse lexer / parser, which affects
 // use of results
-func (hm *Highlighting) UsingParse() bool {
-	return hm.ParseLang != nil
+func (hi *Highlighting) UsingParse() bool {
+	return hi.parseLanguage != nil
 }
 
-// Init initializes the syntax highlighting for current params
-func (hm *Highlighting) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
-	hm.info = info
-	hm.ParseState = pist
+// init initializes the syntax highlighting for current params
+func (hi *Highlighting) init(info *fileinfo.FileInfo, pist *parse.FileStates) {
+	hi.info = info
+	hi.parseState = pist
 
-	if hm.info.Known != fileinfo.Unknown {
-		if lp, err := parse.LangSupport.Properties(hm.info.Known); err == nil {
+	if hi.info.Known != fileinfo.Unknown {
+		if lp, err := parse.LangSupport.Properties(hi.info.Known); err == nil {
 			if lp.Lang != nil {
-				hm.lexer = nil
-				hm.ParseLang = lp.Lang
+				hi.lexer = nil
+				hi.parseLanguage = lp.Lang
 			} else {
-				hm.ParseLang = nil
+				hi.parseLanguage = nil
 			}
 		}
 	}
 
-	if hm.ParseLang == nil {
-		lexer := lexers.MatchMimeType(hm.info.Mime)
+	if hi.parseLanguage == nil {
+		lexer := lexers.MatchMimeType(hi.info.Mime)
 		if lexer == nil {
-			lexer = lexers.Match(hm.info.Name)
+			lexer = lexers.Match(hi.info.Name)
 		}
 		if lexer != nil {
-			hm.Lang = lexer.Config().Name
-			hm.lexer = lexer
+			hi.language = lexer.Config().Name
+			hi.lexer = lexer
 		}
 	}
 
-	if hm.Style == "" || (hm.ParseLang == nil && hm.lexer == nil) {
-		hm.Has = false
+	if hi.Style == "" || (hi.parseLanguage == nil && hi.lexer == nil) {
+		hi.Has = false
 		return
 	}
-	hm.Has = true
+	hi.Has = true
 
-	if hm.Style != hm.lastStyle {
-		hm.style = highlighting.AvailableStyle(hm.Style)
-		hm.CSSProperties = hm.style.ToProperties()
-		hm.lastStyle = hm.Style
+	if hi.Style != hi.lastStyle {
+		hi.style = highlighting.AvailableStyle(hi.Style)
+		hi.cssProperties = hi.style.ToProperties()
+		hi.lastStyle = hi.Style
 	}
 
-	if hm.lexer != nil && hm.Lang != hm.lastLang {
-		hm.lexer = chroma.Coalesce(lexers.Get(hm.Lang))
-		hm.formatter = html.New(html.WithClasses(true), html.TabWidth(hm.TabSize))
-		hm.lastLang = hm.Lang
+	if hi.lexer != nil && hi.language != hi.lastLanguage {
+		hi.lexer = chroma.Coalesce(lexers.Get(hi.language))
+		hi.formatter = html.New(html.WithClasses(true), html.TabWidth(hi.tabSize))
+		hi.lastLanguage = hi.language
 	}
 }
 
-// SetHiStyle sets the highlighting style and updates corresponding settings
-func (hm *Highlighting) SetHiStyle(style core.HighlightingName) {
+// setStyle sets the highlighting style and updates corresponding settings
+func (hi *Highlighting) setStyle(style core.HighlightingName) {
 	if style == "" {
 		return
 	}
-	st := highlighting.AvailableStyle(hm.Style)
+	st := highlighting.AvailableStyle(hi.Style)
 	if st == nil {
 		slog.Error("Highlighting Style not found:", "style", style)
 		return
 	}
-	hm.Style = style
-	hm.style = st
-	hm.CSSProperties = hm.style.ToProperties()
-	hm.lastStyle = hm.Style
+	hi.Style = style
+	hi.style = st
+	hi.cssProperties = hi.style.ToProperties()
+	hi.lastStyle = hi.Style
 }
 
-// MarkupTagsAll returns all the markup tags according to current
+// markupTagsAll returns all the markup tags according to current
 // syntax highlighting settings
-func (hm *Highlighting) MarkupTagsAll(txt []byte) ([]lexer.Line, error) {
-	if hm.Off {
+func (hi *Highlighting) markupTagsAll(txt []byte) ([]lexer.Line, error) {
+	if hi.off {
 		return nil, nil
 	}
-	if hm.ParseLang != nil {
-		hm.ParseLang.ParseFile(hm.ParseState, txt) // processes in Proc(), does Switch()
-		return hm.ParseState.Done().Src.Lexs, nil  // Done() is previous Proc() -- still has type info coming in later, but lexs are good
-	} else if hm.lexer != nil {
-		return hm.ChromaTagsAll(txt)
+	if hi.parseLanguage != nil {
+		hi.parseLanguage.ParseFile(hi.parseState, txt) // processes in Proc(), does Switch()
+		return hi.parseState.Done().Src.Lexs, nil      // Done() is previous Proc() -- still has type info coming in later, but lexs are good
+	} else if hi.lexer != nil {
+		return hi.chromaTagsAll(txt)
 	}
 	return nil, nil
 }
 
-// MarkupTagsLine returns tags for one line according to current
+// markupTagsLine returns tags for one line according to current
 // syntax highlighting settings
-func (hm *Highlighting) MarkupTagsLine(ln int, txt []rune) (lexer.Line, error) {
-	if hm.Off {
+func (hi *Highlighting) markupTagsLine(ln int, txt []rune) (lexer.Line, error) {
+	if hi.off {
 		return nil, nil
 	}
-	if hm.ParseLang != nil {
-		ll := hm.ParseLang.HiLine(hm.ParseState, ln, txt)
+	if hi.parseLanguage != nil {
+		ll := hi.parseLanguage.HiLine(hi.parseState, ln, txt)
 		return ll, nil
-	} else if hm.lexer != nil {
-		return hm.ChromaTagsLine(txt)
+	} else if hi.lexer != nil {
+		return hi.chromaTagsLine(txt)
 	}
 	return nil, nil
 }
 
-// ChromaTagsForLine generates the chroma tags for one line of chroma tokens
-func ChromaTagsForLine(tags *lexer.Line, toks []chroma.Token) {
+// chromaTagsForLine generates the chroma tags for one line of chroma tokens
+func chromaTagsForLine(tags *lexer.Line, toks []chroma.Token) {
 	cp := 0
 	for _, tok := range toks {
 		str := []rune(strings.TrimSuffix(tok.Value, "\n"))
@@ -185,11 +181,11 @@ func ChromaTagsForLine(tags *lexer.Line, toks []chroma.Token) {
 	}
 }
 
-// ChromaTagsAll returns all the markup tags according to current
+// chromaTagsAll returns all the markup tags according to current
 // syntax highlighting settings
-func (hm *Highlighting) ChromaTagsAll(txt []byte) ([]lexer.Line, error) {
+func (hi *Highlighting) chromaTagsAll(txt []byte) ([]lexer.Line, error) {
 	txtstr := string(txt) // expensive!
-	iterator, err := hm.lexer.Tokenise(nil, txtstr)
+	iterator, err := hi.lexer.Tokenise(nil, txtstr)
 	if err != nil {
 		slog.Error(err.Error())
 		return nil, err
@@ -198,20 +194,20 @@ func (hm *Highlighting) ChromaTagsAll(txt []byte) ([]lexer.Line, error) {
 	sz := len(lines)
 	tags := make([]lexer.Line, sz)
 	for li, lt := range lines {
-		ChromaTagsForLine(&tags[li], lt)
+		chromaTagsForLine(&tags[li], lt)
 	}
 	return tags, nil
 }
 
-// ChromaTagsLine returns tags for one line according to current
+// chromaTagsLine returns tags for one line according to current
 // syntax highlighting settings
-func (hm *Highlighting) ChromaTagsLine(txt []rune) (lexer.Line, error) {
-	return ChromaTagsLine(hm.lexer, txt)
+func (hi *Highlighting) chromaTagsLine(txt []rune) (lexer.Line, error) {
+	return chromaTagsLine(hi.lexer, txt)
 }
 
-// ChromaTagsLine returns tags for one line according to current
+// chromaTagsLine returns tags for one line according to current
 // syntax highlighting settings
-func ChromaTagsLine(clex chroma.Lexer, txt []rune) (lexer.Line, error) {
+func chromaTagsLine(clex chroma.Lexer, txt []rune) (lexer.Line, error) {
 	txtstr := string(txt) + "\n"
 	iterator, err := clex.Tokenise(nil, txtstr)
 	if err != nil {
@@ -220,21 +216,21 @@ func ChromaTagsLine(clex chroma.Lexer, txt []rune) (lexer.Line, error) {
 	}
 	var tags lexer.Line
 	toks := iterator.Tokens()
-	ChromaTagsForLine(&tags, toks)
+	chromaTagsForLine(&tags, toks)
 	return tags, nil
 }
 
-// MaxLineLen prevents overflow in allocating line length
+// maxLineLen prevents overflow in allocating line length
 const (
-	MaxLineLen = 64 * 1024 * 1024
-	MaxNTags   = 1024
+	maxLineLen = 64 * 1024 * 1024
+	maxNumTags = 1024
 )
 
-// MarkupLine returns the line with html class tags added for each tag
+// markupLine returns the line with html class tags added for each tag
 // takes both the hi tags and extra tags.  Only fully nested tags are supported --
 // any dangling ends are truncated.
-func (hm *Highlighting) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
-	if len(txt) > MaxLineLen { // avoid overflow
+func (hi *Highlighting) markupLine(txt []rune, hitags, tags lexer.Line) []byte {
+	if len(txt) > maxLineLen { // avoid overflow
 		return nil
 	}
 	sz := len(txt)
@@ -243,8 +239,8 @@ func (hm *Highlighting) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 	}
 	ttags := lexer.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
 	nt := len(ttags)
-	if nt == 0 || nt > MaxNTags {
-		return HTMLEscapeRunes(txt)
+	if nt == 0 || nt > maxNumTags {
+		return htmlEscapeRunes(txt)
 	}
 	sps := []byte(`<span class="`)
 	sps2 := []byte(`">`)
@@ -265,7 +261,7 @@ func (hm *Highlighting) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 			if ts.Ed <= tr.St {
 				ep := min(sz, ts.Ed)
 				if cp < ep {
-					mu = append(mu, HTMLEscapeRunes(txt[cp:ep])...)
+					mu = append(mu, htmlEscapeRunes(txt[cp:ep])...)
 					cp = ep
 				}
 				mu = append(mu, spe...)
@@ -276,7 +272,7 @@ func (hm *Highlighting) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 			break
 		}
 		if tr.St > cp {
-			mu = append(mu, HTMLEscapeRunes(txt[cp:tr.St])...)
+			mu = append(mu, htmlEscapeRunes(txt[cp:tr.St])...)
 		}
 		mu = append(mu, sps...)
 		clsnm := tr.Token.Token.StyleName()
@@ -305,7 +301,7 @@ func (hm *Highlighting) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 		}
 		ep = min(len(txt), ep)
 		if tr.St < ep {
-			mu = append(mu, HTMLEscapeRunes(txt[tr.St:ep])...)
+			mu = append(mu, htmlEscapeRunes(txt[tr.St:ep])...)
 		}
 		if addEnd {
 			mu = append(mu, spe...)
@@ -313,7 +309,7 @@ func (hm *Highlighting) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 		cp = ep
 	}
 	if sz > cp {
-		mu = append(mu, HTMLEscapeRunes(txt[cp:sz])...)
+		mu = append(mu, htmlEscapeRunes(txt[cp:sz])...)
 	}
 	// pop any left on stack..
 	for si := len(tstack) - 1; si >= 0; si-- {
@@ -322,18 +318,18 @@ func (hm *Highlighting) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 	return mu
 }
 
-// HTMLEscapeBytes escapes special characters like "<" to become "&lt;". It
+// htmlEscapeBytes escapes special characters like "<" to become "&lt;". It
 // escapes only five such characters: <, >, &, ' and ".
 // It operates on a *copy* of the byte string and does not modify the input!
 // otherwise it causes major problems..
-func HTMLEscapeBytes(b []byte) []byte {
+func htmlEscapeBytes(b []byte) []byte {
 	return []byte(stdhtml.EscapeString(string(b)))
 }
 
-// HTMLEscapeRunes escapes special characters like "<" to become "&lt;". It
+// htmlEscapeRunes escapes special characters like "<" to become "&lt;". It
 // escapes only five such characters: <, >, &, ' and ".
 // It operates on a *copy* of the byte string and does not modify the input!
 // otherwise it causes major problems..
-func HTMLEscapeRunes(r []rune) []byte {
+func htmlEscapeRunes(r []rune) []byte {
 	return []byte(stdhtml.EscapeString(string(r)))
 }
