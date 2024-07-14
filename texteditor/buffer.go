@@ -2326,7 +2326,7 @@ func (tb *Buffer) JoinParaLines(startLine, endLine int) {
 	tb.signalMods()
 }
 
-// tabsToSpaces replaces tabs with spaces in given line.
+// tabsToSpaces replaces tabs with spaces in the given line.
 func (tb *Buffer) tabsToSpaces(ln int) {
 	tabSz := tb.Options.TabSize
 
@@ -2353,8 +2353,8 @@ func (tb *Buffer) tabsToSpaces(ln int) {
 	}
 }
 
-// TabsToSpacesRegion replaces tabs with spaces over given region; end is *exclusive*
-func (tb *Buffer) TabsToSpacesRegion(st, ed int) {
+// TabsToSpaces replaces tabs with spaces over given region; end is *exclusive*
+func (tb *Buffer) TabsToSpaces(st, ed int) {
 	autoSave := tb.batchUpdateStart()
 	for ln := st; ln < ed; ln++ {
 		if ln >= tb.NLines {
@@ -2366,7 +2366,7 @@ func (tb *Buffer) TabsToSpacesRegion(st, ed int) {
 	tb.signalMods()
 }
 
-// spacesToTabs replaces spaces with tabs in given line.
+// spacesToTabs replaces spaces with tabs in the given line.
 func (tb *Buffer) spacesToTabs(ln int) {
 	tabSz := tb.Options.TabSize
 
@@ -2399,8 +2399,8 @@ func (tb *Buffer) spacesToTabs(ln int) {
 	}
 }
 
-// SpacesToTabsRegion replaces tabs with spaces over given region; end is *exclusive*
-func (tb *Buffer) SpacesToTabsRegion(st, ed int) {
+// SpacesToTabs replaces tabs with spaces over given region; end is *exclusive*
+func (tb *Buffer) SpacesToTabs(st, ed int) {
 	autoSave := tb.batchUpdateStart()
 	for ln := st; ln < ed; ln++ {
 		if ln >= tb.NLines {
