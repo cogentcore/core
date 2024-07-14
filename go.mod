@@ -71,4 +71,4 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
-replace github.com/traefik/yaegi v0.16.1 => github.com/cogentcore/yaegi v0.0.0-20240713193340-a990f4d3c449
+replace github.com/traefik/yaegi v0.16.1 => github.com/cogentcore/yaegi v0.0.0-20240714002104-38ca6babefac
