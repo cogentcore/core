@@ -23,9 +23,8 @@ type Text struct { //types:add
 	Align Aligns
 
 	// vertical alignment of text (inherited).
-	// This is only applicable for SVG styling, not regular CSS / Cogent Core,
-	// which uses the global Align.Y.  It *only* applies to the text within
-	// its containing element: if that element does not have a specified size
+	// This *only* applies to the text within its containing element:
+	// if that element does not have a specified size
 	// that is different from the text size, then this has *no effect*.
 	AlignV Aligns
 

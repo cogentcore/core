@@ -241,6 +241,7 @@ func (ed *Editor) Init() {
 		s.Align.Content = styles.Start
 		s.Align.Items = styles.Start
 		s.Text.Align = styles.Start
+		s.Text.AlignV = styles.Start
 		s.Text.TabSize = core.SystemSettings.Editor.TabSize
 		s.Color = colors.Scheme.OnSurface
 		s.Min.X.Em(10)
