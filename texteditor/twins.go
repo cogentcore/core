@@ -39,10 +39,10 @@ func (te *TwinEditors) Init() {
 				s.Min.Y.Em(40)
 			})
 			w.On(events.Scroll, func(e events.Event) {
-				te.SyncViews(events.Scroll, e, name)
+				te.syncEditors(events.Scroll, e, name)
 			})
 			w.On(events.Input, func(e events.Event) {
-				te.SyncViews(events.Input, e, name)
+				te.syncEditors(events.Input, e, name)
 			})
 		})
 	}
@@ -50,18 +50,16 @@ func (te *TwinEditors) Init() {
 	f("text-b", te.BufferB)
 }
 
-// SetFiles sets files for each text [Buffer].
-func (te *TwinEditors) SetFiles(fileA, fileB string, lineNumbers bool) {
+// SetFiles sets the files for each [Buffer].
+func (te *TwinEditors) SetFiles(fileA, fileB string) {
 	te.BufferA.Filename = core.Filename(fileA)
-	te.BufferA.Options.LineNumbers = lineNumbers
 	te.BufferA.Stat() // update markup
 	te.BufferB.Filename = core.Filename(fileB)
-	te.BufferB.Options.LineNumbers = lineNumbers
 	te.BufferB.Stat() // update markup
 }
 
-// SyncViews synchronizes the text view scrolling and cursor positions
-func (te *TwinEditors) SyncViews(typ events.Types, e events.Event, name string) {
+// syncEditors synchronizes the [Editor] scrolling and cursor positions
+func (te *TwinEditors) syncEditors(typ events.Types, e events.Event, name string) {
 	tva, tvb := te.Editors()
 	me, other := tva, tvb
 	if name == "text-b" {

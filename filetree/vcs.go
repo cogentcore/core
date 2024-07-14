@@ -283,7 +283,7 @@ func BlameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *textedito
 	d := core.NewBody().AddTitle(title)
 	tv := texteditor.NewTwinEditors(d)
 	tv.SetSplits(.3, .7)
-	tv.SetFiles(fname, fname, true)
+	tv.SetFiles(fname, fname)
 	flns := bytes.Split(fbytes, []byte("\n"))
 	lns := bytes.Split(blame, []byte("\n"))
 	nln := min(len(lns), len(flns))
