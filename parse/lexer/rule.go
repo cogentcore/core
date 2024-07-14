@@ -444,7 +444,7 @@ func (lr *Rule) DoAct(ls *State, act Actions, tok *token.KeyToken) {
 		if ls.LastName == "" {
 			ls.Error(ls.Pos, "SetGuestLex action requires prior Name action -- name is empty", lr)
 		} else {
-			lx := TheLangLexer.LexerByName(ls.LastName)
+			lx := TheLanguageLexer.LexerByName(ls.LastName)
 			if lx != nil {
 				ls.GuestLex = lx
 				ls.SaveStack = ls.Stack.Clone()

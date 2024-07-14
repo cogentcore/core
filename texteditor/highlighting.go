@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/lexer"
-	_ "cogentcore.org/core/parse/suplangs"
+	_ "cogentcore.org/core/parse/supportedlanguages"
 	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/texteditor/highlighting"
 	"github.com/alecthomas/chroma/v2"
@@ -73,7 +73,7 @@ func (hi *Highlighting) init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 	hi.parseState = pist
 
 	if hi.info.Known != fileinfo.Unknown {
-		if lp, err := parse.LangSupport.Properties(hi.info.Known); err == nil {
+		if lp, err := parse.LanguageSupport.Properties(hi.info.Known); err == nil {
 			if lp.Lang != nil {
 				hi.lexer = nil
 				hi.parseLanguage = lp.Lang
@@ -151,7 +151,7 @@ func (hi *Highlighting) markupTagsLine(ln int, txt []rune) (lexer.Line, error) {
 		return nil, nil
 	}
 	if hi.parseLanguage != nil {
-		ll := hi.parseLanguage.HiLine(hi.parseState, ln, txt)
+		ll := hi.parseLanguage.HighlightLine(hi.parseState, ln, txt)
 		return ll, nil
 	} else if hi.lexer != nil {
 		return hi.chromaTagsLine(txt)

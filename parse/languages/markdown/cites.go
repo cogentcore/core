@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/complete"
-	"cogentcore.org/core/parse/langs/bibtex"
+	"cogentcore.org/core/parse/languages/bibtex"
 	"cogentcore.org/core/parse/lexer"
 )
 

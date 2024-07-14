@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/parse"
-	_ "cogentcore.org/core/parse/langs"
+	_ "cogentcore.org/core/parse/languages"
 	"cogentcore.org/core/parse/syms"
 )
 
@@ -25,7 +25,7 @@ func main() {
 	var recurse bool
 	var excl string
 
-	parse.LangSupport.OpenStandard()
+	parse.LanguageSupport.OpenStandard()
 
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
@@ -57,7 +57,7 @@ func main() {
 
 func DoGoPath(path string) {
 	fmt.Printf("Processing path: %v\n", path)
-	lp, _ := parse.LangSupport.Properties(fileinfo.Go)
+	lp, _ := parse.LanguageSupport.Properties(fileinfo.Go)
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 	fs := parse.NewFileState()

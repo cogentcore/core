@@ -19,12 +19,12 @@ import (
 )
 
 func init() {
-	parse.LangSupport.OpenStandard()
+	parse.LanguageSupport.OpenStandard()
 }
 
 func TestParse(t *testing.T) {
 	// t.Skip("todo: reenable soon")
-	lp, _ := parse.LangSupport.Properties(fileinfo.Go)
+	lp, _ := parse.LanguageSupport.Properties(fileinfo.Go)
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 

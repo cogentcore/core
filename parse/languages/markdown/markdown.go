@@ -13,8 +13,8 @@ import (
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/complete"
-	"cogentcore.org/core/parse/langs"
-	"cogentcore.org/core/parse/langs/bibtex"
+	"cogentcore.org/core/parse/languages"
+	"cogentcore.org/core/parse/languages/bibtex"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/syms"
 	"cogentcore.org/core/parse/token"
@@ -35,17 +35,17 @@ type MarkdownLang struct {
 var TheMarkdownLang = MarkdownLang{}
 
 func init() {
-	parse.StandardLangProperties[fileinfo.Markdown].Lang = &TheMarkdownLang
-	langs.ParserBytes[fileinfo.Markdown] = parserBytes
+	parse.StandardLanguageProperties[fileinfo.Markdown].Lang = &TheMarkdownLang
+	languages.ParserBytes[fileinfo.Markdown] = parserBytes
 }
 
 func (ml *MarkdownLang) Parser() *parse.Parser {
 	if ml.Pr != nil {
 		return ml.Pr
 	}
-	lp, _ := parse.LangSupport.Properties(fileinfo.Markdown)
+	lp, _ := parse.LanguageSupport.Properties(fileinfo.Markdown)
 	if lp.Parser == nil {
-		parse.LangSupport.OpenStandard()
+		parse.LanguageSupport.OpenStandard()
 	}
 	ml.Pr = lp.Parser
 	if ml.Pr == nil {
@@ -79,7 +79,7 @@ func (ml *MarkdownLang) ParseLine(fs *parse.FileState, line int) *parse.FileStat
 	return nil
 }
 
-func (ml *MarkdownLang) HiLine(fss *parse.FileStates, line int, txt []rune) lexer.Line {
+func (ml *MarkdownLang) HighlightLine(fss *parse.FileStates, line int, txt []rune) lexer.Line {
 	fs := fss.Done()
 	return ml.LexLine(fs, line, txt)
 }

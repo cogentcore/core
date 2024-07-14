@@ -12,8 +12,8 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/langs"
-	"cogentcore.org/core/parse/langs/bibtex"
+	"cogentcore.org/core/parse/languages"
+	"cogentcore.org/core/parse/languages/bibtex"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/syms"
 )
@@ -33,17 +33,17 @@ type TexLang struct {
 var TheTexLang = TexLang{}
 
 func init() {
-	parse.StandardLangProperties[fileinfo.TeX].Lang = &TheTexLang
-	langs.ParserBytes[fileinfo.TeX] = parserBytes
+	parse.StandardLanguageProperties[fileinfo.TeX].Lang = &TheTexLang
+	languages.ParserBytes[fileinfo.TeX] = parserBytes
 }
 
 func (tl *TexLang) Parser() *parse.Parser {
 	if tl.Pr != nil {
 		return tl.Pr
 	}
-	lp, _ := parse.LangSupport.Properties(fileinfo.TeX)
+	lp, _ := parse.LanguageSupport.Properties(fileinfo.TeX)
 	if lp.Parser == nil {
-		parse.LangSupport.OpenStandard()
+		parse.LanguageSupport.OpenStandard()
 	}
 	tl.Pr = lp.Parser
 	if tl.Pr == nil {
@@ -77,7 +77,7 @@ func (tl *TexLang) ParseLine(fs *parse.FileState, line int) *parse.FileState {
 	return nil
 }
 
-func (tl *TexLang) HiLine(fss *parse.FileStates, line int, txt []rune) lexer.Line {
+func (tl *TexLang) HighlightLine(fss *parse.FileStates, line int, txt []rune) lexer.Line {
 	fs := fss.Done()
 	return tl.LexLine(fs, line, txt)
 }

@@ -13,16 +13,16 @@ import (
 	"cogentcore.org/core/parse/token"
 )
 
-// LangLexer looks up lexer for given language; implementation in parent parse package
+// LanguageLexer looks up lexer for given language; implementation in parent parse package
 // so we need the interface
-type LangLexer interface {
+type LanguageLexer interface {
 	// LexerByName returns the top-level [Rule] for given language (case invariant lookup)
 	LexerByName(lang string) *Rule
 }
 
-// TheLangLexer is the instance of LangLexer interface used to lookup lexers
-// for languages -- is set in pi/langs.go
-var TheLangLexer LangLexer
+// TheLanguageLexer is the instance of LangLexer interface used to lookup lexers
+// for languages -- is set in parse/languages.go
+var TheLanguageLexer LanguageLexer
 
 // State is the state maintained for lexing
 type State struct {

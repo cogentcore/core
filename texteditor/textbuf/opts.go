@@ -53,7 +53,7 @@ func (tb *Options) ConfigKnown(sup fileinfo.Known) bool {
 	if sup == fileinfo.Unknown {
 		return false
 	}
-	lp, ok := parse.StandardLangProperties[sup]
+	lp, ok := parse.StandardLanguageProperties[sup]
 	if !ok {
 		return false
 	}
@@ -85,7 +85,7 @@ func KnownComments(fpath string) (comLn, comSt, comEd string) {
 	if sup == fileinfo.Unknown {
 		return
 	}
-	lp, ok := parse.StandardLangProperties[sup]
+	lp, ok := parse.StandardLanguageProperties[sup]
 	if !ok {
 		return
 	}

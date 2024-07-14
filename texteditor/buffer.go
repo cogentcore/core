@@ -2166,7 +2166,7 @@ func (tb *Buffer) autoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 
 	tb.LinesMu.RLock()
 	tb.markupMu.RLock()
-	lp, _ := parse.LangSupport.Properties(tb.ParseState.Sup)
+	lp, _ := parse.LanguageSupport.Properties(tb.ParseState.Sup)
 	var pInd, delInd int
 	if lp != nil && lp.Lang != nil {
 		pInd, delInd, _, _ = lp.Lang.IndentLine(&tb.ParseState, tb.Lines, tb.hiTags, ln, tabSz)

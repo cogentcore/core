@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/langs"
+	"cogentcore.org/core/parse/languages"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"
 )
@@ -33,17 +33,17 @@ type GoLang struct {
 var TheGoLang = GoLang{}
 
 func init() {
-	parse.StandardLangProperties[fileinfo.Go].Lang = &TheGoLang
-	langs.ParserBytes[fileinfo.Go] = parserBytes
+	parse.StandardLanguageProperties[fileinfo.Go].Lang = &TheGoLang
+	languages.ParserBytes[fileinfo.Go] = parserBytes
 }
 
 func (gl *GoLang) Parser() *parse.Parser {
 	if gl.Pr != nil {
 		return gl.Pr
 	}
-	lp, _ := parse.LangSupport.Properties(fileinfo.Go)
+	lp, _ := parse.LanguageSupport.Properties(fileinfo.Go)
 	if lp.Parser == nil {
-		parse.LangSupport.OpenStandard()
+		parse.LanguageSupport.OpenStandard()
 	}
 	gl.Pr = lp.Parser
 	if gl.Pr == nil {
@@ -114,7 +114,7 @@ func (gl *GoLang) ParseLine(fs *parse.FileState, line int) *parse.FileState {
 	return lfs
 }
 
-func (gl *GoLang) HiLine(fss *parse.FileStates, line int, txt []rune) lexer.Line {
+func (gl *GoLang) HighlightLine(fss *parse.FileStates, line int, txt []rune) lexer.Line {
 	pr := gl.Parser()
 	if pr == nil {
 		return nil

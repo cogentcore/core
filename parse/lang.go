@@ -44,13 +44,13 @@ type Language interface {
 	// If txt is nil then any existing source in fs is used.
 	ParseFile(fs *FileStates, txt []byte)
 
-	// HiLine does the lexing and potentially parsing of a given line of the file,
+	// HighlightLine does the lexing and potentially parsing of a given line of the file,
 	// for purposes of syntax highlighting -- uses Done() FileState of existing context
 	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes,
 	// and provides relevant context for the overall parsing, which is performed
 	// on the given line of text runes, and also updates corresponding source in FileState
 	// (via a copy).  If txt is nil then any existing source in fs is used.
-	HiLine(fs *FileStates, line int, txt []rune) lexer.Line
+	HighlightLine(fs *FileStates, line int, txt []rune) lexer.Line
 
 	// CompleteLine provides the list of relevant completions for given text
 	// which is at given position within the file.

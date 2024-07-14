@@ -178,7 +178,7 @@ func (hs *Styles) ViewStandard() {
 // Init must be called to initialize the hi styles -- post startup
 // so chroma stuff is all in place, and loads custom styles
 func Init() {
-	parse.LangSupport.OpenStandard()
+	parse.LanguageSupport.OpenStandard()
 	StandardStyles.OpenDefaults()
 	CustomStyles.OpenSettings()
 	if len(CustomStyles) == 0 {

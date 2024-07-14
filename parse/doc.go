@@ -8,7 +8,7 @@ Package parse is the top-level package for the Cogent Core parsing system.
 The code is organized into the various sub-packages, dealing with the different
 stages of parsing etc.
 
-Sub-package langs has the parsers for specific languages, including Go (of course), markdown
+Sub-package languages has the parsers for specific languages, including Go (of course), markdown
 and tex (latter are lexer-only)
 
 Note that the GUI editor framework for creating and testing parsers is currently

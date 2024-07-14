@@ -328,7 +328,7 @@ func (ed *Editor) keyInput(e events.Event) {
 		if !e.HasAnyModifier(key.Control, key.Meta) {
 			e.SetHandled()
 			if ed.Buffer.Options.AutoIndent {
-				lp, _ := parse.LangSupport.Properties(ed.Buffer.ParseState.Sup)
+				lp, _ := parse.LanguageSupport.Properties(ed.Buffer.ParseState.Sup)
 				if lp != nil && lp.Lang != nil && lp.HasFlag(parse.ReAutoIndent) {
 					// only re-indent current line for supported types
 					tbe, _, _ := ed.Buffer.autoIndent(ed.CursorPos.Ln) // reindent current line
@@ -399,7 +399,7 @@ func (ed *Editor) keyInputInsertBracket(kt events.Event) {
 	newLine := false
 	curLn := ed.Buffer.line(pos.Ln)
 	lnLen := len(curLn)
-	lp, _ := parse.LangSupport.Properties(ed.Buffer.ParseState.Sup)
+	lp, _ := parse.LanguageSupport.Properties(ed.Buffer.ParseState.Sup)
 	if lp != nil && lp.Lang != nil {
 		match, newLine = lp.Lang.AutoBracket(&ed.Buffer.ParseState, kt.KeyRune(), pos, curLn)
 	} else {
