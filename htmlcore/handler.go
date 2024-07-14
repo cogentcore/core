@@ -39,11 +39,11 @@ var ElementHandlers = map[string]func(ctx *Context) bool{}
 var BindTextEditor func(ed *texteditor.Editor, parent core.Widget)
 
 // New adds a new widget of the given type to the context parent.
-// It automatically calls [Context.Config] on the resulting widget.
+// It automatically calls [Context.config] on the resulting widget.
 func New[T tree.NodeValue](ctx *Context) *T {
 	parent := ctx.Parent()
 	w := tree.New[T](parent)
-	ctx.Config(any(w).(core.Widget)) // TODO(config): better htmlcore structure with new config paradigm?
+	ctx.config(any(w).(core.Widget)) // TODO(config): better htmlcore structure with new config paradigm?
 	return w
 }
 
@@ -86,9 +86,9 @@ func HandleElement(ctx *Context) {
 		if errors.Log(err) != nil {
 			return
 		}
-		ctx.AddStyle(string(b))
+		ctx.addStyle(string(b))
 	case "style":
-		ctx.AddStyle(ExtractText(ctx))
+		ctx.addStyle(ExtractText(ctx))
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul":
 		w := New[core.Frame](ctx)
 		ctx.NewParent = w

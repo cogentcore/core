@@ -23,14 +23,12 @@ import (
 // Context contains context information about the current state of a htmlcore
 // reader and its surrounding context. It should be created with [NewContext].
 type Context struct {
+
 	// Node is the node that is currently being read.
 	Node *html.Node
 
-	// Styles are the CSS styling rules for each node.
-	Styles map[*html.Node][]*css.Rule
-
-	// Widgets are the core widgets for each node.
-	Widgets map[*html.Node]core.Widget
+	// styles are the CSS styling rules for each node.
+	styles map[*html.Node][]*css.Rule
 
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
@@ -40,11 +38,11 @@ type Context struct {
 	// should be added to.
 	BlockParent core.Widget
 
-	// InlinePw is the current parent widget that inline
+	// inlineParent is the current parent widget that inline
 	// elements should be added to; it must be got through
 	// [Context.InlineParent], as it may need to be constructed
 	// on the fly. However, it can be set directly.
-	InlinePw core.Widget
+	inlineParent core.Widget
 
 	// PageURL, if not "", is the URL of the current page.
 	// Otherwise, there is no current page.
@@ -60,8 +58,7 @@ type Context struct {
 // NewContext returns a new [Context] with basic defaults.
 func NewContext() *Context {
 	return &Context{
-		Styles:  map[*html.Node][]*css.Rule{},
-		Widgets: map[*html.Node]core.Widget{},
+		styles:  map[*html.Node][]*css.Rule{},
 		OpenURL: system.TheApp.OpenURL,
 	}
 }
@@ -71,7 +68,7 @@ func NewContext() *Context {
 // It may make changes to the widget tree, so the widget
 // must be added to the resulting parent immediately.
 func (c *Context) Parent() core.Widget {
-	rules := c.Styles[c.Node]
+	rules := c.styles[c.Node]
 	display := ""
 	for _, rule := range rules {
 		for _, decl := range rule.Declarations {
@@ -86,15 +83,15 @@ func (c *Context) Parent() core.Widget {
 		parent = c.InlineParent()
 	default:
 		parent = c.BlockParent
-		c.InlinePw = nil
+		c.inlineParent = nil
 	}
 	return parent
 }
 
-// Config configures the given widget. It needs to be called
+// config configures the given widget. It needs to be called
 // on all widgets that are not configured through the [New]
 // pathway.
-func (c *Context) Config(w core.Widget) {
+func (c *Context) config(w core.Widget) {
 	wb := w.AsWidget()
 	for _, attr := range c.Node.Attr {
 		switch attr.Key {
@@ -111,16 +108,16 @@ func (c *Context) Config(w core.Widget) {
 				continue
 			}
 			rule := &css.Rule{Declarations: decls}
-			if c.Styles == nil {
-				c.Styles = map[*html.Node][]*css.Rule{}
+			if c.styles == nil {
+				c.styles = map[*html.Node][]*css.Rule{}
 			}
-			c.Styles[c.Node] = append(c.Styles[c.Node], rule)
+			c.styles[c.Node] = append(c.styles[c.Node], rule)
 		default:
 			wb.SetProperty(attr.Key, attr.Val)
 		}
 	}
 	wb.SetProperty("tag", c.Node.Data)
-	rules := c.Styles[c.Node]
+	rules := c.styles[c.Node]
 	wb.Styler(func(s *styles.Style) {
 		for _, rule := range rules {
 			for _, decl := range rule.Declarations {
@@ -134,20 +131,20 @@ func (c *Context) Config(w core.Widget) {
 // InlineParent returns the current parent widget that inline
 // elements should be added to.
 func (c *Context) InlineParent() core.Widget {
-	if c.InlinePw != nil {
-		return c.InlinePw
+	if c.inlineParent != nil {
+		return c.inlineParent
 	}
-	c.InlinePw = core.NewFrame(c.BlockParent)
-	c.InlinePw.AsTree().SetName("inline-container")
-	tree.SetUniqueName(c.InlinePw)
-	c.InlinePw.AsWidget().Styler(func(s *styles.Style) {
+	c.inlineParent = core.NewFrame(c.BlockParent)
+	c.inlineParent.AsTree().SetName("inline-container")
+	tree.SetUniqueName(c.inlineParent)
+	c.inlineParent.AsWidget().Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 	})
-	return c.InlinePw
+	return c.inlineParent
 }
 
-// AddStyle adds the given CSS style string to the page's compiled styles.
-func (c *Context) AddStyle(style string) {
+// addStyle adds the given CSS style string to the page's compiled styles.
+func (c *Context) addStyle(style string) {
 	ss, err := parser.Parse(style)
 	if errors.Log(err) != nil {
 		return
@@ -169,7 +166,7 @@ func (c *Context) AddStyle(style string) {
 
 		matches := sel.Select(root)
 		for _, match := range matches {
-			c.Styles[match] = append(c.Styles[match], rule)
+			c.styles[match] = append(c.styles[match], rule)
 		}
 	}
 }
