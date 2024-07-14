@@ -23,8 +23,8 @@ github.com/bramvdbogaerde/go-scp v1.4.0 h1:jKMwpwCbcX1KyvDbm/PDJuXcMuNVlLGi0Q0re
 github.com/bramvdbogaerde/go-scp v1.4.0/go.mod h1:on2aH5AxaFb2G0N5Vsdy6B0Ml7k9HuHSwfo1y0QzAbQ=
 github.com/chewxy/math32 v1.10.1 h1:LFpeY0SLJXeaiej/eIp2L40VYfscTvKh/FSEZ68uMkU=
 github.com/chewxy/math32 v1.10.1/go.mod h1:dOB2rcuFrCn6UHrze36WSLVPKtzPMRAQvBvUwkSsLqs=
-github.com/cogentcore/yaegi v0.0.0-20240714002104-38ca6babefac h1:5OWwuplQR449IYHZQqZYPSb6ubi1QxykYug9ph415/0=
-github.com/cogentcore/yaegi v0.0.0-20240714002104-38ca6babefac/go.mod h1:Cdu3sNF6HYZewTQB9+rhNfwmi1E1imIpo/XE445jgTc=
+github.com/cogentcore/yaegi v0.0.0-20240714043945-dadb98936955 h1:KYLrEXVCaBsw3msuox5E6r7QrYMyafu5zX3omRTSdBU=
+github.com/cogentcore/yaegi v0.0.0-20240714043945-dadb98936955/go.mod h1:+MGpZ0srBmeJ7aaOLTdVss8WLolt0/y/plVHLpxgd3A=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/go-etcd v2.0.0+incompatible/go.mod h1:Jez6KQU2B/sWsbdaef3ED8NzMklzPG4d5KIOhIy30Tk=
 github.com/coreos/go-oidc/v3 v3.10.0 h1:tDnXHnLyiTVyT/2zLDGj09pFPkhND8Gl8lnTRhoEaJU=
