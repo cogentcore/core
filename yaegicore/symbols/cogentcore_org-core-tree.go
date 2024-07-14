@@ -3,9 +3,10 @@
 package symbols
 
 import (
-	"cogentcore.org/core/tree"
-	"github.com/traefik/yaegi/interp"
 	"reflect"
+
+	"cogentcore.org/core/tree"
+	"github.com/cogentcore/yaegi/interp"
 )
 
 func init() {

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package yaegicore provides functions connecting
-// https://github.com/traefik/yaegi to Cogent Core.
+// https://github.com/cogentcore/yaegi to Cogent Core.
 package yaegicore
 
 import (
@@ -18,8 +18,8 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/yaegicore/symbols"
-	"github.com/traefik/yaegi/interp"
-	"github.com/traefik/yaegi/stdlib"
+	"github.com/cogentcore/yaegi/interp"
+	"github.com/cogentcore/yaegi/stdlib"
 )
 
 var autoPlanNameCounter uint64

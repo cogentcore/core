@@ -3,6 +3,11 @@
 package symbols
 
 import (
+	"go/constant"
+	"go/token"
+	"image"
+	"reflect"
+
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -10,11 +15,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"github.com/traefik/yaegi/interp"
-	"go/constant"
-	"go/token"
-	"image"
-	"reflect"
+	"github.com/cogentcore/yaegi/interp"
 )
 
 func init() {
