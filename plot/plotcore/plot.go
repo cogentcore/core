@@ -43,12 +43,12 @@ func (pt *Plot) SetPlot(pl *plot.Plot) {
 		pl.SetPixels(pt.Plot.Pixels) // re-use the image!
 	}
 	pt.Plot = pl
-	pt.UpdatePlot()
+	pt.updatePlot()
 }
 
-// UpdatePlot draws the current plot at the size of the current widget,
+// updatePlot draws the current plot at the size of the current widget,
 // and triggers a Render so the widget will be rendered.
-func (pt *Plot) UpdatePlot() {
+func (pt *Plot) updatePlot() {
 	if pt.Plot == nil {
 		pt.NeedsRender()
 		return
@@ -92,7 +92,7 @@ func (pt *Plot) Init() {
 		pt.Plot.X.Max += dx
 		pt.Plot.Y.Min += dy
 		pt.Plot.Y.Max += dy
-		pt.UpdatePlot()
+		pt.updatePlot()
 		pt.NeedsRender()
 	})
 
@@ -107,7 +107,7 @@ func (pt *Plot) Init() {
 		pt.Plot.X.Max *= sc
 		pt.Plot.Y.Min *= sc
 		pt.Plot.Y.Max *= sc
-		pt.UpdatePlot()
+		pt.updatePlot()
 		pt.NeedsRender()
 	})
 }
@@ -127,21 +127,9 @@ func (pt *Plot) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return pt.Tooltip, pt.DefaultTooltipPos()
 }
 
-// SaveSVG saves the current Plot to an SVG file
-func (pt *Plot) SavePlot(filename core.Filename) error { //types:add
-	// return sv.Plot.SaveXML(string(filename))
-	return nil
-}
-
-// SavePNG saves the current rendered Plot image to an PNG image file.
-func (pt *Plot) SavePNG(filename core.Filename) error { //types:add
-	// return sv.Plot.SavePNG(string(filename))
-	return nil
-}
-
 func (pt *Plot) SizeFinal() {
 	pt.WidgetBase.SizeFinal()
-	pt.UpdatePlot()
+	pt.updatePlot()
 }
 
 func (pt *Plot) Render() {
