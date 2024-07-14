@@ -84,7 +84,7 @@ func (ed *Editor) keyInput(e events.Event) {
 	// cancelAll cancels search, completer, and..
 	cancelAll := func() {
 		ed.CancelComplete()
-		ed.CancelCorrect()
+		ed.cancelCorrect()
 		ed.iSearchCancel()
 		ed.qReplaceCancel()
 		ed.lastAutoInsert = 0
@@ -109,7 +109,7 @@ func (ed *Editor) keyInput(e events.Event) {
 		ed.shiftSelect(e)
 		ed.cursorForward(1)
 		ed.shiftSelectExtend(e)
-		ed.ISpellKeyInput(e)
+		ed.iSpellKeyInput(e)
 	case keymap.WordRight:
 		cancelAll()
 		e.SetHandled()
@@ -134,14 +134,14 @@ func (ed *Editor) keyInput(e events.Event) {
 		ed.shiftSelect(e)
 		ed.cursorUp(1)
 		ed.shiftSelectExtend(e)
-		ed.ISpellKeyInput(e)
+		ed.iSpellKeyInput(e)
 	case keymap.MoveDown:
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
 		ed.cursorDown(1)
 		ed.shiftSelectExtend(e)
-		ed.ISpellKeyInput(e)
+		ed.iSpellKeyInput(e)
 	case keymap.PageUp:
 		cancelAll()
 		e.SetHandled()
@@ -262,8 +262,8 @@ func (ed *Editor) keyInput(e events.Event) {
 		} else {
 			e.SetHandled()
 			ed.cursorBackspace(1)
-			ed.ISpellKeyInput(e)
-			ed.OfferComplete()
+			ed.iSpellKeyInput(e)
+			ed.offerComplete()
 		}
 	case keymap.Kill:
 		cancelAll()
@@ -273,7 +273,7 @@ func (ed *Editor) keyInput(e events.Event) {
 		cancelAll()
 		e.SetHandled()
 		ed.cursorDelete(1)
-		ed.ISpellKeyInput(e)
+		ed.iSpellKeyInput(e)
 	case keymap.BackspaceWord:
 		cancelAll()
 		e.SetHandled()
@@ -319,9 +319,9 @@ func (ed *Editor) keyInput(e events.Event) {
 		ed.iSearchCancel()
 		e.SetHandled()
 		if ed.Buffer.isSpellEnabled(ed.CursorPos) {
-			ed.OfferCorrect()
+			ed.offerCorrect()
 		} else {
-			ed.OfferComplete()
+			ed.offerComplete()
 		}
 	case keymap.Enter:
 		cancelAll()
@@ -346,7 +346,7 @@ func (ed *Editor) keyInput(e events.Event) {
 			} else {
 				ed.InsertAtCursor([]byte("\n"))
 			}
-			ed.ISpellKeyInput(e)
+			ed.iSpellKeyInput(e)
 		}
 		// todo: KeFunFocusPrev -- unindent
 	case keymap.FocusNext: // tab
@@ -363,7 +363,7 @@ func (ed *Editor) keyInput(e events.Event) {
 				ed.InsertAtCursor(indent.Bytes(ed.Buffer.Options.IndentChar(), 1, ed.Styles.Text.TabSize))
 			}
 			ed.NeedsRender()
-			ed.ISpellKeyInput(e)
+			ed.iSpellKeyInput(e)
 		}
 	case keymap.FocusPrev: // shift-tab
 		cancelAll()
@@ -378,7 +378,7 @@ func (ed *Editor) keyInput(e events.Event) {
 					ed.SetCursorShow(npos)
 				}
 			}
-			ed.ISpellKeyInput(e)
+			ed.iSpellKeyInput(e)
 		}
 	case keymap.None:
 		if unicode.IsPrint(e.KeyRune()) {
@@ -386,7 +386,7 @@ func (ed *Editor) keyInput(e events.Event) {
 				ed.keyInputInsertRune(e)
 			}
 		}
-		ed.ISpellKeyInput(e)
+		ed.iSpellKeyInput(e)
 	}
 	ed.lastWasTabAI = gotTabAI
 }
@@ -470,7 +470,7 @@ func (ed *Editor) keyInputInsertRune(kt events.Event) {
 			if kt.KeyRune() == ' ' {
 				ed.CancelComplete()
 			} else {
-				ed.OfferComplete()
+				ed.offerComplete()
 			}
 		}
 		if kt.KeyRune() == '}' || kt.KeyRune() == ')' || kt.KeyRune() == ']' {
@@ -693,7 +693,7 @@ func (ed *Editor) setCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 func (ed *Editor) ShowContextMenu(e events.Event) {
 	if ed.Buffer.spell != nil && !ed.HasSelection() && ed.Buffer.isSpellEnabled(ed.CursorPos) {
 		if ed.Buffer.spell != nil {
-			if ed.OfferCorrect() {
+			if ed.offerCorrect() {
 				return
 			}
 		}
