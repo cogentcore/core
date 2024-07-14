@@ -6,12 +6,20 @@
 package wpath
 
 import (
+	"path"
 	"slices"
 	"strings"
 	"unicode"
 
 	"cogentcore.org/core/base/strcase"
 )
+
+// Ignore returns whether the given path should be ignored
+// in released builds, which is the case if the path starts
+// with a dash.
+func Ignore(p string) bool {
+	return strings.HasPrefix(path.Base(p), "-")
+}
 
 // Format formats the given path into a correct pages path
 // by removing all `{digit(s)}-` prefixes at the start of path

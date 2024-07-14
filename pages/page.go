@@ -122,13 +122,19 @@ func (pg *Page) Init() {
 
 				pg.URLToPagePath = map[string]string{"": "index.md"}
 				errors.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
+					if err != nil {
+						return err
+					}
+
 					// already handled
 					if fpath == "" || fpath == "." {
 						return nil
 					}
 
+					if system.TheApp.Platform() == system.Web && wpath.Ignore(fpath) {
+						return nil
+					}
 					p := wpath.Format(fpath)
-
 					pdir := path.Dir(p)
 					base := path.Base(p)
 
@@ -229,6 +235,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 					return err
 				}
 				if path == pg.PagePath || d.IsDir() {
+					return nil
+				}
+				if system.TheApp.Platform() == system.Web && wpath.Ignore(path) {
 					return nil
 				}
 				pg.PagePath = path
