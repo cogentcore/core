@@ -200,7 +200,8 @@ func TestRenderGridCenteredFrame(t *testing.T) {
 	})
 	fr := NewFrame(grid)
 	fr.Styler(func(s *styles.Style) {
-		s.CenterAll()
+		s.Justify.Content = styles.Center
+		s.Align.Items = styles.Center
 		s.Background = colors.Scheme.Select.Container
 	})
 	tx := NewText(fr).SetText("0 nodes").SetType(TextLabelLarge)
