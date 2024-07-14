@@ -178,19 +178,20 @@ func (ed *Editor) SizeUp() {
 func (ed *Editor) SizeDown(iter int) bool {
 	if iter == 0 {
 		ed.LayoutAllLines()
-		sz := &ed.Geom.Size
-		maxh := maxGrowLines * ed.lineHeight
-		ty := ed.linesSize.Y + 2*ed.lineHeight
-		ty = min(ty, maxh)
-		if sz.Max.Y > 0 {
-			ty = min(sz.Max.Y, ty)
-		}
-		sz.Actual.Content.Y = ty
-		if core.DebugSettings.LayoutTrace {
-			fmt.Println(ed, "texteditor SizeDown iter0 targ:", ty, "linesSize:", ed.linesSize.Y, "Actual:", sz.Actual.Content)
-		}
 	} else {
 		ed.ReLayoutAllLines()
+	}
+	// use actual lineSize from layout to ensure fit
+	sz := &ed.Geom.Size
+	maxh := maxGrowLines * ed.lineHeight
+	ty := ed.linesSize.Y + 1*ed.lineHeight
+	ty = min(ty, maxh)
+	if sz.Max.Y > 0 {
+		ty = min(sz.Max.Y, ty)
+	}
+	sz.Actual.Content.Y = ty
+	if core.DebugSettings.LayoutTrace {
+		fmt.Println(ed, "texteditor SizeDown targ:", ty, "linesSize:", ed.linesSize.Y, "Actual:", sz.Actual.Content)
 	}
 
 	redo := ed.Frame.SizeDown(iter)
