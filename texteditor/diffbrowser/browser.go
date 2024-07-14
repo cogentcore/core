@@ -100,7 +100,7 @@ func (br *Browser) ViewDiff(fn *Node) *texteditor.DiffEditor {
 	tb := core.NewToolbar(tab)
 	dv := texteditor.NewDiffEditor(tab)
 	tb.Maker(dv.MakeToolbar)
-	dv.SetFileA(fn.FileA).SetFileB(fn.FileB).SetRevA(fn.RevA).SetRevB(fn.RevB)
+	dv.SetFileA(fn.FileA).SetFileB(fn.FileB).SetRevisionA(fn.RevA).SetRevisionB(fn.RevB)
 	dv.DiffStrings(stringsx.SplitLines(fn.TextA), stringsx.SplitLines(fn.TextB))
 	br.Update()
 	return dv

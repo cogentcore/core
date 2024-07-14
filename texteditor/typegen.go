@@ -8,7 +8,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
@@ -48,17 +47,14 @@ func (t *DiffEditor) SetFileA(v string) *DiffEditor { t.FileA = v; return t }
 // second file name being compared
 func (t *DiffEditor) SetFileB(v string) *DiffEditor { t.FileB = v; return t }
 
-// SetRevA sets the [DiffEditor.RevA]:
+// SetRevisionA sets the [DiffEditor.RevA]:
 // revision for first file, if relevant
-func (t *DiffEditor) SetRevA(v string) *DiffEditor { t.RevA = v; return t }
+func (t *DiffEditor) SetRevisionA(v string) *DiffEditor { t.RevisionA = v; return t }
 
-// SetRevB sets the [DiffEditor.RevB]:
+// SetRevisionB sets the [DiffEditor.RevB]:
 // revision for second file, if relevant
-func (t *DiffEditor) SetRevB(v string) *DiffEditor { t.RevB = v; return t }
+func (t *DiffEditor) SetRevisionB(v string) *DiffEditor { t.RevisionB = v; return t }
 
-// SetDiffs sets the [DiffEditor.Diffs]:
-// Diffs applied
-func (t *DiffEditor) SetDiffs(v textbuf.DiffSelected) *DiffEditor { t.Diffs = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.DiffTextEditor", IDName: "diff-text-editor", Doc: "DiffTextEditor supports double-click based application of edits from one\nbuffer to the other.", Embeds: []types.Field{{Name: "Editor"}}})
 
