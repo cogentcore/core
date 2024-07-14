@@ -372,11 +372,11 @@ func (tb *Buffer) BytesLine(ln int) []byte {
 	return tb.lineBytes[ln]
 }
 
-// SetLang sets the language for highlighting and updates
+// SetLanguage sets the language for highlighting and updates
 // the highlighting style and buffer accordingly.
-func (tb *Buffer) SetLang(lang string) *Buffer {
-	lang = strings.ToLower(lang)
-	tb.SetFilename("_placeholder." + lang)
+func (tb *Buffer) SetLanguage(language string) *Buffer {
+	language = strings.ToLower(language)
+	tb.SetFilename("_placeholder." + language)
 	tb.SetText(tb.text) // to update it
 	return tb
 }

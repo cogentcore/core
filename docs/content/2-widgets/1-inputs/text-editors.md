@@ -19,7 +19,7 @@ texteditor.NewEditor(b).Buffer.SetString("Hello, world!")
 You can set the highlighting language of a text editor:
 
 ```Go
-texteditor.NewEditor(b).Buffer.SetLang("go").SetString(`package main
+texteditor.NewEditor(b).Buffer.SetLanguage("go").SetString(`package main
 
 func main() {
     fmt.Println("Hello, world!")

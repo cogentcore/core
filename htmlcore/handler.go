@@ -126,7 +126,7 @@ func HandleElement(ctx *Context) {
 			ed.Buffer.SetString(ExtractText(ctx))
 			lang := getLanguage(GetAttr(ctx.Node, "class"))
 			if lang != "" {
-				ed.Buffer.SetLang(lang)
+				ed.Buffer.SetLanguage(lang)
 			}
 			if BindTextEditor != nil && lang == "Go" {
 				ed.Buffer.SpacesToTabs(0, ed.Buffer.NumLines) // Go uses tabs

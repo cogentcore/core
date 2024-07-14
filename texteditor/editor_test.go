@@ -27,9 +27,9 @@ func TestEditorSetText(t *testing.T) {
 	b.AssertRender(t, "set-text")
 }
 
-func TestEditorSetLang(t *testing.T) {
+func TestEditorSetLanguage(t *testing.T) {
 	b := core.NewBody()
-	NewEditor(b).Buffer.SetLang("go").SetString(`package main
+	NewEditor(b).Buffer.SetLanguage("go").SetString(`package main
 
 	func main() {
 		fmt.Println("Hello, world!")
