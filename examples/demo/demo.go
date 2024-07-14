@@ -256,8 +256,8 @@ func textEditors(ts *core.Tabs) {
 
 	sp := core.NewSplits(tab)
 
-	errors.Log(texteditor.NewSoloEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
-	texteditor.NewSoloEditor(sp).Buffer.SetLang("svg").SetTextString(core.AppIcon)
+	errors.Log(texteditor.NewEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
+	texteditor.NewEditor(sp).Buffer.SetLang("svg").SetTextString(core.AppIcon)
 }
 
 func valueBinding(ts *core.Tabs) {

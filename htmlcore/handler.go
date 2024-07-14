@@ -121,7 +121,7 @@ func HandleElement(ctx *Context) {
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
-			ed := New[texteditor.Editor](ctx).SetNewBuffer()
+			ed := New[texteditor.Editor](ctx)
 			ctx.Node = ctx.Node.FirstChild // go to the code element
 			ed.Buffer.SetTextString(ExtractText(ctx))
 			lang := getLanguage(GetAttr(ctx.Node, "class"))

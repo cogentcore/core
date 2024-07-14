@@ -30,7 +30,6 @@ func init() {
 		"NewDiffEditor":            reflect.ValueOf(texteditor.NewDiffEditor),
 		"NewDiffTextEditor":        reflect.ValueOf(texteditor.NewDiffTextEditor),
 		"NewEditor":                reflect.ValueOf(texteditor.NewEditor),
-		"NewSoloEditor":            reflect.ValueOf(texteditor.NewSoloEditor),
 		"NewTwinEditors":           reflect.ValueOf(texteditor.NewTwinEditors),
 		"PrevISearchString":        reflect.ValueOf(&texteditor.PrevISearchString).Elem(),
 		"PrevQReplaceFinds":        reflect.ValueOf(&texteditor.PrevQReplaceFinds).Elem(),

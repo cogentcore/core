@@ -24,7 +24,6 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
-	"cogentcore.org/core/tree"
 )
 
 // TODO: move these into an editor settings object
@@ -212,24 +211,12 @@ type Editor struct { //core:embedder
 	lastFilename   core.Filename
 }
 
-// NewSoloEditor returns a new [Editor] with an associated [Buffer].
-// This is appropriate for making a standalone editor in which there
-// is there is one editor per buffer.
-func NewSoloEditor(parent ...tree.Node) *Editor {
-	return NewEditor(parent...).SetNewBuffer()
-}
-
-// SetNewBuffer sets the [Buffer] for this [Editor] to a [NewBuffer].
-func (ed *Editor) SetNewBuffer() *Editor {
-	ed.SetBuffer(NewBuffer())
-	return ed
-}
-
 func (ed *Editor) WidgetValue() any { return &ed.Buffer.text }
 
 func (ed *Editor) Init() {
 	ed.Frame.Init()
 	ed.AddContextMenu(ed.ContextMenu)
+	ed.SetBuffer(NewBuffer())
 	ed.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		ed.CursorWidth.Dp(2)

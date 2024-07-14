@@ -17,19 +17,19 @@ import (
 
 func TestEditor(t *testing.T) {
 	b := core.NewBody()
-	NewSoloEditor(b)
+	NewEditor(b)
 	b.AssertRender(t, "basic")
 }
 
 func TestEditorSetText(t *testing.T) {
 	b := core.NewBody()
-	NewSoloEditor(b).Buffer.SetTextString("Hello, world!")
+	NewEditor(b).Buffer.SetTextString("Hello, world!")
 	b.AssertRender(t, "set-text")
 }
 
 func TestEditorSetLang(t *testing.T) {
 	b := core.NewBody()
-	NewSoloEditor(b).Buffer.SetLang("go").SetTextString(`package main
+	NewEditor(b).Buffer.SetLang("go").SetTextString(`package main
 
 	func main() {
 		fmt.Println("Hello, world!")
@@ -43,13 +43,13 @@ var myFile embed.FS
 
 func TestEditorOpenFS(t *testing.T) {
 	b := core.NewBody()
-	errors.Log(NewSoloEditor(b).Buffer.OpenFS(myFile, "editor.go"))
+	errors.Log(NewEditor(b).Buffer.OpenFS(myFile, "editor.go"))
 	b.AssertRender(t, "open-fs")
 }
 
 func TestEditorOpen(t *testing.T) {
 	b := core.NewBody()
-	errors.Log(NewSoloEditor(b).Buffer.Open("editor.go"))
+	errors.Log(NewEditor(b).Buffer.Open("editor.go"))
 	b.AssertRender(t, "open")
 }
 
@@ -63,7 +63,7 @@ func TestEditorMulti(t *testing.T) {
 
 func TestEditorChange(t *testing.T) {
 	b := core.NewBody()
-	ed := NewSoloEditor(b)
+	ed := NewEditor(b)
 	n := 0
 	text := ""
 	ed.OnChange(func(e events.Event) {
@@ -90,7 +90,7 @@ func TestEditorChange(t *testing.T) {
 
 func TestEditorInput(t *testing.T) {
 	b := core.NewBody()
-	ed := NewSoloEditor(b)
+	ed := NewEditor(b)
 	n := 0
 	text := ""
 	ed.OnInput(func(e events.Event) {
