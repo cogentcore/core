@@ -243,13 +243,16 @@ func (sl *Splits) setSplit(idx int, nwval float32) {
 }
 
 func (sl *Splits) SizeDownSetAllocs(iter int) {
+	sl.updateSplits()
 	sz := &sl.Geom.Size
-	csz := sz.Alloc.Content
+	csz := sz.Alloc.Content.Sub(sz.InnerSpace)
 	dim := sl.Styles.Direction.Dim()
 	od := dim.Other()
 	cszd := csz.Dim(dim)
 	cszod := csz.Dim(od)
-	sl.updateSplits()
+	hand := sl.Parts.Child(0).(*Handle)
+	hwd := hand.Geom.Size.Actual.Total.Dim(dim)
+	cszd -= float32(len(sl.Splits)-1) * hwd
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		sw := math32.Round(sl.Splits[i] * cszd)
 		ksz := &kwb.Geom.Size
