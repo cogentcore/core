@@ -29,7 +29,7 @@ import (
 func (ed *Editor) HandleFocus() {
 	ed.OnFocusLost(func(e events.Event) {
 		if ed.IsReadOnly() {
-			ed.ClearCursor()
+			ed.clearCursor()
 			return
 		}
 		if ed.AbilityIs(abilities.Focusable) {
@@ -360,7 +360,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 			if !lasttab && ed.CursorPos.Ch == 0 && ed.Buffer.Options.AutoIndent {
 				_, _, cpos := ed.Buffer.autoIndent(ed.CursorPos.Ln)
 				ed.CursorPos.Ch = cpos
-				ed.RenderCursor(true)
+				ed.renderCursor(true)
 				gotTabAI = true
 			} else {
 				ed.InsertAtCursor(indent.Bytes(ed.Buffer.Options.IndentChar(), 1, ed.Styles.Text.TabSize))
@@ -654,7 +654,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 		}
 		ed.SetCursor(newPos)
 		ed.SelectRegUpdate(ed.CursorPos)
-		ed.RenderCursor(true)
+		ed.renderCursor(true)
 		return
 	}
 

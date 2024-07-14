@@ -81,7 +81,7 @@ func (ed *Editor) SetCursor(pos lexer.Pos) {
 func (ed *Editor) SetCursorShow(pos lexer.Pos) {
 	ed.SetCursor(pos)
 	ed.ScrollCursorToCenterIfHidden()
-	ed.RenderCursor(true)
+	ed.renderCursor(true)
 }
 
 // SetCursorTarget sets a new cursor target position, ensures that it is visible
@@ -138,7 +138,7 @@ func (ed *Editor) CursorToHistPrev() bool {
 	ed.CursorPos = ed.Buffer.validPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
-	ed.RenderCursor(true)
+	ed.renderCursor(true)
 	return true
 }
 
@@ -162,7 +162,7 @@ func (ed *Editor) CursorToHistNext() bool {
 	ed.CursorPos = ed.Buffer.validPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
-	ed.RenderCursor(true)
+	ed.renderCursor(true)
 	return true
 }
 
@@ -314,7 +314,7 @@ func (ed *Editor) CursorPageDown(steps int) {
 		}
 		ed.CursorPos.Ch = min(ed.Buffer.lineLen(ed.CursorPos.Ln), ed.CursorCol)
 		ed.ScrollCursorToTop()
-		ed.RenderCursor(true)
+		ed.renderCursor(true)
 	}
 	ed.SetCursor(ed.CursorPos)
 	ed.CursorSelect(org)
@@ -456,7 +456,7 @@ func (ed *Editor) CursorPageUp(steps int) {
 		}
 		ed.CursorPos.Ch = min(ed.Buffer.lineLen(ed.CursorPos.Ln), ed.CursorCol)
 		ed.ScrollCursorToBottom()
-		ed.RenderCursor(true)
+		ed.renderCursor(true)
 	}
 	ed.SetCursor(ed.CursorPos)
 	ed.CursorSelect(org)
@@ -506,7 +506,7 @@ func (ed *Editor) CursorStartLine() {
 	// fmt.Printf("sol cursorcol: %v\n", ed.CursorCol)
 	ed.SetCursor(ed.CursorPos)
 	ed.ScrollCursorToRight()
-	ed.RenderCursor(true)
+	ed.renderCursor(true)
 	ed.CursorSelect(org)
 	ed.NeedsRender()
 }
@@ -521,7 +521,7 @@ func (ed *Editor) CursorStartDoc() {
 	ed.CursorCol = ed.CursorPos.Ch
 	ed.SetCursor(ed.CursorPos)
 	ed.ScrollCursorToTop()
-	ed.RenderCursor(true)
+	ed.renderCursor(true)
 	ed.CursorSelect(org)
 	ed.NeedsRender()
 }
@@ -552,7 +552,7 @@ func (ed *Editor) CursorEndLine() {
 	}
 	ed.SetCursor(ed.CursorPos)
 	ed.ScrollCursorToRight()
-	ed.RenderCursor(true)
+	ed.renderCursor(true)
 	ed.CursorSelect(org)
 	ed.NeedsRender()
 }
@@ -567,7 +567,7 @@ func (ed *Editor) CursorEndDoc() {
 	ed.CursorCol = ed.CursorPos.Ch
 	ed.SetCursor(ed.CursorPos)
 	ed.ScrollCursorToBottom()
-	ed.RenderCursor(true)
+	ed.renderCursor(true)
 	ed.CursorSelect(org)
 	ed.NeedsRender()
 }
@@ -589,7 +589,7 @@ func (ed *Editor) CursorBackspace(steps int) {
 	// note: no update b/c signal from buf will drive update
 	ed.CursorBackward(steps)
 	ed.ScrollCursorToCenterIfHidden()
-	ed.RenderCursor(true)
+	ed.renderCursor(true)
 	ed.Buffer.DeleteText(ed.CursorPos, org, EditSignal)
 	ed.NeedsRender()
 }
@@ -621,7 +621,7 @@ func (ed *Editor) CursorBackspaceWord(steps int) {
 	// note: no update b/c signal from buf will drive update
 	ed.CursorBackwardWord(steps)
 	ed.ScrollCursorToCenterIfHidden()
-	ed.RenderCursor(true)
+	ed.renderCursor(true)
 	ed.Buffer.DeleteText(ed.CursorPos, org, EditSignal)
 	ed.NeedsRender()
 }
@@ -851,7 +851,7 @@ func (ed *Editor) ScrollCursorInView() bool {
 		return false
 	}
 	if ed.IsVisible() {
-		curBBox := ed.CursorBBox(ed.CursorPos)
+		curBBox := ed.cursorBBox(ed.CursorPos)
 		return ed.ScrollInView(curBBox)
 	}
 	return false
@@ -860,7 +860,7 @@ func (ed *Editor) ScrollCursorInView() bool {
 // ScrollCursorToCenterIfHidden checks if the cursor is not visible, and if
 // so, scrolls to the center, along both dimensions.
 func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
-	curBBox := ed.CursorBBox(ed.CursorPos)
+	curBBox := ed.cursorBBox(ed.CursorPos)
 	did := false
 	lht := int(ed.lineHeight)
 	bb := ed.RenderBBox()
@@ -899,7 +899,7 @@ func (ed *Editor) ScrollToTop(pos int) bool {
 // ScrollCursorToTop tells any parent scroll layout to scroll to get cursor
 // at top of view to extent possible -- returns true if scrolled.
 func (ed *Editor) ScrollCursorToTop() bool {
-	curBBox := ed.CursorBBox(ed.CursorPos)
+	curBBox := ed.cursorBBox(ed.CursorPos)
 	return ed.ScrollToTop(curBBox.Min.Y)
 }
 
@@ -914,7 +914,7 @@ func (ed *Editor) ScrollToBottom(pos int) bool {
 // ScrollCursorToBottom tells any parent scroll layout to scroll to get cursor
 // at bottom of view to extent possible -- returns true if scrolled.
 func (ed *Editor) ScrollCursorToBottom() bool {
-	curBBox := ed.CursorBBox(ed.CursorPos)
+	curBBox := ed.cursorBBox(ed.CursorPos)
 	return ed.ScrollToBottom(curBBox.Max.Y)
 }
 
@@ -930,7 +930,7 @@ func (ed *Editor) ScrollToVertCenter(pos int) bool {
 // cursor at vert center of view to extent possible -- returns true if
 // scrolled.
 func (ed *Editor) ScrollCursorToVertCenter() bool {
-	curBBox := ed.CursorBBox(ed.CursorPos)
+	curBBox := ed.cursorBBox(ed.CursorPos)
 	mid := (curBBox.Min.Y + curBBox.Max.Y) / 2
 	return ed.ScrollToVertCenter(mid)
 }
@@ -960,7 +960,7 @@ func (ed *Editor) ScrollCursorToLeft() bool {
 		// todo: what is right thing here?
 		// return ed.ScrollToLeft(ed.ObjBBox.Min.X - int(ed.Styles.BoxSpace().Left) - 2)
 	}
-	curBBox := ed.CursorBBox(ed.CursorPos)
+	curBBox := ed.cursorBBox(ed.CursorPos)
 	return ed.ScrollToLeft(curBBox.Min.X)
 }
 
@@ -974,7 +974,7 @@ func (ed *Editor) ScrollToRight(pos int) bool {
 // ScrollCursorToRight tells any parent scroll layout to scroll to get cursor
 // at right of view to extent possible -- returns true if scrolled.
 func (ed *Editor) ScrollCursorToRight() bool {
-	curBBox := ed.CursorBBox(ed.CursorPos)
+	curBBox := ed.cursorBBox(ed.CursorPos)
 	return ed.ScrollToRight(curBBox.Max.X)
 }
 
@@ -989,7 +989,7 @@ func (ed *Editor) ScrollToHorizCenter(pos int) bool {
 // cursor at horiz center of view to extent possible -- returns true if
 // scrolled.
 func (ed *Editor) ScrollCursorToHorizCenter() bool {
-	curBBox := ed.CursorBBox(ed.CursorPos)
+	curBBox := ed.cursorBBox(ed.CursorPos)
 	mn := int(math32.Ceil(float32(curBBox.Min.X) + ed.LineNumberOffset))
 	mid := (mn + curBBox.Max.X) / 2
 	return ed.ScrollToHorizCenter(mid)

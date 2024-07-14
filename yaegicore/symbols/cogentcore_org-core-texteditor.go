@@ -25,8 +25,6 @@ func init() {
 		"DiffRevertLines":          reflect.ValueOf(&texteditor.DiffRevertLines).Elem(),
 		"EditNoSignal":             reflect.ValueOf(texteditor.EditNoSignal),
 		"EditSignal":               reflect.ValueOf(texteditor.EditSignal),
-		"EditorBlinker":            reflect.ValueOf(&texteditor.EditorBlinker).Elem(),
-		"EditorSpriteName":         reflect.ValueOf(&texteditor.EditorSpriteName).Elem(),
 		"HTMLEscapeBytes":          reflect.ValueOf(texteditor.HTMLEscapeBytes),
 		"HTMLEscapeRunes":          reflect.ValueOf(texteditor.HTMLEscapeRunes),
 		"MarkupDelay":              reflect.ValueOf(&texteditor.MarkupDelay).Elem(),

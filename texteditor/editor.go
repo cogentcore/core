@@ -277,7 +277,7 @@ func (ed *Editor) Init() {
 }
 
 func (ed *Editor) Destroy() {
-	ed.StopCursor()
+	ed.stopCursor()
 	ed.Frame.Destroy()
 }
 
@@ -288,7 +288,7 @@ func (ed *Editor) EditDone() {
 		ed.Buffer.editDone()
 	}
 	ed.ClearSelected()
-	ed.ClearCursor()
+	ed.clearCursor()
 	ed.Send(events.Change)
 }
 

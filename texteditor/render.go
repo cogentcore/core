@@ -49,15 +49,15 @@ func (ed *Editor) RenderWidget() {
 		ed.PositionScrolls()
 		ed.RenderAllLines()
 		if ed.StateIs(states.Focused) {
-			ed.StartCursor()
+			ed.startCursor()
 		} else {
-			ed.StopCursor()
+			ed.stopCursor()
 		}
 		ed.RenderChildren()
 		ed.RenderScrolls()
 		ed.PopBounds()
 	} else {
-		ed.StopCursor()
+		ed.stopCursor()
 	}
 }
 
