@@ -10,6 +10,7 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/shell/cosh/cosh"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"AllFiles":      reflect.ValueOf(cosh.AllFiles),
 		"FileExists":    reflect.ValueOf(cosh.FileExists),
 		"ReadFile":      reflect.ValueOf(cosh.ReadFile),
 		"ReplaceInFile": reflect.ValueOf(cosh.ReplaceInFile),

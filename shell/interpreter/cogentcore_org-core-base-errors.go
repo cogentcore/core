@@ -4,6 +4,7 @@ package interpreter
 
 import (
 	"cogentcore.org/core/base/errors"
+	"github.com/cogentcore/yaegi/interp"
 	"reflect"
 )
 
@@ -16,6 +17,7 @@ func init() {
 		"Is":             reflect.ValueOf(errors.Is),
 		"Join":           reflect.ValueOf(errors.Join),
 		"Log":            reflect.ValueOf(errors.Log),
+		"Log1":           reflect.ValueOf(interp.GenericFunc("func Log1[T any](v T, err error) T { //yaegi:add\n\tif err != nil {\n\t\tslog.Error(err.Error() + \" | \" + CallerInfo())\n\t}\n\treturn v\n}")),
 		"Must":           reflect.ValueOf(errors.Must),
 		"New":            reflect.ValueOf(errors.New),
 		"Unwrap":         reflect.ValueOf(errors.Unwrap),
