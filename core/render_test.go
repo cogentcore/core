@@ -128,8 +128,6 @@ func TestRenderFrameAlignmentCenter(t *testing.T) {
 
 // For https://github.com/cogentcore/core/issues/808
 func TestOverflowAutoDefinedMax(t *testing.T) {
-	DebugSettings.LayoutTrace = true
-	DebugSettings.LayoutTraceDetail = true
 	b := NewBody()
 	fr := NewFrame(b)
 	fr.Styler(func(s *styles.Style) {
