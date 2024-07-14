@@ -10,7 +10,6 @@ package plotcore
 import (
 	"fmt"
 	"io/fs"
-	"log"
 	"log/slog"
 	"path/filepath"
 	"reflect"
@@ -57,6 +56,9 @@ type PlotEditor struct { //types:add
 
 	// currently doing a plot
 	inPlot bool
+
+	columnsFrame *core.Frame
+	plotWidget   *Plot
 }
 
 func (pl *PlotEditor) CopyFieldsFrom(frm tree.Node) {
@@ -100,7 +102,8 @@ func (pl *PlotEditor) Init() {
 	pl.Updater(func() {
 		pl.Options.fromMeta(pl.table.Table)
 	})
-	tree.AddChildAt(pl, "cols", func(w *core.Frame) {
+	tree.AddChildAt(pl, "columns", func(w *core.Frame) {
+		pl.columnsFrame = w
 		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(0, 1)
@@ -110,6 +113,7 @@ func (pl *PlotEditor) Init() {
 		w.Maker(pl.makeColumns)
 	})
 	tree.AddChildAt(pl, "plot", func(w *Plot) {
+		pl.plotWidget = w
 		w.Plot = pl.plot
 		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
@@ -294,8 +298,8 @@ func (pl *PlotEditor) genPlot() {
 	case Bar:
 		pl.genPlotBar()
 	}
-	pl.PlotChild().Scale = pl.Options.Scale
-	pl.PlotChild().SetPlot(pl.plot) // redraws etc
+	pl.plotWidget.Scale = pl.Options.Scale
+	pl.plotWidget.SetPlot(pl.plot) // redraws etc
 	pl.inPlot = false
 }
 
@@ -341,25 +345,17 @@ func (pl *PlotEditor) plotXAxis(plt *plot.Plot, ixvw *table.IndexView) (xi int, 
 	if xc.NumDims() > 1 {
 		sz = xc.Len() / xc.DimSize(0)
 		if xp.TensorIndex > sz || xp.TensorIndex < 0 {
-			log.Printf("eplot.PlotXAxis: TensorIndex invalid -- reset to 0")
+			slog.Error("plotcore.PlotEditor.plotXAxis: TensorIndex invalid -- reset to 0")
 			xp.TensorIndex = 0
 		}
 	}
 	return
 }
 
-func (pl *PlotEditor) ColumnsFrame() *core.Frame {
-	return pl.ChildByName("cols", 0).(*core.Frame)
-}
+const plotColumnsHeaderN = 2
 
-func (pl *PlotEditor) PlotChild() *Plot {
-	return pl.ChildByName("plot", 1).(*Plot)
-}
-
-const PlotColumnsHeaderN = 2
-
-// ColumnsListUpdate updates the list of columns
-func (pl *PlotEditor) ColumnsListUpdate() {
+// columnsListUpdate updates the list of columns
+func (pl *PlotEditor) columnsListUpdate() {
 	if pl.table == nil || pl.table.Table == nil {
 		pl.Columns = nil
 		return
@@ -392,21 +388,14 @@ func (pl *PlotEditor) ColumnsListUpdate() {
 	}
 }
 
-// ColumnsFromMetaMap updates all the column settings from given meta map
-func (pl *PlotEditor) ColumnsFromMetaMap(meta map[string]string) {
-	for _, cp := range pl.Columns {
-		cp.fromMetaMap(meta)
-	}
-}
-
-// SetAllColumns turns all Columns on or off (except X axis)
-func (pl *PlotEditor) SetAllColumns(on bool) {
-	fr := pl.ColumnsFrame()
+// setAllColumns turns all Columns on or off (except X axis)
+func (pl *PlotEditor) setAllColumns(on bool) {
+	fr := pl.columnsFrame
 	for i, cli := range fr.Children {
-		if i < PlotColumnsHeaderN {
+		if i < plotColumnsHeaderN {
 			continue
 		}
-		ci := i - PlotColumnsHeaderN
+		ci := i - plotColumnsHeaderN
 		cp := pl.Columns[ci]
 		if cp.Column == pl.Options.XAxisColumn {
 			continue
@@ -420,14 +409,14 @@ func (pl *PlotEditor) SetAllColumns(on bool) {
 	pl.NeedsRender()
 }
 
-// SetColumnsByName turns cols On or Off if their name contains given string
-func (pl *PlotEditor) SetColumnsByName(nameContains string, on bool) { //types:add
-	fr := pl.ColumnsFrame()
+// setColumnsByName turns cols On or Off if their name contains given string
+func (pl *PlotEditor) setColumnsByName(nameContains string, on bool) { //types:add
+	fr := pl.columnsFrame
 	for i, cli := range fr.Children {
-		if i < PlotColumnsHeaderN {
+		if i < plotColumnsHeaderN {
 			continue
 		}
-		ci := i - PlotColumnsHeaderN
+		ci := i - plotColumnsHeaderN
 		cp := pl.Columns[ci]
 		if cp.Column == pl.Options.XAxisColumn {
 			continue
@@ -446,7 +435,7 @@ func (pl *PlotEditor) SetColumnsByName(nameContains string, on bool) { //types:a
 
 // makeColumns makes the Plans for columns
 func (pl *PlotEditor) makeColumns(p *tree.Plan) {
-	pl.ColumnsListUpdate()
+	pl.columnsListUpdate()
 	tree.Add(p, func(w *core.Frame) {
 		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Row
@@ -456,14 +445,14 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 			w.SetType(core.SwitchCheckbox).SetTooltip("Toggle off all columns")
 			w.OnChange(func(e events.Event) {
 				w.SetChecked(false)
-				pl.SetAllColumns(false)
+				pl.setAllColumns(false)
 			})
 		})
 		tree.AddChild(w, func(w *core.Button) {
 			w.SetText("Select Columns").SetType(core.ButtonAction).
 				SetTooltip("click to select columns based on column name").
 				OnClick(func(e events.Event) {
-					core.CallFunc(pl, pl.SetColumnsByName)
+					core.CallFunc(pl, pl.setColumnsByName)
 				})
 		})
 	})
@@ -522,9 +511,9 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.PanTool).
 			SetTooltip("toggle the ability to zoom and pan the view").OnClick(func(e events.Event) {
-			pc := pl.PlotChild()
-			pc.SetReadOnly(!pc.IsReadOnly())
-			pc.Restyle()
+			pw := pl.plotWidget
+			pw.SetReadOnly(!pw.IsReadOnly())
+			pw.Restyle()
 		})
 	})
 	tree.Add(p, func(w *core.Button) {
