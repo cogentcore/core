@@ -66,6 +66,7 @@ func main() {
 		})
 	})
 
+	symbols.Symbols["."]["content"] = reflect.ValueOf(content)
 	symbols.Symbols["."]["myImage"] = reflect.ValueOf(myImage)
 	symbols.Symbols["."]["mySVG"] = reflect.ValueOf(mySVG)
 	symbols.Symbols["."]["myFile"] = reflect.ValueOf(myFile)
