@@ -30,7 +30,7 @@ func (ed *Editor) NeedsLayout() {
 
 func (ed *Editor) RenderLayout() {
 	chg := ed.ManageOverflow(3, true)
-	ed.LayoutAllLines()
+	ed.layoutAllLines()
 	ed.ConfigScrolls()
 	if chg {
 		ed.Frame.NeedsLayout() // required to actually update scrollbar vs not

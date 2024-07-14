@@ -345,7 +345,7 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 			ed.SetCursorShow(lexer.Pos{})
 		}
 	}
-	ed.LayoutAllLines()
+	ed.layoutAllLines()
 	ed.NeedsLayout()
 	return ed
 }
@@ -419,7 +419,7 @@ func (ed *Editor) bufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 			// fmt.Printf("ed %v lines insert %v - %v\n", ed.Nm, tbe.Reg.Start, tbe.Reg.End)
 			ed.linesInserted(tbe) // triggers full layout
 		} else {
-			ed.LayoutLine(tbe.Reg.Start.Ln) // triggers layout if line width exceeds
+			ed.layoutLine(tbe.Reg.Start.Ln) // triggers layout if line width exceeds
 		}
 		if ndup {
 			ed.Update()
@@ -432,7 +432,7 @@ func (ed *Editor) bufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			ed.linesDeleted(tbe) // triggers full layout
 		} else {
-			ed.LayoutLine(tbe.Reg.Start.Ln)
+			ed.layoutLine(tbe.Reg.Start.Ln)
 		}
 		if ndup {
 			ed.Update()
@@ -494,5 +494,5 @@ func (ed *Editor) styleEditor() {
 
 func (ed *Editor) Style() {
 	ed.styleEditor()
-	ed.StyleSizes()
+	ed.styleSizes()
 }

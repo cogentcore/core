@@ -16,8 +16,8 @@ import (
 // (subject to other styling constraints).
 const maxGrowLines = 25
 
-// StyleSizes gets the size info based on Style settings.
-func (ed *Editor) StyleSizes() {
+// styleSizes gets the size info based on Style settings.
+func (ed *Editor) styleSizes() {
 	sty := &ed.Styles
 	spc := sty.BoxSpace()
 	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnitContext)
@@ -39,9 +39,9 @@ func (ed *Editor) StyleSizes() {
 	}
 }
 
-// UpdateFromAlloc updates size info based on allocated size:
+// updateFromAlloc updates size info based on allocated size:
 // NLinesChars, LineNumberOff, LineLayoutSize
-func (ed *Editor) UpdateFromAlloc() {
+func (ed *Editor) updateFromAlloc() {
 	sty := &ed.Styles
 	asz := ed.Geom.Size.Alloc.Content
 	spsz := sty.BoxSpace().Size()
@@ -65,18 +65,18 @@ func (ed *Editor) UpdateFromAlloc() {
 	ed.lineLayoutSize.X -= ed.LineNumberOffset
 }
 
-func (ed *Editor) InternalSizeFromLines() {
+func (ed *Editor) internalSizeFromLines() {
 	ed.totalSize = ed.linesSize
 	ed.totalSize.X += ed.LineNumberOffset
 	ed.Geom.Size.Internal = ed.totalSize
 	ed.Geom.Size.Internal.Y += ed.lineHeight
 }
 
-// LayoutAllLines generates paint.Text Renders of lines
+// layoutAllLines generates paint.Text Renders of lines
 // from the Markup version of the source in Buf.
 // It computes the total LinesSize and TotalSize.
-func (ed *Editor) LayoutAllLines() {
-	ed.UpdateFromAlloc()
+func (ed *Editor) layoutAllLines() {
+	ed.updateFromAlloc()
 	if ed.lineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
@@ -133,12 +133,12 @@ func (ed *Editor) LayoutAllLines() {
 	buf.markupMu.RUnlock()
 	ed.linesSize = math32.Vec2(mxwd, off)
 	ed.lastlineLayoutSize = ed.lineLayoutSize
-	ed.InternalSizeFromLines()
+	ed.internalSizeFromLines()
 }
 
-// ReLayoutAllLines updates the Renders Layout given current size, if changed
-func (ed *Editor) ReLayoutAllLines() {
-	ed.UpdateFromAlloc()
+// reLayoutAllLines updates the Renders Layout given current size, if changed
+func (ed *Editor) reLayoutAllLines() {
+	ed.updateFromAlloc()
 	if ed.lineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
@@ -146,10 +146,10 @@ func (ed *Editor) ReLayoutAllLines() {
 		return
 	}
 	if ed.lastlineLayoutSize == ed.lineLayoutSize {
-		ed.InternalSizeFromLines()
+		ed.internalSizeFromLines()
 		return
 	}
-	ed.LayoutAllLines()
+	ed.layoutAllLines()
 }
 
 // note: Layout reverts to basic Widget behavior for layout if no kids, like us..
@@ -177,9 +177,9 @@ func (ed *Editor) SizeUp() {
 
 func (ed *Editor) SizeDown(iter int) bool {
 	if iter == 0 {
-		ed.LayoutAllLines()
+		ed.layoutAllLines()
 	} else {
-		ed.ReLayoutAllLines()
+		ed.reLayoutAllLines()
 	}
 	// use actual lineSize from layout to ensure fit
 	sz := &ed.Geom.Size
@@ -201,7 +201,7 @@ func (ed *Editor) SizeDown(iter int) bool {
 
 func (ed *Editor) SizeFinal() {
 	ed.Frame.SizeFinal()
-	ed.ReLayoutAllLines()
+	ed.reLayoutAllLines()
 }
 
 func (ed *Editor) Position() {
@@ -214,11 +214,11 @@ func (ed *Editor) ApplyScenePos() {
 	ed.PositionScrolls()
 }
 
-// LayoutLine generates render of given line (including highlighting).
+// layoutLine generates render of given line (including highlighting).
 // If the line with exceeds the current maximum, or the number of effective
 // lines (e.g., from word-wrap) is different, then NeedsLayout is called
 // and it returns true.
-func (ed *Editor) LayoutLine(ln int) bool {
+func (ed *Editor) layoutLine(ln int) bool {
 	if ed.Buffer == nil || ed.Buffer.numLines() == 0 || ln >= len(ed.renders) {
 		return false
 	}
