@@ -123,7 +123,7 @@ func HandleElement(ctx *Context) {
 		if hasCode {
 			ed := New[texteditor.Editor](ctx)
 			ctx.Node = ctx.Node.FirstChild // go to the code element
-			ed.Buffer.SetTextString(ExtractText(ctx))
+			ed.Buffer.SetString(ExtractText(ctx))
 			lang := getLanguage(GetAttr(ctx.Node, "class"))
 			if lang != "" {
 				ed.Buffer.SetLang(lang)

@@ -13,13 +13,13 @@ texteditor.NewEditor(b)
 You can set the text of a text editor:
 
 ```Go
-texteditor.NewEditor(b).Buffer.SetTextString("Hello, world!")
+texteditor.NewEditor(b).Buffer.SetString("Hello, world!")
 ```
 
 You can set the highlighting language of a text editor:
 
 ```Go
-texteditor.NewEditor(b).Buffer.SetLang("go").SetTextString(`package main
+texteditor.NewEditor(b).Buffer.SetLang("go").SetString(`package main
 
 func main() {
     fmt.Println("Hello, world!")
@@ -47,7 +47,7 @@ errors.Log(texteditor.NewEditor(b).Buffer.Open("file.go"))
 You can make multiple text editors that edit the same underlying text buffer:
 
 ```Go
-tb := texteditor.NewBuffer().SetTextString("Hello, world!")
+tb := texteditor.NewBuffer().SetString("Hello, world!")
 texteditor.NewEditor(b).SetBuffer(tb)
 texteditor.NewEditor(b).SetBuffer(tb)
 ```

@@ -23,13 +23,13 @@ func TestEditor(t *testing.T) {
 
 func TestEditorSetText(t *testing.T) {
 	b := core.NewBody()
-	NewEditor(b).Buffer.SetTextString("Hello, world!")
+	NewEditor(b).Buffer.SetString("Hello, world!")
 	b.AssertRender(t, "set-text")
 }
 
 func TestEditorSetLang(t *testing.T) {
 	b := core.NewBody()
-	NewEditor(b).Buffer.SetLang("go").SetTextString(`package main
+	NewEditor(b).Buffer.SetLang("go").SetString(`package main
 
 	func main() {
 		fmt.Println("Hello, world!")
@@ -55,7 +55,7 @@ func TestEditorOpen(t *testing.T) {
 
 func TestEditorMulti(t *testing.T) {
 	b := core.NewBody()
-	tb := NewBuffer().SetTextString("Hello, world!")
+	tb := NewBuffer().SetString("Hello, world!")
 	NewEditor(b).SetBuffer(tb)
 	NewEditor(b).SetBuffer(tb)
 	b.AssertRender(t, "multi")

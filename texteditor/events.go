@@ -33,7 +33,7 @@ func (ed *Editor) HandleFocus() {
 			return
 		}
 		if ed.AbilityIs(abilities.Focusable) {
-			ed.EditDone()
+			ed.editDone()
 			ed.SetState(false, states.Focused)
 		}
 	})
@@ -184,7 +184,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 	case keymap.Recenter:
 		cancelAll()
 		kt.SetHandled()
-		ed.ReMarkup()
+		ed.reMarkup()
 		ed.CursorRecenter()
 	case keymap.SelectMode:
 		cancelAll()
@@ -308,16 +308,16 @@ func (ed *Editor) KeyInput(kt events.Event) {
 	case keymap.Accept:
 		cancelAll()
 		kt.SetHandled()
-		ed.EditDone()
+		ed.editDone()
 	case keymap.Undo:
 		cancelAll()
 		kt.SetHandled()
-		ed.Undo()
+		ed.undo()
 		ed.lastWasUndo = true
 	case keymap.Redo:
 		cancelAll()
 		kt.SetHandled()
-		ed.Redo()
+		ed.redo()
 	case keymap.Complete:
 		ed.ISearchCancel()
 		kt.SetHandled()

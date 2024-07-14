@@ -220,7 +220,7 @@ const (
 // to all the [Editor]s for this [Buffer]
 func (tb *Buffer) signalEditors(sig bufferSignals, edit *textbuf.Edit) {
 	for _, vw := range tb.editors {
-		vw.BufferSignal(sig, edit)
+		vw.bufferSignal(sig, edit)
 	}
 	if sig == bufferDone {
 		e := &events.Base{Typ: events.Change}
@@ -265,8 +265,8 @@ func (tb *Buffer) SetText(text []byte) *Buffer {
 	return tb
 }
 
-// SetTextString sets the text to the given string.
-func (tb *Buffer) SetTextString(txt string) *Buffer {
+// SetString sets the text to the given string.
+func (tb *Buffer) SetString(txt string) *Buffer {
 	return tb.SetText([]byte(txt))
 }
 

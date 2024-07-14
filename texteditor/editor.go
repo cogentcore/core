@@ -259,7 +259,7 @@ func (ed *Editor) Init() {
 	ed.HandleLinkCursor()
 	ed.HandleFocus()
 	ed.OnClose(func(e events.Event) {
-		ed.EditDone()
+		ed.editDone()
 	})
 
 	ed.Updater(ed.NeedsLayout)
@@ -270,30 +270,25 @@ func (ed *Editor) Destroy() {
 	ed.Frame.Destroy()
 }
 
-// EditDone completes editing and copies the active edited text to the text --
+// editDone completes editing and copies the active edited text to the text;
 // called when the return key is pressed or goes out of focus
-func (ed *Editor) EditDone() {
+func (ed *Editor) editDone() {
 	if ed.Buffer != nil {
 		ed.Buffer.editDone()
 	}
 	ed.ClearSelected()
 	ed.clearCursor()
-	ed.Send(events.Change)
+	ed.SendChange()
 }
 
-// ReMarkup triggers a complete re-markup of the entire text --
+// reMarkup triggers a complete re-markup of the entire text --
 // can do this when needed if the markup gets off due to multi-line
 // formatting issues -- via Recenter key
-func (ed *Editor) ReMarkup() {
+func (ed *Editor) reMarkup() {
 	if ed.Buffer == nil {
 		return
 	}
 	ed.Buffer.reMarkup()
-}
-
-// IsChanged returns true if buffer was changed (edited) since last EditDone
-func (ed *Editor) IsChanged() bool {
-	return ed.Buffer != nil && ed.Buffer.Changed
 }
 
 // IsNotSaved returns true if buffer was changed (edited) since last Save
@@ -301,7 +296,7 @@ func (ed *Editor) IsNotSaved() bool {
 	return ed.Buffer != nil && ed.Buffer.NotSaved
 }
 
-// Clear resets all the text in the buffer for this view
+// Clear resets all the text in the buffer for this editor.
 func (ed *Editor) Clear() {
 	if ed.Buffer == nil {
 		return
@@ -312,8 +307,8 @@ func (ed *Editor) Clear() {
 ///////////////////////////////////////////////////////////////////////////////
 //  Buffer communication
 
-// ResetState resets all the random state variables, when opening a new buffer etc
-func (ed *Editor) ResetState() {
+// resetState resets all the random state variables, when opening a new buffer etc
+func (ed *Editor) resetState() {
 	ed.SelectReset()
 	ed.Highlights = nil
 	ed.ISearch.On = false
@@ -326,7 +321,7 @@ func (ed *Editor) ResetState() {
 	}
 }
 
-// SetBuffer sets the [Buffer] that this is a view of, and interconnects their events.
+// SetBuffer sets the [Buffer] that this is an editor of, and interconnects their events.
 func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 	if buf != nil && ed.Buffer == buf {
 		return ed
@@ -337,7 +332,7 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 		ed.Buffer.deleteEditor(ed)
 	}
 	ed.Buffer = buf
-	ed.ResetState()
+	ed.resetState()
 	if buf != nil {
 		buf.addEditor(ed)
 		bhl := len(buf.posHistory)
@@ -354,8 +349,8 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 	return ed
 }
 
-// LinesInserted inserts new lines of text and reformats them
-func (ed *Editor) LinesInserted(tbe *textbuf.Edit) {
+// linesInserted inserts new lines of text and reformats them
+func (ed *Editor) linesInserted(tbe *textbuf.Edit) {
 	stln := tbe.Reg.Start.Ln + 1
 	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
 	if stln > len(ed.renders) { // invalid
@@ -389,8 +384,8 @@ func (ed *Editor) LinesInserted(tbe *textbuf.Edit) {
 	ed.NeedsLayout()
 }
 
-// LinesDeleted deletes lines of text and reformats remaining one
-func (ed *Editor) LinesDeleted(tbe *textbuf.Edit) {
+// linesDeleted deletes lines of text and reformats remaining one
+func (ed *Editor) linesDeleted(tbe *textbuf.Edit) {
 	stln := tbe.Reg.Start.Ln
 	edln := tbe.Reg.End.Ln
 	dsz := edln - stln
@@ -402,13 +397,13 @@ func (ed *Editor) LinesDeleted(tbe *textbuf.Edit) {
 	ed.NeedsLayout()
 }
 
-// BufferSignal receives a signal from the Buffer when the underlying text
+// bufferSignal receives a signal from the Buffer when the underlying text
 // is changed.
-func (ed *Editor) BufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
+func (ed *Editor) bufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 	switch sig {
 	case bufferDone:
 	case bufferNew:
-		ed.ResetState()
+		ed.resetState()
 		ed.SetCursorShow(ed.CursorPos)
 		ed.NeedsLayout()
 	case bufferMods:
@@ -421,7 +416,7 @@ func (ed *Editor) BufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 		// fmt.Printf("ed %v got %v\n", ed.Nm, tbe.Reg.Start)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			// fmt.Printf("ed %v lines insert %v - %v\n", ed.Nm, tbe.Reg.Start, tbe.Reg.End)
-			ed.LinesInserted(tbe) // triggers full layout
+			ed.linesInserted(tbe) // triggers full layout
 		} else {
 			ed.LayoutLine(tbe.Reg.Start.Ln) // triggers layout if line width exceeds
 		}
@@ -434,7 +429,7 @@ func (ed *Editor) BufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 		}
 		ndup := ed.renders == nil
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
-			ed.LinesDeleted(tbe) // triggers full layout
+			ed.linesDeleted(tbe) // triggers full layout
 		} else {
 			ed.LayoutLine(tbe.Reg.Start.Ln)
 		}
@@ -451,8 +446,8 @@ func (ed *Editor) BufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 ///////////////////////////////////////////////////////////////////////////////
 //    Undo / Redo
 
-// Undo undoes previous action
-func (ed *Editor) Undo() {
+// undo undoes previous action
+func (ed *Editor) undo() {
 	tbe := ed.Buffer.undo()
 	if tbe != nil {
 		if tbe.Delete { // now an insert
@@ -468,8 +463,8 @@ func (ed *Editor) Undo() {
 	ed.NeedsRender()
 }
 
-// Redo redoes previously undone action
-func (ed *Editor) Redo() {
+// redo redoes previously undone action
+func (ed *Editor) redo() {
 	tbe := ed.Buffer.redo()
 	if tbe != nil {
 		if tbe.Delete {
@@ -484,8 +479,8 @@ func (ed *Editor) Redo() {
 	ed.NeedsRender()
 }
 
-// StyleView sets the style of widget
-func (ed *Editor) StyleView() {
+// styleEditor applies the editor styles.
+func (ed *Editor) styleEditor() {
 	if ed.NeedsRebuild() {
 		histyle.UpdateFromTheme()
 		if ed.Buffer != nil {
@@ -496,8 +491,7 @@ func (ed *Editor) StyleView() {
 	ed.CursorWidth.ToDots(&ed.Styles.UnitContext)
 }
 
-// Style calls StyleView and sets the style
 func (ed *Editor) Style() {
-	ed.StyleView()
+	ed.styleEditor()
 	ed.StyleSizes()
 }

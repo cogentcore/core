@@ -517,14 +517,14 @@ func (dv *DiffEditor) undoDiff(ab int) error {
 			core.ErrorSnackbar(dv, err)
 			return err
 		}
-		tvb.Undo()
+		tvb.undo()
 	} else {
 		if !dv.diffs.A.Undo() {
 			err := errors.New("No more edits to undo")
 			core.ErrorSnackbar(dv, err)
 			return err
 		}
-		tva.Undo()
+		tva.undo()
 	}
 	return nil
 }
