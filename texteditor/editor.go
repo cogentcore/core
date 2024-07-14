@@ -215,7 +215,7 @@ func (ed *Editor) WidgetValue() any { return &ed.Buffer.text }
 
 func (ed *Editor) Init() {
 	ed.Frame.Init()
-	ed.AddContextMenu(ed.ContextMenu)
+	ed.AddContextMenu(ed.contextMenu)
 	ed.SetBuffer(NewBuffer())
 	ed.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
@@ -254,10 +254,10 @@ func (ed *Editor) Init() {
 		}
 	})
 
-	ed.HandleKeyChord()
-	ed.HandleMouse()
-	ed.HandleLinkCursor()
-	ed.HandleFocus()
+	ed.handleKeyChord()
+	ed.handleMouse()
+	ed.handleLinkCursor()
+	ed.handleFocus()
 	ed.OnClose(func(e events.Event) {
 		ed.editDone()
 	})
