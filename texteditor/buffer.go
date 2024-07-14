@@ -71,8 +71,8 @@ type Buffer struct {
 	// Hi is the syntax highlighting markup parameters, such as the language and style.
 	Hi HiMarkup
 
-	// NLines is the number of lines in the buffer.
-	NLines int `json:"-" xml:"-"`
+	// NumLines is the number of lines in the buffer.
+	NumLines int `json:"-" xml:"-"`
 
 	// LineColors are the colors to use for rendering circles
 	// next to the line numbers of certain lines.
@@ -278,9 +278,9 @@ func (tb *Buffer) Update() {
 // if cpy is true, make a copy of bytes -- otherwise use
 func (tb *Buffer) setTextLines(lns [][]byte, cpy bool) {
 	tb.LinesMu.Lock()
-	tb.NLines = len(lns)
+	tb.NumLines = len(lns)
 	tb.LinesMu.Unlock()
-	tb.NewBuffer(tb.NLines)
+	tb.NewBuffer(tb.NumLines)
 	tb.LinesMu.Lock()
 	bo := 0
 	for ln, txt := range lns {
@@ -330,7 +330,7 @@ func (tb *Buffer) String() string {
 func (tb *Buffer) numLines() int {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	return tb.NLines
+	return tb.NumLines
 }
 
 // IsValidLine returns true if given line is in range
@@ -346,7 +346,7 @@ func (tb *Buffer) IsValidLine(ln int) bool {
 func (tb *Buffer) line(ln int) []rune {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	if ln >= tb.NLines || ln < 0 {
+	if ln >= tb.NumLines || ln < 0 {
 		return nil
 	}
 	return tb.Lines[ln]
@@ -356,7 +356,7 @@ func (tb *Buffer) line(ln int) []rune {
 func (tb *Buffer) lineLen(ln int) int {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	if ln >= tb.NLines || ln < 0 {
+	if ln >= tb.NumLines || ln < 0 {
 		return 0
 	}
 	return len(tb.Lines[ln])
@@ -366,7 +366,7 @@ func (tb *Buffer) lineLen(ln int) int {
 func (tb *Buffer) BytesLine(ln int) []byte {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	if ln >= tb.NLines || ln < 0 {
+	if ln >= tb.NumLines || ln < 0 {
 		return nil
 	}
 	return tb.lineBytes[ln]
@@ -438,7 +438,7 @@ func (tb *Buffer) NewBuffer(nlines int) {
 		tb.Markup[0] = []byte("")
 	}
 
-	tb.NLines = nlines
+	tb.NumLines = nlines
 
 	tb.ParseState.SetSrc(string(tb.Filename), "", tb.Info.Known)
 	tb.Hi.Init(&tb.Info, &tb.ParseState)
@@ -562,7 +562,7 @@ func (tb *Buffer) Revert() bool { //types:add
 	}
 
 	didDiff := false
-	if tb.NLines < diffRevertLines {
+	if tb.NumLines < diffRevertLines {
 		ob := NewBuffer()
 		err := ob.openFile(tb.Filename)
 		if errors.Log(err) != nil {
@@ -573,7 +573,7 @@ func (tb *Buffer) Revert() bool { //types:add
 			return false
 		}
 		tb.Stat() // "own" the new file..
-		if ob.NLines < diffRevertLines {
+		if ob.NumLines < diffRevertLines {
 			diffs := tb.diffBuffers(ob)
 			if len(diffs) < diffRevertDiffs {
 				tb.patchFromBuffer(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
@@ -805,10 +805,10 @@ func (tb *Buffer) endPos() lexer.Pos {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 
-	if tb.NLines == 0 {
+	if tb.NumLines == 0 {
 		return lexer.PosZero
 	}
-	ed := lexer.Pos{tb.NLines - 1, len(tb.Lines[tb.NLines-1])}
+	ed := lexer.Pos{tb.NumLines - 1, len(tb.Lines[tb.NumLines-1])}
 	return ed
 }
 
@@ -943,7 +943,7 @@ func (tb *Buffer) linesToBytes() {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 
-	if tb.NLines == 0 {
+	if tb.NumLines == 0 {
 		if tb.text != nil {
 			tb.text = tb.text[:0]
 		}
@@ -976,13 +976,13 @@ func (tb *Buffer) bytesToLines() {
 	}
 	tb.LinesMu.Lock()
 	lns := bytes.Split(tb.text, []byte("\n"))
-	tb.NLines = len(lns)
-	if len(lns[tb.NLines-1]) == 0 { // lines have lf at end typically
-		tb.NLines--
-		lns = lns[:tb.NLines]
+	tb.NumLines = len(lns)
+	if len(lns[tb.NumLines-1]) == 0 { // lines have lf at end typically
+		tb.NumLines--
+		lns = lns[:tb.NumLines]
 	}
 	tb.LinesMu.Unlock()
-	tb.NewBuffer(tb.NLines)
+	tb.NewBuffer(tb.NumLines)
 	tb.LinesMu.Lock()
 	bo := 0
 	for ln, txt := range lns {
@@ -1002,7 +1002,7 @@ func (tb *Buffer) bytesToLines() {
 func (tb *Buffer) Strings(addNewLine bool) []string {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	str := make([]string, tb.NLines)
+	str := make([]string, tb.NumLines)
 	for i, l := range tb.Lines {
 		str[i] = string(l)
 		if addNewLine {
@@ -1054,7 +1054,7 @@ func (tb *Buffer) validPos(pos lexer.Pos) lexer.Pos {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 
-	if tb.NLines == 0 {
+	if tb.NumLines == 0 {
 		return lexer.PosZero
 	}
 	if pos.Ln < 0 {
@@ -1147,7 +1147,7 @@ func (tb *Buffer) deleteTextImpl(st, ed lexer.Pos) *textbuf.Edit {
 		if eoed != nil {
 			tb.Lines[cpln] = append(tb.Lines[cpln], eoed...)
 		}
-		tb.NLines = len(tb.Lines)
+		tb.NumLines = len(tb.Lines)
 		tb.linesDeleted(tbe)
 	}
 	return tbe
@@ -1272,7 +1272,7 @@ func (tb *Buffer) insertTextImpl(st lexer.Pos, text []byte) *textbuf.Edit {
 		copy(nt[stln+nsz:], nt[stln:]) // move stuff to end
 		copy(nt[stln:], tmp)           // copy into position
 		tb.Lines = nt
-		tb.NLines = len(tb.Lines)
+		tb.NumLines = len(tb.Lines)
 		ed.Ln += nsz
 		ed.Ch = len(tb.Lines[ed.Ln])
 		if eost != nil {
@@ -1296,7 +1296,7 @@ func (tb *Buffer) insertTextRect(tbe *textbuf.Edit, signal bool) *textbuf.Edit {
 	tb.FileModCheck() // will just revert changes if shouldn't have changed
 	tb.setChanged()
 	tb.LinesMu.Lock()
-	nln := tb.NLines
+	nln := tb.NumLines
 	re := tb.insertTextRectImpl(tbe)
 	tb.saveUndo(re)
 	tb.LinesMu.Unlock()
@@ -1334,7 +1334,7 @@ func (tb *Buffer) insertTextRectImpl(tbe *textbuf.Edit) *textbuf.Edit {
 		nln := (1 + ed.Ln) - cln
 		tmp := make([][]rune, nln)
 		tb.Lines = append(tb.Lines, tmp...) // first append to end to extend capacity
-		tb.NLines = len(tb.Lines)
+		tb.NumLines = len(tb.Lines)
 		ie := &textbuf.Edit{}
 		ie.Reg.Start.Ln = cln - 1
 		ie.Reg.End.Ln = ed.Ln
@@ -1630,7 +1630,7 @@ func (tb *Buffer) initialMarkup() {
 		fs := tb.ParseState.Done() // initialize
 		fs.Src.SetBytes(tb.text)
 	}
-	mxhi := min(100, tb.NLines-1)
+	mxhi := min(100, tb.NumLines-1)
 	tb.markupAllLines(mxhi)
 }
 
@@ -1638,7 +1638,7 @@ func (tb *Buffer) initialMarkup() {
 func (tb *Buffer) StartDelayedReMarkup() {
 	tb.markupDelayMu.Lock()
 	defer tb.markupDelayMu.Unlock()
-	if !tb.Hi.HasHi() || tb.NLines == 0 {
+	if !tb.Hi.HasHi() || tb.NumLines == 0 {
 		return
 	}
 	if tb.markupDelayTimer != nil {
@@ -1675,7 +1675,7 @@ func (tb *Buffer) stopDelayedReMarkup() {
 
 // reMarkup runs re-markup on text in background
 func (tb *Buffer) reMarkup() {
-	if !tb.Hi.HasHi() || tb.NLines == 0 {
+	if !tb.Hi.HasHi() || tb.NumLines == 0 {
 		return
 	}
 	if tb.markingUp {
@@ -1715,7 +1715,7 @@ func (tb *Buffer) AdjustedTagsImpl(tags lexer.Line, ln int) lexer.Line {
 // designed to be called in a separate goroutine.
 // if maxLines > 0 then it specifies a maximum number of lines (for InitialMarkup)
 func (tb *Buffer) markupAllLines(maxLines int) {
-	if !tb.Hi.HasHi() || tb.NLines == 0 {
+	if !tb.Hi.HasHi() || tb.NumLines == 0 {
 		return
 	}
 	if tb.markingUp {
@@ -1747,7 +1747,7 @@ func (tb *Buffer) markupAllLines(maxLines int) {
 	tb.LinesMu.Lock()
 	tb.markupMu.Lock()
 
-	maxln := min(len(tb.Markup), tb.NLines)
+	maxln := min(len(tb.Markup), tb.NumLines)
 	if maxLines > 0 {
 		maxln = min(maxln, maxLines)
 	}
@@ -1813,11 +1813,11 @@ func (tb *Buffer) markupAllLines(maxLines int) {
 // line.  returns true if all lines were marked up successfully.  This does
 // NOT lock the MarkupMu mutex (done at outer loop)
 func (tb *Buffer) markupLines(st, ed int) bool {
-	if !tb.Hi.HasHi() || tb.NLines == 0 {
+	if !tb.Hi.HasHi() || tb.NumLines == 0 {
 		return false
 	}
-	if ed >= tb.NLines {
-		ed = tb.NLines - 1
+	if ed >= tb.NumLines {
+		ed = tb.NumLines - 1
 	}
 
 	allgood := true
@@ -2188,7 +2188,7 @@ func (tb *Buffer) AutoIndentRegion(start, end int) {
 	autoSave := tb.batchUpdateStart()
 	defer tb.batchUpdateEnd(autoSave)
 	for ln := start; ln < end; ln++ {
-		if ln >= tb.NLines {
+		if ln >= tb.NumLines {
 			break
 		}
 		tb.autoIndent(ln)
@@ -2354,10 +2354,10 @@ func (tb *Buffer) tabsToSpaces(ln int) {
 }
 
 // TabsToSpaces replaces tabs with spaces over given region; end is *exclusive*
-func (tb *Buffer) TabsToSpaces(st, ed int) {
+func (tb *Buffer) TabsToSpaces(start, end int) {
 	autoSave := tb.batchUpdateStart()
-	for ln := st; ln < ed; ln++ {
-		if ln >= tb.NLines {
+	for ln := start; ln < end; ln++ {
+		if ln >= tb.NumLines {
 			break
 		}
 		tb.tabsToSpaces(ln)
@@ -2400,10 +2400,10 @@ func (tb *Buffer) spacesToTabs(ln int) {
 }
 
 // SpacesToTabs replaces tabs with spaces over given region; end is *exclusive*
-func (tb *Buffer) SpacesToTabs(st, ed int) {
+func (tb *Buffer) SpacesToTabs(start, end int) {
 	autoSave := tb.batchUpdateStart()
-	for ln := st; ln < ed; ln++ {
-		if ln >= tb.NLines {
+	for ln := start; ln < end; ln++ {
+		if ln >= tb.NumLines {
 			break
 		}
 		tb.spacesToTabs(ln)
