@@ -195,6 +195,7 @@ func (ed *Editor) SizeDown(iter int) bool {
 	}
 
 	redo := ed.Frame.SizeDown(iter)
+	sz.Actual.Content.Y = ty
 	chg := ed.ManageOverflow(iter, true) // this must go first.
 	return redo || chg
 }

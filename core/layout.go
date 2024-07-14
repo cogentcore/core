@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 )
 
@@ -679,16 +680,67 @@ func (wb *WidgetBase) spaceFromStyle() {
 // Required first call in SizeUp.
 func (wb *WidgetBase) sizeFromStyle() {
 	sz := &wb.Geom.Size
+	s := &wb.Styles
 	wb.spaceFromStyle()
 	wb.Geom.Size.InnerSpace.SetZero()
-	sz.Min = wb.Styles.Min.Dots().Ceil()
-	sz.Max = wb.Styles.Max.Dots().Ceil()
+	sz.Min = s.Min.Dots().Ceil()
+	sz.Max = s.Max.Dots().Ceil()
+	if s.Min.X.Unit == units.UnitPw || s.Min.X.Unit == units.UnitPh {
+		sz.Min.X = 0
+	}
+	if s.Min.Y.Unit == units.UnitPw || s.Min.Y.Unit == units.UnitPh {
+		sz.Min.Y = 0
+	}
+	if s.Max.X.Unit == units.UnitPw || s.Max.X.Unit == units.UnitPh {
+		sz.Max.X = 0
+	}
+	if s.Max.Y.Unit == units.UnitPw || s.Max.Y.Unit == units.UnitPh {
+		sz.Max.Y = 0
+	}
 	sz.Internal.SetZero()
 	sz.setInitContentMin(sz.Min)
 	sz.setTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace && (sz.Actual.Content.X > 0 || sz.Actual.Content.Y > 0) {
 		fmt.Println(wb, "SizeUp from Style:", sz.Actual.Content.String())
 	}
+}
+
+// updateParentRelSizes updates any parent-relative Min, Max size values
+// based on current actual parent sizes.
+func (wb *WidgetBase) updateParentRelSizes() bool {
+	pwb := wb.parentWidget()
+	if pwb == nil {
+		return false
+	}
+	sz := &wb.Geom.Size
+	s := &wb.Styles
+	psz := pwb.Geom.Size.Alloc.Content.Sub(pwb.Geom.Size.InnerSpace)
+	got := false
+	for d := math32.X; d <= math32.Y; d++ {
+		if s.Min.Dim(d).Unit == units.UnitPw {
+			got = true
+			sz.Min.SetDim(d, psz.X*0.01*s.Min.Dim(d).Value)
+		}
+		if s.Min.Dim(d).Unit == units.UnitPh {
+			got = true
+			sz.Min.SetDim(d, psz.Y*0.01*s.Min.Dim(d).Value)
+		}
+		if s.Max.Dim(d).Unit == units.UnitPw {
+			got = true
+			sz.Max.SetDim(d, psz.X*0.01*s.Max.Dim(d).Value)
+		}
+		if s.Max.Dim(d).Unit == units.UnitPh {
+			got = true
+			sz.Max.SetDim(d, psz.Y*0.01*s.Max.Dim(d).Value)
+		}
+	}
+	if got {
+		sz.fitSizeMax(&sz.Actual.Total, sz.Min)
+		sz.fitSizeMax(&sz.Alloc.Total, sz.Min)
+		sz.setContentFromTotal(&sz.Actual)
+		sz.setContentFromTotal(&sz.Alloc)
+	}
+	return got
 }
 
 // sizeUpParts adjusts the Content size to hold the Parts layout if present
@@ -1002,7 +1054,9 @@ func (fr *Frame) sizeFromChildrenStacked() math32.Vector2 {
 // as Actual sizes must always represent the minimums (see Position).
 // Returns true if any change in Actual size occurred.
 func (wb *WidgetBase) SizeDown(iter int) bool {
-	return wb.sizeDownParts(iter)
+	prel := wb.updateParentRelSizes()
+	redo := wb.sizeDownParts(iter)
+	return prel || redo
 }
 
 func (wb *WidgetBase) sizeDownParts(iter int) bool {
@@ -1096,6 +1150,7 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "SizeDown") {
 		return fr.WidgetBase.SizeDown(iter) // behave like a widget
 	}
+	prel := fr.updateParentRelSizes()
 	sz := &fr.Geom.Size
 	styles.SetClampMaxVector(&sz.Alloc.Content, sz.Max) // can't be more than max..
 	sz.setTotalFromContent(&sz.Alloc)
@@ -1112,11 +1167,11 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 	}
 	fr.This.(Layouter).SizeDownSetAllocs(iter)
 	redo := fr.sizeDownChildren(iter)
-	if redo || wrapped {
+	if prel || redo || wrapped {
 		fr.sizeFromChildrenFit(iter, SizeDownPass)
 	}
 	fr.sizeDownParts(iter) // no std role, just get sizes
-	return chg || wrapped || redo
+	return chg || wrapped || redo || prel
 }
 
 // SizeDownSetAllocs is the key SizeDown step that sets the allocations
@@ -1464,9 +1519,6 @@ func (wb *WidgetBase) growToAlloc() bool {
 		}
 		sz.Actual.Total = act // already has max constraint
 		sz.setContentFromTotal(&sz.Actual)
-		if wb.Styles.LayoutHasParSizing() {
-			// todo: requires some additional logic to see if actually changes something
-		}
 	}
 	return change
 }
@@ -1517,22 +1569,21 @@ func (fr *Frame) sizeFinalChildren() {
 // styleSizeUpdate updates styling size values for widget and its parent,
 // which should be called after these are updated.  Returns true if any changed.
 func (wb *WidgetBase) styleSizeUpdate() bool {
-	return false
-	// TODO(kai): this seems to break parent-relative units instead of making them work
-	/*
-		el := wb.Geom.Size.Alloc.Content
-		var parent math32.Vector2
-		pwb := wb.ParentWidget()
-		if pwb != nil {
-			parent = pwb.Geom.Size.Alloc.Content
-		}
-		sz := wb.Scene.SceneGeom.Size
-		chg := wb.Styles.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
-		if chg {
-			wb.Styles.ToDots()
-		}
-		return chg
-	*/
+	pwb := wb.parentWidget()
+	if pwb == nil {
+		return false
+	}
+	if !wb.updateParentRelSizes() {
+		return false
+	}
+	scsz := wb.Scene.sceneGeom.Size
+	sz := wb.Geom.Size.Alloc.Content
+	psz := pwb.Geom.Size.Alloc.Content
+	chg := wb.Styles.UnitContext.SetSizes(float32(scsz.X), float32(scsz.Y), sz.X, sz.Y, psz.X, psz.Y)
+	if chg {
+		wb.Styles.ToDots()
+	}
+	return chg
 }
 
 // Position uses the final sizes to set relative positions within layouts

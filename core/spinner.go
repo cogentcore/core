@@ -108,8 +108,8 @@ func (sp *Spinner) Init() {
 	sp.Styler(func(s *styles.Style) {
 		s.VirtualKeyboard = styles.KeyboardNumber
 		if sp.IsReadOnly() {
-			s.Min.X.Ch(4)
-			s.Max.X.Ch(8)
+			s.Min.X.Ch(6)
+			s.Max.X.Ch(12)
 		} else {
 			s.Min.X.Ch(14)
 			s.Max.X.Ch(18)

@@ -322,7 +322,8 @@ func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
 	if tx.Styles.Text.HasWordWrap() {
-		tx.configTextSize(paint.TextWrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), &tx.Styles.Font))
+		// note: using a narrow ratio of .5 to allow text to squeeze into narrow space
+		tx.configTextSize(paint.TextWrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), 0.5, &tx.Styles.Font))
 	} else {
 		tx.configTextSize(sz.Actual.Content)
 	}

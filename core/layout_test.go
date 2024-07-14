@@ -453,3 +453,28 @@ func TestLayoutScrollLabel(t *testing.T) {
 	NewText(b).SetText(LongText)
 	b.AssertRender(t, "layout/scroll/label")
 }
+
+func TestParentRelativeSize(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(100))
+	})
+	fr := NewFrame(b)
+	fr.SetName("target")
+	fr.Styler(func(s *styles.Style) {
+		s.Direction = styles.Row
+		s.Grow.Set(1, 1)
+		s.Overflow.Set(styles.OverflowAuto)
+	})
+	NewFrame(fr).Styler(func(s *styles.Style) {
+		s.Background = colors.Scheme.Select.Container
+		s.Grow.Set(0, 0)
+		s.Min.Set(units.Pw(50))
+	})
+	NewFrame(fr).Styler(func(s *styles.Style) {
+		s.Background = colors.Scheme.Error.Base
+		s.Grow.Set(0, 0)
+		s.Min.Set(units.Pw(50))
+	})
+	b.AssertRender(t, "layout/parent-relative")
+}

@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"log/slog"
 	"strings"
 
 	"cogentcore.org/core/base/reflectx"
@@ -374,6 +375,12 @@ func (s *Style) ToDotsImpl(uc *units.Context) {
 // ToDots caches all style elements in terms of raw pixel
 // dots for rendering.
 func (s *Style) ToDots() {
+	if s.Min.X.Unit == units.UnitEw || s.Min.X.Unit == units.UnitEh ||
+		s.Min.Y.Unit == units.UnitEw || s.Min.Y.Unit == units.UnitEh ||
+		s.Max.X.Unit == units.UnitEw || s.Max.X.Unit == units.UnitEh ||
+		s.Max.Y.Unit == units.UnitEw || s.Max.Y.Unit == units.UnitEh {
+		slog.Error("styling error: cannot use Ew or Eh for Min size -- that is self-referential!")
+	}
 	s.ToDotsImpl(&s.UnitContext)
 }
 

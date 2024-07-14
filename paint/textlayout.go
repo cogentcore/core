@@ -401,15 +401,16 @@ func (tr *Text) UpdateBBox() {
 // TextWrapSizeEstimate is the size to use for layout during the SizeUp pass,
 // for word wrap case, where the sizing actually matters,
 // based on trying to fit the given number of characters into the given content size
-// with given font height.
-func TextWrapSizeEstimate(csz math32.Vector2, nChars int, fs *styles.Font) math32.Vector2 {
+// with given font height, and ratio of width to height.
+// Ratio is used when csz is 0: 1.618 is golden, and smaller numbers to allow
+// for narrower, taller text columns.
+func TextWrapSizeEstimate(csz math32.Vector2, nChars int, ratio float32, fs *styles.Font) math32.Vector2 {
 	chars := float32(nChars)
 	fht := float32(16)
 	if fs.Face != nil {
 		fht = fs.Face.Metrics.Height
 	}
 	area := chars * fht * fht
-	ratio := float32(1.618) // default to golden
 	if csz.X > 0 && csz.Y > 0 {
 		ratio = csz.X / csz.Y
 		// fmt.Println(lb, "content size ratio:", ratio)
