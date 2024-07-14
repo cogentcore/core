@@ -7,7 +7,9 @@
 package cosh
 
 import (
+	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -66,4 +68,21 @@ func ReplaceInFile(filename, old, new string) string {
 // a command, for example.
 func StringsToAnys(s []string) []any {
 	return slicesx.ToAny(s)
+}
+
+// AllFiles returns a list of all files (excluding directories)
+// under the given path.
+func AllFiles(path string) []string {
+	var files []string
+	filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		files = append(files, path)
+		return nil
+	})
+	return files
 }

@@ -30,7 +30,7 @@ require (
 	github.com/nsf/termbox-go v1.1.1
 	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
 	github.com/stretchr/testify v1.9.0
-	github.com/traefik/yaegi v0.16.1
+	github.com/cogentcore/yaegi v0.16.1
 	github.com/yuin/goldmark v1.7.3
 	github.com/zergon321/reisen v0.1.9
 	go.abhg.dev/goldmark/wikilink v0.5.0
@@ -71,4 +71,4 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
-replace github.com/traefik/yaegi v0.16.1 => github.com/cogentcore/yaegi v0.0.0-20240714002104-38ca6babefac
+replace github.com/cogentcore/yaegi v0.16.1 => github.com/cogentcore/yaegi v0.0.0-20240714002104-38ca6babefac

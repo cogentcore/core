@@ -7,7 +7,7 @@ package interpreter
 import (
 	"reflect"
 
-	"github.com/traefik/yaegi/interp"
+	"github.com/cogentcore/yaegi/interp"
 )
 
 var Symbols = map[string]map[string]reflect.Value{}

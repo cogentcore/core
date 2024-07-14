@@ -18,9 +18,9 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/shell"
+	"github.com/cogentcore/yaegi/interp"
+	"github.com/cogentcore/yaegi/stdlib"
 	"github.com/ergochat/readline"
-	"github.com/traefik/yaegi/interp"
-	"github.com/traefik/yaegi/stdlib"
 )
 
 // Interpreter represents one running shell context
