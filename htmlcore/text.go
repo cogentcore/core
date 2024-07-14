@@ -21,29 +21,29 @@ func ExtractText(ctx *Context) string {
 	if ctx.Node.FirstChild == nil {
 		return ""
 	}
-	return extractTextImpl(ctx, ctx.Node.FirstChild)
+	return extractText(ctx, ctx.Node.FirstChild)
 }
 
-func extractTextImpl(ctx *Context, n *html.Node) string {
+func extractText(ctx *Context, n *html.Node) string {
 	str := ""
 	if n.Type == html.TextNode {
 		str += n.Data
 	}
-	it := IsText(n)
+	it := isText(n)
 	if !it {
 		readHTMLNode(ctx, ctx.Parent(), n)
 	}
 	if it && n.FirstChild != nil {
-		start, end := NodeString(n)
-		str = start + extractTextImpl(ctx, n.FirstChild) + end
+		start, end := nodeString(n)
+		str = start + extractText(ctx, n.FirstChild) + end
 	}
 	if n.NextSibling != nil {
-		str += extractTextImpl(ctx, n.NextSibling)
+		str += extractText(ctx, n.NextSibling)
 	}
 	return str
 }
 
-// NodeString returns the given node as starting and ending strings in the format:
+// nodeString returns the given node as starting and ending strings in the format:
 //
 //	<tag attr0="value0" attr1="value1">
 //
@@ -52,7 +52,7 @@ func extractTextImpl(ctx *Context, n *html.Node) string {
 //	</tag>
 //
 // It returns "", "" if the given node is not an [html.ElementNode]
-func NodeString(n *html.Node) (start, end string) {
+func nodeString(n *html.Node) (start, end string) {
 	if n.Type != html.ElementNode {
 		return
 	}
@@ -66,23 +66,23 @@ func NodeString(n *html.Node) (start, end string) {
 	return
 }
 
-// TextTags are all of the node tags that result in a true return value for [IsText].
-var TextTags = []string{
+// textTags are all of the node tags that result in a true return value for [isText].
+var textTags = []string{
 	"a", "abbr", "b", "bdi", "bdo", "br", "cite", "code", "data", "dfn",
 	"em", "i", "kbd", "mark", "q", "rp", "rt", "ruby", "s", "samp", "small",
 	"span", "strong", "sub", "sup", "time", "u", "var", "wbr",
 }
 
-// IsText returns true if the given node is a [html.TextNode] or
+// isText returns true if the given node is a [html.TextNode] or
 // an [html.ElementNode] designed for holding text (a, span, b, code, etc),
 // and false otherwise.
-func IsText(n *html.Node) bool {
+func isText(n *html.Node) bool {
 	if n.Type == html.TextNode {
 		return true
 	}
 	if n.Type == html.ElementNode {
 		tag := n.Data
-		return slices.Contains(TextTags, tag)
+		return slices.Contains(textTags, tag)
 	}
 	return false
 }

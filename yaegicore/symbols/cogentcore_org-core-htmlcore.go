@@ -14,10 +14,8 @@ func init() {
 		"ElementHandlers":  reflect.ValueOf(&htmlcore.ElementHandlers).Elem(),
 		"ExtractText":      reflect.ValueOf(htmlcore.ExtractText),
 		"Get":              reflect.ValueOf(htmlcore.Get),
-		"IsText":           reflect.ValueOf(htmlcore.IsText),
 		"IsURL":            reflect.ValueOf(htmlcore.IsURL),
 		"NewContext":       reflect.ValueOf(htmlcore.NewContext),
-		"NodeString":       reflect.ValueOf(htmlcore.NodeString),
 		"NormalizeURL":     reflect.ValueOf(htmlcore.NormalizeURL),
 		"ParseRelativeURL": reflect.ValueOf(htmlcore.ParseRelativeURL),
 		"ParseURL":         reflect.ValueOf(htmlcore.ParseURL),
@@ -26,7 +24,6 @@ func init() {
 		"ReadHTMLString":   reflect.ValueOf(htmlcore.ReadHTMLString),
 		"ReadMD":           reflect.ValueOf(htmlcore.ReadMD),
 		"ReadMDString":     reflect.ValueOf(htmlcore.ReadMDString),
-		"TextTags":         reflect.ValueOf(&htmlcore.TextTags).Elem(),
 
 		// type definitions
 		"Context": reflect.ValueOf((*htmlcore.Context)(nil)),

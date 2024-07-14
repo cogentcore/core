@@ -59,7 +59,7 @@ func handleElement(ctx *Context) {
 		}
 	}
 
-	if slices.Contains(TextTags, tag) {
+	if slices.Contains(textTags, tag) {
 		handleTextTag(ctx)
 		return
 	}
@@ -265,11 +265,11 @@ func handleText(ctx *Context) *core.Text {
 
 // handleTextTag creates a new [core.Text] from the given information, setting the text and
 // the text click function so that URLs are opened according to [Context.OpenURL]. Also,
-// it wraps the text with the [NodeString] of the given node, meaning that it
+// it wraps the text with the [nodeString] of the given node, meaning that it
 // should be used for standalone elements that are meant to only exist in text
 // (eg: a, span, b, code, etc).
 func handleTextTag(ctx *Context) *core.Text {
-	start, end := NodeString(ctx.Node)
+	start, end := nodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
 	lb := New[core.Text](ctx).SetText(str)
 	lb.HandleTextClick(func(tl *paint.TextLink) {
