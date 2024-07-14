@@ -175,7 +175,7 @@ type Buffer struct {
 // and initializes it.
 func NewBuffer() *Buffer {
 	tb := &Buffer{}
-	tb.SetHiStyle(highlighting.StyleDefault)
+	tb.SetHighlighting(highlighting.StyleDefault)
 	tb.Options.EditorSettings = core.SystemSettings.Editor
 	tb.SetText([]byte{}) // to initialize
 	return tb
@@ -381,8 +381,8 @@ func (tb *Buffer) SetLang(lang string) *Buffer {
 	return tb
 }
 
-// SetHiStyle sets the highlighting style of the buffer.
-func (tb *Buffer) SetHiStyle(style core.HighlightingName) *Buffer {
+// SetHighlighting sets the highlighting style of the buffer.
+func (tb *Buffer) SetHighlighting(style core.HighlightingName) *Buffer {
 	tb.markupMu.Lock()
 	tb.Highlighting.SetHiStyle(style)
 	tb.markupMu.Unlock()

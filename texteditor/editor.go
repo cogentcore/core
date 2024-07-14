@@ -485,7 +485,7 @@ func (ed *Editor) styleEditor() {
 	if ed.NeedsRebuild() {
 		highlighting.UpdateFromTheme()
 		if ed.Buffer != nil {
-			ed.Buffer.SetHiStyle(highlighting.StyleDefault)
+			ed.Buffer.SetHighlighting(highlighting.StyleDefault)
 		}
 	}
 	ed.WidgetBase.Style()

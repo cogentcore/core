@@ -50,7 +50,7 @@ type Highlighting struct {
 	ParseLang parse.Lang
 
 	// current highlighting style
-	HiStyle *highlighting.Style
+	style *highlighting.Style
 
 	// external toggle to turn off automatic highlighting
 	Off       bool
@@ -105,8 +105,8 @@ func (hm *Highlighting) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 	hm.Has = true
 
 	if hm.Style != hm.lastStyle {
-		hm.HiStyle = highlighting.AvailableStyle(hm.Style)
-		hm.CSSProperties = hm.HiStyle.ToProperties()
+		hm.style = highlighting.AvailableStyle(hm.Style)
+		hm.CSSProperties = hm.style.ToProperties()
 		hm.lastStyle = hm.Style
 	}
 
@@ -128,8 +128,8 @@ func (hm *Highlighting) SetHiStyle(style core.HighlightingName) {
 		return
 	}
 	hm.Style = style
-	hm.HiStyle = st
-	hm.CSSProperties = hm.HiStyle.ToProperties()
+	hm.style = st
+	hm.CSSProperties = hm.style.ToProperties()
 	hm.lastStyle = hm.Style
 }
 
