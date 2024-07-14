@@ -63,6 +63,12 @@ func main() {
 				pg.Context.OpenURL("/playground")
 			})
 		})
+		tree.Add(p, func(w *core.Button) {
+			w.SetText("GitHub")
+			w.OnClick(func(e events.Event) {
+				core.TheApp.OpenURL("https://github.com/cogentcore/core")
+			})
+		})
 	})
 
 	symbols.Symbols["."]["content"] = reflect.ValueOf(content)
