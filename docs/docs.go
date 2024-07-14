@@ -208,7 +208,7 @@ func homePage(ctx *htmlcore.Context) bool {
 		initIcon(w).SetIcon(icons.ScatterPlot)
 	})
 
-	makeBlock("OPTIMIZED EXPERIENCE", "Every part of your development experience is guided by a comprehensive set of interactive example-based documentation, in-depth video tutorials, easy-to-use command line tools specialized for Cogent Core, and active support and development from the Cogent Core developers.", func(w *core.Icon) {
+	makeBlock("OPTIMIZED EXPERIENCE", "Every part of your development experience is guided by a comprehensive set of editable interactive example-based documentation, in-depth video tutorials, easy-to-use command line tools specialized for Cogent Core, and active support and development from the Cogent Core developers.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.PlayCircle)
 	})
 
@@ -263,15 +263,15 @@ func homePage(ctx *htmlcore.Context) bool {
 		w.SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core instead of something else?</b>")
 	})
 
-	makeBlock(`THE PROBLEM`, "After using other frameworks built on HTML and Qt for years to make various apps ranging from simple tools to complex scientific models, we realized that we were spending more time dealing with excessive boilerplate, browser inconsistencies, and dependency management issues than actual app development.", func(w *core.Icon) {
+	makeBlock("THE PROBLEM", "After using other frameworks built on HTML and Qt for years to make various apps ranging from simple tools to complex scientific models, we realized that we were spending more time dealing with excessive boilerplate, browser inconsistencies, and dependency management issues than actual app development.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Problem)
 	})
 
-	makeBlock(`THE SOLUTION`, "We decided to make a framework that would allow us to focus on app content and logic by providing a consistent and elegant API that automatically handles cross-platform support, user customization, and app packaging and deployment.", func(w *core.Icon) {
+	makeBlock("THE SOLUTION", "We decided to make a framework that would allow us to focus on app content and logic by providing a consistent and elegant API that automatically handles cross-platform support, user customization, and app packaging and deployment.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Build)
 	})
 
-	makeBlock(`THE RESULT`, "Instead of constantly jumping through hoops to create a consistent, easy-to-use, cross-platform app, you can now take advantage of a powerful featureset on all platforms and vastly simplify your development experience.", func(w *core.Icon) {
+	makeBlock("THE RESULT", "Instead of constantly jumping through hoops to create a consistent, easy-to-use, cross-platform app, you can now take advantage of a powerful featureset on all platforms and vastly simplify your development experience.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Check)
 	})
 
