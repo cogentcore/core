@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/parse/lexer"
 	_ "cogentcore.org/core/parse/suplangs"
 	"cogentcore.org/core/parse/token"
-	"cogentcore.org/core/texteditor/histyle"
+	"cogentcore.org/core/texteditor/highlighting"
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
@@ -50,7 +50,7 @@ type Highlighting struct {
 	ParseLang parse.Lang
 
 	// current highlighting style
-	HiStyle *histyle.Style
+	HiStyle *highlighting.Style
 
 	// external toggle to turn off automatic highlighting
 	Off       bool
@@ -105,7 +105,7 @@ func (hm *Highlighting) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 	hm.Has = true
 
 	if hm.Style != hm.lastStyle {
-		hm.HiStyle = histyle.AvailableStyle(hm.Style)
+		hm.HiStyle = highlighting.AvailableStyle(hm.Style)
 		hm.CSSProperties = hm.HiStyle.ToProperties()
 		hm.lastStyle = hm.Style
 	}
@@ -122,7 +122,7 @@ func (hm *Highlighting) SetHiStyle(style core.HighlightingName) {
 	if style == "" {
 		return
 	}
-	st := histyle.AvailableStyle(hm.Style)
+	st := highlighting.AvailableStyle(hm.Style)
 	if st == nil {
 		slog.Error("Highlighting Style not found:", "style", style)
 		return
@@ -178,7 +178,7 @@ func ChromaTagsForLine(tags *lexer.Line, toks []chroma.Token) {
 		}
 		ep := cp + slen
 		if tok.Type < chroma.Text {
-			ht := histyle.TokenFromChroma(tok.Type)
+			ht := highlighting.TokenFromChroma(tok.Type)
 			tags.AddLex(token.KeyToken{Token: ht}, cp, ep)
 		}
 		cp = ep

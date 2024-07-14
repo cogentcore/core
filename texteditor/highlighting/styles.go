@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package histyle
+package highlighting
 
 import (
 	_ "embed"
@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/parse"
 )
 
-//go:embed defaults.histys
+//go:embed defaults.highlighting
 var defaults []byte
 
 // Styles is a collection of styles
@@ -147,7 +147,7 @@ func (hs *Styles) SaveAll(dir core.Filename) {
 }
 
 // OpenDefaults opens the default highlighting styles (from chroma originally)
-// These are encoded as an embed from defaults.histys
+// These are encoded as an embed from defaults.highlighting
 func (hs *Styles) OpenDefaults() error {
 	err := json.Unmarshal(defaults, hs)
 	if err != nil {

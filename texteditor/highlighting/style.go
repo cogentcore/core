@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package histyle provides syntax highlighting styles; it is based on
+// Package highlighting provides syntax highlighting styles; it is based on
 // github.com/alecthomas/chroma, which in turn was based on the python
-// pygments package.  Note that this package depends on core and pi
+// pygments package.  Note that this package depends on core and parse
 // and cannot be imported there; is imported in texteditor.
-package histyle
+package highlighting
 
 //go:generate core generate -add-types
 

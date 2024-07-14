@@ -29,13 +29,13 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/texteditor/histyle"
+	"cogentcore.org/core/texteditor/highlighting"
 	"cogentcore.org/core/tree"
 )
 
 // NodeHiStyle is the default style for syntax highlighting to use for
 // file node buffers
-var NodeHiStyle = histyle.StyleDefault
+var NodeHiStyle = highlighting.StyleDefault
 
 // Node represents a file in the file system, as a [core.Tree] node.
 // The name of the node is the name of the file.

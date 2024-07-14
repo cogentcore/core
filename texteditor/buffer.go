@@ -30,7 +30,7 @@ import (
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/spell"
-	"cogentcore.org/core/texteditor/histyle"
+	"cogentcore.org/core/texteditor/highlighting"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
@@ -175,7 +175,7 @@ type Buffer struct {
 // and initializes it.
 func NewBuffer() *Buffer {
 	tb := &Buffer{}
-	tb.SetHiStyle(histyle.StyleDefault)
+	tb.SetHiStyle(highlighting.StyleDefault)
 	tb.Options.EditorSettings = core.SystemSettings.Editor
 	tb.SetText([]byte{}) // to initialize
 	return tb

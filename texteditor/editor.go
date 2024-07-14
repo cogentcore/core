@@ -22,7 +22,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/texteditor/histyle"
+	"cogentcore.org/core/texteditor/highlighting"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
@@ -483,9 +483,9 @@ func (ed *Editor) redo() {
 // styleEditor applies the editor styles.
 func (ed *Editor) styleEditor() {
 	if ed.NeedsRebuild() {
-		histyle.UpdateFromTheme()
+		highlighting.UpdateFromTheme()
 		if ed.Buffer != nil {
-			ed.Buffer.SetHiStyle(histyle.StyleDefault)
+			ed.Buffer.SetHiStyle(highlighting.StyleDefault)
 		}
 	}
 	ed.WidgetBase.Style()
