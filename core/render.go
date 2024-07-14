@@ -343,7 +343,7 @@ func (wb *WidgetBase) PushBounds() bool {
 	if pc.State == nil || pc.Image == nil {
 		return false
 	}
-	if false && len(pc.BoundsStack) == 0 && wb.Parent != nil { // TODO: fix firstRender for [Tree]
+	if len(pc.BoundsStack) == 0 && wb.Parent != nil {
 		wb.firstRender = true
 		// push our parent's bounds if we are the first to render
 		pw := wb.parentWidget()
