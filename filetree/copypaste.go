@@ -61,22 +61,22 @@ func (fn *Node) Cut() { //types:add
 func (fn *Node) Paste() { //types:add
 	md := fn.Clipboard().Read([]string{fileinfo.TextPlain})
 	if md != nil {
-		fn.PasteFiles(md, false, nil)
+		fn.pasteFiles(md, false, nil)
 	}
 }
 
 func (fn *Node) DragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
 	md := de.Data.(mimedata.Mimes)
-	fn.PasteFiles(md, de.Source == nil, func() {
+	fn.pasteFiles(md, de.Source == nil, func() {
 		fn.This.(core.Treer).DropFinalize(de)
 	})
 }
 
-// PasteCheckExisting checks for existing files in target node directory if
+// pasteCheckExisting checks for existing files in target node directory if
 // that is non-nil (otherwise just uses absolute path), and returns list of existing
 // and node for last one if exists.
-func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes, externalDrop bool) ([]string, *Node) {
+func (fn *Node) pasteCheckExisting(tfn *Node, md mimedata.Mimes, externalDrop bool) ([]string, *Node) {
 	froot := fn.FileRoot
 	tpath := ""
 	if tfn != nil {
@@ -116,8 +116,8 @@ func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes, externalDrop bo
 	return existing, sfn
 }
 
-// PasteCopyFiles copies files in given data into given target directory
-func (fn *Node) PasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool) {
+// pasteCopyFiles copies files in given data into given target directory
+func (fn *Node) pasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool) {
 	froot := fn.FileRoot
 	nf := len(md)
 	if !externalDrop {
@@ -148,12 +148,12 @@ func (fn *Node) PasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool)
 	}
 }
 
-// PasteCopyFilesCheck copies files into given directory node,
+// pasteCopyFilesCheck copies files into given directory node,
 // first checking if any already exist -- if they exist, prompts.
-func (fn *Node) PasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop bool, dropFinal func()) {
-	existing, _ := fn.PasteCheckExisting(tdir, md, externalDrop)
+func (fn *Node) pasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop bool, dropFinal func()) {
+	existing, _ := fn.pasteCheckExisting(tdir, md, externalDrop)
 	if len(existing) == 0 {
-		fn.PasteCopyFiles(tdir, md, externalDrop)
+		fn.pasteCopyFiles(tdir, md, externalDrop)
 		if dropFinal != nil {
 			dropFinal()
 		}
@@ -164,7 +164,7 @@ func (fn *Node) PasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop 
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
-			fn.PasteCopyFiles(tdir, md, externalDrop)
+			fn.pasteCopyFiles(tdir, md, externalDrop)
 			if dropFinal != nil {
 				dropFinal()
 			}
@@ -173,10 +173,10 @@ func (fn *Node) PasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop 
 	d.RunDialog(fn)
 }
 
-// PasteFiles applies a paste / drop of mime data onto this node.
+// pasteFiles applies a paste / drop of mime data onto this node.
 // always does a copy of files into / onto target.
 // externalDrop is true if this is an externally generated Drop event (from OS)
-func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func()) {
+func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func()) {
 	if len(md) == 0 {
 		return
 	}
@@ -187,12 +187,12 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	tpath := string(fn.Filepath)
 	isdir := fn.IsDir()
 	if isdir {
-		fn.PasteCopyFilesCheck(fn, md, externalDrop, dropFinal)
+		fn.pasteCopyFilesCheck(fn, md, externalDrop, dropFinal)
 		return
 	}
 	if len(md) > 3 { // multiple files -- automatically goes into parent dir
 		tdir := AsNode(fn.Parent)
-		fn.PasteCopyFilesCheck(tdir, md, externalDrop, dropFinal)
+		fn.pasteCopyFilesCheck(tdir, md, externalDrop, dropFinal)
 		return
 	}
 	// single file dropped onto a single target file
@@ -204,7 +204,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	}
 	fname := filepath.Base(srcpath)
 	tdir := AsNode(fn.Parent)
-	existing, sfn := fn.PasteCheckExisting(tdir, md, externalDrop)
+	existing, sfn := fn.pasteCheckExisting(tdir, md, externalDrop)
 	mode := os.FileMode(0664)
 	if sfn != nil {
 		mode = sfn.Info.Mode
