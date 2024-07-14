@@ -637,6 +637,7 @@ func makeStyles(ts *core.Tabs) {
 
 	fr.Styler(func(s *styles.Style) {
 		s.Background = colors.Scheme.Select.Container
+		s.Grow.Set(1, 1)
 	})
 
 	fr.OnShow(func(e events.Event) {
