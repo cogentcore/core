@@ -95,10 +95,10 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 
 	// now that we have drawn background color
 	// above, we can draw the border
-	mpos.SetSub(st.Border.Width.Dots().Pos().MulScalar(0.5).Ceil())
-	msize.SetAdd(st.Border.Width.Dots().Size().MulScalar(0.5).Ceil())
-	mpos.SetSub(st.Border.Offset.Dots().Pos().Ceil())
-	msize.SetAdd(st.Border.Offset.Dots().Size().Ceil())
+	mpos.SetSub(st.Border.Width.Dots().Pos().MulScalar(0.5))
+	msize.SetAdd(st.Border.Width.Dots().Size().MulScalar(0.5))
+	mpos.SetSub(st.Border.Offset.Dots().Pos())
+	msize.SetAdd(st.Border.Offset.Dots().Size())
 	pc.FillStyle.Color = nil
 	pc.DrawBorder(mpos.X, mpos.Y, msize.X, msize.Y, st.Border)
 }
