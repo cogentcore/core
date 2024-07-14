@@ -129,6 +129,7 @@ func HandleElement(ctx *Context) {
 				ed.Buffer.SetLang(lang)
 			}
 			if BindTextEditor != nil && lang == "Go" {
+				ed.Buffer.SpacesToTabs(0, ed.Buffer.NumLines) // Go uses tabs
 				parent := core.NewFrame(ed.Parent)
 				parent.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column
