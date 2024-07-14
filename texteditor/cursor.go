@@ -74,7 +74,7 @@ func (ed *Editor) stopCursor() {
 
 // cursorBBox returns a bounding-box for a cursor at given position
 func (ed *Editor) cursorBBox(pos lexer.Pos) image.Rectangle {
-	cpos := ed.CharStartPos(pos)
+	cpos := ed.charStartPos(pos)
 	cbmin := cpos.SubScalar(ed.CursorWidth.Dots)
 	cbmax := cpos.AddScalar(ed.CursorWidth.Dots)
 	cbmax.Y += ed.fontHeight
@@ -112,7 +112,7 @@ func (ed *Editor) renderCursor(on bool) {
 	if sp == nil {
 		return
 	}
-	sp.Geom.Pos = ed.CharStartPos(ed.CursorPos).ToPointFloor()
+	sp.Geom.Pos = ed.charStartPos(ed.CursorPos).ToPointFloor()
 }
 
 // cursorSpriteName returns the name of the cursor sprite

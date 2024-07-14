@@ -504,10 +504,10 @@ func (ed *Editor) linkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 	if !(pos.Ln < len(ed.renders) && len(ed.renders[pos.Ln].Links) > 0) {
 		return nil, false
 	}
-	cpos := ed.CharStartPos(pos).ToPointCeil()
+	cpos := ed.charStartPos(pos).ToPointCeil()
 	cpos.Y += 2
 	cpos.X += 2
-	lpos := ed.CharStartPos(lexer.Pos{Ln: pos.Ln})
+	lpos := ed.charStartPos(lexer.Pos{Ln: pos.Ln})
 	rend := &ed.renders[pos.Ln]
 	for ti := range rend.Links {
 		tl := &rend.Links[ti]
@@ -616,7 +616,7 @@ func (ed *Editor) handleLinkCursor() {
 		if mpos.Ln >= ed.NumLines {
 			return
 		}
-		pos := ed.RenderStartPos()
+		pos := ed.renderStartPos()
 		pos.Y += ed.offsets[mpos.Ln]
 		pos.X += ed.LineNumberOffset
 		rend := &ed.renders[mpos.Ln]

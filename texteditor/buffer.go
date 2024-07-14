@@ -905,7 +905,7 @@ func (tb *Buffer) sceneFromEditor() *core.Scene {
 func (tb *Buffer) AutoScrollEditors() {
 	for _, ed := range tb.editors {
 		if ed != nil && ed.This != nil {
-			ed.RenderLayout()
+			ed.renderLayout()
 			ed.SetCursorTarget(tb.endPos())
 		}
 	}

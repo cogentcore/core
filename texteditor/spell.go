@@ -45,7 +45,7 @@ func (ed *Editor) OfferComplete() {
 	}
 
 	//	count := ed.Buf.ByteOffs[ed.CursorPos.Ln] + ed.CursorPos.Ch
-	cpos := ed.CharStartPos(ed.CursorPos).ToPoint() // physical location
+	cpos := ed.charStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
 	ed.Buffer.setByteOffs() // make sure the pos offset is updated!!
@@ -105,7 +105,7 @@ func (ed *Editor) Lookup() { //types:add
 	}
 
 	//	count := ed.Buf.ByteOffs[ed.CursorPos.Ln] + ed.CursorPos.Ch
-	cpos := ed.CharStartPos(ed.CursorPos).ToPoint() // physical location
+	cpos := ed.charStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
 	ed.Buffer.setByteOffs() // make sure the pos offset is updated!!
@@ -254,7 +254,7 @@ func (ed *Editor) OfferCorrect() bool {
 	}
 	ed.Buffer.spell.setWord(wb, sugs, tbe.Reg.Start.Ln, tbe.Reg.Start.Ch)
 
-	cpos := ed.CharStartPos(ed.CursorPos).ToPoint() // physical location
+	cpos := ed.charStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
 	ed.Buffer.currentEditor = ed

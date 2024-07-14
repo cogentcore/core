@@ -307,7 +307,7 @@ func (ed *Editor) cursorPageDown(steps int) {
 	ed.validateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
-		lvln := ed.LastVisibleLine(ed.CursorPos.Ln)
+		lvln := ed.lastVisibleLine(ed.CursorPos.Ln)
 		ed.CursorPos.Ln = lvln
 		if ed.CursorPos.Ln >= ed.NumLines {
 			ed.CursorPos.Ln = ed.NumLines - 1
@@ -449,7 +449,7 @@ func (ed *Editor) cursorPageUp(steps int) {
 	ed.validateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
-		lvln := ed.FirstVisibleLine(ed.CursorPos.Ln)
+		lvln := ed.firstVisibleLine(ed.CursorPos.Ln)
 		ed.CursorPos.Ln = lvln
 		if ed.CursorPos.Ln <= 0 {
 			ed.CursorPos.Ln = 0
@@ -850,7 +850,7 @@ func (ed *Editor) scrollCursorToCenterIfHidden() bool {
 	curBBox := ed.cursorBBox(ed.CursorPos)
 	did := false
 	lht := int(ed.lineHeight)
-	bb := ed.RenderBBox()
+	bb := ed.renderBBox()
 	if bb.Size().Y <= lht {
 		return false
 	}
