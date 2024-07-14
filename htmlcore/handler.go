@@ -134,6 +134,20 @@ func HandleElement(ctx *Context) {
 					s.Direction = styles.Column
 					s.Grow.Set(1, 0)
 				})
+				// we inherit our Grow.Y from our first child so that
+				// elements that want to grow can do so
+				parent.OnWidgetAdded(func(w core.Widget) {
+					wb := w.AsWidget()
+					if _, ok := w.(*core.Body); ok { // Body should not grow
+						return
+					}
+					if wb.IndexInParent() != 0 {
+						return
+					}
+					wb.FinalStyler(func(s *styles.Style) {
+						parent.Styles.Grow.Y = s.Grow.Y
+					})
+				})
 				BindTextEditor(ed, parent)
 			} else {
 				ed.SetReadOnly(true)
