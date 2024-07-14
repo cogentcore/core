@@ -178,5 +178,6 @@ func TestRenderElementCutOff(t *testing.T) {
 		s.Max.X.Zero()
 	})
 	NewButton(fr).SetIcon(icons.Send)
-	b.AssertRender(t, "render/element-cut-off")
+	b.AssertRender(t, "render/element-cut-off", func() {
+	})
 }

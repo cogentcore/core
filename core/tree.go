@@ -216,6 +216,7 @@ func (tr *Tree) Init() {
 		// s.Border.Color.Left = colors.Scheme.OutlineVariant
 		s.Margin.Zero()
 		s.Padding.Set(units.Dp(4))
+		s.Padding.Right.Zero()
 		s.Text.Align = styles.Start
 
 		// need to copy over to actual and then clear styles one
@@ -504,6 +505,7 @@ func (tr *Tree) Style() {
 	}
 	tr.WidgetBase.Style()
 	tr.Indent.ToDots(&tr.Styles.UnitContext)
+	tr.Indent.Dots = math32.Ceil(tr.Indent.Dots)
 }
 
 func (tr *Tree) setBranchState() {
@@ -573,10 +575,11 @@ func (tr *Tree) Position() {
 		return
 	}
 	tr.setBranchState()
-	tr.Geom.Size.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tr.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
-	tr.widgetSize.X = tr.Geom.Size.Actual.Total.X
-
-	tr.WidgetBase.Position()
+	sz := &tr.Geom.Size
+	sz.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tr.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
+	sz.Actual.Content.X = sz.Actual.Total.X - sz.Space.X
+	tr.widgetSize.X = sz.Actual.Total.X
+	tr.WidgetBase.Position() // just does our parts
 
 	if !tr.Closed {
 		h := tr.widgetSize.Y
