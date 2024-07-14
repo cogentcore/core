@@ -64,7 +64,7 @@ func main() {
 			})
 		})
 		tree.Add(p, func(w *core.Button) {
-			w.SetText("GitHub")
+			w.SetText("GitHub").SetIcon(icons.GitHub)
 			w.OnClick(func(e events.Event) {
 				core.TheApp.OpenURL("https://github.com/cogentcore/core")
 			})

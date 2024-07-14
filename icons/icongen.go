@@ -3351,6 +3351,8 @@ var (
 	GirlFill Icon
 	//go:embed svg/girl.svg
 	Girl Icon
+	//go:embed svg/git-hub.svg
+	GitHub Icon
 	//go:embed svg/git.svg
 	Git Icon
 	//go:embed svg/glass_cup-fill.svg
