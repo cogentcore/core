@@ -14,7 +14,7 @@ import (
 
 // DrawStandardBox draws the CSS standard box model using the given styling information,
 // position, size, and parent actual background. This is used for rendering
-// widgets such as buttons, textfields, etc in a GUI.
+// widgets such as buttons, text fields, etc in a GUI.
 func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size math32.Vector2, pabg image.Image) {
 	if !st.RenderBox {
 		return
@@ -25,7 +25,7 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 	mpos := pos.Add(tm.Pos())
 	msize := size.Sub(tm.Size())
 	radius := st.Border.Radius.Dots()
-	if encroach {
+	if encroach { // if we encroach, we must limit ourselves to the parent radius
 		radius = radius.Max(pr)
 	}
 
@@ -51,7 +51,7 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 		// so TODO: maybe come up with a better solution for this.
 		// We need to use raw geom data because we need to clear
 		// any box shadow that may have gone in margin.
-		if encroach {
+		if encroach { // if we encroach, we must limit ourselves to the parent radius
 			pc.FillStyle.Color = pabg
 			pc.DrawRoundedRectangle(pos.X, pos.Y, size.X, size.Y, radius)
 			pc.Fill()
