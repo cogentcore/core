@@ -64,9 +64,15 @@ func main() {
 			})
 		})
 		tree.Add(p, func(w *core.Button) {
+			w.SetText("Blog").SetIcon(icons.RssFeed)
+			w.OnClick(func(e events.Event) {
+				pg.Context.OpenURL("https://cogentcore.org/blog")
+			})
+		})
+		tree.Add(p, func(w *core.Button) {
 			w.SetText("GitHub").SetIcon(icons.GitHub)
 			w.OnClick(func(e events.Event) {
-				core.TheApp.OpenURL("https://github.com/cogentcore/core")
+				pg.Context.OpenURL("https://github.com/cogentcore/core")
 			})
 		})
 	})
