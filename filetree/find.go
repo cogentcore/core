@@ -91,14 +91,14 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 	return ffn, found
 }
 
-// nodeNameCount is used to report counts of different string-based things
+// NodeNameCount is used to report counts of different string-based things
 // in the file tree
-type nodeNameCount struct {
+type NodeNameCount struct {
 	Name  string
 	Count int
 }
 
-func NodeNameCountSort(ecs []nodeNameCount) {
+func NodeNameCountSort(ecs []NodeNameCount) {
 	sort.Slice(ecs, func(i, j int) bool {
 		return ecs[i].Count > ecs[j].Count
 	})
@@ -108,7 +108,7 @@ func NodeNameCountSort(ecs []nodeNameCount) {
 // from highest to lowest.
 // If cat is != fileinfo.Unknown then it only uses files of that type
 // (e.g., fileinfo.Code to find any code files)
-func (fn *Node) FileExtensionCounts(cat fileinfo.Categories) []nodeNameCount {
+func (fn *Node) FileExtensionCounts(cat fileinfo.Categories) []NodeNameCount {
 	cmap := make(map[string]int, 20)
 	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
@@ -128,10 +128,10 @@ func (fn *Node) FileExtensionCounts(cat fileinfo.Categories) []nodeNameCount {
 		}
 		return tree.Continue
 	})
-	ecs := make([]nodeNameCount, len(cmap))
+	ecs := make([]NodeNameCount, len(cmap))
 	idx := 0
 	for key, val := range cmap {
-		ecs[idx] = nodeNameCount{Name: key, Count: val}
+		ecs[idx] = NodeNameCount{Name: key, Count: val}
 		idx++
 	}
 	NodeNameCountSort(ecs)
