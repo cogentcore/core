@@ -59,18 +59,17 @@ func (fn *Node) VCSContextMenu(m *core.Scene) {
 }
 
 func (fn *Node) ContextMenu(m *core.Scene) {
-	fl := fn.This.(Filer)
-	core.NewFuncButton(m).SetFunc(fl.ShowFileInfo).SetText("Info").SetIcon(icons.Info).SetEnabled(fn.HasSelection())
-	open := core.NewFuncButton(m).SetFunc(fl.OpenFilesDefault).SetText("Open").SetIcon(icons.Open)
+	core.NewFuncButton(m).SetFunc(fn.ShowFileInfo).SetText("Info").SetIcon(icons.Info).SetEnabled(fn.HasSelection())
+	open := core.NewFuncButton(m).SetFunc(fn.OpenFilesDefault).SetText("Open").SetIcon(icons.Open)
 	open.SetEnabled(fn.HasSelection())
 	if core.TheApp.Platform() == system.Web {
 		open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to your device")
 	}
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m).SetFunc(fl.DuplicateFiles).SetText("Duplicate").SetIcon(icons.Copy).SetKey(keymap.Duplicate).SetEnabled(fn.HasSelection())
-	core.NewFuncButton(m).SetFunc(fl.DeleteFiles).SetText("Delete").SetIcon(icons.Delete).SetKey(keymap.Delete).SetEnabled(fn.HasSelection())
-	core.NewFuncButton(m).SetFunc(fl.RenameFiles).SetText("Rename").SetIcon(icons.NewLabel).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.DuplicateFiles).SetText("Duplicate").SetIcon(icons.Copy).SetKey(keymap.Duplicate).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.DeleteFiles).SetText("Delete").SetIcon(icons.Delete).SetKey(keymap.Delete).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.This.(Filer).RenameFiles).SetText("Rename").SetIcon(icons.NewLabel).SetEnabled(fn.HasSelection())
 	core.NewSeparator(m)
 
 	core.NewFuncButton(m).SetFunc(fn.OpenAll).SetText("Open all").SetIcon(icons.KeyboardArrowDown).SetEnabled(fn.HasSelection() && fn.IsDir())

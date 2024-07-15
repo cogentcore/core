@@ -7,9 +7,7 @@ package filetree
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"syscall"
 
@@ -24,65 +22,11 @@ import (
 type Filer interface { //types:add
 	core.Treer
 
-	// AsFileNode returns the filetree.Node
+	// AsFileNode returns the [Node]
 	AsFileNode() *Node
 
-	// OpenFilesDefault opens selected files with default app for that file type (os defined).
-	// It runs open on Mac, xdg-open on Linux, and start on Windows.
-	OpenFilesDefault()
-
-	// OpenFileDefault opens file with default app for that file type (os defined)
-	// It runs open on Mac, xdg-open on Linux, and start on Windows.
-	OpenFileDefault() error
-
-	// OpenFilesWith opens selected files with user-specified command.
-	OpenFilesWith()
-
-	// OpenFileWith opens file with given command.
-	// does not wait for command to finish in this routine (separate routine Waits)
-	OpenFileWith(command string) error
-
-	// DuplicateFiles makes a copy of selected files
-	DuplicateFiles()
-
-	// DuplicateFile creates a copy of given file -- only works for regular files, not
-	// directories
-	DuplicateFile() error
-
-	// DeleteFiles deletes any selected files or directories. If any directory is selected,
-	// all files and subdirectories in that directory are also deleted.
-	DeleteFiles()
-
-	// DeleteFilesImpl does the actual deletion, no prompts
-	DeleteFilesImpl()
-
-	// DeleteFile deletes this file
-	DeleteFile() error
-
-	// RenameFiles renames any selected files
+	// RenameFiles renames any selected files.
 	RenameFiles()
-
-	// RenameFile renames file to new name
-	RenameFile(newpath string) error
-
-	// NewFiles makes a new file in selected directory
-	NewFiles(filename string, addToVCS bool)
-
-	// NewFile makes a new file in this directory node
-	NewFile(filename string, addToVCS bool)
-
-	// NewFolders makes a new folder in the given selected directory
-	NewFolders(foldername string)
-
-	// NewFolder makes a new folder (directory) in this directory node
-	NewFolder(foldername string)
-
-	// CopyFileToDir copies given file path into node that is a directory.
-	// This does NOT check for overwriting -- that must be done at higher level!
-	CopyFileToDir(filename string, perm os.FileMode)
-
-	// Shows file information about selected file(s)
-	ShowFileInfo()
 }
 
 // check for interface impl
@@ -92,7 +36,7 @@ var _ Filer = (*Node)(nil)
 // runs open on Mac, xdg-open on Linux, and start on Windows
 func (fn *Node) OpenFilesDefault() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
-		sn.This.(Filer).OpenFileDefault()
+		sn.OpenFileDefault()
 	})
 }
 
@@ -103,32 +47,11 @@ func (fn *Node) OpenFileDefault() error {
 	return nil
 }
 
-// OpenFilesWith opens selected files with user-specified command.
-func (fn *Node) OpenFilesWith() {
-	fn.SelectedFunc(func(sn *Node) {
-		core.CallFunc(sn, sn.OpenFileWith) // todo: not using interface?
-	})
-}
-
-// OpenFileWith opens file with given command.
-// does not wait for command to finish in this routine (separate routine Waits)
-func (fn *Node) OpenFileWith(command string) error {
-	cmd := exec.Command(command, string(fn.Filepath))
-	err := cmd.Start()
-	go func() {
-		err := cmd.Wait()
-		if err != nil {
-			slog.Error(err.Error())
-		}
-	}()
-	return err
-}
-
 // DuplicateFiles makes a copy of selected files
 func (fn *Node) DuplicateFiles() { //types:add
 	fn.FileRoot.NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
-		sn.This.(Filer).DuplicateFile()
+		sn.DuplicateFile()
 	})
 }
 
@@ -151,7 +74,7 @@ func (fn *Node) DeleteFiles() { //types:add
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Delete Files").OnClick(func(e events.Event) {
-			fn.This.(Filer).DeleteFilesImpl()
+			fn.DeleteFilesImpl()
 		})
 	})
 	d.RunDialog(fn)
@@ -177,7 +100,7 @@ func (fn *Node) DeleteFilesImpl() {
 				sn.CloseBuf()
 			}
 		}
-		sn.This.(Filer).DeleteFile()
+		sn.DeleteFile()
 	})
 }
 
@@ -275,7 +198,7 @@ func (fn *Node) NewFiles(filename string, addToVCS bool) { //types:add
 	done := false
 	fn.SelectedFunc(func(sn *Node) {
 		if !done {
-			sn.This.(Filer).NewFile(filename, addToVCS)
+			sn.NewFile(filename, addToVCS)
 			done = true
 		}
 	})
@@ -313,7 +236,7 @@ func (fn *Node) NewFolders(foldername string) { //types:add
 	done := false
 	fn.SelectedFunc(func(sn *Node) {
 		if !done {
-			sn.This.(Filer).NewFolder(foldername)
+			sn.NewFolder(foldername)
 			done = true
 		}
 	})
