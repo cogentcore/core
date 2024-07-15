@@ -6,22 +6,22 @@ package filetree
 
 import "sync"
 
-// DirFlags are flags on directories: Open, SortBy, etc.
+// dirFlags are flags on directories: Open, SortBy, etc.
 // These flags are stored in the DirFlagMap for persistence.
 // This map is saved to a file, so these flags must be stored
 // as bit flags instead of a struct to ensure efficient serialization.
-type DirFlags int64 //enums:bitflag -trim-prefix Dir
+type dirFlags int64 //enums:bitflag -trim-prefix dir
 
 const (
-	// DirIsOpen means directory is open -- else closed
-	DirIsOpen DirFlags = iota
+	// dirIsOpen means directory is open -- else closed
+	dirIsOpen dirFlags = iota
 
-	// DirSortByName means sort the directory entries by name.
+	// dirSortByName means sort the directory entries by name.
 	// this is mutex with other sorts -- keeping option open for non-binary sort choices.
-	DirSortByName
+	dirSortByName
 
-	// DirSortByModTime means sort the directory entries by modification time
-	DirSortByModTime
+	// dirSortByModTime means sort the directory entries by modification time
+	dirSortByModTime
 )
 
 // DirFlagMap is a map for encoding directories that are open in the file
@@ -31,70 +31,70 @@ const (
 type DirFlagMap struct {
 
 	// map of paths and associated flags
-	Map map[string]DirFlags
+	Map map[string]dirFlags
 
 	// mutex for accessing map
-	Mu sync.Mutex `display:"-" json:"-" xml:"-" toml:"-"`
+	mu sync.Mutex
 }
 
-// Init initializes the map, and sets the Mutex lock -- must unlock manually
-func (dm *DirFlagMap) Init() {
-	dm.Mu.Lock()
+// init initializes the map, and sets the Mutex lock -- must unlock manually
+func (dm *DirFlagMap) init() {
+	dm.mu.Lock()
 	if dm.Map == nil {
-		dm.Map = make(map[string]DirFlags)
+		dm.Map = make(map[string]dirFlags)
 	}
 }
 
-// IsOpen returns true if path has IsOpen bit flag set
-func (dm *DirFlagMap) IsOpen(path string) bool {
-	dm.Init()
-	defer dm.Mu.Unlock()
+// isOpen returns true if path has isOpen bit flag set
+func (dm *DirFlagMap) isOpen(path string) bool {
+	dm.init()
+	defer dm.mu.Unlock()
 	if df, ok := dm.Map[path]; ok {
-		return df.HasFlag(DirIsOpen)
+		return df.HasFlag(dirIsOpen)
 	}
 	return false
 }
 
 // SetOpenState sets the given directory's open flag
-func (dm *DirFlagMap) SetOpen(path string, open bool) {
-	dm.Init()
-	defer dm.Mu.Unlock()
+func (dm *DirFlagMap) setOpen(path string, open bool) {
+	dm.init()
+	defer dm.mu.Unlock()
 	df := dm.Map[path]
-	df.SetFlag(open, DirIsOpen)
+	df.SetFlag(open, dirIsOpen)
 	dm.Map[path] = df
 }
 
-// SortByName returns true if path is sorted by name (default if not in map)
-func (dm *DirFlagMap) SortByName(path string) bool {
-	dm.Init()
-	defer dm.Mu.Unlock()
+// sortByName returns true if path is sorted by name (default if not in map)
+func (dm *DirFlagMap) sortByName(path string) bool {
+	dm.init()
+	defer dm.mu.Unlock()
 	if df, ok := dm.Map[path]; ok {
-		return df.HasFlag(DirSortByName)
+		return df.HasFlag(dirSortByName)
 	}
 	return true
 }
 
-// SortByModTime returns true if path is sorted by mod time
-func (dm *DirFlagMap) SortByModTime(path string) bool {
-	dm.Init()
-	defer dm.Mu.Unlock()
+// sortByModTime returns true if path is sorted by mod time
+func (dm *DirFlagMap) sortByModTime(path string) bool {
+	dm.init()
+	defer dm.mu.Unlock()
 	if df, ok := dm.Map[path]; ok {
-		return df.HasFlag(DirSortByModTime)
+		return df.HasFlag(dirSortByModTime)
 	}
 	return false
 }
 
-// SetSortBy sets the given directory's sort by option
-func (dm *DirFlagMap) SetSortBy(path string, modTime bool) {
-	dm.Init()
-	defer dm.Mu.Unlock()
+// setSortBy sets the given directory's sort by option
+func (dm *DirFlagMap) setSortBy(path string, modTime bool) {
+	dm.init()
+	defer dm.mu.Unlock()
 	df := dm.Map[path]
 	if modTime {
-		df.SetFlag(true, DirSortByModTime)
-		df.SetFlag(false, DirSortByName)
+		df.SetFlag(true, dirSortByModTime)
+		df.SetFlag(false, dirSortByName)
 	} else {
-		df.SetFlag(false, DirSortByModTime)
-		df.SetFlag(true, DirSortByName)
+		df.SetFlag(false, dirSortByModTime)
+		df.SetFlag(true, dirSortByName)
 	}
 	dm.Map[path] = df
 }

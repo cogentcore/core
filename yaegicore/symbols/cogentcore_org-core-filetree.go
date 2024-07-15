@@ -23,9 +23,6 @@ func init() {
 		"BlameDialog":              reflect.ValueOf(filetree.BlameDialog),
 		"DirFlagsN":                reflect.ValueOf(filetree.DirFlagsN),
 		"DirFlagsValues":           reflect.ValueOf(filetree.DirFlagsValues),
-		"DirIsOpen":                reflect.ValueOf(filetree.DirIsOpen),
-		"DirSortByModTime":         reflect.ValueOf(filetree.DirSortByModTime),
-		"DirSortByName":            reflect.ValueOf(filetree.DirSortByName),
 		"ExternalFilesName":        reflect.ValueOf(constant.MakeFromLiteral("\"[external files]\"", token.STRING, 0)),
 		"FileAtRevDialog":          reflect.ValueOf(filetree.FileAtRevDialog),
 		"FindAll":                  reflect.ValueOf(filetree.FindAll),
@@ -50,7 +47,6 @@ func init() {
 
 		// type definitions
 		"DirFlagMap":         reflect.ValueOf((*filetree.DirFlagMap)(nil)),
-		"DirFlags":           reflect.ValueOf((*filetree.DirFlags)(nil)),
 		"Filer":              reflect.ValueOf((*filetree.Filer)(nil)),
 		"FindLoc":            reflect.ValueOf((*filetree.FindLoc)(nil)),
 		"Node":               reflect.ValueOf((*filetree.Node)(nil)),

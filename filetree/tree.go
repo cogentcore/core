@@ -255,37 +255,37 @@ func (ft *Tree) IsDirOpen(fpath core.Filename) bool {
 	if fpath == ft.Filepath { // we are always open
 		return true
 	}
-	return ft.Dirs.IsOpen(ft.RelPath(fpath))
+	return ft.Dirs.isOpen(ft.RelPath(fpath))
 }
 
 // SetDirOpen sets the given directory path to be open
 func (ft *Tree) SetDirOpen(fpath core.Filename) {
 	rp := ft.RelPath(fpath)
 	// fmt.Printf("setdiropen: %s\n", rp)
-	ft.Dirs.SetOpen(rp, true)
+	ft.Dirs.setOpen(rp, true)
 	ft.WatchPath(fpath)
 }
 
 // SetDirClosed sets the given directory path to be closed
 func (ft *Tree) SetDirClosed(fpath core.Filename) {
 	rp := ft.RelPath(fpath)
-	ft.Dirs.SetOpen(rp, false)
+	ft.Dirs.setOpen(rp, false)
 	ft.UnWatchPath(fpath)
 }
 
 // SetDirSortBy sets the given directory path sort by option
 func (ft *Tree) SetDirSortBy(fpath core.Filename, modTime bool) {
-	ft.Dirs.SetSortBy(ft.RelPath(fpath), modTime)
+	ft.Dirs.setSortBy(ft.RelPath(fpath), modTime)
 }
 
 // DirSortByName returns true if dir is sorted by name
 func (ft *Tree) DirSortByName(fpath core.Filename) bool {
-	return ft.Dirs.SortByName(ft.RelPath(fpath))
+	return ft.Dirs.sortByName(ft.RelPath(fpath))
 }
 
 // DirSortByModTime returns true if dir is sorted by mod time
 func (ft *Tree) DirSortByModTime(fpath core.Filename) bool {
-	return ft.Dirs.SortByModTime(ft.RelPath(fpath))
+	return ft.Dirs.sortByModTime(ft.RelPath(fpath))
 }
 
 // AddExternalFile adds an external file outside of root of file tree
