@@ -479,9 +479,7 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 					d := core.NewBody().AddTitle("Column options")
 					core.NewForm(d).SetStruct(cp).
 						OnChange(func(e events.Event) {
-							pl.AsyncLock()
-							pl.UpdatePlot()
-							pl.AsyncUnlock()
+							pl.Async(pl.UpdatePlot)
 						})
 					d.AddAppBar(func(p *tree.Plan) {
 						tree.Add(p, func(w *core.Button) {
@@ -540,9 +538,7 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 				d := core.NewBody().AddTitle("Plot options")
 				core.NewForm(d).SetStruct(&pl.Options).
 					OnChange(func(e events.Event) {
-						pl.AsyncLock()
-						pl.UpdatePlot()
-						pl.AsyncUnlock()
+						pl.Async(pl.UpdatePlot)
 					})
 				d.RunWindowDialog(pl)
 			})

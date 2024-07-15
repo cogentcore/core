@@ -144,9 +144,9 @@ func (tb *Table) SetTable(et *table.Table) *Table {
 	return tb
 }
 
-// GoUpdateView updates the display for asynchronous updating from
-// other goroutines.  Also updates indexview (calling Sequential).
-func (tb *Table) GoUpdateView() {
+// AsyncUpdateTable updates the display for asynchronous updating from
+// other goroutines. Also updates indexview (calling Sequential).
+func (tb *Table) AsyncUpdateTable() {
 	tb.AsyncLock()
 	tb.Table.Sequential()
 	tb.ScrollToIndexNoUpdate(tb.SliceSize - 1)
