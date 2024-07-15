@@ -40,7 +40,6 @@ func init() {
 		"NodeHiStyle":              reflect.ValueOf(&filetree.NodeHiStyle).Elem(),
 		"NodeNameCountSort":        reflect.ValueOf(filetree.NodeNameCountSort),
 		"Search":                   reflect.ValueOf(filetree.Search),
-		"VCSLabelFunc":             reflect.ValueOf(filetree.VCSLabelFunc),
 		"VCSLogDialog":             reflect.ValueOf(filetree.VCSLogDialog),
 		"VersionControlNameProper": reflect.ValueOf(filetree.VersionControlNameProper),
 		"VersionControlSystems":    reflect.ValueOf(&filetree.VersionControlSystems).Elem(),

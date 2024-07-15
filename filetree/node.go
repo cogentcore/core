@@ -74,7 +74,7 @@ func (fn *Node) Init() {
 	fn.IconOpen = icons.FolderOpen
 	fn.IconClosed = icons.Folder
 	fn.ContextMenus = nil // do not include tree
-	fn.AddContextMenu(fn.ContextMenu)
+	fn.AddContextMenu(fn.contextMenu)
 	fn.Styler(func(s *styles.Style) {
 		status := fn.Info.VCS
 		switch {
