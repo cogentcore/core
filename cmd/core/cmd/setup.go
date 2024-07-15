@@ -71,6 +71,10 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
+			err = exec.Run("start", "cmd.exe", "/c", `cd C:\TDM-GCC-64 && mingwvars.bat`)
+			if err != nil {
+				return err
+			}
 		}
 		if _, err := exec.LookPath("git"); err != nil {
 			err := vc.Run("curl", "-O", "https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe")
