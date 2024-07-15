@@ -156,8 +156,8 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 		return err
 	}
 	if fn.IsDir() {
-		if fn.FileRoot.IsDirOpen(orgpath) {
-			fn.FileRoot.SetDirOpen(core.Filename(newpath))
+		if fn.FileRoot.isDirOpen(orgpath) {
+			fn.FileRoot.setDirOpen(core.Filename(newpath))
 		}
 	}
 	repo, _ := fn.Repo()

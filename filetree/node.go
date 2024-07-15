@@ -185,8 +185,8 @@ func (fn *Node) Init() {
 		if fn.Filepath == "" {
 			return
 		}
-		if fn.Name == ExternalFilesName {
-			files := fn.FileRoot.ExternalFiles
+		if fn.Name == externalFilesName {
+			files := fn.FileRoot.externalFiles
 			for _, fi := range files {
 				tree.AddNew(p, fi, func() Filer {
 					return tree.NewOfType(fn.FileRoot.FileNodeType).(Filer)
@@ -204,7 +204,7 @@ func (fn *Node) Init() {
 		if !fn.IsDir() || fn.IsIrregular() {
 			return
 		}
-		if !((fn.FileRoot.inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot.IsDirOpen(fn.Filepath)) {
+		if !((fn.FileRoot.inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot.isDirOpen(fn.Filepath)) {
 			return
 		}
 		repo, _ := fn.Repo()
@@ -310,7 +310,7 @@ func (fn *Node) dirFileList() []os.FileInfo {
 		}
 		return nil
 	})
-	doModSort := fn.FileRoot.DirSortByModTime(core.Filename(path))
+	doModSort := fn.FileRoot.dirSortByModTime(core.Filename(path))
 	if fn.FileRoot.DirsOnTop {
 		if doModSort {
 			sortByModTime(files) // just sort files, not dirs
@@ -409,7 +409,7 @@ func (fn *Node) OnClose() {
 	if !fn.IsDir() {
 		return
 	}
-	fn.FileRoot.SetDirClosed(fn.Filepath)
+	fn.FileRoot.setDirClosed(fn.Filepath)
 }
 
 func (fn *Node) CanOpen() bool {
@@ -421,7 +421,7 @@ func (fn *Node) openDir() {
 	if !fn.IsDir() {
 		return
 	}
-	fn.FileRoot.SetDirOpen(fn.Filepath)
+	fn.FileRoot.setDirOpen(fn.Filepath)
 	fn.Update()
 }
 
@@ -436,7 +436,7 @@ func (fn *Node) sortBys(modTime bool) { //types:add
 // sortBy determines how to sort the files in the directory -- default is alpha by name,
 // optionally can be sorted by modification time.
 func (fn *Node) sortBy(modTime bool) {
-	fn.FileRoot.SetDirSortBy(fn.Filepath, modTime)
+	fn.FileRoot.setDirSortBy(fn.Filepath, modTime)
 	fn.NeedsLayout()
 }
 
@@ -477,7 +477,7 @@ func (fn *Node) removeFromExterns() { //types:add
 		if !sn.isExternal() {
 			return
 		}
-		sn.FileRoot.RemoveExternalFile(string(sn.Filepath))
+		sn.FileRoot.removeExternalFile(string(sn.Filepath))
 		sn.closeBuf()
 		sn.Delete()
 	})
