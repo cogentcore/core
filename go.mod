@@ -11,7 +11,6 @@ require (
 	github.com/aymerick/douceur v0.2.0
 	github.com/bramvdbogaerde/go-scp v1.4.0
 	github.com/chewxy/math32 v1.10.1
-	github.com/cogentcore/copier v0.0.0-20240715081229-0497a923f46b
 	github.com/cogentcore/yaegi v0.0.0-20240714043945-dadb98936955
 	github.com/coreos/go-oidc/v3 v3.10.0
 	github.com/ergochat/readline v0.1.0
@@ -25,6 +24,7 @@ require (
 	github.com/h2non/filetype v1.1.3
 	github.com/hack-pad/hackpadfs v0.2.1
 	github.com/jackmordaunt/icns/v2 v2.2.7
+	github.com/jinzhu/copier v0.4.0
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.15.2

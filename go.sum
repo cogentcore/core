@@ -23,8 +23,6 @@ github.com/bramvdbogaerde/go-scp v1.4.0 h1:jKMwpwCbcX1KyvDbm/PDJuXcMuNVlLGi0Q0re
 github.com/bramvdbogaerde/go-scp v1.4.0/go.mod h1:on2aH5AxaFb2G0N5Vsdy6B0Ml7k9HuHSwfo1y0QzAbQ=
 github.com/chewxy/math32 v1.10.1 h1:LFpeY0SLJXeaiej/eIp2L40VYfscTvKh/FSEZ68uMkU=
 github.com/chewxy/math32 v1.10.1/go.mod h1:dOB2rcuFrCn6UHrze36WSLVPKtzPMRAQvBvUwkSsLqs=
-github.com/cogentcore/copier v0.0.0-20240715081229-0497a923f46b h1:iFU2cJ0iqs4zx3JFSh2qv8SxusQfwfj/mPVbMC2a874=
-github.com/cogentcore/copier v0.0.0-20240715081229-0497a923f46b/go.mod h1:YPptMErSkCqpyoWhjsF04dIEGZYZTB7GZVE3XE1cYRQ=
 github.com/cogentcore/yaegi v0.0.0-20240714043945-dadb98936955 h1:KYLrEXVCaBsw3msuox5E6r7QrYMyafu5zX3omRTSdBU=
 github.com/cogentcore/yaegi v0.0.0-20240714043945-dadb98936955/go.mod h1:+MGpZ0srBmeJ7aaOLTdVss8WLolt0/y/plVHLpxgd3A=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
@@ -92,6 +90,8 @@ github.com/jackmordaunt/icns/v2 v2.2.7 h1:K/RbfvuzjmjVY5y4g+XENRs8ZZatwz4YnLHypa
 github.com/jackmordaunt/icns/v2 v2.2.7/go.mod h1:ovoTxGguSuoUGKMk5Nn3R7L7BgMQkylsO+bblBuI22A=
 github.com/jfreymuth/oggvorbis v1.0.1/go.mod h1:NqS+K+UXKje0FUYUPosyQ+XTVvjmVjps1aEZH1sumIk=
 github.com/jfreymuth/vorbis v1.0.0/go.mod h1:8zy3lUAm9K/rJJk223RKy6vjCZTWC61NA2QD06bfOE0=
+github.com/jinzhu/copier v0.4.0 h1:w3ciUoD19shMCRargcpm0cm91ytaBhDvuRpz1ODO/U8=
+github.com/jinzhu/copier v0.4.0/go.mod h1:DfbEm0FYsaqBcKcFuvmOZb218JkPGtvSHsKg8S8hyyg=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
