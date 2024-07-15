@@ -59,7 +59,7 @@ func (fn *Node) VCSContextMenu(m *core.Scene) {
 }
 
 func (fn *Node) ContextMenu(m *core.Scene) {
-	core.NewFuncButton(m).SetFunc(fn.ShowFileInfo).SetText("Info").SetIcon(icons.Info).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.showFileInfo).SetText("Info").SetIcon(icons.Info).SetEnabled(fn.HasSelection())
 	open := core.NewFuncButton(m).SetFunc(fn.OpenFilesDefault).SetText("Open").SetIcon(icons.Open)
 	open.SetEnabled(fn.HasSelection())
 	if core.TheApp.Platform() == system.Web {
@@ -67,8 +67,8 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 	}
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m).SetFunc(fn.DuplicateFiles).SetText("Duplicate").SetIcon(icons.Copy).SetKey(keymap.Duplicate).SetEnabled(fn.HasSelection())
-	core.NewFuncButton(m).SetFunc(fn.DeleteFiles).SetText("Delete").SetIcon(icons.Delete).SetKey(keymap.Delete).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.duplicateFiles).SetText("Duplicate").SetIcon(icons.Copy).SetKey(keymap.Duplicate).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.deleteFiles).SetText("Delete").SetIcon(icons.Delete).SetKey(keymap.Delete).SetEnabled(fn.HasSelection())
 	core.NewFuncButton(m).SetFunc(fn.This.(Filer).RenameFiles).SetText("Rename").SetIcon(icons.NewLabel).SetEnabled(fn.HasSelection())
 	core.NewSeparator(m)
 
@@ -77,8 +77,8 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 	core.NewFuncButton(m).SetFunc(fn.SortBys).SetText("Sort by").SetIcon(icons.Sort).SetEnabled(fn.HasSelection() && fn.IsDir())
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m).SetFunc(fn.NewFiles).SetText("New file").SetIcon(icons.OpenInNew).SetEnabled(fn.HasSelection())
-	core.NewFuncButton(m).SetFunc(fn.NewFolders).SetText("New folder").SetIcon(icons.CreateNewFolder).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.newFiles).SetText("New file").SetIcon(icons.OpenInNew).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.newFolders).SetText("New folder").SetIcon(icons.CreateNewFolder).SetEnabled(fn.HasSelection())
 	core.NewSeparator(m)
 
 	fn.VCSContextMenu(m)

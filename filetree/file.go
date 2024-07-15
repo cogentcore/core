@@ -29,35 +29,34 @@ type Filer interface { //types:add
 	RenameFiles()
 }
 
-// check for interface impl
 var _ Filer = (*Node)(nil)
 
 // OpenFilesDefault opens selected files with default app for that file type (os defined).
 // runs open on Mac, xdg-open on Linux, and start on Windows
 func (fn *Node) OpenFilesDefault() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
-		sn.OpenFileDefault()
+		sn.openFileDefault()
 	})
 }
 
-// OpenFileDefault opens file with default app for that file type (os defined)
+// openFileDefault opens file with default app for that file type (os defined)
 // runs open on Mac, xdg-open on Linux, and start on Windows
-func (fn *Node) OpenFileDefault() error {
+func (fn *Node) openFileDefault() error {
 	core.TheApp.OpenURL("file://" + string(fn.Filepath))
 	return nil
 }
 
-// DuplicateFiles makes a copy of selected files
-func (fn *Node) DuplicateFiles() { //types:add
+// duplicateFiles makes a copy of selected files
+func (fn *Node) duplicateFiles() { //types:add
 	fn.FileRoot.NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
-		sn.DuplicateFile()
+		sn.duplicateFile()
 	})
 }
 
-// DuplicateFile creates a copy of given file -- only works for regular files, not
+// duplicateFile creates a copy of given file -- only works for regular files, not
 // directories
-func (fn *Node) DuplicateFile() error {
+func (fn *Node) duplicateFile() error {
 	_, err := fn.Info.Duplicate()
 	if err == nil && fn.Parent != nil {
 		fnp := AsNode(fn.Parent)
@@ -68,24 +67,24 @@ func (fn *Node) DuplicateFile() error {
 
 // deletes any selected files or directories. If any directory is selected,
 // all files and subdirectories in that directory are also deleted.
-func (fn *Node) DeleteFiles() { //types:add
+func (fn *Node) deleteFiles() { //types:add
 	d := core.NewBody().AddTitle("Delete Files?").
 		AddText("Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.")
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Delete Files").OnClick(func(e events.Event) {
-			fn.DeleteFilesImpl()
+			fn.deleteFilesImpl()
 		})
 	})
 	d.RunDialog(fn)
 }
 
-// DeleteFilesImpl does the actual deletion, no prompts
-func (fn *Node) DeleteFilesImpl() {
+// deleteFilesImpl does the actual deletion, no prompts
+func (fn *Node) deleteFilesImpl() {
 	fn.FileRoot.NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
 		if !sn.Info.IsDir() {
-			sn.DeleteFile()
+			sn.deleteFile()
 			return
 		}
 		var fns []string
@@ -100,12 +99,12 @@ func (fn *Node) DeleteFilesImpl() {
 				sn.CloseBuf()
 			}
 		}
-		sn.DeleteFile()
+		sn.deleteFile()
 	})
 }
 
-// DeleteFile deletes this file
-func (fn *Node) DeleteFile() error {
+// deleteFile deletes this file
+func (fn *Node) deleteFile() error {
 	if fn.IsExternal() {
 		return nil
 	}
@@ -193,19 +192,19 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 	return err
 }
 
-// NewFiles makes a new file in selected directory
-func (fn *Node) NewFiles(filename string, addToVCS bool) { //types:add
+// newFiles makes a new file in selected directory
+func (fn *Node) newFiles(filename string, addToVCS bool) { //types:add
 	done := false
 	fn.SelectedFunc(func(sn *Node) {
 		if !done {
-			sn.NewFile(filename, addToVCS)
+			sn.newFile(filename, addToVCS)
 			done = true
 		}
 	})
 }
 
-// NewFile makes a new file in this directory node
-func (fn *Node) NewFile(filename string, addToVCS bool) { //types:add
+// newFile makes a new file in this directory node
+func (fn *Node) newFile(filename string, addToVCS bool) { //types:add
 	if fn.IsExternal() {
 		return
 	}
@@ -232,18 +231,18 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //types:add
 }
 
 // makes a new folder in the given selected directory
-func (fn *Node) NewFolders(foldername string) { //types:add
+func (fn *Node) newFolders(foldername string) { //types:add
 	done := false
 	fn.SelectedFunc(func(sn *Node) {
 		if !done {
-			sn.NewFolder(foldername)
+			sn.newFolder(foldername)
 			done = true
 		}
 	})
 }
 
-// NewFolder makes a new folder (directory) in this directory node
-func (fn *Node) NewFolder(foldername string) { //types:add
+// newFolder makes a new folder (directory) in this directory node
+func (fn *Node) newFolder(foldername string) { //types:add
 	if fn.IsExternal() {
 		return
 	}
@@ -260,9 +259,9 @@ func (fn *Node) NewFolder(foldername string) { //types:add
 	fn.FileRoot.UpdatePath(ppath)
 }
 
-// CopyFileToDir copies given file path into node that is a directory.
+// copyFileToDir copies given file path into node that is a directory.
 // This does NOT check for overwriting -- that must be done at higher level!
-func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
+func (fn *Node) copyFileToDir(filename string, perm os.FileMode) {
 	if fn.IsExternal() {
 		return
 	}
@@ -286,7 +285,7 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 }
 
 // Shows file information about selected file(s)
-func (fn *Node) ShowFileInfo() { //types:add
+func (fn *Node) showFileInfo() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
 		d := core.NewBody().AddTitle("File info")
 		core.NewForm(d).SetStruct(&sn.Info).SetReadOnly(true)

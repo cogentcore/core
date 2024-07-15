@@ -111,19 +111,19 @@ func (fn *Node) Init() {
 		if !fn.IsReadOnly() && !e.IsHandled() {
 			switch kf {
 			case keymap.Delete:
-				fn.DeleteFiles()
+				fn.deleteFiles()
 				e.SetHandled()
 			case keymap.Backspace:
-				fn.DeleteFiles()
+				fn.deleteFiles()
 				e.SetHandled()
 			case keymap.Duplicate:
-				fn.DuplicateFiles()
+				fn.duplicateFiles()
 				e.SetHandled()
 			case keymap.Insert: // New File
-				core.CallFunc(fn, fn.NewFile)
+				core.CallFunc(fn, fn.newFile)
 				e.SetHandled()
 			case keymap.InsertAfter: // New Folder
-				core.CallFunc(fn, fn.NewFolder)
+				core.CallFunc(fn, fn.newFolder)
 				e.SetHandled()
 			}
 		}

@@ -144,7 +144,7 @@ func (fn *Node) pasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool)
 		}
 		path := string(d.Data)
 		path = strings.TrimPrefix(path, "file://")
-		tdir.CopyFileToDir(path, mode)
+		tdir.copyFileToDir(path, mode)
 	}
 }
 
@@ -268,7 +268,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				}
 			})
 			d.AddOK(parent).SetText("Copy new file").OnClick(func(e events.Event) {
-				tdir.CopyFileToDir(srcpath, mode)
+				tdir.copyFileToDir(srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
@@ -301,6 +301,6 @@ func (fn *Node) DropDeleteSource(e events.Event) {
 			continue
 		}
 		// fmt.Printf("dnd deleting: %v  path: %v\n", sfn.Path(), sfn.FPath)
-		sfn.DeleteFile()
+		sfn.deleteFile()
 	}
 }
