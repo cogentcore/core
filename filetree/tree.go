@@ -200,7 +200,7 @@ func (ft *Tree) WatchUpdate(path string) {
 			return // no update
 		}
 	}
-	fn, err := ft.FindDirNode(rp)
+	fn, err := ft.findDirNode(rp)
 	if err != nil {
 		// slog.Error(err.Error())
 		return

@@ -16,9 +16,9 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// FindDirNode finds directory node by given path.
+// findDirNode finds directory node by given path.
 // Must be a relative path already rooted at tree, or absolute path within tree.
-func (fn *Node) FindDirNode(path string) (*Node, error) {
+func (fn *Node) findDirNode(path string) (*Node, error) {
 	rp := fn.RelPath(core.Filename(path))
 	if rp == "" {
 		return nil, fmt.Errorf("FindDirNode: path: %s is not relative to this node's path: %s", path, fn.Filepath)
@@ -39,7 +39,7 @@ func (fn *Node) FindDirNode(path string) (*Node, error) {
 		}
 		return nil, fmt.Errorf("FindDirNode: item at path: %s is not a Directory", path)
 	}
-	return dn.FindDirNode(filepath.Join(dirs[1:]...))
+	return dn.findDirNode(filepath.Join(dirs[1:]...))
 }
 
 // FindFile finds first node representing given file (false if not found) --
@@ -91,51 +91,24 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 	return ffn, found
 }
 
-// FilesMatching returns list of all nodes whose file name contains given
-// string (no regexp). ignoreCase transforms everything into lowercase
-func (fn *Node) FilesMatching(match string, ignoreCase bool) []*Node {
-	mls := make([]*Node, 0)
-	if ignoreCase {
-		match = strings.ToLower(match)
-	}
-	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
-		sfn := AsNode(wi)
-		if sfn == nil {
-			return tree.Continue
-		}
-		if ignoreCase {
-			nm := strings.ToLower(sfn.Name)
-			if strings.Contains(nm, match) {
-				mls = append(mls, sfn)
-			}
-		} else {
-			if strings.Contains(sfn.Name, match) {
-				mls = append(mls, sfn)
-			}
-		}
-		return tree.Continue
-	})
-	return mls
-}
-
-// NodeNameCount is used to report counts of different string-based things
+// nodeNameCount is used to report counts of different string-based things
 // in the file tree
-type NodeNameCount struct {
+type nodeNameCount struct {
 	Name  string
 	Count int
 }
 
-func NodeNameCountSort(ecs []NodeNameCount) {
+func NodeNameCountSort(ecs []nodeNameCount) {
 	sort.Slice(ecs, func(i, j int) bool {
 		return ecs[i].Count > ecs[j].Count
 	})
 }
 
-// FileExtCounts returns a count of all the different file extensions, sorted
+// FileExtensionCounts returns a count of all the different file extensions, sorted
 // from highest to lowest.
 // If cat is != fileinfo.Unknown then it only uses files of that type
 // (e.g., fileinfo.Code to find any code files)
-func (fn *Node) FileExtCounts(cat fileinfo.Categories) []NodeNameCount {
+func (fn *Node) FileExtensionCounts(cat fileinfo.Categories) []nodeNameCount {
 	cmap := make(map[string]int, 20)
 	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
@@ -155,10 +128,10 @@ func (fn *Node) FileExtCounts(cat fileinfo.Categories) []NodeNameCount {
 		}
 		return tree.Continue
 	})
-	ecs := make([]NodeNameCount, len(cmap))
+	ecs := make([]nodeNameCount, len(cmap))
 	idx := 0
 	for key, val := range cmap {
-		ecs[idx] = NodeNameCount{Name: key, Count: val}
+		ecs[idx] = nodeNameCount{Name: key, Count: val}
 		idx++
 	}
 	NodeNameCountSort(ecs)

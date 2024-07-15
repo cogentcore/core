@@ -51,7 +51,6 @@ func init() {
 		"FindLoc":            reflect.ValueOf((*filetree.FindLoc)(nil)),
 		"Node":               reflect.ValueOf((*filetree.Node)(nil)),
 		"NodeEmbedder":       reflect.ValueOf((*filetree.NodeEmbedder)(nil)),
-		"NodeNameCount":      reflect.ValueOf((*filetree.NodeNameCount)(nil)),
 		"SearchResults":      reflect.ValueOf((*filetree.SearchResults)(nil)),
 		"Tree":               reflect.ValueOf((*filetree.Tree)(nil)),
 		"VCSLog":             reflect.ValueOf((*filetree.VCSLog)(nil)),
