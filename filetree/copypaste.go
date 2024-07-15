@@ -180,7 +180,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	if len(md) == 0 {
 		return
 	}
-	if fn == nil || fn.IsExternal() {
+	if fn == nil || fn.isExternal() {
 		return
 	}
 
@@ -284,7 +284,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 func (fn *Node) DropDeleteSource(e events.Event) {
 	de := e.(*events.DragDrop)
 	froot := fn.FileRoot
-	if froot == nil || fn.IsExternal() {
+	if froot == nil || fn.isExternal() {
 		return
 	}
 	md := de.Data.(mimedata.Mimes)

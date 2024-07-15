@@ -70,7 +70,7 @@ func (fn *Node) DetectVCSRepo(updateFiles bool) bool {
 // and the node for the directory where the repo is based.
 // Goes up the tree until a repository is found.
 func (fn *Node) Repo() (vcs.Repo, *Node) {
-	if fn.IsExternal() {
+	if fn.isExternal() {
 		return nil, nil
 	}
 	if fn.DirRepo != nil {
@@ -100,7 +100,7 @@ func (fn *Node) UpdateRepoFiles() {
 	if fn.DirRepo == nil {
 		return
 	}
-	fn.RepoFiles, _ = fn.DirRepo.Files()
+	fn.repoFiles, _ = fn.DirRepo.Files()
 }
 
 // AddToVCSSel adds selected files to version control system
@@ -360,7 +360,7 @@ func (fn *Node) UpdateAllVCS() {
 			}
 		}
 		repo := sfn.DirRepo
-		fmt.Printf("Updating %v repository: %s from: %s\n", repo.Vcs(), sfn.MyRelPath(), repo.Remote())
+		fmt.Printf("Updating %v repository: %s from: %s\n", repo.Vcs(), sfn.RelativePath(), repo.Remote())
 		err := repo.Update()
 		if err != nil {
 			fmt.Printf("error: %v\n", err)

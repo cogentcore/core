@@ -19,7 +19,7 @@ import (
 // findDirNode finds directory node by given path.
 // Must be a relative path already rooted at tree, or absolute path within tree.
 func (fn *Node) findDirNode(path string) (*Node, error) {
-	rp := fn.RelPath(core.Filename(path))
+	rp := fn.RelativePathFrom(core.Filename(path))
 	if rp == "" {
 		return nil, fmt.Errorf("FindDirNode: path: %s is not relative to this node's path: %s", path, fn.Filepath)
 	}
@@ -67,7 +67,7 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 	}
 
 	if strings.HasPrefix(fneff, string(fn.Filepath)) { // full path
-		ffn, err := fn.DirsTo(fneff)
+		ffn, err := fn.dirsTo(fneff)
 		if err == nil {
 			return ffn, true
 		}

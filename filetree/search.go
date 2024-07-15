@@ -73,11 +73,11 @@ func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLoc, acti
 		if sfn == nil {
 			return tree.Continue
 		}
-		if sfn.IsDir() && !sfn.IsOpen() {
+		if sfn.IsDir() && !sfn.isOpen() {
 			// fmt.Printf("dir: %v closed\n", sfn.FPath)
 			return tree.Break // don't go down into closed directories!
 		}
-		if sfn.IsDir() || sfn.IsExec() || sfn.Info.Kind == "octet-stream" || sfn.IsAutoSave() {
+		if sfn.IsDir() || sfn.IsExec() || sfn.Info.Kind == "octet-stream" || sfn.isAutoSave() {
 			// fmt.Printf("dir: %v opened\n", sfn.Nm)
 			return tree.Continue
 		}
@@ -102,7 +102,7 @@ func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLoc, acti
 		}
 		var cnt int
 		var matches []textbuf.Match
-		if sfn.IsOpen() && sfn.Buffer != nil {
+		if sfn.isOpen() && sfn.Buffer != nil {
 			if regExp {
 				cnt, matches = sfn.Buffer.SearchRegexp(re)
 			} else {

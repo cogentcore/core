@@ -37,7 +37,7 @@ func init() {
 		"NewNode":                  reflect.ValueOf(filetree.NewNode),
 		"NewTree":                  reflect.ValueOf(filetree.NewTree),
 		"NewVCSLog":                reflect.ValueOf(filetree.NewVCSLog),
-		"NodeHiStyle":              reflect.ValueOf(&filetree.NodeHiStyle).Elem(),
+		"NodeHiStyle":              reflect.ValueOf(&filetree.NodeHighlighting).Elem(),
 		"NodeNameCountSort":        reflect.ValueOf(filetree.NodeNameCountSort),
 		"Search":                   reflect.ValueOf(filetree.Search),
 		"VCSLogDialog":             reflect.ValueOf(filetree.VCSLogDialog),

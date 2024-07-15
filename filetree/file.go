@@ -96,7 +96,7 @@ func (fn *Node) deleteFilesImpl() {
 				continue
 			}
 			if sn.Buffer != nil {
-				sn.CloseBuf()
+				sn.closeBuf()
 			}
 		}
 		sn.deleteFile()
@@ -105,7 +105,7 @@ func (fn *Node) deleteFilesImpl() {
 
 // deleteFile deletes this file
 func (fn *Node) deleteFile() error {
-	if fn.IsExternal() {
+	if fn.isExternal() {
 		return nil
 	}
 	pari := fn.Parent
@@ -113,7 +113,7 @@ func (fn *Node) deleteFile() error {
 	if pari != nil {
 		parent = AsNode(pari)
 	}
-	fn.CloseBuf()
+	fn.closeBuf()
 	repo, _ := fn.Repo()
 	var err error
 	if !fn.Info.IsDir() && repo != nil && fn.Info.VCS >= vcs.Stored {
@@ -144,12 +144,12 @@ func (fn *Node) RenameFiles() { //types:add
 
 // RenameFile renames file to new name
 func (fn *Node) RenameFile(newpath string) error { //types:add
-	if fn.IsExternal() {
+	if fn.isExternal() {
 		return nil
 	}
 	root := fn.FileRoot
 	var err error
-	fn.CloseBuf() // invalid after this point
+	fn.closeBuf() // invalid after this point
 	orgpath := fn.Filepath
 	newpath, err = fn.Info.Rename(newpath)
 	if len(newpath) == 0 || err != nil {
@@ -205,7 +205,7 @@ func (fn *Node) newFiles(filename string, addToVCS bool) { //types:add
 
 // newFile makes a new file in this directory node
 func (fn *Node) newFile(filename string, addToVCS bool) { //types:add
-	if fn.IsExternal() {
+	if fn.isExternal() {
 		return
 	}
 	ppath := string(fn.Filepath)
@@ -243,7 +243,7 @@ func (fn *Node) newFolders(foldername string) { //types:add
 
 // newFolder makes a new folder (directory) in this directory node
 func (fn *Node) newFolder(foldername string) { //types:add
-	if fn.IsExternal() {
+	if fn.isExternal() {
 		return
 	}
 	ppath := string(fn.Filepath)
@@ -262,7 +262,7 @@ func (fn *Node) newFolder(foldername string) { //types:add
 // copyFileToDir copies given file path into node that is a directory.
 // This does NOT check for overwriting -- that must be done at higher level!
 func (fn *Node) copyFileToDir(filename string, perm os.FileMode) {
-	if fn.IsExternal() {
+	if fn.isExternal() {
 		return
 	}
 	ppath := string(fn.Filepath)

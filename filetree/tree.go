@@ -113,7 +113,7 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	}
 	ft.Filepath = core.Filename(abs)
 	ft.SetDirOpen(core.Filename(abs))
-	ft.InitFileInfo()
+	ft.initFileInfo()
 	ft.Open()
 	ft.Update()
 	return ft
@@ -126,7 +126,7 @@ func (ft *Tree) OpenPath(path string) *Tree {
 func (ft *Tree) UpdatePath(path string) {
 	ft.NeedsRender()
 	path = filepath.Clean(path)
-	ft.DirsTo(path)
+	ft.dirsTo(path)
 	if fn, ok := ft.FindFile(path); ok {
 		if fn.IsDir() {
 			fn.Update()
@@ -191,7 +191,7 @@ func (ft *Tree) WatchUpdate(path string) {
 	// fmt.Println(path)
 
 	dir, _ := filepath.Split(path)
-	rp := ft.RelPath(core.Filename(dir))
+	rp := ft.RelativePathFrom(core.Filename(dir))
 	if rp == ft.lastWatchUpdate {
 		now := time.Now()
 		lagMs := int(now.Sub(ft.lastWatchTime) / time.Millisecond)
@@ -207,7 +207,7 @@ func (ft *Tree) WatchUpdate(path string) {
 	}
 	ft.lastWatchUpdate = rp
 	ft.lastWatchTime = time.Now()
-	if !fn.IsOpen() {
+	if !fn.isOpen() {
 		// fmt.Printf("warning: watcher updating closed node: %s\n", rp)
 		return // shouldn't happen
 	}
@@ -220,7 +220,7 @@ func (ft *Tree) WatchPath(path core.Filename) error {
 	if core.TheApp.Platform() == system.MacOS {
 		return nil // mac is not supported in a high-capacity fashion at this point
 	}
-	rp := ft.RelPath(path)
+	rp := ft.RelativePathFrom(path)
 	on, has := ft.watchedPaths[rp]
 	if on || has {
 		return nil
@@ -239,7 +239,7 @@ func (ft *Tree) WatchPath(path core.Filename) error {
 
 // UnWatchPath removes given path from those watched
 func (ft *Tree) UnWatchPath(path core.Filename) {
-	rp := ft.RelPath(path)
+	rp := ft.RelativePathFrom(path)
 	on, has := ft.watchedPaths[rp]
 	if !on || !has {
 		return
@@ -255,12 +255,12 @@ func (ft *Tree) IsDirOpen(fpath core.Filename) bool {
 	if fpath == ft.Filepath { // we are always open
 		return true
 	}
-	return ft.Dirs.isOpen(ft.RelPath(fpath))
+	return ft.Dirs.isOpen(ft.RelativePathFrom(fpath))
 }
 
 // SetDirOpen sets the given directory path to be open
 func (ft *Tree) SetDirOpen(fpath core.Filename) {
-	rp := ft.RelPath(fpath)
+	rp := ft.RelativePathFrom(fpath)
 	// fmt.Printf("setdiropen: %s\n", rp)
 	ft.Dirs.setOpen(rp, true)
 	ft.WatchPath(fpath)
@@ -268,24 +268,24 @@ func (ft *Tree) SetDirOpen(fpath core.Filename) {
 
 // SetDirClosed sets the given directory path to be closed
 func (ft *Tree) SetDirClosed(fpath core.Filename) {
-	rp := ft.RelPath(fpath)
+	rp := ft.RelativePathFrom(fpath)
 	ft.Dirs.setOpen(rp, false)
 	ft.UnWatchPath(fpath)
 }
 
 // SetDirSortBy sets the given directory path sort by option
 func (ft *Tree) SetDirSortBy(fpath core.Filename, modTime bool) {
-	ft.Dirs.setSortBy(ft.RelPath(fpath), modTime)
+	ft.Dirs.setSortBy(ft.RelativePathFrom(fpath), modTime)
 }
 
 // DirSortByName returns true if dir is sorted by name
 func (ft *Tree) DirSortByName(fpath core.Filename) bool {
-	return ft.Dirs.sortByName(ft.RelPath(fpath))
+	return ft.Dirs.sortByName(ft.RelativePathFrom(fpath))
 }
 
 // DirSortByModTime returns true if dir is sorted by mod time
 func (ft *Tree) DirSortByModTime(fpath core.Filename) bool {
-	return ft.Dirs.sortByModTime(ft.RelPath(fpath))
+	return ft.Dirs.sortByModTime(ft.RelativePathFrom(fpath))
 }
 
 // AddExternalFile adds an external file outside of root of file tree
