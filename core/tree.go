@@ -377,7 +377,7 @@ func (tr *Tree) Init() {
 		}
 	})
 	parts.On(events.DragStart, func(e events.Event) {
-		tr.DragStart(e)
+		tr.dragStart(e)
 	})
 	parts.On(events.DragEnter, func(e events.Event) {
 		tr.SetState(true, states.DragHovered)
@@ -1481,9 +1481,9 @@ func (tr *Tree) pasteChildren(md mimedata.Mimes, mod events.DropMods) {
 //////////////////////////////////////////////////////////////////////////////
 //    Drag-n-Drop
 
-// DragStart starts a drag-n-drop on this node -- it includes any other
+// dragStart starts a drag-n-drop on this node -- it includes any other
 // selected nodes as well, each as additional records in mimedata.
-func (tr *Tree) DragStart(e events.Event) {
+func (tr *Tree) dragStart(e events.Event) {
 	sels := tr.GetSelectedNodes()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
