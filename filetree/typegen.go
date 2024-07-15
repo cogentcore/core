@@ -73,7 +73,3 @@ func (t *VCSLog) SetSince(v string) *VCSLog { t.Since = v; return t }
 // SetRepo sets the [VCSLog.Repo]:
 // version control system repository
 func (t *VCSLog) SetRepo(v vcs.Repo) *VCSLog { t.Repo = v; return t }
-
-// SetSetA sets the [VCSLog.SetA]:
-// double-click will set the A revision -- else B
-func (t *VCSLog) SetSetA(v bool) *VCSLog { t.SetA = v; return t }

@@ -38,20 +38,20 @@ type VCSLog struct {
 	Repo vcs.Repo `json:"-" xml:"-" copier:"-"`
 
 	// revision A -- defaults to HEAD
-	RevA string `set:"-"`
+	revisionA string
 
 	// revision B -- blank means current working copy
-	RevB string `set:"-"`
+	revisionB string
 
 	// double-click will set the A revision -- else B
-	SetA bool
+	setA bool
 }
 
 func (lv *VCSLog) Init() {
 	lv.Frame.Init()
-	lv.RevA = "HEAD"
-	lv.RevB = ""
-	lv.SetA = true
+	lv.revisionA = "HEAD"
+	lv.revisionB = ""
+	lv.setA = true
 	lv.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
@@ -67,13 +67,13 @@ func (lv *VCSLog) Init() {
 				SetTooltip("Set Buffer A's revision to this").
 				OnClick(func(e events.Event) {
 					cmt := lv.Log[w.SelectedIndex]
-					lv.SetRevA(cmt.Rev)
+					lv.setRevisionA(cmt.Rev)
 				})
 			core.NewButton(m).SetText("Set Revision B").
 				SetTooltip("Set Buffer B's revision to this").
 				OnClick(func(e events.Event) {
 					cmt := lv.Log[w.SelectedIndex]
-					lv.SetRevB(cmt.Rev)
+					lv.setRevisionB(cmt.Rev)
 				})
 			core.NewButton(m).SetText("Copy Revision ID").
 				SetTooltip("Copies the revision number / hash for this").
@@ -100,12 +100,12 @@ func (lv *VCSLog) Init() {
 				return
 			}
 			cmt := lv.Log[idx]
-			if lv.SetA {
-				lv.SetRevA(cmt.Rev)
+			if lv.setA {
+				lv.setRevisionA(cmt.Rev)
 			} else {
-				lv.SetRevB(cmt.Rev)
+				lv.setRevisionB(cmt.Rev)
 			}
-			lv.ToggleRev()
+			lv.toggleRevision()
 		})
 		w.OnDoubleClick(func(e events.Event) {
 			idx := w.SelectedIndex
@@ -114,12 +114,12 @@ func (lv *VCSLog) Init() {
 			}
 			cmt := lv.Log[idx]
 			if lv.File != "" {
-				if lv.SetA {
-					lv.SetRevA(cmt.Rev)
+				if lv.setA {
+					lv.setRevisionA(cmt.Rev)
 				} else {
-					lv.SetRevB(cmt.Rev)
+					lv.setRevisionB(cmt.Rev)
 				}
-				lv.ToggleRev()
+				lv.toggleRevision()
 			}
 			cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
 			if err != nil {
@@ -145,9 +145,9 @@ func (lv *VCSLog) Init() {
 	})
 }
 
-// SetRevA sets the revision to use for buffer A
-func (lv *VCSLog) SetRevA(rev string) {
-	lv.RevA = rev
+// setRevisionA sets the revision to use for buffer A
+func (lv *VCSLog) setRevisionA(rev string) {
+	lv.revisionA = rev
 	tb := lv.Toolbar()
 	tfi := tb.ChildByName("a-tf", 2)
 	if tfi == nil {
@@ -156,9 +156,9 @@ func (lv *VCSLog) SetRevA(rev string) {
 	tfi.(*core.TextField).SetText(rev)
 }
 
-// SetRevB sets the revision to use for buffer B
-func (lv *VCSLog) SetRevB(rev string) {
-	lv.RevB = rev
+// setRevisionB sets the revision to use for buffer B
+func (lv *VCSLog) setRevisionB(rev string) {
+	lv.revisionB = rev
 	tb := lv.Toolbar()
 	tfi := tb.ChildByName("b-tf", 2)
 	if tfi == nil {
@@ -167,14 +167,14 @@ func (lv *VCSLog) SetRevB(rev string) {
 	tfi.(*core.TextField).SetText(rev)
 }
 
-// ToggleRev switches the active revision to set
-func (lv *VCSLog) ToggleRev() {
+// toggleRevision switches the active revision to set
+func (lv *VCSLog) toggleRevision() {
 	tb := lv.Toolbar()
 	cba := tb.ChildByName("a-rev", 2).(*core.Switch)
 	cbb := tb.ChildByName("b-rev", 2).(*core.Switch)
-	lv.SetA = !lv.SetA
-	cba.SetState(lv.SetA, states.Checked)
-	cbb.SetState(!lv.SetA, states.Checked)
+	lv.setA = !lv.setA
+	cba.SetState(lv.setA, states.Checked)
+	cbb.SetState(!lv.setA, states.Checked)
 	cbb.NeedsRender()
 	cba.NeedsRender()
 }
@@ -199,24 +199,24 @@ func (lv *VCSLog) MakeToolbar(p *tree.Plan) {
 		w.SetTooltip("If selected, clicking in log will set this A Revision to use for Diff")
 		w.SetState(true, states.Checked)
 		w.OnClick(func(e events.Event) {
-			lv.SetA = w.IsChecked()
+			lv.setA = w.IsChecked()
 			cbb := w.Parent.AsTree().ChildByName("b-rev", 2).(*core.Switch)
-			cbb.SetState(!lv.SetA, states.Checked)
+			cbb.SetState(!lv.setA, states.Checked)
 			cbb.NeedsRender()
 		})
 	})
 	tree.AddAt(p, "a-tf", func(w *core.TextField) {
-		w.SetText(lv.RevA)
+		w.SetText(lv.revisionA)
 		w.SetTooltip("A revision: typically this is the older, base revision to compare")
 		w.OnChange(func(e events.Event) {
-			lv.RevA = w.Text()
+			lv.revisionA = w.Text()
 		})
 	})
 	tree.Add(p, func(w *core.Button) {
 		w.SetText("View A").SetIcon(icons.Document).
 			SetTooltip("View file at revision A").
 			OnClick(func(e events.Event) {
-				FileAtRevDialog(lv, lv.Repo, lv.File, lv.RevA)
+				FileAtRevDialog(lv, lv.Repo, lv.File, lv.revisionA)
 			})
 	})
 
@@ -226,25 +226,25 @@ func (lv *VCSLog) MakeToolbar(p *tree.Plan) {
 		w.SetText("B Rev: ")
 		w.SetTooltip("If selected, clicking in log will set this B Revision to use for Diff")
 		w.OnClick(func(e events.Event) {
-			lv.SetA = !w.IsChecked()
+			lv.setA = !w.IsChecked()
 			cba := w.Parent.AsTree().ChildByName("a-rev", 2).(*core.Switch)
-			cba.SetState(lv.SetA, states.Checked)
+			cba.SetState(lv.setA, states.Checked)
 			cba.NeedsRender()
 		})
 	})
 
 	tree.AddAt(p, "b-tf", func(w *core.TextField) {
-		w.SetText(lv.RevB)
+		w.SetText(lv.revisionB)
 		w.SetTooltip("B revision: typically this is the newer revision to compare.  Leave blank for the current working directory.")
 		w.OnChange(func(e events.Event) {
-			lv.RevB = w.Text()
+			lv.revisionB = w.Text()
 		})
 	})
 	tree.Add(p, func(w *core.Button) {
 		w.SetText("View B").SetIcon(icons.Document).
 			SetTooltip("View file at revision B").
 			OnClick(func(e events.Event) {
-				FileAtRevDialog(lv, lv.Repo, lv.File, lv.RevB)
+				FileAtRevDialog(lv, lv.Repo, lv.File, lv.revisionB)
 			})
 	})
 
@@ -255,9 +255,9 @@ func (lv *VCSLog) MakeToolbar(p *tree.Plan) {
 			SetTooltip("Show the diffs between two revisions; if blank, A is current HEAD, and B is current working copy").
 			OnClick(func(e events.Event) {
 				if lv.File == "" {
-					diffbrowser.NewDiffBrowserVCS(lv.Repo, lv.RevA, lv.RevB)
+					diffbrowser.NewDiffBrowserVCS(lv.Repo, lv.revisionA, lv.revisionB)
 				} else {
-					texteditor.DiffEditorDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
+					texteditor.DiffEditorDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.revisionA, lv.revisionB)
 				}
 			})
 	})
