@@ -660,16 +660,19 @@ type DiffTextEditor struct {
 	Editor
 }
 
-func (tv *DiffTextEditor) Init() {
-	tv.Editor.Init()
-	tv.OnDoubleClick(func(e events.Event) {
-		pt := tv.PointToRelPos(e.Pos())
-		if pt.X >= 0 && pt.X < int(tv.LineNumberOffset) {
-			newPos := tv.PixelToCursor(pt)
+func (ed *DiffTextEditor) Init() {
+	ed.Editor.Init()
+	ed.Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+	})
+	ed.OnDoubleClick(func(e events.Event) {
+		pt := ed.PointToRelPos(e.Pos())
+		if pt.X >= 0 && pt.X < int(ed.LineNumberOffset) {
+			newPos := ed.PixelToCursor(pt)
 			ln := newPos.Ln
-			dv := tv.diffEditor()
-			if dv != nil && tv.Buffer != nil {
-				if tv.Name == "text-a" {
+			dv := ed.diffEditor()
+			if dv != nil && ed.Buffer != nil {
+				if ed.Name == "text-a" {
 					dv.applyDiff(0, ln)
 				} else {
 					dv.applyDiff(1, ln)
@@ -681,6 +684,6 @@ func (tv *DiffTextEditor) Init() {
 	})
 }
 
-func (tv *DiffTextEditor) diffEditor() *DiffEditor {
-	return tree.ParentByType[*DiffEditor](tv)
+func (ed *DiffTextEditor) diffEditor() *DiffEditor {
+	return tree.ParentByType[*DiffEditor](ed)
 }

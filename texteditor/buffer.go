@@ -45,7 +45,7 @@ import (
 // explicit Event suffix.
 // Internally, the buffer represents new lines using \n = LF, but saving
 // and loading can deal with Windows/DOS CRLF format.
-type Buffer struct {
+type Buffer struct { //types:add
 
 	// Filename is the filename of the file that was last loaded or saved.
 	// It is used when highlighting code.
