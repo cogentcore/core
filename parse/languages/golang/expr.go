@@ -20,7 +20,7 @@ import (
 // This computes the last ast point as the stopping point for processing
 // and then calls TypeFromAstExpr.
 // It returns the type, any Ast node that remained unprocessed at the end, and bool if found.
-func (gl *GoLang) TypeFromAstExprStart(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast *parser.Ast) (*syms.Type, *parser.Ast, bool) {
+func (gl *GoLang) TypeFromAstExprStart(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast *parser.AST) (*syms.Type, *parser.AST, bool) {
 	last := tyast.NextSiblingAst()
 	// fmt.Printf("last: %v \n", last.PathUnique())
 	return gl.TypeFromAstExpr(fs, origPkg, pkg, tyast, last)
@@ -28,7 +28,7 @@ func (gl *GoLang) TypeFromAstExprStart(fs *parse.FileState, origPkg, pkg *syms.S
 
 // TypeFromAstExpr walks the ast expression to find the type.
 // It returns the type, any Ast node that remained unprocessed at the end, and bool if found.
-func (gl *GoLang) TypeFromAstExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.Ast) (*syms.Type, *parser.Ast, bool) {
+func (gl *GoLang) TypeFromAstExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST) (*syms.Type, *parser.AST, bool) {
 	pos := tyast.SrcReg.St
 	fpath, _ := filepath.Abs(fs.Src.Filename)
 	// containers of given region -- local scoping
@@ -197,7 +197,7 @@ func (gl *GoLang) TypeFromAstExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 
 // TypeFromAstSym attempts to get the type from given symbol as part of expression.
 // It returns the type, any Ast node that remained unprocessed at the end, and bool if found.
-func (gl *GoLang) TypeFromAstSym(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.Ast, sym *syms.Symbol) (*syms.Type, *parser.Ast, bool) {
+func (gl *GoLang) TypeFromAstSym(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST, sym *syms.Symbol) (*syms.Type, *parser.AST, bool) {
 	// if TraceTypes {
 	// 	fmt.Printf("TExpr: sym named: %v  kind: %v  type: %v\n", sym.Name, sym.Kind, sym.Type)
 	// }
@@ -216,7 +216,7 @@ func (gl *GoLang) TypeFromAstSym(fs *parse.FileState, origPkg, pkg *syms.Symbol,
 
 // TypeFromAstType walks the ast expression to find the type, starting from current type name.
 // It returns the type, any Ast node that remained unprocessed at the end, and bool if found.
-func (gl *GoLang) TypeFromAstType(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.Ast, tnm string) (*syms.Type, *parser.Ast, bool) {
+func (gl *GoLang) TypeFromAstType(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST, tnm string) (*syms.Type, *parser.AST, bool) {
 	if tnm[0] == '*' {
 		tnm = tnm[1:]
 	}
@@ -344,7 +344,7 @@ func (gl *GoLang) TypeFromAstType(fs *parse.FileState, origPkg, pkg *syms.Symbol
 
 // TypeFromAstFuncCall gets return type of function call as return value, and returns the sibling node to
 // continue parsing in, skipping over everything in the function call
-func (gl *GoLang) TypeFromFuncCall(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.Ast, ftyp *syms.Type) (*syms.Type, *parser.Ast, bool) {
+func (gl *GoLang) TypeFromFuncCall(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST, ftyp *syms.Type) (*syms.Type, *parser.AST, bool) {
 	nxt := tyast.NextSiblingAst() // skip over everything within method in ast
 	if len(ftyp.Size) != 2 {
 		if TraceTypes {
@@ -374,7 +374,7 @@ func (gl *GoLang) TypeFromFuncCall(fs *parse.FileState, origPkg, pkg *syms.Symbo
 }
 
 // TypeFromAstName gets type from a Name in a given context (conts)
-func (gl *GoLang) TypeFromAstName(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.Ast, conts syms.SymMap) (*syms.Type, *parser.Ast, bool) {
+func (gl *GoLang) TypeFromAstName(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST, conts syms.SymMap) (*syms.Type, *parser.AST, bool) {
 	snm := tyast.Src
 	sym, got := fs.FindNameScoped(snm, conts)
 	if got && sym.Kind.SubCat() != token.NameScope {

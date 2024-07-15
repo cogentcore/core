@@ -370,19 +370,19 @@ func (gl *GoLang) LookupString(fs *parse.FileState, pkg *syms.Symbol, scopes sym
 
 // CompleteAstStart finds the best starting point in the given current-line Ast
 // to start completion process, which walks back down from that starting point
-func (gl *GoLang) CompleteAstStart(ast *parser.Ast, scope token.Tokens) (start, last *parser.Ast) {
+func (gl *GoLang) CompleteAstStart(ast *parser.AST, scope token.Tokens) (start, last *parser.AST) {
 	curi := tree.Last(ast)
 	if curi == nil {
 		return
 	}
-	cur := curi.(*parser.Ast)
+	cur := curi.(*parser.AST)
 	last = cur
 	start = cur
 	prv := cur
 	for {
-		var parent *parser.Ast
+		var parent *parser.AST
 		if cur.Parent != nil {
-			parent = cur.Parent.(*parser.Ast)
+			parent = cur.Parent.(*parser.AST)
 		}
 		switch {
 		case cur.Name == "TypeNm":

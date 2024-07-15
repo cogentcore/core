@@ -47,46 +47,46 @@ func (i Actions) MarshalText() ([]byte, error) { return []byte(i.String()), nil 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Actions) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Actions") }
 
-var _AstActsValues = []AstActs{0, 1, 2, 3, 4}
+var _ASTActsValues = []ASTActs{0, 1, 2, 3, 4}
 
-// AstActsN is the highest valid value for type AstActs, plus one.
-const AstActsN AstActs = 5
+// ASTActsN is the highest valid value for type ASTActs, plus one.
+const ASTActsN ASTActs = 5
 
-var _AstActsValueMap = map[string]AstActs{`NoAst`: 0, `AddAst`: 1, `SubAst`: 2, `AnchorAst`: 3, `AnchorFirstAst`: 4}
+var _ASTActsValueMap = map[string]ASTActs{`NoAST`: 0, `AddAST`: 1, `SubAST`: 2, `AnchorAST`: 3, `AnchorFirstAST`: 4}
 
-var _AstActsDescMap = map[AstActs]string{0: `NoAst means don&#39;t create an Ast node for this rule`, 1: `AddAst means create an Ast node for this rule, adding it to the current anchor Ast. Any sub-rules within this rule are *not* added as children of this node -- see SubAst and AnchorAst. This is good for token-only terminal nodes and list elements that should be added to a list.`, 2: `SubAst means create an Ast node and add all the elements of *this rule* as children of this new node (including sub-rules), *except* for the very last rule which is assumed to be a recursive rule -- that one goes back up to the parent node. This is good for adding more complex elements with sub-rules to a recursive list, without creating a new hierarchical depth level for every such element.`, 3: `AnchorAst means create an Ast node and set it as the anchor that subsequent sub-nodes are added into. This is for a new hierarchical depth level where everything under this rule gets organized.`, 4: `AnchorFirstAst means create an Ast node and set it as the anchor that subsequent sub-nodes are added into, *only* if this is the first time that this rule has matched within the current sequence (i.e., if the parent of this rule is the same rule then don&#39;t add a new Ast node). This is good for starting a new list of recursively defined elements, without creating increasing depth levels.`}
+var _ASTActsDescMap = map[ASTActs]string{0: `NoAST means don&#39;t create an Ast node for this rule`, 1: `AddAST means create an Ast node for this rule, adding it to the current anchor Ast. Any sub-rules within this rule are *not* added as children of this node -- see SubAst and AnchorAst. This is good for token-only terminal nodes and list elements that should be added to a list.`, 2: `SubAST means create an Ast node and add all the elements of *this rule* as children of this new node (including sub-rules), *except* for the very last rule which is assumed to be a recursive rule -- that one goes back up to the parent node. This is good for adding more complex elements with sub-rules to a recursive list, without creating a new hierarchical depth level for every such element.`, 3: `AnchorAST means create an Ast node and set it as the anchor that subsequent sub-nodes are added into. This is for a new hierarchical depth level where everything under this rule gets organized.`, 4: `AnchorFirstAST means create an Ast node and set it as the anchor that subsequent sub-nodes are added into, *only* if this is the first time that this rule has matched within the current sequence (i.e., if the parent of this rule is the same rule then don&#39;t add a new Ast node). This is good for starting a new list of recursively defined elements, without creating increasing depth levels.`}
 
-var _AstActsMap = map[AstActs]string{0: `NoAst`, 1: `AddAst`, 2: `SubAst`, 3: `AnchorAst`, 4: `AnchorFirstAst`}
+var _ASTActsMap = map[ASTActs]string{0: `NoAST`, 1: `AddAST`, 2: `SubAST`, 3: `AnchorAST`, 4: `AnchorFirstAST`}
 
-// String returns the string representation of this AstActs value.
-func (i AstActs) String() string { return enums.String(i, _AstActsMap) }
+// String returns the string representation of this ASTActs value.
+func (i ASTActs) String() string { return enums.String(i, _ASTActsMap) }
 
-// SetString sets the AstActs value from its string representation,
+// SetString sets the ASTActs value from its string representation,
 // and returns an error if the string is invalid.
-func (i *AstActs) SetString(s string) error {
-	return enums.SetString(i, s, _AstActsValueMap, "AstActs")
+func (i *ASTActs) SetString(s string) error {
+	return enums.SetString(i, s, _ASTActsValueMap, "ASTActs")
 }
 
-// Int64 returns the AstActs value as an int64.
-func (i AstActs) Int64() int64 { return int64(i) }
+// Int64 returns the ASTActs value as an int64.
+func (i ASTActs) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the AstActs value from an int64.
-func (i *AstActs) SetInt64(in int64) { *i = AstActs(in) }
+// SetInt64 sets the ASTActs value from an int64.
+func (i *ASTActs) SetInt64(in int64) { *i = ASTActs(in) }
 
-// Desc returns the description of the AstActs value.
-func (i AstActs) Desc() string { return enums.Desc(i, _AstActsDescMap) }
+// Desc returns the description of the ASTActs value.
+func (i ASTActs) Desc() string { return enums.Desc(i, _ASTActsDescMap) }
 
-// AstActsValues returns all possible values for the type AstActs.
-func AstActsValues() []AstActs { return _AstActsValues }
+// ASTActsValues returns all possible values for the type ASTActs.
+func ASTActsValues() []ASTActs { return _ASTActsValues }
 
-// Values returns all possible values for the type AstActs.
-func (i AstActs) Values() []enums.Enum { return enums.Values(_AstActsValues) }
+// Values returns all possible values for the type ASTActs.
+func (i ASTActs) Values() []enums.Enum { return enums.Values(_ASTActsValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i AstActs) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+func (i ASTActs) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *AstActs) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "AstActs") }
+func (i *ASTActs) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "ASTActs") }
 
 var _StepsValues = []Steps{0, 1, 2, 3, 4}
 

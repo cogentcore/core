@@ -22,7 +22,7 @@ type State struct {
 	Trace TraceOptions
 
 	// root of the Ast abstract syntax tree we're updating
-	Ast *Ast
+	Ast *AST
 
 	// symbol map that everything gets added to from current file of parsing -- typically best for subsequent management to just have a single outer-most scoping symbol here (e.g., in Go it is the package), and then everything is a child under that
 	Syms syms.SymMap
@@ -47,7 +47,7 @@ type State struct {
 }
 
 // Init initializes the state at start of parsing
-func (ps *State) Init(src *lexer.File, ast *Ast) {
+func (ps *State) Init(src *lexer.File, ast *AST) {
 	// fmt.Println("in init")
 	// if ps.Src != nil {
 	// 	fmt.Println("was:", ps.Src.Filename)
@@ -276,9 +276,9 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lexer.Reg) (lexer.Pos
 	return cp, false
 }
 
-// AddAst adds a child Ast node to given parent Ast node
-func (ps *State) AddAst(parAst *Ast, rule string, reg lexer.Reg) *Ast {
-	chAst := NewAst(parAst)
+// AddAST adds a child Ast node to given parent Ast node
+func (ps *State) AddAST(parAST *AST, rule string, reg lexer.Reg) *AST {
+	chAst := NewAST(parAST)
 	chAst.SetName(rule)
 	chAst.SetTokReg(reg, ps.Src)
 	return chAst

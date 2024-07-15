@@ -74,7 +74,7 @@ type Rule struct {
 	StackMatch string `json:",omitempty"`
 
 	// what action should be take for this node when it matches
-	Ast AstActs
+	AST ASTActs
 
 	// actions to perform based on parsed Ast tree data, when this rule is done executing
 	Acts Acts `json:",omitempty"`
@@ -358,7 +358,7 @@ func (pr *Rule) Compile(ps *State) bool {
 		}
 	}
 	if pr.reverse {
-		pr.Ast = AnchorAst // must be
+		pr.AST = AnchorAST // must be
 	}
 	if ntok == 0 && nmatch == 0 {
 		pr.Rules[0].Match = true
@@ -576,12 +576,12 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 		return nil
 	}
 	kpr := pr.Children[0].(*Rule) // first rule is special set of valid top-level matches
-	var parAst *Ast
+	var parAst *AST
 	scope := lexer.Reg{St: ps.Pos}
 	if ps.Ast.HasChildren() {
 		parAst = ps.Ast.ChildAst(0)
 	} else {
-		parAst = NewAst(ps.Ast)
+		parAst = NewAST(ps.Ast)
 		parAst.SetName(kpr.Name)
 		ok := false
 		scope.St, ok = ps.Src.ValidTokenPos(scope.St)
@@ -626,7 +626,7 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 // parAst is the current ast node that we add to.
 // scope is the region to search within, defined by parent or EOS if we have a terminal
 // one
-func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule {
+func (pr *Rule) Parse(ps *State, parent *Rule, parAst *AST, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule {
 	if pr.Off {
 		return nil
 	}
@@ -659,7 +659,7 @@ func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, opt
 }
 
 // ParseRules parses rules and returns this rule if it matches, nil if not
-func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule {
+func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *AST, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule {
 	ok := false
 	if pr.setsScope {
 		scope, ok = pr.Scope(ps, parAst, scope)
@@ -679,19 +679,19 @@ func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg
 
 	rparent := parent.Parent.(*Rule)
 
-	if parent.Ast != NoAst && parent.IsGroup() {
+	if parent.AST != NoAST && parent.IsGroup() {
 		if parAst.Name != parent.Name {
 			mreg := mpos.StartEndExcl(ps)
-			newAst := ps.AddAst(parAst, parent.Name, mreg)
-			if parent.Ast == AnchorAst {
+			newAst := ps.AddAST(parAst, parent.Name, mreg)
+			if parent.AST == AnchorAST {
 				parAst = newAst
 			}
 		}
-	} else if parent.IsGroup() && rparent.Ast != NoAst && rparent.IsGroup() { // two-level group...
+	} else if parent.IsGroup() && rparent.AST != NoAST && rparent.IsGroup() { // two-level group...
 		if parAst.Name != rparent.Name {
 			mreg := mpos.StartEndExcl(ps)
-			newAst := ps.AddAst(parAst, rparent.Name, mreg)
-			if rparent.Ast == AnchorAst {
+			newAst := ps.AddAST(parAst, rparent.Name, mreg)
+			if rparent.AST == AnchorAST {
 				parAst = newAst
 			}
 		}
@@ -706,7 +706,7 @@ func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg
 // Scope finds the potential scope region for looking for tokens -- either from
 // EOS position or State ScopeStack pushed from parents.
 // Returns new scope and false if no valid scope found.
-func (pr *Rule) Scope(ps *State, parAst *Ast, scope lexer.Reg) (lexer.Reg, bool) {
+func (pr *Rule) Scope(ps *State, parAst *AST, scope lexer.Reg) (lexer.Reg, bool) {
 	// prf := profile.Start("Scope")
 	// defer prf.End()
 
@@ -742,7 +742,7 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lexer.Reg) (lexer.Reg, bool)
 
 // Match attempts to match the rule, returns true if it matches, and the
 // match positions, along with any update to the scope
-func (pr *Rule) Match(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Reg, Matches) {
+func (pr *Rule) Match(ps *State, parAst *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Reg, Matches) {
 	if pr.Off {
 		return false, scope, nil
 	}
@@ -816,7 +816,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap
 }
 
 // MatchOnlyToks matches rules having only tokens
-func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
+func (pr *Rule) MatchOnlyToks(ps *State, parAst *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
 	nr := len(pr.Rules)
 
 	var mpos Matches
@@ -866,7 +866,7 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lexer.Reg, depth int
 
 // MatchToken matches one token sub-rule -- returns true for match and
 // false if no match -- and the position where it was / should have been
-func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, creg *lexer.Reg, mpos Matches, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Pos) {
+func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, creg *lexer.Reg, mpos Matches, parAst *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Pos) {
 	nr := len(pr.Rules)
 	ok := false
 	matchst := false // match start of creg
@@ -923,7 +923,7 @@ func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, cre
 }
 
 // MatchMixed matches mixed tokens and non-tokens
-func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
+func (pr *Rule) MatchMixed(ps *State, parAst *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
 	nr := len(pr.Rules)
 	var mpos Matches
 
@@ -1043,7 +1043,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lexer.Reg, depth int, o
 }
 
 // MatchNoToks matches NoToks case -- just does single sub-rule match
-func (pr *Rule) MatchNoToks(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
+func (pr *Rule) MatchNoToks(ps *State, parAst *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
 	creg := scope
 	ri := 0
 	rr := &pr.Rules[0]
@@ -1065,7 +1065,7 @@ func (pr *Rule) MatchNoToks(ps *State, parAst *Ast, scope lexer.Reg, depth int, 
 }
 
 // MatchGroup does matching for Group rules
-func (pr *Rule) MatchGroup(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Reg, Matches) {
+func (pr *Rule) MatchGroup(ps *State, parAst *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Reg, Matches) {
 	// prf := profile.Start("SubMatch")
 	if mst, match := ps.IsMatch(pr, scope); match {
 		// 	prf.End()
@@ -1219,14 +1219,14 @@ func (pr *Rule) MatchExclude(ps *State, scope lexer.Reg, ktpos lexer.Reg, depth 
 
 // DoRules after we have matched, goes through rest of the rules -- returns false if
 // there were any issues encountered
-func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lexer.Reg, mpos Matches, optMap lexer.TokenMap, depth int) bool {
+func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *AST, scope lexer.Reg, mpos Matches, optMap lexer.TokenMap, depth int) bool {
 	trcAst := parentAst
-	var ourAst *Ast
-	anchorFirst := (pr.Ast == AnchorFirstAst && parentAst.Name != pr.Name)
+	var ourAst *AST
+	anchorFirst := (pr.AST == AnchorFirstAST && parentAst.Name != pr.Name)
 
-	if pr.Ast != NoAst {
+	if pr.AST != NoAST {
 		// prf := profile.Start("AddAst")
-		ourAst = ps.AddAst(parentAst, pr.Name, scope)
+		ourAst = ps.AddAST(parentAst, pr.Name, scope)
 		// prf.End()
 		trcAst = ourAst
 		if ps.Trace.On {
@@ -1324,7 +1324,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lexer.Reg
 			break // no point in continuing
 		}
 		useAst := parentAst
-		if pr.Ast == AnchorAst || anchorFirst || (pr.Ast == SubAst && ri < nr-1) {
+		if pr.AST == AnchorAST || anchorFirst || (pr.AST == SubAST && ri < nr-1) {
 			useAst = ourAst
 		}
 		// NOTE: we can't use anything about the previous match here, because it could have
@@ -1360,7 +1360,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lexer.Reg
 // relative to that, and don't otherwise adjust scope or position.  In particular all
 // the position updating taking place in sup-rules is then just ignored and we set the
 // position to the end position matched by the "last" rule (which was the first processed)
-func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *Ast, scope lexer.Reg, mpos Matches, ourAst *Ast, optMap lexer.TokenMap, depth int) bool {
+func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *AST, scope lexer.Reg, mpos Matches, ourAst *AST, optMap lexer.TokenMap, depth int) bool {
 	nr := len(pr.Rules)
 	valid := true
 	creg := scope
@@ -1400,7 +1400,7 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *Ast, scope 
 				continue
 			}
 			useAst := parentAst
-			if pr.Ast == AnchorAst {
+			if pr.AST == AnchorAST {
 				useAst = ourAst
 			}
 			if ps.Trace.On {
@@ -1434,7 +1434,7 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *Ast, scope 
 }
 
 // DoActs performs actions at given point in rule execution (ri = rule index, is -1 at end)
-func (pr *Rule) DoActs(ps *State, ri int, parent *Rule, ourAst, parentAst *Ast) bool {
+func (pr *Rule) DoActs(ps *State, ri int, parent *Rule, ourAst, parentAst *AST) bool {
 	if len(pr.Acts) == 0 {
 		return false
 	}
@@ -1454,7 +1454,7 @@ func (pr *Rule) DoActs(ps *State, ri int, parent *Rule, ourAst, parentAst *Ast) 
 }
 
 // DoAct performs one action after a rule executes
-func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bool {
+func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *AST) bool {
 	if act.Act == PushStack {
 		ps.Stack.Push(act.Path)
 		return true
@@ -1534,7 +1534,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 		}
 		return false
 	}
-	ast := node.(*Ast)
+	ast := node.(*AST)
 	lx := ps.Src.LexAt(ast.TokReg.St)
 	useTok := lx.Token.Token
 	if act.Token != token.None {
@@ -1544,7 +1544,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 	nms := strings.Split(nm, ",")
 	if len(adnl) > 0 {
 		for _, pk := range adnl {
-			nast := pk.(*Ast)
+			nast := pk.(*AST)
 			if nast != ast {
 				nms = append(nms, strings.Split(nast.Src, ",")...)
 			}
@@ -1563,7 +1563,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 		}
 		if len(adnl) > 0 {
 			for _, pk := range adnl {
-				nast := pk.(*Ast)
+				nast := pk.(*AST)
 				cp := nast.TokReg.St
 				for cp.IsLess(nast.TokReg.Ed) {
 					tlx := ps.Src.LexAt(cp)
@@ -1733,14 +1733,14 @@ func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			fmt.Fprintf(writer, "%v}\n", ind)
 		} else {
 			astr := ""
-			switch pr.Ast {
-			case AddAst:
+			switch pr.AST {
+			case AddAST:
 				astr = "+Ast"
-			case SubAst:
+			case SubAST:
 				astr = "_Ast"
-			case AnchorAst:
+			case AnchorAST:
 				astr = ">Ast"
-			case AnchorFirstAst:
+			case AnchorFirstAST:
 				astr = ">1Ast"
 			}
 			fmt.Fprintf(writer, "%v%v:\t%v\t%v\n", ind, nmstr, pr.Rule, astr)

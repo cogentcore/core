@@ -35,7 +35,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 		return
 	}
 	if sy.Ast != nil {
-		ast := sy.Ast.(*parser.Ast)
+		ast := sy.Ast.(*parser.AST)
 		switch {
 		case sy.Kind == token.NameField:
 			stsc, ok := sy.Scopes[token.NameStruct]
@@ -70,7 +70,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 				sy.Type = stsc
 			}
 		case sy.Kind.SubCat() == token.NameVar:
-			var astyp *parser.Ast
+			var astyp *parser.AST
 			if ast.HasChildren() {
 				if strings.HasPrefix(ast.Name, "ForRange") {
 					gl.InferForRangeSymbolType(sy, fs, pkg)
@@ -190,7 +190,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 // InferForRangeSymbolType infers the type of a ForRange expr
 // gets the container type properly
 func (gl *GoLang) InferForRangeSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *syms.Symbol) {
-	ast := sy.Ast.(*parser.Ast)
+	ast := sy.Ast.(*parser.AST)
 	if ast.NumChildren() < 2 {
 		sy.Type = TypeErr // actively mark as err so not re-processed
 		if TraceTypes {
