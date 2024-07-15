@@ -173,7 +173,7 @@ func (fn *Node) Init() {
 		if fn.IsDir() {
 			repo, rnode := fn.Repo()
 			if repo != nil && rnode.This == fn.This {
-				go rnode.UpdateRepoFiles()
+				go rnode.updateRepoFiles()
 			}
 		} else {
 			fn.initFileInfo()
@@ -219,7 +219,7 @@ func (fn *Node) Init() {
 				w.Filepath = core.Filename(filepath.Join(string(fn.Filepath), fi.Name()))
 				w.initFileInfo()
 				if w.IsDir() && repo == nil {
-					w.DetectVCSRepo(true) // update files
+					w.detectVCSRepo(true) // update files
 				}
 			})
 		}

@@ -20,7 +20,6 @@ func init() {
 	Symbols["cogentcore.org/core/filetree/filetree"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AsNode":                   reflect.ValueOf(filetree.AsNode),
-		"BlameDialog":              reflect.ValueOf(filetree.BlameDialog),
 		"DirFlagsN":                reflect.ValueOf(filetree.DirFlagsN),
 		"DirFlagsValues":           reflect.ValueOf(filetree.DirFlagsValues),
 		"ExternalFilesName":        reflect.ValueOf(constant.MakeFromLiteral("\"[external files]\"", token.STRING, 0)),
@@ -40,8 +39,6 @@ func init() {
 		"NodeNameCountSort":        reflect.ValueOf(filetree.NodeNameCountSort),
 		"Search":                   reflect.ValueOf(filetree.Search),
 		"VCSLogDialog":             reflect.ValueOf(filetree.VCSLogDialog),
-		"VersionControlNameProper": reflect.ValueOf(filetree.VersionControlNameProper),
-		"VersionControlSystems":    reflect.ValueOf(&filetree.VersionControlSystems).Elem(),
 
 		// type definitions
 		"DirFlagMap":         reflect.ValueOf((*filetree.DirFlagMap)(nil)),

@@ -26,33 +26,33 @@ func vcsLabelFunc(fn *Node, label string) string {
 }
 
 func (fn *Node) VCSContextMenu(m *core.Scene) {
-	core.NewFuncButton(m).SetFunc(fn.AddToVCSSel).SetText(vcsLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
+	core.NewFuncButton(m).SetFunc(fn.addToVCSSelected).SetText(vcsLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS != vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m).SetFunc(fn.DeleteFromVCSSel).SetText(vcsLabelFunc(fn, "Delete from VCS")).SetIcon(icons.Delete).
+	core.NewFuncButton(m).SetFunc(fn.deleteFromVCSSelected).SetText(vcsLabelFunc(fn, "Delete from VCS")).SetIcon(icons.Delete).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m).SetFunc(fn.CommitToVCSSel).SetText(vcsLabelFunc(fn, "Commit to VCS")).SetIcon(icons.Star).
+	core.NewFuncButton(m).SetFunc(fn.commitToVCSSelected).SetText(vcsLabelFunc(fn, "Commit to VCS")).SetIcon(icons.Star).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m).SetFunc(fn.RevertVCSSel).SetText(vcsLabelFunc(fn, "Revert from VCS")).SetIcon(icons.Undo).
+	core.NewFuncButton(m).SetFunc(fn.revertVCSSelected).SetText(vcsLabelFunc(fn, "Revert from VCS")).SetIcon(icons.Undo).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m).SetFunc(fn.DiffVCSSel).SetText(vcsLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
+	core.NewFuncButton(m).SetFunc(fn.diffVCSSelected).SetText(vcsLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m).SetFunc(fn.LogVCSSel).SetText(vcsLabelFunc(fn, "Log VCS")).SetIcon(icons.List).
+	core.NewFuncButton(m).SetFunc(fn.logVCSSelected).SetText(vcsLabelFunc(fn, "Log VCS")).SetIcon(icons.List).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m).SetFunc(fn.BlameVCSSel).SetText(vcsLabelFunc(fn, "Blame VCS")).SetIcon(icons.CreditScore).
+	core.NewFuncButton(m).SetFunc(fn.blameVCSSelected).SetText(vcsLabelFunc(fn, "Blame VCS")).SetIcon(icons.CreditScore).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
