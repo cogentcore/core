@@ -78,7 +78,8 @@ func (wb *WidgetBase) Async(f func()) {
 
 // AsyncLock must be called before making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
-// It must have a matching [WidgetBase.AsyncUnlock] after it.
+// It must have a matching [WidgetBase.AsyncUnlock] after it. Also see
+// [WidgetBase.Async].
 func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {
@@ -96,7 +97,8 @@ func (wb *WidgetBase) AsyncLock() {
 
 // AsyncUnlock must be called after making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
-// It must have a matching [WidgetBase.AsyncLock] before it.
+// It must have a matching [WidgetBase.AsyncLock] before it. Also see
+// [WidgetBase.Async].
 func (wb *WidgetBase) AsyncUnlock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {
