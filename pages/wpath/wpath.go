@@ -14,10 +14,10 @@ import (
 	"cogentcore.org/core/base/strcase"
 )
 
-// Ignore returns whether the given path should be ignored
-// in released builds, which is the case if the path starts
-// with a dash.
-func Ignore(p string) bool {
+// Draft returns whether the given path is a draft page that
+// should be ignored in released builds, which is the case
+// if the path starts with a dash.
+func Draft(p string) bool {
 	return strings.HasPrefix(path.Base(p), "-")
 }
 

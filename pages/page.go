@@ -131,7 +131,7 @@ func (pg *Page) Init() {
 						return nil
 					}
 
-					if system.TheApp.Platform() == system.Web && wpath.Ignore(fpath) {
+					if system.TheApp.Platform() == system.Web && wpath.Draft(fpath) {
 						return nil
 					}
 					p := wpath.Format(fpath)
@@ -237,7 +237,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 				if path == pg.PagePath || d.IsDir() {
 					return nil
 				}
-				if system.TheApp.Platform() == system.Web && wpath.Ignore(path) {
+				if system.TheApp.Platform() == system.Web && wpath.Draft(path) {
 					return nil
 				}
 				pg.PagePath = path
@@ -297,6 +297,13 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	utv.ScrollToThis()
 
 	pg.body.DeleteChildren()
+	if wpath.Draft(pg.PagePath) {
+		draft := core.NewText(pg.body).SetType(core.TextDisplayLarge).SetText("THIS IS A DRAFT")
+		draft.Styler(func(s *styles.Style) {
+			s.Color = colors.Scheme.Error.Base
+			s.Font.Weight = styles.WeightBold
+		})
+	}
 	err = htmlcore.ReadMD(pg.Context, pg.body, b)
 	if err != nil {
 		core.ErrorSnackbar(pg, err, "Error loading page")

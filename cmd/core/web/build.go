@@ -160,7 +160,7 @@ func makePages(c *config.Config) error {
 		path = strings.TrimSuffix(path, ".md")
 		path = strings.TrimPrefix(path, c.Pages)
 		path = strings.TrimPrefix(path, "/")
-		if wpath.Ignore(path) {
+		if wpath.Draft(path) {
 			return nil
 		}
 		path = wpath.Format(path)
