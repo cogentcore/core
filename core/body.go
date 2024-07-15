@@ -31,11 +31,14 @@ type Body struct { //core:no-new
 // the name of [TheApp] is unset, it sets it to the given name.
 func NewBody(name ...string) *Body {
 	bd := tree.New[Body]()
-	nm := "Cogent Core"
+	nm := "body"
 	if len(name) > 0 {
 		nm = name[0]
 	}
 	if TheApp.Name() == "" {
+		if len(name) == 0 {
+			nm = "Cogent Core" // first one is called Cogent Core by default
+		}
 		TheApp.SetName(nm)
 	}
 	if AppearanceSettings.Zoom == 0 {
