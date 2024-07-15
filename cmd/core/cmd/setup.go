@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"fmt"
-	"log/slog"
 	"path/filepath"
 	"runtime"
 
@@ -63,7 +62,14 @@ func Setup(c *config.Config) error { //types:add
 		}
 		return fmt.Errorf("unknown Linux distro (apt-get and dnf not found); file an issue at https://github.com/cogentcore/core/issues")
 	case "windows":
-		slog.Warn("Follow the manual setup instructions in the documentation for Windows.")
+		err := vc.Run("curl", "-O", "https://github.com/jmeubank/tdm-gcc/releases/download/v10.3.0-tdm64-2/tdm64-gcc-10.3.0-2.exe")
+		if err != nil {
+			return err
+		}
+		err = vc.Run("tdm64-gcc-10.3.0-2.exe")
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	return fmt.Errorf("platform %q not supported for core setup", runtime.GOOS)
