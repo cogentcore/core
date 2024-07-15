@@ -6,33 +6,35 @@ package htmlcore
 
 import (
 	"bytes"
-	"fmt"
 
 	"cogentcore.org/core/core"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/renderer/html"
-	"go.abhg.dev/goldmark/wikilink"
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/html"
+	"github.com/gomarkdown/markdown/parser"
 )
+
+func mdToHTML(md []byte) []byte {
+	// create markdown parser with extensions
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	p := parser.NewWithExtensions(extensions)
+	prev := p.RegisterInline('[', nil)
+	p.RegisterInline('[', wikiLink(prev))
+	doc := p.Parse(md)
+
+	// create HTML renderer with extensions
+	htmlFlags := html.CommonFlags | html.HrefTargetBlank
+	opts := html.RendererOptions{Flags: htmlFlags}
+	renderer := html.NewRenderer(opts)
+
+	return markdown.Render(doc, renderer)
+}
 
 // ReadMD reads MD (markdown) from the given bytes and adds corresponding
 // Cogent Core widgets to the given [core.Widget], using the given context.
 func ReadMD(ctx *Context, parent core.Widget, b []byte) error {
-	md := goldmark.New(
-		goldmark.WithExtensions(
-			extension.GFM,
-			&wikilink.Extender{ctx},
-		),
-		goldmark.WithRendererOptions(
-			html.WithUnsafe(),
-		),
-	)
-	var buf bytes.Buffer
-	err := md.Convert(b, &buf)
-	if err != nil {
-		return fmt.Errorf("error parsing MD (markdown): %w", err)
-	}
-	return ReadHTML(ctx, parent, &buf)
+	htm := mdToHTML(b)
+	buf := bytes.NewBuffer(htm)
+	return ReadHTML(ctx, parent, buf)
 }
 
 // ReadMDString reads MD (markdown) from the given string and adds

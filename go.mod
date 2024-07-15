@@ -20,6 +20,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240307211618-a69d953ea142
 	github.com/goki/freetype v1.0.5
 	github.com/goki/vulkan v1.0.7
+	github.com/gomarkdown/markdown v0.0.0-20240626202925-2eda941fd024
 	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/h2non/filetype v1.1.3
 	github.com/hack-pad/hackpadfs v0.2.1
@@ -31,9 +32,7 @@ require (
 	github.com/nsf/termbox-go v1.1.1
 	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
 	github.com/stretchr/testify v1.9.0
-	github.com/yuin/goldmark v1.7.3
 	github.com/zergon321/reisen v0.1.9
-	go.abhg.dev/goldmark/wikilink v0.5.0
 	golang.org/x/crypto v0.24.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	golang.org/x/image v0.18.0
