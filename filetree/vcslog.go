@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/diffbrowser"
 	"cogentcore.org/core/tree"
@@ -45,6 +44,9 @@ type VCSLog struct {
 
 	// double-click will set the A revision -- else B
 	setA bool
+
+	arev, brev *core.Switch
+	atf, btf   *core.TextField
 }
 
 func (lv *VCSLog) Init() {
@@ -148,45 +150,20 @@ func (lv *VCSLog) Init() {
 // setRevisionA sets the revision to use for buffer A
 func (lv *VCSLog) setRevisionA(rev string) {
 	lv.revisionA = rev
-	tb := lv.Toolbar()
-	tfi := tb.ChildByName("a-tf", 2)
-	if tfi == nil {
-		return
-	}
-	tfi.(*core.TextField).SetText(rev)
+	lv.atf.Update()
 }
 
 // setRevisionB sets the revision to use for buffer B
 func (lv *VCSLog) setRevisionB(rev string) {
 	lv.revisionB = rev
-	tb := lv.Toolbar()
-	tfi := tb.ChildByName("b-tf", 2)
-	if tfi == nil {
-		return
-	}
-	tfi.(*core.TextField).SetText(rev)
+	lv.btf.Update()
 }
 
 // toggleRevision switches the active revision to set
 func (lv *VCSLog) toggleRevision() {
-	tb := lv.Toolbar()
-	cba := tb.ChildByName("a-rev", 2).(*core.Switch)
-	cbb := tb.ChildByName("b-rev", 2).(*core.Switch)
 	lv.setA = !lv.setA
-	cba.SetState(lv.setA, states.Checked)
-	cbb.SetState(!lv.setA, states.Checked)
-	cbb.NeedsRender()
-	cba.NeedsRender()
-}
-
-// Toolbar returns the toolbar
-func (lv *VCSLog) Toolbar() *core.Toolbar {
-	return lv.ChildByName("toolbar", 0).(*core.Toolbar)
-}
-
-// Table returns the table
-func (lv *VCSLog) Table() *core.Table {
-	return lv.ChildByName("log", 1).(*core.Table)
+	lv.arev.UpdateRender()
+	lv.brev.UpdateRender()
 }
 
 func (lv *VCSLog) MakeToolbar(p *tree.Plan) {
@@ -195,22 +172,18 @@ func (lv *VCSLog) MakeToolbar(p *tree.Plan) {
 	})
 
 	tree.AddAt(p, "a-rev", func(w *core.Switch) {
+		lv.arev = w
+		core.Bind(&lv.setA, w)
 		w.SetText("A Rev: ")
 		w.SetTooltip("If selected, clicking in log will set this A Revision to use for Diff")
-		w.SetState(true, states.Checked)
-		w.OnClick(func(e events.Event) {
-			lv.setA = w.IsChecked()
-			cbb := w.Parent.AsTree().ChildByName("b-rev", 2).(*core.Switch)
-			cbb.SetState(!lv.setA, states.Checked)
-			cbb.NeedsRender()
+		w.OnChange(func(e events.Event) {
+			lv.brev.UpdateRender()
 		})
 	})
 	tree.AddAt(p, "a-tf", func(w *core.TextField) {
-		w.SetText(lv.revisionA)
+		lv.atf = w
+		core.Bind(&lv.revisionA, w)
 		w.SetTooltip("A revision: typically this is the older, base revision to compare")
-		w.OnChange(func(e events.Event) {
-			lv.revisionA = w.Text()
-		})
 	})
 	tree.Add(p, func(w *core.Button) {
 		w.SetText("View A").SetIcon(icons.Document).
@@ -223,22 +196,22 @@ func (lv *VCSLog) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *core.Separator) {})
 
 	tree.AddAt(p, "b-rev", func(w *core.Switch) {
+		lv.brev = w
 		w.SetText("B Rev: ")
 		w.SetTooltip("If selected, clicking in log will set this B Revision to use for Diff")
-		w.OnClick(func(e events.Event) {
+		w.Updater(func() {
+			w.SetChecked(!lv.setA)
+		})
+		w.OnChange(func(e events.Event) {
 			lv.setA = !w.IsChecked()
-			cba := w.Parent.AsTree().ChildByName("a-rev", 2).(*core.Switch)
-			cba.SetState(lv.setA, states.Checked)
-			cba.NeedsRender()
+			lv.arev.UpdateRender()
 		})
 	})
 
 	tree.AddAt(p, "b-tf", func(w *core.TextField) {
-		w.SetText(lv.revisionB)
+		lv.btf = w
+		core.Bind(&lv.revisionB, w)
 		w.SetTooltip("B revision: typically this is the newer revision to compare.  Leave blank for the current working directory.")
-		w.OnChange(func(e events.Event) {
-			lv.revisionB = w.Text()
-		})
 	})
 	tree.Add(p, func(w *core.Button) {
 		w.SetText("View B").SetIcon(icons.Document).
