@@ -62,13 +62,25 @@ func Setup(c *config.Config) error { //types:add
 		}
 		return fmt.Errorf("unknown Linux distro (apt-get and dnf not found); file an issue at https://github.com/cogentcore/core/issues")
 	case "windows":
-		err := vc.Run("curl", "-O", "https://github.com/jmeubank/tdm-gcc/releases/download/v10.3.0-tdm64-2/tdm64-gcc-10.3.0-2.exe")
-		if err != nil {
-			return err
+		if _, err := exec.LookPath("gcc"); err != nil {
+			err := vc.Run("curl", "-O", "https://github.com/jmeubank/tdm-gcc/releases/download/v10.3.0-tdm64-2/tdm64-gcc-10.3.0-2.exe")
+			if err != nil {
+				return err
+			}
+			err = vc.Run("tdm64-gcc-10.3.0-2.exe")
+			if err != nil {
+				return err
+			}
 		}
-		err = vc.Run("tdm64-gcc-10.3.0-2.exe")
-		if err != nil {
-			return err
+		if _, err := exec.LookPath("git"); err != nil {
+			err := vc.Run("curl", "-O", "https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe")
+			if err != nil {
+				return err
+			}
+			err = vc.Run("Git-2.45.2-64-bit.exe")
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}
