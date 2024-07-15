@@ -254,7 +254,7 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 	if !opts.Nocache {
 		syms.SaveSymCache(pkgsym, fileinfo.Go, pkgPathAbs)
 	}
-	pkgsym.ClearAst() // otherwise memory can be huge -- can comment this out for debugging
+	pkgsym.ClearAST() // otherwise memory can be huge -- can comment this out for debugging
 	for _, fs := range fss {
 		fs.Destroy()
 	}
@@ -367,10 +367,10 @@ func (gl *GoLang) AddImportsToExts(fss *parse.FileStates, pfs *parse.FileState, 
 	}
 	gl.ResolveTypes(pfs, pkg, true) // true = do include function-internal scope items
 reset:
-	pfs.ClearAst()
-	pkg.ClearAst()
-	// if pfs.Ast.HasChildren() {
-	// 	pfs.Ast.DeleteChildren()
+	pfs.ClearAST()
+	pkg.ClearAST()
+	// if pfs.AST.HasChildren() {
+	// 	pfs.AST.DeleteChildren()
 	// }
 }
 

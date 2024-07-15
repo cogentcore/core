@@ -69,8 +69,8 @@ func (ss *SymStack) FindNameScoped(nm string) (*Symbol, bool) {
 	return nil, false
 }
 
-func (ss *SymStack) ClearAst() {
+func (ss *SymStack) ClearAST() {
 	for _, sy := range *ss {
-		sy.ClearAst()
+		sy.ClearAST()
 	}
 }

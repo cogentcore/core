@@ -24,13 +24,13 @@ import (
 type AST struct {
 	tree.NodeBase
 
-	// region in source lexical tokens corresponding to this Ast node -- Ch = index in lex lines
+	// region in source lexical tokens corresponding to this AST node -- Ch = index in lex lines
 	TokReg lexer.Reg `set:"-"`
 
-	// region in source file corresponding to this Ast node
+	// region in source file corresponding to this AST node
 	SrcReg lexer.Reg `set:"-"`
 
-	// source code corresponding to this Ast node
+	// source code corresponding to this AST node
 	Src string `set:"-"`
 
 	// stack of symbols created for this node
@@ -38,19 +38,19 @@ type AST struct {
 }
 
 func (ast *AST) Destroy() {
-	ast.Syms.ClearAst()
+	ast.Syms.ClearAST()
 	ast.Syms = nil
 	ast.NodeBase.Destroy()
 }
 
-// ChildAst returns the Child at given index as an Ast.
+// ChildAST returns the Child at given index as an AST.
 // Will panic if index is invalid -- use Try if unsure.
-func (ast *AST) ChildAst(idx int) *AST {
+func (ast *AST) ChildAST(idx int) *AST {
 	return ast.Child(idx).(*AST)
 }
 
-// ParentAst returns the Parent as an Ast.
-func (ast *AST) ParentAst() *AST {
+// ParentAST returns the Parent as an AST.
+func (ast *AST) ParentAST() *AST {
 	if ast.Parent == nil {
 		return nil
 	}
@@ -61,8 +61,8 @@ func (ast *AST) ParentAst() *AST {
 	return pn.(*AST)
 }
 
-// NextAst returns the next node in the Ast tree, or nil if none
-func (ast *AST) NextAst() *AST {
+// NextAST returns the next node in the AST tree, or nil if none
+func (ast *AST) NextAST() *AST {
 	nxti := tree.Next(ast)
 	if nxti == nil {
 		return nil
@@ -70,8 +70,8 @@ func (ast *AST) NextAst() *AST {
 	return nxti.(*AST)
 }
 
-// NextSiblingAst returns the next sibling node in the Ast tree, or nil if none
-func (ast *AST) NextSiblingAst() *AST {
+// NextSiblingAST returns the next sibling node in the AST tree, or nil if none
+func (ast *AST) NextSiblingAST() *AST {
 	nxti := tree.NextSibling(ast)
 	if nxti == nil {
 		return nil
@@ -79,8 +79,8 @@ func (ast *AST) NextSiblingAst() *AST {
 	return nxti.(*AST)
 }
 
-// PrevAst returns the previous node in the Ast tree, or nil if none
-func (ast *AST) PrevAst() *AST {
+// PrevAST returns the previous node in the AST tree, or nil if none
+func (ast *AST) PrevAST() *AST {
 	nxti := tree.Previous(ast)
 	if nxti == nil {
 		return nil

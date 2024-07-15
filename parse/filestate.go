@@ -21,7 +21,7 @@ import (
 // should be maintained for each file; texteditor.Buf has one as ParseState field.
 //
 // Separate State structs are maintained for each stage (Lexing, PassTwo, Parsing) and
-// the final output of Parsing goes into the Ast and Syms fields.
+// the final output of Parsing goes into the AST and Syms fields.
 //
 // The Src lexer.File field maintains all the info about the source file, and the basic
 // tokenized version of the source produced initially by lexing and updated by the
@@ -41,7 +41,7 @@ type FileState struct {
 	ParseState parser.State `json:"-" xml:"-"`
 
 	// ast output tree from parsing
-	Ast *parser.AST `json:"-" xml:"-"`
+	AST *parser.AST `json:"-" xml:"-"`
 
 	// symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface.
 	Syms syms.SymMap `json:"-" xml:"-"`
@@ -65,10 +65,10 @@ type FileState struct {
 // Init initializes the file state
 func (fs *FileState) Init() {
 	// fmt.Println("fs init:", fs.Src.Filename)
-	fs.Ast = parser.NewAST()
+	fs.AST = parser.NewAST()
 	fs.LexState.Init()
 	fs.TwoState.Init()
-	fs.ParseState.Init(&fs.Src, fs.Ast)
+	fs.ParseState.Init(&fs.Src, fs.AST)
 	fs.SymsMu.Lock()
 	fs.Syms = make(syms.SymMap)
 	fs.SymsMu.Unlock()
@@ -82,16 +82,16 @@ func NewFileState() *FileState {
 	return fs
 }
 
-func (fs *FileState) ClearAst() {
-	fs.Syms.ClearAst()
-	fs.ExtSyms.ClearAst()
+func (fs *FileState) ClearAST() {
+	fs.Syms.ClearAST()
+	fs.ExtSyms.ClearAST()
 }
 
 func (fs *FileState) Destroy() {
-	fs.ClearAst()
+	fs.ClearAST()
 	fs.Syms = nil
 	fs.ExtSyms = nil
-	fs.Ast.Destroy()
+	fs.AST.Destroy()
 	fs.LexState.Init()
 	fs.TwoState.Init()
 	fs.ParseState.Destroy()

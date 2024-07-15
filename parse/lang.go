@@ -54,7 +54,7 @@ type Language interface {
 
 	// CompleteLine provides the list of relevant completions for given text
 	// which is at given position within the file.
-	// Typically the language will call ParseLine on that line, and use the Ast
+	// Typically the language will call ParseLine on that line, and use the AST
 	// to guide the selection of relevant symbols that can complete the code at
 	// the given point.
 	CompleteLine(fs *FileStates, text string, pos lexer.Pos) complete.Matches
@@ -104,7 +104,7 @@ type Language interface {
 	// the FileState for just that line.  Line is in 0-indexed "internal" line indexes.
 	// The rune source information is assumed to have already been updated in FileState
 	// Existing context information from full-file parsing is used as appropriate, but
-	// the results will NOT be used to update any existing full-file Ast representation --
+	// the results will NOT be used to update any existing full-file AST representation --
 	// should call ParseFile to update that as appropriate.
 	ParseLine(fs *FileState, line int) *FileState
 }

@@ -54,8 +54,8 @@ type Type struct {
 	// additional type properties, such as const, virtual, static -- these are just recorded textually and not systematized to keep things open-ended -- many of the most important properties can be inferred from the Kind property
 	Properties map[string]any
 
-	// Ast node that corresponds to this type -- only valid during parsing
-	Ast tree.Node `json:"-" xml:"-"`
+	// AST node that corresponds to this type -- only valid during parsing
+	AST tree.Node `json:"-" xml:"-"`
 }
 
 // NewType returns a new Type struct initialized with given name and kind
@@ -75,16 +75,16 @@ func (ty *Type) AllocScopes() {
 func (ty *Type) CopyFromSrc(cp *Type) {
 	ty.Filename = cp.Filename
 	ty.Region = cp.Region
-	if cp.Ast != nil {
-		ty.Ast = cp.Ast
+	if cp.AST != nil {
+		ty.AST = cp.AST
 	}
 }
 
 // Clone returns a deep copy of this type, cloning / copying all sub-elements
-// except the Ast and Initialized
+// except the AST and Initialized
 func (ty *Type) Clone() *Type {
 	// note: not copying Initialized
-	nty := &Type{Name: ty.Name, Kind: ty.Kind, Desc: ty.Desc, Filename: ty.Filename, Region: ty.Region, Ast: ty.Ast}
+	nty := &Type{Name: ty.Name, Kind: ty.Kind, Desc: ty.Desc, Filename: ty.Filename, Region: ty.Region, AST: ty.AST}
 	nty.Els.CopyFrom(ty.Els)
 	nty.Meths = ty.Meths.Clone()
 	nty.Size = slices.Clone(ty.Size)

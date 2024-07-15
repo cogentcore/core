@@ -80,8 +80,8 @@ type Symbol struct {
 	// types defined within the scope of this symbol
 	Types TypeMap
 
-	// Ast node that created this symbol -- only valid during parsing
-	Ast tree.Node `json:"-" xml:"-"`
+	// AST node that created this symbol -- only valid during parsing
+	AST tree.Node `json:"-" xml:"-"`
 }
 
 // NewSymbol returns a new symbol with the basic info filled in -- SelectReg defaults to Region
@@ -91,7 +91,7 @@ func NewSymbol(name string, kind token.Tokens, fname string, reg lexer.Reg) *Sym
 }
 
 // CopyFromSrc copies all the source-related fields from other symbol
-// (no Type, Types, or Children).  Ast is only copied if non-nil.
+// (no Type, Types, or Children).  AST is only copied if non-nil.
 func (sy *Symbol) CopyFromSrc(cp *Symbol) {
 	sy.Detail = cp.Detail
 	sy.Kind = cp.Kind
@@ -99,8 +99,8 @@ func (sy *Symbol) CopyFromSrc(cp *Symbol) {
 	sy.Filename = cp.Filename
 	sy.Region = cp.Region
 	sy.SelectReg = cp.SelectReg
-	// if cp.Ast != nil {
-	// 	sy.Ast = cp.Ast
+	// if cp.AST != nil {
+	// 	sy.AST = cp.AST
 	// }
 }
 
@@ -144,7 +144,7 @@ func (sy *Symbol) Label() string {
 func (sy *Symbol) Clone() *Symbol {
 	nsy := &Symbol{Name: sy.Name, Detail: sy.Detail, Kind: sy.Kind, Type: sy.Type, Index: sy.Index, Filename: sy.Filename, Region: sy.Region, SelectReg: sy.SelectReg}
 	nsy.Scopes = sy.Scopes.Clone()
-	// nsy.Ast = sy.Ast
+	// nsy.AST = sy.AST
 	return nsy
 }
 
@@ -289,34 +289,34 @@ func (sy *Symbol) WriteDoc(out io.Writer, depth int) {
 	}
 }
 
-// ClearAst sets the Ast pointers to nil for all symbols in this one.
-// otherwise the Ast memory is never freed and can get quite large.
-func (sm *Symbol) ClearAst() {
-	sm.Ast = nil
-	sm.Children.ClearAst()
-	sm.Types.ClearAst()
+// ClearAST sets the AST pointers to nil for all symbols in this one.
+// otherwise the AST memory is never freed and can get quite large.
+func (sm *Symbol) ClearAST() {
+	sm.AST = nil
+	sm.Children.ClearAST()
+	sm.Types.ClearAST()
 }
 
-// ClearAst sets the Ast pointers to nil for all symbols.
-// otherwise the Ast memory is never freed and can get quite large.
-func (sm *SymMap) ClearAst() {
+// ClearAST sets the AST pointers to nil for all symbols.
+// otherwise the AST memory is never freed and can get quite large.
+func (sm *SymMap) ClearAST() {
 	for _, ss := range *sm {
-		ss.ClearAst()
+		ss.ClearAST()
 	}
 }
 
-// ClearAst sets the Ast pointers to nil for all symbols in this one.
-// otherwise the Ast memory is never freed and can get quite large.
-func (ty *Type) ClearAst() {
-	ty.Ast = nil
-	ty.Meths.ClearAst()
+// ClearAST sets the AST pointers to nil for all symbols in this one.
+// otherwise the AST memory is never freed and can get quite large.
+func (ty *Type) ClearAST() {
+	ty.AST = nil
+	ty.Meths.ClearAST()
 }
 
-// ClearAst sets the Ast pointers to nil for all symbols.
-// otherwise the Ast memory is never freed and can get quite large.
-func (tm *TypeMap) ClearAst() {
+// ClearAST sets the AST pointers to nil for all symbols.
+// otherwise the AST memory is never freed and can get quite large.
+func (tm *TypeMap) ClearAST() {
 	for _, ty := range *tm {
-		ty.ClearAst()
+		ty.ClearAST()
 	}
 }
 

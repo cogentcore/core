@@ -97,7 +97,7 @@ You can create arbitrarily long expressions by stringing together sequences of b
 
 1. Each operator must be uniquely recognizable from the soup of tokens, and this critically includes distinguishing unary from binary: e.g., correctly recognizing the binary and unary - signs here: `a - b * -c`  
 
-2. The operators must be organized in *reverse* order of priority, so that the lowest priority operations are factored out first, creating the highest-level, broadest splits of the overall expression (in the Ast tree), and then progressively finer, tighter, inner steps are parsed out.  Thus, for example in this expression:
+2. The operators must be organized in *reverse* order of priority, so that the lowest priority operations are factored out first, creating the highest-level, broadest splits of the overall expression (in the AST tree), and then progressively finer, tighter, inner steps are parsed out.  Thus, for example in this expression:
 
 ```Go
 if a + b * 2 / 7 - 42 > c * d + e / 72

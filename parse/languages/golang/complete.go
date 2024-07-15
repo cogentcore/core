@@ -56,7 +56,7 @@ func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos lexer.Pos) (ld c
 	}
 
 	if CompleteTrace {
-		lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
+		lfs.ParseState.AST.WriteTree(os.Stdout, 0)
 		lfs.LexState.Errs.Report(20, "", true, true)
 		lfs.ParseState.Errs.Report(20, "", true, true)
 	}
@@ -64,14 +64,14 @@ func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos lexer.Pos) (ld c
 	var scopes syms.SymMap // scope(s) for position, fname
 	scope := gl.CompletePosScope(fs, pos, fpath, &scopes)
 
-	start, last := gl.CompleteAstStart(lfs.ParseState.Ast, scope)
+	start, last := gl.CompleteASTStart(lfs.ParseState.AST, scope)
 	if CompleteTrace {
 		if start == nil {
 			fmt.Printf("start = nil\n")
 			return
 		}
 		fmt.Printf("\n####################\nlookup start in scope: %v\n", scope)
-		lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
+		lfs.ParseState.AST.WriteTree(os.Stdout, 0)
 		fmt.Printf("Start tree:\n")
 		start.WriteTree(os.Stdout, 0)
 	}
@@ -87,7 +87,7 @@ func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos lexer.Pos) (ld c
 		return gl.LookupString(fs, pkg, scopes, str)
 	}
 
-	typ, nxt, got := gl.TypeFromAstExprStart(fs, pkg, pkg, start)
+	typ, nxt, got := gl.TypeFromASTExprStart(fs, pkg, pkg, start)
 	lststr := ""
 	if nxt != nil {
 		lststr = nxt.Src
@@ -110,7 +110,7 @@ func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos lexer.Pos) (ld c
 		return
 	}
 	// see if it starts with a package name..
-	snxt := start.NextAst()
+	snxt := start.NextAST()
 	lststr = last.Src
 	if snxt != nil && snxt.Src != "" {
 		ststr := snxt.Src
@@ -166,7 +166,7 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos)
 	}
 
 	if CompleteTrace {
-		lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
+		lfs.ParseState.AST.WriteTree(os.Stdout, 0)
 		lfs.LexState.Errs.Report(20, "", true, true)
 		lfs.ParseState.Errs.Report(20, "", true, true)
 	}
@@ -174,14 +174,14 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos)
 	var scopes syms.SymMap // scope(s) for position, fname
 	scope := gl.CompletePosScope(fs, pos, fpath, &scopes)
 
-	start, last := gl.CompleteAstStart(lfs.ParseState.Ast, scope)
+	start, last := gl.CompleteASTStart(lfs.ParseState.AST, scope)
 	if CompleteTrace {
 		if start == nil {
 			fmt.Printf("start = nil\n")
 			return
 		}
 		fmt.Printf("\n####################\ncompletion start in scope: %v\n", scope)
-		lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
+		lfs.ParseState.AST.WriteTree(os.Stdout, 0)
 		fmt.Printf("Start tree:\n")
 		start.WriteTree(os.Stdout, 0)
 	}
@@ -207,7 +207,7 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos)
 		return
 	}
 
-	typ, nxt, got := gl.TypeFromAstExprStart(fs, pkg, pkg, start)
+	typ, nxt, got := gl.TypeFromASTExprStart(fs, pkg, pkg, start)
 	lststr := ""
 	if nxt != nil {
 		lststr = nxt.Src
@@ -218,7 +218,7 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos)
 	} else {
 		// see if it starts with a package name..
 		// todo: move this to a function as in lookup
-		snxt := start.NextAst()
+		snxt := start.NextAST()
 		if snxt != nil && snxt.Src != "" {
 			ststr := snxt.Src
 			psym, has := gl.PkgSyms(fs, pkg.Children, ststr)
@@ -242,7 +242,7 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos)
 
 	// if len(md.Matches) == 0 {
 	// 	fmt.Printf("complete str:  %v  orig: %v\n", str, origStr)
-	// 	lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
+	// 	lfs.ParseState.AST.WriteTree(os.Stdout, 0)
 	// }
 
 	return
@@ -368,9 +368,9 @@ func (gl *GoLang) LookupString(fs *parse.FileState, pkg *syms.Symbol, scopes sym
 	return
 }
 
-// CompleteAstStart finds the best starting point in the given current-line Ast
+// CompleteASTStart finds the best starting point in the given current-line AST
 // to start completion process, which walks back down from that starting point
-func (gl *GoLang) CompleteAstStart(ast *parser.AST, scope token.Tokens) (start, last *parser.AST) {
+func (gl *GoLang) CompleteASTStart(ast *parser.AST, scope token.Tokens) (start, last *parser.AST) {
 	curi := tree.Last(ast)
 	if curi == nil {
 		return
@@ -435,7 +435,7 @@ func (gl *GoLang) CompleteAstStart(ast *parser.AST, scope token.Tokens) (start, 
 		case cur.Name == "Args":
 			return prv, last
 		}
-		nxt := cur.PrevAst()
+		nxt := cur.PrevAST()
 		if nxt == nil {
 			return cur, last
 		}

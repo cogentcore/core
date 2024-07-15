@@ -40,14 +40,14 @@ const (
 
 	// PopScopeReg means remove the most recently added scope item, and also
 	// updates the source region for that item based on final SrcReg from
-	// corresponding Ast node -- for "definitional" scope
+	// corresponding AST node -- for "definitional" scope
 	PopScopeReg
 
 	// AddDetail adds src at given path as detail info for the last-added symbol
 	// if there is already something there, a space is added for this new addition
 	AddDetail
 
-	// AddType Adds a type with the given name -- sets the Ast node for this rule
+	// AddType Adds a type with the given name -- sets the AST node for this rule
 	// and actual type is resolved later in a second language-specific pass
 	AddType
 
@@ -59,16 +59,16 @@ const (
 	PopStack
 )
 
-// Act is one action to perform, operating on the Ast output
+// Act is one action to perform, operating on the AST output
 type Act struct {
 
-	// at what point during sequence of sub-rules / tokens should this action be run?  -1 = at end, 0 = before first rule, 1 = before second rule, etc -- must be at point when relevant Ast nodes have been added, but for scope setting, must be early enough so that scope is present
+	// at what point during sequence of sub-rules / tokens should this action be run?  -1 = at end, 0 = before first rule, 1 = before second rule, etc -- must be at point when relevant AST nodes have been added, but for scope setting, must be early enough so that scope is present
 	RunIndex int
 
 	// what action to perform
 	Act Actions
 
-	// Ast path, relative to current node: empty = current node; specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | or & and will be tried in order until one succeeds (for |) or all that succeed will be used for &. ... means use all nodes with given name (only for change token) -- for PushStack, this is what to push on the stack
+	// AST path, relative to current node: empty = current node; specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | or & and will be tried in order until one succeeds (for |) or all that succeed will be used for &. ... means use all nodes with given name (only for change token) -- for PushStack, this is what to push on the stack
 	Path string `width:"50"`
 
 	// for ChangeToken, the new token type to assign to token at given path
@@ -120,31 +120,31 @@ type ASTActs int32 //enums:enum
 
 // The [AST] actions
 const (
-	// NoAST means don't create an Ast node for this rule
+	// NoAST means don't create an AST node for this rule
 	NoAST ASTActs = iota
 
-	// AddAST means create an Ast node for this rule, adding it to the current anchor Ast.
+	// AddAST means create an AST node for this rule, adding it to the current anchor AST.
 	// Any sub-rules within this rule are *not* added as children of this node -- see
-	// SubAst and AnchorAst.  This is good for token-only terminal nodes and list elements
+	// SubAST and AnchorAST.  This is good for token-only terminal nodes and list elements
 	// that should be added to a list.
 	AddAST
 
-	// SubAST means create an Ast node and add all the elements of *this rule* as
+	// SubAST means create an AST node and add all the elements of *this rule* as
 	// children of this new node (including sub-rules), *except* for the very last rule
 	// which is assumed to be a recursive rule -- that one goes back up to the parent node.
 	// This is good for adding more complex elements with sub-rules to a recursive list,
 	// without creating a new hierarchical depth level for every such element.
 	SubAST
 
-	// AnchorAST means create an Ast node and set it as the anchor that subsequent
+	// AnchorAST means create an AST node and set it as the anchor that subsequent
 	// sub-nodes are added into.  This is for a new hierarchical depth level
 	// where everything under this rule gets organized.
 	AnchorAST
 
-	// AnchorFirstAST means create an Ast node and set it as the anchor that subsequent
+	// AnchorFirstAST means create an AST node and set it as the anchor that subsequent
 	// sub-nodes are added into, *only* if this is the first time that this rule has
 	// matched within the current sequence (i.e., if the parent of this rule is the same
-	// rule then don't add a new Ast node).  This is good for starting a new list
+	// rule then don't add a new AST node).  This is good for starting a new list
 	// of recursively defined elements, without creating increasing depth levels.
 	AnchorFirstAST
 )

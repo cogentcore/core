@@ -188,7 +188,7 @@ func (pr *Parser) LexAll(fs *FileState) {
 // ParserInit initializes the parser prior to running
 func (pr *Parser) ParserInit(fs *FileState) bool {
 	fs.AnonCtr = 0
-	fs.ParseState.Init(&fs.Src, fs.Ast)
+	fs.ParseState.Init(&fs.Src, fs.AST)
 	return true
 }
 
@@ -225,7 +225,7 @@ func (pr *Parser) ParseAll(fs *FileState) {
 
 // ParseLine runs parser for given single line of source
 // does Parsing in a separate FileState and returns that with
-// Ast etc (or nil if nothing).  Assumes LexLine has already
+// AST etc (or nil if nothing).  Assumes LexLine has already
 // been run on given line.
 func (pr *Parser) ParseLine(fs *FileState, ln int) *FileState {
 	nlines := fs.Src.NLines()
@@ -235,7 +235,7 @@ func (pr *Parser) ParseLine(fs *FileState, ln int) *FileState {
 	lfs := NewFileState()
 	lfs.Src.InitFromLine(&fs.Src, ln)
 	lfs.Src.EnsureFinalEos(0)
-	lfs.ParseState.Init(&lfs.Src, lfs.Ast)
+	lfs.ParseState.Init(&lfs.Src, lfs.AST)
 	pr.ParseRun(lfs)
 	return lfs
 }
@@ -252,7 +252,7 @@ func (pr *Parser) ParseString(str string, fname string, sup fileinfo.Known) *Fil
 	lfs.Src.InitFromString(str, fname, sup)
 	// lfs.ParseState.Trace.FullOn()
 	// lfs.ParseSTate.Trace.StdOut()
-	lfs.ParseState.Init(&lfs.Src, lfs.Ast)
+	lfs.ParseState.Init(&lfs.Src, lfs.AST)
 	pr.LexAll(lfs)
 	lxs := lfs.Src.Lexs[0]
 	if len(lxs) == 0 {

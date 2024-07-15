@@ -89,9 +89,9 @@ func (gl *GoLang) ParseFile(fss *parse.FileStates, txt []byte) {
 		if TraceTypes {
 			fmt.Printf("not importing scope for: %v\n", path)
 		}
-		pfs.ClearAst()
-		if pfs.Ast.HasChildren() {
-			pfs.Ast.DeleteChildren()
+		pfs.ClearAST()
+		if pfs.AST.HasChildren() {
+			pfs.AST.DeleteChildren()
 		}
 		// fmt.Println("done no import")
 	}

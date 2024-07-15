@@ -21,8 +21,8 @@ type State struct {
 	// tracing for this parser
 	Trace TraceOptions
 
-	// root of the Ast abstract syntax tree we're updating
-	Ast *AST
+	// root of the AST abstract syntax tree we're updating
+	AST *AST
 
 	// symbol map that everything gets added to from current file of parsing -- typically best for subsequent management to just have a single outer-most scoping symbol here (e.g., in Go it is the package), and then everything is a child under that
 	Syms syms.SymMap
@@ -56,16 +56,16 @@ func (ps *State) Init(src *lexer.File, ast *AST) {
 	// 	fmt.Println("new:", src.Filename)
 	// }
 	ps.Src = src
-	if ps.Ast != nil && ps.Ast.This != nil {
+	if ps.AST != nil && ps.AST.This != nil {
 		// fmt.Println("deleting old ast")
-		ps.Ast.DeleteChildren()
+		ps.AST.DeleteChildren()
 	}
-	ps.Ast = ast
-	if ps.Ast != nil && ps.Ast.This != nil {
+	ps.AST = ast
+	if ps.AST != nil && ps.AST.This != nil {
 		// fmt.Println("deleting new ast")
-		ps.Ast.DeleteChildren()
+		ps.AST.DeleteChildren()
 	}
-	ps.ClearAst()
+	ps.ClearAST()
 	ps.Syms.Reset()
 	ps.Scopes.Reset()
 	ps.Stack.Reset()
@@ -77,17 +77,17 @@ func (ps *State) Init(src *lexer.File, ast *AST) {
 	ps.AllocRules()
 }
 
-func (ps *State) ClearAst() {
-	ps.Syms.ClearAst()
-	ps.Scopes.ClearAst()
+func (ps *State) ClearAST() {
+	ps.Syms.ClearAST()
+	ps.Scopes.ClearAST()
 }
 
 func (ps *State) Destroy() {
-	if ps.Ast != nil && ps.Ast.This != nil {
-		ps.Ast.DeleteChildren()
+	if ps.AST != nil && ps.AST.This != nil {
+		ps.AST.DeleteChildren()
 	}
-	ps.Ast = nil
-	ps.ClearAst()
+	ps.AST = nil
+	ps.ClearAST()
 	ps.Syms.Reset()
 	ps.Scopes.Reset()
 	ps.Stack.Reset()
@@ -276,12 +276,12 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lexer.Reg) (lexer.Pos
 	return cp, false
 }
 
-// AddAST adds a child Ast node to given parent Ast node
+// AddAST adds a child AST node to given parent AST node
 func (ps *State) AddAST(parAST *AST, rule string, reg lexer.Reg) *AST {
-	chAst := NewAST(parAST)
-	chAst.SetName(rule)
-	chAst.SetTokReg(reg, ps.Src)
-	return chAst
+	chAST := NewAST(parAST)
+	chAST.SetName(rule)
+	chAST.SetTokReg(reg, ps.Src)
+	return chAST
 }
 
 ///////////////////////////////////////////////////////////////////////////

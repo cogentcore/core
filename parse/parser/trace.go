@@ -135,7 +135,7 @@ func (pt *TraceOptions) Out(ps *State, pr *Rule, step Steps, pos lexer.Pos, scop
 		}
 	}
 	tokSrc := pos.String() + `"` + string(ps.Src.TokenSrc(pos)) + `"`
-	plev := ast.ParentLevel(ps.Ast)
+	plev := ast.ParentLevel(ps.AST)
 	ind := ""
 	for i := 0; i < plev; i++ {
 		ind += "\t"

@@ -34,8 +34,8 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 		sy.Type = TypeErr
 		return
 	}
-	if sy.Ast != nil {
-		ast := sy.Ast.(*parser.AST)
+	if sy.AST != nil {
+		ast := sy.AST.(*parser.AST)
 		switch {
 		case sy.Kind == token.NameField:
 			stsc, ok := sy.Scopes[token.NameStruct]
@@ -75,8 +75,8 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 				if strings.HasPrefix(ast.Name, "ForRange") {
 					gl.InferForRangeSymbolType(sy, fs, pkg)
 				} else {
-					astyp = ast.ChildAst(len(ast.Children) - 1)
-					vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
+					astyp = ast.ChildAST(len(ast.Children) - 1)
+					vty, ok := gl.TypeFromAST(fs, pkg, nil, astyp)
 					if ok {
 						sy.Type = SymTypeNameForPkg(vty, pkg)
 						// if TraceTypes {
@@ -103,15 +103,15 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 				}
 				return
 			}
-			parent := ast.ParentAst()
+			parent := ast.ParentAST()
 			if parent != nil && parent.HasChildren() {
-				fc := parent.ChildAst(0)
+				fc := parent.ChildAST(0)
 				if fc.HasChildren() {
-					ffc := fc.ChildAst(0)
+					ffc := fc.ChildAST(0)
 					if ffc.Name == "Name" {
-						ffc = ffc.NextAst()
+						ffc = ffc.NextAST()
 					}
-					vty, ok := gl.TypeFromAst(fs, pkg, nil, ffc)
+					vty, ok := gl.TypeFromAST(fs, pkg, nil, ffc)
 					if ok {
 						sy.Type = SymTypeNameForPkg(vty, pkg)
 					} else {
@@ -136,12 +136,12 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 				// 	fmt.Printf("InferSymbolType: NameType: %v\n", sy.Name)
 				// }
 				if ast.HasChildren() {
-					astyp := ast.ChildAst(len(ast.Children) - 1)
+					astyp := ast.ChildAST(len(ast.Children) - 1)
 					if astyp.Name == "FieldTag" {
 						// ast.WriteTree(os.Stdout, 1)
-						astyp = ast.ChildAst(len(ast.Children) - 2)
+						astyp = ast.ChildAST(len(ast.Children) - 2)
 					}
-					vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
+					vty, ok := gl.TypeFromAST(fs, pkg, nil, astyp)
 					if ok {
 						sy.Type = SymTypeNameForPkg(vty, pkg)
 						// if TraceTypes {
@@ -159,7 +159,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 				}
 			}
 		case sy.Kind == token.NameFunction:
-			ftyp := gl.FuncTypeFromAst(fs, pkg, ast, nil)
+			ftyp := gl.FuncTypeFromAST(fs, pkg, ast, nil)
 			if ftyp != nil {
 				ftyp.Name = "func " + sy.Name
 				ftyp.Filename = sy.Filename
@@ -190,7 +190,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 // InferForRangeSymbolType infers the type of a ForRange expr
 // gets the container type properly
 func (gl *GoLang) InferForRangeSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *syms.Symbol) {
-	ast := sy.Ast.(*parser.AST)
+	ast := sy.AST.(*parser.AST)
 	if ast.NumChildren() < 2 {
 		sy.Type = TypeErr // actively mark as err so not re-processed
 		if TraceTypes {
@@ -200,8 +200,8 @@ func (gl *GoLang) InferForRangeSymbolType(sy *syms.Symbol, fs *parse.FileState, 
 		return
 	}
 	// vars are in first child, type is in second child, rest of code is on last node
-	astyp := ast.ChildAst(1)
-	vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
+	astyp := ast.ChildAST(1)
+	vty, ok := gl.TypeFromAST(fs, pkg, nil, astyp)
 	if !ok {
 		sy.Type = TypeErr // actively mark as err so not re-processed
 		if TraceTypes {
@@ -212,10 +212,10 @@ func (gl *GoLang) InferForRangeSymbolType(sy *syms.Symbol, fs *parse.FileState, 
 	}
 
 	varidx := 1 // which variable are we: first or second?
-	vast := ast.ChildAst(0)
+	vast := ast.ChildAST(0)
 	if vast.NumChildren() <= 1 {
 		varidx = 0
-	} else if vast.ChildAst(0).Src == sy.Name {
+	} else if vast.ChildAST(0).Src == sy.Name {
 		varidx = 0
 	}
 	// vty is the container -- first el should be the type of element

@@ -25,11 +25,11 @@ func (gl *GoLang) TypeMeths(fs *parse.FileState, pkg *syms.Symbol, ty *syms.Type
 		return
 	}
 	for _, sy := range tsym.Children {
-		if sy.Kind.SubCat() != token.NameFunction || sy.Ast == nil {
+		if sy.Kind.SubCat() != token.NameFunction || sy.AST == nil {
 			continue
 		}
 
-		fty := gl.FuncTypeFromAst(fs, pkg, sy.Ast.(*parser.AST), nil)
+		fty := gl.FuncTypeFromAST(fs, pkg, sy.AST.(*parser.AST), nil)
 		if fty != nil {
 			fty.Kind = syms.Method
 			fty.Name = sy.Name
@@ -47,9 +47,9 @@ func (gl *GoLang) TypeMeths(fs *parse.FileState, pkg *syms.Symbol, ty *syms.Type
 	}
 }
 
-// NamesFromAst returns a slice of name(s) from namelist nodes
-func (gl *GoLang) NamesFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *parser.AST, idx int) []string {
-	sast := ast.ChildAst(idx)
+// NamesFromAST returns a slice of name(s) from namelist nodes
+func (gl *GoLang) NamesFromAST(fs *parse.FileState, pkg *syms.Symbol, ast *parser.AST, idx int) []string {
+	sast := ast.ChildAST(idx)
 	if sast == nil {
 		if TraceTypes {
 			fmt.Printf("TraceTypes: could not find child 0 on ast %v", ast)
@@ -59,7 +59,7 @@ func (gl *GoLang) NamesFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *parse
 	var sary []string
 	if sast.HasChildren() {
 		for i := range sast.Children {
-			sary = append(sary, gl.NamesFromAst(fs, pkg, sast, i)...)
+			sary = append(sary, gl.NamesFromAST(fs, pkg, sast, i)...)
 		}
 	} else {
 		sary = append(sary, sast.Src)
@@ -67,15 +67,15 @@ func (gl *GoLang) NamesFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *parse
 	return sary
 }
 
-// FuncTypeFromAst initializes a function type from ast -- type can either be anon
+// FuncTypeFromAST initializes a function type from ast -- type can either be anon
 // or a named type -- if anon then the name is the full type signature without param names
-func (gl *GoLang) FuncTypeFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *parser.AST, fty *syms.Type) *syms.Type {
+func (gl *GoLang) FuncTypeFromAST(fs *parse.FileState, pkg *syms.Symbol, ast *parser.AST, fty *syms.Type) *syms.Type {
 	// ast.WriteTree(os.Stdout, 0)
 
 	if ast == nil || !ast.HasChildren() {
 		return nil
 	}
-	pars := ast.ChildAst(0)
+	pars := ast.ChildAST(0)
 	if pars == nil {
 		if TraceTypes {
 			fmt.Printf("TraceTypes: could not find child 0 on ast %v", ast)
@@ -94,15 +94,15 @@ func (gl *GoLang) FuncTypeFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *pa
 		rtyp := pars.Children[1].(*parser.AST)
 		fty.Els.Add(rcv.Src, rtyp.Src)
 		poff = 2
-		pars = ast.ChildAst(2)
+		pars = ast.ChildAST(2)
 	} else if pars.Name == "Name" && len(ast.Children) > 1 {
 		poff = 1
-		pars = ast.ChildAst(1)
+		pars = ast.ChildAST(1)
 	}
 	npars := len(pars.Children)
 	var sigpars *parser.AST
 	if npars > 0 && (pars.Name == "SigParams" || pars.Name == "SigParamsResult") {
-		if ps := pars.ChildAst(0); ps == nil {
+		if ps := pars.ChildAST(0); ps == nil {
 			sigpars = pars
 			pars = ps
 			npars = len(pars.Children)
@@ -111,7 +111,7 @@ func (gl *GoLang) FuncTypeFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *pa
 		}
 	}
 	if npars > 0 {
-		gl.ParamsFromAst(fs, pkg, pars, fty, "param")
+		gl.ParamsFromAST(fs, pkg, pars, fty, "param")
 		npars = len(fty.Els) // how many we added -- auto-includes receiver for method
 	} else {
 		if isMeth {
@@ -120,20 +120,20 @@ func (gl *GoLang) FuncTypeFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *pa
 	}
 	nrvals := 0
 	if sigpars != nil && len(sigpars.Children) >= 2 {
-		rvals := sigpars.ChildAst(1)
-		gl.RvalsFromAst(fs, pkg, rvals, fty)
+		rvals := sigpars.ChildAST(1)
+		gl.RvalsFromAST(fs, pkg, rvals, fty)
 		nrvals = len(fty.Els) - npars // how many we added..
 	} else if poff < 2 && (len(ast.Children) >= poff+2) {
-		rvals := ast.ChildAst(poff + 1)
-		gl.RvalsFromAst(fs, pkg, rvals, fty)
+		rvals := ast.ChildAST(poff + 1)
+		gl.RvalsFromAST(fs, pkg, rvals, fty)
 		nrvals = len(fty.Els) - npars // how many we added..
 	}
 	fty.Size = []int{npars, nrvals}
 	return fty
 }
 
-// ParamsFromAst sets params as Els for given function type (also for return types)
-func (gl *GoLang) ParamsFromAst(fs *parse.FileState, pkg *syms.Symbol, pars *parser.AST, fty *syms.Type, name string) {
+// ParamsFromAST sets params as Els for given function type (also for return types)
+func (gl *GoLang) ParamsFromAST(fs *parse.FileState, pkg *syms.Symbol, pars *parser.AST, fty *syms.Type, name string) {
 	npars := len(pars.Children)
 	var pnames []string // param names that all share same type
 	for i := 0; i < npars; i++ {
@@ -148,7 +148,7 @@ func (gl *GoLang) ParamsFromAst(fs *parse.FileState, pkg *syms.Symbol, pars *par
 				}
 				pnames = append(pnames, par.Src) // add to later type
 			} else {
-				ptyp, ok := gl.SubTypeFromAst(fs, pkg, par, 0)
+				ptyp, ok := gl.SubTypeFromAST(fs, pkg, par, 0)
 				if ok {
 					pnsz := len(pnames)
 					if pnsz > 0 {
@@ -163,7 +163,7 @@ func (gl *GoLang) ParamsFromAst(fs *parse.FileState, pkg *syms.Symbol, pars *par
 			}
 		} else if psz == 2 { // ParName
 			pnm := par.Children[0].(*parser.AST)
-			ptyp, ok := gl.SubTypeFromAst(fs, pkg, par, 1)
+			ptyp, ok := gl.SubTypeFromAST(fs, pkg, par, 1)
 			if ok {
 				pnsz := len(pnames)
 				if pnsz > 0 {
@@ -179,22 +179,22 @@ func (gl *GoLang) ParamsFromAst(fs *parse.FileState, pkg *syms.Symbol, pars *par
 	}
 }
 
-// RvalsFromAst sets return value(s) as Els for given function type
-func (gl *GoLang) RvalsFromAst(fs *parse.FileState, pkg *syms.Symbol, rvals *parser.AST, fty *syms.Type) {
+// RvalsFromAST sets return value(s) as Els for given function type
+func (gl *GoLang) RvalsFromAST(fs *parse.FileState, pkg *syms.Symbol, rvals *parser.AST, fty *syms.Type) {
 	if rvals.Name == "Block" { // todo: maybe others
 		return
 	}
 	nrvals := len(rvals.Children)
 	if nrvals == 1 { // single rval, unnamed, has type directly..
-		rval := rvals.ChildAst(0)
+		rval := rvals.ChildAST(0)
 		if rval.Name != "ParName" {
 			nrvals = 1
-			rtyp, ok := gl.SubTypeFromAst(fs, pkg, rvals, 0)
+			rtyp, ok := gl.SubTypeFromAST(fs, pkg, rvals, 0)
 			if ok {
 				fty.Els.Add("rval", rtyp.Name)
 				return
 			}
 		}
 	}
-	gl.ParamsFromAst(fs, pkg, rvals, fty, "rval")
+	gl.ParamsFromAST(fs, pkg, rvals, fty, "rval")
 }

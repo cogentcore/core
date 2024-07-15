@@ -751,7 +751,7 @@ func tst() {
 func tst() {
 	pv.SaveParser()
 	pv.GetSettings()
-	Trace.Out(ps, pr, Run, creg.St, creg, trcAst, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name()))
+	Trace.Out(ps, pr, Run, creg.St, creg, trcAST, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name()))
 }
 
 var unaryptr = 25 * *(ptr+2)  // directly to rhs or depth sub of it
@@ -852,7 +852,7 @@ func (pr *Parser) Init2(a int, fname string, amap map[string]string) bool {
 }
 
 func (pr *Parser) Init3(a, b int, fname string) (bool, string) {
-	pr.Ast.InitName(&pr.Ast, "Ast")
+	pr.AST.InitName(&pr.AST, "AST")
 }
 
 func (pr *Parser) Init4(a, b int, fname string) (ok bool, name string) {

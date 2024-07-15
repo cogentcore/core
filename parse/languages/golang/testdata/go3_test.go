@@ -46,15 +46,15 @@ type Lang interface {
 	LexLine(fs *FileState, line int) lexer.Line
 
 	// ParseLine does complete parser processing of a single line from given file, and returns
-	// the Ast generated for that line.  Line is in 0-indexed "internal" line indexes.
+	// the AST generated for that line.  Line is in 0-indexed "internal" line indexes.
 	// The rune source information is assumed to have already been updated in FileState
 	// Existing context information from full-file parsing is used as appropriate, but
-	// the results will NOT be used to update any existing full-file Ast representation --
+	// the results will NOT be used to update any existing full-file AST representation --
 	// should call ParseFile to update that as appropriate.
-	ParseLine(fs *FileState, line int) *parser.Ast
+	ParseLine(fs *FileState, line int) *parser.AST
 
 	// CompleteLine provides the list of relevant completions for given position within
-	// the file -- typically language will call ParseLine on that line, and use the Ast
+	// the file -- typically language will call ParseLine on that line, and use the AST
 	// to guide the selection of relevant symbols that can complete the code at
 	// the given point.  A stack (slice) of symbols is returned so that the completer
 	// can control the order of items presented, as compared to the SymMap.
