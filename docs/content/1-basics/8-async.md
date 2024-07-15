@@ -17,4 +17,4 @@ go func() {
 }()
 ```
 
-If you are calling multiple functions asynchronously, you should use [[core.WidgetBase.AsyncLock]] and [[core.WidgetBase.AsyncUnlock]] to surround the functions instead.
+If you are calling multiple functions asynchronously, you should use [[core.WidgetBase.AsyncLock]] and [[core.WidgetBase.AsyncUnlock]] to surround the function calls instead.
