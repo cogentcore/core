@@ -59,7 +59,7 @@ func (lv *VCSLog) Init() {
 		s.Grow.Set(1, 1)
 	})
 	tree.AddChildAt(lv, "toolbar", func(w *core.Toolbar) {
-		w.Maker(lv.MakeToolbar)
+		w.Maker(lv.makeToolbar)
 	})
 	tree.AddChildAt(lv, "log", func(w *core.Table) {
 		w.SetReadOnly(true)
@@ -87,7 +87,7 @@ func (lv *VCSLog) Init() {
 				SetTooltip("Views the file at this revision").
 				OnClick(func(e events.Event) {
 					cmt := lv.Log[w.SelectedIndex]
-					FileAtRevDialog(lv, lv.Repo, lv.File, cmt.Rev)
+					fileAtRevisionDialog(lv, lv.Repo, lv.File, cmt.Rev)
 				})
 			core.NewButton(m).SetText("Checkout Revision").
 				SetTooltip("Checks out this revision").
@@ -166,7 +166,7 @@ func (lv *VCSLog) toggleRevision() {
 	lv.brev.UpdateRender()
 }
 
-func (lv *VCSLog) MakeToolbar(p *tree.Plan) {
+func (lv *VCSLog) makeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *core.Text) {
 		w.SetText("File: " + fsx.DirAndFile(lv.File))
 	})
@@ -189,7 +189,7 @@ func (lv *VCSLog) MakeToolbar(p *tree.Plan) {
 		w.SetText("View A").SetIcon(icons.Document).
 			SetTooltip("View file at revision A").
 			OnClick(func(e events.Event) {
-				FileAtRevDialog(lv, lv.Repo, lv.File, lv.revisionA)
+				fileAtRevisionDialog(lv, lv.Repo, lv.File, lv.revisionA)
 			})
 	})
 
@@ -217,7 +217,7 @@ func (lv *VCSLog) MakeToolbar(p *tree.Plan) {
 		w.SetText("View B").SetIcon(icons.Document).
 			SetTooltip("View file at revision B").
 			OnClick(func(e events.Event) {
-				FileAtRevDialog(lv, lv.Repo, lv.File, lv.revisionB)
+				fileAtRevisionDialog(lv, lv.Repo, lv.File, lv.revisionB)
 			})
 	})
 
@@ -236,8 +236,8 @@ func (lv *VCSLog) MakeToolbar(p *tree.Plan) {
 	})
 }
 
-// VCSLogDialog returns a VCS Log View for given repo, log and file (file could be empty)
-func VCSLogDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since string) *core.Body {
+// vcsLogDialog returns a VCS Log View for given repo, log and file (file could be empty)
+func vcsLogDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since string) *core.Body {
 	title := "VCS Log: "
 	if file == "" {
 		title += "All files"
@@ -254,8 +254,8 @@ func VCSLogDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since string
 	return d
 }
 
-// FileAtRevDialog Shows a file at a given revision in a new dialog window
-func FileAtRevDialog(ctx core.Widget, repo vcs.Repo, file, rev string) *core.Body {
+// fileAtRevisionDialog shows a file at a given revision in a new dialog window
+func fileAtRevisionDialog(ctx core.Widget, repo vcs.Repo, file, rev string) *core.Body {
 	fb, err := repo.FileContents(file, rev)
 	if err != nil {
 		core.ErrorDialog(ctx, err)

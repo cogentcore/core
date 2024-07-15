@@ -263,7 +263,7 @@ func (fn *Node) LogVCS(allFiles bool, since string) (vcs.Log, error) {
 	if err != nil {
 		return lg, err
 	}
-	VCSLogDialog(nil, repo, lg, fnm, since)
+	vcsLogDialog(nil, repo, lg, fnm, since)
 	return lg, nil
 }
 
