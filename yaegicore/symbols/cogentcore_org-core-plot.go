@@ -31,7 +31,7 @@ func init() {
 		"DataRanger":     reflect.ValueOf((*plot.DataRanger)(nil)),
 		"DefaultTicks":   reflect.ValueOf((*plot.DefaultTicks)(nil)),
 		"InvertedScale":  reflect.ValueOf((*plot.InvertedScale)(nil)),
-		"Labeller":       reflect.ValueOf((*plot.Labeler)(nil)),
+		"Labeler":        reflect.ValueOf((*plot.Labeler)(nil)),
 		"Legend":         reflect.ValueOf((*plot.Legend)(nil)),
 		"LegendEntry":    reflect.ValueOf((*plot.LegendEntry)(nil)),
 		"LegendPosition": reflect.ValueOf((*plot.LegendPosition)(nil)),
@@ -62,7 +62,7 @@ func init() {
 
 		// interface wrapper definitions
 		"_DataRanger":  reflect.ValueOf((*_cogentcore_org_core_plot_DataRanger)(nil)),
-		"_Labeller":    reflect.ValueOf((*_cogentcore_org_core_plot_Labeller)(nil)),
+		"_Labeler":     reflect.ValueOf((*_cogentcore_org_core_plot_Labeler)(nil)),
 		"_Normalizer":  reflect.ValueOf((*_cogentcore_org_core_plot_Normalizer)(nil)),
 		"_Plotter":     reflect.ValueOf((*_cogentcore_org_core_plot_Plotter)(nil)),
 		"_Thumbnailer": reflect.ValueOf((*_cogentcore_org_core_plot_Thumbnailer)(nil)),
@@ -83,13 +83,13 @@ func (W _cogentcore_org_core_plot_DataRanger) DataRange() (xmin float32, xmax fl
 	return W.WDataRange()
 }
 
-// _cogentcore_org_core_plot_Labeller is an interface wrapper for Labeller type
-type _cogentcore_org_core_plot_Labeller struct {
+// _cogentcore_org_core_plot_Labeler is an interface wrapper for Labeler type
+type _cogentcore_org_core_plot_Labeler struct {
 	IValue interface{}
 	WLabel func(i int) string
 }
 
-func (W _cogentcore_org_core_plot_Labeller) Label(i int) string { return W.WLabel(i) }
+func (W _cogentcore_org_core_plot_Labeler) Label(i int) string { return W.WLabel(i) }
 
 // _cogentcore_org_core_plot_Normalizer is an interface wrapper for Normalizer type
 type _cogentcore_org_core_plot_Normalizer struct {

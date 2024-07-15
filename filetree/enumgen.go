@@ -6,50 +6,50 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _DirFlagsValues = []dirFlags{0, 1, 2}
+var _dirFlagsValues = []dirFlags{0, 1, 2}
 
-// DirFlagsN is the highest valid value for type DirFlags, plus one.
-const DirFlagsN dirFlags = 3
+// dirFlagsN is the highest valid value for type dirFlags, plus one.
+const dirFlagsN dirFlags = 3
 
-var _DirFlagsValueMap = map[string]dirFlags{`IsOpen`: 0, `SortByName`: 1, `SortByModTime`: 2}
+var _dirFlagsValueMap = map[string]dirFlags{`IsOpen`: 0, `SortByName`: 1, `SortByModTime`: 2}
 
-var _DirFlagsDescMap = map[dirFlags]string{0: `DirIsOpen means directory is open -- else closed`, 1: `DirSortByName means sort the directory entries by name. this is mutex with other sorts -- keeping option open for non-binary sort choices.`, 2: `DirSortByModTime means sort the directory entries by modification time`}
+var _dirFlagsDescMap = map[dirFlags]string{0: `dirIsOpen means directory is open -- else closed`, 1: `dirSortByName means sort the directory entries by name. this is mutex with other sorts -- keeping option open for non-binary sort choices.`, 2: `dirSortByModTime means sort the directory entries by modification time`}
 
-var _DirFlagsMap = map[dirFlags]string{0: `IsOpen`, 1: `SortByName`, 2: `SortByModTime`}
+var _dirFlagsMap = map[dirFlags]string{0: `IsOpen`, 1: `SortByName`, 2: `SortByModTime`}
 
-// String returns the string representation of this DirFlags value.
-func (i dirFlags) String() string { return enums.BitFlagString(i, _DirFlagsValues) }
+// String returns the string representation of this dirFlags value.
+func (i dirFlags) String() string { return enums.BitFlagString(i, _dirFlagsValues) }
 
-// BitIndexString returns the string representation of this DirFlags value
+// BitIndexString returns the string representation of this dirFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
-func (i dirFlags) BitIndexString() string { return enums.String(i, _DirFlagsMap) }
+func (i dirFlags) BitIndexString() string { return enums.String(i, _dirFlagsMap) }
 
-// SetString sets the DirFlags value from its string representation,
+// SetString sets the dirFlags value from its string representation,
 // and returns an error if the string is invalid.
 func (i *dirFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
-// SetStringOr sets the DirFlags value from its string representation
+// SetStringOr sets the dirFlags value from its string representation
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *dirFlags) SetStringOr(s string) error {
-	return enums.SetStringOr(i, s, _DirFlagsValueMap, "DirFlags")
+	return enums.SetStringOr(i, s, _dirFlagsValueMap, "dirFlags")
 }
 
-// Int64 returns the DirFlags value as an int64.
+// Int64 returns the dirFlags value as an int64.
 func (i dirFlags) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the DirFlags value from an int64.
+// SetInt64 sets the dirFlags value from an int64.
 func (i *dirFlags) SetInt64(in int64) { *i = dirFlags(in) }
 
-// Desc returns the description of the DirFlags value.
-func (i dirFlags) Desc() string { return enums.Desc(i, _DirFlagsDescMap) }
+// Desc returns the description of the dirFlags value.
+func (i dirFlags) Desc() string { return enums.Desc(i, _dirFlagsDescMap) }
 
-// DirFlagsValues returns all possible values for the type DirFlags.
-func DirFlagsValues() []dirFlags { return _DirFlagsValues }
+// dirFlagsValues returns all possible values for the type dirFlags.
+func dirFlagsValues() []dirFlags { return _dirFlagsValues }
 
-// Values returns all possible values for the type DirFlags.
-func (i dirFlags) Values() []enums.Enum { return enums.Values(_DirFlagsValues) }
+// Values returns all possible values for the type dirFlags.
+func (i dirFlags) Values() []enums.Enum { return enums.Values(_dirFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
 func (i dirFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
@@ -61,45 +61,47 @@ func (i *dirFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)
 func (i dirFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *dirFlags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "DirFlags") }
+func (i *dirFlags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "dirFlags") }
 
-var _FindLocValues = []FindLocation{0, 1, 2, 3, 4}
+var _FindLocationValues = []FindLocation{0, 1, 2, 3, 4}
 
-// FindLocN is the highest valid value for type FindLoc, plus one.
-const FindLocN FindLocation = 5
+// FindLocationN is the highest valid value for type FindLocation, plus one.
+const FindLocationN FindLocation = 5
 
-var _FindLocValueMap = map[string]FindLocation{`Open`: 0, `All`: 1, `File`: 2, `Dir`: 3, `NotTop`: 4}
+var _FindLocationValueMap = map[string]FindLocation{`Open`: 0, `All`: 1, `File`: 2, `Dir`: 3, `NotTop`: 4}
 
-var _FindLocDescMap = map[FindLocation]string{0: `FindOpen finds in all open folders in the left file browser`, 1: `FindLocAll finds in all directories under the root path. can be slow for large file trees`, 2: `FindLocFile only finds in the current active file`, 3: `FindLocDir only finds in the directory of the current active file`, 4: `FindLocNotTop finds in all open folders *except* the top-level folder`}
+var _FindLocationDescMap = map[FindLocation]string{0: `FindOpen finds in all open folders in the left file browser`, 1: `FindLocationAll finds in all directories under the root path. can be slow for large file trees`, 2: `FindLocationFile only finds in the current active file`, 3: `FindLocationDir only finds in the directory of the current active file`, 4: `FindLocationNotTop finds in all open folders *except* the top-level folder`}
 
-var _FindLocMap = map[FindLocation]string{0: `Open`, 1: `All`, 2: `File`, 3: `Dir`, 4: `NotTop`}
+var _FindLocationMap = map[FindLocation]string{0: `Open`, 1: `All`, 2: `File`, 3: `Dir`, 4: `NotTop`}
 
-// String returns the string representation of this FindLoc value.
-func (i FindLocation) String() string { return enums.String(i, _FindLocMap) }
+// String returns the string representation of this FindLocation value.
+func (i FindLocation) String() string { return enums.String(i, _FindLocationMap) }
 
-// SetString sets the FindLoc value from its string representation,
+// SetString sets the FindLocation value from its string representation,
 // and returns an error if the string is invalid.
 func (i *FindLocation) SetString(s string) error {
-	return enums.SetString(i, s, _FindLocValueMap, "FindLoc")
+	return enums.SetString(i, s, _FindLocationValueMap, "FindLocation")
 }
 
-// Int64 returns the FindLoc value as an int64.
+// Int64 returns the FindLocation value as an int64.
 func (i FindLocation) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the FindLoc value from an int64.
+// SetInt64 sets the FindLocation value from an int64.
 func (i *FindLocation) SetInt64(in int64) { *i = FindLocation(in) }
 
-// Desc returns the description of the FindLoc value.
-func (i FindLocation) Desc() string { return enums.Desc(i, _FindLocDescMap) }
+// Desc returns the description of the FindLocation value.
+func (i FindLocation) Desc() string { return enums.Desc(i, _FindLocationDescMap) }
 
-// FindLocValues returns all possible values for the type FindLoc.
-func FindLocValues() []FindLocation { return _FindLocValues }
+// FindLocationValues returns all possible values for the type FindLocation.
+func FindLocationValues() []FindLocation { return _FindLocationValues }
 
-// Values returns all possible values for the type FindLoc.
-func (i FindLocation) Values() []enums.Enum { return enums.Values(_FindLocValues) }
+// Values returns all possible values for the type FindLocation.
+func (i FindLocation) Values() []enums.Enum { return enums.Values(_FindLocationValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i FindLocation) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *FindLocation) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "FindLoc") }
+func (i *FindLocation) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "FindLocation")
+}

@@ -60,17 +60,17 @@ func init() {
 		"XErrorBars": reflect.ValueOf((*plots.XErrorBars)(nil)),
 		"XErrorer":   reflect.ValueOf((*plots.XErrorer)(nil)),
 		"XErrors":    reflect.ValueOf((*plots.XErrors)(nil)),
-		"XYLabeller": reflect.ValueOf((*plots.XYLabeler)(nil)),
+		"XYLabeler":  reflect.ValueOf((*plots.XYLabeler)(nil)),
 		"XYLabels":   reflect.ValueOf((*plots.XYLabels)(nil)),
 		"YErrorBars": reflect.ValueOf((*plots.YErrorBars)(nil)),
 		"YErrorer":   reflect.ValueOf((*plots.YErrorer)(nil)),
 		"YErrors":    reflect.ValueOf((*plots.YErrors)(nil)),
 
 		// interface wrapper definitions
-		"_Table":      reflect.ValueOf((*_cogentcore_org_core_plot_plots_Table)(nil)),
-		"_XErrorer":   reflect.ValueOf((*_cogentcore_org_core_plot_plots_XErrorer)(nil)),
-		"_XYLabeller": reflect.ValueOf((*_cogentcore_org_core_plot_plots_XYLabeller)(nil)),
-		"_YErrorer":   reflect.ValueOf((*_cogentcore_org_core_plot_plots_YErrorer)(nil)),
+		"_Table":     reflect.ValueOf((*_cogentcore_org_core_plot_plots_Table)(nil)),
+		"_XErrorer":  reflect.ValueOf((*_cogentcore_org_core_plot_plots_XErrorer)(nil)),
+		"_XYLabeler": reflect.ValueOf((*_cogentcore_org_core_plot_plots_XYLabeler)(nil)),
+		"_YErrorer":  reflect.ValueOf((*_cogentcore_org_core_plot_plots_YErrorer)(nil)),
 	}
 }
 
@@ -100,17 +100,17 @@ func (W _cogentcore_org_core_plot_plots_XErrorer) XError(i int) (low float32, hi
 	return W.WXError(i)
 }
 
-// _cogentcore_org_core_plot_plots_XYLabeller is an interface wrapper for XYLabeller type
-type _cogentcore_org_core_plot_plots_XYLabeller struct {
+// _cogentcore_org_core_plot_plots_XYLabeler is an interface wrapper for XYLabeler type
+type _cogentcore_org_core_plot_plots_XYLabeler struct {
 	IValue interface{}
 	WLabel func(i int) string
 	WLen   func() int
 	WXY    func(i int) (x float32, y float32)
 }
 
-func (W _cogentcore_org_core_plot_plots_XYLabeller) Label(i int) string              { return W.WLabel(i) }
-func (W _cogentcore_org_core_plot_plots_XYLabeller) Len() int                        { return W.WLen() }
-func (W _cogentcore_org_core_plot_plots_XYLabeller) XY(i int) (x float32, y float32) { return W.WXY(i) }
+func (W _cogentcore_org_core_plot_plots_XYLabeler) Label(i int) string              { return W.WLabel(i) }
+func (W _cogentcore_org_core_plot_plots_XYLabeler) Len() int                        { return W.WLen() }
+func (W _cogentcore_org_core_plot_plots_XYLabeler) XY(i int) (x float32, y float32) { return W.WXY(i) }
 
 // _cogentcore_org_core_plot_plots_YErrorer is an interface wrapper for YErrorer type
 type _cogentcore_org_core_plot_plots_YErrorer struct {

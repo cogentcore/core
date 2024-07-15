@@ -4,8 +4,6 @@ package symbols
 
 import (
 	"cogentcore.org/core/texteditor"
-	"go/constant"
-	"go/token"
 	"reflect"
 )
 
@@ -18,8 +16,6 @@ func init() {
 		"DiffFiles":                reflect.ValueOf(texteditor.DiffFiles),
 		"EditNoSignal":             reflect.ValueOf(texteditor.EditNoSignal),
 		"EditSignal":               reflect.ValueOf(texteditor.EditSignal),
-		"MaxLineLen":               reflect.ValueOf(constant.MakeFromLiteral("67108864", token.INT, 0)),
-		"MaxNTags":                 reflect.ValueOf(constant.MakeFromLiteral("1024", token.INT, 0)),
 		"NewBuffer":                reflect.ValueOf(texteditor.NewBuffer),
 		"NewDiffEditor":            reflect.ValueOf(texteditor.NewDiffEditor),
 		"NewDiffTextEditor":        reflect.ValueOf(texteditor.NewDiffTextEditor),
@@ -36,6 +32,7 @@ func init() {
 		"DiffTextEditor":         reflect.ValueOf((*texteditor.DiffTextEditor)(nil)),
 		"Editor":                 reflect.ValueOf((*texteditor.Editor)(nil)),
 		"EditorEmbedder":         reflect.ValueOf((*texteditor.EditorEmbedder)(nil)),
+		"Highlighting":           reflect.ValueOf((*texteditor.Highlighting)(nil)),
 		"ISearch":                reflect.ValueOf((*texteditor.ISearch)(nil)),
 		"OutputBuffer":           reflect.ValueOf((*texteditor.OutputBuffer)(nil)),
 		"OutputBufferMarkupFunc": reflect.ValueOf((*texteditor.OutputBufferMarkupFunc)(nil)),

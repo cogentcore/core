@@ -9,41 +9,36 @@ import (
 	"cogentcore.org/core/filetree"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"go/constant"
-	"go/token"
 	"image"
-	"io/fs"
 	"reflect"
 )
 
 func init() {
 	Symbols["cogentcore.org/core/filetree/filetree"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"AsNode":                   reflect.ValueOf(filetree.AsNode),
-		"DirFlagsN":                reflect.ValueOf(filetree.DirFlagsN),
-		"DirFlagsValues":           reflect.ValueOf(filetree.DirFlagsValues),
-		"ExternalFilesName":        reflect.ValueOf(constant.MakeFromLiteral("\"[external files]\"", token.STRING, 0)),
-		"FindLocAll":               reflect.ValueOf(filetree.FindLocationAll),
-		"FindLocDir":               reflect.ValueOf(filetree.FindLocationDir),
-		"FindLocFile":              reflect.ValueOf(filetree.FindLocationFile),
-		"FindLocN":                 reflect.ValueOf(filetree.FindLocN),
-		"FindLocNotTop":            reflect.ValueOf(filetree.FindLocationNotTop),
-		"FindLocOpen":              reflect.ValueOf(filetree.FindLocationOpen),
-		"FindLocValues":            reflect.ValueOf(filetree.FindLocValues),
-		"IsVersionControlSystem":   reflect.ValueOf(filetree.IsVersionControlSystem),
-		"NewNode":                  reflect.ValueOf(filetree.NewNode),
-		"NewTree":                  reflect.ValueOf(filetree.NewTree),
-		"NewVCSLog":                reflect.ValueOf(filetree.NewVCSLog),
-		"NodeHiStyle":              reflect.ValueOf(&filetree.NodeHighlighting).Elem(),
-		"NodeNameCountSort":        reflect.ValueOf(filetree.NodeNameCountSort),
-		"Search":                   reflect.ValueOf(filetree.Search),
+		"AsNode":                 reflect.ValueOf(filetree.AsNode),
+		"FindLocationAll":        reflect.ValueOf(filetree.FindLocationAll),
+		"FindLocationDir":        reflect.ValueOf(filetree.FindLocationDir),
+		"FindLocationFile":       reflect.ValueOf(filetree.FindLocationFile),
+		"FindLocationN":          reflect.ValueOf(filetree.FindLocationN),
+		"FindLocationNotTop":     reflect.ValueOf(filetree.FindLocationNotTop),
+		"FindLocationOpen":       reflect.ValueOf(filetree.FindLocationOpen),
+		"FindLocationValues":     reflect.ValueOf(filetree.FindLocationValues),
+		"IsVersionControlSystem": reflect.ValueOf(filetree.IsVersionControlSystem),
+		"NewNode":                reflect.ValueOf(filetree.NewNode),
+		"NewTree":                reflect.ValueOf(filetree.NewTree),
+		"NewVCSLog":              reflect.ValueOf(filetree.NewVCSLog),
+		"NodeHighlighting":       reflect.ValueOf(&filetree.NodeHighlighting).Elem(),
+		"NodeNameCountSort":      reflect.ValueOf(filetree.NodeNameCountSort),
+		"Search":                 reflect.ValueOf(filetree.Search),
 
 		// type definitions
 		"DirFlagMap":         reflect.ValueOf((*filetree.DirFlagMap)(nil)),
 		"Filer":              reflect.ValueOf((*filetree.Filer)(nil)),
-		"FindLoc":            reflect.ValueOf((*filetree.FindLocation)(nil)),
+		"FindLocation":       reflect.ValueOf((*filetree.FindLocation)(nil)),
 		"Node":               reflect.ValueOf((*filetree.Node)(nil)),
 		"NodeEmbedder":       reflect.ValueOf((*filetree.NodeEmbedder)(nil)),
+		"NodeNameCount":      reflect.ValueOf((*filetree.NodeNameCount)(nil)),
 		"SearchResults":      reflect.ValueOf((*filetree.SearchResults)(nil)),
 		"Tree":               reflect.ValueOf((*filetree.Tree)(nil)),
 		"VCSLog":             reflect.ValueOf((*filetree.VCSLog)(nil)),
@@ -58,7 +53,6 @@ func init() {
 // _cogentcore_org_core_filetree_Filer is an interface wrapper for Filer type
 type _cogentcore_org_core_filetree_Filer struct {
 	IValue             interface{}
-	WAddChildNode      func()
 	WApplyScenePos     func()
 	WAsCoreTree        func() *core.Tree
 	WAsFileNode        func() *filetree.Node
@@ -69,49 +63,26 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WContextMenuPos    func(e events.Event) image.Point
 	WCopy              func()
 	WCopyFieldsFrom    func(from tree.Node)
-	WCopyFileToDir     func(filename string, perm fs.FileMode)
 	WCut               func()
-	WDeleteFile        func() error
-	WDeleteFiles       func()
-	WDeleteFilesImpl   func()
-	WDeleteNode        func()
 	WDestroy           func()
 	WDirectRenderDraw  func(drw system.Drawer, idx int, flipY bool)
 	WDirectRenderImage func(drw system.Drawer, idx int)
 	WDragDrop          func(e events.Event)
-	WDragStart         func(e events.Event)
 	WDropDeleteSource  func(e events.Event)
-	WDropFinalize      func(de *events.DragDrop)
-	WDuplicate         func()
-	WDuplicateFile     func() error
-	WDuplicateFiles    func()
 	WInit              func()
-	WInsertAfter       func()
-	WInsertBefore      func()
-	WMakePasteMenu     func(m *core.Scene, md mimedata.Mimes, fun func())
 	WMimeData          func(md *mimedata.Mimes)
-	WNewFile           func(filename string, addToVCS bool)
-	WNewFiles          func(filename string, addToVCS bool)
-	WNewFolder         func(foldername string)
-	WNewFolders        func(foldername string)
 	WNodeWalkDown      func(fun func(n tree.Node) bool)
 	WOnAdd             func()
 	WOnChildAdded      func(child tree.Node)
 	WOnClose           func()
 	WOnOpen            func()
-	WOpenFileDefault   func() error
-	WOpenFileWith      func(command string) error
-	WOpenFilesDefault  func()
-	WOpenFilesWith     func()
 	WPaste             func()
 	WPlanName          func() string
 	WPosition          func()
-	WRenameFile        func(newpath string) error
 	WRenameFiles       func()
 	WRender            func()
 	WRenderWidget      func()
 	WShowContextMenu   func(e events.Event)
-	WShowFileInfo      func()
 	WSizeDown          func(iter int) bool
 	WSizeFinal         func()
 	WSizeUp            func()
@@ -119,7 +90,6 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WWidgetTooltip     func(pos image.Point) (string, image.Point)
 }
 
-func (W _cogentcore_org_core_filetree_Filer) AddChildNode()              { W.WAddChildNode() }
 func (W _cogentcore_org_core_filetree_Filer) ApplyScenePos()             { W.WApplyScenePos() }
 func (W _cogentcore_org_core_filetree_Filer) AsCoreTree() *core.Tree     { return W.WAsCoreTree() }
 func (W _cogentcore_org_core_filetree_Filer) AsFileNode() *filetree.Node { return W.WAsFileNode() }
@@ -134,67 +104,32 @@ func (W _cogentcore_org_core_filetree_Filer) ContextMenuPos(e events.Event) imag
 }
 func (W _cogentcore_org_core_filetree_Filer) Copy()                         { W.WCopy() }
 func (W _cogentcore_org_core_filetree_Filer) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
-func (W _cogentcore_org_core_filetree_Filer) CopyFileToDir(filename string, perm fs.FileMode) {
-	W.WCopyFileToDir(filename, perm)
-}
-func (W _cogentcore_org_core_filetree_Filer) Cut()              { W.WCut() }
-func (W _cogentcore_org_core_filetree_Filer) DeleteFile() error { return W.WDeleteFile() }
-func (W _cogentcore_org_core_filetree_Filer) DeleteFiles()      { W.WDeleteFiles() }
-func (W _cogentcore_org_core_filetree_Filer) DeleteFilesImpl()  { W.WDeleteFilesImpl() }
-func (W _cogentcore_org_core_filetree_Filer) DeleteNode()       { W.WDeleteNode() }
-func (W _cogentcore_org_core_filetree_Filer) Destroy()          { W.WDestroy() }
+func (W _cogentcore_org_core_filetree_Filer) Cut()                          { W.WCut() }
+func (W _cogentcore_org_core_filetree_Filer) Destroy()                      { W.WDestroy() }
 func (W _cogentcore_org_core_filetree_Filer) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	W.WDirectRenderDraw(drw, idx, flipY)
 }
 func (W _cogentcore_org_core_filetree_Filer) DirectRenderImage(drw system.Drawer, idx int) {
 	W.WDirectRenderImage(drw, idx)
 }
-func (W _cogentcore_org_core_filetree_Filer) DragDrop(e events.Event)          { W.WDragDrop(e) }
-func (W _cogentcore_org_core_filetree_Filer) DragStart(e events.Event)         { W.WDragStart(e) }
-func (W _cogentcore_org_core_filetree_Filer) DropDeleteSource(e events.Event)  { W.WDropDeleteSource(e) }
-func (W _cogentcore_org_core_filetree_Filer) DropFinalize(de *events.DragDrop) { W.WDropFinalize(de) }
-func (W _cogentcore_org_core_filetree_Filer) Duplicate()                       { W.WDuplicate() }
-func (W _cogentcore_org_core_filetree_Filer) DuplicateFile() error             { return W.WDuplicateFile() }
-func (W _cogentcore_org_core_filetree_Filer) DuplicateFiles()                  { W.WDuplicateFiles() }
-func (W _cogentcore_org_core_filetree_Filer) Init()                            { W.WInit() }
-func (W _cogentcore_org_core_filetree_Filer) InsertAfter()                     { W.WInsertAfter() }
-func (W _cogentcore_org_core_filetree_Filer) InsertBefore()                    { W.WInsertBefore() }
-func (W _cogentcore_org_core_filetree_Filer) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) {
-	W.WMakePasteMenu(m, md, fun)
-}
-func (W _cogentcore_org_core_filetree_Filer) MimeData(md *mimedata.Mimes) { W.WMimeData(md) }
-func (W _cogentcore_org_core_filetree_Filer) NewFile(filename string, addToVCS bool) {
-	W.WNewFile(filename, addToVCS)
-}
-func (W _cogentcore_org_core_filetree_Filer) NewFiles(filename string, addToVCS bool) {
-	W.WNewFiles(filename, addToVCS)
-}
-func (W _cogentcore_org_core_filetree_Filer) NewFolder(foldername string)  { W.WNewFolder(foldername) }
-func (W _cogentcore_org_core_filetree_Filer) NewFolders(foldername string) { W.WNewFolders(foldername) }
+func (W _cogentcore_org_core_filetree_Filer) DragDrop(e events.Event)         { W.WDragDrop(e) }
+func (W _cogentcore_org_core_filetree_Filer) DropDeleteSource(e events.Event) { W.WDropDeleteSource(e) }
+func (W _cogentcore_org_core_filetree_Filer) Init()                           { W.WInit() }
+func (W _cogentcore_org_core_filetree_Filer) MimeData(md *mimedata.Mimes)     { W.WMimeData(md) }
 func (W _cogentcore_org_core_filetree_Filer) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_filetree_Filer) OnAdd()                       { W.WOnAdd() }
-func (W _cogentcore_org_core_filetree_Filer) OnChildAdded(child tree.Node) { W.WOnChildAdded(child) }
-func (W _cogentcore_org_core_filetree_Filer) OnClose()                     { W.WOnClose() }
-func (W _cogentcore_org_core_filetree_Filer) OnOpen()                      { W.WOnOpen() }
-func (W _cogentcore_org_core_filetree_Filer) OpenFileDefault() error       { return W.WOpenFileDefault() }
-func (W _cogentcore_org_core_filetree_Filer) OpenFileWith(command string) error {
-	return W.WOpenFileWith(command)
-}
-func (W _cogentcore_org_core_filetree_Filer) OpenFilesDefault() { W.WOpenFilesDefault() }
-func (W _cogentcore_org_core_filetree_Filer) OpenFilesWith()    { W.WOpenFilesWith() }
-func (W _cogentcore_org_core_filetree_Filer) Paste()            { W.WPaste() }
-func (W _cogentcore_org_core_filetree_Filer) PlanName() string  { return W.WPlanName() }
-func (W _cogentcore_org_core_filetree_Filer) Position()         { W.WPosition() }
-func (W _cogentcore_org_core_filetree_Filer) RenameFile(newpath string) error {
-	return W.WRenameFile(newpath)
-}
+func (W _cogentcore_org_core_filetree_Filer) OnAdd()                         { W.WOnAdd() }
+func (W _cogentcore_org_core_filetree_Filer) OnChildAdded(child tree.Node)   { W.WOnChildAdded(child) }
+func (W _cogentcore_org_core_filetree_Filer) OnClose()                       { W.WOnClose() }
+func (W _cogentcore_org_core_filetree_Filer) OnOpen()                        { W.WOnOpen() }
+func (W _cogentcore_org_core_filetree_Filer) Paste()                         { W.WPaste() }
+func (W _cogentcore_org_core_filetree_Filer) PlanName() string               { return W.WPlanName() }
+func (W _cogentcore_org_core_filetree_Filer) Position()                      { W.WPosition() }
 func (W _cogentcore_org_core_filetree_Filer) RenameFiles()                   { W.WRenameFiles() }
 func (W _cogentcore_org_core_filetree_Filer) Render()                        { W.WRender() }
 func (W _cogentcore_org_core_filetree_Filer) RenderWidget()                  { W.WRenderWidget() }
 func (W _cogentcore_org_core_filetree_Filer) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
-func (W _cogentcore_org_core_filetree_Filer) ShowFileInfo()                  { W.WShowFileInfo() }
 func (W _cogentcore_org_core_filetree_Filer) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
 func (W _cogentcore_org_core_filetree_Filer) SizeFinal()                     { W.WSizeFinal() }
 func (W _cogentcore_org_core_filetree_Filer) SizeUp()                        { W.WSizeUp() }

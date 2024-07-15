@@ -1688,6 +1688,7 @@ func init() {
 		"Girl":                                  reflect.ValueOf(&icons.Girl).Elem(),
 		"GirlFill":                              reflect.ValueOf(&icons.GirlFill).Elem(),
 		"Git":                                   reflect.ValueOf(&icons.Git).Elem(),
+		"GitHub":                                reflect.ValueOf(&icons.GitHub).Elem(),
 		"GlassCup":                              reflect.ValueOf(&icons.GlassCup).Elem(),
 		"GlassCupFill":                          reflect.ValueOf(&icons.GlassCupFill).Elem(),
 		"GlobeAsia":                             reflect.ValueOf(&icons.GlobeAsia).Elem(),

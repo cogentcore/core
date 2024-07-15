@@ -3,11 +3,6 @@
 package symbols
 
 import (
-	"go/constant"
-	"go/token"
-	"image"
-	"reflect"
-
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -16,6 +11,10 @@ import (
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"github.com/cogentcore/yaegi/interp"
+	"go/constant"
+	"go/token"
+	"image"
+	"reflect"
 )
 
 func init() {
@@ -244,7 +243,7 @@ func init() {
 		"FuncArg":                reflect.ValueOf((*core.FuncArg)(nil)),
 		"FuncButton":             reflect.ValueOf((*core.FuncButton)(nil)),
 		"Handle":                 reflect.ValueOf((*core.Handle)(nil)),
-		"HiStyleName":            reflect.ValueOf((*core.HighlightingName)(nil)),
+		"HighlightingName":       reflect.ValueOf((*core.HighlightingName)(nil)),
 		"Icon":                   reflect.ValueOf((*core.Icon)(nil)),
 		"IconButton":             reflect.ValueOf((*core.IconButton)(nil)),
 		"Image":                  reflect.ValueOf((*core.Image)(nil)),
@@ -448,13 +447,8 @@ type _cogentcore_org_core_core_Lister struct {
 	WCopySelectToMime func() mimedata.Mimes
 	WDeleteAt         func(idx int)
 	WDestroy          func()
-	WDragDrop         func(e events.Event)
-	WDragStart        func(e events.Event)
-	WDropDeleteSource func(e events.Event)
-	WDropFinalize     func(de *events.DragDrop)
 	WHasStyler        func() bool
 	WInit             func()
-	WMakePasteMenu    func(m *core.Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func())
 	WMakeRow          func(p *tree.Plan, i int)
 	WMimeDataType     func() string
 	WNewAt            func(idx int)
@@ -464,7 +458,6 @@ type _cogentcore_org_core_core_Lister struct {
 	WPasteAssign      func(md mimedata.Mimes, idx int)
 	WPasteAtIndex     func(md mimedata.Mimes, idx int)
 	WPlanName         func() string
-	WRowFirstWidget   func(row int) (*core.WidgetBase, bool)
 	WRowGrabFocus     func(row int) *core.WidgetBase
 	WRowWidgetNs      func() (nWidgPerRow int, idxOff int)
 	WSliceIndex       func(i int) (si int, vi int, invis bool)
@@ -480,17 +473,10 @@ func (W _cogentcore_org_core_core_Lister) CopyFieldsFrom(from tree.Node) { W.WCo
 func (W _cogentcore_org_core_core_Lister) CopySelectToMime() mimedata.Mimes {
 	return W.WCopySelectToMime()
 }
-func (W _cogentcore_org_core_core_Lister) DeleteAt(idx int)                 { W.WDeleteAt(idx) }
-func (W _cogentcore_org_core_core_Lister) Destroy()                         { W.WDestroy() }
-func (W _cogentcore_org_core_core_Lister) DragDrop(e events.Event)          { W.WDragDrop(e) }
-func (W _cogentcore_org_core_core_Lister) DragStart(e events.Event)         { W.WDragStart(e) }
-func (W _cogentcore_org_core_core_Lister) DropDeleteSource(e events.Event)  { W.WDropDeleteSource(e) }
-func (W _cogentcore_org_core_core_Lister) DropFinalize(de *events.DragDrop) { W.WDropFinalize(de) }
-func (W _cogentcore_org_core_core_Lister) HasStyler() bool                  { return W.WHasStyler() }
-func (W _cogentcore_org_core_core_Lister) Init()                            { W.WInit() }
-func (W _cogentcore_org_core_core_Lister) MakePasteMenu(m *core.Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
-	W.WMakePasteMenu(m, md, idx, mod, fun)
-}
+func (W _cogentcore_org_core_core_Lister) DeleteAt(idx int)            { W.WDeleteAt(idx) }
+func (W _cogentcore_org_core_core_Lister) Destroy()                    { W.WDestroy() }
+func (W _cogentcore_org_core_core_Lister) HasStyler() bool             { return W.WHasStyler() }
+func (W _cogentcore_org_core_core_Lister) Init()                       { W.WInit() }
 func (W _cogentcore_org_core_core_Lister) MakeRow(p *tree.Plan, i int) { W.WMakeRow(p, i) }
 func (W _cogentcore_org_core_core_Lister) MimeDataType() string        { return W.WMimeDataType() }
 func (W _cogentcore_org_core_core_Lister) NewAt(idx int)               { W.WNewAt(idx) }
@@ -506,9 +492,6 @@ func (W _cogentcore_org_core_core_Lister) PasteAtIndex(md mimedata.Mimes, idx in
 	W.WPasteAtIndex(md, idx)
 }
 func (W _cogentcore_org_core_core_Lister) PlanName() string { return W.WPlanName() }
-func (W _cogentcore_org_core_core_Lister) RowFirstWidget(row int) (*core.WidgetBase, bool) {
-	return W.WRowFirstWidget(row)
-}
 func (W _cogentcore_org_core_core_Lister) RowGrabFocus(row int) *core.WidgetBase {
 	return W.WRowGrabFocus(row)
 }
@@ -618,7 +601,6 @@ func (W _cogentcore_org_core_core_ToolbarMaker) MakeToolbar(p *tree.Plan) { W.WM
 // _cogentcore_org_core_core_Treer is an interface wrapper for Treer type
 type _cogentcore_org_core_core_Treer struct {
 	IValue             interface{}
-	WAddChildNode      func()
 	WApplyScenePos     func()
 	WAsCoreTree        func() *core.Tree
 	WAsTree            func() *tree.NodeBase
@@ -629,19 +611,12 @@ type _cogentcore_org_core_core_Treer struct {
 	WCopy              func()
 	WCopyFieldsFrom    func(from tree.Node)
 	WCut               func()
-	WDeleteNode        func()
 	WDestroy           func()
 	WDirectRenderDraw  func(drw system.Drawer, idx int, flipY bool)
 	WDirectRenderImage func(drw system.Drawer, idx int)
 	WDragDrop          func(e events.Event)
-	WDragStart         func(e events.Event)
 	WDropDeleteSource  func(e events.Event)
-	WDropFinalize      func(de *events.DragDrop)
-	WDuplicate         func()
 	WInit              func()
-	WInsertAfter       func()
-	WInsertBefore      func()
-	WMakePasteMenu     func(m *core.Scene, md mimedata.Mimes, fun func())
 	WMimeData          func(md *mimedata.Mimes)
 	WNodeWalkDown      func(fun func(n tree.Node) bool)
 	WOnAdd             func()
@@ -661,7 +636,6 @@ type _cogentcore_org_core_core_Treer struct {
 	WWidgetTooltip     func(pos image.Point) (string, image.Point)
 }
 
-func (W _cogentcore_org_core_core_Treer) AddChildNode()              { W.WAddChildNode() }
 func (W _cogentcore_org_core_core_Treer) ApplyScenePos()             { W.WApplyScenePos() }
 func (W _cogentcore_org_core_core_Treer) AsCoreTree() *core.Tree     { return W.WAsCoreTree() }
 func (W _cogentcore_org_core_core_Treer) AsTree() *tree.NodeBase     { return W.WAsTree() }
@@ -676,7 +650,6 @@ func (W _cogentcore_org_core_core_Treer) ContextMenuPos(e events.Event) image.Po
 func (W _cogentcore_org_core_core_Treer) Copy()                         { W.WCopy() }
 func (W _cogentcore_org_core_core_Treer) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Treer) Cut()                          { W.WCut() }
-func (W _cogentcore_org_core_core_Treer) DeleteNode()                   { W.WDeleteNode() }
 func (W _cogentcore_org_core_core_Treer) Destroy()                      { W.WDestroy() }
 func (W _cogentcore_org_core_core_Treer) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	W.WDirectRenderDraw(drw, idx, flipY)
@@ -684,18 +657,10 @@ func (W _cogentcore_org_core_core_Treer) DirectRenderDraw(drw system.Drawer, idx
 func (W _cogentcore_org_core_core_Treer) DirectRenderImage(drw system.Drawer, idx int) {
 	W.WDirectRenderImage(drw, idx)
 }
-func (W _cogentcore_org_core_core_Treer) DragDrop(e events.Event)          { W.WDragDrop(e) }
-func (W _cogentcore_org_core_core_Treer) DragStart(e events.Event)         { W.WDragStart(e) }
-func (W _cogentcore_org_core_core_Treer) DropDeleteSource(e events.Event)  { W.WDropDeleteSource(e) }
-func (W _cogentcore_org_core_core_Treer) DropFinalize(de *events.DragDrop) { W.WDropFinalize(de) }
-func (W _cogentcore_org_core_core_Treer) Duplicate()                       { W.WDuplicate() }
-func (W _cogentcore_org_core_core_Treer) Init()                            { W.WInit() }
-func (W _cogentcore_org_core_core_Treer) InsertAfter()                     { W.WInsertAfter() }
-func (W _cogentcore_org_core_core_Treer) InsertBefore()                    { W.WInsertBefore() }
-func (W _cogentcore_org_core_core_Treer) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) {
-	W.WMakePasteMenu(m, md, fun)
-}
-func (W _cogentcore_org_core_core_Treer) MimeData(md *mimedata.Mimes) { W.WMimeData(md) }
+func (W _cogentcore_org_core_core_Treer) DragDrop(e events.Event)         { W.WDragDrop(e) }
+func (W _cogentcore_org_core_core_Treer) DropDeleteSource(e events.Event) { W.WDropDeleteSource(e) }
+func (W _cogentcore_org_core_core_Treer) Init()                           { W.WInit() }
+func (W _cogentcore_org_core_core_Treer) MimeData(md *mimedata.Mimes)     { W.WMimeData(md) }
 func (W _cogentcore_org_core_core_Treer) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }

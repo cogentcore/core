@@ -36,7 +36,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.XYZ", IDName: 
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.XYValues", IDName: "xy-values", Doc: "XYValues implements the XYer interface, returning\nthe x and y values from an XYZer.", Embeds: []types.Field{{Name: "XYZer"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Labeller", IDName: "labeller", Doc: "Labeller provides an interface for a list of string labels", Methods: []types.Method{{Name: "Label", Doc: "Label returns a label.", Args: []string{"i"}, Returns: []string{"string"}}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Labeler", IDName: "labeler", Doc: "Labeler provides an interface for a list of string labels", Methods: []types.Method{{Name: "Label", Doc: "Label returns a label.", Args: []string{"i"}, Returns: []string{"string"}}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.selection", IDName: "selection", Fields: []types.Field{{Name: "n", Doc: "n is the number of labels selected."}, {Name: "lMin", Doc: "lMin and lMax are the selected min\nand max label values. lq is the q\nchosen."}, {Name: "lMax", Doc: "lMin and lMax are the selected min\nand max label values. lq is the q\nchosen."}, {Name: "lStep", Doc: "lMin and lMax are the selected min\nand max label values. lq is the q\nchosen."}, {Name: "lq", Doc: "lMin and lMax are the selected min\nand max label values. lq is the q\nchosen."}, {Name: "score", Doc: "score is the score for the selection."}, {Name: "magnitude", Doc: "magnitude is the magnitude of the\nlabel step distance."}}})
 

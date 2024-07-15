@@ -4,28 +4,25 @@ package symbols
 
 import (
 	"cogentcore.org/core/plot/plotcore"
-	"go/constant"
-	"go/token"
 	"reflect"
 )
 
 func init() {
 	Symbols["cogentcore.org/core/plot/plotcore/plotcore"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"Bar":                reflect.ValueOf(plotcore.Bar),
-		"FixMax":             reflect.ValueOf(plotcore.FixMax),
-		"FixMin":             reflect.ValueOf(plotcore.FixMin),
-		"FloatMax":           reflect.ValueOf(plotcore.FloatMax),
-		"FloatMin":           reflect.ValueOf(plotcore.FloatMin),
-		"NewPlot":            reflect.ValueOf(plotcore.NewPlot),
-		"NewPlotEditor":      reflect.ValueOf(plotcore.NewPlotEditor),
-		"NewSubPlot":         reflect.ValueOf(plotcore.NewSubPlot),
-		"Off":                reflect.ValueOf(plotcore.Off),
-		"On":                 reflect.ValueOf(plotcore.On),
-		"PlotColumnsHeaderN": reflect.ValueOf(constant.MakeFromLiteral("2", token.INT, 0)),
-		"PlotTypesN":         reflect.ValueOf(plotcore.PlotTypesN),
-		"PlotTypesValues":    reflect.ValueOf(plotcore.PlotTypesValues),
-		"XY":                 reflect.ValueOf(plotcore.XY),
+		"Bar":             reflect.ValueOf(plotcore.Bar),
+		"FixMax":          reflect.ValueOf(plotcore.FixMax),
+		"FixMin":          reflect.ValueOf(plotcore.FixMin),
+		"FloatMax":        reflect.ValueOf(plotcore.FloatMax),
+		"FloatMin":        reflect.ValueOf(plotcore.FloatMin),
+		"NewPlot":         reflect.ValueOf(plotcore.NewPlot),
+		"NewPlotEditor":   reflect.ValueOf(plotcore.NewPlotEditor),
+		"NewSubPlot":      reflect.ValueOf(plotcore.NewSubPlot),
+		"Off":             reflect.ValueOf(plotcore.Off),
+		"On":              reflect.ValueOf(plotcore.On),
+		"PlotTypesN":      reflect.ValueOf(plotcore.PlotTypesN),
+		"PlotTypesValues": reflect.ValueOf(plotcore.PlotTypesValues),
+		"XY":              reflect.ValueOf(plotcore.XY),
 
 		// type definitions
 		"ColumnOptions": reflect.ValueOf((*plotcore.ColumnOptions)(nil)),
