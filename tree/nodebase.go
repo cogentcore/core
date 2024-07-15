@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jinzhu/copier"
+	"github.com/cogentcore/copier"
 
 	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/base/strcase"
