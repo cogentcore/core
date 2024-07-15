@@ -108,10 +108,6 @@ type Lister interface {
 	// StyleRow calls a custom style function on given row (and field)
 	StyleRow(w Widget, idx, fidx int)
 
-	// RowFirstWidget returns the first widget for given row
-	// (could be index or not) -- false if out of range
-	RowFirstWidget(row int) (*WidgetBase, bool)
-
 	// RowGrabFocus grabs the focus for the first focusable
 	// widget in given row.
 	// returns that element or nil if not successful
@@ -138,12 +134,6 @@ type Lister interface {
 	// PasteAtIndex inserts object(s) from mime data at
 	// (before) given slice index
 	PasteAtIndex(md mimedata.Mimes, idx int)
-
-	MakePasteMenu(m *Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func())
-	DragStart(e events.Event)
-	DragDrop(e events.Event)
-	DropFinalize(de *events.DragDrop)
-	DropDeleteSource(e events.Event)
 }
 
 var _ Lister = &List{}
@@ -256,7 +246,6 @@ func (lb *ListBase) Init() {
 	lb.hoverRow = -1
 	lb.MinRows = 4
 	lb.ReadOnlyKeyNav = true
-	svi := lb.This.(Lister)
 
 	lb.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable)
@@ -269,7 +258,7 @@ func (lb *ListBase) Init() {
 	})
 	if !lb.IsReadOnly() {
 		lb.On(events.DragStart, func(e events.Event) {
-			svi.DragStart(e)
+			lb.dragStart(e)
 		})
 		lb.On(events.DragEnter, func(e events.Event) {
 			e.SetHandled()
@@ -278,10 +267,10 @@ func (lb *ListBase) Init() {
 			e.SetHandled()
 		})
 		lb.On(events.Drop, func(e events.Event) {
-			svi.DragDrop(e)
+			lb.dragDrop(e)
 		})
 		lb.On(events.DropDeleteSource, func(e events.Event) {
-			svi.DropDeleteSource(e)
+			lb.dropDeleteSource(e)
 		})
 	}
 	lb.FinalStyler(func(s *styles.Style) {
@@ -633,7 +622,7 @@ func (lb *ListBase) MakeRow(p *tree.Plan, i int) {
 }
 
 func (lb *ListBase) MakeGridIndex(p *tree.Plan, i, si int, itxt string, invis bool) {
-	svi := lb.This.(Lister)
+	ls := lb.This.(Lister)
 	tree.AddAt(p, "index-"+itxt, func(w *Text) {
 		w.SetProperty(ListRowProperty, i)
 		w.Styler(func(s *styles.Style) {
@@ -657,7 +646,7 @@ func (lb *ListBase) MakeGridIndex(p *tree.Plan, i, si int, itxt string, invis bo
 		w.On(events.ContextMenu, lb.HandleEvent)
 		if !lb.IsReadOnly() {
 			w.On(events.DragStart, func(e events.Event) {
-				svi.DragStart(e)
+				lb.dragStart(e)
 			})
 			w.On(events.DragEnter, func(e events.Event) {
 				e.SetHandled()
@@ -666,14 +655,14 @@ func (lb *ListBase) MakeGridIndex(p *tree.Plan, i, si int, itxt string, invis bo
 				e.SetHandled()
 			})
 			w.On(events.Drop, func(e events.Event) {
-				svi.DragDrop(e)
+				lb.dragDrop(e)
 			})
 			w.On(events.DropDeleteSource, func(e events.Event) {
-				svi.DropDeleteSource(e)
+				lb.dropDeleteSource(e)
 			})
 		}
 		w.Updater(func() {
-			si, _, invis := svi.SliceIndex(i)
+			si, _, invis := ls.SliceIndex(i)
 			sitxt := strconv.Itoa(si)
 			w.SetText(sitxt)
 			w.SetReadOnly(lb.IsReadOnly())
@@ -863,9 +852,9 @@ func (lb *ListBase) IsRowInBounds(row int) bool {
 	return row >= 0 && row < lb.VisibleRows
 }
 
-// RowFirstWidget returns the first widget for given row (could be index or
+// rowFirstWidget returns the first widget for given row (could be index or
 // not) -- false if out of range
-func (lb *ListBase) RowFirstWidget(row int) (*WidgetBase, bool) {
+func (lb *ListBase) rowFirstWidget(row int) (*WidgetBase, bool) {
 	if !lb.ShowIndexes {
 		return nil, false
 	}
@@ -915,7 +904,7 @@ func (lb *ListBase) indexPos(idx int) image.Point {
 		row = lb.VisibleRows - 1
 	}
 	var pos image.Point
-	w, ok := lb.This.(Lister).RowFirstWidget(row)
+	w, ok := lb.rowFirstWidget(row)
 	if ok {
 		pos = w.ContextMenuPos(nil)
 	}
@@ -926,7 +915,7 @@ func (lb *ListBase) indexPos(idx int) image.Point {
 func (lb *ListBase) rowFromPos(posY int) (int, bool) {
 	// todo: could optimize search to approx loc, and search up / down from there
 	for rw := 0; rw < lb.VisibleRows; rw++ {
-		w, ok := lb.This.(Lister).RowFirstWidget(rw)
+		w, ok := lb.rowFirstWidget(rw)
 		if ok {
 			if w.Geom.TotalBBox.Min.Y < posY && posY < w.Geom.TotalBBox.Max.Y {
 				return rw, true
@@ -1371,8 +1360,8 @@ func (lb *ListBase) pasteIndex(idx int) { //types:add
 	}
 }
 
-// MakePasteMenu makes the menu of options for paste events
-func (lb *ListBase) MakePasteMenu(m *Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
+// makePasteMenu makes the menu of options for paste events
+func (lb *ListBase) makePasteMenu(m *Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
 	svi := lb.This.(Lister)
 	if mod == events.DropCopy {
 		NewButton(m).SetText("Assign to").OnClick(func(e events.Event) {
@@ -1402,7 +1391,7 @@ func (lb *ListBase) MakePasteMenu(m *Scene, md mimedata.Mimes, idx int, mod even
 func (lb *ListBase) pasteMenu(md mimedata.Mimes, idx int) {
 	lb.unselectAllIndexes()
 	mf := func(m *Scene) {
-		lb.MakePasteMenu(m, md, idx, events.DropCopy, nil)
+		lb.makePasteMenu(m, md, idx, events.DropCopy, nil)
 	}
 	pos := lb.indexPos(idx)
 	NewMenu(mf, lb.This.(Widget), pos).Run()
@@ -1487,7 +1476,7 @@ func (lb *ListBase) mousePosInGrid(e events.Event) bool {
 	return lb.ListGrid.mousePosInGrid(e.Pos())
 }
 
-func (lb *ListBase) DragStart(e events.Event) {
+func (lb *ListBase) dragStart(e events.Event) {
 	if !lb.selectRowIfNone(e) || !lb.mousePosInGrid(e) {
 		return
 	}
@@ -1496,7 +1485,7 @@ func (lb *ListBase) DragStart(e events.Event) {
 		return
 	}
 	md := lb.This.(Lister).CopySelectToMime()
-	w, ok := lb.This.(Lister).RowFirstWidget(ixs[0] - lb.StartIndex)
+	w, ok := lb.rowFirstWidget(ixs[0] - lb.StartIndex)
 	if ok {
 		lb.Scene.Events.dragStart(w, md, e)
 		e.SetHandled()
@@ -1505,12 +1494,11 @@ func (lb *ListBase) DragStart(e events.Event) {
 	}
 }
 
-func (lb *ListBase) DragDrop(e events.Event) {
+func (lb *ListBase) dragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
 	if de.Data == nil {
 		return
 	}
-	svi := lb.This.(Lister)
 	pos := de.Pos()
 	idx, ok := lb.indexFromPos(pos.Y)
 	if ok {
@@ -1520,8 +1508,8 @@ func (lb *ListBase) DragDrop(e events.Event) {
 		md := de.Data.(mimedata.Mimes)
 		mf := func(m *Scene) {
 			lb.Scene.Events.dragMenuAddModText(m, de.DropMod)
-			svi.MakePasteMenu(m, md, idx, de.DropMod, func() {
-				svi.DropFinalize(de)
+			lb.makePasteMenu(m, md, idx, de.DropMod, func() {
+				lb.dropFinalize(de)
 			})
 		}
 		pos := lb.indexPos(lb.tmpIndex)
@@ -1529,16 +1517,16 @@ func (lb *ListBase) DragDrop(e events.Event) {
 	}
 }
 
-// DropFinalize is called to finalize Drop actions on the Source node.
+// dropFinalize is called to finalize Drop actions on the Source node.
 // Only relevant for DropMod == DropMove.
-func (lb *ListBase) DropFinalize(de *events.DragDrop) {
+func (lb *ListBase) dropFinalize(de *events.DragDrop) {
 	lb.NeedsLayout()
 	lb.unselectAllIndexes()
 	lb.Scene.Events.dropFinalize(de) // sends DropDeleteSource to Source
 }
 
-// DropDeleteSource handles delete source event for DropMove case
-func (lb *ListBase) DropDeleteSource(e events.Event) {
+// dropDeleteSource handles delete source event for DropMove case
+func (lb *ListBase) dropDeleteSource(e events.Event) {
 	sort.Slice(lb.draggedIndexes, func(i, j int) bool {
 		return lb.draggedIndexes[i] > lb.draggedIndexes[j]
 	})
