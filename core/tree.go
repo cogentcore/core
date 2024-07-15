@@ -52,20 +52,12 @@ type Treer interface { //types:add
 
 	// The following are all tree editing functions:
 
-	DeleteNode()
-	Duplicate()
-	AddChildNode()
-	InsertBefore()
-	InsertAfter()
 	MimeData(md *mimedata.Mimes)
 	Cut()
 	Copy()
 	Paste()
-	DragStart(e events.Event)
 	DragDrop(e events.Event)
-	DropFinalize(de *events.DragDrop)
 	DropDeleteSource(e events.Event)
-	MakePasteMenu(m *Scene, md mimedata.Mimes, fun func())
 }
 
 // AsTree returns the given value as a value of type [Tree] if the type
@@ -262,7 +254,7 @@ func (tr *Tree) Init() {
 			}
 		}
 
-		tvi := tr.This.(Treer)
+		tri := tr.This.(Treer)
 
 		// first all the keys that work for ReadOnly and active
 		switch kf {
@@ -304,28 +296,28 @@ func (tr *Tree) Init() {
 			tr.ToggleClose()
 			e.SetHandled()
 		case keymap.Copy:
-			tvi.Copy()
+			tri.Copy()
 			e.SetHandled()
 		}
 		if !tr.rootIsReadOnly() && !e.IsHandled() {
 			switch kf {
 			case keymap.Delete:
-				tvi.DeleteNode()
+				tr.DeleteNode()
 				e.SetHandled()
 			case keymap.Duplicate:
-				tvi.Duplicate()
+				tr.Duplicate()
 				e.SetHandled()
 			case keymap.Insert:
-				tvi.InsertBefore()
+				tr.InsertBefore()
 				e.SetHandled()
 			case keymap.InsertAfter:
-				tvi.InsertAfter()
+				tr.InsertAfter()
 				e.SetHandled()
 			case keymap.Cut:
-				tvi.Cut()
+				tri.Cut()
 				e.SetHandled()
 			case keymap.Paste:
-				tvi.Paste()
+				tri.Paste()
 				e.SetHandled()
 			}
 		}
@@ -385,7 +377,7 @@ func (tr *Tree) Init() {
 		}
 	})
 	parts.On(events.DragStart, func(e events.Event) {
-		tri.DragStart(e)
+		tr.DragStart(e)
 	})
 	parts.On(events.DragEnter, func(e events.Event) {
 		tr.SetState(true, states.DragHovered)
@@ -1212,11 +1204,11 @@ func (tr *Tree) contextMenu(m *Scene) {
 		return
 	}
 	tri := tr.This.(Treer)
-	NewFuncButton(m).SetFunc(tri.AddChildNode).SetText("Add child").SetIcon(icons.Add).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tri.InsertBefore).SetIcon(icons.Add).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tri.InsertAfter).SetIcon(icons.Add).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tri.Duplicate).SetIcon(icons.ContentCopy).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tri.DeleteNode).SetText("Delete").SetIcon(icons.Delete).
+	NewFuncButton(m).SetFunc(tr.AddChildNode).SetText("Add child").SetIcon(icons.Add).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.InsertBefore).SetIcon(icons.Add).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.InsertAfter).SetIcon(icons.Add).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.Duplicate).SetIcon(icons.ContentCopy).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.DeleteNode).SetText("Delete").SetIcon(icons.Delete).
 		SetEnabled(tr.HasSelection())
 	NewSeparator(m)
 	NewFuncButton(m).SetFunc(tri.Copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetEnabled(tr.HasSelection())
@@ -1336,16 +1328,16 @@ func (tr *Tree) Paste() { //types:add
 func (tr *Tree) pasteMenu(md mimedata.Mimes) {
 	tr.UnselectAll()
 	mf := func(m *Scene) {
-		tr.This.(Treer).MakePasteMenu(m, md, nil)
+		tr.makePasteMenu(m, md, nil)
 	}
 	pos := tr.ContextMenuPos(nil)
 	NewMenu(mf, tr.This.(Widget), pos).Run()
 }
 
-// MakePasteMenu makes the menu of options for paste events
+// makePasteMenu makes the menu of options for paste events
 // Optional function is typically the DropFinalize but could also be other actions
 // to take after each optional action.
-func (tr *Tree) MakePasteMenu(m *Scene, md mimedata.Mimes, fun func()) {
+func (tr *Tree) makePasteMenu(m *Scene, md mimedata.Mimes, fun func()) {
 	NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
 		tr.pasteAssign(md)
 		if fun != nil {
@@ -1522,7 +1514,6 @@ func (tr *Tree) dragClearStates() {
 // DragDrop handles drag drop event
 func (tr *Tree) DragDrop(e events.Event) {
 	// todo: some kind of validation for source
-	tvi := tr.This.(Treer)
 	tr.UnselectAll()
 	de := e.(*events.DragDrop)
 	stv := AsTree(de.Source.(Widget))
@@ -1532,8 +1523,8 @@ func (tr *Tree) DragDrop(e events.Event) {
 	md := de.Data.(mimedata.Mimes)
 	mf := func(m *Scene) {
 		tr.Scene.Events.dragMenuAddModText(m, de.DropMod)
-		tvi.MakePasteMenu(m, md, func() {
-			tvi.DropFinalize(de)
+		tr.makePasteMenu(m, md, func() {
+			tr.DropFinalize(de)
 		})
 	}
 	pos := tr.ContextMenuPos(nil)

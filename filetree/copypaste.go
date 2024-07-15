@@ -69,7 +69,7 @@ func (fn *Node) DragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
 	md := de.Data.(mimedata.Mimes)
 	fn.pasteFiles(md, de.Source == nil, func() {
-		fn.This.(core.Treer).DropFinalize(de)
+		fn.DropFinalize(de)
 	})
 }
 
