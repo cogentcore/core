@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
@@ -256,11 +257,14 @@ func handleElement(ctx *Context) {
 // handleText creates a new [core.Text] from the given information, setting the text and
 // the text click function so that URLs are opened according to [Context.OpenURL].
 func handleText(ctx *Context) *core.Text {
-	lb := New[core.Text](ctx).SetText(ExtractText(ctx))
-	lb.HandleTextClick(func(tl *paint.TextLink) {
+	tx := New[core.Text](ctx).SetText(ExtractText(ctx))
+	tx.Styler(func(s *styles.Style) {
+		s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
+	})
+	tx.HandleTextClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})
-	return lb
+	return tx
 }
 
 // handleTextTag creates a new [core.Text] from the given information, setting the text and
@@ -271,11 +275,11 @@ func handleText(ctx *Context) *core.Text {
 func handleTextTag(ctx *Context) *core.Text {
 	start, end := nodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
-	lb := New[core.Text](ctx).SetText(str)
-	lb.HandleTextClick(func(tl *paint.TextLink) {
+	tx := New[core.Text](ctx).SetText(str)
+	tx.HandleTextClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})
-	return lb
+	return tx
 }
 
 // getAttr gets the given attribute from the given node, returning ""

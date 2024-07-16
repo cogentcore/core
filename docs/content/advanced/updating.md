@@ -82,7 +82,7 @@ The [[tree.AddAt]] adds a child with the given name to the overall [[tree.Plan]]
 
 The `Updater` closure added here will be called _every time Update() is called_ on the Icon, and it ensures that this icon is always updated to reflect the `Icon` field _on the parent Button_ object.  This is how you establish connections between properties on different widgets to ensure everything is consistent: the button's Icon field is the definitive source setting for what the icon should be.
 
-In general, it is ideal to be able to specify _all_ of the dynamic updating logic for the children within these Updater functions.  However, sometimes you need to provide additional methods that access the `ChildByName` using its unique name provided to `AddAt`, and update its properties.
+In general, it is ideal to be able to specify _all_ of the dynamic updating logic for the children within the Add and Updater functions.  Indeed, this ability to put all the logic in one place is a major advantage of this system.  Nevertheless, sometimes you also need to provide additional methods that access the `ChildByName` using its unique name provided to `AddAt`, and update its properties.
 
 Note that you should _never_ call functions like `Styler`, `Maker`, `OnClick` etc in a situation where they might be called multiple times, because that would end up adding _multiple copies_ of the given closure functions to the list of such functions to be run at the appropriate time, which, aside from being inefficient, could lead to bad effects.
 
@@ -106,7 +106,36 @@ In a Widget that embeds another widget type and extends its functionality, you c
 
 If a widget does not require dynamic configuration of its children (i.e., it always has the same children), you can save a step of indentation by using the [[tree.AddChildAt]] version of [[tree.AddAt]], without enclosing everything in an outer `Maker` function.  These `Child` versions of all the basic `tree.Add*` functions simply create a separate `Maker` function wrapper for you.  There is a list of Maker functions that are called to create the overall [[tree.Plan]] for the widget, so multiple such functions can be defined, and they are called in the order added.
 
-These `Child` versions are essential when you need to specify the children of children (and beyond), to configure an entire complex structure.
+These `Child` versions are essential when you need to specify the children of children (and beyond), to configure an entire complex structure.  Here's an example from the [Cogent Mail](https://github.com/cogentcore/cogent/mail) app:
 
-TODO: example here.
+```go
+	tree.AddChildAt(a, "splits", func(w *core.Splits) {
+		tree.AddChildAt(w, "mbox", func(w *core.Tree) {
+			w.SetText("Mailboxes")
+		})
+		tree.AddChildAt(w, "list", func(w *core.Frame) {
+			w.Styler(func(s *styles.Style) {
+				s.Direction = styles.Column
+			})
+		})
+		tree.AddChildAt(w, "mail", func(w *core.Frame) {
+			w.Styler(func(s *styles.Style) {
+				s.Direction = styles.Column
+			})
+			tree.AddChildAt(w, "msv", func(w *core.Form) {
+				w.SetReadOnly(true)
+			})
+			tree.AddChildAt(w, "mb", func(w *core.Frame) {
+				w.Styler(func(s *styles.Style) {
+					s.Direction = styles.Column
+				})
+			})
+		})
+		w.SetSplits(0.1, 0.2, 0.7)
+	})
+```
+
+The resulting code nicely captures the tree structure of the overall GUI, and this can be useful even when there aren't any dynamic elements to it.
+
+
 

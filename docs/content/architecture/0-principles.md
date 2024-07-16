@@ -1,6 +1,6 @@
 This page contains a list of fundamental principles that Cogent Core is built on. There are occasional exceptions to these principles, but they should be followed almost all of the time, and there must be a very clear reason for not following them.
 
-# Code is always the best solution
+## Code is always the best solution
 
 A common approach to programming, especially for the web, is to reduce the amount of actual programming that takes place and instead use simplified markup, configuration, and selection formats like CSS, HTML, YAML, and Regex. The promise of this is that you will be able to accomplish everything you need to do in a very easy, simple way. However, there are several problems with this strategy. First, it requires learning many different languages, typically with very magic syntaxes packed with random symbols that do various things, with no clear connection between the symbols and the actions. Second of all, the simplified formats never end up covering all use cases, resulting in hacky workarounds to achieve the desired functionality, or, in some cases, entirely new languages that promise to cover all of the use cases, for real this time.
 
@@ -8,7 +8,7 @@ The eventual result of this trend is that people end up stuffing entire programm
 
 The solution to this is simple: whenever possible, everything should be written in real code, preferably in one language. Therefore, Cogent Core takes this approach: everything, from trees to widgets to styling to enums, is written in real, pure Go code. The only non-Go functional files in a Cogent Core package or app should be TOML files, which are only used for very simple configuration options to commands, and not for any actual code.
 
-# Go is the best programming language (for GUIs)
+## Go is the best programming language (for GUIs)
 
 There are many programming languages, and each one represents a different set of tradeoffs.  We think that Go is the best language (for GUIs and most other use-cases) according to the following list of fundamental characteristics:
 
@@ -36,9 +36,9 @@ Go's `module` based versioning and package management system is built into the l
 
 Languages must be rational and consistent both internally and with other programming languages. If other programming languages use `object.Method(args)` to call a method, and you use `function(args)` to call a function, then maybe you should not use `[object method:args]` to call methods (Objective-C). `SCREAMING_SNAKE_CASE` may help you vent frustration at the terrible programming language you are using, but it is not good for clean and readable code. If `10+"1"` is `"101"`, then maybe `10-"1"` shouldn't be `9` (JavaScript). Two of the most core operations in a programming language, `var` and `==`, should not be semantically incorrect and require the use of alternative operators instead, `let` and `===` (also JavaScript).
 
-# Go language-specific considerations 
+## Go language-specific considerations 
 
-## Struct fields are better than maps for things like configuration and styling
+### Struct fields are better than maps for things like configuration and styling
 
 Configuration settings, typically settable with a config file and / or command-line arguments, are stored as key-value maps in the widely used [cobra](https://github.com/spf13/cobra), viper and other such tools.  Likewise, in v1 of core, styling was set using Properties maps.
 
@@ -51,7 +51,7 @@ However, using a `struct` with appropriately named fields has the following adva
 
 This is why the [[cli]] configuration and app command management system is based on structs, and why Cogent Core uses direct styling functions that directly set values on the [[styles.Style]] structs.
 
-## Generate vs. `reflect` tradeoffs
+### Generate vs. `reflect` tradeoffs
 
 Generated code is, in general, faster and cleaner and can be targeted to just what is needed. On the other hand, `reflect` is more robust than generated code (doesn't require proper such code to have been generated), and generated code takes more space.  Therefore, these tradeoffs need to be considered in a case-by-case basis, also in conjunction with generics.
 
@@ -59,13 +59,13 @@ Generated code is, in general, faster and cleaner and can be targeted to just wh
 
 * Many "Collection" elements in [[core]] use `reflect` to operate on any Go type, e.g., [[core.Form]] on `struct` and [[core.List]] on `slices` etc.
 
-## Interfaces instead of `reflect`
+### Interfaces instead of `reflect`
 
 Interfaces go hand-in-hand with generated code: the boilerplate code that satisfies the interfaces is auto-generated as needed.
 
 The prototype here is [[enums]].
 
-## Keep interfaces small
+### Keep interfaces small
 
 This is a Go mantra that can be difficult for people coming from other languages such as C++, where there is a temptation to specify all functionality in a header-file like interface, and then implement that with a base type.
 
@@ -73,7 +73,7 @@ The general principle is simple: _an interface should only specify the methods t
 
 For example, the [[tree.Node]] interface used to be rather large, but now we follow the above principle and just require people to do `AsTree()` to access all the "base" level functionality defined on [[tree.NodeBase]].  This also helps to avoid naming conflicts between the interface methods and the implementation fields.
 
-## Exporting vs. hiding
+### Exporting vs. hiding
 
 One extreme strategy is to hide (lowercase) everything and only export (uppercase) the minimal set of functionality, exclusively through methods, including `Set` and `Get` accessors for all fields.  While this is maximally "future proof" and robust (e.g., when `Set` might have side-effects or not), it results in significant boilerplate code to provide all the accessors.
 
@@ -87,7 +87,7 @@ Nevertheless, hiding implementational details makes it easier for users to find 
 
 Therefore, _if anyone ever needs access to something that has been hidden, we are more than happy to export it!_ -- just file an issue.
 
-## Chaining function calls
+### Chaining function calls
 
 The [[types]] package performs automatic generation of `New` and `Set` convenience methods that have one key advantage over direct field access: they return a pointer to the receiver object, so that you can chain multiple calls together, as in:
 
@@ -99,9 +99,9 @@ core.NewButton(b).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Even
 
 This can save considerable vertical space, and avoids any temptation to bundle multiple field setters into one function with multiple arguments, which then become more ambiguous.
 
-# Code organization
+## Code organization
 
-## Packages should be small, focused, and minimal
+### Packages should be small, focused, and minimal
 
 We find the coherent chunks of functionality and encapsulate them in separate packages, instead of creating sprawling mega-packages like `ki` was before.  Now that we know all the functionality we need, we can think more carefully about how to package it.
 
@@ -114,7 +114,7 @@ Examples:
 * [[reflectx]] pulled reflection stuff out of tree
 * [[clicore]] separated from [[cli]] to keep cli free of core dependency
 
-## Use function libraries instead of putting lots of methods on a type
+### Use function libraries instead of putting lots of methods on a type
 
 Go uses the `strings` package instead of adding a lot of builtin methods on the `string` type. The advantages are:
 
@@ -124,7 +124,7 @@ Go uses the `strings` package instead of adding a lot of builtin methods on the 
 
 Consistent with this approach, [[colors]] implements functions operating on the standard `color.RGBA` data type, instead of the many methods we defined on `gist.Color` in the old version.
 
-# Naming
+## Naming
 
 In general, we follow the Go standards:
 
@@ -138,7 +138,7 @@ Furthermore, additional effort should be spent to avoid generic names such as `M
 Here is a list of choices for cases where there are two widely-used but equivalent names: use only one of them everywhere for consistency:
 * `Delete` instead of `Remove`
 
-## Collections are plural
+### Collections are plural
 
 Packages and types whose primary purpose is to describe/hold a collection of something should be named in the plural. For example, [[events]] holds a collection of different event types, so it has a plural name. Also, per this rule, enum types are almost always named in the plural, as they describe a collection of possible values.
 
