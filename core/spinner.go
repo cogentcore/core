@@ -94,6 +94,9 @@ func (sp *Spinner) OnBind(value any, tags reflect.StructTag) {
 	if f, ok := tags.Lookup("format"); ok {
 		sp.SetFormat(f)
 	}
+	setFromTag(tags, "min", func(v float32) { sp.SetMin(v) })
+	setFromTag(tags, "max", func(v float32) { sp.SetMax(v) })
+	setFromTag(tags, "step", func(v float32) { sp.SetStep(v) })
 }
 
 func (sp *Spinner) Init() {

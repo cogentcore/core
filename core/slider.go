@@ -143,6 +143,9 @@ func (sr *Slider) OnBind(value any, tags reflect.StructTag) {
 	if kind >= reflect.Int && kind <= reflect.Uintptr {
 		sr.SetStep(1).SetEnforceStep(true).SetMax(100)
 	}
+	setFromTag(tags, "min", func(v float32) { sr.SetMin(v) })
+	setFromTag(tags, "max", func(v float32) { sr.SetMax(v) })
+	setFromTag(tags, "step", func(v float32) { sr.SetStep(v) })
 }
 
 func (sr *Slider) Init() {

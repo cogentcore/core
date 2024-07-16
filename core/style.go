@@ -203,24 +203,26 @@ func (wb *WidgetBase) parentActualBackground() image.Image {
 	return pwb.This.(Widget).ChildBackground(wb.This.(Widget))
 }
 
+// setFromTag uses the given tags to call the given set function for the given tag.
+func setFromTag(tags reflect.StructTag, tag string, set func(v float32)) {
+	if v, ok := tags.Lookup(tag); ok {
+		f, err := reflectx.ToFloat32(v)
+		if errors.Log(err) == nil {
+			set(f)
+		}
+	}
+}
+
 // styleFromTags adds a [WidgetBase.Styler] to the given widget
 // to set its style properties based on the given [reflect.StructTag].
 // Width, height, and grow properties are supported.
 func styleFromTags(w Widget, tags reflect.StructTag) {
-	style := func(tag string, set func(v float32)) {
-		if v, ok := tags.Lookup(tag); ok {
-			f, err := reflectx.ToFloat32(v)
-			if errors.Log(err) == nil {
-				set(f)
-			}
-		}
-	}
 	w.AsWidget().Styler(func(s *styles.Style) {
-		style("width", s.Min.X.Ch)
-		style("max-width", s.Max.X.Ch)
-		style("height", s.Min.Y.Em)
-		style("max-height", s.Max.Y.Em)
-		style("grow", func(v float32) { s.Grow.X = v })
-		style("grow-y", func(v float32) { s.Grow.Y = v })
+		setFromTag(tags, "width", s.Min.X.Ch)
+		setFromTag(tags, "max-width", s.Max.X.Ch)
+		setFromTag(tags, "height", s.Min.Y.Em)
+		setFromTag(tags, "max-height", s.Max.Y.Em)
+		setFromTag(tags, "grow", func(v float32) { s.Grow.X = v })
+		setFromTag(tags, "grow-y", func(v float32) { s.Grow.Y = v })
 	})
 }
