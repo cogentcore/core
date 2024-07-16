@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	core.AddValueType[xyz.MeshName, *MeshButton]()
+	core.AddValueType[xyz.MeshName, MeshButton]()
 }
 
 // MeshButton represents an [xyz.MeshName] value with a button.

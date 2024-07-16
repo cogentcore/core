@@ -13,15 +13,15 @@ import (
 )
 
 func init() {
-	core.AddValueType[table.Table, *TableButton]()
-	core.AddValueType[tensor.Float32, *TensorButton]()
-	core.AddValueType[tensor.Float64, *TensorButton]()
-	core.AddValueType[tensor.Int, *TensorButton]()
-	core.AddValueType[tensor.Int32, *TensorButton]()
-	core.AddValueType[tensor.Byte, *TensorButton]()
-	core.AddValueType[tensor.String, *TensorButton]()
-	core.AddValueType[tensor.Bits, *TensorButton]()
-	core.AddValueType[simat.SimMat, *SimMatButton]()
+	core.AddValueType[table.Table, TableButton]()
+	core.AddValueType[tensor.Float32, TensorButton]()
+	core.AddValueType[tensor.Float64, TensorButton]()
+	core.AddValueType[tensor.Int, TensorButton]()
+	core.AddValueType[tensor.Int32, TensorButton]()
+	core.AddValueType[tensor.Byte, TensorButton]()
+	core.AddValueType[tensor.String, TensorButton]()
+	core.AddValueType[tensor.Bits, TensorButton]()
+	core.AddValueType[simat.SimMat, SimMatButton]()
 }
 
 // TensorButton represents a Tensor with a button for making a [TensorView]
