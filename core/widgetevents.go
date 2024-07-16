@@ -297,6 +297,10 @@ func (wb *WidgetBase) handleWidgetClick() {
 		} else {
 			wb.focusClear()
 		}
+		// note: read only widgets are automatically selectable
+		if wb.AbilityIs(abilities.Selectable) || wb.IsReadOnly() {
+			wb.Send(events.Select, e)
+		}
 	})
 }
 
