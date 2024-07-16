@@ -60,7 +60,7 @@ func NewValue(value any, tags reflect.StructTag, parent ...tree.Node) Value {
 	if tags != "" {
 		styleFromTags(vw, tags)
 	}
-	Bind(value, vw)
+	Bind(value, vw, tags)
 	if len(parent) > 0 {
 		parent[0].AsTree().AddChild(vw)
 	}
