@@ -101,9 +101,11 @@ func DiffEditorDialog(ctx core.Widget, title string, astr, bstr []string, afile,
 // TextDialog opens a dialog for displaying text string
 func TextDialog(ctx core.Widget, title, text string) *Editor {
 	d := core.NewBody().AddTitle(title)
-	buf := NewBuffer()
-	ed := NewEditor(d).SetBuffer(buf)
-	buf.SetText([]byte(text))
+	ed := NewEditor(d)
+	ed.Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+	})
+	ed.Buffer.SetText([]byte(text))
 	d.AddBottomBar(func(parent core.Widget) {
 		core.NewButton(parent).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
 			OnClick(func(e events.Event) {

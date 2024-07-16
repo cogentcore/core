@@ -29,3 +29,4 @@ core.NewFrame(b).Styler(func(s *styles.Style) {
 Throughout the documentation for different widgets, you will learn how to use various other styling properties. This is just an introduction to the basic structure of styling.
 
 You can see the [advanced styling page](../advanced/styling) for more information if you need it.
+
