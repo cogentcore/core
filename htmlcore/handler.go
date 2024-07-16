@@ -43,7 +43,7 @@ var BindTextEditor func(ed *texteditor.Editor, parent core.Widget)
 func New[T tree.NodeValue](ctx *Context) *T {
 	parent := ctx.Parent()
 	w := tree.New[T](parent)
-	ctx.config(any(w).(core.Widget)) // TODO(config): better htmlcore structure with new config paradigm?
+	ctx.config(any(w).(core.Widget)) // TODO: better htmlcore structure with new config paradigm?
 	return w
 }
 

@@ -26,7 +26,7 @@ func TestSceneInit(t *testing.T) {
 	}()
 	b := NewBody()
 	NewButton(b).SetText("Test")
-	b.AssertRender(t, "app/scene-config")
+	b.AssertRender(t, "app/scene-init")
 }
 
 func TestMakeAppBar(t *testing.T) {
