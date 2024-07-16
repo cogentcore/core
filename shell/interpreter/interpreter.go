@@ -130,6 +130,8 @@ func (in *Interpreter) RunCode() (reflect.Value, error) {
 			in.Shell.ResetDepth()
 			if !cancelled {
 				in.Shell.AddError(err)
+			} else {
+				in.Shell.Errors = nil
 			}
 			break
 		}
@@ -237,6 +239,7 @@ func (in *Interpreter) Interactive() error {
 		} else if line != "" && !strings.HasPrefix(line, "history") && line != "h" {
 			in.Shell.AddHistory(line)
 		}
+		in.Shell.Errors = nil
 		v, hasPrint, err := in.Eval(line)
 		if err == nil && !hasPrint && v.IsValid() && !v.IsZero() && v.Kind() != reflect.Func {
 			fmt.Println(v.Interface())
