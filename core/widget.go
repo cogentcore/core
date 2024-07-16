@@ -281,7 +281,7 @@ func (wb *WidgetBase) OnAdd() {
 		// the Scene of the Parts may not have been set yet if they were made in Init
 		wb.Parts.Scene = wb.Scene
 	}
-	if wb.Scene.WidgetInit != nil {
+	if wb.Scene != nil && wb.Scene.WidgetInit != nil {
 		wb.Scene.WidgetInit(wb.This.(Widget))
 	}
 }
