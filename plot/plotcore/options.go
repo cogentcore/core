@@ -95,7 +95,7 @@ func (po *PlotOptions) defaults() {
 
 // fromMeta sets plot options from meta data.
 func (po *PlotOptions) fromMeta(dt *table.Table) {
-	po.fromMetaMap(dt.MetaData)
+	po.FromMetaMap(dt.MetaData)
 }
 
 // metaMapLower tries meta data access by lower-case version of key too
@@ -108,8 +108,8 @@ func metaMapLower(meta map[string]string, key string) (string, bool) {
 	return vl, has
 }
 
-// fromMetaMap sets plot options from meta data map.
-func (po *PlotOptions) fromMetaMap(meta map[string]string) {
+// FromMetaMap sets plot options from meta data map.
+func (po *PlotOptions) FromMetaMap(meta map[string]string) {
 	if typ, has := metaMapLower(meta, "Type"); has {
 		po.Type.SetString(typ)
 	}

@@ -388,6 +388,13 @@ func (pl *PlotEditor) columnsListUpdate() {
 	}
 }
 
+// ColumnsFromMetaMap updates all the column settings from given meta map
+func (pl *PlotEditor) ColumnsFromMetaMap(meta map[string]string) {
+	for _, cp := range pl.Columns {
+		cp.fromMetaMap(meta)
+	}
+}
+
 // setAllColumns turns all Columns on or off (except X axis)
 func (pl *PlotEditor) setAllColumns(on bool) {
 	fr := pl.columnsFrame
