@@ -1,5 +1,3 @@
-# Apps
-
 The first call in every Cogent Core app is [[core.NewBody]]. This creates and returns a new [[core.Body]], which is a container in which app content is placed.
 
 After calling [[core.NewBody]], you add content to the [[core.Body]] that was returned, which is typically given the local variable name `b` for body.

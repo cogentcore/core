@@ -1,5 +1,3 @@
-# Sliders
-
 Cogent Core provides customizable sliders for bounded numeric input.
 
 You can make a slider without any custom options:

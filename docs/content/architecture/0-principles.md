@@ -1,5 +1,3 @@
-# Principles
-
 This page contains a list of fundamental principles that Cogent Core is built on. There are occasional exceptions to these principles, but they should be followed almost all of the time, and there must be a very clear reason for not following them.
 
 # Code is always the best solution

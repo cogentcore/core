@@ -1,5 +1,3 @@
-# Plans
-
 The previous two pages cover how to update the properties of a widget, but what if you want to update the structure of a widget? To answer that question, Cogent Core provides [[tree.Plan]], a mechanism for specifying what the children of a widget should be, which is then used to automatically update the actual children to reflect that.
 
 For example, this code uses [[tree.Plan]] through [[core.WidgetBase.Maker]] to dynamically update the number of buttons in a frame:

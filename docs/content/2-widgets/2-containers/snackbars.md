@@ -1,5 +1,3 @@
-# Snackbars
-
 Cogent Core provides customizable snackbars for displaying temporary information to the user.
 
 You can make a snackbar with a text message:

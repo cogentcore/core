@@ -1,5 +1,3 @@
-# Dialogs
-
 Cogent Core provides various different types of customizable dialogs with support for any kind of content.
 
 You can make a dialog with a text message:

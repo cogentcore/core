@@ -1,5 +1,3 @@
-# Running the demo
-
 You can run the Cogent Core Demo to verify Cogent Core is properly installed on your system by running the following:
 
 ```sh

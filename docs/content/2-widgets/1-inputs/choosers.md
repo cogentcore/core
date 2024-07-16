@@ -1,5 +1,3 @@
-# Choosers
-
 Cogent Core provides highly customizable choosers that allow users to choose one option among a list of items.
 
 You can set the items of a chooser from a list of strings:

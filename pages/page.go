@@ -27,6 +27,7 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/pages/wpath"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
@@ -170,6 +171,7 @@ func (pg *Page) Init() {
 			pg.body = w
 			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
+				s.Padding.Set(units.Dp(8))
 			})
 		})
 	})

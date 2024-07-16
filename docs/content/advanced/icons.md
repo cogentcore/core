@@ -1,5 +1,3 @@
-# Custom icons
-
 You can add custom icons to your app using icongen, a part of the `core generate` tool. Custom icons are typically placed in a `cicons` (custom icons) directory. In it, you can add all of your custom SVG icon files and an `icons.go` file with the following code:
 
 ```go

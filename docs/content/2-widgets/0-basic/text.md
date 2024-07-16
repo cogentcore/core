@@ -1,5 +1,3 @@
-# Text
-      
 Cogent Core provides customizable and selectable text widgets that can display many kinds of text.
 
 You can render plain text:

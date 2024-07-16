@@ -1,5 +1,3 @@
-# Lists
-
 Cogent Core provides interactive lists that allow you to display a slice value to users and have them edit it. Users can use context menus and drag-and-drop to add, remove, and move rows.
 
 You can make a list from any slice pointer:

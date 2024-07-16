@@ -1,5 +1,3 @@
-# SVGs
-
 Cogent Core provides customizable widgets that allow you to render any SVG object.
 
 You should load SVG files by embedding them so that they work across all platforms:

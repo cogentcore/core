@@ -1,5 +1,3 @@
-# Meters
-
 Cogent Core provides customizable meters for displaying bounded numeric values to users.
 
 You can make a meter without any custom options:

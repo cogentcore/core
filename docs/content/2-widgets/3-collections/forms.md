@@ -1,5 +1,3 @@
-# Forms
-
 Cogent Core provides interactive forms that allow you to display a struct value to users and have them edit it.
 
 You can make a form from any struct pointer:

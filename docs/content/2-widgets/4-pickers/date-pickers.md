@@ -1,5 +1,3 @@
-# Date pickers
-
 Cogent Core provides interactive date pickers that allow users to select a year, month, and day. See [time pickers](time-pickers) for time pickers that allow users to select an hour and minute, a unified time input that allows users to select both a date and time using text fields and dialogs, and a duration input.
 
 You can make a date picker and set its starting value:

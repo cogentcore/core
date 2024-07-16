@@ -1,5 +1,3 @@
-# Toolbars
-
 Cogent Core provides an extensible system of powerful toolbars that allows you to create responsive toolbars that work on all platforms.
 
 All toolbars use the [[tree.Plan]] system through [[core.WidgetBase.Maker]]. This ensures that toolbars can always be dynamic and responsive.

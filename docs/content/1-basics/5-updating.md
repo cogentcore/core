@@ -1,5 +1,3 @@
-# Updating
-
 Cogent Core provides several ways to dynamically update the content of an app.
 
 The simplest way to update a widget is to call [[core.WidgetBase.Update]] after changing any of its properties:

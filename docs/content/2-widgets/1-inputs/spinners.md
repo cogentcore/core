@@ -1,5 +1,3 @@
-# Spinners
-
 Cogent Core provides customizable spinners, which are text fields designed for numeric input. They automatically support the parsing and validation of input, in addition to convenient incrementing and decrementing.
 
 You can make a spinner without any custom options:

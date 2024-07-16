@@ -1,5 +1,3 @@
-# Hello world
-
 This code makes a simple hello world example app using Cogent Core:
 
 ```Go

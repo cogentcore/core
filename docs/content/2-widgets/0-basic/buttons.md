@@ -1,5 +1,3 @@
-# Buttons
-
 Cogent Core provides interactive buttons that support a wide variety of different features. See [func buttons](../other/func-buttons) for buttons bound to functions.
 
 You can make a button with text:

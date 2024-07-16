@@ -1,5 +1,3 @@
-# Icons
-
 Cogent Core provides more than 2,000 unique icons from the Material Symbols collection, allowing you to easily represent many things in a concise, visually pleasing, and language-independent way.
 
 Icons are specified using their named variable in the [[icons]] package, and they are typically used in the context of another widget, like a button:

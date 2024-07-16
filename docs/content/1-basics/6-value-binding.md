@@ -1,5 +1,3 @@
-# Value binding
-
 Cogent Core provides a powerful value binding mechanism that allows you to link the value of a variable and the value of a widget, ensuring that they automatically stay up-to-date.
 
 For example, the example in the [previous updating page](updating) can also be written as:

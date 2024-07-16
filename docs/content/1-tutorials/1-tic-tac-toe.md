@@ -1,5 +1,3 @@
-# Tic-tac-toe
-
 This tutorial shows how to make a simple tic-tac-toe game using Cogent Core.
 
 First, we will make a 3x3 grid of action buttons with borders:

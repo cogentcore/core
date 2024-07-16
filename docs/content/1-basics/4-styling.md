@@ -1,5 +1,3 @@
-# Styling
-
 Cogent Core provides a versatile styling system that allows you to easily customize the appearance of widgets at any level.
 
 You can change any style properties of a widget:

@@ -1,5 +1,3 @@
-# HTML
-
 Cogent Core provides functions for converting HTML and Markdown into interactive Cogent Core widgets. Not all of HTML and Markdown are supported yet, and some things may render incorrectly.
 
 You can convert an HTML string into Cogent Core widgets:

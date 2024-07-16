@@ -1,5 +1,3 @@
-# Events
-
 ## Low-level events
 
 For low-level system events like [[events.MouseDown]] and [[events.KeyUp]], there is no `On{EventType}` helper method for listening to the event, so you must use [[core.Widget.On]] with the event type as an argument.

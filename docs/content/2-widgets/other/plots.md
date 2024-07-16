@@ -1,5 +1,3 @@
-# Plots
-
 Cogent Core provides interactive and customizable data plots.
 
 You can make an interactive plot from slice data:
