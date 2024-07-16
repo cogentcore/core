@@ -197,7 +197,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	}
 	// single file dropped onto a single target file
 	srcpath := ""
-	if externalDrop {
+	if externalDrop || len(md) < 2 {
 		srcpath = string(md[0].Data) // just file path
 	} else {
 		srcpath = string(md[1].Data) // 1 has file path, 0 = tree path, 2 = file data
