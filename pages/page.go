@@ -298,7 +298,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 
 	pg.body.DeleteChildren()
 	if wpath.Draft(pg.PagePath) {
-		draft := core.NewText(pg.body).SetType(core.TextDisplayLarge).SetText("THIS IS A DRAFT")
+		draft := core.NewText(pg.body).SetType(core.TextDisplayLarge).SetText("DRAFT")
 		draft.Styler(func(s *styles.Style) {
 			s.Color = colors.Scheme.Error.Base
 			s.Font.Weight = styles.WeightBold
