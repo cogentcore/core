@@ -85,6 +85,7 @@ func (sw *Switch) Init() {
 		s.Padding.SetHorizontal(units.Dp(ConstantSpacing(4))) // needed for layout issues
 		s.Border.Radius = styles.BorderRadiusSmall
 		s.Gap.Zero()
+		s.CenterAll()
 
 		if sw.Type == SwitchChip {
 			if s.Is(states.Checked) {
