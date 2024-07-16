@@ -164,7 +164,7 @@ type Tree struct {
 	inOpen bool
 
 	// Branch is the branch widget that is used to open and close the tree node.
-	Branch *Switch `json:"-" xml:"-" copier:"-" set:"-"`
+	Branch *Switch `json:"-" xml:"-" copier:"-" set:"-" display:"-"`
 }
 
 // AsCoreTree satisfies the [Treer] interface.

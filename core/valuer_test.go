@@ -21,6 +21,8 @@ func TestNewValue(t *testing.T) {
 		{"float", 3.14},
 		{"string", "hello"},
 		{"enum", styles.Center},
+		{"tree", NewWidgetBase()},
+		{"tree-nil", (*Frame)(nil)},
 	}
 	for _, value := range values {
 		b := NewBody()
