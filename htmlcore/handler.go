@@ -256,10 +256,12 @@ func handleElement(ctx *Context) {
 
 func textStyler(s *styles.Style) {
 	s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
-	scale := float32(1.2)
-	s.Font.Size.Value *= scale
-	s.Text.LineHeight.Value *= scale
-	s.Text.LetterSpacing.Value *= scale
+	// TODO: it would be ideal for htmlcore to automatically save a scale factor
+	// in general and for each domain, that is applied only to page content
+	// scale := float32(1.2)
+	// s.Font.Size.Value *= scale
+	// s.Text.LineHeight.Value *= scale
+	// s.Text.LetterSpacing.Value *= scale
 }
 
 // handleText creates a new [core.Text] from the given information, setting the text and
