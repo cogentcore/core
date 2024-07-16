@@ -24,7 +24,7 @@ func init() {
 	core.AddValueType[simat.SimMat, SimMatButton]()
 }
 
-// TensorButton represents a Tensor with a button for making a [TensorView]
+// TensorButton represents a Tensor with a button for making a [TensorGrid]
 // viewer for an [tensor.Tensor].
 type TensorButton struct {
 	core.Button
@@ -75,7 +75,7 @@ func (tb *TableButton) Init() {
 	})
 }
 
-// SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].
+// SimMatValue presents a button that pulls up the [SimMatGrid] viewer for a [table.Table].
 type SimMatButton struct {
 	core.Button
 	SimMat *simat.SimMat
