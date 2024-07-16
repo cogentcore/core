@@ -10,7 +10,6 @@ package pages
 
 import (
 	"bytes"
-	"fmt"
 	"io/fs"
 	"log/slog"
 	"net/url"
@@ -284,7 +283,6 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		if len(fmb) > 0 {
 			var fm map[string]string
 			errors.Log(tomlx.ReadBytes(&fm, fmb))
-			fmt.Println("front matter", fm)
 		}
 	}
 
@@ -303,6 +301,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 			s.Color = colors.Scheme.Error.Base
 			s.Font.Weight = styles.WeightBold
 		})
+	}
+	if utv != pg.nav {
+		core.NewText(pg.body).SetType(core.TextHeadlineLarge).SetText(utv.Text)
 	}
 	err = htmlcore.ReadMD(pg.Context, pg.body, b)
 	if err != nil {
