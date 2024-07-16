@@ -45,7 +45,8 @@ type OnBinder interface {
 // and during [WidgetBase.UpdateWidget]. It returns the widget to enable method chaining.
 // It also accepts an optional [reflect.StructTag], which is used to set properties
 // of certain value widgets.
-func Bind[T Value](value any, vw T, tags ...reflect.StructTag) T { //yaegi:add
+func Bind[T Value](value any, vw T, tags ...string) T { //yaegi:add
+	// TODO: make tags be reflect.StructTag once yaegi is fixed to work with that
 	wb := vw.AsWidget()
 	alreadyBound := wb.ValueUpdate != nil
 	wb.ValueUpdate = func() {
@@ -65,7 +66,7 @@ func Bind[T Value](value any, vw T, tags ...reflect.StructTag) T { //yaegi:add
 	if ob, ok := any(vw).(OnBinder); ok {
 		tag := reflect.StructTag("")
 		if len(tags) > 0 {
-			tag = tags[0]
+			tag = reflect.StructTag(tags[0])
 		}
 		ob.OnBind(value, tag)
 	}

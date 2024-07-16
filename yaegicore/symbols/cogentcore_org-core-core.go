@@ -31,7 +31,7 @@ func init() {
 		"AsTextField":                   reflect.ValueOf(core.AsTextField),
 		"AsTree":                        reflect.ValueOf(core.AsTree),
 		"AsWidget":                      reflect.ValueOf(core.AsWidget),
-		"Bind":                          reflect.ValueOf(interp.GenericFunc("func Bind[T Value](value any, vw T) T { //yaegi:add\n\twb := vw.AsWidget()\n\talreadyBound := wb.ValueUpdate != nil\n\twb.ValueUpdate = func() {\n\t\tif vws, ok := any(vw).(ValueSetter); ok {\n\t\t\tErrorSnackbar(vw, vws.SetWidgetValue(value))\n\t\t} else {\n\t\t\tErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))\n\t\t}\n\t}\n\twb.ValueOnChange = func() {\n\t\tErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))\n\t}\n\tif alreadyBound {\n\t\tResetWidgetValue(vw)\n\t}\n\twb.ValueTitle = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))\n\tif ob, ok := any(vw).(OnBinder); ok {\n\t\tob.OnBind(value)\n\t}\n\twb.ValueUpdate() // we update it with the initial value immediately\n\treturn vw\n}")),
+		"Bind":                          reflect.ValueOf(interp.GenericFunc("func Bind[T Value](value any, vw T, tags ...string) T { //yaegi:add\n\twb := vw.AsWidget()\n\talreadyBound := wb.ValueUpdate != nil\n\twb.ValueUpdate = func() {\n\t\tif vws, ok := any(vw).(ValueSetter); ok {\n\t\t\tErrorSnackbar(vw, vws.SetWidgetValue(value))\n\t\t} else {\n\t\t\tErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))\n\t\t}\n\t}\n\twb.ValueOnChange = func() {\n\t\tErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))\n\t}\n\tif alreadyBound {\n\t\tResetWidgetValue(vw)\n\t}\n\twb.ValueTitle = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))\n\tif ob, ok := any(vw).(OnBinder); ok {\n\t\ttag := reflect.StructTag(\"\")\n\t\tif len(tags) > 0 {\n\t\t\ttag = reflect.StructTag(tags[0])\n\t\t}\n\t\tob.OnBind(value, tag)\n\t}\n\twb.ValueUpdate() // we update it with the initial value immediately\n\treturn vw\n}")),
 		"ButtonAction":                  reflect.ValueOf(core.ButtonAction),
 		"ButtonElevated":                reflect.ValueOf(core.ButtonElevated),
 		"ButtonFilled":                  reflect.ValueOf(core.ButtonFilled),
@@ -362,7 +362,6 @@ type _cogentcore_org_core_core_Layouter struct {
 	WManageOverflow    func(iter int, updateSize bool) bool
 	WNodeWalkDown      func(fun func(n tree.Node) bool)
 	WOnAdd             func()
-	WOnChildAdded      func(child tree.Node)
 	WPlanName          func() string
 	WPosition          func()
 	WRender            func()
@@ -407,12 +406,11 @@ func (W _cogentcore_org_core_core_Layouter) ManageOverflow(iter int, updateSize 
 func (W _cogentcore_org_core_core_Layouter) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_core_Layouter) OnAdd()                       { W.WOnAdd() }
-func (W _cogentcore_org_core_core_Layouter) OnChildAdded(child tree.Node) { W.WOnChildAdded(child) }
-func (W _cogentcore_org_core_core_Layouter) PlanName() string             { return W.WPlanName() }
-func (W _cogentcore_org_core_core_Layouter) Position()                    { W.WPosition() }
-func (W _cogentcore_org_core_core_Layouter) Render()                      { W.WRender() }
-func (W _cogentcore_org_core_core_Layouter) RenderWidget()                { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Layouter) OnAdd()           { W.WOnAdd() }
+func (W _cogentcore_org_core_core_Layouter) PlanName() string { return W.WPlanName() }
+func (W _cogentcore_org_core_core_Layouter) Position()        { W.WPosition() }
+func (W _cogentcore_org_core_core_Layouter) Render()          { W.WRender() }
+func (W _cogentcore_org_core_core_Layouter) RenderWidget()    { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Layouter) ScrollChanged(d math32.Dims, sb *core.Slider) {
 	W.WScrollChanged(d, sb)
 }
@@ -454,7 +452,6 @@ type _cogentcore_org_core_core_Lister struct {
 	WNewAt            func(idx int)
 	WNodeWalkDown     func(fun func(n tree.Node) bool)
 	WOnAdd            func()
-	WOnChildAdded     func(child tree.Node)
 	WPasteAssign      func(md mimedata.Mimes, idx int)
 	WPasteAtIndex     func(md mimedata.Mimes, idx int)
 	WPlanName         func() string
@@ -483,8 +480,7 @@ func (W _cogentcore_org_core_core_Lister) NewAt(idx int)               { W.WNewA
 func (W _cogentcore_org_core_core_Lister) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_core_Lister) OnAdd()                       { W.WOnAdd() }
-func (W _cogentcore_org_core_core_Lister) OnChildAdded(child tree.Node) { W.WOnChildAdded(child) }
+func (W _cogentcore_org_core_core_Lister) OnAdd() { W.WOnAdd() }
 func (W _cogentcore_org_core_core_Lister) PasteAssign(md mimedata.Mimes, idx int) {
 	W.WPasteAssign(md, idx)
 }
@@ -513,10 +509,12 @@ func (W _cogentcore_org_core_core_Lister) UpdateSliceSize() int { return W.WUpda
 // _cogentcore_org_core_core_OnBinder is an interface wrapper for OnBinder type
 type _cogentcore_org_core_core_OnBinder struct {
 	IValue  interface{}
-	WOnBind func(value any)
+	WOnBind func(value any, tags reflect.StructTag)
 }
 
-func (W _cogentcore_org_core_core_OnBinder) OnBind(value any) { W.WOnBind(value) }
+func (W _cogentcore_org_core_core_OnBinder) OnBind(value any, tags reflect.StructTag) {
+	W.WOnBind(value, tags)
+}
 
 // _cogentcore_org_core_core_Settings is an interface wrapper for Settings type
 type _cogentcore_org_core_core_Settings struct {
@@ -620,7 +618,6 @@ type _cogentcore_org_core_core_Treer struct {
 	WMimeData          func(md *mimedata.Mimes)
 	WNodeWalkDown      func(fun func(n tree.Node) bool)
 	WOnAdd             func()
-	WOnChildAdded      func(child tree.Node)
 	WOnClose           func()
 	WOnOpen            func()
 	WPaste             func()
@@ -665,7 +662,6 @@ func (W _cogentcore_org_core_core_Treer) NodeWalkDown(fun func(n tree.Node) bool
 	W.WNodeWalkDown(fun)
 }
 func (W _cogentcore_org_core_core_Treer) OnAdd()                         { W.WOnAdd() }
-func (W _cogentcore_org_core_core_Treer) OnChildAdded(child tree.Node)   { W.WOnChildAdded(child) }
 func (W _cogentcore_org_core_core_Treer) OnClose()                       { W.WOnClose() }
 func (W _cogentcore_org_core_core_Treer) OnOpen()                        { W.WOnOpen() }
 func (W _cogentcore_org_core_core_Treer) Paste()                         { W.WPaste() }
@@ -705,7 +701,6 @@ type _cogentcore_org_core_core_Value struct {
 	WInit              func()
 	WNodeWalkDown      func(fun func(n tree.Node) bool)
 	WOnAdd             func()
-	WOnChildAdded      func(child tree.Node)
 	WPlanName          func() string
 	WPosition          func()
 	WRender            func()
@@ -741,7 +736,6 @@ func (W _cogentcore_org_core_core_Value) NodeWalkDown(fun func(n tree.Node) bool
 	W.WNodeWalkDown(fun)
 }
 func (W _cogentcore_org_core_core_Value) OnAdd()                         { W.WOnAdd() }
-func (W _cogentcore_org_core_core_Value) OnChildAdded(child tree.Node)   { W.WOnChildAdded(child) }
 func (W _cogentcore_org_core_core_Value) PlanName() string               { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Value) Position()                      { W.WPosition() }
 func (W _cogentcore_org_core_core_Value) Render()                        { W.WRender() }
@@ -789,7 +783,6 @@ type _cogentcore_org_core_core_Widget struct {
 	WInit              func()
 	WNodeWalkDown      func(fun func(n tree.Node) bool)
 	WOnAdd             func()
-	WOnChildAdded      func(child tree.Node)
 	WPlanName          func() string
 	WPosition          func()
 	WRender            func()
@@ -824,7 +817,6 @@ func (W _cogentcore_org_core_core_Widget) NodeWalkDown(fun func(n tree.Node) boo
 	W.WNodeWalkDown(fun)
 }
 func (W _cogentcore_org_core_core_Widget) OnAdd()                         { W.WOnAdd() }
-func (W _cogentcore_org_core_core_Widget) OnChildAdded(child tree.Node)   { W.WOnChildAdded(child) }
 func (W _cogentcore_org_core_core_Widget) PlanName() string               { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Widget) Position()                      { W.WPosition() }
 func (W _cogentcore_org_core_core_Widget) Render()                        { W.WRender() }

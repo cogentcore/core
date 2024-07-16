@@ -301,14 +301,14 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 
 	pg.body.DeleteChildren()
 	if wpath.Draft(pg.PagePath) {
-		draft := core.NewText(pg.body).SetType(core.TextDisplayLarge).SetText("DRAFT")
+		draft := core.NewText(pg.body).SetType(core.TextDisplayMedium).SetText("DRAFT")
 		draft.Styler(func(s *styles.Style) {
 			s.Color = colors.Scheme.Error.Base
 			s.Font.Weight = styles.WeightBold
 		})
 	}
 	if utv != pg.nav {
-		core.NewText(pg.body).SetType(core.TextHeadlineLarge).SetText(utv.Text)
+		core.NewText(pg.body).SetType(core.TextDisplaySmall).SetText(utv.Text)
 	}
 	base := strings.TrimPrefix(path.Base(pg.PagePath), "-")
 	if len(base) >= 10 {
