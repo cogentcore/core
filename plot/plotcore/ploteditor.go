@@ -255,6 +255,24 @@ func (pl *PlotEditor) xLabel() string {
 	return "X"
 }
 
+// GoUpdatePlot updates the display based on current IndexView into table.
+// This version can be called from goroutines. It does Sequential() on
+// the [table.IndexView], under the assumption that it is used for tracking a
+// the latest updates of a running process.
+func (pl *PlotEditor) GoUpdatePlot() {
+	if pl == nil || pl.This == nil {
+		return
+	}
+	if !pl.IsVisible() || pl.table == nil || pl.table.Table == nil || pl.inPlot {
+		return
+	}
+	pl.Scene.AsyncLock()
+	pl.table.Sequential()
+	pl.genPlot()
+	pl.NeedsRender()
+	pl.Scene.AsyncUnlock()
+}
+
 // UpdatePlot updates the display based on current IndexView into table.
 // It does not automatically update the [table.IndexView] unless it is
 // nil or out date.
