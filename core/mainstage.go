@@ -291,7 +291,7 @@ func (st *Stage) runDialog() *Stage {
 		// dialogs must be at least 25% of the window height and 25% of the window width,
 		// unless we have a window that is higher than wider (mobile), in which case
 		// we take up the entire width
-		minsz := st.renderContext.geom.Size
+		minsz := ms.renderContext.geom.Size
 		if minsz.X > minsz.Y {
 			minsz.X /= 4
 		}

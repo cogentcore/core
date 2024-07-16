@@ -190,7 +190,7 @@ func (ws *windowGeometrySaver) save() error {
 	}
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, ws.filename+".json")
-	b, err := json.MarshalIndent(ws.geometries, "", "\t")
+	b, err := json.Marshal(ws.geometries)
 	if err != nil {
 		slog.Error(err.Error())
 		return err
