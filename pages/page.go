@@ -84,15 +84,6 @@ func (pg *Page) Init() {
 		s.Grow.Set(1, 1)
 	})
 
-	pg.OnShow(func(e events.Event) {
-		if pg.PagePath == "" {
-			if getWebURL != nil {
-				pg.OpenURL(getWebURL(), true)
-			} else {
-				pg.OpenURL("/", true)
-			}
-		}
-	})
 	// must be done after the default title is set elsewhere in normal OnShow
 	pg.OnFinal(events.Show, func(e events.Event) {
 		pg.setStageTitle()
@@ -166,6 +157,16 @@ func (pg *Page) Init() {
 					pg.URLToPagePath[tv.PathFrom(w)] = fpath
 					return nil
 				}))
+				// open the default page if there is no currently open page
+				if pg.PagePath == "" {
+					if getWebURL != nil {
+						u := getWebURL()
+						getWebURL = nil // we only call this once for the first page
+						pg.OpenURL(u, true)
+					} else {
+						pg.OpenURL("/", true)
+					}
+				}
 			})
 		})
 		tree.AddChild(w, func(w *core.Frame) {
