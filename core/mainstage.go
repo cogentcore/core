@@ -208,9 +208,11 @@ func (st *Stage) runWindow() *Stage {
 			// on other platforms, we want extra space and a minimum window size
 			sz = sz.Add(image.Pt(20, 20))
 			if st.NewWindow {
-				// we require the window to be at least half of the screen size
+				// we require windows to be at least 60% and no more than 80% of the
+				// screen size by default
 				scsz := system.TheApp.Screen(0).PixSize // TODO(kai): is there a better screen to get here?
-				sz = image.Pt(max(sz.X, scsz.X/2), max(sz.Y, scsz.Y/2))
+				sz = image.Pt(max(sz.X, scsz.X*6/10), max(sz.Y, scsz.Y*6/10))
+				sz = image.Pt(min(sz.X, scsz.X*8/10), min(sz.Y, scsz.Y*8/10))
 			}
 		}
 	}
@@ -288,9 +290,9 @@ func (st *Stage) runDialog() *Stage {
 	if !st.FullWindow || st.NewWindow {
 		sz = sc.prefSize(sz)
 		sz = sz.Add(image.Point{50, 50})
-		// dialogs must be at least 25% of the window height and 25% of the window width,
-		// unless we have a window that is higher than wider (mobile), in which case
-		// we take up the entire width
+		// dialogs must be at least 25% of the window height and 25% of the window width
+		// by default, unless we have a window that is higher than wider (mobile), in
+		// which case we take up the entire width
 		minsz := ms.renderContext.geom.Size
 		if minsz.X > minsz.Y {
 			minsz.X /= 4
