@@ -81,6 +81,12 @@ func main() {
 				pg.Context.OpenURL("https://github.com/cogentcore/core")
 			})
 		})
+		tree.Add(p, func(w *core.Button) {
+			w.SetText("Contact").SetIcon(icons.Mail)
+			w.OnClick(func(e events.Event) {
+				core.MessageDialog(w, "contact@cogentcore.org", "Contact us via email at")
+			})
+		})
 	})
 
 	symbols.Symbols["."]["content"] = reflect.ValueOf(content)
