@@ -404,8 +404,12 @@ func (fr *Frame) ScrollDimToStart(d math32.Dims, posi int) bool {
 // ScrollDimToContentStart is a helper function that scrolls the layout to the
 // start of its content (ie: moves the scrollbar to the very start).
 func (fr *Frame) ScrollDimToContentStart(d math32.Dims) bool {
-	start := fr.Geom.Pos.Content.Dim(d)
-	return fr.ScrollDimToStart(d, int(start))
+	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
+		return false
+	}
+	sb := fr.scrolls[d]
+	sb.setValueEvent(0)
+	return true
 }
 
 // ScrollDimToEnd scrolls to put the given child coordinate position (eg.,
@@ -429,8 +433,12 @@ func (fr *Frame) ScrollDimToEnd(d math32.Dims, posi int) bool {
 // ScrollDimToContentEnd is a helper function that scrolls the layout to the
 // end of its content (ie: moves the scrollbar to the very end).
 func (fr *Frame) ScrollDimToContentEnd(d math32.Dims) bool {
-	end := fr.Geom.Pos.Content.Dim(d) + fr.Geom.Size.Internal.Dim(d)
-	return fr.ScrollDimToEnd(d, int(end))
+	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
+		return false
+	}
+	sb := fr.scrolls[d]
+	sb.setValueEvent(sb.effectiveMax())
+	return true
 }
 
 // ScrollDimToCenter scrolls to put the given child coordinate position (eg.,
