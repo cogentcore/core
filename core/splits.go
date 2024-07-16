@@ -47,9 +47,10 @@ func (sl *Splits) Init() {
 			s.Direction = styles.Row
 		}
 	})
-	sl.OnWidgetAdded(func(w Widget) {
-		if w != sl.Parts {
-			w.AsWidget().Styler(func(s *styles.Style) {
+	sl.SetOnChildAdded(func(n tree.Node) {
+		if n != sl.Parts {
+			_, wb := AsWidget(n)
+			wb.Styler(func(s *styles.Style) {
 				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)

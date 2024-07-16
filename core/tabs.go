@@ -151,8 +151,9 @@ func (ts *Tabs) Init() {
 				s.Min.Set(units.Dp(160), units.Dp(96))
 				s.Grow.Set(1, 1)
 			})
-			w.OnWidgetAdded(func(w Widget) {
-				w.AsWidget().Styler(func(s *styles.Style) {
+			w.SetOnChildAdded(func(n tree.Node) {
+				_, wb := AsWidget(n)
+				wb.Styler(func(s *styles.Style) {
 					// tab frames must scroll independently and grow
 					s.Overflow.Set(styles.OverflowAuto)
 					s.Grow.Set(1, 1)

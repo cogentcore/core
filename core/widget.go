@@ -179,13 +179,6 @@ type WidgetBase struct {
 	// and [WidgetBase.OnFinal] functions, or any of the various On{EventType} helper functions.
 	Listeners tiered.Tiered[events.Listeners] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
-	// OnWidgetAdders is a slice of functions called on widgets that are added as
-	// direct children of this widget. These functions are called in sequential
-	// ascending order, so the last added one is called last and thus can
-	// override anything set by the other ones. These should be set using
-	// [WidgetBase.OnWidgetAdded].
-	OnWidgetAdders []func(w Widget) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
-
 	// ContextMenus is a slice of menu functions to call to construct
 	// the widget's context menu on an [events.ContextMenu]. The
 	// functions are called in reverse order such that the elements
@@ -298,19 +291,6 @@ func (wb *WidgetBase) setScene(sc *Scene) {
 		kwb.Scene = sc
 		return tree.Continue
 	})
-}
-
-func (wb *WidgetBase) OnChildAdded(child tree.Node) {
-	w := child.(Widget)
-	for _, f := range wb.OnWidgetAdders {
-		f(w)
-	}
-}
-
-// OnWidgetAdded adds a function that is called when a widget is added
-// as a direct child of the widget.
-func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) {
-	wb.OnWidgetAdders = append(wb.OnWidgetAdders, fun)
 }
 
 // AsWidget returns the given [tree.Node]

@@ -223,12 +223,12 @@ func ToolbarStyles(w Widget) {
 			s.Padding.SetVertical(units.Dp(ConstantSpacing(16)))
 		}
 	})
-	wb.OnWidgetAdded(func(w Widget) {
-		if bt := AsButton(w); bt != nil {
+	wb.SetOnChildAdded(func(n tree.Node) {
+		if bt := AsButton(n); bt != nil {
 			bt.Type = ButtonAction
 			return
 		}
-		if sp, ok := w.(*Separator); ok {
+		if sp, ok := n.(*Separator); ok {
 			sp.Styler(func(s *styles.Style) {
 				s.Direction = wb.Styles.Direction.Other()
 			})

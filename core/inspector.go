@@ -41,9 +41,9 @@ func (is *Inspector) Init() {
 		s.Grow.Set(1, 1)
 		s.Direction = styles.Column
 	})
-	is.OnWidgetAdded(func(w Widget) {
+	is.SetOnChildAdded(func(n tree.Node) {
 		// TODO(config)
-		if tw, ok := w.(*Tree); ok {
+		if tw, ok := n.(*Tree); ok {
 			tw.Styler(func(s *styles.Style) {
 				s.Max.X.Em(20)
 			})

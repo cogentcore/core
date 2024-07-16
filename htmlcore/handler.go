@@ -137,11 +137,11 @@ func handleElement(ctx *Context) {
 				})
 				// we inherit our Grow.Y from our first child so that
 				// elements that want to grow can do so
-				parent.OnWidgetAdded(func(w core.Widget) {
-					wb := w.AsWidget()
-					if _, ok := w.(*core.Body); ok { // Body should not grow
+				parent.SetOnChildAdded(func(n tree.Node) {
+					if _, ok := n.(*core.Body); ok { // Body should not grow
 						return
 					}
+					_, wb := core.AsWidget(n)
 					if wb.IndexInParent() != 0 {
 						return
 					}

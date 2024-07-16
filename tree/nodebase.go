@@ -81,6 +81,11 @@ type NodeBase struct {
 	// [NodeBase.FinalMaker] to add one.
 	Makers tiered.Tiered[[]func(p *Plan)] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
+	// OnChildAdded is called when a node is added as a direct child of this node.
+	// When a node is added to a parent, it calls [Node.OnAdd] on itself and then
+	// this function on its parent if it is non-nil.
+	OnChildAdded func(n Node) `copier:"-" json:"-" xml:"-" edit:"-"`
+
 	// numLifetimeChildren is the number of children that have ever been added to this
 	// node, which is used for automatic unique naming.
 	numLifetimeChildren uint64
@@ -724,7 +729,3 @@ func (n *NodeBase) Init() {}
 // OnAdd is a placeholder implementation of
 // [Node.OnAdd] that does nothing.
 func (n *NodeBase) OnAdd() {}
-
-// OnChildAdded is a placeholder implementation of
-// [Node.OnChildAdded] that does nothing.
-func (n *NodeBase) OnChildAdded(child Node) {}

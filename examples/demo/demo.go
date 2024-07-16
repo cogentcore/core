@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/tree"
 )
 
 //go:embed demo.go
@@ -209,14 +210,16 @@ func inputs(ts *core.Tabs) {
 	core.NewSwitches(tab).SetType(core.SwitchChip).SetStrings("Chip 1", "Chip 2", "Chip 3")
 	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetStrings("Checkbox 1", "Checkbox 2", "Checkbox 3")
 	cs := core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3")
-	cs.OnWidgetAdded(func(w core.Widget) {
-		w.AsWidget().SetState(true, states.Indeterminate)
+	cs.SetOnChildAdded(func(n tree.Node) {
+		_, wb := core.AsWidget(n)
+		wb.SetState(true, states.Indeterminate)
 	})
 
 	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetStrings("Radio Button 1", "Radio Button 2", "Radio Button 3")
 	rs := core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3")
-	rs.OnWidgetAdded(func(w core.Widget) {
-		w.AsWidget().SetState(true, states.Indeterminate)
+	rs.SetOnChildAdded(func(n tree.Node) {
+		_, wb := core.AsWidget(n)
+		wb.SetState(true, states.Indeterminate)
 	})
 
 	core.NewSwitches(tab).SetType(core.SwitchSegmentedButton).SetMutex(true).SetStrings("Segmented Button 1", "Segmented Button 2", "Segmented Button 3")
