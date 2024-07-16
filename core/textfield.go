@@ -281,7 +281,6 @@ func (tf *TextField) Init() {
 	})
 
 	tf.handleKeyEvents()
-	tf.handleSelectToggle()
 	tf.OnFirst(events.Change, func(e events.Event) {
 		tf.validate()
 		if tf.error != nil {

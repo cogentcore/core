@@ -49,9 +49,6 @@ func TestHandleWidgetState(t *testing.T) {
 	test(abilities.Draggable, states.Dragging, events.DragStart, events.Drop)
 	test(abilities.Focusable, states.Focused, events.Focus, events.FocusLost)
 	test(abilities.Checkable, states.Checked, events.Click, events.Click)
-
-	w.handleSelectToggle()
-	test(abilities.Selectable, states.Selected, events.Select, events.Select)
 }
 
 func TestWidgetEventManager(t *testing.T) {

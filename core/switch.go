@@ -111,7 +111,6 @@ func (sw *Switch) Init() {
 		}
 	})
 
-	sw.handleSelectToggle()
 	sw.HandleClickOnEnterSpace()
 	sw.OnFinal(events.Click, func(e events.Event) {
 		sw.SetChecked(sw.IsChecked())

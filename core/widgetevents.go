@@ -297,24 +297,6 @@ func (wb *WidgetBase) handleWidgetClick() {
 		} else {
 			wb.focusClear()
 		}
-		// note: ReadOnly items are automatically selectable, for choosers
-		if wb.AbilityIs(abilities.Selectable) || wb.IsReadOnly() {
-			wb.Send(events.Select, e)
-		}
-	})
-}
-
-// handleSelectToggle does basic selection handling logic on widget,
-// as just a toggle on individual selection state, including ensuring
-// consistent selection flagging for parts.
-// This is not called by WidgetBase but should be called for simple
-// Widget types.  More complex container / View widgets likely implement
-// their own more complex selection logic.
-func (wb *WidgetBase) handleSelectToggle() {
-	wb.OnSelect(func(e events.Event) {
-		if wb.AbilityIs(abilities.Selectable) {
-			wb.SetState(!wb.StateIs(states.Selected), states.Selected)
-		}
 	})
 }
 
