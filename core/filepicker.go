@@ -115,11 +115,6 @@ func (fp *FilePicker) Init() {
 		if len(recentPaths) == 0 {
 			openRecentPaths()
 		}
-		// if we update the title before the scene is shown, it may incorrectly
-		// override the title of the window of the context widget
-		if fp.Scene.hasShown {
-			fp.Scene.Body.SetTitle("Files: " + fp.directory)
-		}
 		recentPaths.AddPath(fp.directory, SystemSettings.SavedPathsMax)
 		saveRecentPaths()
 		fp.readFiles()
@@ -140,6 +135,12 @@ func (fp *FilePicker) Init() {
 			fp.prevPath = fp.directory
 		}
 
+		tree.AddAt(p, "title", func(w *Text) {
+			w.SetType(TextTitleLarge)
+			w.Updater(func() {
+				w.SetText(fp.directory)
+			})
+		})
 		tree.AddAt(p, "files", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
@@ -725,6 +726,8 @@ func (fb *FileButton) Init() {
 	})
 	var fp *FilePicker
 	InitValueButton(fb, false, func(d *Body) {
+		d.Title = "Select file"
+		d.DeleteChildByName("body-title") // file picker has its own title
 		// ext, _ := v.Tag("ext") // TODO(config) (also rename to extension)
 		fp = NewFilePicker(d).SetFilename(fb.Filename)
 		fb.valueNewWindow = true
