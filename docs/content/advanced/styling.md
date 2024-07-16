@@ -38,14 +38,14 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
-TODO(config): You can style all widgets in the entire app using [[core.App.SceneInit]] in conjunction with [[core.Scene.WidgetInit]]. For example, to make all buttons in your app have a small border radius, you can do the following:
+You can style all widgets in the entire app using [[core.App.SceneInit]] in conjunction with [[core.Scene.WidgetInit]]. For example, to make all buttons in your app have a small border radius, you can do the following:
 
 ```go
 core.TheApp.SetSceneInit(func(sc *core.Scene) {
-    sc.SetOnChildAdded(func(n tree.Node) {
-        switch n := n.(type) {
+    sc.SetWidgetInit(func(w core.Widget) {
+        switch w := w.(type) {
         case *core.Button:
-            n.Styler(func(s *styles.Style) {
+            w.Styler(func(s *styles.Style) {
                 s.Border.Radius = styles.BorderRadiusSmall
             })
         }

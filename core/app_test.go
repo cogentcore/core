@@ -8,13 +8,12 @@ import (
 	"testing"
 
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/tree"
 )
 
 func TestSceneInit(t *testing.T) {
 	TheApp.SetSceneInit(func(sc *Scene) {
-		sc.SetOnChildAdded(func(n tree.Node) { // TODO(config)
-			switch w := n.(type) {
+		sc.SetWidgetInit(func(w Widget) {
+			switch w := w.(type) {
 			case *Button:
 				w.Styler(func(s *styles.Style) {
 					s.Border.Radius = styles.BorderRadiusSmall

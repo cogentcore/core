@@ -29,6 +29,18 @@ import (
 type Scene struct { //core:no-new
 	Frame
 
+	// Body provides the main contents of scenes that use control Bars
+	// to allow the main window contents to be specified separately
+	// from that dynamic control content.  When constructing scenes using
+	// a [Body], you can operate directly on the [Body], which has wrappers
+	// for most major Scene functions.
+	Body *Body `json:"-" xml:"-" set:"-"`
+
+	// WidgetInit is a function called on every newly created [Widget].
+	// This can be used to set global configuration and styling for all
+	// widgets in conjunction with [App.SceneInit].
+	WidgetInit func(w Widget) `json:"-" xml:"-"`
+
 	// Bars contains functions for constructing the control bars for this Scene,
 	// attached to different sides of a Scene (e.g., TopAppBar at Top,
 	// NavBar at Bottom, etc).  Functions are called in forward order
@@ -41,13 +53,6 @@ type Scene struct { //core:no-new
 
 	// AppBars contains functions for making the plan for the top app bar.
 	AppBars []func(p *tree.Plan) `json:"-" xml:"-"`
-
-	// Body provides the main contents of scenes that use control Bars
-	// to allow the main window contents to be specified separately
-	// from that dynamic control content.  When constructing scenes using
-	// a Body, you can operate directly on the [Body], which has wrappers
-	// for most major Scene functions.
-	Body *Body
 
 	// Data is the optional data value being represented by this scene.
 	// Used e.g., for recycling views of a given item instead of creating new one.
