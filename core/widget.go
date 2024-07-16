@@ -428,23 +428,22 @@ func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 	wb.Parts.WalkDown(fun)
 }
 
-// WidgetKidsIter iterates through the Kids, as widgets, calling the given function.
+// ForWidgetChildren iterates through the children as widgets, calling the given function.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) WidgetKidsIter(fun func(i int, w Widget, cwb *WidgetBase) bool) {
+func (wb *WidgetBase) ForWidgetChildren(fun func(i int, w Widget, cwb *WidgetBase) bool) {
 	for i, k := range wb.Children {
 		w, cwb := AsWidget(k)
-		cont := fun(i, w, cwb)
-		if !cont {
+		if !fun(i, w, cwb) {
 			break
 		}
 	}
 }
 
-// VisibleKidsIter iterates through the Kids, as widgets, calling the given function,
+// forVisibleChildren iterates through the children,as widgets, calling the given function,
 // excluding any with the *local* states.Invisible flag set (does not check parents).
 // This is used e.g., for layout functions to exclude non-visible direct children.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) VisibleKidsIter(fun func(i int, w Widget, cwb *WidgetBase) bool) {
+func (wb *WidgetBase) forVisibleChildren(fun func(i int, w Widget, cwb *WidgetBase) bool) {
 	for i, k := range wb.Children {
 		w, cwb := AsWidget(k)
 		if cwb.StateIs(states.Invisible) {
@@ -457,8 +456,7 @@ func (wb *WidgetBase) VisibleKidsIter(fun func(i int, w Widget, cwb *WidgetBase)
 	}
 }
 
-// WidgetWalkDown is a version of [tree.Node.WalkDown] that automatically filters
-// nil or deleted items and operates on [Widget] types.
+// WidgetWalkDown is a version of [tree.NodeBase.WalkDown] that operates on [Widget] types.
 // Return [tree.Continue] to continue and [tree.Break] to terminate.
 func (wb *WidgetBase) WidgetWalkDown(fun func(kwi Widget, kwb *WidgetBase) bool) {
 	wb.WalkDown(func(k tree.Node) bool {

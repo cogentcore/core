@@ -534,7 +534,7 @@ func (tr *Tree) SizeUp() {
 
 	if !tr.Closed {
 		// we layout children under us
-		tr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		tr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeUp()
 			h += kwb.Geom.Size.Actual.Total.Y
 			kw := kwb.Geom.Size.Actual.Total.X
@@ -576,7 +576,7 @@ func (tr *Tree) Position() {
 
 	if !tr.Closed {
 		h := tr.widgetSize.Y
-		tr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		tr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwb.Geom.RelPos.Y = h
 			kwb.Geom.RelPos.X = tr.Indent.Dots
 			h += kwb.Geom.Size.Actual.Total.Y

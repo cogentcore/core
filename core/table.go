@@ -581,7 +581,7 @@ func (tb *Table) SizeFinal() {
 		return
 	}
 	sh := tb.header
-	sh.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	sh.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		_, sgb := AsWidget(sg.Child(i))
 		gsz := &sgb.Geom.Size
 		ksz := &kwb.Geom.Size

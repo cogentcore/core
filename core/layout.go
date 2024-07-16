@@ -779,13 +779,13 @@ func (fr *Frame) LayoutSpace() {
 // sizeUpChildren calls SizeUp on all the children of this node
 func (fr *Frame) sizeUpChildren() {
 	if fr.Styles.Display == styles.Stacked && !fr.LayoutStackTopOnly {
-		fr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		fr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeUp()
 			return tree.Continue
 		})
 		return
 	}
-	fr.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.SizeUp()
 		return tree.Continue
 	})
@@ -829,7 +829,7 @@ func (fr *Frame) setInitCellsFlex() {
 	ca := li.MainAxis.Other()
 	li.Wraps = nil
 	idx := 0
-	fr.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		math32.SetPointDim(&kwb.Geom.Cell, li.MainAxis, idx)
 		math32.SetPointDim(&kwb.Geom.Cell, ca, 0)
 		idx++
@@ -848,7 +848,7 @@ func (fr *Frame) setInitCellsWrap() {
 	li := &fr.layout
 	li.MainAxis = math32.Dims(fr.Styles.Direction)
 	ni := 0
-	fr.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ni++
 		return tree.Continue
 	})
@@ -882,7 +882,7 @@ func (fr *Frame) setWrapIndexes() {
 	li := &fr.layout
 	idx := 0
 	var maxc image.Point
-	fr.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ic := li.wrapIndexToCoord(idx)
 		kwb.Geom.Cell = ic
 		if ic.X > maxc.X {
@@ -902,7 +902,7 @@ func (fr *Frame) setWrapIndexes() {
 // UpdateStackedVisibility updates the visibility for Stacked layouts
 // so the StackTop widget is visible, and others are Invisible.
 func (fr *Frame) UpdateStackedVisibility() {
-	fr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.SetState(i != fr.StackTop, states.Invisible)
 		kwb.Geom.Cell = image.Point{0, 0}
 		return tree.Continue
@@ -930,7 +930,7 @@ func (fr *Frame) setInitCellsGrid() {
 	fr.layout.Shape = image.Point{max(cols, 1), max(rows, 1)}
 	ci := 0
 	ri := 0
-	fr.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.Cell = image.Point{ci, ri}
 		ci++
 		cs := kwb.Styles.ColSpan
@@ -980,7 +980,7 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 	//   +--+--+
 	li := &fr.layout
 	li.initCells()
-	fr.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
 		sz := kwb.Geom.Size.Actual.Total
 		grw := kwb.Styles.Grow
@@ -1081,7 +1081,7 @@ func (wb *WidgetBase) sizeDownParts(iter int) bool {
 // do custom layout and call this too.
 func (wb *WidgetBase) sizeDownChildren(iter int) bool {
 	redo := false
-	wb.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	wb.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		re := kwi.SizeDown(iter)
 		if re && DebugSettings.LayoutTrace {
 			fmt.Println(wb, "SizeDownChildren child:", kwb.Name, "triggered redo")
@@ -1099,7 +1099,7 @@ func (wb *WidgetBase) sizeDownChildren(iter int) bool {
 func (fr *Frame) sizeDownChildren(iter int) bool {
 	if fr.Styles.Display == styles.Stacked && !fr.LayoutStackTopOnly {
 		redo := false
-		fr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		fr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			re := kwi.SizeDown(iter)
 			if i == fr.StackTop {
 				redo = redo || re
@@ -1274,7 +1274,7 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 		slog.Error("unexpected error: layout has not been initialized", "layout", fr.String())
 		return false
 	}
-	fr.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
 		ksz := &kwb.Geom.Size
 		grw := kwb.Styles.Grow
@@ -1342,7 +1342,7 @@ func (fr *Frame) sizeDownWrap(iter int) bool {
 	var sum float32
 	var n int
 	var wraps []int
-	fr.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ksz := kwb.Geom.Size.Actual.Total
 		if first {
 			n = 1
@@ -1410,7 +1410,7 @@ func (fr *Frame) sizeDownGrowStacked(iter int, extra math32.Vector2) bool {
 	}
 	// note: allocate everyone in case they are flipped to top
 	// need a new layout if size is actually different
-	fr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ksz := &kwb.Geom.Size
 		if ksz.Alloc.Total != asz {
 			chg = true
@@ -1436,7 +1436,7 @@ func (fr *Frame) sizeDownAllocActual(iter int) {
 // Note however that due to max sizing for row / column,
 // this size can actually be different than original actual.
 func (fr *Frame) sizeDownAllocActualCells(iter int) {
-	fr.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ksz := &kwb.Geom.Size
 		cidx := kwb.Geom.Cell
 		for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
@@ -1467,7 +1467,7 @@ func (fr *Frame) sizeDownAllocActualStacked(iter int) {
 	}
 	// note: allocate everyone in case they are flipped to top
 	// need a new layout if size is actually different
-	fr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ksz := &kwb.Geom.Size
 		ksz.Alloc.Total = asz
 		ksz.setContentFromTotal(&ksz.Alloc)
@@ -1548,7 +1548,7 @@ func (fr *Frame) SizeFinal() {
 
 // sizeFinalChildren calls SizeFinal on all the children of this node
 func (wb *WidgetBase) sizeFinalChildren() {
-	wb.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	wb.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.SizeFinal()
 		return tree.Continue
 	})
@@ -1557,7 +1557,7 @@ func (wb *WidgetBase) sizeFinalChildren() {
 // sizeFinalChildren calls SizeFinal on all the children of this node
 func (fr *Frame) sizeFinalChildren() {
 	if fr.Styles.Display == styles.Stacked && !fr.LayoutStackTopOnly {
-		fr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		fr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeFinal()
 			return tree.Continue
 		})
@@ -1628,7 +1628,7 @@ func (wb *WidgetBase) positionParts() {
 
 // positionChildren runs Position on the children
 func (wb *WidgetBase) positionChildren() {
-	wb.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	wb.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.Position()
 		return tree.Continue
 	})
@@ -1676,7 +1676,7 @@ func (ly *Frame) positionCellsMainX() {
 	pos := stPos
 	var lastSz math32.Vector2
 	idx := 0
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	ly.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
 		if cidx.X == 0 && idx > 0 {
 			pos.X = stPos.X
@@ -1704,7 +1704,7 @@ func (ly *Frame) positionCellsMainY() {
 	stPos.X = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.X, sz.Actual.Content.X)
 	pos := stPos
 	idx := 0
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	ly.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
 		if cidx.Y == 0 && idx > 0 {
 			pos.Y = stPos.Y
@@ -1720,7 +1720,7 @@ func (ly *Frame) positionCellsMainY() {
 }
 
 func (ly *Frame) positionStacked() {
-	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	ly.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.RelPos.SetZero()
 		if !ly.LayoutStackTopOnly || i == ly.StackTop {
 			kwi.Position()
@@ -1804,7 +1804,7 @@ func (wb *WidgetBase) applyScenePosParts() {
 
 // applyScenePosChildren runs ApplyScenePos on the children
 func (wb *WidgetBase) applyScenePosChildren() {
-	wb.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	wb.forVisibleChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.ApplyScenePos()
 		return tree.Continue
 	})
@@ -1813,7 +1813,7 @@ func (wb *WidgetBase) applyScenePosChildren() {
 // applyScenePosChildren runs ScenePos on the children
 func (fr *Frame) applyScenePosChildren() {
 	if fr.Styles.Display == styles.Stacked && !fr.LayoutStackTopOnly {
-		fr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		fr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.ApplyScenePos()
 			return tree.Continue
 		})

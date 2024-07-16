@@ -586,7 +586,7 @@ func (tb *Table) SizeFinal() {
 	tb.ListBase.SizeFinal()
 	lg := tb.ListGrid
 	sh := tb.SliceHeader()
-	sh.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
+	sh.ForWidgetChildren(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 		_, sgb := core.AsWidget(lg.Child(i))
 		gsz := &sgb.Geom.Size
 		if gsz.Actual.Total.X == 0 {

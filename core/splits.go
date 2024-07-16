@@ -253,7 +253,7 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 	hand := sl.Parts.Child(0).(*Handle)
 	hwd := hand.Geom.Size.Actual.Total.Dim(dim)
 	cszd -= float32(len(sl.Splits)-1) * hwd
-	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	sl.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		sw := math32.Round(sl.Splits[i] * cszd)
 		ksz := &kwb.Geom.Size
 		ksz.Alloc.Total.SetDim(dim, sw)
@@ -293,7 +293,7 @@ func (sl *Splits) positionSplits() {
 	hht := hand.Geom.Size.Actual.Total.Dim(od)
 	mid := (csz.Dim(od) - hht) / 2
 
-	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	sl.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.RelPos.SetZero()
 		if i == 0 {
 			return tree.Continue
@@ -313,7 +313,7 @@ func (sl *Splits) positionSplits() {
 
 func (sl *Splits) RenderWidget() {
 	if sl.PushBounds() {
-		sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		sl.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			sp := sl.Splits[i]
 			if sp <= 0.01 {
 				kwb.SetState(true, states.Invisible)

@@ -451,7 +451,7 @@ func (wb *WidgetBase) renderParts() {
 
 // renderChildren renders all of the widget's children.
 func (wb *WidgetBase) renderChildren() {
-	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	wb.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.RenderWidget()
 		return tree.Continue
 	})

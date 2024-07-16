@@ -143,7 +143,7 @@ func (tb *Toolbar) moveToOverflow() {
 	ovidx := n - 1
 	hasOv := false
 	szsum := float32(0)
-	tb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	tb.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		if i >= n-1 {
 			return tree.Break
 		}
