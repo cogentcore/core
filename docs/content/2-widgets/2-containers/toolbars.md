@@ -22,7 +22,7 @@ You can add any types of widgets to toolbars, although [buttons](../basic/button
 tb := core.NewToolbar(b)
 tb.Maker(func(p *tree.Plan) {
     tree.Add(p, func(w *core.FuncButton) {
-        w.SetFunc(core.AppearanceSettings.SaveScreenZoom)
+        w.SetFunc(core.SettingsWindow)
     })
     tree.Add(p, func(w *core.Switch) {
         w.SetText("Active")
