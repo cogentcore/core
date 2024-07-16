@@ -11,7 +11,6 @@ package jsfs
 
 import (
 	"os"
-	"syscall"
 	"syscall/js"
 )
 
@@ -56,11 +55,11 @@ func JSStat(info os.FileInfo) js.Value {
 }
 
 var ModeBitTranslation = map[os.FileMode]uint32{
-	os.ModeDir:        syscall.S_IFDIR,
-	os.ModeCharDevice: syscall.S_IFCHR,
-	os.ModeNamedPipe:  syscall.S_IFIFO,
-	os.ModeSymlink:    syscall.S_IFLNK,
-	os.ModeSocket:     syscall.S_IFSOCK,
+	os.ModeDir:        0000040000,
+	os.ModeCharDevice: 0000020000,
+	os.ModeNamedPipe:  0000010000,
+	os.ModeSymlink:    0000120000,
+	os.ModeSocket:     0000140000,
 }
 
 func JSMode(mode os.FileMode) uint32 {

@@ -328,9 +328,9 @@ func CopyFile(dst, src string, perm os.FileMode) error {
 		os.Remove(tmp.Name())
 		return err
 	}
-	if err = os.Chmod(tmp.Name(), perm); err != nil {
-		os.Remove(tmp.Name())
-		return err
-	}
+	// if err = os.Chmod(tmp.Name(), perm); err != nil {
+	// 	os.Remove(tmp.Name())
+	// 	return err
+	// }
 	return os.Rename(tmp.Name(), dst)
 }
