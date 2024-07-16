@@ -401,6 +401,13 @@ func (fr *Frame) ScrollDimToStart(d math32.Dims, posi int) bool {
 	return true
 }
 
+// ScrollDimToContentStart is a helper function that scrolls the layout to the
+// start of its content (ie: moves the scrollbar to the very start).
+func (fr *Frame) ScrollDimToContentStart(d math32.Dims) bool {
+	start := fr.Geom.Pos.Content.Dim(d)
+	return fr.ScrollDimToStart(d, int(start))
+}
+
 // ScrollDimToEnd scrolls to put the given child coordinate position (eg.,
 // bottom / right of a view box) at the end (bottom / right) of our scroll
 // area, to the extent possible. Returns true if scrolling was needed.

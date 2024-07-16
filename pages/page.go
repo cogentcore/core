@@ -26,6 +26,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pages/wpath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -322,6 +323,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		return
 	}
 	pg.body.Update()
+	pg.body.ScrollDimToContentStart(math32.Y)
 }
 
 func (pg *Page) MakeToolbar(p *tree.Plan) {
