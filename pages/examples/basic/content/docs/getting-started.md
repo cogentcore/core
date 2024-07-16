@@ -1,5 +1,3 @@
-# Getting started with Pages
-
 To get started with pages, make a new Go file with this code:
 
 ```go
