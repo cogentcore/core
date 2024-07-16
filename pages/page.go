@@ -16,6 +16,7 @@ import (
 	"path"
 	"slices"
 	"strings"
+	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
@@ -306,6 +307,13 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	}
 	if utv != pg.nav {
 		core.NewText(pg.body).SetType(core.TextHeadlineLarge).SetText(utv.Text)
+	}
+	base := strings.TrimPrefix(path.Base(pg.PagePath), "-")
+	if len(base) >= 10 {
+		date := base[:10]
+		if t, err := time.Parse("2006-01-02", date); err == nil {
+			core.NewText(pg.body).SetType(core.TextTitleLarge).SetText(t.Format("1/2/2006"))
+		}
 	}
 	err = htmlcore.ReadMD(pg.Context, pg.body, b)
 	if err != nil {
