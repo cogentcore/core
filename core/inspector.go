@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/base/labels"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
@@ -74,6 +75,7 @@ func (is *Inspector) Init() {
 		var form *Form
 		tree.AddChildAt(w, "tree-frame", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
+				s.Background = colors.Scheme.SurfaceContainerLow
 				s.Direction = styles.Column
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Gap.Zero()
