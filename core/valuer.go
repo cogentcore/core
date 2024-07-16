@@ -122,13 +122,7 @@ func toValue(value any, tags reflect.StructTag) Value {
 		if _, ok := value.(fmt.Stringer); ok {
 			return NewTextField()
 		}
-		sp := NewSpinner()
-		if f, ok := tags.Lookup("format"); ok {
-			sp.SetFormat(f)
-		} else if kind == reflect.Uintptr {
-			sp.SetFormat("%#x")
-		}
-		return sp
+		return NewSpinner()
 	case kind == reflect.Bool:
 		return NewSwitch()
 	case kind == reflect.Struct:

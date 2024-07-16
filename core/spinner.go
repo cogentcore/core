@@ -91,6 +91,9 @@ func (sp *Spinner) OnBind(value any, tags reflect.StructTag) {
 			sp.SetMin(0)
 		}
 	}
+	if f, ok := tags.Lookup("format"); ok {
+		sp.SetFormat(f)
+	}
 }
 
 func (sp *Spinner) Init() {
