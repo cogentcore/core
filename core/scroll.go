@@ -272,7 +272,11 @@ func (wb *WidgetBase) ScrollToThis() bool {
 // It returns whether scrolling was needed.
 func (fr *Frame) scrollToWidget(w Widget) bool {
 	// note: critical to NOT use BBox b/c it is zero for invisible items!
-	return fr.ScrollToBox(w.AsWidget().Geom.totalRect())
+	box := w.AsWidget().Geom.totalRect()
+	if box.Size() == (image.Point{}) {
+		return false
+	}
+	return fr.ScrollToBox(box)
 }
 
 // autoScrollDim auto-scrolls along one dimension, based on the current
