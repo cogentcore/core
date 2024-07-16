@@ -133,7 +133,7 @@ type Scene struct { //core:no-new
 func newBodyScene(body *Body) *Scene {
 	sc := NewScene(body.Name + " scene")
 	sc.Body = body
-	// need to set parent immediately so that SceneConfig works,
+	// need to set parent immediately so that SceneInit works,
 	// but can not add it yet because it may go elsewhere due
 	// to app bars
 	tree.SetParent(body, sc)
@@ -191,8 +191,8 @@ func (sc *Scene) Init() {
 		st := sm.stack.ValueByIndex(sm.stack.Len() - 2)
 		currentRenderWindow.SetStageTitle(st.Title)
 	})
-	if TheApp.SceneConfig != nil {
-		TheApp.SceneConfig(sc)
+	if TheApp.SceneInit != nil {
+		TheApp.SceneInit(sc)
 	}
 }
 

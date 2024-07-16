@@ -21,14 +21,13 @@ import (
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.App", IDName: "app", Doc: "App represents a Cogent Core app. It extends [system.App] to provide both system-level\nand high-level data and functions to do with the currently running application. The\nsingle instance of it is [TheApp], which embeds [system.TheApp].", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "App"}}, Fields: []types.Field{{Name: "SceneConfig", Doc: "SceneConfig is the function called on every newly created [Scene]\nto configure it, if it is non-nil. This can be used to set global\nconfiguration and styling for all widgets using the OnWidgetAdded\nmethod."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.App", IDName: "app", Doc: "App represents a Cogent Core app. It extends [system.App] to provide both system-level\nand high-level data and functions to do with the currently running application. The\nsingle instance of it is [TheApp], which embeds [system.TheApp].", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "App"}}, Fields: []types.Field{{Name: "SceneInit", Doc: "SceneInit is a function called on every newly created [Scene].\nThis can be used to set global configuration and styling for all\nwidgets in conjunction with [Scene.WidgetInit]."}}})
 
-// SetSceneConfig sets the [App.SceneConfig]:
-// SceneConfig is the function called on every newly created [Scene]
-// to configure it, if it is non-nil. This can be used to set global
-// configuration and styling for all widgets using the OnWidgetAdded
-// method.
-func (t *App) SetSceneConfig(v func(sc *Scene)) *App { t.SceneConfig = v; return t }
+// SetSceneInit sets the [App.SceneInit]:
+// SceneInit is a function called on every newly created [Scene].
+// This can be used to set global configuration and styling for all
+// widgets in conjunction with [Scene.WidgetInit].
+func (t *App) SetSceneInit(v func(sc *Scene)) *App { t.SceneInit = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Body", IDName: "body", Doc: "Body holds the primary content of a [Scene].\nIt is the main container for app content.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Title", Doc: "Title is the title of the body, which is also\nused for the window title where relevant."}}})
 

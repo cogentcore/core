@@ -11,8 +11,8 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-func TestSceneConfig(t *testing.T) {
-	TheApp.SetSceneConfig(func(sc *Scene) {
+func TestSceneInit(t *testing.T) {
+	TheApp.SetSceneInit(func(sc *Scene) {
 		sc.SetOnChildAdded(func(n tree.Node) { // TODO(config)
 			switch w := n.(type) {
 			case *Button:
@@ -23,7 +23,7 @@ func TestSceneConfig(t *testing.T) {
 		})
 	})
 	defer func() {
-		TheApp.SetSceneConfig(nil)
+		TheApp.SetSceneInit(nil)
 	}()
 	b := NewBody()
 	NewButton(b).SetText("Test")
