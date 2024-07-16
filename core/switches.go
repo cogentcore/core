@@ -103,7 +103,7 @@ func (sw *Switches) SetWidgetValue(value any) error {
 	return sw.SelectValue(value)
 }
 
-func (sw *Switches) OnBind(value any) {
+func (sw *Switches) OnBind(value any, tags reflect.StructTag) {
 	if e, ok := value.(enums.Enum); ok {
 		sw.SetEnum(e).SetType(SwitchSegmentedButton).SetMutex(true)
 	}

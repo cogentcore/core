@@ -138,7 +138,7 @@ const (
 
 func (sr *Slider) WidgetValue() any { return &sr.Value }
 
-func (sr *Slider) OnBind(value any) {
+func (sr *Slider) OnBind(value any, tags reflect.StructTag) {
 	kind := reflectx.NonPointerType(reflect.TypeOf(value)).Kind()
 	if kind >= reflect.Int && kind <= reflect.Uintptr {
 		sr.SetStep(1).SetEnforceStep(true).SetMax(100)

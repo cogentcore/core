@@ -35,14 +35,17 @@ type ValueSetter interface {
 // do something when the widget is bound to the given value.
 type OnBinder interface {
 
-	// OnBind is called when the widget is bound to the given value.
-	OnBind(value any)
+	// OnBind is called when the widget is bound to the given value
+	// with the given optional struct tags.
+	OnBind(value any, tags reflect.StructTag)
 }
 
 // Bind binds the given value to the given [Value] such that the values of
 // the two will be linked and updated appropriately after [events.Change] events
 // and during [WidgetBase.UpdateWidget]. It returns the widget to enable method chaining.
-func Bind[T Value](value any, vw T) T { //yaegi:add
+// It also accepts an optional [reflect.StructTag], which is used to set properties
+// of certain value widgets.
+func Bind[T Value](value any, vw T, tags ...reflect.StructTag) T { //yaegi:add
 	wb := vw.AsWidget()
 	alreadyBound := wb.ValueUpdate != nil
 	wb.ValueUpdate = func() {
@@ -60,7 +63,11 @@ func Bind[T Value](value any, vw T) T { //yaegi:add
 	}
 	wb.ValueTitle = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))
 	if ob, ok := any(vw).(OnBinder); ok {
-		ob.OnBind(value)
+		tag := reflect.StructTag("")
+		if len(tags) > 0 {
+			tag = tags[0]
+		}
+		ob.OnBind(value, tag)
 	}
 	wb.ValueUpdate() // we update it with the initial value immediately
 	return vw

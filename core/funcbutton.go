@@ -136,7 +136,7 @@ func (fb *FuncButton) SetWidgetValue(value any) error {
 	return nil
 }
 
-func (fb *FuncButton) OnBind(value any) {
+func (fb *FuncButton) OnBind(value any, tags reflect.StructTag) {
 	// If someone is viewing a function value, there is a good chance
 	// that it is not added to types (and that is out of their control)
 	// (eg: in the inspector), so we do not warn on unadded functions.

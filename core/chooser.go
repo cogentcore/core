@@ -155,7 +155,7 @@ func (ch *Chooser) SetWidgetValue(value any) error {
 	return nil
 }
 
-func (ch *Chooser) OnBind(value any) {
+func (ch *Chooser) OnBind(value any, tags reflect.StructTag) {
 	if e, ok := value.(enums.Enum); ok {
 		ch.SetEnum(e)
 	}

@@ -83,7 +83,7 @@ func (sp *Spinner) SetWidgetValue(value any) error {
 	return nil
 }
 
-func (sp *Spinner) OnBind(value any) {
+func (sp *Spinner) OnBind(value any, tags reflect.StructTag) {
 	kind := reflectx.NonPointerType(reflect.TypeOf(value)).Kind()
 	if kind >= reflect.Int && kind <= reflect.Uintptr {
 		sp.SetStep(1).SetEnforceStep(true)
