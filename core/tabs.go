@@ -140,7 +140,7 @@ func (ts *Tabs) Init() {
 					return
 				}
 				ntb := NewButton(w).SetType(ButtonAction).SetIcon(icons.Add)
-				ntb.SetName("new-tab-button")
+				ntb.SetTooltip("Add a new tab").SetName("new-tab-button")
 				ntb.OnClick(func(e events.Event) {
 					ts.NewTab("New tab")
 					ts.SelectTabIndex(ts.NumTabs() - 1)
