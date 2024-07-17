@@ -100,6 +100,10 @@ func (fm *Form) getStructFields() {
 						return shouldShow(parent, sfield)
 					},
 					func(parent reflect.Value, parentField *reflect.StructField, sfield reflect.StructField, value reflect.Value) {
+						// if our parent field is read only, we must also be
+						if field.Tag.Get("edit") == "-" && sfield.Tag.Get("edit") == "" {
+							sfield.Tag += ` edit:"-"`
+						}
 						fields = append(fields, &structField{path: field.Name + " • " + sfield.Name, field: sfield, value: value, parent: parent})
 					})
 			} else {
