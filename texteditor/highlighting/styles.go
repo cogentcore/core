@@ -141,7 +141,7 @@ func (hs *Styles) SaveSettings() error {
 // SaveAll saves all styles individually to chosen directory
 func (hs *Styles) SaveAll(dir core.Filename) {
 	for nm, st := range *hs {
-		fnm := filepath.Join(string(dir), nm+".histy")
+		fnm := filepath.Join(string(dir), nm+".highlighting")
 		st.SaveJSON(core.Filename(fnm))
 	}
 }
