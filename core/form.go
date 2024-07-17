@@ -149,7 +149,15 @@ func (fm *Form) Init() {
 				label = lt
 			}
 			labnm := fmt.Sprintf("label-%s", f.path)
-			valnm := fmt.Sprintf("value-%s-%s", f.path, reflectx.ShortTypeName(f.field.Type))
+			// we must have a different name for different types
+			// so that the widget can be re-made for a new type
+			typnm := reflectx.ShortTypeName(f.field.Type)
+			// we must have a different name for invalid values
+			// so that the widget can be re-made for valid values
+			if !reflectx.Underlying(f.value).IsValid() {
+				typnm = "invalid"
+			}
+			valnm := fmt.Sprintf("value-%s-%s", f.path, typnm)
 			readOnlyTag := f.field.Tag.Get("edit") == "-"
 			def, hasDef := f.field.Tag.Lookup("default")
 
