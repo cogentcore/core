@@ -398,7 +398,6 @@ func collections(ts *core.Tabs) {
 	sp := core.NewSplits(vts.NewTab("Trees")).SetSplits(0.3, 0.7)
 	tr := core.NewTree(core.NewFrame(sp)).SetText("Root")
 	makeTree(tr, 0)
-	tr.RootSetViewIndex()
 
 	sv := core.NewForm(sp).SetStruct(tr)
 

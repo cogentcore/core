@@ -172,11 +172,9 @@ func (tr *Tree) AsCoreTree() *Tree {
 	return tr
 }
 
-// RootSetViewIndex sets the RootView and ViewIndex for all nodes.
-// This must be called from the root node after
-// construction or any modification to the tree.
-// Returns the total number of leaves in the tree.
-func (tr *Tree) RootSetViewIndex() int {
+// rootSetViewIndex sets the [Tree.root] and [Tree.viewIndex] for all nodes.
+// It returns the total number of leaves in the tree.
+func (tr *Tree) rootSetViewIndex() int {
 	idx := 0
 	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		tvn := AsTree(wi)
@@ -529,7 +527,7 @@ func (tr *Tree) SizeUp() {
 	h := tr.widgetSize.Y
 	w := tr.widgetSize.X
 	if tr.root.This == tr.This { // do it every time on root
-		tr.root.RootSetViewIndex()
+		tr.root.rootSetViewIndex()
 	}
 
 	if !tr.Closed {
