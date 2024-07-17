@@ -131,17 +131,21 @@ func (ts *Tabs) Init() {
 					s.Wrap = true
 				}
 			})
-			// w.Maker(func(p *tree.Plan) {
-			// 	if ts.NewTabButton {
-			// 		AddAt(p, "new-tab", func(w *Button) { // TODO(config)
-			// 			w.SetIcon(icons.Add).SetType(ButtonAction)
-			// 			w.OnClick(func(e events.Event) {
-			// 				ts.NewTab("New tab")
-			// 				ts.SelectTabIndex(ts.NumTabs() - 1)
-			// 			})
-			// 		})
-			// 	}
-			// })
+			w.Updater(func() {
+				if !ts.NewTabButton {
+					w.DeleteChildByName("new-tab-button")
+					return
+				}
+				if w.ChildByName("new-tab-button") != nil {
+					return
+				}
+				ntb := NewButton(w).SetType(ButtonAction).SetIcon(icons.Add)
+				ntb.SetName("new-tab-button")
+				ntb.OnClick(func(e events.Event) {
+					ts.NewTab("New tab")
+					ts.SelectTabIndex(ts.NumTabs() - 1)
+				})
+			})
 		})
 		tree.AddAt(p, "frame", func(w *Frame) {
 			ts.frame = w
