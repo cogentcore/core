@@ -114,9 +114,9 @@ func (hs *Styles) SaveJSON(filename core.Filename) error { //types:add
 	return err
 }
 
-// SettingsStylesFilename is the name of the preferences file in App prefs
+// SettingsStylesFilename is the name of the preferences file in App data
 // directory for saving / loading the custom styles
-var SettingsStylesFilename = "hi_styles.json"
+var SettingsStylesFilename = "highlighting.json"
 
 // StylesChanged is used for gui updating while editing
 var StylesChanged = false
