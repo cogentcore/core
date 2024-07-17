@@ -224,7 +224,7 @@ func NewFilePicker(parent ...tree.Node) *FilePicker { return tree.New[FilePicker
 // Filterer is an optional filtering function for which files to display.
 func (t *FilePicker) SetFilterer(v FilePickerFilterer) *FilePicker { t.Filterer = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FileButton", IDName: "file-button", Doc: "FileButton represents a [Filename] value with a button\nthat opens a [FilePicker].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Filename"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FileButton", IDName: "file-button", Doc: "FileButton represents a [Filename] value with a button\nthat opens a [FilePicker].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Filename"}, {Name: "Extensions", Doc: "Extensions are the target file extensions for the file picker."}}})
 
 // NewFileButton returns a new [FileButton] with the given optional parent:
 // FileButton represents a [Filename] value with a button
@@ -233,6 +233,10 @@ func NewFileButton(parent ...tree.Node) *FileButton { return tree.New[FileButton
 
 // SetFilename sets the [FileButton.Filename]
 func (t *FileButton) SetFilename(v string) *FileButton { t.Filename = v; return t }
+
+// SetExtensions sets the [FileButton.Extensions]:
+// Extensions are the target file extensions for the file picker.
+func (t *FileButton) SetExtensions(v string) *FileButton { t.Extensions = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Form", IDName: "form", Doc: "Form represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the form in one line."}, {Name: "structFields", Doc: "structFields are the fields of the current struct."}, {Name: "isShouldDisplayer", Doc: "isShouldDisplayer is whether the struct implements [ShouldDisplayer], which results\nin additional updating being done at certain points."}}})
 
@@ -425,7 +429,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.InlineList", I
 // This is typically used for smaller slices.
 func NewInlineList(parent ...tree.Node) *InlineList { return tree.New[InlineList](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Inspector", IDName: "inspector", Doc: "Inspector represents a [tree.Node] with a [Tree] and a [Form].", Methods: []types.Method{{Name: "save", Doc: "save saves the tree to current filename, in a standard JSON-formatted file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}}, {Name: "saveAs", Doc: "saveAs saves tree to given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "open", Doc: "open opens tree from given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "toggleSelectionMode", Doc: "toggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicking on a Widget pulls it up in the inspector.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "inspectApp", Doc: "inspectApp displays the underlying operating system app", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Root", Doc: "Root is the root of the tree being edited."}, {Name: "currentNode", Doc: "currentNode is the currently selected node in the tree."}, {Name: "filename", Doc: "filename is the current filename for saving / loading"}, {Name: "treeWidget"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Inspector", IDName: "inspector", Doc: "Inspector represents a [tree.Node] with a [Tree] and a [Form].", Methods: []types.Method{{Name: "save", Doc: "save saves the tree to current filename, in a standard JSON-formatted file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}}, {Name: "saveAs", Doc: "saveAs saves tree to given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "open", Doc: "open opens tree from given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "toggleSelectionMode", Doc: "toggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicking on a Widget pulls it up in the inspector.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "inspectApp", Doc: "inspectApp displays [TheApp].", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Root", Doc: "Root is the root of the tree being edited."}, {Name: "currentNode", Doc: "currentNode is the currently selected node in the tree."}, {Name: "filename", Doc: "filename is the current filename for saving / loading"}, {Name: "treeWidget"}}})
 
 // NewInspector returns a new [Inspector] with the given optional parent:
 // Inspector represents a [tree.Node] with a [Tree] and a [Form].

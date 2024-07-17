@@ -265,7 +265,7 @@ func (is *Inspector) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *Separator) {})
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.open).SetIcon(icons.Open).SetKey(keymap.Open)
-		w.Args[0].SetValue(is.filename).SetTag(`ext:".json"`)
+		w.Args[0].SetValue(is.filename).SetTag(`extension:".json"`)
 	})
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.save).SetIcon(icons.Save).SetKey(keymap.Save)
@@ -275,7 +275,7 @@ func (is *Inspector) MakeToolbar(p *tree.Plan) {
 	})
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.saveAs).SetIcon(icons.SaveAs).SetKey(keymap.SaveAs)
-		w.Args[0].SetValue(is.filename).SetTag(`ext:".json"`)
+		w.Args[0].SetValue(is.filename).SetTag(`extension:".json"`)
 	})
 	tree.Add(p, func(w *Separator) {})
 	tree.Add(p, func(w *FuncButton) {

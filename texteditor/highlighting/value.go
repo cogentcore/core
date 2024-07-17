@@ -61,11 +61,11 @@ func View(st *Styles) {
 	d.AddAppBar(func(p *tree.Plan) {
 		tree.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
-			w.Args[0].SetTag(`ext:".histy"`)
+			w.Args[0].SetTag(`extension:".histy"`)
 		})
 		tree.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
-			w.Args[0].SetTag(`ext:".histy"`)
+			w.Args[0].SetTag(`extension:".histy"`)
 		})
 		tree.Add(p, func(w *core.Separator) {})
 		mv.MakeToolbar(p)
