@@ -5,6 +5,7 @@
 package core
 
 import (
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -17,41 +18,93 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// todo: this plan below cannot represent the
-// 012
-// 033 
-// case.  need to keep working on this 
+// SplitsTiles specifies 2D tiles for organizing elements within the [Splits] Widget.
+// The [styles.Style.Direction] defines the main axis, and the cross axis is orthogonal
+// to that, which is organized into chunks of 2 cross-axis "rows".  In the case of a
+// 1D pattern, only Span is relevant, indicating a single element per split.
+type SplitsTiles int32 //enums:enum -trim-prefix Tile
+
+const (
+	// Span has a single element spanning the cross dimension, i.e.,
+	// a vertical span for a horizontal main axis, or a horizontal
+	// span for a vertical main axis.  It is the only valid value
+	// for 1D Splits, where it specifies a single element per split.
+	// If all tiles are Span, then a 1D line is generated.
+	TileSpan SplitsTiles = iota
+
+	// Split has a split between elements along the cross dimension,
+	// with the first of 2 elements in the first main axis line and
+	// the second in the second line.
+	TileSplit
+
+	// FirstLong has a long span of first element along the first
+	// main axis line and a split between the next two elements
+	// along the second line, with a split between the two lines.
+	// Visually, the splits form a T shape for a horizontal main axis.
+	TileFirstLong
+
+	// SecondLong has the first two elements split along the first line,
+	//	and the third with a long span along the second main axis line,
+	// with a split between the two lines.  Visually, the splits form
+	// an inverted T shape for a horizontal main axis.
+	TileSecondLong
+)
+
+var (
+	// tileNumElements is the number of elements per tile.
+	// the number of splitter handles is n-1.
+	tileNumElements = map[SplitsTiles]int{TileSpan: 1, TileSplit: 2, TileFirstLong: 3, TileSecondLong: 3}
+
+	// tileNumSubSplits is the number of SubSplits proportions per tile.
+	// The Long cases require 2 pairs, first for the split along the cross axis
+	// and second for the split along the main axis.
+	tileNumSubSplits = map[SplitsTiles]int{TileSpan: 1, TileSplit: 2, TileFirstLong: 4, TileSecondLong: 4}
+)
 
 // Splits allocates a certain proportion of its space to each of its children,
-// organized according to [styles.Style.Direction] and [styles.Style.Columns],
-// where "columns" is either 1 or 2, and actually represents the number of 
-// rows when Direction = Rows, and Columns for Direction = Columns.
-// For Columns = 2, the Spans field indicates which Columns are grouped into
-// a single span of 2.  Non-spanned cases hold separate elements.
-// For example, Columns = 2 with 4 Children and Spans[0] = true results
-// in a "tall" element at the start, followed by 2 
-// It adds [Handle] widgets to its parts that allow the user to customize
-// the amount of space allocated to each child.
-// Use nested Splits to implement more complex configurations.
+// organized along [styles.Style.Direction] as the main axis, and supporting
+// [SplitsTiles] of 2D splits configurations along the cross axis.
+// There is always a split between each Tile segment along the main axis,
+// with the proportion of the total main axis space per Tile allocated
+// according to normalized Splits factors.
+// If all Tiles are Span then a 1D line is generated.  Children are allocated
+// in order along the main axis, according to each of the Tiles,
+// which consume 1, 2 or 3 elements, and have 0, 1 or 2 splits internally.
+// The internal split proportion are stored separately in SubSplits.
+// A [Handle] widget is added to the Parts for each split, allowing the user
+// to drag the relative size of each splits region.
+// If more complex geometries are required, use nested Splits.
 type Splits struct {
 	Frame
 
+	// Tiles specifies the 2D layout of elements along the [styles.Style.Direction]
+	// main axis and the orthogonal cross axis.  If all Tiles are TileSpan, then
+	// a 1D line is generated.  There is always a split between each Tile segment,
+	// and different tiles consume different numbers of elements in order, and
+	// have different numbers of SubSplits.  Because each Tile can represent a
+	// different number of elements, care must be taken to ensure that the full
+	// set of tiles corresponds to the actual number of children.  A default
+	// 1D configuration will be imposed if there is a mismatch.
+	Tiles []SplitsTiles
+
 	// Splits is the proportion (0-1 normalized, enforced) of space
-	// allocated to each element. 0 indicates that an element should
-	// be completely collapsed. By default, each element gets the
-	// same amount of space.
+	// allocated to each Tile element along the main axis.
+	// 0 indicates that an element should  be completely collapsed.
+	// By default, each element gets the same amount of space.
 	Splits []float32
 
-	Spans []
-	
-	// savedSplits is a saved version of the splits that can be restored
+	// SubSplits contains splits proportions for each Tile element, with
+	// a variable number depending on the Tile.  For the First and Second Long
+	// elements, there are 2 subsets of sub-splits, with 4 total subsplits.
+	SubSplits [][]float32
+
+	// savedSplits is a saved version of the Splits that can be restored
 	// for dynamic collapse/expand operations.
 	savedSplits []float32
 
-	// spans is used when the smallest dimension is 2 ("rows"), to indicate which
-	// of the "columns" span both rows.  The [styles.Style.Direction] is used to
-	// indicate which direction is the _long_ axis.
-	spans []bool
+	// savedSubSplits is a saved version of the SubSplits that can be restored
+	// for dynamic collapse/expand operations.
+	savedSubSplits [][]float32
 }
 
 func (sl *Splits) Init() {
@@ -97,7 +150,9 @@ func (sl *Splits) Init() {
 		kn := int(knc)
 		if kn == 0 {
 			e.SetHandled()
-			sl.evenSplits()
+			sl.evenSplits(sl.Splits)
+			sl.NeedsLayout()
+
 		} else if kn <= len(sl.Children) {
 			e.SetHandled()
 			if sl.Splits[kn-1] <= 0.01 {
@@ -126,85 +181,87 @@ func (sl *Splits) Init() {
 	})
 }
 
-// updateSplits ensures the Order and Splits are all set properly.
+// tilesTotal returns the total number of child elements associated
+// with the current set of Tiles elements, and whether there are any
+// non-TileSpan elements, which has implications for error handling
+// if the total does not match the actual number of children in the Splits.
+func (sl *Splits) tilesTotal() (total int, hasNonSpans bool) {
+	for _, t := range sl.Tiles {
+		total += tileNumElements[t]
+		if t != TileSpan {
+			hasNonSpans = true
+		}
+	}
+	return
+}
+
+// updateSplits ensures the Tiles, Splits and SubSplits are all configured properly,
+// given the number of children in the splits.
 func (sl *Splits) updateSplits() *Splits {
 	nc := len(sl.Children)
 	if nc == 0 {
 		return sl
 	}
-	if len(sl.Order) < nc {
-		sl.Order = slicesx.SetLength(sl.Order, nc)
+	ntc, hasNonSpans := sl.tilesTotal()
+	if ntc != nc {
+		if ntc != 0 && hasNonSpans {
+			slog.Error("core.Splits: number of children for current Tiles != number of actual children, reverting to 1D", "children", nc, "tiles", ntc)
+		}
+		sl.Tiles = slicesx.SetLength(sl.Tiles, nc)
 		for i := range nc {
-			sl.Order[i] = i
+			sl.Tiles[i] = TileSpan
 		}
 	}
-	// get rows and cols
-	no := len(sl.Order)
-	cols := sl.Styles.Columns
-	if cols == 0 || cols > no {
-		cols = no
-	} else if no%cols != 0 {
-		for {
-			cols++
-			if no%cols == 0 {
-				break
-			}
-		}
-	}
-	sl.Styles.Columns = cols
-	rows := no / cols
-
-	if rows == 1 || cols == 1 {
-		if rows == 1 {
-			sl.Styles.Direction = 
-		}
-	}
-	
-	ns := 0 // num splits
-	for ri := range rows {
-		li := 0
-		for ci := range cols {
-			oi := sl.Order[ri*cols+ci]
-			if oi != li {
-				if ri == 0 {
-					ns++
-				} else {
-					pi := sl.Order[(ri-1)*cols+ci]
-					if pi != oi {
-						ns++
-					}
-				}
-			}
-		}
-	}
+	nt := len(sl.Tiles)
+	ns := nt - 1
 	sl.Splits = slicesx.SetLength(sl.Splits, ns)
+	sl.normSplits(sl.Splits)
+	sl.SubSplits = slicesx.SetLength(sl.SubSplits, nt)
+	for i, t := range sl.Tiles {
+		ssn := tileNumSubSplits[t]
+		ss := sl.SubSplits[i]
+		ss = slicesx.SetLength(ss, ssn)
+		switch t {
+		case TileSpan:
+			ss[0] = 1
+		case TileSplit:
+			sl.normSplits(ss)
+		case TileFirstLong, TileSecondLong:
+			sl.normSplits(ss[:2])
+			sl.normSplits(ss[2:])
+		}
+		sl.SubSplits[i] = ss
+	}
+	return sl
+}
+
+// normSplits normalizes the given splits proportions,
+// using evenSplits if all zero
+func (sl *Splits) normSplits(s []float32) {
 	sum := float32(0)
-	for _, sp := range sl.Splits {
+	for _, sp := range s {
 		sum += sp
 	}
 	if sum == 0 { // set default even splits
-		sl.evenSplits()
-		sum = 1
+		sl.evenSplits(s)
 	} else {
 		norm := 1 / sum
 		for i := range sl.Splits {
 			sl.Splits[i] *= norm
 		}
 	}
-	return sl
 }
 
-// evenSplits splits space evenly across all panels
-func (sl *Splits) evenSplits() {
-	n := len(sl.Children)
+// evenSplits splits space evenly across all elements
+func (sl *Splits) evenSplits(s []float32) {
+	n := len(s)
 	if n == 0 {
 		return
 	}
 	even := 1.0 / float32(n)
-	for i := range sl.Splits {
-		sl.Splits[i] = even
+	for i := range s {
+		s[i] = even
 	}
-	sl.NeedsLayout()
 }
 
 // saveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits

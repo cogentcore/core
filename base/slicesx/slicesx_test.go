@@ -23,4 +23,7 @@ func TestSetLength(t *testing.T) {
 	s = SetLength(s, 4)
 	assert.Equal(t, 4, len(s))
 	assert.Equal(t, 2, s[2])
+
+	s = SetLength(s, 0)
+	assert.Equal(t, 0, len(s))
 }
