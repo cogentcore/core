@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -16,9 +17,12 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Splits allocates a certain proportion of its space to each of its children
-// along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
-// allow the user to customize the amount of space allocated to each child.
+// Splits allocates a certain proportion of its space to each of its children,
+// organized according to Order and [styles.Style.Columns], where Columns
+// can be an even divisor of the Order length to create 2D layouts,
+// or 1 to specify a vertical instead of horizontal layout.
+// It adds [Handle] widgets to its parts that allow the user to customize
+// the amount of space allocated to each child.
 type Splits struct {
 	Frame
 
@@ -27,6 +31,14 @@ type Splits struct {
 	// be completely collapsed. By default, each element gets the
 	// same amount of space.
 	Splits []float32
+
+	// Order is the organization of the splits content, using indexes 0..n-1
+	// to specify what goes where, in generally increasing seqeuential order.
+	// This is used to specify 2D layouts when [styles.Style.Columns] is an
+	// even divisor of the Order length, e.g., 0012 with Columns = 2
+	// specifies the first element spanning the top row, with the next two
+	// elements splitting the bottom row.
+	Order []int
 
 	// savedSplits is a saved version of the splits that can be restored
 	// for dynamic collapse/expand operations.
@@ -108,13 +120,11 @@ func (sl *Splits) Init() {
 // updateSplits normalizes the splits and ensures that there are as
 // many split proportions as children.
 func (sl *Splits) updateSplits() *Splits {
-	sz := len(sl.Children)
-	if sz == 0 {
+	n := len(sl.Children)
+	if n == 0 {
 		return sl
 	}
-	if sl.Splits == nil || len(sl.Splits) != sz {
-		sl.Splits = make([]float32, sz)
-	}
+	sl.Splits = slicesx.SetLength(sl.Splits, n)
 	sum := float32(0)
 	for _, sp := range sl.Splits {
 		sum += sp
@@ -133,11 +143,11 @@ func (sl *Splits) updateSplits() *Splits {
 
 // evenSplits splits space evenly across all panels
 func (sl *Splits) evenSplits() {
-	sz := len(sl.Children)
-	if sz == 0 {
+	n := len(sl.Children)
+	if n == 0 {
 		return
 	}
-	even := 1.0 / float32(sz)
+	even := 1.0 / float32(n)
 	for i := range sl.Splits {
 		sl.Splits[i] = even
 	}
@@ -146,12 +156,12 @@ func (sl *Splits) evenSplits() {
 
 // saveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
 func (sl *Splits) saveSplits() {
-	sz := len(sl.Splits)
-	if sz == 0 {
+	n := len(sl.Splits)
+	if n == 0 {
 		return
 	}
-	if sl.savedSplits == nil || len(sl.savedSplits) != sz {
-		sl.savedSplits = make([]float32, sz)
+	if sl.savedSplits == nil || len(sl.savedSplits) != n {
+		sl.savedSplits = make([]float32, n)
 	}
 	copy(sl.savedSplits, sl.Splits)
 }
@@ -171,9 +181,9 @@ func (sl *Splits) collapseChild(save bool, idxs ...int) {
 	if save {
 		sl.saveSplits()
 	}
-	sz := len(sl.Children)
+	n := len(sl.Children)
 	for _, idx := range idxs {
-		if idx >= 0 && idx < sz {
+		if idx >= 0 && idx < n {
 			sl.Splits[idx] = 0
 		}
 	}
@@ -183,10 +193,10 @@ func (sl *Splits) collapseChild(save bool, idxs ...int) {
 
 // restoreChild restores given child(ren) -- does an Update
 func (sl *Splits) restoreChild(idxs ...int) {
-	sz := len(sl.Children)
+	n := len(sl.Children)
 	for _, idx := range idxs {
-		if idx >= 0 && idx < sz {
-			sl.Splits[idx] = 1.0 / float32(sz)
+		if idx >= 0 && idx < n {
+			sl.Splits[idx] = 1.0 / float32(n)
 		}
 	}
 	sl.updateSplits()
@@ -195,8 +205,8 @@ func (sl *Splits) restoreChild(idxs ...int) {
 
 // isCollapsed returns true if given split number is collapsed
 func (sl *Splits) isCollapsed(idx int) bool {
-	sz := len(sl.Children)
-	if idx >= 0 && idx < sz {
+	n := len(sl.Children)
+	if idx >= 0 && idx < n {
 		return sl.Splits[idx] < 0.01
 	}
 	return false
@@ -208,7 +218,7 @@ func (sl *Splits) isCollapsed(idx int) bool {
 // Splitters are updated to ensure that selected position is achieved,
 // while dividing remainder appropriately.
 func (sl *Splits) setSplit(idx int, nwval float32) {
-	sz := len(sl.Splits)
+	n := len(sl.Splits)
 	oldsum := float32(0)
 	for i := 0; i <= idx; i++ {
 		oldsum += sl.Splits[i]
@@ -222,17 +232,17 @@ func (sl *Splits) setSplit(idx int, nwval float32) {
 		nwval = oldsum + delta
 	}
 	rmdr := 1 - nwval
-	if idx < sz-1 {
+	if idx < n-1 {
 		oldrmdr := 1 - oldsum
 		if oldrmdr <= 0 {
 			if rmdr > 0 {
-				dper := rmdr / float32((sz-1)-idx)
-				for i := idx + 1; i < sz; i++ {
+				dper := rmdr / float32((n-1)-idx)
+				for i := idx + 1; i < n; i++ {
 					sl.Splits[i] = dper
 				}
 			}
 		} else {
-			for i := idx + 1; i < sz; i++ {
+			for i := idx + 1; i < n; i++ {
 				curval := sl.Splits[i]
 				sl.Splits[i] = rmdr * (curval / oldrmdr) // proportional
 			}

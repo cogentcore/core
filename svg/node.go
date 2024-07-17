@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -211,23 +212,6 @@ func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, ro
 func (g *NodeBase) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 }
 
-// SetFloat32SliceLen is a utility function to set given slice of float32 values
-// to given length, reusing existing where possible and making a new one as needed.
-// For use in WriteGeom routines.
-func SetFloat32SliceLen(dat *[]float32, sz int) {
-	switch {
-	case len(*dat) == sz:
-	case len(*dat) < sz:
-		if cap(*dat) >= sz {
-			*dat = (*dat)[0:sz]
-		} else {
-			*dat = make([]float32, sz)
-		}
-	default:
-		*dat = (*dat)[0:sz]
-	}
-}
-
 // WriteTransform writes the node transform to slice at starting index.
 // slice must already be allocated sufficiently.
 func (g *NodeBase) WriteTransform(dat []float32, idx int) {
@@ -253,7 +237,7 @@ func (g *NodeBase) ReadTransform(dat []float32, idx int) {
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
 func (g *NodeBase) WriteGeom(sv *SVG, dat *[]float32) {
-	SetFloat32SliceLen(dat, 6)
+	*dat = slicesx.SetLength(*dat, 6)
 	g.WriteTransform(*dat, 0)
 }
 

@@ -14,6 +14,7 @@ import (
 	"unsafe"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/math32"
 	vk "github.com/goki/vulkan"
@@ -473,11 +474,7 @@ func (im *Image) DevGoImageCopy(rgba *image.RGBA) error {
 	ptr := MapMemoryAll(im.Dev, im.Mem)
 	pix := (*[ByteCopyMemoryLimit]byte)(ptr)[offset : size+offset]
 
-	if cap(rgba.Pix) < size {
-		rgba.Pix = make([]byte, size)
-	} else {
-		rgba.Pix = rgba.Pix[:size]
-	}
+	rgba.Pix = slicesx.SetLength(rgba.Pix, size)
 	copy(rgba.Pix, pix)
 	vk.UnmapMemory(im.Dev, im.Mem)
 	if im.Format.IsRGBAUnorm() {

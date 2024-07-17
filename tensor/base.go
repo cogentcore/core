@@ -10,6 +10,7 @@ import (
 	"reflect"
 
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/slicesx"
 )
 
 // Base is an n-dim array of float64s.
@@ -54,13 +55,7 @@ func (tsr *Base[T]) Set1D(i int, val T) { tsr.Values[i] = val }
 func (tsr *Base[T]) SetShape(sizes []int, names ...string) {
 	tsr.Shp.SetShape(sizes, names...)
 	nln := tsr.Len()
-	if cap(tsr.Values) >= nln {
-		tsr.Values = tsr.Values[0:nln]
-	} else {
-		nv := make([]T, nln)
-		copy(nv, tsr.Values)
-		tsr.Values = nv
-	}
+	tsr.Values = slicesx.SetLength(tsr.Values, nln)
 }
 
 // SetNumRows sets the number of rows (outer-most dimension) in a RowMajor organized tensor.
@@ -69,13 +64,7 @@ func (tsr *Base[T]) SetNumRows(rows int) {
 	_, cells := tsr.Shp.RowCellSize()
 	nln := rows * cells
 	tsr.Shp.Sizes[0] = rows
-	if cap(tsr.Values) >= nln {
-		tsr.Values = tsr.Values[0:nln]
-	} else {
-		nv := make([]T, nln)
-		copy(nv, tsr.Values)
-		tsr.Values = nv
-	}
+	tsr.Values = slicesx.SetLength(tsr.Values, nln)
 }
 
 // subSpaceImpl returns a new tensor with innermost subspace at given

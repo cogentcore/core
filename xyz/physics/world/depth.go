@@ -7,6 +7,7 @@ package world
 import (
 	"image"
 
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors/colormap"
 	"cogentcore.org/core/math32"
 )
@@ -20,13 +21,7 @@ import (
 func DepthNorm(nd *[]float32, depth []float32, cam *Camera, flipY bool) {
 	sz := cam.Size
 	totn := sz.X * sz.Y
-	if len(*nd) != totn {
-		if cap(*nd) >= totn {
-			*nd = (*nd)[0:totn]
-		} else {
-			*nd = make([]float32, totn)
-		}
-	}
+	*nd = slicesx.SetLength(*nd, totn)
 	fpn := cam.Far + cam.Near
 	fmn := cam.Far - cam.Near
 	var norm float32

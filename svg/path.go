@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unsafe"
 
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/tree"
@@ -1114,7 +1115,7 @@ func (g *Path) ApplyTransformImpl(xf math32.Matrix2, lpt math32.Vector2) {
 // Slice must be passed and will be resized if not the correct length.
 func (g *Path) WriteGeom(sv *SVG, dat *[]float32) {
 	sz := len(g.Data)
-	SetFloat32SliceLen(dat, sz+6)
+	*dat = slicesx.SetLength(*dat, sz+6)
 	for i := range g.Data {
 		(*dat)[i] = float32(g.Data[i])
 	}

@@ -7,6 +7,7 @@ package svg
 import (
 	"image"
 
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
@@ -279,7 +280,7 @@ func (g *Text) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.V
 func (g *Text) WriteGeom(sv *SVG, dat *[]float32) {
 	if g.IsParText() {
 		npt := 9 + g.NumChildren()*3
-		SetFloat32SliceLen(dat, npt)
+		*dat = slicesx.SetLength(*dat, npt)
 		(*dat)[0] = g.Pos.X
 		(*dat)[1] = g.Pos.Y
 		(*dat)[2] = g.Width
@@ -292,7 +293,7 @@ func (g *Text) WriteGeom(sv *SVG, dat *[]float32) {
 			(*dat)[off+2] = kt.Width
 		}
 	} else {
-		SetFloat32SliceLen(dat, 3+6)
+		*dat = slicesx.SetLength(*dat, 3+6)
 		(*dat)[0] = g.Pos.X
 		(*dat)[1] = g.Pos.Y
 		(*dat)[2] = g.Width

@@ -7,6 +7,7 @@ package histogram
 //go:generate core generate
 
 import (
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
@@ -16,11 +17,7 @@ import (
 // number of bins and min / max range.  hist vals is sized to nBins.
 // if value is < min or > max it is ignored.
 func F64(hist *[]float64, vals []float64, nBins int, min, max float64) {
-	if cap(*hist) >= nBins {
-		*hist = (*hist)[0:nBins]
-	} else {
-		*hist = make([]float64, nBins)
-	}
+	*hist = slicesx.SetLength(*hist, nBins)
 	h := *hist
 	// 0.1.2.3 = 3-0 = 4 bins
 	inc := (max - min) / float64(nBins)
@@ -65,11 +62,7 @@ func F64Table(dt *table.Table, vals []float64, nBins int, min, max float64) {
 // number of bins and min / max range.  hist vals is sized to nBins.
 // if value is < min or > max it is ignored.
 func F32(hist *[]float32, vals []float32, nBins int, min, max float32) {
-	if cap(*hist) >= nBins {
-		*hist = (*hist)[0:nBins]
-	} else {
-		*hist = make([]float32, nBins)
-	}
+	*hist = slicesx.SetLength(*hist, nBins)
 	h := *hist
 	// 0.1.2.3 = 3-0 = 4 bins
 	inc := (max - min) / float32(nBins)

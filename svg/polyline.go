@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 )
 
@@ -118,7 +119,7 @@ func (g *Polyline) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math
 // Slice must be passed and will be resized if not the correct length.
 func (g *Polyline) WriteGeom(sv *SVG, dat *[]float32) {
 	sz := len(g.Points) * 2
-	SetFloat32SliceLen(dat, sz+6)
+	*dat = slicesx.SetLength(*dat, sz+6)
 	for i, p := range g.Points {
 		(*dat)[i*2] = p.X
 		(*dat)[i*2+1] = p.Y

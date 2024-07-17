@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/tensor/bitslice"
 	"gonum.org/v1/gonum/mat"
 )
@@ -156,7 +157,7 @@ func (tsr *Bits) SetFloatRowCell(row, cell int, val float64) {
 
 func (tsr *Bits) Floats(flt *[]float64) {
 	sz := tsr.Len()
-	*flt = SetSliceLength(*flt, sz)
+	*flt = slicesx.SetLength(*flt, sz)
 	for j := 0; j < sz; j++ {
 		(*flt)[j] = BoolToFloat64(tsr.Values.Index(j))
 	}

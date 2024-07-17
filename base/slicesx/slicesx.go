@@ -8,6 +8,22 @@ package slicesx
 
 import "slices"
 
+// SetLength sets the length of the given slice,
+// re-using and preserving existing values to the extent possible.
+func SetLength[E any](s []E, n int) []E {
+	if len(s) == n {
+		return s
+	}
+	if s == nil {
+		return make([]E, n)
+	}
+	if cap(s) < n {
+		s = slices.Grow(s, n-cap(s))
+	}
+	s = s[:n]
+	return s
+}
+
 // Move moves the element in the given slice at the given
 // old position to the given new position and returns the
 // resulting slice.
