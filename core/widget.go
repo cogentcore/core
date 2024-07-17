@@ -37,8 +37,11 @@ type Widget interface {
 	// core widget functionality is implemented on [WidgetBase].
 	AsWidget() *WidgetBase
 
-	// See [WidgetBase.Style].
-	Style() // TODO(config): remove
+	// Style updates the style properties of the widget based on [WidgetBase.Stylers].
+	// To specify the style properties of a widget, use [WidgetBase.Styler].
+	// Widgets can implement this method if necessary to add additional styling behavior,
+	// such as calling [units.Value.ToDots] on a custom [units.Value] field.
+	Style()
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 	// based on Styles.Min / Max sizes and actual content sizing
