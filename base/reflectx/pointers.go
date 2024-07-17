@@ -63,23 +63,29 @@ func OnePointerValue(v reflect.Value) reflect.Value {
 // Underlying returns the actual underlying version of the given value,
 // going through any pointers and interfaces.
 func Underlying(v reflect.Value) reflect.Value {
-	return UnderlyingPointer(v).Elem()
+	if !v.IsValid() {
+		return v
+	}
+	for v.Type().Kind() == reflect.Interface || v.Type().Kind() == reflect.Pointer {
+		v = v.Elem()
+		if !v.IsValid() {
+			return v
+		}
+	}
+	return v
 }
 
 // UnderlyingPointer returns a pointer to the actual underlying version of the
 // given value, going through any pointers and interfaces.
 func UnderlyingPointer(v reflect.Value) reflect.Value {
-	npv := NonPointerValue(v)
-	if !npv.IsValid() {
+	if !v.IsValid() {
 		return v
 	}
-	if npv.IsZero() {
-		return OnePointerValue(npv)
+	uv := Underlying(v)
+	if !uv.IsValid() {
+		return v
 	}
-	for npv.Type().Kind() == reflect.Interface || npv.Type().Kind() == reflect.Pointer {
-		npv = npv.Elem()
-	}
-	return OnePointerValue(npv)
+	return OnePointerValue(uv)
 }
 
 // NewFrom returns a value that is guaranteed to be a pointer to the [Underlying] version of
