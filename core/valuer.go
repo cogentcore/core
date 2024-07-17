@@ -86,7 +86,7 @@ func toValue(value any, tags reflect.StructTag) Value {
 	}
 	uv := reflectx.Underlying(rv)
 	if !uv.IsValid() {
-		return toValue(reflect.New(rv.Type()).Interface(), tags)
+		return NewText()
 	}
 	typ := uv.Type()
 	if vwt, ok := ValueTypes[types.TypeName(typ)]; ok {
