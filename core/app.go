@@ -45,7 +45,7 @@ type App struct { //types:add -setters
 	// SceneInit is a function called on every newly created [Scene].
 	// This can be used to set global configuration and styling for all
 	// widgets in conjunction with [Scene.WidgetInit].
-	SceneInit func(sc *Scene)
+	SceneInit func(sc *Scene) `edit:"-"`
 }
 
 // appIconImagesCache is a cached version of [appIconImages].

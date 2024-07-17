@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
 
@@ -248,10 +247,10 @@ func (is *Inspector) selectionMonitor() {
 	sc.AsyncUnlock()
 }
 
-// inspectApp displays the underlying operating system app
+// inspectApp displays [TheApp].
 func (is *Inspector) inspectApp() { //types:add
 	d := NewBody().AddTitle("Inspect app")
-	NewForm(d).SetStruct(system.TheApp).SetReadOnly(true)
+	NewForm(d).SetStruct(TheApp).SetReadOnly(true)
 	d.RunFullDialog(is)
 }
 

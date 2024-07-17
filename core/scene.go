@@ -39,7 +39,7 @@ type Scene struct { //core:no-new
 	// WidgetInit is a function called on every newly created [Widget].
 	// This can be used to set global configuration and styling for all
 	// widgets in conjunction with [App.SceneInit].
-	WidgetInit func(w Widget) `json:"-" xml:"-"`
+	WidgetInit func(w Widget) `json:"-" xml:"-" edit:"-"`
 
 	// Bars contains functions for constructing the control bars for this Scene,
 	// attached to different sides of a Scene (e.g., TopAppBar at Top,
