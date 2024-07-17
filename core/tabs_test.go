@@ -92,7 +92,8 @@ func TestTabsNewClick(t *testing.T) {
 	ts.NewTab("First")
 	ts.NewTab("Second")
 	b.AssertRender(t, "tabs/new-click", func() {
-		ts.getTabs().ChildByName("new-tab").(Widget).AsWidget().Send(events.Click)
+		_, wb := AsWidget(ts.getTabs().ChildByName("new-tab-button"))
+		wb.Send(events.Click)
 		assert.Equal(t, ts.NumTabs(), 3)
 	})
 }
