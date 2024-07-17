@@ -17,12 +17,22 @@ import (
 	"cogentcore.org/core/tree"
 )
 
+// todo: this plan below cannot represent the
+// 012
+// 033 
+// case.  need to keep working on this 
+
 // Splits allocates a certain proportion of its space to each of its children,
-// organized according to Order and [styles.Style.Columns], where Columns
-// can be an even divisor of the Order length to create 2D layouts,
-// or 1 to specify a vertical instead of horizontal layout.
+// organized according to [styles.Style.Direction] and [styles.Style.Columns],
+// where "columns" is either 1 or 2, and actually represents the number of 
+// rows when Direction = Rows, and Columns for Direction = Columns.
+// For Columns = 2, the Spans field indicates which Columns are grouped into
+// a single span of 2.  Non-spanned cases hold separate elements.
+// For example, Columns = 2 with 4 Children and Spans[0] = true results
+// in a "tall" element at the start, followed by 2 
 // It adds [Handle] widgets to its parts that allow the user to customize
 // the amount of space allocated to each child.
+// Use nested Splits to implement more complex configurations.
 type Splits struct {
 	Frame
 
@@ -32,17 +42,16 @@ type Splits struct {
 	// same amount of space.
 	Splits []float32
 
-	// Order is the organization of the splits content, using indexes 0..n-1
-	// to specify what goes where, in generally increasing seqeuential order.
-	// This is used to specify 2D layouts when [styles.Style.Columns] is an
-	// even divisor of the Order length, e.g., 0012 with Columns = 2
-	// specifies the first element spanning the top row, with the next two
-	// elements splitting the bottom row.
-	Order []int
-
+	Spans []
+	
 	// savedSplits is a saved version of the splits that can be restored
 	// for dynamic collapse/expand operations.
 	savedSplits []float32
+
+	// spans is used when the smallest dimension is 2 ("rows"), to indicate which
+	// of the "columns" span both rows.  The [styles.Style.Direction] is used to
+	// indicate which direction is the _long_ axis.
+	spans []bool
 }
 
 func (sl *Splits) Init() {
@@ -117,14 +126,58 @@ func (sl *Splits) Init() {
 	})
 }
 
-// updateSplits normalizes the splits and ensures that there are as
-// many split proportions as children.
+// updateSplits ensures the Order and Splits are all set properly.
 func (sl *Splits) updateSplits() *Splits {
-	n := len(sl.Children)
-	if n == 0 {
+	nc := len(sl.Children)
+	if nc == 0 {
 		return sl
 	}
-	sl.Splits = slicesx.SetLength(sl.Splits, n)
+	if len(sl.Order) < nc {
+		sl.Order = slicesx.SetLength(sl.Order, nc)
+		for i := range nc {
+			sl.Order[i] = i
+		}
+	}
+	// get rows and cols
+	no := len(sl.Order)
+	cols := sl.Styles.Columns
+	if cols == 0 || cols > no {
+		cols = no
+	} else if no%cols != 0 {
+		for {
+			cols++
+			if no%cols == 0 {
+				break
+			}
+		}
+	}
+	sl.Styles.Columns = cols
+	rows := no / cols
+
+	if rows == 1 || cols == 1 {
+		if rows == 1 {
+			sl.Styles.Direction = 
+		}
+	}
+	
+	ns := 0 // num splits
+	for ri := range rows {
+		li := 0
+		for ci := range cols {
+			oi := sl.Order[ri*cols+ci]
+			if oi != li {
+				if ri == 0 {
+					ns++
+				} else {
+					pi := sl.Order[(ri-1)*cols+ci]
+					if pi != oi {
+						ns++
+					}
+				}
+			}
+		}
+	}
+	sl.Splits = slicesx.SetLength(sl.Splits, ns)
 	sum := float32(0)
 	for _, sp := range sl.Splits {
 		sum += sp
