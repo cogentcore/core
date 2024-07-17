@@ -283,9 +283,10 @@ func (sl *Splits) positionSplits() {
 	if sl.Parts != nil {
 		sl.Parts.Geom.Size = sl.Geom.Size // inherit: allows bbox to include handle
 	}
+	sz := &sl.Geom.Size
 	dim := sl.Styles.Direction.Dim()
 	od := dim.Other()
-	csz := sl.Geom.Size.Alloc.Content // key to use Alloc here!  excludes gaps
+	csz := sz.Alloc.Content.Sub(sz.InnerSpace)
 	cszd := csz.Dim(dim)
 	pos := float32(0)
 
@@ -293,6 +294,7 @@ func (sl *Splits) positionSplits() {
 	hwd := hand.Geom.Size.Actual.Total.Dim(dim)
 	hht := hand.Geom.Size.Actual.Total.Dim(od)
 	mid := (csz.Dim(od) - hht) / 2
+	cszd -= float32(len(sl.Splits)-1) * hwd
 
 	sl.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.RelPos.SetZero()
