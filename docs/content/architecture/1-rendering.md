@@ -1,6 +1,6 @@
 ## Rendering logic
 
-The logic for rendering updates to the 
+At the highest level, rendering is made robust by updating the window in response to [[events.WindowPaint]] events that are guaranteed to be processed separate (via the `renderContext` mutex) from the other events that arise in response to user actions.  Therefore, these actions can perform all manner of state updating, without any concern for a possible simultaneous render taking place.  Furthermore, the state updating sets various flags that determine what kind of rendering occurs on the render step.
 
 Key principles:
 
