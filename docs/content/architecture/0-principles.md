@@ -126,19 +126,20 @@ Consistent with this approach, [[colors]] implements functions operating on the 
 
 ## Naming
 
-In general, we follow the Go standards:
+In general, we follow the Go and Google standards:
 
-* https://golang.org/doc/effective_go.html#names
-* https://github.com/golang/go/wiki/CodeReviewComments 
+* https://go.dev/doc/effective_go#names
+* https://go.dev/wiki/CodeReviewComments
+* https://google.github.io/styleguide/go/decisions
 
 Consistent with the minimalist Go aesthetic, wherever possible, we try to find the shortest _full_ name for any element, that captures its meaning well.  Although abbreviations are widely used and ever so tempting to save space and remove code clutter, it is better if a complete and _short_ name can be found instead.
 
 Furthermore, additional effort should be spent to avoid generic names such as `Manager`, and adding other generic terms like `Item`, `Data`, `State`, `Run`, `Compute`, etc to names.  You'll find that they are usually superfluous, and almost everything a computer does involves these things, so just focus on what uniquely applies to the particular case you're trying to name.
 
 Here is a list of choices for cases where there are two widely-used but equivalent names: use only one of them everywhere for consistency:
+
 * `Delete` instead of `Remove`
 
 ### Collections are plural
 
 Packages and types whose primary purpose is to describe/hold a collection of something should be named in the plural. For example, [[events]] holds a collection of different event types, so it has a plural name. Also, per this rule, enum types are almost always named in the plural, as they describe a collection of possible values.
-
