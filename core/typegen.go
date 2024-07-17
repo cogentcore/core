@@ -745,12 +745,15 @@ func (t *Spinner) SetPrecision(v int) *Spinner { t.Precision = v; return t }
 // converted to decimal prior to printing.
 func (t *Spinner) SetFormat(v string) *Spinner { t.Format = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Splits", IDName: "splits", Doc: "Splits allocates a certain proportion of its space to each of its children\nalong [styles.Style.Direction]. It adds [Handle] widgets to its parts that\nallow the user to customize the amount of space allocated to each child.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Splits", Doc: "Splits is the proportion (0-1 normalized, enforced) of space\nallocated to each element. 0 indicates that an element should\nbe completely collapsed. By default, each element gets the\nsame amount of space."}, {Name: "savedSplits", Doc: "savedSplits is a saved version of the splits that can be restored\nfor dynamic collapse/expand operations."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Splits", IDName: "splits", Doc: "Splits allocates a certain proportion of its space to each of its children,\norganized according to Order and [styles.Style.Columns], where Columns\ncan be an even divisor of the Order length to create 2D layouts,\nor 1 to specify a vertical instead of horizontal layout.\nIt adds [Handle] widgets to its parts that allow the user to customize\nthe amount of space allocated to each child.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Splits", Doc: "Splits is the proportion (0-1 normalized, enforced) of space\nallocated to each element. 0 indicates that an element should\nbe completely collapsed. By default, each element gets the\nsame amount of space."}, {Name: "Order", Doc: "Order is the organization of the splits content, using indexes 0..n-1\nto specify what goes where, in generally increasing seqeuential order.\nThis is used to specify 2D layouts when [styles.Style.Columns] is an\neven divisor of the Order length, e.g., 0012 with Columns = 2\nspecifies the first element spanning the top row, with the next two\nelements splitting the bottom row."}, {Name: "savedSplits", Doc: "savedSplits is a saved version of the splits that can be restored\nfor dynamic collapse/expand operations."}}})
 
 // NewSplits returns a new [Splits] with the given optional parent:
-// Splits allocates a certain proportion of its space to each of its children
-// along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
-// allow the user to customize the amount of space allocated to each child.
+// Splits allocates a certain proportion of its space to each of its children,
+// organized according to Order and [styles.Style.Columns], where Columns
+// can be an even divisor of the Order length to create 2D layouts,
+// or 1 to specify a vertical instead of horizontal layout.
+// It adds [Handle] widgets to its parts that allow the user to customize
+// the amount of space allocated to each child.
 func NewSplits(parent ...tree.Node) *Splits { return tree.New[Splits](parent...) }
 
 // SetSplits sets the [Splits.Splits]:
@@ -759,6 +762,15 @@ func NewSplits(parent ...tree.Node) *Splits { return tree.New[Splits](parent...)
 // be completely collapsed. By default, each element gets the
 // same amount of space.
 func (t *Splits) SetSplits(v ...float32) *Splits { t.Splits = v; return t }
+
+// SetOrder sets the [Splits.Order]:
+// Order is the organization of the splits content, using indexes 0..n-1
+// to specify what goes where, in generally increasing seqeuential order.
+// This is used to specify 2D layouts when [styles.Style.Columns] is an
+// even divisor of the Order length, e.g., 0012 with Columns = 2
+// specifies the first element spanning the top row, with the next two
+// elements splitting the bottom row.
+func (t *Splits) SetOrder(v ...int) *Splits { t.Order = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stage", IDName: "stage", Doc: "Stage is a container and manager for displaying a [Scene]\nin different functional ways, defined by [StageTypes].", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of [Stage], which determines behavior and styling."}, {Name: "Scene", Doc: "Scene contents of this [Stage] (what it displays)."}, {Name: "Context", Doc: "Context is a widget in another scene that requested this stage to be created\nand provides context."}, {Name: "Name", Doc: "Name is the name of the Stage, which is generally auto-set\nbased on the [Scene.Name]."}, {Name: "Title", Doc: "Title is the title of the Stage, which is generally auto-set\nbased on the [Body.Title]. It used for the title of [WindowStage]\nand [DialogStage] types."}, {Name: "Modal", Doc: "Modal, if true, blocks input to all other stages."}, {Name: "Scrim", Doc: "Scrim, if true, places a darkening scrim over other stages."}, {Name: "ClickOff", Doc: "ClickOff, if true, dismisses the [Stage] if the user clicks anywhere\noff of the [Stage]."}, {Name: "ignoreEvents", Doc: "ignoreEvents is whether to send no events to the stage and\njust pass them down to lower stages."}, {Name: "NewWindow", Doc: "NewWindow, if true, opens a [WindowStage] or [DialogStage] in its own\nseparate operating system window ([renderWindow]). This is true by\ndefault for [WindowStage] on non-mobile platforms, otherwise false."}, {Name: "FullWindow", Doc: "FullWindow, if [Stage.NewWindow] is false, makes [DialogStage]s and\n[WindowStage]s take up the entire window they are created in."}, {Name: "CloseOnBack", Doc: "CloseOnBack is whether to close the stage when the back button\nis pressed in the app bar. Otherwise, it goes back to the next\nstage but keeps this one open. This is on by default for\n[DialogStage]s and off for [WindowStage]s."}, {Name: "Timeout", Doc: "Timeout, if greater than 0, results in a popup stages disappearing\nafter this timeout duration."}, {Name: "Pos", Doc: "Pos is the target position for the [Stage] to be placed within\nthe surrounding window."}, {Name: "Main", Doc: "If a popup stage, this is the main stage that owns it (via its [Stage.popups]).\nIf a main stage, it points to itself."}, {Name: "popups", Doc: "For main stages, this is the stack of the popups within it\n(created specifically for the main stage).\nFor popups, this is the pointer to the popups within the\nmain stage managing it."}, {Name: "Mains", Doc: "For all stages, this is the main [Stages] that lives in a [renderWindow]\nand manages the main stages."}, {Name: "renderContext", Doc: "rendering context which has info about the RenderWindow onto which we render.\nThis should be used instead of the RenderWindow itself for all relevant\nrendering information. This is only available once a Stage is Run,\nand must always be checked for nil."}, {Name: "Sprites", Doc: "Sprites are named images that are rendered last overlaying everything else."}}})
 
