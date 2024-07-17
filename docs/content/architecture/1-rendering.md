@@ -1,23 +1,18 @@
 ## Rendering logic
 
-At the highest level, rendering is made robust by updating the window in response to [[events.WindowPaint]] events that are guaranteed to be processed separate (via the `renderContext` mutex) from the other events that arise in response to user actions.  Therefore, these actions can perform all manner of state updating, without any concern for a possible simultaneous render taking place.  Furthermore, the state updating sets various flags that determine what kind of rendering occurs on the render step.
+At the highest level, rendering is made robust by having a completely separate, mutex lock-protected pass where all render-level updating takes place.  This render pass is triggered by [[events.WindowPaint]] events that are sent regularly at 60 FPS (frames per second).  If nothing needs to be updated, nothing happens (which is the typical case for most frames), so it is not a significant additional cost.
 
-Key principles:
+The usual processing of events that arise in response to user GUI actions, or any other source of changes, sets flags that determine what kind of updating needs to happen during rendering.  These are typically set via [[WidgetBase.NeedsRender]] or [[WidgetBase.NeedsLayout]] calls.
 
-* Async updates (animation, mouse events, etc) change state, _set only flags_
-  using thread-safe atomic bitflag operations. True async rendering
-  is really hard to get right, and requires tons of mutexes etc. Async updates
- must go through [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock].
-* Synchronous, full-tree render updates do the layout, rendering,
-  at regular FPS (frames-per-second) rate -- nop unless flag set.
+The first step in the `renderWindow.renderWindow()` rendering function is to call `updateAll()` which ends up calling `doUpdate()` on the [[Scene]] elements within a render window, and this function is what checks if a new [layout](layout) pass has been called for, or whether any individual widgets need to be rendered. This rendering update writes to a separate `image.RGBA` owned by the Scene, which provides the raw input for the final image rendered to the window.
 
-Three main steps:
-* Config: (re)configures widgets based on current params
-  typically by making Parts.  Always calls ApplyStyle.
-* Layout: does sizing and positioning on tree, arranging widgets.
-  Needed for whole tree after any Config changes anywhere
-  See layout.go for full details and code.
-* Render: just draws with current config, layout.
+Most updating of widgets happens in the event processing step, which is synchronous (one event is processed at a time).  
+
+For any updating that happens outside of the normal event loop (e.g., timer-based animations etc), you must go through [[WidgetBase.AsyncLock]] and [[WidgetBase.AsyncUnlock]].  The [[WidgetBase.Async]] helper function makes this a one-liner.
+
+## Structure of the renderWindow
+
+* stages, etc
 
 ApplyStyle is always called after Config, and after any
 current state of the Widget changes via events, animations, etc
