@@ -67,7 +67,7 @@ func ReplaceInFile(filename, old, new string) string {
 // yet, so this wrapper is needed.  Use for passing args to
 // a command, for example.
 func StringsToAnys(s []string) []any {
-	return slicesx.ToAny(s)
+	return slicesx.As[string, any](s)
 }
 
 // AllFiles returns a list of all files (excluding directories)

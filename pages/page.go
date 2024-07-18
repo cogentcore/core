@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/tomlx"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -274,6 +275,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	}
 	pg.setStageTitle()
 
+	var frontMatter map[string]any
 	btp := []byte("+++")
 	if bytes.HasPrefix(b, btp) {
 		b = bytes.TrimPrefix(b, btp)
@@ -286,8 +288,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 			b = content
 		}
 		if len(fmb) > 0 {
-			var fm map[string]string
-			errors.Log(tomlx.ReadBytes(&fm, fmb))
+			errors.Log(tomlx.ReadBytes(&frontMatter, fmb))
 		}
 	}
 
@@ -310,11 +311,15 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	if utv != pg.nav {
 		core.NewText(pg.body).SetType(core.TextDisplaySmall).SetText(utv.Text)
 	}
+	if author := frontMatter["author"]; author != nil {
+		author := slicesx.As[any, string](author.([]any))
+		core.NewText(pg.body).SetType(core.TextTitleLarge).SetText("By " + strcase.FormatList(author...))
+	}
 	base := strings.TrimPrefix(path.Base(pg.PagePath), "-")
 	if len(base) >= 10 {
 		date := base[:10]
 		if t, err := time.Parse("2006-01-02", date); err == nil {
-			core.NewText(pg.body).SetType(core.TextTitleLarge).SetText(t.Format("1/2/2006"))
+			core.NewText(pg.body).SetType(core.TextTitleMedium).SetText(t.Format("1/2/2006"))
 		}
 	}
 	err = htmlcore.ReadMD(pg.Context, pg.body, b)
