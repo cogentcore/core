@@ -266,7 +266,6 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	if saveWebURL != nil {
 		saveWebURL(pg.Context.PageURL)
 	}
-	pg.setStageTitle()
 
 	var frontMatter map[string]any
 	btp := []byte("+++")
@@ -308,6 +307,8 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	}
 	curNav.Select()
 	curNav.ScrollToThis()
+	pg.Context.PageURL = curNav.PathFrom(pg.nav)
+	pg.setStageTitle()
 
 	pg.body.DeleteChildren()
 	if wpath.Draft(pg.PagePath) {
@@ -318,7 +319,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		})
 	}
 	if curNav != pg.nav {
-		bc := core.NewText(pg.body).SetText(wpath.Breadcrumbs(curNav.PathFrom(pg.nav), core.TheApp.Name()))
+		bc := core.NewText(pg.body).SetText(wpath.Breadcrumbs(pg.Context.PageURL, core.TheApp.Name()))
 		bc.HandleTextClick(func(tl *paint.TextLink) {
 			pg.Context.OpenURL(tl.URL)
 		})
