@@ -227,7 +227,7 @@ func (sl *Splits) updateSplits() *Splits {
 		case TileSplit:
 			sl.normSplits(ss)
 		case TileFirstLong, TileSecondLong:
-			sl.normSplits(ss[:2])
+			sl.normSplits(ss[:2]) // first is cross-axis
 			sl.normSplits(ss[2:])
 		}
 		sl.SubSplits[i] = ss
@@ -270,38 +270,73 @@ func (sl *Splits) saveSplits() {
 	if n == 0 {
 		return
 	}
-	if sl.savedSplits == nil || len(sl.savedSplits) != n {
-		sl.savedSplits = make([]float32, n)
-	}
+	sl.savedSplits = slicesx.SetLength(sl.savedSplits, n)
 	copy(sl.savedSplits, sl.Splits)
+	sl.savedSubSplits = slicesx.SetLength(sl.savedSubSplits, n)
+	for i, ss := range sl.SubSplits {
+		sv := sl.savedSubSplits[i]
+		sv = slicesx.SetLength(sv, len(ss))
+		copy(sv, ss)
+		sl.savedSubSplits[i] = sv
+	}
 }
 
 // restoreSplits restores a previously saved set of splits (if it exists), does an update
 func (sl *Splits) restoreSplits() {
-	if sl.savedSplits == nil {
+	if len(sl.savedSplits) != len(sl.Splits) {
 		return
 	}
-	sl.SetSplits(sl.savedSplits...).NeedsLayout()
+	sl.SetSplits(sl.savedSplits...)
+	for i, ss := range sl.SubSplits {
+		sv := sl.savedSubSplits[i]
+		if len(sv) == len(ss) {
+			copy(ss, sv)
+		}
+	}
+	sl.NeedsLayout()
 }
 
 // collapseChild collapses given child(ren) (sets split proportion to 0),
-// optionally saving the prior splits for later Restore function -- does an
-// Update -- triggered by double-click of splitter
+// optionally saving the prior splits for later Restore function.
 func (sl *Splits) collapseChild(save bool, idxs ...int) {
 	if save {
 		sl.saveSplits()
 	}
-	n := len(sl.Children)
-	for _, idx := range idxs {
-		if idx >= 0 && idx < n {
-			sl.Splits[idx] = 0
+	ci := 0
+	for i, t := range sl.Tiles {
+		tn := tileNumElements[t]
+		for _, idx := range idxs {
+			if idx < ci || idx >= ci+tn {
+				continue
+			}
+			ri := idx - ci
+			switch t {
+			case TileSpan:
+				sl.Splits[idx] = 0
+			case TileSplit:
+				sl.SubSplits[i][ri] = 0
+			case TileFirstLong:
+				if ri == 0 {
+					sl.SubSplits[i][0] = 0
+				} else {
+					sl.SubSplits[i][2+ri] = 0
+				}
+			case TileSecondLong:
+				if ri == 2 {
+					sl.SubSplits[i][0] = 0
+				} else {
+					sl.SubSplits[i][ri] = 0
+				}
+			}
 		}
+		ci += tn
 	}
 	sl.updateSplits()
 	sl.NeedsLayout()
 }
 
-// restoreChild restores given child(ren) -- does an Update
+// restoreChild restores given child(ren)
+// todo: not clear if this makes sense anymore
 func (sl *Splits) restoreChild(idxs ...int) {
 	n := len(sl.Children)
 	for _, idx := range idxs {
@@ -313,13 +348,42 @@ func (sl *Splits) restoreChild(idxs ...int) {
 	sl.NeedsLayout()
 }
 
-// isCollapsed returns true if given split number is collapsed
-func (sl *Splits) isCollapsed(idx int) bool {
-	n := len(sl.Children)
-	if idx >= 0 && idx < n {
-		return sl.Splits[idx] < 0.01
+// splitValue returns the split proportion for given child index
+func (sl *Splits) splitValue(idx int) float32 {
+	ci := 0
+	for i, t := range sl.Tiles {
+		tn := tileNumElements[t]
+		if idx < ci || idx >= ci+tn {
+			continue
+		}
+		ri := idx - ci
+		switch t {
+		case TileSpan:
+			return sl.Splits[idx]
+		case TileSplit:
+			return sl.SubSplits[i][ri]
+		case TileFirstLong:
+			if ri == 0 {
+				return sl.SubSplits[i][0]
+			} else {
+				return sl.SubSplits[i][2+ri]
+			}
+		case TileSecondLong:
+			if ri == 2 {
+				return sl.SubSplits[i][0]
+			} else {
+				return sl.SubSplits[i][ri]
+			}
+		}
+		ci += tn
 	}
-	return false
+	return 0
+}
+
+// isCollapsed returns true if the split proportion
+// for given child index is 0
+func (sl *Splits) isCollapsed(idx int) bool {
+	return sl.splitValue(idx) < 0.01
 }
 
 // setSplit sets the new splitter value, for given splitter.
@@ -374,15 +438,41 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 	hand := sl.Parts.Child(0).(*Handle)
 	hwd := hand.Geom.Size.Actual.Total.Dim(dim)
 	cszd -= float32(len(sl.Splits)-1) * hwd
-	sl.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		sw := math32.Round(sl.Splits[i] * cszd)
+
+	setCsz := func(idx int, szm, szc float32) {
+		_, kwb := AsWidget(sl.Child(idx))
 		ksz := &kwb.Geom.Size
-		ksz.Alloc.Total.SetDim(dim, sw)
-		ksz.Alloc.Total.SetDim(od, cszod)
+		ksz.Alloc.Total.SetDim(dim, szm)
+		ksz.Alloc.Total.SetDim(od, szc)
 		ksz.setContentFromTotal(&ksz.Alloc)
-		// ksz.Actual = ksz.Alloc
-		return tree.Continue
-	})
+	}
+
+	ci := 0
+	for i, t := range sl.Tiles {
+		szt := math32.Round(sl.Splits[i] * cszd) // tile size, main axis
+		szm := szt                               // element, main axis
+		szc := cszod                             // cross axis
+		szcs := cszod - hwd                      // cross axis spilt
+		tn := tileNumElements[t]
+		switch t {
+		case TileSpan:
+			setCsz(ci, szm, szc)
+		case TileSplit:
+			setCsz(ci, szm, math32.Round(szcs*sl.SubSplits[i][0]))
+			setCsz(ci, szm, math32.Round(szcs*sl.SubSplits[i][1]))
+		case TileFirstLong:
+			setCsz(ci, szm, math32.Round(szc*sl.SubSplits[i][0]))
+			szc = math32.Round(szcs * sl.SubSplits[i][1])
+			setCsz(ci+1, math32.Round(szm*sl.SubSplits[i][2]), szc)
+			setCsz(ci+2, math32.Round(szm*sl.SubSplits[i][3]), szc)
+		case TileSecondLong:
+			setCsz(ci+2, szm, math32.Round(szc*sl.SubSplits[i][0]))
+			szc = math32.Round(szcs * sl.SubSplits[i][1])
+			setCsz(ci, math32.Round(szm*sl.SubSplits[i][2]), szc)
+			setCsz(ci+1, math32.Round(szm*sl.SubSplits[i][3]), szc)
+		}
+		ci += tn
+	}
 }
 
 func (sl *Splits) Position() {
