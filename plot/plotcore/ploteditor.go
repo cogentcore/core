@@ -465,40 +465,41 @@ func (pl *PlotEditor) setColumnsByName(nameContains string, on bool) { //types:a
 func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 	pl.columnsListUpdate()
 	tree.Add(p, func(w *core.Frame) {
-		w.Styler(func(s *styles.Style) {
-			s.Direction = styles.Row
-			s.Grow.Set(0, 0)
-		})
-		tree.AddChild(w, func(w *core.Switch) {
-			w.SetType(core.SwitchCheckbox).SetTooltip("Toggle off all columns")
-			w.OnChange(func(e events.Event) {
-				w.SetChecked(false)
+		tree.AddChild(w, func(w *core.Button) {
+			w.SetText("Clear").SetIcon(icons.ClearAll).SetType(core.ButtonAction)
+			w.SetTooltip("Turn all columns off")
+			w.OnClick(func(e events.Event) {
 				pl.setAllColumns(false)
 			})
 		})
 		tree.AddChild(w, func(w *core.Button) {
-			w.SetText("Select Columns").SetType(core.ButtonAction).
-				SetTooltip("click to select columns based on column name").
-				OnClick(func(e events.Event) {
-					core.CallFunc(pl, pl.setColumnsByName)
-				})
+			w.SetText("Search").SetIcon(icons.Search).SetType(core.ButtonAction)
+			w.SetTooltip("Select columns by column name")
+			w.OnClick(func(e events.Event) {
+				core.CallFunc(pl, pl.setColumnsByName)
+			})
 		})
 	})
 	tree.Add(p, func(w *core.Separator) {})
 	for _, cp := range pl.Columns {
 		tree.AddAt(p, cp.Column, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
-				s.Direction = styles.Row
-				s.Grow.Set(0, 0)
+				s.CenterAll()
 			})
 			tree.AddChild(w, func(w *core.Switch) {
-				w.SetType(core.SwitchCheckbox).SetTooltip("toggle plot on")
+				w.SetType(core.SwitchCheckbox).SetTooltip("Turn this column on or off")
 				w.OnChange(func(e events.Event) {
-					cp.On = w.StateIs(states.Checked)
+					cp.On = w.IsChecked()
 					pl.UpdatePlot()
 				})
 				w.Updater(func() {
-					w.SetState(cp.On, states.Checked)
+					xaxis := cp.Column == pl.Options.XAxis
+					w.SetState(xaxis, states.Disabled, states.Indeterminate)
+					if xaxis {
+						cp.On = false
+					} else {
+						w.SetChecked(cp.On)
+					}
 				})
 			})
 			tree.AddChild(w, func(w *core.Button) {
@@ -507,17 +508,17 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 					d := core.NewBody().AddTitle("Column options")
 					core.NewForm(d).SetStruct(cp).
 						OnChange(func(e events.Event) {
-							pl.Async(pl.UpdatePlot)
+							pl.GoUpdatePlot()
 						})
 					d.AddAppBar(func(p *tree.Plan) {
 						tree.Add(p, func(w *core.Button) {
-							w.SetText("Set X Axis").OnClick(func(e events.Event) {
+							w.SetText("Set x-axis").OnClick(func(e events.Event) {
 								pl.Options.XAxis = cp.Column
 								pl.UpdatePlot()
 							})
 						})
 						tree.Add(p, func(w *core.Button) {
-							w.SetText("Set Legend").OnClick(func(e events.Event) {
+							w.SetText("Set legend").OnClick(func(e events.Event) {
 								pl.Options.Legend = cp.Column
 								pl.UpdatePlot()
 							})
@@ -566,7 +567,7 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 				d := core.NewBody().AddTitle("Plot options")
 				core.NewForm(d).SetStruct(&pl.Options).
 					OnChange(func(e events.Event) {
-						pl.Async(pl.UpdatePlot)
+						pl.GoUpdatePlot()
 					})
 				d.RunWindowDialog(pl)
 			})
