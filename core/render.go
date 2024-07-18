@@ -21,22 +21,9 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Async calls the given function after [WidgetBase.AsyncLock] and before
-// [WidgetBase.AsyncUnlock]. It should be used when making any updates in
-// a separate goroutine outside of the main configuration, rendering, and
-// event handling structure. If those updates are not contained within a
-// single function, you should call [WidgetBase.AsyncLock] and
-// [WidgetBase.AsyncUnlock] directly instead.
-func (wb *WidgetBase) Async(f func()) {
-	wb.AsyncLock()
-	f()
-	wb.AsyncUnlock()
-}
-
 // AsyncLock must be called before making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
-// It must have a matching [WidgetBase.AsyncUnlock] after it. Also see
-// [WidgetBase.Async].
+// It must have a matching [WidgetBase.AsyncUnlock] after it.
 func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {
@@ -54,8 +41,7 @@ func (wb *WidgetBase) AsyncLock() {
 
 // AsyncUnlock must be called after making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
-// It must have a matching [WidgetBase.AsyncLock] before it. Also see
-// [WidgetBase.Async].
+// It must have a matching [WidgetBase.AsyncLock] before it.
 func (wb *WidgetBase) AsyncUnlock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {

@@ -8,7 +8,7 @@ The first step in the `renderWindow.renderWindow()` rendering function is to cal
 
 Most updating of widgets happens in the event processing loop, which is synchronous (one event is processed at a time).  
 
-For any updating that happens outside of the normal event loop (e.g., timer-based animations etc), you must go through [[WidgetBase.AsyncLock]] and [[WidgetBase.AsyncUnlock]].  The [[WidgetBase.Async]] helper function makes this a one-liner.
+For any updating that happens outside of the normal event loop (e.g., timer-based animations etc), you must go through [[WidgetBase.AsyncLock]] and [[WidgetBase.AsyncUnlock]].
 
 ## Structure of the renderWindow
 

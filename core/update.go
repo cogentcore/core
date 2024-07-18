@@ -51,8 +51,8 @@ func (wb *WidgetBase) UpdateTree() {
 //
 // If you are calling this in a separate goroutine outside of the main
 // configuration, rendering, and event handling structure, you need to
-// call [WidgetBase.Async], or [WidgetBase.AsyncLock] and
-// [WidgetBase.AsyncUnlock] before and after this, respectively.
+// call [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and
+// after this, respectively.
 func (wb *WidgetBase) Update() { //types:add
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)

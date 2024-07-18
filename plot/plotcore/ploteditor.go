@@ -514,13 +514,13 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 						tree.Add(p, func(w *core.Button) {
 							w.SetText("Set x-axis").OnClick(func(e events.Event) {
 								pl.Options.XAxis = cp.Column
-								pl.UpdatePlot()
+								pl.GoUpdatePlot()
 							})
 						})
 						tree.Add(p, func(w *core.Button) {
 							w.SetText("Set legend").OnClick(func(e events.Event) {
 								pl.Options.Legend = cp.Column
-								pl.UpdatePlot()
+								pl.GoUpdatePlot()
 							})
 						})
 					})
