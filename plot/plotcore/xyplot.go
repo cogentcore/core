@@ -30,13 +30,13 @@ func (pl *PlotEditor) genPlotXY() {
 
 	var lsplit *table.Splits
 	nleg := 1
-	if pl.Options.LegendColumn != "" {
-		_, err = pl.table.Table.ColumnIndexTry(pl.Options.LegendColumn)
+	if pl.Options.Legend != "" {
+		_, err = pl.table.Table.ColumnIndexTry(pl.Options.Legend)
 		if err != nil {
 			slog.Error("plot.LegendColumn", "err", err.Error())
 		} else {
-			errors.Log(xview.SortStableColumnNames([]string{pl.Options.LegendColumn, xp.Column}, table.Ascending))
-			lsplit = split.GroupBy(xview, pl.Options.LegendColumn)
+			errors.Log(xview.SortStableColumnNames([]string{pl.Options.Legend, xp.Column}, table.Ascending))
+			lsplit = split.GroupBy(xview, pl.Options.Legend)
 			nleg = max(lsplit.Len(), 1)
 		}
 	}

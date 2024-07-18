@@ -58,12 +58,12 @@ type PlotOptions struct { //types:add
 	// what column to use for the common X axis. if empty or not found,
 	// the row number is used.  This optional for Bar plots, if present and
 	// LegendColumn is also present, then an extra space will be put between X values.
-	XAxisColumn string
+	XAxis string
 
 	// optional column for adding a separate colored / styled line or bar
 	// according to this value, and acts just like a separate Y variable,
 	// crossed with Y variables.
-	LegendColumn string
+	Legend string
 
 	// position of the Legend
 	LegendPosition plot.LegendPosition `display:"inline"`
@@ -147,10 +147,10 @@ func (po *PlotOptions) FromMetaMap(meta map[string]string) {
 		po.Scale, _ = reflectx.ToFloat32(scl)
 	}
 	if xc, has := metaMapLower(meta, "XAxisColumn"); has {
-		po.XAxisColumn = xc
+		po.XAxis = xc
 	}
 	if lc, has := metaMapLower(meta, "LegendColumn"); has {
-		po.LegendColumn = lc
+		po.Legend = lc
 	}
 	if xrot, has := metaMapLower(meta, "XAxisRotation"); has {
 		po.XAxisRotation, _ = reflectx.ToFloat32(xrot)

@@ -245,12 +245,12 @@ func (pl *PlotEditor) xLabel() string {
 	if pl.Options.XAxisLabel != "" {
 		return pl.Options.XAxisLabel
 	}
-	if pl.Options.XAxisColumn != "" {
-		cp := pl.ColumnOptions(pl.Options.XAxisColumn)
+	if pl.Options.XAxis != "" {
+		cp := pl.ColumnOptions(pl.Options.XAxis)
 		if cp != nil {
 			return cp.getLabel()
 		}
-		return pl.Options.XAxisColumn
+		return pl.Options.XAxis
 	}
 	return "X"
 }
@@ -345,7 +345,7 @@ func (pl *PlotEditor) configPlot(plt *plot.Plot) {
 
 // plotXAxis processes the XAxis and returns its index
 func (pl *PlotEditor) plotXAxis(plt *plot.Plot, ixvw *table.IndexView) (xi int, xview *table.IndexView, err error) {
-	xi, err = ixvw.Table.ColumnIndexTry(pl.Options.XAxisColumn)
+	xi, err = ixvw.Table.ColumnIndexTry(pl.Options.XAxis)
 	if err != nil {
 		// log.Println("plot.PlotXAxis: " + err.Error())
 		return
@@ -387,8 +387,8 @@ func (pl *PlotEditor) columnsListUpdate() {
 	clri := 0
 	for ci := range dt.NumColumns() {
 		cn := dt.ColumnName(ci)
-		if pl.Options.XAxisColumn == "" && ci == 0 {
-			pl.Options.XAxisColumn = cn // x-axis defaults to the first column
+		if pl.Options.XAxis == "" && ci == 0 {
+			pl.Options.XAxis = cn // x-axis defaults to the first column
 		}
 		cp := &ColumnOptions{Column: cn}
 		cp.defaults()
@@ -400,7 +400,7 @@ func (pl *PlotEditor) columnsListUpdate() {
 		}
 		cp.fromMetaMap(pl.table.Table.MetaData)
 		inc := 1
-		if cn == pl.Options.XAxisColumn || tcol.IsString() || tcol.DataType() == reflect.Int || tcol.DataType() == reflect.Int64 || tcol.DataType() == reflect.Int32 || tcol.DataType() == reflect.Uint8 {
+		if cn == pl.Options.XAxis || tcol.IsString() || tcol.DataType() == reflect.Int || tcol.DataType() == reflect.Int64 || tcol.DataType() == reflect.Int32 || tcol.DataType() == reflect.Uint8 {
 			inc = 0
 		}
 		cp.Color = colors.Uniform(colors.Spaced(clri))
@@ -425,7 +425,7 @@ func (pl *PlotEditor) setAllColumns(on bool) {
 		}
 		ci := i - plotColumnsHeaderN
 		cp := pl.Columns[ci]
-		if cp.Column == pl.Options.XAxisColumn {
+		if cp.Column == pl.Options.XAxis {
 			continue
 		}
 		cp.On = on
@@ -446,7 +446,7 @@ func (pl *PlotEditor) setColumnsByName(nameContains string, on bool) { //types:a
 		}
 		ci := i - plotColumnsHeaderN
 		cp := pl.Columns[ci]
-		if cp.Column == pl.Options.XAxisColumn {
+		if cp.Column == pl.Options.XAxis {
 			continue
 		}
 		if !strings.Contains(cp.Column, nameContains) {
@@ -512,13 +512,13 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 					d.AddAppBar(func(p *tree.Plan) {
 						tree.Add(p, func(w *core.Button) {
 							w.SetText("Set X Axis").OnClick(func(e events.Event) {
-								pl.Options.XAxisColumn = cp.Column
+								pl.Options.XAxis = cp.Column
 								pl.UpdatePlot()
 							})
 						})
 						tree.Add(p, func(w *core.Button) {
 							w.SetText("Set Legend").OnClick(func(e events.Event) {
-								pl.Options.LegendColumn = cp.Column
+								pl.Options.Legend = cp.Column
 								pl.UpdatePlot()
 							})
 						})

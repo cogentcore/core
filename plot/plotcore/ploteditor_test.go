@@ -26,7 +26,7 @@ func TestTablePlotEditor(t *testing.T) {
 
 	pl := NewPlotEditor(b)
 	pl.Options.Title = "RA25 Epoch Train"
-	pl.Options.XAxisColumn = "Epoch"
+	pl.Options.XAxis = "Epoch"
 	// pl.Options.Scale = 2
 	pl.Options.Points = true
 	pl.SetTable(epc)
@@ -49,7 +49,7 @@ func TestSlicePlotEditor(t *testing.T) {
 
 	pl := NewPlotEditor(b)
 	pl.Options.Title = "Slice Data"
-	pl.Options.XAxisColumn = "City"
+	pl.Options.XAxis = "City"
 	pl.Options.Points = true
 	pl.SetTable(dt)
 	pl.ColumnOptions("Population").On = true

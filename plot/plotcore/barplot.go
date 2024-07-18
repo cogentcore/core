@@ -36,13 +36,13 @@ func (pl *PlotEditor) genPlotBar() {
 
 	var lsplit *table.Splits
 	nleg := 1
-	if pl.Options.LegendColumn != "" {
-		_, err = pl.table.Table.ColumnIndexTry(pl.Options.LegendColumn)
+	if pl.Options.Legend != "" {
+		_, err = pl.table.Table.ColumnIndexTry(pl.Options.Legend)
 		if err != nil {
 			log.Println("plot.LegendColumn: " + err.Error())
 		} else {
-			xview.SortColumnNames([]string{pl.Options.LegendColumn, xp.Column}, table.Ascending) // make it fit!
-			lsplit = split.GroupBy(xview, pl.Options.LegendColumn)
+			xview.SortColumnNames([]string{pl.Options.Legend, xp.Column}, table.Ascending) // make it fit!
+			lsplit = split.GroupBy(xview, pl.Options.Legend)
 			nleg = max(lsplit.Len(), 1)
 		}
 	}
