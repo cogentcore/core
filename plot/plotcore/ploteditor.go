@@ -387,6 +387,9 @@ func (pl *PlotEditor) columnsListUpdate() {
 	clri := 0
 	for ci := range dt.NumColumns() {
 		cn := dt.ColumnName(ci)
+		if pl.Options.XAxisColumn == "" && ci == 0 {
+			pl.Options.XAxisColumn = cn // x-axis defaults to the first column
+		}
 		cp := &ColumnOptions{Column: cn}
 		cp.defaults()
 		tcol := dt.Columns[ci]
