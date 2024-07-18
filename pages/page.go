@@ -30,6 +30,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pages/wpath"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
@@ -253,7 +254,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 
 	b, err := fs.ReadFile(pg.Source, pg.PagePath)
 	if err != nil {
-		core.ErrorSnackbar(pg, err, "Error opening page")
+		core.ErrorSnackbar(pg, err, "Error opening page "+rawURL)
 		return
 	}
 
@@ -317,6 +318,10 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		})
 	}
 	if curNav != pg.nav {
+		bc := core.NewText(pg.body).SetText(wpath.Breadcrumbs(curNav.PathFrom(pg.nav), core.TheApp.Name()))
+		bc.HandleTextClick(func(tl *paint.TextLink) {
+			pg.Context.OpenURL(tl.URL)
+		})
 		core.NewText(pg.body).SetType(core.TextDisplaySmall).SetText(curNav.Text)
 	}
 	if author := frontMatter["author"]; author != nil {
