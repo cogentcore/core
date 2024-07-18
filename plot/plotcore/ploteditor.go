@@ -385,6 +385,7 @@ func (pl *PlotEditor) columnsListUpdate() {
 	}
 	pl.Columns = make([]*ColumnOptions, nc)
 	clri := 0
+	hasOn := false
 	for ci := range dt.NumColumns() {
 		cn := dt.ColumnName(ci)
 		if pl.Options.XAxis == "" && ci == 0 {
@@ -397,6 +398,11 @@ func (pl *PlotEditor) columnsListUpdate() {
 			cp.IsString = true
 		} else {
 			cp.IsString = false
+			// we enable the first non-string, non-x-axis, non-first column by default
+			if !hasOn && cn != pl.Options.XAxis && ci != 0 {
+				cp.On = true
+				hasOn = true
+			}
 		}
 		cp.fromMetaMap(pl.table.Table.MetaData)
 		inc := 1
