@@ -158,7 +158,7 @@ func (sl *Splits) Init() {
 			if sl.Splits[kn-1] <= 0.01 {
 				sl.restoreChild(kn - 1)
 			} else {
-				sl.collapseChild(true, kn-1)
+				sl.collapseSplit(true, kn-1)
 			}
 		}
 	})
@@ -168,15 +168,36 @@ func (sl *Splits) Init() {
 	})
 	parts := sl.newParts()
 	parts.Maker(func(p *tree.Plan) {
-		for i := range len(sl.Children) - 1 { // one fewer handle than children
-			tree.AddAt(p, "handle-"+strconv.Itoa(i), func(w *Handle) {
+		// handles are organized first between tiles, then within tiles.
+		dir := sl.Styles.Direction
+		odir := dir.Other()
+		addHand := func(hidx int, hdir styles.Directions) {
+			tree.AddAt(p, "handle-"+strconv.Itoa(hidx), func(w *Handle) {
 				w.OnChange(func(e events.Event) {
-					sl.setSplit(w.IndexInParent(), w.Value())
+					sl.setSplitPos(w.IndexInParent(), w.Value())
 				})
 				w.Styler(func(s *styles.Style) {
-					s.Direction = sl.Styles.Direction
+					s.Direction = hdir
 				})
 			})
+		}
+
+		nt := len(sl.Tiles)
+		for i := range nt - 1 {
+			addHand(i, dir)
+		}
+		hi := nt - 1
+		for _, t := range sl.Tiles {
+			switch t {
+			case TileSpan:
+			case TileSplit:
+				addHand(hi, odir)
+				hi++
+			case TileFirstLong, TileSecondLong:
+				addHand(hi, odir)  // long
+				addHand(hi+1, dir) // sub
+				hi += 2
+			}
 		}
 	})
 }
@@ -213,8 +234,7 @@ func (sl *Splits) updateSplits() *Splits {
 		}
 	}
 	nt := len(sl.Tiles)
-	ns := nt - 1
-	sl.Splits = slicesx.SetLength(sl.Splits, ns)
+	sl.Splits = slicesx.SetLength(sl.Splits, nt)
 	sl.normSplits(sl.Splits)
 	sl.SubSplits = slicesx.SetLength(sl.SubSplits, nt)
 	for i, t := range sl.Tiles {
@@ -296,37 +316,85 @@ func (sl *Splits) restoreSplits() {
 	sl.NeedsLayout()
 }
 
-// collapseChild collapses given child(ren) (sets split proportion to 0),
+// setSplit sets given proportional "Splits" space to given value.
+// Splits are indexed first by Tiles (major splits) and then
+// within tiles, where TileSplit has 2 and the Long cases,
+// have the long element first followed by the two smaller ones.
+// Calls updateSplits after to ensure renormalization and
+// NeedsLayout to ensure layout is updated.
+func (sl *Splits) setSplit(idx int, val float32) {
+	nt := len(sl.Tiles)
+	if nt == 0 {
+		return
+	}
+	if idx < nt {
+		sl.Splits[idx] = val
+		return
+	}
+	ci := nt
+	for i, t := range sl.Tiles {
+		tn := tileNumElements[t]
+		ri := idx - ci
+		if ri < 0 {
+			break
+		}
+		switch t {
+		case TileSpan:
+		case TileSplit:
+			if ri < 2 {
+				sl.SubSplits[i][ri] = val
+			}
+		case TileFirstLong, TileSecondLong:
+			if ri < 3 {
+				sl.SubSplits[i][ri] = val
+			}
+		}
+		ci += tn
+	}
+	sl.updateSplits()
+	sl.NeedsLayout()
+}
+
+// collapseSplit collapses the splitter region(s) at given index(es),
+// by setting splits value to 0.
 // optionally saving the prior splits for later Restore function.
-func (sl *Splits) collapseChild(save bool, idxs ...int) {
+func (sl *Splits) collapseSplit(save bool, idxs ...int) {
 	if save {
 		sl.saveSplits()
 	}
+	for _, idx := range idxs {
+		sl.setSplit(idx, 0)
+	}
+}
+
+// setSplitPos sets given splitter position to given 0-1 normalized value.
+// Calls updateSplits after to ensure renormalization and
+// NeedsLayout to ensure layout is updated.
+func (sl *Splits) setSplitPos(idx int, val float32) {
 	ci := 0
 	for i, t := range sl.Tiles {
 		tn := tileNumElements[t]
-		for _, idx := range idxs {
-			if idx < ci || idx >= ci+tn {
-				continue
+		if idx < ci || idx >= ci+tn {
+			ci += tn
+			continue
+		}
+		ri := idx - ci
+		switch t {
+		case TileSpan:
+			sl.Splits[idx] = val
+		case TileSplit:
+			sl.SubSplits[i][ri] = val
+		case TileFirstLong:
+			if ri == 0 {
+				sl.SubSplits[i][0] = val
+			} else {
+				sl.SubSplits[i][2+ri] = val
 			}
-			ri := idx - ci
-			switch t {
-			case TileSpan:
-				sl.Splits[idx] = 0
-			case TileSplit:
-				sl.SubSplits[i][ri] = 0
-			case TileFirstLong:
-				if ri == 0 {
-					sl.SubSplits[i][0] = 0
-				} else {
-					sl.SubSplits[i][2+ri] = 0
-				}
-			case TileSecondLong:
-				if ri == 2 {
-					sl.SubSplits[i][0] = 0
-				} else {
-					sl.SubSplits[i][ri] = 0
-				}
+		case TileSecondLong:
+			if ri == 2 {
+				sl.SubSplits[i][0] = val
+			} else {
+				sl.SubSplits[i][ri] = val
 			}
 		}
 		ci += tn
@@ -391,7 +459,7 @@ func (sl *Splits) isCollapsed(idx int) bool {
 // It is a sum of all the positions up to that point.
 // Splitters are updated to ensure that selected position is achieved,
 // while dividing remainder appropriately.
-func (sl *Splits) setSplit(idx int, nwval float32) {
+func (sl *Splits) setSplitOld(idx int, nwval float32) {
 	n := len(sl.Splits)
 	oldsum := float32(0)
 	for i := 0; i <= idx; i++ {
@@ -428,13 +496,16 @@ func (sl *Splits) setSplit(idx int, nwval float32) {
 }
 
 func (sl *Splits) SizeDownSetAllocs(iter int) {
+	if sl.NumChildren() <= 1 {
+		return
+	}
 	sl.updateSplits()
 	sz := &sl.Geom.Size
 	csz := sz.Alloc.Content.Sub(sz.InnerSpace)
 	dim := sl.Styles.Direction.Dim()
-	od := dim.Other()
+	odim := dim.Other()
 	cszd := csz.Dim(dim)
-	cszod := csz.Dim(od)
+	cszod := csz.Dim(odim)
 	hand := sl.Parts.Child(0).(*Handle)
 	hwd := hand.Geom.Size.Actual.Total.Dim(dim)
 	cszd -= float32(len(sl.Splits)-1) * hwd
@@ -443,7 +514,7 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 		_, kwb := AsWidget(sl.Child(idx))
 		ksz := &kwb.Geom.Size
 		ksz.Alloc.Total.SetDim(dim, szm)
-		ksz.Alloc.Total.SetDim(od, szc)
+		ksz.Alloc.Total.SetDim(odim, szc)
 		ksz.setContentFromTotal(&ksz.Alloc)
 	}
 
@@ -475,17 +546,6 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 	}
 }
 
-func (sl *Splits) Position() {
-	if !sl.HasChildren() {
-		sl.Frame.Position()
-		return
-	}
-	sl.updateSplits()
-	sl.ConfigScrolls()
-	sl.positionSplits()
-	sl.positionChildren()
-}
-
 func (sl *Splits) positionSplits() {
 	if sl.NumChildren() <= 1 {
 		return
@@ -495,33 +555,102 @@ func (sl *Splits) positionSplits() {
 	}
 	sz := &sl.Geom.Size
 	dim := sl.Styles.Direction.Dim()
-	od := dim.Other()
+	odim := dim.Other()
 	csz := sz.Alloc.Content.Sub(sz.InnerSpace)
 	cszd := csz.Dim(dim)
-	pos := float32(0)
+	cszod := csz.Dim(odim)
 
 	hand := sl.Parts.Child(0).(*Handle)
 	hwd := hand.Geom.Size.Actual.Total.Dim(dim)
-	hht := hand.Geom.Size.Actual.Total.Dim(od)
-	mid := (csz.Dim(od) - hht) / 2
+	hht := hand.Geom.Size.Actual.Total.Dim(odim)
+	mid := (csz.Dim(odim) - hht) / 2
 	cszd -= float32(len(sl.Splits)-1) * hwd
 
-	sl.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwb.Geom.RelPos.SetZero()
-		if i == 0 {
-			return tree.Continue
-		}
-		sw := math32.Round(sl.Splits[i-1] * cszd)
-		pos += sw + hwd
-		kwb.Geom.RelPos.SetDim(dim, pos)
-		hl := sl.Parts.Child(i - 1).(*Handle)
-		hl.Geom.RelPos.SetDim(dim, pos-hwd)
-		hl.Geom.RelPos.SetDim(od, mid)
+	setChildPos := func(idx int, dpos, opos float32) {
+		_, kwb := AsWidget(sl.Child(idx))
+		kwb.Geom.RelPos.SetDim(dim, dpos)
+		kwb.Geom.RelPos.SetDim(odim, opos)
+	}
+	setHandlePos := func(idx int, dpos, opos, max, lpos float32) {
+		hl := sl.Parts.Child(idx).(*Handle)
+		hl.Geom.RelPos.SetDim(dim, dpos)
+		hl.Geom.RelPos.SetDim(odim, opos)
 		hl.Min = 0
-		hl.Max = cszd
-		hl.Pos = pos
-		return tree.Continue
-	})
+		hl.Max = max
+		hl.Pos = lpos
+	}
+
+	tpos := float32(0) // tile position
+	ci := 0
+	nt := len(sl.Tiles)
+	hi := nt - 1 // extra handles
+	for i, t := range sl.Tiles {
+		szt := math32.Round(sl.Splits[i] * cszd) // tile size, main axis
+		szcs := cszod - hwd                      // cross axis spilt
+		tn := tileNumElements[t]
+		if i > 0 {
+			setHandlePos(i-1, tpos-hwd, mid, cszd, tpos)
+		}
+		switch t {
+		case TileSpan:
+			setChildPos(ci, tpos, 0)
+		case TileSplit:
+			fcht := math32.Round(szcs * sl.SubSplits[i][0])
+			setHandlePos(hi, tpos+.5*szt-hwd, fcht-hwd, cszod, fcht)
+			hi++
+			setChildPos(ci, tpos, 0)
+			setChildPos(ci, tpos, fcht+hwd)
+		case TileFirstLong:
+			fcht := math32.Round(szcs * sl.SubSplits[i][0])
+			scht := math32.Round(szcs * sl.SubSplits[i][1])
+			swd := math32.Round(szt * sl.SubSplits[i][2])
+			setHandlePos(hi, tpos+.5*szt-hwd, fcht-hwd, cszod, fcht) // long
+			setHandlePos(hi+1, tpos+swd-hwd, fcht-hwd+0.5*scht, szt, swd)
+			hi += 2
+			setChildPos(ci, tpos, 0)
+			setChildPos(ci+1, tpos, fcht+hwd)
+			setChildPos(ci+2, tpos+swd+hwd, fcht+hwd)
+		case TileSecondLong:
+			fcht := math32.Round(szcs * sl.SubSplits[i][0])
+			scht := math32.Round(szcs * sl.SubSplits[i][1])
+			swd := math32.Round(szt * sl.SubSplits[i][2])
+			setHandlePos(hi, tpos+.5*szt-hwd, fcht-hwd+0.5*scht, cszod, fcht) // long
+			setHandlePos(hi+1, tpos+swd-hwd, fcht-hwd, szt, swd)
+			hi += 2
+			setChildPos(ci+2, tpos, fcht+hwd)
+			setChildPos(ci, tpos, 0)
+			setChildPos(ci+1, tpos+swd+hwd, 0)
+		}
+		ci += tn
+		tpos += szt + hwd
+	}
+	//	sl.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	//		kwb.Geom.RelPos.SetZero()
+	//		if i == 0 {
+	//			return tree.Continue
+	//		}
+	//		sw := math32.Round(sl.Splits[i-1] * cszd)
+	//		pos += sw + hwd
+	//		kwb.Geom.RelPos.SetDim(dim, pos)
+	//		hl := sl.Parts.Child(i - 1).(*Handle)
+	//		hl.Geom.RelPos.SetDim(dim, pos-hwd)
+	//		hl.Geom.RelPos.SetDim(od, mid)
+	//		hl.Min = 0
+	//		hl.Max = cszd
+	//		hl.Pos = pos
+	//		return tree.Continue
+	//	})
+}
+
+func (sl *Splits) Position() {
+	if !sl.HasChildren() {
+		sl.Frame.Position()
+		return
+	}
+	sl.updateSplits()
+	sl.ConfigScrolls()
+	sl.positionSplits()
+	sl.positionChildren()
 }
 
 func (sl *Splits) RenderWidget() {
