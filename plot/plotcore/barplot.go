@@ -39,7 +39,7 @@ func (pl *PlotEditor) genPlotBar() {
 	if pl.Options.Legend != "" {
 		_, err = pl.table.Table.ColumnIndexTry(pl.Options.Legend)
 		if err != nil {
-			log.Println("plot.LegendColumn: " + err.Error())
+			log.Println("plot.Legend: " + err.Error())
 		} else {
 			xview.SortColumnNames([]string{pl.Options.Legend, xp.Column}, table.Ascending) // make it fit!
 			lsplit = split.GroupBy(xview, pl.Options.Legend)

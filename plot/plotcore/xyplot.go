@@ -33,7 +33,7 @@ func (pl *PlotEditor) genPlotXY() {
 	if pl.Options.Legend != "" {
 		_, err = pl.table.Table.ColumnIndexTry(pl.Options.Legend)
 		if err != nil {
-			slog.Error("plot.LegendColumn", "err", err.Error())
+			slog.Error("plot.Legend", "err", err.Error())
 		} else {
 			errors.Log(xview.SortStableColumnNames([]string{pl.Options.Legend, xp.Column}, table.Ascending))
 			lsplit = split.GroupBy(xview, pl.Options.Legend)
