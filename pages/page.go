@@ -168,7 +168,7 @@ func (pg *Page) Init() {
 					}
 					if !exists {
 						fpath = needsPath
-						tr.SetProperty("needs-path", true)
+						tr.SetProperty("no-index", true)
 					}
 					pg.URLToPagePath[tr.PathFrom(w)] = fpath
 					// everyone who needs a path gets our path
@@ -289,18 +289,16 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 
 	pg.nav.UnselectAll()
 	curNav := pg.nav.FindPath(rawURL).(*core.Tree)
-	if curNav.Property("needs-path") != nil {
+	// we must select the first tree that does not have "no-index"
+	if curNav.Property("no-index") != nil {
 		got := false
 		curNav.WalkDown(func(n tree.Node) bool {
 			if got {
 				return tree.Break
 			}
-			if n.AsTree().Property("needs-path") != nil {
-				return tree.Continue
-			}
 			tr, ok := n.(*core.Tree)
-			if !ok {
-				return tree.Break
+			if !ok || n.AsTree().Property("no-index") != nil {
+				return tree.Continue
 			}
 			curNav = tr
 			got = true
@@ -345,11 +343,17 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 			s.Grow.Set(1, 0)
 		})
 		if previous, ok := tree.Previous(curNav).(*core.Tree); ok {
-			bt := core.NewButton(buttons).SetText("Previous").SetIcon(icons.ArrowBack).SetType(core.ButtonTonal)
-			bt.OnClick(func(e events.Event) {
-				curNav.Unselect()
-				previous.SelectEvent(events.SelectOne)
-			})
+			// we must skip over trees with "no-index" to get to a real new page
+			for previous != nil && previous.Property("no-index") != nil {
+				previous, _ = tree.Previous(previous).(*core.Tree)
+			}
+			if previous != nil {
+				bt := core.NewButton(buttons).SetText("Previous").SetIcon(icons.ArrowBack).SetType(core.ButtonTonal)
+				bt.OnClick(func(e events.Event) {
+					curNav.Unselect()
+					previous.SelectEvent(events.SelectOne)
+				})
+			}
 		}
 		if next, ok := tree.Next(curNav).(*core.Tree); ok {
 			core.NewStretch(buttons)
