@@ -27,6 +27,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pages/wpath"
 	"cogentcore.org/core/styles"
@@ -296,9 +297,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	NumExamples[pg.Context.PageURL] = 0
 
 	pg.nav.UnselectAll()
-	utv := pg.nav.FindPath(rawURL).(*core.Tree)
-	utv.Select()
-	utv.ScrollToThis()
+	curNav := pg.nav.FindPath(rawURL).(*core.Tree)
+	curNav.Select()
+	curNav.ScrollToThis()
 
 	pg.body.DeleteChildren()
 	if wpath.Draft(pg.PagePath) {
@@ -308,8 +309,8 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 			s.Font.Weight = styles.WeightBold
 		})
 	}
-	if utv != pg.nav {
-		core.NewText(pg.body).SetType(core.TextDisplaySmall).SetText(utv.Text)
+	if curNav != pg.nav {
+		core.NewText(pg.body).SetType(core.TextDisplaySmall).SetText(curNav.Text)
 	}
 	if author := frontMatter["author"]; author != nil {
 		author := slicesx.As[any, string](author.([]any))
@@ -327,6 +328,30 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		core.ErrorSnackbar(pg, err, "Error loading page")
 		return
 	}
+
+	if curNav != pg.nav {
+		buttons := core.NewFrame(pg.body)
+		buttons.Styler(func(s *styles.Style) {
+			s.Align.Items = styles.Center
+			s.Grow.Set(1, 0)
+		})
+		if previous, ok := tree.Previous(curNav).(*core.Tree); ok {
+			bt := core.NewButton(buttons).SetText("Previous").SetIcon(icons.ArrowBack).SetType(core.ButtonTonal)
+			bt.OnClick(func(e events.Event) {
+				curNav.Unselect()
+				previous.SelectEvent(events.SelectOne)
+			})
+		}
+		if next, ok := tree.Next(curNav).(*core.Tree); ok {
+			core.NewStretch(buttons)
+			bt := core.NewButton(buttons).SetText("Next").SetIcon(icons.ArrowForward).SetType(core.ButtonTonal)
+			bt.OnClick(func(e events.Event) {
+				curNav.Unselect()
+				next.SelectEvent(events.SelectOne)
+			})
+		}
+	}
+
 	pg.body.Update()
 	pg.body.ScrollDimToContentStart(math32.Y)
 }
