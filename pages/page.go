@@ -245,6 +245,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		}
 		rawURL = path.Join(current, rawURL)
 	}
+	if rawURL == ".." {
+		rawURL = ""
+	}
 
 	// the paths in the fs are never rooted, so we trim a rooted one
 	rawURL = strings.TrimPrefix(rawURL, "/")
