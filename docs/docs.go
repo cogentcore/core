@@ -251,11 +251,11 @@ func homePage(ctx *htmlcore.Context) bool {
 		w.SetType(core.TextDisplaySmall).SetText("<b>What can Cogent Core do?</b>")
 	})
 
-	makeBlock("COGENT CODE", "Cogent Code is a fully featured Go IDE with support for syntax highlighting, code completion, symbol lookup, building and debugging, version control, keyboard shortcuts, and many other features.", func(w *core.SVG) {
+	makeBlock(`<a href="https://cogentcore.org/cogent/code">COGENT CODE</a>`, "Cogent Code is a fully featured Go IDE with support for syntax highlighting, code completion, symbol lookup, building and debugging, version control, keyboard shortcuts, and many other features.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "code-icon.svg"))
 	})
 
-	makeBlock("COGENT CANVAS", "Cogent Canvas is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(w *core.SVG) {
+	makeBlock(`<a href="https://cogentcore.org/cogent/canvas">COGENT CANVAS</a>`, "Cogent Canvas is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "canvas-icon.svg"))
 	})
 
