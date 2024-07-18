@@ -5,7 +5,6 @@
 package plotcore
 
 import (
-	"log/slog"
 	"testing"
 
 	"cogentcore.org/core/core"
@@ -19,7 +18,7 @@ type Data struct {
 }
 
 func TestTablePlotEditor(t *testing.T) {
-	b := core.NewBody("Plot View")
+	b := core.NewBody()
 
 	epc := table.NewTable("epc")
 	epc.OpenCSV("testdata/ra25epoch.tsv", table.Tab)
@@ -32,7 +31,7 @@ func TestTablePlotEditor(t *testing.T) {
 	pl.SetTable(epc)
 	pl.ColumnOptions("UnitErr").On = true
 	b.AddAppBar(pl.MakeToolbar)
-	b.AssertRender(t, "plotcore_table")
+	b.AssertRender(t, "table")
 }
 
 func TestSlicePlotEditor(t *testing.T) {
@@ -41,19 +40,13 @@ func TestSlicePlotEditor(t *testing.T) {
 		{"Boulder", 85000, 800},
 	}
 
-	b := core.NewBody("Plot View")
-	dt, err := table.NewSliceTable(data)
-	if err != nil {
-		slog.Error(err.Error())
-	}
+	b := core.NewBody()
 
 	pl := NewPlotEditor(b)
 	pl.Options.Title = "Slice Data"
-	pl.Options.XAxis = "City"
 	pl.Options.Points = true
-	pl.SetTable(dt)
-	pl.ColumnOptions("Population").On = true
+	pl.SetSlice(data)
 	b.AddAppBar(pl.MakeToolbar)
 
-	b.AssertRender(t, "plotcore_slice")
+	b.AssertRender(t, "slice")
 }

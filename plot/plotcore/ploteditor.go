@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -139,6 +140,12 @@ func (pl *PlotEditor) SetTable(tab *table.Table) *PlotEditor {
 	pl.table = table.NewIndexView(tab)
 	pl.Update()
 	return pl
+}
+
+// SetSlice sets the table to a [table.NewSliceTable]
+// from the given slice.
+func (pl *PlotEditor) SetSlice(sl any) *PlotEditor {
+	return pl.SetTable(errors.Log1(table.NewSliceTable(sl)))
 }
 
 // ColumnOptions returns the current column options by name
