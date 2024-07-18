@@ -76,6 +76,11 @@ var getWebURL func() string
 // saveWebURL, if non-nil, saves the given web URL to the user's browser address bar and history.
 var saveWebURL func(u string)
 
+// needsPath indicates that a URL in [Page.URLToPagePath] needs its path
+// to be set to the first valid child path, since its index.md file does
+// not exist.
+const needsPath = "$__NEEDS_PATH__$"
+
 func (pg *Page) Init() {
 	pg.Frame.Init()
 	pg.Context = htmlcore.NewContext()
@@ -150,14 +155,28 @@ func (pg *Page) Init() {
 
 					nm := strings.TrimSuffix(base, ext)
 					txt := strcase.ToSentence(nm)
-					tv := core.NewTree(parent).SetText(txt)
-					tv.SetName(nm)
+					tr := core.NewTree(parent).SetText(txt)
+					tr.SetName(nm)
 
 					// need index.md for page path
 					if d.IsDir() {
 						fpath += "/index.md"
 					}
-					pg.URLToPagePath[tv.PathFrom(w)] = fpath
+					exists, err := fsx.FileExistsFS(pg.Source, fpath)
+					if err != nil {
+						return err
+					}
+					if !exists {
+						fpath = needsPath
+						tr.SetProperty("needs-path", true)
+					}
+					pg.URLToPagePath[tr.PathFrom(w)] = fpath
+					// everyone who needs a path gets our path
+					for u, p := range pg.URLToPagePath {
+						if p == needsPath {
+							pg.URLToPagePath[u] = fpath
+						}
+					}
 					return nil
 				}))
 				// open the default page if there is no currently open page
@@ -234,36 +253,8 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 
 	b, err := fs.ReadFile(pg.Source, pg.PagePath)
 	if err != nil {
-		// we go to the first page in the directory if there is no index page
-		if errors.Is(err, fs.ErrNotExist) && (strings.HasSuffix(pg.PagePath, "index.md") || strings.HasSuffix(pg.PagePath, "index.html")) {
-			err = fs.WalkDir(pg.Source, path.Dir(pg.PagePath), func(path string, d fs.DirEntry, err error) error {
-				if err != nil {
-					return err
-				}
-				if path == pg.PagePath || d.IsDir() {
-					return nil
-				}
-				if system.TheApp.Platform() == system.Web && wpath.Draft(path) {
-					return nil
-				}
-				pg.PagePath = path
-				return fs.SkipAll
-			})
-			// need to update rawURL with new page path
-			for u, p := range pg.URLToPagePath {
-				if p == pg.PagePath {
-					rawURL = u
-					break
-				}
-			}
-			if err == nil {
-				b, err = fs.ReadFile(pg.Source, pg.PagePath)
-			}
-		}
-		if errors.Log(err) != nil {
-			core.ErrorSnackbar(pg, err, "Error opening page")
-			return
-		}
+		core.ErrorSnackbar(pg, err, "Error opening page")
+		return
 	}
 
 	pg.Context.PageURL = rawURL
@@ -298,6 +289,24 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 
 	pg.nav.UnselectAll()
 	curNav := pg.nav.FindPath(rawURL).(*core.Tree)
+	if curNav.Property("needs-path") != nil {
+		got := false
+		curNav.WalkDown(func(n tree.Node) bool {
+			if got {
+				return tree.Break
+			}
+			if n.AsTree().Property("needs-path") != nil {
+				return tree.Continue
+			}
+			tr, ok := n.(*core.Tree)
+			if !ok {
+				return tree.Break
+			}
+			curNav = tr
+			got = true
+			return tree.Break
+		})
+	}
 	curNav.Select()
 	curNav.ScrollToThis()
 
