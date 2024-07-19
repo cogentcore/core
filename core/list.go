@@ -577,6 +577,9 @@ func (lb *ListBase) MakeValue(w Value, i int) {
 	})
 	wb.OnDoubleClick(lb.HandleEvent)
 	wb.On(events.ContextMenu, lb.HandleEvent)
+	wb.OnFirst(events.ContextMenu, func(e events.Event) {
+		wb.Send(events.Select, e) // we must select the row for context menu actions
+	})
 	if !lb.IsReadOnly() {
 		wb.OnInput(lb.HandleEvent)
 	}
