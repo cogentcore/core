@@ -71,8 +71,8 @@ func (wb *WidgetBase) SetReadOnly(ro bool) *WidgetBase {
 // of its children have the given state flag.
 func (wb *WidgetBase) HasStateWithin(state states.States) bool {
 	got := false
-	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		if wb.StateIs(state) {
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if cwb.StateIs(state) {
 			got = true
 			return tree.Break
 		}

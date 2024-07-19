@@ -25,8 +25,8 @@ import (
 func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 	var repo vcs.Repo
 	var rnode *Node
-	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
-		sfn := AsNode(wi)
+	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		sfn := AsNode(cw)
 		if sfn == nil {
 			return tree.Continue
 		}
@@ -347,8 +347,8 @@ func (fn *Node) blameVCS() ([]byte, error) {
 
 // UpdateAllVCS does an update on any repositories below this one in file tree
 func (fn *Node) UpdateAllVCS() {
-	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
-		sfn := AsNode(wi)
+	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		sfn := AsNode(cw)
 		if sfn == nil {
 			return tree.Continue
 		}

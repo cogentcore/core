@@ -293,8 +293,8 @@ func (wb *WidgetBase) OnAdd() {
 // This can be necessary when creating widgets outside the usual New* paradigm,
 // e.g., when reading from a JSON file.
 func (wb *WidgetBase) setScene(sc *Scene) {
-	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
-		kwb.Scene = sc
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		cwb.Scene = sc
 		return tree.Continue
 	})
 }
@@ -415,7 +415,7 @@ func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 
 // ForWidgetChildren iterates through the children as widgets, calling the given function.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) ForWidgetChildren(fun func(i int, w Widget, cwb *WidgetBase) bool) {
+func (wb *WidgetBase) ForWidgetChildren(fun func(i int, cw Widget, cwb *WidgetBase) bool) {
 	for i, c := range wb.Children {
 		w, cwb := c.(Widget), AsWidget(c)
 		if !fun(i, w, cwb) {
@@ -428,7 +428,7 @@ func (wb *WidgetBase) ForWidgetChildren(fun func(i int, w Widget, cwb *WidgetBas
 // excluding any with the *local* states.Invisible flag set (does not check parents).
 // This is used e.g., for layout functions to exclude non-visible direct children.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) forVisibleChildren(fun func(i int, w Widget, cwb *WidgetBase) bool) {
+func (wb *WidgetBase) forVisibleChildren(fun func(i int, cw Widget, cwb *WidgetBase) bool) {
 	for i, k := range wb.Children {
 		w, cwb := k.(Widget), AsWidget(k)
 		if cwb.StateIs(states.Invisible) {
@@ -443,7 +443,7 @@ func (wb *WidgetBase) forVisibleChildren(fun func(i int, w Widget, cwb *WidgetBa
 
 // WidgetWalkDown is a version of [tree.NodeBase.WalkDown] that operates on [Widget] types.
 // Return [tree.Continue] to continue and [tree.Break] to terminate.
-func (wb *WidgetBase) WidgetWalkDown(fun func(kwi Widget, kwb *WidgetBase) bool) {
+func (wb *WidgetBase) WidgetWalkDown(fun func(cw Widget, cwb *WidgetBase) bool) {
 	wb.WalkDown(func(n tree.Node) bool {
 		cw, cwb := n.(Widget), AsWidget(n)
 		return fun(cw, cwb)

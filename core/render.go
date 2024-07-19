@@ -142,12 +142,12 @@ func (wb *WidgetBase) doNeedsRender() {
 	if wb.This == nil {
 		return
 	}
-	wb.WidgetWalkDown(func(w Widget, cwb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		if cwb.needsRender {
-			w.RenderWidget()
+			cw.RenderWidget()
 			return tree.Break // don't go any deeper
 		}
-		if ly := AsFrame(w); ly != nil {
+		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] && ly.scrolls[d] != nil {
 					ly.scrolls[d].doNeedsRender()
@@ -394,8 +394,8 @@ func (wb *WidgetBase) renderParts() {
 
 // renderChildren renders all of the widget's children.
 func (wb *WidgetBase) renderChildren() {
-	wb.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwi.RenderWidget()
+	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		cw.RenderWidget()
 		return tree.Continue
 	})
 }

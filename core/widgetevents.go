@@ -513,11 +513,11 @@ func (wb *WidgetBase) SetFocusEvent() {
 // focusableInThis returns the first Focusable element within this widget
 func (wb *WidgetBase) focusableInThis() Widget {
 	var foc Widget
-	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		if !wb.AbilityIs(abilities.Focusable) {
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if !cwb.AbilityIs(abilities.Focusable) {
 			return tree.Continue
 		}
-		foc = wi
+		foc = cw
 		return tree.Break // done
 	})
 	return foc

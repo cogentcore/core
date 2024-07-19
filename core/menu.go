@@ -72,18 +72,18 @@ func newMenuScene(menu func(m *Scene), name ...string) *Scene {
 	}
 
 	hasSelected := false
-	msc.WidgetWalkDown(func(w Widget, wb *WidgetBase) bool {
-		if w == msc {
+	msc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if cw == msc {
 			return tree.Continue
 		}
-		if bt := AsButton(w); bt != nil {
+		if bt := AsButton(cw); bt != nil {
 			if bt.Menu == nil {
 				bt.handleClickDismissMenu()
 			}
 		}
-		if !hasSelected && wb.StateIs(states.Selected) {
+		if !hasSelected && cwb.StateIs(states.Selected) {
 			// fmt.Println("start focus sel:", wb)
-			msc.Events.SetStartFocus(wb)
+			msc.Events.SetStartFocus(cwb)
 			hasSelected = true
 		}
 		return tree.Continue

@@ -586,13 +586,13 @@ func (tb *Table) SizeFinal() {
 	tb.ListBase.SizeFinal()
 	lg := tb.ListGrid
 	sh := tb.SliceHeader()
-	sh.ForWidgetChildren(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
+	sh.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
 		sgb := core.AsWidget(lg.Child(i))
 		gsz := &sgb.Geom.Size
 		if gsz.Actual.Total.X == 0 {
 			return tree.Continue
 		}
-		ksz := &kwb.Geom.Size
+		ksz := &cwb.Geom.Size
 		ksz.Actual.Total.X = gsz.Actual.Total.X
 		ksz.Actual.Content.X = gsz.Actual.Content.X
 		ksz.Alloc.Total.X = gsz.Alloc.Total.X

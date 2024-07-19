@@ -181,8 +181,8 @@ func (tr *Tree) AsCoreTree() *Tree {
 // It returns the total number of leaves in the tree.
 func (tr *Tree) rootSetViewIndex() int {
 	idx := 0
-	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		tvn := AsTree(wi)
+	tr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		tvn := AsTree(cw)
 		if tvn != nil {
 			tvn.viewIndex = idx
 			tvn.root = tr
@@ -539,12 +539,12 @@ func (tr *Tree) SizeUp() {
 
 	if !tr.Closed {
 		// we layout children under us
-		tr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-			kwi.SizeUp()
-			h += kwb.Geom.Size.Actual.Total.Y
-			kw := kwb.Geom.Size.Actual.Total.X
+		tr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			cw.SizeUp()
+			h += cwb.Geom.Size.Actual.Total.Y
+			kw := cwb.Geom.Size.Actual.Total.X
 			if math32.IsNaN(kw) { // somehow getting a nan
-				slog.Error("Tree, node width is NaN", "node:", kwb)
+				slog.Error("Tree, node width is NaN", "node:", cwb)
 			} else {
 				w = max(w, tr.Indent.Dots+kw)
 			}
@@ -581,11 +581,11 @@ func (tr *Tree) Position() {
 
 	if !tr.Closed {
 		h := tr.widgetSize.Y
-		tr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-			kwb.Geom.RelPos.Y = h
-			kwb.Geom.RelPos.X = tr.Indent.Dots
-			h += kwb.Geom.Size.Actual.Total.Y
-			kwi.Position()
+		tr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			cwb.Geom.RelPos.Y = h
+			cwb.Geom.RelPos.X = tr.Indent.Dots
+			h += cwb.Geom.Size.Actual.Total.Y
+			cw.Position()
 			return tree.Continue
 		})
 	}
@@ -1142,8 +1142,8 @@ func (tr *Tree) ToggleClose() {
 
 // OpenAll opens the node and all of its sub-nodes.
 func (tr *Tree) OpenAll() { //types:add
-	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		tvn := AsTree(wi)
+	tr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		tvn := AsTree(cw)
 		if tvn != nil {
 			tvn.Open()
 			return tree.Continue
@@ -1155,8 +1155,8 @@ func (tr *Tree) OpenAll() { //types:add
 
 // CloseAll closes the node and all of its sub-nodes.
 func (tr *Tree) CloseAll() { //types:add
-	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		tvn := AsTree(wi)
+	tr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		tvn := AsTree(cw)
 		if tvn != nil {
 			tvn.Close()
 			return tree.Continue

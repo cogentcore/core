@@ -186,8 +186,8 @@ func (fr *Frame) RenderChildren() {
 		}
 		return
 	}
-	fr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwi.RenderWidget()
+	fr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		cw.RenderWidget()
 		return tree.Continue
 	})
 }
@@ -212,9 +212,9 @@ func (fr *Frame) childWithFocus() (Widget, int) {
 	}
 	var foc Widget
 	focIndex := -1
-	fr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		if kwb.ContainsFocus() {
-			foc = kwi
+	fr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if cwb.ContainsFocus() {
+			foc = cw
 			focIndex = i
 			return tree.Break
 		}
