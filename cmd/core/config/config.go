@@ -174,6 +174,12 @@ func (c *Config) OnConfig(cmd string) error {
 	if len(c.Build.Target) == 0 && cmd != "init" {
 		c.Build.Target = []Platform{{OS: runtime.GOOS, Arch: runtime.GOARCH}}
 	}
+	if c.Build.Output == "" && len(c.Build.Target) > 0 {
+		t := c.Build.Target[0]
+		if cmd == "pack" || t.OS == "web" || t.OS == "android" || t.OS == "ios" {
+			c.Build.Output = filepath.Join("bin", t.OS)
+		}
+	}
 	// we must make the output dir absolute before changing the current directory
 	out, err := filepath.Abs(c.Build.Output)
 	if err != nil {
