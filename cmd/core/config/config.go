@@ -174,8 +174,17 @@ func (c *Config) OnConfig(cmd string) error {
 	if len(c.Build.Target) == 0 && cmd != "init" {
 		c.Build.Target = []Platform{{OS: runtime.GOOS, Arch: runtime.GOARCH}}
 	}
+	// we must make the output dir absolute before changing the current directory
+	out, err := filepath.Abs(c.Build.Output)
+	if err != nil {
+		return err
+	}
+	c.Build.Output = out
 	if c.Build.Dir != "" {
-		return os.Chdir(c.Build.Dir)
+		err := os.Chdir(c.Build.Dir)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
