@@ -198,5 +198,5 @@ func (fb *FontButton) Init() {
 }
 
 // HighlightingName is a highlighting style name.
-// TODO(config): figure out a better location for this.
+// TODO: move this to texteditor/highlighting.
 type HighlightingName string
