@@ -11,8 +11,7 @@ You can style all direct children of a container at once using [[tree.NodeBase.O
 ```Go
 fr := core.NewFrame(b)
 fr.SetOnChildAdded(func(n tree.Node) {
-    _, wb := core.AsWidget(n)
-    wb.Styler(func(s *styles.Style) {
+    core.AsWidget(n).Styler(func(s *styles.Style) {
         s.Color = colors.Scheme.Error.Base
     })
 })
