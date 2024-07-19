@@ -78,6 +78,15 @@ type Build struct { //types:add
 	// the target platforms to build executables for
 	Target []Platform `flag:"t,target" posarg:"0" required:"-" save:"-"`
 
+	// Dir is the directory to build the app from.
+	// It defaults to the current directory.
+	Dir string
+
+	// Output is the directory to output the built app to.
+	// It defaults to the current directory for desktop executables
+	// and "bin/{platform}" for all other platforms and command "pack".
+	Output string `flag:"o,output"`
+
 	// whether to build/run the app in debug mode, which sets
 	// the "debug" tag when building. On iOS and Android, this
 	// also prints the program output.
