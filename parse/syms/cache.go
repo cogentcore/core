@@ -6,7 +6,6 @@ package syms
 
 import (
 	"go/build"
-	"log"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -18,16 +17,17 @@ import (
 
 // ParseCacheDir returns the parse cache directory for given language, and ensures that it exists.
 func ParseCacheDir(lang fileinfo.Known) (string, error) {
-	ucdir, err := os.UserCacheDir()
-	if err != nil {
-		return "", err
-	}
-	cdir := filepath.Join(filepath.Join(ucdir, "Cogent Core", "parse"), lang.String())
-	err = os.MkdirAll(cdir, 0775)
-	if err != nil {
-		log.Printf("ParseCacheDir: cache not available: %v\n", err)
-	}
-	return cdir, err
+	// ucdir, err := os.UserCacheDir()
+	// if err != nil {
+	// 	return "", err
+	// }
+	// cdir := filepath.Join(filepath.Join(ucdir, "Cogent Core", "parse"), lang.String())
+	// err = os.MkdirAll(cdir, 0775)
+	// if err != nil {
+	// 	log.Printf("ParseCacheDir: cache not available: %v\n", err)
+	// }
+	// return cdir, err
+	return "", nil
 }
 
 // GoRelPath returns the GOPATH or GOROOT relative path for given filename
