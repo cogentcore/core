@@ -12,6 +12,7 @@ import (
 )
 
 // TODO: fix xml io; should save fields as attributes, not elements
+// (https://github.com/cogentcore/core/issues/1021)
 
 // WriteXML writes the tree to an XML-encoded byte string over io.Writer
 // using MarshalXML.
