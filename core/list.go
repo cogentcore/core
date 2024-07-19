@@ -739,28 +739,12 @@ func (lb *ListBase) NewAt(idx int) {
 	}
 
 	lb.NewAtSelect(idx)
-
-	sltyp := reflectx.SliceElementType(lb.Slice) // has pointer if it is there
-	slptr := sltyp.Kind() == reflect.Pointer
-	sz := lb.SliceSize
-	svnp := lb.sliceUnderlying
-
-	nval := reflect.New(reflectx.NonPointerType(sltyp)) // make the concrete el
-	if !slptr {
-		nval = nval.Elem() // use concrete value
-	}
-	svnp = reflect.Append(svnp, nval)
-	if idx >= 0 && idx < sz {
-		reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
-		svnp.Index(idx).Set(nval)
-	}
-	lb.sliceUnderlying.Set(svnp)
+	reflectx.SliceNewAt(lb.Slice, idx)
 	if idx < 0 {
-		idx = sz
+		idx = lb.SliceSize
 	}
 
 	lb.This.(Lister).UpdateSliceSize()
-
 	lb.SelectIndexEvent(idx, events.SelectOne)
 	lb.UpdateChange()
 	lb.IndexGrabFocus(idx)
