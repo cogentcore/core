@@ -174,6 +174,9 @@ func (c *Config) OnConfig(cmd string) error {
 	if len(c.Build.Target) == 0 && cmd != "init" {
 		c.Build.Target = []Platform{{OS: runtime.GOOS, Arch: runtime.GOARCH}}
 	}
+	if c.Build.Dir != "" {
+		return os.Chdir(c.Build.Dir)
+	}
 	return nil
 }
 
