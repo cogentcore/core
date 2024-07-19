@@ -169,10 +169,10 @@ func (hs *Styles) Names() []string {
 	return nms
 }
 
-// ViewStandard shows the standard styles that are compiled into the program via
-// chroma package
+// ViewStandard shows the standard styles that are compiled
+// into the program via chroma package
 func (hs *Styles) ViewStandard() {
-	// View(&StandardStyles) TODO(config)
+	Editor(&StandardStyles)
 }
 
 // Init must be called to initialize the hi styles -- post startup

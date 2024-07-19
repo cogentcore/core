@@ -4,58 +4,52 @@
 
 package highlighting
 
-/* TODO(config)
 import (
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/tree"
 )
 
 func init() {
-	core.AddValue(core.HiStyleName(""), func() core.Value { return &Value{} })
+	core.AddValueType[core.HighlightingName, Button]()
 }
 
-// Value represents a [core.HiStyleName] with a button.
-type Value struct {
-	core.ValueBase[*core.Button]
+// Button represents a [core.HighlightingName] with a button.
+type Button struct {
+	core.Button
+	HighlightingName string
 }
 
-func (v *Value) Config() {
-	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Brush)
-	core.ConfigDialogWidget(v, false)
+func (hb *Button) WidgetValue() any { return &hb.HighlightingName }
+
+func (hb *Button) Init() {
+	hb.Button.Init()
+	hb.SetType(core.ButtonTonal).SetIcon(icons.Brush)
+	hb.Updater(func() {
+		hb.SetText(hb.HighlightingName)
+	})
+	core.InitValueButton(hb, false, func(d *core.Body) {
+		d.SetTitle("Select a syntax highlighting style")
+		si := 0
+		ls := core.NewList(d).SetSlice(&StyleNames).SetSelectedValue(hb.HighlightingName).BindSelect(&si)
+		ls.OnChange(func(e events.Event) {
+			hb.HighlightingName = StyleNames[si]
+		})
+	})
 }
 
-func (v *Value) Update() {
-	txt := reflectx.ToString(v.Value.Interface())
-	v.Widget.SetText(txt).Update()
-}
-
-func (v *Value) ConfigDialog(d *core.Body) (bool, func()) {
-	d.SetTitle("Select a syntax highlighting style")
-	si := 0
-	cur := reflectx.ToString(v.Value.Interface())
-	core.NewList(d).SetSlice(&StyleNames).SetSelectedValue(cur).BindSelect(&si)
-	return true, func() {
-		if si >= 0 {
-			hs := StyleNames[si]
-			v.SetValue(hs)
-			v.Update()
-		}
-	}
-}
-
-// View opens a view of highlighting styles
-func View(st *Styles) {
+// Editor opens an editor of highlighting styles.
+func Editor(st *Styles) {
 	if core.RecycleMainWindow(st) {
 		return
 	}
 
-	d := core.NewBody("hi-styles").SetData(st)
-	d.AddTitle("Highlighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
-	mv := core.NewKeyedList(d).SetMap(st)
+	d := core.NewBody().SetData(st).AddTitle("Highlighting styles")
+	d.AddText("View standard to see the builtin styles, from which you can add and customize by saving ones from the standard and then loading them into a custom file to modify.")
+	kl := core.NewKeyedList(d).SetMap(st)
 	StylesChanged = false
-	mv.OnChange(func(e events.Event) {
+	kl.OnChange(func(e events.Event) {
 		StylesChanged = true
 	})
 	d.AddAppBar(func(p *tree.Plan) {
@@ -67,9 +61,11 @@ func View(st *Styles) {
 			w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 			w.Args[0].SetTag(`extension:".highlighting"`)
 		})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(st.ViewStandard).SetIcon(icons.Visibility)
+		})
 		tree.Add(p, func(w *core.Separator) {})
-		mv.MakeToolbar(p)
+		kl.MakeToolbar(p)
 	})
 	d.RunWindow() // note: no context here so not dialog
 }
-*/
