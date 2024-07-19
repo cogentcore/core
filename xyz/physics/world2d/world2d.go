@@ -272,7 +272,7 @@ func (vw *View) SyncNode(wn physics.Node, vn svg.Node) bool {
 	nm := wn.AsTree().Name
 	vn.AsTree().SetName(nm) // guaranteed to be unique
 	skids := wn.AsTree().Children
-	p := make(tree.TypePlan, 0, len(skids)) // TODO(config): update to new plan structure
+	p := make(tree.TypePlan, 0, len(skids)) // TODO: update to new plan structure (https://github.com/cogentcore/core/issues/1022)
 	for _, skid := range skids {
 		p.Add(types.For[svg.Group](), skid.AsTree().Name)
 	}
