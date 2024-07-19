@@ -299,13 +299,12 @@ func (wb *WidgetBase) setScene(sc *Scene) {
 	})
 }
 
-// AsWidget returns the given [tree.Node]
-// as a [Widget] interface and a [WidgetBase].
-func AsWidget(n tree.Node) (Widget, *WidgetBase) {
+// AsWidget returns the given [tree.Node] as a [WidgetBase] or nil.
+func AsWidget(n tree.Node) *WidgetBase {
 	if w, ok := n.(Widget); ok {
-		return w, w.AsWidget()
+		return w.AsWidget()
 	}
-	return nil, nil
+	return nil
 }
 
 func (wb *WidgetBase) AsWidget() *WidgetBase {
@@ -314,7 +313,7 @@ func (wb *WidgetBase) AsWidget() *WidgetBase {
 
 func (wb *WidgetBase) CopyFieldsFrom(from tree.Node) {
 	wb.NodeBase.CopyFieldsFrom(from)
-	_, frm := AsWidget(from)
+	frm := AsWidget(from)
 
 	n := len(wb.ContextMenus)
 	if len(frm.ContextMenus) > n {
@@ -417,8 +416,8 @@ func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 // ForWidgetChildren iterates through the children as widgets, calling the given function.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func (wb *WidgetBase) ForWidgetChildren(fun func(i int, w Widget, cwb *WidgetBase) bool) {
-	for i, k := range wb.Children {
-		w, cwb := AsWidget(k)
+	for i, c := range wb.Children {
+		w, cwb := c.(Widget), AsWidget(c)
 		if !fun(i, w, cwb) {
 			break
 		}
@@ -431,7 +430,7 @@ func (wb *WidgetBase) ForWidgetChildren(fun func(i int, w Widget, cwb *WidgetBas
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func (wb *WidgetBase) forVisibleChildren(fun func(i int, w Widget, cwb *WidgetBase) bool) {
 	for i, k := range wb.Children {
-		w, cwb := AsWidget(k)
+		w, cwb := k.(Widget), AsWidget(k)
 		if cwb.StateIs(states.Invisible) {
 			continue
 		}
@@ -445,9 +444,9 @@ func (wb *WidgetBase) forVisibleChildren(fun func(i int, w Widget, cwb *WidgetBa
 // WidgetWalkDown is a version of [tree.NodeBase.WalkDown] that operates on [Widget] types.
 // Return [tree.Continue] to continue and [tree.Break] to terminate.
 func (wb *WidgetBase) WidgetWalkDown(fun func(kwi Widget, kwb *WidgetBase) bool) {
-	wb.WalkDown(func(k tree.Node) bool {
-		kwi, kwb := AsWidget(k)
-		return fun(kwi, kwb)
+	wb.WalkDown(func(n tree.Node) bool {
+		cw, cwb := n.(Widget), AsWidget(n)
+		return fun(cw, cwb)
 	})
 }
 

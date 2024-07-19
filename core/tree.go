@@ -1442,7 +1442,7 @@ func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 			}
 		}
 		parent.InsertChild(ns, myidx+i)
-		_, nwb := AsWidget(ns)
+		nwb := AsWidget(ns)
 		ntv := AsTree(ns)
 		ntv.root = tr.root
 		nwb.setScene(tr.Scene)
@@ -1473,7 +1473,7 @@ func (tr *Tree) pasteChildren(md mimedata.Mimes, mod events.DropMods) {
 
 	for _, ns := range sl {
 		tr.AddChild(ns)
-		_, nwb := AsWidget(ns)
+		nwb := AsWidget(ns)
 		ntv := AsTree(ns)
 		ntv.root = tr.root
 		nwb.setScene(tr.Scene)
@@ -1568,8 +1568,7 @@ func (tr *Tree) DropDeleteSource(e events.Event) {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
 			sn.AsTree().SetName(orgnm)
-			_, swb := AsWidget(sn)
-			swb.NeedsRender()
+			AsWidget(sn).NeedsRender()
 		}
 	}
 }

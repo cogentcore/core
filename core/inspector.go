@@ -93,9 +93,9 @@ func (is *Inspector) Init() {
 					if !ok {
 						return
 					}
-					if w, wb := AsWidget(sn); w != nil {
+					if wb := AsWidget(sn); wb != nil {
 						pselw := sc.selectedWidget
-						sc.selectedWidget = w
+						sc.selectedWidget = sn.(Widget)
 						wb.NeedsRender()
 						if pselw != nil {
 							pselw.AsWidget().NeedsRender()

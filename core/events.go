@@ -188,7 +188,7 @@ func (em *Events) handleFocusEvent(e events.Event) {
 	}
 	if em.focus != nil {
 		em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
-			_, wb := AsWidget(k)
+			wb := AsWidget(k)
 			if !wb.IsVisible() {
 				return tree.Break
 			}
@@ -200,7 +200,7 @@ func (em *Events) handleFocusEvent(e events.Event) {
 		}
 		if !e.IsHandled() {
 			em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
-				_, wb := AsWidget(k)
+				wb := AsWidget(k)
 				if !wb.IsVisible() {
 					return tree.Break
 				}
@@ -959,7 +959,7 @@ func (em *Events) focusOnOrNext(foc Widget) bool {
 	if cfoc == foc {
 		return true
 	}
-	_, wb := AsWidget(foc)
+	wb := AsWidget(foc)
 	if !wb.IsVisible() {
 		return false
 	}
@@ -977,7 +977,7 @@ func (em *Events) focusOnOrPrev(foc Widget) bool {
 	if cfoc == foc {
 		return true
 	}
-	_, wb := AsWidget(foc)
+	wb := AsWidget(foc)
 	if !wb.IsVisible() {
 		return false
 	}

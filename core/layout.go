@@ -618,8 +618,8 @@ func (ls *layoutState) String() string {
 	return s
 }
 
-// StackTopWidget returns the [Frame.StackTop] element as a widget.
-func (fr *Frame) StackTopWidget() (Widget, *WidgetBase) {
+// StackTopWidget returns the [Frame.StackTop] element as a [WidgetBase].
+func (fr *Frame) StackTopWidget() *WidgetBase {
 	n := fr.Child(fr.StackTop)
 	return AsWidget(n)
 }
@@ -1028,7 +1028,7 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 // sizeFromChildrenStacked for stacked case
 func (fr *Frame) sizeFromChildrenStacked() math32.Vector2 {
 	fr.layout.initCells()
-	_, kwb := fr.StackTopWidget()
+	kwb := fr.StackTopWidget()
 	li := &fr.layout
 	var ksz math32.Vector2
 	if kwb != nil {
@@ -1397,7 +1397,7 @@ func (fr *Frame) sizeDownGrowStacked(iter int, extra math32.Vector2) bool {
 	asz := fr.Geom.Size.Alloc.Content
 	// todo: could actually use the grow factors to decide if growing here?
 	if fr.LayoutStackTopOnly {
-		_, kwb := fr.StackTopWidget()
+		kwb := fr.StackTopWidget()
 		if kwb != nil {
 			ksz := &kwb.Geom.Size
 			if ksz.Alloc.Total != asz {
@@ -1457,7 +1457,7 @@ func (fr *Frame) sizeDownAllocActualStacked(iter int) {
 	asz := fr.Geom.Size.Actual.Content
 	// todo: could actually use the grow factors to decide if growing here?
 	if fr.LayoutStackTopOnly {
-		_, kwb := fr.StackTopWidget()
+		kwb := fr.StackTopWidget()
 		if kwb != nil {
 			ksz := &kwb.Geom.Size
 			ksz.Alloc.Total = asz

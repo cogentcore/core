@@ -501,8 +501,7 @@ func (tr *Tree) dropDeleteSourceSync(de *events.DragDrop) {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
 			sn.AsTree().SetName(orgnm)
-			_, swb := AsWidget(sn)
-			swb.NeedsRender()
+			AsWidget(sn).NeedsRender()
 		}
 	}
 	tr.sendChangeEventReSync(nil)

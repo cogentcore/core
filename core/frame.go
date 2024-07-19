@@ -180,9 +180,9 @@ func (fr *Frame) deleteScroll(d math32.Dims) {
 
 func (fr *Frame) RenderChildren() {
 	if fr.Styles.Display == styles.Stacked {
-		kwi, _ := fr.StackTopWidget()
-		if kwi != nil {
-			kwi.RenderWidget()
+		wb := fr.StackTopWidget()
+		if wb != nil {
+			wb.This.(Widget).RenderWidget()
 		}
 		return
 	}
@@ -353,7 +353,7 @@ func childByLabelCanFocus(fr *Frame, name string, after tree.Node) tree.Node {
 		if n == fr.This { // skip us
 			return tree.Continue
 		}
-		_, wb := AsWidget(n)
+		wb := AsWidget(n)
 		if wb == nil || !wb.CanFocus() { // don't go any further
 			return tree.Continue
 		}

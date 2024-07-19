@@ -61,8 +61,7 @@ func (sl *Splits) Init() {
 	})
 	sl.SetOnChildAdded(func(n tree.Node) {
 		if n != sl.Parts {
-			_, wb := AsWidget(n)
-			wb.Styler(func(s *styles.Style) {
+			AsWidget(n).Styler(func(s *styles.Style) {
 				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)

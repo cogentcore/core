@@ -142,7 +142,7 @@ func handleElement(ctx *Context) {
 					if _, ok := n.(*core.Body); ok { // Body should not grow
 						return
 					}
-					_, wb := core.AsWidget(n)
+					wb := core.AsWidget(n)
 					if wb.IndexInParent() != 0 {
 						return
 					}
