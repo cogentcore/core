@@ -40,14 +40,6 @@ func (is *Inspector) Init() {
 		s.Grow.Set(1, 1)
 		s.Direction = styles.Column
 	})
-	is.SetOnChildAdded(func(n tree.Node) {
-		// TODO(config)
-		if tw, ok := n.(*Tree); ok {
-			tw.Styler(func(s *styles.Style) {
-				s.Max.X.Em(20)
-			})
-		}
-	})
 
 	var titleWidget *Text
 	tree.AddChildAt(is, "title", func(w *Text) {
@@ -81,6 +73,11 @@ func (is *Inspector) Init() {
 			})
 			tree.AddChildAt(w, "tree", func(w *Tree) {
 				is.treeWidget = w
+				w.SetTreeInit(func(tr *Tree) {
+					tr.Styler(func(s *styles.Style) {
+						s.Max.X.Em(20)
+					})
+				})
 				w.OnSelect(func(e events.Event) {
 					if len(w.SelectedNodes) == 0 {
 						return
