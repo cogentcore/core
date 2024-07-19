@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/styles"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewValue(t *testing.T) {
@@ -31,19 +32,11 @@ func TestNewValue(t *testing.T) {
 	}
 }
 
-/* TODO(config)
-func TestAddValue(t *testing.T) {
+func TestAddValueType(t *testing.T) {
 	type myType int
 	type myValue struct {
-		StringValue
+		Text
 	}
-	AddValue(myType(0), func() Value {
-		return &myValue{}
-	})
-	assert.Equal(t, &myValue{}, ToValue(myType(0), ""))
+	AddValueType[myType, myValue]()
+	assert.IsType(t, &myValue{}, toValue(myType(0), ""))
 }
-
-func TestToValue(t *testing.T) {
-	assert.Equal(t, &NilValue{}, ToValue(nil, ""))
-}
-*/
