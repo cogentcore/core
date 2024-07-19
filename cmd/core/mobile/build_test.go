@@ -87,6 +87,7 @@ func TestAndroidBuild(t *testing.T) {
 
 	c := &config.Config{}
 	reflectx.SetFromDefaultTags(c)
+	c.OnConfig("build")
 	defer func() {
 		exec.SetMajor(nil)
 	}()
@@ -271,6 +272,7 @@ func TestBuildWithGoModules(t *testing.T) {
 				t.Run(tc.Name, func(t *testing.T) {
 					c := &config.Config{}
 					reflectx.SetFromDefaultTags(c)
+					c.OnConfig("build")
 					c.ID = "org.golang.todo"
 					c.Build.Target = make([]config.Platform, 1)
 					assert.NoError(t, c.Build.Target[0].SetString(target))
