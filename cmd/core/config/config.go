@@ -19,6 +19,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
+	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/enums/enumgen"
 	"cogentcore.org/core/types/typegen"
@@ -189,6 +190,11 @@ func (c *Config) OnConfig(cmd string) error {
 	if c.Build.Dir != "" {
 		err := os.Chdir(c.Build.Dir)
 		if err != nil {
+			return err
+		}
+		// re-read the config file from the new location if it exists
+		err = tomlx.Open(c, "core.toml")
+		if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			return err
 		}
 	}
