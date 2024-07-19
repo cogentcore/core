@@ -99,7 +99,7 @@ type Tree struct {
 	// [Tree.SyncTree].
 	SyncNode tree.Node `set:"-" copier:"-" json:"-" xml:"-"`
 
-	// text is the text to display for the tree item label, which automatically
+	// Text is the text to display for the tree item label, which automatically
 	// defaults to the [tree.Node.Name] of the tree node. It has no effect
 	// if [Tree.SyncNode] is non-nil.
 	Text string
@@ -118,6 +118,11 @@ type Tree struct {
 	// IconLeaf is the icon to use for a terminal node branch that has no children;
 	// it defaults to [icons.Blank].
 	IconLeaf icons.Icon
+
+	// TreeInit is a function set on the root node that is called
+	// with each child tree node when it is initialized (but not
+	// with the root node itself).
+	TreeInit func(tr *Tree)
 
 	// Indent is the amount to indent children relative to this node.
 	// It should be set in a Styler like all other style properties.
@@ -475,8 +480,10 @@ func (tr *Tree) OnAdd() {
 		tr.IconClosed = ptv.IconClosed
 		tr.IconLeaf = ptv.IconLeaf
 	} else {
-		// fmt.Println("set root to:", tv, &tv)
 		tr.root = tr
+	}
+	if tr.root.TreeInit != nil {
+		tr.root.TreeInit(tr)
 	}
 }
 
