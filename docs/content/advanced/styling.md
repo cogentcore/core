@@ -6,12 +6,13 @@ As with event handlers, there are three levels of stylers: `First`, regular, and
 
 ## Styling multiple widgets
 
-You can style all direct children of a container at once using [[core.Widget.OnWidgetAdded]]:
+You can style all direct children of a container at once using [[tree.NodeBase.OnChildAdded]]:
 
 ```Go
 fr := core.NewFrame(b)
-fr.OnWidgetAdded(func(w core.Widget) {
-    w.AsWidget().Styler(func(s *styles.Style) {
+fr.SetOnChildAdded(func(n tree.Node) {
+    _, wb := core.AsWidget(n)
+    wb.Styler(func(s *styles.Style) {
         s.Color = colors.Scheme.Error.Base
     })
 })
@@ -24,10 +25,10 @@ You can style all direct children of a certain type in a container:
 
 ```Go
 fr := core.NewFrame(b)
-fr.OnWidgetAdded(func(w core.Widget) {
-    switch w := w.(type) {
+fr.SetOnChildAdded(func(n tree.Node) {
+    switch n := n.(type) {
     case *core.Button:
-        w.Styler(func(s *styles.Style) {
+        n.Styler(func(s *styles.Style) {
             s.Border.Radius = styles.BorderRadiusSmall
         })
     }
@@ -37,11 +38,11 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
-TODO(config): You can style all widgets in the entire app using [[core.App.SceneConfig]] in combination with [[core.WidgetBase.OnWidgetAdded]]. For example, to make all buttons in your app have a small border radius, you can do the following:
+You can style all widgets in the entire app using [[core.App.SceneInit]] in conjunction with [[core.Scene.WidgetInit]]. For example, to make all buttons in your app have a small border radius, you can do the following:
 
 ```go
-core.TheApp.SetSceneConfig(func(sc *core.Scene) {
-    sc.OnWidgetAdded(func(w core.Widget) {
+core.TheApp.SetSceneInit(func(sc *core.Scene) {
+    sc.SetWidgetInit(func(w core.Widget) {
         switch w := w.(type) {
         case *core.Button:
             w.Styler(func(s *styles.Style) {
@@ -51,3 +52,26 @@ core.TheApp.SetSceneConfig(func(sc *core.Scene) {
     })
 })
 ```
+
+## States and Abilities
+
+The [[styles/states]] and [[styles/abilities]] flags provide a major source of input for the styling of a widget.  For example, if a widget has the `abilities.Hoverable` flag set, then when a user hovers the mouse over that widget, it will get the `states.Hovered` flag set, which can then be used to style the widget appropriately.
+
+For example, here's the relevant code for the [[core.Button]]:
+
+```go
+    bt.Styler(func(s *styles.Style) {
+        s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
+        ...
+        s.MaxBoxShadow = styles.BoxShadow1()
+        if s.Is(states.Hovered) {
+            s.BoxShadow = s.MaxBoxShadow
+        }
+        ...
+    }
+```   
+
+
+
+
+

@@ -13,8 +13,8 @@ We can create a slice of these items and then represent them with a [[core.Table
 
 ```Go
 type item struct {
-    Done bool
-    Task string
+	Done bool `display:"checkbox"`
+	Task string
 }
 items := []item{{Task: "Code"}, {Task: "Eat"}}
 core.NewTable(b).SetSlice(&items)
@@ -24,8 +24,8 @@ We can add a button for adding a new todo list item:
 
 ```Go
 type item struct {
-    Done bool
-    Task string
+	Done bool `display:"checkbox"`
+	Task string
 }
 items := []item{{Task: "Code"}, {Task: "Eat"}}
 var table *core.Table

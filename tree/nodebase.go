@@ -81,6 +81,11 @@ type NodeBase struct {
 	// [NodeBase.FinalMaker] to add one.
 	Makers tiered.Tiered[[]func(p *Plan)] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
+	// OnChildAdded is called when a node is added as a direct child of this node.
+	// When a node is added to a parent, it calls [Node.OnAdd] on itself and then
+	// this function on its parent if it is non-nil.
+	OnChildAdded func(n Node) `copier:"-" json:"-" xml:"-" edit:"-"`
+
 	// numLifetimeChildren is the number of children that have ever been added to this
 	// node, which is used for automatic unique naming.
 	numLifetimeChildren uint64
@@ -243,18 +248,16 @@ func (n *NodeBase) Path() string {
 // automatically gets the [NodeBase.This] version of the given parent,
 // so a base type can be passed in without manually accessing [NodeBase.This].
 func (n *NodeBase) PathFrom(parent Node) string {
+	if n.This == parent {
+		return ""
+	}
 	// critical to get `This`
 	parent = parent.AsTree().This
 	// we bail a level below the parent so it isn't in the path
 	if n.Parent == nil || n.Parent == parent {
 		return EscapePathName(n.Name)
 	}
-	ppath := ""
-	if n.Parent == parent {
-		ppath = "/" + EscapePathName(parent.AsTree().Name)
-	} else {
-		ppath = n.Parent.AsTree().PathFrom(parent)
-	}
+	ppath := n.Parent.AsTree().PathFrom(parent)
 	return ppath + "/" + EscapePathName(n.Name)
 
 }
@@ -724,7 +727,3 @@ func (n *NodeBase) Init() {}
 // OnAdd is a placeholder implementation of
 // [Node.OnAdd] that does nothing.
 func (n *NodeBase) OnAdd() {}
-
-// OnChildAdded is a placeholder implementation of
-// [Node.OnChildAdded] that does nothing.
-func (n *NodeBase) OnChildAdded(child Node) {}

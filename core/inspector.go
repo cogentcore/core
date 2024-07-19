@@ -10,11 +10,11 @@ import (
 
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/base/labels"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
 
@@ -40,9 +40,9 @@ func (is *Inspector) Init() {
 		s.Grow.Set(1, 1)
 		s.Direction = styles.Column
 	})
-	is.OnWidgetAdded(func(w Widget) {
+	is.SetOnChildAdded(func(n tree.Node) {
 		// TODO(config)
-		if tw, ok := w.(*Tree); ok {
+		if tw, ok := n.(*Tree); ok {
 			tw.Styler(func(s *styles.Style) {
 				s.Max.X.Em(20)
 			})
@@ -74,6 +74,7 @@ func (is *Inspector) Init() {
 		var form *Form
 		tree.AddChildAt(w, "tree-frame", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
+				s.Background = colors.Scheme.SurfaceContainerLow
 				s.Direction = styles.Column
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Gap.Zero()
@@ -246,10 +247,10 @@ func (is *Inspector) selectionMonitor() {
 	sc.AsyncUnlock()
 }
 
-// inspectApp displays the underlying operating system app
+// inspectApp displays [TheApp].
 func (is *Inspector) inspectApp() { //types:add
 	d := NewBody().AddTitle("Inspect app")
-	NewForm(d).SetStruct(system.TheApp).SetReadOnly(true)
+	NewForm(d).SetStruct(TheApp).SetReadOnly(true)
 	d.RunFullDialog(is)
 }
 
@@ -264,7 +265,7 @@ func (is *Inspector) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *Separator) {})
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.open).SetIcon(icons.Open).SetKey(keymap.Open)
-		w.Args[0].SetValue(is.filename).SetTag(`ext:".json"`)
+		w.Args[0].SetValue(is.filename).SetTag(`extension:".json"`)
 	})
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.save).SetIcon(icons.Save).SetKey(keymap.Save)
@@ -274,7 +275,7 @@ func (is *Inspector) MakeToolbar(p *tree.Plan) {
 	})
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.saveAs).SetIcon(icons.SaveAs).SetKey(keymap.SaveAs)
-		w.Args[0].SetValue(is.filename).SetTag(`ext:".json"`)
+		w.Args[0].SetValue(is.filename).SetTag(`extension:".json"`)
 	})
 	tree.Add(p, func(w *Separator) {})
 	tree.Add(p, func(w *FuncButton) {

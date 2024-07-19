@@ -19,3 +19,6 @@ spinner.OnChange(func(e events.Event) {
 ```
 
 Plans are a powerful tool that are critical for some widgets such as those that need to dynamically manage hundreds of children in a convenient and performant way. They aren't always necessary, but you will find them being used a lot in complicated apps, and you will see more examples of them in the rest of this documentation.
+
+In general, you can see that all of the major steps for configuring Widget elements in core are based on specifying _closure_ functions that are run when needed to perform styling, updating, plan making, etc.  Thus, it is important to remember that these functions are not run immediately where they are written, but will be run _later_ in the proper sequence.  See [advanced updating](../advanced/updating) for more details.
+

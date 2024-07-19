@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log/slog"
+	"reflect"
 	"slices"
 	"sync"
 	"time"
@@ -198,7 +199,7 @@ type Validator interface {
 
 func (tf *TextField) WidgetValue() any { return &tf.text }
 
-func (tf *TextField) OnBind(value any) {
+func (tf *TextField) OnBind(value any, tags reflect.StructTag) {
 	if vd, ok := value.(Validator); ok {
 		tf.Validator = vd.Validate
 	}

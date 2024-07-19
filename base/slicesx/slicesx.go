@@ -8,6 +8,22 @@ package slicesx
 
 import "slices"
 
+// SetLength sets the length of the given slice,
+// re-using and preserving existing values to the extent possible.
+func SetLength[E any](s []E, n int) []E {
+	if len(s) == n {
+		return s
+	}
+	if s == nil {
+		return make([]E, n)
+	}
+	if cap(s) < n {
+		s = slices.Grow(s, n-cap(s))
+	}
+	s = s[:n]
+	return s
+}
+
 // Move moves the element in the given slice at the given
 // old position to the given new position and returns the
 // resulting slice.
@@ -23,11 +39,12 @@ func Swap[E any](s []E, i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-// ToAny converts a slice of the given type to a []any slice.
-func ToAny[E any](s []E) []any {
-	as := make([]any, len(s))
+// As converts a slice of the given type to a slice of the other given type.
+// The underlying types of the slice elements must be equivalent.
+func As[F, T any](s []F) []T {
+	as := make([]T, len(s))
 	for i, v := range s {
-		as[i] = v
+		as[i] = any(v).(T)
 	}
 	return as
 }

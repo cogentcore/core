@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/slicesx"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -141,7 +142,7 @@ func (tsr *String) SetFloatRowCell(row, cell int, val float64) {
 // This can be used for all of the gonum/floats methods
 // for basic math, gonum/stats, etc.
 func (tsr *String) Floats(flt *[]float64) {
-	*flt = SetSliceLength(*flt, len(tsr.Values))
+	*flt = slicesx.SetLength(*flt, len(tsr.Values))
 	for i, v := range tsr.Values {
 		(*flt)[i] = StringToFloat64(v)
 	}

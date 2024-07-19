@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"strings"
 
@@ -43,18 +44,18 @@ type FilePicker struct {
 	Filterer FilePickerFilterer `display:"-" json:"-" xml:"-"`
 
 	// directory is the absolute path to the directory of files to display.
-	directory string `set:"-"`
+	directory string
 
 	// selectedFilename is the name of the currently selected file,
 	// not including the directory. See [FilePicker.SelectedFile]
 	// for the full path.
-	selectedFilename string `set:"-"`
+	selectedFilename string
 
 	// extensions is a list of the target file extensions.
 	// If there are multiple, they must be comma separated.
 	// The extensions must include the dot (".") at the start.
 	// They must be set using [FilePicker.SetExtensions].
-	extensions string `set:"-"`
+	extensions string
 
 	// extensionMap is a map of lower-cased extensions from Extensions.
 	// It used for highlighting files with one of these extensions;
@@ -115,11 +116,6 @@ func (fp *FilePicker) Init() {
 		if len(recentPaths) == 0 {
 			openRecentPaths()
 		}
-		// if we update the title before the scene is shown, it may incorrectly
-		// override the title of the window of the context widget
-		if fp.Scene.hasShown {
-			fp.Scene.Body.SetTitle("Files: " + fp.directory)
-		}
 		recentPaths.AddPath(fp.directory, SystemSettings.SavedPathsMax)
 		saveRecentPaths()
 		fp.readFiles()
@@ -140,6 +136,12 @@ func (fp *FilePicker) Init() {
 			fp.prevPath = fp.directory
 		}
 
+		tree.AddAt(p, "title", func(w *Text) {
+			w.SetType(TextTitleLarge)
+			w.Updater(func() {
+				w.SetText(fp.directory)
+			})
+		})
 		tree.AddAt(p, "files", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
@@ -709,9 +711,18 @@ type Filename string
 type FileButton struct {
 	Button
 	Filename string
+
+	// Extensions are the target file extensions for the file picker.
+	Extensions string
 }
 
 func (fb *FileButton) WidgetValue() any { return &fb.Filename }
+
+func (fb *FileButton) OnBind(value any, tags reflect.StructTag) {
+	if ext, ok := tags.Lookup("extension"); ok {
+		fb.SetExtensions(ext)
+	}
+}
 
 func (fb *FileButton) Init() {
 	fb.Button.Init()
@@ -725,8 +736,9 @@ func (fb *FileButton) Init() {
 	})
 	var fp *FilePicker
 	InitValueButton(fb, false, func(d *Body) {
-		// ext, _ := v.Tag("ext") // TODO(config) (also rename to extension)
-		fp = NewFilePicker(d).SetFilename(fb.Filename)
+		d.Title = "Select file"
+		d.DeleteChildByName("body-title") // file picker has its own title
+		fp = NewFilePicker(d).SetFilename(fb.Filename).SetExtensions(fb.Extensions)
 		fb.valueNewWindow = true
 		d.AddAppBar(fp.MakeToolbar)
 	}, func() {

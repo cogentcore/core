@@ -83,7 +83,7 @@ func (sp *Spinner) SetWidgetValue(value any) error {
 	return nil
 }
 
-func (sp *Spinner) OnBind(value any) {
+func (sp *Spinner) OnBind(value any, tags reflect.StructTag) {
 	kind := reflectx.NonPointerType(reflect.TypeOf(value)).Kind()
 	if kind >= reflect.Int && kind <= reflect.Uintptr {
 		sp.SetStep(1).SetEnforceStep(true)
@@ -91,14 +91,17 @@ func (sp *Spinner) OnBind(value any) {
 			sp.SetMin(0)
 		}
 	}
+	if f, ok := tags.Lookup("format"); ok {
+		sp.SetFormat(f)
+	}
+	setFromTag(tags, "min", func(v float32) { sp.SetMin(v) })
+	setFromTag(tags, "max", func(v float32) { sp.SetMax(v) })
+	setFromTag(tags, "step", func(v float32) { sp.SetStep(v) })
 }
 
 func (sp *Spinner) Init() {
 	sp.TextField.Init()
-	sp.Step = 0.1
-	sp.PageStep = 0.2
-	sp.Max = 1.0
-	sp.Precision = 6
+	sp.SetStep(0.1).SetPageStep(0.2).SetPrecision(4).SetFormat("%g")
 	sp.SetLeadingIcon(icons.Remove, func(e events.Event) {
 		sp.incrementValue(-1)
 	}).SetTrailingIcon(icons.Add, func(e events.Event) {
@@ -112,7 +115,7 @@ func (sp *Spinner) Init() {
 			s.Max.X.Ch(12)
 		} else {
 			s.Min.X.Ch(14)
-			s.Max.X.Ch(18)
+			s.Max.X.Ch(20)
 		}
 		// s.Text.Align = styles.End // this doesn't work
 	})
@@ -275,9 +278,6 @@ func (sp *Spinner) formatIsInt() bool {
 
 // valueToString converts the value to the string representation thereof
 func (sp *Spinner) valueToString(val float32) string {
-	if sp.Format == "" {
-		return fmt.Sprintf("%g", val)
-	}
 	if sp.formatIsInt() {
 		return fmt.Sprintf(sp.Format, int64(val))
 	}

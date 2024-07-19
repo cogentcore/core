@@ -143,8 +143,8 @@ func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) {
 				inClose = false
 				canClose = false
 			})
-			parent.AsWidget().OnWidgetAdded(func(w Widget) {
-				if bt := AsButton(w); bt != nil {
+			parent.AsWidget().SetOnChildAdded(func(n tree.Node) {
+				if bt := AsButton(n); bt != nil {
 					bt.OnFirst(events.Click, func(e events.Event) {
 						// any button click gives us permission to close
 						canClose = true
@@ -296,6 +296,10 @@ func (wb *WidgetBase) handleWidgetClick() {
 			wb.SetFocus()
 		} else {
 			wb.focusClear()
+		}
+		// note: read only widgets are automatically selectable
+		if wb.AbilityIs(abilities.Selectable) || wb.IsReadOnly() {
+			wb.Send(events.Select, e)
 		}
 	})
 }

@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
@@ -43,7 +44,7 @@ var BindTextEditor func(ed *texteditor.Editor, parent core.Widget)
 func New[T tree.NodeValue](ctx *Context) *T {
 	parent := ctx.Parent()
 	w := tree.New[T](parent)
-	ctx.config(any(w).(core.Widget)) // TODO(config): better htmlcore structure with new config paradigm?
+	ctx.config(any(w).(core.Widget)) // TODO: better htmlcore structure with new config paradigm?
 	return w
 }
 
@@ -137,11 +138,11 @@ func handleElement(ctx *Context) {
 				})
 				// we inherit our Grow.Y from our first child so that
 				// elements that want to grow can do so
-				parent.OnWidgetAdded(func(w core.Widget) {
-					wb := w.AsWidget()
-					if _, ok := w.(*core.Body); ok { // Body should not grow
+				parent.SetOnChildAdded(func(n tree.Node) {
+					if _, ok := n.(*core.Body); ok { // Body should not grow
 						return
 					}
+					_, wb := core.AsWidget(n)
 					if wb.IndexInParent() != 0 {
 						return
 					}
@@ -253,14 +254,25 @@ func handleElement(ctx *Context) {
 	}
 }
 
+func textStyler(s *styles.Style) {
+	s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
+	// TODO: it would be ideal for htmlcore to automatically save a scale factor
+	// in general and for each domain, that is applied only to page content
+	// scale := float32(1.2)
+	// s.Font.Size.Value *= scale
+	// s.Text.LineHeight.Value *= scale
+	// s.Text.LetterSpacing.Value *= scale
+}
+
 // handleText creates a new [core.Text] from the given information, setting the text and
 // the text click function so that URLs are opened according to [Context.OpenURL].
 func handleText(ctx *Context) *core.Text {
-	lb := New[core.Text](ctx).SetText(ExtractText(ctx))
-	lb.HandleTextClick(func(tl *paint.TextLink) {
+	tx := New[core.Text](ctx).SetText(ExtractText(ctx))
+	tx.Styler(textStyler)
+	tx.HandleTextClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})
-	return lb
+	return tx
 }
 
 // handleTextTag creates a new [core.Text] from the given information, setting the text and
@@ -271,11 +283,12 @@ func handleText(ctx *Context) *core.Text {
 func handleTextTag(ctx *Context) *core.Text {
 	start, end := nodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
-	lb := New[core.Text](ctx).SetText(str)
-	lb.HandleTextClick(func(tl *paint.TextLink) {
+	tx := New[core.Text](ctx).SetText(str)
+	tx.Styler(textStyler)
+	tx.HandleTextClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})
-	return lb
+	return tx
 }
 
 // getAttr gets the given attribute from the given node, returning ""

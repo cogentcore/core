@@ -10,5 +10,5 @@ import (
 )
 
 func init() {
-	core.AddValueType[slbool.Bool, *core.Switch]()
+	core.AddValueType[slbool.Bool, core.Switch]()
 }

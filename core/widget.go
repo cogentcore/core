@@ -37,8 +37,11 @@ type Widget interface {
 	// core widget functionality is implemented on [WidgetBase].
 	AsWidget() *WidgetBase
 
-	// See [WidgetBase.Style].
-	Style() // TODO(config): remove
+	// Style updates the style properties of the widget based on [WidgetBase.Stylers].
+	// To specify the style properties of a widget, use [WidgetBase.Styler].
+	// Widgets can implement this method if necessary to add additional styling behavior,
+	// such as calling [units.Value.ToDots] on a custom [units.Value] field.
+	Style()
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 	// based on Styles.Min / Max sizes and actual content sizing
@@ -179,13 +182,6 @@ type WidgetBase struct {
 	// and [WidgetBase.OnFinal] functions, or any of the various On{EventType} helper functions.
 	Listeners tiered.Tiered[events.Listeners] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
-	// OnWidgetAdders is a slice of functions called on widgets that are added as
-	// direct children of this widget. These functions are called in sequential
-	// ascending order, so the last added one is called last and thus can
-	// override anything set by the other ones. These should be set using
-	// [WidgetBase.OnWidgetAdded].
-	OnWidgetAdders []func(w Widget) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
-
 	// ContextMenus is a slice of menu functions to call to construct
 	// the widget's context menu on an [events.ContextMenu]. The
 	// functions are called in reverse order such that the elements
@@ -288,6 +284,9 @@ func (wb *WidgetBase) OnAdd() {
 		// the Scene of the Parts may not have been set yet if they were made in Init
 		wb.Parts.Scene = wb.Scene
 	}
+	if wb.Scene != nil && wb.Scene.WidgetInit != nil {
+		wb.Scene.WidgetInit(wb.This.(Widget))
+	}
 }
 
 // setScene sets the Scene pointer for this widget and all of its children.
@@ -298,19 +297,6 @@ func (wb *WidgetBase) setScene(sc *Scene) {
 		kwb.Scene = sc
 		return tree.Continue
 	})
-}
-
-func (wb *WidgetBase) OnChildAdded(child tree.Node) {
-	w := child.(Widget)
-	for _, f := range wb.OnWidgetAdders {
-		f(w)
-	}
-}
-
-// OnWidgetAdded adds a function that is called when a widget is added
-// as a direct child of the widget.
-func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) {
-	wb.OnWidgetAdders = append(wb.OnWidgetAdders, fun)
 }
 
 // AsWidget returns the given [tree.Node]
@@ -428,23 +414,22 @@ func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 	wb.Parts.WalkDown(fun)
 }
 
-// WidgetKidsIter iterates through the Kids, as widgets, calling the given function.
+// ForWidgetChildren iterates through the children as widgets, calling the given function.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) WidgetKidsIter(fun func(i int, w Widget, cwb *WidgetBase) bool) {
+func (wb *WidgetBase) ForWidgetChildren(fun func(i int, w Widget, cwb *WidgetBase) bool) {
 	for i, k := range wb.Children {
 		w, cwb := AsWidget(k)
-		cont := fun(i, w, cwb)
-		if !cont {
+		if !fun(i, w, cwb) {
 			break
 		}
 	}
 }
 
-// VisibleKidsIter iterates through the Kids, as widgets, calling the given function,
+// forVisibleChildren iterates through the children,as widgets, calling the given function,
 // excluding any with the *local* states.Invisible flag set (does not check parents).
 // This is used e.g., for layout functions to exclude non-visible direct children.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) VisibleKidsIter(fun func(i int, w Widget, cwb *WidgetBase) bool) {
+func (wb *WidgetBase) forVisibleChildren(fun func(i int, w Widget, cwb *WidgetBase) bool) {
 	for i, k := range wb.Children {
 		w, cwb := AsWidget(k)
 		if cwb.StateIs(states.Invisible) {
@@ -457,8 +442,7 @@ func (wb *WidgetBase) VisibleKidsIter(fun func(i int, w Widget, cwb *WidgetBase)
 	}
 }
 
-// WidgetWalkDown is a version of [tree.Node.WalkDown] that automatically filters
-// nil or deleted items and operates on [Widget] types.
+// WidgetWalkDown is a version of [tree.NodeBase.WalkDown] that operates on [Widget] types.
 // Return [tree.Continue] to continue and [tree.Break] to terminate.
 func (wb *WidgetBase) WidgetWalkDown(fun func(kwi Widget, kwb *WidgetBase) bool) {
 	wb.WalkDown(func(k tree.Node) bool {

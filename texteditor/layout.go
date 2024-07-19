@@ -7,6 +7,7 @@ package texteditor
 import (
 	"fmt"
 
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -95,16 +96,8 @@ func (ed *Editor) layoutAllLines() {
 	if nln >= len(buf.Markup) {
 		nln = len(buf.Markup)
 	}
-	if cap(ed.renders) >= nln {
-		ed.renders = ed.renders[:nln]
-	} else {
-		ed.renders = make([]paint.Text, nln)
-	}
-	if cap(ed.offsets) >= nln {
-		ed.offsets = ed.offsets[:nln]
-	} else {
-		ed.offsets = make([]float32, nln)
-	}
+	ed.renders = slicesx.SetLength(ed.renders, nln)
+	ed.offsets = slicesx.SetLength(ed.offsets, nln)
 
 	sz := ed.lineLayoutSize
 

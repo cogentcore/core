@@ -18,6 +18,9 @@ import (
 // builtin types into more friendly forms (eg: "int" to "Number").
 func FriendlyTypeName(typ reflect.Type) string {
 	nptyp := reflectx.NonPointerType(typ)
+	if nptyp == nil {
+		return "None"
+	}
 	nm := nptyp.Name()
 
 	// if it is named, we use that

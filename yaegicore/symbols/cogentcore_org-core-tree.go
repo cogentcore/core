@@ -67,7 +67,6 @@ type _cogentcore_org_core_tree_Node struct {
 	WInit           func()
 	WNodeWalkDown   func(fun func(n tree.Node) bool)
 	WOnAdd          func()
-	WOnChildAdded   func(child tree.Node)
 	WPlanName       func() string
 }
 
@@ -78,9 +77,8 @@ func (W _cogentcore_org_core_tree_Node) Init()                         { W.WInit
 func (W _cogentcore_org_core_tree_Node) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_tree_Node) OnAdd()                       { W.WOnAdd() }
-func (W _cogentcore_org_core_tree_Node) OnChildAdded(child tree.Node) { W.WOnChildAdded(child) }
-func (W _cogentcore_org_core_tree_Node) PlanName() string             { return W.WPlanName() }
+func (W _cogentcore_org_core_tree_Node) OnAdd()           { W.WOnAdd() }
+func (W _cogentcore_org_core_tree_Node) PlanName() string { return W.WPlanName() }
 
 // _cogentcore_org_core_tree_NodeValue is an interface wrapper for NodeValue type
 type _cogentcore_org_core_tree_NodeValue struct {

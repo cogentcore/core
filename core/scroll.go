@@ -272,7 +272,11 @@ func (wb *WidgetBase) ScrollToThis() bool {
 // It returns whether scrolling was needed.
 func (fr *Frame) scrollToWidget(w Widget) bool {
 	// note: critical to NOT use BBox b/c it is zero for invisible items!
-	return fr.ScrollToBox(w.AsWidget().Geom.totalRect())
+	box := w.AsWidget().Geom.totalRect()
+	if box.Size() == (image.Point{}) {
+		return false
+	}
+	return fr.ScrollToBox(box)
 }
 
 // autoScrollDim auto-scrolls along one dimension, based on the current
@@ -401,6 +405,17 @@ func (fr *Frame) ScrollDimToStart(d math32.Dims, posi int) bool {
 	return true
 }
 
+// ScrollDimToContentStart is a helper function that scrolls the layout to the
+// start of its content (ie: moves the scrollbar to the very start).
+func (fr *Frame) ScrollDimToContentStart(d math32.Dims) bool {
+	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
+		return false
+	}
+	sb := fr.scrolls[d]
+	sb.setValueEvent(0)
+	return true
+}
+
 // ScrollDimToEnd scrolls to put the given child coordinate position (eg.,
 // bottom / right of a view box) at the end (bottom / right) of our scroll
 // area, to the extent possible. Returns true if scrolling was needed.
@@ -422,8 +437,12 @@ func (fr *Frame) ScrollDimToEnd(d math32.Dims, posi int) bool {
 // ScrollDimToContentEnd is a helper function that scrolls the layout to the
 // end of its content (ie: moves the scrollbar to the very end).
 func (fr *Frame) ScrollDimToContentEnd(d math32.Dims) bool {
-	end := fr.Geom.Pos.Content.Dim(d) + fr.Geom.Size.Internal.Dim(d)
-	return fr.ScrollDimToEnd(d, int(end))
+	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
+		return false
+	}
+	sb := fr.scrolls[d]
+	sb.setValueEvent(sb.effectiveMax())
+	return true
 }
 
 // ScrollDimToCenter scrolls to put the given child coordinate position (eg.,

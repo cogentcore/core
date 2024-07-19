@@ -23,7 +23,7 @@ func main() {
 
 	pl := plotcore.NewPlotEditor(b)
 	pl.Options.Title = "RA25 Epoch Train"
-	pl.Options.XAxisColumn = "Epoch"
+	pl.Options.XAxis = "Epoch"
 	pl.Options.Points = true
 	pl.SetTable(epc)
 	pl.ColumnOptions("UnitErr").On = true

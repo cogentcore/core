@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -141,6 +142,12 @@ func (pl *PlotEditor) SetTable(tab *table.Table) *PlotEditor {
 	return pl
 }
 
+// SetSlice sets the table to a [table.NewSliceTable]
+// from the given slice.
+func (pl *PlotEditor) SetSlice(sl any) *PlotEditor {
+	return pl.SetTable(errors.Log1(table.NewSliceTable(sl)))
+}
+
 // ColumnOptions returns the current column options by name
 // (to access by index, just use Columns directly).
 func (pl *PlotEditor) ColumnOptions(column string) *ColumnOptions {
@@ -245,14 +252,32 @@ func (pl *PlotEditor) xLabel() string {
 	if pl.Options.XAxisLabel != "" {
 		return pl.Options.XAxisLabel
 	}
-	if pl.Options.XAxisColumn != "" {
-		cp := pl.ColumnOptions(pl.Options.XAxisColumn)
+	if pl.Options.XAxis != "" {
+		cp := pl.ColumnOptions(pl.Options.XAxis)
 		if cp != nil {
 			return cp.getLabel()
 		}
-		return pl.Options.XAxisColumn
+		return pl.Options.XAxis
 	}
 	return "X"
+}
+
+// GoUpdatePlot updates the display based on current IndexView into table.
+// This version can be called from goroutines. It does Sequential() on
+// the [table.IndexView], under the assumption that it is used for tracking a
+// the latest updates of a running process.
+func (pl *PlotEditor) GoUpdatePlot() {
+	if pl == nil || pl.This == nil {
+		return
+	}
+	if !pl.IsVisible() || pl.table == nil || pl.table.Table == nil || pl.inPlot {
+		return
+	}
+	pl.Scene.AsyncLock()
+	pl.table.Sequential()
+	pl.genPlot()
+	pl.NeedsRender()
+	pl.Scene.AsyncUnlock()
 }
 
 // UpdatePlot updates the display based on current IndexView into table.
@@ -327,7 +352,7 @@ func (pl *PlotEditor) configPlot(plt *plot.Plot) {
 
 // plotXAxis processes the XAxis and returns its index
 func (pl *PlotEditor) plotXAxis(plt *plot.Plot, ixvw *table.IndexView) (xi int, xview *table.IndexView, err error) {
-	xi, err = ixvw.Table.ColumnIndexTry(pl.Options.XAxisColumn)
+	xi, err = ixvw.Table.ColumnIndexTry(pl.Options.XAxis)
 	if err != nil {
 		// log.Println("plot.PlotXAxis: " + err.Error())
 		return
@@ -367,8 +392,12 @@ func (pl *PlotEditor) columnsListUpdate() {
 	}
 	pl.Columns = make([]*ColumnOptions, nc)
 	clri := 0
+	hasOn := false
 	for ci := range dt.NumColumns() {
 		cn := dt.ColumnName(ci)
+		if pl.Options.XAxis == "" && ci == 0 {
+			pl.Options.XAxis = cn // x-axis defaults to the first column
+		}
 		cp := &ColumnOptions{Column: cn}
 		cp.defaults()
 		tcol := dt.Columns[ci]
@@ -376,15 +405,27 @@ func (pl *PlotEditor) columnsListUpdate() {
 			cp.IsString = true
 		} else {
 			cp.IsString = false
+			// we enable the first non-string, non-x-axis, non-first column by default
+			if !hasOn && cn != pl.Options.XAxis && ci != 0 {
+				cp.On = true
+				hasOn = true
+			}
 		}
 		cp.fromMetaMap(pl.table.Table.MetaData)
 		inc := 1
-		if cn == pl.Options.XAxisColumn || tcol.IsString() || tcol.DataType() == reflect.Int || tcol.DataType() == reflect.Int64 || tcol.DataType() == reflect.Int32 || tcol.DataType() == reflect.Uint8 {
+		if cn == pl.Options.XAxis || tcol.IsString() || tcol.DataType() == reflect.Int || tcol.DataType() == reflect.Int64 || tcol.DataType() == reflect.Int32 || tcol.DataType() == reflect.Uint8 {
 			inc = 0
 		}
 		cp.Color = colors.Uniform(colors.Spaced(clri))
 		pl.Columns[ci] = cp
 		clri += inc
+	}
+}
+
+// ColumnsFromMetaMap updates all the column settings from given meta map
+func (pl *PlotEditor) ColumnsFromMetaMap(meta map[string]string) {
+	for _, cp := range pl.Columns {
+		cp.fromMetaMap(meta)
 	}
 }
 
@@ -397,7 +438,7 @@ func (pl *PlotEditor) setAllColumns(on bool) {
 		}
 		ci := i - plotColumnsHeaderN
 		cp := pl.Columns[ci]
-		if cp.Column == pl.Options.XAxisColumn {
+		if cp.Column == pl.Options.XAxis {
 			continue
 		}
 		cp.On = on
@@ -418,7 +459,7 @@ func (pl *PlotEditor) setColumnsByName(nameContains string, on bool) { //types:a
 		}
 		ci := i - plotColumnsHeaderN
 		cp := pl.Columns[ci]
-		if cp.Column == pl.Options.XAxisColumn {
+		if cp.Column == pl.Options.XAxis {
 			continue
 		}
 		if !strings.Contains(cp.Column, nameContains) {
@@ -437,40 +478,41 @@ func (pl *PlotEditor) setColumnsByName(nameContains string, on bool) { //types:a
 func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 	pl.columnsListUpdate()
 	tree.Add(p, func(w *core.Frame) {
-		w.Styler(func(s *styles.Style) {
-			s.Direction = styles.Row
-			s.Grow.Set(0, 0)
-		})
-		tree.AddChild(w, func(w *core.Switch) {
-			w.SetType(core.SwitchCheckbox).SetTooltip("Toggle off all columns")
-			w.OnChange(func(e events.Event) {
-				w.SetChecked(false)
+		tree.AddChild(w, func(w *core.Button) {
+			w.SetText("Clear").SetIcon(icons.ClearAll).SetType(core.ButtonAction)
+			w.SetTooltip("Turn all columns off")
+			w.OnClick(func(e events.Event) {
 				pl.setAllColumns(false)
 			})
 		})
 		tree.AddChild(w, func(w *core.Button) {
-			w.SetText("Select Columns").SetType(core.ButtonAction).
-				SetTooltip("click to select columns based on column name").
-				OnClick(func(e events.Event) {
-					core.CallFunc(pl, pl.setColumnsByName)
-				})
+			w.SetText("Search").SetIcon(icons.Search).SetType(core.ButtonAction)
+			w.SetTooltip("Select columns by column name")
+			w.OnClick(func(e events.Event) {
+				core.CallFunc(pl, pl.setColumnsByName)
+			})
 		})
 	})
 	tree.Add(p, func(w *core.Separator) {})
 	for _, cp := range pl.Columns {
 		tree.AddAt(p, cp.Column, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
-				s.Direction = styles.Row
-				s.Grow.Set(0, 0)
+				s.CenterAll()
 			})
 			tree.AddChild(w, func(w *core.Switch) {
-				w.SetType(core.SwitchCheckbox).SetTooltip("toggle plot on")
+				w.SetType(core.SwitchCheckbox).SetTooltip("Turn this column on or off")
 				w.OnChange(func(e events.Event) {
-					cp.On = w.StateIs(states.Checked)
+					cp.On = w.IsChecked()
 					pl.UpdatePlot()
 				})
 				w.Updater(func() {
-					w.SetState(cp.On, states.Checked)
+					xaxis := cp.Column == pl.Options.XAxis
+					w.SetState(xaxis, states.Disabled, states.Indeterminate)
+					if xaxis {
+						cp.On = false
+					} else {
+						w.SetChecked(cp.On)
+					}
 				})
 			})
 			tree.AddChild(w, func(w *core.Button) {
@@ -479,19 +521,19 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 					d := core.NewBody().AddTitle("Column options")
 					core.NewForm(d).SetStruct(cp).
 						OnChange(func(e events.Event) {
-							pl.Async(pl.UpdatePlot)
+							pl.GoUpdatePlot()
 						})
 					d.AddAppBar(func(p *tree.Plan) {
 						tree.Add(p, func(w *core.Button) {
-							w.SetText("Set X Axis").OnClick(func(e events.Event) {
-								pl.Options.XAxisColumn = cp.Column
-								pl.UpdatePlot()
+							w.SetText("Set x-axis").OnClick(func(e events.Event) {
+								pl.Options.XAxis = cp.Column
+								pl.GoUpdatePlot()
 							})
 						})
 						tree.Add(p, func(w *core.Button) {
-							w.SetText("Set Legend").OnClick(func(e events.Event) {
-								pl.Options.LegendColumn = cp.Column
-								pl.UpdatePlot()
+							w.SetText("Set legend").OnClick(func(e events.Event) {
+								pl.Options.Legend = cp.Column
+								pl.GoUpdatePlot()
 							})
 						})
 					})
@@ -538,7 +580,7 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 				d := core.NewBody().AddTitle("Plot options")
 				core.NewForm(d).SetStruct(&pl.Options).
 					OnChange(func(e events.Event) {
-						pl.Async(pl.UpdatePlot)
+						pl.GoUpdatePlot()
 					})
 				d.RunWindowDialog(pl)
 			})

@@ -21,65 +21,9 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Rendering logic:
-//
-// Key principles:
-//
-// * Async updates (animation, mouse events, etc) change state, _set only flags_
-//   using thread-safe atomic bitflag operations. True async rendering
-//   is really hard to get right, and requires tons of mutexes etc. Async updates
-//	 must go through [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock].
-// * Synchronous, full-tree render updates do the layout, rendering,
-//   at regular FPS (frames-per-second) rate -- nop unless flag set.
-//
-// Three main steps:
-// * Config: (re)configures widgets based on current params
-//   typically by making Parts.  Always calls ApplyStyle.
-// * Layout: does sizing and positioning on tree, arranging widgets.
-//   Needed for whole tree after any Config changes anywhere
-//   See layout.go for full details and code.
-// * Render: just draws with current config, layout.
-//
-// ApplyStyle is always called after Config, and after any
-// current state of the Widget changes via events, animations, etc
-// (e.g., a Hover started or a Button is pushed down).
-// Use NeedsRender() to drive the rendering update at next DoNeedsRender call.
-//
-// The initial configuration of a scene can skip calling
-// Config and ApplyStyle because these will be called automatically
-// during the Run() process for the Scene.
-//
-// For dynamic reconfiguration after initial display,
-// Update() is the key method, calling Config then
-// ApplyStyle on the node and all of its children.
-//
-// For nodes with dynamic content that doesn't require styling or config,
-// a simple NeedsRender call will drive re-rendering.
-//
-// Updating is _always_ driven top-down by RenderWindow at FPS sampling rate,
-// in the DoUpdate() call on the Scene.
-// Three types of updates can be triggered, in order of least impact
-// and highest frequency first:
-// * ScNeedsRender: does NeedsRender on nodes.
-// * ScNeedsLayout: does GetSize, DoLayout, then Render -- after Config.
-//
-
-// Async calls the given function after [WidgetBase.AsyncLock] and before
-// [WidgetBase.AsyncUnlock]. It should be used when making any updates in
-// a separate goroutine outside of the main configuration, rendering, and
-// event handling structure. If those updates are not contained within a
-// single function, you should call [WidgetBase.AsyncLock] and
-// [WidgetBase.AsyncUnlock] directly instead.
-func (wb *WidgetBase) Async(f func()) {
-	wb.AsyncLock()
-	f()
-	wb.AsyncUnlock()
-}
-
 // AsyncLock must be called before making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
-// It must have a matching [WidgetBase.AsyncUnlock] after it. Also see
-// [WidgetBase.Async].
+// It must have a matching [WidgetBase.AsyncUnlock] after it.
 func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {
@@ -97,8 +41,7 @@ func (wb *WidgetBase) AsyncLock() {
 
 // AsyncUnlock must be called after making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
-// It must have a matching [WidgetBase.AsyncLock] before it. Also see
-// [WidgetBase.Async].
+// It must have a matching [WidgetBase.AsyncLock] before it.
 func (wb *WidgetBase) AsyncUnlock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {
@@ -451,7 +394,7 @@ func (wb *WidgetBase) renderParts() {
 
 // renderChildren renders all of the widget's children.
 func (wb *WidgetBase) renderChildren() {
-	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	wb.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.RenderWidget()
 		return tree.Continue
 	})

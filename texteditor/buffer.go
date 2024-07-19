@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/runes"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/parse"
@@ -425,11 +426,7 @@ func (tb *Buffer) NewBuffer(nlines int) {
 	tb.hiTags = make([]lexer.Line, nlines)
 	tb.Markup = make([][]byte, nlines)
 
-	if cap(tb.byteOffsets) >= nlines {
-		tb.byteOffsets = tb.byteOffsets[:nlines]
-	} else {
-		tb.byteOffsets = make([]int, nlines)
-	}
+	tb.byteOffsets = slicesx.SetLength(tb.byteOffsets, nlines)
 
 	if nlines == 1 { // this is used for a new blank doc
 		tb.byteOffsets[0] = 0 // by definition

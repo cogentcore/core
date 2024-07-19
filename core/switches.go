@@ -85,7 +85,10 @@ func (si *SwitchItem) getText() string {
 func (sw *Switches) WidgetValue() any {
 	if sw.bitFlagValue != nil {
 		sw.bitFlagFromSelected(sw.bitFlagValue)
-		return sw.bitFlagValue
+		// We must return a non-pointer value to prevent [ResetWidgetValue]
+		// from clearing the bit flag value (since we only ever have one
+		// total pointer to it, so it is uniquely vulnerable to being destroyed).
+		return reflectx.Underlying(reflect.ValueOf(sw.bitFlagValue)).Interface()
 	}
 	item := sw.SelectedItem()
 	if item == nil {
@@ -103,7 +106,7 @@ func (sw *Switches) SetWidgetValue(value any) error {
 	return sw.SelectValue(value)
 }
 
-func (sw *Switches) OnBind(value any) {
+func (sw *Switches) OnBind(value any, tags reflect.StructTag) {
 	if e, ok := value.(enums.Enum); ok {
 		sw.SetEnum(e).SetType(SwitchSegmentedButton).SetMutex(true)
 	}

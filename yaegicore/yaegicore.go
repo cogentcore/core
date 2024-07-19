@@ -19,14 +19,12 @@ import (
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/yaegicore/symbols"
 	"github.com/cogentcore/yaegi/interp"
-	"github.com/cogentcore/yaegi/stdlib"
 )
 
 var autoPlanNameCounter uint64
 
 func init() {
 	htmlcore.BindTextEditor = BindTextEditor
-	delete(stdlib.Symbols, "errors/errors")           // we have our own errors package
 	symbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
 }
 
@@ -44,7 +42,6 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 		symbols.Symbols["cogentcore.org/core/tree/tree"]["AutoPlanName"] = reflect.ValueOf(func(int) string {
 			return fmt.Sprintf("yaegi-%v", atomic.AddUint64(&autoPlanNameCounter, 1))
 		})
-		errors.Log(in.Use(stdlib.Symbols))
 		errors.Log(in.Use(symbols.Symbols))
 		in.ImportUsed()
 

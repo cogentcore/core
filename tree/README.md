@@ -1,10 +1,8 @@
-# Trees in Go
+# Tree
 
 The **Tree** is one of the most flexible, widely used data structures in programming, including the DOM structure at the core of a web browser, scene graphs for 3D and 2D graphics systems, JSON, XML, SVG, filesystems, programs themselves, etc.  This is because trees can capture most relevant forms of *structure* (hierarchical groupings, categories, relationships, etc) and are most powerful when they are fully *generative* -- arbitrary new types can be inserted flexibly.
 
 Cogent Core provides a general-purpose tree container type, that can support all of these applications, by embedding and extending the `NodeBase` struct type that implements the `Node` `interface`.  Unlike many cases in Go, the need to be able to arbitrarily extend the type space of nodes in the tree within a consistent API, means that the more traditional object-oriented model works best here, with a single common base type, and derived types that handle diverse cases (e.g., different types of widgets in a GUI).  Cogent Core stores a `Node` interface of each node, enabling correct virtual function calling on these derived types.
-
-A virtue of using an appropriate data representation is that some important operations can be performed particularly concisely and efficiently when they are naturally supported by the data structure.  For example, matrices and vectors as supported by numpy or MATLAB provide a concise high-level language for expressing many algorithms.
 
 In addition, Cogent Core provides functions that traverse the tree in the usual relevant ways and take a `func` function argument, so you can easily apply a common operation across the whole tree in a transparent and self-contained manner, like this:
 
@@ -20,42 +18,20 @@ func (mn *MyNode) DoSomethingOnMyTree() {
 
 Many operations are naturally expressed in terms of these traversal algorithms.
 
-In addition, the `ConfigChildren` function is particularly useful.  It uses a list of types and names and performs a minimal, efficient update of the children of a node to configure them to match (including no changes if already configured accordingly).  This is used during loading from JSON, and extensively in the `Cogent Core` GUI system to efficiently re-use existing tree elements.  There is often complex logic to determine what elements need to be present in a Widget, so separating that out from then configuring the elements that actually are present is efficient and simplifies the code.
+## Making a Plan for the Tree
 
-## Cogent Core Graphical Interface
+The `tree` package implements an efficient mechanism for dynamically updating the tree contents, based on creating a `tree.Plan` that specifies the desired elements of the tree, and functions to make and initialize new nodes when they are needed. The [base/plan](../base/plan) package implements the `Update` function that performs the minimal additions and deletions to update the current state of the tree to match the specified Plan.
 
-The first and most important application of `tree` is the Cogent Core graphical interface system, in the [core](../core) package.  The scene graph of tree elements automatically drives minimal refresh updates, allowing Cogent Core to provide a complete interactive GUI environment in native Go, in a compact codebase.
+The `NodeBase` contains a set of `Makers` functions that are called to create the Plan and define its functions, as well as a set of `Updaters` that are called for all elements when `Update` is called.  Together, these allow significant flexibility in creating efficient, dynamically updatable trees.
 
-The [parse](../parse) interactive parsing framework also leverages Cogent Core trees to represent the AST (abstract syntax tree) of programs in different languages.  Further, the parser grammar itself is written (in a GUI interactive way) as a tree of parsing elements using tree nodes.
+In the Cogent Core GUI context, this infrastructure provides a more efficient and effective alternative to the _declarative_ paradigm used in many other GUI frameworks, where the _entire_ new desired state of the GUI is constructed at _every update_, and then a generic "diff"-like algorithm compares that state with the current and drives the necessary updates.  This is typically extremely wasteful in terms of unnecessary memory and processing churn, and also creates problems tracking the current active state of elements.
 
-## Examples
+By contrast, the Plan-based mechanism does the diff only on unique names of each element in the tree, and calls closure functions to configure and update any new elements as needed, instead of running such functions for every single element even when unnecessary.
 
-See `node_test.go` for lots of simple usage examples.
+## Fast finding in a slice
 
-## Trick for fast finding in a slice
+Several tree methods take an optional `startIndex` argument that is used by the generic [base/slicesx](../base/slicesx) `Search` algorithm to search for the item starting at that index, looking up and down from that starting point.  Thus, if you have any idea where the item might be in the list, it can save (considerable for large lists) time finding it.
 
-Cogent Core takes an extra starting index arg for all methods that lookup a value in a slice, such as ChildByName.  The search for the item starts at that index, and goes up and down from there.  Thus, if you have any idea where the item might be in the list, it can save (considerable for large lists) time finding it.
+The `IndexInParent()` method uses this trick, using the cached `NodeBase.index` value, so it is very fast in general, while also robust to dynamically changing trees.
 
-The `IndexInParent()` method uses this trick, using the cached `Node.index` value.
 
-Here's example code for a separate Find method where the indexes are stored in a map:
-
-```Go
-// FindByName finds item by name, using cached indexes for speed
-func (ob *Obj) FindByName(nm string) *Obj {
-	if sv.FindIndexes == nil {
-		ob.FindIndexes = make(map[string]int) // field on object
-	}
-	idx, has := ob.FindIndexes[nm]
-	if !has {
-		idx = len(ob.Kids) / 2 // start in middle first time
-	}
-	idx, has = ob.Kids.IndexByName(nm, idx)
-	if has {
-		ob.FindIndexes[nm] = idx
-		return ob.Kids[idx].(*Obj)
-  	}
-	delete(ob.FindIndexes, nm) // must have been deleted
-	return nil
-}
-```

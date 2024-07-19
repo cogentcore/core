@@ -57,13 +57,13 @@ type PlotOptions struct { //types:add
 
 	// what column to use for the common X axis. if empty or not found,
 	// the row number is used.  This optional for Bar plots, if present and
-	// LegendColumn is also present, then an extra space will be put between X values.
-	XAxisColumn string
+	// Legend is also present, then an extra space will be put between X values.
+	XAxis string
 
 	// optional column for adding a separate colored / styled line or bar
 	// according to this value, and acts just like a separate Y variable,
 	// crossed with Y variables.
-	LegendColumn string
+	Legend string
 
 	// position of the Legend
 	LegendPosition plot.LegendPosition `display:"inline"`
@@ -95,7 +95,7 @@ func (po *PlotOptions) defaults() {
 
 // fromMeta sets plot options from meta data.
 func (po *PlotOptions) fromMeta(dt *table.Table) {
-	po.fromMetaMap(dt.MetaData)
+	po.FromMetaMap(dt.MetaData)
 }
 
 // metaMapLower tries meta data access by lower-case version of key too
@@ -108,8 +108,8 @@ func metaMapLower(meta map[string]string, key string) (string, bool) {
 	return vl, has
 }
 
-// fromMetaMap sets plot options from meta data map.
-func (po *PlotOptions) fromMetaMap(meta map[string]string) {
+// FromMetaMap sets plot options from meta data map.
+func (po *PlotOptions) FromMetaMap(meta map[string]string) {
 	if typ, has := metaMapLower(meta, "Type"); has {
 		po.Type.SetString(typ)
 	}
@@ -146,11 +146,11 @@ func (po *PlotOptions) fromMetaMap(meta map[string]string) {
 	if scl, has := metaMapLower(meta, "Scale"); has {
 		po.Scale, _ = reflectx.ToFloat32(scl)
 	}
-	if xc, has := metaMapLower(meta, "XAxisColumn"); has {
-		po.XAxisColumn = xc
+	if xc, has := metaMapLower(meta, "XAxis"); has {
+		po.XAxis = xc
 	}
-	if lc, has := metaMapLower(meta, "LegendColumn"); has {
-		po.LegendColumn = lc
+	if lc, has := metaMapLower(meta, "Legend"); has {
+		po.Legend = lc
 	}
 	if xrot, has := metaMapLower(meta, "XAxisRotation"); has {
 		po.XAxisRotation, _ = reflectx.ToFloat32(xrot)

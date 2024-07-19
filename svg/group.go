@@ -7,6 +7,7 @@ package svg
 import (
 	"image"
 
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 )
 
@@ -77,7 +78,7 @@ func (g *Group) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
 func (g *Group) WriteGeom(sv *SVG, dat *[]float32) {
-	SetFloat32SliceLen(dat, 6)
+	*dat = slicesx.SetLength(*dat, 6)
 	g.WriteTransform(*dat, 0)
 }
 

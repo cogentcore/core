@@ -114,9 +114,9 @@ func (hs *Styles) SaveJSON(filename core.Filename) error { //types:add
 	return err
 }
 
-// SettingsStylesFilename is the name of the preferences file in App prefs
+// SettingsStylesFilename is the name of the preferences file in App data
 // directory for saving / loading the custom styles
-var SettingsStylesFilename = "hi_styles.json"
+var SettingsStylesFilename = "highlighting.json"
 
 // StylesChanged is used for gui updating while editing
 var StylesChanged = false
@@ -141,7 +141,7 @@ func (hs *Styles) SaveSettings() error {
 // SaveAll saves all styles individually to chosen directory
 func (hs *Styles) SaveAll(dir core.Filename) {
 	for nm, st := range *hs {
-		fnm := filepath.Join(string(dir), nm+".histy")
+		fnm := filepath.Join(string(dir), nm+".highlighting")
 		st.SaveJSON(core.Filename(fnm))
 	}
 }

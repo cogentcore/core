@@ -8,6 +8,8 @@ package convolve
 
 import (
 	"errors"
+
+	"cogentcore.org/core/base/slicesx"
 )
 
 // Slice32 convolves given kernel with given source slice, putting results in
@@ -31,13 +33,7 @@ func Slice32(dest *[]float32, src []float32, kern []float32) error {
 		return errors.New("convolve.Slice32: source must be > kernel in size")
 	}
 	khalf := (ksz - 1) / 2
-	if len(*dest) != sz {
-		if cap(*dest) >= sz {
-			*dest = (*dest)[:sz]
-		} else {
-			*dest = make([]float32, sz)
-		}
-	}
+	*dest = slicesx.SetLength(*dest, sz)
 	for i := khalf; i < sz-khalf; i++ {
 		var sum float32
 		for j := 0; j < ksz; j++ {
@@ -92,13 +88,7 @@ func Slice64(dest *[]float64, src []float64, kern []float64) error {
 		return errors.New("convolve.Slice64: source must be > kernel in size")
 	}
 	khalf := (ksz - 1) / 2
-	if len(*dest) != sz {
-		if cap(*dest) >= sz {
-			*dest = (*dest)[:sz]
-		} else {
-			*dest = make([]float64, sz)
-		}
-	}
+	*dest = slicesx.SetLength(*dest, sz)
 	for i := khalf; i < sz-khalf; i++ {
 		var sum float64
 		for j := 0; j < ksz; j++ {

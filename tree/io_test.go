@@ -88,7 +88,7 @@ func BenchmarkNodeUnmarshalJSON(b *testing.B) {
 	}
 }
 
-/* TODO(config): add back tree xml support
+/* TODO: add back tree xml support
 func TestNodeXML(t *testing.T) {
 	parent := testNodeTree()
 

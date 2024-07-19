@@ -42,11 +42,10 @@ var (
 type App struct { //types:add -setters
 	system.App `set:"-"`
 
-	// SceneConfig is the function called on every newly created [Scene]
-	// to configure it, if it is non-nil. This can be used to set global
-	// configuration and styling for all widgets using the OnWidgetAdded
-	// method.
-	SceneConfig func(sc *Scene)
+	// SceneInit is a function called on every newly created [Scene].
+	// This can be used to set global configuration and styling for all
+	// widgets in conjunction with [Scene.WidgetInit].
+	SceneInit func(sc *Scene) `edit:"-"`
 }
 
 // appIconImagesCache is a cached version of [appIconImages].

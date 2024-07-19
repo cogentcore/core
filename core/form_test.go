@@ -8,6 +8,9 @@ import (
 	"testing"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/states"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,16 +51,25 @@ func TestFormChange(t *testing.T) {
 
 	n := 0
 	value := person{}
-	sv := NewForm(b).SetStruct(&p)
-	sv.OnChange(func(e events.Event) {
+	fm := NewForm(b).SetStruct(&p)
+	fm.OnChange(func(e events.Event) {
 		n++
 		value = p
 	})
 	b.AssertRender(t, "form/change", func() {
 		// [3] is value of second row, which is Age
-		sv.Child(3).(*Spinner).leadingIconButton.Send(events.Click)
+		fm.Child(3).(*Spinner).leadingIconButton.Send(events.Click)
 		assert.Equal(t, 1, n)
 		assert.Equal(t, p, value)
 		assert.Equal(t, person{Name: "Go", Age: 34}, p)
 	})
+}
+
+func TestFormStyle(t *testing.T) {
+	b := NewBody()
+	s := styles.NewStyle()
+	s.SetState(true, states.Active)
+	s.SetAbilities(true, abilities.Checkable)
+	NewForm(b).SetStruct(s)
+	b.AssertRender(t, "form/style")
 }

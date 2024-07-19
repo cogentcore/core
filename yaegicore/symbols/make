@@ -1,5 +1,7 @@
 #!/usr/bin/env cosh
 
+yaegi extract fmt strconv strings image image/color image/draw time log/slog reflect
+
 command extract {
     for _, pkg := range args {
         yaegi extract {"cogentcore.org/core/"+pkg}

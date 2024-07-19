@@ -10,6 +10,7 @@ import (
 	"log"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"golang.org/x/image/draw"
@@ -164,7 +165,7 @@ func (g *Image) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
 func (g *Image) WriteGeom(sv *SVG, dat *[]float32) {
-	SetFloat32SliceLen(dat, 4+6)
+	*dat = slicesx.SetLength(*dat, 4+6)
 	(*dat)[0] = g.Pos.X
 	(*dat)[1] = g.Pos.Y
 	(*dat)[2] = g.Size.X

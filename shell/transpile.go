@@ -50,6 +50,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	ewords, err := ExecWords(ln)
 	if err != nil {
 		sh.AddError(err)
+		return nil
 	}
 	logx.PrintlnDebug("\n########## line:\n", ln, "\nTokens:\n", toks.String(), "\nWords:\n", ewords)
 
@@ -167,6 +168,9 @@ func (sh *Shell) TranspileGo(toks Tokens) Tokens {
 // from a backtick-encoded string, with the given bool indicating
 // whether [Output] is needed.
 func (sh *Shell) TranspileExecString(str string, output bool) Tokens {
+	if len(str) <= 1 {
+		return nil
+	}
 	ewords, err := ExecWords(str[1 : len(str)-1]) // enclosed string
 	if err != nil {
 		sh.AddError(err)

@@ -28,8 +28,8 @@ func StyleMenuScene(msc *Scene) {
 		s.BoxShadow = styles.BoxShadow2()
 		s.Gap.Zero()
 	})
-	msc.OnWidgetAdded(func(w Widget) {
-		if bt := AsButton(w); bt != nil {
+	msc.SetOnChildAdded(func(n tree.Node) {
+		if bt := AsButton(n); bt != nil {
 			bt.Type = ButtonMenu
 			bt.OnKeyChord(func(e events.Event) {
 				kf := keymap.Of(e.KeyChord())
@@ -48,7 +48,7 @@ func StyleMenuScene(msc *Scene) {
 			})
 			return
 		}
-		if sp, ok := w.(*Separator); ok {
+		if sp, ok := n.(*Separator); ok {
 			sp.Styler(func(s *styles.Style) {
 				s.Direction = styles.Row
 			})

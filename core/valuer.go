@@ -60,7 +60,7 @@ func NewValue(value any, tags reflect.StructTag, parent ...tree.Node) Value {
 	if tags != "" {
 		styleFromTags(vw, tags)
 	}
-	Bind(value, vw)
+	Bind(value, vw, string(tags))
 	if len(parent) > 0 {
 		parent[0].AsTree().AddChild(vw)
 	}
@@ -86,7 +86,7 @@ func toValue(value any, tags reflect.StructTag) Value {
 	}
 	uv := reflectx.Underlying(rv)
 	if !uv.IsValid() {
-		return toValue(reflect.New(rv.Type()).Interface(), tags)
+		return NewText()
 	}
 	typ := uv.Type()
 	if vwt, ok := ValueTypes[types.TypeName(typ)]; ok {
@@ -122,13 +122,7 @@ func toValue(value any, tags reflect.StructTag) Value {
 		if _, ok := value.(fmt.Stringer); ok {
 			return NewTextField()
 		}
-		sp := NewSpinner()
-		if f, ok := tags.Lookup("format"); ok {
-			sp.SetFormat(f)
-		} else if kind == reflect.Uintptr {
-			sp.SetFormat("%#x")
-		}
-		return sp
+		return NewSpinner()
 	case kind == reflect.Bool:
 		return NewSwitch()
 	case kind == reflect.Struct:

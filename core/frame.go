@@ -186,7 +186,7 @@ func (fr *Frame) RenderChildren() {
 		}
 		return
 	}
-	fr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.RenderWidget()
 		return tree.Continue
 	})
@@ -212,7 +212,7 @@ func (fr *Frame) childWithFocus() (Widget, int) {
 	}
 	var foc Widget
 	focIndex := -1
-	fr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		if kwb.ContainsFocus() {
 			foc = kwi
 			focIndex = i

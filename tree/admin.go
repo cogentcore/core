@@ -66,7 +66,9 @@ func SetParent(child Node, parent Node) {
 	nb.Parent = parent.AsTree().This
 	setUniqueName(child, false)
 	child.AsTree().This.OnAdd()
-	nb.Parent.OnChildAdded(child)
+	if oca := nb.Parent.AsTree().OnChildAdded; oca != nil {
+		oca(child)
+	}
 }
 
 // MoveToParent removes the given node from its current parent

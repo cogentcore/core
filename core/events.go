@@ -758,6 +758,9 @@ func (em *Events) dragMove(e events.Event) {
 		return
 	}
 	sp.Geom.Pos = e.WindowPos()
+	for _, w := range em.dragHovers {
+		w.AsWidget().ScrollToThis()
+	}
 	em.scene.NeedsRender()
 }
 

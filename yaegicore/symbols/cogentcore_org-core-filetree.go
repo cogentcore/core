@@ -73,7 +73,6 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WMimeData          func(md *mimedata.Mimes)
 	WNodeWalkDown      func(fun func(n tree.Node) bool)
 	WOnAdd             func()
-	WOnChildAdded      func(child tree.Node)
 	WOnClose           func()
 	WOnOpen            func()
 	WPaste             func()
@@ -120,7 +119,6 @@ func (W _cogentcore_org_core_filetree_Filer) NodeWalkDown(fun func(n tree.Node) 
 	W.WNodeWalkDown(fun)
 }
 func (W _cogentcore_org_core_filetree_Filer) OnAdd()                         { W.WOnAdd() }
-func (W _cogentcore_org_core_filetree_Filer) OnChildAdded(child tree.Node)   { W.WOnChildAdded(child) }
 func (W _cogentcore_org_core_filetree_Filer) OnClose()                       { W.WOnClose() }
 func (W _cogentcore_org_core_filetree_Filer) OnOpen()                        { W.WOnOpen() }
 func (W _cogentcore_org_core_filetree_Filer) Paste()                         { W.WPaste() }

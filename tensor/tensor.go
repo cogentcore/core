@@ -225,20 +225,3 @@ func CopyDense(to Tensor, dm *mat.Dense) {
 		}
 	}
 }
-
-// SetSliceLength is a utility function to set given slice to given length,
-// reusing existing where possible and making a new one as needed.
-func SetSliceLength[S ~[]E, E any](s S, sz int) S {
-	switch {
-	case len(s) == sz:
-	case len(s) < sz:
-		if cap(s) >= sz {
-			s = (s)[:sz]
-		} else {
-			s = make([]E, sz)
-		}
-	default:
-		s = s[:sz]
-	}
-	return s
-}

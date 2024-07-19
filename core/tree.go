@@ -164,7 +164,7 @@ type Tree struct {
 	inOpen bool
 
 	// Branch is the branch widget that is used to open and close the tree node.
-	Branch *Switch `json:"-" xml:"-" copier:"-" set:"-"`
+	Branch *Switch `json:"-" xml:"-" copier:"-" set:"-" display:"-"`
 }
 
 // AsCoreTree satisfies the [Treer] interface.
@@ -172,11 +172,9 @@ func (tr *Tree) AsCoreTree() *Tree {
 	return tr
 }
 
-// RootSetViewIndex sets the RootView and ViewIndex for all nodes.
-// This must be called from the root node after
-// construction or any modification to the tree.
-// Returns the total number of leaves in the tree.
-func (tr *Tree) RootSetViewIndex() int {
+// rootSetViewIndex sets the [Tree.root] and [Tree.viewIndex] for all nodes.
+// It returns the total number of leaves in the tree.
+func (tr *Tree) rootSetViewIndex() int {
 	idx := 0
 	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		tvn := AsTree(wi)
@@ -529,12 +527,12 @@ func (tr *Tree) SizeUp() {
 	h := tr.widgetSize.Y
 	w := tr.widgetSize.X
 	if tr.root.This == tr.This { // do it every time on root
-		tr.root.RootSetViewIndex()
+		tr.root.rootSetViewIndex()
 	}
 
 	if !tr.Closed {
 		// we layout children under us
-		tr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		tr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeUp()
 			h += kwb.Geom.Size.Actual.Total.Y
 			kw := kwb.Geom.Size.Actual.Total.X
@@ -576,7 +574,7 @@ func (tr *Tree) Position() {
 
 	if !tr.Closed {
 		h := tr.widgetSize.Y
-		tr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		tr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwb.Geom.RelPos.Y = h
 			kwb.Geom.RelPos.X = tr.Indent.Dots
 			h += kwb.Geom.Size.Actual.Total.Y
