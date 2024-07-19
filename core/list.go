@@ -754,12 +754,10 @@ func (lb *ListBase) NewAt(idx int) {
 		reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
 		svnp.Index(idx).Set(nval)
 	}
-	svnp.Set(svnp)
+	lb.sliceUnderlying.Set(svnp)
 	if idx < 0 {
 		idx = sz
 	}
-
-	lb.sliceUnderlying = reflectx.NonPointerValue(reflect.ValueOf(lb.Slice)) // need to update after changes
 
 	lb.This.(Lister).UpdateSliceSize()
 
