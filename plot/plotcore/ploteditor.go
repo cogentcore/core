@@ -518,28 +518,33 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 			tree.AddChild(w, func(w *core.Button) {
 				w.SetText(cp.Column).SetType(core.ButtonAction).SetTooltip("Edit column options including setting it as the x-axis or legend")
 				w.OnClick(func(e events.Event) {
+					update := func() {
+						if core.TheApp.Platform().IsMobile() {
+							pl.Update()
+							return
+						}
+						// we must be async on multi-window platforms since
+						// it is coming from a separate window
+						pl.AsyncLock()
+						pl.Update()
+						pl.AsyncUnlock()
+					}
 					d := core.NewBody().AddTitle("Column options")
 					core.NewForm(d).SetStruct(cp).
 						OnChange(func(e events.Event) {
-							pl.AsyncLock()
-							pl.Update()
-							pl.AsyncUnlock()
+							update()
 						})
 					d.AddAppBar(func(p *tree.Plan) {
 						tree.Add(p, func(w *core.Button) {
 							w.SetText("Set x-axis").OnClick(func(e events.Event) {
-								pl.AsyncLock()
 								pl.Options.XAxis = cp.Column
-								pl.Update()
-								pl.AsyncUnlock()
+								update()
 							})
 						})
 						tree.Add(p, func(w *core.Button) {
 							w.SetText("Set legend").OnClick(func(e events.Event) {
-								pl.AsyncLock()
 								pl.Options.Legend = cp.Column
-								pl.Update()
-								pl.AsyncUnlock()
+								update()
 							})
 						})
 					})
