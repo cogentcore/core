@@ -506,7 +506,7 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 					pl.UpdatePlot()
 				})
 				w.Updater(func() {
-					xaxis := cp.Column == pl.Options.XAxis
+					xaxis := cp.Column == pl.Options.XAxis || cp.Column == pl.Options.Legend
 					w.SetState(xaxis, states.Disabled, states.Indeterminate)
 					if xaxis {
 						cp.On = false
@@ -521,19 +521,25 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 					d := core.NewBody().AddTitle("Column options")
 					core.NewForm(d).SetStruct(cp).
 						OnChange(func(e events.Event) {
-							pl.GoUpdatePlot()
+							pl.AsyncLock()
+							pl.Update()
+							pl.AsyncUnlock()
 						})
 					d.AddAppBar(func(p *tree.Plan) {
 						tree.Add(p, func(w *core.Button) {
 							w.SetText("Set x-axis").OnClick(func(e events.Event) {
+								pl.AsyncLock()
 								pl.Options.XAxis = cp.Column
-								pl.GoUpdatePlot()
+								pl.Update()
+								pl.AsyncUnlock()
 							})
 						})
 						tree.Add(p, func(w *core.Button) {
 							w.SetText("Set legend").OnClick(func(e events.Event) {
+								pl.AsyncLock()
 								pl.Options.Legend = cp.Column
-								pl.GoUpdatePlot()
+								pl.Update()
+								pl.AsyncUnlock()
 							})
 						})
 					})
