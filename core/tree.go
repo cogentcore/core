@@ -425,9 +425,7 @@ func (tr *Tree) Init() {
 				// we are receiving it, not just our parent
 				s.StateLayer *= 3
 			} else {
-				// no state layer and abilities for indeterminate because they
-				// are not interactive
-				s.StateLayer = 0
+				// no abilities for indeterminate because they are not interactive
 				s.Abilities = 0
 			}
 		})
