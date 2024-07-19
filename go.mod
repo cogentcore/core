@@ -10,7 +10,7 @@ require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/aymerick/douceur v0.2.0
 	github.com/bramvdbogaerde/go-scp v1.4.0
-	github.com/chewxy/math32 v1.10.1
+	github.com/chewxy/math32 v1.10.2-0.20240509203351-7caa3bba2ee1
 	github.com/cogentcore/yaegi v0.0.0-20240714043945-dadb98936955
 	github.com/coreos/go-oidc/v3 v3.10.0
 	github.com/ergochat/readline v0.1.0
