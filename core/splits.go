@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/slicesx"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -128,6 +129,7 @@ func (sl *Splits) Init() {
 				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
+				s.Background = colors.Scheme.Select.Container
 			})
 		}
 	})
@@ -422,25 +424,26 @@ func (sl *Splits) splitValue(idx int) float32 {
 	for i, t := range sl.Tiles {
 		tn := tileNumElements[t]
 		if idx < ci || idx >= ci+tn {
+			ci += tn
 			continue
 		}
 		ri := idx - ci
 		switch t {
 		case TileSpan:
-			return sl.Splits[idx]
+			return sl.Splits[ri]
 		case TileSplit:
 			return sl.SubSplits[i][ri]
 		case TileFirstLong:
 			if ri == 0 {
 				return sl.SubSplits[i][0]
 			} else {
-				return sl.SubSplits[i][2+ri]
+				return sl.SubSplits[i][2+ri-1]
 			}
 		case TileSecondLong:
 			if ri == 2 {
 				return sl.SubSplits[i][0]
 			} else {
-				return sl.SubSplits[i][ri]
+				return sl.SubSplits[i][2+ri-1]
 			}
 		}
 		ci += tn
@@ -449,9 +452,35 @@ func (sl *Splits) splitValue(idx int) float32 {
 }
 
 // isCollapsed returns true if the split proportion
-// for given child index is 0
+// for given child index is 0.  Also checks the overall tile
+// splits for the child.
 func (sl *Splits) isCollapsed(idx int) bool {
-	return sl.splitValue(idx) < 0.01
+	if sl.splitValue(idx) < 0.01 {
+		return true
+	}
+	ci := 0
+	for i, t := range sl.Tiles {
+		tn := tileNumElements[t]
+		if idx < ci || idx >= ci+tn {
+			ci += tn
+			continue
+		}
+		ri := idx - ci
+		if sl.Splits[i] < 0.01 {
+			return true
+		}
+		switch t {
+		case TileFirstLong:
+			if ri > 0 && sl.SubSplits[i][1] < 0.01 {
+				return true
+			}
+		case TileSecondLong:
+			if ri < 2 && sl.SubSplits[i][1] < 0.01 {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // setSplit sets the new splitter value, for given splitter.
@@ -656,12 +685,7 @@ func (sl *Splits) Position() {
 func (sl *Splits) RenderWidget() {
 	if sl.PushBounds() {
 		sl.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-			sp := sl.Splits[i]
-			if sp <= 0.01 {
-				kwb.SetState(true, states.Invisible)
-			} else {
-				kwb.SetState(false, states.Invisible)
-			}
+			kwb.SetState(sl.isCollapsed(i), states.Invisible)
 			kwi.RenderWidget()
 			return tree.Continue
 		})

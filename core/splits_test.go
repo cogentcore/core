@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 )
 
 func TestSplits(t *testing.T) {
@@ -71,4 +72,19 @@ func TestMixedVerticalSplits(t *testing.T) {
 	NewText(sp).SetText(txt)
 	NewText(b).SetText(txt)
 	b.AssertRender(t, "splits/mixed-vertical")
+}
+
+func TestSplitsTiles1(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Em(40))
+	})
+	sp := NewSplits(b)
+	NewText(NewFrame(sp)).SetText("First")
+	NewText(NewFrame(sp)).SetText("Second")
+	NewText(NewFrame(sp)).SetText("Third")
+	NewText(NewFrame(sp)).SetText("Fourth")
+	sp.SetTiles(TileSpan, TileFirstLong)
+
+	b.AssertRender(t, "splits/tiles1")
 }
