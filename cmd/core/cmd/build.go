@@ -41,7 +41,7 @@ func Build(c *config.Config) error { //types:add
 			return mobile.Build(c)
 		}
 		if platform.OS == "web" {
-			err := os.MkdirAll(filepath.Join("bin", "web"), 0777)
+			err := os.MkdirAll(c.Build.Output, 0777)
 			if err != nil {
 				return err
 			}
@@ -75,7 +75,7 @@ func buildDesktop(c *config.Config, platform config.Platform) error {
 		// tags = append(tags, "-ldflags", "-H=windowsgui")
 	}
 	ldflags += " " + config.LinkerFlags(c)
-	tags = append(tags, "-ldflags", ldflags, "-o", output)
+	tags = append(tags, "-ldflags", ldflags, "-o", filepath.Join(c.Build.Output, output))
 
 	err := xc.Run("go", tags...)
 	if err != nil {

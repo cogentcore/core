@@ -106,12 +106,12 @@ func goAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		return nil, err
 	}
 
-	err = os.MkdirAll(filepath.Join("bin", "android"), 0777)
+	err = os.MkdirAll(c.Build.Output, 0777)
 	if err != nil {
 		return nil, err
 	}
 	var out io.Writer
-	f, err := os.Create(filepath.Join("bin", "android", c.Name+".apk"))
+	f, err := os.Create(filepath.Join(c.Build.Output, c.Name+".apk"))
 	if err != nil {
 		return nil, err
 	}
