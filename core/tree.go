@@ -425,8 +425,10 @@ func (tr *Tree) Init() {
 				// we are receiving it, not just our parent
 				s.StateLayer *= 3
 			} else {
-				// no state layer for indeterminate because they are not interactive
+				// no state layer and abilities for indeterminate because they
+				// are not interactive
 				s.StateLayer = 0
+				s.Abilities = 0
 			}
 		})
 		w.OnClick(func(e events.Event) {
