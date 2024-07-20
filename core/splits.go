@@ -5,7 +5,6 @@
 package core
 
 import (
-	"fmt"
 	"log/slog"
 	"strconv"
 	"strings"
@@ -224,14 +223,15 @@ func (sl *Splits) SetSplits(splits ...float32) *Splits {
 		return sl
 	}
 	for i, sp := range splits {
-		sl.setChildSplit(i, sp)
+		sl.SetSplit(i, sp)
 	}
 	return sl
 }
 
-// setChildSplit sets the split specific to given child index.
-// also updates other split values in proportion.
-func (sl *Splits) setChildSplit(idx int, val float32) {
+// SetSplit sets the split proportion of relevant display width
+// specific to given child index.  Also updates other split values
+// in proportion.
+func (sl *Splits) SetSplit(idx int, val float32) {
 	ci := 0
 	for i, t := range sl.Tiles {
 		tn := tileNumElements[t]
@@ -266,6 +266,83 @@ func (sl *Splits) setChildSplit(idx int, val float32) {
 		}
 		ci += tn
 	}
+}
+
+// Splits returns the split proportion for each child element.
+func (sl *Splits) Splits() []float32 {
+	nc := len(sl.Children)
+	sv := make([]float32, nc)
+	for i := range nc {
+		sv[i] = sl.Split(i)
+	}
+	return sv
+}
+
+// Split returns the split proportion for given child index
+func (sl *Splits) Split(idx int) float32 {
+	ci := 0
+	for i, t := range sl.Tiles {
+		tn := tileNumElements[t]
+		if idx < ci || idx >= ci+tn {
+			ci += tn
+			continue
+		}
+		ri := idx - ci
+		switch t {
+		case TileSpan:
+			return sl.TileSplits[i]
+		case TileSplit:
+			return sl.SubSplits[i][ri]
+		case TileFirstLong:
+			if ri == 0 {
+				return sl.SubSplits[i][0]
+			} else {
+				return sl.SubSplits[i][1+ri]
+			}
+		case TileSecondLong:
+			if ri == 2 {
+				return sl.SubSplits[i][1]
+			} else {
+				return sl.SubSplits[i][2+ri]
+			}
+		}
+		ci += tn
+	}
+	return 0
+}
+
+// ChildIsCollapsed returns true if the split proportion
+// for given child index is 0.  Also checks the overall tile
+// splits for the child.
+func (sl *Splits) ChildIsCollapsed(idx int) bool {
+	if sl.Split(idx) < 0.01 {
+		return true
+	}
+	ci := 0
+	for i, t := range sl.Tiles {
+		tn := tileNumElements[t]
+		if idx < ci || idx >= ci+tn {
+			ci += tn
+			continue
+		}
+		ri := idx - ci
+		if sl.TileSplits[i] < 0.01 {
+			return true
+		}
+		// extra consideration for long split onto subs:
+		switch t {
+		case TileFirstLong:
+			if ri > 0 && sl.SubSplits[i][1] < 0.01 {
+				return true
+			}
+		case TileSecondLong:
+			if ri < 2 && sl.SubSplits[i][0] < 0.01 {
+				return true
+			}
+		}
+		return false
+	}
+	return false
 }
 
 // tilesTotal returns the total number of child elements associated
@@ -363,9 +440,6 @@ func (sl *Splits) normOtherSplits(idx int, s []float32) {
 			s[i] *= norm
 		}
 		nsum += s[i]
-	}
-	if nsum != 1 {
-		fmt.Println(sl, "normOther err", nsum)
 	}
 }
 
@@ -549,73 +623,6 @@ func (sl *Splits) restoreChild(idxs ...int) {
 	}
 	sl.updateSplits()
 	sl.NeedsLayout()
-}
-
-// splitValue returns the split proportion for given child index
-func (sl *Splits) splitValue(idx int) float32 {
-	ci := 0
-	for i, t := range sl.Tiles {
-		tn := tileNumElements[t]
-		if idx < ci || idx >= ci+tn {
-			ci += tn
-			continue
-		}
-		ri := idx - ci
-		switch t {
-		case TileSpan:
-			return sl.TileSplits[i]
-		case TileSplit:
-			return sl.SubSplits[i][ri]
-		case TileFirstLong:
-			if ri == 0 {
-				return sl.SubSplits[i][0]
-			} else {
-				return sl.SubSplits[i][1+ri]
-			}
-		case TileSecondLong:
-			if ri == 2 {
-				return sl.SubSplits[i][1]
-			} else {
-				return sl.SubSplits[i][2+ri]
-			}
-		}
-		ci += tn
-	}
-	return 0
-}
-
-// ChildIsCollapsed returns true if the split proportion
-// for given child index is 0.  Also checks the overall tile
-// splits for the child.
-func (sl *Splits) ChildIsCollapsed(idx int) bool {
-	if sl.splitValue(idx) < 0.01 {
-		return true
-	}
-	ci := 0
-	for i, t := range sl.Tiles {
-		tn := tileNumElements[t]
-		if idx < ci || idx >= ci+tn {
-			ci += tn
-			continue
-		}
-		ri := idx - ci
-		if sl.TileSplits[i] < 0.01 {
-			return true
-		}
-		// extra consideration for long split onto subs:
-		switch t {
-		case TileFirstLong:
-			if ri > 0 && sl.SubSplits[i][1] < 0.01 {
-				return true
-			}
-		case TileSecondLong:
-			if ri < 2 && sl.SubSplits[i][0] < 0.01 {
-				return true
-			}
-		}
-		return false
-	}
-	return false
 }
 
 func (sl *Splits) SizeDownSetAllocs(iter int) {
