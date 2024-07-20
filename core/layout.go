@@ -1663,26 +1663,26 @@ func (ly *Frame) positionCells() {
 }
 
 // Main axis = X
-func (ly *Frame) positionCellsMainX() {
+func (fr *Frame) positionCellsMainX() {
 	// todo: can break apart further into Flex rows
-	gap := ly.layout.Gap
-	sz := &ly.Geom.Size
+	gap := fr.layout.Gap
+	sz := &fr.Geom.Size
 	if DebugSettings.LayoutTraceDetail {
-		fmt.Println(ly, "PositionCells Main X, actual:", sz.Actual.Content, "internal:", sz.Internal)
+		fmt.Println(fr, "PositionCells Main X, actual:", sz.Actual.Content, "internal:", sz.Internal)
 	}
 	var stPos math32.Vector2
-	stPos.X = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.X, sz.Actual.Content.X)
-	stPos.Y = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.Y, sz.Actual.Content.Y)
+	stPos.X = styles.AlignPos(fr.Styles.Justify.Content, sz.Internal.X, sz.Actual.Content.X)
+	stPos.Y = styles.AlignPos(fr.Styles.Align.Content, sz.Internal.Y, sz.Actual.Content.Y)
 	pos := stPos
 	var lastSz math32.Vector2
 	idx := 0
-	ly.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		if cidx.X == 0 && idx > 0 {
 			pos.X = stPos.X
 			pos.Y += lastSz.Y + gap.Y
 		}
-		cwb.positionWithinAllocMainX(pos, ly.Styles.Justify.Items, ly.Styles.Align.Items)
+		cwb.positionWithinAllocMainX(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items)
 		alloc := cwb.Geom.Size.Alloc.Total
 		pos.X += alloc.X + gap.X
 		lastSz = alloc
