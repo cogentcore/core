@@ -53,8 +53,11 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 		return mtyp, ext, nil
 	}
 	_, fn := filepath.Split(fname)
-	fc := fn[0]
-	lc := fn[len(fn)-1]
+	var fc, lc byte
+	if len(fn) > 0 {
+		fc = fn[0]
+		lc = fn[len(fn)-1]
+	}
 	if fc == '~' || fc == '%' || fc == '#' || lc == '~' || lc == '%' || lc == '#' {
 		return MimeString(Trash), ext, nil
 	}
