@@ -63,7 +63,7 @@ func init() {
 			link := links.Index(i)
 			href := link.Get("href").String()
 			relative := strings.TrimPrefix(href, base.String())
-			fmt.Println(href, base.String(), relative)
+			fmt.Println("href", href, "base", base.String(), "newBasePath", newBasePath, "relative", relative)
 			newHref := path.Join(newBasePath, relative)
 			link.Set("href", newHref)
 		}
