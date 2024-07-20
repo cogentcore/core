@@ -21,6 +21,8 @@ import (
 // which is used to prevent nested [Page] widgets from incorrectly affecting the URL.
 var firstPage *Page
 
+var documentData = js.Global().Get("document").Get("documentElement").Get("dataset")
+
 func init() {
 	getWebURL = func(p *Page) string {
 		if firstPage == nil {
@@ -55,6 +57,7 @@ func init() {
 		// We must first apply all our new base path to all of the links so
 		// that the favicon updates correctly.
 		newBasePath := wpath.BasePath(u)
+		documentData.Set("basePath", newBasePath)
 		links := js.Global().Get("document").Get("head").Call("getElementsByTagName", "link")
 		for i := range links.Length() {
 			link := links.Index(i)
@@ -86,7 +89,7 @@ func getURL() (full, base *url.URL, err error) {
 		base = originalBase
 		return
 	}
-	basePath, err := url.Parse(js.Global().Get("document").Get("documentElement").Get("dataset").Get("basePath").String())
+	basePath, err := url.Parse(documentData.Get("basePath").String())
 	if err != nil {
 		return
 	}
