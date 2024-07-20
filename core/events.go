@@ -261,9 +261,11 @@ func (em *Events) handlePosEvent(e events.Event) {
 	case events.Scroll:
 		if em.scroll != nil {
 			scInTime := time.Since(em.lastScrollTime) < DeviceSettings.ScrollFocusTime
-			em.lastScrollTime = time.Now()
 			if scInTime {
 				em.scroll.AsWidget().HandleEvent(e)
+				if e.IsHandled() {
+					em.lastScrollTime = time.Now()
+				}
 				return
 			} else {
 				em.scroll = nil
