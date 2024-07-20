@@ -9,7 +9,6 @@ package pages
 import (
 	"fmt"
 	"net/url"
-	"path"
 	"strings"
 	"syscall/js"
 
@@ -45,7 +44,7 @@ func init() {
 		if firstPage != p {
 			return
 		}
-		_, base, err := getURL()
+		full, base, err := getURL()
 		if errors.Log(err) != nil {
 			return
 		}
@@ -63,8 +62,8 @@ func init() {
 			link := links.Index(i)
 			href := link.Get("href").String()
 			relative := strings.TrimPrefix(href, base.String())
-			fmt.Println("href", href, "base", base.String(), "newBasePath", newBasePath, "relative", relative)
-			newHref := path.Join(newBasePath, relative)
+			newHref := newBasePath + relative
+			fmt.Println("href", href, "base", base.String(), "newBasePath", newBasePath, "relative", relative, "newHref", newHref, "currentURL", full.String())
 			link.Set("href", newHref)
 		}
 
