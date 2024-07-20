@@ -222,6 +222,7 @@ func (s *Style) Defaults() {
 	s.UnitContext.Defaults()
 	s.LayoutDefaults()
 	s.Color = colors.Scheme.OnSurface
+	s.Border.Color.Set(colors.Scheme.Outline)
 	s.Opacity = 1
 	s.RenderBox = true
 	s.FillMargin = true

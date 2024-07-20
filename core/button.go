@@ -151,10 +151,6 @@ func (bt *Button) Init() {
 			s.Color = colors.Scheme.Primary.Base
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Dp(1))
-			// if focused then default primary
-			if !s.Is(states.Focused) {
-				s.Border.Color.Set(colors.Scheme.Outline)
-			}
 		case ButtonText:
 			s.Color = colors.Scheme.Primary.Base
 		case ButtonAction:

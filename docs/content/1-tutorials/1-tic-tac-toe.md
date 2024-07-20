@@ -12,7 +12,6 @@ for range 9 {
     bt := core.NewButton(grid).SetType(core.ButtonAction)
     bt.Styler(func(s *styles.Style) {
         s.Border.Width.Set(units.Dp(1))
-        s.Border.Color.Set(colors.Scheme.Outline)
         s.Border.Radius.Zero()
         s.Min.Set(units.Em(2))
     })
@@ -33,7 +32,6 @@ for i := range 9 {
     bt := core.NewButton(grid).SetType(core.ButtonAction)
     bt.Styler(func(s *styles.Style) {
         s.Border.Width.Set(units.Dp(1))
-        s.Border.Color.Set(colors.Scheme.Outline)
         s.Border.Radius.Zero()
         s.Min.Set(units.Em(2))
     })
@@ -90,7 +88,6 @@ for i := range 9 {
     bt := core.NewButton(grid).SetType(core.ButtonAction)
     bt.Styler(func(s *styles.Style) {
         s.Border.Width.Set(units.Dp(1))
-        s.Border.Color.Set(colors.Scheme.Outline)
         s.Border.Radius.Zero()
         s.Min.Set(units.Em(2))
     })

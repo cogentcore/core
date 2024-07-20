@@ -261,7 +261,6 @@ func (tf *TextField) Init() {
 			s.MaxBorder.Width.Set(units.Dp(2))
 			s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
 			s.Border.Width.Set(units.Dp(1))
-			s.Border.Color.Set(colors.Scheme.Outline)
 			if tf.error != nil {
 				s.Border.Color.Set(colors.Scheme.Error.Base)
 			}

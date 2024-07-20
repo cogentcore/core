@@ -103,13 +103,11 @@ func (sw *Switch) Init() {
 				s.Background = colors.Scheme.SurfaceVariant
 				s.Color = colors.Scheme.OnSurfaceVariant
 			} else if !s.Is(states.Focused) {
-				s.Border.Color.Set(colors.Scheme.Outline)
 				s.Border.Width.Set(units.Dp(1))
 			}
 		}
 		if sw.Type == SwitchSegmentedButton {
 			if !s.Is(states.Focused) {
-				s.Border.Color.Set(colors.Scheme.Outline)
 				s.Border.Width.Set(units.Dp(1))
 			}
 			if s.Is(states.Checked) {

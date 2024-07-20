@@ -173,7 +173,6 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 func boxFrame(parent Widget) *Frame {
 	fr := NewFrame(parent)
 	fr.Styler(func(s *styles.Style) {
-		s.Border.Color.Set(colors.Scheme.Outline)
 		s.Border.Width.Set(units.Dp(2))
 	})
 	return fr
