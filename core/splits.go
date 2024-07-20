@@ -490,10 +490,10 @@ func (sl *Splits) splitValue(idx int) float32 {
 	return 0
 }
 
-// isCollapsed returns true if the split proportion
+// ChildIsCollapsed returns true if the split proportion
 // for given child index is 0.  Also checks the overall tile
 // splits for the child.
-func (sl *Splits) isCollapsed(idx int) bool {
+func (sl *Splits) ChildIsCollapsed(idx int) bool {
 	if sl.splitValue(idx) < 0.01 {
 		return true
 	}
@@ -570,11 +570,11 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 			setCsz(ci+1, math32.Round(szs*sl.SubSplits[i][2]), scht)
 			setCsz(ci+2, math32.Round(szs*sl.SubSplits[i][3]), scht)
 		case TileSecondLong:
-			fcht := math32.Round(szcs * sl.SubSplits[i][0])
-			scht := math32.Round(szcs * sl.SubSplits[i][1])
-			setCsz(ci+2, szt, fcht)
+			fcht := math32.Round(szcs * sl.SubSplits[i][1])
+			scht := math32.Round(szcs * sl.SubSplits[i][0])
 			setCsz(ci, math32.Round(szs*sl.SubSplits[i][2]), scht)
 			setCsz(ci+1, math32.Round(szs*sl.SubSplits[i][3]), scht)
+			setCsz(ci+2, szt, fcht)
 		}
 		ci += tn
 	}
@@ -652,9 +652,9 @@ func (sl *Splits) positionSplits() {
 				setChildPos(ci+2, tpos+swd+hwd+gapd, bot)
 			} else {
 				setHandlePos(hi+1, tpos+swd+0.5*gapd, 0.5*(fcht-hht), tpos+swd, tpos, tpos+szs)
-				setChildPos(ci+2, tpos, bot)
 				setChildPos(ci, tpos, 0)
 				setChildPos(ci+1, tpos+swd+hwd+gapd, 0)
+				setChildPos(ci+2, tpos, bot)
 			}
 			hi += 2
 		}
@@ -677,7 +677,7 @@ func (sl *Splits) Position() {
 func (sl *Splits) RenderWidget() {
 	if sl.PushBounds() {
 		sl.ForWidgetChildren(func(i int, kwi Widget, cwb *WidgetBase) bool {
-			cwb.SetState(sl.isCollapsed(i), states.Invisible)
+			cwb.SetState(sl.ChildIsCollapsed(i), states.Invisible)
 			kwi.RenderWidget()
 			return tree.Continue
 		})
