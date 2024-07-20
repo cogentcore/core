@@ -55,6 +55,9 @@ func Label(u string, backup string) string {
 // BasePath returns a path that will take the given path all the
 // way to the root using sequences of "..".
 func BasePath(path string) string {
+	if path == "" {
+		return ""
+	}
 	numNested := strings.Count(path, "/") + 1
 	basePath := ""
 	for range numNested {

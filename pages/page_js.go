@@ -8,10 +8,12 @@ package pages
 
 import (
 	"net/url"
+	"path"
 	"strings"
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/pages/wpath"
 )
 
 func init() {
@@ -32,6 +34,19 @@ func init() {
 		if errors.Log(err) != nil {
 			return
 		}
+
+		// We must first apply all our new base path to all of the links so
+		// that the favicon updates correctly.
+		newBasePath := wpath.BasePath(u)
+		links := js.Global().Get("document").Get("head").Call("getElementsByTagName", "link")
+		for i := range links.Length() {
+			link := links.Index(i)
+			href := link.Get("href").String()
+			relative := strings.TrimPrefix(href, base.String())
+			newHref := path.Join(newBasePath, relative)
+			link.Set("href", newHref)
+		}
+
 		fullNew := base.ResolveReference(new)
 		js.Global().Get("history").Call("pushState", "", "", fullNew.String())
 	}
