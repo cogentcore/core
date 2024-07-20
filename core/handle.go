@@ -71,5 +71,5 @@ func (hl *Handle) Init() {
 // Value returns the value on a normalized scale of 0-1,
 // based on [Handle.Pos], [Handle.Min], and [Handle.Max].
 func (hl *Handle) Value() float32 {
-	return hl.Pos / (hl.Max - hl.Min)
+	return (hl.Pos - hl.Min) / (hl.Max - hl.Min)
 }

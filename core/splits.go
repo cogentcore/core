@@ -172,7 +172,7 @@ func (sl *Splits) Init() {
 		addHand := func(hidx int, hdir styles.Directions) {
 			tree.AddAt(p, "handle-"+strconv.Itoa(hidx), func(w *Handle) {
 				w.OnChange(func(e events.Event) {
-					sl.setSplitPos(w.IndexInParent(), w.Value())
+					sl.setHandlePos(w.IndexInParent(), w.Value())
 				})
 				w.Styler(func(s *styles.Style) {
 					dir := sl.Styles.Direction
@@ -371,34 +371,72 @@ func (sl *Splits) collapseSplit(save bool, idxs ...int) {
 	}
 }
 
-// setSplitPos sets given splitter position to given 0-1 normalized value.
+// setHandlePos sets given splits handle position to given 0-1 normalized value.
+// Handles are indexed 0..Tiles-1 for main tiles handles, then sequentially
+// for any additional child sub-splits depending on tile config.
 // Calls updateSplits after to ensure renormalization and
 // NeedsLayout to ensure layout is updated.
-func (sl *Splits) setSplitPos(idx int, val float32) {
-	ci := 0
+func (sl *Splits) setHandlePos(idx int, val float32) {
+	val = math32.Clamp(val, 0, 1)
+
+	update := func(idx int, nw float32, s []float32) {
+		n := len(s)
+		old := s[idx]
+		sumTo := float32(0)
+		for i := range idx + 1 {
+			sumTo += s[i]
+		}
+		delta := nw - sumTo
+		uval := old + delta
+		if uval < 0 {
+			uval = 0
+			delta = -old
+			nw = sumTo + delta
+		}
+		rmdr := 1 - nw
+		oldrmdr := 1 - sumTo
+		if oldrmdr <= 0 {
+			if rmdr > 0 {
+				dper := rmdr / float32((n-1)-idx)
+				for i := idx + 1; i < n; i++ {
+					s[i] = dper
+				}
+			}
+		} else {
+			for i := idx + 1; i < n; i++ {
+				cur := s[i]
+				s[i] = rmdr * (cur / oldrmdr) // proportional
+			}
+		}
+		s[idx] = uval
+	}
+
+	nt := len(sl.Tiles)
+	if idx < nt-1 {
+		update(idx, val, sl.Splits)
+		sl.updateSplits()
+		sl.NeedsLayout()
+		return
+	}
+	ci := nt - 1
 	for i, t := range sl.Tiles {
-		tn := tileNumElements[t]
+		tn := tileNumElements[t] - 1
+		if tn == 0 {
+			continue
+		}
 		if idx < ci || idx >= ci+tn {
 			ci += tn
 			continue
 		}
 		ri := idx - ci
 		switch t {
-		case TileSpan:
-			sl.Splits[idx] = val
 		case TileSplit:
-			sl.SubSplits[i][ri] = val
-		case TileFirstLong:
+			update(0, val, sl.SubSplits[i])
+		case TileFirstLong, TileSecondLong:
 			if ri == 0 {
-				sl.SubSplits[i][0] = val
+				update(0, val, sl.SubSplits[i][:2])
 			} else {
-				sl.SubSplits[i][2+ri] = val
-			}
-		case TileSecondLong:
-			if ri == 2 {
-				sl.SubSplits[i][0] = val
-			} else {
-				sl.SubSplits[i][ri] = val
+				update(0, val, sl.SubSplits[i][2:])
 			}
 		}
 		ci += tn
@@ -432,7 +470,7 @@ func (sl *Splits) splitValue(idx int) float32 {
 		ri := idx - ci
 		switch t {
 		case TileSpan:
-			return sl.Splits[ri]
+			return sl.Splits[i]
 		case TileSplit:
 			return sl.SubSplits[i][ri]
 		case TileFirstLong:
@@ -443,9 +481,9 @@ func (sl *Splits) splitValue(idx int) float32 {
 			}
 		case TileSecondLong:
 			if ri == 2 {
-				return sl.SubSplits[i][0]
+				return sl.SubSplits[i][1]
 			} else {
-				return sl.SubSplits[i][2+ri-1]
+				return sl.SubSplits[i][2+ri]
 			}
 		}
 		ci += tn
@@ -471,59 +509,20 @@ func (sl *Splits) isCollapsed(idx int) bool {
 		if sl.Splits[i] < 0.01 {
 			return true
 		}
+		// extra consideration for long split onto subs:
 		switch t {
 		case TileFirstLong:
 			if ri > 0 && sl.SubSplits[i][1] < 0.01 {
 				return true
 			}
 		case TileSecondLong:
-			if ri < 2 && sl.SubSplits[i][1] < 0.01 {
+			if ri < 2 && sl.SubSplits[i][0] < 0.01 {
 				return true
 			}
 		}
+		return false
 	}
 	return false
-}
-
-// setSplit sets the new splitter value, for given splitter.
-// New value is 0..1 value of position of that splitter.
-// It is a sum of all the positions up to that point.
-// Splitters are updated to ensure that selected position is achieved,
-// while dividing remainder appropriately.
-func (sl *Splits) setSplitOld(idx int, nwval float32) {
-	n := len(sl.Splits)
-	oldsum := float32(0)
-	for i := 0; i <= idx; i++ {
-		oldsum += sl.Splits[i]
-	}
-	delta := nwval - oldsum
-	oldval := sl.Splits[idx]
-	uval := oldval + delta
-	if uval < 0 {
-		uval = 0
-		delta = -oldval
-		nwval = oldsum + delta
-	}
-	rmdr := 1 - nwval
-	if idx < n-1 {
-		oldrmdr := 1 - oldsum
-		if oldrmdr <= 0 {
-			if rmdr > 0 {
-				dper := rmdr / float32((n-1)-idx)
-				for i := idx + 1; i < n; i++ {
-					sl.Splits[i] = dper
-				}
-			}
-		} else {
-			for i := idx + 1; i < n; i++ {
-				curval := sl.Splits[i]
-				sl.Splits[i] = rmdr * (curval / oldrmdr) // proportional
-			}
-		}
-	}
-	sl.Splits[idx] = uval
-	sl.updateSplits()
-	sl.NeedsLayout()
 }
 
 func (sl *Splits) SizeDownSetAllocs(iter int) {
@@ -602,7 +601,6 @@ func (sl *Splits) positionSplits() {
 	hand := sl.Parts.Child(0).(*Handle)
 	hwd := hand.Geom.Size.Actual.Total.Dim(dim)
 	hht := hand.Geom.Size.Actual.Total.Dim(odim)
-	mid := (csz.Dim(odim) - hht) / 2
 	cszd -= float32(len(sl.Splits)-1) * (hwd + gapd)
 	hwdg := hwd + 0.5*gapd
 
@@ -611,13 +609,13 @@ func (sl *Splits) positionSplits() {
 		kwb.Geom.RelPos.SetDim(dim, dpos)
 		kwb.Geom.RelPos.SetDim(odim, opos)
 	}
-	setHandlePos := func(idx int, dpos, opos, max, lpos float32) {
+	setHandlePos := func(idx int, dpos, opos, lpos, mn, mx float32) {
 		hl := sl.Parts.Child(idx).(*Handle)
 		hl.Geom.RelPos.SetDim(dim, dpos)
 		hl.Geom.RelPos.SetDim(odim, opos)
-		hl.Min = 0
-		hl.Max = max
 		hl.Pos = lpos
+		hl.Min = mn
+		hl.Max = mx
 	}
 
 	tpos := float32(0) // tile position
@@ -631,14 +629,14 @@ func (sl *Splits) positionSplits() {
 		szs := szt - hwd - gapd
 		tn := tileNumElements[t]
 		if i > 0 {
-			setHandlePos(i-1, tpos-hwdg, mid, cszd, tpos)
+			setHandlePos(i-1, tpos-hwdg, .5*(cszo-hht), tpos, 0, cszd)
 		}
 		switch t {
 		case TileSpan:
 			setChildPos(ci, tpos, 0)
 		case TileSplit:
 			fcht := math32.Round(szcs * sl.SubSplits[i][0])
-			setHandlePos(hi, tpos+.5*(szt-hht), fcht+0.5*gapo, cszo, fcht)
+			setHandlePos(hi, tpos+.5*(szt-hht), fcht+0.5*gapo, fcht, 0, szcs)
 			hi++
 			setChildPos(ci, tpos, 0)
 			setChildPos(ci+1, tpos, fcht+hwd+gapo)
@@ -647,14 +645,14 @@ func (sl *Splits) positionSplits() {
 			scht := math32.Round(szcs * sl.SubSplits[i][1])
 			swd := math32.Round(szs * sl.SubSplits[i][2])
 			bot := fcht + hwd + gapo
-			setHandlePos(hi, tpos+.5*(szt-hht), fcht+0.5*gapo, cszo, fcht) // long
+			setHandlePos(hi, tpos+.5*(szt-hht), fcht+0.5*gapo, fcht, 0, szcs) // long
 			if t == TileFirstLong {
-				setHandlePos(hi+1, tpos+swd+0.5*gapd, bot+0.5*(scht-hht), szt, swd)
+				setHandlePos(hi+1, tpos+swd+0.5*gapd, bot+0.5*(scht-hht), tpos+swd, tpos, tpos+szs)
 				setChildPos(ci, tpos, 0)
 				setChildPos(ci+1, tpos, bot)
 				setChildPos(ci+2, tpos+swd+hwd+gapd, bot)
 			} else {
-				setHandlePos(hi+1, tpos+swd+0.5*gapd, 0.5*(fcht-hht), szt, swd)
+				setHandlePos(hi+1, tpos+swd+0.5*gapd, 0.5*(fcht-hht), tpos+swd, tpos, tpos+szs)
 				setChildPos(ci+2, tpos, bot)
 				setChildPos(ci, tpos, 0)
 				setChildPos(ci+1, tpos+swd+hwd+gapd, 0)
