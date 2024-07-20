@@ -72,10 +72,10 @@ var _ tree.Node = (*Page)(nil)
 
 // getWebURL, if non-nil, returns the current relative web URL that should
 // be passed to [Page.OpenURL] on startup.
-var getWebURL func() string
+var getWebURL func(p *Page) string
 
 // saveWebURL, if non-nil, saves the given web URL to the user's browser address bar and history.
-var saveWebURL func(u string)
+var saveWebURL func(p *Page, u string)
 
 // needsPath indicates that a URL in [Page.URLToPagePath] needs its path
 // to be set to the first valid child path, since its index.md file does
@@ -182,13 +182,7 @@ func (pg *Page) Init() {
 				}))
 				// open the default page if there is no currently open page
 				if pg.PagePath == "" {
-					if getWebURL != nil {
-						u := getWebURL()
-						getWebURL = nil // we only call this once for the first page
-						pg.OpenURL(u, true)
-					} else {
-						pg.OpenURL("/", true)
-					}
+					pg.OpenURL(getWebURL(pg), true)
 				}
 			})
 		})
@@ -267,7 +261,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		pg.History = append(pg.History, pg.Context.PageURL)
 	}
 	if saveWebURL != nil {
-		saveWebURL(pg.Context.PageURL)
+		saveWebURL(pg, pg.Context.PageURL)
 	}
 
 	var frontMatter map[string]any

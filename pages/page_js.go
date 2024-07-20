@@ -16,8 +16,18 @@ import (
 	"cogentcore.org/core/pages/wpath"
 )
 
+// firstPage is the first [Page] used for [getWebURL] or [saveWebURL],
+// which is used to prevent nested [Page] widgets from incorrectly affecting the URL.
+var firstPage *Page
+
 func init() {
-	getWebURL = func() string {
+	getWebURL = func(p *Page) string {
+		if firstPage == nil {
+			firstPage = p
+		}
+		if firstPage != p {
+			return "/"
+		}
 		full, base, err := getURL()
 		if errors.Log(err) != nil {
 			return "/"
@@ -25,7 +35,13 @@ func init() {
 		result := strings.TrimPrefix(full.String(), base.String())
 		return "/" + result
 	}
-	saveWebURL = func(u string) {
+	saveWebURL = func(p *Page, u string) {
+		if firstPage == nil {
+			firstPage = p
+		}
+		if firstPage != p {
+			return
+		}
 		_, base, err := getURL()
 		if errors.Log(err) != nil {
 			return
