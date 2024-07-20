@@ -5,6 +5,7 @@
 package core
 
 import (
+	"fmt"
 	"log/slog"
 	"strconv"
 	"strings"
@@ -87,11 +88,11 @@ type Splits struct {
 	// 1D configuration will be imposed if there is a mismatch.
 	Tiles []SplitsTiles
 
-	// Splits is the proportion (0-1 normalized, enforced) of space
+	// TileSplits is the proportion (0-1 normalized, enforced) of space
 	// allocated to each Tile element along the main axis.
 	// 0 indicates that an element should  be completely collapsed.
 	// By default, each element gets the same amount of space.
-	Splits []float32
+	TileSplits []float32
 
 	// SubSplits contains splits proportions for each Tile element, with
 	// a variable number depending on the Tile.  For the First and Second Long
@@ -149,12 +150,12 @@ func (sl *Splits) Init() {
 		kn := int(knc)
 		if kn == 0 {
 			e.SetHandled()
-			sl.evenSplits(sl.Splits)
+			sl.evenSplits(sl.TileSplits)
 			sl.NeedsLayout()
 
 		} else if kn <= len(sl.Children) {
 			e.SetHandled()
-			if sl.Splits[kn-1] <= 0.01 {
+			if sl.TileSplits[kn-1] <= 0.01 {
 				sl.restoreChild(kn - 1)
 			} else {
 				sl.collapseSplit(true, kn-1)
@@ -205,6 +206,68 @@ func (sl *Splits) Init() {
 	})
 }
 
+// SetSplits sets the split proportions for the children.
+// In general you should pass the same number of args
+// as there are children, though fewer could be passed.
+func (sl *Splits) SetSplits(splits ...float32) *Splits {
+	sl.updateSplits()
+	ntc, _ := sl.tilesTotal()
+	if ntc == 0 {
+		nc := len(splits)
+		sl.TileSplits = slicesx.SetLength(sl.TileSplits, nc)
+		copy(sl.TileSplits, splits)
+		sl.Tiles = slicesx.SetLength(sl.Tiles, nc)
+		for i := range nc {
+			sl.Tiles[i] = TileSpan
+		}
+		sl.updateSplits()
+		return sl
+	}
+	for i, sp := range splits {
+		sl.setChildSplit(i, sp)
+	}
+	return sl
+}
+
+// setChildSplit sets the split specific to given child index.
+// also updates other split values in proportion.
+func (sl *Splits) setChildSplit(idx int, val float32) {
+	ci := 0
+	for i, t := range sl.Tiles {
+		tn := tileNumElements[t]
+		if idx < ci || idx >= ci+tn {
+			ci += tn
+			continue
+		}
+		ri := idx - ci
+		switch t {
+		case TileSpan:
+			sl.TileSplits[i] = val
+			sl.normOtherSplits(i, sl.TileSplits)
+		case TileSplit:
+			sl.SubSplits[i][ri] = val
+			sl.normOtherSplits(ri, sl.SubSplits[i])
+		case TileFirstLong:
+			if ri == 0 {
+				sl.SubSplits[i][0] = val
+				sl.normOtherSplits(0, sl.SubSplits[i][:2])
+			} else {
+				sl.SubSplits[i][1+ri] = val
+				sl.normOtherSplits(ri-1, sl.SubSplits[i][2:])
+			}
+		case TileSecondLong:
+			if ri == 2 {
+				sl.SubSplits[i][1] = val
+				sl.normOtherSplits(1, sl.SubSplits[i][:2])
+			} else {
+				sl.SubSplits[i][2+ri] = val
+				sl.normOtherSplits(ri, sl.SubSplits[i][2:])
+			}
+		}
+		ci += tn
+	}
+}
+
 // tilesTotal returns the total number of child elements associated
 // with the current set of Tiles elements, and whether there are any
 // non-TileSpan elements, which has implications for error handling
@@ -219,15 +282,15 @@ func (sl *Splits) tilesTotal() (total int, hasNonSpans bool) {
 	return
 }
 
-// updateSplits ensures the Tiles, Splits and SubSplits are all configured properly,
-// given the number of children in the splits.
+// updateSplits ensures the Tiles, TileSplits and SubSplits
+// are all configured properly, given the number of children.
 func (sl *Splits) updateSplits() *Splits {
 	nc := len(sl.Children)
-	if nc == 0 {
+	ntc, hasNonSpans := sl.tilesTotal()
+	if nc == 0 && ntc == 0 {
 		return sl
 	}
-	ntc, hasNonSpans := sl.tilesTotal()
-	if ntc != nc {
+	if nc > 0 && ntc != nc {
 		if ntc != 0 && hasNonSpans {
 			slog.Error("core.Splits: number of children for current Tiles != number of actual children, reverting to 1D", "children", nc, "tiles", ntc)
 		}
@@ -237,8 +300,8 @@ func (sl *Splits) updateSplits() *Splits {
 		}
 	}
 	nt := len(sl.Tiles)
-	sl.Splits = slicesx.SetLength(sl.Splits, nt)
-	sl.normSplits(sl.Splits)
+	sl.TileSplits = slicesx.SetLength(sl.TileSplits, nt)
+	sl.normSplits(sl.TileSplits)
 	sl.SubSplits = slicesx.SetLength(sl.SubSplits, nt)
 	for i, t := range sl.Tiles {
 		ssn := tileNumSubSplits[t]
@@ -267,11 +330,42 @@ func (sl *Splits) normSplits(s []float32) {
 	}
 	if sum == 0 { // set default even splits
 		sl.evenSplits(s)
-	} else {
-		norm := 1 / sum
-		for i := range sl.Splits {
-			sl.Splits[i] *= norm
+		return
+	}
+	norm := 1 / sum
+	for i := range s {
+		s[i] *= norm
+	}
+}
+
+// normOtherSplits normalizes the given splits proportions,
+// while keeping the one at the given index at its current value.
+func (sl *Splits) normOtherSplits(idx int, s []float32) {
+	n := len(s)
+	if n == 1 {
+		return
+	}
+	val := s[idx]
+	sum := float32(0)
+	even := (1 - val) / float32(n-1)
+	for i, sp := range s {
+		if i != idx {
+			if sp == 0 {
+				s[i], sp = even, even
+			}
+			sum += sp
 		}
+	}
+	norm := (1 - val) / sum
+	nsum := float32(0)
+	for i := range s {
+		if i != idx {
+			s[i] *= norm
+		}
+		nsum += s[i]
+	}
+	if nsum != 1 {
+		fmt.Println(sl, "normOther err", nsum)
 	}
 }
 
@@ -289,12 +383,12 @@ func (sl *Splits) evenSplits(s []float32) {
 
 // saveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
 func (sl *Splits) saveSplits() {
-	n := len(sl.Splits)
+	n := len(sl.TileSplits)
 	if n == 0 {
 		return
 	}
 	sl.savedSplits = slicesx.SetLength(sl.savedSplits, n)
-	copy(sl.savedSplits, sl.Splits)
+	copy(sl.savedSplits, sl.TileSplits)
 	sl.savedSubSplits = slicesx.SetLength(sl.savedSubSplits, n)
 	for i, ss := range sl.SubSplits {
 		sv := sl.savedSubSplits[i]
@@ -306,7 +400,7 @@ func (sl *Splits) saveSplits() {
 
 // restoreSplits restores a previously saved set of splits (if it exists), does an update
 func (sl *Splits) restoreSplits() {
-	if len(sl.savedSplits) != len(sl.Splits) {
+	if len(sl.savedSplits) != len(sl.TileSplits) {
 		return
 	}
 	sl.SetSplits(sl.savedSplits...)
@@ -319,19 +413,19 @@ func (sl *Splits) restoreSplits() {
 	sl.NeedsLayout()
 }
 
-// setSplit sets given proportional "Splits" space to given value.
+// setSplitIndex sets given proportional "Splits" space to given value.
 // Splits are indexed first by Tiles (major splits) and then
 // within tiles, where TileSplit has 2 and the Long cases,
 // have the long element first followed by the two smaller ones.
 // Calls updateSplits after to ensure renormalization and
 // NeedsLayout to ensure layout is updated.
-func (sl *Splits) setSplit(idx int, val float32) {
+func (sl *Splits) setSplitIndex(idx int, val float32) {
 	nt := len(sl.Tiles)
 	if nt == 0 {
 		return
 	}
 	if idx < nt {
-		sl.Splits[idx] = val
+		sl.TileSplits[idx] = val
 		return
 	}
 	ci := nt
@@ -366,7 +460,7 @@ func (sl *Splits) collapseSplit(save bool, idxs ...int) {
 		sl.saveSplits()
 	}
 	for _, idx := range idxs {
-		sl.setSplit(idx, 0)
+		sl.setSplitIndex(idx, 0)
 	}
 }
 
@@ -412,7 +506,7 @@ func (sl *Splits) setHandlePos(idx int, val float32) {
 
 	nt := len(sl.Tiles)
 	if idx < nt-1 {
-		update(idx, val, sl.Splits)
+		update(idx, val, sl.TileSplits)
 		sl.updateSplits()
 		sl.NeedsLayout()
 		return
@@ -450,7 +544,7 @@ func (sl *Splits) restoreChild(idxs ...int) {
 	n := len(sl.Children)
 	for _, idx := range idxs {
 		if idx >= 0 && idx < n {
-			sl.Splits[idx] = 1.0 / float32(n)
+			sl.TileSplits[idx] = 1.0 / float32(n)
 		}
 	}
 	sl.updateSplits()
@@ -469,14 +563,14 @@ func (sl *Splits) splitValue(idx int) float32 {
 		ri := idx - ci
 		switch t {
 		case TileSpan:
-			return sl.Splits[i]
+			return sl.TileSplits[i]
 		case TileSplit:
 			return sl.SubSplits[i][ri]
 		case TileFirstLong:
 			if ri == 0 {
 				return sl.SubSplits[i][0]
 			} else {
-				return sl.SubSplits[i][2+ri-1]
+				return sl.SubSplits[i][1+ri]
 			}
 		case TileSecondLong:
 			if ri == 2 {
@@ -505,7 +599,7 @@ func (sl *Splits) ChildIsCollapsed(idx int) bool {
 			continue
 		}
 		ri := idx - ci
-		if sl.Splits[i] < 0.01 {
+		if sl.TileSplits[i] < 0.01 {
 			return true
 		}
 		// extra consideration for long split onto subs:
@@ -541,7 +635,7 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 	gapo := gap.Dim(odim)
 	hand := sl.Parts.Child(0).(*Handle)
 	hwd := hand.Geom.Size.Actual.Total.Dim(dim)
-	cszd -= float32(len(sl.Splits)-1) * (hwd + gapd)
+	cszd -= float32(len(sl.TileSplits)-1) * (hwd + gapd)
 
 	setCsz := func(idx int, szm, szc float32) {
 		cwb := AsWidget(sl.Child(idx))
@@ -553,8 +647,8 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 
 	ci := 0
 	for i, t := range sl.Tiles {
-		szt := math32.Round(sl.Splits[i] * cszd) // tile size, main axis
-		szcs := cszo - hwd - gapo                // cross axis spilt
+		szt := math32.Round(sl.TileSplits[i] * cszd) // tile size, main axis
+		szcs := cszo - hwd - gapo                    // cross axis spilt
 		szs := szt - hwd - gapd
 		tn := tileNumElements[t]
 		switch t {
@@ -600,7 +694,7 @@ func (sl *Splits) positionSplits() {
 	hand := sl.Parts.Child(0).(*Handle)
 	hwd := hand.Geom.Size.Actual.Total.Dim(dim)
 	hht := hand.Geom.Size.Actual.Total.Dim(odim)
-	cszd -= float32(len(sl.Splits)-1) * (hwd + gapd)
+	cszd -= float32(len(sl.TileSplits)-1) * (hwd + gapd)
 	hwdg := hwd + 0.5*gapd
 
 	setChildPos := func(idx int, dpos, opos float32) {
@@ -623,8 +717,8 @@ func (sl *Splits) positionSplits() {
 	hi := nt - 1 // extra handles
 
 	for i, t := range sl.Tiles {
-		szt := math32.Round(sl.Splits[i] * cszd) // tile size, main axis
-		szcs := cszo - hwd - gapo                // cross axis spilt
+		szt := math32.Round(sl.TileSplits[i] * cszd) // tile size, main axis
+		szcs := cszo - hwd - gapo                    // cross axis spilt
 		szs := szt - hwd - gapd
 		tn := tileNumElements[t]
 		if i > 0 {

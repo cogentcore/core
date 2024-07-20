@@ -115,3 +115,24 @@ func TestSplitsTilesRowSplitSpanSplit(t *testing.T) {
 	sp.SetTiles(TileSplit, TileSpan, TileSplit)
 	b.AssertRender(t, "splits/tiles-row-split-span-split")
 }
+
+func TestSplitsTilesRowSpanFirstSet(t *testing.T) {
+	b, sp := makeSplits(4, 40, 20)
+	sp.SetTiles(TileSpan, TileFirstLong)
+	sp.SetSplits(0.2, 0.8, 0.4, 0.6)
+	b.AssertRender(t, "splits/tiles-row-span-first-set")
+}
+
+func TestSplitsTilesRowSpanSecondSet(t *testing.T) {
+	b, sp := makeSplits(4, 40, 20)
+	sp.SetTiles(TileSpan, TileSecondLong)
+	sp.SetSplits(0.2, 0.8, 0.2, 0.3)
+	b.AssertRender(t, "splits/tiles-row-span-second-set")
+}
+
+func TestSplitsTilesRowSplitSpanSplitSet(t *testing.T) {
+	b, sp := makeSplits(5, 40, 20)
+	sp.SetTiles(TileSplit, TileSpan, TileSplit)
+	sp.SetSplits(0.2, 0.8, 0.6, 0.6, 0.4)
+	b.AssertRender(t, "splits/tiles-row-split-span-split-set")
+}
