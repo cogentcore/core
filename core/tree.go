@@ -99,7 +99,7 @@ type Tree struct {
 	// [Tree.SyncTree].
 	SyncNode tree.Node `set:"-" copier:"-" json:"-" xml:"-"`
 
-	// text is the text to display for the tree item label, which automatically
+	// Text is the text to display for the tree item label, which automatically
 	// defaults to the [tree.Node.Name] of the tree node. It has no effect
 	// if [Tree.SyncNode] is non-nil.
 	Text string
@@ -118,6 +118,11 @@ type Tree struct {
 	// IconLeaf is the icon to use for a terminal node branch that has no children;
 	// it defaults to [icons.Blank].
 	IconLeaf icons.Icon
+
+	// TreeInit is a function set on the root node that is called
+	// with each child tree node when it is initialized (but not
+	// with the root node itself).
+	TreeInit func(tr *Tree)
 
 	// Indent is the amount to indent children relative to this node.
 	// It should be set in a Styler like all other style properties.
@@ -176,8 +181,8 @@ func (tr *Tree) AsCoreTree() *Tree {
 // It returns the total number of leaves in the tree.
 func (tr *Tree) rootSetViewIndex() int {
 	idx := 0
-	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		tvn := AsTree(wi)
+	tr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		tvn := AsTree(cw)
 		if tvn != nil {
 			tvn.viewIndex = idx
 			tvn.root = tr
@@ -420,8 +425,8 @@ func (tr *Tree) Init() {
 				// we are receiving it, not just our parent
 				s.StateLayer *= 3
 			} else {
-				// no state layer for indeterminate because they are not interactive
-				s.StateLayer = 0
+				// no abilities for indeterminate because they are not interactive
+				s.Abilities = 0
 			}
 		})
 		w.OnClick(func(e events.Event) {
@@ -475,8 +480,10 @@ func (tr *Tree) OnAdd() {
 		tr.IconClosed = ptv.IconClosed
 		tr.IconLeaf = ptv.IconLeaf
 	} else {
-		// fmt.Println("set root to:", tv, &tv)
 		tr.root = tr
+	}
+	if tr.root.TreeInit != nil {
+		tr.root.TreeInit(tr)
 	}
 }
 
@@ -532,12 +539,12 @@ func (tr *Tree) SizeUp() {
 
 	if !tr.Closed {
 		// we layout children under us
-		tr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-			kwi.SizeUp()
-			h += kwb.Geom.Size.Actual.Total.Y
-			kw := kwb.Geom.Size.Actual.Total.X
+		tr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			cw.SizeUp()
+			h += cwb.Geom.Size.Actual.Total.Y
+			kw := cwb.Geom.Size.Actual.Total.X
 			if math32.IsNaN(kw) { // somehow getting a nan
-				slog.Error("Tree, node width is NaN", "node:", kwb)
+				slog.Error("Tree, node width is NaN", "node:", cwb)
 			} else {
 				w = max(w, tr.Indent.Dots+kw)
 			}
@@ -574,11 +581,11 @@ func (tr *Tree) Position() {
 
 	if !tr.Closed {
 		h := tr.widgetSize.Y
-		tr.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-			kwb.Geom.RelPos.Y = h
-			kwb.Geom.RelPos.X = tr.Indent.Dots
-			h += kwb.Geom.Size.Actual.Total.Y
-			kwi.Position()
+		tr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			cwb.Geom.RelPos.Y = h
+			cwb.Geom.RelPos.X = tr.Indent.Dots
+			h += cwb.Geom.Size.Actual.Total.Y
+			cw.Position()
 			return tree.Continue
 		})
 	}
@@ -1135,8 +1142,8 @@ func (tr *Tree) ToggleClose() {
 
 // OpenAll opens the node and all of its sub-nodes.
 func (tr *Tree) OpenAll() { //types:add
-	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		tvn := AsTree(wi)
+	tr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		tvn := AsTree(cw)
 		if tvn != nil {
 			tvn.Open()
 			return tree.Continue
@@ -1148,8 +1155,8 @@ func (tr *Tree) OpenAll() { //types:add
 
 // CloseAll closes the node and all of its sub-nodes.
 func (tr *Tree) CloseAll() { //types:add
-	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		tvn := AsTree(wi)
+	tr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		tvn := AsTree(cw)
 		if tvn != nil {
 			tvn.Close()
 			return tree.Continue
@@ -1435,7 +1442,7 @@ func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 			}
 		}
 		parent.InsertChild(ns, myidx+i)
-		_, nwb := AsWidget(ns)
+		nwb := AsWidget(ns)
 		ntv := AsTree(ns)
 		ntv.root = tr.root
 		nwb.setScene(tr.Scene)
@@ -1466,7 +1473,7 @@ func (tr *Tree) pasteChildren(md mimedata.Mimes, mod events.DropMods) {
 
 	for _, ns := range sl {
 		tr.AddChild(ns)
-		_, nwb := AsWidget(ns)
+		nwb := AsWidget(ns)
 		ntv := AsTree(ns)
 		ntv.root = tr.root
 		nwb.setScene(tr.Scene)
@@ -1561,8 +1568,7 @@ func (tr *Tree) DropDeleteSource(e events.Event) {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
 			sn.AsTree().SetName(orgnm)
-			_, swb := AsWidget(sn)
-			swb.NeedsRender()
+			AsWidget(sn).NeedsRender()
 		}
 	}
 }

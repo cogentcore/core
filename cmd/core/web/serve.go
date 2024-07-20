@@ -6,7 +6,6 @@ package web
 
 import (
 	"net/http"
-	"path/filepath"
 
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/core/config"
@@ -14,7 +13,7 @@ import (
 
 // Serve serves the build output directory on the default network address at the config port.
 func Serve(c *config.Config) error {
-	fs := http.FileServer(http.Dir(filepath.Join("bin", "web")))
+	fs := http.FileServer(http.Dir(c.Build.Output))
 	http.Handle("/", fs)
 	http.HandleFunc("/app.wasm", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/wasm")

@@ -123,8 +123,8 @@ func (tr *Tree) selectedSyncNodes() []tree.Node {
 // source [tree.Node] in [Tree.SyncNode] or nil if not found.
 func (tr *Tree) FindSyncNode(n tree.Node) *Tree {
 	var res *Tree
-	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		tvn := AsTree(wi)
+	tr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		tvn := AsTree(cw)
 		if tvn != nil {
 			if tvn.SyncNode == n {
 				res = tvn
@@ -501,8 +501,7 @@ func (tr *Tree) dropDeleteSourceSync(de *events.DragDrop) {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
 			sn.AsTree().SetName(orgnm)
-			_, swb := AsWidget(sn)
-			swb.NeedsRender()
+			AsWidget(sn).NeedsRender()
 		}
 	}
 	tr.sendChangeEventReSync(nil)

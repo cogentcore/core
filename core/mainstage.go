@@ -289,15 +289,10 @@ func (st *Stage) runDialog() *Stage {
 	sz := ms.renderContext.geom.Size
 	if !st.FullWindow || st.NewWindow {
 		sz = sc.prefSize(sz)
-		sz = sz.Add(image.Point{50, 50})
-		// dialogs must be at least 25% of the window height and 25% of the window width
-		// by default, unless we have a window that is higher than wider (mobile), in
-		// which case we take up the entire width
-		minsz := ms.renderContext.geom.Size
-		if minsz.X > minsz.Y {
-			minsz.X /= 4
-		}
-		sz = image.Pt(max(sz.X, minsz.X), max(sz.Y, minsz.Y/4))
+		sz = sz.Add(image.Pt(50, 50))
+		// dialogs must be at least 400dp x 400dp by default
+		minsz := int(ctx.Scene.Styles.UnitContext.Dp(400))
+		sz = image.Pt(max(sz.X, minsz), max(sz.Y, minsz))
 		sc.Events.startFocusFirst = true // popup dialogs always need focus
 	}
 	if DebugSettings.WinRenderTrace {

@@ -34,7 +34,7 @@ func (mb *MeshButton) Init() {
 	})
 	core.InitValueButton(mb, false, func(d *core.Body) {
 		d.SetTitle("Select a mesh")
-		// TODO(config)
+		// TODO: https://github.com/cogentcore/core/issues/1023
 		// if v.OwnKind != reflect.Struct {
 		// 	return false, nil
 		// }
@@ -67,7 +67,7 @@ func (mb *MeshButton) Init() {
 
 /*
 
-TODO: This doesn't work because texture is on Material which doesn't have a pointer to the Scene!
+TODO: This doesn't work because texture is on Material which doesn't have a pointer to the Scene! (https://github.com/cogentcore/core/issues/1023)
 
 // Value restylesers TexValue as the viewer of TexName
 func (mn TexName) Value() core.Value {

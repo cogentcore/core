@@ -241,8 +241,6 @@ async function appInitWebAssembly() {
     go.run(wasm.instance);
     loader.remove();
   } catch (err) {
-    loaderIcon.className = "app-logo";
-    loaderLabel.innerText = err;
     console.error("loading wasm failed: ", err);
   }
 }

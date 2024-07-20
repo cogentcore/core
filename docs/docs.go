@@ -125,7 +125,10 @@ func main() {
 
 var home *core.Frame
 
-func makeBlock[T tree.NodeValue](title, text string, graphic func(w *T)) {
+func makeBlock[T tree.NodeValue](title, text string, graphic func(w *T), url ...string) {
+	if len(url) > 0 {
+		title = `<a href="` + url[0] + `">` + title + `</a>`
+	}
 	tree.AddChildAt(home, title, func(w *core.Frame) {
 		w.Styler(func(s *styles.Style) {
 			s.Gap.Set(units.Em(1))
@@ -203,7 +206,7 @@ func homePage(ctx *htmlcore.Context) bool {
 		return w
 	}
 
-	makeBlock("CODE ONCE, RUN EVERYWHERE", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the Web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single pure Go codebase.", func(w *core.Icon) {
+	makeBlock("CODE ONCE, RUN EVERYWHERE", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single Go codebase.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Devices)
 	})
 
@@ -253,34 +256,34 @@ func homePage(ctx *htmlcore.Context) bool {
 
 	makeBlock("COGENT CODE", "Cogent Code is a fully featured Go IDE with support for syntax highlighting, code completion, symbol lookup, building and debugging, version control, keyboard shortcuts, and many other features.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "code-icon.svg"))
-	})
+	}, "https://cogentcore.org/cogent/code")
 
 	makeBlock("COGENT CANVAS", "Cogent Canvas is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "canvas-icon.svg"))
-	})
+	}, "https://cogentcore.org/cogent/canvas")
 
 	makeBlock("COGENT NUMBERS", "Cogent Numbers is a highly extensible math, data science, and statistics platform that combines the power of programming with the convenience of spreadsheets and graphing calculators.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "numbers-icon.svg"))
-	})
+	}, "https://github.com/cogentcore/cogent/tree/main/numbers")
 
 	makeBlock("COGENT MAIL", "Cogent Mail is a customizable email client with built-in Markdown support, automatic mail filtering, and an extensive set of keyboard shortcuts for advanced mail filing.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "mail-icon.svg"))
-	})
+	}, "https://github.com/cogentcore/cogent/tree/main/mail")
 
 	makeBlock("COGENT CRAFT", "Cogent Craft is a powerful 3D modeling app with support for creating, loading, and editing 3D object files using an interactive WYSIWYG editor.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "craft-icon.svg"))
-	})
+	}, "https://github.com/cogentcore/cogent/tree/main/craft")
 
-	makeBlock(`<a href="https://emersim.org">EMERGENT</a>`, "Emergent is a collection of biologically based 3D neural network models of the brain that power ongoing research in computational cognitive neuroscience.", func(w *core.SVG) {
+	makeBlock("EMERGENT", "Emergent is a collection of biologically based 3D neural network models of the brain that power ongoing research in computational cognitive neuroscience.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "emergent-icon.svg"))
-	})
+	}, "https://emersim.org")
 
-	// makeBlock(`<a href="https://github.com/WaveELD/WELDBook/blob/main/textmd/ch01_intro.md">WELD</a>`, "WELD is a set of 3D computational models of a new approach to quantum physics based on the de Broglie-Bohm pilot wave theory.", func(w *core.Image) {
+	// makeBlock("WELD", "WELD is a set of 3D computational models of a new approach to quantum physics based on the de Broglie-Bohm pilot wave theory.", func(w *core.Image) {
 	// 	errors.Log(w.OpenFS(resources, "weld-icon.png"))
 	// 	w.Styler(func(s *styles.Style) {
 	// 		s.Min.Set(units.Dp(256))
 	// 	})
-	// })
+	// }, "https://github.com/WaveELD/WELDBook/blob/main/textmd/ch01_intro.md")
 
 	tree.AddChild(home, func(w *core.Text) {
 		w.SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core instead of something else?</b>")

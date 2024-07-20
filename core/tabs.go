@@ -33,9 +33,9 @@ type Tabs struct {
 	// NewTabButton is whether to show a new tab button at the end of the list of tabs.
 	NewTabButton bool
 
-	// MaxChars is the maximum number of characters to include in the tab text.
+	// maxChars is the maximum number of characters to include in the tab text.
 	// It elides text that are longer than that.
-	MaxChars int
+	maxChars int
 
 	// CloseIcon is the icon used for tab close buttons.
 	// If it is "" or [icons.None], the tab is not closeable.
@@ -103,7 +103,7 @@ func (tt TabTypes) isColumn() bool {
 
 func (ts *Tabs) Init() {
 	ts.Frame.Init()
-	ts.MaxChars = 16
+	ts.maxChars = 16
 	ts.CloseIcon = icons.Close
 	ts.Styler(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnBackground
@@ -131,17 +131,21 @@ func (ts *Tabs) Init() {
 					s.Wrap = true
 				}
 			})
-			// w.Maker(func(p *tree.Plan) {
-			// 	if ts.NewTabButton {
-			// 		AddAt(p, "new-tab", func(w *Button) { // TODO(config)
-			// 			w.SetIcon(icons.Add).SetType(ButtonAction)
-			// 			w.OnClick(func(e events.Event) {
-			// 				ts.NewTab("New tab")
-			// 				ts.SelectTabIndex(ts.NumTabs() - 1)
-			// 			})
-			// 		})
-			// 	}
-			// })
+			w.Updater(func() {
+				if !ts.NewTabButton {
+					w.DeleteChildByName("new-tab-button")
+					return
+				}
+				if w.ChildByName("new-tab-button") != nil {
+					return
+				}
+				ntb := NewButton(w).SetType(ButtonAction).SetIcon(icons.Add)
+				ntb.SetTooltip("Add a new tab").SetName("new-tab-button")
+				ntb.OnClick(func(e events.Event) {
+					ts.NewTab("New tab")
+					ts.SelectTabIndex(ts.NumTabs() - 1)
+				})
+			})
 		})
 		tree.AddAt(p, "frame", func(w *Frame) {
 			ts.frame = w
@@ -152,8 +156,7 @@ func (ts *Tabs) Init() {
 				s.Grow.Set(1, 1)
 			})
 			w.SetOnChildAdded(func(n tree.Node) {
-				_, wb := AsWidget(n)
-				wb.Styler(func(s *styles.Style) {
+				AsWidget(n).Styler(func(s *styles.Style) {
 					// tab frames must scroll independently and grow
 					s.Overflow.Set(styles.OverflowAuto)
 					s.Grow.Set(1, 1)
@@ -225,7 +228,8 @@ func (ts *Tabs) insertTabOnlyAt(label string, idx int, icon ...icons.Icon) {
 	tab := tree.New[Tab]()
 	tb.InsertChild(tab, idx)
 	tab.SetName(label)
-	tab.SetText(label).SetType(ts.Type).SetCloseIcon(ts.CloseIcon).SetMaxChars(ts.MaxChars).SetTooltip(label)
+	tab.SetText(label).SetType(ts.Type).SetCloseIcon(ts.CloseIcon).SetTooltip(label)
+	tab.maxChars = ts.maxChars
 	if len(icon) > 0 {
 		tab.SetIcon(icon[0])
 	}
@@ -435,14 +439,14 @@ type Tab struct { //core:no-new
 
 	// TODO(kai): replace this with general text overflow property (#778)
 
-	// MaxChars is the maximum number of characters to include in tab text.
+	// maxChars is the maximum number of characters to include in tab text.
 	// It elides text that is longer than that.
-	MaxChars int
+	maxChars int
 }
 
 func (tb *Tab) Init() {
 	tb.Frame.Init()
-	tb.MaxChars = 16
+	tb.maxChars = 16
 	tb.CloseIcon = icons.Close
 	tb.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
@@ -477,8 +481,8 @@ func (tb *Tab) Init() {
 	tb.HandleClickOnEnterSpace()
 
 	tb.Maker(func(p *tree.Plan) {
-		if tb.MaxChars > 0 { // TODO(config): find a better time to do this?
-			tb.Text = elide.Middle(tb.Text, tb.MaxChars)
+		if tb.maxChars > 0 { // TODO: find a better time to do this?
+			tb.Text = elide.Middle(tb.Text, tb.maxChars)
 		}
 
 		if tb.Icon.IsSet() {

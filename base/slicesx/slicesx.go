@@ -39,11 +39,12 @@ func Swap[E any](s []E, i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-// ToAny converts a slice of the given type to a []any slice.
-func ToAny[E any](s []E) []any {
-	as := make([]any, len(s))
+// As converts a slice of the given type to a slice of the other given type.
+// The underlying types of the slice elements must be equivalent.
+func As[F, T any](s []F) []T {
+	as := make([]T, len(s))
 	for i, v := range s {
-		as[i] = v
+		as[i] = any(v).(T)
 	}
 	return as
 }

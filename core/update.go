@@ -29,8 +29,8 @@ func (wb *WidgetBase) UpdateWidget() *WidgetBase {
 // UpdateTree calls [WidgetBase.UpdateWidget] on every widget in the tree
 // starting with this one and going down.
 func (wb *WidgetBase) UpdateTree() {
-	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wb.UpdateWidget()
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		cwb.UpdateWidget()
 		return tree.Continue
 	})
 }
@@ -51,15 +51,15 @@ func (wb *WidgetBase) UpdateTree() {
 //
 // If you are calling this in a separate goroutine outside of the main
 // configuration, rendering, and event handling structure, you need to
-// call [WidgetBase.Async], or [WidgetBase.AsyncLock] and
-// [WidgetBase.AsyncUnlock] before and after this, respectively.
+// call [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and
+// after this, respectively.
 func (wb *WidgetBase) Update() { //types:add
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
 	}
-	wb.WidgetWalkDown(func(w Widget, wb *WidgetBase) bool {
-		wb.UpdateWidget()
-		w.Style()
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		cwb.UpdateWidget()
+		cw.Style()
 		return tree.Continue
 	})
 	wb.NeedsLayout()
@@ -72,9 +72,9 @@ func (wb *WidgetBase) Update() { //types:add
 // or other layout properties of the widget, you need a new layout pass
 // and should call [WidgetBase.Update] instead).
 func (wb *WidgetBase) UpdateRender() {
-	wb.WidgetWalkDown(func(w Widget, wb *WidgetBase) bool {
-		wb.UpdateWidget()
-		w.Style()
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		cwb.UpdateWidget()
+		cw.Style()
 		return tree.Continue
 	})
 	wb.NeedsRender()

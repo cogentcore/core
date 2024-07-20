@@ -247,8 +247,8 @@ func (sm *stages) sendShowEvents() {
 				// profile.Profiling = true
 				// pr := profile.Start("send show")
 				sc.Events.getShortcuts()
-				sc.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
-					kwi.AsWidget().Send(events.Show)
+				sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+					cwb.Send(events.Show)
 					return tree.Continue
 				})
 				// pr.End()

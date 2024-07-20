@@ -577,6 +577,9 @@ func (lb *ListBase) MakeValue(w Value, i int) {
 	})
 	wb.OnDoubleClick(lb.HandleEvent)
 	wb.On(events.ContextMenu, lb.HandleEvent)
+	wb.OnFirst(events.ContextMenu, func(e events.Event) {
+		wb.Send(events.Select, e) // we must select the row for context menu actions
+	})
 	if !lb.IsReadOnly() {
 		wb.OnInput(lb.HandleEvent)
 	}
@@ -739,30 +742,12 @@ func (lb *ListBase) NewAt(idx int) {
 	}
 
 	lb.NewAtSelect(idx)
-
-	sltyp := reflectx.SliceElementType(lb.Slice) // has pointer if it is there
-	slptr := sltyp.Kind() == reflect.Pointer
-	sz := lb.SliceSize
-	svnp := lb.sliceUnderlying
-
-	nval := reflect.New(reflectx.NonPointerType(sltyp)) // make the concrete el
-	if !slptr {
-		nval = nval.Elem() // use concrete value
-	}
-	svnp = reflect.Append(svnp, nval)
-	if idx >= 0 && idx < sz {
-		reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
-		svnp.Index(idx).Set(nval)
-	}
-	svnp.Set(svnp)
+	reflectx.SliceNewAt(lb.Slice, idx)
 	if idx < 0 {
-		idx = sz
+		idx = lb.SliceSize
 	}
-
-	lb.sliceUnderlying = reflectx.NonPointerValue(reflect.ValueOf(lb.Slice)) // need to update after changes
 
 	lb.This.(Lister).UpdateSliceSize()
-
 	lb.SelectIndexEvent(idx, events.SelectOne)
 	lb.UpdateChange()
 	lb.IndexGrabFocus(idx)

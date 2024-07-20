@@ -5,6 +5,9 @@
 package core
 
 import (
+	"reflect"
+
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
@@ -24,6 +27,7 @@ type Switch struct {
 	Frame
 
 	// Type is the styling type of switch.
+	// It must be set using [Switch.SetType].
 	Type SwitchTypes `set:"-"`
 
 	// Text is the optional text of the switch.
@@ -40,7 +44,7 @@ type Switch struct {
 }
 
 // SwitchTypes contains the different types of [Switch]es.
-type SwitchTypes int32 //enums:enum -trim-prefix Switch
+type SwitchTypes int32 //enums:enum -trim-prefix Switch -transform kebab
 
 const (
 	// SwitchSwitch indicates to display a switch as a switch (toggle slider).
@@ -70,6 +74,13 @@ func (sw *Switch) SetWidgetValue(value any) error {
 	}
 	sw.SetChecked(b)
 	return nil
+}
+
+func (sw *Switch) OnBind(value any, tags reflect.StructTag) {
+	if d, ok := tags.Lookup("display"); ok {
+		errors.Log(sw.Type.SetString(d))
+		sw.SetType(sw.Type)
+	}
 }
 
 func (sw *Switch) Init() {
@@ -266,7 +277,6 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 		sw.IconOff = icons.RadioButtonUnchecked
 		sw.IconIndeterminate = icons.RadioButtonPartial
 	}
-	sw.NeedsLayout()
 	return sw
 }
 

@@ -248,18 +248,16 @@ func (n *NodeBase) Path() string {
 // automatically gets the [NodeBase.This] version of the given parent,
 // so a base type can be passed in without manually accessing [NodeBase.This].
 func (n *NodeBase) PathFrom(parent Node) string {
+	if n.This == parent {
+		return ""
+	}
 	// critical to get `This`
 	parent = parent.AsTree().This
 	// we bail a level below the parent so it isn't in the path
 	if n.Parent == nil || n.Parent == parent {
 		return EscapePathName(n.Name)
 	}
-	ppath := ""
-	if n.Parent == parent {
-		ppath = "/" + EscapePathName(parent.AsTree().Name)
-	} else {
-		ppath = n.Parent.AsTree().PathFrom(parent)
-	}
+	ppath := n.Parent.AsTree().PathFrom(parent)
 	return ppath + "/" + EscapePathName(n.Name)
 
 }

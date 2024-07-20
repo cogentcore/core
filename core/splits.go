@@ -123,8 +123,7 @@ func (sl *Splits) Init() {
 	})
 	sl.SetOnChildAdded(func(n tree.Node) {
 		if n != sl.Parts {
-			_, wb := AsWidget(n)
-			wb.Styler(func(s *styles.Style) {
+			AsWidget(n).Styler(func(s *styles.Style) {
 				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
@@ -545,8 +544,8 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 	cszd -= float32(len(sl.Splits)-1) * (hwd + gapd)
 
 	setCsz := func(idx int, szm, szc float32) {
-		_, kwb := AsWidget(sl.Child(idx))
-		ksz := &kwb.Geom.Size
+		cwb := AsWidget(sl.Child(idx))
+		ksz := &cwb.Geom.Size
 		ksz.Alloc.Total.SetDim(dim, szm)
 		ksz.Alloc.Total.SetDim(odim, szc)
 		ksz.setContentFromTotal(&ksz.Alloc)
@@ -605,9 +604,9 @@ func (sl *Splits) positionSplits() {
 	hwdg := hwd + 0.5*gapd
 
 	setChildPos := func(idx int, dpos, opos float32) {
-		_, kwb := AsWidget(sl.Child(idx))
-		kwb.Geom.RelPos.SetDim(dim, dpos)
-		kwb.Geom.RelPos.SetDim(odim, opos)
+		cwb := AsWidget(sl.Child(idx))
+		cwb.Geom.RelPos.SetDim(dim, dpos)
+		cwb.Geom.RelPos.SetDim(odim, opos)
 	}
 	setHandlePos := func(idx int, dpos, opos, lpos, mn, mx float32) {
 		hl := sl.Parts.Child(idx).(*Handle)
@@ -677,8 +676,8 @@ func (sl *Splits) Position() {
 
 func (sl *Splits) RenderWidget() {
 	if sl.PushBounds() {
-		sl.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-			kwb.SetState(sl.isCollapsed(i), states.Invisible)
+		sl.ForWidgetChildren(func(i int, kwi Widget, cwb *WidgetBase) bool {
+			cwb.SetState(sl.isCollapsed(i), states.Invisible)
 			kwi.RenderWidget()
 			return tree.Continue
 		})

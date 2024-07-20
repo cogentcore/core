@@ -21,13 +21,16 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/tomlx"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pages/wpath"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
@@ -73,6 +76,11 @@ var getWebURL func() string
 
 // saveWebURL, if non-nil, saves the given web URL to the user's browser address bar and history.
 var saveWebURL func(u string)
+
+// needsPath indicates that a URL in [Page.URLToPagePath] needs its path
+// to be set to the first valid child path, since its index.md file does
+// not exist.
+const needsPath = "$__NEEDS_PATH__$"
 
 func (pg *Page) Init() {
 	pg.Frame.Init()
@@ -148,14 +156,28 @@ func (pg *Page) Init() {
 
 					nm := strings.TrimSuffix(base, ext)
 					txt := strcase.ToSentence(nm)
-					tv := core.NewTree(parent).SetText(txt)
-					tv.SetName(nm)
+					tr := core.NewTree(parent).SetText(txt)
+					tr.SetName(nm)
 
 					// need index.md for page path
 					if d.IsDir() {
 						fpath += "/index.md"
 					}
-					pg.URLToPagePath[tv.PathFrom(w)] = fpath
+					exists, err := fsx.FileExistsFS(pg.Source, fpath)
+					if err != nil {
+						return err
+					}
+					if !exists {
+						fpath = needsPath
+						tr.SetProperty("no-index", true)
+					}
+					pg.URLToPagePath[tr.PathFrom(w)] = fpath
+					// everyone who needs a path gets our path
+					for u, p := range pg.URLToPagePath {
+						if p == needsPath {
+							pg.URLToPagePath[u] = fpath
+						}
+					}
 					return nil
 				}))
 				// open the default page if there is no currently open page
@@ -223,6 +245,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		}
 		rawURL = path.Join(current, rawURL)
 	}
+	if rawURL == ".." {
+		rawURL = ""
+	}
 
 	// the paths in the fs are never rooted, so we trim a rooted one
 	rawURL = strings.TrimPrefix(rawURL, "/")
@@ -232,36 +257,8 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 
 	b, err := fs.ReadFile(pg.Source, pg.PagePath)
 	if err != nil {
-		// we go to the first page in the directory if there is no index page
-		if errors.Is(err, fs.ErrNotExist) && (strings.HasSuffix(pg.PagePath, "index.md") || strings.HasSuffix(pg.PagePath, "index.html")) {
-			err = fs.WalkDir(pg.Source, path.Dir(pg.PagePath), func(path string, d fs.DirEntry, err error) error {
-				if err != nil {
-					return err
-				}
-				if path == pg.PagePath || d.IsDir() {
-					return nil
-				}
-				if system.TheApp.Platform() == system.Web && wpath.Draft(path) {
-					return nil
-				}
-				pg.PagePath = path
-				return fs.SkipAll
-			})
-			// need to update rawURL with new page path
-			for u, p := range pg.URLToPagePath {
-				if p == pg.PagePath {
-					rawURL = u
-					break
-				}
-			}
-			if err == nil {
-				b, err = fs.ReadFile(pg.Source, pg.PagePath)
-			}
-		}
-		if errors.Log(err) != nil {
-			core.ErrorSnackbar(pg, err, "Error opening page")
-			return
-		}
+		core.ErrorSnackbar(pg, err, "Error opening page "+rawURL)
+		return
 	}
 
 	pg.Context.PageURL = rawURL
@@ -272,8 +269,8 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	if saveWebURL != nil {
 		saveWebURL(pg.Context.PageURL)
 	}
-	pg.setStageTitle()
 
+	var frontMatter map[string]any
 	btp := []byte("+++")
 	if bytes.HasPrefix(b, btp) {
 		b = bytes.TrimPrefix(b, btp)
@@ -286,8 +283,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 			b = content
 		}
 		if len(fmb) > 0 {
-			var fm map[string]string
-			errors.Log(tomlx.ReadBytes(&fm, fmb))
+			errors.Log(tomlx.ReadBytes(&frontMatter, fmb))
 		}
 	}
 
@@ -295,9 +291,27 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	NumExamples[pg.Context.PageURL] = 0
 
 	pg.nav.UnselectAll()
-	utv := pg.nav.FindPath(rawURL).(*core.Tree)
-	utv.Select()
-	utv.ScrollToThis()
+	curNav := pg.nav.FindPath(rawURL).(*core.Tree)
+	// we must select the first tree that does not have "no-index"
+	if curNav.Property("no-index") != nil {
+		got := false
+		curNav.WalkDown(func(n tree.Node) bool {
+			if got {
+				return tree.Break
+			}
+			tr, ok := n.(*core.Tree)
+			if !ok || n.AsTree().Property("no-index") != nil {
+				return tree.Continue
+			}
+			curNav = tr
+			got = true
+			return tree.Break
+		})
+	}
+	curNav.Select()
+	curNav.ScrollToThis()
+	pg.Context.PageURL = curNav.PathFrom(pg.nav)
+	pg.setStageTitle()
 
 	pg.body.DeleteChildren()
 	if wpath.Draft(pg.PagePath) {
@@ -307,14 +321,22 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 			s.Font.Weight = styles.WeightBold
 		})
 	}
-	if utv != pg.nav {
-		core.NewText(pg.body).SetType(core.TextDisplaySmall).SetText(utv.Text)
+	if curNav != pg.nav {
+		bc := core.NewText(pg.body).SetText(wpath.Breadcrumbs(pg.Context.PageURL, core.TheApp.Name()))
+		bc.HandleTextClick(func(tl *paint.TextLink) {
+			pg.Context.OpenURL(tl.URL)
+		})
+		core.NewText(pg.body).SetType(core.TextDisplaySmall).SetText(curNav.Text)
+	}
+	if author := frontMatter["author"]; author != nil {
+		author := slicesx.As[any, string](author.([]any))
+		core.NewText(pg.body).SetType(core.TextTitleLarge).SetText("By " + strcase.FormatList(author...))
 	}
 	base := strings.TrimPrefix(path.Base(pg.PagePath), "-")
 	if len(base) >= 10 {
 		date := base[:10]
 		if t, err := time.Parse("2006-01-02", date); err == nil {
-			core.NewText(pg.body).SetType(core.TextTitleLarge).SetText(t.Format("1/2/2006"))
+			core.NewText(pg.body).SetType(core.TextTitleMedium).SetText(t.Format("1/2/2006"))
 		}
 	}
 	err = htmlcore.ReadMD(pg.Context, pg.body, b)
@@ -322,6 +344,36 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		core.ErrorSnackbar(pg, err, "Error loading page")
 		return
 	}
+
+	if curNav != pg.nav {
+		buttons := core.NewFrame(pg.body)
+		buttons.Styler(func(s *styles.Style) {
+			s.Align.Items = styles.Center
+			s.Grow.Set(1, 0)
+		})
+		if previous, ok := tree.Previous(curNav).(*core.Tree); ok {
+			// we must skip over trees with "no-index" to get to a real new page
+			for previous != nil && previous.Property("no-index") != nil {
+				previous, _ = tree.Previous(previous).(*core.Tree)
+			}
+			if previous != nil {
+				bt := core.NewButton(buttons).SetText("Previous").SetIcon(icons.ArrowBack).SetType(core.ButtonTonal)
+				bt.OnClick(func(e events.Event) {
+					curNav.Unselect()
+					previous.SelectEvent(events.SelectOne)
+				})
+			}
+		}
+		if next, ok := tree.Next(curNav).(*core.Tree); ok {
+			core.NewStretch(buttons)
+			bt := core.NewButton(buttons).SetText("Next").SetIcon(icons.ArrowForward).SetType(core.ButtonTonal)
+			bt.OnClick(func(e events.Event) {
+				curNav.Unselect()
+				next.SelectEvent(events.SelectOne)
+			})
+		}
+	}
+
 	pg.body.Update()
 	pg.body.ScrollDimToContentStart(math32.Y)
 }

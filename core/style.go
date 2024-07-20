@@ -146,8 +146,8 @@ func (wb *WidgetBase) styleSettings() {
 // StyleTree calls [WidgetBase.Style] on every widget in tree
 // underneath and including this widget.
 func (wb *WidgetBase) StyleTree() {
-	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wi.Style()
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		cw.Style()
 		return tree.Continue
 	})
 }

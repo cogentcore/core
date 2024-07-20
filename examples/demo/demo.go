@@ -211,15 +211,13 @@ func inputs(ts *core.Tabs) {
 	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetStrings("Checkbox 1", "Checkbox 2", "Checkbox 3")
 	cs := core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3")
 	cs.SetOnChildAdded(func(n tree.Node) {
-		_, wb := core.AsWidget(n)
-		wb.SetState(true, states.Indeterminate)
+		core.AsWidget(n).SetState(true, states.Indeterminate)
 	})
 
 	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetStrings("Radio Button 1", "Radio Button 2", "Radio Button 3")
 	rs := core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3")
 	rs.SetOnChildAdded(func(n tree.Node) {
-		_, wb := core.AsWidget(n)
-		wb.SetState(true, states.Indeterminate)
+		core.AsWidget(n).SetState(true, states.Indeterminate)
 	})
 
 	core.NewSwitches(tab).SetType(core.SwitchSegmentedButton).SetMutex(true).SetStrings("Segmented Button 1", "Segmented Button 2", "Segmented Button 3")

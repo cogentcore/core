@@ -19,6 +19,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
+	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/enums/enumgen"
 	"cogentcore.org/core/types/typegen"
@@ -77,6 +78,15 @@ type Build struct { //types:add
 
 	// the target platforms to build executables for
 	Target []Platform `flag:"t,target" posarg:"0" required:"-" save:"-"`
+
+	// Dir is the directory to build the app from.
+	// It defaults to the current directory.
+	Dir string
+
+	// Output is the directory to output the built app to.
+	// It defaults to the current directory for desktop executables
+	// and "bin/{platform}" for all other platforms and command "pack".
+	Output string `flag:"o,output"`
 
 	// whether to build/run the app in debug mode, which sets
 	// the "debug" tag when building. On iOS and Android, this
@@ -164,6 +174,29 @@ func (c *Config) OnConfig(cmd string) error {
 	// the config file to be specific to our platform
 	if len(c.Build.Target) == 0 && cmd != "init" {
 		c.Build.Target = []Platform{{OS: runtime.GOOS, Arch: runtime.GOARCH}}
+	}
+	if c.Build.Output == "" && len(c.Build.Target) > 0 {
+		t := c.Build.Target[0]
+		if cmd == "pack" || t.OS == "web" || t.OS == "android" || t.OS == "ios" {
+			c.Build.Output = filepath.Join("bin", t.OS)
+		}
+	}
+	// we must make the output dir absolute before changing the current directory
+	out, err := filepath.Abs(c.Build.Output)
+	if err != nil {
+		return err
+	}
+	c.Build.Output = out
+	if c.Build.Dir != "" {
+		err := os.Chdir(c.Build.Dir)
+		if err != nil {
+			return err
+		}
+		// re-read the config file from the new location if it exists
+		err = tomlx.Open(c, "core.toml")
+		if err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
 	}
 	return nil
 }

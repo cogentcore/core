@@ -58,7 +58,7 @@ func packLinux(c *config.Config) error {
 	vnm := strings.TrimPrefix(c.Version, "v")
 	avnm := anm + "_" + vnm
 
-	bpath := filepath.Join("bin", "linux")
+	bpath := c.Build.Output
 	apath := filepath.Join(bpath, avnm)
 	ulbpath := filepath.Join(apath, "usr", "local", "bin")
 	usipath := filepath.Join(apath, "usr", "share", "icons", "hicolor")
@@ -191,7 +191,7 @@ func packDarwin(c *config.Config) error {
 
 	anm := c.Name + ".app"
 
-	bpath := filepath.Join("bin", "darwin")
+	bpath := c.Build.Output
 	apath := filepath.Join(bpath, anm)
 	cpath := filepath.Join(apath, "Contents")
 	mpath := filepath.Join(cpath, "MacOS")
@@ -341,7 +341,7 @@ background = "builtin-arrow"
 
 // packWindows packages the app for Windows by generating a .msi file.
 func packWindows(c *config.Config) error {
-	opath := filepath.Join("bin", "windows")
+	opath := c.Build.Output
 	ipath := filepath.Join(opath, "tempWindowsInstaller")
 	gpath := filepath.Join(ipath, "installer.go")
 	epath := filepath.Join(opath, c.Name+" Installer.exe")

@@ -87,13 +87,12 @@ func TestTabsNew(t *testing.T) {
 }
 
 func TestTabsNewClick(t *testing.T) {
-	t.Skip("TODO(config): NewTabButton not working correctly with new config structure")
 	b := NewBody()
 	ts := NewTabs(b).SetNewTabButton(true)
 	ts.NewTab("First")
 	ts.NewTab("Second")
 	b.AssertRender(t, "tabs/new-click", func() {
-		ts.getTabs().ChildByName("new-tab").(Widget).AsWidget().Send(events.Click)
+		AsWidget(ts.getTabs().ChildByName("new-tab-button")).Send(events.Click)
 		assert.Equal(t, ts.NumTabs(), 3)
 	})
 }

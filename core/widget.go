@@ -37,8 +37,11 @@ type Widget interface {
 	// core widget functionality is implemented on [WidgetBase].
 	AsWidget() *WidgetBase
 
-	// See [WidgetBase.Style].
-	Style() // TODO(config): remove
+	// Style updates the style properties of the widget based on [WidgetBase.Stylers].
+	// To specify the style properties of a widget, use [WidgetBase.Styler].
+	// Widgets can implement this method if necessary to add additional styling behavior,
+	// such as calling [units.Value.ToDots] on a custom [units.Value] field.
+	Style()
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 	// based on Styles.Min / Max sizes and actual content sizing
@@ -290,19 +293,18 @@ func (wb *WidgetBase) OnAdd() {
 // This can be necessary when creating widgets outside the usual New* paradigm,
 // e.g., when reading from a JSON file.
 func (wb *WidgetBase) setScene(sc *Scene) {
-	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
-		kwb.Scene = sc
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		cwb.Scene = sc
 		return tree.Continue
 	})
 }
 
-// AsWidget returns the given [tree.Node]
-// as a [Widget] interface and a [WidgetBase].
-func AsWidget(n tree.Node) (Widget, *WidgetBase) {
+// AsWidget returns the given [tree.Node] as a [WidgetBase] or nil.
+func AsWidget(n tree.Node) *WidgetBase {
 	if w, ok := n.(Widget); ok {
-		return w, w.AsWidget()
+		return w.AsWidget()
 	}
-	return nil, nil
+	return nil
 }
 
 func (wb *WidgetBase) AsWidget() *WidgetBase {
@@ -311,7 +313,7 @@ func (wb *WidgetBase) AsWidget() *WidgetBase {
 
 func (wb *WidgetBase) CopyFieldsFrom(from tree.Node) {
 	wb.NodeBase.CopyFieldsFrom(from)
-	_, frm := AsWidget(from)
+	frm := AsWidget(from)
 
 	n := len(wb.ContextMenus)
 	if len(frm.ContextMenus) > n {
@@ -413,9 +415,9 @@ func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 
 // ForWidgetChildren iterates through the children as widgets, calling the given function.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) ForWidgetChildren(fun func(i int, w Widget, cwb *WidgetBase) bool) {
-	for i, k := range wb.Children {
-		w, cwb := AsWidget(k)
+func (wb *WidgetBase) ForWidgetChildren(fun func(i int, cw Widget, cwb *WidgetBase) bool) {
+	for i, c := range wb.Children {
+		w, cwb := c.(Widget), AsWidget(c)
 		if !fun(i, w, cwb) {
 			break
 		}
@@ -426,9 +428,9 @@ func (wb *WidgetBase) ForWidgetChildren(fun func(i int, w Widget, cwb *WidgetBas
 // excluding any with the *local* states.Invisible flag set (does not check parents).
 // This is used e.g., for layout functions to exclude non-visible direct children.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) forVisibleChildren(fun func(i int, w Widget, cwb *WidgetBase) bool) {
+func (wb *WidgetBase) forVisibleChildren(fun func(i int, cw Widget, cwb *WidgetBase) bool) {
 	for i, k := range wb.Children {
-		w, cwb := AsWidget(k)
+		w, cwb := k.(Widget), AsWidget(k)
 		if cwb.StateIs(states.Invisible) {
 			continue
 		}
@@ -441,10 +443,10 @@ func (wb *WidgetBase) forVisibleChildren(fun func(i int, w Widget, cwb *WidgetBa
 
 // WidgetWalkDown is a version of [tree.NodeBase.WalkDown] that operates on [Widget] types.
 // Return [tree.Continue] to continue and [tree.Break] to terminate.
-func (wb *WidgetBase) WidgetWalkDown(fun func(kwi Widget, kwb *WidgetBase) bool) {
-	wb.WalkDown(func(k tree.Node) bool {
-		kwi, kwb := AsWidget(k)
-		return fun(kwi, kwb)
+func (wb *WidgetBase) WidgetWalkDown(fun func(cw Widget, cwb *WidgetBase) bool) {
+	wb.WalkDown(func(n tree.Node) bool {
+		cw, cwb := n.(Widget), AsWidget(n)
+		return fun(cw, cwb)
 	})
 }
 

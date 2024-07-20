@@ -41,7 +41,6 @@ func Format(path string) string {
 // Label returns a user friendly label for the given page URL,
 // with the given backup name if the URL is blank.
 func Label(u string, backup string) string {
-	res := ""
 	if u == "" {
 		return backup
 	}
@@ -50,6 +49,33 @@ func Label(u string, backup string) string {
 		parts[i] = strcase.ToSentence(part)
 	}
 	slices.Reverse(parts)
-	res = strings.Join(parts, " • ")
-	return res
+	return strings.Join(parts, " • ")
+}
+
+// Breadcrumbs returns breadcrumbs (context about the parent directories
+// of the given URL). The breadcrumb parts are links. It also takes the
+// given name user-friendly name for the root directory.
+func Breadcrumbs(u string, root string) string {
+	dir := path.Dir(u)
+	if dir == "" {
+		return ""
+	}
+	if !strings.HasPrefix(dir, ".") {
+		dir = "./" + dir
+	}
+	parts := strings.Split(dir, "/")
+	for i, part := range parts {
+		n := len(parts) - i
+		pageURL := ""
+		for range n {
+			pageURL = path.Join(pageURL, "..")
+		}
+		pageURL = path.Join(pageURL, part)
+		s := strcase.ToSentence(part)
+		if part == "." {
+			s = root
+		}
+		parts[i] = `<a href="` + pageURL + `">` + s + `</a>`
+	}
+	return strings.Join(parts, " • ")
 }

@@ -76,8 +76,8 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 
 	var ffn *Node
 	found := false
-	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
-		sfn := AsNode(wi)
+	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		sfn := AsNode(cw)
 		if sfn == nil {
 			return tree.Continue
 		}
@@ -110,8 +110,8 @@ func NodeNameCountSort(ecs []NodeNameCount) {
 // (e.g., fileinfo.Code to find any code files)
 func (fn *Node) FileExtensionCounts(cat fileinfo.Categories) []NodeNameCount {
 	cmap := make(map[string]int, 20)
-	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
-		sfn := AsNode(wi)
+	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		sfn := AsNode(cw)
 		if sfn == nil {
 			return tree.Continue
 		}
@@ -143,8 +143,8 @@ func (fn *Node) FileExtensionCounts(cat fileinfo.Categories) []NodeNameCount {
 // (e.g., fileinfo.Code to find any code files)
 func (fn *Node) LatestFileMod(cat fileinfo.Categories) time.Time {
 	tmod := time.Time{}
-	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
-		sfn := AsNode(wi)
+	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		sfn := AsNode(cw)
 		if sfn == nil {
 			return tree.Continue
 		}

@@ -188,7 +188,7 @@ func (em *Events) handleFocusEvent(e events.Event) {
 	}
 	if em.focus != nil {
 		em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
-			_, wb := AsWidget(k)
+			wb := AsWidget(k)
 			if !wb.IsVisible() {
 				return tree.Break
 			}
@@ -200,7 +200,7 @@ func (em *Events) handleFocusEvent(e events.Event) {
 		}
 		if !e.IsHandled() {
 			em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
-				_, wb := AsWidget(k)
+				wb := AsWidget(k)
 				if !wb.IsVisible() {
 					return tree.Break
 				}
@@ -660,21 +660,21 @@ func (em *Events) handleLong(e events.Event, deep Widget, w *Widget, pos *image.
 
 func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 	wb := w.AsWidget()
-	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		// we do not handle disabled here so that
 		// we correctly process cursors for disabled elements.
 		// it needs to be handled downstream by anyone who needs it.
-		if !kwb.IsVisible() {
+		if !cwb.IsVisible() {
 			return tree.Break
 		}
-		if !kwb.posInScBBox(pos) {
+		if !cwb.posInScBBox(pos) {
 			return tree.Break
 		}
-		em.mouseInBBox = append(em.mouseInBBox, kwi)
-		if kwb.Parts != nil {
-			em.getMouseInBBox(kwb.Parts, pos)
+		em.mouseInBBox = append(em.mouseInBBox, cw)
+		if cwb.Parts != nil {
+			em.getMouseInBBox(cwb.Parts, pos)
 		}
-		if ly := AsFrame(kwi); ly != nil {
+		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] {
 					sb := ly.scrolls[d]
@@ -959,7 +959,7 @@ func (em *Events) focusOnOrNext(foc Widget) bool {
 	if cfoc == foc {
 		return true
 	}
-	_, wb := AsWidget(foc)
+	wb := AsWidget(foc)
 	if !wb.IsVisible() {
 		return false
 	}
@@ -977,7 +977,7 @@ func (em *Events) focusOnOrPrev(foc Widget) bool {
 	if cfoc == foc {
 		return true
 	}
-	_, wb := AsWidget(foc)
+	wb := AsWidget(foc)
 	if !wb.IsVisible() {
 		return false
 	}

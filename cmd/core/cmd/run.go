@@ -53,9 +53,9 @@ func Run(c *config.Config) error { //types:add
 	}
 	switch t.OS {
 	case "darwin", "windows", "linux":
-		return exec.Verbose().SetBuffer(false).Run("." + string(filepath.Separator) + c.Name)
+		return exec.Verbose().SetBuffer(false).Run(filepath.Join(c.Build.Output, c.Name))
 	case "android":
-		err := exec.Run("adb", "install", "-r", filepath.Join("bin", "android", c.Name+".apk"))
+		err := exec.Run("adb", "install", "-r", filepath.Join(c.Build.Output, c.Name+".apk"))
 		if err != nil {
 			return fmt.Errorf("error installing app: %w", err)
 		}
@@ -77,7 +77,7 @@ func Run(c *config.Config) error { //types:add
 		if !c.Build.Debug {
 			return mobile.Install(c)
 		}
-		return exec.Verbose().SetBuffer(false).Run("ios-deploy", "-b", filepath.Join("bin", "ios", c.Name+".app"), "-d")
+		return exec.Verbose().SetBuffer(false).Run("ios-deploy", "-b", filepath.Join(c.Build.Output, c.Name+".app"), "-d")
 	case "web":
 		return web.Serve(c)
 	}

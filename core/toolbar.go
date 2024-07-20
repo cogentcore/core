@@ -143,11 +143,11 @@ func (tb *Toolbar) moveToOverflow() {
 	ovidx := n - 1
 	hasOv := false
 	szsum := float32(0)
-	tb.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	tb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		if i >= n-1 {
 			return tree.Break
 		}
-		ksz := kwb.Geom.Size.Alloc.Total.Dim(ma)
+		ksz := cwb.Geom.Size.Alloc.Total.Dim(ma)
 		szsum += ksz
 		if szsum > avsz {
 			if !hasOv {

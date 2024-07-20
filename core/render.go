@@ -21,22 +21,9 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Async calls the given function after [WidgetBase.AsyncLock] and before
-// [WidgetBase.AsyncUnlock]. It should be used when making any updates in
-// a separate goroutine outside of the main configuration, rendering, and
-// event handling structure. If those updates are not contained within a
-// single function, you should call [WidgetBase.AsyncLock] and
-// [WidgetBase.AsyncUnlock] directly instead.
-func (wb *WidgetBase) Async(f func()) {
-	wb.AsyncLock()
-	f()
-	wb.AsyncUnlock()
-}
-
 // AsyncLock must be called before making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
-// It must have a matching [WidgetBase.AsyncUnlock] after it. Also see
-// [WidgetBase.Async].
+// It must have a matching [WidgetBase.AsyncUnlock] after it.
 func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {
@@ -54,8 +41,7 @@ func (wb *WidgetBase) AsyncLock() {
 
 // AsyncUnlock must be called after making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
-// It must have a matching [WidgetBase.AsyncLock] before it. Also see
-// [WidgetBase.Async].
+// It must have a matching [WidgetBase.AsyncLock] before it.
 func (wb *WidgetBase) AsyncUnlock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {
@@ -156,12 +142,12 @@ func (wb *WidgetBase) doNeedsRender() {
 	if wb.This == nil {
 		return
 	}
-	wb.WidgetWalkDown(func(w Widget, cwb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		if cwb.needsRender {
-			w.RenderWidget()
+			cw.RenderWidget()
 			return tree.Break // don't go any deeper
 		}
-		if ly := AsFrame(w); ly != nil {
+		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] && ly.scrolls[d] != nil {
 					ly.scrolls[d].doNeedsRender()
@@ -408,8 +394,8 @@ func (wb *WidgetBase) renderParts() {
 
 // renderChildren renders all of the widget's children.
 func (wb *WidgetBase) renderChildren() {
-	wb.ForWidgetChildren(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwi.RenderWidget()
+	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		cw.RenderWidget()
 		return tree.Continue
 	})
 }

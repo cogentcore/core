@@ -53,7 +53,7 @@ func Install(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
-			return exec.Run("cp", "-a", filepath.Join("bin", "darwin", c.Name+".app"), "/Applications")
+			return exec.Run("cp", "-a", filepath.Join(c.Build.Output, c.Name+".app"), "/Applications")
 		default:
 			return exec.Major().SetEnv("GOOS", p.OS).SetEnv("GOARCH", runtime.GOARCH).Run("go", "install")
 		}
