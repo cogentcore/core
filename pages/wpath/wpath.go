@@ -52,6 +52,17 @@ func Label(u string, backup string) string {
 	return strings.Join(parts, " • ")
 }
 
+// BasePath returns a path that will take the given path all the
+// way to the root using sequences of "..".
+func BasePath(path string) string {
+	numNested := strings.Count(path, "/") + 1
+	basePath := ""
+	for range numNested {
+		basePath += "../"
+	}
+	return basePath
+}
+
 // Breadcrumbs returns breadcrumbs (context about the parent directories
 // of the given URL). The breadcrumb parts are links. It also takes the
 // given name user-friendly name for the root directory.

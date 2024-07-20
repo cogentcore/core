@@ -172,16 +172,11 @@ func makePages(c *config.Config) error {
 		if err != nil {
 			return err
 		}
-		numNested := strings.Count(path, "/") + 1
-		basePath := ""
-		for range numNested {
-			basePath += "../"
-		}
 		title := wpath.Label(path, c.Name)
 		if title != c.Name {
 			title += " • " + c.Name
 		}
-		b, err := makeIndexHTML(c, basePath, title)
+		b, err := makeIndexHTML(c, wpath.BasePath(path), title)
 		if err != nil {
 			return err
 		}
