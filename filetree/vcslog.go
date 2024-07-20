@@ -133,7 +133,9 @@ func (lv *VCSLog) Init() {
 			buf.Filename = core.Filename(lv.File)
 			buf.Options.LineNumbers = true
 			buf.Stat()
-			texteditor.NewEditor(d).SetBuffer(buf)
+			texteditor.NewEditor(d).SetBuffer(buf).Styler(func(s *styles.Style) {
+				s.Grow.Set(1, 1)
+			})
 			buf.SetText(cinfo)
 			d.AddBottomBar(func(parent core.Widget) {
 				core.NewButton(parent).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
@@ -268,7 +270,9 @@ func fileAtRevisionDialog(ctx core.Widget, repo vcs.Repo, file, rev string) *cor
 	d := core.NewBody().AddTitle(title)
 
 	tb := texteditor.NewBuffer().SetText(fb).SetFilename(file) // file is key for getting lang
-	texteditor.NewEditor(d).SetBuffer(tb).SetReadOnly(true)
+	texteditor.NewEditor(d).SetBuffer(tb).SetReadOnly(true).Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+	})
 	d.RunWindowDialog(ctx)
 	tb.StartDelayedReMarkup() // update markup
 	return d

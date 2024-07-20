@@ -5,57 +5,70 @@
 package core
 
 import (
+	"strconv"
 	"testing"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles"
 )
 
-func TestSplits(t *testing.T) {
+func makeSplits(n, w, h int) (*Body, *Splits) {
 	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.X.Em(float32(w))
+		s.Min.Y.Em(float32(h))
+	})
 	sp := NewSplits(b)
-	NewText(sp).SetText("First")
-	NewText(sp).SetText("Second")
-	b.AssertRender(t, "splits/basic")
+	for i := range n {
+		f := NewFrame(sp)
+		f.Styler(func(s *styles.Style) {
+			s.Background = colors.Scheme.Select.Container
+		})
+		NewText(f).SetText(strconv.Itoa(i))
+	}
+	return b, sp
 }
 
-func TestSplitsMany(t *testing.T) {
-	b := NewBody()
-	sp := NewSplits(b)
-	NewText(sp).SetText("First")
-	NewText(sp).SetText("Second")
-	NewText(sp).SetText("Third")
-	NewText(sp).SetText("Fourth")
-	b.AssertRender(t, "splits/many")
+func TestSplitsRow2(t *testing.T) {
+	b, _ := makeSplits(2, 40, 20)
+	b.AssertRender(t, "splits/row-2")
 }
 
-func TestSplitsSet(t *testing.T) {
-	b := NewBody()
-	sp := NewSplits(b).SetSplits(0.2, 0.8)
-	NewText(sp).SetText("First")
-	NewText(sp).SetText("Second")
-	b.AssertRender(t, "splits/set")
+func TestSplitsColumn2(t *testing.T) {
+	b, _ := makeSplits(2, 20, 40)
+	b.AssertRender(t, "splits/column-2")
 }
 
-func TestSplitsColumn(t *testing.T) {
-	b := NewBody()
-	sp := NewSplits(b)
+func TestSplitsRow4(t *testing.T) {
+	b, _ := makeSplits(4, 40, 20)
+	b.AssertRender(t, "splits/row-4")
+}
+
+func TestSplitsColumn4(t *testing.T) {
+	b, _ := makeSplits(4, 20, 40)
+	b.AssertRender(t, "splits/column-4")
+}
+
+func TestSplitsRow2Set(t *testing.T) {
+	b, sp := makeSplits(2, 40, 20)
+	sp.SetSplits(0.2, 0.8)
+	b.AssertRender(t, "splits/row-2-set")
+}
+
+func TestSplitsRow2Column(t *testing.T) {
+	b, sp := makeSplits(2, 40, 20)
 	sp.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	NewText(sp).SetText("First")
-	NewText(sp).SetText("Second")
-	b.AssertRender(t, "splits/column")
+	b.AssertRender(t, "splits/row-2-column")
 }
 
-func TestSplitsRow(t *testing.T) {
-	b := NewBody()
-	sp := NewSplits(b)
+func TestSplitsColumn2Row(t *testing.T) {
+	b, sp := makeSplits(2, 20, 40)
 	sp.Styler(func(s *styles.Style) {
 		s.Direction = styles.Row
 	})
-	NewText(sp).SetText("First")
-	NewText(sp).SetText("Second")
-	b.AssertRender(t, "splits/row")
+	b.AssertRender(t, "splits/column-2-row")
 }
 
 // For https://github.com/cogentcore/core/issues/850
@@ -71,4 +84,34 @@ func TestMixedVerticalSplits(t *testing.T) {
 	NewText(sp).SetText(txt)
 	NewText(b).SetText(txt)
 	b.AssertRender(t, "splits/mixed-vertical")
+}
+
+func TestSplitsTilesRowSpanFirst(t *testing.T) {
+	b, sp := makeSplits(4, 40, 20)
+	sp.SetTiles(TileSpan, TileFirstLong)
+	b.AssertRender(t, "splits/tiles-row-span-first")
+}
+
+func TestSplitsTilesRowSpanSecond(t *testing.T) {
+	b, sp := makeSplits(4, 40, 20)
+	sp.SetTiles(TileSpan, TileSecondLong)
+	b.AssertRender(t, "splits/tiles-row-span-second")
+}
+
+func TestSplitsTilesColumnSpanFirst(t *testing.T) {
+	b, sp := makeSplits(4, 20, 40)
+	sp.SetTiles(TileSpan, TileFirstLong)
+	b.AssertRender(t, "splits/tiles-column-span-first")
+}
+
+func TestSplitsTilesColumnSpanSecond(t *testing.T) {
+	b, sp := makeSplits(4, 20, 40)
+	sp.SetTiles(TileSpan, TileSecondLong)
+	b.AssertRender(t, "splits/tiles-column-span-second")
+}
+
+func TestSplitsTilesRowSplitSpanSplit(t *testing.T) {
+	b, sp := makeSplits(5, 40, 20)
+	sp.SetTiles(TileSplit, TileSpan, TileSplit)
+	b.AssertRender(t, "splits/tiles-row-split-span-split")
 }

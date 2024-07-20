@@ -26,6 +26,17 @@ core.NewText(sp).SetText("First")
 core.NewText(sp).SetText("Second")
 ```
 
+You can use [[core.Splits.Tiles]] to create 2D arrangements of widgets, without having to nest multiple splits.  This is simpler because it operates on the same list of child widgets, whereas the nesting approach requires moving child widgets around to switch between different arrangements.
+
+```Go
+sp := core.NewSplits(b)
+core.NewText(sp).SetText("First")
+core.NewText(sp).SetText("Second")
+core.NewText(sp).SetText("Third")
+core.NewText(sp).SetText("Fourth")
+sp.SetTiles(core.TileSpan, core.TileSecondLong)
+```
+
 You can arrange widgets in a column (by default, split widgets are arranged in a row on wide screens and a column on compact screens):
 
 ```Go

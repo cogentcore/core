@@ -1654,12 +1654,12 @@ func (fr *Frame) Position() {
 	fr.positionParts()
 }
 
-func (ly *Frame) positionCells() {
-	if ly.Styles.Display == styles.Flex && ly.Styles.Direction == styles.Column {
-		ly.positionCellsMainY()
+func (fr *Frame) positionCells() {
+	if fr.Styles.Display == styles.Flex && fr.Styles.Direction == styles.Column {
+		fr.positionCellsMainY()
 		return
 	}
-	ly.positionCellsMainX()
+	fr.positionCellsMainX()
 }
 
 // Main axis = X
@@ -1692,25 +1692,25 @@ func (fr *Frame) positionCellsMainX() {
 }
 
 // Main axis = Y
-func (ly *Frame) positionCellsMainY() {
-	gap := ly.layout.Gap
-	sz := &ly.Geom.Size
+func (fr *Frame) positionCellsMainY() {
+	gap := fr.layout.Gap
+	sz := &fr.Geom.Size
 	if DebugSettings.LayoutTraceDetail {
-		fmt.Println(ly, "PositionCells, actual", sz.Actual.Content, "internal:", sz.Internal)
+		fmt.Println(fr, "PositionCells, actual", sz.Actual.Content, "internal:", sz.Internal)
 	}
 	var lastSz math32.Vector2
 	var stPos math32.Vector2
-	stPos.Y = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.Y, sz.Actual.Content.Y)
-	stPos.X = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.X, sz.Actual.Content.X)
+	stPos.Y = styles.AlignPos(fr.Styles.Justify.Content, sz.Internal.Y, sz.Actual.Content.Y)
+	stPos.X = styles.AlignPos(fr.Styles.Align.Content, sz.Internal.X, sz.Actual.Content.X)
 	pos := stPos
 	idx := 0
-	ly.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		if cidx.Y == 0 && idx > 0 {
 			pos.Y = stPos.Y
 			pos.X += lastSz.X + gap.X
 		}
-		cwb.positionWithinAllocMainY(pos, ly.Styles.Justify.Items, ly.Styles.Align.Items)
+		cwb.positionWithinAllocMainY(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items)
 		alloc := cwb.Geom.Size.Alloc.Total
 		pos.Y += alloc.Y + gap.Y
 		lastSz = alloc
@@ -1719,10 +1719,10 @@ func (ly *Frame) positionCellsMainY() {
 	})
 }
 
-func (ly *Frame) positionStacked() {
-	ly.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+func (fr *Frame) positionStacked() {
+	fr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cwb.Geom.RelPos.SetZero()
-		if !ly.LayoutStackTopOnly || i == ly.StackTop {
+		if !fr.LayoutStackTopOnly || i == fr.StackTop {
 			cw.Position()
 		}
 		return tree.Continue
