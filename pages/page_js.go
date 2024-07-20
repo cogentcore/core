@@ -7,6 +7,7 @@
 package pages
 
 import (
+	"fmt"
 	"net/url"
 	"path"
 	"strings"
@@ -59,6 +60,7 @@ func init() {
 			link := links.Index(i)
 			href := link.Get("href").String()
 			relative := strings.TrimPrefix(href, base.String())
+			fmt.Println(href, base.String(), relative)
 			newHref := path.Join(newBasePath, relative)
 			link.Set("href", newHref)
 		}
