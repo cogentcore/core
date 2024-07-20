@@ -7,13 +7,11 @@
 package pages
 
 import (
-	"fmt"
 	"net/url"
 	"strings"
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/pages/wpath"
 )
 
 // firstPage is the first [Page] used for [getWebURL] or [saveWebURL],
@@ -44,7 +42,7 @@ func init() {
 		if firstPage != p {
 			return
 		}
-		full, base, err := getURL()
+		_, base, err := getURL()
 		if errors.Log(err) != nil {
 			return
 		}
@@ -52,21 +50,6 @@ func init() {
 		if errors.Log(err) != nil {
 			return
 		}
-
-		// We must first apply all our new base path to all of the links so
-		// that the favicon updates correctly.
-		newBasePath := wpath.BasePath(u)
-		documentData.Set("basePath", newBasePath)
-		links := js.Global().Get("document").Get("head").Call("getElementsByTagName", "link")
-		for i := range links.Length() {
-			link := links.Index(i)
-			href := link.Get("href").String()
-			relative := strings.TrimPrefix(href, base.String())
-			newHref := newBasePath + relative
-			fmt.Println("href", href, "base", base.String(), "newBasePath", newBasePath, "relative", relative, "newHref", newHref, "currentURL", full.String())
-			link.Set("href", newHref)
-		}
-
 		fullNew := base.ResolveReference(new)
 		js.Global().Get("history").Call("pushState", "", "", fullNew.String())
 	}
@@ -94,5 +77,16 @@ func getURL() (full, base *url.URL, err error) {
 	}
 	base = full.ResolveReference(basePath)
 	originalBase = base
+
+	// We must apply our new absolute base path to all of the links so
+	// that the favicon updates correctly on future page changes.
+	documentData.Set("basePath", base.String())
+	links := js.Global().Get("document").Get("head").Call("getElementsByTagName", "link")
+	for i := range links.Length() {
+		link := links.Index(i)
+		// Get("href") returns the absolute version, so we can just Set it directly.
+		link.Set("href", link.Get("href").String())
+	}
+
 	return
 }
