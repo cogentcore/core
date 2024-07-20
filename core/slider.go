@@ -444,14 +444,16 @@ func (sr *Slider) SetValue(value float32) *Slider {
 }
 
 // setValueEvent sets the value and updates the slider representation, and
-// emits an input and change event
-func (sr *Slider) setValueEvent(val float32) {
+// emits an input and change event.  Returns true if value actually changed.
+func (sr *Slider) setValueEvent(val float32) bool {
 	if sr.Value == val {
-		return
+		return false
 	}
+	curVal := sr.Value
 	sr.SetValue(val)
 	sr.Send(events.Input)
 	sr.SendChange()
+	return curVal != sr.Value
 }
 
 func (sr *Slider) WidgetTooltip(pos image.Point) (string, image.Point) {

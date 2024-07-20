@@ -43,99 +43,102 @@ const dragSpriteName = "__DragSprite__"
 // and Focus management for keyboard events.
 type Events struct {
 
-	// scene is the scene that we manage events for
+	// scene is the scene that we manage events for.
 	scene *Scene
 
-	// mutex that protects timer variable updates (e.g., hover AfterFunc's)
+	// mutex that protects timer variable updates (e.g., hover AfterFunc's).
 	timerMu sync.Mutex
 
-	// stack of sprites with mouse pointer in BBox, with any listeners present
+	// stack of sprites with mouse pointer in BBox, with any listeners present.
 	spriteInBBox []*Sprite
 
-	// currently pressing sprite
+	// currently pressing sprite.
 	spritePress *Sprite
 
-	// currently sliding (dragging) sprite
+	// currently sliding (dragging) sprite.
 	spriteSlide *Sprite
 
 	// stack of widgets with mouse pointer in BBox, and are not Disabled.
 	// Last item in the stack is the deepest nested widget (smallest BBox).
 	mouseInBBox []Widget
 
-	// stack of hovered widgets: have mouse pointer in BBox and have Hoverable flag
+	// stack of hovered widgets: have mouse pointer in BBox and have Hoverable flag.
 	hovers []Widget
 
-	// lastClickWidget is the last widget that has been clicked on
+	// lastClickWidget is the last widget that has been clicked on.
 	lastClickWidget Widget
 
-	// lastDoubleClickWidget is the last widget that has been clicked on
+	// lastDoubleClickWidget is the last widget that has been clicked on.
 	lastDoubleClickWidget Widget
 
-	// lastClickTime is the time the last widget was clicked on
+	// lastClickTime is the time the last widget was clicked on.
 	lastClickTime time.Time
 
-	// the current candidate for a long hover event
+	// the current candidate for a long hover event.
 	longHoverWidget Widget
 
-	// the position of the mouse at the start of LongHoverTimer
+	// the position of the mouse at the start of LongHoverTimer.
 	longHoverPos image.Point
 
-	// the timer for the LongHover event, started with time.AfterFunc
+	// the timer for the LongHover event, started with time.AfterFunc.
 	longHoverTimer *time.Timer
 
-	// the current candidate for a long press event
+	// the current candidate for a long press event.
 	longPressWidget Widget
 
-	// the position of the mouse at the start of LongPressTimer
+	// the position of the mouse at the start of LongPressTimer.
 	longPressPos image.Point
 
-	// the timer for the LongPress event, started with time.AfterFunc
+	// the timer for the LongPress event, started with time.AfterFunc.
 	longPressTimer *time.Timer
 
-	// stack of drag-hovered widgets: have mouse pointer in BBox and have Droppable flag
+	// stack of drag-hovered widgets: have mouse pointer in BBox and have Droppable flag.
 	dragHovers []Widget
 
-	// the deepest widget that was just pressed
+	// the deepest widget that was just pressed.
 	press Widget
 
-	// widget receiving mouse dragging events -- for drag-n-drop
+	// widget receiving mouse dragging events, for drag-n-drop.
 	drag Widget
 
-	// the deepest draggable widget that was just pressed
+	// the deepest draggable widget that was just pressed.
 	dragPress Widget
 
-	// widget receiving mouse sliding events
+	// widget receiving mouse sliding events.
 	slide Widget
 
-	// the deepest slideable widget that was just pressed
+	// the deepest slideable widget that was just pressed.
 	slidePress Widget
 
-	// widget receiving mouse scrolling events
+	// widget receiving mouse scrolling events, has "scroll focus".
 	scroll Widget
 
-	// widget being held down with RepeatClickable ability
+	lastScrollTime time.Time
+
+	// widget being held down with RepeatClickable ability.
 	repeatClick Widget
 
-	// the timer for RepeatClickable items
+	// the timer for RepeatClickable items.
 	repeatClickTimer *time.Timer
 
-	// widget receiving keyboard events -- use SetFocus, CurFocus
+	// widget receiving keyboard events.  Use SetFocus, CurFocus.
 	focus Widget
 
-	// widget to focus on at start when no other focus has been set yet -- use SetStartFocus
+	// widget to focus on at start when no other focus has been
+	// set yet. Use SetStartFocus.
 	startFocus Widget
 
 	// if StartFocus not set, activate starting focus on first element
 	startFocusFirst bool
 
-	// previously focused widget -- what was in Focus when FocusClear is called
+	// previously focused widget.  Was in Focus when FocusClear is called.
 	prevFocus Widget
 
 	// Currently active shortcuts for this window (shortcuts are always window-wide.
 	// Use widget key event processing for more local key functions)
 	shortcuts shortcuts
 
-	// source data from DragStart event
+	// source data from DragStart event.
 	dragData any
 }
 
@@ -257,8 +260,14 @@ func (em *Events) handlePosEvent(e events.Event) {
 		}
 	case events.Scroll:
 		if em.scroll != nil {
-			em.scroll.AsWidget().HandleEvent(e)
-			return
+			scInTime := time.Since(em.lastScrollTime) < DeviceSettings.ScrollFocusTime
+			em.lastScrollTime = time.Now()
+			if scInTime {
+				em.scroll.AsWidget().HandleEvent(e)
+				return
+			} else {
+				em.scroll = nil
+			}
 		}
 	}
 
@@ -299,10 +308,12 @@ func (em *Events) handlePosEvent(e events.Event) {
 		w.AsWidget().HandleEvent(e) // everyone gets the primary event who is in scope, deepest first
 		switch et {
 		case events.MouseMove:
+			em.scroll = nil
 			if move == nil && wb.Styles.Abilities.IsHoverable() {
 				move = w
 			}
 		case events.MouseDown:
+			em.scroll = nil
 			// in ScRenderBBoxes, everyone is effectively pressable
 			if press == nil && (wb.Styles.Abilities.IsPressable() || sc.renderBBoxes) {
 				press = w
@@ -317,9 +328,17 @@ func (em *Events) handlePosEvent(e events.Event) {
 				repeatClick = w
 			}
 		case events.MouseUp:
+			em.scroll = nil
 			// in ScRenderBBoxes, everyone is effectively pressable
 			if up == nil && (wb.Styles.Abilities.IsPressable() || sc.renderBBoxes) {
 				up = w
+			}
+		case events.Scroll:
+			if e.IsHandled() {
+				if em.scroll == nil {
+					em.scroll = w
+					em.lastScrollTime = time.Now()
+				}
 			}
 		}
 	}

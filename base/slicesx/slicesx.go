@@ -8,6 +8,18 @@ package slicesx
 
 import "slices"
 
+// GrowTo increases the slice's capacity, if necessary,
+// so that it can hold at least n elements.
+func GrowTo[S ~[]E, E any](s S, n int) S {
+	if n < 0 {
+		panic("cannot be negative")
+	}
+	if n -= cap(s); n > 0 {
+		s = append(s[:cap(s)], make([]E, n)...)[:len(s)]
+	}
+	return s
+}
+
 // SetLength sets the length of the given slice,
 // re-using and preserving existing values to the extent possible.
 func SetLength[E any](s []E, n int) []E {
@@ -18,7 +30,7 @@ func SetLength[E any](s []E, n int) []E {
 		return make([]E, n)
 	}
 	if cap(s) < n {
-		s = slices.Grow(s, n-cap(s))
+		s = GrowTo(s, n)
 	}
 	s = s[:n]
 	return s

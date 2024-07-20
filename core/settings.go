@@ -408,6 +408,10 @@ type DeviceSettingsData struct { //types:add
 	// so unfortunately you have to set it here.
 	ScrollWheelSpeed float32 `default:"1" min:"0.01" step:"1"`
 
+	// The duration over which the current scroll widget retains scroll focus,
+	// such that subsequent scroll events are sent to it.
+	ScrollFocusTime time.Duration `default:"250ms" min:"50ms" step:"50ms"`
+
 	// The amount of time to wait before initiating a slide event
 	// (as opposed to a basic press event)
 	SlideStartTime time.Duration `default:"50ms" min:"5ms" max:"1s" step:"5ms"`

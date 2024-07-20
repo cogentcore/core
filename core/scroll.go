@@ -198,13 +198,18 @@ func (fr *Frame) setScrollsOff() {
 }
 
 // scrollActionDelta moves the scrollbar in given dimension by given delta.
-func (fr *Frame) scrollActionDelta(d math32.Dims, delta float32) {
+// returns whether actually scrolled.
+func (fr *Frame) scrollActionDelta(d math32.Dims, delta float32) bool {
 	if fr.HasScroll[d] && fr.scrolls[d] != nil {
 		sb := fr.scrolls[d]
 		nval := sb.Value + sb.scrollScale(delta)
-		sb.setValueEvent(nval)
-		fr.NeedsRender() // only render needed -- scroll updates pos
+		chg := sb.setValueEvent(nval)
+		if chg {
+			fr.NeedsRender() // only render needed -- scroll updates pos
+		}
+		return chg
 	}
+	return false
 }
 
 // scrollDelta processes a scroll event.  If only one dimension is processed,
@@ -220,23 +225,30 @@ func (fr *Frame) scrollDelta(e events.Event) {
 		if !fr.HasScroll[math32.X] { // if we have shift, we can only horizontal scroll
 			return
 		}
-		fr.scrollActionDelta(math32.X, fdel.Y)
+		if fr.scrollActionDelta(math32.X, fdel.Y) {
+			e.SetHandled()
+		}
 		return
 	}
 
 	if fr.HasScroll[math32.Y] && fr.HasScroll[math32.X] {
-		fr.scrollActionDelta(math32.Y, fdel.Y)
-		fr.scrollActionDelta(math32.X, fdel.X)
+		ch1 := fr.scrollActionDelta(math32.Y, fdel.Y)
+		ch2 := fr.scrollActionDelta(math32.X, fdel.X)
+		if ch1 || ch2 {
+			e.SetHandled()
+		}
 	} else if fr.HasScroll[math32.Y] {
-		fr.scrollActionDelta(math32.Y, fdel.Y)
-		if se.Delta.X != 0 {
-			se.Delta.Y = 0
+		if fr.scrollActionDelta(math32.Y, fdel.Y) {
+			e.SetHandled()
 		}
 	} else if fr.HasScroll[math32.X] {
 		if se.Delta.X != 0 {
-			fr.scrollActionDelta(math32.X, fdel.X)
-			if se.Delta.Y != 0 {
-				se.Delta.X = 0
+			if fr.scrollActionDelta(math32.X, fdel.X) {
+				e.SetHandled()
+			}
+		} else if se.Delta.Y != 0 {
+			if fr.scrollActionDelta(math32.X, fdel.Y) {
+				e.SetHandled()
 			}
 		}
 	}
