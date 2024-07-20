@@ -84,7 +84,8 @@ func getURL() (full, base *url.URL, err error) {
 	links := js.Global().Get("document").Get("head").Call("getElementsByTagName", "link")
 	for i := range links.Length() {
 		link := links.Index(i)
-		// Get("href") returns the absolute version, so we can just Set it directly.
+		// Get returns the absolute version, so we can just call Set with it
+		// to update the href to actually be the absolute version.
 		link.Set("href", link.Get("href").String())
 	}
 
