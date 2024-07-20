@@ -7,7 +7,6 @@ grid := core.NewFrame(b)
 grid.Styler(func(s *styles.Style) {
     s.Display = styles.Grid
     s.Columns = 3
-    s.Gap.Zero()
 })
 for range 9 {
     bt := core.NewButton(grid).SetType(core.ButtonAction)
@@ -29,7 +28,6 @@ grid := core.NewFrame(b)
 grid.Styler(func(s *styles.Style) {
     s.Display = styles.Grid
     s.Columns = 3
-    s.Gap.Zero()
 })
 for i := range 9 {
     bt := core.NewButton(grid).SetType(core.ButtonAction)
@@ -87,7 +85,6 @@ grid := core.NewFrame(b)
 grid.Styler(func(s *styles.Style) {
     s.Display = styles.Grid
     s.Columns = 3
-    s.Gap.Zero()
 })
 for i := range 9 {
     bt := core.NewButton(grid).SetType(core.ButtonAction)
