@@ -105,6 +105,11 @@ type Splits struct {
 	// savedSubSplits is a saved version of the SubSplits that can be restored
 	// for dynamic collapse/expand operations.
 	savedSubSplits [][]float32
+
+	// handleDirs contains the target directions for each of the handles.
+	// this is set by parent split in its style function, and consumed
+	// by each handle in its own style function.
+	handleDirs []styles.Directions
 }
 
 func (sl *Splits) Init() {
@@ -120,6 +125,9 @@ func (sl *Splits) Init() {
 		} else {
 			s.Direction = styles.Row
 		}
+	})
+	sl.FinalStyler(func(s *styles.Style) {
+		sl.styleSplits()
 	})
 	sl.SetOnChildAdded(func(n tree.Node) {
 		if n != sl.Parts {
@@ -168,18 +176,16 @@ func (sl *Splits) Init() {
 	parts := sl.newParts()
 	parts.Maker(func(p *tree.Plan) {
 		// handles are organized first between tiles, then within tiles.
-		addHand := func(hidx int, hdir styles.Directions) {
+		sl.styleSplits()
+		addHand := func(hidx int) {
 			tree.AddAt(p, "handle-"+strconv.Itoa(hidx), func(w *Handle) {
 				w.OnChange(func(e events.Event) {
 					sl.setHandlePos(w.IndexInParent(), w.Value())
 				})
 				w.Styler(func(s *styles.Style) {
-					dir := sl.Styles.Direction
-					odir := dir.Other()
-					if hdir == styles.Column {
-						s.Direction = dir
-					} else {
-						s.Direction = odir
+					ix := w.IndexInParent()
+					if len(sl.handleDirs) > ix {
+						s.Direction = sl.handleDirs[ix]
 					}
 				})
 			})
@@ -187,18 +193,18 @@ func (sl *Splits) Init() {
 
 		nt := len(sl.Tiles)
 		for i := range nt - 1 {
-			addHand(i, styles.Column)
+			addHand(i)
 		}
 		hi := nt - 1
 		for _, t := range sl.Tiles {
 			switch t {
 			case TileSpan:
 			case TileSplit:
-				addHand(hi, styles.Row)
+				addHand(hi)
 				hi++
 			case TileFirstLong, TileSecondLong:
-				addHand(hi, styles.Row)      // long
-				addHand(hi+1, styles.Column) // sub
+				addHand(hi)     // long
+				addHand(hi + 1) // sub
 				hi += 2
 			}
 		}
@@ -623,6 +629,34 @@ func (sl *Splits) restoreChild(idxs ...int) {
 	}
 	sl.updateSplits()
 	sl.NeedsLayout()
+}
+
+func (sl *Splits) styleSplits() {
+	nt := len(sl.Tiles)
+	nh := nt - 1
+	for _, t := range sl.Tiles {
+		nh += tileNumElements[t] - 1
+	}
+	sl.handleDirs = slicesx.SetLength(sl.handleDirs, nh)
+	dir := sl.Styles.Direction
+	odir := dir.Other()
+	hi := nt - 1 // extra handles
+
+	for i, t := range sl.Tiles {
+		if i > 0 {
+			sl.handleDirs[i-1] = dir
+		}
+		switch t {
+		case TileSpan:
+		case TileSplit:
+			sl.handleDirs[hi] = odir
+			hi++
+		case TileFirstLong, TileSecondLong:
+			sl.handleDirs[hi] = odir
+			sl.handleDirs[hi+1] = dir
+			hi += 2
+		}
+	}
 }
 
 func (sl *Splits) SizeDownSetAllocs(iter int) {
