@@ -182,7 +182,11 @@ func (pg *Page) Init() {
 				}))
 				// open the default page if there is no currently open page
 				if pg.PagePath == "" {
-					pg.OpenURL(getWebURL(pg), true)
+					if getWebURL != nil {
+						pg.OpenURL(getWebURL(pg), true)
+					} else {
+						pg.OpenURL("/", true)
+					}
 				}
 			})
 		})
