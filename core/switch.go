@@ -124,7 +124,7 @@ func (sw *Switch) Init() {
 	sw.HandleClickOnEnterSpace()
 	sw.OnFinal(events.Click, func(e events.Event) {
 		sw.SetChecked(sw.IsChecked())
-		if sw.Type == SwitchChip {
+		if sw.Type == SwitchChip || sw.Type == SwitchSegmentedButton {
 			sw.updateStackTop() // must update here
 			sw.NeedsLayout()
 		} else {
