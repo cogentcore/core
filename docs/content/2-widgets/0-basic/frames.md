@@ -176,10 +176,13 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
-You can add a stretch to create a gap between elements inside of a frame:
+You can add a stretch to create a growing gap between elements inside of a frame:
 
 ```Go
 fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Grow.Set(1, 0)
+})
 core.NewButton(fr).SetText("First")
 core.NewButton(fr).SetText("Second")
 core.NewStretch(fr)
