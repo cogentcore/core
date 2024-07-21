@@ -1,4 +1,4 @@
-Cogent Core provides interactive video players for playing video and audio media. Video support is currently experimental and only present on desktop platforms.
+Cogent Core provides interactive video players for playing video and audio media. Video support is currently experimental and only fully present on macOS and Linux. To use video players, you must first install these [dependencies](https://github.com/zergon321/reisen#dependencies).
 
 You can make a new video widget, open a video file, and play it:
 
