@@ -189,7 +189,7 @@ func homePage(ctx *htmlcore.Context) bool {
 		})
 	})
 	tree.AddChild(home, func(w *core.Text) {
-		w.SetType(core.TextHeadlineMedium).SetText("A cross-platform framework for building powerful, fast, and elegant 2D and 3D apps")
+		w.SetType(core.TextHeadlineMedium).SetText("A cross-platform framework for building powerful, fast, elegant 2D and 3D apps")
 	})
 	tree.AddChild(home, func(w *core.Button) {
 		w.SetText("Get started")
