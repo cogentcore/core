@@ -234,6 +234,7 @@ func (tf *TextField) Init() {
 			s.Padding.Right.Dp(12)
 		}
 		s.Text.Align = styles.Start
+		s.Align.Items = styles.Center
 		s.Color = colors.Scheme.OnSurface
 		switch tf.Type {
 		case TextFieldFilled:
