@@ -246,6 +246,7 @@ func (ls *Lines) RegionRect(st, ed lexer.Pos) *Edit {
 // DeleteText is the primary method for deleting text from the lines.
 // It deletes region of text between start and end positions.
 // Sets the timestamp on resulting Edit to now.
+// An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) DeleteText(st, ed lexer.Pos) *Edit {
 	ls.Lock()
 	defer ls.Unlock()
@@ -255,6 +256,7 @@ func (ls *Lines) DeleteText(st, ed lexer.Pos) *Edit {
 // DeleteTextRect deletes rectangular region of text between start, end
 // defining the upper-left and lower-right corners of a rectangle.
 // Fails if st.Ch >= ed.Ch. Sets the timestamp on resulting Edit to now.
+// An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) DeleteTextRect(st, ed lexer.Pos) *Edit {
 	ls.Lock()
 	defer ls.Unlock()
@@ -263,6 +265,7 @@ func (ls *Lines) DeleteTextRect(st, ed lexer.Pos) *Edit {
 
 // InsertText is the primary method for inserting text,
 // at given starting position.  Sets the timestamp on resulting Edit to now.
+// An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) InsertText(st lexer.Pos, text []byte) *Edit {
 	ls.Lock()
 	defer ls.Unlock()
@@ -272,6 +275,7 @@ func (ls *Lines) InsertText(st lexer.Pos, text []byte) *Edit {
 // InsertTextRect inserts a rectangle of text defined in given Edit record,
 // (e.g., from RegionRect or DeleteRect).
 // Returns a copy of the Edit record with an updated timestamp.
+// An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) InsertTextRect(tbe *Edit) *Edit {
 	ls.Lock()
 	defer ls.Unlock()
@@ -283,6 +287,7 @@ func (ls *Lines) InsertTextRect(tbe *Edit) *Edit {
 // if matchCase is true, then the lexer.MatchCase function is called to match the
 // case (upper / lower) of the new inserted text to that of the text being replaced.
 // returns the Edit for the inserted text.
+// An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) ReplaceText(delSt, delEd, insPos lexer.Pos, insTxt string, matchCase bool) *Edit {
 	ls.Lock()
 	defer ls.Unlock()
@@ -311,6 +316,21 @@ func (ls *Lines) ReMarkup() {
 	ls.Lock()
 	defer ls.Unlock()
 	ls.reMarkup()
+}
+
+// Undo undoes next group of items on the undo stack
+func (ls *Lines) Undo() *Edit {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.undo()
+}
+
+// Redo redoes next group of items on the undo stack,
+// and returns the last record, nil if no more
+func (ls *Lines) Redo() *Edit {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.redo()
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -679,7 +699,14 @@ func (ls *Lines) regionRect(st, ed lexer.Pos) *Edit {
 
 // deleteText is the primary method for deleting text,
 // between start and end positions.
+// An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) deleteText(st, ed lexer.Pos) *Edit {
+	tbe := ls.deleteTextImpl(st, ed)
+	ls.saveUndo(tbe)
+	return tbe
+}
+
+func (ls *Lines) deleteTextImpl(st, ed lexer.Pos) *Edit {
 	tbe := ls.region(st, ed)
 	if tbe == nil {
 		return nil
@@ -713,6 +740,12 @@ func (ls *Lines) deleteText(st, ed lexer.Pos) *Edit {
 // Fails if st.Ch >= ed.Ch. Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) deleteTextRect(st, ed lexer.Pos) *Edit {
+	tbe := ls.deleteTextRectImpl(st, ed)
+	ls.saveUndo(tbe)
+	return tbe
+}
+
+func (ls *Lines) deleteTextRectImpl(st, ed lexer.Pos) *Edit {
 	tbe := ls.regionRect(st, ed)
 	if tbe == nil {
 		return nil
@@ -734,7 +767,14 @@ func (ls *Lines) deleteTextRect(st, ed lexer.Pos) *Edit {
 
 // insertText is the primary method for inserting text,
 // at given starting position.  Sets the timestamp on resulting Edit to now.
+// An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) insertText(st lexer.Pos, text []byte) *Edit {
+	tbe := ls.insertTextImpl(st, text)
+	ls.saveUndo(tbe)
+	return tbe
+}
+
+func (ls *Lines) insertTextImpl(st lexer.Pos, text []byte) *Edit {
 	if len(text) == 0 {
 		return nil
 	}
@@ -783,7 +823,14 @@ func (ls *Lines) insertText(st lexer.Pos, text []byte) *Edit {
 // insertTextRect inserts a rectangle of text defined in given Edit record,
 // (e.g., from RegionRect or DeleteRect).
 // Returns a copy of the Edit record with an updated timestamp.
+// An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) insertTextRect(tbe *Edit) *Edit {
+	tbe = ls.insertTextRectImpl(tbe)
+	ls.saveUndo(tbe)
+	return tbe
+}
+
+func (ls *Lines) insertTextRectImpl(tbe *Edit) *Edit {
 	st := tbe.Reg.Start
 	ed := tbe.Reg.End
 	nlns := (ed.Ln - st.Ln) + 1
@@ -826,6 +873,7 @@ func (ls *Lines) insertTextRect(tbe *Edit) *Edit {
 // if matchCase is true, then the lexer.MatchCase function is called to match the
 // case (upper / lower) of the new inserted text to that of the text being replaced.
 // returns the Edit for the inserted text.
+// An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) replaceText(delSt, delEd, insPos lexer.Pos, insTxt string, matchCase bool) *Edit {
 	if matchCase {
 		red := ls.region(delSt, delEd)
@@ -837,6 +885,108 @@ func (ls *Lines) replaceText(delSt, delEd, insPos lexer.Pos, insTxt string, matc
 		return ls.insertText(insPos, []byte(insTxt))
 	}
 	return ls.deleteText(delSt, delEd)
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//   Undo
+
+// saveUndo saves given edit to undo stack
+func (ls *Lines) saveUndo(tbe *Edit) {
+	if tbe == nil {
+		return
+	}
+	ls.Undos.Save(tbe)
+}
+
+// undo undoes next group of items on the undo stack
+func (ls *Lines) undo() *Edit {
+	// todo: return list of edits!
+	tbe := ls.Undos.UndoPop()
+	if tbe == nil {
+		return nil
+	}
+	stgp := tbe.Group
+	last := tbe
+	for {
+		if tbe.Rect {
+			if tbe.Delete {
+				utbe := ls.insertTextRectImpl(tbe)
+				utbe.Group = stgp + tbe.Group
+				if ls.Options.EmacsUndo {
+					ls.Undos.SaveUndo(utbe)
+				}
+			} else {
+				utbe := ls.deleteTextRectImpl(tbe.Reg.Start, tbe.Reg.End)
+				utbe.Group = stgp + tbe.Group
+				if ls.Options.EmacsUndo {
+					ls.Undos.SaveUndo(utbe)
+				}
+			}
+		} else {
+			if tbe.Delete {
+				utbe := ls.insertTextImpl(tbe.Reg.Start, tbe.ToBytes())
+				utbe.Group = stgp + tbe.Group
+				if ls.Options.EmacsUndo {
+					ls.Undos.SaveUndo(utbe)
+				}
+			} else {
+				utbe := ls.deleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
+				utbe.Group = stgp + tbe.Group
+				if ls.Options.EmacsUndo {
+					ls.Undos.SaveUndo(utbe)
+				}
+			}
+		}
+		tbe = ls.Undos.UndoPopIfGroup(stgp)
+		if tbe == nil {
+			break
+		}
+		last = tbe
+	}
+	return last
+}
+
+// emacsUndoSave is called by View at end of latest set of undo commands.
+// If EmacsUndo mode is active, saves the current UndoStack to the regular Undo stack
+// at the end, and moves undo to the very end -- undo is a constant stream.
+func (ls *Lines) emacsUndoSave() {
+	if !ls.Options.EmacsUndo {
+		return
+	}
+	ls.Undos.UndoStackSave()
+}
+
+// redo redoes next group of items on the undo stack,
+// and returns the last record, nil if no more
+func (ls *Lines) redo() *Edit {
+	// todo: return list of edits!
+	tbe := ls.Undos.RedoNext()
+	if tbe == nil {
+		return nil
+	}
+	stgp := tbe.Group
+	last := tbe
+	for {
+		if tbe.Rect {
+			if tbe.Delete {
+				ls.deleteTextRectImpl(tbe.Reg.Start, tbe.Reg.End)
+			} else {
+				ls.insertTextRectImpl(tbe)
+			}
+		} else {
+			if tbe.Delete {
+				ls.deleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
+			} else {
+				ls.insertTextImpl(tbe.Reg.Start, tbe.ToBytes())
+			}
+		}
+		tbe = ls.Undos.RedoNextIfGroup(stgp)
+		if tbe == nil {
+			break
+		}
+		last = tbe
+	}
+	return last
 }
 
 /////////////////////////////////////////////////////////////////////////////
