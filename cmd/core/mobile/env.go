@@ -233,7 +233,7 @@ func envInit(c *config.Config) (err error) {
 			if err != nil {
 				return fmt.Errorf("error getting user home directory: %w", err)
 			}
-			mff := " -F" + hdir + "/Library/Cogent Core" // need to link to MoltenVK.framework in user's Cogent Core library
+			mff := " -F" + hdir + `/Library/Cogent\ Core` // need to link to MoltenVK.framework in user's Cogent Core library
 
 			appleEnv[platform+"/"+arch] = map[string]string{
 				"GOOS":         goos,
