@@ -128,11 +128,12 @@ func main() {
 		})
 		fm := core.NewForm(sp)
 		fr := core.NewFrame(core.NewFrame(sp)) // can not control layout when directly in splits
-		fm.SetStruct(&fr.Styles)
 		fr.Styler(func(s *styles.Style) {
 			s.Background = colors.Scheme.Select.Container
 			s.Grow.Set(1, 1)
 		})
+		fr.Style() // must style immediately to get correct default values
+		fm.SetStruct(&fr.Styles)
 		fm.OnChange(func(e events.Event) {
 			fr.OverrideStyle = true
 			fr.Update()
