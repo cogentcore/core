@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -117,6 +118,38 @@ func main() {
 		})
 		parent := core.NewFrame(splits)
 		yaegicore.BindTextEditor(ed, parent)
+		return true
+	}
+	htmlcore.ElementHandlers["style-demo"] = func(ctx *htmlcore.Context) bool {
+		// same as demo styles tab
+		sp := core.NewSplits(ctx.BlockParent)
+		sp.Styler(func(s *styles.Style) {
+			s.Min.Y.Em(40)
+		})
+		fm := core.NewForm(sp)
+		fr := core.NewFrame(core.NewFrame(sp)) // can not control layout when directly in splits
+		fm.SetStruct(&fr.Styles)
+		fr.Styler(func(s *styles.Style) {
+			s.Background = colors.Scheme.Select.Container
+			s.Grow.Set(1, 1)
+		})
+		fm.OnChange(func(e events.Event) {
+			fr.OverrideStyle = true
+			fr.Update()
+		})
+		frameSizes := []math32.Vector2{
+			{20, 100},
+			{80, 20},
+			{60, 80},
+			{40, 120},
+			{150, 100},
+		}
+		for _, sz := range frameSizes {
+			core.NewFrame(fr).Styler(func(s *styles.Style) {
+				s.Min.Set(units.Px(sz.X), units.Px(sz.Y))
+				s.Background = colors.Scheme.Primary.Base
+			})
+		}
 		return true
 	}
 

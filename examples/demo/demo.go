@@ -628,26 +628,19 @@ func makeStyles(ts *core.Tabs) {
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Styles and layouts")
 	core.NewText(tab).SetText("Cogent Core provides a fully customizable styling and layout system that allows you to easily control the position, size, and appearance of all widgets. You can edit the style properties of the outer frame below.")
 
+	// same as docs advanced styling demo
 	sp := core.NewSplits(tab)
-
-	sv := core.NewForm(sp)
-
+	fm := core.NewForm(sp)
 	fr := core.NewFrame(core.NewFrame(sp)) // can not control layout when directly in splits
-	sv.SetStruct(&fr.Styles)
-
+	fm.SetStruct(&fr.Styles)
 	fr.Styler(func(s *styles.Style) {
 		s.Background = colors.Scheme.Select.Container
 		s.Grow.Set(1, 1)
 	})
-
-	fr.OnShow(func(e events.Event) {
+	fm.OnChange(func(e events.Event) {
 		fr.OverrideStyle = true
-	})
-
-	sv.OnChange(func(e events.Event) {
 		fr.Update()
 	})
-
 	frameSizes := []math32.Vector2{
 		{20, 100},
 		{80, 20},
@@ -655,11 +648,9 @@ func makeStyles(ts *core.Tabs) {
 		{40, 120},
 		{150, 100},
 	}
-
 	for _, sz := range frameSizes {
 		core.NewFrame(fr).Styler(func(s *styles.Style) {
 			s.Min.Set(units.Px(sz.X), units.Px(sz.Y))
-			s.Grow.Set(0, 0)
 			s.Background = colors.Scheme.Primary.Base
 		})
 	}
