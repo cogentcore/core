@@ -153,9 +153,8 @@ func goAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		return nil, err
 	}
 
-	// need to copy framework
-	// TODO(kai): could do framework setup step here
-	err = exec.Run("cp", "-r", "$HOME/Library/CogentCore/MoltenVK.framework", output)
+	// Need to copy the MoltenVK framework.
+	err = exec.Run("cp", "-r", "$HOME/Library/Cogent Core/MoltenVK.framework", output)
 	if err != nil {
 		return nil, err
 	}
