@@ -158,12 +158,14 @@ func (ed *Editor) SizeUp() {
 	if nln == 0 {
 		return
 	}
-	maxh := maxGrowLines * ed.lineHeight
-	ty := styles.ClampMin(styles.ClampMax(min(float32(nln+1)*ed.lineHeight, maxh), sz.Max.Y), sz.Min.Y)
-	sz.Actual.Content.Y = ty
-	sz.Actual.Total.Y = sz.Actual.Content.Y + sz.Space.Y
-	if core.DebugSettings.LayoutTrace {
-		fmt.Println(ed, "texteditor SizeUp targ:", ty, "nln:", nln, "Actual:", sz.Actual.Content)
+	if ed.Styles.Grow.Y == 0 {
+		maxh := maxGrowLines * ed.lineHeight
+		ty := styles.ClampMin(styles.ClampMax(min(float32(nln+1)*ed.lineHeight, maxh), sz.Max.Y), sz.Min.Y)
+		sz.Actual.Content.Y = ty
+		sz.Actual.Total.Y = sz.Actual.Content.Y + sz.Space.Y
+		if core.DebugSettings.LayoutTrace {
+			fmt.Println(ed, "texteditor SizeUp targ:", ty, "nln:", nln, "Actual:", sz.Actual.Content)
+		}
 	}
 }
 
@@ -178,21 +180,18 @@ func (ed *Editor) SizeDown(iter int) bool {
 	maxh := maxGrowLines * ed.lineHeight
 	ty := ed.linesSize.Y + 1*ed.lineHeight
 	ty = styles.ClampMin(styles.ClampMax(min(ty, maxh), sz.Max.Y), sz.Min.Y)
-	if ed.Styles.Grow.Y > 0 {
-		sz.Actual.Content.Y = min(ty, sz.Alloc.Content.Y)
-	} else {
+	if ed.Styles.Grow.Y == 0 {
 		sz.Actual.Content.Y = ty
+		sz.Actual.Total.Y = sz.Actual.Content.Y + sz.Space.Y
 	}
-	sz.Actual.Total.Y = sz.Actual.Content.Y + sz.Space.Y
 	if core.DebugSettings.LayoutTrace {
 		fmt.Println(ed, "texteditor SizeDown targ:", ty, "linesSize:", ed.linesSize.Y, "Actual:", sz.Actual.Content)
 	}
 
 	redo := ed.Frame.SizeDown(iter)
-	if ed.Styles.Grow.Y > 0 {
-		sz.Actual.Content.Y = min(ty, sz.Alloc.Content.Y)
-	} else {
+	if ed.Styles.Grow.Y == 0 {
 		sz.Actual.Content.Y = ty
+		sz.Actual.Content.Y = min(ty, sz.Alloc.Content.Y)
 	}
 	sz.Actual.Total.Y = sz.Actual.Content.Y + sz.Space.Y
 	chg := ed.ManageOverflow(iter, true) // this must go first.
