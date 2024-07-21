@@ -129,9 +129,6 @@ type Buffer struct { //types:add
 	// editors are the editors that are currently viewing this buffer.
 	editors []*Editor
 
-	// Undos is the undo manager.
-	Undos textbuf.Undo `json:"-" xml:"-"`
-
 	// posHistory is the history of cursor positions.
 	// It can be used to move back through them.
 	posHistory []lexer.Pos

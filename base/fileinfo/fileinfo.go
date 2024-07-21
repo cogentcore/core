@@ -83,18 +83,24 @@ func NewFileInfo(fname string) (*FileInfo, error) {
 	return fi, err
 }
 
-// InitFile initializes a FileInfo based on a filename -- directly returns
-// filepath.Abs or os.Stat error on the given file.  filename can be anything
-// that works given current directory -- Path will contain the full
-// filepath.Abs path, and Name will be just the filename.
+// InitFile initializes a FileInfo based on a filename, which is
+// updated to full path using filepath.Abs.  Returns error from
+// filepath.Abs and / or os.Stat error on the given file,
+// but file info will be updated based on the filename even if
+// the file does not exist.
 func (fi *FileInfo) InitFile(fname string) error {
 	path, err := filepath.Abs(fname)
-	if err != nil {
-		return err
+	if err == nil {
+		fi.Path = path
+	} else {
+		fi.Path = fname // robust to
 	}
-	fi.Path = path
 	_, fi.Name = filepath.Split(path)
-	return fi.Stat()
+	serr := fi.Stat()
+	if err == nil {
+		return serr
+	}
+	return errors.Join(err, serr)
 }
 
 // Stat runs os.Stat on file, returns any error directly but otherwise updates

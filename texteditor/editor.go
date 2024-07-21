@@ -9,7 +9,6 @@ package texteditor
 import (
 	"image"
 	"sync"
-	"time"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -31,17 +30,11 @@ var (
 	// Maximum amount of clipboard history to retain
 	clipboardHistoryMax = 100 // `default:"100" min:"0" max:"1000" step:"5"`
 
-	// maximum number of lines to look for matching scope syntax (parens, brackets)
-	maxScopeLines = 100 // `default:"100" min:"10" step:"10"`
-
 	// text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted
 	diffRevertLines = 10000 // `default:"10000" min:"0" step:"1000"`
 
 	// text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert
 	diffRevertDiffs = 20 // `default:"20" min:"0" step:"1"`
-
-	// amount of time to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
-	markupDelay = 1000 * time.Millisecond // `default:"1000" min:"100" step:"100"`
 )
 
 // Editor is a widget for editing multiple lines of complicated text (as compared to
