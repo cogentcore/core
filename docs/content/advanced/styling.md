@@ -52,25 +52,20 @@ core.TheApp.SetSceneInit(func(sc *core.Scene) {
 })
 ```
 
-## States and Abilities
+## States and abilities
 
 The [[styles/states]] and [[styles/abilities]] flags provide a major source of input for the styling of a widget.  For example, if a widget has the `abilities.Hoverable` flag set, then when a user hovers the mouse over that widget, it will get the `states.Hovered` flag set, which can then be used to style the widget appropriately.
 
 For example, here's the relevant code for the [[core.Button]]:
 
 ```go
-    bt.Styler(func(s *styles.Style) {
-        s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
-        ...
-        s.MaxBoxShadow = styles.BoxShadow1()
-        if s.Is(states.Hovered) {
-            s.BoxShadow = s.MaxBoxShadow
-        }
-        ...
+bt.Styler(func(s *styles.Style) {
+    s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
+    ...
+    s.MaxBoxShadow = styles.BoxShadow1()
+    if s.Is(states.Hovered) {
+        s.BoxShadow = s.MaxBoxShadow
     }
-```   
-
-
-
-
-
+    ...
+})
+```
