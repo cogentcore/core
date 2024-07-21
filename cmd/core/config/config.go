@@ -139,6 +139,36 @@ type Generate struct { //types:add
 }
 
 func (c *Config) OnConfig(cmd string) error {
+	// if we have no target, we assume it is our current platform,
+	// unless we are in init, in which case we do not want to set
+	// the config file to be specific to our platform
+	if len(c.Build.Target) == 0 && cmd != "init" {
+		c.Build.Target = []Platform{{OS: runtime.GOOS, Arch: runtime.GOARCH}}
+	}
+	if c.Build.Output == "" && len(c.Build.Target) > 0 {
+		t := c.Build.Target[0]
+		if cmd == "pack" || t.OS == "web" || t.OS == "android" || t.OS == "ios" {
+			c.Build.Output = filepath.Join("bin", t.OS)
+		}
+	}
+	// we must make the output dir absolute before changing the current directory
+	out, err := filepath.Abs(c.Build.Output)
+	if err != nil {
+		return err
+	}
+	c.Build.Output = out
+	if c.Build.Dir != "" {
+		err := os.Chdir(c.Build.Dir)
+		if err != nil {
+			return err
+		}
+		// re-read the config file from the new location if it exists
+		err = tomlx.Open(c, "core.toml")
+		if err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+	}
+	// we must do auto-naming after we apply any directory change above
 	if c.Name == "" || c.ID == "" {
 		cdir, err := os.Getwd()
 		if err != nil {
@@ -167,35 +197,6 @@ func (c *Config) OnConfig(cmd string) error {
 			// the default ID is "com.dir.base", which is relatively likely
 			// to be close to "com.org.app", the intended format
 			c.ID = "com." + dir + "." + base
-		}
-	}
-	// if we have no target, we assume it is our current platform,
-	// unless we are in init, in which case we do not want to set
-	// the config file to be specific to our platform
-	if len(c.Build.Target) == 0 && cmd != "init" {
-		c.Build.Target = []Platform{{OS: runtime.GOOS, Arch: runtime.GOARCH}}
-	}
-	if c.Build.Output == "" && len(c.Build.Target) > 0 {
-		t := c.Build.Target[0]
-		if cmd == "pack" || t.OS == "web" || t.OS == "android" || t.OS == "ios" {
-			c.Build.Output = filepath.Join("bin", t.OS)
-		}
-	}
-	// we must make the output dir absolute before changing the current directory
-	out, err := filepath.Abs(c.Build.Output)
-	if err != nil {
-		return err
-	}
-	c.Build.Output = out
-	if c.Build.Dir != "" {
-		err := os.Chdir(c.Build.Dir)
-		if err != nil {
-			return err
-		}
-		// re-read the config file from the new location if it exists
-		err = tomlx.Open(c, "core.toml")
-		if err != nil && !errors.Is(err, fs.ErrNotExist) {
-			return err
 		}
 	}
 	return nil
