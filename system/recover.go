@@ -41,7 +41,7 @@ var HandleRecover = func(r any) {
 // the program exits. This is needed because, without this, the program
 // may exit before it can print the stack trace on some systems like Android,
 // which makes debugging nearly impossible. It also saves a crash log to
-// [TheApp.CogentCore].
+// [App.AppDataDir].
 func HandleRecoverBase(r any) {
 	if r == nil {
 		return
