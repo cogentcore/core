@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/styles"
 )
 
 // maxGrowLines is the maximum number of lines to grow to
@@ -158,11 +159,9 @@ func (ed *Editor) SizeUp() {
 		return
 	}
 	maxh := maxGrowLines * ed.lineHeight
-	ty := min(float32(nln+1)*ed.lineHeight, maxh)
-	if sz.Max.Y > 0 {
-		ty = min(sz.Max.Y, ty)
-	}
+	ty := styles.ClampMin(styles.ClampMax(min(float32(nln+1)*ed.lineHeight, maxh), sz.Max.Y), sz.Min.Y)
 	sz.Actual.Content.Y = ty
+	sz.Actual.Total.Y = sz.Actual.Content.Y + sz.Space.Y
 	if core.DebugSettings.LayoutTrace {
 		fmt.Println(ed, "texteditor SizeUp targ:", ty, "nln:", nln, "Actual:", sz.Actual.Content)
 	}
@@ -178,17 +177,24 @@ func (ed *Editor) SizeDown(iter int) bool {
 	sz := &ed.Geom.Size
 	maxh := maxGrowLines * ed.lineHeight
 	ty := ed.linesSize.Y + 1*ed.lineHeight
-	ty = min(ty, maxh)
-	if sz.Max.Y > 0 {
-		ty = min(sz.Max.Y, ty)
+	ty = styles.ClampMin(styles.ClampMax(min(ty, maxh), sz.Max.Y), sz.Min.Y)
+	if ed.Styles.Grow.Y > 0 {
+		sz.Actual.Content.Y = min(ty, sz.Alloc.Content.Y)
+	} else {
+		sz.Actual.Content.Y = ty
 	}
-	sz.Actual.Content.Y = ty
+	sz.Actual.Total.Y = sz.Actual.Content.Y + sz.Space.Y
 	if core.DebugSettings.LayoutTrace {
 		fmt.Println(ed, "texteditor SizeDown targ:", ty, "linesSize:", ed.linesSize.Y, "Actual:", sz.Actual.Content)
 	}
 
 	redo := ed.Frame.SizeDown(iter)
-	sz.Actual.Content.Y = ty
+	if ed.Styles.Grow.Y > 0 {
+		sz.Actual.Content.Y = min(ty, sz.Alloc.Content.Y)
+	} else {
+		sz.Actual.Content.Y = ty
+	}
+	sz.Actual.Total.Y = sz.Actual.Content.Y + sz.Space.Y
 	chg := ed.ManageOverflow(iter, true) // this must go first.
 	return redo || chg
 }
