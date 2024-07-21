@@ -30,11 +30,11 @@ func Render(size int) (*image.RGBA, error) {
 		if !errors.Is(err, fs.ErrNotExist) {
 			return nil, fmt.Errorf("error opening svg icon file: %w", err)
 		}
-		err = os.WriteFile(spath, []byte(icons.DefaultAppIcon), 0666)
+		err = os.WriteFile(spath, []byte(icons.CogentCore), 0666)
 		if err != nil {
 			return nil, err
 		}
-		err = sv.ReadXML(strings.NewReader(icons.DefaultAppIcon))
+		err = sv.ReadXML(strings.NewReader(string(icons.CogentCore)))
 		if err != nil {
 			return nil, err
 		}
