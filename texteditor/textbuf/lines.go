@@ -849,19 +849,22 @@ func (ls *Lines) deleteTextImpl(st, ed lexer.Pos) *Edit {
 		return nil
 	}
 	tbe.Delete = true
+	nl := ls.numLines()
 	if ed.Ln == st.Ln {
-		ls.lines[st.Ln] = append(ls.lines[st.Ln][:st.Ch], ls.lines[st.Ln][ed.Ch:]...)
-		ls.linesEdited(tbe)
+		if st.Ln < nl {
+			ls.lines[st.Ln] = append(ls.lines[st.Ln][:st.Ch], ls.lines[st.Ln][ed.Ch:]...)
+			ls.linesEdited(tbe)
+		}
 	} else {
 		// first get chars on start and end
 		stln := st.Ln + 1
 		cpln := st.Ln
 		ls.lines[st.Ln] = ls.lines[st.Ln][:st.Ch]
 		eoedl := 0
-		if ed.Ln >= len(ls.lines) {
+		if ed.Ln >= nl {
 			// todo: somehow this is happening in patch diffs -- can't figure out why
-			// fmt.Println("err in range:", ed.Ln, len(ls.lines), ed.Ch)
-			ed.Ln = len(ls.lines) - 1
+			// fmt.Println("err in range:", ed.Ln, nl, ed.Ch)
+			ed.Ln = nl - 1
 		}
 		if ed.Ch < len(ls.lines[ed.Ln]) {
 			eoedl = len(ls.lines[ed.Ln][ed.Ch:])
