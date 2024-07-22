@@ -98,8 +98,14 @@ func (pg *Page) Init() {
 			return http.Get(rawURL)
 		}
 		rawURL = strings.TrimPrefix(rawURL, "/")
-		dir := path.Dir(pg.URLToPagePath[path.Dir(rawURL)])
-		f, err := pg.Source.Open(path.Join(dir, path.Base(rawURL)))
+		filename := ""
+		dirPath, ok := pg.URLToPagePath[path.Dir(rawURL)]
+		if ok && dirPath != needsPath {
+			filename = path.Join(path.Dir(dirPath), path.Base(rawURL))
+		} else {
+			filename = rawURL
+		}
+		f, err := pg.Source.Open(filename)
 		if err != nil {
 			return nil, err
 		}
