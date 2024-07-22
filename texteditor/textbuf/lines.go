@@ -1222,7 +1222,6 @@ func (ls *Lines) startDelayedReMarkup() {
 		ls.markupDelayTimer = nil
 	}
 	ls.markupDelayTimer = time.AfterFunc(markupDelay, func() {
-		// fmt.Printf("delayed remarkup\n")
 		ls.markupDelayTimer = nil
 		ls.asyncMarkup() // already in a goroutine
 	})
@@ -1292,7 +1291,6 @@ func (ls *Lines) asyncMarkup() {
 	}
 	ls.Lock()
 	defer ls.Unlock()
-	tags = ls.markupApplyEdits(tags)
 	ls.markupApplyTags(tags)
 }
 
@@ -1306,9 +1304,6 @@ func (ls *Lines) markupTags(txt []byte) ([]lexer.Line, error) {
 // markupApplyEdits applies any edits in markupEdits to the
 // tags prior to applying the tags.  returns the updated tags.
 func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
-	if ls.markupEdits == nil {
-		return tags
-	}
 	edits := ls.markupEdits
 	ls.markupEdits = nil
 	if ls.Highlighter.UsingParse() {
@@ -1346,11 +1341,15 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 // markupApplyTags applies given tags to current text
 // and sets the markup lines.  Must be called under Lock.
 func (ls *Lines) markupApplyTags(tags []lexer.Line) {
+	tags = ls.markupApplyEdits(tags)
 	maxln := min(len(tags), ls.numLines())
-	for ln := 0; ln < maxln; ln++ {
+	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
 		ls.Markup[ln] = ls.Highlighter.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln])
+	}
+	if ls.MarkupDoneFunc != nil {
+		ls.MarkupDoneFunc()
 	}
 }
 

@@ -185,7 +185,9 @@ func (tb *Buffer) setChanged() {
 // Pass nil to initialize an empty buffer.
 func (tb *Buffer) SetText(text []byte) *Buffer {
 	if tb.MarkupDoneFunc == nil {
-		tb.MarkupDoneFunc = tb.signalMods
+		tb.MarkupDoneFunc = func() {
+			tb.signalEditors(bufferMarkupUpdated, nil)
+		}
 	}
 	tb.Lines.SetText(text)
 	tb.signalEditors(bufferNew, nil)
