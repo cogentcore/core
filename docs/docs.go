@@ -215,12 +215,9 @@ func homePage(ctx *htmlcore.Context) bool {
 	tree.AddChild(home, func(w *core.Image) {
 		errors.Log(w.OpenFS(resources, "name.png"))
 		w.Styler(func(s *styles.Style) {
-			x := func(uc *units.Context) float32 {
+			s.Min.X.SetCustom(func(uc *units.Context) float32 {
 				return min(uc.Dp(612), uc.Vw(80))
-			}
-			s.Min.Set(units.Custom(x), units.Custom(func(uc *units.Context) float32 {
-				return x(uc) * (128.0 / 612.0)
-			}))
+			})
 		})
 	})
 	tree.AddChild(home, func(w *core.Text) {
