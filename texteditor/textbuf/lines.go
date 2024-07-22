@@ -318,16 +318,17 @@ func (ls *Lines) ReMarkup() {
 	ls.reMarkup()
 }
 
-// Undo undoes next group of items on the undo stack
-func (ls *Lines) Undo() *Edit {
+// Undo undoes next group of items on the undo stack,
+// and returns all the edits performed.
+func (ls *Lines) Undo() []*Edit {
 	ls.Lock()
 	defer ls.Unlock()
 	return ls.undo()
 }
 
 // Redo redoes next group of items on the undo stack,
-// and returns the last record, nil if no more
-func (ls *Lines) Redo() *Edit {
+// and returns all the edits performed.
+func (ls *Lines) Redo() []*Edit {
 	ls.Lock()
 	defer ls.Unlock()
 	return ls.redo()
@@ -825,8 +826,8 @@ func (ls *Lines) insertTextImpl(st lexer.Pos, text []byte) *Edit {
 // Returns a copy of the Edit record with an updated timestamp.
 // An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) insertTextRect(tbe *Edit) *Edit {
-	tbe = ls.insertTextRectImpl(tbe)
-	ls.saveUndo(tbe)
+	re := ls.insertTextRectImpl(tbe)
+	ls.saveUndo(re)
 	return tbe
 }
 
@@ -899,14 +900,14 @@ func (ls *Lines) saveUndo(tbe *Edit) {
 }
 
 // undo undoes next group of items on the undo stack
-func (ls *Lines) undo() *Edit {
+func (ls *Lines) undo() []*Edit {
 	// todo: return list of edits!
 	tbe := ls.Undos.UndoPop()
 	if tbe == nil {
 		return nil
 	}
 	stgp := tbe.Group
-	last := tbe
+	var eds []*Edit
 	for {
 		if tbe.Rect {
 			if tbe.Delete {
@@ -915,12 +916,14 @@ func (ls *Lines) undo() *Edit {
 				if ls.Options.EmacsUndo {
 					ls.Undos.SaveUndo(utbe)
 				}
+				eds = append(eds, utbe)
 			} else {
 				utbe := ls.deleteTextRectImpl(tbe.Reg.Start, tbe.Reg.End)
 				utbe.Group = stgp + tbe.Group
 				if ls.Options.EmacsUndo {
 					ls.Undos.SaveUndo(utbe)
 				}
+				eds = append(eds, utbe)
 			}
 		} else {
 			if tbe.Delete {
@@ -929,21 +932,22 @@ func (ls *Lines) undo() *Edit {
 				if ls.Options.EmacsUndo {
 					ls.Undos.SaveUndo(utbe)
 				}
+				eds = append(eds, utbe)
 			} else {
 				utbe := ls.deleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
 				utbe.Group = stgp + tbe.Group
 				if ls.Options.EmacsUndo {
 					ls.Undos.SaveUndo(utbe)
 				}
+				eds = append(eds, utbe)
 			}
 		}
 		tbe = ls.Undos.UndoPopIfGroup(stgp)
 		if tbe == nil {
 			break
 		}
-		last = tbe
 	}
-	return last
+	return eds
 }
 
 // emacsUndoSave is called by View at end of latest set of undo commands.
@@ -958,14 +962,13 @@ func (ls *Lines) emacsUndoSave() {
 
 // redo redoes next group of items on the undo stack,
 // and returns the last record, nil if no more
-func (ls *Lines) redo() *Edit {
-	// todo: return list of edits!
+func (ls *Lines) redo() []*Edit {
 	tbe := ls.Undos.RedoNext()
 	if tbe == nil {
 		return nil
 	}
+	var eds []*Edit
 	stgp := tbe.Group
-	last := tbe
 	for {
 		if tbe.Rect {
 			if tbe.Delete {
@@ -980,13 +983,31 @@ func (ls *Lines) redo() *Edit {
 				ls.insertTextImpl(tbe.Reg.Start, tbe.ToBytes())
 			}
 		}
+		eds = append(eds, tbe)
 		tbe = ls.Undos.RedoNextIfGroup(stgp)
 		if tbe == nil {
 			break
 		}
-		last = tbe
 	}
-	return last
+	return eds
+}
+
+// DiffBuffers computes the diff between this buffer and the other buffer,
+// reporting a sequence of operations that would convert this buffer (a) into
+// the other buffer (b).  Each operation is either an 'r' (replace), 'd'
+// (delete), 'i' (insert) or 'e' (equal).  Everything is line-based (0, offset).
+func (ls *Lines) DiffBuffers(ob *Lines) Diffs {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.diffBuffers(ob)
+}
+
+// PatchFromBuffer patches (edits) using content from other,
+// according to diff operations (e.g., as generated from DiffBufs).
+func (ls *Lines) PatchFromBuffer(ob *Lines, diffs Diffs) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.patchFromBuffer(ob, diffs)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1083,8 +1104,8 @@ func (ls *Lines) startDelayedReMarkup() {
 	})
 }
 
-// stopDelayedReMarkup stops timer for doing markup after an interval
-func (ls *Lines) stopDelayedReMarkup() {
+// StopDelayedReMarkup stops timer for doing markup after an interval
+func (ls *Lines) StopDelayedReMarkup() {
 	ls.markupDelayMu.Lock()
 	defer ls.markupDelayMu.Unlock()
 
@@ -1099,18 +1120,13 @@ func (ls *Lines) reMarkup() {
 	if !ls.Highlighter.Has || ls.numLines() == 0 {
 		return
 	}
-	ls.stopDelayedReMarkup()
+	ls.StopDelayedReMarkup()
 	go ls.asyncMarkup()
 }
 
-// adjustedTags updates tag positions for edits
-// must be called under MarkupMu lock
+// adjustedTags updates tag positions for edits, for given list of tags
 func (ls *Lines) adjustedTags(ln int) lexer.Line {
-	return ls.AdjustedTagsImpl(ls.tags[ln], ln)
-}
-
-// AdjustedTagsImpl updates tag positions for edits, for given list of tags
-func (ls *Lines) AdjustedTagsImpl(tags lexer.Line, ln int) lexer.Line {
+	tags := ls.tags[ln]
 	sz := len(tags)
 	if sz == 0 {
 		return nil
@@ -1125,7 +1141,6 @@ func (ls *Lines) AdjustedTagsImpl(tags lexer.Line, ln int) lexer.Line {
 			ntr.Time.Now()
 		}
 	}
-	// lexer.LexsCleanup(&ntags)
 	return ntags
 }
 
@@ -1195,7 +1210,7 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	maxln := min(len(tags), ls.numLines())
 	for ln := 0; ln < maxln; ln++ {
 		ls.hiTags[ln] = tags[ln]
-		ls.tags[ln] = ls.adjustedTags(ln) // todo
+		ls.tags[ln] = ls.adjustedTags(ln)
 		ls.markup[ln] = ls.Highlighter.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln])
 	}
 }
@@ -1232,11 +1247,14 @@ func (ls *Lines) markupLines(st, ed int) bool {
 /////////////////////////////////////////////////////////////////////////////
 //   Tags
 
-// addTag adds a new custom tag for given line, at given position
-func (ls *Lines) addTag(ln, st, ed int, tag token.Tokens) {
+// AddTag adds a new custom tag for given line, at given position.
+func (ls *Lines) AddTag(ln, st, ed int, tag token.Tokens) {
 	if !ls.IsValidLine(ln) {
 		return
 	}
+	ls.Lock()
+	defer ls.Unlock()
+
 	tr := lexer.NewLex(token.KeyToken{Token: tag}, st, ed)
 	tr.Time.Now()
 	if len(ls.tags[ln]) == 0 {
@@ -1248,17 +1266,20 @@ func (ls *Lines) addTag(ln, st, ed int, tag token.Tokens) {
 	ls.markupLines(ln, ln)
 }
 
-// addTagEdit adds a new custom tag for given line, using Edit for location
-func (ls *Lines) addTagEdit(tbe *Edit, tag token.Tokens) {
-	ls.addTag(tbe.Reg.Start.Ln, tbe.Reg.Start.Ch, tbe.Reg.End.Ch, tag)
+// AddTagEdit adds a new custom tag for given line, using Edit for location.
+func (ls *Lines) AddTagEdit(tbe *Edit, tag token.Tokens) {
+	ls.AddTag(tbe.Reg.Start.Ln, tbe.Reg.Start.Ch, tbe.Reg.End.Ch, tag)
 }
 
-// removeTag removes tag (optionally only given tag if non-zero) at given position
-// if it exists -- returns tag
-func (ls *Lines) removeTag(pos lexer.Pos, tag token.Tokens) (reg lexer.Lex, ok bool) {
+// RemoveTag removes tag (optionally only given tag if non-zero)
+// at given position if it exists. returns tag.
+func (ls *Lines) RemoveTag(pos lexer.Pos, tag token.Tokens) (reg lexer.Lex, ok bool) {
 	if !ls.IsValidLine(pos.Ln) {
 		return
 	}
+	ls.Lock()
+	defer ls.Unlock()
+
 	ls.tags[pos.Ln] = ls.adjustedTags(pos.Ln) // re-adjust for current info
 	for i, t := range ls.tags[pos.Ln] {
 		if t.ContainsPos(pos.Ch) {
@@ -1305,21 +1326,22 @@ func (ls *Lines) LexObjPathString(ln int, lx *lexer.Lex) string {
 	return string(rns)
 }
 
-// inTokenSubCat returns true if the given text position is marked with lexical
+// InTokenSubCat returns true if the given text position is marked with lexical
 // type in given SubCat sub-category
-func (ls *Lines) inTokenSubCat(pos lexer.Pos, subCat token.Tokens) bool {
+func (ls *Lines) InTokenSubCat(pos lexer.Pos, subCat token.Tokens) bool {
 	lx, _ := ls.HiTagAtPos(pos)
 	return lx != nil && lx.Token.Token.InSubCat(subCat)
 }
 
 // inLitString returns true if position is in a string literal
-func (ls *Lines) inLitString(pos lexer.Pos) bool {
-	return ls.inTokenSubCat(pos, token.LitStr)
+func (ls *Lines) InLitString(pos lexer.Pos) bool {
+	return ls.InTokenSubCat(pos, token.LitStr)
 }
 
-// inTokenCode returns true if position is in a Keyword, Name, Operator, or Punctuation.
+// InTokenCode returns true if position is in a Keyword,
+// Name, Operator, or Punctuation.
 // This is useful for turning off spell checking in docs
-func (ls *Lines) inTokenCode(pos lexer.Pos) bool {
+func (ls *Lines) InTokenCode(pos lexer.Pos) bool {
 	lx, _ := ls.HiTagAtPos(pos)
 	if lx == nil {
 		return false
@@ -1397,7 +1419,7 @@ func (ls *Lines) commentStart(ln int) int {
 // inComment returns true if the given text position is within
 // a commented region.
 func (ls *Lines) inComment(pos lexer.Pos) bool {
-	if ls.inTokenSubCat(pos, token.Comment) {
+	if ls.InTokenSubCat(pos, token.Comment) {
 		return true
 	}
 	cs := ls.commentStart(pos.Ln)

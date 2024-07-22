@@ -220,8 +220,8 @@ func (ed *Editor) spellCheck(reg *textbuf.Edit) bool {
 	}
 	// fmt.Printf("spell err: %s\n", wb)
 	ed.Buffer.spell.setWord(wb, sugs, reg.Reg.Start.Ln, reg.Reg.Start.Ch)
-	ed.Buffer.removeTag(reg.Reg.Start, token.TextSpellErr)
-	ed.Buffer.addTagEdit(reg, token.TextSpellErr)
+	ed.Buffer.RemoveTag(reg.Reg.Start, token.TextSpellErr)
+	ed.Buffer.AddTagEdit(reg, token.TextSpellErr)
 	return true
 }
 
