@@ -170,13 +170,12 @@ func (sw *Switch) Init() {
 				})
 				// same styles for off and indeterminate
 				iconStyle := func(s *styles.Style) {
-					switch sw.Type {
-					case SwitchSwitch:
+					switch {
+					case sw.Type == SwitchSwitch:
 						// switches need to be bigger
 						s.Min.Set(units.Em(2), units.Em(1.5))
-					case SwitchChip, SwitchSegmentedButton:
-						// chips and segmented buttons render no icon when off
-						s.Min.Zero()
+					case sw.IconOff == icons.None && sw.IconIndeterminate == icons.None:
+						s.Min.Zero() // nothing to render
 					default:
 						s.Min.Set(units.Em(1.5))
 					}

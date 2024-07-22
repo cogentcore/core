@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
@@ -197,6 +198,10 @@ func (sw *Switches) Init() {
 				})
 				w.Updater(func() {
 					w.SetType(sw.Type).SetText(item.getText()).SetTooltip(item.Tooltip)
+					if sw.Type == SwitchSegmentedButton && sw.Styles.Direction == styles.Column {
+						// need a blank icon to create a cohesive segmented button
+						w.SetIconOff(icons.Blank).SetIconIndeterminate(icons.Blank)
+					}
 					if !w.StateIs(states.Indeterminate) {
 						w.SetChecked(slices.Contains(sw.selectedIndexes, i))
 					}
