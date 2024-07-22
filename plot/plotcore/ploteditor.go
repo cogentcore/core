@@ -456,7 +456,8 @@ func (pl *PlotEditor) setAllColumns(on bool) {
 	pl.NeedsRender()
 }
 
-// setColumnsByName turns cols On or Off if their name contains given string
+// setColumnsByName turns columns on or off if their name contains
+// the given string.
 func (pl *PlotEditor) setColumnsByName(nameContains string, on bool) { //types:add
 	fr := pl.columnsFrame
 	for i, cli := range fr.Children {
