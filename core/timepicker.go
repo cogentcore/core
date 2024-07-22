@@ -152,6 +152,9 @@ type DatePicker struct {
 	// correctly in the inner closures of the grid maker; otherwise, the local
 	// variables needed would be stale.
 	getTime func(i int) time.Time
+
+	// som is the start of the month (must be set here to avoid stale variables).
+	som time.Time
 }
 
 // setTime sets the source time and updates the picker.
@@ -260,6 +263,7 @@ func (dp *DatePicker) Init() {
 			dp.getTime = func(i int) time.Time {
 				return somw.AddDate(0, 0, i)
 			}
+			dp.som = som
 			for i := range eomwyd - somwyd {
 				tree.AddAt(p, strconv.Itoa(i), func(w *Button) {
 					w.SetType(ButtonAction)
@@ -274,7 +278,7 @@ func (dp *DatePicker) Init() {
 						s.Min.Set(units.Dp(32))
 						s.Padding.Set(units.Dp(6))
 						dt := dp.getTime(i)
-						if dt.Month() != som.Month() {
+						if dt.Month() != dp.som.Month() {
 							s.Color = colors.Scheme.OnSurfaceVariant
 						}
 						if dt.Year() == time.Now().Year() && dt.YearDay() == time.Now().YearDay() {
@@ -287,8 +291,8 @@ func (dp *DatePicker) Init() {
 							s.Color = colors.Scheme.Primary.On
 						}
 					})
-					w.Maker(func(p *tree.Plan) {
-						tree.AddInit(p, "text", func(w *Text) {
+					tree.AddChildInit(w, "text", func(w *Text) {
+						w.FinalUpdater(func() {
 							w.SetType(TextBodyLarge)
 						})
 					})
