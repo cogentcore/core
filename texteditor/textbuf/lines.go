@@ -137,18 +137,16 @@ func (ls *Lines) SetFileInfo(info *fileinfo.FileInfo) {
 	ls.ParseState.SetSrc(string(info.Path), "", info.Known)
 	ls.Highlighter.Init(info, &ls.ParseState)
 	ls.Options.ConfigKnown(info.Known)
+	if ls.numLines() > 0 {
+		ls.initialMarkup()
+		ls.startDelayedReMarkup()
+	}
 }
 
 // SetFileType sets the syntax highlighting and other parameters
 // based on the given fileinfo.Known file type
 func (ls *Lines) SetLanguage(ftyp fileinfo.Known) {
-	ls.Lock()
-	defer ls.Unlock()
-
-	info := fileinfo.NewFileInfoType(ftyp)
-	ls.ParseState.SetSrc(string(info.Path), "", info.Known)
-	ls.Highlighter.Init(info, &ls.ParseState)
-	ls.Options.ConfigKnown(info.Known)
+	ls.SetFileInfo(fileinfo.NewFileInfoType(ftyp))
 }
 
 // SetFileExt sets syntax highlighting and other parameters
@@ -493,7 +491,7 @@ func (ls *Lines) AutoIndentRegion(start, end int) {
 func (ls *Lines) CommentRegion(start, end int) {
 	ls.Lock()
 	defer ls.Unlock()
-	ls.CommentRegion(start, end)
+	ls.commentRegion(start, end)
 }
 
 // JoinParaLines merges sequences of lines with hard returns forming paragraphs,
@@ -614,9 +612,18 @@ func (ls *Lines) initFromLineBytes() {
 	ls.startDelayedReMarkup()
 }
 
-// bytes returns the current text lines as a slice of bytes,
+// bytes returns the current text lines as a slice of bytes.
 func (ls *Lines) bytes() []byte {
-	return bytes.Join(ls.lineBytes, []byte("\n"))
+	txt := bytes.Join(ls.lineBytes, []byte("\n"))
+	return txt
+}
+
+// bytesLF returns the current text lines as a slice of bytes,
+// with an additional line feed at the end, needed for passing code to markup.
+func (ls *Lines) bytesLF() []byte {
+	txt := ls.bytes()
+	txt = append(txt, []byte("\n")...)
+	return txt
 }
 
 // lineOffsets returns the index offsets for the start of each line
@@ -734,6 +741,11 @@ func (ls *Lines) validPos(pos lexer.Pos) lexer.Pos {
 func (ls *Lines) region(st, ed lexer.Pos) *Edit {
 	st = ls.validPos(st)
 	ed = ls.validPos(ed)
+	n := ls.numLines()
+	// not here:
+	// if ed.Ln >= n {
+	// 	fmt.Println("region err in range:", ed.Ln, len(ls.lines), ed.Ch)
+	// }
 	if st == ed {
 		return nil
 	}
@@ -752,8 +764,8 @@ func (ls *Lines) region(st, ed lexer.Pos) *Edit {
 		copy(tbe.Text[0][:sz], ls.lines[st.Ln][st.Ch:ed.Ch])
 	} else {
 		// first get chars on start and end
-		if ed.Ln >= ls.numLines() {
-			ed.Ln = ls.numLines() - 1
+		if ed.Ln >= n {
+			ed.Ln = n - 1
 			ed.Ch = len(ls.lines[ed.Ln])
 		}
 		nlns := (ed.Ln - st.Ln) + 1
@@ -845,7 +857,15 @@ func (ls *Lines) deleteTextImpl(st, ed lexer.Pos) *Edit {
 		stln := st.Ln + 1
 		cpln := st.Ln
 		ls.lines[st.Ln] = ls.lines[st.Ln][:st.Ch]
-		eoedl := len(ls.lines[ed.Ln][ed.Ch:])
+		eoedl := 0
+		if ed.Ln >= len(ls.lines) {
+			// todo: somehow this is happening in patch diffs -- can't figure out why
+			// fmt.Println("err in range:", ed.Ln, len(ls.lines), ed.Ch)
+			ed.Ln = len(ls.lines) - 1
+		}
+		if ed.Ch < len(ls.lines[ed.Ln]) {
+			eoedl = len(ls.lines[ed.Ln][ed.Ch:])
+		}
 		var eoed []rune
 		if eoedl > 0 { // save it
 			eoed = make([]rune, eoedl)
@@ -1199,10 +1219,11 @@ func (ls *Lines) initialMarkup() {
 	}
 	if ls.Highlighter.UsingParse() {
 		fs := ls.ParseState.Done() // initialize
-		fs.Src.SetBytes(ls.bytes())
+		fs.Src.SetBytes(ls.bytesLF())
 	}
-	mxhi := min(100, ls.numLines()-1)
+	mxhi := min(100, ls.numLines())
 	txt := bytes.Join(ls.lineBytes[:mxhi], []byte("\n"))
+	txt = append(txt, []byte("\n")...)
 	tags, err := ls.markupTags(txt)
 	if err == nil {
 		ls.markupApplyTags(tags)
@@ -1285,7 +1306,11 @@ func (ls *Lines) adjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
 // asyncMarkup runs markupAllLines from a separate goroutine.
 // Does not start or end with lock, but acquires at end to apply.
 func (ls *Lines) asyncMarkup() {
-	tags, err := ls.markupTags(ls.Bytes())
+	ls.Lock()
+	txt := ls.bytesLF()
+	ls.Unlock()
+
+	tags, err := ls.markupTags(txt)
 	if err != nil {
 		return
 	}
