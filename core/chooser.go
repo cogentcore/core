@@ -150,8 +150,13 @@ const (
 func (ch *Chooser) WidgetValue() any { return ch.CurrentItem.Value }
 
 func (ch *Chooser) SetWidgetValue(value any) error {
-	value = reflectx.Underlying(reflect.ValueOf(value)).Interface()
-	ch.SetCurrentValue(value)
+	rv := reflect.ValueOf(value)
+	if rv.Kind() == reflect.Pointer {
+		rv = reflectx.UnderlyingPointer(rv)
+	} else {
+		rv = reflectx.Underlying(rv)
+	}
+	ch.SetCurrentValue(rv.Interface())
 	return nil
 }
 
