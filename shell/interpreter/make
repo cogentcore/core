@@ -11,5 +11,7 @@ command cosh {
 	yaegi extract cogentcore.org/core/shell/cosh
 }
 
-shell.RunCommands(args)
+// shell.RunCommands(args)
+base
+cosh
 

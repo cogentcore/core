@@ -161,7 +161,7 @@ func (fi *FileInfo) SetType(ftyp Known) {
 	mt := MimeFromKnown(ftyp)
 	fi.Mime = mt.Mime
 	fi.Cat = mt.Cat
-	fi.Known = mt.Sup
+	fi.Known = mt.Known
 	if fi.Name == "" && len(mt.Exts) > 0 {
 		fi.Name = "_fake" + mt.Exts[0]
 		fi.Path = fi.Name

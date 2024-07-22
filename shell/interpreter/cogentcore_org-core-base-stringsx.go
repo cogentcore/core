@@ -10,7 +10,10 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/base/stringsx/stringsx"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"ByteSplitLines":    reflect.ValueOf(stringsx.ByteSplitLines),
+		"ByteTrimCR":        reflect.ValueOf(stringsx.ByteTrimCR),
 		"InsertFirstUnique": reflect.ValueOf(stringsx.InsertFirstUnique),
 		"SplitLines":        reflect.ValueOf(stringsx.SplitLines),
+		"TrimCR":            reflect.ValueOf(stringsx.TrimCR),
 	}
 }

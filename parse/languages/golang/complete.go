@@ -50,7 +50,7 @@ func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos lexer.Pos) (ld c
 	if CompleteTrace {
 		fmt.Printf("lookup str:  %v  orig: %v\n", str, origStr)
 	}
-	lfs := pr.ParseString(str, fpath, fs.Src.Sup)
+	lfs := pr.ParseString(str, fpath, fs.Src.Known)
 	if lfs == nil {
 		return
 	}
@@ -160,7 +160,7 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos)
 	if CompleteTrace {
 		fmt.Printf("complete str:  %v  orig: %v\n", str, origStr)
 	}
-	lfs := pr.ParseString(str, fpath, fs.Src.Sup)
+	lfs := pr.ParseString(str, fpath, fs.Src.Known)
 	if lfs == nil {
 		return
 	}

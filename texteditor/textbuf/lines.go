@@ -1548,7 +1548,7 @@ func (ls *Lines) indentLine(ln, ind int) *Edit {
 // level and character position for the indent of the current line.
 func (ls *Lines) autoIndent(ln int) (tbe *Edit, indLev, chPos int) {
 	tabSz := ls.Options.TabSize
-	lp, _ := parse.LanguageSupport.Properties(ls.ParseState.Sup)
+	lp, _ := parse.LanguageSupport.Properties(ls.ParseState.Known)
 	var pInd, delInd int
 	if lp != nil && lp.Lang != nil {
 		pInd, delInd, _, _ = lp.Lang.IndentLine(&ls.ParseState, ls.lines, ls.hiTags, ln, tabSz)

@@ -139,7 +139,7 @@ type MimeType struct {
 	Cat Categories
 
 	// if known, the name of the known file type, else NoSupporUnknown
-	Sup Known
+	Known Known
 }
 
 // CustomMimes can be set by other apps to contain custom mime types that
@@ -158,7 +158,7 @@ func MimeKnown(mime string) Known {
 	if !has {
 		return Unknown
 	}
-	return mt.Sup
+	return mt.Known
 }
 
 // ExtKnown returns the known type for given file extension,
@@ -172,7 +172,7 @@ func ExtKnown(ext string) Known {
 	if !has {
 		return Unknown
 	}
-	return mt.Sup
+	return mt.Known
 }
 
 // KnownFromFile returns the known type for given file,
@@ -188,7 +188,7 @@ func KnownFromFile(fname string) Known {
 // MimeFromKnown returns MimeType info for given known file type.
 func MimeFromKnown(ftyp Known) MimeType {
 	for _, mt := range AvailableMimes {
-		if mt.Sup == ftyp {
+		if mt.Known == ftyp {
 			return mt
 		}
 	}
@@ -223,20 +223,20 @@ func MergeAvailableMimes() {
 					ExtMimeMap[ex] = mt.Mime
 				}
 			}
-			if mt.Sup != Unknown {
-				if hsp, has := KnownMimes[mt.Sup]; has {
-					fmt.Printf("fileinfo.MergeAvailMimes: more-than-one mimetype has extensions for same known file type: %v -- one: %v other %v\n", mt.Sup, hsp.Mime, mt.Mime)
+			if mt.Known != Unknown {
+				if hsp, has := KnownMimes[mt.Known]; has {
+					fmt.Printf("fileinfo.MergeAvailMimes: more-than-one mimetype has extensions for same known file type: %v -- one: %v other %v\n", mt.Known, hsp.Mime, mt.Mime)
 				} else {
-					KnownMimes[mt.Sup] = mt
+					KnownMimes[mt.Known] = mt
 				}
 			}
 		}
 	}
 	// second pass to get any known guys that don't have exts
 	for _, mt := range AvailableMimes {
-		if mt.Sup != Unknown {
-			if _, has := KnownMimes[mt.Sup]; !has {
-				KnownMimes[mt.Sup] = mt
+		if mt.Known != Unknown {
+			if _, has := KnownMimes[mt.Known]; !has {
+				KnownMimes[mt.Known] = mt
 			}
 		}
 	}

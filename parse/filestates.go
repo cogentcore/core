@@ -20,7 +20,7 @@ type FileStates struct {
 	Filename string
 
 	// the known file type, if known (typically only known files are processed)
-	Sup fileinfo.Known
+	Known fileinfo.Known
 
 	// base path for reporting file names -- this must be set externally e.g., by gide for the project root path
 	BasePath string
@@ -62,7 +62,7 @@ func (fs *FileStates) SetSrc(fname, basepath string, sup fileinfo.Known) {
 
 	fs.Filename = fname
 	fs.BasePath = basepath
-	fs.Sup = sup
+	fs.Known = sup
 
 	fs.FsA.SetSrc(nil, fname, basepath, sup)
 	fs.FsB.SetSrc(nil, fname, basepath, sup)

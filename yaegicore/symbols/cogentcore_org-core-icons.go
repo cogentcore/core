@@ -4,8 +4,6 @@ package symbols
 
 import (
 	"cogentcore.org/core/icons"
-	"go/constant"
-	"go/token"
 	"reflect"
 )
 
@@ -976,7 +974,6 @@ func init() {
 		"DecimalIncreaseFill":                   reflect.ValueOf(&icons.DecimalIncreaseFill).Elem(),
 		"Deck":                                  reflect.ValueOf(&icons.Deck).Elem(),
 		"DeckFill":                              reflect.ValueOf(&icons.DeckFill).Elem(),
-		"DefaultAppIcon":                        reflect.ValueOf(constant.MakeFromLiteral("\"<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"48\\\" height=\\\"48\\\" viewBox=\\\"0 -960 960 960\\\"><path fill=\\\"#4285f4\\\" d=\\\"M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H180Zm0-513h600v-147H180v147Zm600 60H180v393h600v-393Zm-600-60v60-60Zm0 0v-147 147Zm0 60v393-393Z\\\"/></svg>\"", token.STRING, 0)),
 		"Dehaze":                                reflect.ValueOf(&icons.Dehaze).Elem(),
 		"DehazeFill":                            reflect.ValueOf(&icons.DehazeFill).Elem(),
 		"Delete":                                reflect.ValueOf(&icons.Delete).Elem(),

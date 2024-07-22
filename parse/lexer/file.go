@@ -25,7 +25,7 @@ type File struct {
 	Filename string
 
 	// the known file type, if known (typically only known files are processed)
-	Sup fileinfo.Known
+	Known fileinfo.Known
 
 	// base path for reporting file names -- this must be set externally e.g., by gide for the project root path
 	BasePath string
@@ -48,12 +48,12 @@ type File struct {
 
 // SetSrc sets the source to given content, and alloc Lexs -- if basepath is empty
 // then it is set to the path for the filename
-func (fl *File) SetSrc(src [][]rune, fname, basepath string, sup fileinfo.Known) {
+func (fl *File) SetSrc(src [][]rune, fname, basepath string, known fileinfo.Known) {
 	fl.Filename = fname
 	if basepath != "" {
 		fl.BasePath = basepath
 	}
-	fl.Sup = sup
+	fl.Known = known
 	fl.Lines = src
 	fl.AllocLines()
 }
@@ -141,8 +141,8 @@ func (fl *File) OpenFile(fname string) error {
 		return err
 	}
 	rns := RunesFromBytes(alltxt)
-	sup := fileinfo.KnownFromFile(fname)
-	fl.SetSrc(rns, fname, "", sup)
+	known := fileinfo.KnownFromFile(fname)
+	fl.SetSrc(rns, fname, "", known)
 	return nil
 }
 
@@ -173,7 +173,7 @@ func (fl *File) InitFromLine(sfl *File, ln int) bool {
 		return false
 	}
 	src := [][]rune{sfl.Lines[ln], {}} // need extra blank
-	fl.SetSrc(src, sfl.Filename, sfl.BasePath, sfl.Sup)
+	fl.SetSrc(src, sfl.Filename, sfl.BasePath, sfl.Known)
 	fl.Lexs = []Line{sfl.Lexs[ln], {}}
 	fl.Comments = []Line{sfl.Comments[ln], {}}
 	fl.EosPos = []EosPos{sfl.EosPos[ln], {}}
@@ -181,7 +181,7 @@ func (fl *File) InitFromLine(sfl *File, ln int) bool {
 }
 
 // InitFromString initializes from given string. Returns false if string is empty
-func (fl *File) InitFromString(str string, fname string, sup fileinfo.Known) bool {
+func (fl *File) InitFromString(str string, fname string, known fileinfo.Known) bool {
 	if str == "" {
 		return false
 	}
@@ -189,7 +189,7 @@ func (fl *File) InitFromString(str string, fname string, sup fileinfo.Known) boo
 	if len(src) == 1 { // need more than 1 line
 		src = append(src, []rune{})
 	}
-	fl.SetSrc(src, fname, "", sup)
+	fl.SetSrc(src, fname, "", known)
 	return true
 }
 
