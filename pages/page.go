@@ -212,7 +212,9 @@ func (pg *Page) Init() {
 				for u, p := range pg.URLToPagePath {
 					if p == needsPath {
 						delete(pg.URLToPagePath, u)
-						w.FindPath(u).AsTree().Delete()
+						if n := w.FindPath(u); n != nil {
+							n.AsTree().Delete()
+						}
 					}
 				}
 				// open the default page if there is no currently open page
