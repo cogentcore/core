@@ -4,10 +4,6 @@ This demo shows the basic functionality of the 3D rendering framework in Cogent 
 
 The gopher object that is imported is borrowed from: https://github.com/g3n/engine, which also served as the source / reference for a lot of the 3D code, including especially the math32 math library, the file importing code, and the opengl shader programs.
 
-## Installation
-
-The usual Go install procedure will work -- see [Install](https://cogentcore.org/core/gi/v2/wiki/Install) for details.
-
 ## Animation and embedded 2D GUI
 
 As you can see, a 2D gui can be embedded within the 3D scene, in this case to control the animation.  This affords unique opportunities for embedding active gui elements within scenes.  Technically, it is achieved by updating a texture projected on a flat plane surface, which is rendered by the 2D gui.  The 2D framework is sufficiently encapsulated that it can be embedded like this with just a bit of surrounding code to manage events within the altered geometry (which nevertheless causes some remaining challenges for elements like popups and the cursor which operate strictly in the overlaying 2D).
