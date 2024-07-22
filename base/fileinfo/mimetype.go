@@ -185,6 +185,16 @@ func KnownFromFile(fname string) Known {
 	return MimeKnown(mtyp)
 }
 
+// MimeFromKnown returns MimeType info for given known file type.
+func MimeFromKnown(ftyp Known) MimeType {
+	for _, mt := range AvailableMimes {
+		if mt.Sup == ftyp {
+			return mt
+		}
+	}
+	return MimeType{}
+}
+
 // MergeAvailableMimes merges the StdMimes and CustomMimes into AvailMimes
 // if CustomMimes is updated, then this should be called -- initially
 // it just has StdMimes.

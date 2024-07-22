@@ -67,6 +67,10 @@ type Lines struct {
 	// ParseState is the parsing state information for the file.
 	ParseState parse.FileStates
 
+	// MarkupDoneFunc is called when the offline markup pass is done
+	// so that the GUI can be updated accordingly.
+	MarkupDoneFunc func()
+
 	// lineBytes are the live lines of text being edited,
 	// with the latest modifications, continuously updated
 	// back-and-forth with the lines runes.
@@ -98,6 +102,7 @@ type Lines struct {
 }
 
 // SetText sets the text to the given bytes (makes a copy).
+// Pass nil to initialize an empty buffer.
 func (ls *Lines) SetText(text []byte) {
 	ls.Lock()
 	defer ls.Unlock()
@@ -129,6 +134,18 @@ func (ls *Lines) SetFileInfo(info *fileinfo.FileInfo) {
 	ls.Lock()
 	defer ls.Unlock()
 
+	ls.ParseState.SetSrc(string(info.Path), "", info.Known)
+	ls.Highlighter.Init(info, &ls.ParseState)
+	ls.Options.ConfigKnown(info.Known)
+}
+
+// SetFileType sets the syntax highlighting and other parameters
+// based on the given fileinfo.Known file type
+func (ls *Lines) SetLanguage(ftyp fileinfo.Known) {
+	ls.Lock()
+	defer ls.Unlock()
+
+	info := fileinfo.NewFileInfoType(ftyp)
 	ls.ParseState.SetSrc(string(info.Path), "", info.Known)
 	ls.Highlighter.Init(info, &ls.ParseState)
 	ls.Options.ConfigKnown(info.Known)
@@ -413,6 +430,38 @@ func (ls *Lines) LexObjPathString(ln int, lx *lexer.Lex) string {
 	return ls.lexObjPathString(ln, lx)
 }
 
+// AdjustedTags updates tag positions for edits, for given line
+// and returns the new tags
+func (ls *Lines) AdjustedTags(ln int) lexer.Line {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.adjustedTags(ln)
+}
+
+// AdjustedTagsLine updates tag positions for edits, for given list of tags,
+// associated with given line of text.
+func (ls *Lines) AdjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.adjustedTagsLine(tags, ln)
+}
+
+// MarkupLines generates markup of given range of lines.
+// end is *inclusive* line.  Called after edits, under Lock().
+// returns true if all lines were marked up successfully.
+func (ls *Lines) MarkupLines(st, ed int) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.markupLines(st, ed)
+}
+
+// StartDelayedReMarkup starts a timer for doing markup after an interval.
+func (ls *Lines) StartDelayedReMarkup() {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.startDelayedReMarkup()
+}
+
 // IndentLine indents line by given number of tab stops, using tabs or spaces,
 // for given tab size (if using spaces) -- either inserts or deletes to reach target.
 // Returns edit record for any change.
@@ -468,6 +517,13 @@ func (ls *Lines) SpacesToTabs(start, end int) {
 	ls.Lock()
 	defer ls.Unlock()
 	ls.spacesToTabs(start, end)
+}
+
+func (ls *Lines) CountWordsLinesRegion(reg Region) (words, lines int) {
+	ls.Lock()
+	defer ls.Unlock()
+	words, lines = CountWordsLinesRegion(ls.lines, reg)
+	return
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1202,7 +1258,14 @@ func (ls *Lines) AdjustRegion(reg Region) Region {
 
 // adjustedTags updates tag positions for edits, for given list of tags
 func (ls *Lines) adjustedTags(ln int) lexer.Line {
-	tags := ls.tags[ln]
+	if !ls.isValidLine(ln) {
+		return nil
+	}
+	return ls.adjustedTagsLine(ls.tags[ln], ln)
+}
+
+// adjustedTagsLine updates tag positions for edits, for given list of tags
+func (ls *Lines) adjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
 	sz := len(tags)
 	if sz == 0 {
 		return nil
@@ -1372,6 +1435,16 @@ func (ls *Lines) RemoveTag(pos lexer.Pos, tag token.Tokens) (reg lexer.Lex, ok b
 		ls.markupLines(pos.Ln, pos.Ln)
 	}
 	return
+}
+
+// SetTags tags for given line.
+func (ls *Lines) SetTags(ln int, tags lexer.Line) {
+	if !ls.IsValidLine(ln) {
+		return
+	}
+	ls.Lock()
+	defer ls.Unlock()
+	ls.tags[ln] = tags
 }
 
 // lexObjPathString returns the string at given lex, and including prior

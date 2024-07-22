@@ -77,10 +77,18 @@ type FileInfo struct { //types:add
 	Path string `table:"-"`
 }
 
+// NewFileInfo returns a new FileInfo for given file.
 func NewFileInfo(fname string) (*FileInfo, error) {
 	fi := &FileInfo{}
 	err := fi.InitFile(fname)
 	return fi, err
+}
+
+// NewFileInfoType returns a new FileInfo representing the given file type.
+func NewFileInfoType(ftyp Known) *FileInfo {
+	fi := &FileInfo{}
+	fi.SetType(ftyp)
+	return fi
 }
 
 // InitFile initializes a FileInfo based on a filename, which is
@@ -146,6 +154,22 @@ func (fi *FileInfo) Stat() error {
 	icn, _ := fi.FindIcon()
 	fi.Ic = icn
 	return nil
+}
+
+// SetType sets file type information for given Known file type
+func (fi *FileInfo) SetType(ftyp Known) {
+	mt := MimeFromKnown(ftyp)
+	fi.Mime = mt.Mime
+	fi.Cat = mt.Cat
+	fi.Known = mt.Sup
+	if fi.Name == "" && len(mt.Exts) > 0 {
+		fi.Name = "_fake" + mt.Exts[0]
+		fi.Path = fi.Name
+	}
+	fi.Kind = fi.Cat.String() + ": "
+	if fi.Known != Unknown {
+		fi.Kind += fi.Known.String()
+	}
 }
 
 // IsDir returns true if file is a directory (folder)

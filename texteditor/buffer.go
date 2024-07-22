@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/spell"
 	"cogentcore.org/core/texteditor/highlighting"
 	"cogentcore.org/core/texteditor/textbuf"
 )
@@ -102,7 +103,7 @@ func NewBuffer() *Buffer {
 	tb := &Buffer{}
 	tb.SetHighlighting(highlighting.StyleDefault)
 	tb.Options.EditorSettings = core.SystemSettings.Editor
-	tb.SetText([]byte{}) // to initialize
+	tb.SetText(nil) // to initialize
 	return tb
 }
 
@@ -181,7 +182,11 @@ func (tb *Buffer) setChanged() {
 }
 
 // SetText sets the text to the given bytes.
+// Pass nil to initialize an empty buffer.
 func (tb *Buffer) SetText(text []byte) *Buffer {
+	if tb.MarkupDoneFunc == nil {
+		tb.MarkupDoneFunc = tb.signalMods
+	}
 	tb.Lines.SetText(text)
 	tb.signalEditors(bufferNew, nil)
 	return tb
@@ -262,9 +267,15 @@ func (tb *Buffer) ConfigKnown() bool {
 	return false
 }
 
-// todo: change me
 func (tb *Buffer) SetFileExt(ext string) *Buffer {
 	tb.Lines.SetFileExt(ext)
+	return tb
+}
+
+// SetFileType sets the syntax highlighting and other parameters
+// based on the given fileinfo.Known file type
+func (tb *Buffer) SetLanguage(ftyp fileinfo.Known) *Buffer {
+	tb.Lines.SetLanguage(ftyp)
 	return tb
 }
 
@@ -385,7 +396,6 @@ func (tb *Buffer) Revert() bool { //types:add
 // If it does exist then prompts to overwrite or not.
 // If afterFunc is non-nil, then it is called with the status of the user action.
 func (tb *Buffer) SaveAsFunc(filename core.Filename, afterFunc func(canceled bool)) {
-	// todo: filemodcheck!
 	tb.editDone()
 	if !errors.Log1(fsx.FileExists(string(filename))) {
 		tb.saveFile(filename)
@@ -512,7 +522,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 		return false // awaiting decisions..
 	}
 	tb.signalEditors(bufferClosed, nil)
-	tb.SetText([]byte(""))
+	tb.SetText(nil)
 	tb.Filename = ""
 	tb.clearNotSaved()
 	if afterFun != nil {
@@ -921,6 +931,17 @@ func (tb *Buffer) SpacesToTabs(start, end int) {
 	tb.signalMods()
 }
 
+// DiffBuffersUnified computes the diff between this buffer and the other buffer,
+// returning a unified diff with given amount of context (default of 3 will be
+// used if -1)
+func (tb *Buffer) DiffBuffersUnified(ob *Buffer, context int) []byte {
+	astr := tb.Strings(true) // needs newlines for some reason
+	bstr := ob.Strings(true)
+
+	return textbuf.DiffLinesUnified(astr, bstr, context, string(tb.Filename), tb.Info.ModTime.String(),
+		string(ob.Filename), ob.Info.ModTime.String())
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //    Complete and Spell
 
@@ -1046,25 +1067,22 @@ func (tb *Buffer) SpellCheckLineErrors(ln int) lexer.Line {
 	if !tb.IsValidLine(ln) {
 		return nil
 	}
-	// todo:
-	// return spell.CheckLexLine(tb.Lines[ln], tb.hiTags[ln])
-	return nil
+	return spell.CheckLexLine(tb.Line(ln), tb.HiTags(ln))
 }
 
 // spellCheckLineTag runs spell check on given line, and sets Tags for any
 // misspelled words and updates markup for that line.
 func (tb *Buffer) spellCheckLineTag(ln int) {
-	// todo:
-	// if !tb.IsValidLine(ln) {
-	// 	return
-	// }
-	// ser := tb.SpellCheckLineErrors(ln)
-	// ntgs := tb.adjustedTags(ln)
-	// ntgs.DeleteToken(token.TextSpellErr)
-	// for _, t := range ser {
-	// 	ntgs.AddSort(t)
-	// }
-	// tb.tags[ln] = ntgs
-	// tb.markupLines(ln, ln)
-	// tb.StartDelayedReMarkup()
+	if !tb.IsValidLine(ln) {
+		return
+	}
+	ser := tb.SpellCheckLineErrors(ln)
+	ntgs := tb.AdjustedTags(ln)
+	ntgs.DeleteToken(token.TextSpellErr)
+	for _, t := range ser {
+		ntgs.AddSort(t)
+	}
+	tb.SetTags(ln, ntgs)
+	tb.MarkupLines(ln, ln)
+	tb.StartDelayedReMarkup()
 }

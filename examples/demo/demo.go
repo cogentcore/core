@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -258,7 +259,7 @@ func textEditors(ts *core.Tabs) {
 	sp := core.NewSplits(tab)
 
 	errors.Log(texteditor.NewEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
-	texteditor.NewEditor(sp).Buffer.SetFileExt("svg").SetString(core.AppIcon)
+	texteditor.NewEditor(sp).Buffer.SetLanguage(fileinfo.Svg).SetString(core.AppIcon)
 }
 
 func valueBinding(ts *core.Tabs) {
