@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
@@ -29,7 +30,7 @@ func TestEditorSetText(t *testing.T) {
 
 func TestEditorSetLanguage(t *testing.T) {
 	b := core.NewBody()
-	NewEditor(b).Buffer.SetLanguage("go").SetString(`package main
+	NewEditor(b).Buffer.SetLanguage(fileinfo.Go).SetString(`package main
 
 	func main() {
 		fmt.Println("Hello, world!")
@@ -84,7 +85,7 @@ func TestEditorChange(t *testing.T) {
 		mods.SetFlag(true, key.Control)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, mods))
 		assert.Equal(t, 1, n)
-		assert.Equal(t, "Go\n\n", text)
+		assert.Equal(t, "Go\n", text)
 	})
 }
 
@@ -100,12 +101,12 @@ func TestEditorInput(t *testing.T) {
 	b.AssertRender(t, "input", func() {
 		ed.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
 		assert.Equal(t, 1, n)
-		assert.Equal(t, "G\n", text)
+		assert.Equal(t, "G", text)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
 		assert.Equal(t, 2, n)
-		assert.Equal(t, "Go\n", text)
+		assert.Equal(t, "Go", text)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
 		assert.Equal(t, 3, n)
-		assert.Equal(t, "Go\n\n", text)
+		assert.Equal(t, "Go\n", text)
 	})
 }
