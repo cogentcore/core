@@ -77,24 +77,38 @@ type FileInfo struct { //types:add
 	Path string `table:"-"`
 }
 
+// NewFileInfo returns a new FileInfo for given file.
 func NewFileInfo(fname string) (*FileInfo, error) {
 	fi := &FileInfo{}
 	err := fi.InitFile(fname)
 	return fi, err
 }
 
-// InitFile initializes a FileInfo based on a filename -- directly returns
-// filepath.Abs or os.Stat error on the given file.  filename can be anything
-// that works given current directory -- Path will contain the full
-// filepath.Abs path, and Name will be just the filename.
+// NewFileInfoType returns a new FileInfo representing the given file type.
+func NewFileInfoType(ftyp Known) *FileInfo {
+	fi := &FileInfo{}
+	fi.SetType(ftyp)
+	return fi
+}
+
+// InitFile initializes a FileInfo based on a filename, which is
+// updated to full path using filepath.Abs.  Returns error from
+// filepath.Abs and / or os.Stat error on the given file,
+// but file info will be updated based on the filename even if
+// the file does not exist.
 func (fi *FileInfo) InitFile(fname string) error {
 	path, err := filepath.Abs(fname)
-	if err != nil {
-		return err
+	if err == nil {
+		fi.Path = path
+	} else {
+		fi.Path = fname // robust to
 	}
-	fi.Path = path
 	_, fi.Name = filepath.Split(path)
-	return fi.Stat()
+	serr := fi.Stat()
+	if err == nil {
+		return serr
+	}
+	return errors.Join(err, serr)
 }
 
 // Stat runs os.Stat on file, returns any error directly but otherwise updates
@@ -140,6 +154,22 @@ func (fi *FileInfo) Stat() error {
 	icn, _ := fi.FindIcon()
 	fi.Ic = icn
 	return nil
+}
+
+// SetType sets file type information for given Known file type
+func (fi *FileInfo) SetType(ftyp Known) {
+	mt := MimeFromKnown(ftyp)
+	fi.Mime = mt.Mime
+	fi.Cat = mt.Cat
+	fi.Known = mt.Sup
+	if fi.Name == "" && len(mt.Exts) > 0 {
+		fi.Name = "_fake" + mt.Exts[0]
+		fi.Path = fi.Name
+	}
+	fi.Kind = fi.Cat.String() + ": "
+	if fi.Known != Unknown {
+		fi.Kind += fi.Known.String()
+	}
 }
 
 // IsDir returns true if file is a directory (folder)

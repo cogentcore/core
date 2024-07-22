@@ -75,37 +75,20 @@ func (fl *File) AllocLines() {
 // the markup with ongoing edits
 func (fl *File) LinesInserted(stln, nlns int) {
 	// Lexs
-	tmplx := make([]Line, nlns)
-	nlx := append(fl.Lexs, tmplx...)
-	copy(nlx[stln+nlns:], nlx[stln:])
-	copy(nlx[stln:], tmplx)
-	fl.Lexs = nlx
-
-	// Comments
-	tmpcm := make([]Line, nlns)
-	ncm := append(fl.Comments, tmpcm...)
-	copy(ncm[stln+nlns:], ncm[stln:])
-	copy(ncm[stln:], tmpcm)
-	fl.Comments = ncm
-
-	// LastStacks
-	tmpls := make([]Stack, nlns)
-	nls := append(fl.LastStacks, tmpls...)
-	copy(nls[stln+nlns:], nls[stln:])
-	copy(nls[stln:], tmpls)
-	fl.LastStacks = nls
-
-	// EosPos
-	tmpep := make([]EosPos, nlns)
-	nep := append(fl.EosPos, tmpep...)
-	copy(nep[stln+nlns:], nep[stln:])
-	copy(nep[stln:], tmpep)
-	fl.EosPos = nep
+	n := len(fl.Lexs)
+	if stln > n {
+		stln = n
+	}
+	fl.Lexs = slices.Insert(fl.Lexs, stln, make([]Line, nlns)...)
+	fl.Comments = slices.Insert(fl.Comments, stln, make([]Line, nlns)...)
+	fl.LastStacks = slices.Insert(fl.LastStacks, stln, make([]Stack, nlns)...)
+	fl.EosPos = slices.Insert(fl.EosPos, stln, make([]EosPos, nlns)...)
 }
 
 // LinesDeleted deletes lines -- called e.g., by core.TextBuf to sync
 // the markup with ongoing edits
 func (fl *File) LinesDeleted(stln, edln int) {
+	edln = min(edln, len(fl.Lexs))
 	fl.Lexs = append(fl.Lexs[:stln], fl.Lexs[edln:]...)
 	fl.Comments = append(fl.Comments[:stln], fl.Comments[edln:]...)
 	fl.LastStacks = append(fl.LastStacks[:stln], fl.LastStacks[edln:]...)

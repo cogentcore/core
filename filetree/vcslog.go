@@ -274,6 +274,6 @@ func fileAtRevisionDialog(ctx core.Widget, repo vcs.Repo, file, rev string) *cor
 		s.Grow.Set(1, 1)
 	})
 	d.RunWindowDialog(ctx)
-	tb.StartDelayedReMarkup() // update markup
+	tb.ReMarkup() // update markup
 	return d
 }

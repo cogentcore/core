@@ -6,12 +6,53 @@
 // beyond those in the standard [strings] package.
 package stringsx
 
-import "strings"
+import (
+	"bytes"
+	"strings"
+)
+
+// TrimCR returns the string without any trailing \r carriage return
+func TrimCR(s string) string {
+	n := len(s)
+	if n == 0 {
+		return s
+	}
+	if s[n-1] == '\r' {
+		return s[:n-1]
+	}
+	return s
+}
+
+// ByteTrimCR returns the byte string without any trailing \r carriage return
+func ByteTrimCR(s []byte) []byte {
+	n := len(s)
+	if n == 0 {
+		return s
+	}
+	if s[n-1] == '\r' {
+		return s[:n-1]
+	}
+	return s
+}
 
 // SplitLines is a windows-safe version of [strings.Split](s, "\n")
-// that replaces "\r\n" with "\n" first.
+// that removes any trailing \r carriage returns from the split lines.
 func SplitLines(s string) []string {
-	return strings.Split(strings.ReplaceAll(s, "\r\n", "\n"), "\n")
+	ls := strings.Split(s, "\n")
+	for i, l := range ls {
+		ls[i] = TrimCR(l)
+	}
+	return ls
+}
+
+// ByteSplitLines is a windows-safe version of [bytes.Split](s, "\n")
+// that removes any trailing \r carriage returns from the split lines.
+func ByteSplitLines(s []byte) [][]byte {
+	ls := bytes.Split(s, []byte("\n"))
+	for i, l := range ls {
+		ls[i] = ByteTrimCR(l)
+	}
+	return ls
 }
 
 // InsertFirstUnique inserts the given string at the start of the given string slice

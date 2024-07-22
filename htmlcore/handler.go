@@ -124,13 +124,13 @@ func handleElement(ctx *Context) {
 		if hasCode {
 			ed := New[texteditor.Editor](ctx)
 			ctx.Node = ctx.Node.FirstChild // go to the code element
-			ed.Buffer.SetString(ExtractText(ctx))
 			lang := getLanguage(getAttr(ctx.Node, "class"))
 			if lang != "" {
-				ed.Buffer.SetLanguage(lang)
+				ed.Buffer.SetFileExt(lang)
 			}
+			ed.Buffer.SetString(ExtractText(ctx))
 			if BindTextEditor != nil && lang == "Go" {
-				ed.Buffer.SpacesToTabs(0, ed.Buffer.NumLines) // Go uses tabs
+				ed.Buffer.SpacesToTabs(0, ed.Buffer.NumLines()) // Go uses tabs
 				parent := core.NewFrame(ed.Parent)
 				parent.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column

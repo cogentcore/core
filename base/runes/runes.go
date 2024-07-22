@@ -15,6 +15,8 @@ package runes
 import (
 	"unicode"
 	"unicode/utf8"
+
+	"cogentcore.org/core/base/slicesx"
 )
 
 // EqualFold reports whether s and t are equal under Unicode case-folding.
@@ -132,4 +134,20 @@ func Repeat(r []rune, count int) []rune {
 		bp *= 2
 	}
 	return nb
+}
+
+// SetFromBytes sets slice of runes from given slice of bytes,
+// using efficient memory reallocation of existing slice.
+// returns potentially modified slice: use assign to update.
+func SetFromBytes(rs []rune, s []byte) []rune {
+	n := utf8.RuneCount(s)
+	rs = slicesx.SetLength(rs, n)
+	i := 0
+	for len(s) > 0 {
+		r, l := utf8.DecodeRune(s)
+		rs[i] = r
+		i++
+		s = s[l:]
+	}
+	return rs
 }

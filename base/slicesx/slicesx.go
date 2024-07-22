@@ -36,6 +36,15 @@ func SetLength[E any](s []E, n int) []E {
 	return s
 }
 
+// CopyFrom efficiently copies from src into dest, using SetLength
+// to ensure the destination has sufficient capacity, and returns
+// the destination (which may have changed location as a result).
+func CopyFrom[E any](dest []E, src []E) []E {
+	dest = SetLength(dest, len(src))
+	copy(dest, src)
+	return dest
+}
+
 // Move moves the element in the given slice at the given
 // old position to the given new position and returns the
 // resulting slice.

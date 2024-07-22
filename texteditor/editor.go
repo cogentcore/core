@@ -9,8 +9,8 @@ package texteditor
 import (
 	"image"
 	"sync"
-	"time"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
@@ -31,17 +31,11 @@ var (
 	// Maximum amount of clipboard history to retain
 	clipboardHistoryMax = 100 // `default:"100" min:"0" max:"1000" step:"5"`
 
-	// maximum number of lines to look for matching scope syntax (parens, brackets)
-	maxScopeLines = 100 // `default:"100" min:"10" step:"10"`
-
 	// text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted
 	diffRevertLines = 10000 // `default:"10000" min:"0" step:"1000"`
 
 	// text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert
 	diffRevertDiffs = 20 // `default:"20" min:"0" step:"1"`
-
-	// amount of time to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
-	markupDelay = 1000 * time.Millisecond // `default:"1000" min:"100" step:"100"`
 )
 
 // Editor is a widget for editing multiple lines of complicated text (as compared to
@@ -211,7 +205,12 @@ type Editor struct { //core:embedder
 	lastFilename   core.Filename
 }
 
-func (ed *Editor) WidgetValue() any { return &ed.Buffer.text }
+func (ed *Editor) WidgetValue() any { return ed.Buffer.Text() }
+
+func (ed *Editor) SetWidgetValue(value any) error {
+	ed.Buffer.SetString(reflectx.ToString(value))
+	return nil
+}
 
 func (ed *Editor) Init() {
 	ed.Frame.Init()
@@ -289,7 +288,7 @@ func (ed *Editor) reMarkup() {
 	if ed.Buffer == nil {
 		return
 	}
-	ed.Buffer.reMarkup()
+	ed.Buffer.ReMarkup()
 }
 
 // IsNotSaved returns true if buffer was changed (edited) since last Save
@@ -302,7 +301,7 @@ func (ed *Editor) Clear() {
 	if ed.Buffer == nil {
 		return
 	}
-	ed.Buffer.NewBuffer(0)
+	ed.Buffer.SetText([]byte{})
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -449,8 +448,9 @@ func (ed *Editor) bufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 
 // undo undoes previous action
 func (ed *Editor) undo() {
-	tbe := ed.Buffer.undo()
-	if tbe != nil {
+	tbes := ed.Buffer.undo()
+	if tbes != nil {
+		tbe := tbes[len(tbes)-1]
 		if tbe.Delete { // now an insert
 			ed.SetCursorShow(tbe.Reg.End)
 		} else {
@@ -466,8 +466,9 @@ func (ed *Editor) undo() {
 
 // redo redoes previously undone action
 func (ed *Editor) redo() {
-	tbe := ed.Buffer.redo()
-	if tbe != nil {
+	tbes := ed.Buffer.redo()
+	if tbes != nil {
+		tbe := tbes[len(tbes)-1]
 		if tbe.Delete {
 			ed.SetCursorShow(tbe.Reg.Start)
 		} else {

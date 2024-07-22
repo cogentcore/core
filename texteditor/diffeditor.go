@@ -417,11 +417,11 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 			absln += di
 		}
 	}
-	dv.bufferA.setTextLines(ab, false) // don't copy
-	dv.bufferB.setTextLines(bb, false) // don't copy
+	dv.bufferA.SetTextLines(ab) // don't copy
+	dv.bufferB.SetTextLines(bb) // don't copy
 	dv.tagWordDiffs()
-	dv.bufferA.reMarkup()
-	dv.bufferB.reMarkup()
+	dv.bufferA.ReMarkup()
+	dv.bufferB.ReMarkup()
 }
 
 // tagWordDiffs goes through replace diffs and tags differences at the
@@ -437,8 +437,8 @@ func (dv *DiffEditor) tagWordDiffs() {
 		stln := df.I1
 		for i := 0; i < mx; i++ {
 			ln := stln + i
-			ra := dv.bufferA.Lines[ln]
-			rb := dv.bufferB.Lines[ln]
+			ra := dv.bufferA.Line(ln)
+			rb := dv.bufferB.Line(ln)
 			lna := lexer.RuneFields(ra)
 			lnb := lexer.RuneFields(rb)
 			fla := lna.RuneStrings(ra)
@@ -454,18 +454,18 @@ func (dv *DiffEditor) tagWordDiffs() {
 				case 'r':
 					sla := lna[ld.I1]
 					ela := lna[ld.I2-1]
-					dv.bufferA.addTag(ln, sla.St, ela.Ed, token.TextStyleError)
+					dv.bufferA.AddTag(ln, sla.St, ela.Ed, token.TextStyleError)
 					slb := lnb[ld.J1]
 					elb := lnb[ld.J2-1]
-					dv.bufferB.addTag(ln, slb.St, elb.Ed, token.TextStyleError)
+					dv.bufferB.AddTag(ln, slb.St, elb.Ed, token.TextStyleError)
 				case 'd':
 					sla := lna[ld.I1]
 					ela := lna[ld.I2-1]
-					dv.bufferA.addTag(ln, sla.St, ela.Ed, token.TextStyleDeleted)
+					dv.bufferA.AddTag(ln, sla.St, ela.Ed, token.TextStyleDeleted)
 				case 'i':
 					slb := lnb[ld.J1]
 					elb := lnb[ld.J2-1]
-					dv.bufferB.addTag(ln, slb.St, elb.Ed, token.TextStyleDeleted)
+					dv.bufferB.AddTag(ln, slb.St, elb.Ed, token.TextStyleDeleted)
 				}
 			}
 		}

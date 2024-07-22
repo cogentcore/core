@@ -81,14 +81,14 @@ func (ed *Editor) selectModeToggle() {
 // selectAll selects all the text
 func (ed *Editor) selectAll() {
 	ed.SelectRegion.Start = lexer.PosZero
-	ed.SelectRegion.End = ed.Buffer.endPos()
+	ed.SelectRegion.End = ed.Buffer.EndPos()
 	ed.NeedsRender()
 }
 
 // wordBefore returns the word before the lexer.Pos
 // uses IsWordBreak to determine the bounds of the word
 func (ed *Editor) wordBefore(tp lexer.Pos) *textbuf.Edit {
-	txt := ed.Buffer.line(tp.Ln)
+	txt := ed.Buffer.Line(tp.Ln)
 	ch := tp.Ch
 	ch = min(ch, len(txt))
 	st := ch
@@ -113,7 +113,7 @@ func (ed *Editor) wordBefore(tp lexer.Pos) *textbuf.Edit {
 // isWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
 func (ed *Editor) isWordEnd(tp lexer.Pos) bool {
-	txt := ed.Buffer.line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return false
@@ -135,7 +135,7 @@ func (ed *Editor) isWordEnd(tp lexer.Pos) bool {
 // i.e. the character before the cursor and the one after the cursor
 // are not classified as word break characters
 func (ed *Editor) isWordMiddle(tp lexer.Pos) bool {
-	txt := ed.Buffer.line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz < 2 {
 		return false
@@ -157,7 +157,7 @@ func (ed *Editor) selectWord() bool {
 	if ed.Buffer == nil {
 		return false
 	}
-	txt := ed.Buffer.line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return false
@@ -172,7 +172,7 @@ func (ed *Editor) selectWord() bool {
 func (ed *Editor) wordAt() (reg textbuf.Region) {
 	reg.Start = ed.CursorPos
 	reg.End = ed.CursorPos
-	txt := ed.Buffer.line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return reg
@@ -404,7 +404,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 // CopyRect copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
 func (ed *Editor) CopyRect(reset bool) *textbuf.Edit {
-	tbe := ed.Buffer.regionRect(ed.SelectRegion.Start, ed.SelectRegion.End)
+	tbe := ed.Buffer.RegionRect(ed.SelectRegion.Start, ed.SelectRegion.End)
 	if tbe == nil {
 		return nil
 	}

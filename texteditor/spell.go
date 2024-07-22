@@ -29,7 +29,7 @@ func (ed *Editor) offerComplete() {
 	if !ed.Buffer.Options.Completion {
 		return
 	}
-	if ed.Buffer.inComment(ed.CursorPos) || ed.Buffer.inLitString(ed.CursorPos) {
+	if ed.Buffer.InComment(ed.CursorPos) || ed.Buffer.InLitString(ed.CursorPos) {
 		return
 	}
 
@@ -48,7 +48,8 @@ func (ed *Editor) offerComplete() {
 	cpos := ed.charStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
-	ed.Buffer.setByteOffs() // make sure the pos offset is updated!!
+	// ed.Buffer.setByteOffs() // make sure the pos offset is updated!!
+	// todo: why? for above
 	ed.Buffer.currentEditor = ed
 	ed.Buffer.Complete.SrcLn = ed.CursorPos.Ln
 	ed.Buffer.Complete.SrcCh = ed.CursorPos.Ch
@@ -108,7 +109,8 @@ func (ed *Editor) Lookup() { //types:add
 	cpos := ed.charStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
-	ed.Buffer.setByteOffs() // make sure the pos offset is updated!!
+	// ed.Buffer.setByteOffs() // make sure the pos offset is updated!!
+	// todo: why?
 	ed.Buffer.currentEditor = ed
 	ed.Buffer.Complete.Lookup(s, ed.CursorPos.Ln, ed.CursorPos.Ch, ed.Scene, cpos)
 }
@@ -144,12 +146,12 @@ func (ed *Editor) iSpellKeyInput(kt events.Event) {
 			if isDoc {
 				ed.Buffer.spellCheckLineTag(tp.Ln) // redo prior line
 			}
-			tp.Ch = ed.Buffer.lineLen(tp.Ln)
+			tp.Ch = ed.Buffer.LineLen(tp.Ln)
 			reg := ed.wordBefore(tp)
 			ed.spellCheck(reg)
 			break
 		}
-		txt := ed.Buffer.line(tp.Ln)
+		txt := ed.Buffer.Line(tp.Ln)
 		var r rune
 		atend := false
 		if tp.Ch >= len(txt) {
@@ -168,7 +170,7 @@ func (ed *Editor) iSpellKeyInput(kt events.Event) {
 		if isDoc {
 			ed.Buffer.spellCheckLineTag(tp.Ln) // redo prior line
 		}
-		tp.Ch = ed.Buffer.lineLen(tp.Ln)
+		tp.Ch = ed.Buffer.LineLen(tp.Ln)
 		reg := ed.wordBefore(tp)
 		ed.spellCheck(reg)
 	case keymap.FocusNext:
@@ -215,13 +217,13 @@ func (ed *Editor) spellCheck(reg *textbuf.Edit) bool {
 
 	sugs, knwn := ed.Buffer.spell.checkWord(lwb)
 	if knwn {
-		ed.Buffer.removeTag(reg.Reg.Start, token.TextSpellErr)
+		ed.Buffer.RemoveTag(reg.Reg.Start, token.TextSpellErr)
 		return false
 	}
 	// fmt.Printf("spell err: %s\n", wb)
 	ed.Buffer.spell.setWord(wb, sugs, reg.Reg.Start.Ln, reg.Reg.Start.Ch)
-	ed.Buffer.removeTag(reg.Reg.Start, token.TextSpellErr)
-	ed.Buffer.addTagEdit(reg, token.TextSpellErr)
+	ed.Buffer.RemoveTag(reg.Reg.Start, token.TextSpellErr)
+	ed.Buffer.AddTagEdit(reg, token.TextSpellErr)
 	return true
 }
 
