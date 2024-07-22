@@ -222,15 +222,16 @@ func ChromaTagsLine(clex chroma.Lexer, txt string) (lexer.Line, error) {
 
 // maxLineLen prevents overflow in allocating line length
 const (
-	maxLineLen = 64 * 1024 * 1024
-	maxNumTags = 1024
+	maxLineLen   = 64 * 1024 * 1024
+	maxNumTags   = 1024
+	EscapeHTML   = true
+	NoEscapeHTML = false
 )
 
 // MarkupLine returns the line with html class tags added for each tag
 // takes both the hi tags and extra tags.  Only fully nested tags are supported,
-// with any dangling ends truncated. only operates on given inputs, does not
-// require any locking in terms of internal state.
-func MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
+// with any dangling ends truncated.
+func MarkupLine(txt []rune, hitags, tags lexer.Line, escapeHtml bool) []byte {
 	if len(txt) > maxLineLen { // avoid overflow
 		return nil
 	}
@@ -238,10 +239,19 @@ func MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 	if sz == 0 {
 		return nil
 	}
+	var escf func([]rune) []byte
+	if escapeHtml {
+		escf = HtmlEscapeRunes
+	} else {
+		escf = func(r []rune) []byte {
+			return []byte(string(r))
+		}
+	}
+
 	ttags := lexer.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
 	nt := len(ttags)
 	if nt == 0 || nt > maxNumTags {
-		return HtmlEscapeRunes(txt)
+		return escf(txt)
 	}
 	sps := []byte(`<span class="`)
 	sps2 := []byte(`">`)
@@ -262,7 +272,7 @@ func MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 			if ts.Ed <= tr.St {
 				ep := min(sz, ts.Ed)
 				if cp < ep {
-					mu = append(mu, HtmlEscapeRunes(txt[cp:ep])...)
+					mu = append(mu, escf(txt[cp:ep])...)
 					cp = ep
 				}
 				mu = append(mu, spe...)
@@ -273,7 +283,7 @@ func MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 			break
 		}
 		if tr.St > cp {
-			mu = append(mu, HtmlEscapeRunes(txt[cp:tr.St])...)
+			mu = append(mu, escf(txt[cp:tr.St])...)
 		}
 		mu = append(mu, sps...)
 		clsnm := tr.Token.Token.StyleName()
@@ -302,7 +312,7 @@ func MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 		}
 		ep = min(len(txt), ep)
 		if tr.St < ep {
-			mu = append(mu, HtmlEscapeRunes(txt[tr.St:ep])...)
+			mu = append(mu, escf(txt[tr.St:ep])...)
 		}
 		if addEnd {
 			mu = append(mu, spe...)
@@ -310,7 +320,7 @@ func MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 		cp = ep
 	}
 	if sz > cp {
-		mu = append(mu, HtmlEscapeRunes(txt[cp:sz])...)
+		mu = append(mu, escf(txt[cp:sz])...)
 	}
 	// pop any left on stack..
 	for si := len(tstack) - 1; si >= 0; si-- {

@@ -64,7 +64,7 @@ func (ed *Editor) RenderWidget() {
 
 // textStyleProperties returns the styling properties for text based on HiStyle Markup
 func (ed *Editor) textStyleProperties() map[string]any {
-	if ed.Buffer == nil || !ed.Buffer.Highlighter.Has {
+	if ed.Buffer == nil {
 		return nil
 	}
 	return ed.Buffer.Highlighter.CSSProperties

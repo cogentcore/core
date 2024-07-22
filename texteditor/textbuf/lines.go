@@ -1356,6 +1356,7 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 			} else {
 				stln := tbe.Reg.Start.Ln + 1
 				nlns := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
+				stln = min(stln, len(tags))
 				tags = slices.Insert(tags, stln, make([]lexer.Line, nlns)...)
 			}
 		}
@@ -1371,7 +1372,7 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
-		ls.Markup[ln] = highlighting.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln])
+		ls.Markup[ln] = highlighting.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln], highlighting.EscapeHTML)
 	}
 	if ls.MarkupDoneFunc != nil {
 		ls.MarkupDoneFunc()
@@ -1396,7 +1397,7 @@ func (ls *Lines) markupLines(st, ed int) bool {
 		mt, err := ls.Highlighter.MarkupTagsLine(ln, ltxt)
 		if err == nil {
 			ls.hiTags[ln] = mt
-			ls.Markup[ln] = highlighting.MarkupLine(ltxt, mt, ls.adjustedTags(ln))
+			ls.Markup[ln] = highlighting.MarkupLine(ltxt, mt, ls.adjustedTags(ln), highlighting.EscapeHTML)
 		} else {
 			ls.Markup[ln] = highlighting.HtmlEscapeRunes(ltxt)
 			allgood = false

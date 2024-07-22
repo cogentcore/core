@@ -109,12 +109,13 @@ func (ed *Editor) layoutAllLines() {
 	mxwd := sz.X // always start with our render size
 
 	ed.hasLinks = false
+	cssAgg := ed.textStyleProperties()
 	for ln := 0; ln < nln; ln++ {
 		if ln >= len(ed.renders) || ln >= len(buf.Markup) {
 			break
 		}
 		rn := &ed.renders[ln]
-		rn.SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.textStyleProperties())
+		rn.SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnitContext, cssAgg)
 		rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
 		if !ed.hasLinks && len(rn.Links) > 0 {
 			ed.hasLinks = true
