@@ -100,7 +100,7 @@ func (pg *Page) Init() {
 		rawURL = strings.TrimPrefix(rawURL, "/")
 		filename := ""
 		dirPath, ok := pg.URLToPagePath[path.Dir(rawURL)]
-		if ok && dirPath != needsPath {
+		if ok {
 			filename = path.Join(path.Dir(dirPath), path.Base(rawURL))
 		} else {
 			filename = rawURL
@@ -208,6 +208,13 @@ func (pg *Page) Init() {
 					}
 					return nil
 				}))
+				// If we still need a path, we shouldn't exist.
+				for u, p := range pg.URLToPagePath {
+					if p == needsPath {
+						delete(pg.URLToPagePath, u)
+						w.FindPath(u).AsTree().Delete()
+					}
+				}
 				// open the default page if there is no currently open page
 				if pg.PagePath == "" {
 					if getWebURL != nil {
