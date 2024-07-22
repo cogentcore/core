@@ -12,6 +12,7 @@ import (
 	"bytes"
 	"io/fs"
 	"log/slog"
+	"net/http"
 	"net/url"
 	"path"
 	"slices"
@@ -87,6 +88,27 @@ func (pg *Page) Init() {
 	pg.Context = htmlcore.NewContext()
 	pg.Context.OpenURL = func(url string) {
 		pg.OpenURL(url, true)
+	}
+	pg.Context.GetURL = func(rawURL string) (*http.Response, error) {
+		u, err := url.Parse(rawURL)
+		if err != nil {
+			return nil, err
+		}
+		if u.Scheme != "" {
+			return http.Get(rawURL)
+		}
+		rawURL = strings.TrimPrefix(rawURL, "/")
+		dir := path.Dir(pg.URLToPagePath[path.Dir(rawURL)])
+		f, err := pg.Source.Open(path.Join(dir, path.Base(rawURL)))
+		if err != nil {
+			return nil, err
+		}
+		return &http.Response{
+			Status:        "200 OK",
+			StatusCode:    200,
+			Body:          f,
+			ContentLength: -1,
+		}, nil
 	}
 	pg.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column

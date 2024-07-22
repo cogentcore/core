@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
@@ -44,9 +45,12 @@ func (im *Image) WidgetValue() any { return &im.Image }
 func (im *Image) Init() {
 	im.WidgetBase.Init()
 	im.Styler(func(s *styles.Style) {
+		s.ObjectFit = styles.FitContain
 		if im.Image != nil {
 			sz := im.Image.Bounds().Size()
-			s.Min.X.Dp(float32(sz.X))
+			s.Min.X.SetCustom(func(uc *units.Context) float32 {
+				return min(uc.Dp(float32(sz.X)), uc.Pw(95))
+			})
 			s.Min.Y.Dp(float32(sz.Y))
 		}
 	})

@@ -322,7 +322,7 @@ func getLanguage(class string) string {
 	return ""
 }
 
-// Get is a helper function that calls [http.Get] with the given URL, parsed
+// Get is a helper function that calls [Context.GetURL] with the given URL, parsed
 // relative to the page URL of the given context. It also checks the status
 // code of the response and closes the response body and returns an error if
 // it is not [http.StatusOK]. If the error is nil, then the response body is
@@ -332,7 +332,7 @@ func Get(ctx *Context, url string) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.Get(u.String())
+	resp, err := ctx.GetURL(u.String())
 	if err != nil {
 		return nil, err
 	}

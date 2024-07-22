@@ -135,7 +135,7 @@ func main() {
 	anim := &Anim{}
 	b := core.NewBody("XYZ Demo")
 
-	core.NewText(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> Framework.`).
+	core.NewText(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> framework`).
 		SetType(core.TextHeadlineSmall).
 		Styler(func(s *styles.Style) {
 			s.Text.Align = styles.Center

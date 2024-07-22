@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"net/http"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -47,8 +48,13 @@ type Context struct {
 	// Otherwise, there is no current page.
 	PageURL string
 
-	// OpenURL is the function used to open URLs.
+	// OpenURL is the function used to open URLs,
+	// which defaults to [system.App.OpenURL].
 	OpenURL func(url string)
+
+	// GetURL is the function used to get resources from URLs,
+	// which defaults to [http.Get].
+	GetURL func(url string) (*http.Response, error)
 }
 
 // NewContext returns a new [Context] with basic defaults.
@@ -56,6 +62,7 @@ func NewContext() *Context {
 	return &Context{
 		styles:  map[*html.Node][]*css.Rule{},
 		OpenURL: system.TheApp.OpenURL,
+		GetURL:  http.Get,
 	}
 }
 

@@ -9,25 +9,13 @@ import (
 )
 
 func main() {
-	b := core.NewBody("Basic Video Example")
-	fr := core.NewFrame(b)
-	fr.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-	})
-	core.NewText(fr).SetText("video:").Styler(func(s *styles.Style) {
-		s.SetTextWrap(false)
-	})
-	v := video.NewVideo(fr)
+	b := core.NewBody("Video Example")
+	v := video.NewVideo(b)
 	v.Styler(func(s *styles.Style) {
-		s.Min.X.Px(200)
 		s.Grow.Set(1, 1)
 	})
-	core.NewText(fr).SetText("filler:").Styler(func(s *styles.Style) {
-		s.SetTextWrap(false)
-	})
-	core.NewText(b).SetText("footer:")
 	errors.Log(v.Open("deer.mp4"))
-	b.OnShow(func(e events.Event) {
+	v.OnShow(func(e events.Event) {
 		v.Play(0, 0)
 	})
 	b.RunMainWindow()
