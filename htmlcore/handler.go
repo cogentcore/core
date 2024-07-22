@@ -199,6 +199,7 @@ func handleElement(ctx *Context) {
 	case "img":
 		img := New[core.Image](ctx)
 		n := ctx.Node
+		img.SetTooltip(getAttr(n, "alt"))
 		go func() {
 			src := getAttr(n, "src")
 			resp, err := Get(ctx, src)
