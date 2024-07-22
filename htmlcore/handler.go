@@ -215,8 +215,10 @@ func handleElement(ctx *Context) {
 					slog.Error("error loading image", "url", src, "err", err)
 					return
 				}
+				img.AsyncLock()
 				img.SetImage(im)
 				img.Update()
+				img.AsyncUnlock()
 			}
 		}()
 	case "input":
