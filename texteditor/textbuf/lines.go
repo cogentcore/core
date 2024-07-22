@@ -38,7 +38,7 @@ var (
 	maxScopeLines = 100 // `default:"100" min:"10" step:"10"`
 
 	// amount of time to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
-	markupDelay = 1000 * time.Millisecond // `default:"1000" min:"100" step:"100"`
+	markupDelay = 500 * time.Millisecond // `default:"500" min:"100" step:"100"`
 )
 
 // Lines manages multi-line text, with original source text encoded as bytes
@@ -1371,7 +1371,7 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
-		ls.Markup[ln] = ls.Highlighter.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln])
+		ls.Markup[ln] = highlighting.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln])
 	}
 	if ls.MarkupDoneFunc != nil {
 		ls.MarkupDoneFunc()
@@ -1396,7 +1396,7 @@ func (ls *Lines) markupLines(st, ed int) bool {
 		mt, err := ls.Highlighter.MarkupTagsLine(ln, ltxt)
 		if err == nil {
 			ls.hiTags[ln] = mt
-			ls.Markup[ln] = ls.Highlighter.MarkupLine(ltxt, mt, ls.adjustedTags(ln))
+			ls.Markup[ln] = highlighting.MarkupLine(ltxt, mt, ls.adjustedTags(ln))
 		} else {
 			ls.Markup[ln] = highlighting.HtmlEscapeRunes(ltxt)
 			allgood = false

@@ -197,14 +197,19 @@ func (hi *Highlighter) chromaTagsAll(txt []byte) ([]lexer.Line, error) {
 // chromaTagsLine returns tags for one line according to current
 // syntax highlighting settings
 func (hi *Highlighter) chromaTagsLine(txt []rune) (lexer.Line, error) {
-	return chromaTagsLine(hi.lexer, txt)
+	return ChromaTagsLine(hi.lexer, string(txt))
 }
 
-// chromaTagsLine returns tags for one line according to current
-// syntax highlighting settings
-func chromaTagsLine(clex chroma.Lexer, txt []rune) (lexer.Line, error) {
-	txtstr := string(txt) + "\n"
-	iterator, err := clex.Tokenise(nil, txtstr)
+// ChromaTagsLine returns tags for one line according to given chroma lexer
+func ChromaTagsLine(clex chroma.Lexer, txt string) (lexer.Line, error) {
+	n := len(txt)
+	if n == 0 {
+		return nil, nil
+	}
+	if txt[n-1] != '\n' {
+		txt += "\n"
+	}
+	iterator, err := clex.Tokenise(nil, txt)
 	if err != nil {
 		slog.Error(err.Error())
 		return nil, err
@@ -225,7 +230,7 @@ const (
 // takes both the hi tags and extra tags.  Only fully nested tags are supported,
 // with any dangling ends truncated. only operates on given inputs, does not
 // require any locking in terms of internal state.
-func (hi *Highlighter) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
+func MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 	if len(txt) > maxLineLen { // avoid overflow
 		return nil
 	}
