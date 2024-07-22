@@ -34,7 +34,23 @@ func (tp *TimePicker) WidgetValue() any { return &tp.Time }
 
 func (tp *TimePicker) Init() {
 	tp.Frame.Init()
+	spinnerInit := func(w *Spinner) {
+		w.Styler(func(s *styles.Style) {
+			s.Font.Size.Dp(57)
+			s.Min.X.Ch(7)
+		})
+		buttonInit := func(w *Button) {
+			tree.AddChildInit(w, "icon", func(w *Icon) {
+				w.Styler(func(s *styles.Style) {
+					s.Font.Size.Dp(32)
+				})
+			})
+		}
+		tree.AddChildInit(w, "lead-icon", buttonInit)
+		tree.AddChildInit(w, "trail-icon", buttonInit)
+	}
 	tree.AddChild(tp, func(w *Spinner) {
+		spinnerInit(w)
 		w.SetStep(1).SetEnforceStep(true)
 		w.Updater(func() {
 			if SystemSettings.Clock24 {
@@ -48,10 +64,6 @@ func (tp *TimePicker) Init() {
 				w.SetMax(12).SetMin(1)
 			}
 			w.SetValue(float32(tp.hour))
-		})
-		w.Styler(func(s *styles.Style) {
-			s.Font.Size.Dp(57)
-			s.Min.X.Dp(96)
 		})
 		w.OnChange(func(e events.Event) {
 			hr := int(w.Value)
@@ -77,14 +89,11 @@ func (tp *TimePicker) Init() {
 		})
 	})
 	tree.AddChild(tp, func(w *Spinner) {
+		spinnerInit(w)
 		w.SetStep(1).SetEnforceStep(true).
 			SetMin(0).SetMax(60).SetFormat("%02d")
 		w.Updater(func() {
 			w.SetValue(float32(tp.Time.Minute()))
-		})
-		w.Styler(func(s *styles.Style) {
-			s.Font.Size.Dp(57)
-			s.Min.X.Dp(96)
 		})
 		w.OnChange(func(e events.Event) {
 			// we set our minute and keep everything else
