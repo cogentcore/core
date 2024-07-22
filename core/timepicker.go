@@ -209,19 +209,19 @@ func (dp *DatePicker) Init() {
 			w.Styler(arrowStyle)
 		})
 		tree.AddChild(w, func(w *Chooser) {
-			yr := dp.Time.Year()
-			var yrs []ChooserItem
-			// we go 100 in each direction from the current year
-			for i := yr - 100; i <= yr+100; i++ {
-				yrs = append(yrs, ChooserItem{Value: i})
-			}
-			w.SetItems(yrs...)
 			w.Updater(func() {
+				yr := dp.Time.Year()
+				var yrs []ChooserItem
+				// we go 100 in each direction from the current year
+				for i := yr - 100; i <= yr+100; i++ {
+					yrs = append(yrs, ChooserItem{Value: i})
+				}
+				w.SetItems(yrs...)
 				w.SetCurrentValue(yr)
 			})
 			w.OnChange(func(e events.Event) {
 				// we are centered at current year with 100 in each direction
-				nyr := w.CurrentIndex + yr - 100
+				nyr := w.CurrentIndex + dp.Time.Year() - 100
 				// set our year
 				dp.setTime(dp.Time.AddDate(nyr-dp.Time.Year(), 0, 0))
 			})
