@@ -13,7 +13,7 @@ require (
 	github.com/chewxy/math32 v1.10.1
 	github.com/cogentcore/yaegi v0.0.0-20240714043945-dadb98936955
 	github.com/coreos/go-oidc/v3 v3.10.0
-	github.com/ergochat/readline v0.1.0
+	github.com/ergochat/readline v0.1.2
 	github.com/ericchiang/css v1.3.0
 	github.com/faiface/beep v1.1.0
 	github.com/fsnotify/fsnotify v1.7.0
