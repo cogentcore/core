@@ -76,6 +76,17 @@ func (im *Image) OpenFS(fsys fs.FS, filename string) error {
 	return nil
 }
 
+func (im *Image) SizeUp() {
+	im.WidgetBase.SizeUp()
+	if im.Image != nil {
+		sz := &im.Geom.Size
+		obj := math32.Vector2FromPoint(im.Image.Bounds().Size())
+		osz := styles.ObjectSizeFromFit(im.Styles.ObjectFit, obj, sz.Actual.Content)
+		sz.Actual.Content = osz
+		sz.setTotalFromContent(&sz.Actual)
+	}
+}
+
 func (im *Image) Render() {
 	im.WidgetBase.Render()
 
