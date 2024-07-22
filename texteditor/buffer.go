@@ -262,6 +262,12 @@ func (tb *Buffer) ConfigKnown() bool {
 	return false
 }
 
+// todo: change me
+func (tb *Buffer) SetFileExt(ext string) *Buffer {
+	tb.Lines.SetFileExt(ext)
+	return tb
+}
+
 // FileModCheck checks if the underlying file has been modified since last
 // Stat (open, save); if haven't yet prompted, user is prompted to ensure
 // that this is OK. It returns true if the file was modified.

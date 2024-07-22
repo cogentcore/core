@@ -127,10 +127,10 @@ func handleElement(ctx *Context) {
 			ed.Buffer.SetString(ExtractText(ctx))
 			lang := getLanguage(getAttr(ctx.Node, "class"))
 			if lang != "" {
-				ed.Buffer.SetLanguage(lang)
+				ed.Buffer.SetFileExt(lang)
 			}
 			if BindTextEditor != nil && lang == "Go" {
-				ed.Buffer.SpacesToTabs(0, ed.Buffer.NumLines) // Go uses tabs
+				ed.Buffer.SpacesToTabs(0, ed.Buffer.NumLines()) // Go uses tabs
 				parent := core.NewFrame(ed.Parent)
 				parent.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column

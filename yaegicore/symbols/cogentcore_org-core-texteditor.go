@@ -32,7 +32,6 @@ func init() {
 		"DiffTextEditor":         reflect.ValueOf((*texteditor.DiffTextEditor)(nil)),
 		"Editor":                 reflect.ValueOf((*texteditor.Editor)(nil)),
 		"EditorEmbedder":         reflect.ValueOf((*texteditor.EditorEmbedder)(nil)),
-		"Highlighting":           reflect.ValueOf((*texteditor.Highlighting)(nil)),
 		"ISearch":                reflect.ValueOf((*texteditor.ISearch)(nil)),
 		"OutputBuffer":           reflect.ValueOf((*texteditor.OutputBuffer)(nil)),
 		"OutputBufferMarkupFunc": reflect.ValueOf((*texteditor.OutputBufferMarkupFunc)(nil)),

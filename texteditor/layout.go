@@ -88,9 +88,9 @@ func (ed *Editor) layoutAllLines() {
 	}
 	ed.lastFilename = ed.Buffer.Filename
 
+	ed.NumLines = ed.Buffer.NumLines()
 	ed.Buffer.Lock()
 	ed.Buffer.Highlighter.TabSize = ed.Styles.Text.TabSize
-	ed.NumLines = ed.Buffer.NumLines()
 	buf := ed.Buffer
 
 	nln := ed.NumLines

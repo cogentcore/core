@@ -363,6 +363,56 @@ func (ls *Lines) Redo() []*Edit {
 /////////////////////////////////////////////////////////////////////////////
 //   Edit helpers
 
+// InComment returns true if the given text position is within
+// a commented region.
+func (ls *Lines) InComment(pos lexer.Pos) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.inComment(pos)
+}
+
+// HiTagAtPos returns the highlighting (markup) lexical tag at given position
+// using current Markup tags, and index, -- could be nil if none or out of range.
+func (ls *Lines) HiTagAtPos(pos lexer.Pos) (*lexer.Lex, int) {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.hiTagAtPos(pos)
+}
+
+// InTokenSubCat returns true if the given text position is marked with lexical
+// type in given SubCat sub-category.
+func (ls *Lines) InTokenSubCat(pos lexer.Pos, subCat token.Tokens) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.inTokenSubCat(pos, subCat)
+}
+
+// InLitString returns true if position is in a string literal.
+func (ls *Lines) InLitString(pos lexer.Pos) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.inLitString(pos)
+}
+
+// InTokenCode returns true if position is in a Keyword,
+// Name, Operator, or Punctuation.
+// This is useful for turning off spell checking in docs
+func (ls *Lines) InTokenCode(pos lexer.Pos) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.inTokenCode(pos)
+}
+
+// LexObjPathString returns the string at given lex, and including prior
+// lex-tagged regions that include sequences of PunctSepPeriod and NameTag
+// which are used for object paths -- used for e.g., debugger to pull out
+// variable expressions that can be evaluated.
+func (ls *Lines) LexObjPathString(ln int, lx *lexer.Lex) string {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.lexObjPathString(ln, lx)
+}
+
 // IndentLine indents line by given number of tab stops, using tabs or spaces,
 // for given tab size (if using spaces) -- either inserts or deletes to reach target.
 // Returns edit record for any change.
@@ -388,14 +438,6 @@ func (ls *Lines) AutoIndentRegion(start, end int) {
 	ls.Lock()
 	defer ls.Unlock()
 	ls.autoIndentRegion(start, end)
-}
-
-// InComment returns true if the given text position is within
-// a commented region.
-func (ls *Lines) InComment(pos lexer.Pos) bool {
-	ls.Lock()
-	defer ls.Unlock()
-	return ls.inComment(pos)
 }
 
 // CommentRegion inserts comment marker on given lines; end is *exclusive*.
@@ -1332,51 +1374,45 @@ func (ls *Lines) RemoveTag(pos lexer.Pos, tag token.Tokens) (reg lexer.Lex, ok b
 	return
 }
 
-// HiTagAtPos returns the highlighting (markup) lexical tag at given position
-// using current Markup tags, and index, -- could be nil if none or out of range
-func (ls *Lines) HiTagAtPos(pos lexer.Pos) (*lexer.Lex, int) {
-	if !ls.IsValidLine(pos.Ln) {
-		return nil, -1
-	}
-	ls.Lock()
-	defer ls.Unlock()
-
-	return ls.hiTags[pos.Ln].AtPos(pos.Ch)
-}
-
-// LexObjPathString returns the string at given lex, and including prior
+// lexObjPathString returns the string at given lex, and including prior
 // lex-tagged regions that include sequences of PunctSepPeriod and NameTag
 // which are used for object paths -- used for e.g., debugger to pull out
 // variable expressions that can be evaluated.
-func (ls *Lines) LexObjPathString(ln int, lx *lexer.Lex) string {
-	if !ls.IsValidLine(ln) {
+func (ls *Lines) lexObjPathString(ln int, lx *lexer.Lex) string {
+	if !ls.isValidLine(ln) {
 		return ""
 	}
-	ls.Lock()
-	defer ls.Unlock()
-
 	stlx := lexer.ObjPathAt(ls.hiTags[ln], lx)
 	rns := ls.lines[ln][stlx.St:lx.Ed]
 	return string(rns)
 }
 
-// InTokenSubCat returns true if the given text position is marked with lexical
-// type in given SubCat sub-category
-func (ls *Lines) InTokenSubCat(pos lexer.Pos, subCat token.Tokens) bool {
-	lx, _ := ls.HiTagAtPos(pos)
+// hiTagAtPos returns the highlighting (markup) lexical tag at given position
+// using current Markup tags, and index, -- could be nil if none or out of range
+func (ls *Lines) hiTagAtPos(pos lexer.Pos) (*lexer.Lex, int) {
+	if !ls.isValidLine(pos.Ln) {
+		return nil, -1
+	}
+	return ls.hiTags[pos.Ln].AtPos(pos.Ch)
+}
+
+// inTokenSubCat returns true if the given text position is marked with lexical
+// type in given SubCat sub-category.
+func (ls *Lines) inTokenSubCat(pos lexer.Pos, subCat token.Tokens) bool {
+	lx, _ := ls.hiTagAtPos(pos)
 	return lx != nil && lx.Token.Token.InSubCat(subCat)
 }
 
 // inLitString returns true if position is in a string literal
-func (ls *Lines) InLitString(pos lexer.Pos) bool {
-	return ls.InTokenSubCat(pos, token.LitStr)
+func (ls *Lines) inLitString(pos lexer.Pos) bool {
+	return ls.inTokenSubCat(pos, token.LitStr)
 }
 
-// InTokenCode returns true if position is in a Keyword,
+// inTokenCode returns true if position is in a Keyword,
 // Name, Operator, or Punctuation.
 // This is useful for turning off spell checking in docs
-func (ls *Lines) InTokenCode(pos lexer.Pos) bool {
-	lx, _ := ls.HiTagAtPos(pos)
+func (ls *Lines) inTokenCode(pos lexer.Pos) bool {
+	lx, _ := ls.hiTagAtPos(pos)
 	if lx == nil {
 		return false
 	}
@@ -1453,7 +1489,7 @@ func (ls *Lines) commentStart(ln int) int {
 // inComment returns true if the given text position is within
 // a commented region.
 func (ls *Lines) inComment(pos lexer.Pos) bool {
-	if ls.InTokenSubCat(pos, token.Comment) {
+	if ls.inTokenSubCat(pos, token.Comment) {
 		return true
 	}
 	cs := ls.commentStart(pos.Ln)
