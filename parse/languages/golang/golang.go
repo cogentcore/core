@@ -62,6 +62,7 @@ func (gl *GoLang) ParseFile(fss *parse.FileStates, txt []byte) {
 	pfs := fss.StartProc(txt) // current processing one
 	ext := filepath.Ext(pfs.Src.Filename)
 	if ext == ".mod" { // note: mod doesn't parse!
+		fss.EndProc()
 		return
 	}
 	// fmt.Println("\nstarting Parse:", pfs.Src.Filename)
