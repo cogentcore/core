@@ -59,8 +59,17 @@ type Lines struct {
 	// Undos is the undo manager.
 	Undos Undo
 
-	// lineBytes are the live lines of text being edited, with the latest modifications,
-	// continuously updated back-and-forth with the lines runes.
+	// Markup is the marked-up version of the edited text lines, after being run
+	// through the syntax highlighting process. This is what is actually rendered.
+	// You MUST access it only under a Lock()!
+	Markup [][]byte
+
+	// ParseState is the parsing state information for the file.
+	ParseState parse.FileStates
+
+	// lineBytes are the live lines of text being edited,
+	// with the latest modifications, continuously updated
+	// back-and-forth with the lines runes.
 	lineBytes [][]byte
 
 	// Lines are the live lines of text being edited, with the latest modifications.
@@ -75,15 +84,8 @@ type Lines struct {
 	// hiTags are the syntax highlighting tags, which are auto-generated.
 	hiTags []lexer.Line
 
-	// Markup is the marked-up version of the edited text lines, after being run
-	// through the syntax highlighting process. This is what is actually rendered.
-	markup [][]byte
-
 	// markupEdits are the edits that have been made since the last full markup.
 	markupEdits []*Edit
-
-	// ParseState is the parsing state information for the file.
-	parseState parse.FileStates
 
 	// markupDelayTimer is the markup delay timer.
 	markupDelayTimer *time.Timer
@@ -127,8 +129,8 @@ func (ls *Lines) SetFileInfo(info *fileinfo.FileInfo) {
 	ls.Lock()
 	defer ls.Unlock()
 
-	ls.parseState.SetSrc(string(info.Path), "", info.Known)
-	ls.Highlighter.Init(info, &ls.parseState)
+	ls.ParseState.SetSrc(string(info.Path), "", info.Known)
+	ls.Highlighter.Init(info, &ls.ParseState)
 	ls.Options.ConfigKnown(info.Known)
 }
 
@@ -207,6 +209,30 @@ func (ls *Lines) LineLen(ln int) int {
 	ls.Lock()
 	defer ls.Unlock()
 	return len(ls.lines[ln])
+}
+
+// LineChar returns rune at given line and character position.
+// returns a 0 if character position is not valid
+func (ls *Lines) LineChar(ln, ch int) rune {
+	if !ls.IsValidLine(ln) {
+		return 0
+	}
+	ls.Lock()
+	defer ls.Unlock()
+	if len(ls.lines[ln]) <= ch {
+		return 0
+	}
+	return ls.lines[ln][ch]
+}
+
+// HiTags returns the highlighting tags for given line, nil if invalid
+func (ls *Lines) HiTags(ln int) lexer.Line {
+	if !ls.IsValidLine(ln) {
+		return nil
+	}
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.hiTags[ln]
 }
 
 // EndPos returns the ending position at end of lines.
@@ -481,10 +507,10 @@ func (ls *Lines) initFromLineBytes() {
 	ls.lines = slicesx.SetLength(ls.lines, n)
 	ls.tags = slicesx.SetLength(ls.tags, n)
 	ls.hiTags = slicesx.SetLength(ls.hiTags, n)
-	ls.markup = slicesx.SetLength(ls.markup, n)
+	ls.Markup = slicesx.SetLength(ls.Markup, n)
 	for ln, txt := range ls.lineBytes {
 		ls.lines[ln] = runes.SetFromBytes(ls.lines[ln], txt)
-		ls.markup[ln] = highlighting.HtmlEscapeRunes(ls.lines[ln])
+		ls.Markup[ln] = highlighting.HtmlEscapeRunes(ls.lines[ln])
 	}
 	ls.initialMarkup()
 	ls.startDelayedReMarkup()
@@ -551,7 +577,7 @@ func (ls *Lines) appendTextMarkup(text []byte, markup []byte) *Edit {
 		el = min(st+len(msplt)-1, el)
 	}
 	for ln := st; ln <= el; ln++ {
-		ls.markup[ln] = msplt[ln-st]
+		ls.Markup[ln] = msplt[ln-st]
 	}
 	return tbe
 }
@@ -575,7 +601,7 @@ func (ls *Lines) appendTextLineMarkup(text []byte, markup []byte) *Edit {
 		efft[sz] = '\n'
 	}
 	tbe := ls.insertText(ed, efft)
-	ls.markup[tbe.Reg.Start.Ln] = markup
+	ls.Markup[tbe.Reg.Start.Ln] = markup
 	return tbe
 }
 
@@ -950,10 +976,10 @@ func (ls *Lines) undo() []*Edit {
 	return eds
 }
 
-// emacsUndoSave is called by View at end of latest set of undo commands.
+// EmacsUndoSave is called by View at end of latest set of undo commands.
 // If EmacsUndo mode is active, saves the current UndoStack to the regular Undo stack
 // at the end, and moves undo to the very end -- undo is a constant stream.
-func (ls *Lines) emacsUndoSave() {
+func (ls *Lines) EmacsUndoSave() {
 	if !ls.Options.EmacsUndo {
 		return
 	}
@@ -1018,7 +1044,7 @@ func (ls *Lines) linesEdited(tbe *Edit) {
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
 	for ln := st; ln <= ed; ln++ {
 		ls.lineBytes[ln] = []byte(string(ls.lines[ln]))
-		ls.markup[ln] = highlighting.HtmlEscapeRunes(ls.lines[ln])
+		ls.Markup[ln] = highlighting.HtmlEscapeRunes(ls.lines[ln])
 	}
 	ls.markupLines(st, ed)
 	ls.startDelayedReMarkup()
@@ -1032,12 +1058,12 @@ func (ls *Lines) linesInserted(tbe *Edit) {
 
 	ls.markupEdits = append(ls.markupEdits, tbe)
 	ls.lineBytes = slices.Insert(ls.lineBytes, stln, make([][]byte, nsz)...)
-	ls.markup = slices.Insert(ls.markup, stln, make([][]byte, nsz)...)
+	ls.Markup = slices.Insert(ls.Markup, stln, make([][]byte, nsz)...)
 	ls.tags = slices.Insert(ls.tags, stln, make([]lexer.Line, nsz)...)
 	ls.hiTags = slices.Insert(ls.hiTags, stln, make([]lexer.Line, nsz)...)
 
 	if ls.Highlighter.UsingParse() {
-		pfs := ls.parseState.Done()
+		pfs := ls.ParseState.Done()
 		pfs.Src.LinesInserted(stln, nsz)
 	}
 	ls.linesEdited(tbe)
@@ -1050,17 +1076,17 @@ func (ls *Lines) linesDeleted(tbe *Edit) {
 	stln := tbe.Reg.Start.Ln
 	edln := tbe.Reg.End.Ln
 	ls.lineBytes = append(ls.lineBytes[:stln], ls.lineBytes[edln:]...)
-	ls.markup = append(ls.markup[:stln], ls.markup[edln:]...)
+	ls.Markup = append(ls.Markup[:stln], ls.Markup[edln:]...)
 	ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
 	ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
 
 	if ls.Highlighter.UsingParse() {
-		pfs := ls.parseState.Done()
+		pfs := ls.ParseState.Done()
 		pfs.Src.LinesDeleted(stln, edln)
 	}
 	st := tbe.Reg.Start.Ln
 	ls.lineBytes[st] = []byte(string(ls.lines[st]))
-	ls.markup[st] = highlighting.HtmlEscapeRunes(ls.lines[st])
+	ls.Markup[st] = highlighting.HtmlEscapeRunes(ls.lines[st])
 	ls.markupLines(st, st)
 	ls.startDelayedReMarkup()
 }
@@ -1074,7 +1100,7 @@ func (ls *Lines) initialMarkup() {
 		return
 	}
 	if ls.Highlighter.UsingParse() {
-		fs := ls.parseState.Done() // initialize
+		fs := ls.ParseState.Done() // initialize
 		fs.Src.SetBytes(ls.bytes())
 	}
 	mxhi := min(100, ls.numLines()-1)
@@ -1122,6 +1148,14 @@ func (ls *Lines) reMarkup() {
 	}
 	ls.StopDelayedReMarkup()
 	go ls.asyncMarkup()
+}
+
+// AdjustRegion adjusts given text region for any edits that
+// have taken place since time stamp on region (using the Undo stack).
+// If region was wholly within a deleted region, then RegionNil will be
+// returned -- otherwise it is clipped appropriately as function of deletes.
+func (ls *Lines) AdjustRegion(reg Region) Region {
+	return ls.Undos.AdjustRegion(reg)
 }
 
 // adjustedTags updates tag positions for edits, for given list of tags
@@ -1173,7 +1207,7 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 	edits := ls.markupEdits
 	ls.markupEdits = nil
 	if ls.Highlighter.UsingParse() {
-		pfs := ls.parseState.Done()
+		pfs := ls.ParseState.Done()
 		for _, tbe := range edits {
 			if tbe.Delete {
 				stln := tbe.Reg.Start.Ln
@@ -1211,7 +1245,7 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	for ln := 0; ln < maxln; ln++ {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
-		ls.markup[ln] = ls.Highlighter.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln])
+		ls.Markup[ln] = ls.Highlighter.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln])
 	}
 }
 
@@ -1233,9 +1267,9 @@ func (ls *Lines) markupLines(st, ed int) bool {
 		mt, err := ls.Highlighter.MarkupTagsLine(ln, ltxt)
 		if err == nil {
 			ls.hiTags[ln] = mt
-			ls.markup[ln] = ls.Highlighter.MarkupLine(ltxt, mt, ls.adjustedTags(ln))
+			ls.Markup[ln] = ls.Highlighter.MarkupLine(ltxt, mt, ls.adjustedTags(ln))
 		} else {
-			ls.markup[ln] = highlighting.HtmlEscapeRunes(ltxt)
+			ls.Markup[ln] = highlighting.HtmlEscapeRunes(ltxt)
 			allgood = false
 		}
 	}
@@ -1381,10 +1415,10 @@ func (ls *Lines) indentLine(ln, ind int) *Edit {
 // level and character position for the indent of the current line.
 func (ls *Lines) autoIndent(ln int) (tbe *Edit, indLev, chPos int) {
 	tabSz := ls.Options.TabSize
-	lp, _ := parse.LanguageSupport.Properties(ls.parseState.Sup)
+	lp, _ := parse.LanguageSupport.Properties(ls.ParseState.Sup)
 	var pInd, delInd int
 	if lp != nil && lp.Lang != nil {
-		pInd, delInd, _, _ = lp.Lang.IndentLine(&ls.parseState, ls.lines, ls.hiTags, ln, tabSz)
+		pInd, delInd, _, _ = lp.Lang.IndentLine(&ls.ParseState, ls.lines, ls.hiTags, ln, tabSz)
 	} else {
 		pInd, delInd, _, _ = lexer.BracketIndentLine(ls.lines, ls.hiTags, ln, tabSz)
 	}

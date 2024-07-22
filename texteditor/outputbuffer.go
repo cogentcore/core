@@ -11,6 +11,8 @@ import (
 	"slices"
 	"sync"
 	"time"
+
+	"cogentcore.org/core/texteditor/highlighting"
 )
 
 // OutputBufferMarkupFunc is a function that returns a marked-up version of a given line of
@@ -63,7 +65,7 @@ func (ob *OutputBuffer) MonitorOutput() {
 	for outscan.Scan() {
 		b := outscan.Bytes()
 		bc := slices.Clone(b) // outscan bytes are temp
-		bec := htmlEscapeBytes(bc)
+		bec := highlighting.HtmlEscapeBytes(bc)
 
 		ob.mu.Lock()
 		if ob.afterTimer != nil {

@@ -82,16 +82,16 @@ func (ed *Editor) layoutAllLines() {
 	if ed.lineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
-	if ed.Buffer == nil || ed.Buffer.numLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
 		ed.NumLines = 0
 		return
 	}
 	ed.lastFilename = ed.Buffer.Filename
 
-	ed.Buffer.Highlighting.tabSize = ed.Styles.Text.TabSize
-	ed.NumLines = ed.Buffer.numLines()
+	ed.Buffer.Lock()
+	ed.Buffer.Highlighter.TabSize = ed.Styles.Text.TabSize
+	ed.NumLines = ed.Buffer.NumLines()
 	buf := ed.Buffer
-	buf.markupMu.RLock()
 
 	nln := ed.NumLines
 	if nln >= len(buf.Markup) {
@@ -124,7 +124,7 @@ func (ed *Editor) layoutAllLines() {
 		off += lsz
 		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
 	}
-	buf.markupMu.RUnlock()
+	ed.Buffer.Unlock()
 	ed.linesSize = math32.Vec2(mxwd, off)
 	ed.lastlineLayoutSize = ed.lineLayoutSize
 	ed.internalSizeFromLines()
@@ -136,7 +136,7 @@ func (ed *Editor) reLayoutAllLines() {
 	if ed.lineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
-	if ed.Buffer == nil || ed.Buffer.numLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
 		return
 	}
 	if ed.lastlineLayoutSize == ed.lineLayoutSize {
@@ -154,7 +154,7 @@ func (ed *Editor) SizeUp() {
 	if ed.Buffer == nil {
 		return
 	}
-	nln := len(ed.Buffer.Lines)
+	nln := ed.Buffer.NumLines()
 	if nln == 0 {
 		return
 	}
@@ -218,7 +218,7 @@ func (ed *Editor) ApplyScenePos() {
 // lines (e.g., from word-wrap) is different, then NeedsLayout is called
 // and it returns true.
 func (ed *Editor) layoutLine(ln int) bool {
-	if ed.Buffer == nil || ed.Buffer.numLines() == 0 || ln >= len(ed.renders) {
+	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 || ln >= len(ed.renders) {
 		return false
 	}
 	sty := &ed.Styles
@@ -227,10 +227,11 @@ func (ed *Editor) layoutLine(ln int) bool {
 	mxwd := float32(ed.linesSize.X)
 	needLay := false
 
-	ed.Buffer.markupMu.RLock()
 	rn := &ed.renders[ln]
 	curspans := len(rn.Spans)
+	ed.Buffer.Lock()
 	rn.SetHTMLPre(ed.Buffer.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.textStyleProperties())
+	ed.Buffer.Unlock()
 	rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, ed.lineLayoutSize)
 	if !ed.hasLinks && len(rn.Links) > 0 {
 		ed.hasLinks = true
@@ -242,7 +243,6 @@ func (ed *Editor) layoutLine(ln int) bool {
 	if rn.BBox.Size().X > mxwd {
 		needLay = true
 	}
-	ed.Buffer.markupMu.RUnlock()
 
 	if needLay {
 		ed.NeedsLayout()

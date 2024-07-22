@@ -10,6 +10,7 @@ import (
 	"image"
 	"sync"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
@@ -204,7 +205,12 @@ type Editor struct { //core:embedder
 	lastFilename   core.Filename
 }
 
-func (ed *Editor) WidgetValue() any { return &ed.Buffer.text }
+func (ed *Editor) WidgetValue() any { return ed.Buffer.Text() }
+
+func (ed *Editor) SetWidgetValue(value any) error {
+	ed.Buffer.SetString(reflectx.ToString(value))
+	return nil
+}
 
 func (ed *Editor) Init() {
 	ed.Frame.Init()
@@ -282,7 +288,7 @@ func (ed *Editor) reMarkup() {
 	if ed.Buffer == nil {
 		return
 	}
-	ed.Buffer.reMarkup()
+	ed.Buffer.ReMarkup()
 }
 
 // IsNotSaved returns true if buffer was changed (edited) since last Save
@@ -295,7 +301,7 @@ func (ed *Editor) Clear() {
 	if ed.Buffer == nil {
 		return
 	}
-	ed.Buffer.NewBuffer(0)
+	ed.Buffer.SetText([]byte{})
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -442,8 +448,9 @@ func (ed *Editor) bufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
 
 // undo undoes previous action
 func (ed *Editor) undo() {
-	tbe := ed.Buffer.undo()
-	if tbe != nil {
+	tbes := ed.Buffer.undo()
+	if tbes != nil {
+		tbe := tbes[len(tbes)-1]
 		if tbe.Delete { // now an insert
 			ed.SetCursorShow(tbe.Reg.End)
 		} else {
@@ -459,8 +466,9 @@ func (ed *Editor) undo() {
 
 // redo redoes previously undone action
 func (ed *Editor) redo() {
-	tbe := ed.Buffer.redo()
-	if tbe != nil {
+	tbes := ed.Buffer.redo()
+	if tbes != nil {
+		tbe := tbes[len(tbes)-1]
 		if tbe.Delete {
 			ed.SetCursorShow(tbe.Reg.Start)
 		} else {

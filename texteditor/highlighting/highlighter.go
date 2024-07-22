@@ -35,10 +35,10 @@ type Highlighter struct {
 	Has bool
 
 	// tab size, in chars
-	tabSize int
+	TabSize int
 
 	// Commpiled CSS properties for given highlighting style
-	cssProperties map[string]any
+	CSSProperties map[string]any
 
 	// parser state info
 	parseState *parse.FileStates
@@ -97,13 +97,13 @@ func (hi *Highlighter) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 
 	if hi.StyleName != hi.lastStyle {
 		hi.style = AvailableStyle(hi.StyleName)
-		hi.cssProperties = hi.style.ToProperties()
+		hi.CSSProperties = hi.style.ToProperties()
 		hi.lastStyle = hi.StyleName
 	}
 
 	if hi.lexer != nil && hi.language != hi.lastLanguage {
 		hi.lexer = chroma.Coalesce(lexers.Get(hi.language))
-		hi.formatter = html.New(html.WithClasses(true), html.TabWidth(hi.tabSize))
+		hi.formatter = html.New(html.WithClasses(true), html.TabWidth(hi.TabSize))
 		hi.lastLanguage = hi.language
 	}
 }
@@ -120,7 +120,7 @@ func (hi *Highlighter) SetStyle(style core.HighlightingName) {
 	}
 	hi.StyleName = style
 	hi.style = st
-	hi.cssProperties = hi.style.ToProperties()
+	hi.CSSProperties = hi.style.ToProperties()
 	hi.lastStyle = hi.StyleName
 }
 

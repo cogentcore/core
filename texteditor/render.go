@@ -64,10 +64,10 @@ func (ed *Editor) RenderWidget() {
 
 // textStyleProperties returns the styling properties for text based on HiStyle Markup
 func (ed *Editor) textStyleProperties() map[string]any {
-	if ed.Buffer == nil || !ed.Buffer.Highlighting.Has {
+	if ed.Buffer == nil || !ed.Buffer.Highlighter.Has {
 		return nil
 	}
-	return ed.Buffer.Highlighting.cssProperties
+	return ed.Buffer.Highlighter.CSSProperties
 }
 
 // renderStartPos is absolute rendering start position from our content pos with scroll
@@ -207,10 +207,9 @@ func (ed *Editor) renderDepthBackground(stln, edln int) {
 		return
 	}
 	buf := ed.Buffer
-	buf.markupMu.RLock() // needed for HiTags access
-	defer buf.markupMu.RUnlock()
 
 	bb := ed.renderBBox()
+	bln := buf.NumLines()
 	sty := &ed.Styles
 	isDark := matcolor.SchemeIsDark
 	nclrs := len(viewDepthColors)
@@ -224,10 +223,10 @@ func (ed *Editor) renderDepthBackground(stln, edln int) {
 		if int(math32.Floor(lst)) > bb.Max.Y {
 			continue
 		}
-		if ln >= len(buf.hiTags) { // may be out of sync
+		if ln >= bln { // may be out of sync
 			continue
 		}
-		ht := buf.hiTags[ln]
+		ht := buf.HiTags(ln)
 		lsted := 0
 		for ti := range ht {
 			lx := &ht[ti]
@@ -584,7 +583,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lexer.Pos {
 	if cln >= len(ed.renders) {
 		return lexer.Pos{Ln: cln, Ch: 0}
 	}
-	lnsz := ed.Buffer.lineLen(cln)
+	lnsz := ed.Buffer.LineLen(cln)
 	if lnsz == 0 || sty.Font.Face == nil {
 		return lexer.Pos{Ln: cln, Ch: 0}
 	}

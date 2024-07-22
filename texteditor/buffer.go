@@ -23,7 +23,6 @@ import (
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"
-	"cogentcore.org/core/spell"
 	"cogentcore.org/core/texteditor/highlighting"
 	"cogentcore.org/core/texteditor/textbuf"
 )
@@ -1041,22 +1040,25 @@ func (tb *Buffer) SpellCheckLineErrors(ln int) lexer.Line {
 	if !tb.IsValidLine(ln) {
 		return nil
 	}
-	return spell.CheckLexLine(tb.Lines[ln], tb.hiTags[ln])
+	// todo:
+	// return spell.CheckLexLine(tb.Lines[ln], tb.hiTags[ln])
+	return nil
 }
 
 // spellCheckLineTag runs spell check on given line, and sets Tags for any
 // misspelled words and updates markup for that line.
 func (tb *Buffer) spellCheckLineTag(ln int) {
-	if !tb.IsValidLine(ln) {
-		return
-	}
-	ser := tb.SpellCheckLineErrors(ln)
-	ntgs := tb.adjustedTags(ln)
-	ntgs.DeleteToken(token.TextSpellErr)
-	for _, t := range ser {
-		ntgs.AddSort(t)
-	}
-	tb.tags[ln] = ntgs
-	tb.markupLines(ln, ln)
-	tb.StartDelayedReMarkup()
+	// todo:
+	// if !tb.IsValidLine(ln) {
+	// 	return
+	// }
+	// ser := tb.SpellCheckLineErrors(ln)
+	// ntgs := tb.adjustedTags(ln)
+	// ntgs.DeleteToken(token.TextSpellErr)
+	// for _, t := range ser {
+	// 	ntgs.AddSort(t)
+	// }
+	// tb.tags[ln] = ntgs
+	// tb.markupLines(ln, ln)
+	// tb.StartDelayedReMarkup()
 }
