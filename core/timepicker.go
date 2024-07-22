@@ -146,6 +146,12 @@ type DatePicker struct {
 
 	// Time is the time that we are viewing.
 	Time time.Time
+
+	// getTime converts the given calendar grid index to its corresponding time.
+	// We must store this logic in a closure so that it can always be recomputed
+	// correctly in the inner closures of the grid maker; otherwise, the local
+	// variables needed would be stale.
+	getTime func(i int) time.Time
 }
 
 // setTime sets the source time and updates the picker.
@@ -251,19 +257,23 @@ func (dp *DatePicker) Init() {
 			if eomw.Year() > somw.Year() {
 				eomwyd += time.Date(somw.Year(), 13, -1, 0, 0, 0, 0, somw.Location()).YearDay()
 			}
-			for yd := somwyd; yd <= eomwyd; yd++ {
-				tree.AddAt(p, strconv.Itoa(yd), func(w *Button) { // TODO(config)
-					// actual time of this date
-					dt := somw.AddDate(0, 0, yd-somwyd)
-					ds := strconv.Itoa(dt.Day())
-					w.SetType(ButtonAction).SetText(ds)
+			dp.getTime = func(i int) time.Time {
+				return somw.AddDate(0, 0, i)
+			}
+			for i := range eomwyd - somwyd {
+				tree.AddAt(p, strconv.Itoa(i), func(w *Button) {
+					w.SetType(ButtonAction)
+					w.Updater(func() {
+						w.SetText(strconv.Itoa(dp.getTime(i).Day()))
+					})
 					w.OnClick(func(e events.Event) {
-						dp.setTime(dt)
+						dp.setTime(dp.getTime(i))
 					})
 					w.Styler(func(s *styles.Style) {
 						s.CenterAll()
 						s.Min.Set(units.Dp(32))
 						s.Padding.Set(units.Dp(6))
+						dt := dp.getTime(i)
 						if dt.Month() != som.Month() {
 							s.Color = colors.Scheme.OnSurfaceVariant
 						}
