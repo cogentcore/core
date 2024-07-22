@@ -92,8 +92,10 @@ func (pl *PlotEditor) Init() {
 
 	pl.Options.defaults()
 	pl.Styler(func(s *styles.Style) {
-		s.Direction = styles.Row
 		s.Grow.Set(1, 1)
+		if pl.SizeClass() == core.SizeCompact {
+			s.Direction = styles.Column
+		}
 	})
 
 	pl.OnShow(func(e events.Event) {
@@ -107,9 +109,13 @@ func (pl *PlotEditor) Init() {
 		pl.columnsFrame = w
 		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
-			s.Grow.Set(0, 1)
-			s.Overflow.Y = styles.OverflowAuto
 			s.Background = colors.Scheme.SurfaceContainerLow
+			if w.SizeClass() == core.SizeCompact {
+				s.Grow.Set(1, 0)
+			} else {
+				s.Grow.Set(0, 1)
+				s.Overflow.Y = styles.OverflowAuto
+			}
 		})
 		w.Maker(pl.makeColumns)
 	})
