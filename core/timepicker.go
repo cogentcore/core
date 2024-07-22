@@ -264,7 +264,7 @@ func (dp *DatePicker) Init() {
 				return somw.AddDate(0, 0, i)
 			}
 			dp.som = som
-			for i := range eomwyd - somwyd {
+			for i := range 1 + eomwyd - somwyd {
 				tree.AddAt(p, strconv.Itoa(i), func(w *Button) {
 					w.SetType(ButtonAction)
 					w.Updater(func() {
