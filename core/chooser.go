@@ -151,7 +151,9 @@ func (ch *Chooser) WidgetValue() any { return ch.CurrentItem.Value }
 
 func (ch *Chooser) SetWidgetValue(value any) error {
 	rv := reflect.ValueOf(value)
-	if rv.Kind() == reflect.Pointer {
+	// If the first item is a pointer, we assume that our value should
+	// be a pointer. Otherwise, it should be a non-pointer value.
+	if len(ch.Items) > 0 && reflect.TypeOf(ch.Items[0].Value).Kind() == reflect.Pointer {
 		rv = reflectx.UnderlyingPointer(rv)
 	} else {
 		rv = reflectx.Underlying(rv)
