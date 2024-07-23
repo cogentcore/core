@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -208,4 +209,19 @@ func TestRenderGridCenteredFrame(t *testing.T) {
 		s.SetTextWrap(false)
 	})
 	b.AssertRender(t, "render/grid-centered-frame")
+}
+
+// For https://github.com/cogentcore/core/issues/1034
+func TestRenderParentGradient(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Direction = styles.Row
+		s.Background = gradient.NewLinear().AddStop(colors.White, 0).AddStop(colors.Black, 1)
+	})
+	for range 3 {
+		NewFrame(b).Styler(func(s *styles.Style) {
+			s.Min.Set(units.Em(2))
+		})
+	}
+	b.AssertRender(t, "render/parent-gradient")
 }
