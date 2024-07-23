@@ -8,6 +8,7 @@ package texteditor
 
 import (
 	"image"
+	"slices"
 	"sync"
 
 	"cogentcore.org/core/base/reflectx"
@@ -356,13 +357,7 @@ func (ed *Editor) linesInserted(tbe *textbuf.Edit) {
 	if stln > len(ed.renders) { // invalid
 		return
 	}
-
-	// Renders
-	tmprn := make([]paint.Text, nsz)
-	nrn := append(ed.renders, tmprn...)
-	copy(nrn[stln+nsz:], nrn[stln:])
-	copy(nrn[stln:], tmprn)
-	ed.renders = nrn
+	ed.renders = slices.Insert(ed.renders, stln, make([]paint.Text, nsz)...)
 
 	// Offs
 	tmpof := make([]float32, nsz)
@@ -375,10 +370,7 @@ func (ed *Editor) linesInserted(tbe *textbuf.Edit) {
 	for i := range tmpof {
 		tmpof[i] = ov
 	}
-	nof := append(ed.offsets, tmpof...)
-	copy(nof[stln+nsz:], nof[stln:])
-	copy(nof[stln:], tmpof)
-	ed.offsets = nof
+	ed.offsets = slices.Insert(ed.offsets, stln, tmpof...)
 
 	ed.NumLines += nsz
 	ed.NeedsLayout()

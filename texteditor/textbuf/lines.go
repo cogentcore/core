@@ -37,6 +37,9 @@ var (
 	// maximum number of lines to look for matching scope syntax (parens, brackets)
 	maxScopeLines = 100 // `default:"100" min:"10" step:"10"`
 
+	// maximum number of lines to apply syntax highlighting markup on
+	maxMarkupLines = 10000 // `default:"10000" min:"1000" step:"1000"`
+
 	// amount of time to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
 	markupDelay = 500 * time.Millisecond // `default:"500" min:"100" step:"100"`
 )
@@ -1238,7 +1241,7 @@ func (ls *Lines) startDelayedReMarkup() {
 	ls.markupDelayMu.Lock()
 	defer ls.markupDelayMu.Unlock()
 
-	if !ls.Highlighter.Has || ls.numLines() == 0 {
+	if !ls.Highlighter.Has || ls.numLines() == 0 || ls.numLines() > maxMarkupLines {
 		return
 	}
 	if ls.markupDelayTimer != nil {
@@ -1264,7 +1267,7 @@ func (ls *Lines) StopDelayedReMarkup() {
 
 // reMarkup runs re-markup on text in background
 func (ls *Lines) reMarkup() {
-	if !ls.Highlighter.Has || ls.numLines() == 0 {
+	if !ls.Highlighter.Has || ls.numLines() == 0 || ls.numLines() > maxMarkupLines {
 		return
 	}
 	ls.StopDelayedReMarkup()
@@ -1306,11 +1309,12 @@ func (ls *Lines) adjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
 	return ntags
 }
 
-// asyncMarkup runs markupAllLines from a separate goroutine.
+// asyncMarkup does the markupTags from a separate goroutine.
 // Does not start or end with lock, but acquires at end to apply.
 func (ls *Lines) asyncMarkup() {
 	ls.Lock()
 	txt := ls.bytesLF()
+	ls.markupEdits = nil // only accumulate after this point; very rare
 	ls.Unlock()
 
 	tags, err := ls.markupTags(txt)
@@ -1483,9 +1487,15 @@ func (ls *Lines) lexObjPathString(ln int, lx *lexer.Lex) string {
 	if !ls.isValidLine(ln) {
 		return ""
 	}
+	lln := len(ls.lines[ln])
+	if lx.Ed > lln {
+		return ""
+	}
 	stlx := lexer.ObjPathAt(ls.hiTags[ln], lx)
-	rns := ls.lines[ln][stlx.St:lx.Ed]
-	return string(rns)
+	if stlx.St >= lx.Ed {
+		return ""
+	}
+	return string(ls.lines[ln][stlx.St:lx.Ed])
 }
 
 // hiTagAtPos returns the highlighting (markup) lexical tag at given position
@@ -1540,7 +1550,7 @@ func (ls *Lines) indentLine(ln, ind int) *Edit {
 	} else if ind < curind {
 		spos := indent.Len(ichr, ind, tabSz)
 		cpos := indent.Len(ichr, curind, tabSz)
-		return ls.DeleteText(lexer.Pos{Ln: ln, Ch: spos}, lexer.Pos{Ln: ln, Ch: cpos})
+		return ls.deleteText(lexer.Pos{Ln: ln, Ch: spos}, lexer.Pos{Ln: ln, Ch: cpos})
 	}
 	return nil
 }
