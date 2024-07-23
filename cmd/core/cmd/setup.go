@@ -10,6 +10,7 @@ import (
 	"runtime"
 
 	"cogentcore.org/core/base/exec"
+	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/core/config"
 	"github.com/mitchellh/go-homedir"
 )
@@ -28,6 +29,12 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
+		} else {
+			logx.PrintlnWarn("xcode tools already installed")
+		}
+		if _, err := exec.LookPath("vulkaninfo"); err == nil {
+			logx.PrintlnWarn("vulkan already installed")
+			return nil
 		}
 		err = vc.Run("curl", "-OL", "https://sdk.lunarg.com/sdk/download/"+vulkanVersion+"/mac/vulkansdk-macos-"+vulkanVersion+".dmg")
 		if err != nil {
@@ -79,6 +86,8 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
+		} else {
+			logx.PrintlnWarn("gcc already installed")
 		}
 		if _, err := exec.LookPath("git"); err != nil {
 			err := vc.Run("curl", "-OL", "https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe")
@@ -93,6 +102,8 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
+		} else {
+			logx.PrintlnWarn("git already installed")
 		}
 		return nil
 	}
