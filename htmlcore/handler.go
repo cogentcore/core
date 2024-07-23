@@ -106,9 +106,9 @@ func handleElement(ctx *Context) {
 	case "button":
 		New[core.Button](ctx).SetText(ExtractText(ctx))
 	case "h1":
-		handleText(ctx).SetType(core.TextHeadlineLarge)
+		handleText(ctx).SetType(core.TextDisplaySmall)
 	case "h2":
-		handleText(ctx).SetType(core.TextHeadlineSmall)
+		handleText(ctx).SetType(core.TextHeadlineMedium)
 	case "h3":
 		handleText(ctx).SetType(core.TextTitleLarge)
 	case "h4":
