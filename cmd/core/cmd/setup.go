@@ -29,7 +29,7 @@ func Setup(c *config.Config) error { //types:add
 				return err
 			}
 		}
-		err = vc.Run("curl", "-O", "https://sdk.lunarg.com/sdk/download/"+vulkanVersion+"/mac/vulkansdk-macos-"+vulkanVersion+".dmg")
+		err = vc.Run("curl", "-OL", "https://sdk.lunarg.com/sdk/download/"+vulkanVersion+"/mac/vulkansdk-macos-"+vulkanVersion+".dmg")
 		if err != nil {
 			return err
 		}
@@ -63,7 +63,7 @@ func Setup(c *config.Config) error { //types:add
 		return fmt.Errorf("unknown Linux distro (apt-get and dnf not found); file an issue at https://github.com/cogentcore/core/issues")
 	case "windows":
 		if _, err := exec.LookPath("gcc"); err != nil {
-			err := vc.Run("curl", "-O", "https://github.com/jmeubank/tdm-gcc/releases/download/v10.3.0-tdm64-2/tdm64-gcc-10.3.0-2.exe")
+			err := vc.Run("curl", "-OL", "https://github.com/jmeubank/tdm-gcc/releases/download/v10.3.0-tdm64-2/tdm64-gcc-10.3.0-2.exe")
 			if err != nil {
 				return err
 			}
@@ -81,7 +81,7 @@ func Setup(c *config.Config) error { //types:add
 			}
 		}
 		if _, err := exec.LookPath("git"); err != nil {
-			err := vc.Run("curl", "-O", "https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe")
+			err := vc.Run("curl", "-OL", "https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe")
 			if err != nil {
 				return err
 			}
