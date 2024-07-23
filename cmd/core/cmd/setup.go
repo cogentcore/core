@@ -67,7 +67,11 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
-			err = vc.Run("tdm64-gcc-10.3.0-2.exe")
+			path, err := filepath.Abs("tdm64-gcc-10.3.0-2.exe")
+			if err != nil {
+				return err
+			}
+			err = vc.Run(path)
 			if err != nil {
 				return err
 			}
@@ -81,7 +85,11 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
-			err = vc.Run("Git-2.45.2-64-bit.exe")
+			path, err := filepath.Abs("Git-2.45.2-64-bit.exe")
+			if err != nil {
+				return err
+			}
+			err = vc.Run(path)
 			if err != nil {
 				return err
 			}
