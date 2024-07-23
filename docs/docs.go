@@ -255,14 +255,15 @@ func homePage(ctx *htmlcore.Context) bool {
 	})
 
 	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.", func(w *texteditor.Editor) {
-		w.Buffer.SetLanguage(fileinfo.Go).SetString(`func main() {
-	b := core.NewBody()
-	core.NewButton(b).SetText("Hello, World!")
-	b.RunMainWindow()
-}`)
+		w.Buffer.SetLanguage(fileinfo.Go).SetString(`b := core.NewBody()
+core.NewButton(b).SetText("Hello, World!")
+b.RunMainWindow()`)
+		w.SetReadOnly(true)
+		w.Buffer.Options.LineNumbers = false
 		w.Styler(func(s *styles.Style) {
-			s.Min.X.Em(10)
-			s.Max.X.Em(40)
+			if w.SizeClass() != core.SizeCompact {
+				s.Min.X.Em(20)
+			}
 		})
 	})
 
@@ -333,12 +334,12 @@ func homePage(ctx *htmlcore.Context) bool {
 		w.SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core instead of something else?</b>")
 	})
 
-	makeBlock("THE PROBLEM", "After using other frameworks built on HTML and Qt for years to make various apps ranging from simple tools to complex scientific models, we realized that we were spending more time dealing with excessive boilerplate, browser inconsistencies, and dependency management issues than actual app development.", func(w *core.Icon) {
+	makeBlock("THE PROBLEM", "After using other frameworks built on HTML and Qt for years to make apps ranging from simple tools to complex scientific models, we realized that we were spending more time dealing with excessive boilerplate, browser inconsistencies, and dependency management issues than actual app development.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Problem)
 	})
 
 	makeBlock("THE SOLUTION", "We decided to make a framework that would allow us to focus on app content and logic by providing a consistent and elegant API that automatically handles cross-platform support, user customization, and app packaging and deployment.", func(w *core.Icon) {
-		initIcon(w).SetIcon(icons.Build)
+		initIcon(w).SetIcon(icons.Lightbulb)
 	})
 
 	makeBlock("THE RESULT", "Instead of constantly jumping through hoops to create a consistent, easy-to-use, cross-platform app, you can now take advantage of a powerful featureset on all platforms and vastly simplify your development experience.", func(w *core.Icon) {
