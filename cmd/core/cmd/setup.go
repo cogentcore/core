@@ -75,7 +75,7 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
-			err = exec.Run("start", "cmd.exe", "/c", `cd C:\TDM-GCC-64 && mingwvars.bat`)
+			err = exec.Run("cmd.exe", "/c", `cd C:\TDM-GCC-64 && mingwvars.bat`)
 			if err != nil {
 				return err
 			}
