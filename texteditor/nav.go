@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/texteditor/text"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,8 +68,8 @@ func (ed *Editor) setCursor(pos lexer.Pos) {
 		if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
 			tp, found := ed.Buffer.BraceMatch(txt[ch], ed.CursorPos)
 			if found {
-				ed.scopelights = append(ed.scopelights, textbuf.NewRegionPos(ed.CursorPos, lexer.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch + 1}))
-				ed.scopelights = append(ed.scopelights, textbuf.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
+				ed.scopelights = append(ed.scopelights, text.NewRegionPos(ed.CursorPos, lexer.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch + 1}))
+				ed.scopelights = append(ed.scopelights, text.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
 			}
 		}
 	}
@@ -729,7 +729,7 @@ func (ed *Editor) jumpToLine(ln int) {
 }
 
 // findNextLink finds next link after given position, returns false if no such links
-func (ed *Editor) findNextLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) {
+func (ed *Editor) findNextLink(pos lexer.Pos) (lexer.Pos, text.Region, bool) {
 	for ln := pos.Ln; ln < ed.NumLines; ln++ {
 		if len(ed.renders[ln].Links) == 0 {
 			pos.Ch = 0
@@ -743,7 +743,7 @@ func (ed *Editor) findNextLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) 
 			if tl.StartSpan >= si && tl.StartIndex >= ri {
 				st, _ := rend.SpanPosToRuneIndex(tl.StartSpan, tl.StartIndex)
 				ed, _ := rend.SpanPosToRuneIndex(tl.EndSpan, tl.EndIndex)
-				reg := textbuf.NewRegion(ln, st, ln, ed)
+				reg := text.NewRegion(ln, st, ln, ed)
 				pos.Ch = st + 1 // get into it so next one will go after..
 				return pos, reg, true
 			}
@@ -751,11 +751,11 @@ func (ed *Editor) findNextLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) 
 		pos.Ln = ln + 1
 		pos.Ch = 0
 	}
-	return pos, textbuf.RegionNil, false
+	return pos, text.RegionNil, false
 }
 
 // findPrevLink finds previous link before given position, returns false if no such links
-func (ed *Editor) findPrevLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) {
+func (ed *Editor) findPrevLink(pos lexer.Pos) (lexer.Pos, text.Region, bool) {
 	for ln := pos.Ln - 1; ln >= 0; ln-- {
 		if len(ed.renders[ln].Links) == 0 {
 			if ln-1 >= 0 {
@@ -774,14 +774,14 @@ func (ed *Editor) findPrevLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) 
 			if tl.StartSpan <= si && tl.StartIndex < ri {
 				st, _ := rend.SpanPosToRuneIndex(tl.StartSpan, tl.StartIndex)
 				ed, _ := rend.SpanPosToRuneIndex(tl.EndSpan, tl.EndIndex)
-				reg := textbuf.NewRegion(ln, st, ln, ed)
+				reg := text.NewRegion(ln, st, ln, ed)
 				pos.Ln = ln
 				pos.Ch = st + 1
 				return pos, reg, true
 			}
 		}
 	}
-	return pos, textbuf.RegionNil, false
+	return pos, text.RegionNil, false
 }
 
 // CursorNextLink moves cursor to next link. wraparound wraps around to top of

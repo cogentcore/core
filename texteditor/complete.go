@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/parser"
-	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/texteditor/text"
 )
 
 // completeParse uses [parse] symbols and language; the string is a line of text
@@ -61,7 +61,7 @@ func completeEditParse(data any, text string, cursorPos int, comp complete.Compl
 // lookupParse uses [parse] symbols and language; the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func lookupParse(data any, text string, posLine, posChar int) (ld complete.Lookup) {
+func lookupParse(data any, txt string, posLine, posChar int) (ld complete.Lookup) {
 	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("LookupPi: data is nil not FileStates or is nil - can't lookup\n")
@@ -80,15 +80,15 @@ func lookupParse(data any, text string, posLine, posChar int) (ld complete.Looku
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
 	parser.GUIActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
-	ld = lp.Lang.Lookup(sfs, text, lexer.Pos{posLine, posChar})
+	ld = lp.Lang.Lookup(sfs, txt, lexer.Pos{posLine, posChar})
 	if len(ld.Text) > 0 {
-		TextDialog(nil, "Lookup: "+text, string(ld.Text))
+		TextDialog(nil, "Lookup: "+txt, string(ld.Text))
 		return ld
 	}
 	if ld.Filename != "" {
-		txt := textbuf.FileRegionBytes(ld.Filename, ld.StLine, ld.EdLine, true, 10) // comments, 10 lines back max
+		tx := text.FileRegionBytes(ld.Filename, ld.StLine, ld.EdLine, true, 10) // comments, 10 lines back max
 		prmpt := fmt.Sprintf("%v [%d:%d]", ld.Filename, ld.StLine, ld.EdLine)
-		TextDialog(nil, "Lookup: "+text+": "+prmpt, string(txt))
+		TextDialog(nil, "Lookup: "+txt+": "+prmpt, string(tx))
 		return ld
 	}
 

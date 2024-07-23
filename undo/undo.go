@@ -33,7 +33,7 @@ import (
 	"strings"
 	"sync"
 
-	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/texteditor/text"
 )
 
 // DefaultRawInterval is interval for saving raw state -- need to do this
@@ -56,7 +56,7 @@ type Record struct {
 	Raw []string
 
 	// patch to get from previous record to this one
-	Patch textbuf.Patch
+	Patch text.Patch
 
 	// this record is an UndoSave, when Undo first called from end of stack
 	UndoSave bool
@@ -187,7 +187,7 @@ func (us *Stack) SaveState(nr *Record, idx int, state []string) {
 		return
 	}
 	prv := us.RecState(idx - 1)
-	dif := textbuf.DiffLines(prv, state)
+	dif := text.DiffLines(prv, state)
 	nr.Patch = dif.ToPatch(state)
 	us.Mu.Unlock()
 }

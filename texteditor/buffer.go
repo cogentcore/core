@@ -25,7 +25,7 @@ import (
 	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/spell"
 	"cogentcore.org/core/texteditor/highlighting"
-	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/texteditor/text"
 )
 
 // Buffer is a buffer of text, which can be viewed by [Editor](s).
@@ -40,7 +40,7 @@ import (
 // Internally, the buffer represents new lines using \n = LF, but saving
 // and loading can deal with Windows/DOS CRLF format.
 type Buffer struct { //types:add
-	textbuf.Lines
+	text.Lines
 
 	// Filename is the filename of the file that was last loaded or saved.
 	// It is used when highlighting code.
@@ -124,12 +124,12 @@ const (
 	bufferMods
 
 	// bufferInsert signals that some text was inserted.
-	// data is textbuf.Edit describing change.
+	// data is text.Edit describing change.
 	// The Buf always reflects the current state *after* the edit.
 	bufferInsert
 
 	// bufferDelete signals that some text was deleted.
-	// data is textbuf.Edit describing change.
+	// data is text.Edit describing change.
 	// The Buf always reflects the current state *after* the edit.
 	bufferDelete
 
@@ -138,13 +138,13 @@ const (
 	// so should be used with a mutex
 	bufferMarkupUpdated
 
-	// bufferClosed signals that the textbuf was closed.
+	// bufferClosed signals that the text was closed.
 	bufferClosed
 )
 
 // signalEditors sends the given signal and optional edit info
 // to all the [Editor]s for this [Buffer]
-func (tb *Buffer) signalEditors(sig bufferSignals, edit *textbuf.Edit) {
+func (tb *Buffer) signalEditors(sig bufferSignals, edit *text.Edit) {
 	for _, vw := range tb.editors {
 		vw.bufferSignal(sig, edit)
 	}
@@ -603,7 +603,7 @@ func (tb *Buffer) AutoSaveCheck() bool {
 
 // AppendTextMarkup appends new text to end of buffer, using insert, returns
 // edit, and uses supplied markup to render it.
-func (tb *Buffer) AppendTextMarkup(text []byte, markup []byte, signal bool) *textbuf.Edit {
+func (tb *Buffer) AppendTextMarkup(text []byte, markup []byte, signal bool) *text.Edit {
 	tbe := tb.Lines.AppendTextMarkup(text, markup)
 	if tbe != nil && signal {
 		tb.signalEditors(bufferInsert, tbe)
@@ -614,7 +614,7 @@ func (tb *Buffer) AppendTextMarkup(text []byte, markup []byte, signal bool) *tex
 // AppendTextLineMarkup appends one line of new text to end of buffer, using
 // insert, and appending a LF at the end of the line if it doesn't already
 // have one. User-supplied markup is used. Returns the edit region.
-func (tb *Buffer) AppendTextLineMarkup(text []byte, markup []byte, signal bool) *textbuf.Edit {
+func (tb *Buffer) AppendTextLineMarkup(text []byte, markup []byte, signal bool) *text.Edit {
 	tbe := tb.Lines.AppendTextLineMarkup(text, markup)
 	if tbe != nil && signal {
 		tb.signalEditors(bufferInsert, tbe)
@@ -690,7 +690,7 @@ const (
 // optionally signaling views after text lines have been updated.
 // Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) DeleteText(st, ed lexer.Pos, signal bool) *textbuf.Edit {
+func (tb *Buffer) DeleteText(st, ed lexer.Pos, signal bool) *text.Edit {
 	tb.FileModCheck()
 	tb.setChanged()
 	tbe := tb.Lines.DeleteText(st, ed)
@@ -708,9 +708,9 @@ func (tb *Buffer) DeleteText(st, ed lexer.Pos, signal bool) *textbuf.Edit {
 
 // deleteTextRect deletes rectangular region of text between start, end
 // defining the upper-left and lower-right corners of a rectangle.
-// Fails if st.Ch >= ed.Ch. Sets the timestamp on resulting textbuf.Edit to now.
+// Fails if st.Ch >= ed.Ch. Sets the timestamp on resulting text.Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) deleteTextRect(st, ed lexer.Pos, signal bool) *textbuf.Edit {
+func (tb *Buffer) deleteTextRect(st, ed lexer.Pos, signal bool) *text.Edit {
 	tb.FileModCheck()
 	tb.setChanged()
 	tbe := tb.Lines.DeleteTextRect(st, ed)
@@ -730,7 +730,7 @@ func (tb *Buffer) deleteTextRect(st, ed lexer.Pos, signal bool) *textbuf.Edit {
 // It inserts new text at given starting position, optionally signaling
 // views after text has been inserted.  Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) insertText(st lexer.Pos, text []byte, signal bool) *textbuf.Edit {
+func (tb *Buffer) insertText(st lexer.Pos, text []byte, signal bool) *text.Edit {
 	tb.FileModCheck() // will just revert changes if shouldn't have changed
 	tb.setChanged()
 	tbe := tb.Lines.InsertText(st, text)
@@ -746,12 +746,12 @@ func (tb *Buffer) insertText(st lexer.Pos, text []byte, signal bool) *textbuf.Ed
 	return tbe
 }
 
-// insertTextRect inserts a rectangle of text defined in given textbuf.Edit record,
+// insertTextRect inserts a rectangle of text defined in given text.Edit record,
 // (e.g., from RegionRect or DeleteRect), optionally signaling
 // views after text has been inserted.
 // Returns a copy of the Edit record with an updated timestamp.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) insertTextRect(tbe *textbuf.Edit, signal bool) *textbuf.Edit {
+func (tb *Buffer) insertTextRect(tbe *text.Edit, signal bool) *text.Edit {
 	tb.FileModCheck() // will just revert changes if shouldn't have changed
 	tb.setChanged()
 	nln := tb.NumLines()
@@ -761,7 +761,7 @@ func (tb *Buffer) insertTextRect(tbe *textbuf.Edit, signal bool) *textbuf.Edit {
 	}
 	if signal {
 		if re.Reg.End.Ln >= nln {
-			ie := &textbuf.Edit{}
+			ie := &text.Edit{}
 			ie.Reg.Start.Ln = nln - 1
 			ie.Reg.End.Ln = re.Reg.End.Ln
 			tb.signalEditors(bufferInsert, ie)
@@ -779,8 +779,8 @@ func (tb *Buffer) insertTextRect(tbe *textbuf.Edit, signal bool) *textbuf.Edit {
 // (typically same as delSt but not necessarily), optionally emitting a signal after the insert.
 // if matchCase is true, then the lexer.MatchCase function is called to match the
 // case (upper / lower) of the new inserted text to that of the text being replaced.
-// returns the textbuf.Edit for the inserted text.
-func (tb *Buffer) ReplaceText(delSt, delEd, insPos lexer.Pos, insTxt string, signal, matchCase bool) *textbuf.Edit {
+// returns the text.Edit for the inserted text.
+func (tb *Buffer) ReplaceText(delSt, delEd, insPos lexer.Pos, insTxt string, signal, matchCase bool) *text.Edit {
 	tbe := tb.Lines.ReplaceText(delSt, delEd, insPos, insTxt, matchCase)
 	if tbe == nil {
 		return tbe
@@ -815,7 +815,7 @@ func (tb *Buffer) savePosHistory(pos lexer.Pos) bool {
 //   Undo
 
 // undo undoes next group of items on the undo stack
-func (tb *Buffer) undo() []*textbuf.Edit {
+func (tb *Buffer) undo() []*text.Edit {
 	autoSave := tb.batchUpdateStart()
 	defer tb.batchUpdateEnd(autoSave)
 	tbe := tb.Lines.Undo()
@@ -829,7 +829,7 @@ func (tb *Buffer) undo() []*textbuf.Edit {
 
 // redo redoes next group of items on the undo stack,
 // and returns the last record, nil if no more
-func (tb *Buffer) redo() []*textbuf.Edit {
+func (tb *Buffer) redo() []*text.Edit {
 	autoSave := tb.batchUpdateStart()
 	defer tb.batchUpdateEnd(autoSave)
 	tbe := tb.Lines.Redo()
@@ -883,7 +883,7 @@ func (tb *Buffer) DeleteLineColor(ln int) {
 // indentLine indents line by given number of tab stops, using tabs or spaces,
 // for given tab size (if using spaces) -- either inserts or deletes to reach target.
 // Returns edit record for any change.
-func (tb *Buffer) indentLine(ln, ind int) *textbuf.Edit {
+func (tb *Buffer) indentLine(ln, ind int) *text.Edit {
 	autoSave := tb.batchUpdateStart()
 	defer tb.batchUpdateEnd(autoSave)
 	tbe := tb.Lines.IndentLine(ln, ind)
@@ -940,7 +940,7 @@ func (tb *Buffer) DiffBuffersUnified(ob *Buffer, context int) []byte {
 	astr := tb.Strings(true) // needs newlines for some reason
 	bstr := ob.Strings(true)
 
-	return textbuf.DiffLinesUnified(astr, bstr, context, string(tb.Filename), tb.Info.ModTime.String(),
+	return text.DiffLinesUnified(astr, bstr, context, string(tb.Filename), tb.Info.ModTime.String(),
 		string(ob.Filename), ob.Info.ModTime.String())
 }
 

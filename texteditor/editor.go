@@ -24,7 +24,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor/highlighting"
-	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/texteditor/text"
 )
 
 // TODO: move these into an editor settings object
@@ -118,17 +118,17 @@ type Editor struct { //core:embedder
 	selectStart lexer.Pos
 
 	// SelectRegion is the current selection region.
-	SelectRegion textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
+	SelectRegion text.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// previousSelectRegion is the previous selection region that was actually rendered.
 	// It is needed to update the render.
-	previousSelectRegion textbuf.Region
+	previousSelectRegion text.Region
 
 	// Highlights is a slice of regions representing the highlighted regions, e.g., for search results.
-	Highlights []textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
+	Highlights []text.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// scopelights is a slice of regions representing the highlighted regions specific to scope markers.
-	scopelights []textbuf.Region
+	scopelights []text.Region
 
 	// LinkHandler handles link clicks.
 	// If it is nil, they are sent to the standard web URL handler.
@@ -351,7 +351,7 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 }
 
 // linesInserted inserts new lines of text and reformats them
-func (ed *Editor) linesInserted(tbe *textbuf.Edit) {
+func (ed *Editor) linesInserted(tbe *text.Edit) {
 	stln := tbe.Reg.Start.Ln + 1
 	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
 	if stln > len(ed.renders) { // invalid
@@ -377,7 +377,7 @@ func (ed *Editor) linesInserted(tbe *textbuf.Edit) {
 }
 
 // linesDeleted deletes lines of text and reformats remaining one
-func (ed *Editor) linesDeleted(tbe *textbuf.Edit) {
+func (ed *Editor) linesDeleted(tbe *text.Edit) {
 	stln := tbe.Reg.Start.Ln
 	edln := tbe.Reg.End.Ln
 	dsz := edln - stln
@@ -391,7 +391,7 @@ func (ed *Editor) linesDeleted(tbe *textbuf.Edit) {
 
 // bufferSignal receives a signal from the Buffer when the underlying text
 // is changed.
-func (ed *Editor) bufferSignal(sig bufferSignals, tbe *textbuf.Edit) {
+func (ed *Editor) bufferSignal(sig bufferSignals, tbe *text.Edit) {
 	switch sig {
 	case bufferDone:
 	case bufferNew:

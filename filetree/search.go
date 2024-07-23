@@ -15,7 +15,7 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/texteditor/text"
 	"cogentcore.org/core/tree"
 )
 
@@ -43,7 +43,7 @@ const (
 type SearchResults struct {
 	Node    *Node
 	Count   int
-	Matches []textbuf.Match
+	Matches []text.Match
 }
 
 // Search returns list of all nodes starting at given node of given
@@ -101,7 +101,7 @@ func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLocation,
 			// }
 		}
 		var cnt int
-		var matches []textbuf.Match
+		var matches []text.Match
 		if sfn.isOpen() && sfn.Buffer != nil {
 			if regExp {
 				cnt, matches = sfn.Buffer.SearchRegexp(re)
@@ -110,9 +110,9 @@ func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLocation,
 			}
 		} else {
 			if regExp {
-				cnt, matches = textbuf.SearchFileRegexp(string(sfn.Filepath), re)
+				cnt, matches = text.SearchFileRegexp(string(sfn.Filepath), re)
 			} else {
-				cnt, matches = textbuf.SearchFile(string(sfn.Filepath), fb, ignoreCase)
+				cnt, matches = text.SearchFile(string(sfn.Filepath), fb, ignoreCase)
 			}
 		}
 		if cnt > 0 {
@@ -175,7 +175,7 @@ func findAll(start *Node, find string, ignoreCase, regExp bool, langs []fileinfo
 		}
 		ofn := openPath(path)
 		var cnt int
-		var matches []textbuf.Match
+		var matches []text.Match
 		if ofn != nil && ofn.Buffer != nil {
 			if regExp {
 				cnt, matches = ofn.Buffer.SearchRegexp(re)
@@ -184,9 +184,9 @@ func findAll(start *Node, find string, ignoreCase, regExp bool, langs []fileinfo
 			}
 		} else {
 			if regExp {
-				cnt, matches = textbuf.SearchFileRegexp(path, re)
+				cnt, matches = text.SearchFileRegexp(path, re)
 			} else {
-				cnt, matches = textbuf.SearchFile(path, fb, ignoreCase)
+				cnt, matches = text.SearchFile(path, fb, ignoreCase)
 			}
 		}
 		if cnt > 0 {

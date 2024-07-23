@@ -25,7 +25,7 @@ import (
 	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/texteditor/text"
 	"cogentcore.org/core/tree"
 )
 
@@ -58,12 +58,12 @@ func DiffEditorDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf 
 		if fbuf != nil {
 			bstr = fbuf.Strings(false)
 		} else {
-			fb, err := textbuf.FileBytes(file)
+			fb, err := text.FileBytes(file)
 			if err != nil {
 				core.ErrorDialog(ctx, err)
 				return nil, err
 			}
-			bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+			bstr = text.BytesToLineStrings(fb, false) // don't add new lines
 		}
 	} else {
 		fb, err := repo.FileContents(file, rev_b)
@@ -71,14 +71,14 @@ func DiffEditorDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf 
 			core.ErrorDialog(ctx, err)
 			return nil, err
 		}
-		bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+		bstr = text.BytesToLineStrings(fb, false) // don't add new lines
 	}
 	fb, err := repo.FileContents(file, rev_a)
 	if err != nil {
 		core.ErrorDialog(ctx, err)
 		return nil, err
 	}
-	astr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+	astr = text.BytesToLineStrings(fb, false) // don't add new lines
 	if rev_a == "" {
 		rev_a = "HEAD"
 	}
@@ -141,10 +141,10 @@ type DiffEditor struct {
 	bufferB *Buffer
 
 	// aligned diffs records diff for aligned lines
-	alignD textbuf.Diffs
+	alignD text.Diffs
 
 	// diffs applied
-	diffs textbuf.DiffSelected
+	diffs text.DiffSelected
 
 	inInputEvent bool
 }
@@ -330,7 +330,7 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 	chg := colors.Scheme.Primary.Base
 
 	nd := len(dv.diffs.Diffs)
-	dv.alignD = make(textbuf.Diffs, nd)
+	dv.alignD = make(text.Diffs, nd)
 	var ab, bb [][]byte
 	absln := 0
 	bspc := []byte(" ")
@@ -444,7 +444,7 @@ func (dv *DiffEditor) tagWordDiffs() {
 			fla := lna.RuneStrings(ra)
 			flb := lnb.RuneStrings(rb)
 			nab := max(len(fla), len(flb))
-			ldif := textbuf.DiffLines(fla, flb)
+			ldif := text.DiffLines(fla, flb)
 			ndif := len(ldif)
 			if nab > 25 && ndif > nab/2 { // more than half of big diff -- skip
 				continue

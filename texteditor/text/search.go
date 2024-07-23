@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package textbuf
+package text
 
 import (
 	"bufio"
@@ -190,7 +190,7 @@ func Search(reader io.Reader, find []byte, ignoreCase bool) (int, []Match) {
 func SearchFile(filename string, find []byte, ignoreCase bool) (int, []Match) {
 	fp, err := os.Open(filename)
 	if err != nil {
-		log.Printf("textbuf.SearchFile: open error: %v\n", err)
+		log.Printf("text.SearchFile: open error: %v\n", err)
 		return 0, nil
 	}
 	defer fp.Close()
@@ -245,7 +245,7 @@ func SearchRegexp(reader io.Reader, re *regexp.Regexp) (int, []Match) {
 func SearchFileRegexp(filename string, re *regexp.Regexp) (int, []Match) {
 	fp, err := os.Open(filename)
 	if err != nil {
-		log.Printf("textbuf.SearchFile: open error: %v\n", err)
+		log.Printf("text.SearchFile: open error: %v\n", err)
 		return 0, nil
 	}
 	defer fp.Close()

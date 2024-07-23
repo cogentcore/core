@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package textbuf
+package text
 
 import (
 	"bytes"
@@ -753,7 +753,7 @@ func (ls *Lines) region(st, ed lexer.Pos) *Edit {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("textbuf.region: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("text.region: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tbe := &Edit{Reg: NewRegionPos(st, ed)}
@@ -1638,7 +1638,7 @@ func (ls *Lines) commentRegion(start, end int) {
 
 	comst, comed := ls.Options.CommentStrings()
 	if comst == "" {
-		log.Printf("textbuf.Lines: attempt to comment region without any comment syntax defined")
+		log.Printf("text.Lines: attempt to comment region without any comment syntax defined")
 		return
 	}
 

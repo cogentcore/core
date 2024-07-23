@@ -23,7 +23,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/texteditor/text"
 )
 
 func (ed *Editor) handleFocus() {
@@ -46,15 +46,15 @@ func (ed *Editor) handleKeyChord() {
 }
 
 // shiftSelect sets the selection start if the shift key is down but wasn't on the last key move.
-// If the shift key has been released the select region is set to textbuf.RegionNil
+// If the shift key has been released the select region is set to text.RegionNil
 func (ed *Editor) shiftSelect(kt events.Event) {
 	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
-		if ed.SelectRegion == textbuf.RegionNil {
+		if ed.SelectRegion == text.RegionNil {
 			ed.selectStart = ed.CursorPos
 		}
 	} else {
-		ed.SelectRegion = textbuf.RegionNil
+		ed.SelectRegion = text.RegionNil
 	}
 }
 
@@ -479,8 +479,8 @@ func (ed *Editor) keyInputInsertRune(kt events.Event) {
 			np.Ch--
 			tp, found := ed.Buffer.BraceMatch(kt.KeyRune(), np)
 			if found {
-				ed.scopelights = append(ed.scopelights, textbuf.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
-				ed.scopelights = append(ed.scopelights, textbuf.NewRegionPos(np, lexer.Pos{cp.Ln, cp.Ch}))
+				ed.scopelights = append(ed.scopelights, text.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
+				ed.scopelights = append(ed.scopelights, text.NewRegionPos(np, lexer.Pos{cp.Ln, cp.Ch}))
 			}
 		}
 	}
@@ -527,7 +527,7 @@ func (ed *Editor) OpenLinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 		rend := &ed.renders[pos.Ln]
 		st, _ := rend.SpanPosToRuneIndex(tl.StartSpan, tl.StartIndex)
 		end, _ := rend.SpanPosToRuneIndex(tl.EndSpan, tl.EndIndex)
-		reg := textbuf.NewRegion(pos.Ln, st, pos.Ln, end)
+		reg := text.NewRegion(pos.Ln, st, pos.Ln, end)
 		_ = reg
 		ed.HighlightRegion(reg)
 		ed.SetCursorTarget(pos)
@@ -647,7 +647,7 @@ func (ed *Editor) setCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 	defer ed.NeedsRender()
 
 	if !ed.selectMode && selMode == events.ExtendContinuous {
-		if ed.SelectRegion == textbuf.RegionNil {
+		if ed.SelectRegion == text.RegionNil {
 			ed.selectStart = ed.CursorPos
 		}
 		ed.setCursor(newPos)
