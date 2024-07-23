@@ -4,4 +4,5 @@ Now that you have read the [basics](../basics) and [tutorials](../tutorials), yo
 2. Run `go install cogentcore.org/core/cmd/core@main` to install the Cogent Core command line tool.
 3. Run `core setup` to install platform-specific dependencies.
     * You may need to enter your password so that it can run `sudo` commands.
+    * You may need to restart your shell after running the command.
     * On Windows, you must run the command from a shell/prompt running as administrator. You may need to follow steps in installers. If it asks you about Git Bash, you should choose to install it, and you should use it as your main shell for development.
