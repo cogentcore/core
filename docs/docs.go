@@ -84,6 +84,12 @@ func main() {
 			})
 		})
 		tree.Add(p, func(w *core.Button) {
+			w.SetText("Sponsor").SetIcon(icons.Favorite)
+			w.OnClick(func(e events.Event) {
+				pg.Context.OpenURL("https://github.com/sponsors/cogentcore")
+			})
+		})
+		tree.Add(p, func(w *core.Button) {
 			w.SetText("Contact").SetIcon(icons.Mail)
 			w.OnClick(func(e events.Event) {
 				core.MessageDialog(w, "contact@cogentcore.org", "Contact us via email at")
