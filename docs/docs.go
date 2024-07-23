@@ -60,6 +60,12 @@ func main() {
 	b.AddAppBar(pg.MakeToolbar)
 	b.AddAppBar(func(p *tree.Plan) {
 		tree.Add(p, func(w *core.Button) {
+			w.SetText("Setup").SetIcon(icons.Download)
+			w.OnClick(func(e events.Event) {
+				pg.Context.OpenURL("/setup")
+			})
+		})
+		tree.Add(p, func(w *core.Button) {
 			w.SetText("Playground").SetIcon(icons.PlayCircle)
 			w.OnClick(func(e events.Event) {
 				pg.Context.OpenURL("/playground")
