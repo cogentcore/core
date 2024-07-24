@@ -21,7 +21,6 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
@@ -123,8 +122,8 @@ func handleElement(ctx *Context) {
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
-			if core.TheApp.SystemPlatform() == system.IOS { // TODO: remove this when fixed
-				New[core.Text](ctx).SetText("<i>Text editors are temporarily disabled on iOS mobile due to stability issues</i>")
+			if core.TheApp.SystemPlatform().IsMobile() { // TODO: remove this when fixed
+				New[core.Text](ctx).SetText("<i>Text editors are temporarily disabled on mobile due to stability issues</i>")
 				break
 			}
 			ed := New[texteditor.Editor](ctx)
