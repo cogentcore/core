@@ -220,6 +220,9 @@ func homePage(ctx *htmlcore.Context) bool {
 		s.Grow.Set(1, 1)
 		s.CenterAll()
 	})
+	home.OnShow(func(e events.Event) {
+		home.Update() // TODO: temporary workaround for #1037
+	})
 
 	tree.AddChild(home, func(w *core.SVG) {
 		errors.Log(w.ReadString(core.AppIcon))
@@ -250,7 +253,7 @@ func homePage(ctx *htmlcore.Context) bool {
 		return w
 	}
 
-	makeBlock("CODE ONCE, RUN EVERYWHERE", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single Go codebase.", func(w *core.Icon) {
+	makeBlock("CODE ONCE, RUN EVERYWHERE (CORE)", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single Go codebase.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Devices)
 	})
 
