@@ -220,6 +220,9 @@ func homePage(ctx *htmlcore.Context) bool {
 		s.Grow.Set(1, 1)
 		s.CenterAll()
 	})
+	home.OnShow(func(e events.Event) {
+		home.Update() // TODO: temporary workaround for #1037
+	})
 
 	tree.AddChild(home, func(w *core.SVG) {
 		errors.Log(w.ReadString(core.AppIcon))
