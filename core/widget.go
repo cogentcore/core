@@ -124,7 +124,7 @@ type Widget interface {
 	// ChildBackground returns the background color (Image) for given child Widget.
 	// By default, this is just our [styles.Style.ActualBackground] but it can be computed
 	// specifically for the child (e.g., for zebra stripes in [ListGrid]).
-<<<<,,,	ChildBackground(child Widget) image.Image
+	ChildBackground(child Widget) image.Image
 
 	// DirectRenderImage uploads image directly into given system.Drawer at given index
 	// Typically this is a drw.SetGoImage call with an [image.RGBA], or
