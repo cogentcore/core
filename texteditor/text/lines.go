@@ -137,6 +137,7 @@ func (ls *Lines) SetTextLines(lns [][]byte) {
 }
 
 // Bytes returns the current text lines as a slice of bytes,
+// with an additional line feed at the end, per POSIX standards.
 func (ls *Lines) Bytes() []byte {
 	ls.Lock()
 	defer ls.Unlock()
@@ -642,15 +643,10 @@ func (ls *Lines) initFromLineBytes() {
 }
 
 // bytes returns the current text lines as a slice of bytes.
+// with an additional line feed at the end, per POSIX standards.
 func (ls *Lines) bytes() []byte {
 	txt := bytes.Join(ls.lineBytes, []byte("\n"))
-	return txt
-}
-
-// bytesLF returns the current text lines as a slice of bytes,
-// with an additional line feed at the end, needed for passing code to markup.
-func (ls *Lines) bytesLF() []byte {
-	txt := ls.bytes()
+	// https://stackoverflow.com/questions/729692/why-should-text-files-end-with-a-newline
 	txt = append(txt, []byte("\n")...)
 	return txt
 }
@@ -1269,7 +1265,7 @@ func (ls *Lines) initialMarkup() {
 	}
 	if ls.Highlighter.UsingParse() {
 		fs := ls.ParseState.Done() // initialize
-		fs.Src.SetBytes(ls.bytesLF())
+		fs.Src.SetBytes(ls.bytes())
 	}
 	mxhi := min(100, ls.numLines())
 	txt := bytes.Join(ls.lineBytes[:mxhi], []byte("\n"))
@@ -1357,7 +1353,7 @@ func (ls *Lines) adjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
 // Does not start or end with lock, but acquires at end to apply.
 func (ls *Lines) asyncMarkup() {
 	ls.Lock()
-	txt := ls.bytesLF()
+	txt := ls.bytes()
 	ls.markupEdits = nil // only accumulate after this point; very rare
 	ls.Unlock()
 
