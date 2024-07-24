@@ -573,7 +573,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 			dv.undoDiff(0)
 		})
 		w.Styler(func(s *styles.Style) {
-			s.SetState(!dv.bufferA.Changed, states.Disabled)
+			s.SetState(!dv.bufferA.IsNotSaved(), states.Disabled)
 		})
 	})
 	tree.Add(p, func(w *core.Button) {
@@ -584,7 +584,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 			fb.CallFunc()
 		})
 		w.Styler(func(s *styles.Style) {
-			s.SetState(!dv.bufferA.Changed, states.Disabled)
+			s.SetState(!dv.bufferA.IsNotSaved(), states.Disabled)
 		})
 	})
 
@@ -631,7 +631,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 			dv.undoDiff(1)
 		})
 		w.Styler(func(s *styles.Style) {
-			s.SetState(!dv.bufferB.Changed, states.Disabled)
+			s.SetState(!dv.bufferB.IsNotSaved(), states.Disabled)
 		})
 	})
 	tree.Add(p, func(w *core.Button) {
@@ -642,7 +642,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 			fb.CallFunc()
 		})
 		w.Styler(func(s *styles.Style) {
-			s.SetState(!dv.bufferB.Changed, states.Disabled)
+			s.SetState(!dv.bufferB.IsNotSaved(), states.Disabled)
 		})
 	})
 }

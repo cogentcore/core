@@ -70,9 +70,20 @@ type Lines struct {
 	// ParseState is the parsing state information for the file.
 	ParseState parse.FileStates
 
+	// ChangedFunc is called whenever the text content is changed.
+	// The changed flag is always updated on changes, but this can be
+	// used for other flags or events that need to be tracked. The
+	// Lock is off when this is called.
+	ChangedFunc func()
+
 	// MarkupDoneFunc is called when the offline markup pass is done
-	// so that the GUI can be updated accordingly.
+	// so that the GUI can be updated accordingly.  The lock is off
+	// when this is called.
 	MarkupDoneFunc func()
+
+	// changed indicates whether any changes have been made.
+	// Use [IsChanged] method to access.
+	changed bool
 
 	// lineBytes are the live lines of text being edited,
 	// with the latest modifications, continuously updated
@@ -91,7 +102,8 @@ type Lines struct {
 	// hiTags are the syntax highlighting tags, which are auto-generated.
 	hiTags []lexer.Line
 
-	// markupEdits are the edits that have been made since the last full markup.
+	// markupEdits are the edits that were made during the time it takes to generate
+	// the new markup tags -- rare but it does happen.
 	markupEdits []*Edit
 
 	// markupDelayTimer is the markup delay timer.
@@ -174,6 +186,20 @@ func (ls *Lines) SetHighlighting(style core.HighlightingName) {
 	defer ls.Unlock()
 
 	ls.Highlighter.SetStyle(style)
+}
+
+// IsChanged reports whether any edits have been applied to text
+func (ls *Lines) IsChanged() bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.changed
+}
+
+// SetChanged sets the changed flag to given value (e.g., when file saved)
+func (ls *Lines) SetChanged(changed bool) {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.changed = changed
 }
 
 // NumLines returns the number of lines.
@@ -837,6 +863,17 @@ func (ls *Lines) regionRect(st, ed lexer.Pos) *Edit {
 	return tbe
 }
 
+// callChangedFunc calls the ChangedFunc if it is set,
+// starting from a Lock state, losing and then regaining the lock.
+func (ls *Lines) callChangedFunc() {
+	if ls.ChangedFunc == nil {
+		return
+	}
+	ls.Unlock()
+	ls.ChangedFunc()
+	ls.Lock()
+}
+
 // deleteText is the primary method for deleting text,
 // between start and end positions.
 // An Undo record is automatically saved depending on Undo.Off setting.
@@ -883,6 +920,8 @@ func (ls *Lines) deleteTextImpl(st, ed lexer.Pos) *Edit {
 		}
 		ls.linesDeleted(tbe)
 	}
+	ls.changed = true
+	ls.callChangedFunc()
 	return tbe
 }
 
@@ -913,6 +952,8 @@ func (ls *Lines) deleteTextRectImpl(st, ed lexer.Pos) *Edit {
 		}
 	}
 	ls.linesEdited(tbe)
+	ls.changed = true
+	ls.callChangedFunc()
 	return tbe
 }
 
@@ -968,6 +1009,8 @@ func (ls *Lines) insertTextImpl(st lexer.Pos, text []byte) *Edit {
 		tbe = ls.region(st, ed)
 		ls.linesInserted(tbe)
 	}
+	ls.changed = true
+	ls.callChangedFunc()
 	return tbe
 }
 
@@ -988,6 +1031,7 @@ func (ls *Lines) insertTextRectImpl(tbe *Edit) *Edit {
 	if nlns <= 0 {
 		return nil
 	}
+	ls.changed = true
 	// make sure there are enough lines -- add as needed
 	cln := ls.numLines()
 	if cln <= ed.Ln {
@@ -1051,9 +1095,9 @@ func (ls *Lines) saveUndo(tbe *Edit) {
 
 // undo undoes next group of items on the undo stack
 func (ls *Lines) undo() []*Edit {
-	// todo: return list of edits!
 	tbe := ls.Undos.UndoPop()
 	if tbe == nil {
+		// note: could clear the changed flag on tbe == nil in parent
 		return nil
 	}
 	stgp := tbe.Group
@@ -1322,8 +1366,11 @@ func (ls *Lines) asyncMarkup() {
 		return
 	}
 	ls.Lock()
-	defer ls.Unlock()
 	ls.markupApplyTags(tags)
+	ls.Unlock()
+	if ls.MarkupDoneFunc != nil {
+		ls.MarkupDoneFunc()
+	}
 }
 
 // markupTags generates the new markup tags from the highligher.
@@ -1380,9 +1427,6 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
 		ls.Markup[ln] = highlighting.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln], highlighting.EscapeHTML)
-	}
-	if ls.MarkupDoneFunc != nil {
-		ls.MarkupDoneFunc()
 	}
 }
 
