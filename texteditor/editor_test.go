@@ -85,7 +85,7 @@ func TestEditorChange(t *testing.T) {
 		mods.SetFlag(true, key.Control)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, mods))
 		assert.Equal(t, 1, n)
-		assert.Equal(t, "Go\n", text)
+		assert.Equal(t, "Go\n\n", text)
 	})
 }
 
@@ -101,12 +101,12 @@ func TestEditorInput(t *testing.T) {
 	b.AssertRender(t, "input", func() {
 		ed.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
 		assert.Equal(t, 1, n)
-		assert.Equal(t, "G", text)
+		assert.Equal(t, "G\n", text)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
 		assert.Equal(t, 2, n)
-		assert.Equal(t, "Go", text)
+		assert.Equal(t, "Go\n", text)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
 		assert.Equal(t, 3, n)
-		assert.Equal(t, "Go\n", text)
+		assert.Equal(t, "Go\n\n", text)
 	})
 }
