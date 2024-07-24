@@ -123,7 +123,7 @@ func handleElement(ctx *Context) {
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
-			if core.TheApp.SystemPlatform() == system.IOS {
+			if core.TheApp.SystemPlatform() == system.IOS { // TODO: remove this when fixed
 				New[core.Text](ctx).SetText("<i>Text editors are temporarily disabled on iOS mobile due to stability issues</i>")
 				break
 			}
