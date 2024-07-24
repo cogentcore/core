@@ -265,7 +265,7 @@ func (fn *Node) isOpen() bool {
 
 // IsNotSaved returns true if the file is open and has been changed (edited) since last Save
 func (fn *Node) IsNotSaved() bool {
-	return fn.Buffer != nil && fn.Buffer.NotSaved
+	return fn.Buffer != nil && fn.Buffer.IsNotSaved()
 }
 
 // isAutoSave returns true if file is an auto-save file (starts and ends with #)

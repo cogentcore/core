@@ -84,13 +84,12 @@ type Buffer struct { //types:add
 	// autoSaving is used in atomically safe way to protect autosaving
 	autoSaving bool
 
-	// Changed indicates if the text has been Changed (edited) relative to the
-	// original, since last EditDone
-	Changed bool
-
-	// NotSaved indicates if the text has been changed (edited) relative to the
-	// original, since last Save
-	NotSaved bool
+	// notSaved indicates if the text has been changed (edited) relative to the
+	// original, since last Save.  This can be true even when changed flag is
+	// false, because changed is cleared on EditDone, e.g., when texteditor
+	// is being monitored for OnChange and user does Control+Enter.
+	// Use IsNotSaved() method to query state.
+	notSaved bool
 
 	// fileModOK have already asked about fact that file has changed since being
 	// opened, user is ok
@@ -146,7 +145,9 @@ const (
 // to all the [Editor]s for this [Buffer]
 func (tb *Buffer) signalEditors(sig bufferSignals, edit *text.Edit) {
 	for _, vw := range tb.editors {
-		vw.bufferSignal(sig, edit)
+		if vw != nil && vw.This != nil { // editor can be deleting
+			vw.bufferSignal(sig, edit)
+		}
 	}
 	if sig == bufferDone {
 		e := &events.Base{Typ: events.Change}
@@ -169,26 +170,35 @@ func (tb *Buffer) OnInput(fun func(e events.Event)) {
 	tb.listeners.Add(events.Input, fun)
 }
 
-// clearNotSaved sets Changed and NotSaved to false.
-func (tb *Buffer) clearNotSaved() {
-	tb.Changed = false
-	tb.NotSaved = false
+// IsNotSaved returns true if buffer was changed (edited) since last Save.
+func (tb *Buffer) IsNotSaved() bool {
+	// note: could use a mutex on this if there are significant race issues
+	return tb.notSaved
 }
 
-// setChanged sets Changed and NotSaved to true.
-func (tb *Buffer) setChanged() {
-	tb.Changed = true
-	tb.NotSaved = true
+// clearNotSaved sets Changed and NotSaved to false.
+func (tb *Buffer) clearNotSaved() {
+	tb.SetChanged(false)
+	tb.notSaved = false
+}
+
+// Init initializes the buffer.  Called automatically in SetText.
+func (tb *Buffer) Init() {
+	if tb.MarkupDoneFunc != nil {
+		return
+	}
+	tb.MarkupDoneFunc = func() {
+		tb.signalEditors(bufferMarkupUpdated, nil)
+	}
+	tb.ChangedFunc = func() {
+		tb.notSaved = true
+	}
 }
 
 // SetText sets the text to the given bytes.
 // Pass nil to initialize an empty buffer.
 func (tb *Buffer) SetText(text []byte) *Buffer {
-	if tb.MarkupDoneFunc == nil {
-		tb.MarkupDoneFunc = func() {
-			tb.signalEditors(bufferMarkupUpdated, nil)
-		}
-	}
+	tb.Init()
 	tb.Lines.SetText(text)
 	tb.signalEditors(bufferNew, nil)
 	return tb
@@ -206,7 +216,7 @@ func (tb *Buffer) Update() {
 // editDone finalizes any current editing, sends signal
 func (tb *Buffer) editDone() {
 	tb.AutoSaveDelete()
-	tb.Changed = false
+	tb.SetChanged(false)
 	tb.signalEditors(bufferDone, nil)
 }
 
@@ -293,7 +303,7 @@ func (tb *Buffer) FileModCheck() bool {
 		return false
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
-		if !tb.Changed { // we haven't edited: just revert
+		if !tb.IsNotSaved() { // we haven't edited: just revert
 			tb.Revert()
 			return true
 		}
@@ -479,7 +489,7 @@ func (tb *Buffer) Save() error { //types:add
 // from editors. If afterFun is non-nil, then it is called with the status of the user
 // action.
 func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
-	if tb.Changed {
+	if tb.IsNotSaved() {
 		tb.StopDelayedReMarkup()
 		sc := tb.sceneFromEditor()
 		if tb.Filename != "" {
@@ -692,7 +702,6 @@ const (
 // An Undo record is automatically saved depending on Undo.Off setting.
 func (tb *Buffer) DeleteText(st, ed lexer.Pos, signal bool) *text.Edit {
 	tb.FileModCheck()
-	tb.setChanged()
 	tbe := tb.Lines.DeleteText(st, ed)
 	if tbe == nil {
 		return tbe
@@ -712,7 +721,6 @@ func (tb *Buffer) DeleteText(st, ed lexer.Pos, signal bool) *text.Edit {
 // An Undo record is automatically saved depending on Undo.Off setting.
 func (tb *Buffer) deleteTextRect(st, ed lexer.Pos, signal bool) *text.Edit {
 	tb.FileModCheck()
-	tb.setChanged()
 	tbe := tb.Lines.DeleteTextRect(st, ed)
 	if tbe == nil {
 		return tbe
@@ -732,7 +740,6 @@ func (tb *Buffer) deleteTextRect(st, ed lexer.Pos, signal bool) *text.Edit {
 // An Undo record is automatically saved depending on Undo.Off setting.
 func (tb *Buffer) insertText(st lexer.Pos, text []byte, signal bool) *text.Edit {
 	tb.FileModCheck() // will just revert changes if shouldn't have changed
-	tb.setChanged()
 	tbe := tb.Lines.InsertText(st, text)
 	if tbe == nil {
 		return tbe
@@ -753,7 +760,6 @@ func (tb *Buffer) insertText(st lexer.Pos, text []byte, signal bool) *text.Edit 
 // An Undo record is automatically saved depending on Undo.Off setting.
 func (tb *Buffer) insertTextRect(tbe *text.Edit, signal bool) *text.Edit {
 	tb.FileModCheck() // will just revert changes if shouldn't have changed
-	tb.setChanged()
 	nln := tb.NumLines()
 	re := tb.Lines.InsertTextRect(tbe)
 	if re == nil {
@@ -819,8 +825,9 @@ func (tb *Buffer) undo() []*text.Edit {
 	autoSave := tb.batchUpdateStart()
 	defer tb.batchUpdateEnd(autoSave)
 	tbe := tb.Lines.Undo()
-	if tbe == nil || tb.Undos.Pos == 0 {
-		tb.Changed = false
+	if tbe == nil || tb.Undos.Pos == 0 { // no more undo = fully undone
+		tb.SetChanged(false)
+		tb.notSaved = false
 		tb.AutoSaveDelete()
 	}
 	tb.signalMods()

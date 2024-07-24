@@ -292,9 +292,9 @@ func (ed *Editor) reMarkup() {
 	ed.Buffer.ReMarkup()
 }
 
-// IsNotSaved returns true if buffer was changed (edited) since last Save
+// IsNotSaved returns true if buffer was changed (edited) since last Save.
 func (ed *Editor) IsNotSaved() bool {
-	return ed.Buffer != nil && ed.Buffer.NotSaved
+	return ed.Buffer != nil && ed.Buffer.IsNotSaved()
 }
 
 // Clear resets all the text in the buffer for this editor.
@@ -324,7 +324,7 @@ func (ed *Editor) resetState() {
 
 // SetBuffer sets the [Buffer] that this is an editor of, and interconnects their events.
 func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
-	if buf != nil && ed.Buffer == buf {
+	if ed == nil || buf != nil && ed.Buffer == buf {
 		return ed
 	}
 	// had := false

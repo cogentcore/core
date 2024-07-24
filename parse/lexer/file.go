@@ -227,7 +227,8 @@ func (fl *File) SetLine(ln int, lexs, comments Line, stack Stack) {
 	fl.EosPos[ln] = nil
 }
 
-// LexLine returns the lexing output for given line, combining comments and all other tokens
+// LexLine returns the lexing output for given line,
+// combining comments and all other tokens
 // and allocating new memory using clone
 func (fl *File) LexLine(ln int) Line {
 	if len(fl.Lexs) <= ln {
