@@ -7,7 +7,7 @@ package enums
 import (
 	"errors"
 	"fmt"
-	"log/slog"
+	"log"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -310,7 +310,8 @@ func SetFlag(i *int64, on bool, f ...BitFlag) {
 // one modified enum from tanking an entire object loading operation.
 func UnmarshalText[T EnumSetter](i T, text []byte, typeName string) error {
 	if err := i.SetString(string(text)); err != nil {
-		slog.Error(typeName+".UnmarshalText", "err", err)
+		log.Println(err)
+		// slog.Error(typeName+".UnmarshalText", "err", err)
 	}
 	return nil
 }

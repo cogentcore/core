@@ -7,7 +7,7 @@
 package errors
 
 import (
-	"log/slog"
+	"log"
 	"runtime"
 	"strconv"
 )
@@ -20,7 +20,8 @@ import (
 //	return errors.Log(MyFunc(v))
 func Log(err error) error {
 	if err != nil {
-		slog.Error(err.Error() + " | " + CallerInfo())
+		log.Println(err)
+		// slog.Error(err.Error() + " | " + CallerInfo())
 	}
 	return err
 }
@@ -32,7 +33,8 @@ func Log(err error) error {
 //	a := errors.Log1(MyFunc(v))
 func Log1[T any](v T, err error) T { //yaegi:add
 	if err != nil {
-		slog.Error(err.Error() + " | " + CallerInfo())
+		log.Println(err)
+		// slog.Error(err.Error() + " | " + CallerInfo())
 	}
 	return v
 }
@@ -44,7 +46,8 @@ func Log1[T any](v T, err error) T { //yaegi:add
 //	a, b := errors.Log2(MyFunc(v))
 func Log2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 	if err != nil {
-		slog.Error(err.Error() + " | " + CallerInfo())
+		log.Println(err)
+		// slog.Error(err.Error() + " | " + CallerInfo())
 	}
 	return v1, v2
 }

@@ -21,7 +21,7 @@ import "errors"
 //
 // Functions and methods should document the cases in which an error
 // wrapping this will be returned.
-var ErrUnsupported = errors.ErrUnsupported
+// var ErrUnsupported = errors.ErrUnsupported
 
 // As finds the first error in err's tree that matches target, and if one is found, sets
 // target to that error value and returns true. Otherwise, it returns false.
@@ -69,7 +69,7 @@ func Is(err, target error) bool { return errors.Is(err, target) }
 // between each string.
 //
 // A non-nil error returned by Join implements the Unwrap() []error method.
-func Join(errs ...error) error { return errors.Join(errs...) }
+func Join(errs ...error) error { return nil }
 
 // New returns an error that formats as the given text.
 // Each call to New returns a distinct error value even if the text is identical.

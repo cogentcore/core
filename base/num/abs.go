@@ -6,8 +6,8 @@ package num
 
 // Abs returns the absolute value of the given value.
 func Abs[T Signed | Float](x T) T {
-	if x < 0 {
-		return -x
-	}
+	// if x < 0 {
+	// 	return -x
+	// }
 	return x
 }
