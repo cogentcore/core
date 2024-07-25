@@ -1290,10 +1290,12 @@ func init() {
 	TheApp.AddQuitCleanFunc(textFieldBlinker.QuitClean)
 	textFieldBlinker.Func = func() {
 		w := textFieldBlinker.Widget
+		textFieldBlinker.Unlock() // comes in locked
 		if w == nil {
 			return
 		}
 		tf := AsTextField(w)
+		tf.AsyncLock()
 		if !w.AsWidget().StateIs(states.Focused) || !w.AsWidget().IsVisible() {
 			tf.blinkOn = false
 			tf.renderCursor(false)
@@ -1301,6 +1303,7 @@ func init() {
 			tf.blinkOn = !tf.blinkOn
 			tf.renderCursor(tf.blinkOn)
 		}
+		tf.AsyncUnlock()
 	}
 }
 

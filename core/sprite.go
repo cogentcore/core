@@ -210,7 +210,7 @@ func (ss *Sprites) reset() {
 	ss.Modified = true
 }
 
-// ActivateSprite flags the sprite as active, setting Modified if wasn't before
+// ActivateSprite flags the sprite as active, setting Modified if wasn't before.
 func (ss *Sprites) ActivateSprite(name string) {
 	sp, ok := ss.SpriteByName(name)
 	if !ok {
@@ -222,7 +222,7 @@ func (ss *Sprites) ActivateSprite(name string) {
 	}
 }
 
-// InactivateSprite flags the sprite as inactive, setting Modified if wasn't before
+// InactivateSprite flags the sprite as inactive, setting Modified if wasn't before.
 func (ss *Sprites) InactivateSprite(name string) {
 	sp, ok := ss.SpriteByName(name)
 	if !ok {
