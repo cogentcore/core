@@ -201,6 +201,7 @@ func init() {
 		"ThemesN":                       reflect.ValueOf(core.ThemesN),
 		"ThemesValues":                  reflect.ValueOf(core.ThemesValues),
 		"TileFirstLong":                 reflect.ValueOf(core.TileFirstLong),
+		"TilePlus":                      reflect.ValueOf(core.TilePlus),
 		"TileSecondLong":                reflect.ValueOf(core.TileSecondLong),
 		"TileSpan":                      reflect.ValueOf(core.TileSpan),
 		"TileSplit":                     reflect.ValueOf(core.TileSplit),
