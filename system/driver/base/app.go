@@ -61,7 +61,8 @@ type App struct {
 // Init does basic initialization steps of the given App. It should be called by
 // platform-specific implementations of Init with their platform-specific app
 // instance and its base App field. Other platform-specific initial configuration
-// steps can be called before this.
+// steps can be called before this. Platform-specific implementations of Init are
+// always called by a lowercase init function in system/driver/driver_{platform}.go.
 func Init(a system.App, ab *App) {
 	ab.This = a
 	system.TheApp = a
