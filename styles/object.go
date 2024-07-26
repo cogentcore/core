@@ -87,7 +87,7 @@ func (s *Style) ResizeImage(img image.Image, box math32.Vector2) image.Image {
 	if s.ObjectFit == FitScaleDown && sz.X >= obj.X {
 		return img
 	}
-	rimg := transform.Resize(img, int(sz.X), int(sz.Y), transform.Linear)
+	rimg := transform.Resize(img, int(sz.X), int(sz.Y), transform.NearestNeighbor)
 	if s.ObjectFit != FitCover {
 		return rimg
 	}
