@@ -225,8 +225,10 @@ func (ed *Editor) Init() {
 		ed.HighlightColor = colors.Scheme.Warn.Container
 		ed.CursorColor = colors.Scheme.Primary.Base
 
-		s.VirtualKeyboard = styles.KeyboardMultiLine
 		s.Cursor = cursors.Text
+		if !ed.IsReadOnly() {
+			s.VirtualKeyboard = styles.KeyboardMultiLine
+		}
 		if core.SystemSettings.Editor.WordWrap {
 			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		} else {
