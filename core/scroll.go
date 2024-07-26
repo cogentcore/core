@@ -169,7 +169,7 @@ func (fr *Frame) positionScroll(d math32.Dims) {
 	sb.SetValue(sb.Value) // keep in range
 	fr.This.(Layouter).SetScrollParams(d, sb)
 
-	sb.Update() // applies style
+	sb.Restyle() // applies style
 	sb.SizeUp()
 	sb.Geom.Size.Alloc = fr.Geom.Size.Actual
 	sb.SizeDown(0)
