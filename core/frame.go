@@ -151,14 +151,13 @@ func (fr *Frame) Init() {
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 	fr.On(events.SlideStop, func(e events.Event) {
+		// If we have enough velocity, we continue scrolling over the
+		// next second in a goroutine while slowly decelerating for a
+		// smoother experience.
 		vel := math32.Vector2FromPoint(e.StartDelta()).DivScalar(float32(e.SinceStart().Milliseconds())).Negate()
-		hasX := math32.Abs(vel.X) > 1
-		hasY := math32.Abs(vel.Y) > 1
-		if !hasX && !hasY {
+		if math32.Abs(vel.X) < 1 && math32.Abs(vel.Y) < 1 {
 			return
 		}
-		// If we have enough velocity, we continue scrolling over the
-		// next second in a goroutine while slowly decelerating.
 		go func() {
 			i := 0
 			tick := time.NewTicker(time.Second / 60)
