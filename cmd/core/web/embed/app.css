@@ -1,6 +1,22 @@
 body {
   margin: 0;
   overflow: hidden;
+
+  color: #E1E2EB;
+  background-color: #121316;
+  --container-color: #44474E;
+  --primary-color: #ADC6FF;
+  --shine-color: #fff1;
+}
+
+@media (prefers-color-scheme: light) {
+  body {
+    color: #191B22;
+    background-color: #FAF8FD;
+    --container-color: #E1E2EB;
+    --primary-color: #005BC0;
+    --shine-color: #fff4;
+  }
 }
 
 #app {
@@ -47,21 +63,6 @@ body {
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   font-size: 13px;
   font-weight: 400;
-  color: #E1E2EB;
-  background-color: #121316;
-  --container-color: #44474E;
-  --primary-color: #ADC6FF;
-  --shine-color: #fff1;
-}
-
-@media (prefers-color-scheme: light) {
-  #app-wasm-loader {
-    color: #191B22;
-    background-color: #FAF8FD;
-    --container-color: #E1E2EB;
-    --primary-color: #005BC0;
-    --shine-color: #fff4;
-  }
 }
 
 #app-wasm-loader-header {
