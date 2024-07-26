@@ -152,7 +152,8 @@ func (fr *Frame) Init() {
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 	fr.On(events.SlideStop, func(e events.Event) {
-		fmt.Println(e.StartDelta(), e.SinceStart())
+		vel := math32.Vector2FromPoint(e.StartDelta()).DivScalar(float32(e.SinceStart().Milliseconds()))
+		fmt.Println(vel)
 	})
 }
 
