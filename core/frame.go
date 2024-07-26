@@ -162,7 +162,9 @@ func (fr *Frame) Init() {
 			i := 0
 			tick := time.NewTicker(time.Second / 60)
 			for range tick.C {
+				fr.AsyncLock()
 				fr.scrollDelta(events.NewScroll(e.WindowPos(), vel, e.Modifiers()))
+				fr.AsyncUnlock()
 				vel.SetMulScalar(0.9)
 				i++
 				if i > 60 {
