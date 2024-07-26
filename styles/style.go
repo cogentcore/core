@@ -180,7 +180,8 @@ type Style struct { //types:add
 	ActualBackground image.Image
 
 	// VirtualKeyboard is the virtual keyboard to display, if any,
-	// on mobile platforms when this element is focused.
+	// on mobile platforms when this element is focused. It is not
+	// used if the element is read only.
 	VirtualKeyboard VirtualKeyboards
 
 	// position is only used for Layout = Nil cases
