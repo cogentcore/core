@@ -36,6 +36,7 @@ func (a *App) AddEventListeners() {
 	AddEventListener(g, "keyup", a.OnKeyUp)
 	AddEventListener(g, "beforeinput", a.OnBeforeInput)
 	AddEventListener(g.Get("visualViewport"), "resize", a.OnResize)
+	AddEventListener(g, "blur", a.OnBlur)
 }
 
 func AddEventListener(v js.Value, nm string, fn func(this js.Value, args []js.Value) any, opts ...map[string]any) {
@@ -262,5 +263,10 @@ func (a *App) OnBeforeInput(this js.Value, args []js.Value) any {
 
 func (a *App) OnResize(this js.Value, args []js.Value) any {
 	a.Resize()
+	return nil
+}
+
+func (a *App) OnBlur(this js.Value, args []js.Value) any {
+	a.KeyMods = 0
 	return nil
 }
