@@ -48,17 +48,22 @@ const (
 	// with a split between the two lines.  Visually, the splits form
 	// an inverted T shape for a horizontal main axis.
 	TileSecondLong
+
+	// Plus is arranged like a plus sign + with the main split along
+	// the main axis line, and then individual cross-axis splits
+	// between the first two and next two elements.
+	TilePlus
 )
 
 var (
 	// tileNumElements is the number of elements per tile.
 	// the number of splitter handles is n-1.
-	tileNumElements = map[SplitsTiles]int{TileSpan: 1, TileSplit: 2, TileFirstLong: 3, TileSecondLong: 3}
+	tileNumElements = map[SplitsTiles]int{TileSpan: 1, TileSplit: 2, TileFirstLong: 3, TileSecondLong: 3, TilePlus: 4}
 
 	// tileNumSubSplits is the number of SubSplits proportions per tile.
 	// The Long cases require 2 pairs, first for the split along the cross axis
-	// and second for the split along the main axis.
-	tileNumSubSplits = map[SplitsTiles]int{TileSpan: 1, TileSplit: 2, TileFirstLong: 4, TileSecondLong: 4}
+	// and second for the split along the main axis; Plus requires 3 pairs.
+	tileNumSubSplits = map[SplitsTiles]int{TileSpan: 1, TileSplit: 2, TileFirstLong: 4, TileSecondLong: 4, TilePlus: 6}
 )
 
 // Splits allocates a certain proportion of its space to each of its children,
@@ -69,7 +74,7 @@ var (
 // according to normalized Splits factors.
 // If all Tiles are Span then a 1D line is generated.  Children are allocated
 // in order along the main axis, according to each of the Tiles,
-// which consume 1, 2 or 3 elements, and have 0, 1 or 2 splits internally.
+// which consume 1 to 4 elements, and have 0 to 3 splits internally.
 // The internal split proportion are stored separately in SubSplits.
 // A [Handle] widget is added to the Parts for each split, allowing the user
 // to drag the relative size of each splits region.
@@ -206,6 +211,11 @@ func (sl *Splits) Init() {
 				addHand(hi)     // long
 				addHand(hi + 1) // sub
 				hi += 2
+			case TilePlus:
+				addHand(hi)     // long
+				addHand(hi + 1) // sub1
+				addHand(hi + 2) // sub2
+				hi += 3
 			}
 		}
 	})
@@ -269,6 +279,12 @@ func (sl *Splits) SetSplit(idx int, val float32) {
 				sl.SubSplits[i][2+ri] = val
 				sl.normOtherSplits(ri, sl.SubSplits[i][2:])
 			}
+		case TilePlus:
+			si := 2 + ri
+			gi := (si / 2) * 2
+			oi := 1 - (si % 2)
+			sl.SubSplits[i][si] = val
+			sl.normOtherSplits(oi, sl.SubSplits[i][gi:gi+2])
 		}
 		ci += tn
 	}
@@ -311,6 +327,9 @@ func (sl *Splits) Split(idx int) float32 {
 			} else {
 				return sl.SubSplits[i][2+ri]
 			}
+		case TilePlus:
+			si := 2 + ri
+			return sl.SubSplits[i][si]
 		}
 		ci += tn
 	}
@@ -344,6 +363,12 @@ func (sl *Splits) ChildIsCollapsed(idx int) bool {
 		case TileSecondLong:
 			if ri < 2 && sl.SubSplits[i][0] < 0.01 {
 				return true
+			}
+		case TilePlus:
+			if ri < 2 {
+				return sl.SubSplits[i][0] < 0.01
+			} else {
+				return sl.SubSplits[i][1] < 0.01
 			}
 		}
 		return false
@@ -398,6 +423,10 @@ func (sl *Splits) updateSplits() *Splits {
 		case TileFirstLong, TileSecondLong:
 			sl.normSplits(ss[:2]) // first is cross-axis
 			sl.normSplits(ss[2:])
+		case TilePlus:
+			for j := range 3 {
+				sl.normSplits(ss[2*j : 2*j+2])
+			}
 		}
 		sl.SubSplits[i] = ss
 	}
@@ -522,9 +551,13 @@ func (sl *Splits) setSplitIndex(idx int, val float32) {
 				sl.SubSplits[i][ri] = val
 			}
 		case TileFirstLong, TileSecondLong:
-			if ri < 3 {
+			if ri == 0 {
 				sl.SubSplits[i][ri] = val
+			} else {
+				sl.SubSplits[i][2+ri-1] = val
 			}
+		case TilePlus:
+			sl.SubSplits[i][2+ri] = val
 		}
 		ci += tn
 	}
@@ -611,6 +644,13 @@ func (sl *Splits) setHandlePos(idx int, val float32) {
 			} else {
 				update(0, val, sl.SubSplits[i][2:])
 			}
+		case TilePlus:
+			if ri == 0 {
+				update(0, val, sl.SubSplits[i][:2])
+			} else {
+				gi := ri * 2
+				update(0, val, sl.SubSplits[i][gi:gi+2])
+			}
 		}
 		ci += tn
 	}
@@ -655,6 +695,11 @@ func (sl *Splits) styleSplits() {
 			sl.handleDirs[hi] = odir
 			sl.handleDirs[hi+1] = dir
 			hi += 2
+		case TilePlus:
+			sl.handleDirs[hi] = odir
+			sl.handleDirs[hi+1] = dir
+			sl.handleDirs[hi+2] = dir
+			hi += 3
 		}
 	}
 }
@@ -710,6 +755,13 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 			setCsz(ci, math32.Round(szs*sl.SubSplits[i][2]), scht)
 			setCsz(ci+1, math32.Round(szs*sl.SubSplits[i][3]), scht)
 			setCsz(ci+2, szt, fcht)
+		case TilePlus:
+			fcht := math32.Round(szcs * sl.SubSplits[i][0])
+			scht := math32.Round(szcs * sl.SubSplits[i][1])
+			setCsz(ci, math32.Round(szs*sl.SubSplits[i][2]), fcht)
+			setCsz(ci+1, math32.Round(szs*sl.SubSplits[i][3]), fcht)
+			setCsz(ci+2, math32.Round(szs*sl.SubSplits[i][4]), scht)
+			setCsz(ci+3, math32.Round(szs*sl.SubSplits[i][5]), scht)
 		}
 		ci += tn
 	}
@@ -792,6 +844,20 @@ func (sl *Splits) positionSplits() {
 				setChildPos(ci+2, tpos, bot)
 			}
 			hi += 2
+		case TilePlus:
+			fcht := math32.Round(szcs * sl.SubSplits[i][0])
+			scht := math32.Round(szcs * sl.SubSplits[i][1])
+			bot := fcht + hwd + gapo
+			setHandlePos(hi, tpos+.5*(szt-hht), fcht+0.5*gapo, fcht, 0, szcs) // long
+			swd1 := math32.Round(szs * sl.SubSplits[i][2])
+			swd2 := math32.Round(szs * sl.SubSplits[i][4])
+			setHandlePos(hi+1, tpos+swd1+0.5*gapd, 0.5*(fcht-hht), tpos+swd1, tpos, tpos+szs)
+			setHandlePos(hi+2, tpos+swd2+0.5*gapd, bot+0.5*(scht-hht), tpos+swd2, tpos, tpos+szs)
+			setChildPos(ci, tpos, 0)
+			setChildPos(ci+1, tpos+swd1+hwd+gapd, 0)
+			setChildPos(ci+2, tpos, bot)
+			setChildPos(ci+3, tpos+swd2+hwd+gapd, bot)
+			hi += 3
 		}
 		ci += tn
 		tpos += szt + hwd + gapd

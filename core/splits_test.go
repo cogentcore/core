@@ -136,3 +136,9 @@ func TestSplitsTilesRowSplitSpanSplitSet(t *testing.T) {
 	sp.SetSplits(0.2, 0.8, 0.6, 0.6, 0.4)
 	b.AssertRender(t, "splits/tiles-row-split-span-split-set")
 }
+
+func TestSplitsTilesRowSpanPlus(t *testing.T) {
+	b, sp := makeSplits(5, 40, 20)
+	sp.SetTiles(TileSpan, TilePlus)
+	b.AssertRender(t, "splits/tiles-row-span-plus")
+}

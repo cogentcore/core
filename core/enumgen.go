@@ -303,16 +303,16 @@ func (i *SliderTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "SliderTypes")
 }
 
-var _SplitsTilesValues = []SplitsTiles{0, 1, 2, 3}
+var _SplitsTilesValues = []SplitsTiles{0, 1, 2, 3, 4}
 
 // SplitsTilesN is the highest valid value for type SplitsTiles, plus one.
-const SplitsTilesN SplitsTiles = 4
+const SplitsTilesN SplitsTiles = 5
 
-var _SplitsTilesValueMap = map[string]SplitsTiles{`Span`: 0, `Split`: 1, `FirstLong`: 2, `SecondLong`: 3}
+var _SplitsTilesValueMap = map[string]SplitsTiles{`Span`: 0, `Split`: 1, `FirstLong`: 2, `SecondLong`: 3, `Plus`: 4}
 
-var _SplitsTilesDescMap = map[SplitsTiles]string{0: `Span has a single element spanning the cross dimension, i.e., a vertical span for a horizontal main axis, or a horizontal span for a vertical main axis. It is the only valid value for 1D Splits, where it specifies a single element per split. If all tiles are Span, then a 1D line is generated.`, 1: `Split has a split between elements along the cross dimension, with the first of 2 elements in the first main axis line and the second in the second line.`, 2: `FirstLong has a long span of first element along the first main axis line and a split between the next two elements along the second line, with a split between the two lines. Visually, the splits form a T shape for a horizontal main axis.`, 3: `SecondLong has the first two elements split along the first line, and the third with a long span along the second main axis line, with a split between the two lines. Visually, the splits form an inverted T shape for a horizontal main axis.`}
+var _SplitsTilesDescMap = map[SplitsTiles]string{0: `Span has a single element spanning the cross dimension, i.e., a vertical span for a horizontal main axis, or a horizontal span for a vertical main axis. It is the only valid value for 1D Splits, where it specifies a single element per split. If all tiles are Span, then a 1D line is generated.`, 1: `Split has a split between elements along the cross dimension, with the first of 2 elements in the first main axis line and the second in the second line.`, 2: `FirstLong has a long span of first element along the first main axis line and a split between the next two elements along the second line, with a split between the two lines. Visually, the splits form a T shape for a horizontal main axis.`, 3: `SecondLong has the first two elements split along the first line, and the third with a long span along the second main axis line, with a split between the two lines. Visually, the splits form an inverted T shape for a horizontal main axis.`, 4: `Plus is arranged like a plus sign + with the main split along the main axis line, and then individual cross-axis splits between the first two and next two elements.`}
 
-var _SplitsTilesMap = map[SplitsTiles]string{0: `Span`, 1: `Split`, 2: `FirstLong`, 3: `SecondLong`}
+var _SplitsTilesMap = map[SplitsTiles]string{0: `Span`, 1: `Split`, 2: `FirstLong`, 3: `SecondLong`, 4: `Plus`}
 
 // String returns the string representation of this SplitsTiles value.
 func (i SplitsTiles) String() string { return enums.String(i, _SplitsTilesMap) }
