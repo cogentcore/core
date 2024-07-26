@@ -197,9 +197,8 @@ func (tb *Table) UpdateMaxWidths() {
 		tb.colMaxWidths[fli] = 0
 		val := tb.sliceElementValue(0)
 		fval := val.FieldByIndex(field.Index)
-		_, isicon := fval.Interface().(icons.Icon)
-		isString := fval.Type().Kind() == reflect.String
-		if !isString || isicon {
+		isString := fval.Type().Kind() == reflect.String && fval.Type() != reflect.TypeFor[icons.Icon]()
+		if !isString {
 			continue
 		}
 		mxw := 0

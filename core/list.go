@@ -486,7 +486,7 @@ func (lb *ListBase) BindSelect(val *int) *ListBase {
 func (lb *ListBase) UpdateMaxWidths() {
 	lb.maxWidth = 0
 	npv := reflectx.NonPointerValue(lb.elementValue)
-	isString := npv.Type().Kind() == reflect.String
+	isString := npv.Type().Kind() == reflect.String && npv.Type() != reflect.TypeFor[icons.Icon]()
 	if !isString || lb.SliceSize == 0 {
 		return
 	}
