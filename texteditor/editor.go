@@ -226,9 +226,7 @@ func (ed *Editor) Init() {
 		ed.CursorColor = colors.Scheme.Primary.Base
 
 		s.Cursor = cursors.Text
-		if !ed.IsReadOnly() {
-			s.VirtualKeyboard = styles.KeyboardMultiLine
-		}
+		s.VirtualKeyboard = styles.KeyboardMultiLine
 		if core.SystemSettings.Editor.WordWrap {
 			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		} else {

@@ -216,9 +216,7 @@ func (tf *TextField) Init() {
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor = colors.Scheme.Primary.Base
 		s.Cursor = cursors.Text
-		if !tf.IsReadOnly() {
-			s.VirtualKeyboard = styles.KeyboardSingleLine
-		}
+		s.VirtualKeyboard = styles.KeyboardSingleLine
 		s.GrowWrap = false // note: doesn't work with Grow
 		s.Grow.Set(1, 0)
 		s.Min.Y.Em(1.1)

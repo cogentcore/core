@@ -109,13 +109,13 @@ func (sp *Spinner) Init() {
 	})
 	sp.Updater(sp.setTextToValue)
 	sp.Styler(func(s *styles.Style) {
+		s.VirtualKeyboard = styles.KeyboardNumber
 		if sp.IsReadOnly() {
 			s.Min.X.Ch(6)
 			s.Max.X.Ch(12)
 		} else {
 			s.Min.X.Ch(14)
 			s.Max.X.Ch(20)
-			s.VirtualKeyboard = styles.KeyboardNumber
 		}
 		// s.Text.Align = styles.End // this doesn't work
 	})
