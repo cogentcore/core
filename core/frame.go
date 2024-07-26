@@ -147,7 +147,7 @@ func (fr *Frame) Init() {
 	// we treat slide events on layouts as scroll events
 	// we must reverse the delta for "natural" scrolling behavior
 	fr.On(events.SlideMove, func(e events.Event) {
-		del := math32.Vector2FromPoint(e.PrevDelta()).MulScalar(-0.1)
+		del := math32.Vector2FromPoint(e.PrevDelta()).MulScalar(-0.034)
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 }

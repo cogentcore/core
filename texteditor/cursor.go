@@ -27,10 +27,12 @@ func init() {
 	core.TheApp.AddQuitCleanFunc(editorBlinker.QuitClean)
 	editorBlinker.Func = func() {
 		w := editorBlinker.Widget
+		editorBlinker.Unlock() // comes in locked
 		if w == nil {
 			return
 		}
 		ed := AsEditor(w)
+		ed.AsyncLock()
 		if !w.AsWidget().StateIs(states.Focused) || !w.AsWidget().IsVisible() {
 			ed.blinkOn = false
 			ed.renderCursor(false)
@@ -38,6 +40,7 @@ func init() {
 			ed.blinkOn = !ed.blinkOn
 			ed.renderCursor(ed.blinkOn)
 		}
+		ed.AsyncUnlock()
 	}
 }
 
