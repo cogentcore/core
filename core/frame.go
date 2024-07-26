@@ -153,6 +153,11 @@ func (fr *Frame) Init() {
 	})
 	fr.On(events.SlideStop, func(e events.Event) {
 		vel := math32.Vector2FromPoint(e.StartDelta()).DivScalar(float32(e.SinceStart().Milliseconds()))
+		hasX := math32.Abs(vel.X) > 0.8
+		hasY := math32.Abs(vel.Y) > 0.8
+		if !hasX && !hasY {
+			return
+		}
 		fmt.Println(vel)
 	})
 }
