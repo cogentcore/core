@@ -94,7 +94,7 @@ func (es *Source) KeyChord(rn rune, code key.Codes, mods key.Modifiers) {
 // MouseButton creates and sends a mouse button event with given values
 func (es *Source) MouseButton(typ Types, but Buttons, where image.Point, mods key.Modifiers) {
 	ev := NewMouse(typ, but, where, mods)
-	if typ == MouseUp && es.Last.MouseButtonType == MouseDown {
+	if typ != MouseDown && es.Last.MouseButtonType == MouseDown {
 		ev.StTime = es.Last.MouseDownTime
 		ev.PrvTime = es.Last.MouseMoveTime
 		ev.Start = es.Last.MouseDownPos
