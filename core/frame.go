@@ -154,7 +154,7 @@ func (fr *Frame) Init() {
 		// If we have enough velocity, we continue scrolling over the
 		// next second in a goroutine while slowly decelerating for a
 		// smoother experience.
-		vel := math32.Vector2FromPoint(e.StartDelta()).DivScalar(float32(e.SinceStart().Milliseconds())).Negate()
+		vel := math32.Vector2FromPoint(e.StartDelta()).DivScalar(1.5 * float32(e.SinceStart().Milliseconds())).Negate()
 		if math32.Abs(vel.X) < 1 && math32.Abs(vel.Y) < 1 {
 			return
 		}
@@ -165,9 +165,9 @@ func (fr *Frame) Init() {
 				fr.AsyncLock()
 				fr.scrollDelta(events.NewScroll(e.WindowPos(), vel, e.Modifiers()))
 				fr.AsyncUnlock()
-				vel.SetMulScalar(0.9)
+				vel.SetMulScalar(0.95)
 				i++
-				if i > 60 {
+				if i > 120 {
 					tick.Stop()
 					break
 				}
