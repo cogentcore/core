@@ -5,6 +5,7 @@
 package core
 
 import (
+	"fmt"
 	"log/slog"
 	"time"
 	"unicode"
@@ -144,11 +145,14 @@ func (fr *Frame) Init() {
 	fr.On(events.Scroll, func(e events.Event) {
 		fr.scrollDelta(e)
 	})
-	// we treat slide events on layouts as scroll events
-	// we must reverse the delta for "natural" scrolling behavior
+	// We treat slide events on frames as scroll events.
 	fr.On(events.SlideMove, func(e events.Event) {
+		// We must negate the delta for "natural" scrolling behavior.
 		del := math32.Vector2FromPoint(e.PrevDelta()).MulScalar(-0.034)
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
+	})
+	fr.On(events.SlideStop, func(e events.Event) {
+		fmt.Println(e.StartDelta(), e.SinceStart())
 	})
 }
 
