@@ -144,11 +144,35 @@ func (fr *Frame) Init() {
 	fr.On(events.Scroll, func(e events.Event) {
 		fr.scrollDelta(e)
 	})
-	// we treat slide events on layouts as scroll events
-	// we must reverse the delta for "natural" scrolling behavior
+	// We treat slide events on frames as scroll events.
 	fr.On(events.SlideMove, func(e events.Event) {
+		// We must negate the delta for "natural" scrolling behavior.
 		del := math32.Vector2FromPoint(e.PrevDelta()).MulScalar(-0.034)
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
+	})
+	fr.On(events.SlideStop, func(e events.Event) {
+		// If we have enough velocity, we continue scrolling over the
+		// next second in a goroutine while slowly decelerating for a
+		// smoother experience.
+		vel := math32.Vector2FromPoint(e.StartDelta()).DivScalar(1.5 * float32(e.SinceStart().Milliseconds())).Negate()
+		if math32.Abs(vel.X) < 1 && math32.Abs(vel.Y) < 1 {
+			return
+		}
+		go func() {
+			i := 0
+			tick := time.NewTicker(time.Second / 60)
+			for range tick.C {
+				fr.AsyncLock()
+				fr.scrollDelta(events.NewScroll(e.WindowPos(), vel, e.Modifiers()))
+				fr.AsyncUnlock()
+				vel.SetMulScalar(0.95)
+				i++
+				if i > 120 {
+					tick.Stop()
+					break
+				}
+			}
+		}()
 	})
 }
 
