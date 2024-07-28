@@ -21,6 +21,11 @@ func ToCSS(s *Style) string {
 	add("color", colors.AsHex(colors.ToUniform(s.Color)))
 	add("background", colors.AsHex(colors.ToUniform(s.Background)))
 	add("font-size", s.Font.Size.StringCSS())
+	add("border-style", s.Border.Style.Top.String())
+	add("border-width", s.Border.Width.Top.StringCSS())
+	add("border-radius", s.Border.Radius.Top.StringCSS())
+	add("border-offset", s.Border.Offset.Top.StringCSS())
+	add("border-color", colors.AsHex(colors.ToUniform(s.Border.Color.Top)))
 
 	return strings.Join(parts, ";")
 }
