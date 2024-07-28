@@ -7,7 +7,10 @@ package core
 import (
 	"bytes"
 	"encoding/xml"
+	"html"
+	"reflect"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/tree"
 )
 
@@ -43,10 +46,23 @@ func toHTML(w Widget, e *xml.Encoder) error {
 	if en, ok := htmlElementNames[se.Name.Local]; ok {
 		se.Name.Local = en
 	}
+
+	rv := reflect.ValueOf(w)
+	uv := reflectx.Underlying(rv)
+
 	err := e.EncodeToken(se)
 	if err != nil {
 		return err
 	}
+
+	if text := uv.FieldByName("Text"); text.IsValid() {
+		cd := xml.CharData(html.EscapeString(text.String()))
+		err := e.EncodeToken(cd)
+		if err != nil {
+			return err
+		}
+	}
+
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		err = toHTML(cw, e)
 		if err != nil {
