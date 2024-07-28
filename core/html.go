@@ -7,9 +7,7 @@ package core
 import (
 	"bytes"
 	"encoding/xml"
-	"reflect"
 
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -56,8 +54,8 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	addAttr(se, "id", wb.Name)
 	addAttr(se, "style", styles.ToCSS(&wb.Styles))
 
-	rv := reflect.ValueOf(w)
-	uv := reflectx.Underlying(rv)
+	// rv := reflect.ValueOf(w)
+	// uv := reflectx.Underlying(rv)
 
 	err := e.EncodeToken(*se)
 	if err != nil {
@@ -68,9 +66,9 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		return err
 	}
 
-	if text := uv.FieldByName("Text"); text.IsValid() {
+	if text, ok := w.(*Text); ok {
 		// We don't want any escaping of HTML-formatted text, so we write directly.
-		b.WriteString(text.String())
+		b.WriteString(text.Text)
 	}
 
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
