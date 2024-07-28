@@ -21,11 +21,7 @@ import (
 func ToHTML(w Widget) ([]byte, error) {
 	b := &bytes.Buffer{}
 	e := xml.NewEncoder(b)
-	err := toHTML(w, e)
-	if err != nil {
-		return nil, err
-	}
-	err = e.Flush()
+	err := toHTML(w, e, b)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +45,7 @@ func addAttr(se *xml.StartElement, name, value string) {
 }
 
 // toHTML is the recursive implementation of [ToHTML].
-func toHTML(w Widget, e *xml.Encoder) error {
+func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	wb := w.AsWidget()
 	se := &xml.StartElement{}
 	se.Name.Local = wb.NodeType().IDName
@@ -67,16 +63,18 @@ func toHTML(w Widget, e *xml.Encoder) error {
 	if err != nil {
 		return err
 	}
+	err = e.Flush()
+	if err != nil {
+		return err
+	}
 
 	if text := uv.FieldByName("Text"); text.IsValid() {
-		err := e.EncodeToken(xml.CharData(text.String()))
-		if err != nil {
-			return err
-		}
+		// We don't want any escaping of HTML-formatted text, so we write directly.
+		b.WriteString(text.String())
 	}
 
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		err = toHTML(cw, e)
+		err = toHTML(cw, e, b)
 		if err != nil {
 			return tree.Break
 		}
@@ -85,5 +83,9 @@ func toHTML(w Widget, e *xml.Encoder) error {
 	if err != nil {
 		return err
 	}
-	return e.EncodeToken(xml.EndElement{se.Name})
+	err = e.EncodeToken(xml.EndElement{se.Name})
+	if err != nil {
+		return err
+	}
+	return e.Flush()
 }
