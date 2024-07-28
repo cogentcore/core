@@ -7,7 +7,6 @@ package core
 import (
 	"bytes"
 	"encoding/xml"
-	"html"
 	"reflect"
 
 	"cogentcore.org/core/base/reflectx"
@@ -17,7 +16,13 @@ import (
 // htmlElementNames is a map from widget [types.Type.IDName]s to HTML element
 // names for cases in which those differ.
 var htmlElementNames = map[string]string{
-	"body": "main", // we are typically placed in a different outer body
+	"body":      "main", // we are typically placed in a different outer body
+	"frame":     "div",
+	"text":      "p",
+	"image":     "img",
+	"icon":      "svg",
+	"space":     "div",
+	"separator": "hr",
 }
 
 // ToHTML converts the given widget and all of its children to HTML.
@@ -56,8 +61,7 @@ func toHTML(w Widget, e *xml.Encoder) error {
 	}
 
 	if text := uv.FieldByName("Text"); text.IsValid() {
-		cd := xml.CharData(html.EscapeString(text.String()))
-		err := e.EncodeToken(cd)
+		err := e.EncodeToken(xml.CharData(text.String()))
 		if err != nil {
 			return err
 		}
