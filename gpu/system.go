@@ -35,14 +35,6 @@ type System struct {
 	// if true, this is a compute system -- otherwise is graphics
 	Compute bool
 
-	// if true, variables are statically bound to specific offsets
-	// in memory buffers, vs. dynamically bound offsets.
-	// Typically a compute shader operating on fixed data variables
-	// can use static binding, while graphics (e.g., vphong) requires
-	// dynamic binding to efficiently use the same shader code for
-	// multiple different values of the same variable type.
-	StaticVars bool
-
 	// all pipelines
 	Pipelines []*Pipeline
 
@@ -61,10 +53,10 @@ type System struct {
 	// map of command buffers, for persistent recorded commands -- names must be unique
 	CmdBuffs map[string]*wgpu.CommandEncoder
 
-	// Mem manages all the memory for the system, with a list of Vars
-	// variables, one for each resource that is made visible to the shader,
+	// Vars represents all the resources used by the system, with one
+	// Var for each resource that is made visible to the shader,
 	// indexed by Group (@group) and Binding (@binding).
-	Mem Memory
+	Vars Vars
 
 	// renderpass with depth buffer for this system
 	Render Render
@@ -105,11 +97,6 @@ func (sy *System) InitCompute(gp *GPU, name string) error {
 func (sy *System) InitCmd() {
 	sy.CmdPool.ConfigResettable(&sy.Device)
 	sy.CmdPool.NewBuffer(&sy.Device)
-}
-
-// Vars returns a pointer to the vars for this pipeline, which has vals within it
-func (sy *System) Vars() *Vars {
-	return &sy.Mem.Vars
 }
 
 func (sy *System) Destroy() {

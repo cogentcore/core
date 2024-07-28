@@ -32,7 +32,7 @@ const (
 // but these are optional and may be required for
 // other uses (e.g., compute shaders).
 // See also InstanceExts, DeviceExts, and ValidationLayers.
-type CPUOptions int32 //enums:enum -trim-prefix Opt
+type CPUOptions int32
 
 // const (
 // https://www.w3.org/TR/webgpu/#gpufeaturename

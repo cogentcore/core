@@ -121,12 +121,3 @@ func (bt BufferTypes) AlignBytes(gp *GPU) int {
 	}
 	return int(gp.GPUProperties.Limits.MinUniformBuffererOffsetAlignment)
 }
-
-// BufferUsages maps BufferTypes into buffer usage flags
-var BufferUsages = map[BufferTypes]wgpu.BufferUsage{
-	VertexBuffer:  wgpu.BufferUsage_Vertex | wgpu.BufferUsage_CopyDst,
-	VertexBuffer:  wgpu.BufferUsage_Index | wgpu.BufferUsage_CopyDst,
-	UniformBuffer: wgpu.BufferUsage_Uniform | wgpu.BufferUsage_CopyDst,
-	StorageBuffer: wgpu.BufferUsage_Storage | wgpu.BufferUsage_CopyDst | wgpu.BufferUsage_CopySrc,
-	TextureBuff:   wgpu.BufferUsage_Storage | wgpu.BufferUsage_CopyDst | wgpu.BufferUsage_CopySrc,
-}

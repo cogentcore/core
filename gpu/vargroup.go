@@ -74,10 +74,8 @@ type VarGroup struct {
 	// number of textures, at point of creating the DescLayout
 	NTextures int
 
-	// for texture vars, this is the number of descriptor sets required to represent all of the different Texture image Values that have been allocated.  Use Vars.BindAllTextureValues to bind all such vals, and System.CmdBindTextureVarIndex to automatically bind the correct set.
-	NTextureDescs int
-
-	// map of vars by different roles, within this set -- updated in Config(), after all vars added
+	// map of vars by different roles, within this set.
+	// Updated in Config(), after all vars added
 	RoleMap map[VarRoles][]*Var
 
 	// the parent vars we belong to
@@ -85,9 +83,6 @@ type VarGroup struct {
 
 	// set layout info: description of each var type, role, binding, stages
 	Layout *wgpu.BindGroupLayout
-
-	// allocated descriptor set -- one of these per Vars.NDescs -- can have multiple sets that can be independently updated, e.g., for parallel rendering passes.  If only rendering one at a time, only need one.
-	// VkDescSets []vk.DescriptorSet
 }
 
 // AddVar adds given variable
@@ -196,7 +191,8 @@ func (vg *VarGroup) DestroyLayout() {
 
 // BindLayout creates the BindGroupLayout for given set.
 // Only for non-VertexGroup sets.
-// Must have set NValuesPer for any TextureRole vars, which require separate descriptors per.
+// Must have set NValuesPer for any TextureRole vars,
+// which require separate descriptors per.
 func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 	vg.DestroyLayout(dev)
 	vg.NTextures = 0
@@ -257,111 +253,13 @@ func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 		return err
 	}
 	vg.Layout = bgl
-
-	// it does not seem like you need to pre-allocate these desc sets
-	/*
-		st.VkDescSets = make([]vk.DescriptorSet, vs.NDescs)
-		for i := 0; i < vs.NDescs; i++ {
-			dalloc := &vk.DescriptorSetAllocateInfo{
-				SType:              vk.StructureTypeDescriptorSetAllocateInfo,
-				DescriptorPool:     vs.VkDescPool,
-				DescriptorSetCount: 1,
-				PSetLayouts:        []vk.DescriptorSetLayout{st.VkLayout},
-			}
-			if nVarDesc > 0 {
-				dalloc.PNext = unsafe.Pointer(&vk.DescriptorSetVariableDescriptorCountAllocateInfo{
-					SType:              vk.StructureTypeDescriptorSetVariableDescriptorCountAllocateInfo,
-					DescriptorSetCount: 1,
-					PDescriptorCounts:  []uint32{uint32(nVarDesc)},
-				})
-			}
-			var dset vk.DescriptorSet
-			ret := vk.AllocateDescriptorSets(dev, dalloc, &dset)
-			IfPanic(NewError(ret))
-			st.VkDescSets[i] = dset
-		}
-	*/
-}
-
-// BindDynVars binds all dynamic vars in set, to be able to
-// use dynamic vars, in subsequent BindDynValue* calls during the
-// render pass, which update the offsets.
-// For Uniform & Storage variables, which use dynamic binding.
-//
-// All vals must be uploaded to Device memory prior to this,
-// and it is not possible to update actual values during a render pass.
-// The memory buffer is essentially what is bound here.
-//
-// Must have called BindVarsStart prior to this.
-func (vg *VarGroup) BindDynVars(vs *Vars) {
-	for _, vr := range vg.Vars {
-		if vr.Role < Uniform || vr.Role > Storage {
-			continue
-		}
-		vg.BindDynVar(vs, vr)
-	}
-}
-
-// BindDynVarName binds dynamic variable for given var
-// looked up by name, for Uniform, Storage variables.
-//
-// All vals must be uploaded to Device memory prior to this,
-// and it is not possible to update actual values during a render pass.
-// The memory buffer is essentially what is bound here.
-//
-// Must have called BindVarsStart prior to this.
-func (vg *VarGroup) BindDynVarName(vs *Vars, varNm string) error {
-	vr, err := vg.VarByNameTry(varNm)
-	if err != nil {
-		return err
-	}
-	vg.BindDynVar(vs, vr)
-	return nil
-}
-
-// BindDynVar binds dynamic variable for given var
-// for Uniform, Storage variables.
-//
-// All vals must be uploaded to Device memory prior to this,
-// and it is not possible to update actual values during a render pass.
-// The memory buffer is essentially what is bound here.
-//
-// Must have called BindVarsStart prior to this.
-func (vg *VarGroup) BindDynVar(vs *Vars, vr *Var) error {
-	if vr.Role < Uniform || vr.Role > StorageImage {
-		err := fmt.Errorf("gpu.Group:BindDynVar dynamic binding only valid for Uniform or Storage Vars, not: %s", vr.Role.String())
-		if Debug {
-			log.Println(err)
-		}
-		return err
-	}
-
-	wd := vk.WriteDescriptorSet{
-		SType:           vk.StructureTypeWriteDescriptorSet,
-		DstSet:          vg.VkDescSets[vs.BindDescIndex],
-		DstBinding:      uint32(vr.Binding),
-		DescriptorCount: 1,
-		DescriptorType:  vr.Role.VkDescriptor(),
-	}
-	bt := vr.BuffType()
-	buff := vs.Mem.Buffs[bt]
-	if bt == StorageBuffer {
-		buff = vs.Mem.StorageBuffers[vr.StorageBuffer]
-	}
-	wd.PBufferInfo = []vk.DescriptorBufferInfo{{
-		Offset: 0, // dynamic
-		Range:  vk.DeviceSize(vr.MemSize()),
-		Buffer: buff.Dev,
-	}}
-	vs.VkWriteValues = append(vs.VkWriteValues, wd)
-	return nil
 }
 
 // todo: other static cases need same approach as images!
 // also, need an option to allow a single val to be used in a static way, selecting from among multiple,
 // instead of always assuming an array used.
 
-// BindStatVarsAll dynamically binds all uniform, storage values
+// BindStatVarsAll statically binds all uniform, storage values
 // in given set, for all variables, for all values.
 //
 // Must call BindVarStart / End around this.
@@ -509,6 +407,7 @@ func (vg *VarGroup) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 	return cfg
 }
 
+/*
 // VkPushConfig returns WebGPU push constant ranges
 func (vs *VarGroup) VkPushConfig() []vk.PushConstantRange {
 	alignBytes := 8 // unclear what alignment is
@@ -535,91 +434,7 @@ func (vs *VarGroup) VkPushConfig() []vk.PushConstantRange {
 	}
 	return ranges
 }
-
-/////////////////////////////////////////////////////////////////////////
-// Dynamic Binding
-
-// BindDynValuesAllIndex dynamically binds all uniform, storage values
-// in given set, for all variables, for given value index.
-//
-// This only dynamically updates the offset to point to the specified val.
-// MUST call System.BindVars prior to any subsequent draw calls for this
-// new offset to be bound at the proper point in the command buffer prior
-// (call after all such dynamic bindings are updated.)
-//
-// Do NOT call BindValuesStart / End around this.
-func (vg *VarGroup) BindDynValuesAllIndex(vs *Vars, idx int) {
-	for _, vr := range vg.Vars {
-		if vr.Role < Uniform || vr.Role > Storage {
-			continue
-		}
-		vl := vr.Values.Values[idx]
-		vg.BindDynValue(vs, vr, vl)
-	}
-}
-
-// BindDynValueName dynamically binds given uniform or storage value
-// by name for given variable name, in given set.
-//
-// This only dynamically updates the offset to point to the specified val.
-// MUST call System.BindVars prior to any subsequent draw calls for this
-// new offset to be bound at the proper point in the command buffer prior
-// (call after all such dynamic bindings are updated.)
-//
-// Do NOT call BindValuesStart / End around this.
-//
-// returns error if not found.
-func (vg *VarGroup) BindDynValueName(vs *Vars, varNm, valNm string) error {
-	vr, vl, err := vg.ValueByNameTry(varNm, valNm)
-	if err != nil {
-		return err
-	}
-	vg.BindDynValue(vs, vr, vl)
-	return nil
-}
-
-// BindDynValueIndex dynamically binds given uniform or storage value
-// by index for given variable name, in given set.
-//
-// This only dynamically updates the offset to point to the specified val.
-// MUST call System.BindVars prior to any subsequent draw calls for this
-// new offset to be bound at the proper point in the command buffer prior
-// (call after all such dynamic bindings are updated.)
-//
-// Do NOT call BindValuesStart / End around this.
-//
-// returns error if not found.
-func (vg *VarGroup) BindDynValueIndex(vs *Vars, varNm string, valIndex int) error {
-	vr, vl, err := vg.ValueByIndexTry(varNm, valIndex)
-	if err != nil {
-		return err
-	}
-	return vg.BindDynValue(vs, vr, vl)
-}
-
-// BindDynValue dynamically binds given uniform or storage value
-// for given variable in given set.
-//
-// This only dynamically updates the offset to point to the specified val.
-// MUST call System.BindVars prior to any subsequent draw calls for this
-// new offset to be bound at the proper point in the command buffer prior
-// (call after all such dynamic bindings are updated.)
-//
-// Do NOT call BindValuesStart / End around this.
-//
-// returns error if not found.
-func (vg *VarGroup) BindDynValue(vs *Vars, vr *Var, vl *Value) error {
-	if vr.Role < Uniform || vr.Role > Storage {
-		err := fmt.Errorf("gpu.Group:BindDynValue dynamic binding only valid for Uniform or Storage Vars, not: %s", vr.Role.String())
-		if Debug {
-			log.Println(err)
-		}
-		return err
-	}
-	vr.BindValueIndex[vs.BindDescIndex] = vl.Index // note: not used but potentially informative
-	vs.DynOffs[vs.BindDescIndex][vr.DynOffIndex] = uint32(vl.Offset)
-	return nil
-}
+*/
 
 // TextureGroupSizeIndexes for texture at given index, allocated in groups by size
 // using Values.AllocTexBySize, returns the indexes for the texture

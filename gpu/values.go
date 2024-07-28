@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"log/slog"
 	"unsafe"
 
 	"cogentcore.org/core/enums"
@@ -32,9 +33,6 @@ type Value struct {
 	// If 0, this is a dynamically sized item and the size must be set.
 	N int
 
-	// offset in bytes from start of memory buffer.
-	Offset int
-
 	// val state flags
 	Flags ValueFlags
 
@@ -44,9 +42,7 @@ type Value struct {
 	// syncing operations, instead of memcopy.
 	ElSize int
 
-	// total memory size of this value in bytes, as allocated,
-	// including array alignment but not any additional buffer-required
-	// alignment padding.
+	// total memory size of this value in bytes, as allocated in buffer.
 	AllocSize int
 
 	// buffer for this value, makes it accessible to the GPU
@@ -65,21 +61,6 @@ func (vl *Value) HasFlag(flag ValueFlags) bool {
 // SetFlag sets flag(s) using atomic, safe for concurrent access
 func (vl *Value) SetFlag(on bool, flag ...enums.BitFlag) {
 	vl.Flags.SetFlag(on, flag...)
-}
-
-// IsMod returns true if the value has been modified since last memory sync
-func (vl *Value) IsMod() bool {
-	return vl.HasFlag(ValueMod)
-}
-
-// SetMod sets modified flag
-func (vl *Value) SetMod() {
-	vl.SetFlag(true, ValueMod)
-}
-
-// ClearMod clears modified flag
-func (vl *Value) ClearMod() {
-	vl.SetFlag(false, ValueMod)
 }
 
 // Init initializes value based on variable and index within list of vals for this var
@@ -110,53 +91,56 @@ func (vl *Value) MemSize(vr *Var) int {
 		vl.ElSize = vr.SizeOf
 		return vl.ElSize * vl.N
 	case vr.Role == Uniform:
-		vl.ElSize = MemSizeAlign(vr.SizeOf, 16) // todo: test this!
+		// vl.ElSize = MemSizeAlign(vr.SizeOf, 16) // note: webgpu manages
+		vl.ElSize = vr.SizeOf
 		return vl.ElSize * vl.N
 	default: // storage is ok with anything?
-		// vl.ElSize = MemSizeAlign(vr.SizeOf, 16) // todo: test this!
+		// vl.ElSize = MemSizeAlign(vr.SizeOf, 16) // note: webgpu manages
 		vl.ElSize = vr.SizeOf
 		return vl.ElSize * vl.N
 	}
 }
 
-// AllocMem allocates this value at given offset in owning Memory buffer.
-// returns AllocSize() of this value, so memory can increment to next item.
-// offsets are guaranteed to be properly aligned per minUniformBuffererOffsetAlignment.
-func (vl *Value) AllocMem(vr *Var, buff *Buffer, offset int) int {
-	mem := vl.MemSize(vr)
-	vl.AllocSize = mem
-	if mem == 0 {
-		return 0
+// CreateBuffer creates the GPU buffer for this value if it does not
+// yet exist or is not the right size.
+// Buffers always start mapped.
+func (vl *Value) CreateBuffer(dev *Device, vr *Var) error {
+	if vr.Role >= TextureRole {
+		return nil
 	}
-	vl.Offset = offset
-	if vl.Texture != nil {
-		vl.Texture.ConfigValueHost(buff, offset)
-	} else {
-		if vl.N > 1 && vl.ElSize != vr.SizeOf {
-			vl.SetFlag(true, ValuePaddedArray)
-		} else {
-			vl.SetFlag(false, ValuePaddedArray)
-		}
+	sz := vl.MemSize(vr)
+	if sz == 0 {
+		vl.Free()
+		return nil
 	}
-	return mem
+	if sz == vl.AllocSize && vl.Buffer != nil {
+		return nil
+	}
+	buf, err := dev.Device.CreateBuffer(&wgpu.BufferDescriptor{
+		Size:             uint64(sz),
+		Label:            Name,
+		Usage:            vr.Role.BufferUsages(),
+		MappedAtCreation: true,
+	})
+	if err != nil {
+		slog.Error(err)
+		return err
+	}
+	vl.AllocSize = sz
+	vl.Buffer = buf
+	return nil
 }
 
-// Free resets the MemPtr for this value
+// Free releases the buffer / texture for this value
 func (vl *Value) Free() {
-	vl.Offset = 0
-	vl.MemPtr = nil
+	if vl.Buffer != nil {
+		vl.Buffer.Release()
+		vl.Buffer = nil
+	}
 	if vl.Texture != nil {
 		vl.Texture.Destroy()
+		vl.Texture = nil
 	}
-}
-
-// Bytes returns byte array of the Value data, including any additional
-// alignment  -- can be written to directly.
-// Be mindful of potential padding and alignment issues relative to
-// go-based storage.
-// Set Mod flag when changes have been made.
-func (vl *Value) Bytes() []byte {
-	return (*[ByteCopyMemoryLimit]byte)(vl.MemPtr)[:vl.AllocSize]
 }
 
 // Floats32 returns math32.ArrayF32 of the Value data -- can be written to directly.
@@ -187,29 +171,74 @@ func (vl *Value) PaddedArrayCheck() error {
 	return nil
 }
 
-// CopyFromBytes copies bytes from given source pointer into memory,
-// and sets Mod flag.  Use this for struct data types.
-func (vl *Value) CopyFromBytes(srcPtr unsafe.Pointer) {
-	if err := vl.PaddedArrayCheck(); err != nil {
-		log.Println(err)
-		// return
+// NilBufferCheckCheck checks if buffer is nil, returning error if so
+func (vl *Value) NilBufferCheck() error {
+	if vl.Buffer == nil {
+		return fmt.Errorf("gpu.Value NilBufferCheck: buffer is nil for value: %s", vl.Name)
 	}
-	dst := vl.Bytes()
-	src := (*[ByteCopyMemoryLimit]byte)(srcPtr)[:vl.AllocSize]
-	copy(dst, src)
-	vl.SetMod()
+	return nil
 }
 
-// CopyToBytes copies bytes from val to given source pointer into memory.
-// Use this for struct data types to retrieve computed results.
-func (vl *Value) CopyToBytes(srcPtr unsafe.Pointer) {
-	if err := vl.PaddedArrayCheck(); err != nil {
-		log.Println(err)
-		return
+// SetValueFromAsync copies given values into value buffer memory,
+// ensuring that the buffer is mapped and ready to be copied into.
+// This automatically calls Unmap() after copying.
+func SetValueFromAsync[E any](vl *Value, from []E) error {
+	return vl.SetFromBytesAsync(wgpu.ToBytes(from))
+}
+
+// SetFromBytesAsync copies given bytes into value buffer memory,
+// ensuring that the buffer is mapped and ready to be copied into.
+// This automatically calls Unmap() after copying.
+func (vl *Value) SetFromBytesAsync(from []byte) error {
+	if err := vl.NilBufferCheck(); err != nil {
+		slog.Error(err)
+		return err
 	}
-	dst := vl.Bytes()
-	src := (*[ByteCopyMemoryLimit]byte)(srcPtr)[:vl.AllocSize]
-	copy(src, dst)
+	if err := vl.PaddedArrayCheck(); err != nil {
+		slog.Error(err)
+		return err
+	}
+	vl.Buffer.MapAsync(wgpu.MapMode_Write, 0, vl.AllocSize, func(stat BufferMapAsyncStatus) {
+		if stat != wgpu.BufferMapAsyncStatus_Success {
+			err = return fmt.Errorf("gpu.Value SetFromBytesAsync: %s for value: %s", stat.String(), vl.Name)
+			return
+		}
+		bm := vl.Buffer.GetMappedRange(0, vl.AllocSize)
+		copy(bm, from)
+		vl.Buffer.Unmap()
+	})
+	return err
+}
+
+// CopyValueToBytesAsync copies given value buffer memory to given bytes,
+// ensuring that the buffer is mapped and ready to be copied into.
+// This automatically calls Unmap() after copying.
+func CopyValueToBytesAsync[E any](vl *Value, dest []E) error {
+	return vl.CopyToBytesAsync(wgpu.ToBytes(dest))
+}
+
+// CopyToBytesAsync copies value buffer memory to given bytes,
+// ensuring that the buffer is mapped and ready to be copied into.
+// This automatically calls Unmap() after copying.
+func (vl *Value) CopyToBytesAsync(dest []byte) error {
+	if err := vl.NilBufferCheck(); err != nil {
+		slog.Error(err)
+		return err
+	}
+	if err := vl.PaddedArrayCheck(); err != nil {
+		slog.Error(err)
+		return err
+	}
+	vl.Buffer.MapAsync(wgpu.MapMode_Read, 0, vl.AllocSize, func(stat BufferMapAsyncStatus) {
+		if stat != wgpu.BufferMapAsyncStatus_Success {
+			err = return fmt.Errorf("gpu.Value CopyToBytesAsync: %s for value: %s", stat.String(), vl.Name)
+			return
+		}
+		bm := vl.Buffer.GetMappedRange(0, vl.AllocSize)
+		copy(dest, bm)
+		vl.Buffer.Unmap()
+	})
+	return err
 }
 
 // SetGoImage sets Texture image data from an *image.RGBA standard Go image,
@@ -241,16 +270,6 @@ func (vl *Value) SetGoImage(img image.Image, layer int, flipY bool) error {
 	return err
 }
 
-// MemReg returns the memory region for this value
-func (vl *Value) MemReg(vr *Var) MemReg {
-	bt := vr.Role.BuffType()
-	mr := MemReg{Offset: vl.Offset, Size: vl.AllocSize, BuffType: bt}
-	if bt == StorageBuffer {
-		mr.BuffIndex = vr.StorageBuffer
-	}
-	return mr
-}
-
 //////////////////////////////////////////////////////////////////
 // Values
 
@@ -260,21 +279,26 @@ type Values struct {
 	// values in indexed order
 	Values []*Value
 
-	// map of vals by name -- only for specifically named vals vs. generically allocated ones -- names must be unique
+	// map of vals by name, only for specifically named vals
+	// vs. generically allocated ones. Names must be unique
 	NameMap map[string]*Value
 
-	// for texture values, this allocates textures to texture arrays by size -- used if On flag is set -- must call AllocTexBySize to allocate after ConfigGoImage is called on all vals.  Then call SetGoImage method on Values to set the Go Image for each val -- this automatically redirects to the group allocated images.
+	// for texture values, this allocates textures to texture arrays by size.
+	// Used if On flag is set. Must call AllocTexBySize to allocate after
+	// ConfigGoImage is called on all vals.  Then call SetGoImage method on
+	// Values to set the Go Image for each val. This automatically redirects
+	// to the group allocated images.
 	TexSzAlloc szalloc.SzAlloc
 
-	// for texture values, if AllocTexBySize is called, these are the actual allocated image arrays that hold the grouped images (size = TexSzAlloc.GpAllocs.
+	// for texture values, if AllocTexBySize is called, these are the actual
+	// allocated image arrays that hold the grouped images (size = TexSzAlloc.GpAllocs.
 	GpTexValues []*Value
 }
 
 // ConfigValues configures given number of values in the list for given variable.
 // If the same number of vals is given, nothing is done, so it is safe to call
-// repeatedly.  Otherwise, any existing vals will be deleted -- the Memory system
-// must free all associated memory prior!
-// Returns true if new config made, else false if same size.
+// repeatedly.  Otherwise, any existing values will be freed.
+// Returns true if a new config made, else false if same size.
 func (vs *Values) ConfigValues(gp *GPU, dev *Device, vr *Var, nvals int) bool {
 	if len(vs.Values) == nvals {
 		return false
@@ -353,7 +377,7 @@ func (vs *Values) ActiveValues() []*Value {
 }
 
 // MemSize returns size across all Values in list
-func (vs *Values) MemSize(vr *Var, alignBytes int) int {
+func (vs *Values) MemSize(vr *Var) int {
 	tsz := 0
 	vals := vs.ActiveValues()
 	for _, vl := range vals {
@@ -361,33 +385,12 @@ func (vs *Values) MemSize(vr *Var, alignBytes int) int {
 		if sz == 0 {
 			continue
 		}
-		esz := MemSizeAlign(sz, alignBytes)
-		tsz += esz
+		tsz += sz
 	}
 	return tsz
 }
 
-// AllocMem allocates values at given offset in given Memory buffer.
-// Computes the MemPtr for each item, and returns TotSize
-// across all vals.  The effective offset increment (based on size) is
-// aligned at the given align byte level, which should be
-// MinUniformBuffererOffsetAlignment from gpu.
-func (vs *Values) AllocMem(vr *Var, buff *Buffer, offset int) int {
-	tsz := 0
-	vals := vs.ActiveValues()
-	for _, vl := range vals {
-		sz := vl.AllocMem(vr, buff, buff.HostPtr, offset)
-		if sz == 0 {
-			continue
-		}
-		esz := MemSizeAlign(sz, buff.AlignBytes)
-		offset += esz
-		tsz += esz
-	}
-	return tsz
-}
-
-// Free resets the MemPtr for values, resets any self-owned resources (Textures)
+// Free frees all the value buffers / textures
 func (vs *Values) Free() {
 	vals := vs.ActiveValues()
 	for _, vl := range vals {
@@ -403,19 +406,6 @@ func (vs *Values) Destroy() {
 	vs.GpTexValues = nil
 	vs.TexSzAlloc.On = false
 	vs.NameMap = nil
-}
-
-// ModRegs returns the regions of Values that have been modified
-func (vs *Values) ModRegs(vr *Var) []MemReg {
-	var mods []MemReg
-	vals := vs.ActiveValues()
-	for _, vl := range vals {
-		if vl.IsMod() {
-			mods = append(mods, vl.MemReg(vr))
-			vl.ClearMod() // assuming it will clear now..
-		}
-	}
-	return mods
 }
 
 // AllocTexBySize allocates textures by size so they fit within the
@@ -505,11 +495,8 @@ func (vs *Values) AllocTextures(mm *Memory) {
 type ValueFlags int64 //enums:bitflag -trim-prefix Value
 
 const (
-	// ValueMod the value has been modified
-	ValueMod ValueFlags = iota
-
 	// ValuePaddedArray array had to be padded -- cannot access elements continuously
-	ValuePaddedArray
+	ValuePaddedArray ValueFlags = iota
 
 	// ValueTextureOwns val owns and manages the host staging memory for texture.
 	// based on Var TextureOwns -- for dynamically changing images.

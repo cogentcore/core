@@ -73,6 +73,12 @@ TODO:
 * no arrays of textures -- store each one in a Value and copy up each time.
 * this gets around the limitation, and we can pre-load them somenow so not such a big deal?
 
+*Single most important fact: all resources (data in buffers, textures) must be in the GPU at the _start_ of the render pass*
+
+You can use different BindGroups to select different Value buffers for a given Var, but everything has to be uploaded at the start.
+
+Given that the number of objects rendered is likely to vary between frames, it might be better to go ahead and use the vertex data, which is more dynamically accessed per item, to stream the model matrix and any other per-instance data into the thing, in the absence of push constants.
+
 `Memory` maintains a host-visible, mapped staging buffer, and a corresponding device-local memory buffer that the GPU uses to compute on (the latter of which is optional for unified memory architectures).  Each `Value` records when it is modified, and a global Sync step efficiently transfers only what has changed.  *You must allocate and sync update a unique Value for each different value you will need for the entire render pass* -- although you can dynamically select *which Value* to use for each draw command, you cannot in general update the actual data associated with these values during the course of a single rendering pass.
 
 * `Vars` variables define the `Type` and `Role` of data used in the shaders.  There are 3 major categories of Var roles:
