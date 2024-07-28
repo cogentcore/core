@@ -11,6 +11,12 @@ import (
 	"cogentcore.org/core/tree"
 )
 
+// htmlElementNames is a map from widget [types.Type.IDName]s to HTML element
+// names for cases in which those differ.
+var htmlElementNames = map[string]string{
+	"body": "main", // we are typically placed in a different outer body
+}
+
 // ToHTML converts the given widget and all of its children to HTML.
 // This is not guaranteed to be perfect HTML, and it should not be used as a
 // replacement for a Cogent Core app. However, it is good enough to be used as
@@ -34,6 +40,9 @@ func toHTML(w Widget, e *xml.Encoder) error {
 	wb := w.AsWidget()
 	se := xml.StartElement{}
 	se.Name.Local = wb.NodeType().IDName
+	if en, ok := htmlElementNames[se.Name.Local]; ok {
+		se.Name.Local = en
+	}
 	err := e.EncodeToken(se)
 	if err != nil {
 		return err
