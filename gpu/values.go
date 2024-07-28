@@ -116,7 +116,8 @@ func (vl *Value) CreateBuffer(dev *Device, vr *Var) error {
 	if sz == vl.AllocSize && vl.Buffer != nil {
 		return nil
 	}
-	buf, err := dev.Device.CreateBuffer(&wgpu.BufferDescriptor{
+	vl.Free()
+var	buf, err := dev.Device.CreateBuffer(&wgpu.BufferDescriptor{
 		Size:             uint64(sz),
 		Label:            Name,
 		Usage:            vr.Role.BufferUsages(),
@@ -141,24 +142,6 @@ func (vl *Value) Free() {
 		vl.Texture.Destroy()
 		vl.Texture = nil
 	}
-}
-
-// Floats32 returns math32.ArrayF32 of the Value data -- can be written to directly.
-// Only recommended for Vertex data.  Otherwise, be mindful of potential padding
-// and alignment issues relative to go-based storage.
-// Set Mod flag when changes have been made.
-func (vl *Value) Floats32() math32.ArrayF32 {
-	nf := vl.AllocSize / 4
-	return math32.ArrayF32((*[ByteCopyMemoryLimit]float32)(vl.MemPtr)[:nf])
-}
-
-// UInts32 returns math32.ArrayU32 of the Value data -- can be written to directly.
-// Only recommended for Vertex data.  Otherwise, be mindful of potential padding
-// and alignment issues relative to go-based storage.
-// Set Mod flag when changes have been made.
-func (vl *Value) UInts32() math32.ArrayU32 {
-	nf := vl.AllocSize / 4
-	return math32.ArrayU32((*[ByteCopyMemoryLimit]uint32)(vl.MemPtr)[:nf])
 }
 
 // PaddedArrayCheck checks if this is an array with padding on the elements

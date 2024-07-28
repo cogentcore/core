@@ -211,7 +211,7 @@ func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 		if vr.Role <= StorageImage {
 			bd.Buffer = wgpu.BufferBindingLayout{
 				Type:             vr.Role.BindingType(),
-				HasDynamicOffset: vr.Role.IsDynamic(),
+				HasDynamicOffset: false,
 				MinBindingSize:   0, // 0 is fine
 			}
 		} else if vr.Role == TextureRole {
@@ -232,14 +232,6 @@ func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 			bd.DescriptorCount = uint32(nVarDesc)
 		}
 		binds = append(binds, bd)
-		if !vs.StaticVars {
-			if vr.Role == Uniform || vr.Role == Storage {
-				vr.BindValueIndex = make([]int, vs.NDescs)
-				vr.DynOffIndex = dyno
-				vs.AddDynOff()
-				dyno++
-			}
-		}
 	}
 
 	bgld := BindGroupLayoutDescriptor{
@@ -253,53 +245,6 @@ func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 		return err
 	}
 	vg.Layout = bgl
-}
-
-// todo: other static cases need same approach as images!
-// also, need an option to allow a single val to be used in a static way, selecting from among multiple,
-// instead of always assuming an array used.
-
-// BindStatVarsAll statically binds all uniform, storage values
-// in given set, for all variables, for all values.
-//
-// Must call BindVarStart / End around this.
-func (vg *VarGroup) BindStatVarsAll(vs *Vars) {
-	for _, vr := range vg.Vars {
-		if vr.Role < Uniform || vr.Role > Storage {
-			continue
-		}
-		vg.BindStatVar(vs, vr)
-	}
-}
-
-// BindStatVars binds all static vars to their current values,
-// for non-Uniform, Storage, variables (e.g., Textures).
-// Each Value for a given Var is given a descriptor binding
-// and the shader sees an array of values of corresponding length.
-// All vals must be uploaded to Device memory prior to this,
-// and it is not possible to update anything during a render pass.
-func (vg *VarGroup) BindStatVars(vs *Vars) {
-	for _, vr := range vg.Vars {
-		if vr.Role <= Storage {
-			continue
-		}
-		vg.BindStatVar(vs, vr)
-	}
-}
-
-// BindStatVarName does static variable binding for given var
-// looked up by name, For non-Uniform, Storage, variables (e.g., Textures).
-// Each Value for a given Var is given a descriptor binding
-// and the shader sees an array of values of corresponding length.
-// All vals must be uploaded to Device memory prior to this,
-// and it is not possible to update anything during a render pass.
-func (vg *VarGroup) BindStatVarName(vs *Vars, varNm string) error {
-	vr, err := vg.VarByNameTry(varNm)
-	if err != nil {
-		return err
-	}
-	vg.BindStatVar(vs, vr)
-	return nil
 }
 
 // BindStatVar does static variable binding for given var,

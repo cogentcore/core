@@ -74,35 +74,12 @@ type Var struct {
 	// Otherwise image host staging memory is allocated in a common buffer
 	TextureOwns bool `edit:"-"`
 
-	// todo: still needed?
-
-	// Index into the dynamic offset list, where dynamic offsets of vals
-	// need to be set. For Uniform and Storage Roles, set during BindGroupLayout.
-	DynOffIndex int `edit:"-"`
-
 	// Values is the the array of Values allocated for this variable.
 	// The size of this array is determined by the Group membership of this Var,
 	// and the current index is updated at the group level.
 	// For Texture Roles, there is a separate descriptor for each value (image),
 	// otherwise dynamic offset binding is used.
 	Values Values
-
-	// For dynamically bound vars (Vertex, Uniform, Storage), this is the
-	// index of the currently bound value in the Values list.
-	// The index in this array is the descIndex out of Vars NDescs
-	// (see for docs) to allow for parallel update pathways.
-	// Only valid until set again, and only actually used for Vertex binding,
-	// as unforms etc have the WriteDescriptor mechanism.
-	BindValueIndex []int `edit:"-"`
-
-	// index of the storage buffer in Memory that holds this Var, for Storage
-	// buffer types.  Due to support for dynamic binding, all Values of a
-	// given Var must be stored in the same buffer, and the allocation
-	// mechanism ensures this.  This constrains large vars approaching the
-	// MaxStorageBuffererRange capacity to only have 1 val, which is typically
-	// reasonable given that compute shaders use large data and tend to use static
-	// binding anyway, and graphics uses tend to be smaller.
-	StorageBuffer int `edit:"-"`
 
 	// offset: only for push constants
 	Offset int `edit:"-"`
@@ -135,31 +112,6 @@ func (vr *Var) String() string {
 	return s
 }
 
-// BuffType returns the memory buffer type for this variable, based on Var.Role
-func (vr *Var) BuffType() BufferTypes {
-	return vr.Role.BuffType()
-}
-
-// BindValue returns the currently bound value at given descriptor collection index
-// as set by BindDyn* methods.  Returns nil, error if not valid.
-func (vr *Var) BindValue(descIndex int) (*Value, error) {
-	idx := vr.BindValueIndex[descIndex]
-	return vr.Values.ValueByIndexTry(idx)
-}
-
-// ValuesMemSize returns the memory allocation size
-// for all values for this Var, in bytes
-func (vr *Var) ValuesMemSize(alignBytes int) int {
-	return vr.Values.MemSize(vr, alignBytes)
-}
-
-// MemSizeStorage adds a Storage memory allocation record to Memory
-// for all values for this Var
-func (vr *Var) MemSizeStorage(mm *Memory, alignBytes int) {
-	tsz := vr.Values.MemSize(vr, alignBytes)
-	mm.StorageMems = append(mm.StorageMems, &VarMem{Var: vr, Size: tsz})
-}
-
 // MemSize returns the memory allocation size for this value, in bytes
 func (vr *Var) MemSize() int {
 	n := vr.ArrayN
@@ -179,25 +131,10 @@ func (vr *Var) MemSize() int {
 	}
 }
 
-// AllocMem allocates values at given offset in given Memory buffer.
-// Computes the MemPtr for each item, and returns TotSize
-// across all vals.  The effective offset increment (based on size) is
-// aligned at the given align byte level, which should be
-// MinUniformBuffererOffsetAlignment from gpu.
-func (vr *Var) AllocMem(buff *Buffer, offset int) int {
-	return vr.Values.AllocMem(vr, buff, offset)
-}
-
 // Free resets the MemPtr for values, resets any self-owned resources (Textures)
 func (vr *Var) Free() {
 	vr.Values.Free()
-	vr.StorageBuffer = -1
 	// todo: free anything in var
-}
-
-// ModRegs returns the regions of Values that have been modified
-func (vr *Var) ModRegs() []MemReg {
-	return vr.Values.ModRegs(vr)
 }
 
 // SetTextureDev sets Device for textures
