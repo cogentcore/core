@@ -21,7 +21,7 @@ import (
 // https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSampledImages&platform=all
 
 const (
-	// MaxTexturesPerSet is the maximum number of image variables that can be used
+	// MaxTexturesPerGroup is the maximum number of image variables that can be used
 	// in one descriptor set.  This value is a lowest common denominator across
 	// platforms.  To overcome this limitation, when more Texture vals are allocated,
 	// multiple NDescs are used, setting the and switch
@@ -30,7 +30,7 @@ const (
 	// allocated in the descriptor set, with bindings of values wrapping
 	// around across as many such sets as are vals, with a warning if insufficient
 	// numbers are present.
-	MaxTexturesPerSet = 16
+	MaxTexturesPerGroup = 16
 
 	// MaxImageLayers is the maximum number of layers per image
 	MaxImageLayers = 128
@@ -39,28 +39,36 @@ const (
 // NDescForTextures returns number of descriptors (NDesc) required for
 // given number of texture values.
 func NDescForTextures(nvals int) int {
-	nDescSetsReq := nvals / MaxTexturesPerSet
-	if nvals%MaxTexturesPerSet > 0 {
-		nDescSetsReq++
+	nDescGroupsReq := nvals / MaxTexturesPerGroup
+	if nvals%MaxTexturesPerGroup > 0 {
+		nDescGroupsReq++
 	}
-	return nDescSetsReq
+	return nDescGroupsReq
 }
 
 const (
-	VertexSet = -2
-	PushSet   = -1
+	VertexGroup = -2
+	PushGroup   = -1
 )
 
-// VarSet contains a set of Var variables that are all updated at the same time
+// VarGroup contains a set of Var variables that are all updated at the same time
 // and have the same number of distinct Values values per Var per render pass.
 // The first set at index -1 contains Vertex and Index data, handed separately.
-type VarSet struct {
+type VarGroup struct {
 	VarList
 
 	// set number
-	Set int
+	Group int
 
-	// number of value instances to allocate per variable in this set: each value must be allocated in advance for each unique instance of a variable required across a complete scene rendering -- e.g., if this is an object position matrix, then one per object is required.  If a dynamic number are required, allocate the max possible.  For Texture vars, each of the NDesc sets can have a maximum of MaxTexturesPerSet (16) -- if NValuesPer > MaxTexturesPerSet, then vals are wrapped across sets, and accessing them requires using the appropriate DescIndex, as in System.CmdBindTextureVarIndex.
+	// number of value instances to allocate per variable in this Group.
+	// Each value must be allocated in advance for each unique instance
+	// of a variable required across a complete scene rendering.
+	// e.g., if this is an object position matrix, then one per object is required.
+	// If a dynamic number are required, allocate the max possible.
+	// For Texture vars, each of the NDesc sets can have a maximum of
+	// MaxTexturesPerGroup (16), so if NValuesPer > MaxTexturesPerGroup,
+	// then vals are wrapped across sets, and accessing them requires using the
+	// appropriate DescIndex, as in System.CmdBindTextureVarIndex.
 	NValuesPer int
 
 	// number of textures, at point of creating the DescLayout
@@ -75,81 +83,81 @@ type VarSet struct {
 	// the parent vars we belong to
 	ParentVars *Vars
 
-	// set layout info -- static description of each var type, role, binding, stages
+	// set layout info: description of each var type, role, binding, stages
 	Layout *wgpu.BindGroupLayout
 
 	// allocated descriptor set -- one of these per Vars.NDescs -- can have multiple sets that can be independently updated, e.g., for parallel rendering passes.  If only rendering one at a time, only need one.
-	VkDescSets []vk.DescriptorSet
+	// VkDescSets []vk.DescriptorSet
 }
 
 // AddVar adds given variable
-func (st *VarSet) AddVar(vr *Var) {
-	if st.VarMap == nil {
-		st.VarMap = make(map[string]*Var)
+func (vg *VarGroup) AddVar(vr *Var) {
+	if vg.VarMap == nil {
+		vg.VarMap = make(map[string]*Var)
 	}
-	st.Vars = append(st.Vars, vr)
-	st.VarMap[vr.Name] = vr
+	vg.Vars = append(vg.Vars, vr)
+	vg.VarMap[vr.Name] = vr
 }
 
 // Add adds a new variable of given type, role, arrayN, and shaders where used
-func (st *VarSet) Add(name string, typ Types, arrayN int, role VarRoles, shaders ...ShaderTypes) *Var {
+func (vg *VarGroup) Add(name string, typ Types, arrayN int, role VarRoles, shaders ...ShaderTypes) *Var {
 	vr := &Var{}
-	vr.Init(name, typ, arrayN, role, st.Set, shaders...)
-	st.AddVar(vr)
+	vr.Init(name, typ, arrayN, role, vg.Group, shaders...)
+	vg.AddVar(vr)
 	return vr
 }
 
 // AddStruct adds a new struct variable of given total number of bytes in size,
 // type, role, set, and shaders where used
-func (st *VarSet) AddStruct(name string, size int, arrayN int, role VarRoles, shaders ...ShaderTypes) *Var {
+func (vg *VarGroup) AddStruct(name string, size int, arrayN int, role VarRoles, shaders ...ShaderTypes) *Var {
 	vr := &Var{}
-	vr.Init(name, Struct, arrayN, role, st.Set, shaders...)
+	vr.Init(name, Struct, arrayN, role, vg.Group, shaders...)
 	vr.SizeOf = size
-	st.AddVar(vr)
+	vg.AddVar(vr)
 	return vr
 }
 
 // Config must be called after all variables have been added.
 // configures binding / location for all vars based on sequential order.
 // also does validation and returns error message.
-func (st *VarSet) Config(dev *Device) error {
-	st.RoleMap = make(map[VarRoles][]*Var)
+func (vg *VarGroup) Config(dev *Device) error {
+	vg.RoleMap = make(map[VarRoles][]*Var)
 	var cerr error
 	bloc := 0
-	for _, vr := range st.Vars {
-		if st.Set == VertexSet && vr.Role > Index {
-			err := fmt.Errorf("vgpu.VarSet:Config VertexSet cannot contain variables of role: %s  var: %s", vr.Role.String(), vr.Name)
+	for _, vr := range vg.Vars {
+		if vg.Group == VertexGroup && vr.Role > Index {
+			err := fmt.Errorf("gpu.VarGroup:Config VertexGroup cannot contain variables of role: %s  var: %s", vr.Role.String(), vr.Name)
 			cerr = err
 			if Debug {
 				log.Println(err)
 			}
 			continue
 		}
-		if st.Set >= 0 && vr.Role <= Index {
-			err := fmt.Errorf("vgpu.VarSet:Config Vertex or Index Vars must be located in a VertexSet!  Use AddVertexSet() method instead of AddSet()")
+		if vg.Group >= 0 && vr.Role <= Index {
+			err := fmt.Errorf("gpu.VarGroup:Config Vertex or Index Vars must be located in a VertexGroup!  Use AddVertexGroup() method instead of AddGroup()")
 			cerr = err
 			if Debug {
 				log.Println(err)
 			}
 		}
-		rl := st.RoleMap[vr.Role]
+		rl := vg.RoleMap[vr.Role]
 		rl = append(rl, vr)
-		st.RoleMap[vr.Role] = rl
+		vg.RoleMap[vr.Role] = rl
 		if vr.Role == Index && len(rl) > 1 {
-			err := fmt.Errorf("vgpu.VarSet:Config VertexSet should not contain multiple Index variables: %v", rl)
+			err := fmt.Errorf("gpu.VarGroup:Config VertexGroup should not contain multiple Index variables: %v", rl)
 			cerr = err
 			if Debug {
 				log.Println(err)
 			}
 		}
-		if vr.Role > Storage && (len(st.RoleMap[Uniform]) > 0 || len(st.RoleMap[Storage]) > 0) {
-			err := fmt.Errorf("vgpu.VarSet:Config Set with dynamic Uniform or Storage variables should not contain static variables (e.g., textures): %s", vr.Role.String())
+		if vr.Role > Storage && (len(vg.RoleMap[Uniform]) > 0 || len(vg.RoleMap[Storage]) > 0) {
+			err := fmt.Errorf("gpu.VarGroup:Config Group with dynamic Uniform or Storage variables should not contain static variables (e.g., textures): %s", vr.Role.String())
 			cerr = err
 			if Debug {
 				log.Println(err)
 			}
 		}
-		vr.BindLoc = bloc
+		vr.Binding = bloc
 		if vr.Role == TextureRole {
 			vr.SetTextureDev(dev)
 		}
@@ -163,46 +171,45 @@ func (st *VarSet) Config(dev *Device) error {
 // distinct value to be rendered within a single pass.  All Vars in the
 // same set have the same number of vals.
 // Any existing vals will be deleted -- must free all associated memory prior!
-func (st *VarSet) ConfigValues(nvals int) {
-	dev := st.ParentVars.Mem.Device.Device
-	gp := st.ParentVars.Mem.GPU
-	st.NValuesPer = nvals
-	for _, vr := range st.Vars {
+func (vg *VarGroup) ConfigValues(nvals int) {
+	dev := vg.ParentVars.Mem.Device.Device
+	gp := vg.ParentVars.Mem.GPU
+	vg.NValuesPer = nvals
+	for _, vr := range vg.Vars {
 		vr.Values.ConfigValues(gp, dev, vr, nvals)
 	}
 }
 
-// Destroy destroys infrastructure for Set, Vars and Values -- assumes Free has
+// Destroy destroys infrastructure for Group, Vars and Values -- assumes Free has
 // already been called to free host and device memory.
-func (st *VarSet) Destroy(dev *Device) {
-	st.DestroyLayout(dev)
+func (vg *VarGroup) Destroy(dev *Device) {
+	vg.DestroyLayout()
 }
 
 // DestroyLayout destroys layout
-func (st *VarSet) DestroyLayout(dev *Device) {
-	vk.DestroyDescriptorSetLayout(dev, st.VkLayout, nil)
-	st.VkLayout = vk.NullDescriptorSetLayout
+func (vg *VarGroup) DestroyLayout() {
+	if vg.Layout != nil {
+		vg.Layout.Release()
+		vg.Layout = nil
+	}
 }
 
-// DescLayout creates the DescriptorSetLayout in DescLayout for given set.
-// Only for non-VertexSet sets.
+// BindLayout creates the BindGroupLayout for given set.
+// Only for non-VertexGroup sets.
 // Must have set NValuesPer for any TextureRole vars, which require separate descriptors per.
-func (st *VarSet) DescLayout(dev *Device, vs *Vars) error {
-	st.DestroyLayout(dev)
-	st.NTextures = 0
-	var descLayout vk.DescriptorSetLayout
+func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
+	vg.DestroyLayout(dev)
+	vg.NTextures = 0
 	var binds []wgpu.BindGroupLayoutEntry
 	dyno := len(vs.DynOffs[0])
-	var flags vk.DescriptorSetLayoutCreateFlags
-	var dbf []vk.DescriptorBindingFlags
-	nvar := len(st.Vars)
+	nvar := len(vg.Vars)
 	nVarDesc := 0
-	st.NTextureDescs = 1
+	vg.NTextureDescs = 1
 
 	// https://toji.dev/webgpu-best-practices/bind-groups.html
-	for vi, vr := range st.Vars {
+	for vi, vr := range vg.Vars {
 		bd := wgpu.BindGroupLayoutEntry{
-			Binding:    uint32(vr.BindLoc),
+			Binding:    uint32(vr.Binding),
 			Visibility: fr.Shaders,
 		}
 		if vr.Role <= StorageImage {
@@ -217,23 +224,16 @@ func (st *VarSet) DescLayout(dev *Device, vs *Vars) error {
 			}
 			vals := vr.Values.ActiveValues()
 			nvals := len(vals)
-			st.NTextures += nvals
-			nVarDesc = min(nvals, MaxTexturesPerSet) // per desc
+			vg.NTextures += nvals
+			nVarDesc = min(nvals, MaxTexturesPerGroup) // per desc
 
-			if nvals > MaxTexturesPerSet {
-				st.NTextureDescs = NDescForTextures(nvals)
-				if st.NTextureDescs > vs.NDescs {
-					fmt.Printf("vgpu.VarSet: Texture %s NValues: %d requires NDescs = %d, but it is only: %d -- this probably won't end well, but can't be fixed here\n", vr.Name, nvals, st.NTextureDescs, vs.NDescs)
+			if nvals > MaxTexturesPerGroup {
+				vg.NTextureDescs = NDescForTextures(nvals)
+				if vg.NTextureDescs > vs.NDescs {
+					fmt.Printf("gpu.VarGroup: Texture %s NValues: %d requires NDescs = %d, but it is only: %d -- this probably won't end well, but can't be fixed here\n", vr.Name, nvals, vg.NTextureDescs, vs.NDescs)
 				}
 			}
 			bd.DescriptorCount = uint32(nVarDesc)
-			dbfFlags := vk.DescriptorBindingPartiallyBoundBit
-			//  | vk.DescriptorBindingUpdateAfterBindBit | vk.DescriptorBindingUpdateUnusedWhilePendingBit
-			if vi == nvar-1 {
-				dbfFlags |= vk.DescriptorBindingVariableDescriptorCountBit // can only be for last one
-			}
-			dbf = append(dbf, vk.DescriptorBindingFlags(dbfFlags))
-			// flags = vk.DescriptorSetLayoutCreateFlags(vk.DescriptorSetLayoutCreateUpdateAfterBindPoolBit)
 		}
 		binds = append(binds, bd)
 		if !vs.StaticVars {
@@ -247,7 +247,7 @@ func (st *VarSet) DescLayout(dev *Device, vs *Vars) error {
 	}
 
 	bgld := BindGroupLayoutDescriptor{
-		Label:   strconv.Itoa(vs.Set),
+		Label:   strconv.Itoa(vs.Group),
 		Entries: binds,
 	}
 
@@ -256,7 +256,7 @@ func (st *VarSet) DescLayout(dev *Device, vs *Vars) error {
 		slog.Error(err)
 		return err
 	}
-	st.Layout = bgl
+	vg.Layout = bgl
 
 	// it does not seem like you need to pre-allocate these desc sets
 	/*
@@ -293,12 +293,12 @@ func (st *VarSet) DescLayout(dev *Device, vs *Vars) error {
 // The memory buffer is essentially what is bound here.
 //
 // Must have called BindVarsStart prior to this.
-func (st *VarSet) BindDynVars(vs *Vars) {
-	for _, vr := range st.Vars {
+func (vg *VarGroup) BindDynVars(vs *Vars) {
+	for _, vr := range vg.Vars {
 		if vr.Role < Uniform || vr.Role > Storage {
 			continue
 		}
-		st.BindDynVar(vs, vr)
+		vg.BindDynVar(vs, vr)
 	}
 }
 
@@ -310,12 +310,12 @@ func (st *VarSet) BindDynVars(vs *Vars) {
 // The memory buffer is essentially what is bound here.
 //
 // Must have called BindVarsStart prior to this.
-func (st *VarSet) BindDynVarName(vs *Vars, varNm string) error {
-	vr, err := st.VarByNameTry(varNm)
+func (vg *VarGroup) BindDynVarName(vs *Vars, varNm string) error {
+	vr, err := vg.VarByNameTry(varNm)
 	if err != nil {
 		return err
 	}
-	st.BindDynVar(vs, vr)
+	vg.BindDynVar(vs, vr)
 	return nil
 }
 
@@ -327,9 +327,9 @@ func (st *VarSet) BindDynVarName(vs *Vars, varNm string) error {
 // The memory buffer is essentially what is bound here.
 //
 // Must have called BindVarsStart prior to this.
-func (st *VarSet) BindDynVar(vs *Vars, vr *Var) error {
+func (vg *VarGroup) BindDynVar(vs *Vars, vr *Var) error {
 	if vr.Role < Uniform || vr.Role > StorageImage {
-		err := fmt.Errorf("vgpu.Set:BindDynVar dynamic binding only valid for Uniform or Storage Vars, not: %s", vr.Role.String())
+		err := fmt.Errorf("gpu.Group:BindDynVar dynamic binding only valid for Uniform or Storage Vars, not: %s", vr.Role.String())
 		if Debug {
 			log.Println(err)
 		}
@@ -338,8 +338,8 @@ func (st *VarSet) BindDynVar(vs *Vars, vr *Var) error {
 
 	wd := vk.WriteDescriptorSet{
 		SType:           vk.StructureTypeWriteDescriptorSet,
-		DstSet:          st.VkDescSets[vs.BindDescIndex],
-		DstBinding:      uint32(vr.BindLoc),
+		DstSet:          vg.VkDescSets[vs.BindDescIndex],
+		DstBinding:      uint32(vr.Binding),
 		DescriptorCount: 1,
 		DescriptorType:  vr.Role.VkDescriptor(),
 	}
@@ -365,12 +365,12 @@ func (st *VarSet) BindDynVar(vs *Vars, vr *Var) error {
 // in given set, for all variables, for all values.
 //
 // Must call BindVarStart / End around this.
-func (st *VarSet) BindStatVarsAll(vs *Vars) {
-	for _, vr := range st.Vars {
+func (vg *VarGroup) BindStatVarsAll(vs *Vars) {
+	for _, vr := range vg.Vars {
 		if vr.Role < Uniform || vr.Role > Storage {
 			continue
 		}
-		st.BindStatVar(vs, vr)
+		vg.BindStatVar(vs, vr)
 	}
 }
 
@@ -380,12 +380,12 @@ func (st *VarSet) BindStatVarsAll(vs *Vars) {
 // and the shader sees an array of values of corresponding length.
 // All vals must be uploaded to Device memory prior to this,
 // and it is not possible to update anything during a render pass.
-func (st *VarSet) BindStatVars(vs *Vars) {
-	for _, vr := range st.Vars {
+func (vg *VarGroup) BindStatVars(vs *Vars) {
+	for _, vr := range vg.Vars {
 		if vr.Role <= Storage {
 			continue
 		}
-		st.BindStatVar(vs, vr)
+		vg.BindStatVar(vs, vr)
 	}
 }
 
@@ -395,12 +395,12 @@ func (st *VarSet) BindStatVars(vs *Vars) {
 // and the shader sees an array of values of corresponding length.
 // All vals must be uploaded to Device memory prior to this,
 // and it is not possible to update anything during a render pass.
-func (st *VarSet) BindStatVarName(vs *Vars, varNm string) error {
-	vr, err := st.VarByNameTry(varNm)
+func (vg *VarGroup) BindStatVarName(vs *Vars, varNm string) error {
+	vr, err := vg.VarByNameTry(varNm)
 	if err != nil {
 		return err
 	}
-	st.BindStatVar(vs, vr)
+	vg.BindStatVar(vs, vr)
 	return nil
 }
 
@@ -409,14 +409,14 @@ func (st *VarSet) BindStatVarName(vs *Vars, varNm string) error {
 // and the shader sees an array of values of corresponding length.
 // All vals must be uploaded to Device memory prior to this,
 // and it is not possible to update anything during a render pass.
-func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
+func (vg *VarGroup) BindStatVar(vs *Vars, vr *Var) {
 
 	vals := vr.Values.ActiveValues()
 	nvals := len(vals)
 	wd := vk.WriteDescriptorSet{
 		SType:          vk.StructureTypeWriteDescriptorSet,
-		DstSet:         st.VkDescSets[vs.BindDescIndex],
-		DstBinding:     uint32(vr.BindLoc),
+		DstSet:         vg.VkDescSets[vs.BindDescIndex],
+		DstBinding:     uint32(vr.Binding),
 		DescriptorType: vr.Role.VkDescriptorStatic(),
 	}
 	bt := vr.BuffType()
@@ -438,12 +438,12 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 	} else {
 		imgs := []vk.DescriptorImageInfo{}
 		nvals := len(vals)
-		if nvals > MaxTexturesPerSet {
-			sti := vs.BindDescIndex * MaxTexturesPerSet
-			if sti > nvals-MaxTexturesPerSet {
-				sti = nvals - MaxTexturesPerSet
+		if nvals > MaxTexturesPerGroup {
+			sti := vs.BindDescIndex * MaxTexturesPerGroup
+			if sti > nvals-MaxTexturesPerGroup {
+				sti = nvals - MaxTexturesPerGroup
 			}
-			mx := sti + MaxTexturesPerSet
+			mx := sti + MaxTexturesPerGroup
 			for vi := sti; vi < mx; vi++ {
 				vl := vals[vi]
 				if vl.Texture != nil && vl.Texture.IsActive() {
@@ -480,24 +480,24 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 // VkVertexConfig fills in the relevant info into given WebGPU config struct.
 // for VertexSet only!
 // Note: there is no support for interleaved arrays so each binding and location
-// is assigned the same sequential number, recorded in var BindLoc
-func (st *VarSet) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
+// is assigned the same sequential number, recorded in var Binding
+func (vg *VarGroup) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 	cfg := &vk.PipelineVertexInputStateCreateInfo{}
 	cfg.SType = vk.StructureTypePipelineVertexInputStateCreateInfo
 	var bind []vk.VertexInputBindingDescription
 	var attr []vk.VertexInputAttributeDescription
-	for _, vr := range st.Vars {
+	for _, vr := range vg.Vars {
 		if vr.Role != Vertex { // not Index
 			continue
 		}
 		bind = append(bind, vk.VertexInputBindingDescription{
-			Binding:   uint32(vr.BindLoc),
+			Binding:   uint32(vr.Binding),
 			Stride:    uint32(vr.SizeOf),
 			InputRate: vk.VertexInputRateVertex,
 		})
 		attr = append(attr, vk.VertexInputAttributeDescription{
-			Location: uint32(vr.BindLoc),
-			Binding:  uint32(vr.BindLoc),
+			Location: uint32(vr.Binding),
+			Binding:  uint32(vr.Binding),
 			Format:   vr.Type.VkFormat(),
 			Offset:   0,
 		})
@@ -510,7 +510,7 @@ func (st *VarSet) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 }
 
 // VkPushConfig returns WebGPU push constant ranges
-func (vs *VarSet) VkPushConfig() []vk.PushConstantRange {
+func (vs *VarGroup) VkPushConfig() []vk.PushConstantRange {
 	alignBytes := 8 // unclear what alignment is
 	var ranges []vk.PushConstantRange
 	offset := 0
@@ -530,7 +530,7 @@ func (vs *VarSet) VkPushConfig() []vk.PushConstantRange {
 	}
 	if tsz > 128 {
 		if Debug {
-			fmt.Printf("vgpu.VarSet:VkPushConfig total push constant memory exceeds nominal minimum size of 128 bytes: %d\n", tsz)
+			fmt.Printf("gpu.VarGroup:VkPushConfig total push constant memory exceeds nominal minimum size of 128 bytes: %d\n", tsz)
 		}
 	}
 	return ranges
@@ -548,13 +548,13 @@ func (vs *VarSet) VkPushConfig() []vk.PushConstantRange {
 // (call after all such dynamic bindings are updated.)
 //
 // Do NOT call BindValuesStart / End around this.
-func (st *VarSet) BindDynValuesAllIndex(vs *Vars, idx int) {
-	for _, vr := range st.Vars {
+func (vg *VarGroup) BindDynValuesAllIndex(vs *Vars, idx int) {
+	for _, vr := range vg.Vars {
 		if vr.Role < Uniform || vr.Role > Storage {
 			continue
 		}
 		vl := vr.Values.Values[idx]
-		st.BindDynValue(vs, vr, vl)
+		vg.BindDynValue(vs, vr, vl)
 	}
 }
 
@@ -569,12 +569,12 @@ func (st *VarSet) BindDynValuesAllIndex(vs *Vars, idx int) {
 // Do NOT call BindValuesStart / End around this.
 //
 // returns error if not found.
-func (st *VarSet) BindDynValueName(vs *Vars, varNm, valNm string) error {
-	vr, vl, err := st.ValueByNameTry(varNm, valNm)
+func (vg *VarGroup) BindDynValueName(vs *Vars, varNm, valNm string) error {
+	vr, vl, err := vg.ValueByNameTry(varNm, valNm)
 	if err != nil {
 		return err
 	}
-	st.BindDynValue(vs, vr, vl)
+	vg.BindDynValue(vs, vr, vl)
 	return nil
 }
 
@@ -589,12 +589,12 @@ func (st *VarSet) BindDynValueName(vs *Vars, varNm, valNm string) error {
 // Do NOT call BindValuesStart / End around this.
 //
 // returns error if not found.
-func (st *VarSet) BindDynValueIndex(vs *Vars, varNm string, valIndex int) error {
-	vr, vl, err := st.ValueByIndexTry(varNm, valIndex)
+func (vg *VarGroup) BindDynValueIndex(vs *Vars, varNm string, valIndex int) error {
+	vr, vl, err := vg.ValueByIndexTry(varNm, valIndex)
 	if err != nil {
 		return err
 	}
-	return st.BindDynValue(vs, vr, vl)
+	return vg.BindDynValue(vs, vr, vl)
 }
 
 // BindDynValue dynamically binds given uniform or storage value
@@ -608,9 +608,9 @@ func (st *VarSet) BindDynValueIndex(vs *Vars, varNm string, valIndex int) error 
 // Do NOT call BindValuesStart / End around this.
 //
 // returns error if not found.
-func (st *VarSet) BindDynValue(vs *Vars, vr *Var, vl *Value) error {
+func (vg *VarGroup) BindDynValue(vs *Vars, vr *Var, vl *Value) error {
 	if vr.Role < Uniform || vr.Role > Storage {
-		err := fmt.Errorf("vgpu.Set:BindDynValue dynamic binding only valid for Uniform or Storage Vars, not: %s", vr.Role.String())
+		err := fmt.Errorf("gpu.Group:BindDynValue dynamic binding only valid for Uniform or Storage Vars, not: %s", vr.Role.String())
 		if Debug {
 			log.Println(err)
 		}
@@ -625,8 +625,8 @@ func (st *VarSet) BindDynValue(vs *Vars, vr *Var, vl *Value) error {
 // using Values.AllocTexBySize, returns the indexes for the texture
 // and layer to actually select the texture in the shader, and proportion
 // of the Gp allocated texture size occupied by the texture.
-func (st *VarSet) TextureGroupSizeIndexes(vs *Vars, varNm string, valIndex int) *szalloc.Indexes {
-	vr, err := st.VarByNameTry(varNm)
+func (vg *VarGroup) TextureGroupSizeIndexes(vs *Vars, varNm string, valIndex int) *szalloc.Indexes {
+	vr, err := vg.VarByNameTry(varNm)
 	if err != nil {
 		log.Println(err)
 		return nil

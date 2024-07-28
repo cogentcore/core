@@ -13,41 +13,51 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/gpu/szalloc"
 	"cogentcore.org/core/math32"
+	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
-// Value represents a specific value of a Var variable.
+// Value represents a specific value of a Var variable, with
+// its own WebGPU Buffer associated with it.
+// If there are multiple values per variable, then the desired one
+// must be activated prior to the render / compute pass.
+// Most typically there are only multiple values for Texture vars.
 type Value struct {
-
 	// name of this value, named by default as the variable name_idx
 	Name string
 
 	// index of this value within the Var list of values
 	Index int
 
-	// actual number of elements in an array -- 1 means scalar / singular value.  If 0, this is a dynamically sized item and the size must be set.
+	// actual number of elements in an array, where 1 means scalar / singular value.
+	// If 0, this is a dynamically sized item and the size must be set.
 	N int
 
-	// offset in bytes from start of memory buffer
+	// offset in bytes from start of memory buffer.
 	Offset int
 
 	// val state flags
 	Flags ValueFlags
 
-	// if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally aligned types require slower element-by-element syncing operations, instead of memcopy.
+	// if N > 1 (array) then this is the effective size of each element,
+	// which must be aligned to 16 byte modulo for Uniform types.
+	// Non-naturally aligned types require slower element-by-element
+	// syncing operations, instead of memcopy.
 	ElSize int
 
-	// total memory size of this value in bytes, as allocated, including array alignment but not any additional buffer-required alignment padding
+	// total memory size of this value in bytes, as allocated,
+	// including array alignment but not any additional buffer-required
+	// alignment padding.
 	AllocSize int
 
-	// for Texture Var roles, this is the Texture
-	Texture *Texture
+	// buffer for this value, makes it accessible to the GPU
+	Buffer *wgpu.Buffer `display:"-"`
 
-	// pointer to the start of the staging memory for this value
-	MemPtr unsafe.Pointer `display:"-"`
+	// for Texture Var roles, this is the Texture.
+	Texture *Texture
 }
 
-// HasFlag checks if flag is set
-// using atomic, safe for concurrent access
+// HasFlag checks if flag is set using atomic,
+// safe for concurrent access
 func (vl *Value) HasFlag(flag ValueFlags) bool {
 	return vl.Flags.HasFlag(flag)
 }
@@ -109,20 +119,18 @@ func (vl *Value) MemSize(vr *Var) int {
 	}
 }
 
-// AllocHost allocates this value at given offset in owning Memory buffer.
-// Computes the MemPtr for this item, and returns AllocSize() of this
-// value, so memory can increment to next item.
+// AllocMem allocates this value at given offset in owning Memory buffer.
+// returns AllocSize() of this value, so memory can increment to next item.
 // offsets are guaranteed to be properly aligned per minUniformBuffererOffsetAlignment.
-func (vl *Value) AllocHost(vr *Var, buff *Buffer, buffPtr unsafe.Pointer, offset int) int {
+func (vl *Value) AllocMem(vr *Var, buff *Buffer, offset int) int {
 	mem := vl.MemSize(vr)
 	vl.AllocSize = mem
 	if mem == 0 {
 		return 0
 	}
-	vl.MemPtr = unsafe.Pointer(uintptr(buffPtr) + uintptr(offset))
 	vl.Offset = offset
 	if vl.Texture != nil {
-		vl.Texture.ConfigValueHost(buff, buffPtr, offset)
+		vl.Texture.ConfigValueHost(buff, offset)
 	} else {
 		if vl.N > 1 && vl.ElSize != vr.SizeOf {
 			vl.SetFlag(true, ValuePaddedArray)
@@ -174,7 +182,7 @@ func (vl *Value) UInts32() math32.ArrayU32 {
 // possible.
 func (vl *Value) PaddedArrayCheck() error {
 	if vl.HasFlag(ValuePaddedArray) {
-		return fmt.Errorf("vgpu.Value PaddedArrayCheck: this array value has padding around elements not present in Go version -- cannot copy directly: %s", vl.Name)
+		return fmt.Errorf("gpu.Value PaddedArrayCheck: this array value has padding around elements not present in Go version -- cannot copy directly: %s", vl.Name)
 	}
 	return nil
 }
@@ -217,7 +225,7 @@ func (vl *Value) SetGoImage(img image.Image, layer int, flipY bool) error {
 		if layer == 0 && vl.Texture.Format.Layers <= 1 {
 			vl.Texture.ConfigGoImage(img.Bounds().Size(), layer+1)
 		}
-		vl.Texture.AllocHost()
+		vl.Texture.AllocMem()
 	}
 	err := vl.Texture.SetGoImage(img, layer, flipY)
 	if err != nil {
@@ -290,7 +298,7 @@ func (vs *Values) ConfigValues(gp *GPU, dev *Device, vr *Var, nvals int) bool {
 // ValueByIndexTry returns Value at given index with range checking error message.
 func (vs *Values) ValueByIndexTry(idx int) (*Value, error) {
 	if idx >= len(vs.Values) || idx < 0 {
-		err := fmt.Errorf("vgpu.Values:ValueByIndexTry index %d out of range", idx)
+		err := fmt.Errorf("gpu.Values:ValueByIndexTry index %d out of range", idx)
 		if Debug {
 			log.Println(err)
 		}
@@ -308,7 +316,7 @@ func (vs *Values) SetName(idx int, name string) (*Value, error) {
 	}
 	_, has := vs.NameMap[name]
 	if has {
-		err := fmt.Errorf("vgpu.Values:SetName name %s exists", name)
+		err := fmt.Errorf("gpu.Values:SetName name %s exists", name)
 		if Debug {
 			log.Println(err)
 		}
@@ -323,7 +331,7 @@ func (vs *Values) SetName(idx int, name string) (*Value, error) {
 func (vs *Values) ValueByNameTry(name string) (*Value, error) {
 	vl, ok := vs.NameMap[name]
 	if !ok {
-		err := fmt.Errorf("vgpu.Values:ValueByNameTry name %s not found", name)
+		err := fmt.Errorf("gpu.Values:ValueByNameTry name %s not found", name)
 		if Debug {
 			log.Println(err)
 		}
@@ -359,16 +367,16 @@ func (vs *Values) MemSize(vr *Var, alignBytes int) int {
 	return tsz
 }
 
-// AllocHost allocates values at given offset in given Memory buffer.
+// AllocMem allocates values at given offset in given Memory buffer.
 // Computes the MemPtr for each item, and returns TotSize
 // across all vals.  The effective offset increment (based on size) is
 // aligned at the given align byte level, which should be
 // MinUniformBuffererOffsetAlignment from gpu.
-func (vs *Values) AllocHost(vr *Var, buff *Buffer, offset int) int {
+func (vs *Values) AllocMem(vr *Var, buff *Buffer, offset int) int {
 	tsz := 0
 	vals := vs.ActiveValues()
 	for _, vl := range vals {
-		sz := vl.AllocHost(vr, buff, buff.HostPtr, offset)
+		sz := vl.AllocMem(vr, buff, buff.HostPtr, offset)
 		if sz == 0 {
 			continue
 		}
@@ -420,7 +428,7 @@ func (vs *Values) ModRegs(vr *Var) []MemReg {
 // redirects to the proper allocated GpTexValues image and layer.
 func (vs *Values) AllocTexBySize(gp *GPU, vr *Var) {
 	if vr.TextureOwns {
-		log.Println("vgpu.Values.AllocTexBySize: cannot use TextureOwns flag for this function.")
+		log.Println("gpu.Values.AllocTexBySize: cannot use TextureOwns flag for this function.")
 		vs.TexSzAlloc.On = false
 		return
 	}

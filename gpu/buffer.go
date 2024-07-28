@@ -34,12 +34,12 @@ type Buffer struct {
 	Active bool `edit:"-"`
 }
 
-// AllocHost allocates memory for this buffer of given size in bytes,
+// AllocMem allocates memory for this buffer of given size in bytes,
 // freeing any existing memory allocated first.
 // Host and Dev buffers are made, and host memory is allocated and mapped
 // for staging purposes.  Call AllocDev to allocate device memory.
 // Returns true if a different memory size was allocated.
-func (mb *Buffer) AllocHost(dev *Device, bsz int) bool {
+func (mb *Buffer) AllocMem(dev *Device, bsz int) bool {
 	if bsz == mb.Size {
 		return false
 	}
