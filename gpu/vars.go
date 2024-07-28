@@ -10,9 +10,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/vgpu/szalloc"
 
-	vk "github.com/goki/WebGPU"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -37,9 +35,6 @@ type Vars struct {
 
 	// true if PushGroup has been added.  Note: not yet supported in WebGPU.
 	hasPush bool `edit:"-"`
-
-	// number of textures, at point of creating the DescLayout
-	NTextures int
 }
 
 func (vs *Vars) Destroy(dev *Device) {
@@ -212,16 +207,12 @@ func (vs *Vars) GroupTry(set int) (*VarGroup, error) {
 	return vg, nil
 }
 
-// VkVertexConfig returns WebGPU vertex config struct, for VertexGroup only!
-// Note: there is no support for interleaved arrays so each binding and location
-// is assigned the same sequential number, recorded in var Binding
-func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
+// VertexLayout returns WebGPU vertex layout, for VertexGroup only!
+func (vs *Vars) VertexLayout() []wgpu.VertexBufferLayout {
 	if vs.hasVertex {
-		return vs.Groups[VertexGroup].VkVertexConfig()
+		return vs.Groups[VertexGroup].VertexLayout()
 	}
-	cfg := &vk.PipelineVertexInputStateCreateInfo{}
-	cfg.SType = vk.StructureTypePipelineVertexInputStateCreateInfo
-	return cfg
+	return nil
 }
 
 /*
@@ -239,15 +230,11 @@ func (vs *Vars) VkPushConfig() []vk.PushConstantRange {
 
 // BindLayout configures the Layouts slice of BindGroupLayouts
 // for all of the non-Vertex vars
-func (vs *Vars) BindLayout(dev *Device) {
-	vs.NTextures = 0
-	if vs.NDescs < 1 {
-		vs.NDescs = 1
-	}
+func (vs *Vars) BindLayout(dev *Device) []*wgpu.BindGroupLayout {
 	nset := vs.NGroups()
 	if nset == 0 {
 		vs.Layouts = nil
-		return
+		return nil
 	}
 
 	var lays []*wgpu.BindGroupLayout
@@ -257,22 +244,11 @@ func (vs *Vars) BindLayout(dev *Device) {
 			continue
 		}
 		vg.BindLayout(dev, vs)
-		vs.NTextures += vg.NTextures
 		lays = append(lays, vg.Layout)
 	}
+	vs.Layouts = lays
+	return lays
 }
-
-/*
-	bg, err = dev.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{
-		Label:  vl.Name,
-		Layout: cameraBindGroupLayout,
-		Entries: []wgpu.BindGroupEntry{{
-			Binding: 0,
-			Buffer:  vl.Bufer,
-			Size:    wgpu.WholeSize,
-		}},
-	})
-*/
 
 // BindVertexValueName dynamically binds given VertexGroup value
 // by name for given variable name.
@@ -318,75 +294,6 @@ func (vs *Vars) BindVertexValueIndex(varNm string, valIndex int) error {
 	return nil
 }
 
-// TextureGroupSizeIndexes for texture at given index, allocated in groups by size
-// using Values.AllocTexBySize, returns the indexes for the texture
-// and layer to actually select the texture in the shader, and proportion
-// of the Gp allocated texture size occupied by the texture.
-func (vs *Vars) TextureGroupSizeIndexes(set int, varNm string, valIndex int) *szalloc.Indexes {
-	vg, err := vs.GroupTry(set)
-	if err != nil {
-		return nil
-	}
-	return vg.TextureGroupSizeIndexes(vs, varNm, valIndex)
-}
-
-///////////////////////////////////////////////////////////
-// Memory allocation
-
-func (vs *Vars) MemSize(buff *Buffer) int {
-	tsz := 0
-	ns := vs.NGroups()
-	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.Groups[si]
-		if vg == nil {
-			continue
-		}
-		for _, vr := range vg.Vars {
-			if vr.Role.BuffType() != buff.Type {
-				continue
-			}
-			tsz += vr.ValuesMemSize(buff.AlignBytes)
-		}
-	}
-	return tsz
-}
-
-func (vs *Vars) MemSizeStorage(mm *Memory, alignBytes int) {
-	ns := vs.NGroups()
-	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.Groups[si]
-		if vg == nil {
-			continue
-		}
-		for _, vr := range vg.Vars {
-			if vr.Role.BuffType() != StorageBuffer {
-				continue
-			}
-			vr.MemSizeStorage(mm, alignBytes)
-		}
-	}
-}
-
-func (vs *Vars) AllocMem(buff *Buffer, offset int) int {
-	ns := vs.NGroups()
-	tsz := 0
-	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.Groups[si]
-		if vg == nil || vg.Group == PushGroup {
-			continue
-		}
-		for _, vr := range vg.Vars {
-			if vr.Role.BuffType() != buff.Type {
-				continue
-			}
-			sz := vr.Values.AllocMem(vr, buff, offset)
-			offset += sz
-			tsz += sz
-		}
-	}
-	return tsz
-}
-
 // Free resets the MemPtr for values, resets any self-owned resources (Textures)
 func (vs *Vars) Free(buff *Buffer) {
 	ns := vs.NGroups()
@@ -400,66 +307,6 @@ func (vs *Vars) Free(buff *Buffer) {
 				continue
 			}
 			vr.Values.Free()
-		}
-	}
-}
-
-// ModRegs returns the regions of Values that have been modified
-func (vs *Vars) ModRegs(bt BufferTypes) []MemReg {
-	ns := vs.NGroups()
-	var mods []MemReg
-	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.Groups[si]
-		if vg == nil || vg.Group == PushSet {
-			continue
-		}
-		for _, vr := range vg.Vars {
-			if vr.Role.BuffType() != bt {
-				continue
-			}
-			md := vr.Values.ModRegs(vr)
-			mods = append(mods, md...)
-		}
-	}
-	return mods
-}
-
-// ModRegStorage returns the regions of Storage Values that have been modified
-func (vs *Vars) ModRegsStorage(bufIndex int, buff *Buffer) []MemReg {
-	ns := vs.NSets()
-	var mods []MemReg
-	for si := vs.StartSet(); si < ns; si++ {
-		vg := vs.SetMap[si]
-		if vg == nil || vg.Set == PushSet {
-			continue
-		}
-		for _, vr := range vg.Vars {
-			if vr.Role.BuffType() != StorageBuffer {
-				continue
-			}
-			if vr.StorageBuffer != bufIndex {
-				continue
-			}
-			md := vr.Values.ModRegs(vr)
-			mods = append(mods, md...)
-		}
-	}
-	return mods
-}
-
-// AllocTextures allocates images on device memory
-func (vs *Vars) AllocTextures(mm *Memory) {
-	ns := vs.NSets()
-	for si := vs.StartSet(); si < ns; si++ {
-		vg := vs.SetMap[si]
-		if vg == nil || vg.Set == PushSet {
-			continue
-		}
-		for _, vr := range vg.Vars {
-			if vr.Role != SampledTexture {
-				continue
-			}
-			vr.Values.AllocTextures(mm)
 		}
 	}
 }
