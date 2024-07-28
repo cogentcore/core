@@ -6,7 +6,6 @@ package core
 
 import (
 	"strings"
-	"testing"
 
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -51,7 +50,7 @@ func (bf *BarFuncs) Inherit(obf BarFuncs) {
 func (sc *Scene) makeSceneBars() {
 	// at last possible moment, add app-specific app bar config
 	if sc.Stage.Type.isMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
-		if sc.Bars.Top.IsEmpty() && !testing.Testing() { // no app bar while testing
+		if sc.Bars.Top.IsEmpty() && !sc.DisableAppBar {
 			sc.Bars.Top.Add(makeAppBar) // put in the top by default
 		}
 	}
