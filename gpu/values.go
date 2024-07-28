@@ -218,7 +218,7 @@ func (vl *Value) BindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 	}
 }
 
-// SetGoTexture sets Texture image data from an *image.RGBA standard Go image,
+// SetGoImage sets Texture image data from an *image.RGBA standard Go image,
 // at given layer, and sets the Mod flag, so it will be sync'd by Memory
 // or if TextureOwns is set for the var, it allocates Host memory.
 // This is most efficiently done using an image.RGBA, but other
@@ -226,14 +226,14 @@ func (vl *Value) BindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 // If flipY is true then the Texture Y axis is flipped when copying into
 // the image data (requires row-by-row copy) -- can avoid this
 // by configuring texture coordinates to compensate.
-func (vl *Value) SetGoTexture(img image.Texture, layer int, flipY bool) error {
+func (vl *Value) SetGoImage(img image.Texture, layer int, flipY bool) error {
 	if vl.HasFlag(ValueTextureOwns) {
 		if layer == 0 && vl.Texture.Format.Layers <= 1 {
-			vl.Texture.ConfigGoTexture(img.Bounds().Size(), layer+1)
+			vl.Texture.ConfigGoImage(img.Bounds().Size(), layer+1)
 		}
 		vl.Texture.AllocMem()
 	}
-	err := vl.Texture.SetGoTexture(img, layer, flipY)
+	err := vl.Texture.SetGoImage(img, layer, flipY)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -241,7 +241,7 @@ func (vl *Value) SetGoTexture(img image.Texture, layer int, flipY bool) error {
 	}
 	if vl.HasFlag(ValueTextureOwns) {
 		vl.Texture.AllocTexture()
-		// svimg, _ := vl.Texture.GoTexture()
+		// svimg, _ := vl.Texture.GoImage()
 		// images.Save(svimg, fmt.Sprintf("dimg_%d.png", vl.Index))
 	}
 	return err
