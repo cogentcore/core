@@ -45,7 +45,7 @@ const (
 	Float32Matrix4 // std transform matrix: math32.Matrix4 works directly
 	Float32Matrix3 // std transform matrix: math32.Matrix3 works directly
 
-	ImageRGBA32 // 32 bits with 8 bits per component of R,G,B,A -- std image format
+	TextureRGBA32 // 32 bits with 8 bits per component of R,G,B,A -- std image format
 
 	Depth32      // standard float32 depth buffer
 	Depth24Sten8 // standard 24 bit float with 8 bit stencil
@@ -119,16 +119,16 @@ var TypeToVertexFormats = map[Types]wgpu.VertexFormat{
 	Float32Vector2: wgpu.VertexFormat_Float32x2,
 	Float32Vector3: wgpu.VertexFormat_Float32x3,
 	Float32Vector4: wgpu.VertexFormat_Float32x4,
-	// ImageRGBA32:    wgpu.TextureFormat_R8g8b8a8Srgb,
+	// TextureRGBA32:    wgpu.TextureFormat_R8g8b8a8Srgb,
 	// Depth32:        wgpu.VertexFormat_D32Sfloat,
 	// Depth24Sten8:   wgpu.VertexFormat_D24UnormS8Uint,
 }
 
 // most commonly available formats: https://WebGPU.gpuinfo.org/listsurfaceformats.php
 
-// ImageFormatNames translates image format into human-readable string
+// TextureFormatNames translates image format into human-readable string
 // for most commonly available formats
-var ImageFormatNames = map[wgpu.TextureFormat]string{
+var TextureFormatNames = map[wgpu.TextureFormat]string{
 	wgpu.TextureFormat_RGBA8UnormSrgb: "RGBA 8bit sRGB colorspace",
 	wgpu.TextureFormat_RGBA8Unorm:     "RGBA 8bit unsigned linear colorspace",
 	// wgpu.TextureFormatR5g6b5UnormPack16:      "RGB 5bit (pack 16bit total) unsigned linear colorspace",

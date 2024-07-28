@@ -49,63 +49,63 @@ func (i *BufferTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "BufferTypes")
 }
 
-var _ImageFlagsValues = []ImageFlags{0, 1, 2, 3, 4, 5, 6, 7}
+var _TextureFlagsValues = []TextureFlags{0, 1, 2, 3, 4, 5, 6, 7}
 
-// ImageFlagsN is the highest valid value for type ImageFlags, plus one.
-const ImageFlagsN ImageFlags = 8
+// TextureFlagsN is the highest valid value for type TextureFlags, plus one.
+const TextureFlagsN TextureFlags = 8
 
-var _ImageFlagsValueMap = map[string]ImageFlags{`Active`: 0, `HostActive`: 1, `OwnsImage`: 2, `OwnsHost`: 3, `IsValue`: 4, `DepthImage`: 5, `FramebufferImage`: 6, `OnHostOnly`: 7}
+var _TextureFlagsValueMap = map[string]TextureFlags{`Active`: 0, `HostActive`: 1, `OwnsTexture`: 2, `OwnsHost`: 3, `IsValue`: 4, `DepthTexture`: 5, `FramebufferTexture`: 6, `OnHostOnly`: 7}
 
-var _ImageFlagsDescMap = map[ImageFlags]string{0: `ImageActive: the Image and ImageView are configured and ready to use`, 1: `ImageHostActive: the Host representation of the image is present and ready to be accessed`, 2: `ImageOwnsImage: we own the Vk.Image`, 3: `ImageOwnsHost: we own the Host buffer (and it is initialized)`, 4: `ImageIsValue: we are a Value image and our Host buffer is shared, with offset. this is incompatible with ImageOwnsHost`, 5: `DepthImage indicates that this is a Depth buffer image`, 6: `FramebufferImage indicates that this is a Framebuffer image`, 7: `ImageOnHostOnly causes the image to be created only on host visible memory, not on device memory -- no additional host buffer should be created. this is for an ImageGrab image. layout is LINEAR`}
+var _TextureFlagsDescMap = map[TextureFlags]string{0: `TextureActive: the Texture and TextureView are configured and ready to use`, 1: `TextureHostActive: the Host representation of the image is present and ready to be accessed`, 2: `TextureOwnsTexture: we own the Vk.Texture`, 3: `TextureOwnsHost: we own the Host buffer (and it is initialized)`, 4: `TextureIsValue: we are a Value image and our Host buffer is shared, with offset. this is incompatible with TextureOwnsHost`, 5: `DepthTexture indicates that this is a Depth buffer image`, 6: `FramebufferTexture indicates that this is a Framebuffer image`, 7: `TextureOnHostOnly causes the image to be created only on host visible memory, not on device memory -- no additional host buffer should be created. this is for an TextureGrab image. layout is LINEAR`}
 
-var _ImageFlagsMap = map[ImageFlags]string{0: `Active`, 1: `HostActive`, 2: `OwnsImage`, 3: `OwnsHost`, 4: `IsValue`, 5: `DepthImage`, 6: `FramebufferImage`, 7: `OnHostOnly`}
+var _TextureFlagsMap = map[TextureFlags]string{0: `Active`, 1: `HostActive`, 2: `OwnsTexture`, 3: `OwnsHost`, 4: `IsValue`, 5: `DepthTexture`, 6: `FramebufferTexture`, 7: `OnHostOnly`}
 
-// String returns the string representation of this ImageFlags value.
-func (i ImageFlags) String() string { return enums.BitFlagString(i, _ImageFlagsValues) }
+// String returns the string representation of this TextureFlags value.
+func (i TextureFlags) String() string { return enums.BitFlagString(i, _TextureFlagsValues) }
 
-// BitIndexString returns the string representation of this ImageFlags value
+// BitIndexString returns the string representation of this TextureFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
-func (i ImageFlags) BitIndexString() string { return enums.String(i, _ImageFlagsMap) }
+func (i TextureFlags) BitIndexString() string { return enums.String(i, _TextureFlagsMap) }
 
-// SetString sets the ImageFlags value from its string representation,
+// SetString sets the TextureFlags value from its string representation,
 // and returns an error if the string is invalid.
-func (i *ImageFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
+func (i *TextureFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
-// SetStringOr sets the ImageFlags value from its string representation
+// SetStringOr sets the TextureFlags value from its string representation
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
-func (i *ImageFlags) SetStringOr(s string) error {
-	return enums.SetStringOr(i, s, _ImageFlagsValueMap, "ImageFlags")
+func (i *TextureFlags) SetStringOr(s string) error {
+	return enums.SetStringOr(i, s, _TextureFlagsValueMap, "TextureFlags")
 }
 
-// Int64 returns the ImageFlags value as an int64.
-func (i ImageFlags) Int64() int64 { return int64(i) }
+// Int64 returns the TextureFlags value as an int64.
+func (i TextureFlags) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the ImageFlags value from an int64.
-func (i *ImageFlags) SetInt64(in int64) { *i = ImageFlags(in) }
+// SetInt64 sets the TextureFlags value from an int64.
+func (i *TextureFlags) SetInt64(in int64) { *i = TextureFlags(in) }
 
-// Desc returns the description of the ImageFlags value.
-func (i ImageFlags) Desc() string { return enums.Desc(i, _ImageFlagsDescMap) }
+// Desc returns the description of the TextureFlags value.
+func (i TextureFlags) Desc() string { return enums.Desc(i, _TextureFlagsDescMap) }
 
-// ImageFlagsValues returns all possible values for the type ImageFlags.
-func ImageFlagsValues() []ImageFlags { return _ImageFlagsValues }
+// TextureFlagsValues returns all possible values for the type TextureFlags.
+func TextureFlagsValues() []TextureFlags { return _TextureFlagsValues }
 
-// Values returns all possible values for the type ImageFlags.
-func (i ImageFlags) Values() []enums.Enum { return enums.Values(_ImageFlagsValues) }
+// Values returns all possible values for the type TextureFlags.
+func (i TextureFlags) Values() []enums.Enum { return enums.Values(_TextureFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i ImageFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i TextureFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *ImageFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+func (i *TextureFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ImageFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+func (i TextureFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ImageFlags) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "ImageFlags")
+func (i *TextureFlags) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "TextureFlags")
 }
 
 var _OptionStatesValues = []OptionStates{0, 1, 2, 3}
@@ -283,11 +283,11 @@ var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
 // TypesN is the highest valid value for type Types, plus one.
 const TypesN Types = 24
 
-var _TypesValueMap = map[string]Types{`UndefType`: 0, `Bool32`: 1, `Int16`: 2, `Uint16`: 3, `Int32`: 4, `Int32Vector2`: 5, `Int32Vector4`: 6, `Uint32`: 7, `Uint32Vector2`: 8, `Uint32Vector4`: 9, `Float32`: 10, `Float32Vector2`: 11, `Float32Vector3`: 12, `Float32Vector4`: 13, `Float64`: 14, `Float64Vector2`: 15, `Float64Vector3`: 16, `Float64Vector4`: 17, `Float32Matrix4`: 18, `Float32Matrix3`: 19, `ImageRGBA32`: 20, `Depth32`: 21, `Depth24Sten8`: 22, `Struct`: 23}
+var _TypesValueMap = map[string]Types{`UndefType`: 0, `Bool32`: 1, `Int16`: 2, `Uint16`: 3, `Int32`: 4, `Int32Vector2`: 5, `Int32Vector4`: 6, `Uint32`: 7, `Uint32Vector2`: 8, `Uint32Vector4`: 9, `Float32`: 10, `Float32Vector2`: 11, `Float32Vector3`: 12, `Float32Vector4`: 13, `Float64`: 14, `Float64Vector2`: 15, `Float64Vector3`: 16, `Float64Vector4`: 17, `Float32Matrix4`: 18, `Float32Matrix3`: 19, `TextureRGBA32`: 20, `Depth32`: 21, `Depth24Sten8`: 22, `Struct`: 23}
 
 var _TypesDescMap = map[Types]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: ``, 7: ``, 8: ``, 9: ``, 10: ``, 11: ``, 12: ``, 13: ``, 14: ``, 15: ``, 16: ``, 17: ``, 18: ``, 19: ``, 20: ``, 21: ``, 22: ``, 23: ``}
 
-var _TypesMap = map[Types]string{0: `UndefType`, 1: `Bool32`, 2: `Int16`, 3: `Uint16`, 4: `Int32`, 5: `Int32Vector2`, 6: `Int32Vector4`, 7: `Uint32`, 8: `Uint32Vector2`, 9: `Uint32Vector4`, 10: `Float32`, 11: `Float32Vector2`, 12: `Float32Vector3`, 13: `Float32Vector4`, 14: `Float64`, 15: `Float64Vector2`, 16: `Float64Vector3`, 17: `Float64Vector4`, 18: `Float32Matrix4`, 19: `Float32Matrix3`, 20: `ImageRGBA32`, 21: `Depth32`, 22: `Depth24Sten8`, 23: `Struct`}
+var _TypesMap = map[Types]string{0: `UndefType`, 1: `Bool32`, 2: `Int16`, 3: `Uint16`, 4: `Int32`, 5: `Int32Vector2`, 6: `Int32Vector4`, 7: `Uint32`, 8: `Uint32Vector2`, 9: `Uint32Vector4`, 10: `Float32`, 11: `Float32Vector2`, 12: `Float32Vector3`, 13: `Float32Vector4`, 14: `Float64`, 15: `Float64Vector2`, 16: `Float64Vector3`, 17: `Float64Vector4`, 18: `Float32Matrix4`, 19: `Float32Matrix3`, 20: `TextureRGBA32`, 21: `Depth32`, 22: `Depth24Sten8`, 23: `Struct`}
 
 // String returns the string representation of this Types value.
 func (i Types) String() string { return enums.String(i, _TypesMap) }

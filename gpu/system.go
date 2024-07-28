@@ -245,14 +245,14 @@ func (sy *System) CmdBuffByNameTry(name string) (*wgpu.CommandEncoder, error) {
 // ConfigRender configures the renderpass, including the image
 // format that we're rendering to, for a surface render target,
 // and the depth buffer format (pass UndefType for no depth buffer).
-func (sy *System) ConfigRender(imgFmt *ImageFormat, depthFmt Types) {
+func (sy *System) ConfigRender(imgFmt *TextureFormat, depthFmt Types) {
 	sy.Render.Config(sy.Device.Device, imgFmt, depthFmt, false)
 }
 
 // ConfigRenderNonSurface configures the renderpass, including the image
 // format that we're rendering to, for a RenderFrame non-surface target,
 // and the depth buffer format (pass UndefType for no depth buffer).
-func (sy *System) ConfigRenderNonSurface(imgFmt *ImageFormat, depthFmt Types) {
+func (sy *System) ConfigRenderNonSurface(imgFmt *TextureFormat, depthFmt Types) {
 	sy.Render.Config(sy.Device.Device, imgFmt, depthFmt, true)
 }
 
@@ -472,7 +472,7 @@ func (sy *System) ResetBeginRenderPassNoClear(cmd *wgpu.CommandEncoder, fr *Fram
 // in case any further commands are to be added.
 func (sy *System) EndRenderPass(cmd *wgpu.CommandEncoder) {
 	// Note that ending the renderpass changes the image's layout from
-	// vk.ImageLayoutColorAttachmentOptimal to vk.ImageLayoutPresentSrc
+	// vk.TextureLayoutColorAttachmentOptimal to vk.TextureLayoutPresentSrc
 	vk.CmdEndRenderPass(cmd)
 }
 

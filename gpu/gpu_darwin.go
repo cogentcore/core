@@ -16,10 +16,10 @@ func PlatformDefaults(gp *GPU) {
 	// 	SType:                                  vk.StructureTypePhysicalDevicePortabilitySubsetFeatures,
 	// 	ConstantAlphaColorBlendFactors:         vk.True,
 	// 	Events:                                 vk.True,
-	// 	ImageViewFormatReinterpretation:        vk.True,
-	// 	ImageViewFormatSwizzle:                 vk.True,
-	// 	ImageView2DOn3DImage:                   vk.False,
-	// 	MultisampleArrayImage:                  vk.True,
+	// 	TextureViewFormatReinterpretation:        vk.True,
+	// 	TextureViewFormatSwizzle:                 vk.True,
+	// 	TextureView2DOn3DTexture:                   vk.False,
+	// 	MultisampleArrayTexture:                  vk.True,
 	// 	MutableComparisonSamplers:              vk.True,
 	// 	PointPolygons:                          vk.False,
 	// 	SamplerMipLodBias:                      vk.False,
@@ -37,7 +37,7 @@ func PlatformDefaults(gp *GPU) {
 	// 	DescriptorBindingPartiallyBound:              vk.True,
 	// 	RuntimeDescriptorArray:                       vk.True,
 	// 	DescriptorIndexing:                           vk.True, // might not be needed?  not for phong or vdraw
-	// 	DescriptorBindingSampledImageUpdateAfterBind: vk.True, // might not be needed?  not for phong or vdraw
+	// 	DescriptorBindingSampledTextureUpdateAfterBind: vk.True, // might not be needed?  not for phong or vdraw
 	// 	PNext: portFeatures,
 	// }
 }

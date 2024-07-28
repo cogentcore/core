@@ -52,11 +52,11 @@ The [phong](vphong) package provides a complete rendering implementation with di
     + `Pipeline` performs a specific chain of operations, using `Shader` program(s).  In a graphics context, each pipeline typically handles a different type of material or other variation in rendering (textured vs. not, transparent vs. solid, etc).
     + `Memory` manages the memory, organized by `Vars` variables that are referenced in the shader programs, with each Var having any number of associated values in `Values`.  Vars are organized into `Set`s that manage their bindings distinctly, and can be updated at different time scales. It has 4 different `Buffer` buffers for different types of memory.  It is assumed that the *sizes* of all the Values do not change frequently, so everything is Alloc'd afresh if any size changes.  This avoids the need for complex de-fragmentation algorithms, and is maximally efficient, but is not good if sizes change (which is rare in most rendering cases).
   
-* `Image` manages a WebGPU Image and associated `ImageView`, including potential host staging buffer (shared as in a Value or owned separately).
-* `Texture` extends the `Image` with a `Sampler` that defines how pixels are accessed in a shader.
-* `Framebuffer` manages an `Image` along with a `RenderPass` configuration for managing a `Render` target (shared for rendering onto a window `Surface` or an offscreen `RenderFrame`)
+* `Texture` manages a WebGPU Texture and associated `TextureView`, including potential host staging buffer (shared as in a Value or owned separately).
+* `Texture` extends the `Texture` with a `Sampler` that defines how pixels are accessed in a shader.
+* `Framebuffer` manages an `Texture` along with a `RenderPass` configuration for managing a `Render` target (shared for rendering onto a window `Surface` or an offscreen `RenderFrame`)
 
-* `Surface` represents the full hardware-managed `Image`s associated with an actual on-screen Window.  One can associate a System with a Surface to manage the Swapchain updating for effective double or triple buffering.
+* `Surface` represents the full hardware-managed `Texture`s associated with an actual on-screen Window.  One can associate a System with a Surface to manage the Swapchain updating for effective double or triple buffering.
 * `RenderFrame` is an offscreen render target with Framebuffers and a logical device if being used without any Surface -- otherwise it should use the Surface device so images can be copied across them.
 
 * Unlike most game-oriented GPU setups, wGPU is designed to be used in an event-driven manner where render updates arise from user input or other events, instead of requiring a constant render loop taking place at all times (which can optionally be established too).  The event-driven model is vastly more energy efficient for non-game applications.
@@ -85,7 +85,7 @@ Given that the number of objects rendered is likely to vary between frames, it m
     + `Vertex` and `Index` represent mesh points etc that provide input to Vertex shader -- these are handled very differently from the others, and must be located in a `VertexSet` which has a set index of -2.  The offsets into allocated Values are updated *dynamically* for each render Draw command, so you can Bind different Vertex Values as you iterate through objects within a single render pass (again, the underlying vals must be sync'd prior).
     + `PushConst` are push constants that can only be 128 bytes total that can be directly copied from CPU ram to the GPU via a command -- it is the most high-performance way to update dynamically changing content, such as view matricies or indexes into other data structures.  Must be located in `PushConstSet` set (index -1).
     + `Uniform` (read-only "constants") and `Storage` (read-write) data that contain misc other data, e.g., transformation matricies.  These are also updated *dynamically* using dynamic offsets, so you can also call `BindDynValue` methods to select different such vals as you iterate through objects.  The original binding is done automatically in the Memory Config (via BindDynVarsAll) and usually does not need to be redone.
-    + `Texture` vars that provide the raw `Image` data, the `ImageView` through which that is accessed, and a `Sampler` that parametrizes how the pixels are mapped onto coordinates in the Fragment shader.  Each texture object is managed as a distinct item in device memory, and they cannot be accessed through a dynamic offset.  Thus, a unique descriptor is provided for each texture Value, and your shader should describe them as an array.  All such textures must be in place at the start of the render pass, and cannot be updated on the fly during rendering!  Thus, you must dynamically bind a uniform variable or push constant to select which texture item from the array to use on a given step of rendering.
+    + `Texture` vars that provide the raw `Texture` data, the `TextureView` through which that is accessed, and a `Sampler` that parametrizes how the pixels are mapped onto coordinates in the Fragment shader.  Each texture object is managed as a distinct item in device memory, and they cannot be accessed through a dynamic offset.  Thus, a unique descriptor is provided for each texture Value, and your shader should describe them as an array.  All such textures must be in place at the start of the render pass, and cannot be updated on the fly during rendering!  Thus, you must dynamically bind a uniform variable or push constant to select which texture item from the array to use on a given step of rendering.
         + There is a low maximum number of Texture descriptors (vals) available within one descriptor set on many platforms, including the Mac, only 16, which is enforced via the `MaxTexturesPerSet` const.  There are two (non mutually exclusive) strategies for increasing the number of available textures:
         + Each individual Texture can have up to 128 (again a low limit present on the Mac) layers in a 2d Array of images, in addition to all the separate texture vals being in an Array -- arrays of arrays.  Each of the array layers must be the same size -- they are allocated and managed as a unit.  The `szalloc` package provides manager for efficiently allocating images of various sizes to these 16 x 128 (or any N's) groups of layer arrays.  This is integrated into the `Values` value manager and can be engaged by calling `AllocTexBySize` there.  The texture UV coordinates need to be processed by the actual pct size of a given texture relative to the allocated group size -- this is all done in the `vphong` package and the `texture_frag.frag` file there can be consulted for a working example.
         + If you allocate more than 16 texture Values, then multiple entire collections of these descriptors will be allocated, as indicated by the `NTextureDescs` on `VarGroup` and `Vars` (see that for more info, and the `vdraw` `Draw` method for an example).  You can use `Vars.BindAllTextureValues` to bind all texture vals (iterating over NTextureDescs), and `System.CmdBindTextureVarIndex` to automatically bind the correct set.
@@ -195,7 +195,7 @@ Here's how it works:
 It is hard to find this info very clearly stated:
 
 * All internal computation in shaders is done in a *linear* color space.
-* Image textures are assumed to be sRGB and are automatically converted to linear on upload.
+* Texture textures are assumed to be sRGB and are automatically converted to linear on upload.
 * Other colors that are passed in should be converted from sRGB to linear (the Phong shaders do this).
 * The `Surface` automatically converts from Linear to sRGB for actual rendering.
 * A `RenderFrame` for offscreen / headless rendering *must* use `wgpu.TextureFormatR8g8b8a8Srgb` for the format, in order to get back an image that is automatically converted back to sRGB format.
@@ -220,9 +220,9 @@ These are useful for deciding what kinds of limits are likely to work in practic
 
 * 4 max bound descriptor sets: keep below this in general. https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxBoundDescriptorSets&platform=all
 
-* maxPerStageDescriptorSamplers is only 16 on mac -- this is the relevant limit on textures!  also SampledImages is basically the same:
+* maxPerStageDescriptorSamplers is only 16 on mac -- this is the relevant limit on textures!  also SampledTextures is basically the same:
 https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSamplers&platform=all
-https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSampledImages&platform=all
+https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSampledTextures&platform=all
 
 This is a significant constraint!  need to work around it.
 

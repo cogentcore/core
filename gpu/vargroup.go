@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	// MaxImageLayers is the maximum number of layers per image
-	MaxImageLayers = 128
+	// MaxTextureLayers is the maximum number of layers per image
+	MaxTextureLayers = 128
 
 	// VertexGroup is the group number for Vertex and Index variables,
 	// which have special treatment.
@@ -27,10 +27,15 @@ const (
 	PushGroup   = -1
 )
 
-// VarGroup contains a set of Var variables that are all updated at the same time.
+// VarGroup contains a group of Var variables, accessed via @group number
+// in shader code, with @binding allocated sequentially within group
+// (or @location in the case of VertexGroup).
 type VarGroup struct {
 	VarList
 
+	// Name of this group: GroupX by default
+	Name string
+	
 	// Group index is assigned sequentially, with special VertexGroup and
 	// PushGroup having negative numbers, not accessed via @group in shader.
 	Group int
@@ -47,6 +52,8 @@ type VarGroup struct {
 
 	// group layout info: description of each var type, role, binding, stages
 	Layout *wgpu.BindGroupLayout
+	
+	Device Device
 }
 
 // AddVar adds given variable
@@ -77,74 +84,63 @@ func (vg *VarGroup) AddStruct(name string, size int, arrayN int, role VarRoles, 
 }
 
 // Config must be called after all variables have been added.
-// configures binding / location for all vars based on sequential order.
+// Configures binding / location for all vars based on sequential order.
 // also does validation and returns error message.
 func (vg *VarGroup) Config(dev *Device) error {
+	if vg.Name == "" {
+		switch vg.Group {
+		case VertexGroup:
+			vg.Name= "VertexGroup"
+		case PushGroup:
+			vg.Name = "PushGroup"
+		default:
+			vg.Name = fmt.Sprintf("Group%d", vg.Group)
+		}
+	}
+	vg.Device = *dev
 	vg.RoleMap = make(map[VarRoles][]*Var)
-	var cerr error
-	bloc := 0
+	var errs []error
+	bnum := 0
 	for _, vr := range vg.Vars {
 		if vg.Group == VertexGroup && vr.Role > Index {
 			err := fmt.Errorf("gpu.VarGroup:Config VertexGroup cannot contain variables of role: %s  var: %s", vr.Role.String(), vr.Name)
-			cerr = err
-			if Debug {
-				log.Println(err)
-			}
+			errs = append(errs, err)
+			slog.Error(err)
 			continue
 		}
 		if vg.Group >= 0 && vr.Role <= Index {
 			err := fmt.Errorf("gpu.VarGroup:Config Vertex or Index Vars must be located in a VertexGroup!  Use AddVertexGroup() method instead of AddGroup()")
-			cerr = err
-			if Debug {
-				log.Println(err)
-			}
+			errs = append(errs, err)
+			slog.Error(err)
 		}
 		rl := vg.RoleMap[vr.Role]
 		rl = append(rl, vr)
 		vg.RoleMap[vr.Role] = rl
 		if vr.Role == Index && len(rl) > 1 {
 			err := fmt.Errorf("gpu.VarGroup:Config VertexGroup should not contain multiple Index variables: %v", rl)
-			cerr = err
-			if Debug {
-				log.Println(err)
-			}
+			errs = append(errs, err)
+			slog.Error(err)
 		}
 		if vr.Role > Storage && (len(vg.RoleMap[Uniform]) > 0 || len(vg.RoleMap[Storage]) > 0) {
 			err := fmt.Errorf("gpu.VarGroup:Config Group with dynamic Uniform or Storage variables should not contain static variables (e.g., textures): %s", vr.Role.String())
-			cerr = err
-			if Debug {
-				log.Println(err)
-			}
+			errs = append(errs, err)
+			slog.Error(err)
 		}
-		vr.Binding = bloc
-		if vr.Role == SampledTexture {
-			vr.SetTextureDev(dev)
-		}
-		bloc++
+		vr.Binding = bnum
+		bnum++
 		if vr.Role == Vertex && vr.Type == Float32Matrix4 { // special case
-			block+=3
+			bnum+=3
+		}
+		if vr.Role == SampledTexture { // sampler too
+			bnum++
 		}
 	}
-	return cerr
-}
-
-// ConfigValues configures the Values for the vars in this set, allocating
-// nvals per variable.  There must be a unique value available for each
-// distinct value to be rendered within a single pass.  All Vars in the
-// same set have the same number of vals.
-// Any existing vals will be deleted -- must free all associated memory prior!
-func (vg *VarGroup) ConfigValues() {
-	dev := vg.ParentVars.Mem.Device.Device
-	gp := vg.ParentVars.Mem.GPU
-	vg.NValuesPer = nvals
-	for _, vr := range vg.Vars {
-		vr.Values.ConfigValues(gp, dev, vr, nvals)
-	}
+	return errors.Join(errs...)
 }
 
 // Destroy destroys infrastructure for Group, Vars and Values -- assumes Free has
 // already been called to free host and device memory.
-func (vg *VarGroup) Destroy(dev *Device) {
+func (vg *VarGroup) Destroy() {
 	vg.DestroyLayout()
 }
 
@@ -156,21 +152,35 @@ func (vg *VarGroup) DestroyLayout() {
 	}
 }
 
-// BindLayout creates the BindGroupLayout for given set.
+// SetNValues sets all vars in this group to have specified
+// number of Values.
+func (vg *VarGroup) SetNValues(nvals int) {
+	for _, vr := range vg.Vars {
+		vr.SetNValues(&vg.Device, nvals)
+	}
+}
+
+// SetCurrentValue sets the Current Value index, which is
+// the Value that will be used in rendering, via BindGroup,
+// for all vars in group.
+func (vg *VarGroup) SetCurrentValue(i int) {
+	for _, vr := range vg.Vars {
+		vr.SetCurrentValue(i)
+	}
+}
+
+// BindLayout creates the BindGroupLayout for given group.
 // Only for non-VertexGroup sets.
 // Must have set NValuesPer for any SampledTexture vars,
 // which require separate descriptors per.
-func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
-	vg.DestroyLayout(dev)
-	vg.NTextures = 0
+func (vg *VarGroup) BindLayout(vs *Vars) error {
+	vg.DestroyLayout()
 	var binds []wgpu.BindGroupLayoutEntry
 	nvar := len(vg.Vars)
-	nVarDesc := 0
-	vg.NTextureDescs = 1
 
 	// https://toji.dev/webgpu-best-practices/bind-groups.html
 	for vi, vr := range vg.Vars {
-		if vr.Role == Vertex || vr.Role == Index {
+		if vr.Role == Vertex || vr.Role == Index { // shouldn't happen
 			continue
 		}
 		bd := wgpu.BindGroupLayoutEntry{
@@ -179,17 +189,19 @@ func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 		}
 		switch {
 		case vr.Role == SampledTexture:
+			bind = append(binds, wgpu.BindGroupLayoutEntry{
+					Binding:    uint32(vr.Binding),
+					Visibility: fr.Shaders,
+					bd.Texture = wgpu.TextureBindingLayout{
+						Multisampled: false,
+						ViewDimension: wgpu.TextureViewDimension_2D, // todo:
+						SampleType: wgpu.TextureSampleType_Float,
+					}
+				})
+			bd.Binding = uint32(vr.Binding+1)
 			bd.Sampler = wgpu.SamplerBindingLayout{
 				Type: wgpu.SamplerBindingType_Filtering,
 			}
-			vals := vr.Values.ActiveValues()
-			nvals := len(vals)
-			vg.NTextures += nvals
-			nVarDesc = min(nvals, MaxTexturesPerGroup) // per desc
-			if nvals > MaxTexturesPerGroup { // todo: fixme
-				vg.NTextureDescs = NDescForTextures(nvals)
-			}
-			// bd.DescriptorCount = uint32(nVarDesc)
 		default:
 			bd.Buffer = wgpu.BufferBindingLayout{
 				Type:             vr.Role.BindingType(),
@@ -213,83 +225,9 @@ func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 	vg.Layout = bgl
 }
 
-/*
-// BindStatVar does static variable binding for given var,
-// Each Value for a given Var is given a descriptor binding
-// and the shader sees an array of values of corresponding length.
-// All vals must be uploaded to Device memory prior to this,
-// and it is not possible to update anything during a render pass.
-func (vg *VarGroup) BindStatVar(vs *Vars, vr *Var) {
 
-	vals := vr.Values.ActiveValues()
-	nvals := len(vals)
-	wd := vk.WriteDescriptorSet{
-		SType:          vk.StructureTypeWriteDescriptorSet,
-		DstSet:         vg.VkDescSets[vs.BindDescIndex],
-		DstBinding:     uint32(vr.Binding),
-		DescriptorType: vr.Role.VkDescriptorStatic(),
-	}
-	bt := vr.BuffType()
-	buff := vs.Mem.Buffs[bt]
-	if bt == StorageBuffer {
-		buff = vs.Mem.StorageBuffers[vr.StorageBuffer]
-	}
-	if vr.Role < SampledTexture {
-		bis := make([]vk.DescriptorBufferInfo, nvals)
-		for i, vl := range vals {
-			bis[i] = vk.DescriptorBufferInfo{
-				Offset: vk.DeviceSize(vl.Offset),
-				Range:  vk.DeviceSize(vl.AllocSize),
-				Buffer: buff.Dev,
-			}
-		}
-		wd.PBufferInfo = bis
-		wd.DescriptorCount = uint32(nvals)
-	} else {
-		imgs := []vk.DescriptorImageInfo{}
-		nvals := len(vals)
-		if nvals > MaxTexturesPerGroup {
-			sti := vs.BindDescIndex * MaxTexturesPerGroup
-			if sti > nvals-MaxTexturesPerGroup {
-				sti = nvals - MaxTexturesPerGroup
-			}
-			mx := sti + MaxTexturesPerGroup
-			for vi := sti; vi < mx; vi++ {
-				vl := vals[vi]
-				if vl.Texture != nil && vl.Texture.IsActive() {
-					di := vk.DescriptorImageInfo{
-						ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
-						ImageView:   vl.Texture.View,
-						Sampler:     vl.Texture.VkSampler,
-					}
-					imgs = append(imgs, di)
-				}
-			}
-
-		} else {
-			for _, vl := range vals {
-				if vl.Texture != nil && vl.Texture.IsActive() {
-					di := vk.DescriptorImageInfo{
-						ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
-						ImageView:   vl.Texture.View,
-						Sampler:     vl.Texture.VkSampler,
-					}
-					imgs = append(imgs, di)
-				}
-			}
-		}
-		if len(imgs) == 0 {
-			return // don't add
-		}
-		wd.PImageInfo = imgs
-		wd.DescriptorCount = uint32(len(imgs))
-	}
-	vs.VkWriteValues = append(vs.VkWriteValues, wd)
-}
-*/
-
-// VertexConfig returns the VertexBufferLayout based on Vertex role
-// variables within the group.
+// VertexLayout returns the VertexBufferLayout based on Vertex role
+// variables within this VertexGroup.
 // Note: there is no support for interleaved arrays
 // so each location is sequential number, recorded in var Binding
 func (vg *VarGroup) VertexLayout() []wgpu.VertexBufferLayout {
@@ -328,7 +266,7 @@ func (vg *VarGroup) VertexLayout() []wgpu.VertexBufferLayout {
 						Format:         Float32Vector4.VertexFormat(),
 					},
 				},
-			}
+			})
 		} else {
 			vbls = append(fbls, wgpu.VertexBufferLayout{
 				ArrayStride: uint64(vr.SizeOf),
@@ -340,10 +278,27 @@ func (vg *VarGroup) VertexLayout() []wgpu.VertexBufferLayout {
 						Format:         vr.Type.VertexFormat(),
 					},
 				},
-			}
+			})
 		}
 	}
 	return vbls
+}
+
+// BindGroup returns the Current Value bindings for all variables
+// within this Group.  This determines what Values of the Vars the
+// current Render actions will use.
+// Only for non-VertexGroup groups.
+func (vg *VarGroup) BindGroup() *wgpu.BindGroup {
+	var bgs []wgpu.BindGroupEntry
+	for vi, vr := range vg.Vars {
+		bgs = append(vgs, vr.BindGroupEntry()...)
+	}
+	bg, err := vg.Device.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{
+		Layout: vg.Layout,
+		Entries: bgs,
+		Label: vg.Name,
+	})
+	return bg
 }
 
 /*
@@ -375,17 +330,4 @@ func (vs *VarGroup) VkPushConfig() []vk.PushConstantRange {
 }
 */
 
-// TextureGroupSizeIndexes for texture at given index, allocated in groups by size
-// using Values.AllocTexBySize, returns the indexes for the texture
-// and layer to actually select the texture in the shader, and proportion
-// of the Gp allocated texture size occupied by the texture.
-func (vg *VarGroup) TextureGroupSizeIndexes(vs *Vars, varNm string, valIndex int) *szalloc.Indexes {
-	vr, err := vg.VarByNameTry(varNm)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	idxs := vr.Values.TexSzAlloc.ItemIndexes[valIndex]
-	return idxs
-}
 

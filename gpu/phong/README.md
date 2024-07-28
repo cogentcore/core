@@ -64,7 +64,7 @@ Set: 2
         Var: 3:	SpotLights	Struct[8]	(size: 64)	Values: 1
 Set: 3
     Role: SampledTexture
-        Var: 0:	Tex	ImageRGBA32	(size: 4)	Values: 3
+        Var: 0:	Tex	TextureRGBA32	(size: 4)	Values: 3
 ```
 
 # WebGPU specific considerations

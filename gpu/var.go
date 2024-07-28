@@ -24,14 +24,13 @@ import (
 // and less-frequently-updated items should be in the lower-numbered groups.
 // The Role
 type Var struct {
-
 	// variable name
 	Name string
 
 	// type of data in variable.  Note that there are strict contraints
 	// on the alignment of fields within structs.  If you can keep all fields
 	// at 4 byte increments, that works, but otherwise larger fields trigger
-	// a 16 byte alignment constraint.  Texture Images do not have such alignment
+	// a 16 byte alignment constraint.  Texture Textures do not have such alignment
 	// constraints, and are stored separately or in arrays organized by size.
 	// Use Float32Matrix4 for model matricies in Vertex role, which will
 	// automatically be sent as 4 interleaved Float32Vector4 chuncks.
@@ -83,10 +82,9 @@ type Var struct {
 	TextureOwns bool `edit:"-"`
 
 	// Values is the the array of Values allocated for this variable.
-	// The size of this array is determined by the Group membership of this Var,
-	// and the current index is updated at the group level.
-	// For Texture Roles, there is a separate descriptor for each value (image),
-	// otherwise dynamic offset binding is used.
+	// Each value has its own corresponding Buffer or Texture.
+	// The currently-active Value is specified by the Current index,
+	// and this is what will be used for Binding.
 	Values Values
 
 	// offset: only for push constants
@@ -145,47 +143,22 @@ func (vr *Var) Free() {
 	// todo: free anything in var
 }
 
-// SetTextureDev sets Device for textures
-// only called on Role = SampledTexture
-func (vr *Var) SetTextureDev(dev *Device) {
-	vals := vr.Values.ActiveValues()
-	for _, vl := range vals {
-		if vl.Texture == nil {
-			continue
-		}
-		vl.Texture.Dev = dev
-	}
+// SetNValues sets specified number of Values for this var.
+// returns true if changed.
+func (vr *Var) SetNValues(dev *Device, nvals int) bool {
+	return vr.Values.SetN(vr, dev, nvals)
 }
 
-// AllocTextures allocates images on device memory
-// only called on Role = SampledTexture
-func (vr *Var) AllocTextures(mm *Memory) {
-	vr.Values.AllocTextures(mm)
+// SetCurrentValue sets the Current Value index, which is
+// the Value that will be used in rendering, via BindGroup
+func (vr *Var) SetCurrentValue(i int) {
+	vr.Values.Current = i
 }
 
-// TextureValidIndex returns the index of the given texture value at our
-// index in list of vals, starting at given index, skipping over any
-// inactive textures which do not show up when accessed in the shader.
-// You must use this value when passing a texture index to the shader!
-// returns -1 if idx is not valid
-func (vr *Var) TextureValidIndex(stIndex, idx int) int {
-	vals := vr.Values.ActiveValues()
-	vidx := 0
-	mx := min(stIndex+MaxTexturesPerGroup, len(vals))
-	for i := stIndex; i < mx; i++ {
-		vl := vals[i]
-		if i == idx {
-			return vidx
-		}
-		if vl.Texture == nil || !vl.Texture.IsActive() {
-			if i == idx {
-				return -1
-			}
-			continue
-		}
-		vidx++
-	}
-	return -1
+// BindGroupEntry returns the BindGroupEntry for Current
+// value for this variable.
+func (vr *Var) BindGroupEntry() wgpu.BindGroupEntry {
+	return vr.Values.BindGroupEntry(vr)
 }
 
 //////////////////////////////////////////////////////////////////
@@ -193,7 +166,6 @@ func (vr *Var) TextureValidIndex(stIndex, idx int) int {
 
 // VarList is a list of variables
 type VarList struct {
-
 	// variables in order
 	Vars []*Var
 

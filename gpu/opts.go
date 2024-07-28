@@ -117,8 +117,8 @@ func (gp *GPU) CheckGPUOpts(feats *vk.PhysicalDeviceFeatures, opts *GPUOpts, rep
 			hasOpt = (feats.RobustBufferAccess == vk.True)
 		case OptFullDrawIndexUint32:
 			hasOpt = (feats.FullDrawIndexUint32 == vk.True)
-		case OptImageCubeArray:
-			hasOpt = (feats.ImageCubeArray == vk.True)
+		case OptTextureCubeArray:
+			hasOpt = (feats.TextureCubeArray == vk.True)
 		case OptIndependentBlend:
 			hasOpt = (feats.IndependentBlend == vk.True)
 		case OptGeometryShader:
@@ -169,24 +169,24 @@ func (gp *GPU) CheckGPUOpts(feats *vk.PhysicalDeviceFeatures, opts *GPUOpts, rep
 			hasOpt = (feats.FragmentStoresAndAtomics == vk.True)
 		case OptShaderTessellationAndGeometryPointSize:
 			hasOpt = (feats.ShaderTessellationAndGeometryPointSize == vk.True)
-		case OptShaderImageGatherExtended:
-			hasOpt = (feats.ShaderImageGatherExtended == vk.True)
-		case OptShaderStorageImageExtendedFormats:
-			hasOpt = (feats.ShaderStorageImageExtendedFormats == vk.True)
-		case OptShaderStorageImageMultisample:
-			hasOpt = (feats.ShaderStorageImageMultisample == vk.True)
-		case OptShaderStorageImageReadWithoutFormat:
-			hasOpt = (feats.ShaderStorageImageReadWithoutFormat == vk.True)
-		case OptShaderStorageImageWriteWithoutFormat:
-			hasOpt = (feats.ShaderStorageImageWriteWithoutFormat == vk.True)
+		case OptShaderTextureGatherExtended:
+			hasOpt = (feats.ShaderTextureGatherExtended == vk.True)
+		case OptShaderStorageTextureExtendedFormats:
+			hasOpt = (feats.ShaderStorageTextureExtendedFormats == vk.True)
+		case OptShaderStorageTextureMultisample:
+			hasOpt = (feats.ShaderStorageTextureMultisample == vk.True)
+		case OptShaderStorageTextureReadWithoutFormat:
+			hasOpt = (feats.ShaderStorageTextureReadWithoutFormat == vk.True)
+		case OptShaderStorageTextureWriteWithoutFormat:
+			hasOpt = (feats.ShaderStorageTextureWriteWithoutFormat == vk.True)
 		case OptShaderUniformBuffererArrayDynamicIndexing:
 			hasOpt = (feats.ShaderUniformBuffererArrayDynamicIndexing == vk.True)
-		case OptShaderSampledImageArrayDynamicIndexing:
-			hasOpt = (feats.ShaderSampledImageArrayDynamicIndexing == vk.True)
+		case OptShaderSampledTextureArrayDynamicIndexing:
+			hasOpt = (feats.ShaderSampledTextureArrayDynamicIndexing == vk.True)
 		case OptShaderStorageBuffererArrayDynamicIndexing:
 			hasOpt = (feats.ShaderStorageBuffererArrayDynamicIndexing == vk.True)
-		case OptShaderStorageImageArrayDynamicIndexing:
-			hasOpt = (feats.ShaderStorageImageArrayDynamicIndexing == vk.True)
+		case OptShaderStorageTextureArrayDynamicIndexing:
+			hasOpt = (feats.ShaderStorageTextureArrayDynamicIndexing == vk.True)
 		case OptShaderClipDistance:
 			hasOpt = (feats.ShaderClipDistance == vk.True)
 		case OptShaderCullDistance:
@@ -205,10 +205,10 @@ func (gp *GPU) CheckGPUOpts(feats *vk.PhysicalDeviceFeatures, opts *GPUOpts, rep
 			hasOpt = (feats.SparseBinding == vk.True)
 		case OptSparseResidencyBuffer:
 			hasOpt = (feats.SparseResidencyBuffer == vk.True)
-		case OptSparseResidencyImage2D:
-			hasOpt = (feats.SparseResidencyImage2D == vk.True)
-		case OptSparseResidencyImage3D:
-			hasOpt = (feats.SparseResidencyImage3D == vk.True)
+		case OptSparseResidencyTexture2D:
+			hasOpt = (feats.SparseResidencyTexture2D == vk.True)
+		case OptSparseResidencyTexture3D:
+			hasOpt = (feats.SparseResidencyTexture3D == vk.True)
 		case OptSparseResidency2Samples:
 			hasOpt = (feats.SparseResidency2Samples == vk.True)
 		case OptSparseResidency4Samples:
@@ -265,8 +265,8 @@ func (gp *GPU) SetGPUOpts(feats *vk.PhysicalDeviceFeatures, opts GPUOpts) {
 			feats.RobustBufferAccess = vk.True
 		case OptFullDrawIndexUint32:
 			feats.FullDrawIndexUint32 = vk.True
-		case OptImageCubeArray:
-			feats.ImageCubeArray = vk.True
+		case OptTextureCubeArray:
+			feats.TextureCubeArray = vk.True
 		case OptIndependentBlend:
 			feats.IndependentBlend = vk.True
 		case OptGeometryShader:
@@ -317,24 +317,24 @@ func (gp *GPU) SetGPUOpts(feats *vk.PhysicalDeviceFeatures, opts GPUOpts) {
 			feats.FragmentStoresAndAtomics = vk.True
 		case OptShaderTessellationAndGeometryPointSize:
 			feats.ShaderTessellationAndGeometryPointSize = vk.True
-		case OptShaderImageGatherExtended:
-			feats.ShaderImageGatherExtended = vk.True
-		case OptShaderStorageImageExtendedFormats:
-			feats.ShaderStorageImageExtendedFormats = vk.True
-		case OptShaderStorageImageMultisample:
-			feats.ShaderStorageImageMultisample = vk.True
-		case OptShaderStorageImageReadWithoutFormat:
-			feats.ShaderStorageImageReadWithoutFormat = vk.True
-		case OptShaderStorageImageWriteWithoutFormat:
-			feats.ShaderStorageImageWriteWithoutFormat = vk.True
+		case OptShaderTextureGatherExtended:
+			feats.ShaderTextureGatherExtended = vk.True
+		case OptShaderStorageTextureExtendedFormats:
+			feats.ShaderStorageTextureExtendedFormats = vk.True
+		case OptShaderStorageTextureMultisample:
+			feats.ShaderStorageTextureMultisample = vk.True
+		case OptShaderStorageTextureReadWithoutFormat:
+			feats.ShaderStorageTextureReadWithoutFormat = vk.True
+		case OptShaderStorageTextureWriteWithoutFormat:
+			feats.ShaderStorageTextureWriteWithoutFormat = vk.True
 		case OptShaderUniformBuffererArrayDynamicIndexing:
 			feats.ShaderUniformBuffererArrayDynamicIndexing = vk.True
-		case OptShaderSampledImageArrayDynamicIndexing:
-			feats.ShaderSampledImageArrayDynamicIndexing = vk.True
+		case OptShaderSampledTextureArrayDynamicIndexing:
+			feats.ShaderSampledTextureArrayDynamicIndexing = vk.True
 		case OptShaderStorageBuffererArrayDynamicIndexing:
 			feats.ShaderStorageBuffererArrayDynamicIndexing = vk.True
-		case OptShaderStorageImageArrayDynamicIndexing:
-			feats.ShaderStorageImageArrayDynamicIndexing = vk.True
+		case OptShaderStorageTextureArrayDynamicIndexing:
+			feats.ShaderStorageTextureArrayDynamicIndexing = vk.True
 		case OptShaderClipDistance:
 			feats.ShaderClipDistance = vk.True
 		case OptShaderCullDistance:
@@ -353,10 +353,10 @@ func (gp *GPU) SetGPUOpts(feats *vk.PhysicalDeviceFeatures, opts GPUOpts) {
 			feats.SparseBinding = vk.True
 		case OptSparseResidencyBuffer:
 			feats.SparseResidencyBuffer = vk.True
-		case OptSparseResidencyImage2D:
-			feats.SparseResidencyImage2D = vk.True
-		case OptSparseResidencyImage3D:
-			feats.SparseResidencyImage3D = vk.True
+		case OptSparseResidencyTexture2D:
+			feats.SparseResidencyTexture2D = vk.True
+		case OptSparseResidencyTexture3D:
+			feats.SparseResidencyTexture3D = vk.True
 		case OptSparseResidency2Samples:
 			feats.SparseResidency2Samples = vk.True
 		case OptSparseResidency4Samples:

@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Cogent Core. All rights reserved.
+/ Copyright (c) 2022, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -18,10 +18,9 @@ import (
 )
 
 // Value represents a specific value of a Var variable, with
-// its own WebGPU Buffer associated with it.
-// If there are multiple values per variable, then the desired one
-// must be activated prior to the render / compute pass.
-// Most typically there are only multiple values for Texture vars.
+// its own WebGPU Buffer or Texture associated with it.
+// The current active Value can be set on the corresponding Var.
+// Typically there are only multiple values for Vertex and Texture vars.
 type Value struct {
 	// name of this value, named by default as the variable name_idx
 	Name string
@@ -33,9 +32,6 @@ type Value struct {
 	// If 0, this is a dynamically sized item and the size must be set.
 	N int
 
-	// val state flags
-	Flags ValueFlags
-
 	// if N > 1 (array) then this is the effective size of each element,
 	// which must be aligned to 16 byte modulo for Uniform types.
 	// Non-naturally aligned types require slower element-by-element
@@ -45,58 +41,53 @@ type Value struct {
 	// total memory size of this value in bytes, as allocated in buffer.
 	AllocSize int
 
+	Device Device
+	
 	// buffer for this value, makes it accessible to the GPU
 	Buffer *wgpu.Buffer `display:"-"`
 
-	// for Texture Var roles, this is the Texture.
+	// for SampledTexture Var roles, this is the Texture.
 	Texture *Texture
+	
+	TextureOwns bool
 }
 
-// HasFlag checks if flag is set using atomic,
-// safe for concurrent access
-func (vl *Value) HasFlag(flag ValueFlags) bool {
-	return vl.Flags.HasFlag(flag)
+func NewValue(vr *Var, dev *Device, idx int) *Value {
+	vl := &Value{}
+	vl.Init(vr, dev, idx)
+	return vl
 }
 
-// SetFlag sets flag(s) using atomic, safe for concurrent access
-func (vl *Value) SetFlag(on bool, flag ...enums.BitFlag) {
-	vl.Flags.SetFlag(on, flag...)
-}
-
-// Init initializes value based on variable and index within list of vals for this var
-func (vl *Value) Init(gp *GPU, vr *Var, idx int) {
+// Init initializes value based on variable and index
+// within list of vals for this var.
+func (vl *Value) Init(vr *Var, dev *Device, idx int) {
+	vl.Device = *dev
 	vl.Index = idx
 	vl.Name = fmt.Sprintf("%s_%d", vr.Name, vl.Index)
+	vl.ElSize = vr.SizeOf
 	vl.N = vr.ArrayN
+	vl.TextureOwns = vr.TextureOwns
 	if vr.Role >= SampledTexture {
-		vl.Texture = &Texture{}
-		vl.Texture.GPU = gp
+		vl.Texture = &Texture{} // todo: NewTexture
+		vl.Texture.Dev = dev
 		vl.Texture.Defaults()
+	} else {
+		vl.CreateBuffer(vr, dev)
 	}
 }
 
-// MemSize returns the memory allocation size for this value, in bytes
-func (vl *Value) MemSize(vr *Var) int {
+// Size returns the memory allocation size for this value, in bytes.
+func (vl *Value) Size() int {
 	if vl.N == 0 {
 		vl.N = 1
 	}
-	switch {
-	case vr.Role >= SampledTexture:
-		if vr.TextureOwns {
+	if vr.Role == SampledTexture {
+		if vl.TextureOwns {
 			return 0
 		} else {
 			return vl.Texture.Format.TotalByteSize()
 		}
-	case vl.N == 1 || vr.Role < Uniform:
-		vl.ElSize = vr.SizeOf
-		return vl.ElSize * vl.N
-	case vr.Role == Uniform:
-		// vl.ElSize = MemSizeAlign(vr.SizeOf, 16) // note: webgpu manages
-		vl.ElSize = vr.SizeOf
-		return vl.ElSize * vl.N
-	default: // storage is ok with anything?
-		// vl.ElSize = MemSizeAlign(vr.SizeOf, 16) // note: webgpu manages
-		vl.ElSize = vr.SizeOf
+	} else {
 		return vl.ElSize * vl.N
 	}
 }
@@ -104,11 +95,11 @@ func (vl *Value) MemSize(vr *Var) int {
 // CreateBuffer creates the GPU buffer for this value if it does not
 // yet exist or is not the right size.
 // Buffers always start mapped.
-func (vl *Value) CreateBuffer(dev *Device, vr *Var) error {
-	if vr.Role >= SampledTexture {
+func (vl *Value) CreateBuffer(vr *Var, dev *Device) error {
+	if vr.Role == SampledTexture {
 		return nil
 	}
-	sz := vl.MemSize(vr)
+	sz := vl.Size()
 	if sz == 0 {
 		vl.Free()
 		return nil
@@ -117,7 +108,7 @@ func (vl *Value) CreateBuffer(dev *Device, vr *Var) error {
 		return nil
 	}
 	vl.Free()
-var	buf, err := dev.Device.CreateBuffer(&wgpu.BufferDescriptor{
+	buf, err := dev.Device.CreateBuffer(&wgpu.BufferDescriptor{
 		Size:             uint64(sz),
 		Label:            Name,
 		Usage:            vr.Role.BufferUsages(),
@@ -206,22 +197,43 @@ func (vl *Value) CopyToBytesAsync(dest []byte) error {
 	return err
 }
 
-// SetGoImage sets Texture image data from an *image.RGBA standard Go image,
+func (vl *Value) BindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
+	if vr.Role >= SampledTexture {
+		return []wgpu.BindGroupEntry{
+			{
+				Binding:     vr.Binding,
+				TextureView: vl.Texture.View
+			},
+			{
+				Binding: vr.Binding+1,
+				Sampler: vl.Texture.Sampler,
+			},
+		}
+	}
+	return []wgpu.BindGroupEntry{{
+			Binding: vr.Binding,
+			Buffer:  vl.Buffer,
+			Size:    wgpu.WholeSize,
+		},
+	}
+}
+
+// SetGoTexture sets Texture image data from an *image.RGBA standard Go image,
 // at given layer, and sets the Mod flag, so it will be sync'd by Memory
 // or if TextureOwns is set for the var, it allocates Host memory.
 // This is most efficiently done using an image.RGBA, but other
 // formats will be converted as necessary.
-// If flipY is true then the Image Y axis is flipped when copying into
+// If flipY is true then the Texture Y axis is flipped when copying into
 // the image data (requires row-by-row copy) -- can avoid this
 // by configuring texture coordinates to compensate.
-func (vl *Value) SetGoImage(img image.Image, layer int, flipY bool) error {
+func (vl *Value) SetGoTexture(img image.Texture, layer int, flipY bool) error {
 	if vl.HasFlag(ValueTextureOwns) {
 		if layer == 0 && vl.Texture.Format.Layers <= 1 {
-			vl.Texture.ConfigGoImage(img.Bounds().Size(), layer+1)
+			vl.Texture.ConfigGoTexture(img.Bounds().Size(), layer+1)
 		}
 		vl.Texture.AllocMem()
 	}
-	err := vl.Texture.SetGoImage(img, layer, flipY)
+	err := vl.Texture.SetGoTexture(img, layer, flipY)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -229,7 +241,7 @@ func (vl *Value) SetGoImage(img image.Image, layer int, flipY bool) error {
 	}
 	if vl.HasFlag(ValueTextureOwns) {
 		vl.Texture.AllocTexture()
-		// svimg, _ := vl.Texture.GoImage()
+		// svimg, _ := vl.Texture.GoTexture()
 		// images.Save(svimg, fmt.Sprintf("dimg_%d.png", vl.Index))
 	}
 	return err
@@ -238,47 +250,44 @@ func (vl *Value) SetGoImage(img image.Image, layer int, flipY bool) error {
 //////////////////////////////////////////////////////////////////
 // Values
 
-// Values is a list container of Value values, accessed by index or name
+// Values is a list container of Value values, accessed by index or name.
 type Values struct {
-	// values in indexed order
+	// values in indexed order.
 	Values []*Value
 
+	// Current specifies the current value to use in rendering.
+	Current int
+	
 	// map of vals by name, only for specifically named vals
-	// vs. generically allocated ones. Names must be unique
+	// vs. generically allocated ones. Names must be unique.
 	NameMap map[string]*Value
-
-	// for texture values, this allocates textures to texture arrays by size.
-	// Used if On flag is set. Must call AllocTexBySize to allocate after
-	// ConfigGoImage is called on all vals.  Then call SetGoImage method on
-	// Values to set the Go Image for each val. This automatically redirects
-	// to the group allocated images.
-	TexSzAlloc szalloc.SzAlloc
-
-	// for texture values, if AllocTexBySize is called, these are the actual
-	// allocated image arrays that hold the grouped images (size = TexSzAlloc.GpAllocs.
-	GpTexValues []*Value
 }
 
-// ConfigValues configures given number of values in the list for given variable.
-// If the same number of vals is given, nothing is done, so it is safe to call
-// repeatedly.  Otherwise, any existing values will be freed.
-// Returns true if a new config made, else false if same size.
-func (vs *Values) ConfigValues(gp *GPU, dev *Device, vr *Var, nvals int) bool {
-	if len(vs.Values) == nvals {
+// Add adds a new Value for given variable.
+func (vs *Values) Add(vr *Var, dev *Device, name ...string) *Value {
+	if len(name) == 1 && vs.NameMap == nil {
+		vs.NameMap = make(map[string]*Value)
+	}
+	cn := len(vs.Values)
+	vl := NewValue(vr, dev, cn)
+	vs.Values = append(vs.Values, vl)
+	if len(name) == 1 {
+		vl.Name = name
+		vs.NameMap[name] = vl
+	}
+	return vl
+}
+
+// SetN sets specific number of values, returning true if changed.
+func (vs *Values) SetN(vr *Var, dev *Device, nvals int) bool {
+	cn := len(vs.Values)
+	if cn == nvals {
 		return false
 	}
-	vs.NameMap = make(map[string]*Value, nvals)
-	vs.Values = make([]*Value, nvals)
-	for i := 0; i < nvals; i++ {
-		vl := &Value{}
-		vl.Init(gp, vr, i)
+	vs.Values = slicesx.SetLength(vs.Values, nvals)
+	for i := cn; i < nvals; i++ {
+		vl := NewValue(vr, dev, cn)
 		vs.Values[i] = vl
-		if vr.TextureOwns {
-			vl.SetFlag(true, ValueTextureOwns)
-		}
-		if vl.Texture != nil {
-			vl.Texture.Dev = dev
-		}
 	}
 	return true
 }
@@ -328,36 +337,9 @@ func (vs *Values) ValueByNameTry(name string) (*Value, error) {
 	return vl, nil
 }
 
-//////////////////////////////////////////////////////////////////
-// Values
-
-// ActiveValues returns the Values to actually use for memory allocation etc
-// this is Values list except for textures with TexSzAlloc.On active
-func (vs *Values) ActiveValues() []*Value {
-	if vs.TexSzAlloc.On && vs.GpTexValues != nil {
-		return vs.GpTexValues
-	}
-	return vs.Values
-}
-
-// MemSize returns size across all Values in list
-func (vs *Values) MemSize(vr *Var) int {
-	tsz := 0
-	vals := vs.ActiveValues()
-	for _, vl := range vals {
-		sz := vl.MemSize(vr)
-		if sz == 0 {
-			continue
-		}
-		tsz += sz
-	}
-	return tsz
-}
-
 // Free frees all the value buffers / textures
 func (vs *Values) Free() {
-	vals := vs.ActiveValues()
-	for _, vl := range vals {
+	for _, vl := range vs.Values {
 		vl.Free()
 	}
 }
@@ -367,99 +349,22 @@ func (vs *Values) Free() {
 func (vs *Values) Destroy() {
 	vs.Free()
 	vs.Values = nil
-	vs.GpTexValues = nil
-	vs.TexSzAlloc.On = false
 	vs.NameMap = nil
 }
 
-// AllocTexBySize allocates textures by size so they fit within the
-// MaxTexturesPerGroup.  Must call ConfigGoImage on the original
-// values to set the sizes prior to calling this, and cannot have
-// the TextureOwns flag set.  Also does not support arrays in source vals.
-// Apps can always use szalloc.SzAlloc upstream of this to allocate.
-// This method creates actual image vals in GpTexValues, which
-// are allocated.  Must call SetGoImage on Values here, which
-// redirects to the proper allocated GpTexValues image and layer.
-func (vs *Values) AllocTexBySize(gp *GPU, vr *Var) {
-	if vr.TextureOwns {
-		log.Println("gpu.Values.AllocTexBySize: cannot use TextureOwns flag for this function.")
-		vs.TexSzAlloc.On = false
-		return
+// MemSize returns size in bytes across all Values in list
+func (vs *Values) MemSize() int {
+	tsz := 0
+	for _, vl := range vs.Values {
+		tsz += vl.Size()
 	}
-	nv := len(vs.Values)
-	if nv == 0 {
-		vs.Free()
-		vs.TexSzAlloc.On = false
-		vs.GpTexValues = nil
-		return
-	}
-	szs := make([]image.Point, nv)
-	for i, vl := range vs.Values {
-		szs[i] = vl.Texture.Format.Size
-	}
-	// 4,4 = MaxTexturesPerSet
-	vs.TexSzAlloc.SetSizes(image.Point{4, 4}, MaxImageLayers, szs)
-	vs.TexSzAlloc.Alloc()
-	ng := len(vs.TexSzAlloc.GpAllocs)
-	vs.GpTexValues = make([]*Value, ng)
-	for i, sz := range vs.TexSzAlloc.GpSizes {
-		nlay := len(vs.TexSzAlloc.GpAllocs[i])
-		vl := &Value{}
-		vl.Init(gp, vr, i)
-		vs.GpTexValues[i] = vl
-		vl.Texture.ConfigGoImage(sz, nlay)
-	}
+	return tsz
 }
 
-// SetGoImage calls SetGoImage on the proper Texture value for given index.
-// if TexSzAlloc.On via AllocTexBySize then this is routed to the actual
-// allocated image array, otherwise it goes directly to the standard Value.
-//
-// SetGoImage sets staging image data from a standard Go image at given layer.
-// This is most efficiently done using an image.RGBA, but other
-// formats will be converted as necessary.
-// If flipY is true then the Image Y axis is flipped
-// when copying into the image data, so that images will appear
-// upright in the standard OpenGL Y-is-up coordinate system.
-// If using the Y-is-down Vulkan coordinate system, don't flip.
-// Only works if IsHostActive and Image Format is default wgpu.TextureFormatR8g8b8a8Srgb,
-// Must still call AllocImage to have image allocated on the device,
-// and copy from this host staging data to the device.
-func (vs *Values) SetGoImage(idx int, img image.Image, flipy bool) {
-	if !vs.TexSzAlloc.On || vs.GpTexValues == nil {
-		vl := vs.Values[idx]
-		vl.SetGoImage(img, 0, flipy)
-		return
-	}
-	idxs := vs.TexSzAlloc.ItemIndexes[idx]
-	vl := vs.GpTexValues[idxs.GpIndex]
-	vl.SetGoImage(img, idxs.ItemIndex, flipy)
+// BindGroupEntry returns the BindGroupEntry for Current
+// value for this variable.
+func (vs *Values) BindGroupEntry(vr *Var) wgpu.BindGroupEntry {
+	vl := vs.Values[vs.Current]
+	return vl.BindGroupEntry(vr)
 }
 
-////////////////////////////////////////////////////////////////
-// Texture val functions
-
-// AllocTextures allocates images on device memory
-// only called on Role = SampledTexture
-func (vs *Values) AllocTextures(mm *Memory) {
-	vals := vs.ActiveValues()
-	for _, vl := range vals {
-		if vl.Texture == nil {
-			continue
-		}
-		vl.Texture.Dev = mm.Device.Device
-		vl.Texture.AllocTexture()
-	}
-}
-
-/////////////////////////////////////////////////////////////////////
-// ValueFlags
-
-// ValueFlags are bitflags for Value state
-type ValueFlags int64 //enums:bitflag -trim-prefix Value
-
-const (
-	// ValueTextureOwns val owns and manages the host staging memory for texture.
-	// based on Var TextureOwns -- for dynamically changing images.
-	ValueTextureOwns
-)
