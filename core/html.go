@@ -10,6 +10,7 @@ import (
 	"reflect"
 
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
 
@@ -57,7 +58,7 @@ func toHTML(w Widget, e *xml.Encoder) error {
 	}
 
 	addAttr(se, "id", wb.Name)
-	addAttr(se, "style", "")
+	addAttr(se, "style", styles.ToCSS(&wb.Styles))
 
 	rv := reflect.ValueOf(w)
 	uv := reflectx.Underlying(rv)
