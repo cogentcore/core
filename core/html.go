@@ -22,6 +22,10 @@ func ToHTML(w Widget) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = e.Flush()
+	if err != nil {
+		return nil, err
+	}
 	return b.Bytes(), nil
 }
 
