@@ -106,7 +106,7 @@ func (bd *Body) SetData(data any) *Body {
 }
 
 // DisableAppBar sets [Scene.DisableAppBar] to true,
-// disabling the default top app bar for this [Scene].
+// disabling the default top app bar for this [Body].
 func (bd *Body) DisableAppBar() *Body {
 	bd.Scene.SetDisableAppBar(true)
 	return bd
