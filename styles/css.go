@@ -4,7 +4,11 @@
 
 package styles
 
-import "strings"
+import (
+	"strings"
+
+	"cogentcore.org/core/colors"
+)
 
 // ToCSS converts the given [Style] object to a semicolon-separated CSS string.
 // It is not guaranteed to be fully complete or accurate.
@@ -14,6 +18,8 @@ func ToCSS(s *Style) string {
 		parts = append(parts, key+":"+value)
 	}
 
+	add("color", colors.AsHex(colors.ToUniform(s.Color)))
+	add("background", colors.AsHex(colors.ToUniform(s.Background)))
 	add("font-size", s.Font.Size.StringCSS())
 
 	return strings.Join(parts, ";")
