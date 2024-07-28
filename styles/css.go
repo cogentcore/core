@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/styles/units"
 )
 
 // ToCSS converts the given [Style] object to a semicolon-separated CSS string.
@@ -15,29 +16,26 @@ import (
 func ToCSS(s *Style) string {
 	parts := []string{}
 	add := func(key, value string) {
-		// exclude default values
-		switch value {
-		case "#00000000", "0px", "none", "solid":
-			return
-		case "16px":
-			if key == "font-size" {
-				return
-			}
-		}
 		parts = append(parts, key+":"+value)
 	}
 
 	add("color", colors.AsHex(colors.ToUniform(s.Color)))
-	add("background", colors.AsHex(colors.ToUniform(s.Background)))
-	add("font-size", s.Font.Size.StringCSS())
+	if s.Background != nil {
+		add("background", colors.AsHex(colors.ToUniform(s.Background)))
+	}
+	if s.Font.Size.Value != 16 || s.Font.Size.Unit != units.UnitDp {
+		add("font-size", s.Font.Size.StringCSS())
+	}
 	if s.Font.Family != "Roboto" {
 		add("font-family", s.Font.Family)
 	}
 	if s.Border.Width.Top.Value > 0 {
 		add("border-style", s.Border.Style.Top.String())
 		add("border-width", s.Border.Width.Top.StringCSS())
-		add("border-radius", s.Border.Radius.Top.StringCSS())
 		add("border-color", colors.AsHex(colors.ToUniform(s.Border.Color.Top)))
+	}
+	if s.Border.Radius.Top.Value > 0 {
+		add("border-radius", s.Border.Radius.Top.StringCSS())
 	}
 
 	return strings.Join(parts, ";")
