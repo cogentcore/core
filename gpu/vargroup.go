@@ -11,7 +11,6 @@ import (
 	"strconv"
 
 	"cogentcore.org/core/vgpu/szalloc"
-	vk "github.com/goki/WebGPU"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -157,6 +156,9 @@ func (vg *VarGroup) Config(dev *Device) error {
 			vr.SetTextureDev(dev)
 		}
 		bloc++
+		if vr.Role == Vertex && vr.Type == Float32Matrix4 { // special case
+			block+=3
+		}
 	}
 	return cerr
 }
@@ -197,24 +199,21 @@ func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 	vg.DestroyLayout(dev)
 	vg.NTextures = 0
 	var binds []wgpu.BindGroupLayoutEntry
-	dyno := len(vs.DynOffs[0])
 	nvar := len(vg.Vars)
 	nVarDesc := 0
 	vg.NTextureDescs = 1
 
 	// https://toji.dev/webgpu-best-practices/bind-groups.html
 	for vi, vr := range vg.Vars {
+		if vr.Role == Vertex || vr.Role == Index {
+			continue
+		}
 		bd := wgpu.BindGroupLayoutEntry{
 			Binding:    uint32(vr.Binding),
 			Visibility: fr.Shaders,
 		}
-		if vr.Role <= StorageImage {
-			bd.Buffer = wgpu.BufferBindingLayout{
-				Type:             vr.Role.BindingType(),
-				HasDynamicOffset: false,
-				MinBindingSize:   0, // 0 is fine
-			}
-		} else if vr.Role == TextureRole {
+		switch {
+		case vr.Role == TextureRole:
 			bd.Sampler = wgpu.SamplerBindingLayout{
 				Type: wgpu.SamplerBindingType_Filtering,
 			}
@@ -222,14 +221,16 @@ func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 			nvals := len(vals)
 			vg.NTextures += nvals
 			nVarDesc = min(nvals, MaxTexturesPerGroup) // per desc
-
-			if nvals > MaxTexturesPerGroup {
+			if nvals > MaxTexturesPerGroup { // todo: fixme
 				vg.NTextureDescs = NDescForTextures(nvals)
-				if vg.NTextureDescs > vs.NDescs {
-					fmt.Printf("gpu.VarGroup: Texture %s NValues: %d requires NDescs = %d, but it is only: %d -- this probably won't end well, but can't be fixed here\n", vr.Name, nvals, vg.NTextureDescs, vs.NDescs)
-				}
 			}
-			bd.DescriptorCount = uint32(nVarDesc)
+			// bd.DescriptorCount = uint32(nVarDesc)
+		default:
+			bd.Buffer = wgpu.BufferBindingLayout{
+				Type:             vr.Role.BindingType(),
+				HasDynamicOffset: false,
+				MinBindingSize:   0, // 0 is fine
+			}
 		}
 		binds = append(binds, bd)
 	}
@@ -247,6 +248,7 @@ func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 	vg.Layout = bgl
 }
 
+/*
 // BindStatVar does static variable binding for given var,
 // Each Value for a given Var is given a descriptor binding
 // and the shader sees an array of values of corresponding length.
@@ -319,37 +321,64 @@ func (vg *VarGroup) BindStatVar(vs *Vars, vr *Var) {
 	}
 	vs.VkWriteValues = append(vs.VkWriteValues, wd)
 }
+*/
 
-// VkVertexConfig fills in the relevant info into given WebGPU config struct.
-// for VertexSet only!
-// Note: there is no support for interleaved arrays so each binding and location
-// is assigned the same sequential number, recorded in var Binding
-func (vg *VarGroup) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
-	cfg := &vk.PipelineVertexInputStateCreateInfo{}
-	cfg.SType = vk.StructureTypePipelineVertexInputStateCreateInfo
-	var bind []vk.VertexInputBindingDescription
-	var attr []vk.VertexInputAttributeDescription
+// VertexConfig returns the VertexBufferLayout based on Vertex role
+// variables within the group.
+// Note: there is no support for interleaved arrays
+// so each location is sequential number, recorded in var Binding
+func (vg *VarGroup) VertexLayout() []wgpu.VertexBufferLayout {
+	var vbls []wgpu.VertexBufferLayout
 	for _, vr := range vg.Vars {
 		if vr.Role != Vertex { // not Index
 			continue
 		}
-		bind = append(bind, vk.VertexInputBindingDescription{
-			Binding:   uint32(vr.Binding),
-			Stride:    uint32(vr.SizeOf),
-			InputRate: vk.VertexInputRateVertex,
-		})
-		attr = append(attr, vk.VertexInputAttributeDescription{
-			Location: uint32(vr.Binding),
-			Binding:  uint32(vr.Binding),
-			Format:   vr.Type.VkFormat(),
-			Offset:   0,
-		})
+		stepMode := wgpu.VertexStepMode_Vertex
+		if vr.VertexInstance {
+			stepMode = wgpu.VertexStepMode_Instance
+		}
+		if vr.Type == Float32Matrix4 {
+			vbls = append(fbls, wgpu.VertexBufferLayout{
+				ArrayStride: uint64(vr.SizeOf),
+				StepMode:    stepMode,
+				Attributes: []wgpu.VertexAttribute{
+					{
+						Offset:         0,
+						ShaderLocation: vr.Binding,
+						Format:         Float32Vector4.VertexFormat(),
+					},
+					{
+						Offset:         4,
+						ShaderLocation: vr.Binding+1,
+						Format:         Float32Vector4.VertexFormat(),
+					},
+					{
+						Offset:         8,
+						ShaderLocation: vr.Binding+2,
+						Format:         Float32Vector4.VertexFormat(),
+					},
+					{
+						Offset:         12,
+						ShaderLocation: vr.Binding+3,
+						Format:         Float32Vector4.VertexFormat(),
+					},
+				},
+			}
+		} else {
+			vbls = append(fbls, wgpu.VertexBufferLayout{
+				ArrayStride: uint64(vr.SizeOf),
+				StepMode:    stepMode,
+				Attributes: []wgpu.VertexAttribute{
+					{
+						Offset:         0,
+						ShaderLocation: vr.Binding,
+						Format:         vr.Type.VertexFormat(),
+					},
+				},
+			}
+		}
 	}
-	cfg.VertexBindingDescriptionCount = uint32(len(bind))
-	cfg.PVertexBindingDescriptions = bind
-	cfg.VertexAttributeDescriptionCount = uint32(len(attr))
-	cfg.PVertexAttributeDescriptions = attr
-	return cfg
+	return vbls
 }
 
 /*
@@ -394,3 +423,4 @@ func (vg *VarGroup) TextureGroupSizeIndexes(vs *Vars, varNm string, valIndex int
 	idxs := vr.Values.TexSzAlloc.ItemIndexes[valIndex]
 	return idxs
 }
+

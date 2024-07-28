@@ -35,8 +35,9 @@ type Var struct {
 	// on the alignment of fields within structs.  If you can keep all fields
 	// at 4 byte increments, that works, but otherwise larger fields trigger
 	// a 16 byte alignment constraint.  Texture Images do not have such alignment
-	// constraints, and can be allocated in a big host buffer or in separate
-	// buffers depending on how frequently they are updated with different sizes.
+	// constraints, and are stored separately or in arrays organized by size.
+	// Use Float32Matrix4 for model matricies in Vertex role, which will
+	// automatically be sent as 4 interleaved Float32Vector4 chuncks.
 	Type Types
 
 	// number of elements if this is a fixed array. Use 1 if singular element,
@@ -48,6 +49,14 @@ type Var struct {
 	// is configured in a BindGroup.  Textures are accessed via arrays always.
 	// Note: Push is not yet supported.
 	Role VarRoles
+
+	// VertexInstance is whether this Vertex role variable is specified
+	// per instance (true) or per vertex (false, default).
+	// Instance variables can be used for sending per-object data like
+	// the model matrix (as Float32Matrix4 which is serialized as 4
+	// Float32Vector4 values).  Can also send texture indexes,
+	// per object color, etc.
+	VertexInstance bool
 
 	// bit flags for set of shaders that this variable is used in, determined
 	// by the Role.

@@ -42,11 +42,6 @@ const (
 	Float32Vector3 // note: only use for vertex data -- not properly aligned for uniforms
 	Float32Vector4
 
-	Float64
-	Float64Vector2
-	Float64Vector3
-	Float64Vector4
-
 	Float32Matrix4 // std transform matrix: math32.Matrix4 works directly
 	Float32Matrix3 // std transform matrix: math32.Matrix3 works directly
 
@@ -58,9 +53,9 @@ const (
 	Struct
 )
 
-// VkFormat returns the Vulkan VkFormat for given type
-func (tp Types) VkFormat() wgpu.TextureFormat {
-	return WebGPUTypes[tp]
+// VertexFormat returns the WebGPU VertexFormat for given type
+func (tp Types) VertexFormat() wgpu.VertexFormat {
+	return TypeToVertexFormat[tp]
 }
 
 // VkIndexType returns the Vulkan vk.IndexType for var
@@ -86,8 +81,9 @@ func (tp Types) Bytes() int {
 	return 0
 }
 
-// FormatSizes gives size of known WebGPU formats in bytes
-var FormatSizes = map[wgpu.TextureFormat]int{
+// TextureFormatSizes gives size of known WebGPU
+// TextureFormats in bytes
+var TextureFormatSizes = map[wgpu.TextureFormat]int{
 	wgpu.TextureFormat_Undefined:          0,
 	wgpu.TextureFormat_R16Sint:            2,
 	wgpu.TextureFormat_R16Uint:            2,
@@ -107,9 +103,8 @@ var FormatSizes = map[wgpu.TextureFormat]int{
 	wgpu.TextureFormat_Depth24UnormS8Uint: 4,
 }
 
-/*
-// WebGPUTypes maps gpu.Types to WebGPU types
-var WebGPUTypes = map[Types]wgpu.VertexFormat{
+// TypeToVertexFormats maps gpu.Types to WebGPU VertexFormat
+var TypeToVertexFormats = map[Types]wgpu.VertexFormat{
 	UndefType: wgpu.VertexFormat_Undefined,
 	// Bool32:         wgpu.VertexFormat_Uint32,
 	// Int16:          wgpu.VertexFormat_R16Sint,
@@ -124,11 +119,10 @@ var WebGPUTypes = map[Types]wgpu.VertexFormat{
 	Float32Vector2: wgpu.VertexFormat_Float32x2,
 	Float32Vector3: wgpu.VertexFormat_Float32x3,
 	Float32Vector4: wgpu.VertexFormat_Float32x4,
-	ImageRGBA32:    wgpu.TextureFormat_R8g8b8a8Srgb,
+	// ImageRGBA32:    wgpu.TextureFormat_R8g8b8a8Srgb,
 	// Depth32:        wgpu.VertexFormat_D32Sfloat,
 	// Depth24Sten8:   wgpu.VertexFormat_D24UnormS8Uint,
 }
-*/
 
 // most commonly available formats: https://WebGPU.gpuinfo.org/listsurfaceformats.php
 
