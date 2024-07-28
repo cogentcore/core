@@ -23,7 +23,7 @@ import (
 type Vars struct {
 	// map of Groups, by group number: VertexGroup is -2, PushGroup is -1,
 	// rest are added incrementally.
-	GroupMap map[int]*VarGroup
+	Groups map[int]*VarGroup
 
 	// map of vars by different roles across all Groups, updated in Config(),
 	// after all vars added.
@@ -43,7 +43,7 @@ type Vars struct {
 }
 
 func (vs *Vars) Destroy(dev *Device) {
-	for _, vg := range vs.GroupMap {
+	for _, vg := range vs.Groups {
 		vg.Destroy(dev)
 	}
 }
@@ -51,46 +51,46 @@ func (vs *Vars) Destroy(dev *Device) {
 // AddVertexGroup adds a new Vertex Group.
 // This is a special Group holding Vertex, Index vars
 func (vs *Vars) AddVertexGroup() *VarGroup {
-	if vs.GroupMap == nil {
-		vs.GroupMap = make(map[int]*VarGroup)
+	if vs.Groups == nil {
+		vs.Groups = make(map[int]*VarGroup)
 	}
 	vg := &VarGroup{Group: VertexGroup, ParentVars: vs}
-	vs.GroupMap[VertexGroup] = vg
+	vs.Groups[VertexGroup] = vg
 	vs.hasVertex = true
 	return vg
 }
 
 // VertexGroup returns the Vertex Group -- a special Group holding Vertex, Index vars
 func (vs *Vars) VertexGroup() *VarGroup {
-	return vs.GroupMap[VertexGroup]
+	return vs.Groups[VertexGroup]
 }
 
 // AddPushGroup adds a new push constant Group -- this is a special Group holding
 // values sent directly in the command buffer.
 func (vs *Vars) AddPushGroup() *VarGroup {
-	if vs.GroupMap == nil {
-		vs.GroupMap = make(map[int]*VarGroup)
+	if vs.Groups == nil {
+		vs.Groups = make(map[int]*VarGroup)
 	}
 	vg := &VarGroup{Group: PushGroup, ParentVars: vs}
-	vs.GroupMap[PushGroup] = vg
+	vs.Groups[PushGroup] = vg
 	vs.hasPush = true
 	return vg
 }
 
 // PushGroup returns the Push Group -- a special Group holding push constants
 func (vs *Vars) PushGroup() *VarGroup {
-	return vs.GroupMap[PushGroup]
+	return vs.Groups[PushGroup]
 }
 
 // AddGroup adds a new non-Vertex Group for holding Uniforms, Storage, etc
 // Groups are automatically numbered sequentially
 func (vs *Vars) AddGroup() *VarGroup {
-	if vs.GroupMap == nil {
-		vs.GroupMap = make(map[int]*VarGroup)
+	if vs.Groups == nil {
+		vs.Groups = make(map[int]*VarGroup)
 	}
 	idx := vs.NGroups()
 	vg := &VarGroup{Group: idx, ParentVars: vs}
-	vs.GroupMap[idx] = vg
+	vs.Groups[idx] = vg
 	return vg
 }
 
@@ -133,7 +133,7 @@ func (vs *Vars) Config() error {
 	var cerr error
 	vs.RoleMap = make(map[VarRoles][]*Var)
 	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.GroupMap[si]
+		vg := vs.Groups[si]
 		if vg == nil {
 			continue
 		}
@@ -155,7 +155,7 @@ func (vs *Vars) StringDoc() string {
 	var sb strings.Builder
 	ns := vs.NGroups()
 	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.GroupMap[si]
+		vg := vs.Groups[si]
 		if vg == nil {
 			continue
 		}
@@ -184,7 +184,7 @@ func (vs *Vars) NGroups() int {
 	if vs.hasPush {
 		ex++
 	}
-	return len(vs.GroupMap) - ex
+	return len(vs.Groups) - ex
 }
 
 // StartGroup returns the starting set to use for iterating sets
@@ -201,7 +201,7 @@ func (vs *Vars) StartGroup() int {
 
 // GroupTry returns set by index, returning nil and error if not found
 func (vs *Vars) GroupTry(set int) (*VarGroup, error) {
-	vg, has := vs.GroupMap[set]
+	vg, has := vs.Groups[set]
 	if !has {
 		err := fmt.Errorf("gpu.Vars:GroupTry set number %d not found", set)
 		if Debug {
@@ -217,7 +217,7 @@ func (vs *Vars) GroupTry(set int) (*VarGroup, error) {
 // is assigned the same sequential number, recorded in var Binding
 func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 	if vs.hasVertex {
-		return vs.GroupMap[VertexGroup].VkVertexConfig()
+		return vs.Groups[VertexGroup].VkVertexConfig()
 	}
 	cfg := &vk.PipelineVertexInputStateCreateInfo{}
 	cfg.SType = vk.StructureTypePipelineVertexInputStateCreateInfo
@@ -228,7 +228,7 @@ func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 // VkPushConfig returns WebGPU push constant ranges, only if PushGroup used.
 func (vs *Vars) VkPushConfig() []vk.PushConstantRange {
 	if vs.hasPush {
-		return vs.GroupMap[PushGroup].VkPushConfig()
+		return vs.Groups[PushGroup].VkPushConfig()
 	}
 	return nil
 }
@@ -252,7 +252,7 @@ func (vs *Vars) BindLayout(dev *Device) {
 
 	var lays []*wgpu.BindGroupLayout
 	for si := 0; si < nset; si++ { // auto-skips vertex, push
-		vg := vs.GroupMap[si]
+		vg := vs.Groups[si]
 		if vg == nil {
 			continue
 		}
@@ -287,7 +287,7 @@ func (vs *Vars) BindLayout(dev *Device) {
 //
 // returns error if not found.
 func (vs *Vars) BindVertexValueName(varNm, valNm string) error {
-	vg := vs.GroupMap[VertexGroup]
+	vg := vs.Groups[VertexGroup]
 	vr, vl, err := vg.ValueByNameTry(varNm, valNm)
 	if err != nil {
 		return err
@@ -309,7 +309,7 @@ func (vs *Vars) BindVertexValueName(varNm, valNm string) error {
 //
 // returns error if not found.
 func (vs *Vars) BindVertexValueIndex(varNm string, valIndex int) error {
-	vg := vs.GroupMap[VertexGroup]
+	vg := vs.Groups[VertexGroup]
 	vr, vl, err := vg.ValueByIndexTry(varNm, valIndex)
 	if err != nil {
 		return err
@@ -337,7 +337,7 @@ func (vs *Vars) MemSize(buff *Buffer) int {
 	tsz := 0
 	ns := vs.NGroups()
 	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.GroupMap[si]
+		vg := vs.Groups[si]
 		if vg == nil {
 			continue
 		}
@@ -354,7 +354,7 @@ func (vs *Vars) MemSize(buff *Buffer) int {
 func (vs *Vars) MemSizeStorage(mm *Memory, alignBytes int) {
 	ns := vs.NGroups()
 	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.GroupMap[si]
+		vg := vs.Groups[si]
 		if vg == nil {
 			continue
 		}
@@ -371,7 +371,7 @@ func (vs *Vars) AllocMem(buff *Buffer, offset int) int {
 	ns := vs.NGroups()
 	tsz := 0
 	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.GroupMap[si]
+		vg := vs.Groups[si]
 		if vg == nil || vg.Group == PushGroup {
 			continue
 		}
@@ -391,7 +391,7 @@ func (vs *Vars) AllocMem(buff *Buffer, offset int) int {
 func (vs *Vars) Free(buff *Buffer) {
 	ns := vs.NGroups()
 	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.GroupMap[si]
+		vg := vs.Groups[si]
 		if vg == nil || vg.Group == PushGroup {
 			continue
 		}
@@ -409,7 +409,7 @@ func (vs *Vars) ModRegs(bt BufferTypes) []MemReg {
 	ns := vs.NGroups()
 	var mods []MemReg
 	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.GroupMap[si]
+		vg := vs.Groups[si]
 		if vg == nil || vg.Group == PushSet {
 			continue
 		}
@@ -456,7 +456,7 @@ func (vs *Vars) AllocTextures(mm *Memory) {
 			continue
 		}
 		for _, vr := range vg.Vars {
-			if vr.Role != TextureRole {
+			if vr.Role != SampledTexture {
 				continue
 			}
 			vr.Values.AllocTextures(mm)

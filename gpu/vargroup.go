@@ -14,73 +14,38 @@ import (
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
-// maxPerStageDescriptorSamplers is only 16 on mac -- this is the relevant limit on textures!
-// also maxPerStageDescriptorSampledImages is basically the same:
-// https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSamplers&platform=all
-// https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSampledImages&platform=all
-
 const (
-	// MaxTexturesPerGroup is the maximum number of image variables that can be used
-	// in one descriptor set.  This value is a lowest common denominator across
-	// platforms.  To overcome this limitation, when more Texture vals are allocated,
-	// multiple NDescs are used, setting the and switch
-	// across those -- each such Desc set can hold this many textures.
-	// NValuesPer on a Texture var can be set higher and only this many will be
-	// allocated in the descriptor set, with bindings of values wrapping
-	// around across as many such sets as are vals, with a warning if insufficient
-	// numbers are present.
-	MaxTexturesPerGroup = 16
-
 	// MaxImageLayers is the maximum number of layers per image
 	MaxImageLayers = 128
-)
 
-// NDescForTextures returns number of descriptors (NDesc) required for
-// given number of texture values.
-func NDescForTextures(nvals int) int {
-	nDescGroupsReq := nvals / MaxTexturesPerGroup
-	if nvals%MaxTexturesPerGroup > 0 {
-		nDescGroupsReq++
-	}
-	return nDescGroupsReq
-}
-
-const (
+	// VertexGroup is the group number for Vertex and Index variables,
+	// which have special treatment.
 	VertexGroup = -2
+
+	// PushGroup is the group number for Push Constants, which 
+	// do not appear in the BindGroupLayout and are managed separately.
 	PushGroup   = -1
 )
 
-// VarGroup contains a set of Var variables that are all updated at the same time
-// and have the same number of distinct Values values per Var per render pass.
-// The first set at index -1 contains Vertex and Index data, handed separately.
+// VarGroup contains a set of Var variables that are all updated at the same time.
 type VarGroup struct {
 	VarList
 
-	// set number
+	// Group index is assigned sequentially, with special VertexGroup and
+	// PushGroup having negative numbers, not accessed via @group in shader.
 	Group int
 
-	// number of value instances to allocate per variable in this Group.
-	// Each value must be allocated in advance for each unique instance
-	// of a variable required across a complete scene rendering.
-	// e.g., if this is an object position matrix, then one per object is required.
-	// If a dynamic number are required, allocate the max possible.
-	// For Texture vars, each of the NDesc sets can have a maximum of
-	// MaxTexturesPerGroup (16), so if NValuesPer > MaxTexturesPerGroup,
-	// then vals are wrapped across sets, and accessing them requires using the
-	// appropriate DescIndex, as in System.CmdBindTextureVarIndex.
-	NValuesPer int
+	// Role is default Role of variables within this group.
+	// Vertex is configured separately, and everything else
+	// is configured in a BindGroup.
+	// Note: Push is not yet supported.
+	Role VarRoles
 
-	// number of textures, at point of creating the DescLayout
-	NTextures int
-
-	// map of vars by different roles, within this set.
+	// map of vars by different roles, within this group.
 	// Updated in Config(), after all vars added
 	RoleMap map[VarRoles][]*Var
 
-	// the parent vars we belong to
-	ParentVars *Vars
-
-	// set layout info: description of each var type, role, binding, stages
+	// group layout info: description of each var type, role, binding, stages
 	Layout *wgpu.BindGroupLayout
 }
 
@@ -94,9 +59,9 @@ func (vg *VarGroup) AddVar(vr *Var) {
 }
 
 // Add adds a new variable of given type, role, arrayN, and shaders where used
-func (vg *VarGroup) Add(name string, typ Types, arrayN int, role VarRoles, shaders ...ShaderTypes) *Var {
+func (vg *VarGroup) Add(name string, typ Types, arrayN int, shaders ...ShaderTypes) *Var {
 	vr := &Var{}
-	vr.Init(name, typ, arrayN, role, vg.Group, shaders...)
+	vr.Init(name, typ, arrayN, vg.Role, vg.Group, shaders...)
 	vg.AddVar(vr)
 	return vr
 }
@@ -152,7 +117,7 @@ func (vg *VarGroup) Config(dev *Device) error {
 			}
 		}
 		vr.Binding = bloc
-		if vr.Role == TextureRole {
+		if vr.Role == SampledTexture {
 			vr.SetTextureDev(dev)
 		}
 		bloc++
@@ -168,7 +133,7 @@ func (vg *VarGroup) Config(dev *Device) error {
 // distinct value to be rendered within a single pass.  All Vars in the
 // same set have the same number of vals.
 // Any existing vals will be deleted -- must free all associated memory prior!
-func (vg *VarGroup) ConfigValues(nvals int) {
+func (vg *VarGroup) ConfigValues() {
 	dev := vg.ParentVars.Mem.Device.Device
 	gp := vg.ParentVars.Mem.GPU
 	vg.NValuesPer = nvals
@@ -193,7 +158,7 @@ func (vg *VarGroup) DestroyLayout() {
 
 // BindLayout creates the BindGroupLayout for given set.
 // Only for non-VertexGroup sets.
-// Must have set NValuesPer for any TextureRole vars,
+// Must have set NValuesPer for any SampledTexture vars,
 // which require separate descriptors per.
 func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 	vg.DestroyLayout(dev)
@@ -213,7 +178,7 @@ func (vg *VarGroup) BindLayout(dev *Device, vs *Vars) error {
 			Visibility: fr.Shaders,
 		}
 		switch {
-		case vr.Role == TextureRole:
+		case vr.Role == SampledTexture:
 			bd.Sampler = wgpu.SamplerBindingLayout{
 				Type: wgpu.SamplerBindingType_Filtering,
 			}
@@ -269,7 +234,7 @@ func (vg *VarGroup) BindStatVar(vs *Vars, vr *Var) {
 	if bt == StorageBuffer {
 		buff = vs.Mem.StorageBuffers[vr.StorageBuffer]
 	}
-	if vr.Role < TextureRole {
+	if vr.Role < SampledTexture {
 		bis := make([]vk.DescriptorBufferInfo, nvals)
 		for i, vl := range vals {
 			bis[i] = vk.DescriptorBufferInfo{

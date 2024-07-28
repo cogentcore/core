@@ -68,7 +68,7 @@ func (vl *Value) Init(gp *GPU, vr *Var, idx int) {
 	vl.Index = idx
 	vl.Name = fmt.Sprintf("%s_%d", vr.Name, vl.Index)
 	vl.N = vr.ArrayN
-	if vr.Role >= TextureRole {
+	if vr.Role >= SampledTexture {
 		vl.Texture = &Texture{}
 		vl.Texture.GPU = gp
 		vl.Texture.Defaults()
@@ -81,7 +81,7 @@ func (vl *Value) MemSize(vr *Var) int {
 		vl.N = 1
 	}
 	switch {
-	case vr.Role >= TextureRole:
+	case vr.Role >= SampledTexture:
 		if vr.TextureOwns {
 			return 0
 		} else {
@@ -105,7 +105,7 @@ func (vl *Value) MemSize(vr *Var) int {
 // yet exist or is not the right size.
 // Buffers always start mapped.
 func (vl *Value) CreateBuffer(dev *Device, vr *Var) error {
-	if vr.Role >= TextureRole {
+	if vr.Role >= SampledTexture {
 		return nil
 	}
 	sz := vl.MemSize(vr)
@@ -144,16 +144,6 @@ func (vl *Value) Free() {
 	}
 }
 
-// PaddedArrayCheck checks if this is an array with padding on the elements
-// due to alignment issues.  If this is the case, then direct copying is not
-// possible.
-func (vl *Value) PaddedArrayCheck() error {
-	if vl.HasFlag(ValuePaddedArray) {
-		return fmt.Errorf("gpu.Value PaddedArrayCheck: this array value has padding around elements not present in Go version -- cannot copy directly: %s", vl.Name)
-	}
-	return nil
-}
-
 // NilBufferCheckCheck checks if buffer is nil, returning error if so
 func (vl *Value) NilBufferCheck() error {
 	if vl.Buffer == nil {
@@ -174,10 +164,6 @@ func SetValueFromAsync[E any](vl *Value, from []E) error {
 // This automatically calls Unmap() after copying.
 func (vl *Value) SetFromBytesAsync(from []byte) error {
 	if err := vl.NilBufferCheck(); err != nil {
-		slog.Error(err)
-		return err
-	}
-	if err := vl.PaddedArrayCheck(); err != nil {
 		slog.Error(err)
 		return err
 	}
@@ -205,10 +191,6 @@ func CopyValueToBytesAsync[E any](vl *Value, dest []E) error {
 // This automatically calls Unmap() after copying.
 func (vl *Value) CopyToBytesAsync(dest []byte) error {
 	if err := vl.NilBufferCheck(); err != nil {
-		slog.Error(err)
-		return err
-	}
-	if err := vl.PaddedArrayCheck(); err != nil {
 		slog.Error(err)
 		return err
 	}
@@ -258,7 +240,6 @@ func (vl *Value) SetGoImage(img image.Image, layer int, flipY bool) error {
 
 // Values is a list container of Value values, accessed by index or name
 type Values struct {
-
 	// values in indexed order
 	Values []*Value
 
@@ -459,7 +440,7 @@ func (vs *Values) SetGoImage(idx int, img image.Image, flipy bool) {
 // Texture val functions
 
 // AllocTextures allocates images on device memory
-// only called on Role = TextureRole
+// only called on Role = SampledTexture
 func (vs *Values) AllocTextures(mm *Memory) {
 	vals := vs.ActiveValues()
 	for _, vl := range vals {
@@ -478,9 +459,6 @@ func (vs *Values) AllocTextures(mm *Memory) {
 type ValueFlags int64 //enums:bitflag -trim-prefix Value
 
 const (
-	// ValuePaddedArray array had to be padded -- cannot access elements continuously
-	ValuePaddedArray ValueFlags = iota
-
 	// ValueTextureOwns val owns and manages the host staging memory for texture.
 	// based on Var TextureOwns -- for dynamically changing images.
 	ValueTextureOwns

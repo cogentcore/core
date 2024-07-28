@@ -12,20 +12,17 @@ import (
 )
 
 // Var specifies a variable used in a pipeline, accessed in shader programs
-// A Var represents a type of input or output into the GPU program,
-// including things like Vertex arrays, transformation matricies (Uniforms),
-// Images (Textures), and arbitrary Structs for Compute shaders.
+// at a specific @group (from VarGroup owner) and @binding location.
+// There must be a different Var for each type of input or output into
+// the GPU program, including things like Vertex arrays, transformation
+// matricies (Uniforms), Textures, and arbitrary Storage data (Structs)
+// for Compute shaders.
 // There are one or more corresponding Value items for each Var, which represent
-// the actual value of the variable: Var only represents all the type-level info.
-// Each Var belongs to a Group, and its Binding location is allocated within that,
-// and these numbers are used in WGSL shader via @group and @binding to refer to
-// the variables. The entire Group is updated at the same time scale,
-// and all vars in the Group have the same number of allocated Value instances
-// representing a specific value of the variable.
-// There must be a unique Value instance for each value of the variable used in
-// a single render: a previously used Value's contents cannot be updated within
-// the render pass, but new information can be written to an as-yet unused Value
-// prior to using in a render (although this comes at a performance cost).
+// the actual value of the variable: Var only represents the type-level info.
+// Each Var belongs to a VarGroup, and its Binding location is sequential within that.
+// The entire Group is updated at the same time from the hardware perspective,
+// and less-frequently-updated items should be in the lower-numbered groups.
+// The Role
 type Var struct {
 
 	// variable name
@@ -45,8 +42,10 @@ type Var struct {
 	// specific size. This also works for arrays of Textures, up to 128 max.
 	ArrayN int
 
-	// role of variable: Vertex is configured separately, and everything else
-	// is configured in a BindGroup.  Textures are accessed via arrays always.
+	// Role of variable: Vertex is configured separately, and everything else
+	// is configured in a BindGroup.  This is inherited from the VarGroup
+	// and all Vars in a Group must have the same Role, except Index is also
+	// included in the VertexGroup (-2).
 	// Note: Push is not yet supported.
 	Role VarRoles
 
@@ -128,7 +127,7 @@ func (vr *Var) MemSize() int {
 		n = 1
 	}
 	switch {
-	case vr.Role >= TextureRole:
+	case vr.Role >= SampledTexture:
 		return 0
 	case n == 1 || vr.Role < Uniform:
 		return vr.SizeOf * n
@@ -147,7 +146,7 @@ func (vr *Var) Free() {
 }
 
 // SetTextureDev sets Device for textures
-// only called on Role = TextureRole
+// only called on Role = SampledTexture
 func (vr *Var) SetTextureDev(dev *Device) {
 	vals := vr.Values.ActiveValues()
 	for _, vl := range vals {
@@ -159,7 +158,7 @@ func (vr *Var) SetTextureDev(dev *Device) {
 }
 
 // AllocTextures allocates images on device memory
-// only called on Role = TextureRole
+// only called on Role = SampledTexture
 func (vr *Var) AllocTextures(mm *Memory) {
 	vr.Values.AllocTextures(mm)
 }

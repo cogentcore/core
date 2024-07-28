@@ -111,8 +111,11 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 					if ffc.Name == "Name" {
 						ffc = ffc.NextAST()
 					}
-					vty, ok := gl.TypeFromAST(fs, pkg, nil, ffc)
-					if ok {
+					var vty *syms.Type
+					if ffc != nil {
+						vty, _ = gl.TypeFromAST(fs, pkg, nil, ffc)
+					}
+					if vty != nil {
 						sy.Type = SymTypeNameForPkg(vty, pkg)
 					} else {
 						sy.Type = TypeErr

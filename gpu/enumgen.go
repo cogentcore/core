@@ -156,11 +156,11 @@ var _VarRolesValues = []VarRoles{0, 1, 2, 3, 4, 5, 6, 7}
 // VarRolesN is the highest valid value for type VarRoles, plus one.
 const VarRolesN VarRoles = 8
 
-var _VarRolesValueMap = map[string]VarRoles{`UndefVarRole`: 0, `Vertex`: 1, `Index`: 2, `Push`: 3, `Uniform`: 4, `Storage`: 5, `StorageImage`: 6, `TextureRole`: 7}
+var _VarRolesValueMap = map[string]VarRoles{`UndefVarRole`: 0, `Vertex`: 1, `Index`: 2, `Push`: 3, `Uniform`: 4, `Storage`: 5, `StorageTexture`: 6, `SampledTexture`: 7}
 
 var _VarRolesDescMap = map[VarRoles]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: ``, 7: ``}
 
-var _VarRolesMap = map[VarRoles]string{0: `UndefVarRole`, 1: `Vertex`, 2: `Index`, 3: `Push`, 4: `Uniform`, 5: `Storage`, 6: `StorageImage`, 7: `TextureRole`}
+var _VarRolesMap = map[VarRoles]string{0: `UndefVarRole`, 1: `Vertex`, 2: `Index`, 3: `Push`, 4: `Uniform`, 5: `Storage`, 6: `StorageTexture`, 7: `SampledTexture`}
 
 // String returns the string representation of this VarRoles value.
 func (i VarRoles) String() string { return enums.String(i, _VarRolesMap) }

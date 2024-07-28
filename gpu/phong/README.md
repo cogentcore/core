@@ -63,7 +63,7 @@ Set: 2
         Var: 2:	PointLights	Struct[8]	(size: 48)	Values: 1
         Var: 3:	SpotLights	Struct[8]	(size: 64)	Values: 1
 Set: 3
-    Role: TextureRole
+    Role: SampledTexture
         Var: 0:	Tex	ImageRGBA32	(size: 4)	Values: 3
 ```
 
