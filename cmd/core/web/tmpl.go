@@ -137,6 +137,7 @@ type indexHTMLData struct {
 	Image                  string
 	VanityURL              string
 	GithubVanityRepository string
+	PreRenderHTML          string
 }
 
 // makeIndexHTML exectues [indexHTMLTmpl] based on the given configuration information,
