@@ -48,6 +48,10 @@ var htmlElementNames = map[string]string{
 	"editor":     "textarea",
 	"switches":   "div",
 	"switch":     "input",
+	"splits":     "div",
+	"tabs":       "div",
+	"tab":        "button",
+	"tree":       "div",
 }
 
 func addAttr(se *xml.StartElement, name, value string) {
@@ -61,7 +65,8 @@ func addAttr(se *xml.StartElement, name, value string) {
 func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	wb := w.AsWidget()
 	se := &xml.StartElement{}
-	se.Name.Local = wb.NodeType().IDName
+	idName := wb.NodeType().IDName
+	se.Name.Local = idName
 	if en, ok := htmlElementNames[se.Name.Local]; ok {
 		se.Name.Local = en
 	}
@@ -70,21 +75,32 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	}
 
 	addAttr(se, "id", wb.Name)
-	addAttr(se, "style", styles.ToCSS(&wb.Styles))
+	if se.Name.Local != "img" { // images don't render yet
+		addAttr(se, "style", styles.ToCSS(&wb.Styles))
+	}
+
+	handleChildren := true
 
 	switch w := w.(type) {
 	case *TextField:
 		addAttr(se, "type", "text")
 		addAttr(se, "value", w.text)
+		handleChildren = false
 	case *Spinner:
 		addAttr(se, "type", "number")
 		addAttr(se, "value", fmt.Sprintf("%g", w.Value))
+		handleChildren = false
 	case *Slider:
 		addAttr(se, "type", "range")
 		addAttr(se, "value", fmt.Sprintf("%g", w.Value))
+		handleChildren = false
 	case *Switch:
 		addAttr(se, "type", "checkbox")
 		addAttr(se, "value", strconv.FormatBool(w.IsChecked()))
+	}
+	if se.Name.Local == "textarea" {
+		addAttr(se, "rows", "10")
+		addAttr(se, "cols", "30")
 	}
 
 	// rv := reflect.ValueOf(w)
@@ -117,15 +133,20 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		b.WriteString(reflectx.Underlying(reflect.ValueOf(w)).FieldByName("Buffer").Interface().(fmt.Stringer).String())
 	}
 
-	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		err = toHTML(cw, e, b)
+	if handleChildren {
+		wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			if idName == "switch" && cwb.Name == "stack" {
+				return tree.Continue
+			}
+			err = toHTML(cw, e, b)
+			if err != nil {
+				return tree.Break
+			}
+			return tree.Continue
+		})
 		if err != nil {
-			return tree.Break
+			return err
 		}
-		return tree.Continue
-	})
-	if err != nil {
-		return err
 	}
 	err = e.EncodeToken(xml.EndElement{se.Name})
 	if err != nil {
