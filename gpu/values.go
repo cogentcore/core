@@ -16,8 +16,9 @@ import (
 
 // Value represents a specific value of a Var variable, with
 // its own WebGPU Buffer or Texture associated with it.
-// The current active Value can be set on the corresponding Var.
-// Typically there are only multiple values for Vertex and Texture vars.
+// The Current active Value index can be set in the corresponding Var.Values.
+// The Buffer for a Uniform or Storage value is created on the first
+// SetValueFrom call, or
 type Value struct {
 	// name of this value, named by default as the variable name_idx
 	Name string
@@ -37,6 +38,8 @@ type Value struct {
 
 	// total memory size of this value in bytes, as allocated in buffer.
 	AllocSize int
+
+	role VarRoles
 
 	device Device
 
@@ -58,6 +61,7 @@ func NewValue(vr *Var, dev *Device, idx int) *Value {
 // Init initializes value based on variable and index
 // within list of vals for this var.
 func (vl *Value) Init(vr *Var, dev *Device, idx int) {
+	vl.role = vr.Role
 	vl.device = *dev
 	vl.Index = idx
 	vl.Name = fmt.Sprintf("%s_%d", vr.Name, vl.Index)
@@ -66,8 +70,6 @@ func (vl *Value) Init(vr *Var, dev *Device, idx int) {
 	vl.TextureOwns = vr.TextureOwns
 	if vr.Role >= SampledTexture {
 		vl.texture = NewTextureSample(dev)
-	} else {
-		vl.CreateBuffer(vr, dev)
 	}
 }
 
@@ -85,7 +87,6 @@ func (vl *Value) MemSize() int {
 
 // CreateBuffer creates the GPU buffer for this value if it does not
 // yet exist or is not the right size.
-// Buffers always start mapped.
 func (vl *Value) CreateBuffer(vr *Var, dev *Device) error {
 	if vr.Role == SampledTexture {
 		return nil
@@ -137,20 +138,29 @@ func (vl *Value) NilBufferCheck() error {
 }
 
 // SetValueFrom copies given values into value buffer memory,
-// ensuring that the buffer is mapped and ready to be copied into.
-// This automatically calls Unmap() after copying.
+// making the buffer if it has not yet been constructed.
 func SetValueFrom[E any](vl *Value, from []E) error {
 	return vl.SetFromBytes(wgpu.ToBytes(from))
 }
 
 // SetFromBytes copies given bytes into value buffer memory,
-// ensuring that the buffer is mapped and ready to be copied into.
-// This automatically calls Unmap() after copying.
+// making the buffer if it has not yet been constructed.
 func (vl *Value) SetFromBytes(from []byte) error {
-	if err := vl.NilBufferCheck(); err != nil {
-		slog.Error(err.Error())
-		return err
+	if vl.buffer == nil {
+		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
+			Label:    vl.Name,
+			Contents: from,
+			Usage:    vl.role.BufferUsages(),
+		})
+		if err != nil {
+			slog.Error(err.Error())
+			return err
+		}
+		vl.buffer = buf
+		vl.AllocSize = len(from) // todo: compare with target
+		return nil
 	}
+	// todo: deal with padding?
 	err := vl.device.Queue.WriteBuffer(vl.buffer, 0, from)
 	if err != nil {
 		slog.Error(err.Error())

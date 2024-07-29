@@ -128,7 +128,9 @@ func main() {
 	camo.Projection.SetVkPerspective(45, aspect, 0.01, 100)
 	gpu.SetValueFrom(cam, []CamView{camo}) // note: always use slice to copy
 
-	sy.WaitDone()
+	// if sy.Validate() != nil { // useful check, makes any read-out buffers
+	// 	return
+	// }
 
 	frameCount := 0
 	stTime := time.Now()
@@ -168,7 +170,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 6
+	fpsDelay := time.Second / 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {
