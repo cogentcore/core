@@ -215,7 +215,8 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 	tree.AddAt(p, "header", func(w *Frame) {
 		tb.header = w
 		ToolbarStyles(w)
-		w.Styler(func(s *styles.Style) {
+		w.FinalStyler(func(s *styles.Style) {
+			s.Padding.Zero()
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
