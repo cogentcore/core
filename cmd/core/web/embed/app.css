@@ -117,35 +117,10 @@ body {
   background-color: var(--primary-color);
 }
 
-#app-wasm-loader-rectangles {
-  display: flex;
-  flex-grow: 1;
-  gap: 1em;
+#app-wasm-loader > main {
+  overflow: auto;
 }
 
-.app-wasm-loader-rectangle {
-  background-color: var(--container-color);
-  border-radius: 20px;
-  flex-grow: 1;
-}
-
-@media only screen and (max-width: 768px) {
-  #app-wasm-loader-rectangles {
-    flex-direction: column;
-  }
-}
-
-/* Loading animation effect: */
-.app-wasm-loader-rectangle {
-	background-image:	linear-gradient(90deg, #0000, var(--shine-color), #0000);
-	background-size: 160px 100%;
-	background-repeat: no-repeat;
-	background-position: left -160px top 0;
-	animation: shine 1s ease infinite;
-}
-
-@keyframes shine {
-	to {
-		background-position: right -160px top 0;
-	}
+#app-wasm-loader button {
+  border: none;
 }

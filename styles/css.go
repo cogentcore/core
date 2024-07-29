@@ -19,14 +19,16 @@ func ToCSS(s *Style) string {
 		parts = append(parts, key+":"+value)
 	}
 
-	add("color", colors.AsHex(colors.ToUniform(s.Color)))
+	if s.Color != nil {
+		add("color", colors.AsHex(colors.ToUniform(s.Color)))
+	}
 	if s.Background != nil {
 		add("background", colors.AsHex(colors.ToUniform(s.Background)))
 	}
 	if s.Font.Size.Value != 16 || s.Font.Size.Unit != units.UnitDp {
 		add("font-size", s.Font.Size.StringCSS())
 	}
-	if s.Font.Family != "Roboto" {
+	if s.Font.Family != "" && s.Font.Family != "Roboto" {
 		add("font-family", s.Font.Family)
 	}
 	if s.Border.Width.Top.Value > 0 {
