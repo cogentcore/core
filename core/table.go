@@ -222,7 +222,7 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 		})
 		w.Maker(func(p *tree.Plan) {
 			if tb.ShowIndexes {
-				tree.AddAt(p, "head-index", func(w *Text) {
+				tree.AddAt(p, "_head-index", func(w *Text) {
 					w.SetType(TextBodyMedium)
 					w.Styler(func(s *styles.Style) {
 						s.Align.Self = styles.Center
