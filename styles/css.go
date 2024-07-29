@@ -5,6 +5,8 @@
 package styles
 
 import (
+	"fmt"
+	"strconv"
 	"strings"
 
 	"cogentcore.org/core/colors"
@@ -16,7 +18,7 @@ import (
 func ToCSS(s *Style) string {
 	parts := []string{}
 	add := func(key, value string) {
-		if value == "0px" {
+		if value == "0" || value == "0px" || value == "0dot" {
 			return
 		}
 		parts = append(parts, key+":"+value)
@@ -28,6 +30,12 @@ func ToCSS(s *Style) string {
 	if s.Background != nil {
 		add("background", colors.AsHex(colors.ToUniform(s.Background)))
 	}
+	add("display", s.Display.String())
+	add("flex-direction", s.Direction.String())
+	add("flex-grow", fmt.Sprintf("%g", s.Grow.Y))
+	add("justify-content", s.Justify.Content.String())
+	add("align-items", s.Align.Items.String())
+	add("columns", strconv.Itoa(s.Columns))
 	add("width", s.Min.X.StringCSS())
 	add("height", s.Min.Y.StringCSS())
 	add("max-width", s.Max.X.StringCSS())
