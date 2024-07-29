@@ -29,7 +29,7 @@ func NewDevice(gpu *GPU) (*Device, error) {
 	return dev, nil
 }
 
-func (dv *Device) Destroy() {
+func (dv *Device) Release() {
 	if dv.Device == nil {
 		return
 	}

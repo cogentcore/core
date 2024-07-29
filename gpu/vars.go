@@ -28,7 +28,7 @@ type Vars struct {
 	RoleMap map[VarRoles][]*Var
 
 	// full set of BindGroupLayouts, one for each VarGroup >= 0
-	Layouts []*wgpu.BindGroupLayout `display:"-"`
+	layouts []*wgpu.BindGroupLayout `display:"-"`
 
 	// true if a VertexGroup has been added
 	hasVertex bool `edit:"-"`
@@ -37,9 +37,9 @@ type Vars struct {
 	hasPush bool `edit:"-"`
 }
 
-func (vs *Vars) Destroy(dev *Device) {
+func (vs *Vars) Release(dev *Device) {
 	for _, vg := range vs.Groups {
-		vg.Destroy(dev)
+		vg.Release(dev)
 	}
 }
 
@@ -228,12 +228,12 @@ func (vs *Vars) VkPushConfig() []vk.PushConstantRange {
 ///////////////////////////////////////////////////////////////////
 // Binding, Layouts
 
-// BindLayout configures the Layouts slice of BindGroupLayouts
+// bindLayout configures the Layouts slice of BindGroupLayouts
 // for all of the non-Vertex vars
-func (vs *Vars) BindLayout(dev *Device) []*wgpu.BindGroupLayout {
+func (vs *Vars) bindLayout(dev *Device) []*wgpu.BindGroupLayout {
 	nset := vs.NGroups()
 	if nset == 0 {
-		vs.Layouts = nil
+		vs.layouts = nil
 		return nil
 	}
 
@@ -246,7 +246,7 @@ func (vs *Vars) BindLayout(dev *Device) []*wgpu.BindGroupLayout {
 		vg.BindLayout(dev, vs)
 		lays = append(lays, vg.Layout)
 	}
-	vs.Layouts = lays
+	vs.layouts = lays
 	return lays
 }
 

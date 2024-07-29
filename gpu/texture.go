@@ -33,13 +33,20 @@ type Texture struct {
 	Format TextureFormat
 
 	// WebGPU texture handle, in device memory
-	Texture *wgpu.Texture `display:"-"`
+	texture *wgpu.Texture `display:"-"`
 
 	// WebGPU texture view
-	View *wgpu.TextureView `display:"-"`
+	view *wgpu.TextureView `display:"-"`
 
 	// keep track of device for destroying view
-	Device Device `display:"-"`
+	device Device `display:"-"`
+}
+
+func NewTexture(dev *Device) *Texture {
+	tx := &Texture{}
+	tx.device = dev
+	tx.Defaults()
+	return tx
 }
 
 // HasFlag checks if flag is set
@@ -170,12 +177,9 @@ func (tx *Texture) UnmapDev() {
 */
 
 // ConfigGoImage configures the texture for storing an texture
-// of the given size, for textures allocated in a shared host buffer.
-// (i.e., not Var.TextureOwns).  Texture format will be set to default
+// of the given size. Texture format will be set to default
 // unless format is already set.  Layers is number of separate textures
 // of given size allocated in a texture array.
-// Once memory is allocated then SetGoImage can be called in a
-// second pass.
 func (tx *Texture) ConfigGoImage(sz texture.Point, layers int) {
 	if tx.Format.Format != wgpu.TextureFormat_RGBA8UnormSrgb {
 		tx.Format.Defaults()
@@ -219,7 +223,7 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int, flipY bool) error 
 		Height:             uint32(sz.Y),
 		DepthOrArrayLayers: 1,
 	}
-	t, err := tx.Device.Device.CreateTexture(&wgpu.TextureDescriptor{
+	t, err := tx.device.Device.CreateTexture(&wgpu.TextureDescriptor{
 		Label:         tx.Name,
 		Size:          size,
 		MipLevelCount: 1,
@@ -232,10 +236,10 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int, flipY bool) error 
 		slog.Error(err)
 		return err
 	}
-	tx.Texture = t
+	tx.texture = t
 
 	// https://www.w3.org/TR/webgpu/#gpuimagecopytexture
-	tx.Device.Queue.WriteTexture(
+	tx.device.Queue.WriteTexture(
 		&wgpu.ImageCopyTexture{
 			Aspect:   wgpu.TextureAspect_All,
 			Texture:  t,
@@ -255,7 +259,7 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int, flipY bool) error 
 	if err != nil {
 		return
 	}
-	tx.View = vw
+	tx.view = vw
 	return nil
 }
 
@@ -265,7 +269,7 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int, flipY bool) error 
 // using format.  Sets multisampling to 1, layers to 1.
 // Only makes a device texture -- no host rep.
 func (tx *Texture) ConfigFramebuffer(dev *Device, imgFmt *TextureFormat) {
-	tx.Device = *dev
+	tx.device = *dev
 	tx.Format.Format = imgFmt.Format
 	tx.Format.SetMultisample(1)
 	tx.Format.Layers = 1
@@ -279,7 +283,7 @@ func (tx *Texture) ConfigFramebuffer(dev *Device, imgFmt *TextureFormat) {
 // using given depth texture format, and other on format information
 // from the render texture format.
 func (tx *Texture) ConfigDepth(dev *Device, depthType Types, imgFmt *TextureFormat) {
-	tx.Device = *dev
+	tx.device = *dev
 	tx.Format.Format = depthType.Format()
 	tx.Format.Samples = imgFmt.Samples
 	tx.Format.Layers = 1
@@ -292,7 +296,7 @@ func (tx *Texture) ConfigDepth(dev *Device, depthType Types, imgFmt *TextureForm
 // ConfigMulti configures this texture as a mutisampling texture
 // using format.  Only makes a device texture -- no host rep.
 func (tx *Texture) ConfigMulti(dev *Device, imgFmt *TextureFormat) {
-	tx.Device = *dev
+	tx.device = *dev
 	tx.Format.Format = imgFmt.Format
 	tx.Format.Samples = imgFmt.Samples
 	tx.Format.Layers = 1
@@ -305,7 +309,7 @@ func (tx *Texture) ConfigMulti(dev *Device, imgFmt *TextureFormat) {
 // ConfigStdView configures a standard 2D texture view, for current texture,
 // format, and device.
 func (tx *Texture) ConfigStdView() {
-	// tx.DestroyView()
+	// tx.ReleaseView()
 	// var view vk.TextureView
 	// viewtyp := vk.TextureViewType2d
 	// if !tx.HasFlag(DepthTexture) && !tx.HasFlag(FramebufferTexture) {
@@ -335,7 +339,7 @@ func (tx *Texture) ConfigStdView() {
 
 // ConfigDepthView configures a depth view texture
 func (tx *Texture) ConfigDepthView() {
-	// tx.DestroyView()
+	// tx.ReleaseView()
 	// var view vk.TextureView
 	// ret := vk.CreateTextureView(tx.Dev, &vk.TextureViewCreateInfo{
 	// 	SType:  vk.StructureTypeTextureViewCreateInfo,
@@ -359,40 +363,36 @@ func (tx *Texture) ConfigDepthView() {
 	// tx.SetFlag(true, TextureActive)
 }
 
-// DestroyView destroys any existing view
-func (tx *Texture) DestroyView() {
-	if tx.View != nil {
+// ReleaseView destroys any existing view
+func (tx *Texture) ReleaseView() {
+	if tx.view != nil {
 		tx.SetFlag(false, TextureActive)
-		tx.View.Release()
-		tx.View = nil
+		tx.view.Release()
+		tx.view = nil
 	}
 }
 
-// FreeTexture frees device memory version of texture that we own
-func (tx *Texture) FreeTexture() {
-	if tx.Dev == nil {
-		return
-	}
-	// vk.DeviceWaitIdle(tx.Dev)
-	tx.DestroyView()
-	if tx.Texture == nil || !tx.IsTextureOwner() {
+// ReleaseTexture frees device memory version of texture that we own
+func (tx *Texture) ReleaseTexture() {
+	tx.ReleaseView()
+	if tx.texture == nil || !tx.IsTextureOwner() {
 		return
 	}
 	tx.SetFlag(false, TextureOwnsTexture)
-	vk.Texture.Release()
-	tx.Texture = nil
+	vk.texture.Release()
+	tx.texture = nil
 }
 
-// Destroy destroys any existing view, nils fields
-func (tx *Texture) Destroy() {
-	tx.FreeTexture()
-	tx.DestroyView()
+// Release destroys any existing view, nils fields
+func (tx *Texture) Release() {
+	tx.ReleaseTexture()
+	tx.ReleaseView()
 }
 
 // SetNil sets everything to nil, for shared texture
 func (tx *Texture) SetNil() {
-	tx.View = nil
-	tx.Texture = nil
+	tx.view = nil
+	tx.texture = nil
 	tx.Flags = 0
 }
 
@@ -411,7 +411,7 @@ func (tx *Texture) SetSize(size texture.Point) bool {
 // AllocTexture allocates the VkTexture on the device (must set first),
 // based on the current Format info, and other flags.
 func (tx *Texture) AllocTexture() {
-	// tx.FreeTexture()
+	// tx.ReleaseTexture()
 	// var usage vk.TextureUsageFlagBits
 	// // var imgFlags vk.TextureCreateFlags
 	// imgType := vk.TextureType2d
@@ -501,12 +501,8 @@ const (
 	// TextureActive: the Texture and TextureView are configured and ready to use
 	TextureActive TextureFlags = iota
 
-	// TextureOwnsTexture: we own the Vk.Texture
+	// TextureOwnsTexture: we own the Texture
 	TextureOwnsTexture
-
-	// TextureIsValue: we are a Value texture and our Host buffer is shared, with offset.
-	// this is incompatible with TextureOwnsHost
-	TextureIsValue
 
 	// DepthTexture indicates that this is a Depth buffer texture
 	DepthTexture

@@ -51,7 +51,7 @@ type VarGroup struct {
 	RoleMap map[VarRoles][]*Var
 
 	// group layout info: description of each var type, role, binding, stages
-	Layout *wgpu.BindGroupLayout
+	layout *wgpu.BindGroupLayout
 	
 	Device Device
 }
@@ -138,17 +138,17 @@ func (vg *VarGroup) Config(dev *Device) error {
 	return errors.Join(errs...)
 }
 
-// Destroy destroys infrastructure for Group, Vars and Values -- assumes Free has
+// Release destroys infrastructure for Group, Vars and Values -- assumes Free has
 // already been called to free host and device memory.
-func (vg *VarGroup) Destroy() {
-	vg.DestroyLayout()
+func (vg *VarGroup) Release() {
+	vg.ReleaseLayout()
 }
 
-// DestroyLayout destroys layout
-func (vg *VarGroup) DestroyLayout() {
-	if vg.Layout != nil {
-		vg.Layout.Release()
-		vg.Layout = nil
+// ReleaseLayout destroys layout
+func (vg *VarGroup) ReleaseLayout() {
+	if vg.layout != nil {
+		vg.layout.Release()
+		vg.layout = nil
 	}
 }
 
@@ -169,12 +169,12 @@ func (vg *VarGroup) SetCurrentValue(i int) {
 	}
 }
 
-// BindLayout creates the BindGroupLayout for given group.
+// bindLayout creates the BindGroupLayout for given group.
 // Only for non-VertexGroup sets.
 // Must have set NValuesPer for any SampledTexture vars,
 // which require separate descriptors per.
-func (vg *VarGroup) BindLayout(vs *Vars) error {
-	vg.DestroyLayout()
+func (vg *VarGroup) bindLayout(vs *Vars) error {
+	vg.ReleaseLayout()
 	var binds []wgpu.BindGroupLayoutEntry
 	nvar := len(vg.Vars)
 
@@ -222,15 +222,15 @@ func (vg *VarGroup) BindLayout(vs *Vars) error {
 		slog.Error(err)
 		return err
 	}
-	vg.Layout = bgl
+	vg.layout = bgl
 }
 
 
-// VertexLayout returns the VertexBufferLayout based on Vertex role
+// vertexLayout returns the VertexBufferLayout based on Vertex role
 // variables within this VertexGroup.
 // Note: there is no support for interleaved arrays
 // so each location is sequential number, recorded in var Binding
-func (vg *VarGroup) VertexLayout() []wgpu.VertexBufferLayout {
+func (vg *VarGroup) vertexLayout() []wgpu.VertexBufferLayout {
 	var vbls []wgpu.VertexBufferLayout
 	for _, vr := range vg.Vars {
 		if vr.Role != Vertex { // not Index
@@ -284,17 +284,17 @@ func (vg *VarGroup) VertexLayout() []wgpu.VertexBufferLayout {
 	return vbls
 }
 
-// BindGroup returns the Current Value bindings for all variables
+// bindGroup returns the Current Value bindings for all variables
 // within this Group.  This determines what Values of the Vars the
 // current Render actions will use.
 // Only for non-VertexGroup groups.
-func (vg *VarGroup) BindGroup() *wgpu.BindGroup {
+func (vg *VarGroup) bindGroup() *wgpu.BindGroup {
 	var bgs []wgpu.BindGroupEntry
 	for vi, vr := range vg.Vars {
 		bgs = append(vgs, vr.BindGroupEntry()...)
 	}
 	bg, err := vg.Device.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{
-		Layout: vg.Layout,
+		Layout: vg.layout,
 		Entries: bgs,
 		Label: vg.Name,
 	})

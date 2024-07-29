@@ -18,7 +18,6 @@ import (
 // compute operations performed on a common set of data.
 // It maintains its own logical device and associated queue.
 type System struct {
-
 	// optional name of this System
 	Name string
 
@@ -99,30 +98,30 @@ func (sy *System) InitCmd() {
 	sy.CmdPool.NewBuffer(&sy.Device)
 }
 
-func (sy *System) Destroy() {
+func (sy *System) Release() {
 	// for _, ev := range sy.Events {
-	// 	vk.DestroyEvent(sy.Device.Device, ev, nil)
+	// 	vk.ReleaseEvent(sy.Device.Device, ev, nil)
 	// }
 	// sy.Events = nil
 	// for _, sp := range sy.Semaphores {
-	// 	vk.DestroySemaphore(sy.Device.Device, sp, nil)
+	// 	vk.ReleaseSemaphore(sy.Device.Device, sp, nil)
 	// }
 	// sy.Semaphores = nil
 	// for _, fc := range sy.Fences {
-	// 	vk.DestroyFence(sy.Device.Device, fc, nil)
+	// 	vk.ReleaseFence(sy.Device.Device, fc, nil)
 	// }
 	// sy.Fences = nil
 	sy.CmdBuffs = nil
 	for _, pl := range sy.Pipelines {
-		pl.Destroy()
+		pl.Release()
 	}
 	sy.Pipelines = nil
-	sy.CmdPool.Destroy(sy.Device.Device)
-	sy.Mem.Destroy(sy.Device.Device)
+	sy.CmdPool.Release(sy.Device.Device)
+	sy.Mem.Release(sy.Device.Device)
 	if sy.Compute {
-		sy.Device.Destroy()
+		sy.Device.Release()
 	} else {
-		sy.Render.Destroy()
+		sy.Render.Release()
 	}
 	sy.GPU = nil
 }

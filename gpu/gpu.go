@@ -298,8 +298,8 @@ func (gp *GPU) SelectGPU(gpus []wgpu.Adapter) int {
 	// return maxIndex
 }
 
-// Destroy releases GPU resources -- call after everything else has been destroyed
-func (gp *GPU) Destroy() {
+// Release releases GPU resources -- call after everything else has been destroyed
+func (gp *GPU) Release() {
 	if gp.GPU != nil {
 		gp.GPU = nil
 	}

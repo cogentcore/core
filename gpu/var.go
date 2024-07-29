@@ -58,7 +58,7 @@ type Var struct {
 
 	// bit flags for set of shaders that this variable is used in, determined
 	// by the Role.
-	Shaders wgpu.ShaderStage `edit:"-"`
+	shaders wgpu.ShaderStage `edit:"-"`
 
 	// Group binding for this variable, indicated by @group in WGSL shader.
 	// In general, put data that is updated at the same point in time in the same
@@ -99,9 +99,9 @@ func (vr *Var) Init(name string, typ Types, arrayN int, role VarRoles, group int
 	vr.Role = role
 	vr.SizeOf = typ.Bytes()
 	vr.Group = group
-	vr.Shaders = 0
+	vr.shaders = 0
 	for _, sh := range shaders {
-		vr.Shaders |= ShaderStageFlags[sh]
+		vr.shaders |= ShaderStageFlags[sh]
 	}
 }
 

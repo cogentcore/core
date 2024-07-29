@@ -5,58 +5,96 @@
 package gpu
 
 import (
-	"log"
+	"io/fs"
+	"log/slog"
 	"os"
 
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
-// todo: should be able to handle multiple types per shader
-
-// Shader manages a single Shader program,
-// which can have multiple entry points.
+// Shader manages a single Shader program, which can have multiple
+// entry points. See ShaderEntry for entry points into Shaders.
 type Shader struct {
-	Name   string
-	Type   ShaderTypes
-	Module *wgpu.ShaderModule
+	Name string
+
+	module *wgpu.ShaderModule
+
+	device Device
 }
 
-// Init initializes the shader
-func (sh *Shader) Init(name string, typ ShaderTypes) {
-	sh.Name = name
-	sh.Type = typ
+func NewShader(name string, dev *Device) *Shader {
+	sh := &Shader{Name: name}
+	sh.device = *dev
+	return sh
 }
 
-// OpenFile loads given SPIR-V ".spv" code from file for the Shader.
-func (sh *Shader) OpenFile(dev *Device, fname string) error {
+// OpenFile loads given WGSL ".wgl" code from file for the Shader.
+func (sh *Shader) OpenFile(fname string) error {
 	if sh.Name == "" {
 		sh.Name = fname
 	}
 	b, err := os.ReadFile(fname)
 	if err != nil {
-		log.Printf("gpu.Shader OpenFile: %s\n", err)
+		slog.Error("gpu.Shader OpenFile", err)
+		return err
+	}
+	return sh.OpenCode(dev, string(b))
+}
+
+// OpenFileFS loads given WGSL ".wgl" code from file for the Shader.
+func (sh *Shader) OpenFileFS(fsys fs.FS, fname string) error {
+	if sh.Name == "" {
+		sh.Name = fname
+	}
+	b, err := fs.ReadFile(fsys, fname)
+	if err != nil {
+		slog.Error("gpu.Shader OpenFileFS", err)
 		return err
 	}
 	return sh.OpenCode(dev, string(b))
 }
 
 // OpenCode loads given WGSL ".wgl" code for the Shader.
-func (sh *Shader) OpenCode(dev *Device, code string) error {
-	module, err := dev.Device.CreateShaderModule(&wgpu.ShaderModuleDescriptor{
+func (sh *Shader) OpenCode(code string) error {
+	module, err := sh.device.Device.CreateShaderModule(&wgpu.ShaderModuleDescriptor{
 		Label:          sh.Name,
 		WGSLDescriptor: &wgpu.ShaderModuleWGSLDescriptor{Code: code},
 	})
-	sh.Module = module
+	if err != nil {
+		slog.Error(err)
+		return err
+	}
+	sh.module = module
 	return nil
 }
 
-// Destroy destroys the shader
-func (sh *Shader) Destroy() {
-	if sh.Module == nil {
+// Release destroys the shader
+func (sh *Shader) Release() {
+	if sh.module == nil {
 		return
 	}
-	sh.Module.Release()
-	sh.Module = nil
+	sh.module.Release()
+	sh.module = nil
+}
+
+// ShaderEntry is an entry point into a Shader.  There can be multiple
+// entry points per shader.
+type ShaderEntry struct {
+	// Shader has the code
+	Shader *Shader
+
+	// Type of shader entry point.
+	Type ShaderTypes
+
+	// Entry is the name of the function to call for this Entry.
+	// Conventionally, it is some variant on "main"
+	Entry string
+}
+
+// NewShaderEntry returns a new ShaderEntry with given settings
+func NewShaderEntry(sh *Shader, typ ShaderTypes, entry string) *ShaderEntry {
+	se := &ShaderEntry{Shader: sh, Type: typ, Entry: entry}
+	return se
 }
 
 // ShaderTypes is a list of GPU shader types

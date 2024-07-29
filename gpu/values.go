@@ -41,13 +41,13 @@ type Value struct {
 	// total memory size of this value in bytes, as allocated in buffer.
 	AllocSize int
 
-	Device Device
+	device Device
 	
 	// buffer for this value, makes it accessible to the GPU
-	Buffer *wgpu.Buffer `display:"-"`
+	buffer *wgpu.Buffer `display:"-"`
 
 	// for SampledTexture Var roles, this is the Texture.
-	Texture *Texture
+	texture *Texture
 	
 	TextureOwns bool
 }
@@ -68,9 +68,7 @@ func (vl *Value) Init(vr *Var, dev *Device, idx int) {
 	vl.N = vr.ArrayN
 	vl.TextureOwns = vr.TextureOwns
 	if vr.Role >= SampledTexture {
-		vl.Texture = &Texture{} // todo: NewTexture
-		vl.Texture.Dev = dev
-		vl.Texture.Defaults()
+		vl.texture = NewTexture(dev)
 	} else {
 		vl.CreateBuffer(vr, dev)
 	}
@@ -85,7 +83,7 @@ func (vl *Value) Size() int {
 		if vl.TextureOwns {
 			return 0
 		} else {
-			return vl.Texture.Format.TotalByteSize()
+			return vl.texture.Format.TotalByteSize()
 		}
 	} else {
 		return vl.ElSize * vl.N
@@ -101,13 +99,13 @@ func (vl *Value) CreateBuffer(vr *Var, dev *Device) error {
 	}
 	sz := vl.Size()
 	if sz == 0 {
-		vl.Free()
+		vl.Release()
 		return nil
 	}
-	if sz == vl.AllocSize && vl.Buffer != nil {
+	if sz == vl.AllocSize && vl.buffer != nil {
 		return nil
 	}
-	vl.Free()
+	vl.Release()
 	buf, err := dev.Device.CreateBuffer(&wgpu.BufferDescriptor{
 		Size:             uint64(sz),
 		Label:            Name,
@@ -119,25 +117,25 @@ func (vl *Value) CreateBuffer(vr *Var, dev *Device) error {
 		return err
 	}
 	vl.AllocSize = sz
-	vl.Buffer = buf
+	vl.buffer = buf
 	return nil
 }
 
-// Free releases the buffer / texture for this value
-func (vl *Value) Free() {
-	if vl.Buffer != nil {
-		vl.Buffer.Release()
-		vl.Buffer = nil
+// Release releases the buffer / texture for this value
+func (vl *Value) Release() {
+	if vl.buffer != nil {
+		vl.buffer.Release()
+		vl.buffer = nil
 	}
-	if vl.Texture != nil {
-		vl.Texture.Destroy()
-		vl.Texture = nil
+	if vl.texture != nil {
+		vl.texture.Release()
+		vl.texture = nil
 	}
 }
 
 // NilBufferCheckCheck checks if buffer is nil, returning error if so
 func (vl *Value) NilBufferCheck() error {
-	if vl.Buffer == nil {
+	if vl.buffer == nil {
 		return fmt.Errorf("gpu.Value NilBufferCheck: buffer is nil for value: %s", vl.Name)
 	}
 	return nil
@@ -158,14 +156,14 @@ func (vl *Value) SetFromBytesAsync(from []byte) error {
 		slog.Error(err)
 		return err
 	}
-	vl.Buffer.MapAsync(wgpu.MapMode_Write, 0, vl.AllocSize, func(stat BufferMapAsyncStatus) {
+	vl.buffer.MapAsync(wgpu.MapMode_Write, 0, vl.AllocSize, func(stat BufferMapAsyncStatus) {
 		if stat != wgpu.BufferMapAsyncStatus_Success {
 			err = return fmt.Errorf("gpu.Value SetFromBytesAsync: %s for value: %s", stat.String(), vl.Name)
 			return
 		}
-		bm := vl.Buffer.GetMappedRange(0, vl.AllocSize)
+		bm := vl.buffer.GetMappedRange(0, vl.AllocSize)
 		copy(bm, from)
-		vl.Buffer.Unmap()
+		vl.buffer.Unmap()
 	})
 	return err
 }
@@ -185,14 +183,14 @@ func (vl *Value) CopyToBytesAsync(dest []byte) error {
 		slog.Error(err)
 		return err
 	}
-	vl.Buffer.MapAsync(wgpu.MapMode_Read, 0, vl.AllocSize, func(stat BufferMapAsyncStatus) {
+	vl.buffer.MapAsync(wgpu.MapMode_Read, 0, vl.AllocSize, func(stat BufferMapAsyncStatus) {
 		if stat != wgpu.BufferMapAsyncStatus_Success {
 			err = return fmt.Errorf("gpu.Value CopyToBytesAsync: %s for value: %s", stat.String(), vl.Name)
 			return
 		}
-		bm := vl.Buffer.GetMappedRange(0, vl.AllocSize)
+		bm := vl.buffer.GetMappedRange(0, vl.AllocSize)
 		copy(dest, bm)
-		vl.Buffer.Unmap()
+		vl.buffer.Unmap()
 	})
 	return err
 }
@@ -202,49 +200,30 @@ func (vl *Value) BindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 		return []wgpu.BindGroupEntry{
 			{
 				Binding:     vr.Binding,
-				TextureView: vl.Texture.View
+				TextureView: vl.texture.View
 			},
 			{
 				Binding: vr.Binding+1,
-				Sampler: vl.Texture.Sampler,
+				Sampler: vl.texture.Sampler,
 			},
 		}
 	}
 	return []wgpu.BindGroupEntry{{
 			Binding: vr.Binding,
-			Buffer:  vl.Buffer,
+			Buffer:  vl.buffer,
 			Size:    wgpu.WholeSize,
 		},
 	}
 }
 
-// SetGoImage sets Texture image data from an *image.RGBA standard Go image,
-// at given layer, and sets the Mod flag, so it will be sync'd by Memory
-// or if TextureOwns is set for the var, it allocates Host memory.
-// This is most efficiently done using an image.RGBA, but other
+// SetGoImage sets Texture image data from an image.Image standard Go image,
+// at given layer. This is most efficiently done using an image.RGBA, but other
 // formats will be converted as necessary.
 // If flipY is true then the Texture Y axis is flipped when copying into
-// the image data (requires row-by-row copy) -- can avoid this
-// by configuring texture coordinates to compensate.
-func (vl *Value) SetGoImage(img image.Texture, layer int, flipY bool) error {
-	if vl.HasFlag(ValueTextureOwns) {
-		if layer == 0 && vl.Texture.Format.Layers <= 1 {
-			vl.Texture.ConfigGoImage(img.Bounds().Size(), layer+1)
-		}
-		vl.Texture.AllocMem()
-	}
-	err := vl.Texture.SetGoImage(img, layer, flipY)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		vl.SetMod()
-	}
-	if vl.HasFlag(ValueTextureOwns) {
-		vl.Texture.AllocTexture()
-		// svimg, _ := vl.Texture.GoImage()
-		// images.Save(svimg, fmt.Sprintf("dimg_%d.png", vl.Index))
-	}
-	return err
+// the image data.  Can avoid this by configuring texture coordinates to
+// compensate.
+func (vl *Value) SetGoImage(img image.Image, layer int, flipY bool) error {
+	return vl.texture.SetGoImage(img, layer, flipY)
 }
 
 //////////////////////////////////////////////////////////////////
@@ -344,9 +323,9 @@ func (vs *Values) Free() {
 	}
 }
 
-// Destroy frees all existing values and resets the list of Values so subsequent
+// Release frees all existing values and resets the list of Values so subsequent
 // Config will start fresh (e.g., if Var type changes).
-func (vs *Values) Destroy() {
+func (vs *Values) Release() {
 	vs.Free()
 	vs.Values = nil
 	vs.NameMap = nil

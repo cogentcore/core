@@ -126,7 +126,7 @@ void main() {
 * `New` returns a new object
 * `Init` operates on existing object, doing initialization needed for subsequent setting of options
 * `Config` operates on an existing object and settings, and does everything to get it configured for use.
-* `Destroy` destroys allocated WebGPU objects
+* `Release` releases allocated WebGPU objects
 * `Alloc` is for allocating memory (vs. making a new object)
 * `Free` is for freeing memory (vs. destroying an object)
 

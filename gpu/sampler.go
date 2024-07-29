@@ -21,9 +21,9 @@ func (tx *SampledTexture) Defaults() {
 	tx.Sampler.Defaults()
 }
 
-func (tx *SampledTexture) Destroy() {
-	tx.Sampler.Destroy()
-	tx.Texture.Destroy()
+func (tx *SampledTexture) Release() {
+	tx.Sampler.Release()
+	tx.Texture.Release()
 }
 
 // AllocSampledTexture allocates texture device image, stdview, and sampler
@@ -66,7 +66,7 @@ func (sm *Sampler) Defaults() {
 
 // Config configures sampler on device
 func (sm *Sampler) Config(dev *Device) error {
-	sm.Destroy()
+	sm.Release()
 	samp, err = dev.Device.CreateSampler(&wgpu.SamplerDescriptor{
 		AddressModeU:   sm.UMode.Mode(),
 		AddressModeV:   sm.VMode.Mode(),
@@ -91,7 +91,7 @@ func (sm *Sampler) Config(dev *Device) error {
 	return nil
 }
 
-func (sm *Sampler) Destroy() {
+func (sm *Sampler) Release() {
 	if sm.Sampler != nil {
 		sm.Sampler.Release()
 		sm.Sampler = nil
