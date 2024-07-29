@@ -6,8 +6,10 @@ package gpu
 
 import (
 	"fmt"
-	"log"
+	"image/color"
+	"log/slog"
 
+	"cogentcore.org/core/colors"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -32,7 +34,7 @@ type System struct {
 	Compute bool
 
 	// GraphicsPipelines by name
-	GraphicsPipelines map[string]*GraphicsPipelines
+	GraphicsPipelines map[string]*GraphicsPipeline
 
 	// map of events for synchronizing processing within a single command stream -- this is the best method for compute shaders to coordinate within a given sequence of shader runs in a single command stream
 	// Events map[string]vk.Event
@@ -63,7 +65,7 @@ type System struct {
 // the graphics device from the Surface associated with this system.
 func (sy *System) InitGraphics(gp *GPU, name string, dev *Device) error {
 	sy.GPU = gp
-	sy.Render.Sys = sy
+	sy.Render.sys = sy
 	sy.Name = name
 	sy.Compute = false
 	sy.device = *dev
@@ -74,16 +76,25 @@ func (sy *System) InitGraphics(gp *GPU, name string, dev *Device) error {
 // which creates its own Compute device.
 func (sy *System) InitCompute(gp *GPU, name string) error {
 	sy.GPU = gp
-	sy.Render.Sys = sy
+	sy.Render.sys = sy
 	sy.Name = name
 	sy.Compute = true
-	sy.device = *NewDevice(gp)
+	dev, err := NewDevice(gp)
+	if err != nil {
+		return err
+	}
+	sy.device = *dev
 	// sy.NewFence("ComputeWait") // always have this named fence avail for wait
 	return nil
 }
 
-func (sy *System) NewCommandEncoder() *vgpu.CommandEncoder {
-	return sy.device.Device.CreateCommandEncoder(nil)
+func (sy *System) NewCommandEncoder() *wgpu.CommandEncoder {
+	ce, err := sy.device.Device.CreateCommandEncoder(nil)
+	if err != nil {
+		slog.Error(err.Error())
+		return nil
+	}
+	return ce
 }
 
 func (sy *System) Release() {
@@ -99,7 +110,7 @@ func (sy *System) Release() {
 	// 	vk.ReleaseFence(sy.device.Device, fc, nil)
 	// }
 	// sy.Fences = nil
-	sy.CmdBuffs = nil
+	// sy.CmdBuffs = nil
 	if sy.GraphicsPipelines != nil {
 		for _, pl := range sy.GraphicsPipelines {
 			pl.Release()
@@ -120,9 +131,10 @@ func (sy *System) AddGraphicsPipeline(name string) *GraphicsPipeline {
 	if sy.GraphicsPipelines == nil {
 		sy.GraphicsPipelines = make(map[string]*GraphicsPipeline)
 	}
-	pl := NweGraphicsPipeline(name)
+	pl := NewGraphicsPipeline(name)
 	pl.Init(sy)
 	sy.GraphicsPipelines[pl.Name] = pl
+	return pl
 }
 
 /*
@@ -210,33 +222,33 @@ func (sy *System) CmdBuffByNameTry(name string) (*wgpu.CommandEncoder, error) {
 	// 	return nil, err
 	// }
 	// return cb, nil
-	return nil
+	return nil, nil
 }
 
 // ConfigRender configures the renderpass, including the image
 // format that we're rendering to, for a surface render target,
 // and the depth buffer format (pass UndefType for no depth buffer).
-func (sy *System) ConfigRender(depthFmt Types) {
-	sy.Render.Config(sy.device.Device, depthFmt, false)
+func (sy *System) ConfigRender(imgFmt *TextureFormat, depthFmt Types) {
+	sy.Render.Config(&sy.device, imgFmt, depthFmt, false)
 }
 
 // ConfigRenderNonSurface configures the renderpass, including the image
 // format that we're rendering to, for a RenderFrame non-surface target,
 // and the depth buffer format (pass UndefType for no depth buffer).
-func (sy *System) ConfigRenderNonSurface(depthFmt Types) {
-	sy.Render.Config(sy.device.Device, depthFmt, true)
+func (sy *System) ConfigRenderNonSurface(imgFmt *TextureFormat, depthFmt Types) {
+	sy.Render.Config(&sy.device, imgFmt, depthFmt, true)
 }
 
 // Config configures the entire system, after everything has been
 // setup (Pipelines, Vars, etc).
 func (sy *System) Config() {
-	sy.Vars.Config(sy.device.Device)
+	sy.Vars.Config(&sy.device)
 	if Debug {
-		fmt.Printf("%s\n", sy.Vars().StringDoc())
+		fmt.Printf("%s\n", sy.Vars.StringDoc())
 	}
-	if pl.GraphicsPipelines != nil {
+	if sy.GraphicsPipelines != nil {
 		for _, pl := range sy.GraphicsPipelines {
-			pl.Config(rebuild)
+			pl.Config(true)
 		}
 	}
 }
@@ -250,7 +262,7 @@ func (sy *System) SetGraphicsDefaults() *System {
 	for _, pl := range sy.GraphicsPipelines {
 		pl.SetGraphicsDefaults()
 	}
-	sy.SetClearColor(0, 0, 0, 1)
+	sy.SetClearColor(colors.Black)
 	sy.SetClearDepthStencil(1, 0)
 	return sy
 }
@@ -315,8 +327,8 @@ func (sy *System) SetColorBlend(alphaBlend bool) *System {
 
 // SetClearColor sets the RGBA colors to set when starting new render
 // For all pipelines, to keep graphics settings consistent.
-func (sy *System) SetClearColor(r, g, b, a float32) *System {
-	sy.Render.SetClearColor(r, g, b, a)
+func (sy *System) SetClearColor(c color.Color) *System {
+	sy.Render.ClearColor = c
 	return sy
 }
 
@@ -361,7 +373,7 @@ func (sy *System) CmdResetBindVars(cmd *wgpu.CommandEncoder, descIndex int) {
 // BeginRenderPass adds commands to the given command buffer
 // to start the render pass on given TextureView.
 // Clears the frame first, according to the ClearValues.
-func (sy *System) BeginRenderPass(cmd *wgpu.CommandEncoder, view *TextureView) *wgpu.RenderPass {
+func (sy *System) BeginRenderPass(cmd *wgpu.CommandEncoder, view *wgpu.TextureView) *wgpu.RenderPassEncoder {
 	// sy.CmdBindVars(cmd, descIndex)
 	return sy.Render.BeginRenderPass(cmd, view)
 }
@@ -371,7 +383,7 @@ func (sy *System) BeginRenderPass(cmd *wgpu.CommandEncoder, view *TextureView) *
 // does NOT clear the frame first -- loads prior state.
 // Also Binds descriptor sets to command buffer for given collection
 // of descriptors descIndex (see Vars NDescs for info).
-func (sy *System) BeginRenderPassNoClear(cmd *wgpu.CommandEncoder, view *TextureView) *wgpu.RenderPass {
+func (sy *System) BeginRenderPassNoClear(cmd *wgpu.CommandEncoder, view *wgpu.TextureView) *wgpu.RenderPassEncoder {
 	// sy.CmdBindVars(cmd, descIndex)
 	return sy.Render.BeginRenderPassNoClear(cmd, view)
 }
@@ -382,7 +394,7 @@ func (sy *System) BeginRenderPassNoClear(cmd *wgpu.CommandEncoder, view *Texture
 func (sy *System) EndRenderPass(cmd *wgpu.CommandEncoder) {
 	// Note that ending the renderpass changes the image's layout from
 	// vk.TextureLayoutColorAttachmentOptimal to vk.TextureLayoutPresentSrc
-	vk.CmdEndRenderPass(cmd)
+	// vk.CmdEndRenderPass(cmd)
 }
 
 /////////////////////////////////////////////
@@ -390,5 +402,5 @@ func (sy *System) EndRenderPass(cmd *wgpu.CommandEncoder) {
 
 // CmdSubmitWait does SubmitWait on CmdPool
 func (sy *System) CmdSubmitWait() {
-	sy.CmdPool.SubmitWait(&sy.device)
+	// sy.CmdPool.SubmitWait(&sy.device)
 }

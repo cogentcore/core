@@ -5,12 +5,9 @@
 package gpu
 
 import (
-	"fmt"
 	"image"
 	"log/slog"
-	"unsafe"
 
-	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/enums"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
@@ -44,8 +41,8 @@ type Texture struct {
 
 func NewTexture(dev *Device) *Texture {
 	tx := &Texture{}
-	tx.device = dev
-	tx.Defaults()
+	tx.device = *dev
+	tx.Format.Defaults()
 	return tx
 }
 
@@ -68,11 +65,6 @@ func (tx *Texture) IsActive() bool {
 // IsTextureOwner returns true if the vk.Texture is owned by us
 func (tx *Texture) IsTextureOwner() bool {
 	return tx.HasFlag(TextureOwnsTexture)
-}
-
-// IsValue returns true if the texture belongs to a Value
-func (tx *Texture) IsValue() bool {
-	return tx.HasFlag(TextureIsValue)
 }
 
 /*
@@ -180,7 +172,7 @@ func (tx *Texture) UnmapDev() {
 // of the given size. Texture format will be set to default
 // unless format is already set.  Layers is number of separate textures
 // of given size allocated in a texture array.
-func (tx *Texture) ConfigGoImage(sz texture.Point, layers int) {
+func (tx *Texture) ConfigGoImage(sz image.Point, layers int) {
 	if tx.Format.Format != wgpu.TextureFormat_RGBA8UnormSrgb {
 		tx.Format.Defaults()
 	}
@@ -233,7 +225,7 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int, flipY bool) error 
 		Usage:         wgpu.TextureUsage_TextureBinding | wgpu.TextureUsage_CopyDst,
 	})
 	if err != nil {
-		slog.Error(err)
+		slog.Error(err.Error())
 		return err
 	}
 	tx.texture = t
@@ -257,7 +249,7 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int, flipY bool) error 
 
 	vw, err := t.CreateView(nil)
 	if err != nil {
-		return
+		return err
 	}
 	tx.view = vw
 	return nil
@@ -284,7 +276,7 @@ func (tx *Texture) ConfigFramebuffer(dev *Device, imgFmt *TextureFormat) {
 // from the render texture format.
 func (tx *Texture) ConfigDepth(dev *Device, depthType Types, imgFmt *TextureFormat) {
 	tx.device = *dev
-	tx.Format.Format = depthType.Format()
+	tx.Format.Format = depthType.TextureFormat()
 	tx.Format.Samples = imgFmt.Samples
 	tx.Format.Layers = 1
 	tx.SetFlag(true, DepthTexture)
@@ -379,7 +371,7 @@ func (tx *Texture) ReleaseTexture() {
 		return
 	}
 	tx.SetFlag(false, TextureOwnsTexture)
-	vk.texture.Release()
+	tx.texture.Release()
 	tx.texture = nil
 }
 
@@ -399,7 +391,7 @@ func (tx *Texture) SetNil() {
 // SetSize sets the size. If the size is not the same as current,
 // and Texture owns the Host and / or Texture, then those are resized.
 // returns true if resized.
-func (tx *Texture) SetSize(size texture.Point) bool {
+func (tx *Texture) SetSize(size image.Point) bool {
 	if tx.Format.Size == size {
 		return false
 	}

@@ -6,11 +6,10 @@ package gpu
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"strconv"
 
-	"cogentcore.org/core/vgpu/szalloc"
+	"cogentcore.org/core/base/errors"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -22,9 +21,9 @@ const (
 	// which have special treatment.
 	VertexGroup = -2
 
-	// PushGroup is the group number for Push Constants, which 
+	// PushGroup is the group number for Push Constants, which
 	// do not appear in the BindGroupLayout and are managed separately.
-	PushGroup   = -1
+	PushGroup = -1
 )
 
 // VarGroup contains a group of Var variables, accessed via @group number
@@ -35,7 +34,7 @@ type VarGroup struct {
 
 	// Name of this group: GroupX by default
 	Name string
-	
+
 	// Group index is assigned sequentially, with special VertexGroup and
 	// PushGroup having negative numbers, not accessed via @group in shader.
 	Group int
@@ -52,8 +51,8 @@ type VarGroup struct {
 
 	// group layout info: description of each var type, role, binding, stages
 	layout *wgpu.BindGroupLayout
-	
-	Device Device
+
+	device Device
 }
 
 // AddVar adds given variable
@@ -90,14 +89,14 @@ func (vg *VarGroup) Config(dev *Device) error {
 	if vg.Name == "" {
 		switch vg.Group {
 		case VertexGroup:
-			vg.Name= "VertexGroup"
+			vg.Name = "VertexGroup"
 		case PushGroup:
 			vg.Name = "PushGroup"
 		default:
 			vg.Name = fmt.Sprintf("Group%d", vg.Group)
 		}
 	}
-	vg.Device = *dev
+	vg.device = *dev
 	vg.RoleMap = make(map[VarRoles][]*Var)
 	var errs []error
 	bnum := 0
@@ -105,13 +104,13 @@ func (vg *VarGroup) Config(dev *Device) error {
 		if vg.Group == VertexGroup && vr.Role > Index {
 			err := fmt.Errorf("gpu.VarGroup:Config VertexGroup cannot contain variables of role: %s  var: %s", vr.Role.String(), vr.Name)
 			errs = append(errs, err)
-			slog.Error(err)
+			slog.Error(err.Error())
 			continue
 		}
 		if vg.Group >= 0 && vr.Role <= Index {
 			err := fmt.Errorf("gpu.VarGroup:Config Vertex or Index Vars must be located in a VertexGroup!  Use AddVertexGroup() method instead of AddGroup()")
 			errs = append(errs, err)
-			slog.Error(err)
+			slog.Error(err.Error())
 		}
 		rl := vg.RoleMap[vr.Role]
 		rl = append(rl, vr)
@@ -119,17 +118,17 @@ func (vg *VarGroup) Config(dev *Device) error {
 		if vr.Role == Index && len(rl) > 1 {
 			err := fmt.Errorf("gpu.VarGroup:Config VertexGroup should not contain multiple Index variables: %v", rl)
 			errs = append(errs, err)
-			slog.Error(err)
+			slog.Error(err.Error())
 		}
 		if vr.Role > Storage && (len(vg.RoleMap[Uniform]) > 0 || len(vg.RoleMap[Storage]) > 0) {
 			err := fmt.Errorf("gpu.VarGroup:Config Group with dynamic Uniform or Storage variables should not contain static variables (e.g., textures): %s", vr.Role.String())
 			errs = append(errs, err)
-			slog.Error(err)
+			slog.Error(err.Error())
 		}
 		vr.Binding = bnum
 		bnum++
 		if vr.Role == Vertex && vr.Type == Float32Matrix4 { // special case
-			bnum+=3
+			bnum += 3
 		}
 		if vr.Role == SampledTexture { // sampler too
 			bnum++
@@ -156,7 +155,7 @@ func (vg *VarGroup) ReleaseLayout() {
 // number of Values.
 func (vg *VarGroup) SetNValues(nvals int) {
 	for _, vr := range vg.Vars {
-		vr.SetNValues(&vg.Device, nvals)
+		vr.SetNValues(&vg.device, nvals)
 	}
 }
 
@@ -176,29 +175,29 @@ func (vg *VarGroup) SetCurrentValue(i int) {
 func (vg *VarGroup) bindLayout(vs *Vars) error {
 	vg.ReleaseLayout()
 	var binds []wgpu.BindGroupLayoutEntry
-	nvar := len(vg.Vars)
 
 	// https://toji.dev/webgpu-best-practices/bind-groups.html
-	for vi, vr := range vg.Vars {
+	for _, vr := range vg.Vars {
 		if vr.Role == Vertex || vr.Role == Index { // shouldn't happen
 			continue
 		}
 		bd := wgpu.BindGroupLayoutEntry{
 			Binding:    uint32(vr.Binding),
-			Visibility: fr.Shaders,
+			Visibility: vr.shaders,
 		}
 		switch {
 		case vr.Role == SampledTexture:
-			bind = append(binds, wgpu.BindGroupLayoutEntry{
-					Binding:    uint32(vr.Binding),
-					Visibility: fr.Shaders,
-					bd.Texture = wgpu.TextureBindingLayout{
-						Multisampled: false,
-						ViewDimension: wgpu.TextureViewDimension_2D, // todo:
-						SampleType: wgpu.TextureSampleType_Float,
-					}
-				})
-			bd.Binding = uint32(vr.Binding+1)
+			binds = append(binds, wgpu.BindGroupLayoutEntry{
+				Binding:    uint32(vr.Binding),
+				Visibility: vr.shaders,
+				Texture: wgpu.TextureBindingLayout{
+
+					Multisampled:  false,
+					ViewDimension: wgpu.TextureViewDimension_2D, // todo:
+					SampleType:    wgpu.TextureSampleType_Float,
+				},
+			})
+			bd.Binding = uint32(vr.Binding + 1)
 			bd.Sampler = wgpu.SamplerBindingLayout{
 				Type: wgpu.SamplerBindingType_Filtering,
 			}
@@ -212,19 +211,19 @@ func (vg *VarGroup) bindLayout(vs *Vars) error {
 		binds = append(binds, bd)
 	}
 
-	bgld := BindGroupLayoutDescriptor{
-		Label:   strconv.Itoa(vs.Group),
+	bgld := wgpu.BindGroupLayoutDescriptor{
+		Label:   strconv.Itoa(vg.Group),
 		Entries: binds,
 	}
 
-	bgl, err := dev.Device.CreateBindGroupLayout(&bgld)
+	bgl, err := vg.device.Device.CreateBindGroupLayout(&bgld)
 	if err != nil {
-		slog.Error(err)
+		slog.Error(err.Error())
 		return err
 	}
 	vg.layout = bgl
+	return nil
 }
-
 
 // vertexLayout returns the VertexBufferLayout based on Vertex role
 // variables within this VertexGroup.
@@ -241,40 +240,40 @@ func (vg *VarGroup) vertexLayout() []wgpu.VertexBufferLayout {
 			stepMode = wgpu.VertexStepMode_Instance
 		}
 		if vr.Type == Float32Matrix4 {
-			vbls = append(fbls, wgpu.VertexBufferLayout{
+			vbls = append(vbls, wgpu.VertexBufferLayout{
 				ArrayStride: uint64(vr.SizeOf),
 				StepMode:    stepMode,
 				Attributes: []wgpu.VertexAttribute{
 					{
 						Offset:         0,
-						ShaderLocation: vr.Binding,
+						ShaderLocation: uint32(vr.Binding),
 						Format:         Float32Vector4.VertexFormat(),
 					},
 					{
 						Offset:         4,
-						ShaderLocation: vr.Binding+1,
+						ShaderLocation: uint32(vr.Binding + 1),
 						Format:         Float32Vector4.VertexFormat(),
 					},
 					{
 						Offset:         8,
-						ShaderLocation: vr.Binding+2,
+						ShaderLocation: uint32(vr.Binding + 2),
 						Format:         Float32Vector4.VertexFormat(),
 					},
 					{
 						Offset:         12,
-						ShaderLocation: vr.Binding+3,
+						ShaderLocation: uint32(vr.Binding + 3),
 						Format:         Float32Vector4.VertexFormat(),
 					},
 				},
 			})
 		} else {
-			vbls = append(fbls, wgpu.VertexBufferLayout{
+			vbls = append(vbls, wgpu.VertexBufferLayout{
 				ArrayStride: uint64(vr.SizeOf),
 				StepMode:    stepMode,
 				Attributes: []wgpu.VertexAttribute{
 					{
 						Offset:         0,
-						ShaderLocation: vr.Binding,
+						ShaderLocation: uint32(vr.Binding),
 						Format:         vr.Type.VertexFormat(),
 					},
 				},
@@ -290,14 +289,18 @@ func (vg *VarGroup) vertexLayout() []wgpu.VertexBufferLayout {
 // Only for non-VertexGroup groups.
 func (vg *VarGroup) bindGroup() *wgpu.BindGroup {
 	var bgs []wgpu.BindGroupEntry
-	for vi, vr := range vg.Vars {
-		bgs = append(vgs, vr.BindGroupEntry()...)
+	for _, vr := range vg.Vars {
+		bgs = append(bgs, vr.BindGroupEntry()...)
 	}
-	bg, err := vg.Device.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{
-		Layout: vg.layout,
+	bg, err := vg.device.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{
+		Layout:  vg.layout,
 		Entries: bgs,
-		Label: vg.Name,
+		Label:   vg.Name,
 	})
+	if err != nil {
+		slog.Error(err.Error())
+		// todo: panic?
+	}
 	return bg
 }
 
@@ -329,5 +332,3 @@ func (vs *VarGroup) VkPushConfig() []vk.PushConstantRange {
 	return ranges
 }
 */
-
-

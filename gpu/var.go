@@ -130,16 +130,16 @@ func (vr *Var) MemSize() int {
 	case n == 1 || vr.Role < Uniform:
 		return vr.SizeOf * n
 	case vr.Role == Uniform:
-		sz := MemSizeAlign(vr.SizeOf, 16) // todo: test this!
-		return sz * n
+		// sz := MemSizeAlign(vr.SizeOf, 16) // todo: test this!
+		return vr.SizeOf * n
 	default:
 		return vr.SizeOf * n
 	}
 }
 
-// Free resets the MemPtr for values, resets any self-owned resources (Textures)
-func (vr *Var) Free() {
-	vr.Values.Free()
+// Release resets the MemPtr for values, resets any self-owned resources (Textures)
+func (vr *Var) Release() {
+	vr.Values.Release()
 	// todo: free anything in var
 }
 
@@ -157,7 +157,7 @@ func (vr *Var) SetCurrentValue(i int) {
 
 // BindGroupEntry returns the BindGroupEntry for Current
 // value for this variable.
-func (vr *Var) BindGroupEntry() wgpu.BindGroupEntry {
+func (vr *Var) BindGroupEntry() []wgpu.BindGroupEntry {
 	return vr.Values.BindGroupEntry(vr)
 }
 

@@ -155,7 +155,7 @@ func (rf *RenderFrame) ReConfig() {
 // Assumes Config has been called.
 func (rf *RenderFrame) ReConfigFrames() {
 	for _, fr := range rf.Frames {
-		fr.ConfigRenderTexture(rf.GPU, rf.Device.Device, rf.Format)
+		fr.ConfigRenderTexture(rf.GPU, &rf.Device, rf.Format)
 		fr.ConfigRender(rf.Render)
 	}
 }
@@ -194,7 +194,7 @@ func (rf *RenderFrame) SubmitRender(cmd *wgpu.CommandEncoder) {
 
 // WaitForRender waits until the last submitted render completes
 func (rf *RenderFrame) WaitForRender() {
-	dev := rf.Device.Device
+	// dev := rf.Device.Device
 	// vk.WaitForFences(dev, 1, []vk.Fence{rf.RenderFence}, vk.True, vk.MaxUint64)
 	// vk.ResetFences(dev, 1, []vk.Fence{rf.RenderFence})
 }
@@ -202,13 +202,11 @@ func (rf *RenderFrame) WaitForRender() {
 // GrabTexture grabs rendered image of given index to Framebuffer.TextureGrab.
 // must have waited for render already.
 func (rf *RenderFrame) GrabTexture(cmd *wgpu.CommandEncoder, idx int) {
-	dev := rf.Device.Device
-	rf.Frames[idx].GrabTexture(dev, cmd)
+	rf.Frames[idx].GrabTexture(&rf.Device, cmd)
 }
 
 // GrabDepthTexture grabs rendered depth image from the Render,
 // must have waited for render already.
 func (rf *RenderFrame) GrabDepthTexture(cmd *wgpu.CommandEncoder) {
-	dev := rf.Device.Device
-	rf.Render.GrabDepthTexture(dev, cmd)
+	rf.Render.GrabDepthTexture(&rf.Device, cmd)
 }

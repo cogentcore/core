@@ -10,24 +10,31 @@ import (
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
-// SampledTexture supplies a Texture and a Sampler
-type SampledTexture struct {
+// TextureSample supplies a Texture and a Sampler
+type TextureSample struct {
 	Texture
 	Sampler
 }
 
-func (tx *SampledTexture) Defaults() {
+func NewTextureSample(dev *Device) *TextureSample {
+	tx := &TextureSample{}
+	tx.device = *dev
+	tx.Format.Defaults()
+	return tx
+}
+
+func (tx *TextureSample) Defaults() {
 	tx.Texture.Format.Defaults()
 	tx.Sampler.Defaults()
 }
 
-func (tx *SampledTexture) Release() {
+func (tx *TextureSample) Release() {
 	tx.Sampler.Release()
 	tx.Texture.Release()
 }
 
-// AllocSampledTexture allocates texture device image, stdview, and sampler
-// func (tx *SampledTexture) AllocSampledTexture() {
+// AllocTextureSample allocates texture device image, stdview, and sampler
+// func (tx *TextureSample) AllocTextureSample() {
 // 	tx.AllocTexture()
 // 	if tx.Sampler.VkSampler == vk.NullSampler {
 // 		tx.Sampler.Config(tx.GPU, tx.Dev)
@@ -54,7 +61,7 @@ type Sampler struct {
 	Border BorderColors
 
 	// the WebGPU sampler
-	Sampler *wgpu.Sampler
+	sampler *wgpu.Sampler
 }
 
 func (sm *Sampler) Defaults() {
@@ -67,7 +74,7 @@ func (sm *Sampler) Defaults() {
 // Config configures sampler on device
 func (sm *Sampler) Config(dev *Device) error {
 	sm.Release()
-	samp, err = dev.Device.CreateSampler(&wgpu.SamplerDescriptor{
+	samp, err := dev.Device.CreateSampler(&wgpu.SamplerDescriptor{
 		AddressModeU:   sm.UMode.Mode(),
 		AddressModeV:   sm.VMode.Mode(),
 		AddressModeW:   sm.WMode.Mode(),
@@ -84,21 +91,21 @@ func (sm *Sampler) Config(dev *Device) error {
 	// UnnormalizedCoordinates: vk.False,
 	// CompareEnable:           vk.False,
 	if err != nil {
-		slog.Error(err)
+		slog.Error(err.Error())
 		return err
 	}
-	sm.Sampler = samp
+	sm.sampler = samp
 	return nil
 }
 
 func (sm *Sampler) Release() {
-	if sm.Sampler != nil {
-		sm.Sampler.Release()
-		sm.Sampler = nil
+	if sm.sampler != nil {
+		sm.sampler.Release()
+		sm.sampler = nil
 	}
 }
 
-// SampledTexture image sampler modes
+// TextureSample image sampler modes
 type SamplerModes int32 //enums:enum
 
 const (
@@ -106,7 +113,7 @@ const (
 	Repeat SamplerModes = iota
 
 	// Like repeat, but inverts the coordinates to mirror the image when going beyond the dimensions.
-	MirroredRepeat
+	MirrorRepeat
 
 	// Take the color of the edge closest to the coordinate beyond the image dimensions.
 	ClampToEdge
@@ -123,14 +130,14 @@ func (sm SamplerModes) Mode() wgpu.AddressMode {
 }
 
 var WebGPUSamplerModes = map[SamplerModes]wgpu.AddressMode{
-	Repeat:         wgpu.AddressMode_Repeat,
-	MirroredRepeat: wgpu.AddressMode_MirroredRepeat,
-	ClampToEdge:    wgpu.AddressMode_ClampToEdge,
+	Repeat:       wgpu.AddressMode_Repeat,
+	MirrorRepeat: wgpu.AddressMode_MirrorRepeat,
+	ClampToEdge:  wgpu.AddressMode_ClampToEdge,
 }
 
 //////////////////////////////////////////////////////
 
-// SampledTexture image sampler modes
+// TextureSample image sampler modes
 type BorderColors int32 //enums:enum -trim-prefix Border
 
 const (

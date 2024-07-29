@@ -135,7 +135,7 @@ func SetTextureSRGBToLinear(img *image.RGBA) {
 
 // ImageToRGBA returns image.RGBA version of given image
 // either because it already is one, or by converting it.
-func ImageToRGBA(img image.Texture) *image.RGBA {
+func ImageToRGBA(img image.Image) *image.RGBA {
 	rimg, ok := img.(*image.RGBA)
 	if !ok {
 		rimg = imagex.CloneAsRGBA(img)

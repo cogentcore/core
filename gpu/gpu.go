@@ -173,9 +173,9 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	gp.Instance = wgpu.CreateInstance(nil)
 
 	gpus := gp.Instance.EnumerateAdapters(nil)
-	gpIndex := gp.SelectGPU(gpus, gpuCount)
-	gp.Adapter = gpus[gpIndex]
-	props := gp.Adapter.AdapterProperties()
+	gpIndex := gp.SelectGPU(gpus)
+	gp.GPU = gpus[gpIndex]
+	props := gp.GPU.GetProperties()
 	gp.DeviceName = props.Name
 
 	// vk.GetPhysicalDeviceFeatures(gp.GPU, &gp.GPUFeats)
@@ -204,7 +204,7 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	return nil
 }
 
-func (gp *GPU) SelectGPU(gpus []wgpu.Adapter) int {
+func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 	n := len(gpus)
 	if n == 1 {
 		return 0
@@ -239,7 +239,7 @@ func (gp *GPU) SelectGPU(gpus []wgpu.Adapter) int {
 			// 	BackendType       BackendType
 			// }
 
-			props := gpus[gi].AdapterProperties()
+			props := gpus[gi].GetProperties()
 			if strings.Contains(props.Name, trgDevNm) {
 				devNm := props.Name
 				if Debug {
@@ -253,15 +253,11 @@ func (gp *GPU) SelectGPU(gpus []wgpu.Adapter) int {
 		}
 	}
 
-	devNm := ""
-	maxSz := 0
-	maxIndex := 0
 	for gi := range n {
 		// note: we could potentially check for the optional features here
 		// but generally speaking the discrete device is going to be the most
 		// feature-full, so the practical benefit is unlikely to be significant.
-		props := gpus[gi].AdapterProperties()
-		dnm := props.Name
+		props := gpus[gi].GetProperties()
 		if props.AdapterType == wgpu.AdapterType_DiscreteGPU {
 			// todo: pick one with best memory
 			// var memProperties vk.PhysicalDeviceMemoryProperties
@@ -301,11 +297,8 @@ func (gp *GPU) SelectGPU(gpus []wgpu.Adapter) int {
 // Release releases GPU resources -- call after everything else has been destroyed
 func (gp *GPU) Release() {
 	if gp.GPU != nil {
+		gp.GPU.Release()
 		gp.GPU = nil
-	}
-	if gp.Adapter != nil {
-		gp.Adapter.Release()
-		gp.Adapter = nil
 	}
 	if gp.Instance != nil {
 		gp.Instance.Release()

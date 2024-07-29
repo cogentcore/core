@@ -7,8 +7,10 @@ package gpu
 import (
 	"errors"
 	"image"
+	"image/color"
 	"log"
 
+	"cogentcore.org/core/colors"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -56,11 +58,16 @@ func (rp *Render) Release() {
 	// rp.GrabDepth.Free(rp.Dev)
 }
 
+func (rp *Render) SetSize(sz image.Point) {
+	rp.Format.Size = sz
+}
+
 // Config configures the render pass for given device,
 // Using standard parameters for graphics rendering,
 // based on the given image format and depth image format
 // (pass UndefType for no depth buffer).
-func (rp *Render) Config(dev *Device, depthFmt Types, notSurface bool) {
+func (rp *Render) Config(dev *Device, imgFmt *TextureFormat, depthFmt Types, notSurface bool) {
+	rp.Format = *imgFmt
 	rp.NotSurface = notSurface
 	rp.ClearColor = colors.Black
 	rp.SetClearDepthStencil(1, 0)
@@ -68,7 +75,7 @@ func (rp *Render) Config(dev *Device, depthFmt Types, notSurface bool) {
 
 // ClearRenderPass returns a render pass descriptor that clears the framebuffer
 func (rp *Render) ClearRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescriptor {
-	r, g, b, a := colors.ToFloat32(rp.ClearColor)
+	r, g, b, a := colors.ToFloat64(rp.ClearColor)
 	return &wgpu.RenderPassDescriptor{
 		ColorAttachments: []wgpu.RenderPassColorAttachment{{
 			View:   view,
@@ -89,8 +96,8 @@ func (rp *Render) LoadRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescrip
 	return &wgpu.RenderPassDescriptor{
 		ColorAttachments: []wgpu.RenderPassColorAttachment{{
 			View:    view,
-			LoadOp:  wgpu.LoadOpLoad,
-			StoreOp: wgpu.StoreOpStore,
+			LoadOp:  wgpu.LoadOp_Load,
+			StoreOp: wgpu.StoreOp_Store,
 		}},
 	}
 }
@@ -107,21 +114,21 @@ func (rp *Render) SetClearDepthStencil(depth float32, stencil uint32) {
 // to start the render pass on given framebuffer.
 // Clears the frame first, according to the ClearValues
 // See BeginRenderPassNoClear for non-clearing version.
-func (rp *Render) BeginRenderPass(cmd *wgpu.CommandEncoder, view *wgpu.TextureView) *wgpu.RenderPass {
+func (rp *Render) BeginRenderPass(cmd *wgpu.CommandEncoder, view *wgpu.TextureView) *wgpu.RenderPassEncoder {
 	return rp.BeginRenderPassImpl(cmd, view, true)
 }
 
 // BeginRenderPassNoClear adds commands to the given command buffer
 // to start the render pass on given framebuffer.
 // does NOT clear the frame first -- loads prior state.
-func (rp *Render) BeginRenderPassNoClear(cmd *wgpu.CommandEncoder, view *wgpu.TextureView) *wgpu.RenderPass {
+func (rp *Render) BeginRenderPassNoClear(cmd *wgpu.CommandEncoder, view *wgpu.TextureView) *wgpu.RenderPassEncoder {
 	return rp.BeginRenderPassImpl(cmd, view, false)
 }
 
 // BeginRenderPassImpl adds commands to the given command buffer
 // to start the render pass on given framebuffer.
 // If clear = true, clears the frame according to the ClearColor.
-func (rp *Render) BeginRenderPassImpl(cmd *wgpu.CommandEncoder, view *wgpu.TextureView, clear bool) *wgpu.RenderPass {
+func (rp *Render) BeginRenderPassImpl(cmd *wgpu.CommandEncoder, view *wgpu.TextureView, clear bool) *wgpu.RenderPassEncoder {
 	// w, h := fr.Texture.Format.Size32()
 	// clearValues := rp.ClearValues
 	// vrp := rp.VkClearPass
@@ -154,8 +161,7 @@ func (rp *Render) ConfigGrab(dev *Device) {
 	rp.Grab.Format = rp.Format
 	rp.Grab.Format.SetMultisample(1) // can't have for grabs
 	// rp.Grab.SetFlag(true, TextureOnHostOnly)
-	rp.Grab.Dev = dev
-	rp.Grab.GPU = rp.Sys.GPU
+	rp.Grab.device = *dev
 	// rp.Grab.AllocTexture()
 }
 
@@ -167,15 +173,14 @@ func (rp *Render) ConfigGrab(dev *Device) {
 // ConfigGrabDepth configures the GrabDepth for copying depth image
 // back to host memory.  Uses format of current Depth image.
 func (rp *Render) ConfigGrabDepth(dev *Device) {
-	bsz := rp.Format.Size.X * rp.Format.Size.Y * 4 // 32 bit = 4 bytes per pixel
-	if rp.GrabDepth.Active {
-		if rp.GrabDepth.Size == bsz {
-			return
-		}
-		rp.GrabDepth.Free(dev)
-	}
-	rp.GrabDepth.GPU = rp.Sys.GPU
-	rp.GrabDepth.Type = StorageBuffer
+	// bsz := rp.Format.Size.X * rp.Format.Size.Y * 4 // 32 bit = 4 bytes per pixel
+	// if rp.GrabDepth.Active {
+	// 	if rp.GrabDepth.Size == bsz {
+	// 		return
+	// 	}
+	// 	rp.GrabDepth.Free(dev)
+	// }
+	// rp.GrabDepth.Type = StorageBuffer
 	// rp.GrabDepth.AllocMem(dev, bsz)
 }
 
@@ -183,7 +188,7 @@ func (rp *Render) ConfigGrabDepth(dev *Device) {
 // which must have the cmdBegin called already.  Uses the GrabDepth Storage Buffer.
 // call this after: sys.MemCmdEndSubmitWaitFree()
 func (rp *Render) GrabDepthTexture(dev *Device, cmd *wgpu.CommandEncoder) error {
-	nsamp := rp.Format.NSamples()
+	nsamp := rp.Format.Samples
 	if nsamp > 1 {
 		err := errors.New("gpu.Render.GrabDepthTexture(): does not work if multisampling is > 1")
 		if Debug {

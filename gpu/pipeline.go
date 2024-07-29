@@ -4,6 +4,13 @@
 
 package gpu
 
+import (
+	"log"
+	"log/slog"
+
+	"github.com/rajveermalviya/go-webgpu/wgpu"
+)
+
 // Pipeline is the shared Base for Graphics and Compute Pipelines.
 // It manages Shader program(s) that accomplish a specific
 // type of rendering or compute function, using Vars / Values
@@ -25,7 +32,7 @@ type Pipeline struct {
 	// Entries contains the entry points into shader code,
 	// which are what is actually called.
 	Entries map[string]*ShaderEntry
-	
+
 	layout *wgpu.PipelineLayout
 }
 
@@ -90,7 +97,7 @@ func (pl *Pipeline) AddEntry(sh *Shader, typ ShaderTypes, entry string) *ShaderE
 	name := sh.Name + ":" + entry
 	if se, has := pl.Entries[name]; has {
 		slog.Error("gpu.Pipeline AddEntry", "ShaderEntry named", name, "already exists in pipline", pl.Name)
-		return sh
+		return se
 	}
 	se := NewShaderEntry(sh, typ, entry)
 	pl.Entries[name] = se
@@ -108,14 +115,16 @@ func (pl *Pipeline) ReleaseShaders() {
 
 // BindLayout configures the PipeLineLayout based on Vars
 func (pl *Pipeline) BindLayout() error {
-	lays := pl.Vars().BindLayout()
+	lays := pl.Vars().bindLayout(&pl.Sys.device)
 
-	renderPipelineLayout, err := sys.Device.Device.CreatePipelineLayout(&wgpu.PipelineLayoutDescriptor{
-		Label: Name,
-		BindGroupLayouts: lays
+	rpl, err := pl.Sys.device.Device.CreatePipelineLayout(&wgpu.PipelineLayoutDescriptor{
+		Label:            pl.Name,
+		BindGroupLayouts: lays,
 	})
 	if err != nil {
-		slog.Error(err)
+		slog.Error(err.Error())
 		return err
 	}
+	pl.layout = rpl
+	return nil
 }

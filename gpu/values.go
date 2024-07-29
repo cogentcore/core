@@ -1,4 +1,4 @@
-/ Copyright (c) 2022, Cogent Core. All rights reserved.
+// Copyright (c) 2022, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,11 +9,8 @@ import (
 	"image"
 	"log"
 	"log/slog"
-	"unsafe"
 
-	"cogentcore.org/core/enums"
-	"cogentcore.org/core/gpu/szalloc"
-	"cogentcore.org/core/math32"
+	"cogentcore.org/core/base/slicesx"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -42,13 +39,13 @@ type Value struct {
 	AllocSize int
 
 	device Device
-	
+
 	// buffer for this value, makes it accessible to the GPU
 	buffer *wgpu.Buffer `display:"-"`
 
 	// for SampledTexture Var roles, this is the Texture.
-	texture *Texture
-	
+	texture *TextureSample
+
 	TextureOwns bool
 }
 
@@ -61,30 +58,26 @@ func NewValue(vr *Var, dev *Device, idx int) *Value {
 // Init initializes value based on variable and index
 // within list of vals for this var.
 func (vl *Value) Init(vr *Var, dev *Device, idx int) {
-	vl.Device = *dev
+	vl.device = *dev
 	vl.Index = idx
 	vl.Name = fmt.Sprintf("%s_%d", vr.Name, vl.Index)
 	vl.ElSize = vr.SizeOf
 	vl.N = vr.ArrayN
 	vl.TextureOwns = vr.TextureOwns
 	if vr.Role >= SampledTexture {
-		vl.texture = NewTexture(dev)
+		vl.texture = NewTextureSample(dev)
 	} else {
 		vl.CreateBuffer(vr, dev)
 	}
 }
 
-// Size returns the memory allocation size for this value, in bytes.
-func (vl *Value) Size() int {
+// MemSize returns the memory allocation size for this value, in bytes.
+func (vl *Value) MemSize() int {
 	if vl.N == 0 {
 		vl.N = 1
 	}
-	if vr.Role == SampledTexture {
-		if vl.TextureOwns {
-			return 0
-		} else {
-			return vl.texture.Format.TotalByteSize()
-		}
+	if vl.texture != nil {
+		return vl.texture.Format.TotalByteSize()
 	} else {
 		return vl.ElSize * vl.N
 	}
@@ -97,7 +90,7 @@ func (vl *Value) CreateBuffer(vr *Var, dev *Device) error {
 	if vr.Role == SampledTexture {
 		return nil
 	}
-	sz := vl.Size()
+	sz := vl.MemSize()
 	if sz == 0 {
 		vl.Release()
 		return nil
@@ -108,12 +101,12 @@ func (vl *Value) CreateBuffer(vr *Var, dev *Device) error {
 	vl.Release()
 	buf, err := dev.Device.CreateBuffer(&wgpu.BufferDescriptor{
 		Size:             uint64(sz),
-		Label:            Name,
+		Label:            vl.Name,
 		Usage:            vr.Role.BufferUsages(),
 		MappedAtCreation: true,
 	})
 	if err != nil {
-		slog.Error(err)
+		slog.Error(err.Error())
 		return err
 	}
 	vl.AllocSize = sz
@@ -153,15 +146,16 @@ func SetValueFromAsync[E any](vl *Value, from []E) error {
 // This automatically calls Unmap() after copying.
 func (vl *Value) SetFromBytesAsync(from []byte) error {
 	if err := vl.NilBufferCheck(); err != nil {
-		slog.Error(err)
+		slog.Error(err.Error())
 		return err
 	}
-	vl.buffer.MapAsync(wgpu.MapMode_Write, 0, vl.AllocSize, func(stat BufferMapAsyncStatus) {
+	var err error
+	vl.buffer.MapAsync(wgpu.MapMode_Write, 0, uint64(vl.AllocSize), func(stat wgpu.BufferMapAsyncStatus) {
 		if stat != wgpu.BufferMapAsyncStatus_Success {
-			err = return fmt.Errorf("gpu.Value SetFromBytesAsync: %s for value: %s", stat.String(), vl.Name)
+			err = fmt.Errorf("gpu.Value SetFromBytesAsync: %s for value: %s", stat.String(), vl.Name)
 			return
 		}
-		bm := vl.buffer.GetMappedRange(0, vl.AllocSize)
+		bm := vl.buffer.GetMappedRange(0, uint(vl.AllocSize))
 		copy(bm, from)
 		vl.buffer.Unmap()
 	})
@@ -180,15 +174,16 @@ func CopyValueToBytesAsync[E any](vl *Value, dest []E) error {
 // This automatically calls Unmap() after copying.
 func (vl *Value) CopyToBytesAsync(dest []byte) error {
 	if err := vl.NilBufferCheck(); err != nil {
-		slog.Error(err)
+		slog.Error(err.Error())
 		return err
 	}
-	vl.buffer.MapAsync(wgpu.MapMode_Read, 0, vl.AllocSize, func(stat BufferMapAsyncStatus) {
+	var err error
+	vl.buffer.MapAsync(wgpu.MapMode_Read, 0, uint64(vl.AllocSize), func(stat wgpu.BufferMapAsyncStatus) {
 		if stat != wgpu.BufferMapAsyncStatus_Success {
-			err = return fmt.Errorf("gpu.Value CopyToBytesAsync: %s for value: %s", stat.String(), vl.Name)
+			err = fmt.Errorf("gpu.Value CopyToBytesAsync: %s for value: %s", stat.String(), vl.Name)
 			return
 		}
-		bm := vl.buffer.GetMappedRange(0, vl.AllocSize)
+		bm := vl.buffer.GetMappedRange(0, uint(vl.AllocSize))
 		copy(dest, bm)
 		vl.buffer.Unmap()
 	})
@@ -199,31 +194,31 @@ func (vl *Value) BindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 	if vr.Role >= SampledTexture {
 		return []wgpu.BindGroupEntry{
 			{
-				Binding:     vr.Binding,
-				TextureView: vl.texture.View
+				Binding:     uint32(vr.Binding),
+				TextureView: vl.texture.view,
 			},
 			{
-				Binding: vr.Binding+1,
-				Sampler: vl.texture.Sampler,
+				Binding: uint32(vr.Binding + 1),
+				Sampler: vl.texture.Sampler.sampler,
 			},
 		}
 	}
 	return []wgpu.BindGroupEntry{{
-			Binding: vr.Binding,
-			Buffer:  vl.buffer,
-			Size:    wgpu.WholeSize,
-		},
+		Binding: uint32(vr.Binding),
+		Buffer:  vl.buffer,
+		Size:    wgpu.WholeSize,
+	},
 	}
 }
 
-// SetGoImage sets Texture image data from an image.Image standard Go image,
+// SetFromGoImage sets Texture image data from an image.Image standard Go image,
 // at given layer. This is most efficiently done using an image.RGBA, but other
 // formats will be converted as necessary.
 // If flipY is true then the Texture Y axis is flipped when copying into
 // the image data.  Can avoid this by configuring texture coordinates to
 // compensate.
-func (vl *Value) SetGoImage(img image.Image, layer int, flipY bool) error {
-	return vl.texture.SetGoImage(img, layer, flipY)
+func (vl *Value) SetFromGoImage(img image.Image, layer int, flipY bool) error {
+	return vl.texture.SetFromGoImage(img, layer, flipY)
 }
 
 //////////////////////////////////////////////////////////////////
@@ -236,7 +231,7 @@ type Values struct {
 
 	// Current specifies the current value to use in rendering.
 	Current int
-	
+
 	// map of vals by name, only for specifically named vals
 	// vs. generically allocated ones. Names must be unique.
 	NameMap map[string]*Value
@@ -251,8 +246,8 @@ func (vs *Values) Add(vr *Var, dev *Device, name ...string) *Value {
 	vl := NewValue(vr, dev, cn)
 	vs.Values = append(vs.Values, vl)
 	if len(name) == 1 {
-		vl.Name = name
-		vs.NameMap[name] = vl
+		vl.Name = name[0]
+		vs.NameMap[vl.Name] = vl
 	}
 	return vl
 }
@@ -316,17 +311,11 @@ func (vs *Values) ValueByNameTry(name string) (*Value, error) {
 	return vl, nil
 }
 
-// Free frees all the value buffers / textures
-func (vs *Values) Free() {
-	for _, vl := range vs.Values {
-		vl.Free()
-	}
-}
-
-// Release frees all existing values and resets the list of Values so subsequent
-// Config will start fresh (e.g., if Var type changes).
+// Release frees all the value buffers / textures
 func (vs *Values) Release() {
-	vs.Free()
+	for _, vl := range vs.Values {
+		vl.Release()
+	}
 	vs.Values = nil
 	vs.NameMap = nil
 }
@@ -335,15 +324,14 @@ func (vs *Values) Release() {
 func (vs *Values) MemSize() int {
 	tsz := 0
 	for _, vl := range vs.Values {
-		tsz += vl.Size()
+		tsz += vl.MemSize()
 	}
 	return tsz
 }
 
 // BindGroupEntry returns the BindGroupEntry for Current
 // value for this variable.
-func (vs *Values) BindGroupEntry(vr *Var) wgpu.BindGroupEntry {
+func (vs *Values) BindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 	vl := vs.Values[vs.Current]
 	return vl.BindGroupEntry(vr)
 }
-

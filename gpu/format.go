@@ -77,7 +77,7 @@ func (im *TextureFormat) Set(w, h int, ft wgpu.TextureFormat) {
 
 // SetFormat sets the format using vgpu standard Types
 func (im *TextureFormat) SetFormat(ft Types) {
-	im.Format = WebGPUTypes[ft]
+	im.Format = ft.TextureFormat()
 }
 
 // SetMultisample sets the number of multisampling to decrease aliasing
@@ -110,7 +110,7 @@ func (im *TextureFormat) Bounds() image.Rectangle {
 // one Pixel (in Host memory at least).  TODO only works
 // for known formats -- need to add more as needed.
 func (im *TextureFormat) BytesPerPixel() int {
-	bpp := FormatSizes[im.Format]
+	bpp := TextureFormatSizes[im.Format]
 	if bpp > 0 {
 		return bpp
 	}

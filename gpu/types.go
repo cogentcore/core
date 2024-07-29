@@ -5,7 +5,7 @@
 package gpu
 
 import (
-	vk "github.com/goki/WebGPU"
+	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
 // See: https://www.khronos.org/opengl/wiki/Data_Type_(GLSL)
@@ -53,58 +53,88 @@ const (
 	Struct
 )
 
-// VertexFormat returns the WebGPU VertexFormat for given type
+// VertexFormat returns the WebGPU VertexFormat for given type.
 func (tp Types) VertexFormat() wgpu.VertexFormat {
 	return TypeToVertexFormat[tp]
 }
 
-// VkIndexType returns the Vulkan vk.IndexType for var
-// must be either Uint16 or Uint32
-func (tp Types) VkIndexType() vk.IndexType {
-	if tp == Uint16 {
-		return vk.IndexTypeUint16
-	}
-	return vk.IndexTypeUint32
+// TextureFormat returns the WebGPU TextureFormat for given type.
+func (tp Types) TextureFormat() wgpu.TextureFormat {
+	return TypeToTextureFormat[tp]
 }
+
+// IndexType returns the WebGPU VertexFormat for Index var.
+// must be either Uint16 or Uint32.
+// func (tp Types) IndexType() wgpu.VertexFormat {
+// 	if tp == Uint16 {
+// 		return wgpu.Vertexk.IndexTypeUint16
+// 	}
+// 	return vk.IndexTypeUint32
+// }
 
 // Bytes returns number of bytes for this type
 func (tp Types) Bytes() int {
-	switch tp {
-	case Float32Matrix4:
-		return 64
-	case Float32Matrix3:
-		return 36
-	}
-	if vf, has := WebGPUTypes[tp]; has {
-		return FormatSizes[vf]
-	}
-	return 0
+	return TypeSizes[tp]
+}
+
+var TypeToTextureFormat = map[Types]wgpu.TextureFormat{
+	TextureRGBA32: wgpu.TextureFormat_RGBA8UnormSrgb,
+	Depth32:       wgpu.TextureFormat_Depth32Float,
+	Depth24Sten8:  wgpu.TextureFormat_Depth24PlusStencil8,
 }
 
 // TextureFormatSizes gives size of known WebGPU
 // TextureFormats in bytes
 var TextureFormatSizes = map[wgpu.TextureFormat]int{
-	wgpu.TextureFormat_Undefined:          0,
-	wgpu.TextureFormat_R16Sint:            2,
-	wgpu.TextureFormat_R16Uint:            2,
-	wgpu.TextureFormat_R32Sint:            4,
-	wgpu.TextureFormat_RG32Sint:           8,
-	wgpu.TextureFormat_RGA32Sint:          16,
-	wgpu.TextureFormat_R32Uint:            4,
-	wgpu.TextureFormat_RG32Uint:           8,
-	wgpu.TextureFormat_RGBA32Uint:         16,
-	wgpu.TextureFormat_R32Float:           4,
-	wgpu.TextureFormat_RG32Float:          8,
-	wgpu.TextureFormat_RGB32Float:         12,
-	wgpu.TextureFormat_RGBA32F:            16,
-	wgpu.TextureFormat_RGBA8Sint:          4,
-	wgpu.TextureFormat_RGBA8Unorm:         4,
-	wgpu.TextureFormat_Depth32SFloat:      4,
-	wgpu.TextureFormat_Depth24UnormS8Uint: 4,
+	wgpu.TextureFormat_Undefined:           0,
+	wgpu.TextureFormat_R16Sint:             2,
+	wgpu.TextureFormat_R16Uint:             2,
+	wgpu.TextureFormat_R32Sint:             4,
+	wgpu.TextureFormat_RG32Sint:            8,
+	wgpu.TextureFormat_R32Uint:             4,
+	wgpu.TextureFormat_RG32Uint:            8,
+	wgpu.TextureFormat_RGBA32Uint:          16,
+	wgpu.TextureFormat_R32Float:            4,
+	wgpu.TextureFormat_RG32Float:           8,
+	wgpu.TextureFormat_RGBA32Float:         16,
+	wgpu.TextureFormat_RGBA8Sint:           4,
+	wgpu.TextureFormat_RGBA8Unorm:          4,
+	wgpu.TextureFormat_RGBA8UnormSrgb:      4,
+	wgpu.TextureFormat_Depth32Float:        4,
+	wgpu.TextureFormat_Depth24PlusStencil8: 4,
 }
 
-// TypeToVertexFormats maps gpu.Types to WebGPU VertexFormat
-var TypeToVertexFormats = map[Types]wgpu.VertexFormat{
+// TypeSizes gives our data type sizes in bytes
+var TypeSizes = map[Types]int{
+	Bool32: 4,
+
+	Int16:  2,
+	Uint16: 2,
+
+	Int32:        4,
+	Int32Vector2: 8,
+	Int32Vector4: 16,
+
+	Uint32:        4,
+	Uint32Vector2: 8,
+	Uint32Vector4: 16,
+
+	Float32:        4,
+	Float32Vector2: 8,
+	Float32Vector3: 12,
+	Float32Vector4: 16,
+
+	Float32Matrix4: 64,
+	Float32Matrix3: 36,
+
+	TextureRGBA32: 4,
+
+	Depth32:      4,
+	Depth24Sten8: 4,
+}
+
+// TypeToVertexFormat maps gpu.Types to WebGPU VertexFormat
+var TypeToVertexFormat = map[Types]wgpu.VertexFormat{
 	UndefType: wgpu.VertexFormat_Undefined,
 	// Bool32:         wgpu.VertexFormat_Uint32,
 	// Int16:          wgpu.VertexFormat_R16Sint,

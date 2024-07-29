@@ -46,14 +46,14 @@ func (fb *Framebuffer) ConfigSurfaceTexture(gp *GPU, dev *Device, fmt TextureFor
 // (see ConfigRender)
 func (fb *Framebuffer) ConfigRenderTexture(gp *GPU, dev *Device, fmt TextureFormat) {
 	fb.Format = fmt
-	fb.Texture.ConfigFramebuffer(gp, dev, &fmt)
+	fb.Texture.ConfigFramebuffer(dev, &fmt)
 }
 
 // ConfigRender configures for Render, assuming image is already set
 // and Configs the Framebuffer based on that.
 func (fb *Framebuffer) ConfigRender(rp *Render) {
 	fb.Render = rp
-	if fb.Texture.Dev != rp.Dev { // device must be same as renderpass
+	if fb.Texture.device.Device != rp.device.Device { // device must be same as renderpass
 		panic("gpu.Framebuffer:ConfigRender -- image and renderpass have different devices -- this will not work -- e.g., must set Surface to use System's device or vice-versa")
 	}
 	fb.Config()
@@ -134,4 +134,4 @@ func (fb *Framebuffer) GrabTexture(dev *Device, cmd *wgpu.CommandEncoder) {
 // func (fb *Framebuffer) CopyToTexture(toImg *Texture, dev *Device, cmd *wgpu.CommandEncoder) {
 // 	toImg.TransitionForDst(cmd, vk.PipelineStageTransferBit) // no idea why, but SaschaWillems does
 // 	vk.CmdCopyTexture(cmd, fb.Texture.Texture, vk.TextureLayoutTransferSrcOptimal, toImg.Texture, vk.TextureLayoutTransferDstOptimal, 1, []vk.TextureCopy{toImg.CopyTextureRec()})
-}
+// }

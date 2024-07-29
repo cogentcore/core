@@ -38,7 +38,7 @@ func (sh *Shader) OpenFile(fname string) error {
 		slog.Error("gpu.Shader OpenFile", err)
 		return err
 	}
-	return sh.OpenCode(dev, string(b))
+	return sh.OpenCode(string(b))
 }
 
 // OpenFileFS loads given WGSL ".wgl" code from file for the Shader.
@@ -51,7 +51,7 @@ func (sh *Shader) OpenFileFS(fsys fs.FS, fname string) error {
 		slog.Error("gpu.Shader OpenFileFS", err)
 		return err
 	}
-	return sh.OpenCode(dev, string(b))
+	return sh.OpenCode(string(b))
 }
 
 // OpenCode loads given WGSL ".wgl" code for the Shader.
@@ -61,7 +61,7 @@ func (sh *Shader) OpenCode(code string) error {
 		WGSLDescriptor: &wgpu.ShaderModuleWGSLDescriptor{Code: code},
 	})
 	if err != nil {
-		slog.Error(err)
+		slog.Error(err.Error())
 		return err
 	}
 	sh.module = module

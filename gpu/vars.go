@@ -37,9 +37,9 @@ type Vars struct {
 	hasPush bool `edit:"-"`
 }
 
-func (vs *Vars) Release(dev *Device) {
+func (vs *Vars) Release() {
 	for _, vg := range vs.Groups {
-		vg.Release(dev)
+		vg.Release()
 	}
 }
 
@@ -49,7 +49,7 @@ func (vs *Vars) AddVertexGroup() *VarGroup {
 	if vs.Groups == nil {
 		vs.Groups = make(map[int]*VarGroup)
 	}
-	vg := &VarGroup{Group: VertexGroup, ParentVars: vs}
+	vg := &VarGroup{Group: VertexGroup}
 	vs.Groups[VertexGroup] = vg
 	vs.hasVertex = true
 	return vg
@@ -66,7 +66,7 @@ func (vs *Vars) AddPushGroup() *VarGroup {
 	if vs.Groups == nil {
 		vs.Groups = make(map[int]*VarGroup)
 	}
-	vg := &VarGroup{Group: PushGroup, ParentVars: vs}
+	vg := &VarGroup{Group: PushGroup}
 	vs.Groups[PushGroup] = vg
 	vs.hasPush = true
 	return vg
@@ -84,7 +84,7 @@ func (vs *Vars) AddGroup() *VarGroup {
 		vs.Groups = make(map[int]*VarGroup)
 	}
 	idx := vs.NGroups()
-	vg := &VarGroup{Group: idx, ParentVars: vs}
+	vg := &VarGroup{Group: idx}
 	vs.Groups[idx] = vg
 	return vg
 }
@@ -122,8 +122,7 @@ func (vs *Vars) ValueByIndexTry(set int, varName string, valIndex int) (*Var, *V
 // Config must be called after all variables have been added.
 // Configures all Groups and also does validation, returning error
 // does DescLayout too, so all ready for Pipeline config.
-func (vs *Vars) Config() error {
-	dev := vs.Mem.Device.Device
+func (vs *Vars) Config(dev *Device) error {
 	ns := vs.NGroups()
 	var cerr error
 	vs.RoleMap = make(map[VarRoles][]*Var)
@@ -140,7 +139,7 @@ func (vs *Vars) Config() error {
 			vs.RoleMap[ri] = append(vs.RoleMap[ri], rl...)
 		}
 	}
-	vs.BindLayout(dev)
+	vs.bindLayout(dev)
 	return cerr
 }
 
@@ -210,7 +209,7 @@ func (vs *Vars) GroupTry(set int) (*VarGroup, error) {
 // VertexLayout returns WebGPU vertex layout, for VertexGroup only!
 func (vs *Vars) VertexLayout() []wgpu.VertexBufferLayout {
 	if vs.hasVertex {
-		return vs.Groups[VertexGroup].VertexLayout()
+		return vs.Groups[VertexGroup].vertexLayout()
 	}
 	return nil
 }
@@ -243,8 +242,8 @@ func (vs *Vars) bindLayout(dev *Device) []*wgpu.BindGroupLayout {
 		if vg == nil {
 			continue
 		}
-		vg.BindLayout(dev, vs)
-		lays = append(lays, vg.Layout)
+		vg.bindLayout(vs)
+		lays = append(lays, vg.layout)
 	}
 	vs.layouts = lays
 	return lays
@@ -263,12 +262,12 @@ func (vs *Vars) bindLayout(dev *Device) []*wgpu.BindGroupLayout {
 //
 // returns error if not found.
 func (vs *Vars) BindVertexValueName(varNm, valNm string) error {
-	vg := vs.Groups[VertexGroup]
-	vr, vl, err := vg.ValueByNameTry(varNm, valNm)
-	if err != nil {
-		return err
-	}
-	vr.BindValueIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
+	// vg := vs.Groups[VertexGroup]
+	// vr, vl, err := vg.ValueByNameTry(varNm, valNm)
+	// if err != nil {
+	// 	return err
+	// }
+	// vr.BindValueIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
 	return nil
 }
 
@@ -285,28 +284,11 @@ func (vs *Vars) BindVertexValueName(varNm, valNm string) error {
 //
 // returns error if not found.
 func (vs *Vars) BindVertexValueIndex(varNm string, valIndex int) error {
-	vg := vs.Groups[VertexGroup]
-	vr, vl, err := vg.ValueByIndexTry(varNm, valIndex)
-	if err != nil {
-		return err
-	}
-	vr.BindValueIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
+	// vg := vs.Groups[VertexGroup]
+	// vr, vl, err := vg.ValueByIndexTry(varNm, valIndex)
+	// if err != nil {
+	// 	return err
+	// }
+	// vr.BindValueIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
 	return nil
-}
-
-// Free resets the MemPtr for values, resets any self-owned resources (Textures)
-func (vs *Vars) Free(buff *Buffer) {
-	ns := vs.NGroups()
-	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.Groups[si]
-		if vg == nil || vg.Group == PushGroup {
-			continue
-		}
-		for _, vr := range vg.Vars {
-			if vr.Role.BuffType() != buff.Type {
-				continue
-			}
-			vr.Values.Free()
-		}
-	}
 }

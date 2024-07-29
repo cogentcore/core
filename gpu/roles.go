@@ -60,13 +60,8 @@ func (vr VarRoles) IsDynamic() bool {
 	return vr == Uniform || vr == Storage
 }
 
-// BuffType returns type of memory buffer for this role
-func (vr VarRoles) BuffType() BufferTypes {
-	return RoleBuffers[vr]
-}
-
 func (vr VarRoles) BindingType() wgpu.BufferBindingType {
-	return RoleBindTypes[vr]
+	return RoleBindingTypes[vr]
 }
 
 var RoleBindingTypes = map[VarRoles]wgpu.BufferBindingType{

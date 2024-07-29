@@ -6,7 +6,6 @@ package gpu
 
 import (
 	"log/slog"
-	"unsafe"
 
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
@@ -14,7 +13,7 @@ import (
 // GraphicsPipeline is a Pipeline specifically for the Graphics stack.
 // In this context, each pipeline could handle a different
 // class of materials (textures, Phong lighting, etc).
-// There must be two shader-names 
+// There must be two shader-names
 type GraphicsPipeline struct {
 	Pipeline
 
@@ -28,8 +27,9 @@ type GraphicsPipeline struct {
 }
 
 // NewGraphicsPipeline returns a new GraphicsPipeline.
-func NewGraphicsPipeline(name string) *Pipeline {
-	pl := &Pipeline{Name: name}
+func NewGraphicsPipeline(name string) *GraphicsPipeline {
+	pl := &GraphicsPipeline{}
+	pl.Name = name
 	return pl
 }
 
@@ -43,7 +43,7 @@ func (pl *GraphicsPipeline) InitPipeline() {
 	pl.SetGraphicsDefaults()
 }
 
-func (pl *GraphicsPipeline) Pipeline() *wgpu.RenderPipeline {
+func (pl *GraphicsPipeline) GPUPipeline() *wgpu.RenderPipeline {
 	if pl.renderPipeline != nil {
 		return pl.renderPipeline
 	}
@@ -73,9 +73,9 @@ func (pl *GraphicsPipeline) FragmentEntry() *ShaderEntry {
 // The rebuild flag indicates whether pipelines should rebuild,
 // e.g., based on NTextures changing.
 func (pl *GraphicsPipeline) Config(rebuild bool) error {
-	if pl.RenderPipeline != nil {
+	if pl.renderPipeline != nil {
 		if !rebuild {
-			return
+			return nil
 		}
 		pl.ReleasePipeline() // starting over: note: requires keeping shaders around
 	}
@@ -84,16 +84,16 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 		return err
 	}
 	pd := &wgpu.RenderPipelineDescriptor{
-		Label:  pl.Name,
-		Layout: pl.layout,
-		Primitive: pl.Primitive,
-		Multisample: pl.Multisample
+		Label:       pl.Name,
+		Layout:      pl.layout,
+		Primitive:   pl.Primitive,
+		Multisample: pl.Multisample,
 	}
 	ve := pl.VertexEntry()
 	if ve != nil {
 		vtxLay := pl.Vars().VertexLayout()
 		// todo: err if vtxlay is nil
-		pd.Vertex = &wgpu.VertexState{
+		pd.Vertex = wgpu.VertexState{
 			Module:     ve.Shader.module,
 			EntryPoint: ve.Entry,
 			Buffers:    vtxLay,
@@ -103,17 +103,17 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 	if fe != nil {
 		pd.Fragment = &wgpu.FragmentState{
 			Module:     ve.Shader.module,
-			EntryPoint: ve.Entry
+			EntryPoint: ve.Entry,
 			Targets: []wgpu.ColorTargetState{{
-				Format:    s.config.Format, // todo
+				Format:    pl.Sys.Render.Format.Format,
 				Blend:     &wgpu.BlendState_Replace, // todo
 				WriteMask: wgpu.ColorWriteMask_All,  // todo
 			}},
-		},
-	})
-	rp, err := s.device.CreateRenderPipeline(pd)
+		}
+	}
+	rp, err := pl.Sys.device.Device.CreateRenderPipeline(pd)
 	if err != nil {
-		slog.Error(err)
+		slog.Error(err.Error())
 		return err
 	}
 	pl.renderPipeline = rp
@@ -160,13 +160,13 @@ func (pl *GraphicsPipeline) Release() {
 }
 
 func (pl *GraphicsPipeline) ReleasePipeline() {
-	if pl.Layout != nil {
-		pl.Layout.Release()
-		pl.Layout = nil
+	if pl.layout != nil {
+		pl.layout.Release()
+		pl.layout = nil
 	}
-	if pl.RenderPipeline != nil {
-		pl.RenderPipeline.Release()
-		pl.RenderPipeline = nil
+	if pl.renderPipeline != nil {
+		pl.renderPipeline.Release()
+		pl.renderPipeline = nil
 	}
 }
 
@@ -175,7 +175,7 @@ func (pl *GraphicsPipeline) ReleasePipeline() {
 
 // SetGraphicsDefaults configures all the default settings for a
 // graphics rendering pipeline (not for a compute pipeline)
-func (pl *GraphicsPipeline) SetGraphicsDefaults()  *GraphicsPipeline {
+func (pl *GraphicsPipeline) SetGraphicsDefaults() *GraphicsPipeline {
 	pl.SetTopology(TriangleList, false)
 	pl.SetFrontFace(true)
 	pl.SetCullFace(true)
@@ -188,7 +188,7 @@ func (pl *GraphicsPipeline) SetGraphicsDefaults()  *GraphicsPipeline {
 // TriangleList is the default.
 // Also for Strip modes, restartEnable allows restarting a new
 // strip by inserting a ??
-func (pl *GraphicsPipeline) SetTopology(topo Topologies, restartEnable bool)  *GraphicsPipeline {
+func (pl *GraphicsPipeline) SetTopology(topo Topologies, restartEnable bool) *GraphicsPipeline {
 	pl.Primitive.Topology = topo.Primitive()
 	return pl
 }
@@ -206,7 +206,7 @@ func (pl *GraphicsPipeline) SetFrontFace(ccw bool) *GraphicsPipeline {
 
 // SetCullFace sets the face culling mode: true = back, false = front
 // use CullBack, CullFront constants
-func (pl *GraphicsPipeline) SetCullFace(back bool)  *GraphicsPipeline {
+func (pl *GraphicsPipeline) SetCullFace(back bool) *GraphicsPipeline {
 	cm := wgpu.CullMode_Front
 	if back {
 		cm = wgpu.CullMode_Back
@@ -215,10 +215,10 @@ func (pl *GraphicsPipeline) SetCullFace(back bool)  *GraphicsPipeline {
 	return pl
 }
 
-func (pl *GraphicsPipeline) SetMultisample(ms int)  *GraphicsPipeline {
-	pl.Multisample.Count = max(1, ms)
-	pl.Multsample.Mask = 0xFFFFFFFF // todo
-	pl.AlphaToCoverageEnabled = false // todo
+func (pl *GraphicsPipeline) SetMultisample(ms int) *GraphicsPipeline {
+	pl.Multisample.Count = uint32(max(1, ms))
+	pl.Multisample.Mask = 0xFFFFFFFF              // todo
+	pl.Multisample.AlphaToCoverageEnabled = false // todo
 	return pl
 }
 
@@ -238,7 +238,7 @@ const (
 
 // SetLineWidth sets the rendering line width -- 1 is default.
 func (pl *GraphicsPipeline) SetLineWidth(lineWidth float32) {
-// 	pl.VkConfig.PRasterizationState.LineWidth = lineWidth
+	// pl.VkConfig.PRasterizationState.LineWidth = lineWidth
 }
 
 // SetColorBlend determines the color blending function:
@@ -248,7 +248,7 @@ func (pl *GraphicsPipeline) SetColorBlend(alphaBlend bool) {
 	// todo:
 	// var cb vk.PipelineColorBlendAttachmentState
 	// cb.ColorWriteMask = 0xF
-// 
+	//
 	// if alphaBlend {
 	// 	cb.BlendEnable = vk.True
 	// 	cb.SrcColorBlendFactor = vk.BlendFactorOne // vk.BlendFactorSrcAlpha -- that is traditional
@@ -266,15 +266,6 @@ func (pl *GraphicsPipeline) SetColorBlend(alphaBlend bool) {
 ////////////////////////////////////////////////////////
 // Graphics render
 
-// todo: here
-
-// BindPipeline adds commands to the given command buffer to bind
-// this pipeline to command buffer.
-// System BeginRenderPass must have been called at some point before this.
-func (pl *GraphicsPipeline) BindPipeline(cmd *wgpu.CommandEncoder) {
-	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, pl.VkPipeline)
-}
-
 // Push pushes given value as a push constant for given
 // registered push constant variable.
 // Note: it is *essential* to use a local, stack variable for the push value
@@ -285,89 +276,70 @@ func (pl *GraphicsPipeline) BindPipeline(cmd *wgpu.CommandEncoder) {
 // 	vk.CmdPushConstants(cmd, vs.VkDescLayout, vk.ShaderStageFlags(vr.Shaders), uint32(vr.Offset), uint32(vr.SizeOf), val)
 // }
 
-// Draw adds CmdDraw command to the given command buffer
-// BindPipeline must have been called before this.
-// SeeDrawVertex for more typical case using Vertex (and Index) variables.
-func (pl *GraphicsPipeline) Draw(cmd *wgpu.CommandEncoder, vtxCount, instanceCount, firstVtx, firstInstance int) {
-	vk.CmdDraw(cmd, uint32(vtxCount), uint32(instanceCount), uint32(firstVtx), uint32(firstInstance))
-}
-
 // DrawVertex adds commands to the given command buffer
 // to bind vertex / index values and Draw based on current BindVertexValue
 // setting for any Vertex (and associated Index) Vars,
 // for given descIndex set of descriptors (see Vars NDescs for info).
 func (pl *GraphicsPipeline) DrawVertex(cmd *wgpu.CommandEncoder, descIndex int) {
 	vs := pl.Vars()
-	if !vs.HasVertex {
+	if !vs.hasVertex {
 		return
 	}
-	st := vs.SetMap[VertexSet]
-	var offs []vk.DeviceSize
-	var idxVar *Var
-	var idxValue *Value
-	if len(st.RoleMap[Index]) == 1 {
-		idxVar = st.RoleMap[Index][0]
-		idxValue, _ = idxVar.BindValue(descIndex)
-	}
-	vtxn := 0
-	for _, vr := range st.Vars {
-		vl, err := vr.BindValue(descIndex)
-		if err != nil || vr.Role != Vertex {
-			continue
-		}
-		offs = append(offs, vk.DeviceSize(vl.Offset))
-		if vtxn == 0 {
-			vtxn = vl.N
-		} else {
-			vtxn = min(vtxn, vl.N)
-		}
-	}
-	mbuf := pl.Sys.Mem.Buffs[IndexBuffer].Dev
-	vtxbuf := make([]vk.Buffer, len(offs))
-	for i := range vtxbuf {
-		vtxbuf[i] = mbuf
-	}
-	vk.CmdBindVertexBuffers(cmd, 0, uint32(len(offs)), vtxbuf, offs)
-	if idxValue != nil {
-		vktyp := idxVar.Type.VkIndexType()
-		vk.CmdBindIndexBuffer(cmd, mbuf, vk.DeviceSize(idxValue.Offset), vktyp)
-		vk.CmdDrawIndexed(cmd, uint32(idxValue.N), 1, 0, 0, 0)
-	} else {
-		vk.CmdDraw(cmd, uint32(vtxn), 1, 0, 0)
-	}
+	// st := vs.SetMap[VertexSet]
+	// var offs []vk.DeviceSize
+	// var idxVar *Var
+	// var idxValue *Value
+	// if len(st.RoleMap[Index]) == 1 {
+	// 	idxVar = st.RoleMap[Index][0]
+	// 	idxValue, _ = idxVar.BindValue(descIndex)
+	// }
+	// vtxn := 0
+	// for _, vr := range st.Vars {
+	// 	vl, err := vr.BindValue(descIndex)
+	// 	if err != nil || vr.Role != Vertex {
+	// 		continue
+	// 	}
+	// 	offs = append(offs, vk.DeviceSize(vl.Offset))
+	// 	if vtxn == 0 {
+	// 		vtxn = vl.N
+	// 	} else {
+	// 		vtxn = min(vtxn, vl.N)
+	// 	}
+	// }
+	// mbuf := pl.Sys.Mem.Buffs[IndexBuffer].Dev
+	// vtxbuf := make([]vk.Buffer, len(offs))
+	// for i := range vtxbuf {
+	// 	vtxbuf[i] = mbuf
+	// }
+	// vk.CmdBindVertexBuffers(cmd, 0, uint32(len(offs)), vtxbuf, offs)
+	// if idxValue != nil {
+	// 	vktyp := idxVar.Type.VkIndexType()
+	// 	vk.CmdBindIndexBuffer(cmd, mbuf, vk.DeviceSize(idxValue.Offset), vktyp)
+	// 	vk.CmdDrawIndexed(cmd, uint32(idxValue.N), 1, 0, 0, 0)
+	// } else {
+	// 	vk.CmdDraw(cmd, uint32(vtxn), 1, 0, 0)
+	// }
 }
-
-// BindDrawVertex adds commands to the given command buffer
-// to bind this pipeline, and then bind vertex / index values and Draw
-// based on current vals for any Vertex (and associated Index) Vars.
-// for given descIndex set of descriptors (see Vars NDescs for info).
-// This is the standard unit of drawing between Begin and End.
-func (pl *GraphicsPipeline) BindDrawVertex(cmd *wgpu.CommandEncoder, descIndex int) {
-	pl.BindPipeline(cmd)
-	pl.DrawVertex(cmd, descIndex)
-}
-
 
 // Topologies are the different vertex topology
 type Topologies int32 //enum:enum
 
 const (
-	PointList       Topologies = iota
-	LineList                   
-	LineStrip                  
-	TriangleList               
-	TriangleStrip              
+	PointList Topologies = iota
+	LineList
+	LineStrip
+	TriangleList
+	TriangleStrip
 )
 
-func(tp Topologies) Primitive() wgpu.PrimitiveTopology {
+func (tp Topologies) Primitive() wgpu.PrimitiveTopology {
 	return WebGPUTopologies[tp]
 }
 
 var WebGPUTopologies = map[Topologies]wgpu.PrimitiveTopology{
-	PointList: wgpu.PrimitiveTopology_PointList,
-	LineList: wgpu.PrimitiveTopology_LineList,
-	LineStrip: wgpu.PrimitiveTopology_LineStrip,
-	TriangleList: wgpu.PrimitiveTopology_TriangleList
-	TriangleStrip: wgpu.PrimitiveTopology_TriangleStrip
+	PointList:     wgpu.PrimitiveTopology_PointList,
+	LineList:      wgpu.PrimitiveTopology_LineList,
+	LineStrip:     wgpu.PrimitiveTopology_LineStrip,
+	TriangleList:  wgpu.PrimitiveTopology_TriangleList,
+	TriangleStrip: wgpu.PrimitiveTopology_TriangleStrip,
 }
-

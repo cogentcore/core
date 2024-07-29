@@ -20,7 +20,7 @@ type Device struct {
 // NewDevice returns a new device for given GPU.
 // It gets the Queue for this device.
 func NewDevice(gpu *GPU) (*Device, error) {
-	wdev, err = gpu.Adapter.RequestDevice(nil)
+	wdev, err := gpu.GPU.RequestDevice(nil)
 	if err != nil {
 		return nil, err
 	}
