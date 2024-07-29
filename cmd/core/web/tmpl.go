@@ -141,9 +141,10 @@ type indexHTMLData struct {
 }
 
 // makeIndexHTML exectues [indexHTMLTmpl] based on the given configuration information,
-// base path for app resources (used in [makePages]), and optional title (used in [makePages],
-// defaults to [config.Config.Name] otherwise).
-func makeIndexHTML(c *config.Config, basePath string, title string) ([]byte, error) {
+// base path for app resources (used in [makePages]), optional title (used in [makePages],
+// defaults to [config.Config.Name] otherwise), and pre-render HTML representation of app
+// content.
+func makeIndexHTML(c *config.Config, basePath, title, preRenderHTML string) ([]byte, error) {
 	if title == "" {
 		title = c.Name
 	}
@@ -157,6 +158,7 @@ func makeIndexHTML(c *config.Config, basePath string, title string) ([]byte, err
 		Image:                  c.Web.Image,
 		VanityURL:              c.Web.VanityURL,
 		GithubVanityRepository: c.Web.GithubVanityRepository,
+		PreRenderHTML:          preRenderHTML,
 	}
 
 	b := &bytes.Buffer{}

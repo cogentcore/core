@@ -30,5 +30,6 @@ func init() {
 			os.Exit(1)
 		}
 		fmt.Println(string(h))
+		os.Exit(0)
 	})
 }

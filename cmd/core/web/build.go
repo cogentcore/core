@@ -103,7 +103,11 @@ func makeFiles(c *config.Config) error {
 		return err
 	}
 
-	iht, err := makeIndexHTML(c, "", "")
+	preRenderHTML, err := exec.Output("go", "run", "-tags", "offscreen,generatehtml", ".")
+	if err != nil {
+		return err
+	}
+	iht, err := makeIndexHTML(c, "", "", preRenderHTML)
 	if err != nil {
 		return err
 	}
@@ -176,7 +180,7 @@ func makePages(c *config.Config) error {
 		if title != c.Name {
 			title += " • " + c.Name
 		}
-		b, err := makeIndexHTML(c, wpath.BasePath(path), title)
+		b, err := makeIndexHTML(c, wpath.BasePath(path), title, "")
 		if err != nil {
 			return err
 		}
