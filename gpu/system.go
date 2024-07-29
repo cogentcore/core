@@ -61,6 +61,15 @@ type System struct {
 	configNTextures int
 }
 
+// NewGraphicsSystem returns a new System for graphics use, using
+// the graphics Device from the Surface or RenderFrame depending
+// on the target of rendering.the Surface associated with this system.
+func NewGraphicsSystem(gp *GPU, name string, dev *Device) *System {
+	sy := &System{}
+	sy.InitGraphics(gp, name, dev)
+	return sy
+}
+
 // InitGraphics initializes the System for graphics use, using
 // the graphics device from the Surface associated with this system.
 func (sy *System) InitGraphics(gp *GPU, name string, dev *Device) error {

@@ -8,6 +8,8 @@
 package gpu
 
 import (
+	"log/slog"
+
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -15,21 +17,21 @@ import (
 // of a window surface, and the swapchain for presenting images.
 type Surface struct {
 
-	// pointer to gpu device, for convenience
+	// pointer to gpu device, for convenience.
 	GPU *GPU
 
-	// device for this surface. Each window surface has its own device,
-	// configured for that surface
-	device *Device
+	// Device for this surface, which we own.
+	// Each window surface has its own device, configured for that surface.
+	Device *Device
 
-	// the Render for this Surface, typically from a System
+	// Render for this Surface, typically from a System.
 	Render *Render
 
 	// Format has the current swapchain image format and dimensions.
 	// the Size values here are definitive for the target size of the surface.
 	Format TextureFormat
 
-	// ordered list of surface formats to select
+	// ordered list of surface formats to select.
 	DesiredFormats []wgpu.TextureFormat
 
 	// number of frames to maintain in the swapchain
@@ -94,11 +96,37 @@ func (sf *Surface) Defaults() {
 func (sf *Surface) Init(gp *GPU, ws *wgpu.Surface, width, height int) error {
 	sf.GPU = gp
 	sf.surface = ws
-	sf.device, _ = gp.NewDevice() // surface owns this device
+	dev, err := gp.NewDevice() // surface owns this device
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+	sf.Device = dev
+	sf.Format.Format = ws.GetPreferredFormat(gp.GPU)
+	sf.Format.Samples = 1
 	sf.Format.Size.X = width
 	sf.Format.Size.Y = height
 	sf.ConfigSwapChain()
 	return nil
+}
+
+func (sf *Surface) AcquireNextTexture() (*wgpu.TextureView, error) {
+	return sf.swapChain.GetCurrentTextureView()
+}
+
+func (sf *Surface) SubmitRender(cmd *wgpu.CommandEncoder) error {
+	cmdBuffer, err := cmd.Finish(nil)
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+	defer cmdBuffer.Release()
+	sf.Device.Queue.Submit(cmdBuffer)
+	return nil
+}
+
+func (sf *Surface) Present() {
+	sf.swapChain.Present()
 }
 
 // ConfigSwapChain configures the swapchain for surface.
@@ -115,7 +143,9 @@ func (sf *Surface) ConfigSwapChain() error {
 		AlphaMode:   caps.AlphaModes[0],
 	}
 
-	sc, err := sf.device.Device.CreateSwapChain(sf.surface, sf.swapChainConfig)
+	sf.Format.Format = caps.Formats[0]
+
+	sc, err := sf.Device.Device.CreateSwapChain(sf.surface, sf.swapChainConfig)
 	if err != nil {
 		return err
 	}
@@ -319,9 +349,9 @@ func (sf *Surface) Release() {
 		sf.surface.Release()
 		sf.surface = nil
 	}
-	if sf.device != nil {
-		sf.device.Release()
-		sf.device = nil
+	if sf.Device != nil {
+		sf.Device.Release()
+		sf.Device = nil
 	}
 	sf.GPU = nil
 }

@@ -318,9 +318,7 @@ func (gp *GPU) NewComputeSystem(name string) *System {
 // for graphics functionality, using Device from the Surface or
 // RenderFrame depending on the target of rendering.
 func (gp *GPU) NewGraphicsSystem(name string, dev *Device) *System {
-	sy := &System{}
-	sy.InitGraphics(gp, name, dev)
-	return sy
+	return NewGraphicsSystem(gp, name, dev)
 }
 
 // NewDevice returns a new device for given GPU.

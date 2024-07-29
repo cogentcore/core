@@ -6,13 +6,15 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"runtime"
 	"time"
 
 	"cogentcore.org/core/gpu"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/rajveermalviya/go-webgpu/wgpu"
+	wgpuext_glfw "github.com/rajveermalviya/go-webgpu/wgpuext/glfw"
 )
 
 func init() {
@@ -41,12 +43,15 @@ func main() {
 
 	fmt.Printf("format: %s\n", sf.Format.String())
 
-	sy := gp.NewGraphicsSystem("drawtri", &sf.Device)
-	pl := sy.AddGraphicPipeline("drawtri")
-	sy.ConfigRender(gpu.UndefType)
+	sy := gp.NewGraphicsSystem("drawtri", sf.Device)
+	pl := sy.AddGraphicsPipeline("drawtri")
+	sy.ConfigRender(&sf.Format, gpu.UndefType)
+	pl.Primitive.CullMode = wgpu.CullMode_None
+	// sy.SetCullMode(wgpu.CullMode_None)
 	// sf.SetRender(&sy.Render)
 
-	sh := pl.AddShader("trianglelit").OpenFile("trianglelit.wgl")
+	sh := pl.AddShader("trianglelit")
+	sh.OpenFile("trianglelit.wgsl")
 	pl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	pl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
@@ -59,7 +64,7 @@ func main() {
 		sy.Release()
 		sf.Release()
 		gp.Release()
-		window.Release()
+		window.Destroy()
 		gpu.Terminate()
 	}
 
@@ -69,20 +74,21 @@ func main() {
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
-		view, ok := sf.AcquireNextTexture()
-		if !ok {
+		view, err := sf.AcquireNextTexture()
+		if err != nil {
+			slog.Error(err.Error())
 			return
 		}
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
 		cmd := sy.NewCommandEncoder()
 		rp := sy.BeginRenderPass(cmd, view)
 		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
-		rp.SetPipeline(pl.Pipeline())
+		pl.BindPipeline(rp)
 		rp.Draw(3, 1, 0, 0)
-		sy.EndRenderPass(cmd)
+		rp.End()
 		sf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
-		sf.PresentTexture(idx)
+		sf.Present()
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++
 		eTime := time.Now()
@@ -97,7 +103,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 600
+	fpsDelay := time.Second / 6
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

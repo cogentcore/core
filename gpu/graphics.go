@@ -43,16 +43,17 @@ func (pl *GraphicsPipeline) InitPipeline() {
 	pl.SetGraphicsDefaults()
 }
 
-func (pl *GraphicsPipeline) GPUPipeline() *wgpu.RenderPipeline {
+func (pl *GraphicsPipeline) BindPipeline(rp *wgpu.RenderPassEncoder) error {
 	if pl.renderPipeline != nil {
-		return pl.renderPipeline
+		rp.SetPipeline(pl.renderPipeline)
+		return nil
 	}
 	err := pl.Config(false)
 	if err == nil {
-		return pl.renderPipeline
+		rp.SetPipeline(pl.renderPipeline)
+		return nil
 	}
-	panic(err)
-	return nil
+	return err
 }
 
 // VertexEntry returns the [ShaderEntry] for [VertexShader].
@@ -102,8 +103,8 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 	fe := pl.FragmentEntry()
 	if fe != nil {
 		pd.Fragment = &wgpu.FragmentState{
-			Module:     ve.Shader.module,
-			EntryPoint: ve.Entry,
+			Module:     fe.Shader.module,
+			EntryPoint: fe.Entry,
 			Targets: []wgpu.ColorTargetState{{
 				Format:    pl.Sys.Render.Format.Format,
 				Blend:     &wgpu.BlendState_Replace, // todo
@@ -180,6 +181,7 @@ func (pl *GraphicsPipeline) SetGraphicsDefaults() *GraphicsPipeline {
 	pl.SetFrontFace(true)
 	pl.SetCullFace(true)
 	pl.SetColorBlend(true) // alpha blending
+	pl.SetMultisample(1)
 	// pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 	return pl
 }

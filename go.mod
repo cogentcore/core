@@ -31,6 +31,7 @@ require (
 	github.com/muesli/termenv v0.15.2
 	github.com/nsf/termbox-go v1.1.1
 	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
+	github.com/rajveermalviya/go-webgpu v0.17.1
 	github.com/stretchr/testify v1.9.0
 	github.com/zergon321/reisen v0.1.9
 	golang.org/x/crypto v0.24.0

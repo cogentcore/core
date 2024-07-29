@@ -46,6 +46,7 @@ const (
 	Float32Matrix3 // std transform matrix: math32.Matrix3 works directly
 
 	TextureRGBA32 // 32 bits with 8 bits per component of R,G,B,A -- std image format
+	TextureBGRA32
 
 	Depth32      // standard float32 depth buffer
 	Depth24Sten8 // standard 24 bit float with 8 bit stencil
@@ -79,6 +80,7 @@ func (tp Types) Bytes() int {
 
 var TypeToTextureFormat = map[Types]wgpu.TextureFormat{
 	TextureRGBA32: wgpu.TextureFormat_RGBA8UnormSrgb,
+	TextureBGRA32: wgpu.TextureFormat_BGRA8UnormSrgb,
 	Depth32:       wgpu.TextureFormat_Depth32Float,
 	Depth24Sten8:  wgpu.TextureFormat_Depth24PlusStencil8,
 }
@@ -100,6 +102,8 @@ var TextureFormatSizes = map[wgpu.TextureFormat]int{
 	wgpu.TextureFormat_RGBA8Sint:           4,
 	wgpu.TextureFormat_RGBA8Unorm:          4,
 	wgpu.TextureFormat_RGBA8UnormSrgb:      4,
+	wgpu.TextureFormat_BGRA8Unorm:          4,
+	wgpu.TextureFormat_BGRA8UnormSrgb:      4,
 	wgpu.TextureFormat_Depth32Float:        4,
 	wgpu.TextureFormat_Depth24PlusStencil8: 4,
 }
