@@ -87,18 +87,18 @@ func main() {
 
 	camv := ugp.AddStruct("Camera", gpu.Float32Matrix4.Bytes()*3, 1, gpu.VertexShader)
 
-	vgp.SetNValues(1) // one val per var
-	ugp.SetNValues(1) // one val per var
+	vgp.SetNValues(1)
+	ugp.SetNValues(1)
 	sy.Config()
 
 	triPos := posv.Values.Values[0]
-	gpu.SetValueFrom(triPos, []float32{0,
+	gpu.SetValueFrom(triPos, []float32{
 		-0.5, 0.5, 0.0,
 		0.5, 0.5, 0.0,
 		0.0, -0.5, 0.0}) // negative point is UP in native Vulkan
 
 	triClr := clrv.Values.Values[0]
-	gpu.SetValueFrom(triClr, []float32{0,
+	gpu.SetValueFrom(triClr, []float32{
 		1.0, 0.0, 0.0,
 		0.0, 1.0, 0.0,
 		0.0, 0.0, 1.0})
