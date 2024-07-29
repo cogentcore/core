@@ -236,12 +236,6 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 					w.SetType(ButtonAction)
 					w.Styler(func(s *styles.Style) {
 						s.Justify.Content = styles.Start
-						s.Justify.Items = styles.Start
-					})
-					tree.AddChildInit(w, "indicator-stretch", func(w *Stretch) {
-						w.Styler(func(s *styles.Style) {
-							s.Grow.Set(1, 0)
-						})
 					})
 					w.OnClick(func(e events.Event) {
 						tb.SortColumn(fli)
