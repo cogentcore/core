@@ -12,9 +12,7 @@ import (
 
 	"cogentcore.org/core/gpu"
 
-	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
-	wgpuext_glfw "github.com/rajveermalviya/go-webgpu/wgpuext/glfw"
 )
 
 func init() {
@@ -23,21 +21,15 @@ func init() {
 }
 
 func main() {
-	if gpu.Init() != nil {
-		return
-	}
-
-	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
-	window, err := glfw.CreateWindow(1024, 768, "Draw Triangle", nil, nil)
-	if err != nil {
-		panic(err)
-	}
-
 	gp := gpu.NewGPU()
 	gp.Config("drawtri")
 
-	sp := gp.Instance.CreateSurface(wgpuext_glfw.GetSurfaceDescriptor(window))
-	width, height := window.GetSize()
+	width, height := 1024, 768
+	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Triangle")
+	if err != nil {
+		return
+	}
+
 	sf := gpu.NewSurface(gp, sp, width, height)
 
 	fmt.Printf("format: %s\n", sf.Format.String())
@@ -62,8 +54,7 @@ func main() {
 		sy.Release()
 		sf.Release()
 		gp.Release()
-		window.Destroy()
-		gpu.Terminate()
+		terminate()
 	}
 
 	frameCount := 0
@@ -110,11 +101,10 @@ func main() {
 			destroy()
 			return
 		case <-fpsTicker.C:
-			if window.ShouldClose() {
+			if !pollEvents() {
 				exitC <- struct{}{}
 				continue
 			}
-			glfw.PollEvents()
 			renderFrame()
 		}
 	}
