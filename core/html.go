@@ -11,6 +11,7 @@ import (
 	"io"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/styles"
@@ -74,6 +75,10 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		se.Name.Local = tag
 	}
 
+	if idName == "tree" {
+		return nil
+	}
+
 	addAttr(se, "id", wb.Name)
 	if se.Name.Local != "img" { // images don't render yet
 		addAttr(se, "style", styles.ToCSS(&wb.Styles))
@@ -103,9 +108,6 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		addAttr(se, "cols", "30")
 	}
 
-	// rv := reflect.ValueOf(w)
-	// uv := reflectx.Underlying(rv)
-
 	err := e.EncodeToken(*se)
 	if err != nil {
 		return err
@@ -120,8 +122,14 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		// We don't want any escaping of HTML-formatted text, so we write directly.
 		b.WriteString(w.Text)
 	case *Icon:
-		b.WriteString(string(w.Icon))
+		si := string(w.Icon)
+		// Just use the default size from the element.
+		si = strings.ReplaceAll(si, `width="48"`, "")
+		si = strings.ReplaceAll(si, `height="48"`, "")
+		b.WriteString(si)
 	case *SVG:
+		w.SVG.PhysicalWidth = wb.Styles.Min.X
+		w.SVG.PhysicalHeight = wb.Styles.Min.Y
 		sb := &bytes.Buffer{}
 		err := w.SVG.WriteXML(sb, false)
 		if err != nil {

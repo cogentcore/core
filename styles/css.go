@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 )
@@ -46,6 +47,10 @@ func ToCSS(s *Style) string {
 	add("min-height", s.Min.Y.StringCSS())
 	add("max-width", s.Max.X.StringCSS())
 	add("max-height", s.Max.Y.StringCSS())
+	if s.Grow == (math32.Vector2{}) {
+		add("width", s.Min.X.StringCSS())
+		add("height", s.Min.Y.StringCSS())
+	}
 	add("padding", s.Padding.Top.StringCSS())
 	add("margin", s.Margin.Top.StringCSS())
 	if s.Font.Size.Value != 16 || s.Font.Size.Unit != units.UnitDp {
