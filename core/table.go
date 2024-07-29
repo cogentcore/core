@@ -233,6 +233,15 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 				field := tb.visibleFields[fli]
 				tree.AddAt(p, "head-"+field.Name, func(w *Button) {
 					w.SetType(ButtonAction)
+					w.Styler(func(s *styles.Style) {
+						s.Justify.Content = styles.Start
+						s.Justify.Items = styles.Start
+					})
+					tree.AddChildInit(w, "indicator-stretch", func(w *Stretch) {
+						w.Styler(func(s *styles.Style) {
+							s.Grow.Set(1, 0)
+						})
+					})
 					w.OnClick(func(e events.Event) {
 						tb.SortColumn(fli)
 					})
@@ -252,12 +261,12 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 						tb.headerWidths[fli] = len(htxt)
 						if fli == tb.sortIndex {
 							if tb.sortDescending {
-								w.SetIcon(icons.KeyboardArrowDown)
+								w.SetIndicator(icons.KeyboardArrowDown)
 							} else {
-								w.SetIcon(icons.KeyboardArrowUp)
+								w.SetIndicator(icons.KeyboardArrowUp)
 							}
 						} else {
-							w.SetIcon(icons.Blank)
+							w.SetIndicator(icons.Blank)
 						}
 					})
 				})
