@@ -1086,8 +1086,8 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	me := xml.StartElement{}
 	me.Name.Local = "svg"
 	// todo: look for properties about units?
-	XMLAddAttr(&me.Attr, "width", sv.PhysicalWidth.String())
-	XMLAddAttr(&me.Attr, "height", sv.PhysicalHeight.String())
+	// XMLAddAttr(&me.Attr, "width", sv.PhysicalWidth.StringCSS())
+	// XMLAddAttr(&me.Attr, "height", sv.PhysicalHeight.StringCSS())
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.Root.ViewBox.Min.X, sv.Root.ViewBox.Min.Y, sv.Root.ViewBox.Size.X, sv.Root.ViewBox.Size.Y))
 	XMLAddAttr(&me.Attr, "xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape")
 	XMLAddAttr(&me.Attr, "xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd")

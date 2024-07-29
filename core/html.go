@@ -7,6 +7,7 @@ package core
 import (
 	"bytes"
 	"encoding/xml"
+	"io"
 
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -69,12 +70,19 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		return err
 	}
 
-	if text, ok := w.(*Text); ok {
+	switch w := w.(type) {
+	case *Text:
 		// We don't want any escaping of HTML-formatted text, so we write directly.
-		b.WriteString(text.Text)
-	}
-	if icon, ok := w.(*Icon); ok {
-		b.WriteString(string(icon.Icon))
+		b.WriteString(w.Text)
+	case *Icon:
+		b.WriteString(string(w.Icon))
+	case *SVG:
+		sb := &bytes.Buffer{}
+		err := w.SVG.WriteXML(sb, false)
+		if err != nil {
+			return err
+		}
+		io.Copy(b, sb)
 	}
 
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
