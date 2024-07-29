@@ -9,8 +9,10 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"reflect"
 	"strconv"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -63,6 +65,9 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	if en, ok := htmlElementNames[se.Name.Local]; ok {
 		se.Name.Local = en
 	}
+	if tag, ok := wb.Property("tag").(string); ok {
+		se.Name.Local = tag
+	}
 
 	addAttr(se, "id", wb.Name)
 	addAttr(se, "style", styles.ToCSS(&wb.Styles))
@@ -107,6 +112,9 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 			return err
 		}
 		io.Copy(b, sb)
+	}
+	if se.Name.Local == "textarea" {
+		b.WriteString(reflectx.Underlying(reflect.ValueOf(w)).FieldByName("Buffer").Interface().(fmt.Stringer).String())
 	}
 
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {

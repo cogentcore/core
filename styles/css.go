@@ -52,7 +52,13 @@ func ToCSS(s *Style) string {
 		add("font-size", s.Font.Size.StringCSS())
 	}
 	if s.Font.Family != "" && s.Font.Family != "Roboto" {
-		add("font-family", s.Font.Family)
+		ff := s.Font.Family
+		if strings.HasSuffix(ff, "Mono") {
+			ff += ", monospace"
+		} else {
+			ff += ", sans-serif"
+		}
+		add("font-family", ff)
 	}
 	if s.Font.Weight == WeightMedium {
 		add("font-weight", "500")
