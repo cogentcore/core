@@ -15,7 +15,7 @@ import (
 // ToHTML converts the given widget and all of its children to HTML.
 // This is not guaranteed to be perfect HTML, and it should not be used as a
 // replacement for a Cogent Core app. However, it is good enough to be used as
-// a preview or for SEO purposes.
+// a preview or for SEO purposes (see generatehtml.go).
 func ToHTML(w Widget) ([]byte, error) {
 	b := &bytes.Buffer{}
 	e := xml.NewEncoder(b)

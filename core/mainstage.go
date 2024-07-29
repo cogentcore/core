@@ -35,6 +35,9 @@ func newMainStage(typ StageTypes, sc *Scene) *Stage {
 // ExternalParent is a parent widget external to this program.
 // If it is set, [Body.RunMainWindow] will add the [Body] to this
 // parent instead of creating a new window and starting the app loop.
+// It should typically not be used by end users; it is used in yaegicore
+// and for pre-rendering apps as HTML that can be used as a preview and
+// for SEO purposes.
 var ExternalParent Widget
 
 // RunMainWindow creates a new main window from the body,
