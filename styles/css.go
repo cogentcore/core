@@ -16,6 +16,9 @@ import (
 func ToCSS(s *Style) string {
 	parts := []string{}
 	add := func(key, value string) {
+		if value == "0px" {
+			return
+		}
 		parts = append(parts, key+":"+value)
 	}
 
@@ -25,6 +28,8 @@ func ToCSS(s *Style) string {
 	if s.Background != nil {
 		add("background", colors.AsHex(colors.ToUniform(s.Background)))
 	}
+	add("width", s.Min.X.StringCSS())
+	add("height", s.Min.Y.StringCSS())
 	if s.Font.Size.Value != 16 || s.Font.Size.Unit != units.UnitDp {
 		add("font-size", s.Font.Size.StringCSS())
 	}
@@ -36,9 +41,7 @@ func ToCSS(s *Style) string {
 		add("border-width", s.Border.Width.Top.StringCSS())
 		add("border-color", colors.AsHex(colors.ToUniform(s.Border.Color.Top)))
 	}
-	if s.Border.Radius.Top.Value > 0 {
-		add("border-radius", s.Border.Radius.Top.StringCSS())
-	}
+	add("border-radius", s.Border.Radius.Top.StringCSS())
 
 	return strings.Join(parts, ";")
 }

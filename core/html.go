@@ -39,6 +39,9 @@ var htmlElementNames = map[string]string{
 }
 
 func addAttr(se *xml.StartElement, name, value string) {
+	if value == "" {
+		return
+	}
 	se.Attr = append(se.Attr, xml.Attr{Name: xml.Name{Local: name}, Value: value})
 }
 
@@ -69,6 +72,9 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	if text, ok := w.(*Text); ok {
 		// We don't want any escaping of HTML-formatted text, so we write directly.
 		b.WriteString(text.Text)
+	}
+	if icon, ok := w.(*Icon); ok {
+		b.WriteString(string(icon.Icon))
 	}
 
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
