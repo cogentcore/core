@@ -43,17 +43,85 @@ func (pl *GraphicsPipeline) InitPipeline() {
 	pl.SetGraphicsDefaults()
 }
 
+// BindPipeline binds this pipeline as the one to use for next commands in
+// the given render pass.
+// This also calls BindAllGroups, to bind the Current Value for all variables,
+// excluding Vertex level variables: use BindVertex for that.
+// Be sure to set the desired Current value prior to calling.
 func (pl *GraphicsPipeline) BindPipeline(rp *wgpu.RenderPassEncoder) error {
 	if pl.renderPipeline != nil {
 		rp.SetPipeline(pl.renderPipeline)
+		pl.BindAllGroups(rp)
 		return nil
 	}
 	err := pl.Config(false)
 	if err == nil {
 		rp.SetPipeline(pl.renderPipeline)
+		pl.BindAllGroups(rp)
 		return nil
 	}
 	return err
+}
+
+// BindAllGroups binds the Current Value for all variables across all
+// variable groups, as the Value to use by shader.
+// Automatically called in BindPipeline at start of render for pipeline.
+// Be sure to set Current index to correct value before calling!
+func (pl *GraphicsPipeline) BindAllGroups(rp *wgpu.RenderPassEncoder) {
+	vs := &pl.Sys.Vars
+	ngp := vs.NGroups()
+	for gi := 0; gi < ngp; gi++ {
+		vg := vs.Groups[gi]
+		rp.SetBindGroup(uint32(vg.Group), vg.bindGroup(), nil) // note: nil is dynamic offsets
+	}
+}
+
+// BindGroup binds the Current Value for all variables in given
+// variable group, as the Value to use by shader.
+// Be sure to set Current index to correct value before calling!
+func (pl *GraphicsPipeline) BindGroup(rp *wgpu.RenderPassEncoder, group int) {
+	vs := &pl.Sys.Vars
+	vg := vs.Groups[group]
+	rp.SetBindGroup(uint32(vg.Group), vg.bindGroup(), nil) // note: nil is dynamic offsets
+}
+
+// BindDrawVertex binds the Current Value for all VertexGroup variables,
+// as the vertex data, and then does a DrawIndexed call.
+func (pl *GraphicsPipeline) BindDrawVertex(rp *wgpu.RenderPassEncoder) {
+	pl.BindVertex(rp)
+	pl.DrawIndexed(rp)
+}
+
+// BindVertex binds the Current Value for all VertexGroup variables,
+// as the vertex data to use for next DrawIndexed call.
+func (pl *GraphicsPipeline) BindVertex(rp *wgpu.RenderPassEncoder) {
+	vs := &pl.Sys.Vars
+	vg := vs.Groups[VertexGroup]
+	if vg == nil {
+		return
+	}
+	for _, vr := range vg.Vars {
+		vl := vr.Values.CurrentValue()
+		if vr.Role == Index {
+			rp.SetIndexBuffer(vl.buffer, vr.Type.IndexType(), 0, wgpu.WholeSize)
+		} else {
+			rp.SetVertexBuffer(uint32(vr.Binding), vl.buffer, 0, wgpu.WholeSize)
+		}
+	}
+}
+
+func (pl *GraphicsPipeline) DrawIndexed(rp *wgpu.RenderPassEncoder) {
+	vs := &pl.Sys.Vars
+	vg := vs.Groups[VertexGroup]
+	if vg == nil {
+		return
+	}
+	ix := vg.IndexVar()
+	if ix == nil {
+		return
+	}
+	iv := ix.Values.CurrentValue()
+	rp.DrawIndexed(uint32(iv.N), 1, 0, 0, 0)
 }
 
 // VertexEntry returns the [ShaderEntry] for [VertexShader].
@@ -178,8 +246,8 @@ func (pl *GraphicsPipeline) ReleasePipeline() {
 // graphics rendering pipeline (not for a compute pipeline)
 func (pl *GraphicsPipeline) SetGraphicsDefaults() *GraphicsPipeline {
 	pl.SetTopology(TriangleList, false)
-	pl.SetFrontFace(true)
-	pl.SetCullFace(true)
+	pl.SetFrontFace(wgpu.FrontFace_CCW)
+	pl.SetCullMode(wgpu.CullMode_Back)
 	pl.SetColorBlend(true) // alpha blending
 	pl.SetMultisample(1)
 	// pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
@@ -195,25 +263,15 @@ func (pl *GraphicsPipeline) SetTopology(topo Topologies, restartEnable bool) *Gr
 	return pl
 }
 
-// SetFrontFace sets the winding order for what counts as a front face
-// true = CCW, false = CW
-func (pl *GraphicsPipeline) SetFrontFace(ccw bool) *GraphicsPipeline {
-	cm := wgpu.FrontFace_CW
-	if ccw {
-		cm = wgpu.FrontFace_CCW
-	}
-	pl.Primitive.FrontFace = cm
+// SetFrontFace sets the winding order for what counts as a front face.
+func (pl *GraphicsPipeline) SetFrontFace(face wgpu.FrontFace) *GraphicsPipeline {
+	pl.Primitive.FrontFace = face
 	return pl
 }
 
-// SetCullFace sets the face culling mode: true = back, false = front
-// use CullBack, CullFront constants
-func (pl *GraphicsPipeline) SetCullFace(back bool) *GraphicsPipeline {
-	cm := wgpu.CullMode_Front
-	if back {
-		cm = wgpu.CullMode_Back
-	}
-	pl.Primitive.CullMode = cm
+// SetCullMode sets the face culling mode.
+func (pl *GraphicsPipeline) SetCullMode(mode wgpu.CullMode) *GraphicsPipeline {
+	pl.Primitive.CullMode = mode
 	return pl
 }
 
@@ -223,20 +281,6 @@ func (pl *GraphicsPipeline) SetMultisample(ms int) *GraphicsPipeline {
 	pl.Multisample.AlphaToCoverageEnabled = false // todo
 	return pl
 }
-
-const (
-	// CullBack is for SetCullFace function
-	CullBack = true
-
-	// CullFront is for SetCullFace function
-	CullFront = false
-
-	// CCW is for SetFrontFace function
-	CCW = true
-
-	// CW is for SetFrontFace function
-	CW = false
-)
 
 // SetLineWidth sets the rendering line width -- 1 is default.
 func (pl *GraphicsPipeline) SetLineWidth(lineWidth float32) {

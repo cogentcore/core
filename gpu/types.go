@@ -66,12 +66,12 @@ func (tp Types) TextureFormat() wgpu.TextureFormat {
 
 // IndexType returns the WebGPU VertexFormat for Index var.
 // must be either Uint16 or Uint32.
-// func (tp Types) IndexType() wgpu.VertexFormat {
-// 	if tp == Uint16 {
-// 		return wgpu.Vertexk.IndexTypeUint16
-// 	}
-// 	return vk.IndexTypeUint32
-// }
+func (tp Types) IndexType() wgpu.IndexFormat {
+	if tp == Uint16 {
+		return wgpu.IndexFormat_Uint16
+	}
+	return wgpu.IndexFormat_Uint32
+}
 
 // Bytes returns number of bytes for this type
 func (tp Types) Bytes() int {

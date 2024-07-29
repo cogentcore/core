@@ -6,7 +6,6 @@ package gpu
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
@@ -91,8 +90,8 @@ type Var struct {
 	Offset int `edit:"-"`
 }
 
-// Init initializes the main values
-func (vr *Var) Init(name string, typ Types, arrayN int, role VarRoles, group int, shaders ...ShaderTypes) {
+// init initializes the main values
+func (vr *Var) init(name string, typ Types, arrayN int, role VarRoles, group int, shaders ...ShaderTypes) {
 	vr.Name = name
 	vr.Type = typ
 	vr.ArrayN = arrayN
@@ -155,55 +154,8 @@ func (vr *Var) SetCurrentValue(i int) {
 	vr.Values.Current = i
 }
 
-// BindGroupEntry returns the BindGroupEntry for Current
+// bindGroupEntry returns the BindGroupEntry for Current
 // value for this variable.
-func (vr *Var) BindGroupEntry() []wgpu.BindGroupEntry {
-	return vr.Values.BindGroupEntry(vr)
-}
-
-//////////////////////////////////////////////////////////////////
-// VarList
-
-// VarList is a list of variables
-type VarList struct {
-	// variables in order
-	Vars []*Var
-
-	// map of vars by name -- names must be unique
-	VarMap map[string]*Var
-}
-
-// VarByNameTry returns Var by name, returning error if not found
-func (vs *VarList) VarByNameTry(name string) (*Var, error) {
-	vr, ok := vs.VarMap[name]
-	if !ok {
-		err := fmt.Errorf("Variable named %s not found", name)
-		if Debug {
-			log.Println(err)
-		}
-		return nil, err
-	}
-	return vr, nil
-}
-
-// ValueByNameTry returns value by first looking up variable name, then value name,
-// returning error if not found
-func (vs *VarList) ValueByNameTry(varName, valName string) (*Var, *Value, error) {
-	vr, err := vs.VarByNameTry(varName)
-	if err != nil {
-		return nil, nil, err
-	}
-	vl, err := vr.Values.ValueByNameTry(valName)
-	return vr, vl, err
-}
-
-// ValueByIndexTry returns value by first looking up variable name, then value index,
-// returning error if not found
-func (vs *VarList) ValueByIndexTry(varName string, valIndex int) (*Var, *Value, error) {
-	vr, err := vs.VarByNameTry(varName)
-	if err != nil {
-		return nil, nil, err
-	}
-	vl, err := vr.Values.ValueByIndexTry(valIndex)
-	return vr, vl, err
+func (vr *Var) bindGroupEntry() []wgpu.BindGroupEntry {
+	return vr.Values.bindGroupEntry(vr)
 }

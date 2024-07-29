@@ -6,6 +6,7 @@ package gpu
 
 import (
 	"fmt"
+	"log"
 	"log/slog"
 	"strconv"
 
@@ -30,7 +31,11 @@ const (
 // in shader code, with @binding allocated sequentially within group
 // (or @location in the case of VertexGroup).
 type VarGroup struct {
-	VarList
+	// variables in order
+	Vars []*Var
+
+	// map of vars by name; names must be unique
+	VarMap map[string]*Var
 
 	// Name of this group: GroupX by default
 	Name string
@@ -55,8 +60,8 @@ type VarGroup struct {
 	device Device
 }
 
-// AddVar adds given variable
-func (vg *VarGroup) AddVar(vr *Var) {
+// addVar adds given variable
+func (vg *VarGroup) addVar(vr *Var) {
 	if vg.VarMap == nil {
 		vg.VarMap = make(map[string]*Var)
 	}
@@ -67,19 +72,54 @@ func (vg *VarGroup) AddVar(vr *Var) {
 // Add adds a new variable of given type, role, arrayN, and shaders where used
 func (vg *VarGroup) Add(name string, typ Types, arrayN int, shaders ...ShaderTypes) *Var {
 	vr := &Var{}
-	vr.Init(name, typ, arrayN, vg.Role, vg.Group, shaders...)
-	vg.AddVar(vr)
+	vr.init(name, typ, arrayN, vg.Role, vg.Group, shaders...)
+	vg.addVar(vr)
 	return vr
 }
 
 // AddStruct adds a new struct variable of given total number of bytes in size,
 // type, role, set, and shaders where used
-func (vg *VarGroup) AddStruct(name string, size int, arrayN int, role VarRoles, shaders ...ShaderTypes) *Var {
+func (vg *VarGroup) AddStruct(name string, size int, arrayN int, shaders ...ShaderTypes) *Var {
 	vr := &Var{}
-	vr.Init(name, Struct, arrayN, role, vg.Group, shaders...)
+	vr.init(name, Struct, arrayN, vg.Role, vg.Group, shaders...)
 	vr.SizeOf = size
-	vg.AddVar(vr)
+	vg.addVar(vr)
 	return vr
+}
+
+// VarByNameTry returns Var by name, returning error if not found
+func (vg *VarGroup) VarByNameTry(name string) (*Var, error) {
+	vr, ok := vg.VarMap[name]
+	if !ok {
+		err := fmt.Errorf("Variable named %s not found", name)
+		if Debug {
+			log.Println(err)
+		}
+		return nil, err
+	}
+	return vr, nil
+}
+
+// ValueByNameTry returns value by first looking up variable name, then value name,
+// returning error if not found
+func (vg *VarGroup) ValueByNameTry(varName, valName string) (*Var, *Value, error) {
+	vr, err := vg.VarByNameTry(varName)
+	if err != nil {
+		return nil, nil, err
+	}
+	vl, err := vr.Values.ValueByNameTry(valName)
+	return vr, vl, err
+}
+
+// ValueByIndexTry returns value by first looking up variable name, then value index,
+// returning error if not found
+func (vg *VarGroup) ValueByIndexTry(varName string, valIndex int) (*Var, *Value, error) {
+	vr, err := vg.VarByNameTry(varName)
+	if err != nil {
+		return nil, nil, err
+	}
+	vl, err := vr.Values.ValueByIndexTry(valIndex)
+	return vr, vl, err
 }
 
 // Config must be called after all variables have been added.
@@ -125,8 +165,10 @@ func (vg *VarGroup) Config(dev *Device) error {
 			errs = append(errs, err)
 			slog.Error(err.Error())
 		}
-		vr.Binding = bnum
-		bnum++
+		if vr.Role != Index { // index doesn't count
+			vr.Binding = bnum
+			bnum++
+		}
 		if vr.Role == Vertex && vr.Type == Float32Matrix4 { // special case
 			bnum += 3
 		}
@@ -225,6 +267,19 @@ func (vg *VarGroup) bindLayout(vs *Vars) error {
 	return nil
 }
 
+// IndexVar returns the Index variable within this VertexGroup.
+// returns nil if not found.
+func (vg *VarGroup) IndexVar() *Var {
+	n := len(vg.Vars)
+	for i := n - 1; i >= 0; i-- { // typically at end, go in reverse
+		vr := vg.Vars[i]
+		if vr.Role == Index {
+			return vr
+		}
+	}
+	return nil
+}
+
 // vertexLayout returns the VertexBufferLayout based on Vertex role
 // variables within this VertexGroup.
 // Note: there is no support for interleaved arrays
@@ -290,7 +345,7 @@ func (vg *VarGroup) vertexLayout() []wgpu.VertexBufferLayout {
 func (vg *VarGroup) bindGroup() *wgpu.BindGroup {
 	var bgs []wgpu.BindGroupEntry
 	for _, vr := range vg.Vars {
-		bgs = append(bgs, vr.BindGroupEntry()...)
+		bgs = append(bgs, vr.bindGroupEntry()...)
 	}
 	bg, err := vg.device.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{
 		Layout:  vg.layout,

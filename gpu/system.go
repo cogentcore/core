@@ -78,6 +78,7 @@ func (sy *System) InitGraphics(gp *GPU, name string, dev *Device) error {
 	sy.Name = name
 	sy.Compute = false
 	sy.device = *dev
+	sy.Vars.device = *dev
 	return nil
 }
 
@@ -93,6 +94,7 @@ func (sy *System) InitCompute(gp *GPU, name string) error {
 		return err
 	}
 	sy.device = *dev
+	sy.Vars.device = *dev
 	// sy.NewFence("ComputeWait") // always have this named fence avail for wait
 	return nil
 }
@@ -104,6 +106,11 @@ func (sy *System) NewCommandEncoder() *wgpu.CommandEncoder {
 		return nil
 	}
 	return ce
+}
+
+// WaitDone waits until device is done with current processing steps
+func (sy *System) WaitDone() {
+	sy.device.Device.Poll(true, nil)
 }
 
 func (sy *System) Release() {
@@ -297,20 +304,18 @@ func (sy *System) SetTopology(topo Topologies, restartEnable bool) *System {
 // 	}
 // }
 
-// SetCullFace sets the face culling mode: true = back, false = front
-// use CullBack, CullFront constants
-func (sy *System) SetCullFace(back bool) *System {
+// SetCullMode sets the face culling mode.
+func (sy *System) SetCullMode(mode wgpu.CullMode) *System {
 	for _, pl := range sy.GraphicsPipelines {
-		pl.SetCullFace(back)
+		pl.SetCullMode(mode)
 	}
 	return sy
 }
 
-// SetFrontFace sets the winding order for what counts as a front face
-// true = CCW, false = CW
-func (sy *System) SetFrontFace(ccw bool) *System {
+// SetFrontFace sets the winding order for what counts as a front face.
+func (sy *System) SetFrontFace(face wgpu.FrontFace) *System {
 	for _, pl := range sy.GraphicsPipelines {
-		pl.SetFrontFace(ccw)
+		pl.SetFrontFace(face)
 	}
 	return sy
 }

@@ -99,11 +99,13 @@ func (vl *Value) CreateBuffer(vr *Var, dev *Device) error {
 		return nil
 	}
 	vl.Release()
+	mapNow := false // vl.ElSize >= 4
+	fmt.Println(vl.Name, "map now:", mapNow, "sz:", sz, "usage:", int(vr.Role.BufferUsages()))
 	buf, err := dev.Device.CreateBuffer(&wgpu.BufferDescriptor{
 		Size:             uint64(sz),
 		Label:            vl.Name,
 		Usage:            vr.Role.BufferUsages(),
-		MappedAtCreation: true,
+		MappedAtCreation: mapNow,
 	})
 	if err != nil {
 		slog.Error(err.Error())
@@ -134,45 +136,40 @@ func (vl *Value) NilBufferCheck() error {
 	return nil
 }
 
-// SetValueFromAsync copies given values into value buffer memory,
+// SetValueFrom copies given values into value buffer memory,
 // ensuring that the buffer is mapped and ready to be copied into.
 // This automatically calls Unmap() after copying.
-func SetValueFromAsync[E any](vl *Value, from []E) error {
-	return vl.SetFromBytesAsync(wgpu.ToBytes(from))
+func SetValueFrom[E any](vl *Value, from []E) error {
+	return vl.SetFromBytes(wgpu.ToBytes(from))
 }
 
-// SetFromBytesAsync copies given bytes into value buffer memory,
+// SetFromBytes copies given bytes into value buffer memory,
 // ensuring that the buffer is mapped and ready to be copied into.
 // This automatically calls Unmap() after copying.
-func (vl *Value) SetFromBytesAsync(from []byte) error {
+func (vl *Value) SetFromBytes(from []byte) error {
 	if err := vl.NilBufferCheck(); err != nil {
 		slog.Error(err.Error())
 		return err
 	}
-	var err error
-	vl.buffer.MapAsync(wgpu.MapMode_Write, 0, uint64(vl.AllocSize), func(stat wgpu.BufferMapAsyncStatus) {
-		if stat != wgpu.BufferMapAsyncStatus_Success {
-			err = fmt.Errorf("gpu.Value SetFromBytesAsync: %s for value: %s", stat.String(), vl.Name)
-			return
-		}
-		bm := vl.buffer.GetMappedRange(0, uint(vl.AllocSize))
-		copy(bm, from)
-		vl.buffer.Unmap()
-	})
-	return err
+	err := vl.device.Queue.WriteBuffer(vl.buffer, 0, from)
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+	return nil
 }
 
-// CopyValueToBytesAsync copies given value buffer memory to given bytes,
+// CopyValueToBytes copies given value buffer memory to given bytes,
 // ensuring that the buffer is mapped and ready to be copied into.
 // This automatically calls Unmap() after copying.
-func CopyValueToBytesAsync[E any](vl *Value, dest []E) error {
-	return vl.CopyToBytesAsync(wgpu.ToBytes(dest))
+func CopyValueToBytes[E any](vl *Value, dest []E) error {
+	return vl.CopyToBytes(wgpu.ToBytes(dest))
 }
 
-// CopyToBytesAsync copies value buffer memory to given bytes,
+// CopyToBytes copies value buffer memory to given bytes,
 // ensuring that the buffer is mapped and ready to be copied into.
 // This automatically calls Unmap() after copying.
-func (vl *Value) CopyToBytesAsync(dest []byte) error {
+func (vl *Value) CopyToBytes(dest []byte) error {
 	if err := vl.NilBufferCheck(); err != nil {
 		slog.Error(err.Error())
 		return err
@@ -190,7 +187,7 @@ func (vl *Value) CopyToBytesAsync(dest []byte) error {
 	return err
 }
 
-func (vl *Value) BindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
+func (vl *Value) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 	if vr.Role >= SampledTexture {
 		return []wgpu.BindGroupEntry{
 			{
@@ -266,16 +263,9 @@ func (vs *Values) SetN(vr *Var, dev *Device, nvals int) bool {
 	return true
 }
 
-// ValueByIndexTry returns Value at given index with range checking error message.
-func (vs *Values) ValueByIndexTry(idx int) (*Value, error) {
-	if idx >= len(vs.Values) || idx < 0 {
-		err := fmt.Errorf("gpu.Values:ValueByIndexTry index %d out of range", idx)
-		if Debug {
-			log.Println(err)
-		}
-		return nil, err
-	}
-	return vs.Values[idx], nil
+// CurrentValue returns the current Value according to Current index.
+func (vs *Values) CurrentValue() *Value {
+	return vs.Values[vs.Current]
 }
 
 // SetName sets name of given Value, by index, adds name to map, checking
@@ -296,6 +286,18 @@ func (vs *Values) SetName(idx int, name string) (*Value, error) {
 	vl.Name = name
 	vs.NameMap[name] = vl
 	return vl, nil
+}
+
+// ValueByIndexTry returns Value at given index with range checking error message.
+func (vs *Values) ValueByIndexTry(idx int) (*Value, error) {
+	if idx >= len(vs.Values) || idx < 0 {
+		err := fmt.Errorf("gpu.Values:ValueByIndexTry index %d out of range", idx)
+		if Debug {
+			log.Println(err)
+		}
+		return nil, err
+	}
+	return vs.Values[idx], nil
 }
 
 // ValueByNameTry returns value by name, returning error if not found
@@ -329,9 +331,9 @@ func (vs *Values) MemSize() int {
 	return tsz
 }
 
-// BindGroupEntry returns the BindGroupEntry for Current
+// bindGroupEntry returns the BindGroupEntry for Current
 // value for this variable.
-func (vs *Values) BindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
-	vl := vs.Values[vs.Current]
-	return vl.BindGroupEntry(vr)
+func (vs *Values) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
+	vl := vs.CurrentValue()
+	return vl.bindGroupEntry(vr)
 }

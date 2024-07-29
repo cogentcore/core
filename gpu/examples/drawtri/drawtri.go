@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Cogent Core. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -32,7 +32,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer window.Destroy()
 
 	gp := gpu.NewGPU()
 	gp.Config("drawtri")
@@ -46,8 +45,7 @@ func main() {
 	sy := gp.NewGraphicsSystem("drawtri", sf.Device)
 	pl := sy.AddGraphicsPipeline("drawtri")
 	sy.ConfigRender(&sf.Format, gpu.UndefType)
-	pl.Primitive.CullMode = wgpu.CullMode_None
-	// sy.SetCullMode(wgpu.CullMode_None)
+	pl.SetFrontFace(wgpu.FrontFace_CW)
 	// sf.SetRender(&sy.Render)
 
 	sh := pl.AddShader("trianglelit")

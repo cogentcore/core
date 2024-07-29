@@ -35,6 +35,8 @@ type Vars struct {
 
 	// true if PushGroup has been added.  Note: not yet supported in WebGPU.
 	hasPush bool `edit:"-"`
+
+	device Device
 }
 
 func (vs *Vars) Release() {
@@ -49,7 +51,7 @@ func (vs *Vars) AddVertexGroup() *VarGroup {
 	if vs.Groups == nil {
 		vs.Groups = make(map[int]*VarGroup)
 	}
-	vg := &VarGroup{Group: VertexGroup}
+	vg := &VarGroup{Group: VertexGroup, Role: Vertex, device: vs.device}
 	vs.Groups[VertexGroup] = vg
 	vs.hasVertex = true
 	return vg
@@ -66,7 +68,7 @@ func (vs *Vars) AddPushGroup() *VarGroup {
 	if vs.Groups == nil {
 		vs.Groups = make(map[int]*VarGroup)
 	}
-	vg := &VarGroup{Group: PushGroup}
+	vg := &VarGroup{Group: PushGroup, device: vs.device}
 	vs.Groups[PushGroup] = vg
 	vs.hasPush = true
 	return vg
@@ -77,22 +79,23 @@ func (vs *Vars) PushGroup() *VarGroup {
 	return vs.Groups[PushGroup]
 }
 
-// AddGroup adds a new non-Vertex Group for holding Uniforms, Storage, etc
-// Groups are automatically numbered sequentially
-func (vs *Vars) AddGroup() *VarGroup {
+// AddGroup adds a new non-Vertex Group for holding data for given Role
+// (Uniform, Storage, etc).
+// Groups are automatically numbered sequentially.
+func (vs *Vars) AddGroup(role VarRoles) *VarGroup {
 	if vs.Groups == nil {
 		vs.Groups = make(map[int]*VarGroup)
 	}
 	idx := vs.NGroups()
-	vg := &VarGroup{Group: idx}
+	vg := &VarGroup{Group: idx, Role: role, device: vs.device}
 	vs.Groups[idx] = vg
 	return vg
 }
 
-// VarByNameTry returns Var by name in given set number,
+// VarByNameTry returns Var by name in given group number,
 // returning error if not found
-func (vs *Vars) VarByNameTry(set int, name string) (*Var, error) {
-	vg, err := vs.GroupTry(set)
+func (vs *Vars) VarByNameTry(group int, name string) (*Var, error) {
+	vg, err := vs.GroupTry(group)
 	if err != nil {
 		return nil, err
 	}
@@ -100,9 +103,9 @@ func (vs *Vars) VarByNameTry(set int, name string) (*Var, error) {
 }
 
 // ValueByNameTry returns value by first looking up variable name, then value name,
-// within given set number, returning error if not found
-func (vs *Vars) ValueByNameTry(set int, varName, valName string) (*Var, *Value, error) {
-	vg, err := vs.GroupTry(set)
+// within given group number, returning error if not found
+func (vs *Vars) ValueByNameTry(group int, varName, valName string) (*Var, *Value, error) {
+	vg, err := vs.GroupTry(group)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -111,8 +114,8 @@ func (vs *Vars) ValueByNameTry(set int, varName, valName string) (*Var, *Value, 
 
 // ValueByIndexTry returns value by first looking up variable name, then value index,
 // returning error if not found
-func (vs *Vars) ValueByIndexTry(set int, varName string, valIndex int) (*Var, *Value, error) {
-	vg, err := vs.GroupTry(set)
+func (vs *Vars) ValueByIndexTry(group int, varName string, valIndex int) (*Var, *Value, error) {
+	vg, err := vs.GroupTry(group)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -126,8 +129,8 @@ func (vs *Vars) Config(dev *Device) error {
 	ns := vs.NGroups()
 	var cerr error
 	vs.RoleMap = make(map[VarRoles][]*Var)
-	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.Groups[si]
+	for gi := vs.StartGroup(); gi < ns; gi++ {
+		vg := vs.Groups[gi]
 		if vg == nil {
 			continue
 		}
@@ -148,8 +151,8 @@ func (vs *Vars) StringDoc() string {
 	ispc := 4
 	var sb strings.Builder
 	ns := vs.NGroups()
-	for si := vs.StartGroup(); si < ns; si++ {
-		vg := vs.Groups[si]
+	for gi := vs.StartGroup(); gi < ns; gi++ {
+		vg := vs.Groups[gi]
 		if vg == nil {
 			continue
 		}
@@ -169,7 +172,7 @@ func (vs *Vars) StringDoc() string {
 	return sb.String()
 }
 
-// NGroups returns the number of regular non-VertexGroup sets
+// NGroups returns the number of regular non-VertexGroup groups
 func (vs *Vars) NGroups() int {
 	ex := 0
 	if vs.hasVertex {
@@ -181,7 +184,7 @@ func (vs *Vars) NGroups() int {
 	return len(vs.Groups) - ex
 }
 
-// StartGroup returns the starting set to use for iterating sets
+// StartGroup returns the starting group to use for iterating groups
 func (vs *Vars) StartGroup() int {
 	switch {
 	case vs.hasVertex:
@@ -193,11 +196,11 @@ func (vs *Vars) StartGroup() int {
 	}
 }
 
-// GroupTry returns set by index, returning nil and error if not found
-func (vs *Vars) GroupTry(set int) (*VarGroup, error) {
-	vg, has := vs.Groups[set]
+// GroupTry returns group by index, returning nil and error if not found
+func (vs *Vars) GroupTry(group int) (*VarGroup, error) {
+	vg, has := vs.Groups[group]
 	if !has {
-		err := fmt.Errorf("gpu.Vars:GroupTry set number %d not found", set)
+		err := fmt.Errorf("gpu.Vars:GroupTry gp number %d not found", group)
 		if Debug {
 			log.Println(err)
 		}
@@ -224,21 +227,18 @@ func (vs *Vars) VkPushConfig() []vk.PushConstantRange {
 }
 */
 
-///////////////////////////////////////////////////////////////////
-// Binding, Layouts
-
 // bindLayout configures the Layouts slice of BindGroupLayouts
 // for all of the non-Vertex vars
 func (vs *Vars) bindLayout(dev *Device) []*wgpu.BindGroupLayout {
-	nset := vs.NGroups()
-	if nset == 0 {
+	ngp := vs.NGroups()
+	if ngp == 0 {
 		vs.layouts = nil
 		return nil
 	}
 
 	var lays []*wgpu.BindGroupLayout
-	for si := 0; si < nset; si++ { // auto-skips vertex, push
-		vg := vs.Groups[si]
+	for gi := 0; gi < ngp; gi++ { // auto-skips vertex, push
+		vg := vs.Groups[gi]
 		if vg == nil {
 			continue
 		}
@@ -247,48 +247,4 @@ func (vs *Vars) bindLayout(dev *Device) []*wgpu.BindGroupLayout {
 	}
 	vs.layouts = lays
 	return lays
-}
-
-// BindVertexValueName dynamically binds given VertexGroup value
-// by name for given variable name.
-// using given descIndex description set index (among the NDescs allocated).
-//
-// Value must have already been updated into device memory prior to this,
-// ideally through a batch update prior to starting rendering, so that
-// all the values are ready to be used during the render pass.
-// This dynamically updates the offset to point to the specified val.
-//
-// Do NOT call BindValuesStart / End around this.
-//
-// returns error if not found.
-func (vs *Vars) BindVertexValueName(varNm, valNm string) error {
-	// vg := vs.Groups[VertexGroup]
-	// vr, vl, err := vg.ValueByNameTry(varNm, valNm)
-	// if err != nil {
-	// 	return err
-	// }
-	// vr.BindValueIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
-	return nil
-}
-
-// BindVertexValueIndex dynamically binds given VertexGroup value
-// by index for given variable name.
-// using given descIndex description set index (among the NDescs allocated).
-//
-// Value must have already been updated into device memory prior to this,
-// ideally through a batch update prior to starting rendering, so that
-// all the values are ready to be used during the render pass.
-// This only dynamically updates the offset to point to the specified val.
-//
-// Do NOT call BindValuesStart / End around this.
-//
-// returns error if not found.
-func (vs *Vars) BindVertexValueIndex(varNm string, valIndex int) error {
-	// vg := vs.Groups[VertexGroup]
-	// vr, vl, err := vg.ValueByIndexTry(varNm, valIndex)
-	// if err != nil {
-	// 	return err
-	// }
-	// vr.BindValueIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
-	return nil
 }
