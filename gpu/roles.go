@@ -65,11 +65,11 @@ func (vr VarRoles) BindingType() wgpu.BufferBindingType {
 }
 
 var RoleBindingTypes = map[VarRoles]wgpu.BufferBindingType{
-	UndefVarRole:   wgpu.BufferBindingType_Storage,
-	Uniform:        wgpu.BufferBindingType_Uniform,
-	Storage:        wgpu.BufferBindingType_Storage,
-	StorageTexture: wgpu.BufferBindingType_Storage,
-	// also defined: wgpu.BufferBindingType_ReadOnlyStorage,
+	UndefVarRole:   wgpu.BufferBindingTypeStorage,
+	Uniform:        wgpu.BufferBindingTypeUniform,
+	Storage:        wgpu.BufferBindingTypeStorage,
+	StorageTexture: wgpu.BufferBindingTypeStorage,
+	// also defined: wgpu.BufferBindingTypeReadOnlyStorage,
 }
 
 func (vr VarRoles) BufferUsages() wgpu.BufferUsage {
@@ -78,9 +78,9 @@ func (vr VarRoles) BufferUsages() wgpu.BufferUsage {
 
 // RoleBufferUsages maps VarRoles into buffer usage flags
 var RoleBufferUsages = map[VarRoles]wgpu.BufferUsage{
-	Vertex:         wgpu.BufferUsage_Vertex | wgpu.BufferUsage_CopyDst,
-	Index:          wgpu.BufferUsage_Index | wgpu.BufferUsage_CopyDst,
-	Uniform:        wgpu.BufferUsage_Uniform | wgpu.BufferUsage_CopyDst,
-	Storage:        wgpu.BufferUsage_Storage | wgpu.BufferUsage_CopyDst | wgpu.BufferUsage_CopySrc,
-	StorageTexture: wgpu.BufferUsage_Storage | wgpu.BufferUsage_CopyDst | wgpu.BufferUsage_CopySrc,
+	Vertex:         wgpu.BufferUsageVertex | wgpu.BufferUsageCopyDst,
+	Index:          wgpu.BufferUsageIndex | wgpu.BufferUsageCopyDst,
+	Uniform:        wgpu.BufferUsageUniform | wgpu.BufferUsageCopyDst,
+	Storage:        wgpu.BufferUsageStorage | wgpu.BufferUsageCopyDst | wgpu.BufferUsageCopySrc,
+	StorageTexture: wgpu.BufferUsageStorage | wgpu.BufferUsageCopyDst | wgpu.BufferUsageCopySrc,
 }

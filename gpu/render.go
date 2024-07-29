@@ -79,14 +79,14 @@ func (rp *Render) ClearRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescri
 	return &wgpu.RenderPassDescriptor{
 		ColorAttachments: []wgpu.RenderPassColorAttachment{{
 			View:   view,
-			LoadOp: wgpu.LoadOp_Clear,
+			LoadOp: wgpu.LoadOpClear,
 			ClearValue: wgpu.Color{
 				R: r,
 				G: g,
 				B: b,
 				A: a,
 			},
-			StoreOp: wgpu.StoreOp_Store,
+			StoreOp: wgpu.StoreOpStore,
 		}},
 	}
 }
@@ -96,8 +96,8 @@ func (rp *Render) LoadRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescrip
 	return &wgpu.RenderPassDescriptor{
 		ColorAttachments: []wgpu.RenderPassColorAttachment{{
 			View:    view,
-			LoadOp:  wgpu.LoadOp_Load,
-			StoreOp: wgpu.StoreOp_Store,
+			LoadOp:  wgpu.LoadOpLoad,
+			StoreOp: wgpu.StoreOpStore,
 		}},
 	}
 }

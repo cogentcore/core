@@ -45,7 +45,7 @@ func (dv *Device) Release() {
 // bad state, that generates a panic.
 func (dv *Device) DeviceWaitIdle(fun func()) {
 	dv.Queue.OnSubmittedWorkDone(func(stat wgpu.QueueWorkDoneStatus) {
-		if stat == wgpu.QueueWorkDoneStatus_Success {
+		if stat == wgpu.QueueWorkDoneStatusSuccess {
 			fun()
 			return
 		}

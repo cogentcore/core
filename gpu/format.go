@@ -40,7 +40,7 @@ func NewTextureFormat(width, height, layers int) *TextureFormat {
 }
 
 func (im *TextureFormat) Defaults() {
-	im.Format = wgpu.TextureFormat_RGBA8UnormSrgb
+	im.Format = wgpu.TextureFormatRGBA8UnormSrgb
 	im.Samples = 1
 	im.Layers = 1
 }
@@ -51,17 +51,17 @@ func (im *TextureFormat) String() string {
 }
 
 // IsStdRGBA returns true if image format is the standard
-// wgpu.TextureFormat_RGBA8UnormSrgb
+// wgpu.TextureFormatRGBA8UnormSrgb
 // which is compatible with go image.RGBA format.
 func (im *TextureFormat) IsStdRGBA() bool {
-	return im.Format == wgpu.TextureFormat_RGBA8UnormSrgb
+	return im.Format == wgpu.TextureFormatRGBA8UnormSrgb
 }
 
 // IsRGBAUnorm returns true if image format is the
-// wgpu.TextureFormat_RGBA8Unorm format
+// wgpu.TextureFormatRGBA8Unorm format
 // which is compatible with go image.RGBA format with colorspace conversion.
 func (im *TextureFormat) IsRGBAUnorm() bool {
-	return im.Format == wgpu.TextureFormat_RGBA8Unorm
+	return im.Format == wgpu.TextureFormatRGBA8Unorm
 }
 
 // SetSize sets the width, height

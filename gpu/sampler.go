@@ -78,10 +78,10 @@ func (sm *Sampler) Config(dev *Device) error {
 		AddressModeU:   sm.UMode.Mode(),
 		AddressModeV:   sm.VMode.Mode(),
 		AddressModeW:   sm.WMode.Mode(),
-		MagFilter:      wgpu.FilterMode_Linear, // nearest?
-		MinFilter:      wgpu.FilterMode_Linear,
-		MipmapFilter:   wgpu.MipmapFilterMode_Linear,
-		Compare:        wgpu.CompareFunction_LessEqual,
+		MagFilter:      wgpu.FilterModeLinear, // nearest?
+		MinFilter:      wgpu.FilterModeLinear,
+		MipmapFilter:   wgpu.MipmapFilterModeLinear,
+		Compare:        wgpu.CompareFunctionLessEqual,
 		LodMinClamp:    0,
 		LodMaxClamp:    32,
 		MaxAnisotrophy: 1,
@@ -130,9 +130,9 @@ func (sm SamplerModes) Mode() wgpu.AddressMode {
 }
 
 var WebGPUSamplerModes = map[SamplerModes]wgpu.AddressMode{
-	Repeat:       wgpu.AddressMode_Repeat,
-	MirrorRepeat: wgpu.AddressMode_MirrorRepeat,
-	ClampToEdge:  wgpu.AddressMode_ClampToEdge,
+	Repeat:       wgpu.AddressModeRepeat,
+	MirrorRepeat: wgpu.AddressModeMirrorRepeat,
+	ClampToEdge:  wgpu.AddressModeClampToEdge,
 }
 
 //////////////////////////////////////////////////////

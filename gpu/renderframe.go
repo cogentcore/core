@@ -79,7 +79,7 @@ func (rf *RenderFrame) Defaults() {
 	rf.Format.Defaults()
 	// note: screen-correct results obtained by using Srgb here, which forces
 	// this format in the final output.  Looks like what comes out from direct rendering.
-	rf.Format.Set(1024, 768, wgpu.TextureFormat_RGBA8UnormSrgb)
+	rf.Format.Set(1024, 768, wgpu.TextureFormatRGBA8UnormSrgb)
 	// rf.Format.Set(1024, 768, wgpu.TextureFormatR8g8b8a8Unorm)
 	rf.Format.SetMultisample(4)
 }

@@ -173,7 +173,7 @@ func (tx *Texture) UnmapDev() {
 // unless format is already set.  Layers is number of separate textures
 // of given size allocated in a texture array.
 func (tx *Texture) ConfigGoImage(sz image.Point, layers int) {
-	if tx.Format.Format != wgpu.TextureFormat_RGBA8UnormSrgb {
+	if tx.Format.Format != wgpu.TextureFormatRGBA8UnormSrgb {
 		tx.Format.Defaults()
 	}
 	tx.Format.Size = sz
@@ -207,7 +207,7 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int, flipY bool) error 
 	// flipY has to be managed using a Draw command presumably --
 	// doesn't read through image interface so can't do something easy there.
 	tx.Format.Size = sz
-	tx.Format.Format = wgpu.TextureFormat_RGBA8UnormSrgb
+	tx.Format.Format = wgpu.TextureFormatRGBA8UnormSrgb
 	tx.Format.Layers = 1
 
 	size := wgpu.Extent3D{
@@ -220,9 +220,9 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int, flipY bool) error 
 		Size:          size,
 		MipLevelCount: 1,
 		SampleCount:   1,
-		Dimension:     wgpu.TextureDimension_2D,
-		Format:        wgpu.TextureFormat_RGBA8UnormSrgb,
-		Usage:         wgpu.TextureUsage_TextureBinding | wgpu.TextureUsage_CopyDst,
+		Dimension:     wgpu.TextureDimension2D,
+		Format:        wgpu.TextureFormatRGBA8UnormSrgb,
+		Usage:         wgpu.TextureUsageTextureBinding | wgpu.TextureUsageCopyDst,
 	})
 	if err != nil {
 		slog.Error(err.Error())
@@ -233,7 +233,7 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int, flipY bool) error 
 	// https://www.w3.org/TR/webgpu/#gpuimagecopytexture
 	tx.device.Queue.WriteTexture(
 		&wgpu.ImageCopyTexture{
-			Aspect:   wgpu.TextureAspect_All,
+			Aspect:   wgpu.TextureAspectAll,
 			Texture:  t,
 			MipLevel: 0,
 			Origin:   wgpu.Origin3D{X: 0, Y: 0, Z: 0},

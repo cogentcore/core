@@ -235,13 +235,13 @@ func (vg *VarGroup) bindLayout(vs *Vars) error {
 				Texture: wgpu.TextureBindingLayout{
 
 					Multisampled:  false,
-					ViewDimension: wgpu.TextureViewDimension_2D, // todo:
-					SampleType:    wgpu.TextureSampleType_Float,
+					ViewDimension: wgpu.TextureViewDimension2D, // todo:
+					SampleType:    wgpu.TextureSampleTypeFloat,
 				},
 			})
 			bd.Binding = uint32(vr.Binding + 1)
 			bd.Sampler = wgpu.SamplerBindingLayout{
-				Type: wgpu.SamplerBindingType_Filtering,
+				Type: wgpu.SamplerBindingTypeFiltering,
 			}
 		default:
 			bd.Buffer = wgpu.BufferBindingLayout{
@@ -290,9 +290,9 @@ func (vg *VarGroup) vertexLayout() []wgpu.VertexBufferLayout {
 		if vr.Role != Vertex { // not Index
 			continue
 		}
-		stepMode := wgpu.VertexStepMode_Vertex
+		stepMode := wgpu.VertexStepModeVertex
 		if vr.VertexInstance {
-			stepMode = wgpu.VertexStepMode_Instance
+			stepMode = wgpu.VertexStepModeInstance
 		}
 		if vr.Type == Float32Matrix4 {
 			vbls = append(vbls, wgpu.VertexBufferLayout{

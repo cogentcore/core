@@ -45,7 +45,7 @@ func main() {
 	sy := gp.NewGraphicsSystem("drawtri", sf.Device)
 	pl := sy.AddGraphicsPipeline("drawtri")
 	sy.ConfigRender(&sf.Format, gpu.UndefType)
-	pl.SetFrontFace(wgpu.FrontFace_CW)
+	pl.SetFrontFace(wgpu.FrontFaceCW)
 	// sf.SetRender(&sy.Render)
 
 	sh := pl.AddShader("trianglelit")

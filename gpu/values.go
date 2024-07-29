@@ -185,8 +185,8 @@ func (vl *Value) CopyToBytes(dest []byte) error {
 		return err
 	}
 	var err error
-	vl.buffer.MapAsync(wgpu.MapMode_Read, 0, uint64(vl.AllocSize), func(stat wgpu.BufferMapAsyncStatus) {
-		if stat != wgpu.BufferMapAsyncStatus_Success {
+	vl.buffer.MapAsync(wgpu.MapModeRead, 0, uint64(vl.AllocSize), func(stat wgpu.BufferMapAsyncStatus) {
+		if stat != wgpu.BufferMapAsyncStatusSuccess {
 			err = fmt.Errorf("gpu.Value CopyToBytesAsync: %s for value: %s", stat.String(), vl.Name)
 			return
 		}

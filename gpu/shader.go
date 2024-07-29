@@ -108,10 +108,10 @@ const (
 )
 
 var ShaderStageFlags = map[ShaderTypes]wgpu.ShaderStage{
-	UnknownShader:  wgpu.ShaderStage_None,
-	VertexShader:   wgpu.ShaderStage_Vertex,
-	FragmentShader: wgpu.ShaderStage_Fragment,
-	ComputeShader:  wgpu.ShaderStage_Compute,
+	UnknownShader:  wgpu.ShaderStageNone,
+	VertexShader:   wgpu.ShaderStageVertex,
+	FragmentShader: wgpu.ShaderStageFragment,
+	ComputeShader:  wgpu.ShaderStageCompute,
 }
 
 /*

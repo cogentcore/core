@@ -81,10 +81,10 @@ func NewSurface(gp *GPU, wsurf *wgpu.Surface, width, height int) *Surface {
 func (sf *Surface) Defaults() {
 	// sf.NFrames = 3 // requested, will be updated with actual
 	sf.Format.Defaults()
-	sf.Format.Set(1024, 768, wgpu.TextureFormat_RGBA8UnormSrgb)
+	sf.Format.Set(1024, 768, wgpu.TextureFormatRGBA8UnormSrgb)
 	sf.Format.SetMultisample(4) // good default
 	sf.DesiredFormats = []wgpu.TextureFormat{
-		wgpu.TextureFormat_RGBA8UnormSrgb,
+		wgpu.TextureFormatRGBA8UnormSrgb,
 		// wgpu.TextureFormatR8g8b8a8Unorm, // these def too dark
 		// wgpu.TextureFormatB8g8r8a8Unorm,
 	}
@@ -135,11 +135,11 @@ func (sf *Surface) ConfigSwapChain() error {
 	caps := sf.surface.GetCapabilities(sf.GPU.GPU)
 
 	sf.swapChainConfig = &wgpu.SwapChainDescriptor{
-		Usage:       wgpu.TextureUsage_RenderAttachment,
+		Usage:       wgpu.TextureUsageRenderAttachment,
 		Format:      caps.Formats[0],
 		Width:       uint32(sf.Format.Size.X),
 		Height:      uint32(sf.Format.Size.Y),
-		PresentMode: wgpu.PresentMode_Fifo,
+		PresentMode: wgpu.PresentModeFifo,
 		AlphaMode:   caps.AlphaModes[0],
 	}
 

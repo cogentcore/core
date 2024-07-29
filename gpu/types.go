@@ -68,9 +68,9 @@ func (tp Types) TextureFormat() wgpu.TextureFormat {
 // must be either Uint16 or Uint32.
 func (tp Types) IndexType() wgpu.IndexFormat {
 	if tp == Uint16 {
-		return wgpu.IndexFormat_Uint16
+		return wgpu.IndexFormatUint16
 	}
-	return wgpu.IndexFormat_Uint32
+	return wgpu.IndexFormatUint32
 }
 
 // Bytes returns number of bytes for this type
@@ -79,33 +79,33 @@ func (tp Types) Bytes() int {
 }
 
 var TypeToTextureFormat = map[Types]wgpu.TextureFormat{
-	TextureRGBA32: wgpu.TextureFormat_RGBA8UnormSrgb,
-	TextureBGRA32: wgpu.TextureFormat_BGRA8UnormSrgb,
-	Depth32:       wgpu.TextureFormat_Depth32Float,
-	Depth24Sten8:  wgpu.TextureFormat_Depth24PlusStencil8,
+	TextureRGBA32: wgpu.TextureFormatRGBA8UnormSrgb,
+	TextureBGRA32: wgpu.TextureFormatBGRA8UnormSrgb,
+	Depth32:       wgpu.TextureFormatDepth32Float,
+	Depth24Sten8:  wgpu.TextureFormatDepth24PlusStencil8,
 }
 
 // TextureFormatSizes gives size of known WebGPU
 // TextureFormats in bytes
 var TextureFormatSizes = map[wgpu.TextureFormat]int{
-	wgpu.TextureFormat_Undefined:           0,
-	wgpu.TextureFormat_R16Sint:             2,
-	wgpu.TextureFormat_R16Uint:             2,
-	wgpu.TextureFormat_R32Sint:             4,
-	wgpu.TextureFormat_RG32Sint:            8,
-	wgpu.TextureFormat_R32Uint:             4,
-	wgpu.TextureFormat_RG32Uint:            8,
-	wgpu.TextureFormat_RGBA32Uint:          16,
-	wgpu.TextureFormat_R32Float:            4,
-	wgpu.TextureFormat_RG32Float:           8,
-	wgpu.TextureFormat_RGBA32Float:         16,
-	wgpu.TextureFormat_RGBA8Sint:           4,
-	wgpu.TextureFormat_RGBA8Unorm:          4,
-	wgpu.TextureFormat_RGBA8UnormSrgb:      4,
-	wgpu.TextureFormat_BGRA8Unorm:          4,
-	wgpu.TextureFormat_BGRA8UnormSrgb:      4,
-	wgpu.TextureFormat_Depth32Float:        4,
-	wgpu.TextureFormat_Depth24PlusStencil8: 4,
+	wgpu.TextureFormatUndefined:           0,
+	wgpu.TextureFormatR16Sint:             2,
+	wgpu.TextureFormatR16Uint:             2,
+	wgpu.TextureFormatR32Sint:             4,
+	wgpu.TextureFormatRG32Sint:            8,
+	wgpu.TextureFormatR32Uint:             4,
+	wgpu.TextureFormatRG32Uint:            8,
+	wgpu.TextureFormatRGBA32Uint:          16,
+	wgpu.TextureFormatR32Float:            4,
+	wgpu.TextureFormatRG32Float:           8,
+	wgpu.TextureFormatRGBA32Float:         16,
+	wgpu.TextureFormatRGBA8Sint:           4,
+	wgpu.TextureFormatRGBA8Unorm:          4,
+	wgpu.TextureFormatRGBA8UnormSrgb:      4,
+	wgpu.TextureFormatBGRA8Unorm:          4,
+	wgpu.TextureFormatBGRA8UnormSrgb:      4,
+	wgpu.TextureFormatDepth32Float:        4,
+	wgpu.TextureFormatDepth24PlusStencil8: 4,
 }
 
 // TypeSizes gives our data type sizes in bytes
@@ -139,23 +139,23 @@ var TypeSizes = map[Types]int{
 
 // TypeToVertexFormat maps gpu.Types to WebGPU VertexFormat
 var TypeToVertexFormat = map[Types]wgpu.VertexFormat{
-	UndefType: wgpu.VertexFormat_Undefined,
-	// Bool32:         wgpu.VertexFormat_Uint32,
-	// Int16:          wgpu.VertexFormat_R16Sint,
-	// Uint16:         wgpu.VertexFormat_R16Uint,
-	Int32:          wgpu.VertexFormat_Sint32,
-	Int32Vector2:   wgpu.VertexFormat_Sint32x2,
-	Int32Vector4:   wgpu.VertexFormat_Sint32x4,
-	Uint32:         wgpu.VertexFormat_Uint32,
-	Uint32Vector2:  wgpu.VertexFormat_Uint32x2,
-	Uint32Vector4:  wgpu.VertexFormat_Uint32x4,
-	Float32:        wgpu.VertexFormat_Float32,
-	Float32Vector2: wgpu.VertexFormat_Float32x2,
-	Float32Vector3: wgpu.VertexFormat_Float32x3,
-	Float32Vector4: wgpu.VertexFormat_Float32x4,
-	// TextureRGBA32:    wgpu.TextureFormat_R8g8b8a8Srgb,
-	// Depth32:        wgpu.VertexFormat_D32Sfloat,
-	// Depth24Sten8:   wgpu.VertexFormat_D24UnormS8Uint,
+	UndefType: wgpu.VertexFormatUndefined,
+	// Bool32:         wgpu.VertexFormatUint32,
+	// Int16:          wgpu.VertexFormatR16Sint,
+	// Uint16:         wgpu.VertexFormatR16Uint,
+	Int32:          wgpu.VertexFormatSint32,
+	Int32Vector2:   wgpu.VertexFormatSint32x2,
+	Int32Vector4:   wgpu.VertexFormatSint32x4,
+	Uint32:         wgpu.VertexFormatUint32,
+	Uint32Vector2:  wgpu.VertexFormatUint32x2,
+	Uint32Vector4:  wgpu.VertexFormatUint32x4,
+	Float32:        wgpu.VertexFormatFloat32,
+	Float32Vector2: wgpu.VertexFormatFloat32x2,
+	Float32Vector3: wgpu.VertexFormatFloat32x3,
+	Float32Vector4: wgpu.VertexFormatFloat32x4,
+	// TextureRGBA32:    wgpu.TextureFormatR8g8b8a8Srgb,
+	// Depth32:        wgpu.VertexFormatD32Sfloat,
+	// Depth24Sten8:   wgpu.VertexFormatD24UnormS8Uint,
 }
 
 // most commonly available formats: https://WebGPU.gpuinfo.org/listsurfaceformats.php
@@ -163,8 +163,8 @@ var TypeToVertexFormat = map[Types]wgpu.VertexFormat{
 // TextureFormatNames translates image format into human-readable string
 // for most commonly available formats
 var TextureFormatNames = map[wgpu.TextureFormat]string{
-	wgpu.TextureFormat_RGBA8UnormSrgb: "RGBA 8bit sRGB colorspace",
-	wgpu.TextureFormat_RGBA8Unorm:     "RGBA 8bit unsigned linear colorspace",
+	wgpu.TextureFormatRGBA8UnormSrgb: "RGBA 8bit sRGB colorspace",
+	wgpu.TextureFormatRGBA8Unorm:     "RGBA 8bit unsigned linear colorspace",
 	// wgpu.TextureFormatR5g6b5UnormPack16:      "RGB 5bit (pack 16bit total) unsigned linear colorspace",
 	// wgpu.TextureFormatA2b10g10r10UnormPack32: "ABGR 10bit, 2bit alpha (pack 32bit total), unsigned linear colorspace",
 	// wgpu.TextureFormatB8g8r8a8Srgb:           "BGRA 8bit sRGB colorspace",

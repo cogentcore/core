@@ -258,7 +258,7 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 		// but generally speaking the discrete device is going to be the most
 		// feature-full, so the practical benefit is unlikely to be significant.
 		props := gpus[gi].GetProperties()
-		if props.AdapterType == wgpu.AdapterType_DiscreteGPU {
+		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
 			// todo: pick one with best memory
 			// var memProperties vk.PhysicalDeviceMemoryProperties
 			// vk.GetPhysicalDeviceMemoryProperties(gpus[gi], &memProperties)

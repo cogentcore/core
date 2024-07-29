@@ -175,8 +175,8 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 			EntryPoint: fe.Entry,
 			Targets: []wgpu.ColorTargetState{{
 				Format:    pl.Sys.Render.Format.Format,
-				Blend:     &wgpu.BlendState_Replace, // todo
-				WriteMask: wgpu.ColorWriteMask_All,  // todo
+				Blend:     &wgpu.BlendStateReplace, // todo
+				WriteMask: wgpu.ColorWriteMaskAll,  // todo
 			}},
 		}
 	}
@@ -246,8 +246,8 @@ func (pl *GraphicsPipeline) ReleasePipeline() {
 // graphics rendering pipeline (not for a compute pipeline)
 func (pl *GraphicsPipeline) SetGraphicsDefaults() *GraphicsPipeline {
 	pl.SetTopology(TriangleList, false)
-	pl.SetFrontFace(wgpu.FrontFace_CCW)
-	pl.SetCullMode(wgpu.CullMode_Back)
+	pl.SetFrontFace(wgpu.FrontFaceCCW)
+	pl.SetCullMode(wgpu.CullModeBack)
 	pl.SetColorBlend(true) // alpha blending
 	pl.SetMultisample(1)
 	// pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
@@ -383,9 +383,9 @@ func (tp Topologies) Primitive() wgpu.PrimitiveTopology {
 }
 
 var WebGPUTopologies = map[Topologies]wgpu.PrimitiveTopology{
-	PointList:     wgpu.PrimitiveTopology_PointList,
-	LineList:      wgpu.PrimitiveTopology_LineList,
-	LineStrip:     wgpu.PrimitiveTopology_LineStrip,
-	TriangleList:  wgpu.PrimitiveTopology_TriangleList,
-	TriangleStrip: wgpu.PrimitiveTopology_TriangleStrip,
+	PointList:     wgpu.PrimitiveTopologyPointList,
+	LineList:      wgpu.PrimitiveTopologyLineList,
+	LineStrip:     wgpu.PrimitiveTopologyLineStrip,
+	TriangleList:  wgpu.PrimitiveTopologyTriangleList,
+	TriangleStrip: wgpu.PrimitiveTopologyTriangleStrip,
 }
