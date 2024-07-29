@@ -120,10 +120,8 @@ body {
   overflow: auto;
 }
 
-#app-wasm-loader button {
-  border: none;
-}
-
 #app-wasm-loader * {
+  border: unset;
   margin-block: unset;
+  font-family: unset;
 }

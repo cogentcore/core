@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -30,12 +31,17 @@ func ToCSS(s *Style) string {
 	if s.Background != nil {
 		add("background", colors.AsHex(colors.ToUniform(s.Background)))
 	}
-	add("display", s.Display.String())
+	if s.Is(states.Invisible) {
+		add("display", "none")
+	} else {
+		add("display", s.Display.String())
+	}
 	add("flex-direction", s.Direction.String())
 	add("flex-grow", fmt.Sprintf("%g", s.Grow.Y))
 	add("justify-content", s.Justify.Content.String())
 	add("align-items", s.Align.Items.String())
 	add("columns", strconv.Itoa(s.Columns))
+	add("gap", s.Gap.X.StringCSS())
 	add("width", s.Min.X.StringCSS())
 	add("height", s.Min.Y.StringCSS())
 	add("max-width", s.Max.X.StringCSS())

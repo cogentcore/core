@@ -7,7 +7,9 @@ package core
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"io"
+	"strconv"
 
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -30,13 +32,20 @@ func ToHTML(w Widget) ([]byte, error) {
 // htmlElementNames is a map from widget [types.Type.IDName]s to HTML element
 // names for cases in which those differ.
 var htmlElementNames = map[string]string{
-	"body":      "main", // we are typically placed in a different outer body
-	"frame":     "div",
-	"text":      "p",
-	"image":     "img",
-	"icon":      "svg",
-	"space":     "div",
-	"separator": "hr",
+	"body":       "main", // we are typically placed in a different outer body
+	"frame":      "div",
+	"text":       "p",
+	"image":      "img",
+	"icon":       "svg",
+	"space":      "div",
+	"separator":  "hr",
+	"text-field": "input",
+	"spinner":    "input",
+	"slider":     "input",
+	"chooser":    "select",
+	"editor":     "textarea",
+	"switches":   "div",
+	"switch":     "input",
 }
 
 func addAttr(se *xml.StartElement, name, value string) {
@@ -57,6 +66,21 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 
 	addAttr(se, "id", wb.Name)
 	addAttr(se, "style", styles.ToCSS(&wb.Styles))
+
+	switch w := w.(type) {
+	case *TextField:
+		addAttr(se, "type", "text")
+		addAttr(se, "value", w.text)
+	case *Spinner:
+		addAttr(se, "type", "number")
+		addAttr(se, "value", fmt.Sprintf("%g", w.Value))
+	case *Slider:
+		addAttr(se, "type", "range")
+		addAttr(se, "value", fmt.Sprintf("%g", w.Value))
+	case *Switch:
+		addAttr(se, "type", "checkbox")
+		addAttr(se, "value", strconv.FormatBool(w.IsChecked()))
+	}
 
 	// rv := reflect.ValueOf(w)
 	// uv := reflectx.Underlying(rv)
