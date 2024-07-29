@@ -232,7 +232,7 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 			for fli := 0; fli < tb.numVisibleFields; fli++ {
 				field := tb.visibleFields[fli]
 				tree.AddAt(p, "head-"+field.Name, func(w *Button) {
-					w.SetType(ButtonMenu)
+					w.SetType(ButtonAction)
 					w.OnClick(func(e events.Event) {
 						tb.SortColumn(fli)
 					})
@@ -256,6 +256,8 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 							} else {
 								w.SetIcon(icons.KeyboardArrowUp)
 							}
+						} else {
+							w.SetIcon(icons.Blank)
 						}
 					})
 				})
@@ -397,25 +399,15 @@ func (tb *Table) SortColumn(fieldIndex int) {
 	sgh := tb.header
 	_, idxOff := tb.RowWidgetNs()
 
-	ascending := true
-
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		hdr := sgh.Child(idxOff + fli).(*Button)
 		hdr.SetType(ButtonAction)
 		if fli == fieldIndex {
 			if tb.sortIndex == fli {
 				tb.sortDescending = !tb.sortDescending
-				ascending = !tb.sortDescending
 			} else {
 				tb.sortDescending = false
 			}
-			if ascending {
-				hdr.SetIcon(icons.KeyboardArrowUp)
-			} else {
-				hdr.SetIcon(icons.KeyboardArrowDown)
-			}
-		} else {
-			hdr.SetIcon("none")
 		}
 	}
 
