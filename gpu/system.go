@@ -12,7 +12,7 @@ import (
 )
 
 // System manages a system of Pipelines that all share
-// a common collection of Vars, Values, and a Memory manager.
+// a common collection of Vars and Values.
 // For example, this could be a collection of different
 // pipelines for different material types, or different
 // compute operations performed on a common set of data.
@@ -26,19 +26,13 @@ type System struct {
 
 	// logical device for this System.
 	// This is owned by us for a Compute device.
-	Device Device
+	device Device
 
-	// cmd pool specific to this system
-	CmdPool CmdPool
-
-	// if true, this is a compute system -- otherwise is graphics
+	// if true, this is a pure compute system -- otherwise has graphics
 	Compute bool
 
-	// all pipelines
-	Pipelines []*Pipeline
-
-	// map of all pipelines; names must be unique.
-	PipelineMap map[string]*Pipeline
+	// GraphicsPipelines by name
+	GraphicsPipelines map[string]*GraphicsPipelines
 
 	// map of events for synchronizing processing within a single command stream -- this is the best method for compute shaders to coordinate within a given sequence of shader runs in a single command stream
 	// Events map[string]vk.Event
@@ -50,7 +44,7 @@ type System struct {
 	// Fences map[string]vk.Fence
 
 	// map of command buffers, for persistent recorded commands -- names must be unique
-	CmdBuffs map[string]*wgpu.CommandEncoder
+	// CmdBuffs map[string]*wgpu.CommandEncoder
 
 	// Vars represents all the resources used by the system, with one
 	// Var for each resource that is made visible to the shader,
@@ -72,9 +66,7 @@ func (sy *System) InitGraphics(gp *GPU, name string, dev *Device) error {
 	sy.Render.Sys = sy
 	sy.Name = name
 	sy.Compute = false
-	sy.Device = *dev
-	sy.InitCmd()
-	sy.Mem.Init(gp, &sy.Device)
+	sy.device = *dev
 	return nil
 }
 
@@ -85,80 +77,58 @@ func (sy *System) InitCompute(gp *GPU, name string) error {
 	sy.Render.Sys = sy
 	sy.Name = name
 	sy.Compute = true
-	sy.Device = *NewDevice(gp)
-	sy.InitCmd()
-	sy.Mem.Init(gp, &sy.Device)
-	sy.NewFence("ComputeWait") // always have this named fence avail for wait
+	sy.device = *NewDevice(gp)
+	// sy.NewFence("ComputeWait") // always have this named fence avail for wait
 	return nil
 }
 
-// InitCmd initializes the command pool and buffer
-func (sy *System) InitCmd() {
-	sy.CmdPool.ConfigResettable(&sy.Device)
-	sy.CmdPool.NewBuffer(&sy.Device)
+func (sy *System) NewCommandEncoder() *vgpu.CommandEncoder {
+	return sy.device.Device.CreateCommandEncoder(nil)
 }
 
 func (sy *System) Release() {
 	// for _, ev := range sy.Events {
-	// 	vk.ReleaseEvent(sy.Device.Device, ev, nil)
+	// 	vk.ReleaseEvent(sy.device.Device, ev, nil)
 	// }
 	// sy.Events = nil
 	// for _, sp := range sy.Semaphores {
-	// 	vk.ReleaseSemaphore(sy.Device.Device, sp, nil)
+	// 	vk.ReleaseSemaphore(sy.device.Device, sp, nil)
 	// }
 	// sy.Semaphores = nil
 	// for _, fc := range sy.Fences {
-	// 	vk.ReleaseFence(sy.Device.Device, fc, nil)
+	// 	vk.ReleaseFence(sy.device.Device, fc, nil)
 	// }
 	// sy.Fences = nil
 	sy.CmdBuffs = nil
-	for _, pl := range sy.Pipelines {
-		pl.Release()
+	if sy.GraphicsPipelines != nil {
+		for _, pl := range sy.GraphicsPipelines {
+			pl.Release()
+		}
+		sy.GraphicsPipelines = nil
 	}
-	sy.Pipelines = nil
-	sy.CmdPool.Release(sy.Device.Device)
-	sy.Mem.Release(sy.Device.Device)
+	sy.Vars.Release()
 	if sy.Compute {
-		sy.Device.Release()
+		sy.device.Release()
 	} else {
 		sy.Render.Release()
 	}
 	sy.GPU = nil
 }
 
-// AddPipeline adds given pipeline
-func (sy *System) AddPipeline(pl *Pipeline) {
-	if sy.PipelineMap == nil {
-		sy.PipelineMap = make(map[string]*Pipeline)
+// AddGraphicsPipeline adds a new GraphicsPipeline to the system
+func (sy *System) AddGraphicsPipeline(name string) *GraphicsPipeline {
+	if sy.GraphicsPipelines == nil {
+		sy.GraphicsPipelines = make(map[string]*GraphicsPipeline)
 	}
-	sy.Pipelines = append(sy.Pipelines, pl)
-	sy.PipelineMap[pl.Name] = pl
-}
-
-// NewPipeline returns a new pipeline added to this System,
-// initialized for use in this system.
-func (sy *System) NewPipeline(name string) *Pipeline {
-	pl := &Pipeline{Name: name}
+	pl := NweGraphicsPipeline(name)
 	pl.Init(sy)
-	sy.AddPipeline(pl)
-	return pl
-}
-
-// PipelineByNameTry returns pipeline by name with error for not found
-func (sy *System) PipelineByNameTry(name string) (*Pipeline, error) {
-	pl, ok := sy.PipelineMap[name]
-	if !ok {
-		err := fmt.Errorf("Pipeline named: %s not found", name)
-		log.Println(err)
-		return nil, err
-	}
-	return pl, nil
+	sy.GraphicsPipelines[pl.Name] = pl
 }
 
 /*
 // NewSemaphore returns a new semaphore using system device
 func (sy *System) NewSemaphore(name string) vk.Semaphore {
-	sp := NewSemaphore(sy.Device.Device)
+	sp := NewSemaphore(sy.device.Device)
 	if sy.Semaphores == nil {
 		sy.Semaphores = make(map[string]vk.Semaphore)
 	}
@@ -179,7 +149,7 @@ func (sy *System) SemaphoreByNameTry(name string) (vk.Semaphore, error) {
 
 // NewEvent returns a new event using system device
 func (sy *System) NewEvent(name string) vk.Event {
-	sp := NewEvent(sy.Device.Device)
+	sp := NewEvent(sy.device.Device)
 	if sy.Events == nil {
 		sy.Events = make(map[string]vk.Event)
 	}
@@ -200,7 +170,7 @@ func (sy *System) EventByNameTry(name string) (vk.Event, error) {
 
 // NewFence returns a new fence using system device
 func (sy *System) NewFence(name string) vk.Fence {
-	sp := NewFence(sy.Device.Device)
+	sp := NewFence(sy.device.Device)
 	if sy.Fences == nil {
 		sy.Fences = make(map[string]vk.Fence)
 	}
@@ -222,61 +192,53 @@ func (sy *System) FenceByNameTry(name string) (vk.Fence, error) {
 
 // NewCmdBuff returns a new command encoder using system device
 func (sy *System) NewCmdBuff(name string) *wgpu.CommandEncoder {
-	cb := sy.CmdPool.NewBuffer(&sy.Device)
-	if sy.CmdBuffs == nil {
-		sy.CmdBuffs = make(map[string]*wgpu.CommandEncoder)
-	}
-	sy.CmdBuffs[name] = cb
-	return cb
+	// cb := sy.CmdPool.NewBuffer(&sy.device)
+	// if sy.CmdBuffs == nil {
+	// 	sy.CmdBuffs = make(map[string]*wgpu.CommandEncoder)
+	// }
+	// sy.CmdBuffs[name] = cb
+	// return cb
+	return nil
 }
 
 // CmdBuffByNameTry returns command encoder by name with error for not found
 func (sy *System) CmdBuffByNameTry(name string) (*wgpu.CommandEncoder, error) {
-	cb, ok := sy.CmdBuffs[name]
-	if !ok {
-		err := fmt.Errorf("CmdBuff named: %s not found", name)
-		// log.Println(err)
-		return nil, err
-	}
-	return cb, nil
+	// cb, ok := sy.CmdBuffs[name]
+	// if !ok {
+	// 	err := fmt.Errorf("CmdBuff named: %s not found", name)
+	// 	// log.Println(err)
+	// 	return nil, err
+	// }
+	// return cb, nil
+	return nil
 }
 
 // ConfigRender configures the renderpass, including the image
 // format that we're rendering to, for a surface render target,
 // and the depth buffer format (pass UndefType for no depth buffer).
-func (sy *System) ConfigRender(imgFmt *TextureFormat, depthFmt Types) {
-	sy.Render.Config(sy.Device.Device, imgFmt, depthFmt, false)
+func (sy *System) ConfigRender(depthFmt Types) {
+	sy.Render.Config(sy.device.Device, depthFmt, false)
 }
 
 // ConfigRenderNonSurface configures the renderpass, including the image
 // format that we're rendering to, for a RenderFrame non-surface target,
 // and the depth buffer format (pass UndefType for no depth buffer).
-func (sy *System) ConfigRenderNonSurface(imgFmt *TextureFormat, depthFmt Types) {
-	sy.Render.Config(sy.Device.Device, imgFmt, depthFmt, true)
+func (sy *System) ConfigRenderNonSurface(depthFmt Types) {
+	sy.Render.Config(sy.device.Device, depthFmt, true)
 }
 
 // Config configures the entire system, after everything has been
-// setup (Pipelines, Vars, etc).  Memory / Values do not yet need to
-// be initialized but are allocated from the Vars on this call,
-// so the total number of Values per Var, and number of VarGroups,
-// all must be configured.
+// setup (Pipelines, Vars, etc).
 func (sy *System) Config() {
-	sy.Mem.Vars.StaticVars = sy.StaticVars
-	sy.Mem.Config(sy.Device.Device)
-	if sy.StaticVars {
-		sy.Mem.Vars.BindStatVarsAll()
-	} else {
-		sy.Mem.Vars.BindDynVarsAll()
-	}
-	ntextures := sy.Mem.Vars.NTextures
-	rebuild := ntextures != sy.configNTextures
+	sy.Vars.Config(sy.device.Device)
 	if Debug {
 		fmt.Printf("%s\n", sy.Vars().StringDoc())
 	}
-	for _, pl := range sy.Pipelines {
-		pl.Config(rebuild)
+	if pl.GraphicsPipelines != nil {
+		for _, pl := range sy.GraphicsPipelines {
+			pl.Config(rebuild)
+		}
 	}
-	sy.configNTextures = ntextures
 }
 
 //////////////////////////////////////////////////////////////
@@ -284,12 +246,13 @@ func (sy *System) Config() {
 
 // SetGraphicsDefaults configures all the default settings for all
 // graphics rendering pipelines (not for a compute pipeline)
-func (sy *System) SetGraphicsDefaults() {
-	for _, pl := range sy.Pipelines {
+func (sy *System) SetGraphicsDefaults() *System {
+	for _, pl := range sy.GraphicsPipelines {
 		pl.SetGraphicsDefaults()
 	}
 	sy.SetClearColor(0, 0, 0, 1)
 	sy.SetClearDepthStencil(1, 0)
+	return sy
 }
 
 // SetTopology sets the topology of vertex position data.
@@ -297,64 +260,71 @@ func (sy *System) SetGraphicsDefaults() {
 // Also for Strip modes, restartEnable allows restarting a new
 // strip by inserting a ??
 // For all pipelines, to keep graphics settings consistent.
-func (sy *System) SetTopology(topo Topologies, restartEnable bool) {
-	for _, pl := range sy.Pipelines {
+func (sy *System) SetTopology(topo Topologies, restartEnable bool) *System {
+	for _, pl := range sy.GraphicsPipelines {
 		pl.SetTopology(topo, restartEnable)
 	}
+	return sy
 }
 
 // SetRasterization sets various options for how to rasterize shapes:
 // Defaults are: vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0
 // For all pipelines, to keep graphics settings consistent.
-func (sy *System) SetRasterization(polygonMode vk.PolygonMode, cullMode vk.CullModeFlagBits, frontFace vk.FrontFace, lineWidth float32) {
-	for _, pl := range sy.Pipelines {
-		pl.SetRasterization(polygonMode, cullMode, frontFace, lineWidth)
-	}
-}
+// func (sy *System) SetRasterization(polygonMode vk.PolygonMode, cullMode vk.CullModeFlagBits, frontFace vk.FrontFace, lineWidth float32) {
+// 	for _, pl := range sy.GraphicsPipelines {
+// 		pl.SetRasterization(polygonMode, cullMode, frontFace, lineWidth)
+// 	}
+// }
 
 // SetCullFace sets the face culling mode: true = back, false = front
 // use CullBack, CullFront constants
-func (sy *System) SetCullFace(back bool) {
-	for _, pl := range sy.Pipelines {
+func (sy *System) SetCullFace(back bool) *System {
+	for _, pl := range sy.GraphicsPipelines {
 		pl.SetCullFace(back)
 	}
+	return sy
 }
 
 // SetFrontFace sets the winding order for what counts as a front face
 // true = CCW, false = CW
-func (sy *System) SetFrontFace(ccw bool) {
-	for _, pl := range sy.Pipelines {
+func (sy *System) SetFrontFace(ccw bool) *System {
+	for _, pl := range sy.GraphicsPipelines {
 		pl.SetFrontFace(ccw)
 	}
+	return sy
 }
 
 // SetLineWidth sets the rendering line width -- 1 is default.
-func (sy *System) SetLineWidth(lineWidth float32) {
-	for _, pl := range sy.Pipelines {
+func (sy *System) SetLineWidth(lineWidth float32) *System {
+	for _, pl := range sy.GraphicsPipelines {
 		pl.SetLineWidth(lineWidth)
 	}
+	return sy
 }
 
 // SetColorBlend determines the color blending function:
 // either 1-source alpha (alphaBlend) or no blending:
 // new color overwrites old.  Default is alphaBlend = true
 // For all pipelines, to keep graphics settings consistent.
-func (sy *System) SetColorBlend(alphaBlend bool) {
-	for _, pl := range sy.Pipelines {
+func (sy *System) SetColorBlend(alphaBlend bool) *System {
+	for _, pl := range sy.GraphicsPipelines {
 		pl.SetColorBlend(alphaBlend)
 	}
+	return sy
 }
 
 // SetClearColor sets the RGBA colors to set when starting new render
 // For all pipelines, to keep graphics settings consistent.
-func (sy *System) SetClearColor(r, g, b, a float32) {
+func (sy *System) SetClearColor(r, g, b, a float32) *System {
 	sy.Render.SetClearColor(r, g, b, a)
+	return sy
 }
 
 // SetClearDepthStencil sets the depth and stencil values when starting new render
 // For all pipelines, to keep graphics settings consistent.
-func (sy *System) SetClearDepthStencil(depth float32, stencil uint32) {
+func (sy *System) SetClearDepthStencil(depth float32, stencil uint32) *System {
 	sy.Render.SetClearDepthStencil(depth, stencil)
+	return sy
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -364,85 +334,36 @@ func (sy *System) SetClearDepthStencil(depth float32, stencil uint32) {
 // to bind the Vars descriptors, for given collection of descriptors descIndex
 // (see Vars NDescs for info).
 func (sy *System) CmdBindVars(cmd *wgpu.CommandEncoder, descIndex int) {
-	vars := sy.Vars()
-	if len(vars.SetMap) == 0 {
-		return
-	}
-	vars.BindDescIndex = descIndex
-	dset := vars.VkDescSets[descIndex]
-	doff := vars.DynOffs[descIndex]
-
-	if sy.Compute {
-		if sy.StaticVars {
-			vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, vars.VkDescLayout,
-				0, uint32(len(dset)), dset, 0, nil)
-		} else {
-			vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, vars.VkDescLayout,
-				0, uint32(len(dset)), dset, uint32(len(doff)), doff)
-		}
-	} else {
-		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointGraphics, vars.VkDescLayout,
-			0, uint32(len(dset)), dset, uint32(len(doff)), doff)
-	}
-
-}
-
-// CmdBindTextureVarIndex returns the txIndex needed to select the given Texture value
-// at valIndex in given variable in given set index, for use in a shader (i.e., pass
-// txIndex as a push constant to the shader to select this texture).  If there are
-// more than MaxTexturesPerSet textures, then it may need to select a different
-// descIndex where that val has been allocated -- the descIndex is returned, and
-// switched is true if it had to issue a CmdBindVars to given command buffer
-// to bind to that desc set, updating BindDescIndex.  Typically other vars are
-// bound to the same vals across sets, so this should not affect them, but
-// that is not necessarily the case, so other steps might need to be taken.
-// If the texture is not valid, a -1 is returned for txIndex, and an error is logged.
-func (sy *System) CmdBindTextureVarIndex(cmd *wgpu.CommandEncoder, setIndex int, varNm string, valIndex int) (txIndex, descIndex int, switched bool, err error) {
-	vars := sy.Vars()
-	txv, _, _ := vars.ValueByIndexTry(setIndex, varNm, valIndex)
-
-	descIndex = valIndex / MaxTexturesPerSet
-	if descIndex != vars.BindDescIndex {
-		sy.CmdBindVars(cmd, descIndex)
-		vars.BindDescIndex = descIndex
-		switched = true
-	}
-	stIndex := descIndex * MaxTexturesPerSet
-	txIndex = txv.TextureValidIndex(stIndex, valIndex)
-	if txIndex < 0 {
-		err = fmt.Errorf("gpu.CmdBindTextureVarIndex: Texture var %s image val at index %d (starting at idx: %d) is not valid", varNm, valIndex, stIndex)
-		log.Println(err) // this is always bad
-	}
-	return
+	// vars := sy.Vars()
+	// if len(vars.SetMap) == 0 {
+	// 	return
+	// }
+	// vars.BindDescIndex = descIndex
+	// dset := vars.VkDescSets[descIndex]
+	// doff := vars.DynOffs[descIndex]
+	// if sy.Compute {
+	// 	vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, vars.VkDescLayout,
+	// 		0, uint32(len(dset)), dset, 0, nil)
+	// } else {
+	// 	vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointGraphics, vars.VkDescLayout,
+	// 		0, uint32(len(dset)), dset, uint32(len(doff)), doff)
+	// }
 }
 
 // CmdResetBindVars adds command to the given command buffer
 // to bind the Vars descriptors, for given collection of descriptors descIndex
 // (see Vars NDescs for info).
 func (sy *System) CmdResetBindVars(cmd *wgpu.CommandEncoder, descIndex int) {
-	CmdResetBegin(cmd)
-	sy.CmdBindVars(cmd, descIndex)
+	// CmdResetBegin(cmd)
+	// sy.CmdBindVars(cmd, descIndex)
 }
 
 // BeginRenderPass adds commands to the given command buffer
-// to start the render pass on given framebuffer.
+// to start the render pass on given TextureView.
 // Clears the frame first, according to the ClearValues.
-// Also Binds descriptor sets to command buffer for given collection
-// of descriptors descIndex (see Vars NDescs for info).
-func (sy *System) BeginRenderPass(cmd *wgpu.CommandEncoder, fr *Framebuffer, descIndex int) {
-	sy.CmdBindVars(cmd, descIndex)
-	sy.Render.BeginRenderPass(cmd, fr)
-}
-
-// ResetBeginRenderPass adds commands to the given command buffer
-// to reset command buffer and call begin on it, then starts
-// the render pass on given framebuffer (BeginRenderPass)
-// Clears the frame first, according to the ClearValues.
-// Also Binds descriptor sets to command buffer for given collection
-// of descriptors descIndex (see Vars NDescs for info).
-func (sy *System) ResetBeginRenderPass(cmd *wgpu.CommandEncoder, fr *Framebuffer, descIndex int) {
-	CmdResetBegin(cmd)
-	sy.BeginRenderPass(cmd, fr, descIndex)
+func (sy *System) BeginRenderPass(cmd *wgpu.CommandEncoder, view *TextureView) *wgpu.RenderPass {
+	// sy.CmdBindVars(cmd, descIndex)
+	return sy.Render.BeginRenderPass(cmd, view)
 }
 
 // BeginRenderPassNoClear adds commands to the given command buffer
@@ -450,20 +371,9 @@ func (sy *System) ResetBeginRenderPass(cmd *wgpu.CommandEncoder, fr *Framebuffer
 // does NOT clear the frame first -- loads prior state.
 // Also Binds descriptor sets to command buffer for given collection
 // of descriptors descIndex (see Vars NDescs for info).
-func (sy *System) BeginRenderPassNoClear(cmd *wgpu.CommandEncoder, fr *Framebuffer, descIndex int) {
-	sy.CmdBindVars(cmd, descIndex)
-	sy.Render.BeginRenderPassNoClear(cmd, fr)
-}
-
-// ResetBeginRenderPassNoClear adds commands to the given command buffer
-// to reset command buffer and call begin on it, then starts
-// the render pass on given framebuffer (BeginRenderPass)
-// does NOT clear the frame first -- loads prior state.
-// Also Binds descriptor sets to command buffer for given collection
-// of descriptors descIndex (see Vars NDescs for info).
-func (sy *System) ResetBeginRenderPassNoClear(cmd *wgpu.CommandEncoder, fr *Framebuffer, descIndex int) {
-	CmdResetBegin(cmd)
-	sy.BeginRenderPassNoClear(cmd, fr, descIndex)
+func (sy *System) BeginRenderPassNoClear(cmd *wgpu.CommandEncoder, view *TextureView) *wgpu.RenderPass {
+	// sy.CmdBindVars(cmd, descIndex)
+	return sy.Render.BeginRenderPassNoClear(cmd, view)
 }
 
 // EndRenderPass adds commands to the given command buffer
@@ -476,28 +386,9 @@ func (sy *System) EndRenderPass(cmd *wgpu.CommandEncoder) {
 }
 
 /////////////////////////////////////////////
-// Memory utils
-
-// MemCmdStart starts a one-time memory command using the
-// Memory CmdPool and Device associated with this System
-// Use this for other random memory transfer commands.
-func (sy *System) MemCmdStart() *wgpu.CommandEncoder {
-	cmd := sy.Mem.CmdPool.NewBuffer(&sy.Device)
-	CmdBeginOneTime(cmd)
-	return cmd
-}
-
-// MemCmdEndSubmitWaitFree submits current one-time memory command
-// using the Memory CmdPool and Device associated with this System
-// Use this for other random memory transfer commands.
-func (sy *System) MemCmdEndSubmitWaitFree() {
-	sy.Mem.CmdPool.EndSubmitWaitFree(&sy.Device)
-}
-
-/////////////////////////////////////////////
 // Compute utils
 
 // CmdSubmitWait does SubmitWait on CmdPool
 func (sy *System) CmdSubmitWait() {
-	sy.CmdPool.SubmitWait(&sy.Device)
+	sy.CmdPool.SubmitWait(&sy.device)
 }

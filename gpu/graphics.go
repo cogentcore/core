@@ -27,6 +27,34 @@ type GraphicsPipeline struct {
 	renderPipeline *wgpu.RenderPipeline
 }
 
+// NewGraphicsPipeline returns a new GraphicsPipeline.
+func NewGraphicsPipeline(name string) *Pipeline {
+	pl := &Pipeline{Name: name}
+	return pl
+}
+
+// Init initializes pipeline as part of given System
+func (pl *GraphicsPipeline) Init(sy *System) {
+	pl.Sys = sy
+	pl.InitPipeline()
+}
+
+func (pl *GraphicsPipeline) InitPipeline() {
+	pl.SetGraphicsDefaults()
+}
+
+func (pl *GraphicsPipeline) Pipeline() *wgpu.RenderPipeline {
+	if pl.renderPipeline != nil {
+		return pl.renderPipeline
+	}
+	err := pl.Config(false)
+	if err == nil {
+		return pl.renderPipeline
+	}
+	panic(err)
+	return nil
+}
+
 // VertexEntry returns the [ShaderEntry] for [VertexShader].
 // Can be nil if no vertex shader defined.
 func (pl *GraphicsPipeline) VertexEntry() *ShaderEntry {
@@ -44,7 +72,7 @@ func (pl *GraphicsPipeline) FragmentEntry() *ShaderEntry {
 // The parent System has already done what it can for its config.
 // The rebuild flag indicates whether pipelines should rebuild,
 // e.g., based on NTextures changing.
-func (pl *GraphicsPipeline) Config(rebuild bool) {
+func (pl *GraphicsPipeline) Config(rebuild bool) error {
 	if pl.RenderPipeline != nil {
 		if !rebuild {
 			return
@@ -142,62 +170,56 @@ func (pl *GraphicsPipeline) ReleasePipeline() {
 	}
 }
 
-// Init initializes pipeline as part of given System
-func (pl *GraphicsPipeline) Init(sy *System) {
-	pl.Sys = sy
-	pl.InitPipeline()
-}
-
-func (pl *GraphicsPipeline) InitPipeline() {
-	pl.SetGraphicsDefaults()
-}
-
 //////////////////////////////////////////////////////////////
 // Set graphics options
 
 // SetGraphicsDefaults configures all the default settings for a
 // graphics rendering pipeline (not for a compute pipeline)
-func (pl *GraphicsPipeline) SetGraphicsDefaults() {
-	pl.SetDynamicState()
+func (pl *GraphicsPipeline) SetGraphicsDefaults()  *GraphicsPipeline {
 	pl.SetTopology(TriangleList, false)
 	pl.SetFrontFace(true)
 	pl.SetCullFace(true)
+	pl.SetColorBlend(true) // alpha blending
 	// pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
-	// pl.SetColorBlend(true) // alpha blending
+	return pl
 }
 
 // SetTopology sets the topology of vertex position data.
 // TriangleList is the default.
 // Also for Strip modes, restartEnable allows restarting a new
 // strip by inserting a ??
-func (pl *GraphicsPipeline) SetTopology(topo Topologies, restartEnable bool) {
+func (pl *GraphicsPipeline) SetTopology(topo Topologies, restartEnable bool)  *GraphicsPipeline {
 	pl.Primitive.Topology = topo.Primitive()
+	return pl
 }
 
 // SetFrontFace sets the winding order for what counts as a front face
 // true = CCW, false = CW
-func (pl *GraphicsPipeline) SetFrontFace(ccw bool) {
+func (pl *GraphicsPipeline) SetFrontFace(ccw bool) *GraphicsPipeline {
 	cm := wgpu.FrontFace_CW
 	if ccw {
 		cm = wgpu.FrontFace_CCW
 	}
 	pl.Primitive.FrontFace = cm
+	return pl
 }
 
 // SetCullFace sets the face culling mode: true = back, false = front
 // use CullBack, CullFront constants
-func (pl *GraphicsPipeline) SetCullFace(back bool) {
+func (pl *GraphicsPipeline) SetCullFace(back bool)  *GraphicsPipeline {
 	cm := wgpu.CullMode_Front
 	if back {
 		cm = wgpu.CullMode_Back
 	}
 	pl.Primitive.CullMode = cm
+	return pl
 }
 
-func (pl *GraphicsPipeline) SetMultisample(ms int) {
+func (pl *GraphicsPipeline) SetMultisample(ms int)  *GraphicsPipeline {
 	pl.Multisample.Count = max(1, ms)
 	pl.Multsample.Mask = 0xFFFFFFFF // todo
 	pl.AlphaToCoverageEnabled = false // todo
+	return pl
 }
 
 const (
@@ -215,9 +237,9 @@ const (
 )
 
 // SetLineWidth sets the rendering line width -- 1 is default.
-// func (pl *GraphicsPipeline) SetLineWidth(lineWidth float32) {
+func (pl *GraphicsPipeline) SetLineWidth(lineWidth float32) {
 // 	pl.VkConfig.PRasterizationState.LineWidth = lineWidth
-// }
+}
 
 // SetColorBlend determines the color blending function:
 // either 1-source alpha (alphaBlend) or no blending:
