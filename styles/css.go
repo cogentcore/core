@@ -51,7 +51,10 @@ func ToCSS(s *Style) string {
 		add("width", s.Min.X.StringCSS())
 		add("height", s.Min.Y.StringCSS())
 	}
-	add("padding", s.Padding.Top.StringCSS())
+	add("padding-top", s.Padding.Top.StringCSS())
+	add("padding-right", s.Padding.Right.StringCSS())
+	add("padding-bottom", s.Padding.Bottom.StringCSS())
+	add("padding-left", s.Padding.Left.StringCSS())
 	add("margin", s.Margin.Top.StringCSS())
 	if s.Font.Size.Value != 16 || s.Font.Size.Unit != units.UnitDp {
 		add("font-size", s.Font.Size.StringCSS())
@@ -71,6 +74,7 @@ func ToCSS(s *Style) string {
 		add("font-weight", s.Font.Weight.String())
 	}
 	add("line-height", s.Text.LineHeight.StringCSS())
+	add("text-align", s.Text.Align.String())
 	if s.Border.Width.Top.Value > 0 {
 		add("border-style", s.Border.Style.Top.String())
 		add("border-width", s.Border.Width.Top.StringCSS())
