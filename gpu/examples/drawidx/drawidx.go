@@ -96,6 +96,7 @@ func main() {
 
 	triIndex := idxv.Values.Values[0]
 	gpu.SetValueFrom(triIndex, []uint16{0, 1, 2})
+	// note: the only way to set indexes is at start..
 
 	// This is the standard camera view projection computation
 	cam := camv.Values.Values[0]
@@ -118,10 +119,6 @@ func main() {
 	// will render identically here.
 	camo.Projection.SetVkPerspective(45, aspect, 0.01, 100)
 	gpu.SetValueFrom(cam, []CamView{camo}) // note: always use slice to copy
-
-	// if sy.Validate() != nil { // useful check, makes any read-out buffers
-	// 	return
-	// }
 
 	frameCount := 0
 	stTime := time.Now()

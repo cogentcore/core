@@ -87,8 +87,8 @@ func (vl *Value) MemSize() int {
 
 // CreateBuffer creates the GPU buffer for this value if it does not
 // yet exist or is not the right size.
-func (vl *Value) CreateBuffer(vr *Var, dev *Device) error {
-	if vr.Role == SampledTexture {
+func (vl *Value) CreateBuffer() error {
+	if vl.role == SampledTexture {
 		return nil
 	}
 	sz := vl.MemSize()
@@ -100,13 +100,11 @@ func (vl *Value) CreateBuffer(vr *Var, dev *Device) error {
 		return nil
 	}
 	vl.Release()
-	mapNow := false // vl.ElSize >= 4
-	fmt.Println(vl.Name, "map now:", mapNow, "sz:", sz, "usage:", int(vr.Role.BufferUsages()))
-	buf, err := dev.Device.CreateBuffer(&wgpu.BufferDescriptor{
+	buf, err := vl.device.Device.CreateBuffer(&wgpu.BufferDescriptor{
 		Size:             uint64(sz),
 		Label:            vl.Name,
-		Usage:            vr.Role.BufferUsages(),
-		MappedAtCreation: mapNow,
+		Usage:            vl.role.BufferUsages(),
+		MappedAtCreation: false,
 	})
 	if err != nil {
 		slog.Error(err.Error())
@@ -157,10 +155,13 @@ func (vl *Value) SetFromBytes(from []byte) error {
 			return err
 		}
 		vl.buffer = buf
-		vl.AllocSize = len(from) // todo: compare with target
+		sz := vl.MemSize()
+		if len(from) != sz {
+			slog.Error("gpu.Value SetFromBytes", "Size passed", len(from), "!= Size expected", sz)
+		}
+		vl.AllocSize = sz
 		return nil
 	}
-	// todo: deal with padding?
 	err := vl.device.Queue.WriteBuffer(vl.buffer, 0, from)
 	if err != nil {
 		slog.Error(err.Error())
@@ -210,6 +211,7 @@ func (vl *Value) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 			},
 		}
 	}
+	vl.CreateBuffer() // ensure made
 	return []wgpu.BindGroupEntry{{
 		Binding: uint32(vr.Binding),
 		Buffer:  vl.buffer,
