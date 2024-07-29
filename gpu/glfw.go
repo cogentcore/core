@@ -9,6 +9,8 @@ package gpu
 import (
 	"cogentcore.org/core/base/errors"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/rajveermalviya/go-webgpu/wgpu"
+	wgpuext_glfw "github.com/rajveermalviya/go-webgpu/wgpuext/glfw"
 )
 
 // note: this file contains the glfw dependencies, for desktop platform builds
@@ -33,4 +35,30 @@ func Init() error {
 // IMPORTANT: must be called on the main initial thread!
 func Terminate() {
 	glfw.Terminate()
+}
+
+// GLFWCreateWindow is a helper function intended only for use in simple examples that makes a
+// new window with glfw on platforms that support it and is largely a no-op on other platforms.
+func GLFWCreateWindow(gp *GPU, width, height int, title string) (surface *wgpu.Surface, terminate func(), pollEvents func() bool, err error) {
+	if err = Init(); err != nil {
+		return
+	}
+	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
+	window, err := glfw.CreateWindow(width, height, title, nil, nil)
+	if err != nil {
+		return
+	}
+	surface = gp.Instance.CreateSurface(wgpuext_glfw.GetSurfaceDescriptor(window))
+	terminate = func() {
+		window.Destroy()
+		Terminate()
+	}
+	pollEvents = func() bool {
+		if window.ShouldClose() {
+			return false
+		}
+		glfw.PollEvents()
+		return true
+	}
+	return
 }

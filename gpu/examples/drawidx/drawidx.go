@@ -13,9 +13,7 @@ import (
 
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
-	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
-	wgpuext_glfw "github.com/rajveermalviya/go-webgpu/wgpuext/glfw"
 )
 
 func init() {
@@ -30,22 +28,16 @@ type CamView struct {
 }
 
 func main() {
-	if gpu.Init() != nil {
-		return
-	}
-
-	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
-	window, err := glfw.CreateWindow(1024, 768, "Draw Triangle", nil, nil)
-	if err != nil {
-		panic(err)
-	}
-
 	gp := gpu.NewGPU()
 	gpu.Debug = true
 	gp.Config("drawidx")
 
-	sp := gp.Instance.CreateSurface(wgpuext_glfw.GetSurfaceDescriptor(window))
-	width, height := window.GetSize()
+	width, height := 1024, 768
+	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Triangle Indexed")
+	if err != nil {
+		return
+	}
+
 	sf := gpu.NewSurface(gp, sp, width, height)
 
 	fmt.Printf("format: %s\n", sf.Format.String())
@@ -57,8 +49,7 @@ func main() {
 		sy.Release()
 		sf.Release()
 		gp.Release()
-		window.Destroy()
-		gpu.Terminate()
+		terminate()
 	}
 
 	pl := sy.AddGraphicsPipeline("drawidx")
@@ -179,11 +170,10 @@ func main() {
 			destroy()
 			return
 		case <-fpsTicker.C:
-			if window.ShouldClose() {
+			if !pollEvents() {
 				exitC <- struct{}{}
 				continue
 			}
-			glfw.PollEvents()
 			renderFrame()
 		}
 	}
