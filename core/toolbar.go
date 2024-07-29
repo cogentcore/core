@@ -217,10 +217,10 @@ func ToolbarStyles(w Widget) {
 	wb.FinalStyler(func(s *styles.Style) {
 		if s.Direction == styles.Row {
 			s.Grow.Set(1, 0)
-			s.Padding.SetHorizontal(units.Dp(ConstantSpacing(16)))
+			s.Padding.SetHorizontal(units.Dp(16))
 		} else {
 			s.Grow.Set(0, 1)
-			s.Padding.SetVertical(units.Dp(ConstantSpacing(16)))
+			s.Padding.SetVertical(units.Dp(16))
 		}
 	})
 	wb.SetOnChildAdded(func(n tree.Node) {
