@@ -31,7 +31,8 @@ require (
 	github.com/muesli/termenv v0.15.2
 	github.com/nsf/termbox-go v1.1.1
 	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
-	github.com/rajveermalviya/go-webgpu v0.17.1
+	github.com/rajveermalviya/go-webgpu/wgpu v0.17.1
+	github.com/rajveermalviya/go-webgpu/wgpuext/glfw v0.1.1
 	github.com/stretchr/testify v1.9.0
 	github.com/zergon321/reisen v0.1.9
 	golang.org/x/crypto v0.24.0
@@ -61,7 +62,6 @@ require (
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/rajveermalviya/go-webgpu/wgpu v0.17.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20240416160154-fe59bbe5cc7f // indirect
