@@ -461,7 +461,7 @@ func (ds *DeviceSettingsData) Apply() {
 type ScreenSettings struct { //types:add
 
 	// overall zoom factor as a percentage of the default zoom
-	Zoom float32 `default:"100" min:"10" max:"1000" step:"10"`
+	Zoom float32 `default:"100" min:"10" max:"1000" step:"10" format:"%g%%"`
 }
 
 // SystemSettings are the currently active Cogent Core system settings.

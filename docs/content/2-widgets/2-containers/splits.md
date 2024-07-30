@@ -8,6 +8,18 @@ core.NewText(sp).SetText("First")
 core.NewText(sp).SetText("Second")
 ```
 
+You can add as much content as you want to each splits item:
+
+```Go
+sp := core.NewSplits(b)
+first := core.NewFrame(sp)
+core.NewButton(first).SetText("First")
+core.NewTextField(first).SetText("First")
+second := core.NewFrame(sp)
+core.NewButton(second).SetText("Second")
+core.NewTextField(second).SetText("Second")
+```
+
 You can add as many items as you want to splits:
 
 ```Go
