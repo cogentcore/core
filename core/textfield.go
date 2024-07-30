@@ -555,6 +555,7 @@ func (tf *TextField) clearError() {
 	}
 	tf.error = nil
 	tf.Update()
+	tf.Send(events.LongHoverEnd) // get rid of any validation tooltip
 }
 
 // validate runs [TextField.Validator] and takes any necessary actions
