@@ -230,6 +230,8 @@ func (vl *Value) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 func (vl *Value) SetFromGoImage(img image.Image, layer int, flipY bool) *TextureSample {
 	err := vl.Texture.SetFromGoImage(img, layer, flipY)
 	errors.Log(err)
+	err = vl.Texture.Sampler.Config(&vl.device)
+	errors.Log(err)
 	return vl.Texture
 }
 

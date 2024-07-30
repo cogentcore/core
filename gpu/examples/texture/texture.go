@@ -152,7 +152,7 @@ func main() {
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
-		camo.Model.SetRotationY(.002 * float32(frameCount))
+		camo.Model.SetRotationY(.004 * float32(frameCount))
 		gpu.SetValueFrom(cam, []CamView{camo})
 
 		imgIndex := int32(frameCount % len(imgs))

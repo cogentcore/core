@@ -11,7 +11,6 @@ import (
 	"strconv"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/reflectx"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -253,7 +252,7 @@ func (vg *VarGroup) bindLayout(vs *Vars) error {
 		binds = append(binds, bd)
 	}
 
-	fmt.Println(reflectx.StringJSON(binds))
+	// fmt.Println(reflectx.StringJSON(binds))
 
 	bgld := wgpu.BindGroupLayoutDescriptor{
 		Label:   strconv.Itoa(vg.Group),
