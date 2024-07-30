@@ -75,16 +75,16 @@ func (sm *Sampler) Defaults() {
 func (sm *Sampler) Config(dev *Device) error {
 	sm.Release()
 	samp, err := dev.Device.CreateSampler(&wgpu.SamplerDescriptor{
-		AddressModeU:   sm.UMode.Mode(),
-		AddressModeV:   sm.VMode.Mode(),
-		AddressModeW:   sm.WMode.Mode(),
-		MagFilter:      wgpu.FilterModeLinear, // nearest?
-		MinFilter:      wgpu.FilterModeLinear,
-		MipmapFilter:   wgpu.MipmapFilterModeLinear,
-		LodMinClamp:    0,
-		LodMaxClamp:    32,
-		Compare:        wgpu.CompareFunctionUndefined,
-		MaxAnisotrophy: 1,
+		AddressModeU:  sm.UMode.Mode(),
+		AddressModeV:  sm.VMode.Mode(),
+		AddressModeW:  sm.WMode.Mode(),
+		MagFilter:     wgpu.FilterModeLinear, // nearest?
+		MinFilter:     wgpu.FilterModeLinear,
+		MipmapFilter:  wgpu.MipmapFilterModeLinear,
+		LodMinClamp:   0,
+		LodMaxClamp:   32,
+		Compare:       wgpu.CompareFunctionUndefined,
+		MaxAnisotropy: 1,
 	})
 	// MaxAnisotropy:           gp.GPUProperties.Limits.MaxSamplerAnisotropy,
 	// BorderColor:             sm.Border.VkColor(),
