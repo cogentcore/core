@@ -227,6 +227,8 @@ func (vl *Value) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 // If flipY is true then the Texture Y axis is flipped when copying into
 // the image data.  Can avoid this by configuring texture coordinates to
 // compensate.
+// The Sampler is also configured at this point, with the current settings,
+// so set those before making this call.
 func (vl *Value) SetFromGoImage(img image.Image, layer int, flipY bool) *TextureSample {
 	err := vl.Texture.SetFromGoImage(img, layer, flipY)
 	errors.Log(err)

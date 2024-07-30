@@ -155,8 +155,7 @@ func main() {
 		camo.Model.SetRotationY(.004 * float32(frameCount))
 		gpu.SetValueFrom(cam, []CamView{camo})
 
-		imgIndex := int32(frameCount % len(imgs))
-		_ = imgIndex
+		imgIndex := frameCount % len(imgs)
 
 		view, err := sf.AcquireNextTexture()
 		if err != nil {
@@ -165,6 +164,7 @@ func main() {
 		}
 		cmd := sy.NewCommandEncoder()
 		rp := sy.BeginRenderPass(cmd, view)
+		txv.Values.Current = imgIndex
 		pl.BindPipeline(rp)
 		pl.BindDrawVertex(rp)
 		rp.End()
