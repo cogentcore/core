@@ -5,6 +5,7 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"image"
 	"image/color"
@@ -17,6 +18,9 @@ import (
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
 )
+
+//go:embed texture.wgsl
+var texture string
 
 func init() {
 	// a must lock main thread for gpu!
@@ -60,7 +64,7 @@ func main() {
 	sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 
 	sh := pl.AddShader("texture")
-	sh.OpenFile("texture.wgsl")
+	sh.OpenCode(texture)
 	pl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	pl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
@@ -155,7 +159,7 @@ func main() {
 		camo.Model.SetRotationY(.004 * float32(frameCount))
 		gpu.SetValueFrom(cam, []CamView{camo})
 
-		imgIndex := frameCount % len(imgs)
+		imgIndex := (frameCount / 10) % len(imgs)
 
 		view, err := sf.AcquireNextTexture()
 		if errors.Log(err) != nil {
