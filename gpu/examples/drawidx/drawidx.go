@@ -8,10 +8,10 @@ import (
 	_ "embed"
 	"fmt"
 	"image/color"
-	"log/slog"
 	"runtime"
 	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
@@ -134,8 +134,7 @@ func main() {
 		gpu.SetValueFrom(cam, []CamView{camo})
 
 		view, err := sf.AcquireNextTexture()
-		if err != nil {
-			slog.Error(err.Error())
+		if errors.Log(err) != nil {
 			return
 		}
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
