@@ -65,8 +65,8 @@ func main() {
 	pl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
 	vgp := sy.Vars.AddVertexGroup()
+	tgp := sy.Vars.AddGroup(gpu.SampledTexture) // texture in 0 so frag only gets 0
 	ugp := sy.Vars.AddGroup(gpu.Uniform)
-	tgp := sy.Vars.AddGroup(gpu.SampledTexture)
 
 	nPts := 4
 	nIndexes := 6

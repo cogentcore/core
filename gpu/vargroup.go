@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/reflectx"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -233,7 +234,6 @@ func (vg *VarGroup) bindLayout(vs *Vars) error {
 				Binding:    uint32(vr.Binding),
 				Visibility: vr.shaders,
 				Texture: wgpu.TextureBindingLayout{
-
 					Multisampled:  false,
 					ViewDimension: wgpu.TextureViewDimension2D, // todo:
 					SampleType:    wgpu.TextureSampleTypeFloat,
@@ -252,6 +252,8 @@ func (vg *VarGroup) bindLayout(vs *Vars) error {
 		}
 		binds = append(binds, bd)
 	}
+
+	fmt.Println(reflectx.StringJSON(binds))
 
 	bgld := wgpu.BindGroupLayoutDescriptor{
 		Label:   strconv.Itoa(vg.Group),
