@@ -5,8 +5,7 @@
 package gpu
 
 import (
-	"log/slog"
-
+	"cogentcore.org/core/base/errors"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -181,8 +180,7 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 		}
 	}
 	rp, err := pl.Sys.device.Device.CreateRenderPipeline(pd)
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		return err
 	}
 	pl.renderPipeline = rp

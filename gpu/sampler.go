@@ -5,8 +5,7 @@
 package gpu
 
 import (
-	"log/slog"
-
+	"cogentcore.org/core/base/errors"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -90,8 +89,7 @@ func (sm *Sampler) Config(dev *Device) error {
 	// BorderColor:             sm.Border.VkColor(),
 	// UnnormalizedCoordinates: vk.False,
 	// CompareEnable:           vk.False,
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		return err
 	}
 	sm.sampler = samp

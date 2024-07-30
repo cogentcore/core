@@ -8,8 +8,7 @@
 package gpu
 
 import (
-	"log/slog"
-
+	"cogentcore.org/core/base/errors"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -97,8 +96,7 @@ func (sf *Surface) Init(gp *GPU, ws *wgpu.Surface, width, height int) error {
 	sf.GPU = gp
 	sf.surface = ws
 	dev, err := gp.NewDevice() // surface owns this device
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		return err
 	}
 	sf.Device = dev
@@ -116,8 +114,7 @@ func (sf *Surface) AcquireNextTexture() (*wgpu.TextureView, error) {
 
 func (sf *Surface) SubmitRender(cmd *wgpu.CommandEncoder) error {
 	cmdBuffer, err := cmd.Finish(nil)
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		return err
 	}
 	defer cmdBuffer.Release()

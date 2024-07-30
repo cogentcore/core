@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"log/slog"
 	"path/filepath"
 	"runtime"
 	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
@@ -158,8 +158,7 @@ func main() {
 		imgIndex := frameCount % len(imgs)
 
 		view, err := sf.AcquireNextTexture()
-		if err != nil {
-			slog.Error(err.Error())
+		if errors.Log(err) != nil {
 			return
 		}
 		cmd := sy.NewCommandEncoder()

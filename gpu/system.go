@@ -7,8 +7,8 @@ package gpu
 import (
 	"fmt"
 	"image/color"
-	"log/slog"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
@@ -101,8 +101,7 @@ func (sy *System) InitCompute(gp *GPU, name string) error {
 
 func (sy *System) NewCommandEncoder() *wgpu.CommandEncoder {
 	ce, err := sy.device.Device.CreateCommandEncoder(nil)
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		return nil
 	}
 	return ce

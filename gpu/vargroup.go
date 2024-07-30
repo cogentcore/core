@@ -7,7 +7,6 @@ package gpu
 import (
 	"fmt"
 	"log"
-	"log/slog"
 	"strconv"
 
 	"cogentcore.org/core/base/errors"
@@ -144,13 +143,13 @@ func (vg *VarGroup) Config(dev *Device) error {
 		if vg.Group == VertexGroup && vr.Role > Index {
 			err := fmt.Errorf("gpu.VarGroup:Config VertexGroup cannot contain variables of role: %s  var: %s", vr.Role.String(), vr.Name)
 			errs = append(errs, err)
-			slog.Error(err.Error())
+			errors.Log(err)
 			continue
 		}
 		if vg.Group >= 0 && vr.Role <= Index {
 			err := fmt.Errorf("gpu.VarGroup:Config Vertex or Index Vars must be located in a VertexGroup!  Use AddVertexGroup() method instead of AddGroup()")
 			errs = append(errs, err)
-			slog.Error(err.Error())
+			errors.Log(err)
 		}
 		rl := vg.RoleMap[vr.Role]
 		rl = append(rl, vr)
@@ -158,12 +157,12 @@ func (vg *VarGroup) Config(dev *Device) error {
 		if vr.Role == Index && len(rl) > 1 {
 			err := fmt.Errorf("gpu.VarGroup:Config VertexGroup should not contain multiple Index variables: %v", rl)
 			errs = append(errs, err)
-			slog.Error(err.Error())
+			errors.Log(err)
 		}
 		if vr.Role > Storage && (len(vg.RoleMap[Uniform]) > 0 || len(vg.RoleMap[Storage]) > 0) {
 			err := fmt.Errorf("gpu.VarGroup:Config Group with dynamic Uniform or Storage variables should not contain static variables (e.g., textures): %s", vr.Role.String())
 			errs = append(errs, err)
-			slog.Error(err.Error())
+			errors.Log(err)
 		}
 		if vr.Role != Index { // index doesn't count
 			vr.Binding = bnum
@@ -260,8 +259,7 @@ func (vg *VarGroup) bindLayout(vs *Vars) error {
 	}
 
 	bgl, err := vg.device.Device.CreateBindGroupLayout(&bgld)
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		return err
 	}
 	vg.layout = bgl
@@ -353,8 +351,7 @@ func (vg *VarGroup) bindGroup() *wgpu.BindGroup {
 		Entries: bgs,
 		Label:   vg.Name,
 	})
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		// todo: panic?
 	}
 	return bg

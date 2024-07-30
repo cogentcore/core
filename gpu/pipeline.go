@@ -8,6 +8,7 @@ import (
 	"log"
 	"log/slog"
 
+	"cogentcore.org/core/base/errors"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -121,8 +122,7 @@ func (pl *Pipeline) BindLayout() error {
 		Label:            pl.Name,
 		BindGroupLayouts: lays,
 	})
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		return err
 	}
 	pl.layout = rpl

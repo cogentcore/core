@@ -107,8 +107,7 @@ func (vl *Value) CreateBuffer() error {
 		Usage:            vl.role.BufferUsages(),
 		MappedAtCreation: false,
 	})
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		return err
 	}
 	vl.AllocSize = sz
@@ -151,8 +150,7 @@ func (vl *Value) SetFromBytes(from []byte) error {
 			Contents: from,
 			Usage:    vl.role.BufferUsages(),
 		})
-		if err != nil {
-			slog.Error(err.Error())
+		if errors.Log(err) != nil {
 			return err
 		}
 		vl.buffer = buf
@@ -164,8 +162,7 @@ func (vl *Value) SetFromBytes(from []byte) error {
 		return nil
 	}
 	err := vl.device.Queue.WriteBuffer(vl.buffer, 0, from)
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		return err
 	}
 	return nil
@@ -182,8 +179,7 @@ func CopyValueToBytes[E any](vl *Value, dest []E) error {
 // ensuring that the buffer is mapped and ready to be copied into.
 // This automatically calls Unmap() after copying.
 func (vl *Value) CopyToBytes(dest []byte) error {
-	if err := vl.NilBufferCheck(); err != nil {
-		slog.Error(err.Error())
+	if err := vl.NilBufferCheck(); errors.Log(err) != nil {
 		return err
 	}
 	var err error

@@ -6,8 +6,8 @@ package gpu
 
 import (
 	"image"
-	"log/slog"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/enums"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
@@ -224,8 +224,7 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int, flipY bool) error 
 		Format:        wgpu.TextureFormatRGBA8UnormSrgb,
 		Usage:         wgpu.TextureUsageTextureBinding | wgpu.TextureUsageCopyDst,
 	})
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		return err
 	}
 	tx.texture = t
