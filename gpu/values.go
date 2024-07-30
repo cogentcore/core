@@ -10,6 +10,7 @@ import (
 	"log"
 	"log/slog"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/slicesx"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
@@ -47,7 +48,7 @@ type Value struct {
 	buffer *wgpu.Buffer `display:"-"`
 
 	// for SampledTexture Var roles, this is the Texture.
-	texture *TextureSample
+	Texture *TextureSample
 
 	TextureOwns bool
 }
@@ -69,7 +70,7 @@ func (vl *Value) Init(vr *Var, dev *Device, idx int) {
 	vl.N = vr.ArrayN
 	vl.TextureOwns = vr.TextureOwns
 	if vr.Role >= SampledTexture {
-		vl.texture = NewTextureSample(dev)
+		vl.Texture = NewTextureSample(dev)
 	}
 }
 
@@ -78,8 +79,8 @@ func (vl *Value) MemSize() int {
 	if vl.N == 0 {
 		vl.N = 1
 	}
-	if vl.texture != nil {
-		return vl.texture.Format.TotalByteSize()
+	if vl.Texture != nil {
+		return vl.Texture.Format.TotalByteSize()
 	} else {
 		return vl.ElSize * vl.N
 	}
@@ -121,9 +122,9 @@ func (vl *Value) Release() {
 		vl.buffer.Release()
 		vl.buffer = nil
 	}
-	if vl.texture != nil {
-		vl.texture.Release()
-		vl.texture = nil
+	if vl.Texture != nil {
+		vl.Texture.Release()
+		vl.Texture = nil
 	}
 }
 
@@ -203,11 +204,11 @@ func (vl *Value) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 		return []wgpu.BindGroupEntry{
 			{
 				Binding:     uint32(vr.Binding),
-				TextureView: vl.texture.view,
+				TextureView: vl.Texture.view,
 			},
 			{
 				Binding: uint32(vr.Binding + 1),
-				Sampler: vl.texture.Sampler.sampler,
+				Sampler: vl.Texture.Sampler.sampler,
 			},
 		}
 	}
@@ -226,8 +227,10 @@ func (vl *Value) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 // If flipY is true then the Texture Y axis is flipped when copying into
 // the image data.  Can avoid this by configuring texture coordinates to
 // compensate.
-func (vl *Value) SetFromGoImage(img image.Image, layer int, flipY bool) error {
-	return vl.texture.SetFromGoImage(img, layer, flipY)
+func (vl *Value) SetFromGoImage(img image.Image, layer int, flipY bool) *TextureSample {
+	err := vl.Texture.SetFromGoImage(img, layer, flipY)
+	errors.Log(err)
+	return vl.Texture
 }
 
 //////////////////////////////////////////////////////////////////

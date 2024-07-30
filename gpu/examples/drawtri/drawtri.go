@@ -53,8 +53,7 @@ func main() {
 	// no vars..
 
 	destroy := func() {
-		// vk.DeviceWaitIdle(sf.Device.Device)
-		// todo: poll
+		sy.WaitDone()
 		sy.Release()
 		sf.Release()
 		gp.Release()

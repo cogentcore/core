@@ -246,7 +246,7 @@ func (pl *GraphicsPipeline) ReleasePipeline() {
 // graphics rendering pipeline (not for a compute pipeline)
 func (pl *GraphicsPipeline) SetGraphicsDefaults() *GraphicsPipeline {
 	pl.SetTopology(TriangleList, false)
-	pl.SetFrontFace(wgpu.FrontFaceCCW)
+	pl.SetFrontFace(wgpu.FrontFaceCW)
 	pl.SetCullMode(wgpu.CullModeBack)
 	pl.SetColorBlend(true) // alpha blending
 	pl.SetMultisample(1)
@@ -264,6 +264,7 @@ func (pl *GraphicsPipeline) SetTopology(topo Topologies, restartEnable bool) *Gr
 }
 
 // SetFrontFace sets the winding order for what counts as a front face.
+// Default is CW.
 func (pl *GraphicsPipeline) SetFrontFace(face wgpu.FrontFace) *GraphicsPipeline {
 	pl.Primitive.FrontFace = face
 	return pl
