@@ -5,6 +5,7 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"log/slog"
 	"runtime"
@@ -14,6 +15,9 @@ import (
 
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
+
+//go:embed trianglelit.wgsl
+var trianglelit string
 
 func init() {
 	// must lock main thread for gpu!
@@ -41,7 +45,7 @@ func main() {
 	// sf.SetRender(&sy.Render)
 
 	sh := pl.AddShader("trianglelit")
-	sh.OpenFile("trianglelit.wgsl")
+	sh.OpenCode(trianglelit)
 	pl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	pl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 

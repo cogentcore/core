@@ -5,6 +5,7 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"image/color"
 	"log/slog"
@@ -15,6 +16,9 @@ import (
 	"cogentcore.org/core/math32"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
+
+//go:embed indexed.wgsl
+var indexed string
 
 func init() {
 	// must lock main thread for gpu!
@@ -60,7 +64,7 @@ func main() {
 	sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 
 	sh := pl.AddShader("indexed")
-	sh.OpenFile("indexed.wgsl")
+	sh.OpenCode(indexed)
 	pl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	pl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 

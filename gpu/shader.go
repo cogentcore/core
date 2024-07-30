@@ -6,9 +6,9 @@ package gpu
 
 import (
 	"io/fs"
-	"log/slog"
 	"os"
 
+	"cogentcore.org/core/base/errors"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -34,8 +34,7 @@ func (sh *Shader) OpenFile(fname string) error {
 		sh.Name = fname
 	}
 	b, err := os.ReadFile(fname)
-	if err != nil {
-		slog.Error("gpu.Shader OpenFile", err)
+	if errors.Log(err) != nil {
 		return err
 	}
 	return sh.OpenCode(string(b))
@@ -47,8 +46,7 @@ func (sh *Shader) OpenFileFS(fsys fs.FS, fname string) error {
 		sh.Name = fname
 	}
 	b, err := fs.ReadFile(fsys, fname)
-	if err != nil {
-		slog.Error("gpu.Shader OpenFileFS", err)
+	if errors.Log(err) != nil {
 		return err
 	}
 	return sh.OpenCode(string(b))
@@ -60,8 +58,7 @@ func (sh *Shader) OpenCode(code string) error {
 		Label:          sh.Name,
 		WGSLDescriptor: &wgpu.ShaderModuleWGSLDescriptor{Code: code},
 	})
-	if err != nil {
-		slog.Error(err.Error())
+	if errors.Log(err) != nil {
 		return err
 	}
 	sh.module = module
