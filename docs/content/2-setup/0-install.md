@@ -7,4 +7,4 @@ Now that you have read the [basics](../basics) and [tutorials](../tutorials), yo
     * You should run the command from your home directory.
     * You may need to enter your password so that it can run `sudo` commands.
     * You may need to restart your shell/prompt/terminal after running the command.
-    * On Windows, you may need to run the command from a shell/prompt/terminal running as administrator (but still in your home directory). You may need to follow steps in installers; the default options should be fine. If it asks you about Git Bash, you should choose to install it, and you should use it as your shell for running all Cogent Core commands.
+    * On Windows, you may need to run the command from a shell/prompt/terminal running as administrator (but still in your home directory). You may need to follow steps in installers; the default options should be fine. If it asks you about Git Bash, you should choose to install it, and you should use it as your shell for running all commands related to Cogent Core.
