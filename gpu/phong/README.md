@@ -21,22 +21,17 @@ There are 3 rendering pipelines:
 * PerVertex: color is provided per vertex by the mesh.
 
 The color model has the following factors:
-* `Color` = main color of surface arising from one of the 3 sources listed above, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering, to sort objects as a function of depth.
-* `Emissive` = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object.
-* `Shiny` = specular shininess factor -- how focally the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128) having a smaller more focal specular reflection. Default is 30.
-* `Reflect` = reflectiveness of the surface in the region where specular reflected light is emitted -- 1 for full shiny white reflection (specular) color, 0 = no shine reflection.  The specular color is always set to white, which will reflect the light color accurately.
-* `Bright` = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters.
-
-# Known Issues
-
-There must be at least one texture image, otherwise the Mac VKMolten system triggers this error.  The system automatically adds a dummy image to deal with this.
-
-```
-[mvk-error] VK_ERROR_INVALID_SHADER_NV: Unable to convert SPIR-V to MSL:
-MSL conversion error: Unsized array of images is not supported in MSL.
-```
+* `Color` = main color of surface arising from one of the 3 sources listed above, used for both ambient and diffuse color in standard Phong model.  The alpha component determines transparency.  Note that transparent objects require more complex rendering, to sort objects as a function of depth.
+* `Emissive` = color that surface emits independent of any lighting, i.e., glow, can be used for marking lights with an object.
+* `Shiny` = specular shininess factor, which determines how focally the surface shines back directional light. This is an exponential factor, where 0 = very broad diffuse reflection, and higher values (typically max of 128) have a smaller more focal specular reflection. Default is 30.
+* `Reflect` = reflectiveness of the surface in the region where specular reflected light is emitted, where 1 = full shiny white reflection (specular) color and 0 = no shine reflection.  The specular color is always set to white, which will reflect the light color accurately.
+* `Bright` = overall multiplier on final computed color value. Can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters.
 
 # Layout of Vars
+
+Without push constants in WebGPU, we need to store and send the per-object color and model matrix in the Vertex group, as Per-instance variables.  Vertex variables can only be up to 4 bytes (Float32Vector4) so we serialize each color component separately, and the Float32Matrix4 has support for serializing the 4x variables.
+
+This also means that we need to manage this per-object data as variables in the 
 
 ```
 Set: -2
@@ -69,9 +64,7 @@ Set: 3
 
 # WebGPU specific considerations
 
-WebGPU does not (yet) support either:
-* push constants: https://github.com/gpuweb/gpuweb/issues/75
-* arrays of samplers / textures: https://github.com/gpuweb/gpuweb/issues/822
+WebGPU does not (yet) support push constants: https://github.com/gpuweb/gpuweb/issues/75
 
 Vulkan-based vGPU took full advantage of push constants, to send up the model matrix and texture index for the current object being rendered.
 
@@ -91,9 +84,5 @@ Without push constants, there are 3 different options:
 All options require allocating data on a _per object_ basis, whereas otherwise phong is designed to only require knowing the _meshes_ which drive the vertex data, and are generally much smaller in number than the objects (this is the instancing concept).
 
 Probably the vertex buffer is the fastest of the options -- will investigate.
-
-Next, we have to figure out how to deal with the textures..
-
-
 
 

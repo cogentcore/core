@@ -30,6 +30,9 @@ const (
 // in shader code, with @binding allocated sequentially within group
 // (or @location in the case of VertexGroup).
 type VarGroup struct {
+	// name is optional, for user reference, documentation
+	Name string
+
 	// variables in order
 	Vars []*Var
 

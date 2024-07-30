@@ -51,7 +51,7 @@ func (vs *Vars) AddVertexGroup() *VarGroup {
 	if vs.Groups == nil {
 		vs.Groups = make(map[int]*VarGroup)
 	}
-	vg := &VarGroup{Group: VertexGroup, Role: Vertex, device: vs.device}
+	vg := &VarGroup{Name: "Vertex", Group: VertexGroup, Role: Vertex, device: vs.device}
 	vs.Groups[VertexGroup] = vg
 	vs.hasVertex = true
 	return vg
@@ -68,7 +68,7 @@ func (vs *Vars) AddPushGroup() *VarGroup {
 	if vs.Groups == nil {
 		vs.Groups = make(map[int]*VarGroup)
 	}
-	vg := &VarGroup{Group: PushGroup, device: vs.device}
+	vg := &VarGroup{Name: "Push", Group: PushGroup, device: vs.device}
 	vs.Groups[PushGroup] = vg
 	vs.hasPush = true
 	return vg
@@ -81,13 +81,17 @@ func (vs *Vars) PushGroup() *VarGroup {
 
 // AddGroup adds a new non-Vertex Group for holding data for given Role
 // (Uniform, Storage, etc).
-// Groups are automatically numbered sequentially.
-func (vs *Vars) AddGroup(role VarRoles) *VarGroup {
+// Groups are automatically numbered sequentially in order added.
+// Name is optional and just provides documentation.
+func (vs *Vars) AddGroup(role VarRoles, name ...string) *VarGroup {
 	if vs.Groups == nil {
 		vs.Groups = make(map[int]*VarGroup)
 	}
 	idx := vs.NGroups()
 	vg := &VarGroup{Group: idx, Role: role, device: vs.device}
+	if len(name) == 1 {
+		vg.Name = name[0]
+	}
 	vs.Groups[idx] = vg
 	return vg
 }
@@ -156,7 +160,7 @@ func (vs *Vars) StringDoc() string {
 		if vg == nil {
 			continue
 		}
-		sb.WriteString(fmt.Sprintf("Group: %d\n", vg.Group))
+		sb.WriteString(fmt.Sprintf("Group: %d %s\n", vg.Group, vg.Name))
 
 		for ri := Vertex; ri < VarRolesN; ri++ {
 			rl, has := vg.RoleMap[ri]
