@@ -83,7 +83,7 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 
 	addAttr(se, "id", wb.Name)
 	if se.Name.Local != "img" { // images don't render yet
-		addAttr(se, "style", styles.ToCSS(&wb.Styles))
+		addAttr(se, "style", styles.ToCSS(&wb.Styles, idName))
 	}
 
 	handleChildren := true

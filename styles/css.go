@@ -16,8 +16,9 @@ import (
 )
 
 // ToCSS converts the given [Style] object to a semicolon-separated CSS string.
-// It is not guaranteed to be fully complete or accurate.
-func ToCSS(s *Style) string {
+// It is not guaranteed to be fully complete or accurate. It also takes the kebab-case
+// ID name of the associated widget for context.
+func ToCSS(s *Style, idName string) string {
 	parts := []string{}
 	add := func(key, value string) {
 		if value == "0" || value == "0px" || value == "0dot" {
@@ -32,17 +33,19 @@ func ToCSS(s *Style) string {
 	if s.Background != nil {
 		add("background", colors.AsHex(colors.ToUniform(s.Background)))
 	}
-	if s.Is(states.Invisible) {
-		add("display", "none")
-	} else {
-		add("display", s.Display.String())
+	if idName != "text" { // text does not have these layout properties
+		if s.Is(states.Invisible) {
+			add("display", "none")
+		} else {
+			add("display", s.Display.String())
+		}
+		add("flex-direction", s.Direction.String())
+		add("flex-grow", fmt.Sprintf("%g", s.Grow.Y))
+		add("justify-content", s.Justify.Content.String())
+		add("align-items", s.Align.Items.String())
+		add("columns", strconv.Itoa(s.Columns))
+		add("gap", s.Gap.X.StringCSS())
 	}
-	add("flex-direction", s.Direction.String())
-	add("flex-grow", fmt.Sprintf("%g", s.Grow.Y))
-	add("justify-content", s.Justify.Content.String())
-	add("align-items", s.Align.Items.String())
-	add("columns", strconv.Itoa(s.Columns))
-	add("gap", s.Gap.X.StringCSS())
 	add("min-width", s.Min.X.StringCSS())
 	add("min-height", s.Min.Y.StringCSS())
 	add("max-width", s.Max.X.StringCSS())
