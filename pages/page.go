@@ -30,7 +30,7 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/pages/wpath"
+	"cogentcore.org/core/pages/ppath"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -160,10 +160,10 @@ func (pg *Page) Init() {
 						return nil
 					}
 
-					if system.TheApp.Platform() == system.Web && wpath.Draft(fpath) {
+					if system.TheApp.Platform() == system.Web && ppath.Draft(fpath) {
 						return nil
 					}
-					p := wpath.Format(fpath)
+					p := ppath.Format(fpath)
 					pdir := path.Dir(p)
 					base := path.Base(p)
 
@@ -240,7 +240,7 @@ func (pg *Page) Init() {
 // setStageTitle sets the title of the stage based on the current page URL.
 func (pg *Page) setStageTitle() {
 	if rw := pg.Scene.RenderWindow(); rw != nil {
-		rw.SetStageTitle(wpath.Label(pg.Context.PageURL, core.TheApp.Name()))
+		rw.SetStageTitle(ppath.Label(pg.Context.PageURL, core.TheApp.Name()))
 	}
 }
 
@@ -349,7 +349,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	pg.setStageTitle()
 
 	pg.body.DeleteChildren()
-	if wpath.Draft(pg.PagePath) {
+	if ppath.Draft(pg.PagePath) {
 		draft := core.NewText(pg.body).SetType(core.TextDisplayMedium).SetText("DRAFT")
 		draft.Styler(func(s *styles.Style) {
 			s.Color = colors.Scheme.Error.Base
@@ -357,7 +357,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		})
 	}
 	if curNav != pg.nav {
-		bc := core.NewText(pg.body).SetText(wpath.Breadcrumbs(pg.Context.PageURL, core.TheApp.Name()))
+		bc := core.NewText(pg.body).SetText(ppath.Breadcrumbs(pg.Context.PageURL, core.TheApp.Name()))
 		bc.HandleTextClick(func(tl *paint.TextLink) {
 			pg.Context.OpenURL(tl.URL)
 		})
@@ -434,7 +434,7 @@ func (pg *Page) MakeToolbar(p *tree.Plan) {
 			for _, u := range urls {
 				w.Items = append(w.Items, core.ChooserItem{
 					Value: u,
-					Text:  wpath.Label(u, core.TheApp.Name()),
+					Text:  ppath.Label(u, core.TheApp.Name()),
 					Func: func() {
 						pg.OpenURL("/"+u, true)
 					},

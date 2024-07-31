@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/pages/wpath"
+	"cogentcore.org/core/pages/ppath"
 	strip "github.com/grokify/html-strip-tags-go"
 )
 
@@ -164,10 +164,10 @@ func makePages(c *config.Config) error {
 		path = strings.TrimSuffix(path, ".md")
 		path = strings.TrimPrefix(path, c.Pages)
 		path = strings.TrimPrefix(path, "/")
-		if wpath.Draft(path) {
+		if ppath.Draft(path) {
 			return nil
 		}
-		path = wpath.Format(path)
+		path = ppath.Format(path)
 		if path == "" { // exclude root index
 			return nil
 		}
@@ -176,11 +176,11 @@ func makePages(c *config.Config) error {
 		if err != nil {
 			return err
 		}
-		title := wpath.Label(path, c.Name)
+		title := ppath.Label(path, c.Name)
 		if title != c.Name {
 			title += " • " + c.Name
 		}
-		b, err := makeIndexHTML(c, wpath.BasePath(path), title, "")
+		b, err := makeIndexHTML(c, ppath.BasePath(path), title, "")
 		if err != nil {
 			return err
 		}
