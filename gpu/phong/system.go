@@ -30,7 +30,7 @@ type Current struct {
 	ModelMtx math32.Matrix4
 
 	// camera view and projection matrixes
-	VPMtx Mtxs
+	VPMtx Matrix
 
 	// current color surface properties
 	Color Colors
@@ -40,31 +40,6 @@ type Current struct {
 
 	// index of currently selected texture
 	TexIndex int
-}
-
-// PushU is the push constants structure, holding everything that
-// updates per object -- avoids any limitations on capacity.
-type PushU struct {
-
-	// Model Matrix: poses object in world coordinates
-	ModelMtx math32.Matrix4
-
-	// surface colors
-	Color Colors
-
-	// texture parameters
-	Tex TexPars
-}
-
-// NewPush generates a new Push object based on current render settings
-// unsafe.Pointer does not work having this be inside the Current obj itself
-// so we create one afresh.
-func (cr *Current) NewPush() *PushU {
-	pu := &PushU{}
-	pu.ModelMtx = cr.ModelMtx
-	pu.Color = cr.Color
-	// tex set specifically in tex
-	return pu
 }
 
 // ConfigPipeline configures graphics settings on the pipeline
@@ -77,6 +52,16 @@ func (ph *Phong) ConfigPipeline(pl *gpu.Pipeline) {
 	// 	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 	// }
 }
+
+// Groups are the VarGroup numbers.
+type Groups int32 //enums:enum
+
+const (
+	MatrixGroup Groups = iota
+	LightGroup
+	ColorGroup
+	TextureGroup
+)
 
 // ConfigSys configures the vDraw System and pipelines.
 func (ph *Phong) ConfigSys() {

@@ -47,7 +47,7 @@ Set: -1
         Var: 0:	PushU	Struct	(size: 128)	Values: 1
 Set: 0
     Role: Uniform
-        Var: 0:	Mtxs	Struct	(size: 128)	Values: 1
+        Var: 0:	Matrix	Struct	(size: 128)	Values: 1
 Set: 1
     Role: Uniform
         Var: 0:	NLights	Struct	(size: 16)	Values: 1

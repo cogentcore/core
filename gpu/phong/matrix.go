@@ -10,8 +10,8 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// Mtxs contains the camera view and projection matricies, for uniform uploading
-type Mtxs struct {
+// Matrix contains the camera view and projection matricies, for uniform uploading
+type Matrix struct {
 
 	// View Matrix: transforms world into camera-centered, 3D coordinates
 	View math32.Matrix4
@@ -26,10 +26,10 @@ func (ph *Phong) SetViewProjection(view, projection *math32.Matrix4) {
 	ph.Cur.VPMtx.View = *view
 	ph.Cur.VPMtx.Projection = *projection
 	vars := ph.Sys.Vars()
-	_, mtx, _ := vars.ValueByIndexTry(int(MtxsSet), "Mtxs", 0)
+	_, mtx, _ := vars.ValueByIndexTry(int(MatrixSet), "Matrix", 0)
 	mtx.CopyFromBytes(unsafe.Pointer(&ph.Cur.VPMtx))
 	ph.Sys.Mem.SyncToGPU()
-	vars.BindDynamicValueIndex(int(MtxsSet), "Mtxs", 0)
+	vars.BindDynamicValueIndex(int(MatrixSet), "Matrix", 0)
 }
 
 // SetModelMtx sets the model pose matrix -- must be set per render step

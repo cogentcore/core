@@ -17,8 +17,9 @@ import (
 // optionally per-vertex colors.
 type Mesh struct {
 
-	// number of vertex points, as math32.Vector3 -- always includes math32.Vector3 normals and math32.Vector2 texture coordinates
-	NVtx int
+	// number of vertex points, as math32.Vector3.
+	// Always includes math32.Vector3 normals and math32.Vector2 texture coordinates
+	NVertex int
 
 	// number of indexes, as math32.ArrayU32
 	NIndex int
@@ -38,16 +39,16 @@ func (ph *Phong) ConfigMeshes() {
 	for i, kv := range ph.Meshes.Order {
 		mv := kv.Value
 		_, vp, _ := vset.ValueByIndexTry("Pos", i)
-		vp.N = mv.NVtx
+		vp.N = mv.NVertex
 		_, vn, _ := vset.ValueByIndexTry("Norm", i)
-		vn.N = mv.NVtx
+		vn.N = mv.NVertex
 		_, vt, _ := vset.ValueByIndexTry("Tex", i)
-		vt.N = mv.NVtx
+		vt.N = mv.NVertex
 		_, vi, _ := vset.ValueByIndexTry("Index", i)
 		vi.N = mv.NIndex
 		_, vc, _ := vset.ValueByIndexTry("Color", i)
 		if mv.HasColor {
-			vc.N = mv.NVtx
+			vc.N = mv.NVertex
 		} else {
 			vc.N = 1 // todo: should be 0
 		}
@@ -62,7 +63,7 @@ func (ph *Phong) ResetMeshes() {
 // AddMesh adds a Mesh with name and given number of vertices, indexes,
 // and optional per-vertex color
 func (ph *Phong) AddMesh(name string, numVertex, nIndex int, hasColor bool) {
-	ph.Meshes.Add(name, &Mesh{NVtx: numVertex, NIndex: nIndex, HasColor: hasColor})
+	ph.Meshes.Add(name, &Mesh{NVertex: numVertex, NIndex: nIndex, HasColor: hasColor})
 }
 
 // DeleteMesh deletes Mesh with name
