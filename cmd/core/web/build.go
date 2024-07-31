@@ -120,7 +120,7 @@ func makeFiles(c *config.Config) error {
 			c.Pages = "content"
 		}
 	}
-	iht, err := makeIndexHTML(c, "", "", preRenderHTMLIndex)
+	iht, err := makeIndexHTML(c, "", "", "", preRenderHTMLIndex)
 	if err != nil {
 		return err
 	}
@@ -194,7 +194,7 @@ func makePages(c *config.Config, preRenderData *ppath.PreRenderData) error {
 		if title != c.Name {
 			title += " • " + c.Name
 		}
-		b, err := makeIndexHTML(c, ppath.BasePath(path), title, preRenderData.HTML[path])
+		b, err := makeIndexHTML(c, ppath.BasePath(path), title, preRenderData.Description[path], preRenderData.HTML[path])
 		if err != nil {
 			return err
 		}

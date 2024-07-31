@@ -12,6 +12,7 @@ import (
 	"text/template"
 
 	"cogentcore.org/core/cmd/core/config"
+	strip "github.com/grokify/html-strip-tags-go"
 )
 
 // appJSTmpl is the template used in [makeAppJS] to build the app.js file
@@ -130,7 +131,7 @@ var indexHTMLTmpl = template.Must(template.New("index.html").Parse(indexHTML))
 type indexHTMLData struct {
 	BasePath               string
 	Author                 string
-	Desc                   string
+	Description            string
 	Keywords               []string
 	Title                  string
 	SiteName               string
@@ -142,16 +143,24 @@ type indexHTMLData struct {
 
 // makeIndexHTML exectues [indexHTMLTmpl] based on the given configuration information,
 // base path for app resources (used in [makePages]), optional title (used in [makePages],
-// defaults to [config.Config.Name] otherwise), and pre-render HTML representation of app
-// content.
-func makeIndexHTML(c *config.Config, basePath, title, preRenderHTML string) ([]byte, error) {
+// defaults to [config.Config.Name] otherwise), optional page-specific description (used
+// in [makePages], defaults to [config.Config.About]), and pre-render HTML representation
+// of app content.
+func makeIndexHTML(c *config.Config, basePath, title, description, preRenderHTML string) ([]byte, error) {
 	if title == "" {
 		title = c.Name
+	}
+	if description == "" {
+		description = c.About
+	} else {
+		// c.About is already stripped earlier, so only necessary
+		// for page-specific description here.
+		description = strip.StripTags(description)
 	}
 	d := indexHTMLData{
 		BasePath:               basePath,
 		Author:                 c.Web.Author,
-		Desc:                   c.About,
+		Description:            description,
 		Keywords:               c.Web.Keywords,
 		Title:                  title,
 		SiteName:               c.Name,
