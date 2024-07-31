@@ -116,6 +116,9 @@ func makeFiles(c *config.Config) error {
 			return err
 		}
 		preRenderHTMLIndex = pagesPreRenderData.HTML[""]
+		if c.Pages == "" {
+			c.Pages = "content"
+		}
 	}
 	iht, err := makeIndexHTML(c, "", "", preRenderHTMLIndex)
 	if err != nil {

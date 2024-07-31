@@ -39,7 +39,6 @@ func init() {
 			os.Exit(0)
 		}
 		data := &ppath.PreRenderData{
-			Source:      "", // TODO: Source, Description
 			Description: map[string]string{},
 			HTML:        map[string]string{},
 		}

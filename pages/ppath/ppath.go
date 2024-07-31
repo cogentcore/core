@@ -98,9 +98,6 @@ func Breadcrumbs(u string, root string) string {
 // run with the generatehtml tag.
 type PreRenderData struct {
 
-	// Source is the source directory for pages content.
-	Source string
-
 	// Description contains the automatic page descriptions for each page URL.
 	Description map[string]string
 
