@@ -44,7 +44,7 @@ func init() {
 			HTML:        map[string]string{},
 		}
 		pg.UpdateTree() // need initial update first
-		for _, u := range pg.urlToPagePath {
+		for u := range pg.urlToPagePath {
 			pg.OpenURL("/"+u, false)
 			data.HTML[u] = core.GenerateHTML(pg)
 		}
