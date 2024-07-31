@@ -8,10 +8,12 @@ package pages
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/pages/ppath"
 	"cogentcore.org/core/tree"
 )
 
@@ -21,21 +23,31 @@ import (
 func init() {
 	// We override the OnChildAdded set in core/generatehtml.go
 	core.ExternalParent.AsWidget().SetOnChildAdded(func(n tree.Node) {
-		var page *Page
+		var pg *Page
 		n.AsTree().WalkDown(func(n tree.Node) bool {
-			if page != nil {
+			if pg != nil {
 				return tree.Break
 			}
-			if pg, ok := n.(*Page); ok {
-				page = pg
+			if p, ok := n.(*Page); ok {
+				pg = p
 				return tree.Break
 			}
 			return tree.Continue
 		})
-		if page == nil {
-			slog.Error("generatehtml: no pages.Page widget found in an app that imports pages")
-			os.Exit(1)
+		if pg == nil {
+			fmt.Println(core.GenerateHTML(n.(core.Widget))) // basic fallback
+			os.Exit(0)
 		}
-		fmt.Println(page)
+		data := ppath.PreRenderData{
+			Source:      "", // TODO: source
+			Description: map[string]string{},
+			HTML:        map[string]string{},
+		}
+		pg.UpdateTree() // need initial update first
+		for _, u := range pg.urlToPagePath {
+			pg.OpenURL("/"+u, false)
+			data.HTML[u] = core.GenerateHTML(pg)
+		}
+		fmt.Println(string(errors.Log1(jsonx.WriteBytes(data))))
 	})
 }
