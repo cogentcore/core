@@ -9,7 +9,7 @@ import "cogentcore.org/core/math32"
 // Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.
 // Supports different radii on each end.
 // Height is along the Y axis -- total height is Height + TopRad + BotRad.
-type Capsule struct {
+type Capsule struct { //types:add -setters
 	ShapeBase
 
 	// height of the cylinder portion
@@ -82,7 +82,7 @@ func (cp *Capsule) N() (numVertex, nIndex int) {
 
 // SetCapsuleSector sets points in given allocated arrays
 func (cp *Capsule) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	voff := cp.VtxOff
+	voff := cp.VertexOff
 	ioff := cp.IndexOff
 	cp.CBBox = SetCylinderSector(vertexArray, normArray, textureArray, indexArray, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, cp.Pos)
 	nv, ni := CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)

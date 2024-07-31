@@ -66,7 +66,14 @@ type Value struct {
 	// buffer for this value, makes it accessible to the GPU
 	buffer *wgpu.Buffer `display:"-"`
 
+	// dynamicBuffer is a CPU-based staging buffer for dynamic values
+	// so you can separately set individual dynamic index values and
+	// then efficiently copy the entire thing to the device buffer
+	// once everything has been set.
+	dynamicBuffer []byte
+
 	// for SampledTexture Var roles, this is the Texture.
+	// Can set Sampler parameters directly on this.
 	Texture *TextureSample
 
 	TextureOwns bool
@@ -175,19 +182,6 @@ func SetValueFrom[E any](vl *Value, from []E) error {
 	return vl.SetFromBytes(wgpu.ToBytes(from))
 }
 
-// SetDynamicValueFrom copies given values into value buffer memory,
-// at the given dynamic variable index,
-// making the buffer if it has not yet been constructed,
-// for dynamic offset Uniform or Storage variables,
-// which have alignment constraints.  Vertex variables
-// should use standard SetValueFrom function.
-// It is essential that DynamicN is set properly before
-// calling this, and if that number has changed since
-// last setting any values, _all_ of them must be set again.
-func SetDynamicValueFrom[E any](vl *Value, idx int, from []E) error {
-	return vl.SetDynamicFromBytes(idx, wgpu.ToBytes(from))
-}
-
 // SetFromBytes copies given bytes into value buffer memory,
 // making the buffer if it has not yet been constructed.
 // IMPORTANT: do not use this for dynamic offset Uniform or
@@ -199,7 +193,13 @@ func (vl *Value) SetFromBytes(from []byte) error {
 		return errors.Log(err)
 	}
 	nb := len(from)
-	if vl.buffer == nil {
+	tb := vl.MemSize()
+	if nb != tb {
+		err := fmt.Errorf("gpu.Value SetFromBytes %s, Size passed: %d != Size expected %d", vl.Name, nb, tb)
+		return errors.Log(err)
+	}
+	if vl.buffer == nil || vl.AllocSize != tb {
+		vl.Release()
 		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,
 			Contents: from,
@@ -216,30 +216,28 @@ func (vl *Value) SetFromBytes(from []byte) error {
 			return err
 		}
 	}
-	if vl.isDynamic {
-		vl.DynamicN = nb / vl.AlignVarSize
-		if nb%vl.AlignVarSize != 0 {
-			err := fmt.Errorf("gpu.Value SetFromBytes %s, Size passed: %d is not an even multiple of the variable size: %d", vl.Name, nb, vl.AlignVarSize)
-			return errors.Log(err)
-		}
-	}
-	tb := vl.MemSize()
-	if nb != tb {
-		err := fmt.Errorf("gpu.Value SetFromBytes %s, Size passed: %d != Size expected %d", vl.Name, nb, tb)
-		return errors.Log(err)
-	}
 	return nil
 }
 
-// SetDynamicFromBytes copies given values into value buffer memory,
-// at the given dynamic variable index,
-// making the buffer if it has not yet been constructed,
-// for dynamic offset Uniform or Storage variables,
-// which have alignment constraints.  Vertex variables
-// should use standard SetValueFrom function.
+// SetDynamicValueFrom copies given values into a staging buffer
+// at the given dynamic variable index, for dynamic offset
+// Uniform or Storage variables, which have alignment constraints.
+// Must call WriteDynamicBuffer after all such values have been updated,
+// to actually copy the entire staging buffer data to the GPU device.
+// Vertex variables must have separate values for each, and do not
+// support dynamic indexing.
 // It is essential that DynamicN is set properly before
-// calling this, and if that number has changed since
-// last setting any values, _all_ of them must be set again.
+// calling this.  Existing values will be preserved with
+// changes in DynamicN to the extent possible.
+func SetDynamicValueFrom[E any](vl *Value, idx int, from []E) error {
+	return vl.SetDynamicFromBytes(idx, wgpu.ToBytes(from))
+}
+
+// SetDynamicFromBytes copies given values into a staging buffer
+// at the given dynamic variable index, for dynamic offset
+// Uniform or Storage variables, which have alignment constraints.
+// See [SetDynamicValueFrom], which should generally be used,
+// for further info.
 func (vl *Value) SetDynamicFromBytes(idx int, from []byte) error {
 	if !vl.isDynamic || vl.alignBytes == 1 {
 		err := fmt.Errorf("gpu.Value SetDynamicFromBytes %s: Cannot call this on a non-DynamicOffset Uniform or Storage variable; use SetValueFrom instead", vl.Name)
@@ -249,16 +247,46 @@ func (vl *Value) SetDynamicFromBytes(idx int, from []byte) error {
 		err := fmt.Errorf("gpu.Value SetDynamicFromBytes %s: Index: %d >= DynamicN: %d", vl.Name, idx, vl.DynamicN)
 		return errors.Log(err)
 	}
-	if vl.buffer == nil {
-		err := vl.CreateBuffer()
+	sz := vl.MemSize()
+	vl.dynamicBuffer = slicesx.SetLength(vl.dynamicBuffer, sz) // preserves data
+	nb := len(from)
+	if nb != vl.VarSize {
+		err := fmt.Errorf("gpu.Value SetDynamicFromBytes %s, Size passed: %d != Size expected %d", vl.Name, nb, vl.VarSize)
+		return errors.Log(err)
+	}
+	off := idx * vl.AlignVarSize
+	copy(vl.dynamicBuffer[off:off+vl.VarSize], from)
+	return nil
+}
+
+// WriteDynamicBuffer writes the staging buffer up to the GPU
+// device, after calling SetDynamicValueFrom for all the individual
+// dynamic index cases that need to be updated.
+// If this is not called, then the data will not be used!
+func (vl *Value) WriteDynamicBuffer() error {
+	sz := vl.MemSize()
+	nb := len(vl.dynamicBuffer)
+	if sz != nb {
+		err := fmt.Errorf("gpu.Value WriteDynamicBuffer %s, Staging buffer size: %d != Size expected %d; must call SetDynamicValueFrom to establish correct staging buffer size", vl.Name, nb, sz)
+		return errors.Log(err)
+	}
+	if vl.buffer == nil || nb != vl.AllocSize {
+		vl.Release()
+		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
+			Label:    vl.Name,
+			Contents: vl.dynamicBuffer,
+			Usage:    vl.role.BufferUsages(),
+		})
 		if errors.Log(err) != nil {
 			return err
 		}
-	}
-	off := idx * vl.AlignVarSize
-	err := vl.device.Queue.WriteBuffer(vl.buffer, uint64(off), from)
-	if errors.Log(err) != nil {
-		return err
+		vl.buffer = buf
+		vl.AllocSize = nb
+	} else {
+		err := vl.device.Queue.WriteBuffer(vl.buffer, 0, vl.dynamicBuffer)
+		if errors.Log(err) != nil {
+			return err
+		}
 	}
 	return nil
 }

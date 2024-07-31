@@ -78,13 +78,13 @@ func (ph *Phong) ResetTextures() {
 
 // UseNoTexture turns off texture rendering
 func (ph *Phong) UseNoTexture() {
-	ph.Cur.UseTexture = false
+	ph.UseTexture = false
 }
 
 // UseTextureIndex selects texture by index for current render step
 func (ph *Phong) UseTextureIndex(idx int) error {
 	ph.Sys.Vars.SetCurrentValue(int(TextureGroup), "TexSampler", idx)
-	ph.Cur.UseTexture = true
+	ph.UseTexture = true
 	return nil
 }
 

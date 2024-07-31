@@ -7,7 +7,7 @@ package shape
 import "cogentcore.org/core/math32"
 
 // Box is a rectangular-shaped solid (cuboid)
-type Box struct {
+type Box struct { //types:add -setters
 	ShapeBase
 
 	// size along each dimension
@@ -37,7 +37,7 @@ func (bx *Box) N() (numVertex, nIndex int) {
 
 // SetBox sets points in given allocated arrays
 func (bx *Box) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	hSz := SetBox(vertexArray, normArray, textureArray, indexArray, bx.VtxOff, bx.IndexOff, bx.Size, bx.Segs, bx.Pos)
+	hSz := SetBox(vertexArray, normArray, textureArray, indexArray, bx.VertexOff, bx.IndexOff, bx.Size, bx.Segs, bx.Pos)
 
 	mn := bx.Pos.Sub(hSz)
 	mx := bx.Pos.Add(hSz)

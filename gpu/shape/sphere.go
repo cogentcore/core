@@ -11,7 +11,7 @@ import (
 )
 
 // Sphere is a sphere shape (can be a partial sphere too)
-type Sphere struct {
+type Sphere struct { //types:add -setters
 	ShapeBase
 
 	// radius of the sphere
@@ -63,7 +63,7 @@ func (sp *Sphere) N() (numVertex, nIndex int) {
 
 // SetSphereSector sets points in given allocated arrays
 func (sp *Sphere) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	sp.CBBox = SetSphereSector(vertexArray, normArray, textureArray, indexArray, sp.VtxOff, sp.IndexOff, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, sp.Pos)
+	sp.CBBox = SetSphereSector(vertexArray, normArray, textureArray, indexArray, sp.VertexOff, sp.IndexOff, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, sp.Pos)
 }
 
 // SphereSectorN returns the N's for a sphere sector's

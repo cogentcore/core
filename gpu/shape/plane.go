@@ -10,7 +10,7 @@ import (
 
 // Plane is a flat 2D plane, which can be oriented along any
 // axis facing either positive or negative
-type Plane struct {
+type Plane struct { //types:add -setters
 	ShapeBase
 
 	// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
@@ -54,7 +54,7 @@ func (pl *Plane) N() (numVertex, nIndex int) {
 
 // Set sets points in given allocated arrays
 func (pl *Plane) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	sz := SetPlaneAxisSize(vertexArray, normArray, textureArray, indexArray, pl.VtxOff, pl.IndexOff, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pl.Pos)
+	sz := SetPlaneAxisSize(vertexArray, normArray, textureArray, indexArray, pl.VertexOff, pl.IndexOff, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pl.Pos)
 	mn := pl.Pos.Sub(sz)
 	mx := pl.Pos.Add(sz)
 	pl.CBBox.Set(&mn, &mx)

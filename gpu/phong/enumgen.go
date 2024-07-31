@@ -11,11 +11,11 @@ var _GroupsValues = []Groups{0, 1, 2, 3}
 // GroupsN is the highest valid value for type Groups, plus one.
 const GroupsN Groups = 4
 
-var _GroupsValueMap = map[string]Groups{`MatrixGroup`: 0, `LightGroup`: 1, `ColorGroup`: 2, `TextureGroup`: 3}
+var _GroupsValueMap = map[string]Groups{`MatrixGroup`: 0, `LightsGroup`: 1, `ColorGroup`: 2, `TextureGroup`: 3}
 
 var _GroupsDescMap = map[Groups]string{0: ``, 1: ``, 2: ``, 3: ``}
 
-var _GroupsMap = map[Groups]string{0: `MatrixGroup`, 1: `LightGroup`, 2: `ColorGroup`, 3: `TextureGroup`}
+var _GroupsMap = map[Groups]string{0: `MatrixGroup`, 1: `LightsGroup`, 2: `ColorGroup`, 3: `TextureGroup`}
 
 // String returns the string representation of this Groups value.
 func (i Groups) String() string { return enums.String(i, _GroupsMap) }

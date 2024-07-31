@@ -100,7 +100,7 @@ type SpotLight struct {
 // ConfigLights configures the rendering for the lights that have been added.
 func (ph *Phong) ConfigLights() {
 	sy := ph.Sys
-	vs := sy.Vars.Groups[int(LightGroup)]
+	vs := sy.Vars.Groups[int(LightsGroup)]
 	gpu.SetValueFrom(vs.ValueByIndex("NLights", 0), []NLights{ph.NLights})
 	gpu.SetValueFrom(vs.ValueByIndex("AmbLights", 0), ph.Ambient[:])
 	gpu.SetValueFrom(vs.ValueByIndex("DirLights", 0), ph.Dir[:])

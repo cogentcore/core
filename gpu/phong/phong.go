@@ -50,26 +50,33 @@ type Phong struct {
 	// spot lights
 	Spot [MaxLights]SpotLight
 
+	// a texture was selected for next draw, if true, overrides other options
+	UseTexture bool
+
+	// a per-vertex color was selected for next draw
+	UseVertexColor bool
+
 	// render using wireframe instead of filled polygons.
 	// this must be set prior to configuring the Phong rendering system.
 	Wireframe bool `default:"false"`
 
-	// state for current rendering
-	Cur Current
-
-	// meshes -- holds all the mesh data -- must be configured prior to rendering
+	// Meshes holds all of the mesh data, managed by AddMesh, DeleteMesh
+	// methods.
 	Meshes ordmap.Map[string, *Mesh]
 
-	// textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability
+	// Textures holds all of the texture images, managed by AddTexture,
+	// DeleteTexture methods.
 	Textures ordmap.Map[string, *Texture]
 
-	// colors, optionally available for looking up by name -- not used directly in rendering
-	Colors ordmap.Map[string, *Colors]
+	// Objects holds per-object data, keyed by unique name / path id.
+	// All objects must be added at start with AddObject,
+	// and updated per-pass with UpdateObject.
+	Objects ordmap.Map[string, *Object]
 
 	// rendering system
 	Sys *gpu.System
 
-	// overall lock on system, use Lock, Unlock
+	// overall lock on Phong operations, use Lock, Unlock on Phong
 	sync.Mutex
 }
 
@@ -77,7 +84,8 @@ func (ph *Phong) Release() {
 	ph.Sys.Release()
 }
 
-// Config configures everything after everything has been Added
+// Config configures the gpu rendering system after
+// everything has been Added for the first time.
 func (ph *Phong) Config() {
 	ph.ConfigMeshesTextures()
 	ph.Lock()
@@ -113,9 +121,9 @@ func (ph *Phong) Render(rp *wgpu.RenderPassEncoder) {
 	defer ph.Unlock()
 
 	switch {
-	case ph.Cur.UseTexture:
+	case ph.UseTexture:
 		ph.RenderTexture(rp)
-	case ph.Cur.UseVertexColor:
+	case ph.UseVertexColor:
 		ph.RenderVertexColor(rp)
 	default:
 		ph.RenderOneColor(rp)

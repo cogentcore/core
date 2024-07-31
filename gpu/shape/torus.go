@@ -12,7 +12,7 @@ import (
 
 // Torus is a torus mesh, defined by the radius of the solid tube and the
 // larger radius of the ring.
-type Torus struct {
+type Torus struct { //types:add -setters
 	ShapeBase
 
 	// larger radius of the torus ring
@@ -62,7 +62,7 @@ func (tr *Torus) N() (numVertex, nIndex int) {
 
 // Set sets points for torus in given allocated arrays
 func (tr *Torus) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	tr.CBBox = SetTorusSector(vertexArray, normArray, textureArray, indexArray, tr.VtxOff, tr.IndexOff, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, tr.Pos)
+	tr.CBBox = SetTorusSector(vertexArray, normArray, textureArray, indexArray, tr.VertexOff, tr.IndexOff, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, tr.Pos)
 }
 
 // TorusSectorN returns N's for a torus geometry with

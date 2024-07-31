@@ -15,17 +15,6 @@ import (
 //go:embed shaders/*.wgsl
 var shaders embed.FS
 
-// Current holds info about the current render as updated by
-// Use* methods. Determines which pipeline is used.
-// Default is single color.
-type Current struct {
-	// a texture was selected, if true, overrides other options
-	UseTexture bool
-
-	// a per-vertex color was selected
-	UseVertexColor bool
-}
-
 // ConfigPipeline configures graphics settings on the pipeline
 func (ph *Phong) ConfigPipeline(pl *gpu.GraphicsPipeline) {
 	pl.SetGraphicsDefaults()
@@ -42,8 +31,8 @@ type Groups int32 //enums:enum
 
 const (
 	MatrixGroup Groups = iota
-	LightGroup
-	ColorGroup
+	ObjectsGroup
+	LightsGroup
 	TextureGroup
 )
 
@@ -74,8 +63,8 @@ func (ph *Phong) ConfigSys() {
 
 	vgp := sy.Vars.AddVertexGroup()
 	mgp := sy.Vars.AddGroup(gpu.Uniform, "Matrix")         // group = 0
-	lgp := sy.Vars.AddGroup(gpu.Uniform, "Lights")         // group = 1
-	cgp := sy.Vars.AddGroup(gpu.Uniform, "Color")          // group = 2
+	ogp := sy.Vars.AddGroup(gpu.Uniform, "Objects")        // group = 1
+	lgp := sy.Vars.AddGroup(gpu.Uniform, "Lights")         // group = 2
 	tgp := sy.Vars.AddGroup(gpu.SampledTexture, "Texture") // group = 3
 
 	vector4sz := gpu.Float32Vector4.Bytes()
@@ -84,21 +73,19 @@ func (ph *Phong) ConfigSys() {
 	vgp.Add("Norm", gpu.Float32Vector3, 0, gpu.VertexShader)
 	vgp.Add("TexCoord", gpu.Float32Vector2, 0, gpu.VertexShader)
 	vgp.Add("VertexColor", gpu.Float32Vector4, 0, gpu.VertexShader)
-	vgp.Add("ModelMatrix", gpu.Float32Matrix4, 0, gpu.VertexShader) // serialized 4xVector
 	ix := vgp.Add("Index", gpu.Uint32, 0, gpu.VertexShader)
 	ix.Role = gpu.Index
 
 	mgp.AddStruct("Matrix", gpu.Float32Matrix4.Bytes()*2, 1, gpu.VertexShader, gpu.FragmentShader)
+
+	ov := ogp.AddStruct("Object", int(unsafe.Sizeof(Object{})), 1, gpu.VertexShader, gpu.FragmentShader)
+	ov.DynamicOffset = true
 
 	lgp.AddStruct("NLights", int(unsafe.Sizeof(NLights{})), 1, gpu.FragmentShader)
 	lgp.AddStruct("AmbLights", vector4sz*1, MaxLights, gpu.FragmentShader)
 	lgp.AddStruct("DirLights", vector4sz*2, MaxLights, gpu.FragmentShader)
 	lgp.AddStruct("PointLights", vector4sz*3, MaxLights, gpu.FragmentShader)
 	lgp.AddStruct("SpotLights", vector4sz*4, MaxLights, gpu.FragmentShader)
-
-	// note: could combine color + lights but no need to -- under 4 limit
-	cv := cgp.AddStruct("Colors", int(unsafe.Sizeof(Colors{})), 1, gpu.FragmentShader)
-	cv.DynamicOffset = true
 
 	tgp.Add("TexSampler", gpu.TextureRGBA32, 1, gpu.FragmentShader)
 	mgp.SetNValues(1)

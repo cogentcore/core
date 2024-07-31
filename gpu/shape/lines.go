@@ -16,7 +16,7 @@ import (
 // and width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0
 // or a constant unless specifically relevant to have full 3D variation).
 // Rotate the solid to put into other planes.
-type Lines struct {
+type Lines struct { //types:add -setters
 	ShapeBase
 
 	// line points (must be 2 or more)
@@ -53,7 +53,7 @@ func (ln *Lines) N() (numVertex, nIndex int) {
 
 // Set sets points in given allocated arrays
 func (ln *Lines) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	ln.CBBox = SetLines(vertexArray, normArray, textureArray, indexArray, ln.VtxOff, ln.IndexOff, ln.Points, ln.Width, ln.Closed, ln.Pos)
+	ln.CBBox = SetLines(vertexArray, normArray, textureArray, indexArray, ln.VertexOff, ln.IndexOff, ln.Points, ln.Width, ln.Closed, ln.Pos)
 	// todo: colors!
 }
 

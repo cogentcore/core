@@ -8,7 +8,10 @@ import (
 	"fmt"
 	"log"
 
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/shape"
+	"cogentcore.org/core/math32"
 )
 
 // Mesh records the number of elements in an indexed triangle mesh,
@@ -24,11 +27,15 @@ type Mesh struct {
 
 	// has per-vertex colors, as math32.Vector4 per vertex
 	HasColor bool
+
+	//	buffers for mesh data, for shape.Set() method
+	vertexArray, normArray, textureArray math32.ArrayF32
+	indexArray                           math32.ArrayU32
 }
 
-// ConfigMeshes configures vals for meshes -- this is the first of
-// two passes in configuring and setting mesh values -- Phong.Sys.Config is
-// called after this method (and everything else is configured).
+// ConfigMeshes configures values for all current meshes.
+// This is the first of two passes in configuring and setting
+// mesh values.
 func (ph *Phong) ConfigMeshes() {
 	sy := ph.Sys
 	nm := ph.Meshes.Len()
@@ -36,16 +43,21 @@ func (ph *Phong) ConfigMeshes() {
 	vgp.SetNValues(nm)
 	for i, kv := range ph.Meshes.Order {
 		mv := kv.Value
-		vgp.ValueByIndex("Pos", i).DynamicN = mv.NVertex
-		vgp.ValueByIndex("Norm", i).DynamicN = mv.NVertex
-		vgp.ValueByIndex("TexCoord", i).DynamicN = mv.NVertex
-		vgp.ValueByIndex("Index", i).DynamicN = mv.NIndex
-		vc := vgp.ValueByIndex("VertexColor", i)
-		if mv.HasColor {
-			vc.DynamicN = mv.NVertex
-		} else {
-			vc.DynamicN = 1
-		}
+		ph.ConfigMesh(mv, i)
+	}
+}
+
+func (ph *Phong) ConfigMesh(mv *Mesh, idx int) {
+	vgp := ph.Sys.Vars.VertexGroup()
+	vgp.ValueByIndex("Pos", idx).DynamicN = mv.NVertex
+	vgp.ValueByIndex("Norm", idx).DynamicN = mv.NVertex
+	vgp.ValueByIndex("TexCoord", idx).DynamicN = mv.NVertex
+	vgp.ValueByIndex("Index", idx).DynamicN = mv.NIndex
+	vc := vgp.ValueByIndex("VertexColor", idx)
+	if mv.HasColor {
+		vc.DynamicN = mv.NVertex
+	} else {
+		vc.DynamicN = 1
 	}
 }
 
@@ -56,8 +68,35 @@ func (ph *Phong) ResetMeshes() {
 
 // AddMesh adds a Mesh with name and given number of vertices, indexes,
 // and optional per-vertex color
-func (ph *Phong) AddMesh(name string, numVertex, nIndex int, hasColor bool) {
-	ph.Meshes.Add(name, &Mesh{NVertex: numVertex, NIndex: nIndex, HasColor: hasColor})
+func (ph *Phong) AddMesh(name string, nVertex, nIndex int, hasColor bool) *Mesh {
+	ph.Meshes.Add(name, &Mesh{NVertex: nVertex, NIndex: nIndex, HasColor: hasColor})
+	return ph.Meshes.Order[ph.Meshes.Len()-1].Value
+}
+
+// AddMeshFromShape adds a Mesh using the shape.Shape interface for the source
+// of the mesh data, and sets the values directly.  Nothing further needs to
+// be done to configure this mesh after calling this.
+// Also sets optional per-vertex color, which does not come from the shape.
+func (ph *Phong) AddMeshFromShape(name string, sh shape.Shape, hasColor bool) {
+	nVertex, nIndex := sh.N()
+	mv := ph.AddMesh(name, nVertex, nIndex, hasColor)
+
+	mv.vertexArray = slicesx.SetLength(mv.vertexArray, nVertex)
+	mv.normArray = slicesx.SetLength(mv.normArray, nVertex)
+	mv.textureArray = slicesx.SetLength(mv.textureArray, nVertex)
+	mv.indexArray = slicesx.SetLength(mv.indexArray, nIndex)
+	sh.Set(mv.vertexArray, mv.normArray, mv.textureArray, mv.indexArray)
+
+	nm := ph.Meshes.Len()
+	vgp := ph.Sys.Vars.VertexGroup()
+	vgp.SetNValues(nm) // add to all vars
+	idx := nm - 1
+	ph.ConfigMesh(mv, idx)
+
+	gpu.SetValueFrom(vgp.ValueByIndex("Pos", idx), mv.vertexArray)
+	gpu.SetValueFrom(vgp.ValueByIndex("Norm", idx), mv.normArray)
+	gpu.SetValueFrom(vgp.ValueByIndex("TexCoord", idx), mv.textureArray)
+	gpu.SetValueFrom(vgp.ValueByIndex("Index", idx), mv.indexArray)
 }
 
 // DeleteMesh deletes Mesh with name
@@ -91,10 +130,22 @@ func (ph *Phong) UseMeshIndex(idx int) error {
 	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Index", idx)
 	if mesh.HasColor {
 		sy.Vars.SetCurrentValue(gpu.VertexGroup, "Color", idx)
-		ph.Cur.UseVertexColor = true
-		ph.Cur.UseTexture = false
+		ph.UseVertexColor = true
+		ph.UseTexture = false
+	} else {
+		ph.UseVertexColor = false
 	}
 	return nil
 }
 
-// todo: SetMeshIndex
+// SetMeshName sets mesh vertex values, by mesh name.
+func (ph *Phong) SetMeshName(name string) error {
+	idx, ok := ph.Meshes.IndexByKeyTry(name)
+	if !ok {
+		err := fmt.Errorf("phong:UseMeshName -- name not found: %s", name)
+		if gpu.Debug {
+			log.Println(err)
+		}
+	}
+	return ph.UseMeshIndex(idx)
+}

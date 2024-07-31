@@ -11,7 +11,7 @@ import (
 // Cylinder is a generalized cylinder shape, including a cone
 // or truncated cone by having different size circles at either end.
 // Height is up along the Y axis.
-type Cylinder struct {
+type Cylinder struct { //types:add -setters
 	ShapeBase
 
 	// height of the cylinder
@@ -96,7 +96,7 @@ func (cy *Cylinder) N() (numVertex, nIndex int) {
 
 // SetCylinderSector sets points in given allocated arrays
 func (cy *Cylinder) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	cy.CBBox = SetCylinderSector(vertexArray, normArray, textureArray, indexArray, cy.VtxOff, cy.IndexOff, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, cy.Pos)
+	cy.CBBox = SetCylinderSector(vertexArray, normArray, textureArray, indexArray, cy.VertexOff, cy.IndexOff, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, cy.Pos)
 }
 
 ////////////////////////////////////////////////////////////////

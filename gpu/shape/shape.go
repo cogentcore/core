@@ -1,8 +1,10 @@
-// Copyright 2022 Cogent Core. All rights reserved.
+//types:add -setters// Copyright 2022 Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package shape
+
+//go:generate core generate
 
 import "cogentcore.org/core/math32"
 
@@ -10,6 +12,9 @@ import "cogentcore.org/core/math32"
 type Shape interface {
 	// N returns number of vertex, index points in this shape element
 	N() (numVertex, nIndex int)
+
+	// Set sets points in given allocated arrays
+	Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32)
 
 	// Offs returns starting offset for vertices, indexes in full shape array,
 	// in terms of points, not floats
@@ -19,19 +24,16 @@ type Shape interface {
 	// in terms of points, not floats
 	SetOffs(vtxOff, idxOff int)
 
-	// Set sets points in given allocated arrays
-	Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32)
-
 	// BBox returns the bounding box for the shape, typically centered around 0
 	// This is only valid after Set has been called.
 	BBox() math32.Box3
 }
 
 // ShapeBase is the base shape element
-type ShapeBase struct {
+type ShapeBase struct { //types:add -setters
 
 	// vertex offset, in points
-	VtxOff int
+	VertexOff int
 
 	// index offset, in points
 	IndexOff int
@@ -46,13 +48,13 @@ type ShapeBase struct {
 // Offs returns starting offset for vertices, indexes in full shape array,
 // in terms of points, not floats
 func (sb *ShapeBase) Offs() (vtxOff, idxOff int) {
-	vtxOff, idxOff = sb.VtxOff, sb.IndexOff
+	vtxOff, idxOff = sb.VertexOff, sb.IndexOff
 	return
 }
 
 // SetOffs sets starting offsets for vertices, indexes in full shape array
 func (sb *ShapeBase) SetOffs(vtxOff, idxOff int) {
-	sb.VtxOff, sb.IndexOff = vtxOff, idxOff
+	sb.VertexOff, sb.IndexOff = vtxOff, idxOff
 }
 
 // BBox returns the bounding box for the shape, typically centered around 0

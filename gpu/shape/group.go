@@ -7,7 +7,7 @@ package shape
 import "cogentcore.org/core/math32"
 
 // ShapeGroup is a group of shapes -- returns summary data for shape elements
-type ShapeGroup struct {
+type ShapeGroup struct { //types:add -setters
 	ShapeBase
 
 	// list of shapes in group
@@ -28,7 +28,7 @@ func (sb *ShapeGroup) N() (numVertex, nIndex int) {
 
 // Set sets points in given allocated arrays, also updates offsets
 func (sb *ShapeGroup) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	vo := sb.VtxOff
+	vo := sb.VertexOff
 	io := sb.IndexOff
 	sb.CBBox.SetEmpty()
 	for _, sh := range sb.Shapes {
