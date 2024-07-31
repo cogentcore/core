@@ -177,6 +177,7 @@ func makePages(c *config.Config, preRenderData *ppath.PreRenderData) error {
 		path = strings.TrimSuffix(path, ".md")
 		path = strings.TrimPrefix(path, c.Pages)
 		path = strings.TrimPrefix(path, "/")
+		path = strings.TrimSuffix(path, "/")
 		if ppath.Draft(path) {
 			return nil
 		}
