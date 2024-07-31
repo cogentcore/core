@@ -6,6 +6,7 @@ package styles
 
 import (
 	"fmt"
+	"image"
 	"strconv"
 	"strings"
 
@@ -21,18 +22,14 @@ import (
 func ToCSS(s *Style, idName string) string {
 	parts := []string{}
 	add := func(key, value string) {
-		if value == "0" || value == "0px" || value == "0dot" {
+		if value == "" || value == "0" || value == "0px" || value == "0dot" {
 			return
 		}
 		parts = append(parts, key+":"+value)
 	}
 
-	if s.Color != nil {
-		add("color", colors.AsHex(colors.ToUniform(s.Color)))
-	}
-	if s.Background != nil {
-		add("background", colors.AsHex(colors.ToUniform(s.Background)))
-	}
+	add("color", colorToCSS(s.Color))
+	add("background", colorToCSS(s.Background))
 	if idName != "text" { // text does not have these layout properties
 		if s.Is(states.Invisible) {
 			add("display", "none")
@@ -81,9 +78,26 @@ func ToCSS(s *Style, idName string) string {
 	if s.Border.Width.Top.Value > 0 {
 		add("border-style", s.Border.Style.Top.String())
 		add("border-width", s.Border.Width.Top.StringCSS())
-		add("border-color", colors.AsHex(colors.ToUniform(s.Border.Color.Top)))
+		add("border-color", colorToCSS(s.Border.Color.Top))
 	}
 	add("border-radius", s.Border.Radius.Top.StringCSS())
 
 	return strings.Join(parts, ";")
+}
+
+func colorToCSS(c image.Image) string {
+	switch c {
+	case nil:
+		return ""
+	case colors.Scheme.Primary.Base:
+		return "var(--primary-color)"
+	case colors.Scheme.Primary.On:
+		return "var(--primary-on-color)"
+	case colors.Scheme.Surface, colors.Scheme.OnSurface:
+		return "" // already default
+	case colors.Scheme.SurfaceContainer:
+		return "var(--surface-container-color)"
+	default:
+		return colors.AsHex(colors.ToUniform(c))
+	}
 }
