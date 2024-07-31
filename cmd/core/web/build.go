@@ -127,7 +127,7 @@ func makeFiles(c *config.Config) error {
 	}
 
 	if c.Pages != "" {
-		err := makePages(c)
+		err := makePages(c, pagesPreRenderData)
 		if err != nil {
 			return err
 		}
@@ -158,7 +158,7 @@ func makeFiles(c *config.Config) error {
 
 // makePages makes a directory structure of pages for
 // the core pages located at [config.Config.Pages].
-func makePages(c *config.Config) error {
+func makePages(c *config.Config, preRenderData *ppath.PreRenderData) error {
 	return filepath.WalkDir(c.Pages, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -190,7 +190,7 @@ func makePages(c *config.Config) error {
 		if title != c.Name {
 			title += " • " + c.Name
 		}
-		b, err := makeIndexHTML(c, ppath.BasePath(path), title, "")
+		b, err := makeIndexHTML(c, ppath.BasePath(path), title, preRenderData.HTML[path])
 		if err != nil {
 			return err
 		}

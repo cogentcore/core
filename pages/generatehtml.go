@@ -38,7 +38,7 @@ func init() {
 			fmt.Println(core.GenerateHTML(n.(core.Widget))) // basic fallback
 			os.Exit(0)
 		}
-		data := ppath.PreRenderData{
+		data := &ppath.PreRenderData{
 			Source:      "", // TODO: source
 			Description: map[string]string{},
 			HTML:        map[string]string{},
