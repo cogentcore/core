@@ -157,7 +157,12 @@ func (fm *Form) Init() {
 			if !reflectx.Underlying(f.value).IsValid() {
 				typnm = "invalid"
 			}
-			valnm := fmt.Sprintf("value-%s-%s", f.path, typnm)
+			// We must have a different name for different indexes so that the index
+			// is always guaranteed to be accurate, which is required since we use it
+			// as the ground truth everywhere. The index could otherwise become invalid,
+			// such as when a ShouldDisplayer condition is newly satisfied
+			// (see https://github.com/cogentcore/core/issues/1096).
+			valnm := fmt.Sprintf("value-%s-%s-%d", f.path, typnm, i)
 			readOnlyTag := f.field.Tag.Get("edit") == "-"
 			def, hasDef := f.field.Tag.Lookup("default")
 
@@ -169,12 +174,16 @@ func (fm *Form) Init() {
 				w.Styler(func(s *styles.Style) {
 					s.SetTextWrap(false)
 				})
+				// TODO: technically we should recompute doc, readOnlyTag,
+				// def, hasDef, etc every time, as this is not fully robust
+				// (see https://github.com/cogentcore/core/issues/1098).
 				doc, _ := types.GetDoc(f.value, f.parent, f.field, label)
 				w.SetTooltip(doc)
 				if hasDef {
 					w.SetTooltip("(Default: " + def + ") " + w.Tooltip)
 					var isDef bool
 					w.Styler(func(s *styles.Style) {
+						f := fm.structFields[i]
 						isDef = reflectx.ValueIsDefault(f.value, def)
 						dcr := "(Double click to reset to default) "
 						if !isDef {
@@ -188,6 +197,7 @@ func (fm *Form) Init() {
 						}
 					})
 					w.OnDoubleClick(func(e events.Event) {
+						f := fm.structFields[i]
 						if isDef {
 							return
 						}
@@ -225,6 +235,7 @@ func (fm *Form) Init() {
 					wb.SetTooltip("(Default: " + def + ") " + wb.Tooltip)
 				}
 				wb.OnInput(func(e events.Event) {
+					f := fm.structFields[i]
 					fm.Send(events.Input, e)
 					if f.field.Tag.Get("immediate") == "+" {
 						wb.SendChange(e)
@@ -244,7 +255,8 @@ func (fm *Form) Init() {
 				wb.Updater(func() {
 					wb.SetReadOnly(fm.IsReadOnly() || readOnlyTag)
 					if i < len(fm.structFields) {
-						Bind(reflectx.UnderlyingPointer(fm.structFields[i].value).Interface(), w)
+						f := fm.structFields[i]
+						Bind(reflectx.UnderlyingPointer(f.value).Interface(), w)
 						vc := joinValueTitle(fm.ValueTitle, label)
 						if vc != wb.ValueTitle {
 							wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
