@@ -215,13 +215,14 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 	tree.AddAt(p, "header", func(w *Frame) {
 		tb.header = w
 		ToolbarStyles(w)
-		w.Styler(func(s *styles.Style) {
+		w.FinalStyler(func(s *styles.Style) {
+			s.Padding.Zero()
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
 		w.Maker(func(p *tree.Plan) {
 			if tb.ShowIndexes {
-				tree.AddAt(p, "head-index", func(w *Text) {
+				tree.AddAt(p, "_head-index", func(w *Text) {
 					w.SetType(TextBodyMedium)
 					w.Styler(func(s *styles.Style) {
 						s.Align.Self = styles.Center
@@ -232,7 +233,10 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 			for fli := 0; fli < tb.numVisibleFields; fli++ {
 				field := tb.visibleFields[fli]
 				tree.AddAt(p, "head-"+field.Name, func(w *Button) {
-					w.SetType(ButtonMenu)
+					w.SetType(ButtonAction)
+					w.Styler(func(s *styles.Style) {
+						s.Justify.Content = styles.Start
+					})
 					w.OnClick(func(e events.Event) {
 						tb.SortColumn(fli)
 					})
@@ -252,10 +256,12 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 						tb.headerWidths[fli] = len(htxt)
 						if fli == tb.sortIndex {
 							if tb.sortDescending {
-								w.SetIcon(icons.KeyboardArrowDown)
+								w.SetIndicator(icons.KeyboardArrowDown)
 							} else {
-								w.SetIcon(icons.KeyboardArrowUp)
+								w.SetIndicator(icons.KeyboardArrowUp)
 							}
+						} else {
+							w.SetIndicator(icons.Blank)
 						}
 					})
 				})
@@ -397,25 +403,15 @@ func (tb *Table) SortColumn(fieldIndex int) {
 	sgh := tb.header
 	_, idxOff := tb.RowWidgetNs()
 
-	ascending := true
-
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		hdr := sgh.Child(idxOff + fli).(*Button)
 		hdr.SetType(ButtonAction)
 		if fli == fieldIndex {
 			if tb.sortIndex == fli {
 				tb.sortDescending = !tb.sortDescending
-				ascending = !tb.sortDescending
 			} else {
 				tb.sortDescending = false
 			}
-			if ascending {
-				hdr.SetIcon(icons.KeyboardArrowUp)
-			} else {
-				hdr.SetIcon(icons.KeyboardArrowDown)
-			}
-		} else {
-			hdr.SetIcon("none")
 		}
 	}
 

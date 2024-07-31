@@ -217,13 +217,14 @@ func (tb *Table) UpdateMaxWidths() {
 func (tb *Table) MakeHeader(p *tree.Plan) {
 	tree.AddAt(p, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
-		w.Styler(func(s *styles.Style) {
+		w.FinalStyler(func(s *styles.Style) {
+			s.Padding.Zero()
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
 		w.Maker(func(p *tree.Plan) {
 			if tb.ShowIndexes {
-				tree.AddAt(p, "head-index", func(w *core.Text) { // TODO: is not working
+				tree.AddAt(p, "_head-index", func(w *core.Text) { // TODO: is not working
 					w.SetType(core.TextBodyMedium)
 					w.Styler(func(s *styles.Style) {
 						s.Align.Self = styles.Center
@@ -234,8 +235,10 @@ func (tb *Table) MakeHeader(p *tree.Plan) {
 			for fli := 0; fli < tb.NCols; fli++ {
 				field := tb.Table.Table.ColumnNames[fli]
 				tree.AddAt(p, "head-"+field, func(w *core.Button) {
-					w.SetType(core.ButtonMenu)
-					w.SetText(field)
+					w.SetType(core.ButtonAction)
+					w.Styler(func(s *styles.Style) {
+						s.Justify.Content = styles.Start
+					})
 					w.OnClick(func(e events.Event) {
 						tb.SortSliceAction(fli)
 					})
@@ -245,10 +248,12 @@ func (tb *Table) MakeHeader(p *tree.Plan) {
 						tb.headerWidths[fli] = len(field)
 						if fli == tb.SortIndex {
 							if tb.SortDescending {
-								w.SetIcon(icons.KeyboardArrowDown)
+								w.SetIndicator(icons.KeyboardArrowDown)
 							} else {
-								w.SetIcon(icons.KeyboardArrowUp)
+								w.SetIndicator(icons.KeyboardArrowUp)
 							}
+						} else {
+							w.SetIndicator(icons.Blank)
 						}
 					})
 				})
@@ -435,25 +440,15 @@ func (tb *Table) SortSliceAction(fldIndex int) {
 	sgh := tb.SliceHeader()
 	_, idxOff := tb.RowWidgetNs()
 
-	ascending := true
-
 	for fli := 0; fli < tb.NCols; fli++ {
 		hdr := sgh.Child(idxOff + fli).(*core.Button)
 		hdr.SetType(core.ButtonAction)
 		if fli == fldIndex {
 			if tb.SortIndex == fli {
 				tb.SortDescending = !tb.SortDescending
-				ascending = !tb.SortDescending
 			} else {
 				tb.SortDescending = false
 			}
-			if ascending {
-				hdr.SetIcon(icons.KeyboardArrowUp)
-			} else {
-				hdr.SetIcon(icons.KeyboardArrowDown)
-			}
-		} else {
-			hdr.SetIcon("none")
 		}
 	}
 

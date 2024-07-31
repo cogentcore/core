@@ -87,21 +87,3 @@ func BenchmarkNodeUnmarshalJSON(b *testing.B) {
 		assert.NoError(b, jsonx.Read(&testload, bytes.NewReader(bs)))
 	}
 }
-
-/* TODO: add back tree xml support
-func TestNodeXML(t *testing.T) {
-	parent := testNodeTree()
-
-	var buf bytes.Buffer
-	assert.NoError(t, parent.WriteXML(&buf, true))
-	b := buf.Bytes()
-
-	testload := testdata.NewNodeEmbed()
-	if assert.NoError(t, testload.ReadXML(bytes.NewReader(b))) {
-		var buf2 bytes.Buffer
-		assert.NoError(t, testload.WriteXML(&buf2, true))
-		tstb := buf2.Bytes()
-		assert.Equal(t, string(b), string(tstb))
-	}
-}
-*/
