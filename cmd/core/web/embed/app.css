@@ -2,6 +2,7 @@ body {
   margin: 0;
   overflow: hidden;
 
+  color-scheme: dark;
   color: #E1E2EB;
   background-color: #121316;
   --container-color: #44474E;
@@ -11,6 +12,7 @@ body {
 
 @media (prefers-color-scheme: light) {
   body {
+    color-scheme: light;
     color: #191B22;
     background-color: #FAF8FD;
     --container-color: #E1E2EB;

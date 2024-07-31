@@ -53,6 +53,7 @@ var htmlElementNames = map[string]string{
 	"tabs":       "div",
 	"tab":        "button",
 	"tree":       "div",
+	"page":       "main",
 }
 
 func addAttr(se *xml.StartElement, name, value string) {
