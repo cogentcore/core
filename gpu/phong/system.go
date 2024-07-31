@@ -6,9 +6,9 @@ package phong
 
 import (
 	"embed"
+	"unsafe"
 
 	"cogentcore.org/core/gpu"
-	"cogentcore.org/core/math32"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -19,31 +19,15 @@ var shaders embed.FS
 // Use* methods. Determines which pipeline is used.
 // Default is single color.
 type Current struct {
-
 	// a texture was selected, if true, overrides other options
 	UseTexture bool
 
 	// a per-vertex color was selected
-	UseVtxColor bool
-
-	// current model pose matrix
-	ModelMtx math32.Matrix4
-
-	// camera view and projection matrixes
-	VPMtx Matrix
-
-	// current color surface properties
-	Color Colors
-
-	// texture parameters -- repeat, offset
-	TexPars TexPars
-
-	// index of currently selected texture
-	TexIndex int
+	UseVertexColor bool
 }
 
 // ConfigPipeline configures graphics settings on the pipeline
-func (ph *Phong) ConfigPipeline(pl *gpu.Pipeline) {
+func (ph *Phong) ConfigPipeline(pl *gpu.GraphicsPipeline) {
 	pl.SetGraphicsDefaults()
 	pl.SetCullMode(wgpu.CullModeNone)
 	// if ph.Wireframe {
@@ -66,11 +50,11 @@ const (
 // ConfigSys configures the vDraw System and pipelines.
 func (ph *Phong) ConfigSys() {
 	sy := ph.Sys
-	tpl := sy.NewPipeline("texture")
+	tpl := sy.AddGraphicsPipeline("texture")
 	ph.ConfigPipeline(tpl)
-	opl := sy.NewPipeline("onecolor")
+	opl := sy.AddGraphicsPipeline("onecolor")
 	ph.ConfigPipeline(opl)
-	vpl := sy.NewPipeline("pervertex")
+	vpl := sy.AddGraphicsPipeline("pervertex")
 	ph.ConfigPipeline(vpl)
 
 	sh := tpl.AddShader("texture")
@@ -100,20 +84,20 @@ func (ph *Phong) ConfigSys() {
 	vgp.Add("Norm", gpu.Float32Vector3, 0, gpu.VertexShader)
 	vgp.Add("TexCoord", gpu.Float32Vector2, 0, gpu.VertexShader)
 	vgp.Add("VertexColor", gpu.Float32Vector4, 0, gpu.VertexShader)
-	mx := vgp.Add("ModelMtx", gpu.Float32Matrix4, 0, gpu.VertexShader) // serialized 4xVector
+	vgp.Add("ModelMatrix", gpu.Float32Matrix4, 0, gpu.VertexShader) // serialized 4xVector
 	ix := vgp.Add("Index", gpu.Uint32, 0, gpu.VertexShader)
 	ix.Role = gpu.Index
 
 	mgp.AddStruct("Matrix", gpu.Float32Matrix4.Bytes()*2, 1, gpu.VertexShader, gpu.FragmentShader)
 
-	lgp.AddStruct("NLights", reflectx.SizeOf(NLights), 1, gpu.FragmentShader)
+	lgp.AddStruct("NLights", int(unsafe.Sizeof(NLights{})), 1, gpu.FragmentShader)
 	lgp.AddStruct("AmbLights", vector4sz*1, MaxLights, gpu.FragmentShader)
 	lgp.AddStruct("DirLights", vector4sz*2, MaxLights, gpu.FragmentShader)
 	lgp.AddStruct("PointLights", vector4sz*3, MaxLights, gpu.FragmentShader)
 	lgp.AddStruct("SpotLights", vector4sz*4, MaxLights, gpu.FragmentShader)
 
 	// note: could combine color + lights but no need to -- under 4 limit
-	cv := cgp.AddStruct("Color", reflectx.SizeOf(Colors), 1, gpu.FragmentShader)
+	cv := cgp.AddStruct("Colors", int(unsafe.Sizeof(Colors{})), 1, gpu.FragmentShader)
 	cv.DynamicOffset = true
 
 	tgp.Add("TexSampler", gpu.TextureRGBA32, 1, gpu.FragmentShader)

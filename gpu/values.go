@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"log/slog"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/slicesx"
@@ -34,6 +35,13 @@ type Value struct {
 	// Value buffer, for Vertex values or DynamicOffset values
 	// (otherwise it is always effectively 1).
 	DynamicN int
+
+	// DynamicIndex is the current index into a DynamicOffset variable
+	// to use for the SetBindGroup call.  Note that this is an index,
+	// not an offset, so it indexes the DynamicN Vars in the Value,
+	// using the AlignVarSize to compute the dynamicOffset, which
+	// is what is actually used.
+	DynamicIndex int
 
 	// AlignVarSize is VarSize subject to memory alignment constraints,
 	// for DynamicN case.
@@ -255,6 +263,18 @@ func (vl *Value) SetDynamicFromBytes(idx int, from []byte) error {
 	return nil
 }
 
+// SetDynamicIndex sets the dynamic index to use for
+// the current value, returning the value or nil if if the index
+// was out of range (logs an error too).
+func (vl *Value) SetDynamicIndex(idx int) *Value {
+	if idx >= vl.DynamicN {
+		slog.Error("gpu.Values.SetDynamicIndex", "index", idx, "is out of range", vl.DynamicN)
+		return nil
+	}
+	vl.DynamicIndex = idx
+	return vl
+}
+
 // CopyValueToBytes copies given value buffer memory to given bytes,
 // ensuring that the buffer is mapped and ready to be copied into.
 // This automatically calls Unmap() after copying.
@@ -331,13 +351,6 @@ type Values struct {
 	// Current specifies the current value to use in rendering.
 	Current int
 
-	// DynamicIndex is the current index into a DynamicOffset variable
-	// to use for the SetBindGroup call.  Note that this is an index,
-	// not an offset, so it indexes the DynamicN Vars in the Value,
-	// using the AlignVarSize to compute the dynamicOffset, which
-	// is what is actually used.
-	DynamicIndex int
-
 	// map of vals by name, only for specifically named vals
 	// vs. generically allocated ones. Names must be unique.
 	NameMap map[string]*Value
@@ -375,6 +388,26 @@ func (vs *Values) SetN(vr *Var, dev *Device, nvals int) bool {
 // CurrentValue returns the current Value according to Current index.
 func (vs *Values) CurrentValue() *Value {
 	return vs.Values[vs.Current]
+}
+
+// SetCurrentValue sets the Current value to given index,
+// returning the value or nil if if the index
+// was out of range (logs an error too).
+func (vs *Values) SetCurrentValue(idx int) *Value {
+	if idx >= len(vs.Values) {
+		slog.Error("gpu.Values.SetCurrentValue", "index", idx, "is out of range", len(vs.Values))
+		return nil
+	}
+	vs.Current = idx
+	return vs.CurrentValue()
+}
+
+// SetDynamicIndex sets the dynamic index to use for
+// the current value, returning the value or nil if if the index
+// was out of range (logs an error too).
+func (vs *Values) SetDynamicIndex(idx int) *Value {
+	vl := vs.CurrentValue()
+	return vl.SetDynamicIndex(idx)
 }
 
 // SetName sets name of given Value, by index, adds name to map, checking
@@ -448,6 +481,6 @@ func (vs *Values) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 }
 
 func (vs *Values) dynamicOffset() uint32 {
-	vl := vs.Values[0]
-	return uint32(vl.AlignVarSize * vs.DynamicIndex)
+	vl := vs.CurrentValue()
+	return uint32(vl.AlignVarSize * vl.DynamicIndex)
 }

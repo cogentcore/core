@@ -181,7 +181,7 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 			}},
 		}
 	}
-	rp, err := pl.Sys.device.Device.CreateRenderPipeline(pd)
+	rp, err := pl.Sys.Device.Device.CreateRenderPipeline(pd)
 	if errors.Log(err) != nil {
 		return err
 	}

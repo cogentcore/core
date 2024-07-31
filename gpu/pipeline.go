@@ -52,7 +52,7 @@ func (pl *Pipeline) AddShader(name string) *Shader {
 		log.Printf("gpu.Pipeline AddShader: Shader named: %s already exists in pipline: %s\n", name, pl.Name)
 		return sh
 	}
-	sh := NewShader(name, &pl.Sys.device)
+	sh := NewShader(name, &pl.Sys.Device)
 	pl.Shaders[name] = sh
 	return sh
 }
@@ -116,9 +116,9 @@ func (pl *Pipeline) ReleaseShaders() {
 
 // BindLayout configures the PipeLineLayout based on Vars
 func (pl *Pipeline) BindLayout() error {
-	lays := pl.Vars().bindLayout(&pl.Sys.device)
+	lays := pl.Vars().bindLayout(&pl.Sys.Device)
 
-	rpl, err := pl.Sys.device.Device.CreatePipelineLayout(&wgpu.PipelineLayoutDescriptor{
+	rpl, err := pl.Sys.Device.Device.CreatePipelineLayout(&wgpu.PipelineLayoutDescriptor{
 		Label:            pl.Name,
 		BindGroupLayouts: lays,
 	})

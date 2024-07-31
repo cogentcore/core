@@ -93,6 +93,11 @@ func (vg *VarGroup) AddStruct(name string, size int, arrayN int, shaders ...Shad
 	return vr
 }
 
+// VarByName returns Var by name
+func (vg *VarGroup) VarByName(name string) *Var {
+	return errors.Log1(vg.VarByNameTry(name))
+}
+
 // VarByNameTry returns Var by name, returning error if not found
 func (vg *VarGroup) VarByNameTry(name string) (*Var, error) {
 	vr, ok := vg.VarMap[name]
@@ -108,24 +113,62 @@ func (vg *VarGroup) VarByNameTry(name string) (*Var, error) {
 
 // ValueByNameTry returns value by first looking up variable name, then value name,
 // returning error if not found
-func (vg *VarGroup) ValueByNameTry(varName, valName string) (*Var, *Value, error) {
+func (vg *VarGroup) ValueByNameTry(varName, valName string) (*Value, error) {
 	vr, err := vg.VarByNameTry(varName)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	vl, err := vr.Values.ValueByNameTry(valName)
-	return vr, vl, err
+	return vl, err
+}
+
+// ValueByIndex returns value by first looking up variable name, then value index.
+func (vg *VarGroup) ValueByIndex(varName string, valIndex int) *Value {
+	return errors.Log1(vg.ValueByIndexTry(varName, valIndex))
 }
 
 // ValueByIndexTry returns value by first looking up variable name, then value index,
 // returning error if not found
-func (vg *VarGroup) ValueByIndexTry(varName string, valIndex int) (*Var, *Value, error) {
+func (vg *VarGroup) ValueByIndexTry(varName string, valIndex int) (*Value, error) {
 	vr, err := vg.VarByNameTry(varName)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	vl, err := vr.Values.ValueByIndexTry(valIndex)
-	return vr, vl, err
+	return vl, err
+}
+
+// SetCurrentValue sets the index of the Current Value to use
+// for given variable name.
+func (vg *VarGroup) SetCurrentValue(name string, valueIndex int) *Var {
+	vr := vg.VarByName(name)
+	vr.Values.SetCurrentValue(valueIndex)
+	return vr
+}
+
+// SetDynamicIndex sets the dynamic offset index for Value to use
+// for given variable name.
+func (vg *VarGroup) SetDynamicIndex(name string, dynamicIndex int) *Var {
+	vr := vg.VarByName(name)
+	vr.Values.SetDynamicIndex(dynamicIndex)
+	return vr
+}
+
+// SetNValues sets all vars in this group to have specified
+// number of Values.
+func (vg *VarGroup) SetNValues(nvals int) {
+	for _, vr := range vg.Vars {
+		vr.SetNValues(&vg.device, nvals)
+	}
+}
+
+// SetAllCurrentValue sets the Current Value index, which is
+// the Value that will be used in rendering, via BindGroup,
+// for all vars in group.
+func (vg *VarGroup) SetAllCurrentValue(i int) {
+	for _, vr := range vg.Vars {
+		vr.SetCurrentValue(i)
+	}
 }
 
 // Config must be called after all variables have been added.
@@ -196,23 +239,6 @@ func (vg *VarGroup) ReleaseLayout() {
 	if vg.layout != nil {
 		vg.layout.Release()
 		vg.layout = nil
-	}
-}
-
-// SetNValues sets all vars in this group to have specified
-// number of Values.
-func (vg *VarGroup) SetNValues(nvals int) {
-	for _, vr := range vg.Vars {
-		vr.SetNValues(&vg.device, nvals)
-	}
-}
-
-// SetCurrentValue sets the Current Value index, which is
-// the Value that will be used in rendering, via BindGroup,
-// for all vars in group.
-func (vg *VarGroup) SetCurrentValue(i int) {
-	for _, vr := range vg.Vars {
-		vr.SetCurrentValue(i)
 	}
 }
 

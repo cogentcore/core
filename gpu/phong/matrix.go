@@ -1,12 +1,11 @@
-// Copyright 2022 Cogent Core. All rights reserved.
+// Copyright 2024 Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package vphong
+package phong
 
 import (
-	"unsafe"
-
+	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
 )
 
@@ -23,17 +22,14 @@ type Matrix struct {
 // SetViewProjection sets the camera view and projection matrixes, and updates
 // uniform data, so they are ready to use.
 func (ph *Phong) SetViewProjection(view, projection *math32.Matrix4) {
-	ph.Cur.VPMtx.View = *view
-	ph.Cur.VPMtx.Projection = *projection
-	vars := ph.Sys.Vars()
-	_, mtx, _ := vars.ValueByIndexTry(int(MatrixSet), "Matrix", 0)
-	mtx.CopyFromBytes(unsafe.Pointer(&ph.Cur.VPMtx))
-	ph.Sys.Mem.SyncToGPU()
-	vars.BindDynamicValueIndex(int(MatrixSet), "Matrix", 0)
+	sy := ph.Sys
+	vl := sy.Vars.ValueByIndex(int(MatrixGroup), "Matrix", 0)
+	gpu.SetValueFrom(vl, []Matrix{Matrix{View: *view, Projection: *projection}})
 }
 
 // SetModelMtx sets the model pose matrix -- must be set per render step
 // (otherwise last one will be used)
 func (ph *Phong) SetModelMtx(model *math32.Matrix4) {
-	ph.Cur.ModelMtx = *model
+	// todo:
+	// ph.Cur.ModelMtx = *model
 }

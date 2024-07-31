@@ -100,32 +100,24 @@ func main() {
 
 	sy.Config()
 
-	rectPos := posv.Values.Values[0]
-	gpu.SetValueFrom(rectPos, []float32{
+	gpu.SetValueFrom(posv.Values.Values[0], []float32{
 		-0.5, -0.5, 0.0,
 		0.5, -0.5, 0.0,
 		0.5, 0.5, 0.0,
 		-0.5, 0.5, 0.0})
-
-	rectClr := clrv.Values.Values[0]
-	gpu.SetValueFrom(rectClr, []float32{
+	gpu.SetValueFrom(clrv.Values.Values[0], []float32{
 		1.0, 0.0, 0.0,
 		0.0, 1.0, 0.0,
 		0.0, 0.0, 1.0,
 		1.0, 1.0, 0.0})
-
-	rectTex := txcv.Values.Values[0]
-	gpu.SetValueFrom(rectTex, []float32{
+	gpu.SetValueFrom(txcv.Values.Values[0], []float32{
 		1.0, 0.0,
 		0.0, 0.0,
 		0.0, 1.0,
 		1.0, 1.0})
-
-	rectIndex := idxv.Values.Values[0]
-	gpu.SetValueFrom(rectIndex, []uint16{0, 1, 2, 0, 2, 3})
+	gpu.SetValueFrom(idxv.Values.Values[0], []uint16{0, 1, 2, 0, 2, 3})
 
 	// This is the standard camera view projection computation
-	cam := camv.Values.Values[0]
 	campos := math32.Vec3(0, 0, 2)
 	target := math32.Vec3(0, 0, 0)
 	var lookq math32.Quat
@@ -145,7 +137,7 @@ func main() {
 	// will render identically here.
 	camo.Projection.SetVkPerspective(45, aspect, 0.01, 100)
 
-	gpu.SetValueFrom(cam, []CamView{camo}) // note: always use slice to copy
+	gpu.SetValueFrom(camv.Values.Values[0], []CamView{camo}) // note: always use slice to copy
 
 	frameCount := 0
 	stTime := time.Now()

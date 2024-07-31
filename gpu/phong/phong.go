@@ -1,8 +1,8 @@
-// Copyright (c) 2022, Cogent Core. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package vphong
+package phong
 
 //go:generate core generate
 
@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/gpu"
+	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
 // MaxLights is upper limit on number of any given type of light
@@ -68,8 +69,8 @@ type Phong struct {
 	// rendering system
 	Sys *gpu.System
 
-	// mutex on updating
-	UpdateMu sync.Mutex `display:"-" copier:"-" json:"-" xml:"-"`
+	// overall lock on system, use Lock, Unlock
+	sync.Mutex
 }
 
 func (ph *Phong) Release() {
@@ -79,50 +80,62 @@ func (ph *Phong) Release() {
 // Config configures everything after everything has been Added
 func (ph *Phong) Config() {
 	ph.ConfigMeshesTextures()
-	ph.UpdateMu.Lock()
+	ph.Lock()
 	ph.Sys.Config()
-
 	ph.ConfigLights()
-	ph.AllocTextures()
-	ph.Sys.Mem.SyncToGPU()
-	ph.UpdateMu.Unlock()
+	ph.Unlock()
 }
 
 // ConfigMeshesTextures configures the Meshes and Textures based
 // on everything added in the Phong config, prior to Sys.Config()
 // which does host allocation.
 func (ph *Phong) ConfigMeshesTextures() {
-	ph.UpdateMu.Lock()
-	ph.Sys.Mem.Free()
+	ph.Lock()
 	ph.ConfigMeshes()
 	ph.ConfigTextures()
-	ph.UpdateMu.Unlock()
+	ph.Unlock()
 }
 
 // Sync synchronizes any changes in val data up to GPU device memory.
 // any changes in numbers or sizes of any element requires a Config call.
 func (ph *Phong) Sync() {
-	ph.UpdateMu.Lock()
-	ph.Sys.Mem.SyncToGPU()
-	ph.UpdateMu.Unlock()
+	ph.Lock()
+	// todo!
+	ph.Unlock()
 }
 
 ///////////////////////////////////////////////////
 // Rendering
 
 // Render does one step of rendering given current Use* settings
-func (ph *Phong) Render() {
-	ph.UpdateMu.Lock()
-	sy := &ph.Sys
-	cmd := sy.CmdPool.Buff
-	sy.CmdBindVars(cmd, 0) // updates all dynamics
+func (ph *Phong) Render(rp *wgpu.RenderPassEncoder) {
+	ph.Lock()
+	defer ph.Unlock()
+
 	switch {
 	case ph.Cur.UseTexture:
-		ph.RenderTexture()
-	case ph.Cur.UseVtxColor:
-		ph.RenderVtxColor()
+		ph.RenderTexture(rp)
+	case ph.Cur.UseVertexColor:
+		ph.RenderVertexColor(rp)
 	default:
-		ph.RenderOnecolor()
+		ph.RenderOneColor(rp)
 	}
-	ph.UpdateMu.Unlock()
+}
+
+// RenderTexture renders current settings to texture pipeline
+func (ph *Phong) RenderTexture(rp *wgpu.RenderPassEncoder) {
+	pl := ph.Sys.GraphicsPipelines["texture"]
+	pl.BindDrawVertex(rp)
+}
+
+// RenderOneColor renders current settings to onecolor pipeline.
+func (ph *Phong) RenderOneColor(rp *wgpu.RenderPassEncoder) {
+	pl := ph.Sys.GraphicsPipelines["onecolor"]
+	pl.BindDrawVertex(rp)
+}
+
+// RenderVertexColor renders current settings to vertexcolor pipeline
+func (ph *Phong) RenderVertexColor(rp *wgpu.RenderPassEncoder) {
+	pl := ph.Sys.GraphicsPipelines["pervertex"]
+	pl.BindDrawVertex(rp)
 }

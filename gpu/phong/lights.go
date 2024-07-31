@@ -5,8 +5,7 @@
 package phong
 
 import (
-	"unsafe"
-
+	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
 )
 
@@ -100,22 +99,13 @@ type SpotLight struct {
 
 // ConfigLights configures the rendering for the lights that have been added.
 func (ph *Phong) ConfigLights() {
-	vs := ph.Sys.Vars.SetMap[int(NLightSet)]
-	nlv, nl, _ := vs.ValueByIndexTry("NLights", 0)
-	nl.CopyFromBytes(unsafe.Pointer(&ph.NLights))
-
-	vs = ph.Sys.Vars.SetMap[int(LightSet)]
-	alv, al, _ := vs.ValueByIndexTry("AmbLights", 0)
-	al.CopyFromBytes(unsafe.Pointer(&ph.Ambient[0]))
-
-	dlv, dl, _ := vs.ValueByIndexTry("DirLights", 0)
-	dl.CopyFromBytes(unsafe.Pointer(&ph.Dir[0]))
-
-	plv, pl, _ := vs.ValueByIndexTry("PointLights", 0)
-	pl.CopyFromBytes(unsafe.Pointer(&ph.Point[0]))
-
-	slv, sl, _ := vs.ValueByIndexTry("SpotLights", 0)
-	sl.CopyFromBytes(unsafe.Pointer(&ph.Spot[0]))
+	sy := ph.Sys
+	vs := sy.Vars.Groups[int(LightGroup)]
+	gpu.SetValueFrom(vs.ValueByIndex("NLights", 0), []NLights{ph.NLights})
+	gpu.SetValueFrom(vs.ValueByIndex("AmbLights", 0), ph.Ambient[:])
+	gpu.SetValueFrom(vs.ValueByIndex("DirLights", 0), ph.Dir[:])
+	gpu.SetValueFrom(vs.ValueByIndex("PointLights", 0), ph.Point[:])
+	gpu.SetValueFrom(vs.ValueByIndex("SpotLights", 0), ph.Spot[:])
 }
 
 // ResetNLights resets number of lights to 0 -- for reconfig

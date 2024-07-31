@@ -1,33 +1,32 @@
-// Copyright 2022 Cogent Core. All rights reserved.
+// Copyright 2024 Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package vphong
+package phong
 
 import (
 	"fmt"
 	"image"
 	"log"
-	"log/slog"
 
 	"cogentcore.org/core/gpu"
-	"cogentcore.org/core/math32"
 )
 
-// Texture has texture image -- stored as image.RGBA for GPU compatibility
+// Texture has texture image and other params.
+// Stored as image.RGBA for GPU compatibility.
 type Texture struct {
-	Texture *image.RGBA
+	Image *image.RGBA
 }
 
-func NewTexture(img image.Texture) *Texture {
+func NewTexture(img image.Image) *Texture {
 	tx := &Texture{}
 	tx.Set(img)
 	return tx
 }
 
 // Set sets values
-func (tx *Texture) Set(img image.Texture) {
-	tx.Texture = gpu.ImageToRGBA(img)
+func (tx *Texture) Set(img image.Image) {
+	tx.Image = gpu.ImageToRGBA(img)
 }
 
 // AddTexture adds to list of textures
@@ -43,12 +42,11 @@ func (ph *Phong) DeleteTexture(name string) {
 // configDummyTexture configures a dummy texture (if none configured)
 func (ph *Phong) configDummyTexture() {
 	// there must be one texture -- otherwise Mac Molten triggers an error
-	vars := ph.Sys.Vars()
-	txset := vars.SetMap[int(TexSet)]
-	txset.ConfigValues(1)
+	tgp := ph.Sys.Vars.Groups[int(TextureGroup)]
+	tgp.SetNValues(1)
 	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
-	_, img, _ := txset.ValueByIndexTry("Tex", 0)
-	img.Texture.ConfigGoImage(dimg.Bounds().Size(), 0)
+	img := tgp.ValueByIndex("TexSampler", 0)
+	img.SetFromGoImage(dimg, 0, gpu.NoFlipY)
 }
 
 // ConfigTextures configures vals for textures -- this is the first
@@ -56,50 +54,25 @@ func (ph *Phong) configDummyTexture() {
 // This automatically allocates images by size so everything fits
 // within the MaxTexturesPerStage limit, as texture arrays.
 func (ph *Phong) ConfigTextures() {
+	sy := ph.Sys
 	ntx := ph.Textures.Len()
 	if ntx == 0 {
 		ph.configDummyTexture()
 		return
 	}
-	vars := ph.Sys.Vars()
-	txset := vars.SetMap[int(TexSet)]
-	txset.ConfigValues(ntx)
+	tvr := sy.Vars.VarByName(int(TextureGroup), "TexSampler")
+	tvr.SetNValues(&sy.Device, ntx)
 	for i, kv := range ph.Textures.Order {
-		_, img, err := txset.ValueByIndexTry("Tex", i)
-		if err != nil {
-			slog.Error("gpu.Phong ConfigTextures: txset Texture is nil", "Texture", i)
-			continue
-		}
-		if kv.Value.Texture == nil {
-			slog.Error("gpu.Phong ConfigTextures: Texture is nil", "Texture", i)
-			continue
-		}
-		img.Texture.ConfigGoImage(kv.Value.Texture.Bounds().Size(), 1)
+		tvv := tvr.Values.Values[i]
+		tvv.SetFromGoImage(kv.Value.Image, 1, gpu.NoFlipY)
 	}
-	ivar := txset.VarMap["Tex"]
-	ivar.Values.AllocTexBySize(ph.Sys.GPU, ivar) // organize images by size so all fit
-}
-
-// AllocTextures allocates textures that have been previously configured,
-// via ConfigTextures(), after Phong.Sys.Config() has been called.
-func (ph *Phong) AllocTextures() {
-	vars := ph.Sys.Vars()
-	ntx := ph.Textures.Len()
-	if ntx > 0 {
-		txset := vars.SetMap[int(TexSet)]
-		ivar := txset.VarMap["Tex"]
-		for i, kv := range ph.Textures.Order {
-			ivar.Values.SetGoImage(i, kv.Value.Texture, gpu.FlipY)
-		}
-	}
-	vars.BindAllTextureVars(int(TexSet)) // gets images
 }
 
 // ResetTextures resets all textures
 func (ph *Phong) ResetTextures() {
-	vars := ph.Sys.Vars()
-	txset := vars.SetMap[int(TexSet)]
-	txset.Release(ph.Sys.Device.Device)
+	sy := ph.Sys
+	tgp := sy.Vars.Groups[int(TextureGroup)]
+	tgp.Release()
 	ph.Textures.Reset()
 }
 
@@ -110,7 +83,7 @@ func (ph *Phong) UseNoTexture() {
 
 // UseTextureIndex selects texture by index for current render step
 func (ph *Phong) UseTextureIndex(idx int) error {
-	ph.Cur.TexIndex = idx // todo: range check
+	ph.Sys.Vars.SetCurrentValue(int(TextureGroup), "TexSampler", idx)
 	ph.Cur.UseTexture = true
 	return nil
 }
@@ -119,7 +92,7 @@ func (ph *Phong) UseTextureIndex(idx int) error {
 func (ph *Phong) UseTextureName(name string) error {
 	idx, ok := ph.Textures.IndexByKeyTry(name)
 	if !ok {
-		err := fmt.Errorf("vphong:UseTextureName -- name not found: %s", name)
+		err := fmt.Errorf("phong:UseTextureName -- name not found: %s", name)
 		if gpu.Debug {
 			log.Println(err)
 		}
@@ -131,16 +104,15 @@ func (ph *Phong) UseTextureName(name string) error {
 // the underlying image changes.  Assumes the size remains the same.
 // Must Sync for the changes to take effect.
 func (ph *Phong) UpdateTextureIndex(idx int) error {
-	ph.UpdateMu.Lock()
-	defer ph.UpdateMu.Unlock()
+	sy := ph.Sys
+	ph.Lock()
+	defer ph.Unlock()
 	if idx >= ph.Textures.Len() {
 		return nil
 	}
 	tx := ph.Textures.Order[idx].Value
-	vars := ph.Sys.Vars()
-	txset := vars.SetMap[int(TexSet)]
-	ivar := txset.VarMap["Tex"]
-	ivar.Values.SetGoImage(idx, tx.Texture, gpu.FlipY)
+	tvl := sy.Vars.ValueByIndex(int(TextureGroup), "TexSampler", idx)
+	tvl.SetFromGoImage(tx.Image, 1, gpu.FlipY)
 	return nil
 }
 
@@ -154,54 +126,4 @@ func (ph *Phong) UpdateTextureName(name string) error {
 		}
 	}
 	return ph.UpdateTextureIndex(idx)
-}
-
-// UseTexturePars sets the texture parameters for the next render command:
-// how often the texture repeats along each dimension, and the offset
-func (ph *Phong) UseTexturePars(repeat math32.Vector2, off math32.Vector2) {
-	ph.Cur.TexPars.Set(repeat, off)
-}
-
-// UseFullTexture sets the texture parameters for the next render command:
-// to render the full texture: repeat = 1,1; off = 0,0
-func (ph *Phong) UseFullTexture() {
-	ph.Cur.TexPars.Set(math32.Vec2(1, 1), math32.Vector2{})
-}
-
-// TexPars holds texture parameters: how often to repeat the texture image and offset
-type TexPars struct {
-
-	// how often to repeat the texture in each direction
-	Repeat math32.Vector2
-
-	// offset for when to start the texure in each direction
-	Off math32.Vector2
-}
-
-func (tp *TexPars) Set(rpt, off math32.Vector2) {
-	tp.Repeat = rpt
-	tp.Off = off
-}
-
-// RenderTexture renders current settings to texture pipeline
-func (ph *Phong) RenderTexture() {
-	sy := &ph.Sys
-	cmd := sy.CmdPool.Buff
-	pl := sy.PipelineMap["texture"]
-
-	vars := ph.Sys.Vars()
-	idxs := vars.TextureGroupSizeIndexes(int(TexSet), "Tex", ph.Cur.TexIndex)
-
-	txIndex, _, _, err := sy.CmdBindTextureVarIndex(cmd, int(TexSet), "Tex", idxs.GpIndex)
-	if err != nil {
-		return
-	}
-	push := ph.Cur.NewPush()
-	push.Tex = ph.Cur.TexPars
-	push.ModelMtx[15] = idxs.PctSize.X // packing bits..
-	push.Color.Emissive.W = idxs.PctSize.Y
-	txIndexP := txIndex*1024 + idxs.ItemIndex // packing index and layer into one
-	push.Color.ShinyBright.W = float32(txIndexP)
-	ph.Push(pl, push)
-	pl.BindDrawVertex(cmd, ph.Cur.DescIndex)
 }

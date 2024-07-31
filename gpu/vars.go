@@ -9,6 +9,7 @@ import (
 	"log"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/indent"
 
 	"github.com/rajveermalviya/go-webgpu/wgpu"
@@ -108,6 +109,11 @@ func (vs *Vars) AddGroup(role VarRoles, name ...string) *VarGroup {
 	return vg
 }
 
+// VarByName returns Var by name in given group number
+func (vs *Vars) VarByName(group int, name string) *Var {
+	return errors.Log1(vs.VarByNameTry(group, name))
+}
+
 // VarByNameTry returns Var by name in given group number,
 // returning error if not found
 func (vs *Vars) VarByNameTry(group int, name string) (*Var, error) {
@@ -120,22 +126,43 @@ func (vs *Vars) VarByNameTry(group int, name string) (*Var, error) {
 
 // ValueByNameTry returns value by first looking up variable name, then value name,
 // within given group number, returning error if not found
-func (vs *Vars) ValueByNameTry(group int, varName, valName string) (*Var, *Value, error) {
+func (vs *Vars) ValueByNameTry(group int, varName, valName string) (*Value, error) {
 	vg, err := vs.GroupTry(group)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	return vg.ValueByNameTry(varName, valName)
 }
 
+// ValueByIndex returns value by first looking up variable name, then value index.
+func (vs *Vars) ValueByIndex(group int, varName string, valIndex int) *Value {
+	return errors.Log1(vs.ValueByIndexTry(group, varName, valIndex))
+}
+
 // ValueByIndexTry returns value by first looking up variable name, then value index,
 // returning error if not found
-func (vs *Vars) ValueByIndexTry(group int, varName string, valIndex int) (*Var, *Value, error) {
+func (vs *Vars) ValueByIndexTry(group int, varName string, valIndex int) (*Value, error) {
 	vg, err := vs.GroupTry(group)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	return vg.ValueByIndexTry(varName, valIndex)
+}
+
+// SetCurrentValue sets the index of the current Value to use
+// for given variable name, in given group number.
+func (vs *Vars) SetCurrentValue(group int, name string, valueIndex int) *Var {
+	vr := vs.VarByName(group, name)
+	vr.Values.SetCurrentValue(valueIndex)
+	return vr
+}
+
+// SetDynamicIndex sets the dynamic offset index for Value to use
+// for given variable name, in given group number.
+func (vs *Vars) SetDynamicIndex(group int, name string, dynamicIndex int) *Var {
+	vr := vs.VarByName(group, name)
+	vr.Values.SetDynamicIndex(dynamicIndex)
+	return vr
 }
 
 // Config must be called after all variables have been added.

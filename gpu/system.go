@@ -42,7 +42,7 @@ type System struct {
 
 	// logical device for this System.
 	// This is owned by us for a Compute device.
-	device Device
+	Device Device
 }
 
 // NewGraphicsSystem returns a new System for graphics use, using
@@ -67,7 +67,7 @@ func (sy *System) init(gp *GPU, name string, dev *Device) {
 	sy.GPU = gp
 	sy.Render.sys = sy
 	sy.Name = name
-	sy.device = *dev
+	sy.Device = *dev
 	sy.Vars.device = *dev
 	sy.Vars.sys = sy
 }
@@ -94,7 +94,7 @@ func (sy *System) initCompute(gp *GPU, name string) error {
 }
 
 func (sy *System) NewCommandEncoder() *wgpu.CommandEncoder {
-	ce, err := sy.device.Device.CreateCommandEncoder(nil)
+	ce, err := sy.Device.Device.CreateCommandEncoder(nil)
 	if errors.Log(err) != nil {
 		return nil
 	}
@@ -103,20 +103,20 @@ func (sy *System) NewCommandEncoder() *wgpu.CommandEncoder {
 
 // WaitDone waits until device is done with current processing steps
 func (sy *System) WaitDone() {
-	sy.device.Device.Poll(true, nil)
+	sy.Device.Device.Poll(true, nil)
 }
 
 func (sy *System) Release() {
 	// for _, ev := range sy.Events {
-	// 	vk.ReleaseEvent(sy.device.Device, ev, nil)
+	// 	vk.ReleaseEvent(sy.Device.Device, ev, nil)
 	// }
 	// sy.Events = nil
 	// for _, sp := range sy.Semaphores {
-	// 	vk.ReleaseSemaphore(sy.device.Device, sp, nil)
+	// 	vk.ReleaseSemaphore(sy.Device.Device, sp, nil)
 	// }
 	// sy.Semaphores = nil
 	// for _, fc := range sy.Fences {
-	// 	vk.ReleaseFence(sy.device.Device, fc, nil)
+	// 	vk.ReleaseFence(sy.Device.Device, fc, nil)
 	// }
 	// sy.Fences = nil
 	// sy.CmdBuffs = nil
@@ -128,7 +128,7 @@ func (sy *System) Release() {
 	}
 	sy.Vars.Release()
 	if sy.Compute {
-		sy.device.Release()
+		sy.Device.Release()
 	} else {
 		sy.Render.Release()
 	}
@@ -149,7 +149,7 @@ func (sy *System) AddGraphicsPipeline(name string) *GraphicsPipeline {
 /*
 // NewSemaphore returns a new semaphore using system device
 func (sy *System) NewSemaphore(name string) vk.Semaphore {
-	sp := NewSemaphore(sy.device.Device)
+	sp := NewSemaphore(sy.Device.Device)
 	if sy.Semaphores == nil {
 		sy.Semaphores = make(map[string]vk.Semaphore)
 	}
@@ -170,7 +170,7 @@ func (sy *System) SemaphoreByNameTry(name string) (vk.Semaphore, error) {
 
 // NewEvent returns a new event using system device
 func (sy *System) NewEvent(name string) vk.Event {
-	sp := NewEvent(sy.device.Device)
+	sp := NewEvent(sy.Device.Device)
 	if sy.Events == nil {
 		sy.Events = make(map[string]vk.Event)
 	}
@@ -191,7 +191,7 @@ func (sy *System) EventByNameTry(name string) (vk.Event, error) {
 
 // NewFence returns a new fence using system device
 func (sy *System) NewFence(name string) vk.Fence {
-	sp := NewFence(sy.device.Device)
+	sp := NewFence(sy.Device.Device)
 	if sy.Fences == nil {
 		sy.Fences = make(map[string]vk.Fence)
 	}
@@ -213,7 +213,7 @@ func (sy *System) FenceByNameTry(name string) (vk.Fence, error) {
 
 // NewCmdBuff returns a new command encoder using system device
 func (sy *System) NewCmdBuff(name string) *wgpu.CommandEncoder {
-	// cb := sy.CmdPool.NewBuffer(&sy.device)
+	// cb := sy.CmdPool.NewBuffer(&sy.Device)
 	// if sy.CmdBuffs == nil {
 	// 	sy.CmdBuffs = make(map[string]*wgpu.CommandEncoder)
 	// }
@@ -238,20 +238,20 @@ func (sy *System) CmdBuffByNameTry(name string) (*wgpu.CommandEncoder, error) {
 // format that we're rendering to, for a surface render target,
 // and the depth buffer format (pass UndefType for no depth buffer).
 func (sy *System) ConfigRender(imgFmt *TextureFormat, depthFmt Types) {
-	sy.Render.Config(&sy.device, imgFmt, depthFmt, false)
+	sy.Render.Config(&sy.Device, imgFmt, depthFmt, false)
 }
 
 // ConfigRenderNonSurface configures the renderpass, including the image
 // format that we're rendering to, for a RenderFrame non-surface target,
 // and the depth buffer format (pass UndefType for no depth buffer).
 func (sy *System) ConfigRenderNonSurface(imgFmt *TextureFormat, depthFmt Types) {
-	sy.Render.Config(&sy.device, imgFmt, depthFmt, true)
+	sy.Render.Config(&sy.Device, imgFmt, depthFmt, true)
 }
 
 // Config configures the entire system, after everything has been
 // setup (Pipelines, Vars, etc).
 func (sy *System) Config() {
-	sy.Vars.Config(&sy.device)
+	sy.Vars.Config(&sy.Device)
 	if Debug {
 		fmt.Printf("%s\n", sy.Vars.StringDoc())
 	}
@@ -409,5 +409,5 @@ func (sy *System) EndRenderPass(cmd *wgpu.CommandEncoder) {
 
 // CmdSubmitWait does SubmitWait on CmdPool
 func (sy *System) CmdSubmitWait() {
-	// sy.CmdPool.SubmitWait(&sy.device)
+	// sy.CmdPool.SubmitWait(&sy.Device)
 }
