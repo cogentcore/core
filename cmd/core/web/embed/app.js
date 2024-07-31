@@ -239,7 +239,6 @@ async function appInitWebAssembly() {
       go.importObject,
     );
     go.run(wasm.instance);
-    loader.remove();
   } catch (err) {
     console.error("loading wasm failed: ", err);
   }
