@@ -114,12 +114,16 @@ func (v *Value) String() string {
 }
 
 // StringCSS returns the value as a string suitable for CSS
-// by changing dp to px.
+// by changing dp to px and using % if applicable.
 func (v Value) StringCSS() string {
 	if v.Unit == UnitDp {
 		v.Unit = UnitPx // non-pointer so can change directly
 	}
-	return v.String()
+	s := v.String()
+	if v.Unit == UnitPw || v.Unit == UnitPh || v.Unit == UnitEw || v.Unit == UnitEh {
+		s = s[:len(s)-2] + "%"
+	}
+	return s
 }
 
 // SetString sets value from a string

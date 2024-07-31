@@ -80,6 +80,9 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	if idName == "tree" {
 		return nil
 	}
+	if se.Name.Local == "textarea" {
+		wb.Styles.Min.X.Pw(95)
+	}
 
 	addAttr(se, "id", wb.Name)
 	if se.Name.Local != "img" { // images don't render yet

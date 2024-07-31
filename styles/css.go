@@ -95,8 +95,8 @@ func colorToCSS(c image.Image) string {
 		return "var(--primary-on-color)"
 	case colors.Scheme.Surface, colors.Scheme.OnSurface:
 		return "" // already default
-	case colors.Scheme.SurfaceContainer:
-		return "var(--surface-container-color)"
+	case colors.Scheme.SurfaceContainer, colors.Scheme.SurfaceContainerLowest, colors.Scheme.SurfaceContainerLow, colors.Scheme.SurfaceContainerHigh, colors.Scheme.SurfaceContainerHighest:
+		return "var(--surface-container-color)" // all of them are close enough for this
 	default:
 		return colors.AsHex(colors.ToUniform(c))
 	}
