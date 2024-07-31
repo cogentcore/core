@@ -71,7 +71,8 @@ func (pl *GraphicsPipeline) BindAllGroups(rp *wgpu.RenderPassEncoder) {
 	ngp := vs.NGroups()
 	for gi := 0; gi < ngp; gi++ {
 		vg := vs.Groups[gi]
-		rp.SetBindGroup(uint32(vg.Group), vg.bindGroup(), nil) // note: nil is dynamic offsets
+		bg, dynOffs := vg.bindGroup()
+		rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
 	}
 }
 
@@ -81,7 +82,8 @@ func (pl *GraphicsPipeline) BindAllGroups(rp *wgpu.RenderPassEncoder) {
 func (pl *GraphicsPipeline) BindGroup(rp *wgpu.RenderPassEncoder, group int) {
 	vs := &pl.Sys.Vars
 	vg := vs.Groups[group]
-	rp.SetBindGroup(uint32(vg.Group), vg.bindGroup(), nil) // note: nil is dynamic offsets
+	bg, dynOffs := vg.bindGroup()
+	rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
 }
 
 // BindDrawVertex binds the Current Value for all VertexGroup variables,
@@ -120,7 +122,7 @@ func (pl *GraphicsPipeline) DrawIndexed(rp *wgpu.RenderPassEncoder) {
 		return
 	}
 	iv := ix.Values.CurrentValue()
-	rp.DrawIndexed(uint32(iv.N), 1, 0, 0, 0)
+	rp.DrawIndexed(uint32(iv.DynamicN), 1, 0, 0, 0)
 }
 
 // VertexEntry returns the [ShaderEntry] for [VertexShader].

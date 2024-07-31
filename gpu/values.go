@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"log/slog"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/slicesx"
@@ -27,20 +26,32 @@ type Value struct {
 	// index of this value within the Var list of values
 	Index int
 
-	// actual number of elements in an array, where 1 means scalar / singular value.
-	// If 0, this is a dynamically sized item and the size must be set.
-	N int
+	// VarSize is the size of each Var element, which includes any fixed ArrayN
+	// array size specified on the Var.
+	VarSize int
 
-	// if N > 1 (array) then this is the effective size of each element,
-	// which must be aligned to 16 byte modulo for Uniform types.
-	// Non-naturally aligned types require slower element-by-element
-	// syncing operations, instead of memcopy.
-	ElSize int
+	// DynamicN is the number of Var elements to encode within one
+	// Value buffer, for Vertex values or DynamicOffset values
+	// (otherwise it is always effectively 1).
+	DynamicN int
 
-	// total memory size of this value in bytes, as allocated in buffer.
+	// AlignVarSize is VarSize subject to memory alignment constraints,
+	// for DynamicN case.
+	AlignVarSize int
+
+	// AllocSize is total memory size of this value in bytes,
+	// as allocated in the buffer.  For non-dynamic case, it is just VarSize.
+	// For dynamic, it is DynamicN * AlignVarSize.
 	AllocSize int
 
 	role VarRoles
+
+	// for this variable type, this is the alignment requirement in bytes,
+	// for DynamicOffset variables.  This is 1 for Vertex buffer variables.
+	alignBytes int
+
+	// true if this is a dynamic variable (Vertex, DynamicOffset Uniform or Storage)
+	isDynamic bool
 
 	device Device
 
@@ -55,19 +66,32 @@ type Value struct {
 
 func NewValue(vr *Var, dev *Device, idx int) *Value {
 	vl := &Value{}
-	vl.Init(vr, dev, idx)
+	vl.init(vr, dev, idx)
 	return vl
 }
 
-// Init initializes value based on variable and index
+// MemSizeAlign returns the size aligned according to align byte increments
+// e.g., if align = 16 and size = 12, it returns 16
+func MemSizeAlign(size, align int) int {
+	if size%align == 0 {
+		return size
+	}
+	nb := size / align
+	return (nb + 1) * align
+}
+
+// init initializes value based on variable and index
 // within list of vals for this var.
-func (vl *Value) Init(vr *Var, dev *Device, idx int) {
+func (vl *Value) init(vr *Var, dev *Device, idx int) {
 	vl.role = vr.Role
 	vl.device = *dev
 	vl.Index = idx
 	vl.Name = fmt.Sprintf("%s_%d", vr.Name, vl.Index)
-	vl.ElSize = vr.SizeOf
-	vl.N = vr.ArrayN
+	vl.VarSize = vr.MemSize()
+	vl.alignBytes = vr.alignBytes
+	vl.AlignVarSize = MemSizeAlign(vl.VarSize, vl.alignBytes)
+	vl.isDynamic = vl.role == Vertex || vl.role == Index || vr.DynamicOffset
+	vl.DynamicN = 1
 	vl.TextureOwns = vr.TextureOwns
 	if vr.Role >= SampledTexture {
 		vl.Texture = NewTextureSample(dev)
@@ -76,14 +100,13 @@ func (vl *Value) Init(vr *Var, dev *Device, idx int) {
 
 // MemSize returns the memory allocation size for this value, in bytes.
 func (vl *Value) MemSize() int {
-	if vl.N == 0 {
-		vl.N = 1
-	}
 	if vl.Texture != nil {
 		return vl.Texture.Format.TotalByteSize()
-	} else {
-		return vl.ElSize * vl.N
 	}
+	if vl.isDynamic {
+		return vl.AlignVarSize * vl.DynamicN
+	}
+	return vl.VarSize
 }
 
 // CreateBuffer creates the GPU buffer for this value if it does not
@@ -137,13 +160,37 @@ func (vl *Value) NilBufferCheck() error {
 
 // SetValueFrom copies given values into value buffer memory,
 // making the buffer if it has not yet been constructed.
+// IMPORTANT: do not use this for dynamic offset Uniform or
+// Storage variables, as the alignment will not be correct;
+// See SetDynamicFromBytes.
 func SetValueFrom[E any](vl *Value, from []E) error {
 	return vl.SetFromBytes(wgpu.ToBytes(from))
 }
 
+// SetDynamicValueFrom copies given values into value buffer memory,
+// at the given dynamic variable index,
+// making the buffer if it has not yet been constructed,
+// for dynamic offset Uniform or Storage variables,
+// which have alignment constraints.  Vertex variables
+// should use standard SetValueFrom function.
+// It is essential that DynamicN is set properly before
+// calling this, and if that number has changed since
+// last setting any values, _all_ of them must be set again.
+func SetDynamicValueFrom[E any](vl *Value, idx int, from []E) error {
+	return vl.SetDynamicFromBytes(idx, wgpu.ToBytes(from))
+}
+
 // SetFromBytes copies given bytes into value buffer memory,
 // making the buffer if it has not yet been constructed.
+// IMPORTANT: do not use this for dynamic offset Uniform or
+// Storage variables, as the alignment will not be correct;
+// See SetDynamicFromBytes.
 func (vl *Value) SetFromBytes(from []byte) error {
+	if vl.isDynamic && vl.alignBytes != 1 {
+		err := fmt.Errorf("gpu.Value SetFromBytes %s: Cannot call this on a DynamicOffset Uniform or Storage variable; use SetDynamicValueFrom instead", vl.Name)
+		return errors.Log(err)
+	}
+	nb := len(from)
 	if vl.buffer == nil {
 		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,
@@ -154,14 +201,54 @@ func (vl *Value) SetFromBytes(from []byte) error {
 			return err
 		}
 		vl.buffer = buf
-		sz := vl.MemSize()
-		if len(from) != sz {
-			slog.Error("gpu.Value SetFromBytes", "Size passed", len(from), "!= Size expected", sz)
+		vl.AllocSize = nb
+	} else {
+		err := vl.device.Queue.WriteBuffer(vl.buffer, 0, from)
+		if errors.Log(err) != nil {
+			return err
 		}
-		vl.AllocSize = sz
-		return nil
 	}
-	err := vl.device.Queue.WriteBuffer(vl.buffer, 0, from)
+	if vl.isDynamic {
+		vl.DynamicN = nb / vl.AlignVarSize
+		if nb%vl.AlignVarSize != 0 {
+			err := fmt.Errorf("gpu.Value SetFromBytes %s, Size passed: %d is not an even multiple of the variable size: %d", vl.Name, nb, vl.AlignVarSize)
+			return errors.Log(err)
+		}
+	}
+	tb := vl.MemSize()
+	if nb != tb {
+		err := fmt.Errorf("gpu.Value SetFromBytes %s, Size passed: %d != Size expected %d", vl.Name, nb, tb)
+		return errors.Log(err)
+	}
+	return nil
+}
+
+// SetDynamicFromBytes copies given values into value buffer memory,
+// at the given dynamic variable index,
+// making the buffer if it has not yet been constructed,
+// for dynamic offset Uniform or Storage variables,
+// which have alignment constraints.  Vertex variables
+// should use standard SetValueFrom function.
+// It is essential that DynamicN is set properly before
+// calling this, and if that number has changed since
+// last setting any values, _all_ of them must be set again.
+func (vl *Value) SetDynamicFromBytes(idx int, from []byte) error {
+	if !vl.isDynamic || vl.alignBytes == 1 {
+		err := fmt.Errorf("gpu.Value SetDynamicFromBytes %s: Cannot call this on a non-DynamicOffset Uniform or Storage variable; use SetValueFrom instead", vl.Name)
+		return errors.Log(err)
+	}
+	if idx >= vl.DynamicN {
+		err := fmt.Errorf("gpu.Value SetDynamicFromBytes %s: Index: %d >= DynamicN: %d", vl.Name, idx, vl.DynamicN)
+		return errors.Log(err)
+	}
+	if vl.buffer == nil {
+		err := vl.CreateBuffer()
+		if errors.Log(err) != nil {
+			return err
+		}
+	}
+	off := idx * vl.AlignVarSize
+	err := vl.device.Queue.WriteBuffer(vl.buffer, uint64(off), from)
 	if errors.Log(err) != nil {
 		return err
 	}
@@ -185,7 +272,7 @@ func (vl *Value) CopyToBytes(dest []byte) error {
 	var err error
 	vl.buffer.MapAsync(wgpu.MapModeRead, 0, uint64(vl.AllocSize), func(stat wgpu.BufferMapAsyncStatus) {
 		if stat != wgpu.BufferMapAsyncStatusSuccess {
-			err = fmt.Errorf("gpu.Value CopyToBytesAsync: %s for value: %s", stat.String(), vl.Name)
+			err = fmt.Errorf("gpu.Value CopyToBytesAsync %s: status is %s", vl.Name, stat.String())
 			return
 		}
 		bm := vl.buffer.GetMappedRange(0, uint(vl.AllocSize))
@@ -243,6 +330,13 @@ type Values struct {
 
 	// Current specifies the current value to use in rendering.
 	Current int
+
+	// DynamicIndex is the current index into a DynamicOffset variable
+	// to use for the SetBindGroup call.  Note that this is an index,
+	// not an offset, so it indexes the DynamicN Vars in the Value,
+	// using the AlignVarSize to compute the dynamicOffset, which
+	// is what is actually used.
+	DynamicIndex int
 
 	// map of vals by name, only for specifically named vals
 	// vs. generically allocated ones. Names must be unique.
@@ -351,4 +445,9 @@ func (vs *Values) MemSize() int {
 func (vs *Values) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 	vl := vs.CurrentValue()
 	return vl.bindGroupEntry(vr)
+}
+
+func (vs *Values) dynamicOffset() uint32 {
+	vl := vs.Values[0]
+	return uint32(vl.AlignVarSize * vs.DynamicIndex)
 }

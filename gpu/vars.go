@@ -36,6 +36,8 @@ type Vars struct {
 	// true if PushGroup has been added.  Note: not yet supported in WebGPU.
 	hasPush bool `edit:"-"`
 
+	sys *System
+
 	device Device
 }
 
@@ -51,7 +53,7 @@ func (vs *Vars) AddVertexGroup() *VarGroup {
 	if vs.Groups == nil {
 		vs.Groups = make(map[int]*VarGroup)
 	}
-	vg := &VarGroup{Name: "Vertex", Group: VertexGroup, Role: Vertex, device: vs.device}
+	vg := &VarGroup{Name: "Vertex", Group: VertexGroup, Role: Vertex, alignBytes: 1, device: vs.device}
 	vs.Groups[VertexGroup] = vg
 	vs.hasVertex = true
 	return vg
@@ -68,7 +70,7 @@ func (vs *Vars) AddPushGroup() *VarGroup {
 	if vs.Groups == nil {
 		vs.Groups = make(map[int]*VarGroup)
 	}
-	vg := &VarGroup{Name: "Push", Group: PushGroup, device: vs.device}
+	vg := &VarGroup{Name: "Push", Group: PushGroup, alignBytes: 1, device: vs.device}
 	vs.Groups[PushGroup] = vg
 	vs.hasPush = true
 	return vg
@@ -83,14 +85,24 @@ func (vs *Vars) PushGroup() *VarGroup {
 // (Uniform, Storage, etc).
 // Groups are automatically numbered sequentially in order added.
 // Name is optional and just provides documentation.
+// Important limit: there can only be a maximum of 4 Groups!
 func (vs *Vars) AddGroup(role VarRoles, name ...string) *VarGroup {
 	if vs.Groups == nil {
 		vs.Groups = make(map[int]*VarGroup)
 	}
 	idx := vs.NGroups()
+	if idx >= 4 {
+		panic("gpu.AddGroup: there is a hard limit of 4 on the number of VarGroups imposed by the WebGPU system, on Web platforms!")
+	}
 	vg := &VarGroup{Group: idx, Role: role, device: vs.device}
 	if len(name) == 1 {
 		vg.Name = name[0]
+	}
+	vg.alignBytes = 1
+	if role == Uniform {
+		vg.alignBytes = int(vs.sys.GPU.Limits.Limits.MinUniformBufferOffsetAlignment)
+	} else if role == Storage {
+		vg.alignBytes = int(vs.sys.GPU.Limits.Limits.MinStorageBufferOffsetAlignment)
 	}
 	vs.Groups[idx] = vg
 	return vg

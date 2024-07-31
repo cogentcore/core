@@ -72,13 +72,10 @@ func main() {
 	tgp := sy.Vars.AddGroup(gpu.SampledTexture) // texture in 0 so frag only gets 0
 	ugp := sy.Vars.AddGroup(gpu.Uniform)
 
-	nPts := 4
-	nIndexes := 6
-
-	posv := vgp.Add("Pos", gpu.Float32Vector3, nPts, gpu.VertexShader)
-	clrv := vgp.Add("Color", gpu.Float32Vector3, nPts, gpu.VertexShader)
-	txcv := vgp.Add("TexCoord", gpu.Float32Vector2, nPts, gpu.VertexShader)
-	idxv := vgp.Add("Index", gpu.Uint16, nIndexes, gpu.VertexShader)
+	posv := vgp.Add("Pos", gpu.Float32Vector3, 0, gpu.VertexShader)
+	clrv := vgp.Add("Color", gpu.Float32Vector3, 0, gpu.VertexShader)
+	txcv := vgp.Add("TexCoord", gpu.Float32Vector2, 0, gpu.VertexShader)
+	idxv := vgp.Add("Index", gpu.Uint16, 0, gpu.VertexShader)
 	idxv.Role = gpu.Index
 
 	camv := ugp.AddStruct("Camera", gpu.Float32Matrix4.Bytes()*3, 1, gpu.VertexShader)

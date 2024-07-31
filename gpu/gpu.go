@@ -7,17 +7,25 @@ package gpu
 //go:generate core generate
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/reflectx"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
-// Debug is a global flag for turning on debug mode
-// Set to true prior to GPU.Config to get validation debugging.
-var Debug = false
+var (
+	// Debug is a global flag for turning on debug mode, getting
+	// more diagnostic output about GPU configuration etc.
+	Debug = false
+
+	// DebugAdapter provides detailed information about the selected
+	// GPU adpater device (i.e., the type and limits of the hardware).
+	DebugAdapter = false
+)
 
 // DefaultOpts are default GPU config options that can be set by any app
 // prior to initializing the GPU object -- this may be easier than passing
@@ -28,7 +36,6 @@ var DefaultOpts *GPUOpts
 
 // GPU represents the GPU hardware
 type GPU struct {
-
 	// Instance represents the WebGPU system overall
 	Instance *wgpu.Instance
 
@@ -48,38 +55,14 @@ type GPU struct {
 	// name of application -- set during Config and used in init of GPU
 	AppName string
 
-	// // version of WebGPU API to target
-	// APIVersion vk.Version
-
-	// // version of application -- optional
-	// AppVersion vk.Version
-
-	// use Add method to add required instance extentions prior to calling Config
-	// InstanceExts []string
-
-	// use Add method to add required device extentions prior to calling Config
-	// DeviceExts []string
-
-	// set Add method to add required validation layers prior to calling Config
-	// ValidationLayers []string
-
-	// physical device features required -- set per platform as needed
-	// DeviceFeaturesNeeded *vk.PhysicalDeviceVulkan12Features
-
 	// this is used for computing, not graphics
 	Compute bool
 
-	// our custom debug callback
-	// DebugCallback vk.DebugReportCallback
+	// Properties are the general properties of the GPU adapter.
+	Properties wgpu.AdapterProperties
 
-	// properties of physical hardware -- populated after Config
-	// GPUProperties vk.PhysicalDeviceProperties
-
-	// features of physical hardware -- populated after Config
-	// GPUFeats vk.PhysicalDeviceFeatures
-
-	// properties of device memory -- populated after Config
-	// MemoryProperties vk.PhysicalDeviceMemoryProperties
+	// Limits are the limits of the current GPU adapter.
+	Limits wgpu.SupportedLimits
 
 	// maximum number of compute threads per compute shader invokation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup, which allows for the and maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroupvalue is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values.
 	MaxComputeWorkGroupCount1D int
@@ -141,55 +124,21 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 			gp.UserOpts.CopyFrom(opts[0])
 		}
 	}
-	// if Debug {
-	// 	gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
-	// 	gp.AddInstanceExt("VK_EXT_debug_report") // note _utils is not avail yet
-	// }
-
-	// Select instance extensions
-	// requiredInstanceExts := SafeStrings(gp.InstanceExts)
-	// actualInstanceExts, err := InstanceExts()
-	// IfPanic(err)
-	// instanceExts, missing := CheckExisting(actualInstanceExts, requiredInstanceExts)
-	// if missing > 0 {
-	// 	log.Println("vgpu: warning: missing", missing, "required instance extensions during Config")
-	// }
-	// if Debug {
-	// 	log.Printf("vgpu: enabling %d instance extensions", len(instanceExts))
-	// }
-
-	// Select instance layers
-	// var validationLayers []string
-	// if len(gp.ValidationLayers) > 0 {
-	// 	requiredValidationLayers := SafeStrings(gp.ValidationLayers)
-	// 	actualValidationLayers, err := ValidationLayers()
-	// 	IfPanic(err)
-	// 	validationLayers, missing = CheckExisting(actualValidationLayers, requiredValidationLayers)
-	// 	if missing > 0 {
-	// 		log.Println("vgpu: warning: missing", missing, "required validation layers during Config")
-	// 	}
-	// }
-
 	gp.Instance = wgpu.CreateInstance(nil)
 
 	gpus := gp.Instance.EnumerateAdapters(nil)
 	gpIndex := gp.SelectGPU(gpus)
 	gp.GPU = gpus[gpIndex]
-	props := gp.GPU.GetProperties()
-	gp.DeviceName = props.Name
+	gp.Properties = gp.GPU.GetProperties()
+	gp.DeviceName = gp.Properties.Name
 
-	// vk.GetPhysicalDeviceFeatures(gp.GPU, &gp.GPUFeats)
-	// gp.GPUFeats.Deref()
-	// if !gp.CheckGPUOpts(&gp.GPUFeats, gp.UserOpts, true) {
-	// 	return errors.New("vgpu: fatal config error found, see messages above")
-	// }
-	//
-	// vk.GetPhysicalDeviceProperties(gp.GPU, &gp.GPUProperties)
-	// gp.GPUProperties.Deref()
-	// gp.GPUProperties.Limits.Deref()
-	// vk.GetPhysicalDeviceMemoryProperties(gp.GPU, &gp.MemoryProperties)
-	// gp.MemoryProperties.Deref()
+	gp.Limits = gp.GPU.GetLimits()
 
+	if DebugAdapter {
+		fmt.Println(gp.PropertiesString())
+	}
+
+	// todo:
 	// gp.MaxComputeWorkGroupCount1D = int(gp.GPUProperties.Limits.MaxComputeWorkGroupCount[0])
 	// note: unclear what the limit is here.
 	// if gp.MaxComputeWorkGroupCount1D == 0 { // otherwise set per-platform in defaults (DARWIN)
@@ -307,11 +256,9 @@ func (gp *GPU) Release() {
 }
 
 // NewComputeSystem returns a new system initialized for this GPU,
-// for Compute, not graphics functionality.
+// exclusively for Compute, not graphics functionality.
 func (gp *GPU) NewComputeSystem(name string) *System {
-	sy := &System{}
-	sy.InitCompute(gp, name)
-	return sy
+	return NewComputeSystem(gp, name)
 }
 
 // NewGraphicsSystem returns a new system initialized for this GPU,
@@ -328,20 +275,8 @@ func (gp *GPU) NewDevice() (*Device, error) {
 }
 
 // PropertiesString returns a human-readable summary of the GPU properties.
-func (gp *GPU) PropertiesString(print bool) string {
-	ps := "\n\n######## GPU Properties\n"
-	// prs := reflectx.StringJSON(&gp.GPUProperties)
-	// devnm := `  "DeviceName": `
-	// ps += prs[:strings.Index(prs, devnm)]
-	// ps += devnm + string(gp.GPUProperties.DeviceName[:]) + "\n"
-	// ps += prs[strings.Index(prs, `  "Limits":`):]
-	// // ps += "\n\n######## GPU Memory Properties\n" // not really useful
-	// // ps += reflectx.StringJSON(&gp.MemoryProperties)
-	// ps += "\n"
-	// if print {
-	// 	fmt.Println(ps)
-	// }
-	return ps
+func (gp *GPU) PropertiesString() string {
+	return "\n######## GPU Properties\n" + reflectx.StringJSON(&gp.Properties) + reflectx.StringJSON(gp.Limits.Limits)
 }
 
 // NoDisplayGPU Initializes the Vulkan GPU and returns that

@@ -26,18 +26,23 @@ type Var struct {
 	// variable name
 	Name string
 
-	// type of data in variable.  Note that there are strict contraints
+	// Type of data in variable.  Note that there are strict contraints
 	// on the alignment of fields within structs.  If you can keep all fields
 	// at 4 byte increments, that works, but otherwise larger fields trigger
-	// a 16 byte alignment constraint.  Texture Textures do not have such alignment
+	// a 16 byte alignment constraint.  Textures do not have such alignment
 	// constraints, and are stored separately or in arrays organized by size.
 	// Use Float32Matrix4 for model matricies in Vertex role, which will
 	// automatically be sent as 4 interleaved Float32Vector4 chuncks.
 	Type Types
 
-	// number of elements if this is a fixed array. Use 1 if singular element,
-	// and 0 if a variable-sized array, where each Value can have its own
-	// specific size. This also works for arrays of Textures, up to 128 max.
+	// number of elements, which is 1 for a single element, or a constant
+	// number for a fixed array of elements.  For Vertex variables, the
+	// number is dynamic and does not need to be specified in advance,
+	// so you can leave it at 1. There can be alignment issues with arrays
+	// so make sure your elemental types are compatible.
+	// Note that DynamicOffset variables can have Value buffers with multiple
+	// instances of the variable (with proper alignment stride), which is
+	// which goes on top of any array value for the variable itself.
 	ArrayN int
 
 	// Role of variable: Vertex is configured separately, and everything else
@@ -68,12 +73,19 @@ type Var struct {
 	// These are automatically assigned sequentially within Group.
 	Binding int `edit:"-"`
 
-	// size in bytes of one element (not array size).
+	// size in bytes of one element (exclusive of array size).
 	// Note that arrays in Uniform require 16 byte alignment for each element,
 	// so if using arrays, it is best to work within that constraint.
 	// In Storage, 4 byte (e.g., float32 or int32) works fine as an array type.
 	// For Push role, SizeOf must be set exactly, as no vals are created.
 	SizeOf int
+
+	// DynamicOffset indicates whether the specific Value to use
+	// is specified using a dynamic offset specified in the Value
+	// via DynamicIndex.  There are limits on the number of dynamic
+	// variables within each group (as few as 4).
+	// Only for Uniform and Storage variables.
+	DynamicOffset bool
 
 	// Texture manages its own memory allocation, and this indicates that
 	// the texture object can change size dynamically.
@@ -86,18 +98,23 @@ type Var struct {
 	// and this is what will be used for Binding.
 	Values Values
 
-	// offset: only for push constants
-	Offset int `edit:"-"`
+	// offset: for push constants, not currently used.
+	offset int `edit:"-"`
+
+	// the alignment requirement in bytes for DynamicOffset variables.
+	// This is 1 for Vertex buffer variables.
+	alignBytes int
 }
 
 // init initializes the main values
-func (vr *Var) init(name string, typ Types, arrayN int, role VarRoles, group int, shaders ...ShaderTypes) {
+func (vr *Var) init(name string, typ Types, arrayN int, role VarRoles, group int, alignBytes int, shaders ...ShaderTypes) {
 	vr.Name = name
 	vr.Type = typ
-	vr.ArrayN = arrayN
+	vr.ArrayN = max(arrayN, 1)
 	vr.Role = role
 	vr.SizeOf = typ.Bytes()
 	vr.Group = group
+	vr.alignBytes = alignBytes
 	vr.shaders = 0
 	for _, sh := range shaders {
 		vr.shaders |= ShaderStageFlags[sh]
@@ -119,20 +136,15 @@ func (vr *Var) String() string {
 
 // MemSize returns the memory allocation size for this value, in bytes
 func (vr *Var) MemSize() int {
-	n := vr.ArrayN
-	if n == 0 {
-		n = 1
+	if vr.ArrayN < 1 {
+		vr.ArrayN = 1
 	}
+	// todo: may need to diagnose alignments here..
 	switch {
 	case vr.Role >= SampledTexture:
 		return 0
-	case n == 1 || vr.Role < Uniform:
-		return vr.SizeOf * n
-	case vr.Role == Uniform:
-		// sz := MemSizeAlign(vr.SizeOf, 16) // todo: test this!
-		return vr.SizeOf * n
 	default:
-		return vr.SizeOf * n
+		return vr.SizeOf * vr.ArrayN
 	}
 }
 

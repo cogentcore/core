@@ -23,12 +23,10 @@ type System struct {
 	// optional name of this System
 	Name string
 
-	// gpu
-	GPU *GPU
-
-	// logical device for this System.
-	// This is owned by us for a Compute device.
-	device Device
+	// Vars represents all the resources used by the system, with one
+	// Var for each resource that is made visible to the shader,
+	// indexed by Group (@group) and Binding (@binding).
+	Vars Vars
 
 	// if true, this is a pure compute system -- otherwise has graphics
 	Compute bool
@@ -36,29 +34,15 @@ type System struct {
 	// GraphicsPipelines by name
 	GraphicsPipelines map[string]*GraphicsPipeline
 
-	// map of events for synchronizing processing within a single command stream -- this is the best method for compute shaders to coordinate within a given sequence of shader runs in a single command stream
-	// Events map[string]vk.Event
-
-	// map of semaphores for GPU-side sync between different submitted commands -- names must be unique -- note: better to use Events within one command if possible.
-	// Semaphores map[string]vk.Semaphore
-
-	// map of fences for CPU-GPU sync -- names must be unique.  WaitIdle implictly uses a fence so it is not essential to use this for simple wait case
-	// Fences map[string]vk.Fence
-
-	// map of command buffers, for persistent recorded commands -- names must be unique
-	// CmdBuffs map[string]*wgpu.CommandEncoder
-
-	// Vars represents all the resources used by the system, with one
-	// Var for each resource that is made visible to the shader,
-	// indexed by Group (@group) and Binding (@binding).
-	Vars Vars
-
 	// renderpass with depth buffer for this system
 	Render Render
 
-	// number of textures at point of last system Config.
-	// pipelines are not rebuilt if this is the same.
-	configNTextures int
+	// GPU is needed to access some properties and alignment factors.
+	GPU *GPU
+
+	// logical device for this System.
+	// This is owned by us for a Compute device.
+	device Device
 }
 
 // NewGraphicsSystem returns a new System for graphics use, using
@@ -66,35 +50,45 @@ type System struct {
 // on the target of rendering.the Surface associated with this system.
 func NewGraphicsSystem(gp *GPU, name string, dev *Device) *System {
 	sy := &System{}
-	sy.InitGraphics(gp, name, dev)
+	sy.initGraphics(gp, name, dev)
 	return sy
 }
 
-// InitGraphics initializes the System for graphics use, using
-// the graphics device from the Surface associated with this system.
-func (sy *System) InitGraphics(gp *GPU, name string, dev *Device) error {
+// NewComputeSystem returns a new System for purely compute use,
+// creating a new device specific to this system.
+func NewComputeSystem(gp *GPU, name string) *System {
+	sy := &System{}
+	sy.initCompute(gp, name)
+	return sy
+}
+
+// init initializes the System
+func (sy *System) init(gp *GPU, name string, dev *Device) {
 	sy.GPU = gp
 	sy.Render.sys = sy
 	sy.Name = name
-	sy.Compute = false
 	sy.device = *dev
 	sy.Vars.device = *dev
+	sy.Vars.sys = sy
+}
+
+// initGraphics initializes the System for graphics use, using
+// the graphics device from the Surface associated with this system.
+func (sy *System) initGraphics(gp *GPU, name string, dev *Device) error {
+	sy.init(gp, name, dev)
+	sy.Compute = false
 	return nil
 }
 
-// InitCompute initializes the System for compute functionality,
+// initCompute initializes the System for compute functionality,
 // which creates its own Compute device.
-func (sy *System) InitCompute(gp *GPU, name string) error {
-	sy.GPU = gp
-	sy.Render.sys = sy
-	sy.Name = name
-	sy.Compute = true
+func (sy *System) initCompute(gp *GPU, name string) error {
 	dev, err := NewDevice(gp)
 	if err != nil {
 		return err
 	}
-	sy.device = *dev
-	sy.Vars.device = *dev
+	sy.init(gp, name, dev)
+	sy.Compute = true
 	// sy.NewFence("ComputeWait") // always have this named fence avail for wait
 	return nil
 }

@@ -10,6 +10,7 @@ import (
 	"image/color"
 	"runtime"
 	"time"
+	"unsafe"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
@@ -71,15 +72,14 @@ func main() {
 	vgp := sy.Vars.AddVertexGroup()
 	ugp := sy.Vars.AddGroup(gpu.Uniform)
 
-	nPts := 3
-
-	posv := vgp.Add("Pos", gpu.Float32Vector3, nPts, gpu.VertexShader)
-	clrv := vgp.Add("Color", gpu.Float32Vector3, nPts, gpu.VertexShader)
+	// vertex are dynamically sized in general, so using 0 here
+	posv := vgp.Add("Pos", gpu.Float32Vector3, 0, gpu.VertexShader)
+	clrv := vgp.Add("Color", gpu.Float32Vector3, 0, gpu.VertexShader)
 	// note: index goes last usually
-	idxv := vgp.Add("Index", gpu.Uint16, nPts, gpu.VertexShader)
+	idxv := vgp.Add("Index", gpu.Uint16, 0, gpu.VertexShader)
 	idxv.Role = gpu.Index
 
-	camv := ugp.AddStruct("Camera", gpu.Float32Matrix4.Bytes()*3, 1, gpu.VertexShader)
+	camv := ugp.AddStruct("Camera", int(unsafe.Sizeof(CamView{})), 1, gpu.VertexShader)
 
 	vgp.SetNValues(1)
 	ugp.SetNValues(1)

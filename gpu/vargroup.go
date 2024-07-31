@@ -39,9 +39,6 @@ type VarGroup struct {
 	// map of vars by name; names must be unique
 	VarMap map[string]*Var
 
-	// Name of this group: GroupX by default
-	Name string
-
 	// Group index is assigned sequentially, with special VertexGroup and
 	// PushGroup having negative numbers, not accessed via @group in shader.
 	Group int
@@ -59,7 +56,14 @@ type VarGroup struct {
 	// group layout info: description of each var type, role, binding, stages
 	layout *wgpu.BindGroupLayout
 
+	// number of variables with DynamicOffset set
+	nDynamicOffsets int
+
 	device Device
+
+	// the alignment requirement in bytes for DynamicOffset variables.
+	// This is 1 for Vertex buffer variables.
+	alignBytes int
 }
 
 // addVar adds given variable
@@ -74,7 +78,7 @@ func (vg *VarGroup) addVar(vr *Var) {
 // Add adds a new variable of given type, role, arrayN, and shaders where used
 func (vg *VarGroup) Add(name string, typ Types, arrayN int, shaders ...ShaderTypes) *Var {
 	vr := &Var{}
-	vr.init(name, typ, arrayN, vg.Role, vg.Group, shaders...)
+	vr.init(name, typ, arrayN, vg.Role, vg.Group, vg.alignBytes, shaders...)
 	vg.addVar(vr)
 	return vr
 }
@@ -83,7 +87,7 @@ func (vg *VarGroup) Add(name string, typ Types, arrayN int, shaders ...ShaderTyp
 // type, role, set, and shaders where used
 func (vg *VarGroup) AddStruct(name string, size int, arrayN int, shaders ...ShaderTypes) *Var {
 	vr := &Var{}
-	vr.init(name, Struct, arrayN, vg.Role, vg.Group, shaders...)
+	vr.init(name, Struct, arrayN, vg.Role, vg.Group, vg.alignBytes, shaders...)
 	vr.SizeOf = size
 	vg.addVar(vr)
 	return vr
@@ -220,6 +224,8 @@ func (vg *VarGroup) bindLayout(vs *Vars) error {
 	vg.ReleaseLayout()
 	var binds []wgpu.BindGroupLayoutEntry
 
+	vg.nDynamicOffsets = 0
+	// https://eliemichel.github.io/LearnWebGPU/basic-3d-rendering/shader-uniforms/dynamic-uniforms.html
 	// https://toji.dev/webgpu-best-practices/bind-groups.html
 	for _, vr := range vg.Vars {
 		if vr.Role == Vertex || vr.Role == Index { // shouldn't happen
@@ -249,6 +255,10 @@ func (vg *VarGroup) bindLayout(vs *Vars) error {
 				Type:             vr.Role.BindingType(),
 				HasDynamicOffset: false,
 				MinBindingSize:   0, // 0 is fine
+			}
+			if vr.DynamicOffset {
+				bd.Buffer.HasDynamicOffset = true
+				vg.nDynamicOffsets++
 			}
 		}
 		binds = append(binds, bd)
@@ -342,12 +352,22 @@ func (vg *VarGroup) vertexLayout() []wgpu.VertexBufferLayout {
 
 // bindGroup returns the Current Value bindings for all variables
 // within this Group.  This determines what Values of the Vars the
-// current Render actions will use.
-// Only for non-VertexGroup groups.
-func (vg *VarGroup) bindGroup() *wgpu.BindGroup {
+// current Render actions will use.  Only for non-VertexGroup groups.
+// The second return value is the dynamicOffsets for any dynamic
+// offset variables.
+func (vg *VarGroup) bindGroup() (*wgpu.BindGroup, []uint32) {
+	var dynamicOffsets []uint32
+	if vg.nDynamicOffsets > 0 {
+		dynamicOffsets = make([]uint32, vg.nDynamicOffsets)
+	}
+	curDynIdx := 0
 	var bgs []wgpu.BindGroupEntry
 	for _, vr := range vg.Vars {
 		bgs = append(bgs, vr.bindGroupEntry()...)
+		if vr.DynamicOffset {
+			dynamicOffsets[curDynIdx] = vr.Values.dynamicOffset()
+			curDynIdx++
+		}
 	}
 	bg, err := vg.device.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{
 		Layout:  vg.layout,
@@ -357,7 +377,7 @@ func (vg *VarGroup) bindGroup() *wgpu.BindGroup {
 	if errors.Log(err) != nil {
 		// todo: panic?
 	}
-	return bg
+	return bg, dynamicOffsets
 }
 
 /*
