@@ -17,6 +17,7 @@ import (
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
 	"cogentcore.org/core/pages/ppath"
@@ -107,7 +108,16 @@ func makeFiles(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	iht, err := makeIndexHTML(c, "", "", preRenderHTML)
+	preRenderHTMLIndex := preRenderHTML
+	pagesPreRenderData := &ppath.PreRenderData{}
+	if strings.HasPrefix(preRenderHTML, "{") {
+		err := jsonx.Read(pagesPreRenderData, strings.NewReader(preRenderHTML))
+		if err != nil {
+			return err
+		}
+		preRenderHTMLIndex = pagesPreRenderData.HTML[""]
+	}
+	iht, err := makeIndexHTML(c, "", "", preRenderHTMLIndex)
 	if err != nil {
 		return err
 	}
