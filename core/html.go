@@ -47,6 +47,7 @@ var htmlElementNames = map[string]string{
 	"slider":     "input",
 	"chooser":    "select",
 	"editor":     "textarea",
+	"pre":        "textarea",
 	"switches":   "div",
 	"switch":     "input",
 	"splits":     "div",
@@ -69,11 +70,11 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	se := &xml.StartElement{}
 	idName := wb.NodeType().IDName
 	se.Name.Local = idName
-	if en, ok := htmlElementNames[se.Name.Local]; ok {
-		se.Name.Local = en
-	}
 	if tag, ok := wb.Property("tag").(string); ok {
 		se.Name.Local = tag
+	}
+	if en, ok := htmlElementNames[se.Name.Local]; ok {
+		se.Name.Local = en
 	}
 
 	if idName == "tree" {
