@@ -22,8 +22,7 @@ type Matrix struct {
 // SetViewProjection sets the camera view and projection matrixes, and updates
 // uniform data, so they are ready to use.
 func (ph *Phong) SetViewProjection(view, projection *math32.Matrix4) {
-	sy := ph.Sys
-	vl := sy.Vars.ValueByIndex(int(MatrixGroup), "Matrix", 0)
+	vl := ph.Sys.Vars.ValueByIndex(int(MatrixGroup), "Matrix", 0)
 	gpu.SetValueFrom(vl, []Matrix{Matrix{View: *view, Projection: *projection}})
 }
 

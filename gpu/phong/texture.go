@@ -31,12 +31,18 @@ func (tx *Texture) Set(img image.Image) {
 
 // AddTexture adds to list of textures
 func (ph *Phong) AddTexture(name string, tex *Texture) {
-	ph.Textures.Add(name, tex)
+	ph.Lock()
+	defer ph.Unlock()
+
+	ph.textures.Add(name, tex)
 }
 
 // DeleteTexture deletes texture with name
 func (ph *Phong) DeleteTexture(name string) {
-	ph.Textures.DeleteKey(name)
+	ph.Lock()
+	defer ph.Unlock()
+
+	ph.textures.DeleteKey(name)
 }
 
 // configDummyTexture configures a dummy texture (if none configured)
@@ -49,31 +55,14 @@ func (ph *Phong) configDummyTexture() {
 	img.SetFromGoImage(dimg, 0, gpu.NoFlipY)
 }
 
-// ConfigTextures configures vals for textures -- this is the first
-// of two passes -- call Phong.Sys.Config after everything is config'd.
-// This automatically allocates images by size so everything fits
-// within the MaxTexturesPerStage limit, as texture arrays.
-func (ph *Phong) ConfigTextures() {
-	sy := ph.Sys
-	ntx := ph.Textures.Len()
-	if ntx == 0 {
-		ph.configDummyTexture()
-		return
-	}
-	tvr := sy.Vars.VarByName(int(TextureGroup), "TexSampler")
-	tvr.SetNValues(&sy.Device, ntx)
-	for i, kv := range ph.Textures.Order {
-		tvv := tvr.Values.Values[i]
-		tvv.SetFromGoImage(kv.Value.Image, 1, gpu.NoFlipY)
-	}
-}
-
 // ResetTextures resets all textures
 func (ph *Phong) ResetTextures() {
-	sy := ph.Sys
-	tgp := sy.Vars.Groups[int(TextureGroup)]
-	tgp.Release()
-	ph.Textures.Reset()
+	ph.Lock()
+	defer ph.Unlock()
+
+	ph.textures.Reset()
+	tgp := ph.Sys.Vars.Groups[int(TextureGroup)]
+	tgp.SetNValues(1)
 }
 
 // UseNoTexture turns off texture rendering
@@ -90,7 +79,7 @@ func (ph *Phong) UseTextureIndex(idx int) error {
 
 // UseTextureName selects texture by name for current render step
 func (ph *Phong) UseTextureName(name string) error {
-	idx, ok := ph.Textures.IndexByKeyTry(name)
+	idx, ok := ph.textures.IndexByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("phong:UseTextureName -- name not found: %s", name)
 		if gpu.Debug {
@@ -107,10 +96,10 @@ func (ph *Phong) UpdateTextureIndex(idx int) error {
 	sy := ph.Sys
 	ph.Lock()
 	defer ph.Unlock()
-	if idx >= ph.Textures.Len() {
+	if idx >= ph.textures.Len() {
 		return nil
 	}
-	tx := ph.Textures.Order[idx].Value
+	tx := ph.textures.Order[idx].Value
 	tvl := sy.Vars.ValueByIndex(int(TextureGroup), "TexSampler", idx)
 	tvl.SetFromGoImage(tx.Image, 1, gpu.FlipY)
 	return nil
@@ -118,7 +107,7 @@ func (ph *Phong) UpdateTextureIndex(idx int) error {
 
 // UpdateTextureName updates texture by name
 func (ph *Phong) UpdateTextureName(name string) error {
-	idx, ok := ph.Textures.IndexByKeyTry(name)
+	idx, ok := ph.textures.IndexByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UpdateTextureName -- name not found: %s", name)
 		if gpu.Debug {
@@ -126,4 +115,23 @@ func (ph *Phong) UpdateTextureName(name string) error {
 		}
 	}
 	return ph.UpdateTextureIndex(idx)
+}
+
+// configTextures configures vals for textures -- this is the first
+// of two passes -- call Phong.Sys.Config after everything is config'd.
+// This automatically allocates images by size so everything fits
+// within the MaxTexturesPerStage limit, as texture arrays.
+func (ph *Phong) configTextures() {
+	sy := ph.Sys
+	ntx := ph.textures.Len()
+	if ntx == 0 {
+		ph.configDummyTexture()
+		return
+	}
+	tvr := sy.Vars.VarByName(int(TextureGroup), "TexSampler")
+	tvr.SetNValues(&sy.Device, ntx)
+	for i, kv := range ph.textures.Order {
+		tvv := tvr.Values.Values[i]
+		tvv.SetFromGoImage(kv.Value.Image, 1, gpu.NoFlipY)
+	}
 }

@@ -16,7 +16,7 @@ import (
 var shaders embed.FS
 
 // ConfigPipeline configures graphics settings on the pipeline
-func (ph *Phong) ConfigPipeline(pl *gpu.GraphicsPipeline) {
+func (ph *Phong) configPipeline(pl *gpu.GraphicsPipeline) {
 	pl.SetGraphicsDefaults()
 	pl.SetCullMode(wgpu.CullModeNone)
 	// if ph.Wireframe {
@@ -31,20 +31,20 @@ type Groups int32 //enums:enum
 
 const (
 	MatrixGroup Groups = iota
-	ObjectsGroup
-	LightsGroup
+	ObjectGroup
+	LightGroup
 	TextureGroup
 )
 
-// ConfigSys configures the vDraw System and pipelines.
-func (ph *Phong) ConfigSys() {
+// configSystem configures the Phong System and pipelines.
+func (ph *Phong) configSystem() {
 	sy := ph.Sys
 	tpl := sy.AddGraphicsPipeline("texture")
-	ph.ConfigPipeline(tpl)
+	ph.configPipeline(tpl)
 	opl := sy.AddGraphicsPipeline("onecolor")
-	ph.ConfigPipeline(opl)
+	ph.configPipeline(opl)
 	vpl := sy.AddGraphicsPipeline("pervertex")
-	ph.ConfigPipeline(vpl)
+	ph.configPipeline(vpl)
 
 	sh := tpl.AddShader("texture")
 	sh.OpenFileFS(shaders, "shaders/texture.wgsl")

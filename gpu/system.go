@@ -234,18 +234,18 @@ func (sy *System) CmdBuffByNameTry(name string) (*wgpu.CommandEncoder, error) {
 	return nil, nil
 }
 
-// ConfigRender configures the renderpass, including the image
+// ConfigRender configures the renderpass, including the texture
 // format that we're rendering to, for a surface render target,
 // and the depth buffer format (pass UndefType for no depth buffer).
-func (sy *System) ConfigRender(imgFmt *TextureFormat, depthFmt Types) {
-	sy.Render.Config(&sy.Device, imgFmt, depthFmt, false)
+func (sy *System) ConfigRender(renderFormat *TextureFormat, depthFmt Types) {
+	sy.Render.Config(&sy.Device, renderFormat, depthFmt, false)
 }
 
-// ConfigRenderNonSurface configures the renderpass, including the image
+// ConfigRenderNonSurface configures the renderpass, including the texture
 // format that we're rendering to, for a RenderFrame non-surface target,
 // and the depth buffer format (pass UndefType for no depth buffer).
-func (sy *System) ConfigRenderNonSurface(imgFmt *TextureFormat, depthFmt Types) {
-	sy.Render.Config(&sy.Device, imgFmt, depthFmt, true)
+func (sy *System) ConfigRenderNonSurface(renderFormat *TextureFormat, depthFmt Types) {
+	sy.Render.Config(&sy.Device, renderFormat, depthFmt, true)
 }
 
 // Config configures the entire system, after everything has been

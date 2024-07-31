@@ -2,6 +2,15 @@
 
 Blinn-Phong is a standard lighting model that used to be built into OpenGL, and is widely used in 3D graphics: [wikipedia Blinn-Phong](https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model),  [learnopengl.com](https://learnopengl.com/Lighting/Basic-Lighting).
 
+# Usage
+
+See [examples/phong] for a working example.
+
+```Go
+    ph := phong.NewPhong(sf.GPU, &sf.Device) // needs a gpu.GPU and a gpu.Device
+```
+
+# Features
 
 Supports 4 different types of lights, with a max of 8 instances of each light type:
 

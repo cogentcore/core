@@ -97,17 +97,6 @@ type SpotLight struct {
 	Decay math32.Vector4
 }
 
-// ConfigLights configures the rendering for the lights that have been added.
-func (ph *Phong) ConfigLights() {
-	sy := ph.Sys
-	vs := sy.Vars.Groups[int(LightsGroup)]
-	gpu.SetValueFrom(vs.ValueByIndex("NLights", 0), []NLights{ph.NLights})
-	gpu.SetValueFrom(vs.ValueByIndex("AmbLights", 0), ph.Ambient[:])
-	gpu.SetValueFrom(vs.ValueByIndex("DirLights", 0), ph.Dir[:])
-	gpu.SetValueFrom(vs.ValueByIndex("PointLights", 0), ph.Point[:])
-	gpu.SetValueFrom(vs.ValueByIndex("SpotLights", 0), ph.Spot[:])
-}
-
 // ResetNLights resets number of lights to 0 -- for reconfig
 func (ph *Phong) ResetNLights() {
 	ph.NLights.Reset()
@@ -165,4 +154,15 @@ func (ph *Phong) SetSpotLight(idx int, color, pos, dir math32.Vector3, angDecay,
 	ph.Spot[idx].Pos = pos
 	ph.Spot[idx].Dir = dir
 	ph.Spot[idx].Decay = math32.Vec4(angDecay, cutAngle, linDecay, quadDecay)
+}
+
+// configLights configures the rendering for the lights that have been added.
+func (ph *Phong) configLights() {
+	sy := ph.Sys
+	vs := sy.Vars.Groups[int(LightGroup)]
+	gpu.SetValueFrom(vs.ValueByIndex("NLights", 0), []NLights{ph.NLights})
+	gpu.SetValueFrom(vs.ValueByIndex("AmbLights", 0), ph.Ambient[:])
+	gpu.SetValueFrom(vs.ValueByIndex("DirLights", 0), ph.Dir[:])
+	gpu.SetValueFrom(vs.ValueByIndex("PointLights", 0), ph.Point[:])
+	gpu.SetValueFrom(vs.ValueByIndex("SpotLights", 0), ph.Spot[:])
 }

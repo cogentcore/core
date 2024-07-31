@@ -33,53 +33,35 @@ type Mesh struct {
 	indexArray                           math32.ArrayU32
 }
 
-// ConfigMeshes configures values for all current meshes.
-// This is the first of two passes in configuring and setting
-// mesh values.
-func (ph *Phong) ConfigMeshes() {
-	sy := ph.Sys
-	nm := ph.Meshes.Len()
-	vgp := sy.Vars.VertexGroup()
-	vgp.SetNValues(nm)
-	for i, kv := range ph.Meshes.Order {
-		mv := kv.Value
-		ph.ConfigMesh(mv, i)
-	}
-}
-
-func (ph *Phong) ConfigMesh(mv *Mesh, idx int) {
-	vgp := ph.Sys.Vars.VertexGroup()
-	vgp.ValueByIndex("Pos", idx).DynamicN = mv.NVertex
-	vgp.ValueByIndex("Norm", idx).DynamicN = mv.NVertex
-	vgp.ValueByIndex("TexCoord", idx).DynamicN = mv.NVertex
-	vgp.ValueByIndex("Index", idx).DynamicN = mv.NIndex
-	vc := vgp.ValueByIndex("VertexColor", idx)
-	if mv.HasColor {
-		vc.DynamicN = mv.NVertex
-	} else {
-		vc.DynamicN = 1
-	}
-}
-
 // ResetMeshes resets the meshes for reconfiguring
 func (ph *Phong) ResetMeshes() {
-	ph.Meshes.Reset()
+	ph.Lock()
+	defer ph.Unlock()
+
+	ph.meshes.Reset()
+	vgp := ph.Sys.Vars.VertexGroup()
+	vgp.SetNValues(1)
 }
 
 // AddMesh adds a Mesh with name and given number of vertices, indexes,
 // and optional per-vertex color
 func (ph *Phong) AddMesh(name string, nVertex, nIndex int, hasColor bool) *Mesh {
-	ph.Meshes.Add(name, &Mesh{NVertex: nVertex, NIndex: nIndex, HasColor: hasColor})
-	return ph.Meshes.Order[ph.Meshes.Len()-1].Value
+	ph.Lock()
+	defer ph.Unlock()
+
+	ph.meshes.Add(name, &Mesh{NVertex: nVertex, NIndex: nIndex, HasColor: hasColor})
+	return ph.meshes.Order[ph.meshes.Len()-1].Value
 }
 
 // AddMeshFromShape adds a Mesh using the shape.Shape interface for the source
 // of the mesh data, and sets the values directly.  Nothing further needs to
 // be done to configure this mesh after calling this.
-// Also sets optional per-vertex color, which does not come from the shape.
-func (ph *Phong) AddMeshFromShape(name string, sh shape.Shape, hasColor bool) {
+func (ph *Phong) AddMeshFromShape(name string, sh shape.Shape) {
+	ph.Lock()
+	defer ph.Unlock()
+
 	nVertex, nIndex := sh.N()
-	mv := ph.AddMesh(name, nVertex, nIndex, hasColor)
+	mv := ph.AddMesh(name, nVertex, nIndex, false)
 
 	mv.vertexArray = slicesx.SetLength(mv.vertexArray, nVertex)
 	mv.normArray = slicesx.SetLength(mv.normArray, nVertex)
@@ -87,11 +69,11 @@ func (ph *Phong) AddMeshFromShape(name string, sh shape.Shape, hasColor bool) {
 	mv.indexArray = slicesx.SetLength(mv.indexArray, nIndex)
 	sh.Set(mv.vertexArray, mv.normArray, mv.textureArray, mv.indexArray)
 
-	nm := ph.Meshes.Len()
+	nm := ph.meshes.Len()
 	vgp := ph.Sys.Vars.VertexGroup()
 	vgp.SetNValues(nm) // add to all vars
 	idx := nm - 1
-	ph.ConfigMesh(mv, idx)
+	ph.configMesh(mv, idx)
 
 	gpu.SetValueFrom(vgp.ValueByIndex("Pos", idx), mv.vertexArray)
 	gpu.SetValueFrom(vgp.ValueByIndex("Norm", idx), mv.normArray)
@@ -101,14 +83,17 @@ func (ph *Phong) AddMeshFromShape(name string, sh shape.Shape, hasColor bool) {
 
 // DeleteMesh deletes Mesh with name
 func (ph *Phong) DeleteMesh(name string) {
-	ph.Meshes.DeleteKey(name)
+	ph.Lock()
+	defer ph.Unlock()
+
+	ph.meshes.DeleteKey(name)
 }
 
 // UseMeshName selects mesh by name for current render step
 // If mesh has per-vertex colors, these are selected for rendering,
 // and texture is turned off.  UseTexture* after this to override.
 func (ph *Phong) UseMeshName(name string) error {
-	idx, ok := ph.Meshes.IndexByKeyTry(name)
+	idx, ok := ph.meshes.IndexByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("phong:UseMeshName -- name not found: %s", name)
 		if gpu.Debug {
@@ -122,8 +107,11 @@ func (ph *Phong) UseMeshName(name string) error {
 // If mesh has per-vertex colors, these are selected for rendering,
 // and texture is turned off.  UseTexture* after this to override.
 func (ph *Phong) UseMeshIndex(idx int) error {
-	mesh := ph.Meshes.ValueByIndex(idx)
+	ph.Lock()
+	defer ph.Unlock()
+
 	sy := ph.Sys
+	mesh := ph.meshes.ValueByIndex(idx)
 	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Pos", idx)
 	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Norm", idx)
 	sy.Vars.SetCurrentValue(gpu.VertexGroup, "TexCoord", idx)
@@ -140,7 +128,10 @@ func (ph *Phong) UseMeshIndex(idx int) error {
 
 // SetMeshName sets mesh vertex values, by mesh name.
 func (ph *Phong) SetMeshName(name string) error {
-	idx, ok := ph.Meshes.IndexByKeyTry(name)
+	ph.Lock()
+	defer ph.Unlock()
+
+	idx, ok := ph.meshes.IndexByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("phong:UseMeshName -- name not found: %s", name)
 		if gpu.Debug {
@@ -148,4 +139,31 @@ func (ph *Phong) SetMeshName(name string) error {
 		}
 	}
 	return ph.UseMeshIndex(idx)
+}
+
+// configMeshes configures values for all current meshes.
+// If not using AddMeshFromShape then values need to be set
+// manually after this.  Otherwise, they should be good to go.
+func (ph *Phong) configMeshes() {
+	nm := ph.meshes.Len()
+	vgp := ph.Sys.Vars.VertexGroup()
+	vgp.SetNValues(nm)
+	for i, kv := range ph.meshes.Order {
+		mv := kv.Value
+		ph.configMesh(mv, i)
+	}
+}
+
+func (ph *Phong) configMesh(mv *Mesh, idx int) {
+	vgp := ph.Sys.Vars.VertexGroup()
+	vgp.ValueByIndex("Pos", idx).DynamicN = mv.NVertex
+	vgp.ValueByIndex("Norm", idx).DynamicN = mv.NVertex
+	vgp.ValueByIndex("TexCoord", idx).DynamicN = mv.NVertex
+	vgp.ValueByIndex("Index", idx).DynamicN = mv.NIndex
+	vc := vgp.ValueByIndex("VertexColor", idx)
+	if mv.HasColor {
+		vc.DynamicN = mv.NVertex
+	} else {
+		vc.DynamicN = 1
+	}
 }

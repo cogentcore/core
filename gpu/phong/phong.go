@@ -17,24 +17,25 @@ import (
 // MaxLights is upper limit on number of any given type of light
 const MaxLights = 8
 
-// Phong implements standard Blinn-Phong rendering pipelines in a vgpu System.
-// Must Add all Lights, Meshes, Colors, Textures first, and call
-// Config() to configure everything prior to first RenderStart.
+// Phong implements standard Blinn-Phong rendering pipelines
+// in a gpu System.
+// Must Add all Lights, Meshes, Textures and Objects after
+// getting a NewPhong, and then call Config() to configure
+// everything on the GPU prior to first RenderStart.
 //
-// Meshes are configured initially with numbers of points, then
-// after Config(), points are set by calling MeshFloatsBy* and
-// assigning values.
+// If any changes are made to any of these elements after
+// initial Config, call the appropriate Config* method
+// to update them.
 //
-// If any changes are made to numbers or sizes of anything,
-// you must call Config() again.
-//
-// Changes to data only can be synced by calling Sync()
+// Object data will generally be updated every render frame,
+// and it is automatically sync'd up to the GPU during the
+// RenderStart call.
 //
 // Rendering starts with RenderStart, followed by Use* calls
-// to specify the parameters for each item, and then a Draw call
-// to add the rendering command, followed by RenderEnd.
+// to specify the render parameters for each item,
+// followed by the Render() method that calls the proper
+// pipeline's BindDrawVertex based on the render parameters.
 type Phong struct {
-
 	// number of each type of light
 	NLights NLights
 
@@ -62,16 +63,20 @@ type Phong struct {
 
 	// Meshes holds all of the mesh data, managed by AddMesh, DeleteMesh
 	// methods.
-	Meshes ordmap.Map[string, *Mesh]
+	meshes ordmap.Map[string, *Mesh]
 
 	// Textures holds all of the texture images, managed by AddTexture,
 	// DeleteTexture methods.
-	Textures ordmap.Map[string, *Texture]
+	textures ordmap.Map[string, *Texture]
 
 	// Objects holds per-object data, keyed by unique name / path id.
 	// All objects must be added at start with AddObject,
-	// and updated per-pass with UpdateObject.
-	Objects ordmap.Map[string, *Object]
+	// and updated per-pass with UpdateObjects.
+	objects ordmap.Map[string, *Object]
+
+	// objectUpdated is set whenever SetObject is called,
+	// and cleared when the objects have been updated to the GPU.
+	objectUpdated bool
 
 	// rendering system
 	Sys *gpu.System
@@ -80,42 +85,97 @@ type Phong struct {
 	sync.Mutex
 }
 
+// NewPhong returns a new Phong system that is ready to be
+// configured by adding the relevant elements.
+// When done, call Config() to perform initial configuration.
+func NewPhong(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.TextureFormat) *Phong {
+	ph := &Phong{}
+	ph.Sys = gpu.NewGraphicsSystem(gp, "phong", dev)
+	ph.Sys.ConfigRender(renderFormat, gpu.Depth32)
+	// sf.SetRender(&sy.Render)
+	ph.configSystem()
+	return ph
+}
+
+// Release should be called to release all the GPU resources.
 func (ph *Phong) Release() {
+	ph.Lock()
+	defer ph.Unlock()
+
+	if ph.Sys == nil {
+		return
+	}
 	ph.Sys.Release()
+	ph.Sys = nil
+	ph.meshes.Reset()
+	ph.textures.Reset()
+	ph.objects.Reset()
 }
 
 // Config configures the gpu rendering system after
 // everything has been Added for the first time.
-func (ph *Phong) Config() {
-	ph.ConfigMeshesTextures()
+// This should generally only be called once,
+// and then more specific Config calls made thereafter
+// as needed.
+func (ph *Phong) Config() *Phong {
 	ph.Lock()
+	defer ph.Unlock()
+
 	ph.Sys.Config()
-	ph.ConfigLights()
-	ph.Unlock()
+	ph.configLights()
+	ph.configMeshes()
+	ph.configTextures()
+	return ph
 }
 
-// ConfigMeshesTextures configures the Meshes and Textures based
-// on everything added in the Phong config, prior to Sys.Config()
-// which does host allocation.
-func (ph *Phong) ConfigMeshesTextures() {
+// ConfigLights can be called after initial Config
+// whenver the Lights data has changed, to sync changes
+// up to the GPU.
+func (ph *Phong) ConfigLights() *Phong {
 	ph.Lock()
-	ph.ConfigMeshes()
-	ph.ConfigTextures()
-	ph.Unlock()
+	defer ph.Unlock()
+	ph.configLights()
+	return ph
 }
 
-// Sync synchronizes any changes in val data up to GPU device memory.
-// any changes in numbers or sizes of any element requires a Config call.
-func (ph *Phong) Sync() {
+// ConfigMeshes can be called after initial Config
+// whenver the Meshes data has changed, to sync changes
+// up to the GPU.
+func (ph *Phong) ConfigMeshes() *Phong {
 	ph.Lock()
-	// todo!
-	ph.Unlock()
+	defer ph.Unlock()
+	ph.configMeshes()
+	return ph
+}
+
+// ConfigTextures can be called after initial Config
+// whenver the Textures data has changed, to sync changes
+// up to the GPU.
+func (ph *Phong) ConfigTextures() *Phong {
+	ph.Lock()
+	defer ph.Unlock()
+	ph.configTextures()
+	return ph
 }
 
 ///////////////////////////////////////////////////
 // Rendering
 
-// Render does one step of rendering given current Use* settings
+// RenderStart should be called at the start of rendering.
+// It updates the object data on the GPU based on any changes made
+// via SetObject calls since the last render.
+func (ph *Phong) RenderStart(rp *wgpu.RenderPassEncoder) {
+	ph.Lock()
+	defer ph.Unlock()
+
+	if ph.objectUpdated {
+		ph.updateObjects()
+		ph.objectUpdated = false
+	}
+}
+
+// Render does one step of rendering given current Use* settings,
+// which can be updated in between subsequent Render calls.
 func (ph *Phong) Render(rp *wgpu.RenderPassEncoder) {
 	ph.Lock()
 	defer ph.Unlock()
