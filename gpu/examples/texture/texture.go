@@ -39,7 +39,7 @@ func main() {
 	gp.Config("texture")
 
 	width, height := 1024, 768
-	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Triangle Indexed")
+	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Texture")
 	if err != nil {
 		return
 	}

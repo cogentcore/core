@@ -38,10 +38,10 @@ type Object struct {
 func main() {
 	gp := gpu.NewGPU()
 	gpu.Debug = true
-	gp.Config("drawidx")
+	gp.Config("phong")
 
 	width, height := 1024, 768
-	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Triangle Indexed")
+	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Phong")
 	if err != nil {
 		return
 	}
@@ -70,10 +70,10 @@ func main() {
 
 	// Note: 100 segs improves lighting differentiation significantly
 
-	ph.AddMeshFromShape("floor",
-		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{10, 10}))
 	ph.AddMeshFromShape("cube",
 		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3i{10, 10, 10}))
+	ph.AddMeshFromShape("floor",
+		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{10, 10}))
 	ph.AddMeshFromShape("sphere", shape.NewSphere(.5, 64))
 	ph.AddMeshFromShape("cylinder", shape.NewCylinder(1, .5, 64, 64, true, true))
 	ph.AddMeshFromShape("cone", shape.NewCone(1, .5, 64, 64, true))
@@ -119,8 +119,8 @@ func main() {
 	projection.SetVkPerspective(45, aspect, 0.01, 100)
 
 	objs := []Object{
-		{Mesh: "floor", Color: blue, Texture: "ground"},
 		{Mesh: "cube", Color: red, Texture: "teximg"},
+		{Mesh: "floor", Color: blue, Texture: "ground"},
 		{Mesh: "cylinder", Color: blue, Texture: "wood"},
 		{Mesh: "cone", Color: green},
 		{Mesh: "lines", Color: orange},
@@ -129,9 +129,11 @@ func main() {
 		{Mesh: "torus", Color: blueTr},
 	}
 
-	objs[0].Matrix.SetTranslation(0, -2, -2)
+	// objs[0].Matrix.SetTranslation(0, -2, -2)
+	objs[1].Matrix.SetTranslation(0, -2, -2)
 	// objs[0].Colors.SetTextureRepeat(math32.Vector2{50, 50})
-	objs[1].Matrix.SetTranslation(-2, 0, 0)
+	// objs[1].Matrix.SetTranslation(-2, 0, 0)
+	objs[0].Matrix.SetTranslation(-2, 0, 0)
 	objs[2].Matrix.SetTranslation(0, 0, -2)
 	objs[4].Matrix.SetTranslation(-1, 0, -2)
 	objs[5].Matrix.SetTranslation(1, 0, -1)
@@ -169,17 +171,16 @@ func main() {
 
 	render1 := func(rp *wgpu.RenderPassEncoder) {
 		for i, ob := range objs {
-			ph.UseObjectIndex(i)
-			ph.UseMeshName(ob.Mesh)
-			if ob.Texture != "" {
-				ph.UseTextureName(ob.Texture)
-			} else {
-				ph.UseNoTexture()
+			if i == 0 {
+				ph.UseObjectIndex(i)
+				ph.UseMeshName(ob.Mesh)
+				if ob.Texture != "" {
+					ph.UseTextureName(ob.Texture)
+				} else {
+					ph.UseNoTexture()
+				}
+				ph.Render(rp)
 			}
-			ph.Render(rp)
-			// if i == 0 {
-			// 	break
-			// }
 		}
 	}
 
@@ -216,7 +217,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 6
+	fpsDelay := time.Second / 10
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

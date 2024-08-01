@@ -161,10 +161,10 @@ func (ph *Phong) configMesh(mv *Mesh, idx int) {
 	vgp.ValueByIndex("Norm", idx).DynamicN = mv.NVertex
 	vgp.ValueByIndex("TexCoord", idx).DynamicN = mv.NVertex
 	vgp.ValueByIndex("Index", idx).DynamicN = mv.NIndex
-	vc := vgp.ValueByIndex("VertexColor", idx)
-	if mv.HasColor {
-		vc.DynamicN = mv.NVertex
-	} else {
-		vc.DynamicN = 1
-	}
+	// vc := vgp.ValueByIndex("VertexColor", idx)
+	// if mv.HasColor {
+	// 	vc.DynamicN = mv.NVertex
+	// } else {
+	// 	vc.DynamicN = 1
+	// }
 }
