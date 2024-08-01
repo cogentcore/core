@@ -45,6 +45,7 @@ var htmlElementNames = map[string]string{
 	"text-field": "input",
 	"spinner":    "input",
 	"slider":     "input",
+	"meter":      "progress",
 	"chooser":    "select",
 	"editor":     "textarea",
 	"pre":        "textarea",
