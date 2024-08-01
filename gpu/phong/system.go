@@ -30,7 +30,7 @@ func (ph *Phong) configPipeline(pl *gpu.GraphicsPipeline) {
 type Groups int32 //enums:enum
 
 const (
-	MatrixGroup Groups = iota
+	CameraGroup Groups = iota
 	ObjectGroup
 	LightGroup
 	TextureGroup
@@ -47,7 +47,8 @@ func (ph *Phong) configSystem() {
 	ph.configPipeline(vpl)
 
 	sh := tpl.AddShader("texture")
-	sh.OpenFileFS(shaders, "shaders/texture.wgsl")
+	// sh.OpenFileFS(shaders, "shaders/texture.wgsl")
+	sh.OpenFileFS(shaders, "shaders/onecolor.wgsl")
 	tpl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	tpl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
@@ -57,13 +58,14 @@ func (ph *Phong) configSystem() {
 	opl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
 	sh = opl.AddShader("pervertex")
-	sh.OpenFileFS(shaders, "shaders/pervertex.wgsl")
+	// sh.OpenFileFS(shaders, "shaders/pervertex.wgsl")
+	sh.OpenFileFS(shaders, "shaders/onecolor.wgsl")
 	vpl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	vpl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
 	vgp := sy.Vars.AddVertexGroup()
-	mgp := sy.Vars.AddGroup(gpu.Uniform, "Matrix")         // group = 0
-	ogp := sy.Vars.AddGroup(gpu.Uniform, "Objects")        // group = 1
+	cgp := sy.Vars.AddGroup(gpu.Uniform, "Camera")         // group = 0
+	ogp := sy.Vars.AddGroup(gpu.Storage, "Objects")        // group = 1
 	lgp := sy.Vars.AddGroup(gpu.Uniform, "Lights")         // group = 2
 	tgp := sy.Vars.AddGroup(gpu.SampledTexture, "Texture") // group = 3
 
@@ -76,7 +78,7 @@ func (ph *Phong) configSystem() {
 	ix := vgp.Add("Index", gpu.Uint32, 0, gpu.VertexShader)
 	ix.Role = gpu.Index
 
-	mgp.AddStruct("Matrix", gpu.Float32Matrix4.Bytes()*2, 1, gpu.VertexShader, gpu.FragmentShader)
+	cgp.AddStruct("Camera", gpu.Float32Matrix4.Bytes()*2, 1, gpu.VertexShader, gpu.FragmentShader)
 
 	ov := ogp.AddStruct("Object", int(unsafe.Sizeof(Object{})), 1, gpu.VertexShader, gpu.FragmentShader)
 	ov.DynamicOffset = true
@@ -88,7 +90,7 @@ func (ph *Phong) configSystem() {
 	lgp.AddStruct("SpotLights", vector4sz*4, MaxLights, gpu.FragmentShader)
 
 	tgp.Add("TexSampler", gpu.TextureRGBA32, 1, gpu.FragmentShader)
-	mgp.SetNValues(1)
+	cgp.SetNValues(1)
 	lgp.SetNValues(1)
 	tgp.SetNValues(1)
 }

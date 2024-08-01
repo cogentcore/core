@@ -152,13 +152,13 @@ func main() {
 
 	ph.Config()
 
-	ph.SetViewProjection(view, &projection)
+	ph.SetCamera(view, &projection)
 
-	updateMats := func() {
+	updateCamera := func() {
 		aspect := sf.Format.Aspect()
 		view = phong.CameraViewMat(campos, math32.Vec3(0, 0, 0), math32.Vec3(0, 1, 0))
 		projection.SetVkPerspective(45, aspect, 0.01, 100)
-		ph.SetViewProjection(view, &projection)
+		ph.SetCamera(view, &projection)
 	}
 
 	updateObs := func() {
@@ -197,7 +197,7 @@ func main() {
 		_ = fcr
 		campos.X = float32(frameCount) * 0.01
 		campos.Z = 10 - float32(frameCount)*0.03
-		updateMats()
+		updateCamera()
 		render1(rp)
 
 		frameCount++
@@ -216,13 +216,9 @@ func main() {
 		}
 	}
 
-	pollEvents()
-	renderFrame()
-	pollEvents()
-
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 60
+	fpsDelay := time.Second / 6
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {
