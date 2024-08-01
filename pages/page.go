@@ -129,6 +129,7 @@ func (pg *Page) Init() {
 	tree.AddChild(pg, func(w *core.Splits) {
 		w.SetSplits(0.2, 0.8)
 		tree.AddChild(w, func(w *core.Frame) {
+			w.SetProperty("tag", "tree") // ignore in generatehtml
 			w.Styler(func(s *styles.Style) {
 				s.Background = colors.Scheme.SurfaceContainerLow
 			})

@@ -73,13 +73,13 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	if tag, ok := wb.Property("tag").(string); ok {
 		se.Name.Local = tag
 	}
+	if se.Name.Local == "tree" { // trees not supported yet
+		return nil
+	}
 	if en, ok := htmlElementNames[se.Name.Local]; ok {
 		se.Name.Local = en
 	}
 
-	if idName == "tree" {
-		return nil
-	}
 	if se.Name.Local == "textarea" {
 		wb.Styles.Min.X.Pw(95)
 	}
