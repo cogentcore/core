@@ -347,9 +347,19 @@ func (vl *Value) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 		}
 	}
 	vl.CreateBuffer() // ensure made
+	if vr.DynamicOffset {
+		return []wgpu.BindGroupEntry{{
+			Binding: uint32(vr.Binding),
+			Buffer:  vl.buffer,
+			Offset:  0,
+			Size:    uint64(vl.VarSize), // note: size of one element
+		},
+		}
+	}
 	return []wgpu.BindGroupEntry{{
 		Binding: uint32(vr.Binding),
 		Buffer:  vl.buffer,
+		Offset:  0,
 		Size:    wgpu.WholeSize,
 	},
 	}

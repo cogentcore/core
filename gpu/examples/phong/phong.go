@@ -119,8 +119,8 @@ func main() {
 	projection.SetVkPerspective(45, aspect, 0.01, 100)
 
 	objs := []Object{
-		{Mesh: "cube", Color: red, Texture: "teximg"},
 		{Mesh: "floor", Color: blue, Texture: "ground"},
+		{Mesh: "cube", Color: red, Texture: "teximg"},
 		{Mesh: "cylinder", Color: blue, Texture: "wood"},
 		{Mesh: "cone", Color: green},
 		{Mesh: "lines", Color: orange},
@@ -129,11 +129,9 @@ func main() {
 		{Mesh: "torus", Color: blueTr},
 	}
 
-	// objs[0].Matrix.SetTranslation(0, -2, -2)
-	objs[1].Matrix.SetTranslation(0, -2, -2)
+	objs[0].Matrix.SetTranslation(0, -2, -2)
 	// objs[0].Colors.SetTextureRepeat(math32.Vector2{50, 50})
-	// objs[1].Matrix.SetTranslation(-2, 0, 0)
-	objs[0].Matrix.SetTranslation(-2, 0, 0)
+	objs[1].Matrix.SetTranslation(-2, 0, 0)
 	objs[2].Matrix.SetTranslation(0, 0, -2)
 	objs[4].Matrix.SetTranslation(-1, 0, -2)
 	objs[5].Matrix.SetTranslation(1, 0, -1)
@@ -171,16 +169,14 @@ func main() {
 
 	render1 := func(rp *wgpu.RenderPassEncoder) {
 		for i, ob := range objs {
-			if i == 0 {
-				ph.UseObjectIndex(i)
-				ph.UseMeshName(ob.Mesh)
-				if ob.Texture != "" {
-					ph.UseTextureName(ob.Texture)
-				} else {
-					ph.UseNoTexture()
-				}
-				ph.Render(rp)
+			ph.UseObjectIndex(i)
+			ph.UseMeshName(ob.Mesh)
+			if ob.Texture != "" {
+				ph.UseTextureName(ob.Texture)
+			} else {
+				ph.UseNoTexture()
 			}
+			ph.Render(rp)
 		}
 	}
 
@@ -231,6 +227,8 @@ func main() {
 				continue
 			}
 			renderFrame()
+			// destroy()
+			// return
 		}
 	}
 }
