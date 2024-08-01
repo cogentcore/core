@@ -163,7 +163,7 @@ function appNewNotification(jsonNotification) {
 // -----------------------------------------------------------------------------
 
 const appCanvas = document.getElementById('app');
-const appCanvasCtx = appCanvas.getContext('2d');
+// const appCanvasCtx = appCanvas.getContext('2d'); TODO: move to Go
 
 // displayImage takes the pointer to the target image in the wasm linear memory
 // and its length. Then, it gets the resulting byte slice and creates an image data
