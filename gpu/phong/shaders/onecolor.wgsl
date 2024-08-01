@@ -10,6 +10,7 @@ struct ObjectStorage {
 	emissive: vec4<f32>,
 	textureRepeatOff: vec4<f32>,
 	matrix: mat4x4<f32>,
+	world: mat4x4<f32>,
 };
 
 @group(0) @binding(0)
@@ -20,14 +21,14 @@ var<uniform> object: ObjectStorage;
 
 struct VertexInput {
 	@location(0) position: vec3<f32>,
-	@location(1) norm: vec3<f32>,
-   @location(2) tex_coord: vec2<f32>,a
+	@location(1) normal: vec3<f32>,
+   @location(2) tex_coord: vec2<f32>,
 //	@location(3) vertex_color: vec4<f32>,
 };
 
 struct VertexOutput {
 	@builtin(position) clip_position: vec4<f32>,
-	@location(0) norm: vec3<f32>,
+	@location(0) normal: vec3<f32>,
 	@location(1) cam_dir: vec3<f32>,
    @location(2) tex_coord: vec2<f32>,
 //	@location(3) vertex_color: vec4<f32>,
@@ -38,16 +39,12 @@ fn vs_main(
 	model: VertexInput,
 ) -> VertexOutput {
 	var out: VertexOutput;
-	
+
 	let mvm = camera.view * object.matrix;
 	let cpos = mvm * vec4<f32>(model.position, 1.0);
-	// todo: no transpose on GPU, upload in object instead.
-	// let normMtx = transpose(inverse(mat3x3<f32>(mvm)));
 	
-   // out.clip_position = camera.prjn * camera.view * vec4<f32>(model.position, 1.0);
    out.clip_position = camera.prjn * mvm * vec4<f32>(model.position, 1.0);
-	// out.norm = normalize(normMtx * model.norm);
-	out.norm = model.norm;
+	out.normal = (object.world * vec4<f32>(model.normal, 0.0)).xyz;
 	out.tex_coord = model.tex_coord;
 	out.cam_dir = normalize(-cpos.xyz);
    // out.vertex_color = model.vertex_color;
@@ -103,7 +100,7 @@ var<uniform> point: array<Point, MaxLights>;
 @group(2) @binding(4)
 var<uniform> spot: array<Spot, MaxLights>;
 
-fn phongModel(pos: vec4<f32>, norm: vec3<f32>, camDir: vec3<f32>, matAmbient: vec3<f32>,  matDiffuse: vec3<f32>, shiny: f32, reflct: f32, bright: f32, opacity: f32) -> vec4<f32> {
+fn phongModel(pos: vec4<f32>, normal: vec3<f32>, camDir: vec3<f32>, matAmbient: vec3<f32>,  matDiffuse: vec3<f32>, shiny: f32, reflct: f32, bright: f32, opacity: f32) -> vec4<f32> {
 	var ambientTotal: vec3<f32>;
 	var diffuseTotal: vec3<f32>;
 	var specularTotal: vec3<f32>;
@@ -119,11 +116,11 @@ fn phongModel(pos: vec4<f32>, norm: vec3<f32>, camDir: vec3<f32>, matAmbient: ve
 		let lp4: vec4<f32> = vec4<f32>(dir[i].pos, 0.0);
  		let lightDir: vec3<f32> = normalize(camera.view * lp4).xyz;
 		// Calculates the dot product between the light direction and this vertex normal.
-		let dotNormal: f32 = dot(lightDir, norm);
+		let dotNormal: f32 = dot(lightDir, normal);
 		if (dotNormal > eps) {
 			diffuseTotal += dir[i].color * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
-			let refl: vec3<f32> = reflect(-lightDir, norm);
+			let refl: vec3<f32> = reflect(-lightDir, normal);
 			specularTotal += dir[i].color * matSpecular * pow(max(dot(refl, camDir), 0.0), shiny);
 		}
 	}
@@ -138,7 +135,7 @@ fn phongModel(pos: vec4<f32>, norm: vec3<f32>, camDir: vec3<f32>, matAmbient: ve
 		lightDir = lightDir / lightDist;
 		// Calculates the attenuation due to the distance of the light
 		// Diffuse reflection
-		let dotNormal: f32 = dot(lightDir, norm);
+		let dotNormal: f32 = dot(lightDir, normal);
 		if (dotNormal > eps) {
 			let linDecay: f32 = point[i].decay.x;
 			let quadDecay: f32 = point[i].decay.y;
@@ -147,7 +144,7 @@ fn phongModel(pos: vec4<f32>, norm: vec3<f32>, camDir: vec3<f32>, matAmbient: ve
 			let attenColor: vec3<f32> = point[i].color * attenuation;
 			diffuseTotal += attenColor * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
-			let refl: vec3<f32> = reflect(-lightDir, norm);
+			let refl: vec3<f32> = reflect(-lightDir, normal);
 			specularTotal += attenColor * matSpecular * pow(max(dot(refl, camDir), 0.0), shiny);
 		}
 	}
@@ -172,7 +169,7 @@ fn phongModel(pos: vec4<f32>, norm: vec3<f32>, camDir: vec3<f32>, matAmbient: ve
 
 		if (angle < cutoff) {
 			// Diffuse reflection
-			float dotNormal = dot(lightDir, norm);
+			float dotNormal = dot(lightDir, normal);
 			if (dotNormal > eps) {
 				// Calculates the attenuation due to the distance of the light
 				vec4<f32> dk = SpotLights[i].Decay;
@@ -184,7 +181,7 @@ fn phongModel(pos: vec4<f32>, norm: vec3<f32>, camDir: vec3<f32>, matAmbient: ve
 				vec3<f32> attenColor = SpotLights[i].Color * attenuation * spotFactor;
 				diffuseTotal += attenColor * matDiffuse * dotNormal;
 				// Specular reflection
-				vec3<f32> ref = reflect(-lightDir, norm);
+				vec3<f32> ref = reflect(-lightDir, normal);
 				specularTotal += attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
 			}
 		}
@@ -200,7 +197,7 @@ fn phongModel(pos: vec4<f32>, norm: vec3<f32>, camDir: vec3<f32>, matAmbient: ve
 struct FragmentInput {
 	@builtin(position) clip_position: vec4<f32>,
 	@builtin(front_facing) front_face: bool,
-	@location(0) norm: vec3<f32>,
+	@location(0) normal: vec3<f32>,
 	@location(1) cam_dir: vec3<f32>,
    @location(2) tex_coord: vec2<f32>,
 //	@location(3) vertex_color: vec4<f32>,
@@ -220,11 +217,11 @@ fn fs_main(in: FragmentInput) -> @location(0) vec4<f32> {
 	let shiny: f32 = object.shinyBright.x;
 	let reflct: f32 = object.shinyBright.y;
 	let bright: f32 = object.shinyBright.z;
-	var norm: vec3<f32> = in.norm;
+	var normal: vec3<f32> = in.normal;
 	if (in.front_face) {
-		norm = -norm;
+		normal = -normal;
 	}
-	return phongModel(in.clip_position, norm, in.cam_dir, clr, clr, shiny, reflct, bright, opacity);
+	return phongModel(in.clip_position, normal, in.cam_dir, clr, clr, shiny, reflct, bright, opacity);
 	// return textureSample(t_tex, s_tex, in.tex_coords);
 }
 

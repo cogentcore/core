@@ -20,8 +20,14 @@ import (
 type Object struct {
 	Colors
 
-	// Matrix specifies the transformation matrix for this specific Object.
+	// Matrix specifies the transformation matrix for this specific Object ("model").
 	Matrix math32.Matrix4
+
+	// WorldMatrix is the transpose of the inverse of the
+	// Camera.View matrix * Object "model" Matrix, used to
+	// compute the proper normals. WebGPU does not
+	// have the transpose function.
+	WorldMatrix math32.Matrix4
 }
 
 // NewObject returns a new object with given matrix and colors.
@@ -68,6 +74,12 @@ func (ph *Phong) object(name string) *Object {
 	return ob
 }
 
+func (ph *Phong) setWorldMatrix(ob *Object) {
+	mvm := math32.Matrix3FromMatrix4(ph.Camera.View.Mul(&ob.Matrix))
+	nm := mvm.Inverse().Transpose()
+	ob.WorldMatrix.SetFromMatrix3(&nm)
+}
+
 // SetObject sets the updated object data for given object name.
 // This must be called for any object updates _prior_ to the next
 // render pass.  All of the object data must be transferred to the
@@ -94,6 +106,7 @@ func (ph *Phong) SetObjectMatrix(name string, mtx *math32.Matrix4) *Object {
 	if ob == nil {
 		return nil
 	}
+	ob.Matrix = *mtx
 	ph.objectUpdated = true
 	return ob
 }
@@ -138,28 +151,21 @@ func (ph *Phong) UseObjectIndex(idx int) error {
 	return nil
 }
 
-// UpdateObjects must be called after all the SetObject* calls have
-// been made, setting updated object data.
-// It sends all the updated object data up to the GPU.
-func (ph *Phong) UpdateObjects() {
-	ph.Lock()
-	defer ph.Unlock()
-
-	if !ph.objectUpdated {
-		return
-	}
-	ph.updateObjects()
-	ph.objectUpdated = false
-}
-
-// updateObjects updates the object specific data to the GPU.
+// updateObjects updates the object specific data to the GPU,
+// updating the WorldMatrix based on current Camera settings first.
 // This is called in the RenderStart function.
 func (ph *Phong) updateObjects() {
+	if !(ph.objectUpdated || ph.cameraUpdated) {
+		return
+	}
 	vl := ph.Sys.Vars.ValueByIndex(int(ObjectGroup), "Object", 0)
 	vl.DynamicN = ph.objects.Len()
 	for i, kv := range ph.objects.Order {
 		ob := kv.Value
+		ph.setWorldMatrix(ob)
 		gpu.SetDynamicValueFrom(vl, i, []Object{*ob})
 	}
 	vl.WriteDynamicBuffer()
+	ph.objectUpdated = false
+	ph.cameraUpdated = false
 }

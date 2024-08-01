@@ -46,7 +46,7 @@ This also means that we need to manage this per-object data as variables in the
 Set: -2
     Role: Vertex
         Var: 0:	Pos	Float32Vector3	(size: 12)	Values: 6
-        Var: 1:	Norm	Float32Vector3	(size: 12)	Values: 6
+        Var: 1:	Normal	Float32Vector3	(size: 12)	Values: 6
         Var: 2:	Tex	Float32Vector2	(size: 8)	Values: 6
         Var: 3:	Color	Float32Vector4	(size: 16)	Values: 6
     Role: Index

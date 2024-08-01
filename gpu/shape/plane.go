@@ -13,11 +13,11 @@ import (
 type Plane struct { //types:add -setters
 	ShapeBase
 
-	// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
-	NormAxis math32.Dims
+	// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormalNeg for whether it is facing in the positive or negative of the given axis.
+	NormalAxis math32.Dims
 
-	// if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true
-	NormNeg bool
+	// if false, the plane normal facing in the positive direction along specified NormalAxis, otherwise it faces in the negative if true
+	NormalNeg bool
 
 	// 2D size of plane
 	Size math32.Vector2
@@ -33,14 +33,14 @@ type Plane struct { //types:add -setters
 func NewPlane(axis math32.Dims, width, height float32) *Plane {
 	pl := &Plane{}
 	pl.Defaults()
-	pl.NormAxis = axis
+	pl.NormalAxis = axis
 	pl.Size.Set(width, height)
 	return pl
 }
 
 func (pl *Plane) Defaults() {
-	pl.NormAxis = math32.Y
-	pl.NormNeg = false
+	pl.NormalAxis = math32.Y
+	pl.NormalNeg = false
 	pl.Size.Set(1, 1)
 	pl.Segs.Set(1, 1)
 	pl.Offset = 0
@@ -53,8 +53,8 @@ func (pl *Plane) N() (numVertex, nIndex int) {
 }
 
 // Set sets points in given allocated arrays
-func (pl *Plane) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	sz := SetPlaneAxisSize(vertexArray, normArray, textureArray, indexArray, pl.VertexOff, pl.IndexOff, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pl.Pos)
+func (pl *Plane) Set(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
+	sz := SetPlaneAxisSize(vertexArray, normalArray, textureArray, indexArray, pl.VertexOff, pl.IndexOff, pl.NormalAxis, pl.NormalNeg, pl.Size, pl.Segs, pl.Offset, pl.Pos)
 	mn := pl.Pos.Sub(sz)
 	mx := pl.Pos.Add(sz)
 	pl.CBBox.Set(&mn, &mx)
@@ -74,53 +74,53 @@ func PlaneN(wsegs, hsegs int) (numVertex, nIndex int) {
 	return
 }
 
-// SetPlaneAxisSize sets plane vertex, norm, tex, index data at
+// SetPlaneAxisSize sets plane vertex, normal, tex, index data at
 // given starting *vertex* index (i.e., multiply this *3 to get
 // actual float offset in Vtx array), and starting Index index.
-// using Norm Axis, offset, and size params.
+// using Normal Axis, offset, and size params.
 // wsegs, hsegs = number of segments to create in each dimension --
 // more finely subdividing a plane allows for higher-quality lighting
 // and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetPlaneAxisSize(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, normAxis math32.Dims, normNeg bool, size math32.Vector2, segs math32.Vector2i, offset float32, pos math32.Vector3) math32.Vector3 {
+func SetPlaneAxisSize(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, normalAxis math32.Dims, normalNeg bool, size math32.Vector2, segs math32.Vector2i, offset float32, pos math32.Vector3) math32.Vector3 {
 	hSz := size.DivScalar(2)
 	thin := float32(.0000001)
 	sz := math32.Vector3{}
-	switch normAxis {
+	switch normalAxis {
 	case math32.X:
 		sz.Set(thin, hSz.Y, hSz.X)
-		if normNeg {
-			SetPlane(vertexArray, normArray, textureArray, indexArray, vtxOff, idxOff, math32.Z, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nx
+		if normalNeg {
+			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.Z, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nx
 			sz.X += -offset
 		} else {
-			SetPlane(vertexArray, normArray, textureArray, indexArray, vtxOff, idxOff, math32.Z, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // px
+			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.Z, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // px
 			sz.X += offset
 		}
 	case math32.Y:
 		sz.Set(hSz.X, thin, hSz.Y)
-		if normNeg {
-			SetPlane(vertexArray, normArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Z, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // ny
+		if normalNeg {
+			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Z, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // ny
 			sz.Y += -offset
 		} else {
-			SetPlane(vertexArray, normArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Z, 1, 1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // py
+			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Z, 1, 1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // py
 			sz.Y += offset
 		}
 	case math32.Z:
 		sz.Set(hSz.X, hSz.Y, thin)
-		if normNeg {
-			SetPlane(vertexArray, normArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nz
+		if normalNeg {
+			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nz
 			sz.Z += -offset
 		} else {
-			SetPlane(vertexArray, normArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // pz
+			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // pz
 			sz.Z += offset
 		}
 	}
 	return sz
 }
 
-// SetPlane sets plane vertex, norm, tex, index data at given starting *vertex* index
+// SetPlane sets plane vertex, normal, tex, index data at given starting *vertex* index
 // (i.e., multiply this *3 to get actual float offset in Vtx array), and starting Index index.
 // waxis, haxis = width, height axis, wdir, hdir are the directions for width
 // and height dimensions.
@@ -129,7 +129,7 @@ func SetPlaneAxisSize(vertexArray, normArray, textureArray math32.ArrayF32, inde
 // and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
 // pos is a 3D position offset.
-func SetPlane(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, waxis, haxis math32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, pos math32.Vector3) {
+func SetPlane(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, waxis, haxis math32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, pos math32.Vector3) {
 	w := math32.Z
 	if (waxis == math32.X && haxis == math32.Y) || (waxis == math32.Y && haxis == math32.X) {
 		w = math32.Z
@@ -141,11 +141,11 @@ func SetPlane(vertexArray, normArray, textureArray math32.ArrayF32, indexArray m
 	wsegs = max(wsegs, 1)
 	hsegs = max(hsegs, 1)
 
-	norm := math32.Vector3{}
+	normal := math32.Vector3{}
 	if zoff > 0 {
-		norm.SetDim(w, 1)
+		normal.SetDim(w, 1)
 	} else {
-		norm.SetDim(w, -1)
+		normal.SetDim(w, -1)
 	}
 
 	wsegs1 := wsegs + 1
@@ -174,7 +174,7 @@ func SetPlane(vertexArray, normArray, textureArray math32.ArrayF32, indexArray m
 			vtx.SetDim(w, zoff)
 			vtx.Add(pos)
 			vtx.ToSlice(vertexArray, vidx)
-			norm.ToSlice(normArray, vidx)
+			normal.ToSlice(normalArray, vidx)
 			tex.Set(float32(ix)/float32(wsegs), float32(1)-(float32(iy)/float32(hsegs)))
 			tex.ToSlice(textureArray, tidx)
 			vidx += 3

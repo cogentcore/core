@@ -14,7 +14,7 @@ type Shape interface {
 	N() (numVertex, nIndex int)
 
 	// Set sets points in given allocated arrays
-	Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32)
+	Set(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32)
 
 	// Offs returns starting offset for vertices, indexes in full shape array,
 	// in terms of points, not floats

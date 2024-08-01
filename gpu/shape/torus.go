@@ -61,8 +61,8 @@ func (tr *Torus) N() (numVertex, nIndex int) {
 }
 
 // Set sets points for torus in given allocated arrays
-func (tr *Torus) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	tr.CBBox = SetTorusSector(vertexArray, normArray, textureArray, indexArray, tr.VertexOff, tr.IndexOff, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, tr.Pos)
+func (tr *Torus) Set(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
+	tr.CBBox = SetTorusSector(vertexArray, normalArray, textureArray, indexArray, tr.VertexOff, tr.IndexOff, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, tr.Pos)
 }
 
 // TorusSectorN returns N's for a torus geometry with
@@ -74,7 +74,7 @@ func TorusSectorN(radialSegs, tubeSegs int) (numVertex, nIndex int) {
 	return
 }
 
-// SetTorusSector sets torus sector vertex, norm, tex, index data
+// SetTorusSector sets torus sector vertex, normal, tex, index data
 // at given starting *vertex* index (i.e., multiply this *3 to get
 // actual float offset in Vtx array), and starting Index index,
 // with the specified revolution radius, tube radius,
@@ -82,7 +82,7 @@ func TorusSectorN(radialSegs, tubeSegs int) (numVertex, nIndex int) {
 // radial sector start angle and length in degrees (0 - 360)
 // pos is an arbitrary offset (for composing shapes),
 // returns bounding box.
-func SetTorusSector(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, radius, tubeRadius float32, radialSegs, tubeSegs int, angStart, angLen float32, pos math32.Vector3) math32.Box3 {
+func SetTorusSector(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, radius, tubeRadius float32, radialSegs, tubeSegs int, angStart, angLen float32, pos math32.Vector3) math32.Box3 {
 	angStRad := math32.DegToRad(angStart)
 	angLenRad := math32.DegToRad(angLen)
 
@@ -109,7 +109,7 @@ func SetTorusSector(vertexArray, normArray, textureArray math32.ArrayF32, indexA
 			pt.SetAdd(pos)
 			vertexArray.SetVector3(vidx+idx*3, pt)
 			textureArray.Set(tidx+idx*2, float32(i)/float32(tubeSegs), float32(j)/float32(radialSegs))
-			normArray.SetVector3(vidx+idx*3, pt.Sub(center).Normal())
+			normalArray.SetVector3(vidx+idx*3, pt.Sub(center).Normal())
 			bb.ExpandByPoint(pt)
 			idx++
 		}

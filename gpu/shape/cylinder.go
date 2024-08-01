@@ -95,8 +95,8 @@ func (cy *Cylinder) N() (numVertex, nIndex int) {
 }
 
 // SetCylinderSector sets points in given allocated arrays
-func (cy *Cylinder) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	cy.CBBox = SetCylinderSector(vertexArray, normArray, textureArray, indexArray, cy.VertexOff, cy.IndexOff, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, cy.Pos)
+func (cy *Cylinder) Set(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
+	cy.CBBox = SetCylinderSector(vertexArray, normalArray, textureArray, indexArray, cy.VertexOff, cy.IndexOff, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, cy.Pos)
 }
 
 ////////////////////////////////////////////////////////////////
@@ -118,24 +118,24 @@ func CylinderSectorN(radialSegs, heightSegs int, top, bottom bool) (numVertex, n
 }
 
 // SetCone creates a cone mesh with the specified base radius, height,
-// vertex, norm, tex, index data at given starting *vertex* index
+// vertex, normal, tex, index data at given starting *vertex* index
 // (i.e., multiply this *3 to get actual float offset in Vtx array),
 // number of radial segments, number of height segments, and presence of a bottom cap.
 // Height is along the Y axis.
 // pos is an arbitrary offset (for composing shapes).
-func SetCone(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, height, radius float32, radialSegs, heightSegs int, bottom bool, pos math32.Vector3) math32.Box3 {
-	return SetCylinderSector(vertexArray, normArray, textureArray, indexArray, vtxOff, idxOff, height, 0, radius, radialSegs, heightSegs, 0, 360, false, bottom, pos)
+func SetCone(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, height, radius float32, radialSegs, heightSegs int, bottom bool, pos math32.Vector3) math32.Box3 {
+	return SetCylinderSector(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, height, 0, radius, radialSegs, heightSegs, 0, 360, false, bottom, pos)
 }
 
 // SetCylinderSector creates a generalized cylinder (truncated cone) sector
-// vertex, norm, tex, index data at given starting *vertex* index
+// vertex, normal, tex, index data at given starting *vertex* index
 // (i.e., multiply this *3 to get actual float offset in Vtx array),
 // with the specified top and bottom radii, height, number of radial segments,
 // number of height segments, sector start angle in degrees (start = -1,0,0)
 // sector size angle in degrees, and presence of a top and/or bottom cap.
 // Height is along the Y axis.
 // pos is an arbitrary offset (for composing shapes).
-func SetCylinderSector(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool, pos math32.Vector3) math32.Box3 {
+func SetCylinderSector(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool, pos math32.Vector3) math32.Box3 {
 	hHt := height / 2
 	vtxs := [][]int{}
 	uvsOrig := [][]math32.Vector2{}
@@ -209,15 +209,15 @@ func SetCylinderSector(vertexArray, normArray, textureArray math32.ArrayF32, ind
 
 			indexArray.Set(ii, vOff+uint32(v1), vOff+uint32(v2), vOff+uint32(v4))
 			ii += 3
-			normArray.SetVector3(3*v1, n1)
-			normArray.SetVector3(3*v2, n2)
-			normArray.SetVector3(3*v4, n4)
+			normalArray.SetVector3(3*v1, n1)
+			normalArray.SetVector3(3*v2, n2)
+			normalArray.SetVector3(3*v4, n4)
 
 			indexArray.Set(ii, vOff+uint32(v2), vOff+uint32(v3), vOff+uint32(v4))
 			ii += 3
-			normArray.SetVector3(3*v2, n2)
-			normArray.SetVector3(3*v3, n3)
-			normArray.SetVector3(3*v4, n4)
+			normalArray.SetVector3(3*v2, n2)
+			normalArray.SetVector3(3*v3, n3)
+			normalArray.SetVector3(3*v4, n4)
 
 			textureArray.SetVector2(2*v1, uv1)
 			textureArray.SetVector2(2*v2, uv2)
@@ -239,7 +239,7 @@ func SetCylinderSector(vertexArray, normArray, textureArray math32.ArrayF32, ind
 			uv3 = math32.Vec2(uv2.X, 0)
 			// Appends CENTER with its own UV.
 			vertexArray.Set(vidx+idx*3, 0, hHt, 0)
-			normArray.Set(vidx+idx*3, 0, 1, 0)
+			normalArray.Set(vidx+idx*3, 0, 1, 0)
 			textureArray.SetVector2(tidx+idx*2, uv3)
 			idxsOrig = append(idxsOrig, uint32(idx))
 			idx++
@@ -248,28 +248,28 @@ func SetCylinderSector(vertexArray, normArray, textureArray math32.ArrayF32, ind
 			vi := vtxs[0][x]
 			vertexArray.GetVector3(3*vi, &v)
 			vertexArray.SetVector3(vidx+idx*3, v)
-			normArray.Set(vidx+idx*3, 0, 1, 0)
+			normalArray.Set(vidx+idx*3, 0, 1, 0)
 			textureArray.SetVector2(tidx+idx*2, uv1)
 			idxsOrig = append(idxsOrig, uint32(idx))
 			idx++
 		}
 		// Appends copy of first vertex (center)
-		var pt, norm math32.Vector3
+		var pt, normal math32.Vector3
 		var uv math32.Vector2
 		vertexArray.GetVector3(3*int(idxsOrig[0]), &pt)
-		normArray.GetVector3(3*int(idxsOrig[0]), &norm)
+		normalArray.GetVector3(3*int(idxsOrig[0]), &normal)
 		textureArray.GetVector2(2*int(idxsOrig[0]), &uv)
 		vertexArray.SetVector3(vidx+idx*3, pt)
-		normArray.SetVector3(vidx+idx*3, norm)
+		normalArray.SetVector3(vidx+idx*3, normal)
 		textureArray.SetVector2(tidx+idx*2, uv)
 		idxsOrig = append(idxsOrig, uint32(idx))
 		idx++
 
 		// Appends copy of second vertex (v1) USING LAST UVec2
 		vertexArray.GetVector3(3*int(idxsOrig[1]), &pt)
-		normArray.GetVector3(3*int(idxsOrig[1]), &norm)
+		normalArray.GetVector3(3*int(idxsOrig[1]), &normal)
 		vertexArray.SetVector3(vidx+idx*3, pt)
-		normArray.SetVector3(vidx+idx*3, norm)
+		normalArray.SetVector3(vidx+idx*3, normal)
 		textureArray.SetVector2(tidx+idx*2, uv2)
 		idxsOrig = append(idxsOrig, uint32(idx))
 		idx++
@@ -298,7 +298,7 @@ func SetCylinderSector(vertexArray, normArray, textureArray math32.ArrayF32, ind
 			uv3 = math32.Vec2(uv2.X, 1)
 			// Appends CENTER with its own UV.
 			vertexArray.Set(vidx+idx*3, 0, -hHt, 0)
-			normArray.Set(vidx+idx*3, 0, -1, 0)
+			normalArray.Set(vidx+idx*3, 0, -1, 0)
 			textureArray.SetVector2(tidx+idx*2, uv3)
 			idxsOrig = append(idxsOrig, uint32(idx))
 			idx++
@@ -307,29 +307,29 @@ func SetCylinderSector(vertexArray, normArray, textureArray math32.ArrayF32, ind
 			vi := vtxs[heightSegs][x]
 			vertexArray.GetVector3(3*vi, &v)
 			vertexArray.SetVector3(vidx+idx*3, v)
-			normArray.Set(vidx+idx*3, 0, -1, 0)
+			normalArray.Set(vidx+idx*3, 0, -1, 0)
 			textureArray.SetVector2(tidx+idx*2, uv1)
 			idxsOrig = append(idxsOrig, uint32(idx))
 			idx++
 		}
 
 		// Appends copy of first vertex (center)
-		var pt, norm math32.Vector3
+		var pt, normal math32.Vector3
 		var uv math32.Vector2
 		vertexArray.GetVector3(3*int(idxsOrig[0]), &pt)
-		normArray.GetVector3(3*int(idxsOrig[0]), &norm)
+		normalArray.GetVector3(3*int(idxsOrig[0]), &normal)
 		textureArray.GetVector2(2*int(idxsOrig[0]), &uv)
 		vertexArray.SetVector3(vidx+idx*3, pt)
-		normArray.SetVector3(vidx+idx*3, norm)
+		normalArray.SetVector3(vidx+idx*3, normal)
 		textureArray.SetVector2(tidx+idx*2, uv)
 		idxsOrig = append(idxsOrig, uint32(idx))
 		idx++
 
 		// Appends copy of second vertex (v1) USING LAST UVec2
 		vertexArray.GetVector3(3*int(idxsOrig[1]), &pt)
-		normArray.GetVector3(3*int(idxsOrig[1]), &norm)
+		normalArray.GetVector3(3*int(idxsOrig[1]), &normal)
 		vertexArray.SetVector3(vidx+idx*3, pt)
-		normArray.SetVector3(vidx+idx*3, norm)
+		normalArray.SetVector3(vidx+idx*3, normal)
 		textureArray.SetVector2(tidx+idx*2, uv2)
 		idxsOrig = append(idxsOrig, uint32(idx))
 		idx++

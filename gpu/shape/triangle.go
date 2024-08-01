@@ -19,22 +19,22 @@ func TriangleN() (numVertex, nIndex int) {
 // SetTriangle sets one triangle of vertex data indexes, and optionally
 // texUV coords, at given starting *vertex* index (i.e., multiply this *3
 // to get actual float offset in Vtx array), and starting Index index.
-// Norm is auto-computed, and bounds expanded.
+// Normal is auto-computed, and bounds expanded.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetTriangle(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, a, b, c math32.Vector3, texs []math32.Vector2, pos math32.Vector3) math32.Box3 {
+func SetTriangle(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, a, b, c math32.Vector3, texs []math32.Vector2, pos math32.Vector3) math32.Box3 {
 	hasTex := texs != nil
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
 
-	norm := math32.Normal(a, b, c)
+	normal := math32.Normal(a, b, c)
 
 	a.Add(pos).ToSlice(vertexArray, vidx)
-	norm.ToSlice(normArray, vidx)
+	normal.ToSlice(normalArray, vidx)
 	b.Add(pos).ToSlice(vertexArray, vidx+3)
-	norm.ToSlice(normArray, vidx+3)
+	normal.ToSlice(normalArray, vidx+3)
 	c.Add(pos).ToSlice(vertexArray, vidx+6)
-	norm.ToSlice(normArray, vidx+6)
+	normal.ToSlice(normalArray, vidx+6)
 	if hasTex {
 		texs[0].ToSlice(textureArray, tidx)
 		texs[1].ToSlice(textureArray, tidx+2)
@@ -59,19 +59,19 @@ func QuadN() (numVertex, nIndex int) {
 // SetQuad sets quad vertex data (optionally texUV, color, and indexes)
 // at given starting *vertex* index (i.e., multiply this *3 to get actual float
 // offset in Vtx array), and starting Index index.
-// Norm is auto-computed, and bbox expanded by points.
+// Normal is auto-computed, and bbox expanded by points.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetQuad(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, vtxs []math32.Vector3, texs []math32.Vector2, pos math32.Vector3) math32.Box3 {
+func SetQuad(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, vtxs []math32.Vector3, texs []math32.Vector2, pos math32.Vector3) math32.Box3 {
 	hasTex := texs != nil
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
 
-	norm := math32.Normal(vtxs[0], vtxs[1], vtxs[2])
+	normal := math32.Normal(vtxs[0], vtxs[1], vtxs[2])
 
 	for vi := range vtxs {
 		vtxs[vi].Add(pos).ToSlice(vertexArray, vidx)
-		norm.ToSlice(normArray, vidx)
+		normal.ToSlice(normalArray, vidx)
 		vidx += 3
 		if hasTex {
 			texs[vi].ToSlice(textureArray, tidx)

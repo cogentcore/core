@@ -72,7 +72,7 @@ func (ph *Phong) configSystem() {
 	vector4sz := gpu.Float32Vector4.Bytes()
 
 	vgp.Add("Pos", gpu.Float32Vector3, 0, gpu.VertexShader)
-	vgp.Add("Norm", gpu.Float32Vector3, 0, gpu.VertexShader)
+	vgp.Add("Normal", gpu.Float32Vector3, 0, gpu.VertexShader)
 	vgp.Add("TexCoord", gpu.Float32Vector2, 0, gpu.VertexShader)
 	// vgp.Add("VertexColor", gpu.Float32Vector4, 0, gpu.VertexShader)
 	ix := vgp.Add("Index", gpu.Uint32, 0, gpu.VertexShader)

@@ -27,13 +27,13 @@ func (sb *ShapeGroup) N() (numVertex, nIndex int) {
 }
 
 // Set sets points in given allocated arrays, also updates offsets
-func (sb *ShapeGroup) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
+func (sb *ShapeGroup) Set(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	vo := sb.VertexOff
 	io := sb.IndexOff
 	sb.CBBox.SetEmpty()
 	for _, sh := range sb.Shapes {
 		sh.SetOffs(vo, io)
-		sh.Set(vertexArray, normArray, textureArray, indexArray)
+		sh.Set(vertexArray, normalArray, textureArray, indexArray)
 		sb.CBBox.ExpandByBox(sh.BBox())
 		nv, ni := sh.N()
 		vo += nv

@@ -163,7 +163,6 @@ func main() {
 			nm := strconv.Itoa(i)
 			ph.SetObjectMatrix(nm, &ob.Matrix)
 		}
-		ph.UpdateObjects()
 	}
 	updateObs() // gotta do at least once
 
@@ -213,7 +212,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 10
+	fpsDelay := time.Second / 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

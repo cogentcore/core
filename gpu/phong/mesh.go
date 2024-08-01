@@ -29,8 +29,8 @@ type Mesh struct {
 	HasColor bool
 
 	//	buffers for mesh data, for shape.Set() method
-	vertexArray, normArray, textureArray math32.ArrayF32
-	indexArray                           math32.ArrayU32
+	vertexArray, normalArray, textureArray math32.ArrayF32
+	indexArray                             math32.ArrayU32
 }
 
 // ResetMeshes resets the meshes for reconfiguring
@@ -65,10 +65,10 @@ func (ph *Phong) AddMeshFromShape(name string, sh shape.Shape) {
 	mv := ph.meshes.Order[ph.meshes.Len()-1].Value
 
 	mv.vertexArray = slicesx.SetLength(mv.vertexArray, nVertex*3)
-	mv.normArray = slicesx.SetLength(mv.normArray, nVertex*3)
+	mv.normalArray = slicesx.SetLength(mv.normalArray, nVertex*3)
 	mv.textureArray = slicesx.SetLength(mv.textureArray, nVertex*2)
 	mv.indexArray = slicesx.SetLength(mv.indexArray, nIndex)
-	sh.Set(mv.vertexArray, mv.normArray, mv.textureArray, mv.indexArray)
+	sh.Set(mv.vertexArray, mv.normalArray, mv.textureArray, mv.indexArray)
 
 	nm := ph.meshes.Len()
 	vgp := ph.Sys.Vars.VertexGroup()
@@ -77,7 +77,7 @@ func (ph *Phong) AddMeshFromShape(name string, sh shape.Shape) {
 	ph.configMesh(mv, idx)
 
 	gpu.SetValueFrom(vgp.ValueByIndex("Pos", idx), mv.vertexArray)
-	gpu.SetValueFrom(vgp.ValueByIndex("Norm", idx), mv.normArray)
+	gpu.SetValueFrom(vgp.ValueByIndex("Normal", idx), mv.normalArray)
 	gpu.SetValueFrom(vgp.ValueByIndex("TexCoord", idx), mv.textureArray)
 	gpu.SetValueFrom(vgp.ValueByIndex("Index", idx), mv.indexArray)
 }
@@ -114,7 +114,7 @@ func (ph *Phong) UseMeshIndex(idx int) error {
 	sy := ph.Sys
 	mesh := ph.meshes.ValueByIndex(idx)
 	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Pos", idx)
-	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Norm", idx)
+	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Normal", idx)
 	sy.Vars.SetCurrentValue(gpu.VertexGroup, "TexCoord", idx)
 	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Index", idx)
 	if mesh.HasColor {
@@ -158,7 +158,7 @@ func (ph *Phong) configMeshes() {
 func (ph *Phong) configMesh(mv *Mesh, idx int) {
 	vgp := ph.Sys.Vars.VertexGroup()
 	vgp.ValueByIndex("Pos", idx).DynamicN = mv.NVertex
-	vgp.ValueByIndex("Norm", idx).DynamicN = mv.NVertex
+	vgp.ValueByIndex("Normal", idx).DynamicN = mv.NVertex
 	vgp.ValueByIndex("TexCoord", idx).DynamicN = mv.NVertex
 	vgp.ValueByIndex("Index", idx).DynamicN = mv.NIndex
 	// vc := vgp.ValueByIndex("VertexColor", idx)

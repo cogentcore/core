@@ -115,15 +115,15 @@ func (t *Lines) SetColors(v ...color.Color) *Lines { t.Colors = v; return t }
 // if true, connect the first and last points to form a closed shape
 func (t *Lines) SetClosed(v bool) *Lines { t.Closed = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.Plane", IDName: "plane", Doc: "Plane is a flat 2D plane, which can be oriented along any\naxis facing either positive or negative", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "NormAxis", Doc: "axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis."}, {Name: "NormNeg", Doc: "if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true"}, {Name: "Size", Doc: "2D size of plane"}, {Name: "Segs", Doc: "number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}, {Name: "Offset", Doc: "offset from origin along direction of normal to the plane"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.Plane", IDName: "plane", Doc: "Plane is a flat 2D plane, which can be oriented along any\naxis facing either positive or negative", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "NormalAxis", Doc: "axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormalNeg for whether it is facing in the positive or negative of the given axis."}, {Name: "NormalNeg", Doc: "if false, the plane normal facing in the positive direction along specified NormalAxis, otherwise it faces in the negative if true"}, {Name: "Size", Doc: "2D size of plane"}, {Name: "Segs", Doc: "number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}, {Name: "Offset", Doc: "offset from origin along direction of normal to the plane"}}})
 
-// SetNormAxis sets the [Plane.NormAxis]:
-// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
-func (t *Plane) SetNormAxis(v math32.Dims) *Plane { t.NormAxis = v; return t }
+// SetNormalAxis sets the [Plane.NormalAxis]:
+// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormalNeg for whether it is facing in the positive or negative of the given axis.
+func (t *Plane) SetNormalAxis(v math32.Dims) *Plane { t.NormalAxis = v; return t }
 
-// SetNormNeg sets the [Plane.NormNeg]:
-// if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true
-func (t *Plane) SetNormNeg(v bool) *Plane { t.NormNeg = v; return t }
+// SetNormalNeg sets the [Plane.NormalNeg]:
+// if false, the plane normal facing in the positive direction along specified NormalAxis, otherwise it faces in the negative if true
+func (t *Plane) SetNormalNeg(v bool) *Plane { t.NormalNeg = v; return t }
 
 // SetSize sets the [Plane.Size]:
 // 2D size of plane

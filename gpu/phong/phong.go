@@ -36,6 +36,10 @@ const MaxLights = 8
 // followed by the Render() method that calls the proper
 // pipeline's BindDrawVertex based on the render parameters.
 type Phong struct {
+	// The current camera view and projection matricies.
+	// This is used for updating the object WorldMatrix.
+	Camera Camera
+
 	// number of each type of light
 	NLights NLights
 
@@ -73,6 +77,10 @@ type Phong struct {
 	// All objects must be added at start with AddObject,
 	// and updated per-pass with UpdateObjects.
 	objects ordmap.Map[string, *Object]
+
+	// cameraUpdated is set whenver SetCamera is called.
+	// it triggers an up date of the object's WorldMatrix.
+	cameraUpdated bool
 
 	// objectUpdated is set whenever SetObject is called,
 	// and cleared when the objects have been updated to the GPU.
@@ -166,9 +174,13 @@ func (ph *Phong) ConfigTextures() *Phong {
 // CommandEncoder and RenderPassEncoder used for encoding
 // the rendering commands for this pass.
 // Pass the TextureView to render into (e.g., from Surface).
+// This also ensures that all updated object data from SetObject*
+// calls is transferred to the GPU.
 func (ph *Phong) RenderStart(view *wgpu.TextureView) (*wgpu.CommandEncoder, *wgpu.RenderPassEncoder) {
 	ph.Lock()
 	defer ph.Unlock()
+
+	ph.updateObjects()
 
 	cmd := ph.Sys.NewCommandEncoder()
 	rp := ph.Sys.BeginRenderPass(cmd, view)
