@@ -32,21 +32,36 @@ func newMainStage(typ StageTypes, sc *Scene) *Stage {
 	return st
 }
 
-// ExternalParent is a parent widget external to this program.
-// If it is set, [Body.RunMainWindow] will add the [Body] to this
-// parent instead of creating a new window and starting the app loop.
-// It should typically not be used by end users; it is used in yaegicore
-// and for pre-rendering apps as HTML that can be used as a preview and
-// for SEO purposes.
-var ExternalParent Widget
-
 // RunMainWindow creates a new main window from the body,
 // runs it, starts the app's main loop, and waits for all windows
 // to close. It should typically be called once by every app at
 // the end of their main function. It can not be called more than
 // once for one app. For secondary windows, see [Body.RunWindow].
 func (bd *Body) RunMainWindow() {
-	if ExternalParent != nil {
+	bd.RunWindow()
+	Wait()
+}
+
+// ExternalParent is a parent widget external to this program.
+// If it is set, the first call to [Body.RunWindow] will add the [Body]
+// to this parent instead of creating a new window. It will also prevent [Wait]
+// from doing anything. It should typically not be used by end users;
+// it is used in yaegicore and for pre-rendering apps as HTML that can
+// be used as a preview and for SEO purposes.
+var ExternalParent Widget
+
+// externalParentUsed is used to ensure that [ExternalParent] is only used
+// for one call to [Body.RunWindow].
+var externalParentUsed bool
+
+// RunWindow returns and runs a new [WindowStage] that is placed in
+// a new system window on multi-window platforms.
+// See [Body.NewWindow] to make a window without running it.
+// For the first window of your app, you should typically call
+// [Body.RunMainWindow] instead.
+func (bd *Body) RunWindow() *Stage {
+	if ExternalParent != nil && !externalParentUsed {
+		externalParentUsed = true
 		ExternalParent.AsWidget().AddChild(bd)
 		// we must set the correct scene for each node
 		bd.WalkDown(func(n tree.Node) bool {
@@ -57,18 +72,8 @@ func (bd *Body) RunMainWindow() {
 		bd.Styler(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowVisible)
 		})
-		return
+		return nil
 	}
-	bd.RunWindow()
-	Wait()
-}
-
-// RunWindow returns and runs a new [WindowStage] that is placed in
-// a new system window on multi-window platforms.
-// See [Body.NewWindow] to make a window without running it.
-// For the first window of your app, you should typically call
-// [Body.RunMainWindow] instead.
-func (bd *Body) RunWindow() *Stage {
 	return bd.NewWindow().Run()
 }
 

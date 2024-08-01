@@ -28,9 +28,12 @@ import (
 var windowWait sync.WaitGroup
 
 // Wait waits for all windows to close and runs the main app loop.
-// This should be put at the end of the main function, and is typically
-// called through [Stage.Wait].
+// This should be put at the end of the main function if
+// [Body.RunMainWindow] is not used.
 func Wait() {
+	if ExternalParent != nil {
+		return
+	}
 	defer func() { system.HandleRecover(recover()) }()
 	go func() {
 		defer func() { system.HandleRecover(recover()) }()
