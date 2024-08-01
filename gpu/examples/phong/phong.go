@@ -8,19 +8,31 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 	"time"
 
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/examples/images"
 	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/gpu/shape"
 	"cogentcore.org/core/math32"
+	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
 func init() {
 	// must lock main thread for gpu!
 	runtime.LockOSThread()
+}
+
+type Object struct {
+	Mesh    string
+	Color   color.Color
+	Texture string
+	Matrix  math32.Matrix4
 }
 
 func main() {
@@ -35,10 +47,11 @@ func main() {
 	}
 
 	sf := gpu.NewSurface(gp, sp, width, height)
-	ph := phong.NewPhong(sf.GPU, &sf.Device, &sf.Format)
+	ph := phong.NewPhong(sf.GPU, sf.Device, &sf.Format)
+	sy := ph.Sys
 
 	destroy := func() {
-		vk.DeviceWaitIdle(sf.Device.Device)
+		sy.WaitDone()
 		ph.Release()
 		sf.Release()
 		gp.Release()
@@ -60,9 +73,9 @@ func main() {
 	// Note: 100 segs improves lighting differentiation significantly
 
 	ph.AddMeshFromShape("floor",
-		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2{100, 100}))
+		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{100, 100}))
 	ph.AddMeshFromShape("cube",
-		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3{100, 100, 100}))
+		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3i{100, 100, 100}))
 	ph.AddMeshFromShape("sphere", shape.NewSphere(.5, 64))
 	ph.AddMeshFromShape("cylinder", shape.NewCylinder(1, .5, 64, 64, true, true))
 	ph.AddMeshFromShape("cone", shape.NewCone(1, .5, 64, 64, true))
@@ -76,11 +89,11 @@ func main() {
 	// Textures
 
 	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
-	imgs := make([]image.Texture, len(imgFiles))
+	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
-		pnm := filepath.Join("../images", fnm)
-		imgs[i] = OpenTexture(pnm)
-		ph.AddTexture(fnm, phong.NewTexture(imgs[i]))
+		imgs[i], _, _ = imagex.OpenFS(images.Images, fnm)
+		fn := strings.Split(fnm, ".")[0]
+		ph.AddTexture(fn, phong.NewTexture(imgs[i]))
 	}
 
 	ph.Config()
@@ -89,6 +102,7 @@ func main() {
 	// Colors
 
 	dark := color.RGBA{20, 20, 20, 255}
+	_ = dark
 	blue := color.RGBA{0, 0, 255, 255}
 	blueTr := color.RGBA{0, 0, 200, 200}
 	red := color.RGBA{255, 0, 0, 255}
@@ -96,13 +110,6 @@ func main() {
 	green := color.RGBA{0, 255, 0, 255}
 	orange := color.RGBA{180, 130, 0, 255}
 	tan := color.RGBA{210, 180, 140, 255}
-	ph.AddColor("blue", phong.NewColors(blue, color.Black, 30, 1, 1))
-	ph.AddColor("blueTr", phong.NewColors(blueTr, color.Black, 30, 1, 1))
-	ph.AddColor("red", phong.NewColors(red, color.Black, 30, 1, 1))
-	ph.AddColor("redTr", phong.NewColors(redTr, color.Black, 30, 1, 1))
-	ph.AddColor("green", phong.NewColors(dark, green, 30, .1, 1))
-	ph.AddColor("orange", phong.NewColors(orange, color.Black, 30, 1, 1))
-	ph.AddColor("tan", phong.NewColors(tan, color.Black, 30, 1, 1))
 
 	/////////////////////////////
 	// Camera / Matrix
@@ -115,23 +122,30 @@ func main() {
 	var projection math32.Matrix4
 	projection.SetVkPerspective(45, aspect, 0.01, 100)
 
-	var model1 math32.Matrix4
-	model1.SetRotationY(0.5)
+	objs := []Object{
+		{Mesh: "floor", Color: blue, Texture: "ground"},
+		{Mesh: "cube", Color: red, Texture: "teximg"},
+		{Mesh: "cylinder", Color: blue, Texture: "wood"},
+		{Mesh: "cone", Color: green},
+		{Mesh: "lines", Color: orange},
+		{Mesh: "capsule", Color: tan},
+		{Mesh: "sphere", Color: redTr},
+		{Mesh: "torus", Color: blueTr},
+	}
 
-	var model2 math32.Matrix4
-	model2.SetTranslation(-2, 0, 0)
+	objs[0].Matrix.SetTranslation(0, -2, -2)
+	// objs[0].Colors.SetTextureRepeat(math32.Vector2{50, 50})
+	objs[1].Matrix.SetTranslation(-2, 0, 0)
+	objs[2].Matrix.SetTranslation(0, 0, -2)
+	objs[4].Matrix.SetTranslation(-1, 0, -2)
+	objs[5].Matrix.SetTranslation(1, 0, -1)
+	objs[6].Matrix.SetRotationY(0.5)
+	objs[7].Matrix.SetTranslation(1, 0, -1)
 
-	var model3 math32.Matrix4
-	model3.SetTranslation(0, 0, -2)
-
-	var model4 math32.Matrix4
-	model4.SetTranslation(-1, 0, -2)
-
-	var model5 math32.Matrix4
-	model5.SetTranslation(1, 0, -1)
-
-	var floortx math32.Matrix4
-	floortx.SetTranslation(0, -2, -2)
+	for i, ob := range objs {
+		nm := strconv.Itoa(i)
+		ph.AddObject(nm, phong.NewObject(&ob.Matrix, ob.Color, color.Black, 30, 1, 1))
+	}
 
 	/////////////////////////////
 	//  Config!
@@ -140,43 +154,6 @@ func main() {
 
 	ph.SetViewProjection(view, &projection)
 
-	/////////////////////////////
-	//  Set Mesh values
-
-	vertexArray, normArray, textureArray, _, indexArray := ph.MeshFloatsByName("floor")
-	floor.Set(vertexArray, normArray, textureArray, indexArray)
-	ph.ModMeshByName("floor")
-
-	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("cube")
-	cube.Set(vertexArray, normArray, textureArray, indexArray)
-	ph.ModMeshByName("cube")
-
-	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("sphere")
-	sphere.Set(vertexArray, normArray, textureArray, indexArray)
-	ph.ModMeshByName("sphere")
-
-	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("cylinder")
-	cylinder.Set(vertexArray, normArray, textureArray, indexArray)
-	ph.ModMeshByName("cylinder")
-
-	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("cone")
-	cone.Set(vertexArray, normArray, textureArray, indexArray)
-	ph.ModMeshByName("cone")
-
-	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("capsule")
-	capsule.Set(vertexArray, normArray, textureArray, indexArray)
-	ph.ModMeshByName("capsule")
-
-	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("torus")
-	torus.Set(vertexArray, normArray, textureArray, indexArray)
-	ph.ModMeshByName("torus")
-
-	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("lines")
-	lines.Set(vertexArray, normArray, textureArray, indexArray)
-	ph.ModMeshByName("lines")
-
-	ph.Sync()
-
 	updateMats := func() {
 		aspect := sf.Format.Aspect()
 		view = phong.CameraViewMat(campos, math32.Vec3(0, 0, 0), math32.Vec3(0, 1, 0))
@@ -184,92 +161,50 @@ func main() {
 		ph.SetViewProjection(view, &projection)
 	}
 
-	render1 := func() {
-		ph.UseColorName("blue")
-		ph.SetModelMatrix(&floortx)
-		ph.UseMeshName("floor")
-		// ph.UseNoTexture()
-		ph.UseTexturePars(math32.Vec2(50, 50), math32.Vector2{})
-		ph.UseTextureName("ground.png")
-		ph.Render()
+	updateObs := func() {
+		for i, ob := range objs {
+			nm := strconv.Itoa(i)
+			ph.SetObjectMatrix(nm, &ob.Matrix)
+		}
+	}
+	_ = updateObs
 
-		ph.UseColorName("red")
-		ph.SetModelMatrix(&model2)
-		ph.UseMeshName("cube")
-		ph.UseFullTexture()
-		ph.UseTextureName("teximg.jpg")
-		// ph.UseNoTexture()
-		ph.Render()
-
-		ph.UseColorName("blue")
-		ph.SetModelMatrix(&model3)
-		ph.UseMeshName("cylinder")
-		ph.UseTextureName("wood.png")
-		// ph.UseNoTexture()
-		ph.Render()
-
-		ph.UseColorName("green")
-		ph.SetModelMatrix(&model4)
-		ph.UseMeshName("cone")
-		// ph.UseTextureName("teximg.jpg")
-		ph.UseNoTexture()
-		ph.Render()
-
-		ph.UseColorName("orange")
-		ph.SetModelMatrix(&model5)
-		ph.UseMeshName("lines")
-		ph.UseNoTexture()
-		ph.Render()
-
-		// ph.UseColorName("blueTr")
-		ph.UseColorName("tan")
-		ph.SetModelMatrix(&model5)
-		ph.UseMeshName("capsule")
-		ph.UseNoTexture()
-		ph.Render()
-
-		// trans at end
-
-		ph.UseColorName("redTr")
-		ph.SetModelMatrix(&model1)
-		ph.UseMeshName("sphere")
-		ph.UseNoTexture()
-		ph.Render()
-
-		ph.UseColorName("blueTr")
-		ph.SetModelMatrix(&model5)
-		ph.UseMeshName("torus")
-		ph.UseNoTexture()
-		ph.Render()
-
+	render1 := func(rp *wgpu.RenderPassEncoder) {
+		ph.RenderStart(rp)
+		for i, ob := range objs {
+			ph.UseObjectIndex(i)
+			ph.UseMeshName(ob.Mesh)
+			if ob.Texture != "" {
+				ph.UseTextureName(ob.Texture)
+			} else {
+				ph.UseNoTexture()
+			}
+			ph.Render(rp)
+		}
 	}
 
 	frameCount := 0
 	stTime := time.Now()
 
 	renderFrame := func() {
-		idx, ok := sf.AcquireNextTexture()
-		if !ok {
+		view, err := sf.AcquireNextTexture()
+		if errors.Log(err) != nil {
 			return
 		}
-		cmd := sy.CmdPool.Buff
-		descIndex := 0 // if running multiple frames in parallel, need diff sets
-		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIndex)
-
+		cmd := sy.NewCommandEncoder()
+		rp := sy.BeginRenderPass(cmd, view)
 		fcr := frameCount % 10
 		_ = fcr
-
 		campos.X = float32(frameCount) * 0.01
 		campos.Z = 10 - float32(frameCount)*0.03
 		updateMats()
-		render1()
+		render1(rp)
 
 		frameCount++
 
-		sy.EndRenderPass(cmd)
-
-		sf.SubmitRender(cmd) // this is where it waits for the 16 msec
-		sf.PresentTexture(idx)
+		rp.End()
+		sf.SubmitRender(cmd)
+		sf.Present()
 
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)

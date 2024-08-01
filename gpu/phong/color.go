@@ -17,24 +17,28 @@ type Colors struct {
 	// Note that transparent objects require more complex rendering.
 	Color math32.Vector4
 
-	// X = shininess spread factor, Y = shine reflection factor,
-	// Z = brightness factor:  shiny = specular shininess factor:
-	// how focally the surface shines back directional light, which
-	// is an exponential factor, where 0 = very broad diffuse reflection,
-	// and higher values (typically max of 128) have a smaller more
-	// focal specular reflection.
-	// Shine reflect = 1 for full shine white reflection (specular) color,
-	// 0 = no shine reflection.
-	// Bright = overall multiplier on final computed color value,
-	// which can be used to tune the overall brightness of various surfaces
-	// relative to each other for a given set of lighting parameters.
+	// ShinyBright has shininess and brightness factors:
+	//
+	// X = shininess spread factor (30 default), which determines
+	// 	how focally the surface shines back directional light, which
+	// 	is an exponential factor, where 0 = very broad diffuse reflection,
+	// 	and higher values (typically max of 128) have a smaller more
+	// 	focal specular reflection.
+	//
+	// Y = shine reflection factor (1 default), which determines how much
+	//		of the incident light is reflected back (0 = no shine).
+	//
+	// Z = brightness factor (1 default), which is an overall multiplier
+	// 	on final computed color value, which can be used to tune the
+	//		overall brightness of various surfaces relative to each other
+	//		for a given set of lighting parameters.
 	ShinyBright math32.Vector4
 
 	// color that surface emits independent of any lighting,
 	// i.e., glow. Can be used for marking lights with an object.
 	Emissive math32.Vector4
 
-	// texture repeat and offset factors
+	// texture repeat and offset factors.
 	// X,Y = how often to repeat the texture in each direction
 	// Z,W = offset for where to start the texture in each direction
 	TextureRepeatOff math32.Vector4
@@ -47,6 +51,12 @@ func NewColors(clr, emis color.Color, shiny, reflect, bright float32) *Colors {
 	cl.SetColors(clr, emis, shiny, reflect, bright)
 	cl.TextureRepeatOff.Set(1, 1, 0, 0)
 	return cl
+}
+
+func (cl *Colors) Defaults() {
+	cl.ShinyBright.X = 30
+	cl.ShinyBright.Y = 1
+	cl.ShinyBright.Z = 1
 }
 
 // SetColors sets the colors from standard Go colors.
