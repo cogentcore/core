@@ -31,9 +31,7 @@ var windowWait sync.WaitGroup
 // This should be put at the end of the main function if
 // [Body.RunMainWindow] is not used.
 func Wait() {
-	if ExternalParent != nil {
-		return
-	}
+	waitCalled = true
 	defer func() { system.HandleRecover(recover()) }()
 	go func() {
 		defer func() { system.HandleRecover(recover()) }()
