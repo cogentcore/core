@@ -139,6 +139,7 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		// We don't want any escaping of HTML-formatted text, so we write directly.
 		b.WriteString(w.Text)
 	case *Icon:
+		w.Styles.Min.Zero() // do not specify any size for the inner svg object
 		err := writeSVG(&w.svg)
 		if err != nil {
 			return err
