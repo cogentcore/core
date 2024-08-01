@@ -116,7 +116,7 @@ func main() {
 
 	aspect := sf.Format.Aspect()
 	var projection math32.Matrix4
-	projection.SetVkPerspective(45, aspect, 0.01, 100)
+	projection.SetPerspective(45, aspect, 0.01, 100)
 
 	objs := []Object{
 		{Mesh: "floor", Color: blue, Texture: "ground"},
@@ -153,7 +153,7 @@ func main() {
 	updateCamera := func() {
 		aspect := sf.Format.Aspect()
 		view = phong.CameraViewMat(campos, math32.Vec3(0, 0, 0), math32.Vec3(0, 1, 0))
-		projection.SetVkPerspective(45, aspect, 0.01, 100)
+		projection.SetPerspective(45, aspect, 0.01, 100)
 		ph.SetCamera(view, &projection)
 	}
 	updateCamera()

@@ -21,7 +21,7 @@ var<uniform> object: ObjectStorage;
 struct VertexInput {
 	@location(0) position: vec3<f32>,
 	@location(1) norm: vec3<f32>,
-   @location(2) tex_coord: vec2<f32>,
+   @location(2) tex_coord: vec2<f32>,a
 //	@location(3) vertex_color: vec4<f32>,
 };
 
