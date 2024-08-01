@@ -68,7 +68,8 @@ func addAttr(se *xml.StartElement, name, value string) {
 func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	wb := w.AsWidget()
 	se := &xml.StartElement{}
-	idName := wb.NodeType().IDName
+	typ := wb.NodeType()
+	idName := typ.IDName
 	se.Name.Local = idName
 	if tag, ok := wb.Property("tag").(string); ok {
 		se.Name.Local = tag
@@ -80,6 +81,10 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		se.Name.Local = en
 	}
 
+	switch typ.Name {
+	case "cogentcore.org/cogent/canvas.Canvas", "cogentcore.org/cogent/code.Code":
+		se.Name.Local = "div"
+	}
 	if se.Name.Local == "textarea" {
 		wb.Styles.Min.X.Pw(95)
 	}
