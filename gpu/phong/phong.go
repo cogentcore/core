@@ -164,7 +164,7 @@ func (ph *Phong) ConfigTextures() *Phong {
 // RenderStart should be called at the start of rendering.
 // It updates the object data on the GPU based on any changes made
 // via SetObject calls since the last render.
-func (ph *Phong) RenderStart(rp *wgpu.RenderPassEncoder) {
+func (ph *Phong) RenderStart() {
 	ph.Lock()
 	defer ph.Unlock()
 
@@ -193,17 +193,20 @@ func (ph *Phong) Render(rp *wgpu.RenderPassEncoder) {
 // RenderTexture renders current settings to texture pipeline
 func (ph *Phong) RenderTexture(rp *wgpu.RenderPassEncoder) {
 	pl := ph.Sys.GraphicsPipelines["texture"]
+	pl.BindPipeline(rp)
 	pl.BindDrawVertex(rp)
 }
 
 // RenderOneColor renders current settings to onecolor pipeline.
 func (ph *Phong) RenderOneColor(rp *wgpu.RenderPassEncoder) {
 	pl := ph.Sys.GraphicsPipelines["onecolor"]
+	pl.BindPipeline(rp)
 	pl.BindDrawVertex(rp)
 }
 
 // RenderVertexColor renders current settings to vertexcolor pipeline
 func (ph *Phong) RenderVertexColor(rp *wgpu.RenderPassEncoder) {
 	pl := ph.Sys.GraphicsPipelines["pervertex"]
+	pl.BindPipeline(rp)
 	pl.BindDrawVertex(rp)
 }

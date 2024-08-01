@@ -65,7 +65,7 @@ func (ph *Phong) configSystem() {
 
 	vgp := sy.Vars.AddVertexGroup()
 	cgp := sy.Vars.AddGroup(gpu.Uniform, "Camera")         // group = 0
-	ogp := sy.Vars.AddGroup(gpu.Storage, "Objects")        // group = 1
+	ogp := sy.Vars.AddGroup(gpu.Uniform, "Objects")        // group = 1
 	lgp := sy.Vars.AddGroup(gpu.Uniform, "Lights")         // group = 2
 	tgp := sy.Vars.AddGroup(gpu.SampledTexture, "Texture") // group = 3
 
@@ -90,7 +90,9 @@ func (ph *Phong) configSystem() {
 	lgp.AddStruct("SpotLights", vector4sz*4, MaxLights, gpu.FragmentShader)
 
 	tgp.Add("TexSampler", gpu.TextureRGBA32, 1, gpu.FragmentShader)
+	vgp.SetNValues(1)
 	cgp.SetNValues(1)
+	ogp.SetNValues(1)
 	lgp.SetNValues(1)
 	tgp.SetNValues(1)
 }

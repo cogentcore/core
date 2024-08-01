@@ -106,6 +106,9 @@ func (pl *GraphicsPipeline) BindVertex(rp *wgpu.RenderPassEncoder) {
 		if vr.Role == Index {
 			rp.SetIndexBuffer(vl.buffer, vr.Type.IndexType(), 0, wgpu.WholeSize)
 		} else {
+			if vr.Name == "VertexColor" {
+				continue
+			}
 			rp.SetVertexBuffer(uint32(vr.Binding), vl.buffer, 0, wgpu.WholeSize)
 		}
 	}

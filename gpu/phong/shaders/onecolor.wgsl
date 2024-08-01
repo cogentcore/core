@@ -16,7 +16,7 @@ struct ObjectStorage {
 var<uniform> camera: CameraUniform;
 
 @group(1) @binding(0)
-var<storage> object: ObjectStorage;
+var<uniform> object: ObjectStorage;
 
 // lights
 

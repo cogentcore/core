@@ -73,9 +73,9 @@ func main() {
 	// Note: 100 segs improves lighting differentiation significantly
 
 	ph.AddMeshFromShape("floor",
-		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{100, 100}))
+		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{10, 10}))
 	ph.AddMeshFromShape("cube",
-		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3i{100, 100, 100}))
+		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3i{10, 10, 10}))
 	ph.AddMeshFromShape("sphere", shape.NewSphere(.5, 64))
 	ph.AddMeshFromShape("cylinder", shape.NewCylinder(1, .5, 64, 64, true, true))
 	ph.AddMeshFromShape("cone", shape.NewCone(1, .5, 64, 64, true))
@@ -160,6 +160,7 @@ func main() {
 		projection.SetVkPerspective(45, aspect, 0.01, 100)
 		ph.SetCamera(view, &projection)
 	}
+	updateCamera()
 
 	updateObs := func() {
 		for i, ob := range objs {
@@ -167,10 +168,10 @@ func main() {
 			ph.SetObjectMatrix(nm, &ob.Matrix)
 		}
 	}
-	_ = updateObs
+	updateObs()      // gotta do at least once
+	ph.RenderStart() // todo:
 
 	render1 := func(rp *wgpu.RenderPassEncoder) {
-		ph.RenderStart(rp)
 		for i, ob := range objs {
 			ph.UseObjectIndex(i)
 			ph.UseMeshName(ob.Mesh)
@@ -180,6 +181,9 @@ func main() {
 				ph.UseNoTexture()
 			}
 			ph.Render(rp)
+			if i == 0 {
+				break
+			}
 		}
 	}
 
@@ -187,6 +191,8 @@ func main() {
 	stTime := time.Now()
 
 	renderFrame := func() {
+		// updateCamera()
+		// ph.RenderStart()
 		view, err := sf.AcquireNextTexture()
 		if errors.Log(err) != nil {
 			return
@@ -197,7 +203,6 @@ func main() {
 		_ = fcr
 		campos.X = float32(frameCount) * 0.01
 		campos.Z = 10 - float32(frameCount)*0.03
-		updateCamera()
 		render1(rp)
 
 		frameCount++

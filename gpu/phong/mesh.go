@@ -61,11 +61,12 @@ func (ph *Phong) AddMeshFromShape(name string, sh shape.Shape) {
 	defer ph.Unlock()
 
 	nVertex, nIndex := sh.N()
-	mv := ph.AddMesh(name, nVertex, nIndex, false)
+	ph.meshes.Add(name, &Mesh{NVertex: nVertex, NIndex: nIndex})
+	mv := ph.meshes.Order[ph.meshes.Len()-1].Value
 
-	mv.vertexArray = slicesx.SetLength(mv.vertexArray, nVertex)
-	mv.normArray = slicesx.SetLength(mv.normArray, nVertex)
-	mv.textureArray = slicesx.SetLength(mv.textureArray, nVertex)
+	mv.vertexArray = slicesx.SetLength(mv.vertexArray, nVertex*3)
+	mv.normArray = slicesx.SetLength(mv.normArray, nVertex*3)
+	mv.textureArray = slicesx.SetLength(mv.textureArray, nVertex*2)
 	mv.indexArray = slicesx.SetLength(mv.indexArray, nIndex)
 	sh.Set(mv.vertexArray, mv.normArray, mv.textureArray, mv.indexArray)
 
