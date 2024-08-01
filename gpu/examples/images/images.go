@@ -6,5 +6,5 @@ package images
 
 import "embed"
 
-//go:embed *.png
-var images embed.FS
+//go:embed *.png *.jpg
+var Images embed.FS

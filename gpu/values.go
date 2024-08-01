@@ -193,6 +193,9 @@ func (vl *Value) SetFromBytes(from []byte) error {
 		return errors.Log(err)
 	}
 	nb := len(from)
+	if vl.isDynamic { // Vertex, Index at this point
+		vl.DynamicN = nb / vl.VarSize
+	}
 	tb := vl.MemSize()
 	if nb != tb {
 		err := fmt.Errorf("gpu.Value SetFromBytes %s, Size passed: %d != Size expected %d", vl.Name, nb, tb)

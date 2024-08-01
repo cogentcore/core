@@ -9,13 +9,13 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"path/filepath"
 	"runtime"
 	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/examples/images"
 	"cogentcore.org/core/math32"
 )
 
@@ -89,8 +89,7 @@ func main() {
 	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
 	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
-		pnm := filepath.Join("../images", fnm)
-		imgs[i], _, _ = imagex.Open(pnm)
+		imgs[i], _, _ = imagex.OpenFS(images.Images, fnm)
 		img := txv.Values.Values[i]
 		img.SetFromGoImage(imgs[i], 0, gpu.NoFlipY)
 		// img.Texture.Sampler.Border = gpu.BorderBlack
@@ -136,8 +135,8 @@ func main() {
 	// into a 0..1 range instead of -1..1, so original GL based geometry
 	// will render identically here.
 	camo.Projection.SetVkPerspective(45, aspect, 0.01, 100)
-
-	gpu.SetValueFrom(camv.Values.Values[0], []CamView{camo}) // note: always use slice to copy
+	cam := camv.Values.Values[0]
+	gpu.SetValueFrom(cam, []CamView{camo}) // note: always use slice to copy
 
 	frameCount := 0
 	stTime := time.Now()
