@@ -97,6 +97,10 @@ func colorToCSS(c image.Image) string {
 		return "var(--primary-color)"
 	case colors.Scheme.Primary.On:
 		return "var(--primary-on-color)"
+	case colors.Scheme.Secondary.Container:
+		return "var(--secondary-container-color)"
+	case colors.Scheme.Secondary.OnContainer:
+		return "var(--secondary-on-container-color)"
 	case colors.Scheme.Surface, colors.Scheme.OnSurface:
 		return "" // already default
 	case colors.Scheme.SurfaceContainer, colors.Scheme.SurfaceContainerLowest, colors.Scheme.SurfaceContainerLow, colors.Scheme.SurfaceContainerHigh, colors.Scheme.SurfaceContainerHighest:
