@@ -18,8 +18,8 @@ import (
 
 // ToCSS converts the given [Style] object to a semicolon-separated CSS string.
 // It is not guaranteed to be fully complete or accurate. It also takes the kebab-case
-// ID name of the associated widget for context.
-func ToCSS(s *Style, idName string) string {
+// ID name of the associated widget and the resultant html element name for context.
+func ToCSS(s *Style, idName, htmlName string) string {
 	parts := []string{}
 	add := func(key, value string) {
 		if value == "" || value == "0" || value == "0px" || value == "0dot" {
@@ -30,6 +30,10 @@ func ToCSS(s *Style, idName string) string {
 
 	add("color", colorToCSS(s.Color))
 	add("background", colorToCSS(s.Background))
+	if htmlName == "svg" {
+		add("stroke", colorToCSS(s.Color))
+		add("fill", colorToCSS(s.Color))
+	}
 	if idName != "text" { // text does not have these layout properties
 		if s.Is(states.Invisible) {
 			add("display", "none")
