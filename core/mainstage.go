@@ -32,11 +32,6 @@ func newMainStage(typ StageTypes, sc *Scene) *Stage {
 	return st
 }
 
-// ExternalParent is a parent widget external to this program.
-// If it is set, [Body.RunMainWindow] will add the [Body] to this
-// parent instead of creating a new window and starting the app loop.
-var ExternalParent Widget
-
 // RunMainWindow creates a new main window from the body,
 // runs it, starts the app's main loop, and waits for all windows
 // to close. It should typically be called once by every app at
@@ -44,21 +39,24 @@ var ExternalParent Widget
 // once for one app. For secondary windows, see [Body.RunWindow].
 func (bd *Body) RunMainWindow() {
 	if ExternalParent != nil {
-		ExternalParent.AsWidget().AddChild(bd)
-		// we must set the correct scene for each node
-		bd.WalkDown(func(n tree.Node) bool {
-			n.(Widget).AsWidget().Scene = bd.Scene
-			return tree.Continue
-		})
-		// we must not get additional scrollbars here
-		bd.Styler(func(s *styles.Style) {
-			s.Overflow.Set(styles.OverflowVisible)
-		})
+		bd.handleExternalParent()
 		return
 	}
 	bd.RunWindow()
 	Wait()
 }
+
+// ExternalParent is a parent widget external to this program.
+// If it is set, calls to [Body.RunWindow] before [Wait] and
+// calls to [Body.RunMainWindow] will add the [Body] to this
+// parent instead of creating a new window. It should typically not be
+// used by end users; it is used in yaegicore and for pre-rendering apps
+// as HTML that can be used as a preview and for SEO purposes.
+var ExternalParent Widget
+
+// waitCalled is whether [Wait] has been called. It is used for
+// [ExternalParent] logic in [Body.RunWindow].
+var waitCalled bool
 
 // RunWindow returns and runs a new [WindowStage] that is placed in
 // a new system window on multi-window platforms.
@@ -66,7 +64,26 @@ func (bd *Body) RunMainWindow() {
 // For the first window of your app, you should typically call
 // [Body.RunMainWindow] instead.
 func (bd *Body) RunWindow() *Stage {
+	if ExternalParent != nil && !waitCalled {
+		bd.handleExternalParent()
+		return nil
+	}
 	return bd.NewWindow().Run()
+}
+
+// handleExternalParent handles [ExternalParent] logic for
+// [Body.RunWindow] and [Body.RunMainWindow].
+func (bd *Body) handleExternalParent() {
+	ExternalParent.AsWidget().AddChild(bd)
+	// we must set the correct scene for each node
+	bd.WalkDown(func(n tree.Node) bool {
+		n.(Widget).AsWidget().Scene = bd.Scene
+		return tree.Continue
+	})
+	// we must not get additional scrollbars here
+	bd.Styler(func(s *styles.Style) {
+		s.Overflow.Set(styles.OverflowVisible)
+	})
 }
 
 // NewWindow returns a new [WindowStage] that is placed in

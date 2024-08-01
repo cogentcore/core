@@ -125,7 +125,7 @@ func (c *Context) config(w core.Widget) {
 		for _, rule := range rules {
 			for _, decl := range rule.Declarations {
 				// TODO(kai/styproperties): parent style and context
-				s.StyleFromProp(s, decl.Property, decl.Value, colors.BaseContext(colors.ToUniform(s.Color)))
+				s.StyleFromProperty(s, decl.Property, decl.Value, colors.BaseContext(colors.ToUniform(s.Color)))
 			}
 		}
 	})

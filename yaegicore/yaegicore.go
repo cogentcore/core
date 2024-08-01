@@ -35,9 +35,8 @@ func init() {
 func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 	oc := func() {
 		in := interp.New(interp.Options{})
-		rparent := reflect.ValueOf(parent)
-		symbols.Symbols["cogentcore.org/core/core/core"]["ExternalParent"].Set(rparent)
-		symbols.Symbols["."]["b"] = rparent
+		core.ExternalParent = parent
+		symbols.Symbols["."]["b"] = reflect.ValueOf(parent)
 		// the normal AutoPlanName cannot be used because the stack trace in yaegi is not helpful
 		symbols.Symbols["cogentcore.org/core/tree/tree"]["AutoPlanName"] = reflect.ValueOf(func(int) string {
 			return fmt.Sprintf("yaegi-%v", atomic.AddUint64(&autoPlanNameCounter, 1))

@@ -99,7 +99,7 @@ func (fs *Font) StyleFromProperties(parent *Font, properties map[string]any, ctx
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
-		if sfunc, ok := StyleFontFuncs[key]; ok {
+		if sfunc, ok := styleFontFuncs[key]; ok {
 			sfunc(fs, key, val, parent, ctxt)
 		}
 	}
@@ -451,7 +451,7 @@ func (fs *FontRender) StyleRenderFromProperties(parent *FontRender, properties m
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
-		if sfunc, ok := StyleFontRenderFuncs[key]; ok {
+		if sfunc, ok := styleFontRenderFuncs[key]; ok {
 			sfunc(fs, key, val, parent, ctxt)
 		}
 	}

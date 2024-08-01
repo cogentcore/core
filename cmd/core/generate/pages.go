@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/base/generate"
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/pages/wpath"
+	"cogentcore.org/core/pages/ppath"
 )
 
 // Pages does any necessary generation for pages.
@@ -90,7 +90,7 @@ func getPagesExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				rel = strings.ReplaceAll(rel, `\`, "/")
 				rel = strings.TrimSuffix(rel, filepath.Ext(rel))
 				rel = strings.TrimSuffix(rel, "/index")
-				rel = wpath.Format(rel)
+				rel = ppath.Format(rel)
 				id := rel + "-" + strconv.Itoa(numExamples)
 				examples.Add(id, bytes.Join(curExample, []byte{'\n'}))
 				curExample = nil

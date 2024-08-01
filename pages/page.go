@@ -30,7 +30,7 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/pages/wpath"
+	"cogentcore.org/core/pages/ppath"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -50,17 +50,17 @@ type Page struct {
 	Context *htmlcore.Context `set:"-"`
 
 	// The history of URLs that have been visited. The oldest page is first.
-	History []string `set:"-"`
+	history []string
 
-	// HistoryIndex is the current place we are at in the History
-	HistoryIndex int `set:"-"`
+	// historyIndex is the current place we are at in the History
+	historyIndex int
 
-	// PagePath is the fs path of the current page in [Page.Source]
-	PagePath string `set:"-"`
+	// pagePath is the fs path of the current page in [Page.Source]
+	pagePath string
 
-	// URLToPagePath is a map between user-facing page URLs and underlying
+	// urlToPagePath is a map between user-facing page URLs and underlying
 	// FS page paths.
-	URLToPagePath map[string]string `set:"-"`
+	urlToPagePath map[string]string
 
 	// nav is the navigation tree.
 	nav *core.Tree
@@ -99,7 +99,7 @@ func (pg *Page) Init() {
 		}
 		rawURL = strings.TrimPrefix(rawURL, "/")
 		filename := ""
-		dirPath, ok := pg.URLToPagePath[path.Dir(rawURL)]
+		dirPath, ok := pg.urlToPagePath[path.Dir(rawURL)]
 		if ok {
 			filename = path.Join(path.Dir(dirPath), path.Base(rawURL))
 		} else {
@@ -129,6 +129,7 @@ func (pg *Page) Init() {
 	tree.AddChild(pg, func(w *core.Splits) {
 		w.SetSplits(0.2, 0.8)
 		tree.AddChild(w, func(w *core.Frame) {
+			w.SetProperty("tag", "tree") // ignore in generatehtml
 			w.Styler(func(s *styles.Style) {
 				s.Background = colors.Scheme.SurfaceContainerLow
 			})
@@ -149,7 +150,7 @@ func (pg *Page) Init() {
 					pg.OpenURL(url, true)
 				})
 
-				pg.URLToPagePath = map[string]string{"": "index.md"}
+				pg.urlToPagePath = map[string]string{"": "index.md"}
 				errors.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
 					if err != nil {
 						return err
@@ -160,10 +161,10 @@ func (pg *Page) Init() {
 						return nil
 					}
 
-					if system.TheApp.Platform() == system.Web && wpath.Draft(fpath) {
+					if system.TheApp.Platform() == system.Web && ppath.Draft(fpath) {
 						return nil
 					}
-					p := wpath.Format(fpath)
+					p := ppath.Format(fpath)
 					pdir := path.Dir(p)
 					base := path.Base(p)
 
@@ -199,26 +200,26 @@ func (pg *Page) Init() {
 						fpath = needsPath
 						tr.SetProperty("no-index", true)
 					}
-					pg.URLToPagePath[tr.PathFrom(w)] = fpath
+					pg.urlToPagePath[tr.PathFrom(w)] = fpath
 					// everyone who needs a path gets our path
-					for u, p := range pg.URLToPagePath {
+					for u, p := range pg.urlToPagePath {
 						if p == needsPath {
-							pg.URLToPagePath[u] = fpath
+							pg.urlToPagePath[u] = fpath
 						}
 					}
 					return nil
 				}))
 				// If we still need a path, we shouldn't exist.
-				for u, p := range pg.URLToPagePath {
+				for u, p := range pg.urlToPagePath {
 					if p == needsPath {
-						delete(pg.URLToPagePath, u)
+						delete(pg.urlToPagePath, u)
 						if n := w.FindPath(u); n != nil {
 							n.AsTree().Delete()
 						}
 					}
 				}
 				// open the default page if there is no currently open page
-				if pg.PagePath == "" {
+				if pg.pagePath == "" {
 					if getWebURL != nil {
 						pg.OpenURL(getWebURL(pg), true)
 					} else {
@@ -240,7 +241,7 @@ func (pg *Page) Init() {
 // setStageTitle sets the title of the stage based on the current page URL.
 func (pg *Page) setStageTitle() {
 	if rw := pg.Scene.RenderWindow(); rw != nil {
-		rw.SetStageTitle(wpath.Label(pg.Context.PageURL, core.TheApp.Name()))
+		rw.SetStageTitle(ppath.Label(pg.Context.PageURL, core.TheApp.Name()))
 	}
 }
 
@@ -275,7 +276,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	// if we are not rooted, we go relative to our current URL
 	if !strings.HasPrefix(rawURL, "/") {
 		current := pg.Context.PageURL
-		if !strings.HasSuffix(pg.PagePath, "index.md") && !strings.HasSuffix(pg.PagePath, "index.html") {
+		if !strings.HasSuffix(pg.pagePath, "index.md") && !strings.HasSuffix(pg.pagePath, "index.html") {
 			current = path.Dir(current) // we must go up one if we are not the index page (which is already up one)
 		}
 		rawURL = path.Join(current, rawURL)
@@ -288,9 +289,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	rawURL = strings.TrimPrefix(rawURL, "/")
 	rawURL = strings.TrimSuffix(rawURL, "/")
 
-	pg.PagePath = pg.URLToPagePath[rawURL]
+	pg.pagePath = pg.urlToPagePath[rawURL]
 
-	b, err := fs.ReadFile(pg.Source, pg.PagePath)
+	b, err := fs.ReadFile(pg.Source, pg.pagePath)
 	if err != nil {
 		core.ErrorSnackbar(pg, err, "Error opening page "+rawURL)
 		return
@@ -298,8 +299,8 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 
 	pg.Context.PageURL = rawURL
 	if addToHistory {
-		pg.HistoryIndex = len(pg.History)
-		pg.History = append(pg.History, pg.Context.PageURL)
+		pg.historyIndex = len(pg.history)
+		pg.history = append(pg.history, pg.Context.PageURL)
 	}
 	if saveWebURL != nil {
 		saveWebURL(pg, pg.Context.PageURL)
@@ -349,7 +350,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	pg.setStageTitle()
 
 	pg.body.DeleteChildren()
-	if wpath.Draft(pg.PagePath) {
+	if ppath.Draft(pg.pagePath) {
 		draft := core.NewText(pg.body).SetType(core.TextDisplayMedium).SetText("DRAFT")
 		draft.Styler(func(s *styles.Style) {
 			s.Color = colors.Scheme.Error.Base
@@ -357,7 +358,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		})
 	}
 	if curNav != pg.nav {
-		bc := core.NewText(pg.body).SetText(wpath.Breadcrumbs(pg.Context.PageURL, core.TheApp.Name()))
+		bc := core.NewText(pg.body).SetText(ppath.Breadcrumbs(pg.Context.PageURL, core.TheApp.Name()))
 		bc.HandleTextClick(func(tl *paint.TextLink) {
 			pg.Context.OpenURL(tl.URL)
 		})
@@ -367,7 +368,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		author := slicesx.As[any, string](author.([]any))
 		core.NewText(pg.body).SetType(core.TextTitleLarge).SetText("By " + strcase.FormatList(author...))
 	}
-	base := strings.TrimPrefix(path.Base(pg.PagePath), "-")
+	base := strings.TrimPrefix(path.Base(pg.pagePath), "-")
 	if len(base) >= 10 {
 		date := base[:10]
 		if t, err := time.Parse("2006-01-02", date); err == nil {
@@ -416,10 +417,10 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 func (pg *Page) MakeToolbar(p *tree.Plan) {
 	tree.AddInit(p, "back", func(w *core.Button) {
 		w.OnClick(func(e events.Event) {
-			if pg.HistoryIndex > 0 {
-				pg.HistoryIndex--
+			if pg.historyIndex > 0 {
+				pg.historyIndex--
 				// we need a slash so that it doesn't think it's a relative URL
-				pg.OpenURL("/"+pg.History[pg.HistoryIndex], false)
+				pg.OpenURL("/"+pg.history[pg.historyIndex], false)
 				e.SetHandled()
 			}
 		})
@@ -427,14 +428,14 @@ func (pg *Page) MakeToolbar(p *tree.Plan) {
 	tree.AddInit(p, "app-chooser", func(w *core.Chooser) {
 		w.AddItemsFunc(func() {
 			urls := []string{}
-			for u := range pg.URLToPagePath {
+			for u := range pg.urlToPagePath {
 				urls = append(urls, u)
 			}
 			slices.Sort(urls)
 			for _, u := range urls {
 				w.Items = append(w.Items, core.ChooserItem{
 					Value: u,
-					Text:  wpath.Label(u, core.TheApp.Name()),
+					Text:  ppath.Label(u, core.TheApp.Name()),
 					Func: func() {
 						pg.OpenURL("/"+u, true)
 					},

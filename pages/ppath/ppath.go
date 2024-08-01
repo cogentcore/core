@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package wpath handles pages paths.
-package wpath
+// Package ppath handles pages paths.
+package ppath
 
 import (
 	"path"
@@ -92,4 +92,15 @@ func Breadcrumbs(u string, root string) string {
 		parts[i] = `<a href="` + pageURL + `">` + s + `</a>`
 	}
 	return strings.Join(parts, " • ")
+}
+
+// PreRenderData contains the data printed in JSON by a pages app
+// run with the generatehtml tag.
+type PreRenderData struct {
+
+	// Description contains the automatic page descriptions for each page URL.
+	Description map[string]string
+
+	// HTML contains the pre-rendered HTML for each page URL.
+	HTML map[string]string
 }

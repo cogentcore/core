@@ -174,7 +174,7 @@ var home *core.Frame
 
 func makeBlock[T tree.NodeValue](title, text string, graphic func(w *T), url ...string) {
 	if len(url) > 0 {
-		title = `<a href="` + url[0] + `">` + title + `</a>`
+		title = `<a target="_blank" href="` + url[0] + `">` + title + `</a>`
 	}
 	tree.AddChildAt(home, title, func(w *core.Frame) {
 		w.Styler(func(s *styles.Style) {

@@ -2,20 +2,28 @@ body {
   margin: 0;
   overflow: hidden;
 
+  color-scheme: dark;
   color: #E1E2EB;
   background-color: #121316;
   --container-color: #44474E;
   --primary-color: #ADC6FF;
-  --shine-color: #fff1;
+  --primary-on-color: #002E68;
+  --surface-container-color: #1F1F23;
+  --secondary-container-color: #3F4759;
+  --secondary-on-container-color: #DAE2F9;
 }
 
 @media (prefers-color-scheme: light) {
   body {
+    color-scheme: light;
     color: #191B22;
     background-color: #FAF8FD;
     --container-color: #E1E2EB;
     --primary-color: #005BC0;
-    --shine-color: #fff4;
+    --primary-on-color: #FFFFFF;
+    --surface-container-color: #EFEDF2;
+    --secondary-container-color: #DAE2F9;
+    --secondary-on-container-color: #131B2C;
   }
 }
 
@@ -59,9 +67,8 @@ body {
   gap: 1em;
   padding: 1em;
 
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+  font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Oxygen,
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  font-size: 13px;
   font-weight: 400;
 }
 
@@ -117,35 +124,12 @@ body {
   background-color: var(--primary-color);
 }
 
-#app-wasm-loader-rectangles {
-  display: flex;
-  flex-grow: 1;
-  gap: 1em;
+#app-wasm-loader > main {
+  overflow: auto;
 }
 
-.app-wasm-loader-rectangle {
-  background-color: var(--container-color);
-  border-radius: 20px;
-  flex-grow: 1;
-}
-
-@media only screen and (max-width: 768px) {
-  #app-wasm-loader-rectangles {
-    flex-direction: column;
-  }
-}
-
-/* Loading animation effect: */
-.app-wasm-loader-rectangle {
-	background-image:	linear-gradient(90deg, #0000, var(--shine-color), #0000);
-	background-size: 160px 100%;
-	background-repeat: no-repeat;
-	background-position: left -160px top 0;
-	animation: shine 1s ease infinite;
-}
-
-@keyframes shine {
-	to {
-		background-position: right -160px top 0;
-	}
+#app-wasm-loader * {
+  border: unset;
+  margin-block: unset;
+  font-family: unset;
 }

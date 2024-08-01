@@ -55,7 +55,8 @@ type Config struct { //types:add
 	// language Go (must be uppercase, as that indicates that is an
 	// "exported" example) will be collected and stored at pagegen.go, and
 	// a directory tree will be made for all of the pages when building
-	// for platform web.
+	// for platform web. This defaults to "content" when building an app
+	// for platform web that imports pages.
 	Pages string
 
 	// the configuration options for the build, install, run, and pack commands

@@ -26,10 +26,16 @@ func (dw *Drawer) DestBounds() image.Rectangle {
 	return TheApp.Scrn.Geometry
 }
 
+var loader = js.Global().Get("document").Call("getElementById", "app-wasm-loader")
+
 // EndDraw ends image drawing rendering process on render target.
 // This is the thing that actually does the drawing on web.
 func (dw *Drawer) EndDraw() {
 	sz := dw.Image.Bounds().Size()
 	ptr := uintptr(unsafe.Pointer(&dw.Image.Pix[0]))
 	js.Global().Call("displayImage", ptr, len(dw.Image.Pix), sz.X, sz.Y)
+	if loader.Truthy() {
+		loader.Call("remove")
+		loader = js.Value{}
+	}
 }
