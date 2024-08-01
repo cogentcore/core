@@ -125,6 +125,7 @@ func (ph *Phong) Config() *Phong {
 	ph.configLights()
 	ph.configMeshes()
 	ph.configTextures()
+	ph.updateObjects()
 	return ph
 }
 
@@ -161,17 +162,17 @@ func (ph *Phong) ConfigTextures() *Phong {
 ///////////////////////////////////////////////////
 // Rendering
 
-// RenderStart should be called at the start of rendering.
-// It updates the object data on the GPU based on any changes made
-// via SetObject calls since the last render.
-func (ph *Phong) RenderStart() {
+// RenderStart starts the render pass, returning the
+// CommandEncoder and RenderPassEncoder used for encoding
+// the rendering commands for this pass.
+// Pass the TextureView to render into (e.g., from Surface).
+func (ph *Phong) RenderStart(view *wgpu.TextureView) (*wgpu.CommandEncoder, *wgpu.RenderPassEncoder) {
 	ph.Lock()
 	defer ph.Unlock()
 
-	if ph.objectUpdated {
-		ph.updateObjects()
-		ph.objectUpdated = false
-	}
+	cmd := ph.Sys.NewCommandEncoder()
+	rp := ph.Sys.BeginRenderPass(cmd, view)
+	return cmd, rp
 }
 
 // Render does one step of rendering given current Use* settings,
@@ -179,6 +180,9 @@ func (ph *Phong) RenderStart() {
 func (ph *Phong) Render(rp *wgpu.RenderPassEncoder) {
 	ph.Lock()
 	defer ph.Unlock()
+
+	ph.RenderOneColor(rp)
+	return
 
 	switch {
 	case ph.UseTexture:
@@ -190,16 +194,16 @@ func (ph *Phong) Render(rp *wgpu.RenderPassEncoder) {
 	}
 }
 
-// RenderTexture renders current settings to texture pipeline
-func (ph *Phong) RenderTexture(rp *wgpu.RenderPassEncoder) {
-	pl := ph.Sys.GraphicsPipelines["texture"]
+// RenderOneColor renders current settings to onecolor pipeline.
+func (ph *Phong) RenderOneColor(rp *wgpu.RenderPassEncoder) {
+	pl := ph.Sys.GraphicsPipelines["onecolor"]
 	pl.BindPipeline(rp)
 	pl.BindDrawVertex(rp)
 }
 
-// RenderOneColor renders current settings to onecolor pipeline.
-func (ph *Phong) RenderOneColor(rp *wgpu.RenderPassEncoder) {
-	pl := ph.Sys.GraphicsPipelines["onecolor"]
+// RenderTexture renders current settings to texture pipeline
+func (ph *Phong) RenderTexture(rp *wgpu.RenderPassEncoder) {
+	pl := ph.Sys.GraphicsPipelines["texture"]
 	pl.BindPipeline(rp)
 	pl.BindDrawVertex(rp)
 }

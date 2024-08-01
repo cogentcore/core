@@ -107,6 +107,9 @@ func (sy *System) WaitDone() {
 }
 
 func (sy *System) Release() {
+	if sy.Device.Device != nil {
+		sy.WaitDone()
+	}
 	// for _, ev := range sy.Events {
 	// 	vk.ReleaseEvent(sy.Device.Device, ev, nil)
 	// }

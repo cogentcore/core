@@ -48,10 +48,8 @@ func main() {
 
 	sf := gpu.NewSurface(gp, sp, width, height)
 	ph := phong.NewPhong(sf.GPU, sf.Device, &sf.Format)
-	sy := ph.Sys
 
 	destroy := func() {
-		sy.WaitDone()
 		ph.Release()
 		sf.Release()
 		gp.Release()
@@ -95,8 +93,6 @@ func main() {
 		fn := strings.Split(fnm, ".")[0]
 		ph.AddTexture(fn, phong.NewTexture(imgs[i]))
 	}
-
-	ph.Config()
 
 	/////////////////////////////
 	// Colors
@@ -167,9 +163,9 @@ func main() {
 			nm := strconv.Itoa(i)
 			ph.SetObjectMatrix(nm, &ob.Matrix)
 		}
+		ph.UpdateObjects()
 	}
-	updateObs()      // gotta do at least once
-	ph.RenderStart() // todo:
+	updateObs() // gotta do at least once
 
 	render1 := func(rp *wgpu.RenderPassEncoder) {
 		for i, ob := range objs {
@@ -181,9 +177,9 @@ func main() {
 				ph.UseNoTexture()
 			}
 			ph.Render(rp)
-			if i == 0 {
-				break
-			}
+			// if i == 0 {
+			// 	break
+			// }
 		}
 	}
 
@@ -191,22 +187,19 @@ func main() {
 	stTime := time.Now()
 
 	renderFrame := func() {
-		// updateCamera()
-		// ph.RenderStart()
-		view, err := sf.AcquireNextTexture()
-		if errors.Log(err) != nil {
-			return
-		}
-		cmd := sy.NewCommandEncoder()
-		rp := sy.BeginRenderPass(cmd, view)
 		fcr := frameCount % 10
 		_ = fcr
 		campos.X = float32(frameCount) * 0.01
 		campos.Z = 10 - float32(frameCount)*0.03
-		render1(rp)
-
 		frameCount++
+		updateCamera()
 
+		view, err := sf.AcquireNextTexture()
+		if errors.Log(err) != nil {
+			return
+		}
+		cmd, rp := ph.RenderStart(view)
+		render1(rp)
 		rp.End()
 		sf.SubmitRender(cmd)
 		sf.Present()

@@ -213,16 +213,16 @@ var t_tex: texture_2d<f32>;
 var s_tex: sampler;
 
 @fragment
-fn fs_main(in: FragmentInput) -> @location(0) vec4<f32> {
+fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 	let opacity: f32 = object.color.a;
 	let clr: vec3<f32> = object.color.rgb;
 	let shiny: f32 = object.shinyBright.x;
 	let reflct: f32 = object.shinyBright.y;
 	let bright: f32 = object.shinyBright.z;
 	var norm: vec3<f32> = in.norm;
-	if (in.front_face) {
-		norm = -norm;
-	}
+	// if (in.front_face) {
+	// 	norm = -norm;
+	// }
 	return phongModel(in.clip_position, norm, in.cam_dir, clr, clr, shiny, reflct, bright, opacity);
 	// return textureSample(t_tex, s_tex, in.tex_coords);
 }

@@ -138,6 +138,20 @@ func (ph *Phong) UseObjectIndex(idx int) error {
 	return nil
 }
 
+// UpdateObjects must be called after all the SetObject* calls have
+// been made, setting updated object data.
+// It sends all the updated object data up to the GPU.
+func (ph *Phong) UpdateObjects() {
+	ph.Lock()
+	defer ph.Unlock()
+
+	if !ph.objectUpdated {
+		return
+	}
+	ph.updateObjects()
+	ph.objectUpdated = false
+}
+
 // updateObjects updates the object specific data to the GPU.
 // This is called in the RenderStart function.
 func (ph *Phong) updateObjects() {

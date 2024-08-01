@@ -39,29 +39,29 @@ const (
 // configSystem configures the Phong System and pipelines.
 func (ph *Phong) configSystem() {
 	sy := ph.Sys
-	tpl := sy.AddGraphicsPipeline("texture")
-	ph.configPipeline(tpl)
 	opl := sy.AddGraphicsPipeline("onecolor")
 	ph.configPipeline(opl)
-	vpl := sy.AddGraphicsPipeline("pervertex")
-	ph.configPipeline(vpl)
+	// tpl := sy.AddGraphicsPipeline("texture")
+	// ph.configPipeline(tpl)
+	// vpl := sy.AddGraphicsPipeline("pervertex")
+	// ph.configPipeline(vpl)
 
-	sh := tpl.AddShader("texture")
-	// sh.OpenFileFS(shaders, "shaders/texture.wgsl")
-	sh.OpenFileFS(shaders, "shaders/onecolor.wgsl")
-	tpl.AddEntry(sh, gpu.VertexShader, "vs_main")
-	tpl.AddEntry(sh, gpu.FragmentShader, "fs_main")
-
-	sh = opl.AddShader("onecolor")
+	sh := opl.AddShader("onecolor")
 	sh.OpenFileFS(shaders, "shaders/onecolor.wgsl")
 	opl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	opl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
-	sh = opl.AddShader("pervertex")
-	// sh.OpenFileFS(shaders, "shaders/pervertex.wgsl")
-	sh.OpenFileFS(shaders, "shaders/onecolor.wgsl")
-	vpl.AddEntry(sh, gpu.VertexShader, "vs_main")
-	vpl.AddEntry(sh, gpu.FragmentShader, "fs_main")
+	// sh = tpl.AddShader("texture")
+	// // sh.OpenFileFS(shaders, "shaders/texture.wgsl")
+	// sh.OpenFileFS(shaders, "shaders/onecolor.wgsl")
+	// tpl.AddEntry(sh, gpu.VertexShader, "vs_main")
+	// tpl.AddEntry(sh, gpu.FragmentShader, "fs_main")
+
+	// sh = opl.AddShader("pervertex")
+	// // sh.OpenFileFS(shaders, "shaders/pervertex.wgsl")
+	// sh.OpenFileFS(shaders, "shaders/onecolor.wgsl")
+	// vpl.AddEntry(sh, gpu.VertexShader, "vs_main")
+	// vpl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
 	vgp := sy.Vars.AddVertexGroup()
 	cgp := sy.Vars.AddGroup(gpu.Uniform, "Camera")         // group = 0
@@ -90,6 +90,7 @@ func (ph *Phong) configSystem() {
 	lgp.AddStruct("SpotLights", vector4sz*4, MaxLights, gpu.FragmentShader)
 
 	tgp.Add("TexSampler", gpu.TextureRGBA32, 1, gpu.FragmentShader)
+
 	vgp.SetNValues(1)
 	cgp.SetNValues(1)
 	ogp.SetNValues(1)
