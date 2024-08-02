@@ -7,6 +7,7 @@ package gpu
 import (
 	"io/fs"
 	"os"
+	"path/filepath"
 
 	"cogentcore.org/core/base/errors"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
@@ -37,7 +38,8 @@ func (sh *Shader) OpenFile(fname string) error {
 	if errors.Log(err) != nil {
 		return err
 	}
-	return sh.OpenCode(string(b))
+	cp := errors.Log1(os.Getwd())
+	return sh.OpenCode(IncludeFS(os.DirFS(cp), "", string(b))) // todo: maybe not ideal
 }
 
 // OpenFileFS loads given WGSL ".wgl" code from file for the Shader.
@@ -49,7 +51,7 @@ func (sh *Shader) OpenFileFS(fsys fs.FS, fname string) error {
 	if errors.Log(err) != nil {
 		return err
 	}
-	return sh.OpenCode(string(b))
+	return sh.OpenCode(IncludeFS(fsys, filepath.Dir(fname), string(b)))
 }
 
 // OpenCode loads given WGSL ".wgl" code for the Shader.

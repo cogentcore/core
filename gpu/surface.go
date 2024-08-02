@@ -8,10 +8,7 @@
 package gpu
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/reflectx"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -134,7 +131,7 @@ func (sf *Surface) Present() {
 func (sf *Surface) ConfigSwapChain() error {
 	caps := sf.surface.GetCapabilities(sf.GPU.GPU)
 
-	fmt.Println(reflectx.StringJSON(caps))
+	// fmt.Println(reflectx.StringJSON(caps))
 
 	sf.swapChainConfig = &wgpu.SwapChainDescriptor{
 		Usage:       wgpu.TextureUsageRenderAttachment,

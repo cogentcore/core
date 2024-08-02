@@ -1,182 +1,163 @@
-// #include to implement Blinn-Phong lighting model
+// phong.wgsl implements the Phong-Blinn lighting model
+// and has the standard Camera and Object structs
+// for the phong package.
 
-// note: all of these vec3 must be padded by an extra float on Go side
+const MaxLights = 8;
+const eps: f32 = 0.00001;
 
-#define MAX_LIGHTS 8
-
-layout(set = 1, binding = 0) uniform NLightsU {
-	int NAmbient;
-	int NDir;
-	int NPoint;
-	int NSpot;
+struct NLights {
+	ambient: i32,
+	dir: i32,
+	point: i32,
+	spot: i32,
 };
 
 struct Ambient {
-	vec3 Color;
-};
-
-layout(set = 2, binding = 0) uniform AmbLightsU {
-	Ambient AmbLights[MAX_LIGHTS];
+	color: vec3<f32>,
 };
 
 struct Dir {
-	vec3 Color;
-	vec3 Pos;
-};
-
-layout(set = 2, binding = 1) uniform DirLightsU {
-	Dir DirLights[MAX_LIGHTS];
+	color: vec3<f32>, 
+	pos: vec3<f32>,
 };
 
 struct Point {
-	vec3 Color;
-	vec3 Pos;
-	vec3 Decay; // x = Lin, y = Quad
-};
-
-layout(set = 2, binding = 2) uniform PointLightsU {
-	Point PointLights[MAX_LIGHTS];
+	color: vec3<f32>,
+	pos: vec3<f32>,
+	decay: vec3<f32>, // x = Lin, y = Quad
 };
 
 struct Spot {
-	vec3 Color;
-	vec3 Pos;
-	vec3 Dir;
-	vec4 Decay; // x = Ang, y = CutAngle, z = Lin, w = Quad
+	color: vec3<f32>,
+	pos: vec3<f32>,
+	dir: vec3<f32>,
+	decay: vec4<f32>, // x = Ang, y = CutAngle, z = Lin, w = Quad
 };
 
-layout(set = 2, binding = 3) uniform SpotLightsU {
-	Spot SpotLights[MAX_LIGHTS];
-};
+@group(2) @binding(0)
+var<uniform> nLights: NLights;
 
-// debugVector3 renders vector to color for debugging values
-// void debugVector3(vec3 val, out vec4 clr) {
-// 	clr = vec4(0.5 + 0.5 * val, 1.0);
-// }
+@group(2) @binding(1)
+var<uniform> ambient: array<Ambient, MaxLights>;
 
-void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, vec3 matSpecular, float shiny, float reflct, float bright, float opacity, out vec4 outColor) {
+@group(2) @binding(2)
+var<uniform> dir: array<Dir, MaxLights>;
 
-	vec3 ambientTotal  = vec3(0.0);
-	vec3 diffuseTotal  = vec3(0.0);
-	vec3 specularTotal = vec3(0.0);
+@group(2) @binding(3)
+var<uniform> point: array<Point, MaxLights>;
 
-	matSpecular =  vec3(reflct,reflct,reflct);
+@group(2) @binding(4)
+var<uniform> spot: array<Spot, MaxLights>;
+
+fn phongModel(pos: vec4<f32>, normal: vec3<f32>, camDir: vec3<f32>, matAmbient: vec3<f32>,  matDiffuse: vec3<f32>, shiny: f32, reflct: f32, bright: f32, opacity: f32) -> vec4<f32> {
+	var ambientTotal: vec3<f32>;
+	var diffuseTotal: vec3<f32>;
+	var specularTotal: vec3<f32>;
+
+	let matSpecular = vec3<f32>(reflct);
 	
-	const float EPS = 0.00001;
-
-    // Workaround for gl_FrontFacing (buggy on Intel integrated GPU's)
-    vec3 fdx = dFdx(pos.xyz);
-    vec3 fdy = dFdy(pos.xyz);
-    vec3 faceNorm = normalize(cross(fdx,fdy));
-    if (dot(norm, faceNorm) > 0.0) { // note: reversed from openGL due to vulkan
-        norm = -norm;
-    }
-	// if (gl_FrontFacing) {
-	// 	norm = -norm;
-	// }
-
-	for (int i = 0; i < NAmbient; i++) {
-		ambientTotal += AmbLights[i].Color * matAmbient;
+	for (var i = 0; i < nLights.ambient; i++) {
+		ambientTotal += ambient[i].color * matAmbient;
 	}
 
-	for (int i = 0; i < NDir; i++) {
+	for (var i = 0; i < nLights.dir; i++) {
 		// LightDir is the position = - direction of the current light
-		vec4 lp4 = vec4(DirLights[i].Pos, 0.0); // 0 = no offsets
- 		vec3 lightDir = normalize((ViewMtx * lp4).xyz);
+		let lp4 = vec4<f32>(dir[i].pos, 0.0);
+ 		let lightDir = normalize(camera.view * lp4).xyz;
 		// Calculates the dot product between the light direction and this vertex normal.
-		float dotNormal = dot(lightDir, norm);
-		if (dotNormal > EPS) {
-			diffuseTotal += DirLights[i].Color * matDiffuse * dotNormal;
+		let dotNormal = dot(lightDir, normal);
+		if (dotNormal > eps) {
+			diffuseTotal += dir[i].color * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
-			vec3 ref = reflect(-lightDir, norm);
-			specularTotal += DirLights[i].Color * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
+			let refl = reflect(-lightDir, normal);
+			specularTotal += dir[i].color * matSpecular * pow(max(dot(refl, camDir), 0.0), shiny);
 		}
 	}
 
-	for (int i = 0; i < NPoint; i++) {
+	for (var i = 0; i < nLights.point; i++) {
 		// Calculates the direction and distance from the current vertex to this point light.
-		vec4 lp4 = vec4(PointLights[i].Pos, 1.0); // 1 = offset
- 		vec3 lightPos = (ViewMtx * lp4).xyz;
-		vec3 lightDir = lightPos - vec3(pos);
-		float lightDist = length(lightDir);
+		let lp4 = vec4<f32>(point[i].pos, 1.0); // 1 = offset
+ 		let lightPos = (camera.view * lp4).xyz;
+		var lightDir = lightPos - pos.xyz;
+		let lightDist = length(lightDir);
 		// Normalizes the lightDir
 		lightDir = lightDir / lightDist;
 		// Calculates the attenuation due to the distance of the light
 		// Diffuse reflection
-		float dotNormal = dot(lightDir, norm);
-		if (dotNormal > EPS) {
-			float linDecay = PointLights[i].Decay.x;
-			float quadDecay = PointLights[i].Decay.y;
-			float attenuation = 1.0 / (1.0 + lightDist * (linDecay +
+		let dotNormal = dot(lightDir, normal);
+		if (dotNormal > eps) {
+			let linDecay = point[i].decay.x;
+			let quadDecay = point[i].decay.y;
+			let attenuation = 1.0 / (1.0 + lightDist * (linDecay +
 				quadDecay * lightDist));
-			vec3 attenColor = PointLights[i].Color * attenuation;
+			let attenColor = point[i].color * attenuation;
 			diffuseTotal += attenColor * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
-			vec3 ref = reflect(-lightDir, norm);
-			specularTotal += attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
+			let refl = reflect(-lightDir, normal);
+			specularTotal += attenColor * matSpecular * pow(max(dot(refl, camDir), 0.0), shiny);
 		}
 	}
 
-	for (int i = 0; i < NSpot; i++) {
+	for (var i = 0; i < nLights.spot; i++) {
 		// Calculates the direction and distance from the current vertex to this spot light.
-		vec4 lp4 = vec4(SpotLights[i].Pos, 1.0); // 1 = offset
- 		vec3 lightPos = (ViewMtx * lp4).xyz;
-		vec3 lightDir = lightPos - vec3(pos);
-		float lightDist = length(lightDir);
+		var lp4 = vec4<f32>(spot[i].pos, 1.0); // 1 = offset
+ 		let lightPos = (camera.view * lp4).xyz;
+		var lightDir = lightPos - pos.xyz;
+		let lightDist = length(lightDir);
 		lightDir = lightDir / lightDist;
 
 		// Calculates the angle between the vertex direction and spot direction
 		// If this angle is greater than the cutoff the spotlight will not contribute
 		// to the final color.
-		vec4 ld4 = vec4(SpotLights[i].Dir, 0.0); // 0 = no offset
- 		vec3 lDir = (ViewMtx * ld4).xyz;
+		let ld4 = vec4<f32>(spot[i].dir, 0.0); // 0 = no offset
+ 		let lDir = (camera.view * ld4).xyz;
 
-		float angle = acos(dot(-lightDir, lDir));
-		float cutAng = SpotLights[i].Decay.y;
-		float cutoff = radians(clamp(cutAng, 0.0, 90.0));
+		let angle = acos(dot(-lightDir, lDir));
+		let cutAng = spot[i].decay.y;
+		let cutoff = radians(clamp(cutAng, 0.0, 90.0));
 
 		if (angle < cutoff) {
 			// Diffuse reflection
-			float dotNormal = dot(lightDir, norm);
-			if (dotNormal > EPS) {
+			let dotNormal = dot(lightDir, normal);
+			if (dotNormal > eps) {
 				// Calculates the attenuation due to the distance of the light
-				vec4 dk = SpotLights[i].Decay;
-				float angDecay = dk.x;
-				float linDecay = dk.z;
-				float quadDecay = dk.w;
-				float attenuation = 1.0 / (1.0 + lightDist * (linDecay +	quadDecay * lightDist));
-				float spotFactor = pow(dot(-lightDir, SpotLights[i].Dir), angDecay);
-				vec3 attenColor = SpotLights[i].Color * attenuation * spotFactor;
+				let dk = spot[i].decay;
+				let angDecay = dk.x;
+				let linDecay = dk.z;
+				let quadDecay = dk.w;
+				let attenuation = 1.0 / (1.0 + lightDist * (linDecay +	quadDecay * lightDist));
+				let spotFactor = pow(dot(-lightDir, spot[i].dir), angDecay);
+				let attenColor = spot[i].color * attenuation * spotFactor;
 				diffuseTotal += attenColor * matDiffuse * dotNormal;
 				// Specular reflection
-				vec3 ref = reflect(-lightDir, norm);
-				specularTotal += attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
+				let refl = reflect(-lightDir, normal);
+				specularTotal += attenColor * matSpecular * pow(max(dot(refl, camDir), 0.0), shiny);
 			}
 		}
 	}
 
-	vec3 ambdiff = ambientTotal + Emissive.rgb + diffuseTotal;
-	outColor = min(vec4((bright * ambdiff + specularTotal) * opacity, opacity), vec4(1.0));
+
+	let ambdiff = ambientTotal + object.emissive.rgb + diffuseTotal;
+	return min(vec4<f32>((bright * ambdiff + specularTotal) * opacity, opacity), vec4<f32>(1.0));
 }
 
-float SRGBToLinearComp(float value) {
-    const float inv_12_92 = 0.0773993808;
-    return value <= 0.04045
-       ? value * inv_12_92 
-       : pow((value + 0.055) / 1.055, 2.4);
-}
+struct CameraUniform {
+   view: mat4x4<f32>,
+   prjn: mat4x4<f32>,
+};
 
-float LinearToSRGBComp(float value) {
-    return value <= 0.0031308
-       ? value * 12.92
-       : 1.055 * (pow(value, 1.0/2.4)) + 0.055;
-}
+struct ObjectStorage {
+	color: vec4<f32>,
+	shinyBright: vec4<f32>,
+	emissive: vec4<f32>,
+	textureRepeatOff: vec4<f32>,
+	matrix: mat4x4<f32>,
+	world: mat4x4<f32>,
+};
 
-vec3 LinearToSRGB(vec3 lin) {
-    return vec3(LinearToSRGBComp(lin.x), LinearToSRGBComp(lin.y), LinearToSRGBComp(lin.z));
-}
+@group(0) @binding(0)
+var<uniform> camera: CameraUniform;
 
-vec3 SRGBToLinear(vec3 srgb) {
-    return vec3(SRGBToLinearComp(srgb.x), SRGBToLinearComp(srgb.y), SRGBToLinearComp(srgb.z));
-}
+@group(1) @binding(0)
+var<uniform> object: ObjectStorage;
 
