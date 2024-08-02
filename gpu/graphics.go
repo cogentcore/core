@@ -178,8 +178,8 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 			EntryPoint: fe.Entry,
 			Targets: []wgpu.ColorTargetState{{
 				Format:    pl.Sys.Render.Format.Format,
-				Blend:     &wgpu.BlendStateReplace, // todo
-				WriteMask: wgpu.ColorWriteMaskAll,  // todo
+				Blend:     &wgpu.BlendStatePremultipliedAlphaBlending,
+				WriteMask: wgpu.ColorWriteMaskAll, // todo
 			}},
 		}
 	}

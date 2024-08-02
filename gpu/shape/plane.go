@@ -40,7 +40,7 @@ func NewPlane(axis math32.Dims, width, height float32) *Plane {
 
 func (pl *Plane) Defaults() {
 	pl.NormalAxis = math32.Y
-	pl.NormalNeg = false
+	pl.NormalNeg = true
 	pl.Size.Set(1, 1)
 	pl.Segs.Set(1, 1)
 	pl.Offset = 0
