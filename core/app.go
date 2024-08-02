@@ -127,55 +127,59 @@ func makeStandardAppBar(p *tree.Plan) {
 		// })
 	})
 	tree.AddAt(p, "app-chooser", func(w *Chooser) {
-		w.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
-		if TheApp.SystemPlatform().IsMobile() {
-			w.SetPlaceholder("Search")
-		} else {
-			w.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
-		}
+		initAppChooser(w, p.Parent.(Widget))
+	})
+}
 
-		tree.AddChildInit(w, "text-field", func(w *TextField) {
-			w.Styler(func(s *styles.Style) {
-				s.Background = colors.Scheme.SurfaceContainerHighest
-				if !s.Is(states.Focused) && w.error == nil {
-					s.Border = styles.Border{}
-				}
-				s.Border.Radius = styles.BorderRadiusFull
-				s.Min.X.SetCustom(func(uc *units.Context) float32 {
-					return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
-				})
-				s.Max.X = s.Min.X
-			})
-		})
+func initAppChooser(w *Chooser, parent Widget) {
+	w.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
+	if TheApp.SystemPlatform().IsMobile() {
+		w.SetPlaceholder("Search")
+	} else {
+		w.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
+	}
 
-		w.AddItemsFunc(func() {
-			for _, rw := range AllRenderWindows {
-				for _, kv := range rw.mains.stack.Order {
-					st := kv.Value
-					// we do not include ourself
-					if st == w.Scene.Stage {
-						continue
-					}
-					w.Items = append(w.Items, ChooserItem{
-						Text:    st.Title,
-						Icon:    icons.Toolbar,
-						Tooltip: "Show " + st.Title,
-						Func:    st.raise,
-					})
-				}
+	tree.AddChildInit(w, "text-field", func(w *TextField) {
+		w.Styler(func(s *styles.Style) {
+			s.Background = colors.Scheme.SurfaceContainerHighest
+			if !s.Is(states.Focused) && w.error == nil {
+				s.Border = styles.Border{}
 			}
+			s.Border.Radius = styles.BorderRadiusFull
+			s.Min.X.SetCustom(func(uc *units.Context) float32 {
+				return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
+			})
+			s.Max.X = s.Min.X
 		})
-		w.AddItemsFunc(func() {
-			addButtonItems(&w.Items, p.Parent, "")
-		})
+	})
 
-		w.OnFinal(events.Change, func(e events.Event) {
-			// we must never have a chooser label so that it
-			// always displays the search placeholder
-			w.CurrentIndex = -1
-			w.CurrentItem = ChooserItem{}
-			w.showCurrentItem()
-		})
+	w.AddItemsFunc(func() {
+		for _, rw := range AllRenderWindows {
+			for _, kv := range rw.mains.stack.Order {
+				st := kv.Value
+				// we do not include ourself
+				if st == w.Scene.Stage {
+					continue
+				}
+				w.Items = append(w.Items, ChooserItem{
+					Text:    st.Title,
+					Icon:    icons.Toolbar,
+					Tooltip: "Show " + st.Title,
+					Func:    st.raise,
+				})
+			}
+		}
+	})
+	w.AddItemsFunc(func() {
+		addButtonItems(&w.Items, parent, "")
+	})
+
+	w.OnFinal(events.Change, func(e events.Event) {
+		// we must never have a chooser label so that it
+		// always displays the search placeholder
+		w.CurrentIndex = -1
+		w.CurrentItem = ChooserItem{}
+		w.showCurrentItem()
 	})
 }
 
@@ -191,6 +195,12 @@ var (
 
 // standardOverflowMenu adds standard overflow menu items for an app bar.
 func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
+	NewButton(m).SetText("Search").SetIcon(icons.Search).OnClick(func(e events.Event) {
+		d := NewBody().AddTitle("Search")
+		ch := NewChooser(d)
+		initAppChooser(ch, tb)
+		d.RunDialog(m)
+	})
 	NewButton(m).SetText("About").SetIcon(icons.Info).OnClick(func(e events.Event) {
 		d := NewBody(TheApp.Name())
 		d.Styler(func(s *styles.Style) {
