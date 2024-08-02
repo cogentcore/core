@@ -13,11 +13,13 @@ type Box struct { //types:add -setters
 	// size along each dimension
 	Size math32.Vector3
 
-	// number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
+	// number of segments to divide each plane into
+	// (enforced to be at least 1).
+	// Can generally increase rendering quality to have > 1.
 	Segs math32.Vector3i
 }
 
-// NewBox returns a Box shape with given size
+// NewBox returns a Box shape with given size.
 func NewBox(width, height, depth float32) *Box {
 	bx := &Box{}
 	bx.Defaults()
@@ -35,7 +37,7 @@ func (bx *Box) N() (numVertex, nIndex int) {
 	return
 }
 
-// SetBox sets points in given allocated arrays
+// SetBox sets points in given allocated arrays.
 func (bx *Box) Set(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	hSz := SetBox(vertexArray, normalArray, textureArray, indexArray, bx.VertexOff, bx.IndexOff, bx.Size, bx.Segs, bx.Pos)
 

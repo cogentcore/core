@@ -13,23 +13,28 @@ import (
 type Plane struct { //types:add -setters
 	ShapeBase
 
-	// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormalNeg for whether it is facing in the positive or negative of the given axis.
+	// axis along which the normal perpendicular to the plane points.
+	// E.g., if the Y axis is specified, then it is a standard X-Z ground plane.
+	// See also NormalNeg for whether it is facing in the positive or
+	// negative of the given axis.
 	NormalAxis math32.Dims
 
-	// if false, the plane normal facing in the positive direction along specified NormalAxis, otherwise it faces in the negative if true
+	// if false, the plane normal is facing in the positive direction
+	// along specified NormalAxis, otherwise it faces in the negative.
 	NormalNeg bool
 
 	// 2D size of plane
 	Size math32.Vector2
 
-	// number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
+	// number of segments to divide plane into (enforced to be at least 1).
+	// Can generally increase rendering quality to have > 1.
 	Segs math32.Vector2i
 
-	// offset from origin along direction of normal to the plane
+	// offset from origin along direction of normal to the plane.
 	Offset float32
 }
 
-// NewPlane returns a Plane shape with given size
+// NewPlane returns a Plane shape with given size.
 func NewPlane(axis math32.Dims, width, height float32) *Plane {
 	pl := &Plane{}
 	pl.Defaults()
@@ -40,7 +45,7 @@ func NewPlane(axis math32.Dims, width, height float32) *Plane {
 
 func (pl *Plane) Defaults() {
 	pl.NormalAxis = math32.Y
-	pl.NormalNeg = true
+	pl.NormalNeg = false
 	pl.Size.Set(1, 1)
 	pl.Segs.Set(1, 1)
 	pl.Offset = 0
@@ -52,7 +57,7 @@ func (pl *Plane) N() (numVertex, nIndex int) {
 	return
 }
 
-// Set sets points in given allocated arrays
+// Set sets points in given allocated arrays.
 func (pl *Plane) Set(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	sz := SetPlaneAxisSize(vertexArray, normalArray, textureArray, indexArray, pl.VertexOff, pl.IndexOff, pl.NormalAxis, pl.NormalNeg, pl.Size, pl.Segs, pl.Offset, pl.Pos)
 	mn := pl.Pos.Sub(sz)
@@ -65,7 +70,7 @@ func (pl *Plane) Set(vertexArray, normalArray, textureArray math32.ArrayF32, ind
 // Note: In *vertex* units, not float units (i.e., x3 to get
 // actual float offset in Vtx array).
 // numVertex = (wsegs + 1) * (hsegs + 1)
-// nIndex = wsegs * hsegs * 6
+// nIndex = wsegs * hsegs * 6.
 func PlaneN(wsegs, hsegs int) (numVertex, nIndex int) {
 	wsegs = max(wsegs, 1)
 	hsegs = max(hsegs, 1)

@@ -1,6 +1,10 @@
-# Phong is a Blinn-Phong rendering system in vGPU
+# Phong is a Blinn-Phong rendering system in gpu
 
 Blinn-Phong is a standard lighting model that used to be built into OpenGL, and is widely used in 3D graphics: [wikipedia Blinn-Phong](https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model),  [learnopengl.com](https://learnopengl.com/Lighting/Basic-Lighting).
+
+This package provides a "middleware" layer between the basic `gpu` package and a complete end-user framework like [xyz](https://github.com/cogentcore/core/tree/main/xyz) which can focus on how to organize the scenegraph data structures, and then relies on `phong` to mange the gpu-side rendering efficiently.
+
+TODO: turn on auto-mipmap stuff for smoother texture rendering
 
 # Usage
 

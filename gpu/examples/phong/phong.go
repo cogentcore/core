@@ -71,7 +71,7 @@ func main() {
 	// Note: 100 segs improves lighting differentiation significantly
 
 	ph.AddMeshFromShape("floor",
-		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{100, 100}))
+		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{100, 100}).SetNormalNeg(true))
 	ph.AddMeshFromShape("cube",
 		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3i{50, 50, 50}))
 	ph.AddMeshFromShape("sphere", shape.NewSphere(.5, 64))
