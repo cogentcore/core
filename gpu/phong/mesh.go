@@ -79,6 +79,10 @@ func (ph *Phong) AddMeshFromShape(name string, sh shape.Shape) {
 	gpu.SetValueFrom(vgp.ValueByIndex("Pos", idx), mv.vertexArray)
 	gpu.SetValueFrom(vgp.ValueByIndex("Normal", idx), mv.normalArray)
 	gpu.SetValueFrom(vgp.ValueByIndex("TexCoord", idx), mv.textureArray)
+	if idx == 0 {
+		// set dummy vertexcolor
+		gpu.SetValueFrom(vgp.ValueByIndex("VertexColor", idx), make([]float32, nVertex*4))
+	}
 	gpu.SetValueFrom(vgp.ValueByIndex("Index", idx), mv.indexArray)
 }
 
@@ -118,10 +122,11 @@ func (ph *Phong) UseMeshIndex(idx int) error {
 	sy.Vars.SetCurrentValue(gpu.VertexGroup, "TexCoord", idx)
 	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Index", idx)
 	if mesh.HasColor {
-		sy.Vars.SetCurrentValue(gpu.VertexGroup, "Color", idx)
+		sy.Vars.SetCurrentValue(gpu.VertexGroup, "VertexColor", idx)
 		ph.UseVertexColor = true
 		ph.UseTexture = false
 	} else {
+		sy.Vars.SetCurrentValue(gpu.VertexGroup, "VertexColor", 0)
 		ph.UseVertexColor = false
 	}
 	return nil
@@ -161,10 +166,10 @@ func (ph *Phong) configMesh(mv *Mesh, idx int) {
 	vgp.ValueByIndex("Normal", idx).DynamicN = mv.NVertex
 	vgp.ValueByIndex("TexCoord", idx).DynamicN = mv.NVertex
 	vgp.ValueByIndex("Index", idx).DynamicN = mv.NIndex
-	// vc := vgp.ValueByIndex("VertexColor", idx)
-	// if mv.HasColor {
-	// 	vc.DynamicN = mv.NVertex
-	// } else {
-	// 	vc.DynamicN = 1
-	// }
+	vc := vgp.ValueByIndex("VertexColor", idx)
+	if mv.HasColor {
+		vc.DynamicN = mv.NVertex
+	} else {
+		vc.DynamicN = 1
+	}
 }
