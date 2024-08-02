@@ -1,4 +1,4 @@
-// phong.wgsl implements the Phong-Blinn lighting model
+// phong.wgsl implements the Blinn-Phong lighting model
 // and has the standard Camera and Object structs
 // for the phong package.
 
@@ -139,6 +139,28 @@ fn phongModel(pos: vec4<f32>, normal: vec3<f32>, camDir: vec3<f32>, matAmbient: 
 
 	let ambdiff = ambientTotal + object.emissive.rgb + diffuseTotal;
 	return min(vec4<f32>((bright * ambdiff + specularTotal) * opacity, opacity), vec4<f32>(1.0));
+}
+
+fn SRGBToLinearComp(value: f32) -> f32 {
+	if (value <= 0.04045) {
+		return value * 0.0773993808;
+	}
+ 	return pow((value + 0.055) / 1.055, 2.4);
+}
+
+fn LinearToSRGBComp(value: f32) -> f32 {
+	if (value <= 0.0031308) {
+		return value * 12.92;
+	}
+	return 1.055 * (pow(value, 1.0/2.4)) + 0.055;
+}
+
+fn LinearToSRGB(lin: vec3<f32>) -> vec3<f32> {
+    return vec3<f32>(LinearToSRGBComp(lin.x), LinearToSRGBComp(lin.y), LinearToSRGBComp(lin.z));
+}
+
+fn SRGBToLinear(srgb: vec3<f32>) -> vec3<f32> {
+    return vec3<f32>(SRGBToLinearComp(srgb.x), SRGBToLinearComp(srgb.y), SRGBToLinearComp(srgb.z));
 }
 
 struct CameraUniform {

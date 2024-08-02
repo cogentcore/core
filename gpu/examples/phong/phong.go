@@ -59,11 +59,11 @@ func main() {
 	/////////////////////////////
 	// Lights
 
-	ph.AddAmbientLight(math32.NewVector3Color(color.White).MulScalar(.1))
-	ph.AddDirLight(math32.NewVector3Color(color.White), math32.Vec3(0, 1, 1))
+	ph.AddAmbient(math32.NewVector3Color(color.White).MulScalar(.1))
+	ph.AddDirectional(math32.NewVector3Color(color.White), math32.Vec3(0, 1, 1))
 
-	// ph.AddPointLight(math32.NewVector3Color(color.White), math32.Vec3(0, 2, 5), .1, .01)
-	// ph.AddSpotLight(math32.NewVector3Color(color.White), math32.Vec3(-2, 5, -2), math32.Vec3(0, -1, 0), 10, 45, .01, .001)
+	// ph.AddPoint(math32.NewVector3Color(color.White), math32.Vec3(0, 2, 5), .1, .01)
+	// ph.AddSpot(math32.NewVector3Color(color.White), math32.Vec3(-2, 5, -2), math32.Vec3(0, -1, 0), 10, 45, .01, .001)
 
 	/////////////////////////////
 	// Meshes
@@ -144,12 +144,12 @@ func main() {
 		ph.AddObject(nm, phong.NewObject(&ob.Matrix, ob.Color, color.Black, 30, 1, 1))
 	}
 
+	ph.SetCamera(view, &projection)
+
 	/////////////////////////////
 	//  Config!
 
 	ph.Config()
-
-	ph.SetCamera(view, &projection)
 
 	updateCamera := func() {
 		aspect := sf.Format.Aspect()
@@ -165,6 +165,9 @@ func main() {
 			od := ph.SetObjectMatrix(nm, &ob.Matrix)
 			if i == 0 {
 				od.SetTextureRepeat(math32.Vector2{50, 50})
+			}
+			if i == 3 { // cone
+				od.SetColors(dark, green, 30, .1, 1) // emissive, not reflective
 			}
 		}
 	}

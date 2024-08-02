@@ -7,26 +7,66 @@ Blinn-Phong is a standard lighting model that used to be built into OpenGL, and 
 See [examples/phong] for a working example.
 
 ```Go
-    ph := phong.NewPhong(sf.GPU, &sf.Device) // needs a gpu.GPU and a gpu.Device
+    // needs a gpu.GPU, gpu.Device, and a gpu.TextureFormat for the render target
+    ph := phong.NewPhong(sf.GPU, &sf.Device, &sf.Format)
+    
+    // add lights
+    ph.AddDirectional(math32.NewVector3Color(color.White), math32.Vec3(0, 1, 1))
+    ...
+    
+    // add meshes
+    ph.AddMeshFromShape("sphere", shape.NewSphere(.5, 64))
+    ...
+    
+    // add textures
+    ph.AddTexture(fn, phong.NewTexture(imgs[i])) // go image.Image, ideally RGBA
+    ...
+
+    // add objects
+    ph.AddObject(nm, phong.NewObject(&ob.Matrix, ob.Color, color.Black, 30, 1, 1))
+    ...
+    
+    // set the camera matricies
+    ph.SetCamera(view, projection)
+    
+    ph.Config() // configures everything for current settings -- only call once
+    
+    // can call ph.ConfigMeshes(), ph.ConfigTextures(), ph.ConfigLights()
+    // to update any of those elements if they change
+
+    // render, to a surface:
+    cmd, rp := ph.RenderStart(view) // uploads updated object data too
+    for i, ob := range objects {
+        ph.UseObjectIndex(i)
+        ph.UseMeshName(ob.Mesh)
+        if ob.Texture != "" {
+            ph.UseTextureName(ob.Texture)
+        } else {
+            ph.UseNoTexture()
+        }
+    }
+    rp.End()
+    sf.SubmitRender(cmd)
+    sf.Present()
 ```
 
 # Features
 
 Supports 4 different types of lights, with a max of 8 instances of each light type:
 
-* Ambient: light emitted from everywhere -- provides a background of diffuse light bouncing around in all directions.
+* `Ambient`: light emitted from everywhere -- provides a background of diffuse light bouncing around in all directions.
 
-* Directional: light directed along a given vector (specified as a position of a light shining toward the origin), with no attenuation.  This is like the sun.
+* `Directional`: light directed along a given vector (specified as a position of a light shining toward the origin), with no attenuation.  This is like the sun.
 
-* Point: an omnidirectional light with a position and associated decay factors, which divide the light intensity as a function of linear and quadratic distance.  The quadratic factor dominates at longer distances.light radiating out in all directdions from a specific point, 
+* `Point`: an omnidirectional light with a position and associated decay factors, which divide the light intensity as a function of linear and quadratic distance.  The quadratic factor dominates at longer distances.light radiating out in all directdions from a specific point, 
 
-* Spot: a light with a position and direction and associated decay factors and angles, which divide the light intensity as a function of linear and quadratic distance. The quadratic factor dominates at longer distances.
+* `Spot`: a light with a position and direction and associated decay factors and angles, which divide the light intensity as a function of linear and quadratic distance. The quadratic factor dominates at longer distances.
 
 Meshes are indexed triangles.
 
 There are 3 rendering pipelines:
-* Texture: color comes from texture image
 * OneColor: a single color for the entire mesh.
+* Texture: color comes from texture image
 * PerVertex: color is provided per vertex by the mesh.
 
 The color model has the following factors:
@@ -38,60 +78,33 @@ The color model has the following factors:
 
 # Layout of Vars
 
-Without push constants in WebGPU, we need to store and send the per-object color and model matrix in the Vertex group, as Per-instance variables.  Vertex variables can only be up to 4 bytes (Float32Vector4) so we serialize each color component separately, and the Float32Matrix4 has support for serializing the 4x variables.
-
-This also means that we need to manage this per-object data as variables in the 
+Without push constants in WebGPU, we maintain an `Objects` group with per-object dynamic offset data, that is selected with the `UseObject*` function on each render step.  This means that the phong system must know about all the objects in advance.
 
 ```
-Set: -2
+Group: -2 Vertex
     Role: Vertex
-        Var: 0:	Pos	Float32Vector3	(size: 12)	Values: 6
-        Var: 1:	Normal	Float32Vector3	(size: 12)	Values: 6
-        Var: 2:	Tex	Float32Vector2	(size: 8)	Values: 6
-        Var: 3:	Color	Float32Vector4	(size: 16)	Values: 6
+        Var: 0:	Pos	Float32Vector3	(size: 12)	Values: 8
+        Var: 1:	Normal	Float32Vector3	(size: 12)	Values: 8
+        Var: 2:	TexCoord	Float32Vector2	(size: 8)	Values: 8
+        Var: 3:	VertexColor	Float32Vector4	(size: 16)	Values: 8
     Role: Index
-        Var: 4:	Index	Uint32	(size: 4)	Values: 6
-Set: -1
-    Role: Push
-        Var: 0:	PushU	Struct	(size: 128)	Values: 1
-Set: 0
+        Var: 0:	Index	Uint32	(size: 4)	Values: 8
+Group: 0 Camera
     Role: Uniform
-        Var: 0:	Matrix	Struct	(size: 128)	Values: 1
-Set: 1
+        Var: 0:	Camera	Struct	(size: 128)	Values: 1
+Group: 1 Objects
+    Role: Uniform
+        Var: 0:	Object	Struct	(size: 192)	Values: 1
+Group: 2 Lights
     Role: Uniform
         Var: 0:	NLights	Struct	(size: 16)	Values: 1
-Set: 2
-    Role: Uniform
-        Var: 0:	AmbLights	Struct[8]	(size: 16)	Values: 1
-        Var: 1:	DirLights	Struct[8]	(size: 32)	Values: 1
-        Var: 2:	PointLights	Struct[8]	(size: 48)	Values: 1
-        Var: 3:	SpotLights	Struct[8]	(size: 64)	Values: 1
-Set: 3
+        Var: 1:	Ambient	Struct[8]	(size: 16)	Values: 1
+        Var: 2:	Directional	Struct[8]	(size: 32)	Values: 1
+        Var: 3:	Point	Struct[8]	(size: 48)	Values: 1
+        Var: 4:	Spot	Struct[8]	(size: 64)	Values: 1
+Group: 3 Texture
     Role: SampledTexture
-        Var: 0:	Tex	TextureRGBA32	(size: 4)	Values: 3
+        Var: 0:	TexSampler	TextureRGBA32	(size: 4)	Values: 1
 ```
-
-# WebGPU specific considerations
-
-WebGPU does not (yet) support push constants: https://github.com/gpuweb/gpuweb/issues/75
-
-Vulkan-based vGPU took full advantage of push constants, to send up the model matrix and texture index for the current object being rendered.
-
-The general problem here is called "instanced rendering", and there are various ideas about how best to accomplish it.
-
-* https://www.reddit.com/r/vulkan/comments/1bp3tw3/how_to_do_instanced_rendering/
-* https://stackoverflow.com/questions/40309914/how-to-send-my-model-matrix-only-once-per-model-to-shaders
-
-Without push constants, there are 3 different options:
-
-1. push it through the vertex buffer, as _per instance_ vec4 values that are then assembled into a 4x4 matrix.  this is what the `go-webgpu-examples/learn-gpu/beginner/tutorial7-instances` does.
-
-2. store it in a storage buffer per object, and use the magic `gl_InstanceID` index to index into that.
-
-3. use different BindGroup configs that reference different Uniform or Storage Values, one per object, and update the bindings before each object.
-
-All options require allocating data on a _per object_ basis, whereas otherwise phong is designed to only require knowing the _meshes_ which drive the vertex data, and are generally much smaller in number than the objects (this is the instancing concept).
-
-Probably the vertex buffer is the fastest of the options -- will investigate.
 
 

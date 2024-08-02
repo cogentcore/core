@@ -11,32 +11,32 @@ import (
 
 // Number of different lights active.
 type NLights struct {
-	Ambient int32
-	Dir     int32
-	Point   int32
-	Spot    int32
+	Ambient     int32
+	Directional int32
+	Point       int32
+	Spot        int32
 }
 
 func (nl *NLights) Reset() {
 	nl.Ambient = 0
-	nl.Dir = 0
+	nl.Directional = 0
 	nl.Point = 0
 	nl.Spot = 0
 }
 
-// AmbientLight provides diffuse uniform lighting. Typically only one of these.
-type AmbientLight struct {
+// Ambient provides diffuse uniform lighting. Typically only one of these.
+type Ambient struct {
 
 	// color of light, which multiplies ambient color of materials.
 	Color math32.Vector3
 	pad0  float32
 }
 
-// DirLight is directional light, which is assumed to project light toward
+// Directional is directional light, which is assumed to project light toward
 // the origin based on its position, with no attenuation, like the Sun.
 // For rendering, the position is negated and normalized to get the direction
 // vector (i.e., absolute distance doesn't matter).
-type DirLight struct {
+type Directional struct {
 
 	// color of light at full intensity.
 	Color math32.Vector3
@@ -49,11 +49,11 @@ type DirLight struct {
 	pad1 float32
 }
 
-// PointLight is an omnidirectional light with a position
+// Point is an omnidirectional light with a position
 // and associated decay factors, which divide the light
 // intensity as a function of linear and quadratic distance.
 // The quadratic factor dominates at longer distances.
-type PointLight struct {
+type Point struct {
 
 	// color of light a full intensity.
 	Color math32.Vector3
@@ -75,7 +75,7 @@ type PointLight struct {
 // which divide the light intensity as a function of
 // linear and quadratic distance.
 // The quadratic factor dominates at longer distances.
-type SpotLight struct {
+type Spot struct {
 
 	// color of light a full intensity.
 	Color math32.Vector3
@@ -102,54 +102,54 @@ func (ph *Phong) ResetNLights() {
 	ph.NLights.Reset()
 }
 
-// AddAmbientLight adds Ambient light at given position
-func (ph *Phong) AddAmbientLight(color math32.Vector3) {
-	ph.SetAmbientLight(int(ph.NLights.Ambient), color)
+// AddAmbient adds Ambient light at given position
+func (ph *Phong) AddAmbient(color math32.Vector3) {
+	ph.SetAmbient(int(ph.NLights.Ambient), color)
 	ph.NLights.Ambient++
 }
 
-// SetAmbientLight sets Ambient light at index to given position
-func (ph *Phong) SetAmbientLight(idx int, color math32.Vector3) {
+// SetAmbient sets Ambient light at index to given position
+func (ph *Phong) SetAmbient(idx int, color math32.Vector3) {
 	ph.Ambient[idx].Color = color
 }
 
-// AddDirLight adds directional light
-func (ph *Phong) AddDirLight(color, pos math32.Vector3) {
-	ph.SetDirLight(int(ph.NLights.Dir), color, pos)
-	ph.NLights.Dir++
+// AddDirectional adds directional light
+func (ph *Phong) AddDirectional(color, pos math32.Vector3) {
+	ph.SetDirectional(int(ph.NLights.Directional), color, pos)
+	ph.NLights.Directional++
 }
 
-// SetDirLight sets directional light at given index
-func (ph *Phong) SetDirLight(idx int, color, pos math32.Vector3) {
-	ph.Dir[idx].Color = color
-	ph.Dir[idx].Pos = pos
+// SetDirectional sets directional light at given index
+func (ph *Phong) SetDirectional(idx int, color, pos math32.Vector3) {
+	ph.Directional[idx].Color = color
+	ph.Directional[idx].Pos = pos
 }
 
-// AddPointLight adds point light.
+// AddPoint adds point light.
 // Defaults: linDecay=.1, quadDecay=.01
-func (ph *Phong) AddPointLight(color, pos math32.Vector3, linDecay, quadDecay float32) {
-	ph.SetPointLight(int(ph.NLights.Point), color, pos, linDecay, quadDecay)
+func (ph *Phong) AddPoint(color, pos math32.Vector3, linDecay, quadDecay float32) {
+	ph.SetPoint(int(ph.NLights.Point), color, pos, linDecay, quadDecay)
 	ph.NLights.Point++
 }
 
-// SetPointLight sets point light at given index.
+// SetPoint sets point light at given index.
 // Defaults: linDecay=.1, quadDecay=.01
-func (ph *Phong) SetPointLight(idx int, color, pos math32.Vector3, linDecay, quadDecay float32) {
+func (ph *Phong) SetPoint(idx int, color, pos math32.Vector3, linDecay, quadDecay float32) {
 	ph.Point[idx].Color = color
 	ph.Point[idx].Pos = pos
 	ph.Point[idx].Decay = math32.Vector3{X: linDecay, Y: quadDecay}
 }
 
-// AddSpotLight adds spot light
+// AddSpot adds spot light
 // Defaults: angDecay=15, cutAngle=45 (max 90), linDecay=.01, quadDecay=0.001
-func (ph *Phong) AddSpotLight(color, pos, dir math32.Vector3, angDecay, cutAngle, linDecay, quadDecay float32) {
-	ph.SetSpotLight(int(ph.NLights.Spot), color, pos, dir, angDecay, cutAngle, linDecay, quadDecay)
+func (ph *Phong) AddSpot(color, pos, dir math32.Vector3, angDecay, cutAngle, linDecay, quadDecay float32) {
+	ph.SetSpot(int(ph.NLights.Spot), color, pos, dir, angDecay, cutAngle, linDecay, quadDecay)
 	ph.NLights.Spot++
 }
 
-// SetSpotLight sets spot light at given index
+// SetSpot sets spot light at given index
 // Defaults: angDecay=15, cutAngle=45 (max 90), linDecay=.01, quadDecay=0.001
-func (ph *Phong) SetSpotLight(idx int, color, pos, dir math32.Vector3, angDecay, cutAngle, linDecay, quadDecay float32) {
+func (ph *Phong) SetSpot(idx int, color, pos, dir math32.Vector3, angDecay, cutAngle, linDecay, quadDecay float32) {
 	ph.Spot[idx].Color = color
 	ph.Spot[idx].Pos = pos
 	ph.Spot[idx].Dir = dir
@@ -161,8 +161,8 @@ func (ph *Phong) configLights() {
 	sy := ph.Sys
 	vs := sy.Vars.Groups[int(LightGroup)]
 	gpu.SetValueFrom(vs.ValueByIndex("NLights", 0), []NLights{ph.NLights})
-	gpu.SetValueFrom(vs.ValueByIndex("AmbLights", 0), ph.Ambient[:])
-	gpu.SetValueFrom(vs.ValueByIndex("DirLights", 0), ph.Dir[:])
-	gpu.SetValueFrom(vs.ValueByIndex("PointLights", 0), ph.Point[:])
-	gpu.SetValueFrom(vs.ValueByIndex("SpotLights", 0), ph.Spot[:])
+	gpu.SetValueFrom(vs.ValueByIndex("Ambient", 0), ph.Ambient[:])
+	gpu.SetValueFrom(vs.ValueByIndex("Directional", 0), ph.Directional[:])
+	gpu.SetValueFrom(vs.ValueByIndex("Point", 0), ph.Point[:])
+	gpu.SetValueFrom(vs.ValueByIndex("Spot", 0), ph.Spot[:])
 }

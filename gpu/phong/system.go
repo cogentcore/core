@@ -83,10 +83,10 @@ func (ph *Phong) configSystem() {
 	ov.DynamicOffset = true
 
 	lgp.AddStruct("NLights", int(unsafe.Sizeof(NLights{})), 1, gpu.FragmentShader)
-	lgp.AddStruct("AmbLights", vector4sz*1, MaxLights, gpu.FragmentShader)
-	lgp.AddStruct("DirLights", vector4sz*2, MaxLights, gpu.FragmentShader)
-	lgp.AddStruct("PointLights", vector4sz*3, MaxLights, gpu.FragmentShader)
-	lgp.AddStruct("SpotLights", vector4sz*4, MaxLights, gpu.FragmentShader)
+	lgp.AddStruct("Ambient", vector4sz*1, MaxLights, gpu.FragmentShader)
+	lgp.AddStruct("Directional", vector4sz*2, MaxLights, gpu.FragmentShader)
+	lgp.AddStruct("Point", vector4sz*3, MaxLights, gpu.FragmentShader)
+	lgp.AddStruct("Spot", vector4sz*4, MaxLights, gpu.FragmentShader)
 
 	tgp.Add("TexSampler", gpu.TextureRGBA32, 1, gpu.FragmentShader)
 

@@ -43,21 +43,14 @@ struct FragmentInput {
 //	@location(3) vertex_color: vec4<f32>,
 };
 
-/*
-@group(3) @binding(0)
-var t_tex: texture_2d<f32>;
-@group(3) @binding(1)
-var s_tex: sampler;
-*/
-
 @fragment
 fn fs_main(in: FragmentInput) -> @location(0) vec4<f32> {
-	let opacity: f32 = object.color.a;
-	let clr: vec3<f32> = object.color.rgb;
-	let shiny: f32 = object.shinyBright.x;
-	let reflct: f32 = object.shinyBright.y;
-	let bright: f32 = object.shinyBright.z;
-	var normal: vec3<f32> = in.normal;
+	let opacity = object.color.a;
+	let clr = object.color.rgb;
+	let shiny  = object.shinyBright.x;
+	let reflct = object.shinyBright.y;
+	let bright = object.shinyBright.z;
+	var normal = in.normal;
 	if (in.front_face) {
 		normal = -normal;
 	}

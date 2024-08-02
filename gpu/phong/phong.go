@@ -44,16 +44,16 @@ type Phong struct {
 	NLights NLights
 
 	// ambient lights
-	Ambient [MaxLights]AmbientLight
+	Ambient [MaxLights]Ambient
 
 	// directional lights
-	Dir [MaxLights]DirLight
+	Directional [MaxLights]Directional
 
 	// point lights
-	Point [MaxLights]PointLight
+	Point [MaxLights]Point
 
 	// spot lights
-	Spot [MaxLights]SpotLight
+	Spot [MaxLights]Spot
 
 	// a texture was selected for next draw, if true, overrides other options
 	UseTexture bool
