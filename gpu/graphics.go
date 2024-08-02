@@ -230,7 +230,7 @@ func (pl *GraphicsPipeline) SetGraphicsDefaults() *GraphicsPipeline {
 	pl.SetFrontFace(wgpu.FrontFaceCW)
 	pl.SetCullMode(wgpu.CullModeBack)
 	pl.SetColorBlend(true) // alpha blending
-	pl.SetMultisample(1)
+	pl.SetMultisample(4)
 	// pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 	return pl
 }

@@ -345,7 +345,8 @@ func (sy *System) SetClearColor(c color.Color) *System {
 // SetClearDepthStencil sets the depth and stencil values when starting new render
 // For all pipelines, to keep graphics settings consistent.
 func (sy *System) SetClearDepthStencil(depth float32, stencil uint32) *System {
-	sy.Render.SetClearDepthStencil(depth, stencil)
+	sy.Render.ClearDepth = depth
+	sy.Render.ClearStencil = stencil
 	return sy
 }
 

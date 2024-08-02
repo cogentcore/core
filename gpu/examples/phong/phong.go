@@ -70,10 +70,10 @@ func main() {
 
 	// Note: 100 segs improves lighting differentiation significantly
 
-	ph.AddMeshFromShape("cube",
-		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3i{10, 10, 10}))
 	ph.AddMeshFromShape("floor",
 		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{10, 10}))
+	ph.AddMeshFromShape("cube",
+		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3i{10, 10, 10}))
 	ph.AddMeshFromShape("sphere", shape.NewSphere(.5, 64))
 	ph.AddMeshFromShape("cylinder", shape.NewCylinder(1, .5, 64, 64, true, true))
 	ph.AddMeshFromShape("cone", shape.NewCone(1, .5, 64, 64, true))
@@ -133,7 +133,8 @@ func main() {
 	// objs[0].Colors.SetTextureRepeat(math32.Vector2{50, 50})
 	objs[1].Matrix.SetTranslation(-2, 0, 0)
 	objs[2].Matrix.SetTranslation(0, 0, -2)
-	objs[4].Matrix.SetTranslation(-1, 0, -2)
+	objs[3].Matrix.SetTranslation(-1, 0, -2)
+	objs[4].Matrix.SetTranslation(1, 0, -1)
 	objs[5].Matrix.SetTranslation(1, 0, -1)
 	objs[6].Matrix.SetRotationY(0.5)
 	objs[7].Matrix.SetTranslation(1, 0, -1)

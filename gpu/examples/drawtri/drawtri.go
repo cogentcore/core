@@ -42,7 +42,6 @@ func main() {
 	pl := sy.AddGraphicsPipeline("drawtri")
 	sy.ConfigRender(&sf.Format, gpu.UndefType)
 	pl.SetFrontFace(wgpu.FrontFaceCW)
-	// sf.SetRender(&sy.Render)
 
 	sh := pl.AddShader("trianglelit")
 	sh.OpenCode(trianglelit)

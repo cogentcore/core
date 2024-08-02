@@ -76,17 +76,33 @@ func (rp *Render) Config(dev *Device, imgFmt *TextureFormat, depthFmt Types, not
 	rp.ClearColor = colors.Black
 	rp.ClearDepth = 1
 	rp.ClearStencil = 0
-	rp.SetClearDepthStencil(1, 0)
 	if depthFmt != UndefType {
 		rp.Depth.ConfigDepth(dev, depthFmt, imgFmt)
+	}
+	if rp.Format.Samples > 1 {
+		rp.Multi.ConfigMulti(dev, imgFmt)
 	}
 }
 
 // ClearRenderPass returns a render pass descriptor that clears the framebuffer
 func (rp *Render) ClearRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescriptor {
 	r, g, b, a := colors.ToFloat64(rp.ClearColor)
-	rpd := &wgpu.RenderPassDescriptor{
-		ColorAttachments: []wgpu.RenderPassColorAttachment{{
+	rpd := &wgpu.RenderPassDescriptor{}
+	if rp.Format.Samples > 1 && rp.Multi.view != nil {
+		rpd.ColorAttachments = []wgpu.RenderPassColorAttachment{{
+			View:          rp.Multi.view,
+			ResolveTarget: view,
+			LoadOp:        wgpu.LoadOpClear,
+			ClearValue: wgpu.Color{
+				R: r,
+				G: g,
+				B: b,
+				A: a,
+			},
+			StoreOp: wgpu.StoreOpStore,
+		}}
+	} else {
+		rpd.ColorAttachments = []wgpu.RenderPassColorAttachment{{
 			View:   view,
 			LoadOp: wgpu.LoadOpClear,
 			ClearValue: wgpu.Color{
@@ -96,7 +112,28 @@ func (rp *Render) ClearRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescri
 				A: a,
 			},
 			StoreOp: wgpu.StoreOpStore,
-		}},
+		}}
+	}
+	rp.SetDepthDescriptor(rpd)
+	return rpd
+}
+
+// LoadRenderPass returns a render pass descriptor that loads previous framebuffer
+func (rp *Render) LoadRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescriptor {
+	rpd := &wgpu.RenderPassDescriptor{}
+	if rp.Format.Samples > 1 && rp.Multi.view != nil {
+		rpd.ColorAttachments = []wgpu.RenderPassColorAttachment{{
+			View:          rp.Multi.view,
+			ResolveTarget: view,
+			LoadOp:        wgpu.LoadOpLoad,
+			StoreOp:       wgpu.StoreOpStore,
+		}}
+	} else {
+		rpd.ColorAttachments = []wgpu.RenderPassColorAttachment{{
+			View:    view,
+			LoadOp:  wgpu.LoadOpLoad,
+			StoreOp: wgpu.StoreOpStore,
+		}}
 	}
 	rp.SetDepthDescriptor(rpd)
 	return rpd
@@ -118,27 +155,6 @@ func (rp *Render) SetDepthDescriptor(rpd *wgpu.RenderPassDescriptor) {
 		StencilReadOnly:   true,
 	}
 
-}
-
-// LoadRenderPass returns a render pass descriptor that loads previous framebuffer
-func (rp *Render) LoadRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescriptor {
-	rpd := &wgpu.RenderPassDescriptor{
-		ColorAttachments: []wgpu.RenderPassColorAttachment{{
-			View:    view,
-			LoadOp:  wgpu.LoadOpLoad,
-			StoreOp: wgpu.StoreOpStore,
-		}},
-	}
-	rp.SetDepthDescriptor(rpd)
-	return rpd
-}
-
-// SetClearDepthStencil sets the depth and stencil values when starting new render
-func (rp *Render) SetClearDepthStencil(depth float32, stencil uint32) {
-	// if len(rp.ClearValues) == 0 {
-	// 	rp.ClearValues = make([]vk.ClearValue, 2)
-	// }
-	// rp.ClearValues[1].SetDepthStencil(depth, stencil)
 }
 
 // BeginRenderPass adds commands to the given command buffer

@@ -8,7 +8,10 @@
 package gpu
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/reflectx"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -101,7 +104,7 @@ func (sf *Surface) Init(gp *GPU, ws *wgpu.Surface, width, height int) error {
 	}
 	sf.Device = dev
 	sf.Format.Format = ws.GetPreferredFormat(gp.GPU)
-	sf.Format.Samples = 1
+	sf.Format.Samples = 4
 	sf.Format.Size.X = width
 	sf.Format.Size.Y = height
 	sf.ConfigSwapChain()
@@ -130,6 +133,8 @@ func (sf *Surface) Present() {
 // This assumes that all existing items have been destroyed.
 func (sf *Surface) ConfigSwapChain() error {
 	caps := sf.surface.GetCapabilities(sf.GPU.GPU)
+
+	fmt.Println(reflectx.StringJSON(caps))
 
 	sf.swapChainConfig = &wgpu.SwapChainDescriptor{
 		Usage:       wgpu.TextureUsageRenderAttachment,

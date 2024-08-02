@@ -172,15 +172,13 @@ func (tx *Texture) ConfigDepth(dev *Device, depthType Types, imgFmt *TextureForm
 
 // ConfigMulti configures this texture as a mutisampling texture
 // using format.
-// todo:
-func (tx *Texture) ConfigMulti(dev *Device, imgFmt *TextureFormat) {
+func (tx *Texture) ConfigMulti(dev *Device, imgFmt *TextureFormat) error {
 	tx.device = *dev
-	tx.Format.Format = imgFmt.Format
-	tx.Format.Samples = imgFmt.Samples
-	tx.Format.Layers = 1
-	// if tx.SetSize(imgFmt.Size) {
-	// 	tx.ConfigStdView()
-	// }
+	if tx.texture != nil && tx.Format == *imgFmt {
+		return nil
+	}
+	tx.Format = *imgFmt
+	return tx.CreateTexture(wgpu.TextureUsageRenderAttachment)
 }
 
 // ReleaseView destroys any existing view

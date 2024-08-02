@@ -58,10 +58,8 @@ func main() {
 	}
 
 	pl := sy.AddGraphicsPipeline("drawidx")
-	// sf.Format.SetMultisample(1)
 	sy.ConfigRender(&sf.Format, gpu.Depth32)
 	pl.SetCullMode(wgpu.CullModeNone)
-	// sf.SetRender(&sy.Render)
 	sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 
 	sh := pl.AddShader("indexed")
