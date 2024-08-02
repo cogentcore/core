@@ -5,7 +5,6 @@
 package core
 
 import (
-	"fmt"
 	"image"
 	"strings"
 
@@ -15,8 +14,6 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/svg"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
@@ -126,61 +123,6 @@ func makeStandardAppBar(p *tree.Plan) {
 		// 	s.SetState(tb.Scene.Stage.Mains.Stack.Len() <= 1 && len(AllRenderWins) <= 1, states.Disabled)
 		// })
 	})
-	tree.AddAt(p, "app-chooser", func(w *Chooser) {
-		initAppChooser(w, p.Parent.(Widget))
-	})
-}
-
-func initAppChooser(w *Chooser, parent Widget) {
-	w.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
-	if TheApp.SystemPlatform().IsMobile() {
-		w.SetPlaceholder("Search")
-	} else {
-		w.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
-	}
-
-	tree.AddChildInit(w, "text-field", func(w *TextField) {
-		w.Styler(func(s *styles.Style) {
-			s.Background = colors.Scheme.SurfaceContainerHighest
-			if !s.Is(states.Focused) && w.error == nil {
-				s.Border = styles.Border{}
-			}
-			s.Border.Radius = styles.BorderRadiusFull
-			s.Min.X.SetCustom(func(uc *units.Context) float32 {
-				return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
-			})
-			s.Max.X = s.Min.X
-		})
-	})
-
-	w.AddItemsFunc(func() {
-		for _, rw := range AllRenderWindows {
-			for _, kv := range rw.mains.stack.Order {
-				st := kv.Value
-				// we do not include ourself
-				if st == w.Scene.Stage {
-					continue
-				}
-				w.Items = append(w.Items, ChooserItem{
-					Text:    st.Title,
-					Icon:    icons.Toolbar,
-					Tooltip: "Show " + st.Title,
-					Func:    st.raise,
-				})
-			}
-		}
-	})
-	w.AddItemsFunc(func() {
-		addButtonItems(&w.Items, parent, "")
-	})
-
-	w.OnFinal(events.Change, func(e events.Event) {
-		// we must never have a chooser label so that it
-		// always displays the search placeholder
-		w.CurrentIndex = -1
-		w.CurrentItem = ChooserItem{}
-		w.showCurrentItem()
-	})
 }
 
 var (
@@ -195,10 +137,35 @@ var (
 
 // standardOverflowMenu adds standard overflow menu items for an app bar.
 func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
-	NewButton(m).SetText("Search").SetIcon(icons.Search).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu).OnClick(func(e events.Event) {
 		d := NewBody().AddTitle("Search")
-		ch := NewChooser(d)
-		initAppChooser(ch, tb)
+		w := NewChooser(d).SetEditable(true).SetIcon(icons.Search)
+		w.AddItemsFunc(func() {
+			for _, rw := range AllRenderWindows {
+				for _, kv := range rw.mains.stack.Order {
+					st := kv.Value
+					// we do not include ourself
+					if st == w.Scene.Stage {
+						continue
+					}
+					w.Items = append(w.Items, ChooserItem{
+						Text:    st.Title,
+						Icon:    icons.Toolbar,
+						Tooltip: "Show " + st.Title,
+						Func:    st.raise,
+					})
+				}
+			}
+		})
+		w.AddItemsFunc(func() {
+			addButtonItems(&w.Items, tb, "")
+		})
+		w.OnFinal(events.Change, func(e events.Event) {
+			d.Close()
+		})
+		d.AddBottomBar(func(parent Widget) {
+			d.AddCancel(parent)
+		})
 		d.RunDialog(m)
 	})
 	NewButton(m).SetText("About").SetIcon(icons.Info).OnClick(func(e events.Event) {
