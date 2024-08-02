@@ -24,7 +24,7 @@ import (
 )
 
 func init() {
-	// must lock main thread for gpu!
+	// must lock main thread for gpu!  really
 	runtime.LockOSThread()
 }
 
@@ -71,9 +71,9 @@ func main() {
 	// Note: 100 segs improves lighting differentiation significantly
 
 	ph.AddMeshFromShape("floor",
-		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{10, 10}))
+		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{100, 100}))
 	ph.AddMeshFromShape("cube",
-		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3i{10, 10, 10}))
+		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3i{50, 50, 50}))
 	ph.AddMeshFromShape("sphere", shape.NewSphere(.5, 64))
 	ph.AddMeshFromShape("cylinder", shape.NewCylinder(1, .5, 64, 64, true, true))
 	ph.AddMeshFromShape("cone", shape.NewCone(1, .5, 64, 64, true))
@@ -162,7 +162,10 @@ func main() {
 	updateObs := func() {
 		for i, ob := range objs {
 			nm := strconv.Itoa(i)
-			ph.SetObjectMatrix(nm, &ob.Matrix)
+			od := ph.SetObjectMatrix(nm, &ob.Matrix)
+			if i == 0 {
+				od.SetTextureRepeat(math32.Vector2{50, 50})
+			}
 		}
 	}
 	updateObs() // gotta do at least once

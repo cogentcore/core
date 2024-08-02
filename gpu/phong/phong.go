@@ -193,9 +193,6 @@ func (ph *Phong) Render(rp *wgpu.RenderPassEncoder) {
 	ph.Lock()
 	defer ph.Unlock()
 
-	ph.RenderOneColor(rp)
-	return
-
 	switch {
 	case ph.UseTexture:
 		ph.RenderTexture(rp)

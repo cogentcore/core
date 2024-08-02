@@ -1,40 +1,68 @@
-#version 450
+#include "phong.wgsl"
 
-// must be <= 128 bytes -- contains all per-object data
-layout(push_constant) uniform PushU {
-	mat4 ModelMtx; // 64 bytes, [3][3] = TexPct.X
-	vec4 Color; // 16
-	vec4 ShinyBright; // 16 x = Shiny, y = Reflect, z = Bright, w = TexIndex
-	vec4 Emissive; // 16 rgb, a = TexPct.Y
-	vec4 TexRepeatOff; // 16 xy = Repeat, zw = Offset
+struct VertexInput {
+	@location(0) position: vec3<f32>,
+	@location(1) normal: vec3<f32>,
+   @location(2) tex_coord: vec2<f32>,
+//	@location(3) vertex_color: vec4<f32>,
 };
 
-layout(set = 0, binding = 0) uniform MtxsU {
-    mat4 ViewMtx;
-    mat4 PrjnMtx;
+struct VertexOutput {
+	@builtin(position) clip_position: vec4<f32>,
+	@location(0) normal: vec3<f32>,
+	@location(1) cam_dir: vec3<f32>,
+   @location(2) tex_coord: vec2<f32>,
+//	@location(3) vertex_color: vec4<f32>,
 };
 
-layout(location = 0) in vec3 VtxPos;
-layout(location = 1) in vec3 VtxNorm;
-layout(location = 2) in vec2 VtxTex;
-// layout(location = 3) in vec4 VtxColor;
+@vertex
+fn vs_main(
+	model: VertexInput,
+) -> VertexOutput {
+	var out: VertexOutput;
 
-layout(location = 0) out vec4 Pos;
-layout(location = 1) out vec3 Norm;
-layout(location = 2) out vec3 CamDir;
-layout(location = 3) out vec2 TexCoord;
+	let mvm = camera.view * object.matrix;
+	let cpos = mvm * vec4<f32>(model.position, 1.0);
+	
+   out.clip_position = camera.prjn * mvm * vec4<f32>(model.position, 1.0);
+	out.normal = (object.world * vec4<f32>(model.normal, 0.0)).xyz;
+	out.tex_coord = model.tex_coord;
+	out.cam_dir = normalize(-cpos.xyz);
+   // out.vertex_color = model.vertex_color;
+	return out;
+}
 
-void main() {
-	vec4 vPos = vec4(VtxPos, 1.0);
-	vec4 vNorm = vec4(VtxNorm, 1.0);
-	mat4 MMtx = ModelMtx;
-	MMtx[3][3] = 1;
-	mat4 MVMtx = ViewMtx * MMtx;
-	Pos = MVMtx * vPos;
-	mat3 NormMtx = transpose(inverse(mat3(MVMtx)));
-	Norm = normalize(NormMtx * VtxNorm).xyz;
-	CamDir = normalize(-Pos.xyz);
-	TexCoord = VtxTex;
-	gl_Position = PrjnMtx * MVMtx * vPos;
+// Fragment
+
+struct FragmentInput {
+	@builtin(position) clip_position: vec4<f32>,
+	@builtin(front_facing) front_face: bool,
+	@location(0) normal: vec3<f32>,
+	@location(1) cam_dir: vec3<f32>,
+   @location(2) tex_coord: vec2<f32>,
+//	@location(3) vertex_color: vec4<f32>,
+};
+
+@group(3) @binding(0)
+var t_tex: texture_2d<f32>;
+@group(3) @binding(1)
+var s_tex: sampler;
+
+@fragment
+fn fs_main(in: FragmentInput) -> @location(0) vec4<f32> {
+
+	let itc = vec2<f32>(in.tex_coord.x, 1.0-in.tex_coord.y); // flipy
+	let ttc = itc * object.textureRepeatOff.xy + object.textureRepeatOff.zw;
+	let tc = vec2<f32>(ttc.x % 1.0, ttc.y % 1.0);
+	let clr = textureSample(t_tex, s_tex, tc).xyz;
+	let opacity: f32 = object.color.a;
+	let shiny: f32 = object.shinyBright.x;
+	let reflct: f32 = object.shinyBright.y;
+	let bright: f32 = object.shinyBright.z;
+	var normal: vec3<f32> = in.normal;
+	if (in.front_face) {
+		normal = -normal;
+	}
+	return phongModel(in.clip_position, normal, in.cam_dir, clr, clr, shiny, reflct, bright, opacity);
 }
 

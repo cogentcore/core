@@ -5,7 +5,6 @@
 package gpu
 
 import (
-	"fmt"
 	"io/fs"
 	"log/slog"
 	"path/filepath"
@@ -33,7 +32,6 @@ func IncludeFS(fsys fs.FS, path, code string) string {
 			continue
 		}
 		fname := fn[:qi]
-		fmt.Println(ln, fname)
 		b, err := fs.ReadFile(fsys, fname)
 		if err != nil {
 			b, err = fs.ReadFile(fsys, filepath.Join(path, fname))

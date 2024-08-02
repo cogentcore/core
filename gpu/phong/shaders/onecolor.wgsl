@@ -3,7 +3,7 @@
 struct VertexInput {
 	@location(0) position: vec3<f32>,
 	@location(1) normal: vec3<f32>,
-   @location(2) tex_coord: vec2<f32>,
+// @location(2) tex_coord: vec2<f32>,
 //	@location(3) vertex_color: vec4<f32>,
 };
 
@@ -11,7 +11,7 @@ struct VertexOutput {
 	@builtin(position) clip_position: vec4<f32>,
 	@location(0) normal: vec3<f32>,
 	@location(1) cam_dir: vec3<f32>,
-   @location(2) tex_coord: vec2<f32>,
+// @location(2) tex_coord: vec2<f32>,
 //	@location(3) vertex_color: vec4<f32>,
 };
 
@@ -26,8 +26,8 @@ fn vs_main(
 	
    out.clip_position = camera.prjn * mvm * vec4<f32>(model.position, 1.0);
 	out.normal = (object.world * vec4<f32>(model.normal, 0.0)).xyz;
-	out.tex_coord = model.tex_coord;
 	out.cam_dir = normalize(-cpos.xyz);
+	// out.tex_coord = model.tex_coord;
    // out.vertex_color = model.vertex_color;
 	return out;
 }
@@ -39,7 +39,7 @@ struct FragmentInput {
 	@builtin(front_facing) front_face: bool,
 	@location(0) normal: vec3<f32>,
 	@location(1) cam_dir: vec3<f32>,
-   @location(2) tex_coord: vec2<f32>,
+// @location(2) tex_coord: vec2<f32>,
 //	@location(3) vertex_color: vec4<f32>,
 };
 
