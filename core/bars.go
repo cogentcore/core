@@ -6,7 +6,6 @@ package core
 
 import (
 	"strings"
-	"testing"
 
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -49,9 +48,10 @@ func (bf *BarFuncs) Inherit(obf BarFuncs) {
 
 // makeSceneBars configures the side control bars, for main scenes.
 func (sc *Scene) makeSceneBars() {
-	// at last possible moment, add app-specific app bar config
+	// At the last possible moment, add the default app bar
+	// if there are [Scene.AppBars] specified.
 	if sc.Stage.Type.isMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
-		if sc.Bars.Top.IsEmpty() && !testing.Testing() { // no app bar while testing
+		if sc.Bars.Top.IsEmpty() && len(sc.AppBars) > 0 {
 			sc.Bars.Top.Add(makeAppBar) // put in the top by default
 		}
 	}

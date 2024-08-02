@@ -52,6 +52,7 @@ type Scene struct { //core:no-new
 	BarsInherit styles.Sides[bool]
 
 	// AppBars contains functions for making the plan for the top app bar.
+	// If there are no such functions, no top app bar will be made.
 	AppBars []func(p *tree.Plan) `json:"-" xml:"-"`
 
 	// Data is the optional data value being represented by this scene.
