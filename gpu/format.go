@@ -93,6 +93,15 @@ func (im *TextureFormat) Size32() (width, height uint32) {
 	return
 }
 
+func (im *TextureFormat) Extent3D() wgpu.Extent3D {
+	ex := wgpu.Extent3D{
+		Width:              uint32(im.Size.X),
+		Height:             uint32(im.Size.Y),
+		DepthOrArrayLayers: uint32(im.Layers),
+	}
+	return ex
+}
+
 // Aspect returns the aspect ratio X / Y
 func (im *TextureFormat) Aspect() float32 {
 	if im.Size.Y > 0 {

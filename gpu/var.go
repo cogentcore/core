@@ -87,11 +87,6 @@ type Var struct {
 	// Only for Uniform and Storage variables.
 	DynamicOffset bool
 
-	// Texture manages its own memory allocation, and this indicates that
-	// the texture object can change size dynamically.
-	// Otherwise image host staging memory is allocated in a common buffer
-	TextureOwns bool `edit:"-"`
-
 	// Values is the the array of Values allocated for this variable.
 	// Each value has its own corresponding Buffer or Texture.
 	// The currently-active Value is specified by the Current index,

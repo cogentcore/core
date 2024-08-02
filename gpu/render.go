@@ -47,6 +47,10 @@ type Render struct {
 	// values for clearing image when starting render pass
 	ClearColor color.Color
 
+	ClearDepth float32
+
+	ClearStencil uint32
+
 	sys    *System
 	device *Device
 }
@@ -70,13 +74,18 @@ func (rp *Render) Config(dev *Device, imgFmt *TextureFormat, depthFmt Types, not
 	rp.Format = *imgFmt
 	rp.NotSurface = notSurface
 	rp.ClearColor = colors.Black
+	rp.ClearDepth = 1
+	rp.ClearStencil = 0
 	rp.SetClearDepthStencil(1, 0)
+	if depthFmt != UndefType {
+		rp.Depth.ConfigDepth(dev, depthFmt, imgFmt)
+	}
 }
 
 // ClearRenderPass returns a render pass descriptor that clears the framebuffer
 func (rp *Render) ClearRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescriptor {
 	r, g, b, a := colors.ToFloat64(rp.ClearColor)
-	return &wgpu.RenderPassDescriptor{
+	rpd := &wgpu.RenderPassDescriptor{
 		ColorAttachments: []wgpu.RenderPassColorAttachment{{
 			View:   view,
 			LoadOp: wgpu.LoadOpClear,
@@ -89,17 +98,39 @@ func (rp *Render) ClearRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescri
 			StoreOp: wgpu.StoreOpStore,
 		}},
 	}
+	rp.SetDepthDescriptor(rpd)
+	return rpd
+}
+
+func (rp *Render) SetDepthDescriptor(rpd *wgpu.RenderPassDescriptor) {
+	if rp.Depth.texture == nil {
+		return
+	}
+	rpd.DepthStencilAttachment = &wgpu.RenderPassDepthStencilAttachment{
+		View:              rp.Depth.view,
+		DepthClearValue:   rp.ClearDepth,
+		DepthLoadOp:       wgpu.LoadOpClear,
+		DepthStoreOp:      wgpu.StoreOpStore,
+		DepthReadOnly:     false,
+		StencilClearValue: rp.ClearStencil,
+		StencilLoadOp:     wgpu.LoadOpLoad,
+		StencilStoreOp:    wgpu.StoreOpStore,
+		StencilReadOnly:   true,
+	}
+
 }
 
 // LoadRenderPass returns a render pass descriptor that loads previous framebuffer
 func (rp *Render) LoadRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescriptor {
-	return &wgpu.RenderPassDescriptor{
+	rpd := &wgpu.RenderPassDescriptor{
 		ColorAttachments: []wgpu.RenderPassColorAttachment{{
 			View:    view,
 			LoadOp:  wgpu.LoadOpLoad,
 			StoreOp: wgpu.StoreOpStore,
 		}},
 	}
+	rp.SetDepthDescriptor(rpd)
+	return rpd
 }
 
 // SetClearDepthStencil sets the depth and stencil values when starting new render
@@ -150,19 +181,14 @@ func (rp *Render) BeginRenderPassImpl(cmd *wgpu.CommandEncoder, view *wgpu.Textu
 // ConfigGrab configures the Grab for copying rendered image
 // back to host memory.  Uses format of current Texture.
 func (rp *Render) ConfigGrab(dev *Device) {
-	if rp.Grab.IsActive() {
-		if rp.Grab.Format.Size == rp.Format.Size {
-			return
-		}
-		rp.Grab.SetSize(rp.Format.Size)
+	if rp.Grab.texture != nil && rp.Grab.Format.Size == rp.Format.Size {
 		return
 	}
 	rp.Grab.Format.Defaults()
 	rp.Grab.Format = rp.Format
 	rp.Grab.Format.SetMultisample(1) // can't have for grabs
-	// rp.Grab.SetFlag(true, TextureOnHostOnly)
 	rp.Grab.device = *dev
-	// rp.Grab.AllocTexture()
+	rp.Grab.CreateTexture(wgpu.TextureUsageCopySrc) // todo: not sure what else?
 }
 
 // https://www.reddit.com/r/WebGPU/comments/7yhvep/retrieve_depth_attachment_from_framebuffer/

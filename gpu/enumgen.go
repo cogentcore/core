@@ -176,65 +176,6 @@ func (i *BorderColors) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "BorderColors")
 }
 
-var _TextureFlagsValues = []TextureFlags{0, 1, 2, 3}
-
-// TextureFlagsN is the highest valid value for type TextureFlags, plus one.
-const TextureFlagsN TextureFlags = 4
-
-var _TextureFlagsValueMap = map[string]TextureFlags{`Active`: 0, `OwnsTexture`: 1, `DepthTexture`: 2, `FramebufferTexture`: 3}
-
-var _TextureFlagsDescMap = map[TextureFlags]string{0: `TextureActive: the Texture and TextureView are configured and ready to use`, 1: `TextureOwnsTexture: we own the Texture`, 2: `DepthTexture indicates that this is a Depth buffer texture`, 3: `FramebufferTexture indicates that this is a Framebuffer texture`}
-
-var _TextureFlagsMap = map[TextureFlags]string{0: `Active`, 1: `OwnsTexture`, 2: `DepthTexture`, 3: `FramebufferTexture`}
-
-// String returns the string representation of this TextureFlags value.
-func (i TextureFlags) String() string { return enums.BitFlagString(i, _TextureFlagsValues) }
-
-// BitIndexString returns the string representation of this TextureFlags value
-// if it is a bit index value (typically an enum constant), and
-// not an actual bit flag value.
-func (i TextureFlags) BitIndexString() string { return enums.String(i, _TextureFlagsMap) }
-
-// SetString sets the TextureFlags value from its string representation,
-// and returns an error if the string is invalid.
-func (i *TextureFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
-
-// SetStringOr sets the TextureFlags value from its string representation
-// while preserving any bit flags already set, and returns an
-// error if the string is invalid.
-func (i *TextureFlags) SetStringOr(s string) error {
-	return enums.SetStringOr(i, s, _TextureFlagsValueMap, "TextureFlags")
-}
-
-// Int64 returns the TextureFlags value as an int64.
-func (i TextureFlags) Int64() int64 { return int64(i) }
-
-// SetInt64 sets the TextureFlags value from an int64.
-func (i *TextureFlags) SetInt64(in int64) { *i = TextureFlags(in) }
-
-// Desc returns the description of the TextureFlags value.
-func (i TextureFlags) Desc() string { return enums.Desc(i, _TextureFlagsDescMap) }
-
-// TextureFlagsValues returns all possible values for the type TextureFlags.
-func TextureFlagsValues() []TextureFlags { return _TextureFlagsValues }
-
-// Values returns all possible values for the type TextureFlags.
-func (i TextureFlags) Values() []enums.Enum { return enums.Values(_TextureFlagsValues) }
-
-// HasFlag returns whether these bit flags have the given bit flag set.
-func (i TextureFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
-
-// SetFlag sets the value of the given flags in these flags to the given value.
-func (i *TextureFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TextureFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *TextureFlags) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "TextureFlags")
-}
-
 var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 
 // TypesN is the highest valid value for type Types, plus one.

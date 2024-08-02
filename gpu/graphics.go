@@ -183,6 +183,19 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 			}},
 		}
 	}
+	if pl.Sys.Render.Depth.texture != nil {
+		pd.DepthStencil = &wgpu.DepthStencilState{
+			Format:            pl.Sys.Render.Depth.Format.Format,
+			DepthWriteEnabled: true,
+			DepthCompare:      wgpu.CompareFunctionLess,
+			StencilFront: wgpu.StencilFaceState{
+				Compare: wgpu.CompareFunctionAlways,
+			},
+			StencilBack: wgpu.StencilFaceState{
+				Compare: wgpu.CompareFunctionAlways,
+			},
+		}
+	}
 	rp, err := pl.Sys.Device.Device.CreateRenderPipeline(pd)
 	if errors.Log(err) != nil {
 		return err

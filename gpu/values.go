@@ -75,8 +75,6 @@ type Value struct {
 	// for SampledTexture Var roles, this is the Texture.
 	// Can set Sampler parameters directly on this.
 	Texture *TextureSample
-
-	TextureOwns bool
 }
 
 func NewValue(vr *Var, dev *Device, idx int) *Value {
@@ -107,7 +105,6 @@ func (vl *Value) init(vr *Var, dev *Device, idx int) {
 	vl.AlignVarSize = MemSizeAlign(vl.VarSize, vl.alignBytes)
 	vl.isDynamic = vl.role == Vertex || vl.role == Index || vr.DynamicOffset
 	vl.DynamicN = 1
-	vl.TextureOwns = vr.TextureOwns
 	if vr.Role >= SampledTexture {
 		vl.Texture = NewTextureSample(dev)
 	}
