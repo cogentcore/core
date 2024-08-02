@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/core"
@@ -142,6 +143,12 @@ func (tb *Table) SetTable(et *table.Table) *Table {
 	tb.This.(core.Lister).UpdateSliceSize()
 	tb.Update()
 	return tb
+}
+
+// SetSlice sets the source table to a [table.NewSliceTable]
+// from the given slice.
+func (tb *Table) SetSlice(sl any) *Table {
+	return tb.SetTable(errors.Log1(table.NewSliceTable(sl)))
 }
 
 // AsyncUpdateTable updates the display for asynchronous updating from
