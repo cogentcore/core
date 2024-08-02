@@ -205,6 +205,7 @@ func init() {
 		"TileSecondLong":                reflect.ValueOf(core.TileSecondLong),
 		"TileSpan":                      reflect.ValueOf(core.TileSpan),
 		"TileSplit":                     reflect.ValueOf(core.TileSplit),
+		"ToHTML":                        reflect.ValueOf(core.ToHTML),
 		"ToolbarStyles":                 reflect.ValueOf(core.ToolbarStyles),
 		"TooltipStage":                  reflect.ValueOf(core.TooltipStage),
 		"UpdateAll":                     reflect.ValueOf(core.UpdateAll),

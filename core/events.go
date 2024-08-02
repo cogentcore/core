@@ -482,11 +482,6 @@ func (em *Events) handlePosEvent(e events.Event) {
 		}
 		em.press = nil
 
-		// if we have sent a long press start event, we send an end
-		// event (non-nil widget plus nil timer means we already sent)
-		if em.longPressWidget != nil && em.longPressTimer == nil {
-			em.longPressWidget.AsWidget().Send(events.LongPressEnd, e)
-		}
 		em.cancelLongPress()
 		// a mouse up event acts also acts as a mouse leave
 		// event on mobile, as that is needed to clear any
@@ -708,6 +703,11 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 }
 
 func (em *Events) cancelLongPress() {
+	// if we have sent a long press start event, we send an end
+	// event (non-nil widget plus nil timer means we already sent)
+	if em.longPressWidget != nil && em.longPressTimer == nil {
+		em.longPressWidget.AsWidget().Send(events.LongPressEnd)
+	}
 	em.longPressWidget = nil
 	em.longPressPos = image.Point{}
 	if em.longPressTimer != nil {

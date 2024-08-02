@@ -22,8 +22,8 @@ import (
 //   Styling functions for setting from properties
 //     see style_properties.go for master version
 
-// StyleFromProperties sets style field values based on map[string]any properties
-func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, cc colors.Context) {
+// styleFromProperties sets style field values based on map[string]any properties
+func (pc *Paint) styleFromProperties(parent *Paint, properties map[string]any, cc colors.Context) {
 	for key, val := range properties {
 		if len(key) == 0 {
 			continue
@@ -32,7 +32,7 @@ func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, c
 			continue
 		}
 		if key == "display" {
-			if inh, init := StyleInhInit(val, parent); inh || init {
+			if inh, init := styleInhInit(val, parent); inh || init {
 				if inh {
 					pc.Display = parent.Display
 				} else if init {
@@ -51,7 +51,7 @@ func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, c
 			}
 			continue
 		}
-		if sfunc, ok := StyleStrokeFuncs[key]; ok {
+		if sfunc, ok := styleStrokeFuncs[key]; ok {
 			if parent != nil {
 				sfunc(&pc.StrokeStyle, key, val, &parent.StrokeStyle, cc)
 			} else {
@@ -59,7 +59,7 @@ func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, c
 			}
 			continue
 		}
-		if sfunc, ok := StyleFillFuncs[key]; ok {
+		if sfunc, ok := styleFillFuncs[key]; ok {
 			if parent != nil {
 				sfunc(&pc.FillStyle, key, val, &parent.FillStyle, cc)
 			} else {
@@ -67,7 +67,7 @@ func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, c
 			}
 			continue
 		}
-		if sfunc, ok := StyleFontFuncs[key]; ok {
+		if sfunc, ok := styleFontFuncs[key]; ok {
 			if parent != nil {
 				sfunc(&pc.FontStyle.Font, key, val, &parent.FontStyle.Font, cc)
 			} else {
@@ -75,7 +75,7 @@ func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, c
 			}
 			continue
 		}
-		if sfunc, ok := StyleFontRenderFuncs[key]; ok {
+		if sfunc, ok := styleFontRenderFuncs[key]; ok {
 			if parent != nil {
 				sfunc(&pc.FontStyle, key, val, &parent.FontStyle, cc)
 			} else {
@@ -83,7 +83,7 @@ func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, c
 			}
 			continue
 		}
-		if sfunc, ok := StyleTextFuncs[key]; ok {
+		if sfunc, ok := styleTextFuncs[key]; ok {
 			if parent != nil {
 				sfunc(&pc.TextStyle, key, val, &parent.TextStyle, cc)
 			} else {
@@ -91,7 +91,7 @@ func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, c
 			}
 			continue
 		}
-		if sfunc, ok := StylePaintFuncs[key]; ok {
+		if sfunc, ok := stylePaintFuncs[key]; ok {
 			sfunc(pc, key, val, parent, cc)
 			continue
 		}
@@ -101,11 +101,11 @@ func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, c
 /////////////////////////////////////////////////////////////////////////////////
 //  Stroke
 
-// StyleStrokeFuncs are functions for styling the Stroke object
-var StyleStrokeFuncs = map[string]StyleFunc{
+// styleStrokeFuncs are functions for styling the Stroke object
+var styleStrokeFuncs = map[string]styleFunc{
 	"stroke": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Stroke)
-		if inh, init := StyleInhInit(val, parent); inh || init {
+		if inh, init := styleInhInit(val, parent); inh || init {
 			if inh {
 				fs.Color = parent.(*Stroke).Color
 			} else if init {
@@ -115,15 +115,15 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		}
 		fs.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
-	"stroke-opacity": StyleFuncFloat(float32(1),
+	"stroke-opacity": styleFuncFloat(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
-	"stroke-width": StyleFuncUnits(units.Dp(1),
+	"stroke-width": styleFuncUnits(units.Dp(1),
 		func(obj *Stroke) *units.Value { return &(obj.Width) }),
-	"stroke-min-width": StyleFuncUnits(units.Dp(1),
+	"stroke-min-width": styleFuncUnits(units.Dp(1),
 		func(obj *Stroke) *units.Value { return &(obj.MinWidth) }),
 	"stroke-dasharray": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Stroke)
-		if inh, init := StyleInhInit(val, parent); inh || init {
+		if inh, init := styleInhInit(val, parent); inh || init {
 			if inh {
 				fs.Dashes = parent.(*Stroke).Dashes
 			} else if init {
@@ -133,29 +133,29 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			fs.Dashes = ParseDashesString(vt)
+			fs.Dashes = parseDashesString(vt)
 		case []float32:
 			math32.CopyFloat32s(&fs.Dashes, vt)
 		case *[]float32:
 			math32.CopyFloat32s(&fs.Dashes, *vt)
 		}
 	},
-	"stroke-linecap": StyleFuncEnum(LineCapButt,
+	"stroke-linecap": styleFuncEnum(LineCapButt,
 		func(obj *Stroke) enums.EnumSetter { return &(obj.Cap) }),
-	"stroke-linejoin": StyleFuncEnum(LineJoinMiter,
+	"stroke-linejoin": styleFuncEnum(LineJoinMiter,
 		func(obj *Stroke) enums.EnumSetter { return &(obj.Join) }),
-	"stroke-miterlimit": StyleFuncFloat(float32(1),
+	"stroke-miterlimit": styleFuncFloat(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.MiterLimit) }),
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 //  Fill
 
-// StyleFillFuncs are functions for styling the Fill object
-var StyleFillFuncs = map[string]StyleFunc{
+// styleFillFuncs are functions for styling the Fill object
+var styleFillFuncs = map[string]styleFunc{
 	"fill": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Fill)
-		if inh, init := StyleInhInit(val, parent); inh || init {
+		if inh, init := styleInhInit(val, parent); inh || init {
 			if inh {
 				fs.Color = parent.(*Fill).Color
 			} else if init {
@@ -165,22 +165,22 @@ var StyleFillFuncs = map[string]StyleFunc{
 		}
 		fs.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
-	"fill-opacity": StyleFuncFloat(float32(1),
+	"fill-opacity": styleFuncFloat(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),
-	"fill-rule": StyleFuncEnum(FillRuleNonZero,
+	"fill-rule": styleFuncEnum(FillRuleNonZero,
 		func(obj *Fill) enums.EnumSetter { return &(obj.Rule) }),
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 //  Paint
 
-// StylePaintFuncs are functions for styling the Stroke object
-var StylePaintFuncs = map[string]StyleFunc{
-	"vector-effect": StyleFuncEnum(VectorEffectNone,
+// stylePaintFuncs are functions for styling the Stroke object
+var stylePaintFuncs = map[string]styleFunc{
+	"vector-effect": styleFuncEnum(VectorEffectNone,
 		func(obj *Paint) enums.EnumSetter { return &(obj.VectorEffect) }),
 	"transform": func(obj any, key string, val any, parent any, cc colors.Context) {
 		pc := obj.(*Paint)
-		if inh, init := StyleInhInit(val, parent); inh || init {
+		if inh, init := styleInhInit(val, parent); inh || init {
 			if inh {
 				pc.Transform = parent.(*Paint).Transform
 			} else if init {
@@ -199,8 +199,8 @@ var StylePaintFuncs = map[string]StyleFunc{
 	},
 }
 
-// ParseDashesString gets a dash slice from given string
-func ParseDashesString(str string) []float32 {
+// parseDashesString gets a dash slice from given string
+func parseDashesString(str string) []float32 {
 	if len(str) == 0 || str == "none" {
 		return nil
 	}

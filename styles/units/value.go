@@ -108,9 +108,22 @@ func (v *Value) Convert(to Units, uc *Context) Value {
 	return Value{Value: dots / uc.Dots(to), Unit: to, Dots: dots}
 }
 
-// String implements the fmt.Stringer interface.
+// String implements the [fmt.Stringer] interface.
 func (v *Value) String() string {
 	return fmt.Sprintf("%g%s", v.Value, v.Unit.String())
+}
+
+// StringCSS returns the value as a string suitable for CSS
+// by changing dp to px and using % if applicable.
+func (v Value) StringCSS() string {
+	if v.Unit == UnitDp {
+		v.Unit = UnitPx // non-pointer so can change directly
+	}
+	s := v.String()
+	if v.Unit == UnitPw || v.Unit == UnitPh || v.Unit == UnitEw || v.Unit == UnitEh {
+		s = s[:len(s)-2] + "%"
+	}
+	return s
 }
 
 // SetString sets value from a string

@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="{{.Author}}">
-    <meta name="description" content="{{.Desc}}">
+    <meta name="description" content="{{.Description}}">
     <meta name="keywords" content="{{.Keywords}}">
     <meta name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
     <meta property="og:title" content="{{.Title}}">
-    <meta property="og:description" content="{{.Desc}}">
+    <meta property="og:description" content="{{.Description}}">
     <meta property="og:type" content="website">
     <meta property="og:image" content="{{.BasePath}}icons/512.png">
     <meta property="og:site_name" content="{{.SiteName}}">
@@ -32,18 +32,17 @@
 <body role="application">
     <canvas id="app" contenteditable="true"></canvas>
     <input id="text-field" type="text">
-    <aside id="app-wasm-loader">
-        <div id="app-wasm-loader-header">
+    <div id="app-wasm-loader">
+        <header id="app-wasm-loader-header">
             <img id="app-wasm-loader-icon" src="{{.BasePath}}icons/svg.svg">
             <p id="app-wasm-loader-title">{{.SiteName}}</p>
             <p id="app-wasm-loader-label">0%</p>
             <progress id="app-wasm-loader-progress" value="0"></progress>
-        </div>
-        <div id="app-wasm-loader-rectangles">
-            <div class="app-wasm-loader-rectangle"></div>
-            <div class="app-wasm-loader-rectangle"></div>
-        </div>
-    </aside>
+        </header>
+        <h1>Loading...</h1>
+        <h3>Static preview:</h3>
+        {{.PreRenderHTML}}
+    </div>
 </body>
 
 </html>

@@ -17,9 +17,10 @@ import (
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/pages/wpath"
+	"cogentcore.org/core/pages/ppath"
 	strip "github.com/grokify/html-strip-tags-go"
 )
 
@@ -103,7 +104,23 @@ func makeFiles(c *config.Config) error {
 		return err
 	}
 
-	iht, err := makeIndexHTML(c, "", "")
+	preRenderHTML, err := exec.Output("go", "run", "-tags", "offscreen,generatehtml", ".")
+	if err != nil {
+		return err
+	}
+	preRenderHTMLIndex := preRenderHTML
+	pagesPreRenderData := &ppath.PreRenderData{}
+	if strings.HasPrefix(preRenderHTML, "{") {
+		err := jsonx.Read(pagesPreRenderData, strings.NewReader(preRenderHTML))
+		if err != nil {
+			return err
+		}
+		preRenderHTMLIndex = pagesPreRenderData.HTML[""]
+		if c.Pages == "" {
+			c.Pages = "content"
+		}
+	}
+	iht, err := makeIndexHTML(c, "", "", "", preRenderHTMLIndex)
 	if err != nil {
 		return err
 	}
@@ -113,7 +130,7 @@ func makeFiles(c *config.Config) error {
 	}
 
 	if c.Pages != "" {
-		err := makePages(c)
+		err := makePages(c, pagesPreRenderData)
 		if err != nil {
 			return err
 		}
@@ -144,7 +161,7 @@ func makeFiles(c *config.Config) error {
 
 // makePages makes a directory structure of pages for
 // the core pages located at [config.Config.Pages].
-func makePages(c *config.Config) error {
+func makePages(c *config.Config, preRenderData *ppath.PreRenderData) error {
 	return filepath.WalkDir(c.Pages, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -160,10 +177,11 @@ func makePages(c *config.Config) error {
 		path = strings.TrimSuffix(path, ".md")
 		path = strings.TrimPrefix(path, c.Pages)
 		path = strings.TrimPrefix(path, "/")
-		if wpath.Draft(path) {
+		path = strings.TrimSuffix(path, "/")
+		if ppath.Draft(path) {
 			return nil
 		}
-		path = wpath.Format(path)
+		path = ppath.Format(path)
 		if path == "" { // exclude root index
 			return nil
 		}
@@ -172,11 +190,11 @@ func makePages(c *config.Config) error {
 		if err != nil {
 			return err
 		}
-		title := wpath.Label(path, c.Name)
+		title := ppath.Label(path, c.Name)
 		if title != c.Name {
 			title += " • " + c.Name
 		}
-		b, err := makeIndexHTML(c, wpath.BasePath(path), title)
+		b, err := makeIndexHTML(c, ppath.BasePath(path), title, preRenderData.Description[path], preRenderData.HTML[path])
 		if err != nil {
 			return err
 		}

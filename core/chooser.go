@@ -325,6 +325,9 @@ func (ch *Chooser) Init() {
 					}
 				})
 				w.Updater(func() {
+					if w.error != nil {
+						return // don't override anything when we have an invalid value
+					}
 					w.SetText(ch.CurrentItem.GetText()).SetLeadingIcon(ch.Icon).
 						SetTrailingIcon(ch.Indicator, func(e events.Event) {
 							ch.openMenu(e)
@@ -553,6 +556,9 @@ func (ch *Chooser) selectItemEvent(index int) *Chooser {
 		return ch
 	}
 	ch.selectItem(index)
+	if ch.textField != nil {
+		ch.textField.validate()
+	}
 	ch.SendChange()
 	return ch
 }

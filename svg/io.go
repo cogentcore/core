@@ -1085,9 +1085,13 @@ func MarshalXMLTree(n Node, enc *XMLEncoder, setName string) (string, error) {
 func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	me := xml.StartElement{}
 	me.Name.Local = "svg"
-	// todo: look for properties about units?
-	XMLAddAttr(&me.Attr, "width", sv.PhysicalWidth.String())
-	XMLAddAttr(&me.Attr, "height", sv.PhysicalHeight.String())
+	// TODO: what makes sense for PhysicalWidth and PhysicalHeight here?
+	if sv.PhysicalWidth.Value > 0 {
+		XMLAddAttr(&me.Attr, "width", fmt.Sprintf("%g", sv.PhysicalWidth.Value))
+	}
+	if sv.PhysicalHeight.Value > 0 {
+		XMLAddAttr(&me.Attr, "height", fmt.Sprintf("%g", sv.PhysicalHeight.Value))
+	}
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.Root.ViewBox.Min.X, sv.Root.ViewBox.Min.Y, sv.Root.ViewBox.Size.X, sv.Root.ViewBox.Size.Y))
 	XMLAddAttr(&me.Attr, "xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape")
 	XMLAddAttr(&me.Attr, "xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd")

@@ -62,7 +62,7 @@ type AppSingler interface {
 // NewAppSingle makes a new [AppSingle].
 func NewAppSingle[D system.Drawer, W system.Window]() AppSingle[D, W] {
 	return AppSingle[D, W]{
-		Scrn: &system.Screen{},
+		Scrn: &system.Screen{Name: "main"},
 	}
 }
 

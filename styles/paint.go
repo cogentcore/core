@@ -87,7 +87,7 @@ func (pc *Paint) SetStyleProperties(parent *Paint, properties map[string]any, ct
 	if !pc.StyleSet && parent != nil { // first time
 		pc.InheritFields(parent)
 	}
-	pc.StyleFromProperties(parent, properties, ctxt)
+	pc.styleFromProperties(parent, properties, ctxt)
 
 	pc.PropertiesNil = (len(properties) == 0)
 	pc.StyleSet = true
