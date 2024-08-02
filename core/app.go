@@ -140,6 +140,9 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 	NewButton(m).SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu).OnClick(func(e events.Event) {
 		d := NewBody().AddTitle("Search")
 		w := NewChooser(d).SetEditable(true).SetIcon(icons.Search)
+		w.Styler(func(s *styles.Style) {
+			s.Grow.Set(1, 0)
+		})
 		w.AddItemsFunc(func() {
 			for _, rw := range AllRenderWindows {
 				for _, kv := range rw.mains.stack.Order {
