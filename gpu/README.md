@@ -1,21 +1,18 @@
-# wGPU: WebGPU Framework for Go
+# GPU for Graphics and Compute
 
-This is based on vGPU, which provides an abstraction layer for managing all the complexity associated with Vulkan.  Although WebGPU is friendlier than Vulkan, these memory management abstractions are quite general and useful.
+The `gpu` package manages all the details of [WebGPU](https://www.w3.org/TR/webgpu/) to provide a higher-level interface where you can specify the data variables and values, shader pipelines, and other parameters that tell the GPU what to do, without having to worry about all the lower-level implementational details.  It maps directly onto the underlying WebGPU structure, and does not decrease performance in any way.  It supports both graphics and compute functionality.
 
-Links:
+The main gpu code is in the top-level `gpu` package, with the following sub-packages available:
 
-* https://webgpu.rocks/
-* https://gpuweb.github.io/gpuweb/wgsl/
-* https://www.w3.org/TR/webgpu
-* https://web3dsurvey.com/webgpu/limits/maxSampledTexturesPerShaderStage
-* https://toji.dev/webgpu-best-practices/ -- very helpful tutorial info
-* https://sotrh.github.io/learn-wgpu/beginner/tutorial5-textures/
+* [wgpu] is an updated version of [go-webgpu](github.com/rajveermalviya/go-webgpu) that provides the direct WebGPU bindings for Go, using the Rust-based [wgpu](https://github.com/gfx-rs/wgpu) implementation of the WebGPU standard, including [webgpu-native](https://github.com/gfx-rs/wgpu-native) for non-web "native" use on all major platforms, and javascript web bindings adapted from the Go-based [wasmgpu](https://github.com/mokiat/wasmgpu) package.
 
-wGPU is a WebGPU-based framework for both Graphics and Compute Engine use of GPU hardware, in the Go langauge.  It uses the basic cgo-based Go bindings to WebGPU in [WebGPU-go](https://github.com/WebGPU-go/WebGPU) and was developed starting with the associated example code surrounding that project.  WebGPU is a relatively new, essentially universally supported interface to GPU hardware across all types of systems from mobile phones to massive GPU-based compute hardware, and it provides high-performance "bare metal" access to the hardware, for both graphics and computational uses.
+* [phong] is a Blinn-Phong lighting model implementation on top of `gpu`, which then serves as the basis for the higherlevel [xyz](https://github.com/cogentcore/core/tree/main/xyz) 3D scenegraph system.
 
-[WebGPU](https://www.w3.org/TR/webgpu/) is very low-level and demands a higher-level framework to manage the complexity and verbosity.  While there are many helpful tutorials covering the basic API, many of the tutorials don't provide much of a pathway for how to organize everything at a higher level of abstraction.  wGPU represents one attempt that enforces some reasonable choices that enable a significantly simpler programming model, while still providing considerable flexibility and high levels of performance.  Everything is a tradeoff, and simplicity definitely was prioritized over performance in a few cases, but in practical use-cases, the performance differences should be minimal.
+* [shape] generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates.  You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by gpu.  It only has a dependency on the [math32](../math32) package and could be used for anything.
 
-* The [gosl](gosl) sub-package provides a way to translate Go code into GPU shader language code for running under wGPU, playing the role of NVIDIA's "cuda" language in other frameworks.
+* [gpudraw] implements GPU-accelerated texture-based versions of the Go [image/draw](https://pkg.go.dev/image/draw) api.  This is used for compositing images in the `core` GUI to construct the final rendered scene, and for drawing that scene on the actual hardware window.
+
+* [gosl](gosl) translates Go code into GPU shader language code for running compute shaders in `gpu`, playing the role of NVIDIA's "cuda" language in other frameworks.
 
 # Platforms
 
@@ -27,6 +24,8 @@ wGPU is a WebGPU-based framework for both Graphics and Compute Engine use of GPU
 
 For systems with multiple GPU devices, by default the discrete device is selected, and if multiple of those are present, the one with the most RAM is used.  To see what is available and their properties, use:
 
+TODO: write a simple command-line tool to show driver features, and update this.
+
 ```
 $ WebGPUinfo --summary
 ```
@@ -36,157 +35,70 @@ The following environment variables can be set to specifically select a particul
 * `MESA_VK_DEVICE_SELECT` (standard for mesa-based drivers) or `VK_DEVICE_SELECT` -- for graphics or compute usage.
 * `VK_COMPUTE_DEVICE_SELECT` -- only used for compute, if present -- will override above, so you can use different GPUs for graphics vs compute.
 
-# phong and vShape
-
-The [phong](vphong) package provides a complete rendering implementation with different pipelines for different materials, and support for 4 different types of light sources based on the classic Blinn-Phong lighting model.  See the `examples/phong` example for how to use it.  It does not assume any kind of organization of the rendering elements, and just provides name and index-based access to all the resources needed to render a scene.
-
-[vShape](vshape) generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates.  You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by gpu.  It only has a dependency on the [math32](../math32) package and could be used for anything.
 
 # Basic Elements and Organization
 
-* `GPU` represents the hardware `Device` and maintains global settings, info about the hardware.
-    + `Device` is a *logical* device and associated Queue info -- each such device can function in parallel.
-    + `CmdPool` manages a command pool and buffer, associated with a specific logical device, for submitting commands to the GPU.
+* `GPU` represents the hardware `Adapter` and maintains global settings, info about the hardware.
+    + `Device` is a *logical* device and associated `Queue` info. Each such device can function in parallel.
 
-* `System` manages multiple WebGPU `Pipeline`s and associated variables, variable values, and memory, to accomplish a complete overall rendering / computational job.  The Memory with Vars and Values are shared across all pipelines within a System.
+* `System` manages multiple `Pipeline`s and associated variables (`Var`) and `Value`s, to accomplish a complete overall rendering / computational job.  The `Vars` and `Values` are shared across all pipelines within a System, which is more efficient and usually what you want.  A given shader can simply ignore the variables it doesn't need.
     + `Pipeline` performs a specific chain of operations, using `Shader` program(s).  In a graphics context, each pipeline typically handles a different type of material or other variation in rendering (textured vs. not, transparent vs. solid, etc).
-    + `Memory` manages the memory, organized by `Vars` variables that are referenced in the shader programs, with each Var having any number of associated values in `Values`.  Vars are organized into `Set`s that manage their bindings distinctly, and can be updated at different time scales. It has 4 different `Buffer` buffers for different types of memory.  It is assumed that the *sizes* of all the Values do not change frequently, so everything is Alloc'd afresh if any size changes.  This avoids the need for complex de-fragmentation algorithms, and is maximally efficient, but is not good if sizes change (which is rare in most rendering cases).
+    + `Vars` has up to 4 (hard limit imposed by WebGPU) `VarGroup`s which are referenced with the `@group(n)` syntax in the WGSL shader, in addition to a special `VertexGroup` specifically for the special Vertex and Index variables.  Each `VarGroup` can have a number of `Var` variables, which occupy sequential `@binding(n)` numbers within each group.
+    + `Values` within `Var` manages the specific data values for each variable.  For example, each `Texture` or vertex mesh is stored in its own separate `Value`, with its own `wgpu.Buffer` that is used to transfer data from the CPU to the GPU device.  The `SetCurrent` method selects which `Value` is currently used, for the next `BindPipeline` call that sets all the values to use for a given pipeline run.  Critically, all values must be uploaded to the GPU in advance of a given GPU pass.  For large numbers of `Uniform` and `Storage` values, a `DynamicOffset` can be set so there is just a single `Value` but the specific data used is determined by the `DynamicIndex` within the one big value buffer.
   
-* `Texture` manages a WebGPU Texture and associated `TextureView`, including potential host staging buffer (shared as in a Value or owned separately).
-* `Texture` extends the `Texture` with a `Sampler` that defines how pixels are accessed in a shader.
-* `Framebuffer` manages an `Texture` along with a `RenderPass` configuration for managing a `Render` target (shared for rendering onto a window `Surface` or an offscreen `RenderFrame`)
+* `Texture` manages a WebGPU Texture and associated `TextureView`.
+* `TextureSample` extends the `Texture` with a `Sampler` that defines how pixels are accessed in a shader.  This is what is actually used for textures in graphics rendering.
+* TODO don't need this, but need to see about offscreen: `Framebuffer` manages an `Texture` along with a `RenderPass` configuration for managing a `Render` target (shared for rendering onto a window `Surface` or an offscreen `RenderFrame`)
 
 * `Surface` represents the full hardware-managed `Texture`s associated with an actual on-screen Window.  One can associate a System with a Surface to manage the Swapchain updating for effective double or triple buffering.
 * `RenderFrame` is an offscreen render target with Framebuffers and a logical device if being used without any Surface -- otherwise it should use the Surface device so images can be copied across them.
 
-* Unlike most game-oriented GPU setups, wGPU is designed to be used in an event-driven manner where render updates arise from user input or other events, instead of requiring a constant render loop taking place at all times (which can optionally be established too).  The event-driven model is vastly more energy efficient for non-game applications.
+* Unlike most game-oriented GPU setups, `gpu` is designed to be used in an event-driven manner where render updates arise from user input or other events, instead of requiring a constant render loop taking place at all times (which can optionally be established too).  The event-driven model is vastly more energy efficient for non-game applications.
 
-## Memory organization
+## Var and Value data
 
-TODO:
+The single most important constraint in thinking about how the GPU works, is that *all resources (data in buffers, textures) must be uploaded to the GPU at the _start_ of the render pass*.
 
-* key simplification: just have one buffer per value -- this is much simpler and really not a problem in practice -- we just don't have that many vars / values anyway.  and it greatly simplifies management.
+Thus, you must configure all the vars and values prior to a render pass, and if anything changes, these need to be reconfigured.
 
-* mostly only ever have 1 Value, except for Textures
-* todo: what about lights?  not clear why need to be dynamic, but really only case that is.
-* no push constants: for phong, just re-bind model matrix every time.
-* no arrays of textures -- store each one in a Value and copy up each time.
-* this gets around the limitation, and we can pre-load them somenow so not such a big deal?
+Then, during the render pass, the `BindPipeline` calls `BindAllGroups` to select which of multiple possible `Value` instances of each `Var` is actually seen by the current GPU commands.  After the initial `BindPipeline` call, you can more selectively call `BindGroup` on an individual group to update the bindings.
 
-*Single most important fact: all resources (data in buffers, textures) must be in the GPU at the _start_ of the render pass*
+Furthermore if you change the `DynamicOffset` for a variable configured with that property, you need to call BindGroup to update the offset into a larger shared value buffer, to determine which value is processed.
 
-You can use different BindGroups to select different Value buffers for a given Var, but everything has to be uploaded at the start.
+The `Var.Values.Current` index determines which Value is used for the BindGroup call, and `SetCurrent*` methods set this for you at various levels of the variable hierarchy.  Likewise, the `Value.DynamicIndex` determines the dynamic offset, and can be set with `SetDynamicIndex*` calls.
 
-Given that the number of objects rendered is likely to vary between frames, it might be better to go ahead and use the vertex data, which is more dynamically accessed per item, to stream the model matrix and any other per-instance data into the thing, in the absence of push constants.
+`Vars` variables define the `Type` and `Role` of data used in the shaders.  There are 3 major categories of Var roles:
 
-`Memory` maintains a host-visible, mapped staging buffer, and a corresponding device-local memory buffer that the GPU uses to compute on (the latter of which is optional for unified memory architectures).  Each `Value` records when it is modified, and a global Sync step efficiently transfers only what has changed.  *You must allocate and sync update a unique Value for each different value you will need for the entire render pass* -- although you can dynamically select *which Value* to use for each draw command, you cannot in general update the actual data associated with these values during the course of a single rendering pass.
+* `Vertex` and `Index` represent mesh points etc that provide input to Vertex shader -- these are handled very differently from the others, and must be located in a `VertexSet` which has a set index of -2.  The offsets into allocated Values are updated *dynamically* for each render Draw command, so you can Bind different Vertex Values as you iterate through objects within a single render pass (again, the underlying vals must be sync'd prior).
 
-* `Vars` variables define the `Type` and `Role` of data used in the shaders.  There are 3 major categories of Var roles:
-    + `Vertex` and `Index` represent mesh points etc that provide input to Vertex shader -- these are handled very differently from the others, and must be located in a `VertexSet` which has a set index of -2.  The offsets into allocated Values are updated *dynamically* for each render Draw command, so you can Bind different Vertex Values as you iterate through objects within a single render pass (again, the underlying vals must be sync'd prior).
-    + `PushConst` are push constants that can only be 128 bytes total that can be directly copied from CPU ram to the GPU via a command -- it is the most high-performance way to update dynamically changing content, such as view matricies or indexes into other data structures.  Must be located in `PushConstSet` set (index -1).
-    + `Uniform` (read-only "constants") and `Storage` (read-write) data that contain misc other data, e.g., transformation matricies.  These are also updated *dynamically* using dynamic offsets, so you can also call `BindDynValue` methods to select different such vals as you iterate through objects.  The original binding is done automatically in the Memory Config (via BindDynVarsAll) and usually does not need to be redone.
-    + `Texture` vars that provide the raw `Texture` data, the `TextureView` through which that is accessed, and a `Sampler` that parametrizes how the pixels are mapped onto coordinates in the Fragment shader.  Each texture object is managed as a distinct item in device memory, and they cannot be accessed through a dynamic offset.  Thus, a unique descriptor is provided for each texture Value, and your shader should describe them as an array.  All such textures must be in place at the start of the render pass, and cannot be updated on the fly during rendering!  Thus, you must dynamically bind a uniform variable or push constant to select which texture item from the array to use on a given step of rendering.
-        + There is a low maximum number of Texture descriptors (vals) available within one descriptor set on many platforms, including the Mac, only 16, which is enforced via the `MaxTexturesPerSet` const.  There are two (non mutually exclusive) strategies for increasing the number of available textures:
-        + Each individual Texture can have up to 128 (again a low limit present on the Mac) layers in a 2d Array of images, in addition to all the separate texture vals being in an Array -- arrays of arrays.  Each of the array layers must be the same size -- they are allocated and managed as a unit.  The `szalloc` package provides manager for efficiently allocating images of various sizes to these 16 x 128 (or any N's) groups of layer arrays.  This is integrated into the `Values` value manager and can be engaged by calling `AllocTexBySize` there.  The texture UV coordinates need to be processed by the actual pct size of a given texture relative to the allocated group size -- this is all done in the `vphong` package and the `texture_frag.frag` file there can be consulted for a working example.
-        + If you allocate more than 16 texture Values, then multiple entire collections of these descriptors will be allocated, as indicated by the `NTextureDescs` on `VarGroup` and `Vars` (see that for more info, and the `vdraw` `Draw` method for an example).  You can use `Vars.BindAllTextureValues` to bind all texture vals (iterating over NTextureDescs), and `System.CmdBindTextureVarIndex` to automatically bind the correct set.
-        +, here's some `glsl` shader code showing how to use the `sampler2DArray`, as used in the `vdraw` `draw_frag.frag` fragment shader code:
-        
-```
-#version 450
-#extension GL_EXT_nonuniform_qualifier : require
+* `PushConst` (not yet available in WebGPU) are push constants that can only be 128 bytes total that can be directly copied from CPU ram to the GPU via a command -- it is the most high-performance way to update dynamically changing content, such as view matricies or indexes into other data structures.  Must be located in `PushConstSet` set (index -1).
 
-// must use mat4 -- mat3 alignment issues are horrible.
-// each mat4 = 64 bytes, so full 128 byte total, but only using mat3.
-// pack the tex index into [0][3] of mvp,
-// and the fill color into [3][0-3] of uvp
-layout(push_constant) uniform Matrix {
-	mat4 mvp;
-	mat4 uvp;
-};
+* `Uniform` (read-only "constants") and `Storage` (read-write) data that contain misc other data, e.g., transformation matricies.  These are the only types that can optionally use the `DynamicOffset` mechanism, which should generally be reserved for cases where there is a large and variable number of values that need to be selected among during a render pass.  The [phong] system stores the object-specific "model matrix" and other object-specific data using this dynamic offset mechanism.
 
-layout(set = 0, binding = 0) uniform sampler2DArray Tex[]; //
-layout(location = 0) in vector2 uv;
-layout(location = 0) out vector4 outputColor;
-
-void main() {
-	int idx = int(mvp[3][0]);   // packing into unused part of mat4 matrix push constant
-	int layer = int(mvp[3][1]);
-	outputColor = texture(Tex[idx], vector3(uv,layer)); // layer selection as 3rd dim here
-}
-```
-    
-* `Var`s are accessed at a given `location` or `binding` number by the shader code, and these bindings can be organized into logical sets called DescriptorSets (see Graphics Rendering example below).  In [HLSL](https://www.lei.chat/posts/hlsl-for-WebGPU-resources/), these are specified like this: `[[vk::binding(5, 1)]] Texture2D MyTexture2;` for descriptor 5 in set 1 (set 0 is the first set).
-    + You manage these sets explicitly by calling `AddSet` or `AddVertexSet` / `AddPushConstSet` to create new `VarGroup`s, and then add `Var`s directly to each set.
-    + `Values` represent the values of Vars, with each `Value` representing a distinct value of a corresponding `Var`. The `ConfigValues` call on a given `VarGroup` specifies how many Values to create per each Var within a Set -- this is a shared property of the Set, and should be a consideration in organizing the sets.  For example, Sets that are per object should contain one Value per object, etc, while others that are per material would have one Value per material.
-    + There is no support for interleaved arrays -- if you want to achieve such a thing, you need to use an array of structs, but the main use-case is for VertexInput, which actually works faster with non-interleaved simple arrays of vector4 points in most cases (e.g., for the points and their normals).
-    + You can allocate multiple bindings of all the variables, with each binding being used for a different parallel threaded rendering pass.  However, there is only one shared set of Values, so your logic will have to take that into account (e.g., allocating 2x Values per object to allow 2 separate threads to each update and bind their own unique subset of these Values for their own render pass).  See discussion under `Texture` about how this is done in that case.  The number of such DescriptorSets is configured in `Memory.Vars.NDescs` (defaults to 1). Note that these are orthogonal to the number of `VarGroup`s -- the terminology is confusing.  Various methods take a `descIndex` to determine which such descriptor set to use -- typically in a threaded swapchain logic you would use the acquired frame index as the descIndex to determine what binding to use.
+* `Texture` vars that provide the raw `Texture` data, the `TextureView` through which that is accessed, and a `Sampler` that parametrizes how the pixels are mapped onto coordinates in the Fragment shader.  Each texture object is managed as a distinct item in device memory.  
 
 ## Naming conventions
 
-* `New` returns a new object
-* `Init` operates on existing object, doing initialization needed for subsequent setting of options
+* `New*` returns a new object.
 * `Config` operates on an existing object and settings, and does everything to get it configured for use.
-* `Release` releases allocated WebGPU objects
-* `Alloc` is for allocating memory (vs. making a new object)
-* `Free` is for freeing memory (vs. destroying an object)
+* `Release` releases allocated WebGPU objects.
 
-# Graphics Rendering
-
-See https://developer.nvidia.com/WebGPU-shader-resource-binding for a clear description of DescriptorSets etc.
-
-Here's a widely used rendering logic, supported by the Cogent Core Scene (and tbd std Pipeline), and how you should organize the Uniform data into different sets at each level, to optimize the binding overhead:
-
-```
-for each view {
-  bind view resources [Set 0]         // camera, environment...
-  for each shader type (based on material type: textured, transparent..) {
-    bind shader pipeline  
-    bind shader resources [Set 1]    // shader control values (maybe none)
-    for each specific material {
-      bind material resources  [Set 2] // material parameters and textures
-      for each object {
-        bind object resources  [Set 3] // object transforms
-        draw object [VertexInput binding to locations]
-        (only finally calls Pipeline here!)
-      }
-    }
-  }
-}
-```
-
-It is common practice to use different DescriptorSets for each level in the swapchain, for maintaining high FPS rates by rendering the next frame while the current one is still cooking along itself -- this is the `NDescs` parameter mentioned above.
-
-Because everything is all packed into big buffers organized by different broad categories, in `Memory`, we *exclusively* use the Dynamic mode for Uniform and Storage binding, where the offset into the buffer is specified at the time of the binding call, not in advance in the descriptor set itself.  This has only very minor performance implications and makes everything much more flexible and simple: just bind whatever variables you want and that data will be used.
-
-The examples and provided `phong` package retain the Y-is-up coordinate system from OpenGL, which is more "natural" for the physical world, where the Y axis is the height dimension, and up is up, after all.  Some of the defaults reflect this choice, but it is easy to use the native WebGPU Y-is-down coordinate system too.
-
-## Combining many pipeline renders per RenderPass
-
-The various introductory tutorials all seem to focus on just a single simple render pass with one draw operation, but any realistic scene needs different settings for each object!  As noted above, this requires dynamic binding, which is good for Uniforms and Vertex data, but you might not appreciate that this also requires that you pre-allocate and sync up to device memory all the Values that you will need for the entire render pass -- the dynamic binding only selects different offsets into memory buffers, but the actual contents of those buffers should not change during a single render pass (otherwise things will get very slow and lots of bad sync steps might be required, etc).  The Memory system makes it easy to allocate, update, and dynamically bind these vals.
-
-Here's some info on the logical issues:
-
-* [Stack Overflow](https://stackoverflow.com/questions/54103399/how-to-repeatedly-update-a-uniform-data-for-number-of-objects-inside-a-single-vu) discussion of the issues.
-
-* [NVIDIA github](https://github.com/nvpro-samples/gl_vk_threaded_cadscene/blob/master/doc/WebGPU_uniforms.md) has explicit code and benchmarks of different strategies.
-
-This [blog](http://kylehalladay.com/blog/tutorial/WebGPU/2018/01/28/Textue-Arrays-WebGPU.html) has a particularly clear discussion of the need for Texture arrays for managing textures within a render pass.  This is automatically how Texture vars are managed .
 
 # GPU Accelerated Compute Engine
 
 See `examples/compute1` for a very simple compute shader, and [compute.go](vgpu/compute.go) for `Compute*` methods specifically useful for this case.
 
-See the [gosl](https://github.com/emer/gosl) repository for a tool that converts Go code into HLSL shader code, so you can effectively run Go on the GPU.
+See [gosl] for a tool that converts Go code into WGSL shader code, so you can effectively run Go on the GPU.
 
 Here's how it works:
 
-* Each WebGPU `Pipeline` holds **1** compute `shader` program, which is equivalent to a `kernel` in CUDA -- this is the basic unit of computation, accomplishing one parallel sweep of processing across some number of identical data structures.
+* Each WebGPU `Pipeline` holds **1** compute `shader` program, which is equivalent to a `kernel` in CUDA. This is the basic unit of computation, accomplishing one parallel sweep of processing across some number of identical data structures.
 
-* You must organize at the outset your `Vars` and `Values` in the `System` `Memory` to hold the data structures your shaders operate on.  In general, you want to have a single static set of Vars that cover everything you'll need, and different shaders can operate on different subsets of these.  You want to minimize the amount of memory transfer.
+* You must organize at the outset your `Vars` and `Values` in the `System` to hold the data structures your shaders operate on.  In general, you want to have a single static set of Vars that cover everything you'll need, and different shaders can operate on different subsets of these.  You want to minimize the amount of memory transfer.
 
-* Because the `vkQueueSubmit` call is by far the most expensive call in WebGPU, you want to minimize those.  This means you want to combine as much of your computation into one big Command sequence, with calls to various different `Pipeline` shaders (which can all be put in one command buffer) that gets submitted *once*, rather than submitting separate commands for each shader.  Ideally this also involves combining memory transfers to / from the GPU in the same command buffer as well.
+* Because the `Queue.Submit` call is by far the most expensive call in WebGPU, you want to minimize those.  This means you want to combine as much of your computation into one big Command sequence, with calls to various different `Pipeline` shaders (which can all be put in one command buffer) that gets submitted *once*, rather than submitting separate commands for each shader.  Ideally this also involves combining memory transfers to / from the GPU in the same command buffer as well.
 
-* Although rarely used in graphics, the most important tool for synchronizing commands _within a single command stream_ is the [vkEvent](https://registry.khronos.org/WebGPU/specs/1.3-extensions/man/html/VkEvent.html), which is described a bit in the [Khronos Blog](https://www.khronos.org/blog/understanding-WebGPU-synchronization).  Much of WebGPU discussion centers instead around `Semaphores`, but these are only used for synchronization _between different commands_ --- each of which requires a different `vkQueueSubmit` (and is therefore suboptimal).
+* TODO: update for webgpu sync mechanisms.  Although rarely used in graphics, the most important tool for synchronizing commands _within a single command stream_ is the [vkEvent](https://registry.khronos.org/WebGPU/specs/1.3-extensions/man/html/VkEvent.html), which is described a bit in the [Khronos Blog](https://www.khronos.org/blog/understanding-WebGPU-synchronization).  Much of WebGPU discussion centers instead around `Semaphores`, but these are only used for synchronization _between different commands_ --- each of which requires a different `vkQueueSubmit` (and is therefore suboptimal).
 
 * Thus, you should create named events in your compute `System`, and inject calls to set and wait on those events in your command stream.
 
@@ -195,44 +107,26 @@ Here's how it works:
 It is hard to find this info very clearly stated:
 
 * All internal computation in shaders is done in a *linear* color space.
-* Texture textures are assumed to be sRGB and are automatically converted to linear on upload.
-* Other colors that are passed in should be converted from sRGB to linear (the Phong shaders do this).
+* Textures are assumed to be sRGB and are automatically converted to linear on upload.
+* Other colors that are passed in should be converted from sRGB to linear (the [phong] shader does this for the PerVertex case).
 * The `Surface` automatically converts from Linear to sRGB for actual rendering.
-* A `RenderFrame` for offscreen / headless rendering *must* use `wgpu.TextureFormatR8g8b8a8Srgb` for the format, in order to get back an image that is automatically converted back to sRGB format.
+* A `RenderFrame` for offscreen / headless rendering *must* use `wgpu.TextureFormatRGBA8UnormSrgb` for the format, in order to get back an image that is automatically converted back to sRGB format.
 
-# Mac Platform
+# Limits
 
-To have the mac use the `libMoltenVK.dylib` installed by `brew install molten-vk`, you need to change the LDFLAGS here:
+See https://web3dsurvey.com/webgpu for a browser of limits across different platforms, _for the web platform_.  Note that the native version typically will have higher limits for many things across these same platforms, but because we want to maintain full interoperability across web and native, it is the lower web limits that constrain.
 
-`github.com/goki/WebGPU/WebGPU_darwin.go`
+* https://web3dsurvey.com/webgpu/limits/maxBindGroups only 4!
+* https://web3dsurvey.com/webgpu/limits/maxBindingsPerBindGroup 640 low end: plenty of room for all your variables, you just have to put them in relatively few top-level groups.
+* https://web3dsurvey.com/webgpu/limits/maxDynamicUniformBuffersPerPipelineLayout 8: should be plenty.
+* https://web3dsurvey.com/webgpu/limits/maxVertexBuffers 8: can't stuff too many vars into the vertex group, but typically not a problem.
 
-```
-#cgo darwin LDFLAGS: -L/opt/homebrew/lib -Wl,-rpath,/opt/homebrew/lib -F/Library/Frameworks -framework Cocoa -framework IOKit -framework IOSurface -framework QuartzCore -framework Metal -lMoltenVK -lc++
-```
+# WebGPU Links
 
-However it does not find the `libWebGPU` which is not included in molten-vk.
-
-# Platform properties
-
-See MACOS.md file for full report of properties on Mac.
-
-These are useful for deciding what kinds of limits are likely to work in practice:
-
-* 4 max bound descriptor sets: keep below this in general. https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxBoundDescriptorSets&platform=all
-
-* maxPerStageDescriptorSamplers is only 16 on mac -- this is the relevant limit on textures!  also SampledTextures is basically the same:
-https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSamplers&platform=all
-https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSampledTextures&platform=all
-
-This is a significant constraint!  need to work around it.
-
-* 8 dynamic uniform descriptors (mac has 155) https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxDescriptorSetUniformBufferersDynamic&platform=all
-
-Note that this constraint is largely irrelevant because each dynamic descriptor can have an unlimited number of offset values used for it. 
-
-* 128 push constant bytes actually quite prevalent: https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxPushConstantsSize&platform=all
-
-* image formats: https://WebGPU.gpuinfo.org/listsurfaceformats.php
-
-* helpful info on dxc compiler, which is best for HLSL inputs: https://github.com/microsoft/DirectXShaderCompiler/blob/main/docs/SPIR-V.rst
+* https://webgpu.rocks/
+* https://gpuweb.github.io/gpuweb/wgsl/
+* https://www.w3.org/TR/webgpu
+* https://web3dsurvey.com/webgpu
+* https://toji.dev/webgpu-best-practices/ -- very helpful tutorial info
+* https://sotrh.github.io/learn-wgpu/beginner/tutorial5-textures/
 
