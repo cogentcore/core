@@ -23,11 +23,11 @@ type Matrix struct {
 }
 
 // ConfigMatrix configures the draw matrix for given draw parameters:
-// src2dst is the transform mapping source to destination
+// xform is the transform mapping source to destination
 // coordinates (translation, scaling), txsz is the size of the texture to draw,
 // sr is the source region (set to tex.Format.Bounds() for all)
 // flipY inverts the Y axis of the source image.
-func ConfigMatrix(destSz image.Point, src2dst math32.Matrix3, txsz image.Point, sr image.Rectangle, flipY bool) *Matrix {
+func ConfigMatrix(destSz image.Point, xform math32.Matrix3, txsz image.Point, sr image.Rectangle, flipY bool) *Matrix {
 	var tmat Matrix
 
 	sr = sr.Intersect(image.Rectangle{Max: txsz})
@@ -43,15 +43,14 @@ func ConfigMatrix(destSz image.Point, src2dst math32.Matrix3, txsz image.Point, 
 	srcR := float32(sr.Max.X)
 	srcB := float32(sr.Max.Y)
 
-	// Transform to dst-space via the src2dst matrix, then to a MVP matrix.
+	// Transform to dst-space via the xform matrix, then to a MVP matrix.
 	matMVP := calcMVP(destSz.X, destSz.Y,
-		src2dst[0]*srcL+src2dst[3]*srcT+src2dst[6],
-		src2dst[1]*srcL+src2dst[4]*srcT+src2dst[7],
-		src2dst[0]*srcR+src2dst[3]*srcT+src2dst[6],
-		src2dst[1]*srcR+src2dst[4]*srcT+src2dst[7],
-		src2dst[0]*srcL+src2dst[3]*srcB+src2dst[6],
-		src2dst[1]*srcL+src2dst[4]*srcB+src2dst[7],
-		false,
+		xform[0]*srcL+xform[3]*srcT+xform[6],
+		xform[1]*srcL+xform[4]*srcT+xform[7],
+		xform[0]*srcR+xform[3]*srcT+xform[6],
+		xform[1]*srcR+xform[4]*srcT+xform[7],
+		xform[0]*srcL+xform[3]*srcB+xform[6],
+		xform[1]*srcL+xform[4]*srcB+xform[7],
 	)
 	tmat.MVP.SetFromMatrix3(&matMVP) // todo render direct
 
@@ -113,27 +112,16 @@ func ConfigMatrix(destSz image.Point, src2dst math32.Matrix3, txsz image.Point, 
 //
 // In vertex shader space, the window ranges from (-1, +1) to (+1, -1), which
 // is a 2-unit by 2-unit square. The Y-axis points upwards.
-//
-// if yisdown is true, then the y=0 is at top in dest, else bottom
-func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32, yisdown bool) math32.Matrix3 {
+func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32) math32.Matrix3 {
 	// Convert from pixel coords to vertex shader coords.
 	invHalfWidth := 2 / float32(widthPx)
 	invHalfHeight := 2 / float32(heightPx)
-	if yisdown {
-		tlx = tlx*invHalfWidth - 1
-		tly = tly*invHalfHeight - 1
-		trx = trx*invHalfWidth - 1
-		try = try*invHalfHeight - 1
-		blx = blx*invHalfWidth - 1
-		bly = bly*invHalfHeight - 1
-	} else {
-		tlx = tlx*invHalfWidth - 1
-		tly = 1 - tly*invHalfHeight // 1 - min
-		trx = trx*invHalfWidth - 1
-		try = 1 - try*invHalfHeight // 1 - min
-		blx = blx*invHalfWidth - 1
-		bly = 1 - bly*invHalfHeight // 1 - (min + max)
-	}
+	tlx = tlx*invHalfWidth - 1
+	tly = 1 - tly*invHalfHeight // 1 - min
+	trx = trx*invHalfWidth - 1
+	try = 1 - try*invHalfHeight // 1 - min
+	blx = blx*invHalfWidth - 1
+	bly = 1 - bly*invHalfHeight // 1 - (min + max)
 
 	// The resultant affine matrix:
 	//	- maps (0, 0) to (tlx, tly).

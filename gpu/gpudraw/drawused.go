@@ -57,14 +57,14 @@ func (dw *Drawer) SetFrameTexture(idx int, fbi any) {
 	// dw.Unlock()
 }
 
-// Copy copies the current Use* texture to render target.
+// CopyUsed copies the current Use* texture to render target.
 // Must have called StartDraw and a Use* method first!
 // dp is the destination point,
 // sr is the source region (set to image.ZR zero rect for all),
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
-func (dw *Drawer) Copy(dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) {
+func (dw *Drawer) CopyUsed(dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) {
 	if sr == (image.Rectangle{}) {
 		sr.Max = dw.curImageSize
 	}
@@ -73,42 +73,44 @@ func (dw *Drawer) Copy(dp image.Point, sr image.Rectangle, op draw.Op, flipY boo
 		0, 1, 0,
 		float32(dp.X - sr.Min.X), float32(dp.Y - sr.Min.Y), 1,
 	}
-	dw.Draw(mat, sr, op, flipY)
+	dw.TransformUsed(mat, sr, op, flipY)
 }
 
-// Scale copies the current Use* texture to render target.
-// Must have called StartDraw and a Use* method first!
-// Scales the region defined by src and sr to the destination
+// ScaleUsed copies the current Use* texture to render target,
+// scaling the region defined by src and sr to the destination
 // such that sr in src-space is mapped to dr in dst-space.
-// dr is the destination rectangle
-// sr is the source region (set to image.Rectangle{} zero rect for all),
+// Must have called StartDraw and a Use* method first!
+// dr is the destination rectangle; if zero uses full dest image.
+// sr is the source region; if zero uses full src image.
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
 // rotDeg = rotation degrees to apply in the mapping: 90 = left, -90 = right, 180 = invert
-func (dw *Drawer) Scale(dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool, rotDeg float32) {
+func (dw *Drawer) ScaleUsed(dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool, rotDeg float32) {
+	if dr == (image.Rectangle{}) {
+		dr.Max = dw.DestSize()
+	}
 	if sr == (image.Rectangle{}) {
 		sr.Max = dw.curImageSize
 	}
-	dw.Draw(TransformMatrix(dr, sr, rotDeg), sr, op, flipY)
+	dw.TransformUsed(TransformMatrix(dr, sr, rotDeg), sr, op, flipY)
 }
 
-// Draw draws the current Use* texture to render target.
+// TransformUsed draws the current Use* texture to render target
 // Must have called StartDraw and a Use* method first!
-// src2dst is the transform mapping source to destination
+// transform is the transform mapping source to destination
 // coordinates (translation, scaling),
-// sr is the source region (set to image.ZR for all)
+// sr is the source region; if zero uses full src image.
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
-func (dw *Drawer) Draw(src2dst math32.Matrix3, sr image.Rectangle, op draw.Op, flipY bool) {
+func (dw *Drawer) TransformUsed(xform math32.Matrix3, sr image.Rectangle, op draw.Op, flipY bool) {
 	dw.Lock()
 	defer dw.Unlock()
 	if sr == (image.Rectangle{}) {
 		sr.Max = dw.curImageSize
 	}
 
-	tmat := ConfigMatrix(dw.DestSize(), src2dst, dw.curImageSize, sr, flipY)
-	// fmt.Printf("sr: %v  sz: %v  omat: %v  tmat: %v \n", sr, dw.curImageSize, src2dst, tmat)
+	tmat := ConfigMatrix(dw.DestSize(), xform, dw.curImageSize, sr, flipY)
 	dw.addOp(op, tmat)
 }
 
