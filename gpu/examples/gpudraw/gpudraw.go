@@ -38,6 +38,8 @@ func main() {
 
 	sf := gpu.NewSurface(gp, sp, width, height)
 
+	fmt.Printf("format: %s\n", sf.Format.String())
+
 	drw := gpudraw.NewDrawerSurface(sf)
 
 	destroy := func() {
@@ -64,19 +66,20 @@ func main() {
 	}
 
 	rendImgs := func(idx int) {
+		fmt.Println(drw.DestSize())
 		drw.StartDraw()
 		drw.UseGoImage(imgs[idx])
-		drw.Scale(sf.Format.Bounds(), image.ZR, gpudraw.Src, gpu.NoFlipY, 0)
+		drw.Scale(sf.Format.Bounds(), image.ZR, gpudraw.Src, false, 0)
 		for i := range imgFiles {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
 			dp := image.Point{i * 50, i * 50}
 			drw.UseGoImage(imgs[i])
-			drw.Copy(dp, image.ZR, gpudraw.Src, gpu.NoFlipY)
+			drw.Copy(dp, image.ZR, gpudraw.Src, false)
 		}
 		for i := range iconFiles {
 			dp := image.Point{rand.Intn(500), rand.Intn(500)}
 			drw.UseGoImage(iconImgs[i])
-			drw.Copy(dp, image.ZR, gpudraw.Over, gpu.NoFlipY)
+			drw.Copy(dp, image.ZR, gpudraw.Over, false)
 		}
 		drw.EndDraw()
 	}

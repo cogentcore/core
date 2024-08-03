@@ -31,6 +31,7 @@ func (dw *Drawer) ConfigPipeline(pl *gpu.GraphicsPipeline) {
 
 // configSystem configures GPUDraw sytem
 func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.TextureFormat) {
+	dw.YIsDown = false
 	dw.opList = slicesx.SetLength(dw.opList, AllocChunk) // allocate
 	dw.opList = dw.opList[:0]
 
@@ -117,13 +118,13 @@ func (dw *Drawer) drawAll() error {
 		// sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], descIndex)
 	}
 
-	cmd := sy.NewCommandEncoder()
-	rp := sy.BeginRenderPassNoClear(cmd, view) // NoClear
-
 	mvr := sy.Vars.VarByName(0, "Matrix")
 	mvl := mvr.Values.Values[0]
 	tvr := sy.Vars.VarByName(1, "TexSampler")
 	tvr.Values.Current = 0
+
+	cmd := sy.NewCommandEncoder()
+	rp := sy.BeginRenderPassNoClear(cmd, view) // NoClear
 
 	imgIdx := 0
 	lastOp := draw.Op(-1)
@@ -140,8 +141,6 @@ func (dw *Drawer) drawAll() error {
 		}
 		mvl.DynamicIndex = i
 		if op != Fill {
-			// fmt.Println(i, op, mvl.DynamicN, mvl.AllocSize, "using img:", imgIdx)
-			// , tvr.Values.Values[imgIdx].Texture.Format.String()
 			tvr.Values.Current = imgIdx
 			imgIdx++
 		}

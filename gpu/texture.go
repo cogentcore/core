@@ -55,35 +55,20 @@ func (tx *Texture) ConfigGoImage(sz image.Point, layers int) {
 	tx.Format.Layers = layers
 }
 
-const (
-	// FlipY used as named arg for flipping the Y axis of textures, etc
-	FlipY = true
-
-	// NoFlipY used as named arg for not flipping the Y axis of textures
-	NoFlipY = false
-)
-
 // SetFromGoImage sets texture data from a standard Go texture at given layer.
 // This is most efficiently done using an texture.RGBA, but other
 // formats will be converted as necessary.
-// If flipY is true then the Texture Y axis is flipped
-// when copying into the texture data, so that textures will appear
-// upright in the standard OpenGL Y-is-up coordinate system.
-// If using the Y-is-down Vulkan coordinate system, don't flip.
 // This starts the full WriteTexture call to upload to device.
-func (tx *Texture) SetFromGoImage(img image.Image, layer int, flipY bool) error {
+func (tx *Texture) SetFromGoImage(img image.Image, layer int) error {
 	rimg := ImageToRGBA(img)
 	sz := rimg.Rect.Size()
 
-	// todo: deal with layer / array
-	// flipY has to be managed using a Draw command presumably --
-	// doesn't read through image interface so can't do something easy there.
 	tx.Format.Size = sz
 	tx.Format.Format = wgpu.TextureFormatRGBA8UnormSrgb
 	tx.Format.Layers = 1
 
 	err := tx.CreateTexture(wgpu.TextureUsageTextureBinding | wgpu.TextureUsageCopyDst)
-	if err != nil {
+	if err != nil { // already logged
 		return err
 	}
 

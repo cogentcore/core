@@ -370,8 +370,8 @@ func (vl *Value) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 // compensate.
 // The Sampler is also configured at this point, with the current settings,
 // so set those before making this call.
-func (vl *Value) SetFromGoImage(img image.Image, layer int, flipY bool) *TextureSample {
-	err := vl.Texture.SetFromGoImage(img, layer, flipY)
+func (vl *Value) SetFromGoImage(img image.Image, layer int) *TextureSample {
+	err := vl.Texture.SetFromGoImage(img, layer)
 	errors.Log(err)
 	err = vl.Texture.Sampler.Config(&vl.device)
 	errors.Log(err)

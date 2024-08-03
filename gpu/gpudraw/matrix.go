@@ -33,9 +33,9 @@ type Matrix struct {
 func (dw *Drawer) ConfigMatrix(src2dst math32.Matrix3, txsz image.Point, sr image.Rectangle, op draw.Op, flipY bool) *Matrix {
 	var tmat Matrix
 
-	// if dw.YIsDown {
-	flipY = !flipY
-	// }
+	if dw.YIsDown {
+		flipY = !flipY
+	}
 
 	sr = sr.Intersect(image.Rectangle{Max: txsz})
 	if sr.Empty() {
@@ -60,7 +60,7 @@ func (dw *Drawer) ConfigMatrix(src2dst math32.Matrix3, txsz image.Point, sr imag
 		src2dst[1]*srcR+src2dst[4]*srcT+src2dst[7],
 		src2dst[0]*srcL+src2dst[3]*srcB+src2dst[6],
 		src2dst[1]*srcL+src2dst[4]*srcB+src2dst[7],
-		false, // dw.YIsDown,
+		dw.YIsDown,
 	)
 	tmat.MVP.SetFromMatrix3(&matMVP) // todo render direct
 
@@ -95,7 +95,7 @@ func (dw *Drawer) ConfigMatrix(src2dst math32.Matrix3, txsz image.Point, sr imag
 	//	  0 + a01 + a02 = sx = px
 	//	  0 + a11 + a12 = sy
 
-	if flipY { // note: reversed from openGL for vulkan
+	if !flipY { // note: reversed from openGL for vulkan
 		tmat.UVP.SetFromMatrix3(&math32.Matrix3{
 			qx - px, 0, 0,
 			0, sy - py, 0, // sy - py

@@ -27,7 +27,9 @@ func (dw *Drawer) FillRect(clr color.Color, reg image.Rectangle, op draw.Op) {
 // Over = alpha blend with existing
 func (dw *Drawer) Fill(clr color.Color, src2dst math32.Matrix3, reg image.Rectangle, op draw.Op) {
 	dsz := dw.DestSize()
-	tmat := dw.ConfigMatrix(src2dst, dsz, reg, op, false)
+	dw.YIsDown = true
+	tmat := dw.ConfigMatrix(src2dst, dsz, reg, op, true)
+	dw.YIsDown = false
 	clr4 := math32.NewVector4Color(clr)
 	clr4.ToSlice(tmat.UVP[:], 12) // last column holds color
 	dw.addOp(Fill, tmat)

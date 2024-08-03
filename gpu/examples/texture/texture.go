@@ -90,7 +90,7 @@ func main() {
 	for i, fnm := range imgFiles {
 		imgs[i], _, _ = imagex.OpenFS(images.Images, fnm)
 		img := txv.Values.Values[i]
-		img.SetFromGoImage(imgs[i], 0, gpu.NoFlipY)
+		img.SetFromGoImage(imgs[i], 0)
 		// img.Texture.Sampler.Border = gpu.BorderBlack
 		// img.Texture.Sampler.UMode = gpu.ClampToBorder
 		// img.Texture.Sampler.VMode = gpu.ClampToBorder

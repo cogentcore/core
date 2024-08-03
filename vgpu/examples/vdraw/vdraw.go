@@ -111,6 +111,7 @@ func main() {
 	drw.SyncImages()
 
 	rendImgs := func(idx int) {
+		fmt.Println(drw.DestSize())
 		descIndex := 0
 		if idx+stoff >= vgpu.MaxTexturesPerSet {
 			descIndex = 1

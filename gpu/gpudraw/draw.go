@@ -19,7 +19,7 @@ func (dw *Drawer) UseGoImage(img image.Image) {
 	defer dw.Unlock()
 	dw.curImageSize = img.Bounds().Size()
 	tvv := dw.getNextTextureValue()
-	tvv.SetFromGoImage(img, 1, gpu.NoFlipY)
+	tvv.SetFromGoImage(img, 0)
 }
 
 // getNextTextureValue gets the next Texture image value, for Use
@@ -65,6 +65,9 @@ func (dw *Drawer) SetFrameTexture(idx int, fbi any) {
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
 func (dw *Drawer) Copy(dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) {
+	if sr == (image.Rectangle{}) {
+		sr.Max = dw.curImageSize
+	}
 	mat := math32.Matrix3{
 		1, 0, 0,
 		0, 1, 0,
@@ -84,8 +87,7 @@ func (dw *Drawer) Copy(dp image.Point, sr image.Rectangle, op draw.Op, flipY boo
 // flipY = flipY axis when drawing this image
 // rotDeg = rotation degrees to apply in the mapping: 90 = left, -90 = right, 180 = invert
 func (dw *Drawer) Scale(dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool, rotDeg float32) {
-	zr := image.Rectangle{}
-	if sr == zr {
+	if sr == (image.Rectangle{}) {
 		sr.Max = dw.curImageSize
 	}
 	dw.Draw(TransformMatrix(dr, sr, rotDeg), sr, op, flipY)
@@ -101,6 +103,9 @@ func (dw *Drawer) Scale(dr image.Rectangle, sr image.Rectangle, op draw.Op, flip
 func (dw *Drawer) Draw(src2dst math32.Matrix3, sr image.Rectangle, op draw.Op, flipY bool) {
 	dw.Lock()
 	defer dw.Unlock()
+	if sr == (image.Rectangle{}) {
+		sr.Max = dw.curImageSize
+	}
 
 	tmat := dw.ConfigMatrix(src2dst, dw.curImageSize, sr, op, flipY)
 	// fmt.Printf("sr: %v  sz: %v  omat: %v  tmat: %v \n", sr, dw.curImageSize, src2dst, tmat)
@@ -115,7 +120,6 @@ func (dw *Drawer) addOp(op draw.Op, mtx *Matrix) {
 	if oi >= nv {
 		mvl.DynamicN += AllocChunk
 	}
-	// fmt.Println("mtx", oi, mtx.MVP, mtx.UVP)
 	gpu.SetDynamicValueFrom(mvl, oi, []Matrix{*mtx})
 	dw.opList = append(dw.opList, op)
 }

@@ -36,6 +36,13 @@ type Drawer struct {
 	// drawing system
 	Sys *gpu.System
 
+	// render so the Y axis points down, with 0,0 at the upper left,
+	// which is the Vulkan standard.  default is Y is up, with 0,0 at
+	// bottom left, which is OpenGL default.
+	// this must be set prior to configuring the surface, as it
+	// determines the rendering parameters.
+	YIsDown bool
+
 	// surface if render target
 	surface *gpu.Surface
 
