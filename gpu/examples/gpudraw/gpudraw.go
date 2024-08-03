@@ -73,7 +73,7 @@ func main() {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
 			dp := image.Point{i * 50, i * 50}
 			drw.UseGoImage(imgs[i])
-			drw.Copy(dp, image.ZR, gpudraw.Src, false)
+			drw.Copy(dp, image.ZR, gpudraw.Src, true)
 		}
 		for i := range iconFiles {
 			dp := image.Point{rand.Intn(500), rand.Intn(500)}

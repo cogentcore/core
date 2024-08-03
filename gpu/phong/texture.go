@@ -52,7 +52,7 @@ func (ph *Phong) configDummyTexture() {
 	tgp.SetNValues(1)
 	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
 	img := tgp.ValueByIndex("TexSampler", 0)
-	img.SetFromGoImage(dimg, 0, gpu.NoFlipY)
+	img.SetFromGoImage(dimg, 0)
 }
 
 // ResetTextures resets all textures
@@ -101,7 +101,7 @@ func (ph *Phong) UpdateTextureIndex(idx int) error {
 	}
 	tx := ph.textures.Order[idx].Value
 	tvl := sy.Vars.ValueByIndex(int(TextureGroup), "TexSampler", idx)
-	tvl.SetFromGoImage(tx.Image, 1, gpu.FlipY)
+	tvl.SetFromGoImage(tx.Image, 1)
 	return nil
 }
 
@@ -132,6 +132,6 @@ func (ph *Phong) configTextures() {
 	tvr.SetNValues(&sy.Device, ntx)
 	for i, kv := range ph.textures.Order {
 		tvv := tvr.Values.Values[i]
-		tvv.SetFromGoImage(kv.Value.Image, 1, gpu.NoFlipY)
+		tvv.SetFromGoImage(kv.Value.Image, 1)
 	}
 }
