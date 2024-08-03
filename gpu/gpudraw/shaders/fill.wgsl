@@ -19,8 +19,9 @@ fn vs_main(
 	model: VertexInput,
 ) -> VertexOutput {
 	var out: VertexOutput;
-	let p4 = vec4<f32>(model.position, 0.0, 0.0);
-	out.clip_position = matrix.mvp * p4;
+	let p3 = vec3<f32>(model.position, 1.0);
+	let mv3 = mat3x3<f32>(matrix.mvp[0].xyz, matrix.mvp[1].xyz, matrix.mvp[2].xyz);
+	out.clip_position = vec4<f32>(mv3 * p3, 1.0);
 	return out;
 }
 

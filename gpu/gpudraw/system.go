@@ -21,6 +21,7 @@ var shaders embed.FS
 // ConfigPipeline configures graphics settings on the pipeline
 func (dw *Drawer) ConfigPipeline(pl *gpu.GraphicsPipeline) {
 	pl.SetGraphicsDefaults()
+	pl.SetCullMode(wgpu.CullModeNone)
 	// if dw.YIsDown {
 	// 	pl.SetFrontFace(wgpu.FrontFaceCCW)
 	// } else {
@@ -36,15 +37,16 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.T
 	dw.Sys = gpu.NewGraphicsSystem(gp, "gpudraw", dev)
 	dw.Sys.ConfigRender(renderFormat, gpu.UndefType)
 	sy := dw.Sys
+	// sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 
 	// note: requires different pipelines for src vs. over draw op modes
 	dspl := sy.AddGraphicsPipeline("drawsrc")
 	dw.ConfigPipeline(dspl)
-	// dspl.SetColorBlend(false)
+	dspl.SetColorBlend(false)
 
 	dopl := sy.AddGraphicsPipeline("drawover")
 	dw.ConfigPipeline(dopl)
-	// dopl.SetColorBlend(true) // default
+	dopl.SetColorBlend(true) // default
 
 	fpl := sy.AddGraphicsPipeline("fill")
 	dw.ConfigPipeline(dopl)
@@ -115,12 +117,13 @@ func (dw *Drawer) drawAll() error {
 		// sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], descIndex)
 	}
 
-	cmd := dw.Sys.NewCommandEncoder()
-	rp := dw.Sys.BeginRenderPassNoClear(cmd, view)
+	cmd := sy.NewCommandEncoder()
+	rp := sy.BeginRenderPassNoClear(cmd, view) // NoClear
 
 	mvr := sy.Vars.VarByName(0, "Matrix")
 	mvl := mvr.Values.Values[0]
 	tvr := sy.Vars.VarByName(1, "TexSampler")
+	tvr.Values.Current = 0
 
 	imgIdx := 0
 	lastOp := draw.Op(-1)
@@ -137,14 +140,16 @@ func (dw *Drawer) drawAll() error {
 		}
 		mvl.DynamicIndex = i
 		if op != Fill {
+			// fmt.Println(i, op, mvl.DynamicN, mvl.AllocSize, "using img:", imgIdx)
+			// , tvr.Values.Values[imgIdx].Texture.Format.String()
 			tvr.Values.Current = imgIdx
 			imgIdx++
 		}
-		// if op != lastOp { // todo:optimize
-		pl.BindPipeline(rp)
-		// }
-		lastOp = op
-		pl.DrawIndexed(rp)
+		if op != lastOp {
+			pl.BindPipeline(rp)
+			lastOp = op
+		}
+		pl.BindDrawIndexed(rp)
 	}
 	rp.End()
 	if dw.surface != nil {

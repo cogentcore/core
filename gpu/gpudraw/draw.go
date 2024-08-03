@@ -17,10 +17,9 @@ import (
 func (dw *Drawer) UseGoImage(img image.Image) {
 	dw.Lock()
 	defer dw.Unlock()
-
+	dw.curImageSize = img.Bounds().Size()
 	tvv := dw.getNextTextureValue()
 	tvv.SetFromGoImage(img, 1, gpu.NoFlipY)
-	dw.curImageSize = img.Bounds().Size()
 }
 
 // getNextTextureValue gets the next Texture image value, for Use
@@ -116,6 +115,7 @@ func (dw *Drawer) addOp(op draw.Op, mtx *Matrix) {
 	if oi >= nv {
 		mvl.DynamicN += AllocChunk
 	}
+	// fmt.Println("mtx", oi, mtx.MVP, mtx.UVP)
 	gpu.SetDynamicValueFrom(mvl, oi, []Matrix{*mtx})
 	dw.opList = append(dw.opList, op)
 }

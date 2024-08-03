@@ -9,12 +9,11 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	_ "image/jpeg"
-	_ "image/png"
 	"math/rand"
 	"runtime"
 	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/examples/images"
@@ -29,10 +28,10 @@ func init() {
 func main() {
 	gp := gpu.NewGPU()
 	gpu.Debug = true
-	gp.Config("drawidx")
+	gp.Config("gpudraw")
 
 	width, height := 1024, 768
-	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Triangle Indexed")
+	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "GPU Draw")
 	if err != nil {
 		return
 	}
@@ -51,7 +50,10 @@ func main() {
 	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
 	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
-		imgs[i], _, _ = imagex.OpenFS(images.Images, fnm)
+		imgs[i], _, err = imagex.OpenFS(images.Images, fnm)
+		if err != nil {
+			errors.Log(err)
+		}
 	}
 
 	// icons loaded into a texture array
@@ -71,11 +73,11 @@ func main() {
 			drw.UseGoImage(imgs[i])
 			drw.Copy(dp, image.ZR, gpudraw.Src, gpu.NoFlipY)
 		}
-		// for i := range iconFiles {
-		// 	dp := image.Point{rand.Intn(500), rand.Intn(500)}
-		// 	drw.UseGoImage(iconImgs[i])
-		// 	drw.Copy(dp, image.ZR, gpudraw.Over, gpu.NoFlipY)
-		// }
+		for i := range iconFiles {
+			dp := image.Point{rand.Intn(500), rand.Intn(500)}
+			drw.UseGoImage(iconImgs[i])
+			drw.Copy(dp, image.ZR, gpudraw.Over, gpu.NoFlipY)
+		}
 		drw.EndDraw()
 	}
 
@@ -97,6 +99,7 @@ func main() {
 		}
 		drw.EndDraw()
 	}
+	_ = fillRnd
 
 	frameCount := 0
 	stTime := time.Now()

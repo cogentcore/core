@@ -57,7 +57,7 @@ func main() {
 	}
 
 	pl := sy.AddGraphicsPipeline("drawidx")
-	sy.ConfigRender(&sf.Format, gpu.Depth32)
+	sy.ConfigRender(&sf.Format, gpu.UndefType)
 	pl.SetCullMode(wgpu.CullModeNone)
 	sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 

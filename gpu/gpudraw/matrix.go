@@ -34,7 +34,7 @@ func (dw *Drawer) ConfigMatrix(src2dst math32.Matrix3, txsz image.Point, sr imag
 	var tmat Matrix
 
 	// if dw.YIsDown {
-	// 	flipY = !flipY
+	flipY = !flipY
 	// }
 
 	sr = sr.Intersect(image.Rectangle{Max: txsz})
