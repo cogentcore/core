@@ -148,6 +148,8 @@ func (dw *Drawer) drawAll() error {
 		if op != lastOp {
 			pl.BindPipeline(rp)
 			lastOp = op
+		} else {
+			pl.BindAllGroups(rp)
 		}
 		pl.BindDrawIndexed(rp)
 	}
