@@ -9,6 +9,7 @@ import (
 	"image/draw"
 
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/drawmatrix"
 	"cogentcore.org/core/math32"
 )
 
@@ -95,7 +96,7 @@ func (dw *Drawer) ScaleUsed(dr image.Rectangle, sr image.Rectangle, op draw.Op, 
 	if sr == (image.Rectangle{}) {
 		sr.Max = dw.curImageSize
 	}
-	dw.TransformUsed(TransformMatrix(dr, sr, rotDeg), sr, op, flipY)
+	dw.TransformUsed(drawmatrix.Transform(dr, sr, rotDeg), sr, op, flipY)
 }
 
 // TransformUsed draws the current Use* texture to render target
@@ -111,12 +112,12 @@ func (dw *Drawer) TransformUsed(xform math32.Matrix3, sr image.Rectangle, op dra
 		sr.Max = dw.curImageSize
 	}
 
-	tmat := ConfigMatrix(dw.DestSize(), xform, dw.curImageSize, sr, flipY)
+	tmat := drawmatrix.Config(dw.DestSize(), xform, dw.curImageSize, sr, flipY)
 	dw.addOp(op, tmat)
 }
 
 // addOp adds matrix for given operation
-func (dw *Drawer) addOp(op draw.Op, mtx *Matrix) {
+func (dw *Drawer) addOp(op draw.Op, mtx *drawmatrix.Matrix) {
 	oi := len(dw.opList)
 	mvr := dw.Sys.Vars.VarByName(0, "Matrix")
 	mvl := mvr.Values.Values[0]
@@ -124,6 +125,6 @@ func (dw *Drawer) addOp(op draw.Op, mtx *Matrix) {
 	if oi >= nv {
 		mvl.DynamicN += AllocChunk
 	}
-	gpu.SetDynamicValueFrom(mvl, oi, []Matrix{*mtx})
+	gpu.SetDynamicValueFrom(mvl, oi, []drawmatrix.Matrix{*mtx})
 	dw.opList = append(dw.opList, op)
 }

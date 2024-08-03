@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"image/draw"
 
+	"cogentcore.org/core/gpu/drawmatrix"
 	"cogentcore.org/core/math32"
 )
 
@@ -17,7 +18,7 @@ import (
 //     Over = alpha blend with existing
 func (dw *Drawer) Fill(clr color.Color, dr image.Rectangle, op draw.Op) {
 	dsz := dw.DestSize()
-	tmat := ConfigMatrix(dsz, math32.Identity3(), dr.Max, dr, false)
+	tmat := drawmatrix.Config(dsz, math32.Identity3(), dr.Max, dr, false)
 	clr4 := math32.NewVector4Color(clr)
 	clr4.ToSlice(tmat.UVP[:], 12) // last column holds color
 	dw.addOp(Fill, tmat)

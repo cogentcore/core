@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/drawmatrix"
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
@@ -71,7 +72,7 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.T
 	idxv := vgp.Add("Index", gpu.Uint16, 0, gpu.VertexShader)
 	idxv.Role = gpu.Index
 
-	mv := mgp.AddStruct("Matrix", int(unsafe.Sizeof(Matrix{})), 1, gpu.VertexShader, gpu.FragmentShader)
+	mv := mgp.AddStruct("Matrix", int(unsafe.Sizeof(drawmatrix.Matrix{})), 1, gpu.VertexShader, gpu.FragmentShader)
 	mv.DynamicOffset = true
 
 	tgp.Add("TexSampler", gpu.TextureRGBA32, 1, gpu.FragmentShader)

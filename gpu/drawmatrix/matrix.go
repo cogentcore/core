@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gpudraw
+package drawmatrix
 
 import (
 	"image"
@@ -22,12 +22,12 @@ type Matrix struct {
 	UVP math32.Matrix4
 }
 
-// ConfigMatrix configures the draw matrix for given draw parameters:
+// Config configures the draw matrix for given draw parameters:
 // xform is the transform mapping source to destination
 // coordinates (translation, scaling), txsz is the size of the texture to draw,
 // sr is the source region (set to tex.Format.Bounds() for all)
 // flipY inverts the Y axis of the source image.
-func ConfigMatrix(destSz image.Point, xform math32.Matrix3, txsz image.Point, sr image.Rectangle, flipY bool) *Matrix {
+func Config(destSz image.Point, xform math32.Matrix3, txsz image.Point, sr image.Rectangle, flipY bool) *Matrix {
 	var tmat Matrix
 
 	sr = sr.Intersect(image.Rectangle{Max: txsz})
@@ -134,12 +134,15 @@ func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32) math32
 	}
 }
 
-// TransformMatrix returns a transformation matrix for the generic Draw function
-// that scales, translates, and rotates the source image by the given degrees.
-// to make it fit within the destination rectangle dr, given its original size sr (unrotated).
-// To avoid scaling, ensure that the dr and sr are the same dimensions (post rotation).
-// rotDeg = rotation degrees to apply in the mapping: 90 = left, -90 = right, 180 = invert
-func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) math32.Matrix3 {
+// Transform returns a transformation matrix for the
+// generic Draw function that scales, translates, and rotates
+// the source image by the given degrees, to make it fit within
+// the destination rectangle dr, given its original size sr (unrotated).
+// To avoid scaling, ensure that the dr and sr are the same
+// dimensions (post rotation).
+// rotDeg = rotation degrees to apply in the mapping:
+// 90 = left, -90 = right, 180 = invert.
+func Transform(dr image.Rectangle, sr image.Rectangle, rotDeg float32) math32.Matrix3 {
 	sx := float32(dr.Dx()) / float32(sr.Dx())
 	sy := float32(dr.Dy()) / float32(sr.Dy())
 	tx := float32(dr.Min.X) - sx*float32(sr.Min.X)

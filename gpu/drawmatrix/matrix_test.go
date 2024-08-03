@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gpudraw
+package drawmatrix
 
 import (
 	"image"
@@ -88,7 +88,7 @@ func CompareRect(t *testing.T, pts []math32.Vector2, rect image.Rectangle) {
 func TestFillMatrix(t *testing.T) {
 	dr := image.Rectangle{Min: image.Point{10, 20}, Max: image.Point{200, 300}}
 	destSz := image.Point{1000, 500}
-	tmat := ConfigMatrix(destSz, math32.Identity3(), destSz, dr, false)
+	tmat := Config(destSz, math32.Identity3(), destSz, dr, false)
 	pts := DrawFromMatrixMVP4(&tmat.MVP)
 	CompareRect(t, pts, dr)
 }
@@ -102,7 +102,7 @@ func TestDrawMatrix(t *testing.T) {
 		0, 1, 0,
 		float32(dp.X - sr.Min.X), float32(dp.Y - sr.Min.Y), 1,
 	}
-	tmat := ConfigMatrix(destSz, mat, sr.Max, sr, false)
+	tmat := Config(destSz, mat, sr.Max, sr, false)
 	// fmt.Println("draw:")
 	pts := DrawFromMatrixMVP4(&tmat.MVP)
 	dr := sr.Add(dp)
