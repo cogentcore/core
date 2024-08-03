@@ -96,61 +96,60 @@ func (bd *Body) NewWindow() *Stage {
 	return ms
 }
 
-func (st *Stage) addDialogParts() *Stage {
-	if st.FullWindow {
-		return st
+func (st *Stage) addSceneParts() *Stage {
+	if st.Type == DialogStage && !st.FullWindow && !st.NewWindow {
+		sc := st.Scene
+		parts := sc.newParts()
+		parts.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.Grow.Set(0, 1)
+			s.Gap.Zero()
+		})
+		mv := NewHandle(parts)
+		mv.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
+		mv.FinalStyler(func(s *styles.Style) {
+			s.Cursor = cursors.Move
+		})
+		mv.SetName("move")
+		mv.OnChange(func(e events.Event) {
+			e.SetHandled()
+			pd := e.PrevDelta()
+			np := sc.sceneGeom.Pos.Add(pd)
+			np.X = max(np.X, 0)
+			np.Y = max(np.Y, 0)
+			rw := sc.RenderWindow()
+			sz := rw.SystemWindow.Size()
+			mx := sz.X - int(sc.sceneGeom.Size.X)
+			my := sz.Y - int(sc.sceneGeom.Size.Y)
+			np.X = min(np.X, mx)
+			np.Y = min(np.Y, my)
+			sc.sceneGeom.Pos = np
+			sc.NeedsRender()
+		})
+		rsz := NewHandle(parts)
+		rsz.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.FillMargin = false
+		})
+		rsz.FinalStyler(func(s *styles.Style) {
+			s.Cursor = cursors.ResizeNWSE
+			s.Min.Set(units.Em(1))
+		})
+		rsz.SetName("resize")
+		rsz.OnChange(func(e events.Event) {
+			e.SetHandled()
+			pd := e.PrevDelta()
+			np := sc.sceneGeom.Size.Add(pd)
+			minsz := 100
+			np.X = max(np.X, minsz)
+			np.Y = max(np.Y, minsz)
+			ng := sc.sceneGeom
+			ng.Size = np
+			sc.resize(ng)
+		})
 	}
-	sc := st.Scene
-	parts := sc.newParts()
-	parts.Styler(func(s *styles.Style) {
-		s.Direction = styles.Column
-		s.Grow.Set(0, 1)
-		s.Gap.Zero()
-	})
-	mv := NewHandle(parts)
-	mv.Styler(func(s *styles.Style) {
-		s.Direction = styles.Column
-	})
-	mv.FinalStyler(func(s *styles.Style) {
-		s.Cursor = cursors.Move
-	})
-	mv.SetName("move")
-	mv.OnChange(func(e events.Event) {
-		e.SetHandled()
-		pd := e.PrevDelta()
-		np := sc.sceneGeom.Pos.Add(pd)
-		np.X = max(np.X, 0)
-		np.Y = max(np.Y, 0)
-		rw := sc.RenderWindow()
-		sz := rw.SystemWindow.Size()
-		mx := sz.X - int(sc.sceneGeom.Size.X)
-		my := sz.Y - int(sc.sceneGeom.Size.Y)
-		np.X = min(np.X, mx)
-		np.Y = min(np.Y, my)
-		sc.sceneGeom.Pos = np
-		sc.NeedsRender()
-	})
-	rsz := NewHandle(parts)
-	rsz.Styler(func(s *styles.Style) {
-		s.Direction = styles.Column
-		s.FillMargin = false
-	})
-	rsz.FinalStyler(func(s *styles.Style) {
-		s.Cursor = cursors.ResizeNWSE
-		s.Min.Set(units.Em(1))
-	})
-	rsz.SetName("resize")
-	rsz.OnChange(func(e events.Event) {
-		e.SetHandled()
-		pd := e.PrevDelta()
-		np := sc.sceneGeom.Size.Add(pd)
-		minsz := 100
-		np.X = max(np.X, minsz)
-		np.Y = max(np.Y, minsz)
-		ng := sc.sceneGeom
-		ng.Size = np
-		sc.resize(ng)
-	})
 	return st
 }
 
@@ -191,6 +190,7 @@ func (st *Stage) runWindow() *Stage {
 		st.setMains(&currentRenderWindow.mains)
 	}
 	st.configMainStage()
+	st.addSceneParts()
 
 	sz := st.renderContext.geom.Size
 	// offscreen windows always consider pref size because
@@ -298,7 +298,7 @@ func (st *Stage) runDialog() *Stage {
 
 	sc := st.Scene
 	st.configMainStage()
-	st.addDialogParts()
+	st.addSceneParts()
 	sc.sceneGeom.Pos = st.Pos
 
 	st.setMains(ms) // temporary for prefs
