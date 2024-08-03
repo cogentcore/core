@@ -50,7 +50,6 @@ func main() {
 	sy := gp.NewGraphicsSystem("drawidx", sf.Device)
 
 	destroy := func() {
-		sy.WaitDone()
 		sy.Release()
 		sf.Release()
 		gp.Release()
@@ -137,7 +136,7 @@ func main() {
 		cmd := sy.NewCommandEncoder()
 		rp := sy.BeginRenderPass(cmd, view)
 		pl.BindPipeline(rp)
-		pl.BindDrawVertex(rp)
+		pl.BindDrawIndexed(rp)
 		rp.End()
 		sf.SubmitRender(cmd)
 		sf.Present()

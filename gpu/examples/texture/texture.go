@@ -51,7 +51,6 @@ func main() {
 	sy := gp.NewGraphicsSystem("texture", sf.Device)
 
 	destroy := func() {
-		sy.WaitDone()
 		sy.Release()
 		sf.Release()
 		gp.Release()
@@ -157,7 +156,7 @@ func main() {
 		rp := sy.BeginRenderPass(cmd, view)
 		txv.Values.Current = imgIndex
 		pl.BindPipeline(rp)
-		pl.BindDrawVertex(rp)
+		pl.BindDrawIndexed(rp)
 		rp.End()
 		sf.SubmitRender(cmd)
 		sf.Present()

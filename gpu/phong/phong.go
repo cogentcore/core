@@ -34,7 +34,7 @@ const MaxLights = 8
 // Rendering starts with RenderStart, followed by Use* calls
 // to specify the render parameters for each item,
 // followed by the Render() method that calls the proper
-// pipeline's BindDrawVertex based on the render parameters.
+// pipeline's BindDrawIndexed based on the render parameters.
 type Phong struct {
 	// The current camera view and projection matricies.
 	// This is used for updating the object WorldMatrix.
@@ -207,19 +207,19 @@ func (ph *Phong) Render(rp *wgpu.RenderPassEncoder) {
 func (ph *Phong) RenderOneColor(rp *wgpu.RenderPassEncoder) {
 	pl := ph.Sys.GraphicsPipelines["onecolor"]
 	pl.BindPipeline(rp)
-	pl.BindDrawVertex(rp)
+	pl.BindDrawIndexed(rp)
 }
 
 // RenderTexture renders current settings to texture pipeline
 func (ph *Phong) RenderTexture(rp *wgpu.RenderPassEncoder) {
 	pl := ph.Sys.GraphicsPipelines["texture"]
 	pl.BindPipeline(rp)
-	pl.BindDrawVertex(rp)
+	pl.BindDrawIndexed(rp)
 }
 
 // RenderVertexColor renders current settings to vertexcolor pipeline
 func (ph *Phong) RenderVertexColor(rp *wgpu.RenderPassEncoder) {
 	pl := ph.Sys.GraphicsPipelines["pervertex"]
 	pl.BindPipeline(rp)
-	pl.BindDrawVertex(rp)
+	pl.BindDrawIndexed(rp)
 }

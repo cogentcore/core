@@ -4,13 +4,13 @@ The `gpu` package manages all the details of [WebGPU](https://www.w3.org/TR/webg
 
 The main gpu code is in the top-level `gpu` package, with the following sub-packages available:
 
-* [wgpu] is an updated version of [go-webgpu](github.com/rajveermalviya/go-webgpu) that provides the direct WebGPU bindings for Go, using the Rust-based [wgpu](https://github.com/gfx-rs/wgpu) implementation of the WebGPU standard, including [webgpu-native](https://github.com/gfx-rs/wgpu-native) for non-web "native" use on all major platforms, and javascript web bindings adapted from the Go-based [wasmgpu](https://github.com/mokiat/wasmgpu) package.
+* [wgpu](wgpu) is an updated version of [go-webgpu](github.com/rajveermalviya/go-webgpu) that provides the direct WebGPU bindings for Go, using the Rust-based [wgpu](https://github.com/gfx-rs/wgpu) implementation of the WebGPU standard, including [webgpu-native](https://github.com/gfx-rs/wgpu-native) for non-web "native" use on all major platforms, and javascript web bindings adapted from the Go-based [wasmgpu](https://github.com/mokiat/wasmgpu) package.
 
-* [phong] is a Blinn-Phong lighting model implementation on top of `gpu`, which then serves as the basis for the higherlevel [xyz](https://github.com/cogentcore/core/tree/main/xyz) 3D scenegraph system.
+* [phong](phong) is a Blinn-Phong lighting model implementation on top of `gpu`, which then serves as the basis for the higherlevel [xyz](https://github.com/cogentcore/core/tree/main/xyz) 3D scenegraph system.
 
-* [shape] generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates.  You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by gpu.  It only has a dependency on the [math32](../math32) package and could be used for anything.
+* [shape](shape) generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates.  You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by gpu.  It only has a dependency on the [math32](../math32) package and could be used for anything.
 
-* [gpudraw] implements GPU-accelerated texture-based versions of the Go [image/draw](https://pkg.go.dev/image/draw) api.  This is used for compositing images in the `core` GUI to construct the final rendered scene, and for drawing that scene on the actual hardware window.
+* [gpudraw](gpudraw) implements GPU-accelerated texture-based versions of the Go [image/draw](https://pkg.go.dev/image/draw) api.  This is used for compositing images in the `core` GUI to construct the final rendered scene, and for drawing that scene on the actual hardware window.
 
 * [gosl](gosl) translates Go code into GPU shader language code for running compute shaders in `gpu`, playing the role of NVIDIA's "cuda" language in other frameworks.
 
@@ -73,7 +73,7 @@ The `Var.Values.Current` index determines which Value is used for the BindGroup 
 
 * `PushConst` (not yet available in WebGPU) are push constants that can only be 128 bytes total that can be directly copied from CPU ram to the GPU via a command -- it is the most high-performance way to update dynamically changing content, such as view matricies or indexes into other data structures.  Must be located in `PushConstSet` set (index -1).
 
-* `Uniform` (read-only "constants") and `Storage` (read-write) data that contain misc other data, e.g., transformation matricies.  These are the only types that can optionally use the `DynamicOffset` mechanism, which should generally be reserved for cases where there is a large and variable number of values that need to be selected among during a render pass.  The [phong] system stores the object-specific "model matrix" and other object-specific data using this dynamic offset mechanism.
+* `Uniform` (read-only "constants") and `Storage` (read-write) data that contain misc other data, e.g., transformation matricies.  These are the only types that can optionally use the `DynamicOffset` mechanism, which should generally be reserved for cases where there is a large and variable number of values that need to be selected among during a render pass.  The [phong](phong) system stores the object-specific "model matrix" and other object-specific data using this dynamic offset mechanism.
 
 * `Texture` vars that provide the raw `Texture` data, the `TextureView` through which that is accessed, and a `Sampler` that parametrizes how the pixels are mapped onto coordinates in the Fragment shader.  Each texture object is managed as a distinct item in device memory.  
 
@@ -108,7 +108,7 @@ It is hard to find this info very clearly stated:
 
 * All internal computation in shaders is done in a *linear* color space.
 * Textures are assumed to be sRGB and are automatically converted to linear on upload.
-* Other colors that are passed in should be converted from sRGB to linear (the [phong] shader does this for the PerVertex case).
+* Other colors that are passed in should be converted from sRGB to linear (the [phong](phong) shader does this for the PerVertex case).
 * The `Surface` automatically converts from Linear to sRGB for actual rendering.
 * A `RenderFrame` for offscreen / headless rendering *must* use `wgpu.TextureFormatRGBA8UnormSrgb` for the format, in order to get back an image that is automatically converted back to sRGB format.
 

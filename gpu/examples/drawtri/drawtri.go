@@ -52,7 +52,6 @@ func main() {
 	// no vars..
 
 	destroy := func() {
-		sy.WaitDone()
 		sy.Release()
 		sf.Release()
 		gp.Release()

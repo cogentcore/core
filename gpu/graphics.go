@@ -86,9 +86,9 @@ func (pl *GraphicsPipeline) BindGroup(rp *wgpu.RenderPassEncoder, group int) {
 	rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
 }
 
-// BindDrawVertex binds the Current Value for all VertexGroup variables,
+// BindDrawIndexed binds the Current Value for all VertexGroup variables,
 // as the vertex data, and then does a DrawIndexed call.
-func (pl *GraphicsPipeline) BindDrawVertex(rp *wgpu.RenderPassEncoder) {
+func (pl *GraphicsPipeline) BindDrawIndexed(rp *wgpu.RenderPassEncoder) {
 	pl.BindVertex(rp)
 	pl.DrawIndexed(rp)
 }
