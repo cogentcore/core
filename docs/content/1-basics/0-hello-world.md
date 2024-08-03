@@ -15,3 +15,5 @@ func main() {
 Notice how you can see the result of the code above, a button with the text "Hello, World!". Not only can you see the result of the code, you can edit the code live. Try changing "Hello, World!" to "Click me!" and you will see the button update accordingly.
 
 Even though Cogent Core is written in Go, a compiled language, it uses the interpreter [yaegi](https://github.com/cogentcore/yaegi) to provide interactive editing. You can edit almost all of the examples on this website and see the result immediately. You can also use the [Cogent Core playground](../playground) to experiment interactively with Cogent Core.
+
+You can jump ahead to the [install](../setup/install) page if you want to get started developing on your computer now, although we recommend that you follow the default order and read the rest of the basics and tutorials first.
