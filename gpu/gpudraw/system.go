@@ -21,10 +21,11 @@ import (
 var shaders embed.FS
 
 // ConfigPipeline configures graphics settings on the pipeline
-func (dw *Drawer) ConfigPipeline(pl *gpu.GraphicsPipeline) {
+func (dw *Drawer) ConfigPipeline(pl *gpu.GraphicsPipeline, blend bool) {
 	pl.SetGraphicsDefaults()
 	pl.SetCullMode(wgpu.CullModeBack)
 	pl.SetFrontFace(wgpu.FrontFaceCCW)
+	pl.SetAlphaBlend(blend)
 }
 
 // configSystem configures GPUDraw sytem
@@ -38,31 +39,37 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.T
 	// sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 
 	// note: requires different pipelines for src vs. over draw op modes
-	dspl := sy.AddGraphicsPipeline("drawsrc")
-	dw.ConfigPipeline(dspl)
-	dspl.SetColorBlend(false)
-
 	dopl := sy.AddGraphicsPipeline("drawover")
-	dw.ConfigPipeline(dopl)
-	dopl.SetColorBlend(true) // default
+	dw.ConfigPipeline(dopl, true)
 
-	fpl := sy.AddGraphicsPipeline("fill")
-	dw.ConfigPipeline(fpl)
+	dspl := sy.AddGraphicsPipeline("drawsrc")
+	dw.ConfigPipeline(dspl, false)
 
-	sh := dspl.AddShader("draw")
-	sh.OpenFileFS(shaders, "shaders/draw.wgsl")
-	dspl.AddEntry(sh, gpu.VertexShader, "vs_main")
-	dspl.AddEntry(sh, gpu.FragmentShader, "fs_main")
+	fopl := sy.AddGraphicsPipeline("fillover")
+	dw.ConfigPipeline(fopl, true)
 
-	sh = dopl.AddShader("draw")
+	fspl := sy.AddGraphicsPipeline("fillsrc")
+	dw.ConfigPipeline(fspl, false)
+
+	sh := dopl.AddShader("draw")
 	sh.OpenFileFS(shaders, "shaders/draw.wgsl")
 	dopl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	dopl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
-	sh = fpl.AddShader("fill")
+	sh = dspl.AddShader("draw")
+	sh.OpenFileFS(shaders, "shaders/draw.wgsl")
+	dspl.AddEntry(sh, gpu.VertexShader, "vs_main")
+	dspl.AddEntry(sh, gpu.FragmentShader, "fs_main")
+
+	sh = fopl.AddShader("fill")
 	sh.OpenFileFS(shaders, "shaders/fill.wgsl")
-	fpl.AddEntry(sh, gpu.VertexShader, "vs_main")
-	fpl.AddEntry(sh, gpu.FragmentShader, "fs_main")
+	fopl.AddEntry(sh, gpu.VertexShader, "vs_main")
+	fopl.AddEntry(sh, gpu.FragmentShader, "fs_main")
+
+	sh = fspl.AddShader("fill")
+	sh.OpenFileFS(shaders, "shaders/fill.wgsl")
+	fspl.AddEntry(sh, gpu.VertexShader, "vs_main")
+	fspl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
 	vgp := sy.Vars.AddVertexGroup()
 	mgp := sy.Vars.AddGroup(gpu.Uniform, "Matrix")         // 0
@@ -134,15 +141,17 @@ func (dw *Drawer) drawAll() error {
 	for i, op := range dw.opList {
 		var pl *gpu.GraphicsPipeline
 		switch op {
-		case draw.Src:
-			pl = sy.GraphicsPipelines["drawsrc"]
 		case draw.Over:
 			pl = sy.GraphicsPipelines["drawover"]
-		default:
-			pl = sy.GraphicsPipelines["fill"]
+		case draw.Src:
+			pl = sy.GraphicsPipelines["drawsrc"]
+		case fillOver:
+			pl = sy.GraphicsPipelines["fillover"]
+		case fillSrc:
+			pl = sy.GraphicsPipelines["fillsrc"]
 		}
 		mvl.DynamicIndex = i
-		if op != Fill {
+		if op < fillOver {
 			tvr.Values.Current = imgIdx
 			imgIdx++
 		}

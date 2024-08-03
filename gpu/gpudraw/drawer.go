@@ -15,11 +15,19 @@ import (
 )
 
 // These draw.Op constants are provided so that users of this package don't
-// have to explicitly import "image/draw".  We also add the fill operation.
+// have to explicitly import "image/draw".  We also add the fill operations.
 const (
+	// Over = alpha blend with existing content.
 	Over = draw.Over
-	Src  = draw.Src
-	Fill = draw.Src + 1
+
+	// Src = copy source to destination with no blending ("blit").
+	Src = draw.Src
+
+	// fillOver is used internally for the fill version of Over.
+	fillOver = draw.Src + 1
+
+	// fillSrc is used internally for the fill version of Src.
+	fillSrc = draw.Src + 2
 )
 
 // AllocChunk is number of images / matrix elements to allocate

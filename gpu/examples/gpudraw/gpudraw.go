@@ -82,8 +82,8 @@ func main() {
 
 	_ = rendImgs
 
-	red := color.RGBA{255, 0, 0, 255}
-	green := color.RGBA{0, 255, 0, 255}
+	red := color.RGBA{128, 0, 0, 128}
+	green := color.RGBA{0, 128, 0, 128}
 	blue := color.RGBA{0, 0, 255, 255}
 
 	colors := []color.Color{color.White, color.Black, red, green, blue}
@@ -97,7 +97,7 @@ func main() {
 			sp := image.Point{i * 30, i * 40}
 			sz := image.Point{(i + 1) * 20, (i + 1) * 20}
 			sr := image.Rectangle{Min: sp, Max: sp.Add(sz)}
-			drw.Fill(colors[i%nclr], sr, draw.Src)
+			drw.Fill(colors[i%nclr], sr, draw.Over)
 		}
 		drw.EndDraw()
 	}

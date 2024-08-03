@@ -21,5 +21,9 @@ func (dw *Drawer) Fill(clr color.Color, dr image.Rectangle, op draw.Op) {
 	tmat := drawmatrix.Config(dsz, math32.Identity3(), dr.Max, dr, false)
 	clr4 := math32.NewVector4Color(clr)
 	clr4.ToSlice(tmat.UVP[:], 12) // last column holds color
-	dw.addOp(Fill, tmat)
+	if op == Over {
+		dw.addOp(fillOver, tmat)
+	} else {
+		dw.addOp(fillSrc, tmat)
+	}
 }

@@ -22,6 +22,9 @@ type GraphicsPipeline struct {
 
 	Multisample wgpu.MultisampleState
 
+	// AlphaBlend determines whether to do alpha blending or not.
+	AlphaBlend bool
+
 	renderPipeline *wgpu.RenderPipeline
 }
 
@@ -113,6 +116,8 @@ func (pl *GraphicsPipeline) BindVertex(rp *wgpu.RenderPassEncoder) {
 	}
 }
 
+// DrawVertex adds commands to the given command encoder
+// to Draw based on current Index and Vertex values.
 func (pl *GraphicsPipeline) DrawIndexed(rp *wgpu.RenderPassEncoder) {
 	vs := &pl.Sys.Vars
 	vg := vs.Groups[VertexGroup]
@@ -126,6 +131,22 @@ func (pl *GraphicsPipeline) DrawIndexed(rp *wgpu.RenderPassEncoder) {
 	iv := ix.Values.CurrentValue()
 	rp.DrawIndexed(uint32(iv.DynamicN), 1, 0, 0, 0)
 }
+
+// DrawVertex adds commands to the given command buffer
+// to Draw based on current Vertex values
+// func (pl *GraphicsPipeline) DrawVertex(cmd *wgpu.CommandEncoder) {
+// 	vs := &pl.Sys.Vars
+// 	vg := vs.Groups[VertexGroup]
+// 	if vg == nil {
+// 		return
+// 	}
+// 	ix := vg.IndexVar()
+// 	if ix == nil {
+// 		return
+// 	}
+// 	iv := ix.Values.CurrentValue()
+// 	rp.DrawIndexed(uint32(iv.DynamicN), 1, 0, 0, 0)
+// }
 
 // VertexEntry returns the [ShaderEntry] for [VertexShader].
 // Can be nil if no vertex shader defined.
@@ -182,6 +203,9 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 				WriteMask: wgpu.ColorWriteMaskAll, // todo
 			}},
 		}
+		if !pl.AlphaBlend {
+			pd.Fragment.Targets[0].Blend = &wgpu.BlendStateReplace
+		}
 	}
 	if pl.Sys.Render.Depth.texture != nil {
 		pd.DepthStencil = &wgpu.DepthStencilState{
@@ -229,7 +253,7 @@ func (pl *GraphicsPipeline) SetGraphicsDefaults() *GraphicsPipeline {
 	pl.SetTopology(TriangleList, false)
 	pl.SetFrontFace(wgpu.FrontFaceCW)
 	pl.SetCullMode(wgpu.CullModeBack)
-	pl.SetColorBlend(true) // alpha blending
+	pl.SetAlphaBlend(true) // alpha blending
 	pl.SetMultisample(4)
 	// pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 	return pl
@@ -269,26 +293,11 @@ func (pl *GraphicsPipeline) SetLineWidth(lineWidth float32) {
 	// pl.VkConfig.PRasterizationState.LineWidth = lineWidth
 }
 
-// SetColorBlend determines the color blending function:
+// SetAlphaBlend determines the alpha (transparency) blending function:
 // either 1-source alpha (alphaBlend) or no blending:
 // new color overwrites old.  Default is alphaBlend = true
-func (pl *GraphicsPipeline) SetColorBlend(alphaBlend bool) {
-	// todo:
-	// var cb vk.PipelineColorBlendAttachmentState
-	// cb.ColorWriteMask = 0xF
-	//
-	// if alphaBlend {
-	// 	cb.BlendEnable = vk.True
-	// 	cb.SrcColorBlendFactor = vk.BlendFactorOne // vk.BlendFactorSrcAlpha -- that is traditional
-	// 	cb.DstColorBlendFactor = vk.BlendFactorOneMinusSrcAlpha
-	// 	cb.ColorBlendOp = vk.BlendOpAdd
-	// 	cb.SrcAlphaBlendFactor = vk.BlendFactorOne
-	// 	cb.DstAlphaBlendFactor = vk.BlendFactorZero
-	// 	cb.AlphaBlendOp = vk.BlendOpAdd
-	// 	cb.ColorWriteMask = 0xF
-	// } else {
-	// 	cb.BlendEnable = vk.False
-	// }
+func (pl *GraphicsPipeline) SetAlphaBlend(alphaBlend bool) {
+	pl.AlphaBlend = alphaBlend
 }
 
 ////////////////////////////////////////////////////////
@@ -303,51 +312,6 @@ func (pl *GraphicsPipeline) SetColorBlend(alphaBlend bool) {
 // 	vs := pl.Vars()
 // 	vk.CmdPushConstants(cmd, vs.VkDescLayout, vk.ShaderStageFlags(vr.Shaders), uint32(vr.Offset), uint32(vr.SizeOf), val)
 // }
-
-// DrawVertex adds commands to the given command buffer
-// to bind vertex / index values and Draw based on current BindVertexValue
-// setting for any Vertex (and associated Index) Vars,
-// for given descIndex set of descriptors (see Vars NDescs for info).
-func (pl *GraphicsPipeline) DrawVertex(cmd *wgpu.CommandEncoder, descIndex int) {
-	vs := pl.Vars()
-	if !vs.hasVertex {
-		return
-	}
-	// st := vs.SetMap[VertexSet]
-	// var offs []vk.DeviceSize
-	// var idxVar *Var
-	// var idxValue *Value
-	// if len(st.RoleMap[Index]) == 1 {
-	// 	idxVar = st.RoleMap[Index][0]
-	// 	idxValue, _ = idxVar.BindValue(descIndex)
-	// }
-	// vtxn := 0
-	// for _, vr := range st.Vars {
-	// 	vl, err := vr.BindValue(descIndex)
-	// 	if err != nil || vr.Role != Vertex {
-	// 		continue
-	// 	}
-	// 	offs = append(offs, vk.DeviceSize(vl.Offset))
-	// 	if vtxn == 0 {
-	// 		vtxn = vl.N
-	// 	} else {
-	// 		vtxn = min(vtxn, vl.N)
-	// 	}
-	// }
-	// mbuf := pl.Sys.Mem.Buffs[IndexBuffer].Dev
-	// vtxbuf := make([]vk.Buffer, len(offs))
-	// for i := range vtxbuf {
-	// 	vtxbuf[i] = mbuf
-	// }
-	// vk.CmdBindVertexBuffers(cmd, 0, uint32(len(offs)), vtxbuf, offs)
-	// if idxValue != nil {
-	// 	vktyp := idxVar.Type.VkIndexType()
-	// 	vk.CmdBindIndexBuffer(cmd, mbuf, vk.DeviceSize(idxValue.Offset), vktyp)
-	// 	vk.CmdDrawIndexed(cmd, uint32(idxValue.N), 1, 0, 0, 0)
-	// } else {
-	// 	vk.CmdDraw(cmd, uint32(vtxn), 1, 0, 0)
-	// }
-}
 
 // Topologies are the different vertex topology
 type Topologies int32 //enum:enum

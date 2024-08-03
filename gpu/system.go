@@ -324,13 +324,13 @@ func (sy *System) SetLineWidth(lineWidth float32) *System {
 	return sy
 }
 
-// SetColorBlend determines the color blending function:
+// SetAlphaBlend determines the alpha (transparency) blending function:
 // either 1-source alpha (alphaBlend) or no blending:
 // new color overwrites old.  Default is alphaBlend = true
 // For all pipelines, to keep graphics settings consistent.
-func (sy *System) SetColorBlend(alphaBlend bool) *System {
+func (sy *System) SetAlphaBlend(alphaBlend bool) *System {
 	for _, pl := range sy.GraphicsPipelines {
-		pl.SetColorBlend(alphaBlend)
+		pl.SetAlphaBlend(alphaBlend)
 	}
 	return sy
 }
