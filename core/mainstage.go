@@ -11,6 +11,8 @@ import (
 
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -97,14 +99,35 @@ func (bd *Body) NewWindow() *Stage {
 }
 
 func (st *Stage) addSceneParts() *Stage {
-	if st.Type == DialogStage && !st.FullWindow && !st.NewWindow {
-		sc := st.Scene
-		parts := sc.newParts()
-		parts.Styler(func(s *styles.Style) {
-			s.Direction = styles.Column
-			s.Grow.Set(0, 1)
-			s.Gap.Zero()
+	sc := st.Scene
+	parts := sc.newParts() // TODO: only make if needed
+	parts.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Grow.Set(0, 1)
+		s.Gap.Zero()
+	})
+	if st.Type == DialogStage && st.FullWindow && !st.NewWindow {
+		back := NewButton(parts).SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
+		back.SetType(ButtonAction).SetTooltip("Back")
+		back.OnClick(func(e events.Event) {
+			if slen := back.Scene.Stage.Mains.stack.Len(); slen > 1 {
+				if back.Scene.Stage.CloseOnBack {
+					back.Scene.Close()
+				} else {
+					back.Scene.Stage.Mains.stack.ValueByIndex(slen - 2).raise()
+				}
+				return
+			}
+			if wlen := len(AllRenderWindows); wlen > 1 {
+				if back.Scene.Stage.CloseOnBack {
+					currentRenderWindow.closeReq()
+				}
+				AllRenderWindows[wlen-2].Raise()
+			}
 		})
+	}
+	if st.Type == DialogStage && !st.FullWindow && !st.NewWindow {
+
 		mv := NewHandle(parts)
 		mv.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column

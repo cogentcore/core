@@ -88,41 +88,10 @@ func appIconImages() []image.Image {
 // followed by standard overflow menu items.
 func makeAppBar(parent Widget) {
 	tb := NewToolbar(parent)
-	tb.Maker(makeStandardAppBar)
 	if len(tb.Scene.AppBars) > 0 {
 		tb.Makers.Normal = append(tb.Makers.Normal, tb.Scene.AppBars...)
 	}
 	tb.AddOverflowMenu(tb.standardOverflowMenu)
-}
-
-// makeStandardAppBar adds standard items to start of an app bar [tree.Plan].
-func makeStandardAppBar(p *tree.Plan) {
-	tree.AddAt(p, "back", func(w *Button) {
-		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev).SetTooltip("Back")
-		w.OnClick(func(e events.Event) {
-			if slen := w.Scene.Stage.Mains.stack.Len(); slen > 1 {
-				if w.Scene.Stage.CloseOnBack {
-					w.Scene.Close()
-				} else {
-					w.Scene.Stage.Mains.stack.ValueByIndex(slen - 2).raise()
-				}
-				return
-			}
-			if wlen := len(AllRenderWindows); wlen > 1 {
-				if w.Scene.Stage.CloseOnBack {
-					currentRenderWindow.closeReq()
-				}
-				AllRenderWindows[wlen-2].Raise()
-			}
-		})
-		// TODO(kai/abc): app bar back button disabling
-		// bt.FirstStyler(func(s *styles.Style) {
-		// 	if tb.Scene.Stage.Mains == nil {
-		// 		return
-		// 	}
-		// 	s.SetState(tb.Scene.Stage.Mains.Stack.Len() <= 1 && len(AllRenderWins) <= 1, states.Disabled)
-		// })
-	})
 }
 
 var (
