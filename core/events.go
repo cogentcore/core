@@ -1097,17 +1097,6 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		if em.focusPrev() {
 			e.SetHandled()
 		}
-	case keymap.Menu:
-		if tb := sc.GetTopAppBar(); tb != nil {
-			ch := tree.ChildByType[*Chooser](tb)
-			if ch != nil {
-				ch.SetFocusEvent()
-				ch.textField.offerComplete()
-			} else {
-				tb.SetFocusEvent()
-			}
-			e.SetHandled()
-		}
 	case keymap.WinSnapshot:
 		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
 		fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".png")

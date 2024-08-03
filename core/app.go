@@ -169,7 +169,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 		d.AddBottomBar(func(parent Widget) {
 			d.AddCancel(parent)
 		})
-		d.RunDialog(m)
+		d.RunDialog(tb)
 	})
 	NewButton(m).SetText("About").SetIcon(icons.Info).OnClick(func(e events.Event) {
 		d := NewBody(TheApp.Name())
@@ -185,7 +185,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 		}
 		NewText(d).SetText("App version: " + system.AppVersion)
 		NewText(d).SetText("Core version: " + system.CoreVersion)
-		d.AddOKOnly().RunDialog(m)
+		d.AddOKOnly().RunDialog(tb)
 	})
 	NewFuncButton(m).SetFunc(SettingsWindow).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,")
 	if webCanInstall {
