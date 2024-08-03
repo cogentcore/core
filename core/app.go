@@ -137,7 +137,7 @@ var (
 
 // standardOverflowMenu adds standard overflow menu items for an app bar.
 func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
-	NewButton(m).SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip("Search the menus").OnClick(func(e events.Event) {
 		d := NewBody().AddTitle("Search")
 		w := NewChooser(d).SetEditable(true).SetIcon(icons.Search)
 		w.Styler(func(s *styles.Style) {
