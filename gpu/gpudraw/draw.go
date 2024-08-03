@@ -107,7 +107,7 @@ func (dw *Drawer) Draw(src2dst math32.Matrix3, sr image.Rectangle, op draw.Op, f
 		sr.Max = dw.curImageSize
 	}
 
-	tmat := dw.ConfigMatrix(src2dst, dw.curImageSize, sr, op, flipY)
+	tmat := ConfigMatrix(dw.DestSize(), src2dst, dw.curImageSize, sr, flipY)
 	// fmt.Printf("sr: %v  sz: %v  omat: %v  tmat: %v \n", sr, dw.curImageSize, src2dst, tmat)
 	dw.addOp(op, tmat)
 }

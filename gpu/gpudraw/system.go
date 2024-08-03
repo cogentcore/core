@@ -6,6 +6,7 @@ package gpudraw
 
 import (
 	"embed"
+	"image"
 	"image/draw"
 	"unsafe"
 
@@ -21,17 +22,12 @@ var shaders embed.FS
 // ConfigPipeline configures graphics settings on the pipeline
 func (dw *Drawer) ConfigPipeline(pl *gpu.GraphicsPipeline) {
 	pl.SetGraphicsDefaults()
-	pl.SetCullMode(wgpu.CullModeNone)
-	// if dw.YIsDown {
-	// 	pl.SetFrontFace(wgpu.FrontFaceCCW)
-	// } else {
-	pl.SetFrontFace(wgpu.FrontFaceCW)
-	// }
+	pl.SetCullMode(wgpu.CullModeBack)
+	pl.SetFrontFace(wgpu.FrontFaceCCW)
 }
 
 // configSystem configures GPUDraw sytem
 func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.TextureFormat) {
-	dw.YIsDown = false
 	dw.opList = slicesx.SetLength(dw.opList, AllocChunk) // allocate
 	dw.opList = dw.opList[:0]
 
@@ -50,7 +46,7 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.T
 	dopl.SetColorBlend(true) // default
 
 	fpl := sy.AddGraphicsPipeline("fill")
-	dw.ConfigPipeline(dopl)
+	dw.ConfigPipeline(fpl)
 
 	sh := dspl.AddShader("draw")
 	sh.OpenFileFS(shaders, "shaders/draw.wgsl")
@@ -98,6 +94,11 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.T
 
 	vl := sy.Vars.ValueByIndex(0, "Matrix", 0)
 	vl.DynamicN = AllocChunk
+
+	// need a dummy texture in case only using fill
+	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
+	img := tgp.ValueByIndex("TexSampler", 0)
+	img.SetFromGoImage(dimg, 0)
 }
 
 func (dw *Drawer) drawAll() error {

@@ -6,7 +6,6 @@ package gpudraw
 
 import (
 	"image"
-	"image/draw"
 
 	"cogentcore.org/core/math32"
 )
@@ -27,15 +26,9 @@ type Matrix struct {
 // src2dst is the transform mapping source to destination
 // coordinates (translation, scaling), txsz is the size of the texture to draw,
 // sr is the source region (set to tex.Format.Bounds() for all)
-// op is the drawing operation: Src = copy source directly (blit),
-// Over = alpha blend with existing
 // flipY inverts the Y axis of the source image.
-func (dw *Drawer) ConfigMatrix(src2dst math32.Matrix3, txsz image.Point, sr image.Rectangle, op draw.Op, flipY bool) *Matrix {
+func ConfigMatrix(destSz image.Point, src2dst math32.Matrix3, txsz image.Point, sr image.Rectangle, flipY bool) *Matrix {
 	var tmat Matrix
-
-	if dw.YIsDown {
-		flipY = !flipY
-	}
 
 	sr = sr.Intersect(image.Rectangle{Max: txsz})
 	if sr.Empty() {
@@ -43,8 +36,6 @@ func (dw *Drawer) ConfigMatrix(src2dst math32.Matrix3, txsz image.Point, sr imag
 		tmat.UVP.SetIdentity()
 		return &tmat
 	}
-
-	destSz := dw.DestSize()
 
 	// Start with src-space left, top, right and bottom.
 	srcL := float32(sr.Min.X)
@@ -60,7 +51,7 @@ func (dw *Drawer) ConfigMatrix(src2dst math32.Matrix3, txsz image.Point, sr imag
 		src2dst[1]*srcR+src2dst[4]*srcT+src2dst[7],
 		src2dst[0]*srcL+src2dst[3]*srcB+src2dst[6],
 		src2dst[1]*srcL+src2dst[4]*srcB+src2dst[7],
-		dw.YIsDown,
+		false,
 	)
 	tmat.MVP.SetFromMatrix3(&matMVP) // todo render direct
 

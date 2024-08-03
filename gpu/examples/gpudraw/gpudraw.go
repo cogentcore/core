@@ -9,7 +9,6 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"math/rand"
 	"runtime"
 	"time"
 
@@ -18,6 +17,7 @@ import (
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/examples/images"
 	"cogentcore.org/core/gpu/gpudraw"
+	"golang.org/x/exp/rand"
 )
 
 func init() {
@@ -66,7 +66,6 @@ func main() {
 	}
 
 	rendImgs := func(idx int) {
-		fmt.Println(drw.DestSize())
 		drw.StartDraw()
 		drw.UseGoImage(imgs[idx])
 		drw.Scale(sf.Format.Bounds(), image.ZR, gpudraw.Src, false, 0)
@@ -92,17 +91,20 @@ func main() {
 
 	colors := []color.Color{color.White, color.Black, red, green, blue}
 
-	fillRnd := func() {
+	rendFill := func() {
 		nclr := len(colors)
 		drw.StartDraw()
 		for i := 0; i < 5; i++ {
-			sp := image.Point{rand.Intn(500), rand.Intn(500)}
-			sz := image.Point{rand.Intn(500), rand.Intn(500)}
-			drw.FillRect(colors[i%nclr], image.Rectangle{Min: sp, Max: sp.Add(sz)}, draw.Src)
+			// sp := image.Point{rand.Intn(500), rand.Intn(500)}
+			// sz := image.Point{rand.Intn(500), rand.Intn(500)}
+			sp := image.Point{i * 30, i * 40}
+			sz := image.Point{(i + 1) * 20, (i + 1) * 20}
+			sr := image.Rectangle{Min: sp, Max: sp.Add(sz)}
+			drw.FillRect(colors[i%nclr], sr, draw.Src)
 		}
 		drw.EndDraw()
 	}
-	_ = fillRnd
+	_ = rendFill
 
 	frameCount := 0
 	stTime := time.Now()
@@ -114,7 +116,7 @@ func main() {
 		case fcr < 3:
 			rendImgs(fcr)
 		default:
-			fillRnd()
+			rendFill()
 		}
 		frameCount++
 
@@ -129,6 +131,8 @@ func main() {
 	}
 
 	exitC := make(chan struct{}, 2)
+
+	// rendImgs(0)
 
 	fpsDelay := time.Second / 1
 	fpsTicker := time.NewTicker(fpsDelay)
