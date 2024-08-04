@@ -20,6 +20,6 @@ func init() {
 
 // GLFWCreateWindow is a helper function intended only for use in simple examples that makes a
 // new window with glfw on platforms that support it and is largely a no-op on other platforms.
-func GLFWCreateWindow(gp *GPU, width, height int, title string, resize *func(width, height int)) (surface *wgpu.Surface, terminate func(), pollEvents func() bool, err error) {
+func GLFWCreateWindow(gp *GPU, width, height int, title string, resize *func(width, height int)) (surface *wgpu.Surface, terminate func(), pollEvents func() bool, actualWidth int, actualHeight int, err error) {
 	return
 }
