@@ -13,6 +13,16 @@ import (
 
 // this file contains the official image/draw like interface
 
+const (
+	// Unchanged should be used for the unchanged argument in drawer calls,
+	// when the caller knows that the image is unchanged.
+	Unchanged = true
+
+	// Changed should be used for the unchanged argument to drawer calls,
+	// when the image has changed since last time or its status is unknown
+	Changed
+)
+
 // Copy copies the given Go source image to the render target, with the
 // same semantics as golang.org/x/image/draw.Copy, with the destination
 // implicit in the Drawer target.
@@ -22,7 +32,9 @@ import (
 //   - sr is the source region, if zero full src is used; must have for Uniform.
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
-func (dw *Drawer) Copy(dp image.Point, src image.Image, sr image.Rectangle, op draw.Op) {
+//   - unchanged should be true if caller knows that this image is unchanged
+//     from the last time it was used -- saves re-uploading to gpu.
+func (dw *Drawer) Copy(dp image.Point, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool) {
 	if u, ok := src.(*image.Uniform); ok {
 		dr := sr
 		del := dp.Sub(sr.Min)
@@ -31,7 +43,7 @@ func (dw *Drawer) Copy(dp image.Point, src image.Image, sr image.Rectangle, op d
 		dw.Fill(u.At(0, 0), dr, op)
 		return
 	}
-	dw.UseGoImage(src)
+	dw.UseGoImage(src, unchanged)
 	dw.CopyUsed(dp, sr, op, false)
 }
 
@@ -47,8 +59,10 @@ func (dw *Drawer) Copy(dp image.Point, src image.Image, sr image.Rectangle, op d
 //   - sr is the source region, if zero full src is used; must have for Uniform.
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
-func (dw *Drawer) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, op draw.Op) {
-	dw.UseGoImage(src)
+//   - unchanged should be true if caller knows that this image is unchanged
+//     from the last time it was used -- saves re-uploading to gpu.
+func (dw *Drawer) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool) {
+	dw.UseGoImage(src, unchanged)
 	dw.ScaleUsed(dr, sr, op, false, 0)
 }
 
@@ -60,7 +74,9 @@ func (dw *Drawer) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle,
 //   - sr is the source region, if zero full src is used; must have for Uniform.
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
-func (dw *Drawer) Transform(xform math32.Matrix3, src image.Image, sr image.Rectangle, op draw.Op) {
-	dw.UseGoImage(src)
+//   - unchanged should be true if caller knows that this image is unchanged
+//     from the last time it was used -- saves re-uploading to gpu.
+func (dw *Drawer) Transform(xform math32.Matrix3, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool) {
+	dw.UseGoImage(src, unchanged)
 	dw.TransformUsed(xform, sr, op, false)
 }

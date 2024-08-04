@@ -5,6 +5,7 @@
 package gpudraw
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 
@@ -14,27 +15,25 @@ import (
 )
 
 // UseGoImage uses the given Go image.Image as the source image
-// for the next Draw operation.
-func (dw *Drawer) UseGoImage(img image.Image) {
+// for the next Draw operation.  unchanged is a hint from the source
+// about whether the image is unchanged from last use, in which case
+// it does not need to be re-uploaded (if found).
+func (dw *Drawer) UseGoImage(img image.Image, unchanged bool) {
 	dw.Lock()
 	defer dw.Unlock()
 	dw.curImageSize = img.Bounds().Size()
-	tvv := dw.getNextTextureValue()
-	tvv.SetFromGoImage(img, 0)
-}
-
-// getNextTextureValue gets the next Texture image value, for Use
-// methods.
-func (dw *Drawer) getNextTextureValue() *gpu.Value {
-	sy := dw.Sys
-	tvr := sy.Vars.VarByName(1, "TexSampler")
-	ni := dw.curTexIdx
-	dw.curTexIdx++
-	nv := len(tvr.Values.Values)
-	if ni >= nv {
-		tvr.SetNValues(&sy.Device, nv+AllocChunk)
+	idx, exists := dw.images.use(img)
+	if exists && unchanged {
+		fmt.Println("unchanged:", idx) // todo: not getting this when should
+		return
 	}
-	return tvr.Values.Values[ni]
+	tvr := dw.Sys.Vars.VarByName(1, "TexSampler")
+	nv := len(tvr.Values.Values)
+	if idx >= nv { // new allocation
+		tvr.SetNValues(&dw.Sys.Device, dw.images.capacity)
+	}
+	tvv := tvr.Values.Values[idx]
+	tvv.SetFromGoImage(img, 0)
 }
 
 // SetFrameTexture sets given gpu.Framebuffer image as a drawing source at index,

@@ -32,6 +32,7 @@ func (dw *Drawer) ConfigPipeline(pl *gpu.GraphicsPipeline, blend bool) {
 func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.TextureFormat) {
 	dw.opList = slicesx.SetLength(dw.opList, AllocChunk) // allocate
 	dw.opList = dw.opList[:0]
+	dw.images.init()
 
 	dw.Sys = gpu.NewGraphicsSystem(gp, "gpudraw", dev)
 	dw.Sys.ConfigRender(renderFormat, gpu.UndefType)
@@ -152,7 +153,7 @@ func (dw *Drawer) drawAll() error {
 		}
 		mvl.DynamicIndex = i
 		if op < fillOver {
-			tvr.Values.Current = imgIdx
+			tvr.Values.Current = dw.images.used[imgIdx].index
 			imgIdx++
 		}
 		if op != lastOp {

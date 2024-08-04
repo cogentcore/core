@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"log/slog"
 	"sync"
 
 	"cogentcore.org/core/base/errors"
@@ -77,10 +76,6 @@ type renderWindow struct {
 	// mains is the stack of main stages in this render window.
 	// The [RenderContext] in this manager is the original source for all Stages.
 	mains stages
-
-	// renderScenes are the Scene elements that draw directly to the window,
-	// arranged in order, and continuously updated during Render.
-	renderScenes renderScenes
 
 	// noEventsChan is a channel on which a signal is sent when there are
 	// no events left in the window [events.Deque]. It is used internally
@@ -345,8 +340,6 @@ func (w *renderWindow) closed() {
 	}
 	// these are managed by the window itself
 	// w.Sprites.Reset()
-
-	w.renderScenes.reset()
 	// todo: delete the contents of the window here??
 }
 
@@ -608,107 +601,14 @@ func (rc *renderContext) String() string {
 	return str
 }
 
-// renderScenes are a list of Scene and direct rendering widgets,
-// compiled in rendering order, whose Pixels images are composed
-// directly to the RenderWindow window.
-type renderScenes struct {
-
-	// max index (exclusive) for this set of Scenes
-	maxIndex int
-
-	// set to true to flip Y axis in drawing these images
-	flipY bool
-
-	// ordered list of scenes and direct rendering widgets. Index is Drawer image index.
-	scenes []Widget
-
-	// sceneIndex holds the index for each scene / direct render widget.
-	// Used to detect changes in index.
-	sceneIndex map[Widget]int
-}
-
-// reset resets the list
-func (rs *renderScenes) reset() {
-	rs.scenes = nil
-	if rs.sceneIndex == nil {
-		rs.sceneIndex = make(map[Widget]int)
-	}
-}
-
-// add adds a new node, returning index
-func (rs *renderScenes) add(w Widget, scIndex map[Widget]int) int {
-	sc := w.AsWidget().Scene
-	if sc.Pixels == nil {
-		return -1
-	}
-	idx := len(rs.scenes)
-	// if idx >= rs.maxIndex {
-	// 	slog.Error("RenderScenes: too many Scenes to render all of them!", "max", rs.maxIndex)
-	// 	return -1
-	// }
-	if prvIndex, has := rs.sceneIndex[w]; has {
-		if prvIndex != idx {
-			sc.imageUpdated = true // need to copy b/c cur has diff image
-		}
-	} else {
-		sc.imageUpdated = true // need to copy b/c new
-	}
-	scIndex[w] = idx
-	rs.scenes = append(rs.scenes, w)
-	return idx
-}
-
-// setImages calls drw.SetGoImage on all updated Scene images
-func (rs *renderScenes) setImages(drw system.Drawer) {
-	if len(rs.scenes) == 0 {
-		if DebugSettings.WinRenderTrace {
-			fmt.Println("RenderScene.SetImages: no scenes")
-		}
-	}
-	var skipScene *Scene
-	_ = skipScene
-	for _, w := range rs.scenes {
-		sc := w.AsWidget().Scene
-		_, isSc := w.(*Scene)
-		if isSc && (sc.updating || !sc.imageUpdated) {
-			if DebugSettings.WinRenderTrace {
-				if sc.updating {
-					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name)
-				}
-				if !sc.imageUpdated {
-					fmt.Println("RenderScenes.SetImages: sc Image NotUpdated", sc.Name)
-				}
-			}
-			skipScene = sc
-			continue
-		}
-		if DebugSettings.WinRenderTrace {
-			fmt.Println("RenderScenes.SetImages:", sc.Name)
-		}
-		// if isSc || sc != skipScene {
-		// 	w.DirectRenderImage(drw, i)
-		// }
-	}
-}
-
-// drawAll does drw.Copy drawing call for all Scenes,
-// using proper TextureSet for each of system.MaxTexturesPerSet Scenes.
-func (rs *renderScenes) drawAll(drw system.Drawer) {
-	if len(rs.scenes) == 0 {
-		return
-	}
-	for i, w := range rs.scenes {
-		w.DirectRenderDraw(drw, i)
-	}
-}
-
 func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int) {
 	op := draw.Over
 	if idx == 0 {
 		op = draw.Src
 	}
 	bb := sc.Pixels.Bounds()
-	drw.Copy(sc.sceneGeom.Pos, sc.Pixels, bb, op)
+	unchanged := !sc.imageUpdated || sc.updating
+	drw.Copy(sc.sceneGeom.Pos, sc.Pixels, bb, op, unchanged)
 }
 
 func (w *renderWindow) renderContext() *renderContext {
@@ -730,11 +630,18 @@ func (w *renderWindow) renderWindow() {
 
 	stageMods, sceneMods := w.mains.updateAll() // handles all Scene / Widget updates!
 	top := w.mains.top()
-	if top == nil {
+	if top == nil || w.mains.stack.Len() == 0 {
 		return
 	}
+
 	if !top.Sprites.Modified && !rebuild && !stageMods && !sceneMods { // nothing to do!
 		// fmt.Println("no mods") // note: get a ton of these..
+		return
+	}
+	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
+		if DebugSettings.WinRenderTrace {
+			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
+		}
 		return
 	}
 
@@ -743,26 +650,6 @@ func (w *renderWindow) renderWindow() {
 		fmt.Println("rebuild:", rebuild, "stageMods:", stageMods, "sceneMods:", sceneMods)
 	}
 
-	if stageMods || rebuild {
-		if !w.gatherScenes() {
-			slog.Error("RenderWindow: no scenes")
-			return
-		}
-	}
-	w.drawScenes()
-}
-
-// drawScenes does the drawing of RenderScenes to the window.
-func (w *renderWindow) drawScenes() {
-	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
-		if DebugSettings.WinRenderTrace {
-			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
-		}
-		return
-	}
-	// if !w.HasFlag(WinSentShow) {
-	// 	return
-	// }
 	if !w.SystemWindow.Lock() {
 		if DebugSettings.WinRenderTrace {
 			fmt.Printf("RenderWindow: window was closed: %v\n", w.name)
@@ -774,22 +661,63 @@ func (w *renderWindow) drawScenes() {
 	// pr := profile.Start("win.DrawScenes")
 
 	drw := w.SystemWindow.Drawer()
-	rs := &w.renderScenes
+	drw.Start()
 
-	rs.setImages(drw) // ensure all updated images copied
+	w.fillInsets()
 
-	top := w.mains.top()
+	sm := &w.mains
+	n := sm.stack.Len()
+
+	// first, find the top-level window:
+	winIndex := 0
+	var winScene *Scene
+	idx := 0
+	for i := n - 1; i >= 0; i-- {
+		st := sm.stack.ValueByIndex(i)
+		if st.Type == WindowStage {
+			if DebugSettings.WinRenderTrace {
+				fmt.Println("GatherScenes: main Window:", st.String())
+			}
+			winScene = st.Scene
+			winScene.DirectRenderDraw(drw, idx)
+			winIndex = i
+			idx++
+			for _, w := range st.Scene.directRenders {
+				w.DirectRenderDraw(drw, idx)
+				idx++
+			}
+			break
+		}
+	}
+
+	// then add everyone above that
+	for i := winIndex + 1; i < n; i++ {
+		st := sm.stack.ValueByIndex(i)
+		if st.Scrim && i == n-1 {
+			// todo: just direct render the scrim here.
+			// drw.Copy(sc.sceneGeom.Pos, colors.ToUniform(colors.ApplyOpacity(colors.Scheme.Scrim, 0.5)), math32.Identity3(), sc.Geom.TotalBBox, draw.Over)
+		}
+		st.Scene.DirectRenderDraw(drw, idx)
+		idx++
+		if DebugSettings.WinRenderTrace {
+			fmt.Println("GatherScenes: overlay Stage:", st.String())
+		}
+	}
+
+	// then add the popups for the top main stage
+	for _, kv := range top.popups.stack.Order {
+		st := kv.Value
+		st.Scene.DirectRenderDraw(drw, idx)
+		idx++
+		if DebugSettings.WinRenderTrace {
+			fmt.Println("GatherScenes: popup:", st.String())
+		}
+	}
 	if top.Sprites.Modified {
 		top.Sprites.configSprites(drw)
 	}
-
-	w.fillInsets()
-	drw.Start()
-	rs.drawAll(drw)
 	top.Sprites.drawSprites(drw)
 	drw.End()
-
-	// pr.End()
 }
 
 // fillInsets fills the window insets, if any, with [colors.Scheme.Background].
@@ -826,66 +754,6 @@ func (w *renderWindow) fillInsets() {
 
 		drw.EndFill()
 	*/
-}
-
-// gatherScenes finds all the Scene elements that drive rendering
-// into the RenderScenes list.  Returns false on failure / nothing to render.
-func (w *renderWindow) gatherScenes() bool {
-	rs := &w.renderScenes
-	rs.reset()
-	scIndex := make(map[Widget]int)
-
-	sm := &w.mains
-	n := sm.stack.Len()
-	if n == 0 {
-		slog.Error("GatherScenes stack empty")
-		return false // shouldn't happen!
-	}
-
-	// first, find the top-level window:
-	winIndex := 0
-	var winScene *Scene
-	for i := n - 1; i >= 0; i-- {
-		st := sm.stack.ValueByIndex(i)
-		if st.Type == WindowStage {
-			if DebugSettings.WinRenderTrace {
-				fmt.Println("GatherScenes: main Window:", st.String())
-			}
-			winScene = st.Scene
-			rs.add(st.Scene, scIndex)
-			for _, w := range st.Scene.directRenders {
-				rs.add(w, scIndex)
-			}
-			winIndex = i
-			break
-		}
-	}
-
-	// then add everyone above that
-	for i := winIndex + 1; i < n; i++ {
-		st := sm.stack.ValueByIndex(i)
-		if st.Scrim && i == n-1 {
-			rs.add(newScrim(winScene), scIndex)
-		}
-		rs.add(st.Scene, scIndex)
-		if DebugSettings.WinRenderTrace {
-			fmt.Println("GatherScenes: overlay Stage:", st.String())
-		}
-	}
-
-	top := sm.top()
-	top.Sprites.Modified = true // ensure configured
-
-	// then add the popups for the top main stage
-	for _, kv := range top.popups.stack.Order {
-		st := kv.Value
-		rs.add(st.Scene, scIndex)
-		if DebugSettings.WinRenderTrace {
-			fmt.Println("GatherScenes: popup:", st.String())
-		}
-	}
-	rs.sceneIndex = scIndex
-	return true
 }
 
 // A scrim is just a dummy Widget used for rendering a scrim.

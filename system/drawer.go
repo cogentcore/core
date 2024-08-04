@@ -37,7 +37,9 @@ type Drawer interface {
 	//   - sr is the source region, if zero full src is used; must have for Uniform.
 	//   - op is the drawing operation: Src = copy source directly (blit),
 	//     Over = alpha blend with existing.
-	Copy(dp image.Point, src image.Image, sr image.Rectangle, op draw.Op)
+	//   - unchanged should be true if caller knows that this image is unchanged
+	//     from the last time it was used -- saves re-uploading to gpu.
+	Copy(dp image.Point, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool)
 
 	// Scale copies the given Go source image to the render target,
 	// scaling the region defined by src and sr to the destination
@@ -51,7 +53,9 @@ type Drawer interface {
 	//   - sr is the source region, if zero full src is used; must have for Uniform.
 	//   - op is the drawing operation: Src = copy source directly (blit),
 	//     Over = alpha blend with existing.
-	Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, op draw.Op)
+	//   - unchanged should be true if caller knows that this image is unchanged
+	//     from the last time it was used -- saves re-uploading to gpu.
+	Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool)
 
 	// Transform copies the given Go source image to the render target,
 	// with the same semantics as golang.org/x/image/draw.Transform, with the
@@ -61,7 +65,9 @@ type Drawer interface {
 	//   - sr is the source region, if zero full src is used; must have for Uniform.
 	//   - op is the drawing operation: Src = copy source directly (blit),
 	//     Over = alpha blend with existing.
-	Transform(xform math32.Matrix3, src image.Image, sr image.Rectangle, op draw.Op)
+	//   - unchanged should be true if caller knows that this image is unchanged
+	//     from the last time it was used -- saves re-uploading to gpu.
+	Transform(xform math32.Matrix3, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool)
 
 	// Surface is the gpu device being drawn to.
 	// Could be nil on unsupported devices (web).
@@ -84,7 +90,9 @@ type DrawerBase struct {
 //   - sr is the source region, if zero full src is used; must have for Uniform.
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
-func (dw *DrawerBase) Copy(dp image.Point, src image.Image, sr image.Rectangle, op draw.Op) {
+//   - unchanged should be true if caller knows that this image is unchanged
+//     from the last time it was used -- saves re-uploading to gpu.
+func (dw *DrawerBase) Copy(dp image.Point, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool) {
 	draw.Draw(dw.Image, image.Rectangle{dp, dp.Add(src.Bounds().Size())}, src, sr.Min, op)
 }
 
@@ -100,7 +108,9 @@ func (dw *DrawerBase) Copy(dp image.Point, src image.Image, sr image.Rectangle, 
 //   - sr is the source region, if zero full src is used; must have for Uniform.
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
-func (dw *DrawerBase) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, op draw.Op) {
+//   - unchanged should be true if caller knows that this image is unchanged
+//     from the last time it was used -- saves re-uploading to gpu.
+func (dw *DrawerBase) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool) {
 	// todo: use drawmatrix and x/image to implement scale.
 	draw.Draw(dw.Image, dr, src, sr.Min, op)
 }
@@ -113,7 +123,9 @@ func (dw *DrawerBase) Scale(dr image.Rectangle, src image.Image, sr image.Rectan
 //   - sr is the source region, if zero full src is used; must have for Uniform.
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
-func (dw *DrawerBase) Transform(xform math32.Matrix3, src image.Image, sr image.Rectangle, op draw.Op) {
+//   - unchanged should be true if caller knows that this image is unchanged
+//     from the last time it was used -- saves re-uploading to gpu.
+func (dw *DrawerBase) Transform(xform math32.Matrix3, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool) {
 	// todo: use drawmatrix and x/image to implement transform
 	draw.Draw(dw.Image, sr, src, sr.Min, op)
 }

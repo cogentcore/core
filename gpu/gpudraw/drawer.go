@@ -51,11 +51,12 @@ type Drawer struct {
 	Frame *gpu.RenderFrame
 
 	// opList is the list of drawing operations made on the current pass.
-	// This is recorded during the p
+	// This is recorded after Start and executed at End.
 	opList []draw.Op
 
-	// current texture index to use
-	curTexIdx int
+	// images manages the list of images and their allocation
+	// to Value indexes.
+	images images
 
 	// size of current image, set via Use* methods
 	curImageSize image.Point
@@ -138,7 +139,7 @@ func (dw *Drawer) Start() {
 	defer dw.Unlock()
 
 	dw.opList = dw.opList[:0]
-	dw.curTexIdx = 0
+	dw.images.start()
 }
 
 // End ends image drawing rendering process on render target.
@@ -152,5 +153,4 @@ func (dw *Drawer) End() {
 	dw.drawAll()
 
 	dw.opList = dw.opList[:0]
-	dw.curTexIdx = 0
 }
