@@ -84,8 +84,8 @@ func (a *App) SetSystemWindow() {
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	a.UnderlyingPlatform = UserAgentToOS(ua)
 
-	a.Resize()
 	a.InitDrawer()
+	a.Resize()
 	a.Event.Window(events.WinShow)
 	a.Event.Window(events.ScreenUpdate)
 	a.Event.Window(events.WinFocus)
@@ -148,7 +148,11 @@ func (a *App) Resize() {
 	cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.X)/a.Scrn.DevicePixelRatio))
 	cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.Y)/a.Scrn.DevicePixelRatio))
 
-	// a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize}) TODO(wgpu)
+	if a.Draw.wgpu != nil {
+		// TODO(wgpu): resize
+	} else {
+		a.Draw.base.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
+	}
 
 	a.Event.WindowResize()
 }
