@@ -30,18 +30,21 @@ func main() {
 	gpu.Debug = true
 	gp.Config("gpudraw")
 
+	var resize func(width, height int)
 	width, height := 1024, 768
-	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "GPU Draw")
+	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "GPU Draw", &resize)
 	if err != nil {
 		return
 	}
 
 	sf := gpu.NewSurface(gp, sp, width, height)
+	drw := gpudraw.NewDrawerSurface(sf)
 
 	fmt.Printf("format: %s\n", sf.Format.String())
 
-	drw := gpudraw.NewDrawerSurface(sf)
-
+	resize = func(width, height int) {
+		sf.Resized(image.Point{width, height})
+	}
 	destroy := func() {
 		drw.Release()
 		sf.Release()

@@ -6,6 +6,7 @@ package gpu
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 
 	"cogentcore.org/core/base/errors"
@@ -34,7 +35,7 @@ type System struct {
 	// GraphicsPipelines by name
 	GraphicsPipelines map[string]*GraphicsPipeline
 
-	// renderpass with depth buffer for this system
+	// Render manages multisampling and depth buffers.
 	Render Render
 
 	// GPU is needed to access some properties and alignment factors.
@@ -43,6 +44,9 @@ type System struct {
 	// logical device for this System.
 	// This is owned by us for a Compute device.
 	Device Device
+
+	// if we are configured with a surface, this is it, else nil.
+	Surface *Surface
 }
 
 // NewGraphicsSystem returns a new System for graphics use, using
@@ -65,7 +69,6 @@ func NewComputeSystem(gp *GPU, name string) *System {
 // init initializes the System
 func (sy *System) init(gp *GPU, name string, dev *Device) {
 	sy.GPU = gp
-	sy.Render.sys = sy
 	sy.Name = name
 	sy.Device = *dev
 	sy.Vars.device = *dev
@@ -103,13 +106,11 @@ func (sy *System) NewCommandEncoder() *wgpu.CommandEncoder {
 
 // WaitDone waits until device is done with current processing steps
 func (sy *System) WaitDone() {
-	sy.Device.Device.Poll(true, nil)
+	sy.Device.WaitDone()
 }
 
 func (sy *System) Release() {
-	if sy.Device.Device != nil {
-		sy.WaitDone()
-	}
+	sy.WaitDone()
 	// for _, ev := range sy.Events {
 	// 	vk.ReleaseEvent(sy.Device.Device, ev, nil)
 	// }
@@ -240,8 +241,25 @@ func (sy *System) CmdBuffByNameTry(name string) (*wgpu.CommandEncoder, error) {
 // ConfigRender configures the renderpass, including the texture
 // format that we're rendering to, for a surface render target,
 // and the depth buffer format (pass UndefType for no depth buffer).
-func (sy *System) ConfigRender(renderFormat *TextureFormat, depthFmt Types) {
+// surface should be passed if rendering to a surface (nil ok),
+// to connect the render target to it, so it will be updated during resizing.
+func (sy *System) ConfigRender(renderFormat *TextureFormat, depthFmt Types, surface *Surface) {
 	sy.Render.Config(&sy.Device, renderFormat, depthFmt, false)
+	sy.Surface = surface
+	if sy.Surface != nil {
+		sy.Surface.Render = &sy.Render
+	}
+}
+
+// When the render surface (e.g., window) is resized, call this function.
+// WebGPU does not have any internal mechanism for tracking this, so we
+// need to drive it from external events.
+func (sy *System) Resized(newSize image.Point) {
+	if sy.Surface != nil {
+		sy.Surface.Resized(newSize)
+	} else {
+		sy.Render.SetSize(newSize)
+	}
 }
 
 // ConfigRenderNonSurface configures the renderpass, including the texture

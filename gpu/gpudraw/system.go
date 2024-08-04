@@ -35,7 +35,7 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.T
 	dw.images.init()
 
 	dw.Sys = gpu.NewGraphicsSystem(gp, "gpudraw", dev)
-	dw.Sys.ConfigRender(renderFormat, gpu.UndefType)
+	dw.Sys.ConfigRender(renderFormat, gpu.UndefType, dw.surface)
 	sy := dw.Sys
 	// sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 
@@ -166,7 +166,7 @@ func (dw *Drawer) drawAll() error {
 	}
 	rp.End()
 	if dw.surface != nil {
-		dw.surface.SubmitRender(cmd)
+		dw.surface.SubmitRender(rp, cmd)
 		dw.surface.Present()
 	} else {
 		// dw.Frame.SubmitRender(cmd)

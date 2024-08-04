@@ -40,17 +40,25 @@ func (dv *Device) Release() {
 	})
 }
 
-// DeviceWaitIdle waits until the device is idle and then calls
+// WaitDoneFunc waits until the device is idle and then calls
 // given function, if the device is ready. If it is in some other
 // bad state, that generates a panic.
-func (dv *Device) DeviceWaitIdle(fun func()) {
+func (dv *Device) WaitDoneFunc(fun func()) {
 	dv.Queue.OnSubmittedWorkDone(func(stat wgpu.QueueWorkDoneStatus) {
 		if stat == wgpu.QueueWorkDoneStatusSuccess {
 			fun()
 			return
 		}
-		panic("DeviceWaitIdle: bad queue status: " + stat.String())
+		panic("Device.WaitDoneFunc: bad queue status: " + stat.String())
 	})
+}
+
+// WaitDone does a blocking wait until the device is done with current work.
+func (dv *Device) WaitDone() {
+	if dv.Device == nil {
+		return
+	}
+	dv.Device.Poll(true, nil)
 }
 
 // NewGraphicsDevice returns a new Graphics Device, on given GPU.

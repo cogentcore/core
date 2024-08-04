@@ -7,6 +7,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"image"
 	"image/color"
 	"runtime"
 	"time"
@@ -37,8 +38,9 @@ func main() {
 	gpu.Debug = true
 	gp.Config("drawidx")
 
+	var resize func(width, height int)
 	width, height := 1024, 768
-	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Triangle Indexed")
+	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Triangle Indexed", &resize)
 	if err != nil {
 		return
 	}
@@ -48,7 +50,11 @@ func main() {
 	fmt.Printf("format: %s\n", sf.Format.String())
 
 	sy := gp.NewGraphicsSystem("drawidx", sf.Device)
+	sy.ConfigRender(&sf.Format, gpu.UndefType, sf)
 
+	resize = func(width, height int) {
+		sf.Resized(image.Point{width, height})
+	}
 	destroy := func() {
 		sy.Release()
 		sf.Release()
@@ -57,7 +63,6 @@ func main() {
 	}
 
 	pl := sy.AddGraphicsPipeline("drawidx")
-	sy.ConfigRender(&sf.Format, gpu.UndefType)
 	pl.SetCullMode(wgpu.CullModeNone)
 	sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 
@@ -138,7 +143,7 @@ func main() {
 		pl.BindPipeline(rp)
 		pl.BindDrawIndexed(rp)
 		rp.End()
-		sf.SubmitRender(cmd)
+		sf.SubmitRender(rp, cmd)
 		sf.Present()
 
 		frameCount++

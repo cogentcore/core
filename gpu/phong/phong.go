@@ -96,11 +96,12 @@ type Phong struct {
 // NewPhong returns a new Phong system that is ready to be
 // configured by adding the relevant elements.
 // When done, call Config() to perform initial configuration.
-func NewPhong(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.TextureFormat) *Phong {
+// surface should be passed if rendering to a surface (nil ok),
+// to connect the render target to it, so it will be updated during resizing.
+func NewPhong(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.TextureFormat, surface *gpu.Surface) *Phong {
 	ph := &Phong{}
 	ph.Sys = gpu.NewGraphicsSystem(gp, "phong", dev)
-	ph.Sys.ConfigRender(renderFormat, gpu.Depth32)
-	// sf.SetRender(&sy.Render)
+	ph.Sys.ConfigRender(renderFormat, gpu.Depth32, surface)
 	ph.configSystem()
 	return ph
 }

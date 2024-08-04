@@ -7,6 +7,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"image"
 	"runtime"
 	"time"
 
@@ -28,8 +29,9 @@ func main() {
 	gp := gpu.NewGPU()
 	gp.Config("drawtri")
 
+	var resize func(width, height int)
 	width, height := 1024, 768
-	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Triangle")
+	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Triangle", &resize)
 	if err != nil {
 		return
 	}
@@ -39,8 +41,19 @@ func main() {
 	fmt.Printf("format: %s\n", sf.Format.String())
 
 	sy := gp.NewGraphicsSystem("drawtri", sf.Device)
+	sy.ConfigRender(&sf.Format, gpu.UndefType, sf)
+
+	resize = func(width, height int) {
+		sf.Resized(image.Point{width, height})
+	}
+	destroy := func() {
+		sy.Release()
+		sf.Release()
+		gp.Release()
+		terminate()
+	}
+
 	pl := sy.AddGraphicsPipeline("drawtri")
-	sy.ConfigRender(&sf.Format, gpu.UndefType)
 	pl.SetFrontFace(wgpu.FrontFaceCW)
 
 	sh := pl.AddShader("trianglelit")
@@ -50,13 +63,6 @@ func main() {
 
 	sy.Config()
 	// no vars..
-
-	destroy := func() {
-		sy.Release()
-		sf.Release()
-		gp.Release()
-		terminate()
-	}
 
 	frameCount := 0
 	stTime := time.Now()
@@ -75,7 +81,7 @@ func main() {
 		pl.BindPipeline(rp)
 		rp.Draw(3, 1, 0, 0)
 		rp.End()
-		sf.SubmitRender(cmd) // this is where it waits for the 16 msec
+		sf.SubmitRender(rp, cmd) // this is where it waits for the 16 msec
 		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
 		sf.Present()
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))

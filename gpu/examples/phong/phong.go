@@ -40,15 +40,19 @@ func main() {
 	gpu.Debug = true
 	gp.Config("phong")
 
+	var resize func(width, height int)
 	width, height := 1024, 768
-	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Phong")
+	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Phong", &resize)
 	if err != nil {
 		return
 	}
 
 	sf := gpu.NewSurface(gp, sp, width, height)
-	ph := phong.NewPhong(sf.GPU, sf.Device, &sf.Format)
+	ph := phong.NewPhong(sf.GPU, sf.Device, &sf.Format, sf)
 
+	resize = func(width, height int) {
+		sf.Resized(image.Point{width, height})
+	}
 	destroy := func() {
 		ph.Release()
 		sf.Release()
@@ -204,7 +208,7 @@ func main() {
 		cmd, rp := ph.RenderStart(view)
 		render1(rp)
 		rp.End()
-		sf.SubmitRender(cmd)
+		sf.SubmitRender(rp, cmd)
 		sf.Present()
 
 		eTime := time.Now()
@@ -214,6 +218,8 @@ func main() {
 			fmt.Printf("fps: %.0f\n", fps)
 			frameCount = 0
 			stTime = eTime
+			sf.ReConfigSwapChain() // in case we resized..
+			fmt.Println(sf.Format)
 		}
 	}
 
@@ -233,8 +239,6 @@ func main() {
 				continue
 			}
 			renderFrame()
-			// destroy()
-			// return
 		}
 	}
 }
