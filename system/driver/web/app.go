@@ -65,14 +65,6 @@ type App struct {
 	KeyMods key.Modifiers
 }
 
-func (a *App) InitGPU() {
-	gp := gpu.NewGPU()
-	gp.Config(a.Name())
-	surf := gp.Instance.CreateSurface(nil)
-	sf := gpu.NewSurface(gp, surf, 2220, 1984) // TODO(wgpu)
-	a.Draw = gpudraw.NewDrawerSurface(sf)
-}
-
 // NewWindow creates a new window with the given options.
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
@@ -97,6 +89,7 @@ func (a *App) SetSystemWindow() {
 	a.UnderlyingPlatform = UserAgentToOS(ua)
 
 	a.Resize()
+	a.InitGPU()
 	a.Event.Window(events.WinShow)
 	a.Event.Window(events.ScreenUpdate)
 	a.Event.Window(events.WinFocus)
@@ -159,9 +152,18 @@ func (a *App) Resize() {
 	cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.X)/a.Scrn.DevicePixelRatio))
 	cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.Y)/a.Scrn.DevicePixelRatio))
 
-	// a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
+	// a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize}) TODO(wgpu)
 
 	a.Event.WindowResize()
+}
+
+// InitGPU initializes the gpu drawer for the app.
+func (a *App) InitGPU() {
+	gp := gpu.NewGPU()
+	gp.Config(a.Name())
+	surf := gp.Instance.CreateSurface(nil)
+	sf := gpu.NewSurface(gp, surf, a.Scrn.PixSize.X, a.Scrn.PixSize.Y)
+	a.Draw = gpudraw.NewDrawerSurface(sf)
 }
 
 func (a *App) DataDir() string {
