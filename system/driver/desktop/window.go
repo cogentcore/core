@@ -14,17 +14,16 @@ import (
 	"log"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
-	"cogentcore.org/core/vgpu/vdraw"
 	"github.com/go-gl/glfw/v3.3/glfw"
-
-	vk "github.com/goki/vulkan"
+	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
 // Window is the implementation of [system.Window] for the desktop platform.
 type Window struct {
-	base.WindowMulti[*App, *vdraw.Drawer]
+	base.WindowMulti[*App, *gpudraw.Drawer]
 
 	// Glw is the glfw window associated with this window
 	Glw *glfw.Window
@@ -301,12 +300,13 @@ func (w *Window) Close() {
 	defer w.Mu.Unlock()
 
 	w.App.RunOnMain(func() {
-		vk.DeviceWaitIdle(w.Draw.Surf.Device.Device)
+		// vk.DeviceWaitIdle(w.Draw.Surf.Device.Device)
+		w.Draw.Sys.WaitDone()
 		if w.DestroyGPUFunc != nil {
 			w.DestroyGPUFunc()
 		}
-		w.Draw.Destroy()
-		w.Draw.Surf.Destroy()
+		w.Draw.Release()
+		w.Draw.Surface().(*wgpu.Surface).Release()
 		w.Glw.Destroy()
 		w.Glw = nil // marks as closed for all other calls
 		w.Draw = nil

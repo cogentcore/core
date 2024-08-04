@@ -16,7 +16,7 @@ import (
 // Copy copies the given Go source image to the render target, with the
 // same semantics as golang.org/x/image/draw.Copy, with the destination
 // implicit in the Drawer target.
-//   - Must have called StartDraw first!
+//   - Must have called Start first!
 //   - dp is the destination point.
 //   - src is the source image. If an image.Uniform, fast Fill is done.
 //   - sr is the source region, if zero full src is used; must have for Uniform.
@@ -41,7 +41,7 @@ func (dw *Drawer) Copy(dp image.Point, src image.Image, sr image.Rectangle, op d
 // with the same semantics as golang.org/x/image/draw.Scale, with the
 // destination implicit in the Drawer target.
 // If src image is an
-//   - Must have called StartDraw first!
+//   - Must have called Start first!
 //   - dr is the destination rectangle; if zero uses full dest image.
 //   - src is the source image. Uniform does not work (or make sense) here.
 //   - sr is the source region, if zero full src is used; must have for Uniform.

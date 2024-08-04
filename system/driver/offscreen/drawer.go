@@ -20,9 +20,9 @@ func (dw *Drawer) DestBounds() image.Rectangle {
 	return TheApp.Scrn.Geometry
 }
 
-// EndDraw ends image drawing rendering process on render target.
+// End ends image drawing rendering process on render target.
 // This is the function that actually sends the image to the capture channel.
-func (dw *Drawer) EndDraw() {
+func (dw *Drawer) End() {
 	if !system.NeedsCapture {
 		return
 	}

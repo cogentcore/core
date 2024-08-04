@@ -59,7 +59,7 @@ func (dw *Drawer) SetFrameTexture(idx int, fbi any) {
 }
 
 // CopyUsed copies the current Use* texture to render target.
-// Must have called StartDraw and a Use* method first!
+// Must have called Start and a Use* method first!
 //   - dp is the destination point.
 //   - src is the source image. If an image.Uniform, fast Fill is done.
 //   - sr is the source region, if zero full src is used.
@@ -81,7 +81,7 @@ func (dw *Drawer) CopyUsed(dp image.Point, sr image.Rectangle, op draw.Op, flipY
 // ScaleUsed copies the current Use* texture to render target,
 // scaling the region defined by src and sr to the destination
 // such that sr in src-space is mapped to dr in dst-space.
-// Must have called StartDraw and a Use* method first!
+// Must have called Start and a Use* method first!
 //   - dr is the destination rectangle; if zero uses full dest image.
 //   - sr is the source region; if zero uses full src image.
 //   - op is the drawing operation: Src = copy source directly (blit),
@@ -100,7 +100,7 @@ func (dw *Drawer) ScaleUsed(dr image.Rectangle, sr image.Rectangle, op draw.Op, 
 }
 
 // TransformUsed draws the current Use* texture to render target
-// Must have called StartDraw and a Use* method first!
+// Must have called Start and a Use* method first!
 //   - xform is the transform mapping source to destination coordinates.
 //   - sr is the source region; if zero uses full src image.
 //   - op is the drawing operation: Src = copy source directly (blit),

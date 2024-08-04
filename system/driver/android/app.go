@@ -10,10 +10,10 @@ import (
 	"log"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 	"cogentcore.org/core/vgpu"
-	"cogentcore.org/core/vgpu/vdraw"
 	vk "github.com/goki/vulkan"
 )
 
@@ -24,11 +24,11 @@ func Init() {
 }
 
 // TheApp is the single [system.App] for the Android platform
-var TheApp = &App{AppSingle: base.NewAppSingle[*vdraw.Drawer, *Window]()}
+var TheApp = &App{AppSingle: base.NewAppSingle[*gpudraw.Drawer, *Window]()}
 
 // App is the [system.App] implementation for the Android platform
 type App struct {
-	base.AppSingle[*vdraw.Drawer, *Window]
+	base.AppSingle[*gpudraw.Drawer, *Window]
 
 	// GPU is the system GPU used for the app
 	GPU *vgpu.GPU
@@ -108,12 +108,7 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	sf.SetRender(&sys.Render)
 	// sys.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
 	sys.Config()
-	a.Draw = &vdraw.Drawer{
-		Sys:     *sys,
-		YIsDown: true,
-	}
-	// a.Draw.ConfigSys()
-	a.Draw.ConfigSurface(sf, vgpu.MaxTexturesPerSet)
+	a.Draw = gpudraw.NewDrawerSurface(sf)
 
 	a.Winptr = winptr
 

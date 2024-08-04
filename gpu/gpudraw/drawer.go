@@ -38,7 +38,7 @@ var AllocChunk = 16
 // Drawer is the overall GPUDraw implementation, which draws Textures
 // or Fills solid colors to a render target.
 // A sequence of drawing operations is programmed for each render pass,
-// between StartDraw and EndDraw calls, which is then uploaded and performed
+// between Start and End calls, which is then uploaded and performed
 // in one GPU render pass, according to the recorded order of operations.
 type Drawer struct {
 	// drawing system
@@ -130,9 +130,10 @@ func (dw *Drawer) Surface() any {
 	return dw.surface
 }
 
-// StartDraw starts recording a sequence of draw / fill actions,
-// which will be performed on the GPU at EndDraw().
-func (dw *Drawer) StartDraw() {
+// Start starts recording a sequence of draw / fill actions,
+// which will be performed on the GPU at End().
+// This must be called prior to any Drawer operations.
+func (dw *Drawer) Start() {
 	dw.Lock()
 	defer dw.Unlock()
 
@@ -140,8 +141,8 @@ func (dw *Drawer) StartDraw() {
 	dw.curTexIdx = 0
 }
 
-// EndDraw ends image drawing rendering process on render target
-func (dw *Drawer) EndDraw() {
+// End ends image drawing rendering process on render target.
+func (dw *Drawer) End() {
 	if len(dw.opList) == 0 {
 		return
 	}
