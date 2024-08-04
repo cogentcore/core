@@ -3,6 +3,11 @@
 package symbols
 
 import (
+	"go/constant"
+	"go/token"
+	"image"
+	"reflect"
+
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -11,10 +16,6 @@ import (
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"github.com/cogentcore/yaegi/interp"
-	"go/constant"
-	"go/token"
-	"image"
-	"reflect"
 )
 
 func init() {
@@ -364,7 +365,7 @@ type _cogentcore_org_core_core_Layouter struct {
 	WContextMenuPos    func(e events.Event) image.Point
 	WCopyFieldsFrom    func(from tree.Node)
 	WDestroy           func()
-	WDirectRenderDraw  func(drw system.Drawer, idx int, flipY bool)
+	WRenderDraw        func(drw system.Drawer, idx int, flipY bool)
 	WDirectRenderImage func(drw system.Drawer, idx int)
 	WInit              func()
 	WLayoutSpace       func()
@@ -401,8 +402,8 @@ func (W _cogentcore_org_core_core_Layouter) ContextMenuPos(e events.Event) image
 }
 func (W _cogentcore_org_core_core_Layouter) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Layouter) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_core_Layouter) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	W.WDirectRenderDraw(drw, idx, flipY)
+func (W _cogentcore_org_core_core_Layouter) RenderDraw(drw system.Drawer, idx int, flipY bool) {
+	W.WRenderDraw(drw, idx, flipY)
 }
 func (W _cogentcore_org_core_core_Layouter) DirectRenderImage(drw system.Drawer, idx int) {
 	W.WDirectRenderImage(drw, idx)
@@ -619,7 +620,7 @@ type _cogentcore_org_core_core_Treer struct {
 	WCopyFieldsFrom    func(from tree.Node)
 	WCut               func()
 	WDestroy           func()
-	WDirectRenderDraw  func(drw system.Drawer, idx int, flipY bool)
+	WRenderDraw        func(drw system.Drawer, idx int, flipY bool)
 	WDirectRenderImage func(drw system.Drawer, idx int)
 	WDragDrop          func(e events.Event)
 	WDropDeleteSource  func(e events.Event)
@@ -657,8 +658,8 @@ func (W _cogentcore_org_core_core_Treer) Copy()                         { W.WCop
 func (W _cogentcore_org_core_core_Treer) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Treer) Cut()                          { W.WCut() }
 func (W _cogentcore_org_core_core_Treer) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_core_Treer) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	W.WDirectRenderDraw(drw, idx, flipY)
+func (W _cogentcore_org_core_core_Treer) RenderDraw(drw system.Drawer, idx int, flipY bool) {
+	W.WRenderDraw(drw, idx, flipY)
 }
 func (W _cogentcore_org_core_core_Treer) DirectRenderImage(drw system.Drawer, idx int) {
 	W.WDirectRenderImage(drw, idx)
@@ -705,7 +706,7 @@ type _cogentcore_org_core_core_Value struct {
 	WContextMenuPos    func(e events.Event) image.Point
 	WCopyFieldsFrom    func(from tree.Node)
 	WDestroy           func()
-	WDirectRenderDraw  func(drw system.Drawer, idx int, flipY bool)
+	WRenderDraw        func(drw system.Drawer, idx int, flipY bool)
 	WDirectRenderImage func(drw system.Drawer, idx int)
 	WInit              func()
 	WNodeWalkDown      func(fun func(n tree.Node) bool)
@@ -734,8 +735,8 @@ func (W _cogentcore_org_core_core_Value) ContextMenuPos(e events.Event) image.Po
 }
 func (W _cogentcore_org_core_core_Value) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Value) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_core_Value) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	W.WDirectRenderDraw(drw, idx, flipY)
+func (W _cogentcore_org_core_core_Value) RenderDraw(drw system.Drawer, idx int, flipY bool) {
+	W.WRenderDraw(drw, idx, flipY)
 }
 func (W _cogentcore_org_core_core_Value) DirectRenderImage(drw system.Drawer, idx int) {
 	W.WDirectRenderImage(drw, idx)
@@ -787,7 +788,7 @@ type _cogentcore_org_core_core_Widget struct {
 	WContextMenuPos    func(e events.Event) image.Point
 	WCopyFieldsFrom    func(from tree.Node)
 	WDestroy           func()
-	WDirectRenderDraw  func(drw system.Drawer, idx int, flipY bool)
+	WRenderDraw        func(drw system.Drawer, idx int, flipY bool)
 	WDirectRenderImage func(drw system.Drawer, idx int)
 	WInit              func()
 	WNodeWalkDown      func(fun func(n tree.Node) bool)
@@ -815,8 +816,8 @@ func (W _cogentcore_org_core_core_Widget) ContextMenuPos(e events.Event) image.P
 }
 func (W _cogentcore_org_core_core_Widget) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Widget) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_core_Widget) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	W.WDirectRenderDraw(drw, idx, flipY)
+func (W _cogentcore_org_core_core_Widget) RenderDraw(drw system.Drawer, idx int, flipY bool) {
+	W.WRenderDraw(drw, idx, flipY)
 }
 func (W _cogentcore_org_core_core_Widget) DirectRenderImage(drw system.Drawer, idx int) {
 	W.WDirectRenderImage(drw, idx)

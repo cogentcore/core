@@ -11,12 +11,12 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
 
@@ -124,16 +124,6 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 		}
 		win.Close()
 	})
-
-	// drw := w.SystemWindow.Drawer()
-	// win.SystemWin.SetDestroyGPUResourcesFunc(func() {
-	// 	for _, ph := range win.Phongs {
-	// 		ph.Destroy()
-	// 	}
-	// 	for _, fr := range win.Frames {
-	// 		fr.Destroy()
-	// 	}
-	// })
 	return w
 }
 
@@ -338,9 +328,6 @@ func (w *renderWindow) closed() {
 		}
 		pfw.Raise()
 	}
-	// these are managed by the window itself
-	// w.Sprites.Reset()
-	// todo: delete the contents of the window here??
 }
 
 // isClosed reports if the window has been closed
@@ -601,14 +588,10 @@ func (rc *renderContext) String() string {
 	return str
 }
 
-func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int) {
-	op := draw.Over
-	if idx == 0 {
-		op = draw.Src
-	}
-	bb := sc.Pixels.Bounds()
+func (sc *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
 	unchanged := !sc.imageUpdated || sc.updating
-	drw.Copy(sc.sceneGeom.Pos, sc.Pixels, bb, op, unchanged)
+	drw.Copy(sc.sceneGeom.Pos, sc.Pixels, sc.Pixels.Bounds(), op, unchanged)
+	sc.imageUpdated = false
 }
 
 func (w *renderWindow) renderContext() *renderContext {
@@ -671,7 +654,6 @@ func (w *renderWindow) renderWindow() {
 	// first, find the top-level window:
 	winIndex := 0
 	var winScene *Scene
-	idx := 0
 	for i := n - 1; i >= 0; i-- {
 		st := sm.stack.ValueByIndex(i)
 		if st.Type == WindowStage {
@@ -679,12 +661,10 @@ func (w *renderWindow) renderWindow() {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}
 			winScene = st.Scene
-			winScene.DirectRenderDraw(drw, idx)
+			winScene.RenderDraw(drw, draw.Src) // first window blits
 			winIndex = i
-			idx++
 			for _, w := range st.Scene.directRenders {
-				w.DirectRenderDraw(drw, idx)
-				idx++
+				w.RenderDraw(drw, draw.Over)
 			}
 			break
 		}
@@ -694,11 +674,10 @@ func (w *renderWindow) renderWindow() {
 	for i := winIndex + 1; i < n; i++ {
 		st := sm.stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
-			// todo: just direct render the scrim here.
-			// drw.Copy(sc.sceneGeom.Pos, colors.ToUniform(colors.ApplyOpacity(colors.Scheme.Scrim, 0.5)), math32.Identity3(), sc.Geom.TotalBBox, draw.Over)
+			clr := colors.Uniform(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5))
+			drw.Copy(image.Point{}, clr, winScene.Geom.TotalBBox, draw.Over, system.Unchanged)
 		}
-		st.Scene.DirectRenderDraw(drw, idx)
-		idx++
+		st.Scene.RenderDraw(drw, draw.Over)
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
@@ -707,20 +686,17 @@ func (w *renderWindow) renderWindow() {
 	// then add the popups for the top main stage
 	for _, kv := range top.popups.stack.Order {
 		st := kv.Value
-		st.Scene.DirectRenderDraw(drw, idx)
-		idx++
+		st.Scene.RenderDraw(drw, draw.Over)
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
-	}
-	if top.Sprites.Modified {
-		top.Sprites.configSprites(drw)
 	}
 	top.Sprites.drawSprites(drw)
 	drw.End()
 }
 
 // fillInsets fills the window insets, if any, with [colors.Scheme.Background].
+// called within the overall drawer.Start() render pass.
 func (w *renderWindow) fillInsets() {
 	// render geom and window geom
 	rg := w.SystemWindow.RenderGeom()
@@ -732,50 +708,18 @@ func (w *renderWindow) fillInsets() {
 		return
 	}
 
-	/*
-		drw := w.SystemWindow.Drawer()
-		if !drw.StartFill() {
+	drw := w.SystemWindow.Drawer()
+	fill := func(x0, y0, x1, y1 int) {
+		r := image.Rect(x0, y0, x1, y1)
+		if r.Dx() == 0 || r.Dy() == 0 {
 			return
 		}
-
-		fill := func(x0, y0, x1, y1 int) {
-			r := image.Rect(x0, y0, x1, y1)
-			if r.Dx() == 0 || r.Dy() == 0 {
-				return
-			}
-			drw.Fill(colors.ToUniform(colors.Scheme.Background), math32.Identity3(), r, draw.Src)
-		}
-		rb := rg.Bounds()
-		wb := wg.Bounds()
-		fill(0, 0, wb.Max.X, rb.Min.Y)        // top
-		fill(0, rb.Max.Y, wb.Max.X, wb.Max.Y) // bottom
-		fill(rb.Max.X, 0, wb.Max.X, wb.Max.Y) // right
-		fill(0, 0, rb.Min.X, wb.Max.Y)        // left
-
-		drw.EndFill()
-	*/
-}
-
-// A scrim is just a dummy Widget used for rendering a scrim.
-// Only used for its type. Everything else managed by [renderWindow].
-type scrim struct { //core:no-new
-	WidgetBase
-}
-
-// newScrim creates a new [scrim] for use in rendering.
-// It does not actually add the Scrim to the Scene,
-// just sets its pointers.
-func newScrim(sc *Scene) *scrim {
-	sr := tree.New[scrim]() // critical to not add to scene!
-	tree.SetParent(sr, sc)
-	return sr
-}
-
-func (sr *scrim) DirectRenderImage(drw system.Drawer, idx int) {
-	// no-op
-}
-
-func (sr *scrim) DirectRenderDraw(drw system.Drawer, idx int) {
-	// sc := sr.Parent.(*Scene)
-	// drw.Copy(sc.sceneGeom.Pos, colors.ToUniform(colors.ApplyOpacity(colors.Scheme.Scrim, 0.5)), math32.Identity3(), sc.Geom.TotalBBox, draw.Over)
+		drw.Copy(image.Point{}, colors.Scheme.Background, r, draw.Src, system.Unchanged)
+	}
+	rb := rg.Bounds()
+	wb := wg.Bounds()
+	fill(0, 0, wb.Max.X, rb.Min.Y)        // top
+	fill(0, rb.Max.Y, wb.Max.X, wb.Max.Y) // bottom
+	fill(rb.Max.X, 0, wb.Max.X, wb.Max.Y) // right
+	fill(0, 0, rb.Min.X, wb.Max.Y)        // left
 }

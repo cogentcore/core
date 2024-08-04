@@ -11,6 +11,16 @@ import (
 	"cogentcore.org/core/math32"
 )
 
+const (
+	// Unchanged should be used for the unchanged argument in drawer calls,
+	// when the caller knows that the image is unchanged.
+	Unchanged = true
+
+	// Changed should be used for the unchanged argument to drawer calls,
+	// when the image has changed since last time or its status is unknown
+	Changed
+)
+
 // Drawer is an interface for image/draw style image compositing
 // functionality, which is implemented for the GPU in
 // [*cogentcore.org/core/gpu/gpudraw.Drawer] and in offscreen drivers.
@@ -43,19 +53,22 @@ type Drawer interface {
 
 	// Scale copies the given Go source image to the render target,
 	// scaling the region defined by src and sr to the destination
-	// such that sr in src-space is mapped to dr in dst-space.
-	// with the same semantics as golang.org/x/image/draw.Scale, with the
+	// such that sr in src-space is mapped to dr in dst-space,
+	// and applying an optional rotation of the source image.
+	// Has the same general semantics as golang.org/x/image/draw.Scale, with the
 	// destination implicit in the Drawer target.
 	// If src image is an
 	//   - Must have called Start first!
 	//   - dr is the destination rectangle; if zero uses full dest image.
 	//   - src is the source image. Uniform does not work (or make sense) here.
 	//   - sr is the source region, if zero full src is used; must have for Uniform.
+	//   - rotateDeg = rotation degrees to apply in the mapping:
+	//     90 = left, -90 = right, 180 = invert.
 	//   - op is the drawing operation: Src = copy source directly (blit),
 	//     Over = alpha blend with existing.
 	//   - unchanged should be true if caller knows that this image is unchanged
 	//     from the last time it was used -- saves re-uploading to gpu.
-	Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool)
+	Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, rotateDeg float32, op draw.Op, unchanged bool)
 
 	// Transform copies the given Go source image to the render target,
 	// with the same semantics as golang.org/x/image/draw.Transform, with the
@@ -98,19 +111,22 @@ func (dw *DrawerBase) Copy(dp image.Point, src image.Image, sr image.Rectangle, 
 
 // Scale copies the given Go source image to the render target,
 // scaling the region defined by src and sr to the destination
-// such that sr in src-space is mapped to dr in dst-space.
-// with the same semantics as golang.org/x/image/draw.Scale, with the
+// such that sr in src-space is mapped to dr in dst-space,
+// and applying an optional rotation of the source image.
+// Has the same general semantics as golang.org/x/image/draw.Scale, with the
 // destination implicit in the Drawer target.
 // If src image is an
 //   - Must have called Start first!
 //   - dr is the destination rectangle; if zero uses full dest image.
 //   - src is the source image. Uniform does not work (or make sense) here.
 //   - sr is the source region, if zero full src is used; must have for Uniform.
+//   - rotateDeg = rotation degrees to apply in the mapping:
+//     90 = left, -90 = right, 180 = invert.
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
 //   - unchanged should be true if caller knows that this image is unchanged
 //     from the last time it was used -- saves re-uploading to gpu.
-func (dw *DrawerBase) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool) {
+func (dw *DrawerBase) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, rotateDeg float32, op draw.Op, unchanged bool) {
 	// todo: use drawmatrix and x/image to implement scale.
 	draw.Draw(dw.Image, dr, src, sr.Min, op)
 }

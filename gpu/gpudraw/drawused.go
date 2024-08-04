@@ -5,7 +5,6 @@
 package gpudraw
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
 
@@ -24,7 +23,6 @@ func (dw *Drawer) UseGoImage(img image.Image, unchanged bool) {
 	dw.curImageSize = img.Bounds().Size()
 	idx, exists := dw.images.use(img)
 	if exists && unchanged {
-		fmt.Println("unchanged:", idx) // todo: not getting this when should
 		return
 	}
 	tvr := dw.Sys.Vars.VarByName(1, "TexSampler")
@@ -83,19 +81,19 @@ func (dw *Drawer) CopyUsed(dp image.Point, sr image.Rectangle, op draw.Op, flipY
 // Must have called Start and a Use* method first!
 //   - dr is the destination rectangle; if zero uses full dest image.
 //   - sr is the source region; if zero uses full src image.
+//   - rotateDeg = rotation degrees to apply in the mapping:
+//     90 = left, -90 = right, 180 = invert.
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
 //   - flipY = flipY axis when drawing this image.
-//   - rotDeg = rotation degrees to apply in the mapping:
-//     90 = left, -90 = right, 180 = invert.
-func (dw *Drawer) ScaleUsed(dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool, rotDeg float32) {
+func (dw *Drawer) ScaleUsed(dr image.Rectangle, sr image.Rectangle, rotateDeg float32, op draw.Op, flipY bool) {
 	if dr == (image.Rectangle{}) {
 		dr.Max = dw.DestSize()
 	}
 	if sr == (image.Rectangle{}) {
 		sr.Max = dw.curImageSize
 	}
-	dw.TransformUsed(drawmatrix.Transform(dr, sr, rotDeg), sr, op, flipY)
+	dw.TransformUsed(drawmatrix.Transform(dr, sr, rotateDeg), sr, op, flipY)
 }
 
 // TransformUsed draws the current Use* texture to render target

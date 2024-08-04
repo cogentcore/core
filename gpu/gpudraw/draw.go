@@ -49,21 +49,24 @@ func (dw *Drawer) Copy(dp image.Point, src image.Image, sr image.Rectangle, op d
 
 // Scale copies the given Go source image to the render target,
 // scaling the region defined by src and sr to the destination
-// such that sr in src-space is mapped to dr in dst-space.
-// with the same semantics as golang.org/x/image/draw.Scale, with the
+// such that sr in src-space is mapped to dr in dst-space,
+// and applying an optional rotation of the source image.
+// Has the same general semantics as golang.org/x/image/draw.Scale, with the
 // destination implicit in the Drawer target.
 // If src image is an
 //   - Must have called Start first!
 //   - dr is the destination rectangle; if zero uses full dest image.
 //   - src is the source image. Uniform does not work (or make sense) here.
 //   - sr is the source region, if zero full src is used; must have for Uniform.
+//   - rotateDeg = rotation degrees to apply in the mapping:
+//     90 = left, -90 = right, 180 = invert.
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
 //   - unchanged should be true if caller knows that this image is unchanged
 //     from the last time it was used -- saves re-uploading to gpu.
-func (dw *Drawer) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool) {
+func (dw *Drawer) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, rotateDeg float32, op draw.Op, unchanged bool) {
 	dw.UseGoImage(src, unchanged)
-	dw.ScaleUsed(dr, sr, op, false, 0)
+	dw.ScaleUsed(dr, sr, rotateDeg, op, false)
 }
 
 // Transform copies the given Go source image to the render target,

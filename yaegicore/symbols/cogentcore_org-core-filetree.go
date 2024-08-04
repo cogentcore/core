@@ -3,14 +3,15 @@
 package symbols
 
 import (
+	"image"
+	"reflect"
+
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/filetree"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"image"
-	"reflect"
 )
 
 func init() {
@@ -65,7 +66,7 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WCopyFieldsFrom    func(from tree.Node)
 	WCut               func()
 	WDestroy           func()
-	WDirectRenderDraw  func(drw system.Drawer, idx int, flipY bool)
+	WRenderDraw        func(drw system.Drawer, idx int, flipY bool)
 	WDirectRenderImage func(drw system.Drawer, idx int)
 	WDragDrop          func(e events.Event)
 	WDropDeleteSource  func(e events.Event)
@@ -105,8 +106,8 @@ func (W _cogentcore_org_core_filetree_Filer) Copy()                         { W.
 func (W _cogentcore_org_core_filetree_Filer) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_filetree_Filer) Cut()                          { W.WCut() }
 func (W _cogentcore_org_core_filetree_Filer) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_filetree_Filer) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	W.WDirectRenderDraw(drw, idx, flipY)
+func (W _cogentcore_org_core_filetree_Filer) RenderDraw(drw system.Drawer, idx int, flipY bool) {
+	W.WRenderDraw(drw, idx, flipY)
 }
 func (W _cogentcore_org_core_filetree_Filer) DirectRenderImage(drw system.Drawer, idx int) {
 	W.WDirectRenderImage(drw, idx)

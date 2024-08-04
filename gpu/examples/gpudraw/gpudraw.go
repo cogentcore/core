@@ -67,15 +67,15 @@ func main() {
 
 	rendImgs := func(idx int) {
 		drw.Start()
-		drw.Scale(image.Rectangle{}, imgs[idx], image.Rectangle{}, gpudraw.Src, true)
+		drw.Scale(image.Rectangle{}, imgs[idx], image.Rectangle{}, 0, gpudraw.Src, gpudraw.Unchanged)
 		for i := range imgFiles {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
 			dp := image.Point{i * 50, i * 50}
-			drw.Copy(dp, imgs[i], image.Rectangle{}, gpudraw.Src, true)
+			drw.Copy(dp, imgs[i], image.Rectangle{}, gpudraw.Src, gpudraw.Unchanged)
 		}
 		for i := range iconFiles {
 			dp := image.Point{rand.Intn(500), rand.Intn(500)}
-			drw.Copy(dp, iconImgs[i], image.Rectangle{}, gpudraw.Over, true)
+			drw.Copy(dp, iconImgs[i], image.Rectangle{}, gpudraw.Over, gpudraw.Unchanged)
 		}
 		drw.End()
 	}

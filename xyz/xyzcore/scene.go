@@ -135,8 +135,8 @@ func (sw *Scene) DirectRenderImage(drw system.Drawer, idx int) {
 	drw.SetFrameImage(idx, sw.XYZ.Frame.Frames[0])
 }
 
-// DirectRenderDraw draws the current image to RenderWindow drawer
-func (sw *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
+// RenderDraw draws the current image to RenderWindow drawer
+func (sw *Scene) RenderDraw(drw system.Drawer, idx int, flipY bool) {
 	if !sw.IsVisible() {
 		return
 	}
