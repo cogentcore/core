@@ -119,10 +119,7 @@ func main() {
 	camo.View.CopyFrom(view)
 	aspect := float32(sf.Format.Size.X) / float32(sf.Format.Size.Y)
 	fmt.Printf("aspect: %g\n", aspect)
-	// VkPerspective version automatically flips Y axis and shifts depth
-	// into a 0..1 range instead of -1..1, so original GL based geometry
-	// will render identically here.
-	camo.Projection.SetVkPerspective(45, aspect, 0.01, 100)
+	camo.Projection.SetPerspective(45, aspect, 0.01, 100)
 	gpu.SetValueFrom(cam, []CamView{camo}) // note: always use slice to copy
 
 	frameCount := 0
