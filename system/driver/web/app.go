@@ -20,8 +20,6 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gpu"
-	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
@@ -45,18 +43,16 @@ func Init() {
 		}
 	}
 
-	TheApp.InitGPU()
 	TheApp.SetSystemWindow()
-
 	base.Init(TheApp, &TheApp.App)
 }
 
 // TheApp is the single [system.App] for the web platform
-var TheApp = &App{AppSingle: base.NewAppSingle[*gpudraw.Drawer, *Window]()}
+var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
 
 // App is the [system.App] implementation for the web platform
 type App struct {
-	base.AppSingle[*gpudraw.Drawer, *Window]
+	base.AppSingle[*Drawer, *Window]
 
 	// UnderlyingPlatform is the underlying system platform (Android, iOS, etc)
 	UnderlyingPlatform system.Platforms
@@ -89,7 +85,7 @@ func (a *App) SetSystemWindow() {
 	a.UnderlyingPlatform = UserAgentToOS(ua)
 
 	a.Resize()
-	a.InitGPU()
+	a.InitDrawer()
 	a.Event.Window(events.WinShow)
 	a.Event.Window(events.ScreenUpdate)
 	a.Event.Window(events.WinFocus)
@@ -155,15 +151,6 @@ func (a *App) Resize() {
 	// a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize}) TODO(wgpu)
 
 	a.Event.WindowResize()
-}
-
-// InitGPU initializes the gpu drawer for the app.
-func (a *App) InitGPU() {
-	gp := gpu.NewGPU()
-	gp.Config(a.Name())
-	surf := gp.Instance.CreateSurface(nil)
-	sf := gpu.NewSurface(gp, surf, a.Scrn.PixSize.X, a.Scrn.PixSize.Y)
-	a.Draw = gpudraw.NewDrawerSurface(sf)
 }
 
 func (a *App) DataDir() string {

@@ -12,6 +12,7 @@ import (
 	"syscall/js"
 	"unsafe"
 
+	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
@@ -25,6 +26,21 @@ type Drawer struct {
 
 	// base is used for the backup 2D image drawer.
 	base *system.DrawerBase
+}
+
+// InitDrawer sets the [Drawer] to either a WebGPU-based drawer
+// or a backup 2D image drawer based on whether the browser supports WebGPU.
+func (a *App) InitDrawer() {
+	a.Draw = &Drawer{}
+	if js.Global().Get("navigator").Get("gpu").Truthy() {
+		gp := gpu.NewGPU()
+		gp.Config(a.Name())
+		surf := gp.Instance.CreateSurface(nil)
+		sf := gpu.NewSurface(gp, surf, a.Scrn.PixSize.X, a.Scrn.PixSize.Y)
+		a.Draw.wgpu = gpudraw.NewDrawerSurface(sf)
+		return
+	}
+	a.Draw.base = &system.DrawerBase{}
 }
 
 var loader = js.Global().Get("document").Call("getElementById", "app-wasm-loader")
@@ -84,4 +100,11 @@ func (dw *Drawer) Transform(xform math32.Matrix3, src image.Image, sr image.Rect
 		return
 	}
 	dw.base.Transform(xform, src, sr, op, unchanged)
+}
+
+func (dw *Drawer) Surface() any {
+	if dw.wgpu != nil {
+		return dw.wgpu.Surface()
+	}
+	return nil
 }
