@@ -25,9 +25,8 @@ func GLFWCreateWindow(gp *GPU, width, height int, title string, resize *func(wid
 	getSize := func() (w, h int) {
 		w, h = vv.Get("width").Int(), vv.Get("height").Int()
 		canvas := js.Global().Get("document").Call("querySelector", "canvas")
-		dpr := js.Global().Get("devicePixelRatio").Float()
-		canvas.Set("width", float64(w)/dpr)
-		canvas.Set("height", float64(h)/dpr)
+		canvas.Set("width", w)
+		canvas.Set("height", h)
 		return
 	}
 	vv.Call("addEventListener", "resize", js.FuncOf(func(this js.Value, args []js.Value) any {
