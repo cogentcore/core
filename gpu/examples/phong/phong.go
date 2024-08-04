@@ -42,7 +42,7 @@ func main() {
 
 	var resize func(width, height int)
 	width, height := 1024, 768
-	sp, terminate, pollEvents, err := gpu.GLFWCreateWindow(gp, width, height, "Phong", &resize)
+	sp, terminate, pollEvents, width, height, err := gpu.GLFWCreateWindow(gp, width, height, "Phong", &resize)
 	if err != nil {
 		return
 	}
