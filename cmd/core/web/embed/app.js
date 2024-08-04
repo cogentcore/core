@@ -178,32 +178,6 @@ function displayImage(pointer, length, w, h) {
 }
 
 // -----------------------------------------------------------------------------
-// Keep Clean Body
-// -----------------------------------------------------------------------------
-function appKeepBodyClean() {
-  const body = document.body;
-  const bodyChildrenCount = body.children.length;
-
-  const mutationObserver = new MutationObserver(function (mutationList) {
-    mutationList.forEach((mutation) => {
-      switch (mutation.type) {
-        case "childList":
-          while (body.children.length > bodyChildrenCount) {
-            body.removeChild(body.lastChild);
-          }
-          break;
-      }
-    });
-  });
-
-  mutationObserver.observe(document.body, {
-    childList: true,
-  });
-
-  return () => mutationObserver.disconnect();
-}
-
-// -----------------------------------------------------------------------------
 // Web Assembly
 // -----------------------------------------------------------------------------
 
