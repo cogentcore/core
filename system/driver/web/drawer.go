@@ -4,6 +4,8 @@
 
 //go:build js
 
+// TODO(wgpu)
+
 package web
 
 import (

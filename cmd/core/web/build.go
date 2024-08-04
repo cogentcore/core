@@ -104,10 +104,12 @@ func makeFiles(c *config.Config) error {
 		return err
 	}
 
-	preRenderHTML, err := exec.Output("go", "run", "-tags", "offscreen,generatehtml", ".")
-	if err != nil {
-		return err
-	}
+	// TODO(wgpu):
+	// preRenderHTML, err := exec.Output("go", "run", "-tags", "offscreen,generatehtml", ".")
+	// if err != nil {
+	// 	return err
+	// }
+	preRenderHTML := ""
 	preRenderHTMLIndex := preRenderHTML
 	pagesPreRenderData := &ppath.PreRenderData{}
 	if strings.HasPrefix(preRenderHTML, "{") {

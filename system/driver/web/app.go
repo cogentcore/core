@@ -20,6 +20,8 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
@@ -28,8 +30,6 @@ import (
 )
 
 func Init() {
-	TheApp.Draw = &Drawer{}
-
 	err := os.Setenv("HOME", "/home/me")
 	if err != nil {
 		slog.Error("error setting home directory", "err", err)
@@ -45,23 +45,32 @@ func Init() {
 		}
 	}
 
+	TheApp.InitGPU()
 	TheApp.SetSystemWindow()
 
 	base.Init(TheApp, &TheApp.App)
 }
 
 // TheApp is the single [system.App] for the web platform
-var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
+var TheApp = &App{AppSingle: base.NewAppSingle[*gpudraw.Drawer, *Window]()}
 
 // App is the [system.App] implementation for the web platform
 type App struct {
-	base.AppSingle[*Drawer, *Window]
+	base.AppSingle[*gpudraw.Drawer, *Window]
 
 	// UnderlyingPlatform is the underlying system platform (Android, iOS, etc)
 	UnderlyingPlatform system.Platforms
 
 	// KeyMods are the current key mods
 	KeyMods key.Modifiers
+}
+
+func (a *App) InitGPU() {
+	gp := gpu.NewGPU()
+	gp.Config(a.Name())
+	surf := gp.Instance.CreateSurface(nil)
+	sf := gpu.NewSurface(gp, surf, 2220, 1984) // TODO(wgpu)
+	a.Draw = gpudraw.NewDrawerSurface(sf)
 }
 
 // NewWindow creates a new window with the given options.
@@ -150,7 +159,7 @@ func (a *App) Resize() {
 	cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.X)/a.Scrn.DevicePixelRatio))
 	cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.Y)/a.Scrn.DevicePixelRatio))
 
-	a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
+	// a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
 
 	a.Event.WindowResize()
 }
