@@ -46,6 +46,11 @@ func main() {
 		// we are creating an additional rendering system here.
 		sf = w.Drawer().Surface().(*gpu.Surface)
 		sy = sf.GPU.NewGraphicsSystem("drawtri", sf.Device)
+		destroy := func() {
+			sy.Release()
+		}
+		w.SetDestroyGPUResourcesFunc(destroy)
+
 		pl = sy.AddGraphicsPipeline("drawtri")
 		sy.ConfigRender(&sf.Format, gpu.UndefType, sf)
 		pl.SetFrontFace(wgpu.FrontFaceCW)
@@ -56,10 +61,6 @@ func main() {
 		pl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
 		sy.Config()
-		destroy := func() {
-			sy.Release()
-		}
-		w.SetDestroyGPUResourcesFunc(destroy)
 
 		fmt.Println("made and configured pipelines")
 	}
@@ -89,6 +90,7 @@ func main() {
 		sf.Present()
 		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
+
 		frameCount++
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
