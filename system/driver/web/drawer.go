@@ -26,12 +26,17 @@ type Drawer struct {
 
 	// base is used for the backup 2D image drawer.
 	base system.DrawerBase
+
+	// context2D is the 2D rendering context of the canvas
+	// for the backup 2D image drawer.
+	context2D js.Value
 }
 
-// InitDrawer sets the [Drawer] to a WebGPU-based drawer
-// if the browser supports WebGPU.
+// InitDrawer sets the [Drawer] to a WebGPU-based drawer if the browser
+// supports WebGPU and a backup 2D image drawer otherwise.
 func (a *App) InitDrawer() {
 	if !js.Global().Get("navigator").Get("gpu").Truthy() {
+		a.Draw.context2D = js.Global().Get("document").Call("querySelector", "canvas").Call("getContext", "2d")
 		return
 	}
 	gp := gpu.NewGPU()
