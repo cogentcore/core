@@ -103,8 +103,17 @@ func TestDrawMatrix(t *testing.T) {
 		float32(dp.X - sr.Min.X), float32(dp.Y - sr.Min.Y), 1,
 	}
 	tmat := Config(destSz, mat, sr.Max, sr, false)
-	// fmt.Println("draw:")
 	pts := DrawFromMatrixMVP4(&tmat.MVP)
 	dr := sr.Add(dp)
+	CompareRect(t, pts, dr)
+}
+
+func TestScaleMatrix(t *testing.T) {
+	sr := image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{190, 280}}
+	destSz := image.Point{1000, 500}
+	dr := image.Rectangle{Max: destSz}
+	mat := Transform(dr, sr, 0)
+	tmat := Config(destSz, mat, sr.Max, sr, false)
+	pts := DrawFromMatrixMVP4(&tmat.MVP)
 	CompareRect(t, pts, dr)
 }
