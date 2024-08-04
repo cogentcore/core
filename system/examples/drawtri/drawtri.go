@@ -47,7 +47,7 @@ func main() {
 		sf = w.Drawer().Surface().(*gpu.Surface)
 		sy = sf.GPU.NewGraphicsSystem("drawtri", sf.Device)
 		pl = sy.AddGraphicsPipeline("drawtri")
-		sy.ConfigRender(&sf.Format, gpu.UndefType)
+		sy.ConfigRender(&sf.Format, gpu.UndefType, sf)
 		pl.SetFrontFace(wgpu.FrontFaceCW)
 
 		sh := pl.AddShader("trianglelit")
@@ -85,7 +85,7 @@ func main() {
 		pl.BindPipeline(rp)
 		rp.Draw(3, 1, 0, 0)
 		rp.End()
-		sf.SubmitRender(cmd) // this is where it waits for the 16 msec
+		sf.SubmitRender(rp, cmd) // this is where it waits for the 16 msec
 		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++
