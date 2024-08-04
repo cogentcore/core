@@ -83,7 +83,7 @@ type Drawer interface {
 	Transform(xform math32.Matrix3, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool)
 
 	// Surface is the gpu device being drawn to.
-	// Could be nil on unsupported devices (web).
+	// Could be nil on unsupported devices (such as offscreen).
 	Surface() any
 }
 
