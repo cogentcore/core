@@ -12,9 +12,14 @@ import (
 	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
+func init() {
+	// Needs immediate clean quit for generatehtml;
+	// otherwise, the app will hang forever.
+	os.Exit(0)
+}
+
 // GLFWCreateWindow is a helper function intended only for use in simple examples that makes a
 // new window with glfw on platforms that support it and is largely a no-op on other platforms.
 func GLFWCreateWindow(gp *GPU, width, height int, title string) (surface *wgpu.Surface, terminate func(), pollEvents func() bool, err error) {
-	os.Exit(0) // TODO: needs clean quit for generatehtml; is there any better solution?
 	return
 }
