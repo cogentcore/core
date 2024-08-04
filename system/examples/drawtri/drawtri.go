@@ -86,6 +86,7 @@ func main() {
 		rp.Draw(3, 1, 0, 0)
 		rp.End()
 		sf.SubmitRender(rp, cmd) // this is where it waits for the 16 msec
+		sf.Present()
 		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++
