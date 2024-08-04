@@ -12,7 +12,6 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -131,10 +130,7 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 		win.Close()
 	})
 
-	drw := w.SystemWindow.Drawer()
-	drw.SetMaxTextures(system.MaxTexturesPerSet * 3)       // use 3 sets
-	w.renderScenes.maxIndex = system.MaxTexturesPerSet * 2 // reserve last for sprites
-
+	// drw := w.SystemWindow.Drawer()
 	// win.SystemWin.SetDestroyGPUResourcesFunc(func() {
 	// 	for _, ph := range win.Phongs {
 	// 		ph.Destroy()
@@ -268,8 +264,7 @@ func (w *renderWindow) resized() {
 		return
 	}
 
-	drw := w.SystemWindow.Drawer()
-
+	// drw := w.SystemWindow.Drawer()
 	rg := w.SystemWindow.RenderGeom()
 
 	curRg := rc.geom
@@ -283,9 +278,6 @@ func (w *renderWindow) resized() {
 			sc.applyStyleScene()
 		}
 		return
-	}
-	if drw.MaxTextures() != system.MaxTexturesPerSet*3 { // this is essential after hibernate
-		drw.SetMaxTextures(system.MaxTexturesPerSet * 3) // use 3 sets
 	}
 	// w.FocusInactivate()
 	// w.InactivateAllSprites()
@@ -530,12 +522,6 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 /////////////////////////////////////////////////////////////////////////////
 //                   Rendering
 
-const (
-	// Sprites are stored as arrays of same-sized textures,
-	// allocated by size in Set 2, starting at 32
-	spriteStart = system.MaxTexturesPerSet * 2
-)
-
 // renderParams are the key [renderWindow] params that determine if
 // a scene needs to be restyled since last render, if these params change.
 type renderParams struct {
@@ -656,10 +642,10 @@ func (rs *renderScenes) add(w Widget, scIndex map[Widget]int) int {
 		return -1
 	}
 	idx := len(rs.scenes)
-	if idx >= rs.maxIndex {
-		slog.Error("RenderScenes: too many Scenes to render all of them!", "max", rs.maxIndex)
-		return -1
-	}
+	// if idx >= rs.maxIndex {
+	// 	slog.Error("RenderScenes: too many Scenes to render all of them!", "max", rs.maxIndex)
+	// 	return -1
+	// }
 	if prvIndex, has := rs.sceneIndex[w]; has {
 		if prvIndex != idx {
 			sc.imageUpdated = true // need to copy b/c cur has diff image
@@ -680,7 +666,8 @@ func (rs *renderScenes) setImages(drw system.Drawer) {
 		}
 	}
 	var skipScene *Scene
-	for i, w := range rs.scenes {
+	_ = skipScene
+	for _, w := range rs.scenes {
 		sc := w.AsWidget().Scene
 		_, isSc := w.(*Scene)
 		if isSc && (sc.updating || !sc.imageUpdated) {
@@ -698,40 +685,30 @@ func (rs *renderScenes) setImages(drw system.Drawer) {
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("RenderScenes.SetImages:", sc.Name)
 		}
-		if isSc || sc != skipScene {
-			w.DirectRenderImage(drw, i)
-		}
+		// if isSc || sc != skipScene {
+		// 	w.DirectRenderImage(drw, i)
+		// }
 	}
 }
 
 // drawAll does drw.Copy drawing call for all Scenes,
 // using proper TextureSet for each of system.MaxTexturesPerSet Scenes.
 func (rs *renderScenes) drawAll(drw system.Drawer) {
-	nPerSet := system.MaxTexturesPerSet
 	if len(rs.scenes) == 0 {
 		return
 	}
 	for i, w := range rs.scenes {
-		set := i / nPerSet
-		if i%nPerSet == 0 && set > 0 {
-			drw.UseTextureSet(set)
-		}
-		w.DirectRenderDraw(drw, i, rs.flipY)
+		w.DirectRenderDraw(drw, i)
 	}
 }
 
-func (sc *Scene) DirectRenderImage(drw system.Drawer, idx int) {
-	drw.SetGoImage(idx, 0, sc.Pixels, system.NoFlipY)
-	sc.imageUpdated = false
-}
-
-func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
+func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int) {
 	op := draw.Over
 	if idx == 0 {
 		op = draw.Src
 	}
 	bb := sc.Pixels.Bounds()
-	drw.Copy(idx, 0, sc.sceneGeom.Pos, bb, op, flipY)
+	drw.Copy(sc.sceneGeom.Pos, sc.Pixels, bb, op)
 }
 
 func (w *renderWindow) renderContext() *renderContext {
@@ -806,18 +783,11 @@ func (w *renderWindow) drawScenes() {
 		top.Sprites.configSprites(drw)
 	}
 
-	drw.SyncImages()
 	w.fillInsets()
-	if !drw.StartDraw(0) {
-		return
-	}
-	drw.UseTextureSet(0)
+	drw.Start()
 	rs.drawAll(drw)
-
-	drw.UseTextureSet(2)
 	top.Sprites.drawSprites(drw)
-
-	drw.EndDraw()
+	drw.End()
 
 	// pr.End()
 }
@@ -834,26 +804,28 @@ func (w *renderWindow) fillInsets() {
 		return
 	}
 
-	drw := w.SystemWindow.Drawer()
-	if !drw.StartFill() {
-		return
-	}
-
-	fill := func(x0, y0, x1, y1 int) {
-		r := image.Rect(x0, y0, x1, y1)
-		if r.Dx() == 0 || r.Dy() == 0 {
+	/*
+		drw := w.SystemWindow.Drawer()
+		if !drw.StartFill() {
 			return
 		}
-		drw.Fill(colors.ToUniform(colors.Scheme.Background), math32.Identity3(), r, draw.Src)
-	}
-	rb := rg.Bounds()
-	wb := wg.Bounds()
-	fill(0, 0, wb.Max.X, rb.Min.Y)        // top
-	fill(0, rb.Max.Y, wb.Max.X, wb.Max.Y) // bottom
-	fill(rb.Max.X, 0, wb.Max.X, wb.Max.Y) // right
-	fill(0, 0, rb.Min.X, wb.Max.Y)        // left
 
-	drw.EndFill()
+		fill := func(x0, y0, x1, y1 int) {
+			r := image.Rect(x0, y0, x1, y1)
+			if r.Dx() == 0 || r.Dy() == 0 {
+				return
+			}
+			drw.Fill(colors.ToUniform(colors.Scheme.Background), math32.Identity3(), r, draw.Src)
+		}
+		rb := rg.Bounds()
+		wb := wg.Bounds()
+		fill(0, 0, wb.Max.X, rb.Min.Y)        // top
+		fill(0, rb.Max.Y, wb.Max.X, wb.Max.Y) // bottom
+		fill(rb.Max.X, 0, wb.Max.X, wb.Max.Y) // right
+		fill(0, 0, rb.Min.X, wb.Max.Y)        // left
+
+		drw.EndFill()
+	*/
 }
 
 // gatherScenes finds all the Scene elements that drive rendering
@@ -935,7 +907,7 @@ func (sr *scrim) DirectRenderImage(drw system.Drawer, idx int) {
 	// no-op
 }
 
-func (sr *scrim) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	sc := sr.Parent.(*Scene)
-	drw.Fill(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5), math32.Identity3(), sc.Geom.TotalBBox, draw.Over)
+func (sr *scrim) DirectRenderDraw(drw system.Drawer, idx int) {
+	// sc := sr.Parent.(*Scene)
+	// drw.Copy(sc.sceneGeom.Pos, colors.ToUniform(colors.ApplyOpacity(colors.Scheme.Scrim, 0.5)), math32.Identity3(), sc.Geom.TotalBBox, draw.Over)
 }

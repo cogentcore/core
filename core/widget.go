@@ -126,16 +126,9 @@ type Widget interface {
 	// specifically for the child (e.g., for zebra stripes in [ListGrid]).
 	ChildBackground(child Widget) image.Image
 
-	// DirectRenderImage uploads image directly into given system.Drawer at given index
-	// Typically this is a drw.SetGoImage call with an [image.RGBA], or
-	// drw.SetFrameImage with a [vgpu.FrameBuffer]
-	DirectRenderImage(drw system.Drawer, idx int)
-
-	// DirectRenderDraw draws the current image at index onto the RenderWindow window,
-	// typically using drw.Copy, drw.Scale, or drw.Fill.
-	// flipY is the default setting for whether the Y axis needs to be flipped during drawing,
-	// which is typically passed along to the Copy or Scale methods.
-	DirectRenderDraw(drw system.Drawer, idx int, flipY bool)
+	// DirectRenderDraw draws the current image onto the RenderWindow window,
+	// typically using drw.Copy or drw.Scale.
+	DirectRenderDraw(drw system.Drawer, idx int)
 }
 
 // WidgetBase implements the [Widget] interface and provides the core functionality
@@ -398,10 +391,8 @@ func (wb *WidgetBase) IsVisible() bool {
 func (wb *WidgetBase) DirectRenderImage(drw system.Drawer, idx int) {}
 
 // DirectRenderDraw draws the current image at index onto the RenderWindow window,
-// typically using drw.Copy, drw.Scale, or drw.Fill.
-// flipY is the default setting for whether the Y axis needs to be flipped during drawing,
-// which is typically passed along to the Copy or Scale methods.
-func (wb *WidgetBase) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {}
+// typically using drw.Copy, drw.Scale.
+func (wb *WidgetBase) DirectRenderDraw(drw system.Drawer, idx int) {}
 
 // NodeWalkDown extends [tree.Node.WalkDown] to [WidgetBase.Parts],
 // which is key for getting full tree traversal to work when updating,

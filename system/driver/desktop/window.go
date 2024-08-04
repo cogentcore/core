@@ -14,11 +14,11 @@ import (
 	"log"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
 // Window is the implementation of [system.Window] for the desktop platform.
@@ -306,7 +306,7 @@ func (w *Window) Close() {
 			w.DestroyGPUFunc()
 		}
 		w.Draw.Release()
-		w.Draw.Surface().(*wgpu.Surface).Release()
+		w.Draw.Surface().(*gpu.Surface).Release()
 		w.Glw.Destroy()
 		w.Glw = nil // marks as closed for all other calls
 		w.Draw = nil

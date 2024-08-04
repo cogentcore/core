@@ -5,7 +5,6 @@
 package core
 
 import (
-	"fmt"
 	"image"
 
 	"cogentcore.org/core/base/ordmap"
@@ -178,7 +177,7 @@ func (ss *Sprites) allocSizes() {
 	if idx != ns {
 		szs = szs[:idx]
 	}
-	ss.szAlloc.SetSizes(image.Point{4, 4}, system.MaxImageLayers, szs)
+	ss.szAlloc.SetSizes(image.Point{4, 4}, 128, szs) // todo:
 	ss.szAlloc.Alloc()
 }
 
@@ -238,40 +237,42 @@ func (ss *Sprites) InactivateSprite(name string) {
 // Does a new SzAlloc, and sets corresponding images.
 func (ss *Sprites) configSprites(drw system.Drawer) {
 	// fmt.Println("config sprites")
-	ss.allocSizes()
-	sa := &ss.szAlloc
-	for gpi, ga := range sa.GpAllocs {
-		gsz := sa.GpSizes[gpi]
-		imgidx := spriteStart + gpi
-		drw.ConfigImageDefaultFormat(imgidx, gsz.X, gsz.Y, len(ga))
-		for ii, spi := range ga {
-			if err := ss.Names.IndexIsValid(spi); err != nil {
-				fmt.Println(err)
-				continue
-			}
-			sp := ss.Names.ValueByIndex(spi)
-			drw.SetGoImage(imgidx, ii, sp.Pixels, system.NoFlipY)
-		}
-	}
+	// todo:
+	// ss.allocSizes()
+	// sa := &ss.szAlloc
+	// for gpi, ga := range sa.GpAllocs {
+	// 	gsz := sa.GpSizes[gpi]
+	// 	imgidx := spriteStart + gpi
+	// 	drw.ConfigImageDefaultFormat(imgidx, gsz.X, gsz.Y, len(ga))
+	// 	for ii, spi := range ga {
+	// 		if err := ss.Names.IndexIsValid(spi); err != nil {
+	// 			fmt.Println(err)
+	// 			continue
+	// 		}
+	// 		sp := ss.Names.ValueByIndex(spi)
+	// 		drw.SetGoImage(imgidx, ii, sp.Pixels, system.NoFlipY)
+	// 	}
+	// }
 	ss.Modified = false
 }
 
 // drawSprites draws sprites
 func (ss *Sprites) drawSprites(drw system.Drawer) {
 	// fmt.Println("draw sprites")
-	sa := &ss.szAlloc
-	for gpi, ga := range sa.GpAllocs {
-		imgidx := spriteStart + gpi
-		for ii, spi := range ga {
-			if ss.Names.IndexIsValid(spi) != nil {
-				continue
-			}
-			sp := ss.Names.ValueByIndex(spi)
-			if !sp.Active {
-				continue
-			}
-			// fmt.Println("ds", imgidx, ii, sp.Geom.Pos)
-			drw.Copy(imgidx, ii, sp.Geom.Pos, image.Rectangle{}, draw.Over, system.NoFlipY)
-		}
-	}
+	// todo:
+	// sa := &ss.szAlloc
+	// for gpi, ga := range sa.GpAllocs {
+	// 	imgidx := spriteStart + gpi
+	// 	for ii, spi := range ga {
+	// 		if ss.Names.IndexIsValid(spi) != nil {
+	// 			continue
+	// 		}
+	// 		sp := ss.Names.ValueByIndex(spi)
+	// 		if !sp.Active {
+	// 			continue
+	// 		}
+	// 		// fmt.Println("ds", imgidx, ii, sp.Geom.Pos)
+	// 		drw.Copy(imgidx, ii, sp.Geom.Pos, image.Rectangle{}, draw.Over, system.NoFlipY)
+	// 	}
+	// }
 }
