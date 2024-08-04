@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/examples/images"
 	"cogentcore.org/core/math32"
+	"github.com/rajveermalviya/go-webgpu/wgpu"
 )
 
 //go:embed texture.wgsl
@@ -64,6 +65,7 @@ func main() {
 
 	pl := sy.AddGraphicsPipeline("texture")
 	sy.SetClearColor(color.RGBA{50, 50, 50, 255})
+	pl.SetFrontFace(wgpu.FrontFaceCCW)
 
 	sh := pl.AddShader("texture")
 	sh.OpenCode(texture)
@@ -132,11 +134,7 @@ func main() {
 	camo.Model.SetIdentity()
 	camo.View.CopyFrom(view)
 	aspect := float32(sf.Format.Size.X) / float32(sf.Format.Size.Y)
-	// fmt.Printf("aspect: %g\n", aspect)
-	// VkPerspective version automatically flips Y axis and shifts depth
-	// into a 0..1 range instead of -1..1, so original GL based geometry
-	// will render identically here.
-	camo.Projection.SetVkPerspective(45, aspect, 0.01, 100)
+	camo.Projection.SetPerspective(45, aspect, 0.01, 100)
 	cam := camv.Values.Values[0]
 	gpu.SetValueFrom(cam, []CamView{camo}) // note: always use slice to copy
 
