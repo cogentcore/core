@@ -25,22 +25,20 @@ type Drawer struct {
 	wgpu *gpudraw.Drawer
 
 	// base is used for the backup 2D image drawer.
-	base *system.DrawerBase
+	base system.DrawerBase
 }
 
-// InitDrawer sets the [Drawer] to either a WebGPU-based drawer
-// or a backup 2D image drawer based on whether the browser supports WebGPU.
+// InitDrawer sets the [Drawer] to a WebGPU-based drawer
+// if the browser supports WebGPU.
 func (a *App) InitDrawer() {
-	a.Draw = &Drawer{}
-	if js.Global().Get("navigator").Get("gpu").Truthy() {
-		gp := gpu.NewGPU()
-		gp.Config(a.Name())
-		surf := gp.Instance.CreateSurface(nil)
-		sf := gpu.NewSurface(gp, surf, a.Scrn.PixSize.X, a.Scrn.PixSize.Y)
-		a.Draw.wgpu = gpudraw.NewDrawerSurface(sf)
+	if !js.Global().Get("navigator").Get("gpu").Truthy() {
 		return
 	}
-	a.Draw.base = &system.DrawerBase{}
+	gp := gpu.NewGPU()
+	gp.Config(a.Name())
+	surf := gp.Instance.CreateSurface(nil)
+	sf := gpu.NewSurface(gp, surf, a.Scrn.PixSize.X, a.Scrn.PixSize.Y)
+	a.Draw.wgpu = gpudraw.NewDrawerSurface(sf)
 }
 
 var loader = js.Global().Get("document").Call("getElementById", "app-wasm-loader")

@@ -84,8 +84,9 @@ func (a *App) SetSystemWindow() {
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	a.UnderlyingPlatform = UserAgentToOS(ua)
 
-	a.InitDrawer()
+	a.Draw = &Drawer{}
 	a.Resize()
+	a.InitDrawer()
 	a.Event.Window(events.WinShow)
 	a.Event.Window(events.ScreenUpdate)
 	a.Event.Window(events.WinFocus)
