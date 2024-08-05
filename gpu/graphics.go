@@ -160,11 +160,10 @@ func (pl *GraphicsPipeline) FragmentEntry() *ShaderEntry {
 	return pl.EntryByType(FragmentShader)
 }
 
-// Config is called once all the VkConfig options have been set
+// Config is called once all the Config options have been set
 // using Set* methods, and the shaders have been loaded.
 // The parent System has already done what it can for its config.
-// The rebuild flag indicates whether pipelines should rebuild,
-// e.g., based on NTextures changing.
+// The rebuild flag indicates whether pipelines should rebuild
 func (pl *GraphicsPipeline) Config(rebuild bool) error {
 	if pl.renderPipeline != nil {
 		if !rebuild {
@@ -176,6 +175,7 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 	if err != nil {
 		return err
 	}
+	pl.Multisample.Count = uint32(pl.Sys.Render.Format.Samples)
 	pd := &wgpu.RenderPipelineDescriptor{
 		Label:       pl.Name,
 		Layout:      pl.layout,
@@ -254,8 +254,9 @@ func (pl *GraphicsPipeline) SetGraphicsDefaults() *GraphicsPipeline {
 	pl.SetFrontFace(wgpu.FrontFaceCW)
 	pl.SetCullMode(wgpu.CullModeBack)
 	pl.SetAlphaBlend(true) // alpha blending
-	pl.SetMultisample(4)
-	// pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
+	pl.Multisample.Count = 1
+	pl.Multisample.Mask = 0xFFFFFFFF              // todo
+	pl.Multisample.AlphaToCoverageEnabled = false // todo
 	return pl
 }
 
@@ -278,13 +279,6 @@ func (pl *GraphicsPipeline) SetFrontFace(face wgpu.FrontFace) *GraphicsPipeline 
 // SetCullMode sets the face culling mode.
 func (pl *GraphicsPipeline) SetCullMode(mode wgpu.CullMode) *GraphicsPipeline {
 	pl.Primitive.CullMode = mode
-	return pl
-}
-
-func (pl *GraphicsPipeline) SetMultisample(ms int) *GraphicsPipeline {
-	pl.Multisample.Count = uint32(max(1, ms))
-	pl.Multisample.Mask = 0xFFFFFFFF              // todo
-	pl.Multisample.AlphaToCoverageEnabled = false // todo
 	return pl
 }
 

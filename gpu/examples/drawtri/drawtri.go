@@ -41,7 +41,7 @@ func main() {
 	fmt.Printf("format: %s\n", sf.Format.String())
 
 	sy := gp.NewGraphicsSystem("drawtri", sf.Device)
-	sy.ConfigRender(&sf.Format, gpu.UndefType, sf)
+	sy.ConfigRender(&sf.Format, gpu.Depth32, sf)
 
 	resize = func(width, height int) {
 		sf.Resized(image.Point{width, height})

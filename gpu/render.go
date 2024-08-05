@@ -160,7 +160,7 @@ func (rp *Render) SetDepthDescriptor(rpd *wgpu.RenderPassDescriptor) {
 		DepthStoreOp:      wgpu.StoreOpStore,
 		DepthReadOnly:     false,
 		StencilClearValue: rp.ClearStencil,
-		StencilLoadOp:     wgpu.LoadOpLoad,
+		StencilLoadOp:     wgpu.LoadOpClear,
 		StencilStoreOp:    wgpu.StoreOpStore,
 		StencilReadOnly:   true,
 	}
@@ -249,58 +249,11 @@ func (rp *Render) GrabDepthTexture(dev *Device, cmd *wgpu.CommandEncoder) error 
 		return err
 	}
 	rp.ConfigGrabDepth(dev) // ensure image grab setup
-	// first, prepare TextureGrab to receive copy from render image.
-	// apparently, the color attachment, with src flag already set, does not need this.
-
-	// reg := vk.BufferTextureCopy{BufferOffset: 0, BufferRowLength: 0, BufferTextureHeight: 0}
-	// reg.TextureSubresource.AspectMask = vk.TextureAspectFlags(vk.TextureAspectDepthBit)
-	// reg.TextureSubresource.MipLevel = 0
-	// reg.TextureSubresource.BaseArrayLayer = 0
-	// reg.TextureSubresource.LayerCount = 1
-	// reg.TextureOffset.X, reg.TextureOffset.Y, reg.TextureOffset.Z = 0, 0, 0
-	// reg.TextureExtent.Width = uint32(rp.Format.Size.X)
-	// reg.TextureExtent.Height = uint32(rp.Format.Size.Y)
-	// reg.TextureExtent.Depth = 1
-	//
-	// vk.CmdCopyTextureToBuffer(cmd, rp.Depth.Texture, vk.TextureLayoutTransferSrcOptimal, rp.GrabDepth.Host, 1, []vk.BufferTextureCopy{reg})
 	return nil
 }
 
 // DepthTextureArray returns the float values from the last GrabDepthTexture call
 // automatically handles down-sampling from multisampling.
 func (rp *Render) DepthTextureArray() ([]float32, error) {
-	/*
-		if rp.GrabDepth.Host == vk.NullBuffer {
-			err := errors.New("DepthTextureArray: No GrabDepth.Host buffer -- must call GrabDepthTexture")
-			if Debug {
-				log.Println(err)
-			}
-			return nil, err
-		}
-		sz := rp.Format.Size
-		fsz := sz.X * sz.Y
-		ary := make([]float32, fsz)
-		fp := (*[ByteCopyMemoryLimit]float32)(rp.GrabDepth.HostPtr)[0:fsz]
-		copy(ary, fp)
-	*/
-	// note: you cannot specify a greater width than actual width
-	// and resolving depth images GPU-side is not exactly clear:
-	// https://community.khronos.org/t/how-to-resolve-multi-sampled-depth-images/7584
-	// https://www.reddit.com/r/WebGPU/comments/rpeywp/is_it_possible_to_resolve_a_depth_msaa_buffer/
-	// furthermore, the function for resolving the multiple samples is not obvious either -- average
-	// is implemented below:
-	// for y := 0; y < sz.Y; y++ {
-	// 	for x := 0; x < sz.X; x++ {
-	// 		sum := float32(0)
-	// 		for ys := 0; ys < ns2; ys++ {
-	// 			for xs := 0; xs < ns2; xs++ {
-	// 				si := (y*ns2+ys)*sz.X*ns2 + x*ns2 + xs
-	// 				sum += fp[si]
-	// 			}
-	// 		}
-	// 		di := y*sz.X + x
-	// 		ary[di] = sum / float32(nsamp)
-	// 	}
-	// }
 	return nil, nil
 }

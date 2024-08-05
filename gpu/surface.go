@@ -84,7 +84,6 @@ func (sf *Surface) Init(gp *GPU, ws *wgpu.Surface, width, height int) error {
 	}
 	sf.Device = dev
 	sf.Format.Format = ws.GetPreferredFormat(gp.GPU)
-	sf.Format.Samples = 4
 	sf.Format.Size.X = width
 	sf.Format.Size.Y = height
 	sf.ConfigSwapChain()
