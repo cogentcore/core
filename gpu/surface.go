@@ -64,7 +64,7 @@ func (sf *Surface) Defaults() {
 	// sf.NFrames = 3 // requested, will be updated with actual
 	sf.Format.Defaults()
 	sf.Format.Set(1024, 768, wgpu.TextureFormatRGBA8UnormSrgb)
-	sf.Format.SetMultisample(4) // good default
+	sf.Format.SetMultisample(1) // good default // TODO(wgpu): set to 4
 	sf.DesiredFormats = []wgpu.TextureFormat{
 		wgpu.TextureFormatRGBA8UnormSrgb,
 		// wgpu.TextureFormatR8g8b8a8Unorm, // these def too dark
