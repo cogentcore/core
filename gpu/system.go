@@ -240,7 +240,7 @@ func (sy *System) CmdBuffByNameTry(name string) (*wgpu.CommandEncoder, error) {
 
 // ConfigRender configures the renderpass, including the texture
 // format that we're rendering to, for a surface render target,
-// and the depth buffer format (pass UndefType for no depth buffer).
+// and the depth buffer format (pass UndefinedType for no depth buffer).
 // surface should be passed if rendering to a surface (nil ok),
 // to connect the render target to it, so it will be updated during resizing.
 func (sy *System) ConfigRender(renderFormat *TextureFormat, depthFmt Types, surface *Surface) {
@@ -264,7 +264,7 @@ func (sy *System) Resized(newSize image.Point) {
 
 // ConfigRenderNonSurface configures the renderpass, including the texture
 // format that we're rendering to, for a RenderFrame non-surface target,
-// and the depth buffer format (pass UndefType for no depth buffer).
+// and the depth buffer format (pass UndefinedType for no depth buffer).
 func (sy *System) ConfigRenderNonSurface(renderFormat *TextureFormat, depthFmt Types) {
 	sy.Render.Config(&sy.Device, renderFormat, depthFmt, true)
 }

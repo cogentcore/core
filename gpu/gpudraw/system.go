@@ -35,7 +35,7 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.T
 	dw.images.init()
 
 	dw.Sys = gpu.NewGraphicsSystem(gp, "gpudraw", dev)
-	dw.Sys.ConfigRender(renderFormat, gpu.UndefType, dw.surface)
+	dw.Sys.ConfigRender(renderFormat, gpu.UndefinedType, dw.surface)
 	sy := dw.Sys
 	// sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 

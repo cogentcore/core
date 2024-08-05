@@ -28,7 +28,7 @@ type Render struct {
 	// the associated depth buffer, if set
 	Depth Texture
 
-	// if this is not UndefType, depth format is used
+	// if this is not UndefinedType, depth format is used
 	DepthFormat Types
 
 	// for multisampling, this is the multisampled image that is the actual render target
@@ -67,7 +67,7 @@ func (rp *Render) SetSize(sz image.Point) {
 		if rp.HasMulti {
 			rp.Multi.ConfigMulti(&rp.device, &rp.Format)
 		}
-		if rp.DepthFormat != UndefType {
+		if rp.DepthFormat != UndefinedType {
 			rp.Depth.ConfigDepth(&rp.device, rp.DepthFormat, &rp.Format)
 		}
 	}
@@ -76,7 +76,7 @@ func (rp *Render) SetSize(sz image.Point) {
 // Config configures the render pass for given device,
 // Using standard parameters for graphics rendering,
 // based on the given image format and depth image format
-// (pass UndefType for no depth buffer).
+// (pass UndefinedType for no depth buffer).
 func (rp *Render) Config(dev *Device, imgFmt *TextureFormat, depthFmt Types, notSurface bool) {
 	rp.device = *dev
 	rp.Format = *imgFmt
@@ -85,7 +85,7 @@ func (rp *Render) Config(dev *Device, imgFmt *TextureFormat, depthFmt Types, not
 	rp.ClearDepth = 1
 	rp.ClearStencil = 0
 	rp.DepthFormat = depthFmt
-	if depthFmt != UndefType {
+	if depthFmt != UndefinedType {
 		rp.Depth.ConfigDepth(dev, rp.DepthFormat, imgFmt)
 	}
 	if rp.Format.Samples > 1 {

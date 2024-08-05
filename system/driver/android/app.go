@@ -104,7 +104,7 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	sf := vgpu.NewSurface(a.GPU, vsf)
 
 	sys := a.GPU.NewGraphicsSystem(a.Name(), &sf.Device)
-	sys.ConfigRender(&sf.Format, vgpu.UndefType)
+	sys.ConfigRender(&sf.Format, vgpu.UndefinedType)
 	sf.SetRender(&sys.Render)
 	// sys.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
 	sys.Config()

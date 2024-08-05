@@ -52,7 +52,7 @@ func main() {
 		w.SetDestroyGPUResourcesFunc(destroy)
 
 		pl = sy.AddGraphicsPipeline("drawtri")
-		sy.ConfigRender(&sf.Format, gpu.UndefType, sf)
+		sy.ConfigRender(&sf.Format, gpu.UndefinedType, sf)
 		pl.SetFrontFace(wgpu.FrontFaceCW)
 
 		sh := pl.AddShader("trianglelit")

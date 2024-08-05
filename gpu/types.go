@@ -23,7 +23,7 @@ import (
 type Types int32 //enums:enum
 
 const (
-	UndefType Types = iota
+	UndefinedType Types = iota
 	Bool32
 
 	Int16
@@ -48,8 +48,8 @@ const (
 	TextureRGBA32 // 32 bits with 8 bits per component of R,G,B,A -- std image format
 	TextureBGRA32
 
-	Depth32      // standard float32 depth buffer
-	Depth24Sten8 // standard 24 bit float with 8 bit stencil
+	Depth32         // standard float32 depth buffer
+	Depth24Stencil8 // standard 24 bit float with 8 bit stencil
 
 	Struct
 )
@@ -79,10 +79,10 @@ func (tp Types) Bytes() int {
 }
 
 var TypeToTextureFormat = map[Types]wgpu.TextureFormat{
-	TextureRGBA32: wgpu.TextureFormatRGBA8UnormSrgb,
-	TextureBGRA32: wgpu.TextureFormatBGRA8UnormSrgb,
-	Depth32:       wgpu.TextureFormatDepth32Float,
-	Depth24Sten8:  wgpu.TextureFormatDepth24PlusStencil8,
+	TextureRGBA32:   wgpu.TextureFormatRGBA8UnormSrgb,
+	TextureBGRA32:   wgpu.TextureFormatBGRA8UnormSrgb,
+	Depth32:         wgpu.TextureFormatDepth32Float,
+	Depth24Stencil8: wgpu.TextureFormatDepth24PlusStencil8,
 }
 
 // TextureFormatSizes gives size of known WebGPU
@@ -133,13 +133,13 @@ var TypeSizes = map[Types]int{
 
 	TextureRGBA32: 4,
 
-	Depth32:      4,
-	Depth24Sten8: 4,
+	Depth32:         4,
+	Depth24Stencil8: 4,
 }
 
 // TypeToVertexFormat maps gpu.Types to WebGPU VertexFormat
 var TypeToVertexFormat = map[Types]wgpu.VertexFormat{
-	UndefType: wgpu.VertexFormatUndefined,
+	UndefinedType: wgpu.VertexFormatUndefined,
 	// Bool32:         wgpu.VertexFormatUint32,
 	// Int16:          wgpu.VertexFormatR16Sint,
 	// Uint16:         wgpu.VertexFormatR16Uint,
@@ -155,7 +155,7 @@ var TypeToVertexFormat = map[Types]wgpu.VertexFormat{
 	Float32Vector4: wgpu.VertexFormatFloat32x4,
 	// TextureRGBA32:    wgpu.TextureFormatR8g8b8a8Srgb,
 	// Depth32:        wgpu.VertexFormatD32Sfloat,
-	// Depth24Sten8:   wgpu.VertexFormatD24UnormS8Uint,
+	// Depth24Stencil8:   wgpu.VertexFormatD24UnormS8Uint,
 }
 
 // most commonly available formats: https://WebGPU.gpuinfo.org/listsurfaceformats.php
