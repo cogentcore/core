@@ -57,7 +57,11 @@ func (dw *Drawer) End() {
 	} else {
 		sz := dw.base.Image.Bounds().Size()
 		ptr := uintptr(unsafe.Pointer(&dw.base.Image.Pix[0]))
-		js.Global().Call("displayImage", ptr, len(dw.base.Image.Pix), sz.X, sz.Y)
+		memoryBytes := js.Global().Get("Uint8ClampedArray").New(js.Global().Get("wasm").Get("instance").Get("exports").Get("mem").Get("buffer"))
+		// using subarray instead of slice gives a 5x performance improvement due to no copying
+		bytes := memoryBytes.Call("subarray", ptr, ptr+uintptr(len(dw.base.Image.Pix)))
+		data := js.Global().Get("ImageData").New(bytes, sz.X, sz.Y)
+		dw.context2D.Call("putImageData", data, 0, 0)
 	}
 	// Only remove the loader after we have successfully rendered.
 	if loader.Truthy() {

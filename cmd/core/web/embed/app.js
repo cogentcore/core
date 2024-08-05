@@ -159,25 +159,6 @@ function appNewNotification(jsonNotification) {
 }
 
 // -----------------------------------------------------------------------------
-// Display Image
-// -----------------------------------------------------------------------------
-
-const appCanvas = document.getElementById('app');
-// const appCanvasCtx = appCanvas.getContext('2d'); TODO: move to Go
-
-// displayImage takes the pointer to the target image in the wasm linear memory
-// and its length. Then, it gets the resulting byte slice and creates an image data
-// with the given width and height.
-function displayImage(pointer, length, w, h) {
-  const memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
-
-  // using subarray instead of slice gives a 5x performance improvement due to no copying
-  const bytes = memoryBytes.subarray(pointer, pointer + length);
-  const data = new ImageData(bytes, w, h);
-  appCanvasCtx.putImageData(data, 0, 0);
-}
-
-// -----------------------------------------------------------------------------
 // Web Assembly
 // -----------------------------------------------------------------------------
 
