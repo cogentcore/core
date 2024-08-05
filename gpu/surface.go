@@ -128,13 +128,23 @@ func (sf *Surface) ConfigSwapChain() error {
 
 	// fmt.Println(reflectx.StringJSON(caps))
 
+	trgFmt := caps.Formats[0]
+	var viewfmts []wgpu.TextureFormat
+	switch trgFmt {
+	case wgpu.TextureFormatBGRA8Unorm:
+		viewfmts = append(viewfmts, wgpu.TextureFormatBGRA8UnormSrgb)
+	case wgpu.TextureFormatRGBA8Unorm:
+		viewfmts = append(viewfmts, wgpu.TextureFormatRGBA8UnormSrgb)
+	}
+
 	sf.swapChainConfig = &wgpu.SwapChainDescriptor{
 		Usage:       wgpu.TextureUsageRenderAttachment,
-		Format:      caps.Formats[0],
+		Format:      trgFmt,
 		Width:       uint32(sf.Format.Size.X),
 		Height:      uint32(sf.Format.Size.Y),
 		PresentMode: wgpu.PresentModeFifo,
 		AlphaMode:   caps.AlphaModes[0],
+		ViewFormats: viewfmts,
 	}
 
 	sf.Format.Format = caps.Formats[0]
