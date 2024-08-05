@@ -101,7 +101,7 @@ type Phong struct {
 func NewPhong(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.TextureFormat, surface *gpu.Surface) *Phong {
 	ph := &Phong{}
 	ph.Sys = gpu.NewGraphicsSystem(gp, "phong", dev)
-	ph.Sys.ConfigRender(renderFormat, gpu.UndefType, surface) // TODO: use Depth32
+	ph.Sys.ConfigRender(renderFormat, gpu.Depth32, surface)
 	ph.configSystem()
 	return ph
 }
