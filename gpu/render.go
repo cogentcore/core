@@ -6,7 +6,6 @@ package gpu
 
 import (
 	"errors"
-	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -60,7 +59,6 @@ type Render struct {
 func (rd *Render) Config(dev *Device, imgFmt *TextureFormat, depthFmt Types) {
 	rd.device = *dev
 	rd.Format = *imgFmt
-	fmt.Println(rd.Format)
 	rd.ClearColor = colors.Black
 	rd.ClearDepth = 1
 	rd.ClearStencil = 0

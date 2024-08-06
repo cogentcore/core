@@ -213,8 +213,6 @@ func main() {
 			fmt.Printf("fps: %.0f\n", fps)
 			frameCount = 0
 			stTime = eTime
-			sf.ReConfigSwapChain() // in case we resized..
-			fmt.Println(sf.Format)
 		}
 	}
 

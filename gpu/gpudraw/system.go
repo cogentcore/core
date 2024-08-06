@@ -120,7 +120,7 @@ func (dw *Drawer) drawAll() error {
 	tvr := sy.Vars().VarByName(1, "TexSampler")
 	tvr.Values.Current = 0
 
-	rp, err := sy.BeginRenderPassNoClear()
+	rp, err := sy.BeginRenderPass() // NoClear() // TODO: NoClear not working!
 	if errors.Log(err) != nil {
 		return err
 	}
