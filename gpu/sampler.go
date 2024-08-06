@@ -9,40 +9,6 @@ import (
 	"github.com/cogentcore/webgpu/wgpu"
 )
 
-// TextureSample supplies a Texture and a Sampler
-type TextureSample struct {
-	Texture
-	Sampler
-}
-
-func NewTextureSample(dev *Device) *TextureSample {
-	tx := &TextureSample{}
-	tx.device = *dev
-	tx.Format.Defaults()
-	return tx
-}
-
-func (tx *TextureSample) Defaults() {
-	tx.Texture.Format.Defaults()
-	tx.Sampler.Defaults()
-}
-
-func (tx *TextureSample) Release() {
-	tx.Sampler.Release()
-	tx.Texture.Release()
-}
-
-// AllocTextureSample allocates texture device image, stdview, and sampler
-// func (tx *TextureSample) AllocTextureSample() {
-// 	tx.AllocTexture()
-// 	if tx.Sampler.VkSampler == vk.NullSampler {
-// 		tx.Sampler.Config(tx.GPU, tx.Dev)
-// 	}
-// 	tx.ConfigStdView()
-// }
-
-///////////////////////////////////////////////////
-
 // Sampler represents a WebGPU image sampler
 type Sampler struct {
 	Name string
@@ -70,9 +36,13 @@ func (sm *Sampler) Defaults() {
 	sm.Border = BorderTrans
 }
 
-// Config configures sampler on device
+// Config configures sampler on device.  If the sampler
+// already exists, then it is not reconfigured.
+// Use Release first to force a reconfigure.
 func (sm *Sampler) Config(dev *Device) error {
-	sm.Release()
+	if sm.sampler != nil {
+		return nil
+	}
 	samp, err := dev.Device.CreateSampler(&wgpu.SamplerDescriptor{
 		AddressModeU:  sm.UMode.Mode(),
 		AddressModeV:  sm.VMode.Mode(),
@@ -97,13 +67,14 @@ func (sm *Sampler) Config(dev *Device) error {
 }
 
 func (sm *Sampler) Release() {
-	if sm.sampler != nil {
-		sm.sampler.Release()
-		sm.sampler = nil
+	if sm.sampler == nil {
+		return
 	}
+	sm.sampler.Release()
+	sm.sampler = nil
 }
 
-// TextureSample image sampler modes
+// Texture image sampler modes
 type SamplerModes int32 //enums:enum
 
 const (
@@ -135,7 +106,7 @@ var WebGPUSamplerModes = map[SamplerModes]wgpu.AddressMode{
 
 //////////////////////////////////////////////////////
 
-// TextureSample image sampler modes
+// Texture image sampler modes
 type BorderColors int32 //enums:enum -trim-prefix Border
 
 const (

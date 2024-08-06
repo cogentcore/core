@@ -74,7 +74,7 @@ type Value struct {
 
 	// for SampledTexture Var roles, this is the Texture.
 	// Can set Sampler parameters directly on this.
-	Texture *TextureSample
+	Texture *Texture
 
 	// variable for this value
 	vvar *Var
@@ -110,7 +110,7 @@ func (vl *Value) init(vr *Var, dev *Device, idx int) {
 	vl.isDynamic = vl.role == Vertex || vl.role == Index || vr.DynamicOffset
 	vl.dynamicN = 1
 	if vr.Role >= SampledTexture {
-		vl.Texture = NewTextureSample(dev)
+		vl.Texture = NewTexture(dev)
 	}
 }
 
@@ -394,12 +394,10 @@ func (vl *Value) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 // SetFromGoImage sets Texture image data from an image.Image standard Go image,
 // at given layer. This is most efficiently done using an image.RGBA, but other
 // formats will be converted as necessary.
-// If flipY is true then the Texture Y axis is flipped when copying into
-// the image data.  Can avoid this by configuring texture coordinates to
-// compensate.
 // The Sampler is also configured at this point, with the current settings,
-// so set those before making this call.
-func (vl *Value) SetFromGoImage(img image.Image, layer int) *TextureSample {
+// so set those before making this call.  It will not be re-configured
+// without manually releasing it.
+func (vl *Value) SetFromGoImage(img image.Image, layer int) *Texture {
 	err := vl.Texture.SetFromGoImage(img, layer)
 	errors.Log(err)
 	err = vl.Texture.Sampler.Config(&vl.device)

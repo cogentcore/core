@@ -22,7 +22,6 @@ The main gpu code is in the top-level `gpu` package, with the following sub-pack
 
 For systems with multiple GPU devices, by default the discrete device is selected, and if multiple of those are present, the one with the most RAM is used.  To see what is available and their properties, use:
 
-
 ```
 $ go run cogentcore.org/core/gpu/cmd/webgpuinfo@latest
 ```
@@ -34,23 +33,25 @@ The following environment variables can be set to specifically select a particul
 * `MESA_VK_DEVICE_SELECT` (standard for mesa-based drivers) or `VK_DEVICE_SELECT` -- for graphics or compute usage.
 * `VK_COMPUTE_DEVICE_SELECT` -- only used for compute, if present -- will override above, so you can use different GPUs for graphics vs compute.
 
-
-# Basic Elements and Organization
-
 * `GPU` represents the hardware `Adapter` and maintains global settings, info about the hardware.
-   GraphicsSystemvice` is a *logical* device and associated `Queue` info. Each such device can function in parallel.GraphicsSystem
 
-* `System` manages multiple `Pipeline`s and associated variables (`Var`) and `Value`s, to accomplish a complete overall rendering / computational job.  The `Vars` and `Values` are shared across all pipelines within a System, which is more efficient and usually what you want.  A given shader can simply ignore the variables it doesn't need.
-    + `Pipeline` performs a specific chain of operations, using `Shader` program(s).  In a graphics context, each pipeline typically handles a different type of material or other variation in rendering (textured vs. not, transparent vs. solid, etc).
+* `Device` is a *logical* device and associated `Queue` info. Each such device can function in parallel.
+
+There are many distinct mechanisms for graphics vs. compute functionality, so we review the Graphics system first, then the Compute.
+
+# Graphics System
+
+* `GraphicsSystem` manages multiple `GraphicsPipeline`s and associated variables (`Var`) and `Value`s, to accomplish a complete overall rendering / computational job.  The `Vars` and `Values` are shared across all pipelines within a System, which is more efficient and usually what you want.  A given shader can simply ignore the variables it doesn't need.
+    + `GraphicsPipeline` performs a specific chain of operations, using `Shader` program(s).  In the graphics context, each pipeline typically handles a different type of material or other variation in rendering (textured vs. not, transparent vs. solid, etc).
     + `Vars` has up to 4 (hard limit imposed by WebGPU) `VarGroup`s which are referenced with the `@group(n)` syntax in the WGSL shader, in addition to a special `VertexGroup` specifically for the special Vertex and Index variables.  Each `VarGroup` can have a number of `Var` variables, which occupy sequential `@binding(n)` numbers within each group.
     + `Values` within `Var` manages the specific data values for each variable.  For example, each `Texture` or vertex mesh is stored in its own separate `Value`, with its own `wgpu.Buffer` that is used to transfer data from the CPU to the GPU device.  The `SetCurrent` method selects which `Value` is currently used, for the next `BindPipeline` call that sets all the values to use for a given pipeline run.  Critically, all values must be uploaded to the GPU in advance of a given GPU pass.  For large numbers of `Uniform` and `Storage` values, a `DynamicOffset` can be set so there is just a single `Value` but the specific data used is determined by the `DynamicIndex` within the one big value buffer.
   
-* `Texture` manages a WebGPU Texture and associated `TextureView`.
-* `TextureSample` extends the `Texture` with a `Sampler` that defines how pixels are accessed in a shader.  This is what is actually used for textures in graphics rendering.
-* TODO don't need this, but need to see about offscreen: `RenderTexture` manages an `Texture` along with a `RenderPass` confiGraphicsSystemon for managing a `Render` target (shared for rendering onto a window `Surface` or an offscreen `RenderTexture`)
+* `Texture` manages a WebGPU Texture and associated `TextureView`, along with an optional  `Sampler` that defines how pixels are accessed in a shader.  The Texture can manage any kind of texture object, with different Config methods for the different types.
 
-* `Surface` represents the full hardware-managed `Texture`s associated with an actual on-screen Window.  One can associate a System with a Surface to manage the Swapchain updating for effective double or triple buffering.
-* `RenderTexture` is an offscreen render target with RenderTextures and a logical device if being used without any Surface -- otherwise it should use the Surface device so images can be copied across them.
+* `Renderer` is an interface for the final render target, implemented by two types:
+    + `Surface` represents the full hardware-managed `Texture`s associated with an actual on-screen Window.  
+    + `RenderTexture` is an offscreen render target that renders directly to a Texture, which can then be downloaded from the GPU or used directly as an input to a shader.
+    + `Render` is a helper type that is used by both of the above to manage the additional depth texture and multisampling texture target.
 
 * Unlike most game-oriented GPU setups, `gpu` is designed to be used in an event-driven manner where render updates arise from user input or other events, instead of requiring a constant render loop taking place at all times (which can optionally be established too).  The event-driven model is vastly more energy efficient for non-game applications.
 
@@ -80,10 +81,9 @@ The `Var.Values.Current` index determines which Value is used for the BindGroup 
 
 * `New*` returns a new object.
 * `Config` operates on an existing object and settings, and does everything to get it configured for use.
-* `Release` releases allocated WebGPU objects.
+* `Release` releases allocated WebGPU objects.  The usual Go simplicity of not having to worry about freeing memory does not apply to these objects.
 
-
-# GPU Accelerated Compute Engine
+# Compute System
 
 See `examples/compute1` for a very simple compute shader, and [compute.go](vgpu/compute.go) for `Compute*` methods specifically useful for this case.
 

@@ -14,7 +14,6 @@ import (
 // Texture represents a WebGPU Texture with an associated TextureView.
 // The WebGPU Texture is in device memory, in an optimized format.
 type Texture struct {
-
 	// Name of the texture, e.g., same as Value name if used that way.
 	// This is helpful for debugging. Is auto-set to filename if loaded from
 	// a file and otherwise empty.
@@ -23,10 +22,14 @@ type Texture struct {
 	// Format & size of texture
 	Format TextureFormat
 
+	// Sampler defines how the texture is sampled on the GPU.
+	// Needed for textures used as fragment shader inputs.
+	Sampler Sampler
+
 	// WebGPU texture handle, in device memory
 	texture *wgpu.Texture `display:"-"`
 
-	// WebGPU texture view
+	// WebGPU texture view -- needed for most textures
 	view *wgpu.TextureView `display:"-"`
 
 	// keep track of device for destroying view
@@ -63,13 +66,14 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int) error {
 	rimg := ImageToRGBA(img)
 	sz := rimg.Rect.Size()
 
-	tx.Format.Size = sz
-	tx.Format.Format = wgpu.TextureFormatRGBA8UnormSrgb
-	tx.Format.Layers = 1
+	nfmt := TextureFormat{Size: sz, Format: wgpu.TextureFormatRGBA8UnormSrgb, Layers: 1, Samples: 1}
 
-	err := tx.CreateTexture(wgpu.TextureUsageTextureBinding | wgpu.TextureUsageCopyDst)
-	if err != nil { // already logged
-		return err
+	if tx.texture == nil || tx.Format != nfmt {
+		tx.Format = nfmt
+		err := tx.CreateTexture(wgpu.TextureUsageTextureBinding | wgpu.TextureUsageCopyDst)
+		if err != nil { // already logged
+			return err
+		}
 	}
 
 	size := tx.Format.Extent3D()
@@ -96,14 +100,9 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int) error {
 // CreateTexture creates the texture based on current settings,
 // and a view of that texture.  Calls release first.
 func (tx *Texture) CreateTexture(usage wgpu.TextureUsage) error {
-	tx.Release()
+	tx.ReleaseTexture()
 
-	sz := tx.Format.Size
-	size := wgpu.Extent3D{
-		Width:              uint32(sz.X),
-		Height:             uint32(sz.Y),
-		DepthOrArrayLayers: uint32(tx.Format.Layers),
-	}
+	size := tx.Format.Extent3D()
 	t, err := tx.device.Device.CreateTexture(&wgpu.TextureDescriptor{
 		Label:         tx.Name,
 		Size:          size,
@@ -188,12 +187,7 @@ func (tx *Texture) ReleaseTexture() {
 // Release destroys any existing view, nils fields
 func (tx *Texture) Release() {
 	tx.ReleaseTexture()
-}
-
-// SetNil sets everything to nil, for shared texture
-func (tx *Texture) SetNil() {
-	tx.view = nil
-	tx.texture = nil
+	tx.Sampler.Release()
 }
 
 // TextureBufferDims represents the sizes required in Buffer to

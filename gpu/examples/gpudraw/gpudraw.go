@@ -111,9 +111,11 @@ func main() {
 		_ = fcr
 		switch {
 		case fcr < 3:
-			rendImgs(fcr)
+			rendImgs(0)
+			// rendFill()
 		default:
-			rendFill()
+			rendImgs(0)
+			// rendFill()
 		}
 		frameCount++
 
@@ -129,7 +131,13 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	// rendImgs(0)
+	// var cpuProfileFile *os.File
+	// fmt.Println("Starting standard cpu and memory profiling")
+	// f, err := os.Create("cpu.prof")
+	// if errors.Log(err) == nil {
+	// 	cpuProfileFile = f
+	// 	errors.Log(pprof.StartCPUProfile(f))
+	// }
 
 	fpsDelay := time.Second / 60
 	fpsTicker := time.NewTicker(fpsDelay)
@@ -137,6 +145,14 @@ func main() {
 		select {
 		case <-exitC:
 			fpsTicker.Stop()
+			// pprof.StopCPUProfile()
+			// errors.Log(cpuProfileFile.Close())
+			// f, err = os.Create("mem.prof")
+			// if errors.Log(err) == nil {
+			// 	runtime.GC() // get up-to-date statistics
+			// 	errors.Log(pprof.WriteHeapProfile(f))
+			// 	errors.Log(f.Close())
+			// }
 			destroy()
 			return
 		case <-fpsTicker.C:
