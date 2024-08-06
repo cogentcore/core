@@ -6,6 +6,7 @@ package gpu
 
 import (
 	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -59,6 +60,7 @@ type Render struct {
 func (rd *Render) Config(dev *Device, imgFmt *TextureFormat, depthFmt Types) {
 	rd.device = *dev
 	rd.Format = *imgFmt
+	fmt.Println(rd.Format)
 	rd.ClearColor = colors.Black
 	rd.ClearDepth = 1
 	rd.ClearStencil = 0
@@ -97,6 +99,7 @@ func (rd *Render) ClearRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescri
 	r, g, b, a := colors.ToFloat64(rd.ClearColor)
 	rpd := &wgpu.RenderPassDescriptor{}
 	if rd.Format.Samples > 1 && rd.Multi.view != nil {
+		rpd.Label = "ClearMulti1"
 		rpd.ColorAttachments = []wgpu.RenderPassColorAttachment{{
 			View:          rd.Multi.view,
 			ResolveTarget: view,
@@ -110,6 +113,7 @@ func (rd *Render) ClearRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescri
 			StoreOp: wgpu.StoreOpStore,
 		}}
 	} else {
+		rpd.Label = "Clear1"
 		rpd.ColorAttachments = []wgpu.RenderPassColorAttachment{{
 			View:   view,
 			LoadOp: wgpu.LoadOpClear,
@@ -130,6 +134,7 @@ func (rd *Render) ClearRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescri
 func (rd *Render) LoadRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescriptor {
 	rpd := &wgpu.RenderPassDescriptor{}
 	if rd.Format.Samples > 1 && rd.Multi.view != nil {
+		rpd.Label = "LoadMulti"
 		rpd.ColorAttachments = []wgpu.RenderPassColorAttachment{{
 			View:          rd.Multi.view,
 			ResolveTarget: view,
@@ -137,6 +142,7 @@ func (rd *Render) LoadRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescrip
 			StoreOp:       wgpu.StoreOpStore,
 		}}
 	} else {
+		rpd.Label = "Load1"
 		rpd.ColorAttachments = []wgpu.RenderPassColorAttachment{{
 			View:    view,
 			LoadOp:  wgpu.LoadOpLoad,

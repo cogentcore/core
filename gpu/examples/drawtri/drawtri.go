@@ -27,6 +27,7 @@ func init() {
 func main() {
 	gp := gpu.NewGPU()
 	gp.Config("drawtri")
+	gpu.Debug = true
 
 	var resize func(size image.Point)
 	size := image.Point{1024, 768}
@@ -49,6 +50,7 @@ func main() {
 
 	pl := sy.AddGraphicsPipeline("drawtri")
 	pl.SetFrontFace(wgpu.FrontFaceCCW)
+	pl.SetCullMode(wgpu.CullModeNone)
 
 	sh := pl.AddShader("trianglelit")
 	sh.OpenCode(trianglelit)

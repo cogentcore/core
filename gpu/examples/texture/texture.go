@@ -60,6 +60,7 @@ func main() {
 	pl := sy.AddGraphicsPipeline("texture")
 	sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 	pl.SetFrontFace(wgpu.FrontFaceCCW)
+	pl.SetCullMode(wgpu.CullModeNone)
 
 	sh := pl.AddShader("texture")
 	sh.OpenCode(texture)

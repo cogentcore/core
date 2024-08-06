@@ -218,7 +218,7 @@ func (sy *GraphicsSystem) beginRenderPass() (*Render, *wgpu.TextureView, error) 
 	sy.CurrentCommandEncoder = cmd
 	rd := sy.Renderer
 	view, err := rd.GetCurrentTexture()
-	if err != nil {
+	if errors.Log(err) != nil {
 		return nil, nil, err
 	}
 	return rd.Render(), view, nil
@@ -267,7 +267,7 @@ func (sy *GraphicsSystem) SubmitRender(rp *wgpu.RenderPassEncoder) error {
 	sy.device.Queue.Submit(cmdBuffer)
 	rp.Release()
 	cmd.Release()
-	// cmdBuffer.Release()
+	cmdBuffer.Release()
 	return nil
 }
 
