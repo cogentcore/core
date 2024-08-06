@@ -304,9 +304,8 @@ func (w *Window) Close() {
 		if w.DestroyGPUFunc != nil {
 			w.DestroyGPUFunc()
 		}
-		rnd := w.Draw.Renderer()
-		if rnd != nil {
-			rnd.(*gpu.Surface).Release()
+		if rnd, ok := w.Draw.Renderer().(*gpu.Surface); ok {
+			rnd.Release()
 		}
 		w.Draw.Release()
 		w.Glw.Destroy()
@@ -381,9 +380,8 @@ func (w *Window) UpdateGeom() {
 	w.Mu.Unlock()
 	// w.App.RunOnMain(func() {
 	// note: getting non-main thread warning.
-	rnd := w.Draw.Renderer()
-	if rnd != nil {
-		rnd.(*gpu.Surface).SetSize(w.PixSize)
+	if rnd, ok := w.Draw.Renderer().(*gpu.Surface); ok {
+		rnd.SetSize(w.PixSize)
 	}
 	// })
 	if cursc != w.ScreenWindow {
