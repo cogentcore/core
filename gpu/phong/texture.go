@@ -48,7 +48,7 @@ func (ph *Phong) DeleteTexture(name string) {
 // configDummyTexture configures a dummy texture (if none configured)
 func (ph *Phong) configDummyTexture() {
 	// there must be one texture -- otherwise Mac Molten triggers an error
-	tgp := ph.System.Vars.Groups[int(TextureGroup)]
+	tgp := ph.System.Vars().Groups[int(TextureGroup)]
 	tgp.SetNValues(1)
 	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
 	img := tgp.ValueByIndex("TexSampler", 0)
@@ -61,7 +61,7 @@ func (ph *Phong) ResetTextures() {
 	defer ph.Unlock()
 
 	ph.textures.Reset()
-	tgp := ph.System.Vars.Groups[int(TextureGroup)]
+	tgp := ph.System.Vars().Groups[int(TextureGroup)]
 	tgp.SetNValues(1)
 }
 
@@ -72,7 +72,7 @@ func (ph *Phong) UseNoTexture() {
 
 // UseTextureIndex selects texture by index for current render step
 func (ph *Phong) UseTextureIndex(idx int) error {
-	ph.System.Vars.SetCurrentValue(int(TextureGroup), "TexSampler", idx)
+	ph.System.Vars().SetCurrentValue(int(TextureGroup), "TexSampler", idx)
 	ph.UseTexture = true
 	return nil
 }
@@ -100,7 +100,7 @@ func (ph *Phong) UpdateTextureIndex(idx int) error {
 		return nil
 	}
 	tx := ph.textures.Order[idx].Value
-	tvl := sy.Vars.ValueByIndex(int(TextureGroup), "TexSampler", idx)
+	tvl := sy.Vars().ValueByIndex(int(TextureGroup), "TexSampler", idx)
 	tvl.SetFromGoImage(tx.Image, 1)
 	return nil
 }
@@ -128,8 +128,8 @@ func (ph *Phong) configTextures() {
 		ph.configDummyTexture()
 		return
 	}
-	tvr := sy.Vars.VarByName(int(TextureGroup), "TexSampler")
-	tvr.SetNValues(&sy.Device, ntx)
+	tvr := sy.Vars().VarByName(int(TextureGroup), "TexSampler")
+	tvr.SetNValues(sy.Device(), ntx)
 	for i, kv := range ph.textures.Order {
 		tvv := tvr.Values.Values[i]
 		tvv.SetFromGoImage(kv.Value.Image, 1)

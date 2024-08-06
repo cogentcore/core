@@ -39,7 +39,7 @@ func (ph *Phong) ResetMeshes() {
 	defer ph.Unlock()
 
 	ph.meshes.Reset()
-	vgp := ph.System.Vars.VertexGroup()
+	vgp := ph.System.Vars().VertexGroup()
 	vgp.SetNValues(1)
 }
 
@@ -71,7 +71,7 @@ func (ph *Phong) AddMeshFromShape(name string, sh shape.Shape) {
 	sh.Set(mv.vertexArray, mv.normalArray, mv.textureArray, mv.indexArray)
 
 	nm := ph.meshes.Len()
-	vgp := ph.System.Vars.VertexGroup()
+	vgp := ph.System.Vars().VertexGroup()
 	vgp.SetNValues(nm) // add to all vars
 	idx := nm - 1
 	ph.configMesh(mv, idx)
@@ -117,16 +117,16 @@ func (ph *Phong) UseMeshIndex(idx int) error {
 
 	sy := ph.System
 	mesh := ph.meshes.ValueByIndex(idx)
-	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Pos", idx)
-	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Normal", idx)
-	sy.Vars.SetCurrentValue(gpu.VertexGroup, "TexCoord", idx)
-	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Index", idx)
+	sy.Vars().SetCurrentValue(gpu.VertexGroup, "Pos", idx)
+	sy.Vars().SetCurrentValue(gpu.VertexGroup, "Normal", idx)
+	sy.Vars().SetCurrentValue(gpu.VertexGroup, "TexCoord", idx)
+	sy.Vars().SetCurrentValue(gpu.VertexGroup, "Index", idx)
 	if mesh.HasColor {
-		sy.Vars.SetCurrentValue(gpu.VertexGroup, "VertexColor", idx)
+		sy.Vars().SetCurrentValue(gpu.VertexGroup, "VertexColor", idx)
 		ph.UseVertexColor = true
 		ph.UseTexture = false
 	} else {
-		sy.Vars.SetCurrentValue(gpu.VertexGroup, "VertexColor", 0)
+		sy.Vars().SetCurrentValue(gpu.VertexGroup, "VertexColor", 0)
 		ph.UseVertexColor = false
 	}
 	return nil
@@ -152,7 +152,7 @@ func (ph *Phong) SetMeshName(name string) error {
 // manually after this.  Otherwise, they should be good to go.
 func (ph *Phong) configMeshes() {
 	nm := ph.meshes.Len()
-	vgp := ph.System.Vars.VertexGroup()
+	vgp := ph.System.Vars().VertexGroup()
 	vgp.SetNValues(nm)
 	for i, kv := range ph.meshes.Order {
 		mv := kv.Value
@@ -161,7 +161,7 @@ func (ph *Phong) configMeshes() {
 }
 
 func (ph *Phong) configMesh(mv *Mesh, idx int) {
-	vgp := ph.System.Vars.VertexGroup()
+	vgp := ph.System.Vars().VertexGroup()
 	vgp.ValueByIndex("Pos", idx).DynamicN = mv.NVertex
 	vgp.ValueByIndex("Normal", idx).DynamicN = mv.NVertex
 	vgp.ValueByIndex("TexCoord", idx).DynamicN = mv.NVertex

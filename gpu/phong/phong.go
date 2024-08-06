@@ -87,7 +87,7 @@ type Phong struct {
 	objectUpdated bool
 
 	// rendering system
-	Sys *gpu.GraphicsSystem
+	System *gpu.GraphicsSystem
 
 	// overall lock on Phong operations, use Lock, Unlock on Phong
 	sync.Mutex
@@ -98,10 +98,9 @@ type Phong struct {
 // When done, call Config() to perform initial configuration.
 // surface should be passed if rendering to a surface (nil ok),
 // to connect the render target to it, so it will be updated during resizing.
-func NewPhong(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.TextureFormat, surface *gpu.Surface) *Phong {
+func NewPhong(gp *gpu.GPU, rd gpu.Renderer) *Phong {
 	ph := &Phong{}
-	ph.System = gpu.NewGraphicsSystem(gp, "phong", dev)
-	ph.System.ConfigRender(renderFormat, gpu.Depth32, surface)
+	ph.System = gpu.NewGraphicsSystem(gp, "phong", rd)
 	ph.configGraphicsSystem()
 	return ph
 }
@@ -172,20 +171,21 @@ func (ph *Phong) ConfigTextures() *Phong {
 // Rendering
 
 // RenderStart starts the render pass, returning the
-// CommandEncoder and RenderPassEncoder used for encoding
-// the rendering commands for this pass.
-// Pass the TextureView to render into (e.g., from Surface).
+// RenderPassEncoder used for encoding the rendering commands
+// for this pass.
 // This also ensures that all updated object data from SetObject*
 // calls is transferred to the GPU.
-func (ph *Phong) RenderStart(view *wgpu.TextureView) (*wgpu.CommandEncoder, *wgpu.RenderPassEncoder) {
+func (ph *Phong) RenderStart() (*wgpu.RenderPassEncoder, error) {
 	ph.Lock()
 	defer ph.Unlock()
 
 	ph.updateObjects()
 
-	cmd := ph.System.NewCommandEncoder()
-	rp := ph.System.BeginRenderPass(cmd, view)
-	return cmd, rp
+	return ph.System.BeginRenderPass()
+}
+
+func (ph *Phong) RenderEnd(rp *wgpu.RenderPassEncoder) {
+	ph.System.EndRenderPass(rp)
 }
 
 // Render does one step of rendering given current Use* settings,

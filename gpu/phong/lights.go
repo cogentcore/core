@@ -159,7 +159,7 @@ func (ph *Phong) SetSpot(idx int, color, pos, dir math32.Vector3, angDecay, cutA
 // configLights configures the rendering for the lights that have been added.
 func (ph *Phong) configLights() {
 	sy := ph.System
-	vs := sy.Vars.Groups[int(LightGroup)]
+	vs := sy.Vars().Groups[int(LightGroup)]
 	gpu.SetValueFrom(vs.ValueByIndex("NLights", 0), []NLights{ph.NLights})
 	gpu.SetValueFrom(vs.ValueByIndex("Ambient", 0), ph.Ambient[:])
 	gpu.SetValueFrom(vs.ValueByIndex("Directional", 0), ph.Directional[:])

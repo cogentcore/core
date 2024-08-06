@@ -62,11 +62,11 @@ func (ph *Phong) configGraphicsSystem() {
 	vpl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	vpl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
-	vgp := sy.Vars.AddVertexGroup()
-	cgp := sy.Vars.AddGroup(gpu.Uniform, "Camera")         // group = 0
-	ogp := sy.Vars.AddGroup(gpu.Uniform, "Objects")        // group = 1
-	lgp := sy.Vars.AddGroup(gpu.Uniform, "Lights")         // group = 2
-	tgp := sy.Vars.AddGroup(gpu.SampledTexture, "Texture") // group = 3
+	vgp := sy.Vars().AddVertexGroup()
+	cgp := sy.Vars().AddGroup(gpu.Uniform, "Camera")         // group = 0
+	ogp := sy.Vars().AddGroup(gpu.Uniform, "Objects")        // group = 1
+	lgp := sy.Vars().AddGroup(gpu.Uniform, "Lights")         // group = 2
+	tgp := sy.Vars().AddGroup(gpu.SampledTexture, "Texture") // group = 3
 
 	vector4sz := gpu.Float32Vector4.Bytes()
 

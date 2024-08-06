@@ -40,19 +40,17 @@ func main() {
 	gpu.Debug = true
 	gp.Config("phong")
 
-	var resize func(width, height int)
-	width, height := 1024, 768
-	sp, terminate, pollEvents, width, height, err := gpu.GLFWCreateWindow(gp, width, height, "Phong", &resize)
+	var resize func(size image.Point)
+	size := image.Point{1024, 768}
+	sp, terminate, pollEvents, size, err := gpu.GLFWCreateWindow(gp, size, "Phong", &resize)
 	if err != nil {
 		return
 	}
 
-	sf := gpu.NewSurface(gp, sp, width, height)
-	ph := phong.NewPhong(sf.GPU, sf.Device, &sf.Format, sf)
-
-	resize = func(width, height int) {
-		sf.Resized(image.Point{width, height})
-	}
+	sf := gpu.NewSurface(gp, sp, size, 1, gpu.Depth32)
+	ph := phong.NewPhong(sf.GPU, sf)
+	fmt.Printf("format: %s\n", sf.Format.String())
+	resize = func(size image.Point) { sf.SetSize(size) }
 	destroy := func() {
 		ph.Release()
 		sf.Release()
@@ -201,15 +199,12 @@ func main() {
 		frameCount++
 		updateCamera()
 
-		view, err := sf.GetCurrentTexture()
+		rp, err := ph.RenderStart()
 		if errors.Log(err) != nil {
 			return
 		}
-		cmd, rp := ph.RenderStart(view)
 		render1(rp)
-		rp.End()
-		sf.SubmitRender(rp, cmd)
-		sf.Present()
+		ph.RenderEnd(rp)
 
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)

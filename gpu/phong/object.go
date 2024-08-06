@@ -147,7 +147,7 @@ func (ph *Phong) UseObjectIndex(idx int) error {
 	ph.Lock()
 	defer ph.Unlock()
 
-	ph.System.Vars.SetDynamicIndex(int(ObjectGroup), "Object", idx)
+	ph.System.Vars().SetDynamicIndex(int(ObjectGroup), "Object", idx)
 	return nil
 }
 
@@ -158,7 +158,7 @@ func (ph *Phong) updateObjects() {
 	if !(ph.objectUpdated || ph.cameraUpdated) {
 		return
 	}
-	vl := ph.System.Vars.ValueByIndex(int(ObjectGroup), "Object", 0)
+	vl := ph.System.Vars().ValueByIndex(int(ObjectGroup), "Object", 0)
 	vl.DynamicN = ph.objects.Len()
 	for i, kv := range ph.objects.Order {
 		ob := kv.Value
