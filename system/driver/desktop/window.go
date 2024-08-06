@@ -304,8 +304,11 @@ func (w *Window) Close() {
 		if w.DestroyGPUFunc != nil {
 			w.DestroyGPUFunc()
 		}
+		rnd := w.Draw.Renderer()
+		if rnd != nil {
+			rnd.(*gpu.Surface).Release()
+		}
 		w.Draw.Release()
-		w.Draw.Renderer().(*gpu.Surface).Release()
 		w.Glw.Destroy()
 		w.Glw = nil // marks as closed for all other calls
 		w.Draw = nil
