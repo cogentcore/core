@@ -183,7 +183,7 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 			Module:     fe.Shader.module,
 			EntryPoint: fe.Entry,
 			Targets: []wgpu.ColorTargetState{{
-				Format:    wgpu.TextureFormatBGRA8UnormSrgb, // TODO(wgpu): use correct format
+				Format:    pl.System.Render().Format.Format,
 				Blend:     &wgpu.BlendStatePremultipliedAlphaBlending,
 				WriteMask: wgpu.ColorWriteMaskAll, // todo
 			}},

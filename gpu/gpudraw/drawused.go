@@ -25,10 +25,10 @@ func (dw *Drawer) UseGoImage(img image.Image, unchanged bool) {
 	if exists && unchanged {
 		return
 	}
-	tvr := dw.Sys.Vars.VarByName(1, "TexSampler")
+	tvr := dw.System.Vars().VarByName(1, "TexSampler")
 	nv := len(tvr.Values.Values)
 	if idx >= nv { // new allocation
-		tvr.SetNValues(&dw.Sys.Device, dw.images.capacity)
+		tvr.SetNValues(dw.System.Device(), dw.images.capacity)
 	}
 	tvv := tvr.Values.Values[idx]
 	tvv.SetFromGoImage(img, 0)
@@ -43,15 +43,15 @@ func (dw *Drawer) SetFrameTexture(idx int, fbi any) {
 	// 	return
 	// }
 	// dw.Lock()
-	// _, tx, _ := dw.Sys.Vars().ValueByIndexTry(0, "Tex", idx)
+	// _, tx, _ := dw.System.Vars().ValueByIndexTry(0, "Tex", idx)
 	// if fb.Format.Size != tx.Texture.Format.Size {
 	// 	dw.Unlock()
 	// 	dw.ConfigTexture(idx, &fb.Format)
 	// 	dw.Lock()
 	// }
-	// cmd := dw.Sys.MemCmdStart()
-	// fb.CopyToTexture(&tx.Texture.Texture, dw.Sys.Device.Device, cmd)
-	// dw.Sys.MemCmdEndSubmitWaitFree()
+	// cmd := dw.System.MemCmdStart()
+	// fb.CopyToTexture(&tx.Texture.Texture, dw.System.Device.Device, cmd)
+	// dw.System.MemCmdEndSubmitWaitFree()
 	// dw.Unlock()
 }
 
@@ -116,7 +116,7 @@ func (dw *Drawer) TransformUsed(xform math32.Matrix3, sr image.Rectangle, op dra
 // addOp adds matrix for given operation
 func (dw *Drawer) addOp(op draw.Op, mtx *drawmatrix.Matrix) {
 	oi := len(dw.opList)
-	mvr := dw.Sys.Vars.VarByName(0, "Matrix")
+	mvr := dw.System.Vars().VarByName(0, "Matrix")
 	mvl := mvr.Values.Values[0]
 	nv := mvl.DynamicN
 	if oi >= nv {

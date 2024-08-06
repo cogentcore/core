@@ -5,6 +5,7 @@
 package gpu
 
 import (
+	"fmt"
 	"image"
 	"sync"
 
@@ -99,6 +100,7 @@ func (sf *Surface) SetSize(sz image.Point) {
 	if sf.Format.Size == sz {
 		return
 	}
+	fmt.Println("set size", sz)
 	sf.render.SetSize(sz)
 	sf.Format.Size = sz
 	sf.swapChainConfig.Width = uint32(sf.Format.Size.X)
@@ -110,6 +112,7 @@ func (sf *Surface) SetSize(sz image.Point) {
 // target for rendering.
 func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	if sf.needsReconfig {
+		fmt.Println("reconfig")
 		sf.ReConfigSwapChain()
 	}
 	sf.Lock() // we remain locked until submit!
@@ -125,7 +128,7 @@ func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 // The current texture is automatically Released and Unlock() is called.
 func (sf *Surface) Present() {
 	sf.swapChain.Present()
-	sf.curTexture.Release()
+	// sf.curTexture.Release()
 	sf.curTexture = nil
 	sf.Unlock()
 }
@@ -201,6 +204,7 @@ func (sf *Surface) ReConfigSwapChain() bool {
 }
 
 func (sf *Surface) Release() {
+	sf.render.Release()
 	sf.ReleaseSwapChain()
 	if sf.surface != nil {
 		sf.surface.Release()

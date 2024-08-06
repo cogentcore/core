@@ -42,13 +42,7 @@ var AllocChunk = 16
 // in one GPU render pass, according to the recorded order of operations.
 type Drawer struct {
 	// drawing system
-	Sys *gpu.System
-
-	// surface if render target
-	surface *gpu.Surface
-
-	// render frame if render target
-	Frame *gpu.RenderFrame
+	System *gpu.GraphicsSystem
 
 	// opList is the list of drawing operations made on the current pass.
 	// This is recorded after Start and executed at End.
@@ -65,70 +59,30 @@ type Drawer struct {
 	sync.Mutex
 }
 
-// NewDrawerSurface returns a new Drawer configured for rendering
-// to given Surface.
-func NewDrawerSurface(sf *gpu.Surface) *Drawer {
+// NewDrawer returns a new Drawer configured for rendering
+// to given Renderer.
+func NewDrawer(gp *gpu.GPU, rd gpu.Renderer) *Drawer {
 	dw := &Drawer{}
-	dw.ConfigSurface(sf)
+	dw.configSystem(gp, rd)
 	return dw
-}
-
-// NewDrawerFrame returns a new Drawer configured for rendering
-// to a RenderFrame of given size.
-// Uses given Device if non-nil; otherwise a new Device is made.
-func NewDrawerFrame(dev *gpu.Device, size image.Point) *Drawer {
-	dw := &Drawer{}
-	dw.ConfigFrame(dev, size)
-	return dw
-}
-
-// ConfigSurface configures the Drawer to use given surface as a render target.
-func (dw *Drawer) ConfigSurface(sf *gpu.Surface) {
-	dw.surface = sf
-	dw.configSystem(sf.GPU, sf.Device, &sf.Format)
-}
-
-// ConfigFrame configures the Drawer to use a RenderFrame as a render target,
-// of given size.  Use dw.Frame.SetSize to resize later.
-// Frame is owned and managed by the Drawer.
-// Uses given Device if non-nil; otherwise a new Device is made.
-func (dw *Drawer) ConfigFrame(dev *gpu.Device, size image.Point) {
-	// dw.Frame = gpu.NewRenderFrame(dw.Sys.GPU, dev, size)
-	// dw.configSystem(sf.GPU, sf.Device, &sf.Format)
 }
 
 func (dw *Drawer) Release() {
-	if dw.Sys == nil {
+	if dw.System == nil {
 		return
 	}
-	dw.Sys.Release()
-	dw.Sys = nil
-	if dw.Frame != nil {
-		dw.Frame.Release()
-		dw.Frame = nil
-	}
+	dw.System.Release()
+	dw.System = nil
 }
 
 // DestSize returns the size of the render destination
 func (dw *Drawer) DestSize() image.Point {
-	if dw.surface != nil {
-		return dw.surface.Format.Size
-	} else {
-		return dw.Frame.Format.Size
-	}
+	return dw.System.Renderer.Render().Format.Size
 }
 
 // DestBounds returns the bounds of the render destination
 func (dw *Drawer) DestBounds() image.Rectangle {
-	if dw.surface != nil {
-		return dw.surface.Format.Bounds()
-	} else {
-		return dw.Frame.Format.Bounds()
-	}
-}
-
-func (dw *Drawer) Surface() any {
-	return dw.surface
+	return dw.System.Renderer.Render().Format.Bounds()
 }
 
 // Start starts recording a sequence of draw / fill actions,

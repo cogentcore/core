@@ -47,7 +47,7 @@ func main() {
 		return
 	}
 
-	sf := gpu.NewSurface(gp, sp, size, 1, gpu.Depth32)
+	sf := gpu.NewSurface(gp, sp, size, 4, gpu.Depth32)
 	ph := phong.NewPhong(sf.GPU, sf)
 	fmt.Printf("format: %s\n", sf.Format.String())
 	resize = func(size image.Point) { sf.SetSize(size) }

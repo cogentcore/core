@@ -118,6 +118,7 @@ func (rt *RenderTexture) ReleaseFrames() {
 
 func (rt *RenderTexture) Release() {
 	rt.ReleaseFrames()
+	rt.render.Release()
 }
 
 func (rt *RenderTexture) Present() {

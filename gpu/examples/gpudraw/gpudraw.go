@@ -30,21 +30,18 @@ func main() {
 	gpu.Debug = true
 	gp.Config("gpudraw")
 
-	var resize func(width, height int)
-	width, height := 1024, 768
-	sp, terminate, pollEvents, width, height, err := gpu.GLFWCreateWindow(gp, width, height, "GPU Draw", &resize)
+	var resize func(size image.Point)
+	size := image.Point{1024, 768}
+	sp, terminate, pollEvents, size, err := gpu.GLFWCreateWindow(gp, size, "GPU Draw", &resize)
 	if err != nil {
 		return
 	}
 
-	sf := gpu.NewSurface(gp, sp, width, height)
-	drw := gpudraw.NewDrawerSurface(sf)
-
+	sf := gpu.NewSurface(gp, sp, size, 1, gpu.UndefinedType) // note: 1, no depth for draw
+	drw := gpudraw.NewDrawer(gp, sf)
 	fmt.Printf("format: %s\n", sf.Format.String())
+	resize = func(size image.Point) { sf.SetSize(size) }
 
-	resize = func(width, height int) {
-		sf.Resized(image.Point{width, height})
-	}
 	destroy := func() {
 		drw.Release()
 		sf.Release()
@@ -70,7 +67,7 @@ func main() {
 
 	rendImgs := func(idx int) {
 		drw.Start()
-		drw.Scale(image.Rectangle{}, imgs[idx], image.Rectangle{}, 0, gpudraw.Src, gpudraw.Unchanged)
+		// drw.Scale(image.Rectangle{}, imgs[idx], image.Rectangle{}, 0, gpudraw.Src, gpudraw.Unchanged)
 		for i := range imgFiles {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
 			dp := image.Point{i * 50, i * 50}

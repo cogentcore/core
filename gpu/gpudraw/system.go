@@ -29,14 +29,13 @@ func (dw *Drawer) ConfigPipeline(pl *gpu.GraphicsPipeline, blend bool) {
 }
 
 // configSystem configures GPUDraw sytem
-func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.TextureFormat) {
+func (dw *Drawer) configSystem(gp *gpu.GPU, rd gpu.Renderer) {
 	dw.opList = slicesx.SetLength(dw.opList, AllocChunk) // allocate
 	dw.opList = dw.opList[:0]
 	dw.images.init()
 
-	dw.Sys = gpu.NewGraphicsSystem(gp, "gpudraw", dev)
-	dw.Sys.ConfigRender(renderFormat, gpu.UndefinedType, dw.surface)
-	sy := dw.Sys
+	dw.System = gpu.NewGraphicsSystem(gp, "gpudraw", rd)
+	sy := dw.System
 	// sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 
 	// note: requires different pipelines for src vs. over draw op modes
@@ -72,9 +71,9 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.T
 	fspl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	fspl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
-	vgp := sy.Vars.AddVertexGroup()
-	mgp := sy.Vars.AddGroup(gpu.Uniform, "Matrix")         // 0
-	tgp := sy.Vars.AddGroup(gpu.SampledTexture, "Texture") // 1
+	vgp := sy.Vars().AddVertexGroup()
+	mgp := sy.Vars().AddGroup(gpu.Uniform, "Matrix")         // 0
+	tgp := sy.Vars().AddGroup(gpu.SampledTexture, "Texture") // 1
 
 	posv := vgp.Add("Pos", gpu.Float32Vector2, 0, gpu.VertexShader)
 	idxv := vgp.Add("Index", gpu.Uint16, 0, gpu.VertexShader)
@@ -101,7 +100,7 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.T
 	rectIndex := idxv.Values.Values[0]
 	gpu.SetValueFrom(rectIndex, []uint16{0, 1, 2, 2, 1, 3})
 
-	vl := sy.Vars.ValueByIndex(0, "Matrix", 0)
+	vl := sy.Vars().ValueByIndex(0, "Matrix", 0)
 	vl.DynamicN = AllocChunk
 
 	// need a dummy texture in case only using fill
@@ -111,30 +110,20 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.T
 }
 
 func (dw *Drawer) drawAll() error {
-	sy := dw.Sys
+	sy := dw.System
 
-	vl := sy.Vars.ValueByIndex(0, "Matrix", 0)
+	vl := sy.Vars().ValueByIndex(0, "Matrix", 0)
 	vl.WriteDynamicBuffer()
 
-	var view *wgpu.TextureView
-	var err error
-	if dw.surface != nil {
-		view, err = dw.surface.AcquireNextTexture()
-		if errors.Log(err) != nil {
-			return err
-		}
-	} else {
-		// todo!
-		// sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], descIndex)
-	}
-
-	mvr := sy.Vars.VarByName(0, "Matrix")
+	mvr := sy.Vars().VarByName(0, "Matrix")
 	mvl := mvr.Values.Values[0]
-	tvr := sy.Vars.VarByName(1, "TexSampler")
+	tvr := sy.Vars().VarByName(1, "TexSampler")
 	tvr.Values.Current = 0
 
-	cmd := sy.NewCommandEncoder()
-	rp := sy.BeginRenderPassNoClear(cmd, view) // NoClear
+	rp, err := sy.BeginRenderPassNoClear()
+	if errors.Log(err) != nil {
+		return err
+	}
 
 	imgIdx := 0
 	lastOp := draw.Op(-1)
@@ -164,13 +153,6 @@ func (dw *Drawer) drawAll() error {
 		}
 		pl.BindDrawIndexed(rp)
 	}
-	rp.End()
-	if dw.surface != nil {
-		dw.surface.SubmitRender(rp, cmd)
-		dw.surface.Present()
-	} else {
-		// dw.Frame.SubmitRender(cmd)
-		// dw.Frame.WaitForRender()
-	}
+	sy.EndRenderPass(rp)
 	return nil
 }

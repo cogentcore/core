@@ -211,16 +211,16 @@ func (sy *GraphicsSystem) NewCommandEncoder() (*wgpu.CommandEncoder, error) {
 }
 
 func (sy *GraphicsSystem) beginRenderPass() (*Render, *wgpu.TextureView, error) {
-	cmd, err := sy.NewCommandEncoder()
-	if err != nil {
-		return nil, nil, err
-	}
-	sy.CurrentCommandEncoder = cmd
 	rd := sy.Renderer
 	view, err := rd.GetCurrentTexture()
 	if errors.Log(err) != nil {
 		return nil, nil, err
 	}
+	cmd, err := sy.NewCommandEncoder()
+	if err != nil {
+		return nil, nil, err
+	}
+	sy.CurrentCommandEncoder = cmd
 	return rd.Render(), view, nil
 }
 
