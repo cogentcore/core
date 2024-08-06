@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Shader manages a single Shader program, which can have multiple

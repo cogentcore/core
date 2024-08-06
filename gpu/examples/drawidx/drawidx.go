@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 //go:embed indexed.wgsl

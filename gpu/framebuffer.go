@@ -5,7 +5,7 @@
 package gpu
 
 import (
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Framebuffer combines an Texture and Render info (which has a depth buffer)

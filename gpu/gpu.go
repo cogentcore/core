@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/reflectx"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 var (

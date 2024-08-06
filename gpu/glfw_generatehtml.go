@@ -9,7 +9,7 @@ package gpu
 import (
 	"os"
 
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 func init() {

@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/indent"
 
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Vars are all the variables that are used by a pipeline,

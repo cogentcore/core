@@ -12,7 +12,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Surface manages the physical device for the visible image

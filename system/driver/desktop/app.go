@@ -18,8 +18,8 @@ import (
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
+	"github.com/cogentcore/webgpu/wgpuglfw"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	wgpuext_glfw "github.com/rajveermalviya/go-webgpu/wgpuext/glfw"
 )
 
 func Init() {
@@ -127,7 +127,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	w.This = w
 
 	a.RunOnMain(func() {
-		surf := a.GPU.Instance.CreateSurface(wgpuext_glfw.GetSurfaceDescriptor(glw))
+		surf := a.GPU.Instance.CreateSurface(wgpuglfw.GetSurfaceDescriptor(glw))
 		var fbsz image.Point
 		fbsz.X, fbsz.Y = glw.GetFramebufferSize()
 		if fbsz == (image.Point{}) {

@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/system"
 	_ "cogentcore.org/core/system/driver"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 //go:embed trianglelit.wgsl

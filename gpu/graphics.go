@@ -6,7 +6,7 @@ package gpu
 
 import (
 	"cogentcore.org/core/base/errors"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // GraphicsPipeline is a Pipeline specifically for the Graphics stack.

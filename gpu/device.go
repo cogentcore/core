@@ -4,7 +4,7 @@
 
 package gpu
 
-import "github.com/rajveermalviya/go-webgpu/wgpu"
+import "github.com/cogentcore/webgpu/wgpu"
 
 // Device holds Device and associated Queue info.
 // A Device is a usable instance of the GPU Adapter hardware.

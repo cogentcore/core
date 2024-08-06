@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	_ "cogentcore.org/core/system/driver"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 //go:embed indexed.wgsl

@@ -8,9 +8,9 @@ package gpu
 
 import (
 	"cogentcore.org/core/base/errors"
+	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpuglfw"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
-	wgpuext_glfw "github.com/rajveermalviya/go-webgpu/wgpuext/glfw"
 )
 
 // note: this file contains the glfw dependencies, for desktop platform builds
@@ -48,7 +48,7 @@ func GLFWCreateWindow(gp *GPU, width, height int, title string, resize *func(wid
 	if err != nil {
 		return
 	}
-	surface = gp.Instance.CreateSurface(wgpuext_glfw.GetSurfaceDescriptor(window))
+	surface = gp.Instance.CreateSurface(wgpuglfw.GetSurfaceDescriptor(window))
 	terminate = func() {
 		window.Destroy()
 		Terminate()

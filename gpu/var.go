@@ -7,7 +7,7 @@ package gpu
 import (
 	"fmt"
 
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Var specifies a variable used in a pipeline, accessed in shader programs

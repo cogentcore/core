@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/examples/images"
 	"cogentcore.org/core/math32"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 //go:embed texture.wgsl

@@ -9,7 +9,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Pipeline is the shared Base for Graphics and Compute Pipelines.

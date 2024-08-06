@@ -7,7 +7,7 @@ package gpu
 import (
 	"image"
 
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // RenderFrame is an offscreen, non-window-backed rendering target,

@@ -8,7 +8,7 @@ import (
 	"embed"
 	"math"
 
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 type ComputePipeline struct {

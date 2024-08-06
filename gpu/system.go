@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // System manages a system of Pipelines that all share

@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
 
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 //go:embed trianglelit.wgsl

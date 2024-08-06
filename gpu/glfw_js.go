@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/system/driver/web/jsfs"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // GLFWCreateWindow is a helper function intended only for use in simple examples that makes a

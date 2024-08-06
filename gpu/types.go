@@ -5,7 +5,7 @@
 package gpu
 
 import (
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // See: https://www.khronos.org/opengl/wiki/Data_Type_(GLSL)

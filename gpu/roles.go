@@ -4,7 +4,7 @@
 
 package gpu
 
-import "github.com/rajveermalviya/go-webgpu/wgpu"
+import "github.com/cogentcore/webgpu/wgpu"
 
 // VarRoles are the functional roles of variables,
 type VarRoles int32 //enums:enum
