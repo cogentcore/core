@@ -64,10 +64,8 @@ func (pl *GraphicsPipeline) BindPipeline(rp *wgpu.RenderPassEncoder) error {
 func (pl *GraphicsPipeline) BindAllGroups(rp *wgpu.RenderPassEncoder) {
 	vs := pl.Vars()
 	ngp := vs.NGroups()
-	for gi := 0; gi < ngp; gi++ {
-		vg := vs.Groups[gi]
-		bg, dynOffs := vg.bindGroup()
-		rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
+	for gi := range ngp {
+		pl.BindGroup(rp, gi)
 	}
 }
 
@@ -77,9 +75,10 @@ func (pl *GraphicsPipeline) BindAllGroups(rp *wgpu.RenderPassEncoder) {
 func (pl *GraphicsPipeline) BindGroup(rp *wgpu.RenderPassEncoder, group int) {
 	vs := pl.Vars()
 	vg := vs.Groups[group]
-	bg, dynOffs := vg.bindGroup()
-	rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
-	// bg.Release()
+	bg, dynOffs, err := vg.bindGroup(vs)
+	if err == nil {
+		rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
+	}
 }
 
 // BindDrawIndexed binds the Current Value for all VertexGroup variables,
@@ -146,16 +145,18 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 		if !rebuild {
 			return nil
 		}
-		pl.ReleasePipeline() // starting over: note: requires keeping shaders around
+		pl.releasePipeline() // starting over: note: requires keeping shaders around
 	}
-	err := pl.BindLayout()
+	play, err := pl.bindLayout()
 	if err != nil {
 		return err
 	}
+	defer play.Release()
+
 	pl.Multisample.Count = uint32(pl.System.Render().Format.Samples)
 	pd := &wgpu.RenderPipelineDescriptor{
 		Label:       pl.Name,
-		Layout:      pl.layout,
+		Layout:      play,
 		Primitive:   pl.Primitive,
 		Multisample: pl.Multisample,
 	}
@@ -206,15 +207,11 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 }
 
 func (pl *GraphicsPipeline) Release() {
-	pl.ReleaseShaders()
-	pl.ReleasePipeline()
+	pl.releaseShaders()
+	pl.releasePipeline()
 }
 
-func (pl *GraphicsPipeline) ReleasePipeline() {
-	if pl.layout != nil {
-		pl.layout.Release()
-		pl.layout = nil
-	}
+func (pl *GraphicsPipeline) releasePipeline() {
 	if pl.renderPipeline != nil {
 		pl.renderPipeline.Release()
 		pl.renderPipeline = nil

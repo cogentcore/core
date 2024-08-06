@@ -53,9 +53,6 @@ type VarGroup struct {
 	// Updated in Config(), after all vars added
 	RoleMap map[VarRoles][]*Var
 
-	// group layout info: description of each var type, role, binding, stages
-	layout *wgpu.BindGroupLayout
-
 	// number of variables with DynamicOffset set
 	nDynamicOffsets int
 
@@ -64,6 +61,12 @@ type VarGroup struct {
 	// the alignment requirement in bytes for DynamicOffset variables.
 	// This is 1 for Vertex buffer variables.
 	alignBytes int
+
+	// need a new bindGroup, when a Values.current has been changed.
+	bindGroupDirty bool
+
+	// current bind group
+	currentBindGroup *wgpu.BindGroup
 }
 
 // addVar adds given variable
@@ -134,24 +137,29 @@ func (vg *VarGroup) ValueByIndexTry(varName string, valIndex int) (*Value, error
 	if err != nil {
 		return nil, err
 	}
-	vl, err := vr.Values.ValueByIndexTry(valIndex)
-	return vl, err
+	return vr.Values.ValueByIndexTry(valIndex)
 }
 
 // SetCurrentValue sets the index of the Current Value to use
 // for given variable name.
-func (vg *VarGroup) SetCurrentValue(name string, valueIndex int) *Var {
-	vr := vg.VarByName(name)
-	vr.Values.SetCurrentValue(valueIndex)
-	return vr
+func (vg *VarGroup) SetCurrentValue(name string, valueIndex int) (*Var, error) {
+	vr, err := vg.VarByNameTry(name)
+	if err != nil {
+		return nil, err
+	}
+	vr.Values.SetCurrentValue(vg, valueIndex)
+	return vr, nil
 }
 
 // SetDynamicIndex sets the dynamic offset index for Value to use
 // for given variable name.
-func (vg *VarGroup) SetDynamicIndex(name string, dynamicIndex int) *Var {
-	vr := vg.VarByName(name)
+func (vg *VarGroup) SetDynamicIndex(name string, dynamicIndex int) (*Var, error) {
+	vr, err := vg.VarByNameTry(name)
+	if err != nil {
+		return nil, err
+	}
 	vr.Values.SetDynamicIndex(dynamicIndex)
-	return vr
+	return vr, nil
 }
 
 // SetNValues sets all vars in this group to have specified
@@ -167,7 +175,7 @@ func (vg *VarGroup) SetNValues(nvals int) {
 // for all vars in group.
 func (vg *VarGroup) SetAllCurrentValue(i int) {
 	for _, vr := range vg.Vars {
-		vr.SetCurrentValue(i)
+		vr.Values.SetCurrentValue(vg, i)
 	}
 }
 
@@ -228,17 +236,10 @@ func (vg *VarGroup) Config(dev *Device) error {
 	return errors.Join(errs...)
 }
 
-// Release destroys infrastructure for Group, Vars and Values -- assumes Free has
-// already been called to free host and device memory.
+// Release destroys infrastructure for Group, Vars and Values.
 func (vg *VarGroup) Release() {
-	vg.ReleaseLayout()
-}
-
-// ReleaseLayout destroys layout
-func (vg *VarGroup) ReleaseLayout() {
-	if vg.layout != nil {
-		vg.layout.Release()
-		vg.layout = nil
+	for _, vr := range vg.Vars {
+		vr.Release()
 	}
 }
 
@@ -246,8 +247,7 @@ func (vg *VarGroup) ReleaseLayout() {
 // Only for non-VertexGroup sets.
 // Must have set NValuesPer for any SampledTexture vars,
 // which require separate descriptors per.
-func (vg *VarGroup) bindLayout(vs *Vars) error {
-	vg.ReleaseLayout()
+func (vg *VarGroup) bindLayout(vs *Vars) (*wgpu.BindGroupLayout, error) {
 	var binds []wgpu.BindGroupLayoutEntry
 
 	vg.nDynamicOffsets = 0
@@ -299,10 +299,61 @@ func (vg *VarGroup) bindLayout(vs *Vars) error {
 
 	bgl, err := vg.device.Device.CreateBindGroupLayout(&bgld)
 	if errors.Log(err) != nil {
-		return err
+		return nil, err
 	}
-	vg.layout = bgl
-	return nil
+	return bgl, nil
+}
+
+// dynamicOffsets returns any current dynamic offsets for this group
+func (vg *VarGroup) dynamicOffsets() []uint32 {
+	var do []uint32
+	curDynIdx := 0
+	for _, vr := range vg.Vars {
+		if vr.Role == Vertex || vr.Role == Index || vr.Role == SampledTexture {
+			continue
+		}
+		if vr.DynamicOffset {
+			do = append(do, vr.Values.dynamicOffset())
+			curDynIdx++
+		}
+	}
+	return do
+}
+
+// bindGroup returns the Current Value bindings for all variables
+// within this Group.  This determines what Values of the Vars the
+// current Render actions will use.  Only for non-VertexGroup groups.
+// The second return value is the dynamicOffsets for any dynamic
+// offset variables.
+func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, []uint32, error) {
+	dynamicOffsets := vg.dynamicOffsets()
+	if vg.currentBindGroup != nil && !vg.bindGroupDirty {
+		return vg.currentBindGroup, dynamicOffsets, nil
+	}
+	vg.bindGroupDirty = false
+	if vg.currentBindGroup != nil {
+		vg.currentBindGroup.Release()
+	}
+	bgl, err := vg.bindLayout(vs)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer bgl.Release()
+
+	var bgs []wgpu.BindGroupEntry
+	for _, vr := range vg.Vars {
+		bgs = append(bgs, vr.bindGroupEntry()...)
+	}
+	bg, err := vg.device.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{
+		Layout:  bgl,
+		Entries: bgs,
+		Label:   vg.Name,
+	})
+	if errors.Log(err) != nil {
+		return nil, nil, err
+	}
+	vg.currentBindGroup = bg
+	return bg, dynamicOffsets, nil
 }
 
 // IndexVar returns the Index variable within this VertexGroup.
@@ -375,62 +426,3 @@ func (vg *VarGroup) vertexLayout() []wgpu.VertexBufferLayout {
 	}
 	return vbls
 }
-
-// bindGroup returns the Current Value bindings for all variables
-// within this Group.  This determines what Values of the Vars the
-// current Render actions will use.  Only for non-VertexGroup groups.
-// The second return value is the dynamicOffsets for any dynamic
-// offset variables.
-func (vg *VarGroup) bindGroup() (*wgpu.BindGroup, []uint32) {
-	var dynamicOffsets []uint32
-	if vg.nDynamicOffsets > 0 {
-		dynamicOffsets = make([]uint32, vg.nDynamicOffsets)
-	}
-	curDynIdx := 0
-	var bgs []wgpu.BindGroupEntry
-	for _, vr := range vg.Vars {
-		bgs = append(bgs, vr.bindGroupEntry()...)
-		if vr.DynamicOffset {
-			dynamicOffsets[curDynIdx] = vr.Values.dynamicOffset()
-			curDynIdx++
-		}
-	}
-	bg, err := vg.device.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{
-		Layout:  vg.layout,
-		Entries: bgs,
-		Label:   vg.Name,
-	})
-	if errors.Log(err) != nil {
-		// todo: panic?
-	}
-	return bg, dynamicOffsets
-}
-
-/*
-// VkPushConfig returns WebGPU push constant ranges
-func (vs *VarGroup) VkPushConfig() []vk.PushConstantRange {
-	alignBytes := 8 // unclear what alignment is
-	var ranges []vk.PushConstantRange
-	offset := 0
-	tsz := 0
-	for _, vr := range vs.Vars {
-		vr.Offset = offset
-		sz := vr.SizeOf
-		rg := vk.PushConstantRange{
-			Offset:     uint32(offset),
-			Size:       uint32(sz),
-			StageFlags: vk.ShaderStageFlags(vr.Shaders),
-		}
-		esz := MemSizeAlign(sz, alignBytes)
-		offset += esz
-		tsz += esz
-		ranges = append(ranges, rg)
-	}
-	if tsz > 128 {
-		if Debug {
-			fmt.Printf("gpu.VarGroup:VkPushConfig total push constant memory exceeds nominal minimum size of 128 bytes: %d\n", tsz)
-		}
-	}
-	return ranges
-}
-*/

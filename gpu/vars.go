@@ -151,10 +151,17 @@ func (vs *Vars) ValueByIndexTry(group int, varName string, valIndex int) (*Value
 
 // SetCurrentValue sets the index of the current Value to use
 // for given variable name, in given group number.
-func (vs *Vars) SetCurrentValue(group int, name string, valueIndex int) *Var {
-	vr := vs.VarByName(group, name)
-	vr.Values.SetCurrentValue(valueIndex)
-	return vr
+func (vs *Vars) SetCurrentValue(group int, name string, valueIndex int) (*Var, error) {
+	vg, err := vs.GroupTry(group)
+	if err != nil {
+		return nil, err
+	}
+	vr, err := vg.VarByNameTry(name)
+	if err != nil {
+		return nil, err
+	}
+	vr.Values.SetCurrentValue(vg, valueIndex)
+	return vr, nil
 }
 
 // SetDynamicIndex sets the dynamic offset index for Value to use
@@ -285,9 +292,11 @@ func (vs *Vars) bindLayout(dev *Device) []*wgpu.BindGroupLayout {
 		if vg == nil {
 			continue
 		}
-		vg.bindLayout(vs)
-		lays = append(lays, vg.layout)
+		vgl, err := vg.bindLayout(vs)
+		if err != nil {
+			continue
+		}
+		lays = append(lays, vgl)
 	}
-	vs.layouts = lays
 	return lays
 }

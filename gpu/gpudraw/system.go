@@ -112,13 +112,15 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, rd gpu.Renderer) {
 func (dw *Drawer) drawAll() error {
 	sy := dw.System
 
-	vl := sy.Vars().ValueByIndex(0, "Matrix", 0)
+	vars := sy.Vars()
+	vl := vars.ValueByIndex(0, "Matrix", 0)
 	vl.WriteDynamicBuffer()
 
-	mvr := sy.Vars().VarByName(0, "Matrix")
+	mvr := vars.VarByName(0, "Matrix")
 	mvl := mvr.Values.Values[0]
-	tvr := sy.Vars().VarByName(1, "TexSampler")
-	tvr.Values.Current = 0
+	tvg := vars.Groups[1]
+	tvr := tvg.VarByName("TexSampler")
+	tvr.SetCurrentValue(tvg, 0)
 
 	rp, err := sy.BeginRenderPass() // NoClear() // TODO: NoClear not working!
 	if errors.Log(err) != nil {
@@ -142,7 +144,7 @@ func (dw *Drawer) drawAll() error {
 		}
 		mvl.DynamicIndex = i
 		if op < fillOver {
-			tvr.Values.Current = dw.images.used[imgIdx].index
+			tvr.SetCurrentValue(tvg, dw.images.used[imgIdx].index)
 			imgIdx++
 		}
 		if op != lastOp {

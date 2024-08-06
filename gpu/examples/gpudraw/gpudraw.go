@@ -131,7 +131,7 @@ func main() {
 
 	// rendImgs(0)
 
-	fpsDelay := time.Second / 1
+	fpsDelay := time.Second / 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

@@ -33,8 +33,6 @@ type Pipeline struct {
 	// Entries contains the entry points into shader code,
 	// which are what is actually called.
 	Entries map[string]*ShaderEntry
-
-	layout *wgpu.PipelineLayout
 }
 
 // Vars returns a pointer to the vars for this pipeline,
@@ -105,8 +103,8 @@ func (pl *Pipeline) AddEntry(sh *Shader, typ ShaderTypes, entry string) *ShaderE
 	return se
 }
 
-// ReleaseShaders releases the shaders
-func (pl *Pipeline) ReleaseShaders() {
+// releaseShaders releases the shaders
+func (pl *Pipeline) releaseShaders() {
 	for _, sh := range pl.Shaders {
 		sh.Release()
 	}
@@ -114,17 +112,22 @@ func (pl *Pipeline) ReleaseShaders() {
 	pl.Entries = nil
 }
 
-// BindLayout configures the PipeLineLayout based on Vars
-func (pl *Pipeline) BindLayout() error {
+// bindLayout returns a PipeLineLayout based on Vars
+func (pl *Pipeline) bindLayout() (*wgpu.PipelineLayout, error) {
 	lays := pl.Vars().bindLayout(pl.System.Device())
-
+	if lays != nil {
+		defer func() {
+			for _, bgl := range lays {
+				bgl.Release()
+			}
+		}()
+	}
 	rpl, err := pl.System.Device().Device.CreatePipelineLayout(&wgpu.PipelineLayoutDescriptor{
 		Label:            pl.Name,
 		BindGroupLayouts: lays,
 	})
 	if errors.Log(err) != nil {
-		return err
+		return nil, err
 	}
-	pl.layout = rpl
-	return nil
+	return rpl, nil
 }

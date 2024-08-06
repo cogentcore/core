@@ -45,7 +45,7 @@ func main() {
 		return
 	}
 
-	sf := gpu.NewSurface(gp, sp, size, 1, gpu.UndefinedType)
+	sf := gpu.NewSurface(gp, sp, size, 4, gpu.UndefinedType)
 	sy := gpu.NewGraphicsSystem(gp, "texture", sf)
 	fmt.Printf("format: %s\n", sf.Format.String())
 
@@ -148,7 +148,7 @@ func main() {
 		if err != nil {
 			return
 		}
-		txv.Values.Current = imgIndex
+		pl.Vars().SetCurrentValue(0, "TexSampler", imgIndex)
 		pl.BindPipeline(rp)
 		pl.BindDrawIndexed(rp)
 		sy.EndRenderPass(rp)
@@ -166,7 +166,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 10
+	fpsDelay := time.Second / 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

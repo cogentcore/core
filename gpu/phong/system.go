@@ -19,11 +19,6 @@ var shaders embed.FS
 func (ph *Phong) configPipeline(pl *gpu.GraphicsPipeline) {
 	pl.SetGraphicsDefaults()
 	pl.SetCullMode(wgpu.CullModeNone)
-	// if ph.Wireframe {
-	// 	pl.SetRasterization(vk.PolygonModeLine, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
-	// } else {
-	// 	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
-	// }
 }
 
 // Groups are the VarGroup numbers.

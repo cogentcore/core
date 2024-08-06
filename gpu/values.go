@@ -386,8 +386,8 @@ type Values struct {
 	// values in indexed order.
 	Values []*Value
 
-	// Current specifies the current value to use in rendering.
-	Current int
+	// current specifies the current value to use in rendering.
+	current int
 
 	// map of vals by name, only for specifically named vals
 	// vs. generically allocated ones. Names must be unique.
@@ -425,19 +425,25 @@ func (vs *Values) SetN(vr *Var, dev *Device, nvals int) bool {
 
 // CurrentValue returns the current Value according to Current index.
 func (vs *Values) CurrentValue() *Value {
-	return vs.Values[vs.Current]
+	return vs.Values[vs.current]
 }
 
-// SetCurrentValue sets the Current value to given index,
+// SsetCurrentValue sets the Current value to given index,
 // returning the value or nil if if the index
 // was out of range (logs an error too).
-func (vs *Values) SetCurrentValue(idx int) *Value {
+// Changing this requires regenerating the VarGroup BindGroup
+// so it marks the current such bind group as dirty
+func (vs *Values) SetCurrentValue(vg *VarGroup, idx int) (*Value, error) {
 	if idx >= len(vs.Values) {
-		slog.Error("gpu.Values.SetCurrentValue", "index", idx, "is out of range", len(vs.Values))
-		return nil
+		err := fmt.Errorf("gpu.Values.SetCurrentValue index %d is out of range %d", idx, len(vs.Values))
+		errors.Log(err)
+		return nil, err
 	}
-	vs.Current = idx
-	return vs.CurrentValue()
+	if vs.current != idx {
+		vs.current = idx
+		vg.bindGroupDirty = true
+	}
+	return vs.CurrentValue(), nil
 }
 
 // SetDynamicIndex sets the dynamic index to use for

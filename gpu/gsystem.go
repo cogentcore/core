@@ -257,6 +257,9 @@ func (sy *GraphicsSystem) BeginRenderPassNoClear() (*wgpu.RenderPassEncoder, err
 // submits the current render commands to the device
 // Queue and releases the [CurrentCommandEncoder] and the RenderPassEncoder.
 func (sy *GraphicsSystem) SubmitRender(rp *wgpu.RenderPassEncoder) error {
+	if rp == nil {
+		panic("nill rp!")
+	}
 	rp.End()
 	cmd := sy.CurrentCommandEncoder
 	sy.CurrentCommandEncoder = nil

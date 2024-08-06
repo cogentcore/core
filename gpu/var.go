@@ -157,8 +157,8 @@ func (vr *Var) SetNValues(dev *Device, nvals int) bool {
 
 // SetCurrentValue sets the Current Value index, which is
 // the Value that will be used in rendering, via BindGroup
-func (vr *Var) SetCurrentValue(i int) {
-	vr.Values.Current = i
+func (vr *Var) SetCurrentValue(vg *VarGroup, i int) {
+	vr.Values.SetCurrentValue(vg, i)
 }
 
 // bindGroupEntry returns the BindGroupEntry for Current
