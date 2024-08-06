@@ -79,7 +79,7 @@ func (pl *GraphicsPipeline) BindGroup(rp *wgpu.RenderPassEncoder, group int) {
 	vg := vs.Groups[group]
 	bg, dynOffs := vg.bindGroup()
 	rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
-	bg.Release()
+	// bg.Release()
 }
 
 // BindDrawIndexed binds the Current Value for all VertexGroup variables,

@@ -42,8 +42,8 @@ func (a *App) InitDrawer() {
 	gp := gpu.NewGPU()
 	gp.Config(a.Name())
 	surf := gp.Instance.CreateSurface(nil)
-	sf := gpu.NewSurface(gp, surf, a.Scrn.PixSize.X, a.Scrn.PixSize.Y)
-	a.Draw.wgpu = gpudraw.NewDrawerSurface(sf)
+	sf := gpu.NewSurface(gp, surf, a.Scrn.PixSize, 1, gpu.UndefinedType)
+	a.Draw.wgpu = gpudraw.NewDrawer(gp, sf)
 }
 
 var loader = js.Global().Get("document").Call("getElementById", "app-wasm-loader")
@@ -109,9 +109,9 @@ func (dw *Drawer) Transform(xform math32.Matrix3, src image.Image, sr image.Rect
 	dw.base.Transform(xform, src, sr, op, unchanged)
 }
 
-func (dw *Drawer) Surface() any {
+func (dw *Drawer) Renderer() any {
 	if dw.wgpu != nil {
-		return dw.wgpu.Surface()
+		return dw.wgpu.Renderer()
 	}
 	return nil
 }
