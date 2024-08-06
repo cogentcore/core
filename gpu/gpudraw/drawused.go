@@ -118,9 +118,9 @@ func (dw *Drawer) addOp(op draw.Op, mtx *drawmatrix.Matrix) {
 	oi := len(dw.opList)
 	mvr := dw.System.Vars().VarByName(0, "Matrix")
 	mvl := mvr.Values.Values[0]
-	nv := mvl.DynamicN
+	nv := mvl.DynamicN()
 	if oi >= nv {
-		mvl.DynamicN += AllocChunk
+		mvl.SetDynamicN(nv + AllocChunk)
 	}
 	gpu.SetDynamicValueFrom(mvl, oi, []drawmatrix.Matrix{*mtx})
 	dw.opList = append(dw.opList, op)

@@ -101,7 +101,7 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, rd gpu.Renderer) {
 	gpu.SetValueFrom(rectIndex, []uint16{0, 1, 2, 2, 1, 3})
 
 	vl := sy.Vars().ValueByIndex(0, "Matrix", 0)
-	vl.DynamicN = AllocChunk
+	vl.SetDynamicN(AllocChunk)
 
 	// need a dummy texture in case only using fill
 	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
@@ -118,9 +118,8 @@ func (dw *Drawer) drawAll() error {
 
 	mvr := vars.VarByName(0, "Matrix")
 	mvl := mvr.Values.Values[0]
-	tvg := vars.Groups[1]
-	tvr := tvg.VarByName("TexSampler")
-	tvr.SetCurrentValue(tvg, 0)
+	tvr := vars.VarByName(1, "TexSampler")
+	tvr.SetCurrentValue(0)
 
 	rp, err := sy.BeginRenderPass() // NoClear() // TODO: NoClear not working!
 	if errors.Log(err) != nil {
@@ -144,7 +143,7 @@ func (dw *Drawer) drawAll() error {
 		}
 		mvl.DynamicIndex = i
 		if op < fillOver {
-			tvr.SetCurrentValue(tvg, dw.images.used[imgIdx].index)
+			tvr.SetCurrentValue(dw.images.used[imgIdx].index)
 			imgIdx++
 		}
 		if op != lastOp {

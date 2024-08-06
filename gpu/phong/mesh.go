@@ -162,14 +162,14 @@ func (ph *Phong) configMeshes() {
 
 func (ph *Phong) configMesh(mv *Mesh, idx int) {
 	vgp := ph.System.Vars().VertexGroup()
-	vgp.ValueByIndex("Pos", idx).DynamicN = mv.NVertex
-	vgp.ValueByIndex("Normal", idx).DynamicN = mv.NVertex
-	vgp.ValueByIndex("TexCoord", idx).DynamicN = mv.NVertex
-	vgp.ValueByIndex("Index", idx).DynamicN = mv.NIndex
+	vgp.ValueByIndex("Pos", idx).SetDynamicN(mv.NVertex)
+	vgp.ValueByIndex("Normal", idx).SetDynamicN(mv.NVertex)
+	vgp.ValueByIndex("TexCoord", idx).SetDynamicN(mv.NVertex)
+	vgp.ValueByIndex("Index", idx).SetDynamicN(mv.NIndex)
 	vc := vgp.ValueByIndex("VertexColor", idx)
 	if mv.HasColor {
-		vc.DynamicN = mv.NVertex
+		vc.SetDynamicN(mv.NVertex)
 	} else {
-		vc.DynamicN = 1
+		vc.SetDynamicN(1)
 	}
 }

@@ -159,7 +159,7 @@ func (ph *Phong) updateObjects() {
 		return
 	}
 	vl := ph.System.Vars().ValueByIndex(int(ObjectGroup), "Object", 0)
-	vl.DynamicN = ph.objects.Len()
+	vl.SetDynamicN(ph.objects.Len())
 	for i, kv := range ph.objects.Order {
 		ob := kv.Value
 		ph.setWorldMatrix(ob)

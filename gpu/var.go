@@ -99,17 +99,28 @@ type Var struct {
 	// the alignment requirement in bytes for DynamicOffset variables.
 	// This is 1 for Vertex buffer variables.
 	alignBytes int
+
+	//	var group we are in
+	VarGroup *VarGroup
+}
+
+// NewVar returns a new Var in given var group
+func NewVar(vg *VarGroup, name string, typ Types, arrayN int, shaders ...ShaderTypes) *Var {
+	vr := &Var{}
+	vr.init(vg, name, typ, arrayN, shaders...)
+	return vr
 }
 
 // init initializes the main values
-func (vr *Var) init(name string, typ Types, arrayN int, role VarRoles, group int, alignBytes int, shaders ...ShaderTypes) {
+func (vr *Var) init(vg *VarGroup, name string, typ Types, arrayN int, shaders ...ShaderTypes) {
+	vr.VarGroup = vg
 	vr.Name = name
 	vr.Type = typ
 	vr.ArrayN = max(arrayN, 1)
-	vr.Role = role
+	vr.Role = vg.Role
 	vr.SizeOf = typ.Bytes()
-	vr.Group = group
-	vr.alignBytes = alignBytes
+	vr.Group = vg.Group
+	vr.alignBytes = vg.alignBytes
 	vr.shaders = 0
 	for _, sh := range shaders {
 		vr.shaders |= ShaderStageFlags[sh]
@@ -157,8 +168,8 @@ func (vr *Var) SetNValues(dev *Device, nvals int) bool {
 
 // SetCurrentValue sets the Current Value index, which is
 // the Value that will be used in rendering, via BindGroup
-func (vr *Var) SetCurrentValue(vg *VarGroup, i int) {
-	vr.Values.SetCurrentValue(vg, i)
+func (vr *Var) SetCurrentValue(i int) {
+	vr.Values.SetCurrentValue(i)
 }
 
 // bindGroupEntry returns the BindGroupEntry for Current

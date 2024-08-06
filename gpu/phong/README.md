@@ -11,8 +11,8 @@ TODO: turn on auto-mipmap stuff for smoother texture rendering
 See [examples/phong] for a working example.
 
 ```Go
-    // needs a gpu.GPU, gpu.Device, and a gpu.TextureFormat for the render target
-    ph := phong.NewPhong(sf.GPU, &sf.Device, &sf.Format)
+    // needs a gpu.GPU, and a gpu.Renderer, e.g., the gpu.Surface
+    ph := phong.NewPhong(sf.GPU, sf)
     
     // add lights
     ph.AddDirectional(math32.NewVector3Color(color.White), math32.Vec3(0, 1, 1))
@@ -39,7 +39,7 @@ See [examples/phong] for a working example.
     // to update any of those elements if they change
 
     // render, to a surface:
-    cmd, rp := ph.RenderStart(view) // uploads updated object data too
+    rp, err := ph.RenderStart() // uploads updated object data too
     for i, ob := range objects {
         ph.UseObjectIndex(i)
         ph.UseMeshName(ob.Mesh)
@@ -49,9 +49,7 @@ See [examples/phong] for a working example.
             ph.UseNoTexture()
         }
     }
-    rp.End()
-    sf.SubmitRender(cmd)
-    sf.Present()
+    ph.RenderEnd(rp)
 ```
 
 # Features

@@ -80,8 +80,7 @@ func (vg *VarGroup) addVar(vr *Var) {
 
 // Add adds a new variable of given type, role, arrayN, and shaders where used
 func (vg *VarGroup) Add(name string, typ Types, arrayN int, shaders ...ShaderTypes) *Var {
-	vr := &Var{}
-	vr.init(name, typ, arrayN, vg.Role, vg.Group, vg.alignBytes, shaders...)
+	vr := NewVar(vg, name, typ, arrayN, shaders...)
 	vg.addVar(vr)
 	return vr
 }
@@ -89,8 +88,7 @@ func (vg *VarGroup) Add(name string, typ Types, arrayN int, shaders ...ShaderTyp
 // AddStruct adds a new struct variable of given total number of bytes in size,
 // type, role, set, and shaders where used
 func (vg *VarGroup) AddStruct(name string, size int, arrayN int, shaders ...ShaderTypes) *Var {
-	vr := &Var{}
-	vr.init(name, Struct, arrayN, vg.Role, vg.Group, vg.alignBytes, shaders...)
+	vr := NewVar(vg, name, Struct, arrayN, shaders...)
 	vr.SizeOf = size
 	vg.addVar(vr)
 	return vr
@@ -147,7 +145,7 @@ func (vg *VarGroup) SetCurrentValue(name string, valueIndex int) (*Var, error) {
 	if err != nil {
 		return nil, err
 	}
-	vr.Values.SetCurrentValue(vg, valueIndex)
+	vr.Values.SetCurrentValue(valueIndex)
 	return vr, nil
 }
 
@@ -175,7 +173,7 @@ func (vg *VarGroup) SetNValues(nvals int) {
 // for all vars in group.
 func (vg *VarGroup) SetAllCurrentValue(i int) {
 	for _, vr := range vg.Vars {
-		vr.Values.SetCurrentValue(vg, i)
+		vr.Values.SetCurrentValue(i)
 	}
 }
 
@@ -307,11 +305,11 @@ func (vg *VarGroup) bindLayout(vs *Vars) (*wgpu.BindGroupLayout, error) {
 // dynamicOffsets returns any current dynamic offsets for this group
 func (vg *VarGroup) dynamicOffsets() []uint32 {
 	var do []uint32
+	if vg.Role == Vertex || vg.Role == SampledTexture {
+		return do
+	}
 	curDynIdx := 0
 	for _, vr := range vg.Vars {
-		if vr.Role == Vertex || vr.Role == Index || vr.Role == SampledTexture {
-			continue
-		}
 		if vr.DynamicOffset {
 			do = append(do, vr.Values.dynamicOffset())
 			curDynIdx++
@@ -331,9 +329,7 @@ func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, []uint32, error) {
 		return vg.currentBindGroup, dynamicOffsets, nil
 	}
 	vg.bindGroupDirty = false
-	if vg.currentBindGroup != nil {
-		vg.currentBindGroup.Release()
-	}
+	vg.currentBindGroup = nil // critically, we do NOT release this!
 	bgl, err := vg.bindLayout(vs)
 	if err != nil {
 		return nil, nil, err

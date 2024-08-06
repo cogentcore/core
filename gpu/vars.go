@@ -160,7 +160,7 @@ func (vs *Vars) SetCurrentValue(group int, name string, valueIndex int) (*Var, e
 	if err != nil {
 		return nil, err
 	}
-	vr.Values.SetCurrentValue(vg, valueIndex)
+	vr.Values.SetCurrentValue(valueIndex)
 	return vr, nil
 }
 

@@ -121,7 +121,7 @@ func (pl *GraphicsPipeline) DrawIndexed(rp *wgpu.RenderPassEncoder) {
 		return
 	}
 	iv := ix.Values.CurrentValue()
-	rp.DrawIndexed(uint32(iv.DynamicN), 1, 0, 0, 0)
+	rp.DrawIndexed(uint32(iv.dynamicN), 1, 0, 0, 0)
 }
 
 // VertexEntry returns the [ShaderEntry] for [VertexShader].

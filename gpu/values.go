@@ -31,11 +31,6 @@ type Value struct {
 	// array size specified on the Var.
 	VarSize int
 
-	// DynamicN is the number of Var elements to encode within one
-	// Value buffer, for Vertex values or DynamicOffset values
-	// (otherwise it is always effectively 1).
-	DynamicN int
-
 	// DynamicIndex is the current index into a DynamicOffset variable
 	// to use for the SetBindGroup call.  Note that this is an index,
 	// not an offset, so it indexes the DynamicN Vars in the Value,
@@ -49,7 +44,7 @@ type Value struct {
 
 	// AllocSize is total memory size of this value in bytes,
 	// as allocated in the buffer.  For non-dynamic case, it is just VarSize.
-	// For dynamic, it is DynamicN * AlignVarSize.
+	// For dynamic, it is dynamicN * AlignVarSize.
 	AllocSize int
 
 	role VarRoles
@@ -66,6 +61,11 @@ type Value struct {
 	// buffer for this value, makes it accessible to the GPU
 	buffer *wgpu.Buffer `display:"-"`
 
+	// dynamicN is the number of Var elements to encode within one
+	// Value buffer, for Vertex values or DynamicOffset values
+	// (otherwise it is always effectively 1).
+	dynamicN int
+
 	// dynamicBuffer is a CPU-based staging buffer for dynamic values
 	// so you can separately set individual dynamic index values and
 	// then efficiently copy the entire thing to the device buffer
@@ -75,6 +75,9 @@ type Value struct {
 	// for SampledTexture Var roles, this is the Texture.
 	// Can set Sampler parameters directly on this.
 	Texture *TextureSample
+
+	// variable for this value
+	vvar *Var
 }
 
 func NewValue(vr *Var, dev *Device, idx int) *Value {
@@ -96,6 +99,7 @@ func MemSizeAlign(size, align int) int {
 // init initializes value based on variable and index
 // within list of vals for this var.
 func (vl *Value) init(vr *Var, dev *Device, idx int) {
+	vl.vvar = vr
 	vl.role = vr.Role
 	vl.device = *dev
 	vl.Index = idx
@@ -104,7 +108,7 @@ func (vl *Value) init(vr *Var, dev *Device, idx int) {
 	vl.alignBytes = vr.alignBytes
 	vl.AlignVarSize = MemSizeAlign(vl.VarSize, vl.alignBytes)
 	vl.isDynamic = vl.role == Vertex || vl.role == Index || vr.DynamicOffset
-	vl.DynamicN = 1
+	vl.dynamicN = 1
 	if vr.Role >= SampledTexture {
 		vl.Texture = NewTextureSample(dev)
 	}
@@ -116,7 +120,7 @@ func (vl *Value) MemSize() int {
 		return vl.Texture.Format.TotalByteSize()
 	}
 	if vl.isDynamic {
-		return vl.AlignVarSize * vl.DynamicN
+		return vl.AlignVarSize * vl.dynamicN
 	}
 	return vl.VarSize
 }
@@ -136,6 +140,7 @@ func (vl *Value) CreateBuffer() error {
 		return nil
 	}
 	vl.Release()
+
 	buf, err := vl.device.Device.CreateBuffer(&wgpu.BufferDescriptor{
 		Size:             uint64(sz),
 		Label:            vl.Name,
@@ -170,6 +175,27 @@ func (vl *Value) NilBufferCheck() error {
 	return nil
 }
 
+// DynamicN returns the number of dynamic values currently configured.
+func (vl *Value) DynamicN() int {
+	return vl.dynamicN
+}
+
+// varGroupDirty tells our VarGroup that our buffers have changed,
+// so a new bindGroup needs to be created when it is next requested.
+func (vl *Value) varGroupDirty() {
+	vl.vvar.VarGroup.bindGroupDirty = true
+}
+
+// SetDynamicN sets the number of dynamic values for this Value.
+// If different, a new bindgroup must be generated.
+func (vl *Value) SetDynamicN(n int) {
+	if n == vl.dynamicN {
+		return
+	}
+	vl.varGroupDirty()
+	vl.dynamicN = n
+}
+
 // SetValueFrom copies given values into value buffer memory,
 // making the buffer if it has not yet been constructed.
 // IMPORTANT: do not use this for dynamic offset Uniform or
@@ -191,7 +217,8 @@ func (vl *Value) SetFromBytes(from []byte) error {
 	}
 	nb := len(from)
 	if vl.isDynamic { // Vertex, Index at this point
-		vl.DynamicN = nb / vl.VarSize
+		dn := nb / vl.VarSize
+		vl.SetDynamicN(dn)
 	}
 	tb := vl.MemSize()
 	if nb != tb {
@@ -199,6 +226,7 @@ func (vl *Value) SetFromBytes(from []byte) error {
 		return errors.Log(err)
 	}
 	if vl.buffer == nil || vl.AllocSize != tb {
+		vl.varGroupDirty()
 		vl.Release()
 		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,
@@ -243,8 +271,8 @@ func (vl *Value) SetDynamicFromBytes(idx int, from []byte) error {
 		err := fmt.Errorf("gpu.Value SetDynamicFromBytes %s: Cannot call this on a non-DynamicOffset Uniform or Storage variable; use SetValueFrom instead", vl.Name)
 		return errors.Log(err)
 	}
-	if idx >= vl.DynamicN {
-		err := fmt.Errorf("gpu.Value SetDynamicFromBytes %s: Index: %d >= DynamicN: %d", vl.Name, idx, vl.DynamicN)
+	if idx >= vl.dynamicN {
+		err := fmt.Errorf("gpu.Value SetDynamicFromBytes %s: Index: %d >= DynamicN: %d", vl.Name, idx, vl.dynamicN)
 		return errors.Log(err)
 	}
 	sz := vl.MemSize()
@@ -271,6 +299,7 @@ func (vl *Value) WriteDynamicBuffer() error {
 		return errors.Log(err)
 	}
 	if vl.buffer == nil || nb != vl.AllocSize {
+		vl.varGroupDirty()
 		vl.Release()
 		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,
@@ -295,8 +324,8 @@ func (vl *Value) WriteDynamicBuffer() error {
 // the current value, returning the value or nil if if the index
 // was out of range (logs an error too).
 func (vl *Value) SetDynamicIndex(idx int) *Value {
-	if idx >= vl.DynamicN {
-		slog.Error("gpu.Values.SetDynamicIndex", "index", idx, "is out of range", vl.DynamicN)
+	if idx >= vl.dynamicN {
+		slog.Error("gpu.Values.SetDynamicIndex", "index", idx, "is out of range", vl.dynamicN)
 		return nil
 	}
 	vl.DynamicIndex = idx
@@ -428,12 +457,10 @@ func (vs *Values) CurrentValue() *Value {
 	return vs.Values[vs.current]
 }
 
-// SsetCurrentValue sets the Current value to given index,
+// SetCurrentValue sets the Current value to given index,
 // returning the value or nil if if the index
 // was out of range (logs an error too).
-// Changing this requires regenerating the VarGroup BindGroup
-// so it marks the current such bind group as dirty
-func (vs *Values) SetCurrentValue(vg *VarGroup, idx int) (*Value, error) {
+func (vs *Values) SetCurrentValue(idx int) (*Value, error) {
 	if idx >= len(vs.Values) {
 		err := fmt.Errorf("gpu.Values.SetCurrentValue index %d is out of range %d", idx, len(vs.Values))
 		errors.Log(err)
@@ -441,7 +468,7 @@ func (vs *Values) SetCurrentValue(vg *VarGroup, idx int) (*Value, error) {
 	}
 	if vs.current != idx {
 		vs.current = idx
-		vg.bindGroupDirty = true
+		vs.Values[0].vvar.VarGroup.bindGroupDirty = true
 	}
 	return vs.CurrentValue(), nil
 }
