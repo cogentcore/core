@@ -300,13 +300,12 @@ func (w *Window) Close() {
 	defer w.Mu.Unlock()
 
 	w.App.RunOnMain(func() {
-		// vk.DeviceWaitIdle(w.Draw.Surf.Device.Device)
-		w.Draw.Sys.WaitDone()
+		w.Draw.System.WaitDone()
 		if w.DestroyGPUFunc != nil {
 			w.DestroyGPUFunc()
 		}
 		w.Draw.Release()
-		w.Draw.Surface().(*gpu.Surface).Release()
+		w.Draw.Renderer().(*gpu.Surface).Release()
 		w.Glw.Destroy()
 		w.Glw = nil // marks as closed for all other calls
 		w.Draw = nil
@@ -379,7 +378,10 @@ func (w *Window) UpdateGeom() {
 	w.Mu.Unlock()
 	// w.App.RunOnMain(func() {
 	// note: getting non-main thread warning.
-	w.Draw.Surface().(*gpu.Surface).Resized(w.PixSize)
+	rnd := w.Draw.Renderer()
+	if rnd != nil {
+		rnd.(*gpu.Surface).SetSize(w.PixSize)
+	}
 	// })
 	if cursc != w.ScreenWindow {
 		if MonitorDebug {

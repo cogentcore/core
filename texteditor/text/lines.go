@@ -888,7 +888,7 @@ func (ls *Lines) deleteTextImpl(st, ed lexer.Pos) *Edit {
 	nl := ls.numLines()
 	if ed.Ln == st.Ln {
 		if st.Ln < nl {
-			ec := min(ed.Ch, len(ls.lines[st.Ln)) // somehow region can still not be valid.
+			ec := min(ed.Ch, len(ls.lines[st.Ln])) // somehow region can still not be valid.
 			ls.lines[st.Ln] = append(ls.lines[st.Ln][:st.Ch], ls.lines[st.Ln][ec:]...)
 			ls.linesEdited(tbe)
 		}

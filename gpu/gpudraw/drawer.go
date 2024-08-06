@@ -75,6 +75,13 @@ func (dw *Drawer) Release() {
 	dw.System = nil
 }
 
+func (dw *Drawer) Renderer() any {
+	if dw.System == nil {
+		return nil
+	}
+	return dw.System.Renderer
+}
+
 // DestSize returns the size of the render destination
 func (dw *Drawer) DestSize() image.Point {
 	return dw.System.Renderer.Render().Format.Size

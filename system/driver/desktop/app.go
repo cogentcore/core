@@ -133,8 +133,9 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 		if fbsz == (image.Point{}) {
 			fbsz = opts.Size
 		}
-		sf := gpu.NewSurface(a.GPU, surf, fbsz.X, fbsz.Y)
-		w.Draw = gpudraw.NewDrawerSurface(sf)
+		// no multisample and no depth
+		sf := gpu.NewSurface(a.GPU, surf, fbsz, 1, gpu.UndefinedType)
+		w.Draw = gpudraw.NewDrawer(a.GPU, sf)
 	})
 
 	// w.Flgs.SetFlag(true, system.Focused) // starts out focused

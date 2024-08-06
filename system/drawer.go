@@ -82,9 +82,9 @@ type Drawer interface {
 	//     from the last time it was used -- saves re-uploading to gpu.
 	Transform(xform math32.Matrix3, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool)
 
-	// Surface is the gpu device being drawn to.
+	// Renderer is the gpu device being drawn to.
 	// Could be nil on unsupported devices (such as offscreen).
-	Surface() any
+	Renderer() any
 }
 
 // DrawerBase is a base implementation of [Drawer] with basic no-ops
@@ -153,7 +153,7 @@ func (dw *DrawerBase) Start() {
 	// no-op
 }
 
-func (dw *DrawerBase) Surface() any {
+func (dw *DrawerBase) Renderer() any {
 	// no-op
 	return nil
 }
