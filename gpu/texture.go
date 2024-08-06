@@ -127,17 +127,17 @@ func (tx *Texture) CreateTexture(usage wgpu.TextureUsage) error {
 
 // https://eliemichel.github.io/LearnWebGPU/advanced-techniques/headless.html
 
-// ConfigFramebuffer configures this texture as a framebuffer texture
+// ConfigRenderTexture configures this texture as a render texture
 // using format.  Sets multisampling to 1, layers to 1.
-// Only makes a device texture -- no host rep.
-func (tx *Texture) ConfigFramebuffer(dev *Device, imgFmt *TextureFormat) {
-	// tx.device = *dev
-	// tx.Format.Format = imgFmt.Format
-	// tx.Format.SetMultisample(1)
-	// tx.Format.Layers = 1
-	// if tx.SetSize(imgFmt.Size) {
-	// 	tx.ConfigStdView()
-	// }
+func (tx *Texture) ConfigRenderTexture(dev *Device, imgFmt *TextureFormat) {
+	tx.device = *dev
+	nfmt := *imgFmt
+	nfmt.SetMultisample(1)
+	if tx.texture != nil && tx.Format == nfmt {
+		return nil
+	}
+	tx.Format = nfmt
+	return tx.CreateTexture(wgpu.TextureUsageRenderAttachment | wgpu.TextureUsageCopySrc)
 }
 
 // ConfigDepth configures this texture as a depth texture
@@ -152,7 +152,7 @@ func (tx *Texture) ConfigDepth(dev *Device, depthType Types, imgFmt *TextureForm
 		return nil
 	}
 	tx.Format = nfmt
-	return tx.CreateTexture(wgpu.TextureUsageRenderAttachment | wgpu.TextureUsageTextureBinding)
+	return tx.CreateTexture(wgpu.TextureUsageRenderAttachment | wgpu.TextureUsageCopySrc)
 }
 
 // ConfigMulti configures this texture as a mutisampling texture
@@ -194,4 +194,27 @@ func (tx *Texture) Release() {
 func (tx *Texture) SetNil() {
 	tx.view = nil
 	tx.texture = nil
+}
+
+// TextureBufferDims represents the sizes required in Buffer to
+// represent a texture of a given size.
+type TextureBufferDims struct {
+	Width               uint64
+	Height              uint64
+	UnpaddedBytesPerRow uint64
+	PaddedBytesPerRow   uint64
+}
+
+func NewTextureBufferDims(width, height int) *TextureBufferDims {
+	td := &TextureBufferDims{}
+	td.Set(width, height)
+	return td
+}
+
+func (td *TextureBufferDims) Set(width, height int) {
+	const bytesPerPixel = 4 // unsafe.Sizeof(uint32(0))
+	td.UnpaddedBytesPerRow = uint64(width * bytesPerPixel)
+	align := uint64(wgpu.CopyBytesPerRowAlignment)
+	padding := (align - td.UnpaddedBytesPerRow%align) % align
+	td.PaddedBytesPerRow = td.UnpaddedBytesPerRow + padding
 }

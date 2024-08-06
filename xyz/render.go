@@ -14,8 +14,6 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vgpu"
-
-	vk "github.com/goki/vulkan"
 )
 
 // render notes:
@@ -27,7 +25,7 @@ import (
 // GPU resources.
 // [Scene.NeedsConfig] indicates if any of these resources
 // have been changed and a new Config is required.
-// * ConfigFrame -- allocates the renderframe -- based on Geom.Size
+// * ConfigFrame -- allocates the rendertarget -- based on Geom.Size
 // * Lights, Meshes, Textures
 // * ConfigNodes to update and validate node-specific settings.
 //   Most nodes do not require this, but Text2D and Embed2D do.
@@ -97,25 +95,20 @@ func (sc *Scene) ConfigFrame(gpu *vgpu.GPU, dev *vgpu.Device) {
 		sz = image.Point{480, 320}
 	}
 	if sc.Frame == nil {
-		sc.Frame = vgpu.NewRenderFrame(gpu, dev, sz)
+		sc.Frame = vgpu.NewRenderTexture(gpu, dev, sz)
 		sc.Frame.Format.SetMultisample(sc.MultiSample)
-		sy := &sc.Phong.Sys
+		sy := sc.Phong.Sys
 		sy.InitGraphics(gpu, "vphong.Phong", dev)
 		sy.ConfigRenderNonSurface(&sc.Frame.Format, vgpu.Depth32)
 		sc.Frame.SetRender(&sy.Render)
 		sc.Phong.ConfigSys()
-		if sc.Wireframe {
-			sy.SetRasterization(vk.PolygonModeLine, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
-		} else {
-			sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
-		}
 	} else {
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 	}
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 }
 
-// Image returns the current rendered image from the Frame RenderFrame.
+// Image returns the current rendered image from the Frame RenderTexture.
 // This version returns a direct pointer to the underlying host version of
 // the GPU image, and should only be used immediately (for saving or writing
 // to another image).  You must call ImageDone() when done with the image.
@@ -146,7 +139,7 @@ func (sc *Scene) ImageDone() {
 }
 
 // ImageCopy returns a copy of the current rendered image
-// from the Frame RenderFrame. A re-used image.RGBA is returned.
+// from the Frame RenderTexture. A re-used image.RGBA is returned.
 // This same image is used across calls to avoid large memory allocations,
 // so it will automatically update after the next ImageCopy call.
 // The underlying image is in the [ImgCopy] field.

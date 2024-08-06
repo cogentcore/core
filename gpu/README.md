@@ -22,11 +22,12 @@ The main gpu code is in the top-level `gpu` package, with the following sub-pack
 
 For systems with multiple GPU devices, by default the discrete device is selected, and if multiple of those are present, the one with the most RAM is used.  To see what is available and their properties, use:
 
-TODO: write a simple command-line tool to show driver features, and update this.
 
 ```
-$ WebGPUinfo --summary
+$ go run cogentcore.org/core/gpu/cmd/webgpuinfo@latest
 ```
+
+(you can `install` that tool for later use as well)
 
 The following environment variables can be set to specifically select a particular device by name (`deviceName`): 
 
@@ -46,10 +47,10 @@ The following environment variables can be set to specifically select a particul
   
 * `Texture` manages a WebGPU Texture and associated `TextureView`.
 * `TextureSample` extends the `Texture` with a `Sampler` that defines how pixels are accessed in a shader.  This is what is actually used for textures in graphics rendering.
-* TODO don't need this, but need to see about offscreen: `Framebuffer` manages an `Texture` along with a `RenderPass` configuration for managing a `Render` target (shared for rendering onto a window `Surface` or an offscreen `RenderFrame`)
+* TODO don't need this, but need to see about offscreen: `RenderTexture` manages an `Texture` along with a `RenderPass` configuration for managing a `Render` target (shared for rendering onto a window `Surface` or an offscreen `RenderTexture`)
 
 * `Surface` represents the full hardware-managed `Texture`s associated with an actual on-screen Window.  One can associate a System with a Surface to manage the Swapchain updating for effective double or triple buffering.
-* `RenderFrame` is an offscreen render target with Framebuffers and a logical device if being used without any Surface -- otherwise it should use the Surface device so images can be copied across them.
+* `RenderTexture` is an offscreen render target with RenderTextures and a logical device if being used without any Surface -- otherwise it should use the Surface device so images can be copied across them.
 
 * Unlike most game-oriented GPU setups, `gpu` is designed to be used in an event-driven manner where render updates arise from user input or other events, instead of requiring a constant render loop taking place at all times (which can optionally be established too).  The event-driven model is vastly more energy efficient for non-game applications.
 
@@ -108,7 +109,7 @@ It is hard to find this info very clearly stated:
 * Textures are assumed to be sRGB and are automatically converted to linear on upload.
 * Other colors that are passed in should be converted from sRGB to linear (the [phong](phong) shader does this for the PerVertex case).
 * The `Surface` automatically converts from Linear to sRGB for actual rendering.
-* A `RenderFrame` for offscreen / headless rendering *must* use `wgpu.TextureFormatRGBA8UnormSrgb` for the format, in order to get back an image that is automatically converted back to sRGB format.
+* A `RenderTexture` for offscreen / headless rendering *must* use `wgpu.TextureFormatRGBA8UnormSrgb` for the format, in order to get back an image that is automatically converted back to sRGB format.
 
 # Limits
 

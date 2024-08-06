@@ -201,7 +201,7 @@ func main() {
 		frameCount++
 		updateCamera()
 
-		view, err := sf.AcquireNextTexture()
+		view, err := sf.GetCurrentTexture()
 		if errors.Log(err) != nil {
 			return
 		}

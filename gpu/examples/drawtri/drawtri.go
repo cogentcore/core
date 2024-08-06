@@ -70,7 +70,7 @@ func main() {
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
-		view, err := sf.AcquireNextTexture()
+		view, err := sf.GetCurrentTexture()
 		if errors.Log(err) != nil {
 			return
 		}

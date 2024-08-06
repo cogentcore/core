@@ -21,7 +21,7 @@ type TextureFormat struct {
 	// Texture format: RGBA8UnormSrgb is default
 	Format wgpu.TextureFormat
 
-	// number of samples. set higher for Framebuffer rendering
+	// number of samples. set higher for RenderTexture rendering
 	// but otherwise default of 1
 	Samples int
 

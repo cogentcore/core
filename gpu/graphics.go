@@ -132,22 +132,6 @@ func (pl *GraphicsPipeline) DrawIndexed(rp *wgpu.RenderPassEncoder) {
 	rp.DrawIndexed(uint32(iv.DynamicN), 1, 0, 0, 0)
 }
 
-// DrawVertex adds commands to the given command buffer
-// to Draw based on current Vertex values
-// func (pl *GraphicsPipeline) DrawVertex(cmd *wgpu.CommandEncoder) {
-// 	vs := &pl.Sys.Vars
-// 	vg := vs.Groups[VertexGroup]
-// 	if vg == nil {
-// 		return
-// 	}
-// 	ix := vg.IndexVar()
-// 	if ix == nil {
-// 		return
-// 	}
-// 	iv := ix.Values.CurrentValue()
-// 	rp.DrawIndexed(uint32(iv.DynamicN), 1, 0, 0, 0)
-// }
-
 // VertexEntry returns the [ShaderEntry] for [VertexShader].
 // Can be nil if no vertex shader defined.
 func (pl *GraphicsPipeline) VertexEntry() *ShaderEntry {

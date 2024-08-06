@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Cogent Core. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -38,19 +38,21 @@ type System struct {
 	// Render manages multisampling and depth buffers.
 	Render Render
 
+	// Renderer is the rendering target for this system,
+	// for a graphics-based system.  It is either a Surface
+	// or a RenderTexture.
+	Renderer Renderer
+
 	// GPU is needed to access some properties and alignment factors.
 	GPU *GPU
 
 	// logical device for this System.
 	// This is owned by us for a Compute device.
 	Device Device
-
-	// if we are configured with a surface, this is it, else nil.
-	Surface *Surface
 }
 
 // NewGraphicsSystem returns a new System for graphics use, using
-// the graphics Device from the Surface or RenderFrame depending
+// the graphics Device from the Surface or RenderTexture depending
 // on the target of rendering.the Surface associated with this system.
 func NewGraphicsSystem(gp *GPU, name string, dev *Device) *System {
 	sy := &System{}
@@ -254,7 +256,7 @@ func (sy *System) ConfigRender(renderFormat *TextureFormat, depthFmt Types, surf
 // When the render surface (e.g., window) is resized, call this function.
 // WebGPU does not have any internal mechanism for tracking this, so we
 // need to drive it from external events.
-func (sy *System) Resized(newSize image.Point) {
+func (sy *System) SetSize(size image.Point) {
 	if sy.Surface != nil {
 		sy.Surface.Resized(newSize)
 	} else {
@@ -263,7 +265,7 @@ func (sy *System) Resized(newSize image.Point) {
 }
 
 // ConfigRenderNonSurface configures the renderpass, including the texture
-// format that we're rendering to, for a RenderFrame non-surface target,
+// format that we're rendering to, for a RenderTexture non-surface target,
 // and the depth buffer format (pass UndefinedType for no depth buffer).
 func (sy *System) ConfigRenderNonSurface(renderFormat *TextureFormat, depthFmt Types) {
 	sy.Render.Config(&sy.Device, renderFormat, depthFmt, true)

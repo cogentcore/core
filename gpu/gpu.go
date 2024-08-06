@@ -263,7 +263,7 @@ func (gp *GPU) NewComputeSystem(name string) *System {
 
 // NewGraphicsSystem returns a new system initialized for this GPU,
 // for graphics functionality, using Device from the Surface or
-// RenderFrame depending on the target of rendering.
+// RenderTexture depending on the target of rendering.
 func (gp *GPU) NewGraphicsSystem(name string, dev *Device) *System {
 	return NewGraphicsSystem(gp, name, dev)
 }

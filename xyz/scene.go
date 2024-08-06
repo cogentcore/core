@@ -23,7 +23,7 @@ import (
 var Update3DTrace = false
 
 // Scene is the overall scenegraph containing nodes as children.
-// It renders to its own vgpu.RenderFrame.
+// It renders to its own vgpu.RenderTexture.
 // The Image of this Frame is usable directly or, via xyzcore.Scene,
 // where it is copied into an overall core.Scene image.
 //
@@ -60,7 +60,7 @@ type Scene struct {
 	// Viewport-level viewbox within any parent Viewport2D
 	Geom math32.Geom2DInt `set:"-"`
 
-	// number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
+	// number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderTexture
 	MultiSample int `default:"4"`
 
 	// render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)
@@ -91,7 +91,7 @@ type Scene struct {
 	Phong vphong.Phong `set:"-"`
 
 	// the vgpu render frame holding the rendered scene
-	Frame *vgpu.RenderFrame `set:"-"`
+	Frame *vgpu.RenderTexture `set:"-"`
 
 	// image used to hold a copy of the Frame image, for ImageCopy() call.
 	// This is re-used across calls to avoid large memory allocations,
