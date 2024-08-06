@@ -13,7 +13,6 @@ import (
 	"time"
 	"unsafe"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
 	"github.com/cogentcore/webgpu/wgpu"
@@ -38,23 +37,18 @@ func main() {
 	gpu.Debug = true
 	gp.Config("drawidx")
 
-	var resize func(width, height int)
-	width, height := 1024, 768
-	sp, terminate, pollEvents, width, height, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Triangle Indexed", &resize)
+	var resize func(size image.Point)
+	size := image.Point{1024, 768}
+	sp, terminate, pollEvents, size, err := gpu.GLFWCreateWindow(gp, size, "Draw Triangle Indexed", &resize)
 	if err != nil {
 		return
 	}
 
-	sf := gpu.NewSurface(gp, sp, width, height)
-
+	sf := gpu.NewSurface(gp, sp, size, 1, gpu.UndefinedType)
+	sy := gpu.NewGraphicsSystem(gp, "drawidx", sf)
 	fmt.Printf("format: %s\n", sf.Format.String())
 
-	sy := gp.NewGraphicsSystem("drawidx", sf.Device)
-	sy.ConfigRender(&sf.Format, gpu.UndefinedType, sf)
-
-	resize = func(width, height int) {
-		sf.Resized(image.Point{width, height})
-	}
+	resize = func(size image.Point) { sf.SetSize(size) }
 	destroy := func() {
 		sy.Release()
 		sf.Release()
@@ -71,8 +65,8 @@ func main() {
 	pl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	pl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
-	vgp := sy.Vars.AddVertexGroup()
-	ugp := sy.Vars.AddGroup(gpu.Uniform)
+	vgp := sy.Vars().AddVertexGroup()
+	ugp := sy.Vars().AddGroup(gpu.Uniform)
 
 	// vertex are dynamically sized in general, so using 0 here
 	posv := vgp.Add("Pos", gpu.Float32Vector3, 0, gpu.VertexShader)
@@ -131,17 +125,13 @@ func main() {
 		camo.Model.SetRotationY(.1 * float32(frameCount))
 		gpu.SetValueFrom(cam, []CamView{camo})
 
-		view, err := sf.AcquireNextTexture()
-		if errors.Log(err) != nil {
+		rp, err := sy.BeginRenderPass()
+		if err != nil {
 			return
 		}
-		cmd := sy.NewCommandEncoder()
-		rp := sy.BeginRenderPass(cmd, view)
 		pl.BindPipeline(rp)
 		pl.BindDrawIndexed(rp)
-		rp.End()
-		sf.SubmitRender(rp, cmd)
-		sf.Present()
+		sy.EndRenderPass(rp)
 
 		frameCount++
 		eTime := time.Now()

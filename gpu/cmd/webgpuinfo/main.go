@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/base/reflectx"
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 func main() {

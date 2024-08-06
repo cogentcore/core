@@ -18,7 +18,7 @@ import (
 const MaxLights = 8
 
 // Phong implements standard Blinn-Phong rendering pipelines
-// in a gpu System.
+// in a gpu GraphicsSystem.
 // Must Add all Lights, Meshes, Textures and Objects after
 // getting a NewPhong, and then call Config() to configure
 // everything on the GPU prior to first RenderStart.
@@ -87,7 +87,7 @@ type Phong struct {
 	objectUpdated bool
 
 	// rendering system
-	Sys *gpu.System
+	Sys *gpu.GraphicsSystem
 
 	// overall lock on Phong operations, use Lock, Unlock on Phong
 	sync.Mutex
@@ -100,9 +100,9 @@ type Phong struct {
 // to connect the render target to it, so it will be updated during resizing.
 func NewPhong(gp *gpu.GPU, dev *gpu.Device, renderFormat *gpu.TextureFormat, surface *gpu.Surface) *Phong {
 	ph := &Phong{}
-	ph.Sys = gpu.NewGraphicsSystem(gp, "phong", dev)
-	ph.Sys.ConfigRender(renderFormat, gpu.Depth32, surface)
-	ph.configSystem()
+	ph.System = gpu.NewGraphicsSystem(gp, "phong", dev)
+	ph.System.ConfigRender(renderFormat, gpu.Depth32, surface)
+	ph.configGraphicsSystem()
 	return ph
 }
 
@@ -111,11 +111,11 @@ func (ph *Phong) Release() {
 	ph.Lock()
 	defer ph.Unlock()
 
-	if ph.Sys == nil {
+	if ph.System == nil {
 		return
 	}
-	ph.Sys.Release()
-	ph.Sys = nil
+	ph.System.Release()
+	ph.System = nil
 	ph.meshes.Reset()
 	ph.textures.Reset()
 	ph.objects.Reset()
@@ -130,7 +130,7 @@ func (ph *Phong) Config() *Phong {
 	ph.Lock()
 	defer ph.Unlock()
 
-	ph.Sys.Config()
+	ph.System.Config()
 	ph.configLights()
 	ph.configMeshes()
 	ph.configTextures()
@@ -183,8 +183,8 @@ func (ph *Phong) RenderStart(view *wgpu.TextureView) (*wgpu.CommandEncoder, *wgp
 
 	ph.updateObjects()
 
-	cmd := ph.Sys.NewCommandEncoder()
-	rp := ph.Sys.BeginRenderPass(cmd, view)
+	cmd := ph.System.NewCommandEncoder()
+	rp := ph.System.BeginRenderPass(cmd, view)
 	return cmd, rp
 }
 
@@ -206,21 +206,21 @@ func (ph *Phong) Render(rp *wgpu.RenderPassEncoder) {
 
 // RenderOneColor renders current settings to onecolor pipeline.
 func (ph *Phong) RenderOneColor(rp *wgpu.RenderPassEncoder) {
-	pl := ph.Sys.GraphicsPipelines["onecolor"]
+	pl := ph.System.GraphicsPipelines["onecolor"]
 	pl.BindPipeline(rp)
 	pl.BindDrawIndexed(rp)
 }
 
 // RenderTexture renders current settings to texture pipeline
 func (ph *Phong) RenderTexture(rp *wgpu.RenderPassEncoder) {
-	pl := ph.Sys.GraphicsPipelines["texture"]
+	pl := ph.System.GraphicsPipelines["texture"]
 	pl.BindPipeline(rp)
 	pl.BindDrawIndexed(rp)
 }
 
 // RenderVertexColor renders current settings to vertexcolor pipeline
 func (ph *Phong) RenderVertexColor(rp *wgpu.RenderPassEncoder) {
-	pl := ph.Sys.GraphicsPipelines["pervertex"]
+	pl := ph.System.GraphicsPipelines["pervertex"]
 	pl.BindPipeline(rp)
 	pl.BindDrawIndexed(rp)
 }

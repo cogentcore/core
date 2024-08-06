@@ -39,7 +39,7 @@ func (ph *Phong) ResetMeshes() {
 	defer ph.Unlock()
 
 	ph.meshes.Reset()
-	vgp := ph.Sys.Vars.VertexGroup()
+	vgp := ph.System.Vars.VertexGroup()
 	vgp.SetNValues(1)
 }
 
@@ -71,7 +71,7 @@ func (ph *Phong) AddMeshFromShape(name string, sh shape.Shape) {
 	sh.Set(mv.vertexArray, mv.normalArray, mv.textureArray, mv.indexArray)
 
 	nm := ph.meshes.Len()
-	vgp := ph.Sys.Vars.VertexGroup()
+	vgp := ph.System.Vars.VertexGroup()
 	vgp.SetNValues(nm) // add to all vars
 	idx := nm - 1
 	ph.configMesh(mv, idx)
@@ -115,7 +115,7 @@ func (ph *Phong) UseMeshIndex(idx int) error {
 	ph.Lock()
 	defer ph.Unlock()
 
-	sy := ph.Sys
+	sy := ph.System
 	mesh := ph.meshes.ValueByIndex(idx)
 	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Pos", idx)
 	sy.Vars.SetCurrentValue(gpu.VertexGroup, "Normal", idx)
@@ -152,7 +152,7 @@ func (ph *Phong) SetMeshName(name string) error {
 // manually after this.  Otherwise, they should be good to go.
 func (ph *Phong) configMeshes() {
 	nm := ph.meshes.Len()
-	vgp := ph.Sys.Vars.VertexGroup()
+	vgp := ph.System.Vars.VertexGroup()
 	vgp.SetNValues(nm)
 	for i, kv := range ph.meshes.Order {
 		mv := kv.Value
@@ -161,7 +161,7 @@ func (ph *Phong) configMeshes() {
 }
 
 func (ph *Phong) configMesh(mv *Mesh, idx int) {
-	vgp := ph.Sys.Vars.VertexGroup()
+	vgp := ph.System.Vars.VertexGroup()
 	vgp.ValueByIndex("Pos", idx).DynamicN = mv.NVertex
 	vgp.ValueByIndex("Normal", idx).DynamicN = mv.NVertex
 	vgp.ValueByIndex("TexCoord", idx).DynamicN = mv.NVertex

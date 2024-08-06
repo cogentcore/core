@@ -18,7 +18,7 @@ type ComputePipeline struct {
 // // ConfigCompute does the configuration for a Compute pipeline
 // func (pl *GraphicsPipeline) ConfigCompute() {
 // 	var pipelineCache vk.PipelineCache
-// 	ret := vk.CreatePipelineCache(pl.Sys.Device.Device, &vk.PipelineCacheCreateInfo{
+// 	ret := vk.CreatePipelineCache(pl.System.Device.Device, &vk.PipelineCacheCreateInfo{
 // 		SType: vk.StructureTypePipelineCacheCreateInfo,
 // 	}, nil, &pipelineCache)
 // 	IfPanic(NewError(ret))
@@ -30,7 +30,7 @@ type ComputePipeline struct {
 // 		Layout: pl.Vars().VkDescLayout,
 // 		Stage:  pl.VkConfig.PStages[0], // note: only one allowed
 // 	}
-// 	ret = vk.CreateComputePipelines(pl.Sys.Device.Device, pl.VkCache, 1, []vk.ComputePipelineCreateInfo{cfg}, nil, pipeline)
+// 	ret = vk.CreateComputePipelines(pl.System.Device.Device, pl.VkCache, 1, []vk.ComputePipelineCreateInfo{cfg}, nil, pipeline)
 // 	IfPanic(NewError(ret))
 // 	pl.VkPipeline = pipeline[0]
 //
@@ -39,9 +39,9 @@ type ComputePipeline struct {
 
 // https://www.reddit.com/r/WebGPU/comments/us9p72/multiple_command_buffers_vs_multiple_batches_of/
 
-// NewComputePipelineEmbed returns a new pipeline added to this System,
+// NewComputePipelineEmbed returns a new pipeline added to this GraphicsSystem,
 // using given file name from given embed.FS filesystem as a ComputeShader.
-func (sy *System) NewComputePipelineEmbed(name string, efs embed.FS, fname string) *Pipeline {
+func (sy *GraphicsSystem) NewComputePipelineEmbed(name string, efs embed.FS, fname string) *Pipeline {
 	// pl := sy.NewPipeline(name)
 	// pl.AddShaderEmbed(name, ComputeShader, efs, fname)
 	// return pl
@@ -54,7 +54,7 @@ func (sy *System) NewComputePipelineEmbed(name string, efs embed.FS, fname strin
 // (see Vars NDescs for info).
 // Required whenever variables have changed their mappings,
 // before running a command.
-func (sy *System) ComputeResetBindVars(cmd *wgpu.CommandEncoder, descIndex int) {
+func (sy *GraphicsSystem) ComputeResetBindVars(cmd *wgpu.CommandEncoder, descIndex int) {
 	// sy.CmdResetBindVars(cmd, descIndex)
 }
 
@@ -101,7 +101,7 @@ func (pl *Pipeline) ComputeDispatch1D(cmd *wgpu.CommandEncoder, n, threads int) 
 // This is the best way to coordinate processing within a sequence of
 // compute shader calls within a single command buffer.
 // Returns an error if the named event was not found.
-func (sy *System) ComputeSetEvent(cmd *wgpu.CommandEncoder, event string) error {
+func (sy *GraphicsSystem) ComputeSetEvent(cmd *wgpu.CommandEncoder, event string) error {
 	// ev, err := sy.EventByNameTry(event)
 	// if err != nil {
 	// 	return err
@@ -116,7 +116,7 @@ func (sy *System) ComputeSetEvent(cmd *wgpu.CommandEncoder, event string) error 
 // However, use ComputeWaitMem* calls (e.g., WriteRead) to ensure memory writes
 // have completed, instead of creating an Event.
 // Returns an error if the named event was not found.
-func (sy *System) ComputeWaitEvents(cmd *wgpu.CommandEncoder, event ...string) error {
+func (sy *GraphicsSystem) ComputeWaitEvents(cmd *wgpu.CommandEncoder, event ...string) error {
 	// evts := make([]vk.Event, len(event))
 	// for i, enm := range event {
 	// 	ev, err := sy.EventByNameTry(enm)
@@ -134,14 +134,14 @@ func (sy *System) ComputeWaitEvents(cmd *wgpu.CommandEncoder, event ...string) e
 // ComputeCopyToGPU records command to copy given regions
 // in the Storage buffer memory from CPU to GPU, in one call.
 // Use SyncRegValueIndexFromCPU to get the regions.
-func (sy *System) ComputeCopyToGPU(cmd *wgpu.CommandEncoder, regs ...MemReg) {
+func (sy *GraphicsSystem) ComputeCopyToGPU(cmd *wgpu.CommandEncoder, regs ...MemReg) {
 	sy.Mem.CmdTransferStorageRegsToGPU(cmd, regs)
 }
 
 // ComputeCopyFromGPU records command to copy given regions
 // in the Storage buffer memory from GPU to CPU, in one call.
 // Use SyncRegValueIndexFromCPU to get the regions.
-func (sy *System) ComputeCopyFromGPU(cmd *wgpu.CommandEncoder, regs ...MemReg) {
+func (sy *GraphicsSystem) ComputeCopyFromGPU(cmd *wgpu.CommandEncoder, regs ...MemReg) {
 	sy.Mem.CmdTransferStorageRegsFromGPU(cmd, regs)
 }
 
@@ -149,7 +149,7 @@ func (sy *System) ComputeCopyFromGPU(cmd *wgpu.CommandEncoder, regs ...MemReg) {
 // global memory writes from the shader have completed and are ready to read
 // in the next step of a command queue.
 // Use this instead of Events to synchronize steps of a computation.
-func (sy *System) ComputeWaitMemWriteRead(cmd *wgpu.CommandEncoder) {
+func (sy *GraphicsSystem) ComputeWaitMemWriteRead(cmd *wgpu.CommandEncoder) {
 	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
 	vk.CmdPipelineBarrier(cmd, shader, shader, vk.DependencyFlags(0), 1,
 		[]vk.MemoryBarrier{{
@@ -163,7 +163,7 @@ func (sy *System) ComputeWaitMemWriteRead(cmd *wgpu.CommandEncoder) {
 // global memory writes from the host to shader have completed.
 // Use this if the first commands are to copy memory from host,
 // instead of creating a separate Event.
-func (sy *System) ComputeWaitMemHostToShader(cmd *wgpu.CommandEncoder) {
+func (sy *GraphicsSystem) ComputeWaitMemHostToShader(cmd *wgpu.CommandEncoder) {
 	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
 	host := vk.PipelineStageFlags(vk.PipelineStageHostBit)
 	vk.CmdPipelineBarrier(cmd, host, shader, vk.DependencyFlags(0), 1,
@@ -180,7 +180,7 @@ func (sy *System) ComputeWaitMemHostToShader(cmd *wgpu.CommandEncoder) {
 // This is not necessary if a standard QueueWaitIdle is done at
 // the end of a command (basically not really needed,
 // but included for completeness).
-func (sy *System) ComputeWaitMemShaderToHost(cmd *wgpu.CommandEncoder) {
+func (sy *GraphicsSystem) ComputeWaitMemShaderToHost(cmd *wgpu.CommandEncoder) {
 	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
 	host := vk.PipelineStageFlags(vk.PipelineStageHostBit)
 	vk.CmdPipelineBarrier(cmd, shader, host, vk.DependencyFlags(0), 1,
@@ -195,7 +195,7 @@ func (sy *System) ComputeWaitMemShaderToHost(cmd *wgpu.CommandEncoder) {
 // given buffer's memory writes have completed for given buffer from the compute shader,
 // and are ready for the host to read.  Vulkan docs suggest that global memory
 // buffer barrier is generally better to use (ComputeWaitMem*)
-func (sy *System) ComputeWaitMemoryBuff(cmd *wgpu.CommandEncoder, buff *Buffer) {
+func (sy *GraphicsSystem) ComputeWaitMemoryBuff(cmd *wgpu.CommandEncoder, buff *Buffer) {
 	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
 	host := vk.PipelineStageFlags(vk.PipelineStageHostBit)
 	vk.CmdPipelineBarrier(cmd, shader, host, vk.DependencyFlags(0), 0, nil, 1,
@@ -213,12 +213,12 @@ func (sy *System) ComputeWaitMemoryBuff(cmd *wgpu.CommandEncoder, buff *Buffer) 
 // Then waits for the commands to finish before returning
 // control to the CPU.  Results will be available immediately
 // thereafter for retrieving back from the GPU.
-func (sy *System) ComputeSubmitWait(cmd *wgpu.CommandEncoder) {
+func (sy *GraphicsSystem) ComputeSubmitWait(cmd *wgpu.CommandEncoder) {
 	CmdSubmitWait(cmd, &sy.Device)
 }
 
 // ComputeCmdEnd adds an end to given command buffer
-func (sy *System) ComputeCmdEnd(cmd *wgpu.CommandEncoder) {
+func (sy *GraphicsSystem) ComputeCmdEnd(cmd *wgpu.CommandEncoder) {
 	CmdEnd(cmd)
 }
 
@@ -231,7 +231,7 @@ func (sy *System) ComputeCmdEnd(cmd *wgpu.CommandEncoder) {
 // such commands, whenever the CPU needs to be sure the submitted GPU
 // commands have completed.  Must use "ComputeWait" if using std
 // ComputeWait function.
-func (sy *System) ComputeSubmitWaitSignal(cmd *wgpu.CommandEncoder, wait, signal, fence string) error {
+func (sy *GraphicsSystem) ComputeSubmitWaitSignal(cmd *wgpu.CommandEncoder, wait, signal, fence string) error {
 	CmdEnd(cmd)
 	ws, err := sy.SemaphoreByNameTry(wait)
 	if err != nil {
@@ -259,7 +259,7 @@ func (sy *System) ComputeSubmitWaitSignal(cmd *wgpu.CommandEncoder, wait, signal
 // such commands, whenever the CPU needs to be sure the submitted GPU
 // commands have completed.  Must use "ComputeWait" if using std
 // ComputeWait function.
-func (sy *System) ComputeSubmitSignal(cmd *wgpu.CommandEncoder, signal, fence string) error {
+func (sy *GraphicsSystem) ComputeSubmitSignal(cmd *wgpu.CommandEncoder, signal, fence string) error {
 	CmdEnd(cmd)
 	ss, err := sy.SemaphoreByNameTry(signal)
 	if err != nil {
@@ -277,7 +277,7 @@ func (sy *System) ComputeSubmitSignal(cmd *wgpu.CommandEncoder, signal, fence st
 }
 
 // ComputeWaitFence waits for given fence (by name), and resets the fence
-func (sy *System) ComputeWaitFence(fence string) error {
+func (sy *GraphicsSystem) ComputeWaitFence(fence string) error {
 	fc, err := sy.FenceByNameTry(fence)
 	if err != nil {
 		return err
@@ -288,7 +288,7 @@ func (sy *System) ComputeWaitFence(fence string) error {
 }
 
 // ComputeWait waits for the standard ComputeWait fence
-func (sy *System) ComputeWait() error {
+func (sy *GraphicsSystem) ComputeWait() error {
 	fc, _ := sy.FenceByNameTry("ComputeWait")
 	vk.WaitForFences(sy.Device.Device, 1, []vk.Fence{fc}, vk.True, vk.MaxUint64)
 	vk.ResetFences(sy.Device.Device, 1, []vk.Fence{fc})

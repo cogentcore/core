@@ -257,16 +257,9 @@ func (gp *GPU) Release() {
 
 // NewComputeSystem returns a new system initialized for this GPU,
 // exclusively for Compute, not graphics functionality.
-func (gp *GPU) NewComputeSystem(name string) *System {
-	return NewComputeSystem(gp, name)
-}
-
-// NewGraphicsSystem returns a new system initialized for this GPU,
-// for graphics functionality, using Device from the Surface or
-// RenderTexture depending on the target of rendering.
-func (gp *GPU) NewGraphicsSystem(name string, dev *Device) *System {
-	return NewGraphicsSystem(gp, name, dev)
-}
+// func (gp *GPU) NewComputeSystem(name string) *GraphicsSystem {
+// 	return NewComputeGraphicsSystem(gp, name)
+// }
 
 // NewDevice returns a new device for given GPU.
 // It gets the Queue for this device.

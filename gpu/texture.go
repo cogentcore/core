@@ -129,7 +129,7 @@ func (tx *Texture) CreateTexture(usage wgpu.TextureUsage) error {
 
 // ConfigRenderTexture configures this texture as a render texture
 // using format.  Sets multisampling to 1, layers to 1.
-func (tx *Texture) ConfigRenderTexture(dev *Device, imgFmt *TextureFormat) {
+func (tx *Texture) ConfigRenderTexture(dev *Device, imgFmt *TextureFormat) error {
 	tx.device = *dev
 	nfmt := *imgFmt
 	nfmt.SetMultisample(1)

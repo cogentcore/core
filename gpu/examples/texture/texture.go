@@ -12,7 +12,6 @@ import (
 	"runtime"
 	"time"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/examples/images"
@@ -39,23 +38,18 @@ func main() {
 	gpu.Debug = true
 	gp.Config("texture")
 
-	var resize func(width, height int)
-	width, height := 1024, 768
-	sp, terminate, pollEvents, width, height, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Texture", &resize)
+	var resize func(size image.Point)
+	size := image.Point{1024, 768}
+	sp, terminate, pollEvents, size, err := gpu.GLFWCreateWindow(gp, size, "Draw Texture", &resize)
 	if err != nil {
 		return
 	}
 
-	sf := gpu.NewSurface(gp, sp, width, height)
-
+	sf := gpu.NewSurface(gp, sp, size, 1, gpu.UndefinedType)
+	sy := gpu.NewGraphicsSystem(gp, "texture", sf)
 	fmt.Printf("format: %s\n", sf.Format.String())
 
-	sy := gp.NewGraphicsSystem("texture", sf.Device)
-	sy.ConfigRender(&sf.Format, gpu.UndefinedType, sf)
-
-	resize = func(width, height int) {
-		sf.Resized(image.Point{width, height})
-	}
+	resize = func(size image.Point) { sf.SetSize(size) }
 	destroy := func() {
 		sy.Release()
 		sf.Release()
@@ -72,9 +66,9 @@ func main() {
 	pl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	pl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
-	vgp := sy.Vars.AddVertexGroup()
-	tgp := sy.Vars.AddGroup(gpu.SampledTexture) // texture in 0 so frag only gets 0
-	ugp := sy.Vars.AddGroup(gpu.Uniform)
+	vgp := sy.Vars().AddVertexGroup()
+	tgp := sy.Vars().AddGroup(gpu.SampledTexture) // texture in 0 so frag only gets 0
+	ugp := sy.Vars().AddGroup(gpu.Uniform)
 
 	posv := vgp.Add("Pos", gpu.Float32Vector3, 0, gpu.VertexShader)
 	clrv := vgp.Add("Color", gpu.Float32Vector3, 0, gpu.VertexShader)
@@ -149,18 +143,14 @@ func main() {
 
 		imgIndex := (frameCount / 10) % len(imgs)
 
-		view, err := sf.AcquireNextTexture()
-		if errors.Log(err) != nil {
+		rp, err := sy.BeginRenderPass()
+		if err != nil {
 			return
 		}
-		cmd := sy.NewCommandEncoder()
-		rp := sy.BeginRenderPass(cmd, view)
 		txv.Values.Current = imgIndex
 		pl.BindPipeline(rp)
 		pl.BindDrawIndexed(rp)
-		rp.End()
-		sf.SubmitRender(rp, cmd)
-		sf.Present()
+		sy.EndRenderPass(rp)
 
 		frameCount++
 		eTime := time.Now()

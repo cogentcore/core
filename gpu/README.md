@@ -38,7 +38,7 @@ The following environment variables can be set to specifically select a particul
 # Basic Elements and Organization
 
 * `GPU` represents the hardware `Adapter` and maintains global settings, info about the hardware.
-    + `Device` is a *logical* device and associated `Queue` info. Each such device can function in parallel.
+   GraphicsSystemvice` is a *logical* device and associated `Queue` info. Each such device can function in parallel.GraphicsSystem
 
 * `System` manages multiple `Pipeline`s and associated variables (`Var`) and `Value`s, to accomplish a complete overall rendering / computational job.  The `Vars` and `Values` are shared across all pipelines within a System, which is more efficient and usually what you want.  A given shader can simply ignore the variables it doesn't need.
     + `Pipeline` performs a specific chain of operations, using `Shader` program(s).  In a graphics context, each pipeline typically handles a different type of material or other variation in rendering (textured vs. not, transparent vs. solid, etc).
@@ -47,7 +47,7 @@ The following environment variables can be set to specifically select a particul
   
 * `Texture` manages a WebGPU Texture and associated `TextureView`.
 * `TextureSample` extends the `Texture` with a `Sampler` that defines how pixels are accessed in a shader.  This is what is actually used for textures in graphics rendering.
-* TODO don't need this, but need to see about offscreen: `RenderTexture` manages an `Texture` along with a `RenderPass` configuration for managing a `Render` target (shared for rendering onto a window `Surface` or an offscreen `RenderTexture`)
+* TODO don't need this, but need to see about offscreen: `RenderTexture` manages an `Texture` along with a `RenderPass` confiGraphicsSystemon for managing a `Render` target (shared for rendering onto a window `Surface` or an offscreen `RenderTexture`)
 
 * `Surface` represents the full hardware-managed `Texture`s associated with an actual on-screen Window.  One can associate a System with a Surface to manage the Swapchain updating for effective double or triple buffering.
 * `RenderTexture` is an offscreen render target with RenderTextures and a logical device if being used without any Surface -- otherwise it should use the Surface device so images can be copied across them.
@@ -91,13 +91,13 @@ See [gosl] for a tool that converts Go code into WGSL shader code, so you can ef
 
 Here's how it works:
 
-* Each WebGPU `Pipeline` holds **1** compute `shader` program, which is equivalent to a `kernel` in CUDA. This is the basic unit of computation, accomplishing one parallel sweep of processing across some number of identical data structures.
+* Each WebGPU `Pipeline` holds **1** compute `shader` program, whicGraphicsSystemquivalent to a `kernel` in CUDA. This is the basic unit of computation, accomplishing one parallel sweep of processing across some number of identical data structures.
 
 * You must organize at the outset your `Vars` and `Values` in the `System` to hold the data structures your shaders operate on.  In general, you want to have a single static set of Vars that cover everything you'll need, and different shaders can operate on different subsets of these.  You want to minimize the amount of memory transfer.
 
 * Because the `Queue.Submit` call is by far the most expensive call in WebGPU, you want to minimize those.  This means you want to combine as much of your computation into one big Command sequence, with calls to various different `Pipeline` shaders (which can all be put in one command buffer) that gets submitted *once*, rather than submitting separate commands for each shader.  Ideally this also involves combining memory transfers to / from the GPU in the same command buffer as well.
 
-* TODO: update for webgpu sync mechanisms.  Although rarely used in graphics, the most important tool for synchronizing commands _within a single command stream_ is the [vkEvent](https://registry.khronos.org/WebGPU/specs/1.3-extensions/man/html/VkEvent.html), which is described a bit in the [Khronos Blog](https://www.khronos.org/blog/understanding-WebGPU-synchronization).  Much of WebGPU discussion centers instead around `Semaphores`, but these are only used for synchronization _between different commands_ --- each of which requires a different `vkQueueSubmit` (and is therefore suboptimal).
+* TODO: update for webgpu sync mechanisms.  Although rarGraphicsSystemed in graphics, the most important tool for synchronizing commands _within a single command stream_ is the [vkEvent](https://registry.khronos.org/WebGPU/specs/1.3-extensions/man/html/VkEvent.html), which is described a bit in the [Khronos Blog](https://www.khronos.org/blog/understanding-WebGPU-synchronization).  Much of WebGPU discussion centers instead around `Semaphores`, but these are only used for synchronization _between different commands_ --- each of which requires a different `vkQueueSubmit` (and is therefore suboptimal).
 
 * Thus, you should create named events in your compute `System`, and inject calls to set and wait on those events in your command stream.
 

@@ -11,7 +11,6 @@ import (
 	"runtime"
 	"time"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
 
 	"github.com/cogentcore/webgpu/wgpu"
@@ -29,23 +28,18 @@ func main() {
 	gp := gpu.NewGPU()
 	gp.Config("drawtri")
 
-	var resize func(width, height int)
-	width, height := 1024, 768
-	sp, terminate, pollEvents, width, height, err := gpu.GLFWCreateWindow(gp, width, height, "Draw Triangle", &resize)
+	var resize func(size image.Point)
+	size := image.Point{1024, 768}
+	sp, terminate, pollEvents, size, err := gpu.GLFWCreateWindow(gp, size, "Draw Triangle", &resize)
 	if err != nil {
 		return
 	}
 
-	sf := gpu.NewSurface(gp, sp, width, height)
-
+	sf := gpu.NewSurface(gp, sp, size, 1, gpu.UndefinedType)
+	sy := gpu.NewGraphicsSystem(gp, "drawtri", sf)
 	fmt.Printf("format: %s\n", sf.Format.String())
 
-	sy := gp.NewGraphicsSystem("drawtri", sf.Device)
-	sy.ConfigRender(&sf.Format, gpu.UndefinedType, sf)
-
-	resize = func(width, height int) {
-		sf.Resized(image.Point{width, height})
-	}
+	resize = func(size image.Point) { sf.SetSize(size) }
 	destroy := func() {
 		sy.Release()
 		sf.Release()
@@ -54,7 +48,7 @@ func main() {
 	}
 
 	pl := sy.AddGraphicsPipeline("drawtri")
-	pl.SetFrontFace(wgpu.FrontFaceCW)
+	pl.SetFrontFace(wgpu.FrontFaceCCW)
 
 	sh := pl.AddShader("trianglelit")
 	sh.OpenCode(trianglelit)
@@ -70,21 +64,15 @@ func main() {
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
-		view, err := sf.GetCurrentTexture()
-		if errors.Log(err) != nil {
+
+		rp, err := sy.BeginRenderPass()
+		if err != nil {
 			return
 		}
-		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		cmd := sy.NewCommandEncoder()
-		rp := sy.BeginRenderPass(cmd, view)
-		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
 		pl.BindPipeline(rp)
 		rp.Draw(3, 1, 0, 0)
-		rp.End()
-		sf.SubmitRender(rp, cmd) // this is where it waits for the 16 msec
-		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
-		sf.Present()
-		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
+		sy.EndRenderPass(rp)
+
 		frameCount++
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)

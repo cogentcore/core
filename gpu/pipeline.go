@@ -15,16 +15,16 @@ import (
 // Pipeline is the shared Base for Graphics and Compute Pipelines.
 // It manages Shader program(s) that accomplish a specific
 // type of rendering or compute function, using Vars / Values
-// defined by the overall System.
+// defined by the overall GraphicsSystem.
 // In the graphics context, each pipeline could handle a different
 // class of materials (textures, Phong lighting, etc).
 type Pipeline struct {
 	// unique name of this pipeline
 	Name string
 
-	// system that we belong to and manages all shared resources:
+	// System that we belong to and manages shared resources:
 	// Vars, Values, etc
-	Sys *System
+	System System
 
 	// Shaders contains actual shader code loaded for this pipeline.
 	// A single shader can have multiple entry points: see Entries.
@@ -40,7 +40,7 @@ type Pipeline struct {
 // Vars returns a pointer to the vars for this pipeline,
 // which has Values within it.
 func (pl *Pipeline) Vars() *Vars {
-	return &pl.Sys.Vars
+	return pl.System.Vars()
 }
 
 // AddShader adds Shader with given name to the pipeline
@@ -52,7 +52,7 @@ func (pl *Pipeline) AddShader(name string) *Shader {
 		log.Printf("gpu.Pipeline AddShader: Shader named: %s already exists in pipline: %s\n", name, pl.Name)
 		return sh
 	}
-	sh := NewShader(name, &pl.Sys.Device)
+	sh := NewShader(name, pl.System.Device())
 	pl.Shaders[name] = sh
 	return sh
 }
@@ -116,9 +116,9 @@ func (pl *Pipeline) ReleaseShaders() {
 
 // BindLayout configures the PipeLineLayout based on Vars
 func (pl *Pipeline) BindLayout() error {
-	lays := pl.Vars().bindLayout(&pl.Sys.Device)
+	lays := pl.Vars().bindLayout(pl.System.Device())
 
-	rpl, err := pl.Sys.Device.Device.CreatePipelineLayout(&wgpu.PipelineLayoutDescriptor{
+	rpl, err := pl.System.Device().Device.CreatePipelineLayout(&wgpu.PipelineLayoutDescriptor{
 		Label:            pl.Name,
 		BindGroupLayouts: lays,
 	})

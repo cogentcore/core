@@ -36,9 +36,9 @@ const (
 	TextureGroup
 )
 
-// configSystem configures the Phong System and pipelines.
-func (ph *Phong) configSystem() {
-	sy := ph.Sys
+// configGraphicsSystem configures the Phong GraphicsSystem and pipelines.
+func (ph *Phong) configGraphicsSystem() {
+	sy := ph.System
 	opl := sy.AddGraphicsPipeline("onecolor")
 	ph.configPipeline(opl)
 	tpl := sy.AddGraphicsPipeline("texture")

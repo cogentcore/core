@@ -16,23 +16,24 @@ import (
 // of a window surface, and the swapchain for presenting images.
 // It provides an encapsulated source of TextureView textures
 // for the rendering process to draw on.
-// Call GetCurrentTexture() to get the texture, and SubmitPresent
-// to submit the render commands and present the resulting texture
-// to the window.
+// It implements the Renderer interface, which defines the
+// primary API (GetCurrentTexture() -> Present()).
 type Surface struct {
-	// pointer to gpu device, for convenience.
+	// Render helper for this Surface.
+	render Render
+
+	// Format has the current rendering surface size and
+	// rendering texture format.  This format may be different
+	// from the actual physical swapchain format, in case there
+	// is a different view (e.g., srgb)
+	Format TextureFormat
+
+	// pointer to gpu device, needed for properties.
 	GPU *GPU
 
 	// Device for this surface, which we own.
 	// Each window surface has its own device, configured for that surface.
-	Device *Device
-
-	// Render for this Surface, typically from a System.
-	Render *Render
-
-	// Format has the current swapchain image format and dimensions.
-	// the Size values here are definitive for the target size of the surface.
-	Format TextureFormat
+	device *Device
 
 	// WebGPU handle for surface
 	surface *wgpu.Surface `display:"-"`
@@ -52,14 +53,16 @@ type Surface struct {
 
 // NewSurface returns a new surface initialized for given GPU and WebGPU
 // Surface handle, obtained from a valid window.
-// size should reflect the actual size of the surface,
-// and can be updated with Resized method.
-// samples is the multisampling anti-aliasing parameter: 1 = none
-// 4 = typical default value for smooth "no jaggy" edges.
-func NewSurface(gp *GPU, wsurf *wgpu.Surface, size image.Point, samples int) *Surface {
+//   - size should reflect the actual size of the surface,
+//     and can be updated with SetSize method.
+//   - samples is the multisampling anti-aliasing parameter: 1 = none
+//     4 = typical default value for smooth "no jaggy" edges.
+//   - depthFmt is the depth buffer format.  use UndefinedType for none
+//     or Depth32 recommended for best performance.
+func NewSurface(gp *GPU, wsurf *wgpu.Surface, size image.Point, samples int, depthFmt Types) *Surface {
 	sf := &Surface{}
 	sf.Defaults()
-	sf.init(gp, size, samples)
+	sf.init(gp, wsurf, size, samples, depthFmt)
 	return sf
 }
 
@@ -70,25 +73,37 @@ func (sf *Surface) Defaults() {
 	sf.Format.SetMultisample(4)
 }
 
-func (sf *Surface) init(gp *GPU, ws *wgpu.Surface, size image.Point, samples int) error {
+func (sf *Surface) init(gp *GPU, ws *wgpu.Surface, size image.Point, samples int, depthFmt Types) error {
 	sf.GPU = gp
 	sf.surface = ws
 	dev, err := gp.NewDevice() // surface owns this device
 	if errors.Log(err) != nil {
 		return err
 	}
-	sf.Device = dev
+	sf.device = dev
 	sf.Format.Format = ws.GetPreferredFormat(gp.GPU)
 	sf.Format.SetMultisample(samples)
 	sf.Format.Size = size
-	sf.ConfigSwapChain()
+	sf.ConfigSwapChain() // can change the format
+	sf.render.Config(sf.device, &sf.Format, depthFmt)
 	return nil
 }
 
-// SetRender sets our local Render copy.  We need to update the Render
-// whenever our surface is resized or the format is reconfigured.
-func (sf *Surface) SetRender(r *Render) {
-	sf.Render = r
+func (sf *Surface) Device() *Device { return sf.device }
+func (sf *Surface) Render() *Render { return &sf.render }
+
+// When the render surface (e.g., window) is resized, call this function.
+// WebGPU does not have any internal mechanism for tracking this, so we
+// need to drive it from external events.
+func (sf *Surface) SetSize(sz image.Point) {
+	if sf.Format.Size == sz {
+		return
+	}
+	sf.render.SetSize(sz)
+	sf.Format.Size = sz
+	sf.swapChainConfig.Width = uint32(sf.Format.Size.X)
+	sf.swapChainConfig.Height = uint32(sf.Format.Size.Y)
+	sf.needsReconfig = true
 }
 
 // GetCurrentTexture returns a TextureView that is the current
@@ -104,30 +119,6 @@ func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	}
 	sf.curTexture = view
 	return view, nil
-}
-
-// SubmitPresent submits the full set of commands for this render pass
-// to the device queue. The rp and cmd are Released at this point.
-// Then it presents the rendered texture to the window, unlocking the
-// surface and releasing the current texture.
-func (sf *Surface) SubmitPresent(rp *wgpu.RenderPassEncoder, cmd *wgpu.CommandEncoder) error {
-	err := sf.SubmitRender(rp, cmd)
-	sf.Present()
-	return err
-}
-
-// SubmitRender submits the full set of commands for this render pass
-// to the device queue. The rp and cmd are Released at this point.
-func (sf *Surface) SubmitRender(rp *wgpu.RenderPassEncoder, cmd *wgpu.CommandEncoder) error {
-	cmdBuffer, err := cmd.Finish(nil)
-	if errors.Log(err) != nil {
-		return err
-	}
-	sf.Device.Queue.Submit(cmdBuffer)
-	rp.Release()
-	cmd.Release()
-	cmdBuffer.Release()
-	return nil
 }
 
 // Present is the final step for showing the rendered texture to the window.
@@ -174,7 +165,7 @@ func (sf *Surface) ConfigSwapChain() error {
 }
 
 func (sf *Surface) CreateSwapChain() error {
-	sc, err := sf.Device.Device.CreateSwapChain(sf.surface, sf.swapChainConfig)
+	sc, err := sf.device.Device.CreateSwapChain(sf.surface, sf.swapChainConfig)
 	if err != nil {
 		return err
 	}
@@ -188,19 +179,9 @@ func (sf *Surface) ReleaseSwapChain() {
 	if sf.swapChain == nil {
 		return
 	}
-	sf.Device.WaitDone()
+	sf.device.WaitDone()
 	sf.swapChain.Release()
 	sf.swapChain = nil
-}
-
-// When the render surface (e.g., window) is resized, call this function.
-// WebGPU does not have any internal mechanism for tracking this, so we
-// need to drive it from external events.
-func (sf *Surface) Resized(newSize image.Point) {
-	sf.Format.Size = newSize
-	sf.swapChainConfig.Width = uint32(sf.Format.Size.X)
-	sf.swapChainConfig.Height = uint32(sf.Format.Size.Y)
-	sf.needsReconfig = true
 }
 
 // ReConfigSwapChain does a re-create of swapchain, freeing existing.
@@ -215,9 +196,7 @@ func (sf *Surface) ReConfigSwapChain() bool {
 	if sf.CreateSwapChain() != nil {
 		return false
 	}
-	if sf.Render != nil {
-		sf.Render.SetSize(sf.Format.Size)
-	}
+	sf.render.SetSize(sf.Format.Size)
 	return true
 }
 
@@ -227,9 +206,9 @@ func (sf *Surface) Release() {
 		sf.surface.Release()
 		sf.surface = nil
 	}
-	if sf.Device != nil {
-		sf.Device.Release()
-		sf.Device = nil
+	if sf.device != nil {
+		sf.device.Release()
+		sf.device = nil
 	}
 	sf.GPU = nil
 }

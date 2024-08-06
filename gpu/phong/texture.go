@@ -48,7 +48,7 @@ func (ph *Phong) DeleteTexture(name string) {
 // configDummyTexture configures a dummy texture (if none configured)
 func (ph *Phong) configDummyTexture() {
 	// there must be one texture -- otherwise Mac Molten triggers an error
-	tgp := ph.Sys.Vars.Groups[int(TextureGroup)]
+	tgp := ph.System.Vars.Groups[int(TextureGroup)]
 	tgp.SetNValues(1)
 	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
 	img := tgp.ValueByIndex("TexSampler", 0)
@@ -61,7 +61,7 @@ func (ph *Phong) ResetTextures() {
 	defer ph.Unlock()
 
 	ph.textures.Reset()
-	tgp := ph.Sys.Vars.Groups[int(TextureGroup)]
+	tgp := ph.System.Vars.Groups[int(TextureGroup)]
 	tgp.SetNValues(1)
 }
 
@@ -72,7 +72,7 @@ func (ph *Phong) UseNoTexture() {
 
 // UseTextureIndex selects texture by index for current render step
 func (ph *Phong) UseTextureIndex(idx int) error {
-	ph.Sys.Vars.SetCurrentValue(int(TextureGroup), "TexSampler", idx)
+	ph.System.Vars.SetCurrentValue(int(TextureGroup), "TexSampler", idx)
 	ph.UseTexture = true
 	return nil
 }
@@ -93,7 +93,7 @@ func (ph *Phong) UseTextureName(name string) error {
 // the underlying image changes.  Assumes the size remains the same.
 // Must Sync for the changes to take effect.
 func (ph *Phong) UpdateTextureIndex(idx int) error {
-	sy := ph.Sys
+	sy := ph.System
 	ph.Lock()
 	defer ph.Unlock()
 	if idx >= ph.textures.Len() {
@@ -118,11 +118,11 @@ func (ph *Phong) UpdateTextureName(name string) error {
 }
 
 // configTextures configures vals for textures -- this is the first
-// of two passes -- call Phong.Sys.Config after everything is config'd.
+// of two passes -- call Phong.System.Config after everything is config'd.
 // This automatically allocates images by size so everything fits
 // within the MaxTexturesPerStage limit, as texture arrays.
 func (ph *Phong) configTextures() {
-	sy := ph.Sys
+	sy := ph.System
 	ntx := ph.textures.Len()
 	if ntx == 0 {
 		ph.configDummyTexture()

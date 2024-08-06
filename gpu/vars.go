@@ -37,7 +37,7 @@ type Vars struct {
 	// true if PushGroup has been added.  Note: not yet supported in WebGPU.
 	hasPush bool `edit:"-"`
 
-	sys *System
+	sys System
 
 	device Device
 }
@@ -101,9 +101,9 @@ func (vs *Vars) AddGroup(role VarRoles, name ...string) *VarGroup {
 	}
 	vg.alignBytes = 1
 	if role == Uniform {
-		vg.alignBytes = int(vs.sys.GPU.Limits.Limits.MinUniformBufferOffsetAlignment)
+		vg.alignBytes = int(vs.sys.GPU().Limits.Limits.MinUniformBufferOffsetAlignment)
 	} else if role == Storage {
-		vg.alignBytes = int(vs.sys.GPU.Limits.Limits.MinStorageBufferOffsetAlignment)
+		vg.alignBytes = int(vs.sys.GPU().Limits.Limits.MinStorageBufferOffsetAlignment)
 	}
 	vs.Groups[idx] = vg
 	return vg

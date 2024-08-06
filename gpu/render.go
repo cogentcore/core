@@ -16,10 +16,9 @@ import (
 
 // Render manages various elements needed for rendering,
 // including a function to get a WebGPU RenderPass object,
-// which specifies parameters for rendering to a RenderTexture.
+// which specifies parameters for rendering to a Texture.
 // It holds the Depth buffer if one is used, and a multisampling image too.
-// The Render object lives on the System, and any associated Surface,
-// RenderTexture, and RenderTextures point to it.
+// The Render object is owned by a Renderer (Surface or RenderTexture).
 type Render struct {
 	// texture format information for the texture target we render to.
 	// critically, this can be different from the surface actual format
@@ -38,12 +37,10 @@ type Render struct {
 	// is true if multsampled image configured
 	HasMulti bool
 
-	// host-accessible image that is used to transfer back from a render color attachment to host memory -- requires a different format than color attachment, and is TextureOnHostOnly flagged.
+	// host-accessible image that is used to transfer back
+	// from a render color attachment to host memory.
+	// Requires a different format than color attachment
 	Grab Texture
-
-	// set this to true if it is not using a Surface render target
-	// (i.e., it is a RenderTexture)
-	NotSurface bool
 
 	// values for clearing image when starting render pass
 	ClearColor color.Color
@@ -55,6 +52,26 @@ type Render struct {
 	device Device
 }
 
+// Config configures the render pass for given device,
+// Using standard parameters for graphics rendering,
+// based on the given image format and depth image format
+// (pass UndefinedType for no depth buffer, or Depth32).
+func (rd *Render) Config(dev *Device, imgFmt *TextureFormat, depthFmt Types) {
+	rd.device = *dev
+	rd.Format = *imgFmt
+	rd.ClearColor = colors.Black
+	rd.ClearDepth = 1
+	rd.ClearStencil = 0
+	rd.DepthFormat = depthFmt
+	if depthFmt != UndefinedType {
+		rd.Depth.ConfigDepth(dev, rd.DepthFormat, imgFmt)
+	}
+	if rd.Format.Samples > 1 {
+		rd.Multi.ConfigMulti(dev, imgFmt)
+		rd.HasMulti = true
+	}
+}
+
 func (rd *Render) Release() {
 	rd.Depth.Release()
 	rd.Multi.Release()
@@ -63,35 +80,15 @@ func (rd *Render) Release() {
 }
 
 func (rd *Render) SetSize(sz image.Point) {
-	if rd.Format.Size != sz {
-		rd.Format.Size = sz
-		if rd.HasMulti {
-			rd.Multi.ConfigMulti(&rd.device, &rd.Format)
-		}
-		if rp.DepthFormat != UndefinedType {
-			rp.Depth.ConfigDepth(&rp.device, rp.DepthFormat, &rp.Format)
-		}
+	if rd.Format.Size == sz {
+		return
 	}
-}
-
-// Config configures the render pass for given device,
-// Using standard parameters for graphics rendering,
-// based on the given image format and depth image format
-// (pass UndefinedType for no depth buffer).
-func (rp *Render) Config(dev *Device, imgFmt *TextureFormat, depthFmt Types, notSurface bool) {
-	rp.device = *dev
-	rp.Format = *imgFmt
-	rp.NotSurface = notSurface
-	rp.ClearColor = colors.Black
-	rp.ClearDepth = 1
-	rp.ClearStencil = 0
-	rp.DepthFormat = depthFmt
-	if depthFmt != UndefinedType {
-		rp.Depth.ConfigDepth(dev, rp.DepthFormat, imgFmt)
+	rd.Format.Size = sz
+	if rd.HasMulti {
+		rd.Multi.ConfigMulti(&rd.device, &rd.Format)
 	}
-	if rd.Format.Samples > 1 {
-		rd.Multi.ConfigMulti(dev, imgFmt)
-		rd.HasMulti = true
+	if rd.DepthFormat != UndefinedType {
+		rd.Depth.ConfigDepth(&rd.device, rd.DepthFormat, &rd.Format)
 	}
 }
 
@@ -173,20 +170,17 @@ func (rd *Render) SetDepthDescriptor(rpd *wgpu.RenderPassDescriptor) {
 // Clears the frame first, according to the ClearValues
 // See BeginRenderPassNoClear for non-clearing version.
 func (rd *Render) BeginRenderPass(cmd *wgpu.CommandEncoder, view *wgpu.TextureView) *wgpu.RenderPassEncoder {
-	return rd.BeginRenderPassImpl(cmd, view, true)
+	return rd.beginRenderPass(cmd, view, true)
 }
 
 // BeginRenderPassNoClear adds commands to the given command buffer
 // to start the render pass on given framebuffer.
 // does NOT clear the frame first -- loads prior state.
 func (rd *Render) BeginRenderPassNoClear(cmd *wgpu.CommandEncoder, view *wgpu.TextureView) *wgpu.RenderPassEncoder {
-	return rd.BeginRenderPassImpl(cmd, view, false)
+	return rd.beginRenderPass(cmd, view, false)
 }
 
-// BeginRenderPassImpl adds commands to the given command buffer
-// to start the render pass on given framebuffer.
-// If clear = true, clears the frame according to the ClearColor.
-func (rd *Render) BeginRenderPassImpl(cmd *wgpu.CommandEncoder, view *wgpu.TextureView, clear bool) *wgpu.RenderPassEncoder {
+func (rd *Render) beginRenderPass(cmd *wgpu.CommandEncoder, view *wgpu.TextureView, clear bool) *wgpu.RenderPassEncoder {
 	// w, h := fr.Texture.Format.Size32()
 	// clearValues := rp.ClearValues
 	// vrp := rp.VkClearPass

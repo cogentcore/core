@@ -7,24 +7,18 @@ package gpu
 import (
 	"image"
 
-	"github.com/rajveermalviya/go-webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // RenderTexture is an offscreen, non-window-backed rendering target,
 // functioning like a Surface.
 type RenderTexture struct {
-	// pointer to gpu device, for convenience
-	GPU *GPU
-
-	// device for this Frame.  we do NOT own this device.
-	Device Device
-
-	// the Render for this RenderTexture, typically from a System.
-	Render *Render
+	// Render helper for this RenderTexture.
+	render Render
 
 	// Format has the current image format and dimensions.
 	// The Samples here are the desired value, whereas our Frames
-	// always have Samples = 1.
+	// always have Samples = 1, and use render for multisampling.
 	Format TextureFormat
 
 	// number of frames to maintain in the simulated swapchain.
@@ -33,19 +27,32 @@ type RenderTexture struct {
 
 	// Textures that we iterate through in rendering subsequent frames.
 	Frames []*Texture
+
+	// pointer to gpu device, for convenience
+	GPU *GPU
+
+	// current frame number
+	curFrame int
+
+	// device, which we do NOT own.
+	device Device
 }
 
-// NewRenderTexture returns a new rendertarget for given GPU, device,
-// of given size.  If using in conjunction with a Surface, the device
-// must be from that surface so frames can be transitioned there.
-// If doing pure offscreen rendering, then make a new device and Release
-// it when the RenderTexture is released.
-// samples is the multisampling anti-aliasing parameter: 1 = none
-// 4 = typical default value for smooth "no jaggy" edges.
-func NewRenderTexture(gp *GPU, dev *Device, size image.Point, samples int) *RenderTexture {
+// NewRenderTexture returns a new standalone texture render
+// target for given GPU and device, suitable for offscreen rendering
+// or intermediate use of the render output for other purposes.
+//   - device should be from a Surface if one is being used, otherwise
+//     can be created anew for offscreen rendering, and released at end.
+//   - size should reflect the actual size of the surface,
+//     and can be updated with SetSize method.
+//   - samples is the multisampling anti-aliasing parameter: 1 = none
+//     4 = typical default value for smooth "no jaggy" edges.
+//   - depthFmt is the depth buffer format.  use UndefinedType for none
+//     or Depth32 recommended for best performance.
+func NewRenderTexture(gp *GPU, dev *Device, size image.Point, samples int, depthFmt Types) *RenderTexture {
 	rt := &RenderTexture{}
 	rt.Defaults()
-	rt.init(gp, dev, size, samples)
+	rt.init(gp, dev, size, samples, depthFmt)
 	return rt
 }
 
@@ -58,21 +65,34 @@ func (rt *RenderTexture) Defaults() {
 	rt.Format.SetMultisample(4)
 }
 
-func (rt *RenderTexture) init(gp *GPU, dev *Device, size image.Point, samples int) {
+func (rt *RenderTexture) init(gp *GPU, dev *Device, size image.Point, samples int, depthFmt Types) {
 	rt.GPU = gp
-	rt.Device = *dev
+	rt.device = *dev
 	rt.Format.Size = size
 	rt.Format.SetMultisample(samples)
+	rt.render.Config(&rt.device, &rt.Format, depthFmt)
+	rt.ConfigFrames()
 }
 
-// SetRender sets the Render and configures the frames accordingly.
-func (rt *RenderTexture) SetRender(rp *Render) {
-	rt.Release()
-	rt.Render = rp
+func (rt *RenderTexture) Device() *Device { return &rt.device }
+func (rt *RenderTexture) Render() *Render { return &rt.render }
+
+// GetCurrentTexture returns a TextureView that is the current
+// target for rendering.
+func (rt *RenderTexture) GetCurrentTexture() (*wgpu.TextureView, error) {
+	cf := rt.curFrame
+	rt.curFrame = (rt.curFrame + 1) % rt.NFrames
+	return rt.Frames[cf].view, nil
+}
+
+// ConfigFrames configures the frames, calling ReleaseFrames
+// so it is safe for re-use.
+func (rt *RenderTexture) ConfigFrames() {
+	rt.ReleaseFrames()
 	rt.Frames = make([]*Texture, rt.NFrames)
 	for i := range rt.NFrames {
-		fr := NewTexture(&rt.Device)
-		fr.ConfigRenderTexture(dev, rt.Format)
+		fr := NewTexture(&rt.device)
+		fr.ConfigRenderTexture(&rt.device, &rt.Format)
 		rt.Frames[i] = fr
 	}
 }
@@ -83,73 +103,35 @@ func (rt *RenderTexture) SetSize(size image.Point) bool {
 	if rt.Format.Size == size {
 		return false
 	}
+	rt.render.SetSize(size)
 	rt.Format.Size = size
-	rt.ReConfig()
+	rt.ConfigFrames()
 	return true
 }
 
-// ReConfig reconfigures rendering
-func (rt *RenderTexture) ReConfig() {
-	rt.Render.SetSize(rt.Format.Size)
-	rt.ReConfigFrames()
-}
-
-// ReConfigFrames re-configures the Famebuffers
-// using exiting settings.
-// Assumes Config has been called.
-func (rt *RenderTexture) ReConfigFrames() {
-	for _, fr := range rt.Frames {
-		fr.ConfigRenderTexture(rt.GPU, &rt.Device, rt.Format)
-		fr.ConfigRender(rt.Render)
-	}
-}
-
-func (rt *RenderTexture) Release() {
+func (rt *RenderTexture) ReleaseFrames() {
 	for _, fr := range rt.Frames {
 		fr.Release()
 	}
 	rt.Frames = nil
 }
 
-// SubmitRender submits a rendering command that must have been added
-// to the given command buffer, calling CmdEnd on the buffer first.
-// This buffer triggers the associated Fence logic to control the
-// sequencing of render commands over time.
-// The TextureAcquired semaphore before the command is run.
-func (rt *RenderTexture) SubmitRender(cmd *wgpu.CommandEncoder) {
-	// dev := rf.Device.Device
-	// vk.ResetFences(dev, 1, []vk.Fence{rf.RenderFence})
-	// CmdEnd(cmd)
-	// ret := vk.QueueSubmit(rf.Device.Queue, 1, []vk.SubmitInfo{{
-	// 	SType: vk.StructureTypeSubmitInfo,
-	// 	PWaitDstStageMask: []vk.PipelineStageFlags{
-	// 		vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit),
-	// 	},
-	// 	// WaitSemaphoreCount:   1,
-	// 	// PWaitSemaphores:      []vk.Semaphore{rf.TextureAcquired},
-	// 	CommandBufferCount: 1,
-	// 	PCommandBuffers:    []*wgpu.CommandEncoder{cmd},
-	// 	// SignalSemaphoreCount: 1,
-	// 	// PSignalSemaphores:    []vk.Semaphore{rf.RenderDone},
-	// }}, rf.RenderFence)
-	// IfPanic(NewError(ret))
+func (rt *RenderTexture) Release() {
+	rt.ReleaseFrames()
 }
 
-// WaitForRender waits until the last submitted render completes
-func (rt *RenderTexture) WaitForRender() {
-	// dev := rf.Device.Device
-	// vk.WaitForFences(dev, 1, []vk.Fence{rf.RenderFence}, vk.True, vk.MaxUint64)
-	// vk.ResetFences(dev, 1, []vk.Fence{rf.RenderFence})
+func (rt *RenderTexture) Present() {
+	// no-op
 }
 
 // GrabTexture grabs rendered image of given index to RenderTexture.TextureGrab.
 // must have waited for render already.
 func (rt *RenderTexture) GrabTexture(cmd *wgpu.CommandEncoder, idx int) {
-	rt.Frames[idx].GrabTexture(&rt.Device, cmd)
+	// rt.Frames[idx].GrabTexture(&rt.device, cmd)
 }
 
 // GrabDepthTexture grabs rendered depth image from the Render,
 // must have waited for render already.
 func (rt *RenderTexture) GrabDepthTexture(cmd *wgpu.CommandEncoder) {
-	rt.Render.GrabDepthTexture(&rt.Device, cmd)
+	// rt.render.GrabDepthTexture(&rt.device, cmd)
 }

@@ -97,7 +97,7 @@ func (sc *Scene) ConfigFrame(gpu *vgpu.GPU, dev *vgpu.Device) {
 	if sc.Frame == nil {
 		sc.Frame = vgpu.NewRenderTexture(gpu, dev, sz)
 		sc.Frame.Format.SetMultisample(sc.MultiSample)
-		sy := sc.Phong.Sys
+		sy := sc.Phong.System
 		sy.InitGraphics(gpu, "vphong.Phong", dev)
 		sy.ConfigRenderNonSurface(&sc.Frame.Format, vgpu.Depth32)
 		sc.Frame.SetRender(&sy.Render)
@@ -119,7 +119,7 @@ func (sc *Scene) Image() (*image.RGBA, error) {
 	if fr == nil {
 		return nil, fmt.Errorf("xyz.Scene Image: Scene does not have a Frame")
 	}
-	sy := &sc.Phong.Sys
+	sy := &sc.Phong.System
 	tcmd := sy.MemCmdStart()
 	fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
 	sy.MemCmdEndSubmitWaitFree()
@@ -149,7 +149,7 @@ func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 	if fr == nil {
 		return nil, fmt.Errorf("xyz.Scene ImageCopy: Scene does not have a Frame")
 	}
-	sy := &sc.Phong.Sys
+	sy := &sc.Phong.System
 	tcmd := sy.MemCmdStart()
 	fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
 	sy.MemCmdEndSubmitWaitFree()
@@ -186,7 +186,7 @@ func (sc *Scene) DepthImage() ([]float32, error) {
 	if fr == nil {
 		return nil, fmt.Errorf("xyz.Scene DepthImage: Scene does not have a Frame")
 	}
-	sy := &sc.Phong.Sys
+	sy := &sc.Phong.System
 	tcmd := sy.MemCmdStart()
 	fr.GrabDepthImage(tcmd)
 	sy.MemCmdEndSubmitWaitFree()
@@ -399,7 +399,7 @@ func (sc *Scene) RenderImpl() {
 	})
 
 	sc.Phong.UpdateMu.Lock()
-	sy := &sc.Phong.Sys
+	sy := &sc.Phong.System
 	cmd := sy.CmdPool.Buff
 	descIndex := 0
 	sy.ResetBeginRenderPass(cmd, sc.Frame.Frames[0], descIndex)

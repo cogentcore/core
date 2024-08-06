@@ -7,6 +7,7 @@
 package gpu
 
 import (
+	"image"
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
@@ -16,23 +17,23 @@ import (
 
 // GLFWCreateWindow is a helper function intended only for use in simple examples that makes a
 // new window with glfw on platforms that support it and is largely a no-op on other platforms.
-func GLFWCreateWindow(gp *GPU, width, height int, title string, resize *func(width, height int)) (surface *wgpu.Surface, terminate func(), pollEvents func() bool, actualWidth int, actualHeight int, err error) {
+func GLFWCreateWindow(gp *GPU, size image.Point, title string, resize *func(size image.Point)) (surface *wgpu.Surface, terminate func(), pollEvents func() bool, actualSize image.Point, err error) {
 	errors.Log1(jsfs.Config(js.Global().Get("fs"))) // needed for printing etc to work
 	surface = gp.Instance.CreateSurface(&wgpu.SurfaceDescriptor{})
 	terminate = func() {}
 	pollEvents = func() bool { return true }
 	vv := js.Global().Get("visualViewport")
-	getSize := func() (w, h int) {
-		w, h = vv.Get("width").Int(), vv.Get("height").Int()
+	getSize := func() image.Point {
+		w, h := vv.Get("width").Int(), vv.Get("height").Int()
 		canvas := js.Global().Get("document").Call("querySelector", "canvas")
 		canvas.Set("width", w)
 		canvas.Set("height", h)
-		return
+		return image.Point{w, h}
 	}
 	vv.Call("addEventListener", "resize", js.FuncOf(func(this js.Value, args []js.Value) any {
 		(*resize)(getSize())
 		return nil
 	}))
-	actualWidth, actualHeight = getSize()
+	actualSize = getSize()
 	return
 }

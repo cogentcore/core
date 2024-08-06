@@ -29,15 +29,16 @@ type GraphicsPipeline struct {
 }
 
 // NewGraphicsPipeline returns a new GraphicsPipeline.
-func NewGraphicsPipeline(name string) *GraphicsPipeline {
+func NewGraphicsPipeline(name string, sy *GraphicsSystem) *GraphicsPipeline {
 	pl := &GraphicsPipeline{}
 	pl.Name = name
+	pl.System = sy
 	return pl
 }
 
-// Init initializes pipeline as part of given System
-func (pl *GraphicsPipeline) Init(sy *System) {
-	pl.Sys = sy
+// Init initializes pipeline as part of given GraphicsSystem
+func (pl *GraphicsPipeline) Init(sy *GraphicsSystem) {
+	pl.System = sy
 	pl.InitPipeline()
 }
 
@@ -70,7 +71,7 @@ func (pl *GraphicsPipeline) BindPipeline(rp *wgpu.RenderPassEncoder) error {
 // Automatically called in BindPipeline at start of render for pipeline.
 // Be sure to set Current index to correct value before calling!
 func (pl *GraphicsPipeline) BindAllGroups(rp *wgpu.RenderPassEncoder) {
-	vs := &pl.Sys.Vars
+	vs := pl.Vars()
 	ngp := vs.NGroups()
 	for gi := 0; gi < ngp; gi++ {
 		vg := vs.Groups[gi]
@@ -83,7 +84,7 @@ func (pl *GraphicsPipeline) BindAllGroups(rp *wgpu.RenderPassEncoder) {
 // variable group, as the Value to use by shader.
 // Be sure to set Current index to correct value before calling!
 func (pl *GraphicsPipeline) BindGroup(rp *wgpu.RenderPassEncoder, group int) {
-	vs := &pl.Sys.Vars
+	vs := pl.Vars()
 	vg := vs.Groups[group]
 	bg, dynOffs := vg.bindGroup()
 	rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
@@ -99,7 +100,7 @@ func (pl *GraphicsPipeline) BindDrawIndexed(rp *wgpu.RenderPassEncoder) {
 // BindVertex binds the Current Value for all VertexGroup variables,
 // as the vertex data to use for next DrawIndexed call.
 func (pl *GraphicsPipeline) BindVertex(rp *wgpu.RenderPassEncoder) {
-	vs := &pl.Sys.Vars
+	vs := pl.Vars()
 	vg := vs.Groups[VertexGroup]
 	if vg == nil {
 		return
@@ -119,7 +120,7 @@ func (pl *GraphicsPipeline) BindVertex(rp *wgpu.RenderPassEncoder) {
 // DrawVertex adds commands to the given command encoder
 // to Draw based on current Index and Vertex values.
 func (pl *GraphicsPipeline) DrawIndexed(rp *wgpu.RenderPassEncoder) {
-	vs := &pl.Sys.Vars
+	vs := pl.Vars()
 	vg := vs.Groups[VertexGroup]
 	if vg == nil {
 		return
@@ -146,7 +147,7 @@ func (pl *GraphicsPipeline) FragmentEntry() *ShaderEntry {
 
 // Config is called once all the Config options have been set
 // using Set* methods, and the shaders have been loaded.
-// The parent System has already done what it can for its config.
+// The parent GraphicsSystem has already done what it can for its config.
 // The rebuild flag indicates whether pipelines should rebuild
 func (pl *GraphicsPipeline) Config(rebuild bool) error {
 	if pl.renderPipeline != nil {
@@ -159,7 +160,7 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 	if err != nil {
 		return err
 	}
-	pl.Multisample.Count = uint32(pl.Sys.Render.Format.Samples)
+	pl.Multisample.Count = uint32(pl.System.Render().Format.Samples)
 	pd := &wgpu.RenderPipelineDescriptor{
 		Label:       pl.Name,
 		Layout:      pl.layout,
@@ -191,9 +192,9 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 			pd.Fragment.Targets[0].Blend = &wgpu.BlendStateReplace
 		}
 	}
-	if pl.Sys.Render.Depth.texture != nil {
+	if pl.System.Render().Depth.texture != nil {
 		pd.DepthStencil = &wgpu.DepthStencilState{
-			Format:            pl.Sys.Render.Depth.Format.Format,
+			Format:            pl.System.Render().Depth.Format.Format,
 			DepthWriteEnabled: true,
 			DepthCompare:      wgpu.CompareFunctionLess,
 			StencilFront: wgpu.StencilFaceState{
@@ -204,7 +205,7 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 			},
 		}
 	}
-	rp, err := pl.Sys.Device.Device.CreateRenderPipeline(pd)
+	rp, err := pl.System.Device().Device.CreateRenderPipeline(pd)
 	if errors.Log(err) != nil {
 		return err
 	}
