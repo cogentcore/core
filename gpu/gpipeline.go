@@ -33,17 +33,8 @@ func NewGraphicsPipeline(name string, sy *GraphicsSystem) *GraphicsPipeline {
 	pl := &GraphicsPipeline{}
 	pl.Name = name
 	pl.System = sy
-	return pl
-}
-
-// Init initializes pipeline as part of given GraphicsSystem
-func (pl *GraphicsPipeline) Init(sy *GraphicsSystem) {
-	pl.System = sy
-	pl.InitPipeline()
-}
-
-func (pl *GraphicsPipeline) InitPipeline() {
 	pl.SetGraphicsDefaults()
+	return pl
 }
 
 // BindPipeline binds this pipeline as the one to use for next commands in
@@ -88,6 +79,7 @@ func (pl *GraphicsPipeline) BindGroup(rp *wgpu.RenderPassEncoder, group int) {
 	vg := vs.Groups[group]
 	bg, dynOffs := vg.bindGroup()
 	rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
+	bg.Release()
 }
 
 // BindDrawIndexed binds the Current Value for all VertexGroup variables,

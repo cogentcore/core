@@ -12,8 +12,6 @@ import (
 	"time"
 
 	"cogentcore.org/core/gpu"
-
-	"github.com/cogentcore/webgpu/wgpu"
 )
 
 //go:embed trianglelit.wgsl
@@ -49,8 +47,9 @@ func main() {
 	}
 
 	pl := sy.AddGraphicsPipeline("drawtri")
-	pl.SetFrontFace(wgpu.FrontFaceCCW)
-	pl.SetCullMode(wgpu.CullModeNone)
+	// pl.SetFrontFace(wgpu.FrontFaceCCW)
+	// pl.SetCullMode(wgpu.CullModeNone)
+	// pl.SetAlphaBlend(false)
 
 	sh := pl.AddShader("trianglelit")
 	sh.OpenCode(trianglelit)

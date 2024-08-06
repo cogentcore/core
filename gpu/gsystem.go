@@ -265,9 +265,9 @@ func (sy *GraphicsSystem) SubmitRender(rp *wgpu.RenderPassEncoder) error {
 		return err
 	}
 	sy.device.Queue.Submit(cmdBuffer)
+	cmdBuffer.Release()
 	rp.Release()
 	cmd.Release()
-	cmdBuffer.Release()
 	return nil
 }
 
