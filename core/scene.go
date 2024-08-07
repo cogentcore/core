@@ -54,12 +54,17 @@ type Scene struct { //core:no-new
 	// AppBars contains functions for making the plan for the top app bar.
 	AppBars []func(p *tree.Plan) `json:"-" xml:"-"`
 
+	// DisableAppBar is whether to disable the default top app bar for this [Scene].
+	// For individual [Body]s, it is typically set via [Body.DisableAppBar]. You can
+	// set this for all [Scene]s using [App.SceneInit].
+	DisableAppBar bool
+
 	// Data is the optional data value being represented by this scene.
 	// Used e.g., for recycling views of a given item instead of creating new one.
 	Data any
 
 	// Size and position relative to overall rendering context.
-	sceneGeom math32.Geom2DInt `edit:"-" set:"-"`
+	sceneGeom math32.Geom2DInt
 
 	// paint context for rendering
 	PaintContext paint.Context `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
@@ -86,7 +91,7 @@ type Scene struct { //core:no-new
 
 	// selectedWidgetChan is the channel on which the selected widget through the inspect editor
 	// selection mode is transmitted to the inspect editor after the user is done selecting.
-	selectedWidgetChan chan Widget `json:"-" xml:"-"`
+	selectedWidgetChan chan Widget
 
 	// lastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.

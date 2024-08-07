@@ -22,6 +22,7 @@ import (
 // backslashes on Windows. See [Body.AssertRenderScreen] for a version
 // that asserts the rendered image of the entire screen, not just this body.
 func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
+	b.Scene.DisableAppBar = true // no app bar while testing
 	b.runAndShowNewWindow()
 	for i := 0; i < len(fun); i++ {
 		fun[i]()
