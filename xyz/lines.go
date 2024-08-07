@@ -9,9 +9,9 @@ import (
 	"image/color"
 	"math"
 
+	"cogentcore.org/core/gpu/shape"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/vgpu/vshape"
 )
 
 // Note: Raw line rendering via OpenGL is not very effective
@@ -63,17 +63,16 @@ func NewLines(sc *Scene, name string, points []math32.Vector3, width math32.Vect
 }
 
 func (ln *Lines) Sizes() (numVertex, nIndex int, hasColor bool) {
-	ln.NumVertex, ln.NumIndex = vshape.LinesN(len(ln.Points), ln.Closed)
+	ln.NumVertex, ln.NumIndex = shape.LinesN(len(ln.Points), ln.Closed)
 	ln.HasColor = len(ln.Colors) > 0
 	return ln.NumVertex, ln.NumIndex, ln.HasColor
 }
 
 func (ln *Lines) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	pos := math32.Vector3{}
-	bb := vshape.SetLines(vertexArray, normArray, textureArray, indexArray, 0, 0, ln.Points, ln.Width, ln.Closed, pos)
+	bb := shape.SetLines(vertexArray, normArray, textureArray, indexArray, 0, 0, ln.Points, ln.Width, ln.Closed, pos)
 	ln.BBox.SetBounds(bb.Min, bb.Max)
 	// todo: colors!
-	ln.SetMod(sc)
 }
 
 // UnitLineMesh returns the unit-sized line mesh, of name LineMeshName

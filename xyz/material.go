@@ -157,13 +157,3 @@ func (mt *Material) Validate(sc *Scene) error {
 	}
 	return nil
 }
-
-func (mt *Material) Render(sc *Scene) {
-	sc.Phong.UseColor(mt.Color, mt.Emissive, mt.Shiny, mt.Reflective, mt.Bright)
-	sc.Phong.UseTexturePars(mt.Tiling.Repeat, mt.Tiling.Off)
-	if mt.TextureName != "" {
-		sc.Phong.UseTextureName(string(mt.TextureName))
-	} else {
-		sc.Phong.UseNoTexture()
-	}
-}

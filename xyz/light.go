@@ -203,13 +203,13 @@ func (sc *Scene) ConfigLights() {
 		clr := math32.NewVector3Color(lt.AsLightBase().Color).MulScalar(lt.AsLightBase().Lumens).SRGBToLinear()
 		switch l := lt.(type) {
 		case *AmbientLight:
-			sc.Phong.AddAmbientLight(clr)
+			sc.Phong.AddAmbient(clr)
 		case *DirLight:
-			sc.Phong.AddDirLight(clr, l.Pos)
+			sc.Phong.AddDirectional(clr, l.Pos)
 		case *PointLight:
-			sc.Phong.AddPointLight(clr, l.Pos, l.LinDecay, l.QuadDecay)
+			sc.Phong.AddPoint(clr, l.Pos, l.LinDecay, l.QuadDecay)
 		case *SpotLight:
-			sc.Phong.AddSpotLight(clr, l.Pose.Pos, l.ViewDir(), l.AngDecay, l.CutoffAngle, l.LinDecay, l.QuadDecay)
+			sc.Phong.AddSpot(clr, l.Pose.Pos, l.ViewDir(), l.AngDecay, l.CutoffAngle, l.LinDecay, l.QuadDecay)
 		}
 	}
 }

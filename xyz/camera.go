@@ -43,7 +43,7 @@ type Camera struct {
 	// projection matrix, defining the camera perspective / ortho transform
 	ProjectionMatrix math32.Matrix4 `display:"-"`
 
-	// vulkan projection matrix -- required for vgpu -- produces same effect as ProjectionMatrix, which should be used for all other math
+	// vulkan projection matrix -- required for gpu -- produces same effect as ProjectionMatrix, which should be used for all other math
 	VkProjectionMatrix math32.Matrix4 `display:"-"`
 
 	// inverse of the projection matrix

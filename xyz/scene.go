@@ -13,17 +13,17 @@ import (
 
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/vgpu"
-	"cogentcore.org/core/vgpu/vphong"
 )
 
 // Set Update3DTrace to true to get a trace of 3D updating
 var Update3DTrace = false
 
 // Scene is the overall scenegraph containing nodes as children.
-// It renders to its own vgpu.RenderTexture.
+// It renders to its own gpu.RenderTexture.
 // The Image of this Frame is usable directly or, via xyzcore.Scene,
 // where it is copied into an overall core.Scene image.
 //
@@ -87,11 +87,11 @@ type Scene struct {
 	// saved cameras -- can Save and Set these to view the scene from different angles
 	SavedCams map[string]Camera `set:"-"`
 
-	// the vphong rendering system
-	Phong vphong.Phong `set:"-"`
+	// the phong rendering system
+	Phong *phong.Phong `set:"-"`
 
-	// the vgpu render frame holding the rendered scene
-	Frame *vgpu.RenderTexture `set:"-"`
+	// the gpu render frame holding the rendered scene
+	Frame *gpu.RenderTexture `set:"-"`
 
 	// image used to hold a copy of the Frame image, for ImageCopy() call.
 	// This is re-used across calls to avoid large memory allocations,
@@ -108,11 +108,11 @@ func (sc *Scene) Init() {
 
 // NewOffscreenScene returns a new [Scene] designed for offscreen
 // rendering of 3D content. This can be used in unit tests and other
-// cases not involving xyzcore. It makes a new [vgpu.NoDisplayGPU].
+// cases not involving xyzcore. It makes a new [gpu.NoDisplayGPU].
 func NewOffscreenScene() *Scene {
-	gpu, device, err := vgpu.NoDisplayGPU("offscreen")
+	gpu, device, err := gpu.NoDisplayGPU("offscreen")
 	if err != nil {
-		panic(fmt.Errorf("xyz.NewOffscreenScene: error initializing vgpu.NoDisplayGPU: %w", err))
+		panic(fmt.Errorf("xyz.NewOffscreenScene: error initializing gpu.NoDisplayGPU: %w", err))
 	}
 	sc := NewScene().SetSize(image.Pt(1280, 960))
 	sc.ConfigFrame(gpu, device)
@@ -205,11 +205,13 @@ func (sc *Scene) SetSize(sz image.Point) *Scene {
 }
 
 func (sc *Scene) Destroy() {
-	sc.Phong.Destroy()
+	if sc.Phong != nil {
+		sc.Phong.Release()
+		sc.Phong = nil
+	}
 	if sc.Frame != nil {
-		sc.Frame.Destroy()
+		sc.Frame.Release()
 		sc.Frame = nil
-		// fmt.Println("Phong, Frame destroyed")
 	}
 }
 

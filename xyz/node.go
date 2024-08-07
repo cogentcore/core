@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Node is the common interface for all xyz 3D tree nodes.
@@ -66,9 +67,12 @@ type Node interface {
 	// It is used for organizing the ordering of rendering.
 	RenderClass() RenderClasses
 
-	// Render is called by Scene Render on main thread
-	// when everything is ready to go.
-	Render()
+	// PreRender is called by Scene Render to upload
+	// all the object data to the Phong renderer.
+	PreRender()
+
+	// Render is called by Scene Render to actually render.
+	Render(rp *wgpu.RenderPassEncoder)
 }
 
 // NodeBase is the basic 3D tree node, which has the full transform information
@@ -257,7 +261,11 @@ func (nb *NodeBase) Config() {
 	// nop by default; could connect to scene for update signals or something
 }
 
-func (nb *NodeBase) Render() {
+func (nb *NodeBase) PreRender() {
+	// nop
+}
+
+func (nb *NodeBase) Render(rp *wgpu.RenderPassEncoder) {
 	// nop
 }
 

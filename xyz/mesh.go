@@ -7,8 +7,8 @@ package xyz
 import (
 	"fmt"
 
+	"cogentcore.org/core/gpu/shape"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/vgpu/vshape"
 )
 
 // MeshName is a [Mesh] name. This type provides an automatic GUI chooser for meshes.
@@ -19,8 +19,8 @@ type MeshName string
 // Only indexed triangle meshes are supported.
 // All Meshes must know in advance the number of vertex and index points
 // they require, and the SetVertices method operates on data from the
-// vgpu staging buffer to set the relevant data post-allocation.
-// The vgpu vshape library is used for all basic shapes, and it follows
+// gpu staging buffer to set the relevant data post-allocation.
+// The gpu shape library is used for all basic shapes, and it follows
 // this same logic.
 // Per-vertex Color is optional, as is the ability to update the data
 // after initial SetVertices call (default is to do nothing).
@@ -89,10 +89,6 @@ func (ms *MeshBase) Sizes() (numVertex, numIndex int, hasColor bool) {
 
 func (ms *MeshBase) Update(sc *Scene, vertextureArray, normArray, texArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	// nop: default mesh is static, not dynamic
-}
-
-func (ms *MeshBase) SetMod(sc *Scene) {
-	sc.Phong.ModMeshByName(ms.Name)
 }
 
 // todo!!
@@ -176,8 +172,8 @@ func (sc *Scene) PlaneMesh2D() Mesh {
 // must be called after adding or deleting any meshes or altering
 // the number of vertices.
 func (sc *Scene) ConfigMeshes() {
-	ph := &sc.Phong
-	ph.UpdateMu.Lock()
+	ph := sc.Phong
+	ph.Lock()
 	ph.ResetMeshes()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
@@ -185,35 +181,32 @@ func (sc *Scene) ConfigMeshes() {
 		ph.AddMesh(kv.Key, numVertex, nIndex, hasColor)
 	}
 	ph.ConfigMeshes()
-	ph.UpdateMu.Unlock()
+	ph.Unlock()
 }
 
 // SetMeshes sets the meshes after config
 func (sc *Scene) SetMeshes() {
-	ph := &sc.Phong
-	ph.UpdateMu.Lock()
+	ph := sc.Phong
+	ph.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
 		vertexArray, normArray, textureArray, colorArray, indexArray := ph.MeshFloatsByName(kv.Key)
 		ms.Set(sc, vertexArray, normArray, textureArray, colorArray, indexArray)
-		ph.ModMeshByName(kv.Key)
 	}
-	ph.UpdateMu.Unlock()
-	ph.Sync()
+	ph.Unlock()
 }
 
 // UpdateMeshes iterates over meshes and calls their Update method
 // each mesh Update method must call SetMod to trigger the update
 func (sc *Scene) UpdateMeshes() {
-	ph := &sc.Phong
-	ph.UpdateMu.Lock()
+	ph := sc.Phong
+	ph.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
 		vertexArray, normArray, textureArray, colorArray, indexArray := ph.MeshFloatsByName(kv.Key)
 		ms.Update(sc, vertexArray, normArray, textureArray, colorArray, indexArray)
 	}
-	ph.UpdateMu.Unlock()
-	ph.Sync()
+	ph.Unlock()
 }
 
 // ReconfigMeshes reconfigures meshes on the Phong renderer
@@ -255,6 +248,6 @@ func (ms *GenMesh) Set(sc *Scene, vertexArray, normArray, textureArray, colorArr
 		copy(colorArray, ms.Color)
 	}
 	copy(indexArray, ms.Index)
-	bb := vshape.BBoxFromVtxs(ms.Vertex, 0, ms.NumVertex)
+	bb := shape.BBoxFromVtxs(ms.Vertex, 0, ms.NumVertex)
 	ms.BBox.SetBounds(bb.Min, bb.Max)
 }

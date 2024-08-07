@@ -10,11 +10,11 @@ import (
 	"image/draw"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/vgpu"
 )
 
 // Text2D presents 2D rendered text on a vertically oriented plane, using a texture.
@@ -139,7 +139,7 @@ func (txt *Text2D) RenderText() {
 			tx.AsTextureBase().RGBA = img
 			txt.Material.SetTexture(tx)
 		} else {
-			if vgpu.Debug {
+			if gpu.Debug {
 				fmt.Printf("xyz.Text2D: error: texture name conflict: %s\n", txname)
 			}
 			txt.Material.SetTexture(tx)

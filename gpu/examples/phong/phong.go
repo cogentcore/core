@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/examples/images"
@@ -200,7 +199,7 @@ func main() {
 		updateCamera()
 
 		rp, err := ph.RenderStart()
-		if errors.Log(err) != nil {
+		if err != nil {
 			return
 		}
 		render1(rp)

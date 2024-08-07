@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
@@ -230,10 +232,24 @@ func (sld *Solid) RenderClass() RenderClasses {
 	}
 }
 
+// PreRender activates this solid for rendering
+func (sld *Solid) PreRender() {
+	ph := sld.Scene.Phong
+	nm := sld.Path()
+	od := ph.SetObject(nm, &sld.Pose.Matrix, sld.Material.Color, sld.Material.Emissive, sld.Material.Shiny, sld.Material.Reflective, sld.Material.Bright)
+	// todo, use tiling in phong too!
+	od.SetTextureRepeat(sld.Material.Tiling.Repeat).SetTextureOffset(sld.Material.Tiling.Off)
+}
+
 // Render activates this solid for rendering
-func (sld *Solid) Render() {
-	sld.Scene.Phong.UseMeshName(string(sld.MeshName))
-	sld.Scene.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
-	sld.Material.Render(sld.Scene)
-	sld.Scene.Phong.Render()
+func (sld *Solid) Render(rp *wgpu.RenderPassEncoder) {
+	nm := sld.Path()
+	ph := sld.Scene.Phong
+	ph.UseObjectName(nm)
+	ph.UseMeshName(string(sld.MeshName))
+	if sld.Material.TextureName != "" {
+		ph.UseTextureName(string(sld.Material.TextureName))
+	} else {
+		ph.UseNoTexture()
+	}
 }

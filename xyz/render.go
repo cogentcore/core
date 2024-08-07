@@ -10,10 +10,10 @@ import (
 	"sort"
 
 	"cogentcore.org/core/base/iox/imagex"
-	"cogentcore.org/core/colors"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/vgpu"
 )
 
 // render notes:
@@ -80,28 +80,23 @@ func (sc *Scene) UpdateNodesIfNeeded() {
 }
 
 // ConfigFrameFromSurface configures framebuffer for GPU rendering
-// Using GPU and Device from given vgpu.Surface
-func (sc *Scene) ConfigFrameFromSurface(surf *vgpu.Surface) {
-	sc.ConfigFrame(surf.GPU, &surf.Device)
+// Using GPU and Device from given gpuSurface
+func (sc *Scene) ConfigFrameFromSurface(surf *gpu.Surface) {
+	sc.ConfigFrame(surf.GPU, surf.Device())
 }
 
 // ConfigFrame configures framebuffer for GPU rendering,
 // using given gpu and device, and size set in Geom.Size.
 // Must be called on the main thread.
 // If Frame already exists, it ensures that the Size is correct.
-func (sc *Scene) ConfigFrame(gpu *vgpu.GPU, dev *vgpu.Device) {
+func (sc *Scene) ConfigFrame(gp *gpu.GPU, dev *gpu.Device) {
 	sz := sc.Geom.Size
 	if sz == (image.Point{}) {
 		sz = image.Point{480, 320}
 	}
 	if sc.Frame == nil {
-		sc.Frame = vgpu.NewRenderTexture(gpu, dev, sz)
-		sc.Frame.Format.SetMultisample(sc.MultiSample)
-		sy := sc.Phong.System
-		sy.InitGraphics(gpu, "vphong.Phong", dev)
-		sy.ConfigRenderNonSurface(&sc.Frame.Format, vgpu.Depth32)
-		sc.Frame.SetRender(&sy.Render)
-		sc.Phong.ConfigSys()
+		sc.Frame = gpu.NewRenderTexture(gp, dev, sz, sc.MultiSample, gpu.Depth32)
+		sc.Phong = phong.NewPhong(gp, sc.Frame)
 	} else {
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 	}
@@ -119,15 +114,15 @@ func (sc *Scene) Image() (*image.RGBA, error) {
 	if fr == nil {
 		return nil, fmt.Errorf("xyz.Scene Image: Scene does not have a Frame")
 	}
-	sy := &sc.Phong.System
-	tcmd := sy.MemCmdStart()
-	fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
-	sy.MemCmdEndSubmitWaitFree()
-	img, err := fr.Render.Grab.DevGoImage()
-	if err == nil {
-		return img, err
-	}
-	return nil, err
+	// sy := &sc.Phong.System
+	// tcmd := sy.MemCmdStart()
+	// fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
+	// sy.MemCmdEndSubmitWaitFree()
+	// img, err := fr.Render.Grab.DevGoImage()
+	// if err == nil {
+	// 	return img, err
+	// }
+	return nil, nil //err
 }
 
 // ImageDone must be called when done using the image returned by [Scene.Image].
@@ -135,7 +130,7 @@ func (sc *Scene) ImageDone() {
 	if sc.Frame == nil {
 		return
 	}
-	sc.Frame.Render.Grab.UnmapDev()
+	// sc.Frame.Render.Grab.UnmapDev()
 }
 
 // ImageCopy returns a copy of the current rendered image
@@ -149,15 +144,15 @@ func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 	if fr == nil {
 		return nil, fmt.Errorf("xyz.Scene ImageCopy: Scene does not have a Frame")
 	}
-	sy := &sc.Phong.System
-	tcmd := sy.MemCmdStart()
-	fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
-	sy.MemCmdEndSubmitWaitFree()
-	err := fr.Render.Grab.DevGoImageCopy(&sc.imgCopy)
-	if err == nil {
-		return &sc.imgCopy, err
-	}
-	return nil, err
+	// sy := &sc.Phong.System
+	// tcmd := sy.MemCmdStart()
+	// fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
+	// sy.MemCmdEndSubmitWaitFree()
+	// err := fr.Render.Grab.DevGoImageCopy(&sc.imgCopy)
+	// if err == nil {
+	// 	return &sc.imgCopy, err
+	// }
+	return nil, nil // err
 }
 
 // ImageUpdate configures, updates, and renders the scene, then returns [Scene.Image].
@@ -186,15 +181,15 @@ func (sc *Scene) DepthImage() ([]float32, error) {
 	if fr == nil {
 		return nil, fmt.Errorf("xyz.Scene DepthImage: Scene does not have a Frame")
 	}
-	sy := &sc.Phong.System
-	tcmd := sy.MemCmdStart()
-	fr.GrabDepthImage(tcmd)
-	sy.MemCmdEndSubmitWaitFree()
-	depth, err := fr.Render.DepthImageArray()
-	if err == nil {
-		return depth, err
-	}
-	return nil, err
+	// sy := &sc.Phong.System
+	// tcmd := sy.MemCmdStart()
+	// fr.GrabDepthImage(tcmd)
+	// sy.MemCmdEndSubmitWaitFree()
+	// depth, err := fr.Render.DepthImageArray()
+	// if err == nil {
+	// 	return depth, err
+	// }
+	return nil, nil //err
 }
 
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
@@ -285,8 +280,8 @@ func (sc *Scene) ConfigNodes() {
 // This must be called on the main thread.
 func (sc *Scene) Config() {
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
-	clr := math32.NewVector3Color(colors.ToUniform(sc.Background)).SRGBToLinear()
-	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
+	// 	clr := math32.NewVector3Color(.SRGBToLinear()
+	sc.Frame.Render().ClearColor = sc.Background.At(0, 0)
 	// gpu.Draw.Wireframe(sc.Wireframe)
 	sc.ConfigNodes()
 	UpdateWorldMatrix(sc.This)
@@ -370,10 +365,8 @@ const (
 // RenderImpl renders the scene to the framebuffer.
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) RenderImpl() {
-	sc.Phong.UpdateMu.Lock()
-	sc.Phong.SetViewProjection(&sc.Camera.ViewMatrix, &sc.Camera.VkProjectionMatrix)
-	sc.Phong.UpdateMu.Unlock()
-	sc.Phong.Sync()
+	ph := sc.Phong
+	ph.SetCamera(&sc.Camera.ViewMatrix, &sc.Camera.VkProjectionMatrix)
 
 	var rcs [RenderClassesN][]Node
 	sc.WalkDown(func(k tree.Node) bool {
@@ -397,13 +390,6 @@ func (sc *Scene) RenderImpl() {
 		rcs[rc] = append(rcs[rc], ni)
 		return tree.Continue
 	})
-
-	sc.Phong.UpdateMu.Lock()
-	sy := &sc.Phong.System
-	cmd := sy.CmdPool.Buff
-	descIndex := 0
-	sy.ResetBeginRenderPass(cmd, sc.Frame.Frames[0], descIndex)
-	sc.Phong.UpdateMu.Unlock()
 
 	for rci, objs := range rcs {
 		rc := RenderClasses(rci)
@@ -430,12 +416,27 @@ func (sc *Scene) RenderImpl() {
 			if rc >= RClassTransTexture && rc != lastrc {
 				lastrc = rc
 			}
-			obj.Render()
+			obj.PreRender()
 		}
 	}
-	sc.Phong.UpdateMu.Lock()
-	sy.EndRenderPass(cmd)
-	sc.Frame.SubmitRender(cmd) // this is where it waits for the 16 msec
-	sc.Frame.WaitForRender()
-	sc.Phong.UpdateMu.Unlock()
+
+	rp, err := ph.RenderStart()
+	if err != nil {
+		return
+	}
+	for rci, objs := range rcs {
+		rc := RenderClasses(rci)
+		if len(objs) == 0 {
+			continue
+		}
+		lastrc := RClassOpaqueVertex
+		for _, obj := range objs {
+			rc = obj.RenderClass()
+			if rc >= RClassTransTexture && rc != lastrc {
+				lastrc = rc
+			}
+			obj.Render(rp)
+		}
+	}
+	ph.RenderEnd(rp)
 }

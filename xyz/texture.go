@@ -13,8 +13,8 @@ import (
 
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/imagex"
-	"cogentcore.org/core/vgpu"
-	"cogentcore.org/core/vgpu/vphong"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/phong"
 )
 
 // TextureName provides a GUI interface for choosing textures.
@@ -111,7 +111,7 @@ func (tx *TextureFile) Image() *image.RGBA {
 		slog.Error("xyz.TextureFile: Image load error", "file:", tx.File, "error", err)
 		return nil
 	}
-	tx.RGBA = vgpu.ImageToRGBA(img)
+	tx.RGBA = gpu.ImageToRGBA(img)
 	return tx.RGBA
 }
 
@@ -170,12 +170,12 @@ func (sc *Scene) DeleteTextures() {
 // must be called after adding or deleting any meshes or altering
 // the number of vertices.
 func (sc *Scene) ConfigTextures() {
-	ph := &sc.Phong
+	ph := sc.Phong
 	ph.ResetTextures()
 	for _, kv := range sc.Textures.Order {
 		tx := kv.Value
 		// todo: remove repeat from texture, move to color.
-		ph.AddTexture(kv.Key, vphong.NewTexture(tx.Image()))
+		ph.AddTexture(kv.Key, phong.NewTexture(tx.Image()))
 	}
 }
 
