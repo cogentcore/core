@@ -34,25 +34,23 @@ func (dw *Drawer) UseGoImage(img image.Image, unchanged bool) {
 	tvv.SetFromGoImage(img, 0)
 }
 
-// SetFrameTexture sets given gpu.Framebuffer image as a drawing source at index,
-// used in subsequent Draw methods.  Must have already been configured to fit!
-func (dw *Drawer) SetFrameTexture(idx int, fbi any) {
-	// todo use above api
-	// fb := fbi.(*gpu.Framebuffer)
-	// if fb == nil {
-	// 	return
-	// }
-	// dw.Lock()
-	// _, tx, _ := dw.System.Vars().ValueByIndexTry(0, "Tex", idx)
-	// if fb.Format.Size != tx.Texture.Format.Size {
-	// 	dw.Unlock()
-	// 	dw.ConfigTexture(idx, &fb.Format)
-	// 	dw.Lock()
-	// }
-	// cmd := dw.System.MemCmdStart()
-	// fb.CopyToTexture(&tx.Texture.Texture, dw.System.Device.Device, cmd)
-	// dw.System.MemCmdEndSubmitWaitFree()
-	// dw.Unlock()
+// UseTexture uses the given GPU resident Texture as the source image
+// for the next Draw operation.
+func (dw *Drawer) UseTexture(tx *gpu.Texture) {
+	dw.Lock()
+	defer dw.Unlock()
+	dw.curImageSize = tx.Format.Bounds().Size()
+	idx, _ := dw.images.use(tx)
+	//	if exists && unchanged {
+	//		return
+	//	}
+	tvr := dw.System.Vars().VarByName(1, "TexSampler")
+	nv := len(tvr.Values.Values)
+	if idx >= nv { // new allocation
+		tvr.SetNValues(dw.System.Device(), dw.images.capacity)
+	}
+	tvv := tvr.Values.Values[idx]
+	tvv.SetFromTexture(tx)
 }
 
 // CopyUsed copies the current Use* texture to render target.

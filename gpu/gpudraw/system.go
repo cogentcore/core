@@ -154,6 +154,7 @@ func (dw *Drawer) drawAll() error {
 		}
 		pl.BindDrawIndexed(rp)
 	}
+	rp.End()
 	sy.EndRenderPass(rp)
 	return nil
 }

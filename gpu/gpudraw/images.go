@@ -4,19 +4,10 @@
 
 package gpudraw
 
-import (
-	"image"
-
-	"cogentcore.org/core/gpu"
-)
-
 // imgrec records tracking data for a specific image
 type imgrec struct {
-	// img is the image, if a Go image
-	img image.Image
-
-	// texture, if a texture
-	texture *gpu.Texture
+	// img is the image, or texture
+	img any
 
 	//	index is where it is used in the Values list.
 	index int
@@ -76,7 +67,7 @@ func (im *images) start() {
 // If there are no more free spots, then the index will be at the
 // previous capacity level, which should be len(Values), at which
 // point the drawer can allocate the current capacity amount.
-func (im *images) use(img image.Image) (int, bool) {
+func (im *images) use(img any) (int, bool) {
 	if ir, ok := im.all[img]; ok {
 		ir.used = true
 		im.used = append(im.used, ir)

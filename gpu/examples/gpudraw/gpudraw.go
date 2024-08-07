@@ -67,7 +67,7 @@ func main() {
 
 	rendImgs := func(idx int) {
 		drw.Start()
-		// drw.Scale(image.Rectangle{}, imgs[idx], image.Rectangle{}, 0, gpudraw.Src, gpudraw.Unchanged)
+		drw.Scale(image.Rectangle{}, imgs[idx], image.Rectangle{}, 0, gpudraw.Src, gpudraw.Unchanged)
 		for i := range imgFiles {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
 			dp := image.Point{i * 50, i * 50}
@@ -131,28 +131,12 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	// var cpuProfileFile *os.File
-	// fmt.Println("Starting standard cpu and memory profiling")
-	// f, err := os.Create("cpu.prof")
-	// if errors.Log(err) == nil {
-	// 	cpuProfileFile = f
-	// 	errors.Log(pprof.StartCPUProfile(f))
-	// }
-
 	fpsDelay := time.Second / 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {
 		case <-exitC:
 			fpsTicker.Stop()
-			// pprof.StopCPUProfile()
-			// errors.Log(cpuProfileFile.Close())
-			// f, err = os.Create("mem.prof")
-			// if errors.Log(err) == nil {
-			// 	runtime.GC() // get up-to-date statistics
-			// 	errors.Log(pprof.WriteHeapProfile(f))
-			// 	errors.Log(f.Close())
-			// }
 			destroy()
 			return
 		case <-fpsTicker.C:

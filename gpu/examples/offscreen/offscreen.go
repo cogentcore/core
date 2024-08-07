@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 	"runtime"
 	"time"
 	"unsafe"
@@ -174,12 +175,10 @@ func main() {
 			sy.EndRenderPass(rp)
 		}
 
-		// todo:
-		// drw.SetFrameTexture(0, fr)
-		// drw.SyncTextures()
-		// drw.StartDraw(0)
-		// drw.Scale(0, 0, sf.Format.Bounds(), image.ZR, draw.Src, gpu.NoFlipY, 0)
-		// drw.EndDraw()
+		drw.Start()
+		drw.UseTexture(rt.Frames[0])
+		drw.ScaleUsed(image.Rectangle{}, image.Rectangle{}, 0, draw.Src, false)
+		drw.End()
 
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++
@@ -199,7 +198,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 6
+	fpsDelay := time.Second / 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

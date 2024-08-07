@@ -144,7 +144,7 @@ func (tx *Texture) ConfigRenderTexture(dev *Device, imgFmt *TextureFormat) error
 		return nil
 	}
 	tx.Format = nfmt
-	return tx.CreateTexture(wgpu.TextureUsageRenderAttachment | wgpu.TextureUsageCopySrc)
+	return tx.CreateTexture(wgpu.TextureUsageRenderAttachment | wgpu.TextureUsageCopySrc | wgpu.TextureUsageTextureBinding)
 }
 
 // ConfigDepth configures this texture as a depth texture
