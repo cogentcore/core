@@ -93,7 +93,7 @@ func (t *Cylinder) SetAngStart(v float32) *Cylinder { t.AngStart = v; return t }
 // total angle to generate in degrees (max 360)
 func (t *Cylinder) SetAngLen(v float32) *Cylinder { t.AngLen = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.ShapeGroup", IDName: "shape-group", Doc: "ShapeGroup is a group of shapes -- returns summary data for shape elements", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "Shapes", Doc: "list of shapes in group"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.ShapeGroup", IDName: "shape-group", Doc: "ShapeGroup is a group of shapes.\nReturns summary data for shape elements.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "Shapes", Doc: "list of shapes in group"}}})
 
 // SetShapes sets the [ShapeGroup.Shapes]:
 // list of shapes in group
