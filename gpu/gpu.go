@@ -40,7 +40,7 @@ type GPU struct {
 	Instance *wgpu.Instance
 
 	// GPU represents the specific GPU hardware device used.
-	// You can call AdapterProperties() to get info.
+	// You can call GetInfo() to get info.
 	GPU *wgpu.Adapter
 
 	// options passed in during config
@@ -59,7 +59,7 @@ type GPU struct {
 	Compute bool
 
 	// Properties are the general properties of the GPU adapter.
-	Properties wgpu.AdapterProperties
+	Properties wgpu.AdapterInfo
 
 	// Limits are the limits of the current GPU adapter.
 	Limits wgpu.SupportedLimits
@@ -129,7 +129,7 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	gpus := gp.Instance.EnumerateAdapters(nil)
 	gpIndex := gp.SelectGPU(gpus)
 	gp.GPU = gpus[gpIndex]
-	gp.Properties = gp.GPU.GetProperties()
+	gp.Properties = gp.GPU.GetInfo()
 	gp.DeviceName = gp.Properties.Name
 
 	gp.Limits = gp.GPU.GetLimits()
@@ -177,7 +177,7 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			return idx
 		}
 		for gi := range n {
-			// type AdapterProperties struct {
+			// type AdapterInfo struct {
 			// 	VendorId          uint32
 			// 	VendorName        string
 			// 	Architecture      string
@@ -188,7 +188,7 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			// 	BackendType       BackendType
 			// }
 
-			props := gpus[gi].GetProperties()
+			props := gpus[gi].GetInfo()
 			if strings.Contains(props.Name, trgDevNm) {
 				devNm := props.Name
 				if Debug {
@@ -206,7 +206,7 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 		// note: we could potentially check for the optional features here
 		// but generally speaking the discrete device is going to be the most
 		// feature-full, so the practical benefit is unlikely to be significant.
-		props := gpus[gi].GetProperties()
+		props := gpus[gi].GetInfo()
 		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
 			// todo: pick one with best memory
 			// var memProperties vk.PhysicalDeviceMemoryProperties

@@ -16,7 +16,7 @@ func main() {
 
 	gpus := instance.EnumerateAdapters(nil)
 	for i, a := range gpus {
-		props := a.GetProperties()
+		props := a.GetInfo()
 		fmt.Println("\n########################\nWebGPU Adapter number:", i)
 		fmt.Println(reflectx.StringJSON(props))
 		limits := a.GetLimits()
