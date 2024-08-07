@@ -58,8 +58,8 @@ func (pl *Plane) N() (numVertex, nIndex int) {
 }
 
 // Set sets points in given allocated arrays.
-func (pl *Plane) Set(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	sz := SetPlaneAxisSize(vertexArray, normalArray, textureArray, indexArray, pl.VertexOff, pl.IndexOff, pl.NormalAxis, pl.NormalNeg, pl.Size, pl.Segs, pl.Offset, pl.Pos)
+func (pl *Plane) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
+	sz := SetPlaneAxisSize(vertex, normal, texcoord, index, pl.VertexOffset, pl.IndexOffset, pl.NormalAxis, pl.NormalNeg, pl.Size, pl.Segs, pl.Offset, pl.Pos)
 	mn := pl.Pos.Sub(sz)
 	mx := pl.Pos.Add(sz)
 	pl.CBBox.Set(&mn, &mx)
@@ -89,7 +89,7 @@ func PlaneN(wsegs, hsegs int) (numVertex, nIndex int) {
 // offset is the distance to place the plane along the orthogonal axis.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetPlaneAxisSize(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, normalAxis math32.Dims, normalNeg bool, size math32.Vector2, segs math32.Vector2i, offset float32, pos math32.Vector3) math32.Vector3 {
+func SetPlaneAxisSize(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vtxOff, idxOff int, normalAxis math32.Dims, normalNeg bool, size math32.Vector2, segs math32.Vector2i, offset float32, pos math32.Vector3) math32.Vector3 {
 	hSz := size.DivScalar(2)
 	thin := float32(.0000001)
 	sz := math32.Vector3{}
@@ -97,28 +97,28 @@ func SetPlaneAxisSize(vertexArray, normalArray, textureArray math32.ArrayF32, in
 	case math32.X:
 		sz.Set(thin, hSz.Y, hSz.X)
 		if normalNeg {
-			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.Z, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nx
+			SetPlane(vertex, normal, texcoord, index, vtxOff, idxOff, math32.Z, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nx
 			sz.X += -offset
 		} else {
-			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.Z, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // px
+			SetPlane(vertex, normal, texcoord, index, vtxOff, idxOff, math32.Z, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // px
 			sz.X += offset
 		}
 	case math32.Y:
 		sz.Set(hSz.X, thin, hSz.Y)
 		if normalNeg {
-			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Z, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // ny
+			SetPlane(vertex, normal, texcoord, index, vtxOff, idxOff, math32.X, math32.Z, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // ny
 			sz.Y += -offset
 		} else {
-			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Z, 1, 1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // py
+			SetPlane(vertex, normal, texcoord, index, vtxOff, idxOff, math32.X, math32.Z, 1, 1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // py
 			sz.Y += offset
 		}
 	case math32.Z:
 		sz.Set(hSz.X, hSz.Y, thin)
 		if normalNeg {
-			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nz
+			SetPlane(vertex, normal, texcoord, index, vtxOff, idxOff, math32.X, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nz
 			sz.Z += -offset
 		} else {
-			SetPlane(vertexArray, normalArray, textureArray, indexArray, vtxOff, idxOff, math32.X, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // pz
+			SetPlane(vertex, normal, texcoord, index, vtxOff, idxOff, math32.X, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // pz
 			sz.Z += offset
 		}
 	}
@@ -134,7 +134,7 @@ func SetPlaneAxisSize(vertexArray, normalArray, textureArray math32.ArrayF32, in
 // and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
 // pos is a 3D position offset.
-func SetPlane(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, waxis, haxis math32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, pos math32.Vector3) {
+func SetPlane(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vtxOff, idxOff int, waxis, haxis math32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, pos math32.Vector3) {
 	w := math32.Z
 	if (waxis == math32.X && haxis == math32.Y) || (waxis == math32.Y && haxis == math32.X) {
 		w = math32.Z
@@ -146,11 +146,11 @@ func SetPlane(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray
 	wsegs = max(wsegs, 1)
 	hsegs = max(hsegs, 1)
 
-	normal := math32.Vector3{}
+	norm := math32.Vector3{}
 	if zoff > 0 {
-		normal.SetDim(w, 1)
+		norm.SetDim(w, 1)
 	} else {
-		normal.SetDim(w, -1)
+		norm.SetDim(w, -1)
 	}
 
 	wsegs1 := wsegs + 1
@@ -178,10 +178,10 @@ func SetPlane(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray
 			vtx.SetDim(haxis, (float32(iy)*segHeight)*fhdir+hoff)
 			vtx.SetDim(w, zoff)
 			vtx.Add(pos)
-			vtx.ToSlice(vertexArray, vidx)
-			normal.ToSlice(normalArray, vidx)
+			vtx.ToSlice(vertex, vidx)
+			norm.ToSlice(normal, vidx)
 			tex.Set(float32(ix)/float32(wsegs), float32(1)-(float32(iy)/float32(hsegs)))
-			tex.ToSlice(textureArray, tidx)
+			tex.ToSlice(texcoord, tidx)
 			vidx += 3
 			tidx += 2
 		}
@@ -194,7 +194,7 @@ func SetPlane(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray
 			b := ix + wsegs1*(iy+1)
 			c := (ix + 1) + wsegs1*(iy+1)
 			d := (ix + 1) + wsegs1*iy
-			indexArray.Set(sidx, uint32(a+vtxOff), uint32(b+vtxOff), uint32(d+vtxOff), uint32(b+vtxOff), uint32(c+vtxOff), uint32(d+vtxOff))
+			index.Set(sidx, uint32(a+vtxOff), uint32(b+vtxOff), uint32(d+vtxOff), uint32(b+vtxOff), uint32(c+vtxOff), uint32(d+vtxOff))
 			sidx += 6
 		}
 	}

@@ -6,8 +6,6 @@ package phong
 
 import (
 	"fmt"
-	"image/color"
-	"log"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
@@ -26,34 +24,37 @@ type Object struct {
 	// WorldMatrix is the transpose of the inverse of the
 	// Camera.View matrix * Object "model" Matrix, used to
 	// compute the proper normals. WebGPU does not
-	// have the transpose function.
-	WorldMatrix math32.Matrix4
+	// have the transpose function.  This is managed entirely by the
+	// Phong system and is not set by the user.
+	worldMatrix math32.Matrix4
 }
 
 // NewObject returns a new object with given matrix and colors.
-// Texture defaults to using full texture with 0 offset.
-func NewObject(mtx *math32.Matrix4, clr, emis color.Color, shiny, reflect, bright float32) *Object {
+func NewObject(mtx *math32.Matrix4, clr *Colors) *Object {
 	ob := &Object{}
 	ob.Matrix = *mtx
-	ob.SetColors(clr, emis, shiny, reflect, bright)
-	ob.TextureRepeatOff.Set(1, 1, 0, 0)
+	ob.Colors = *clr
 	return ob
 }
 
-// AddObject adds a Object with given unique name identifier.
-func (ph *Phong) AddObject(name string, ob *Object) {
+// SetObject sets Object data with given unique name identifier.
+// If object already exists, then data is updated if different.
+func (ph *Phong) SetObject(name string, ob *Object) {
 	ph.Lock()
 	defer ph.Unlock()
 
-	ph.objects.Add(name, ob)
-}
-
-// DeleteObject deletes Object with name
-func (ph *Phong) DeleteObject(name string) {
-	ph.Lock()
-	defer ph.Unlock()
-
-	ph.objects.DeleteKey(name)
+	idx, ok := ph.objects.Map[name]
+	if !ok {
+		ph.objects.Add(name, ob)
+		ph.objectUpdated = true
+		// note: allocation of DynamicN happens in updateObjects pass.
+		return
+	}
+	cob := ph.objects.Order[idx].Value
+	if *ob != *cob {
+		ph.objects.Order[idx].Value = ob
+		ph.objectUpdated = true
+	}
 }
 
 // ResetObjects resets the objects for reconfiguring
@@ -77,67 +78,23 @@ func (ph *Phong) object(name string) *Object {
 func (ph *Phong) setWorldMatrix(ob *Object) {
 	mvm := math32.Matrix3FromMatrix4(ph.Camera.View.Mul(&ob.Matrix))
 	nm := mvm.Inverse().Transpose()
-	ob.WorldMatrix.SetFromMatrix3(&nm)
+	ob.worldMatrix.SetFromMatrix3(&nm)
 }
 
-// SetObject sets the updated object data for given object name.
-// This must be called for any object updates _prior_ to the next
-// render pass.  All of the object data must be transferred to the
-// GPU if any are updated, so in general it is fine to update
-// everything every time, just in case anything changed.
-func (ph *Phong) SetObject(name string, mtx *math32.Matrix4, clr, emis color.Color, shiny, reflect, bright float32) *Object {
-	ob := ph.object(name)
-	if ob == nil {
-		return nil
-	}
-	ob.Matrix = *mtx
-	ob.SetColors(clr, emis, shiny, reflect, bright)
-	ph.objectUpdated = true
-	return ob
-}
-
-// SetObjectMatrix sets the updated object matrix for given object name.
-// This must be called for any object updates _prior_ to the next
-// render pass.  All of the object data must be transferred to the
-// GPU if any are updated, so in general it is fine to update
-// everything every time, just in case anything changed.
-func (ph *Phong) SetObjectMatrix(name string, mtx *math32.Matrix4) *Object {
-	ob := ph.object(name)
-	if ob == nil {
-		return nil
-	}
-	ob.Matrix = *mtx
-	ph.objectUpdated = true
-	return ob
-}
-
-// SetObjectColor sets the updated object colors for given object name.
-// This must be called for any object updates _prior_ to the next
-// render pass.  All of the object data must be transferred to the
-// GPU if any are updated, so in general it is fine to update
-// everything every time, just in case anything changed.
-func (ph *Phong) SetObjectColor(name string, clr, emis color.Color, shiny, reflect, bright float32) *Object {
-	ob := ph.object(name)
-	if ob == nil {
-		return nil
-	}
-	ob.SetColors(clr, emis, shiny, reflect, bright)
-	ph.objectUpdated = true
-	return ob
-}
-
-// UseObjectName selects object by name for current render step
+// UseObject selects object by name for current render step.
+// Object must have already been added / updated via [SetObject].
 // If object has per-vertex colors, these are selected for rendering,
 // and texture is turned off.  UseTexture* after this to override.
-func (ph *Phong) UseObjectName(name string) error {
+func (ph *Phong) UseObject(name string) error {
+	ph.Lock()
+	defer ph.Unlock()
+
 	idx, ok := ph.objects.IndexByKeyTry(name)
 	if !ok {
-		err := fmt.Errorf("phong:UseObjectName: name not found: %s", name)
-		if gpu.Debug {
-			log.Println(err)
-		}
+		return errors.Log(fmt.Errorf("phong:UseObject: name not found: %s", name))
 	}
-	return ph.UseObjectIndex(idx)
+	ph.System.Vars().SetDynamicIndex(int(ObjectGroup), "Object", idx)
+	return nil
 }
 
 // UseObjectIndex selects object by index for current render step.

@@ -10,25 +10,8 @@ import (
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/math32"
+	"cogentcore.org/core/gpu/phong"
 )
-
-// Tiling are the texture tiling parameters
-type Tiling struct {
-
-	// how often to repeat the texture in each direction
-	Repeat math32.Vector2
-
-	// offset for when to start the texure in each direction
-	Off math32.Vector2
-}
-
-// Defaults sets default tiling params if not yet initialized
-func (tl *Tiling) Defaults() {
-	if tl.Repeat == (math32.Vector2{}) {
-		tl.Repeat.Set(1, 1)
-	}
-}
 
 // Material describes the material properties of a surface (colors, shininess, texture)
 // i.e., phong lighting parameters.
@@ -57,7 +40,7 @@ type Material struct { //types:add -setters
 	TextureName TextureName `set:"-"`
 
 	// Tiling is the texture tiling parameters: repeat and offset.
-	Tiling Tiling `display:"inline"`
+	Tiling phong.Tiling `display:"inline"`
 
 	// CullBack indicates to cull the back-facing surfaces.
 	CullBack bool

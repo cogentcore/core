@@ -4,9 +4,10 @@ Blinn-Phong is a standard lighting model that used to be built into OpenGL, and 
 
 This package provides a "middleware" layer between the basic `gpu` package and a complete end-user framework like [xyz](https://github.com/cogentcore/core/tree/main/xyz) which can focus on how to organize the scenegraph data structures, and then relies on `phong` to mange the gpu-side rendering efficiently.
 
-TODO: turn on auto-mipmap stuff for smoother texture rendering
 
 # Usage
+
+Phong uses the "Set and Reset" paradigm for all resources except lights, which is generally suited to most 3D use-cases.  Meshes, Textures and Objects must be Set before they are used in a render pass (and further Set calls just update existing properties as needed), and if there is any drastic change to the overall scene configuration, Reset removes all of the existing items.  Otherwise, any unused items just take up space on the GPU, but do not incur additional runtime costs.
 
 See [examples/phong] for a working example.
 
@@ -22,12 +23,12 @@ See [examples/phong] for a working example.
     ph.AddMeshFromShape("sphere", shape.NewSphere(.5, 64))
     ...
     
-    // add textures
-    ph.AddTexture(fn, phong.NewTexture(imgs[i])) // go image.Image, ideally RGBA
+    // set textures
+    ph.SetTexture(fn, phong.NewTexture(imgs[i])) // go image.Image, ideally RGBA
     ...
 
-    // add objects
-    ph.AddObject(nm, phong.NewObject(&ob.Matrix, ob.Color, color.Black, 30, 1, 1))
+    // set objects
+    ph.SetObject(nm, phong.NewObject(&ob.Matrix, ob.Color, color.Black, 30, 1, 1))
     ...
     
     // set the camera matricies

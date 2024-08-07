@@ -51,7 +51,7 @@ var s_tex: sampler;
 @fragment
 fn fs_main(in: FragmentInput) -> @location(0) vec4<f32> {
 	let itc = vec2<f32>(in.tex_coord.x, 1.0-in.tex_coord.y); // flipy
-	let ttc = itc * object.textureRepeatOff.xy + object.textureRepeatOff.zw;
+	let ttc = itc * object.tiling.xy + object.tiling.zw;
 	let tc = vec2<f32>(ttc.x % 1.0, ttc.y % 1.0);
 	let clr = textureSample(t_tex, s_tex, tc).xyz;
 	let opacity = object.color.a;

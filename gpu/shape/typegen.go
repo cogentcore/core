@@ -9,14 +9,16 @@ import (
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.Box", IDName: "box", Doc: "Box is a rectangular-shaped solid (cuboid)", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "Size", Doc: "size along each dimension"}, {Name: "Segs", Doc: "number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.Box", IDName: "box", Doc: "Box is a rectangular-shaped solid (cuboid)", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "Size", Doc: "size along each dimension"}, {Name: "Segs", Doc: "number of segments to divide each plane into\n(enforced to be at least 1).\nCan generally increase rendering quality to have > 1."}}})
 
 // SetSize sets the [Box.Size]:
 // size along each dimension
 func (t *Box) SetSize(v math32.Vector3) *Box { t.Size = v; return t }
 
 // SetSegs sets the [Box.Segs]:
-// number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
+// number of segments to divide each plane into
+// (enforced to be at least 1).
+// Can generally increase rendering quality to have > 1.
 func (t *Box) SetSegs(v math32.Vector3i) *Box { t.Segs = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.Capsule", IDName: "capsule", Doc: "Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.\nSupports different radii on each end.\nHeight is along the Y axis -- total height is Height + TopRad + BotRad.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder portion"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 to omit top cap"}, {Name: "BotRad", Doc: "radius of the bottom -- set to 0 to omit bottom cap"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "CapSegs", Doc: "number of segments in the hemisphere cap ends (16 is a reasonable default)"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
@@ -95,7 +97,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.ShapeGrou
 
 // SetShapes sets the [ShapeGroup.Shapes]:
 // list of shapes in group
-func (t *ShapeGroup) SetShapes(v ...Shape) *ShapeGroup { t.Shapes = v; return t }
+func (t *ShapeGroup) SetShapes(v ...Mesh) *ShapeGroup { t.Shapes = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.Lines", IDName: "lines", Doc: "Lines are lines rendered as long thin boxes defined by points\nand width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0\nor a constant unless specifically relevant to have full 3D variation).\nRotate the solid to put into other planes.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "Points", Doc: "line points (must be 2 or more)"}, {Name: "Width", Doc: "line width, Y = height perpendicular to line direction, and X = depth"}, {Name: "Colors", Doc: "optional colors for each point -- actual color interpolates between"}, {Name: "Closed", Doc: "if true, connect the first and last points to form a closed shape"}}})
 
@@ -115,14 +117,18 @@ func (t *Lines) SetColors(v ...color.Color) *Lines { t.Colors = v; return t }
 // if true, connect the first and last points to form a closed shape
 func (t *Lines) SetClosed(v bool) *Lines { t.Closed = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.Plane", IDName: "plane", Doc: "Plane is a flat 2D plane, which can be oriented along any\naxis facing either positive or negative", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "NormalAxis", Doc: "axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormalNeg for whether it is facing in the positive or negative of the given axis."}, {Name: "NormalNeg", Doc: "if false, the plane normal facing in the positive direction along specified NormalAxis, otherwise it faces in the negative if true"}, {Name: "Size", Doc: "2D size of plane"}, {Name: "Segs", Doc: "number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}, {Name: "Offset", Doc: "offset from origin along direction of normal to the plane"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.Plane", IDName: "plane", Doc: "Plane is a flat 2D plane, which can be oriented along any\naxis facing either positive or negative", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "NormalAxis", Doc: "axis along which the normal perpendicular to the plane points.\nE.g., if the Y axis is specified, then it is a standard X-Z ground plane.\nSee also NormalNeg for whether it is facing in the positive or\nnegative of the given axis."}, {Name: "NormalNeg", Doc: "if false, the plane normal is facing in the positive direction\nalong specified NormalAxis, otherwise it faces in the negative."}, {Name: "Size", Doc: "2D size of plane"}, {Name: "Segs", Doc: "number of segments to divide plane into (enforced to be at least 1).\nCan generally increase rendering quality to have > 1."}, {Name: "Offset", Doc: "offset from origin along direction of normal to the plane."}}})
 
 // SetNormalAxis sets the [Plane.NormalAxis]:
-// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormalNeg for whether it is facing in the positive or negative of the given axis.
+// axis along which the normal perpendicular to the plane points.
+// E.g., if the Y axis is specified, then it is a standard X-Z ground plane.
+// See also NormalNeg for whether it is facing in the positive or
+// negative of the given axis.
 func (t *Plane) SetNormalAxis(v math32.Dims) *Plane { t.NormalAxis = v; return t }
 
 // SetNormalNeg sets the [Plane.NormalNeg]:
-// if false, the plane normal facing in the positive direction along specified NormalAxis, otherwise it faces in the negative if true
+// if false, the plane normal is facing in the positive direction
+// along specified NormalAxis, otherwise it faces in the negative.
 func (t *Plane) SetNormalNeg(v bool) *Plane { t.NormalNeg = v; return t }
 
 // SetSize sets the [Plane.Size]:
@@ -130,22 +136,23 @@ func (t *Plane) SetNormalNeg(v bool) *Plane { t.NormalNeg = v; return t }
 func (t *Plane) SetSize(v math32.Vector2) *Plane { t.Size = v; return t }
 
 // SetSegs sets the [Plane.Segs]:
-// number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
+// number of segments to divide plane into (enforced to be at least 1).
+// Can generally increase rendering quality to have > 1.
 func (t *Plane) SetSegs(v math32.Vector2i) *Plane { t.Segs = v; return t }
 
 // SetOffset sets the [Plane.Offset]:
-// offset from origin along direction of normal to the plane
+// offset from origin along direction of normal to the plane.
 func (t *Plane) SetOffset(v float32) *Plane { t.Offset = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.ShapeBase", IDName: "shape-base", Doc: "ShapeBase is the base shape element", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "VertexOff", Doc: "vertex offset, in points"}, {Name: "IndexOff", Doc: "index offset, in points"}, {Name: "CBBox", Doc: "cubic bounding box in local coords"}, {Name: "Pos", Doc: "all shapes take a 3D position offset to enable composition"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.ShapeBase", IDName: "shape-base", Doc: "ShapeBase is the base shape element", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "VertexOffset", Doc: "vertex offset, in points"}, {Name: "IndexOffset", Doc: "index offset, in points"}, {Name: "CBBox", Doc: "cubic bounding box in local coords"}, {Name: "Pos", Doc: "all shapes take a 3D position offset to enable composition"}}})
 
-// SetVertexOff sets the [ShapeBase.VertexOff]:
+// SetVertexOffset sets the [ShapeBase.VertexOffset]:
 // vertex offset, in points
-func (t *ShapeBase) SetVertexOff(v int) *ShapeBase { t.VertexOff = v; return t }
+func (t *ShapeBase) SetVertexOffset(v int) *ShapeBase { t.VertexOffset = v; return t }
 
-// SetIndexOff sets the [ShapeBase.IndexOff]:
+// SetIndexOffset sets the [ShapeBase.IndexOffset]:
 // index offset, in points
-func (t *ShapeBase) SetIndexOff(v int) *ShapeBase { t.IndexOff = v; return t }
+func (t *ShapeBase) SetIndexOffset(v int) *ShapeBase { t.IndexOffset = v; return t }
 
 // SetCBBox sets the [ShapeBase.CBBox]:
 // cubic bounding box in local coords

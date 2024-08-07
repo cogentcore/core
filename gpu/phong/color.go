@@ -10,6 +10,23 @@ import (
 	"cogentcore.org/core/math32"
 )
 
+// Tiling are the texture tiling parameters
+type Tiling struct {
+
+	// how often to repeat the texture in each direction
+	Repeat math32.Vector2
+
+	// offset for when to start the texure in each direction
+	Offset math32.Vector2
+}
+
+// Defaults sets default tiling params if not yet initialized
+func (tl *Tiling) Defaults() {
+	if tl.Repeat == (math32.Vector2{}) {
+		tl.Repeat.Set(1, 1)
+	}
+}
+
 // Colors are the material colors with padding for direct uploading to shader.
 type Colors struct {
 	// main color of surface, used for both ambient and diffuse color
@@ -38,10 +55,8 @@ type Colors struct {
 	// i.e., glow. Can be used for marking lights with an object.
 	Emissive math32.Vector4
 
-	// texture repeat and offset factors.
-	// X,Y = how often to repeat the texture in each direction
-	// Z,W = offset for where to start the texture in each direction
-	TextureRepeatOff math32.Vector4
+	// texture tiling repeat and offset factors.
+	Tiling Tiling
 }
 
 // NewColors returns a new Colors with given values.
@@ -49,7 +64,7 @@ type Colors struct {
 func NewColors(clr, emis color.Color, shiny, reflect, bright float32) *Colors {
 	cl := &Colors{}
 	cl.SetColors(clr, emis, shiny, reflect, bright)
-	cl.TextureRepeatOff.Set(1, 1, 0, 0)
+	cl.Tiling.Defaults()
 	return cl
 }
 
@@ -70,22 +85,21 @@ func (cl *Colors) SetColors(clr, emis color.Color, shiny, reflect, bright float3
 }
 
 // UseFullTexture sets the texture parameters
-// to render the full texture: repeat = 1,1; off = 0,0
+// to render the full texture: repeat = 1,1; offset = 0,0
 func (cl *Colors) UseFullTexture() *Colors {
-	cl.TextureRepeatOff.Set(1, 1, 0, 0)
+	cl.Tiling.Repeat = math32.Vector2{1, 1}
+	cl.Tiling.Offset = math32.Vector2{0, 0}
 	return cl
 }
 
-// SetTextureRepeat sets how often to repeat the texture in each direction
-func (cl *Colors) SetTextureRepeat(repeat math32.Vector2) *Colors {
-	cl.TextureRepeatOff.X = repeat.X
-	cl.TextureRepeatOff.Y = repeat.Y
+// SetTilingRepeat sets how often to repeat the texture in each direction
+func (cl *Colors) SetTilingRepeat(repeat math32.Vector2) *Colors {
+	cl.Tiling.Repeat = repeat
 	return cl
 }
 
-// SetTextureOffset sets texture start offsets in each direction
-func (cl *Colors) SetTextureOffset(offset math32.Vector2) *Colors {
-	cl.TextureRepeatOff.Z = offset.X
-	cl.TextureRepeatOff.W = offset.Y
+// SetTilingOffset sets texture start offsets in each direction
+func (cl *Colors) SetTilingOffset(offset math32.Vector2) *Colors {
+	cl.Tiling.Offset = offset
 	return cl
 }

@@ -52,8 +52,8 @@ func (ln *Lines) N() (numVertex, nIndex int) {
 }
 
 // Set sets points in given allocated arrays
-func (ln *Lines) Set(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	ln.CBBox = SetLines(vertexArray, normalArray, textureArray, indexArray, ln.VertexOff, ln.IndexOff, ln.Points, ln.Width, ln.Closed, ln.Pos)
+func (ln *Lines) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
+	ln.CBBox = SetLines(vertex, normal, texcoord, index, ln.VertexOffset, ln.IndexOffset, ln.Points, ln.Width, ln.Closed, ln.Pos)
 	// todo: colors!
 }
 
@@ -77,7 +77,7 @@ func LinesN(npoints int, closed bool) (numVertex, nIndex int) {
 // and width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0
 // or a constant unless specifically relevant to have full 3D variation).
 // Rotate to put into other planes.
-func SetLines(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, points []math32.Vector3, width math32.Vector2, closed bool, pos math32.Vector3) math32.Box3 {
+func SetLines(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vtxOff, idxOff int, points []math32.Vector3, width math32.Vector2, closed bool, pos math32.Vector3) math32.Box3 {
 	np := len(points)
 	if np < 2 {
 		log.Printf("vshape.SetLines: need 2 or more Points\n")
@@ -211,46 +211,46 @@ func SetLines(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray
 		// two triangles are: 0,1,2;  0,2,3
 
 		if swap {
-			SetQuad(vertexArray, normalArray, textureArray, indexArray, voff, ioff, []math32.Vector3{sypzm, symzm, eymzm, eypzm}, nil, pos)
+			SetQuad(vertex, normal, texcoord, index, voff, ioff, []math32.Vector3{sypzm, symzm, eymzm, eypzm}, nil, pos)
 			voff += qvn
 			ioff += qin
-			SetQuad(vertexArray, normalArray, textureArray, indexArray, voff, ioff, []math32.Vector3{sypzp, sypzm, eypzm, eypzp}, nil, pos) // bottom (yp, upside down)
+			SetQuad(vertex, normal, texcoord, index, voff, ioff, []math32.Vector3{sypzp, sypzm, eypzm, eypzp}, nil, pos) // bottom (yp, upside down)
 			voff += qvn
 			ioff += qin
-			SetQuad(vertexArray, normalArray, textureArray, indexArray, voff, ioff, []math32.Vector3{symzm, symzp, eymzp, eymzm}, nil, pos) // top (ym)
+			SetQuad(vertex, normal, texcoord, index, voff, ioff, []math32.Vector3{symzm, symzp, eymzp, eymzm}, nil, pos) // top (ym)
 			voff += qvn
 			ioff += qin
-			SetQuad(vertexArray, normalArray, textureArray, indexArray, voff, ioff, []math32.Vector3{symzp, sypzp, eypzp, eymzp}, nil, pos) // front (zp)
+			SetQuad(vertex, normal, texcoord, index, voff, ioff, []math32.Vector3{symzp, sypzp, eypzp, eymzp}, nil, pos) // front (zp)
 			voff += qvn
 			ioff += qin
 		} else {
-			SetQuad(vertexArray, normalArray, textureArray, indexArray, voff, ioff, []math32.Vector3{symzm, sypzm, eypzm, eymzm}, nil, pos) // back (zm)
+			SetQuad(vertex, normal, texcoord, index, voff, ioff, []math32.Vector3{symzm, sypzm, eypzm, eymzm}, nil, pos) // back (zm)
 			voff += qvn
 			ioff += qin
-			SetQuad(vertexArray, normalArray, textureArray, indexArray, voff, ioff, []math32.Vector3{symzp, symzm, eymzm, eymzp}, nil, pos) // bottom (ym)
+			SetQuad(vertex, normal, texcoord, index, voff, ioff, []math32.Vector3{symzp, symzm, eymzm, eymzp}, nil, pos) // bottom (ym)
 			voff += qvn
 			ioff += qin
-			SetQuad(vertexArray, normalArray, textureArray, indexArray, voff, ioff, []math32.Vector3{sypzm, sypzp, eypzp, eypzm}, nil, pos) // top (yp)
+			SetQuad(vertex, normal, texcoord, index, voff, ioff, []math32.Vector3{sypzm, sypzp, eypzp, eypzm}, nil, pos) // top (yp)
 			voff += qvn
 			ioff += qin
-			SetQuad(vertexArray, normalArray, textureArray, indexArray, voff, ioff, []math32.Vector3{sypzp, symzp, eymzp, eypzp}, nil, pos) // front (zp)
+			SetQuad(vertex, normal, texcoord, index, voff, ioff, []math32.Vector3{sypzp, symzp, eymzp, eypzp}, nil, pos) // front (zp)
 			voff += qvn
 			ioff += qin
 		}
 
 		if spSt { // do cap
-			SetQuad(vertexArray, normalArray, textureArray, indexArray, voff, ioff, []math32.Vector3{sypzm, symzm, symzp, sypzp}, nil, pos)
+			SetQuad(vertex, normal, texcoord, index, voff, ioff, []math32.Vector3{sypzm, symzm, symzp, sypzp}, nil, pos)
 			voff += qvn
 			ioff += qin
 		}
 		if epEd {
-			SetQuad(vertexArray, normalArray, textureArray, indexArray, voff, ioff, []math32.Vector3{eypzp, eymzp, eymzm, eypzm}, nil, pos)
+			SetQuad(vertex, normal, texcoord, index, voff, ioff, []math32.Vector3{eypzp, eymzp, eymzm, eypzm}, nil, pos)
 			voff += qvn
 			ioff += qin
 		}
 	}
 	vn := voff - vtxOff
-	return BBoxFromVtxs(vertexArray, vtxOff, vn)
+	return BBoxFromVtxs(vertex, vtxOff, vn)
 }
 
 // MiterPts returns the miter points

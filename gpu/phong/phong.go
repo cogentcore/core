@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/shape"
 	"github.com/cogentcore/webgpu/wgpu"
 )
 
@@ -55,27 +56,27 @@ type Phong struct {
 	// spot lights
 	Spot [MaxLights]Spot
 
-	// a texture was selected for next draw, if true, overrides other options
-	UseTexture bool
+	// a texture was selected for next draw via [UseTexture].
+	// if true, overrides other options.
+	UseCurTexture bool
 
-	// a per-vertex color was selected for next draw
+	// a per-vertex color was selected for next draw.
 	UseVertexColor bool
 
 	// render using wireframe instead of filled polygons.
 	// this must be set prior to configuring the Phong rendering system.
 	Wireframe bool `default:"false"`
 
-	// Meshes holds all of the mesh data, managed by AddMesh, DeleteMesh
-	// methods.
-	meshes ordmap.Map[string, *Mesh]
+	// Meshes holds all of the mesh data, managed by [SetMesh],
+	// [ResetMeshes] methods.
+	meshes ordmap.Map[string, *shape.MeshData]
 
-	// Textures holds all of the texture images, managed by AddTexture,
-	// DeleteTexture methods.
+	// Textures holds all of the texture images, managed by [SetTexture],
+	// [ResetTextures] methods.
 	textures ordmap.Map[string, *Texture]
 
 	// Objects holds per-object data, keyed by unique name / path id.
-	// All objects must be added at start with AddObject,
-	// and updated per-pass with UpdateObjects.
+	// All objects must be added in a pre-Render pass via [SetObject].
 	objects ordmap.Map[string, *Object]
 
 	// cameraUpdated is set whenver SetCamera is called.
@@ -131,9 +132,6 @@ func (ph *Phong) Config() *Phong {
 
 	ph.System.Config()
 	ph.configLights()
-	ph.configMeshes()
-	ph.configTextures()
-	ph.updateObjects()
 	return ph
 }
 
@@ -144,26 +142,6 @@ func (ph *Phong) ConfigLights() *Phong {
 	ph.Lock()
 	defer ph.Unlock()
 	ph.configLights()
-	return ph
-}
-
-// ConfigMeshes can be called after initial Config
-// whenver the Meshes data has changed, to sync changes
-// up to the GPU.
-func (ph *Phong) ConfigMeshes() *Phong {
-	ph.Lock()
-	defer ph.Unlock()
-	ph.configMeshes()
-	return ph
-}
-
-// ConfigTextures can be called after initial Config
-// whenver the Textures data has changed, to sync changes
-// up to the GPU.
-func (ph *Phong) ConfigTextures() *Phong {
-	ph.Lock()
-	defer ph.Unlock()
-	ph.configTextures()
 	return ph
 }
 
@@ -196,7 +174,7 @@ func (ph *Phong) Render(rp *wgpu.RenderPassEncoder) {
 	defer ph.Unlock()
 
 	switch {
-	case ph.UseTexture:
+	case ph.UseCurTexture:
 		ph.RenderTexture(rp)
 	case ph.UseVertexColor:
 		ph.RenderVertexColor(rp)

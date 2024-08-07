@@ -68,9 +68,9 @@ func (ln *Lines) Sizes() (numVertex, nIndex int, hasColor bool) {
 	return ln.NumVertex, ln.NumIndex, ln.HasColor
 }
 
-func (ln *Lines) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
+func (ln *Lines) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, indexArray math32.ArrayU32) {
 	pos := math32.Vector3{}
-	bb := shape.SetLines(vertexArray, normArray, textureArray, indexArray, 0, 0, ln.Points, ln.Width, ln.Closed, pos)
+	bb := shape.SetLines(vertex, normal, texcoord, indexArray, 0, 0, ln.Points, ln.Width, ln.Closed, pos)
 	ln.BBox.SetBounds(bb.Min, bb.Max)
 	// todo: colors!
 }

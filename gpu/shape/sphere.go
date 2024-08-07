@@ -62,8 +62,8 @@ func (sp *Sphere) N() (numVertex, nIndex int) {
 }
 
 // SetSphereSector sets points in given allocated arrays
-func (sp *Sphere) Set(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	sp.CBBox = SetSphereSector(vertexArray, normalArray, textureArray, indexArray, sp.VertexOff, sp.IndexOff, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, sp.Pos)
+func (sp *Sphere) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
+	sp.CBBox = SetSphereSector(vertex, normal, texcoord, index, sp.VertexOffset, sp.IndexOffset, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, sp.Pos)
 }
 
 // SphereSectorN returns the N's for a sphere sector's
@@ -98,7 +98,7 @@ func SphereSectorN(widthSegs, heightSegs int, elevStart, elevLen float32) (numVe
 // elevation start angle and length in degrees (0 - 180), top = 0, bot = 180.
 // pos is an arbitrary offset (for composing shapes),
 // returns bounding box.
-func SetSphereSector(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, radius float32, widthSegs, heightSegs int, angStart, angLen, elevStart, elevLen float32, pos math32.Vector3) math32.Box3 {
+func SetSphereSector(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vtxOff, idxOff int, radius float32, widthSegs, heightSegs int, angStart, angLen, elevStart, elevLen float32, pos math32.Vector3) math32.Box3 {
 	angStRad := math32.DegToRad(angStart)
 	angLenRad := math32.DegToRad(angLen)
 	elevStRad := math32.DegToRad(elevStart)
@@ -116,7 +116,7 @@ func SetSphereSector(vertexArray, normalArray, textureArray math32.ArrayF32, ind
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
 	vtxs := make([][]uint32, 0)
-	var pt, normal math32.Vector3
+	var pt, norm math32.Vector3
 
 	for y := 0; y <= heightSegs; y++ {
 		vtxsRow := make([]uint32, 0)
@@ -128,12 +128,12 @@ func SetSphereSector(vertexArray, normalArray, textureArray math32.ArrayF32, ind
 			pz := radius * math32.Sin(angStRad+u*angLenRad) * math32.Sin(elevStRad+v*elevLenRad)
 			pt.Set(px, py, pz)
 			pt.SetAdd(pos)
-			normal.Set(px, py, pz)
-			normal.SetNormal()
+			norm.Set(px, py, pz)
+			norm.SetNormal()
 
-			vertexArray.SetVector3(vidx+idx*3, pt)
-			normalArray.SetVector3(vidx+idx*3, normal)
-			textureArray.Set(tidx+idx*2, u, v)
+			vertex.SetVector3(vidx+idx*3, pt)
+			normal.SetVector3(vidx+idx*3, norm)
+			texcoord.Set(tidx+idx*2, u, v)
 			vtxsRow = append(vtxsRow, uint32(idx))
 			bb.ExpandByPoint(pt)
 			idx++
@@ -150,11 +150,11 @@ func SetSphereSector(vertexArray, normalArray, textureArray math32.ArrayF32, ind
 			v3 := vtxs[y+1][x]
 			v4 := vtxs[y+1][x+1]
 			if y != 0 || elevStRad > 0 {
-				indexArray.Set(ii, vOff+v1, vOff+v2, vOff+v4)
+				index.Set(ii, vOff+v1, vOff+v2, vOff+v4)
 				ii += 3
 			}
 			if y != heightSegs-1 || elevEndRad < math.Pi {
-				indexArray.Set(ii, vOff+v2, vOff+v3, vOff+v4)
+				index.Set(ii, vOff+v2, vOff+v3, vOff+v4)
 				ii += 3
 			}
 		}
@@ -181,7 +181,7 @@ func DiskSectorN(segs int) (numVertex, nIndex int) {
 // and angle runs counter-clockwise on the XY plane, starting at (x,y,z)=(1,0,0).
 // pos is an arbitrary offset (for composing shapes),
 // returns bounding box.
-func SetDiskSector(vertexArray, normalArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, radius float32, segs int, angStart, angLen float32, pos math32.Vector3) math32.Box3 {
+func SetDiskSector(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vtxOff, idxOff int, radius float32, segs int, angStart, angLen float32, pos math32.Vector3) math32.Box3 {
 	// Validate arguments
 	if segs < 3 {
 		panic("Invalid argument: segments. The number of segments needs to be greater or equal to 3.")
@@ -198,12 +198,12 @@ func SetDiskSector(vertexArray, normalArray, textureArray math32.ArrayF32, index
 
 	// center position
 	center := pos
-	vertexArray.SetVector3(vidx, center)
-	var normal math32.Vector3
-	normal.Z = 1
-	normalArray.SetVector3(vidx, normal)
+	vertex.SetVector3(vidx, center)
+	var norm math32.Vector3
+	norm.Z = 1
+	normal.SetVector3(vidx, norm)
 	centerUV := math32.Vec2(0.5, 0.5)
-	textureArray.SetVector2(tidx, centerUV)
+	texcoord.SetVector2(tidx, centerUV)
 	idx++
 
 	var pt math32.Vector3
@@ -216,9 +216,9 @@ func SetDiskSector(vertexArray, normalArray, textureArray math32.ArrayF32, index
 		pt.SetAdd(pos)
 
 		// Appends vertex position, normal and uv coordinates
-		vertexArray.Set(vidx+idx*3, vx, vy, 0)
-		normalArray.SetVector3(vidx+idx*3, normal)
-		textureArray.Set(tidx+idx*2, (vx/radius+1)/2, (vy/radius+1)/2)
+		vertex.Set(vidx+idx*3, vx, vy, 0)
+		normal.SetVector3(vidx+idx*3, norm)
+		texcoord.Set(tidx+idx*2, (vx/radius+1)/2, (vy/radius+1)/2)
 		bb.ExpandByPoint(pt)
 		idx++
 	}
@@ -226,7 +226,7 @@ func SetDiskSector(vertexArray, normalArray, textureArray math32.ArrayF32, index
 	vOff := uint32(vtxOff)
 	ii := idxOff
 	for i := 1; i <= segs; i++ {
-		indexArray.Set(ii, vOff+uint32(i), vOff+uint32(i)+1, vOff) // ctr = last
+		index.Set(ii, vOff+uint32(i), vOff+uint32(i)+1, vOff) // ctr = last
 	}
 	return bb
 }

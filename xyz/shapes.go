@@ -72,9 +72,9 @@ func (pl *Plane) Sizes() (numVertex, nIndex int, hasColor bool) {
 	return pl.NumVertex, pl.NumIndex, pl.HasColor
 }
 
-func (pl *Plane) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
+func (pl *Plane) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
-	sz := shape.SetPlaneAxisSize(vertexArray, normArray, textureArray, indexArray, 0, 0, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pos)
+	sz := shape.SetPlaneAxisSize(vertex, normal, texcoord, index, 0, 0, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pos)
 	mn := pos.Sub(sz)
 	mx := pos.Add(sz)
 	pl.BBox.SetBounds(mn, mx)
@@ -110,9 +110,9 @@ func (bx *Box) Sizes() (numVertex, nIndex int, hasColor bool) {
 	return bx.NumVertex, bx.NumIndex, bx.HasColor
 }
 
-func (bx *Box) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
+func (bx *Box) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
-	hSz := shape.SetBox(vertexArray, normArray, textureArray, indexArray, 0, 0, bx.Size, bx.Segs, pos)
+	hSz := shape.SetBox(vertex, normal, texcoord, index, 0, 0, bx.Size, bx.Segs, pos)
 	mn := pos.Sub(hSz)
 	mx := pos.Add(hSz)
 	bx.BBox.SetBounds(mn, mx)
@@ -179,9 +179,9 @@ func (sp *Sphere) Sizes() (numVertex, nIndex int, hasColor bool) {
 	return sp.NumVertex, sp.NumIndex, sp.HasColor
 }
 
-func (sp *Sphere) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
+func (sp *Sphere) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
-	bb := shape.SetSphereSector(vertexArray, normArray, textureArray, indexArray, 0, 0, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, pos)
+	bb := shape.SetSphereSector(vertex, normal, texcoord, index, 0, 0, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, pos)
 	sp.BBox.SetBounds(bb.Min, bb.Max)
 }
 
@@ -276,9 +276,9 @@ func (cy *Cylinder) Sizes() (numVertex, nIndex int, hasColor bool) {
 	return cy.NumVertex, cy.NumIndex, cy.HasColor
 }
 
-func (cy *Cylinder) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
+func (cy *Cylinder) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
-	bb := shape.SetCylinderSector(vertexArray, normArray, textureArray, indexArray, 0, 0, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, pos)
+	bb := shape.SetCylinderSector(vertex, normal, texcoord, index, 0, 0, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, pos)
 	cy.BBox.SetBounds(bb.Min, bb.Max)
 }
 
@@ -361,11 +361,11 @@ func (cp *Capsule) Sizes() (numVertex, nIndex int, hasColor bool) {
 	return
 }
 
-func (cp *Capsule) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
+func (cp *Capsule) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
 	voff := 0
 	ioff := 0
-	bb := shape.SetCylinderSector(vertexArray, normArray, textureArray, indexArray, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, pos)
+	bb := shape.SetCylinderSector(vertex, normal, texcoord, index, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, pos)
 	nv, ni := shape.CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)
 	voff += nv
 	ioff += ni
@@ -373,7 +373,7 @@ func (cp *Capsule) Set(sc *Scene, vertexArray, normArray, textureArray, colorArr
 	if cp.BotRad > 0 {
 		ps := pos
 		ps.Y -= cp.Height / 2
-		cbb := shape.SetSphereSector(vertexArray, normArray, textureArray, indexArray, voff, ioff, cp.BotRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 90, 90, ps)
+		cbb := shape.SetSphereSector(vertex, normal, texcoord, index, voff, ioff, cp.BotRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 90, 90, ps)
 		bb.ExpandByBox(cbb)
 		nv, ni = shape.SphereSectorN(cp.RadialSegs, cp.CapSegs, 90, 90)
 		voff += nv
@@ -382,7 +382,7 @@ func (cp *Capsule) Set(sc *Scene, vertexArray, normArray, textureArray, colorArr
 	if cp.TopRad > 0 {
 		ps := pos
 		ps.Y += cp.Height / 2
-		cbb := shape.SetSphereSector(vertexArray, normArray, textureArray, indexArray, voff, ioff, cp.TopRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 0, 90, ps)
+		cbb := shape.SetSphereSector(vertex, normal, texcoord, index, voff, ioff, cp.TopRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 0, 90, ps)
 		bb.ExpandByBox(cbb)
 	}
 	cp.BBox.SetBounds(bb.Min, bb.Max)
@@ -445,8 +445,8 @@ func (tr *Torus) Sizes() (numVertex, nIndex int, hasColor bool) {
 }
 
 // Set sets points for torus in given allocated arrays
-func (tr *Torus) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
+func (tr *Torus) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
-	bb := shape.SetTorusSector(vertexArray, normArray, textureArray, indexArray, 0, 0, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, pos)
+	bb := shape.SetTorusSector(vertex, normal, texcoord, index, 0, 0, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, pos)
 	tr.BBox.SetBounds(bb.Min, bb.Max)
 }

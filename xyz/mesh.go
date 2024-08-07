@@ -15,35 +15,19 @@ import (
 // It is used on [Solid] to link to meshes by name.
 type MeshName string
 
-// Mesh parametrizes the mesh-based shape used for rendering a [Solid].
+// Mesh parametrizes the mesh-based shape used for rendering a [Solid],
+// using the [shape.Mesh] interface for basic shape data.
 // Only indexed triangle meshes are supported.
 // All Meshes must know in advance the number of vertex and index points
-// they require, and the SetVertices method operates on data from the
+// they require, and the Set method operates on data from the
 // gpu staging buffer to set the relevant data post-allocation.
-// The gpu shape library is used for all basic shapes, and it follows
-// this same logic.
-// Per-vertex Color is optional, as is the ability to update the data
-// after initial SetVertices call (default is to do nothing).
+// Per-vertex Color is optional.
 type Mesh interface {
+	shape.Mesh
 
 	// AsMeshBase returns the [MeshBase] for this Mesh,
 	// which provides the core functionality of a mesh.
 	AsMeshBase() *MeshBase
-
-	// Sizes returns the number of vertex and index elements required for this mesh
-	// including a bool representing whether it has per-vertex color.
-	Sizes() (numVertex, numIndex int, hasColor bool)
-
-	// Set sets the mesh points into given arrays, which have been allocated
-	// according to the Sizes() returned by this Mesh.
-	// The mesh is automatically marked with SetMod so that does not need to be done here.
-	Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32)
-
-	// Update updates the mesh points into given arrays, which have previously
-	// been set with SetVertices; this can optimize by only updating whatever might
-	// need to be updated for dynamically changing meshes.
-	// You must call SetMod if the mesh was actually updated at this point.
-	Update(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32)
 }
 
 // MeshBase provides the core implementation of the [Mesh] interface.
@@ -87,7 +71,7 @@ func (ms *MeshBase) Sizes() (numVertex, numIndex int, hasColor bool) {
 	return ms.NumVertex, ms.NumIndex, ms.HasColor
 }
 
-func (ms *MeshBase) Update(sc *Scene, vertextureArray, normArray, texArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
+func (ms *MeshBase) Update(sc *Scene, vertexcoord, normal, texArray, clrs math32.ArrayF32, index math32.ArrayU32) {
 	// nop: default mesh is static, not dynamic
 }
 
@@ -190,8 +174,8 @@ func (sc *Scene) SetMeshes() {
 	ph.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
-		vertexArray, normArray, textureArray, colorArray, indexArray := ph.MeshFloatsByName(kv.Key)
-		ms.Set(sc, vertexArray, normArray, textureArray, colorArray, indexArray)
+		vertex, normal, texcoord, clrs, index := ph.MeshFloatsByName(kv.Key)
+		ms.Set(sc, vertex, normal, texcoord, clrs, index)
 	}
 	ph.Unlock()
 }
@@ -203,8 +187,8 @@ func (sc *Scene) UpdateMeshes() {
 	ph.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
-		vertexArray, normArray, textureArray, colorArray, indexArray := ph.MeshFloatsByName(kv.Key)
-		ms.Update(sc, vertexArray, normArray, textureArray, colorArray, indexArray)
+		vertex, normal, texcoord, clrs, index := ph.MeshFloatsByName(kv.Key)
+		ms.Update(sc, vertex, normal, texcoord, clrs, index)
 	}
 	ph.Unlock()
 }
@@ -240,14 +224,14 @@ func (ms *GenMesh) Sizes() (numVertex, nIndex int, hasColor bool) {
 	return ms.NumVertex, ms.NumIndex, ms.HasColor
 }
 
-func (ms *GenMesh) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	copy(vertexArray, ms.Vertex)
-	copy(normArray, ms.Norm)
-	copy(textureArray, ms.Texture)
+func (ms *GenMesh) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
+	copy(vertex, ms.Vertex)
+	copy(normal, ms.Norm)
+	copy(texcoord, ms.Texture)
 	if ms.HasColor {
-		copy(colorArray, ms.Color)
+		copy(clrs, ms.Color)
 	}
-	copy(indexArray, ms.Index)
+	copy(index, ms.Index)
 	bb := shape.BBoxFromVtxs(ms.Vertex, 0, ms.NumVertex)
 	ms.BBox.SetBounds(bb.Min, bb.Max)
 }

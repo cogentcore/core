@@ -172,7 +172,7 @@ struct ObjectStorage {
 	color: vec4<f32>,
 	shinyBright: vec4<f32>,
 	emissive: vec4<f32>,
-	textureRepeatOff: vec4<f32>,
+	tiling: vec4<f32>,
 	matrix: mat4x4<f32>,
 	world: mat4x4<f32>,
 };
