@@ -12,9 +12,9 @@ import (
 // Mesh is an interface for specifying the triangle Mesh data for 3D shapes.
 // This is used for all mesh / shape data in the phong system.
 type Mesh interface {
-	// Size returns number of vertex, index points in this shape element,
+	// MeshSize returns number of vertex, index points in this shape element,
 	// and whether it has per-vertex color values.
-	Size() (numVertex, nIndex int, hasColor bool)
+	MeshSize() (numVertex, nIndex int, hasColor bool)
 
 	// Set sets points in given allocated arrays.
 	Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32)
@@ -27,10 +27,10 @@ type Mesh interface {
 	// in terms of points, not floats.
 	SetOffsets(vtxOffset, idxOffset int)
 
-	// BBox returns the bounding box for the shape vertex points,
+	// MeshBBox returns the bounding box for the shape vertex points,
 	// typically centered around 0.
 	// This is only valid after Set has been called.
-	BBox() math32.Box3
+	MeshBBox() math32.Box3
 }
 
 // MeshData provides storage buffers for shapes specified using the [Mesh]
@@ -46,9 +46,9 @@ type MeshData struct {
 	// whether this mech has per-vertex colors, as math32.Vector4 per vertex.
 	HasColor bool
 
-	// BBox is the bounding box for the shape vertex points,
+	// MeshBBox is the bounding box for the shape vertex points,
 	// typically centered around 0.
-	BBox math32.Box3
+	MeshBBox math32.Box3
 
 	//	buffers that hold mesh data for the [Mesh.Set] method.
 	Vertex, Normal, TexCoord, Colors math32.ArrayF32
@@ -64,7 +64,7 @@ func NewMeshData(mesh Mesh) *MeshData {
 
 // Set sets mesh data into our buffers, from [shape.Mesh].
 func (md *MeshData) Set(mesh Mesh) *MeshData {
-	md.NumVertex, md.NumIndex, md.HasColor = mesh.Size()
+	md.NumVertex, md.NumIndex, md.HasColor = mesh.MeshSize()
 
 	md.Vertex = slicesx.SetLength(md.Vertex, md.NumVertex*3)
 	md.Normal = slicesx.SetLength(md.Normal, md.NumVertex*3)
@@ -74,5 +74,6 @@ func (md *MeshData) Set(mesh Mesh) *MeshData {
 		md.Colors = slicesx.SetLength(md.Colors, md.NumVertex*4)
 	}
 	mesh.Set(md.Vertex, md.Normal, md.TexCoord, md.Colors, md.Index)
+	md.MeshBBox = mesh.MeshBBox()
 	return md
 }

@@ -35,9 +35,9 @@ func (sb *ShapeBase) SetOffsets(vtxOffset, idxOffset int) {
 	sb.VertexOffset, sb.IndexOffset = vtxOffset, idxOffset
 }
 
-// BBox returns the bounding box for the shape, typically centered around 0
+// MeshBBox returns the bounding box for the shape, typically centered around 0
 // This is only valid after Set has been called.
-func (sb *ShapeBase) BBox() math32.Box3 {
+func (sb *ShapeBase) MeshBBox() math32.Box3 {
 	return sb.CBBox
 }
 

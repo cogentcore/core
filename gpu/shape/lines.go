@@ -46,7 +46,7 @@ func (ln *Lines) Defaults() {
 	ln.Width.Set(.1, .1)
 }
 
-func (ln *Lines) N() (numVertex, nIndex int) {
+func (ln *Lines) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	numVertex, nIndex = LinesN(len(ln.Points), ln.Closed)
 	return
 }

@@ -65,7 +65,7 @@ func (cp *Capsule) Defaults() {
 	cp.AngLen = 360
 }
 
-func (cp *Capsule) N() (numVertex, nIndex int) {
+func (cp *Capsule) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	numVertex, nIndex = CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)
 	if cp.BotRad > 0 {
 		nv, ni := SphereSectorN(cp.RadialSegs, cp.CapSegs, 90, 90)

@@ -56,7 +56,7 @@ func (sp *Sphere) Defaults() {
 	sp.ElevLen = 180
 }
 
-func (sp *Sphere) N() (numVertex, nIndex int) {
+func (sp *Sphere) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	numVertex, nIndex = SphereSectorN(sp.WidthSegs, sp.HeightSegs, sp.ElevStart, sp.ElevLen)
 	return
 }

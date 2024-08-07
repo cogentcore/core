@@ -51,8 +51,8 @@ func (pl *Plane) Defaults() {
 	pl.Offset = 0
 }
 
-// N returns number of vertex, index points in this shape element
-func (pl *Plane) N() (numVertex, nIndex int) {
+// MeshSize returns number of vertex, index points in this shape element
+func (pl *Plane) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	numVertex, nIndex = PlaneN(int(pl.Segs.X), int(pl.Segs.Y))
 	return
 }

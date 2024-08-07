@@ -20,22 +20,12 @@ const MaxLights = 8
 
 // Phong implements standard Blinn-Phong rendering pipelines
 // in a gpu GraphicsSystem.
-// Must Add all Lights, Meshes, Textures and Objects after
-// getting a NewPhong, and then call Config() to configure
-// everything on the GPU prior to first RenderStart.
-//
-// If any changes are made to any of these elements after
-// initial Config, call the appropriate Config* method
-// to update them.
-//
-// Object data will generally be updated every render frame,
-// and it is automatically sync'd up to the GPU during the
-// RenderStart call.
+// Add Lights and call SetMesh, SetTexture, SetObject to config.
 //
 // Rendering starts with RenderStart, followed by Use* calls
 // to specify the render parameters for each item,
 // followed by the Render() method that calls the proper
-// pipeline's BindDrawIndexed based on the render parameters.
+// pipeline's render methods.
 type Phong struct {
 	// The current camera view and projection matricies.
 	// This is used for updating the object WorldMatrix.
@@ -65,6 +55,7 @@ type Phong struct {
 
 	// render using wireframe instead of filled polygons.
 	// this must be set prior to configuring the Phong rendering system.
+	// note: not currently supported in WebGPU.
 	Wireframe bool `default:"false"`
 
 	// Meshes holds all of the mesh data, managed by [SetMesh],
@@ -87,6 +78,9 @@ type Phong struct {
 	// and cleared when the objects have been updated to the GPU.
 	objectUpdated bool
 
+	// lightsUpdated indicates a change has been made to lights.
+	lightsUpdated bool
+
 	// rendering system
 	System *gpu.GraphicsSystem
 
@@ -95,10 +89,9 @@ type Phong struct {
 }
 
 // NewPhong returns a new Phong system that is ready to be
-// configured by adding the relevant elements.
-// When done, call Config() to perform initial configuration.
-// surface should be passed if rendering to a surface (nil ok),
-// to connect the render target to it, so it will be updated during resizing.
+// configured by calls to SetMesh, SetTexture, SetObject,
+// in addition to adding lights.
+// Renderer can either be a Surface or a RenderTexture.
 func NewPhong(gp *gpu.GPU, rd gpu.Renderer) *Phong {
 	ph := &Phong{}
 	ph.System = gpu.NewGraphicsSystem(gp, "phong", rd)
@@ -119,20 +112,6 @@ func (ph *Phong) Release() {
 	ph.meshes.Reset()
 	ph.textures.Reset()
 	ph.objects.Reset()
-}
-
-// Config configures the gpu rendering system after
-// everything has been Added for the first time.
-// This should generally only be called once,
-// and then more specific Config calls made thereafter
-// as needed.
-func (ph *Phong) Config() *Phong {
-	ph.Lock()
-	defer ph.Unlock()
-
-	ph.System.Config()
-	ph.configLights()
-	return ph
 }
 
 // ConfigLights can be called after initial Config
@@ -157,6 +136,8 @@ func (ph *Phong) RenderStart() (*wgpu.RenderPassEncoder, error) {
 	ph.Lock()
 	defer ph.Unlock()
 
+	ph.configLights()       // if needed
+	ph.configDummyTexture() // if needed
 	ph.updateObjects()
 
 	return ph.System.BeginRenderPass()

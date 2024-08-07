@@ -32,7 +32,7 @@ func (bx *Box) Defaults() {
 	bx.Segs.Set(1, 1, 1)
 }
 
-func (bx *Box) N() (numVertex, nIndex int) {
+func (bx *Box) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	numVertex, nIndex = BoxN(bx.Segs)
 	return
 }

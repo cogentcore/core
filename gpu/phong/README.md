@@ -7,7 +7,9 @@ This package provides a "middleware" layer between the basic `gpu` package and a
 
 # Usage
 
-Phong uses the "Set and Reset" paradigm for all resources except lights, which is generally suited to most 3D use-cases.  Meshes, Textures and Objects must be Set before they are used in a render pass (and further Set calls just update existing properties as needed), and if there is any drastic change to the overall scene configuration, Reset removes all of the existing items.  Otherwise, any unused items just take up space on the GPU, but do not incur additional runtime costs.
+Phong uses the "Set and Reset" paradigm for all resources, which is generally suited to most 3D use-cases.  Meshes, Textures and Objects must be `Set` before they are used in a render pass (and further `Set` calls with the same unique name id just update existing properties).  There is no further Config call or anything: everything is dynamically updated in the Set call.  Note that the Phong object must have been created with an active GPU instance and renderer, before calling any Set calls.
+
+If there is any drastic change to the overall scene configuration, Reset removes all of the existing items.  Otherwise, any unused items just take up space on the GPU, but do not incur additional runtime costs.  
 
 See [examples/phong] for a working example.
 
@@ -20,7 +22,7 @@ See [examples/phong] for a working example.
     ...
     
     // add meshes
-    ph.AddMeshFromShape("sphere", shape.NewSphere(.5, 64))
+    ph.SetMesh("sphere", shape.NewSphere(.5, 64))
     ...
     
     // set textures

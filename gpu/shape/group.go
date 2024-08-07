@@ -21,7 +21,7 @@ func (sb *ShapeGroup) Size() (numVertex, numIndex int, hasColor bool) {
 	numIndex = 0
 	hasColor = false
 	for _, sh := range sb.Shapes {
-		nv, ni, hc := sh.Size()
+		nv, ni, hc := sh.MeshSize()
 		numVertex += nv
 		numIndex += ni
 		hasColor = hasColor || hc // todo: not good if inconsistent..
@@ -37,8 +37,8 @@ func (sb *ShapeGroup) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index 
 	for _, sh := range sb.Shapes {
 		sh.SetOffsets(vo, io)
 		sh.Set(vertex, normal, texcoord, clrs, index)
-		sb.CBBox.ExpandByBox(sh.BBox())
-		nv, ni, _ := sh.Size()
+		sb.CBBox.ExpandByBox(sh.MeshBBox())
+		nv, ni, _ := sh.MeshSize()
 		vo += nv
 		io += ni
 	}

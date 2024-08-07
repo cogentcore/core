@@ -90,4 +90,6 @@ func (ph *Phong) configGraphicsSystem() {
 	ogp.SetNValues(1)
 	lgp.SetNValues(1)
 	tgp.SetNValues(1)
+
+	sy.Config()
 }

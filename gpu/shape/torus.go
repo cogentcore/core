@@ -55,7 +55,7 @@ func (tr *Torus) Defaults() {
 	tr.AngLen = 360
 }
 
-func (tr *Torus) N() (numVertex, nIndex int) {
+func (tr *Torus) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	numVertex, nIndex = TorusSectorN(tr.RadialSegs, tr.TubeSegs)
 	return
 }

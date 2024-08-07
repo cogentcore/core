@@ -89,7 +89,7 @@ func (cy *Cylinder) Defaults() {
 	cy.AngLen = 360
 }
 
-func (cy *Cylinder) N() (numVertex, nIndex int) {
+func (cy *Cylinder) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	numVertex, nIndex = CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
 	return
 }

@@ -71,18 +71,18 @@ func main() {
 
 	// Note: 100 segs improves lighting differentiation significantly
 
-	ph.AddMeshFromShape("floor",
+	ph.SetMesh("floor",
 		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{100, 100}).SetNormalNeg(true))
-	ph.AddMeshFromShape("cube",
+	ph.SetMesh("cube",
 		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3i{50, 50, 50}))
-	ph.AddMeshFromShape("sphere", shape.NewSphere(.5, 64))
-	ph.AddMeshFromShape("cylinder", shape.NewCylinder(1, .5, 64, 64, true, true))
-	ph.AddMeshFromShape("cone", shape.NewCone(1, .5, 64, 64, true))
-	ph.AddMeshFromShape("capsule", shape.NewCapsule(1, .5, 64, 64))
-	ph.AddMeshFromShape("torus", shape.NewTorus(2, .2, 64))
+	ph.SetMesh("sphere", shape.NewSphere(.5, 64))
+	ph.SetMesh("cylinder", shape.NewCylinder(1, .5, 64, 64, true, true))
+	ph.SetMesh("cone", shape.NewCone(1, .5, 64, 64, true))
+	ph.SetMesh("capsule", shape.NewCapsule(1, .5, 64, 64))
+	ph.SetMesh("torus", shape.NewTorus(2, .2, 64))
 
 	lines := shape.NewLines([]math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.Vec2(.2, .1), false)
-	ph.AddMeshFromShape("lines", lines)
+	ph.SetMesh("lines", lines)
 
 	/////////////////////////////
 	// Textures
@@ -92,7 +92,7 @@ func main() {
 	for i, fnm := range imgFiles {
 		imgs[i], _, _ = imagex.OpenFS(images.Images, fnm)
 		fn := strings.Split(fnm, ".")[0]
-		ph.AddTexture(fn, phong.NewTexture(imgs[i]))
+		ph.SetTexture(fn, phong.NewTexture(imgs[i]))
 	}
 
 	/////////////////////////////
@@ -119,6 +119,8 @@ func main() {
 	var projection math32.Matrix4
 	projection.SetPerspective(45, aspect, 0.01, 100)
 
+	ph.SetCamera(view, &projection)
+
 	objs := []Object{
 		{Mesh: "floor", Color: blue, Texture: "ground"},
 		{Mesh: "cube", Color: red, Texture: "teximg"},
@@ -142,15 +144,11 @@ func main() {
 
 	for i, ob := range objs {
 		nm := strconv.Itoa(i)
-		ph.AddObject(nm, phong.NewObject(&ob.Matrix, ob.Color, color.Black, 30, 1, 1))
+		ph.SetObject(nm, phong.NewObject(&ob.Matrix, phong.NewColors(ob.Color, color.Black, 30, 1, 1)))
 	}
-
-	ph.SetCamera(view, &projection)
 
 	/////////////////////////////
 	//  Config!
-
-	ph.Config()
 
 	updateCamera := func() {
 		aspect := sf.Format.Aspect()
@@ -163,13 +161,14 @@ func main() {
 	updateObs := func() {
 		for i, ob := range objs {
 			nm := strconv.Itoa(i)
-			od := ph.SetObjectMatrix(nm, &ob.Matrix)
+			od := phong.NewObject(&ob.Matrix, phong.NewColors(ob.Color, color.Black, 30, 1, 1))
 			if i == 0 {
-				od.SetTextureRepeat(math32.Vector2{50, 50})
+				od.SetTilingRepeat(math32.Vector2{50, 50})
 			}
 			if i == 3 { // cone
 				od.SetColors(dark, green, 30, .1, 1) // emissive, not reflective
 			}
+			ph.SetObject(nm, od)
 		}
 	}
 	updateObs() // gotta do at least once
@@ -177,9 +176,9 @@ func main() {
 	render1 := func(rp *wgpu.RenderPassEncoder) {
 		for i, ob := range objs {
 			ph.UseObjectIndex(i)
-			ph.UseMeshName(ob.Mesh)
+			ph.UseMesh(ob.Mesh)
 			if ob.Texture != "" {
-				ph.UseTextureName(ob.Texture)
+				ph.UseTexture(ob.Texture)
 			} else {
 				ph.UseNoTexture()
 			}
