@@ -146,3 +146,46 @@ func (im *TextureFormat) TotalByteSize() int {
 func (im *TextureFormat) Stride() int {
 	return im.BytesPerPixel() * im.Size.X
 }
+
+//////////////////////////////////////////////////////////////////////
+
+// TextureBufferDims represents the sizes required in Buffer to
+// represent a texture of a given size.
+type TextureBufferDims struct {
+	Width           uint64
+	Height          uint64
+	UnpaddedRowSize uint64
+	PaddedRowSize   uint64
+}
+
+func NewTextureBufferDims(size image.Point) *TextureBufferDims {
+	td := &TextureBufferDims{}
+	td.Set(size)
+	return td
+}
+
+func (td *TextureBufferDims) Set(size image.Point) {
+	td.Width = uint64(size.X)
+	td.Height = uint64(size.Y)
+	const bytesPerPixel = 4 // unsafe.Sizeof(uint32(0))
+	td.UnpaddedRowSize = uint64(td.Width * bytesPerPixel)
+	align := uint64(wgpu.CopyBytesPerRowAlignment)
+	padding := (align - td.UnpaddedRowSize%align) % align
+	td.PaddedRowSize = td.UnpaddedRowSize + padding
+}
+
+// PaddedSize returns the total padded size of data
+func (td *TextureBufferDims) PaddedSize() uint64 {
+	return td.PaddedRowSize * td.Height
+}
+
+// UnpaddedSize returns the total unpadded size of data
+func (td *TextureBufferDims) UnpaddedSize() uint64 {
+	return td.UnpaddedRowSize * td.Height
+}
+
+// HasNoPadding returns true if the Unpadded and Padded row sizes
+// are the same.
+func (td *TextureBufferDims) HasNoPadding() bool {
+	return td.UnpaddedRowSize == td.PaddedRowSize
+}

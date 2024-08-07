@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Cogent Core. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -11,19 +11,21 @@ import (
 	"image/color"
 	"runtime"
 	"time"
+	"unsafe"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/gpu"
-	"cogentcore.org/core/gpu/examples/images"
+	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/math32"
 	"github.com/cogentcore/webgpu/wgpu"
 )
 
-//go:embed texture.wgsl
-var texture string
+//go:embed indexed.wgsl
+var indexed string
 
 func init() {
-	// a must lock main thread for gpu!
+	// must lock main thread for gpu!
 	runtime.LockOSThread()
 }
 
@@ -34,88 +36,83 @@ type CamView struct {
 }
 
 func main() {
+	if gpu.Init() != nil {
+		return
+	}
+
 	gp := gpu.NewGPU()
 	gpu.Debug = true
-	gp.Config("texture")
+	gp.Config("drawidx")
 
 	var resize func(size image.Point)
 	size := image.Point{1024, 768}
-	sp, terminate, pollEvents, size, err := gpu.GLFWCreateWindow(gp, size, "Draw Texture", &resize)
+	sp, terminate, pollEvents, size, err := gpu.GLFWCreateWindow(gp, size, "Offscreen Render", &resize)
 	if err != nil {
 		return
 	}
 
-	sf := gpu.NewSurface(gp, sp, size, 4, gpu.UndefinedType)
-	sy := gpu.NewGraphicsSystem(gp, "texture", sf)
-	fmt.Printf("format: %s\n", sf.Format.String())
+	sf := gpu.NewSurface(gp, sp, size, 1, gpu.UndefinedType)
+	drw := gpudraw.NewDrawer(gp, sf)
 
-	resize = func(size image.Point) { sf.SetSize(size) }
+	rt := gpu.NewRenderTexture(gp, sf.Device(), size, 4, gpu.UndefinedType)
+	sy := gpu.NewGraphicsSystem(gp, "drawidx", rt)
+	fmt.Println("format:", rt.Frames[0].Format.String())
+
+	resize = func(size image.Point) {
+		sf.SetSize(size)
+		rt.SetSize(size)
+	}
 	destroy := func() {
+		drw.Release()
 		sy.Release()
 		sf.Release()
 		gp.Release()
 		terminate()
 	}
 
-	pl := sy.AddGraphicsPipeline("texture")
-	sy.SetClearColor(color.RGBA{50, 50, 50, 255})
-	pl.SetFrontFace(wgpu.FrontFaceCCW)
+	pl := sy.AddGraphicsPipeline("drawidx")
 	pl.SetCullMode(wgpu.CullModeNone)
+	sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 
-	sh := pl.AddShader("texture")
-	sh.OpenCode(texture)
+	sh := pl.AddShader("indexed")
+	sh.OpenCode(indexed)
 	pl.AddEntry(sh, gpu.VertexShader, "vs_main")
 	pl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
 	vgp := sy.Vars().AddVertexGroup()
-	tgp := sy.Vars().AddGroup(gpu.SampledTexture) // texture in 0 so frag only gets 0
 	ugp := sy.Vars().AddGroup(gpu.Uniform)
 
+	// vertex are dynamically sized in general, so using 0 here
 	posv := vgp.Add("Pos", gpu.Float32Vector3, 0, gpu.VertexShader)
 	clrv := vgp.Add("Color", gpu.Float32Vector3, 0, gpu.VertexShader)
-	txcv := vgp.Add("TexCoord", gpu.Float32Vector2, 0, gpu.VertexShader)
+	// note: index goes last usually
 	idxv := vgp.Add("Index", gpu.Uint16, 0, gpu.VertexShader)
 	idxv.Role = gpu.Index
 
-	camv := ugp.AddStruct("Camera", gpu.Float32Matrix4.Bytes()*3, 1, gpu.VertexShader)
-
-	txv := tgp.Add("TexSampler", gpu.TextureRGBA32, 1, gpu.FragmentShader)
+	camv := ugp.AddStruct("Camera", int(unsafe.Sizeof(CamView{})), 1, gpu.VertexShader)
 
 	vgp.SetNValues(1)
 	ugp.SetNValues(1)
-	tgp.SetNValues(3)
-
-	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
-	imgs := make([]image.Image, len(imgFiles))
-	for i, fnm := range imgFiles {
-		imgs[i], _, _ = imagex.OpenFS(images.Images, fnm)
-		img := txv.Values.Values[i]
-		img.SetFromGoImage(imgs[i], 0)
-		// img.Texture.Sampler.Border = gpu.BorderBlack
-		// img.Texture.Sampler.UMode = gpu.ClampToBorder
-		// img.Texture.Sampler.VMode = gpu.ClampToBorder
-	}
-
 	sy.Config()
 
-	gpu.SetValueFrom(posv.Values.Values[0], []float32{
-		-0.5, -0.5, 0.0,
-		0.5, -0.5, 0.0,
+	triPos := posv.Values.Values[0]
+	gpu.SetValueFrom(triPos, []float32{
+		-0.5, 0.5, 0.0,
 		0.5, 0.5, 0.0,
-		-0.5, 0.5, 0.0})
-	gpu.SetValueFrom(clrv.Values.Values[0], []float32{
+		0.0, -0.5, 0.0}) // negative point is UP in native Vulkan
+
+	triClr := clrv.Values.Values[0]
+	gpu.SetValueFrom(triClr, []float32{
 		1.0, 0.0, 0.0,
 		0.0, 1.0, 0.0,
-		0.0, 0.0, 1.0,
-		1.0, 1.0, 0.0})
-	gpu.SetValueFrom(txcv.Values.Values[0], []float32{
-		1.0, 0.0,
-		0.0, 0.0,
-		0.0, 1.0,
-		1.0, 1.0})
-	gpu.SetValueFrom(idxv.Values.Values[0], []uint16{0, 1, 2, 0, 2, 3})
+		0.0, 0.0, 1.0})
+
+	triIndex := idxv.Values.Values[0]
+	gpu.SetValueFrom(triIndex, []uint16{0, 1, 2})
+	// note: the only way to set indexes is at start..
 
 	// This is the standard camera view projection computation
+	cam := camv.Values.Values[0]
 	campos := math32.Vec3(0, 0, 2)
 	target := math32.Vec3(0, 0, 0)
 	var lookq math32.Quat
@@ -130,20 +127,31 @@ func main() {
 	camo.View.CopyFrom(view)
 	aspect := float32(sf.Format.Size.X) / float32(sf.Format.Size.Y)
 	camo.Projection.SetPerspective(45, aspect, 0.01, 100)
-	cam := camv.Values.Values[0]
 	gpu.SetValueFrom(cam, []CamView{camo}) // note: always use slice to copy
+
+	updateAspect := func() {
+		aspect := rt.Format.Aspect()
+		fmt.Printf("aspect: %g\n", aspect)
+		camo.Projection.SetPerspective(45, aspect, 0.01, 100)
+		gpu.SetValueFrom(cam, []CamView{camo}) // note: always use slice to copy
+	}
+
+	updateAspect()
+
+	// todo:
+	// drw.ConfigTexture(0, &rt.Format)
 
 	frameCount := 0
 	stTime := time.Now()
 
+	didSave := false
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
-		camo.Model.SetRotationY(.004 * float32(frameCount))
+		camo.Model.SetRotationY(.1 * float32(frameCount))
 		gpu.SetValueFrom(cam, []CamView{camo})
 
-		imgIndex := (frameCount / 10) % len(imgs)
-		pl.Vars().SetCurrentValue(0, "TexSampler", imgIndex)
+		rt.Frames[0].ConfigReadBuffer() // ensure configed with proper size
 
 		rp, err := sy.BeginRenderPass()
 		if err != nil {
@@ -152,14 +160,38 @@ func main() {
 		pl.BindPipeline(rp)
 		pl.BindDrawIndexed(rp)
 		rp.End()
-		sy.EndRenderPass(rp)
+		if !didSave {
+			didSave = true
+			rt.Frames[0].CopyToReadBuffer(sy.CommandEncoder)
+			sy.EndRenderPass(rp)
+			img, err := rt.Frames[0].ReadGoImage()
+			if errors.Log(err) != nil {
+				return
+			}
+			imagex.Save(img, "render.png")
+			fmt.Println("saved image", rt.Frames[0].ReadBufferDims)
+		} else {
+			sy.EndRenderPass(rp)
+		}
 
+		// todo:
+		// drw.SetFrameTexture(0, fr)
+		// drw.SyncTextures()
+		// drw.StartDraw(0)
+		// drw.Scale(0, 0, sf.Format.Bounds(), image.ZR, draw.Src, gpu.NoFlipY, 0)
+		// drw.EndDraw()
+
+		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
 		if dur > 10 {
 			fps := float64(frameCount) / dur
 			fmt.Printf("fps: %.0f\n", fps)
+			sz := rt.Format.Size
+			sz.X -= 10
+			rt.SetSize(sz)
+			updateAspect()
 			frameCount = 0
 			stTime = eTime
 		}
@@ -167,7 +199,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 60
+	fpsDelay := time.Second / 6
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

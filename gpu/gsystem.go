@@ -40,7 +40,7 @@ type GraphicsSystem struct {
 
 	// CurrentCommandEncoder is the command encoder created in
 	// BeginRenderPass, and released in EndRenderPass.
-	CurrentCommandEncoder *wgpu.CommandEncoder
+	CommandEncoder *wgpu.CommandEncoder
 
 	// logical device for this GraphicsSystem, from the Renderer.
 	device Device
@@ -220,7 +220,7 @@ func (sy *GraphicsSystem) beginRenderPass() (*Render, *wgpu.TextureView, error) 
 	if err != nil {
 		return nil, nil, err
 	}
-	sy.CurrentCommandEncoder = cmd
+	sy.CommandEncoder = cmd
 	return rd.Render(), view, nil
 }
 
@@ -235,7 +235,7 @@ func (sy *GraphicsSystem) BeginRenderPass() (*wgpu.RenderPassEncoder, error) {
 	if err != nil {
 		return nil, err
 	}
-	return rd.BeginRenderPass(sy.CurrentCommandEncoder, view), nil
+	return rd.BeginRenderPass(sy.CommandEncoder, view), nil
 }
 
 // BeginRenderPassNoClear adds commands to the given command buffer
@@ -250,19 +250,17 @@ func (sy *GraphicsSystem) BeginRenderPassNoClear() (*wgpu.RenderPassEncoder, err
 	if err != nil {
 		return nil, err
 	}
-	return rd.BeginRenderPassNoClear(sy.CurrentCommandEncoder, view), nil
+	return rd.BeginRenderPassNoClear(sy.CommandEncoder, view), nil
 }
 
-// SubmitRender calls End() on the given [wgpu.RenderPassEncoder],
-// submits the current render commands to the device
-// Queue and releases the [CurrentCommandEncoder] and the RenderPassEncoder.
+// SubmitRender submits the current render commands to the device
+// Queue and releases the [CurrentCommandEncoder] and the given
+// RenderPassEncoder.  Must call rp.End prior to calling this.
+// Can insert other commands after rp.End, e.g., to copy the rendered image,
+// prior to calling SubmitRender.
 func (sy *GraphicsSystem) SubmitRender(rp *wgpu.RenderPassEncoder) error {
-	if rp == nil {
-		panic("nill rp!")
-	}
-	rp.End()
-	cmd := sy.CurrentCommandEncoder
-	sy.CurrentCommandEncoder = nil
+	cmd := sy.CommandEncoder
+	sy.CommandEncoder = nil
 	cmdBuffer, err := cmd.Finish(nil)
 	if errors.Log(err) != nil {
 		return err

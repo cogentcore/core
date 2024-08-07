@@ -55,6 +55,23 @@ There are many distinct mechanisms for graphics vs. compute functionality, so we
 
 * Unlike most game-oriented GPU setups, `gpu` is designed to be used in an event-driven manner where render updates arise from user input or other events, instead of requiring a constant render loop taking place at all times (which can optionally be established too).  The event-driven model is vastly more energy efficient for non-game applications.
 
+## Basic render pass
+
+These are the basic steps for a render pass, using convenient methods on the `sy = GraphicsSystem`, which then manages the rest of the underlying steps.  `pl` here is a `GraphicsPipeline`.
+
+```go
+	rp, err := sy.BeginRenderPass()
+	if err != nil { // error has already been logged, as all errors are.
+		return
+	}
+	pl.BindPipeline(rp)
+	pl.BindDrawIndexed(rp)
+	rp.End() // note: could add stuff after End and before EndRenderPass
+	sy.EndRenderPass(rp)
+```
+
+Note that all errors are logged in the gpu system, because in general GPU-level code should not create errors once it has been debugged.
+
 ## Var and Value data
 
 The single most important constraint in thinking about how the GPU works, is that *all resources (data in buffers, textures) must be uploaded to the GPU at the _start_ of the render pass*.

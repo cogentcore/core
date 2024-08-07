@@ -98,15 +98,14 @@ func (rt *RenderTexture) ConfigFrames() {
 }
 
 // SetSize sets the size for the render frame,
-// doesn't do anything if already that size (returns fale)
-func (rt *RenderTexture) SetSize(size image.Point) bool {
+// doesn't do anything if already that size.
+func (rt *RenderTexture) SetSize(size image.Point) {
 	if rt.Format.Size == size {
-		return false
+		return
 	}
 	rt.render.SetSize(size)
 	rt.Format.Size = size
 	rt.ConfigFrames()
-	return true
 }
 
 func (rt *RenderTexture) ReleaseFrames() {

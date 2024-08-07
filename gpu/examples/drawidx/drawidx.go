@@ -131,6 +131,7 @@ func main() {
 		}
 		pl.BindPipeline(rp)
 		pl.BindDrawIndexed(rp)
+		rp.End()
 		sy.EndRenderPass(rp)
 
 		frameCount++

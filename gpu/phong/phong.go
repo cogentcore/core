@@ -185,6 +185,7 @@ func (ph *Phong) RenderStart() (*wgpu.RenderPassEncoder, error) {
 }
 
 func (ph *Phong) RenderEnd(rp *wgpu.RenderPassEncoder) {
+	rp.End()
 	ph.System.EndRenderPass(rp)
 }
 

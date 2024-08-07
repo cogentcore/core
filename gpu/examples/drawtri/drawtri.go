@@ -72,6 +72,7 @@ func main() {
 		}
 		pl.BindPipeline(rp)
 		rp.Draw(3, 1, 0, 0)
+		rp.End()
 		sy.EndRenderPass(rp)
 
 		frameCount++

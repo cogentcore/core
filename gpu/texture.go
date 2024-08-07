@@ -5,9 +5,11 @@
 package gpu
 
 import (
+	"fmt"
 	"image"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/slicesx"
 	"github.com/cogentcore/webgpu/wgpu"
 )
 
@@ -34,6 +36,12 @@ type Texture struct {
 
 	// keep track of device for destroying view
 	device Device `display:"-"`
+
+	// readBuffer is an optional buffer for reading the contents of a texture
+	readBuffer *wgpu.Buffer
+
+	// current size of the readBuffer
+	ReadBufferDims TextureBufferDims
 }
 
 func NewTexture(dev *Device) *Texture {
@@ -188,27 +196,148 @@ func (tx *Texture) ReleaseTexture() {
 func (tx *Texture) Release() {
 	tx.ReleaseTexture()
 	tx.Sampler.Release()
+	if tx.readBuffer != nil {
+		tx.readBuffer.Release()
+		tx.readBuffer = nil
+	}
 }
 
-// TextureBufferDims represents the sizes required in Buffer to
-// represent a texture of a given size.
-type TextureBufferDims struct {
-	Width               uint64
-	Height              uint64
-	UnpaddedBytesPerRow uint64
-	PaddedBytesPerRow   uint64
+///////////////////////////////////////////////////////////////
+// 	ReadBuffer
+
+// ConfigReadBuffer configures the [readBuffer] for this Texture.
+// Must have this in place prior to render pass with a
+// [CopyToReadBuffer] command added to it.
+func (tx *Texture) ConfigReadBuffer() error {
+	dims := NewTextureBufferDims(tx.Format.Size)
+	buffSize := dims.PaddedSize()
+
+	if tx.readBuffer != nil && tx.ReadBufferDims == *dims {
+		return nil
+	}
+	b, err := tx.device.Device.CreateBuffer(&wgpu.BufferDescriptor{
+		Size:  buffSize,
+		Usage: wgpu.BufferUsageMapRead | wgpu.BufferUsageCopyDst,
+	})
+	if errors.Log(err) != nil {
+		return err
+	}
+	tx.readBuffer = b
+	tx.ReadBufferDims = *dims
+	return nil
 }
 
-func NewTextureBufferDims(width, height int) *TextureBufferDims {
-	td := &TextureBufferDims{}
-	td.Set(width, height)
-	return td
+// CopyToReadBuffer adds a command to the given command encoder
+// to copy this texture to its [readBuffer]. Must have called
+// [ConfigReadBuffer] prior to start of render pass for this to work.
+func (tx *Texture) CopyToReadBuffer(cmd *wgpu.CommandEncoder) error {
+	if tx.readBuffer == nil {
+		err := fmt.Errorf("gpu.Texture.CopyToReadBuffer: must configure readBuffer prior to render pass")
+		return errors.Log(err)
+	}
+	size := tx.Format.Extent3D()
+	cmd.CopyTextureToBuffer(
+		tx.texture.AsImageCopy(),
+		&wgpu.ImageCopyBuffer{
+			Buffer: tx.readBuffer,
+			Layout: wgpu.TextureDataLayout{
+				Offset:       0,
+				BytesPerRow:  uint32(tx.ReadBufferDims.PaddedRowSize),
+				RowsPerImage: wgpu.CopyStrideUndefined,
+			},
+		},
+		&size,
+	)
+	return nil
 }
 
-func (td *TextureBufferDims) Set(width, height int) {
-	const bytesPerPixel = 4 // unsafe.Sizeof(uint32(0))
-	td.UnpaddedBytesPerRow = uint64(width * bytesPerPixel)
-	align := uint64(wgpu.CopyBytesPerRowAlignment)
-	padding := (align - td.UnpaddedBytesPerRow%align) % align
-	td.PaddedBytesPerRow = td.UnpaddedBytesPerRow + padding
+// ReadGoImage reads the GPU-resident Texture and returns
+// a Go image.NRGBA image of the texture.
+func (tx *Texture) ReadGoImage() (*image.NRGBA, error) {
+	var data []byte
+	err := tx.ReadData(&data, true)
+	if err != nil {
+		return nil, err
+	}
+	img := &image.NRGBA{
+		Pix:    data,
+		Stride: int(tx.ReadBufferDims.PaddedRowSize),
+		Rect:   image.Rect(0, 0, int(tx.ReadBufferDims.Width), int(tx.ReadBufferDims.Height)),
+	}
+	return img, nil
+}
+
+// ReadData reads the data from a GPU-resident Texture,
+// setting the given data bytes, which will be resized to fit
+// the data.  If removePadding is true, then extra padding will be
+// removed, if present.
+func (tx *Texture) ReadData(data *[]byte, removePadding bool) error {
+	ud, err := tx.ReadDataMapped()
+	if err != nil {
+		return err
+	}
+	if !removePadding || tx.ReadBufferDims.HasNoPadding() {
+		buffSize := tx.ReadBufferDims.PaddedSize()
+		*data = slicesx.SetLength(*data, int(buffSize))
+		copy(*data, ud)
+		tx.UnmapReadData()
+		return nil
+	}
+	dataSize := tx.ReadBufferDims.UnpaddedSize()
+	*data = slicesx.SetLength(*data, int(dataSize))
+	dims := tx.ReadBufferDims
+	for r := range dims.Height {
+		dStart := r * dims.UnpaddedRowSize
+		dEnd := dStart + dims.UnpaddedRowSize
+		sStart := r * dims.PaddedRowSize
+		sEnd := sStart + dims.UnpaddedRowSize
+		copy((*data)[dStart:dEnd], ud[sStart:sEnd])
+	}
+	tx.UnmapReadData()
+	return nil
+}
+
+// ReadDataMapped reads the data from a GPU-resident Texture,
+// returning the bytes as mapped from the readBuffer,
+// so they must be used immediately, followed by an [UnmapReadData]
+// call to unmap the data.  See [ReadData] for a version that copies
+// the data into a bytes slice, which is safe for indefinite use.
+// There is alignment padding as reflected in the
+// [ReadBufferDims] data.
+func (tx *Texture) ReadDataMapped() ([]byte, error) {
+	dims := NewTextureBufferDims(tx.Format.Size)
+	buffSize := dims.PaddedSize()
+
+	if tx.readBuffer == nil || tx.ReadBufferDims != *dims {
+		b, err := tx.device.Device.CreateBuffer(&wgpu.BufferDescriptor{
+			Size:  buffSize,
+			Usage: wgpu.BufferUsageMapRead | wgpu.BufferUsageCopyDst,
+		})
+		if errors.Log(err) != nil {
+			return nil, err
+		}
+		tx.readBuffer = b
+		tx.ReadBufferDims = *dims
+	}
+
+	var err error
+	tx.readBuffer.MapAsync(wgpu.MapModeRead, 0, buffSize, func(status wgpu.BufferMapAsyncStatus) {
+		if status != wgpu.BufferMapAsyncStatusSuccess {
+			err = fmt.Errorf("gpu.Texture.ReadData: failed to map readBuffer")
+		}
+	})
+	tx.device.WaitDone()
+	if errors.Log(err) != nil {
+		return nil, err
+	}
+	return tx.readBuffer.GetMappedRange(0, uint(buffSize)), nil
+}
+
+// UnmapReadData unmaps the data from a prior ReadDataMapped call.
+func (tx *Texture) UnmapReadData() error {
+	if tx.readBuffer == nil {
+		return errors.Log(fmt.Errorf("gpu.Texture.UnmapReadData: buffer is nil"))
+	}
+	tx.readBuffer.Unmap()
+	return nil
 }
