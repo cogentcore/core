@@ -16,29 +16,8 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// render notes:
-//
-// # Config:
-//
-// Unlike core, xyz Config can only be successfully done after the
-// GPU framework has been initialized, because it is all about allocating
-// GPU resources.
-// [Scene.NeedsConfig] indicates if any of these resources
-// have been changed and a new Config is required.
-// * ConfigFrame -- allocates the rendertarget -- based on Geom.Size
-// * Lights, Meshes, Textures
-// * ConfigNodes to update and validate node-specific settings.
-//   Most nodes do not require this, but Text2D and Embed2D do.
-//
-// # Update:
-//
-// Update involves updating Pose
-
 // DoUpdate handles needed updates based on Scene Flags.
 // If no updates are required, then false is returned, else true.
-// NeedsConfig is NOT handled here because it must be done on main thread,
-// so this must be checked separately (e.g., in xyzcore.Scene, as it requires
-// a separate RunOnMainThread call).
 func (sc *Scene) DoUpdate() bool {
 	switch {
 	case sc.NeedsUpdate:

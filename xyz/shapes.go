@@ -58,7 +58,7 @@ func NewPlane(sc *Scene, name string, width, height float32) *Plane {
 	pl := &Plane{}
 	pl.Name = name
 	pl.NormAxis = math32.Y
-	pl.NormNeg = true
+	pl.NormNeg = false
 	pl.Size.Set(width, height)
 	pl.Segs.Set(1, 1)
 	pl.Offset = 0

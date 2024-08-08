@@ -37,10 +37,6 @@ type CamView struct {
 }
 
 func main() {
-	if gpu.Init() != nil {
-		return
-	}
-
 	gp := gpu.NewGPU()
 	gpu.Debug = true
 	gp.Config("drawidx")

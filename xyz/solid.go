@@ -237,7 +237,7 @@ func (sld *Solid) RenderClass() RenderClasses {
 func (sld *Solid) PreRender() {
 	ph := sld.Scene.Phong
 	nm := sld.Path()
-	ph.SetObject(nm, phong.NewObject(&sld.Pose.Matrix, sld.Material.phongColors()))
+	ph.SetObject(nm, phong.NewObject(&sld.Pose.WorldMatrix, sld.Material.phongColors()))
 	// fmt.Println("pre:", nm, sld.Pose.Matrix, sld.Material.phongColors())
 }
 

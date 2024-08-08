@@ -130,6 +130,7 @@ func (sw *Scene) ManipBox() {
 	nm := ManipBoxName
 
 	nb := sw.CurrentSelected.AsNodeBase()
+	// todo: definitely need to use plan based updating here!
 	xy.DeleteChildByName(nm) // get rid of existing
 	clr := sw.SelectionParams.Color
 

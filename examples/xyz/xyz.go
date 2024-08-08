@@ -197,6 +197,7 @@ func main() {
 		SetColor(color.RGBA{0, 255, 0, 128}).SetShiny(20).SetPos(0, 0, 1)
 
 	floorp := xyz.NewPlane(sc, "floor-plane", 100, 100)
+	floorp.NormNeg = true
 	floor := xyz.NewSolid(sc).SetMesh(floorp).
 		SetColor(colors.Tan).SetTexture(grtx).SetPos(0, -5, 0)
 	floor.Material.Tiling.Repeat.Set(40, 40)
@@ -331,6 +332,5 @@ func main() {
 			}
 		})
 	*/
-
 	b.RunMainWindow()
 }
