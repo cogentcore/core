@@ -106,10 +106,10 @@ func SetPlaneAxisSize(vertex, normal, texcoord math32.ArrayF32, index math32.Arr
 	case math32.Y:
 		sz.Set(hSz.X, thin, hSz.Y)
 		if normalNeg {
-			SetPlane(vertex, normal, texcoord, index, vtxOff, idxOff, math32.X, math32.Z, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // ny
+			SetPlane(vertex, normal, texcoord, index, vtxOff, idxOff, math32.X, math32.Z, 1, 1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // ny
 			sz.Y += -offset
 		} else {
-			SetPlane(vertex, normal, texcoord, index, vtxOff, idxOff, math32.X, math32.Z, 1, 1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // py
+			SetPlane(vertex, normal, texcoord, index, vtxOff, idxOff, math32.X, math32.Z, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // py
 			sz.Y += offset
 		}
 	case math32.Z:

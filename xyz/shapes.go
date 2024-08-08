@@ -34,11 +34,11 @@ const (
 type Plane struct { //types:add -setters
 	MeshBase
 
-	// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
+	// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormalNeg for whether it is facing in the positive or negative of the given axis.
 	NormAxis math32.Dims
 
 	// if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true
-	NormNeg bool
+	NormalNeg bool
 
 	// 2D size of plane
 	Size math32.Vector2
@@ -58,7 +58,7 @@ func NewPlane(sc *Scene, name string, width, height float32) *Plane {
 	pl := &Plane{}
 	pl.Name = name
 	pl.NormAxis = math32.Y
-	pl.NormNeg = true
+	pl.NormalNeg = false
 	pl.Size.Set(width, height)
 	pl.Segs.Set(1, 1)
 	pl.Offset = 0
@@ -74,7 +74,7 @@ func (pl *Plane) MeshSize() (numVertex, nIndex int, hasColor bool) {
 
 func (pl *Plane) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
-	sz := shape.SetPlaneAxisSize(vertex, normal, texcoord, index, 0, 0, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pos)
+	sz := shape.SetPlaneAxisSize(vertex, normal, texcoord, index, 0, 0, pl.NormAxis, pl.NormalNeg, pl.Size, pl.Segs, pl.Offset, pos)
 	mn := pos.Sub(sz)
 	mx := pos.Add(sz)
 	pl.BBox.SetBounds(mn, mx)

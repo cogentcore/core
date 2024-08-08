@@ -94,11 +94,53 @@ The `Var.Values.Current` index determines which Value is used for the BindGroup 
 
 * `Texture` vars that provide the raw `Texture` data, the `TextureView` through which that is accessed, and a `Sampler` that parametrizes how the pixels are mapped onto coordinates in the Fragment shader.  Each texture object is managed as a distinct item in device memory.  
 
-## Naming conventions
+## Coordinate System
 
-* `New*` returns a new object.
-* `Config` operates on an existing object and settings, and does everything to get it configured for use.
-* `Release` releases allocated WebGPU objects.  The usual Go simplicity of not having to worry about freeing memory does not apply to these objects.
+The world and "normalized display coordinate" (NDC) system for `gpu` is the following right-handed framework:
+
+```
+    ^
+ Y+ | 
+    |
+    +-------->
+   /      X+
+  / Z+
+ v
+```
+
+Which is consistent with the [standard cartesian coordinate system](https://en.wikipedia.org/wiki/Cartesian_coordinate_system), where everything is rotated 90 degrees along the X axis, so that Y+ now points into the depth plane, and Z+ points upward:
+
+```
+    ^   ^
+ Z+ |  / Y+
+    | / 
+    +-------->
+   /      X+
+  / Y-
+ v
+```
+
+You can think of this as having vertical "stacks" of standard X-Y coordinates, stacked up along the Z axis, like a big book of graph paper.  In some cases, e.g., neural network layers, where this "stack" analog is particularly relevant, it can be useful to adopt this version of the coordinate system.
+
+However, the advantage of our "Y+ up" system is that the X-Y 2D cartesian plane then maps directly onto the actual 2D screen that the user is looking at, with Z being the "extra" depth axis.  Given the primacy and universal standard way of understanding the 2D plane, this consistency seems like a nice advantage.
+
+In this coordinate system, the standard _front face winding order_ is clockwise (CW), so the default is set to: `pl.SetFrontFace(wgpu.FrontFaceCW)` in the `GraphicsPipeline`.  
+
+The above coordinate system is consistent with OpenGL, but other 3D rendering frameworks, including the default in WebGPU, have other systems, as documented here: https://github.com/gpuweb/gpuweb/issues/416.  WebGPU is consistent with DirectX and Metal (by design), and is a _left handed_ coordinate system (using `FrontFaceCCW` by default), which conflicts with the near-universal [right-hand-rule](https://en.wikipedia.org/wiki/Right-hand_rule) used in physics and engineering.  Vulkan has its own peculiar coordinate system, with the "up" Y direction being _negative_, which turns it into a right-handed system, but one that doesn't make a lot of intuitive sense.
+
+For reference, this is the default [WebGPU coordinate system](https://www.w3.org/TR/webgpu/#coordinate-systems):
+
+```
+    ^
+ Y+ | 
+    |
+    +-------->
+   /      X+
+  / Z-
+ v
+```
+
+Obviously every system can be converted into every other with the proper combination of camera projection matricies and winding order settings, so it isn't a problem that we use something different than WebGPU natively uses -- it just requires a different winding order setting.
 
 # Compute System
 
@@ -127,6 +169,12 @@ It is hard to find this info very clearly stated:
 * Other colors that are passed in should be converted from sRGB to linear (the [phong](phong) shader does this for the PerVertex case).
 * The `Surface` automatically converts from Linear to sRGB for actual rendering.
 * A `RenderTexture` for offscreen / headless rendering *must* use `wgpu.TextureFormatRGBA8UnormSrgb` for the format, in order to get back an image that is automatically converted back to sRGB format.
+
+# Naming conventions
+
+* `New*` returns a new object.
+* `Config` operates on an existing object and settings, and does everything to get it configured for use.
+* `Release` releases allocated WebGPU objects.  The usual Go simplicity of not having to worry about freeing memory does not apply to these objects.
 
 # Limits
 

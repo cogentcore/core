@@ -16,7 +16,6 @@ import (
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/examples/images"
 	"cogentcore.org/core/math32"
-	"github.com/cogentcore/webgpu/wgpu"
 )
 
 //go:embed texture.wgsl
@@ -59,8 +58,8 @@ func main() {
 
 	pl := sy.AddGraphicsPipeline("texture")
 	sy.SetClearColor(color.RGBA{50, 50, 50, 255})
-	pl.SetFrontFace(wgpu.FrontFaceCCW)
-	pl.SetCullMode(wgpu.CullModeNone)
+	// pl.SetFrontFace(wgpu.FrontFaceCW)
+	// pl.SetCullMode(wgpu.CullModeBack)
 
 	sh := pl.AddShader("texture")
 	sh.OpenCode(texture)
@@ -113,7 +112,7 @@ func main() {
 		0.0, 0.0,
 		0.0, 1.0,
 		1.0, 1.0})
-	gpu.SetValueFrom(idxv.Values.Values[0], []uint16{0, 1, 2, 0, 2, 3})
+	gpu.SetValueFrom(idxv.Values.Values[0], []uint16{3, 2, 0, 2, 1, 0}) // reversed binding
 
 	// This is the standard camera view projection computation
 	campos := math32.Vec3(0, 0, 2)
