@@ -32,6 +32,11 @@ type Drawer struct {
 	context2D js.Value
 }
 
+// AsGPUDrawer implements [gpudraw.AsGPUDrawer].
+func (dw *Drawer) AsGPUDrawer() *gpudraw.Drawer {
+	return dw.wgpu
+}
+
 // InitDrawer sets the [Drawer] to a WebGPU-based drawer if the browser
 // supports WebGPU and a backup 2D image drawer otherwise.
 func (a *App) InitDrawer() {

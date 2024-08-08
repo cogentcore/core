@@ -8,6 +8,7 @@ package xyzcore
 //go:generate core generate
 
 import (
+	"errors"
 	"image"
 	"image/draw"
 
@@ -125,10 +126,12 @@ func (sw *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
 	if sw.XYZ.Frame == nil || !sw.IsVisible() {
 		return
 	}
-	gdrw, ok := drw.(*gpudraw.Drawer)
-	if !ok {
+	agd, ok := drw.(gpudraw.AsGPUDrawer)
+	if !ok || agd.AsGPUDrawer() == nil {
+		core.ErrorSnackbar(sw, errors.New("xyz.Scene.RenderDraw: no WebGPU drawer available"))
 		return
 	}
+	gdrw := agd.AsGPUDrawer()
 	gdrw.UseTexture(sw.XYZ.Frame.Frames[0])
 	bb := sw.Geom.TotalBBox
 	ibb := image.Rectangle{Max: bb.Size()}

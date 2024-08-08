@@ -59,11 +59,24 @@ type Drawer struct {
 	sync.Mutex
 }
 
-// NewDrawer returns a new Drawer configured for rendering
+// AsGPUDrawer represents a type that can be used as a [Drawer].
+type AsGPUDrawer interface {
+
+	// AsGPUDrawer returns the drawer as a [Drawer].
+	// It may return nil if it cannot be used as a [Drawer].
+	AsGPUDrawer() *Drawer
+}
+
+// NewDrawer returns a new [Drawer] configured for rendering
 // to given Renderer.
 func NewDrawer(gp *gpu.GPU, rd gpu.Renderer) *Drawer {
 	dw := &Drawer{}
 	dw.configSystem(gp, rd)
+	return dw
+}
+
+// AsGPUDrawer implements [AsGPUDrawer].
+func (dw *Drawer) AsGPUDrawer() *Drawer {
 	return dw
 }
 
