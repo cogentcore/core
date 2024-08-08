@@ -43,9 +43,6 @@ type Camera struct {
 	// projection matrix, defining the camera perspective / ortho transform
 	ProjectionMatrix math32.Matrix4 `display:"-"`
 
-	// vulkan projection matrix -- required for gpu -- produces same effect as ProjectionMatrix, which should be used for all other math
-	VkProjectionMatrix math32.Matrix4 `display:"-"`
-
 	// inverse of the projection matrix
 	InvProjectionMatrix math32.Matrix4 `display:"-"`
 
@@ -83,8 +80,7 @@ func (cm *Camera) UpdateMatrix() {
 		width := cm.Aspect * height
 		cm.ProjectionMatrix.SetOrthographic(width, height, cm.Near, cm.Far)
 	} else {
-		cm.ProjectionMatrix.SetPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far)     // use for everything
-		cm.VkProjectionMatrix.SetVkPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far) // Vk use for render
+		cm.ProjectionMatrix.SetPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far) // use for everything
 	}
 	cm.InvProjectionMatrix.SetInverse(&cm.ProjectionMatrix)
 	var proj math32.Matrix4

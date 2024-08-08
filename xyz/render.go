@@ -340,7 +340,7 @@ const (
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) RenderImpl() {
 	ph := sc.Phong
-	ph.SetCamera(&sc.Camera.ViewMatrix, &sc.Camera.VkProjectionMatrix)
+	ph.SetCamera(&sc.Camera.ViewMatrix, &sc.Camera.ProjectionMatrix)
 
 	var rcs [RenderClassesN][]Node
 	sc.WalkDown(func(k tree.Node) bool {

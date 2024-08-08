@@ -238,6 +238,7 @@ func (sld *Solid) PreRender() {
 	ph := sld.Scene.Phong
 	nm := sld.Path()
 	ph.SetObject(nm, phong.NewObject(&sld.Pose.Matrix, sld.Material.phongColors()))
+	// fmt.Println("pre:", nm, sld.Pose.Matrix, sld.Material.phongColors())
 }
 
 // Render activates this solid for rendering
@@ -246,6 +247,7 @@ func (sld *Solid) Render(rp *wgpu.RenderPassEncoder) {
 	ph := sld.Scene.Phong
 	ph.UseObject(nm)
 	ph.UseMesh(string(sld.MeshName))
+	fmt.Println("rend:", nm, "mesh:", string(sld.MeshName))
 	if sld.Material.TextureName != "" {
 		ph.UseTexture(string(sld.Material.TextureName))
 	} else {

@@ -104,7 +104,7 @@ func NewBox(sc *Scene, name string, width, height, depth float32) *Box {
 	return bx
 }
 
-func (bx *Box) MeshSizes() (numVertex, nIndex int, hasColor bool) {
+func (bx *Box) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	bx.NumVertex, bx.NumIndex = shape.BoxN(bx.Segs)
 	bx.HasColor = false
 	return bx.NumVertex, bx.NumIndex, bx.HasColor
@@ -173,7 +173,7 @@ func (sp *Sphere) Defaults() {
 	sp.ElevLen = 180
 }
 
-func (sp *Sphere) MeshSizes() (numVertex, nIndex int, hasColor bool) {
+func (sp *Sphere) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	sp.NumVertex, sp.NumIndex = shape.SphereSectorN(sp.WidthSegs, sp.HeightSegs, sp.ElevStart, sp.ElevLen)
 	sp.HasColor = false
 	return sp.NumVertex, sp.NumIndex, sp.HasColor
@@ -270,7 +270,7 @@ func (cy *Cylinder) Defaults() {
 	cy.AngLen = 360
 }
 
-func (cy *Cylinder) MeshSizes() (numVertex, nIndex int, hasColor bool) {
+func (cy *Cylinder) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	cy.NumVertex, cy.NumIndex = shape.CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
 	cy.HasColor = false
 	return cy.NumVertex, cy.NumIndex, cy.HasColor
@@ -346,7 +346,7 @@ func (cp *Capsule) Defaults() {
 	cp.AngLen = 360
 }
 
-func (cp *Capsule) MeshSizes() (numVertex, nIndex int, hasColor bool) {
+func (cp *Capsule) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	numVertex, nIndex = shape.CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)
 	if cp.BotRad > 0 {
 		nv, ni := shape.SphereSectorN(cp.RadialSegs, cp.CapSegs, 90, 90)
@@ -439,7 +439,7 @@ func (tr *Torus) Defaults() {
 	tr.AngLen = 360
 }
 
-func (tr *Torus) MeshSizes() (numVertex, nIndex int, hasColor bool) {
+func (tr *Torus) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	numVertex, nIndex = shape.TorusSectorN(tr.RadialSegs, tr.TubeSegs)
 	return
 }
