@@ -36,12 +36,9 @@ type Surface struct {
 	device *Device
 
 	// WebGPU handle for surface
-	surface *wgpu.Surface `display:"-"`
+	surface *wgpu.Surface
 
-	swapChainConfig *wgpu.SwapChainDescriptor
-
-	// WebGPU handle for swapchain
-	swapChain *wgpu.SwapChain `display:"-"`
+	config *wgpu.SurfaceConfiguration
 
 	// current texture: must release at end
 	curTexture *wgpu.TextureView
@@ -81,10 +78,10 @@ func (sf *Surface) init(gp *GPU, ws *wgpu.Surface, size image.Point, samples int
 		return err
 	}
 	sf.device = dev
-	sf.Format.Format = ws.GetPreferredFormat(gp.GPU)
+	sf.Format.Format = wgpu.TextureFormatBGRA8Unorm // ws.GetPreferredFormat(gp.GPU) TODO(wgpu): GetPreferredFormat
 	sf.Format.SetMultisample(samples)
 	sf.Format.Size = size
-	sf.ConfigSwapChain() // can change the format
+	sf.InitConfig() // can change the format
 	sf.render.Config(sf.device, &sf.Format, depthFmt)
 	return nil
 }
@@ -101,8 +98,8 @@ func (sf *Surface) SetSize(sz image.Point) {
 	}
 	sf.render.SetSize(sz)
 	sf.Format.Size = sz
-	sf.swapChainConfig.Width = uint32(sf.Format.Size.X)
-	sf.swapChainConfig.Height = uint32(sf.Format.Size.Y)
+	sf.config.Width = uint32(sf.Format.Size.X)
+	sf.config.Height = uint32(sf.Format.Size.Y)
 	sf.needsReconfig = true
 }
 
@@ -110,10 +107,14 @@ func (sf *Surface) SetSize(sz image.Point) {
 // target for rendering.
 func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	if sf.needsReconfig {
-		sf.ReConfigSwapChain()
+		sf.Reconfig()
 	}
 	sf.Lock() // we remain locked until submit!
-	view, err := sf.swapChain.GetCurrentTextureView()
+	texture, err := sf.surface.GetCurrentTexture()
+	if errors.Log(err) != nil {
+		return nil, err
+	}
+	view, err := texture.CreateView(nil)
 	if errors.Log(err) != nil {
 		return nil, err
 	}
@@ -124,7 +125,7 @@ func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 // Present is the final step for showing the rendered texture to the window.
 // The current texture is automatically Released and Unlock() is called.
 func (sf *Surface) Present() {
-	sf.swapChain.Present()
+	sf.surface.Present()
 	if sf.curTexture != nil {
 		sf.curTexture.Release()
 		sf.curTexture = nil
@@ -132,9 +133,9 @@ func (sf *Surface) Present() {
 	sf.Unlock()
 }
 
-// ConfigSwapChain configures the swapchain for surface.
+// InitConfig does the initial configuration of the surface.
 // This assumes that all existing items have been destroyed.
-func (sf *Surface) ConfigSwapChain() error {
+func (sf *Surface) InitConfig() error {
 	caps := sf.surface.GetCapabilities(sf.GPU.GPU)
 
 	// fmt.Println(reflectx.StringJSON(caps))
@@ -152,7 +153,7 @@ func (sf *Surface) ConfigSwapChain() error {
 		viewFmts = append(viewFmts, viewFmt)
 	}
 
-	sf.swapChainConfig = &wgpu.SwapChainDescriptor{
+	sf.config = &wgpu.SurfaceConfiguration{
 		Usage:       wgpu.TextureUsageRenderAttachment,
 		Format:      trgFmt,
 		Width:       uint32(sf.Format.Size.X),
@@ -163,50 +164,30 @@ func (sf *Surface) ConfigSwapChain() error {
 	}
 
 	sf.Format.Format = viewFmt
-	err := sf.CreateSwapChain()
-	errors.Log(err)
-	return err
-}
-
-func (sf *Surface) CreateSwapChain() error {
-	sc, err := sf.device.Device.CreateSwapChain(sf.surface, sf.swapChainConfig)
-	if err != nil {
-		return err
-	}
-	sf.swapChain = sc
-	// fmt.Println("sc:", sf.Format.String())
+	sf.Config()
 	return nil
 }
 
-// ReleaseSwapChain frees any existing swawpchain (for ReInit or Release)
-func (sf *Surface) ReleaseSwapChain() {
-	if sf.swapChain == nil {
-		return
-	}
-	sf.device.WaitDone()
-	sf.swapChain.Release()
-	sf.swapChain = nil
+// Config configures the surface based on the surface configuration.
+func (sf *Surface) Config() {
+	sf.surface.Configure(sf.GPU.GPU, sf.device.Device, sf.config)
 }
 
-// ReConfigSwapChain does a re-create of swapchain, freeing existing.
+// Reconfig reconfigures the surface.
 // This must be called when the window is resized.
-// must update the swapChainConfig parameters prior to calling!
+// Must update the swapChainConfig parameters prior to calling!
 // It returns false if the swapchain size is zero.
-func (sf *Surface) ReConfigSwapChain() bool {
+func (sf *Surface) Reconfig() bool {
 	sf.Lock()
 	defer sf.Unlock()
 	sf.needsReconfig = false
-	sf.ReleaseSwapChain()
-	if sf.CreateSwapChain() != nil {
-		return false
-	}
+	sf.Config()
 	sf.render.SetSize(sf.Format.Size)
 	return true
 }
 
 func (sf *Surface) Release() {
 	sf.render.Release()
-	sf.ReleaseSwapChain()
 	if sf.surface != nil {
 		sf.surface.Release()
 		sf.surface = nil
