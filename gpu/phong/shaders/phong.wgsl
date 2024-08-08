@@ -53,6 +53,8 @@ fn phongModel(pos: vec4<f32>, normal: vec3<f32>, camDir: vec3<f32>, matAmbient: 
 	var ambientTotal: vec3<f32>;
 	var diffuseTotal: vec3<f32>;
 	var specularTotal: vec3<f32>;
+	
+	let norm = normalize(normal); // make sure
 
 	let matSpecular = vec3<f32>(reflct);
 	
@@ -65,11 +67,11 @@ fn phongModel(pos: vec4<f32>, normal: vec3<f32>, camDir: vec3<f32>, matAmbient: 
 		let lp4 = vec4<f32>(dir[i].pos, 0.0);
  		let lightDir = normalize(camera.view * lp4).xyz;
 		// Calculates the dot product between the light direction and this vertex normal.
-		let dotNormal = dot(lightDir, normal);
+		let dotNormal = dot(lightDir, norm);
 		if (dotNormal > eps) {
 			diffuseTotal += dir[i].color * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
-			let refl = reflect(-lightDir, normal);
+			let refl = reflect(-lightDir, norm);
 			specularTotal += dir[i].color * matSpecular * pow(max(dot(refl, camDir), 0.0), shiny);
 		}
 	}
@@ -84,7 +86,7 @@ fn phongModel(pos: vec4<f32>, normal: vec3<f32>, camDir: vec3<f32>, matAmbient: 
 		lightDir = lightDir / lightDist;
 		// Calculates the attenuation due to the distance of the light
 		// Diffuse reflection
-		let dotNormal = dot(lightDir, normal);
+		let dotNormal = dot(lightDir, norm);
 		if (dotNormal > eps) {
 			let linDecay = point[i].decay.x;
 			let quadDecay = point[i].decay.y;
@@ -93,7 +95,7 @@ fn phongModel(pos: vec4<f32>, normal: vec3<f32>, camDir: vec3<f32>, matAmbient: 
 			let attenColor = point[i].color * attenuation;
 			diffuseTotal += attenColor * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
-			let refl = reflect(-lightDir, normal);
+			let refl = reflect(-lightDir, norm);
 			specularTotal += attenColor * matSpecular * pow(max(dot(refl, camDir), 0.0), shiny);
 		}
 	}
@@ -118,7 +120,7 @@ fn phongModel(pos: vec4<f32>, normal: vec3<f32>, camDir: vec3<f32>, matAmbient: 
 
 		if (angle < cutoff) {
 			// Diffuse reflection
-			let dotNormal = dot(lightDir, normal);
+			let dotNormal = dot(lightDir, norm);
 			if (dotNormal > eps) {
 				// Calculates the attenuation due to the distance of the light
 				let dk = spot[i].decay;
@@ -130,7 +132,7 @@ fn phongModel(pos: vec4<f32>, normal: vec3<f32>, camDir: vec3<f32>, matAmbient: 
 				let attenColor = spot[i].color * attenuation * spotFactor;
 				diffuseTotal += attenColor * matDiffuse * dotNormal;
 				// Specular reflection
-				let refl = reflect(-lightDir, normal);
+				let refl = reflect(-lightDir, norm);
 				specularTotal += attenColor * matSpecular * pow(max(dot(refl, camDir), 0.0), shiny);
 			}
 		}

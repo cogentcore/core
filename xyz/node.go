@@ -306,7 +306,7 @@ func (nb *NodeBase) TrackLight(lightName string) error {
 		return fmt.Errorf("xyz Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}
 	switch l := lt.(type) {
-	case *DirLight:
+	case *DirectionalLight:
 		nb.Pose.Pos = l.Pos
 	case *PointLight:
 		nb.Pose.Pos = l.Pos

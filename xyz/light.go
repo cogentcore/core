@@ -48,8 +48,8 @@ type AmbientLight struct {
 	LightBase
 }
 
-// NewAmbientLight adds Ambient to given scene, with given name, standard color, and lumens (0-1 normalized)
-func NewAmbientLight(sc *Scene, name string, lumens float32, color LightColors) *AmbientLight {
+// NewAmbient adds Ambient to given scene, with given name, standard color, and lumens (0-1 normalized)
+func NewAmbient(sc *Scene, name string, lumens float32, color LightColors) *AmbientLight {
 	lt := &AmbientLight{}
 	lt.Name = name
 	lt.On = true
@@ -59,21 +59,21 @@ func NewAmbientLight(sc *Scene, name string, lumens float32, color LightColors) 
 	return lt
 }
 
-// DirLight is directional light, which is assumed to project light toward
+// DirectionalLight is directional light, which is assumed to project light toward
 // the origin based on its position, with no attenuation, like the Sun.
 // For rendering, the position is negated and normalized to get the direction
 // vector (i.e., absolute distance doesn't matter)
-type DirLight struct {
+type DirectionalLight struct {
 	LightBase
 
 	// position of direct light -- assumed to point at the origin so this determines direction
 	Pos math32.Vector3
 }
 
-// NewDirLight adds direct light to given scene, with given name, standard color, and lumens (0-1 normalized)
+// NewDirectional adds direct light to given scene, with given name, standard color, and lumens (0-1 normalized)
 // By default it is located overhead and toward the default camera (0, 1, 1) -- change Pos otherwise
-func NewDirLight(sc *Scene, name string, lumens float32, color LightColors) *DirLight {
-	lt := &DirLight{}
+func NewDirectional(sc *Scene, name string, lumens float32, color LightColors) *DirectionalLight {
+	lt := &DirectionalLight{}
 	lt.Name = name
 	lt.On = true
 	lt.Color = LightColorMap[color]
@@ -84,7 +84,7 @@ func NewDirLight(sc *Scene, name string, lumens float32, color LightColors) *Dir
 }
 
 // ViewDir gets the direction normal vector, pre-computing the view transform
-func (dl *DirLight) ViewDir(viewMat *math32.Matrix4) math32.Vector3 {
+func (dl *DirectionalLight) ViewDir(viewMat *math32.Matrix4) math32.Vector3 {
 	// adding the 0 in the 4-vector negates any translation factors from the 4 matrix
 	return dl.Pos.MulMatrix4AsVector4(viewMat, 0)
 }
@@ -145,11 +145,11 @@ type SpotLight struct {
 	QuadDecay float32
 }
 
-// NewSpotLight adds spot light to given scene, with given name, standard color, and lumens (0-1 normalized)
+// NewSpot adds spot light to given scene, with given name, standard color, and lumens (0-1 normalized)
 // By default it is located at 0,5,5 (up and between default camera and origin) and pointing at the origin.
 // Use the Pose LookAt function to point it at other locations.
 // In its unrotated state, it points down the -Z axis (i.e., into the scene using default view parameters)
-func NewSpotLight(sc *Scene, name string, lumens float32, color LightColors) *SpotLight {
+func NewSpot(sc *Scene, name string, lumens float32, color LightColors) *SpotLight {
 	lt := &SpotLight{}
 	lt.Name = name
 	lt.On = true
@@ -204,7 +204,7 @@ func (sc *Scene) addPhongLight(lt Light) {
 	switch l := lt.(type) {
 	case *AmbientLight:
 		sc.Phong.AddAmbient(clr)
-	case *DirLight:
+	case *DirectionalLight:
 		sc.Phong.AddDirectional(clr, l.Pos)
 	case *PointLight:
 		sc.Phong.AddPoint(clr, l.Pos, l.LinDecay, l.QuadDecay)
