@@ -165,7 +165,7 @@ func (sc *Scene) PlaneMesh2D() Mesh {
 	}
 	tmp := NewPlane(sc, nm, 1, 1)
 	tmp.NormAxis = math32.Z
-	tmp.NormNeg = false
+	tmp.NormNeg = true
 	return tmp
 }
 
