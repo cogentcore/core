@@ -115,8 +115,8 @@ func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 		return nil, err
 	}
 	view, err := texture.CreateView(&wgpu.TextureViewDescriptor{ // TODO(wgpu): less hacky srgb fix
-		MipLevelCount:   1,
-		ArrayLayerCount: 1,
+		MipLevelCount:   texture.GetMipLevelCount(),
+		ArrayLayerCount: texture.GetDepthOrArrayLayers(),
 		Format:          wgpu.TextureFormatBGRA8UnormSrgb,
 	})
 	if errors.Log(err) != nil {
