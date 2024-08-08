@@ -62,17 +62,17 @@ func NewPlane(sc *Scene, name string, width, height float32) *Plane {
 	pl.Size.Set(width, height)
 	pl.Segs.Set(1, 1)
 	pl.Offset = 0
-	sc.AddMesh(pl)
+	sc.SetMesh(pl)
 	return pl
 }
 
-func (pl *Plane) Sizes() (numVertex, nIndex int, hasColor bool) {
+func (pl *Plane) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	pl.NumVertex, pl.NumIndex = shape.PlaneN(int(pl.Segs.X), int(pl.Segs.Y))
 	pl.HasColor = false
 	return pl.NumVertex, pl.NumIndex, pl.HasColor
 }
 
-func (pl *Plane) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
+func (pl *Plane) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
 	sz := shape.SetPlaneAxisSize(vertex, normal, texcoord, index, 0, 0, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pos)
 	mn := pos.Sub(sz)
@@ -100,17 +100,17 @@ func NewBox(sc *Scene, name string, width, height, depth float32) *Box {
 	bx.Name = name
 	bx.Size.Set(width, height, depth)
 	bx.Segs.Set(1, 1, 1)
-	sc.AddMesh(bx)
+	sc.SetMesh(bx)
 	return bx
 }
 
-func (bx *Box) Sizes() (numVertex, nIndex int, hasColor bool) {
+func (bx *Box) MeshSizes() (numVertex, nIndex int, hasColor bool) {
 	bx.NumVertex, bx.NumIndex = shape.BoxN(bx.Segs)
 	bx.HasColor = false
 	return bx.NumVertex, bx.NumIndex, bx.HasColor
 }
 
-func (bx *Box) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
+func (bx *Box) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
 	hSz := shape.SetBox(vertex, normal, texcoord, index, 0, 0, bx.Size, bx.Segs, pos)
 	mn := pos.Sub(hSz)
@@ -159,7 +159,7 @@ func NewSphere(sc *Scene, name string, radius float32, segs int) *Sphere {
 	sp.AngLen = 360
 	sp.ElevStart = 0
 	sp.ElevLen = 180
-	sc.AddMesh(sp)
+	sc.SetMesh(sp)
 	return sp
 }
 
@@ -173,13 +173,13 @@ func (sp *Sphere) Defaults() {
 	sp.ElevLen = 180
 }
 
-func (sp *Sphere) Sizes() (numVertex, nIndex int, hasColor bool) {
+func (sp *Sphere) MeshSizes() (numVertex, nIndex int, hasColor bool) {
 	sp.NumVertex, sp.NumIndex = shape.SphereSectorN(sp.WidthSegs, sp.HeightSegs, sp.ElevStart, sp.ElevLen)
 	sp.HasColor = false
 	return sp.NumVertex, sp.NumIndex, sp.HasColor
 }
 
-func (sp *Sphere) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
+func (sp *Sphere) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
 	bb := shape.SetSphereSector(vertex, normal, texcoord, index, 0, 0, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, pos)
 	sp.BBox.SetBounds(bb.Min, bb.Max)
@@ -254,7 +254,7 @@ func NewCylinderSector(sc *Scene, name string, height, topRad, botRad float32, r
 	cy.AngLen = angLen
 	cy.Top = top
 	cy.Bottom = bottom
-	sc.AddMesh(cy)
+	sc.SetMesh(cy)
 	return cy
 }
 
@@ -270,13 +270,13 @@ func (cy *Cylinder) Defaults() {
 	cy.AngLen = 360
 }
 
-func (cy *Cylinder) Sizes() (numVertex, nIndex int, hasColor bool) {
+func (cy *Cylinder) MeshSizes() (numVertex, nIndex int, hasColor bool) {
 	cy.NumVertex, cy.NumIndex = shape.CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
 	cy.HasColor = false
 	return cy.NumVertex, cy.NumIndex, cy.HasColor
 }
 
-func (cy *Cylinder) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
+func (cy *Cylinder) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
 	bb := shape.SetCylinderSector(vertex, normal, texcoord, index, 0, 0, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, pos)
 	cy.BBox.SetBounds(bb.Min, bb.Max)
@@ -331,7 +331,7 @@ func NewCapsule(sc *Scene, name string, height, radius float32, segs, heightSegs
 	cp.CapSegs = segs
 	cp.AngStart = 0
 	cp.AngLen = 360
-	sc.AddMesh(cp)
+	sc.SetMesh(cp)
 	return cp
 }
 
@@ -346,7 +346,7 @@ func (cp *Capsule) Defaults() {
 	cp.AngLen = 360
 }
 
-func (cp *Capsule) Sizes() (numVertex, nIndex int, hasColor bool) {
+func (cp *Capsule) MeshSizes() (numVertex, nIndex int, hasColor bool) {
 	numVertex, nIndex = shape.CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)
 	if cp.BotRad > 0 {
 		nv, ni := shape.SphereSectorN(cp.RadialSegs, cp.CapSegs, 90, 90)
@@ -361,7 +361,7 @@ func (cp *Capsule) Sizes() (numVertex, nIndex int, hasColor bool) {
 	return
 }
 
-func (cp *Capsule) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
+func (cp *Capsule) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
 	voff := 0
 	ioff := 0
@@ -426,7 +426,7 @@ func NewTorus(sc *Scene, name string, radius, tubeRadius float32, segs int) *Tor
 	sp.TubeSegs = segs
 	sp.AngStart = 0
 	sp.AngLen = 360
-	sc.AddMesh(sp)
+	sc.SetMesh(sp)
 	return sp
 }
 
@@ -439,13 +439,13 @@ func (tr *Torus) Defaults() {
 	tr.AngLen = 360
 }
 
-func (tr *Torus) Sizes() (numVertex, nIndex int, hasColor bool) {
+func (tr *Torus) MeshSizes() (numVertex, nIndex int, hasColor bool) {
 	numVertex, nIndex = shape.TorusSectorN(tr.RadialSegs, tr.TubeSegs)
 	return
 }
 
 // Set sets points for torus in given allocated arrays
-func (tr *Torus) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
+func (tr *Torus) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
 	bb := shape.SetTorusSector(vertex, normal, texcoord, index, 0, 0, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, pos)
 	tr.BBox.SetBounds(bb.Min, bb.Max)

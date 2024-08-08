@@ -58,7 +58,7 @@ func NewLines(sc *Scene, name string, points []math32.Vector3, width math32.Vect
 	ln.Points = points
 	ln.Width = width
 	ln.Closed = closed
-	sc.AddMesh(ln)
+	sc.SetMesh(ln)
 	return ln
 }
 
@@ -68,7 +68,7 @@ func (ln *Lines) Sizes() (numVertex, nIndex int, hasColor bool) {
 	return ln.NumVertex, ln.NumIndex, ln.HasColor
 }
 
-func (ln *Lines) Set(sc *Scene, vertex, normal, texcoord, clrs math32.ArrayF32, indexArray math32.ArrayU32) {
+func (ln *Lines) Set(vertex, normal, texcoord, clrs math32.ArrayF32, indexArray math32.ArrayU32) {
 	pos := math32.Vector3{}
 	bb := shape.SetLines(vertex, normal, texcoord, indexArray, 0, 0, ln.Points, ln.Width, ln.Closed, pos)
 	ln.BBox.SetBounds(bb.Min, bb.Max)

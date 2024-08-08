@@ -2,13 +2,15 @@
 
 `xyz` is a 3D graphics framework written in Go. It is a separate standalone package that renders to an offscreen Vulkan framebuffer, which can easily be converted into a Go `image.RGBA`.  The [xyzcore](xyzcore) package provides an integration of xyz in Cogent Core, for dynamic and efficient 3D rendering within 2D GUI windows.
 
-`xyz` is built on the [gpu](https://pkg.go.dev/cogentcore.org/core/gpu) Vulkan GPU framework, and uses the [tree](../tree) tree structure for the scenegraph.  It currently supports standard Phong-based rendering with different types of lights and materials.  It is designed for scientific and other non-game 3D applications, and lacks almost all of the advanced features one would expect in a modern 3D graphics framework.  Thus, its primary advantage is its simplicity and support for directly programming 3D visualizations in Go, its broad cross-platform support across all major desktop and mobile platforms, and the use of Vulkan which is highly efficient.
+`xyz` is built on the [gpu](../gpu) WebGPU framework (specifically the [phong](../gpu/phong]) rendering system, and uses the [tree](../tree) tree structure for the scenegraph.  It currently supports standard Phong-based rendering with different types of lights and materials.  It is designed for scientific and other non-game 3D applications, and lacks almost all of the advanced features one would expect in a modern 3D graphics framework.  Thus, its primary advantage is its simplicity and support for directly programming 3D visualizations in Go, its broad cross-platform support across all major desktop and mobile platforms, and the use of WebGPU which is highly efficient.
 
 * The [physics](physics) sub-package provides a physics engine for simulating 3D virtual worlds, using xyz.
 
 # Basic elements
 
 The 3D scenegraph is rooted at a `xyz.Scene` node, which contains all of the shared `Mesh` and `Texture` elements, along with `Lights`, `Camera` and a `Library` of loaded 3D objects that can be referenced by name.
+
+`Mesh` and `Texture` elements use the "Set / Reset" approach, where `Set` does add or update, based on unique name id, and if there are large changes and unused elements, a `Reset` can be used to start over.  After the GPU is up and running (e.g., after the main app window is opened in `xyzcore`), changes take effect immediately, but everything can be configured prior to that, and they will all be applied when the GPU is activated.
 
 Children of the Scene are `Node` nodes, with `Group` and `Solid` as the main subtypes.  `NodeBase` is the base implementation, which has a `Pose `for the full matrix transform of relative position, scale, rotation, and bounding boxes at multiple levels.
 
@@ -40,7 +42,7 @@ There are standard Render types that manage the relevant GPU programs / Pipeline
 
     + `Lights` contain the lighting parameters for the scene -- if you don't have any lights, everything will be dark!
         + `Ambient` lights contribute generic lighting to every surface uniformly -- usually have this at a low level to represent scattered light that has bounced around everywhere.
-        + `Dir` ectional lights represent a distant light-source like the sun, with effectively parallel rays -- the position of the light determines its direction by pointing back from there to the origin -- think of it as the location of the sun.  Only the *normal* direction value is used so the magnitude of the values doesn't matter.
+        + `Directional` lights represent a distant light-source like the sun, with effectively parallel rays -- the position of the light determines its direction by pointing back from there to the origin -- think of it as the location of the sun.  Only the *normal* direction value is used so the magnitude of the values doesn't matter.
         + `Point` lights have a specific position and radiate light uniformly in all directions from that point, with both a linear and quadratic decay term.
         + `Spot` lights are the most sophisticated lights, with both a position and direction, and an angular cutoff so light only spreads out in a cone, with appropriate decay factors.
 

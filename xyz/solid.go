@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"log"
 
+	"cogentcore.org/core/gpu/phong"
 	"github.com/cogentcore/webgpu/wgpu"
 )
 
@@ -236,19 +237,17 @@ func (sld *Solid) RenderClass() RenderClasses {
 func (sld *Solid) PreRender() {
 	ph := sld.Scene.Phong
 	nm := sld.Path()
-	od := ph.SetObject(nm, &sld.Pose.Matrix, sld.Material.Color, sld.Material.Emissive, sld.Material.Shiny, sld.Material.Reflective, sld.Material.Bright)
-	// todo, use tiling in phong too!
-	od.SetTextureRepeat(sld.Material.Tiling.Repeat).SetTextureOffset(sld.Material.Tiling.Off)
+	ph.SetObject(nm, phong.NewObject(&sld.Pose.Matrix, sld.Material.phongColors()))
 }
 
 // Render activates this solid for rendering
 func (sld *Solid) Render(rp *wgpu.RenderPassEncoder) {
 	nm := sld.Path()
 	ph := sld.Scene.Phong
-	ph.UseObjectName(nm)
-	ph.UseMeshName(string(sld.MeshName))
+	ph.UseObject(nm)
+	ph.UseMesh(string(sld.MeshName))
 	if sld.Material.TextureName != "" {
-		ph.UseTextureName(string(sld.Material.TextureName))
+		ph.UseTexture(string(sld.Material.TextureName))
 	} else {
 		ph.UseNoTexture()
 	}

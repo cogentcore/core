@@ -151,7 +151,6 @@ func (sw *Scene) ManipBox() {
 	NewManipPoint(mb, nm+"-uul", mbspm.Name, clr, math32.Vec3(bbox.Max.X, bbox.Max.Y, bbox.Min.Z))
 	NewManipPoint(mb, nm+"-uuu", mbspm.Name, clr, bbox.Max)
 
-	xy.SetNeedsConfig()
 	sw.NeedsRender()
 }
 

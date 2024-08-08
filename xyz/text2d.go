@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
@@ -134,9 +135,9 @@ func (txt *Text2D) RenderText() {
 		tx, err = txt.Scene.TextureByNameTry(txname)
 		if err != nil {
 			tx = &TextureBase{Name: txname}
-			txt.Scene.AddTexture(tx)
 			img = image.NewRGBA(bounds)
 			tx.AsTextureBase().RGBA = img
+			txt.Scene.SetTexture(tx)
 			txt.Material.SetTexture(tx)
 		} else {
 			if gpu.Debug {
@@ -152,7 +153,7 @@ func (txt *Text2D) RenderText() {
 			img = image.NewRGBA(bounds)
 		}
 		tx.AsTextureBase().RGBA = img
-		txt.Scene.Phong.UpdateTextureName(tx.AsTextureBase().Name)
+		txt.Scene.Phong.SetTexture(tx.AsTextureBase().Name, phong.NewTexture(img))
 	}
 	rs := &txt.RenderState
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {

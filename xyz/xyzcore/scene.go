@@ -13,11 +13,12 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/xyz"
 )
 
@@ -87,12 +88,9 @@ func (sw *Scene) Init() {
 		if win == nil {
 			return
 		}
-		drw := win.GraphicsSystemWindow.Drawer()
+		drw := win.SystemWindow.Drawer()
 		system.TheApp.RunOnMain(func() {
-			sw.XYZ.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
-			if doConfig {
-				sw.XYZ.Config()
-			}
+			sw.XYZ.ConfigFrameFromSurface(drw.Renderer().(*gpu.Surface))
 		})
 		sw.XYZ.SetNeedsRender()
 	})
@@ -119,28 +117,20 @@ func (sw *Scene) Render() {
 	if sw.XYZ.Frame == nil {
 		return
 	}
-	if sw.XYZ.NeedsConfig {
-		system.TheApp.RunOnMain(func() {
-			sw.XYZ.Config()
-		})
-	}
 	sw.XYZ.DoUpdate()
 }
 
-// DirectRenderImage uploads framebuffer image
-func (sw *Scene) DirectRenderImage(drw system.Drawer, idx int) {
+// RenderDraw draws the current image to RenderWindow drawer
+func (sw *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
 	if sw.XYZ.Frame == nil || !sw.IsVisible() {
 		return
 	}
-	drw.SetFrameImage(idx, sw.XYZ.Frame.Frames[0])
-}
-
-// RenderDraw draws the current image to RenderWindow drawer
-func (sw *Scene) RenderDraw(drw system.Drawer, idx int, flipY bool) {
-	if !sw.IsVisible() {
+	gdrw, ok := drw.(*gpudraw.Drawer)
+	if !ok {
 		return
 	}
+	gdrw.UseTexture(sw.XYZ.Frame.Frames[0])
 	bb := sw.Geom.TotalBBox
 	ibb := image.Rectangle{Max: bb.Size()}
-	drw.Copy(idx, 0, bb.Min, ibb, draw.Src, flipY)
+	gdrw.CopyUsed(bb.Min, ibb, draw.Src, false)
 }

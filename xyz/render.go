@@ -65,11 +65,6 @@ func (sc *Scene) SetNeedsUpdate() {
 	sc.NeedsUpdate = true
 }
 
-// SetNeedsConfig sets [Scene.SetNeedsConfig] to true.
-func (sc *Scene) SetNeedsConfig() {
-	sc.NeedsConfig = true
-}
-
 // UpdateNodesIfNeeded can be called to update prior to an ad-hoc render
 // if the NeedsUpdate flag has been set (resets flag)
 func (sc *Scene) UpdateNodesIfNeeded() {
@@ -97,10 +92,21 @@ func (sc *Scene) ConfigFrame(gp *gpu.GPU, dev *gpu.Device) {
 	if sc.Frame == nil {
 		sc.Frame = gpu.NewRenderTexture(gp, dev, sz, sc.MultiSample, gpu.Depth32)
 		sc.Phong = phong.NewPhong(gp, sc.Frame)
+		sc.configNewPhong()
 	} else {
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 	}
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
+}
+
+func (sc *Scene) configNewPhong() {
+	sc.Frame.Render().ClearColor = sc.Background.At(0, 0)
+	sc.ConfigNodes()
+	UpdateWorldMatrix(sc.This)
+	sc.setAllLights()
+	sc.setAllMeshes()
+	sc.setAllTextures()
+	sc.NeedsUpdate = true
 }
 
 // Image returns the current rendered image from the Frame RenderTexture.
@@ -157,7 +163,7 @@ func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 
 // ImageUpdate configures, updates, and renders the scene, then returns [Scene.Image].
 func (sc *Scene) ImageUpdate() (*image.RGBA, error) {
-	sc.Config()
+	// sc.Config()
 	sc.UpdateNodes()
 	sc.Render()
 	return sc.Image()
@@ -269,38 +275,6 @@ func (sc *Scene) ConfigNodes() {
 		ni.Config()
 		return tree.Continue
 	})
-}
-
-// Config configures the Scene to prepare for rendering.
-// The Frame should already have been configured.
-// This includes the Phong system and frame.
-// It must be called before the first render, or after
-// any change in the lights, meshes, textures, or any
-// changes to the nodes that require Config updates.
-// This must be called on the main thread.
-func (sc *Scene) Config() {
-	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
-	// 	clr := math32.NewVector3Color(.SRGBToLinear()
-	sc.Frame.Render().ClearColor = sc.Background.At(0, 0)
-	// gpu.Draw.Wireframe(sc.Wireframe)
-	sc.ConfigNodes()
-	UpdateWorldMatrix(sc.This)
-	sc.ConfigLights()
-	sc.ConfigMeshesTextures()
-	sc.NeedsConfig = false
-	sc.NeedsUpdate = true
-}
-
-// ConfigMeshesTextures configures the meshes and the textures to the Phong
-// rendering system.  Called by ConfigRender -- can be called
-// separately if just these elements are updated -- see also ReconfigMeshes
-// and ReconfigTextures
-func (sc *Scene) ConfigMeshesTextures() {
-	sc.ConfigMeshes()
-	sc.ConfigTextures()
-	sc.Phong.Wireframe = sc.Wireframe
-	sc.Phong.Config()
-	sc.SetMeshes()
 }
 
 func (sc *Scene) UpdateNodes() {

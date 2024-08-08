@@ -76,6 +76,12 @@ func (mt *Material) Disconnect() {
 	mt.Texture = nil
 }
 
+func (mt *Material) phongColors() *phong.Colors {
+	clr := phong.NewColors(mt.Color, mt.Emissive, mt.Shiny, mt.Reflective, mt.Bright)
+	clr.Tiling = mt.Tiling
+	return clr
+}
+
 func (mt Material) String() string {
 	return reflectx.StringJSON(mt)
 }
