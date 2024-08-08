@@ -141,7 +141,7 @@ func main() {
 	frameCount := 0
 	stTime := time.Now()
 
-	didSave := false
+	didSave := runtime.GOOS == "js" // don't save png on web
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
