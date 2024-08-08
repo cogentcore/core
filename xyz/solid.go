@@ -247,10 +247,10 @@ func (sld *Solid) Render(rp *wgpu.RenderPassEncoder) {
 	ph := sld.Scene.Phong
 	ph.UseObject(nm)
 	ph.UseMesh(string(sld.MeshName))
-	fmt.Println("rend:", nm, "mesh:", string(sld.MeshName))
 	if sld.Material.TextureName != "" {
 		ph.UseTexture(string(sld.Material.TextureName))
 	} else {
 		ph.UseNoTexture()
 	}
+	ph.Render(rp)
 }

@@ -120,6 +120,7 @@ func main() {
 	projection.SetPerspective(45, aspect, 0.01, 100)
 
 	ph.SetCamera(view, &projection)
+	fmt.Println(view, projection)
 
 	objs := []Object{
 		{Mesh: "floor", Color: blue, Texture: "ground"},

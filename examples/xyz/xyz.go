@@ -267,7 +267,6 @@ func main() {
 	//  Animation & Embedded controls
 
 	anim.Start(se, false) // start without animation running
-
 	/*
 
 		emb := xyz.NewEmbed2D(sc, sc, "embed-but", 150, 100, xyz.FitContent)
