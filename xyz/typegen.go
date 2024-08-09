@@ -29,7 +29,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Decoder", IDNam
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Light", IDName: "light", Doc: "Light represents a light that illuminates a scene.\nThese are stored on the [Scene] object and not within the tree.", Methods: []types.Method{{Name: "AsLightBase", Doc: "AsLightBase returns the [LightBase] for this Light,\nwhich provides the core functionality of a light.", Returns: []string{"LightBase"}}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.LightBase", IDName: "light-base", Doc: "LightBase provides the core implementation of the [Light] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"--setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the light, which matters since lights are accessed by name."}, {Name: "On", Doc: "On is whether the light is turned on. TODO: support this being false."}, {Name: "Lumens", Doc: "Lumens is the brightness/intensity/strength of the light in normalized 0-1 units.\nIt is just multiplied by the color, and is convenient for easily modulating overall brightness."}, {Name: "Color", Doc: "Color is the color of the light at full intensity."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.LightBase", IDName: "light-base", Doc: "LightBase provides the core implementation of the [Light] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"--setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the light, which matters since lights are accessed by name."}, {Name: "On", Doc: "On is whether the light is turned on. TODO: support this being false."}, {Name: "Lumens", Doc: "Lumens is the brightness/intensity/strength of the light\nin normalized 0-1 units.\nIt is just multiplied by the color, and is convenient\nfor easily modulating overall brightness."}, {Name: "Color", Doc: "Color is the color of the light at full intensity."}}})
 
 // SetName sets the [LightBase.Name]:
 // Name is the name of the light, which matters since lights are accessed by name.
@@ -40,21 +40,23 @@ func (t *LightBase) SetName(v string) *LightBase { t.Name = v; return t }
 func (t *LightBase) SetOn(v bool) *LightBase { t.On = v; return t }
 
 // SetLumens sets the [LightBase.Lumens]:
-// Lumens is the brightness/intensity/strength of the light in normalized 0-1 units.
-// It is just multiplied by the color, and is convenient for easily modulating overall brightness.
+// Lumens is the brightness/intensity/strength of the light
+// in normalized 0-1 units.
+// It is just multiplied by the color, and is convenient
+// for easily modulating overall brightness.
 func (t *LightBase) SetLumens(v float32) *LightBase { t.Lumens = v; return t }
 
 // SetColor sets the [LightBase.Color]:
 // Color is the color of the light at full intensity.
 func (t *LightBase) SetColor(v color.RGBA) *LightBase { t.Color = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.AmbientLight", IDName: "ambient-light", Doc: "AmbientLight provides diffuse uniform lighting; typically only one of these in a [Scene].", Embeds: []types.Field{{Name: "LightBase"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Ambient", IDName: "ambient", Doc: "Ambient provides diffuse uniform lighting; typically only one of these in a [Scene].", Embeds: []types.Field{{Name: "LightBase"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.DirectionalLight", IDName: "directional-light", Doc: "DirectionalLight is directional light, which is assumed to project light toward\nthe origin based on its position, with no attenuation, like the Sun.\nFor rendering, the position is negated and normalized to get the direction\nvector (i.e., absolute distance doesn't matter)", Embeds: []types.Field{{Name: "LightBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of direct light -- assumed to point at the origin so this determines direction"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Directional", IDName: "directional", Doc: "Directional is directional light, which is assumed to project light toward\nthe origin based on its position, with no attenuation, like the Sun.\nFor rendering, the position is negated and normalized to get the direction\nvector (i.e., absolute distance doesn't matter)", Embeds: []types.Field{{Name: "LightBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of direct light -- assumed to point at the origin so this determines direction"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.PointLight", IDName: "point-light", Doc: "PointLight is an omnidirectional light with a position\nand associated decay factors, which divide the light intensity as a function of\nlinear and quadratic distance.  The quadratic factor dominates at longer distances.", Embeds: []types.Field{{Name: "LightBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of light in world coordinates"}, {Name: "LinDecay", Doc: "Distance linear decay factor -- defaults to .1"}, {Name: "QuadDecay", Doc: "Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Point", IDName: "point", Doc: "Point is an omnidirectional light with a position\nand associated decay factors, which divide the light intensity as a function of\nlinear and quadratic distance.  The quadratic factor dominates at longer distances.", Embeds: []types.Field{{Name: "LightBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of light in world coordinates"}, {Name: "LinDecay", Doc: "Distance linear decay factor -- defaults to .1"}, {Name: "QuadDecay", Doc: "Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.SpotLight", IDName: "spot-light", Doc: "Spotlight is a light with a position and direction and associated decay factors and angles.\nwhich divide the light intensity as a function of linear and quadratic distance.\nThe quadratic factor dominates at longer distances.", Embeds: []types.Field{{Name: "LightBase"}}, Fields: []types.Field{{Name: "Pose"}, {Name: "AngDecay", Doc: "Angular decay factor -- defaults to 15"}, {Name: "CutoffAngle", Doc: "Cut off angle (in degrees) -- defaults to 45 -- max of 90"}, {Name: "LinDecay", Doc: "Distance linear decay factor -- defaults to .01"}, {Name: "QuadDecay", Doc: "Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Spot", IDName: "spot", Doc: "Spotlight is a light with a position and direction and associated decay factors and angles.\nwhich divide the light intensity as a function of linear and quadratic distance.\nThe quadratic factor dominates at longer distances.", Embeds: []types.Field{{Name: "LightBase"}}, Fields: []types.Field{{Name: "Pose"}, {Name: "AngDecay", Doc: "Angular decay factor -- defaults to 15"}, {Name: "CutoffAngle", Doc: "Cut off angle (in degrees) -- defaults to 45 -- max of 90"}, {Name: "LinDecay", Doc: "Distance linear decay factor -- defaults to .01"}, {Name: "QuadDecay", Doc: "Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.LightColors", IDName: "light-colors", Doc: "LightColors are standard light colors for different light sources"})
 

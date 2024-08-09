@@ -298,7 +298,7 @@ func (nb *NodeBase) TrackCamera() {
 }
 
 // TrackLight moves node to position of light of given name.
-// For SpotLight, copies entire Pose. Does not work for Ambient light
+// For Spot, copies entire Pose. Does not work for Ambient light
 // which has no position information.
 func (nb *NodeBase) TrackLight(lightName string) error {
 	lt, ok := nb.Scene.Lights.ValueByKeyTry(lightName)
@@ -306,11 +306,11 @@ func (nb *NodeBase) TrackLight(lightName string) error {
 		return fmt.Errorf("xyz Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}
 	switch l := lt.(type) {
-	case *DirectionalLight:
+	case *Directional:
 		nb.Pose.Pos = l.Pos
-	case *PointLight:
+	case *Point:
 		nb.Pose.Pos = l.Pos
-	case *SpotLight:
+	case *Spot:
 		nb.Pose.CopyFrom(&l.Pose)
 	}
 	return nil

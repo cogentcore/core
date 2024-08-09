@@ -78,6 +78,16 @@ func (sc *Scene) ConfigFrame(gp *gpu.GPU, dev *gpu.Device) {
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 }
 
+// Rebuild updates all the data resources.
+// Is only effective when the GPU render is active.
+func (sc *Scene) Rebuild() {
+	if !sc.IsLive() {
+		return
+	}
+	sc.Phong.ResetAll()
+	sc.configNewPhong()
+}
+
 func (sc *Scene) configNewPhong() {
 	sc.Frame.Render().ClearColor = sc.Background.At(0, 0)
 	sc.ConfigNodes()

@@ -81,6 +81,7 @@ func (sw *Scene) Init() {
 			if cursz == sz && !doConfig {
 				return
 			}
+			sw.XYZ.Rebuild()
 		} else {
 			doConfig = true
 		}

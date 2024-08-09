@@ -168,10 +168,10 @@ func (ph *Phong) configLights() {
 	}
 	ph.lightsUpdated = false
 	sy := ph.System
-	vs := sy.Vars().Groups[int(LightGroup)]
-	gpu.SetValueFrom(vs.ValueByIndex("NLights", 0), []NLights{ph.NLights})
-	gpu.SetValueFrom(vs.ValueByIndex("Ambient", 0), ph.Ambient[:])
-	gpu.SetValueFrom(vs.ValueByIndex("Directional", 0), ph.Directional[:])
-	gpu.SetValueFrom(vs.ValueByIndex("Point", 0), ph.Point[:])
-	gpu.SetValueFrom(vs.ValueByIndex("Spot", 0), ph.Spot[:])
+	vg := sy.Vars().Groups[int(LightGroup)]
+	gpu.SetValueFrom(vg.ValueByIndex("NLights", 0), []NLights{ph.NLights})
+	gpu.SetValueFrom(vg.ValueByIndex("Ambient", 0), ph.Ambient[:])
+	gpu.SetValueFrom(vg.ValueByIndex("Directional", 0), ph.Directional[:])
+	gpu.SetValueFrom(vg.ValueByIndex("Point", 0), ph.Point[:])
+	gpu.SetValueFrom(vg.ValueByIndex("Spot", 0), ph.Spot[:])
 }

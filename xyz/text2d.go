@@ -62,6 +62,7 @@ func (txt *Text2D) Init() {
 func (txt *Text2D) Defaults() {
 	txt.Solid.Defaults()
 	txt.Pose.Scale.SetScalar(.005)
+	txt.Pose.RotateOnAxis(0, 1, 0, 180)
 	txt.Styles.Defaults()
 	txt.Styles.Font.Size.Pt(36)
 	txt.Styles.Margin.Set(units.Px(2))

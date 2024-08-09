@@ -7,7 +7,7 @@ const eps: f32 = 0.00001;
 
 struct NLights {
 	ambient: i32,
-	dir: i32,
+	directional: i32,
 	point: i32,
 	spot: i32,
 };
@@ -16,7 +16,7 @@ struct Ambient {
 	color: vec3<f32>,
 };
 
-struct Dir {
+struct Directional {
 	color: vec3<f32>, 
 	pos: vec3<f32>,
 };
@@ -41,7 +41,7 @@ var<uniform> nLights: NLights;
 var<uniform> ambient: array<Ambient, MaxLights>;
 
 @group(2) @binding(2)
-var<uniform> dir: array<Dir, MaxLights>;
+var<uniform> directional: array<Directional, MaxLights>;
 
 @group(2) @binding(3)
 var<uniform> point: array<Point, MaxLights>;
@@ -62,17 +62,17 @@ fn phongModel(pos: vec4<f32>, normal: vec3<f32>, camDir: vec3<f32>, matAmbient: 
 		ambientTotal += ambient[i].color * matAmbient;
 	}
 
-	for (var i = 0; i < nLights.dir; i++) {
+	for (var i = 0; i < nLights.directional; i++) {
 		// LightDir is the position = - direction of the current light
-		let lp4 = vec4<f32>(dir[i].pos, 0.0);
+		let lp4 = vec4<f32>(directional[i].pos, 0.0);
  		let lightDir = normalize(camera.view * lp4).xyz;
 		// Calculates the dot product between the light direction and this vertex normal.
 		let dotNormal = dot(lightDir, norm);
 		if (dotNormal > eps) {
-			diffuseTotal += dir[i].color * matDiffuse * dotNormal;
+			diffuseTotal += directional[i].color * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
 			let refl = reflect(-lightDir, norm);
-			specularTotal += dir[i].color * matSpecular * pow(max(dot(refl, camDir), 0.0), shiny);
+			specularTotal += directional[i].color * matSpecular * pow(max(dot(refl, camDir), 0.0), shiny);
 		}
 	}
 

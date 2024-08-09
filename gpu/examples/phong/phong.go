@@ -63,7 +63,7 @@ func main() {
 	ph.AddAmbient(math32.NewVector3Color(color.White).MulScalar(.1))
 	ph.AddDirectional(math32.NewVector3Color(color.White), math32.Vec3(0, 1, 1))
 
-	// ph.AddPoint(math32.NewVector3Color(color.White), math32.Vec3(0, 2, 5), .1, .01)
+	// ph.AddPoint(math32.NewVector3Color(color.White), math32.Vec3(-5, 0, 2), .01, .001)
 	// ph.AddSpot(math32.NewVector3Color(color.White), math32.Vec3(-2, 5, -2), math32.Vec3(0, -1, 0), 10, 45, .01, .001)
 
 	/////////////////////////////
@@ -120,7 +120,6 @@ func main() {
 	projection.SetPerspective(45, aspect, 0.01, 100)
 
 	ph.SetCamera(view, &projection)
-	fmt.Println(view, projection)
 
 	objs := []Object{
 		{Mesh: "floor", Color: blue, Texture: "ground"},

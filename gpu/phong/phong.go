@@ -124,6 +124,15 @@ func (ph *Phong) ConfigLights() *Phong {
 	return ph
 }
 
+// ResetAll resets all the dynamic resources: Objects, Meshes, Textures
+// and Lights.
+func (ph *Phong) ResetAll() {
+	ph.ResetObjects()
+	ph.ResetMeshes()
+	ph.ResetTextures()
+	ph.ResetLights()
+}
+
 ///////////////////////////////////////////////////
 // Rendering
 
