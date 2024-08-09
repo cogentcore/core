@@ -107,7 +107,14 @@ func (sf *Surface) SetSize(sz image.Point) {
 // target for rendering.
 func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	if sf.needsReconfig {
+		// system.TheApp.RunOnMain(func() {
+		// todo: in theory this should be called on main thread
+		// but it deadlocks when we do so, because main thread
+		// is handling another resize event apparently.
+		// everything works fine here -- easiest to just mute the
+		// rust warning about this.
 		sf.Reconfig()
+		// })
 	}
 	sf.Lock() // we remain locked until submit!
 	texture, err := sf.surface.GetCurrentTexture()
