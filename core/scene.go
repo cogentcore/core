@@ -96,7 +96,7 @@ type Scene struct { //core:no-new
 	// to trigger Show event and other steps at start of first show
 	showIter int
 
-	// directRenders are widgets that render directly to the RenderWin
+	// directRenders are widgets that render directly to the [RenderWindow]
 	// instead of rendering into the Scene Pixels image.
 	directRenders []Widget
 

@@ -23,7 +23,7 @@ import (
 type Types int32 //enums:enum
 
 const (
-	UndefType Types = iota
+	UndefinedType Types = iota
 	Bool32
 
 	Int16
@@ -52,8 +52,8 @@ const (
 
 	ImageRGBA32 // 32 bits with 8 bits per component of R,G,B,A -- std image format
 
-	Depth32      // standard float32 depth buffer
-	Depth24Sten8 // standard 24 bit float with 8 bit stencil
+	Depth32         // standard float32 depth buffer
+	Depth24Stencil8 // standard 24 bit float with 8 bit stencil
 
 	Struct
 )
@@ -113,27 +113,27 @@ var FormatSizes = map[vk.Format]int{
 
 // VulkanTypes maps vgpu.Types to vulkan types
 var VulkanTypes = map[Types]vk.Format{
-	UndefType:      vk.FormatUndefined,
-	Bool32:         vk.FormatR32Uint,
-	Int16:          vk.FormatR16Sint,
-	Uint16:         vk.FormatR16Uint,
-	Int32:          vk.FormatR32Sint,
-	Int32Vector2:   vk.FormatR32g32Sint,
-	Int32Vector4:   vk.FormatR32g32b32a32Sint,
-	Uint32:         vk.FormatR32Uint,
-	Uint32Vector2:  vk.FormatR32g32Uint,
-	Uint32Vector4:  vk.FormatR32g32b32a32Uint,
-	Float32:        vk.FormatR32Sfloat,
-	Float32Vector2: vk.FormatR32g32Sfloat,
-	Float32Vector3: vk.FormatR32g32b32Sfloat,
-	Float32Vector4: vk.FormatR32g32b32a32Sfloat,
-	Float64:        vk.FormatR64Sfloat,
-	Float64Vector2: vk.FormatR64g64Sfloat,
-	Float64Vector3: vk.FormatR64g64b64Sfloat,
-	Float64Vector4: vk.FormatR64g64b64a64Sfloat,
-	ImageRGBA32:    vk.FormatR8g8b8a8Srgb,
-	Depth32:        vk.FormatD32Sfloat,
-	Depth24Sten8:   vk.FormatD24UnormS8Uint,
+	UndefinedType:   vk.FormatUndefined,
+	Bool32:          vk.FormatR32Uint,
+	Int16:           vk.FormatR16Sint,
+	Uint16:          vk.FormatR16Uint,
+	Int32:           vk.FormatR32Sint,
+	Int32Vector2:    vk.FormatR32g32Sint,
+	Int32Vector4:    vk.FormatR32g32b32a32Sint,
+	Uint32:          vk.FormatR32Uint,
+	Uint32Vector2:   vk.FormatR32g32Uint,
+	Uint32Vector4:   vk.FormatR32g32b32a32Uint,
+	Float32:         vk.FormatR32Sfloat,
+	Float32Vector2:  vk.FormatR32g32Sfloat,
+	Float32Vector3:  vk.FormatR32g32b32Sfloat,
+	Float32Vector4:  vk.FormatR32g32b32a32Sfloat,
+	Float64:         vk.FormatR64Sfloat,
+	Float64Vector2:  vk.FormatR64g64Sfloat,
+	Float64Vector3:  vk.FormatR64g64b64Sfloat,
+	Float64Vector4:  vk.FormatR64g64b64a64Sfloat,
+	ImageRGBA32:     vk.FormatR8g8b8a8Srgb,
+	Depth32:         vk.FormatD32Sfloat,
+	Depth24Stencil8: vk.FormatD24UnormS8Uint,
 }
 
 // most commonly available formats: https://vulkan.gpuinfo.org/listsurfaceformats.php

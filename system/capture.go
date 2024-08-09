@@ -16,7 +16,7 @@ import (
 // on platform [Offscreen].
 func Capture() *image.RGBA {
 	NeedsCapture = true
-	TheApp.Window(0).Drawer().EndDraw() // triggers capture
+	TheApp.Window(0).Drawer().End() // triggers capture
 	return CaptureImage
 }
 

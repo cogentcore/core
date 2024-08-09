@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"os"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"time"
@@ -461,14 +462,21 @@ func ProfileToggle() { //types:add
 	}
 }
 
-// cpuProfileFile is the file created by [startCPUMemoryProfile],
-// which needs to be stored so that it can be closed in [endCPUMemoryProfile].
-var cpuProfileFile *os.File
+var (
+	// cpuProfileDir is the directory where the profile started
+	cpuProfileDir string
+
+	// cpuProfileFile is the file created by [startCPUMemoryProfile],
+	// which needs to be stored so that it can be closed in [endCPUMemoryProfile].
+	cpuProfileFile *os.File
+)
 
 // startCPUMemoryProfile starts the standard Go cpu and memory profiling.
 func startCPUMemoryProfile() {
-	fmt.Println("Starting standard cpu and memory profiling")
-	f, err := os.Create("cpu.prof")
+	cpuProfileDir, _ = os.Getwd()
+	cpufnm := filepath.Join(cpuProfileDir, "cpu.prof")
+	fmt.Println("Starting standard cpu and memory profiling to:", cpufnm)
+	f, err := os.Create(cpufnm)
 	if errors.Log(err) == nil {
 		cpuProfileFile = f
 		errors.Log(pprof.StartCPUProfile(f))
@@ -477,10 +485,11 @@ func startCPUMemoryProfile() {
 
 // endCPUMemoryProfile ends the standard Go cpu and memory profiling.
 func endCPUMemoryProfile() {
-	fmt.Println("Ending standard cpu and memory profiling")
+	memfnm := filepath.Join(cpuProfileDir, "mem.prof")
+	fmt.Println("Ending standard cpu and memory profiling to:", memfnm)
 	pprof.StopCPUProfile()
 	errors.Log(cpuProfileFile.Close())
-	f, err := os.Create("mem.prof")
+	f, err := os.Create(memfnm)
 	if errors.Log(err) == nil {
 		runtime.GC() // get up-to-date statistics
 		errors.Log(pprof.WriteHeapProfile(f))

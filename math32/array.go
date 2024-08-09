@@ -12,9 +12,13 @@ package math32
 
 import (
 	"unsafe"
+
+	"cogentcore.org/core/base/slicesx"
 )
 
 // ArrayF32 is a slice of float32 with additional convenience methods
+// for other math32 data types.  Use slicesx.SetLength to set length
+// efficiently.
 type ArrayF32 []float32
 
 // NewArrayF32 creates a returns a new array of floats
@@ -23,25 +27,9 @@ func NewArrayF32(size, capacity int) ArrayF32 {
 	return make([]float32, size, capacity)
 }
 
-// Bytes returns the size of the array in bytes
-func (a *ArrayF32) Bytes() int {
+// NumBytes returns the size of the array in bytes
+func (a *ArrayF32) NumBytes() int {
 	return len(*a) * int(unsafe.Sizeof(float32(0)))
-}
-
-// Size returns the number of float32 elements in the array
-func (a *ArrayF32) Size() int {
-	return len(*a)
-}
-
-// Len returns the number of float32 elements in the array
-// It is equivalent to Size()
-func (a *ArrayF32) Len() int {
-	return len(*a)
-}
-
-// Extend appends given number of new float elements to end of existing array
-func (a *ArrayF32) Extend(addLen int) {
-	*a = append(*a, make([]float32, addLen)...)
 }
 
 // Append appends any number of values to the array
@@ -70,15 +58,17 @@ func (a *ArrayF32) AppendVector4(v ...Vector4) {
 	}
 }
 
-// CopyFloat32s copies a []float32 slice from src into target
+// CopyFloat32s copies a []float32 slice from src into target,
+// ensuring that the target is the correct size.
 func CopyFloat32s(trg *[]float32, src []float32) {
-	*trg = make([]float32, len(src))
+	*trg = slicesx.SetLength(*trg, len(src))
 	copy(*trg, src)
 }
 
-// CopyFloat64s copies a []float64 slice from src into target
+// CopyFloat64s copies a []float64 slice from src into target,
+// ensuring that the target is the correct size.
 func CopyFloat64s(trg *[]float64, src []float64) {
-	*trg = make([]float64, len(src))
+	*trg = slicesx.SetLength(*trg, len(src))
 	copy(*trg, src)
 }
 
@@ -166,7 +156,8 @@ func (a ArrayF32) SetVector4(pos int, v Vector4) {
 /////////////////////////////////////////////////////////////////////////////////////
 //   ArrayU32
 
-// ArrayU32 is a slice of uint32 with additional convenience methods
+// ArrayU32 is a slice of uint32 with additional convenience methods.
+// Use slicesx.SetLength to set length efficiently.
 type ArrayU32 []uint32
 
 // NewArrayU32 creates a returns a new array of uint32
@@ -175,29 +166,14 @@ func NewArrayU32(size, capacity int) ArrayU32 {
 	return make([]uint32, size, capacity)
 }
 
-// Bytes returns the size of the array in bytes
-func (a *ArrayU32) Bytes() int {
+// NumBytes returns the size of the array in bytes
+func (a *ArrayU32) NumBytes() int {
 	return len(*a) * int(unsafe.Sizeof(uint32(0)))
-}
-
-// Size returns the number of float32 elements in the array
-func (a *ArrayU32) Size() int {
-	return len(*a)
-}
-
-// Len returns the number of float32 elements in the array
-func (a *ArrayU32) Len() int {
-	return len(*a)
 }
 
 // Append appends n elements to the array updating the slice if necessary
 func (a *ArrayU32) Append(v ...uint32) {
 	*a = append(*a, v...)
-}
-
-// Extend appends given number of new elements to end of existing array
-func (a *ArrayU32) Extend(addLen int) {
-	*a = append(*a, make([]uint32, addLen)...)
 }
 
 // Set sets the values of the array starting at the specified pos

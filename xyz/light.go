@@ -28,8 +28,10 @@ type LightBase struct { //types:add --setters
 	// On is whether the light is turned on. TODO: support this being false.
 	On bool
 
-	// Lumens is the brightness/intensity/strength of the light in normalized 0-1 units.
-	// It is just multiplied by the color, and is convenient for easily modulating overall brightness.
+	// Lumens is the brightness/intensity/strength of the light
+	// in normalized 0-1 units.
+	// It is just multiplied by the color, and is convenient
+	// for easily modulating overall brightness.
 	Lumens float32 `min:"0" step:"0.1"`
 
 	// Color is the color of the light at full intensity.
@@ -43,14 +45,15 @@ func (lb *LightBase) AsLightBase() *LightBase {
 /////////////////////////////////////////////////////////////////////////////
 //  Light types
 
-// AmbientLight provides diffuse uniform lighting; typically only one of these in a [Scene].
-type AmbientLight struct {
+// Ambient provides diffuse uniform lighting; typically only one of these in a [Scene].
+type Ambient struct {
 	LightBase
 }
 
-// NewAmbientLight adds Ambient to given scene, with given name, standard color, and lumens (0-1 normalized)
-func NewAmbientLight(sc *Scene, name string, lumens float32, color LightColors) *AmbientLight {
-	lt := &AmbientLight{}
+// NewAmbient adds Ambient to given scene, with given name,
+// standard color, and lumens (0-1 normalized).
+func NewAmbient(sc *Scene, name string, lumens float32, color LightColors) *Ambient {
+	lt := &Ambient{}
 	lt.Name = name
 	lt.On = true
 	lt.Color = LightColorMap[color]
@@ -59,21 +62,24 @@ func NewAmbientLight(sc *Scene, name string, lumens float32, color LightColors) 
 	return lt
 }
 
-// DirLight is directional light, which is assumed to project light toward
+// Directional is directional light, which is assumed to project light toward
 // the origin based on its position, with no attenuation, like the Sun.
 // For rendering, the position is negated and normalized to get the direction
 // vector (i.e., absolute distance doesn't matter)
-type DirLight struct {
+type Directional struct {
 	LightBase
 
-	// position of direct light -- assumed to point at the origin so this determines direction
+	// position of direct light, assumed to point at the origin
+	// so this determines direction.
 	Pos math32.Vector3
 }
 
-// NewDirLight adds direct light to given scene, with given name, standard color, and lumens (0-1 normalized)
-// By default it is located overhead and toward the default camera (0, 1, 1) -- change Pos otherwise
-func NewDirLight(sc *Scene, name string, lumens float32, color LightColors) *DirLight {
-	lt := &DirLight{}
+// NewDirectional adds direct light to given scene, with given name,
+// standard color, and lumens (0-1 normalized).
+// By default it is located overhead and toward the default camera
+// (0, 1, 1), change Pos otherwise.
+func NewDirectional(sc *Scene, name string, lumens float32, color LightColors) *Directional {
+	lt := &Directional{}
 	lt.Name = name
 	lt.On = true
 	lt.Color = LightColorMap[color]
@@ -83,74 +89,82 @@ func NewDirLight(sc *Scene, name string, lumens float32, color LightColors) *Dir
 	return lt
 }
 
-// ViewDir gets the direction normal vector, pre-computing the view transform
-func (dl *DirLight) ViewDir(viewMat *math32.Matrix4) math32.Vector3 {
+// ViewDir gets the direction normal vector, pre-computing the view transform.
+func (dl *Directional) ViewDir(viewMat *math32.Matrix4) math32.Vector3 {
 	// adding the 0 in the 4-vector negates any translation factors from the 4 matrix
 	return dl.Pos.MulMatrix4AsVector4(viewMat, 0)
 }
 
-// PointLight is an omnidirectional light with a position
-// and associated decay factors, which divide the light intensity as a function of
-// linear and quadratic distance.  The quadratic factor dominates at longer distances.
-type PointLight struct {
+// Point is an omnidirectional light with a position
+// and associated decay factors, which divide the light
+// intensity as a function of linear and quadratic distance.
+// The quadratic factor dominates at longer distances.
+type Point struct {
 	LightBase
 
-	// position of light in world coordinates
+	// position of light in world coordinates.
 	Pos math32.Vector3
 
-	// Distance linear decay factor -- defaults to .1
+	// Distance linear decay factor, defaults to .1
 	LinDecay float32
 
-	// Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances
+	// Distance quadratic decay factor, defaults to .01. Dominates at longer distances.
 	QuadDecay float32
 }
 
-// NewPointLight adds point light to given scene, with given name, standard color, and lumens (0-1 normalized)
-// By default it is located at 0,5,5 (up and between default camera and origin) -- set Pos to change.
-func NewPointLight(sc *Scene, name string, lumens float32, color LightColors) *PointLight {
-	lt := &PointLight{}
+// NewPoint adds point light to given scene, with given name,
+// standard color, and lumens (0-1 normalized).
+// By default it is located at 0,5,5 (up and between default camera
+// and origin) -- set Pos to change.
+func NewPoint(sc *Scene, name string, lumens float32, color LightColors) *Point {
+	lt := &Point{}
 	lt.Name = name
 	lt.On = true
 	lt.Color = LightColorMap[color]
 	lt.Lumens = lumens
-	lt.LinDecay = .1
-	lt.QuadDecay = .01
+	lt.LinDecay = .01
+	lt.QuadDecay = .001
 	lt.Pos.Set(0, 5, 5)
 	sc.AddLight(lt)
 	return lt
 }
 
 // ViewPos gets the position vector, pre-computing the view transform
-func (pl *PointLight) ViewPos(viewMat *math32.Matrix4) math32.Vector3 {
+func (pl *Point) ViewPos(viewMat *math32.Matrix4) math32.Vector3 {
 	return pl.Pos.MulMatrix4AsVector4(viewMat, 1)
 }
 
-// Spotlight is a light with a position and direction and associated decay factors and angles.
-// which divide the light intensity as a function of linear and quadratic distance.
+// Spotlight is a light with a position and direction and
+// associated decay factors and angles, which divide the light
+// intensity as a function of linear and quadratic distance.
 // The quadratic factor dominates at longer distances.
-type SpotLight struct {
+type Spot struct {
 	LightBase
-	Pose Pose // position and orientation
 
-	// Angular decay factor -- defaults to 15
+	Pose Pose // position and orientation.
+
+	// Angular decay factor, defaults to 15.
 	AngDecay float32
 
-	// Cut off angle (in degrees) -- defaults to 45 -- max of 90
+	// Cut off angle (in degrees), defaults to 45; max of 90.
 	CutoffAngle float32 `max:"90" min:"1"`
 
-	// Distance linear decay factor -- defaults to .01
+	// Distance linear decay factor, defaults to .01.
 	LinDecay float32
 
-	// Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances
+	// Distance quadratic decay factor, defaults to .001; dominates at longer distances.
 	QuadDecay float32
 }
 
-// NewSpotLight adds spot light to given scene, with given name, standard color, and lumens (0-1 normalized)
-// By default it is located at 0,5,5 (up and between default camera and origin) and pointing at the origin.
+// NewSpot adds spot light to given scene, with given name,
+// standard color, and lumens (0-1 normalized).
+// By default it is located at 0,5,5 (up and between default camera
+// and origin) and pointing at the origin.
 // Use the Pose LookAt function to point it at other locations.
-// In its unrotated state, it points down the -Z axis (i.e., into the scene using default view parameters)
-func NewSpotLight(sc *Scene, name string, lumens float32, color LightColors) *SpotLight {
-	lt := &SpotLight{}
+// In its unrotated state, it points down the -Z axis (i.e., into the
+// scene using default view parameters)
+func NewSpot(sc *Scene, name string, lumens float32, color LightColors) *Spot {
+	lt := &Spot{}
 	lt.Name = name
 	lt.On = true
 	lt.Color = LightColorMap[color]
@@ -167,7 +181,7 @@ func NewSpotLight(sc *Scene, name string, lumens float32, color LightColors) *Sp
 }
 
 // ViewDir gets the direction normal vector, pre-computing the view transform
-func (sl *SpotLight) ViewDir() math32.Vector3 {
+func (sl *Spot) ViewDir() math32.Vector3 {
 	idmat := math32.Identity4()
 	sl.Pose.UpdateMatrix()
 	sl.Pose.UpdateWorldMatrix(idmat)
@@ -177,12 +191,12 @@ func (sl *SpotLight) ViewDir() math32.Vector3 {
 }
 
 // LookAt points the spotlight at given target location, using given up direction.
-func (sl *SpotLight) LookAt(target, upDir math32.Vector3) {
+func (sl *Spot) LookAt(target, upDir math32.Vector3) {
 	sl.Pose.LookAt(target, upDir)
 }
 
 // LookAtOrigin points the spotlight at origin with Y axis pointing Up (i.e., standard)
-func (sl *SpotLight) LookAtOrigin() {
+func (sl *Spot) LookAtOrigin() {
 	sl.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0))
 }
 
@@ -192,25 +206,33 @@ func (sl *SpotLight) LookAtOrigin() {
 // AddLight adds given light to lights
 // see NewX for convenience methods to add specific lights
 func (sc *Scene) AddLight(lt Light) {
-	sc.Lights.Add(lt.AsLightBase().Name, lt)
+	name := lt.AsLightBase().Name
+	sc.Lights.Add(name, lt)
+	if sc.IsLive() {
+		sc.addPhongLight(lt)
+	}
 }
 
-// ConfigLights configures 3D rendering for current lights
-func (sc *Scene) ConfigLights() {
-	sc.Phong.ResetNLights()
+func (sc *Scene) addPhongLight(lt Light) {
+	clr := math32.NewVector3Color(lt.AsLightBase().Color).MulScalar(lt.AsLightBase().Lumens).SRGBToLinear()
+	switch l := lt.(type) {
+	case *Ambient:
+		sc.Phong.AddAmbient(clr)
+	case *Directional:
+		sc.Phong.AddDirectional(clr, l.Pos)
+	case *Point:
+		sc.Phong.AddPoint(clr, l.Pos, l.LinDecay, l.QuadDecay)
+	case *Spot:
+		sc.Phong.AddSpot(clr, l.Pose.Pos, l.ViewDir(), l.AngDecay, l.CutoffAngle, l.LinDecay, l.QuadDecay)
+	}
+}
+
+// setAllLights configures Phong 3D rendering for current lights.
+func (sc *Scene) setAllLights() {
+	sc.Phong.ResetLights()
 	for _, ltkv := range sc.Lights.Order {
 		lt := ltkv.Value
-		clr := math32.NewVector3Color(lt.AsLightBase().Color).MulScalar(lt.AsLightBase().Lumens).SRGBToLinear()
-		switch l := lt.(type) {
-		case *AmbientLight:
-			sc.Phong.AddAmbientLight(clr)
-		case *DirLight:
-			sc.Phong.AddDirLight(clr, l.Pos)
-		case *PointLight:
-			sc.Phong.AddPointLight(clr, l.Pos, l.LinDecay, l.QuadDecay)
-		case *SpotLight:
-			sc.Phong.AddSpotLight(clr, l.Pose.Pos, l.ViewDir(), l.AngDecay, l.CutoffAngle, l.LinDecay, l.QuadDecay)
-		}
+		sc.addPhongLight(lt)
 	}
 }
 

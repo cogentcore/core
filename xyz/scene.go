@@ -13,17 +13,24 @@ import (
 
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/vgpu"
-	"cogentcore.org/core/vgpu/vphong"
 )
 
 // Set Update3DTrace to true to get a trace of 3D updating
 var Update3DTrace = false
 
+// note: Scene provides a complete separate representation of the
+// render data, on top of gpu.phong.  This allows a scene to be
+// fully specified prior to the gpu being available.
+// once phong is up and running, it directly pushes changes through it
+// to the gpu, so dynamic changes are transparent and don't require
+// further config steps.
+
 // Scene is the overall scenegraph containing nodes as children.
-// It renders to its own vgpu.RenderFrame.
+// It renders to its own gpu.RenderTexture.
 // The Image of this Frame is usable directly or, via xyzcore.Scene,
 // where it is copied into an overall core.Scene image.
 //
@@ -44,11 +51,6 @@ type Scene struct {
 	// which is used directly as a solid color in Vulkan.
 	Background image.Image
 
-	// NeedsConfig means that a GPU resource (Lights, Texture, Meshes,
-	// or more complex Nodes that require ConfigNodes) has been changed
-	// and a Config call is required.
-	NeedsConfig bool `set:"-"`
-
 	// NeedsUpdate means that Node Pose has changed and an update pass
 	// is required to update matrix and bounding boxes.
 	NeedsUpdate bool `set:"-"`
@@ -60,10 +62,14 @@ type Scene struct {
 	// Viewport-level viewbox within any parent Viewport2D
 	Geom math32.Geom2DInt `set:"-"`
 
-	// number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
+	// number of samples in multisampling. Default of 4 produces smooth
+	// rendering.
 	MultiSample int `default:"4"`
 
-	// render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)
+	// render using wireframe instead of filled polygons.
+	// This must be set prior to configuring the Phong rendering
+	// system (i.e., just after Scene is made).
+	// note: not currently working in WebGPU.
 	Wireframe bool `default:"false"`
 
 	// camera determines view onto scene
@@ -72,26 +78,28 @@ type Scene struct {
 	// all lights used in the scene
 	Lights ordmap.Map[string, Light] `set:"-"`
 
-	// meshes -- holds all the mesh data -- must be configured prior to rendering
+	// meshes
 	Meshes ordmap.Map[string, Mesh] `set:"-"`
 
-	// textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability
+	// textures
 	Textures ordmap.Map[string, Texture] `set:"-"`
 
 	// library of objects that can be used in the scene
 	Library map[string]*Group `set:"-"`
 
-	// don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene
+	// don't activate the standard navigation keyboard and mouse
+	// event processing to move around the camera in the scene.
 	NoNav bool
 
-	// saved cameras -- can Save and Set these to view the scene from different angles
+	// saved cameras, can Save and Set these to view the scene
+	// from different angles
 	SavedCams map[string]Camera `set:"-"`
 
-	// the vphong rendering system
-	Phong vphong.Phong `set:"-"`
+	// the phong rendering system
+	Phong *phong.Phong `set:"-"`
 
-	// the vgpu render frame holding the rendered scene
-	Frame *vgpu.RenderFrame `set:"-"`
+	// the gpu render frame holding the rendered scene
+	Frame *gpu.RenderTexture `set:"-"`
 
 	// image used to hold a copy of the Frame image, for ImageCopy() call.
 	// This is re-used across calls to avoid large memory allocations,
@@ -108,11 +116,11 @@ func (sc *Scene) Init() {
 
 // NewOffscreenScene returns a new [Scene] designed for offscreen
 // rendering of 3D content. This can be used in unit tests and other
-// cases not involving xyzcore. It makes a new [vgpu.NoDisplayGPU].
+// cases not involving xyzcore. It makes a new [gpu.NoDisplayGPU].
 func NewOffscreenScene() *Scene {
-	gpu, device, err := vgpu.NoDisplayGPU("offscreen")
+	gpu, device, err := gpu.NoDisplayGPU("offscreen")
 	if err != nil {
-		panic(fmt.Errorf("xyz.NewOffscreenScene: error initializing vgpu.NoDisplayGPU: %w", err))
+		panic(fmt.Errorf("xyz.NewOffscreenScene: error initializing gpu.NoDisplayGPU: %w", err))
 	}
 	sc := NewScene().SetSize(image.Pt(1280, 960))
 	sc.ConfigFrame(gpu, device)
@@ -121,8 +129,13 @@ func NewOffscreenScene() *Scene {
 
 // Update is a global update of everything: config, update, and re-render
 func (sc *Scene) Update() {
-	sc.Config()
 	sc.SetNeedsUpdate()
+}
+
+// IsLive indicates whether the Phong system is active and we can
+// directly update that, vs just creating elements to be added later.
+func (sc *Scene) IsLive() bool {
+	return sc.Phong != nil
 }
 
 // SaveCamera saves the current camera with given name -- can be restored later with SetCamera.
@@ -205,11 +218,13 @@ func (sc *Scene) SetSize(sz image.Point) *Scene {
 }
 
 func (sc *Scene) Destroy() {
-	sc.Phong.Destroy()
+	if sc.Phong != nil {
+		sc.Phong.Release()
+		sc.Phong = nil
+	}
 	if sc.Frame != nil {
-		sc.Frame.Destroy()
+		sc.Frame.Release()
 		sc.Frame = nil
-		// fmt.Println("Phong, Frame destroyed")
 	}
 }
 

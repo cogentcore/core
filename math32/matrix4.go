@@ -650,7 +650,8 @@ func NewLookAt(eye, target, up Vector3) *Matrix4 {
 	return rotMat
 }
 
-// SetFrustum sets this matrix to a projection frustum matrix bounded by the specified planes.
+// SetFrustum sets this matrix to a projection frustum matrix bounded
+// by the specified planes.
 func (m *Matrix4) SetFrustum(left, right, bottom, top, near, far float32) {
 	fmn := far - near
 	m[0] = 2 * near / (right - left)

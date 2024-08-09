@@ -1233,7 +1233,7 @@ func (em *Events) triggerShortcut(chord key.Chord) bool {
 
 func (em *Events) getSpriteInBBox(sc *Scene, pos image.Point) {
 	st := sc.Stage
-	for _, kv := range st.Sprites.Names.Order {
+	for _, kv := range st.Sprites.Order {
 		sp := kv.Value
 		if !sp.Active {
 			continue

@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Node is the common interface for all xyz 3D tree nodes.
@@ -66,9 +67,12 @@ type Node interface {
 	// It is used for organizing the ordering of rendering.
 	RenderClass() RenderClasses
 
-	// Render is called by Scene Render on main thread
-	// when everything is ready to go.
-	Render()
+	// PreRender is called by Scene Render to upload
+	// all the object data to the Phong renderer.
+	PreRender()
+
+	// Render is called by Scene Render to actually render.
+	Render(rp *wgpu.RenderPassEncoder)
 }
 
 // NodeBase is the basic 3D tree node, which has the full transform information
@@ -131,10 +135,16 @@ func (nb *NodeBase) OnAdd() {
 	}
 	if sc, ok := nb.Parent.(*Scene); ok {
 		nb.Scene = sc
+		if nb.Scene != nil {
+			nb.Scene.SetNeedsUpdate()
+		}
 		return
 	}
 	if _, pnb := AsNode(nb.Parent); pnb != nil {
 		nb.Scene = pnb.Scene
+		if nb.Scene != nil {
+			nb.Scene.SetNeedsUpdate()
+		}
 		return
 	}
 	fmt.Println(nb, "not set from parent")
@@ -257,7 +267,11 @@ func (nb *NodeBase) Config() {
 	// nop by default; could connect to scene for update signals or something
 }
 
-func (nb *NodeBase) Render() {
+func (nb *NodeBase) PreRender() {
+	// nop
+}
+
+func (nb *NodeBase) Render(rp *wgpu.RenderPassEncoder) {
 	// nop
 }
 
@@ -284,7 +298,7 @@ func (nb *NodeBase) TrackCamera() {
 }
 
 // TrackLight moves node to position of light of given name.
-// For SpotLight, copies entire Pose. Does not work for Ambient light
+// For Spot, copies entire Pose. Does not work for Ambient light
 // which has no position information.
 func (nb *NodeBase) TrackLight(lightName string) error {
 	lt, ok := nb.Scene.Lights.ValueByKeyTry(lightName)
@@ -292,11 +306,11 @@ func (nb *NodeBase) TrackLight(lightName string) error {
 		return fmt.Errorf("xyz Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}
 	switch l := lt.(type) {
-	case *DirLight:
+	case *Directional:
 		nb.Pose.Pos = l.Pos
-	case *PointLight:
+	case *Point:
 		nb.Pose.Pos = l.Pos
-	case *SpotLight:
+	case *Spot:
 		nb.Pose.CopyFrom(&l.Pose)
 	}
 	return nil
