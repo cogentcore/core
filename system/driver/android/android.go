@@ -329,7 +329,7 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 	for {
 		select {
 		case <-a.MainDone:
-			a.FullDestroyVk()
+			a.FullDestroyGPU()
 			return nil
 		case f := <-a.MainQueue:
 			f.F()
@@ -371,7 +371,7 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			// and lets the size event go through when we come back later
 			a.Win.SetSize(image.Point{})
 			a.Event.Window(events.WinMinimize)
-			a.DestroyVk()
+			a.DestroyGPU()
 		case <-activityDestroyed:
 			// TODO(kai): needed to stop crashing when changing orientation
 			// a.Event.Window(events.WinClose)

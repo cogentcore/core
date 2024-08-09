@@ -7,13 +7,14 @@
 package android
 
 import (
+	"unsafe"
+
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
-	"cogentcore.org/core/vgpu"
-	vk "github.com/goki/vulkan"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 func Init() {
@@ -79,21 +80,14 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 // It should only be called when [App.Mu] is already locked.
 func (a *App) SetSystemWindow(winptr uintptr) error {
 	defer func() { system.HandleRecover(recover()) }()
-	var vsf vk.Surface
-	// we have to remake the surface, system, and drawer every time someone reopens the window
-	// because the operating system changes the underlying window
-	ret := vk.CreateWindowSurface(a.GPU.Instance, winptr, nil, &vsf)
-	if err := vk.Error(ret); err != nil {
-		return err
+	wsd := &wgpu.SurfaceDescriptor{
+		AndroidNativeWindow: &wgpu.SurfaceDescriptorFromAndroidNativeWindow{
+			Window: unsafe.Pointer(winptr),
+		},
 	}
-	sf := vgpu.NewSurface(a.GPU, vsf)
-
-	sys := a.GPU.NewGraphicsSystem(a.Name(), &sf.Device)
-	sys.ConfigRender(&sf.Format, vgpu.UndefinedType)
-	sf.SetRender(&sys.Render)
-	// sys.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
-	sys.Config()
-	a.Draw = gpudraw.NewDrawerSurface(sf)
+	wsf := a.GPU.Instance.CreateSurface(wsd)
+	sf := gpu.NewSurface(a.GPU, wsf, a.Scrn.PixSize, 1, gpu.UndefinedType)
+	a.Draw = gpudraw.NewDrawer(a.GPU, sf)
 
 	a.Winptr = winptr
 
