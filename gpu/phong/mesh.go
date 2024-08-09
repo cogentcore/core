@@ -45,7 +45,9 @@ func (ph *Phong) SetMesh(name string, mesh shape.Mesh) {
 	gpu.SetValueFrom(vgp.ValueByIndex("Pos", idx), md.Vertex)
 	gpu.SetValueFrom(vgp.ValueByIndex("Normal", idx), md.Normal)
 	gpu.SetValueFrom(vgp.ValueByIndex("TexCoord", idx), md.TexCoord)
-	if idx == 0 { // set dummy vertexcolor for first guy
+	if md.HasColor {
+		gpu.SetValueFrom(vgp.ValueByIndex("VertexColor", idx), md.Colors)
+	} else if idx == 0 { // set dummy vertexcolor for first guy
 		gpu.SetValueFrom(vgp.ValueByIndex("VertexColor", idx), make([]float32, md.NumVertex*4))
 	}
 	gpu.SetValueFrom(vgp.ValueByIndex("Index", idx), md.Index)
