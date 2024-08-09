@@ -15,7 +15,6 @@ package desktop
 #cgo CFLAGS: -x objective-c -Wno-deprecated-declarations
 #cgo LDFLAGS: -framework Cocoa
 #import <Cocoa/Cocoa.h>
-#import <pthread.h>
 int setThreadPri(double p);
 void clipClear();
 bool clipIsEmpty();
@@ -70,12 +69,6 @@ func (a *App) DataDir() string {
 		return "/tmp"
 	}
 	return filepath.Join(usr.HomeDir, "Library")
-}
-
-func (a *App) OnMainThread() bool {
-	onmain := C.pthread_main_np() > 0
-	// fmt.Println("onmain:", onmain)
-	return onmain
 }
 
 /////////////////////////////////////////////////////////////////
