@@ -60,9 +60,9 @@ type Point struct {
 	Pos  math32.Vector3
 	pad1 float32
 
-	// X = Linear distance decay factor (default .1).
+	// X = Linear distance decay factor (default .01).
 	// Y = Quadratic distance quadratic decay factor
-	// (default .01, dominates at longer distances)
+	// (default .001, dominates at longer distances)
 	Decay math32.Vector3
 	pad2  float32
 }
@@ -87,7 +87,7 @@ type Spot struct {
 
 	// X = Angular decay, in degrees (15 default)
 	// Y = CutAngle is cutoff angle in degrees beyond which no light (45 default).
-	// Z = LinDecay distance linear decay (.1 default)
+	// Z = LinDecay distance linear decay (.01 default)
 	// W = QuadDecay distance Distance quadratic decay factor (0.001 default),
 	//     which dominates at longer distances
 	Decay math32.Vector4

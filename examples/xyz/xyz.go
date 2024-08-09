@@ -160,21 +160,18 @@ func main() {
 	se.Styler(func(s *styles.Style) {
 		sc.Background = colors.Scheme.Select.Container
 	})
-	xyz.NewAmbient(sc, "ambient", 0.3, xyz.DirectSun)
 
-	// dir := xyz.NewDirectional(sc, "dir", 1, xyz.DirectSun)
-	// dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
+	xyz.NewAmbient(sc, "ambient", 0.3, xyz.DirectSun)
+	xyz.NewDirectional(sc, "directional", 1, xyz.DirectSun).Pos.Set(0, 2, 1)
+	// xyz.NewPoint(sc, "point", 1, xyz.DirectSun).Pos.Set(-5, 0, 2)
+	// spot := xyz.NewSpot(sc, "spot", 1, xyz.DirectSun)
+	// spot.Pose.Pos.Set(0, 5, 5)
+	// spot.LookAtOrigin()
 
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
 	sc.Camera.Pose.Pos.Set(0, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	sc.Camera.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0)) // defaults to looking at origin
-
-	point := xyz.NewPoint(sc, "point", 1, xyz.DirectSun)
-	point.Pos.Set(0, 5, 5)
-
-	// spot := xyz.NewSpot(sc, "spot", 1, xyz.DirectSun)
-	// spot.Pose.Pos.Set(0, 5, 5)
 
 	grtx := xyz.NewTextureFileFS(assets.Content, sc, "ground", "ground.png")
 	// _ = grtx

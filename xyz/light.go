@@ -122,8 +122,8 @@ func NewPoint(sc *Scene, name string, lumens float32, color LightColors) *Point 
 	lt.On = true
 	lt.Color = LightColorMap[color]
 	lt.Lumens = lumens
-	lt.LinDecay = .1
-	lt.QuadDecay = .01
+	lt.LinDecay = .01
+	lt.QuadDecay = .001
 	lt.Pos.Set(0, 5, 5)
 	sc.AddLight(lt)
 	return lt
