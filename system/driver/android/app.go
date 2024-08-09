@@ -43,7 +43,7 @@ func (a *App) InitGPU() {
 	a.GPU.Config(a.Name())
 }
 
-// DestroyGPU releases GPU things (the drawer and surface of the window) for when the app becomes invisible
+// DestroyGPU releases GPU things (the drawer of the window) for when the app becomes invisible
 func (a *App) DestroyGPU() {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()

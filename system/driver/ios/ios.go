@@ -163,7 +163,7 @@ func updateConfig(width, height, orientation int32) {
 
 //export lifecycleDead
 func lifecycleDead() {
-	TheApp.FullDestroyVk()
+	TheApp.FullDestroyGPU()
 }
 
 //export lifecycleAlive
