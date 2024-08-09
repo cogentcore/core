@@ -7,9 +7,8 @@
 package android
 
 import (
-	"log"
-
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
@@ -19,7 +18,7 @@ import (
 
 func Init() {
 	system.OnSystemWindowCreated = make(chan struct{})
-	TheApp.InitVk()
+	TheApp.InitGPU()
 	base.Init(TheApp, &TheApp.App)
 }
 
@@ -31,45 +30,31 @@ type App struct {
 	base.AppSingle[*gpudraw.Drawer, *Window]
 
 	// GPU is the system GPU used for the app
-	GPU *vgpu.GPU
+	GPU *gpu.GPU
 
 	// Winptr is the pointer to the underlying system window
 	Winptr uintptr
 }
 
-// InitVk initializes Vulkan things for the app
-func (a *App) InitVk() {
-	err := vk.SetDefaultGetInstanceProcAddr()
-	if err != nil {
-		// TODO(kai): maybe implement better error handling here
-		log.Fatalln("system/driver/android.App.InitVk: failed to set Vulkan DefaultGetInstanceProcAddr")
-	}
-	err = vk.Init()
-	if err != nil {
-		log.Fatalln("system/driver/android.App.InitVk: failed to initialize vulkan")
-	}
-
-	winext := vk.GetRequiredInstanceExtensions()
-	a.GPU = vgpu.NewGPU()
-	a.GPU.AddInstanceExt(winext...)
+// InitGPU initializes WebGPU for the app.
+func (a *App) InitGPU() {
+	a.GPU = gpu.NewGPU()
 	a.GPU.Config(a.Name())
 }
 
-// DestroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
-func (a *App) DestroyVk() {
+// DestroyGPU releases GPU things (the drawer and surface of the window) for when the app becomes invisible
+func (a *App) DestroyGPU() {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	vk.DeviceWaitIdle(a.Draw.Surf.Device.Device)
-	a.Draw.Destroy()
-	a.Draw.Surf.Destroy()
+	a.Draw.Release()
 	a.Draw = nil
 }
 
-// FullDestroyVk destroys all vulkan things for when the app is fully quit
-func (a *App) FullDestroyVk() {
+// FullDestroyGPU destroys all GPU things for when the app is fully quit.
+func (a *App) FullDestroyGPU() {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	a.GPU.Destroy()
+	a.GPU.Release()
 }
 
 // NewWindow creates a new window with the given options.
