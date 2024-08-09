@@ -382,12 +382,11 @@ func (w *Window) UpdateGeom() {
 	w.PhysDPI = sc.PhysicalDPI
 	w.LogDPI = sc.LogicalDPI
 	w.Mu.Unlock()
-	// w.App.RunOnMain(func() {
-	// note: getting non-main thread warning.
-	if rnd, ok := w.Draw.Renderer().(*gpu.Surface); ok {
-		rnd.SetSize(w.PixSize)
-	}
-	// })
+	w.App.RunOnMain(func() {
+		if rnd, ok := w.Draw.Renderer().(*gpu.Surface); ok {
+			rnd.SetSize(w.PixSize)
+		}
+	})
 	if cursc != w.ScreenWindow {
 		if MonitorDebug {
 			log.Printf("desktop.Window.UpdateGeom: %v: got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)

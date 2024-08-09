@@ -85,9 +85,16 @@ func (a *App) MainLoop() {
 	}
 }
 
+// each platform should define this; default behavior is obtained
+// by returning false, under assumption that existing logic knows
+// not to call RunOnMain when it is already on main.
+func (a *App) OnMainThread() bool {
+	return false
+}
+
 // RunOnMain runs the given function on the main thread
 func (a *App) RunOnMain(f func()) {
-	if a.MainQueue == nil {
+	if a.MainQueue == nil || a.This.OnMainThread() {
 		f()
 		return
 	}

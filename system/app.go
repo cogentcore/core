@@ -175,6 +175,10 @@ type App interface {
 	// directly.
 	RunOnMain(f func())
 
+	// OnMainThread returns true if we are currently running on the main thread.
+	// This is has a platform-specific implementation.
+	OnMainThread() bool
+
 	// SendEmptyEvent sends an empty, blank event to global event processing
 	// system, which has the effect of pushing the system along during cases when
 	// the event loop needs to be "pinged" to get things moving along.
