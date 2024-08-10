@@ -58,7 +58,7 @@ type Surface struct {
 //     or Depth32 recommended for best performance.
 func NewSurface(gp *GPU, wsurf *wgpu.Surface, size image.Point, samples int, depthFmt Types) *Surface {
 	if Debug {
-		wgpu.SetLogLevel(wgpu.LogLevelDebug)
+		wgpu.SetLogLevel(wgpu.LogLevelInfo)
 	} else {
 		wgpu.SetLogLevel(wgpu.LogLevelError)
 	}
