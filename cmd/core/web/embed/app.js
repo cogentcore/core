@@ -8,7 +8,7 @@ var appOnAppInstallChange = function () { };
 const appEnv = {{.Env }};
 const appWasmContentLengthHeader = "{{.WasmContentLengthHeader}}";
 
-let wasm;
+window.wasm = null;
 
 let appServiceWorkerRegistration;
 let deferredPrompt = null;
