@@ -21,7 +21,7 @@ var (
 	// Debug is a global flag for turning on debug mode, getting
 	// more diagnostic output about GPU configuration etc.
 	// If it is set to true, [NewSurface] will call
-	// [wgpu.SetLogLevel]([wgpu.LogLevelInfo]). Otherwise, it will
+	// [wgpu.SetLogLevel]([wgpu.LogLevelDebug]). Otherwise, it will
 	// call [wgpu.SetLogLevel]([wgpu.LogLevelError]).
 	// You can also manually set the log level with [wgpu.SetLogLevel]
 	// after [NewSurface] is called.
