@@ -27,7 +27,6 @@ func init() {
 
 func main() {
 	gp := gpu.NewGPU()
-	gpu.Debug = true
 	gp.Config("gpudraw")
 
 	var resize func(size image.Point)

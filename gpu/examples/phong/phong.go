@@ -36,7 +36,6 @@ type Object struct {
 
 func main() {
 	gp := gpu.NewGPU()
-	gpu.Debug = true
 	gp.Config("phong")
 
 	var resize func(size image.Point)

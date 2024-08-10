@@ -34,7 +34,6 @@ type CamView struct {
 
 func main() {
 	gp := gpu.NewGPU()
-	gpu.Debug = true
 	gp.Config("texture")
 
 	var resize func(size image.Point)
