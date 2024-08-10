@@ -7,6 +7,7 @@
 package android
 
 import (
+	"image"
 	"unsafe"
 
 	"cogentcore.org/core/events"
@@ -88,7 +89,7 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 		},
 	}
 	wsf := a.GPU.Instance.CreateSurface(wsd)
-	sf := gpu.NewSurface(a.GPU, wsf, a.Scrn.PixSize, 1, gpu.UndefinedType)
+	sf := gpu.NewSurface(a.GPU, wsf, image.Pt(512, 512), 1, gpu.UndefinedType) // TODO(wgpu): placeholder size
 	a.Draw = gpudraw.NewDrawer(a.GPU, sf)
 
 	a.Winptr = winptr
