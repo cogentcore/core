@@ -80,6 +80,8 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 // It should only be called when [App.Mu] is already locked.
 func (a *App) SetSystemWindow(winptr uintptr) error {
 	defer func() { system.HandleRecover(recover()) }()
+	// we have to remake the surface and drawer every time someone reopens the window
+	// because the operating system changes the underlying window
 	wsd := &wgpu.SurfaceDescriptor{
 		AndroidNativeWindow: &wgpu.SurfaceDescriptorFromAndroidNativeWindow{
 			Window: unsafe.Pointer(winptr),
