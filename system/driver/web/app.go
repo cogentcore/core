@@ -150,7 +150,7 @@ func (a *App) Resize() {
 	cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.Y)/a.Scrn.DevicePixelRatio))
 
 	if a.Draw.wgpu != nil {
-		// TODO(wgpu): resize
+		a.Draw.wgpu.System.Renderer.SetSize(a.Scrn.PixSize)
 	} else {
 		a.Draw.base.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
 	}
