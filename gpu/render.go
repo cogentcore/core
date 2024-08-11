@@ -94,7 +94,9 @@ func (rd *Render) SetSize(sz image.Point) {
 
 // ClearRenderPass returns a render pass descriptor that clears the framebuffer
 func (rd *Render) ClearRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescriptor {
-	r, g, b, a := colors.ToFloat64(rd.ClearColor)
+	r, g, b, a := colors.ToFloat32(rd.ClearColor)
+	r, g, b = SRGBToLinear(r, g, b)
+	clearColor := wgpu.Color{R: float64(r), G: float64(g), B: float64(b), A: float64(a)}
 	rpd := &wgpu.RenderPassDescriptor{}
 	if rd.Format.Samples > 1 && rd.Multi.view != nil {
 		rpd.Label = "ClearMulti1"
@@ -102,26 +104,16 @@ func (rd *Render) ClearRenderPass(view *wgpu.TextureView) *wgpu.RenderPassDescri
 			View:          rd.Multi.view,
 			ResolveTarget: view,
 			LoadOp:        wgpu.LoadOpClear,
-			ClearValue: wgpu.Color{
-				R: r,
-				G: g,
-				B: b,
-				A: a,
-			},
-			StoreOp: wgpu.StoreOpStore,
+			ClearValue:    clearColor,
+			StoreOp:       wgpu.StoreOpStore,
 		}}
 	} else {
 		rpd.Label = "Clear1"
 		rpd.ColorAttachments = []wgpu.RenderPassColorAttachment{{
-			View:   view,
-			LoadOp: wgpu.LoadOpClear,
-			ClearValue: wgpu.Color{
-				R: r,
-				G: g,
-				B: b,
-				A: a,
-			},
-			StoreOp: wgpu.StoreOpStore,
+			View:       view,
+			LoadOp:     wgpu.LoadOpClear,
+			ClearValue: clearColor,
+			StoreOp:    wgpu.StoreOpStore,
 		}}
 	}
 	rd.SetDepthDescriptor(rpd)
