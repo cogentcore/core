@@ -158,6 +158,7 @@ func updateConfig(width, height, orientation int32) {
 	if system.OnSystemWindowCreated != nil {
 		system.OnSystemWindowCreated <- struct{}{}
 	}
+	TheApp.Draw.System.Renderer.SetSize(TheApp.Scrn.PixSize)
 	TheApp.Event.WindowResize()
 }
 
