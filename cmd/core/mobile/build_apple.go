@@ -23,12 +23,6 @@ import (
 // goAppleBuild builds the given package with the given bundle ID for the given iOS targets.
 func goAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Platform) (map[string]bool, error) {
 	src := pkg.PkgPath
-
-	err := setupMoltenFramework()
-	if err != nil {
-		return nil, err
-	}
-
 	infoplist := new(bytes.Buffer)
 	if err := infoPlistTmpl.Execute(infoplist, infoPlistTmplData{
 		BundleID:           c.ID,
@@ -153,46 +147,7 @@ func goAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		return nil, err
 	}
 
-	// Need to copy the MoltenVK framework.
-	err = exec.Run("cp", "-r", "$HOME/Library/Cogent Core/MoltenVK.framework", output)
-	if err != nil {
-		return nil, err
-	}
 	return nmpkgs, nil
-}
-
-// setupMoltenFramework creates the MoltenVK.framework file in the
-// user's library if it doesn't already exist.
-func setupMoltenFramework() error {
-	hdir, err := os.UserHomeDir()
-	if err != nil {
-		return fmt.Errorf("error getting user home directory: %w", err)
-	}
-	gdir := filepath.Join(hdir, "Library", "Cogent Core")
-	_, err = os.Stat(filepath.Join(gdir, "MoltenVK.framework"))
-	if err == nil {
-		// it already exists
-		return nil
-	}
-
-	tmp, err := os.MkdirTemp("", "cogent-core-setup-ios-vulkan-")
-	if err != nil {
-		return err
-	}
-	err = exec.Major().SetDir(tmp).Run("git", "clone", "https://github.com/goki/vulkan_mac_deps")
-	if err != nil {
-		return err
-	}
-
-	err = exec.MkdirAll(gdir, 0750)
-	if err != nil {
-		return err
-	}
-	err = exec.Run("cp", "-r", filepath.Join(tmp, "vulkan_mac_deps", "sdk", "ios", "MoltenVK.framework"), gdir)
-	if err != nil {
-		return err
-	}
-	return exec.RemoveAll(tmp)
 }
 
 // detectTeamID determines the Apple Development Team ID on the system.
