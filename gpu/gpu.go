@@ -25,6 +25,9 @@ var (
 	// call [wgpu.SetLogLevel]([wgpu.LogLevelError]).
 	// You can also manually set the log level with [wgpu.SetLogLevel]
 	// after [NewSurface] is called.
+	//
+	// NOTE: on Android, you need to specify `-d -all I` for
+	// `core run android` to see the wgpu debug logs.
 	Debug = false
 
 	// DebugAdapter provides detailed information about the selected
