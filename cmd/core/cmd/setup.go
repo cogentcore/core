@@ -12,10 +12,7 @@ import (
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/core/config"
-	"github.com/mitchellh/go-homedir"
 )
-
-const vulkanVersion = "1.3.283.0"
 
 // Setup installs platform-specific dependencies for the current platform.
 // It only needs to be called once per system.
@@ -31,27 +28,6 @@ func Setup(c *config.Config) error { //types:add
 			}
 		} else {
 			logx.PrintlnWarn("xcode tools already installed")
-		}
-		if _, err := exec.LookPath("vulkaninfo"); err == nil {
-			logx.PrintlnWarn("vulkan already installed")
-			return nil
-		}
-		err = vc.Run("curl", "-OL", "https://sdk.lunarg.com/sdk/download/"+vulkanVersion+"/mac/vulkansdk-macos-"+vulkanVersion+".dmg")
-		if err != nil {
-			return err
-		}
-		err = exec.Run("sudo", "hdiutil", "attach", "vulkansdk-macos-"+vulkanVersion+".dmg")
-		if err != nil {
-			return err
-		}
-		home, err := homedir.Dir()
-		if err != nil {
-			return err
-		}
-		root := filepath.Join(home, "VulkanSDK", vulkanVersion)
-		err = vc.Run("sudo", "/Volumes/vulkansdk-macos-"+vulkanVersion+"/InstallVulkan.app/Contents/MacOS/InstallVulkan", "--root", root, "--accept-licenses", "--default-answer", "--confirm-command", "install", "com.lunarg.vulkan.core", "com.lunarg.vulkan.usr", "com.lunarg.vulkan.sdl2", "com.lunarg.vulkan.glm", "com.lunarg.vulkan.volk", "com.lunarg.vulkan.vma")
-		if err != nil {
-			return err
 		}
 		return nil
 	case "linux":
