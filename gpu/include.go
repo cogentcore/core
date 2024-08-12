@@ -7,7 +7,7 @@ package gpu
 import (
 	"io/fs"
 	"log/slog"
-	"path/filepath"
+	"path"
 	"slices"
 	"strings"
 
@@ -17,7 +17,7 @@ import (
 // IncludeFS processes #include "file" statements in
 // the given code string, using the given file system
 // and default path to locate the included files.
-func IncludeFS(fsys fs.FS, path, code string) string {
+func IncludeFS(fsys fs.FS, fpath, code string) string {
 	fl := stringsx.SplitLines(code)
 	nl := len(fl)
 	for li := nl - 1; li >= 0; li-- {
@@ -34,9 +34,9 @@ func IncludeFS(fsys fs.FS, path, code string) string {
 		fname := fn[:qi]
 		b, err := fs.ReadFile(fsys, fname)
 		if err != nil {
-			b, err = fs.ReadFile(fsys, filepath.Join(path, fname))
+			b, err = fs.ReadFile(fsys, path.Join(fpath, fname))
 			if err != nil {
-				slog.Error("IncludeFS: could not find include", "file", fname, "path", path)
+				slog.Error("IncludeFS: could not find include", "file", fname, "fpath", fpath)
 				continue
 			}
 		}
