@@ -57,11 +57,6 @@ type Surface struct {
 //   - depthFmt is the depth buffer format.  use UndefinedType for none
 //     or Depth32 recommended for best performance.
 func NewSurface(gp *GPU, wsurf *wgpu.Surface, size image.Point, samples int, depthFmt Types) *Surface {
-	if Debug {
-		wgpu.SetLogLevel(wgpu.LogLevelDebug)
-	} else {
-		wgpu.SetLogLevel(wgpu.LogLevelError)
-	}
 	sf := &Surface{}
 	sf.Defaults()
 	sf.init(gp, wsurf, size, samples, depthFmt)

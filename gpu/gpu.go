@@ -19,12 +19,12 @@ import (
 
 var (
 	// Debug is a global flag for turning on debug mode, getting
-	// more diagnostic output about GPU configuration etc.
-	// If it is set to true, [NewSurface] will call
+	// more diagnostic output about GPU configuration and rendering.
+	// If it is set to true, [GPU.Config] will call
 	// [wgpu.SetLogLevel]([wgpu.LogLevelDebug]). Otherwise, it will
 	// call [wgpu.SetLogLevel]([wgpu.LogLevelError]).
 	// You can also manually set the log level with [wgpu.SetLogLevel]
-	// after [NewSurface] is called.
+	// after [GPU.Config] is called.
 	Debug = false
 
 	// DebugAdapter provides detailed information about the selected
@@ -120,6 +120,12 @@ func NewComputeGPU() *GPU {
 // Only the first such opts will be used -- the variable args is used to enable
 // no options to be passed by default.
 func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
+	if Debug {
+		wgpu.SetLogLevel(wgpu.LogLevelDebug)
+	} else {
+		wgpu.SetLogLevel(wgpu.LogLevelError)
+	}
+
 	gp.AppName = name
 	gp.UserOpts = DefaultOpts
 	if len(opts) > 0 {
