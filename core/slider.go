@@ -202,9 +202,9 @@ func (sr *Slider) Init() {
 		}
 		if sr.Type == SliderScrollbar {
 			if s.Direction == styles.Row {
-				s.Min.Y = s.ScrollBarWidth
+				s.Min.Y = s.ScrollbarWidth
 			} else {
-				s.Min.X = s.ScrollBarWidth
+				s.Min.X = s.ScrollbarWidth
 			}
 		}
 	})
@@ -570,7 +570,7 @@ func (sr *Slider) ApplyScenePos() {
 	if !pwb.IsVisible() || pwb.Geom.TotalBBox == zr {
 		return
 	}
-	sbw := math32.Ceil(sr.Styles.ScrollBarWidth.Dots)
+	sbw := math32.Ceil(sr.Styles.ScrollbarWidth.Dots)
 	scmax := math32.Vector2FromPoint(sr.Scene.Geom.ContentBBox.Max).SubScalar(sbw)
 	sr.Geom.Pos.Total.SetMin(scmax)
 	sr.setContentPosFromPos()

@@ -205,8 +205,9 @@ type Style struct { //types:add
 	// within a grid layout
 	ColSpan int
 
-	// width of a layout scrollbar
-	ScrollBarWidth units.Value
+	// ScrollbarWidth is the width of layout scrollbars. It defaults
+	// to [DefaultScrollbarWidth], and it is inherited.
+	ScrollbarWidth units.Value
 
 	// font styling parameters
 	Font Font
@@ -360,6 +361,7 @@ func (s *Style) SetAbilities(on bool, able ...abilities.Abilities) {
 func (s *Style) InheritFields(parent *Style) {
 	s.Color = parent.Color
 	s.Opacity = parent.Opacity
+	s.ScrollbarWidth = parent.ScrollbarWidth
 	s.Font.InheritFields(&parent.Font)
 	s.Text.InheritFields(&parent.Text)
 }

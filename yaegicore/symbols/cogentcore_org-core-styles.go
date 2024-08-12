@@ -168,7 +168,7 @@ func init() {
 		"RTL":                          reflect.ValueOf(styles.RTL),
 		"Right":                        reflect.ValueOf(styles.Right),
 		"Row":                          reflect.ValueOf(styles.Row),
-		"ScrollBarWidthDefault":        reflect.ValueOf(&styles.ScrollBarWidthDefault).Elem(),
+		"DefaultScrollbarWidth":        reflect.ValueOf(&styles.DefaultScrollbarWidth).Elem(),
 		"SetClampMax":                  reflect.ValueOf(styles.SetClampMax),
 		"SetClampMaxVector":            reflect.ValueOf(styles.SetClampMaxVector),
 		"SetClampMin":                  reflect.ValueOf(styles.SetClampMin),
