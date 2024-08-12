@@ -23,8 +23,8 @@ github.com/bramvdbogaerde/go-scp v1.4.0 h1:jKMwpwCbcX1KyvDbm/PDJuXcMuNVlLGi0Q0re
 github.com/bramvdbogaerde/go-scp v1.4.0/go.mod h1:on2aH5AxaFb2G0N5Vsdy6B0Ml7k9HuHSwfo1y0QzAbQ=
 github.com/chewxy/math32 v1.10.1 h1:LFpeY0SLJXeaiej/eIp2L40VYfscTvKh/FSEZ68uMkU=
 github.com/chewxy/math32 v1.10.1/go.mod h1:dOB2rcuFrCn6UHrze36WSLVPKtzPMRAQvBvUwkSsLqs=
-github.com/cogentcore/webgpu v0.0.0-20240809053032-52c74d0c674c h1:2z7O6f9N0WDOKlz4Pjf0VlGgwGrqdmM9PmK2Ug9h1yQ=
-github.com/cogentcore/webgpu v0.0.0-20240809053032-52c74d0c674c/go.mod h1:ciqaxChrmRRMU1SnI5OE12Cn3QWvOKO+e5nSy+N9S1o=
+github.com/cogentcore/webgpu v0.0.0-20240810234500-5911b906308b h1:fBOvxxYW+XUdGLifMTakY8RUo6Q0eOl6IDLAk//atmo=
+github.com/cogentcore/webgpu v0.0.0-20240810234500-5911b906308b/go.mod h1:ciqaxChrmRRMU1SnI5OE12Cn3QWvOKO+e5nSy+N9S1o=
 github.com/cogentcore/yaegi v0.0.0-20240724064145-e32a03faad56 h1:Fz1uHiFCHnijFcMXzn36KLamcx5q4pxoR5rKCrcXIcQ=
 github.com/cogentcore/yaegi v0.0.0-20240724064145-e32a03faad56/go.mod h1:+MGpZ0srBmeJ7aaOLTdVss8WLolt0/y/plVHLpxgd3A=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
