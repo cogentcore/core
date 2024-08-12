@@ -25,7 +25,7 @@ func Log(c *config.Config) error { //types:add
 		}
 	}
 	// we are logging continiously so we can't buffer, and we must be verbose
-	err := exec.Verbose().SetBuffer(false).Run("adb", "logcat", "*:"+c.Log.All, "Go:D", "GoLog:D")
+	err := exec.Verbose().SetBuffer(false).Run("adb", "logcat", "*:"+c.Log.All, "Go:D", "GoLog:D", "GoLogWGPU:D")
 	if err != nil {
 		return fmt.Errorf("erroring getting logs: %w", err)
 	}
