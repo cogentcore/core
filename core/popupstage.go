@@ -83,7 +83,7 @@ func (st *Stage) runPopup() *Stage {
 	sc.sceneGeom.Size = maxSz
 	sc.sceneGeom.Pos = st.Pos
 	sz := sc.prefSize(maxSz)
-	scrollWd := int(sc.Styles.ScrollBarWidth.Dots)
+	scrollWd := int(sc.Styles.ScrollbarWidth.Dots)
 	fontHt := 16
 	if sc.Styles.Font.Face != nil {
 		fontHt = int(sc.Styles.Font.Face.Metrics.Height)

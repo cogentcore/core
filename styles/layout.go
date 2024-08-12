@@ -23,14 +23,14 @@ import (
 
 // IMPORTANT: any changes here must be updated in style_properties.go StyleLayoutFuncs
 
-// ScrollBarWidthDefault is the default width of a scrollbar in Dp
-var ScrollBarWidthDefault = float32(10)
+// DefaultScrollbarWidth is the default [Style.ScrollbarWidth].
+var DefaultScrollbarWidth = units.Dp(10)
 
 func (s *Style) LayoutDefaults() {
 	s.Justify.Defaults()
 	s.Align.Defaults()
 	s.Gap.Set(units.Em(0.5))
-	s.ScrollBarWidth.Dp(ScrollBarWidthDefault)
+	s.ScrollbarWidth = DefaultScrollbarWidth
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
@@ -41,7 +41,7 @@ func (s *Style) LayoutToDots(uc *units.Context) {
 	s.Padding.ToDots(uc)
 	s.Margin.ToDots(uc)
 	s.Gap.ToDots(uc)
-	s.ScrollBarWidth.ToDots(uc)
+	s.ScrollbarWidth.ToDots(uc)
 
 	// max must be at least as much as min
 	if s.Max.X.Dots > 0 {

@@ -313,7 +313,7 @@ var styleLayoutFuncs = map[string]styleFunc{
 	"z-index": styleFuncInt(int(0),
 		func(obj *Style) *int { return &obj.ZIndex }),
 	"scrollbar-width": styleFuncUnits(units.Value{},
-		func(obj *Style) *units.Value { return &obj.ScrollBarWidth }),
+		func(obj *Style) *units.Value { return &obj.ScrollbarWidth }),
 }
 
 /////////////////////////////////////////////////////////////////////////////////

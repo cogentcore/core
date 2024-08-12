@@ -48,7 +48,7 @@ func (ed *Editor) updateFromAlloc() {
 	asz := ed.Geom.Size.Alloc.Content
 	spsz := sty.BoxSpace().Size()
 	asz.SetSub(spsz)
-	sbw := math32.Ceil(ed.Styles.ScrollBarWidth.Dots)
+	sbw := math32.Ceil(ed.Styles.ScrollbarWidth.Dots)
 	asz.X -= sbw
 	if ed.HasScroll[math32.X] {
 		asz.Y -= sbw

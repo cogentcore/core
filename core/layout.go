@@ -1198,7 +1198,7 @@ func (fr *Frame) SizeDownSetAllocs(iter int) {
 // (generally should be true, but some cases not)
 func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 	sz := &fr.Geom.Size
-	sbw := math32.Ceil(fr.Styles.ScrollBarWidth.Dots)
+	sbw := math32.Ceil(fr.Styles.ScrollbarWidth.Dots)
 	change := false
 	if iter == 0 {
 		fr.layout.ScrollSize.SetZero()
