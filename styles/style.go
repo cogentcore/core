@@ -205,7 +205,8 @@ type Style struct { //types:add
 	// within a grid layout
 	ColSpan int
 
-	// width of a layout scrollbar (inherited)
+	// ScrollbarWidth is the width of layout scrollbars. It defaults
+	// to [DefaultScrollbarWidth], and it is inherited.
 	ScrollbarWidth units.Value
 
 	// font styling parameters
