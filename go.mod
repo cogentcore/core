@@ -11,7 +11,7 @@ require (
 	github.com/aymerick/douceur v0.2.0
 	github.com/bramvdbogaerde/go-scp v1.4.0
 	github.com/chewxy/math32 v1.10.1
-	github.com/cogentcore/webgpu v0.0.0-20240810234500-5911b906308b
+	github.com/cogentcore/webgpu v0.0.0-20240812054109-ca2e8adebe15
 	github.com/cogentcore/yaegi v0.0.0-20240724064145-e32a03faad56
 	github.com/coreos/go-oidc/v3 v3.10.0
 	github.com/ergochat/readline v0.1.2
