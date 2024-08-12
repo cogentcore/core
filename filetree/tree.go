@@ -113,6 +113,7 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	}
 	ft.Filepath = core.Filename(abs)
 	ft.setDirOpen(core.Filename(abs))
+	ft.detectVCSRepo(true)
 	ft.initFileInfo()
 	ft.Open()
 	ft.Update()

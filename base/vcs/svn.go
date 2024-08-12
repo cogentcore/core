@@ -21,6 +21,10 @@ type SvnRepo struct {
 	vcs.SvnRepo
 }
 
+func (gr *SvnRepo) Type() Types {
+	return Svn
+}
+
 func (gr *SvnRepo) CharToStat(stat byte) FileStatus {
 	switch stat {
 	case 'M', 'R':
