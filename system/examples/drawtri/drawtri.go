@@ -10,7 +10,6 @@ import (
 	"image"
 	"time"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gpu"
@@ -26,33 +25,28 @@ func main() {
 	opts := &system.NewWindowOptions{
 		Size:      image.Pt(1024, 768),
 		StdPixels: true,
-		Title:     "System Test Window",
+		Title:     "System Draw Triangle",
 	}
 	w, err := system.TheApp.NewWindow(opts)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("got new window", w)
-
 	system.TheApp.Cursor(w).SetSize(32)
 
 	var sf *gpu.Surface
-	var sy *gpu.System
+	var sy *gpu.GraphicsSystem
 	var pl *gpu.GraphicsPipeline
 
 	make := func() {
-		// note: drawer is always created and ready to go
-		// we are creating an additional rendering system here.
-		sf = w.Drawer().Surface().(*gpu.Surface)
-		sy = sf.GPU.NewGraphicsSystem("drawtri", sf.Device)
+		sf = w.Drawer().Renderer().(*gpu.Surface)
+		sy = gpu.NewGraphicsSystem(sf.GPU, "drawtri", sf)
 		destroy := func() {
 			sy.Release()
 		}
 		w.SetDestroyGPUResourcesFunc(destroy)
 
 		pl = sy.AddGraphicsPipeline("drawtri")
-		sy.ConfigRender(&sf.Format, gpu.UndefinedType, sf)
 		pl.SetFrontFace(wgpu.FrontFaceCW)
 
 		sh := pl.AddShader("trianglelit")
@@ -75,21 +69,15 @@ func main() {
 		}
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
-		view, err := sf.AcquireNextTexture()
-		if errors.Log(err) != nil {
+
+		rp, err := sy.BeginRenderPass()
+		if err != nil {
 			return
 		}
-		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		cmd := sy.NewCommandEncoder()
-		rp := sy.BeginRenderPass(cmd, view)
-		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
 		pl.BindPipeline(rp)
 		rp.Draw(3, 1, 0, 0)
 		rp.End()
-		sf.SubmitRender(rp, cmd) // this is where it waits for the 16 msec
-		sf.Present()
-		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
-		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
+		sy.EndRenderPass(rp)
 
 		frameCount++
 		eTime := time.Now()
