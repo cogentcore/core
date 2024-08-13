@@ -271,9 +271,8 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 }
 
 func gpuIsBadBackend(bet wgpu.BackendType) bool {
-	return bet == wgpu.BackendTypeOpenGL || bet == wgpu.BackendTypeOpenGLES || bet == wgpu.BackendTypeUndefined || bet == wgpu.BackendTypeNull	
+	return bet == wgpu.BackendTypeOpenGL || bet == wgpu.BackendTypeOpenGLES || bet == wgpu.BackendTypeUndefined || bet == wgpu.BackendTypeNull
 }
-
 
 // Release releases GPU resources -- call after everything else has been destroyed
 func (gp *GPU) Release() {
