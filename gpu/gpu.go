@@ -149,6 +149,9 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	gp.GPU = gpus[gpIndex]
 	gp.Properties = gp.GPU.GetInfo()
 	gp.DeviceName = gp.Properties.Name
+	if Debug || DebugAdapter {
+		fmt.Println("gpu: Selected Device:", gp.DeviceName, " (set DebugAdapter to get more adapter info")
+	}
 
 	gp.Limits = gp.GPU.GetLimits()
 
@@ -207,6 +210,9 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			// }
 
 			props := gpus[gi].GetInfo()
+			if gpuIsBadBackend(props.BackendType) {
+				continue
+			}
 			if strings.Contains(props.Name, trgDevNm) {
 				devNm := props.Name
 				if Debug {
@@ -225,6 +231,9 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 		// but generally speaking the discrete device is going to be the most
 		// feature-full, so the practical benefit is unlikely to be significant.
 		props := gpus[gi].GetInfo()
+		if gpuIsBadBackend(props.BackendType) {
+			continue
+		}
 		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
 			// todo: pick one with best memory
 			// var memProperties vk.PhysicalDeviceMemoryProperties
@@ -260,6 +269,11 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 	// }
 	// return maxIndex
 }
+
+func gpuIsBadBackend(bet wgpu.BackendType) bool {
+	return bet == wgpu.BackendTypeOpenGL || bet == wgpu.BackendTypeOpenGLES || bet == wgpu.BackendTypeUndefined || bet == wgpu.BackendTypeNull	
+}
+
 
 // Release releases GPU resources -- call after everything else has been destroyed
 func (gp *GPU) Release() {

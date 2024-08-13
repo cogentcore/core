@@ -83,6 +83,8 @@ func main() {
 	ugp.SetNValues(1)
 	tgp.SetNValues(3)
 
+	sy.Config()
+
 	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
 	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
@@ -93,8 +95,6 @@ func main() {
 		// img.Texture.Sampler.UMode = gpu.ClampToBorder
 		// img.Texture.Sampler.VMode = gpu.ClampToBorder
 	}
-
-	sy.Config()
 
 	gpu.SetValueFrom(posv.Values.Values[0], []float32{
 		-0.5, -0.5, 0.0,

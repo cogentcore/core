@@ -110,11 +110,9 @@ func main() {
 		_ = fcr
 		switch {
 		case fcr < 3:
-			rendImgs(0)
-			// rendFill()
+			rendImgs(fcr)
 		default:
-			rendImgs(0)
-			// rendFill()
+			rendFill()
 		}
 		frameCount++
 

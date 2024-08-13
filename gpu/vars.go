@@ -102,8 +102,12 @@ func (vs *Vars) AddGroup(role VarRoles, name ...string) *VarGroup {
 	vg.alignBytes = 1
 	if role == Uniform {
 		vg.alignBytes = int(vs.sys.GPU().Limits.Limits.MinUniformBufferOffsetAlignment)
+		// note: wgpu_native reports alignment sizes of 64 
+		// but then barfs when that is used.  256 seems to keep it happy
+		vg.alignBytes = max(vg.alignBytes, 256)
 	} else if role == Storage {
 		vg.alignBytes = int(vs.sys.GPU().Limits.Limits.MinStorageBufferOffsetAlignment)
+		vg.alignBytes = max(vg.alignBytes, 256)
 	}
 	vs.Groups[idx] = vg
 	return vg
