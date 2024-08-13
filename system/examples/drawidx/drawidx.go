@@ -12,7 +12,6 @@ import (
 	"time"
 	"unsafe"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
@@ -35,7 +34,7 @@ func main() {
 	opts := &system.NewWindowOptions{
 		Size:      image.Pt(1024, 768),
 		StdPixels: true,
-		Title:     "System Test Window",
+		Title:     "System Draw Triangle Indexed",
 	}
 	w, err := system.TheApp.NewWindow(opts)
 	if err != nil {
@@ -44,17 +43,14 @@ func main() {
 	// w.SetFPS(20) // 60 default
 
 	var sf *gpu.Surface
-	var sy *gpu.System
+	var sy *gpu.GraphicsSystem
 	var pl *gpu.GraphicsPipeline
 	var cam *gpu.Value
 	var camo CamView
 
 	make := func() {
-		// note: drawer is always created and ready to go
-		// we are creating an additional rendering system here.
-		sf = w.Drawer().Surface().(*gpu.Surface)
-		sy = sf.GPU.NewGraphicsSystem("drawidx", sf.Device)
-
+		sf = w.Drawer().Renderer().(*gpu.Surface)
+		sy = gpu.NewGraphicsSystem(sf.GPU, "drawidx", sf)
 		destroy := func() {
 			sy.Release()
 		}
@@ -69,8 +65,8 @@ func main() {
 		pl.AddEntry(sh, gpu.VertexShader, "vs_main")
 		pl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
-		vgp := sy.Vars.AddVertexGroup()
-		ugp := sy.Vars.AddGroup(gpu.Uniform)
+		vgp := sy.Vars().AddVertexGroup()
+		ugp := sy.Vars().AddGroup(gpu.Uniform)
 
 		// vertex are dynamically sized in general, so using 0 here
 		posv := vgp.Add("Pos", gpu.Float32Vector3, 0, gpu.VertexShader)
@@ -134,17 +130,14 @@ func main() {
 		camo.Model.SetRotationY(.1 * float32(frameCount))
 		gpu.SetValueFrom(cam, []CamView{camo})
 
-		view, err := sf.AcquireNextTexture()
-		if errors.Log(err) != nil {
+		rp, err := sy.BeginRenderPass()
+		if err != nil {
 			return
 		}
-		cmd := sy.NewCommandEncoder()
-		rp := sy.BeginRenderPass(cmd, view)
 		pl.BindPipeline(rp)
 		pl.BindDrawIndexed(rp)
 		rp.End()
-		sf.SubmitRender(rp, cmd)
-		sf.Present()
+		sy.EndRenderPass(rp)
 
 		frameCount++
 		eTime := time.Now()
