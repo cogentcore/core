@@ -16,9 +16,9 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/system"
+	"github.com/cogentcore/reisen"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
-	"github.com/zergon321/reisen"
 )
 
 // Video represents a video playback widget without any controls.
@@ -84,7 +84,7 @@ func (v *Video) RenderDraw(drw system.Drawer, op draw.Op) {
 		unchanged = false
 	}
 	v.framePlayed++
-	bb := v.Geom.TotalBBox.Add(sw.Scene.SceneGeom.Pos)
+	bb := v.Geom.TotalBBox.Add(v.Scene.SceneGeom.Pos)
 	drw.Scale(bb, frame, image.Rectangle{}, v.Rotation, draw.Src, unchanged)
 }
 

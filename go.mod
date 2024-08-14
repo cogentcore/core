@@ -11,6 +11,7 @@ require (
 	github.com/aymerick/douceur v0.2.0
 	github.com/bramvdbogaerde/go-scp v1.4.0
 	github.com/chewxy/math32 v1.10.1
+	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
 	github.com/cogentcore/webgpu v0.0.0-20240812054109-ca2e8adebe15
 	github.com/cogentcore/yaegi v0.0.0-20240724064145-e32a03faad56
 	github.com/coreos/go-oidc/v3 v3.10.0
@@ -33,7 +34,6 @@ require (
 	github.com/nsf/termbox-go v1.1.1
 	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
 	github.com/stretchr/testify v1.9.0
-	github.com/zergon321/reisen v0.1.9
 	golang.org/x/crypto v0.25.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	golang.org/x/image v0.18.0
