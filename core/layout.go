@@ -1576,7 +1576,7 @@ func (wb *WidgetBase) styleSizeUpdate() bool {
 	if !wb.updateParentRelSizes() {
 		return false
 	}
-	scsz := wb.Scene.sceneGeom.Size
+	scsz := wb.Scene.SceneGeom.Size
 	sz := wb.Geom.Size.Alloc.Content
 	psz := pwb.Geom.Size.Alloc.Content
 	chg := wb.Styles.UnitContext.SetSizes(float32(scsz.X), float32(scsz.Y), sz.X, sz.Y, psz.X, psz.Y)

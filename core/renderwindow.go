@@ -590,7 +590,7 @@ func (rc *renderContext) String() string {
 
 func (sc *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
 	unchanged := !sc.imageUpdated || sc.updating
-	drw.Copy(sc.sceneGeom.Pos, sc.Pixels, sc.Pixels.Bounds(), op, unchanged)
+	drw.Copy(sc.SceneGeom.Pos, sc.Pixels, sc.Pixels.Bounds(), op, unchanged)
 	sc.imageUpdated = false
 }
 
@@ -691,7 +691,7 @@ func (w *renderWindow) renderWindow() {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}
-	top.Sprites.drawSprites(drw)
+	top.Sprites.drawSprites(drw, winScene.SceneGeom.Pos)
 	drw.End()
 }
 

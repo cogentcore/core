@@ -99,7 +99,7 @@ func (sc *Scene) layoutScene() {
 	}
 	sc.SizeUp()
 	sz := &sc.Geom.Size
-	sz.Alloc.Total.SetPoint(sc.sceneGeom.Size)
+	sz.Alloc.Total.SetPoint(sc.SceneGeom.Size)
 	sz.setContentFromTotal(&sz.Alloc)
 	// sz.Actual = sz.Alloc // todo: is this needed??
 	if DebugSettings.LayoutTrace {
@@ -430,7 +430,7 @@ func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 func (wb *WidgetBase) winBBox() image.Rectangle {
 	bb := wb.Geom.TotalBBox
 	if wb.Scene != nil {
-		return bb.Add(wb.Scene.sceneGeom.Pos)
+		return bb.Add(wb.Scene.SceneGeom.Pos)
 	}
 	return bb
 }

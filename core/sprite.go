@@ -204,14 +204,15 @@ func (ss *Sprites) InactivateSprite(name string) {
 }
 
 // drawSprites draws sprites
-func (ss *Sprites) drawSprites(drw system.Drawer) {
+func (ss *Sprites) drawSprites(drw system.Drawer, scpos image.Point) {
 	for _, kv := range ss.Order {
 		sp := kv.Value
 		if !sp.Active {
 			continue
 		}
-		// note: in general we assume sprites are static..
-		drw.Copy(sp.Geom.Pos, sp.Pixels, sp.Pixels.Bounds(), draw.Over, system.Unchanged)
+		// note: in general we assume sprites are static, so Unchanged.
+		// if needed, could add a "dynamic" flag or something.
+		drw.Copy(sp.Geom.Pos.Add(scpos), sp.Pixels, sp.Pixels.Bounds(), draw.Over, system.Unchanged)
 	}
 	ss.Modified = false
 }

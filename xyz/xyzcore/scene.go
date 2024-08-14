@@ -134,7 +134,7 @@ func (sw *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
 	}
 	gdrw := agd.AsGPUDrawer()
 	gdrw.UseTexture(sw.XYZ.Frame.Frames[0])
-	bb := sw.Geom.TotalBBox
+	bb := sw.Geom.TotalBBox.Add(sw.Scene.SceneGeom.Pos)
 	ibb := image.Rectangle{Max: bb.Size()}
 	gdrw.CopyUsed(bb.Min, ibb, draw.Src, false)
 }
