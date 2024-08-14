@@ -73,20 +73,6 @@ type GPU struct {
 	MaxComputeWorkGroupCount1D int
 }
 
-// InitNoDisplay initializes WebGPU system for a purely compute-based
-// or headless operation, without any display (i.e., without using glfw).
-// Call before doing any vgpu stuff.
-// Loads the WebGPU library and sets the Vulkan instance proc addr and calls Init.
-// IMPORTANT: must be called on the main initial thread!
-func InitNoDisplay() error {
-	// err := vkinit.LoadVulkan()
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return err
-	// }
-	return nil
-}
-
 // Defaults sets up default parameters, with the graphics flag
 // determining whether graphics-relevant items are added.
 func (gp *GPU) Defaults(graphics bool) {
@@ -267,13 +253,10 @@ func (gp *GPU) PropertiesString() string {
 	return "\n######## GPU Properties\n" + reflectx.StringJSON(&gp.Properties) + reflectx.StringJSON(gp.Limits.Limits)
 }
 
-// NoDisplayGPU Initializes the Vulkan GPU and returns that
-// and the graphics GPU device, with given name, without connecting
-// to the display.
+// NoDisplayGPU Initializes WebGPU and returns that
+// and the graphics GPU device, with given name,
+// without connecting to the display.
 func NoDisplayGPU(nm string) (*GPU, *Device, error) {
-	if err := InitNoDisplay(); err != nil {
-		return nil, nil, err
-	}
 	gp := NewGPU()
 	if err := gp.Config(nm); err != nil {
 		return nil, nil, err

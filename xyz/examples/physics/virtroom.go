@@ -520,8 +520,6 @@ func (ev *Env) NoGUIRun() {
 	ev.MakeWorld()
 	ev.ConfigView3D(se)
 
-	se.Config()
-
 	img, err := ev.RenderEyeImg()
 	if err == nil {
 		imagex.Save(img, "eyer_0.png")

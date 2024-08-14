@@ -122,7 +122,6 @@ func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	if errors.Log(err) != nil {
 		return nil, err
 	}
-	// view, err := texture.CreateView(nil)
 	view, err := texture.CreateView(&wgpu.TextureViewDescriptor{
 		MipLevelCount:   texture.GetMipLevelCount(),
 		ArrayLayerCount: texture.GetDepthOrArrayLayers(),

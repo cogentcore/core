@@ -6,29 +6,18 @@ package world
 
 import (
 	"image"
-	"log"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/xyz"
-
-	vk "github.com/goki/vulkan"
 )
 
 // NoDisplayGPU Initializes the Vulkan GPU (vgpu) and returns that
 // and the graphics GPU device, with given name, without connecting
 // to the display.
 func NoDisplayGPU(nm string) (*gpu.GPU, *gpu.Device, error) {
-	if err := gpu.InitNoDisplay(); err != nil {
-		return nil, nil, errors.Log(err)
-	}
-	gp := gpu.NewGPU()
-	if err := gp.Config(nm, nil); err != nil {
-		log.Println(err)
-		return nil, nil, errors.Log(err)
-	}
-	dev := &gpu.Device{}
-	if err := dev.Init(gp, vk.QueueGraphicsBit); err != nil { // todo: add wrapper to vgpu
+	gp, dev, err := gpu.NoDisplayGPU(nm)
+	if err != nil {
 		return nil, nil, errors.Log(err)
 	}
 	return gp, dev, nil
