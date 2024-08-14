@@ -94,7 +94,6 @@ func (gp *GPU) Defaults(graphics bool) {
 	} else {
 		gp.Compute = true
 	}
-	PlatformDefaults(gp)
 }
 
 // NewGPU returns a new GPU struct with Graphics Defaults set
