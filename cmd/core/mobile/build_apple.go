@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
@@ -26,7 +27,7 @@ func goAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 	infoplist := new(bytes.Buffer)
 	if err := infoPlistTmpl.Execute(infoplist, infoPlistTmplData{
 		BundleID:           c.ID,
-		Name:               c.Name,
+		Name:               elide.AppName(c.Name),
 		Version:            c.Version,
 		InfoString:         c.About,
 		ShortVersionString: c.Version,
