@@ -215,15 +215,15 @@ func (ts *Tabs) insertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 	frame.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	ts.insertTabOnlyAt(label, idx, icon...)
+	ts.insertTabButtonAt(label, idx, icon...)
 	ts.Update()
 	return frame
 }
 
-// insertTabOnlyAt inserts just the tab button at given index, after the panel has
+// insertTabButtonAt inserts just the tab button at given index, after the panel has
 // already been added to the frame; assumed to be wrapped in update. Generally
 // for internal use only. An optional icon can also be passed for the tab button.
-func (ts *Tabs) insertTabOnlyAt(label string, idx int, icon ...icons.Icon) {
+func (ts *Tabs) insertTabButtonAt(label string, idx int, icon ...icons.Icon) {
 	tb := ts.getTabs()
 	tab := tree.New[Tab]()
 	tb.InsertChild(tab, idx)
