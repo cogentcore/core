@@ -307,12 +307,33 @@ func (dp *DatePicker) Init() {
 type TimeInput struct {
 	Frame
 	Time time.Time
+
+	// whether date input is rendered
+	displayDate bool
+
+	// whether time input is rendered
+	displayTime bool
 }
 
 func (ti *TimeInput) WidgetValue() any { return &ti.Time }
 
+// DisplayDate can be used to hide the date field (both date and time displayed by default).
+func (ti *TimeInput) DisplayDate(v bool) *TimeInput {
+	ti.displayDate = v
+	return ti
+}
+
+// DisplayTime can be used to hide the time field (both date and time displayed by default).
+func (ti *TimeInput) DisplayTime(v bool) *TimeInput {
+	ti.displayTime = v
+	return ti
+}
+
 func (ti *TimeInput) Init() {
 	ti.Frame.Init()
+
+	ti.displayDate = true
+	ti.displayTime = true
 
 	style := func(s *styles.Style) {
 		s.Min.X.Em(8)
@@ -322,66 +343,72 @@ func (ti *TimeInput) Init() {
 		}
 	}
 
-	tree.AddChild(ti, func(w *TextField) {
-		w.SetTooltip("The date")
-		w.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
-			d := NewBody().AddTitle("Select date")
-			dp := NewDatePicker(d).SetTime(ti.Time)
-			d.AddBottomBar(func(parent Widget) {
-				d.AddCancel(parent)
-				d.AddOK(parent).OnClick(func(e events.Event) {
-					ti.Time = dp.Time
-					ti.UpdateChange()
+	ti.Maker(func(p *tree.Plan) {
+		if ti.displayDate {
+			tree.Add(p, func(w *TextField) {
+				w.SetTooltip("The date")
+				w.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
+					d := NewBody().AddTitle("Select date")
+					dp := NewDatePicker(d).SetTime(ti.Time)
+					d.AddBottomBar(func(parent Widget) {
+						d.AddCancel(parent)
+						d.AddOK(parent).OnClick(func(e events.Event) {
+							ti.Time = dp.Time
+							ti.UpdateChange()
+						})
+					})
+					d.RunDialog(w)
+				})
+				w.Styler(style)
+				w.Updater(func() {
+					w.SetReadOnly(ti.IsReadOnly())
+					w.SetText(ti.Time.Format("1/2/2006"))
+				})
+				w.SetValidator(func() error {
+					d, err := time.Parse("1/2/2006", w.Text())
+					if err != nil {
+						return err
+					}
+					// new date and old time
+					ti.Time = time.Date(d.Year(), d.Month(), d.Day(), ti.Time.Hour(), ti.Time.Minute(), ti.Time.Second(), ti.Time.Nanosecond(), ti.Time.Location())
+					ti.SendChange()
+					return nil
 				})
 			})
-			d.RunDialog(w)
-		})
-		w.Styler(style)
-		w.Updater(func() {
-			w.SetReadOnly(ti.IsReadOnly())
-			w.SetText(ti.Time.Format("1/2/2006"))
-		})
-		w.SetValidator(func() error {
-			d, err := time.Parse("1/2/2006", w.Text())
-			if err != nil {
-				return err
-			}
-			// new date and old time
-			ti.Time = time.Date(d.Year(), d.Month(), d.Day(), ti.Time.Hour(), ti.Time.Minute(), ti.Time.Second(), ti.Time.Nanosecond(), ti.Time.Location())
-			ti.SendChange()
-			return nil
-		})
-	})
+		}
 
-	tree.AddChild(ti, func(w *TextField) {
-		w.SetTooltip("The time")
-		w.SetLeadingIcon(icons.Schedule, func(e events.Event) {
-			d := NewBody().AddTitle("Edit time")
-			tp := NewTimePicker(d).SetTime(ti.Time)
-			d.AddBottomBar(func(parent Widget) {
-				d.AddCancel(parent)
-				d.AddOK(parent).OnClick(func(e events.Event) {
-					ti.Time = tp.Time
-					ti.UpdateChange()
+		if ti.displayTime {
+			tree.Add(p, func(w *TextField) {
+				w.SetTooltip("The time")
+				w.SetLeadingIcon(icons.Schedule, func(e events.Event) {
+					d := NewBody().AddTitle("Edit time")
+					tp := NewTimePicker(d).SetTime(ti.Time)
+					d.AddBottomBar(func(parent Widget) {
+						d.AddCancel(parent)
+						d.AddOK(parent).OnClick(func(e events.Event) {
+							ti.Time = tp.Time
+							ti.UpdateChange()
+						})
+					})
+					d.RunDialog(w)
+				})
+				w.Styler(style)
+				w.Updater(func() {
+					w.SetReadOnly(ti.IsReadOnly())
+					w.SetText(ti.Time.Format(SystemSettings.TimeFormat()))
+				})
+				w.SetValidator(func() error {
+					t, err := time.Parse(SystemSettings.TimeFormat(), w.Text())
+					if err != nil {
+						return err
+					}
+					// old date and new time
+					ti.Time = time.Date(ti.Time.Year(), ti.Time.Month(), ti.Time.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), ti.Time.Location())
+					ti.SendChange()
+					return nil
 				})
 			})
-			d.RunDialog(w)
-		})
-		w.Styler(style)
-		w.Updater(func() {
-			w.SetReadOnly(ti.IsReadOnly())
-			w.SetText(ti.Time.Format(SystemSettings.TimeFormat()))
-		})
-		w.SetValidator(func() error {
-			t, err := time.Parse(SystemSettings.TimeFormat(), w.Text())
-			if err != nil {
-				return err
-			}
-			// old date and new time
-			ti.Time = time.Date(ti.Time.Year(), ti.Time.Month(), ti.Time.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), ti.Time.Location())
-			ti.SendChange()
-			return nil
-		})
+		}
 	})
 }
 
