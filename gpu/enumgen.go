@@ -6,49 +6,6 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _OptionStatesValues = []OptionStates{0, 1, 2, 3}
-
-// OptionStatesN is the highest valid value for type OptionStates, plus one.
-const OptionStatesN OptionStates = 4
-
-var _OptionStatesValueMap = map[string]OptionStates{`Disabled`: 0, `Optional`: 1, `Required`: 2, `Enabled`: 3}
-
-var _OptionStatesDescMap = map[OptionStates]string{0: `Disabled -- option is not enabled`, 1: `Optional -- option is enabled if possible and code checks for actual state providing workaround if not supported`, 2: `Required -- option is required and GPU.Config fails if not supported by the hardware`, 3: `Enabled is the state of all options specified during Config, and supported bythe hardware`}
-
-var _OptionStatesMap = map[OptionStates]string{0: `Disabled`, 1: `Optional`, 2: `Required`, 3: `Enabled`}
-
-// String returns the string representation of this OptionStates value.
-func (i OptionStates) String() string { return enums.String(i, _OptionStatesMap) }
-
-// SetString sets the OptionStates value from its string representation,
-// and returns an error if the string is invalid.
-func (i *OptionStates) SetString(s string) error {
-	return enums.SetString(i, s, _OptionStatesValueMap, "OptionStates")
-}
-
-// Int64 returns the OptionStates value as an int64.
-func (i OptionStates) Int64() int64 { return int64(i) }
-
-// SetInt64 sets the OptionStates value from an int64.
-func (i *OptionStates) SetInt64(in int64) { *i = OptionStates(in) }
-
-// Desc returns the description of the OptionStates value.
-func (i OptionStates) Desc() string { return enums.Desc(i, _OptionStatesDescMap) }
-
-// OptionStatesValues returns all possible values for the type OptionStates.
-func OptionStatesValues() []OptionStates { return _OptionStatesValues }
-
-// Values returns all possible values for the type OptionStates.
-func (i OptionStates) Values() []enums.Enum { return enums.Values(_OptionStatesValues) }
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i OptionStates) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *OptionStates) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "OptionStates")
-}
-
 var _VarRolesValues = []VarRoles{0, 1, 2, 3, 4, 5, 6, 7}
 
 // VarRolesN is the highest valid value for type VarRoles, plus one.

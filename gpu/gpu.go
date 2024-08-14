@@ -45,13 +45,6 @@ func SetDebug(debug bool) {
 
 func init() { SetDebug(false) }
 
-// DefaultOpts are default GPU config options that can be set by any app
-// prior to initializing the GPU object -- this may be easier than passing
-// options in from the app during the Config call.  Any such options take
-// precedence over these options (usually best to avoid direct conflits --
-// monitor Debug output to see).
-var DefaultOpts *GPUOpts
-
 // GPU represents the GPU hardware
 type GPU struct {
 	// Instance represents the WebGPU system overall
@@ -60,12 +53,6 @@ type GPU struct {
 	// GPU represents the specific GPU hardware device used.
 	// You can call GetInfo() to get info.
 	GPU *wgpu.Adapter
-
-	// options passed in during config
-	UserOpts *GPUOpts
-
-	// set of enabled options set post-Config
-	EnabledOpts GPUOpts
 
 	// name of the physical GPU device
 	DeviceName string
@@ -82,7 +69,7 @@ type GPU struct {
 	// Limits are the limits of the current GPU adapter.
 	Limits wgpu.SupportedLimits
 
-	// maximum number of compute threads per compute shader invokation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup, which allows for the and maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroupvalue is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values.
+	// maximum number of compute threads per compute shader invocation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup, which allows for the and maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroupvalue is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values.
 	MaxComputeWorkGroupCount1D int
 }
 
@@ -128,20 +115,9 @@ func NewComputeGPU() *GPU {
 	return gp
 }
 
-// Config configures the GPU given the extensions set in InstanceExts,
-// DeviceExts, and ValidationLayers, and the given GPUOpts options.
-// Only the first such opts will be used -- the variable args is used to enable
-// no options to be passed by default.
-func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
+// Config configures the GPU using the given name.
+func (gp *GPU) Config(name string) error {
 	gp.AppName = name
-	gp.UserOpts = DefaultOpts
-	if len(opts) > 0 {
-		if gp.UserOpts == nil {
-			gp.UserOpts = opts[0]
-		} else {
-			gp.UserOpts.CopyFrom(opts[0])
-		}
-	}
 	gp.Instance = wgpu.CreateInstance(nil)
 
 	gpus := gp.Instance.EnumerateAdapters(nil)
@@ -198,17 +174,6 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			return idx
 		}
 		for gi := range n {
-			// type AdapterInfo struct {
-			// 	VendorId          uint32
-			// 	VendorName        string
-			// 	Architecture      string
-			// 	DeviceId          uint32
-			// 	Name              string
-			// 	DriverDescription string
-			// 	AdapterType       AdapterType
-			// 	BackendType       BackendType
-			// }
-
 			props := gpus[gi].GetInfo()
 			if gpuIsBadBackend(props.BackendType) {
 				continue
@@ -311,7 +276,7 @@ func NoDisplayGPU(nm string) (*GPU, *Device, error) {
 		return nil, nil, err
 	}
 	gp := NewGPU()
-	if err := gp.Config(nm, nil); err != nil {
+	if err := gp.Config(nm); err != nil {
 		return nil, nil, err
 	}
 	dev, err := NewGraphicsDevice(gp)
