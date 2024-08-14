@@ -5,6 +5,7 @@
 package core
 
 import (
+	"reflect"
 	"strconv"
 	"time"
 
@@ -327,6 +328,16 @@ func (ti *TimeInput) DisplayDate(v bool) *TimeInput {
 func (ti *TimeInput) DisplayTime(v bool) *TimeInput {
 	ti.displayTime = v
 	return ti
+}
+
+func (ti *TimeInput) OnBind(value any, tags reflect.StructTag) {
+	val := tags.Get("display")
+	switch val {
+	case "date":
+		ti.displayTime = false
+	case "time":
+		ti.displayDate = false
+	}
 }
 
 func (ti *TimeInput) Init() {
