@@ -3,7 +3,7 @@ Note: we recommend you read the [basics](../basics) and [tutorials](../tutorials
 1. Download and install Go from [the Go website](https://go.dev/doc/install) if you do not already have Go 1.22+ installed.
 2. Run `go install cogentcore.org/core/cmd/core@main` to install the Cogent Core command line tool.
 3. Run `core setup` to install platform-specific dependencies. Please first read all of the information below:
-    * This installs the [xcode-tools](https://mac.install.guide/commandlinetools/4) on macOS, various window management libraries on Linux, and [TDM-GCC](https://jmeubank.github.io/tdm-gcc/) and [Git](https://git-scm.com/download/win) on Windows.
+    * This installs the [xcode-tools](https://mac.install.guide/commandlinetools/4) on macOS, various graphics libraries on Linux, and [TDM-GCC](https://jmeubank.github.io/tdm-gcc/) and [Git](https://git-scm.com/download/win) on Windows.
     * You should run the command from your home directory.
     * You may need to enter your password so that it can run `sudo` commands.
     * You should restart your shell/prompt/terminal after running the command.

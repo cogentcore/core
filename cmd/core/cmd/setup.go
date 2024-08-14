@@ -37,7 +37,7 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
-			return vc.Run("sudo", "apt-get", "install", "libgl1-mesa-dev", "xorg-dev")
+			return vc.Run("sudo", "apt-get", "install", "-f", "-y", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev")
 		}
 		_, err = exec.LookPath("dnf")
 		if err == nil {
