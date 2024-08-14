@@ -122,6 +122,9 @@ func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	if errors.Log(err) != nil {
 		return nil, err
 	}
+	// Note: we need to specify a descriptor here so that we use the correct
+	// format, which may be different from the default format, such as when
+	// it is srgb.
 	view, err := texture.CreateView(&wgpu.TextureViewDescriptor{
 		MipLevelCount:   texture.GetMipLevelCount(),
 		ArrayLayerCount: texture.GetDepthOrArrayLayers(),
