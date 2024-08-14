@@ -219,7 +219,7 @@ func (ts *Tabs) insertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 	button := ts.insertTabButtonAt(label, idx, icon...)
 	if alreadyExists {
 		tree.SetUniqueName(frame)
-		tree.SetUniqueName(button)
+		button.SetName(frame.Name) // must be the same name
 	}
 	ts.Update()
 	return frame
