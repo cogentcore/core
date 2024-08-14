@@ -78,7 +78,8 @@ func (sf *Surface) init(gp *GPU, ws *wgpu.Surface, size image.Point, samples int
 		return err
 	}
 	sf.device = dev
-	sf.Format.Format = wgpu.TextureFormatBGRA8Unorm // ws.GetPreferredFormat(gp.GPU) TODO(wgpu): GetPreferredFormat
+	// note: Format.Format will be determined in InitConfig,
+	// based on GetCapabilities call.
 	sf.Format.SetMultisample(samples)
 	sf.Format.Size = size
 	sf.InitConfig() // can change the format
@@ -121,12 +122,12 @@ func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	if errors.Log(err) != nil {
 		return nil, err
 	}
-	view, err := texture.CreateView(nil)
-	// view, err := texture.CreateView(&wgpu.TextureViewDescriptor{ // TODO(wgpu): less hacky srgb fix
-	// 	MipLevelCount:   texture.GetMipLevelCount(),
-	// 	ArrayLayerCount: texture.GetDepthOrArrayLayers(),
-	// 	Format:          wgpu.TextureFormatBGRA8UnormSrgb,
-	// })
+	// view, err := texture.CreateView(nil)
+	view, err := texture.CreateView(&wgpu.TextureViewDescriptor{
+		MipLevelCount:   texture.GetMipLevelCount(),
+		ArrayLayerCount: texture.GetDepthOrArrayLayers(),
+		Format:          sf.Format.Format,
+	})
 	if errors.Log(err) != nil {
 		return nil, err
 	}
@@ -149,10 +150,8 @@ func (sf *Surface) Present() {
 // This assumes that all existing items have been destroyed.
 func (sf *Surface) InitConfig() error {
 	caps := sf.surface.GetCapabilities(sf.GPU.GPU)
-
-	// fmt.Println(reflectx.StringJSON(caps))
-
 	trgFmt := caps.Formats[0]
+	// fmt.Println(reflectx.StringJSON(caps), trgFmt)
 	viewFmt := trgFmt
 	switch trgFmt {
 	case wgpu.TextureFormatBGRA8Unorm:
