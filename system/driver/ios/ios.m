@@ -127,7 +127,7 @@ struct utsname sysInfo;
 	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
 	updateConfig((int)size.width, (int)size.height, orientation);
 
-    setWindowPtr([self.view layerClass]);
+    setWindowPtr((void *)[self.view layerClass]);
 	
     CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(render:)];
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
