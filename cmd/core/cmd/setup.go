@@ -58,7 +58,7 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
-			fmt.Println("###  IMPORTANT: ###\nYou need to add C:\\w64devkit\\bin to your PATH\nClick the Windows menu and start typing 'environ..' and it will show you control panel item to set environment variables.  At bottom of dialog, click on Environment Variables.., then on the 'Path' variable in either User or System section (System is applied to all users).  You will need to restart your shell / app to get the updates.")
+			logx.PrintlnWarn("### IMPORTANT: ###\nYou need to add C:\\w64devkit\\bin to your PATH\nClick the Windows menu and type 'environment', and it will show you a control panel item to set environment variables. At the bottom of the dialog, click on Environment Variables, then on the 'Path' variable in either the User or System section (System is applied to all users). You will need to restart your shell/prompt/terminal to apply the changes.")
 		} else {
 			logx.PrintlnWarn("gcc already installed")
 		}
