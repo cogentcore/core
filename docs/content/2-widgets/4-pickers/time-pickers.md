@@ -21,6 +21,12 @@ You can create a unified time input that allows users to select both a date and 
 core.NewTimeInput(b).SetTime(time.Now())
 ```
 
+You can hide the date or time part of a unified time input:
+
+```Go
+core.NewTimeInput(b).SetTime(time.Now()).SetDisplayDate(false)
+```
+
 You can detect when the user changes the value of a unified time input:
 
 ```Go
