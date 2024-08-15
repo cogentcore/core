@@ -406,14 +406,11 @@ func (vl *Value) SetFromGoImage(img image.Image, layer int) *Texture {
 }
 
 // SetFromTexture sets Texture from an existing gpu Texture.
-// The Sampler is also configured at this point, with the current settings,
-// so set those before making this call.  It will not be re-configured
-// without manually releasing it.
+// The Sampler is also ensured configured at this point,
+// with the current settings, so set those before making this call.
+// It will not be re-configured without manually releasing it.
 func (vl *Value) SetFromTexture(tx *Texture) *Texture {
-	if vl.Texture != nil && vl.Texture != tx {
-		vl.Texture.ReleaseTexture()
-	}
-	vl.Texture = tx
+	vl.Texture.SetShared(tx)
 	err := vl.Texture.Sampler.Config(&vl.device)
 	errors.Log(err)
 	return vl.Texture

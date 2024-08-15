@@ -28,6 +28,11 @@ type Texture struct {
 	// Needed for textures used as fragment shader inputs.
 	Sampler Sampler
 
+	// indicates that this texture is shared with some other
+	// resource, and therefore should not be released when done.
+	// Use SetShared method to set texture in this way.
+	shared bool
+
 	// WebGPU texture handle, in device memory
 	texture *wgpu.Texture `display:"-"`
 
@@ -173,12 +178,25 @@ func (tx *Texture) ConfigMulti(dev *Device, imgFmt *TextureFormat) error {
 	return tx.CreateTexture(wgpu.TextureUsageRenderAttachment)
 }
 
+// SetShared sets this texture to point to the given Texture's
+// underlying GPU texture, with the shared flag set so that
+// it will not be released.
+func (tx *Texture) SetShared(ot *Texture) {
+	tx.ReleaseTexture()
+	tx.texture = ot.texture
+	tx.view = ot.view
+	tx.shared = true
+	tx.Format = ot.Format
+}
+
 // ReleaseView destroys any existing view
 func (tx *Texture) ReleaseView() {
 	if tx.view == nil {
 		return
 	}
-	tx.view.Release()
+	if !tx.shared {
+		tx.view.Release()
+	}
 	tx.view = nil
 }
 
@@ -188,7 +206,10 @@ func (tx *Texture) ReleaseTexture() {
 	if tx.texture == nil {
 		return
 	}
-	tx.texture.Release()
+	if !tx.shared {
+		tx.texture.Release()
+	}
+	tx.shared = false
 	tx.texture = nil
 }
 
