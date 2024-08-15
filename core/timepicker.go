@@ -309,42 +309,29 @@ type TimeInput struct {
 	Frame
 	Time time.Time
 
-	// whether date input is rendered
-	displayDate bool
+	// DisplayDate is whether the date input is displayed (default true).
+	DisplayDate bool
 
-	// whether time input is rendered
-	displayTime bool
+	// DisplayTime is whether the time input is displayed (default true).
+	DisplayTime bool
 }
 
 func (ti *TimeInput) WidgetValue() any { return &ti.Time }
 
-// DisplayDate can be used to hide the date field (both date and time displayed by default).
-func (ti *TimeInput) DisplayDate(v bool) *TimeInput {
-	ti.displayDate = v
-	return ti
-}
-
-// DisplayTime can be used to hide the time field (both date and time displayed by default).
-func (ti *TimeInput) DisplayTime(v bool) *TimeInput {
-	ti.displayTime = v
-	return ti
-}
-
 func (ti *TimeInput) OnBind(value any, tags reflect.StructTag) {
-	val := tags.Get("display")
-	switch val {
+	switch tags.Get("display") {
 	case "date":
-		ti.displayTime = false
+		ti.DisplayTime = false
 	case "time":
-		ti.displayDate = false
+		ti.DisplayDate = false
 	}
 }
 
 func (ti *TimeInput) Init() {
 	ti.Frame.Init()
 
-	ti.displayDate = true
-	ti.displayTime = true
+	ti.DisplayDate = true
+	ti.DisplayTime = true
 
 	style := func(s *styles.Style) {
 		s.Min.X.Em(8)
@@ -355,7 +342,7 @@ func (ti *TimeInput) Init() {
 	}
 
 	ti.Maker(func(p *tree.Plan) {
-		if ti.displayDate {
+		if ti.DisplayDate {
 			tree.Add(p, func(w *TextField) {
 				w.SetTooltip("The date")
 				w.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
@@ -388,7 +375,7 @@ func (ti *TimeInput) Init() {
 			})
 		}
 
-		if ti.displayTime {
+		if ti.DisplayTime {
 			tree.Add(p, func(w *TextField) {
 				w.SetTooltip("The time")
 				w.SetLeadingIcon(icons.Schedule, func(e events.Event) {
