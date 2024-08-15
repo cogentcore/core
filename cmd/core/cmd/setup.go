@@ -46,22 +46,19 @@ func Setup(c *config.Config) error { //types:add
 		return fmt.Errorf("unknown Linux distro (apt-get and dnf not found); file an issue at https://github.com/cogentcore/core/issues")
 	case "windows":
 		if _, err := exec.LookPath("gcc"); err != nil {
-			err := vc.Run("curl", "-OL", "https://github.com/jmeubank/tdm-gcc/releases/download/v10.3.0-tdm64-2/tdm64-gcc-10.3.0-2.exe")
+			err := vc.Run("curl", "-OL", "https://github.com/skeeto/w64devkit/releases/download/v2.0.0/w64devkit-x64-2.0.0.exe")
 			if err != nil {
 				return err
 			}
-			path, err := filepath.Abs("tdm64-gcc-10.3.0-2.exe")
+			path, err := filepath.Abs("w64devkit-x64-2.0.0.exe")
 			if err != nil {
 				return err
 			}
-			err = vc.Run(path)
+			err = vc.Run(path, "x", "-oC:", "-aoa")
 			if err != nil {
 				return err
 			}
-			err = exec.Run("cmd.exe", "/c", `cd C:\TDM-GCC-64 && mingwvars.bat`)
-			if err != nil {
-				return err
-			}
+			fmt.Println("###  IMPORTANT: ###\nYou need to add C:\\w64devkit\\bin to your PATH\nClick the Windows menu and start typing 'environ..' and it will show you control panel item to set environment variables.  At bottom of dialog, click on Environment Variables.., then on the 'Path' variable in either User or System section (System is applied to all users).  You will need to restart your shell / app to get the updates.")
 		} else {
 			logx.PrintlnWarn("gcc already installed")
 		}
