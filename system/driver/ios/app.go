@@ -47,7 +47,7 @@ type App struct {
 	// GPU is the system GPU used for the app
 	GPU *gpu.GPU
 
-	// Winptr is the pointer to the underlying system window
+	// Winptr is the pointer to the underlying system CAMetalLayer.
 	Winptr uintptr
 }
 
