@@ -9,6 +9,7 @@ package web
 import (
 	"image"
 	"image/draw"
+	"strings"
 	"syscall/js"
 	"unsafe"
 
@@ -40,7 +41,9 @@ func (dw *Drawer) AsGPUDrawer() *gpudraw.Drawer {
 // InitDrawer sets the [Drawer] to a WebGPU-based drawer if the browser
 // supports WebGPU and a backup 2D image drawer otherwise.
 func (a *App) InitDrawer() {
-	if !js.Global().Get("navigator").Get("gpu").Truthy() {
+	// TODO(wgpu): Firefox currently does not support WebGPU in release builds.
+	isFirefox := strings.Contains(js.Global().Get("navigator").Get("userAgent").String(), "Firefox")
+	if isFirefox || !js.Global().Get("navigator").Get("gpu").Truthy() {
 		a.Draw.context2D = js.Global().Get("document").Call("querySelector", "canvas").Call("getContext", "2d")
 		return
 	}
