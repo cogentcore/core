@@ -92,7 +92,12 @@ func (sw *Scene) Init() {
 		}
 		drw := win.SystemWindow.Drawer()
 		system.TheApp.RunOnMain(func() {
-			sw.XYZ.ConfigFrameFromSurface(drw.Renderer().(*gpu.Surface))
+			sf, ok := drw.Renderer().(*gpu.Surface)
+			if !ok {
+				core.ErrorSnackbar(sw, errors.New("WebGPU not available for 3D rendering"))
+				return
+			}
+			sw.XYZ.ConfigFrameFromSurface(sf)
 		})
 		sw.XYZ.SetNeedsRender()
 	})
