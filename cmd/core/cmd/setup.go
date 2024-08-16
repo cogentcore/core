@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/core/config"
@@ -59,7 +58,10 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
-			errors.Log(windowsRegistryAddPath(`C:\w64devkit\bin`))
+			err = windowsRegistryAddPath(`C:\w64devkit\bin`)
+			if err != nil {
+				return err
+			}
 		} else {
 			logx.PrintlnWarn("gcc already installed")
 		}

@@ -12,10 +12,10 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// WindowsRegistryAddPath adds given path to the system path in the
-// windows registry, using windows path back-slashes.
-// If adding multiple paths, put ; between them, but do NOT add a leading
-// or trailing semicolon -- these will be handled automatically.
+// windowsRegistryAddPath adds the given filepath to the system path in the
+// Windows registry. If you are adding multiple paths, put a semicolon between
+// them, but do NOT add a leading or trailing semicolon; these will be handled
+// automatically.
 func windowsRegistryAddPath(path string) error {
 	k, err := registry.OpenKey(registry.LOCAL_MACHINE, `System\CurrentControlSet\Control\Session Manager\Environment`, registry.QUERY_VALUE|registry.SET_VALUE)
 	if err != nil {
