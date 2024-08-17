@@ -13,3 +13,5 @@ var _ = types.AddFunc(&types.Func{Name: "main.Run", Doc: "Run runs the specified
 var _ = types.AddFunc(&types.Func{Name: "main.Interactive", Doc: "Interactive runs an interactive shell that allows the user to input cosh.", Args: []string{"c", "in"}, Returns: []string{"error"}})
 
 var _ = types.AddFunc(&types.Func{Name: "main.Build", Doc: "Build builds the specified input cosh file to the specified output Go file.", Args: []string{"c"}, Returns: []string{"error"}})
+
+var _ = types.AddFunc(&types.Func{Name: "main.Transpile", Doc: "Transpile transpiles all .cosh files in current directory\ninto corresponding .go files, and then runs go build.", Args: []string{"c"}, Returns: []string{"error"}})

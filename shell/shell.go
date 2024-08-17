@@ -94,6 +94,13 @@ type Shell struct {
 	// and saved / restored from ~/.coshhist file
 	Hist []string
 
+	// FuncToVar translates function definitions into variable definitions,
+	// which is the default for interactive use of random code fragments
+	// without the complete go formatting.
+	// For pure transpiling of a complete codebase with full proper Go formatting
+	// this should be turned off.
+	FuncToVar bool
+
 	// commandArgs is a stack of args passed to a command, used for simplified
 	// processing of args expressions.
 	commandArgs stack.Stack[[]string]
@@ -326,6 +333,25 @@ func (sh *Shell) TranspileFile(in string, out string) error {
 	sh.Lines = append(sh.Lines, "}")
 	src := []byte(sh.Code())
 	// fmt.Println(string(src))
+	res, err := imports.Process(out, src, nil)
+	if err != nil {
+		res = src
+		slog.Error(err.Error())
+	} else {
+		err = sh.DepthError()
+	}
+	werr := os.WriteFile(out, res, 0666)
+	return errors.Join(err, werr)
+}
+
+// TranspileOnly only does direct transpiling of input to output
+// without adding anything to the resulting file.
+func (sh *Shell) TranspileOnly(in string, out string) error {
+	err := sh.TranspileCodeFromFile(in)
+	if err != nil {
+		return err
+	}
+	src := []byte(sh.Code())
 	res, err := imports.Process(out, src, nil)
 	if err != nil {
 		res = src

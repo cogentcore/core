@@ -55,7 +55,7 @@ type Config struct {
 
 func main() { //types:skip
 	opts := cli.DefaultOptions("cosh", "An interactive tool for running and compiling Cogent Shell (cosh).")
-	cli.Run(opts, &Config{}, Run, Build)
+	cli.Run(opts, &Config{}, Run, Build, Transpile)
 }
 
 // Run runs the specified cosh file. If no file is specified,
@@ -113,4 +113,19 @@ func Build(c *Config) error {
 		c.Output = strings.TrimSuffix(c.Input, filepath.Ext(c.Input)) + ".go"
 	}
 	return shell.NewShell().TranspileFile(c.Input, c.Output)
+}
+
+// Transpile transpiles all .cosh files in current directory
+// into corresponding .go files, and then runs go build.
+func Transpile(c *Config) error {
+	fns := fsx.Filenames(".", ".cosh")
+	var errs []error
+	for _, fn := range fns {
+		ofn := strings.TrimSuffix(fn, filepath.Ext(fn)) + ".go"
+		err := shell.NewShell().TranspileOnly(fn, ofn)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
 }
