@@ -5,14 +5,12 @@
 package core
 
 import (
-	"fmt"
 	"image"
 
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/vgpu/szalloc"
 	"golang.org/x/image/draw"
 )
 
@@ -145,41 +143,12 @@ func (sp *Sprite) send(typ events.Types, original ...events.Event) {
 	sp.handleEvent(e)
 }
 
-// Sprites manages a collection of Sprites organized by size and name.
+// Sprites manages a collection of Sprites, with unique name ids.
 type Sprites struct {
-
-	// map of uniquely named sprites
-	Names ordmap.Map[string, *Sprite]
-
-	// allocation of sprites by size for rendering
-	szAlloc szalloc.SzAlloc
+	ordmap.Map[string, *Sprite]
 
 	// set to true if sprites have been modified since last config
 	Modified bool
-}
-
-func (ss *Sprites) init() {
-	ss.Names.Init()
-}
-
-// allocSizes allocates the sprites by size to fixed set of images and layers
-func (ss *Sprites) allocSizes() {
-	ns := ss.Names.Len()
-	szs := make([]image.Point, ns)
-	idx := 0
-	for _, kv := range ss.Names.Order {
-		sp := kv.Value
-		if sp.Geom.Size == (image.Point{}) {
-			continue
-		}
-		szs[idx] = sp.Geom.Size
-		idx++
-	}
-	if idx != ns {
-		szs = szs[:idx]
-	}
-	ss.szAlloc.SetSizes(image.Point{4, 4}, system.MaxImageLayers, szs)
-	ss.szAlloc.Alloc()
 }
 
 // Add adds sprite to list, and returns the image index and
@@ -187,26 +156,26 @@ func (ss *Sprites) allocSizes() {
 // exists on list, then it is returned, with size allocation
 // updated as needed.
 func (ss *Sprites) Add(sp *Sprite) {
-	ss.init()
-	ss.Names.Add(sp.Name, sp)
+	ss.Init()
+	ss.Map.Add(sp.Name, sp)
 	ss.Modified = true
 }
 
 // Delete deletes sprite by name, returning indexes where it was located.
 // All sprite images must be updated when this occurs, as indexes may have shifted.
 func (ss *Sprites) Delete(sp *Sprite) {
-	ss.Names.DeleteKey(sp.Name)
+	ss.DeleteKey(sp.Name)
 	ss.Modified = true
 }
 
 // SpriteByName returns the sprite by name
 func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
-	return ss.Names.ValueByKeyTry(name)
+	return ss.ValueByKeyTry(name)
 }
 
 // reset removes all sprites
 func (ss *Sprites) reset() {
-	ss.Names.Reset()
+	ss.Reset()
 	ss.Modified = true
 }
 
@@ -234,44 +203,16 @@ func (ss *Sprites) InactivateSprite(name string) {
 	}
 }
 
-// configSprites updates the Drawer configuration of sprites.
-// Does a new SzAlloc, and sets corresponding images.
-func (ss *Sprites) configSprites(drw system.Drawer) {
-	// fmt.Println("config sprites")
-	ss.allocSizes()
-	sa := &ss.szAlloc
-	for gpi, ga := range sa.GpAllocs {
-		gsz := sa.GpSizes[gpi]
-		imgidx := spriteStart + gpi
-		drw.ConfigImageDefaultFormat(imgidx, gsz.X, gsz.Y, len(ga))
-		for ii, spi := range ga {
-			if err := ss.Names.IndexIsValid(spi); err != nil {
-				fmt.Println(err)
-				continue
-			}
-			sp := ss.Names.ValueByIndex(spi)
-			drw.SetGoImage(imgidx, ii, sp.Pixels, system.NoFlipY)
+// drawSprites draws sprites
+func (ss *Sprites) drawSprites(drw system.Drawer, scpos image.Point) {
+	for _, kv := range ss.Order {
+		sp := kv.Value
+		if !sp.Active {
+			continue
 		}
+		// note: in general we assume sprites are static, so Unchanged.
+		// if needed, could add a "dynamic" flag or something.
+		drw.Copy(sp.Geom.Pos.Add(scpos), sp.Pixels, sp.Pixels.Bounds(), draw.Over, system.Unchanged)
 	}
 	ss.Modified = false
-}
-
-// drawSprites draws sprites
-func (ss *Sprites) drawSprites(drw system.Drawer) {
-	// fmt.Println("draw sprites")
-	sa := &ss.szAlloc
-	for gpi, ga := range sa.GpAllocs {
-		imgidx := spriteStart + gpi
-		for ii, spi := range ga {
-			if ss.Names.IndexIsValid(spi) != nil {
-				continue
-			}
-			sp := ss.Names.ValueByIndex(spi)
-			if !sp.Active {
-				continue
-			}
-			// fmt.Println("ds", imgidx, ii, sp.Geom.Pos)
-			drw.Copy(imgidx, ii, sp.Geom.Pos, image.Rectangle{}, draw.Over, system.NoFlipY)
-		}
-	}
 }

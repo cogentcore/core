@@ -130,6 +130,7 @@ func (sw *Scene) ManipBox() {
 	nm := ManipBoxName
 
 	nb := sw.CurrentSelected.AsNodeBase()
+	// todo: definitely need to use plan based updating here!
 	xy.DeleteChildByName(nm) // get rid of existing
 	clr := sw.SelectionParams.Color
 
@@ -151,7 +152,6 @@ func (sw *Scene) ManipBox() {
 	NewManipPoint(mb, nm+"-uul", mbspm.Name, clr, math32.Vec3(bbox.Max.X, bbox.Max.Y, bbox.Min.Z))
 	NewManipPoint(mb, nm+"-uuu", mbspm.Name, clr, bbox.Max)
 
-	xy.SetNeedsConfig()
 	sw.NeedsRender()
 }
 

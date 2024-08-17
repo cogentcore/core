@@ -129,9 +129,9 @@ func (ev *Env) ConfigScene(se *xyz.Scene) {
 	ev.SceneEditor.Styler(func(s *styles.Style) {
 		se.Background = colors.Scheme.Select.Container
 	})
-	xyz.NewAmbientLight(se, "ambient", 0.3, xyz.DirectSun)
+	xyz.NewAmbient(se, "ambient", 0.3, xyz.DirectSun)
 
-	dir := xyz.NewDirLight(se, "dir", 1, xyz.DirectSun)
+	dir := xyz.NewDirectional(se, "dir", 1, xyz.DirectSun)
 	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
 	// grtx := xyz.NewTextureFileFS(assets.Content, se, "ground", "ground.png")
@@ -519,8 +519,6 @@ func (ev *Env) NoGUIRun() {
 	ev.ConfigScene(se)
 	ev.MakeWorld()
 	ev.ConfigView3D(se)
-
-	se.Config()
 
 	img, err := ev.RenderEyeImg()
 	if err == nil {

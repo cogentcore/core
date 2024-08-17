@@ -10,11 +10,12 @@ import (
 	"image/draw"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/vgpu"
 )
 
 // Text2D presents 2D rendered text on a vertically oriented plane, using a texture.
@@ -61,6 +62,7 @@ func (txt *Text2D) Init() {
 func (txt *Text2D) Defaults() {
 	txt.Solid.Defaults()
 	txt.Pose.Scale.SetScalar(.005)
+	txt.Pose.RotateOnAxis(0, 1, 0, 180)
 	txt.Styles.Defaults()
 	txt.Styles.Font.Size.Pt(36)
 	txt.Styles.Margin.Set(units.Px(2))
@@ -134,12 +136,12 @@ func (txt *Text2D) RenderText() {
 		tx, err = txt.Scene.TextureByNameTry(txname)
 		if err != nil {
 			tx = &TextureBase{Name: txname}
-			txt.Scene.AddTexture(tx)
 			img = image.NewRGBA(bounds)
 			tx.AsTextureBase().RGBA = img
+			txt.Scene.SetTexture(tx)
 			txt.Material.SetTexture(tx)
 		} else {
-			if vgpu.Debug {
+			if gpu.Debug {
 				fmt.Printf("xyz.Text2D: error: texture name conflict: %s\n", txname)
 			}
 			txt.Material.SetTexture(tx)
@@ -152,7 +154,7 @@ func (txt *Text2D) RenderText() {
 			img = image.NewRGBA(bounds)
 		}
 		tx.AsTextureBase().RGBA = img
-		txt.Scene.Phong.UpdateTextureName(tx.AsTextureBase().Name)
+		txt.Scene.Phong.SetTexture(tx.AsTextureBase().Name, phong.NewTexture(img))
 	}
 	rs := &txt.RenderState
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {

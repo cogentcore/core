@@ -12,10 +12,7 @@ import (
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/core/config"
-	"github.com/mitchellh/go-homedir"
 )
-
-const vulkanVersion = "1.3.283.0"
 
 // Setup installs platform-specific dependencies for the current platform.
 // It only needs to be called once per system.
@@ -32,27 +29,6 @@ func Setup(c *config.Config) error { //types:add
 		} else {
 			logx.PrintlnWarn("xcode tools already installed")
 		}
-		if _, err := exec.LookPath("vulkaninfo"); err == nil {
-			logx.PrintlnWarn("vulkan already installed")
-			return nil
-		}
-		err = vc.Run("curl", "-OL", "https://sdk.lunarg.com/sdk/download/"+vulkanVersion+"/mac/vulkansdk-macos-"+vulkanVersion+".dmg")
-		if err != nil {
-			return err
-		}
-		err = exec.Run("sudo", "hdiutil", "attach", "vulkansdk-macos-"+vulkanVersion+".dmg")
-		if err != nil {
-			return err
-		}
-		home, err := homedir.Dir()
-		if err != nil {
-			return err
-		}
-		root := filepath.Join(home, "VulkanSDK", vulkanVersion)
-		err = vc.Run("sudo", "/Volumes/vulkansdk-macos-"+vulkanVersion+"/InstallVulkan.app/Contents/MacOS/InstallVulkan", "--root", root, "--accept-licenses", "--default-answer", "--confirm-command", "install", "com.lunarg.vulkan.core", "com.lunarg.vulkan.usr", "com.lunarg.vulkan.sdl2", "com.lunarg.vulkan.glm", "com.lunarg.vulkan.volk", "com.lunarg.vulkan.vma")
-		if err != nil {
-			return err
-		}
 		return nil
 	case "linux":
 		_, err := exec.LookPath("apt-get")
@@ -61,7 +37,7 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
-			return vc.Run("sudo", "apt-get", "install", "libgl1-mesa-dev", "xorg-dev")
+			return vc.Run("sudo", "apt-get", "install", "-f", "-y", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev")
 		}
 		_, err = exec.LookPath("dnf")
 		if err == nil {
@@ -70,19 +46,19 @@ func Setup(c *config.Config) error { //types:add
 		return fmt.Errorf("unknown Linux distro (apt-get and dnf not found); file an issue at https://github.com/cogentcore/core/issues")
 	case "windows":
 		if _, err := exec.LookPath("gcc"); err != nil {
-			err := vc.Run("curl", "-OL", "https://github.com/jmeubank/tdm-gcc/releases/download/v10.3.0-tdm64-2/tdm64-gcc-10.3.0-2.exe")
+			err := vc.Run("curl", "-OL", "https://github.com/skeeto/w64devkit/releases/download/v2.0.0/w64devkit-x64-2.0.0.exe")
 			if err != nil {
 				return err
 			}
-			path, err := filepath.Abs("tdm64-gcc-10.3.0-2.exe")
+			path, err := filepath.Abs("w64devkit-x64-2.0.0.exe")
 			if err != nil {
 				return err
 			}
-			err = vc.Run(path)
+			err = vc.Run(path, "x", "-oC:", "-aoa")
 			if err != nil {
 				return err
 			}
-			err = exec.Run("cmd.exe", "/c", `cd C:\TDM-GCC-64 && mingwvars.bat`)
+			err = windowsRegistryAddPath(`C:\w64devkit\bin`)
 			if err != nil {
 				return err
 			}

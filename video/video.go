@@ -16,9 +16,9 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/system"
+	"github.com/cogentcore/reisen"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
-	"github.com/zergon321/reisen"
 )
 
 // Video represents a video playback widget without any controls.
@@ -37,6 +37,9 @@ type Video struct { //types:add
 	Stop bool
 
 	frameBuffer <-chan *image.RGBA
+
+	// last frame we have rendered
+	lastFrame *image.RGBA
 
 	// target frame number to be played
 	frameTarg int
@@ -60,30 +63,29 @@ func (v *Video) Destroy() {
 	v.WidgetBase.Destroy()
 }
 
-// DirectRenderImage uploads the current view frame directly into the drawer
-func (v *Video) DirectRenderImage(drw system.Drawer, idx int) {
+// RenderDraw draws the current image to RenderWindow drawer
+func (v *Video) RenderDraw(drw system.Drawer, op draw.Op) {
 	if !v.IsVisible() {
 		return
 	}
-	if v.framePlayed >= v.frameTarg {
+	frame := v.lastFrame
+	unchanged := true
+	if v.framePlayed >= v.frameTarg && frame == nil {
 		return
 	}
-	frame, ok := <-v.frameBuffer
-	if !ok {
+	newFrame, ok := <-v.frameBuffer
+	if !ok && frame == nil {
 		v.Stop = true
 		return
 	}
-	v.framePlayed++
-	drw.SetGoImage(idx, 0, frame, system.NoFlipY)
-}
-
-// DirectRenderDraw draws the current image to RenderWindow drawer
-func (v *Video) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	if !v.IsVisible() {
-		return
+	if ok {
+		frame = newFrame
+		v.lastFrame = frame
+		unchanged = false
 	}
-	bb := v.Geom.TotalBBox
-	drw.Scale(idx, 0, bb, image.Rectangle{}, draw.Src, flipY, v.Rotation)
+	v.framePlayed++
+	bb := v.Geom.TotalBBox.Add(v.Scene.SceneGeom.Pos)
+	drw.Scale(bb, frame, image.Rectangle{}, v.Rotation, draw.Src, unchanged)
 }
 
 // Open opens the video specified by the given filepath.

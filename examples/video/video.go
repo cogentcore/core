@@ -11,6 +11,7 @@ import (
 func main() {
 	b := core.NewBody("Video Example")
 	v := video.NewVideo(b)
+	// v.Rotation = -90
 	v.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})

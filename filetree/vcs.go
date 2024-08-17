@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"fmt"
 	"log/slog"
-	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
@@ -30,6 +29,7 @@ func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 		if sfn == nil {
 			return tree.Continue
 		}
+		sfn.detectVCSRepo(false)
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
@@ -50,7 +50,7 @@ func (fn *Node) detectVCSRepo(updateFiles bool) bool {
 	}
 	path := string(fn.Filepath)
 	rtyp := vcs.DetectRepo(path)
-	if rtyp == "" {
+	if rtyp == vcs.NoVCS {
 		return false
 	}
 	var err error
@@ -368,30 +368,4 @@ func (fn *Node) UpdateAllVCS() {
 		}
 		return tree.Break
 	})
-}
-
-// versionControlSystems is a list of supported Version Control Systems.
-// These must match the VCS Types from vcs which in turn
-// is based on masterminds/vcs
-var versionControlSystems = []string{"git", "svn", "bzr", "hg"}
-
-// IsVersionControlSystem returns true if the given string matches one of the
-// standard VersionControlSystems -- uses lowercase version of str.
-func IsVersionControlSystem(str string) bool {
-	stl := strings.ToLower(str)
-	for _, vcn := range versionControlSystems {
-		if stl == vcn {
-			return true
-		}
-	}
-	return false
-}
-
-// VersionControlName is the name of a version control system
-type VersionControlName string
-
-// Value registers [core.Chooser] as the [core.Value] widget
-// for [VersionControlName]
-func (kn VersionControlName) Value() core.Value {
-	return core.NewChooser().SetStrings(versionControlSystems...)
 }

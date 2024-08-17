@@ -1270,7 +1270,7 @@ func (tf *TextField) charRenderPos(charidx int, wincoords bool) math32.Vector2 {
 	pos := tf.effPos
 	if wincoords {
 		sc := tf.Scene
-		pos = pos.Add(math32.Vector2FromPoint(sc.sceneGeom.Pos))
+		pos = pos.Add(math32.Vector2FromPoint(sc.SceneGeom.Pos))
 	}
 	cpos := tf.relCharPos(tf.startPos, charidx)
 	return pos.Add(cpos)

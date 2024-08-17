@@ -8,16 +8,18 @@ package xyzcore
 //go:generate core generate
 
 import (
+	"errors"
 	"image"
 	"image/draw"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/xyz"
 )
 
@@ -79,6 +81,7 @@ func (sw *Scene) Init() {
 			if cursz == sz && !doConfig {
 				return
 			}
+			sw.XYZ.Rebuild()
 		} else {
 			doConfig = true
 		}
@@ -89,10 +92,12 @@ func (sw *Scene) Init() {
 		}
 		drw := win.SystemWindow.Drawer()
 		system.TheApp.RunOnMain(func() {
-			sw.XYZ.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
-			if doConfig {
-				sw.XYZ.Config()
+			sf, ok := drw.Renderer().(*gpu.Surface)
+			if !ok {
+				core.ErrorSnackbar(sw, errors.New("WebGPU not available for 3D rendering"))
+				return
 			}
+			sw.XYZ.ConfigFrameFromSurface(sf)
 		})
 		sw.XYZ.SetNeedsRender()
 	})
@@ -119,28 +124,22 @@ func (sw *Scene) Render() {
 	if sw.XYZ.Frame == nil {
 		return
 	}
-	if sw.XYZ.NeedsConfig {
-		system.TheApp.RunOnMain(func() {
-			sw.XYZ.Config()
-		})
-	}
 	sw.XYZ.DoUpdate()
 }
 
-// DirectRenderImage uploads framebuffer image
-func (sw *Scene) DirectRenderImage(drw system.Drawer, idx int) {
+// RenderDraw draws the current image to RenderWindow drawer
+func (sw *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
 	if sw.XYZ.Frame == nil || !sw.IsVisible() {
 		return
 	}
-	drw.SetFrameImage(idx, sw.XYZ.Frame.Frames[0])
-}
-
-// DirectRenderDraw draws the current image to RenderWindow drawer
-func (sw *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	if !sw.IsVisible() {
+	agd, ok := drw.(gpudraw.AsGPUDrawer)
+	if !ok || agd.AsGPUDrawer() == nil {
+		core.ErrorSnackbar(sw, errors.New("xyz.Scene.RenderDraw: no WebGPU drawer available"))
 		return
 	}
-	bb := sw.Geom.TotalBBox
+	gdrw := agd.AsGPUDrawer()
+	gdrw.UseTexture(sw.XYZ.Frame.Frames[0])
+	bb := sw.Geom.TotalBBox.Add(sw.Scene.SceneGeom.Pos)
 	ibb := image.Rectangle{Max: bb.Size()}
-	drw.Copy(idx, 0, bb.Min, ibb, draw.Src, flipY)
+	gdrw.CopyUsed(bb.Min, ibb, draw.Src, false)
 }

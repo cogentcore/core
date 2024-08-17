@@ -74,14 +74,14 @@ func (st *Stage) runPopup() *Stage {
 	ms.popups.push(st)
 	st.setPopups(ms) // sets all pointers
 
-	maxSz := msc.sceneGeom.Size
+	maxSz := msc.SceneGeom.Size
 
 	// original size and position, which is that of the context widget / location for a tooltip
-	osz := sc.sceneGeom.Size
-	opos := sc.sceneGeom.Pos
+	osz := sc.SceneGeom.Size
+	opos := sc.SceneGeom.Pos
 
-	sc.sceneGeom.Size = maxSz
-	sc.sceneGeom.Pos = st.Pos
+	sc.SceneGeom.Size = maxSz
+	sc.SceneGeom.Pos = st.Pos
 	sz := sc.prefSize(maxSz)
 	scrollWd := int(sc.Styles.ScrollbarWidth.Dots)
 	fontHt := 16
@@ -95,15 +95,15 @@ func (st *Stage) runPopup() *Stage {
 		maxht := int(SystemSettings.MenuMaxHeight * fontHt)
 		sz.Y = min(maxht, sz.Y)
 	case SnackbarStage:
-		b := msc.sceneGeom.Bounds()
+		b := msc.SceneGeom.Bounds()
 		// Go in the middle [(max - min) / 2], and then subtract
 		// half of the size because we are specifying starting point,
 		// not the center. This results in us being centered.
-		sc.sceneGeom.Pos.X = (b.Max.X - b.Min.X - sz.X) / 2
+		sc.SceneGeom.Pos.X = (b.Max.X - b.Min.X - sz.X) / 2
 		// get enough space to fit plus 10 extra pixels of margin
-		sc.sceneGeom.Pos.Y = b.Max.Y - sz.Y - 10
+		sc.SceneGeom.Pos.Y = b.Max.Y - sz.Y - 10
 	case TooltipStage:
-		sc.sceneGeom.Pos.X = opos.X
+		sc.SceneGeom.Pos.X = opos.X
 		// default to tooltip above element
 		ypos := opos.Y - sz.Y - 10
 		if ypos < 0 {
@@ -115,11 +115,11 @@ func (st *Stage) runPopup() *Stage {
 		if maxy > opos.Y-10 {
 			ypos = opos.Add(osz).Y + 10
 		}
-		sc.sceneGeom.Pos.Y = ypos
+		sc.SceneGeom.Pos.Y = ypos
 	}
 
-	sc.sceneGeom.Size = sz
-	sc.fitInWindow(msc.sceneGeom) // does resize
+	sc.SceneGeom.Size = sz
+	sc.fitInWindow(msc.SceneGeom) // does resize
 	sc.showIter = 0
 
 	if st.Timeout > 0 {
@@ -171,7 +171,7 @@ func (st *Stage) popupHandleEvent(e events.Event) {
 	if e.IsHandled() {
 		return
 	}
-	e.SetLocalOff(st.Scene.sceneGeom.Pos)
+	e.SetLocalOff(st.Scene.SceneGeom.Pos)
 	// fmt.Println("pos:", evi.Pos(), "local:", evi.LocalPos())
 	st.Scene.Events.handleEvent(e)
 }
@@ -214,7 +214,7 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 	if e.HasPos() {
 		pos := e.WindowPos()
 		// fmt.Println("pos:", pos, "top geom:", ts.SceneGeom)
-		if pos.In(ts.sceneGeom.Bounds()) {
+		if pos.In(ts.SceneGeom.Bounds()) {
 			top.popupHandleEvent(e)
 			e.SetHandled()
 			return
@@ -231,7 +231,7 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 		for i := pm.stack.Len() - 1; i >= 0; i-- {
 			s := pm.stack.ValueByIndex(i)
 			ss := s.Scene
-			if !s.ignoreEvents && pos.In(ss.sceneGeom.Bounds()) {
+			if !s.ignoreEvents && pos.In(ss.SceneGeom.Bounds()) {
 				s.popupHandleEvent(e)
 				e.SetHandled()
 				return

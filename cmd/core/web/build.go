@@ -104,9 +104,12 @@ func makeFiles(c *config.Config) error {
 		return err
 	}
 
-	preRenderHTML, err := exec.Output("go", "run", "-tags", "offscreen,generatehtml", ".")
-	if err != nil {
-		return err
+	preRenderHTML := ""
+	if c.Web.GenerateHTML {
+		preRenderHTML, err = exec.Output("go", "run", "-tags", "offscreen,generatehtml", ".")
+		if err != nil {
+			return err
+		}
 	}
 	preRenderHTMLIndex := preRenderHTML
 	pagesPreRenderData := &ppath.PreRenderData{}

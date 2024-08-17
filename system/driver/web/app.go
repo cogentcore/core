@@ -28,8 +28,6 @@ import (
 )
 
 func Init() {
-	TheApp.Draw = &Drawer{}
-
 	err := os.Setenv("HOME", "/home/me")
 	if err != nil {
 		slog.Error("error setting home directory", "err", err)
@@ -46,7 +44,6 @@ func Init() {
 	}
 
 	TheApp.SetSystemWindow()
-
 	base.Init(TheApp, &TheApp.App)
 }
 
@@ -87,7 +84,9 @@ func (a *App) SetSystemWindow() {
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	a.UnderlyingPlatform = UserAgentToOS(ua)
 
+	a.Draw = &Drawer{}
 	a.Resize()
+	a.InitDrawer()
 	a.Event.Window(events.WinShow)
 	a.Event.Window(events.ScreenUpdate)
 	a.Event.Window(events.WinFocus)
@@ -150,7 +149,11 @@ func (a *App) Resize() {
 	cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.X)/a.Scrn.DevicePixelRatio))
 	cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.Y)/a.Scrn.DevicePixelRatio))
 
-	a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
+	if a.Draw.wgpu != nil {
+		a.Draw.wgpu.System.Renderer.SetSize(a.Scrn.PixSize)
+	} else {
+		a.Draw.base.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
+	}
 
 	a.Event.WindowResize()
 }

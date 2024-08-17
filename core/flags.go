@@ -55,11 +55,9 @@ func (wb *WidgetBase) IsDisabled() bool {
 	return wb.StateIs(states.Disabled)
 }
 
-// IsReadOnly returns whether this node is flagged as [ReadOnly] or [Disabled].
-// If so, behave appropriately. Styling is based on each state separately,
-// but behaviors are often the same for both of these states.
+// IsReadOnly returns whether this widget is flagged as either [states.ReadOnly] or [states.Disabled].
 func (wb *WidgetBase) IsReadOnly() bool {
-	return wb.StateIs(states.ReadOnly) || wb.StateIs(states.Disabled)
+	return wb.Styles.IsReadOnly()
 }
 
 // SetReadOnly sets the [states.ReadOnly] flag to the given value.

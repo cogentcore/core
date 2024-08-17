@@ -21,7 +21,7 @@ func (mr *Int) Set(mn, mx int) {
 // SetInfinity sets the Min to +MaxFloat, Max to -MaxFloat -- suitable for
 // iteratively calling Fit*InRange
 func (mr *Int) SetInfinity() {
-	mr.Min, mr.Max = math.MaxInt64, -math.MaxInt64
+	mr.Min, mr.Max = math.MaxInt, -math.MaxInt
 }
 
 // IsValid returns true if Min <= Max

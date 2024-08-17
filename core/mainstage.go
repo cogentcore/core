@@ -118,16 +118,16 @@ func (st *Stage) addDialogParts() *Stage {
 	mv.OnChange(func(e events.Event) {
 		e.SetHandled()
 		pd := e.PrevDelta()
-		np := sc.sceneGeom.Pos.Add(pd)
+		np := sc.SceneGeom.Pos.Add(pd)
 		np.X = max(np.X, 0)
 		np.Y = max(np.Y, 0)
 		rw := sc.RenderWindow()
 		sz := rw.SystemWindow.Size()
-		mx := sz.X - int(sc.sceneGeom.Size.X)
-		my := sz.Y - int(sc.sceneGeom.Size.Y)
+		mx := sz.X - int(sc.SceneGeom.Size.X)
+		my := sz.Y - int(sc.SceneGeom.Size.Y)
 		np.X = min(np.X, mx)
 		np.Y = min(np.Y, my)
-		sc.sceneGeom.Pos = np
+		sc.SceneGeom.Pos = np
 		sc.NeedsRender()
 	})
 	rsz := NewHandle(parts)
@@ -143,11 +143,11 @@ func (st *Stage) addDialogParts() *Stage {
 	rsz.OnChange(func(e events.Event) {
 		e.SetHandled()
 		pd := e.PrevDelta()
-		np := sc.sceneGeom.Size.Add(pd)
+		np := sc.SceneGeom.Size.Add(pd)
 		minsz := 100
 		np.X = max(np.X, minsz)
 		np.Y = max(np.Y, minsz)
-		ng := sc.sceneGeom
+		ng := sc.SceneGeom
 		ng.Size = np
 		sc.resize(ng)
 	})
@@ -249,15 +249,15 @@ func (st *Stage) runWindow() *Stage {
 	if st.Context != nil {
 		ms := st.Context.AsWidget().Scene.Stage.Mains
 		msc := ms.top().Scene
-		sc.sceneGeom.Size = sz
-		sc.fitInWindow(msc.sceneGeom) // does resize
+		sc.SceneGeom.Size = sz
+		sc.fitInWindow(msc.SceneGeom) // does resize
 		ms.push(st)
 		st.setMains(ms)
 	} else {
 		ms := &currentRenderWindow.mains
 		msc := ms.top().Scene
-		sc.sceneGeom.Size = sz
-		sc.fitInWindow(msc.sceneGeom) // does resize
+		sc.SceneGeom.Size = sz
+		sc.fitInWindow(msc.SceneGeom) // does resize
 		ms.push(st)
 		st.setMains(ms)
 	}
@@ -299,7 +299,7 @@ func (st *Stage) runDialog() *Stage {
 	sc := st.Scene
 	st.configMainStage()
 	st.addDialogParts()
-	sc.sceneGeom.Pos = st.Pos
+	sc.SceneGeom.Pos = st.Pos
 
 	st.setMains(ms) // temporary for prefs
 
@@ -320,14 +320,14 @@ func (st *Stage) runDialog() *Stage {
 		st.Mains = nil
 		sc.resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
-		sc.sceneGeom.Pos = image.Point{} // ignore pos
+		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.newRenderWindow()
 		dialogRenderWindows.add(win)
 		currentRenderWindow = win
 		win.goStartEventLoop()
 		return st
 	}
-	sc.sceneGeom.Size = sz
+	sc.SceneGeom.Size = sz
 	sc.fitInWindow(st.renderContext.geom) // does resize
 	ms.push(st)
 	// st.SetMains(ms) // already set
@@ -340,7 +340,7 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	opts := &system.NewWindowOptions{
 		Title:     title,
 		Icon:      appIconImages(),
-		Size:      st.Scene.sceneGeom.Size,
+		Size:      st.Scene.SceneGeom.Size,
 		StdPixels: false,
 	}
 	wgp := theWindowGeometrySaver.pref(title, nil)
@@ -385,7 +385,7 @@ func (st *Stage) mainHandleEvent(e events.Event) {
 		}
 		return
 	}
-	e.SetLocalOff(st.Scene.sceneGeom.Pos)
+	e.SetLocalOff(st.Scene.SceneGeom.Pos)
 	st.Scene.Events.handleEvent(e)
 }
 

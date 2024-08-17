@@ -109,7 +109,7 @@ func NodeNameCountSort(ecs []NodeNameCount) {
 // If cat is != fileinfo.Unknown then it only uses files of that type
 // (e.g., fileinfo.Code to find any code files)
 func (fn *Node) FileExtensionCounts(cat fileinfo.Categories) []NodeNameCount {
-	cmap := make(map[string]int, 20)
+	cmap := make(map[string]int)
 	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 		sfn := AsNode(cw)
 		if sfn == nil {

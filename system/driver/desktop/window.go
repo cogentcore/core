@@ -14,17 +14,16 @@ import (
 	"log"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
-	"cogentcore.org/core/vgpu/vdraw"
 	"github.com/go-gl/glfw/v3.3/glfw"
-
-	vk "github.com/goki/vulkan"
 )
 
 // Window is the implementation of [system.Window] for the desktop platform.
 type Window struct {
-	base.WindowMulti[*App, *vdraw.Drawer]
+	base.WindowMulti[*App, *gpudraw.Drawer]
 
 	// Glw is the glfw window associated with this window
 	Glw *glfw.Window
@@ -301,12 +300,18 @@ func (w *Window) Close() {
 	defer w.Mu.Unlock()
 
 	w.App.RunOnMain(func() {
-		vk.DeviceWaitIdle(w.Draw.Surf.Device.Device)
+		w.Draw.System.WaitDone()
 		if w.DestroyGPUFunc != nil {
 			w.DestroyGPUFunc()
 		}
-		w.Draw.Destroy()
-		w.Draw.Surf.Destroy()
+		var surf *gpu.Surface
+		if sf, ok := w.Draw.Renderer().(*gpu.Surface); ok {
+			surf = sf
+		}
+		w.Draw.Release()
+		if surf != nil { // note: release surface after draw
+			surf.Release()
+		}
 		w.Glw.Destroy()
 		w.Glw = nil // marks as closed for all other calls
 		w.Draw = nil
@@ -377,9 +382,10 @@ func (w *Window) UpdateGeom() {
 	w.PhysDPI = sc.PhysicalDPI
 	w.LogDPI = sc.LogicalDPI
 	w.Mu.Unlock()
-	// if w.Activate() {
-	// 	w.winTex.SetSize(w.PxSize)
-	// }
+	// w.App.RunOnMain(func() {
+	// note: getting non-main thread warning.
+	w.Draw.System.Renderer.SetSize(w.PixSize)
+	// })
 	if cursc != w.ScreenWindow {
 		if MonitorDebug {
 			log.Printf("desktop.Window.UpdateGeom: %v: got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)

@@ -173,24 +173,28 @@ func (ch *Chooser) Init() {
 	ch.SetIcon(icons.None).SetIndicator(icons.KeyboardArrowDown)
 	ch.CurrentIndex = -1
 	ch.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Hoverable, abilities.LongHoverable)
-		if !ch.Editable {
-			s.SetAbilities(true, abilities.Focusable)
+		if !s.IsReadOnly() {
+			s.SetAbilities(true, abilities.Activatable, abilities.Hoverable, abilities.LongHoverable)
+			if !ch.Editable {
+				s.SetAbilities(true, abilities.Focusable)
+			}
 		}
-		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.Center
 		s.Border.Radius = styles.BorderRadiusSmall
 		s.Padding.Set(units.Dp(8), units.Dp(16))
 		s.CenterAll()
-		switch ch.Type {
-		case ChooserFilled:
-			s.Background = colors.Scheme.Secondary.Container
-			s.Color = colors.Scheme.Secondary.OnContainer
-		case ChooserOutlined:
-			if !s.Is(states.Focused) {
-				s.Border.Style.Set(styles.BorderSolid)
-				s.Border.Width.Set(units.Dp(1))
-				s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
+		if !s.IsReadOnly() {
+			s.Cursor = cursors.Pointer
+			switch ch.Type {
+			case ChooserFilled:
+				s.Background = colors.Scheme.Secondary.Container
+				s.Color = colors.Scheme.Secondary.OnContainer
+			case ChooserOutlined:
+				if !s.Is(states.Focused) {
+					s.Border.Style.Set(styles.BorderSolid)
+					s.Border.Width.Set(units.Dp(1))
+					s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
+				}
 			}
 		}
 		// textfield handles everything
@@ -206,6 +210,9 @@ func (ch *Chooser) Init() {
 	})
 
 	ch.OnClick(func(e events.Event) {
+		if ch.IsReadOnly() {
+			return
+		}
 		if ch.openMenu(e) {
 			e.SetHandled()
 		}
@@ -369,7 +376,7 @@ func (ch *Chooser) Init() {
 			ch.Indicator = icons.KeyboardArrowRight
 		}
 		// editable handles through TextField
-		if !ch.Editable {
+		if !ch.Editable && !ch.IsReadOnly() {
 			tree.AddAt(p, "indicator", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
 					s.Justify.Self = styles.End

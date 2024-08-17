@@ -8,18 +8,18 @@
 package ios
 
 import (
-	"log"
 	"os/user"
 	"path/filepath"
 	"runtime"
+	"unsafe"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
-	"cogentcore.org/core/vgpu"
-	"cogentcore.org/core/vgpu/vdraw"
-	vk "github.com/goki/vulkan"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 func Init() {
@@ -33,57 +33,43 @@ func Init() {
 	runtime.LockOSThread()
 
 	system.OnSystemWindowCreated = make(chan struct{})
-	TheApp.InitVk()
+	TheApp.InitGPU()
 	base.Init(TheApp, &TheApp.App)
 }
 
 // TheApp is the single [system.App] for the iOS platform
-var TheApp = &App{AppSingle: base.NewAppSingle[*vdraw.Drawer, *Window]()}
+var TheApp = &App{AppSingle: base.NewAppSingle[*gpudraw.Drawer, *Window]()}
 
 // App is the [system.App] implementation for the iOS platform
 type App struct {
-	base.AppSingle[*vdraw.Drawer, *Window]
+	base.AppSingle[*gpudraw.Drawer, *Window]
 
 	// GPU is the system GPU used for the app
-	GPU *vgpu.GPU
+	GPU *gpu.GPU
 
-	// Winptr is the pointer to the underlying system window
+	// Winptr is the pointer to the underlying system CAMetalLayer.
 	Winptr uintptr
 }
 
-// InitVk initializes Vulkan things for the app
-func (a *App) InitVk() {
-	err := vk.SetDefaultGetInstanceProcAddr()
-	if err != nil {
-		// TODO(kai): maybe implement better error handling here
-		log.Fatalln("system/driver/ios.App.InitVk: failed to set Vulkan DefaultGetInstanceProcAddr")
-	}
-	err = vk.Init()
-	if err != nil {
-		log.Fatalln("system/driver/ios.App.InitVk: failed to initialize vulkan")
-	}
-
-	winext := vk.GetRequiredInstanceExtensions()
-	a.GPU = vgpu.NewGPU()
-	a.GPU.AddInstanceExt(winext...)
+// InitGPU initializes GPU things for the app
+func (a *App) InitGPU() {
+	a.GPU = gpu.NewGPU()
 	a.GPU.Config(a.Name())
 }
 
-// DestroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
-func (a *App) DestroyVk() {
+// DestroyGPU releases GPU things (the drawer of the window) for when the app becomes invisible
+func (a *App) DestroyGPU() {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	vk.DeviceWaitIdle(a.Draw.Surf.Device.Device)
-	a.Draw.Destroy()
-	a.Draw.Surf.Destroy()
+	a.Draw.Release()
 	a.Draw = nil
 }
 
-// FullDestroyVk destroys all vulkan things for when the app is fully quit
-func (a *App) FullDestroyVk() {
+// FullDestroyGPU destroys all GPU things for when the app is fully quit
+func (a *App) FullDestroyGPU() {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	a.GPU.Destroy()
+	a.GPU.Release()
 }
 
 // NewWindow creates a new window with the given options.
@@ -110,26 +96,16 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 // It should only be called when [App.Mu] is already locked.
 func (a *App) SetSystemWindow(winptr uintptr) error {
 	defer func() { system.HandleRecover(recover()) }()
-	var vsf vk.Surface
-	// we have to remake the surface, system, and drawer every time someone reopens the window
+	// we have to remake the surface and drawer every time someone reopens the window
 	// because the operating system changes the underlying window
-	ret := vk.CreateWindowSurface(a.GPU.Instance, winptr, nil, &vsf)
-	if err := vk.Error(ret); err != nil {
-		return err
+	wsd := &wgpu.SurfaceDescriptor{
+		MetalLayer: &wgpu.SurfaceDescriptorFromMetalLayer{
+			Layer: unsafe.Pointer(winptr), // TODO: probably not layer
+		},
 	}
-	sf := vgpu.NewSurface(a.GPU, vsf)
-
-	sys := a.GPU.NewGraphicsSystem(a.Name(), &sf.Device)
-	sys.ConfigRender(&sf.Format, vgpu.UndefType)
-	sf.SetRender(&sys.Render)
-	// sys.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
-	sys.Config()
-	a.Draw = &vdraw.Drawer{
-		Sys:     *sys,
-		YIsDown: true,
-	}
-	// a.Draw.ConfigSys()
-	a.Draw.ConfigSurface(sf, vgpu.MaxTexturesPerSet)
+	wsf := a.GPU.Instance.CreateSurface(wsd)
+	sf := gpu.NewSurface(a.GPU, wsf, a.Scrn.PixSize, 1, gpu.UndefinedType)
+	a.Draw = gpudraw.NewDrawer(a.GPU, sf)
 
 	a.Winptr = winptr
 

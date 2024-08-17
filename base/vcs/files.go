@@ -4,8 +4,6 @@
 
 package vcs
 
-//go:generate core generate
-
 import (
 	"os"
 	"path/filepath"
