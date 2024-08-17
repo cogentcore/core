@@ -21,6 +21,10 @@ type GitRepo struct {
 	vcs.GitRepo
 }
 
+func (gr *GitRepo) Type() Types {
+	return Git
+}
+
 func (gr *GitRepo) Files() (Files, error) {
 	f := make(Files)
 

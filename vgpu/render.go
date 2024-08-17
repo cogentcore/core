@@ -80,7 +80,7 @@ func (rp *Render) Destroy() {
 // Config configures the render pass for given device,
 // Using standard parameters for graphics rendering,
 // based on the given image format and depth image format
-// (pass UndefType for no depth buffer).
+// (pass UndefinedType for no depth buffer).
 func (rp *Render) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types, notSurface bool) {
 	rp.NotSurface = notSurface
 	rp.SetClearColor(0, 0, 0, 1)
@@ -120,7 +120,7 @@ func (rp *Render) ConfigImpl(dev vk.Device, imgFmt *ImageFormat, depthFmt Types,
 
 	atta := []vk.AttachmentDescription{ca}
 
-	if depthFmt != UndefType {
+	if depthFmt != UndefinedType {
 		rp.HasDepth = true
 		rp.Depth.ConfigDepth(rp.Sys.GPU, dev, depthFmt, imgFmt)
 		depthAttach := vk.AttachmentDescription{

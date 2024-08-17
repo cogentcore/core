@@ -158,12 +158,15 @@ func updateConfig(width, height, orientation int32) {
 	if system.OnSystemWindowCreated != nil {
 		system.OnSystemWindowCreated <- struct{}{}
 	}
+	if TheApp.Draw != nil {
+		TheApp.Draw.System.Renderer.SetSize(TheApp.Scrn.PixSize)
+	}
 	TheApp.Event.WindowResize()
 }
 
 //export lifecycleDead
 func lifecycleDead() {
-	TheApp.FullDestroyVk()
+	TheApp.FullDestroyGPU()
 }
 
 //export lifecycleAlive

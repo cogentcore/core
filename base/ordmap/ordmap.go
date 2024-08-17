@@ -11,7 +11,7 @@ The implementation is fully visible and the API provides a minimal
 subset of methods, compared to other implementations that are heavier,
 so that additional functionality can be added as needed.
 
-The slice structure holds the Key and Val for items as they are added,
+The slice structure holds the Key and Value for items as they are added,
 enabling direct updating of the corresponding map, which holds the
 index into the slice.  Adding and access are fast, while deleting
 and inserting are relatively slow, requiring updating of the index map,

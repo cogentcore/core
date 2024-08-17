@@ -19,7 +19,7 @@ type Pose struct {
 	Scale math32.Vector3
 
 	// Node rotation specified as a Quat (relative to parent)
-	Quat math32.Quat
+	Quat math32.Quat `display:"inline"`
 
 	// Local matrix. Contains all position/rotation/scale information (relative to parent)
 	Matrix math32.Matrix4 `display:"-"`

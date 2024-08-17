@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
+	"golang.org/x/image/draw"
 )
 
 // Widget is the interface that all Cogent Core widgets satisfy.
@@ -126,16 +127,14 @@ type Widget interface {
 	// specifically for the child (e.g., for zebra stripes in [ListGrid]).
 	ChildBackground(child Widget) image.Image
 
-	// DirectRenderImage uploads image directly into given system.Drawer at given index
-	// Typically this is a drw.SetGoImage call with an [image.RGBA], or
-	// drw.SetFrameImage with a [vgpu.FrameBuffer]
-	DirectRenderImage(drw system.Drawer, idx int)
-
-	// DirectRenderDraw draws the current image at index onto the RenderWindow window,
-	// typically using drw.Copy, drw.Scale, or drw.Fill.
-	// flipY is the default setting for whether the Y axis needs to be flipped during drawing,
-	// which is typically passed along to the Copy or Scale methods.
-	DirectRenderDraw(drw system.Drawer, idx int, flipY bool)
+	// RenderDraw draws the current image onto the RenderWindow window,
+	// using the [system.Drawer] interface methods, typically [Drawer.Copy].
+	// The given draw operation is suggested by the RenderWindow, with the
+	// first main window using draw.Src and the rest using draw.Over.
+	// Individual draw methods are free to ignore if necessary.
+	// Optimized direct rendering widgets can register by doing
+	// [Scene.AddDirectRender] to directly draw into the window texture.
+	RenderDraw(drw system.Drawer, op draw.Op)
 }
 
 // WidgetBase implements the [Widget] interface and provides the core functionality
@@ -392,16 +391,14 @@ func (wb *WidgetBase) IsVisible() bool {
 	return wb.parentWidget().IsVisible()
 }
 
-// DirectRenderImage uploads image directly into given system.Drawer at given index
-// Typically this is a drw.SetGoImage call with an [image.RGBA], or
-// drw.SetFrameImage with a [vgpu.FrameBuffer]
-func (wb *WidgetBase) DirectRenderImage(drw system.Drawer, idx int) {}
-
-// DirectRenderDraw draws the current image at index onto the RenderWindow window,
-// typically using drw.Copy, drw.Scale, or drw.Fill.
-// flipY is the default setting for whether the Y axis needs to be flipped during drawing,
-// which is typically passed along to the Copy or Scale methods.
-func (wb *WidgetBase) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {}
+// RenderDraw draws the current image onto the RenderWindow window,
+// using the [system.Drawer] interface methods, typically [Drawer.Copy].
+// The given draw operation is suggested by the RenderWindow, with the
+// first main window using draw.Src and the rest using draw.Over.
+// Individual draw methods are free to ignore if necessary.
+// Optimized direct rendering widgets can register by doing
+// [Scene.AddDirectRender] to directly draw into the window texture.
+func (wb *WidgetBase) RenderDraw(drw system.Drawer, op draw.Op) {}
 
 // NodeWalkDown extends [tree.Node.WalkDown] to [WidgetBase.Parts],
 // which is key for getting full tree traversal to work when updating,

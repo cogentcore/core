@@ -68,8 +68,8 @@ type Config struct { //types:add
 	// the configuration information for web
 	Web Web `cmd:"build,install,run,pack"`
 
-	// the configuration options for the log command
-	Log Log `cmd:"log"`
+	// the configuration options for the log and run commands
+	Log Log `cmd:"log,run"`
 
 	// the configuration options for the generate command
 	Generate Generate `cmd:"generate"`

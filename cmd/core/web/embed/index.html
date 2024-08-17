@@ -40,8 +40,10 @@
             <progress id="app-wasm-loader-progress" value="0"></progress>
         </header>
         <h1>Loading...</h1>
+        {{- if ne .PreRenderHTML ""}}
         <h3>Static preview:</h3>
         {{.PreRenderHTML}}
+        {{- end}}
     </div>
 </body>
 

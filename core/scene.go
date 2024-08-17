@@ -59,7 +59,7 @@ type Scene struct { //core:no-new
 	Data any
 
 	// Size and position relative to overall rendering context.
-	sceneGeom math32.Geom2DInt `edit:"-" set:"-"`
+	SceneGeom math32.Geom2DInt `edit:"-" set:"-"`
 
 	// paint context for rendering
 	PaintContext paint.Context `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
@@ -96,7 +96,7 @@ type Scene struct { //core:no-new
 	// to trigger Show event and other steps at start of first show
 	showIter int
 
-	// directRenders are widgets that render directly to the RenderWin
+	// directRenders are widgets that render directly to the [RenderWindow]
 	// instead of rendering into the Scene Pixels image.
 	directRenders []Widget
 
@@ -231,14 +231,14 @@ func (sc *Scene) RenderWindow() *renderWindow {
 // fitInWindow fits Scene geometry (pos, size) into given window geom.
 // Calls resize for the new size.
 func (sc *Scene) fitInWindow(winGeom math32.Geom2DInt) {
-	geom := sc.sceneGeom
+	geom := sc.SceneGeom
 	// full offscreen windows ignore any window geometry constraints
 	// because they must be unbounded by any previous window sizes
 	if TheApp.Platform() != system.Offscreen || !sc.Stage.FullWindow {
 		geom = geom.FitInWindow(winGeom)
 	}
 	sc.resize(geom)
-	sc.sceneGeom.Pos = geom.Pos
+	sc.SceneGeom.Pos = geom.Pos
 	// fmt.Println("win", winGeom, "geom", geom)
 }
 
@@ -253,12 +253,12 @@ func (sc *Scene) resize(geom math32.Geom2DInt) {
 	if sc.PaintContext.Paint == nil {
 		sc.PaintContext.Paint = &styles.Paint{}
 	}
-	sc.sceneGeom.Pos = geom.Pos
+	sc.SceneGeom.Pos = geom.Pos
 	if sc.Pixels == nil || sc.Pixels.Bounds().Size() != geom.Size {
 		sc.Pixels = image.NewRGBA(image.Rectangle{Max: geom.Size})
 	}
 	sc.PaintContext.Init(geom.Size.X, geom.Size.Y, sc.Pixels)
-	sc.sceneGeom.Size = geom.Size // make sure
+	sc.SceneGeom.Size = geom.Size // make sure
 
 	sc.updateScene()
 	sc.applyStyleScene()

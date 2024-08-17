@@ -147,7 +147,7 @@ func (sc *Scene) OpenObjFS(fsys fs.FS, fname string, gp *Group) error {
 		return err
 	}
 	dec.SetGroup(sc, gp)
-	sc.Config() // needed after loading
+	// sc.Config() // needed after loading
 	return nil
 }
 
@@ -180,9 +180,9 @@ func (sc *Scene) OpenNewObjFS(fsys fs.FS, fname string, parent tree.Node) (*Grou
 	gp := NewGroup(parent)
 	gp.SetName(fn)
 	dec.SetGroup(sc, gp)
-	if sc.Frame != nil { // has already been configured
-		sc.Config()
-	}
+	// if sc.Frame != nil { // has already been configured
+	// 	sc.Config()
+	// }
 	return gp, nil
 }
 
@@ -255,7 +255,7 @@ func (sc *Scene) OpenSceneFS(fsys fs.FS, fname string) error {
 		return err
 	}
 	dec.SetScene(sc)
-	sc.Config() // needed after loading
+	// sc.Config() // needed after loading
 	return nil
 }
 
@@ -282,7 +282,7 @@ func (sc *Scene) ReadObj(fname string, rs []io.Reader, gp *Group) error {
 		return err
 	}
 	dec.SetGroup(sc, gp)
-	sc.Config() // needed after loading
+	// sc.Config() // needed after loading
 	return nil
 }
 
@@ -310,6 +310,6 @@ func (sc *Scene) ReadScene(fname string, rs []io.Reader, gp *Group) error {
 		return err
 	}
 	dec.SetScene(sc)
-	sc.Config() // needed after loading
+	// sc.Config() // needed after loading
 	return nil
 }

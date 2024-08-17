@@ -11,6 +11,7 @@ import (
 	"os"
 	"text/template"
 
+	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/cmd/core/config"
 	strip "github.com/grokify/html-strip-tags-go"
 )
@@ -111,7 +112,7 @@ type manifestJSONData struct {
 // makeManifestJSON exectues [manifestJSONTmpl] based on the given configuration information.
 func makeManifestJSON(c *config.Config) ([]byte, error) {
 	d := manifestJSONData{
-		ShortName:   c.Name,
+		ShortName:   elide.AppName(c.Name),
 		Name:        c.Name,
 		Description: c.About,
 	}

@@ -6,32 +6,19 @@ package world
 
 import (
 	"image"
-	"log"
 
-	"cogentcore.org/core/vgpu"
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/xyz"
-
-	vk "github.com/goki/vulkan"
 )
 
 // NoDisplayGPU Initializes the Vulkan GPU (vgpu) and returns that
 // and the graphics GPU device, with given name, without connecting
 // to the display.
-func NoDisplayGPU(nm string) (*vgpu.GPU, *vgpu.Device, error) {
-	if err := vgpu.InitNoDisplay(); err != nil {
-		log.Println(err)
-		return nil, nil, err
-	}
-	// vgpu.Debug = true
-	gp := vgpu.NewGPU()
-	if err := gp.Config(nm, nil); err != nil {
-		log.Println(err)
-		return nil, nil, err
-	}
-	dev := &vgpu.Device{}
-	if err := dev.Init(gp, vk.QueueGraphicsBit); err != nil { // todo: add wrapper to vgpu
-		log.Println(err)
-		return nil, nil, err
+func NoDisplayGPU(nm string) (*gpu.GPU, *gpu.Device, error) {
+	gp, dev, err := gpu.NoDisplayGPU(nm)
+	if err != nil {
+		return nil, nil, errors.Log(err)
 	}
 	return gp, dev, nil
 }
@@ -40,7 +27,7 @@ func NoDisplayGPU(nm string) (*vgpu.GPU, *vgpu.Device, error) {
 // in NoGUI offscreen rendering mode, using given GPU and device.
 // Must manually call Init3D and Style3D on the Scene prior to
 // a RenderOffNode call to grab the image from a specific camera.
-func NoDisplayScene(gp *vgpu.GPU, dev *vgpu.Device) *xyz.Scene {
+func NoDisplayScene(gp *gpu.GPU, dev *gpu.Device) *xyz.Scene {
 	sc := xyz.NewScene()
 	sc.MultiSample = 4
 	sc.Geom.Size = image.Point{1024, 768}

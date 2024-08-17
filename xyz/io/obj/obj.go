@@ -26,6 +26,7 @@ import (
 
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/xyz"
 )
@@ -167,17 +168,17 @@ func (fc *Face) Destroy() {
 
 // Material contains all information about an object material
 type Material struct {
-	Name       string     // Material name
-	Illum      int        // Illumination model
-	Opacity    float32    // Opacity factor
-	Refraction float32    // Refraction factor
-	Shininess  float32    // Shininess (specular exponent)
-	Ambient    color.RGBA // Ambient color reflectivity
-	Diffuse    color.RGBA // Diffuse color reflectivity
-	Specular   color.RGBA // Specular color reflectivity
-	Emissive   color.RGBA // Emissive color
-	MapKd      string     // Texture file linked to diffuse color
-	Tiling     xyz.Tiling // Tiling parameters: repeat and offset
+	Name       string       // Material name
+	Illum      int          // Illumination model
+	Opacity    float32      // Opacity factor
+	Refraction float32      // Refraction factor
+	Shininess  float32      // Shininess (specular exponent)
+	Ambient    color.RGBA   // Ambient color reflectivity
+	Diffuse    color.RGBA   // Diffuse color reflectivity
+	Specular   color.RGBA   // Specular color reflectivity
+	Emissive   color.RGBA   // Emissive color
+	MapKd      string       // Texture file linked to diffuse color
+	Tiling     phong.Tiling // Tiling parameters: repeat and offset
 }
 
 // Light gray default material used as when other materials cannot be loaded.
@@ -258,7 +259,7 @@ func (dec *Decoder) SetObject(sc *xyz.Scene, objgp *xyz.Group, ob *Object) {
 }
 
 func (dec *Decoder) addNorms(ms *xyz.GenMesh, ai, bi, ci int, idxs []int) {
-	if ms.Norm.Size() >= ms.Vertex.Size() {
+	if len(ms.Normal) >= len(ms.Vertex) {
 		return
 	}
 	var a, b, c math32.Vector3
@@ -267,8 +268,8 @@ func (dec *Decoder) addNorms(ms *xyz.GenMesh, ai, bi, ci int, idxs []int) {
 	ms.Vertex.GetVector3(3*idxs[ci], &c)
 	nrm := math32.Normal(a, b, c)
 	for {
-		ms.Norm.AppendVector3(nrm)
-		if ms.Norm.Size() >= ms.Vertex.Size() {
+		ms.Normal.AppendVector3(nrm)
+		if len(ms.Normal) >= len(ms.Vertex) {
 			break
 		}
 	}
@@ -286,7 +287,7 @@ func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
 	var vector3 math32.Vector3
 	var vector2 math32.Vector2
 
-	vidx := ms.Vertex.Size() / 3
+	vidx := len(ms.Vertex) / 3
 	// Copy vertex position and append to geometry
 	dec.Vertices.GetVector3(3*face.Vertices[idx], &vector3)
 	ms.Vertex.AppendVector3(vector3)
@@ -294,19 +295,19 @@ func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
 	// Copy vertex normal and append to geometry
 	if face.Normals[idx] != invINDEX {
 		i := 3 * face.Normals[idx]
-		if dec.Normals.Size() > i {
+		if len(dec.Normals) > i {
 			dec.Normals.GetVector3(i, &vector3)
 		}
-		ms.Norm.AppendVector3(vector3)
+		ms.Normal.AppendVector3(vector3)
 	}
 
 	// Copy vertex uv and append to geometry
 	if face.Uvs[idx] != invINDEX {
 		i := 2 * face.Uvs[idx]
-		if dec.Uvs.Size() > i {
+		if len(dec.Uvs) > i {
 			dec.Uvs.GetVector2(i, &vector2)
 		}
-		ms.Texture.AppendVector2(vector2)
+		ms.TexCoord.AppendVector2(vector2)
 	}
 	ms.Index.Append(uint32(vidx))
 	return vidx
@@ -349,7 +350,7 @@ func (dec *Decoder) loadTex(sc *xyz.Scene, sld *xyz.Solid, texfn string, mat *Ma
 	if mat.Tiling.Repeat.X > 0 {
 		sld.Material.Tiling.Repeat = mat.Tiling.Repeat
 	}
-	sld.Material.Tiling.Off = mat.Tiling.Off
+	sld.Material.Tiling.Offset = mat.Tiling.Offset
 }
 
 // parse reads the lines from the specified reader and dispatch them
@@ -879,7 +880,7 @@ func (dec *Decoder) parseMapKd(fields []string) error {
 						i++
 					}
 				}
-				dec.matCurrent.Tiling.Off.Set(float32(r1), float32(r2))
+				dec.matCurrent.Tiling.Offset.Set(float32(r1), float32(r2))
 			}
 		} else {
 			dec.matCurrent.MapKd = f

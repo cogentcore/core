@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+
+	"cogentcore.org/core/gpu/phong"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
@@ -230,10 +233,24 @@ func (sld *Solid) RenderClass() RenderClasses {
 	}
 }
 
+// PreRender activates this solid for rendering
+func (sld *Solid) PreRender() {
+	ph := sld.Scene.Phong
+	nm := sld.Path()
+	ph.SetObject(nm, phong.NewObject(&sld.Pose.WorldMatrix, sld.Material.phongColors()))
+	// fmt.Println("pre:", nm, sld.Pose.Matrix, sld.Material.phongColors())
+}
+
 // Render activates this solid for rendering
-func (sld *Solid) Render() {
-	sld.Scene.Phong.UseMeshName(string(sld.MeshName))
-	sld.Scene.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
-	sld.Material.Render(sld.Scene)
-	sld.Scene.Phong.Render()
+func (sld *Solid) Render(rp *wgpu.RenderPassEncoder) {
+	nm := sld.Path()
+	ph := sld.Scene.Phong
+	ph.UseObject(nm)
+	ph.UseMesh(string(sld.MeshName))
+	if sld.Material.TextureName != "" {
+		ph.UseTexture(string(sld.Material.TextureName))
+	} else {
+		ph.UseNoTexture()
+	}
+	ph.Render(rp)
 }

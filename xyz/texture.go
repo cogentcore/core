@@ -13,8 +13,8 @@ import (
 
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/imagex"
-	"cogentcore.org/core/vgpu"
-	"cogentcore.org/core/vgpu/vphong"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/phong"
 )
 
 // TextureName provides a GUI interface for choosing textures.
@@ -22,7 +22,6 @@ type TextureName string
 
 // Texture is the interface for all textures.
 type Texture interface {
-
 	// AsTextureBase returns the [TextureBase] for this texture,
 	// which contains the core data and functionality.
 	AsTextureBase() *TextureBase
@@ -38,7 +37,6 @@ type Texture interface {
 // It uses an [image.RGBA] as the underlying image storage
 // to facilitate interface with GPU.
 type TextureBase struct { //types:add --setters
-
 	// Name is the name of the texture;
 	// textures are connected to [Material]s by name.
 	Name string
@@ -83,7 +81,7 @@ func NewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 	}
 	tx.FS = dfs
 	tx.File = fnm
-	sc.AddTexture(tx)
+	sc.SetTexture(tx)
 	return tx
 }
 
@@ -93,7 +91,7 @@ func NewTextureFileFS(fsys fs.FS, sc *Scene, name string, filename string) *Text
 	tx.Name = name
 	tx.FS = fsys
 	tx.File = filename
-	sc.AddTexture(tx)
+	sc.SetTexture(tx)
 	return tx
 }
 
@@ -111,7 +109,7 @@ func (tx *TextureFile) Image() *image.RGBA {
 		slog.Error("xyz.TextureFile: Image load error", "file:", tx.File, "error", err)
 		return nil
 	}
-	tx.RGBA = vgpu.ImageToRGBA(img)
+	tx.RGBA = gpu.ImageToRGBA(img)
 	return tx.RGBA
 }
 
@@ -126,10 +124,22 @@ type TextureCore struct {
 ///////////////////////////////////////////////////////////////////////////
 // Scene code
 
-// AddTexture adds given texture to texture collection
+// SetTexture adds given texture to texture collection
 // see NewTextureFile to add a texture that loads from file
-func (sc *Scene) AddTexture(tx Texture) {
-	sc.Textures.Add(tx.AsTextureBase().Name, tx)
+func (sc *Scene) SetTexture(tx Texture) {
+	name := tx.AsTextureBase().Name
+	sc.Textures.Add(name, tx) // does replease
+	if sc.IsLive() {
+		sc.Phong.SetTexture(name, phong.NewTexture(tx.Image()))
+	}
+}
+
+func (sc *Scene) setAllTextures() {
+	ph := sc.Phong
+	for _, kv := range sc.Textures.Order {
+		tx := kv.Value
+		ph.SetTexture(kv.Key, phong.NewTexture(tx.Image()))
+	}
 }
 
 // TextureByName looks for texture by name -- returns nil if not found
@@ -153,37 +163,4 @@ func (sc *Scene) TextureByNameTry(nm string) (Texture, error) {
 // TextureList returns a list of available textures (e.g., for chooser)
 func (sc *Scene) TextureList() []string {
 	return sc.Textures.Keys()
-}
-
-// DeleteTexture deletes texture of given name -- returns error if not found
-// must call ConfigTextures or Config to reset after deleting
-func (sc *Scene) DeleteTexture(nm string) {
-	sc.Textures.DeleteKey(nm)
-}
-
-// DeleteTextures removes all textures
-// must call ConfigTextures or Config to reset after deleting
-func (sc *Scene) DeleteTextures() {
-	sc.Textures.Reset()
-}
-
-// must be called after adding or deleting any meshes or altering
-// the number of vertices.
-func (sc *Scene) ConfigTextures() {
-	ph := &sc.Phong
-	ph.ResetTextures()
-	for _, kv := range sc.Textures.Order {
-		tx := kv.Value
-		// todo: remove repeat from texture, move to color.
-		ph.AddTexture(kv.Key, vphong.NewTexture(tx.Image()))
-	}
-}
-
-// ReconfigTextures reconfigures textures on the Phong renderer
-// if there has been a change to the mesh structure
-// Config does a full configure of everything -- this is optimized
-// just for texture changes.
-func (sc *Scene) ReconfigTextures() {
-	sc.ConfigTextures()
-	sc.Phong.Config()
 }

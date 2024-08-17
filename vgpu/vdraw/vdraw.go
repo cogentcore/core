@@ -47,7 +47,7 @@ func (dw *Drawer) ConfigSurface(sf *vgpu.Surface, maxTextures int) {
 	dw.Impl.MaxTextures = maxTextures
 	dw.Surf = sf
 	dw.Sys.InitGraphics(sf.GPU, "vdraw.Drawer", &sf.Device)
-	dw.Sys.ConfigRender(&dw.Surf.Format, vgpu.UndefType)
+	dw.Sys.ConfigRender(&dw.Surf.Format, vgpu.UndefinedType)
 	sf.SetRender(&dw.Sys.Render)
 
 	dw.ConfigSys()
@@ -63,7 +63,7 @@ func (dw *Drawer) ConfigFrame(dev *vgpu.Device, size image.Point, maxTextures in
 	dw.Impl.MaxTextures = maxTextures
 	dw.Frame = vgpu.NewRenderFrame(dw.Sys.GPU, dev, size)
 	dw.Sys.InitGraphics(dw.Sys.GPU, "vdraw.Drawer", &dw.Frame.Device)
-	dw.Sys.ConfigRenderNonSurface(&dw.Frame.Format, vgpu.UndefType)
+	dw.Sys.ConfigRenderNonSurface(&dw.Frame.Format, vgpu.UndefinedType)
 	dw.Frame.SetRender(&dw.Sys.Render)
 
 	dw.ConfigSys()
