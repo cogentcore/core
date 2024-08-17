@@ -332,7 +332,7 @@ func (s *Style) AbilityIs(able abilities.Abilities) bool {
 	return s.Abilities.HasFlag(able)
 }
 
-// SetState sets the given [states.State] flags to the given value
+// SetState sets the given [states.States] flags to the given value
 func (s *Style) SetState(on bool, state ...states.States) *Style {
 	bfs := make([]enums.BitFlag, len(state))
 	for i, st := range state {
@@ -346,6 +346,11 @@ func (s *Style) SetState(on bool, state ...states.States) *Style {
 func (s *Style) SetEnabled(on bool) *Style {
 	s.State.SetFlag(!on, states.Disabled)
 	return s
+}
+
+// IsReadOnly returns whether this style object is flagged as either [states.ReadOnly] or [states.Disabled].
+func (s *Style) IsReadOnly() bool {
+	return s.Is(states.ReadOnly) || s.Is(states.Disabled)
 }
 
 // SetAbilities sets the given [states.State] flags to the given value
