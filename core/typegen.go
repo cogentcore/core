@@ -1098,7 +1098,7 @@ func NewDatePicker(parent ...tree.Node) *DatePicker { return tree.New[DatePicker
 // Time is the time that we are viewing.
 func (t *DatePicker) SetTime(v time.Time) *DatePicker { t.Time = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TimeInput", IDName: "time-input", Doc: "TimeInput presents two text fields for editing a date and time,\nboth of which can pull up corresponding picker dialogs.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TimeInput", IDName: "time-input", Doc: "TimeInput presents two text fields for editing a date and time,\nboth of which can pull up corresponding picker dialogs.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time"}, {Name: "DisplayDate", Doc: "DisplayDate is whether the date input is displayed (default true)."}, {Name: "DisplayTime", Doc: "DisplayTime is whether the time input is displayed (default true)."}}})
 
 // NewTimeInput returns a new [TimeInput] with the given optional parent:
 // TimeInput presents two text fields for editing a date and time,
@@ -1107,6 +1107,14 @@ func NewTimeInput(parent ...tree.Node) *TimeInput { return tree.New[TimeInput](p
 
 // SetTime sets the [TimeInput.Time]
 func (t *TimeInput) SetTime(v time.Time) *TimeInput { t.Time = v; return t }
+
+// SetDisplayDate sets the [TimeInput.DisplayDate]:
+// DisplayDate is whether the date input is displayed (default true).
+func (t *TimeInput) SetDisplayDate(v bool) *TimeInput { t.DisplayDate = v; return t }
+
+// SetDisplayTime sets the [TimeInput.DisplayTime]:
+// DisplayTime is whether the time input is displayed (default true).
+func (t *TimeInput) SetDisplayTime(v bool) *TimeInput { t.DisplayTime = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.DurationInput", IDName: "duration-input", Doc: "DurationInput represents a [time.Duration] value with a spinner and unit chooser.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Duration"}, {Name: "Unit", Doc: "Unit is the unit of time."}}})
 

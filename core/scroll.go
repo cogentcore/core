@@ -27,7 +27,7 @@ func (fr *Frame) hasAnyScroll() bool {
 
 // ScrollGeom returns the target position and size for scrollbars
 func (fr *Frame) ScrollGeom(d math32.Dims) (pos, sz math32.Vector2) {
-	sbw := math32.Ceil(fr.Styles.ScrollBarWidth.Dots)
+	sbw := math32.Ceil(fr.Styles.ScrollbarWidth.Dots)
 	od := d.Other()
 	bbmin := math32.Vector2FromPoint(fr.Geom.ContentBBox.Min)
 	bbmax := math32.Vector2FromPoint(fr.Geom.ContentBBox.Max)
