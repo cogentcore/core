@@ -209,21 +209,26 @@ func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
 // can also be passed for the tab button.
 func (ts *Tabs) insertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 	tfr := ts.getFrame()
+	alreadyExists := tfr.ChildByName(label) != nil
 	frame := NewFrame()
 	tfr.InsertChild(frame, idx)
 	frame.SetName(label)
 	frame.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	ts.insertTabOnlyAt(label, idx, icon...)
+	button := ts.insertTabButtonAt(label, idx, icon...)
+	if alreadyExists {
+		tree.SetUniqueName(frame)  // prevent duplicate names
+		button.SetName(frame.Name) // must be the same name
+	}
 	ts.Update()
 	return frame
 }
 
-// insertTabOnlyAt inserts just the tab button at given index, after the panel has
+// insertTabButtonAt inserts just the tab button at given index, after the panel has
 // already been added to the frame; assumed to be wrapped in update. Generally
 // for internal use only. An optional icon can also be passed for the tab button.
-func (ts *Tabs) insertTabOnlyAt(label string, idx int, icon ...icons.Icon) {
+func (ts *Tabs) insertTabButtonAt(label string, idx int, icon ...icons.Icon) *Tab {
 	tb := ts.getTabs()
 	tab := tree.New[Tab]()
 	tb.InsertChild(tab, idx)
@@ -243,6 +248,7 @@ func (ts *Tabs) insertTabOnlyAt(label string, idx int, icon ...icons.Icon) {
 		// } else {
 		// 	frame.SetState(true, states.Invisible) // new tab is invisible until selected
 	}
+	return tab
 }
 
 // tabAtIndex returns content frame and tab button at given index, nil if

@@ -101,7 +101,7 @@ func (sp *Spinner) OnBind(value any, tags reflect.StructTag) {
 
 func (sp *Spinner) Init() {
 	sp.TextField.Init()
-	sp.SetStep(0.1).SetPageStep(0.2).SetPrecision(4).SetFormat("%g")
+	sp.SetStep(0.1).SetPageStep(0.2).SetPrecision(6).SetFormat("%g")
 	sp.SetLeadingIcon(icons.Remove, func(e events.Event) {
 		sp.incrementValue(-1)
 	}).SetTrailingIcon(icons.Add, func(e events.Event) {
@@ -112,10 +112,10 @@ func (sp *Spinner) Init() {
 		s.VirtualKeyboard = styles.KeyboardNumber
 		if sp.IsReadOnly() {
 			s.Min.X.Ch(6)
-			s.Max.X.Ch(12)
+			s.Max.X.Ch(14)
 		} else {
 			s.Min.X.Ch(14)
-			s.Max.X.Ch(20)
+			s.Max.X.Ch(22)
 		}
 		// s.Text.Align = styles.End // this doesn't work
 	})
