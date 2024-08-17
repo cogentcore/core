@@ -28,3 +28,15 @@ func TestTimeInputTime(t *testing.T) {
 	NewTimeInput(b).SetTime(testTime).SetDisplayDate(false)
 	b.AssertRender(t, "time-input/time")
 }
+
+func TestDurationInput(t *testing.T) {
+	b := NewBody()
+	NewDurationInput(b).SetDuration(2 * time.Minute)
+	b.AssertRender(t, "duration-input/basic")
+}
+
+func TestDurationInputReadOnly(t *testing.T) {
+	b := NewBody()
+	NewDurationInput(b).SetDuration(2 * time.Minute).SetReadOnly(true)
+	b.AssertRender(t, "duration-input/read-only")
+}
