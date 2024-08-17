@@ -432,6 +432,7 @@ func (di *DurationInput) Init() {
 				di.setAutoUnit()
 			}
 			w.SetValue(float32(di.Duration) / float32(durationUnitsMap[di.Unit]))
+			w.SetReadOnly(di.IsReadOnly())
 		})
 		w.OnChange(func(e events.Event) {
 			di.Duration = time.Duration(w.Value * float32(durationUnitsMap[di.Unit]))
@@ -448,6 +449,9 @@ func (di *DurationInput) Init() {
 
 		w.SetItems(units...)
 		w.SetTooltip("The unit of time")
+		w.Updater(func() {
+			w.SetReadOnly(di.IsReadOnly())
+		})
 		w.OnChange(func(e events.Event) {
 			di.Update()
 		})
