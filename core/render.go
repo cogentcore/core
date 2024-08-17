@@ -61,7 +61,9 @@ func (wb *WidgetBase) AsyncUnlock() {
 	}
 }
 
-// RenderUpdateWindow updates window
+// RenderUpdateWindow updates the window.
+// It should not be called by end users.
+// TODO(wgpu): remove.
 func (sc *Scene) RenderUpdateWindow() {
 	// todo: get events
 	w := sc.RenderWindow()
