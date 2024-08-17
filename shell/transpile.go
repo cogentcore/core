@@ -146,7 +146,7 @@ func (sh *Shell) TranspileGo(toks Tokens) Tokens {
 	if n == 0 {
 		return toks
 	}
-	if toks[0].Tok == token.FUNC { // reorder as an assignment
+	if sh.FuncToVar && toks[0].Tok == token.FUNC { // reorder as an assignment
 		if len(toks) > 1 && toks[1].Tok == token.IDENT {
 			toks[0] = toks[1]
 			toks.Insert(1, token.DEFINE)

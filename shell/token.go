@@ -173,7 +173,7 @@ func (tk Tokens) Code() string {
 				str += " "
 			}
 			str += tok.String()
-			prvIdent = false
+			prvIdent = true
 		case tok.IsGo():
 			str += tok.String() + " "
 			prvIdent = false

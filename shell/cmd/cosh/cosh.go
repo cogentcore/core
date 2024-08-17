@@ -104,7 +104,10 @@ func Interactive(c *Config, in *interpreter.Interpreter) error {
 	return nil
 }
 
-// Build builds the specified input cosh file to the specified output Go file.
+// Build builds the specified input cosh file to the specified output Go file,
+// adding the necessary wrappers ("package main; func main()...") so that it
+// can be compiled as a standalone .go executable.  The input cosh file can
+// thus be run either in interactive or compiled mode.
 func Build(c *Config) error {
 	if c.Input == "" {
 		return fmt.Errorf("need input file")
@@ -116,13 +119,17 @@ func Build(c *Config) error {
 }
 
 // Transpile transpiles all .cosh files in current directory
-// into corresponding .go files, and then runs go build.
+// into corresponding .go files, without any further additions.
+// Use this for a multi-file codebase that is only used as a
+// go compiled package, not in interactive mode.
 func Transpile(c *Config) error {
 	fns := fsx.Filenames(".", ".cosh")
 	var errs []error
 	for _, fn := range fns {
 		ofn := strings.TrimSuffix(fn, filepath.Ext(fn)) + ".go"
-		err := shell.NewShell().TranspileOnly(fn, ofn)
+		sh := shell.NewShell()
+		sh.FuncToVar = false
+		err := sh.TranspileOnly(fn, ofn)
 		if err != nil {
 			errs = append(errs, err)
 		}
