@@ -47,7 +47,7 @@ func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T])
 	// all of the bool flags of the meta config object so that we
 	// correctly handle the short (no value) versions of things like
 	// verbose and quiet.
-	if _, ok := any(cfg).(*MetaConfig); !ok {
+	if _, ok := any(cfg).(*metaConfig); !ok {
 		mcf := boolFlags(&metaConfigFields{})
 		maps.Copy(bf, mcf)
 	}

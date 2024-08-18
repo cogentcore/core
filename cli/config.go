@@ -15,18 +15,14 @@ import (
 	"cogentcore.org/core/base/logx"
 )
 
-// TheMetaConfig holds the current [MetaConfig] data for access
-// of verbose and quiet state from client apps.
-var TheMetaConfig *MetaConfig
-
 // IMPORTANT: all changes to [metaConfig] must be updated in [metaConfigFields]
 
-// MetaConfig contains meta configuration information specified
+// metaConfig contains meta configuration information specified
 // via command line arguments that controls the initial behavior
 // of cli for all apps before anything else is loaded. Its
 // main purpose is to support the help command and flag and
 // the specification of custom config files on the command line.
-type MetaConfig struct {
+type metaConfig struct {
 	// the file name of the config file to load
 	Config string `flag:"cfg,config"`
 
@@ -56,7 +52,7 @@ type MetaConfig struct {
 // metaConfigFields is the struct used for the implementation
 // of [addMetaConfigFields], and for the usage information for
 // meta configuration options in [usage].
-// NOTE: we could do this through [MetaConfig], but that
+// NOTE: we could do this through [metaConfig], but that
 // causes problems with the HelpCmd field capturing
 // everything, so it easier to just add through a separate struct.
 // TODO: maybe improve the structure of this.
@@ -94,11 +90,11 @@ func addMetaConfigFields(allFields *fields) {
 	addFields(&metaConfigFields{}, allFields, "")
 }
 
-// metaCmds is a set of commands based on [MetaConfig] that
+// metaCmds is a set of commands based on [metaConfig] that
 // contains a shell implementation of the help command.
-var metaCmds = []*Cmd[*MetaConfig]{
+var metaCmds = []*Cmd[*metaConfig]{
 	{
-		Func: func(mc *MetaConfig) error { return nil }, // this gets handled seperately in [Config], so we don't actually need to do anything here
+		Func: func(mc *metaConfig) error { return nil }, // this gets handled seperately in [Config], so we don't actually need to do anything here
 		Name: "help",
 		Doc:  "show usage information for a command",
 		Root: true,
@@ -142,14 +138,13 @@ func config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	// first, we do a pass to get the meta command flags
 	// (help and config), which we need to know before
 	// we can do other configuration.
-	mc := &MetaConfig{}
+	mc := &metaConfig{}
 	// we ignore not found flags in meta config, because we only care about meta config and not anything else being passed to the command
 	cmd, err := SetFromArgs(mc, args, NoErrNotFound, metaCmds...)
 	if err != nil {
 		// if we can't do first set for meta flags, we return immediately (we only do AllErrors for more specific errors)
 		return cmd, fmt.Errorf("error doing meta configuration: %w", err)
 	}
-	TheMetaConfig = mc
 	logx.UserLevel = logx.LevelFromFlags(mc.VeryVerbose, mc.Verbose, mc.Quiet)
 
 	// both flag and command trigger help
