@@ -176,52 +176,35 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 		}
 	}
 
+	// scoring system has 1 point for discrete and 1 for non-gl backend
+	hiscore := 0
+	best := 0
 	for gi := range n {
-		// note: we could potentially check for the optional features here
-		// but generally speaking the discrete device is going to be the most
-		// feature-full, so the practical benefit is unlikely to be significant.
+		score := 0
 		props := gpus[gi].GetInfo()
 		if gpuIsBadBackend(props.BackendType) {
 			continue
 		}
 		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
-			// todo: pick one with best memory
-			// var memProperties vk.PhysicalDeviceMemoryProperties
-			// vk.GetPhysicalDeviceMemoryProperties(gpus[gi], &memProperties)
-			// memProperties.Deref()
-			// if Debug {
-			// 	log.Printf("vgpu: %d: evaluating discrete device named: %s\n", gi, dnm)
-			// }
-			// for mi := uint32(0); mi < memProperties.MemoryHeapCount; mi++ {
-			// 	heap := &memProperties.MemoryHeaps[mi]
-			// 	heap.Deref()
-			// 	// if heap.Flags&vk.MemoryHeapFlags(vk.MemoryHeapDeviceLocalBit) != 0 {
-			// 	sz := int(heap.Size)
-			// 	if sz > maxSz {
-			// 		devNm = gp.GetDeviceName(&properties, gi)
-			// 		maxSz = sz
-			// 		maxIndex = gi
-			// 	}
-			// }
-			// }
-			return gi
+			score++
 		}
-		// } else {
-		// 	if Debug {
-		// 		log.Printf("vgpu: %d: skipping device named: %s -- not discrete\n", gi, dnm)
-		// 	}
-		// }
+		if !gpuIsGLdBackend(props.BackendType) {
+			score++
+		}
+		if score > hiscore {
+			hiscore = score
+			best = gi
+		}
 	}
-	return 0
-	// gp.DeviceName = devNm
-	// if Debug {
-	// 	log.Printf("vgpu: %d selected device named: %s, memory size: %d\n", maxIndex, devNm, maxSz)
-	// }
-	// return maxIndex
+	return best
+}
+
+func gpuIsGLdBackend(bet wgpu.BackendType) bool {
+	return bet == wgpu.BackendTypeOpenGL || bet == wgpu.BackendTypeOpenGLES
 }
 
 func gpuIsBadBackend(bet wgpu.BackendType) bool {
-	return bet == wgpu.BackendTypeOpenGL || bet == wgpu.BackendTypeOpenGLES || bet == wgpu.BackendTypeUndefined || bet == wgpu.BackendTypeNull
+	return bet == wgpu.BackendTypeUndefined || bet == wgpu.BackendTypeNull
 }
 
 // Release releases GPU resources -- call after everything else has been destroyed
