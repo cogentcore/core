@@ -200,11 +200,12 @@ func (pg *Page) Init() {
 						fpath = needsPath
 						tr.SetProperty("no-index", true)
 					}
-					pg.urlToPagePath[tr.PathFrom(w)] = fpath
-					// everyone who needs a path gets our path
-					for u, p := range pg.urlToPagePath {
-						if p == needsPath {
-							pg.urlToPagePath[u] = fpath
+					u := tr.PathFrom(w)
+					pg.urlToPagePath[u] = fpath
+					// All of our parents who needs a path get our path.
+					for pu, pp := range pg.urlToPagePath {
+						if pp == needsPath && strings.HasPrefix(u, pu) {
+							pg.urlToPagePath[pu] = fpath
 						}
 					}
 					return nil
