@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
 
@@ -27,9 +26,6 @@ import (
 // outside of the main configuration, rendering, and event handling structure.
 // It must have a matching [WidgetBase.AsyncUnlock] after it.
 func (wb *WidgetBase) AsyncLock() {
-	if TheApp.Platform() == system.Web {
-		return
-	}
 	rc := wb.Scene.renderContext()
 	if rc == nil {
 		// if there is no render context, we are probably
@@ -48,9 +44,6 @@ func (wb *WidgetBase) AsyncLock() {
 // outside of the main configuration, rendering, and event handling structure.
 // It must have a matching [WidgetBase.AsyncLock] before it.
 func (wb *WidgetBase) AsyncUnlock() {
-	if TheApp.Platform() == system.Web {
-		return
-	}
 	rc := wb.Scene.renderContext()
 	if rc == nil {
 		return
@@ -59,21 +52,6 @@ func (wb *WidgetBase) AsyncUnlock() {
 	if wb.Scene != nil {
 		wb.Scene.updating = false
 	}
-}
-
-// RenderUpdateWindow updates the window.
-// It should not be called by end users.
-// TODO(wgpu): remove.
-func (sc *Scene) RenderUpdateWindow() {
-	// todo: get events
-	w := sc.RenderWindow()
-	if w == nil {
-		return
-	}
-	rc := w.renderContext()
-	rc.unlock()
-	w.renderWindow() // todo: this doesn't end up actually updating the drawer window..
-	rc.lock()
 }
 
 // NeedsRender specifies that the widget needs to be rendered.
