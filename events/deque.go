@@ -18,7 +18,7 @@ import (
 // are being compressed to eliminate laggy behavior.
 var TraceEventCompression = false
 
-// Dequer is an infinitely buffered double-ended queue of events.
+// Deque is an infinitely buffered double-ended queue of events.
 // If an event is not marked as Unique, and the last
 // event in the queue is of the same type, then the new one
 // replaces the last one.  This automatically implements
@@ -98,29 +98,5 @@ func (q *Deque) Send(ev Event) {
 		}
 	}
 	q.Back = append(q.Back, ev)
-	q.Cond.Signal()
-}
-
-// SendFirst adds an event to the start of the deque.
-// They are returned by NextEvent in LIFO order,
-// and have priority over events sent via Send.
-// This is typically reserved for window events.
-func (q *Deque) SendFirst(ev Event) {
-	q.LockAndInit()
-	defer q.Mu.Unlock()
-
-	n := len(q.Front)
-	if !ev.IsUnique() && n > 0 {
-		lev := q.Front[n-1]
-		if ev.IsSame(lev) {
-			if TraceEventCompression {
-				fmt.Println("compressed front:", ev)
-			}
-			q.Front[n-1] = ev // replace
-			q.Cond.Signal()
-			return
-		}
-	}
-	q.Front = append(q.Front, ev)
 	q.Cond.Signal()
 }

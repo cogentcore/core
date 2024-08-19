@@ -187,7 +187,7 @@ func (es *Source) Window(act WinActions) {
 	if TraceWindowPaint {
 		fmt.Printf("-")
 	}
-	es.Deque.SendFirst(ev)
+	es.Deque.Send(ev)
 }
 
 func (es *Source) WindowPaint() {
@@ -201,7 +201,7 @@ func (es *Source) WindowPaint() {
 			es.PaintCount = 0
 		}
 	}
-	es.Deque.SendFirst(ev) // separate channel for window!
+	es.Deque.Send(ev)
 }
 
 func (es *Source) WindowResize() {
@@ -210,7 +210,7 @@ func (es *Source) WindowResize() {
 	if TraceWindowPaint {
 		fmt.Printf("r")
 	}
-	es.Deque.SendFirst(ev)
+	es.Deque.Send(ev)
 }
 
 func (es *Source) Custom(data any) {
