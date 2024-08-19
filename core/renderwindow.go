@@ -250,7 +250,9 @@ func (w *renderWindow) resized() {
 	}
 
 	// drw := w.SystemWindow.Drawer()
+	w.SystemWindow.Lock()
 	rg := w.SystemWindow.RenderGeom()
+	w.SystemWindow.Unlock()
 
 	curRg := rc.geom
 	if curRg == rg {
