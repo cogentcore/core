@@ -30,11 +30,6 @@ type Config struct {
 	// unless the Interactive mode is flagged.
 	Input string `posarg:"0" required:"-"`
 
-	// Output is the Go file to output the transpiled input file to,
-	// as an optional second argument for the build command.
-	// It defaults to the input file with .cosh changed to .go.
-	Output string `cmd:"build" posarg:"1" required:"-"`
-
 	// Expr is an optional expression to evaluate, which can be used
 	// in addition to the Input file to run, to execute commands
 	// defined within that file for example, or as a command to run
@@ -104,13 +99,25 @@ func Interactive(c *Config, in *interpreter.Interpreter) error {
 	return nil
 }
 
-// Build builds the specified input cosh file to the specified output Go file.
+// Build builds the specified input cosh file, or all .cosh files in the current
+// directory if no input is specified, to corresponding .go file name(s).
+// If the file does not already contain a "package" specification, then
+// "package main; func main()..." wrappers are added, which allows the same
+// code to be used in interactive and Go compiled modes.
 func Build(c *Config) error {
-	if c.Input == "" {
-		return fmt.Errorf("need input file")
+	var fns []string
+	if c.Input != "" {
+		fns = []string{c.Input}
+	} else {
+		fns = fsx.Filenames(".", ".cosh")
 	}
-	if c.Output == "" {
-		c.Output = strings.TrimSuffix(c.Input, filepath.Ext(c.Input)) + ".go"
+	var errs []error
+	for _, fn := range fns {
+		ofn := strings.TrimSuffix(fn, filepath.Ext(fn)) + ".go"
+		err := shell.NewShell().TranspileFile(fn, ofn)
+		if err != nil {
+			errs = append(errs, err)
+		}
 	}
-	return shell.NewShell().TranspileFile(c.Input, c.Output)
+	return errors.Join(errs...)
 }
