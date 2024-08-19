@@ -9,9 +9,9 @@ package enums
 // BitFlag is the interface that all bit flag enum types
 // satisfy. Bit flag enum types support all of the operations
 // that standard enums do, and additionally can check if they
-// have a given bit flag. Note that HasFlag is stored on
+// have a given bit flag. Note that HasFlag is defined on
 // [BitFlagSetter] since it requires a pointer receiver for
-// atomic operations.
+// atomic operations to prevent race conditions.
 type BitFlag interface {
 	Enum
 
