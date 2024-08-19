@@ -673,7 +673,7 @@ func (ed *Editor) setCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 			ed.selectRegionUpdate(ed.CursorPos)
 		}
 		if ed.StateIs(states.Sliding) {
-			ed.AutoScroll(math32.Vector2FromPoint(pt).Sub(ed.Geom.Scroll))
+			ed.AutoScroll(math32.FromPoint(pt).Sub(ed.Geom.Scroll))
 		} else {
 			ed.scrollCursorToCenterIfHidden()
 		}

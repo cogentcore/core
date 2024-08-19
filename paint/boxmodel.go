@@ -125,7 +125,7 @@ func (pc *Context) boundsEncroachParent(pos, size math32.Vector2) (bool, styles.
 	}
 
 	pbox := pc.BoundsStack[len(pc.BoundsStack)-1]
-	psz := math32.Vector2FromPoint(pbox.Size())
+	psz := math32.FromPoint(pbox.Size())
 	pr = ClampBorderRadius(pr, psz.X, psz.Y)
 
 	rect := math32.Box2{Min: pos, Max: pos.Add(size)}

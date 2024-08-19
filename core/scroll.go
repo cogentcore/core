@@ -29,11 +29,11 @@ func (fr *Frame) hasAnyScroll() bool {
 func (fr *Frame) ScrollGeom(d math32.Dims) (pos, sz math32.Vector2) {
 	sbw := math32.Ceil(fr.Styles.ScrollbarWidth.Dots)
 	od := d.Other()
-	bbmin := math32.Vector2FromPoint(fr.Geom.ContentBBox.Min)
-	bbmax := math32.Vector2FromPoint(fr.Geom.ContentBBox.Max)
+	bbmin := math32.FromPoint(fr.Geom.ContentBBox.Min)
+	bbmax := math32.FromPoint(fr.Geom.ContentBBox.Max)
 	if fr.This != fr.Scene.This { // if not the scene, keep inside the scene
-		bbmin.SetMax(math32.Vector2FromPoint(fr.Scene.Geom.ContentBBox.Min))
-		bbmax.SetMin(math32.Vector2FromPoint(fr.Scene.Geom.ContentBBox.Max).SubScalar(sbw))
+		bbmin.SetMax(math32.FromPoint(fr.Scene.Geom.ContentBBox.Min))
+		bbmax.SetMin(math32.FromPoint(fr.Scene.Geom.ContentBBox.Max).SubScalar(sbw))
 	}
 	pos.SetDim(d, bbmin.Dim(d))
 	pos.SetDim(od, bbmax.Dim(od))

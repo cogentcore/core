@@ -147,14 +147,14 @@ func (fr *Frame) Init() {
 	// We treat slide events on frames as scroll events.
 	fr.On(events.SlideMove, func(e events.Event) {
 		// We must negate the delta for "natural" scrolling behavior.
-		del := math32.Vector2FromPoint(e.PrevDelta()).MulScalar(-0.034)
+		del := math32.FromPoint(e.PrevDelta()).MulScalar(-0.034)
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 	fr.On(events.SlideStop, func(e events.Event) {
 		// If we have enough velocity, we continue scrolling over the
 		// next second in a goroutine while slowly decelerating for a
 		// smoother experience.
-		vel := math32.Vector2FromPoint(e.StartDelta()).DivScalar(1.5 * float32(e.SinceStart().Milliseconds())).Negate()
+		vel := math32.FromPoint(e.StartDelta()).DivScalar(1.5 * float32(e.SinceStart().Milliseconds())).Negate()
 		if math32.Abs(vel.X) < 1 && math32.Abs(vel.Y) < 1 {
 			return
 		}
