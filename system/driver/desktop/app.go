@@ -125,6 +125,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 		ScreenWindow: sc.Name,
 	}
 	w.This = w
+	w.Events().Deque.Init()
 
 	a.RunOnMain(func() {
 		surf := a.GPU.Instance.CreateSurface(wgpuglfw.GetSurfaceDescriptor(glw))

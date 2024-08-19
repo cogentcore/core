@@ -377,8 +377,12 @@ func (w *renderWindow) eventLoop() {
 			w.stopEventLoop = false
 			break
 		}
+		if e == nil {
+			continue
+			// time.Sleep(time.Millisecond)
+		}
 		w.handleEvent(e)
-		if w.noEventsChan != nil && len(d.Back) == 0 && len(d.Front) == 0 {
+		if w.noEventsChan != nil && d.Len() == 0 {
 			w.noEventsChan <- struct{}{}
 		}
 	}

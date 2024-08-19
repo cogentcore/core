@@ -33,6 +33,7 @@ func Init() {
 	runtime.LockOSThread()
 
 	system.OnSystemWindowCreated = make(chan struct{})
+	TheApp.Event.Deque.Init()
 	TheApp.InitGPU()
 	base.Init(TheApp, &TheApp.App)
 }

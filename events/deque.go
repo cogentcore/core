@@ -10,8 +10,8 @@
 package events
 
 import (
-	"fmt"
 	"sync"
+	"sync/atomic"
 )
 
 // TraceEventCompression can be set to true to see when events
@@ -27,42 +27,51 @@ var TraceEventCompression = false
 // such as with Mouse movement and Paint events.
 // The zero value is usable, but a Deque value must not be copied.
 type Deque struct {
-	Back  []Event // FIFO.
-	Front []Event // LIFO.
-
-	Mu   sync.Mutex
-	Cond sync.Cond // Cond.L is lazily initialized to &Deque.Mu.
+	head atomic.Pointer[queueEvent]
+	tail atomic.Pointer[queueEvent]
+	len  atomic.Uint64
 }
 
-func (q *Deque) LockAndInit() {
-	q.Mu.Lock()
-	if q.Cond.L == nil {
-		q.Cond.L = &q.Mu
-	}
+// Init initializes the queue.
+func (q *Deque) Init() {
+	head := &queueEvent{}
+	q.head.Store(head)
+	q.tail.Store(head)
+}
+
+type queueEvent struct {
+	next atomic.Pointer[queueEvent]
+	v    Event
+}
+
+var queueEventPool = sync.Pool{
+	New: func() any { return &queueEvent{} },
 }
 
 // NextEvent returns the next event in the deque.
 // It blocks until such an event has been sent.
 func (q *Deque) NextEvent() Event {
-	q.LockAndInit()
-	defer q.Mu.Unlock()
-
+	var first, last, firstnext *queueEvent
 	for {
-		if n := len(q.Front); n > 0 {
-			e := q.Front[n-1]
-			q.Front[n-1] = nil
-			q.Front = q.Front[:n-1]
-			return e
-		}
+		first = q.head.Load()
+		last = q.tail.Load()
+		firstnext = first.next.Load()
+		if first == q.head.Load() {
+			if first == last {
+				if firstnext == nil {
+					return nil
+				}
 
-		if n := len(q.Back); n > 0 {
-			e := q.Back[0]
-			q.Back[0] = nil
-			q.Back = q.Back[1:]
-			return e
+				q.tail.CompareAndSwap(last, firstnext)
+			} else {
+				v := firstnext.v
+				if q.head.CompareAndSwap(first, firstnext) {
+					q.len.Add(^uint64(0))
+					queueEventPool.Put(first)
+					return v
+				}
+			}
 		}
-
-		q.Cond.Wait()
 	}
 }
 
@@ -71,32 +80,29 @@ func (q *Deque) NextEvent() Event {
 // as Unique.
 // They are returned by NextEvent in FIFO order.
 func (q *Deque) Send(ev Event) {
-	q.LockAndInit()
-	defer q.Mu.Unlock()
+	i := queueEventPool.Get().(*queueEvent)
+	i.next.Store(nil)
+	i.v = ev
 
-	n := len(q.Back)
-	if !ev.IsUnique() && n > 0 {
-		lev := q.Back[n-1]
-		if ev.IsSame(lev) {
-			q.Back[n-1] = ev // replace
-			switch ev.Type() {
-			case MouseMove, MouseDrag:
-				me := ev.(*Mouse)
-				le := lev.(*Mouse)
-				me.Prev = le.Prev
-				me.PrvTime = le.PrvTime
-			case Scroll:
-				me := ev.(*MouseScroll)
-				le := lev.(*MouseScroll)
-				me.Delta = me.Delta.Add(le.Delta)
+	var last, lastnext *queueEvent
+	for {
+		last = q.tail.Load()
+		lastnext = last.next.Load()
+		if q.tail.Load() == last {
+			if lastnext == nil {
+				if last.next.CompareAndSwap(lastnext, i) {
+					q.tail.CompareAndSwap(last, i)
+					q.len.Add(1)
+					return
+				}
+			} else {
+				q.tail.CompareAndSwap(last, lastnext)
 			}
-			q.Cond.Signal()
-			if TraceEventCompression {
-				fmt.Println("compressed back:", ev)
-			}
-			return
 		}
 	}
-	q.Back = append(q.Back, ev)
-	q.Cond.Signal()
+}
+
+// Len returns the length of the queue.
+func (q *Deque) Len() uint64 {
+	return q.len.Load()
 }
