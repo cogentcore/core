@@ -313,14 +313,17 @@ func (pl *PlotEditor) genPlot() {
 		return
 	}
 	pl.inPlot = true
-	if pl.table == nil || pl.table.Table.NumRows() == 0 {
-		// sv.DeleteChildren()
+	if pl.table == nil {
 		pl.inPlot = false
 		return
 	}
-	lsti := pl.table.Indexes[pl.table.Len()-1]
-	if lsti >= pl.table.Table.Rows { // out of date
+	if len(pl.table.Indexes) == 0 {
 		pl.table.Sequential()
+	} else {
+		lsti := pl.table.Indexes[pl.table.Len()-1]
+		if lsti >= pl.table.Table.Rows { // out of date
+			pl.table.Sequential()
+		}
 	}
 	pl.plot = nil
 	switch pl.Options.Type {
