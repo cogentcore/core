@@ -61,8 +61,9 @@ func BitIndexStringExtended[T, E BitFlagConstraint](i T, m map[T]string) string 
 // with the given values available.
 func BitFlagString[T BitFlagConstraint](i T, values []T) string {
 	str := ""
+	ip := any(&i).(BitFlagSetter)
 	for _, ie := range values {
-		if i.HasFlag(ie) {
+		if ip.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
 				str = ies
@@ -79,8 +80,9 @@ func BitFlagString[T BitFlagConstraint](i T, values []T) string {
 // bit flag type that has the given values (extendedValues) available.
 func BitFlagStringExtended[T, E BitFlagConstraint](i T, values []T, extendedValues []E) string {
 	str := ""
+	ip := any(&i).(BitFlagSetter)
 	for _, ie := range extendedValues {
-		if i.HasFlag(ie) {
+		if ip.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
 				str = ies
@@ -90,7 +92,7 @@ func BitFlagStringExtended[T, E BitFlagConstraint](i T, values []T, extendedValu
 		}
 	}
 	for _, ie := range values {
-		if i.HasFlag(ie) {
+		if ip.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
 				str = ies
