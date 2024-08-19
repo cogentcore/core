@@ -66,29 +66,6 @@ func (q *Deque) NextEvent() Event {
 	}
 }
 
-// PollEvent returns the next event in the deque if available,
-// and returns true.
-// If none are available, it returns false immediately.
-func (q *Deque) PollEvent() (Event, bool) {
-	q.LockAndInit()
-	defer q.Mu.Unlock()
-
-	if n := len(q.Front); n > 0 {
-		e := q.Front[n-1]
-		q.Front[n-1] = nil
-		q.Front = q.Front[:n-1]
-		return e, true
-	}
-
-	if n := len(q.Back); n > 0 {
-		e := q.Back[0]
-		q.Back[0] = nil
-		q.Back = q.Back[1:]
-		return e, true
-	}
-	return nil, false
-}
-
 // Send adds an event to the end of the deque,
 // replacing the last of the same type unless marked
 // as Unique.
