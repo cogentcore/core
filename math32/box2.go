@@ -86,8 +86,8 @@ func (b *Box2) SetFromPoints(points []Vector2) {
 
 // SetFromRect set this bounding box from an image.Rectangle
 func (b *Box2) SetFromRect(rect image.Rectangle) {
-	b.Min = Vector2FromPoint(rect.Min)
-	b.Max = Vector2FromPoint(rect.Max)
+	b.Min = FromPoint(rect.Min)
+	b.Max = FromPoint(rect.Max)
 }
 
 // ToRect returns image.Rectangle version of this bbox, using floor for min

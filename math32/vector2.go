@@ -33,8 +33,8 @@ func Vector2Scalar(scalar float32) Vector2 {
 	return Vector2{scalar, scalar}
 }
 
-// Vector2FromPoint returns a new [Vector2] from the given [image.Point].
-func Vector2FromPoint(pt image.Point) Vector2 {
+// FromPoint returns a new [Vector2] from the given [image.Point].
+func FromPoint(pt image.Point) Vector2 {
 	v := Vector2{}
 	v.SetPoint(pt)
 	return v
@@ -162,7 +162,7 @@ func RectFromPosSizeMax(pos, size Vector2) image.Rectangle {
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
-// RectFromPosSizeMax returns an [image.Rectangle] from the ceil of pos
+// RectFromPosSizeMin returns an [image.Rectangle] from the ceil of pos
 // and floor of size.
 func RectFromPosSizeMin(pos, size Vector2) image.Rectangle {
 	tp := pos.ToPointCeil()

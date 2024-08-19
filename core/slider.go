@@ -471,7 +471,7 @@ func (sr *Slider) WidgetTooltip(pos image.Point) (string, image.Point) {
 // pointToRelPos translates a point in scene local pixel coords into relative
 // position within the slider content range
 func (sr *Slider) pointToRelPos(pt image.Point) float32 {
-	ptf := math32.Vector2FromPoint(pt).Dim(sr.Styles.Direction.Dim())
+	ptf := math32.FromPoint(pt).Dim(sr.Styles.Direction.Dim())
 	return ptf - sr.Geom.Pos.Content.Dim(sr.Styles.Direction.Dim())
 }
 
@@ -571,7 +571,7 @@ func (sr *Slider) ApplyScenePos() {
 		return
 	}
 	sbw := math32.Ceil(sr.Styles.ScrollbarWidth.Dots)
-	scmax := math32.Vector2FromPoint(sr.Scene.Geom.ContentBBox.Max).SubScalar(sbw)
+	scmax := math32.FromPoint(sr.Scene.Geom.ContentBBox.Max).SubScalar(sbw)
 	sr.Geom.Pos.Total.SetMin(scmax)
 	sr.setContentPosFromPos()
 	sr.setBBoxesFromAllocs()

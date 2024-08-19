@@ -118,9 +118,9 @@ func (ed *Editor) charStartPos(pos lexer.Pos) math32.Vector2 {
 func (ed *Editor) charStartPosVisible(pos lexer.Pos) math32.Vector2 {
 	spos := ed.charStartPos(pos)
 	bb := ed.renderBBox()
-	bbmin := math32.Vector2FromPoint(bb.Min)
+	bbmin := math32.FromPoint(bb.Min)
 	bbmin.X += ed.LineNumberOffset
-	bbmax := math32.Vector2FromPoint(bb.Max)
+	bbmax := math32.FromPoint(bb.Max)
 	spos.SetMax(bbmin)
 	spos.SetMin(bbmax)
 	return spos
@@ -421,8 +421,8 @@ func (ed *Editor) renderLineNumbersBoxAll() {
 	}
 	pc := &ed.Scene.PaintContext
 	bb := ed.renderBBox()
-	spos := math32.Vector2FromPoint(bb.Min)
-	epos := math32.Vector2FromPoint(bb.Max)
+	spos := math32.FromPoint(bb.Min)
+	epos := math32.FromPoint(bb.Max)
 	epos.X = spos.X + ed.LineNumberOffset
 
 	sz := epos.Sub(spos)
@@ -597,7 +597,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lexer.Pos {
 	lnst := ed.charStartPos(lexer.Pos{Ln: cln})
 	lnst.Y -= yoff
 	lnst.X -= xoff
-	rpt := math32.Vector2FromPoint(pt).Sub(lnst)
+	rpt := math32.FromPoint(pt).Sub(lnst)
 
 	si, ri, ok := ed.renders[cln].PosToRune(rpt)
 	if ok {
