@@ -189,7 +189,7 @@ func StatesValues() []States { return _StatesValues }
 func (i States) Values() []enums.Enum { return enums.Values(_StatesValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i States) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *States) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *States) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
@@ -246,7 +246,7 @@ func LanguagesValues() []Languages { return _LanguagesValues }
 func (i Languages) Values() []enums.Enum { return enums.Values(_LanguagesValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i Languages) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *Languages) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *Languages) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
@@ -315,7 +315,7 @@ func (i MoreLanguages) Values() []enums.Enum {
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i MoreLanguages) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *MoreLanguages) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *MoreLanguages) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }

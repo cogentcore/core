@@ -23,7 +23,7 @@ func (g *Generator) BuildBitFlagMethods(runs []Value, typ *Type) {
 
 var HasFlagMethodTmpl = template.Must(template.New("HasFlagMethod").Parse(
 	`// HasFlag returns whether these bit flags have the given bit flag set.
-func (i {{.Name}}) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *{{.Name}}) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 `))
 
 var SetFlagMethodTmpl = template.Must(template.New("SetFlagMethod").Parse(

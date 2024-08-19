@@ -21,8 +21,8 @@ func (e enum) String() string                 { return "extended" }
 func (e enum) Int64() int64                   { return int64(e) }
 func (e enum) Desc() string                   { return "extendedDesc" }
 func (e enum) Values() []Enum                 { return nil }
-func (e enum) HasFlag(f BitFlag) bool         { return hasFlag[f.(enum)] }
 func (e enum) BitIndexString() string         { return bitIndexString[e] }
+func (e *enum) HasFlag(f BitFlag) bool        { return hasFlag[f.(enum)] }
 func (e *enum) SetInt64(i int64)              { *e = enum(i) }
 func (e *enum) SetFlag(on bool, f ...BitFlag) { SetFlag((*int64)(e), on, f...) }
 func (e *enum) SetString(s string) error {
