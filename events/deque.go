@@ -14,26 +14,23 @@ import (
 	"sync/atomic"
 )
 
+// TODO: event compression
+
 // TraceEventCompression can be set to true to see when events
 // are being compressed to eliminate laggy behavior.
 var TraceEventCompression = false
 
-// Deque is an infinitely buffered double-ended queue of events.
-// If an event is not marked as Unique, and the last
-// event in the queue is of the same type, then the new one
-// replaces the last one.  This automatically implements
-// event compression to manage the common situation where
-// event processing is slower than event generation,
-// such as with Mouse movement and Paint events.
-// The zero value is usable, but a Deque value must not be copied.
-type Deque struct {
+// Queue is a lock-free FIFO freelist-based event queue.
+// It must be initialized using [Queue.Init] before use.
+// It is based on https://github.com/fyne-io/fyne/blob/master/internal/async/queue_canvasobject.go
+type Queue struct {
 	head atomic.Pointer[queueEvent]
 	tail atomic.Pointer[queueEvent]
 	len  atomic.Uint64
 }
 
 // Init initializes the queue.
-func (q *Deque) Init() {
+func (q *Queue) Init() {
 	head := &queueEvent{}
 	q.head.Store(head)
 	q.tail.Store(head)
@@ -48,9 +45,9 @@ var queueEventPool = sync.Pool{
 	New: func() any { return &queueEvent{} },
 }
 
-// NextEvent returns the next event in the deque.
-// It blocks until such an event has been sent.
-func (q *Deque) NextEvent() Event {
+// NextEvent removes and returns the next event in the queue.
+// It returns nil if the queue is empty.
+func (q *Queue) NextEvent() Event {
 	var first, last, firstnext *queueEvent
 	for {
 		first = q.head.Load()
@@ -75,11 +72,8 @@ func (q *Deque) NextEvent() Event {
 	}
 }
 
-// Send adds an event to the end of the deque,
-// replacing the last of the same type unless marked
-// as Unique.
-// They are returned by NextEvent in FIFO order.
-func (q *Deque) Send(ev Event) {
+// Send adds an event to the end of the queue.
+func (q *Queue) Send(ev Event) {
 	i := queueEventPool.Get().(*queueEvent)
 	i.next.Store(nil)
 	i.v = ev
@@ -103,6 +97,6 @@ func (q *Deque) Send(ev Event) {
 }
 
 // Len returns the length of the queue.
-func (q *Deque) Len() uint64 {
+func (q *Queue) Len() uint64 {
 	return q.len.Load()
 }

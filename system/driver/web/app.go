@@ -79,7 +79,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 func (a *App) SetSystemWindow() {
 	defer func() { system.HandleRecover(recover()) }()
 
-	a.Event.Deque.Init()
+	a.Event.Queue.Init()
 	a.AddEventListeners()
 
 	ua := js.Global().Get("navigator").Get("userAgent").String()

@@ -24,8 +24,8 @@ var TraceWindowPaint = false
 // It caches state as needed to generate derived events such
 // as [MouseDrag].
 type Source struct {
-	// Deque is the event queue
-	Deque Deque
+	// Queue is the event queue
+	Queue Queue
 
 	// flag for ignoring mouse events when disabling mouse movement
 	ResettingPos bool
@@ -71,7 +71,7 @@ func (es *Source) Key(typ Types, rn rune, code key.Codes, mods key.Modifiers) {
 	es.Last.Mods = mods
 	es.Last.Key = code
 	ev.Init()
-	es.Deque.Send(ev)
+	es.Queue.Send(ev)
 
 	_, mapped := key.CodeRuneMap[code]
 
@@ -79,7 +79,7 @@ func (es *Source) Key(typ Types, rn rune, code key.Codes, mods key.Modifiers) {
 		(ev.HasAnyModifier(key.Control, key.Meta) || !mapped || ev.Code == key.CodeTab) {
 		che := NewKey(KeyChord, rn, code, mods)
 		che.Init()
-		es.Deque.Send(che)
+		es.Queue.Send(che)
 	}
 }
 
@@ -88,7 +88,7 @@ func (es *Source) KeyChord(rn rune, code key.Codes, mods key.Modifiers) {
 	ev := NewKey(KeyChord, rn, code, mods)
 	// no further processing of these
 	ev.Init()
-	es.Deque.Send(ev)
+	es.Queue.Send(ev)
 }
 
 // MouseButton creates and sends a mouse button event with given values
@@ -110,7 +110,7 @@ func (es *Source) MouseButton(typ Types, but Buttons, where image.Point, mods ke
 		es.Last.MouseDownTime = ev.GenTime
 		es.Last.MouseMoveTime = ev.GenTime
 	}
-	es.Deque.Send(ev)
+	es.Queue.Send(ev)
 }
 
 // MouseMove creates and sends a mouse move or drag event with given values
@@ -133,14 +133,14 @@ func (es *Source) MouseMove(where image.Point) {
 	if TraceWindowPaint {
 		fmt.Printf("*")
 	}
-	es.Deque.Send(ev)
+	es.Queue.Send(ev)
 }
 
 // Scroll creates and sends a scroll event with given values
 func (es *Source) Scroll(where image.Point, delta math32.Vector2) {
 	ev := NewScroll(where, delta, es.Last.Mods)
 	ev.Init()
-	es.Deque.Send(ev)
+	es.Queue.Send(ev)
 }
 
 // DropExternal creates and sends a Drop event with given values
@@ -148,7 +148,7 @@ func (es *Source) DropExternal(where image.Point, md mimedata.Mimes) {
 	ev := NewExternalDrop(Drop, es.Last.MouseButton, where, es.Last.Mods, md)
 	es.Last.MousePos = where
 	ev.Init()
-	es.Deque.Send(ev)
+	es.Queue.Send(ev)
 }
 
 // Touch creates and sends a touch event with the given values.
@@ -156,7 +156,7 @@ func (es *Source) DropExternal(where image.Point, md mimedata.Mimes) {
 func (es *Source) Touch(typ Types, seq Sequence, where image.Point) {
 	ev := NewTouch(typ, seq, where)
 	ev.Init()
-	es.Deque.Send(ev)
+	es.Queue.Send(ev)
 
 	if typ == TouchStart {
 		es.MouseButton(MouseDown, Left, where, 0) // TODO: modifiers
@@ -171,14 +171,14 @@ func (es *Source) Touch(typ Types, seq Sequence, where image.Point) {
 func (es *Source) Magnify(scaleFactor float32, where image.Point) {
 	ev := NewMagnify(scaleFactor, where)
 	ev.Init()
-	es.Deque.Send(ev)
+	es.Queue.Send(ev)
 }
 
 //	func (es *Source) DND(act dnd.Actions, where image.Point, data mimedata.Mimes) {
 //		ev := dnd.NewEvent(act, where, em.Last.Mods)
 //		ev.Data = data
 //		ev.Init()
-//		es.Deque.Send(ev)
+//		es.Queue.Send(ev)
 //	}
 
 func (es *Source) Window(act WinActions) {
@@ -187,7 +187,7 @@ func (es *Source) Window(act WinActions) {
 	if TraceWindowPaint {
 		fmt.Printf("-")
 	}
-	es.Deque.Send(ev)
+	es.Queue.Send(ev)
 }
 
 func (es *Source) WindowPaint() {
@@ -201,7 +201,7 @@ func (es *Source) WindowPaint() {
 			es.PaintCount = 0
 		}
 	}
-	es.Deque.Send(ev)
+	es.Queue.Send(ev)
 }
 
 func (es *Source) WindowResize() {
@@ -210,7 +210,7 @@ func (es *Source) WindowResize() {
 	if TraceWindowPaint {
 		fmt.Printf("r")
 	}
-	es.Deque.Send(ev)
+	es.Queue.Send(ev)
 }
 
 func (es *Source) Custom(data any) {
@@ -218,5 +218,5 @@ func (es *Source) Custom(data any) {
 	ce.Typ = Custom
 	ce.Data = data
 	ce.Init()
-	es.Deque.Send(ce)
+	es.Queue.Send(ce)
 }

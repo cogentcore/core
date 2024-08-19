@@ -102,7 +102,7 @@ func main() {
 
 	go func() {
 		for {
-			evi := w.Events().Deque.NextEvent()
+			evi := w.Events().Queue.NextEvent()
 			et := evi.Type()
 			if et != events.WindowPaint && et != events.MouseMove {
 				fmt.Println("got event", evi)

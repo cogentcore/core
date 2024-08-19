@@ -9,6 +9,7 @@ import (
 	"image"
 	"log"
 	"sync"
+	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
@@ -78,7 +79,7 @@ type renderWindow struct {
 	mains stages
 
 	// noEventsChan is a channel on which a signal is sent when there are
-	// no events left in the window [events.Deque]. It is used internally
+	// no events left in the window [events.Queue]. It is used internally
 	// for event handling in tests.
 	noEventsChan chan struct{}
 
@@ -365,7 +366,7 @@ func (w *renderWindow) sendWinFocusEvent(act events.WinActions) {
 func (w *renderWindow) eventLoop() {
 	defer func() { system.HandleRecover(recover()) }()
 
-	d := &w.SystemWindow.Events().Deque
+	d := &w.SystemWindow.Events().Queue
 
 	for {
 		if w.stopEventLoop {
@@ -378,8 +379,10 @@ func (w *renderWindow) eventLoop() {
 			break
 		}
 		if e == nil {
+			if TheApp.Platform() == system.Web {
+				time.Sleep(1) // critical to prevent hanging
+			}
 			continue
-			// time.Sleep(time.Millisecond)
 		}
 		w.handleEvent(e)
 		if w.noEventsChan != nil && d.Len() == 0 {

@@ -17,7 +17,7 @@ import (
 )
 
 func Init() {
-	TheApp.Event.Deque.Init()
+	TheApp.Event.Queue.Init()
 	TheApp.Draw = &Drawer{}
 	TheApp.GetScreens()
 

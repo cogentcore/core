@@ -122,7 +122,7 @@ func init() {
 		"Base":         reflect.ValueOf((*events.Base)(nil)),
 		"Buttons":      reflect.ValueOf((*events.Buttons)(nil)),
 		"CustomEvent":  reflect.ValueOf((*events.CustomEvent)(nil)),
-		"Deque":        reflect.ValueOf((*events.Deque)(nil)),
+		"Queue":        reflect.ValueOf((*events.Queue)(nil)),
 		"DragDrop":     reflect.ValueOf((*events.DragDrop)(nil)),
 		"DropMods":     reflect.ValueOf((*events.DropMods)(nil)),
 		"Event":        reflect.ValueOf((*events.Event)(nil)),
