@@ -380,7 +380,8 @@ func (w *renderWindow) eventLoop() {
 		}
 		if e == nil {
 			if TheApp.Platform() == system.Web {
-				time.Sleep(1) // critical to prevent hanging
+				//lint:ignore SA1004 critical to prevent hanging
+				time.Sleep(1)
 			}
 			continue
 		}
