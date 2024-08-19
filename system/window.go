@@ -20,19 +20,14 @@ import (
 // Window is a double-buffered OS-specific hardware window.
 //
 // It provides basic GPU support functions, and is currently implemented
-// via Vulkan on top of glfw cross-platform window mgmt toolkit (see driver/desktop).
-// using the vgpu framework.
+// via WebGPU. It uses glfw on desktop and native APIs on mobile and web.
 //
-// The Window maintains its own vdraw.Drawer drawing system for rendering
+// The Window maintains its own [Drawer] drawing system for rendering
 // bitmap images and filled regions onto the window surface.
 //
 // The base full-window image should be drawn with a Scale call first,
 // followed by any overlay images such as sprites or direct upload
 // images already on the GPU (e.g., from 3D render frames)
-//
-// vgpu.MaxTexturesPerSet = 16 to work cross-platform, meaning that a maximum of 16
-// images per descriptor set can be uploaded and be ready to use in one render pass.
-// core.Window uses multiple sets to get around this limitation.
 type Window interface {
 
 	// Name returns the name of the window -- name is used strictly for
