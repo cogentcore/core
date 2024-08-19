@@ -224,7 +224,7 @@ func TextDecorationsValues() []TextDecorations { return _TextDecorationsValues }
 func (i TextDecorations) Values() []enums.Enum { return enums.Values(_TextDecorationsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i TextDecorations) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *TextDecorations) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *TextDecorations) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
