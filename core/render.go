@@ -48,10 +48,10 @@ func (wb *WidgetBase) AsyncUnlock() {
 	if rc == nil {
 		return
 	}
-	rc.unlock()
 	if wb.Scene != nil {
 		wb.Scene.updating = false
 	}
+	rc.unlock()
 }
 
 // NeedsRender specifies that the widget needs to be rendered.
