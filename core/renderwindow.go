@@ -591,9 +591,9 @@ func (rc *renderContext) String() string {
 }
 
 func (sc *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
-	unchanged := !sc.imageUpdated || sc.updating
+	unchanged := !sc.hasFlag(sceneImageUpdated) || sc.hasFlag(sceneUpdating)
 	drw.Copy(sc.SceneGeom.Pos, sc.Pixels, sc.Pixels.Bounds(), op, unchanged)
-	sc.imageUpdated = false
+	sc.setFlag(false, sceneImageUpdated)
 }
 
 func (w *renderWindow) renderContext() *renderContext {

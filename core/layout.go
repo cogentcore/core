@@ -642,7 +642,7 @@ func (fr *Frame) laySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 		if nosz {
 			continue
 		}
-		if !(fr.Scene != nil && fr.Scene.prefSizing) && oflow.Dim(d) >= styles.OverflowAuto && fr.Parent != nil {
+		if !(fr.Scene != nil && fr.Scene.hasFlag(scenePrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto && fr.Parent != nil {
 			if mx.Dim(d) > 0 {
 				asz.SetDim(d, styles.ClampMax(styles.ClampMin(asz.Dim(d), nsz.Dim(d)), mx.Dim(d)))
 			}
@@ -1508,7 +1508,7 @@ func (wb *WidgetBase) SizeFinal() {
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change in our Total size.
 func (wb *WidgetBase) growToAlloc() bool {
-	if (wb.Scene != nil && wb.Scene.prefSizing) || wb.Styles.GrowWrap {
+	if (wb.Scene != nil && wb.Scene.hasFlag(scenePrefSizing)) || wb.Styles.GrowWrap {
 		return false
 	}
 	sz := &wb.Geom.Size

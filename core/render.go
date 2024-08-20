@@ -37,7 +37,7 @@ func (wb *WidgetBase) AsyncLock() {
 		rc.unlock()
 		select {}
 	}
-	wb.Scene.updating = true
+	wb.Scene.setFlag(true, sceneUpdating)
 }
 
 // AsyncUnlock must be called after making any updates in a separate goroutine
@@ -49,7 +49,7 @@ func (wb *WidgetBase) AsyncUnlock() {
 		return
 	}
 	if wb.Scene != nil {
-		wb.Scene.updating = false
+		wb.Scene.setFlag(false, sceneUpdating)
 	}
 	rc.unlock()
 }
@@ -61,7 +61,7 @@ func (wb *WidgetBase) NeedsRender() {
 	}
 	wb.needsRender = true
 	if wb.Scene != nil {
-		wb.Scene.sceneNeedsRender = true
+		wb.Scene.setFlag(true, sceneNeedsRender)
 	}
 }
 
@@ -73,7 +73,7 @@ func (wb *WidgetBase) NeedsLayout() {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsLayout:", wb)
 	}
 	if wb.Scene != nil {
-		wb.Scene.needsLayout = true
+		wb.Scene.setFlag(true, sceneNeedsLayout)
 	}
 }
 
@@ -168,16 +168,16 @@ var sceneShowIters = 2
 // returns false if already updating.
 // This is the main update call made by the RenderWindow at FPS frequency.
 func (sc *Scene) doUpdate() bool {
-	if sc.updating {
+	if sc.hasFlag(sceneUpdating) {
 		return false
 	}
-	sc.updating = true // prevent rendering
-	defer func() { sc.updating = false }()
+	sc.setFlag(true, sceneUpdating) // prevent rendering
+	defer func() { sc.setFlag(false, sceneUpdating) }()
 
 	rc := sc.renderContext()
 
 	if sc.showIter < sceneShowIters {
-		sc.needsLayout = true
+		sc.setFlag(true, sceneNeedsLayout)
 		sc.showIter++
 	}
 
@@ -185,31 +185,28 @@ func (sc *Scene) doUpdate() bool {
 	case rc.rebuild:
 		pr := profile.Start("rebuild")
 		sc.doRebuild()
-		sc.needsLayout = false
-		sc.sceneNeedsRender = false
-		sc.imageUpdated = true
+		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
+		sc.setFlag(true, sceneImageUpdated)
 		pr.End()
 	case sc.lastRender.needsRestyle(rc):
 		pr := profile.Start("restyle")
 		sc.applyStyleScene()
 		sc.layoutRenderScene()
-		sc.needsLayout = false
-		sc.sceneNeedsRender = false
-		sc.imageUpdated = true
+		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
+		sc.setFlag(true, sceneImageUpdated)
 		sc.lastRender.saveRender(rc)
 		pr.End()
-	case sc.needsLayout:
+	case sc.hasFlag(sceneNeedsLayout):
 		pr := profile.Start("layout")
 		sc.layoutRenderScene()
-		sc.needsLayout = false
-		sc.sceneNeedsRender = false
-		sc.imageUpdated = true
+		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
+		sc.setFlag(true, sceneImageUpdated)
 		pr.End()
-	case sc.sceneNeedsRender:
+	case sc.hasFlag(sceneNeedsRender):
 		pr := profile.Start("render")
 		sc.doNeedsRender()
-		sc.sceneNeedsRender = false
-		sc.imageUpdated = true
+		sc.setFlag(false, sceneNeedsRender)
+		sc.setFlag(true, sceneImageUpdated)
 		pr.End()
 	default:
 		return false
@@ -217,7 +214,7 @@ func (sc *Scene) doUpdate() bool {
 
 	if sc.showIter == sceneShowIters { // end of first pass
 		sc.showIter++
-		if !sc.prefSizing {
+		if !sc.hasFlag(scenePrefSizing) {
 			sc.Events.activateStartFocus()
 		}
 	}
@@ -232,8 +229,8 @@ func (sc *Scene) doUpdate() bool {
 // is first drawn or resized, or during rebuild,
 // once the full sizing information is available.
 func (sc *Scene) updateScene() {
-	sc.updating = true // prevent rendering
-	defer func() { sc.updating = false }()
+	sc.setFlag(true, sceneUpdating) // prevent rendering
+	defer func() { sc.setFlag(false, sceneUpdating) }()
 
 	sc.UpdateTree()
 }
@@ -242,11 +239,11 @@ func (sc *Scene) updateScene() {
 // This is needed whenever the window geometry, DPI,
 // etc is updated, which affects styling.
 func (sc *Scene) applyStyleScene() {
-	sc.updating = true // prevent rendering
-	defer func() { sc.updating = false }()
+	sc.setFlag(true, sceneUpdating) // prevent rendering
+	defer func() { sc.setFlag(false, sceneUpdating) }()
 
 	sc.StyleTree()
-	sc.needsLayout = true
+	sc.setFlag(true, sceneNeedsLayout)
 }
 
 // doRebuild does the full re-render and RenderContext Rebuild flag
@@ -262,16 +259,16 @@ func (sc *Scene) doRebuild() {
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
 func (sc *Scene) prefSize(initSz image.Point) image.Point {
-	sc.updating = true // prevent rendering
-	defer func() { sc.updating = false }()
+	sc.setFlag(true, sceneUpdating) // prevent rendering
+	defer func() { sc.setFlag(false, sceneUpdating) }()
 
-	sc.prefSizing = true
+	sc.setFlag(true, scenePrefSizing)
 	sc.updateScene()
 	sc.applyStyleScene()
 	sc.layoutScene()
 	sz := &sc.Geom.Size
 	psz := sz.Actual.Total
-	sc.prefSizing = false
+	sc.setFlag(false, scenePrefSizing)
 	sc.showIter = 0
 	return psz.ToPointFloor()
 }
