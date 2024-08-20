@@ -278,6 +278,9 @@ func (pl *PlotEditor) GoUpdatePlot() {
 	if pl == nil || pl.This == nil {
 		return
 	}
+	if core.TheApp.Platform() == system.Web {
+		time.Sleep(time.Millisecond) // critical to prevent hanging!
+	}
 	if !pl.IsVisible() || pl.table == nil || pl.table.Table == nil || pl.inPlot {
 		return
 	}
@@ -286,9 +289,6 @@ func (pl *PlotEditor) GoUpdatePlot() {
 	pl.genPlot()
 	pl.NeedsRender()
 	pl.Scene.AsyncUnlock()
-	if core.TheApp.Platform() == system.Web {
-		time.Sleep(time.Millisecond) // critical to prevent hanging!
-	}
 }
 
 // UpdatePlot updates the display based on current IndexView into table.
