@@ -149,6 +149,9 @@ setScreen:
 // See: https://github.com/glfw/glfw/issues/1699
 // This is adapted from slawrence2302's code posted there.
 func (w *Window) GetScreenOverlap() *system.Screen {
+	w.App.Mu.Lock()
+	defer w.App.Mu.Unlock()
+
 	var wgeom image.Rectangle
 	wgeom.Min.X, wgeom.Min.Y = w.Glw.GetPos()
 	var sz image.Point

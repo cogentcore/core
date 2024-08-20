@@ -52,7 +52,7 @@ func ImageFlagsValues() []ImageFlags { return _ImageFlagsValues }
 func (i ImageFlags) Values() []enums.Enum { return enums.Values(_ImageFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i ImageFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *ImageFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *ImageFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
@@ -406,7 +406,7 @@ func ValueFlagsValues() []ValueFlags { return _ValueFlagsValues }
 func (i ValueFlags) Values() []enums.Enum { return enums.Values(_ValueFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i ValueFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *ValueFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *ValueFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }

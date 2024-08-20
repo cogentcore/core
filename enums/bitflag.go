@@ -9,13 +9,11 @@ package enums
 // BitFlag is the interface that all bit flag enum types
 // satisfy. Bit flag enum types support all of the operations
 // that standard enums do, and additionally can check if they
-// have a given bit flag.
+// have a given bit flag. Note that HasFlag is defined on
+// [BitFlagSetter] since it requires a pointer receiver for
+// atomic operations to prevent race conditions.
 type BitFlag interface {
 	Enum
-
-	// Has returns whether these flags
-	// have the given flag set.
-	HasFlag(f BitFlag) bool
 
 	// BitIndexString returns the string
 	// representation of the bit flag if
@@ -27,11 +25,15 @@ type BitFlag interface {
 
 // BitFlagSetter is an expanded interface that all pointers
 // to bit flag enum types satisfy. Pointers to bit flag
-// enum types must  satisfy all of the methods of [EnumSetter]
+// enum types must satisfy all of the methods of [EnumSetter]
 // and [BitFlag], and must also be able to set a given bit flag.
 type BitFlagSetter interface {
 	EnumSetter
 	BitFlag
+
+	// Has returns whether these flags
+	// have the given flag set.
+	HasFlag(f BitFlag) bool
 
 	// Set sets the value of the given
 	// flags in these flags to the given value.

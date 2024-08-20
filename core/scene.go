@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -100,35 +101,52 @@ type Scene struct { //core:no-new
 	// instead of rendering into the Scene Pixels image.
 	directRenders []Widget
 
-	// State bool values:
+	// flags are atomic bit flags for [Scene] state.
+	flags sceneFlags
+}
 
-	// hasShown is whether this scene has been shown.
+// sceneFlags are atomic bit flags for [Scene] state.
+// They must be atomic to prevent race conditions.
+type sceneFlags int64 //enums:bitflag -trim-prefix scene
+
+const (
+	// sceneHasShown is whether this scene has been shown.
 	// This is used to ensure that [events.Show] is only sent once.
-	hasShown bool
+	sceneHasShown sceneFlags = iota
 
-	// updating means the Scene is in the process of updating.
+	// sceneUpdating means the Scene is in the process of sceneUpdating.
 	// It is set for any kind of tree-level update.
 	// Skip any further update passes until it goes off.
-	updating bool
+	sceneUpdating
 
 	// sceneNeedsRender is whether anything in the Scene needs to be re-rendered
 	// (but not necessarily the whole scene itself).
-	sceneNeedsRender bool
+	sceneNeedsRender
 
-	// needsLayout is whether the Scene needs a new layout pass.
-	needsLayout bool
+	// sceneNeedsLayout is whether the Scene needs a new layout pass.
+	sceneNeedsLayout
 
-	// imageUpdated indicates that the Scene's image has been updated
+	// sceneImageUpdated indicates that the Scene's image has been updated
 	// e.g., due to a render or a resize. This is reset by the
 	// global [RenderWindow] rendering pass, so it knows whether it needs to
 	// copy the image up to the GPU or not.
-	imageUpdated bool
+	sceneImageUpdated
 
-	// prefSizing means that this scene is currently doing a
+	// scenePrefSizing means that this scene is currently doing a
 	// PrefSize computation to compute the size of the scene
 	// (for sizing window for example); affects layout size computation
 	// only for Over
-	prefSizing bool
+	scenePrefSizing
+)
+
+// hasFlag returns whether the given flag is set.
+func (sc *Scene) hasFlag(f sceneFlags) bool {
+	return sc.flags.HasFlag(f)
+}
+
+// setFlag sets the given flags to the given value.
+func (sc *Scene) setFlag(on bool, f ...enums.BitFlag) {
+	sc.flags.SetFlag(on, f...)
 }
 
 // newBodyScene creates a new Scene for use with an associated Body that

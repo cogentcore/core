@@ -178,6 +178,65 @@ func (i *MeterTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "MeterTypes")
 }
 
+var _sceneFlagsValues = []sceneFlags{0, 1, 2, 3, 4, 5}
+
+// sceneFlagsN is the highest valid value for type sceneFlags, plus one.
+const sceneFlagsN sceneFlags = 6
+
+var _sceneFlagsValueMap = map[string]sceneFlags{`HasShown`: 0, `Updating`: 1, `NeedsRender`: 2, `NeedsLayout`: 3, `ImageUpdated`: 4, `PrefSizing`: 5}
+
+var _sceneFlagsDescMap = map[sceneFlags]string{0: `sceneHasShown is whether this scene has been shown. This is used to ensure that [events.Show] is only sent once.`, 1: `sceneUpdating means the Scene is in the process of sceneUpdating. It is set for any kind of tree-level update. Skip any further update passes until it goes off.`, 2: `sceneNeedsRender is whether anything in the Scene needs to be re-rendered (but not necessarily the whole scene itself).`, 3: `sceneNeedsLayout is whether the Scene needs a new layout pass.`, 4: `sceneImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global [RenderWindow] rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 5: `scenePrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example); affects layout size computation only for Over`}
+
+var _sceneFlagsMap = map[sceneFlags]string{0: `HasShown`, 1: `Updating`, 2: `NeedsRender`, 3: `NeedsLayout`, 4: `ImageUpdated`, 5: `PrefSizing`}
+
+// String returns the string representation of this sceneFlags value.
+func (i sceneFlags) String() string { return enums.BitFlagString(i, _sceneFlagsValues) }
+
+// BitIndexString returns the string representation of this sceneFlags value
+// if it is a bit index value (typically an enum constant), and
+// not an actual bit flag value.
+func (i sceneFlags) BitIndexString() string { return enums.String(i, _sceneFlagsMap) }
+
+// SetString sets the sceneFlags value from its string representation,
+// and returns an error if the string is invalid.
+func (i *sceneFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
+
+// SetStringOr sets the sceneFlags value from its string representation
+// while preserving any bit flags already set, and returns an
+// error if the string is invalid.
+func (i *sceneFlags) SetStringOr(s string) error {
+	return enums.SetStringOr(i, s, _sceneFlagsValueMap, "sceneFlags")
+}
+
+// Int64 returns the sceneFlags value as an int64.
+func (i sceneFlags) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the sceneFlags value from an int64.
+func (i *sceneFlags) SetInt64(in int64) { *i = sceneFlags(in) }
+
+// Desc returns the description of the sceneFlags value.
+func (i sceneFlags) Desc() string { return enums.Desc(i, _sceneFlagsDescMap) }
+
+// sceneFlagsValues returns all possible values for the type sceneFlags.
+func sceneFlagsValues() []sceneFlags { return _sceneFlagsValues }
+
+// Values returns all possible values for the type sceneFlags.
+func (i sceneFlags) Values() []enums.Enum { return enums.Values(_sceneFlagsValues) }
+
+// HasFlag returns whether these bit flags have the given bit flag set.
+func (i *sceneFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
+
+// SetFlag sets the value of the given flags in these flags to the given value.
+func (i *sceneFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i sceneFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *sceneFlags) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "sceneFlags")
+}
+
 var _ThemesValues = []Themes{0, 1, 2}
 
 // ThemesN is the highest valid value for type Themes, plus one.
@@ -557,4 +616,63 @@ func (i TextFieldTypes) MarshalText() ([]byte, error) { return []byte(i.String()
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextFieldTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "TextFieldTypes")
+}
+
+var _widgetFlagsValues = []widgetFlags{0, 1, 2}
+
+// widgetFlagsN is the highest valid value for type widgetFlags, plus one.
+const widgetFlagsN widgetFlags = 3
+
+var _widgetFlagsValueMap = map[string]widgetFlags{`ValueNewWindow`: 0, `NeedsRender`: 1, `FirstRender`: 2}
+
+var _widgetFlagsDescMap = map[widgetFlags]string{0: `widgetValueNewWindow indicates that the dialog of a [Value] should be opened as a new window, instead of a typical full window in the same current window. This is set by [InitValueButton] and handled by [openValueDialog]. This is triggered by holding down the Shift key while clicking on a [Value] button. Certain values such as [FileButton] may set this to true in their [InitValueButton] function.`, 1: `widgetNeedsRender is whether the widget needs to be rendered on the next render iteration.`, 2: `widgetFirstRender indicates that we were the first to render, and pushed our parent&#39;s bounds, which then need to be popped.`}
+
+var _widgetFlagsMap = map[widgetFlags]string{0: `ValueNewWindow`, 1: `NeedsRender`, 2: `FirstRender`}
+
+// String returns the string representation of this widgetFlags value.
+func (i widgetFlags) String() string { return enums.BitFlagString(i, _widgetFlagsValues) }
+
+// BitIndexString returns the string representation of this widgetFlags value
+// if it is a bit index value (typically an enum constant), and
+// not an actual bit flag value.
+func (i widgetFlags) BitIndexString() string { return enums.String(i, _widgetFlagsMap) }
+
+// SetString sets the widgetFlags value from its string representation,
+// and returns an error if the string is invalid.
+func (i *widgetFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
+
+// SetStringOr sets the widgetFlags value from its string representation
+// while preserving any bit flags already set, and returns an
+// error if the string is invalid.
+func (i *widgetFlags) SetStringOr(s string) error {
+	return enums.SetStringOr(i, s, _widgetFlagsValueMap, "widgetFlags")
+}
+
+// Int64 returns the widgetFlags value as an int64.
+func (i widgetFlags) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the widgetFlags value from an int64.
+func (i *widgetFlags) SetInt64(in int64) { *i = widgetFlags(in) }
+
+// Desc returns the description of the widgetFlags value.
+func (i widgetFlags) Desc() string { return enums.Desc(i, _widgetFlagsDescMap) }
+
+// widgetFlagsValues returns all possible values for the type widgetFlags.
+func widgetFlagsValues() []widgetFlags { return _widgetFlagsValues }
+
+// Values returns all possible values for the type widgetFlags.
+func (i widgetFlags) Values() []enums.Enum { return enums.Values(_widgetFlagsValues) }
+
+// HasFlag returns whether these bit flags have the given bit flag set.
+func (i *widgetFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
+
+// SetFlag sets the value of the given flags in these flags to the given value.
+func (i *widgetFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i widgetFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *widgetFlags) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "widgetFlags")
 }

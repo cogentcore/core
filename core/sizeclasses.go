@@ -24,7 +24,7 @@ const (
 // SizeClass returns the size class of the scene in which the widget is contained.
 func (wb *WidgetBase) SizeClass() SizeClasses {
 	dots := float32(wb.Scene.SceneGeom.Size.X)
-	if wb.Scene.prefSizing {
+	if wb.Scene.hasFlag(scenePrefSizing) {
 		if currentRenderWindow != nil {
 			rg := currentRenderWindow.SystemWindow.RenderGeom()
 			dots = float32(rg.Size.X)

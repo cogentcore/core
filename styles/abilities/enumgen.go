@@ -52,7 +52,7 @@ func AbilitiesValues() []Abilities { return _AbilitiesValues }
 func (i Abilities) Values() []enums.Enum { return enums.Values(_AbilitiesValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i Abilities) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *Abilities) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *Abilities) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }

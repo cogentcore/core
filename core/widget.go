@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/base/tiered"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
@@ -206,20 +207,39 @@ type WidgetBase struct {
 	// ValueTitle is the title to display for a dialog for this [Value].
 	ValueTitle string
 
-	// valueNewWindow indicates that the dialog of a [Value] should be opened
+	/// flags are atomic bit flags for [WidgetBase] state.
+	flags widgetFlags
+}
+
+// widgetFlags are atomic bit flags for [WidgetBase] state.
+// They must be atomic to prevent race conditions.
+type widgetFlags int64 //enums:bitflag -trim-prefix widget
+
+const (
+	// widgetValueNewWindow indicates that the dialog of a [Value] should be opened
 	// as a new window, instead of a typical full window in the same current window.
 	// This is set by [InitValueButton] and handled by [openValueDialog].
 	// This is triggered by holding down the Shift key while clicking on a
 	// [Value] button. Certain values such as [FileButton] may set this to true
 	// in their [InitValueButton] function.
-	valueNewWindow bool
+	widgetValueNewWindow widgetFlags = iota
 
-	// needsRender is whether the widget needs to be rendered on the next render iteration.
-	needsRender bool
+	// widgetNeedsRender is whether the widget needs to be rendered on the next render iteration.
+	widgetNeedsRender
 
-	// firstRender indicates that we were the first to render, and pushed our parent's
+	// widgetFirstRender indicates that we were the first to render, and pushed our parent's
 	// bounds, which then need to be popped.
-	firstRender bool
+	widgetFirstRender
+)
+
+// hasFlag returns whether the given flag is set.
+func (wb *WidgetBase) hasFlag(f widgetFlags) bool {
+	return wb.flags.HasFlag(f)
+}
+
+// setFlag sets the given flags to the given value.
+func (wb *WidgetBase) setFlag(on bool, f ...enums.BitFlag) {
+	wb.flags.SetFlag(on, f...)
 }
 
 // Init should be called by every [Widget] type in its custom
