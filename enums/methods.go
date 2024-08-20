@@ -297,7 +297,7 @@ func SetFlag(i *int64, on bool, f ...BitFlag) {
 	for _, v := range f {
 		mask |= 1 << v.Int64()
 	}
-	in := *i
+	in := atomic.LoadInt64(i)
 	if on {
 		in |= mask
 		atomic.StoreInt64(i, in)
