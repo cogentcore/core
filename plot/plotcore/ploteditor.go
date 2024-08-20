@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
@@ -25,6 +26,7 @@ import (
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tensor/tensorcore"
 	"cogentcore.org/core/tree"
@@ -284,6 +286,9 @@ func (pl *PlotEditor) GoUpdatePlot() {
 	pl.genPlot()
 	pl.NeedsRender()
 	pl.Scene.AsyncUnlock()
+	if core.TheApp.Platform() == system.Web {
+		time.Sleep(time.Millisecond) // critical to prevent hanging!
+	}
 }
 
 // UpdatePlot updates the display based on current IndexView into table.
