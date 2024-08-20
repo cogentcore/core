@@ -59,7 +59,7 @@ func (wb *WidgetBase) NeedsRender() {
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsRender:", wb)
 	}
-	wb.needsRender = true
+	wb.setFlag(true, widgetNeedsRender)
 	if wb.Scene != nil {
 		wb.Scene.setFlag(true, sceneNeedsRender)
 	}
@@ -144,7 +144,7 @@ func (wb *WidgetBase) doNeedsRender() {
 		return
 	}
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
-		if cwb.needsRender {
+		if cwb.hasFlag(widgetNeedsRender) {
 			cw.RenderWidget()
 			return tree.Break // don't go any deeper
 		}
@@ -285,8 +285,8 @@ func (wb *WidgetBase) PushBounds() bool {
 	if wb == nil || wb.This == nil {
 		return false
 	}
-	wb.needsRender = false // done!
-	if !wb.IsVisible() {   // checks deleted etc
+	wb.setFlag(false, widgetNeedsRender) // done!
+	if !wb.IsVisible() {                 // checks deleted etc
 		return false
 	}
 	if wb.Geom.TotalBBox.Empty() {
@@ -301,12 +301,12 @@ func (wb *WidgetBase) PushBounds() bool {
 		return false
 	}
 	if len(pc.BoundsStack) == 0 && wb.Parent != nil {
-		wb.firstRender = true
+		wb.setFlag(true, widgetFirstRender)
 		// push our parent's bounds if we are the first to render
 		pw := wb.parentWidget()
 		pc.PushBoundsGeom(pw.Geom.TotalBBox, pw.Styles.Border.Radius.Dots())
 	} else {
-		wb.firstRender = false
+		wb.setFlag(false, widgetFirstRender)
 	}
 	pc.PushBoundsGeom(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots())
 	pc.Defaults() // start with default values
@@ -357,9 +357,9 @@ func (wb *WidgetBase) PopBounds() {
 	}
 
 	pc.PopBounds()
-	if wb.firstRender {
+	if wb.hasFlag(widgetFirstRender) {
 		pc.PopBounds()
-		wb.firstRender = false
+		wb.setFlag(false, widgetFirstRender)
 	}
 }
 

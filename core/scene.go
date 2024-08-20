@@ -101,12 +101,12 @@ type Scene struct { //core:no-new
 	// instead of rendering into the Scene Pixels image.
 	directRenders []Widget
 
-	// flags are atomic bit flags for Scene state.
+	// flags are atomic bit flags for [Scene] state.
 	flags sceneFlags
 }
 
 // sceneFlags are atomic bit flags for [Scene] state.
-// This is necessary to prevent race conditions.
+// They must be atomic to prevent race conditions.
 type sceneFlags int64 //enums:bitflag -trim-prefix scene
 
 const (
@@ -144,7 +144,7 @@ func (sc *Scene) hasFlag(f sceneFlags) bool {
 	return sc.flags.HasFlag(f)
 }
 
-// setFlag sets the given flags on or off.
+// setFlag sets the given flags to the given value.
 func (sc *Scene) setFlag(on bool, f ...enums.BitFlag) {
 	sc.flags.SetFlag(on, f...)
 }
