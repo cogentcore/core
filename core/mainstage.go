@@ -169,14 +169,15 @@ func (st *Stage) configMainStage() {
 	if st.NewWindow {
 		st.FullWindow = true
 	}
-	if st.NewWindow && st.Type == DialogStage && TheApp.Platform().IsMobile() && st.Context != nil && st.Context.AsWidget().SizeClass() != SizeCompact {
-		st.NewWindow = false
-		st.FullWindow = false
-		st.Modal = false
-		st.Scrim = false
-	}
-	// if we are on mobile, we can never have new windows
 	if TheApp.Platform().IsMobile() {
+		// If we are a new window dialog on a large single-window platform,
+		// we use a modeless dialog as a substitute.
+		if st.NewWindow && st.Type == DialogStage && st.Context != nil && st.Context.AsWidget().SizeClass() != SizeCompact {
+			st.FullWindow = false
+			st.Modal = false
+			st.Scrim = false
+		}
+		// If we are on mobile, we can never have new windows.
 		st.NewWindow = false
 	}
 	if st.FullWindow || st.NewWindow {
