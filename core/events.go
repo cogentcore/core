@@ -400,6 +400,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 			}
 			em.dragHovers = em.updateHovers(hovs, em.dragHovers, e, events.DragEnter, events.DragLeave)
 			em.dragMove(e)                              // updates sprite position
+			em.drag.AsWidget().HandleEvent(e)           // raw drag
 			em.drag.AsWidget().Send(events.DragMove, e) // usually ignored
 			e.SetHandled()
 		} else {

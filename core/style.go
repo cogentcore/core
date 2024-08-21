@@ -225,7 +225,7 @@ func styleFromTags(w Widget, tags reflect.StructTag) {
 		setFromTag(tags, "grow", func(v float32) { s.Grow.X = v })
 		setFromTag(tags, "grow-y", func(v float32) { s.Grow.Y = v })
 	})
-	if v, ok := tags.Lookup("new-window"); ok && v == "+" {
+	if tags.Get("new-window") == "+" {
 		w.AsWidget().setFlag(true, widgetValueNewWindow)
 	}
 }

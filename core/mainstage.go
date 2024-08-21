@@ -404,7 +404,7 @@ func (sm *stages) mainHandleEvent(e events.Event) {
 		if e.IsHandled() || st.Modal || st.Type == WindowStage || st.FullWindow {
 			break
 		}
-		if st.Type == DialogStage { // modal dialog, by definition
+		if st.Type == DialogStage { // modeless dialog, by definition
 			if e.HasPos() && st.Scene != nil {
 				b := st.Scene.SceneGeom.Bounds()
 				if e.WindowPos().In(b) { // don't propagate
