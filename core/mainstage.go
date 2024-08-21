@@ -165,8 +165,17 @@ func (st *Stage) firstWindowStages() *stages {
 
 // configMainStage does main-stage configuration steps
 func (st *Stage) configMainStage() {
+	sc := st.Scene
 	if st.NewWindow {
 		st.FullWindow = true
+	}
+	if st.NewWindow && st.Type == DialogStage && TheApp.Platform() == system.Web && st.Context != nil {
+		if st.Context.AsWidget().SizeClass() == SizeExpanded {
+			st.NewWindow = false
+			st.FullWindow = false
+			st.Modal = false
+			st.Scrim = false
+		}
 	}
 	// if we are on mobile, we can never have new windows
 	if TheApp.Platform().IsMobile() {
@@ -175,7 +184,6 @@ func (st *Stage) configMainStage() {
 	if st.FullWindow || st.NewWindow {
 		st.Scrim = false
 	}
-	sc := st.Scene
 	sc.makeSceneBars()
 	sc.updateScene()
 }
