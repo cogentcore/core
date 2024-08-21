@@ -60,6 +60,7 @@ body > #app-crash-dialog {
   top: 0;
   background-color: inherit;
   overflow: auto;
+  padding: 8px;
 }
 
 /* Loader: */
