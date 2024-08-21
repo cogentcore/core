@@ -409,8 +409,6 @@ func (sm *stages) mainHandleEvent(e events.Event) {
 		if st.Type == DialogStage { // modal dialog, by definition
 			if e.HasPos() {
 				b := st.Scene.SceneGeom.Bounds()
-				b.Min.Y -= 10 // include a buffer around for dialog decoration
-				b.Max.Y += 10
 				if e.WindowPos().In(b) { // don't propagate
 					break
 				}
