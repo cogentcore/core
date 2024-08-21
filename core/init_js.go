@@ -13,6 +13,18 @@ import (
 )
 
 func init() {
+	webCrashDialog = func(title, text, body string) {
+		document := js.Global().Get("document")
+		div := document.Call("createElement", "div")
+		h1 := document.Call("createElement", "h1")
+		p := document.Call("createElement", "p")
+		h1.Set("innerText", title)
+		p.Set("innerText", text+"\n\n"+body)
+		div.Call("appendChild", h1)
+		div.Call("appendChild", p)
+		document.Get("body").Call("appendChild", div)
+	}
+
 	js.Global().Set("appOnUpdate", js.FuncOf(func(this js.Value, args []js.Value) any {
 		NewBody("web-update-available").
 			AddSnackbarText("A new version is available").
