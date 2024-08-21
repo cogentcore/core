@@ -165,17 +165,24 @@ func (st *Stage) firstWindowStages() *stages {
 
 // configMainStage does main-stage configuration steps
 func (st *Stage) configMainStage() {
+	sc := st.Scene
 	if st.NewWindow {
 		st.FullWindow = true
 	}
-	// if we are on mobile, we can never have new windows
 	if TheApp.Platform().IsMobile() {
+		// If we are a new window dialog on a large single-window platform,
+		// we use a modeless dialog as a substitute.
+		if st.NewWindow && st.Type == DialogStage && st.Context != nil && st.Context.AsWidget().SizeClass() != SizeCompact {
+			st.FullWindow = false
+			st.Modal = false
+			st.Scrim = false
+		}
+		// If we are on mobile, we can never have new windows.
 		st.NewWindow = false
 	}
 	if st.FullWindow || st.NewWindow {
 		st.Scrim = false
 	}
-	sc := st.Scene
 	sc.makeSceneBars()
 	sc.updateScene()
 }
@@ -397,6 +404,14 @@ func (sm *stages) mainHandleEvent(e events.Event) {
 		st.mainHandleEvent(e)
 		if e.IsHandled() || st.Modal || st.Type == WindowStage || st.FullWindow {
 			break
+		}
+		if st.Type == DialogStage { // modeless dialog, by definition
+			if e.HasPos() && st.Scene != nil {
+				b := st.Scene.SceneGeom.Bounds()
+				if e.WindowPos().In(b) { // don't propagate
+					break
+				}
+			}
 		}
 	}
 }
