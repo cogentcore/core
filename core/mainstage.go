@@ -169,13 +169,11 @@ func (st *Stage) configMainStage() {
 	if st.NewWindow {
 		st.FullWindow = true
 	}
-	if st.NewWindow && st.Type == DialogStage && TheApp.Platform() == system.Web && st.Context != nil {
-		if st.Context.AsWidget().SizeClass() == SizeExpanded {
-			st.NewWindow = false
-			st.FullWindow = false
-			st.Modal = false
-			st.Scrim = false
-		}
+	if st.NewWindow && st.Type == DialogStage && TheApp.Platform().IsMobile() && st.Context != nil && st.Context.AsWidget().SizeClass() != SizeCompact {
+		st.NewWindow = false
+		st.FullWindow = false
+		st.Modal = false
+		st.Scrim = false
 	}
 	// if we are on mobile, we can never have new windows
 	if TheApp.Platform().IsMobile() {

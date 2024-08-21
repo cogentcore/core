@@ -249,15 +249,15 @@ func (em *Events) handlePosEvent(e events.Event) {
 		em.resetOnMouseDown()
 	case events.MouseDrag:
 		if em.spriteSlide != nil {
-			e.SetHandled()
 			em.spriteSlide.handleEvent(e)
 			em.spriteSlide.send(events.SlideMove, e)
+			e.SetHandled()
 			return
 		}
 		if em.slide != nil {
-			e.SetHandled()
 			em.slide.AsWidget().HandleEvent(e)
 			em.slide.AsWidget().Send(events.SlideMove, e)
+			e.SetHandled()
 			return
 		}
 	case events.Scroll:
@@ -399,21 +399,21 @@ func (em *Events) handlePosEvent(e events.Event) {
 				}
 			}
 			em.dragHovers = em.updateHovers(hovs, em.dragHovers, e, events.DragEnter, events.DragLeave)
-			em.dragMove(e) // updates sprite position
-			e.SetHandled()
+			em.dragMove(e)                              // updates sprite position
 			em.drag.AsWidget().Send(events.DragMove, e) // usually ignored
+			e.SetHandled()
 		} else {
 			if em.dragPress != nil && em.dragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
 				em.cancelRepeatClick()
 				em.cancelLongPress()
-				e.SetHandled()
 				em.dragPress.AsWidget().Send(events.DragStart, e)
+				e.SetHandled()
 			} else if em.slidePress != nil && em.dragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.DragStartDistance) {
 				em.cancelRepeatClick()
 				em.cancelLongPress()
-				e.SetHandled()
 				em.slide = em.slidePress
 				em.slide.AsWidget().Send(events.SlideStart, e)
+				e.SetHandled()
 			}
 		}
 		// if we already have a long press widget, we update it based on our dragging movement
@@ -423,8 +423,8 @@ func (em *Events) handlePosEvent(e events.Event) {
 	case events.MouseUp:
 		em.cancelRepeatClick()
 		if em.slide != nil {
-			e.SetHandled()
 			em.slide.AsWidget().Send(events.SlideStop, e)
+			e.SetHandled()
 			em.slide = nil
 			em.press = nil
 		}
