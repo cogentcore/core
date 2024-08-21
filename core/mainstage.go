@@ -405,7 +405,7 @@ func (sm *stages) mainHandleEvent(e events.Event) {
 			break
 		}
 		if st.Type == DialogStage { // modal dialog, by definition
-			if e.HasPos() {
+			if e.HasPos() && st.Scene != nil {
 				b := st.Scene.SceneGeom.Bounds()
 				if e.WindowPos().In(b) { // don't propagate
 					break
