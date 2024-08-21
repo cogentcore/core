@@ -218,6 +218,7 @@ func (sw *Scene) handleSelectEventsImpl(e events.Event) {
 
 func (sw *Scene) handleSlideEvents() {
 	sw.On(events.SlideMove, func(e events.Event) {
+		e.SetHandled()
 		pos := sw.Geom.ContentBBox.Min
 		e.SetLocalOff(e.LocalOff().Add(pos))
 		xy := sw.XYZ
