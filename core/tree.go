@@ -637,8 +637,8 @@ func (tr *Tree) RenderWidget() {
 		}
 		tr.PopBounds()
 	}
-	// we always have to render our kids b/c
-	// we could be out of scope but they could be in!
+	// We have to render our children outside of `if PushBounds`
+	// since we could be out of scope but they could still be in!
 	if !tr.Closed {
 		tr.renderChildren()
 	}
