@@ -324,28 +324,34 @@ func (ed *Editor) resetState() {
 
 // SetBuffer sets the [Buffer] that this is an editor of, and interconnects their events.
 func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
-	if ed == nil || buf != nil && ed.Buffer == buf {
+	oldbuf := ed.Buffer
+	if ed == nil || buf != nil && oldbuf == buf {
 		return ed
 	}
 	// had := false
-	if ed.Buffer != nil {
+	if oldbuf != nil {
 		// had = true
-		ed.Buffer.deleteEditor(ed)
+		oldbuf.Lock()
+		oldbuf.deleteEditor(ed)
+		oldbuf.Unlock() // done with oldbuf now
 	}
 	ed.Buffer = buf
 	ed.resetState()
 	if buf != nil {
+		buf.Lock()
 		buf.addEditor(ed)
 		bhl := len(buf.posHistory)
 		if bhl > 0 {
 			cp := buf.posHistory[bhl-1]
 			ed.posHistoryIndex = bhl - 1
+			buf.Unlock()
 			ed.SetCursorShow(cp)
 		} else {
+			buf.Unlock()
 			ed.SetCursorShow(lexer.Pos{})
 		}
 	}
-	ed.layoutAllLines()
+	ed.layoutAllLines() // relocks
 	ed.NeedsLayout()
 	return ed
 }
