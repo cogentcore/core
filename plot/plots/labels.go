@@ -6,7 +6,6 @@ package plots
 
 import (
 	"errors"
-	"fmt"
 	"image"
 
 	"cogentcore.org/core/math32"
@@ -115,7 +114,6 @@ func (l *Labels) Plot(plt *plot.Plot) {
 // DataRange returns the minimum and maximum X and Y values
 func (l *Labels) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
 	xmin, xmax, ymin, ymax = plot.XYRange(l) // first get basic numerical range
-	fmt.Println(plt.Paint.UnitContext)
 	pxToData := math32.FromPoint(plt.Size)
 	pxToData.X = (xmax - xmin) / pxToData.X
 	pxToData.Y = (ymax - ymin) / pxToData.Y
@@ -144,7 +142,6 @@ func (l *Labels) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
 		ymin = min(ymin, miny)
 		ymax = max(ymax, maxy)
 	}
-	fmt.Println(xmin, xmax, ymin, ymax)
 	return
 }
 
