@@ -125,9 +125,13 @@ func (st *Stage) addSceneParts() *Stage {
 				AllRenderWindows[wlen-2].Raise()
 			}
 		})
+		if cwb := AsWidget(sc.Child(0)); cwb != nil {
+			cwb.Styler(func(s *styles.Style) {
+				s.Margin.Left.Dp(56) // make room for back button
+			})
+		}
 	}
 	if st.Type == DialogStage && !st.FullWindow && !st.NewWindow {
-
 		mv := NewHandle(parts)
 		mv.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
