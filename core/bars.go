@@ -126,43 +126,6 @@ func (sc *Scene) GetTopAppBar() *Toolbar {
 	return tree.ChildByType[*Toolbar](tb)
 }
 
-// inheritBarsWidget inherits Bar functions based on a source widget
-// (e.g., Context of dialog)
-func (sc *Scene) inheritBarsWidget(w Widget) {
-	if w == nil {
-		return
-	}
-	wb := w.AsWidget()
-	if wb.Scene == nil {
-		return
-	}
-	sc.inheritBars(wb.Scene)
-}
-
-// inheritBars inherits Bars functions from given other scene
-// for each side that the other scene marks as inherited.
-func (sc *Scene) inheritBars(osc *Scene) {
-	if osc == nil {
-		return
-	}
-	if osc.BarsInherit.Top || sc.BarsInherit.Top {
-		sc.Bars.Top.Inherit(osc.Bars.Top)
-		sc.BarsInherit.Top = true
-	}
-	if osc.BarsInherit.Bottom || sc.BarsInherit.Bottom {
-		sc.Bars.Bottom.Inherit(osc.Bars.Bottom)
-		sc.BarsInherit.Bottom = true
-	}
-	if osc.BarsInherit.Left || sc.BarsInherit.Left {
-		sc.Bars.Left.Inherit(osc.Bars.Left)
-		sc.BarsInherit.Left = true
-	}
-	if osc.BarsInherit.Right || sc.BarsInherit.Right {
-		sc.Bars.Right.Inherit(osc.Bars.Right)
-		sc.BarsInherit.Right = true
-	}
-}
-
 //////////////////////////////////////////////////////////////
 // 	Scene wrappers
 

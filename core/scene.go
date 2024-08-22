@@ -48,10 +48,6 @@ type Scene struct { //core:no-new
 	// so first added are called first.
 	Bars styles.Sides[BarFuncs] `json:"-" xml:"-"`
 
-	// BarsInherit determines which of the Bars side functions are inherited
-	// from the context widget, for FullWindow Dialogs
-	BarsInherit styles.Sides[bool]
-
 	// AppBars contains functions for making the plan for the top app bar.
 	// If there are no such functions, no top app bar will be made.
 	AppBars []func(p *tree.Plan) `json:"-" xml:"-"`
