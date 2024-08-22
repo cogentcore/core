@@ -184,7 +184,6 @@ func (bd *Body) Close() {
 // dialogStyles sets default stylers for dialog bodies.
 // It is automatically called in [Body.NewDialog].
 func (bd *Body) dialogStyles() {
-	bd.Scene.BarsInherit.Top = true
 	bd.Scene.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Color = colors.Scheme.OnSurface
