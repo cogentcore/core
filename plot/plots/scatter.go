@@ -72,7 +72,7 @@ func (pts *Scatter) Plot(plt *plot.Plot) {
 
 // DataRange returns the minimum and maximum
 // x and y values, implementing the plot.DataRanger interface.
-func (pts *Scatter) DataRange() (xmin, xmax, ymin, ymax float32) {
+func (pts *Scatter) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
 	return plot.XYRange(pts)
 }
 

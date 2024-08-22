@@ -19,5 +19,5 @@ type Plotter interface {
 // DataRanger wraps the DataRange method.
 type DataRanger interface {
 	// DataRange returns the range of X and Y values.
-	DataRange() (xmin, xmax, ymin, ymax float32)
+	DataRange(pt *Plot) (xmin, xmax, ymin, ymax float32)
 }

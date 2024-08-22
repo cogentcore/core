@@ -137,7 +137,7 @@ func (e *YErrorBars) Plot(plt *plot.Plot) {
 }
 
 // DataRange implements the plot.DataRanger interface.
-func (e *YErrorBars) DataRange() (xmin, xmax, ymin, ymax float32) {
+func (e *YErrorBars) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
 	xmin, xmax = plot.Range(plot.XValues{e})
 	ymin = math32.Inf(1)
 	ymax = math32.Inf(-1)
@@ -246,7 +246,7 @@ func (e *XErrorBars) Plot(plt *plot.Plot) {
 }
 
 // DataRange implements the plot.DataRanger interface.
-func (e *XErrorBars) DataRange() (xmin, xmax, ymin, ymax float32) {
+func (e *XErrorBars) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
 	ymin, ymax = plot.Range(plot.YValues{e})
 	xmin = math32.Inf(1)
 	xmax = math32.Inf(-1)

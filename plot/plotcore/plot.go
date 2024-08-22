@@ -40,6 +40,7 @@ type Plot struct {
 // drawn at the current size of this widget
 func (pt *Plot) SetPlot(pl *plot.Plot) {
 	if pl != nil && pt.Plot != nil && pt.Plot.Pixels != nil {
+		pl.DPI = pt.Scale * pt.Styles.UnitContext.DPI
 		pl.SetPixels(pt.Plot.Pixels) // re-use the image!
 	}
 	pt.Plot = pl
