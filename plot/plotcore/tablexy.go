@@ -5,9 +5,7 @@
 package plotcore
 
 import (
-	"errors"
-	"log"
-
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
@@ -62,8 +60,7 @@ func newTableXY(dt *table.IndexView, xcol, xtsrIndex, ycol, ytsrIndex int, yrng 
 // Column indexes are enforced to be valid, with an error message if they are not.
 func newTableXYName(dt *table.IndexView, xi, xtsrIndex int, ycol string, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
 	yi, err := dt.Table.ColumnIndexTry(ycol)
-	if err != nil {
-		log.Println(err)
+	if errors.Log(err) != nil {
 		return nil, err
 	}
 	txy := &tableXY{table: dt.Clone(), xColumn: xi, yColumn: yi, xIndex: xtsrIndex, yIndex: ytsrIndex, yRange: yrng}

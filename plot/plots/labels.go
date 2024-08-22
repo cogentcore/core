@@ -12,10 +12,6 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// Copyright (c) 2024, Cogent Core. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 // Labels implements the Plotter interface,
 // drawing a set of labels at specified points.
 type Labels struct {
@@ -87,6 +83,9 @@ func (l *Labels) Plot(plt *plot.Plot) {
 
 	var ltxt plot.Text
 	for i, label := range l.Labels {
+		if label == "" {
+			continue
+		}
 		if customStyles {
 			ltxt.Style = l.TextStyle[i]
 		} else {

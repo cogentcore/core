@@ -8,7 +8,6 @@ package plotcore
 //go:generate core generate
 
 import (
-	"fmt"
 	"io/fs"
 	"log/slog"
 	"path/filepath"
@@ -584,13 +583,13 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 			pw.Restyle()
 		})
 	})
-	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.ArrowForward).
-			SetTooltip("turn on select mode for selecting Plot elements").
-			OnClick(func(e events.Event) {
-				fmt.Println("this will select select mode")
-			})
-	})
+	// tree.Add(p, func(w *core.Button) {
+	// 	w.SetIcon(icons.ArrowForward).
+	// 		SetTooltip("turn on select mode for selecting Plot elements").
+	// 		OnClick(func(e events.Event) {
+	// 			fmt.Println("this will select select mode")
+	// 		})
+	// })
 	tree.Add(p, func(w *core.Separator) {})
 
 	tree.Add(p, func(w *core.Button) {

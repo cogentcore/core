@@ -26,6 +26,11 @@ type SimMat struct {
 	Columns []string
 }
 
+// NewSimMat returns a new SimMat similarity matrix
+func NewSimMat() *SimMat {
+	return &SimMat{}
+}
+
 // Init initializes SimMat with default Matrix and nil rows, cols
 func (smat *SimMat) Init() {
 	smat.Mat = &tensor.Float64{}
