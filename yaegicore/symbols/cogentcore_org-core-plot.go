@@ -76,11 +76,11 @@ func init() {
 // _cogentcore_org_core_plot_DataRanger is an interface wrapper for DataRanger type
 type _cogentcore_org_core_plot_DataRanger struct {
 	IValue     interface{}
-	WDataRange func() (xmin float32, xmax float32, ymin float32, ymax float32)
+	WDataRange func(pt *plot.Plot) (xmin float32, xmax float32, ymin float32, ymax float32)
 }
 
-func (W _cogentcore_org_core_plot_DataRanger) DataRange() (xmin float32, xmax float32, ymin float32, ymax float32) {
-	return W.WDataRange()
+func (W _cogentcore_org_core_plot_DataRanger) DataRange(pt *plot.Plot) (xmin float32, xmax float32, ymin float32, ymax float32) {
+	return W.WDataRange(pt)
 }
 
 // _cogentcore_org_core_plot_Labeler is an interface wrapper for Labeler type
