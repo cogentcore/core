@@ -105,7 +105,9 @@ func (pl *PlotEditor) Init() {
 	})
 
 	pl.Updater(func() {
-		pl.Options.fromMeta(pl.table.Table)
+		if pl.table != nil && pl.table.Table != nil {
+			pl.Options.fromMeta(pl.table.Table)
+		}
 	})
 	tree.AddChildAt(pl, "columns", func(w *core.Frame) {
 		pl.columnsFrame = w
