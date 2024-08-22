@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"os"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"time"
@@ -36,7 +37,7 @@ func (wb *WidgetBase) AsyncLock() {
 		rc.unlock()
 		select {}
 	}
-	wb.Scene.updating = true
+	wb.Scene.setFlag(true, sceneUpdating)
 }
 
 // AsyncUnlock must be called after making any updates in a separate goroutine
@@ -47,10 +48,10 @@ func (wb *WidgetBase) AsyncUnlock() {
 	if rc == nil {
 		return
 	}
-	rc.unlock()
 	if wb.Scene != nil {
-		wb.Scene.updating = false
+		wb.Scene.setFlag(false, sceneUpdating)
 	}
+	rc.unlock()
 }
 
 // NeedsRender specifies that the widget needs to be rendered.
@@ -58,9 +59,9 @@ func (wb *WidgetBase) NeedsRender() {
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsRender:", wb)
 	}
-	wb.needsRender = true
+	wb.setFlag(true, widgetNeedsRender)
 	if wb.Scene != nil {
-		wb.Scene.sceneNeedsRender = true
+		wb.Scene.setFlag(true, sceneNeedsRender)
 	}
 }
 
@@ -72,7 +73,7 @@ func (wb *WidgetBase) NeedsLayout() {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsLayout:", wb)
 	}
 	if wb.Scene != nil {
-		wb.Scene.needsLayout = true
+		wb.Scene.setFlag(true, sceneNeedsLayout)
 	}
 }
 
@@ -98,7 +99,7 @@ func (sc *Scene) layoutScene() {
 	}
 	sc.SizeUp()
 	sz := &sc.Geom.Size
-	sz.Alloc.Total.SetPoint(sc.sceneGeom.Size)
+	sz.Alloc.Total.SetPoint(sc.SceneGeom.Size)
 	sz.setContentFromTotal(&sz.Alloc)
 	// sz.Actual = sz.Alloc // todo: is this needed??
 	if DebugSettings.LayoutTrace {
@@ -143,7 +144,7 @@ func (wb *WidgetBase) doNeedsRender() {
 		return
 	}
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
-		if cwb.needsRender {
+		if cwb.hasFlag(widgetNeedsRender) {
 			cw.RenderWidget()
 			return tree.Break // don't go any deeper
 		}
@@ -167,16 +168,16 @@ var sceneShowIters = 2
 // returns false if already updating.
 // This is the main update call made by the RenderWindow at FPS frequency.
 func (sc *Scene) doUpdate() bool {
-	if sc.updating {
+	if sc.hasFlag(sceneUpdating) {
 		return false
 	}
-	sc.updating = true // prevent rendering
-	defer func() { sc.updating = false }()
+	sc.setFlag(true, sceneUpdating) // prevent rendering
+	defer func() { sc.setFlag(false, sceneUpdating) }()
 
 	rc := sc.renderContext()
 
 	if sc.showIter < sceneShowIters {
-		sc.needsLayout = true
+		sc.setFlag(true, sceneNeedsLayout)
 		sc.showIter++
 	}
 
@@ -184,31 +185,28 @@ func (sc *Scene) doUpdate() bool {
 	case rc.rebuild:
 		pr := profile.Start("rebuild")
 		sc.doRebuild()
-		sc.needsLayout = false
-		sc.sceneNeedsRender = false
-		sc.imageUpdated = true
+		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
+		sc.setFlag(true, sceneImageUpdated)
 		pr.End()
 	case sc.lastRender.needsRestyle(rc):
 		pr := profile.Start("restyle")
 		sc.applyStyleScene()
 		sc.layoutRenderScene()
-		sc.needsLayout = false
-		sc.sceneNeedsRender = false
-		sc.imageUpdated = true
+		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
+		sc.setFlag(true, sceneImageUpdated)
 		sc.lastRender.saveRender(rc)
 		pr.End()
-	case sc.needsLayout:
+	case sc.hasFlag(sceneNeedsLayout):
 		pr := profile.Start("layout")
 		sc.layoutRenderScene()
-		sc.needsLayout = false
-		sc.sceneNeedsRender = false
-		sc.imageUpdated = true
+		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
+		sc.setFlag(true, sceneImageUpdated)
 		pr.End()
-	case sc.sceneNeedsRender:
+	case sc.hasFlag(sceneNeedsRender):
 		pr := profile.Start("render")
 		sc.doNeedsRender()
-		sc.sceneNeedsRender = false
-		sc.imageUpdated = true
+		sc.setFlag(false, sceneNeedsRender)
+		sc.setFlag(true, sceneImageUpdated)
 		pr.End()
 	default:
 		return false
@@ -216,7 +214,7 @@ func (sc *Scene) doUpdate() bool {
 
 	if sc.showIter == sceneShowIters { // end of first pass
 		sc.showIter++
-		if !sc.prefSizing {
+		if !sc.hasFlag(scenePrefSizing) {
 			sc.Events.activateStartFocus()
 		}
 	}
@@ -231,8 +229,8 @@ func (sc *Scene) doUpdate() bool {
 // is first drawn or resized, or during rebuild,
 // once the full sizing information is available.
 func (sc *Scene) updateScene() {
-	sc.updating = true // prevent rendering
-	defer func() { sc.updating = false }()
+	sc.setFlag(true, sceneUpdating) // prevent rendering
+	defer func() { sc.setFlag(false, sceneUpdating) }()
 
 	sc.UpdateTree()
 }
@@ -241,11 +239,11 @@ func (sc *Scene) updateScene() {
 // This is needed whenever the window geometry, DPI,
 // etc is updated, which affects styling.
 func (sc *Scene) applyStyleScene() {
-	sc.updating = true // prevent rendering
-	defer func() { sc.updating = false }()
+	sc.setFlag(true, sceneUpdating) // prevent rendering
+	defer func() { sc.setFlag(false, sceneUpdating) }()
 
 	sc.StyleTree()
-	sc.needsLayout = true
+	sc.setFlag(true, sceneNeedsLayout)
 }
 
 // doRebuild does the full re-render and RenderContext Rebuild flag
@@ -261,16 +259,16 @@ func (sc *Scene) doRebuild() {
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
 func (sc *Scene) prefSize(initSz image.Point) image.Point {
-	sc.updating = true // prevent rendering
-	defer func() { sc.updating = false }()
+	sc.setFlag(true, sceneUpdating) // prevent rendering
+	defer func() { sc.setFlag(false, sceneUpdating) }()
 
-	sc.prefSizing = true
+	sc.setFlag(true, scenePrefSizing)
 	sc.updateScene()
 	sc.applyStyleScene()
 	sc.layoutScene()
 	sz := &sc.Geom.Size
 	psz := sz.Actual.Total
-	sc.prefSizing = false
+	sc.setFlag(false, scenePrefSizing)
 	sc.showIter = 0
 	return psz.ToPointFloor()
 }
@@ -287,8 +285,8 @@ func (wb *WidgetBase) PushBounds() bool {
 	if wb == nil || wb.This == nil {
 		return false
 	}
-	wb.needsRender = false // done!
-	if !wb.IsVisible() {   // checks deleted etc
+	wb.setFlag(false, widgetNeedsRender) // done!
+	if !wb.IsVisible() {                 // checks deleted etc
 		return false
 	}
 	if wb.Geom.TotalBBox.Empty() {
@@ -303,12 +301,12 @@ func (wb *WidgetBase) PushBounds() bool {
 		return false
 	}
 	if len(pc.BoundsStack) == 0 && wb.Parent != nil {
-		wb.firstRender = true
+		wb.setFlag(true, widgetFirstRender)
 		// push our parent's bounds if we are the first to render
 		pw := wb.parentWidget()
 		pc.PushBoundsGeom(pw.Geom.TotalBBox, pw.Styles.Border.Radius.Dots())
 	} else {
-		wb.firstRender = false
+		wb.setFlag(false, widgetFirstRender)
 	}
 	pc.PushBoundsGeom(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots())
 	pc.Defaults() // start with default values
@@ -328,8 +326,8 @@ func (wb *WidgetBase) PopBounds() {
 
 	isSelw := wb.Scene.selectedWidget == wb.This
 	if wb.Scene.renderBBoxes || isSelw {
-		pos := math32.Vector2FromPoint(wb.Geom.TotalBBox.Min)
-		sz := math32.Vector2FromPoint(wb.Geom.TotalBBox.Size())
+		pos := math32.FromPoint(wb.Geom.TotalBBox.Min)
+		sz := math32.FromPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.
 		pcsw := pc.StrokeStyle.Width
 		pcsc := pc.StrokeStyle.Color
@@ -359,9 +357,9 @@ func (wb *WidgetBase) PopBounds() {
 	}
 
 	pc.PopBounds()
-	if wb.firstRender {
+	if wb.hasFlag(widgetFirstRender) {
 		pc.PopBounds()
-		wb.firstRender = false
+		wb.setFlag(false, widgetFirstRender)
 	}
 }
 
@@ -429,7 +427,7 @@ func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 func (wb *WidgetBase) winBBox() image.Rectangle {
 	bb := wb.Geom.TotalBBox
 	if wb.Scene != nil {
-		return bb.Add(wb.Scene.sceneGeom.Pos)
+		return bb.Add(wb.Scene.SceneGeom.Pos)
 	}
 	return bb
 }
@@ -461,14 +459,21 @@ func ProfileToggle() { //types:add
 	}
 }
 
-// cpuProfileFile is the file created by [startCPUMemoryProfile],
-// which needs to be stored so that it can be closed in [endCPUMemoryProfile].
-var cpuProfileFile *os.File
+var (
+	// cpuProfileDir is the directory where the profile started
+	cpuProfileDir string
+
+	// cpuProfileFile is the file created by [startCPUMemoryProfile],
+	// which needs to be stored so that it can be closed in [endCPUMemoryProfile].
+	cpuProfileFile *os.File
+)
 
 // startCPUMemoryProfile starts the standard Go cpu and memory profiling.
 func startCPUMemoryProfile() {
-	fmt.Println("Starting standard cpu and memory profiling")
-	f, err := os.Create("cpu.prof")
+	cpuProfileDir, _ = os.Getwd()
+	cpufnm := filepath.Join(cpuProfileDir, "cpu.prof")
+	fmt.Println("Starting standard cpu and memory profiling to:", cpufnm)
+	f, err := os.Create(cpufnm)
 	if errors.Log(err) == nil {
 		cpuProfileFile = f
 		errors.Log(pprof.StartCPUProfile(f))
@@ -477,10 +482,11 @@ func startCPUMemoryProfile() {
 
 // endCPUMemoryProfile ends the standard Go cpu and memory profiling.
 func endCPUMemoryProfile() {
-	fmt.Println("Ending standard cpu and memory profiling")
+	memfnm := filepath.Join(cpuProfileDir, "mem.prof")
+	fmt.Println("Ending standard cpu and memory profiling to:", memfnm)
 	pprof.StopCPUProfile()
 	errors.Log(cpuProfileFile.Close())
-	f, err := os.Create("mem.prof")
+	f, err := os.Create(memfnm)
 	if errors.Log(err) == nil {
 		runtime.GC() // get up-to-date statistics
 		errors.Log(pprof.WriteHeapProfile(f))

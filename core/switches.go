@@ -99,12 +99,12 @@ func (sw *Switches) WidgetValue() any {
 }
 
 func (sw *Switches) SetWidgetValue(value any) error {
-	value = reflectx.Underlying(reflect.ValueOf(value)).Interface()
-	if bf, ok := value.(enums.BitFlag); ok {
+	up := reflectx.UnderlyingPointer(reflect.ValueOf(value))
+	if bf, ok := up.Interface().(enums.BitFlagSetter); ok {
 		sw.selectFromBitFlag(bf)
 		return nil
 	}
-	return sw.SelectValue(value)
+	return sw.SelectValue(up.Elem().Interface())
 }
 
 func (sw *Switches) OnBind(value any, tags reflect.StructTag) {
@@ -283,7 +283,7 @@ func (sw *Switches) SetEnum(enum enums.Enum) *Switches {
 }
 
 // selectFromBitFlag sets which switches are selected based on the given bit flag value.
-func (sw *Switches) selectFromBitFlag(bitflag enums.BitFlag) {
+func (sw *Switches) selectFromBitFlag(bitflag enums.BitFlagSetter) {
 	values := bitflag.Values()
 	sw.selectedIndexes = []int{}
 	for i, value := range values {

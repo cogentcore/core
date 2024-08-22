@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
@@ -25,6 +26,7 @@ import (
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tensor/tensorcore"
 	"cogentcore.org/core/tree"
@@ -276,6 +278,9 @@ func (pl *PlotEditor) GoUpdatePlot() {
 	if pl == nil || pl.This == nil {
 		return
 	}
+	if core.TheApp.Platform() == system.Web {
+		time.Sleep(time.Millisecond) // critical to prevent hanging!
+	}
 	if !pl.IsVisible() || pl.table == nil || pl.table.Table == nil || pl.inPlot {
 		return
 	}
@@ -313,14 +318,17 @@ func (pl *PlotEditor) genPlot() {
 		return
 	}
 	pl.inPlot = true
-	if pl.table == nil || pl.table.Table.NumRows() == 0 {
-		// sv.DeleteChildren()
+	if pl.table == nil {
 		pl.inPlot = false
 		return
 	}
-	lsti := pl.table.Indexes[pl.table.Len()-1]
-	if lsti >= pl.table.Table.Rows { // out of date
+	if len(pl.table.Indexes) == 0 {
 		pl.table.Sequential()
+	} else {
+		lsti := pl.table.Indexes[pl.table.Len()-1]
+		if lsti >= pl.table.Table.Rows { // out of date
+			pl.table.Sequential()
+		}
 	}
 	pl.plot = nil
 	switch pl.Options.Type {

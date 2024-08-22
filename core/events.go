@@ -251,11 +251,13 @@ func (em *Events) handlePosEvent(e events.Event) {
 		if em.spriteSlide != nil {
 			em.spriteSlide.handleEvent(e)
 			em.spriteSlide.send(events.SlideMove, e)
+			e.SetHandled()
 			return
 		}
 		if em.slide != nil {
 			em.slide.AsWidget().HandleEvent(e)
 			em.slide.AsWidget().Send(events.SlideMove, e)
+			e.SetHandled()
 			return
 		}
 	case events.Scroll:
@@ -400,16 +402,19 @@ func (em *Events) handlePosEvent(e events.Event) {
 			em.dragMove(e)                              // updates sprite position
 			em.drag.AsWidget().HandleEvent(e)           // raw drag
 			em.drag.AsWidget().Send(events.DragMove, e) // usually ignored
+			e.SetHandled()
 		} else {
 			if em.dragPress != nil && em.dragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
 				em.cancelRepeatClick()
 				em.cancelLongPress()
 				em.dragPress.AsWidget().Send(events.DragStart, e)
+				e.SetHandled()
 			} else if em.slidePress != nil && em.dragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.DragStartDistance) {
 				em.cancelRepeatClick()
 				em.cancelLongPress()
 				em.slide = em.slidePress
 				em.slide.AsWidget().Send(events.SlideStart, e)
+				e.SetHandled()
 			}
 		}
 		// if we already have a long press widget, we update it based on our dragging movement
@@ -420,6 +425,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 		em.cancelRepeatClick()
 		if em.slide != nil {
 			em.slide.AsWidget().Send(events.SlideStop, e)
+			e.SetHandled()
 			em.slide = nil
 			em.press = nil
 		}
@@ -746,7 +752,7 @@ func (em *Events) dragStartCheck(e events.Event, dur time.Duration, dist int) bo
 	if since < dur {
 		return false
 	}
-	dst := int(math32.Vector2FromPoint(e.StartDelta()).Length())
+	dst := int(math32.FromPoint(e.StartDelta()).Length())
 	return dst >= dist
 }
 
@@ -1222,7 +1228,7 @@ func (em *Events) triggerShortcut(chord key.Chord) bool {
 
 func (em *Events) getSpriteInBBox(sc *Scene, pos image.Point) {
 	st := sc.Stage
-	for _, kv := range st.Sprites.Names.Order {
+	for _, kv := range st.Sprites.Order {
 		sp := kv.Value
 		if !sp.Active {
 			continue

@@ -91,7 +91,7 @@ func ModifiersValues() []Modifiers { return _ModifiersValues }
 func (i Modifiers) Values() []enums.Enum { return enums.Values(_ModifiersValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i Modifiers) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *Modifiers) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *Modifiers) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }

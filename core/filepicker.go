@@ -739,7 +739,7 @@ func (fb *FileButton) Init() {
 		d.Title = "Select file"
 		d.DeleteChildByName("body-title") // file picker has its own title
 		fp = NewFilePicker(d).SetFilename(fb.Filename).SetExtensions(fb.Extensions)
-		fb.valueNewWindow = true
+		fb.setFlag(true, widgetValueNewWindow)
 		d.AddAppBar(fp.MakeToolbar)
 	}, func() {
 		fb.Filename = fp.SelectedFile()

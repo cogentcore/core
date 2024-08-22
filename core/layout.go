@@ -642,7 +642,7 @@ func (fr *Frame) laySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 		if nosz {
 			continue
 		}
-		if !(fr.Scene != nil && fr.Scene.prefSizing) && oflow.Dim(d) >= styles.OverflowAuto && fr.Parent != nil {
+		if !(fr.Scene != nil && fr.Scene.hasFlag(scenePrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto && fr.Parent != nil {
 			if mx.Dim(d) > 0 {
 				asz.SetDim(d, styles.ClampMax(styles.ClampMin(asz.Dim(d), nsz.Dim(d)), mx.Dim(d)))
 			}
@@ -1198,7 +1198,7 @@ func (fr *Frame) SizeDownSetAllocs(iter int) {
 // (generally should be true, but some cases not)
 func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 	sz := &fr.Geom.Size
-	sbw := math32.Ceil(fr.Styles.ScrollBarWidth.Dots)
+	sbw := math32.Ceil(fr.Styles.ScrollbarWidth.Dots)
 	change := false
 	if iter == 0 {
 		fr.layout.ScrollSize.SetZero()
@@ -1508,7 +1508,7 @@ func (wb *WidgetBase) SizeFinal() {
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change in our Total size.
 func (wb *WidgetBase) growToAlloc() bool {
-	if (wb.Scene != nil && wb.Scene.prefSizing) || wb.Styles.GrowWrap {
+	if (wb.Scene != nil && wb.Scene.hasFlag(scenePrefSizing)) || wb.Styles.GrowWrap {
 		return false
 	}
 	sz := &wb.Geom.Size
@@ -1576,7 +1576,7 @@ func (wb *WidgetBase) styleSizeUpdate() bool {
 	if !wb.updateParentRelSizes() {
 		return false
 	}
-	scsz := wb.Scene.sceneGeom.Size
+	scsz := wb.Scene.SceneGeom.Size
 	sz := wb.Geom.Size.Alloc.Content
 	psz := pwb.Geom.Size.Alloc.Content
 	chg := wb.Styles.UnitContext.SetSizes(float32(scsz.X), float32(scsz.Y), sz.X, sz.Y, psz.X, psz.Y)

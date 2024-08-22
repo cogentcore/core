@@ -173,9 +173,15 @@ func (tk Tokens) Code() string {
 				str += " "
 			}
 			str += tok.String()
-			prvIdent = false
+			prvIdent = true
 		case tok.IsGo():
-			str += tok.String() + " "
+			if prvIdent {
+				str += " "
+			}
+			str += tok.String()
+			if tok.Tok != token.MAP {
+				str += " "
+			}
 			prvIdent = false
 		case tok.Tok == token.IDENT || tok.Tok == token.STRING:
 			if prvIdent {

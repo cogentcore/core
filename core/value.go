@@ -116,7 +116,9 @@ func InitValueButton(v Value, allowReadOnly bool, make func(d *Body), after ...f
 	}
 	wb.OnClick(func(e events.Event) {
 		if allowReadOnly || !wb.IsReadOnly() {
-			wb.valueNewWindow = e.HasAnyModifier(key.Shift)
+			if e.HasAnyModifier(key.Shift) {
+				wb.setFlag(!wb.hasFlag(widgetValueNewWindow), widgetValueNewWindow)
+			}
 			openValueDialog(v, make, after...)
 		}
 	})
@@ -159,7 +161,7 @@ func openValueDialog(v Value, make func(d *Body), after ...func()) {
 		})
 	}
 
-	if wb.valueNewWindow {
+	if wb.hasFlag(widgetValueNewWindow) {
 		d.RunWindowDialog(v)
 	} else {
 		d.RunFullDialog(v)

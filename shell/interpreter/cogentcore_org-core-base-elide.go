@@ -10,7 +10,8 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/base/elide/elide"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"End":    reflect.ValueOf(elide.End),
-		"Middle": reflect.ValueOf(elide.Middle),
+		"AppName": reflect.ValueOf(elide.AppName),
+		"End":     reflect.ValueOf(elide.End),
+		"Middle":  reflect.ValueOf(elide.Middle),
 	}
 }

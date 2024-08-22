@@ -139,16 +139,16 @@ func (st *Stage) addSceneParts() *Stage {
 		mv.OnChange(func(e events.Event) {
 			e.SetHandled()
 			pd := e.PrevDelta()
-			np := sc.sceneGeom.Pos.Add(pd)
+			np := sc.SceneGeom.Pos.Add(pd)
 			np.X = max(np.X, 0)
 			np.Y = max(np.Y, 0)
 			rw := sc.RenderWindow()
 			sz := rw.SystemWindow.Size()
-			mx := sz.X - int(sc.sceneGeom.Size.X)
-			my := sz.Y - int(sc.sceneGeom.Size.Y)
+			mx := sz.X - int(sc.SceneGeom.Size.X)
+			my := sz.Y - int(sc.SceneGeom.Size.Y)
 			np.X = min(np.X, mx)
 			np.Y = min(np.Y, my)
-			sc.sceneGeom.Pos = np
+			sc.SceneGeom.Pos = np
 			sc.NeedsRender()
 		})
 		rsz := NewHandle(parts)
@@ -164,11 +164,11 @@ func (st *Stage) addSceneParts() *Stage {
 		rsz.OnChange(func(e events.Event) {
 			e.SetHandled()
 			pd := e.PrevDelta()
-			np := sc.sceneGeom.Size.Add(pd)
+			np := sc.SceneGeom.Size.Add(pd)
 			minsz := 100
 			np.X = max(np.X, minsz)
 			np.Y = max(np.Y, minsz)
-			ng := sc.sceneGeom
+			ng := sc.SceneGeom
 			ng.Size = np
 			sc.resize(ng)
 		})
@@ -187,17 +187,24 @@ func (st *Stage) firstWindowStages() *stages {
 
 // configMainStage does main-stage configuration steps
 func (st *Stage) configMainStage() {
+	sc := st.Scene
 	if st.NewWindow {
 		st.FullWindow = true
 	}
-	// if we are on mobile, we can never have new windows
 	if TheApp.Platform().IsMobile() {
+		// If we are a new window dialog on a large single-window platform,
+		// we use a modeless dialog as a substitute.
+		if st.NewWindow && st.Type == DialogStage && st.Context != nil && st.Context.AsWidget().SizeClass() != SizeCompact {
+			st.FullWindow = false
+			st.Modal = false
+			st.Scrim = false
+		}
+		// If we are on mobile, we can never have new windows.
 		st.NewWindow = false
 	}
 	if st.FullWindow || st.NewWindow {
 		st.Scrim = false
 	}
-	sc := st.Scene
 	sc.makeSceneBars()
 	sc.updateScene()
 }
@@ -272,15 +279,15 @@ func (st *Stage) runWindow() *Stage {
 	if st.Context != nil {
 		ms := st.Context.AsWidget().Scene.Stage.Mains
 		msc := ms.top().Scene
-		sc.sceneGeom.Size = sz
-		sc.fitInWindow(msc.sceneGeom) // does resize
+		sc.SceneGeom.Size = sz
+		sc.fitInWindow(msc.SceneGeom) // does resize
 		ms.push(st)
 		st.setMains(ms)
 	} else {
 		ms := &currentRenderWindow.mains
 		msc := ms.top().Scene
-		sc.sceneGeom.Size = sz
-		sc.fitInWindow(msc.sceneGeom) // does resize
+		sc.SceneGeom.Size = sz
+		sc.fitInWindow(msc.SceneGeom) // does resize
 		ms.push(st)
 		st.setMains(ms)
 	}
@@ -322,7 +329,7 @@ func (st *Stage) runDialog() *Stage {
 	sc := st.Scene
 	st.configMainStage()
 	st.addSceneParts()
-	sc.sceneGeom.Pos = st.Pos
+	sc.SceneGeom.Pos = st.Pos
 
 	st.setMains(ms) // temporary for prefs
 
@@ -343,14 +350,14 @@ func (st *Stage) runDialog() *Stage {
 		st.Mains = nil
 		sc.resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
-		sc.sceneGeom.Pos = image.Point{} // ignore pos
+		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.newRenderWindow()
 		dialogRenderWindows.add(win)
 		currentRenderWindow = win
 		win.goStartEventLoop()
 		return st
 	}
-	sc.sceneGeom.Size = sz
+	sc.SceneGeom.Size = sz
 	sc.fitInWindow(st.renderContext.geom) // does resize
 	ms.push(st)
 	// st.SetMains(ms) // already set
@@ -363,7 +370,7 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	opts := &system.NewWindowOptions{
 		Title:     title,
 		Icon:      appIconImages(),
-		Size:      st.Scene.sceneGeom.Size,
+		Size:      st.Scene.SceneGeom.Size,
 		StdPixels: false,
 	}
 	wgp := theWindowGeometrySaver.pref(title, nil)
@@ -408,7 +415,7 @@ func (st *Stage) mainHandleEvent(e events.Event) {
 		}
 		return
 	}
-	e.SetLocalOff(st.Scene.sceneGeom.Pos)
+	e.SetLocalOff(st.Scene.SceneGeom.Pos)
 	st.Scene.Events.handleEvent(e)
 }
 
@@ -420,6 +427,14 @@ func (sm *stages) mainHandleEvent(e events.Event) {
 		st.mainHandleEvent(e)
 		if e.IsHandled() || st.Modal || st.Type == WindowStage || st.FullWindow {
 			break
+		}
+		if st.Type == DialogStage { // modeless dialog, by definition
+			if e.HasPos() && st.Scene != nil {
+				b := st.Scene.SceneGeom.Bounds()
+				if e.WindowPos().In(b) { // don't propagate
+					break
+				}
+			}
 		}
 	}
 }

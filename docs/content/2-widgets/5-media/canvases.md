@@ -94,7 +94,7 @@ core.NewCanvas(b).SetDraw(func(pc *paint.Context) {
 })
 ```
 
-You can change the size of the canvas:
+You can change the size of a canvas:
 
 ```Go
 c := core.NewCanvas(b).SetDraw(func(pc *paint.Context) {
@@ -102,5 +102,16 @@ c := core.NewCanvas(b).SetDraw(func(pc *paint.Context) {
 })
 c.Styler(func(s *styles.Style) {
     s.Min.Set(units.Dp(128))
+})
+```
+
+You can make a canvas grow to fill the available space:
+
+```Go
+c := core.NewCanvas(b).SetDraw(func(pc *paint.Context) {
+    pc.FillBox(math32.Vector2{}, math32.Vec2(1, 1), colors.Scheme.Primary.Base)
+})
+c.Styler(func(s *styles.Style) {
+    s.Grow.Set(1, 1)
 })
 ```

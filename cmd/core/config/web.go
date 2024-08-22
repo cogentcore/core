@@ -23,6 +23,10 @@ type Web struct { //types:add
 	// and serve it as a gzip-encoded file in the run command.
 	Gzip bool
 
+	// GenerateHTML is whether to generate an HTML version of app content for
+	// preview and SEO purposes.
+	GenerateHTML bool `default:"true"`
+
 	// The page language.
 	//
 	// DEFAULT: en.

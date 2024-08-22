@@ -216,7 +216,7 @@ func EventFlagsValues() []EventFlags { return _EventFlagsValues }
 func (i EventFlags) Values() []enums.Enum { return enums.Values(_EventFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i EventFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *EventFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *EventFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }

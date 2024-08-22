@@ -18,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/core/config"
@@ -54,7 +55,7 @@ func goAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
 		err := manifestTmpl.Execute(buf, manifestTmplData{
 			JavaPkgPath: c.ID,
-			Name:        c.Name,
+			Name:        elide.AppName(c.Name),
 			LibName:     libName,
 		})
 		if err != nil {

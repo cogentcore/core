@@ -138,7 +138,7 @@ func WindowFlagsValues() []WindowFlags { return _WindowFlagsValues }
 func (i WindowFlags) Values() []enums.Enum { return enums.Values(_WindowFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i WindowFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *WindowFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *WindowFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }

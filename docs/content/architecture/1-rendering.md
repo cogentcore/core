@@ -14,7 +14,7 @@ For any updating that happens outside of the normal event loop (e.g., timer-base
 
 The overall management of rendering is organized as follows:
 
-* `renderWindow` uses the [[system.Drawer]] interface (which is implemented in Vulkan on desktop and mobile platforms) to composite and "blit" (quickly render) all the individual image elements out to the actual hardware window that you see, layered in the proper order.  On the web and offscreen (testing) platforms, Drawer is implemented using Go `image.Draw` functions, with no other hardware dependencies.
+* `renderWindow` uses the [[system.Drawer]] interface (which is implemented using WebGPU on desktop, mobile, and web) to composite and "blit" (quickly render) all the individual image elements out to the actual hardware window that you see, layered in the proper order.  On the web and offscreen (testing) platforms, Drawer is implemented using Go `image.Draw` functions, with no other hardware dependencies.
 
 * `stages` in the renderWindow manages a stack of `stage` elements, each of which manages an individual [[core.Scene]].  There are different types of stage, specified by the [[core.StageTypes]] enum, including the main `WindowStage` for primary app content, `DialogStage`, `MenuStage`, `TooltipStage` etc.
 

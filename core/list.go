@@ -1977,8 +1977,8 @@ func (lg *ListGrid) indexFromPixel(pt image.Point) (row, col int, isValid bool) 
 	if !lg.mousePosInGrid(pt) {
 		return
 	}
-	ptf := math32.Vector2FromPoint(lg.PointToRelPos(pt))
-	sz := math32.Vector2FromPoint(lg.Geom.ContentBBox.Size())
+	ptf := math32.FromPoint(lg.PointToRelPos(pt))
+	sz := math32.FromPoint(lg.Geom.ContentBBox.Size())
 	isValid = true
 	rows := lg.layout.Shape.Y
 	cols := lg.layout.Shape.X

@@ -52,7 +52,7 @@ func ImageFlagsValues() []ImageFlags { return _ImageFlagsValues }
 func (i ImageFlags) Values() []enums.Enum { return enums.Values(_ImageFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i ImageFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *ImageFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *ImageFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
@@ -326,11 +326,11 @@ var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
 // TypesN is the highest valid value for type Types, plus one.
 const TypesN Types = 24
 
-var _TypesValueMap = map[string]Types{`UndefType`: 0, `Bool32`: 1, `Int16`: 2, `Uint16`: 3, `Int32`: 4, `Int32Vector2`: 5, `Int32Vector4`: 6, `Uint32`: 7, `Uint32Vector2`: 8, `Uint32Vector4`: 9, `Float32`: 10, `Float32Vector2`: 11, `Float32Vector3`: 12, `Float32Vector4`: 13, `Float64`: 14, `Float64Vector2`: 15, `Float64Vector3`: 16, `Float64Vector4`: 17, `Float32Matrix4`: 18, `Float32Matrix3`: 19, `ImageRGBA32`: 20, `Depth32`: 21, `Depth24Sten8`: 22, `Struct`: 23}
+var _TypesValueMap = map[string]Types{`UndefinedType`: 0, `Bool32`: 1, `Int16`: 2, `Uint16`: 3, `Int32`: 4, `Int32Vector2`: 5, `Int32Vector4`: 6, `Uint32`: 7, `Uint32Vector2`: 8, `Uint32Vector4`: 9, `Float32`: 10, `Float32Vector2`: 11, `Float32Vector3`: 12, `Float32Vector4`: 13, `Float64`: 14, `Float64Vector2`: 15, `Float64Vector3`: 16, `Float64Vector4`: 17, `Float32Matrix4`: 18, `Float32Matrix3`: 19, `ImageRGBA32`: 20, `Depth32`: 21, `Depth24Stencil8`: 22, `Struct`: 23}
 
 var _TypesDescMap = map[Types]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: ``, 7: ``, 8: ``, 9: ``, 10: ``, 11: ``, 12: ``, 13: ``, 14: ``, 15: ``, 16: ``, 17: ``, 18: ``, 19: ``, 20: ``, 21: ``, 22: ``, 23: ``}
 
-var _TypesMap = map[Types]string{0: `UndefType`, 1: `Bool32`, 2: `Int16`, 3: `Uint16`, 4: `Int32`, 5: `Int32Vector2`, 6: `Int32Vector4`, 7: `Uint32`, 8: `Uint32Vector2`, 9: `Uint32Vector4`, 10: `Float32`, 11: `Float32Vector2`, 12: `Float32Vector3`, 13: `Float32Vector4`, 14: `Float64`, 15: `Float64Vector2`, 16: `Float64Vector3`, 17: `Float64Vector4`, 18: `Float32Matrix4`, 19: `Float32Matrix3`, 20: `ImageRGBA32`, 21: `Depth32`, 22: `Depth24Sten8`, 23: `Struct`}
+var _TypesMap = map[Types]string{0: `UndefinedType`, 1: `Bool32`, 2: `Int16`, 3: `Uint16`, 4: `Int32`, 5: `Int32Vector2`, 6: `Int32Vector4`, 7: `Uint32`, 8: `Uint32Vector2`, 9: `Uint32Vector4`, 10: `Float32`, 11: `Float32Vector2`, 12: `Float32Vector3`, 13: `Float32Vector4`, 14: `Float64`, 15: `Float64Vector2`, 16: `Float64Vector3`, 17: `Float64Vector4`, 18: `Float32Matrix4`, 19: `Float32Matrix3`, 20: `ImageRGBA32`, 21: `Depth32`, 22: `Depth24Stencil8`, 23: `Struct`}
 
 // String returns the string representation of this Types value.
 func (i Types) String() string { return enums.String(i, _TypesMap) }
@@ -406,7 +406,7 @@ func ValueFlagsValues() []ValueFlags { return _ValueFlagsValues }
 func (i ValueFlags) Values() []enums.Enum { return enums.Values(_ValueFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i ValueFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i *ValueFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *ValueFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }

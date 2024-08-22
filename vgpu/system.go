@@ -249,14 +249,14 @@ func (sy *System) CmdBuffByNameTry(name string) (vk.CommandBuffer, error) {
 
 // ConfigRender configures the renderpass, including the image
 // format that we're rendering to, for a surface render target,
-// and the depth buffer format (pass UndefType for no depth buffer).
+// and the depth buffer format (pass UndefinedType for no depth buffer).
 func (sy *System) ConfigRender(imgFmt *ImageFormat, depthFmt Types) {
 	sy.Render.Config(sy.Device.Device, imgFmt, depthFmt, false)
 }
 
 // ConfigRenderNonSurface configures the renderpass, including the image
 // format that we're rendering to, for a RenderFrame non-surface target,
-// and the depth buffer format (pass UndefType for no depth buffer).
+// and the depth buffer format (pass UndefinedType for no depth buffer).
 func (sy *System) ConfigRenderNonSurface(imgFmt *ImageFormat, depthFmt Types) {
 	sy.Render.Config(sy.Device.Device, imgFmt, depthFmt, true)
 }

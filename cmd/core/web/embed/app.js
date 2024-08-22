@@ -8,7 +8,7 @@ var appOnAppInstallChange = function () { };
 const appEnv = {{.Env }};
 const appWasmContentLengthHeader = "{{.WasmContentLengthHeader}}";
 
-let wasm;
+window.wasm = null;
 
 let appServiceWorkerRegistration;
 let deferredPrompt = null;
@@ -156,51 +156,6 @@ function appNewNotification(jsonNotification) {
     appNav(path);
     webNotification.close();
   };
-}
-
-// -----------------------------------------------------------------------------
-// Display Image
-// -----------------------------------------------------------------------------
-
-const appCanvas = document.getElementById('app');
-const appCanvasCtx = appCanvas.getContext('2d');
-
-// displayImage takes the pointer to the target image in the wasm linear memory
-// and its length. Then, it gets the resulting byte slice and creates an image data
-// with the given width and height.
-function displayImage(pointer, length, w, h) {
-  const memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
-
-  // using subarray instead of slice gives a 5x performance improvement due to no copying
-  const bytes = memoryBytes.subarray(pointer, pointer + length);
-  const data = new ImageData(bytes, w, h);
-  appCanvasCtx.putImageData(data, 0, 0);
-}
-
-// -----------------------------------------------------------------------------
-// Keep Clean Body
-// -----------------------------------------------------------------------------
-function appKeepBodyClean() {
-  const body = document.body;
-  const bodyChildrenCount = body.children.length;
-
-  const mutationObserver = new MutationObserver(function (mutationList) {
-    mutationList.forEach((mutation) => {
-      switch (mutation.type) {
-        case "childList":
-          while (body.children.length > bodyChildrenCount) {
-            body.removeChild(body.lastChild);
-          }
-          break;
-      }
-    });
-  });
-
-  mutationObserver.observe(document.body, {
-    childList: true,
-  });
-
-  return () => mutationObserver.disconnect();
 }
 
 // -----------------------------------------------------------------------------

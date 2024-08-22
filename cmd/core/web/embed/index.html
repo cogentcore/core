@@ -31,7 +31,7 @@
 
 <body role="application">
     <canvas id="app" contenteditable="true"></canvas>
-    <input id="text-field" type="text">
+    <input id="app-text-field" type="text">
     <div id="app-wasm-loader">
         <header id="app-wasm-loader-header">
             <img id="app-wasm-loader-icon" src="{{.BasePath}}icons/svg.svg">
@@ -40,8 +40,10 @@
             <progress id="app-wasm-loader-progress" value="0"></progress>
         </header>
         <h1>Loading...</h1>
+        {{- if ne .PreRenderHTML ""}}
         <h3>Static preview:</h3>
         {{.PreRenderHTML}}
+        {{- end}}
     </div>
 </body>
 

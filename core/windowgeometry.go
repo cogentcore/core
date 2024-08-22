@@ -234,7 +234,9 @@ func (ws *windowGeometrySaver) recordPref(win *renderWindow) {
 	if !win.isVisible() {
 		return
 	}
+	win.SystemWindow.Lock()
 	wsz := win.SystemWindow.Size()
+	win.SystemWindow.Unlock()
 	if wsz == (image.Point{}) {
 		if DebugSettings.WinGeomTrace {
 			log.Printf("WindowGeometry: RecordPref: NOT storing null size for win: %v\n", win.name)

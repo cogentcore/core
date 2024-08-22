@@ -48,7 +48,7 @@ func (ed *Editor) updateFromAlloc() {
 	asz := ed.Geom.Size.Alloc.Content
 	spsz := sty.BoxSpace().Size()
 	asz.SetSub(spsz)
-	sbw := math32.Ceil(ed.Styles.ScrollBarWidth.Dots)
+	sbw := math32.Ceil(ed.Styles.ScrollbarWidth.Dots)
 	asz.X -= sbw
 	if ed.HasScroll[math32.X] {
 		asz.Y -= sbw
@@ -125,7 +125,7 @@ func (ed *Editor) layoutAllLines() {
 		off += lsz
 		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
 	}
-	ed.Buffer.Unlock()
+	buf.Unlock()
 	ed.linesSize = math32.Vec2(mxwd, off)
 	ed.lastlineLayoutSize = ed.lineLayoutSize
 	ed.internalSizeFromLines()

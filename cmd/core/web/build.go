@@ -104,11 +104,15 @@ func makeFiles(c *config.Config) error {
 		return err
 	}
 
-	preRenderHTML, err := exec.Output("go", "run", "-tags", "offscreen,generatehtml", ".")
-	if err != nil {
-		return err
+	preRenderHTML := ""
+	if c.Web.GenerateHTML {
+		preRenderHTML, err = exec.Output("go", "run", "-tags", "offscreen,generatehtml", ".")
+		if err != nil {
+			return err
+		}
 	}
 	preRenderHTMLIndex := preRenderHTML
+	preRenderDescriptionIndex := ""
 	pagesPreRenderData := &ppath.PreRenderData{}
 	if strings.HasPrefix(preRenderHTML, "{") {
 		err := jsonx.Read(pagesPreRenderData, strings.NewReader(preRenderHTML))
@@ -116,11 +120,14 @@ func makeFiles(c *config.Config) error {
 			return err
 		}
 		preRenderHTMLIndex = pagesPreRenderData.HTML[""]
+		if c.About == "" {
+			preRenderDescriptionIndex = pagesPreRenderData.Description[""]
+		}
 		if c.Pages == "" {
 			c.Pages = "content"
 		}
 	}
-	iht, err := makeIndexHTML(c, "", "", "", preRenderHTMLIndex)
+	iht, err := makeIndexHTML(c, "", "", preRenderDescriptionIndex, preRenderHTMLIndex)
 	if err != nil {
 		return err
 	}

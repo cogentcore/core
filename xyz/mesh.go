@@ -7,48 +7,31 @@ package xyz
 import (
 	"fmt"
 
+	"cogentcore.org/core/gpu/shape"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/vgpu/vshape"
 )
 
 // MeshName is a [Mesh] name. This type provides an automatic GUI chooser for meshes.
 // It is used on [Solid] to link to meshes by name.
 type MeshName string
 
-// Mesh parametrizes the mesh-based shape used for rendering a [Solid].
+// Mesh parametrizes the mesh-based shape used for rendering a [Solid],
+// using the [shape.Mesh] interface for basic shape data.
 // Only indexed triangle meshes are supported.
 // All Meshes must know in advance the number of vertex and index points
-// they require, and the SetVertices method operates on data from the
-// vgpu staging buffer to set the relevant data post-allocation.
-// The vgpu vshape library is used for all basic shapes, and it follows
-// this same logic.
-// Per-vertex Color is optional, as is the ability to update the data
-// after initial SetVertices call (default is to do nothing).
+// they require, and the Set method writes the mesh data to arrays of
+// appropriate vector data.
+// Per-vertex Color is optional.
 type Mesh interface {
+	shape.Mesh
 
 	// AsMeshBase returns the [MeshBase] for this Mesh,
 	// which provides the core functionality of a mesh.
 	AsMeshBase() *MeshBase
-
-	// Sizes returns the number of vertex and index elements required for this mesh
-	// including a bool representing whether it has per-vertex color.
-	Sizes() (numVertex, numIndex int, hasColor bool)
-
-	// Set sets the mesh points into given arrays, which have been allocated
-	// according to the Sizes() returned by this Mesh.
-	// The mesh is automatically marked with SetMod so that does not need to be done here.
-	Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32)
-
-	// Update updates the mesh points into given arrays, which have previously
-	// been set with SetVertices; this can optimize by only updating whatever might
-	// need to be updated for dynamically changing meshes.
-	// You must call SetMod if the mesh was actually updated at this point.
-	Update(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32)
 }
 
 // MeshBase provides the core implementation of the [Mesh] interface.
 type MeshBase struct { //types:add -setters
-
 	// Name is the name of the mesh. [Mesh]es are linked to [Solid]s
 	// by name so this matters.
 	Name string
@@ -66,10 +49,6 @@ type MeshBase struct { //types:add -setters
 	// as [math32.Vector4] per vertex.
 	HasColor bool
 
-	// Dynamic is whether this mesh changes frequently;
-	// otherwise considered to be static.
-	Dynamic bool
-
 	// Transparent is whether the color has transparency;
 	// not worth checking manually. This is only valid if
 	// [MeshBase.HasColor] is true.
@@ -83,16 +62,20 @@ func (ms *MeshBase) AsMeshBase() *MeshBase {
 	return ms
 }
 
-func (ms *MeshBase) Sizes() (numVertex, numIndex int, hasColor bool) {
+func (ms *MeshBase) MeshSize() (numVertex, numIndex int, hasColor bool) {
 	return ms.NumVertex, ms.NumIndex, ms.HasColor
 }
 
-func (ms *MeshBase) Update(sc *Scene, vertextureArray, normArray, texArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	// nop: default mesh is static, not dynamic
+func (ms *MeshBase) MeshBBox() math32.Box3 {
+	return ms.BBox.BBox
 }
 
-func (ms *MeshBase) SetMod(sc *Scene) {
-	sc.Phong.ModMeshByName(ms.Name)
+func (ms *MeshBase) Offsets() (vtxOffset, idxOffset int) {
+	return 0, 0
+}
+
+func (ms *MeshBase) SetOffsets(vtxOffset, idxOffset int) {
+	// nop
 }
 
 // todo!!
@@ -103,16 +86,30 @@ func (ms *MeshBase) ComputeNorms(pos, norm math32.ArrayF32) {
 ////////////////////////////////////////////////////////////////////////
 // Scene management
 
-// AddMesh adds given mesh to mesh collection.  Any existing mesh of the
-// same name is deleted.
-// see NewX for convenience methods to add specific shapes
-func (sc *Scene) AddMesh(ms Mesh) {
-	sc.Meshes.Add(ms.AsMeshBase().Name, ms)
-	sc.SetNeedsConfig()
+// SetMesh sets / updates the given mesh, updating any existing
+// mesh of the same name.
+// See NewX for convenience methods to add specific shapes.
+func (sc *Scene) SetMesh(ms Mesh) {
+	name := ms.AsMeshBase().Name
+	sc.Meshes.Add(name, ms) // does replace
+	if sc.IsLive() {
+		sc.Phong.SetMesh(name, ms)
+	}
 }
 
-// AddMeshUniqe adds given mesh to mesh collection, ensuring that it has
+// setAllMeshes is called when the Phong system first is activated.
+func (sc *Scene) setAllMeshes() {
+	ph := sc.Phong
+	for _, kv := range sc.Meshes.Order {
+		ms := kv.Value
+		ph.SetMesh(kv.Key, ms)
+	}
+}
+
+// AddMeshUniqe adds given mesh, ensuring that it has
 // a unique name if one already exists.
+// This is used e.g., in loading external files which may not
+// obey this constraint.
 func (sc *Scene) AddMeshUnique(ms Mesh) {
 	nm := ms.AsMeshBase().Name
 	_, err := sc.MeshByNameTry(nm)
@@ -120,11 +117,10 @@ func (sc *Scene) AddMeshUnique(ms Mesh) {
 		nm += fmt.Sprintf("_%d", sc.Meshes.Len())
 		ms.AsMeshBase().SetName(nm)
 	}
-	sc.Meshes.Add(ms.AsMeshBase().Name, ms)
-	sc.SetNeedsConfig()
+	sc.SetMesh(ms)
 }
 
-// MeshByName looks for mesh by name -- returns nil if not found
+// MeshByName looks for mesh by name, returning nil if not found.
 func (sc *Scene) MeshByName(nm string) Mesh {
 	ms, ok := sc.Meshes.ValueByKeyTry(nm)
 	if ok {
@@ -133,7 +129,7 @@ func (sc *Scene) MeshByName(nm string) Mesh {
 	return nil
 }
 
-// MeshByNameTry looks for mesh by name -- returns error if not found
+// MeshByNameTry looks for mesh by name, returning error if not found.
 func (sc *Scene) MeshByNameTry(nm string) (Mesh, error) {
 	ms, ok := sc.Meshes.ValueByKeyTry(nm)
 	if ok {
@@ -147,14 +143,15 @@ func (sc *Scene) MeshList() []string {
 	return sc.Meshes.Keys()
 }
 
-// DeleteMesh removes given mesh -- returns error if mesh not found.
-func (sc *Scene) DeleteMesh(nm string) {
-	sc.Meshes.DeleteKey(nm)
-}
-
-// DeleteMeshes removes all meshes
-func (sc *Scene) DeleteMeshes() {
-	sc.Phong.Meshes.Reset()
+// ResetMeshes removes all meshes.
+// Use this to remove unused meshes after significant update.
+// Note that there is no Delete mechanism because the GPU Phong
+// system does not support it for efficiency reasons.
+func (sc *Scene) ResetMeshes() {
+	if sc.IsLive() {
+		sc.Phong.ResetMeshes()
+	}
+	sc.Meshes.Reset()
 }
 
 // PlaneMesh2D returns the special Plane mesh used for Text2D and Embed2D
@@ -168,63 +165,8 @@ func (sc *Scene) PlaneMesh2D() Mesh {
 	}
 	tmp := NewPlane(sc, nm, 1, 1)
 	tmp.NormAxis = math32.Z
-	tmp.NormNeg = false
+	tmp.NormalNeg = false
 	return tmp
-}
-
-// ConfigMeshes configures meshes for rendering
-// must be called after adding or deleting any meshes or altering
-// the number of vertices.
-func (sc *Scene) ConfigMeshes() {
-	ph := &sc.Phong
-	ph.UpdateMu.Lock()
-	ph.ResetMeshes()
-	for _, kv := range sc.Meshes.Order {
-		ms := kv.Value
-		numVertex, nIndex, hasColor := ms.Sizes()
-		ph.AddMesh(kv.Key, numVertex, nIndex, hasColor)
-	}
-	ph.ConfigMeshes()
-	ph.UpdateMu.Unlock()
-}
-
-// SetMeshes sets the meshes after config
-func (sc *Scene) SetMeshes() {
-	ph := &sc.Phong
-	ph.UpdateMu.Lock()
-	for _, kv := range sc.Meshes.Order {
-		ms := kv.Value
-		vertexArray, normArray, textureArray, colorArray, indexArray := ph.MeshFloatsByName(kv.Key)
-		ms.Set(sc, vertexArray, normArray, textureArray, colorArray, indexArray)
-		ph.ModMeshByName(kv.Key)
-	}
-	ph.UpdateMu.Unlock()
-	ph.Sync()
-}
-
-// UpdateMeshes iterates over meshes and calls their Update method
-// each mesh Update method must call SetMod to trigger the update
-func (sc *Scene) UpdateMeshes() {
-	ph := &sc.Phong
-	ph.UpdateMu.Lock()
-	for _, kv := range sc.Meshes.Order {
-		ms := kv.Value
-		vertexArray, normArray, textureArray, colorArray, indexArray := ph.MeshFloatsByName(kv.Key)
-		ms.Update(sc, vertexArray, normArray, textureArray, colorArray, indexArray)
-	}
-	ph.UpdateMu.Unlock()
-	ph.Sync()
-}
-
-// ReconfigMeshes reconfigures meshes on the Phong renderer
-// if there has been any change to the mesh structure.
-// Config does a full configure of everything -- this is optimized
-// just for mesh changes.
-func (sc *Scene) ReconfigMeshes() {
-	sc.ConfigMeshes()
-	sc.Phong.Config()
-	sc.SetMeshes()
-
 }
 
 ///////////////////////////////////////////////////////////////
@@ -233,28 +175,28 @@ func (sc *Scene) ReconfigMeshes() {
 // GenMesh is a generic, arbitrary Mesh, storing its values
 type GenMesh struct {
 	MeshBase
-	Vertex  math32.ArrayF32
-	Norm    math32.ArrayF32
-	Texture math32.ArrayF32
-	Color   math32.ArrayF32
-	Index   math32.ArrayU32
+	Vertex   math32.ArrayF32
+	Normal   math32.ArrayF32
+	TexCoord math32.ArrayF32
+	Color    math32.ArrayF32
+	Index    math32.ArrayU32
 }
 
-func (ms *GenMesh) Sizes() (numVertex, nIndex int, hasColor bool) {
+func (ms *GenMesh) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	ms.NumVertex = len(ms.Vertex) / 3
 	ms.NumIndex = len(ms.Index)
 	ms.HasColor = len(ms.Color) > 0
 	return ms.NumVertex, ms.NumIndex, ms.HasColor
 }
 
-func (ms *GenMesh) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
-	copy(vertexArray, ms.Vertex)
-	copy(normArray, ms.Norm)
-	copy(textureArray, ms.Texture)
+func (ms *GenMesh) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
+	copy(vertex, ms.Vertex)
+	copy(normal, ms.Normal)
+	copy(texcoord, ms.TexCoord)
 	if ms.HasColor {
-		copy(colorArray, ms.Color)
+		copy(clrs, ms.Color)
 	}
-	copy(indexArray, ms.Index)
-	bb := vshape.BBoxFromVtxs(ms.Vertex, 0, ms.NumVertex)
+	copy(index, ms.Index)
+	bb := shape.BBoxFromVtxs(ms.Vertex, 0, ms.NumVertex)
 	ms.BBox.SetBounds(bb.Min, bb.Max)
 }

@@ -14,6 +14,7 @@ import (
 	"go/constant"
 	"go/token"
 	"image"
+	"image/draw"
 	"reflect"
 )
 
@@ -205,6 +206,7 @@ func init() {
 		"TileSecondLong":                reflect.ValueOf(core.TileSecondLong),
 		"TileSpan":                      reflect.ValueOf(core.TileSpan),
 		"TileSplit":                     reflect.ValueOf(core.TileSplit),
+		"ToHTML":                        reflect.ValueOf(core.ToHTML),
 		"ToolbarStyles":                 reflect.ValueOf(core.ToolbarStyles),
 		"TooltipStage":                  reflect.ValueOf(core.TooltipStage),
 		"UpdateAll":                     reflect.ValueOf(core.UpdateAll),
@@ -363,8 +365,6 @@ type _cogentcore_org_core_core_Layouter struct {
 	WContextMenuPos    func(e events.Event) image.Point
 	WCopyFieldsFrom    func(from tree.Node)
 	WDestroy           func()
-	WDirectRenderDraw  func(drw system.Drawer, idx int, flipY bool)
-	WDirectRenderImage func(drw system.Drawer, idx int)
 	WInit              func()
 	WLayoutSpace       func()
 	WManageOverflow    func(iter int, updateSize bool) bool
@@ -373,6 +373,7 @@ type _cogentcore_org_core_core_Layouter struct {
 	WPlanName          func() string
 	WPosition          func()
 	WRender            func()
+	WRenderDraw        func(drw system.Drawer, op draw.Op)
 	WRenderWidget      func()
 	WScrollChanged     func(d math32.Dims, sb *core.Slider)
 	WScrollGeom        func(d math32.Dims) (pos math32.Vector2, sz math32.Vector2)
@@ -400,14 +401,8 @@ func (W _cogentcore_org_core_core_Layouter) ContextMenuPos(e events.Event) image
 }
 func (W _cogentcore_org_core_core_Layouter) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Layouter) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_core_Layouter) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	W.WDirectRenderDraw(drw, idx, flipY)
-}
-func (W _cogentcore_org_core_core_Layouter) DirectRenderImage(drw system.Drawer, idx int) {
-	W.WDirectRenderImage(drw, idx)
-}
-func (W _cogentcore_org_core_core_Layouter) Init()        { W.WInit() }
-func (W _cogentcore_org_core_core_Layouter) LayoutSpace() { W.WLayoutSpace() }
+func (W _cogentcore_org_core_core_Layouter) Init()                         { W.WInit() }
+func (W _cogentcore_org_core_core_Layouter) LayoutSpace()                  { W.WLayoutSpace() }
 func (W _cogentcore_org_core_core_Layouter) ManageOverflow(iter int, updateSize bool) bool {
 	return W.WManageOverflow(iter, updateSize)
 }
@@ -418,7 +413,10 @@ func (W _cogentcore_org_core_core_Layouter) OnAdd()           { W.WOnAdd() }
 func (W _cogentcore_org_core_core_Layouter) PlanName() string { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Layouter) Position()        { W.WPosition() }
 func (W _cogentcore_org_core_core_Layouter) Render()          { W.WRender() }
-func (W _cogentcore_org_core_core_Layouter) RenderWidget()    { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Layouter) RenderDraw(drw system.Drawer, op draw.Op) {
+	W.WRenderDraw(drw, op)
+}
+func (W _cogentcore_org_core_core_Layouter) RenderWidget() { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Layouter) ScrollChanged(d math32.Dims, sb *core.Slider) {
 	W.WScrollChanged(d, sb)
 }
@@ -606,39 +604,38 @@ func (W _cogentcore_org_core_core_ToolbarMaker) MakeToolbar(p *tree.Plan) { W.WM
 
 // _cogentcore_org_core_core_Treer is an interface wrapper for Treer type
 type _cogentcore_org_core_core_Treer struct {
-	IValue             interface{}
-	WApplyScenePos     func()
-	WAsCoreTree        func() *core.Tree
-	WAsTree            func() *tree.NodeBase
-	WAsWidget          func() *core.WidgetBase
-	WCanOpen           func() bool
-	WChildBackground   func(child core.Widget) image.Image
-	WContextMenuPos    func(e events.Event) image.Point
-	WCopy              func()
-	WCopyFieldsFrom    func(from tree.Node)
-	WCut               func()
-	WDestroy           func()
-	WDirectRenderDraw  func(drw system.Drawer, idx int, flipY bool)
-	WDirectRenderImage func(drw system.Drawer, idx int)
-	WDragDrop          func(e events.Event)
-	WDropDeleteSource  func(e events.Event)
-	WInit              func()
-	WMimeData          func(md *mimedata.Mimes)
-	WNodeWalkDown      func(fun func(n tree.Node) bool)
-	WOnAdd             func()
-	WOnClose           func()
-	WOnOpen            func()
-	WPaste             func()
-	WPlanName          func() string
-	WPosition          func()
-	WRender            func()
-	WRenderWidget      func()
-	WShowContextMenu   func(e events.Event)
-	WSizeDown          func(iter int) bool
-	WSizeFinal         func()
-	WSizeUp            func()
-	WStyle             func()
-	WWidgetTooltip     func(pos image.Point) (string, image.Point)
+	IValue            interface{}
+	WApplyScenePos    func()
+	WAsCoreTree       func() *core.Tree
+	WAsTree           func() *tree.NodeBase
+	WAsWidget         func() *core.WidgetBase
+	WCanOpen          func() bool
+	WChildBackground  func(child core.Widget) image.Image
+	WContextMenuPos   func(e events.Event) image.Point
+	WCopy             func()
+	WCopyFieldsFrom   func(from tree.Node)
+	WCut              func()
+	WDestroy          func()
+	WDragDrop         func(e events.Event)
+	WDropDeleteSource func(e events.Event)
+	WInit             func()
+	WMimeData         func(md *mimedata.Mimes)
+	WNodeWalkDown     func(fun func(n tree.Node) bool)
+	WOnAdd            func()
+	WOnClose          func()
+	WOnOpen           func()
+	WPaste            func()
+	WPlanName         func() string
+	WPosition         func()
+	WRender           func()
+	WRenderDraw       func(drw system.Drawer, op draw.Op)
+	WRenderWidget     func()
+	WShowContextMenu  func(e events.Event)
+	WSizeDown         func(iter int) bool
+	WSizeFinal        func()
+	WSizeUp           func()
+	WStyle            func()
+	WWidgetTooltip    func(pos image.Point) (string, image.Point)
 }
 
 func (W _cogentcore_org_core_core_Treer) ApplyScenePos()             { W.WApplyScenePos() }
@@ -652,16 +649,10 @@ func (W _cogentcore_org_core_core_Treer) ChildBackground(child core.Widget) imag
 func (W _cogentcore_org_core_core_Treer) ContextMenuPos(e events.Event) image.Point {
 	return W.WContextMenuPos(e)
 }
-func (W _cogentcore_org_core_core_Treer) Copy()                         { W.WCopy() }
-func (W _cogentcore_org_core_core_Treer) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
-func (W _cogentcore_org_core_core_Treer) Cut()                          { W.WCut() }
-func (W _cogentcore_org_core_core_Treer) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_core_Treer) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	W.WDirectRenderDraw(drw, idx, flipY)
-}
-func (W _cogentcore_org_core_core_Treer) DirectRenderImage(drw system.Drawer, idx int) {
-	W.WDirectRenderImage(drw, idx)
-}
+func (W _cogentcore_org_core_core_Treer) Copy()                           { W.WCopy() }
+func (W _cogentcore_org_core_core_Treer) CopyFieldsFrom(from tree.Node)   { W.WCopyFieldsFrom(from) }
+func (W _cogentcore_org_core_core_Treer) Cut()                            { W.WCut() }
+func (W _cogentcore_org_core_core_Treer) Destroy()                        { W.WDestroy() }
 func (W _cogentcore_org_core_core_Treer) DragDrop(e events.Event)         { W.WDragDrop(e) }
 func (W _cogentcore_org_core_core_Treer) DropDeleteSource(e events.Event) { W.WDropDeleteSource(e) }
 func (W _cogentcore_org_core_core_Treer) Init()                           { W.WInit() }
@@ -669,13 +660,16 @@ func (W _cogentcore_org_core_core_Treer) MimeData(md *mimedata.Mimes)     { W.WM
 func (W _cogentcore_org_core_core_Treer) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_core_Treer) OnAdd()                         { W.WOnAdd() }
-func (W _cogentcore_org_core_core_Treer) OnClose()                       { W.WOnClose() }
-func (W _cogentcore_org_core_core_Treer) OnOpen()                        { W.WOnOpen() }
-func (W _cogentcore_org_core_core_Treer) Paste()                         { W.WPaste() }
-func (W _cogentcore_org_core_core_Treer) PlanName() string               { return W.WPlanName() }
-func (W _cogentcore_org_core_core_Treer) Position()                      { W.WPosition() }
-func (W _cogentcore_org_core_core_Treer) Render()                        { W.WRender() }
+func (W _cogentcore_org_core_core_Treer) OnAdd()           { W.WOnAdd() }
+func (W _cogentcore_org_core_core_Treer) OnClose()         { W.WOnClose() }
+func (W _cogentcore_org_core_core_Treer) OnOpen()          { W.WOnOpen() }
+func (W _cogentcore_org_core_core_Treer) Paste()           { W.WPaste() }
+func (W _cogentcore_org_core_core_Treer) PlanName() string { return W.WPlanName() }
+func (W _cogentcore_org_core_core_Treer) Position()        { W.WPosition() }
+func (W _cogentcore_org_core_core_Treer) Render()          { W.WRender() }
+func (W _cogentcore_org_core_core_Treer) RenderDraw(drw system.Drawer, op draw.Op) {
+	W.WRenderDraw(drw, op)
+}
 func (W _cogentcore_org_core_core_Treer) RenderWidget()                  { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Treer) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
 func (W _cogentcore_org_core_core_Treer) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
@@ -696,30 +690,29 @@ func (W _cogentcore_org_core_core_Validator) Validate() error { return W.WValida
 
 // _cogentcore_org_core_core_Value is an interface wrapper for Value type
 type _cogentcore_org_core_core_Value struct {
-	IValue             interface{}
-	WApplyScenePos     func()
-	WAsTree            func() *tree.NodeBase
-	WAsWidget          func() *core.WidgetBase
-	WChildBackground   func(child core.Widget) image.Image
-	WContextMenuPos    func(e events.Event) image.Point
-	WCopyFieldsFrom    func(from tree.Node)
-	WDestroy           func()
-	WDirectRenderDraw  func(drw system.Drawer, idx int, flipY bool)
-	WDirectRenderImage func(drw system.Drawer, idx int)
-	WInit              func()
-	WNodeWalkDown      func(fun func(n tree.Node) bool)
-	WOnAdd             func()
-	WPlanName          func() string
-	WPosition          func()
-	WRender            func()
-	WRenderWidget      func()
-	WShowContextMenu   func(e events.Event)
-	WSizeDown          func(iter int) bool
-	WSizeFinal         func()
-	WSizeUp            func()
-	WStyle             func()
-	WWidgetTooltip     func(pos image.Point) (string, image.Point)
-	WWidgetValue       func() any
+	IValue           interface{}
+	WApplyScenePos   func()
+	WAsTree          func() *tree.NodeBase
+	WAsWidget        func() *core.WidgetBase
+	WChildBackground func(child core.Widget) image.Image
+	WContextMenuPos  func(e events.Event) image.Point
+	WCopyFieldsFrom  func(from tree.Node)
+	WDestroy         func()
+	WInit            func()
+	WNodeWalkDown    func(fun func(n tree.Node) bool)
+	WOnAdd           func()
+	WPlanName        func() string
+	WPosition        func()
+	WRender          func()
+	WRenderDraw      func(drw system.Drawer, op draw.Op)
+	WRenderWidget    func()
+	WShowContextMenu func(e events.Event)
+	WSizeDown        func(iter int) bool
+	WSizeFinal       func()
+	WSizeUp          func()
+	WStyle           func()
+	WWidgetTooltip   func(pos image.Point) (string, image.Point)
+	WWidgetValue     func() any
 }
 
 func (W _cogentcore_org_core_core_Value) ApplyScenePos()             { W.WApplyScenePos() }
@@ -733,20 +726,17 @@ func (W _cogentcore_org_core_core_Value) ContextMenuPos(e events.Event) image.Po
 }
 func (W _cogentcore_org_core_core_Value) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Value) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_core_Value) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	W.WDirectRenderDraw(drw, idx, flipY)
-}
-func (W _cogentcore_org_core_core_Value) DirectRenderImage(drw system.Drawer, idx int) {
-	W.WDirectRenderImage(drw, idx)
-}
-func (W _cogentcore_org_core_core_Value) Init() { W.WInit() }
+func (W _cogentcore_org_core_core_Value) Init()                         { W.WInit() }
 func (W _cogentcore_org_core_core_Value) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_core_Value) OnAdd()                         { W.WOnAdd() }
-func (W _cogentcore_org_core_core_Value) PlanName() string               { return W.WPlanName() }
-func (W _cogentcore_org_core_core_Value) Position()                      { W.WPosition() }
-func (W _cogentcore_org_core_core_Value) Render()                        { W.WRender() }
+func (W _cogentcore_org_core_core_Value) OnAdd()           { W.WOnAdd() }
+func (W _cogentcore_org_core_core_Value) PlanName() string { return W.WPlanName() }
+func (W _cogentcore_org_core_core_Value) Position()        { W.WPosition() }
+func (W _cogentcore_org_core_core_Value) Render()          { W.WRender() }
+func (W _cogentcore_org_core_core_Value) RenderDraw(drw system.Drawer, op draw.Op) {
+	W.WRenderDraw(drw, op)
+}
 func (W _cogentcore_org_core_core_Value) RenderWidget()                  { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Value) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
 func (W _cogentcore_org_core_core_Value) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
@@ -778,29 +768,28 @@ func (W _cogentcore_org_core_core_Valuer) Value() core.Value { return W.WValue()
 
 // _cogentcore_org_core_core_Widget is an interface wrapper for Widget type
 type _cogentcore_org_core_core_Widget struct {
-	IValue             interface{}
-	WApplyScenePos     func()
-	WAsTree            func() *tree.NodeBase
-	WAsWidget          func() *core.WidgetBase
-	WChildBackground   func(child core.Widget) image.Image
-	WContextMenuPos    func(e events.Event) image.Point
-	WCopyFieldsFrom    func(from tree.Node)
-	WDestroy           func()
-	WDirectRenderDraw  func(drw system.Drawer, idx int, flipY bool)
-	WDirectRenderImage func(drw system.Drawer, idx int)
-	WInit              func()
-	WNodeWalkDown      func(fun func(n tree.Node) bool)
-	WOnAdd             func()
-	WPlanName          func() string
-	WPosition          func()
-	WRender            func()
-	WRenderWidget      func()
-	WShowContextMenu   func(e events.Event)
-	WSizeDown          func(iter int) bool
-	WSizeFinal         func()
-	WSizeUp            func()
-	WStyle             func()
-	WWidgetTooltip     func(pos image.Point) (string, image.Point)
+	IValue           interface{}
+	WApplyScenePos   func()
+	WAsTree          func() *tree.NodeBase
+	WAsWidget        func() *core.WidgetBase
+	WChildBackground func(child core.Widget) image.Image
+	WContextMenuPos  func(e events.Event) image.Point
+	WCopyFieldsFrom  func(from tree.Node)
+	WDestroy         func()
+	WInit            func()
+	WNodeWalkDown    func(fun func(n tree.Node) bool)
+	WOnAdd           func()
+	WPlanName        func() string
+	WPosition        func()
+	WRender          func()
+	WRenderDraw      func(drw system.Drawer, op draw.Op)
+	WRenderWidget    func()
+	WShowContextMenu func(e events.Event)
+	WSizeDown        func(iter int) bool
+	WSizeFinal       func()
+	WSizeUp          func()
+	WStyle           func()
+	WWidgetTooltip   func(pos image.Point) (string, image.Point)
 }
 
 func (W _cogentcore_org_core_core_Widget) ApplyScenePos()             { W.WApplyScenePos() }
@@ -814,20 +803,17 @@ func (W _cogentcore_org_core_core_Widget) ContextMenuPos(e events.Event) image.P
 }
 func (W _cogentcore_org_core_core_Widget) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Widget) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_core_Widget) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	W.WDirectRenderDraw(drw, idx, flipY)
-}
-func (W _cogentcore_org_core_core_Widget) DirectRenderImage(drw system.Drawer, idx int) {
-	W.WDirectRenderImage(drw, idx)
-}
-func (W _cogentcore_org_core_core_Widget) Init() { W.WInit() }
+func (W _cogentcore_org_core_core_Widget) Init()                         { W.WInit() }
 func (W _cogentcore_org_core_core_Widget) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_core_Widget) OnAdd()                         { W.WOnAdd() }
-func (W _cogentcore_org_core_core_Widget) PlanName() string               { return W.WPlanName() }
-func (W _cogentcore_org_core_core_Widget) Position()                      { W.WPosition() }
-func (W _cogentcore_org_core_core_Widget) Render()                        { W.WRender() }
+func (W _cogentcore_org_core_core_Widget) OnAdd()           { W.WOnAdd() }
+func (W _cogentcore_org_core_core_Widget) PlanName() string { return W.WPlanName() }
+func (W _cogentcore_org_core_core_Widget) Position()        { W.WPosition() }
+func (W _cogentcore_org_core_core_Widget) Render()          { W.WRender() }
+func (W _cogentcore_org_core_core_Widget) RenderDraw(drw system.Drawer, op draw.Op) {
+	W.WRenderDraw(drw, op)
+}
 func (W _cogentcore_org_core_core_Widget) RenderWidget()                  { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Widget) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
 func (W _cogentcore_org_core_core_Widget) SizeDown(iter int) bool         { return W.WSizeDown(iter) }

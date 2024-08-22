@@ -60,12 +60,6 @@ func main() {
 	b.AddAppBar(pg.MakeToolbar)
 	b.AddAppBar(func(p *tree.Plan) {
 		tree.Add(p, func(w *core.Button) {
-			w.SetText("Setup").SetIcon(icons.Download)
-			w.OnClick(func(e events.Event) {
-				pg.Context.OpenURL("/setup")
-			})
-		})
-		tree.Add(p, func(w *core.Button) {
 			w.SetText("Playground").SetIcon(icons.PlayCircle)
 			w.OnClick(func(e events.Event) {
 				pg.Context.OpenURL("/playground")
@@ -238,10 +232,18 @@ func homePage(ctx *htmlcore.Context) bool {
 	tree.AddChild(home, func(w *core.Text) {
 		w.SetType(core.TextHeadlineMedium).SetText("A cross-platform framework for building powerful, fast, elegant 2D and 3D apps")
 	})
-	tree.AddChild(home, func(w *core.Button) {
-		w.SetText("Get started")
-		w.OnClick(func(e events.Event) {
-			ctx.OpenURL("basics")
+	tree.AddChild(home, func(w *core.Frame) {
+		tree.AddChild(w, func(w *core.Button) {
+			w.SetText("Get started")
+			w.OnClick(func(e events.Event) {
+				ctx.OpenURL("/basics")
+			})
+		})
+		tree.AddChild(w, func(w *core.Button) {
+			w.SetText("Install").SetType(core.ButtonTonal)
+			w.OnClick(func(e events.Event) {
+				ctx.OpenURL("/setup/install")
+			})
 		})
 	})
 
@@ -286,7 +288,7 @@ b.RunMainWindow()`)
 		initIcon(w).SetIcon(icons.PlayCircle)
 	})
 
-	makeBlock("EXTREMELY FAST", "Cogent Core is powered by Vulkan, a modern, cross-platform, high-performance graphics framework that allows apps to run on all platforms at extremely fast speeds. All Cogent Core apps compile to machine code, allowing them to run without any overhead.", func(w *core.Icon) {
+	makeBlock("EXTREMELY FAST", "Cogent Core is powered by WebGPU, a modern, cross-platform, high-performance graphics framework that allows apps to run on all platforms at extremely fast speeds. All Cogent Core apps compile to machine code, allowing them to run without any overhead.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Bolt)
 	})
 

@@ -10,25 +10,8 @@ import (
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/math32"
+	"cogentcore.org/core/gpu/phong"
 )
-
-// Tiling are the texture tiling parameters
-type Tiling struct {
-
-	// how often to repeat the texture in each direction
-	Repeat math32.Vector2
-
-	// offset for when to start the texure in each direction
-	Off math32.Vector2
-}
-
-// Defaults sets default tiling params if not yet initialized
-func (tl *Tiling) Defaults() {
-	if tl.Repeat == (math32.Vector2{}) {
-		tl.Repeat.Set(1, 1)
-	}
-}
 
 // Material describes the material properties of a surface (colors, shininess, texture)
 // i.e., phong lighting parameters.
@@ -57,7 +40,7 @@ type Material struct { //types:add -setters
 	TextureName TextureName `set:"-"`
 
 	// Tiling is the texture tiling parameters: repeat and offset.
-	Tiling Tiling `display:"inline"`
+	Tiling phong.Tiling `display:"inline"`
 
 	// CullBack indicates to cull the back-facing surfaces.
 	CullBack bool
@@ -91,6 +74,12 @@ func (mt *Material) ShowShow(field string) bool {
 // Disconnect resets pointers etc
 func (mt *Material) Disconnect() {
 	mt.Texture = nil
+}
+
+func (mt *Material) phongColors() *phong.Colors {
+	clr := phong.NewColors(mt.Color, mt.Emissive, mt.Shiny, mt.Reflective, mt.Bright)
+	clr.Tiling = mt.Tiling
+	return clr
 }
 
 func (mt Material) String() string {
@@ -156,14 +145,4 @@ func (mt *Material) Validate(sc *Scene) error {
 		}
 	}
 	return nil
-}
-
-func (mt *Material) Render(sc *Scene) {
-	sc.Phong.UseColor(mt.Color, mt.Emissive, mt.Shiny, mt.Reflective, mt.Bright)
-	sc.Phong.UseTexturePars(mt.Tiling.Repeat, mt.Tiling.Off)
-	if mt.TextureName != "" {
-		sc.Phong.UseTextureName(string(mt.TextureName))
-	} else {
-		sc.Phong.UseNoTexture()
-	}
 }

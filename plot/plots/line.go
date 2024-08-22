@@ -208,7 +208,7 @@ func (pts *Line) Thumbnail(plt *plot.Plot) {
 		if pts.LineStyle.Width.Value > 0 {
 			tb.Min.Y = int(midY)
 		}
-		pc.FillBox(math32.Vector2FromPoint(tb.Min), math32.Vector2FromPoint(tb.Size()), pts.Fill)
+		pc.FillBox(math32.FromPoint(tb.Min), math32.FromPoint(tb.Size()), pts.Fill)
 	}
 
 	if pts.LineStyle.SetStroke(plt) {

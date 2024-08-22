@@ -172,7 +172,7 @@ func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	if sc != nil {
 		rebuild = sc.NeedsRebuild()
 		rc = sc.renderContext()
-		sz = sc.sceneGeom.Size
+		sz = sc.SceneGeom.Size
 	}
 	if rc != nil {
 		st.UnitContext.DPI = rc.logicalDPI
@@ -225,4 +225,7 @@ func styleFromTags(w Widget, tags reflect.StructTag) {
 		setFromTag(tags, "grow", func(v float32) { s.Grow.X = v })
 		setFromTag(tags, "grow-y", func(v float32) { s.Grow.Y = v })
 	})
+	if tags.Get("new-window") == "+" {
+		w.AsWidget().setFlag(true, widgetValueNewWindow)
+	}
 }

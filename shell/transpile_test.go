@@ -167,6 +167,7 @@ func TestTranspile(t *testing.T) {
 		{"ctr++", "ctr++"},
 		{"stru.ctr++", "stru.ctr++"},
 		{"meta += ln", "meta += ln"},
+		{"var data map[string]any", "var data map[string]any"},
 	}
 
 	sh := NewShell()

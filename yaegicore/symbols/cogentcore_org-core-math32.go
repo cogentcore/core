@@ -164,7 +164,7 @@ func init() {
 		"Vec3i":                    reflect.ValueOf(math32.Vec3i),
 		"Vec4":                     reflect.ValueOf(math32.Vec4),
 		"Vector2FromFixed":         reflect.ValueOf(math32.Vector2FromFixed),
-		"Vector2FromPoint":         reflect.ValueOf(math32.Vector2FromPoint),
+		"FromPoint":         reflect.ValueOf(math32.FromPoint),
 		"Vector2Scalar":            reflect.ValueOf(math32.Vector2Scalar),
 		"Vector2iScalar":           reflect.ValueOf(math32.Vector2iScalar),
 		"Vector3FromVector4":       reflect.ValueOf(math32.Vector3FromVector4),

@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -60,7 +61,7 @@ type Scene struct { //core:no-new
 	Data any
 
 	// Size and position relative to overall rendering context.
-	sceneGeom math32.Geom2DInt `edit:"-" set:"-"`
+	SceneGeom math32.Geom2DInt `edit:"-" set:"-"`
 
 	// paint context for rendering
 	PaintContext paint.Context `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
@@ -97,39 +98,56 @@ type Scene struct { //core:no-new
 	// to trigger Show event and other steps at start of first show
 	showIter int
 
-	// directRenders are widgets that render directly to the RenderWin
+	// directRenders are widgets that render directly to the [RenderWindow]
 	// instead of rendering into the Scene Pixels image.
 	directRenders []Widget
 
-	// State bool values:
+	// flags are atomic bit flags for [Scene] state.
+	flags sceneFlags
+}
 
-	// hasShown is whether this scene has been shown.
+// sceneFlags are atomic bit flags for [Scene] state.
+// They must be atomic to prevent race conditions.
+type sceneFlags int64 //enums:bitflag -trim-prefix scene
+
+const (
+	// sceneHasShown is whether this scene has been shown.
 	// This is used to ensure that [events.Show] is only sent once.
-	hasShown bool
+	sceneHasShown sceneFlags = iota
 
-	// updating means the Scene is in the process of updating.
+	// sceneUpdating means the Scene is in the process of sceneUpdating.
 	// It is set for any kind of tree-level update.
 	// Skip any further update passes until it goes off.
-	updating bool
+	sceneUpdating
 
 	// sceneNeedsRender is whether anything in the Scene needs to be re-rendered
 	// (but not necessarily the whole scene itself).
-	sceneNeedsRender bool
+	sceneNeedsRender
 
-	// needsLayout is whether the Scene needs a new layout pass.
-	needsLayout bool
+	// sceneNeedsLayout is whether the Scene needs a new layout pass.
+	sceneNeedsLayout
 
-	// imageUpdated indicates that the Scene's image has been updated
+	// sceneImageUpdated indicates that the Scene's image has been updated
 	// e.g., due to a render or a resize. This is reset by the
 	// global [RenderWindow] rendering pass, so it knows whether it needs to
 	// copy the image up to the GPU or not.
-	imageUpdated bool
+	sceneImageUpdated
 
-	// prefSizing means that this scene is currently doing a
+	// scenePrefSizing means that this scene is currently doing a
 	// PrefSize computation to compute the size of the scene
 	// (for sizing window for example); affects layout size computation
 	// only for Over
-	prefSizing bool
+	scenePrefSizing
+)
+
+// hasFlag returns whether the given flag is set.
+func (sc *Scene) hasFlag(f sceneFlags) bool {
+	return sc.flags.HasFlag(f)
+}
+
+// setFlag sets the given flags to the given value.
+func (sc *Scene) setFlag(on bool, f ...enums.BitFlag) {
+	sc.flags.SetFlag(on, f...)
 }
 
 // newBodyScene creates a new Scene for use with an associated Body that
@@ -232,14 +250,14 @@ func (sc *Scene) RenderWindow() *renderWindow {
 // fitInWindow fits Scene geometry (pos, size) into given window geom.
 // Calls resize for the new size.
 func (sc *Scene) fitInWindow(winGeom math32.Geom2DInt) {
-	geom := sc.sceneGeom
+	geom := sc.SceneGeom
 	// full offscreen windows ignore any window geometry constraints
 	// because they must be unbounded by any previous window sizes
 	if TheApp.Platform() != system.Offscreen || !sc.Stage.FullWindow {
 		geom = geom.FitInWindow(winGeom)
 	}
 	sc.resize(geom)
-	sc.sceneGeom.Pos = geom.Pos
+	sc.SceneGeom.Pos = geom.Pos
 	// fmt.Println("win", winGeom, "geom", geom)
 }
 
@@ -254,12 +272,12 @@ func (sc *Scene) resize(geom math32.Geom2DInt) {
 	if sc.PaintContext.Paint == nil {
 		sc.PaintContext.Paint = &styles.Paint{}
 	}
-	sc.sceneGeom.Pos = geom.Pos
+	sc.SceneGeom.Pos = geom.Pos
 	if sc.Pixels == nil || sc.Pixels.Bounds().Size() != geom.Size {
 		sc.Pixels = image.NewRGBA(image.Rectangle{Max: geom.Size})
 	}
 	sc.PaintContext.Init(geom.Size.X, geom.Size.Y, sc.Pixels)
-	sc.sceneGeom.Size = geom.Size // make sure
+	sc.SceneGeom.Size = geom.Size // make sure
 
 	sc.updateScene()
 	sc.applyStyleScene()

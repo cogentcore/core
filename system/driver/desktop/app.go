@@ -10,24 +10,23 @@
 package desktop
 
 import (
+	"image"
 	"log"
 	"runtime"
 
-	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
-	"cogentcore.org/core/vgpu"
-	"cogentcore.org/core/vgpu/vdraw"
+	"github.com/cogentcore/webgpu/wgpuglfw"
 	"github.com/go-gl/glfw/v3.3/glfw"
-
-	vk "github.com/goki/vulkan"
 )
 
 func Init() {
 	// some operating systems require us to be on the main thread
 	runtime.LockOSThread()
 
-	TheApp.InitVk()
+	TheApp.InitGPU()
 	base.Init(TheApp, &TheApp.App)
 }
 
@@ -39,7 +38,7 @@ type App struct {
 	base.AppMulti[*Window]
 
 	// GPU is the system GPU used for the app
-	GPU *vgpu.GPU
+	GPU *gpu.GPU
 
 	// ShareWin is a non-visible, always-present window that all windows share gl context with
 	ShareWin *glfw.Window
@@ -68,18 +67,16 @@ func (a *App) MainLoop() {
 				f.Done <- struct{}{}
 			}
 		default:
-			glfw.WaitEvents()
+			glfw.WaitEventsTimeout(0.1) // this is essential on linux
 		}
 	}
 }
 
-// InitVk initializes glfw, vulkan, vgpu, and the screens.
-func (a *App) InitVk() {
+// InitGPU initializes glfw, gpu, and the screens.
+func (a *App) InitGPU() {
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("system/driver/desktop failed to initialize glfw:", err)
 	}
-	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
-	vk.Init()
 	glfw.SetMonitorCallback(a.MonitorChange)
 	// glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
@@ -91,9 +88,7 @@ func (a *App) InitVk() {
 		log.Fatalln("desktop.App failed to create hidden share window", err)
 	}
 
-	winext := a.ShareWin.GetRequiredInstanceExtensions()
-	a.GPU = vgpu.NewGPU()
-	a.GPU.AddInstanceExt(winext...)
+	a.GPU = gpu.NewGPU()
 	a.GPU.Config(a.Name())
 
 	a.GetScreens()
@@ -125,18 +120,22 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	}
 
 	w := &Window{
-		WindowMulti:  base.NewWindowMulti[*App, *vdraw.Drawer](a, opts),
+		WindowMulti:  base.NewWindowMulti[*App, *gpudraw.Drawer](a, opts),
 		Glw:          glw,
 		ScreenWindow: sc.Name,
 	}
 	w.This = w
-	w.Draw = &vdraw.Drawer{}
 
 	a.RunOnMain(func() {
-		surfPtr := errors.Log1(glw.CreateWindowSurface(a.GPU.Instance, nil))
-		sf := vgpu.NewSurface(a.GPU, vk.SurfaceFromPointer(surfPtr))
-		w.Draw.YIsDown = true
-		w.Draw.ConfigSurface(sf, vgpu.MaxTexturesPerSet) // note: can expand
+		surf := a.GPU.Instance.CreateSurface(wgpuglfw.GetSurfaceDescriptor(glw))
+		var fbsz image.Point
+		fbsz.X, fbsz.Y = glw.GetFramebufferSize()
+		if fbsz == (image.Point{}) {
+			fbsz = opts.Size
+		}
+		// no multisample and no depth
+		sf := gpu.NewSurface(a.GPU, surf, fbsz, 1, gpu.UndefinedType)
+		w.Draw = gpudraw.NewDrawer(a.GPU, sf)
 	})
 
 	// w.Flgs.SetFlag(true, system.Focused) // starts out focused

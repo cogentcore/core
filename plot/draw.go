@@ -71,7 +71,7 @@ func (pt *Plot) Draw() {
 	pc.PushBounds(ptb)
 
 	if pt.Background != nil {
-		pc.BlitBox(math32.Vector2{}, math32.Vector2FromPoint(pt.Size), pt.Background)
+		pc.BlitBox(math32.Vector2{}, math32.FromPoint(pt.Size), pt.Background)
 	}
 
 	if pt.Title.Text != "" {
@@ -428,7 +428,7 @@ func (lg *Legend) draw(pt *Plot) {
 	}
 
 	if lg.Fill != nil {
-		pc.FillBox(math32.Vector2FromPoint(pos), math32.Vector2FromPoint(sz), lg.Fill)
+		pc.FillBox(math32.FromPoint(pos), math32.FromPoint(sz), lg.Fill)
 	}
 	cp := pos
 	thsz := image.Point{X: int(lg.ThumbnailWidth.Dots), Y: maxTht - 2*int(pad)}
@@ -444,7 +444,7 @@ func (lg *Legend) draw(pt *Plot) {
 		pc.PopBounds()
 		ltxt.Text = e.Text
 		ltxt.Config(pt)
-		ltxt.Draw(pt, math32.Vector2FromPoint(cp))
+		ltxt.Draw(pt, math32.FromPoint(cp))
 		cp.Y += maxTht
 	}
 }

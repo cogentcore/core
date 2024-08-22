@@ -5,24 +5,24 @@
 package main
 
 import (
-	"embed"
+	_ "embed"
 	"fmt"
 	"image"
+	"image/color"
 	"time"
 	"unsafe"
 
-	vk "github.com/goki/vulkan"
-
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	_ "cogentcore.org/core/system/driver"
-	"cogentcore.org/core/vgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
-//go:embed *.spv
-var content embed.FS
+//go:embed indexed.wgsl
+var indexed string
 
 type CamView struct {
 	Model      math32.Matrix4
@@ -34,7 +34,7 @@ func main() {
 	opts := &system.NewWindowOptions{
 		Size:      image.Pt(1024, 768),
 		StdPixels: true,
-		Title:     "System Test Window",
+		Title:     "System Draw Triangle Indexed",
 	}
 	w, err := system.TheApp.NewWindow(opts)
 	if err != nil {
@@ -42,75 +42,63 @@ func main() {
 	}
 	// w.SetFPS(20) // 60 default
 
-	var sf *vgpu.Surface
-	var sy *vgpu.System
-	var pl *vgpu.Pipeline
-	var cam *vgpu.Value
+	var sf *gpu.Surface
+	var sy *gpu.GraphicsSystem
+	var pl *gpu.GraphicsPipeline
+	var cam *gpu.Value
 	var camo CamView
 
 	make := func() {
-
-		// note: drawer is always created and ready to go
-		// we are creating an additional rendering system here.
-		sf = w.Drawer().Surface().(*vgpu.Surface)
-		sy = sf.GPU.NewGraphicsSystem("drawidx", &sf.Device)
-
+		sf = w.Drawer().Renderer().(*gpu.Surface)
+		sy = gpu.NewGraphicsSystem(sf.GPU, "drawidx", sf)
 		destroy := func() {
-			sy.Destroy()
+			sy.Release()
 		}
 		w.SetDestroyGPUResourcesFunc(destroy)
 
-		pl = sy.NewPipeline("drawidx")
-		// sf.Format.SetMultisample(1)
-		sy.ConfigRender(&sf.Format, vgpu.Depth32)
-		sf.SetRender(&sy.Render)
-		sy.SetClearColor(0.2, 0.2, 0.2, 1)
-		sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+		pl = sy.AddGraphicsPipeline("drawidx")
+		pl.SetCullMode(wgpu.CullModeNone)
+		sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 
-		pl.AddShaderEmbed("indexed", vgpu.VertexShader, content, "indexed.spv")
-		pl.AddShaderEmbed("vtxcolor", vgpu.FragmentShader, content, "vtxcolor.spv")
+		sh := pl.AddShader("indexed")
+		sh.OpenCode(indexed)
+		pl.AddEntry(sh, gpu.VertexShader, "vs_main")
+		pl.AddEntry(sh, gpu.FragmentShader, "fs_main")
 
-		vars := sy.Vars()
-		vset := vars.AddVertexSet()
-		set := vars.AddSet()
+		vgp := sy.Vars().AddVertexGroup()
+		ugp := sy.Vars().AddGroup(gpu.Uniform)
 
-		nPts := 3
+		// vertex are dynamically sized in general, so using 0 here
+		posv := vgp.Add("Pos", gpu.Float32Vector3, 0, gpu.VertexShader)
+		clrv := vgp.Add("Color", gpu.Float32Vector3, 0, gpu.VertexShader)
+		// note: index goes last usually
+		idxv := vgp.Add("Index", gpu.Uint16, 0, gpu.VertexShader)
+		idxv.Role = gpu.Index
 
-		posv := vset.Add("Pos", vgpu.Float32Vector3, nPts, vgpu.Vertex, vgpu.VertexShader)
-		clrv := vset.Add("Color", vgpu.Float32Vector3, nPts, vgpu.Vertex, vgpu.VertexShader)
-		// note: always put indexes last so there isn't a gap in the location indexes!
-		// just the fact of adding one (and only one) Index type triggers indexed render
-		idxv := vset.Add("Index", vgpu.Uint16, nPts, vgpu.Index, vgpu.VertexShader)
+		camv := ugp.AddStruct("Camera", int(unsafe.Sizeof(CamView{})), 1, gpu.VertexShader)
 
-		camv := set.Add("Camera", vgpu.Struct, 1, vgpu.Uniform, vgpu.VertexShader)
-		camv.SizeOf = vgpu.Float32Matrix4.Bytes() * 3 // no padding for these
-
-		vset.ConfigValues(1) // one val per var
-		set.ConfigValues(1)  // one val per var
+		vgp.SetNValues(1)
+		ugp.SetNValues(1)
 		sy.Config()
 
-		triPos, _ := posv.Values.ValueByIndexTry(0)
-		triPosA := triPos.Floats32()
-		triPosA.Set(0,
+		triPos := posv.Values.Values[0]
+		gpu.SetValueFrom(triPos, []float32{
 			-0.5, 0.5, 0.0,
 			0.5, 0.5, 0.0,
-			0.0, -0.5, 0.0) // negative point is UP in native Vulkan
-		triPos.SetMod()
+			0.0, -0.5, 0.0}) // negative point is UP in native Vulkan
 
-		triClr, _ := clrv.Values.ValueByIndexTry(0)
-		triClrA := triClr.Floats32()
-		triClrA.Set(0,
+		triClr := clrv.Values.Values[0]
+		gpu.SetValueFrom(triClr, []float32{
 			1.0, 0.0, 0.0,
 			0.0, 1.0, 0.0,
-			0.0, 0.0, 1.0)
-		triClr.SetMod()
+			0.0, 0.0, 1.0})
 
-		triIndex, _ := idxv.Values.ValueByIndexTry(0)
-		idxs := []uint16{0, 1, 2}
-		triIndex.CopyFromBytes(unsafe.Pointer(&idxs[0]))
+		triIndex := idxv.Values.Values[0]
+		gpu.SetValueFrom(triIndex, []uint16{0, 1, 2})
+		// note: the only way to set indexes is at start..
 
 		// This is the standard camera view projection computation
-		cam, _ = camv.Values.ValueByIndexTry(0)
+		cam = camv.Values.Values[0]
 		campos := math32.Vec3(0, 0, 2)
 		target := math32.Vec3(0, 0, 0)
 		var lookq math32.Quat
@@ -124,16 +112,10 @@ func main() {
 		camo.View.CopyFrom(view)
 		aspect := float32(sf.Format.Size.X) / float32(sf.Format.Size.Y)
 		fmt.Printf("aspect: %g\n", aspect)
-		// VkPerspective version automatically flips Y axis and shifts depth
-		// into a 0..1 range instead of -1..1, so original GL based geometry
-		// will render identically here.
-		camo.Projection.SetVkPerspective(45, aspect, 0.01, 100)
+		camo.Projection.SetPerspective(45, aspect, 0.01, 100)
+		gpu.SetValueFrom(cam, []CamView{camo}) // note: always use slice to copy
 
-		cam.CopyFromBytes(unsafe.Pointer(&camo)) // sets mod
-
-		sy.Mem.SyncToGPU()
-
-		vars.BindDynamicValue(0, camv, cam)
+		fmt.Println("made and configured pipelines")
 	}
 
 	frameCount := 0
@@ -146,24 +128,17 @@ func main() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
 		camo.Model.SetRotationY(.1 * float32(frameCount))
-		cam.CopyFromBytes(unsafe.Pointer(&camo)) // sets mod
-		sy.Mem.SyncToGPU()
+		gpu.SetValueFrom(cam, []CamView{camo})
 
-		idx, ok := sf.AcquireNextImage()
-		if !ok {
+		rp, err := sy.BeginRenderPass()
+		if err != nil {
 			return
 		}
-		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		descIndex := 0 // if running multiple frames in parallel, need diff sets
-		cmd := sy.CmdPool.Buff
-		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIndex)
-		pl.BindDrawVertex(cmd, descIndex)
-		sy.EndRenderPass(cmd)
-		// fmt.Printf("cmd %v\n", time.Now().Sub(rt))
-		sf.SubmitRender(cmd) // this is where it waits for the 16 msec
-		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
-		sf.PresentImage(idx)
-		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
+		pl.BindPipeline(rp)
+		pl.BindDrawIndexed(rp)
+		rp.End()
+		sy.EndRenderPass(rp)
+
 		frameCount++
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)

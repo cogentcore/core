@@ -7,12 +7,29 @@
 package core
 
 import (
+	"os"
 	"syscall/js"
 
 	"cogentcore.org/core/events"
 )
 
 func init() {
+	webCrashDialog = func(title, text, body string) {
+		document := js.Global().Get("document")
+		div := document.Call("createElement", "div")
+		h1 := document.Call("createElement", "h1")
+		p := document.Call("createElement", "p")
+		div.Set("id", "app-crash-dialog")
+		h1.Set("innerText", title)
+		p.Set("innerText", text+"\n\n"+body)
+		div.Call("appendChild", h1)
+		div.Call("appendChild", p)
+		docBody := document.Get("body")
+		docBody.Set("style", "")
+		docBody.Call("appendChild", div)
+		os.Exit(1)
+	}
+
 	js.Global().Set("appOnUpdate", js.FuncOf(func(this js.Value, args []js.Value) any {
 		NewBody("web-update-available").
 			AddSnackbarText("A new version is available").

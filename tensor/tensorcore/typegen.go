@@ -62,10 +62,10 @@ func (t *TensorGrid) SetDisplay(v TensorDisplay) *TensorGrid { t.Display = v; re
 // the actual colormap
 func (t *TensorGrid) SetColorMap(v *colormap.Map) *TensorGrid { t.ColorMap = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.TensorButton", IDName: "tensor-button", Doc: "TensorButton represents a Tensor with a button for making a [TensorView]\nviewer for an [tensor.Tensor].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Tensor"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.TensorButton", IDName: "tensor-button", Doc: "TensorButton represents a Tensor with a button for making a [TensorGrid]\nviewer for an [tensor.Tensor].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Tensor"}}})
 
 // NewTensorButton returns a new [TensorButton] with the given optional parent:
-// TensorButton represents a Tensor with a button for making a [TensorView]
+// TensorButton represents a Tensor with a button for making a [TensorGrid]
 // viewer for an [tensor.Tensor].
 func NewTensorButton(parent ...tree.Node) *TensorButton { return tree.New[TensorButton](parent...) }
 
@@ -81,10 +81,10 @@ func NewTableButton(parent ...tree.Node) *TableButton { return tree.New[TableBut
 // SetTable sets the [TableButton.Table]
 func (t *TableButton) SetTable(v *table.Table) *TableButton { t.Table = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.SimMatButton", IDName: "sim-mat-button", Doc: "SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "SimMat"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.SimMatButton", IDName: "sim-mat-button", Doc: "SimMatValue presents a button that pulls up the [SimMatGrid] viewer for a [table.Table].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "SimMat"}}})
 
 // NewSimMatButton returns a new [SimMatButton] with the given optional parent:
-// SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].
+// SimMatValue presents a button that pulls up the [SimMatGrid] viewer for a [table.Table].
 func NewSimMatButton(parent ...tree.Node) *SimMatButton { return tree.New[SimMatButton](parent...) }
 
 // SetSimMat sets the [SimMatButton.SimMat]

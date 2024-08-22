@@ -16,11 +16,24 @@ import (
 	"github.com/Masterminds/vcs"
 )
 
+type Types int32 //enums:enum -accept-lower
+
+const (
+	NoVCS Types = iota
+	Git
+	Svn
+	Bzr
+	Hg
+)
+
 // Repo provides an interface extending [vcs.Repo]
 // (https://github.com/Masterminds/vcs)
 // with support for file status information and operations.
 type Repo interface {
 	vcs.Repo
+
+	// Type returns the type of repo we are using
+	Type() Types
 
 	// Files returns a map of the current files and their status.
 	Files() (Files, error)
@@ -104,19 +117,19 @@ func NewRepo(remote, local string) (Repo, error) {
 }
 
 // DetectRepo attempts to detect the presence of a repository at the given
-// directory path -- returns type of repository if found, else vcs.NoVCS.
+// directory path -- returns type of repository if found, else NoVCS.
 // Very quickly just looks for signature file name:
 // .git for git
-// .svn for svn -- but note that this will find any subdir in svn repo
-func DetectRepo(path string) vcs.Type {
+// .svn for svn -- but note that this will find any subdir in svn rep.o
+func DetectRepo(path string) Types {
 	if fsx.HasFile(path, ".git") {
-		return vcs.Git
+		return Git
 	}
 	if fsx.HasFile(path, ".svn") {
-		return vcs.Svn
+		return Svn
 	}
 	// todo: rest later..
-	return vcs.NoVCS
+	return NoVCS
 }
 
 // relPath return the path relative to the repository LocalPath()
