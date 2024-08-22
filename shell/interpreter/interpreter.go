@@ -37,6 +37,10 @@ type Interpreter struct {
 	Interp *interp.Interpreter
 }
 
+func init() {
+	delete(stdlib.Symbols, "errors/errors") // use our errors package instead
+}
+
 // NewInterpreter returns a new [Interpreter] initialized with the given options.
 // It automatically imports the standard library and configures necessary shell
 // functions. End user app must call [Interp.Config] after importing any additional
