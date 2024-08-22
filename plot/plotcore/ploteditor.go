@@ -8,7 +8,6 @@ package plotcore
 //go:generate core generate
 
 import (
-	"fmt"
 	"io/fs"
 	"log/slog"
 	"path/filepath"
@@ -105,7 +104,9 @@ func (pl *PlotEditor) Init() {
 	})
 
 	pl.Updater(func() {
-		pl.Options.fromMeta(pl.table.Table)
+		if pl.table != nil && pl.table.Table != nil {
+			pl.Options.fromMeta(pl.table.Table)
+		}
 	})
 	tree.AddChildAt(pl, "columns", func(w *core.Frame) {
 		pl.columnsFrame = w
@@ -338,6 +339,30 @@ func (pl *PlotEditor) genPlot() {
 		pl.genPlotBar()
 	}
 	pl.plotWidget.Scale = pl.Options.Scale
+	pl.plotWidget.SetRangesFunc = func() {
+		plt := pl.plotWidget.Plot
+		xi, err := pl.table.Table.ColumnIndexTry(pl.Options.XAxis)
+		if err == nil {
+			xp := pl.Columns[xi]
+			if xp.Range.FixMin {
+				plt.X.Min = math32.Min(plt.X.Min, float32(xp.Range.Min))
+			}
+			if xp.Range.FixMax {
+				plt.X.Max = math32.Max(plt.X.Max, float32(xp.Range.Max))
+			}
+		}
+		for _, cp := range pl.Columns { // key that this comes at the end, to actually stick
+			if !cp.On || cp.IsString {
+				continue
+			}
+			if cp.Range.FixMin {
+				plt.Y.Min = math32.Min(plt.Y.Min, float32(cp.Range.Min))
+			}
+			if cp.Range.FixMax {
+				plt.Y.Max = math32.Max(plt.Y.Max, float32(cp.Range.Max))
+			}
+		}
+	}
 	pl.plotWidget.SetPlot(pl.plot) // redraws etc
 	pl.inPlot = false
 }
@@ -347,19 +372,6 @@ func (pl *PlotEditor) configPlot(plt *plot.Plot) {
 	plt.Title.Text = pl.Options.Title
 	plt.X.Label.Text = pl.xLabel()
 	plt.Y.Label.Text = pl.yLabel()
-
-	for _, cp := range pl.Columns { // key that this comes at the end, to actually stick
-		if !cp.On || cp.IsString {
-			continue
-		}
-		if cp.Range.FixMin {
-			plt.Y.Min = math32.Min(plt.Y.Min, float32(cp.Range.Min))
-		}
-		if cp.Range.FixMax {
-			plt.Y.Max = math32.Max(plt.Y.Max, float32(cp.Range.Max))
-		}
-	}
-
 	plt.Legend.Position = pl.Options.LegendPosition
 	plt.X.TickText.Style.Rotation = float32(pl.Options.XAxisRotation)
 }
@@ -582,13 +594,13 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 			pw.Restyle()
 		})
 	})
-	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.ArrowForward).
-			SetTooltip("turn on select mode for selecting Plot elements").
-			OnClick(func(e events.Event) {
-				fmt.Println("this will select select mode")
-			})
-	})
+	// tree.Add(p, func(w *core.Button) {
+	// 	w.SetIcon(icons.ArrowForward).
+	// 		SetTooltip("turn on select mode for selecting Plot elements").
+	// 		OnClick(func(e events.Event) {
+	// 			fmt.Println("this will select select mode")
+	// 		})
+	// })
 	tree.Add(p, func(w *core.Separator) {})
 
 	tree.Add(p, func(w *core.Button) {

@@ -34,12 +34,17 @@ type Plot struct {
 
 	// Plot is the Plot to display in this widget
 	Plot *plot.Plot `set:"-"`
+
+	// SetRangesFunc, if set, is called to adjust the data ranges
+	// after the point when these ranges are updated based on the plot data.
+	SetRangesFunc func()
 }
 
 // SetPlot sets the plot to given Plot, and calls UpdatePlot to ensure it is
 // drawn at the current size of this widget
 func (pt *Plot) SetPlot(pl *plot.Plot) {
 	if pl != nil && pt.Plot != nil && pt.Plot.Pixels != nil {
+		pl.DPI = pt.Scale * pt.Styles.UnitContext.DPI
 		pl.SetPixels(pt.Plot.Pixels) // re-use the image!
 	}
 	pt.Plot = pl
@@ -59,6 +64,9 @@ func (pt *Plot) updatePlot() {
 	}
 	pt.Plot.DPI = pt.Scale * pt.Styles.UnitContext.DPI
 	pt.Plot.Resize(sz)
+	if pt.SetRangesFunc != nil {
+		pt.SetRangesFunc()
+	}
 	pt.Plot.Draw()
 	pt.NeedsRender()
 }

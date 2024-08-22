@@ -157,9 +157,8 @@ func (pl *PlotEditor) genPlotXY() {
 	}
 	if firstXY != nil && len(strCols) > 0 {
 		for _, cp := range strCols {
-			xy, _ := newTableXYName(xview, xi, xp.TensorIndex, cp.Column, cp.TensorIndex, firstXY.yRange)
-			xy.labelColumn = xy.yColumn
-			xy.yColumn = firstXY.yColumn
+			xy, _ := newTableXY(xview, xi, xp.TensorIndex, firstXY.yColumn, cp.TensorIndex, firstXY.yRange)
+			xy.labelColumn = xview.Table.ColumnIndex(cp.Column)
 			xy.yIndex = firstXY.yIndex
 			lbls, _ := plots.NewLabels(xy)
 			if lbls != nil {

@@ -148,7 +148,7 @@ func (ax *Axis) sizeX(pt *Plot, axw float32) (ht, lpad, rpad int) {
 	}
 	lw := ax.Line.Width.Dots
 	lpad = int(math32.Ceil(lw)) + 2
-	rpad = int(math32.Ceil(lw)) + 2
+	rpad = int(math32.Ceil(lw)) + 10
 	tht := float32(0)
 	if len(ax.ticks) > 0 {
 		if ax.drawTicks() {
