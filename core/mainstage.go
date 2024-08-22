@@ -125,7 +125,14 @@ func (st *Stage) addSceneParts() *Stage {
 				AllRenderWindows[wlen-2].Raise()
 			}
 		})
+		// Make room for the back button by using the first
+		// [Scene] or [Body] child.
 		if cwb := AsWidget(sc.Child(0)); cwb != nil {
+			if cwb.This == sc.Body { // get first [Body] child if it is the first child
+				if ccwb := AsWidget(cwb.Child(0)); ccwb != nil {
+					cwb = ccwb
+				}
+			}
 			cwb.Styler(func(s *styles.Style) {
 				s.Margin.Left.Dp(56) // make room for back button
 			})
