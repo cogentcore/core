@@ -125,7 +125,7 @@ func (ed *Editor) layoutAllLines() {
 		off += lsz
 		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
 	}
-	ed.Buffer.Unlock()
+	buf.Unlock()
 	ed.linesSize = math32.Vec2(mxwd, off)
 	ed.lastlineLayoutSize = ed.lineLayoutSize
 	ed.internalSizeFromLines()
