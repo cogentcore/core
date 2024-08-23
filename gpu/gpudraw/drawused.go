@@ -25,7 +25,7 @@ func (dw *Drawer) UseGoImage(img image.Image, unchanged bool) {
 	if exists && unchanged {
 		return
 	}
-	tvr := dw.System.Vars().VarByName(1, "TexSampler")
+	tvr, _ := dw.System.Vars().VarByName(1, "TexSampler")
 	nv := len(tvr.Values.Values)
 	if idx >= nv { // new allocation
 		tvr.SetNValues(dw.System.Device(), dw.images.capacity)
@@ -44,7 +44,7 @@ func (dw *Drawer) UseTexture(tx *gpu.Texture) {
 	//	if exists && unchanged {
 	//		return
 	//	}
-	tvr := dw.System.Vars().VarByName(1, "TexSampler")
+	tvr, _ := dw.System.Vars().VarByName(1, "TexSampler")
 	nv := len(tvr.Values.Values)
 	if idx >= nv { // new allocation
 		tvr.SetNValues(dw.System.Device(), dw.images.capacity)
@@ -114,7 +114,7 @@ func (dw *Drawer) TransformUsed(xform math32.Matrix3, sr image.Rectangle, op dra
 // addOp adds matrix for given operation
 func (dw *Drawer) addOp(op draw.Op, mtx *drawmatrix.Matrix) {
 	oi := len(dw.opList)
-	mvr := dw.System.Vars().VarByName(0, "Matrix")
+	mvr, _ := dw.System.Vars().VarByName(0, "Matrix")
 	mvl := mvr.Values.Values[0]
 	nv := mvl.DynamicN()
 	if oi >= nv {

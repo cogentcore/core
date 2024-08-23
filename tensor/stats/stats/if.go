@@ -33,7 +33,7 @@ func CountIfIndex(ix *table.IndexView, colIndex int, iffun IfFunc) []float64 {
 // Return value(s) is size of column cell: 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func CountIfColumn(ix *table.IndexView, column string, iffun IfFunc) []float64 {
-	colIndex := ix.Table.ColumnIndex(column)
+	colIndex, _ := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -69,7 +69,7 @@ func PropIfIndex(ix *table.IndexView, colIndex int, iffun IfFunc) []float64 {
 // Return value(s) is size of column cell: 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func PropIfColumn(ix *table.IndexView, column string, iffun IfFunc) []float64 {
-	colIndex := ix.Table.ColumnIndex(column)
+	colIndex, _ := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -105,7 +105,7 @@ func PctIfIndex(ix *table.IndexView, colIndex int, iffun IfFunc) []float64 {
 // Return value(s) is size of column cell: 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func PctIfColumn(ix *table.IndexView, column string, iffun IfFunc) []float64 {
-	colIndex := ix.Table.ColumnIndex(column)
+	colIndex, _ := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}

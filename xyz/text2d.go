@@ -132,7 +132,7 @@ func (txt *Text2D) RenderText() {
 	var err error
 	if txt.Material.Texture == nil {
 		txname := "__Text2D_" + txt.Name
-		tx, err = txt.Scene.TextureByNameTry(txname)
+		tx, err = txt.Scene.TextureByName(txname)
 		if err != nil {
 			tx = &TextureBase{Name: txname}
 			img = image.NewRGBA(bounds)

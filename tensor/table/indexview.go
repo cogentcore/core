@@ -134,7 +134,7 @@ const (
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
 func (ix *IndexView) SortColumnName(column string, ascending bool) error { //types:add
-	ci, err := ix.Table.ColumnIndexTry(column)
+	ci, err := ix.Table.ColumnIndex(column)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -178,7 +178,7 @@ func (ix *IndexView) SortColumnNames(columns []string, ascending bool) error {
 	}
 	cis := make([]int, nc)
 	for i, cn := range columns {
-		ci, err := ix.Table.ColumnIndexTry(cn)
+		ci, err := ix.Table.ColumnIndex(cn)
 		if err != nil {
 			log.Println(err)
 			return err
@@ -248,7 +248,7 @@ func (ix *IndexView) SortStable(lessFunc func(et *Table, i, j int) bool) {
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
 func (ix *IndexView) SortStableColumnName(column string, ascending bool) error {
-	ci, err := ix.Table.ColumnIndexTry(column)
+	ci, err := ix.Table.ColumnIndex(column)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -292,7 +292,7 @@ func (ix *IndexView) SortStableColumnNames(columns []string, ascending bool) err
 	}
 	cis := make([]int, nc)
 	for i, cn := range columns {
-		ci, err := ix.Table.ColumnIndexTry(cn)
+		ci, err := ix.Table.ColumnIndex(cn)
 		if err != nil {
 			log.Println(err)
 			return err
@@ -364,7 +364,7 @@ func (ix *IndexView) Filter(filterer func(et *Table, row int) bool) {
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
 func (ix *IndexView) FilterColumnName(column string, str string, exclude, contains, ignoreCase bool) error { //types:add
-	ci, err := ix.Table.ColumnIndexTry(column)
+	ci, err := ix.Table.ColumnIndex(column)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -493,25 +493,11 @@ func (ix *IndexView) RowsByStringIndex(colIndex int, str string, contains, ignor
 // RowsByString returns the list of *our indexes* whose row in the table has
 // given string value in given column name (de-reference our indexes to get actual row).
 // if contains, only checks if row contains string; if ignoreCase, ignores case.
-// returns nil if name invalid -- see also Try.
-// Use named args for greater clarity.
-func (ix *IndexView) RowsByString(column string, str string, contains, ignoreCase bool) []int {
-	dt := ix.Table
-	ci := dt.ColumnIndex(column)
-	if ci < 0 {
-		return nil
-	}
-	return ix.RowsByStringIndex(ci, str, contains, ignoreCase)
-}
-
-// RowsByStringTry returns the list of *our indexes* whose row in the table has
-// given string value in given column name (de-reference our indexes to get actual row).
-// if contains, only checks if row contains string; if ignoreCase, ignores case.
 // returns error message for invalid column name.
 // Use named args for greater clarity.
-func (ix *IndexView) RowsByStringTry(column string, str string, contains, ignoreCase bool) ([]int, error) {
+func (ix *IndexView) RowsByString(column string, str string, contains, ignoreCase bool) ([]int, error) {
 	dt := ix.Table
-	ci, err := dt.ColumnIndexTry(column)
+	ci, err := dt.ColumnIndex(column)
 	if err != nil {
 		return nil, err
 	}

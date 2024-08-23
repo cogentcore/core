@@ -5,6 +5,7 @@
 package phong
 
 import (
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
 )
@@ -169,9 +170,9 @@ func (ph *Phong) configLights() {
 	ph.lightsUpdated = false
 	sy := ph.System
 	vg := sy.Vars().Groups[int(LightGroup)]
-	gpu.SetValueFrom(vg.ValueByIndex("NLights", 0), []NLights{ph.NLights})
-	gpu.SetValueFrom(vg.ValueByIndex("Ambient", 0), ph.Ambient[:])
-	gpu.SetValueFrom(vg.ValueByIndex("Directional", 0), ph.Directional[:])
-	gpu.SetValueFrom(vg.ValueByIndex("Point", 0), ph.Point[:])
-	gpu.SetValueFrom(vg.ValueByIndex("Spot", 0), ph.Spot[:])
+	gpu.SetValueFrom(errors.Log1(vg.ValueByIndex("NLights", 0)), []NLights{ph.NLights})
+	gpu.SetValueFrom(errors.Log1(vg.ValueByIndex("Ambient", 0)), ph.Ambient[:])
+	gpu.SetValueFrom(errors.Log1(vg.ValueByIndex("Directional", 0)), ph.Directional[:])
+	gpu.SetValueFrom(errors.Log1(vg.ValueByIndex("Point", 0)), ph.Point[:])
+	gpu.SetValueFrom(errors.Log1(vg.ValueByIndex("Spot", 0)), ph.Spot[:])
 }

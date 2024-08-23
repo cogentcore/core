@@ -100,12 +100,12 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, rd gpu.Renderer) {
 	rectIndex := idxv.Values.Values[0]
 	gpu.SetValueFrom(rectIndex, []uint16{0, 1, 2, 2, 1, 3})
 
-	vl := sy.Vars().ValueByIndex(0, "Matrix", 0)
+	vl, _ := sy.Vars().ValueByIndex(0, "Matrix", 0)
 	vl.SetDynamicN(AllocChunk)
 
 	// need a dummy texture in case only using fill
 	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
-	img := tgp.ValueByIndex("TexSampler", 0)
+	img, _ := tgp.ValueByIndex("TexSampler", 0)
 	img.SetFromGoImage(dimg, 0)
 }
 
@@ -113,12 +113,12 @@ func (dw *Drawer) drawAll() error {
 	sy := dw.System
 
 	vars := sy.Vars()
-	vl := vars.ValueByIndex(0, "Matrix", 0)
+	vl, _ := vars.ValueByIndex(0, "Matrix", 0)
 	vl.WriteDynamicBuffer()
 
-	mvr := vars.VarByName(0, "Matrix")
+	mvr, _ := vars.VarByName(0, "Matrix")
 	mvl := mvr.Values.Values[0]
-	tvr := vars.VarByName(1, "TexSampler")
+	tvr, _ := vars.VarByName(1, "TexSampler")
 	tvr.SetCurrentValue(0)
 
 	rp, err := sy.BeginRenderPass() // NoClear() // TODO: NoClear not working!

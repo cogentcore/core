@@ -15,7 +15,10 @@ func TestAdd3DCol(t *testing.T) {
 	dt := NewTable()
 	dt.AddFloat32TensorColumn("Values", []int{11, 1, 16})
 
-	col := dt.ColumnByName("Values")
+	col, err := dt.ColumnByName("Values")
+	if err != nil {
+		t.Error(err)
+	}
 	if col.NumDims() != 4 {
 		t.Errorf("Add4DCol: # of dims != 4\n")
 	}

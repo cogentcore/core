@@ -64,7 +64,7 @@ func QuantilesIndex(ix *table.IndexView, colIndex int, qs []float64) []float64 {
 // Because this requires a sort, it is more efficient to get as many quantiles
 // as needed in one pass.
 func Quantiles(ix *table.IndexView, column string, qs []float64) []float64 {
-	colIndex := ix.Table.ColumnIndex(column)
+	colIndex, _ := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}

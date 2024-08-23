@@ -53,7 +53,7 @@ func (smat *SimMat) TableColStd(ix *table.IndexView, column, labNm string, blank
 // if labNm is not empty, uses given column name for labels, which if blankRepeat
 // is true are filtered so that any sequentially repeated labels are blank.
 func (smat *SimMat) TableCol(ix *table.IndexView, column, labNm string, blankRepeat bool, mfun metric.Func64) error {
-	col, err := ix.Table.ColumnByNameTry(column)
+	col, err := ix.Table.ColumnByName(column)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func (smat *SimMat) TableCol(ix *table.IndexView, column, labNm string, blankRep
 	if labNm == "" {
 		return nil
 	}
-	lc, err := ix.Table.ColumnByNameTry(labNm)
+	lc, err := ix.Table.ColumnByName(labNm)
 	if err != nil {
 		return err
 	}

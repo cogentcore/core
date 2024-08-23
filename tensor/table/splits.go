@@ -322,41 +322,32 @@ func (spl *Splits) DeleteAggs() {
 	spl.Aggs = nil
 }
 
-// AggByName returns Agg results for given name, which does NOT include the column name, just
-// the name given to the Agg result (e.g., Mean for a standard Mean agg).  See also AggByColumnName.
-// Returns nil if not found.  See also Try version for error message.
-func (spl *Splits) AggByName(name string) *SplitAgg {
+// AggByName returns Agg results for given name, which does NOT include the
+// column name, just the name given to the Agg result
+// (e.g., Mean for a standard Mean agg).
+// Returns error message if not found.
+func (spl *Splits) AggByName(name string) (*SplitAgg, error) {
 	for _, ag := range spl.Aggs {
 		if ag.Name == name {
-			return ag
+			return ag, nil
 		}
 	}
-	return nil
+	return nil, fmt.Errorf("table.Splits AggByName: agg results named: %v not found", name)
 }
 
-// AggByNameTry returns Agg results for given name, which does NOT include the column name, just
-// the name given to the Agg result (e.g., Mean for a standard Mean agg).  See also AggByColumnName.
+// AggByColumnName returns Agg results for given column name,
+// optionally including :Name agg name appended, where Name
+// is the name given to the Agg result (e.g., Mean for a standard Mean agg).
 // Returns error message if not found.
-func (spl *Splits) AggByNameTry(name string) (*SplitAgg, error) {
-	ag := spl.AggByName(name)
-	if ag != nil {
-		return ag, nil
-	}
-	return nil, fmt.Errorf("table.Splits AggByNameTry: agg results named: %v not found", name)
-}
-
-// AggByColumnName returns Agg results for given column name, optionally including :Name agg name
-// appended, where Name is the name given to the Agg result (e.g., Mean for a standard Mean agg).
-// Returns nil if not found.  See also Try version for error message.
-func (spl *Splits) AggByColumnName(name string) *SplitAgg {
+func (spl *Splits) AggByColumnName(name string) (*SplitAgg, error) {
 	dt := spl.Table()
 	if dt == nil {
-		return nil
+		return nil, fmt.Errorf("table.Splits AggByColumnName: table nil")
 	}
 	nmsp := strings.Split(name, ":")
-	colIndex := dt.ColumnIndex(nmsp[0])
-	if colIndex == -1 {
-		return nil
+	colIndex, err := dt.ColumnIndex(nmsp[0])
+	if err != nil {
+		return nil, err
 	}
 	for _, ag := range spl.Aggs {
 		if ag.ColumnIndex != colIndex {
@@ -365,20 +356,9 @@ func (spl *Splits) AggByColumnName(name string) *SplitAgg {
 		if len(nmsp) == 2 && nmsp[1] != ag.Name {
 			continue
 		}
-		return ag
-	}
-	return nil
-}
-
-// AggByColumnNameTry returns Agg results for given column name, optionally including :Name agg name
-// appended, where Name is the name given to the Agg result (e.g., Mean for a standard Mean agg).
-// Returns error message if not found.
-func (spl *Splits) AggByColumnNameTry(name string) (*SplitAgg, error) {
-	ag := spl.AggByColumnName(name)
-	if ag != nil {
 		return ag, nil
 	}
-	return nil, fmt.Errorf("table.Splits AggByColumnNameTry: agg results named: %v not found", name)
+	return nil, fmt.Errorf("table.Splits AggByColumnName: agg results named: %v not found", name)
 }
 
 // SetLevels sets the Levels index names -- must match actual index dimensionality
@@ -409,7 +389,7 @@ func (spl *Splits) AggsToTable(colName bool) *Table {
 	dt := spl.Splits[0].Table
 	st := NewTable().SetNumRows(nsp)
 	for _, cn := range spl.Levels {
-		oc := dt.ColumnByName(cn)
+		oc, _ := dt.ColumnByName(cn)
 		if oc != nil {
 			st.AddColumnOfType(oc.DataType(), cn)
 		} else {
@@ -477,7 +457,7 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 	for _, cn := range dt.ColumnNames {
 		if _, ok := exmap[cn]; !ok {
 			cpcol = append(cpcol, cn)
-			col := dt.ColumnByName(cn)
+			col, _ := dt.ColumnByName(cn)
 			st.AddColumn(col.Clone(), cn)
 		}
 	}

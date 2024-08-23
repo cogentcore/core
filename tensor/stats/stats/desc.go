@@ -99,26 +99,14 @@ func DescIndex(ix *table.IndexView, colIndex int) *table.Table {
 	return dt
 }
 
-// DescColumn returns a table of standard descriptive aggregates
-// of non-NaN elements in given IndexView indexed view of an
-// table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
-func DescColumn(ix *table.IndexView, column string) *table.Table {
-	colIndex := ix.Table.ColumnIndex(column)
-	if colIndex == -1 {
-		return nil
-	}
-	return DescIndex(ix, colIndex)
-}
-
-// DescColumnTry returns a table of standard descriptive stats
+// DescColumn returns a table of standard descriptive stats
 // of non-NaN elements in given IndexView indexed view of an
 // table.Table, for given column name.
 // If name not found, returns error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func DescColumnTry(ix *table.IndexView, column string) (*table.Table, error) {
-	colIndex, err := ix.Table.ColumnIndexTry(column)
+func DescColumn(ix *table.IndexView, column string) (*table.Table, error) {
+	colIndex, err := ix.Table.ColumnIndex(column)
 	if err != nil {
 		return nil, err
 	}

@@ -6,7 +6,6 @@ package gpu
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"cogentcore.org/core/base/errors"
@@ -94,54 +93,44 @@ func (vg *VarGroup) AddStruct(name string, size int, arrayN int, shaders ...Shad
 	return vr
 }
 
-// VarByName returns Var by name
-func (vg *VarGroup) VarByName(name string) *Var {
-	return errors.Log1(vg.VarByNameTry(name))
-}
-
-// VarByNameTry returns Var by name, returning error if not found
-func (vg *VarGroup) VarByNameTry(name string) (*Var, error) {
+// VarByName returns Var by name, returning error if not found
+func (vg *VarGroup) VarByName(name string) (*Var, error) {
 	vr, ok := vg.VarMap[name]
 	if !ok {
 		err := fmt.Errorf("Variable named %s not found", name)
 		if Debug {
-			log.Println(err)
+			errors.Log(err)
 		}
 		return nil, err
 	}
 	return vr, nil
 }
 
-// ValueByNameTry returns value by first looking up variable name, then value name,
-// returning error if not found
-func (vg *VarGroup) ValueByNameTry(varName, valName string) (*Value, error) {
-	vr, err := vg.VarByNameTry(varName)
+// ValueByName returns value by first looking up variable name, then value name,
+// returning error if not found.
+func (vg *VarGroup) ValueByName(varName, valName string) (*Value, error) {
+	vr, err := vg.VarByName(varName)
 	if err != nil {
 		return nil, err
 	}
-	vl, err := vr.Values.ValueByNameTry(valName)
+	vl, err := vr.Values.ValueByName(valName)
 	return vl, err
 }
 
-// ValueByIndex returns value by first looking up variable name, then value index.
-func (vg *VarGroup) ValueByIndex(varName string, valIndex int) *Value {
-	return errors.Log1(vg.ValueByIndexTry(varName, valIndex))
-}
-
-// ValueByIndexTry returns value by first looking up variable name, then value index,
-// returning error if not found
-func (vg *VarGroup) ValueByIndexTry(varName string, valIndex int) (*Value, error) {
-	vr, err := vg.VarByNameTry(varName)
+// ValueByIndex returns value by first looking up variable name, then value index,
+// returning error if not found.
+func (vg *VarGroup) ValueByIndex(varName string, valIndex int) (*Value, error) {
+	vr, err := vg.VarByName(varName)
 	if err != nil {
 		return nil, err
 	}
-	return vr.Values.ValueByIndexTry(valIndex)
+	return vr.Values.ValueByIndex(valIndex)
 }
 
 // SetCurrentValue sets the index of the Current Value to use
 // for given variable name.
 func (vg *VarGroup) SetCurrentValue(name string, valueIndex int) (*Var, error) {
-	vr, err := vg.VarByNameTry(name)
+	vr, err := vg.VarByName(name)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +141,7 @@ func (vg *VarGroup) SetCurrentValue(name string, valueIndex int) (*Var, error) {
 // SetDynamicIndex sets the dynamic offset index for Value to use
 // for given variable name.
 func (vg *VarGroup) SetDynamicIndex(name string, dynamicIndex int) (*Var, error) {
-	vr, err := vg.VarByNameTry(name)
+	vr, err := vg.VarByName(name)
 	if err != nil {
 		return nil, err
 	}

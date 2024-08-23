@@ -64,7 +64,7 @@ func AnalyzePlanets() {
 	split.DescColumn(byMethod, "year") // full desc stats of year
 
 	byMethod.Filter(func(idx int) bool {
-		ag := byMethod.AggByColumnName("year:Std")
+		ag, _ := byMethod.AggByColumnName("year:Std")
 		return ag.Aggs[idx][0] > 0 // exclude results with 0 std
 	})
 

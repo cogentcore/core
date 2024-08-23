@@ -342,7 +342,7 @@ func (dec *Decoder) loadTex(sc *xyz.Scene, sld *xyz.Solid, texfn string, mat *Ma
 		return
 	}
 	_, tfn := filepath.Split(texfn)
-	tf, err := sc.TextureByNameTry(tfn)
+	tf, err := sc.TextureByName(tfn)
 	if err != nil {
 		tf = xyz.NewTextureFileFS(dec.FSys, sc, tfn, texfn)
 	}

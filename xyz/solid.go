@@ -56,7 +56,7 @@ func (sld *Solid) SetMeshName(meshName string) error {
 	if meshName == "" {
 		return nil
 	}
-	ms, err := sld.Scene.MeshByNameTry(meshName)
+	ms, err := sld.Scene.MeshByName(meshName)
 	if err != nil {
 		log.Println(err)
 		return err

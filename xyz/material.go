@@ -108,7 +108,7 @@ func (mt *Material) SetTextureName(sc *Scene, texName string) error {
 		mt.NoTexture()
 		return nil
 	}
-	tx, err := sc.TextureByNameTry(texName)
+	tx, err := sc.TextureByName(texName)
 	if err != nil {
 		log.Println(err)
 		return err

@@ -136,28 +136,28 @@ func (vw *View) InitLibSolid(bod physics.Body, sc *xyz.Scene) {
 	switch wt {
 	case "physics.Box":
 		mnm := "eveBox"
-		bm := sc.MeshByName(mnm)
+		bm, _ := sc.MeshByName(mnm)
 		if bm == nil {
 			bm = xyz.NewBox(sc, mnm, 1, 1, 1)
 		}
 		sld.SetMeshName(mnm)
 	case "physics.Cylinder":
 		mnm := "eveCylinder"
-		cm := sc.MeshByName(mnm)
+		cm, _ := sc.MeshByName(mnm)
 		if cm == nil {
 			cm = xyz.NewCylinder(sc, mnm, 1, 1, 32, 1, true, true)
 		}
 		sld.SetMeshName(mnm)
 	case "physics.Capsule":
 		mnm := "eveCapsule"
-		cm := sc.MeshByName(mnm)
+		cm, _ := sc.MeshByName(mnm)
 		if cm == nil {
 			cm = xyz.NewCapsule(sc, mnm, 1, .2, 32, 1)
 		}
 		sld.SetMeshName(mnm)
 	case "physics.Sphere":
 		mnm := "eveSphere"
-		sm := sc.MeshByName(mnm)
+		sm, _ := sc.MeshByName(mnm)
 		if sm == nil {
 			sm = xyz.NewSphere(sc, mnm, 1, 32)
 		}

@@ -59,7 +59,7 @@ func newTableXY(dt *table.IndexView, xcol, xtsrIndex, ycol, ytsrIndex int, yrng 
 // from given column name and tensor indexes within each cell.
 // Column indexes are enforced to be valid, with an error message if they are not.
 func newTableXYName(dt *table.IndexView, xi, xtsrIndex int, ycol string, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
-	yi, err := dt.Table.ColumnIndexTry(ycol)
+	yi, err := dt.Table.ColumnIndex(ycol)
 	if errors.Log(err) != nil {
 		return nil, err
 	}
