@@ -91,7 +91,6 @@ func makeAppBar(parent Widget) {
 	if len(tb.Scene.AppBars) > 0 {
 		tb.Makers.Normal = append(tb.Makers.Normal, tb.Scene.AppBars...)
 	}
-	tb.AddOverflowMenu(tb.standardOverflowMenu)
 }
 
 var (
@@ -102,10 +101,8 @@ var (
 	webInstall func()
 )
 
-// note: StandardOverflowMenu must be a method on toolbar to get context scene
-
-// standardOverflowMenu adds standard overflow menu items for an app bar.
-func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
+// standardContextMenu adds standard context menu items for the [Scene].
+func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 	NewButton(m).SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip("Search the menus").OnClick(func(e events.Event) {
 		d := NewBody().AddTitle("Search")
 		w := NewChooser(d).SetEditable(true).SetIcon(icons.Search)
@@ -130,7 +127,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 			}
 		})
 		w.AddItemsFunc(func() {
-			addButtonItems(&w.Items, tb, "")
+			addButtonItems(&w.Items, sc, "") // TODO
 		})
 		w.OnFinal(events.Change, func(e events.Event) {
 			d.Close()
@@ -138,7 +135,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 		d.AddBottomBar(func(parent Widget) {
 			d.AddCancel(parent)
 		})
-		d.RunDialog(tb)
+		d.RunDialog(sc)
 	})
 	NewButton(m).SetText("About").SetIcon(icons.Info).OnClick(func(e events.Event) {
 		d := NewBody(TheApp.Name())
@@ -154,7 +151,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 		}
 		NewText(d).SetText("App version: " + system.AppVersion)
 		NewText(d).SetText("Core version: " + system.CoreVersion)
-		d.AddOKOnly().RunDialog(tb)
+		d.AddOKOnly().RunDialog(sc)
 	})
 	NewFuncButton(m).SetFunc(SettingsWindow).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,")
 	if webCanInstall {
@@ -167,7 +164,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 	NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetShortcut("Command+Shift+I").
 		SetTooltip("Developer tools for inspecting the content of the app").
 		OnClick(func(e events.Event) {
-			InspectorWindow(tb.Scene)
+			InspectorWindow(sc)
 		})
 
 	// no window menu on single-window platforms
@@ -181,7 +178,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 		})
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
 			OnClick(func(e events.Event) {
-				win := tb.Scene.RenderWindow()
+				win := sc.RenderWindow()
 				if win != nil {
 					win.minimize()
 				}
@@ -189,7 +186,7 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 		NewSeparator(m)
 		NewButton(m).SetText("Close window").SetIcon(icons.Close).SetKey(keymap.WinClose).
 			OnClick(func(e events.Event) {
-				win := tb.Scene.RenderWindow()
+				win := sc.RenderWindow()
 				if win != nil {
 					win.closeReq()
 				}

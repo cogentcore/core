@@ -174,6 +174,7 @@ func NewScene(name ...string) *Scene {
 func (sc *Scene) Init() {
 	sc.Scene = sc
 	sc.Frame.Init()
+	sc.AddContextMenu(sc.standardContextMenu)
 	sc.Styler(func(s *styles.Style) {
 		s.Cursor = cursors.Arrow
 		s.Background = colors.Scheme.Background
