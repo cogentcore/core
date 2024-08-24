@@ -188,6 +188,7 @@ type WidgetBase struct {
 	// added in the last function are the first in the menu.
 	// Context menus should be added through [WidgetBase.AddContextMenu].
 	// Separators will be added between each context menu function.
+	// [Scene.ContextMenus] apply to all widgets in the scene.
 	ContextMenus []func(m *Scene) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// Scene is the overall Scene to which we belong. It is automatically
