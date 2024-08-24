@@ -219,7 +219,7 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 				for _, kv := range rw.mains.stack.Order {
 					st := kv.Value
 					// we do not include ourself
-					if st == w.Scene.Stage {
+					if st == sc.Stage || st == w.Scene.Stage {
 						continue
 					}
 					w.Items = append(w.Items, ChooserItem{
