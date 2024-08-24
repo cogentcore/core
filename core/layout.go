@@ -1310,10 +1310,12 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				asz = math32.Round(mx + exd*(gr/gsum))
 				styles.SetClampMax(&asz, ksz.Max.Dim(ma))
 				if asz > math32.Ceil(alloc.Dim(ma))+1 { // bug!
-					fmt.Println(fr, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
-					fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "par act:", sz.Actual.Content.Dim(ma))
-					fmt.Println(fr.layout.String())
-					fmt.Println(fr.layout.cellsSize())
+					if DebugSettings.LayoutTrace {
+						fmt.Println(fr, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
+						fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "par act:", sz.Actual.Content.Dim(ma))
+						fmt.Println(fr.layout.String())
+						fmt.Println(fr.layout.cellsSize())
+					}
 				}
 			}
 			if DebugSettings.LayoutTraceDetail {
