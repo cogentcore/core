@@ -18,6 +18,9 @@ func (tl *TexLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos
 	origStr := str
 	lfld := lexer.LastField(str)
 	str = lexer.LastScopedString(str)
+	if len(lfld) < 2 {
+		return md
+	}
 	if lfld[0] == '\\' && lfld[1:] == str { // use the /
 		str = lfld
 	}
