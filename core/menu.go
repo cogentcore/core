@@ -141,22 +141,16 @@ func (wb *WidgetBase) AddContextMenu(menu func(m *Scene)) {
 func (wb *WidgetBase) applyContextMenus(m *Scene) {
 	do := func(cms []func(m *Scene)) {
 		for i := len(cms) - 1; i >= 0; i-- {
-			cms[i](m)
-
-			nc := m.NumChildren()
-			// we delete any extra separator
-			if nc > 0 {
-				if _, ok := m.Child(nc - 1).(*Separator); ok {
-					m.DeleteChildAt(nc - 1)
-				}
-			}
-			if i != 0 {
+			if m.NumChildren() > 0 {
 				NewSeparator(m)
 			}
+			cms[i](m)
 		}
 	}
 	do(wb.ContextMenus)
-	do(wb.Scene.ContextMenus)
+	if wb.This != wb.Scene {
+		do(wb.Scene.ContextMenus)
+	}
 }
 
 // ContextMenuPos returns the default position for the context menu
