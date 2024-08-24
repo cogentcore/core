@@ -169,12 +169,6 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 		OnClick(func(e events.Event) {
 			InspectorWindow(tb.Scene)
 		})
-	NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
-		// todo: these need to actually do something -- currently just show keyboard shortcut
-		NewButton(m).SetText("Copy").SetIcon(icons.Copy).SetKey(keymap.Copy)
-		NewButton(m).SetText("Cut").SetIcon(icons.Cut).SetKey(keymap.Cut)
-		NewButton(m).SetText("Paste").SetIcon(icons.Paste).SetKey(keymap.Paste)
-	})
 
 	// no window menu on single-window platforms
 	if TheApp.Platform().IsMobile() {
