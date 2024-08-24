@@ -493,7 +493,7 @@ func (vs *Values) SetDynamicIndex(idx int) *Value {
 // SetName sets name of given Value, by index, adds name to map, checking
 // that it is not already there yet.  Returns val.
 func (vs *Values) SetName(idx int, name string) (*Value, error) {
-	vl, err := vs.ValueByIndexTry(idx)
+	vl, err := vs.ValueByIndex(idx)
 	if err != nil {
 		return nil, err
 	}
@@ -511,7 +511,7 @@ func (vs *Values) SetName(idx int, name string) (*Value, error) {
 }
 
 // ValueByIndexTry returns Value at given index with range checking error message.
-func (vs *Values) ValueByIndexTry(idx int) (*Value, error) {
+func (vs *Values) ValueByIndex(idx int) (*Value, error) {
 	if idx >= len(vs.Values) || idx < 0 {
 		err := fmt.Errorf("gpu.Values:ValueByIndexTry index %d out of range", idx)
 		if Debug {
@@ -523,7 +523,7 @@ func (vs *Values) ValueByIndexTry(idx int) (*Value, error) {
 }
 
 // ValueByNameTry returns value by name, returning error if not found
-func (vs *Values) ValueByNameTry(name string) (*Value, error) {
+func (vs *Values) ValueByName(name string) (*Value, error) {
 	vl, ok := vs.NameMap[name]
 	if !ok {
 		err := fmt.Errorf("gpu.Values:ValueByNameTry name %s not found", name)

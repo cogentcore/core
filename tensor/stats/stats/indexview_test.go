@@ -8,6 +8,7 @@ import (
 	"math"
 	"testing"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/tensor/table"
 
@@ -50,7 +51,7 @@ func TestIndexView(t *testing.T) {
 	assert.Equal(t, results[Q3:Q3+1], Q3Column(ix, "data"))
 
 	for _, stat := range StatsValues() {
-		tolassert.EqualTol(t, results[stat], StatColumn(ix, "data", stat)[0], 1.0e-8)
+		tolassert.EqualTol(t, results[stat], errors.Log1(StatColumn(ix, "data", stat))[0], 1.0e-8)
 	}
 
 	desc := DescAll(ix)
@@ -63,7 +64,10 @@ func TestIndexView(t *testing.T) {
 		assert.Equal(t, results[stat], dv)
 	}
 
-	desc = DescColumn(ix, "data")
+	desc, err := DescColumn(ix, "data")
+	if err != nil {
+		t.Error(err)
+	}
 	assert.Equal(t, len(DescStats), desc.Rows)
 	assert.Equal(t, 2, desc.NumColumns())
 	for ri, stat := range DescStats {

@@ -341,7 +341,7 @@ func (pl *PlotEditor) genPlot() {
 	pl.plotWidget.Scale = pl.Options.Scale
 	pl.plotWidget.SetRangesFunc = func() {
 		plt := pl.plotWidget.Plot
-		xi, err := pl.table.Table.ColumnIndexTry(pl.Options.XAxis)
+		xi, err := pl.table.Table.ColumnIndex(pl.Options.XAxis)
 		if err == nil {
 			xp := pl.Columns[xi]
 			if xp.Range.FixMin {
@@ -378,7 +378,7 @@ func (pl *PlotEditor) configPlot(plt *plot.Plot) {
 
 // plotXAxis processes the XAxis and returns its index
 func (pl *PlotEditor) plotXAxis(plt *plot.Plot, ixvw *table.IndexView) (xi int, xview *table.IndexView, err error) {
-	xi, err = ixvw.Table.ColumnIndexTry(pl.Options.XAxis)
+	xi, err = ixvw.Table.ColumnIndex(pl.Options.XAxis)
 	if err != nil {
 		// log.Println("plot.PlotXAxis: " + err.Error())
 		return

@@ -37,7 +37,7 @@ func (ph *Phong) SetTexture(name string, tx *Texture) {
 	defer ph.Unlock()
 
 	tgp := ph.System.Vars().Groups[int(TextureGroup)]
-	tvr := tgp.VarByName("TexSampler")
+	tvr := errors.Log1(tgp.VarByName("TexSampler"))
 	idx, ok := ph.textures.Map[name]
 	if !ok {
 		idx = ph.textures.Len()
@@ -59,7 +59,7 @@ func (ph *Phong) configDummyTexture() {
 	tgp := ph.System.Vars().Groups[int(TextureGroup)]
 	tgp.SetNValues(1)
 	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
-	tvv := tgp.ValueByIndex("TexSampler", 0)
+	tvv := errors.Log1(tgp.ValueByIndex("TexSampler", 0))
 	tvv.SetFromGoImage(dimg, 0)
 }
 

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -64,7 +65,7 @@ func AnalyzePlanets() {
 	split.DescColumn(byMethod, "year") // full desc stats of year
 
 	byMethod.Filter(func(idx int) bool {
-		ag := byMethod.AggByColumnName("year:Std")
+		ag := errors.Log1(byMethod.AggByColumnName("year:Std"))
 		return ag.Aggs[idx][0] > 0 // exclude results with 0 std
 	})
 
@@ -84,7 +85,7 @@ func AnalyzePlanets() {
 	// byMethodDecade.ReorderLevels([]int{1, 0})
 	// byMethodDecade.SortLevels()
 
-	decadeOnly, _ := byMethodDecade.ExtractLevels([]int{1})
+	decadeOnly := errors.Log1(byMethodDecade.ExtractLevels([]int{1}))
 	split.AggColumn(decadeOnly, "number", stats.Sum)
 	GpDecade = decadeOnly.AggsToTable(table.AddAggName)
 

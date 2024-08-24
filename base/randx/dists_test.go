@@ -8,6 +8,7 @@ import (
 	"math"
 	"testing"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
 )
@@ -29,10 +30,10 @@ func TestGaussianGen(t *testing.T) {
 	ix := table.NewIndexView(dt)
 	desc := stats.DescAll(ix)
 
-	meanRow := desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase)[0]
-	stdRow := desc.RowsByString("Stat", "Std", table.Equals, table.UseCase)[0]
-	// minRow := desc.RowsByString("Stat", "Min", table.Equals, table.UseCase)[0]
-	// maxRow := desc.RowsByString("Stat", "Max", table.Equals, table.UseCase)[0]
+	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
+	stdRow := errors.Log1(desc.RowsByString("Stat", "Std", table.Equals, table.UseCase))[0]
+	// minRow := errors.Log1(desc.RowsByString("Stat", "Min", table.Equals, table.UseCase))[0]
+	// maxRow := errors.Log1(desc.RowsByString("Stat", "Max", table.Equals, table.UseCase))[0]
 
 	actMean := desc.Float("Val", meanRow)
 	actStd := desc.Float("Val", stdRow)
@@ -65,10 +66,10 @@ func TestBinomialGen(t *testing.T) {
 	ix := table.NewIndexView(dt)
 	desc := stats.DescAll(ix)
 
-	meanRow := desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase)[0]
-	stdRow := desc.RowsByString("Stat", "Std", table.Equals, table.UseCase)[0]
-	minRow := desc.RowsByString("Stat", "Min", table.Equals, table.UseCase)[0]
-	maxRow := desc.RowsByString("Stat", "Max", table.Equals, table.UseCase)[0]
+	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
+	stdRow := errors.Log1(desc.RowsByString("Stat", "Std", table.Equals, table.UseCase))[0]
+	minRow := errors.Log1(desc.RowsByString("Stat", "Min", table.Equals, table.UseCase))[0]
+	maxRow := errors.Log1(desc.RowsByString("Stat", "Max", table.Equals, table.UseCase))[0]
 
 	actMean := desc.Float("Val", meanRow)
 	actStd := desc.Float("Val", stdRow)
@@ -110,10 +111,10 @@ func TestPoissonGen(t *testing.T) {
 	ix := table.NewIndexView(dt)
 	desc := stats.DescAll(ix)
 
-	meanRow := desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase)[0]
-	stdRow := desc.RowsByString("Stat", "Std", table.Equals, table.UseCase)[0]
-	minRow := desc.RowsByString("Stat", "Min", table.Equals, table.UseCase)[0]
-	// maxRow := desc.RowsByString("Stat", "Max", table.Equals, table.UseCase)[0]
+	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
+	stdRow := errors.Log1(desc.RowsByString("Stat", "Std", table.Equals, table.UseCase))[0]
+	minRow := errors.Log1(desc.RowsByString("Stat", "Min", table.Equals, table.UseCase))[0]
+	// maxRow := errors.Log1(desc.RowsByString("Stat", "Max", table.Equals, table.UseCase))[0]
 
 	actMean := desc.Float("Val", meanRow)
 	actStd := desc.Float("Val", stdRow)
@@ -156,8 +157,8 @@ func TestGammaGen(t *testing.T) {
 	ix := table.NewIndexView(dt)
 	desc := stats.DescAll(ix)
 
-	meanRow := desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase)[0]
-	stdRow := desc.RowsByString("Stat", "Std", table.Equals, table.UseCase)[0]
+	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
+	stdRow := errors.Log1(desc.RowsByString("Stat", "Std", table.Equals, table.UseCase))[0]
 
 	actMean := desc.Float("Val", meanRow)
 	actStd := desc.Float("Val", stdRow)
@@ -192,8 +193,8 @@ func TestBetaGen(t *testing.T) {
 	ix := table.NewIndexView(dt)
 	desc := stats.DescAll(ix)
 
-	meanRow := desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase)[0]
-	stdRow := desc.RowsByString("Stat", "Std", table.Equals, table.UseCase)[0]
+	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
+	stdRow := errors.Log1(desc.RowsByString("Stat", "Std", table.Equals, table.UseCase))[0]
 
 	actMean := desc.Float("Val", meanRow)
 	actStd := desc.Float("Val", stdRow)

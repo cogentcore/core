@@ -112,7 +112,7 @@ func (sc *Scene) setAllMeshes() {
 // obey this constraint.
 func (sc *Scene) AddMeshUnique(ms Mesh) {
 	nm := ms.AsMeshBase().Name
-	_, err := sc.MeshByNameTry(nm)
+	_, err := sc.MeshByName(nm)
 	if err == nil {
 		nm += fmt.Sprintf("_%d", sc.Meshes.Len())
 		ms.AsMeshBase().SetName(nm)
@@ -120,17 +120,8 @@ func (sc *Scene) AddMeshUnique(ms Mesh) {
 	sc.SetMesh(ms)
 }
 
-// MeshByName looks for mesh by name, returning nil if not found.
-func (sc *Scene) MeshByName(nm string) Mesh {
-	ms, ok := sc.Meshes.ValueByKeyTry(nm)
-	if ok {
-		return ms
-	}
-	return nil
-}
-
-// MeshByNameTry looks for mesh by name, returning error if not found.
-func (sc *Scene) MeshByNameTry(nm string) (Mesh, error) {
+// MeshByName looks for mesh by name, returning error if not found.
+func (sc *Scene) MeshByName(nm string) (Mesh, error) {
 	ms, ok := sc.Meshes.ValueByKeyTry(nm)
 	if ok {
 		return ms, nil
@@ -159,7 +150,7 @@ func (sc *Scene) ResetMeshes() {
 // This is a 1x1 plane with a normal pointing in +Z direction.
 func (sc *Scene) PlaneMesh2D() Mesh {
 	nm := Plane2DMeshName
-	tm, err := sc.MeshByNameTry(nm)
+	tm, err := sc.MeshByName(nm)
 	if err == nil {
 		return tm
 	}

@@ -6,8 +6,8 @@ package xyz
 
 import (
 	"image/color"
-	"log"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gpu/phong"
@@ -108,9 +108,8 @@ func (mt *Material) SetTextureName(sc *Scene, texName string) error {
 		mt.NoTexture()
 		return nil
 	}
-	tx, err := sc.TextureByNameTry(texName)
-	if err != nil {
-		log.Println(err)
+	tx, err := sc.TextureByName(texName)
+	if errors.Log(err) != nil {
 		return err
 	}
 	mt.TextureName = TextureName(texName)

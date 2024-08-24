@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/math32/minmax"
@@ -37,7 +38,7 @@ func (pl *PlotEditor) genPlotBar() {
 	var lsplit *table.Splits
 	nleg := 1
 	if pl.Options.Legend != "" {
-		_, err = pl.table.Table.ColumnIndexTry(pl.Options.Legend)
+		_, err = pl.table.Table.ColumnIndex(pl.Options.Legend)
 		if err != nil {
 			log.Println("plot.Legend: " + err.Error())
 		} else {
@@ -59,7 +60,7 @@ func (pl *PlotEditor) genPlotBar() {
 			continue
 		}
 		if cp.TensorIndex < 0 {
-			yc := pl.table.Table.ColumnByName(cp.Column)
+			yc := errors.Log1(pl.table.Table.ColumnByName(cp.Column))
 			_, sz := yc.RowCellSize()
 			nys += sz
 		} else {
@@ -97,7 +98,7 @@ func (pl *PlotEditor) genPlotBar() {
 			nidx := 1
 			stidx := cp.TensorIndex
 			if cp.TensorIndex < 0 { // do all
-				yc := pl.table.Table.ColumnByName(cp.Column)
+				yc := errors.Log1(pl.table.Table.ColumnByName(cp.Column))
 				_, sz := yc.RowCellSize()
 				nidx = sz
 				stidx = 0
@@ -127,7 +128,7 @@ func (pl *PlotEditor) genPlotBar() {
 				}
 				ec := -1
 				if cp.ErrColumn != "" {
-					ec = pl.table.Table.ColumnIndex(cp.ErrColumn)
+					ec, _ = pl.table.Table.ColumnIndex(cp.ErrColumn)
 				}
 				var bar *plots.BarChart
 				if ec >= 0 {
@@ -165,7 +166,7 @@ func (pl *PlotEditor) genPlotBar() {
 		n := xview.Len()
 		for _, cp := range strCols {
 			xy, _ := newTableXY(xview, xi, xp.TensorIndex, firstXY.yColumn, cp.TensorIndex, firstXY.yRange)
-			xy.labelColumn = xview.Table.ColumnIndex(cp.Column)
+			xy.labelColumn, _ = xview.Table.ColumnIndex(cp.Column)
 			xy.yIndex = firstXY.yIndex
 
 			xyl := plots.XYLabels{}

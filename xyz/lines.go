@@ -77,7 +77,7 @@ func (ln *Lines) Set(vertex, normal, texcoord, clrs math32.ArrayF32, indexArray 
 
 // UnitLineMesh returns the unit-sized line mesh, of name LineMeshName
 func UnitLineMesh(sc *Scene) *Lines {
-	lm := sc.MeshByName(LineMeshName)
+	lm, _ := sc.MeshByName(LineMeshName)
 	if lm != nil {
 		return lm.(*Lines)
 	}
@@ -88,7 +88,7 @@ func UnitLineMesh(sc *Scene) *Lines {
 // UnitConeMesh returns the unit-sized cone mesh, of name ConeMeshName-segs
 func UnitConeMesh(sc *Scene, segs int) *Cylinder {
 	nm := fmt.Sprintf("%s-%d", ConeMeshName, segs)
-	cm := sc.MeshByName(nm)
+	cm, _ := sc.MeshByName(nm)
 	if cm != nil {
 		return cm.(*Cylinder)
 	}

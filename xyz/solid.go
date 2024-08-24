@@ -7,8 +7,8 @@ package xyz
 import (
 	"fmt"
 	"image/color"
-	"log"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu/phong"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -56,9 +56,8 @@ func (sld *Solid) SetMeshName(meshName string) error {
 	if meshName == "" {
 		return nil
 	}
-	ms, err := sld.Scene.MeshByNameTry(meshName)
-	if err != nil {
-		log.Println(err)
+	ms, err := sld.Scene.MeshByName(meshName)
+	if errors.Log(err) != nil {
 		return err
 	}
 	sld.MeshName = MeshName(meshName)
@@ -172,9 +171,7 @@ func (sld *Solid) ParentMaterial() *Material {
 // Validate checks that solid has valid mesh and texture settings, etc
 func (sld *Solid) Validate() error {
 	if sld.MeshName == "" {
-		err := fmt.Errorf("xyz.Solid: %s Mesh name is empty", sld.Path())
-		log.Println(err)
-		return err
+		return errors.Log(fmt.Errorf("xyz.Solid: %s Mesh name is empty", sld.Path()))
 	}
 	if sld.Mesh == nil || sld.Mesh.AsMeshBase().Name != string(sld.MeshName) {
 		err := sld.SetMeshName(string(sld.MeshName))
