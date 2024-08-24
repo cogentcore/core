@@ -135,23 +135,28 @@ func (wb *WidgetBase) AddContextMenu(menu func(m *Scene)) {
 	wb.ContextMenus = append(wb.ContextMenus, menu)
 }
 
-// applyContextMenus adds the [Widget.ContextMenus] to the given menu scene
-// in reverse order. It also adds separators between each context menu function.
+// applyContextMenus adds the [WidgetBase.ContextMenus] and [Scene.ContextMenus]
+// to the given menu scene in reverse order. It also adds separators between each
+// context menu function.
 func (wb *WidgetBase) applyContextMenus(m *Scene) {
-	for i := len(wb.ContextMenus) - 1; i >= 0; i-- {
-		wb.ContextMenus[i](m)
+	do := func(cms []func(m *Scene)) {
+		for i := len(cms) - 1; i >= 0; i-- {
+			cms[i](m)
 
-		nc := m.NumChildren()
-		// we delete any extra separator
-		if nc > 0 {
-			if _, ok := m.Child(nc - 1).(*Separator); ok {
-				m.DeleteChildAt(nc - 1)
+			nc := m.NumChildren()
+			// we delete any extra separator
+			if nc > 0 {
+				if _, ok := m.Child(nc - 1).(*Separator); ok {
+					m.DeleteChildAt(nc - 1)
+				}
+			}
+			if i != 0 {
+				NewSeparator(m)
 			}
 		}
-		if i != 0 {
-			NewSeparator(m)
-		}
 	}
+	do(wb.ContextMenus)
+	do(wb.Scene.ContextMenus)
 }
 
 // ContextMenuPos returns the default position for the context menu
