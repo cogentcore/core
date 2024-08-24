@@ -60,7 +60,7 @@ func (ph *Phong) configMesh(md *shape.MeshData, idx int) {
 	errors.Log1(vgp.ValueByIndex("Normal", idx)).SetDynamicN(md.NumVertex)
 	errors.Log1(vgp.ValueByIndex("TexCoord", idx)).SetDynamicN(md.NumVertex)
 	errors.Log1(vgp.ValueByIndex("Index", idx)).SetDynamicN(md.NumIndex)
-	vc, _ := vgp.ValueByIndex("VertexColor", idx)
+	vc := errors.Log1(vgp.ValueByIndex("VertexColor", idx))
 	if md.HasColor {
 		vc.SetDynamicN(md.NumVertex)
 	} else {

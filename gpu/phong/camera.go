@@ -5,6 +5,7 @@
 package phong
 
 import (
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/math32"
 )
@@ -23,7 +24,7 @@ type Camera struct {
 func (ph *Phong) SetCamera(view, projection *math32.Matrix4) {
 	ph.Camera.View = *view
 	ph.Camera.Projection = *projection
-	vl, _ := ph.System.Vars().ValueByIndex(int(CameraGroup), "Camera", 0)
+	vl := errors.Log1(ph.System.Vars().ValueByIndex(int(CameraGroup), "Camera", 0))
 	gpu.SetValueFrom(vl, []Camera{Camera{View: *view, Projection: *projection}})
 	ph.cameraUpdated = true
 }

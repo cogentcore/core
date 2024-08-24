@@ -53,7 +53,7 @@ func (pl *PlotEditor) genPlotXY() {
 			continue
 		}
 		if cp.TensorIndex < 0 {
-			yc, _ := pl.table.Table.ColumnByName(cp.Column)
+			yc := errors.Log1(pl.table.Table.ColumnByName(cp.Column))
 			_, sz := yc.RowCellSize()
 			nys += sz
 		} else {
@@ -84,7 +84,7 @@ func (pl *PlotEditor) genPlotXY() {
 			nidx := 1
 			stidx := cp.TensorIndex
 			if cp.TensorIndex < 0 { // do all
-				yc, _ := pl.table.Table.ColumnByName(cp.Column)
+				yc := errors.Log1(pl.table.Table.ColumnByName(cp.Column))
 				_, sz := yc.RowCellSize()
 				nidx = sz
 				stidx = 0
@@ -143,7 +143,7 @@ func (pl *PlotEditor) genPlotXY() {
 					}
 				}
 				if cp.ErrColumn != "" {
-					ec, _ := pl.table.Table.ColumnIndex(cp.ErrColumn)
+					ec := errors.Log1(pl.table.Table.ColumnIndex(cp.ErrColumn))
 					if ec >= 0 {
 						xy.errColumn = ec
 						eb, _ := plots.NewYErrorBars(xy)

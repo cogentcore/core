@@ -9,6 +9,8 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	"cogentcore.org/core/base/errors"
 )
 
 // SplitAgg contains aggregation results for splits
@@ -457,7 +459,7 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 	for _, cn := range dt.ColumnNames {
 		if _, ok := exmap[cn]; !ok {
 			cpcol = append(cpcol, cn)
-			col, _ := dt.ColumnByName(cn)
+			col := errors.Log1(dt.ColumnByName(cn))
 			st.AddColumn(col.Clone(), cn)
 		}
 	}

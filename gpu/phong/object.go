@@ -115,7 +115,7 @@ func (ph *Phong) updateObjects() {
 	if !(ph.objectUpdated || ph.cameraUpdated) {
 		return
 	}
-	vl, _ := ph.System.Vars().ValueByIndex(int(ObjectGroup), "Object", 0)
+	vl := errors.Log1(ph.System.Vars().ValueByIndex(int(ObjectGroup), "Object", 0))
 	vl.SetDynamicN(ph.objects.Len())
 	for i, kv := range ph.objects.Order {
 		ob := kv.Value

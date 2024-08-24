@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/math32/minmax"
@@ -59,7 +60,7 @@ func (pl *PlotEditor) genPlotBar() {
 			continue
 		}
 		if cp.TensorIndex < 0 {
-			yc, _ := pl.table.Table.ColumnByName(cp.Column)
+			yc := errors.Log1(pl.table.Table.ColumnByName(cp.Column))
 			_, sz := yc.RowCellSize()
 			nys += sz
 		} else {
@@ -97,7 +98,7 @@ func (pl *PlotEditor) genPlotBar() {
 			nidx := 1
 			stidx := cp.TensorIndex
 			if cp.TensorIndex < 0 { // do all
-				yc, _ := pl.table.Table.ColumnByName(cp.Column)
+				yc := errors.Log1(pl.table.Table.ColumnByName(cp.Column))
 				_, sz := yc.RowCellSize()
 				nidx = sz
 				stidx = 0
