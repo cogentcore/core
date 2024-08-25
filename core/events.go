@@ -1134,10 +1134,14 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 	}
 }
 
-// getShortcuts gathers all [Button]s in the Scene with a shortcut specified.
-// It recursively navigates [Button.Menu]s.
+// getShortcuts gathers all [Button]s in the [Scene] with a shortcut specified.
+// It recursively navigates [Button.Menu]s. It also gathers shortcuts from the
+// [Scene.ContextMenus].
 func (em *Events) getShortcuts() {
 	em.shortcuts = nil
+	tmps := NewScene()
+	em.scene.applyContextMenus(tmps)
+	em.getShortcutsIn(tmps)
 	em.getShortcutsIn(em.scene)
 }
 
