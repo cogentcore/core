@@ -12,9 +12,9 @@ You can add any widgets to tabs:
 
 ```Go
 ts := core.NewTabs(b)
-first := ts.NewTab("First")
+first, _ := ts.NewTab("First")
 core.NewText(first).SetText("I am first!")
-second := ts.NewTab("Second")
+second, _ := ts.NewTab("Second")
 core.NewText(second).SetText("I am second!")
 ```
 

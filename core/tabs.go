@@ -197,17 +197,17 @@ func (ts *Tabs) CurrentTab() (Widget, int) {
 // NewTab adds a new tab with the given label and returns the resulting tab frame.
 // It is the main end-user API for creating new tabs. An optional icon can also
 // be passed for the tab button.
-func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
+func (ts *Tabs) NewTab(label string, icon ...icons.Icon) (*Frame, *Tab) {
 	fr := ts.getFrame()
 	idx := len(fr.Children)
-	frame := ts.insertNewTab(label, idx, icon...)
-	return frame
+	frame, button := ts.insertNewTab(label, idx, icon...)
+	return frame, button
 }
 
 // insertNewTab inserts a new tab with the given label at the given index position
 // within the list of tabs and returns the resulting tab frame. An optional icon
 // can also be passed for the tab button.
-func (ts *Tabs) insertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
+func (ts *Tabs) insertNewTab(label string, idx int, icon ...icons.Icon) (*Frame, *Tab) {
 	tfr := ts.getFrame()
 	alreadyExists := tfr.ChildByName(label) != nil
 	frame := NewFrame()
@@ -222,7 +222,7 @@ func (ts *Tabs) insertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 		button.SetName(frame.Name) // must be the same name
 	}
 	ts.Update()
-	return frame
+	return frame, button
 }
 
 // insertTabButtonAt inserts just the tab button at given index, after the panel has
@@ -332,7 +332,7 @@ func (ts *Tabs) SelectTabByName(name string) *Frame {
 func (ts *Tabs) RecycleTab(name string) *Frame {
 	frame := ts.TabByName(name)
 	if frame == nil {
-		frame = ts.NewTab(name)
+		frame, _ = ts.NewTab(name)
 	}
 	ts.SelectTabByName(name)
 	return frame

@@ -376,8 +376,8 @@ func (ev *Env) ConfigGUI() *core.Body {
 	imfr := core.NewFrame(split)
 	tbvw := core.NewTabs(split)
 
-	scfr := tbvw.NewTab("3D View")
-	twofr := tbvw.NewTab("2D View")
+	scfr, _ := tbvw.NewTab("3D View")
+	twofr, _ := tbvw.NewTab("2D View")
 
 	split.SetSplits(.1, .2, .2, .5)
 

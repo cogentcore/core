@@ -27,8 +27,8 @@ func main() {
 
 	tv := core.NewTabs(b)
 
-	// nt := tv.NewTab("First")
-	nt := tv.NewTab("Patterns")
+	// nt, _ := tv.NewTab("First")
+	nt, _ := tv.NewTab("Patterns")
 	etv := tensorcore.NewTable(nt).SetTable(pats)
 	b.AddAppBar(etv.MakeToolbar)
 
