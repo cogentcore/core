@@ -84,8 +84,11 @@ func (v *Video) RenderDraw(drw system.Drawer, op draw.Op) {
 		unchanged = false
 	}
 	v.framePlayed++
-	bb := v.Geom.TotalBBox.Add(v.Scene.SceneGeom.Pos)
-	drw.Scale(bb, frame, image.Rectangle{}, v.Rotation, draw.Src, unchanged)
+	bb, sbb, empty := v.DirectRenderDrawBBoxes(frame.Bounds())
+	if empty {
+		return
+	}
+	drw.Scale(bb, frame, sbb, v.Rotation, draw.Src, unchanged)
 }
 
 // Open opens the video specified by the given filepath.

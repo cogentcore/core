@@ -1310,10 +1310,12 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				asz = math32.Round(mx + exd*(gr/gsum))
 				styles.SetClampMax(&asz, ksz.Max.Dim(ma))
 				if asz > math32.Ceil(alloc.Dim(ma))+1 { // bug!
-					fmt.Println(fr, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
-					fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "par act:", sz.Actual.Content.Dim(ma))
-					fmt.Println(fr.layout.String())
-					fmt.Println(fr.layout.cellsSize())
+					if DebugSettings.LayoutTrace {
+						fmt.Println(fr, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
+						fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "par act:", sz.Actual.Content.Dim(ma))
+						fmt.Println(fr.layout.String())
+						fmt.Println(fr.layout.cellsSize())
+					}
 				}
 			}
 			if DebugSettings.LayoutTraceDetail {
@@ -1846,4 +1848,27 @@ func (fr *Frame) scrollResetIfNone() {
 			fr.Geom.Scroll.SetDim(d, 0)
 		}
 	}
+}
+
+// DirectRenderDrawBBoxes returns the destination and source bounding boxes
+// for RenderDraw call for widgets that do direct rendering.
+// The destBBox.Min point can be passed as the dp destination point for Draw
+// function, and srcBBox is the source region.  Empty flag indicates if either
+// of the srcBBox dimensions are <= 0.
+func (wb *WidgetBase) DirectRenderDrawBBoxes(srcFullBBox image.Rectangle) (destBBox, srcBBox image.Rectangle, empty bool) {
+	tbb := wb.Geom.TotalBBox
+	destBBox = tbb.Add(wb.Scene.SceneGeom.Pos)
+	srcBBox = srcFullBBox
+	pos := wb.Geom.Pos.Total.ToPoint()
+	if pos.X < tbb.Min.X { // scrolled off left
+		srcBBox.Min.X = tbb.Min.X - pos.X
+	}
+	if pos.Y < tbb.Min.Y {
+		srcBBox.Min.X = tbb.Min.Y - pos.X
+	}
+	sz := srcBBox.Size()
+	if sz.X <= 0 || sz.Y <= 0 {
+		empty = true
+	}
+	return
 }
