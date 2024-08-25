@@ -106,7 +106,7 @@ func main() {
 	b := core.NewBody("dataproc")
 	tv := core.NewTabs(b)
 
-	nt := tv.NewTab("Planets Data")
+	nt, _ := tv.NewTab("Planets Data")
 	tbv := tensorcore.NewTable(nt).SetTable(Planets)
 	b.AddAppBar(tbv.MakeToolbar)
 	b.AddAppBar(func(p *tree.Plan) {
@@ -118,17 +118,17 @@ func main() {
 		})
 	})
 
-	nt = tv.NewTab("Non-Null Rows Desc")
+	nt, _ = tv.NewTab("Non-Null Rows Desc")
 	tensorcore.NewTable(nt).SetTable(PlanetsNNDesc)
-	nt = tv.NewTab("All Desc")
+	nt, _ = tv.NewTab("All Desc")
 	tensorcore.NewTable(nt).SetTable(PlanetsDesc)
-	nt = tv.NewTab("By Method Orbit")
+	nt, _ = tv.NewTab("By Method Orbit")
 	tensorcore.NewTable(nt).SetTable(GpMethodOrbit)
-	nt = tv.NewTab("By Method Year")
+	nt, _ = tv.NewTab("By Method Year")
 	tensorcore.NewTable(nt).SetTable(GpMethodYear)
-	nt = tv.NewTab("By Method Decade")
+	nt, _ = tv.NewTab("By Method Decade")
 	tensorcore.NewTable(nt).SetTable(GpMethodDecade)
-	nt = tv.NewTab("By Decade")
+	nt, _ = tv.NewTab("By Decade")
 	tensorcore.NewTable(nt).SetTable(GpDecade)
 
 	tv.SelectTabIndex(0)

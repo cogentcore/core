@@ -194,20 +194,18 @@ func (ts *Tabs) CurrentTab() (Widget, int) {
 	return w, fr.StackTop
 }
 
-// NewTab adds a new tab with the given label and returns the resulting tab frame.
-// It is the main end-user API for creating new tabs. An optional icon can also
-// be passed for the tab button.
-func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
+// NewTab adds a new tab with the given label and returns the resulting tab frame
+// and associated tab button, which can be further customized as needed.
+// It is the main end-user API for creating new tabs.
+func (ts *Tabs) NewTab(label string) (*Frame, *Tab) {
 	fr := ts.getFrame()
 	idx := len(fr.Children)
-	frame := ts.insertNewTab(label, idx, icon...)
-	return frame
+	return ts.insertNewTab(label, idx)
 }
 
 // insertNewTab inserts a new tab with the given label at the given index position
-// within the list of tabs and returns the resulting tab frame. An optional icon
-// can also be passed for the tab button.
-func (ts *Tabs) insertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
+// within the list of tabs and returns the resulting tab frame and button.
+func (ts *Tabs) insertNewTab(label string, idx int) (*Frame, *Tab) {
 	tfr := ts.getFrame()
 	alreadyExists := tfr.ChildByName(label) != nil
 	frame := NewFrame()
@@ -216,28 +214,25 @@ func (ts *Tabs) insertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 	frame.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	button := ts.insertTabButtonAt(label, idx, icon...)
+	button := ts.insertTabButtonAt(label, idx)
 	if alreadyExists {
 		tree.SetUniqueName(frame)  // prevent duplicate names
 		button.SetName(frame.Name) // must be the same name
 	}
 	ts.Update()
-	return frame
+	return frame, button
 }
 
 // insertTabButtonAt inserts just the tab button at given index, after the panel has
 // already been added to the frame; assumed to be wrapped in update. Generally
-// for internal use only. An optional icon can also be passed for the tab button.
-func (ts *Tabs) insertTabButtonAt(label string, idx int, icon ...icons.Icon) *Tab {
+// for internal use only.
+func (ts *Tabs) insertTabButtonAt(label string, idx int) *Tab {
 	tb := ts.getTabs()
 	tab := tree.New[Tab]()
 	tb.InsertChild(tab, idx)
 	tab.SetName(label)
 	tab.SetText(label).SetType(ts.Type).SetCloseIcon(ts.CloseIcon).SetTooltip(label)
 	tab.maxChars = ts.maxChars
-	if len(icon) > 0 {
-		tab.SetIcon(icon[0])
-	}
 	tab.OnClick(func(e events.Event) {
 		ts.SelectTabByName(tab.Name)
 	})
@@ -332,7 +327,7 @@ func (ts *Tabs) SelectTabByName(name string) *Frame {
 func (ts *Tabs) RecycleTab(name string) *Frame {
 	frame := ts.TabByName(name)
 	if frame == nil {
-		frame = ts.NewTab(name)
+		frame, _ = ts.NewTab(name)
 	}
 	ts.SelectTabByName(name)
 	return frame

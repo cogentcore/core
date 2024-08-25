@@ -23,9 +23,9 @@ func TestTabs(t *testing.T) {
 func TestTabsWidgets(t *testing.T) {
 	b := NewBody()
 	ts := NewTabs(b)
-	first := ts.NewTab("First")
+	first, _ := ts.NewTab("First")
 	NewText(first).SetText("I am first!")
-	second := ts.NewTab("Second")
+	second, _ := ts.NewTab("Second")
 	NewText(second).SetText("I am second!")
 	b.AssertRender(t, "tabs/widgets")
 }
@@ -33,9 +33,9 @@ func TestTabsWidgets(t *testing.T) {
 func TestTabsClick(t *testing.T) {
 	b := NewBody()
 	ts := NewTabs(b)
-	first := ts.NewTab("First")
+	first, _ := ts.NewTab("First")
 	NewText(first).SetText("I am first!")
-	second := ts.NewTab("Second")
+	second, _ := ts.NewTab("Second")
 	NewText(second).SetText("I am second!")
 	b.AssertRender(t, "tabs/click", func() {
 		ts.getTabs().Child(1).(Widget).AsWidget().Send(events.Click)
@@ -55,8 +55,10 @@ func TestTabsMany(t *testing.T) {
 func TestTabsIcons(t *testing.T) {
 	b := NewBody()
 	ts := NewTabs(b)
-	ts.NewTab("First", icons.Home)
-	ts.NewTab("Second", icons.Explore)
+	_, tb := ts.NewTab("First")
+	tb.SetIcon(icons.Home)
+	_, tb = ts.NewTab("Second")
+	tb.SetIcon(icons.Explore)
 	b.AssertRender(t, "tabs/icons")
 }
 
@@ -72,9 +74,12 @@ func TestTabsFunctional(t *testing.T) {
 func TestTabsNavigation(t *testing.T) {
 	b := NewBody()
 	ts := NewTabs(b).SetType(NavigationAuto)
-	ts.NewTab("First", icons.Home)
-	ts.NewTab("Second", icons.Explore)
-	ts.NewTab("Third", icons.History)
+	_, tb := ts.NewTab("First")
+	tb.SetIcon(icons.Home)
+	_, tb = ts.NewTab("Second")
+	tb.SetIcon(icons.Explore)
+	_, tb = ts.NewTab("Third")
+	tb.SetIcon(icons.History)
 	b.AssertRender(t, "tabs/navigation")
 }
 
