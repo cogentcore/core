@@ -84,21 +84,11 @@ func (v *Video) RenderDraw(drw system.Drawer, op draw.Op) {
 		unchanged = false
 	}
 	v.framePlayed++
-	tbb := v.Geom.TotalBBox
-	bb := tbb.Add(v.Scene.SceneGeom.Pos)
-	ibb := frame.Bounds()
-	pos := v.Geom.Pos.Total.ToPoint()
-	if pos.X < tbb.Min.X { // scrolled off left
-		ibb.Min.X = tbb.Min.X - pos.X
-	}
-	if pos.Y < tbb.Min.Y {
-		ibb.Min.X = tbb.Min.Y - pos.X
-	}
-	sz := ibb.Size()
-	if sz.X <= 0 || sz.Y <= 0 {
+	bb, sbb, empty := v.DirectRenderDrawBBoxes(frame.Bounds())
+	if empty {
 		return
 	}
-	drw.Scale(bb, frame, ibb, v.Rotation, draw.Src, unchanged)
+	drw.Scale(bb, frame, sbb, v.Rotation, draw.Src, unchanged)
 }
 
 // Open opens the video specified by the given filepath.

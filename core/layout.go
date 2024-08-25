@@ -1849,3 +1849,25 @@ func (fr *Frame) scrollResetIfNone() {
 		}
 	}
 }
+
+// DirectRenderDrawBBoxes returns the destination and source bounding boxes
+// for RenderDraw call for widgets that do direct rendering.
+// The destBBox.Min point can be passed as the dp destination point for Draw
+// function, and srcBBox is
+func (wb *WidgetBase) DirectRenderDrawBBoxes(srcFullBBox image.Rectangle) (destBBox, srcBBox image.Rectangle, empty bool) {
+	tbb := wb.Geom.TotalBBox
+	destBBox = tbb.Add(wb.Scene.SceneGeom.Pos)
+	srcBBox = srcFullBBox
+	pos := wb.Geom.Pos.Total.ToPoint()
+	if pos.X < tbb.Min.X { // scrolled off left
+		srcBBox.Min.X = tbb.Min.X - pos.X
+	}
+	if pos.Y < tbb.Min.Y {
+		srcBBox.Min.X = tbb.Min.Y - pos.X
+	}
+	sz := srcBBox.Size()
+	if sz.X <= 0 || sz.Y <= 0 {
+		empty = true
+	}
+	return
+}

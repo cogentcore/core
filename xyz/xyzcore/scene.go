@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/xyz"
 )
@@ -50,7 +51,7 @@ func (sw *Scene) Init() {
 	sw.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable, abilities.DoubleClickable)
 		s.Grow.Set(1, 1)
-		// s.Min.Set(units.Em(5))
+		s.Min.Set(units.Em(2))
 	})
 
 	sw.On(events.Scroll, func(e events.Event) {
@@ -135,21 +136,11 @@ func (sw *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
 		core.ErrorSnackbar(sw, errors.New("xyz.Scene.RenderDraw: no WebGPU drawer available"))
 		return
 	}
-	tbb := sw.Geom.TotalBBox
-	bb := tbb.Add(sw.Scene.SceneGeom.Pos)
-	ibb := sw.XYZ.Frame.Frames[0].Format.Bounds()
-	pos := sw.Geom.Pos.Total.ToPoint()
-	if pos.X < tbb.Min.X { // scrolled off left
-		ibb.Min.X = tbb.Min.X - pos.X
-	}
-	if pos.Y < tbb.Min.Y {
-		ibb.Min.X = tbb.Min.Y - pos.X
-	}
-	sz := ibb.Size()
-	if sz.X <= 0 || sz.Y <= 0 {
+	bb, sbb, empty := sw.DirectRenderDrawBBoxes(sw.XYZ.Frame.Frames[0].Format.Bounds())
+	if empty {
 		return
 	}
 	gdrw := agd.AsGPUDrawer()
 	gdrw.UseTexture(sw.XYZ.Frame.Frames[0])
-	gdrw.CopyUsed(bb.Min, ibb, draw.Src, false)
+	gdrw.CopyUsed(bb.Min, sbb, draw.Src, false)
 }
