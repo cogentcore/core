@@ -1853,7 +1853,8 @@ func (fr *Frame) scrollResetIfNone() {
 // DirectRenderDrawBBoxes returns the destination and source bounding boxes
 // for RenderDraw call for widgets that do direct rendering.
 // The destBBox.Min point can be passed as the dp destination point for Draw
-// function, and srcBBox is
+// function, and srcBBox is the source region.  Empty flag indicates if either
+// of the srcBBox dimensions are <= 0.
 func (wb *WidgetBase) DirectRenderDrawBBoxes(srcFullBBox image.Rectangle) (destBBox, srcBBox image.Rectangle, empty bool) {
 	tbb := wb.Geom.TotalBBox
 	destBBox = tbb.Add(wb.Scene.SceneGeom.Pos)
