@@ -208,7 +208,7 @@ var (
 
 // standardContextMenu adds standard context menu items for the [Scene].
 func (sc *Scene) standardContextMenu(m *Scene) { //types:add
-	NewButton(m).SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip("Search the menus").OnClick(func(e events.Event) {
+	NewButton(m).SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip("Search for buttons and other app actions").OnClick(func(e events.Event) {
 		d := NewBody().AddTitle("Search")
 		w := NewChooser(d).SetEditable(true).SetIcon(icons.Search)
 		w.Styler(func(s *styles.Style) {
@@ -232,7 +232,7 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 			}
 		})
 		w.AddItemsFunc(func() {
-			addButtonItems(&w.Items, sc, "") // TODO
+			addButtonItems(&w.Items, sc, "")
 		})
 		w.OnFinal(events.Change, func(e events.Event) {
 			d.Close()
@@ -328,10 +328,10 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 // about the original button menu. Consumers of this function should
 // typically set path to "".
 func addButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
-	for _, kid := range parent.AsTree().Children {
-		bt := AsButton(kid)
+	parent.AsTree().WalkDown(func(n tree.Node) bool {
+		bt := AsButton(n)
 		if bt == nil || bt.IsDisabled() {
-			continue
+			return tree.Continue
 		}
 		label := bt.Text
 		if label == "" {
@@ -348,7 +348,7 @@ func addButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 				npath += label
 			}
 			addButtonItems(items, tmps, npath)
-			continue
+			return tree.Continue
 		}
 		if path != "" {
 			label = path + " > " + label
@@ -361,11 +361,6 @@ func addButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 				bt.Send(events.Click)
 			},
 		})
-		// after the quit button, there are the render wins,
-		// which we do not want to show here as we are already
-		// showing the stages
-		if bt.Name == "quit-app" {
-			break
-		}
-	}
+		return tree.Continue
+	})
 }
