@@ -194,14 +194,13 @@ func (ts *Tabs) CurrentTab() (Widget, int) {
 	return w, fr.StackTop
 }
 
-// NewTab adds a new tab with the given label and returns the resulting tab frame,
-// and the associated tab button, which can be further styled as needed.
+// NewTab adds a new tab with the given label and returns the resulting tab frame
+// and associated tab button, which can be further customized as needed.
 // It is the main end-user API for creating new tabs.
 func (ts *Tabs) NewTab(label string) (*Frame, *Tab) {
 	fr := ts.getFrame()
 	idx := len(fr.Children)
-	frame, button := ts.insertNewTab(label, idx)
-	return frame, button
+	return ts.insertNewTab(label, idx)
 }
 
 // insertNewTab inserts a new tab with the given label at the given index position

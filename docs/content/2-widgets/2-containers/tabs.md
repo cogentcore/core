@@ -28,7 +28,7 @@ ts.NewTab("Third")
 ts.NewTab("Fourth")
 ```
 
-You can add icons to tabs, using the `Tab` button returned by the `NewTab` function:
+You can add icons to tabs:
 
 ```Go
 ts := core.NewTabs(b)
