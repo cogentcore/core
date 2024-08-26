@@ -103,21 +103,21 @@ func NewLine(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, wi
 	ln := NewSolid(parent).SetMesh(lm)
 	ln.SetName(name)
 	ln.Pose.Scale.Set(1, width, width)
-	SetLineStartEnd(ln, st, ed)
+	SetLineStartEnd(&ln.Pose, st, ed)
 	ln.Material.Color = clr
 	return ln
 }
 
 // SetLineStartEnd sets line Pose such that it starts / ends at given poitns.
-func SetLineStartEnd(ln *Solid, st, ed math32.Vector3) {
-	wd := ln.Pose.Scale.Y
+func SetLineStartEnd(pose *Pose, st, ed math32.Vector3) {
+	wd := pose.Scale.Y
 	d := ed.Sub(st)
 	midp := st.Add(d.DivScalar(2))
-	ln.Pose.Pos = midp
+	pose.Pos = midp
 	dst := st.DistanceTo(ed)
-	ln.Pose.Scale.Set(dst, wd, wd)
+	pose.Scale.Set(dst, wd, wd)
 	dn := d.Normal()
-	ln.Pose.Quat.SetFromUnitVectors(math32.Vec3(1, 0, 0), dn)
+	pose.Quat.SetFromUnitVectors(math32.Vec3(1, 0, 0), dn)
 }
 
 const (
@@ -143,28 +143,35 @@ func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, w
 	cm := UnitConeMesh(sc, arrowSegs)
 	gp := NewGroup(parent)
 	gp.SetName(name)
-	asz := arrowSize * width
-	awd := arrowWidth * asz
 	d := ed.Sub(st)
-	dn := d.Normal()
+	dst := d.Length()
 
-	lst := st
-	led := ed
-	if startArrow {
-		lst.SetAdd(dn.MulScalar(asz))
+	awd := arrowSize * arrowWidth
+	asz := (arrowSize * width) / dst
+	hasz := 0.5 * asz
+
+	ln := NewLine(sc, gp, name+"-line", st, ed, width, clr)
+	ln.Pose.SetIdentity()
+	switch {
+	case startArrow && endArrow:
+		ln.Pose.Scale.X -= 2 * asz
+	case startArrow:
+		ln.Pose.Scale.X -= asz
+		ln.Pose.Pos.X += hasz
+	case endArrow:
+		ln.Pose.Scale.X -= asz
+		ln.Pose.Pos.X -= hasz
 	}
-	if endArrow {
-		led.SetAdd(dn.MulScalar(-asz))
-	}
-	ln := NewLine(sc, gp, name+"-line", lst, led, width, clr)
+
+	gp.Pose.Scale.Set(1, width, width) // group does everything
+	SetLineStartEnd(&gp.Pose, st, ed)
 
 	if startArrow {
 		ar := NewSolid(gp).SetMesh(cm)
 		ar.SetName(name + "-start-arrow")
 		ar.Pose.Scale.Set(awd, asz, awd)                               // Y is up
 		ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), math.Pi/2) // rotate from XY up to -X
-		ar.Pose.Quat.SetMul(ln.Pose.Quat)
-		ar.Pose.Pos = st.Add(dn.MulScalar(.5 * asz))
+		ar.Pose.Pos = math32.Vec3(-0.5+hasz, 0, 0)
 		ar.Material.Color = clr
 	}
 	if endArrow {
@@ -172,8 +179,7 @@ func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, w
 		ar.SetName(name + "-end-arrow")
 		ar.Pose.Scale.Set(awd, asz, awd)
 		ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), -math.Pi/2) // rotate from XY up to +X
-		ar.Pose.Quat.SetMul(ln.Pose.Quat)
-		ar.Pose.Pos = ed.Add(dn.MulScalar(-.5 * asz))
+		ar.Pose.Pos = math32.Vec3(0.5-hasz, 0, 0)
 		ar.Material.Color = clr
 	}
 	return gp
