@@ -6,6 +6,7 @@ package core
 
 import (
 	"fmt"
+	"image"
 	"log"
 	"log/slog"
 	"os"
@@ -17,6 +18,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 
+	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/colors"
@@ -731,7 +733,7 @@ func (fb *FileButton) Init() {
 		if fb.Filename == "" {
 			fb.SetText("Select file")
 		} else {
-			fb.SetText(fb.Filename)
+			fb.SetText(elide.Middle(fb.Filename, 38))
 		}
 	})
 	var fp *FilePicker
@@ -744,4 +746,15 @@ func (fb *FileButton) Init() {
 	}, func() {
 		fb.Filename = fp.SelectedFile()
 	})
+}
+
+func (fb *FileButton) WidgetTooltip(pos image.Point) (string, image.Point) {
+	if fb.Filename == "" {
+		return fb.Tooltip, fb.DefaultTooltipPos()
+	}
+	fnm := "(" + fb.Filename + ")"
+	if fb.Tooltip == "" {
+		return fnm, fb.DefaultTooltipPos()
+	}
+	return fnm + " " + fb.Tooltip, fb.DefaultTooltipPos()
 }
