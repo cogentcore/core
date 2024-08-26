@@ -50,6 +50,13 @@ func (ps *Pose) Defaults() {
 	}
 }
 
+// SetIdentity sets the Pose to the identity transform.
+func (ps *Pose) SetIdentity() {
+	ps.Pos.Set(0, 0, 0)
+	ps.Scale.Set(1, 1, 1)
+	ps.Quat.SetIdentity()
+}
+
 // CopyFrom copies just the pose information from the other pose, critically
 // not copying the ParMatrix so that is preserved in the receiver.
 func (ps *Pose) CopyFrom(op *Pose) {
