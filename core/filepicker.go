@@ -17,6 +17,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 
+	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/colors"
@@ -731,7 +732,7 @@ func (fb *FileButton) Init() {
 		if fb.Filename == "" {
 			fb.SetText("Select file")
 		} else {
-			fb.SetText(fb.Filename)
+			fb.SetText(elide.Middle(fb.Filename, 38))
 		}
 	})
 	var fp *FilePicker
