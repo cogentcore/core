@@ -35,7 +35,7 @@ func NodesUnderPoint(n tree.Node, pt image.Point) []Node {
 			return tree.Break
 		}
 		if pt.In(nb.SceneBBox) {
-			if nb.IsLinear {
+			if nb.isLinear {
 				sp := math32.Vec3(0, 0, 0)
 				ep := math32.Vec3(1, 0, 0)
 				spr := sp.MulMatrix4(&nb.Pose.MVPMatrix)

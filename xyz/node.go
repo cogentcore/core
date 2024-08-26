@@ -108,10 +108,10 @@ type NodeBase struct {
 	// This is BBox intersected with Frame bounds.
 	SceneBBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
-	// IsLinear indicates that this element contains a line-like shape,
+	// isLinear indicates that this element contains a line-like shape,
 	// which engages a more selective event processing logic to determine
 	// if the node was selected based on a mouse click point.
-	IsLinear bool
+	isLinear bool
 }
 
 // AsNode converts the given tree node to a [Node] and [NodeBase],

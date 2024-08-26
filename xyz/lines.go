@@ -101,7 +101,7 @@ func UnitConeMesh(sc *Scene, segs int) *Cylinder {
 func NewLine(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, width float32, clr color.RGBA) *Solid {
 	lm := UnitLineMesh(sc)
 	ln := NewSolid(parent).SetMesh(lm)
-	ln.IsLinear = true
+	ln.isLinear = true
 	ln.SetName(name)
 	ln.Pose.Scale.Set(1, width, width)
 	SetLineStartEnd(&ln.Pose, st, ed)
@@ -143,7 +143,7 @@ const (
 func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
 	cm := UnitConeMesh(sc, arrowSegs)
 	gp := NewGroup(parent)
-	gp.IsLinear = true
+	gp.isLinear = true
 	gp.SetName(name)
 	d := ed.Sub(st)
 	dst := d.Length()

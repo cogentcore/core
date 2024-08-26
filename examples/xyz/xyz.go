@@ -208,9 +208,7 @@ func main() {
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
 	cyan := colors.FromRGB(0, 255, 255)
-	// xyz.NewArrow(sc, sc, "arrow", math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8)
-	xyz.NewArrow(sc, sc, "arrow", math32.Vec3(-1.5, 6, .5), math32.Vec3(2, 7, 1), .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8)
-	xyz.NewLine(sc, sc, "line", math32.Vec3(2, 6, .5), math32.Vec3(-1.5, 7, 1), .05, cyan)
+	xyz.NewArrow(sc, sc, "arrow", math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8)
 
 	// bbclr := styles.Color{}
 	// bbclr.SetUInt8(255, 255, 0, 255)
