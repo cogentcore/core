@@ -35,6 +35,31 @@ func NodesUnderPoint(n tree.Node, pt image.Point) []Node {
 			return tree.Break
 		}
 		if pt.In(nb.SceneBBox) {
+			if nb.IsLinear {
+				sp := math32.Vec3(0, 0, 0)
+				ep := math32.Vec3(1, 0, 0)
+				spr := sp.MulMatrix4(&nb.Pose.MVPMatrix)
+				epr := ep.MulMatrix4(&nb.Pose.MVPMatrix)
+				del := epr.Sub(spr)
+				ang := math32.RadToDeg(math32.Atan2(del.Y, del.X))
+				mn := math32.FromPoint(nb.SceneBBox.Min)
+				mx := math32.FromPoint(nb.SceneBBox.Max)
+				st := mn
+				ed := mx
+				flip := ang < 90 || ang < -90
+				if flip {
+					st = math32.Vec2(mn.X, mx.Y)
+					ed = math32.Vec2(mx.X, mn.Y)
+				}
+				ln := math32.NewLine2(st, ed)
+				pos := math32.FromPoint(pt)
+				cpp := ln.ClosestPointToPoint(pos)
+				dst := cpp.Sub(pos).Length()
+				if dst < 10 { // pixels
+					ns = append(ns, ni)
+				}
+				return tree.Continue
+			}
 			ns = append(ns, ni)
 		}
 		return tree.Continue
