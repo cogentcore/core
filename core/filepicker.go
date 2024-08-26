@@ -6,6 +6,7 @@ package core
 
 import (
 	"fmt"
+	"image"
 	"log"
 	"log/slog"
 	"os"
@@ -745,4 +746,15 @@ func (fb *FileButton) Init() {
 	}, func() {
 		fb.Filename = fp.SelectedFile()
 	})
+}
+
+func (fb *FileButton) WidgetTooltip(pos image.Point) (string, image.Point) {
+	if fb.Filename == "" {
+		return fb.Tooltip, fb.DefaultTooltipPos()
+	}
+	fnm := "(" + fb.Filename + ")"
+	if fb.Tooltip == "" {
+		return fnm, fb.DefaultTooltipPos()
+	}
+	return fnm + " " + fb.Tooltip, fb.DefaultTooltipPos()
 }
