@@ -85,7 +85,6 @@ func (bd *Body) SetTitle(title string) *Body {
 // text which will be used by the [Scene] etc.
 func (bd *Body) AddTitle(title string) *Body {
 	bd.SetTitle(title)
-	NewText(bd).SetText(title).SetType(TextHeadlineSmall).SetName("body-title")
 	return bd
 }
 

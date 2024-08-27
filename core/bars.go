@@ -113,15 +113,22 @@ func (sc *Scene) addDefaultBars() {
 	}
 
 	st := sc.Stage
-	if st.Type == DialogStage && st.FullWindow && !st.NewWindow {
+	if st.Type == DialogStage {
 		sc.Bars.Top.Add(func(parent Widget) {
 			titleRow := NewFrame(parent)
 			titleRow.SetName("title-row")
-			back := NewButton(titleRow).SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
-			back.SetType(ButtonAction).SetTooltip("Back")
-			back.OnClick(func(e events.Event) {
-				sc.Close()
+			titleRow.Styler(func(s *styles.Style) {
+				s.Grow.Set(1, 0)
+				s.Align.Items = styles.Center
 			})
+			if st.FullWindow && !st.NewWindow {
+				back := NewButton(titleRow).SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
+				back.SetType(ButtonAction).SetTooltip("Back")
+				back.OnClick(func(e events.Event) {
+					sc.Close()
+				})
+			}
+			NewText(titleRow).SetText(sc.Body.Title).SetType(TextHeadlineSmall)
 		})
 	}
 }
