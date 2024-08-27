@@ -301,25 +301,6 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 		quit.OnClick(func(e events.Event) {
 			go TheApp.QuitReq()
 		})
-		quit.SetName("quit-app")
-		NewSeparator(m)
-		for _, w := range mainRenderWindows {
-			if w != nil {
-				NewButton(m).SetText(w.title).OnClick(func(e events.Event) {
-					w.Raise()
-				})
-			}
-		}
-		if len(dialogRenderWindows) > 0 {
-			NewSeparator(m)
-			for _, w := range dialogRenderWindows {
-				if w != nil {
-					NewButton(m).SetText(w.title).OnClick(func(e events.Event) {
-						w.Raise()
-					})
-				}
-			}
-		}
 	})
 }
 
