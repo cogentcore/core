@@ -37,7 +37,7 @@ func SettingsWindow() { //types:add
 	}
 	d := NewBody("Settings").SetData(&AllSettings)
 	SettingsEditor(d)
-	d.NewWindow().SetCloseOnBack(true).Run()
+	d.RunWindow()
 }
 
 // SettingsEditor adds to the given body an editor of user settings.

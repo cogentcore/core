@@ -120,20 +120,7 @@ func (sc *Scene) addDefaultBars() {
 			back := NewButton(titleRow).SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
 			back.SetType(ButtonAction).SetTooltip("Back")
 			back.OnClick(func(e events.Event) {
-				if slen := back.Scene.Stage.Mains.stack.Len(); slen > 1 {
-					if back.Scene.Stage.CloseOnBack {
-						back.Scene.Close()
-					} else {
-						back.Scene.Stage.Mains.stack.ValueByIndex(slen - 2).raise()
-					}
-					return
-				}
-				if wlen := len(AllRenderWindows); wlen > 1 {
-					if back.Scene.Stage.CloseOnBack {
-						currentRenderWindow.closeReq()
-					}
-					AllRenderWindows[wlen-2].Raise()
-				}
+				sc.Close()
 			})
 		})
 	}

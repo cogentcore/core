@@ -118,12 +118,6 @@ type Stage struct { //types:add -setters
 	// [WindowStage]s take up the entire window they are created in.
 	FullWindow bool
 
-	// CloseOnBack is whether to close the stage when the back button
-	// is pressed in the app bar. Otherwise, it goes back to the next
-	// stage but keeps this one open. This is on by default for
-	// [DialogStage]s and off for [WindowStage]s.
-	CloseOnBack bool
-
 	// Timeout, if greater than 0, results in a popup stages disappearing
 	// after this timeout duration.
 	Timeout time.Duration
@@ -223,7 +217,6 @@ func (st *Stage) setType(typ StageTypes) *Stage {
 		st.Modal = true
 		st.Scrim = true
 		st.ClickOff = true
-		st.CloseOnBack = true
 	case MenuStage:
 		st.Modal = true
 		st.Scrim = false

@@ -288,7 +288,7 @@ func InspectorWindow(n tree.Node) {
 	}
 	d := NewBody("Inspector")
 	makeInspector(d, n)
-	d.NewWindow().SetCloseOnBack(true).Run()
+	d.RunWindow()
 }
 
 // makeInspector configures the given body to have an interactive inspector
