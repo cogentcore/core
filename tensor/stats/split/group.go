@@ -10,6 +10,7 @@ import (
 	"log"
 	"slices"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor/table"
 )
 
@@ -71,7 +72,7 @@ func GroupByIndex(ix *table.IndexView, colIndexes []int) *table.Splits {
 // across the given set of column names.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
 func GroupBy(ix *table.IndexView, columns ...string) *table.Splits {
-	return GroupByIndex(ix, ix.Table.ColumnIndexesByNames(columns...))
+	return GroupByIndex(ix, errors.Log1(ix.Table.ColumnIndexesByNames(columns...)))
 }
 
 // GroupByFunc returns a new Splits set based on the given function

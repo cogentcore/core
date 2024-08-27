@@ -62,7 +62,6 @@ func (txt *Text2D) Init() {
 func (txt *Text2D) Defaults() {
 	txt.Solid.Defaults()
 	txt.Pose.Scale.SetScalar(.005)
-	txt.Pose.RotateOnAxis(0, 1, 0, 180)
 	txt.Styles.Defaults()
 	txt.Styles.Font.Size.Pt(36)
 	txt.Styles.Margin.Set(units.Px(2))
@@ -133,7 +132,7 @@ func (txt *Text2D) RenderText() {
 	var err error
 	if txt.Material.Texture == nil {
 		txname := "__Text2D_" + txt.Name
-		tx, err = txt.Scene.TextureByNameTry(txname)
+		tx, err = txt.Scene.TextureByName(txname)
 		if err != nil {
 			tx = &TextureBase{Name: txname}
 			img = image.NewRGBA(bounds)
@@ -195,7 +194,9 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 		ps := txt.Pose.Pos
 		ps.X += (0.5 - ax) * sz.X
 		ps.Y += ay * sz.Y
-		txt.Pose.Matrix.SetTransform(ps, txt.Pose.Quat, sc)
+		quat := txt.Pose.Quat
+		quat.SetMul(math32.NewQuatAxisAngle(math32.Vec3(0, 1, 0), math32.DegToRad(180)))
+		txt.Pose.Matrix.SetTransform(ps, quat, sc)
 	} else {
 		txt.Pose.UpdateMatrix()
 	}

@@ -52,7 +52,7 @@ func SettingsEditor(b *Body) {
 	tabs := NewTabs(b)
 
 	for _, se := range AllSettings {
-		fr := tabs.NewTab(se.Label())
+		fr, _ := tabs.NewTab(se.Label())
 
 		NewForm(fr).SetStruct(se).OnChange(func(e events.Event) {
 			UpdateSettings(fr, se)

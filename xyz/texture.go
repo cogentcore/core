@@ -142,17 +142,8 @@ func (sc *Scene) setAllTextures() {
 	}
 }
 
-// TextureByName looks for texture by name -- returns nil if not found
-func (sc *Scene) TextureByName(nm string) Texture {
-	tx, ok := sc.Textures.ValueByKeyTry(nm)
-	if ok {
-		return tx
-	}
-	return nil
-}
-
-// TextureByNameTry looks for texture by name -- returns error if not found
-func (sc *Scene) TextureByNameTry(nm string) (Texture, error) {
+// TextureByName looks for texture by name, returning error if not found.
+func (sc *Scene) TextureByName(nm string) (Texture, error) {
 	tx, ok := sc.Textures.ValueByKeyTry(nm)
 	if ok {
 		return tx, nil

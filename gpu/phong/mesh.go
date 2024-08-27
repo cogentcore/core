@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/shape"
 )
@@ -42,24 +43,24 @@ func (ph *Phong) SetMesh(name string, mesh shape.Mesh) {
 	}
 	ph.configMesh(md, idx)
 
-	gpu.SetValueFrom(vgp.ValueByIndex("Pos", idx), md.Vertex)
-	gpu.SetValueFrom(vgp.ValueByIndex("Normal", idx), md.Normal)
-	gpu.SetValueFrom(vgp.ValueByIndex("TexCoord", idx), md.TexCoord)
+	gpu.SetValueFrom(errors.Log1(vgp.ValueByIndex("Pos", idx)), md.Vertex)
+	gpu.SetValueFrom(errors.Log1(vgp.ValueByIndex("Normal", idx)), md.Normal)
+	gpu.SetValueFrom(errors.Log1(vgp.ValueByIndex("TexCoord", idx)), md.TexCoord)
 	if md.HasColor {
-		gpu.SetValueFrom(vgp.ValueByIndex("VertexColor", idx), md.Colors)
+		gpu.SetValueFrom(errors.Log1(vgp.ValueByIndex("VertexColor", idx)), md.Colors)
 	} else if idx == 0 { // set dummy vertexcolor for first guy
-		gpu.SetValueFrom(vgp.ValueByIndex("VertexColor", idx), make([]float32, md.NumVertex*4))
+		gpu.SetValueFrom(errors.Log1(vgp.ValueByIndex("VertexColor", idx)), make([]float32, md.NumVertex*4))
 	}
-	gpu.SetValueFrom(vgp.ValueByIndex("Index", idx), md.Index)
+	gpu.SetValueFrom(errors.Log1(vgp.ValueByIndex("Index", idx)), md.Index)
 }
 
 func (ph *Phong) configMesh(md *shape.MeshData, idx int) {
 	vgp := ph.System.Vars().VertexGroup()
-	vgp.ValueByIndex("Pos", idx).SetDynamicN(md.NumVertex)
-	vgp.ValueByIndex("Normal", idx).SetDynamicN(md.NumVertex)
-	vgp.ValueByIndex("TexCoord", idx).SetDynamicN(md.NumVertex)
-	vgp.ValueByIndex("Index", idx).SetDynamicN(md.NumIndex)
-	vc := vgp.ValueByIndex("VertexColor", idx)
+	errors.Log1(vgp.ValueByIndex("Pos", idx)).SetDynamicN(md.NumVertex)
+	errors.Log1(vgp.ValueByIndex("Normal", idx)).SetDynamicN(md.NumVertex)
+	errors.Log1(vgp.ValueByIndex("TexCoord", idx)).SetDynamicN(md.NumVertex)
+	errors.Log1(vgp.ValueByIndex("Index", idx)).SetDynamicN(md.NumIndex)
+	vc := errors.Log1(vgp.ValueByIndex("VertexColor", idx))
 	if md.HasColor {
 		vc.SetDynamicN(md.NumVertex)
 	} else {

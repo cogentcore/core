@@ -23,7 +23,7 @@ import (
 // This is the input to the PCA eigenvalue decomposition of the resulting
 // covariance matrix.
 func CovarTableCol(cmat tensor.Tensor, ix *table.IndexView, column string, mfun metric.Func64) error {
-	col, err := ix.Table.ColumnByNameTry(column)
+	col, err := ix.Table.ColumnByName(column)
 	if err != nil {
 		return err
 	}

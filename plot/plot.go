@@ -98,10 +98,6 @@ func New() *Plot {
 // When drawing the plot, Plotters are drawn in the
 // order in which they were added to the plot.
 func (pt *Plot) Add(ps ...Plotter) {
-	for _, d := range ps {
-		pt.UpdateRangeFromPlotter(d)
-	}
-
 	pt.Plotters = append(pt.Plotters, ps...)
 }
 
@@ -111,6 +107,7 @@ func (pt *Plot) SetPixels(img *image.RGBA) {
 	pt.Paint = paint.NewContextFromImage(pt.Pixels)
 	pt.Paint.UnitContext.DPI = pt.DPI
 	pt.Size = pt.Pixels.Bounds().Size()
+	pt.UpdateRange() // needs context, to automatically update for labels
 }
 
 // Resize sets the size of the output image to given size.
@@ -198,7 +195,7 @@ func (pt *Plot) UpdateRange() {
 
 func (pt *Plot) UpdateRangeFromPlotter(d Plotter) {
 	if x, ok := d.(DataRanger); ok {
-		xmin, xmax, ymin, ymax := x.DataRange()
+		xmin, xmax, ymin, ymax := x.DataRange(pt)
 		pt.X.Min = math32.Min(pt.X.Min, xmin)
 		pt.X.Max = math32.Max(pt.X.Max, xmax)
 		pt.Y.Min = math32.Min(pt.Y.Min, ymin)

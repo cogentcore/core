@@ -12,9 +12,9 @@ You can add any widgets to tabs:
 
 ```Go
 ts := core.NewTabs(b)
-first := ts.NewTab("First")
+first, _ := ts.NewTab("First")
 core.NewText(first).SetText("I am first!")
-second := ts.NewTab("Second")
+second, _ := ts.NewTab("Second")
 core.NewText(second).SetText("I am second!")
 ```
 
@@ -32,8 +32,10 @@ You can add icons to tabs:
 
 ```Go
 ts := core.NewTabs(b)
-ts.NewTab("First", icons.Home)
-ts.NewTab("Second", icons.Explore)
+_, tb := ts.NewTab("First")
+tb.SetIcon(icons.Home)
+_, tb = ts.NewTab("Second")
+tb.SetIcon(icons.Explore)
 ```
 
 You can make functional tabs, which can be closed and moved:
@@ -49,9 +51,12 @@ You can make navigation tabs, which dynamically serve as a bottom navigation bar
 
 ```Go
 ts := core.NewTabs(b).SetType(core.NavigationAuto)
-ts.NewTab("First", icons.Home)
-ts.NewTab("Second", icons.Explore)
-ts.NewTab("Third", icons.History)
+_, tb := ts.NewTab("First")
+tb.SetIcon(icons.Home)
+_, tb = ts.NewTab("Second")
+tb.SetIcon(icons.Explore)
+_, tb = ts.NewTab("Third")
+tb.SetIcon(icons.History)
 ```
 
 You can allow the user to add new tabs:

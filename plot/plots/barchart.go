@@ -208,7 +208,7 @@ func (b *BarChart) Plot(plt *plot.Plot) {
 }
 
 // DataRange implements the plot.DataRanger interface.
-func (b *BarChart) DataRange() (xmin, xmax, ymin, ymax float32) {
+func (b *BarChart) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
 	catMin := b.Offset - b.Pad
 	catMax := b.Offset + float32(len(b.Values)-1)*b.Stride + b.Pad
 

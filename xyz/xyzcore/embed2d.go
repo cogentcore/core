@@ -129,7 +129,7 @@ func (em *Embed2D) UploadViewTex(sc *Scene) {
 	var err error
 	if em.Mat.TexPtr == nil {
 		txname := "__Embed2D: " + em.Nm
-		tx, err = sc.TextureByNameTry(txname)
+		tx, err = sc.TextureByName(txname)
 		if err != nil {
 			tx = &TextureBase{Nm: txname}
 			sc.AddTexture(tx)

@@ -9,7 +9,6 @@ package xyzcore
 
 import (
 	"errors"
-	"image"
 	"image/draw"
 
 	"cogentcore.org/core/core"
@@ -52,7 +51,7 @@ func (sw *Scene) Init() {
 	sw.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable, abilities.DoubleClickable)
 		s.Grow.Set(1, 1)
-		s.Min.Set(units.Em(20))
+		s.Min.Set(units.Em(2))
 	})
 
 	sw.On(events.Scroll, func(e events.Event) {
@@ -70,7 +69,7 @@ func (sw *Scene) Init() {
 
 	sw.Updater(func() {
 		sz := sw.Geom.Size.Actual.Content.ToPointFloor()
-		if sz == (image.Point{}) {
+		if sz.X <= 0 || sz.Y <= 0 {
 			return
 		}
 		sw.XYZ.Geom.Size = sz
@@ -137,9 +136,11 @@ func (sw *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
 		core.ErrorSnackbar(sw, errors.New("xyz.Scene.RenderDraw: no WebGPU drawer available"))
 		return
 	}
+	bb, sbb, empty := sw.DirectRenderDrawBBoxes(sw.XYZ.Frame.Frames[0].Format.Bounds())
+	if empty {
+		return
+	}
 	gdrw := agd.AsGPUDrawer()
 	gdrw.UseTexture(sw.XYZ.Frame.Frames[0])
-	bb := sw.Geom.TotalBBox.Add(sw.Scene.SceneGeom.Pos)
-	ibb := image.Rectangle{Max: bb.Size()}
-	gdrw.CopyUsed(bb.Min, ibb, draw.Src, false)
+	gdrw.CopyUsed(bb.Min, sbb, draw.Src, false)
 }

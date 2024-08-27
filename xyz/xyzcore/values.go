@@ -126,9 +126,8 @@ func (vv *TexValue) Activate(vp *core.Viewport2D, dlgRecv tree.Node, dlgFunc tre
 	if !ok {
 		return
 	}
-	sci, err := ndi.ParentByTypeTry(TypeScene, tree.Embeds)
-	if err != nil {
-		log.Println(err)
+	sci, err := ndi.ParentByType(TypeScene, tree.Embeds)
+	if errors.Log1(err) != nil {
 		return
 	}
 	sc := sci.Embed(TypeScene).(*Scene)

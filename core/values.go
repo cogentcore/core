@@ -5,6 +5,7 @@
 package core
 
 import (
+	"image"
 	"reflect"
 
 	"cogentcore.org/core/base/labels"
@@ -111,6 +112,17 @@ func (tb *TreeButton) Init() {
 	InitValueButton(tb, true, func(d *Body) {
 		makeInspector(d, tb.Tree)
 	})
+}
+
+func (tb *TreeButton) WidgetTooltip(pos image.Point) (string, image.Point) {
+	if tb.Tree == nil {
+		return tb.Tooltip, tb.DefaultTooltipPos()
+	}
+	tpa := "(" + tb.Tree.AsTree().Path() + ")"
+	if tb.Tooltip == "" {
+		return tpa, tb.DefaultTooltipPos()
+	}
+	return tpa + " " + tb.Tooltip, tb.DefaultTooltipPos()
 }
 
 // TypeChooser represents a [types.Type] value with a chooser.

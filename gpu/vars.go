@@ -113,54 +113,44 @@ func (vs *Vars) AddGroup(role VarRoles, name ...string) *VarGroup {
 	return vg
 }
 
-// VarByName returns Var by name in given group number
-func (vs *Vars) VarByName(group int, name string) *Var {
-	return errors.Log1(vs.VarByNameTry(group, name))
-}
-
-// VarByNameTry returns Var by name in given group number,
+// VarByName returns Var by name in given group number,
 // returning error if not found
-func (vs *Vars) VarByNameTry(group int, name string) (*Var, error) {
-	vg, err := vs.GroupTry(group)
+func (vs *Vars) VarByName(group int, name string) (*Var, error) {
+	vg, err := vs.Group(group)
 	if err != nil {
 		return nil, err
 	}
-	return vg.VarByNameTry(name)
+	return vg.VarByName(name)
 }
 
-// ValueByNameTry returns value by first looking up variable name, then value name,
+// ValueByName returns value by first looking up variable name, then value name,
 // within given group number, returning error if not found
-func (vs *Vars) ValueByNameTry(group int, varName, valName string) (*Value, error) {
-	vg, err := vs.GroupTry(group)
+func (vs *Vars) ValueByName(group int, varName, valName string) (*Value, error) {
+	vg, err := vs.Group(group)
 	if err != nil {
 		return nil, err
 	}
-	return vg.ValueByNameTry(varName, valName)
+	return vg.ValueByName(varName, valName)
 }
 
-// ValueByIndex returns value by first looking up variable name, then value index.
-func (vs *Vars) ValueByIndex(group int, varName string, valIndex int) *Value {
-	return errors.Log1(vs.ValueByIndexTry(group, varName, valIndex))
-}
-
-// ValueByIndexTry returns value by first looking up variable name, then value index,
+// ValueByIndex returns value by first looking up variable name, then value index,
 // returning error if not found
-func (vs *Vars) ValueByIndexTry(group int, varName string, valIndex int) (*Value, error) {
-	vg, err := vs.GroupTry(group)
+func (vs *Vars) ValueByIndex(group int, varName string, valIndex int) (*Value, error) {
+	vg, err := vs.Group(group)
 	if err != nil {
 		return nil, err
 	}
-	return vg.ValueByIndexTry(varName, valIndex)
+	return vg.ValueByIndex(varName, valIndex)
 }
 
 // SetCurrentValue sets the index of the current Value to use
 // for given variable name, in given group number.
 func (vs *Vars) SetCurrentValue(group int, name string, valueIndex int) (*Var, error) {
-	vg, err := vs.GroupTry(group)
+	vg, err := vs.Group(group)
 	if err != nil {
 		return nil, err
 	}
-	vr, err := vg.VarByNameTry(name)
+	vr, err := vg.VarByName(name)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +161,10 @@ func (vs *Vars) SetCurrentValue(group int, name string, valueIndex int) (*Var, e
 // SetDynamicIndex sets the dynamic offset index for Value to use
 // for given variable name, in given group number.
 func (vs *Vars) SetDynamicIndex(group int, name string, dynamicIndex int) *Var {
-	vr := vs.VarByName(group, name)
+	vr, err := vs.VarByName(group, name)
+	if errors.Log(err) != nil {
+		return nil
+	}
 	vr.Values.SetDynamicIndex(dynamicIndex)
 	return vr
 }
@@ -250,8 +243,8 @@ func (vs *Vars) StartGroup() int {
 	}
 }
 
-// GroupTry returns group by index, returning nil and error if not found
-func (vs *Vars) GroupTry(group int) (*VarGroup, error) {
+// Group returns group by index, returning nil and error if not found
+func (vs *Vars) Group(group int) (*VarGroup, error) {
 	vg, has := vs.Groups[group]
 	if !has {
 		err := fmt.Errorf("gpu.Vars:GroupTry gp number %d not found", group)

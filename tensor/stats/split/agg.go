@@ -25,24 +25,13 @@ func AggIndex(spl *table.Splits, colIndex int, stat stats.Stats) *table.SplitAgg
 
 // AggColumn performs aggregation using given standard statistic (e.g., Mean) across
 // all splits, and returns the SplitAgg container of the results, which are also
-// stored in the Splits.  Column is specified by name -- see Try for error msg version.
-func AggColumn(spl *table.Splits, column string, stat stats.Stats) *table.SplitAgg {
-	dt := spl.Table()
-	if dt == nil {
-		return nil
-	}
-	return AggIndex(spl, dt.ColumnIndex(column), stat)
-}
-
-// AggColumnTry performs aggregation using given standard statistic (e.g., Mean) across
-// all splits, and returns the SplitAgg container of the results, which are also
-// stored in the Splits.  Column is specified by name -- returns error for bad column name.
-func AggColumnTry(spl *table.Splits, column string, stat stats.Stats) (*table.SplitAgg, error) {
+// stored in the Splits.  Column is specified by name; returns error for bad column name.
+func AggColumn(spl *table.Splits, column string, stat stats.Stats) (*table.SplitAgg, error) {
 	dt := spl.Table()
 	if dt == nil {
 		return nil, fmt.Errorf("split.AggTry: No splits to aggregate over")
 	}
-	colIndex, err := dt.ColumnIndexTry(column)
+	colIndex, err := dt.ColumnIndex(column)
 	if err != nil {
 		return nil, err
 	}
@@ -83,24 +72,13 @@ func DescIndex(spl *table.Splits, colIndex int) {
 
 // DescColumn performs aggregation using standard statistics across
 // all splits, and stores results in the Splits.
-// Column is specified by name -- see Try for error msg version.
-func DescColumn(spl *table.Splits, column string) {
-	dt := spl.Table()
-	if dt == nil {
-		return
-	}
-	DescIndex(spl, dt.ColumnIndex(column))
-}
-
-// DescColumnTry performs aggregation using standard statistics across
-// all splits, and stores results in the Splits.
-// Column is specified by name -- returns error for bad column name.
-func DescColumnTry(spl *table.Splits, column string) error {
+// Column is specified by name; returns error for bad column name.
+func DescColumn(spl *table.Splits, column string) error {
 	dt := spl.Table()
 	if dt == nil {
 		return fmt.Errorf("split.DescTry: No splits to aggregate over")
 	}
-	colIndex, err := dt.ColumnIndexTry(column)
+	colIndex, err := dt.ColumnIndex(column)
 	if err != nil {
 		return err
 	}

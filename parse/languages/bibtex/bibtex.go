@@ -12,6 +12,7 @@ package bibtex
 import (
 	"bytes"
 	"fmt"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -155,6 +156,13 @@ func (bib *BibTex) AddEntry(entry *BibEntry) {
 // AddStringVar adds a new string var (if does not exist).
 func (bib *BibTex) AddStringVar(key string, val BibString) {
 	bib.StringVar[key] = &BibVar{Key: key, Value: val}
+}
+
+// SortEntries sorts entries by CiteName.
+func (bib *BibTex) SortEntries() {
+	slices.SortFunc(bib.Entries, func(a, b *BibEntry) int {
+		return strings.Compare(a.CiteName, b.CiteName)
+	})
 }
 
 // GetStringVar looks up a string by its key.

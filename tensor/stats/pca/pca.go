@@ -149,7 +149,7 @@ func (pa *PCA) PCA() error {
 // onto the idx'th eigenvector (0 = largest eigenvalue, 1 = next, etc).
 // Must have already called PCA() method.
 func (pa *PCA) ProjectCol(vals *[]float64, ix *table.IndexView, column string, idx int) error {
-	col, err := ix.Table.ColumnByNameTry(column)
+	col, err := ix.Table.ColumnByName(column)
 	if err != nil {
 		return err
 	}
@@ -193,7 +193,7 @@ func (pa *PCA) ProjectCol(vals *[]float64, ix *table.IndexView, column string, i
 // and stores results along with labels from column labNm into results table.
 // Must have already called PCA() method.
 func (pa *PCA) ProjectColToTable(projections *table.Table, ix *table.IndexView, column, labNm string, idxs []int) error {
-	_, err := ix.Table.ColumnByNameTry(column)
+	_, err := ix.Table.ColumnByName(column)
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func (pa *PCA) ProjectColToTable(projections *table.Table, ix *table.IndexView, 
 	}
 
 	if labNm != "" {
-		lcol, err := ix.Table.ColumnByNameTry(labNm)
+		lcol, err := ix.Table.ColumnByName(labNm)
 		if err == nil {
 			plcol := projections.Columns[0]
 			for row := 0; row < rows; row++ {
