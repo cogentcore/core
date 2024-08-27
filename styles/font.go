@@ -39,10 +39,7 @@ type Font struct { //types:add
 	// normal or small caps (inherited)
 	Variant FontVariants
 
-	// Decoration contains the bit flag [TextDecorations]
-	// (underline, line-through, etc). It must be set using
-	// [Font.SetDecoration] since it contains bit flags.
-	// It is not inherited.
+	// underline, line-through, etc (not inherited)
 	Decoration TextDecorations
 
 	// super / sub script (not inherited)
@@ -245,8 +242,9 @@ const (
 // more specific one hasn't!  And also match the FontStretch enum.
 var FontStretchNames = []string{"Normal", "UltraCondensed", "ExtraCondensed", "SemiCondensed", "SemiExpanded", "ExtraExpanded", "UltraExpanded", "Condensed", "Expanded", "Condensed", "Expanded"}
 
-// TextDecorations are underline, line-through, etc -- operates as bit flags
-// -- also used for additional layout hints for RuneRender
+// TextDecorations are underline, line-through, etc, as bit flags
+// that must be set using [Font.SetDecoration].
+// Also used for additional layout hints for RuneRender.
 type TextDecorations int64 //enums:bitflag -trim-prefix Deco -transform kebab
 
 const (
