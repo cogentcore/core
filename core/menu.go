@@ -234,6 +234,9 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 		})
 		w.AddItemsFunc(func() {
 			addButtonItems(&w.Items, sc, "")
+			tmps := NewScene()
+			sc.applyContextMenus(tmps)
+			addButtonItems(&w.Items, tmps, "")
 		})
 		w.OnFinal(events.Change, func(e events.Event) {
 			d.Close()
