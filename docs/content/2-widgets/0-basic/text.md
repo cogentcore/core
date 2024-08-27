@@ -30,6 +30,7 @@ You can also use a styler to further customize the appearance of text:
 core.NewText(b).SetText("Hello,\n\tworld!").Styler(func(s *styles.Style) {
     s.Font.Size.Dp(21)
     s.Font.Style = styles.Italic
+    s.Font.SetDecoration(styles.Underline, styles.LineThrough)
     s.Text.WhiteSpace = styles.WhiteSpacePre
     s.Color = colors.Scheme.Success.Base
     s.SetMono(true)
