@@ -48,13 +48,7 @@ func (bf *BarFuncs) Inherit(obf BarFuncs) {
 
 // makeSceneBars configures the side control bars, for main scenes.
 func (sc *Scene) makeSceneBars() {
-	// At the last possible moment, add the default app bar
-	// if there are [Scene.AppBars] specified.
-	if sc.Stage.Type.isMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
-		if sc.Bars.Top.IsEmpty() && len(sc.AppBars) > 0 {
-			sc.Bars.Top.Add(makeAppBar) // put in the top by default
-		}
-	}
+	sc.addDefaultBars()
 	if !sc.Bars.Top.IsEmpty() {
 		head := NewFrame(sc)
 		head.SetName("top-bar")
@@ -104,6 +98,15 @@ func (sc *Scene) makeSceneBars() {
 			s.Grow.Set(1, 0)
 		})
 		sc.Bars.Bottom.Call(foot)
+	}
+}
+
+func (sc *Scene) addDefaultBars() {
+	// TODO: remove default default app bar adding
+	if sc.Stage.Type.isMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
+		if len(sc.AppBars) > 0 {
+			sc.Bars.Top.Add(makeAppBar)
+		}
 	}
 }
 
