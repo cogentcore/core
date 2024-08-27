@@ -75,8 +75,9 @@ func (bd *Body) SetTitle(title string) *Body {
 			win.setTitle(title)
 		}
 	}
-	if lb, ok := bd.ChildByName("body-title", 0).(*Text); ok {
-		lb.SetText(title)
+	// title widget is contained within the top bar
+	if tb, ok := bd.Scene.ChildByName("top-bar").(Widget); ok {
+		tb.AsWidget().Update()
 	}
 	return bd
 }
@@ -84,8 +85,7 @@ func (bd *Body) SetTitle(title string) *Body {
 // AddTitle adds [Text] with the given title, and sets the [Body.Title]
 // text which will be used by the [Scene] etc.
 func (bd *Body) AddTitle(title string) *Body {
-	bd.SetTitle(title)
-	return bd
+	return bd.SetTitle(title) // TODO(appbar): AddTitle pointless now
 }
 
 // AddText adds the given supporting [Text], typically added

@@ -128,7 +128,10 @@ func (sc *Scene) addDefaultBars() {
 					sc.Close()
 				})
 			}
-			NewText(titleRow).SetText(sc.Body.Title).SetType(TextHeadlineSmall)
+			title := NewText(titleRow).SetType(TextHeadlineSmall)
+			title.Updater(func() {
+				title.SetText(sc.Body.Title)
+			})
 		})
 	}
 }
