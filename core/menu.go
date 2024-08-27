@@ -208,8 +208,9 @@ var (
 
 // standardContextMenu adds standard context menu items for the [Scene].
 func (sc *Scene) standardContextMenu(m *Scene) { //types:add
-	NewButton(m).SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip("Search for buttons and other app actions").OnClick(func(e events.Event) {
-		d := NewBody().AddTitle("Search")
+	msdesc := "Search for menu buttons and other app actions"
+	NewButton(m).SetText("Menu search").SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip(msdesc).OnClick(func(e events.Event) {
+		d := NewBody().AddTitle("Menu search").AddText(msdesc)
 		w := NewChooser(d).SetEditable(true).SetIcon(icons.Search)
 		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 0)

@@ -80,8 +80,6 @@ func appIconImages() []image.Image {
 }
 
 // makeAppBar configures a new top app bar in the given parent.
-// It adds a back navigation button and an app chooser,
-// followed by standard overflow menu items.
 func makeAppBar(parent Widget) {
 	tb := NewToolbar(parent)
 	if len(tb.Scene.AppBars) > 0 {
