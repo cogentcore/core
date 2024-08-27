@@ -105,7 +105,7 @@ func (sc *Scene) makeSceneBars() {
 }
 
 func (sc *Scene) addDefaultBars() {
-	// TODO: remove default default app bar adding
+	// TODO(appbar): remove default default app bar adding
 	if sc.Stage.Type.isMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
 		if len(sc.AppBars) > 0 {
 			sc.Bars.Top.Add(makeAppBar)
@@ -125,6 +125,8 @@ func (sc *Scene) addDefaultBars() {
 		})
 	}
 }
+
+// TODO(appbar): remove GetBar and GetTopAppBar
 
 // GetBar returns Bar layout widget at given side, nil if not there.
 func (sc *Scene) GetBar(side styles.SideIndexes) *Frame {
