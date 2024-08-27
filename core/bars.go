@@ -7,6 +7,9 @@ package core
 import (
 	"strings"
 
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -107,6 +110,32 @@ func (sc *Scene) addDefaultBars() {
 		if len(sc.AppBars) > 0 {
 			sc.Bars.Top.Add(makeAppBar)
 		}
+	}
+
+	st := sc.Stage
+	if st.Type == DialogStage && st.FullWindow && !st.NewWindow {
+		sc.Bars.Top.Add(func(parent Widget) {
+			titleRow := NewFrame(parent)
+			titleRow.SetName("title-row")
+			back := NewButton(titleRow).SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
+			back.SetType(ButtonAction).SetTooltip("Back")
+			back.OnClick(func(e events.Event) {
+				if slen := back.Scene.Stage.Mains.stack.Len(); slen > 1 {
+					if back.Scene.Stage.CloseOnBack {
+						back.Scene.Close()
+					} else {
+						back.Scene.Stage.Mains.stack.ValueByIndex(slen - 2).raise()
+					}
+					return
+				}
+				if wlen := len(AllRenderWindows); wlen > 1 {
+					if back.Scene.Stage.CloseOnBack {
+						currentRenderWindow.closeReq()
+					}
+					AllRenderWindows[wlen-2].Raise()
+				}
+			})
+		})
 	}
 }
 
