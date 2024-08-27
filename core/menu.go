@@ -315,6 +315,11 @@ func addButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 		if bt == nil || bt.IsDisabled() {
 			return tree.Continue
 		}
+		_, isTb := bt.Parent.(*Toolbar)
+		_, isSc := bt.Parent.(*Scene)
+		if !isTb && !isSc {
+			return tree.Continue
+		}
 		label := bt.Text
 		if label == "" {
 			label = bt.Tooltip
