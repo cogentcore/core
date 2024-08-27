@@ -42,6 +42,10 @@ type Scene struct { //core:no-new
 	// widgets in conjunction with [App.SceneInit].
 	WidgetInit func(w Widget) `json:"-" xml:"-" edit:"-"`
 
+	// MenuSearchInit is a function called with the menu search chooser
+	// created by the default Scene context menu.
+	MenuSearchInit func(w *Chooser) `json:"-" xml:"-" edit:"-"`
+
 	// Bars contains functions for constructing the control bars for this Scene,
 	// attached to different sides of a Scene (e.g., TopAppBar at Top,
 	// NavBar at Bottom, etc).  Functions are called in forward order

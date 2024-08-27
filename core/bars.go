@@ -188,8 +188,3 @@ func (bd *Body) AddBottomBar(fun func(parent Widget)) {
 func (bd *Body) AddAppBar(m ...func(p *tree.Plan)) {
 	bd.Scene.AppBars = append(bd.Scene.AppBars, m...)
 }
-
-// GetTopAppBar returns the TopAppBar Toolbar if it exists, nil otherwise.
-func (bd *Body) GetTopAppBar() *Toolbar {
-	return bd.Scene.GetTopAppBar()
-}

@@ -241,6 +241,9 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 		w.OnFinal(events.Change, func(e events.Event) {
 			d.Close()
 		})
+		if sc.MenuSearchInit != nil {
+			sc.MenuSearchInit(w)
+		}
 		d.AddBottomBar(func(parent Widget) {
 			d.AddCancel(parent)
 		})
