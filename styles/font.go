@@ -39,7 +39,10 @@ type Font struct { //types:add
 	// normal or small caps (inherited)
 	Variant FontVariants
 
-	// underline, line-through, etc (not inherited)
+	// Decoration contains the bit flag [TextDecorations]
+	// (underline, line-through, etc). It must be set using
+	// [Font.SetDecoration] since it contains bit flags.
+	// It is not inherited.
 	Decoration TextDecorations
 
 	// super / sub script (not inherited)
