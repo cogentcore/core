@@ -96,61 +96,61 @@ func (bd *Body) NewWindow() *Stage {
 	return ms
 }
 
-func (st *Stage) addSceneParts() *Stage {
+func (st *Stage) addSceneParts() {
+	if st.Type != DialogStage || st.FullWindow || st.NewWindow {
+		return
+	}
 	sc := st.Scene
-	parts := sc.newParts() // TODO: only make if needed
+	parts := sc.newParts()
 	parts.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(0, 1)
 		s.Gap.Zero()
 	})
-	if st.Type == DialogStage && !st.FullWindow && !st.NewWindow {
-		mv := NewHandle(parts)
-		mv.Styler(func(s *styles.Style) {
-			s.Direction = styles.Column
-		})
-		mv.FinalStyler(func(s *styles.Style) {
-			s.Cursor = cursors.Move
-		})
-		mv.SetName("move")
-		mv.OnChange(func(e events.Event) {
-			e.SetHandled()
-			pd := e.PrevDelta()
-			np := sc.SceneGeom.Pos.Add(pd)
-			np.X = max(np.X, 0)
-			np.Y = max(np.Y, 0)
-			rw := sc.RenderWindow()
-			sz := rw.SystemWindow.Size()
-			mx := sz.X - int(sc.SceneGeom.Size.X)
-			my := sz.Y - int(sc.SceneGeom.Size.Y)
-			np.X = min(np.X, mx)
-			np.Y = min(np.Y, my)
-			sc.SceneGeom.Pos = np
-			sc.NeedsRender()
-		})
-		rsz := NewHandle(parts)
-		rsz.Styler(func(s *styles.Style) {
-			s.Direction = styles.Column
-			s.FillMargin = false
-		})
-		rsz.FinalStyler(func(s *styles.Style) {
-			s.Cursor = cursors.ResizeNWSE
-			s.Min.Set(units.Em(1))
-		})
-		rsz.SetName("resize")
-		rsz.OnChange(func(e events.Event) {
-			e.SetHandled()
-			pd := e.PrevDelta()
-			np := sc.SceneGeom.Size.Add(pd)
-			minsz := 100
-			np.X = max(np.X, minsz)
-			np.Y = max(np.Y, minsz)
-			ng := sc.SceneGeom
-			ng.Size = np
-			sc.resize(ng)
-		})
-	}
-	return st
+	mv := NewHandle(parts)
+	mv.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+	mv.FinalStyler(func(s *styles.Style) {
+		s.Cursor = cursors.Move
+	})
+	mv.SetName("move")
+	mv.OnChange(func(e events.Event) {
+		e.SetHandled()
+		pd := e.PrevDelta()
+		np := sc.SceneGeom.Pos.Add(pd)
+		np.X = max(np.X, 0)
+		np.Y = max(np.Y, 0)
+		rw := sc.RenderWindow()
+		sz := rw.SystemWindow.Size()
+		mx := sz.X - int(sc.SceneGeom.Size.X)
+		my := sz.Y - int(sc.SceneGeom.Size.Y)
+		np.X = min(np.X, mx)
+		np.Y = min(np.Y, my)
+		sc.SceneGeom.Pos = np
+		sc.NeedsRender()
+	})
+	rsz := NewHandle(parts)
+	rsz.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.FillMargin = false
+	})
+	rsz.FinalStyler(func(s *styles.Style) {
+		s.Cursor = cursors.ResizeNWSE
+		s.Min.Set(units.Em(1))
+	})
+	rsz.SetName("resize")
+	rsz.OnChange(func(e events.Event) {
+		e.SetHandled()
+		pd := e.PrevDelta()
+		np := sc.SceneGeom.Size.Add(pd)
+		minsz := 100
+		np.X = max(np.X, minsz)
+		np.Y = max(np.Y, minsz)
+		ng := sc.SceneGeom
+		ng.Size = np
+		sc.resize(ng)
+	})
 }
 
 // firstWindowStages creates a temporary [stages] for the first window
