@@ -41,12 +41,16 @@ func NodesUnderPoint(n tree.Node, pt image.Point) []Node {
 				spr := sp.MulMatrix4(&nb.Pose.MVPMatrix)
 				epr := ep.MulMatrix4(&nb.Pose.MVPMatrix)
 				del := epr.Sub(spr)
-				ang := math32.RadToDeg(math32.Atan2(del.Y, del.X))
+				angxy := math32.RadToDeg(math32.Atan2(del.Y, del.X))
+				if (angxy >= 89 && angxy <= 91) || (angxy >= -91 && angxy <= -89) {
+					ns = append(ns, ni)
+					return tree.Continue
+				}
 				mn := math32.FromPoint(nb.SceneBBox.Min)
 				mx := math32.FromPoint(nb.SceneBBox.Max)
 				st := mn
 				ed := mx
-				flip := ang < 90 || ang < -90
+				flip := (angxy > 0 && angxy < 90) || (angxy < 0 && angxy < -90)
 				if flip {
 					st = math32.Vec2(mn.X, mx.Y)
 					ed = math32.Vec2(mx.X, mn.Y)
