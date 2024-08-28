@@ -74,9 +74,9 @@ func (w *Window) CurMousePosPoint(gw *glfw.Window) image.Point {
 func (w *Window) MousePosToPoint(x, y float64) image.Point {
 	var where image.Point
 	if TheApp.Platform() == system.MacOS {
-		w.Mu.Lock()
+		// w.Mu.Lock() // this mutex can hang on closing windows
 		where = image.Pt(int(w.DevicePixelRatio*float32(x)), int(w.DevicePixelRatio*float32(y)))
-		w.Mu.Unlock()
+		// w.Mu.Unlock()
 	} else {
 		where = image.Pt(int(x), int(y))
 	}
