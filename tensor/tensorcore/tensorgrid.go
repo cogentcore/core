@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tensor"
 )
@@ -24,13 +25,20 @@ import (
 // TensorLayout are layout options for displaying tensors
 type TensorLayout struct { //types:add
 
-	// even-numbered dimensions are displayed as Y*X rectangles -- this determines along which dimension to display any remaining odd dimension: OddRow = true = organize vertically along row dimension, false = organize horizontally across column dimension
+	// even-numbered dimensions are displayed as Y*X rectangles.
+	// This determines along which dimension to display any remaining
+	// odd dimension: OddRow = true = organize vertically along row
+	// dimension, false = organize horizontally across column dimension.
 	OddRow bool
 
-	// if true, then the Y=0 coordinate is displayed from the top-down; otherwise the Y=0 coordinate is displayed from the bottom up, which is typical for emergent network patterns.
+	// if true, then the Y=0 coordinate is displayed from the top-down;
+	// otherwise the Y=0 coordinate is displayed from the bottom up,
+	// which is typical for emergent network patterns.
 	TopZero bool
 
-	// display the data as a bitmap image.  if a 2D tensor, then it will be a greyscale image.  if a 3D tensor with size of either the first or last dim = either 3 or 4, then it is a RGB(A) color image
+	// display the data as a bitmap image.  if a 2D tensor, then it will
+	// be a greyscale image.  if a 3D tensor with size of either the first
+	// or last dim = either 3 or 4, then it is a RGB(A) color image.
 	Image bool
 }
 
@@ -191,15 +199,17 @@ func (tg *TensorGrid) Init() {
 	tg.Display.GridView = tg
 	tg.Display.Defaults()
 	tg.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.DoubleClickable)
 		ms := tg.MinSize()
 		s.Min.Set(units.Dot(ms.X), units.Dot(ms.Y))
 		s.Grow.Set(1, 1)
 	})
 
 	tg.OnDoubleClick(func(e events.Event) {
-		tg.OpenTensorView()
+		tg.OpenTensorEditor()
 	})
-	tg.AddContextMenu(func(m *core.Scene) { // todo: still not getting the context menu event at all
+	tg.AddContextMenu(func(m *core.Scene) {
+		core.NewFuncButton(m).SetFunc(tg.OpenTensorEditor).SetIcon(icons.Edit)
 		core.NewFuncButton(m).SetFunc(tg.EditSettings).SetIcon(icons.Edit)
 	})
 }
@@ -217,21 +227,16 @@ func (tg *TensorGrid) SetTensor(tsr tensor.Tensor) *TensorGrid {
 	return tg
 }
 
-// OpenTensorView pulls up a TensorView of our tensor
-func (tg *TensorGrid) OpenTensorView() {
-	/*
-		dlg := TensorViewDialog(tg.ViewportSafe(), tg.Tensor, core.DlgOpts{Title: "Edit Tensor", Prompt: "", NoAdd: true, NoDelete: true}, nil, nil)
-		tvk := dlg.Frame().ChildByType(KiT_TensorView, true, 2)
-		if tvk != nil {
-			tv := tvk.(*TensorView)
-			tv.TsrLay = tg.Disp.TensorLayout
-			tv.SetInactiveState(tg.IsInactive())
-			tv.ViewSig.Connect(tg.This, func(recv, send tree.Node, sig int64, data interface{}) {
-				tgg, _ := recv.Embed(KiT_TensorGrid).(*TensorGrid)
-				tgg.UpdateSig()
-			})
-		}
-	*/
+// OpenTensorEditor pulls up a TensorEditor of our tensor
+func (tg *TensorGrid) OpenTensorEditor() { //types:add
+	d := core.NewBody().AddTitle("Tensor Editor")
+	tb := core.NewToolbar(d)
+	te := NewTensorEditor(d).SetTensor(tg.Tensor)
+	te.OnChange(func(e events.Event) {
+		tg.NeedsRender()
+	})
+	tb.Maker(te.MakeToolbar)
+	d.RunWindowDialog(tg)
 }
 
 func (tg *TensorGrid) EditSettings() { //types:add
@@ -240,7 +245,7 @@ func (tg *TensorGrid) EditSettings() { //types:add
 		OnChange(func(e events.Event) {
 			tg.NeedsRender()
 		})
-	d.RunFullDialog(tg)
+	d.RunWindowDialog(tg)
 }
 
 // MinSize returns minimum size based on tensor and display settings
