@@ -249,7 +249,7 @@ func (st *Stage) runWindow() *Stage {
 		sc.resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		win := st.newRenderWindow()
 		mainRenderWindows.add(win)
-		currentRenderWindow = win
+		setCurrentRenderWindow(win)
 		win.goStartEventLoop()
 		return st
 	}
@@ -330,7 +330,7 @@ func (st *Stage) runDialog() *Stage {
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.newRenderWindow()
 		dialogRenderWindows.add(win)
-		currentRenderWindow = win
+		setCurrentRenderWindow(win)
 		win.goStartEventLoop()
 		return st
 	}

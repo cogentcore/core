@@ -39,13 +39,21 @@ func Wait() {
 	system.TheApp.MainLoop()
 }
 
-// currentRenderWindow is the current [renderWindow].
-// On single window platforms (mobile, web, and offscreen),
-// this is the only render window.
-var currentRenderWindow *renderWindow
+var (
+	// currentRenderWindow is the current [renderWindow].
+	// On single window platforms (mobile, web, and offscreen),
+	// this is the only render window.
+	currentRenderWindow *renderWindow
 
-// renderWindowGlobalMu is a mutex for any global state associated with windows
-var renderWindowGlobalMu sync.Mutex
+	// renderWindowGlobalMu is a mutex for any global state associated with windows
+	renderWindowGlobalMu sync.Mutex
+)
+
+func setCurrentRenderWindow(w *renderWindow) {
+	renderWindowGlobalMu.Lock()
+	currentRenderWindow = w
+	renderWindowGlobalMu.Unlock()
+}
 
 // renderWindow provides an outer "actual" window where everything is rendered,
 // and is the point of entry for all events coming in from user actions.
@@ -295,7 +303,7 @@ func (w *renderWindow) resized() {
 // [currentRenderWindow] to the window.
 func (w *renderWindow) Raise() {
 	w.SystemWindow.Raise()
-	currentRenderWindow = w
+	setCurrentRenderWindow(w)
 }
 
 // minimize requests that the window be minimized, making it no longer
@@ -481,7 +489,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 					fmt.Printf("Win: %v got extra focus\n", w.name)
 				}
 			}
-			currentRenderWindow = w
+			setCurrentRenderWindow(w)
 		case events.WinFocusLost:
 			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.name)
