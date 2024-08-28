@@ -110,7 +110,6 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 	w.SystemWindow.SetCloseReqFunc(func(win system.Window) {
 		rc := w.renderContext()
 		rc.lock()
-		defer rc.unlock()
 		w.closing = true
 		// ensure that everyone is closed first
 		for _, kv := range w.mains.stack.Order {
@@ -122,6 +121,7 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 				return
 			}
 		}
+		rc.unlock()
 		win.Close()
 	})
 	return w
