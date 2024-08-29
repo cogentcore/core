@@ -48,7 +48,7 @@ type Tree struct {
 	// FileNodeType is the type of node to create; defaults to [Node] but can use custom node types
 	FileNodeType *types.Type `display:"-" json:"-" xml:"-"`
 
-	// FilterFunc if set, determines whether to include the given node in the tree.
+	// FilterFunc, if set, determines whether to include the given node in the tree.
 	// return true to include, false to not.  This applies to files and directories alike.
 	FilterFunc func(path string, info fs.FileInfo) bool
 
