@@ -6,6 +6,7 @@ package filetree
 
 import (
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -46,6 +47,10 @@ type Tree struct {
 
 	// type of node to create; defaults to [Node] but can use custom node types
 	FileNodeType *types.Type `display:"-" json:"-" xml:"-"`
+
+	// function, if set, determines whether to include the given node in the tree.
+	// return true to include, false to not.  This applies to files and directories alike.
+	FilterFunc func(path string, info fs.FileInfo) bool
 
 	// if true, we are in midst of an OpenAll call; nodes should open all dirs
 	inOpenAll bool
