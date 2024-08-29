@@ -88,12 +88,12 @@ func UnderlyingPointer(v reflect.Value) reflect.Value {
 	return OnePointerValue(uv)
 }
 
-// NonPointerNew has the same overall behavior as [reflect.New] except that
+// NonNilNew has the same overall behavior as [reflect.New] except that
 // it traverses through any pointers such that a new zero non-pointer value
 // will be created in the end, so any pointers in the original type will not
-// be nil. For example, in pseudo-code, NonPointerNew(**int) will return
+// be nil. For example, in pseudo-code, NonNilNew(**int) will return
 // &(&(&(0))).
-func NonPointerNew(typ reflect.Type) reflect.Value {
+func NonNilNew(typ reflect.Type) reflect.Value {
 	n := 0
 	for typ.Kind() == reflect.Pointer {
 		n++

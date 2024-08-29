@@ -26,7 +26,7 @@ func init() {
 		"MapValueSort":       reflect.ValueOf(reflectx.MapValueSort),
 		"MapValueType":       reflect.ValueOf(reflectx.MapValueType),
 		"NonDefaultFields":   reflect.ValueOf(reflectx.NonDefaultFields),
-		"NonPointerNew":      reflect.ValueOf(reflectx.NonPointerNew),
+		"NonNilNew":          reflect.ValueOf(reflectx.NonNilNew),
 		"NonPointerType":     reflect.ValueOf(reflectx.NonPointerType),
 		"NonPointerValue":    reflect.ValueOf(reflectx.NonPointerValue),
 		"NumAllFields":       reflect.ValueOf(reflectx.NumAllFields),
