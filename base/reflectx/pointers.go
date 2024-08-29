@@ -88,16 +88,22 @@ func UnderlyingPointer(v reflect.Value) reflect.Value {
 	return OnePointerValue(uv)
 }
 
-// NewFrom returns a value that is guaranteed to be a pointer to the [Underlying] version of
-// the given value. If that value is not addressable, it makes a new fake pointer that points
-// to a copy of the value, not the actual value. This should only be used you do not need the
-// pointer to actually point to the original value.
-func NewFrom(v reflect.Value) reflect.Value {
-	u := Underlying(v)
-	if u.CanAddr() {
-		return u.Addr()
+// NonNilNew has the same overall behavior as [reflect.New] except that
+// it traverses through any pointers such that a new zero non-pointer value
+// will be created in the end, so any pointers in the original type will not
+// be nil. For example, in pseudo-code, NonNilNew(**int) will return
+// &(&(&(0))).
+func NonNilNew(typ reflect.Type) reflect.Value {
+	n := 0
+	for typ.Kind() == reflect.Pointer {
+		n++
+		typ = typ.Elem()
 	}
-	p := reflect.New(u.Type())
-	p.Elem().Set(u)
-	return p
+	v := reflect.New(typ)
+	for range n {
+		pv := reflect.New(v.Type())
+		pv.Elem().Set(v)
+		v = pv
+	}
+	return v
 }
