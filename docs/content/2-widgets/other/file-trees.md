@@ -18,3 +18,17 @@ ft.OnSelect(func(e events.Event) {
     core.MessageSnackbar(ft, strings.Join(selected, " "))
 })
 ```
+
+<!--  TODO: this is crashing yaegi
+You can filter which files or directories are shown:
+
+```Go
+ft := filetree.NewTree(b)
+ft.FilterFunc = func(path string, info fs.FileInfo) bool {
+    return info.IsDir() // only show directories
+}
+ft.OpenPath(".")
+```
+
+-->
+

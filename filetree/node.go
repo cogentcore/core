@@ -8,6 +8,7 @@ package filetree
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"log/slog"
 	"os"
@@ -210,13 +211,17 @@ func (fn *Node) Init() {
 		repo, _ := fn.Repo()
 		files := fn.dirFileList()
 		for _, fi := range files {
+			fpath := filepath.Join(string(fn.Filepath), fi.Name())
+			if fn.FileRoot.FilterFunc != nil && !fn.FileRoot.FilterFunc(fpath, fi) {
+				continue
+			}
 			tree.AddNew(p, fi.Name(), func() Filer {
 				return tree.NewOfType(fn.FileRoot.FileNodeType).(Filer)
 			}, func(wf Filer) {
 				w := wf.AsFileNode()
 				w.NeedsLayout()
 				w.FileRoot = fn.FileRoot
-				w.Filepath = core.Filename(filepath.Join(string(fn.Filepath), fi.Name()))
+				w.Filepath = core.Filename(fpath)
 				w.initFileInfo()
 				if w.IsDir() && repo == nil {
 					w.detectVCSRepo(true) // update files
@@ -283,11 +288,11 @@ func (fn *Node) RelativePath() string {
 
 // dirFileList returns the list of files in this directory,
 // sorted according to DirsOnTop and SortByModTime options
-func (fn *Node) dirFileList() []os.FileInfo {
+func (fn *Node) dirFileList() []fs.FileInfo {
 	path := string(fn.Filepath)
-	var files []os.FileInfo
-	var dirs []os.FileInfo // for DirsOnTop mode
-	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
+	var files []fs.FileInfo
+	var dirs []fs.FileInfo // for DirsOnTop mode
+	filepath.Walk(path, func(pth string, info fs.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("filetree.Node DirFileList Path %q: Error: %v", path, err)
 			log.Println(emsg)
@@ -324,8 +329,8 @@ func (fn *Node) dirFileList() []os.FileInfo {
 	return files
 }
 
-func sortByModTime(files []os.FileInfo) {
-	slices.SortFunc(files, func(a, b os.FileInfo) int {
+func sortByModTime(files []fs.FileInfo) {
+	slices.SortFunc(files, func(a, b fs.FileInfo) int {
 		if a.ModTime().After(b.ModTime()) {
 			return -1
 		}
