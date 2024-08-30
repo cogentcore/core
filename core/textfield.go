@@ -1859,7 +1859,7 @@ func (tf *TextField) SizeUp() {
 		rsz = tf.configTextSize(availSz)
 	}
 	rsz.SetAdd(icsz)
-	sz.fitSizeMax(&sz.Actual.Content, rsz)
+	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
 	tf.fontHeight = tf.Styles.Font.Face.Metrics.Height
 	tf.editText = tmptxt
@@ -1881,7 +1881,7 @@ func (tf *TextField) SizeDown(iter int) bool {
 	rsz.SetAdd(icsz)
 	// start over so we don't reflect hysteresis of prior guess
 	sz.setInitContentMin(tf.Styles.Min.Dots().Ceil())
-	sz.fitSizeMax(&sz.Actual.Content, rsz)
+	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
 	chg := prevContent != sz.Actual.Content
 	if chg {

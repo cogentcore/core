@@ -93,7 +93,7 @@ func (tg *SimMatGrid) SizeLabel(lbs []string, col bool) (minBlank, ngps int, sz 
 	return minBlank, ngps, tr.BBox.Size()
 }
 
-func (tg *SimMatGrid) MinSize() math32.Vector2 {
+func (tg *SimMatGrid) SizeUp() {
 	tg.rowMinBlank, tg.rowNGps, tg.rowMaxSz = tg.SizeLabel(tg.SimMat.Rows, false)
 	tg.colMinBlank, tg.colNGps, tg.colMaxSz = tg.SizeLabel(tg.SimMat.Columns, true)
 
@@ -113,7 +113,9 @@ func (tg *SimMatGrid) MinSize() math32.Vector2 {
 	gsz = math32.Max(gsz, tg.Display.GridMinSize)
 	gsz = math32.Max(gsz, txtsz)
 	gsz = math32.Min(gsz, tg.Display.GridMaxSize)
-	return math32.Vec2(tg.rowMaxSz.X+LabelSpace+gsz*float32(cols), tg.colMaxSz.Y+LabelSpace+gsz*float32(rows))
+	minsz := math32.Vec2(tg.rowMaxSz.X+LabelSpace+gsz*float32(cols), tg.colMaxSz.Y+LabelSpace+gsz*float32(rows))
+	sz := &tg.Geom.Size
+	sz.FitSizeMax(&sz.Actual.Content, minsz)
 }
 
 func (tg *SimMatGrid) Render() {

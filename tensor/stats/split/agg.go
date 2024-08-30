@@ -38,9 +38,9 @@ func AggColumn(spl *table.Splits, column string, stat stats.Stats) (*table.Split
 	return AggIndex(spl, colIndex, stat), nil
 }
 
-// AggAllNumericCols performs aggregation using given standard aggregation function across
+// AggAllNumericColumns performs aggregation using given standard aggregation function across
 // all splits, for all number-valued columns in the table.
-func AggAllNumericCols(spl *table.Splits, stat stats.Stats) {
+func AggAllNumericColumns(spl *table.Splits, stat stats.Stats) {
 	dt := spl.Table()
 	for ci, cl := range dt.Columns {
 		if cl.IsString() {

@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/tensor/table"
 )
 
-// CovarTableCol generates a covariance matrix from given column name
+// CovarTableColumn generates a covariance matrix from given column name
 // in given IndexView of an table.Table, and given metric function
 // (typically Covariance or Correlation -- use Covar if vars have similar
 // overall scaling, which is typical in neural network models, and use
@@ -22,7 +22,7 @@ import (
 // cell co-varies in its value with each other cell across the rows of the table.
 // This is the input to the PCA eigenvalue decomposition of the resulting
 // covariance matrix.
-func CovarTableCol(cmat tensor.Tensor, ix *table.IndexView, column string, mfun metric.Func64) error {
+func CovarTableColumn(cmat tensor.Tensor, ix *table.IndexView, column string, mfun metric.Func64) error {
 	col, err := ix.Table.ColumnByName(column)
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func CovarTableCol(cmat tensor.Tensor, ix *table.IndexView, column string, mfun 
 	rows := ix.Len()
 	nd := col.NumDims()
 	if nd < 2 || rows == 0 {
-		return fmt.Errorf("pca.CovarTableCol: must have 2 or more dims and rows != 0")
+		return fmt.Errorf("pca.CovarTableColumn: must have 2 or more dims and rows != 0")
 	}
 	ln := col.Len()
 	sz := ln / col.DimSize(0) // size of cell
@@ -43,10 +43,10 @@ func CovarTableCol(cmat tensor.Tensor, ix *table.IndexView, column string, mfun 
 	sdim := []int{0, 0}
 	for ai := 0; ai < sz; ai++ {
 		sdim[0] = ai
-		TableColRowsVec(av, ix, col, ai)
+		TableColumnRowsVec(av, ix, col, ai)
 		for bi := 0; bi <= ai; bi++ { // lower diag
 			sdim[1] = bi
-			TableColRowsVec(bv, ix, col, bi)
+			TableColumnRowsVec(bv, ix, col, bi)
 			cv := mfun(av, bv)
 			cmat.SetFloat(sdim, cv)
 		}
@@ -137,9 +137,9 @@ func CovarTensor(cmat tensor.Tensor, tsr tensor.Tensor, mfun metric.Func64) erro
 	return nil
 }
 
-// TableColRowsVec extracts row-wise vector from given cell index into vec.
+// TableColumnRowsVec extracts row-wise vector from given cell index into vec.
 // vec must be of size ix.Len() -- number of rows
-func TableColRowsVec(vec []float64, ix *table.IndexView, col tensor.Tensor, cidx int) {
+func TableColumnRowsVec(vec []float64, ix *table.IndexView, col tensor.Tensor, cidx int) {
 	rows := ix.Len()
 	ln := col.Len()
 	sz := ln / col.DimSize(0) // size of cell
@@ -161,7 +161,7 @@ func TensorRowsVec(vec []float64, tsr tensor.Tensor, cidx int) {
 	}
 }
 
-// CovarTableColStd generates a covariance matrix from given column name
+// CovarTableColumnStd generates a covariance matrix from given column name
 // in given IndexView of an table.Table, and given metric function
 // (typically Covariance or Correlation -- use Covar if vars have similar
 // overall scaling, which is typical in neural network models, and use
@@ -172,8 +172,8 @@ func TensorRowsVec(vec []float64, tsr tensor.Tensor, cidx int) {
 // This is the input to the PCA eigenvalue decomposition of the resulting
 // covariance matrix.
 // This Std version is usable e.g., in Python where the func cannot be passed.
-func CovarTableColStd(cmat tensor.Tensor, ix *table.IndexView, column string, met metric.StdMetrics) error {
-	return CovarTableCol(cmat, ix, column, metric.StdFunc64(met))
+func CovarTableColumnStd(cmat tensor.Tensor, ix *table.IndexView, column string, met metric.StdMetrics) error {
+	return CovarTableColumn(cmat, ix, column, metric.StdFunc64(met))
 }
 
 // CovarTensorStd generates a covariance matrix from given tensor.Tensor,
