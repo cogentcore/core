@@ -50,7 +50,7 @@ func TestSVDIris(t *testing.T) {
 	}
 
 	prjt := &table.Table{}
-	err = pc.ProjectColToTable(prjt, ix, "data", "class", []int{0, 1})
+	err = pc.ProjectColumnToTable(prjt, ix, "data", "class", []int{0, 1})
 	if err != nil {
 		t.Error(err)
 	}

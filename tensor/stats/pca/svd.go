@@ -158,20 +158,20 @@ func (svd *SVD) SVD() error {
 	return nil
 }
 
-// ProjectCol projects values from the given column of given table (via IndexView)
+// ProjectColumn projects values from the given column of given table (via IndexView)
 // onto the idx'th eigenvector (0 = largest eigenvalue, 1 = next, etc).
 // Must have already called SVD() method.
-func (svd *SVD) ProjectCol(vals *[]float64, ix *table.IndexView, column string, idx int) error {
+func (svd *SVD) ProjectColumn(vals *[]float64, ix *table.IndexView, column string, idx int) error {
 	col, err := ix.Table.ColumnByName(column)
 	if err != nil {
 		return err
 	}
 	if svd.Vectors == nil || svd.Vectors.Len() == 0 {
-		return fmt.Errorf("SVD.ProjectCol Vectors are nil: must call SVD first, with Kind = mat.SVDFull so that the vectors are returned")
+		return fmt.Errorf("SVD.ProjectColumn Vectors are nil: must call SVD first, with Kind = mat.SVDFull so that the vectors are returned")
 	}
 	nr := svd.Vectors.DimSize(0)
 	if idx >= nr {
-		return fmt.Errorf("SVD.ProjectCol eigenvector index > rank of matrix")
+		return fmt.Errorf("SVD.ProjectColumn eigenvector index > rank of matrix")
 	}
 	cvec := make([]float64, nr)
 	// eidx := nr - 1 - idx // eigens in reverse order
@@ -186,7 +186,7 @@ func (svd *SVD) ProjectCol(vals *[]float64, ix *table.IndexView, column string, 
 	ln := col.Len()
 	sz := ln / col.DimSize(0) // size of cell
 	if sz != nr {
-		return fmt.Errorf("SVD.ProjectCol column cell size != svd eigenvectors")
+		return fmt.Errorf("SVD.ProjectColumn column cell size != svd eigenvectors")
 	}
 	rdim := []int{0}
 	for row := 0; row < rows; row++ {
@@ -201,17 +201,17 @@ func (svd *SVD) ProjectCol(vals *[]float64, ix *table.IndexView, column string, 
 	return nil
 }
 
-// ProjectColToTable projects values from the given column of given table (via IndexView)
+// ProjectColumnToTable projects values from the given column of given table (via IndexView)
 // onto the given set of eigenvectors (idxs, 0 = largest eigenvalue, 1 = next, etc),
 // and stores results along with labels from column labNm into results table.
 // Must have already called SVD() method.
-func (svd *SVD) ProjectColToTable(projections *table.Table, ix *table.IndexView, column, labNm string, idxs []int) error {
+func (svd *SVD) ProjectColumnToTable(projections *table.Table, ix *table.IndexView, column, labNm string, idxs []int) error {
 	_, err := ix.Table.ColumnByName(column)
 	if errors.Log(err) != nil {
 		return err
 	}
 	if svd.Vectors == nil {
-		return fmt.Errorf("SVD.ProjectCol Vectors are nil -- must call SVD first")
+		return fmt.Errorf("SVD.ProjectColumn Vectors are nil -- must call SVD first")
 	}
 	rows := ix.Len()
 	projections.DeleteAll()
@@ -227,7 +227,7 @@ func (svd *SVD) ProjectColToTable(projections *table.Table, ix *table.IndexView,
 
 	for ii, idx := range idxs {
 		pcol := projections.Columns[pcolSt+ii].(*tensor.Float64)
-		svd.ProjectCol(&pcol.Values, ix, column, idx)
+		svd.ProjectColumn(&pcol.Values, ix, column, idx)
 	}
 
 	if labNm != "" {
