@@ -145,20 +145,20 @@ func (pa *PCA) PCA() error {
 	return nil
 }
 
-// ProjectCol projects values from the given column of given table (via IndexView)
+// ProjectColumn projects values from the given column of given table (via IndexView)
 // onto the idx'th eigenvector (0 = largest eigenvalue, 1 = next, etc).
 // Must have already called PCA() method.
-func (pa *PCA) ProjectCol(vals *[]float64, ix *table.IndexView, column string, idx int) error {
+func (pa *PCA) ProjectColumn(vals *[]float64, ix *table.IndexView, column string, idx int) error {
 	col, err := ix.Table.ColumnByName(column)
 	if err != nil {
 		return err
 	}
 	if pa.Vectors == nil {
-		return fmt.Errorf("PCA.ProjectCol Vectors are nil -- must call PCA first")
+		return fmt.Errorf("PCA.ProjectColumn Vectors are nil -- must call PCA first")
 	}
 	nr := pa.Vectors.DimSize(0)
 	if idx >= nr {
-		return fmt.Errorf("PCA.ProjectCol eigenvector index > rank of matrix")
+		return fmt.Errorf("PCA.ProjectColumn eigenvector index > rank of matrix")
 	}
 	cvec := make([]float64, nr)
 	eidx := nr - 1 - idx // eigens in reverse order
@@ -173,7 +173,7 @@ func (pa *PCA) ProjectCol(vals *[]float64, ix *table.IndexView, column string, i
 	ln := col.Len()
 	sz := ln / col.DimSize(0) // size of cell
 	if sz != nr {
-		return fmt.Errorf("PCA.ProjectCol column cell size != pca eigenvectors")
+		return fmt.Errorf("PCA.ProjectColumn column cell size != pca eigenvectors")
 	}
 	rdim := []int{0}
 	for row := 0; row < rows; row++ {
@@ -188,17 +188,17 @@ func (pa *PCA) ProjectCol(vals *[]float64, ix *table.IndexView, column string, i
 	return nil
 }
 
-// ProjectColToTable projects values from the given column of given table (via IndexView)
+// ProjectColumnToTable projects values from the given column of given table (via IndexView)
 // onto the given set of eigenvectors (idxs, 0 = largest eigenvalue, 1 = next, etc),
 // and stores results along with labels from column labNm into results table.
 // Must have already called PCA() method.
-func (pa *PCA) ProjectColToTable(projections *table.Table, ix *table.IndexView, column, labNm string, idxs []int) error {
+func (pa *PCA) ProjectColumnToTable(projections *table.Table, ix *table.IndexView, column, labNm string, idxs []int) error {
 	_, err := ix.Table.ColumnByName(column)
 	if err != nil {
 		return err
 	}
 	if pa.Vectors == nil {
-		return fmt.Errorf("PCA.ProjectCol Vectors are nil -- must call PCA first")
+		return fmt.Errorf("PCA.ProjectColumn Vectors are nil -- must call PCA first")
 	}
 	rows := ix.Len()
 	projections.DeleteAll()
@@ -214,7 +214,7 @@ func (pa *PCA) ProjectColToTable(projections *table.Table, ix *table.IndexView, 
 
 	for ii, idx := range idxs {
 		pcol := projections.Columns[pcolSt+ii].(*tensor.Float64)
-		pa.ProjectCol(&pcol.Values, ix, column, idx)
+		pa.ProjectColumn(&pcol.Values, ix, column, idx)
 	}
 
 	if labNm != "" {
