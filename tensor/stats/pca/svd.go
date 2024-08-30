@@ -7,6 +7,7 @@ package pca
 import (
 	"fmt"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/metric"
 	"cogentcore.org/core/tensor/table"
@@ -44,7 +45,7 @@ func (svd *SVD) Init() {
 	svd.Values = nil
 }
 
-// TableCol is a convenience method that computes a covariance matrix
+// TableColumn is a convenience method that computes a covariance matrix
 // on given column of table and then performs the SVD on the resulting matrix.
 // If no error occurs, the results can be read out from Vectors and Values
 // or used in Projection methods.
@@ -57,11 +58,11 @@ func (svd *SVD) Init() {
 // This is the input to the SVD eigenvalue decomposition of the resulting
 // covariance matrix, which extracts the eigenvectors as directions with maximal
 // variance in this matrix.
-func (svd *SVD) TableCol(ix *table.IndexView, column string, mfun metric.Func64) error {
+func (svd *SVD) TableColumn(ix *table.IndexView, column string, mfun metric.Func64) error {
 	if svd.Covar == nil {
 		svd.Init()
 	}
-	err := CovarTableCol(svd.Covar, ix, column, mfun)
+	err := CovarTableColumn(svd.Covar, ix, column, mfun)
 	if err != nil {
 		return err
 	}
@@ -92,7 +93,7 @@ func (svd *SVD) Tensor(tsr tensor.Tensor, mfun metric.Func64) error {
 	return svd.SVD()
 }
 
-// TableColStd is a convenience method that computes a covariance matrix
+// TableColumnStd is a convenience method that computes a covariance matrix
 // on given column of table and then performs the SVD on the resulting matrix.
 // If no error occurs, the results can be read out from Vectors and Values
 // or used in Projection methods.
@@ -106,8 +107,8 @@ func (svd *SVD) Tensor(tsr tensor.Tensor, mfun metric.Func64) error {
 // covariance matrix, which extracts the eigenvectors as directions with maximal
 // variance in this matrix.
 // This Std version is usable e.g., in Python where the func cannot be passed.
-func (svd *SVD) TableColStd(ix *table.IndexView, column string, met metric.StdMetrics) error {
-	return svd.TableCol(ix, column, metric.StdFunc64(met))
+func (svd *SVD) TableColumnStd(ix *table.IndexView, column string, met metric.StdMetrics) error {
+	return svd.TableColumn(ix, column, metric.StdFunc64(met))
 }
 
 // TensorStd is a convenience method that computes a covariance matrix
@@ -165,8 +166,8 @@ func (svd *SVD) ProjectCol(vals *[]float64, ix *table.IndexView, column string, 
 	if err != nil {
 		return err
 	}
-	if svd.Vectors == nil {
-		return fmt.Errorf("SVD.ProjectCol Vectors are nil -- must call SVD first")
+	if svd.Vectors == nil || svd.Vectors.Len() == 0 {
+		return fmt.Errorf("SVD.ProjectCol Vectors are nil: must call SVD first, with Kind = mat.SVDFull so that the vectors are returned")
 	}
 	nr := svd.Vectors.DimSize(0)
 	if idx >= nr {
@@ -206,7 +207,7 @@ func (svd *SVD) ProjectCol(vals *[]float64, ix *table.IndexView, column string, 
 // Must have already called SVD() method.
 func (svd *SVD) ProjectColToTable(projections *table.Table, ix *table.IndexView, column, labNm string, idxs []int) error {
 	_, err := ix.Table.ColumnByName(column)
-	if err != nil {
+	if errors.Log(err) != nil {
 		return err
 	}
 	if svd.Vectors == nil {
@@ -231,7 +232,7 @@ func (svd *SVD) ProjectColToTable(projections *table.Table, ix *table.IndexView,
 
 	if labNm != "" {
 		lcol, err := ix.Table.ColumnByName(labNm)
-		if err == nil {
+		if errors.Log(err) == nil {
 			plcol := projections.Columns[0]
 			for row := 0; row < rows; row++ {
 				plcol.SetString1D(row, lcol.String1D(row))

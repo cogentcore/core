@@ -47,41 +47,41 @@ The following packages are included:
 Scalar columns:
 
 ```Go
-val := et.CellFloat("ColName", row)
+val := et.Float("ColName", row)
 ```
 
 ```Go
-str := et.CellString("ColName", row)
+str := et.StringValue("ColName", row)
 ```
 
 Tensor (higher-dimensional) columns:
 
 ```Go
-tsr := et.CellTensor("ColName", row) // entire tensor at cell (a row-level SubSpace of column tensor)
+tsr := et.Tensor("ColName", row) // entire tensor at cell (a row-level SubSpace of column tensor)
 ```
 
 ```Go
-val := et.CellTensorFloat1D("ColName", row, cellidx) // idx is 1D index into cell tensor
+val := et.TensorFloat1D("ColName", row, cellidx) // idx is 1D index into cell tensor
 ```
 
 ## Set Table Value
 
 ```Go
-et.SetCellFloat("ColName", row, val)
+et.SetFloat("ColName", row, val)
 ```
 
 ```Go
-et.SetCellString("ColName", row, str)
+et.SetString("ColName", row, str)
 ```
 
 Tensor (higher-dimensional) columns:
 
 ```Go
-et.SetCellTensor("ColName", row, tsr) // set entire tensor at cell 
+et.SetTensor("ColName", row, tsr) // set entire tensor at cell 
 ```
 
 ```Go
-et.SetCellTensorFloat1D("ColName", row, cellidx, val) // idx is 1D index into cell tensor
+et.SetTensorFloat1D("ColName", row, cellidx, val) // idx is 1D index into cell tensor
 ```
 
 ## Find Value(s) in Column
@@ -105,14 +105,14 @@ ix := etable.NewIndexView(et) // new view with all rows
 ### Sort
 
 ```Go
-ix.SortColName("Name", etable.Ascending) // etable.Ascending or etable.Descending
+ix.SortColumnName("Name", etable.Ascending) // etable.Ascending or etable.Descending
 SortedTable := ix.NewTable() // turn an IndexView back into a new Table organized in order of indexes
 ```
 
 or:
 
 ```Go
-nmcl := et.ColByName("Name") // nmcl is an etensor of the Name column, cached
+nmcl := et.ColumnByName("Name") // nmcl is an etensor of the Name column, cached
 ix.Sort(func(t *Table, i, j int) bool {
 	return nmcl.StringValue1D(i) < nmcl.StringValue1D(j)
 })
@@ -121,7 +121,7 @@ ix.Sort(func(t *Table, i, j int) bool {
 ### Filter
 
 ```Go
-nmcl := et.ColByName("Name") // column we're filtering on
+nmcl := et.ColumnByName("Name") // column we're filtering on
 ix.Filter(func(t *Table, row int) bool {
 	// filter return value is for what to *keep* (=true), not exclude
 	// here we keep any row with a name that contains the string "in"
@@ -145,7 +145,7 @@ Describe (basic stats) all columns in a table:
 ix := etable.NewIndexView(et) // new view with all rows
 desc := agg.DescAll(ix) // summary stats of all columns
 // get value at given column name (from original table), row "Mean"
-mean := desc.CellFloat("ColNm", desc.RowsByString("Agg", "Mean", etable.Equals, etable.UseCase)[0])
+mean := desc.Float("ColNm", desc.RowsByString("Agg", "Mean", etable.Equals, etable.UseCase)[0])
 ```
 
 # CSV / TSV file format

@@ -227,8 +227,8 @@ func (ls *geomSize) setInitContentMin(styMin math32.Vector2) {
 	styles.SetClampMaxVector(csz, ls.Max)
 }
 
-// fitSizeMax increases given size to fit given fm value, subject to Max constraints
-func (ls *geomSize) fitSizeMax(to *math32.Vector2, fm math32.Vector2) {
+// FitSizeMax increases given size to fit given fm value, subject to Max constraints
+func (ls *geomSize) FitSizeMax(to *math32.Vector2, fm math32.Vector2) {
 	styles.SetClampMinVector(to, fm)
 	styles.SetClampMaxVector(to, ls.Max)
 }
@@ -735,8 +735,8 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 		}
 	}
 	if got {
-		sz.fitSizeMax(&sz.Actual.Total, sz.Min)
-		sz.fitSizeMax(&sz.Alloc.Total, sz.Min)
+		sz.FitSizeMax(&sz.Actual.Total, sz.Min)
+		sz.FitSizeMax(&sz.Alloc.Total, sz.Min)
 		sz.setContentFromTotal(&sz.Actual)
 		sz.setContentFromTotal(&sz.Alloc)
 	}
@@ -750,7 +750,7 @@ func (wb *WidgetBase) sizeUpParts() {
 	}
 	wb.Parts.SizeUp()
 	sz := &wb.Geom.Size
-	sz.fitSizeMax(&sz.Actual.Content, wb.Parts.Geom.Size.Actual.Total)
+	sz.FitSizeMax(&sz.Actual.Content, wb.Parts.Geom.Size.Actual.Total)
 }
 
 func (fr *Frame) SizeUp() {
@@ -1532,7 +1532,7 @@ func (wb *WidgetBase) sizeFinalParts() {
 	}
 	wb.Parts.SizeFinal()
 	sz := &wb.Geom.Size
-	sz.fitSizeMax(&sz.Actual.Content, wb.Parts.Geom.Size.Actual.Total)
+	sz.FitSizeMax(&sz.Actual.Content, wb.Parts.Geom.Size.Actual.Total)
 }
 
 func (fr *Frame) SizeFinal() {

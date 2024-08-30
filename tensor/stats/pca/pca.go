@@ -35,7 +35,7 @@ func (pa *PCA) Init() {
 	pa.Values = nil
 }
 
-// TableCol is a convenience method that computes a covariance matrix
+// TableColumn is a convenience method that computes a covariance matrix
 // on given column of table and then performs the PCA on the resulting matrix.
 // If no error occurs, the results can be read out from Vectors and Values
 // or used in Projection methods.
@@ -48,11 +48,11 @@ func (pa *PCA) Init() {
 // This is the input to the PCA eigenvalue decomposition of the resulting
 // covariance matrix, which extracts the eigenvectors as directions with maximal
 // variance in this matrix.
-func (pa *PCA) TableCol(ix *table.IndexView, column string, mfun metric.Func64) error {
+func (pa *PCA) TableColumn(ix *table.IndexView, column string, mfun metric.Func64) error {
 	if pa.Covar == nil {
 		pa.Init()
 	}
-	err := CovarTableCol(pa.Covar, ix, column, mfun)
+	err := CovarTableColumn(pa.Covar, ix, column, mfun)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func (pa *PCA) Tensor(tsr tensor.Tensor, mfun metric.Func64) error {
 	return pa.PCA()
 }
 
-// TableColStd is a convenience method that computes a covariance matrix
+// TableColumnStd is a convenience method that computes a covariance matrix
 // on given column of table and then performs the PCA on the resulting matrix.
 // If no error occurs, the results can be read out from Vectors and Values
 // or used in Projection methods.
@@ -97,8 +97,8 @@ func (pa *PCA) Tensor(tsr tensor.Tensor, mfun metric.Func64) error {
 // covariance matrix, which extracts the eigenvectors as directions with maximal
 // variance in this matrix.
 // This Std version is usable e.g., in Python where the func cannot be passed.
-func (pa *PCA) TableColStd(ix *table.IndexView, column string, met metric.StdMetrics) error {
-	return pa.TableCol(ix, column, metric.StdFunc64(met))
+func (pa *PCA) TableColumnStd(ix *table.IndexView, column string, met metric.StdMetrics) error {
+	return pa.TableColumn(ix, column, metric.StdFunc64(met))
 }
 
 // TensorStd is a convenience method that computes a covariance matrix

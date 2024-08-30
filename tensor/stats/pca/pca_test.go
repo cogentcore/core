@@ -26,9 +26,9 @@ func TestPCAIris(t *testing.T) {
 	}
 	ix := table.NewIndexView(dt)
 	pc := &PCA{}
-	// pc.TableCol(ix, "data", metric.Covariance64)
+	// pc.TableColumn(ix, "data", metric.Covariance64)
 	// fmt.Printf("covar: %v\n", pc.Covar)
-	err = pc.TableCol(ix, "data", metric.Correlation64)
+	err = pc.TableColumn(ix, "data", metric.Correlation64)
 	if err != nil {
 		t.Error(err)
 	}

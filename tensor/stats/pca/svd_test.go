@@ -29,9 +29,9 @@ func TestSVDIris(t *testing.T) {
 	pc := &SVD{}
 	pc.Init()
 	pc.Kind = mat.SVDFull
-	// pc.TableCol(ix, "data", metric.Covariance64)
+	// pc.TableColumn(ix, "data", metric.Covariance64)
 	// fmt.Printf("covar: %v\n", pc.Covar)
-	err = pc.TableCol(ix, "data", metric.Correlation64)
+	err = pc.TableColumn(ix, "data", metric.Correlation64)
 	if err != nil {
 		t.Error(err)
 	}
