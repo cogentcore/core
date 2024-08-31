@@ -31,19 +31,26 @@ func Setup(c *config.Config) error { //types:add
 		}
 		return nil
 	case "linux":
-		_, err := exec.LookPath("apt-get")
-		if err == nil {
+		if _, err := exec.LookPath("apt-get"); err == nil {
 			err := vc.Run("sudo", "apt-get", "update")
 			if err != nil {
 				return err
 			}
 			return vc.Run("sudo", "apt-get", "install", "-f", "-y", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev")
 		}
-		_, err = exec.LookPath("dnf")
-		if err == nil {
+		if _, err := exec.LookPath("dnf"); err == nil {
 			return vc.Run("sudo", "dnf", "install", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel")
 		}
-		return fmt.Errorf("unknown Linux distro (apt-get and dnf not found); file an issue at https://github.com/cogentcore/core/issues")
+		if _, err := exec.LookPath("pacman"); err == nil {
+			return vc.Run("sudo", "pacman", "-S", "xorg-server-devel", "libxcursor", "libxrandr", "libxinerama", "libxi")
+		}
+		if _, err := exec.LookPath("eopkg"); err == nil {
+			return vc.Run("sudo", "eopkg", "it", "-c", "system.devel", "mesalib-devel", "libxrandr-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel")
+		}
+		if _, err := exec.LookPath("zypper"); err == nil {
+			return vc.Run("sudo", "zypper", "install", "libXcursor-devel", "libXrandr-devel", "Mesa-libGL-devel", "libXi-devel", "libXinerama-devel", "libXxf86vm-devel")
+		}
+		return fmt.Errorf("unknown Linux distro; please file a bug report at https://github.com/cogentcore/core/issues")
 	case "windows":
 		if _, err := exec.LookPath("gcc"); err != nil {
 			err := vc.Run("curl", "-OL", "https://github.com/skeeto/w64devkit/releases/download/v2.0.0/w64devkit-x64-2.0.0.exe")
