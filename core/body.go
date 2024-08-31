@@ -6,7 +6,6 @@ package core
 
 import (
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -87,10 +86,7 @@ func (bd *Body) SetTitle(title string) *Body {
 // AddText adds the given supporting [Text], typically added
 // after a title.
 func (bd *Body) AddText(text string) *Body {
-	NewText(bd).SetText(text).
-		SetType(TextBodyMedium).Styler(func(s *styles.Style) {
-		s.Color = colors.Scheme.OnSurfaceVariant
-	})
+	NewText(bd).SetText(text).SetType(TextSupporting)
 	return bd
 }
 
