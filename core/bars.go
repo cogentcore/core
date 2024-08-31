@@ -113,7 +113,7 @@ func (sc *Scene) addDefaultBars() {
 	}
 
 	st := sc.Stage
-	needBackButton := st.Type == DialogStage && st.FullWindow && !st.NewWindow
+	needBackButton := st.FullWindow && !st.NewWindow
 	if st.DisplayTitle || needBackButton {
 		sc.Bars.Top.Add(func(parent Widget) {
 			titleRow := NewFrame(parent)
