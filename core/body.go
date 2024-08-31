@@ -83,13 +83,6 @@ func (bd *Body) SetTitle(title string) *Body {
 	return bd
 }
 
-// AddText adds the given supporting [Text], typically added
-// after a title.
-func (bd *Body) AddText(text string) *Body {
-	NewText(bd).SetText(text).SetType(TextSupporting)
-	return bd
-}
-
 // SetData sets the [Body]'s [Scene.Data].
 func (bd *Body) SetData(data any) *Body {
 	bd.Scene.SetData(data)
