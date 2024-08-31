@@ -60,10 +60,3 @@ func (dv *Device) WaitDone() {
 	}
 	dv.Device.Poll(true, nil)
 }
-
-// NewGraphicsDevice returns a new Graphics Device, on given GPU.
-// TODO: WebGPU does not appear to make any distinction between
-// graphics and compute devices, so probably remove this.
-func NewGraphicsDevice(gp *GPU) (*Device, error) {
-	return NewDevice(gp)
-}

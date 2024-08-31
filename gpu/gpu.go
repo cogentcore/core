@@ -57,52 +57,50 @@ type GPU struct {
 	// name of the physical GPU device
 	DeviceName string
 
-	// name of application -- set during Config and used in init of GPU
-	AppName string
-
-	// this is used for computing, not graphics
-	Compute bool
-
 	// Properties are the general properties of the GPU adapter.
 	Properties wgpu.AdapterInfo
 
 	// Limits are the limits of the current GPU adapter.
 	Limits wgpu.SupportedLimits
 
-	// maximum number of compute threads per compute shader invocation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup, which allows for the and maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroupvalue is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values.
+	// ComputeOnly indicates if this GPU is only used for compute,
+	// which determines if it listens to WEBGPU_COMPUTE_DEVICE_SELECT
+	// environment variable, allowing different compute devices to be
+	// selected vs. graphics devices.
+	ComputeOnly bool
+
+	// maximum number of compute threads per compute shader invocation,
+	// for a 1D number of threads per Warp, which is generally greater
+	// than MaxComputeWorkGroup, which allows for the maxima as well.
+	// This is not defined anywhere in the formal spec, unfortunately,
+	// but has been determined empirically for Mac and NVIDIA which are
+	// two of the most relevant use-cases.  If not a known case,
+	// the MaxComputeWorkGroupvalue is used, which can significantly
+	// slow down compute processing if more could actually be used.
+	// Please file an issue or PR for other GPUs with known larger values.
 	MaxComputeWorkGroupCount1D int
 }
 
-// Defaults sets up default parameters, with the graphics flag
-// determining whether graphics-relevant items are added.
-func (gp *GPU) Defaults(graphics bool) {
-	if graphics {
-	} else {
-		gp.Compute = true
+const (
+	// ComputeOnly is used for the NewGPU arg to indicate a compute-only.
+	ComputeOnly = true
+)
+
+// NewGPU returns a new GPU, configured and ready to use.
+// If only doing compute, use the optional bool arg with
+// ComputeOnly to listen to WEBGPU_COMPUTE_DEVICE_SELECT
+// variable for which GPU device to use.
+func NewGPU(computeOnly ...bool) *GPU {
+	gp := &GPU{}
+	if len(computeOnly) == 1 && computeOnly[0] {
+		gp.ComputeOnly = true
 	}
-}
-
-// NewGPU returns a new GPU struct with Graphics Defaults set
-// configure any additional defaults before calling Config.
-// Use NewComputeGPU for a compute-only GPU that doesn't load graphics extensions.
-func NewGPU() *GPU {
-	gp := &GPU{}
-	gp.Defaults(true)
+	gp.init()
 	return gp
 }
 
-// NewComputeGPU returns a new GPU struct with Compute Defaults set
-// configure any additional defaults before calling Config.
-// Use NewGPU for a graphics enabled GPU.
-func NewComputeGPU() *GPU {
-	gp := &GPU{}
-	gp.Defaults(false)
-	return gp
-}
-
-// Config configures the GPU using the given name.
-func (gp *GPU) Config(name string) error {
-	gp.AppName = name
+// init configures the GPU
+func (gp *GPU) init() error {
 	gp.Instance = wgpu.CreateInstance(nil)
 
 	gpus := gp.Instance.EnumerateAdapters(nil)
@@ -120,18 +118,16 @@ func (gp *GPU) Config(name string) error {
 		fmt.Println(gp.PropertiesString())
 	}
 
-	// todo:
-	// gp.MaxComputeWorkGroupCount1D = int(gp.GPUProperties.Limits.MaxComputeWorkGroupCount[0])
-	// note: unclear what the limit is here.
-	// if gp.MaxComputeWorkGroupCount1D == 0 { // otherwise set per-platform in defaults (DARWIN)
-	// if strings.Contains(gp.DeviceName, "NVIDIA") {
-	// 	// according to: https://WebGPU.gpuinfo.org/displaydevicelimit.php?name=maxComputeWorkGroupInvocations&platform=all
-	// 	// all NVIDIA are either 1 << 31 or -1 of that.
-	// 	gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1 // according to vgpu
-	// } else {
+	gp.MaxComputeWorkGroupCount1D = int(gp.Limits.Limits.MaxComputeWorkgroupsPerDimension)
+	ldv := strings.ToLower(gp.DeviceName)
+	if strings.Contains(ldv, "nvidia") {
+		// all NVIDIA are either 1 << 31 or -1 of that.
+		gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1
+	} else if strings.Contains(ldv, "apple") {
+		gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1
+	}
 	// note: if known to be higher for any specific case, please file an issue or PR
-	// }
-	// }
+	// todo: where are the errors!?
 	return nil
 }
 
@@ -140,15 +136,18 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 	if n == 1 {
 		return 0
 	}
-	// todo: also make available other names!
 	trgDevNm := ""
-	if ev := os.Getenv("MESA_VK_DEVICE_SELECT"); ev != "" {
+	if ev := os.Getenv("WEBGPU_DEVICE_SELECT"); ev != "" {
+		trgDevNm = ev
+	} else if ev := os.Getenv("MESA_VK_DEVICE_SELECT"); ev != "" {
 		trgDevNm = ev
 	} else if ev := os.Getenv("VK_DEVICE_SELECT"); ev != "" {
 		trgDevNm = ev
 	}
-	if gp.Compute {
-		if ev := os.Getenv("VK_COMPUTE_DEVICE_SELECT"); ev != "" {
+	if gp.ComputeOnly {
+		if ev := os.Getenv("WEBGPU_COMPUTE_DEVICE_SELECT"); ev != "" {
+			trgDevNm = ev
+		} else if ev := os.Getenv("VK_COMPUTE_DEVICE_SELECT"); ev != "" {
 			trgDevNm = ev
 		}
 	}
@@ -219,12 +218,6 @@ func (gp *GPU) Release() {
 	}
 }
 
-// NewComputeSystem returns a new system initialized for this GPU,
-// exclusively for Compute, not graphics functionality.
-// func (gp *GPU) NewComputeSystem(name string) *GraphicsSystem {
-// 	return NewComputeGraphicsSystem(gp, name)
-// }
-
 // NewDevice returns a new device for given GPU.
 // It gets the Queue for this device.
 func (gp *GPU) NewDevice() (*Device, error) {
@@ -236,14 +229,10 @@ func (gp *GPU) PropertiesString() string {
 	return "\n######## GPU Properties\n" + reflectx.StringJSON(&gp.Properties) + reflectx.StringJSON(gp.Limits.Limits)
 }
 
-// NoDisplayGPU Initializes WebGPU and returns that
-// and the graphics GPU device, with given name,
-// without connecting to the display.
-func NoDisplayGPU(nm string) (*GPU, *Device, error) {
+// NoDisplayGPU Initializes WebGPU and returns that and a new
+// GPU device, without using an existing surface window.
+func NoDisplayGPU() (*GPU, *Device, error) {
 	gp := NewGPU()
-	if err := gp.Config(nm); err != nil {
-		return nil, nil, err
-	}
-	dev, err := NewGraphicsDevice(gp)
+	dev, err := NewDevice(gp)
 	return gp, dev, err
 }

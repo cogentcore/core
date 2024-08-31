@@ -28,10 +28,11 @@ $ go run cogentcore.org/core/gpu/cmd/webgpuinfo@latest
 
 (you can `install` that tool for later use as well)
 
-The following environment variables can be set to specifically select a particular device by name (`deviceName`): 
+The following environment variables can be set to specifically select a particular device by device number or name (`deviceName`): 
 
+* `WEBGPU_DEVICE_SELECT`, or the following Vulkan-based selectors for backward compatibility:
 * `MESA_VK_DEVICE_SELECT` (standard for mesa-based drivers) or `VK_DEVICE_SELECT` -- for graphics or compute usage.
-* `VK_COMPUTE_DEVICE_SELECT` -- only used for compute, if present -- will override above, so you can use different GPUs for graphics vs compute.
+* `WEBGPU_COMPUTE_DEVICE_SELECT` or `VK_COMPUTE_DEVICE_SELECT` -- only used for compute, if present -- will override above, so you can use different GPUs for graphics vs compute.
 
 * `GPU` represents the hardware `Adapter` and maintains global settings, info about the hardware.
 
@@ -144,21 +145,21 @@ Obviously every system can be converted into every other with the proper combina
 
 # Compute System
 
-See `examples/compute1` for a very simple compute shader, and [compute.go](vgpu/compute.go) for `Compute*` methods specifically useful for this case.
+See `examples/compute1` for a very simple compute shader, and [compute.go](gpu/compute.go) for the `ComputeSystem` that manages compute-only use of the GPU.
 
 See [gosl] for a tool that converts Go code into WGSL shader code, so you can effectively run Go on the GPU.
 
 Here's how it works:
 
-* Each WebGPU `Pipeline` holds **1** compute `shader` program, whicGraphicsSystemquivalent to a `kernel` in CUDA. This is the basic unit of computation, accomplishing one parallel sweep of processing across some number of identical data structures.
+* Each WebGPU `Pipeline` holds **1** compute `shader` program, which is equivalent to a `kernel` in CUDA. This is the basic unit of computation, accomplishing one parallel sweep of processing across some number of identical data structures.
 
 * You must organize at the outset your `Vars` and `Values` in the `System` to hold the data structures your shaders operate on.  In general, you want to have a single static set of Vars that cover everything you'll need, and different shaders can operate on different subsets of these.  You want to minimize the amount of memory transfer.
 
 * Because the `Queue.Submit` call is by far the most expensive call in WebGPU, you want to minimize those.  This means you want to combine as much of your computation into one big Command sequence, with calls to various different `Pipeline` shaders (which can all be put in one command buffer) that gets submitted *once*, rather than submitting separate commands for each shader.  Ideally this also involves combining memory transfers to / from the GPU in the same command buffer as well.
 
-* TODO: update for webgpu sync mechanisms.  Although rarGraphicsSystemed in graphics, the most important tool for synchronizing commands _within a single command stream_ is the [vkEvent](https://registry.khronos.org/WebGPU/specs/1.3-extensions/man/html/VkEvent.html), which is described a bit in the [Khronos Blog](https://www.khronos.org/blog/understanding-WebGPU-synchronization).  Much of WebGPU discussion centers instead around `Semaphores`, but these are only used for synchronization _between different commands_ --- each of which requires a different `vkQueueSubmit` (and is therefore suboptimal).
+* There are no explicit sync mechanisms in WebGPU, but it is designed so that shader compute is automatically properly synced with prior and subsequent memory transfer commands, so it automatically does the right thing for most use cases.
 
-* Thus, you should create named events in your compute `System`, and inject calls to set and wait on those events in your command stream.
+* Compute is particularly taxing on memory transfer in general, and as far as I can tell, the best strategy is to rely on the optimized `WriteBuffer` command to transfer from CPU to GPU, and then use a staging buffer to read data back from the GPU. E.g., see [this reddit post](https://www.reddit.com/r/wgpu/comments/13zqe1u/can_someone_please_explain_to_me_the_whole_buffer/).  Critically, the write commands are queued and any staging buffers are managed internally, so it shouldn't be much slower than manually doing all the staging.  For reading, we have to implement everything ourselves, and here it is critical to batch the `ReadSync` calls for all relevant values, so they all happen at once.  Use ad-hoc `ValueGroup`s to organize these batched read operations efficiently for the different groups of values that need to be read back in the different compute stages.
 
 # Gamma Correction (sRGB vs Linear) and Headless / Offscreen Rendering
 
