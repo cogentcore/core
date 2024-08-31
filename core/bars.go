@@ -102,7 +102,7 @@ func (sc *Scene) addDefaultBars() {
 	}
 
 	st := sc.Stage
-	needBackButton := st.FullWindow && !st.NewWindow
+	needBackButton := st.FullWindow && !st.NewWindow && !(st.Mains != nil && st.Mains.stack.Len() == 0)
 	if st.DisplayTitle || needBackButton {
 		sc.Bars.Top = slices.Insert(sc.Bars.Top, 0, func(parent Widget) {
 			titleRow := NewFrame(parent)
