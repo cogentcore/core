@@ -45,7 +45,7 @@ func Editor(st *Styles) {
 		return
 	}
 
-	d := core.NewBody().SetData(st).AddTitle("Highlighting styles")
+	d := core.NewBody("Highlighting styles").SetData(st)
 	d.AddText("View standard to see the builtin styles, from which you can add and customize by saving ones from the standard and then loading them into a custom file to modify.")
 	kl := core.NewKeyedList(d).SetMap(st)
 	StylesChanged = false

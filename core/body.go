@@ -82,12 +82,6 @@ func (bd *Body) SetTitle(title string) *Body {
 	return bd
 }
 
-// AddTitle adds [Text] with the given title, and sets the [Body.Title]
-// text which will be used by the [Scene] etc.
-func (bd *Body) AddTitle(title string) *Body {
-	return bd.SetTitle(title) // TODO(appbar): AddTitle pointless now
-}
-
 // AddText adds the given supporting [Text], typically added
 // after a title.
 func (bd *Body) AddText(text string) *Body {

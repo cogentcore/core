@@ -77,7 +77,7 @@ You can confirm that the user wants to close a scene when they try to close it:
 
 ```go
 b.AddCloseDialog(func(d *core.Body) bool {
-    d.AddTitle("Are you sure?").AddText("Are you sure you want to close the Cogent Core Demo?")
+    d.SetTitle("Are you sure?").AddText("Are you sure you want to close the Cogent Core Demo?")
     d.AddBottomBar(func(b core.Widget) {
         d.AddOK(b).SetText("Close").OnClick(func(e events.Event) {
             b.Scene.Close()

@@ -89,10 +89,11 @@ func RecycleDialog(data any) bool {
 // MessageDialog opens a new Dialog displaying the given message
 // in the context of the given widget. An optional title can be provided.
 func MessageDialog(ctx Widget, message string, title ...string) {
-	b := NewBody(ctx.AsTree().Name + "-message-dialog")
+	ttl := ""
 	if len(title) > 0 {
-		b.AddTitle(title[0])
+		ttl = title[0]
 	}
+	b := NewBody(ttl)
 	b.AddText(message).AddOKOnly()
 	b.RunDialog(ctx)
 }
@@ -112,8 +113,7 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 	}
 	// we need to get [errors.CallerInfo] at this level
 	slog.Error(ttl + ": " + err.Error() + " | " + errors.CallerInfo())
-	NewBody(ctx.AsTree().Name + "-error-dialog").AddTitle(ttl).AddText(err.Error()).
-		AddOKOnly().RunDialog(ctx)
+	NewBody(ttl).AddText(err.Error()).AddOKOnly().RunDialog(ctx)
 }
 
 // AddOK adds an OK button to the given parent widget (typically in
