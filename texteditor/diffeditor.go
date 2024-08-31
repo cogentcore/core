@@ -277,8 +277,8 @@ func (dv *DiffEditor) saveAs(ab bool, filename core.Filename) {
 	if !errors.Log1(fsx.FileExists(string(filename))) {
 		dv.saveFile(ab, filename)
 	} else {
-		d := core.NewBody("File Exists, Overwrite?").
-			AddText(fmt.Sprintf("File already exists, overwrite?  File: %v", filename))
+		d := core.NewBody("File Exists, Overwrite?")
+		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("File already exists, overwrite?  File: %v", filename))
 		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).OnClick(func(e events.Event) {

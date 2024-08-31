@@ -68,8 +68,8 @@ func (fn *Node) duplicateFile() error {
 // deletes any selected files or directories. If any directory is selected,
 // all files and subdirectories in that directory are also deleted.
 func (fn *Node) deleteFiles() { //types:add
-	d := core.NewBody("Delete Files?").
-		AddText("Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.")
+	d := core.NewBody("Delete Files?")
+	core.NewText(d).SetType(core.TextSupporting).SetText("OK to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.")
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Delete Files").OnClick(func(e events.Event) {
