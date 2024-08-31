@@ -27,8 +27,10 @@ type Body struct { //core:no-new
 // It will create its own parent [Scene] at this point, and has wrapper
 // functions to transparently manage everything that the [Scene]
 // typically manages during configuration, so you can usually avoid
-// having to access the [Scene] directly. If a name is given and
-// the name of [TheApp] is unset, it sets it to the given name.
+// having to access the [Scene] directly. If a name is given, it will
+// be used for the name of the window, and a title widget will be created
+// with that text if [Stage.DisplayTitle] is true. Also, if the name of
+// [TheApp] is unset, it sets it to the given name.
 func NewBody(name ...string) *Body {
 	bd := tree.New[Body]()
 	nm := "body"
