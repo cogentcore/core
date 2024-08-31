@@ -263,7 +263,7 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 		}
 		NewText(d).SetText("App version: " + system.AppVersion)
 		NewText(d).SetText("Core version: " + system.CoreVersion)
-		d.AddOKOnly().RunDialog(sc)
+		d.AddOKOnly().NewDialog(sc).SetDisplayTitle(false).Run()
 	})
 	NewFuncButton(m).SetFunc(SettingsWindow).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,")
 	if webCanInstall {
