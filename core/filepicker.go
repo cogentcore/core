@@ -378,7 +378,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 				SetTooltip("View information about the selected file").
 				OnClick(func(e events.Event) {
 					fn := fp.files[w.SelectedIndex]
-					d := NewBody().AddTitle("Info: " + fn.Name)
+					d := NewBody("Info: " + fn.Name)
 					NewForm(d).SetStruct(&fn).SetReadOnly(true)
 					d.AddOKOnly().RunFullDialog(w)
 				})
@@ -693,7 +693,7 @@ func (fp *FilePicker) fileCompleteEdit(data any, text string, cursorPos int, c c
 // editRecentPaths displays a dialog allowing the user to
 // edit the recent paths list.
 func (fp *FilePicker) editRecentPaths() {
-	d := NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
+	d := NewBody("Recent file paths").AddText("You can delete paths you no longer use")
 	NewList(d).SetSlice(&recentPaths)
 	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)

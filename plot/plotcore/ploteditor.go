@@ -556,7 +556,7 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 						pl.Update()
 						pl.AsyncUnlock()
 					}
-					d := core.NewBody().AddTitle("Column options")
+					d := core.NewBody("Column options")
 					core.NewForm(d).SetStruct(cp).
 						OnChange(func(e events.Event) {
 							update()
@@ -615,7 +615,7 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText("Options").SetIcon(icons.Settings).
 			SetTooltip("Options for how the plot is rendered").
 			OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle("Plot options")
+				d := core.NewBody("Plot options")
 				core.NewForm(d).SetStruct(&pl.Options).
 					OnChange(func(e events.Event) {
 						pl.GoUpdatePlot()
@@ -627,7 +627,7 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText("Table").SetIcon(icons.Edit).
 			SetTooltip("open a Table window of the data").
 			OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle(pl.Name + " Data")
+				d := core.NewBody(pl.Name + " Data")
 				tv := tensorcore.NewTable(d).SetTable(pl.table.Table)
 				d.AddAppBar(tv.MakeToolbar)
 				d.RunWindowDialog(pl)

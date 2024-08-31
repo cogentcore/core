@@ -100,7 +100,7 @@ func DiffEditorDialog(ctx core.Widget, title string, astr, bstr []string, afile,
 
 // TextDialog opens a dialog for displaying text string
 func TextDialog(ctx core.Widget, title, text string) *Editor {
-	d := core.NewBody().AddTitle(title)
+	d := core.NewBody(title)
 	ed := NewEditor(d)
 	ed.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
@@ -277,7 +277,7 @@ func (dv *DiffEditor) saveAs(ab bool, filename core.Filename) {
 	if !errors.Log1(fsx.FileExists(string(filename))) {
 		dv.saveFile(ab, filename)
 	} else {
-		d := core.NewBody().AddTitle("File Exists, Overwrite?").
+		d := core.NewBody("File Exists, Overwrite?").
 			AddText(fmt.Sprintf("File already exists, overwrite?  File: %v", filename))
 		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)

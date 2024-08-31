@@ -281,7 +281,7 @@ func (ed *Editor) QReplacePrompt() {
 	if ed.HasSelection() {
 		find = string(ed.Selection().ToBytes())
 	}
-	d := core.NewBody().AddTitle("Query-Replace").
+	d := core.NewBody("Query-Replace").
 		AddText("Enter strings for find and replace, then select Query-Replace; with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
 	fc := core.NewChooser(d).SetEditable(true).SetDefaultNew(true)
 	fc.Styler(func(s *styles.Style) {

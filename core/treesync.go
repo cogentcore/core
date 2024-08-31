@@ -224,7 +224,7 @@ func (tr *Tree) insertAt(rel int, actNm string) {
 	} else {
 		typ = types.TypeByValue(tr.SyncNode)
 	}
-	d := NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
+	d := NewBody(actNm).AddText("Number and type of items to insert:")
 	nd := &newItemsData{Number: 1, Type: typ}
 	NewForm(d).SetStruct(nd)
 	d.AddBottomBar(func(parent Widget) {
@@ -252,7 +252,7 @@ func (tr *Tree) AddChildNode() { //types:add
 	} else {
 		typ = types.TypeByValue(tr.SyncNode)
 	}
-	d := NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
+	d := NewBody(ttl).AddText("Number and type of items to insert:")
 	nd := &newItemsData{Number: 1, Type: typ}
 	NewForm(d).SetStruct(nd)
 	d.AddBottomBar(func(parent Widget) {
@@ -351,12 +351,12 @@ func (tr *Tree) duplicateSync() {
 func (tr *Tree) editNode() { //types:add
 	if tr.SyncNode != nil {
 		tynm := tr.SyncNode.AsTree().NodeType().Name
-		d := NewBody().AddTitle(tynm)
+		d := NewBody(tynm)
 		NewForm(d).SetStruct(tr.SyncNode).SetReadOnly(tr.IsReadOnly())
 		d.RunWindowDialog(tr)
 	} else {
 		tynm := tr.NodeType().Name
-		d := NewBody().AddTitle(tynm)
+		d := NewBody(tynm)
 		NewForm(d).SetStruct(tr.This).SetReadOnly(tr.IsReadOnly())
 		d.RunWindowDialog(tr)
 	}

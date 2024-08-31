@@ -703,7 +703,7 @@ func (ed *Editor) cursorTransposeWord() {
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
 func (ed *Editor) JumpToLinePrompt() {
 	val := ""
-	d := core.NewBody().AddTitle("Jump to line").AddText("Line number to jump to")
+	d := core.NewBody("Jump to line").AddText("Line number to jump to")
 	tf := core.NewTextField(d).SetPlaceholder("Line number")
 	tf.OnChange(func(e events.Event) {
 		val = tf.Text()

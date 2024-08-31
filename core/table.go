@@ -546,7 +546,7 @@ func (tb *Table) editIndex(idx int) {
 	if lbl != "" {
 		tynm += ": " + lbl
 	}
-	d := NewBody().AddTitle(tynm)
+	d := NewBody(tynm)
 	NewForm(d).SetStruct(stru).SetReadOnly(tb.IsReadOnly())
 	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)

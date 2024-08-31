@@ -158,7 +158,7 @@ func (kl *KeyedList) Init() {
 				w.SetIcon(icons.Edit).SetType(ButtonTonal)
 				w.Tooltip = "Edit in a dialog"
 				w.OnClick(func(e events.Event) {
-					d := NewBody().AddTitle(kl.ValueTitle).AddText(kl.Tooltip)
+					d := NewBody(kl.ValueTitle).AddText(kl.Tooltip)
 					NewKeyedList(d).SetMap(kl.Map).SetValueTitle(kl.ValueTitle)
 					d.OnClose(func(e events.Event) {
 						kl.UpdateChange(e)
@@ -246,7 +246,7 @@ func bindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 			mapv.SetMapIndex(key, reflect.Value{})
 			return
 		}
-		d := NewBody().AddTitle("Key already exists").AddText(fmt.Sprintf("The key %q already exists", reflectx.ToString(newKey.Interface())))
+		d := NewBody("Key already exists").AddText(fmt.Sprintf("The key %q already exists", reflectx.ToString(newKey.Interface())))
 		d.AddBottomBar(func(parent Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {

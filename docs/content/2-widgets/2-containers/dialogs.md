@@ -23,7 +23,7 @@ You can also construct a dialog with any content you want. For example, you can 
 ```Go
 bt := core.NewButton(b).SetText("Confirm")
 bt.OnClick(func(e events.Event) {
-    d := core.NewBody().AddTitle("Confirm").AddText("Send message?")
+    d := core.NewBody("Confirm").AddText("Send message?")
     d.AddBottomBar(func(b core.Widget) {
         d.AddCancel(b).OnClick(func(e events.Event) {
             core.MessageSnackbar(bt, "Dialog canceled")
@@ -41,7 +41,7 @@ You can make an input dialog:
 ```Go
 bt := core.NewButton(b).SetText("Input")
 bt.OnClick(func(e events.Event) {
-    d := core.NewBody().AddTitle("Input").AddText("What is your name?")
+    d := core.NewBody("Input").AddText("What is your name?")
     tf := core.NewTextField(d)
     d.AddBottomBar(func(b core.Widget) {
         d.AddCancel(b)
@@ -58,7 +58,7 @@ You can make a dialog that takes up the entire window:
 ```Go
 bt := core.NewButton(b).SetText("Full window")
 bt.OnClick(func(e events.Event) {
-    d := core.NewBody().AddTitle("Full window dialog")
+    d := core.NewBody("Full window dialog")
     d.RunFullDialog(bt)
 })
 ```
@@ -68,7 +68,7 @@ You can make a dialog that opens in a new window on multi-window platforms (not 
 ```Go
 bt := core.NewButton(b).SetText("New window")
 bt.OnClick(func(e events.Event) {
-    d := core.NewBody().AddTitle("New window dialog")
+    d := core.NewBody("New window dialog")
     d.RunWindowDialog(bt)
 })
 ```

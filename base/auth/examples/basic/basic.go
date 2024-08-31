@@ -15,7 +15,7 @@ import (
 func main() {
 	b := core.NewBody("Auth basic example")
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
-		d := core.NewBody().AddTitle("User info")
+		d := core.NewBody("User info")
 		core.NewText(d).SetType(core.TextHeadlineMedium).SetText("Basic info")
 		core.NewForm(d).SetStruct(userInfo)
 		core.NewText(d).SetType(core.TextHeadlineMedium).SetText("Detailed info")

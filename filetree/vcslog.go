@@ -128,7 +128,7 @@ func (lv *VCSLog) Init() {
 				slog.Error(err.Error())
 				return
 			}
-			d := core.NewBody().AddTitle("Commit Info: " + cmt.Rev)
+			d := core.NewBody("Commit Info: " + cmt.Rev)
 			buf := texteditor.NewBuffer()
 			buf.Filename = core.Filename(lv.File)
 			buf.Options.LineNumbers = true
@@ -249,7 +249,7 @@ func vcsLogDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since string
 	if since != "" {
 		title += " since: " + since
 	}
-	d := core.NewBody().AddTitle(title)
+	d := core.NewBody(title)
 	lv := NewVCSLog(d)
 	lv.SetRepo(repo).SetLog(lg).SetFile(file).SetSince(since)
 	d.RunWindowDialog(ctx)
@@ -267,7 +267,7 @@ func fileAtRevisionDialog(ctx core.Widget, repo vcs.Repo, file, rev string) *cor
 		rev = "HEAD"
 	}
 	title := "File at VCS Revision: " + fsx.DirAndFile(file) + "@" + rev
-	d := core.NewBody().AddTitle(title)
+	d := core.NewBody(title)
 
 	tb := texteditor.NewBuffer().SetText(fb).SetFilename(file) // file is key for getting lang
 	texteditor.NewEditor(d).SetBuffer(tb).SetReadOnly(true).Styler(func(s *styles.Style) {

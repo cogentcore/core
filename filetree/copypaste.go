@@ -159,7 +159,7 @@ func (fn *Node) pasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop 
 		}
 		return
 	}
-	d := core.NewBody().AddTitle("File(s) Exist in Target Dir, Overwrite?").
+	d := core.NewBody("File(s) Exist in Target Dir, Overwrite?").
 		AddText(fmt.Sprintf("File(s): %v exist, do you want to overwrite?", existing))
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
@@ -211,7 +211,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	}
 	switch {
 	case len(existing) == 1 && fname == fn.Name:
-		d := core.NewBody().AddTitle("Overwrite?").
+		d := core.NewBody("Overwrite?").
 			AddText(fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files?", fn.Name))
 		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
@@ -227,7 +227,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		})
 		d.RunDialog(fn)
 	case len(existing) > 0:
-		d := core.NewBody().AddTitle("Overwrite?").
+		d := core.NewBody("Overwrite?").
 			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files?", fn.Name, fname, fname))
 		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
@@ -254,7 +254,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		})
 		d.RunDialog(fn)
 	default:
-		d := core.NewBody().AddTitle("Overwrite?").
+		d := core.NewBody("Overwrite?").
 			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files?", fn.Name, fname, fname))
 		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)

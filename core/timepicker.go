@@ -346,7 +346,7 @@ func (ti *TimeInput) Init() {
 			tree.Add(p, func(w *TextField) {
 				w.SetTooltip("The date")
 				w.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
-					d := NewBody().AddTitle("Select date")
+					d := NewBody("Select date")
 					dp := NewDatePicker(d).SetTime(ti.Time)
 					d.AddBottomBar(func(parent Widget) {
 						d.AddCancel(parent)
@@ -379,7 +379,7 @@ func (ti *TimeInput) Init() {
 			tree.Add(p, func(w *TextField) {
 				w.SetTooltip("The time")
 				w.SetLeadingIcon(icons.Schedule, func(e events.Event) {
-					d := NewBody().AddTitle("Edit time")
+					d := NewBody("Edit time")
 					tp := NewTimePicker(d).SetTime(ti.Time)
 					d.AddBottomBar(func(parent Widget) {
 						d.AddCancel(parent)

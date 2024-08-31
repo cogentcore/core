@@ -246,7 +246,7 @@ func (is *Inspector) selectionMonitor() {
 
 // inspectApp displays [TheApp].
 func (is *Inspector) inspectApp() { //types:add
-	d := NewBody().AddTitle("Inspect app")
+	d := NewBody("Inspect app")
 	NewForm(d).SetStruct(TheApp).SetReadOnly(true)
 	d.RunFullDialog(is)
 }
