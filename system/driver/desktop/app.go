@@ -67,7 +67,7 @@ func (a *App) MainLoop() {
 				f.Done <- struct{}{}
 			}
 		default:
-			glfw.WaitEventsTimeout(0.1) // this is essential on linux
+			glfw.WaitEventsTimeout(0.1) // timeout is essential on linux
 		}
 	}
 }

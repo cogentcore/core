@@ -7,6 +7,7 @@ package core
 import (
 	"fmt"
 	"image"
+	"io/fs"
 	"log"
 	"log/slog"
 	"os"
@@ -497,7 +498,7 @@ func (fp *FilePicker) readFiles() {
 	}
 
 	fp.files = make([]*fileinfo.FileInfo, 0, 1000)
-	filepath.Walk(effpath, func(path string, info os.FileInfo, err error) error {
+	filepath.Walk(effpath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", effpath, err)
 			// if fv.Scene != nil {

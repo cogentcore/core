@@ -184,7 +184,8 @@ type Style struct { //types:add
 	// used if the element is read only.
 	VirtualKeyboard VirtualKeyboards
 
-	// position is only used for Layout = Nil cases
+	// Pos is used for the position of the widget if the parent frame
+	// has [Style.Display] = [NoLayout].
 	Pos units.XY `display:"inline"`
 
 	// ordering factor for rendering depth -- lower numbers rendered first.

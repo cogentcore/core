@@ -136,7 +136,9 @@ func (w *Window) Screen() *system.Screen {
 setScreen:
 	w.ScreenWindow = sc.Name
 	w.PhysDPI = sc.PhysicalDPI
-	w.DevicePixelRatio = sc.DevicePixelRatio
+	if w.DevicePixelRatio != sc.DevicePixelRatio {
+		w.DevicePixelRatio = sc.DevicePixelRatio
+	}
 	if w.LogDPI == 0 {
 		w.LogDPI = sc.LogicalDPI
 	}

@@ -36,7 +36,7 @@ func TestSimMat(t *testing.T) {
 	}
 	ix := table.NewIndexView(dt)
 	smat := &SimMat{}
-	smat.TableCol(ix, "Input", "Name", false, metric.Euclidean64)
+	smat.TableColumn(ix, "Input", "Name", false, metric.Euclidean64)
 
 	// fmt.Println(smat.Mat)
 	assert.Equal(t, simres, smat.Mat.String())

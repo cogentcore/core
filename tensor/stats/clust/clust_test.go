@@ -35,7 +35,7 @@ func TestClust(t *testing.T) {
 	}
 	ix := table.NewIndexView(dt)
 	smat := &simat.SimMat{}
-	smat.TableCol(ix, "Input", "Name", false, metric.Euclidean64)
+	smat.TableColumn(ix, "Input", "Name", false, metric.Euclidean64)
 
 	// fmt.Printf("%v\n", smat.Mat)
 	// cl := Glom(smat, MinDist)

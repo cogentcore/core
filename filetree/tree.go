@@ -6,6 +6,7 @@ package filetree
 
 import (
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -36,33 +37,37 @@ type Tree struct {
 	// in the first sub-node if present; use [Tree.AddExternalFile] to add one.
 	externalFiles []string
 
-	// records state of directories within the tree (encoded using paths relative to root),
+	// Dirs records state of directories within the tree (encoded using paths relative to root),
 	// e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree
 	Dirs DirFlagMap `set:"-"`
 
-	// if true, then all directories are placed at the top of the tree.
+	// DirsOnTop indicates whether all directories are placed at the top of the tree.
 	// Otherwise everything is mixed.
 	DirsOnTop bool
 
-	// type of node to create; defaults to [Node] but can use custom node types
+	// FileNodeType is the type of node to create; defaults to [Node] but can use custom node types
 	FileNodeType *types.Type `display:"-" json:"-" xml:"-"`
 
-	// if true, we are in midst of an OpenAll call; nodes should open all dirs
+	// FilterFunc, if set, determines whether to include the given node in the tree.
+	// return true to include, false to not.  This applies to files and directories alike.
+	FilterFunc func(path string, info fs.FileInfo) bool
+
+	// inOpenAll indicates whether we are in midst of an OpenAll call; nodes should open all dirs.
 	inOpenAll bool
 
-	// change notify for all dirs
+	// watcher does change notify for all dirs
 	watcher *fsnotify.Watcher
 
-	// channel to close watcher watcher
+	// doneWatcher is channel to close watcher watcher
 	doneWatcher chan bool
 
-	// map of paths that have been added to watcher; only active if bool = true
+	// watchedPaths is map of paths that have been added to watcher; only active if bool = true
 	watchedPaths map[string]bool
 
-	// last path updated by watcher
+	// lastWatchUpdate is last path updated by watcher
 	lastWatchUpdate string
 
-	// timestamp of last update
+	// lastWatchTime is timestamp of last update
 	lastWatchTime time.Time
 }
 
