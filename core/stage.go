@@ -223,6 +223,7 @@ func (st *Stage) setType(typ StageTypes) *Stage {
 		st.Modal = true
 		st.Scrim = true
 		st.ClickOff = true
+		st.DisplayTitle = true
 	case MenuStage:
 		st.Modal = true
 		st.Scrim = false
