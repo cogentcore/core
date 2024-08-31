@@ -23,7 +23,8 @@ You can also construct a dialog with any content you want. For example, you can 
 ```Go
 bt := core.NewButton(b).SetText("Confirm")
 bt.OnClick(func(e events.Event) {
-    d := core.NewBody("Confirm").AddText("Send message?")
+    d := core.NewBody("Confirm")
+    core.NewText(d).SetType(core.TextSupporting).SetText("Send message?")
     d.AddBottomBar(func(b core.Widget) {
         d.AddCancel(b).OnClick(func(e events.Event) {
             core.MessageSnackbar(bt, "Dialog canceled")
@@ -41,7 +42,8 @@ You can make an input dialog:
 ```Go
 bt := core.NewButton(b).SetText("Input")
 bt.OnClick(func(e events.Event) {
-    d := core.NewBody("Input").AddText("What is your name?")
+    d := core.NewBody("Input")
+    core.NewText(d).SetType(core.TextSupporting).SetText("What is your name?")
     tf := core.NewTextField(d)
     d.AddBottomBar(func(b core.Widget) {
         d.AddCancel(b)
@@ -77,7 +79,8 @@ You can confirm that the user wants to close a scene when they try to close it:
 
 ```go
 b.AddCloseDialog(func(d *core.Body) bool {
-    d.SetTitle("Are you sure?").AddText("Are you sure you want to close the Cogent Core Demo?")
+    d.SetTitle("Are you sure?")
+    core.NewText(d).SetType(core.TextSupporting).SetText("Are you sure you want to close the Cogent Core Demo?")
     d.AddBottomBar(func(b core.Widget) {
         d.AddOK(b).SetText("Close").OnClick(func(e events.Event) {
             b.Scene.Close()
