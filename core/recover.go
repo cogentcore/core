@@ -59,7 +59,7 @@ func handleRecover(r any) {
 
 	b := NewBody(title)
 	NewText(b).SetText(title).SetType(TextHeadlineSmall)
-	b.AddText(text)
+	NewText(b).SetType(TextSupporting).SetText(text)
 	b.AddBottomBar(func(parent Widget) {
 		NewButton(parent).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
 			d := NewBody("Crash details")

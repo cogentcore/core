@@ -210,7 +210,8 @@ var (
 func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 	msdesc := "Search for menu buttons and other app actions"
 	NewButton(m).SetText("Menu search").SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip(msdesc).OnClick(func(e events.Event) {
-		d := NewBody("Menu search").AddText(msdesc)
+		d := NewBody("Menu search")
+		NewText(d).SetType(TextSupporting).SetText(msdesc)
 		w := NewChooser(d).SetEditable(true).SetIcon(icons.Search)
 		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 0)

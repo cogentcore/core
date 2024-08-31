@@ -139,7 +139,7 @@ func openValueDialog(v Value, make func(d *Body), after ...func()) {
 	wb := v.AsWidget()
 	d := NewBody(wb.ValueTitle)
 	if text := strings.ReplaceAll(wb.Tooltip, shiftNewWindow, ""); text != "" {
-		d.AddText(text)
+		NewText(d).SetType(TextSupporting).SetText(text)
 	}
 	make(d)
 

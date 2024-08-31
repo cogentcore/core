@@ -224,7 +224,8 @@ func (tr *Tree) insertAt(rel int, actNm string) {
 	} else {
 		typ = types.TypeByValue(tr.SyncNode)
 	}
-	d := NewBody(actNm).AddText("Number and type of items to insert:")
+	d := NewBody(actNm)
+	NewText(d).SetType(TextSupporting).SetText("Number and type of items to insert:")
 	nd := &newItemsData{Number: 1, Type: typ}
 	NewForm(d).SetStruct(nd)
 	d.AddBottomBar(func(parent Widget) {
@@ -252,7 +253,8 @@ func (tr *Tree) AddChildNode() { //types:add
 	} else {
 		typ = types.TypeByValue(tr.SyncNode)
 	}
-	d := NewBody(ttl).AddText("Number and type of items to insert:")
+	d := NewBody(ttl)
+	NewText(d).SetType(TextSupporting).SetText("Number and type of items to insert:")
 	nd := &newItemsData{Number: 1, Type: typ}
 	NewForm(d).SetStruct(nd)
 	d.AddBottomBar(func(parent Widget) {

@@ -598,7 +598,8 @@ func (ch *Chooser) makeItemsMenu(m *Scene) {
 		NewButton(m).SetText("New item").SetIcon(icons.Add).
 			SetTooltip("Add a new item to the chooser").
 			OnClick(func(e events.Event) {
-				d := NewBody("New item").AddText("Add a new item to the chooser")
+				d := NewBody("New item")
+				NewText(d).SetType(TextSupporting).SetText("Add a new item to the chooser")
 				tf := NewTextField(d)
 				d.AddBottomBar(func(parent Widget) {
 					d.AddCancel(parent)

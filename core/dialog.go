@@ -93,9 +93,9 @@ func MessageDialog(ctx Widget, message string, title ...string) {
 	if len(title) > 0 {
 		ttl = title[0]
 	}
-	b := NewBody(ttl)
-	b.AddText(message).AddOKOnly()
-	b.RunDialog(ctx)
+	d := NewBody(ttl)
+	NewText(d).SetType(TextSupporting).SetText(message)
+	d.AddOKOnly().RunDialog(ctx)
 }
 
 // ErrorDialog opens a new dialog displaying the given error
@@ -113,7 +113,9 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 	}
 	// we need to get [errors.CallerInfo] at this level
 	slog.Error(ttl + ": " + err.Error() + " | " + errors.CallerInfo())
-	NewBody(ttl).AddText(err.Error()).AddOKOnly().RunDialog(ctx)
+	d := NewBody(ttl)
+	NewText(d).SetType(TextSupporting).SetText(err.Error())
+	d.AddOKOnly().RunDialog(ctx)
 }
 
 // AddOK adds an OK button to the given parent widget (typically in

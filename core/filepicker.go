@@ -693,7 +693,8 @@ func (fp *FilePicker) fileCompleteEdit(data any, text string, cursorPos int, c c
 // editRecentPaths displays a dialog allowing the user to
 // edit the recent paths list.
 func (fp *FilePicker) editRecentPaths() {
-	d := NewBody("Recent file paths").AddText("You can delete paths you no longer use")
+	d := NewBody("Recent file paths")
+	NewText(d).SetType(TextSupporting).SetText("You can delete paths you no longer use")
 	NewList(d).SetSlice(&recentPaths)
 	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
