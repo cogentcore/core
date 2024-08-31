@@ -5,6 +5,7 @@
 package core
 
 import (
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/events"
@@ -15,9 +16,8 @@ import (
 )
 
 // BarFuncs are functions for creating control bars,
-// attached to different sides of a Scene (e.g., TopAppBar at Top,
-// NavBar at Bottom, etc).  Functions are called in forward order
-// so first added are called first.
+// attached to different sides of a [Scene]. Functions
+// are called in forward order so first added are called first.
 type BarFuncs []func(parent Widget)
 
 // Add adds the given function for configuring a control bar
@@ -26,45 +26,34 @@ func (bf *BarFuncs) Add(fun func(parent Widget)) *BarFuncs {
 	return bf
 }
 
-// Call calls all the functions for configuring given widget
-func (bf *BarFuncs) Call(parent Widget) {
+// call calls all the functions for configuring given widget
+func (bf *BarFuncs) call(parent Widget) {
 	for _, fun := range *bf {
 		fun(parent)
 	}
 }
 
-// IsEmpty returns true if there are no functions added
-func (bf *BarFuncs) IsEmpty() bool {
+// isEmpty returns true if there are no functions added
+func (bf *BarFuncs) isEmpty() bool {
 	return len(*bf) == 0
-}
-
-// Inherit adds other bar funcs in front of any existing
-func (bf *BarFuncs) Inherit(obf BarFuncs) {
-	if len(obf) == 0 {
-		return
-	}
-	nbf := make(BarFuncs, len(obf), len(obf)+len(*bf))
-	copy(nbf, obf)
-	nbf = append(nbf, *bf...)
-	*bf = nbf
 }
 
 // makeSceneBars configures the side control bars, for main scenes.
 func (sc *Scene) makeSceneBars() {
 	sc.addDefaultBars()
-	if !sc.Bars.Top.IsEmpty() {
+	if !sc.Bars.Top.isEmpty() {
 		head := NewFrame(sc)
 		head.SetName("top-bar")
 		head.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(1, 0)
 		})
-		sc.Bars.Top.Call(head)
+		sc.Bars.Top.call(head)
 	}
-	if !sc.Bars.Left.IsEmpty() || !sc.Bars.Right.IsEmpty() {
+	if !sc.Bars.Left.isEmpty() || !sc.Bars.Right.isEmpty() {
 		mid := NewFrame(sc)
 		mid.SetName("body-area")
-		if !sc.Bars.Left.IsEmpty() {
+		if !sc.Bars.Left.isEmpty() {
 			left := NewFrame(mid)
 			left.SetName("left-bar")
 			left.Styler(func(s *styles.Style) {
@@ -72,12 +61,12 @@ func (sc *Scene) makeSceneBars() {
 				s.Align.Items = styles.Center
 				s.Grow.Set(0, 1)
 			})
-			sc.Bars.Left.Call(left)
+			sc.Bars.Left.call(left)
 		}
 		if sc.Body != nil {
 			mid.AddChild(sc.Body)
 		}
-		if !sc.Bars.Right.IsEmpty() {
+		if !sc.Bars.Right.isEmpty() {
 			right := NewFrame(mid)
 			right.SetName("right-bar")
 			right.Styler(func(s *styles.Style) {
@@ -85,14 +74,14 @@ func (sc *Scene) makeSceneBars() {
 				s.Align.Items = styles.Center
 				s.Grow.Set(0, 1)
 			})
-			sc.Bars.Right.Call(right)
+			sc.Bars.Right.call(right)
 		}
 	} else {
 		if sc.Body != nil {
 			sc.AddChild(sc.Body)
 		}
 	}
-	if !sc.Bars.Bottom.IsEmpty() {
+	if !sc.Bars.Bottom.isEmpty() {
 		foot := NewFrame(sc)
 		foot.SetName("bottom-bar")
 		foot.Styler(func(s *styles.Style) {
@@ -100,7 +89,7 @@ func (sc *Scene) makeSceneBars() {
 			s.Align.Items = styles.Center
 			s.Grow.Set(1, 0)
 		})
-		sc.Bars.Bottom.Call(foot)
+		sc.Bars.Bottom.call(foot)
 	}
 }
 
@@ -115,7 +104,7 @@ func (sc *Scene) addDefaultBars() {
 	st := sc.Stage
 	needBackButton := st.FullWindow && !st.NewWindow
 	if st.DisplayTitle || needBackButton {
-		sc.Bars.Top.Add(func(parent Widget) {
+		sc.Bars.Top = slices.Insert(sc.Bars.Top, 0, func(parent Widget) {
 			titleRow := NewFrame(parent)
 			titleRow.SetName("title-row")
 			titleRow.Styler(func(s *styles.Style) {
