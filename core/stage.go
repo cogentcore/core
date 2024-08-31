@@ -92,7 +92,8 @@ type Stage struct { //types:add -setters
 
 	// Title is the title of the Stage, which is generally auto-set
 	// based on the [Body.Title]. It used for the title of [WindowStage]
-	// and [DialogStage] types.
+	// and [DialogStage] types, and for a [Text] title widget if
+	// [Stage.DisplayTitle] is true.
 	Title string
 
 	// Modal, if true, blocks input to all other stages.
@@ -121,6 +122,11 @@ type Stage struct { //types:add -setters
 	// Timeout, if greater than 0, results in a popup stages disappearing
 	// after this timeout duration.
 	Timeout time.Duration
+
+	// DisplayTitle is whether to display the [Stage.Title] using a
+	// [Text] widget in the top bar. It is on by default for [DialogStage]s
+	// and off for all other stages.
+	DisplayTitle bool
 
 	// Pos is the target position for the [Stage] to be placed within
 	// the surrounding window.
