@@ -29,6 +29,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pages/ppath"
 	"cogentcore.org/core/paint"
@@ -416,7 +417,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 }
 
 func (pg *Page) MakeToolbar(p *tree.Plan) {
-	tree.AddInit(p, "back", func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
+		w.SetTooltip("Back")
 		w.OnClick(func(e events.Event) {
 			if pg.historyIndex > 0 {
 				pg.historyIndex--
