@@ -57,7 +57,9 @@ func handleRecover(r any) {
 		return
 	}
 
-	b := NewBody("app-stopped-unexpectedly").AddTitle(title).AddText(text)
+	b := NewBody("app-stopped-unexpectedly")
+	NewText(b).SetText(title).SetType(TextHeadlineSmall)
+	b.AddText(text)
 	b.AddBottomBar(func(parent Widget) {
 		NewButton(parent).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
 			d := NewBody("crash-details").AddTitle("Crash details")
