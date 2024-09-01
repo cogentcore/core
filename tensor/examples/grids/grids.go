@@ -30,7 +30,9 @@ func main() {
 	// nt, _ := tv.NewTab("First")
 	nt, _ := tv.NewTab("Patterns")
 	etv := tensorcore.NewTable(nt).SetTable(pats)
-	b.AddAppBar(etv.MakeToolbar)
+	b.AddTopBar(func(bar *core.Frame) {
+		core.NewToolbar(bar).Maker(etv.MakeToolbar)
+	})
 
 	b.RunMainWindow()
 }

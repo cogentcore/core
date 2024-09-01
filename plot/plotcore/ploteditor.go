@@ -561,17 +561,19 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 						OnChange(func(e events.Event) {
 							update()
 						})
-					d.AddAppBar(func(p *tree.Plan) {
-						tree.Add(p, func(w *core.Button) {
-							w.SetText("Set x-axis").OnClick(func(e events.Event) {
-								pl.Options.XAxis = cp.Column
-								update()
+					d.AddTopBar(func(bar *core.Frame) {
+						core.NewToolbar(bar).Maker(func(p *tree.Plan) {
+							tree.Add(p, func(w *core.Button) {
+								w.SetText("Set x-axis").OnClick(func(e events.Event) {
+									pl.Options.XAxis = cp.Column
+									update()
+								})
 							})
-						})
-						tree.Add(p, func(w *core.Button) {
-							w.SetText("Set legend").OnClick(func(e events.Event) {
-								pl.Options.Legend = cp.Column
-								update()
+							tree.Add(p, func(w *core.Button) {
+								w.SetText("Set legend").OnClick(func(e events.Event) {
+									pl.Options.Legend = cp.Column
+									update()
+								})
 							})
 						})
 					})
@@ -629,7 +631,9 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 			OnClick(func(e events.Event) {
 				d := core.NewBody(pl.Name + " Data")
 				tv := tensorcore.NewTable(d).SetTable(pl.table.Table)
-				d.AddAppBar(tv.MakeToolbar)
+				d.AddTopBar(func(bar *core.Frame) {
+					core.NewToolbar(bar).Maker(tv.MakeToolbar)
+				})
 				d.RunWindowDialog(pl)
 			})
 	})

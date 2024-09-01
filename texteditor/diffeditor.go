@@ -93,7 +93,9 @@ func DiffEditorDialog(ctx core.Widget, title string, astr, bstr []string, afile,
 	dv := NewDiffEditor(d)
 	dv.SetFileA(afile).SetFileB(bfile).SetRevisionA(arev).SetRevisionB(brev)
 	dv.DiffStrings(astr, bstr)
-	d.AddAppBar(dv.MakeToolbar)
+	d.AddTopBar(func(bar *core.Frame) {
+		core.NewToolbar(bar).Maker(dv.MakeToolbar)
+	})
 	d.NewWindow().SetContext(ctx).SetNewWindow(true).Run()
 	return dv
 }

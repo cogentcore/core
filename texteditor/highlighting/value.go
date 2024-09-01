@@ -52,20 +52,22 @@ func Editor(st *Styles) {
 	kl.OnChange(func(e events.Event) {
 		StylesChanged = true
 	})
-	d.AddAppBar(func(p *tree.Plan) {
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
-			w.Args[0].SetTag(`extension:".highlighting"`)
+	d.AddTopBar(func(bar *core.Frame) {
+		core.NewToolbar(bar).Maker(func(p *tree.Plan) {
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
+				w.Args[0].SetTag(`extension:".highlighting"`)
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
+				w.Args[0].SetTag(`extension:".highlighting"`)
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(st.ViewStandard).SetIcon(icons.Visibility)
+			})
+			tree.Add(p, func(w *core.Separator) {})
+			kl.MakeToolbar(p)
 		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
-			w.Args[0].SetTag(`extension:".highlighting"`)
-		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(st.ViewStandard).SetIcon(icons.Visibility)
-		})
-		tree.Add(p, func(w *core.Separator) {})
-		kl.MakeToolbar(p)
 	})
 	d.RunWindow() // note: no context here so not dialog
 }

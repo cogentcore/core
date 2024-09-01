@@ -30,7 +30,9 @@ func TestTablePlotEditor(t *testing.T) {
 	pl.Options.Points = true
 	pl.SetTable(epc)
 	pl.ColumnOptions("UnitErr").On = true
-	b.AddAppBar(pl.MakeToolbar)
+	b.AddTopBar(func(bar *core.Frame) {
+		core.NewToolbar(bar).Maker(pl.MakeToolbar)
+	})
 	b.AssertRender(t, "table")
 }
 
@@ -47,7 +49,9 @@ func TestSlicePlotEditor(t *testing.T) {
 	pl.Options.Title = "Slice Data"
 	pl.Options.Points = true
 	pl.SetSlice(data)
-	b.AddAppBar(pl.MakeToolbar)
+	b.AddTopBar(func(bar *core.Frame) {
+		core.NewToolbar(bar).Maker(pl.MakeToolbar)
+	})
 
 	b.AssertRender(t, "slice")
 }
