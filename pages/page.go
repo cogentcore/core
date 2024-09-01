@@ -417,18 +417,18 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 }
 
 func (pg *Page) MakeToolbar(p *tree.Plan) {
-	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
-		w.SetTooltip("Back")
-		w.OnClick(func(e events.Event) {
-			if pg.historyIndex > 0 {
+	if pg.historyIndex > 0 {
+		tree.Add(p, func(w *core.Button) {
+			w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
+			w.SetTooltip("Back")
+			w.OnClick(func(e events.Event) {
 				pg.historyIndex--
 				// we need a slash so that it doesn't think it's a relative URL
 				pg.OpenURL("/"+pg.history[pg.historyIndex], false)
 				e.SetHandled()
-			}
+			})
 		})
-	})
+	}
 }
 
 func (pg *Page) MenuSearch(items *[]core.ChooserItem) {
