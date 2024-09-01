@@ -100,7 +100,7 @@ func (st *Stage) addSceneParts() {
 	if st.Type != DialogStage || st.FullWindow || st.NewWindow {
 		return
 	}
-	// TODO(appbar): maybe convert to use app bar instead of parts?
+	// TODO: convert to use [Scene.Bars] instead of parts
 	sc := st.Scene
 	parts := sc.newParts()
 	parts.Styler(func(s *styles.Style) {
