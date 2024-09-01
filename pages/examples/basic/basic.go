@@ -17,6 +17,8 @@ var content embed.FS
 func main() {
 	b := core.NewBody("Pages Example")
 	pg := pages.NewPage(b).SetContent(content)
-	b.AddAppBar(pg.MakeToolbar)
+	b.AddTopBar(func(parent core.Widget) {
+		core.NewToolbar(parent).Maker(pg.MakeToolbar)
+	})
 	b.RunMainWindow()
 }
