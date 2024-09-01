@@ -34,8 +34,8 @@ func SettingsWindow() { //types:add
 
 // SettingsEditor adds to the given body an editor of user settings.
 func SettingsEditor(b *Body) {
-	b.AddTopBar(func(parent Widget) {
-		tb := NewToolbar(parent)
+	b.AddTopBar(func(bar Widget) {
+		tb := NewToolbar(bar)
 		tb.Maker(settingsEditorToolbarBase)
 		for _, se := range AllSettings {
 			tb.Maker(se.MakeToolbar)

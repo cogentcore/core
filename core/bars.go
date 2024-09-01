@@ -18,18 +18,18 @@ import (
 // BarFuncs are functions for creating control bars,
 // attached to different sides of a [Scene]. Functions
 // are called in forward order so first added are called first.
-type BarFuncs []func(parent Widget)
+type BarFuncs []func(bar Widget)
 
 // Add adds the given function for configuring a control bar
-func (bf *BarFuncs) Add(fun func(parent Widget)) *BarFuncs {
+func (bf *BarFuncs) Add(fun func(bar Widget)) *BarFuncs {
 	*bf = append(*bf, fun)
 	return bf
 }
 
 // call calls all the functions for configuring given widget
-func (bf *BarFuncs) call(parent Widget) {
+func (bf *BarFuncs) call(bar Widget) {
 	for _, fun := range *bf {
-		fun(parent)
+		fun(bar)
 	}
 }
 
@@ -104,16 +104,16 @@ func (sc *Scene) addDefaultBars() {
 	st := sc.Stage
 	needBackButton := st.FullWindow && !st.NewWindow && !(st.Mains != nil && st.Mains.stack.Len() == 0)
 	if st.DisplayTitle || needBackButton {
-		sc.Bars.Top = slices.Insert(sc.Bars.Top, 0, func(parent Widget) {
+		sc.Bars.Top = slices.Insert(sc.Bars.Top, 0, func(bar Widget) {
 			if needBackButton {
-				back := NewButton(parent).SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
+				back := NewButton(bar).SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
 				back.SetType(ButtonAction).SetTooltip("Back")
 				back.OnClick(func(e events.Event) {
 					sc.Close()
 				})
 			}
 			if st.DisplayTitle {
-				title := NewText(parent).SetType(TextHeadlineSmall)
+				title := NewText(bar).SetType(TextHeadlineSmall)
 				title.Updater(func() {
 					title.SetText(sc.Body.Title)
 				})
@@ -148,25 +148,25 @@ func (sc *Scene) GetTopAppBar() *Toolbar {
 
 // AddTopBar adds the given function for configuring a control bar
 // at the top of the window
-func (bd *Body) AddTopBar(fun func(parent Widget)) {
+func (bd *Body) AddTopBar(fun func(bar Widget)) {
 	bd.Scene.Bars.Top.Add(fun)
 }
 
 // AddLeftBar adds the given function for configuring a control bar
 // on the left of the window
-func (bd *Body) AddLeftBar(fun func(parent Widget)) {
+func (bd *Body) AddLeftBar(fun func(bar Widget)) {
 	bd.Scene.Bars.Left.Add(fun)
 }
 
 // AddRightBar adds the given function for configuring a control bar
 // on the right of the window
-func (bd *Body) AddRightBar(fun func(parent Widget)) {
+func (bd *Body) AddRightBar(fun func(bar Widget)) {
 	bd.Scene.Bars.Right.Add(fun)
 }
 
 // AddBottomBar adds the given function for configuring a control bar
 // at the bottom of the window
-func (bd *Body) AddBottomBar(fun func(parent Widget)) {
+func (bd *Body) AddBottomBar(fun func(bar Widget)) {
 	bd.Scene.Bars.Bottom.Add(fun)
 }
 

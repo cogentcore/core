@@ -249,8 +249,8 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 		w.OnFinal(events.Change, func(e events.Event) {
 			d.Close()
 		})
-		d.AddBottomBar(func(parent Widget) {
-			d.AddCancel(parent)
+		d.AddBottomBar(func(bar Widget) {
+			d.AddCancel(bar)
 		})
 		d.RunDialog(sc)
 	})
