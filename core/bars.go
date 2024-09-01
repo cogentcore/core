@@ -6,13 +6,11 @@ package core
 
 import (
 	"slices"
-	"strings"
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/tree"
 )
 
 // BarFuncs are functions for creating control bars,
@@ -113,27 +111,6 @@ func (sc *Scene) addDefaultBars() {
 			}
 		})
 	}
-}
-
-// TODO(appbar): remove GetBar and GetTopAppBar
-
-// GetBar returns Bar layout widget at given side, nil if not there.
-func (sc *Scene) GetBar(side styles.SideIndexes) *Frame {
-	nm := strings.ToLower(side.String()) + "-bar"
-	bar := sc.ChildByName(nm)
-	if bar != nil {
-		return bar.(*Frame)
-	}
-	return nil
-}
-
-// GetTopAppBar returns the TopAppBar Toolbar if it exists, nil otherwise.
-func (sc *Scene) GetTopAppBar() *Toolbar {
-	tb := sc.GetBar(styles.Top)
-	if tb == nil {
-		return nil
-	}
-	return tree.ChildByType[*Toolbar](tb)
 }
 
 //////////////////////////////////////////////////////////////
