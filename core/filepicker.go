@@ -13,7 +13,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"slices"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
@@ -236,9 +235,6 @@ func (fp *FilePicker) selectFile() bool {
 }
 
 func (fp *FilePicker) MakeToolbar(p *tree.Plan) {
-	tree.AddInit(p, "app-chooser", func(w *Chooser) {
-		fp.addChooserPaths(w)
-	})
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.directoryUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
@@ -253,36 +249,33 @@ func (fp *FilePicker) MakeToolbar(p *tree.Plan) {
 	})
 }
 
-// addChooserPaths adds paths to the app chooser
-func (fp *FilePicker) addChooserPaths(ch *Chooser) {
-	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {
-		for _, sp := range recentPaths {
-			ch.Items = append(ch.Items, ChooserItem{
-				Value: sp,
-				Icon:  icons.Folder,
-				Func: func() {
-					fp.directory = sp
-					fp.updateFilesEvent()
-				},
-			})
-		}
-		ch.Items = append(ch.Items, ChooserItem{
-			Value:           "Reset recent paths",
-			Icon:            icons.Refresh,
-			SeparatorBefore: true,
+func (fp *FilePicker) MenuSearch(items *[]ChooserItem) {
+	for _, sp := range recentPaths {
+		*items = append(*items, ChooserItem{
+			Value: sp,
+			Icon:  icons.Folder,
 			Func: func() {
-				recentPaths = make(FilePaths, 1, SystemSettings.SavedPathsMax)
-				recentPaths[0] = fp.directory
-				fp.Update()
+				fp.directory = sp
+				fp.updateFilesEvent()
 			},
 		})
-		ch.Items = append(ch.Items, ChooserItem{
-			Value: "Edit recent paths",
-			Icon:  icons.Edit,
-			Func: func() {
-				fp.editRecentPaths()
-			},
-		})
+	}
+	*items = append(*items, ChooserItem{
+		Value:           "Reset recent paths",
+		Icon:            icons.Refresh,
+		SeparatorBefore: true,
+		Func: func() {
+			recentPaths = make(FilePaths, 1, SystemSettings.SavedPathsMax)
+			recentPaths[0] = fp.directory
+			fp.Update()
+		},
+	})
+	*items = append(*items, ChooserItem{
+		Value: "Edit recent paths",
+		Icon:  icons.Edit,
+		Func: func() {
+			fp.editRecentPaths()
+		},
 	})
 }
 
