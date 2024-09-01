@@ -395,8 +395,7 @@ func (ch *Chooser) Init() {
 // on dynamic data). The functions are called in ascending order such
 // that the items added in the first function will appear before those
 // added in the last function. If at least one ItemsFunc is specified,
-// the items, labels, icons, and tooltips of the chooser will be cleared
-// before calling the functions.
+// the items of the chooser will be cleared before calling the functions.
 func (ch *Chooser) AddItemsFunc(f func()) *Chooser {
 	ch.ItemsFuncs = append(ch.ItemsFuncs, f)
 	return ch

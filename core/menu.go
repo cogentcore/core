@@ -206,6 +206,13 @@ var (
 	webInstall func()
 )
 
+// MenuSearcher is an interface that [Widget]s can implement
+// to customize the items of the menu search chooser created
+// by the default [Scene] context menu.
+type MenuSearcher interface {
+	MenuSearch(items *[]ChooserItem)
+}
+
 // standardContextMenu adds standard context menu items for the [Scene].
 func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 	msdesc := "Search for menu buttons and other app actions"
@@ -242,9 +249,6 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 		w.OnFinal(events.Change, func(e events.Event) {
 			d.Close()
 		})
-		if sc.MenuSearchInit != nil {
-			sc.MenuSearchInit(w)
-		}
 		d.AddBottomBar(func(parent Widget) {
 			d.AddCancel(parent)
 		})
@@ -318,6 +322,9 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 // typically set path to "".
 func addButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 	parent.AsTree().WalkDown(func(n tree.Node) bool {
+		if ms, ok := n.(MenuSearcher); ok {
+			ms.MenuSearch(items)
+		}
 		bt := AsButton(n)
 		if bt == nil || bt.IsDisabled() {
 			return tree.Continue

@@ -431,21 +431,19 @@ func (pg *Page) MakeToolbar(p *tree.Plan) {
 	})
 }
 
-func (pg *Page) MenuSearchInit(w *core.Chooser) {
-	w.AddItemsFunc(func() {
-		urls := []string{}
-		for u := range pg.urlToPagePath {
-			urls = append(urls, u)
-		}
-		slices.Sort(urls)
-		for _, u := range urls {
-			w.Items = append(w.Items, core.ChooserItem{
-				Value: u,
-				Text:  ppath.Label(u, core.TheApp.Name()),
-				Func: func() {
-					pg.OpenURL("/"+u, true)
-				},
-			})
-		}
-	})
+func (pg *Page) MenuSearch(items *[]core.ChooserItem) {
+	urls := []string{}
+	for u := range pg.urlToPagePath {
+		urls = append(urls, u)
+	}
+	slices.Sort(urls)
+	for _, u := range urls {
+		*items = append(*items, core.ChooserItem{
+			Value: u,
+			Text:  ppath.Label(u, core.TheApp.Name()),
+			Func: func() {
+				pg.OpenURL("/"+u, true)
+			},
+		})
+	}
 }
