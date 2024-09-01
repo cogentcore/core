@@ -45,7 +45,7 @@ func (sc *Scene) makeSceneBars() {
 		head := NewFrame(sc)
 		head.SetName("top-bar")
 		head.Styler(func(s *styles.Style) {
-			s.Direction = styles.Column
+			s.Align.Items = styles.Center
 			s.Grow.Set(1, 0)
 		})
 		sc.Bars.Top.call(head)
