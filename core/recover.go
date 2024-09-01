@@ -60,14 +60,14 @@ func handleRecover(r any) {
 	b := NewBody(title)
 	NewText(b).SetText(title).SetType(TextHeadlineSmall)
 	NewText(b).SetType(TextSupporting).SetText(text)
-	b.AddBottomBar(func(bar Widget) {
+	b.AddBottomBar(func(bar *Frame) {
 		NewButton(bar).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
 			d := NewBody("Crash details")
 			NewText(d).SetText(body).Styler(func(s *styles.Style) {
 				s.SetMono(true)
 				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			})
-			d.AddBottomBar(func(bar Widget) {
+			d.AddBottomBar(func(bar *Frame) {
 				NewButton(bar).SetText("Copy").SetIcon(icons.Copy).SetType(ButtonOutlined).
 					OnClick(func(e events.Event) {
 						d.Clipboard().Write(mimedata.NewText(body))

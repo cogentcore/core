@@ -709,7 +709,7 @@ func (ed *Editor) JumpToLinePrompt() {
 	tf.OnChange(func(e events.Event) {
 		val = tf.Text()
 	})
-	d.AddBottomBar(func(bar core.Widget) {
+	d.AddBottomBar(func(bar *core.Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).SetText("Jump").OnClick(func(e events.Event) {
 			val = tf.Text()

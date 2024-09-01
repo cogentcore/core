@@ -106,7 +106,7 @@ func TextDialog(ctx core.Widget, title, text string) *Editor {
 		s.Grow.Set(1, 1)
 	})
 	ed.Buffer.SetText([]byte(text))
-	d.AddBottomBar(func(bar core.Widget) {
+	d.AddBottomBar(func(bar *core.Frame) {
 		core.NewButton(bar).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
 			OnClick(func(e events.Event) {
 				d.Clipboard().Write(mimedata.NewText(text))
@@ -279,7 +279,7 @@ func (dv *DiffEditor) saveAs(ab bool, filename core.Filename) {
 	} else {
 		d := core.NewBody("File Exists, Overwrite?")
 		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("File already exists, overwrite?  File: %v", filename))
-		d.AddBottomBar(func(bar core.Widget) {
+		d.AddBottomBar(func(bar *core.Frame) {
 			d.AddCancel(bar)
 			d.AddOK(bar).OnClick(func(e events.Event) {
 				dv.saveFile(ab, filename)

@@ -692,7 +692,7 @@ func (fp *FilePicker) editRecentPaths() {
 	d := NewBody("Recent file paths")
 	NewText(d).SetType(TextSupporting).SetText("You can delete paths you no longer use")
 	NewList(d).SetSlice(&recentPaths)
-	d.AddBottomBar(func(bar Widget) {
+	d.AddBottomBar(func(bar *Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).OnClick(func(e events.Event) {
 			saveRecentPaths()

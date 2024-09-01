@@ -152,7 +152,7 @@ func openValueDialog(v Value, make func(d *Body), after ...func()) {
 		})
 	} else {
 		// otherwise, we have to make the bottom bar
-		d.AddBottomBar(func(bar Widget) {
+		d.AddBottomBar(func(bar *Frame) {
 			d.AddCancel(bar)
 			d.AddOK(bar).OnClick(func(e events.Event) {
 				after[0]()

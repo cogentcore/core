@@ -80,8 +80,8 @@ func appIconImages() []image.Image {
 }
 
 // makeAppBar configures a new top app bar in the given parent.
-func makeAppBar(parent Widget) {
-	tb := NewToolbar(parent)
+func makeAppBar(bar *Frame) {
+	tb := NewToolbar(bar)
 	if len(tb.Scene.AppBars) > 0 {
 		tb.Makers.Normal = append(tb.Makers.Normal, tb.Scene.AppBars...)
 	}

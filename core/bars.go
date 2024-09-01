@@ -18,16 +18,16 @@ import (
 // BarFuncs are functions for creating control bars,
 // attached to different sides of a [Scene]. Functions
 // are called in forward order so first added are called first.
-type BarFuncs []func(bar Widget)
+type BarFuncs []func(bar *Frame)
 
 // Add adds the given function for configuring a control bar
-func (bf *BarFuncs) Add(fun func(bar Widget)) *BarFuncs {
+func (bf *BarFuncs) Add(fun func(bar *Frame)) *BarFuncs {
 	*bf = append(*bf, fun)
 	return bf
 }
 
 // call calls all the functions for configuring given widget
-func (bf *BarFuncs) call(bar Widget) {
+func (bf *BarFuncs) call(bar *Frame) {
 	for _, fun := range *bf {
 		fun(bar)
 	}
@@ -104,7 +104,7 @@ func (sc *Scene) addDefaultBars() {
 	st := sc.Stage
 	needBackButton := st.FullWindow && !st.NewWindow && !(st.Mains != nil && st.Mains.stack.Len() == 0)
 	if st.DisplayTitle || needBackButton {
-		sc.Bars.Top = slices.Insert(sc.Bars.Top, 0, func(bar Widget) {
+		sc.Bars.Top = slices.Insert(sc.Bars.Top, 0, func(bar *Frame) {
 			if needBackButton {
 				back := NewButton(bar).SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
 				back.SetType(ButtonAction).SetTooltip("Back")
@@ -148,25 +148,25 @@ func (sc *Scene) GetTopAppBar() *Toolbar {
 
 // AddTopBar adds the given function for configuring a control bar
 // at the top of the window
-func (bd *Body) AddTopBar(fun func(bar Widget)) {
+func (bd *Body) AddTopBar(fun func(bar *Frame)) {
 	bd.Scene.Bars.Top.Add(fun)
 }
 
 // AddLeftBar adds the given function for configuring a control bar
 // on the left of the window
-func (bd *Body) AddLeftBar(fun func(bar Widget)) {
+func (bd *Body) AddLeftBar(fun func(bar *Frame)) {
 	bd.Scene.Bars.Left.Add(fun)
 }
 
 // AddRightBar adds the given function for configuring a control bar
 // on the right of the window
-func (bd *Body) AddRightBar(fun func(bar Widget)) {
+func (bd *Body) AddRightBar(fun func(bar *Frame)) {
 	bd.Scene.Bars.Right.Add(fun)
 }
 
 // AddBottomBar adds the given function for configuring a control bar
 // at the bottom of the window
-func (bd *Body) AddBottomBar(fun func(bar Widget)) {
+func (bd *Body) AddBottomBar(fun func(bar *Frame)) {
 	bd.Scene.Bars.Bottom.Add(fun)
 }
 

@@ -161,7 +161,7 @@ func (fn *Node) pasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop 
 	}
 	d := core.NewBody("File(s) Exist in Target Dir, Overwrite?")
 	core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("File(s): %v exist, do you want to overwrite?", existing))
-	d.AddBottomBar(func(bar core.Widget) {
+	d.AddBottomBar(func(bar *core.Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).SetText("Overwrite").OnClick(func(e events.Event) {
 			fn.pasteCopyFiles(tdir, md, externalDrop)
@@ -213,7 +213,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	case len(existing) == 1 && fname == fn.Name:
 		d := core.NewBody("Overwrite?")
 		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files?", fn.Name))
-		d.AddBottomBar(func(bar core.Widget) {
+		d.AddBottomBar(func(bar *core.Frame) {
 			d.AddCancel(bar)
 			d.AddOK(bar).SetText("Diff (compare)").OnClick(func(e events.Event) {
 				texteditor.DiffFiles(fn, tpath, srcpath)
@@ -229,7 +229,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	case len(existing) > 0:
 		d := core.NewBody("Overwrite?")
 		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files?", fn.Name, fname, fname))
-		d.AddBottomBar(func(bar core.Widget) {
+		d.AddBottomBar(func(bar *core.Frame) {
 			d.AddCancel(bar)
 			d.AddOK(bar).SetText("Diff to target").OnClick(func(e events.Event) {
 				texteditor.DiffFiles(fn, tpath, srcpath)
@@ -256,7 +256,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	default:
 		d := core.NewBody("Overwrite?")
 		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files?", fn.Name, fname, fname))
-		d.AddBottomBar(func(bar core.Widget) {
+		d.AddBottomBar(func(bar *core.Frame) {
 			d.AddCancel(bar)
 			d.AddOK(bar).SetText("Diff (compare)").OnClick(func(e events.Event) {
 				texteditor.DiffFiles(fn, tpath, srcpath)

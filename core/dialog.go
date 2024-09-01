@@ -147,7 +147,7 @@ func (bd *Body) AddOK(parent Widget) *Button {
 // OK button automatically results in the dialog being closed. Also see
 // [Body.AddOK].
 func (bd *Body) AddOKOnly() *Body {
-	bd.AddBottomBar(func(bar Widget) { bd.AddOK(bar) })
+	bd.AddBottomBar(func(bar *Frame) { bd.AddOK(bar) })
 	return bd
 }
 

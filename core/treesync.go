@@ -228,7 +228,7 @@ func (tr *Tree) insertAt(rel int, actNm string) {
 	NewText(d).SetType(TextSupporting).SetText("Number and type of items to insert:")
 	nd := &newItemsData{Number: 1, Type: typ}
 	NewForm(d).SetStruct(nd)
-	d.AddBottomBar(func(bar Widget) {
+	d.AddBottomBar(func(bar *Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).OnClick(func(e events.Event) {
 			parent := AsTree(tr.Parent)
@@ -257,7 +257,7 @@ func (tr *Tree) AddChildNode() { //types:add
 	NewText(d).SetType(TextSupporting).SetText("Number and type of items to insert:")
 	nd := &newItemsData{Number: 1, Type: typ}
 	NewForm(d).SetStruct(nd)
-	d.AddBottomBar(func(bar Widget) {
+	d.AddBottomBar(func(bar *Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).OnClick(func(e events.Event) {
 			if tr.SyncNode != nil {

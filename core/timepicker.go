@@ -348,7 +348,7 @@ func (ti *TimeInput) Init() {
 				w.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
 					d := NewBody("Select date")
 					dp := NewDatePicker(d).SetTime(ti.Time)
-					d.AddBottomBar(func(bar Widget) {
+					d.AddBottomBar(func(bar *Frame) {
 						d.AddCancel(bar)
 						d.AddOK(bar).OnClick(func(e events.Event) {
 							ti.Time = dp.Time
@@ -381,7 +381,7 @@ func (ti *TimeInput) Init() {
 				w.SetLeadingIcon(icons.Schedule, func(e events.Event) {
 					d := NewBody("Edit time")
 					tp := NewTimePicker(d).SetTime(ti.Time)
-					d.AddBottomBar(func(bar Widget) {
+					d.AddBottomBar(func(bar *Frame) {
 						d.AddCancel(bar)
 						d.AddOK(bar).OnClick(func(e events.Event) {
 							ti.Time = tp.Time

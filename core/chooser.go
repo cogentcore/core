@@ -600,7 +600,7 @@ func (ch *Chooser) makeItemsMenu(m *Scene) {
 				d := NewBody("New item")
 				NewText(d).SetType(TextSupporting).SetText("Add a new item to the chooser")
 				tf := NewTextField(d)
-				d.AddBottomBar(func(bar Widget) {
+				d.AddBottomBar(func(bar *Frame) {
 					d.AddCancel(bar)
 					d.AddOK(bar).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
 						ch.Items = append(ch.Items, ChooserItem{Value: tf.Text()})

@@ -249,7 +249,7 @@ func bindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 		}
 		d := NewBody("Key already exists")
 		NewText(d).SetType(TextSupporting).SetText(fmt.Sprintf("The key %q already exists", reflectx.ToString(newKey.Interface())))
-		d.AddBottomBar(func(bar Widget) {
+		d.AddBottomBar(func(bar *Frame) {
 			d.AddCancel(bar)
 			d.AddOK(bar).SetText("Overwrite").OnClick(func(e events.Event) {
 				mapv.SetMapIndex(newKey, mapv.MapIndex(key))

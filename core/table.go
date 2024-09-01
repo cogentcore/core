@@ -548,7 +548,7 @@ func (tb *Table) editIndex(idx int) {
 	}
 	d := NewBody(tynm)
 	NewForm(d).SetStruct(stru).SetReadOnly(tb.IsReadOnly())
-	d.AddBottomBar(func(bar Widget) {
+	d.AddBottomBar(func(bar *Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar)
 	})

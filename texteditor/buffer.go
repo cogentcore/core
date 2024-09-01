@@ -310,7 +310,7 @@ func (tb *Buffer) FileModCheck() bool {
 		sc := tb.sceneFromEditor()
 		d := core.NewBody("File changed on disk: " + fsx.DirAndFile(string(tb.Filename)))
 		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("File has changed on disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename))
-		d.AddBottomBar(func(bar core.Widget) {
+		d.AddBottomBar(func(bar *core.Frame) {
 			core.NewButton(bar).SetText("Save as to different file").OnClick(func(e events.Event) {
 				d.Close()
 				core.CallFunc(sc, tb.SaveAs)
@@ -418,7 +418,7 @@ func (tb *Buffer) SaveAsFunc(filename core.Filename, afterFunc func(canceled boo
 		sc := tb.sceneFromEditor()
 		d := core.NewBody("File exists")
 		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("The file already exists; do you want to overwrite it?  File: %v", filename))
-		d.AddBottomBar(func(bar core.Widget) {
+		d.AddBottomBar(func(bar *core.Frame) {
 			d.AddCancel(bar).OnClick(func(e events.Event) {
 				if afterFunc != nil {
 					afterFunc(true)
@@ -466,7 +466,7 @@ func (tb *Buffer) Save() error { //types:add
 		sc := tb.sceneFromEditor()
 		d := core.NewBody("File Changed on Disk")
 		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("File has changed on disk since you opened or saved it; what do you want to do?  File: %v", tb.Filename))
-		d.AddBottomBar(func(bar core.Widget) {
+		d.AddBottomBar(func(bar *core.Frame) {
 			core.NewButton(bar).SetText("Save to different file").OnClick(func(e events.Event) {
 				d.Close()
 				core.CallFunc(sc, tb.SaveAs)
@@ -495,7 +495,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 		if tb.Filename != "" {
 			d := core.NewBody("Close without saving?")
 			core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename))
-			d.AddBottomBar(func(bar core.Widget) {
+			d.AddBottomBar(func(bar *core.Frame) {
 				core.NewButton(bar).SetText("Cancel").OnClick(func(e events.Event) {
 					d.Close()
 					if afterFun != nil {
@@ -517,7 +517,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 		} else {
 			d := core.NewBody("Close without saving?")
 			core.NewText(d).SetType(core.TextSupporting).SetText("Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As")
-			d.AddBottomBar(func(bar core.Widget) {
+			d.AddBottomBar(func(bar *core.Frame) {
 				d.AddCancel(bar).OnClick(func(e events.Event) {
 					if afterFun != nil {
 						afterFun(true)

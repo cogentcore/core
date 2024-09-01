@@ -138,7 +138,7 @@ func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) {
 		}
 		inClose = true
 		d := NewBody()
-		d.AddBottomBar(func(bar Widget) {
+		d.AddBottomBar(func(bar *Frame) {
 			d.AddCancel(bar).OnClick(func(e events.Event) {
 				inClose = false
 				canClose = false
