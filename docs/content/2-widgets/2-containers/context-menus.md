@@ -9,3 +9,9 @@ tf.AddContextMenu(func(m *core.Scene) {
     core.NewButton(m).SetText("Run")
 })
 ```
+
+All widgets inherit the [[core.Scene]] context menu items, which consist of various important actions by default. You can remove these items if you want:
+
+```go
+b.Scene.ContextMenus = nil
+```
