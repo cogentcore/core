@@ -148,7 +148,7 @@ func (fp *FilePicker) Init() {
 				s.Grow.Set(1, 0)
 			})
 			w.OnChange(func(e events.Event) {
-				fp.Update()
+				fp.updateFilesEvent()
 			})
 		})
 		tree.AddAt(p, "files", func(w *Frame) {
@@ -260,30 +260,26 @@ func (fp *FilePicker) addRecentPathItems(items *[]ChooserItem) {
 	for _, sp := range recentPaths {
 		*items = append(*items, ChooserItem{
 			Value: sp,
-			Icon:  icons.Folder,
-			Func: func() {
-				fp.directory = sp
-				fp.updateFilesEvent()
-			},
 		})
 	}
-	*items = append(*items, ChooserItem{
-		Value:           "Reset recent paths",
-		Icon:            icons.Refresh,
-		SeparatorBefore: true,
-		Func: func() {
-			recentPaths = make(FilePaths, 1, SystemSettings.SavedPathsMax)
-			recentPaths[0] = fp.directory
-			fp.Update()
-		},
-	})
-	*items = append(*items, ChooserItem{
-		Value: "Edit recent paths",
-		Icon:  icons.Edit,
-		Func: func() {
-			fp.editRecentPaths()
-		},
-	})
+	// TODO: file picker reset and edit recent paths buttons not working
+	// *items = append(*items, ChooserItem{
+	// 	Value:           "Reset recent paths",
+	// 	Icon:            icons.Refresh,
+	// 	SeparatorBefore: true,
+	// 	Func: func() {
+	// 		recentPaths = make(FilePaths, 1, SystemSettings.SavedPathsMax)
+	// 		recentPaths[0] = fp.directory
+	// 		fp.Update()
+	// 	},
+	// })
+	// *items = append(*items, ChooserItem{
+	// 	Value: "Edit recent paths",
+	// 	Icon:  icons.Edit,
+	// 	Func: func() {
+	// 		fp.editRecentPaths()
+	// 	},
+	// })
 }
 
 func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
