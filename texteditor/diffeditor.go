@@ -90,14 +90,16 @@ func DiffEditorDialog(ctx core.Widget, title string, astr, bstr []string, afile,
 	d := core.NewBody("Diff editor")
 	d.SetTitle(title)
 
-	dv := NewDiffEditor(d)
-	dv.SetFileA(afile).SetFileB(bfile).SetRevisionA(arev).SetRevisionB(brev)
-	dv.DiffStrings(astr, bstr)
+	de := NewDiffEditor(d)
+	de.SetFileA(afile).SetFileB(bfile).SetRevisionA(arev).SetRevisionB(brev)
+	de.DiffStrings(astr, bstr)
 	d.AddTopBar(func(bar *core.Frame) {
-		core.NewToolbar(bar).Maker(dv.MakeToolbar)
+		tb := core.NewToolbar(bar)
+		de.toolbar = tb
+		tb.Maker(de.MakeToolbar)
 	})
 	d.NewWindow().SetContext(ctx).SetNewWindow(true).Run()
-	return dv
+	return de
 }
 
 // TextDialog opens a dialog for displaying text string
@@ -149,6 +151,7 @@ type DiffEditor struct {
 	diffs text.DiffSelected
 
 	inInputEvent bool
+	toolbar      *core.Toolbar
 }
 
 func (dv *DiffEditor) Init() {
@@ -183,11 +186,10 @@ func (dv *DiffEditor) Init() {
 }
 
 func (dv *DiffEditor) updateToolbar() {
-	tb := dv.Scene.GetTopAppBar()
-	if tb == nil {
+	if dv.toolbar == nil {
 		return
 	}
-	tb.Restyle()
+	dv.toolbar.Restyle()
 }
 
 // setFilenames sets the filenames and updates markup accordingly.
