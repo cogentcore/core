@@ -334,6 +334,9 @@ func addButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 		if !isTb && !isSc {
 			return tree.Continue
 		}
+		if bt.Text == "Menu search" {
+			return tree.Continue
+		}
 		label := bt.Text
 		if label == "" {
 			label = bt.Tooltip
