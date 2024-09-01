@@ -141,6 +141,9 @@ func (fp *FilePicker) Init() {
 		tree.AddAt(p, "path", func(w *Chooser) {
 			Bind(&fp.directory, w)
 			w.SetEditable(true).SetDefaultNew(true)
+			w.AddItemsFunc(func() {
+				fp.addRecentPathItems(&w.Items)
+			})
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 			})
@@ -253,7 +256,7 @@ func (fp *FilePicker) MakeToolbar(p *tree.Plan) {
 	})
 }
 
-func (fp *FilePicker) MenuSearch(items *[]ChooserItem) {
+func (fp *FilePicker) addRecentPathItems(items *[]ChooserItem) {
 	for _, sp := range recentPaths {
 		*items = append(*items, ChooserItem{
 			Value: sp,
