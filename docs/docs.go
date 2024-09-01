@@ -57,42 +57,45 @@ func main() {
 	b := core.NewBody("Cogent Core Docs")
 	pg := pages.NewPage(b).SetContent(content)
 	htmlcore.WikilinkBaseURL = "cogentcore.org/core"
-	b.AddAppBar(pg.MakeToolbar)
-	b.AddAppBar(func(p *tree.Plan) {
-		tree.Add(p, func(w *core.Button) {
-			w.SetText("Playground").SetIcon(icons.PlayCircle)
-			w.OnClick(func(e events.Event) {
-				pg.Context.OpenURL("/playground")
+	b.AddTopBar(func(parent core.Widget) {
+		tb := core.NewToolbar(parent)
+		tb.Maker(pg.MakeToolbar)
+		tb.Maker(func(p *tree.Plan) {
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("Playground").SetIcon(icons.PlayCircle)
+				w.OnClick(func(e events.Event) {
+					pg.Context.OpenURL("/playground")
+				})
 			})
-		})
-		tree.Add(p, func(w *core.Button) {
-			w.SetText("Videos").SetIcon(icons.VideoLibrary)
-			w.OnClick(func(e events.Event) {
-				pg.Context.OpenURL("https://youtube.com/@CogentCore")
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("Videos").SetIcon(icons.VideoLibrary)
+				w.OnClick(func(e events.Event) {
+					pg.Context.OpenURL("https://youtube.com/@CogentCore")
+				})
 			})
-		})
-		tree.Add(p, func(w *core.Button) {
-			w.SetText("Blog").SetIcon(icons.RssFeed)
-			w.OnClick(func(e events.Event) {
-				pg.Context.OpenURL("https://cogentcore.org/blog")
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("Blog").SetIcon(icons.RssFeed)
+				w.OnClick(func(e events.Event) {
+					pg.Context.OpenURL("https://cogentcore.org/blog")
+				})
 			})
-		})
-		tree.Add(p, func(w *core.Button) {
-			w.SetText("GitHub").SetIcon(icons.GitHub)
-			w.OnClick(func(e events.Event) {
-				pg.Context.OpenURL("https://github.com/cogentcore/core")
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("GitHub").SetIcon(icons.GitHub)
+				w.OnClick(func(e events.Event) {
+					pg.Context.OpenURL("https://github.com/cogentcore/core")
+				})
 			})
-		})
-		tree.Add(p, func(w *core.Button) {
-			w.SetText("Community").SetIcon(icons.Forum)
-			w.OnClick(func(e events.Event) {
-				pg.Context.OpenURL("https://cogentcore.org/community")
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("Community").SetIcon(icons.Forum)
+				w.OnClick(func(e events.Event) {
+					pg.Context.OpenURL("https://cogentcore.org/community")
+				})
 			})
-		})
-		tree.Add(p, func(w *core.Button) {
-			w.SetText("Sponsor").SetIcon(icons.Favorite)
-			w.OnClick(func(e events.Event) {
-				pg.Context.OpenURL("https://github.com/sponsors/cogentcore")
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("Sponsor").SetIcon(icons.Favorite)
+				w.OnClick(func(e events.Event) {
+					pg.Context.OpenURL("https://github.com/sponsors/cogentcore")
+				})
 			})
 		})
 	})
