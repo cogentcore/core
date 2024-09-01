@@ -17,7 +17,7 @@ import (
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
 // It automatically moves items that do not fit into an overflow menu, and
 // manages additional items that are always placed onto this overflow menu.
-// Use [Body.AddAppBar] to add to the default toolbar at the top of the app.
+// Toolbars are frequently added in [Body.AddTopBar].
 type Toolbar struct {
 	Frame
 
