@@ -25,14 +25,8 @@ type Plan struct {
 	// Children are the [PlanItem]s for the children.
 	Children []*PlanItem
 
-	// Parent is the parent [Node] that the Children are being added to.
-	// It can be useful to access and update this item in some cases,
-	// for example in MakeToolbar functions to also add an OverflowMenu
-	// to the toolbar.
-	Parent Node
-
 	// EnforceEmpty is whether an empty plan results in the removal
-	// of any children on the [Plan.Parent]. If there are [NodeBase.Makers]
+	// of all children of the parent. If there are [NodeBase.Makers]
 	// defined then this is true by default; otherwise it is false.
 	EnforceEmpty bool
 }
@@ -107,8 +101,8 @@ func (nb *NodeBase) Make(p *Plan) {
 
 // UpdateFromMake updates the node using [NodeBase.Make].
 func (nb *NodeBase) UpdateFromMake() {
-	p := Plan{Parent: nb.This}
-	nb.Make(&p)
+	p := &Plan{}
+	nb.Make(p)
 	p.Update(nb)
 }
 

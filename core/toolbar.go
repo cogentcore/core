@@ -100,7 +100,7 @@ func (tb *Toolbar) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 
 // to the end of the list.
 func (tb *Toolbar) allItemsToChildren() {
 	tb.overflowItems = nil
-	tb.allItemsPlan = &tree.Plan{Parent: tb.This}
+	tb.allItemsPlan = &tree.Plan{}
 	tb.Make(tb.allItemsPlan)
 	np := len(tb.allItemsPlan.Children)
 	if tb.NumChildren() != np {
@@ -160,7 +160,7 @@ func (tb *Toolbar) moveToOverflow() {
 		return tree.Continue
 	})
 	if hasOv {
-		p := &tree.Plan{Parent: tb.This}
+		p := &tree.Plan{}
 		p.Children = tb.allItemsPlan.Children[:ovidx]
 		p.Children = append(p.Children, tb.allItemsPlan.Children[pn-1]) // ovm
 		p.Update(tb)
@@ -178,7 +178,7 @@ func (tb *Toolbar) overflowMenu(m *Scene) {
 	nm := len(tb.OverflowMenus)
 	ni := len(tb.overflowItems)
 	if ni > 0 {
-		p := &tree.Plan{Parent: tb.This}
+		p := &tree.Plan{}
 		p.Children = tb.overflowItems
 		p.Update(m)
 		if nm > 1 { // default includes sep
