@@ -105,21 +105,15 @@ func (sc *Scene) addDefaultBars() {
 	needBackButton := st.FullWindow && !st.NewWindow && !(st.Mains != nil && st.Mains.stack.Len() == 0)
 	if st.DisplayTitle || needBackButton {
 		sc.Bars.Top = slices.Insert(sc.Bars.Top, 0, func(parent Widget) {
-			titleRow := NewFrame(parent)
-			titleRow.SetName("title-row")
-			titleRow.Styler(func(s *styles.Style) {
-				// s.Grow.Set(1, 0)
-				s.Align.Items = styles.Center
-			})
 			if needBackButton {
-				back := NewButton(titleRow).SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
+				back := NewButton(parent).SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
 				back.SetType(ButtonAction).SetTooltip("Back")
 				back.OnClick(func(e events.Event) {
 					sc.Close()
 				})
 			}
 			if st.DisplayTitle {
-				title := NewText(titleRow).SetType(TextHeadlineSmall)
+				title := NewText(parent).SetType(TextHeadlineSmall)
 				title.Updater(func() {
 					title.SetText(sc.Body.Title)
 				})
