@@ -138,9 +138,14 @@ func (fp *FilePicker) Init() {
 			fp.prevPath = fp.directory
 		}
 
-		tree.AddAt(p, "title", func(w *Text) {
-			w.Updater(func() {
-				w.SetText(fp.directory)
+		tree.AddAt(p, "path", func(w *Chooser) {
+			Bind(&fp.directory, w)
+			w.SetEditable(true).SetDefaultNew(true)
+			w.Styler(func(s *styles.Style) {
+				s.Grow.Set(1, 0)
+			})
+			w.OnChange(func(e events.Event) {
+				fp.Update()
 			})
 		})
 		tree.AddAt(p, "files", func(w *Frame) {
