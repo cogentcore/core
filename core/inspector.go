@@ -301,5 +301,7 @@ func makeInspector(b *Body, n tree.Node) {
 	}
 	is := NewInspector(b)
 	is.SetRoot(n)
-	b.AddAppBar(is.MakeToolbar)
+	b.AddTopBar(func(bar *Frame) {
+		NewToolbar(bar).Maker(is.MakeToolbar)
+	})
 }

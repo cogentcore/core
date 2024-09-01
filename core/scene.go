@@ -42,15 +42,10 @@ type Scene struct { //core:no-new
 	// widgets in conjunction with [App.SceneInit].
 	WidgetInit func(w Widget) `json:"-" xml:"-" edit:"-"`
 
-	// Bars contains functions for constructing the control bars for this Scene,
-	// attached to different sides of a Scene (e.g., TopAppBar at Top,
-	// NavBar at Bottom, etc).  Functions are called in forward order
-	// so first added are called first.
-	Bars styles.Sides[BarFuncs] `json:"-" xml:"-"`
-
-	// AppBars contains functions for making the plan for the top app bar.
-	// If there are no such functions, no top app bar will be made.
-	AppBars []func(p *tree.Plan) `json:"-" xml:"-"`
+	// Bars are functions for creating control bars,
+	// attached to different sides of a [Scene]. Functions
+	// are called in forward order so first added are called first.
+	Bars styles.Sides[BarFuncs] `json:"-" xml:"-" set:"-"`
 
 	// Data is the optional data value being represented by this scene.
 	// Used e.g., for recycling views of a given item instead of creating new one.

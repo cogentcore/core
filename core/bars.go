@@ -94,13 +94,6 @@ func (sc *Scene) makeSceneBars() {
 }
 
 func (sc *Scene) addDefaultBars() {
-	// TODO(appbar): remove default default app bar adding
-	if sc.Stage.Type.isMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
-		if len(sc.AppBars) > 0 {
-			sc.Bars.Top.Add(makeAppBar)
-		}
-	}
-
 	st := sc.Stage
 	needBackButton := st.FullWindow && !st.NewWindow && !(st.Mains != nil && st.Mains.stack.Len() == 0)
 	if st.DisplayTitle || needBackButton {
@@ -168,9 +161,4 @@ func (bd *Body) AddRightBar(fun func(bar *Frame)) {
 // at the bottom of the window
 func (bd *Body) AddBottomBar(fun func(bar *Frame)) {
 	bd.Scene.Bars.Bottom.Add(fun)
-}
-
-// AddAppBar adds plan maker function(s) for the top app bar, which can be used to add items to it.
-func (bd *Body) AddAppBar(m ...func(p *tree.Plan)) {
-	bd.Scene.AppBars = append(bd.Scene.AppBars, m...)
 }

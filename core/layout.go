@@ -20,8 +20,8 @@ import (
 //
 // SizeUp: (bottom-up) gathers Actual sizes from our Children & Parts,
 // based on Styles.Min / Max sizes and actual content sizing
-// (e.g., text size).  Flexible elements (e.g., Text, Flex Wrap,
-// TopAppBar) should reserve the _minimum_ size possible at this stage,
+// (e.g., text size).  Flexible elements (e.g., [Text], Flex Wrap,
+// [Toolbar]) should reserve the _minimum_ size possible at this stage,
 // and then Grow based on SizeDown allocation.
 
 // SizeDown: (top-down, multiple iterations possible) provides top-down
@@ -103,7 +103,7 @@ type Layouter interface {
 	// SizeFromChildren gathers Actual size from kids into our Actual.Content size.
 	// Different Layout types can alter this to present different Content
 	// sizes for the layout process, e.g., if Content is sized to fit allocation,
-	// as in the TopAppBar and List types.
+	// as in the [Toolbar] and [List] types.
 	SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2
 
 	// SizeDownSetAllocs is the key SizeDown step that sets the allocations
@@ -656,8 +656,8 @@ func (fr *Frame) laySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 
 // SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 // based on Styles.Min / Max sizes and actual content sizing
-// (e.g., text size).  Flexible elements (e.g., Text, Flex Wrap,
-// TopAppBar) should reserve the _minimum_ size possible at this stage,
+// (e.g., text size).  Flexible elements (e.g., [Text], Flex Wrap,
+// [Toolbar]) should reserve the _minimum_ size possible at this stage,
 // and then Grow based on SizeDown allocation.
 func (wb *WidgetBase) SizeUp() {
 	wb.SizeUpWidget()
@@ -959,7 +959,7 @@ func (fr *Frame) sizeFromChildrenFit(iter int, pass LayoutPasses) {
 // SizeFromChildren gathers Actual size from kids.
 // Different Layout types can alter this to present different Content
 // sizes for the layout process, e.g., if Content is sized to fit allocation,
-// as in the TopAppBar and List types.
+// as in the [Toolbar] and [List] types.
 func (fr *Frame) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 {
 	var ksz math32.Vector2
 	if fr.Styles.Display == styles.Stacked {

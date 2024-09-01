@@ -47,8 +47,8 @@ type Widget interface {
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 	// based on Styles.Min / Max sizes and actual content sizing
-	// (e.g., text size).  Flexible elements (e.g., Text, Flex Wrap,
-	// TopAppBar) should reserve the _minimum_ size possible at this stage,
+	// (e.g., text size).  Flexible elements (e.g., [Text], Flex Wrap,
+	// [Toolbar]) should reserve the _minimum_ size possible at this stage,
 	// and then Grow based on SizeDown allocation.
 	SizeUp()
 
