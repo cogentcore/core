@@ -47,9 +47,12 @@ For `.wgsl` files, their filename is used to determine the `shaders` destination
 
 # Usage
 
-	gosl [flags] [path ...]
-
+```
+gosl [flags] [path ...]
+```
+    
 The flags are:
+```
   -debug
     	enable debugging messages while running
   -exclude string
@@ -58,6 +61,7 @@ The flags are:
     	keep temporary converted versions of the source files, for debugging
   -out string
     	output directory for shader code, relative to where gosl is invoked -- must not be an empty string (default "shaders")
+```
 
 `gosl` path args can include filenames, directory names, or Go package paths (e.g., `cogentcore.org/core/math32/fastexp.go` loads just that file from the given package) -- files without any `//gosl:` comment directives will be skipped up front before any expensive processing, so it is not a problem to specify entire directories where only some files are relevant.  Also, you can specify a particular file from a directory, then the entire directory, to ensure that a particular file from that directory appears first -- otherwise alphabetical order is used.  `gosl` ensures that only one copy of each file is included.
   
@@ -67,42 +71,38 @@ Any `struct` types encountered will be checked for 16-byte alignment of sub-type
 
 In general shader code should be simple mathematical expressions and data types, with minimal control logic via `if`, `for` statements, and only using the subset of Go that is consistent with C.  Here are specific restrictions:
 
-## Language features
+* Can only use `float32`, `[u]int32` for basic types (`int` is converted to `int32` automatically), and `struct` types composed of these same types -- no other Go types (i.e., `map`, slices, `string`, etc) are compatible.  There are strict alignment restrictions on 16 byte (e.g., 4 `float32`'s) intervals that are enforced via the `alignsl` sub-package.
 
-* https://google.github.io/tour-of-wgsl/types/pointers/passing_pointers/
-
-* `ptr<function,MyStruct>` provides a pointer arg (phew -- really need that!)
-* `private` scope = within the shader code "module", i.e., one thread.  
-* `function` = within the function, not outside it.
-* `workgroup` = shared across workgroup -- coudl be powerful (but slow!) -- need to learn more.
-
-## Types
-
-* Can only use `float32`, `[u]int32`, and their 64 bit versions for basic types, and `struct` types composed of these same types -- no other Go types (i.e., `map`, slices, `string`, etc) are compatible.  There are strict alignment restrictions on 16 byte (e.g., 4 `float32`'s) intervals that are enforced via the `alignsl` sub-package.
+* WGSL does _not_ support 64 bit float or int.
 
 * Use `slbool.Bool` instead of `bool` -- it defines a Go-friendly interface based on a `int32` basic type.
 
 * Alignment and padding of `struct` fields is key -- this is automatically checked by `gosl`.
 
-TODO: update below!
-
 * WGSL does not support enum types, but standard go `const` declarations will be converted.  Use an `int32` or `uint32` data type.  It will automatically deal with the simple incrementing `iota` values, but not more complex cases.  Also, for bitflags, define explicitly, not using `bitflags` package.
-
-* WGSL does not do multi-pass compiling, so all dependent types must be specified *before* being used in other ones, and this also precludes referencing the *current* type within itself.  todo: can you just use a forward declaration?
-
-* WGSL does not provide the same auto-init-to-zero for declared variables -- safer to initialize directly:
-```Go
-    val := float32(0) // guaranteed 0 value
-    var val float32 // not guaranteed to be 0!  avoid!
-```    
-
-## Syntax
-
-TODO: check:
 
 * Cannot use multiple return values, or multiple assignment of variables in a single `=` expression.
 
 * *Can* use multiple variable names with the same type (e.g., `min, max float32`) -- this will be properly converted to the more redundant C form with the type repeated.
+
+* `switch` `case` statements are _purely_ self-contained -- no `fallthrough` allowed!  does support multiple items per `case` however.
+
+* TODO: WGSL does not do multi-pass compiling, so all dependent types must be specified *before* being used in other ones, and this also precludes referencing the *current* type within itself.  todo: can you just use a forward declaration?
+
+* WGSL does specify that new variables are initialized to 0, like Go, but also somehow discourages that use-case.  It is safer to initialize directly:
+```Go
+    val := float32(0) // guaranteed 0 value
+    var val float32 // ok but generally avoid
+```    
+
+## Other language features
+
+* [tour-of-wgsl](https://google.github.io/tour-of-wgsl/types/pointers/passing_pointers/) is a good reference to explain things more directly than the spec.
+
+* `ptr<function,MyStruct>` provides a pointer arg
+* `private` scope = within the shader code "module", i.e., one thread.  
+* `function` = within the function, not outside it.
+* `workgroup` = shared across workgroup -- coudl be powerful (but slow!) -- need to learn more.
 
 ## Random numbers: slrand
 

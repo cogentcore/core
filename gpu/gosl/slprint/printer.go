@@ -1157,7 +1157,7 @@ func (p *printer) printNode(node any) error {
 	case ast.Decl:
 		p.decl(n)
 	case ast.Spec:
-		p.spec(n, 1, false)
+		p.spec(n, 1, false, token.EOF)
 	case []ast.Stmt:
 		// A labeled statement will un-indent to position the label.
 		// Set p.indent to 1 so we don't get indent "underflow".

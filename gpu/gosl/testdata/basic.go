@@ -47,7 +47,6 @@ func FastExp(x float32) float32 {
 	return math.Float32frombits(uint32(i))
 }
 
-/*
 // NeuronFlags are bit-flags encoding relevant binary state for neurons
 type NeuronFlags int32
 
@@ -83,8 +82,6 @@ const (
 	// Test is this a test mode for the env
 	Test
 )
-
-*/
 
 // DataStruct has the test data
 type DataStruct struct {
@@ -123,6 +120,7 @@ func (ps *ParamStruct) IntegFromRaw(ds *DataStruct, modArg *float32) float32 {
 	}
 	ds.Integ += newVal
 	ds.Exp = math32.Exp(-ds.Integ)
+	ps.AnotherMeth(ds)
 	return ds.Exp
 }
 

@@ -136,6 +136,7 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 		// exsl = append([]byte(once), exsl...)
 		// oncend := fmt.Sprintf("#endif // __%s_WGSL__\n", upfn)
 		// exsl = append(exsl, []byte(oncend)...)
+		exsl = append([]byte("alias int = i32;\n"), exsl...)
 
 		slfn := filepath.Join(*outDir, fn+".wgsl")
 		ioutil.WriteFile(slfn, exsl, 0644)

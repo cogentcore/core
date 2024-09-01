@@ -371,9 +371,19 @@ func (p *printer) parameters(fields *ast.FieldList, mode paramMode) {
 				p.identList(par.Names, ws == indent)
 				p.print(token.COLON)
 				p.print(blank)
+				// parameter type -- gosl = type first, replace ptr star with `inout`
+				atyp, isPtr := p.ptrType(stripParensAlways(par.Type))
+				p.expr(atyp)
+				if isPtr {
+					p.print(">")
+				}
+			} else {
+				atyp, isPtr := p.ptrType(stripParensAlways(par.Type))
+				p.expr(atyp)
+				if isPtr {
+					p.print(">")
+				}
 			}
-			// parameter type
-			p.expr(stripParensAlways(par.Type))
 			prevLine = parLineEnd
 		}
 
@@ -398,6 +408,15 @@ func (p *printer) parameters(fields *ast.FieldList, mode paramMode) {
 
 	p.setPos(fields.Closing)
 	p.print(closeTok)
+}
+
+// gosl: mark pointer types, returns true if pointer
+func (p *printer) ptrType(x ast.Expr) (ast.Expr, bool) {
+	if sx, ok := x.(*ast.StarExpr); ok {
+		p.print("ptr<function", token.COMMA)
+		return sx.X, true
+	}
+	return x, false
 }
 
 // combinesWithName reports whether a name followed by the expression x
@@ -1308,8 +1327,10 @@ func (p *printer) controlClause(isForStmt bool, init ast.Stmt, expr ast.Expr, po
 		// (they are not separators, print them explicitly)
 		if init != nil {
 			p.stmt(init, false, false) // false = generate own semi
+			p.print(blank)
+		} else {
+			p.print(token.SEMICOLON, blank)
 		}
-		p.print(token.SEMICOLON, blank)
 		if expr != nil {
 			p.expr(stripParens(expr))
 			needsBlank = true
@@ -1361,6 +1382,55 @@ func (p *printer) indentList(list []ast.Expr) bool {
 		}
 	}
 	return false
+}
+
+// caseClause processes a CaseClause
+func (p *printer) caseClause(s *ast.CaseClause, nextIsRBrace bool) {
+	if s.List != nil {
+		p.print(token.CASE, blank)
+		p.exprList(s.Pos(), s.List, 1, 0, s.Colon, false)
+		/*
+				// p.exprList(s.Pos(), s.List, 1, 0, s.Colon, false)
+				// glslc compiler crashes if expr is the label -- convert to int.
+				gotInt := false
+				if len(s.List) != 1 {
+					fmt.Printf("%s:\n\tglslc switch only allows single-arg case values that translate to an int\n", p.pkg.Fset.PositionFor(s.Pos(), true).String())
+				} else {
+					vle := s.List[0]
+					if id, ok := vle.(*ast.Ident); ok {
+						if def, ok := p.pkg.TypesInfo.Uses[id]; ok {
+							if cd, ok := def.(*types.Const); ok {
+								p.print(cd.Val().String())
+								gotInt = true
+							}
+						}
+					} else if bl, ok := vle.(*ast.BasicLit); ok {
+						p.print(bl)
+						gotInt = true
+					} else {
+						fmt.Printf("gosl: unsupported switch case value: %#v\n", vle)
+					}
+				}
+			if !gotInt {
+				fmt.Printf("%s:\n\tglslc switch only allows single-arg case values that translate to an int\n", p.pkg.Fset.PositionFor(s.Pos(), true).String())
+				p.exprList(s.Pos(), s.List, 1, 0, s.Colon, false)
+			}
+		*/
+	} else {
+		p.print(token.DEFAULT)
+	}
+	p.print(s.Colon, token.COLON)
+	if len(s.Body) == 1 {
+		if fbr, ok := s.Body[0].(*ast.BranchStmt); ok {
+			if fbr.Tok == token.FALLTHROUGH {
+				p.print(formfeed, "// fallthrough")
+				return
+			}
+		}
+	}
+	p.print(token.LBRACE) // Go implies new context, C doesn't
+	p.stmtList(s.Body, 1, nextIsRBrace)
+	p.print(formfeed, "\tbreak; ", token.RBRACE)
 }
 
 func (p *printer) stmt(stmt ast.Stmt, nextIsRBrace bool, nosemi bool) {
@@ -1435,7 +1505,7 @@ func (p *printer) stmt(stmt ast.Stmt, nextIsRBrace bool, nosemi bool) {
 		case token.DEFINE:
 			p.print(token.ASSIGN, blank)
 		case token.AND_NOT_ASSIGN:
-			p.print(token.AND_ASSIGN, "~")
+			p.print(token.AND_ASSIGN, blank, "~")
 		default:
 			p.print(s.Tok, blank)
 		}
@@ -1506,15 +1576,7 @@ func (p *printer) stmt(stmt ast.Stmt, nextIsRBrace bool, nosemi bool) {
 		}
 
 	case *ast.CaseClause:
-		if s.List != nil {
-			p.print(token.CASE, blank)
-			p.exprList(s.Pos(), s.List, 1, 0, s.Colon, false)
-		} else {
-			p.print(token.DEFAULT)
-		}
-		p.setPos(s.Colon)
-		p.print(token.COLON)
-		p.stmtList(s.Body, 1, nextIsRBrace)
+		p.caseClause(s, nextIsRBrace)
 
 	case *ast.SwitchStmt:
 		p.print(token.SWITCH)
@@ -1654,22 +1716,39 @@ func keepTypeColumn(specs []ast.Spec) []bool {
 	return m
 }
 
-func (p *printer) valueSpec(s *ast.ValueSpec, keepType bool) {
+func (p *printer) valueSpec(s *ast.ValueSpec, keepType bool, tok token.Token, firstSpec *ast.ValueSpec, isIota bool, idx int) {
 	p.setComment(s.Doc)
-	p.identList(s.Names, false) // always present
+
+	// gosl: key to use Pos() as first arg to trigger emitting of comments!
+	switch tok {
+	case token.CONST:
+		p.setPos(s.Pos())
+		p.print(tok, blank)
+	case token.TYPE:
+		p.setPos(s.Pos())
+		p.print("alias", blank)
+	}
+	p.print(vtab)
+
 	extraTabs := 3
-	if s.Type != nil || keepType {
-		p.print(vtab)
+	p.identList(s.Names, false) // always present
+	if isIota {
+		p.print(vtab, token.ASSIGN, blank)
+		p.print(fmt.Sprintf("%d", idx))
+	} else if s.Type != nil || keepType {
+		p.expr(s.Type)
+		extraTabs--
+	} else if tok == token.CONST && firstSpec.Type != nil {
+		p.expr(firstSpec.Type)
 		extraTabs--
 	}
-	if s.Type != nil {
-		p.expr(s.Type)
-	}
-	if s.Values != nil {
+
+	if !(isIota && s == firstSpec) && s.Values != nil {
 		p.print(vtab, token.ASSIGN, blank)
 		p.exprList(token.NoPos, s.Values, 1, 0, token.NoPos, false)
 		extraTabs--
 	}
+	p.print(token.SEMICOLON)
 	if s.Comment != nil {
 		for ; extraTabs > 0; extraTabs-- {
 			p.print(vtab)
@@ -1724,7 +1803,7 @@ func sanitizeImportPath(lit *ast.BasicLit) *ast.BasicLit {
 // The parameter n is the number of specs in the group. If doIndent is set,
 // multi-line identifier lists in the spec are indented when the first
 // linebreak is encountered.
-func (p *printer) spec(spec ast.Spec, n int, doIndent bool) {
+func (p *printer) spec(spec ast.Spec, n int, doIndent bool, tok token.Token) {
 	switch s := spec.(type) {
 	case *ast.ImportSpec:
 		p.setComment(s.Doc)
@@ -1742,6 +1821,9 @@ func (p *printer) spec(spec ast.Spec, n int, doIndent bool) {
 		}
 		p.setComment(s.Doc)
 		p.identList(s.Names, doIndent) // always present
+		if tok == token.CONST {
+			p.print(tok, blank)
+		}
 		if s.Type != nil {
 			p.print(blank)
 			p.expr(s.Type)
@@ -1750,6 +1832,7 @@ func (p *printer) spec(spec ast.Spec, n int, doIndent bool) {
 			p.print(blank, token.ASSIGN, blank)
 			p.exprList(token.NoPos, s.Values, 1, 0, token.NoPos, false)
 		}
+		p.print(token.SEMICOLON)
 		p.setComment(s.Comment)
 
 	case *ast.TypeSpec:
@@ -1759,9 +1842,12 @@ func (p *printer) spec(spec ast.Spec, n int, doIndent bool) {
 			p.setPos(st.Pos())
 			p.print(token.STRUCT, blank)
 		} else {
-			p.print("typedef", blank, s.Type, blank)
+			p.print("alias", blank)
 		}
 		p.expr(s.Name)
+		if !isStruct {
+			p.print(blank, token.ASSIGN, blank)
+		}
 		if s.TypeParams != nil {
 			p.parameters(s.TypeParams, typeTParam)
 		}
@@ -1774,6 +1860,9 @@ func (p *printer) spec(spec ast.Spec, n int, doIndent bool) {
 			p.print(token.ASSIGN, blank)
 		}
 		p.expr(s.Type)
+		if !isStruct {
+			p.print(token.SEMICOLON)
+		}
 		p.setComment(s.Comment)
 
 	default:
@@ -1783,30 +1872,40 @@ func (p *printer) spec(spec ast.Spec, n int, doIndent bool) {
 
 func (p *printer) genDecl(d *ast.GenDecl) {
 	p.setComment(d.Doc)
+	// note: critical to print here to trigger comment generation in right place
 	p.setPos(d.Pos())
 	if d.Tok == token.IMPORT {
-		p.print(d.Tok, blank)
-	} else {
-		p.print(ignore) // don't print import, var, type
+		return
 	}
+	// p.print(d.Pos(), d.Tok, blank)
+	p.print(ignore) // don't print
 
 	if d.Lparen.IsValid() || len(d.Specs) != 1 {
 		// group of parenthesized declarations
-		p.setPos(d.Lparen)
-		p.print(token.LPAREN)
+		// p.setPos(d.Lparen)
+		// p.print(token.LPAREN)
 		if n := len(d.Specs); n > 0 {
-			p.print(indent, formfeed)
+			// p.print(indent, formfeed)
 			if n > 1 && (d.Tok == token.CONST || d.Tok == token.VAR) {
 				// two or more grouped const/var declarations:
 				// determine if the type column must be kept
 				keepType := keepTypeColumn(d.Specs)
+				firstSpec := d.Specs[0].(*ast.ValueSpec)
+				isIota := false
+				if d.Tok == token.CONST {
+					if id, isId := firstSpec.Values[0].(*ast.Ident); isId {
+						if id.Name == "iota" {
+							isIota = true
+						}
+					}
+				}
 				var line int
 				for i, s := range d.Specs {
 					if i > 0 {
 						p.linebreak(p.lineFor(s.Pos()), 1, ignore, p.linesFrom(line) > 0)
 					}
 					p.recordLine(&line)
-					p.valueSpec(s.(*ast.ValueSpec), keepType[i])
+					p.valueSpec(s.(*ast.ValueSpec), keepType[i], d.Tok, firstSpec, isIota, i)
 				}
 			} else {
 				var line int
@@ -1815,17 +1914,16 @@ func (p *printer) genDecl(d *ast.GenDecl) {
 						p.linebreak(p.lineFor(s.Pos()), 1, ignore, p.linesFrom(line) > 0)
 					}
 					p.recordLine(&line)
-					p.spec(s, n, false)
+					p.spec(s, n, false, d.Tok)
 				}
 			}
-			p.print(unindent, formfeed)
+			// p.print(unindent, formfeed)
 		}
-		p.setPos(d.Rparen)
-		p.print(token.RPAREN)
-
+		// p.setPos(d.Rparen)
+		// p.print(token.RPAREN)
 	} else if len(d.Specs) > 0 {
 		// single declaration
-		p.spec(d.Specs[0], 1, true)
+		p.spec(d.Specs[0], 1, true, d.Tok)
 	}
 }
 
