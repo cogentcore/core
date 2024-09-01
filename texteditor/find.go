@@ -304,9 +304,9 @@ func (ed *Editor) QReplacePrompt() {
 	lxi := core.NewSwitch(d).SetText("Lexical Items").SetChecked(lexitems)
 	lxi.SetTooltip("search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything")
 
-	d.AddBottomBar(func(parent core.Widget) {
-		d.AddCancel(parent)
-		d.AddOK(parent).SetText("Query-Replace").OnClick(func(e events.Event) {
+	d.AddBottomBar(func(bar core.Widget) {
+		d.AddCancel(bar)
+		d.AddOK(bar).SetText("Query-Replace").OnClick(func(e events.Event) {
 			var find, repl string
 			if s, ok := fc.CurrentItem.Value.(string); ok {
 				find = s

@@ -137,12 +137,12 @@ func (lv *VCSLog) Init() {
 				s.Grow.Set(1, 1)
 			})
 			buf.SetText(cinfo)
-			d.AddBottomBar(func(parent core.Widget) {
-				core.NewButton(parent).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
+			d.AddBottomBar(func(bar core.Widget) {
+				core.NewButton(bar).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
 					OnClick(func(e events.Event) {
 						d.Clipboard().Write(mimedata.NewTextBytes(cinfo))
 					})
-				d.AddOK(parent)
+				d.AddOK(bar)
 			})
 			d.RunFullDialog(lv)
 		})

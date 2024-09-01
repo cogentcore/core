@@ -709,9 +709,9 @@ func (ed *Editor) JumpToLinePrompt() {
 	tf.OnChange(func(e events.Event) {
 		val = tf.Text()
 	})
-	d.AddBottomBar(func(parent core.Widget) {
-		d.AddCancel(parent)
-		d.AddOK(parent).SetText("Jump").OnClick(func(e events.Event) {
+	d.AddBottomBar(func(bar core.Widget) {
+		d.AddCancel(bar)
+		d.AddOK(bar).SetText("Jump").OnClick(func(e events.Event) {
 			val = tf.Text()
 			ln, err := reflectx.ToInt(val)
 			if err == nil {

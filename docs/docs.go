@@ -57,8 +57,8 @@ func main() {
 	b := core.NewBody("Cogent Core Docs")
 	pg := pages.NewPage(b).SetContent(content)
 	htmlcore.WikilinkBaseURL = "cogentcore.org/core"
-	b.AddTopBar(func(parent core.Widget) {
-		tb := core.NewToolbar(parent)
+	b.AddTopBar(func(bar core.Widget) {
+		tb := core.NewToolbar(bar)
 		tb.Maker(pg.MakeToolbar)
 		tb.Maker(func(p *tree.Plan) {
 			tree.Add(p, func(w *core.Button) {

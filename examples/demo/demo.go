@@ -551,11 +551,11 @@ func dialogs(ts *core.Tabs) {
 	cd.OnClick(func(e events.Event) {
 		d := core.NewBody("Confirm")
 		core.NewText(d).SetType(core.TextSupporting).SetText("Send message?")
-		d.AddBottomBar(func(parent core.Widget) {
-			d.AddCancel(parent).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(bar core.Widget) {
+			d.AddCancel(bar).OnClick(func(e events.Event) {
 				core.MessageSnackbar(cd, "Dialog canceled")
 			})
-			d.AddOK(parent).OnClick(func(e events.Event) {
+			d.AddOK(bar).OnClick(func(e events.Event) {
 				core.MessageSnackbar(cd, "Dialog accepted")
 			})
 		})
@@ -567,9 +567,9 @@ func dialogs(ts *core.Tabs) {
 		d := core.NewBody("Input")
 		core.NewText(d).SetType(core.TextSupporting).SetText("What is your name?")
 		tf := core.NewTextField(d)
-		d.AddBottomBar(func(parent core.Widget) {
-			d.AddCancel(parent)
-			d.AddOK(parent).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(bar core.Widget) {
+			d.AddCancel(bar)
+			d.AddOK(bar).OnClick(func(e events.Event) {
 				core.MessageSnackbar(td, "Your name is "+tf.Text())
 			})
 		})
