@@ -139,7 +139,6 @@ func (fp *FilePicker) Init() {
 		}
 
 		tree.AddAt(p, "title", func(w *Text) {
-			w.SetType(TextTitleLarge)
 			w.Updater(func() {
 				w.SetText(fp.directory)
 			})
