@@ -130,7 +130,7 @@ func (sy *ComputeSystem) BeginComputePass() (*wgpu.ComputePassEncoder, error) {
 // ComputePassEncoder.  You must call ce.End prior to calling this.
 // Can insert other commands after ce.End, e.g., to copy data back
 // from the GPU, prior to calling EndComputePass.
-func (sy *GraphicsSystem) EndComputePass(ce *wgpu.ComputePassEncoder) error {
+func (sy *ComputeSystem) EndComputePass(ce *wgpu.ComputePassEncoder) error {
 	cmd := sy.CommandEncoder
 	sy.CommandEncoder = nil
 	cmdBuffer, err := cmd.Finish(nil)
@@ -152,97 +152,3 @@ func (sy *GraphicsSystem) EndComputePass(ce *wgpu.ComputePassEncoder) error {
 func Warps(n, threads int) int {
 	return int(math.Ceil(float64(n) / float64(threads)))
 }
-
-/*
-// ComputeCopyToGPU records command to copy given regions
-// in the Storage buffer memory from CPU to GPU, in one call.
-// Use SyncRegValueIndexFromCPU to get the regions.
-func (sy *ComputeSystem) ComputeCopyToGPU(cmd *wgpu.ComputePassEncoder, regs ...MemReg) {
-	sy.Mem.CmdTransferStorageRegsToGPU(cmd, regs)
-}
-
-// ComputeCopyFromGPU records command to copy given regions
-// in the Storage buffer memory from GPU to CPU, in one call.
-// Use SyncRegValueIndexFromCPU to get the regions.
-func (sy *ComputeSystem) ComputeCopyFromGPU(cmd *wgpu.ComputePassEncoder, regs ...MemReg) {
-	sy.Mem.CmdTransferStorageRegsFromGPU(cmd, regs)
-}
-
-// ComputeWaitMemWriteRead records pipeline barrier ensuring
-// global memory writes from the shader have completed and are ready to read
-// in the next step of a command queue.
-// Use this instead of Events to synchronize steps of a computation.
-func (sy *ComputeSystem) ComputeWaitMemWriteRead(cmd *wgpu.ComputePassEncoder) {
-	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
-	vk.CmdPipelineBarrier(cmd, shader, shader, vk.DependencyFlags(0), 1,
-		[]vk.MemoryBarrier{{
-			SType:         vk.StructureTypeMemoryBarrier,
-			SrcAccessMask: vk.AccessFlags(vk.AccessShaderWriteBit),
-			DstAccessMask: vk.AccessFlags(vk.AccessShaderReadBit),
-		}}, 0, nil, 0, nil)
-}
-
-// ComputeWaitMemHostToShader records pipeline barrier ensuring
-// global memory writes from the host to shader have completed.
-// Use this if the first commands are to copy memory from host,
-// instead of creating a separate Event.
-func (sy *ComputeSystem) ComputeWaitMemHostToShader(cmd *wgpu.ComputePassEncoder) {
-	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
-	host := vk.PipelineStageFlags(vk.PipelineStageHostBit)
-	vk.CmdPipelineBarrier(cmd, host, shader, vk.DependencyFlags(0), 1,
-		[]vk.MemoryBarrier{{
-			SType:         vk.StructureTypeMemoryBarrier,
-			SrcAccessMask: vk.AccessFlags(vk.AccessHostWriteBit),
-			DstAccessMask: vk.AccessFlags(vk.AccessShaderReadBit),
-		}}, 0, nil, 0, nil)
-}
-
-// ComputeWaitMemShaderToHost records pipeline barrier ensuring
-// global memory writes have completed from the compute shader,
-// and are ready for the host to read.
-// This is not necessary if a standard QueueWaitIdle is done at
-// the end of a command (basically not really needed,
-// but included for completeness).
-func (sy *ComputeSystem) ComputeWaitMemShaderToHost(cmd *wgpu.ComputePassEncoder) {
-	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
-	host := vk.PipelineStageFlags(vk.PipelineStageHostBit)
-	vk.CmdPipelineBarrier(cmd, shader, host, vk.DependencyFlags(0), 1,
-		[]vk.MemoryBarrier{{
-			SType:         vk.StructureTypeMemoryBarrier,
-			SrcAccessMask: vk.AccessFlags(vk.AccessShaderWriteBit),
-			DstAccessMask: vk.AccessFlags(vk.AccessHostReadBit),
-		}}, 0, nil, 0, nil)
-}
-
-// ComputeWaitMemoryBuff records pipeline barrier ensuring
-// given buffer's memory writes have completed for given buffer from the compute shader,
-// and are ready for the host to read.  Vulkan docs suggest that global memory
-// buffer barrier is generally better to use (ComputeWaitMem*)
-func (sy *ComputeSystem) ComputeWaitMemoryBuff(cmd *wgpu.ComputePassEncoder, buff *Buffer) {
-	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
-	host := vk.PipelineStageFlags(vk.PipelineStageHostBit)
-	vk.CmdPipelineBarrier(cmd, shader, host, vk.DependencyFlags(0), 0, nil, 1,
-		[]vk.BufferMemoryBarrier{{
-			SType:         vk.StructureTypeBufferMemoryBarrier,
-			SrcAccessMask: vk.AccessFlags(vk.AccessShaderWriteBit),
-			DstAccessMask: vk.AccessFlags(vk.AccessHostReadBit),
-			Buffer:        buff.Dev,
-			Size:          vk.DeviceSize(buff.Size),
-		}}, 0, nil)
-}
-
-// ComputeSubmitWait submits the current set of commands
-// in the default system CmdPool, typically from ComputeDispatch.
-// Then waits for the commands to finish before returning
-// control to the CPU.  Results will be available immediately
-// thereafter for retrieving back from the GPU.
-func (sy *ComputeSystem) ComputeSubmitWait(cmd *wgpu.ComputePassEncoder) {
-	CmdSubmitWait(cmd, &sy.Device)
-}
-
-// ComputeCmdEnd adds an end to given command buffer
-func (sy *ComputeSystem) ComputeCmdEnd(cmd *wgpu.ComputePassEncoder) {
-	CmdEnd(cmd)
-}
-
-*/

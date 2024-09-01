@@ -454,7 +454,7 @@ func (vl *Value) readNilCheck() error {
 // a target data structure.
 func (vl *Value) GPUToRead(cmd *wgpu.CommandEncoder) error {
 	if err := vl.readNilCheck(); err != nil {
-		return err
+		return errors.Log(err)
 	}
 	return cmd.CopyBufferToBuffer(vl.buffer, 0, vl.readBuffer, 0, uint64(vl.AllocSize))
 }
@@ -464,6 +464,9 @@ func (vl *Value) GPUToRead(cmd *wgpu.CommandEncoder) error {
 // need to be sync'd at the same time, so only use this when copying one value.
 // See [GPUToRead] for overview of the process.
 func (vl *Value) ReadSync() error {
+	if err := vl.readNilCheck(); err != nil {
+		return errors.Log(err)
+	}
 	return ValueReadSync(&vl.device, vl)
 }
 
@@ -481,7 +484,7 @@ func ReadToBytes[E any](vl *Value, dest []E) error {
 // which is enforced to be the correct size if not already.
 func (vl *Value) ReadToBytes(to []byte) error {
 	if err := vl.readNilCheck(); err != nil {
-		return err
+		return errors.Log(err)
 	}
 	copy(to, vl.readBuffer.GetMappedRange(0, uint(vl.AllocSize)))
 	vl.readBuffer.Unmap()

@@ -81,20 +81,20 @@ type GPU struct {
 	MaxComputeWorkGroupCount1D int
 }
 
-const (
-	// ComputeOnly is used for the NewGPU arg to indicate a compute-only.
-	ComputeOnly = true
-)
-
 // NewGPU returns a new GPU, configured and ready to use.
-// If only doing compute, use the optional bool arg with
-// ComputeOnly to listen to WEBGPU_COMPUTE_DEVICE_SELECT
-// variable for which GPU device to use.
-func NewGPU(computeOnly ...bool) *GPU {
+// If only doing compute, use [NewComputeGPU].
+func NewGPU() *GPU {
 	gp := &GPU{}
-	if len(computeOnly) == 1 && computeOnly[0] {
-		gp.ComputeOnly = true
-	}
+	gp.init()
+	return gp
+}
+
+// NewComputeGPU returns a new GPU, configured and ready to use,
+// for purely compute use, which causes it to listen to
+// use the WEBGPU_COMPUTE_DEVICE_SELECT variable for which GPU device to use.
+func NewComputeGPU() *GPU {
+	gp := &GPU{}
+	gp.ComputeOnly = true
 	gp.init()
 	return gp
 }
@@ -107,9 +107,9 @@ func (gp *GPU) init() error {
 	gpIndex := gp.SelectGPU(gpus)
 	gp.GPU = gpus[gpIndex]
 	gp.Properties = gp.GPU.GetInfo()
-	gp.DeviceName = gp.Properties.Name
+	gp.DeviceName = adapterName(&gp.Properties)
 	if Debug || DebugAdapter {
-		fmt.Println("gpu: Selected Device:", gp.DeviceName, " (set DebugAdapter to get more adapter info")
+		fmt.Println("gpu: Selected Device:", gp.DeviceName, " (set DebugAdapter to get more adapter info)")
 	}
 
 	gp.Limits = gp.GPU.GetLimits()
@@ -129,6 +129,16 @@ func (gp *GPU) init() error {
 	// note: if known to be higher for any specific case, please file an issue or PR
 	// todo: where are the errors!?
 	return nil
+}
+
+func adapterName(ai *wgpu.AdapterInfo) string {
+	if ai.Name != "" && ai.Name != "0x0" {
+		return ai.Name
+	}
+	if ai.DriverDescription != "" && ai.DriverDescription != "0x0" {
+		return ai.DriverDescription
+	}
+	return ai.VendorName
 }
 
 func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
@@ -162,7 +172,8 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			if gpuIsBadBackend(props.BackendType) {
 				continue
 			}
-			if strings.Contains(props.Name, trgDevNm) {
+			pnm := adapterName(&props)
+			if strings.Contains(pnm, trgDevNm) {
 				devNm := props.Name
 				if Debug {
 					log.Printf("wgpu: selected device named: %s, specified in *_DEVICE_SELECT environment variable, index: %d\n", devNm, gi)

@@ -22,7 +22,7 @@ type ComputePipeline struct {
 }
 
 // NewComputePipeline returns a new ComputePipeline.
-func NewComputePipeline(name string, sy *ComputeSystem) *ComputePipeline {
+func NewComputePipeline(name string, sy System) *ComputePipeline {
 	pl := &ComputePipeline{}
 	pl.Name = name
 	pl.System = sy
@@ -50,7 +50,7 @@ func NewComputePipelineShaderFS(fsys fs.FS, fname string, sy *ComputeSystem) *Co
 // pipeline for given number of *warps* (work groups of compute threads)
 // along 3 dimensions, which then generate indexes passed into the shader.
 // Calls BindPipeline and then DispatchWorkgroups.
-// In WGSL, the [numthreads(x, y, z)] directive specifies the number
+// In WGSL, the @workgroup_size(x, y, z) directive specifies the number
 // of threads allocated per warp -- the actual number of elements
 // processed is threads * warps per each dimension. See Warps function.
 // The hardware typically has 32 (NVIDIA, M1, M2) or 64 (AMD) hardware

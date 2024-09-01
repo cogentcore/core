@@ -46,6 +46,7 @@ func ValueReadSync(device *Device, values ...*Value) error {
 	var errs []error
 	status := make([]wgpu.BufferMapAsyncStatus, nv)
 	for i, vl := range values {
+		fmt.Println(vl.Name, vl.readBuffer != nil, vl.AllocSize)
 		err := vl.readBuffer.MapAsync(wgpu.MapModeRead, 0, uint64(vl.AllocSize), func(s wgpu.BufferMapAsyncStatus) {
 			status[i] = s
 		})
