@@ -1,0 +1,135 @@
+
+
+// note: here is the wgsl version, only included in wgsl
+
+// MyTrickyFun this is the GPU version of the tricky function
+fn MyTrickyFun(x: f32) {
+	return 16; // ok actually not tricky here, but whatever
+}
+
+
+// FastExp is a quartic spline approximation to the Exp function, by N.N. Schraudolph
+// It does not have any of the sanity checking of a standard method -- returns
+// nonsense when arg is out of range.  Runs in 2.23ns vs. 6.3ns for 64bit which is faster
+// than exp actually.
+fn FastExp(x: f32) -> f32 {
+	if (x <= -88.76731) { // this doesn't add anything and -exp is main use-case anyway
+		return 0;
+	}
+	var i = i32(12102203*x) + 127*(1<<23);
+	var m = i >> 7 & 0xFFFF; // copy mantissa
+	i += (((((((((((3537 * m) >> 16) + 13668) * m) >> 18) + 15817) * m) >> 14) - 80470) * m) >> 11);
+	return asfloat(u32(i));
+}
+
+/*
+// NeuronFlags are bit-flags encoding relevant binary state for neurons
+type NeuronFlags i32
+
+// The neuron flags
+const (
+	// NeuronOff flag indicates that this neuron has been turned off (i.e., lesioned)
+	NeuronOff NeuronFlags = 1
+
+	// NeuronHasExt means the neuron has external input in its Ext field
+	NeuronHasExt NeuronFlags = 1 << 2
+
+	// NeuronHasTarg means the neuron has external target input in its Target field
+	NeuronHasTarg NeuronFlags = 1 << 3
+
+	// NeuronHasCmpr means the neuron has external comparison input in its Target field -- used for computing
+	// comparison statistics but does not drive neural activity ever
+	NeuronHasCmpr NeuronFlags = 1 << 4
+)
+
+// Modes are evaluation modes (Training, Testing, etc)
+type Modes i32
+
+// The evaluation modes
+const (
+	NoEvalMode Modes = iota
+
+	// AllModes indicates that the log should occur over all modes present in other items.
+	AllModes
+
+	// Train is this a training mode for the env
+	Train
+
+	// Test is this a test mode for the env
+	Test
+)
+
+*/
+
+// DataStruct has the test data
+struct DataStruct {
+
+	// raw value
+	Raw: f32,
+
+	// integrated value
+	Integ: f32,
+
+	// exp of integ
+	Exp: f32,
+
+	// must pad to multiple of 4 floats for arrays
+	Pad2: f32,
+}
+
+// ParamStruct has the test params
+struct ParamStruct {
+
+	// rate constant in msec
+	Tau: f32,
+
+	// 1/Tau
+	Dt:     f32,
+	Option: int, // note: standard bool doesn't work
+
+	pad: f32, // comment this out to trigger alignment warning
+}
+
+fn IntegFromRaw(ps: *ParamStruct, ds: *DataStruct, modArg: *f32) -> f32 {
+	// note: the following are just to test basic control structures
+	var newVal = ps.Dt*(ds.Raw-ds.Integ) + *modArg;
+	if (newVal < -10 || ps.Option==1) {
+		newVal = -10;
+	}
+	ds.Integ += newVal;
+	ds.Exp = exp(-ds.Integ);
+	return ds.Exp;
+}
+
+// AnotherMeth does more computation
+fn AnotherMeth(ps: *ParamStruct, ds: *DataStruct) {
+	for (var i = 0;; i < 10; i++) {
+		ds.Integ *= 0.99;
+	}
+	flag NeuronFlags
+	flag &=~NeuronHasExt; // clear flag -- op doesn't exist in C
+
+	var mode = Test;
+	switch (mode) {
+	case Test:
+		fallthrough;
+	case Train:
+		var ab = f32(.5);
+		ds.Exp *= ab;
+	default:
+		var ab = f32(1);
+		ds.Exp *= ab;
+	}
+}
+
+@group(0) @binding(0)
+var<storage, read_write> Params: array<ParamStruct>;
+
+@group(0) @binding(0)
+var<storage, read_write> Data: array<DataStruct>;
+
+@compute
+@workgroup_size(64)
+fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
+    IntegFromRaw(Params[0], Data[idx.x], Data[idx.x].Pad2);
+}
