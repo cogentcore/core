@@ -108,7 +108,7 @@ func (sc *Scene) addDefaultBars() {
 			titleRow := NewFrame(parent)
 			titleRow.SetName("title-row")
 			titleRow.Styler(func(s *styles.Style) {
-				s.Grow.Set(1, 0)
+				// s.Grow.Set(1, 0)
 				s.Align.Items = styles.Center
 			})
 			if needBackButton {
