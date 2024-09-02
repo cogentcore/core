@@ -23,8 +23,6 @@ type Blinker struct {
 	// when transitioning to locking the render context mutex.
 	Func func()
 
-	quit chan struct{}
-
 	// Use Lock and Unlock on blinker directly.
 	sync.Mutex
 }
@@ -37,7 +35,6 @@ func (bl *Blinker) Blink(dur time.Duration) {
 		return
 	}
 	bl.Ticker = time.NewTicker(dur)
-	bl.quit = make(chan struct{})
 	go bl.blinkLoop()
 }
 
@@ -68,7 +65,6 @@ func (bl *Blinker) blinkLoop() {
 		bl.Unlock()
 		select {
 		case <-bl.Ticker.C:
-		case <-bl.quit:
 			return
 		}
 		bl.Lock()
@@ -93,9 +89,9 @@ func (bl *Blinker) QuitClean() {
 	bl.Lock()
 	defer bl.Unlock()
 	if bl.Ticker != nil {
-		bl.Widget = nil
-		bl.Ticker.Stop()
+		tck := bl.Ticker
 		bl.Ticker = nil
-		bl.quit <- struct{}{}
+		bl.Widget = nil
+		tck.Stop()
 	}
 }
