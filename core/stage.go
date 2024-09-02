@@ -123,6 +123,12 @@ type Stage struct { //types:add -setters
 	// after this timeout duration.
 	Timeout time.Duration
 
+	// BackButton is whether to add a back button to the top bar that calls
+	// [Scene.Close] when clicked. It is on by default on non-[system.Offscreen]
+	// platforms for [Stage.FullWindow] but not [Stage.NewWindow] [Stage]s that
+	// are not the first in the stack.
+	BackButton bool
+
 	// DisplayTitle is whether to display the [Stage.Title] using a
 	// [Text] widget in the top bar. It is on by default for [DialogStage]s
 	// and off for all other stages.
