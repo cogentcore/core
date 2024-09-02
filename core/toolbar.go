@@ -66,6 +66,8 @@ func (tb *Toolbar) Init() {
 
 func (tb *Toolbar) SizeUp() {
 	if tb.Styles.Wrap {
+		tb.getOverflowButton()
+		tb.setOverflowMenuVisibility()
 		tb.Frame.SizeUp()
 		return
 	}
@@ -74,8 +76,11 @@ func (tb *Toolbar) SizeUp() {
 }
 
 func (tb *Toolbar) SizeDown(iter int) bool {
+	if tb.Styles.Wrap {
+		return tb.Frame.SizeDown(iter)
+	}
 	redo := tb.Frame.SizeDown(iter)
-	if iter == 0 || tb.Styles.Wrap {
+	if iter == 0 {
 		return true // ensure a second pass
 	}
 	if tb.Scene.showIter > 0 {
@@ -120,6 +125,17 @@ func (tb *Toolbar) parentSize() float32 {
 	return avail
 }
 
+func (tb *Toolbar) getOverflowButton() {
+	tb.overflowButton = nil
+	li := tb.Children[tb.NumChildren()-1]
+	if li == nil {
+		return
+	}
+	if ob, ok := li.(*Button); ok {
+		tb.overflowButton = ob
+	}
+}
+
 // moveToOverflow moves overflow out of children to the OverflowItems list
 func (tb *Toolbar) moveToOverflow() {
 	if !tb.HasChildren() {
@@ -127,13 +143,7 @@ func (tb *Toolbar) moveToOverflow() {
 	}
 	ma := tb.Styles.Direction.Dim()
 	avail := tb.parentSize()
-	li := tb.Children[tb.NumChildren()-1]
-	tb.overflowButton = nil
-	if li != nil {
-		if ob, ok := li.(*Button); ok {
-			tb.overflowButton = ob
-		}
-	}
+	tb.getOverflowButton()
 	if tb.overflowButton == nil {
 		return
 	}
@@ -168,6 +178,19 @@ func (tb *Toolbar) moveToOverflow() {
 		p.Children = tb.allItemsPlan.Children[:ovidx]
 		p.Children = append(p.Children, tb.allItemsPlan.Children[pn-1]) // ovm
 		p.Update(tb)
+	}
+	if len(tb.overflowItems) == 0 && len(tb.OverflowMenus) == 0 {
+		tb.overflowButton.SetState(true, states.Invisible)
+	} else {
+		tb.overflowButton.SetState(false, states.Invisible)
+		tb.overflowButton.Update()
+	}
+	tb.setOverflowMenuVisibility()
+}
+
+func (tb *Toolbar) setOverflowMenuVisibility() {
+	if tb.overflowButton == nil {
+		return
 	}
 	if len(tb.overflowItems) == 0 && len(tb.OverflowMenus) == 0 {
 		tb.overflowButton.SetState(true, states.Invisible)
