@@ -74,15 +74,20 @@ func (st *Stage) runPopup() *Stage {
 	ms.popups.push(st)
 	st.setPopups(ms) // sets all pointers
 
-	maxSz := msc.SceneGeom.Size
-
+	maxGeom := msc.SceneGeom
+	winst := ms.Mains.windowStage()
+	usingWinGeom := false
+	if winst != nil && winst.Scene != nil && winst.Scene != msc {
+		usingWinGeom = true
+		maxGeom = winst.Scene.SceneGeom // use the full window if possible
+	}
 	// original size and position, which is that of the context widget / location for a tooltip
 	osz := sc.SceneGeom.Size
 	opos := sc.SceneGeom.Pos
 
-	sc.SceneGeom.Size = maxSz
+	sc.SceneGeom.Size = maxGeom.Size
 	sc.SceneGeom.Pos = st.Pos
-	sz := sc.prefSize(maxSz)
+	sz := sc.prefSize(maxGeom.Size)
 	scrollWd := int(sc.Styles.ScrollbarWidth.Dots)
 	fontHt := 16
 	if sc.Styles.Font.Face != nil {
@@ -119,7 +124,28 @@ func (st *Stage) runPopup() *Stage {
 	}
 
 	sc.SceneGeom.Size = sz
-	sc.fitInWindow(msc.SceneGeom) // does resize
+	sc.fitInWindow(maxGeom) // does resize
+	if usingWinGeom {       // reposition to be as close to top-right of main scene as possible
+		tpos := msc.SceneGeom.Pos
+		tpos.X += msc.SceneGeom.Size.X
+		if tpos.X+sc.SceneGeom.Size.X > maxGeom.Size.X { // favor left side instead
+			tpos.X = max(msc.SceneGeom.Pos.X-sc.SceneGeom.Size.X, 0)
+		}
+		bpos := tpos.Add(sc.SceneGeom.Size)
+		if bpos.X > maxGeom.Size.X {
+			tpos.X -= bpos.X - maxGeom.Size.X
+		}
+		if bpos.Y > maxGeom.Size.Y {
+			tpos.Y -= bpos.Y - maxGeom.Size.Y
+		}
+		if tpos.X < 0 {
+			tpos.X = 0
+		}
+		if tpos.Y < 0 {
+			tpos.Y = 0
+		}
+		sc.SceneGeom.Pos = tpos
+	}
 	sc.showIter = 0
 
 	if st.Timeout > 0 {

@@ -233,6 +233,18 @@ func (sm *stages) updateAll() (stageMods, sceneMods bool) {
 	return
 }
 
+// windowStage returns the highest level WindowStage (i.e., full window)
+func (sm *stages) windowStage() *Stage {
+	n := sm.stack.Len()
+	for i := n - 1; i >= 0; i-- {
+		st := sm.stack.ValueByIndex(i)
+		if st.Type == WindowStage {
+			return st
+		}
+	}
+	return nil
+}
+
 func (sm *stages) sendShowEvents() {
 	for _, kv := range sm.stack.Order {
 		st := kv.Value
