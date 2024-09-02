@@ -13,7 +13,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"slices"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
@@ -139,10 +138,17 @@ func (fp *FilePicker) Init() {
 			fp.prevPath = fp.directory
 		}
 
-		tree.AddAt(p, "title", func(w *Text) {
-			w.SetType(TextTitleLarge)
-			w.Updater(func() {
-				w.SetText(fp.directory)
+		tree.AddAt(p, "path", func(w *Chooser) {
+			Bind(&fp.directory, w)
+			w.SetEditable(true).SetDefaultNew(true)
+			w.AddItemsFunc(func() {
+				fp.addRecentPathItems(&w.Items)
+			})
+			w.Styler(func(s *styles.Style) {
+				s.Grow.Set(1, 0)
+			})
+			w.OnChange(func(e events.Event) {
+				fp.updateFilesEvent()
 			})
 		})
 		tree.AddAt(p, "files", func(w *Frame) {
@@ -236,9 +242,6 @@ func (fp *FilePicker) selectFile() bool {
 }
 
 func (fp *FilePicker) MakeToolbar(p *tree.Plan) {
-	tree.AddInit(p, "app-chooser", func(w *Chooser) {
-		fp.addChooserPaths(w)
-	})
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.directoryUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
@@ -253,37 +256,30 @@ func (fp *FilePicker) MakeToolbar(p *tree.Plan) {
 	})
 }
 
-// addChooserPaths adds paths to the app chooser
-func (fp *FilePicker) addChooserPaths(ch *Chooser) {
-	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {
-		for _, sp := range recentPaths {
-			ch.Items = append(ch.Items, ChooserItem{
-				Value: sp,
-				Icon:  icons.Folder,
-				Func: func() {
-					fp.directory = sp
-					fp.updateFilesEvent()
-				},
-			})
-		}
-		ch.Items = append(ch.Items, ChooserItem{
-			Value:           "Reset recent paths",
-			Icon:            icons.Refresh,
-			SeparatorBefore: true,
-			Func: func() {
-				recentPaths = make(FilePaths, 1, SystemSettings.SavedPathsMax)
-				recentPaths[0] = fp.directory
-				fp.Update()
-			},
+func (fp *FilePicker) addRecentPathItems(items *[]ChooserItem) {
+	for _, sp := range recentPaths {
+		*items = append(*items, ChooserItem{
+			Value: sp,
 		})
-		ch.Items = append(ch.Items, ChooserItem{
-			Value: "Edit recent paths",
-			Icon:  icons.Edit,
-			Func: func() {
-				fp.editRecentPaths()
-			},
-		})
-	})
+	}
+	// TODO: file picker reset and edit recent paths buttons not working
+	// *items = append(*items, ChooserItem{
+	// 	Value:           "Reset recent paths",
+	// 	Icon:            icons.Refresh,
+	// 	SeparatorBefore: true,
+	// 	Func: func() {
+	// 		recentPaths = make(FilePaths, 1, SystemSettings.SavedPathsMax)
+	// 		recentPaths[0] = fp.directory
+	// 		fp.Update()
+	// 	},
+	// })
+	// *items = append(*items, ChooserItem{
+	// 	Value: "Edit recent paths",
+	// 	Icon:  icons.Edit,
+	// 	Func: func() {
+	// 		fp.editRecentPaths()
+	// 	},
+	// })
 }
 
 func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
@@ -378,7 +374,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 				SetTooltip("View information about the selected file").
 				OnClick(func(e events.Event) {
 					fn := fp.files[w.SelectedIndex]
-					d := NewBody().AddTitle("Info: " + fn.Name)
+					d := NewBody("Info: " + fn.Name)
 					NewForm(d).SetStruct(&fn).SetReadOnly(true)
 					d.AddOKOnly().RunFullDialog(w)
 				})
@@ -693,11 +689,12 @@ func (fp *FilePicker) fileCompleteEdit(data any, text string, cursorPos int, c c
 // editRecentPaths displays a dialog allowing the user to
 // edit the recent paths list.
 func (fp *FilePicker) editRecentPaths() {
-	d := NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
+	d := NewBody("Recent file paths")
+	NewText(d).SetType(TextSupporting).SetText("You can delete paths you no longer use")
 	NewList(d).SetSlice(&recentPaths)
-	d.AddBottomBar(func(parent Widget) {
-		d.AddCancel(parent)
-		d.AddOK(parent).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(bar *Frame) {
+		d.AddCancel(bar)
+		d.AddOK(bar).OnClick(func(e events.Event) {
 			saveRecentPaths()
 			fp.Update()
 		})
@@ -743,7 +740,9 @@ func (fb *FileButton) Init() {
 		d.DeleteChildByName("body-title") // file picker has its own title
 		fp = NewFilePicker(d).SetFilename(fb.Filename).SetExtensions(fb.Extensions)
 		fb.setFlag(true, widgetValueNewWindow)
-		d.AddAppBar(fp.MakeToolbar)
+		d.AddTopBar(func(bar *Frame) {
+			NewToolbar(bar).Maker(fp.MakeToolbar)
+		})
 	}, func() {
 		fb.Filename = fp.SelectedFile()
 	})

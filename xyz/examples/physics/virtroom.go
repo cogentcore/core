@@ -443,69 +443,71 @@ func (ev *Env) ConfigGUI() *core.Body {
 	//////////////////////////////////////////
 	//    Toolbar
 
-	b.AddAppBar(func(p *tree.Plan) {
-		tree.Add(p, func(w *core.Button) {
-			w.SetText("Edit Env").SetIcon(icons.Edit).
-				SetTooltip("Edit the settings for the environment").
-				OnClick(func(e events.Event) {
-					sv.SetStruct(ev)
-				})
-		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(ev.WorldInit).SetText("Init").SetIcon(icons.Update)
-		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(ev.ReMakeWorld).SetText("Make").SetIcon(icons.Update)
-		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
-		})
-		tree.Add(p, func(w *core.Separator) {})
+	b.AddTopBar(func(bar *core.Frame) {
+		core.NewToolbar(bar).Maker(func(p *tree.Plan) {
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("Edit Env").SetIcon(icons.Edit).
+					SetTooltip("Edit the settings for the environment").
+					OnClick(func(e events.Event) {
+						sv.SetStruct(ev)
+					})
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(ev.WorldInit).SetText("Init").SetIcon(icons.Update)
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(ev.ReMakeWorld).SetText("Make").SetIcon(icons.Update)
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
+			})
+			tree.Add(p, func(w *core.Separator) {})
 
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
-				Styler(func(s *styles.Style) {
-					s.SetAbilities(true, abilities.RepeatClickable)
-				})
-		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
-				Styler(func(s *styles.Style) {
-					s.SetAbilities(true, abilities.RepeatClickable)
-				})
-		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
-				Styler(func(s *styles.Style) {
-					s.SetAbilities(true, abilities.RepeatClickable)
-				})
-		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
-				Styler(func(s *styles.Style) {
-					s.SetAbilities(true, abilities.RepeatClickable)
-				})
-		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
-				Styler(func(s *styles.Style) {
-					s.SetAbilities(true, abilities.RepeatClickable)
-				})
-		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
-				Styler(func(s *styles.Style) {
-					s.SetAbilities(true, abilities.RepeatClickable)
-				})
-		})
-		tree.Add(p, func(w *core.Separator) {})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
+					Styler(func(s *styles.Style) {
+						s.SetAbilities(true, abilities.RepeatClickable)
+					})
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
+					Styler(func(s *styles.Style) {
+						s.SetAbilities(true, abilities.RepeatClickable)
+					})
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
+					Styler(func(s *styles.Style) {
+						s.SetAbilities(true, abilities.RepeatClickable)
+					})
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
+					Styler(func(s *styles.Style) {
+						s.SetAbilities(true, abilities.RepeatClickable)
+					})
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
+					Styler(func(s *styles.Style) {
+						s.SetAbilities(true, abilities.RepeatClickable)
+					})
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
+					Styler(func(s *styles.Style) {
+						s.SetAbilities(true, abilities.RepeatClickable)
+					})
+			})
+			tree.Add(p, func(w *core.Separator) {})
 
-		tree.Add(p, func(w *core.Button) {
-			w.SetText("README").SetIcon(icons.FileMarkdown).
-				SetTooltip("Open browser on README.").
-				OnClick(func(e events.Event) {
-					core.TheApp.OpenURL("https://github.com/emer/eve/blob/master/examples/virtroom/README.md")
-				})
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("README").SetIcon(icons.FileMarkdown).
+					SetTooltip("Open browser on README.").
+					OnClick(func(e events.Event) {
+						core.TheApp.OpenURL("https://github.com/emer/eve/blob/master/examples/virtroom/README.md")
+					})
+			})
 		})
 	})
 	return b

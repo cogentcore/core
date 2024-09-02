@@ -57,15 +57,17 @@ tb.AddOverflowMenu(func(m *core.Scene) {
 })
 ```
 
-Typically, you add elements to the main top app bar (see the toolbar at the top of this documentation for example) instead of making a standalone toolbar (in this example, `b` is the [[core.Body]]):
+Toolbars are frequently added in [[core.Body.AddTopBar]]:
 
 ```go
-b.AddAppBar(func(p *tree.Plan) {
-    tree.Add(p, func(w *core.Button) {
-        w.SetText("Build")
-    })
-    tree.Add(p, func(w *core.Button) {
-        w.SetText("Run")
+b.AddTopBar(func(bar *core.Frame) {
+    core.NewToolbar(bar).Maker(func(p *tree.Plan) {
+        tree.Add(p, func(w *core.Button) {
+            w.SetText("Build")
+        })
+        tree.Add(p, func(w *core.Button) {
+            w.SetText("Run")
+        })
     })
 })
 ```

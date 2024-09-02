@@ -314,10 +314,11 @@ func (fb *FuncButton) callFuncShowReturns() {
 // confirmDialog runs the confirm dialog.
 func (fb *FuncButton) confirmDialog() {
 	ctx := fb.goodContext()
-	d := NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
-	d.AddBottomBar(func(parent Widget) {
-		d.AddCancel(parent)
-		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
+	d := NewBody(fb.Text + "?")
+	NewText(d).SetType(TextSupporting).SetText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
+	d.AddBottomBar(func(bar *Frame) {
+		d.AddCancel(bar)
+		d.AddOK(bar).SetText(fb.Text).OnClick(func(e events.Event) {
 			fb.callFuncShowReturns()
 		})
 	})
@@ -339,7 +340,8 @@ func (fb *FuncButton) CallFunc() {
 		fb.confirmDialog()
 		return
 	}
-	d := NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
+	d := NewBody(fb.Text)
+	NewText(d).SetType(TextSupporting).SetText(fb.Tooltip)
 	str := funcArgsToStruct(fb.Args)
 	sv := NewForm(d).SetStruct(str.Addr().Interface())
 
@@ -366,9 +368,9 @@ func (fb *FuncButton) CallFunc() {
 		}
 	}
 
-	d.AddBottomBar(func(parent Widget) {
-		d.AddCancel(parent)
-		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(bar *Frame) {
+		d.AddCancel(bar)
+		d.AddOK(bar).SetText(fb.Text).OnClick(func(e events.Event) {
 			d.Close() // note: the other Close event happens too late!
 			accept()
 		})
@@ -446,7 +448,9 @@ func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 		return
 	}
 
-	d := NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
+	d := NewBody(main)
+	NewText(d).SetType(TextSupporting).SetText(fb.Tooltip)
+	d.AddOKOnly()
 	str := funcArgsToStruct(fb.Returns)
 	sv := NewForm(d).SetStruct(str.Addr().Interface()).SetReadOnly(true)
 

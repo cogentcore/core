@@ -549,12 +549,13 @@ func dialogs(ts *core.Tabs) {
 
 	cd := core.NewButton(drow).SetText("Confirm")
 	cd.OnClick(func(e events.Event) {
-		d := core.NewBody().AddTitle("Confirm").AddText("Send message?")
-		d.AddBottomBar(func(parent core.Widget) {
-			d.AddCancel(parent).OnClick(func(e events.Event) {
+		d := core.NewBody("Confirm")
+		core.NewText(d).SetType(core.TextSupporting).SetText("Send message?")
+		d.AddBottomBar(func(bar *core.Frame) {
+			d.AddCancel(bar).OnClick(func(e events.Event) {
 				core.MessageSnackbar(cd, "Dialog canceled")
 			})
-			d.AddOK(parent).OnClick(func(e events.Event) {
+			d.AddOK(bar).OnClick(func(e events.Event) {
 				core.MessageSnackbar(cd, "Dialog accepted")
 			})
 		})
@@ -563,11 +564,12 @@ func dialogs(ts *core.Tabs) {
 
 	td := core.NewButton(drow).SetText("Input")
 	td.OnClick(func(e events.Event) {
-		d := core.NewBody().AddTitle("Input").AddText("What is your name?")
+		d := core.NewBody("Input")
+		core.NewText(d).SetType(core.TextSupporting).SetText("What is your name?")
 		tf := core.NewTextField(d)
-		d.AddBottomBar(func(parent core.Widget) {
-			d.AddCancel(parent)
-			d.AddOK(parent).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(bar *core.Frame) {
+			d.AddCancel(bar)
+			d.AddOK(bar).OnClick(func(e events.Event) {
 				core.MessageSnackbar(td, "Your name is "+tf.Text())
 			})
 		})
@@ -577,7 +579,8 @@ func dialogs(ts *core.Tabs) {
 	fd := core.NewButton(drow).SetText("Full window")
 	u := &core.User{}
 	fd.OnClick(func(e events.Event) {
-		d := core.NewBody().AddTitle("Full window dialog").AddText("Edit your information")
+		d := core.NewBody("Full window dialog")
+		core.NewText(d).SetType(core.TextSupporting).SetText("Edit your information")
 		core.NewForm(d).SetStruct(u).OnInput(func(e events.Event) {
 			fmt.Println("Got input event")
 		})
@@ -589,7 +592,9 @@ func dialogs(ts *core.Tabs) {
 
 	nd := core.NewButton(drow).SetText("New window")
 	nd.OnClick(func(e events.Event) {
-		core.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms").RunWindowDialog(nd)
+		d := core.NewBody("New window dialog")
+		core.NewText(d).SetType(core.TextSupporting).SetText("This dialog opens in a new window on multi-window platforms")
+		d.RunWindowDialog(nd)
 	})
 
 	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Snackbars")
@@ -618,12 +623,17 @@ func dialogs(ts *core.Tabs) {
 
 	nw := core.NewButton(wrow).SetText("New window")
 	nw.OnClick(func(e events.Event) {
-		core.NewBody().AddTitle("New window").AddText("A standalone window that opens in a new window on multi-window platforms").RunWindow()
+		d := core.NewBody("New window")
+		core.NewText(d).SetType(core.TextHeadlineSmall).SetText("New window")
+		core.NewText(d).SetType(core.TextSupporting).SetText("A standalone window that opens in a new window on multi-window platforms")
+		d.RunWindow()
 	})
 
 	fw := core.NewButton(wrow).SetText("Full window")
 	fw.OnClick(func(e events.Event) {
-		core.NewBody().AddTitle("Full window").AddText("A standalone window that opens in the same system window").NewWindow().SetNewWindow(false).Run()
+		d := core.NewBody("Full window")
+		core.NewText(d).SetType(core.TextSupporting).SetText("A standalone window that opens in the same system window")
+		d.NewWindow().SetNewWindow(false).SetDisplayTitle(true).Run()
 	})
 }
 

@@ -54,9 +54,6 @@ func (bd *Body) NewFullDialog(ctx Widget) *Stage {
 	bd.Scene.Stage.SetModal(true)
 	bd.Scene.Stage.SetContext(ctx)
 	bd.Scene.Stage.SetFullWindow(true)
-	if ctx != nil {
-		bd.Scene.inheritBarsWidget(ctx)
-	}
 	return bd.Scene.Stage
 }
 
@@ -92,12 +89,13 @@ func RecycleDialog(data any) bool {
 // MessageDialog opens a new Dialog displaying the given message
 // in the context of the given widget. An optional title can be provided.
 func MessageDialog(ctx Widget, message string, title ...string) {
-	b := NewBody(ctx.AsTree().Name + "-message-dialog")
+	ttl := ""
 	if len(title) > 0 {
-		b.AddTitle(title[0])
+		ttl = title[0]
 	}
-	b.AddText(message).AddOKOnly()
-	b.RunDialog(ctx)
+	d := NewBody(ttl)
+	NewText(d).SetType(TextSupporting).SetText(message)
+	d.AddOKOnly().RunDialog(ctx)
 }
 
 // ErrorDialog opens a new dialog displaying the given error
@@ -115,8 +113,9 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 	}
 	// we need to get [errors.CallerInfo] at this level
 	slog.Error(ttl + ": " + err.Error() + " | " + errors.CallerInfo())
-	NewBody(ctx.AsTree().Name + "-error-dialog").AddTitle(ttl).AddText(err.Error()).
-		AddOKOnly().RunDialog(ctx)
+	d := NewBody(ttl)
+	NewText(d).SetType(TextSupporting).SetText(err.Error())
+	d.AddOKOnly().RunDialog(ctx)
 }
 
 // AddOK adds an OK button to the given parent widget (typically in
@@ -148,7 +147,7 @@ func (bd *Body) AddOK(parent Widget) *Button {
 // OK button automatically results in the dialog being closed. Also see
 // [Body.AddOK].
 func (bd *Body) AddOKOnly() *Body {
-	bd.AddBottomBar(func(parent Widget) { bd.AddOK(parent) })
+	bd.AddBottomBar(func(bar *Frame) { bd.AddOK(bar) })
 	return bd
 }
 
@@ -184,7 +183,6 @@ func (bd *Body) Close() {
 // dialogStyles sets default stylers for dialog bodies.
 // It is automatically called in [Body.NewDialog].
 func (bd *Body) dialogStyles() {
-	bd.Scene.BarsInherit.Top = true
 	bd.Scene.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Color = colors.Scheme.OnSurface

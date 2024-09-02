@@ -96,10 +96,11 @@ func (bd *Body) NewWindow() *Stage {
 	return ms
 }
 
-func (st *Stage) addDialogParts() *Stage {
-	if st.FullWindow {
-		return st
+func (st *Stage) addSceneParts() {
+	if st.Type != DialogStage || st.FullWindow || st.NewWindow {
+		return
 	}
+	// TODO: convert to use [Scene.Bars] instead of parts
 	sc := st.Scene
 	parts := sc.newParts()
 	parts.Styler(func(s *styles.Style) {
@@ -151,7 +152,6 @@ func (st *Stage) addDialogParts() *Stage {
 		ng.Size = np
 		sc.resize(ng)
 	})
-	return st
 }
 
 // firstWindowStages creates a temporary [stages] for the first window
@@ -176,6 +176,10 @@ func (st *Stage) configMainStage() {
 			st.FullWindow = false
 			st.Modal = false
 			st.Scrim = false
+			// Default is to add back button in this situation.
+			if !st.BackButton.Valid {
+				st.SetBackButton(true)
+			}
 		}
 		// If we are on mobile, we can never have new windows.
 		st.NewWindow = false
@@ -198,6 +202,7 @@ func (st *Stage) runWindow() *Stage {
 		st.setMains(&currentRenderWindow.mains)
 	}
 	st.configMainStage()
+	st.addSceneParts()
 
 	sz := st.renderContext.geom.Size
 	// offscreen windows always consider pref size because
@@ -305,7 +310,7 @@ func (st *Stage) runDialog() *Stage {
 
 	sc := st.Scene
 	st.configMainStage()
-	st.addDialogParts()
+	st.addSceneParts()
 	sc.SceneGeom.Pos = st.Pos
 
 	st.setMains(ms) // temporary for prefs

@@ -9,6 +9,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/base/fileinfo/mimedata"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
@@ -95,6 +96,11 @@ const (
 	// TextLabelSmall is small text used for label text (like a caption
 	// or the text inside a button) with a default font size of 11dp.
 	TextLabelSmall
+
+	// TextSupporting is medium-sized supporting text typically used for
+	// secondary dialog information below the title. It has a default font
+	// size of 14dp and color of [colors.Scheme.OnSurfaceVariant].
+	TextSupporting
 )
 
 func (tx *Text) WidgetValue() any { return &tx.Text }
@@ -134,6 +140,9 @@ func (tx *Text) Init() {
 			s.Font.Size.Dp(16)
 			s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = styles.WeightNormal
+		case TextSupporting:
+			s.Color = colors.Scheme.OnSurfaceVariant
+			fallthrough
 		case TextBodyMedium:
 			s.Text.LineHeight.Dp(20)
 			s.Font.Size.Dp(14)

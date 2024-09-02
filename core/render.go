@@ -378,8 +378,8 @@ func (wb *WidgetBase) Render() {
 func (wb *WidgetBase) RenderWidget() {
 	if wb.PushBounds() {
 		wb.This.(Widget).Render()
-		wb.renderParts()
 		wb.renderChildren()
+		wb.renderParts()
 		wb.PopBounds()
 	}
 }

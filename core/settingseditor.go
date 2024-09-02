@@ -19,14 +19,6 @@ func settingsEditorToolbarBase(p *tree.Plan) {
 			AppearanceSettings.Apply()
 			UpdateAll()
 		})
-
-		p.Parent.(*Toolbar).AddOverflowMenu(func(m *Scene) {
-			NewFuncButton(m).SetFunc(resetAllSettings).SetConfirm(true).SetText("Reset settings").SetIcon(icons.Delete)
-
-			NewFuncButton(m).SetFunc(AppearanceSettings.deleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
-			NewFuncButton(m).SetFunc(ProfileToggle).SetShortcut("Control+Alt+R").SetText("Profile performance").SetIcon(icons.Analytics)
-			NewSeparator(m)
-		})
 	})
 }
 
@@ -37,16 +29,22 @@ func SettingsWindow() { //types:add
 	}
 	d := NewBody("Settings").SetData(&AllSettings)
 	SettingsEditor(d)
-	d.NewWindow().SetCloseOnBack(true).Run()
+	d.RunWindow()
 }
 
 // SettingsEditor adds to the given body an editor of user settings.
 func SettingsEditor(b *Body) {
-	b.AddAppBar(func(p *tree.Plan) {
-		settingsEditorToolbarBase(p)
+	b.AddTopBar(func(bar *Frame) {
+		tb := NewToolbar(bar)
+		tb.Maker(settingsEditorToolbarBase)
 		for _, se := range AllSettings {
-			se.MakeToolbar(p)
+			tb.Maker(se.MakeToolbar)
 		}
+		tb.AddOverflowMenu(func(m *Scene) {
+			NewFuncButton(m).SetFunc(resetAllSettings).SetConfirm(true).SetText("Reset settings").SetIcon(icons.Delete)
+			NewFuncButton(m).SetFunc(AppearanceSettings.deleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+			NewFuncButton(m).SetFunc(ProfileToggle).SetShortcut("Control+Alt+R").SetText("Profile performance").SetIcon(icons.Analytics)
+		})
 	})
 
 	tabs := NewTabs(b)

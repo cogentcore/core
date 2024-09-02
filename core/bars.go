@@ -5,69 +5,54 @@
 package core
 
 import (
-	"strings"
-	"testing"
+	"slices"
 
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/tree"
+	"cogentcore.org/core/system"
 )
 
 // BarFuncs are functions for creating control bars,
-// attached to different sides of a Scene (e.g., TopAppBar at Top,
-// NavBar at Bottom, etc).  Functions are called in forward order
-// so first added are called first.
-type BarFuncs []func(parent Widget)
+// attached to different sides of a [Scene]. Functions
+// are called in forward order so first added are called first.
+type BarFuncs []func(bar *Frame)
 
 // Add adds the given function for configuring a control bar
-func (bf *BarFuncs) Add(fun func(parent Widget)) *BarFuncs {
+func (bf *BarFuncs) Add(fun func(bar *Frame)) *BarFuncs {
 	*bf = append(*bf, fun)
 	return bf
 }
 
-// Call calls all the functions for configuring given widget
-func (bf *BarFuncs) Call(parent Widget) {
+// call calls all the functions for configuring given widget
+func (bf *BarFuncs) call(bar *Frame) {
 	for _, fun := range *bf {
-		fun(parent)
+		fun(bar)
 	}
 }
 
-// IsEmpty returns true if there are no functions added
-func (bf *BarFuncs) IsEmpty() bool {
+// isEmpty returns true if there are no functions added
+func (bf *BarFuncs) isEmpty() bool {
 	return len(*bf) == 0
-}
-
-// Inherit adds other bar funcs in front of any existing
-func (bf *BarFuncs) Inherit(obf BarFuncs) {
-	if len(obf) == 0 {
-		return
-	}
-	nbf := make(BarFuncs, len(obf), len(obf)+len(*bf))
-	copy(nbf, obf)
-	nbf = append(nbf, *bf...)
-	*bf = nbf
 }
 
 // makeSceneBars configures the side control bars, for main scenes.
 func (sc *Scene) makeSceneBars() {
-	// at last possible moment, add app-specific app bar config
-	if sc.Stage.Type.isMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
-		if sc.Bars.Top.IsEmpty() && !testing.Testing() { // no app bar while testing
-			sc.Bars.Top.Add(makeAppBar) // put in the top by default
-		}
-	}
-	if !sc.Bars.Top.IsEmpty() {
+	sc.addDefaultBars()
+	if !sc.Bars.Top.isEmpty() {
 		head := NewFrame(sc)
 		head.SetName("top-bar")
 		head.Styler(func(s *styles.Style) {
 			s.Align.Items = styles.Center
 			s.Grow.Set(1, 0)
 		})
-		sc.Bars.Top.Call(head)
+		sc.Bars.Top.call(head)
 	}
-	if !sc.Bars.Left.IsEmpty() || !sc.Bars.Right.IsEmpty() {
+	if !sc.Bars.Left.isEmpty() || !sc.Bars.Right.isEmpty() {
 		mid := NewFrame(sc)
 		mid.SetName("body-area")
-		if !sc.Bars.Left.IsEmpty() {
+		if !sc.Bars.Left.isEmpty() {
 			left := NewFrame(mid)
 			left.SetName("left-bar")
 			left.Styler(func(s *styles.Style) {
@@ -75,12 +60,12 @@ func (sc *Scene) makeSceneBars() {
 				s.Align.Items = styles.Center
 				s.Grow.Set(0, 1)
 			})
-			sc.Bars.Left.Call(left)
+			sc.Bars.Left.call(left)
 		}
 		if sc.Body != nil {
 			mid.AddChild(sc.Body)
 		}
-		if !sc.Bars.Right.IsEmpty() {
+		if !sc.Bars.Right.isEmpty() {
 			right := NewFrame(mid)
 			right.SetName("right-bar")
 			right.Styler(func(s *styles.Style) {
@@ -88,14 +73,14 @@ func (sc *Scene) makeSceneBars() {
 				s.Align.Items = styles.Center
 				s.Grow.Set(0, 1)
 			})
-			sc.Bars.Right.Call(right)
+			sc.Bars.Right.call(right)
 		}
 	} else {
 		if sc.Body != nil {
 			sc.AddChild(sc.Body)
 		}
 	}
-	if !sc.Bars.Bottom.IsEmpty() {
+	if !sc.Bars.Bottom.isEmpty() {
 		foot := NewFrame(sc)
 		foot.SetName("bottom-bar")
 		foot.Styler(func(s *styles.Style) {
@@ -103,63 +88,29 @@ func (sc *Scene) makeSceneBars() {
 			s.Align.Items = styles.Center
 			s.Grow.Set(1, 0)
 		})
-		sc.Bars.Bottom.Call(foot)
+		sc.Bars.Bottom.call(foot)
 	}
 }
 
-// GetBar returns Bar layout widget at given side, nil if not there.
-func (sc *Scene) GetBar(side styles.SideIndexes) *Frame {
-	nm := strings.ToLower(side.String()) + "-bar"
-	bar := sc.ChildByName(nm)
-	if bar != nil {
-		return bar.(*Frame)
-	}
-	return nil
-}
-
-// GetTopAppBar returns the TopAppBar Toolbar if it exists, nil otherwise.
-func (sc *Scene) GetTopAppBar() *Toolbar {
-	tb := sc.GetBar(styles.Top)
-	if tb == nil {
-		return nil
-	}
-	return tree.ChildByType[*Toolbar](tb)
-}
-
-// inheritBarsWidget inherits Bar functions based on a source widget
-// (e.g., Context of dialog)
-func (sc *Scene) inheritBarsWidget(w Widget) {
-	if w == nil {
-		return
-	}
-	wb := w.AsWidget()
-	if wb.Scene == nil {
-		return
-	}
-	sc.inheritBars(wb.Scene)
-}
-
-// inheritBars inherits Bars functions from given other scene
-// for each side that the other scene marks as inherited.
-func (sc *Scene) inheritBars(osc *Scene) {
-	if osc == nil {
-		return
-	}
-	if osc.BarsInherit.Top || sc.BarsInherit.Top {
-		sc.Bars.Top.Inherit(osc.Bars.Top)
-		sc.BarsInherit.Top = true
-	}
-	if osc.BarsInherit.Bottom || sc.BarsInherit.Bottom {
-		sc.Bars.Bottom.Inherit(osc.Bars.Bottom)
-		sc.BarsInherit.Bottom = true
-	}
-	if osc.BarsInherit.Left || sc.BarsInherit.Left {
-		sc.Bars.Left.Inherit(osc.Bars.Left)
-		sc.BarsInherit.Left = true
-	}
-	if osc.BarsInherit.Right || sc.BarsInherit.Right {
-		sc.Bars.Right.Inherit(osc.Bars.Right)
-		sc.BarsInherit.Right = true
+func (sc *Scene) addDefaultBars() {
+	st := sc.Stage
+	addBack := st.BackButton.Or(st.FullWindow && !st.NewWindow && !(st.Mains != nil && st.Mains.stack.Len() == 0) && TheApp.Platform() != system.Offscreen)
+	if addBack || st.DisplayTitle {
+		sc.Bars.Top = slices.Insert(sc.Bars.Top, 0, func(bar *Frame) {
+			if addBack {
+				back := NewButton(bar).SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
+				back.SetType(ButtonAction).SetTooltip("Back")
+				back.OnClick(func(e events.Event) {
+					sc.Close()
+				})
+			}
+			if st.DisplayTitle {
+				title := NewText(bar).SetType(TextHeadlineSmall)
+				title.Updater(func() {
+					title.SetText(sc.Body.Title)
+				})
+			}
+		})
 	}
 }
 
@@ -168,34 +119,24 @@ func (sc *Scene) inheritBars(osc *Scene) {
 
 // AddTopBar adds the given function for configuring a control bar
 // at the top of the window
-func (bd *Body) AddTopBar(fun func(parent Widget)) {
+func (bd *Body) AddTopBar(fun func(bar *Frame)) {
 	bd.Scene.Bars.Top.Add(fun)
 }
 
 // AddLeftBar adds the given function for configuring a control bar
 // on the left of the window
-func (bd *Body) AddLeftBar(fun func(parent Widget)) {
+func (bd *Body) AddLeftBar(fun func(bar *Frame)) {
 	bd.Scene.Bars.Left.Add(fun)
 }
 
 // AddRightBar adds the given function for configuring a control bar
 // on the right of the window
-func (bd *Body) AddRightBar(fun func(parent Widget)) {
+func (bd *Body) AddRightBar(fun func(bar *Frame)) {
 	bd.Scene.Bars.Right.Add(fun)
 }
 
 // AddBottomBar adds the given function for configuring a control bar
 // at the bottom of the window
-func (bd *Body) AddBottomBar(fun func(parent Widget)) {
+func (bd *Body) AddBottomBar(fun func(bar *Frame)) {
 	bd.Scene.Bars.Bottom.Add(fun)
-}
-
-// AddAppBar adds plan maker function(s) for the top app bar, which can be used to add items to it.
-func (bd *Body) AddAppBar(m ...func(p *tree.Plan)) {
-	bd.Scene.AppBars = append(bd.Scene.AppBars, m...)
-}
-
-// GetTopAppBar returns the TopAppBar Toolbar if it exists, nil otherwise.
-func (bd *Body) GetTopAppBar() *Toolbar {
-	return bd.Scene.GetTopAppBar()
 }

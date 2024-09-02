@@ -224,12 +224,13 @@ func (tr *Tree) insertAt(rel int, actNm string) {
 	} else {
 		typ = types.TypeByValue(tr.SyncNode)
 	}
-	d := NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
+	d := NewBody(actNm)
+	NewText(d).SetType(TextSupporting).SetText("Number and type of items to insert:")
 	nd := &newItemsData{Number: 1, Type: typ}
 	NewForm(d).SetStruct(nd)
-	d.AddBottomBar(func(parent Widget) {
-		d.AddCancel(parent)
-		d.AddOK(parent).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(bar *Frame) {
+		d.AddCancel(bar)
+		d.AddOK(bar).OnClick(func(e events.Event) {
 			parent := AsTree(tr.Parent)
 			if tr.SyncNode != nil {
 				parent.addSyncNodes(rel, myidx, nd.Type, nd.Number)
@@ -252,12 +253,13 @@ func (tr *Tree) AddChildNode() { //types:add
 	} else {
 		typ = types.TypeByValue(tr.SyncNode)
 	}
-	d := NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
+	d := NewBody(ttl)
+	NewText(d).SetType(TextSupporting).SetText("Number and type of items to insert:")
 	nd := &newItemsData{Number: 1, Type: typ}
 	NewForm(d).SetStruct(nd)
-	d.AddBottomBar(func(parent Widget) {
-		d.AddCancel(parent)
-		d.AddOK(parent).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(bar *Frame) {
+		d.AddCancel(bar)
+		d.AddOK(bar).OnClick(func(e events.Event) {
 			if tr.SyncNode != nil {
 				tr.addSyncNodes(0, 0, nd.Type, nd.Number)
 			} else {
@@ -351,12 +353,12 @@ func (tr *Tree) duplicateSync() {
 func (tr *Tree) editNode() { //types:add
 	if tr.SyncNode != nil {
 		tynm := tr.SyncNode.AsTree().NodeType().Name
-		d := NewBody().AddTitle(tynm)
+		d := NewBody(tynm)
 		NewForm(d).SetStruct(tr.SyncNode).SetReadOnly(tr.IsReadOnly())
 		d.RunWindowDialog(tr)
 	} else {
 		tynm := tr.NodeType().Name
-		d := NewBody().AddTitle(tynm)
+		d := NewBody(tynm)
 		NewForm(d).SetStruct(tr.This).SetReadOnly(tr.IsReadOnly())
 		d.RunWindowDialog(tr)
 	}

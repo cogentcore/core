@@ -29,6 +29,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pages/ppath"
 	"cogentcore.org/core/paint"
@@ -416,32 +417,33 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 }
 
 func (pg *Page) MakeToolbar(p *tree.Plan) {
-	tree.AddInit(p, "back", func(w *core.Button) {
-		w.OnClick(func(e events.Event) {
-			if pg.historyIndex > 0 {
+	if pg.historyIndex > 0 {
+		tree.Add(p, func(w *core.Button) {
+			w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
+			w.SetTooltip("Back")
+			w.OnClick(func(e events.Event) {
 				pg.historyIndex--
 				// we need a slash so that it doesn't think it's a relative URL
 				pg.OpenURL("/"+pg.history[pg.historyIndex], false)
 				e.SetHandled()
-			}
+			})
 		})
-	})
-	tree.AddInit(p, "app-chooser", func(w *core.Chooser) {
-		w.AddItemsFunc(func() {
-			urls := []string{}
-			for u := range pg.urlToPagePath {
-				urls = append(urls, u)
-			}
-			slices.Sort(urls)
-			for _, u := range urls {
-				w.Items = append(w.Items, core.ChooserItem{
-					Value: u,
-					Text:  ppath.Label(u, core.TheApp.Name()),
-					Func: func() {
-						pg.OpenURL("/"+u, true)
-					},
-				})
-			}
+	}
+}
+
+func (pg *Page) MenuSearch(items *[]core.ChooserItem) {
+	urls := []string{}
+	for u := range pg.urlToPagePath {
+		urls = append(urls, u)
+	}
+	slices.Sort(urls)
+	for _, u := range urls {
+		*items = append(*items, core.ChooserItem{
+			Value: u,
+			Text:  ppath.Label(u, core.TheApp.Name()),
+			Func: func() {
+				pg.OpenURL("/"+u, true)
+			},
 		})
-	})
+	}
 }

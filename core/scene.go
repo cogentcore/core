@@ -42,18 +42,10 @@ type Scene struct { //core:no-new
 	// widgets in conjunction with [App.SceneInit].
 	WidgetInit func(w Widget) `json:"-" xml:"-" edit:"-"`
 
-	// Bars contains functions for constructing the control bars for this Scene,
-	// attached to different sides of a Scene (e.g., TopAppBar at Top,
-	// NavBar at Bottom, etc).  Functions are called in forward order
-	// so first added are called first.
-	Bars styles.Sides[BarFuncs] `json:"-" xml:"-"`
-
-	// BarsInherit determines which of the Bars side functions are inherited
-	// from the context widget, for FullWindow Dialogs
-	BarsInherit styles.Sides[bool]
-
-	// AppBars contains functions for making the plan for the top app bar.
-	AppBars []func(p *tree.Plan) `json:"-" xml:"-"`
+	// Bars are functions for creating control bars,
+	// attached to different sides of a [Scene]. Functions
+	// are called in forward order so first added are called first.
+	Bars styles.Sides[BarFuncs] `json:"-" xml:"-" set:"-"`
 
 	// Data is the optional data value being represented by this scene.
 	// Used e.g., for recycling views of a given item instead of creating new one.
@@ -177,6 +169,7 @@ func NewScene(name ...string) *Scene {
 func (sc *Scene) Init() {
 	sc.Scene = sc
 	sc.Frame.Init()
+	sc.AddContextMenu(sc.standardContextMenu)
 	sc.Styler(func(s *styles.Style) {
 		s.Cursor = cursors.Arrow
 		s.Background = colors.Scheme.Background

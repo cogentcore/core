@@ -395,8 +395,7 @@ func (ch *Chooser) Init() {
 // on dynamic data). The functions are called in ascending order such
 // that the items added in the first function will appear before those
 // added in the last function. If at least one ItemsFunc is specified,
-// the items, labels, icons, and tooltips of the chooser will be cleared
-// before calling the functions.
+// the items of the chooser will be cleared before calling the functions.
 func (ch *Chooser) AddItemsFunc(f func()) *Chooser {
 	ch.ItemsFuncs = append(ch.ItemsFuncs, f)
 	return ch
@@ -598,11 +597,12 @@ func (ch *Chooser) makeItemsMenu(m *Scene) {
 		NewButton(m).SetText("New item").SetIcon(icons.Add).
 			SetTooltip("Add a new item to the chooser").
 			OnClick(func(e events.Event) {
-				d := NewBody().AddTitle("New item").AddText("Add a new item to the chooser")
+				d := NewBody("New item")
+				NewText(d).SetType(TextSupporting).SetText("Add a new item to the chooser")
 				tf := NewTextField(d)
-				d.AddBottomBar(func(parent Widget) {
-					d.AddCancel(parent)
-					d.AddOK(parent).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+				d.AddBottomBar(func(bar *Frame) {
+					d.AddCancel(bar)
+					d.AddOK(bar).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
 						ch.Items = append(ch.Items, ChooserItem{Value: tf.Text()})
 						ch.selectItemEvent(len(ch.Items) - 1)
 					})

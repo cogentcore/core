@@ -38,11 +38,15 @@ func (lb *ListButton) Init() {
 		if up.Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(lb.Slice)).Kind() == reflect.Struct {
 			tb := NewTable(d).SetSlice(lb.Slice)
 			tb.SetValueTitle(lb.ValueTitle).SetReadOnly(lb.IsReadOnly())
-			d.AddAppBar(tb.MakeToolbar)
+			d.AddTopBar(func(bar *Frame) {
+				NewToolbar(bar).Maker(tb.MakeToolbar)
+			})
 		} else {
 			sv := NewList(d).SetSlice(lb.Slice)
 			sv.SetValueTitle(lb.ValueTitle).SetReadOnly(lb.IsReadOnly())
-			d.AddAppBar(sv.MakeToolbar)
+			d.AddTopBar(func(bar *Frame) {
+				NewToolbar(bar).Maker(sv.MakeToolbar)
+			})
 		}
 	})
 }
@@ -65,7 +69,9 @@ func (fb *FormButton) Init() {
 		fm := NewForm(d).SetStruct(fb.Struct)
 		fm.SetValueTitle(fb.ValueTitle).SetReadOnly(fb.IsReadOnly())
 		if tb, ok := fb.Struct.(ToolbarMaker); ok {
-			d.AddAppBar(tb.MakeToolbar)
+			d.AddTopBar(func(bar *Frame) {
+				NewToolbar(bar).Maker(tb.MakeToolbar)
+			})
 		}
 	})
 }
@@ -87,7 +93,9 @@ func (kb *KeyedListButton) Init() {
 	InitValueButton(kb, true, func(d *Body) {
 		kl := NewKeyedList(d).SetMap(kb.Map)
 		kl.SetValueTitle(kb.ValueTitle).SetReadOnly(kb.IsReadOnly())
-		d.AddAppBar(kl.MakeToolbar)
+		d.AddTopBar(func(bar *Frame) {
+			NewToolbar(bar).Maker(kl.MakeToolbar)
+		})
 	})
 }
 

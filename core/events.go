@@ -1103,17 +1103,6 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		if em.focusPrev() {
 			e.SetHandled()
 		}
-	case keymap.Menu:
-		if tb := sc.GetTopAppBar(); tb != nil {
-			ch := tree.ChildByType[*Chooser](tb)
-			if ch != nil {
-				ch.SetFocusEvent()
-				ch.textField.offerComplete()
-			} else {
-				tb.SetFocusEvent()
-			}
-			e.SetHandled()
-		}
 	case keymap.WinSnapshot:
 		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
 		fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".png")
@@ -1145,10 +1134,14 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 	}
 }
 
-// getShortcuts gathers all [Button]s in the Scene with a shortcut specified.
-// It recursively navigates [Button.Menu]s.
+// getShortcuts gathers all [Button]s in the [Scene] with a shortcut specified.
+// It recursively navigates [Button.Menu]s. It also gathers shortcuts from the
+// [Scene.ContextMenus].
 func (em *Events) getShortcuts() {
 	em.shortcuts = nil
+	tmps := NewScene()
+	em.scene.applyContextMenus(tmps)
+	em.getShortcutsIn(tmps)
 	em.getShortcutsIn(em.scene)
 }
 

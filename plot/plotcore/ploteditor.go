@@ -556,22 +556,24 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 						pl.Update()
 						pl.AsyncUnlock()
 					}
-					d := core.NewBody().AddTitle("Column options")
+					d := core.NewBody("Column options")
 					core.NewForm(d).SetStruct(cp).
 						OnChange(func(e events.Event) {
 							update()
 						})
-					d.AddAppBar(func(p *tree.Plan) {
-						tree.Add(p, func(w *core.Button) {
-							w.SetText("Set x-axis").OnClick(func(e events.Event) {
-								pl.Options.XAxis = cp.Column
-								update()
+					d.AddTopBar(func(bar *core.Frame) {
+						core.NewToolbar(bar).Maker(func(p *tree.Plan) {
+							tree.Add(p, func(w *core.Button) {
+								w.SetText("Set x-axis").OnClick(func(e events.Event) {
+									pl.Options.XAxis = cp.Column
+									update()
+								})
 							})
-						})
-						tree.Add(p, func(w *core.Button) {
-							w.SetText("Set legend").OnClick(func(e events.Event) {
-								pl.Options.Legend = cp.Column
-								update()
+							tree.Add(p, func(w *core.Button) {
+								w.SetText("Set legend").OnClick(func(e events.Event) {
+									pl.Options.Legend = cp.Column
+									update()
+								})
 							})
 						})
 					})
@@ -615,7 +617,7 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText("Options").SetIcon(icons.Settings).
 			SetTooltip("Options for how the plot is rendered").
 			OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle("Plot options")
+				d := core.NewBody("Plot options")
 				core.NewForm(d).SetStruct(&pl.Options).
 					OnChange(func(e events.Event) {
 						pl.GoUpdatePlot()
@@ -627,9 +629,11 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText("Table").SetIcon(icons.Edit).
 			SetTooltip("open a Table window of the data").
 			OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle(pl.Name + " Data")
+				d := core.NewBody(pl.Name + " Data")
 				tv := tensorcore.NewTable(d).SetTable(pl.table.Table)
-				d.AddAppBar(tv.MakeToolbar)
+				d.AddTopBar(func(bar *core.Frame) {
+					core.NewToolbar(bar).Maker(tv.MakeToolbar)
+				})
 				d.RunWindowDialog(pl)
 			})
 	})

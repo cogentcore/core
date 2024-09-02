@@ -27,7 +27,9 @@ func main() {
 	pl.Options.Points = true
 	pl.SetTable(epc)
 	pl.ColumnOptions("UnitErr").On = true
-	b.AddAppBar(pl.MakeToolbar)
+	b.AddTopBar(func(bar *core.Frame) {
+		core.NewToolbar(bar).Maker(pl.MakeToolbar)
+	})
 
 	b.RunMainWindow()
 }

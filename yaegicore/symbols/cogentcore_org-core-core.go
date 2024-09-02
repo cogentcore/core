@@ -190,6 +190,7 @@ func init() {
 		"TextLabelLarge":                reflect.ValueOf(core.TextLabelLarge),
 		"TextLabelMedium":               reflect.ValueOf(core.TextLabelMedium),
 		"TextLabelSmall":                reflect.ValueOf(core.TextLabelSmall),
+		"TextSupporting":                reflect.ValueOf(core.TextSupporting),
 		"TextTitleLarge":                reflect.ValueOf(core.TextTitleLarge),
 		"TextTitleMedium":               reflect.ValueOf(core.TextTitleMedium),
 		"TextTitleSmall":                reflect.ValueOf(core.TextTitleSmall),

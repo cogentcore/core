@@ -108,12 +108,15 @@ func main() {
 
 	nt, _ := tv.NewTab("Planets Data")
 	tbv := tensorcore.NewTable(nt).SetTable(Planets)
-	b.AddAppBar(tbv.MakeToolbar)
-	b.AddAppBar(func(p *tree.Plan) {
-		tree.Add(p, func(w *core.Button) {
-			w.SetText("README").SetIcon(icons.FileMarkdown).
-				SetTooltip("open README help file").OnClick(func(e events.Event) {
-				core.TheApp.OpenURL("https://github.com/cogentcore/core/blob/main/tensor/examples/dataproc/README.md")
+	b.AddTopBar(func(bar *core.Frame) {
+		tb := core.NewToolbar(bar)
+		tb.Maker(tbv.MakeToolbar)
+		tb.Maker(func(p *tree.Plan) {
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("README").SetIcon(icons.FileMarkdown).
+					SetTooltip("open README help file").OnClick(func(e events.Event) {
+					core.TheApp.OpenURL("https://github.com/cogentcore/core/blob/main/tensor/examples/dataproc/README.md")
+				})
 			})
 		})
 	})

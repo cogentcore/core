@@ -6,7 +6,6 @@ package core
 
 import (
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -27,8 +26,10 @@ type Body struct { //core:no-new
 // It will create its own parent [Scene] at this point, and has wrapper
 // functions to transparently manage everything that the [Scene]
 // typically manages during configuration, so you can usually avoid
-// having to access the [Scene] directly. If a name is given and
-// the name of [TheApp] is unset, it sets it to the given name.
+// having to access the [Scene] directly. If a name is given, it will
+// be used for the name of the window, and a title widget will be created
+// with that text if [Stage.DisplayTitle] is true. Also, if the name of
+// [TheApp] is unset, it sets it to the given name.
 func NewBody(name ...string) *Body {
 	bd := tree.New[Body]()
 	nm := "body"
@@ -75,27 +76,10 @@ func (bd *Body) SetTitle(title string) *Body {
 			win.setTitle(title)
 		}
 	}
-	if lb, ok := bd.ChildByName("body-title", 0).(*Text); ok {
-		lb.SetText(title)
+	// title widget is contained within the top bar
+	if tb, ok := bd.Scene.ChildByName("top-bar").(Widget); ok {
+		tb.AsWidget().Update()
 	}
-	return bd
-}
-
-// AddTitle adds [Text] with the given title, and sets the [Body.Title]
-// text which will be used by the [Scene] etc.
-func (bd *Body) AddTitle(title string) *Body {
-	bd.SetTitle(title)
-	NewText(bd).SetText(title).SetType(TextHeadlineSmall).SetName("body-title")
-	return bd
-}
-
-// AddText adds the given supporting [Text], typically added
-// after a title.
-func (bd *Body) AddText(text string) *Body {
-	NewText(bd).SetText(text).
-		SetType(TextBodyMedium).Styler(func(s *styles.Style) {
-		s.Color = colors.Scheme.OnSurfaceVariant
-	})
 	return bd
 }
 

@@ -57,24 +57,26 @@ func handleRecover(r any) {
 		return
 	}
 
-	b := NewBody("app-stopped-unexpectedly").AddTitle(title).AddText(text)
-	b.AddBottomBar(func(parent Widget) {
-		NewButton(parent).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
-			d := NewBody("crash-details").AddTitle("Crash details")
+	b := NewBody(title)
+	NewText(b).SetText(title).SetType(TextHeadlineSmall)
+	NewText(b).SetType(TextSupporting).SetText(text)
+	b.AddBottomBar(func(bar *Frame) {
+		NewButton(bar).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
+			d := NewBody("Crash details")
 			NewText(d).SetText(body).Styler(func(s *styles.Style) {
 				s.SetMono(true)
 				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			})
-			d.AddBottomBar(func(parent Widget) {
-				NewButton(parent).SetText("Copy").SetIcon(icons.Copy).SetType(ButtonOutlined).
+			d.AddBottomBar(func(bar *Frame) {
+				NewButton(bar).SetText("Copy").SetIcon(icons.Copy).SetType(ButtonOutlined).
 					OnClick(func(e events.Event) {
 						d.Clipboard().Write(mimedata.NewText(body))
 					})
-				d.AddOK(parent)
+				d.AddOK(bar)
 			})
 			d.RunFullDialog(b)
 		})
-		NewButton(parent).SetText("Quit").OnClick(func(e events.Event) {
+		NewButton(bar).SetText("Quit").OnClick(func(e events.Event) {
 			quit <- struct{}{}
 		})
 	})

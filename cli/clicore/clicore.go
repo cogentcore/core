@@ -58,22 +58,24 @@ func Run[T any, C cli.CmdOrFunc[T]](opts *cli.Options, cfg T, cmds ...C) error {
 func gui[T any](opts *cli.Options, cfg T, cmds ...*cli.Cmd[T]) {
 	b := core.NewBody(opts.AppName)
 
-	b.AddAppBar(func(p *tree.Plan) {
-		for _, cmd := range cmds {
-			if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
-				continue
+	b.AddTopBar(func(bar *core.Frame) {
+		core.NewToolbar(bar).Maker(func(p *tree.Plan) {
+			for _, cmd := range cmds {
+				if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
+					continue
+				}
+				tree.AddAt(p, cmd.Name, func(w *core.Button) {
+					w.SetText(strcase.ToSentence(cmd.Name)).SetTooltip(cmd.Doc).
+						OnClick(func(e events.Event) {
+							err := cmd.Func(cfg)
+							if err != nil {
+								// TODO: snackbar
+								logx.PrintlnError(err)
+							}
+						})
+				})
 			}
-			tree.AddAt(p, cmd.Name, func(w *core.Button) {
-				w.SetText(strcase.ToSentence(cmd.Name)).SetTooltip(cmd.Doc).
-					OnClick(func(e events.Event) {
-						err := cmd.Func(cfg)
-						if err != nil {
-							// TODO: snackbar
-							logx.PrintlnError(err)
-						}
-					})
-			})
-		}
+		})
 	})
 
 	sv := core.NewForm(b)

@@ -71,7 +71,8 @@ func (il *InlineList) Init() {
 			w.SetIcon(icons.Edit).SetType(ButtonTonal)
 			w.Tooltip = "Edit list in a dialog"
 			w.OnClick(func(e events.Event) {
-				d := NewBody().AddTitle(il.ValueTitle).AddText(il.Tooltip)
+				d := NewBody(il.ValueTitle)
+				NewText(d).SetType(TextSupporting).SetText(il.Tooltip)
 				NewList(d).SetSlice(il.Slice).SetValueTitle(il.ValueTitle)
 				d.OnClose(func(e events.Event) {
 					il.UpdateChange()
