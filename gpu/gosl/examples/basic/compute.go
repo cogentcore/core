@@ -4,12 +4,6 @@
 
 package main
 
-import "cogentcore.org/core/math32"
-
-//gosl:wgsl basic
-// #include "fastexp.wgsl"
-//gosl:end basic
-
 //gosl:start basic
 
 // DataStruct has the test data
@@ -25,7 +19,7 @@ type DataStruct struct {
 	Exp float32
 
 	// must pad to multiple of 4 floats for arrays
-	Pad2 float32
+	pad float32
 }
 
 // ParamStruct has the test params
@@ -37,13 +31,15 @@ type ParamStruct struct {
 	// 1/Tau
 	Dt float32
 
-	pad, pad1 float32
+	pad  float32
+	pad1 float32
 }
 
 // IntegFromRaw computes integrated value from current raw value
 func (ps *ParamStruct) IntegFromRaw(ds *DataStruct) {
 	ds.Integ += ps.Dt * (ds.Raw - ds.Integ)
-	ds.Exp = math32.FastExp(-ds.Integ)
+	// ds.Exp = math32.FastExp(-ds.Integ)
+	ds.Exp = ds.Integ * ds.Integ
 }
 
 //gosl:end basic
@@ -61,14 +57,19 @@ func (ps *ParamStruct) Update() {
 
 //gosl:wgsl basic
 /*
-// // note: double-commented lines required here -- binding is var, set
-[[vk::binding(0, 0)]] RWStructuredBuffer<ParamStruct> Params;
-[[vk::binding(0, 1)]] RWStructuredBuffer<DataStruct> Data;
+@group(0) @binding(0)
+var<storage, read_write> Params: array<ParamStruct>;
 
-[numthreads(64, 1, 1)]
+@group(0) @binding(1)
+var<storage, read_write> Data: array<DataStruct>;
 
-void main(uint3 idx : SV_DispatchThreadID) {
-    Params[0].IntegFromRaw(Data[idx.x]);
+@compute
+@workgroup_size(64)
+fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
+	var pars = Params[0];
+	var data = Data[idx.x];
+	ParamStruct_IntegFromRaw(&pars, &data);
+	Data[idx.x] = data;
 }
 */
 //gosl:end basic

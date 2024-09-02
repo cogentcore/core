@@ -15,7 +15,7 @@ import (
 
 // MyTrickyFun this is the CPU version of the tricky function
 func MyTrickyFun(x float32) float32 {
-	return 10 // ok actually not tricky here, but whatever
+	return 10.0 // ok actually not tricky here, but whatever
 }
 
 //gosl:end basic
@@ -25,8 +25,8 @@ func MyTrickyFun(x float32) float32 {
 // // note: here is the wgsl version, only included in wgsl
 
 // // MyTrickyFun this is the GPU version of the tricky function
-// fn MyTrickyFun(x: f32) {
-// 	return 16; // ok actually not tricky here, but whatever
+// fn MyTrickyFun(x: f32) -> f32 {
+// 	return 16.0; // ok actually not tricky here, but whatever
 // }
 
 //gosl:end basic
@@ -39,9 +39,9 @@ func MyTrickyFun(x float32) float32 {
 // than math32.Exp actually.
 func FastExp(x float32) float32 {
 	if x <= -88.76731 { // this doesn't add anything and -exp is main use-case anyway
-		return 0
+		return 0.0
 	}
-	i := int32(12102203*x) + 127*(1<<23)
+	i := int32(12102203*x) + int32(127)*(int32(1)<<23)
 	m := i >> 7 & 0xFFFF // copy mantissa
 	i += (((((((((((3537 * m) >> 16) + 13668) * m) >> 18) + 15817) * m) >> 14) - 80470) * m) >> 11)
 	return math.Float32frombits(uint32(i))
@@ -112,11 +112,11 @@ type ParamStruct struct {
 	pad float32 // comment this out to trigger alignment warning
 }
 
-func (ps *ParamStruct) IntegFromRaw(ds *DataStruct, modArg *float32) float32 {
+func (ps *ParamStruct) IntegFromRaw(ds *DataStruct) float32 {
 	// note: the following are just to test basic control structures
-	newVal := ps.Dt*(ds.Raw-ds.Integ) + *modArg
+	newVal := ps.Dt * (ds.Raw - ds.Integ)
 	if newVal < -10 || ps.Option.IsTrue() {
-		newVal = -10
+		newVal = -10.0
 	}
 	ds.Integ += newVal
 	ds.Exp = math32.Exp(-ds.Integ)
@@ -164,13 +164,16 @@ func (ps *ParamStruct) Update() {
 @group(0) @binding(0)
 var<storage, read_write> Params: array<ParamStruct>;
 
-@group(0) @binding(0)
+@group(0) @binding(1)
 var<storage, read_write> Data: array<DataStruct>;
 
 @compute
 @workgroup_size(64)
 fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
-    IntegFromRaw(Params[0], Data[idx.x], Data[idx.x].Pad2);
+	var pars = Params[0];
+	var data = Data[idx.x];
+	ParamStruct_IntegFromRaw(&pars, &data);
+	Data[idx.x] = data;
 }
 */
 //gosl:end basic

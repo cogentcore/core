@@ -1,16 +1,26 @@
 // WGSL compute example
-requires pointer_composite_access;
+
+struct Data {
+	A: f32,
+	B: f32,
+	C: f32,
+	D: f32,
+}
 
 @group(0) @binding(0)
-var<storage, read_write> In: array<f32>;
+var<storage, read_write> In: array<Data>;
 
-// note: read_write and both @group and @binding are required
-@group(0) @binding(1)
-var<storage, read_write> Out: array<f32>;
+fn compute(d: ptr<function,Data>) {
+	(*d).C = (*d).A + (*d).B;
+	(*d).D = (*d).C * (*d).C;
+}
 
 @compute
 @workgroup_size(64)
 fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
-	Out[idx.x] = In[idx.x] * In[idx.x];
+	// compute(&In[idx.x]);
+	var d = In[idx.x];
+	compute(&d);
+	In[idx.x] = d;
 }
 

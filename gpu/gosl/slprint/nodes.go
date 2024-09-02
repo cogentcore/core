@@ -1222,13 +1222,17 @@ func (p *printer) possibleSelectorExpr(expr ast.Expr, prec1, depth int) (wasInde
 // multiple lines, and thus was indented.
 func (p *printer) selectorExpr(x *ast.SelectorExpr, depth int, isMethod bool) (wasIndented bool, methRecv ast.Expr) {
 	// gosl: detect pointer types, turn method calls into function calls
-	if isMethod && p.curMethRecv != nil {
-		p.printMethRecv()
-		p.print(x.Sel)
-		return false, x.X
-	}
-	if id, ok := x.X.(*ast.Ident); ok && p.isPtrArg(id) {
-		p.print(token.LPAREN, token.MUL, id, token.RPAREN)
+	if id, ok := x.X.(*ast.Ident); ok {
+		if isMethod && p.curMethRecv != nil && id.Name == p.curMethRecv.Names[0].Name {
+			p.printMethRecv()
+			p.print(x.Sel)
+			return false, x.X
+		}
+		if p.isPtrArg(id) {
+			p.print(token.LPAREN, token.MUL, id, token.RPAREN)
+		} else {
+			p.expr1(x.X, token.HighestPrec, depth)
+		}
 	} else {
 		p.expr1(x.X, token.HighestPrec, depth)
 	}
@@ -1733,9 +1737,17 @@ func (p *printer) valueSpec(s *ast.ValueSpec, keepType bool, tok token.Token, fi
 	extraTabs := 3
 	p.identList(s.Names, false) // always present
 	if isIota {
+		if s.Type != nil {
+			p.print(token.COLON, blank)
+			p.expr(s.Type)
+		} else if firstSpec.Type != nil {
+			p.print(token.COLON, blank)
+			p.expr(firstSpec.Type)
+		}
 		p.print(vtab, token.ASSIGN, blank)
 		p.print(fmt.Sprintf("%d", idx))
 	} else if s.Type != nil || keepType {
+		p.print(token.COLON, blank)
 		p.expr(s.Type)
 		extraTabs--
 	} else if tok == token.CONST && firstSpec.Type != nil {

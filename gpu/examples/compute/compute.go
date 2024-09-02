@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math/rand"
 	"runtime"
+	"unsafe"
 
 	"cogentcore.org/core/gpu"
 )
@@ -19,6 +20,13 @@ var shaders embed.FS
 func init() {
 	// must lock main thread for gpu!
 	runtime.LockOSThread()
+}
+
+type Data struct {
+	A float32
+	B float32
+	C float32
+	D float32
 }
 
 func main() {
@@ -37,39 +45,37 @@ func main() {
 	n := 20 // note: not necc to spec up-front, but easier if so
 	threads := 64
 
-	inv := sgp.Add("In", gpu.Float32, n, gpu.ComputeShader)
-	outv := sgp.Add("Out", gpu.Float32, n, gpu.ComputeShader)
-	_ = outv
+	dv := sgp.AddStruct("Data", int(unsafe.Sizeof(Data{})), n, gpu.ComputeShader)
 
 	sgp.SetNValues(1)
 	sy.Config()
 
-	ivl := inv.Values.Values[0]
-	ovl := outv.Values.Values[0]
+	dvl := dv.Values.Values[0]
 
-	ivals := make([]float32, n)
-	for i := range ivals {
-		ivals[i] = rand.Float32()
+	sd := make([]Data, n)
+	for i := range sd {
+		sd[i].A = rand.Float32()
+		sd[i].B = rand.Float32()
 	}
-	gpu.SetValueFrom(ivl, ivals)
-	ovl.CreateBuffer()
+	gpu.SetValueFrom(dvl, sd)
 
 	sgp.CreateReadBuffers()
 
 	ce, _ := sy.BeginComputePass()
 	pl.Dispatch1D(ce, n, threads)
 	ce.End()
-	ovl.GPUToRead(sy.CommandEncoder)
+	dvl.GPUToRead(sy.CommandEncoder)
 	sy.EndComputePass(ce)
 
-	ovl.ReadSync()
-	ovals := make([]float32, n)
-	gpu.ReadToBytes(ovl, ovals)
+	dvl.ReadSync()
+	gpu.ReadToBytes(dvl, sd)
 
 	for i := 0; i < n; i++ {
-		trg := ivals[i] * ivals[i]
-		diff := ovals[i] - trg
-		fmt.Printf("In:  %d\t in: %g\t out: %g\t trg: %g diff: %g\n", i, ivals[i], ovals[i], trg, diff)
+		tc := sd[i].A + sd[i].B
+		td := tc * tc
+		dc := sd[i].C - tc
+		dd := sd[i].D - td
+		fmt.Printf("%d\t A: %g\t B: %g\t C: %g\t trg: %g\t D: %g \t trg: %g \t difC: %g \t difD: %g\n", i, sd[i].A, sd[i].B, sd[i].C, tc, sd[i].D, td, dc, dd)
 	}
 	fmt.Printf("\n")
 

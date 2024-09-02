@@ -7,19 +7,20 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"math/rand"
 	"runtime"
 	"unsafe"
 
 	"cogentcore.org/core/base/timer"
-	"cogentcore.org/core/math32"
-	"cogentcore.org/core/vgpu"
+	"cogentcore.org/core/gpu"
 )
 
-// note: standard one to use is plain "gosl" which should be go install'd
+//go:generate ../../gosl compute.go
 
-//go:generate ../../gosl cogentcore.org/core/math32/fastexp.go compute.go
+//go:embed shaders/basic.wgsl
+var shaders embed.FS
 
 func init() {
 	// must lock main thread for gpu!
@@ -27,104 +28,86 @@ func init() {
 }
 
 func main() {
-	if vgpu.InitNoDisplay() != nil {
-		return
+	gpu.Debug = true
+	gp := gpu.NewComputeGPU()
+	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
+
+	// gp.PropertiesString(true) // print
+
+	sy := gpu.NewComputeSystem(gp, "compute")
+	pl := gpu.NewComputePipelineShaderFS(shaders, "shaders/basic.wgsl", sy)
+
+	vars := sy.Vars()
+	sgp := vars.AddGroup(gpu.Storage)
+
+	n := 2000000 // note: not necc to spec up-front, but easier if so
+	threads := 64
+
+	pv := sgp.AddStruct("Params", int(unsafe.Sizeof(ParamStruct{})), 1, gpu.ComputeShader)
+	dv := sgp.AddStruct("Data", int(unsafe.Sizeof(DataStruct{})), n, gpu.ComputeShader)
+
+	sgp.SetNValues(1)
+	sy.Config()
+
+	pvl := pv.Values.Values[0]
+	dvl := dv.Values.Values[0]
+
+	pars := make([]ParamStruct, 1)
+	pars[0].Defaults()
+
+	cd := make([]DataStruct, n)
+	for i := range cd {
+		cd[i].Raw = rand.Float32()
 	}
 
-	gp := vgpu.NewComputeGPU()
-	// vgpu.Debug = true
-	gp.Config("basic")
-
-	// gp.PropsString(true) // print
-
-	n := 100000000 // get 80x with 100m, 50x with 10m
-	threads := 64
-	nInt := int(math32.IntMultiple(float32(n), float32(threads)))
-	n = nInt               // enforce optimal n's -- otherwise requires range checking
-	nGps := nInt / threads // dispatch n
-
-	pars := &ParamStruct{}
-	pars.Defaults()
-
-	data := make([]DataStruct, n)
-	for i := range data {
-		d := &data[i]
-		d.Raw = rand.Float32()
-		d.Integ = 0
+	sd := make([]DataStruct, n)
+	for i := range sd {
+		sd[i].Raw = cd[i].Raw
 	}
 
 	cpuTmr := timer.Time{}
 	cpuTmr.Start()
-	for i := range data {
-		d := &data[i]
-		pars.IntegFromRaw(d)
+	for i := range cd {
+		pars[0].IntegFromRaw(&cd[i])
 	}
 	cpuTmr.Stop()
-
-	sy := gp.NewComputeSystem("basic")
-	pl := sy.NewPipeline("basic")
-	pl.AddShaderFile("basic", vgpu.ComputeShader, "shaders/basic.spv")
-
-	vars := sy.Vars()
-	setp := vars.AddSet()
-	setd := vars.AddSet()
-
-	parsv := setp.AddStruct("Params", int(unsafe.Sizeof(ParamStruct{})), 1, vgpu.Storage, vgpu.ComputeShader)
-	datav := setd.AddStruct("Data", int(unsafe.Sizeof(DataStruct{})), n, vgpu.Storage, vgpu.ComputeShader)
-
-	setp.ConfigValues(1) // one val per var
-	setd.ConfigValues(1) // one val per var
-	sy.Config()          // configures vars, allocates vals, configs pipelines..
 
 	gpuFullTmr := timer.Time{}
 	gpuFullTmr.Start()
 
-	// this copy is pretty fast -- most of time is below
-	pvl, _ := parsv.Values.ValueByIndexTry(0)
-	pvl.CopyFromBytes(unsafe.Pointer(pars))
-	dvl, _ := datav.Values.ValueByIndexTry(0)
-	dvl.CopyFromBytes(unsafe.Pointer(&data[0]))
+	gpu.SetValueFrom(pvl, pars)
+	gpu.SetValueFrom(dvl, sd)
 
-	// gpuFullTmr := timer.Time{}
-	// gpuFullTmr.Start()
-
-	sy.Mem.SyncToGPU()
-
-	vars.BindDynamicValueIndex(0, "Params", 0)
-	vars.BindDynamicValueIndex(1, "Data", 0)
-
-	cmd := sy.ComputeCmdBuff()
-	sy.CmdResetBindVars(cmd, 0)
-
-	// gpuFullTmr := timer.Time{}
-	// gpuFullTmr.Start()
+	sgp.CreateReadBuffers()
 
 	gpuTmr := timer.Time{}
 	gpuTmr.Start()
 
-	pl.ComputeDispatch(cmd, nGps, 1, 1)
-	sy.ComputeCmdEnd(cmd)
-	sy.ComputeSubmitWait(cmd)
+	ce, _ := sy.BeginComputePass()
+	pl.Dispatch1D(ce, n, threads)
+	ce.End()
+	dvl.GPUToRead(sy.CommandEncoder)
+	sy.EndComputePass(ce)
 
 	gpuTmr.Stop()
 
-	sy.Mem.SyncValueIndexFromGPU(1, "Data", 0) // this is about same as SyncToGPU
-	dvl.CopyToBytes(unsafe.Pointer(&data[0]))
+	dvl.ReadSync()
+	gpu.ReadToBytes(dvl, sd)
 
 	gpuFullTmr.Stop()
 
 	mx := min(n, 5)
 	for i := 0; i < mx; i++ {
-		d := &data[i]
-		fmt.Printf("%d\tRaw: %g\tInteg: %g\tExp: %g\n", i, d.Raw, d.Integ, d.Exp)
+		d := cd[i].Exp - sd[i].Exp
+		fmt.Printf("%d\t Raw: %g\t Integ: %g\t Exp: %6.4g\tTrg: %6.4g\tDiff: %g\n", i, sd[i].Raw, sd[i].Integ, sd[i].Exp, cd[i].Exp, d)
 	}
 	fmt.Printf("\n")
 
 	cpu := cpuTmr.Total
 	gpu := gpuTmr.Total
-	fmt.Printf("N: %d\t CPU: %v\t GPU: %v\t Full: %v\t CPU/GPU: %6.4g\n", n, cpu, gpu, gpuFullTmr.Total, float64(cpu)/float64(gpu))
+	gpuFull := gpuFullTmr.Total
+	fmt.Printf("N: %d\t CPU: %v\t GPU: %v\t Full: %v\t CPU/GPU: %6.4g\n", n, cpu, gpu, gpuFull, float64(cpu)/float64(gpu))
 
-	sy.Destroy()
-	gp.Destroy()
-	vgpu.Terminate()
+	sy.Release()
+	gp.Release()
 }
