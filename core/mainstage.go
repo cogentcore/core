@@ -176,6 +176,10 @@ func (st *Stage) configMainStage() {
 			st.FullWindow = false
 			st.Modal = false
 			st.Scrim = false
+			// Default is to add back button in this situation.
+			if !st.BackButton.Valid {
+				st.SetBackButton(true)
+			}
 		}
 		// If we are on mobile, we can never have new windows.
 		st.NewWindow = false
