@@ -19,7 +19,7 @@ import (
 // by ID. Generated pagegen.go files add to this by finding
 // all code blocks with language Go (must be uppercase, as that
 // indicates that is an "exported" example).
-var Examples = map[string]func(parent core.Widget){}
+var Examples = map[string]func(b core.Widget){}
 
 func init() {
 	htmlcore.ElementHandlers["pages-example"] = ExampleHandler

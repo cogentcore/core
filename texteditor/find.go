@@ -281,8 +281,8 @@ func (ed *Editor) QReplacePrompt() {
 	if ed.HasSelection() {
 		find = string(ed.Selection().ToBytes())
 	}
-	d := core.NewBody().AddTitle("Query-Replace").
-		AddText("Enter strings for find and replace, then select Query-Replace; with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
+	d := core.NewBody("Query-Replace")
+	core.NewText(d).SetType(core.TextSupporting).SetText("Enter strings for find and replace, then select Query-Replace; with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
 	fc := core.NewChooser(d).SetEditable(true).SetDefaultNew(true)
 	fc.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
@@ -304,9 +304,9 @@ func (ed *Editor) QReplacePrompt() {
 	lxi := core.NewSwitch(d).SetText("Lexical Items").SetChecked(lexitems)
 	lxi.SetTooltip("search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything")
 
-	d.AddBottomBar(func(parent core.Widget) {
-		d.AddCancel(parent)
-		d.AddOK(parent).SetText("Query-Replace").OnClick(func(e events.Event) {
+	d.AddBottomBar(func(bar *core.Frame) {
+		d.AddCancel(bar)
+		d.AddOK(bar).SetText("Query-Replace").OnClick(func(e events.Event) {
 			var find, repl string
 			if s, ok := fc.CurrentItem.Value.(string); ok {
 				find = s

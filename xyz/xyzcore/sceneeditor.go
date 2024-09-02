@@ -217,7 +217,7 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 				if sw.CurrentSelected == nil {
 					return
 				}
-				d := core.NewBody().AddTitle("Selected Node")
+				d := core.NewBody("Selected Node")
 				core.NewForm(d).SetStruct(sw.CurrentSelected)
 				d.RunWindowDialog(sv)
 			})
@@ -227,7 +227,7 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText("Edit Scene").SetIcon(icons.Edit).
 			SetTooltip("edit the 3D Scene object (for access to meshes, textures etc)").
 			OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle("xyz.Scene")
+				d := core.NewBody("xyz.Scene")
 				core.NewForm(d).SetStruct(sv.SceneXYZ())
 				d.RunWindowDialog(sv)
 			})

@@ -45,27 +45,29 @@ func Editor(st *Styles) {
 		return
 	}
 
-	d := core.NewBody().SetData(st).AddTitle("Highlighting styles")
-	d.AddText("View standard to see the builtin styles, from which you can add and customize by saving ones from the standard and then loading them into a custom file to modify.")
+	d := core.NewBody("Highlighting styles").SetData(st)
+	core.NewText(d).SetType(core.TextSupporting).SetText("View standard to see the builtin styles, from which you can add and customize by saving ones from the standard and then loading them into a custom file to modify.")
 	kl := core.NewKeyedList(d).SetMap(st)
 	StylesChanged = false
 	kl.OnChange(func(e events.Event) {
 		StylesChanged = true
 	})
-	d.AddAppBar(func(p *tree.Plan) {
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
-			w.Args[0].SetTag(`extension:".highlighting"`)
+	d.AddTopBar(func(bar *core.Frame) {
+		core.NewToolbar(bar).Maker(func(p *tree.Plan) {
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
+				w.Args[0].SetTag(`extension:".highlighting"`)
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
+				w.Args[0].SetTag(`extension:".highlighting"`)
+			})
+			tree.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(st.ViewStandard).SetIcon(icons.Visibility)
+			})
+			tree.Add(p, func(w *core.Separator) {})
+			kl.MakeToolbar(p)
 		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
-			w.Args[0].SetTag(`extension:".highlighting"`)
-		})
-		tree.Add(p, func(w *core.FuncButton) {
-			w.SetFunc(st.ViewStandard).SetIcon(icons.Visibility)
-		})
-		tree.Add(p, func(w *core.Separator) {})
-		kl.MakeToolbar(p)
 	})
 	d.RunWindow() // note: no context here so not dialog
 }

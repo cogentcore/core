@@ -246,7 +246,7 @@ func (is *Inspector) selectionMonitor() {
 
 // inspectApp displays [TheApp].
 func (is *Inspector) inspectApp() { //types:add
-	d := NewBody().AddTitle("Inspect app")
+	d := NewBody("Inspect app")
 	NewForm(d).SetStruct(TheApp).SetReadOnly(true)
 	d.RunFullDialog(is)
 }
@@ -288,7 +288,7 @@ func InspectorWindow(n tree.Node) {
 	}
 	d := NewBody("Inspector")
 	makeInspector(d, n)
-	d.NewWindow().SetCloseOnBack(true).Run()
+	d.RunWindow()
 }
 
 // makeInspector configures the given body to have an interactive inspector
@@ -301,5 +301,7 @@ func makeInspector(b *Body, n tree.Node) {
 	}
 	is := NewInspector(b)
 	is.SetRoot(n)
-	b.AddAppBar(is.MakeToolbar)
+	b.AddTopBar(func(bar *Frame) {
+		NewToolbar(bar).Maker(is.MakeToolbar)
+	})
 }

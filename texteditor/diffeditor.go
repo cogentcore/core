@@ -90,28 +90,32 @@ func DiffEditorDialog(ctx core.Widget, title string, astr, bstr []string, afile,
 	d := core.NewBody("Diff editor")
 	d.SetTitle(title)
 
-	dv := NewDiffEditor(d)
-	dv.SetFileA(afile).SetFileB(bfile).SetRevisionA(arev).SetRevisionB(brev)
-	dv.DiffStrings(astr, bstr)
-	d.AddAppBar(dv.MakeToolbar)
+	de := NewDiffEditor(d)
+	de.SetFileA(afile).SetFileB(bfile).SetRevisionA(arev).SetRevisionB(brev)
+	de.DiffStrings(astr, bstr)
+	d.AddTopBar(func(bar *core.Frame) {
+		tb := core.NewToolbar(bar)
+		de.toolbar = tb
+		tb.Maker(de.MakeToolbar)
+	})
 	d.NewWindow().SetContext(ctx).SetNewWindow(true).Run()
-	return dv
+	return de
 }
 
 // TextDialog opens a dialog for displaying text string
 func TextDialog(ctx core.Widget, title, text string) *Editor {
-	d := core.NewBody().AddTitle(title)
+	d := core.NewBody(title)
 	ed := NewEditor(d)
 	ed.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
 	ed.Buffer.SetText([]byte(text))
-	d.AddBottomBar(func(parent core.Widget) {
-		core.NewButton(parent).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
+	d.AddBottomBar(func(bar *core.Frame) {
+		core.NewButton(bar).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
 			OnClick(func(e events.Event) {
 				d.Clipboard().Write(mimedata.NewText(text))
 			})
-		d.AddOK(parent)
+		d.AddOK(bar)
 	})
 	d.RunWindowDialog(ctx)
 	return ed
@@ -147,6 +151,7 @@ type DiffEditor struct {
 	diffs text.DiffSelected
 
 	inInputEvent bool
+	toolbar      *core.Toolbar
 }
 
 func (dv *DiffEditor) Init() {
@@ -181,11 +186,10 @@ func (dv *DiffEditor) Init() {
 }
 
 func (dv *DiffEditor) updateToolbar() {
-	tb := dv.Scene.GetTopAppBar()
-	if tb == nil {
+	if dv.toolbar == nil {
 		return
 	}
-	tb.Restyle()
+	dv.toolbar.Restyle()
 }
 
 // setFilenames sets the filenames and updates markup accordingly.
@@ -277,11 +281,11 @@ func (dv *DiffEditor) saveAs(ab bool, filename core.Filename) {
 	if !errors.Log1(fsx.FileExists(string(filename))) {
 		dv.saveFile(ab, filename)
 	} else {
-		d := core.NewBody().AddTitle("File Exists, Overwrite?").
-			AddText(fmt.Sprintf("File already exists, overwrite?  File: %v", filename))
-		d.AddBottomBar(func(parent core.Widget) {
-			d.AddCancel(parent)
-			d.AddOK(parent).OnClick(func(e events.Event) {
+		d := core.NewBody("File Exists, Overwrite?")
+		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("File already exists, overwrite?  File: %v", filename))
+		d.AddBottomBar(func(bar *core.Frame) {
+			d.AddCancel(bar)
+			d.AddOK(bar).OnClick(func(e events.Event) {
 				dv.saveFile(ab, filename)
 			})
 		})

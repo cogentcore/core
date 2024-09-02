@@ -28,12 +28,3 @@ func TestSceneInit(t *testing.T) {
 	NewButton(b).SetText("Test")
 	b.AssertRender(t, "app/scene-init")
 }
-
-func TestMakeAppBar(t *testing.T) {
-	b := NewBody()
-	b.Styler(func(s *styles.Style) {
-		s.Min.X.Dp(500)
-	})
-	makeAppBar(b)
-	b.AssertRender(t, "app/make-app-bar")
-}

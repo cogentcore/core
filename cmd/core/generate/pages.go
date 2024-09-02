@@ -116,10 +116,10 @@ func writePagegen(examples ordmap.Map[string, []byte]) error {
 }
 
 // PagesExamples are the compiled pages examples for this app.
-var PagesExamples = map[string]func(parent core.Widget){`)
+var PagesExamples = map[string]func(b core.Widget){`)
 	for _, kv := range examples.Order {
 		fmt.Fprintf(b, `
-	%q: func(parent core.Widget){
+	%q: func(b core.Widget){
 %s
 },`, kv.Key, kv.Value)
 	}

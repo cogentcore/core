@@ -229,7 +229,7 @@ func (tg *TensorGrid) SetTensor(tsr tensor.Tensor) *TensorGrid {
 
 // OpenTensorEditor pulls up a TensorEditor of our tensor
 func (tg *TensorGrid) OpenTensorEditor() { //types:add
-	d := core.NewBody().AddTitle("Tensor Editor")
+	d := core.NewBody("Tensor Editor")
 	tb := core.NewToolbar(d)
 	te := NewTensorEditor(d).SetTensor(tg.Tensor)
 	te.OnChange(func(e events.Event) {
@@ -240,7 +240,7 @@ func (tg *TensorGrid) OpenTensorEditor() { //types:add
 }
 
 func (tg *TensorGrid) EditSettings() { //types:add
-	d := core.NewBody().AddTitle("Tensor Grid Display Options")
+	d := core.NewBody("Tensor Grid Display Options")
 	core.NewForm(d).SetStruct(&tg.Display).
 		OnChange(func(e events.Event) {
 			tg.NeedsRender()

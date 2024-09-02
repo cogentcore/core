@@ -47,8 +47,8 @@ type Widget interface {
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 	// based on Styles.Min / Max sizes and actual content sizing
-	// (e.g., text size).  Flexible elements (e.g., Text, Flex Wrap,
-	// TopAppBar) should reserve the _minimum_ size possible at this stage,
+	// (e.g., text size).  Flexible elements (e.g., [Text], Flex Wrap,
+	// [Toolbar]) should reserve the _minimum_ size possible at this stage,
 	// and then Grow based on SizeDown allocation.
 	SizeUp()
 
@@ -188,6 +188,7 @@ type WidgetBase struct {
 	// added in the last function are the first in the menu.
 	// Context menus should be added through [WidgetBase.AddContextMenu].
 	// Separators will be added between each context menu function.
+	// [Scene.ContextMenus] apply to all widgets in the scene.
 	ContextMenus []func(m *Scene) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// Scene is the overall Scene to which we belong. It is automatically

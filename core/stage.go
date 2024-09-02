@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"cogentcore.org/core/base/option"
 	"cogentcore.org/core/system"
 )
 
@@ -92,7 +93,8 @@ type Stage struct { //types:add -setters
 
 	// Title is the title of the Stage, which is generally auto-set
 	// based on the [Body.Title]. It used for the title of [WindowStage]
-	// and [DialogStage] types.
+	// and [DialogStage] types, and for a [Text] title widget if
+	// [Stage.DisplayTitle] is true.
 	Title string
 
 	// Modal, if true, blocks input to all other stages.
@@ -118,15 +120,20 @@ type Stage struct { //types:add -setters
 	// [WindowStage]s take up the entire window they are created in.
 	FullWindow bool
 
-	// CloseOnBack is whether to close the stage when the back button
-	// is pressed in the app bar. Otherwise, it goes back to the next
-	// stage but keeps this one open. This is on by default for
-	// [DialogStage]s and off for [WindowStage]s.
-	CloseOnBack bool
-
 	// Timeout, if greater than 0, results in a popup stages disappearing
 	// after this timeout duration.
 	Timeout time.Duration
+
+	// BackButton is whether to add a back button to the top bar that calls
+	// [Scene.Close] when clicked. If it is unset, is will be treated as true
+	// on non-[system.Offscreen] platforms for [Stage.FullWindow] but not
+	// [Stage.NewWindow] [Stage]s that are not the first in the stack.
+	BackButton option.Option[bool] `set:"-"`
+
+	// DisplayTitle is whether to display the [Stage.Title] using a
+	// [Text] widget in the top bar. It is on by default for [DialogStage]s
+	// and off for all other stages.
+	DisplayTitle bool
 
 	// Pos is the target position for the [Stage] to be placed within
 	// the surrounding window.
@@ -166,6 +173,12 @@ func (st *Stage) String() string {
 		str += "  Rc: " + rc.String()
 	}
 	return str
+}
+
+// SetBackButton sets [Stage.BackButton] using [option.Option.Set].
+func (st *Stage) SetBackButton(b bool) *Stage {
+	st.BackButton.Set(b)
+	return st
 }
 
 // setNameFromScene sets the name of this Stage based on existing
@@ -223,7 +236,7 @@ func (st *Stage) setType(typ StageTypes) *Stage {
 		st.Modal = true
 		st.Scrim = true
 		st.ClickOff = true
-		st.CloseOnBack = true
+		st.DisplayTitle = true
 	case MenuStage:
 		st.Modal = true
 		st.Scrim = false

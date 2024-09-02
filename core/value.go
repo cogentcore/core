@@ -137,9 +137,9 @@ func openValueDialog(v Value, make func(d *Body), after ...func()) {
 		return
 	}
 	wb := v.AsWidget()
-	d := NewBody().AddTitle(wb.ValueTitle)
+	d := NewBody(wb.ValueTitle)
 	if text := strings.ReplaceAll(wb.Tooltip, shiftNewWindow, ""); text != "" {
-		d.AddText(text)
+		NewText(d).SetType(TextSupporting).SetText(text)
 	}
 	make(d)
 
@@ -152,9 +152,9 @@ func openValueDialog(v Value, make func(d *Body), after ...func()) {
 		})
 	} else {
 		// otherwise, we have to make the bottom bar
-		d.AddBottomBar(func(parent Widget) {
-			d.AddCancel(parent)
-			d.AddOK(parent).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(bar *Frame) {
+			d.AddCancel(bar)
+			d.AddOK(bar).OnClick(func(e events.Event) {
 				after[0]()
 				wb.UpdateChange()
 			})

@@ -280,7 +280,7 @@ func (fn *Node) blameVCSSelected() { //types:add
 func blameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *texteditor.TwinEditors {
 	title := "VCS Blame: " + fsx.DirAndFile(fname)
 
-	d := core.NewBody().AddTitle(title)
+	d := core.NewBody(title)
 	tv := texteditor.NewTwinEditors(d)
 	tv.SetSplits(.3, .7)
 	tv.SetFiles(fname, fname)

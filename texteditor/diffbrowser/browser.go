@@ -56,7 +56,9 @@ func NewBrowserWindow() (*Browser, *core.Body) {
 	b := core.NewBody("Diff browser")
 	br := NewBrowser(b)
 	br.UpdateTree() // must have tree
-	b.AddAppBar(br.MakeToolbar)
+	b.AddTopBar(func(bar *core.Frame) {
+		core.NewToolbar(bar).Maker(br.MakeToolbar)
+	})
 	return br, b
 }
 
@@ -98,10 +100,10 @@ func (br *Browser) ViewDiff(fn *Node) *texteditor.DiffEditor {
 		return dv
 	}
 	tb := core.NewToolbar(tab)
-	dv := texteditor.NewDiffEditor(tab)
-	tb.Maker(dv.MakeToolbar)
-	dv.SetFileA(fn.FileA).SetFileB(fn.FileB).SetRevisionA(fn.RevA).SetRevisionB(fn.RevB)
-	dv.DiffStrings(stringsx.SplitLines(fn.TextA), stringsx.SplitLines(fn.TextB))
+	de := texteditor.NewDiffEditor(tab)
+	tb.Maker(de.MakeToolbar)
+	de.SetFileA(fn.FileA).SetFileB(fn.FileB).SetRevisionA(fn.RevA).SetRevisionB(fn.RevB)
+	de.DiffStrings(stringsx.SplitLines(fn.TextA), stringsx.SplitLines(fn.TextB))
 	br.Update()
-	return dv
+	return de
 }
