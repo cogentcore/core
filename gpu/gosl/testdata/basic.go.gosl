@@ -19,7 +19,7 @@ fn FastExp(x: f32) -> f32 {
 	var i = i32(12102203*x) + 127*(1<<23);
 	var m = i >> 7 & 0xFFFF; // copy mantissa
 	i += (((((((((((3537 * m) >> 16) + 13668) * m) >> 18) + 15817) * m) >> 14) - 80470) * m) >> 11);
-	return asfloat(u32(i));
+	return bitcast<f32>(u32(i));
 }
 
 // NeuronFlags are bit-flags encoding relevant binary state for neurons
@@ -28,17 +28,17 @@ alias NeuronFlags = i32;
 // The neuron flags
 
 // NeuronOff flag indicates that this neuron has been turned off (i.e., lesioned)
-const  NeuronOffNeuronFlags = 1;
+const  NeuronOffNeuronFlags = 0x01;
 
 // NeuronHasExt means the neuron has external input in its Ext field
-const  NeuronHasExtNeuronFlags = 1 << 2;
+const  NeuronHasExtNeuronFlags = 0x02; // note: 1<<2 does NOT work
 
 // NeuronHasTarg means the neuron has external target input in its Target field
-const  NeuronHasTargNeuronFlags = 1 << 3;
+const  NeuronHasTargNeuronFlags = 0x04;
 
 // NeuronHasCmpr means the neuron has external comparison input in its Target field -- used for computing
 // comparison statistics but does not drive neural activity ever
-const  NeuronHasCmprNeuronFlags = 1 << 4;
+const  NeuronHasCmprNeuronFlags = 0x08;
 
 // Modes are evaluation modes (Training, Testing, etc)
 alias Modes = i32;
@@ -85,36 +85,40 @@ struct ParamStruct {
 	pad: f32, // comment this out to trigger alignment warning
 }
 
-fn IntegFromRaw(ps: ptr<function,ParamStruct>, ds: ptr<function,DataStruct>, modArg: ptr<function,f32>) -> f32 {
+fn ParamStruct_IntegFromRaw(ps: ptr<function,ParamStruct>, ds: ptr<function,DataStruct>, modArg: ptr<function,f32>) -> f32 {
 	// note: the following are just to test basic control structures
-	var newVal = ps.Dt*(ds.Raw-ds.Integ) + *modArg;
-	if (newVal < -10 || ps.Option==1) {
+	var newVal = (*ps).Dt*((*ds).Raw-(*ds).Integ) + *modArg;
+	if (newVal < -10 || ParamStruct_IsTrue((*ps).Option)) {
 		newVal = -10;
 	}
-	ds.Integ += newVal;
-	ds.Exp = exp(-ds.Integ);
-	ps.AnotherMeth(ds);
-	return ds.Exp;
+	(*ds).Integ += newVal;
+	(*ds).Exp = ParamStruct_Exp(math32,-(*ds).Integ);
+	ParamStruct_AnotherMeth(ps,ds);
+	return (*ds).Exp;
 }
 
 // AnotherMeth does more computation
-fn AnotherMeth(ps: ptr<function,ParamStruct>, ds: ptr<function,DataStruct>) {
+fn ParamStruct_AnotherMeth(ps: ptr<function,ParamStruct>, ds: ptr<function,DataStruct>) {
 	for (var i = 0; i < 10; i++) {
-		ds.Integ *= 0.99;
+		(*ds).Integ *= 0.99;
 	}
-	flag NeuronFlags;
-	flag &=~NeuronHasExt; // clear flag -- op doesn't exist in C
+	var flag: NeuronFlags;
+	flag &= ~NeuronHasExt; // clear flag -- op doesn't exist in C
 
 	var mode = Test;
-	switch (mode) {
-	case Test:
-		fallthrough;
-	case Train:
+	switch (mode) { // note: no fallthrough!
+	case Test: {
+		var ab = f32(42);
+		(*ds).Exp /= ab;
+	}
+	case Train: {
 		var ab = f32(.5);
-		ds.Exp *= ab;
-	default:
+		(*ds).Exp *= ab;
+	}
+	default: {
 		var ab = f32(1);
-		ds.Exp *= ab;
+		(*ds).Exp *= ab;
+	}
 	}
 }
 

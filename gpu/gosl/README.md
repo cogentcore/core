@@ -79,7 +79,7 @@ In general shader code should be simple mathematical expressions and data types,
 
 * Alignment and padding of `struct` fields is key -- this is automatically checked by `gosl`.
 
-* WGSL does not support enum types, but standard go `const` declarations will be converted.  Use an `int32` or `uint32` data type.  It will automatically deal with the simple incrementing `iota` values, but not more complex cases.  Also, for bitflags, define explicitly, not using `bitflags` package.
+* WGSL does not support enum types, but standard go `const` declarations will be converted.  Use an `int32` or `uint32` data type.  It will automatically deal with the simple incrementing `iota` values, but not more complex cases.  Also, for bitflags, define explicitly, not using `bitflags` package, and use `0x01`, `0x02`, `0x04` etc instead of `1<<2` -- in theory the latter should be ok but in practice it complains.
 
 * Cannot use multiple return values, or multiple assignment of variables in a single `=` expression.
 

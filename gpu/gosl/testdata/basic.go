@@ -53,17 +53,17 @@ type NeuronFlags int32
 // The neuron flags
 const (
 	// NeuronOff flag indicates that this neuron has been turned off (i.e., lesioned)
-	NeuronOff NeuronFlags = 1
+	NeuronOff NeuronFlags = 0x01
 
 	// NeuronHasExt means the neuron has external input in its Ext field
-	NeuronHasExt NeuronFlags = 1 << 2
+	NeuronHasExt NeuronFlags = 0x02 // note: 1<<2 does NOT work
 
 	// NeuronHasTarg means the neuron has external target input in its Target field
-	NeuronHasTarg NeuronFlags = 1 << 3
+	NeuronHasTarg NeuronFlags = 0x04
 
 	// NeuronHasCmpr means the neuron has external comparison input in its Target field -- used for computing
 	// comparison statistics but does not drive neural activity ever
-	NeuronHasCmpr NeuronFlags = 1 << 4
+	NeuronHasCmpr NeuronFlags = 0x08
 )
 
 // Modes are evaluation modes (Training, Testing, etc)
@@ -133,9 +133,10 @@ func (ps *ParamStruct) AnotherMeth(ds *DataStruct) {
 	flag &^= NeuronHasExt // clear flag -- op doesn't exist in C
 
 	mode := Test
-	switch mode {
+	switch mode { // note: no fallthrough!
 	case Test:
-		fallthrough
+		ab := float32(42)
+		ds.Exp /= ab
 	case Train:
 		ab := float32(.5)
 		ds.Exp *= ab

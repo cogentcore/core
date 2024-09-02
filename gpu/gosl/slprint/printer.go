@@ -94,7 +94,10 @@ type printer struct {
 	cachedPos  token.Pos
 	cachedLine int // line corresponding to cachedPos
 
-	curFuncRecv *ast.Ident // current function receiver
+	// current arguments to function that are pointers and thus need dereferencing
+	// when accessing fields
+	curPtrArgs  []*ast.Ident
+	curMethRecv *ast.Field // current method receiver, also included in curPtrArgs if ptr
 }
 
 func (p *printer) internalError(msg ...any) {

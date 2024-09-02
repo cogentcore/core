@@ -1,4 +1,5 @@
 // WGSL compute example
+requires pointer_composite_access;
 
 @group(0) @binding(0)
 var<storage, read_write> In: array<f32>;

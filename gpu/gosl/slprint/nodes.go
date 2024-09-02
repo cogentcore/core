@@ -376,6 +376,7 @@ func (p *printer) parameters(fields *ast.FieldList, mode paramMode) {
 				p.expr(atyp)
 				if isPtr {
 					p.print(">")
+					p.curPtrArgs = append(p.curPtrArgs, par.Names[0])
 				}
 			} else {
 				atyp, isPtr := p.ptrType(stripParensAlways(par.Type))
@@ -410,13 +411,36 @@ func (p *printer) parameters(fields *ast.FieldList, mode paramMode) {
 	p.print(closeTok)
 }
 
+// gosl: check if identifier is a pointer arg
+func (p *printer) isPtrArg(id *ast.Ident) bool {
+	for _, pt := range p.curPtrArgs {
+		if id.Name == pt.Name {
+			return true
+		}
+	}
+	return false
+}
+
 // gosl: mark pointer types, returns true if pointer
 func (p *printer) ptrType(x ast.Expr) (ast.Expr, bool) {
-	if sx, ok := x.(*ast.StarExpr); ok {
+	if u, ok := x.(*ast.StarExpr); ok {
 		p.print("ptr<function", token.COMMA)
-		return sx.X, true
+		return u.X, true
 	}
 	return x, false
+}
+
+// gosl: printMethRecv prints the method recv prefix for function. returns true if recv is ptr
+func (p *printer) printMethRecv() bool {
+	isPtr := false
+	if u, ok := p.curMethRecv.Type.(*ast.StarExpr); ok {
+		p.expr(u.X)
+		isPtr = true
+	} else {
+		p.expr(p.curMethRecv.Type)
+	}
+	p.print("_")
+	return isPtr
 }
 
 // combinesWithName reports whether a name followed by the expression x
@@ -1021,13 +1045,19 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		if paren {
 			p.print(token.LPAREN)
 		}
-		wasIndented := p.possibleSelectorExpr(x.Fun, token.HighestPrec, depth)
+		wasIndented, methRecv := p.possibleSelectorExpr(x.Fun, token.HighestPrec, depth)
 		if paren {
 			p.print(token.RPAREN)
 		}
 
 		p.setPos(x.Lparen)
 		p.print(token.LPAREN)
+		if methRecv != nil { // gosl: rest of conversion of method to function call
+			p.expr(methRecv)
+			if len(x.Args) > 0 {
+				p.print(token.COMMA)
+			}
+		}
 		if x.Ellipsis.IsValid() {
 			p.exprList(x.Lparen, x.Args, depth, 0, x.Ellipsis, false)
 			p.setPos(x.Ellipsis)
@@ -1180,18 +1210,28 @@ func normalizedNumber(lit *ast.BasicLit) *ast.BasicLit {
 	return &ast.BasicLit{ValuePos: lit.ValuePos, Kind: lit.Kind, Value: x}
 }
 
-func (p *printer) possibleSelectorExpr(expr ast.Expr, prec1, depth int) bool {
+func (p *printer) possibleSelectorExpr(expr ast.Expr, prec1, depth int) (wasIndented bool, methRecv ast.Expr) {
 	if x, ok := expr.(*ast.SelectorExpr); ok {
 		return p.selectorExpr(x, depth, true)
 	}
 	p.expr1(expr, prec1, depth)
-	return false
+	return false, nil
 }
 
 // selectorExpr handles an *ast.SelectorExpr node and reports whether x spans
-// multiple lines.
-func (p *printer) selectorExpr(x *ast.SelectorExpr, depth int, isMethod bool) bool {
-	p.expr1(x.X, token.HighestPrec, depth)
+// multiple lines, and thus was indented.
+func (p *printer) selectorExpr(x *ast.SelectorExpr, depth int, isMethod bool) (wasIndented bool, methRecv ast.Expr) {
+	// gosl: detect pointer types, turn method calls into function calls
+	if isMethod && p.curMethRecv != nil {
+		p.printMethRecv()
+		p.print(x.Sel)
+		return false, x.X
+	}
+	if id, ok := x.X.(*ast.Ident); ok && p.isPtrArg(id) {
+		p.print(token.LPAREN, token.MUL, id, token.RPAREN)
+	} else {
+		p.expr1(x.X, token.HighestPrec, depth)
+	}
 	p.print(token.PERIOD)
 	if line := p.lineFor(x.Sel.Pos()); p.pos.IsValid() && p.pos.Line < line {
 		p.print(indent, newline)
@@ -1200,11 +1240,11 @@ func (p *printer) selectorExpr(x *ast.SelectorExpr, depth int, isMethod bool) bo
 		if !isMethod {
 			p.print(unindent)
 		}
-		return true
+		return true, nil
 	}
 	p.setPos(x.Sel.Pos())
 	p.print(x.Sel)
-	return false
+	return false, nil
 }
 
 func (p *printer) expr0(x ast.Expr, depth int) {
@@ -1384,55 +1424,6 @@ func (p *printer) indentList(list []ast.Expr) bool {
 	return false
 }
 
-// caseClause processes a CaseClause
-func (p *printer) caseClause(s *ast.CaseClause, nextIsRBrace bool) {
-	if s.List != nil {
-		p.print(token.CASE, blank)
-		p.exprList(s.Pos(), s.List, 1, 0, s.Colon, false)
-		/*
-				// p.exprList(s.Pos(), s.List, 1, 0, s.Colon, false)
-				// glslc compiler crashes if expr is the label -- convert to int.
-				gotInt := false
-				if len(s.List) != 1 {
-					fmt.Printf("%s:\n\tglslc switch only allows single-arg case values that translate to an int\n", p.pkg.Fset.PositionFor(s.Pos(), true).String())
-				} else {
-					vle := s.List[0]
-					if id, ok := vle.(*ast.Ident); ok {
-						if def, ok := p.pkg.TypesInfo.Uses[id]; ok {
-							if cd, ok := def.(*types.Const); ok {
-								p.print(cd.Val().String())
-								gotInt = true
-							}
-						}
-					} else if bl, ok := vle.(*ast.BasicLit); ok {
-						p.print(bl)
-						gotInt = true
-					} else {
-						fmt.Printf("gosl: unsupported switch case value: %#v\n", vle)
-					}
-				}
-			if !gotInt {
-				fmt.Printf("%s:\n\tglslc switch only allows single-arg case values that translate to an int\n", p.pkg.Fset.PositionFor(s.Pos(), true).String())
-				p.exprList(s.Pos(), s.List, 1, 0, s.Colon, false)
-			}
-		*/
-	} else {
-		p.print(token.DEFAULT)
-	}
-	p.print(s.Colon, token.COLON)
-	if len(s.Body) == 1 {
-		if fbr, ok := s.Body[0].(*ast.BranchStmt); ok {
-			if fbr.Tok == token.FALLTHROUGH {
-				p.print(formfeed, "// fallthrough")
-				return
-			}
-		}
-	}
-	p.print(token.LBRACE) // Go implies new context, C doesn't
-	p.stmtList(s.Body, 1, nextIsRBrace)
-	p.print(formfeed, "\tbreak; ", token.RBRACE)
-}
-
 func (p *printer) stmt(stmt ast.Stmt, nextIsRBrace bool, nosemi bool) {
 	p.setPos(stmt.Pos())
 
@@ -1576,7 +1567,16 @@ func (p *printer) stmt(stmt ast.Stmt, nextIsRBrace bool, nosemi bool) {
 		}
 
 	case *ast.CaseClause:
-		p.caseClause(s, nextIsRBrace)
+		if s.List != nil {
+			p.print(token.CASE, blank)
+			p.exprList(s.Pos(), s.List, 1, 0, s.Colon, false)
+		} else {
+			p.print(token.DEFAULT)
+		}
+		p.setPos(s.Colon)
+		p.print(token.COLON, blank, token.LBRACE) // Go implies new context, C doesn't
+		p.stmtList(s.Body, 1, nextIsRBrace)
+		p.print(formfeed, token.RBRACE)
 
 	case *ast.SwitchStmt:
 		p.print(token.SWITCH)
@@ -1820,12 +1820,10 @@ func (p *printer) spec(spec ast.Spec, n int, doIndent bool, tok token.Token) {
 			p.internalError("expected n = 1; got", n)
 		}
 		p.setComment(s.Doc)
+		p.print(tok, blank)
 		p.identList(s.Names, doIndent) // always present
-		if tok == token.CONST {
-			p.print(tok, blank)
-		}
 		if s.Type != nil {
-			p.print(blank)
+			p.print(token.COLON, blank)
 			p.expr(s.Type)
 		}
 		if s.Values != nil {
@@ -2094,12 +2092,21 @@ func (p *printer) funcDecl(d *ast.FuncDecl) {
 				return
 			}
 		}
+		if d.Recv.List[0].Names != nil {
+			p.curMethRecv = d.Recv.List[0]
+			if p.printMethRecv() {
+				p.curPtrArgs = []*ast.Ident{p.curMethRecv.Names[0]}
+			}
+			// fmt.Printf("cur func recv: %v\n", p.curMethRecv)
+		}
 		// p.parameters(d.Recv, funcParam) // method: print receiver
 		// p.print(blank)
 	}
 	p.expr(d.Name)
 	p.signature(d.Type, d.Recv)
 	p.funcBody(p.distanceFrom(d.Pos(), startCol), vtab, d.Body)
+	p.curPtrArgs = nil
+	p.curMethRecv = nil
 }
 
 func (p *printer) decl(decl ast.Decl) {

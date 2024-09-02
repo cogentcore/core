@@ -48,8 +48,8 @@ var Replaces = []Replace{
 	{[]byte("int64"), []byte("i64")},                // TODO: does not exist
 	{[]byte("math32.FastExp("), []byte("FastExp(")}, // FastExp about same speed, numerically identical
 	// {[]byte("math32.FastExp("), []byte("exp(")}, // exp is slightly faster it seems
-	{[]byte("math.Float32frombits("), []byte("asfloat(")},
-	{[]byte("math.Float32bits("), []byte("asuint(")},
+	{[]byte("math.Float32frombits("), []byte("bitcast<f32>(")},
+	{[]byte("math.Float32bits("), []byte("bitcast<u32>(")},
 	{[]byte("shaders."), []byte("")},
 	{[]byte("slrand."), []byte("Rand")},
 	{[]byte("sltype.U"), []byte("u")},
