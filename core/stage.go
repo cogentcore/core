@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"cogentcore.org/core/base/option"
 	"cogentcore.org/core/system"
 )
 
@@ -124,10 +125,10 @@ type Stage struct { //types:add -setters
 	Timeout time.Duration
 
 	// BackButton is whether to add a back button to the top bar that calls
-	// [Scene.Close] when clicked. It is on by default on non-[system.Offscreen]
-	// platforms for [Stage.FullWindow] but not [Stage.NewWindow] [Stage]s that
-	// are not the first in the stack.
-	BackButton bool
+	// [Scene.Close] when clicked. If it is unset, is will be treated as true
+	// on non-[system.Offscreen] platforms for [Stage.FullWindow] but not
+	// [Stage.NewWindow] [Stage]s that are not the first in the stack.
+	BackButton option.Option[bool] `set:"-"`
 
 	// DisplayTitle is whether to display the [Stage.Title] using a
 	// [Text] widget in the top bar. It is on by default for [DialogStage]s
@@ -172,6 +173,12 @@ func (st *Stage) String() string {
 		str += "  Rc: " + rc.String()
 	}
 	return str
+}
+
+// SetBackButton sets [Stage.BackButton] using [option.Option.Set].
+func (st *Stage) SetBackButton(b bool) *Stage {
+	st.BackButton.Set(b)
+	return st
 }
 
 // setNameFromScene sets the name of this Stage based on existing
