@@ -25,11 +25,11 @@ bt := core.NewButton(b).SetText("Confirm")
 bt.OnClick(func(e events.Event) {
     d := core.NewBody("Confirm")
     core.NewText(d).SetType(core.TextSupporting).SetText("Send message?")
-    d.AddBottomBar(func(b core.Widget) {
-        d.AddCancel(b).OnClick(func(e events.Event) {
+    d.AddBottomBar(func(bar *core.Frame) {
+        d.AddCancel(bar).OnClick(func(e events.Event) {
             core.MessageSnackbar(bt, "Dialog canceled")
         })
-        d.AddOK(b).OnClick(func(e events.Event) {
+        d.AddOK(bar).OnClick(func(e events.Event) {
             core.MessageSnackbar(bt, "Dialog accepted")
         })
     })
@@ -45,9 +45,9 @@ bt.OnClick(func(e events.Event) {
     d := core.NewBody("Input")
     core.NewText(d).SetType(core.TextSupporting).SetText("What is your name?")
     tf := core.NewTextField(d)
-    d.AddBottomBar(func(b core.Widget) {
-        d.AddCancel(b)
-        d.AddOK(b).OnClick(func(e events.Event) {
+    d.AddBottomBar(func(bar *core.Frame) {
+        d.AddCancel(bar)
+        d.AddOK(bar).OnClick(func(e events.Event) {
             core.MessageSnackbar(bt, "Your name is "+tf.Text())
         })
     })
@@ -81,8 +81,8 @@ You can confirm that the user wants to close a scene when they try to close it:
 b.AddCloseDialog(func(d *core.Body) bool {
     d.SetTitle("Are you sure?")
     core.NewText(d).SetType(core.TextSupporting).SetText("Are you sure you want to close the Cogent Core Demo?")
-    d.AddBottomBar(func(b core.Widget) {
-        d.AddOK(b).SetText("Close").OnClick(func(e events.Event) {
+    d.AddBottomBar(func(bar *core.Frame) {
+        d.AddOK(bar).SetText("Close").OnClick(func(e events.Event) {
             b.Scene.Close()
         })
     })
