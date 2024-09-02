@@ -65,13 +65,17 @@ func (tb *Toolbar) Init() {
 }
 
 func (tb *Toolbar) SizeUp() {
+	if tb.Styles.Wrap {
+		tb.Frame.SizeUp()
+		return
+	}
 	tb.allItemsToChildren()
 	tb.Frame.SizeUp()
 }
 
 func (tb *Toolbar) SizeDown(iter int) bool {
 	redo := tb.Frame.SizeDown(iter)
-	if iter == 0 {
+	if iter == 0 || tb.Styles.Wrap {
 		return true // ensure a second pass
 	}
 	if tb.Scene.showIter > 0 {
