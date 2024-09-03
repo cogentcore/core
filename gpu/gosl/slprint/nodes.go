@@ -878,7 +878,12 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		p.print("BadExpr")
 
 	case *ast.Ident:
-		p.print(x)
+		if x.Name == "int" {
+			fmt.Println("got int")
+			p.print("i32")
+		} else {
+			p.print(x)
+		}
 
 	case *ast.BinaryExpr:
 		if depth < 1 {

@@ -17,9 +17,9 @@ import (
 	"cogentcore.org/core/gpu"
 )
 
-//go:generate ../../gosl compute.go
+//go:generate ../../gosl cogentcore.org/core/math32/fastexp.go compute.go
 
-//go:embed shaders/basic.wgsl
+//go:embed shaders/basic.wgsl shaders/fastexp.wgsl
 var shaders embed.FS
 
 func init() {

@@ -4,6 +4,12 @@
 
 package main
 
+import "cogentcore.org/core/math32"
+
+//gosl:wgsl basic
+// #include "fastexp.wgsl"
+//gosl:end basic
+
 //gosl:start basic
 
 // DataStruct has the test data
@@ -38,8 +44,7 @@ type ParamStruct struct {
 // IntegFromRaw computes integrated value from current raw value
 func (ps *ParamStruct) IntegFromRaw(ds *DataStruct) {
 	ds.Integ += ps.Dt * (ds.Raw - ds.Integ)
-	// ds.Exp = math32.FastExp(-ds.Integ)
-	ds.Exp = ds.Integ * ds.Integ
+	ds.Exp = math32.FastExp(-ds.Integ)
 }
 
 //gosl:end basic
