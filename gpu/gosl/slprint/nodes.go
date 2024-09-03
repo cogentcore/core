@@ -879,7 +879,6 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 
 	case *ast.Ident:
 		if x.Name == "int" {
-			fmt.Println("got int")
 			p.print("i32")
 		} else {
 			p.print(x)
