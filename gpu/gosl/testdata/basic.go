@@ -93,10 +93,7 @@ type DataStruct struct {
 	Integ float32
 
 	// exp of integ
-	Exp float32
-
-	// must pad to multiple of 4 floats for arrays
-	Pad2 float32
+	Exp, Pad2 float32
 }
 
 // ParamStruct has the test params

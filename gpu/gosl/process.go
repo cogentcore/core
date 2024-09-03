@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
@@ -22,6 +23,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gosl/alignsl"
 	"cogentcore.org/core/gpu/gosl/slprint"
 	"golang.org/x/tools/go/packages"
@@ -40,7 +43,7 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 	}
 
 	pf := "./" + *outDir
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesInfo | packages.NeedTypesSizes}, pf)
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles | packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesSizes}, pf)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -115,16 +118,16 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 		}
 
 		// add wgsl code
-		for _, hlfn := range wgslFiles {
-			if fn+".wgsl" != hlfn {
+		for _, slfn := range wgslFiles {
+			if fn+".wgsl" != slfn {
 				continue
 			}
-			buf, err := os.ReadFile(hlfn)
+			buf, err := os.ReadFile(slfn)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			exsl = append(exsl, []byte(fmt.Sprintf("\n// from file: %s\n", hlfn))...)
+			exsl = append(exsl, []byte(fmt.Sprintf("\n// from file: %s\n", slfn))...)
 			exsl = append(exsl, buf...)
 			gosls[fn] = exsl
 			needsCompile[fn] = true // assume any standalone has main
@@ -136,10 +139,10 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 	}
 
 	// check for wgsl files that had no go equivalent
-	for _, hlfn := range wgslFiles {
+	for _, slfn := range wgslFiles {
 		hasGo := false
 		for fn := range gosls {
-			if fn+".wgsl" == hlfn {
+			if fn+".wgsl" == slfn {
 				hasGo = true
 				break
 			}
@@ -147,10 +150,10 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 		if hasGo {
 			continue
 		}
-		_, hlfno := filepath.Split(hlfn) // could be in a subdir
-		tofn := filepath.Join(*outDir, hlfno)
-		CopyFile(hlfn, tofn)
-		fn := strings.TrimSuffix(hlfno, ".wgsl")
+		_, slfno := filepath.Split(slfn) // could be in a subdir
+		tofn := filepath.Join(*outDir, slfno)
+		CopyFile(slfn, tofn)
+		fn := strings.TrimSuffix(slfno, ".wgsl")
 		needsCompile[fn] = true // assume any standalone wgsl is a main
 	}
 
@@ -161,8 +164,20 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 }
 
 func CompileFile(fn string) error {
+	dir, _ := filepath.Abs(*outDir)
+	fsys := os.DirFS(dir)
+	b, err := fs.ReadFile(fsys, fn)
+	if errors.Log(err) != nil {
+		return err
+	}
+	is := gpu.IncludeFS(fsys, "", string(b))
+	ofn := filepath.Join(dir, fn)
+	err = os.WriteFile(ofn, []byte(is), 0666)
+	if errors.Log(err) != nil {
+		return err
+	}
 	cmd := exec.Command("naga", fn)
-	cmd.Dir, _ = filepath.Abs(*outDir)
+	cmd.Dir = dir
 	out, err := cmd.CombinedOutput()
 	fmt.Printf("\n-----------------------------------------------------\nnaga output for: %s\n%s", fn, out)
 	if err != nil {

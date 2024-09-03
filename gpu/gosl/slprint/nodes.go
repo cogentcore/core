@@ -361,7 +361,23 @@ func (p *printer) parameters(fields *ast.FieldList, mode paramMode) {
 				p.print(blank)
 			}
 			// parameter names
-			if len(par.Names) > 0 {
+			if len(par.Names) > 1 {
+				nnm := len(par.Names)
+				for ni, nm := range par.Names {
+					p.print(nm.Name)
+					p.print(token.COLON)
+					p.print(blank)
+					atyp, isPtr := p.ptrType(stripParensAlways(par.Type))
+					p.expr(atyp)
+					if isPtr {
+						p.print(">")
+						p.curPtrArgs = append(p.curPtrArgs, par.Names[0])
+					}
+					if ni < nnm-1 {
+						p.print(token.COMMA)
+					}
+				}
+			} else if len(par.Names) > 0 {
 				// Very subtle: If we indented before (ws == ignore), identList
 				// won't indent again. If we didn't (ws == indent), identList will
 				// indent if the identList spans multiple lines, and it will outdent
@@ -621,7 +637,21 @@ func (p *printer) fieldList(fields *ast.FieldList, isStruct, isIncomplete bool) 
 			extraTabs := 0
 			p.setComment(f.Doc)
 			p.recordLine(&line)
-			if len(f.Names) > 0 {
+			if len(f.Names) > 1 {
+				nnm := len(f.Names)
+				p.setPos(f.Type.Pos())
+				for ni, nm := range f.Names {
+					p.print(nm.Name)
+					p.print(token.COLON)
+					p.print(sep)
+					p.expr(f.Type)
+					if ni < nnm-1 {
+						p.print(token.COMMA)
+						p.print(formfeed)
+					}
+				}
+				extraTabs = 1
+			} else if len(f.Names) > 0 {
 				// named fields
 				p.identList(f.Names, false)
 				p.print(token.COLON)
@@ -2097,7 +2127,6 @@ func (p *printer) methRecvType(typ ast.Expr) string {
 func (p *printer) funcDecl(d *ast.FuncDecl) {
 	p.setComment(d.Doc)
 	p.setPos(d.Pos())
-	p.print("fn", blank)
 	// We have to save startCol only after emitting FUNC; otherwise it can be on a
 	// different line (all whitespace preceding the FUNC is emitted only when the
 	// FUNC is emitted).
@@ -2108,6 +2137,7 @@ func (p *printer) funcDecl(d *ast.FuncDecl) {
 				return
 			}
 		}
+		p.print("fn", blank)
 		if d.Recv.List[0].Names != nil {
 			p.curMethRecv = d.Recv.List[0]
 			if p.printMethRecv() {
@@ -2117,6 +2147,8 @@ func (p *printer) funcDecl(d *ast.FuncDecl) {
 		}
 		// p.parameters(d.Recv, funcParam) // method: print receiver
 		// p.print(blank)
+	} else {
+		p.print("fn", blank)
 	}
 	p.expr(d.Name)
 	p.signature(d.Type, d.Recv)

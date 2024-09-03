@@ -19,7 +19,10 @@ import (
 // and default path to locate the included files.
 func IncludeFS(fsys fs.FS, fpath, code string) string {
 	included := map[string]struct{}{}
+	return includeFS(fsys, fpath, code, included)
+}
 
+func includeFS(fsys fs.FS, fpath, code string, included map[string]struct{}) string {
 	fl := stringsx.SplitLines(code)
 	nl := len(fl)
 	for li := 0; li < nl; li++ {
@@ -53,7 +56,8 @@ func IncludeFS(fsys fs.FS, fpath, code string) string {
 			}
 			inc = fp
 		}
-		ol := stringsx.SplitLines(string(b))
+		ins := includeFS(fsys, fpath, string(b), included)
+		ol := stringsx.SplitLines(ins)
 		fl[li] = "// " + ln
 		nl += len(ol)
 		fl = slices.Insert(fl, li+1, ol...)
