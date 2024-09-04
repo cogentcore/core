@@ -43,7 +43,7 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 	}
 
 	pf := "./" + *outDir
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles | packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesSizes}, pf)
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles | packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesSizes | packages.NeedTypesInfo}, pf)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -96,8 +96,7 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 
 		var buf bytes.Buffer
 		cfg := slprint.Config{Mode: printerMode, Tabwidth: tabWidth, ExcludeFunctions: excludeFunctionMap}
-		// cfg.Fprint(&buf, pkg, fpos, afile)
-		cfg.Fprint(&buf, pkg.Fset, afile)
+		cfg.Fprint(&buf, pkg, afile)
 		// ioutil.WriteFile(filepath.Join(*outDir, fn+".tmp"), buf.Bytes(), 0644)
 		slfix, hasSlrand := SlEdits(buf.Bytes())
 		if hasSlrand && !slrandCopied {

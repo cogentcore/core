@@ -15,6 +15,8 @@ import (
 	"sync"
 	"text/tabwriter"
 	"unicode"
+
+	"golang.org/x/tools/go/packages"
 )
 
 const (
@@ -54,6 +56,7 @@ type printer struct {
 	// Configuration (does not change after initialization)
 	Config
 	fset *token.FileSet
+	pkg  *packages.Package // gosl: extra
 
 	// Current state
 	output       []byte       // raw printer result
@@ -1338,11 +1341,12 @@ var printerPool = sync.Pool{
 	},
 }
 
-func newPrinter(cfg *Config, fset *token.FileSet, nodeSizes map[ast.Node]int) *printer {
+func newPrinter(cfg *Config, pkg *packages.Package, nodeSizes map[ast.Node]int) *printer {
 	p := printerPool.Get().(*printer)
 	*p = printer{
 		Config:    *cfg,
-		fset:      fset,
+		pkg:       pkg,
+		fset:      pkg.Fset,
 		pos:       token.Position{Line: 1, Column: 1},
 		out:       token.Position{Line: 1, Column: 1},
 		wsbuf:     p.wsbuf[:0],
@@ -1363,9 +1367,9 @@ func (p *printer) free() {
 }
 
 // fprint implements Fprint and takes a nodesSizes map for setting up the printer state.
-func (cfg *Config) fprint(output io.Writer, fset *token.FileSet, node any, nodeSizes map[ast.Node]int) (err error) {
+func (cfg *Config) fprint(output io.Writer, pkg *packages.Package, node any, nodeSizes map[ast.Node]int) (err error) {
 	// print node
-	p := newPrinter(cfg, fset, nodeSizes)
+	p := newPrinter(cfg, pkg, nodeSizes)
 	defer p.free()
 	if err = p.printNode(node); err != nil {
 		return
@@ -1426,14 +1430,14 @@ type CommentedNode struct {
 // Position information is interpreted relative to the file set fset.
 // The node type must be *[ast.File], *[CommentedNode], [][ast.Decl], [][ast.Stmt],
 // or assignment-compatible to [ast.Expr], [ast.Decl], [ast.Spec], or [ast.Stmt].
-func (cfg *Config) Fprint(output io.Writer, fset *token.FileSet, node any) error {
-	return cfg.fprint(output, fset, node, make(map[ast.Node]int))
+func (cfg *Config) Fprint(output io.Writer, pkg *packages.Package, node any) error {
+	return cfg.fprint(output, pkg, node, make(map[ast.Node]int))
 }
 
 // Fprint "pretty-prints" an AST node to output.
 // It calls [Config.Fprint] with default settings.
 // Note that gofmt uses tabs for indentation but spaces for alignment;
 // use format.Node (package go/format) for output that matches gofmt.
-func Fprint(output io.Writer, fset *token.FileSet, node any) error {
-	return (&Config{Tabwidth: 8}).Fprint(output, fset, node)
+func Fprint(output io.Writer, pkg *packages.Package, node any) error {
+	return (&Config{Tabwidth: 8}).Fprint(output, pkg, node)
 }

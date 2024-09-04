@@ -69,7 +69,7 @@ var Replaces = []Replace{
 	{[]byte("slbool.FromBool("), []byte("i32(")},
 	{[]byte("bools.ToFloat32("), []byte("f32(")},
 	{[]byte("bools.FromFloat32("), []byte("bool(")},
-	{[]byte("num.FromBool[float]("), []byte("f32(")},
+	{[]byte("num.FromBool[f32]("), []byte("f32(")},
 	{[]byte("num.ToBool("), []byte("bool(")},
 	// todo: do this conversion in nodes only for correct types
 	// {[]byte(".X"), []byte(".x")},
@@ -122,4 +122,32 @@ func SlEditsReplace(lines [][]byte) bool {
 		lines[li] = ln
 	}
 	return hasSlrand
+}
+
+var SLBools = []Replace{
+	{[]byte(".IsTrue()"), []byte("==1")},
+	{[]byte(".IsFalse()"), []byte("==0")},
+	{[]byte(".SetBool(true)"), []byte("=1")},
+	{[]byte(".SetBool(false)"), []byte("=0")},
+	{[]byte(".SetBool("), []byte("=int32(")},
+	{[]byte("slbool.Bool"), []byte("int32")},
+	{[]byte("slbool.True"), []byte("1")},
+	{[]byte("slbool.False"), []byte("0")},
+	{[]byte("slbool.IsTrue("), []byte("(1 == ")},
+	{[]byte("slbool.IsFalse("), []byte("(0 == ")},
+	{[]byte("slbool.FromBool("), []byte("int32(")},
+	{[]byte("bools.ToFloat32("), []byte("float32(")},
+	{[]byte("bools.FromFloat32("), []byte("bool(")},
+	{[]byte("num.FromBool[f32]("), []byte("float32(")},
+	{[]byte("num.ToBool("), []byte("bool(")},
+}
+
+// SlBoolReplace replaces all the slbool methods with literal int32 expressions.
+func SlBoolReplace(lines [][]byte) {
+	for li, ln := range lines {
+		for _, r := range SLBools {
+			ln = bytes.ReplaceAll(ln, r.From, r.To)
+		}
+		lines[li] = ln
+	}
 }

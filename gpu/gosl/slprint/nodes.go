@@ -12,7 +12,9 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"go/types"
 	"math"
+	"path"
 	"strconv"
 	"strings"
 	"unicode"
@@ -435,6 +437,19 @@ func (p *printer) isPtrArg(id *ast.Ident) bool {
 		}
 	}
 	return false
+}
+
+// gosl: dereference pointer vals
+func (p *printer) derefPtrArgs(x ast.Expr, prec, depth int) {
+	if id, ok := x.(*ast.Ident); ok {
+		if p.isPtrArg(id) {
+			p.print(token.LPAREN, token.MUL, id, token.RPAREN)
+		} else {
+			p.expr1(x, prec, depth)
+		}
+	} else {
+		p.expr1(x, prec, depth)
+	}
 }
 
 // gosl: mark pointer types, returns true if pointer
@@ -985,7 +1000,7 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		}
 
 	case *ast.SelectorExpr:
-		p.selectorExpr(x, depth, false)
+		p.selectorExpr(x, depth)
 
 	case *ast.TypeAssertExpr:
 		p.expr1(x.X, token.HighestPrec, depth)
@@ -1079,19 +1094,16 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		if paren {
 			p.print(token.LPAREN)
 		}
-		wasIndented, methRecv := p.possibleSelectorExpr(x.Fun, token.HighestPrec, depth)
+		if _, ok := x.Fun.(*ast.SelectorExpr); ok {
+			p.methodExpr(x, depth)
+			break // handles everything, break out of case
+		}
+		p.expr1(x.Fun, token.HighestPrec, depth)
 		if paren {
 			p.print(token.RPAREN)
 		}
-
 		p.setPos(x.Lparen)
 		p.print(token.LPAREN)
-		if methRecv != nil { // gosl: rest of conversion of method to function call
-			p.expr(methRecv)
-			if len(x.Args) > 0 {
-				p.print(token.COMMA)
-			}
-		}
 		if x.Ellipsis.IsValid() {
 			p.exprList(x.Lparen, x.Args, depth, 0, x.Ellipsis, false)
 			p.setPos(x.Ellipsis)
@@ -1104,9 +1116,6 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		}
 		p.setPos(x.Rparen)
 		p.print(token.RPAREN)
-		if wasIndented {
-			p.print(unindent)
-		}
 
 	case *ast.CompositeLit:
 		// composite literal elements that are composite literals themselves may have the type omitted
@@ -1244,45 +1253,176 @@ func normalizedNumber(lit *ast.BasicLit) *ast.BasicLit {
 	return &ast.BasicLit{ValuePos: lit.ValuePos, Kind: lit.Kind, Value: x}
 }
 
-func (p *printer) possibleSelectorExpr(expr ast.Expr, prec1, depth int) (wasIndented bool, methRecv ast.Expr) {
-	if x, ok := expr.(*ast.SelectorExpr); ok {
-		return p.selectorExpr(x, depth, true)
-	}
-	p.expr1(expr, prec1, depth)
-	return false, nil
-}
-
 // selectorExpr handles an *ast.SelectorExpr node and reports whether x spans
 // multiple lines, and thus was indented.
-func (p *printer) selectorExpr(x *ast.SelectorExpr, depth int, isMethod bool) (wasIndented bool, methRecv ast.Expr) {
-	// gosl: detect pointer types, turn method calls into function calls
-	if id, ok := x.X.(*ast.Ident); ok {
-		if isMethod && p.curMethRecv != nil && id.Name == p.curMethRecv.Names[0].Name {
-			p.printMethRecv()
-			p.print(x.Sel)
-			return false, x.X
-		}
-		if p.isPtrArg(id) {
-			p.print(token.LPAREN, token.MUL, id, token.RPAREN)
-		} else {
-			p.expr1(x.X, token.HighestPrec, depth)
-		}
-	} else {
-		p.expr1(x.X, token.HighestPrec, depth)
-	}
+func (p *printer) selectorExpr(x *ast.SelectorExpr, depth int) (wasIndented bool) {
+	p.derefPtrArgs(x.X, token.HighestPrec, depth)
 	p.print(token.PERIOD)
 	if line := p.lineFor(x.Sel.Pos()); p.pos.IsValid() && p.pos.Line < line {
 		p.print(indent, newline)
 		p.setPos(x.Sel.Pos())
 		p.print(x.Sel)
-		if !isMethod {
-			p.print(unindent)
-		}
-		return true, nil
+		p.print(unindent)
+		return true
 	}
 	p.setPos(x.Sel.Pos())
 	p.print(x.Sel)
-	return false, nil
+	return false
+}
+
+// gosl: methodExpr needs to deal with possible multiple chains of selector exprs
+// to determine the actual type and name of the receiver.
+// a.b.c() -> sel.X = (a.b) Sel=c
+func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, err error) {
+	var baseRecv *ast.Ident // first receiver in path
+	var paths []string
+	cur := x
+	for {
+		paths = append(paths, cur.Sel.Name)
+		if sl, ok := cur.X.(*ast.SelectorExpr); ok { // path is itself a selector
+			cur = sl
+			continue
+		}
+		if id, ok := cur.X.(*ast.Ident); ok {
+			baseRecv = id
+			break
+		}
+		err = fmt.Errorf("gosl methodPath ERROR: path for method call must be simple list of fields, not %#v:", cur.X)
+		fmt.Println(err.Error())
+		return
+	}
+	if p.isPtrArg(baseRecv) {
+		recvPath = "&(*" + baseRecv.Name + ")"
+	} else {
+		recvPath = "&" + baseRecv.Name
+	}
+	bt, err := getStructType(p.getIdType(baseRecv))
+	if err != nil {
+		return
+	}
+	curt := bt
+	np := len(paths)
+	for pi := np - 1; pi >= 0; pi-- {
+		p := paths[pi]
+		recvPath += "." + p
+		f := fieldByName(curt, p)
+		if f == nil {
+			err = fmt.Errorf("gosl ERROR: field not found %q in type: %q:", p, curt.String())
+			fmt.Println(err.Error())
+			return
+		}
+		if pi == 0 {
+
+			recvType = getLocalTypeName(f.Type())
+		} else {
+			curt, err = getStructType(f.Type())
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+func fieldByName(st *types.Struct, name string) *types.Var {
+	nf := st.NumFields()
+	for i := range nf {
+		f := st.Field(i)
+		if f.Name() == name {
+			return f
+		}
+	}
+	return nil
+}
+
+func (p *printer) getIdType(id *ast.Ident) types.Type {
+	if obj, ok := p.pkg.TypesInfo.Uses[id]; ok {
+		return obj.Type()
+	}
+	return nil
+}
+
+func getLocalTypeName(typ types.Type) string {
+	_, nm := path.Split(typ.String())
+	return nm
+}
+
+func getStructType(typ types.Type) (*types.Struct, error) {
+	typ = typ.Underlying()
+	if st, ok := typ.(*types.Struct); ok {
+		return st, nil
+	}
+	if ptr, ok := typ.(*types.Pointer); ok {
+		typ = ptr.Elem().Underlying()
+		if st, ok := typ.(*types.Struct); ok {
+			return st, nil
+		}
+	}
+	err := fmt.Errorf("gosl ERROR: type is not a struct and it should be: %q %+t", typ.String(), typ)
+	fmt.Println(err.Error())
+	return nil, err
+}
+
+func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
+	path := x.Fun.(*ast.SelectorExpr) // we know fun is selector
+	methName := path.Sel.Name
+	recvPath := ""
+	recvType := ""
+	var err error
+	pathIsPackage := false
+	if sl, ok := path.X.(*ast.SelectorExpr); ok { // path is itself a selector
+		recvPath, recvType, err = p.methodPath(sl)
+		if err != nil {
+			return
+		}
+	} else if id, ok := path.X.(*ast.Ident); ok {
+		// if p.isPtrArg(id) {
+		// 	recvPath = "(*" + id.Name + ")"
+		// } else {
+		recvPath = id.Name
+		// }
+		typ := p.getIdType(id)
+		if typ != nil {
+			recvType = getLocalTypeName(typ)
+			if strings.HasPrefix(recvType, "invalid") {
+				pathIsPackage = true
+				recvType = id.Name // is a package path
+			}
+		} else {
+			pathIsPackage = true
+			recvType = id.Name // is a package path
+		}
+	} else {
+		err := fmt.Errorf("gosl methodExpr ERROR: path expression for method call must be simple list of fields, not %#v:", path.X)
+		fmt.Println(err.Error())
+		return
+	}
+	if pathIsPackage {
+		p.print(recvType + "." + methName)
+		p.setPos(x.Lparen)
+		p.print(token.LPAREN)
+	} else {
+		p.print(recvType + "_" + methName)
+		p.setPos(x.Lparen)
+		p.print(token.LPAREN)
+		p.print(recvPath)
+		if len(x.Args) > 0 {
+			p.print(token.COMMA, blank)
+		}
+	}
+	if x.Ellipsis.IsValid() {
+		p.exprList(x.Lparen, x.Args, depth, 0, x.Ellipsis, false)
+		p.setPos(x.Ellipsis)
+		p.print(token.ELLIPSIS)
+		if x.Rparen.IsValid() && p.lineFor(x.Ellipsis) < p.lineFor(x.Rparen) {
+			p.print(token.COMMA, formfeed)
+		}
+	} else {
+		p.exprList(x.Lparen, x.Args, depth, commaTerm, x.Rparen, false)
+	}
+	p.setPos(x.Rparen)
+	p.print(token.RPAREN)
+
 }
 
 func (p *printer) expr0(x ast.Expr, depth int) {
@@ -1866,18 +2006,39 @@ func (p *printer) spec(spec ast.Spec, n int, doIndent bool, tok token.Token) {
 			p.internalError("expected n = 1; got", n)
 		}
 		p.setComment(s.Doc)
-		p.print(tok, blank)
-		p.identList(s.Names, doIndent) // always present
-		if s.Type != nil {
-			p.print(token.COLON, blank)
-			p.expr(s.Type)
+
+		if len(s.Names) > 1 {
+			nnm := len(s.Names)
+			for ni, nm := range s.Names {
+				p.print(tok, blank)
+				p.print(nm.Name)
+				if s.Type != nil {
+					p.print(token.COLON, blank)
+					p.expr(s.Type)
+				}
+				if s.Values != nil {
+					p.print(blank, token.ASSIGN, blank)
+					p.exprList(token.NoPos, s.Values, 1, 0, token.NoPos, false)
+				}
+				p.print(token.SEMICOLON)
+				if ni < nnm-1 {
+					p.print(formfeed)
+				}
+			}
+		} else {
+			p.print(tok, blank)
+			p.identList(s.Names, doIndent) // always present
+			if s.Type != nil {
+				p.print(token.COLON, blank)
+				p.expr(s.Type)
+			}
+			if s.Values != nil {
+				p.print(blank, token.ASSIGN, blank)
+				p.exprList(token.NoPos, s.Values, 1, 0, token.NoPos, false)
+			}
+			p.print(token.SEMICOLON)
+			p.setComment(s.Comment)
 		}
-		if s.Values != nil {
-			p.print(blank, token.ASSIGN, blank)
-			p.exprList(token.NoPos, s.Values, 1, 0, token.NoPos, false)
-		}
-		p.print(token.SEMICOLON)
-		p.setComment(s.Comment)
 
 	case *ast.TypeSpec:
 		p.setComment(s.Doc)
@@ -2012,7 +2173,7 @@ func (p *printer) nodeSize(n ast.Node, maxSize int) (size int) {
 	// in RawFormat
 	cfg := Config{Mode: RawFormat}
 	var counter sizeCounter
-	if err := cfg.fprint(&counter, p.fset, n, p.nodeSizes); err != nil {
+	if err := cfg.fprint(&counter, p.pkg, n, p.nodeSizes); err != nil {
 		return
 	}
 	if counter.size <= maxSize && !counter.hasNewline {

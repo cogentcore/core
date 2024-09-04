@@ -93,7 +93,22 @@ type DataStruct struct {
 	Integ float32
 
 	// exp of integ
-	Exp, Pad2 float32
+	Exp float32
+
+	pad float32
+}
+
+// SubParamStruct has the test sub-params
+type SubParamStruct struct {
+	A, B, C, D float32
+}
+
+func (sp *SubParamStruct) Sum() float32 {
+	return sp.A + sp.B + sp.C + sp.D
+}
+
+func (sp *SubParamStruct) SumPlus(extra float32) float32 {
+	return sp.Sum() + extra
 }
 
 // ParamStruct has the test params
@@ -107,6 +122,9 @@ type ParamStruct struct {
 	Option slbool.Bool // note: standard bool doesn't work
 
 	pad float32 // comment this out to trigger alignment warning
+
+	// extra parameters
+	Subs SubParamStruct
 }
 
 func (ps *ParamStruct) IntegFromRaw(ds *DataStruct) float32 {
@@ -141,6 +159,12 @@ func (ps *ParamStruct) AnotherMeth(ds *DataStruct) {
 		ab := float32(1)
 		ds.Exp *= ab
 	}
+
+	var a, b float32
+	b = 42.0
+	a = ps.Subs.Sum()
+	ds.Exp = ps.Subs.SumPlus(b)
+	ds.Integ = a
 }
 
 //gosl:end basic

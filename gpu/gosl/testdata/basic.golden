@@ -67,7 +67,24 @@ struct DataStruct {
 
 	// exp of integ
 	Exp: f32,
-	Pad2: f32,
+
+	pad: f32,
+}
+
+// SubParamStruct has the test sub-params
+struct SubParamStruct {
+	A: f32,
+	B: f32,
+	C: f32,
+	D: f32,
+}
+
+fn SubParamStruct_Sum(sp: ptr<function,SubParamStruct>) -> f32 {
+	return (*sp).A + (*sp).B + (*sp).C + (*sp).D;
+}
+
+fn SubParamStruct_SumPlus(sp: ptr<function,SubParamStruct>, extra: f32) -> f32 {
+	return SubParamStruct_Sum(sp) + extra;
 }
 
 // ParamStruct has the test params
@@ -81,17 +98,20 @@ struct ParamStruct {
 	Option: i32, // note: standard bool doesn't work
 
 	pad: f32, // comment this out to trigger alignment warning
+
+	// extra parameters
+	Subs: SubParamStruct,
 }
 
 fn ParamStruct_IntegFromRaw(ps: ptr<function,ParamStruct>, ds: ptr<function,DataStruct>) -> f32 {
 	// note: the following are just to test basic control structures
 	var newVal = (*ps).Dt * ((*ds).Raw - (*ds).Integ);
-	if (newVal < -10 || (*ps).Option==1) {
+	if (newVal < -10 || (*ps).Option == 1) {
 		newVal = -10.0;
 	}
 	(*ds).Integ += newVal;
 	(*ds).Exp = exp(-(*ds).Integ);
-	ParamStruct_AnotherMeth(ps,ds);
+	ParamStruct_AnotherMeth(ps, ds);
 	return (*ds).Exp;
 }
 
@@ -118,6 +138,13 @@ fn ParamStruct_AnotherMeth(ps: ptr<function,ParamStruct>, ds: ptr<function,DataS
 		(*ds).Exp *= ab;
 	}
 	}
+
+	var a: f32;
+	var b: f32;
+	b = 42.0;
+	a = SubParamStruct_Sum(&(*ps).Subs);
+	(*ds).Exp = SubParamStruct_SumPlus(&(*ps).Subs, b);
+	(*ds).Integ = a;
 }
 
 @group(0) @binding(0)

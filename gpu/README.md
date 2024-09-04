@@ -194,4 +194,5 @@ See https://web3dsurvey.com/webgpu for a browser of limits across different plat
 * https://web3dsurvey.com/webgpu
 * https://toji.dev/webgpu-best-practices/ -- very helpful tutorial info
 * https://sotrh.github.io/learn-wgpu/beginner/tutorial5-textures/
+* https://webgpu.github.io/webgpu-samples/
 

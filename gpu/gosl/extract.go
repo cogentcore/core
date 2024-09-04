@@ -8,9 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -104,22 +102,24 @@ func ExtractGoFiles(files []string) map[string][]byte {
 		olns = append(olns, []byte("package main"))
 		olns = append(olns, []byte(`import (
 	"math"
-	"cogentcore.org/core/vgpu/gosl/slbool"
-	"cogentcore.org/core/vgpu/gosl/slrand"
-	"cogentcore.org/core/vgpu/gosl/sltype"
+	"cogentcore.org/core/gpu/gosl/slbool"
+	"cogentcore.org/core/gpu/gosl/slrand"
+	"cogentcore.org/core/gpu/gosl/sltype"
 )
 `))
 		olns = append(olns, lns...)
+		SlBoolReplace(olns)
 		res := bytes.Join(olns, nl)
 		ioutil.WriteFile(outfn, res, 0644)
-		cmd := exec.Command("goimports", "-w", fn+".go") // get imports
-		cmd.Dir, _ = filepath.Abs(*outDir)
-		out, err := cmd.CombinedOutput()
-		_ = out
-		// fmt.Printf("\n################\ngoimports output for: %s\n%s\n", outfn, out)
-		if err != nil {
-			log.Println(err)
-		}
+		// not necessary and super slow:
+		// cmd := exec.Command("goimports", "-w", fn+".go") // get imports
+		// cmd.Dir, _ = filepath.Abs(*outDir)
+		// out, err := cmd.CombinedOutput()
+		// _ = out
+		// // fmt.Printf("\n################\ngoimports output for: %s\n%s\n", outfn, out)
+		// if err != nil {
+		// 	log.Println(err)
+		// }
 		rsls[fn] = bytes.Join(lns, nl)
 	}
 
