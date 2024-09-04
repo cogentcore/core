@@ -15,6 +15,7 @@ import (
 	"go/types"
 	"math"
 	"path"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -429,6 +430,130 @@ func (p *printer) parameters(fields *ast.FieldList, mode paramMode) {
 	p.print(closeTok)
 }
 
+// gosl: ensure basic literals are properly cast
+func (p *printer) matchLiteralArgs(args []ast.Expr, params *types.Tuple) []ast.Expr {
+	ags := slices.Clone(args)
+	mx := min(len(args), params.Len())
+	for i := 0; i < mx; i++ {
+		ag := args[i]
+		pr := params.At(i)
+		lit, ok := ag.(*ast.BasicLit)
+		if !ok {
+			continue
+		}
+		typ := pr.Type()
+		tnm := getLocalTypeName(typ)
+		nn := normalizedNumber(lit)
+		nn.Value = tnm + "(" + nn.Value + ")"
+		ags[i] = nn
+	}
+	return ags
+}
+
+// gosl: ensure basic literals are properly cast
+func (p *printer) matchLiteralType(x ast.Expr, typ *ast.Ident) bool {
+	if lit, ok := x.(*ast.BasicLit); ok {
+		p.print(typ.Name, token.LPAREN, normalizedNumber(lit), token.RPAREN)
+		return true
+	}
+	return false
+}
+
+// gosl: ensure basic literals are properly cast
+func (p *printer) matchAssignType(lhs []ast.Expr, rhs []ast.Expr) bool {
+	if len(rhs) != 1 || len(lhs) != 1 {
+		return false
+	}
+	val := ""
+	lit, ok := rhs[0].(*ast.BasicLit)
+	if ok {
+		val = normalizedNumber(lit).Value
+	} else {
+		un, ok := rhs[0].(*ast.UnaryExpr)
+		if !ok || un.Op != token.SUB {
+			return false
+		}
+		lit, ok = un.X.(*ast.BasicLit)
+		if !ok {
+			return false
+		}
+		val = "-" + normalizedNumber(lit).Value
+	}
+	var err error
+	var typ types.Type
+	if id, ok := lhs[0].(*ast.Ident); ok {
+		typ = p.getIdType(id)
+		if typ == nil {
+			return false
+		}
+	} else if sl, ok := lhs[0].(*ast.SelectorExpr); ok {
+		typ, err = p.pathType(sl)
+		if err != nil {
+			return false
+		}
+	} else if st, ok := lhs[0].(*ast.StarExpr); ok {
+		if id, ok := st.X.(*ast.Ident); ok {
+			typ = p.getIdType(id)
+			if typ == nil {
+				return false
+			}
+		}
+		if err != nil {
+			return false
+		}
+	}
+	if typ == nil {
+		return false
+	}
+	tnm := getLocalTypeName(typ)
+	if tnm[0] == '*' {
+		tnm = tnm[1:]
+	}
+	p.print(tnm, "(", val, ")")
+	return true
+}
+
+// gosl: pathType returns the final type for the selector path.
+// a.b.c -> sel.X = (a.b) Sel=c -- returns type of c by tracing
+// through the path.
+func (p *printer) pathType(x *ast.SelectorExpr) (types.Type, error) {
+	var paths []*ast.Ident
+	cur := x
+	for {
+		paths = append(paths, cur.Sel)
+		if sl, ok := cur.X.(*ast.SelectorExpr); ok { // path is itself a selector
+			cur = sl
+			continue
+		}
+		if id, ok := cur.X.(*ast.Ident); ok {
+			paths = append(paths, id)
+			break
+		}
+		return nil, fmt.Errorf("gosl pathType: path not a pure selector path")
+	}
+	np := len(paths)
+	bt, err := getStructType(p.getIdType(paths[np-1]))
+	if err != nil {
+		return nil, err
+	}
+	for pi := np - 2; pi >= 0; pi-- {
+		pt := paths[pi]
+		f := fieldByName(bt, pt.Name)
+		if f == nil {
+			return nil, fmt.Errorf("gosl pathType: field not found %q in type: %q:", p, bt.String())
+		}
+		if pi == 0 {
+			return f.Type(), nil
+		} else {
+			bt, err = getStructType(f.Type())
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return nil, fmt.Errorf("gosl pathType: path not a pure selector path")
+}
+
 // gosl: check if identifier is a pointer arg
 func (p *printer) isPtrArg(id *ast.Ident) bool {
 	for _, pt := range p.curPtrArgs {
@@ -532,6 +657,9 @@ func (p *printer) signature(sig *ast.FuncType, recv *ast.FieldList) {
 	n := res.NumFields()
 	if n > 0 {
 		// res != nil
+		if id, ok := res.List[0].Type.(*ast.Ident); ok {
+			p.curReturnType = id
+		}
 		p.print(blank, "->", blank)
 		if n == 1 && res.List[0].Names == nil {
 			// single anonymous res; no ()'s
@@ -1104,15 +1232,24 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		}
 		p.setPos(x.Lparen)
 		p.print(token.LPAREN)
+		args := x.Args
+		if fid, ok := x.Fun.(*ast.Ident); ok {
+			if obj, ok := p.pkg.TypesInfo.Uses[fid]; ok {
+				if ft, ok := obj.(*types.Func); ok {
+					sig := ft.Type().(*types.Signature)
+					args = p.matchLiteralArgs(x.Args, sig.Params())
+				}
+			}
+		}
 		if x.Ellipsis.IsValid() {
-			p.exprList(x.Lparen, x.Args, depth, 0, x.Ellipsis, false)
+			p.exprList(x.Lparen, args, depth, 0, x.Ellipsis, false)
 			p.setPos(x.Ellipsis)
 			p.print(token.ELLIPSIS)
 			if x.Rparen.IsValid() && p.lineFor(x.Ellipsis) < p.lineFor(x.Rparen) {
 				p.print(token.COMMA, formfeed)
 			}
 		} else {
-			p.exprList(x.Lparen, x.Args, depth, commaTerm, x.Rparen, false)
+			p.exprList(x.Lparen, args, depth, commaTerm, x.Rparen, false)
 		}
 		p.setPos(x.Rparen)
 		p.print(token.RPAREN)
@@ -1273,7 +1410,7 @@ func (p *printer) selectorExpr(x *ast.SelectorExpr, depth int) (wasIndented bool
 // gosl: methodExpr needs to deal with possible multiple chains of selector exprs
 // to determine the actual type and name of the receiver.
 // a.b.c() -> sel.X = (a.b) Sel=c
-func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, err error) {
+func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, pathType types.Type, err error) {
 	var baseRecv *ast.Ident // first receiver in path
 	var paths []string
 	cur := x
@@ -1312,7 +1449,7 @@ func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, er
 			return
 		}
 		if pi == 0 {
-
+			pathType = f.Type()
 			recvType = getLocalTypeName(f.Type())
 		} else {
 			curt, err = getStructType(f.Type())
@@ -1370,23 +1507,22 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 	recvType := ""
 	var err error
 	pathIsPackage := false
+	var pathType types.Type
 	if sl, ok := path.X.(*ast.SelectorExpr); ok { // path is itself a selector
-		recvPath, recvType, err = p.methodPath(sl)
+		recvPath, recvType, pathType, err = p.methodPath(sl)
 		if err != nil {
 			return
 		}
 	} else if id, ok := path.X.(*ast.Ident); ok {
-		// if p.isPtrArg(id) {
-		// 	recvPath = "(*" + id.Name + ")"
-		// } else {
 		recvPath = id.Name
-		// }
 		typ := p.getIdType(id)
 		if typ != nil {
 			recvType = getLocalTypeName(typ)
 			if strings.HasPrefix(recvType, "invalid") {
 				pathIsPackage = true
 				recvType = id.Name // is a package path
+			} else {
+				pathType = typ
 			}
 		} else {
 			pathIsPackage = true
@@ -1410,15 +1546,25 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 			p.print(token.COMMA, blank)
 		}
 	}
+	args := x.Args
+	if pathType != nil {
+		meth, _, _ := types.LookupFieldOrMethod(pathType, true, p.pkg.Types, methName)
+		if meth != nil {
+			if ft, ok := meth.(*types.Func); ok {
+				sig := ft.Type().(*types.Signature)
+				args = p.matchLiteralArgs(x.Args, sig.Params())
+			}
+		}
+	}
 	if x.Ellipsis.IsValid() {
-		p.exprList(x.Lparen, x.Args, depth, 0, x.Ellipsis, false)
+		p.exprList(x.Lparen, args, depth, 0, x.Ellipsis, false)
 		p.setPos(x.Ellipsis)
 		p.print(token.ELLIPSIS)
 		if x.Rparen.IsValid() && p.lineFor(x.Ellipsis) < p.lineFor(x.Rparen) {
 			p.print(token.COMMA, formfeed)
 		}
 	} else {
-		p.exprList(x.Lparen, x.Args, depth, commaTerm, x.Rparen, false)
+		p.exprList(x.Lparen, args, depth, commaTerm, x.Rparen, false)
 	}
 	p.setPos(x.Rparen)
 	p.print(token.RPAREN)
@@ -1678,7 +1824,10 @@ func (p *printer) stmt(stmt ast.Stmt, nextIsRBrace bool, nosemi bool) {
 		default:
 			p.print(s.Tok, blank)
 		}
-		p.exprList(s.TokPos, s.Rhs, depth, 0, token.NoPos, false)
+		if p.matchAssignType(s.Lhs, s.Rhs) {
+		} else {
+			p.exprList(s.TokPos, s.Rhs, depth, 0, token.NoPos, false)
+		}
 		if !nosemi {
 			p.print(token.SEMICOLON)
 		}
@@ -1695,19 +1844,21 @@ func (p *printer) stmt(stmt ast.Stmt, nextIsRBrace bool, nosemi bool) {
 		p.print(token.RETURN)
 		if s.Results != nil {
 			p.print(blank)
-			// Use indentList heuristic to make corner cases look
-			// better (issue 1207). A more systematic approach would
-			// always indent, but this would cause significant
-			// reformatting of the code base and not necessarily
-			// lead to more nicely formatted code in general.
-			if p.indentList(s.Results) {
-				p.print(indent)
-				// Use NoPos so that a newline never goes before
-				// the results (see issue #32854).
-				p.exprList(token.NoPos, s.Results, 1, noIndent, token.NoPos, false)
-				p.print(unindent)
-			} else {
-				p.exprList(token.NoPos, s.Results, 1, 0, token.NoPos, false)
+			if !p.matchLiteralType(s.Results[0], p.curReturnType) {
+				// Use indentList heuristic to make corner cases look
+				// better (issue 1207). A more systematic approach would
+				// always indent, but this would cause significant
+				// reformatting of the code base and not necessarily
+				// lead to more nicely formatted code in general.
+				if p.indentList(s.Results) {
+					p.print(indent)
+					// Use NoPos so that a newline never goes before
+					// the results (see issue #32854).
+					p.exprList(token.NoPos, s.Results, 1, noIndent, token.NoPos, false)
+					p.print(unindent)
+				} else {
+					p.exprList(token.NoPos, s.Results, 1, 0, token.NoPos, false)
+				}
 			}
 		}
 		if !nosemi {

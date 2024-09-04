@@ -99,8 +99,9 @@ type printer struct {
 
 	// current arguments to function that are pointers and thus need dereferencing
 	// when accessing fields
-	curPtrArgs  []*ast.Ident
-	curMethRecv *ast.Field // current method receiver, also included in curPtrArgs if ptr
+	curPtrArgs    []*ast.Ident
+	curMethRecv   *ast.Field // current method receiver, also included in curPtrArgs if ptr
+	curReturnType *ast.Ident
 }
 
 func (p *printer) internalError(msg ...any) {

@@ -14,7 +14,7 @@ fn MyTrickyFun(x: f32) -> f32 {
 // than exp actually.
 fn FastExp(x: f32) -> f32 {
 	if (x <= -88.76731) { // this doesn't add anything and -exp is main use-case anyway
-		return 0.0;
+		return f32(0);
 	}
 	var i = i32(12102203*x) + i32(127)*(i32(1)<<23);
 	var m = i >> 7 & 0xFFFF; // copy mantissa
@@ -107,7 +107,7 @@ fn ParamStruct_IntegFromRaw(ps: ptr<function,ParamStruct>, ds: ptr<function,Data
 	// note: the following are just to test basic control structures
 	var newVal = (*ps).Dt * ((*ds).Raw - (*ds).Integ);
 	if (newVal < -10 || (*ps).Option == 1) {
-		newVal = -10.0;
+		newVal = f32(-10);
 	}
 	(*ds).Integ += newVal;
 	(*ds).Exp = exp(-(*ds).Integ);
@@ -141,7 +141,7 @@ fn ParamStruct_AnotherMeth(ps: ptr<function,ParamStruct>, ds: ptr<function,DataS
 
 	var a: f32;
 	var b: f32;
-	b = 42.0;
+	b = f32(42);
 	a = SubParamStruct_Sum(&(*ps).Subs);
 	(*ds).Exp = SubParamStruct_SumPlus(&(*ps).Subs, b);
 	(*ds).Integ = a;

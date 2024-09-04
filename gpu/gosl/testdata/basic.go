@@ -7,18 +7,14 @@ import (
 	"cogentcore.org/core/vgpu/gosl/slbool"
 )
 
-//gosl:endwgsl basic
-
 // note: this code is included in the go pre-processing output but
 // then removed from the final wgsl output.
 // Use when you need different versions of the same function for CPU vs. GPU
 
 // MyTrickyFun this is the CPU version of the tricky function
 func MyTrickyFun(x float32) float32 {
-	return 10.0 // ok actually not tricky here, but whatever
+	return 10 // ok actually not tricky here, but whatever
 }
-
-//gosl:end basic
 
 //gosl:wgsl basic
 
@@ -39,7 +35,7 @@ func MyTrickyFun(x float32) float32 {
 // than math32.Exp actually.
 func FastExp(x float32) float32 {
 	if x <= -88.76731 { // this doesn't add anything and -exp is main use-case anyway
-		return 0.0
+		return 0
 	}
 	i := int32(12102203*x) + int32(127)*(int32(1)<<23)
 	m := i >> 7 & 0xFFFF // copy mantissa
@@ -131,16 +127,17 @@ func (ps *ParamStruct) IntegFromRaw(ds *DataStruct) float32 {
 	// note: the following are just to test basic control structures
 	newVal := ps.Dt * (ds.Raw - ds.Integ)
 	if newVal < -10 || ps.Option.IsTrue() {
-		newVal = -10.0
+		newVal = -10
 	}
 	ds.Integ += newVal
 	ds.Exp = math32.Exp(-ds.Integ)
-	ps.AnotherMeth(ds)
+	var a float32
+	ps.AnotherMeth(ds, &a)
 	return ds.Exp
 }
 
 // AnotherMeth does more computation
-func (ps *ParamStruct) AnotherMeth(ds *DataStruct) {
+func (ps *ParamStruct) AnotherMeth(ds *DataStruct, ptrarg *float32) {
 	for i := 0; i < 10; i++ {
 		ds.Integ *= 0.99
 	}
@@ -161,10 +158,12 @@ func (ps *ParamStruct) AnotherMeth(ds *DataStruct) {
 	}
 
 	var a, b float32
-	b = 42.0
+	b = 42
 	a = ps.Subs.Sum()
 	ds.Exp = ps.Subs.SumPlus(b)
 	ds.Integ = a
+
+	*ptrarg = -1
 }
 
 //gosl:end basic
