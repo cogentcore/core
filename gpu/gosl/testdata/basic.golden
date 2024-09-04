@@ -111,14 +111,15 @@ fn ParamStruct_IntegFromRaw(ps: ptr<function,ParamStruct>, ds: ptr<function,Data
 	}
 	(*ds).Integ += newVal;
 	(*ds).Exp = exp(-(*ds).Integ);
-	ParamStruct_AnotherMeth(ps, ds);
+	var a: f32;
+	ParamStruct_AnotherMeth(ps, ds, &a);
 	return (*ds).Exp;
 }
 
 // AnotherMeth does more computation
-fn ParamStruct_AnotherMeth(ps: ptr<function,ParamStruct>, ds: ptr<function,DataStruct>) {
+fn ParamStruct_AnotherMeth(ps: ptr<function,ParamStruct>, ds: ptr<function,DataStruct>, ptrarg: ptr<function,f32>) {
 	for (var i = 0; i < 10; i++) {
-		(*ds).Integ *= 0.99;
+		(*ds).Integ *= f32(0.99);
 	}
 	var flag: NeuronFlags;
 	flag &= ~NeuronHasExt; // clear flag -- op doesn't exist in C
@@ -145,6 +146,8 @@ fn ParamStruct_AnotherMeth(ps: ptr<function,ParamStruct>, ds: ptr<function,DataS
 	a = SubParamStruct_Sum(&(*ps).Subs);
 	(*ds).Exp = SubParamStruct_SumPlus(&(*ps).Subs, b);
 	(*ds).Integ = a;
+
+	*ptrarg = f32(-1);
 }
 
 @group(0) @binding(0)
