@@ -8,7 +8,7 @@ The total time to generate 1 million random numbers is shown at the end, compari
 
 # Building
 
-There is a `//go:generate` comment directive in `main.go` that calls `gosl` on the relevant files, so you can do `go generate` followed by `go build` to run it.
+There is a `//go:generate` comment directive in `main.go` that calls _the local build_ of `gosl` on the relevant files, so you can do `go generate` followed by `go build` to run it.  You must do `go build` in main `gosl` dir before this will work.
 
 The generated files go into the `shaders/` subdirectory.
 
