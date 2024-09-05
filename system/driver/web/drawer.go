@@ -11,12 +11,12 @@ import (
 	"image/draw"
 	"strings"
 	"syscall/js"
-	"unsafe"
 
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Drawer implements [system.Drawer] with a WebGPU-based drawer if available
@@ -66,10 +66,7 @@ func (dw *Drawer) End() {
 		dw.wgpu.End()
 	} else {
 		sz := dw.base.Image.Bounds().Size()
-		ptr := uintptr(unsafe.Pointer(&dw.base.Image.Pix[0]))
-		memoryBytes := js.Global().Get("Uint8ClampedArray").New(js.Global().Get("wasm").Get("instance").Get("exports").Get("mem").Get("buffer"))
-		// using subarray instead of slice gives a 5x performance improvement due to no copying
-		bytes := memoryBytes.Call("subarray", ptr, ptr+uintptr(len(dw.base.Image.Pix)))
+		bytes := wgpu.BytesToJS(dw.base.Image.Pix)
 		data := js.Global().Get("ImageData").New(bytes, sz.X, sz.Y)
 		dw.context2D.Call("putImageData", data, 0, 0)
 	}
