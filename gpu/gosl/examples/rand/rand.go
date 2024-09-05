@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
+	"cogentcore.org/core/gpu/gosl/slrand"
+	"cogentcore.org/core/gpu/gosl/sltype"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/vgpu/gosl/slrand"
-	"cogentcore.org/core/vgpu/gosl/sltype"
 )
 
 //gosl:wgsl rand
@@ -15,13 +15,13 @@ import (
 //gosl:start rand
 
 type Rnds struct {
-	Uints      sltype.Uint2
+	Uints      sltype.Uint32Vec2
 	pad, pad1  int32
-	Floats     sltype.Float2
+	Floats     sltype.Float32Vec2
 	pad2, pad3 int32
-	Floats11   sltype.Float2
+	Floats11   sltype.Float32Vec2
 	pad4, pad5 int32
-	Gauss      sltype.Float2
+	Gauss      sltype.Float32Vec2
 	pad6, pad7 int32
 }
 
@@ -32,11 +32,11 @@ type Rnds struct {
 // reference (as a pointer) so subsequent calls get a new counter value.
 // The counter should be incremented by the number of random calls
 // outside of the overall update function.
-func (r *Rnds) RndGen(counter sltype.Uint2, idx uint32) {
-	r.Uints = slrand.Uint2(&counter, idx)
-	r.Floats = slrand.Float2(&counter, idx)
-	r.Floats11 = slrand.Float112(&counter, idx)
-	r.Gauss = slrand.NormFloat2(&counter, idx)
+func (r *Rnds) RndGen(counter uint64, idx uint32) {
+	r.Uints = slrand.Uint32Vec2(counter, uint32(0), idx)
+	r.Floats = slrand.Float32Vec2(counter, uint32(1), idx)
+	r.Floats11 = slrand.Float32Range11Vec2(counter, uint32(2), idx)
+	r.Gauss = slrand.Float32NormVec2(counter, uint32(3), idx)
 }
 
 //gosl:end rand
@@ -49,7 +49,7 @@ func FloatSame(f1, f2 float32) (exact, tol bool) {
 	return
 }
 
-func Float2Same(f1, f2 sltype.Float2) (exact, tol bool) {
+func Float32Vec2Same(f1, f2 sltype.Float32Vec2) (exact, tol bool) {
 	e1, t1 := FloatSame(f1.X, f2.X)
 	e2, t2 := FloatSame(f1.Y, f2.Y)
 	exact = e1 && e2
@@ -60,9 +60,9 @@ func Float2Same(f1, f2 sltype.Float2) (exact, tol bool) {
 // IsSame compares values at two levels: exact and with Tol
 func (r *Rnds) IsSame(o *Rnds) (exact, tol bool) {
 	e1 := r.Uints == o.Uints
-	e2, t2 := Float2Same(r.Floats, o.Floats)
-	e3, t3 := Float2Same(r.Floats11, o.Floats11)
-	_, t4 := Float2Same(r.Gauss, o.Gauss)
+	e2, t2 := Float32Vec2Same(r.Floats, o.Floats)
+	e3, t3 := Float32Vec2Same(r.Floats11, o.Floats11)
+	_, t4 := Float32Vec2Same(r.Gauss, o.Gauss)
 	exact = e1 && e2 && e3 // skip e4 -- know it isn't
 	tol = t2 && t3 && t4
 	return

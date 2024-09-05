@@ -5,7 +5,7 @@
 // than exp actually.
 fn FastExp(x: f32) -> f32 {
 	if (x <= -88.02969) { // this doesn't add anything and -exp is main use-case anyway
-		return 0.0;
+		return f32(0.0);
 	}
 	var i = i32(12102203*x) + i32(127)*(i32(1)<<23);
 	var m = i >> 7 & 0xFFFF; // copy mantissa

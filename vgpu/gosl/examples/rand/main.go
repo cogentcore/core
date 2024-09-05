@@ -38,7 +38,7 @@ func main() {
 	// gp.PropsString(true) // print
 
 	// n := 10
-	n := 10000000
+	n := 1000000
 	threads := 64
 	nInt := int(math32.IntMultiple(float32(n), float32(threads)))
 	n = nInt               // enforce optimal n's -- otherwise requires range checking

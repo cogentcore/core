@@ -1,4 +1,4 @@
-// Copyright 2022 Cogent Core. All rights reserved.
+// Copyright 2024 Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -25,15 +25,15 @@ func MoveLines(lines *[][]byte, to, st, ed int) {
 // * moves wgsl segments around, e.g., methods
 // into their proper classes
 // * fixes printf, slice other common code
-// returns true if a slrand. prefix was found -- drives copying
-// of that file.
-func SlEdits(src []byte) ([]byte, bool) {
+// returns true if a slrand. or sltype. prefix was found,
+// driveing copying of those files.
+func SlEdits(src []byte) ([]byte, bool, bool) {
 	// return src // uncomment to show original without edits
 	nl := []byte("\n")
 	lines := bytes.Split(src, nl)
-	hasSlrand := SlEditsReplace(lines)
+	hasSlrand, hasSltype := SlEditsReplace(lines)
 
-	return bytes.Join(lines, nl), hasSlrand
+	return bytes.Join(lines, nl), hasSlrand, hasSltype
 }
 
 type Replace struct {
@@ -41,19 +41,20 @@ type Replace struct {
 }
 
 var Replaces = []Replace{
+	{[]byte("sltype.Uint32Vec2"), []byte("vec2<u32>")},
+	{[]byte("sltype.Float32Vec2"), []byte("vec2<f32>")},
 	{[]byte("float32"), []byte("f32")},
-	{[]byte("float64"), []byte("f64")},
+	{[]byte("float64"), []byte("f64")}, // TODO: not yet supported
 	{[]byte("uint32"), []byte("u32")},
+	{[]byte("uint64"), []byte("su64")},
 	{[]byte("int32"), []byte("i32")},
-	{[]byte("int64"), []byte("i64")},                // TODO: does not exist
 	{[]byte("math32.FastExp("), []byte("FastExp(")}, // FastExp about same speed, numerically identical
 	// {[]byte("math32.FastExp("), []byte("exp(")}, // exp is slightly faster it seems
 	{[]byte("math.Float32frombits("), []byte("bitcast<f32>(")},
 	{[]byte("math.Float32bits("), []byte("bitcast<u32>(")},
 	{[]byte("shaders."), []byte("")},
 	{[]byte("slrand."), []byte("Rand")},
-	{[]byte("sltype.U"), []byte("u")},
-	{[]byte("sltype.F"), []byte("f")},
+	{[]byte("RandUi32"), []byte("RandUint32")}, // fix int32 -> i32
 	{[]byte(".SetFromVector2("), []byte("=(")},
 	{[]byte(".SetFrom2("), []byte("=(")},
 	{[]byte(".IsTrue()"), []byte("==1")},
@@ -99,14 +100,16 @@ func MathReplaceAll(mat, ln []byte) []byte {
 }
 
 // SlEditsReplace replaces Go with equivalent WGSL code
-// returns true if has slrand. -- auto include that header file
-// if so.
-func SlEditsReplace(lines [][]byte) bool {
+// returns true if has slrand. or sltype.
+// to auto include that header file if so.
+func SlEditsReplace(lines [][]byte) (bool, bool) {
 	mt32 := []byte("math32.")
 	mth := []byte("math.")
 	slr := []byte("slrand.")
+	styp := []byte("sltype.")
 	include := []byte("#include")
 	hasSlrand := false
+	hasSltype := false
 	for li, ln := range lines {
 		if bytes.Contains(ln, include) {
 			continue
@@ -115,13 +118,16 @@ func SlEditsReplace(lines [][]byte) bool {
 			if !hasSlrand && bytes.Contains(ln, slr) {
 				hasSlrand = true
 			}
+			if !hasSltype && bytes.Contains(ln, styp) {
+				hasSltype = true
+			}
 			ln = bytes.ReplaceAll(ln, r.From, r.To)
 		}
 		ln = MathReplaceAll(mt32, ln)
 		ln = MathReplaceAll(mth, ln)
 		lines[li] = ln
 	}
-	return hasSlrand
+	return hasSlrand, hasSltype
 }
 
 var SLBools = []Replace{

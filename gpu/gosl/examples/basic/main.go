@@ -36,7 +36,6 @@ func main() {
 
 	sy := gpu.NewComputeSystem(gp, "compute")
 	pl := gpu.NewComputePipelineShaderFS(shaders, "shaders/basic.wgsl", sy)
-
 	vars := sy.Vars()
 	sgp := vars.AddGroup(gpu.Storage)
 

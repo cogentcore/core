@@ -1,10 +1,11 @@
-// Copyright (c) 2022, Cogent Core. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package main
 
 import (
+	"embed"
 	"fmt"
 	"runtime"
 	"unsafe"
@@ -12,14 +13,15 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/base/timer"
-	"cogentcore.org/core/math32"
-	"cogentcore.org/core/vgpu"
-	"cogentcore.org/core/vgpu/gosl/sltype"
+	"cogentcore.org/core/gpu"
 )
 
 // note: standard one to use is plain "gosl" which should be go install'd
 
 //go:generate ../../gosl rand.go rand.wgsl
+
+//go:embed shaders/*.wgsl
+var shaders embed.FS
 
 func init() {
 	// must lock main thread for gpu!
@@ -27,22 +29,13 @@ func init() {
 }
 
 func main() {
-	if vgpu.InitNoDisplay() != nil {
-		return
-	}
-
-	gp := vgpu.NewComputeGPU()
-	// vgpu.Debug = true
-	gp.Config("slrand")
-
-	// gp.PropsString(true) // print
+	gpu.Debug = true
+	gp := gpu.NewComputeGPU()
+	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
 
 	// n := 10
-	n := 10000000
+	n := 1000000
 	threads := 64
-	nInt := int(math32.IntMultiple(float32(n), float32(threads)))
-	n = nInt               // enforce optimal n's -- otherwise requires range checking
-	nGps := nInt / threads // dispatch n
 
 	dataC := make([]Rnds, n)
 	dataG := make([]Rnds, n)
@@ -50,63 +43,48 @@ func main() {
 	cpuTmr := timer.Time{}
 	cpuTmr.Start()
 
-	seed := sltype.Uint2{0, 0}
-
+	seed := uint64(0)
 	for i := range dataC {
 		d := &dataC[i]
 		d.RndGen(seed, uint32(i))
 	}
 	cpuTmr.Stop()
 
-	sy := gp.NewComputeSystem("slrand")
-	pl := sy.NewPipeline("slrand")
-	pl.AddShaderFile("slrand", vgpu.ComputeShader, "shaders/rand.spv")
-
+	sy := gpu.NewComputeSystem(gp, "slrand")
+	pl := gpu.NewComputePipelineShaderFS(shaders, "shaders/rand.wgsl", sy)
 	vars := sy.Vars()
-	setc := vars.AddSet()
-	setd := vars.AddSet()
+	sgp := vars.AddGroup(gpu.Storage)
 
-	ctrv := setc.AddStruct("Counter", int(unsafe.Sizeof(seed)), 1, vgpu.Storage, vgpu.ComputeShader)
-	datav := setd.AddStruct("Data", int(unsafe.Sizeof(Rnds{})), n, vgpu.Storage, vgpu.ComputeShader)
+	ctrv := sgp.AddStruct("Counter", int(unsafe.Sizeof(seed)), 1, gpu.ComputeShader)
+	datav := sgp.AddStruct("Data", int(unsafe.Sizeof(Rnds{})), n, gpu.ComputeShader)
 
-	setc.ConfigValues(1) // one val per var
-	setd.ConfigValues(1) // one val per var
-	sy.Config()          // configures vars, allocates vals, configs pipelines..
+	sgp.SetNValues(1)
+	sy.Config()
+
+	cvl := ctrv.Values.Values[0]
+	dvl := datav.Values.Values[0]
 
 	gpuFullTmr := timer.Time{}
 	gpuFullTmr.Start()
 
-	// this copy is pretty fast -- most of time is below
-	cvl, _ := ctrv.Values.ValueByIndexTry(0)
-	cvl.CopyFromBytes(unsafe.Pointer(&seed))
-	dvl, _ := datav.Values.ValueByIndexTry(0)
-	dvl.CopyFromBytes(unsafe.Pointer(&dataG[0]))
+	gpu.SetValueFrom(cvl, []uint64{seed})
+	gpu.SetValueFrom(dvl, dataG)
 
-	// gpuFullTmr := timer.Time{}
-	// gpuFullTmr.Start()
-
-	sy.Mem.SyncToGPU()
-
-	vars.BindDynamicValueIndex(0, "Counter", 0)
-	vars.BindDynamicValueIndex(1, "Data", 0)
-
-	cmd := sy.ComputeCmdBuff()
-	sy.CmdResetBindVars(cmd, 0)
-
-	// gpuFullTmr := timer.Time{}
-	// gpuFullTmr.Start()
+	sgp.CreateReadBuffers()
 
 	gpuTmr := timer.Time{}
 	gpuTmr.Start()
 
-	pl.ComputeDispatch(cmd, nGps, 1, 1)
-	sy.ComputeCmdEnd(cmd)
-	sy.ComputeSubmitWait(cmd)
+	ce, _ := sy.BeginComputePass()
+	pl.Dispatch1D(ce, n, threads)
+	ce.End()
+	dvl.GPUToRead(sy.CommandEncoder)
+	sy.EndComputePass(ce)
 
 	gpuTmr.Stop()
 
-	sy.Mem.SyncValueIndexFromGPU(1, "Data", 0) // this is about same as SyncToGPU
-	dvl.CopyToBytes(unsafe.Pointer(&dataG[0]))
+	dvl.ReadSync()
+	gpu.ReadToBytes(dvl, dataG)
 
 	gpuFullTmr.Stop()
 
@@ -150,7 +128,6 @@ func main() {
 	gpu := gpuTmr.Total
 	fmt.Printf("N: %d\t CPU: %v\t GPU: %v\t Full: %v\t CPU/GPU: %6.4g\n", n, cpu, gpu, gpuFullTmr.Total, float64(cpu)/float64(gpu))
 
-	sy.Destroy()
-	gp.Destroy()
-	vgpu.Terminate()
+	sy.Release()
+	gp.Release()
 }

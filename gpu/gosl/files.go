@@ -136,19 +136,18 @@ func CopyFile(src, dst string) error {
 	return err
 }
 
-func CopySlrand() error {
-	hdr := "slrand.wgsl"
-	tofn := filepath.Join(*outDir, hdr)
-
-	pnm := "cogentcore.org/core/gpu/gosl/slrand"
-
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, pnm)
+// CopyPackageFile copies given file name from given package path
+// into the current output directory.
+// e.g., "slrand.wgsl", "cogentcore.org/core/gpu/gosl/slrand"
+func CopyPackageFile(fnm, packagePath string) error {
+	tofn := filepath.Join(*outDir, fnm)
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, packagePath)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 	if len(pkgs) != 1 {
-		err = fmt.Errorf("%s package not found", pnm)
+		err = fmt.Errorf("%s package not found", packagePath)
 		fmt.Println(err)
 		return err
 	}
@@ -159,13 +158,12 @@ func CopySlrand() error {
 	} else if len(pkg.OtherFiles) > 0 {
 		fn = pkg.GoFiles[0]
 	} else {
-		err = fmt.Errorf("No files found in package: %s", pnm)
+		err = fmt.Errorf("No files found in package: %s", packagePath)
 		fmt.Println(err)
 		return err
 	}
 	dir, _ := filepath.Split(fn)
-	// dir = filepath.Join(dir, "slrand")
-	fmfn := filepath.Join(dir, hdr)
+	fmfn := filepath.Join(dir, fnm)
 	CopyFile(fmfn, tofn)
 	return nil
 }

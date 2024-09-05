@@ -10,12 +10,12 @@
 
 // define a u64 type as an alias.
 // if / when u64 actually happens, will make it easier to update.
-alias u64 vec2<u32>;
+alias su64 = vec2<u32>;
 
 // Uint32Mul64 multiplies two uint32 numbers into a uint64 (using vec2<u32>).
-fn Uint32Mul64(a: u32, b: u32) -> u64 {
+fn Uint32Mul64(a: u32, b: u32) -> su64 {
 	let LOMASK = (((u32(1))<<16)-1);
-	var r: u64;
+	var r: su64;
 	r.x = a * b;               /* full low multiply */
 	let ahi = a >> 16;
 	let alo = a & LOMASK;
@@ -29,38 +29,42 @@ fn Uint32Mul64(a: u32, b: u32) -> u64 {
 	var hit = ahi*bhi + (ahbl>>16) +  (albh>>16);
 	hit += ahbl_albh >> 16; /* carry from the sum of lo(ahbl) + lo(albh) ) */
 	/* carry from the sum with alo*blo */
-	hit += ((lo >> 16) < (ahbl_albh&LOMASK));
+	if ((r.x >> u32(16)) < (ahbl_albh&LOMASK)) {
+		hit += u32(1);
+	}
 	r.y = hit; 
+	return r;
 }
 
 /*
-// Uint32Mul64 multiplies two uint32 numbers into a uint64 (using u64).
-fn Uint32Mul64(a: u32, b: u32) -> u64 {
-	return u64(a) * u64(b);
+// Uint32Mul64 multiplies two uint32 numbers into a uint64 (using su64).
+fn Uint32Mul64(a: u32, b: u32) -> su64 {
+	return su64(a) * su64(b);
 }
 */
 
 
 // Uint64Add32 adds given uint32 number to given uint64 (using vec2<u32>).
-fn Uint64Add32(a: u64, b: u32) -> u64 {
+fn Uint64Add32(a: su64, b: u32) -> su64 {
 	if (b == 0) {
 		return a;
 	}
 	var s = a;
-	if (s.x > u32(0xffffffff) - inc) {
+	if (s.x > u32(0xffffffff) - b) {
 		s.y++;
-		s.x = (inc - 1) - (u32(0xffffffff) - s.x);
+		s.x = (b - 1) - (u32(0xffffffff) - s.x);
 	} else {
-		s.x += inc;
+		s.x += b;
 	}
+	return s;
 }
 
 // Uint64Incr returns increment of the given uint64 (using vec2<u32>).
-fn Uint64Incr(a: u64) -> u64 {
+fn Uint64Incr(a: su64) -> su64 {
 	var s = a;
 	if(s.x == 0xffffffff) {
 		s.y++;
-		s.x = 0;
+		s.x = u32(0);
 	} else {
 		s.x++;
 	}
@@ -88,7 +92,7 @@ fn Uint32ToFloat32(val: u32) -> f32 {
 // Uint32ToFloat32Vec2 converts two uint 32 bit integers
 // into two corresponding 32 bit f32 values 
 // in the (0,1) interval (i.e., exclusive of 1).
-fn Uint32ToFloat32Vec2(val: vec2<u32> val) -> vec2<f32> {
+fn Uint32ToFloat32Vec2(val: vec2<u32>) -> vec2<f32> {
 	var r: vec2<f32>;
 	r.x = Uint32ToFloat32(val.x);
 	r.y = Uint32ToFloat32(val.y);
@@ -98,7 +102,7 @@ fn Uint32ToFloat32Vec2(val: vec2<u32> val) -> vec2<f32> {
 // Uint32ToFloat32Range11 converts a uint32 integer into a float32
 // in the [-1..1] interval (inclusive of -1 and 1, never identically == 0).
 fn Uint32ToFloat32Range11(val: u32) -> f32 {
-	let factor = f32(1.0) / (f32(int(0x7fffffff)) + f32(1.0));
+	let factor = f32(1.0) / (f32(i32(0x7fffffff)) + f32(1.0));
 	let halffactor = f32(0.5) * factor;
 	return (f32(val) * factor + halffactor);
 }

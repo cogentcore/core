@@ -66,6 +66,7 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 	}
 
 	slrandCopied := false
+	sltypeCopied := false
 	for fn := range gosls {
 		gofn := fn + ".go"
 		if *debug {
@@ -92,13 +93,21 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 		cfg := slprint.Config{Mode: printerMode, Tabwidth: tabWidth, ExcludeFunctions: excludeFunctionMap}
 		cfg.Fprint(&buf, pkg, afile)
 		// ioutil.WriteFile(filepath.Join(*outDir, fn+".tmp"), buf.Bytes(), 0644)
-		slfix, hasSlrand := SlEdits(buf.Bytes())
+		slfix, hasSltype, hasSlrand := SlEdits(buf.Bytes())
 		if hasSlrand && !slrandCopied {
+			hasSltype = true
 			if *debug {
 				fmt.Printf("\tcopying slrand.wgsl to shaders\n")
 			}
-			CopySlrand()
+			CopyPackageFile("slrand.wgsl", "cogentcore.org/core/gpu/gosl/slrand")
 			slrandCopied = true
+		}
+		if hasSltype && !sltypeCopied {
+			if *debug {
+				fmt.Printf("\tcopying sltype.wgsl to shaders\n")
+			}
+			CopyPackageFile("sltype.wgsl", "cogentcore.org/core/gpu/gosl/sltype")
+			sltypeCopied = true
 		}
 		exsl, hasMain := ExtractWGSL(slfix)
 		gosls[fn] = exsl
