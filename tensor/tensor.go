@@ -50,6 +50,10 @@ type Tensor interface {
 	// Bool is returned for the Bits tensor type.
 	DataType() reflect.Kind
 
+	// Sizeof returns the number of bytes contained in the Values of this tensor.
+	// for String types, this is just the string pointers.
+	Sizeof() int64
+
 	// returns true if the data type is a String. otherwise is numeric.
 	IsString() bool
 

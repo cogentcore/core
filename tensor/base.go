@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"unsafe"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/slicesx"
@@ -44,6 +45,11 @@ func (tsr *Base[T]) RowCellSize() (rows, cells int) {
 func (tsr *Base[T]) DataType() reflect.Kind {
 	var v T
 	return reflect.TypeOf(v).Kind()
+}
+
+func (tsr *Base[T]) Sizeof() int64 {
+	var v T
+	return int64(unsafe.Sizeof(v)) * int64(tsr.Len())
 }
 
 func (tsr *Base[T]) Value(i []int) T    { j := tsr.Shp.Offset(i); return tsr.Values[j] }

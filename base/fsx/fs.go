@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"cogentcore.org/core/base/errors"
 )
@@ -54,4 +55,25 @@ func FileExistsFS(fsys fs.FS, filePath string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+// SplitRootPathFS returns a split of the given FS path (only / path separators)
+// into the root element and everything after that point.
+// Examples:
+//   - "/a/b/c" returns "/", "a/b/c"
+//   - "a/b/c" returns "a", "b/c" (note removal of intervening "/")
+//   - "a" returns "a", ""
+//   - "a/" returns "a", "" (note removal of trailing "/")
+func SplitRootPathFS(path string) (root, rest string) {
+	pi := strings.IndexByte(path, '/')
+	if pi < 0 {
+		return path, ""
+	}
+	if pi == 0 {
+		return "/", path[1:]
+	}
+	if pi < len(path)-1 {
+		return path[:pi], path[pi+1:]
+	}
+	return path[:pi], ""
 }
