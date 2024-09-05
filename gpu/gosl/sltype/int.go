@@ -6,17 +6,14 @@ package sltype
 
 import "cogentcore.org/core/math32"
 
-// Int is identical to an int32
-type Int = int32
+// Int32Vec2 is a length 2 vector of int32
+type Int32Vec2 = math32.Vector2i
 
-// Int2 is a length 2 vector of int32
-type Int2 = math32.Vector2i
+// Int32Vec3 is a length 3 vector of int32
+type IntVec3 = math32.Vector3i
 
-// Int3 is a length 3 vector of int32
-type Int3 = math32.Vector3i
-
-// Int4 is a length 4 vector of int32
-type Int4 struct {
+// Int32Vec4 is a length 4 vector of int32
+type Int32Vec4 struct {
 	X int32
 	Y int32
 	Z int32
@@ -26,31 +23,28 @@ type Int4 struct {
 ////////////////////////////////////////
 // Unsigned
 
-// Uint is identical to a uint32
-type Uint = uint32
-
-// Uint2 is a length 2 vector of uint32
-type Uint2 struct {
+// Uint32Vec2 is a length 2 vector of uint32
+type Uint32Vec2 struct {
 	X uint32
 	Y uint32
 }
 
-// Uint3 is a length 3 vector of uint32
-type Uint3 struct {
+// Uint32Vec3 is a length 3 vector of uint32
+type Uint32Vec3 struct {
 	X uint32
 	Y uint32
 	Z uint32
 }
 
-// Uint4 is a length 4 vector of uint32
-type Uint4 struct {
+// Uint32Vec4 is a length 4 vector of uint32
+type Uint32Vec4 struct {
 	X uint32
 	Y uint32
 	Z uint32
 	W uint32
 }
 
-func (u *Uint4) SetFrom2(u2 Uint2) {
+func (u *Uint32Vec4) SetFromVec2(u2 Uint32Vec2) {
 	u.X = u2.X
 	u.Y = u2.Y
 	u.Z = 0
