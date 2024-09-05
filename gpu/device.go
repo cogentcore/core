@@ -4,7 +4,10 @@
 
 package gpu
 
-import "github.com/cogentcore/webgpu/wgpu"
+import (
+	"cogentcore.org/core/base/errors"
+	"github.com/cogentcore/webgpu/wgpu"
+)
 
 // Device holds Device and associated Queue info.
 // A Device is a usable instance of the GPU Adapter hardware.
@@ -20,8 +23,23 @@ type Device struct {
 // NewDevice returns a new device for given GPU.
 // It gets the Queue for this device.
 func NewDevice(gpu *GPU) (*Device, error) {
-	wdev, err := gpu.GPU.RequestDevice(nil)
-	if err != nil {
+	// we only request max buffer sizes so compute can go as big as it needs to
+	limits := wgpu.DefaultLimits()
+	const maxv = 0xFFFFFFFF
+	// note: these limits are being processed and allow the MaxBufferSize to be the
+	// controlling factor -- if we don't set these, then the slrand example doesn't
+	// work above a smaller limit.
+	limits.MaxUniformBufferBindingSize = min(gpu.Limits.Limits.MaxUniformBufferBindingSize, maxv)
+	limits.MaxStorageBufferBindingSize = min(gpu.Limits.Limits.MaxStorageBufferBindingSize, maxv)
+	// note: this limit is not working properly:
+	limits.MaxBufferSize = min(gpu.Limits.Limits.MaxBufferSize, maxv)
+	desc := wgpu.DeviceDescriptor{
+		RequiredLimits: &wgpu.RequiredLimits{
+			Limits: limits,
+		},
+	}
+	wdev, err := gpu.GPU.RequestDevice(&desc)
+	if errors.Log(err) != nil {
 		return nil, err
 	}
 	dev := &Device{Device: wdev}

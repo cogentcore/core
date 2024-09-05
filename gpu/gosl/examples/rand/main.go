@@ -34,7 +34,7 @@ func main() {
 	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
 
 	// n := 10
-	n := 1000000
+	n := 4_000_000 // 5_000_000 is too much -- 256_000_000 -- up against buf size limit
 	threads := 64
 
 	dataC := make([]Rnds, n)
