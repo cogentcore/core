@@ -12,7 +12,7 @@ require (
 	github.com/bramvdbogaerde/go-scp v1.4.0
 	github.com/chewxy/math32 v1.10.1
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
-	github.com/cogentcore/webgpu v0.0.0-20240906053941-27294deab21a
+	github.com/cogentcore/webgpu v0.0.0-20240906154609-e35089e9a725
 	github.com/cogentcore/yaegi v0.0.0-20240724064145-e32a03faad56
 	github.com/coreos/go-oidc/v3 v3.10.0
 	github.com/ergochat/readline v0.1.2
