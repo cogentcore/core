@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/colors/colormap"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -513,7 +514,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 }
 
 func (ev *Env) NoGUIRun() {
-	gp, dev, err := world.NoDisplayGPU("virtroom")
+	gp, dev, err := gpu.NoDisplayGPU()
 	if err != nil {
 		panic(err)
 	}

@@ -169,6 +169,27 @@ func (vs *Vars) SetDynamicIndex(group int, name string, dynamicIndex int) *Var {
 	return vr
 }
 
+// CreateReadBuffers creates read buffers for all Storage variables.
+// This is needed to be able to read values back from GPU (e.g., for Compute).
+func (vs *Vars) CreateReadBuffers() error {
+	var errs []error
+	ns := vs.NGroups()
+	for gi := vs.StartGroup(); gi < ns; gi++ {
+		vg := vs.Groups[gi]
+		if vg == nil {
+			continue
+		}
+		if vg.Role != Storage {
+			continue
+		}
+		err := vg.CreateReadBuffers()
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
+}
+
 // Config must be called after all variables have been added.
 // Configures all Groups and also does validation, returning error
 // does DescLayout too, so all ready for Pipeline config.

@@ -341,13 +341,7 @@ func (tx *Texture) ReadDataMapped() ([]byte, error) {
 		tx.ReadBufferDims = *dims
 	}
 
-	var err error
-	tx.readBuffer.MapAsync(wgpu.MapModeRead, 0, buffSize, func(status wgpu.BufferMapAsyncStatus) {
-		if status != wgpu.BufferMapAsyncStatusSuccess {
-			err = fmt.Errorf("gpu.Texture.ReadData: failed to map readBuffer")
-		}
-	})
-	tx.device.WaitDone()
+	err := BufferReadSync(&tx.device, int(buffSize), tx.readBuffer)
 	if errors.Log(err) != nil {
 		return nil, err
 	}

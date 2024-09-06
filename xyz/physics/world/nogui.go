@@ -7,21 +7,9 @@ package world
 import (
 	"image"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/xyz"
 )
-
-// NoDisplayGPU Initializes the Vulkan GPU (vgpu) and returns that
-// and the graphics GPU device, with given name, without connecting
-// to the display.
-func NoDisplayGPU(nm string) (*gpu.GPU, *gpu.Device, error) {
-	gp, dev, err := gpu.NoDisplayGPU(nm)
-	if err != nil {
-		return nil, nil, errors.Log(err)
-	}
-	return gp, dev, nil
-}
 
 // NoDisplayScene returns a xyz Scene initialized and ready to use
 // in NoGUI offscreen rendering mode, using given GPU and device.

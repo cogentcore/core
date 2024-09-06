@@ -50,7 +50,6 @@ func (a *App) InitDrawer() {
 		return
 	}
 	gp := gpu.NewGPU()
-	gp.Config(a.Name())
 	surf := gp.Instance.CreateSurface(nil)
 	sf := gpu.NewSurface(gp, surf, a.Scrn.PixSize, 1, gpu.UndefinedType)
 	a.Draw.wgpu = gpudraw.NewDrawer(gp, sf)
