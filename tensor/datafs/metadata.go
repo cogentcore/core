@@ -45,6 +45,9 @@ func (d *Data) SetMetadata(key string, value any) {
 // CopyMetadata does a shallow copy of metadata from source metadata
 // to this data item.
 func (d *Data) CopyMetadata(md Metadata) {
+	if md == nil {
+		return
+	}
 	d.Meta.init()
 	maps.Copy(d.Meta, md)
 }

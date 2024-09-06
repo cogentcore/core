@@ -29,7 +29,7 @@ func NewDir(name string, parent ...*Data) (*Data, error) {
 	if len(parent) == 1 {
 		par = parent[0]
 	}
-	d, err := newData(par, name)
+	d, err := NewData(par, name)
 	d.Value = make(map[string]*Data)
 	return d, err
 }
@@ -53,6 +53,44 @@ func (d *Data) Items(names ...string) ([]*Data, error) {
 		}
 	}
 	return its, errors.Join(errs...)
+}
+
+// ItemsFunc returns data items in given directory
+// filtered by given function, in alpha order.
+func (d *Data) ItemsFunc(fun func(item *Data) bool) []*Data {
+	if err := d.mustDir("items-func", ""); err != nil {
+		return nil
+	}
+	fm := d.filemap()
+	names := d.DirNamesAlpha()
+	var its []*Data
+	for _, nm := range names {
+		dt := fm[nm]
+		if !fun(dt) {
+			continue
+		}
+		its = append(its, dt)
+	}
+	return its
+}
+
+// ItemsAddedFunc returns data items in given directory
+// filtered by given function, in added order.
+func (d *Data) ItemsAddedFunc(fun func(item *Data) bool) []*Data {
+	if err := d.mustDir("items-added-func", ""); err != nil {
+		return nil
+	}
+	fm := d.filemap()
+	names := d.DirNamesAdded()
+	var its []*Data
+	for _, nm := range names {
+		dt := fm[nm]
+		if !fun(dt) {
+			continue
+		}
+		its = append(its, dt)
+	}
+	return its
 }
 
 // Path returns the full path to this data item
@@ -80,6 +118,34 @@ func (d *Data) filemap() map[string]*Data {
 		return nil
 	}
 	return fm
+}
+
+// DirNamesAlpha returns the names of items in the directory
+// sorted alphabetically.  Data must be dir by this point.
+func (d *Data) DirNamesAlpha() []string {
+	fm := d.filemap()
+	names := maps.Keys(fm)
+	sort.Strings(names)
+	return names
+}
+
+// DirNamesAdded returns the names of items in the directory
+// sorted by order added (modTime).  Data must be dir by this point.
+func (d *Data) DirNamesAdded() []string {
+	fm := d.filemap()
+	names := maps.Keys(fm)
+	slices.SortFunc(names, func(a, b string) int {
+		ad := fm[a]
+		bd := fm[b]
+		if ad.ModTime().After(bd.ModTime()) {
+			return -1
+		}
+		if bd.ModTime().After(ad.ModTime()) {
+			return 1
+		}
+		return 0
+	})
+	return names
 }
 
 // mustDir returns an error for given operation and path

@@ -7,6 +7,7 @@ package datafs
 import (
 	"errors"
 	"io/fs"
+	"reflect"
 	"time"
 	"unsafe"
 
@@ -35,11 +36,11 @@ type Data struct {
 	Value any
 }
 
-// newData returns a new Data item in given directory Data item,
+// NewData returns a new Data item in given directory Data item,
 // which can be nil. If not a directory, an error will be generated.
 // The modTime is automatically set to now, and can be used for sorting
 // by order created.  name must be unique within parent.
-func newData(dir *Data, name string) (*Data, error) {
+func NewData(dir *Data, name string) (*Data, error) {
 	d := &Data{parent: dir, name: name, modTime: time.Now()}
 	var err error
 	if dir != nil {
@@ -62,7 +63,7 @@ func New[T any](dir *Data, names ...string) (*Data, error) {
 	var errs []error
 	for _, nm := range names {
 		var v T
-		d, err := newData(dir, nm)
+		d, err := NewData(dir, nm)
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -80,7 +81,7 @@ func New[T any](dir *Data, names ...string) (*Data, error) {
 // name must be unique in the directory.
 func NewTensor[T string | bool | float32 | float64 | int | int32 | byte](dir *Data, name string, sizes []int, names ...string) (tensor.Tensor, error) {
 	tsr := tensor.New[T](sizes, names...)
-	d, err := newData(dir, name)
+	d, err := NewData(dir, name)
 	d.Value = tsr
 	return tsr, err
 }
@@ -98,7 +99,7 @@ func NewTable(dir *Data, names ...string) (*table.Table, error) {
 	var errs []error
 	for _, nm := range names {
 		t := table.NewTable(nm)
-		d, err := newData(dir, nm)
+		d, err := NewData(dir, nm)
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -176,6 +177,15 @@ func (d *Data) Info() (fs.FileInfo, error) {
 
 ///////////////////////////////
 // Data Access
+
+// DataType returns the type of the data elements in the tensor.
+// Bool is returned for the Bits tensor type.
+func (d *Data) DataType() reflect.Kind {
+	if d.Value == nil {
+		return reflect.Invalid
+	}
+	return reflect.TypeOf(d.Value).Kind()
+}
 
 // AsTensor returns the data as a tensor if it is one, else nil.
 func (d *Data) AsTensor() tensor.Tensor {
