@@ -89,7 +89,6 @@ func (a *App) InitGPU() {
 	}
 
 	a.GPU = gpu.NewGPU()
-	a.GPU.Config(a.Name())
 
 	a.GetScreens()
 }

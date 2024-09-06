@@ -73,9 +73,9 @@ func FastExp3(x float32) float32 {
 // than math32.Exp actually.
 func FastExp(x float32) float32 {
 	if x <= -88.02969 { // this doesn't add anything and -exp is main use-case anyway
-		return 0
+		return 0.0
 	}
-	i := int32(12102203*x) + 127*(1<<23)
+	i := int32(12102203*x) + int32(127)*(int32(1)<<23)
 	m := i >> 7 & 0xFFFF // copy mantissa
 	i += (((((((((((3537 * m) >> 16) + 13668) * m) >> 18) + 15817) * m) >> 14) - 80470) * m) >> 11)
 	return math.Float32frombits(uint32(i))

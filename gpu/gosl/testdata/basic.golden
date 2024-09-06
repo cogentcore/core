@@ -1,0 +1,166 @@
+
+
+// note: here is the wgsl version, only included in wgsl
+
+// MyTrickyFun this is the GPU version of the tricky function
+fn MyTrickyFun(x: f32) -> f32 {
+	return 16.0; // ok actually not tricky here, but whatever
+}
+
+
+// FastExp is a quartic spline approximation to the Exp function, by N.N. Schraudolph
+// It does not have any of the sanity checking of a standard method -- returns
+// nonsense when arg is out of range.  Runs in 2.23ns vs. 6.3ns for 64bit which is faster
+// than exp actually.
+fn FastExp(x: f32) -> f32 {
+	if (x <= -88.76731) { // this doesn't add anything and -exp is main use-case anyway
+		return f32(0);
+	}
+	var i = i32(12102203*x) + i32(127)*(i32(1)<<23);
+	var m = i >> 7 & 0xFFFF; // copy mantissa
+	i += (((((((((((3537 * m) >> 16) + 13668) * m) >> 18) + 15817) * m) >> 14) - 80470) * m) >> 11);
+	return bitcast<f32>(u32(i));
+}
+
+// NeuronFlags are bit-flags encoding relevant binary state for neurons
+alias NeuronFlags = i32;
+
+// The neuron flags
+
+// NeuronOff flag indicates that this neuron has been turned off (i.e., lesioned)
+const  NeuronOff: NeuronFlags = 0x01;
+
+// NeuronHasExt means the neuron has external input in its Ext field
+const  NeuronHasExt: NeuronFlags = 0x02; // note: 1<<2 does NOT work
+
+// NeuronHasTarg means the neuron has external target input in its Target field
+const  NeuronHasTarg: NeuronFlags = 0x04;
+
+// NeuronHasCmpr means the neuron has external comparison input in its Target field -- used for computing
+// comparison statistics but does not drive neural activity ever
+const  NeuronHasCmpr: NeuronFlags = 0x08;
+
+// Modes are evaluation modes (Training, Testing, etc)
+alias Modes = i32;
+
+// The evaluation modes
+
+const  NoEvalMode: Modes = 0;
+
+// AllModes indicates that the log should occur over all modes present in other items.
+const  AllModes: Modes = 1;
+
+// Train is this a training mode for the env
+const  Train: Modes = 2;
+
+// Test is this a test mode for the env
+const  Test: Modes = 3;
+
+// DataStruct has the test data
+struct DataStruct {
+
+	// raw value
+	Raw: f32,
+
+	// integrated value
+	Integ: f32,
+
+	// exp of integ
+	Exp: f32,
+
+	pad: f32,
+}
+
+// SubParamStruct has the test sub-params
+struct SubParamStruct {
+	A: f32,
+	B: f32,
+	C: f32,
+	D: f32,
+}
+
+fn SubParamStruct_Sum(sp: ptr<function,SubParamStruct>) -> f32 {
+	return (*sp).A + (*sp).B + (*sp).C + (*sp).D;
+}
+
+fn SubParamStruct_SumPlus(sp: ptr<function,SubParamStruct>, extra: f32) -> f32 {
+	return SubParamStruct_Sum(sp) + extra;
+}
+
+// ParamStruct has the test params
+struct ParamStruct {
+
+	// rate constant in msec
+	Tau: f32,
+
+	// 1/Tau
+	Dt:     f32,
+	Option: i32, // note: standard bool doesn't work
+
+	pad: f32, // comment this out to trigger alignment warning
+
+	// extra parameters
+	Subs: SubParamStruct,
+}
+
+fn ParamStruct_IntegFromRaw(ps: ptr<function,ParamStruct>, ds: ptr<function,DataStruct>) -> f32 {
+	// note: the following are just to test basic control structures
+	var newVal = (*ps).Dt * ((*ds).Raw - (*ds).Integ);
+	if (newVal < -10 || (*ps).Option == 1) {
+		newVal = f32(-10);
+	}
+	(*ds).Integ += newVal;
+	(*ds).Exp = exp(-(*ds).Integ);
+	var a: f32;
+	ParamStruct_AnotherMeth(ps, ds, &a);
+	return (*ds).Exp;
+}
+
+// AnotherMeth does more computation
+fn ParamStruct_AnotherMeth(ps: ptr<function,ParamStruct>, ds: ptr<function,DataStruct>, ptrarg: ptr<function,f32>) {
+	for (var i = 0; i < 10; i++) {
+		(*ds).Integ *= f32(0.99);
+	}
+	var flag: NeuronFlags;
+	flag &= ~NeuronHasExt; // clear flag -- op doesn't exist in C
+
+	var mode = Test;
+	switch (mode) { // note: no fallthrough!
+	case Test: {
+		var ab = f32(42);
+		(*ds).Exp /= ab;
+	}
+	case Train: {
+		var ab = f32(.5);
+		(*ds).Exp *= ab;
+	}
+	default: {
+		var ab = f32(1);
+		(*ds).Exp *= ab;
+	}
+	}
+
+	var a: f32;
+	var b: f32;
+	b = f32(42);
+	a = SubParamStruct_Sum(&(*ps).Subs);
+	(*ds).Exp = SubParamStruct_SumPlus(&(*ps).Subs, b);
+	(*ds).Integ = a;
+
+	*ptrarg = f32(-1);
+}
+
+@group(0) @binding(0)
+var<storage, read_write> Params: array<ParamStruct>;
+
+@group(0) @binding(1)
+var<storage, read_write> Data: array<DataStruct>;
+
+@compute
+@workgroup_size(64)
+fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
+	var pars = Params[0];
+	var data = Data[idx.x];
+	ParamStruct_IntegFromRaw(&pars, &data);
+	Data[idx.x] = data;
+}

@@ -194,3 +194,13 @@ func RelativeFilePath(file, root string) string {
 	}
 	return DirAndFile(file)
 }
+
+// ExtSplit returns the split between the extension and name before
+// the extension, for the given file name.  Any path elements in the
+// file name are preserved; pass [filepath.Base](file) to extract only the
+// last element of the file path if that is what is desired.
+func ExtSplit(file string) (base, ext string) {
+	ext = filepath.Ext(file)
+	base = strings.TrimSuffix(file, ext)
+	return
+}
