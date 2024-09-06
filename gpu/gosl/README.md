@@ -22,11 +22,11 @@ $ go install cogentcore.org/core/vgpu/gosl@latest
 
 In your Go code, use these comment directives:
 ```
-//gosl:start: <filename>
+//gosl:start <filename>
 
 < Go code to be translated >
 
-//gosl:end: <filename>
+//gosl:end <filename>
 ```
 
 to bracket code to be processed.  The resulting converted code is copied into a `shaders` subdirectory created under the current directory where the `gosl` command is run, using the filenames specified in the comment directives.  Each such filename should correspond to a complete shader program (i.e., a "kernel"), or a file that can be included into other shader programs.  Code is appended to the target file names in the order of the source .go files on the command line, so multiple .go files can be combined into one resulting WGSL file.
@@ -123,6 +123,4 @@ With sufficiently large N, and ignoring the data copying setup time, around ~80x
 # Links
 
 Key docs for WGSL as compute shaders:
-
-
 
