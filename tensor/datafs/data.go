@@ -8,99 +8,173 @@ import (
 	"io/fs"
 	"time"
 	"unsafe"
+
+	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/table"
 )
 
-// data is a single item of data, the "file" in the datafs.
-// a subdirectory has the item = map[string]*data
-type data struct {
+// Data is a single item of data, the "file" in the data filesystem.
+// A directory has the Item = map[string]*Data
+type Data struct {
 	// name is the name of this item.  it is not a path.
 	name string
 
 	// modTime tracks time added to directory, used for ordering.
 	modTime time.Time
 
-	// item is the underlying item of data; is a map[string]*data for directories.
-	item any
+	// Meta has arbitrary metadata.
+	Meta MetaData
 
-	// meta has arbitrary metadata.
-	meta MetaData
+	// Item is the underlying item of data; is a map[string]*Data for directories.
+	Item any
 }
 
-///////////////////////////////
-// File interface:
-
-func (d data) Stat() (fs.FileInfo, error) {
-	return &d, nil
+// NewData returns a new Data item in given parent directory Data item,
+// which can be nil and is only used if actually a directory.
+// The modTime is automatically set to now, and can be used for sorting
+// by order created.
+func NewData(name string, parent ...*Data) *Data {
+	d := &Data{name: name, modTime: time.Now()}
+	if len(parent) == 1 && parent[0] != nil && parent[0].IsDir() {
+		parent[0].Add(d)
+	}
+	return d
 }
 
-func (d data) Read([]byte) (int, error) {
-	return 0, nil // todo
+// New returns a new data item representing given value.
+// Returns a pointer to the value represented by this data item.
+func New[T any](name string, parent ...*Data) *T {
+	var v T
+	NewData(name, parent...).Set(&v)
+	return &v
 }
 
-func (d data) Close() error {
-	return nil
+// NewTensor returns a new Tensor of given data type
+// in given parent directory Data item,  which can be nil and is only
+// used if actually a directory.
+func NewTensor[T string | bool | float32 | float64 | int | int32 | byte](name string, parent *Data, sizes []int, names ...string) tensor.Tensor {
+	tsr := tensor.New[T](sizes, names...)
+	NewData(name, parent).Set(tsr)
+	return tsr
+}
+
+// NewTable returns a new table.Table
+func NewTable(name string, parent ...*Data) *table.Table {
+	t := table.NewTable(name)
+	NewData(name, parent...).Set(t)
+	return t
+}
+
+// Set sets the Item for this data element
+func (d *Data) Set(val any) *Data {
+	d.Item = val
+	return d
 }
 
 ///////////////////////////////
 // FileInfo interface:
 
-// Sizer is an interface to allow an arbitrary data item
+// Sizer is an interface to allow an arbitrary data Item
 // to report its size in bytes.  Size is automatically computed for
-// known basic data items supported by datafs directly.
+// known basic data Items supported by datafs directly.
 type Sizer interface {
 	Sizeof() int64
 }
 
-func (d data) Name() string { return d.name }
+func (d *Data) Name() string { return d.name }
 
-// Size returns the size of known data items, or it uses
+// Size returns the size of known data Items, or it uses
 // the Sizer interface, otherwise returns 0.
-func (d data) Size() int64 {
-	if szr, ok := d.item.(Sizer); ok { // tensor implements Sizer
+func (d *Data) Size() int64 {
+	if szr, ok := d.Item.(Sizer); ok { // tensor implements Sizer
 		return szr.Sizeof()
 	}
-	switch x := d.item.(type) {
-	case float32, int32, uint32:
+	switch x := d.Item.(type) {
+	case *float32, *int32, *uint32:
 		return 4
-	case float64, int64:
+	case *float64, *int64:
 		return 8
-	case int:
-		return int64(unsafe.Sizeof(x))
-	case complex64:
+	case *int:
+		return int64(unsafe.Sizeof(*x))
+	case *complex64:
 		return 16
 	case complex128:
 		return 32
-	default:
-		return 0
 	}
+	return 0
 }
 
-func (d data) IsDir() bool {
-	_, ok := d.item.(map[string]*data)
+func (d *Data) IsDir() bool {
+	_, ok := d.Item.(map[string]*Data)
 	return ok
 }
 
-func (d data) ModTime() time.Time {
+func (d *Data) ModTime() time.Time {
 	return d.modTime
 }
 
-func (d data) Mode() fs.FileMode {
+func (d *Data) Mode() fs.FileMode {
 	if d.IsDir() {
 		return 0755 | fs.ModeDir
 	}
 	return 0444
 }
 
-// Sys returns the metadata for item
-func (d data) Sys() any { return d.meta }
+// Sys returns the metadata for Item
+func (d *Data) Sys() any { return d.Meta }
 
 ///////////////////////////////
 // DirEntry interface
 
-func (d data) Type() fs.FileMode {
+func (d *Data) Type() fs.FileMode {
 	return d.Mode().Type()
 }
 
-func (d data) Info() (fs.FileInfo, error) {
+func (d *Data) Info() (fs.FileInfo, error) {
 	return d, nil
+}
+
+///////////////////////////////
+// Data Access
+
+// AsTensor returns the data as a tensor if it is one, else nil.
+func (d *Data) AsTensor() tensor.Tensor {
+	tsr, _ := d.Item.(tensor.Tensor)
+	return tsr
+}
+
+// AsFloat64 returns data as a float64 if it is a scalar value
+// that can be so converted.  Returns false if not.
+func (d *Data) AsFloat64() (float64, bool) {
+	// fast path for actual floats
+	if f, ok := d.Item.(float64); ok {
+		return f, true
+	}
+	if f, ok := d.Item.(float32); ok {
+		return float64(f), true
+	}
+	if tsr := d.AsTensor(); tsr != nil {
+		return 0, false
+	}
+	v, err := reflectx.ToFloat(d.Item)
+	if err != nil {
+		return 0, false
+	}
+	return v, true
+}
+
+// Bytes returns the byte-wise representation of the data Item.
+// This is the actual underlying data, so make a copy if it can be
+// unintentionally modified or retained more than for immediate use.
+func (d *Data) Bytes() []byte {
+	if tsr := d.AsTensor(); tsr != nil {
+		return tsr.Bytes()
+	}
+	size := d.Size()
+	switch x := d.Item.(type) {
+	// todo: other things here?
+	default:
+		return unsafe.Slice((*byte)(unsafe.Pointer(&x)), size)
+	}
 }

@@ -54,6 +54,11 @@ type Tensor interface {
 	// for String types, this is just the string pointers.
 	Sizeof() int64
 
+	// Bytes returns the underlying byte representation of the tensor values.
+	// This is the actual underlying data, so make a copy if it can be
+	// unintentionally modified or retained more than for immediate use.
+	Bytes() []byte
+
 	// returns true if the data type is a String. otherwise is numeric.
 	IsString() bool
 

@@ -72,6 +72,10 @@ func (tsr *Bits) Sizeof() int64 {
 	return int64(len(tsr.Values))
 }
 
+func (tsr *Bits) Bytes() []byte {
+	return slicesx.ToBytes(tsr.Values)
+}
+
 // Shape returns a pointer to the shape that fully parametrizes the tensor shape
 func (tsr *Bits) Shape() *Shape { return &tsr.Shp }
 

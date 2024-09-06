@@ -52,6 +52,10 @@ func (tsr *Base[T]) Sizeof() int64 {
 	return int64(unsafe.Sizeof(v)) * int64(tsr.Len())
 }
 
+func (tsr *Base[T]) Bytes() []byte {
+	return slicesx.ToBytes(tsr.Values)
+}
+
 func (tsr *Base[T]) Value(i []int) T    { j := tsr.Shp.Offset(i); return tsr.Values[j] }
 func (tsr *Base[T]) Value1D(i int) T    { return tsr.Values[i] }
 func (tsr *Base[T]) Set(i []int, val T) { j := tsr.Shp.Offset(i); tsr.Values[j] = val }
