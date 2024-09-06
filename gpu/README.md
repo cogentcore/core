@@ -30,9 +30,8 @@ $ go run cogentcore.org/core/gpu/cmd/webgpuinfo@latest
 
 The following environment variables can be set to specifically select a particular device by device number or name (`deviceName`): 
 
-* `WEBGPU_DEVICE_SELECT`, or the following Vulkan-based selectors for backward compatibility:
-* `MESA_VK_DEVICE_SELECT` (standard for mesa-based drivers) or `VK_DEVICE_SELECT` -- for graphics or compute usage.
-* `WEBGPU_COMPUTE_DEVICE_SELECT` or `VK_COMPUTE_DEVICE_SELECT` -- only used for compute, if present -- will override above, so you can use different GPUs for graphics vs compute.
+* `WEBGPU_DEVICE_SELECT`, for GUI and compute usage.
+* `WEBGPU_COMPUTE_DEVICE_SELECT`, only used for compute, if present, will override above, so you can use different GPUs for graphics vs compute.
 
 * `GPU` represents the hardware `Adapter` and maintains global settings, info about the hardware.
 

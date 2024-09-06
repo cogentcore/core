@@ -149,15 +149,9 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 	trgDevNm := ""
 	if ev := os.Getenv("WEBGPU_DEVICE_SELECT"); ev != "" {
 		trgDevNm = ev
-	} else if ev := os.Getenv("MESA_VK_DEVICE_SELECT"); ev != "" {
-		trgDevNm = ev
-	} else if ev := os.Getenv("VK_DEVICE_SELECT"); ev != "" {
-		trgDevNm = ev
 	}
 	if gp.ComputeOnly {
 		if ev := os.Getenv("WEBGPU_COMPUTE_DEVICE_SELECT"); ev != "" {
-			trgDevNm = ev
-		} else if ev := os.Getenv("VK_COMPUTE_DEVICE_SELECT"); ev != "" {
 			trgDevNm = ev
 		}
 	}
