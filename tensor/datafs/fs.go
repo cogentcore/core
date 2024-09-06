@@ -7,6 +7,7 @@ package datafs
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io/fs"
 	"path"
 	"slices"
@@ -16,33 +17,87 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-// NewDir returns a new datafs filesystem directory with given name.
+// NewDir returns a new datafs directory with given name.
 // if parent != nil and a directory, this dir is added to it.
 // if name is empty, then it is set to "/", the root directory.
-func NewDir(dir string, parent ...*Data) *Data {
-	if dir == "" {
-		dir = "/"
+// Names must be unique within a directory.
+func NewDir(name string, parent ...*Data) (*Data, error) {
+	if name == "" {
+		name = "/"
 	}
-	d := NewData(dir, parent...)
-	d.Item = make(map[string]*Data)
-	return d
+	var par *Data
+	if len(parent) == 1 {
+		par = parent[0]
+	}
+	d, err := newData(par, name)
+	d.Value = make(map[string]*Data)
+	return d, err
 }
 
-// filemap returns the Item as map[string]*Data, or nil if not a dir
+// Items returns data items in given directory by name.
+// error reports any items not found, or if not a directory.
+func (d *Data) Items(names ...string) ([]*Data, error) {
+	if err := d.mustDir("items", names[0]); err != nil {
+		return nil, err
+	}
+	fm := d.filemap()
+	var errs []error
+	var its []*Data
+	for _, nm := range names {
+		dt := fm[nm]
+		if dt != nil {
+			its = append(its, dt)
+		} else {
+			err := fmt.Errorf("datafs Dir %q item not found: %q", d.Path(), nm)
+			errs = append(errs, err)
+		}
+	}
+	return its, errors.Join(errs...)
+}
+
+// Path returns the full path to this data item
+func (d *Data) Path() string {
+	pt := d.name
+	cur := d.parent
+	loops := make(map[*Data]struct{})
+	for {
+		if cur == nil {
+			return pt
+		}
+		if _, ok := loops[cur]; ok {
+			return pt
+		}
+		pt = path.Join(cur.name, pt)
+		loops[cur] = struct{}{}
+		cur = cur.parent
+	}
+}
+
+// filemap returns the Value as map[string]*Data, or nil if not a dir
 func (d *Data) filemap() map[string]*Data {
-	fm, ok := d.Item.(map[string]*Data)
+	fm, ok := d.Value.(map[string]*Data)
 	if !ok {
 		return nil
 	}
 	return fm
 }
 
+// mustDir returns an error for given operation and path
+// if this data item is not a directory.
+func (d *Data) mustDir(op, path string) error {
+	if !d.IsDir() {
+		return &fs.PathError{Op: "open", Path: path, Err: errors.New("datafs item is not a directory")}
+	}
+	return nil
+}
+
 // Add adds an item to this directory data item.
 // The only errors are if this item is not a directory,
-// or the name already exists.  Names must be unique within a directory.
+// or the name already exists.
+// Names must be unique within a directory.
 func (d *Data) Add(it *Data) error {
-	if !d.IsDir() {
-		return &fs.PathError{Op: "add", Path: it.name, Err: errors.New("this datafs item is not a directory")}
+	if err := d.mustDir("add", it.name); err != nil {
+		return err
 	}
 	fm := d.filemap()
 	_, ok := fm[it.name]
@@ -53,11 +108,8 @@ func (d *Data) Add(it *Data) error {
 	return nil
 }
 
-// Open opens the given data Item within this datafs filesystem.
+// Open opens the given data Value within this datafs filesystem.
 func (d *Data) Open(name string) (fs.File, error) {
-	if !d.IsDir() {
-		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("this datafs item is not a directory")}
-	}
 	if !fs.ValidPath(name) {
 		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("invalid name")}
 	}
@@ -71,8 +123,8 @@ func (d *Data) Open(name string) (fs.File, error) {
 
 // Sub returns a data FS corresponding to the subtree rooted at dir.
 func (d *Data) Sub(dir string) (fs.FS, error) {
-	if !d.IsDir() {
-		return nil, &fs.PathError{Op: "sub", Path: dir, Err: errors.New("this datafs Item is not a directory")}
+	if err := d.mustDir("sub", dir); err != nil {
+		return nil, err
 	}
 	if !fs.ValidPath(dir) {
 		return nil, &fs.PathError{Op: "sub", Path: dir, Err: errors.New("invalid name")}
@@ -127,8 +179,8 @@ func (d *Data) ReadDir(dir string) ([]fs.DirEntry, error) {
 // The caller is permitted to modify the returned byte slice.
 // This method should return a copy of the underlying data.
 func (d *Data) ReadFile(name string) ([]byte, error) {
-	if !d.IsDir() {
-		return nil, &fs.PathError{Op: "readFile", Path: name, Err: errors.New("this datafs Item is not a directory")}
+	if err := d.mustDir("readFile", name); err != nil {
+		return nil, err
 	}
 	if !fs.ValidPath(name) {
 		return nil, &fs.PathError{Op: "readFile", Path: name, Err: errors.New("invalid name")}
@@ -139,7 +191,7 @@ func (d *Data) ReadFile(name string) ([]byte, error) {
 		return nil, &fs.PathError{Op: "readFile", Path: name, Err: errors.New("file not found")}
 	}
 	if itm.IsDir() {
-		return nil, &fs.PathError{Op: "readFile", Path: name, Err: errors.New("Item is a directory")}
+		return nil, &fs.PathError{Op: "readFile", Path: name, Err: errors.New("Value is a directory")}
 	}
 	return slices.Clone(itm.Bytes()), nil
 }
@@ -147,8 +199,8 @@ func (d *Data) ReadFile(name string) ([]byte, error) {
 // Mkdir creates a new directory with the specified name.
 // The only error is if this item is not a directory.
 func (d *Data) Mkdir(name string) (*Data, error) {
-	if !d.IsDir() {
-		return nil, &fs.PathError{Op: "readFile", Path: name, Err: errors.New("this datafs Item is not a directory")}
+	if err := d.mustDir("mkdir", name); err != nil {
+		return nil, err
 	}
-	return NewDir(name, d), nil
+	return NewDir(name, d)
 }
