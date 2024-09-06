@@ -7,7 +7,6 @@ package datafs
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io/fs"
 	"path"
 	"slices"
@@ -40,24 +39,17 @@ func (d *Data) filemap() map[string]*Data {
 
 // Add adds an item to this directory data item.
 // The only errors are if this item is not a directory,
-// if the name is not unique, a unique name is created.
+// or the name already exists.  Names must be unique within a directory.
 func (d *Data) Add(it *Data) error {
 	if !d.IsDir() {
 		return &fs.PathError{Op: "add", Path: it.name, Err: errors.New("this datafs item is not a directory")}
 	}
 	fm := d.filemap()
-	nm := it.name
-	ctr := 0
-	for {
-		_, ok := fm[nm]
-		if ok {
-			ctr++
-			nm = fmt.Sprintf("%s_%03d", it.name, ctr)
-			continue
-		}
-		break
+	_, ok := fm[it.name]
+	if ok {
+		return &fs.PathError{Op: "add", Path: it.name, Err: errors.New("data item already exists; names must be unique")}
 	}
-	fm[nm] = it
+	fm[it.name] = it
 	return nil
 }
 

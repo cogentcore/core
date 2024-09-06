@@ -44,10 +44,10 @@ func NewData(name string, parent ...*Data) *Data {
 
 // New returns a new data item representing given value.
 // Returns a pointer to the value represented by this data item.
-func New[T any](name string, parent ...*Data) *T {
+func New[T any](name string, parent ...*Data) T {
 	var v T
-	NewData(name, parent...).Set(&v)
-	return &v
+	NewData(name, parent...).Set(v)
+	return v
 }
 
 // NewTensor returns a new Tensor of given data type
@@ -91,13 +91,13 @@ func (d *Data) Size() int64 {
 		return szr.Sizeof()
 	}
 	switch x := d.Item.(type) {
-	case *float32, *int32, *uint32:
+	case float32, int32, uint32:
 		return 4
-	case *float64, *int64:
+	case float64, int64:
 		return 8
-	case *int:
-		return int64(unsafe.Sizeof(*x))
-	case *complex64:
+	case int:
+		return int64(unsafe.Sizeof(x))
+	case complex64:
 		return 16
 	case complex128:
 		return 32
