@@ -41,7 +41,6 @@ type App struct {
 // InitGPU initializes WebGPU for the app.
 func (a *App) InitGPU() {
 	a.GPU = gpu.NewGPU()
-	a.GPU.Config(a.Name())
 }
 
 // DestroyGPU releases GPU things (the drawer of the window) for when the app becomes invisible
