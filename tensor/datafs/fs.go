@@ -25,12 +25,42 @@ func (d *Data) Open(name string) (fs.File, error) {
 	if !fs.ValidPath(name) {
 		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("invalid name")}
 	}
-	fm := d.filemap()
-	itm, ok := fm[name]
+	dir, file := path.Split(name)
+	sd, err := d.DirAtPath(dir)
+	if err != nil {
+		return nil, err
+	}
+	fm := sd.filemap()
+	itm, ok := fm[file]
 	if !ok {
+		if dir == "" && file == d.name {
+			return &File{Reader: *bytes.NewReader(itm.Bytes()), Data: d}, nil
+		}
 		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("file not found")}
 	}
 	return &File{Reader: *bytes.NewReader(itm.Bytes()), Data: itm}, nil
+}
+
+// Stat returns a FileInfo describing the file.
+// If there is an error, it should be of type *PathError.
+func (d *Data) Stat(name string) (fs.FileInfo, error) {
+	if !fs.ValidPath(name) {
+		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("invalid name")}
+	}
+	dir, file := path.Split(name)
+	sd, err := d.DirAtPath(dir)
+	if err != nil {
+		return nil, err
+	}
+	fm := sd.filemap()
+	itm, ok := fm[file]
+	if !ok {
+		if dir == "" && file == d.name {
+			return d, nil
+		}
+		return nil, &fs.PathError{Op: "stat", Path: name, Err: errors.New("file not found")}
+	}
+	return itm, nil
 }
 
 // Sub returns a data FS corresponding to the subtree rooted at dir.
@@ -41,8 +71,15 @@ func (d *Data) Sub(dir string) (fs.FS, error) {
 	if !fs.ValidPath(dir) {
 		return nil, &fs.PathError{Op: "sub", Path: dir, Err: errors.New("invalid name")}
 	}
+	if dir == "." || dir == "" || dir == d.name {
+		return d, nil
+	}
 	cd := dir
 	cur := d
+	root, rest := fsx.SplitRootPathFS(dir)
+	if root == "." || root == d.name {
+		cd = rest
+	}
 	for {
 		if cd == "." || cd == "" {
 			return cur, nil
@@ -67,12 +104,10 @@ func (d *Data) Sub(dir string) (fs.FS, error) {
 // ReadDir returns the contents of the given directory within this filesystem.
 // Use "." (or "") to refer to the current directory.
 func (d *Data) ReadDir(dir string) ([]fs.DirEntry, error) {
-	dir = path.Clean(dir)
-	sdf, err := d.Sub(dir) // this ensures that d is a dir
+	sd, err := d.DirAtPath(dir)
 	if err != nil {
 		return nil, err
 	}
-	sd := sdf.(*Data)
 	fm := sd.filemap()
 	names := maps.Keys(fm)
 	sort.Strings(names)
@@ -97,8 +132,13 @@ func (d *Data) ReadFile(name string) ([]byte, error) {
 	if !fs.ValidPath(name) {
 		return nil, &fs.PathError{Op: "readFile", Path: name, Err: errors.New("invalid name")}
 	}
-	fm := d.filemap()
-	itm, ok := fm[name]
+	dir, file := path.Split(name)
+	sd, err := d.DirAtPath(dir)
+	if err != nil {
+		return nil, err
+	}
+	fm := sd.filemap()
+	itm, ok := fm[file]
 	if !ok {
 		return nil, &fs.PathError{Op: "readFile", Path: name, Err: errors.New("file not found")}
 	}

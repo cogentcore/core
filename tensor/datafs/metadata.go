@@ -31,7 +31,7 @@ func GetMetadata[T any](md Metadata, key string) (T, error) {
 	}
 	v, ok := x.(T)
 	if !ok {
-		return z, fmt.Errorf("key %q has a different type than expected %t: is %t", key, z, x)
+		return z, fmt.Errorf("key %q has a different type than expected %T: is %T", key, z, x)
 	}
 	return v, nil
 }
@@ -70,8 +70,8 @@ func PlotColumnZeroOne() *plotcore.ColumnOptions {
 	return opts
 }
 
-func (d *Data) SetPlotColumnOptions(opts *plotcore.ColumnOptions, name ...string) error {
-	return d.SetMetadataItems("PlotColumnOptions", opts)
+func (d *Data) SetPlotColumnOptions(opts *plotcore.ColumnOptions, names ...string) error {
+	return d.SetMetadataItems("PlotColumnOptions", opts, names...)
 }
 
 func (md Metadata) PlotColumnOptions() *plotcore.ColumnOptions {

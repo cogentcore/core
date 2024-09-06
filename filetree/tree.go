@@ -42,7 +42,7 @@ type Tree struct {
 	Dirs DirFlagMap `set:"-"`
 
 	// DirsOnTop indicates whether all directories are placed at the top of the tree.
-	// Otherwise everything is mixed.
+	// Otherwise everything is mixed.  This is the default.
 	DirsOnTop bool
 
 	// FileNodeType is the type of node to create; defaults to [Node] but can use custom node types
@@ -51,6 +51,9 @@ type Tree struct {
 	// FilterFunc, if set, determines whether to include the given node in the tree.
 	// return true to include, false to not.  This applies to files and directories alike.
 	FilterFunc func(path string, info fs.FileInfo) bool
+
+	// FSys is the file system we are browsing, if it is an FSys (nil = os filesystem)
+	FSys fs.FS
 
 	// inOpenAll indicates whether we are in midst of an OpenAll call; nodes should open all dirs.
 	inOpenAll bool
@@ -76,6 +79,7 @@ func (ft *Tree) Init() {
 	ft.FileRoot = ft
 	ft.FileNodeType = types.For[Node]()
 	ft.OpenDepth = 4
+	ft.DirsOnTop = true
 	ft.FirstMaker(func(p *tree.Plan) {
 		tree.AddNew(p, externalFilesName, func() Filer {
 			return tree.NewOfType(ft.FileNodeType).(Filer)
@@ -102,8 +106,9 @@ func (fv *Tree) Destroy() {
 	fv.Tree.Destroy()
 }
 
-// OpenPath opens the filetree at the given directory path. It reads all the files at
-// the given path into this tree. Only paths listed in [Tree.Dirs] will be opened.
+// OpenPath opens the filetree at the given os file system directory path.
+// It reads all the files at the given path into this tree.
+// Only paths listed in [Tree.Dirs] will be opened.
 func (ft *Tree) OpenPath(path string) *Tree {
 	if ft.FileNodeType == nil {
 		ft.FileNodeType = types.For[Node]()
@@ -116,9 +121,26 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	if errors.Log(err) != nil {
 		abs = effpath
 	}
+	ft.FSys = nil
 	ft.Filepath = core.Filename(abs)
 	ft.setDirOpen(core.Filename(abs))
 	ft.detectVCSRepo(true)
+	ft.initFileInfo()
+	ft.Open()
+	ft.Update()
+	return ft
+}
+
+// OpenPathFS opens the filetree at the given io/fs file system directory path.
+// It reads all the files at the given path into this tree.
+// Only paths listed in [Tree.Dirs] will be opened.
+func (ft *Tree) OpenPathFS(fsys fs.FS, path string) *Tree {
+	if ft.FileNodeType == nil {
+		ft.FileNodeType = types.For[Node]()
+	}
+	ft.FSys = fsys
+	ft.Filepath = core.Filename(path)
+	ft.setDirOpen(core.Filename(path))
 	ft.initFileInfo()
 	ft.Open()
 	ft.Update()

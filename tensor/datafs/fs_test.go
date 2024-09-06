@@ -7,18 +7,21 @@ package datafs
 import (
 	"fmt"
 	"testing"
+	"testing/fstest"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func makeTestData(t *testing.T) *Data {
-	dfs := NewDir("/")
+	dfs, err := NewDir("root")
+	assert.NoError(t, err)
 	net, err := dfs.Mkdir("network")
 	assert.NoError(t, err)
-	NewTensor[float32]("units", net, []int{50, 50})
+	NewTensor[float32](net, "units", []int{50, 50})
 	log, err := dfs.Mkdir("log")
 	assert.NoError(t, err)
-	NewTable("Trial", log)
+	_, err = NewTable(log, "Trial")
+	assert.NoError(t, err)
 	return dfs
 }
 
@@ -28,5 +31,15 @@ func TestFS(t *testing.T) {
 	assert.NoError(t, err)
 	for _, d := range dirs {
 		fmt.Println(d.Name())
+	}
+	sd, err := dfs.DirAtPath("root")
+	assert.NoError(t, err)
+	sd, err = sd.DirAtPath("network")
+	assert.NoError(t, err)
+	sd, err = dfs.DirAtPath("root/network")
+	assert.NoError(t, err)
+
+	if err := fstest.TestFS(dfs, "root/network/units"); err != nil {
+		t.Fatal(err)
 	}
 }

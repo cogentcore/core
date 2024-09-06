@@ -222,9 +222,17 @@ func (fn *Node) Init() {
 				w.NeedsLayout()
 				w.FileRoot = fn.FileRoot
 				w.Filepath = core.Filename(fpath)
-				w.initFileInfo()
-				if w.IsDir() && repo == nil {
-					w.detectVCSRepo(true) // update files
+				if w.FileRoot.FSys != nil {
+					if fi.IsDir() {
+						fn.Info.SetFileInfo(fi)
+					} else {
+						w.initFileInfo()
+					}
+				} else {
+					w.initFileInfo()
+					if w.IsDir() && repo == nil {
+						w.detectVCSRepo(true) // update files
+					}
 				}
 			})
 		}
@@ -292,17 +300,16 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 	path := string(fn.Filepath)
 	var files []fs.FileInfo
 	var dirs []fs.FileInfo // for DirsOnTop mode
-	filepath.Walk(path, func(pth string, info fs.FileInfo, err error) error {
-		if err != nil {
-			emsg := fmt.Sprintf("filetree.Node DirFileList Path %q: Error: %v", path, err)
-			log.Println(emsg)
-			return nil // ignore
-		}
-		if pth == path { // proceed..
-			return nil
-		}
+	var di []fs.DirEntry
+	if fn.FileRoot.FSys == nil {
+		di = errors.Log1(os.ReadDir(path))
+	} else {
+		di = errors.Log1(fs.ReadDir(fn.FileRoot.FSys, path))
+	}
+	for _, d := range di {
+		info := errors.Log1(d.Info())
 		if fn.FileRoot.DirsOnTop {
-			if info.IsDir() {
+			if d.IsDir() {
 				dirs = append(dirs, info)
 			} else {
 				files = append(files, info)
@@ -310,11 +317,7 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 		} else {
 			files = append(files, info)
 		}
-		if info.IsDir() {
-			return filepath.SkipDir
-		}
-		return nil
-	})
+	}
 	doModSort := fn.FileRoot.dirSortByModTime(core.Filename(path))
 	if fn.FileRoot.DirsOnTop {
 		if doModSort {
@@ -331,13 +334,7 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 
 func sortByModTime(files []fs.FileInfo) {
 	slices.SortFunc(files, func(a, b fs.FileInfo) int {
-		if a.ModTime().After(b.ModTime()) {
-			return -1
-		}
-		if b.ModTime().After(a.ModTime()) {
-			return 1
-		}
-		return 0
+		return a.ModTime().Compare(b.ModTime())
 	})
 }
 
@@ -357,21 +354,28 @@ func (fn *Node) setFileIcon() {
 
 // initFileInfo initializes file info
 func (fn *Node) initFileInfo() error {
-	ls, err := os.Lstat(string(fn.Filepath))
-	if err != nil {
-		return err
+	if fn.Filepath == "" {
+		return nil
 	}
-	if ls.Mode()&os.ModeSymlink != 0 {
-		effpath, err := filepath.EvalSymlinks(string(fn.Filepath))
-		if err != nil {
-			// this happens too often for links -- skip
-			// log.Printf("filetree.Node Path: %v could not be opened -- error: %v\n", fn.Filepath, err)
+	var err error
+	if fn.FileRoot.FSys == nil { // deal with symlinks
+		ls, err := os.Lstat(string(fn.Filepath))
+		if errors.Log(err) != nil {
 			return err
 		}
-		fn.Filepath = core.Filename(effpath)
+		if ls.Mode()&os.ModeSymlink != 0 {
+			effpath, err := filepath.EvalSymlinks(string(fn.Filepath))
+			if err != nil {
+				// this happens too often for links -- skip
+				// log.Printf("filetree.Node Path: %v could not be opened -- error: %v\n", fn.Filepath, err)
+				return err
+			}
+			fn.Filepath = core.Filename(effpath)
+		}
+		err = fn.Info.InitFile(string(fn.Filepath))
+	} else {
+		err = fn.Info.InitFileFS(fn.FileRoot.FSys, string(fn.Filepath))
 	}
-
-	err = fn.Info.InitFile(string(fn.Filepath))
 	if err != nil {
 		emsg := fmt.Errorf("filetree.Node InitFileInfo Path %q: Error: %v", fn.Filepath, err)
 		log.Println(emsg)

@@ -35,7 +35,7 @@ func NewDir(name string, parent ...*Data) (*Data, error) {
 // Items returns data items in given directory by name.
 // error reports any items not found, or if not a directory.
 func (d *Data) Items(names ...string) ([]*Data, error) {
-	if err := d.mustDir("items", names[0]); err != nil {
+	if err := d.mustDir("items", ""); err != nil {
 		return nil, err
 	}
 	fm := d.filemap()
@@ -91,6 +91,18 @@ func (d *Data) ItemsAddedFunc(fun func(item *Data) bool) []*Data {
 	return its
 }
 
+// DirAtPath returns directory at given relative path
+// from this starting dir.
+func (d *Data) DirAtPath(dir string) (*Data, error) {
+	var err error
+	dir = path.Clean(dir)
+	sdf, err := d.Sub(dir) // this ensures that d is a dir
+	if err != nil {
+		return nil, err
+	}
+	return sdf.(*Data), nil
+}
+
 // Path returns the full path to this data item
 func (d *Data) Path() string {
 	pt := d.name
@@ -133,15 +145,7 @@ func (d *Data) DirNamesAdded() []string {
 	fm := d.filemap()
 	names := maps.Keys(fm)
 	slices.SortFunc(names, func(a, b string) int {
-		ad := fm[a]
-		bd := fm[b]
-		if ad.ModTime().After(bd.ModTime()) {
-			return -1
-		}
-		if bd.ModTime().After(ad.ModTime()) {
-			return 1
-		}
-		return 0
+		return fm[a].ModTime().Compare(fm[b].ModTime())
 	})
 	return names
 }

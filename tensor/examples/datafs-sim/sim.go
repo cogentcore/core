@@ -6,7 +6,9 @@ package main
 
 import (
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/databrowser"
 	"cogentcore.org/core/tensor/datafs"
 )
 
@@ -57,7 +59,7 @@ func ConfigAggLog(dir *datafs.Data, level string, stats *datafs.Data, nrows int,
 }
 
 func main() {
-	data = errors.Log1(datafs.NewDir("/"))
+	data = errors.Log1(datafs.NewDir("root"))
 	sim := errors.Log1(data.Mkdir("sim"))
 	stats := ConfigStats(sim)
 	ntrials := 25
@@ -68,5 +70,6 @@ func main() {
 
 	// note: it would be convenient to be able to put the compute closure right here
 	// like it is in the logitem
-
+	databrowser.NewBrowserWindow(data, "root")
+	core.Wait()
 }
