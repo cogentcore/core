@@ -25,6 +25,7 @@ type GraphicsPipeline struct {
 	// AlphaBlend determines whether to do alpha blending or not.
 	AlphaBlend bool
 
+	// renderPipeline is the configured, instantiated wgpu pipeline
 	renderPipeline *wgpu.RenderPipeline
 }
 
@@ -35,26 +36,6 @@ func NewGraphicsPipeline(name string, sy *GraphicsSystem) *GraphicsPipeline {
 	pl.System = sy
 	pl.SetGraphicsDefaults()
 	return pl
-}
-
-// BindPipeline binds this pipeline as the one to use for next commands in
-// the given render pass.
-// This also calls BindAllGroups, to bind the Current Value for all variables,
-// excluding Vertex level variables: use BindVertex for that.
-// Be sure to set the desired Current value prior to calling.
-func (pl *GraphicsPipeline) BindPipeline(rp *wgpu.RenderPassEncoder) error {
-	if pl.renderPipeline != nil {
-		rp.SetPipeline(pl.renderPipeline)
-		pl.BindAllGroups(rp)
-		return nil
-	}
-	err := pl.Config(false)
-	if err == nil {
-		rp.SetPipeline(pl.renderPipeline)
-		pl.BindAllGroups(rp)
-		return nil
-	}
-	return err
 }
 
 // BindAllGroups binds the Current Value for all variables across all
@@ -79,6 +60,23 @@ func (pl *GraphicsPipeline) BindGroup(rp *wgpu.RenderPassEncoder, group int) {
 	if err == nil {
 		rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
 	}
+}
+
+// BindPipeline binds this pipeline as the one to use for next commands in
+// the given render pass.
+// This also calls BindAllGroups, to bind the Current Value for all variables,
+// excluding Vertex level variables: use BindVertex for that.
+// Be sure to set the desired Current value prior to calling.
+func (pl *GraphicsPipeline) BindPipeline(rp *wgpu.RenderPassEncoder) error {
+	if pl.renderPipeline == nil {
+		err := pl.Config(false)
+		if errors.Log(err) != nil {
+			return err
+		}
+	}
+	rp.SetPipeline(pl.renderPipeline)
+	pl.BindAllGroups(rp)
+	return nil
 }
 
 // BindDrawIndexed binds the Current Value for all VertexGroup variables,
@@ -148,7 +146,7 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 		pl.releasePipeline() // starting over: note: requires keeping shaders around
 	}
 	play, err := pl.bindLayout()
-	if err != nil {
+	if errors.Log(err) != nil {
 		return err
 	}
 	defer play.Release()

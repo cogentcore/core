@@ -18,9 +18,14 @@ import (
 // the given code string, using the given file system
 // and default path to locate the included files.
 func IncludeFS(fsys fs.FS, fpath, code string) string {
+	included := map[string]struct{}{}
+	return includeFS(fsys, fpath, code, included)
+}
+
+func includeFS(fsys fs.FS, fpath, code string, included map[string]struct{}) string {
 	fl := stringsx.SplitLines(code)
 	nl := len(fl)
-	for li := nl - 1; li >= 0; li-- {
+	for li := range nl {
 		ln := fl[li]
 		if !strings.HasPrefix(ln, `#include "`) {
 			continue
@@ -32,17 +37,32 @@ func IncludeFS(fsys fs.FS, fpath, code string) string {
 			continue
 		}
 		fname := fn[:qi]
+		fp := path.Join(fpath, fname)
+		if _, ok := included[fname]; ok {
+			fl[li] = "// " + ln
+			continue
+		}
+		if _, ok := included[fp]; ok {
+			fl[li] = "// " + ln
+			continue
+		}
+		inc := fname
 		b, err := fs.ReadFile(fsys, fname)
 		if err != nil {
-			b, err = fs.ReadFile(fsys, path.Join(fpath, fname))
+			b, err = fs.ReadFile(fsys, fp)
 			if err != nil {
 				slog.Error("IncludeFS: could not find include", "file", fname, "fpath", fpath)
 				continue
 			}
+			inc = fp
 		}
-		ol := stringsx.SplitLines(string(b))
+		ins := includeFS(fsys, fpath, string(b), included)
+		ol := stringsx.SplitLines(ins)
 		fl[li] = "// " + ln
+		nl += len(ol)
 		fl = slices.Insert(fl, li+1, ol...)
+		li += len(ol)
+		included[inc] = struct{}{}
 	}
 	return strings.Join(fl, "\n")
 }

@@ -13,8 +13,7 @@ import (
 )
 
 // RandCheck checks that the current random numbers generated across each
-// MPI processor are identical. Most emergent simulations depend on this
-// being true, so it is good to check periodically to ensure!
+// MPI processor are identical.
 func RandCheck(comm *mpi.Comm) error {
 	ws := comm.Size()
 	rnd := rand.Int()

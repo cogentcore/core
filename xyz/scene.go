@@ -118,7 +118,7 @@ func (sc *Scene) Init() {
 // rendering of 3D content. This can be used in unit tests and other
 // cases not involving xyzcore. It makes a new [gpu.NoDisplayGPU].
 func NewOffscreenScene() *Scene {
-	gpu, device, err := gpu.NoDisplayGPU("offscreen")
+	gpu, device, err := gpu.NoDisplayGPU()
 	if err != nil {
 		panic(fmt.Errorf("xyz.NewOffscreenScene: error initializing gpu.NoDisplayGPU: %w", err))
 	}

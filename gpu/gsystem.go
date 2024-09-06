@@ -39,7 +39,7 @@ type GraphicsSystem struct {
 	Renderer Renderer
 
 	// CurrentCommandEncoder is the command encoder created in
-	// BeginRenderPass, and released in EndRenderPass.
+	// [GraphicsSystem.BeginRenderPass], and released in [GraphicsSystem.EndRenderPass].
 	CommandEncoder *wgpu.CommandEncoder
 
 	// logical device for this GraphicsSystem, from the Renderer.
@@ -217,7 +217,7 @@ func (sy *GraphicsSystem) beginRenderPass() (*Render, *wgpu.TextureView, error) 
 		return nil, nil, err
 	}
 	cmd, err := sy.NewCommandEncoder()
-	if err != nil {
+	if errors.Log(err) != nil {
 		return nil, nil, err
 	}
 	sy.CommandEncoder = cmd
@@ -228,11 +228,11 @@ func (sy *GraphicsSystem) beginRenderPass() (*Render, *wgpu.TextureView, error) 
 // to start the render pass using the Renderer configured for
 // this system, and returns the encoder object to which further
 // rendering commands should be added.
-// Call EndRenderPass when done.
+// Call [EndRenderPass] when done.
 // This version Clears the target texture first, using ClearValues.
 func (sy *GraphicsSystem) BeginRenderPass() (*wgpu.RenderPassEncoder, error) {
 	rd, view, err := sy.beginRenderPass()
-	if err != nil {
+	if errors.Log(err) != nil {
 		return nil, err
 	}
 	return rd.BeginRenderPass(sy.CommandEncoder, view), nil
@@ -242,12 +242,12 @@ func (sy *GraphicsSystem) BeginRenderPass() (*wgpu.RenderPassEncoder, error) {
 // to start the render pass using the Renderer configured for
 // this system, and returns the encoder object to which further
 // rendering commands should be added.
-// Call EndRenderPass when done.
+// Call [EndRenderPass] when done.
 // This version does NOT clear the target texture first,
 // so the prior render output is carried over.
 func (sy *GraphicsSystem) BeginRenderPassNoClear() (*wgpu.RenderPassEncoder, error) {
 	rd, view, err := sy.beginRenderPass()
-	if err != nil {
+	if errors.Log(err) != nil {
 		return nil, err
 	}
 	return rd.BeginRenderPassNoClear(sy.CommandEncoder, view), nil
@@ -255,7 +255,7 @@ func (sy *GraphicsSystem) BeginRenderPassNoClear() (*wgpu.RenderPassEncoder, err
 
 // SubmitRender submits the current render commands to the device
 // Queue and releases the [CurrentCommandEncoder] and the given
-// RenderPassEncoder.  Must call rp.End prior to calling this.
+// RenderPassEncoder.  You must call rp.End prior to calling this.
 // Can insert other commands after rp.End, e.g., to copy the rendered image,
 // prior to calling SubmitRender.
 func (sy *GraphicsSystem) SubmitRender(rp *wgpu.RenderPassEncoder) error {

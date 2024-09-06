@@ -166,6 +166,18 @@ func (vg *VarGroup) SetAllCurrentValue(i int) {
 	}
 }
 
+// CreateReadBuffers creates read buffers for all values.
+func (vg *VarGroup) CreateReadBuffers() error {
+	var errs []error
+	for _, vr := range vg.Vars {
+		err := vr.Values.CreateReadBuffers()
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
+}
+
 // Config must be called after all variables have been added.
 // Configures binding / location for all vars based on sequential order.
 // also does validation and returns error message.

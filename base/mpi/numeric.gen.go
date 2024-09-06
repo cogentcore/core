@@ -4,12 +4,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build mpi
+//go:build mpi || mpich
 
 package mpi
 
 /*
-#cgo pkg-config: ompi
+#cgo mpi pkg-config: ompi
+#cgo mpich pkg-config: mpich
 #include "mpi.h"
 
 MPI_Datatype FLOAT64   = MPI_DOUBLE;
