@@ -21,7 +21,6 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/goki/freetype v1.0.5
-	github.com/goki/vulkan v1.0.8
 	github.com/gomarkdown/markdown v0.0.0-20240626202925-2eda941fd024
 	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/h2non/filetype v1.1.3
