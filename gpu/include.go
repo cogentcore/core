@@ -25,7 +25,7 @@ func IncludeFS(fsys fs.FS, fpath, code string) string {
 func includeFS(fsys fs.FS, fpath, code string, included map[string]struct{}) string {
 	fl := stringsx.SplitLines(code)
 	nl := len(fl)
-	for li := 0; li < nl; li++ {
+	for li := range nl {
 		ln := fl[li]
 		if !strings.HasPrefix(ln, `#include "`) {
 			continue

@@ -5,7 +5,7 @@
 package gpu
 
 // System provides the general interface for
-// GraphicSystem and ComputeSystem.
+// [GraphicSystem] and [ComputeSystem].
 type System interface {
 	// vars represents all the data variables used by the system,
 	// with one Var for each resource that is made visible to the shader,

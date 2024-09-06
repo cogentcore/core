@@ -147,11 +147,11 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 		return 0
 	}
 	trgDevNm := ""
-	if ev := os.Getenv("WEBGPU_DEVICE_SELECT"); ev != "" {
+	if ev := os.Getenv("GPU_DEVICE_SELECT"); ev != "" {
 		trgDevNm = ev
 	}
 	if gp.ComputeOnly {
-		if ev := os.Getenv("WEBGPU_COMPUTE_DEVICE_SELECT"); ev != "" {
+		if ev := os.Getenv("GPU_COMPUTE_DEVICE_SELECT"); ev != "" {
 			trgDevNm = ev
 		}
 	}

@@ -39,7 +39,7 @@ type GraphicsSystem struct {
 	Renderer Renderer
 
 	// CurrentCommandEncoder is the command encoder created in
-	// [BeginRenderPass], and released in [EndRenderPass].
+	// [GraphicsSystem.BeginRenderPass], and released in [GraphicsSystem.EndRenderPass].
 	CommandEncoder *wgpu.CommandEncoder
 
 	// logical device for this GraphicsSystem, from the Renderer.
