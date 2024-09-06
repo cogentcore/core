@@ -540,7 +540,7 @@ func (p *printer) pathType(x *ast.SelectorExpr) (types.Type, error) {
 		pt := paths[pi]
 		f := fieldByName(bt, pt.Name)
 		if f == nil {
-			return nil, fmt.Errorf("gosl pathType: field not found %q in type: %q:", p, bt.String())
+			return nil, fmt.Errorf("gosl pathType: field not found %q in type: %q:", pt, bt.String())
 		}
 		if pi == 0 {
 			return f.Type(), nil
