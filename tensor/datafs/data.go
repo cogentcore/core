@@ -115,6 +115,12 @@ func NewTable(dir *Data, names ...string) (*table.Table, error) {
 ///////////////////////////////
 // Data Access
 
+// IsNumeric returns true if the [DataType] is a basic scalar
+// numerical value, e.g., float32, int, etc.
+func (d *Data) IsNumeric() bool {
+	return reflectx.KindIsNumber(d.DataType())
+}
+
 // DataType returns the type of the data elements in the tensor.
 // Bool is returned for the Bits tensor type.
 func (d *Data) DataType() reflect.Kind {
@@ -129,7 +135,7 @@ func (d *Data) KnownFileInfo() fileinfo.Known {
 		return fileinfo.Tensor
 	}
 	kind := d.DataType()
-	if kind >= reflect.Int && kind <= reflect.Complex128 {
+	if reflectx.KindIsNumber(kind) {
 		return fileinfo.Number
 	}
 	if kind == reflect.String {
@@ -163,6 +169,9 @@ func (d *Data) AsFloat64() (float64, bool) {
 	if tsr := d.AsTensor(); tsr != nil {
 		return 0, false
 	}
+	if dt := d.AsTable(); dt != nil {
+		return 0, false
+	}
 	v, err := reflectx.ToFloat(d.Value)
 	if err != nil {
 		return 0, false
@@ -170,7 +179,7 @@ func (d *Data) AsFloat64() (float64, bool) {
 	return v, true
 }
 
-// SetFloat64 sets data as a float64 if it is a scalar value
+// SetFloat64 sets data from given float64 if it is a scalar value
 // that can be so set.  Returns false if not.
 func (d *Data) SetFloat64(v float64) bool {
 	// fast path for actual floats
@@ -185,8 +194,61 @@ func (d *Data) SetFloat64(v float64) bool {
 	if tsr := d.AsTensor(); tsr != nil {
 		return false
 	}
-	// todo: this isn't going to work:
-	err := reflectx.SetRobust(d.Value, v)
+	if dt := d.AsTable(); dt != nil {
+		return false
+	}
+	err := reflectx.SetRobust(&d.Value, v)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+// AsFloat32 returns data as a float32 if it is a scalar value
+// that can be so converted.  Returns false if not.
+func (d *Data) AsFloat32() (float32, bool) {
+	v, ok := d.AsFloat64()
+	return float32(v), ok
+}
+
+// SetFloat32 sets data from given float32 if it is a scalar value
+// that can be so set.  Returns false if not.
+func (d *Data) SetFloat32(v float32) bool {
+	return d.SetFloat64(float64(v))
+}
+
+// AsString returns data as a string if it is a scalar value
+// that can be so converted.  Returns false if not.
+func (d *Data) AsString() (string, bool) {
+	// fast path for actual strings
+	if s, ok := d.Value.(string); ok {
+		return s, true
+	}
+	if tsr := d.AsTensor(); tsr != nil {
+		return "", false
+	}
+	if dt := d.AsTable(); dt != nil {
+		return "", false
+	}
+	s := reflectx.ToString(d.Value)
+	return s, true
+}
+
+// SetString sets data from given string if it is a scalar value
+// that can be so set.  Returns false if not.
+func (d *Data) SetString(v string) bool {
+	// fast path for actual strings
+	if _, ok := d.Value.(string); ok {
+		d.Value = v
+		return true
+	}
+	if tsr := d.AsTensor(); tsr != nil {
+		return false
+	}
+	if dt := d.AsTable(); dt != nil {
+		return false
+	}
+	err := reflectx.SetRobust(&d.Value, v)
 	if err != nil {
 		return false
 	}

@@ -6,6 +6,7 @@ package databrowser
 
 import (
 	"log"
+	"reflect"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -19,7 +20,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
-	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/diffbrowser"
 )
 
@@ -30,29 +30,23 @@ type FileNode struct {
 
 func (fn *FileNode) Init() {
 	fn.Node.Init()
-	fn.AddContextMenu(fn.ContextMenu)
-	fn.Parts.OnDoubleClick(func(e events.Event) {
-		e.SetHandled()
-		br, ok := ParentBrowser(fn.This)
-		if !ok {
-			return
-		}
-		sels := fn.GetSelectedNodes()
-		if len(sels) > 0 {
-			sn := filetree.AsNode(sels[len(sels)-1])
-			if sn != nil {
-				if sn.IsDir() {
-					if !sn.HasChildren() {
-						// sn.OpenEmptyDir() TODO(filetree)
-					} else {
-						sn.ToggleClose()
-					}
-				} else {
-					br.FileNodeOpened(sn)
-				}
-			}
-		}
+	fn.Updater(func() {
+		fn.UpdateTooltip()
 	})
+	fn.AddContextMenu(fn.ContextMenu)
+}
+
+func (fn *FileNode) UpdateTooltip() {
+	if fn.Info.Cat != fileinfo.Data {
+		return
+	}
+	ofn := fn.AsNode()
+	switch fn.Info.Known {
+	case fileinfo.Number, fileinfo.String:
+		dv := DataFS(ofn)
+		v, _ := dv.AsString()
+		fn.SetTooltip(v)
+	}
 }
 
 // DataFS returns the datafs representation of this item.
@@ -94,35 +88,63 @@ func (fn *FileNode) GetFileInfo() error {
 	return err
 }
 
-func (br *Browser) FileNodeOpened(fn *filetree.Node) {
-	// fmt.Println("opened:", fn.FPath)
+func (fn *FileNode) OpenFile() error {
+	ofn := fn.AsNode()
+	br, ok := ParentBrowser(fn.This)
+	if !ok {
+		return nil
+	}
 	df := fsx.DirAndFile(string(fn.Filepath))
 	switch {
 	case fn.Info.Cat == fileinfo.Data:
 		switch fn.Info.Known {
 		case fileinfo.Tensor:
-			d := DataFS(fn)
-			tv := br.NewTabTensorTable(fn.Name)
-			dt := tv.Table.Table
+			d := DataFS(ofn)
 			tsr := d.AsTensor()
-			dt.Rows = tsr.DimSize(0)
-			dt.AddColumn(tsr, fn.Name)
-			br.Update()
+			if tsr.IsString() || tsr.DataType() < reflect.Float32 {
+				br.NewTabTensorEditor(df, tsr)
+			} else {
+				br.NewTabTensorGrid(df, tsr)
+			}
 		case fileinfo.Table:
-			d := DataFS(fn)
-			tv := br.NewTabTensorTable(df)
-			tv.Table.SetTable(d.AsTable())
-			tv.Table.Sequential()
+			d := DataFS(ofn)
+			dt := d.AsTable()
+			br.NewTabTensorTable(df, dt)
 			br.Update()
+		case fileinfo.Number:
+			dv := DataFS(ofn)
+			v, _ := dv.AsFloat32()
+			d := core.NewBody(df)
+			core.NewText(d).SetType(core.TextSupporting).SetText(df)
+			sp := core.NewSpinner(d).SetValue(v)
+			d.AddBottomBar(func(bar *core.Frame) {
+				d.AddCancel(bar)
+				d.AddOK(bar).OnClick(func(e events.Event) {
+					dv.SetFloat32(sp.Value)
+				})
+			})
+			d.RunDialog(br)
+		case fileinfo.String:
+			dv := DataFS(ofn)
+			v, _ := dv.AsString()
+			d := core.NewBody(df)
+			core.NewText(d).SetType(core.TextSupporting).SetText(df)
+			tf := core.NewTextField(d).SetText(v)
+			d.AddBottomBar(func(bar *core.Frame) {
+				d.AddCancel(bar)
+				d.AddOK(bar).OnClick(func(e events.Event) {
+					dv.SetString(tf.Text())
+				})
+			})
+			d.RunDialog(br)
+
 		default:
-			df := fsx.DirAndFile(string(fn.Filepath))
-			tv := br.NewTabTensorTable(df)
-			dt := tv.Table.Table
+			dt := table.NewTable()
 			err := dt.OpenCSV(fn.Filepath, table.Tab) // todo: need more flexible data handling mode
-			tv.Table.Sequential()
-			br.Update()
 			if err != nil {
 				core.ErrorSnackbar(br, err)
+			} else {
+				br.NewTabTensorTable(df, dt)
 			}
 		}
 	case fn.IsExec(): // todo: use exec?
@@ -144,28 +166,7 @@ func (br *Browser) FileNodeOpened(fn *filetree.Node) {
 	default:
 		br.NewTabEditor(df, string(fn.Filepath))
 	}
-}
-
-func (br *Browser) FileNodeSelected(fn *filetree.Node) {
-	// todo: anything?
-}
-
-// NewTabEditor opens an editor tab for given file
-func (br *Browser) NewTabEditor(label, filename string) *texteditor.Editor {
-	tabs := br.Tabs()
-	tab := tabs.RecycleTab(label)
-	if tab.HasChildren() {
-		ed := tab.Child(0).(*texteditor.Editor)
-		ed.Buffer.Open(core.Filename(filename))
-		return ed
-	}
-	ed := texteditor.NewEditor(tab)
-	ed.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-	})
-	ed.Buffer.Open(core.Filename(filename))
-	br.Update()
-	return ed
+	return nil
 }
 
 // EditFiles calls EditFile on selected files
@@ -182,16 +183,23 @@ func (fn *FileNode) EditFile() {
 		return
 	}
 	br, ok := ParentBrowser(fn.This)
-	if ok {
-		df := fsx.DirAndFile(string(fn.Filepath))
-		br.NewTabEditor(df, string(fn.Filepath))
+	if !ok {
+		return
 	}
+	if fn.Info.Cat == fileinfo.Data {
+		fn.OpenFile()
+		return
+	}
+	df := fsx.DirAndFile(string(fn.Filepath))
+	br.NewTabEditor(df, string(fn.Filepath))
 }
 
 // PlotFiles calls PlotFile on selected files
 func (fn *FileNode) PlotFiles() { //types:add
 	fn.SelectedFunc(func(sn *filetree.Node) {
-		sn.This.(*FileNode).PlotFile()
+		if sfn, ok := sn.This.(*FileNode); ok {
+			sfn.PlotFile()
+		}
 	})
 }
 
@@ -201,19 +209,44 @@ func (fn *FileNode) PlotFile() {
 		return
 	}
 	br, ok := ParentBrowser(fn.This)
-	if ok {
-		df := fsx.DirAndFile(string(fn.Filepath))
-		pl := br.NewTabPlot(df)
-
-		dt := table.NewTable()
-		err := dt.OpenCSV(fn.Filepath, table.Tab)
-		if err != nil {
-			core.ErrorSnackbar(br, err)
-		}
-		pl.SetTable(dt)
-		pl.Options.Title = df
-		br.Update()
+	if !ok {
+		return
 	}
+	df := fsx.DirAndFile(string(fn.Filepath))
+	var dt *table.Table
+	switch {
+	case fn.Info.Cat == fileinfo.Data:
+		switch fn.Info.Known {
+		case fileinfo.Tensor:
+			d := DataFS(fn.AsNode())
+			tsr := d.AsTensor()
+			dt = table.NewTable(df)
+			dt.Rows = tsr.DimSize(0)
+			rc := dt.AddIntColumn("Row")
+			for r := range dt.Rows {
+				rc.Values[r] = r
+			}
+			dt.AddColumn(tsr, fn.Name)
+		case fileinfo.Table:
+			d := DataFS(fn.AsNode())
+			dt = d.AsTable()
+		default:
+			dt = table.NewTable(df)
+			err := dt.OpenCSV(fn.Filepath, table.Tab) // todo: need more flexible data handling mode
+			if err != nil {
+				core.ErrorSnackbar(br, err)
+				dt = nil
+			} else {
+				br.NewTabTensorTable(df, dt)
+			}
+		}
+	}
+	if dt == nil {
+		return
+	}
+	pl := br.NewTabPlot(df+" Plot", dt)
+	pl.Options.Title = df
+	br.Update()
 }
 
 // DiffDirs displays a browser with differences between two selected directories

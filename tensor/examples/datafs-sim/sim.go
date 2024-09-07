@@ -31,7 +31,7 @@ func ConfigStats(dir *datafs.Data) *datafs.Data {
 // ConfigTrialLog adds first-level logging of stats into tensors
 func ConfigTrialLog(dir *datafs.Data, stats *datafs.Data, nrows int) *datafs.Data {
 	trial := errors.Log1(dir.Mkdir("Trial"))
-	sitems := stats.ItemsAddedFunc(func(it *datafs.Data) bool {
+	sitems := stats.ItemsByTimeFunc(func(it *datafs.Data) bool {
 		return !it.IsDir()
 	})
 	for _, st := range sitems {
@@ -45,13 +45,19 @@ func ConfigTrialLog(dir *datafs.Data, stats *datafs.Data, nrows int) *datafs.Dat
 // ConfigAggLog adds a higher-level logging of lower-level into higher-level tensors
 func ConfigAggLog(dir *datafs.Data, level string, stats *datafs.Data, nrows int, aggs ...string) *datafs.Data {
 	aglog := errors.Log1(dir.Mkdir(level))
-	sitems := stats.ItemsAddedFunc(func(it *datafs.Data) bool {
+	sitems := stats.ItemsByTimeFunc(func(it *datafs.Data) bool {
 		return !it.IsDir()
 	})
 	for _, st := range sitems {
-		dd := errors.Log1(aglog.Mkdir(st.Name()))
-		for _, ag := range aggs { // key advantage of dir structure: multiple stats per item
-			dt := errors.Log1(datafs.NewData(dd, ag))
+		if st.IsNumeric() {
+			dd := errors.Log1(aglog.Mkdir(st.Name()))
+			for _, ag := range aggs { // key advantage of dir structure: multiple stats per item
+				dt := errors.Log1(datafs.NewData(dd, ag))
+				dt.Value = tensor.NewOfType(st.DataType(), []int{nrows}, "row")
+			}
+		} else {
+			dd := errors.Log1(aglog.Mkdir(st.Name()))
+			dt := errors.Log1(datafs.NewData(dd, st.Name()))
 			dt.Value = tensor.NewOfType(st.DataType(), []int{nrows}, "row")
 		}
 	}

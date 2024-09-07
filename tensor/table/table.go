@@ -39,11 +39,11 @@ type Table struct { //types:add
 }
 
 func NewTable(name ...string) *Table {
-	et := &Table{}
+	dt := &Table{}
 	if len(name) > 0 {
-		et.SetMetaData("name", name[0])
+		dt.SetMetaData("name", name[0])
 	}
-	return et
+	return dt
 }
 
 // IsValidRow returns error if the row is invalid

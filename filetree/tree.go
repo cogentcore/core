@@ -45,6 +45,10 @@ type Tree struct {
 	// Otherwise everything is mixed.  This is the default.
 	DirsOnTop bool
 
+	// SortByModTime causes files to be sorted by modification time by default.
+	// Otherwise it is a per-directory option.
+	SortByModTime bool
+
 	// FileNodeType is the type of node to create; defaults to [Node] but can use custom node types
 	FileNodeType *types.Type `display:"-" json:"-" xml:"-"`
 
@@ -309,6 +313,11 @@ func (ft *Tree) setDirSortBy(fpath core.Filename, modTime bool) {
 // dirSortByModTime returns true if dir is sorted by mod time
 func (ft *Tree) dirSortByModTime(fpath core.Filename) bool {
 	return ft.Dirs.sortByModTime(ft.RelativePathFrom(fpath))
+}
+
+// dirSortByName returns true if dir is sorted by name
+func (ft *Tree) dirSortByName(fpath core.Filename) bool {
+	return ft.Dirs.sortByName(ft.RelativePathFrom(fpath))
 }
 
 // AddExternalFile adds an external file outside of root of file tree

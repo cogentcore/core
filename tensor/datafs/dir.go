@@ -72,9 +72,9 @@ func (d *Data) ItemsFunc(fun func(item *Data) bool) []*Data {
 	return its
 }
 
-// ItemsAddedFunc returns data items in given directory
-// filtered by given function, in added order.
-func (d *Data) ItemsAddedFunc(fun func(item *Data) bool) []*Data {
+// ItemsByTimeFunc returns data items in given directory
+// filtered by given function, in time order (i.e., order added).
+func (d *Data) ItemsByTimeFunc(fun func(item *Data) bool) []*Data {
 	if err := d.mustDir("items-added-func", ""); err != nil {
 		return nil
 	}

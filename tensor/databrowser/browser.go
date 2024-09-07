@@ -121,6 +121,7 @@ func (br *Browser) Tabs() *core.Tabs {
 func (br *Browser) UpdateFiles() { //types:add
 	files := br.FileTree()
 	if br.FSys != nil {
+		files.SortByModTime = true
 		files.OpenPathFS(br.FSys, br.DataRoot)
 	} else {
 		files.OpenPath(br.DataRoot)

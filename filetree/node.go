@@ -139,9 +139,11 @@ func (fn *Node) Init() {
 		}
 	})
 	fn.Parts.OnDoubleClick(func(e events.Event) {
+		e.SetHandled()
 		if fn.IsDir() {
-			fn.Open()
-			e.SetHandled()
+			fn.ToggleClose()
+		} else {
+			fn.This.(Filer).OpenFile()
 		}
 	})
 	tree.AddChildInit(fn.Parts, "branch", func(w *core.Switch) {
@@ -320,10 +322,17 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 			files = append(files, info)
 		}
 	}
-	doModSort := fn.FileRoot.dirSortByModTime(core.Filename(path))
+	doModSort := fn.FileRoot.SortByModTime
+	if doModSort {
+		doModSort = !fn.FileRoot.dirSortByName(core.Filename(path))
+	} else {
+		doModSort = fn.FileRoot.dirSortByModTime(core.Filename(path))
+	}
+
 	if fn.FileRoot.DirsOnTop {
 		if doModSort {
-			sortByModTime(files) // just sort files, not dirs
+			sortByModTime(dirs)
+			sortByModTime(files)
 		}
 		files = append(dirs, files...)
 	} else {
@@ -458,7 +467,7 @@ func (fn *Node) sortBys(modTime bool) { //types:add
 // optionally can be sorted by modification time.
 func (fn *Node) sortBy(modTime bool) {
 	fn.FileRoot.setDirSortBy(fn.Filepath, modTime)
-	fn.NeedsLayout()
+	fn.Update()
 }
 
 // openAll opens all directories under this one
