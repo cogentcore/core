@@ -497,7 +497,7 @@ func (n *NodeBase) WalkDown(fun func(n Node) bool) {
 outer:
 	for {
 		cb := cur.AsTree()
-		if cb.This != nil && fun(cur) { // false return means stop
+		if fun(cur) && cb.This != nil { // false return means stop
 			cb.This.NodeWalkDown(fun)
 			if cb.HasChildren() {
 				tm[cur] = 0 // 0 for no fields
