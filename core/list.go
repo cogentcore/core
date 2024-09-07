@@ -505,10 +505,10 @@ func (lb *ListBase) sliceElementValue(si int) reflect.Value {
 	if si < lb.SliceSize {
 		val = reflectx.Underlying(lb.sliceUnderlying.Index(si)) // deal with pointer lists
 	} else {
-		val = lb.elementValue
+		val = reflectx.Underlying(lb.elementValue)
 	}
 	if !val.IsValid() {
-		val = lb.elementValue
+		val = reflectx.Underlying(lb.elementValue)
 	}
 	return val
 }

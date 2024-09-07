@@ -26,13 +26,7 @@ func SliceElementType(sl any) reflect.Type {
 
 // SliceElementValue returns a new [reflect.Value] of the [SliceElementType].
 func SliceElementValue(sl any) reflect.Value {
-	typ := SliceElementType(sl)
-	isPointer := typ.Kind() == reflect.Pointer
-	val := reflect.New(NonPointerType(typ)) // make the concrete element
-	if !isPointer {
-		val = val.Elem() // use concrete value
-	}
-	return val
+	return NonNilNew(SliceElementType(sl))
 }
 
 // SliceNewAt inserts a new blank element at the given index in the given slice.
