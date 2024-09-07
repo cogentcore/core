@@ -80,11 +80,13 @@ func (fn *FileNode) GetFileInfo() error {
 		fn.Info.Cat = fileinfo.Data
 		switch fn.Info.Known {
 		case fileinfo.Tensor:
-			fn.Info.Ic = icons.Dataset
+			fn.Info.Ic = icons.BarChart
+		case fileinfo.Table:
+			fn.Info.Ic = icons.BarChart4Bars
 		case fileinfo.Number:
-			fn.Info.Ic = icons.Pin
+			fn.Info.Ic = icons.Tag
 		case fileinfo.String:
-			fn.Info.Ic = icons.Pin
+			fn.Info.Ic = icons.Title
 		default:
 			fn.Info.Ic = icons.BarChart
 		}
