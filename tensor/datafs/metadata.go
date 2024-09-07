@@ -5,59 +5,20 @@
 package datafs
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/plot/plotcore"
-	"golang.org/x/exp/maps"
 )
 
-// Metadata can be attached to any data item
-type Metadata map[string]any
+// This file provides standardized metadata options for frequent
+// use cases, using codified key names to eliminate typos.
 
-func (md *Metadata) init() {
-	if *md == nil {
-		*md = make(map[string]any)
-	}
-}
-
-// GetMetadata gets metadata value of given type.
-// returns non-nil error if not present or item is a different type.
-func GetMetadata[T any](md Metadata, key string) (T, error) {
-	var z T
-	x, ok := md[key]
-	if !ok {
-		return z, fmt.Errorf("key %q not found in metadata", key)
-	}
-	v, ok := x.(T)
-	if !ok {
-		return z, fmt.Errorf("key %q has a different type than expected %T: is %T", key, z, x)
-	}
-	return v, nil
-}
-
-// SetMetadata sets the given metadata for this item.
-func (d *Data) SetMetadata(key string, value any) {
-	d.Meta.init()
-	d.Meta[key] = value
-}
-
-// CopyMetadata does a shallow copy of metadata from source metadata
-// to this data item.
-func (d *Data) CopyMetadata(md Metadata) {
-	if md == nil {
-		return
-	}
-	d.Meta.init()
-	maps.Copy(d.Meta, md)
-}
-
-// SetMetadataItems sets given metadata for items in given directory
+// SetMetaItems sets given metadata for items in given directory
 // with given names.  Returns error for any items not found.
-func (d *Data) SetMetadataItems(key string, value any, names ...string) error {
+func (d *Data) SetMetaItems(key string, value any, names ...string) error {
 	its, err := d.Items(names...)
 	for _, it := range its {
-		it.SetMetadata(key, value)
+		it.Meta.Set(key, value)
 	}
 	return err
 }
@@ -70,10 +31,43 @@ func PlotColumnZeroOne() *plotcore.ColumnOptions {
 	return opts
 }
 
+// SetPlotColumnOptions sets given plotting options for named items
+// within this directory (stored in Metadata).
 func (d *Data) SetPlotColumnOptions(opts *plotcore.ColumnOptions, names ...string) error {
-	return d.SetMetadataItems("PlotColumnOptions", opts, names...)
+	return d.SetMetaItems("PlotColumnOptions", opts, names...)
 }
 
-func (md Metadata) PlotColumnOptions() *plotcore.ColumnOptions {
-	return errors.Log1(GetMetadata[*plotcore.ColumnOptions](md, "PlotColumnOptions"))
+// PlotColumnOptions returns plotting options if they have been set, else nil.
+func (d *Data) PlotColumnOptions() *plotcore.ColumnOptions {
+	return errors.Ignore1(metadata.Get[*plotcore.ColumnOptions](d.Meta, "PlotColumnOptions"))
+}
+
+// SetCalcFunc sets a function to compute an updated Value for this data item.
+// Function is stored as CalcFunc in Metadata.  Can be called by [Data.Calc] method.
+func (d *Data) SetCalcFunc(fun func() error) {
+	d.Meta.Set("CalcFunc", fun)
+}
+
+// Calc calls function set by [Data.SetCalcFunc] to compute an updated Value
+// for this data item. Returns an error if func not set, or any error from func itself.
+// Function is stored as CalcFunc in Metadata.
+func (d *Data) Calc() error {
+	fun, err := metadata.Get[func() error](d.Meta, "CalcFunc")
+	if err != nil {
+		return err
+	}
+	return fun()
+}
+
+// CalcAll calls function set by [Data.SetCalcFunc] for all items in this directory
+func (d *Data) CalcAll() error {
+	var errs []error
+	items := d.ItemsByTimeFunc(nil)
+	for _, it := range items {
+		err := it.Calc()
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
 }

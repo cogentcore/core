@@ -123,7 +123,7 @@ func (fn *Node) AddToVCS() {
 	err := repo.Add(string(fn.Filepath))
 	if errors.Log(err) == nil {
 		fn.Info.VCS = vcs.Added
-		fn.NeedsRender()
+		fn.Update()
 	}
 }
 
@@ -144,7 +144,7 @@ func (fn *Node) deleteFromVCS() {
 	err := repo.DeleteRemote(string(fn.Filepath))
 	if fn != nil && errors.Log(err) == nil {
 		fn.Info.VCS = vcs.Deleted
-		fn.NeedsRender()
+		fn.Update()
 	}
 }
 
@@ -173,7 +173,7 @@ func (fn *Node) commitToVCS(message string) (err error) {
 		return err
 	}
 	fn.Info.VCS = vcs.Stored
-	fn.NeedsRender()
+	fn.Update()
 	return err
 }
 
@@ -205,7 +205,7 @@ func (fn *Node) revertVCS() (err error) {
 	if fn.Buffer != nil {
 		fn.Buffer.Revert()
 	}
-	fn.NeedsRender()
+	fn.Update()
 	return err
 }
 

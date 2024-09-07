@@ -32,6 +32,15 @@ func NewDir(name string, parent ...*Data) (*Data, error) {
 	return d, err
 }
 
+// Item returns data item in given directory by name.
+// This is for fast access and direct usage of known
+// items, and it will crash if item is not found or
+// this data is not a directory.
+func (d *Data) Item(name string) *Data {
+	fm := d.filemap()
+	return fm[name]
+}
+
 // Items returns data items in given directory by name.
 // error reports any items not found, or if not a directory.
 func (d *Data) Items(names ...string) ([]*Data, error) {
@@ -55,6 +64,7 @@ func (d *Data) Items(names ...string) ([]*Data, error) {
 
 // ItemsFunc returns data items in given directory
 // filtered by given function, in alpha order.
+// if func is nil, all items are returned.
 func (d *Data) ItemsFunc(fun func(item *Data) bool) []*Data {
 	if err := d.mustDir("items-func", ""); err != nil {
 		return nil
@@ -64,7 +74,7 @@ func (d *Data) ItemsFunc(fun func(item *Data) bool) []*Data {
 	var its []*Data
 	for _, nm := range names {
 		dt := fm[nm]
-		if !fun(dt) {
+		if fun != nil && !fun(dt) {
 			continue
 		}
 		its = append(its, dt)
@@ -74,16 +84,17 @@ func (d *Data) ItemsFunc(fun func(item *Data) bool) []*Data {
 
 // ItemsByTimeFunc returns data items in given directory
 // filtered by given function, in time order (i.e., order added).
+// if func is nil, all items are returned.
 func (d *Data) ItemsByTimeFunc(fun func(item *Data) bool) []*Data {
 	if err := d.mustDir("items-added-func", ""); err != nil {
 		return nil
 	}
 	fm := d.filemap()
-	names := d.DirNamesAdded()
+	names := d.DirNamesByTime()
 	var its []*Data
 	for _, nm := range names {
 		dt := fm[nm]
-		if !fun(dt) {
+		if fun != nil && !fun(dt) {
 			continue
 		}
 		its = append(its, dt)
@@ -139,9 +150,9 @@ func (d *Data) DirNamesAlpha() []string {
 	return names
 }
 
-// DirNamesAdded returns the names of items in the directory
-// sorted by order added (modTime).  Data must be dir by this point.
-func (d *Data) DirNamesAdded() []string {
+// DirNamesByTime returns the names of items in the directory
+// sorted by modTime (order added).  Data must be dir by this point.
+func (d *Data) DirNamesByTime() []string {
 	fm := d.filemap()
 	names := maps.Keys(fm)
 	slices.SortFunc(names, func(a, b string) int {

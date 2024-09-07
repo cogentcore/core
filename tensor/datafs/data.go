@@ -11,6 +11,7 @@ import (
 	"unsafe"
 
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
@@ -28,8 +29,9 @@ type Data struct {
 	// modTime tracks time added to directory, used for ordering.
 	modTime time.Time
 
-	// Meta has arbitrary metadata.
-	Meta Metadata
+	// Meta has metadata, including standardized support for
+	// plotting options, compute functions.
+	Meta metadata.Data
 
 	// Value is the underlying value of data;
 	// is a map[string]*Data for directories.
@@ -239,6 +241,47 @@ func (d *Data) AsString() (string, bool) {
 func (d *Data) SetString(v string) bool {
 	// fast path for actual strings
 	if _, ok := d.Value.(string); ok {
+		d.Value = v
+		return true
+	}
+	if tsr := d.AsTensor(); tsr != nil {
+		return false
+	}
+	if dt := d.AsTable(); dt != nil {
+		return false
+	}
+	err := reflectx.SetRobust(&d.Value, v)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+// AsInt returns data as a int if it is a scalar value
+// that can be so converted.  Returns false if not.
+func (d *Data) AsInt() (int, bool) {
+	// fast path for actual ints
+	if f, ok := d.Value.(int); ok {
+		return f, true
+	}
+	if tsr := d.AsTensor(); tsr != nil {
+		return 0, false
+	}
+	if dt := d.AsTable(); dt != nil {
+		return 0, false
+	}
+	v, err := reflectx.ToInt(d.Value)
+	if err != nil {
+		return 0, false
+	}
+	return int(v), true
+}
+
+// SetInt sets data from given int if it is a scalar value
+// that can be so set.  Returns false if not.
+func (d *Data) SetInt(v int) bool {
+	// fast path for actual ints
+	if _, ok := d.Value.(int); ok {
 		d.Value = v
 		return true
 	}
