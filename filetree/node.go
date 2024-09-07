@@ -177,7 +177,7 @@ func (fn *Node) Init() {
 				go rnode.updateRepoFiles()
 			}
 		} else {
-			fn.initFileInfo()
+			fn.This.(Filer).GetFileInfo()
 		}
 		fn.Text = fn.Info.Name
 	})
@@ -222,14 +222,16 @@ func (fn *Node) Init() {
 				w.NeedsLayout()
 				w.FileRoot = fn.FileRoot
 				w.Filepath = core.Filename(fpath)
-				if w.FileRoot.FSys != nil {
-					if fi.IsDir() {
-						fn.Info.SetFileInfo(fi)
-					} else {
-						w.initFileInfo()
-					}
-				} else {
-					w.initFileInfo()
+				w.This.(Filer).GetFileInfo()
+				// if w.FileRoot.FSys != nil {
+				// 	if fi.IsDir() {
+				// 		fn.Info.SetFileInfo(fi)
+				// 	} else {
+				// 		w.initFileInfo()
+				// 	}
+				// } else {
+				// 	w.initFileInfo()
+				if w.FileRoot.FSys == nil {
 					if w.IsDir() && repo == nil {
 						w.detectVCSRepo(true) // update files
 					}
@@ -339,21 +341,31 @@ func sortByModTime(files []fs.FileInfo) {
 }
 
 func (fn *Node) setFileIcon() {
-	ic, hasic := fn.Info.FindIcon()
-	if !hasic {
-		ic = icons.Blank
+	if fn.Info.Ic == "" {
+		ic, hasic := fn.Info.FindIcon()
+		if hasic {
+			fn.Info.Ic = ic
+		} else {
+			fn.Info.Ic = icons.Blank
+		}
 	}
-	fn.IconLeaf = ic
+	fn.IconLeaf = fn.Info.Ic
 	if br := fn.Branch; br != nil {
-		if br.IconIndeterminate != ic {
-			br.SetIconOn(icons.FolderOpen).SetIconOff(icons.Folder).SetIconIndeterminate(ic)
+		if br.IconIndeterminate != fn.IconLeaf {
+			br.SetIconOn(icons.FolderOpen).SetIconOff(icons.Folder).SetIconIndeterminate(fn.IconLeaf)
 			br.UpdateTree()
 		}
 	}
 }
 
-// initFileInfo initializes file info
-func (fn *Node) initFileInfo() error {
+// GetFileInfo is a Filer interface method that can be overwritten
+// to do custom file info.
+func (fn *Node) GetFileInfo() error {
+	return fn.InitFileInfo()
+}
+
+// InitFileInfo initializes file info
+func (fn *Node) InitFileInfo() error {
 	if fn.Filepath == "" {
 		return nil
 	}

@@ -27,6 +27,9 @@ type Filer interface { //types:add
 
 	// RenameFiles renames any selected files.
 	RenameFiles()
+
+	// GetFileInfo updates the .Info for this file
+	GetFileInfo() error
 }
 
 var _ Filer = (*Node)(nil)

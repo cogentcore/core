@@ -8,6 +8,7 @@ import (
 	"log"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
@@ -16,6 +17,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/diffbrowser"
@@ -29,29 +31,65 @@ type FileNode struct {
 func (fn *FileNode) Init() {
 	fn.Node.Init()
 	fn.AddContextMenu(fn.ContextMenu)
-}
-
-func (fn *FileNode) OnDoubleClick(e events.Event) {
-	e.SetHandled()
-	br, ok := ParentBrowser(fn.This)
-	if !ok {
-		return
-	}
-	sels := fn.GetSelectedNodes()
-	if len(sels) > 0 {
-		sn := filetree.AsNode(sels[len(sels)-1])
-		if sn != nil {
-			if sn.IsDir() {
-				if !sn.HasChildren() {
-					// sn.OpenEmptyDir() TODO(filetree)
+	fn.Parts.OnDoubleClick(func(e events.Event) {
+		e.SetHandled()
+		br, ok := ParentBrowser(fn.This)
+		if !ok {
+			return
+		}
+		sels := fn.GetSelectedNodes()
+		if len(sels) > 0 {
+			sn := filetree.AsNode(sels[len(sels)-1])
+			if sn != nil {
+				if sn.IsDir() {
+					if !sn.HasChildren() {
+						// sn.OpenEmptyDir() TODO(filetree)
+					} else {
+						sn.ToggleClose()
+					}
 				} else {
-					sn.ToggleClose()
+					br.FileNodeOpened(sn)
 				}
-			} else {
-				br.FileNodeOpened(sn)
 			}
 		}
+	})
+}
+
+// DataFS returns the datafs representation of this item.
+// returns nil if not a dataFS item.
+func DataFS(fn *filetree.Node) *datafs.Data {
+	dfs, ok := fn.FileRoot.FSys.(*datafs.Data)
+	if !ok {
+		return nil
 	}
+	dfi, err := dfs.Stat(string(fn.Filepath))
+	if errors.Log(err) != nil {
+		return nil
+	}
+	return dfi.(*datafs.Data)
+}
+
+func (fn *FileNode) GetFileInfo() error {
+	err := fn.InitFileInfo()
+	if fn.FileRoot.FSys == nil {
+		return err
+	}
+	d := DataFS(fn.AsNode())
+	if d != nil {
+		fn.Info.Known = d.KnownFileInfo()
+		fn.Info.Cat = fileinfo.Data
+		switch fn.Info.Known {
+		case fileinfo.Tensor:
+			fn.Info.Ic = icons.Dataset
+		case fileinfo.Number:
+			fn.Info.Ic = icons.Pin
+		case fileinfo.String:
+			fn.Info.Ic = icons.Pin
+		default:
+			fn.Info.Ic = icons.BarChart
+		}
+	}
+	return err
 }
 
 func (br *Browser) FileNodeOpened(fn *filetree.Node) {
@@ -59,14 +97,31 @@ func (br *Browser) FileNodeOpened(fn *filetree.Node) {
 	df := fsx.DirAndFile(string(fn.Filepath))
 	switch {
 	case fn.Info.Cat == fileinfo.Data:
-		df := fsx.DirAndFile(string(fn.Filepath))
-		tv := br.NewTabTensorTable(df)
-		dt := tv.Table.Table
-		err := dt.OpenCSV(fn.Filepath, table.Tab) // todo: need more flexible data handling mode
-		tv.Table.Sequential()
-		br.Update()
-		if err != nil {
-			core.ErrorSnackbar(br, err)
+		switch fn.Info.Known {
+		case fileinfo.Tensor:
+			d := DataFS(fn)
+			tv := br.NewTabTensorTable(fn.Name)
+			dt := tv.Table.Table
+			tsr := d.AsTensor()
+			dt.Rows = tsr.DimSize(0)
+			dt.AddColumn(tsr, fn.Name)
+			br.Update()
+		case fileinfo.Table:
+			d := DataFS(fn)
+			tv := br.NewTabTensorTable(df)
+			tv.Table.SetTable(d.AsTable())
+			tv.Table.Sequential()
+			br.Update()
+		default:
+			df := fsx.DirAndFile(string(fn.Filepath))
+			tv := br.NewTabTensorTable(df)
+			dt := tv.Table.Table
+			err := dt.OpenCSV(fn.Filepath, table.Tab) // todo: need more flexible data handling mode
+			tv.Table.Sequential()
+			br.Update()
+			if err != nil {
+				core.ErrorSnackbar(br, err)
+			}
 		}
 	case fn.IsExec(): // todo: use exec?
 		fn.OpenFilesDefault()

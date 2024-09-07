@@ -10,6 +10,7 @@ import (
 	"time"
 	"unsafe"
 
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
@@ -123,10 +124,30 @@ func (d *Data) DataType() reflect.Kind {
 	return reflect.TypeOf(d.Value).Kind()
 }
 
+func (d *Data) KnownFileInfo() fileinfo.Known {
+	if tsr := d.AsTensor(); tsr != nil {
+		return fileinfo.Tensor
+	}
+	kind := d.DataType()
+	if kind >= reflect.Int && kind <= reflect.Complex128 {
+		return fileinfo.Number
+	}
+	if kind == reflect.String {
+		return fileinfo.String
+	}
+	return fileinfo.Unknown
+}
+
 // AsTensor returns the data as a tensor if it is one, else nil.
 func (d *Data) AsTensor() tensor.Tensor {
 	tsr, _ := d.Value.(tensor.Tensor)
 	return tsr
+}
+
+// AsTable returns the data as a table if it is one, else nil.
+func (d *Data) AsTable() *table.Table {
+	dt, _ := d.Value.(*table.Table)
+	return dt
 }
 
 // AsFloat64 returns data as a float64 if it is a scalar value

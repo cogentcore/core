@@ -125,7 +125,7 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	ft.Filepath = core.Filename(abs)
 	ft.setDirOpen(core.Filename(abs))
 	ft.detectVCSRepo(true)
-	ft.initFileInfo()
+	ft.This.(Filer).GetFileInfo()
 	ft.Open()
 	ft.Update()
 	return ft
@@ -141,7 +141,7 @@ func (ft *Tree) OpenPathFS(fsys fs.FS, path string) *Tree {
 	ft.FSys = fsys
 	ft.Filepath = core.Filename(path)
 	ft.setDirOpen(core.Filename(path))
-	ft.initFileInfo()
+	ft.This.(Filer).GetFileInfo()
 	ft.Open()
 	ft.Update()
 	return ft
