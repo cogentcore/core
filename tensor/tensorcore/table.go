@@ -35,7 +35,7 @@ type Table struct {
 	core.ListBase
 
 	// the idx view of the table that we're a view of
-	Table *table.IndexView `set:"-"`
+	Table *table.Indexed `set:"-"`
 
 	// overall display options for tensor display
 	TensorDisplay TensorDisplay `set:"-"`
@@ -131,7 +131,7 @@ func (tb *Table) StyleValue(w core.Widget, s *styles.Style, row, col int) {
 	s.SetTextWrap(false)
 }
 
-// SetTable sets the source table that we are viewing, using a sequential IndexView
+// SetTable sets the source table that we are viewing, using a sequential Indexed
 // and then configures the display
 func (tb *Table) SetTable(et *table.Table) *Table {
 	if et == nil {
@@ -139,7 +139,7 @@ func (tb *Table) SetTable(et *table.Table) *Table {
 	}
 
 	tb.SetSliceBase()
-	tb.Table = table.NewIndexView(et)
+	tb.Table = table.NewIndexed(et)
 	tb.This.(core.Lister).UpdateSliceSize()
 	tb.Update()
 	return tb
@@ -161,9 +161,9 @@ func (tb *Table) AsyncUpdateTable() {
 	tb.AsyncUnlock()
 }
 
-// SetIndexView sets the source IndexView of a table (using a copy so original is not modified)
+// SetIndexed sets the source Indexed of a table (using a copy so original is not modified)
 // and then configures the display
-func (tb *Table) SetIndexView(ix *table.IndexView) *Table {
+func (tb *Table) SetIndexed(ix *table.Indexed) *Table {
 	if ix == nil {
 		return tb
 	}
@@ -669,7 +669,7 @@ func (tb *Table) CopySelectToMime() mimedata.Mimes {
 	if nitms == 0 {
 		return nil
 	}
-	ix := &table.IndexView{}
+	ix := &table.Indexed{}
 	ix.Table = tb.Table.Table
 	idx := tb.SelectedIndexesList(false) // ascending
 	iidx := make([]int, len(idx))

@@ -52,7 +52,7 @@ func AnalyzePlanets() {
 	Planets = table.NewTable("planets")
 	Planets.OpenFS(csv, "planets.csv", table.Comma)
 
-	PlanetsAll := table.NewIndexView(Planets) // full original data
+	PlanetsAll := table.NewIndexed(Planets) // full original data
 
 	PlanetsDesc = stats.DescAll(PlanetsAll)   // individually excludes Null values in each col, but not row-wise
 	PlanetsNNDesc = stats.DescAll(PlanetsAll) // standard descriptive stats for row-wise non-nulls

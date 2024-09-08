@@ -27,7 +27,7 @@ func TestGaussianGen(t *testing.T) {
 		vl := GaussianGen(mean, sig)
 		dt.SetFloat("Val", i, vl)
 	}
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 	desc := stats.DescAll(ix)
 
 	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
@@ -63,7 +63,7 @@ func TestBinomialGen(t *testing.T) {
 		vl := BinomialGen(n, p)
 		dt.SetFloat("Val", i, vl)
 	}
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 	desc := stats.DescAll(ix)
 
 	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
@@ -108,7 +108,7 @@ func TestPoissonGen(t *testing.T) {
 		vl := PoissonGen(lambda)
 		dt.SetFloat("Val", i, vl)
 	}
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 	desc := stats.DescAll(ix)
 
 	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
@@ -154,7 +154,7 @@ func TestGammaGen(t *testing.T) {
 		vl := GammaGen(alpha, beta)
 		dt.SetFloat("Val", i, vl)
 	}
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 	desc := stats.DescAll(ix)
 
 	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
@@ -190,7 +190,7 @@ func TestBetaGen(t *testing.T) {
 		vl := BetaGen(alpha, beta)
 		dt.SetFloat("Val", i, vl)
 	}
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 	desc := stats.DescAll(ix)
 
 	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]

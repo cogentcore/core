@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"cogentcore.org/core/base/metadata"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -29,8 +30,14 @@ type Tensor interface {
 	fmt.Stringer
 	mat.Matrix
 
-	// Shape returns a pointer to the shape that fully parametrizes the tensor shape
+	// Shape returns a pointer to the Shape that fully parametrizes
+	// the tensor shape.
 	Shape() *Shape
+
+	// SetShape sets the sizes parameters of the tensor, and resizes
+	// backing storage appropriately.
+	// Existing names will be preserved if not presented.
+	SetShape(sizes []int, names ...string)
 
 	// Len returns the number of elements in the tensor (product of shape dimensions).
 	Len() int
@@ -106,11 +113,11 @@ type Tensor interface {
 	SetString1D(i int, val string)
 
 	// StringRowCell returns the value at given row and cell, where row is outer-most dim,
-	// and cell is 1D index into remaining inner dims. For Table columns
+	// and cell is 1D index into remaining inner dims. For Table columns.
 	StringRowCell(row, cell int) string
 
 	// SetStringRowCell sets the value at given row and cell, where row is outer-most dim,
-	// and cell is 1D index into remaining inner dims. For Table columns
+	// and cell is 1D index into remaining inner dims. For Table columns.
 	SetStringRowCell(row, cell int, val string)
 
 	// SubSpace returns a new tensor with innermost subspace at given
@@ -126,7 +133,7 @@ type Tensor interface {
 	// Other math operations can be done using gonum/floats package.
 	Range() (min, max float64, minIndex, maxIndex int)
 
-	// SetZeros is simple convenience function initialize all values to 0
+	// SetZeros is simple convenience function initialize all values to 0.
 	SetZeros()
 
 	// Clone clones this tensor, creating a duplicate copy of itself with its
@@ -150,26 +157,12 @@ type Tensor interface {
 	// of the same type, and otherwise it goes through appropriate standard type.
 	CopyCellsFrom(from Tensor, to, start, n int)
 
-	// SetShape sets the sizes parameters of the tensor, and resizes backing storage appropriately.
-	// existing names will be preserved if not presented.
-	SetShape(sizes []int, names ...string)
-
 	// SetNumRows sets the number of rows (outer-most dimension).
 	SetNumRows(rows int)
 
-	// SetMetaData sets a key=value meta data (stored as a map[string]string).
-	// For TensorGrid display: top-zero=+/-, odd-row=+/-, image=+/-,
-	// min, max set fixed min / max values, background=color
-	SetMetaData(key, val string)
-
-	// MetaData retrieves value of given key, bool = false if not set
-	MetaData(key string) (string, bool)
-
-	// MetaDataMap returns the underlying map used for meta data
-	MetaDataMap() map[string]string
-
-	// CopyMetaData copies meta data from given source tensor
-	CopyMetaData(from Tensor)
+	// Metadata returns the metadata for this tensor, which can be used
+	// to encode plotting options, etc.
+	Metadata() *metadata.Data
 }
 
 // New returns a new n-dimensional tensor of given value type

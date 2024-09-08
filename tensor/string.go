@@ -33,7 +33,7 @@ func NewString(sizes []int, names ...string) *String {
 // using given shape.
 func NewStringShape(shape *Shape) *String {
 	tsr := &String{}
-	tsr.Shp.CopyShape(shape)
+	tsr.shape.CopyShape(shape)
 	tsr.Values = make([]string, tsr.Len())
 	return tsr
 }
@@ -57,21 +57,21 @@ func (tsr *String) IsString() bool {
 }
 
 func (tsr *String) AddScalar(i []int, val float64) float64 {
-	j := tsr.Shp.Offset(i)
+	j := tsr.shape.Offset(i)
 	fv := StringToFloat64(tsr.Values[j]) + val
 	tsr.Values[j] = Float64ToString(fv)
 	return fv
 }
 
 func (tsr *String) MulScalar(i []int, val float64) float64 {
-	j := tsr.Shp.Offset(i)
+	j := tsr.shape.Offset(i)
 	fv := StringToFloat64(tsr.Values[j]) * val
 	tsr.Values[j] = Float64ToString(fv)
 	return fv
 }
 
 func (tsr *String) SetString(i []int, val string) {
-	j := tsr.Shp.Offset(i)
+	j := tsr.shape.Offset(i)
 	tsr.Values[j] = val
 }
 
@@ -80,7 +80,7 @@ func (tsr String) SetString1D(off int, val string) {
 }
 
 func (tsr *String) SetStringRowCell(row, cell int, val string) {
-	_, sz := tsr.Shp.RowCellSize()
+	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = val
 }
 
@@ -95,9 +95,9 @@ func (tsr *String) String() string {
 	b.WriteString(str)
 	b.WriteString("\n")
 	oddRow := true
-	rows, cols, _, _ := Projection2DShape(&tsr.Shp, oddRow)
+	rows, cols, _, _ := Projection2DShape(&tsr.shape, oddRow)
 	for r := 0; r < rows; r++ {
-		rc, _ := Projection2DCoords(&tsr.Shp, oddRow, r, 0)
+		rc, _ := Projection2DCoords(&tsr.shape, oddRow, r, 0)
 		b.WriteString(fmt.Sprintf("%v: ", rc))
 		for c := 0; c < cols; c++ {
 			idx := Projection2DIndex(tsr.Shape(), oddRow, r, c)
@@ -110,12 +110,12 @@ func (tsr *String) String() string {
 }
 
 func (tsr *String) Float(i []int) float64 {
-	j := tsr.Shp.Offset(i)
+	j := tsr.shape.Offset(i)
 	return StringToFloat64(tsr.Values[j])
 }
 
 func (tsr *String) SetFloat(i []int, val float64) {
-	j := tsr.Shp.Offset(i)
+	j := tsr.shape.Offset(i)
 	tsr.Values[j] = Float64ToString(val)
 }
 
@@ -128,12 +128,12 @@ func (tsr *String) SetFloat1D(off int, val float64) {
 }
 
 func (tsr *String) FloatRowCell(row, cell int) float64 {
-	_, sz := tsr.Shp.RowCellSize()
+	_, sz := tsr.shape.RowCellSize()
 	return StringToFloat64(tsr.Values[row*sz+cell])
 }
 
 func (tsr *String) SetFloatRowCell(row, cell int, val float64) {
-	_, sz := tsr.Shp.RowCellSize()
+	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = Float64ToString(val)
 }
 
@@ -212,7 +212,7 @@ func (tsr *String) SetZeros() {
 // own separate memory representation of all the values, and returns
 // that as a Tensor (which can be converted into the known type as needed).
 func (tsr *String) Clone() Tensor {
-	csr := NewStringShape(&tsr.Shp)
+	csr := NewStringShape(&tsr.shape)
 	copy(csr.Values, tsr.Values)
 	return csr
 }

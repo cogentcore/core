@@ -16,7 +16,7 @@ import (
 // which will be normalized to sum to 1 (error returned if sum = 0)
 // names are optional names for each split (e.g., Train, Test) which will be
 // used to label the Values of the resulting Splits.
-func Permuted(ix *table.IndexView, probs []float64, names []string) (*table.Splits, error) {
+func Permuted(ix *table.Indexed, probs []float64, names []string) (*table.Splits, error) {
 	if ix == nil || ix.Len() == 0 {
 		return nil, fmt.Errorf("split.Random table is nil / empty")
 	}

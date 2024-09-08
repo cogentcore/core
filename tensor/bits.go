@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strings"
 
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/tensor/bitslice"
@@ -19,9 +20,9 @@ import (
 // Bits is a tensor of bits backed by a bitslice.Slice for efficient storage
 // of binary data
 type Bits struct {
-	Shp    Shape
+	shape  Shape
 	Values bitslice.Slice
-	Meta   map[string]string
+	Meta   metadata.Data
 }
 
 // NewBits returns a new n-dimensional tensor of bit values
@@ -37,7 +38,7 @@ func NewBits(sizes []int, names ...string) *Bits {
 // using given shape.
 func NewBitsShape(shape *Shape) *Bits {
 	tsr := &Bits{}
-	tsr.Shp.CopyShape(shape)
+	tsr.shape.CopyShape(shape)
 	tsr.Values = bitslice.Make(tsr.Len(), 0)
 	return tsr
 }
@@ -77,36 +78,40 @@ func (tsr *Bits) Bytes() []byte {
 }
 
 // Shape returns a pointer to the shape that fully parametrizes the tensor shape
-func (tsr *Bits) Shape() *Shape { return &tsr.Shp }
+func (tsr *Bits) Shape() *Shape { return &tsr.shape }
+
+// Metadata returns the metadata for this tensor, which can be used
+// to encode plotting options, etc.
+func (tsr *Bits) Metadata() *metadata.Data { return &tsr.Meta }
 
 // Len returns the number of elements in the tensor (product of shape dimensions).
-func (tsr *Bits) Len() int { return tsr.Shp.Len() }
+func (tsr *Bits) Len() int { return tsr.shape.Len() }
 
 // NumDims returns the total number of dimensions.
-func (tsr *Bits) NumDims() int { return tsr.Shp.NumDims() }
+func (tsr *Bits) NumDims() int { return tsr.shape.NumDims() }
 
 // DimSize returns size of given dimension
-func (tsr *Bits) DimSize(dim int) int { return tsr.Shp.DimSize(dim) }
+func (tsr *Bits) DimSize(dim int) int { return tsr.shape.DimSize(dim) }
 
 // RowCellSize returns the size of the outer-most Row shape dimension,
 // and the size of all the remaining inner dimensions (the "cell" size).
 // Used for Tensors that are columns in a data table.
 func (tsr *Bits) RowCellSize() (rows, cells int) {
-	return tsr.Shp.RowCellSize()
+	return tsr.shape.RowCellSize()
 }
 
 // Value returns value at given tensor index
-func (tsr *Bits) Value(i []int) bool { j := int(tsr.Shp.Offset(i)); return tsr.Values.Index(j) }
+func (tsr *Bits) Value(i []int) bool { j := int(tsr.shape.Offset(i)); return tsr.Values.Index(j) }
 
 // Value1D returns value at given tensor 1D (flat) index
 func (tsr *Bits) Value1D(i int) bool { return tsr.Values.Index(i) }
 
-func (tsr *Bits) Set(i []int, val bool) { j := int(tsr.Shp.Offset(i)); tsr.Values.Set(j, val) }
+func (tsr *Bits) Set(i []int, val bool) { j := int(tsr.shape.Offset(i)); tsr.Values.Set(j, val) }
 func (tsr *Bits) Set1D(i int, val bool) { tsr.Values.Set(i, val) }
 
 // SetShape sets the shape params, resizing backing storage appropriately
 func (tsr *Bits) SetShape(sizes []int, names ...string) {
-	tsr.Shp.SetShape(sizes, names...)
+	tsr.shape.SetShape(sizes, names...)
 	nln := tsr.Len()
 	tsr.Values.SetLen(nln)
 }
@@ -114,9 +119,9 @@ func (tsr *Bits) SetShape(sizes []int, names ...string) {
 // SetNumRows sets the number of rows (outer-most dimension) in a RowMajor organized tensor.
 func (tsr *Bits) SetNumRows(rows int) {
 	rows = max(1, rows) // must be > 0
-	_, cells := tsr.Shp.RowCellSize()
+	_, cells := tsr.shape.RowCellSize()
 	nln := rows * cells
-	tsr.Shp.Sizes[0] = rows
+	tsr.shape.Sizes[0] = rows
 	tsr.Values.SetLen(nln)
 }
 
@@ -126,23 +131,23 @@ func (tsr *Bits) SubSpace(offs []int) Tensor {
 }
 
 func (tsr *Bits) Float(i []int) float64 {
-	j := tsr.Shp.Offset(i)
+	j := tsr.shape.Offset(i)
 	return BoolToFloat64(tsr.Values.Index(j))
 }
 
 func (tsr *Bits) SetFloat(i []int, val float64) {
-	j := tsr.Shp.Offset(i)
+	j := tsr.shape.Offset(i)
 	tsr.Values.Set(j, Float64ToBool(val))
 }
 
 func (tsr *Bits) StringValue(i []int) string {
-	j := tsr.Shp.Offset(i)
+	j := tsr.shape.Offset(i)
 	return reflectx.ToString(tsr.Values.Index(j))
 }
 
 func (tsr *Bits) SetString(i []int, val string) {
 	if bv, err := reflectx.ToBool(val); err == nil {
-		j := tsr.Shp.Offset(i)
+		j := tsr.shape.Offset(i)
 		tsr.Values.Set(j, bv)
 	}
 }
@@ -203,45 +208,7 @@ func (tsr *Bits) SetStringRowCell(row, cell int, val string) {
 
 // Label satisfies the core.Labeler interface for a summary description of the tensor
 func (tsr *Bits) Label() string {
-	return fmt.Sprintf("tensor.Bits: %s", tsr.Shp.String())
-}
-
-// SetMetaData sets a key=value meta data (stored as a map[string]string).
-// For TensorGrid display: top-zero=+/-, odd-row=+/-, image=+/-,
-// min, max set fixed min / max values, background=color
-func (tsr *Bits) SetMetaData(key, val string) {
-	if tsr.Meta == nil {
-		tsr.Meta = make(map[string]string)
-	}
-	tsr.Meta[key] = val
-}
-
-// MetaData retrieves value of given key, bool = false if not set
-func (tsr *Bits) MetaData(key string) (string, bool) {
-	if tsr.Meta == nil {
-		return "", false
-	}
-	val, ok := tsr.Meta[key]
-	return val, ok
-}
-
-// MetaDataMap returns the underlying map used for meta data
-func (tsr *Bits) MetaDataMap() map[string]string {
-	return tsr.Meta
-}
-
-// CopyMetaData copies meta data from given source tensor
-func (tsr *Bits) CopyMetaData(frm Tensor) {
-	fmap := frm.MetaDataMap()
-	if len(fmap) == 0 {
-		return
-	}
-	if tsr.Meta == nil {
-		tsr.Meta = make(map[string]string)
-	}
-	for k, v := range fmap {
-		tsr.Meta[k] = v
-	}
+	return fmt.Sprintf("tensor.Bits: %s", tsr.shape.String())
 }
 
 // Range is not applicable to Bits tensor
@@ -263,7 +230,7 @@ func (tsr *Bits) SetZeros() {
 // own separate memory representation of all the values, and returns
 // that as a Tensor (which can be converted into the known type as needed).
 func (tsr *Bits) Clone() Tensor {
-	csr := NewBitsShape(&tsr.Shp)
+	csr := NewBitsShape(&tsr.shape)
 	csr.Values = tsr.Values.Clone()
 	return csr
 }
@@ -337,9 +304,9 @@ func (tsr *Bits) String() string {
 	b.WriteString(str)
 	b.WriteString("\n")
 	oddRow := true
-	rows, cols, _, _ := Projection2DShape(&tsr.Shp, oddRow)
+	rows, cols, _, _ := Projection2DShape(&tsr.shape, oddRow)
 	for r := 0; r < rows; r++ {
-		rc, _ := Projection2DCoords(&tsr.Shp, oddRow, r, 0)
+		rc, _ := Projection2DCoords(&tsr.shape, oddRow, r, 0)
 		b.WriteString(fmt.Sprintf("%v: ", rc))
 		for c := 0; c < cols; c++ {
 			vl := Projection2DValue(tsr, oddRow, r, c)

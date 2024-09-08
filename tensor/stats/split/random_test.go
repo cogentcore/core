@@ -17,7 +17,7 @@ func TestPermuted(t *testing.T) {
 	dt.AddStringColumn("Name")
 	dt.AddFloat32TensorColumn("Input", []int{5, 5}, "Y", "X")
 	dt.AddFloat32TensorColumn("Output", []int{5, 5}, "Y", "X")
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 	spl, err := Permuted(ix, []float64{.5, .5}, nil)
 	if err != nil {
 		t.Error(err)

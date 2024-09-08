@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package agg provides aggregation functions operating on IndexView indexed views
+Package agg provides aggregation functions operating on Indexed indexed views
 of table.Table data, along with standard AggFunc functions that can be used
 at any level of aggregation from tensor on up.
 

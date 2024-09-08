@@ -16,7 +16,7 @@ import (
 
 // All returns a single "split" with all of the rows in given view
 // useful for leveraging the aggregation management functions in splits
-func All(ix *table.IndexView) *table.Splits {
+func All(ix *table.Indexed) *table.Splits {
 	spl := &table.Splits{}
 	spl.Levels = []string{"All"}
 	spl.New(ix.Table, []string{"All"}, ix.Indexes...)
@@ -26,7 +26,7 @@ func All(ix *table.IndexView) *table.Splits {
 // GroupByIndex returns a new Splits set based on the groups of values
 // across the given set of column indexes.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
-func GroupByIndex(ix *table.IndexView, colIndexes []int) *table.Splits {
+func GroupByIndex(ix *table.Indexed, colIndexes []int) *table.Splits {
 	nc := len(colIndexes)
 	if nc == 0 || ix.Table == nil {
 		return nil
@@ -44,7 +44,7 @@ func GroupByIndex(ix *table.IndexView, colIndexes []int) *table.Splits {
 	srt.SortStableColumns(colIndexes, true) // important for consistency
 	lstValues := make([]string, nc)
 	curValues := make([]string, nc)
-	var curIx *table.IndexView
+	var curIx *table.Indexed
 	for _, rw := range srt.Indexes {
 		diff := false
 		for i, ci := range colIndexes {
@@ -71,7 +71,7 @@ func GroupByIndex(ix *table.IndexView, colIndexes []int) *table.Splits {
 // GroupBy returns a new Splits set based on the groups of values
 // across the given set of column names.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
-func GroupBy(ix *table.IndexView, columns ...string) *table.Splits {
+func GroupBy(ix *table.Indexed, columns ...string) *table.Splits {
 	return GroupByIndex(ix, errors.Log1(ix.Table.ColumnIndexesByNames(columns...)))
 }
 
@@ -80,7 +80,7 @@ func GroupBy(ix *table.IndexView, columns ...string) *table.Splits {
 // The function should always return the same number of values -- if
 // it doesn't behavior is undefined.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
-func GroupByFunc(ix *table.IndexView, fun func(row int) []string) *table.Splits {
+func GroupByFunc(ix *table.Indexed, fun func(row int) []string) *table.Splits {
 	if ix.Table == nil {
 		return nil
 	}
@@ -113,7 +113,7 @@ func GroupByFunc(ix *table.IndexView, fun func(row int) []string) *table.Splits 
 	// now do our usual grouping operation
 	spl := &table.Splits{}
 	lstValues := make([]string, nv)
-	var curIx *table.IndexView
+	var curIx *table.Indexed
 	for _, rw := range srt.Indexes {
 		curValues := funvals[rw]
 		diff := (curIx == nil)

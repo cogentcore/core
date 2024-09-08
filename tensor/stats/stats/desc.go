@@ -17,7 +17,7 @@ var DescStatsND = []Stats{Count, Mean, Std, Sem, Min, Max}
 // DescAll returns a table of standard descriptive stats for
 // all numeric columns in given table, operating over all non-Null, non-NaN elements
 // in each column.
-func DescAll(ix *table.IndexView) *table.Table {
+func DescAll(ix *table.Indexed) *table.Table {
 	st := ix.Table
 	nAgg := len(DescStats)
 	dt := table.NewTable().SetNumRows(nAgg)
@@ -63,9 +63,9 @@ func DescAll(ix *table.IndexView) *table.Table {
 }
 
 // DescIndex returns a table of standard descriptive aggregates
-// of non-Null, non-NaN elements in given IndexView indexed view of an
+// of non-Null, non-NaN elements in given Indexed indexed view of an
 // table.Table, for given column index.
-func DescIndex(ix *table.IndexView, colIndex int) *table.Table {
+func DescIndex(ix *table.Indexed, colIndex int) *table.Table {
 	st := ix.Table
 	col := st.Columns[colIndex]
 	stats := DescStats
@@ -100,12 +100,12 @@ func DescIndex(ix *table.IndexView, colIndex int) *table.Table {
 }
 
 // DescColumn returns a table of standard descriptive stats
-// of non-NaN elements in given IndexView indexed view of an
+// of non-NaN elements in given Indexed indexed view of an
 // table.Table, for given column name.
 // If name not found, returns error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func DescColumn(ix *table.IndexView, column string) (*table.Table, error) {
+func DescColumn(ix *table.Indexed, column string) (*table.Table, error) {
 	colIndex, err := ix.Table.ColumnIndex(column)
 	if err != nil {
 		return nil, err

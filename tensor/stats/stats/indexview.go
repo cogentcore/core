@@ -11,20 +11,20 @@ import (
 	"cogentcore.org/core/tensor/table"
 )
 
-// Every IndexView Stats method in this file follows one of these signatures:
+// Every Indexed Stats method in this file follows one of these signatures:
 
-// IndexViewFuncIndex is a stats function operating on IndexView, taking a column index arg
-type IndexViewFuncIndex func(ix *table.IndexView, colIndex int) []float64
+// IndexedFuncIndex is a stats function operating on Indexed, taking a column index arg
+type IndexedFuncIndex func(ix *table.Indexed, colIndex int) []float64
 
-// IndexViewFuncColumn is a stats function operating on IndexView, taking a column name arg
-type IndexViewFuncColumn func(ix *table.IndexView, column string) []float64
+// IndexedFuncColumn is a stats function operating on Indexed, taking a column name arg
+type IndexedFuncColumn func(ix *table.Indexed, column string) []float64
 
-// StatIndex returns IndexView statistic according to given Stats type applied
-// to all non-NaN elements in given IndexView indexed view of
+// StatIndex returns Indexed statistic according to given Stats type applied
+// to all non-NaN elements in given Indexed indexed view of
 // an table.Table, for given column index.
 // Return value(s) is size of column cell: 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func StatIndex(ix *table.IndexView, colIndex int, stat Stats) []float64 {
+func StatIndex(ix *table.Indexed, colIndex int, stat Stats) []float64 {
 	switch stat {
 	case Count:
 		return CountIndex(ix, colIndex)
@@ -70,13 +70,13 @@ func StatIndex(ix *table.IndexView, colIndex int, stat Stats) []float64 {
 	return nil
 }
 
-// StatColumn returns IndexView statistic according to given Stats type applied
-// to all non-NaN elements in given IndexView indexed view of
+// StatColumn returns Indexed statistic according to given Stats type applied
+// to all non-NaN elements in given Indexed indexed view of
 // an table.Table, for given column name.
 // If name not found, returns error message.
 // Return value(s) is size of column cell: 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func StatColumn(ix *table.IndexView, column string, stat Stats) ([]float64, error) {
+func StatColumn(ix *table.Indexed, column string, stat Stats) ([]float64, error) {
 	colIndex, err := ix.Table.ColumnIndex(column)
 	if err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func StatColumn(ix *table.IndexView, column string, stat Stats) ([]float64, erro
 // using float64 conversions of the values.  ini is the initial value for the agg variable.
 // Operates independently over each cell on n-dimensional columns and returns the result as a slice
 // of values per cell.
-func StatIndexFunc(ix *table.IndexView, colIndex int, ini float64, fun StatFunc) []float64 {
+func StatIndexFunc(ix *table.Indexed, colIndex int, ini float64, fun StatFunc) []float64 {
 	cl := ix.Table.Columns[colIndex]
 	_, csz := cl.RowCellSize()
 
@@ -122,19 +122,19 @@ func StatIndexFunc(ix *table.IndexView, colIndex int, ini float64, fun StatFunc)
 //   Count
 
 // CountIndex returns the count of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func CountIndex(ix *table.IndexView, colIndex int) []float64 {
+func CountIndex(ix *table.Indexed, colIndex int) []float64 {
 	return StatIndexFunc(ix, colIndex, 0, CountFunc)
 }
 
 // CountColumn returns the count of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func CountColumn(ix *table.IndexView, column string) []float64 {
+func CountColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -146,19 +146,19 @@ func CountColumn(ix *table.IndexView, column string) []float64 {
 //   Sum
 
 // SumIndex returns the sum of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func SumIndex(ix *table.IndexView, colIndex int) []float64 {
+func SumIndex(ix *table.Indexed, colIndex int) []float64 {
 	return StatIndexFunc(ix, colIndex, 0, SumFunc)
 }
 
 // SumColumn returns the sum of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func SumColumn(ix *table.IndexView, column string) []float64 {
+func SumColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -170,19 +170,19 @@ func SumColumn(ix *table.IndexView, column string) []float64 {
 //   Prod
 
 // ProdIndex returns the product of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func ProdIndex(ix *table.IndexView, colIndex int) []float64 {
+func ProdIndex(ix *table.Indexed, colIndex int) []float64 {
 	return StatIndexFunc(ix, colIndex, 1, ProdFunc)
 }
 
 // ProdColumn returns the product of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func ProdColumn(ix *table.IndexView, column string) []float64 {
+func ProdColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -194,19 +194,19 @@ func ProdColumn(ix *table.IndexView, column string) []float64 {
 //   Min
 
 // MinIndex returns the minimum of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MinIndex(ix *table.IndexView, colIndex int) []float64 {
+func MinIndex(ix *table.Indexed, colIndex int) []float64 {
 	return StatIndexFunc(ix, colIndex, math.MaxFloat64, MinFunc)
 }
 
 // MinColumn returns the minimum of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MinColumn(ix *table.IndexView, column string) []float64 {
+func MinColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -218,19 +218,19 @@ func MinColumn(ix *table.IndexView, column string) []float64 {
 //   Max
 
 // MaxIndex returns the maximum of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MaxIndex(ix *table.IndexView, colIndex int) []float64 {
+func MaxIndex(ix *table.Indexed, colIndex int) []float64 {
 	return StatIndexFunc(ix, colIndex, -math.MaxFloat64, MaxFunc)
 }
 
 // MaxColumn returns the maximum of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MaxColumn(ix *table.IndexView, column string) []float64 {
+func MaxColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -242,19 +242,19 @@ func MaxColumn(ix *table.IndexView, column string) []float64 {
 //   MinAbs
 
 // MinAbsIndex returns the minimum of abs of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MinAbsIndex(ix *table.IndexView, colIndex int) []float64 {
+func MinAbsIndex(ix *table.Indexed, colIndex int) []float64 {
 	return StatIndexFunc(ix, colIndex, math.MaxFloat64, MinAbsFunc)
 }
 
 // MinAbsColumn returns the minimum of abs of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MinAbsColumn(ix *table.IndexView, column string) []float64 {
+func MinAbsColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -266,19 +266,19 @@ func MinAbsColumn(ix *table.IndexView, column string) []float64 {
 //   MaxAbs
 
 // MaxAbsIndex returns the maximum of abs of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MaxAbsIndex(ix *table.IndexView, colIndex int) []float64 {
+func MaxAbsIndex(ix *table.Indexed, colIndex int) []float64 {
 	return StatIndexFunc(ix, colIndex, -math.MaxFloat64, MaxAbsFunc)
 }
 
 // MaxAbsColumn returns the maximum of abs of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MaxAbsColumn(ix *table.IndexView, column string) []float64 {
+func MaxAbsColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -290,10 +290,10 @@ func MaxAbsColumn(ix *table.IndexView, column string) []float64 {
 //   Mean
 
 // MeanIndex returns the mean of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MeanIndex(ix *table.IndexView, colIndex int) []float64 {
+func MeanIndex(ix *table.Indexed, colIndex int) []float64 {
 	cnt := CountIndex(ix, colIndex)
 	if cnt == nil {
 		return nil
@@ -308,11 +308,11 @@ func MeanIndex(ix *table.IndexView, colIndex int) []float64 {
 }
 
 // MeanColumn returns the mean of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MeanColumn(ix *table.IndexView, column string) []float64 {
+func MeanColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -324,11 +324,11 @@ func MeanColumn(ix *table.IndexView, column string) []float64 {
 //   Var
 
 // VarIndex returns the sample variance of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Sample variance is normalized by 1/(n-1) -- see VarPop version for 1/n normalization.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func VarIndex(ix *table.IndexView, colIndex int) []float64 {
+func VarIndex(ix *table.Indexed, colIndex int) []float64 {
 	cnt := CountIndex(ix, colIndex)
 	if cnt == nil {
 		return nil
@@ -355,12 +355,12 @@ func VarIndex(ix *table.IndexView, colIndex int) []float64 {
 }
 
 // VarColumn returns the sample variance of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // Sample variance is normalized by 1/(n-1) -- see VarPop version for 1/n normalization.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func VarColumn(ix *table.IndexView, column string) []float64 {
+func VarColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -372,11 +372,11 @@ func VarColumn(ix *table.IndexView, column string) []float64 {
 //   Std
 
 // StdIndex returns the sample std deviation of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Sample std deviation is normalized by 1/(n-1) -- see StdPop version for 1/n normalization.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func StdIndex(ix *table.IndexView, colIndex int) []float64 {
+func StdIndex(ix *table.Indexed, colIndex int) []float64 {
 	std := VarIndex(ix, colIndex)
 	for i := range std {
 		std[i] = math.Sqrt(std[i])
@@ -385,12 +385,12 @@ func StdIndex(ix *table.IndexView, colIndex int) []float64 {
 }
 
 // StdColumn returns the sample std deviation of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // Sample std deviation is normalized by 1/(n-1) -- see StdPop version for 1/n normalization.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func StdColumn(ix *table.IndexView, column string) []float64 {
+func StdColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -402,11 +402,11 @@ func StdColumn(ix *table.IndexView, column string) []float64 {
 //   Sem
 
 // SemIndex returns the sample standard error of the mean of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Sample sem is normalized by 1/(n-1) -- see SemPop version for 1/n normalization.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func SemIndex(ix *table.IndexView, colIndex int) []float64 {
+func SemIndex(ix *table.Indexed, colIndex int) []float64 {
 	cnt := CountIndex(ix, colIndex)
 	if cnt == nil {
 		return nil
@@ -421,12 +421,12 @@ func SemIndex(ix *table.IndexView, colIndex int) []float64 {
 }
 
 // SemColumn returns the sample standard error of the mean of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // Sample sem is normalized by 1/(n-1) -- see SemPop version for 1/n normalization.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func SemColumn(ix *table.IndexView, column string) []float64 {
+func SemColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -438,19 +438,19 @@ func SemColumn(ix *table.IndexView, column string) []float64 {
 //   L1Norm
 
 // L1NormIndex returns the L1 norm (sum abs values) of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func L1NormIndex(ix *table.IndexView, colIndex int) []float64 {
+func L1NormIndex(ix *table.Indexed, colIndex int) []float64 {
 	return StatIndexFunc(ix, colIndex, 0, L1NormFunc)
 }
 
 // L1NormColumn returns the L1 norm (sum abs values) of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func L1NormColumn(ix *table.IndexView, column string) []float64 {
+func L1NormColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -462,10 +462,10 @@ func L1NormColumn(ix *table.IndexView, column string) []float64 {
 //   SumSq
 
 // SumSqIndex returns the sum-of-squares of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func SumSqIndex(ix *table.IndexView, colIndex int) []float64 {
+func SumSqIndex(ix *table.Indexed, colIndex int) []float64 {
 	cl := ix.Table.Columns[colIndex]
 	_, csz := cl.RowCellSize()
 
@@ -534,11 +534,11 @@ func SumSqIndex(ix *table.IndexView, colIndex int) []float64 {
 }
 
 // SumSqColumn returns the sum-of-squares of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func SumSqColumn(ix *table.IndexView, column string) []float64 {
+func SumSqColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -550,10 +550,10 @@ func SumSqColumn(ix *table.IndexView, column string) []float64 {
 //   L2Norm
 
 // L2NormIndex returns the L2 norm (square root of sum-of-squares) of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func L2NormIndex(ix *table.IndexView, colIndex int) []float64 {
+func L2NormIndex(ix *table.Indexed, colIndex int) []float64 {
 	ss := SumSqIndex(ix, colIndex)
 	for i := range ss {
 		ss[i] = math.Sqrt(ss[i])
@@ -562,11 +562,11 @@ func L2NormIndex(ix *table.IndexView, colIndex int) []float64 {
 }
 
 // L2NormColumn returns the L2 norm (square root of sum-of-squares) of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func L2NormColumn(ix *table.IndexView, column string) []float64 {
+func L2NormColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -578,11 +578,11 @@ func L2NormColumn(ix *table.IndexView, column string) []float64 {
 //   VarPop
 
 // VarPopIndex returns the population variance of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // population variance is normalized by 1/n -- see Var version for 1/(n-1) sample normalization.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func VarPopIndex(ix *table.IndexView, colIndex int) []float64 {
+func VarPopIndex(ix *table.Indexed, colIndex int) []float64 {
 	cnt := CountIndex(ix, colIndex)
 	if cnt == nil {
 		return nil
@@ -609,12 +609,12 @@ func VarPopIndex(ix *table.IndexView, colIndex int) []float64 {
 }
 
 // VarPopColumn returns the population variance of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // population variance is normalized by 1/n -- see Var version for 1/(n-1) sample normalization.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func VarPopColumn(ix *table.IndexView, column string) []float64 {
+func VarPopColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -626,11 +626,11 @@ func VarPopColumn(ix *table.IndexView, column string) []float64 {
 //   StdPop
 
 // StdPopIndex returns the population std deviation of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // population std dev is normalized by 1/n -- see Var version for 1/(n-1) sample normalization.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func StdPopIndex(ix *table.IndexView, colIndex int) []float64 {
+func StdPopIndex(ix *table.Indexed, colIndex int) []float64 {
 	std := VarPopIndex(ix, colIndex)
 	for i := range std {
 		std[i] = math.Sqrt(std[i])
@@ -639,12 +639,12 @@ func StdPopIndex(ix *table.IndexView, colIndex int) []float64 {
 }
 
 // StdPopColumn returns the population std deviation of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // population std dev is normalized by 1/n -- see Var version for 1/(n-1) sample normalization.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func StdPopColumn(ix *table.IndexView, column string) []float64 {
+func StdPopColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -656,11 +656,11 @@ func StdPopColumn(ix *table.IndexView, column string) []float64 {
 //   SemPop
 
 // SemPopIndex returns the population standard error of the mean of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // population sem is normalized by 1/n -- see Var version for 1/(n-1) sample normalization.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func SemPopIndex(ix *table.IndexView, colIndex int) []float64 {
+func SemPopIndex(ix *table.Indexed, colIndex int) []float64 {
 	cnt := CountIndex(ix, colIndex)
 	if cnt == nil {
 		return nil
@@ -675,12 +675,12 @@ func SemPopIndex(ix *table.IndexView, colIndex int) []float64 {
 }
 
 // SemPopColumn returns the standard error of the mean of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // population sem is normalized by 1/n -- see Var version for 1/(n-1) sample normalization.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func SemPopColumn(ix *table.IndexView, column string) []float64 {
+func SemPopColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -692,19 +692,19 @@ func SemPopColumn(ix *table.IndexView, column string) []float64 {
 //   Median
 
 // MedianIndex returns the median of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MedianIndex(ix *table.IndexView, colIndex int) []float64 {
+func MedianIndex(ix *table.Indexed, colIndex int) []float64 {
 	return QuantilesIndex(ix, colIndex, []float64{.5})
 }
 
 // MedianColumn returns the median of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func MedianColumn(ix *table.IndexView, column string) []float64 {
+func MedianColumn(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -716,19 +716,19 @@ func MedianColumn(ix *table.IndexView, column string) []float64 {
 //   Q1
 
 // Q1Index returns the first quartile of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Q1Index(ix *table.IndexView, colIndex int) []float64 {
+func Q1Index(ix *table.Indexed, colIndex int) []float64 {
 	return QuantilesIndex(ix, colIndex, []float64{.25})
 }
 
 // Q1Column returns the first quartile of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Q1Column(ix *table.IndexView, column string) []float64 {
+func Q1Column(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil
@@ -740,19 +740,19 @@ func Q1Column(ix *table.IndexView, column string) []float64 {
 //   Q3
 
 // Q3Index returns the third quartile of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Q3Index(ix *table.IndexView, colIndex int) []float64 {
+func Q3Index(ix *table.Indexed, colIndex int) []float64 {
 	return QuantilesIndex(ix, colIndex, []float64{.75})
 }
 
 // Q3Column returns the third quartile of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Q3Column(ix *table.IndexView, column string) []float64 {
+func Q3Column(ix *table.Indexed, column string) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil

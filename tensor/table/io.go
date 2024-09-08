@@ -85,7 +85,7 @@ func (dt *Table) SaveCSV(filename core.Filename, delim Delims, headers bool) err
 // and tensor cell geometry of the columns, enabling full reloading
 // of exactly the same table format and data (recommended).
 // Otherwise, only the data is written.
-func (ix *IndexView) SaveCSV(filename core.Filename, delim Delims, headers bool) error { //types:add
+func (ix *Indexed) SaveCSV(filename core.Filename, delim Delims, headers bool) error { //types:add
 	fp, err := os.Create(string(filename))
 	defer fp.Close()
 	if err != nil {
@@ -135,14 +135,14 @@ func (dt *Table) OpenFS(fsys fs.FS, filename string, delim Delims) error {
 // information for tensor type and dimensionality.
 // If the table DOES have existing columns, then those are used robustly
 // for whatever information fits from each row of the file.
-func (ix *IndexView) OpenCSV(filename core.Filename, delim Delims) error { //types:add
+func (ix *Indexed) OpenCSV(filename core.Filename, delim Delims) error { //types:add
 	err := ix.Table.OpenCSV(filename, delim)
 	ix.Sequential()
 	return err
 }
 
-// OpenFS is the version of [IndexView.OpenCSV] that uses an [fs.FS] filesystem.
-func (ix *IndexView) OpenFS(fsys fs.FS, filename string, delim Delims) error {
+// OpenFS is the version of [Indexed.OpenCSV] that uses an [fs.FS] filesystem.
+func (ix *Indexed) OpenFS(fsys fs.FS, filename string, delim Delims) error {
 	err := ix.Table.OpenFS(fsys, filename, delim)
 	ix.Sequential()
 	return err
@@ -422,7 +422,7 @@ func (dt *Table) WriteCSV(w io.Writer, delim Delims, headers bool) error {
 // and tensor cell geometry of the columns, enabling full reloading
 // of exactly the same table format and data (recommended).
 // Otherwise, only the data is written.
-func (ix *IndexView) WriteCSV(w io.Writer, delim Delims, headers bool) error {
+func (ix *Indexed) WriteCSV(w io.Writer, delim Delims, headers bool) error {
 	ncol := 0
 	var err error
 	if headers {

@@ -40,19 +40,19 @@ func (smat *SimMat) Init() {
 }
 
 // TableColumnStd generates a similarity / distance matrix from given column name
-// in given IndexView of an table.Table, and given standard metric function.
+// in given Indexed of an table.Table, and given standard metric function.
 // if labNm is not empty, uses given column name for labels, which if blankRepeat
 // is true are filtered so that any sequentially repeated labels are blank.
 // This Std version is usable e.g., in Python where the func cannot be passed.
-func (smat *SimMat) TableColumnStd(ix *table.IndexView, column, labNm string, blankRepeat bool, met metric.StdMetrics) error {
+func (smat *SimMat) TableColumnStd(ix *table.Indexed, column, labNm string, blankRepeat bool, met metric.StdMetrics) error {
 	return smat.TableColumn(ix, column, labNm, blankRepeat, metric.StdFunc64(met))
 }
 
 // TableColumn generates a similarity / distance matrix from given column name
-// in given IndexView of an table.Table, and given metric function.
+// in given Indexed of an table.Table, and given metric function.
 // if labNm is not empty, uses given column name for labels, which if blankRepeat
 // is true are filtered so that any sequentially repeated labels are blank.
-func (smat *SimMat) TableColumn(ix *table.IndexView, column, labNm string, blankRepeat bool, mfun metric.Func64) error {
+func (smat *SimMat) TableColumn(ix *table.Indexed, column, labNm string, blankRepeat bool, mfun metric.Func64) error {
 	col, err := ix.Table.ColumnByName(column)
 	if err != nil {
 		return err

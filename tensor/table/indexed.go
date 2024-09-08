@@ -5,61 +5,50 @@
 package table
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
 	"slices"
 	"sort"
 	"strings"
+
+	"cogentcore.org/core/tensor"
 )
 
-// LessFunc is a function used for sort comparisons that returns
-// true if Table row i is less than Table row j -- these are the
-// raw row numbers, which have already been projected through
-// indexes when used for sorting via Indexes.
-type LessFunc func(et *Table, i, j int) bool
-
-// Filterer is a function used for filtering that returns
-// true if Table row should be included in the current filtered
-// view of the table, and false if it should be removed.
-type Filterer func(et *Table, row int) bool
-
-// IndexView is an indexed wrapper around an table.Table that provides a
+// Indexed is an indexed wrapper around a table.Table that provides a
 // specific view onto the Table defined by the set of indexes.
 // This provides an efficient way of sorting and filtering a table by only
 // updating the indexes while doing nothing to the Table itself.
 // To produce a table that has data actually organized according to the
 // indexed order, call the NewTable method.
-// IndexView views on a table can also be organized together as Splits
+// Indexed views on a table can also be organized together as Splits
 // of the table rows, e.g., by grouping values along a given column.
-type IndexView struct { //types:add
+type Indexed struct { //types:add
 
 	// Table that we are an indexed view onto
 	Table *Table
 
 	// current indexes into Table
 	Indexes []int
-
-	// current Less function used in sorting
-	lessFunc LessFunc `copier:"-" display:"-" xml:"-" json:"-"`
 }
 
-// NewIndexView returns a new IndexView based on given table, initialized with sequential idxes
-func NewIndexView(et *Table) *IndexView {
-	ix := &IndexView{}
-	ix.SetTable(et)
+// NewIndexed returns a new Indexed based on given table, initialized with sequential idxes
+func NewIndexed(dt *Table) *Indexed {
+	ix := &Indexed{}
+	ix.SetTable(dt)
 	return ix
 }
 
 // SetTable sets as indexes into given table with sequential initial indexes
-func (ix *IndexView) SetTable(et *Table) {
-	ix.Table = et
+func (ix *Indexed) SetTable(dt *Table) {
+	ix.Table = dt
 	ix.Sequential()
 }
 
 // DeleteInvalid deletes all invalid indexes from the list.
 // Call this if rows (could) have been deleted from table.
-func (ix *IndexView) DeleteInvalid() {
+func (ix *Indexed) DeleteInvalid() {
 	if ix.Table == nil || ix.Table.Rows <= 0 {
 		ix.Indexes = nil
 		return
@@ -73,7 +62,7 @@ func (ix *IndexView) DeleteInvalid() {
 }
 
 // Sequential sets indexes to sequential row-wise indexes into table
-func (ix *IndexView) Sequential() { //types:add
+func (ix *Indexed) Sequential() { //types:add
 	if ix.Table == nil || ix.Table.Rows <= 0 {
 		ix.Indexes = nil
 		return
@@ -87,7 +76,7 @@ func (ix *IndexView) Sequential() { //types:add
 // Permuted sets indexes to a permuted order -- if indexes already exist
 // then existing list of indexes is permuted, otherwise a new set of
 // permuted indexes are generated
-func (ix *IndexView) Permuted() {
+func (ix *Indexed) Permuted() {
 	if ix.Table == nil || ix.Table.Rows <= 0 {
 		ix.Indexes = nil
 		return
@@ -102,38 +91,33 @@ func (ix *IndexView) Permuted() {
 }
 
 // AddIndex adds a new index to the list
-func (ix *IndexView) AddIndex(idx int) {
+func (ix *Indexed) AddIndex(idx int) {
 	ix.Indexes = append(ix.Indexes, idx)
 }
 
-// Sort sorts the indexes into our Table using given Less function.
-// The Less function operates directly on row numbers into the Table
+// SortFunc sorts the indexes into our Table using given compare function.
+// The compare function operates directly on row numbers into the Table
 // as these row numbers have already been projected through the indexes.
-func (ix *IndexView) Sort(lessFunc func(et *Table, i, j int) bool) {
-	ix.lessFunc = lessFunc
-	sort.Sort(ix)
+// cmp(a, b) should return a negative number when a < b, a positive
+// number when a > b and zero when a == b.
+func (ix *Indexed) SortFunc(cmp func(dt *Table, i, j int) int) {
+	slices.SortFunc(ix.Indexes, func(a, b int) int {
+		return cmp(ix.Table, ix.Indexes[a], ix.Indexes[b])
+	})
 }
 
 // SortIndexes sorts the indexes into our Table directly in
 // numerical order, producing the native ordering, while preserving
 // any filtering that might have occurred.
-func (ix *IndexView) SortIndexes() {
+func (ix *Indexed) SortIndexes() {
 	sort.Ints(ix.Indexes)
 }
-
-const (
-	// Ascending specifies an ascending sort direction for table Sort routines
-	Ascending = true
-
-	// Descending specifies a descending sort direction for table Sort routines
-	Descending = false
-)
 
 // SortColumnName sorts the indexes into our Table according to values in
 // given column name, using either ascending or descending order.
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
-func (ix *IndexView) SortColumnName(column string, ascending bool) error { //types:add
+func (ix *Indexed) SortColumnName(column string, ascending bool) error { //types:add
 	ci, err := ix.Table.ColumnIndex(column)
 	if err != nil {
 		log.Println(err)
@@ -145,36 +129,33 @@ func (ix *IndexView) SortColumnName(column string, ascending bool) error { //typ
 
 // SortColumn sorts the indexes into our Table according to values in
 // given column index, using either ascending or descending order.
-// Only valid for 1-dimensional columns.
-func (ix *IndexView) SortColumn(colIndex int, ascending bool) {
+// Only valid for 1-dimensional columns (returns error if not).
+func (ix *Indexed) SortColumn(colIndex int, ascending bool) error {
 	cl := ix.Table.Columns[colIndex]
+	if cl.NumDims() > 1 {
+		return errors.New("tensor Sorting is only for 1D tensors")
+	}
 	if cl.IsString() {
-		ix.Sort(func(et *Table, i, j int) bool {
-			if ascending {
-				return cl.String1D(i) < cl.String1D(j)
-			} else {
-				return cl.String1D(i) > cl.String1D(j)
-			}
+		ix.SortFunc(func(dt *Table, i, j int) int {
+			return tensor.CompareStrings(cl.String1D(i), cl.String1D(j), ascending)
 		})
 	} else {
-		ix.Sort(func(et *Table, i, j int) bool {
-			if ascending {
-				return cl.Float1D(i) < cl.Float1D(j)
-			} else {
-				return cl.Float1D(i) > cl.Float1D(j)
-			}
+		ix.SortFunc(func(dt *Table, i, j int) int {
+			return tensor.CompareNumbers(cl.Float1D(i), cl.Float1D(j), ascending)
 		})
 	}
+	return nil
 }
 
 // SortColumnNames sorts the indexes into our Table according to values in
-// given column names, using either ascending or descending order.
+// given column names, using either ascending or descending order,
+// and optionally using a stable sort.
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
-func (ix *IndexView) SortColumnNames(columns []string, ascending bool) error {
+func (ix *Indexed) SortColumnNames(columns []string, ascending, stable bool) error {
 	nc := len(columns)
 	if nc == 0 {
-		return fmt.Errorf("table.IndexView.SortColumnNames: no column names provided")
+		return fmt.Errorf("table.Indexed.SortColumnNames: no column names provided")
 	}
 	cis := make([]int, nc)
 	for i, cn := range columns {
@@ -185,69 +166,76 @@ func (ix *IndexView) SortColumnNames(columns []string, ascending bool) error {
 		}
 		cis[i] = ci
 	}
-	ix.SortColumns(cis, ascending)
+	ix.SortColumns(cis, ascending, stable)
 	return nil
 }
 
 // SortColumns sorts the indexes into our Table according to values in
 // given list of column indexes, using either ascending or descending order for
 // all of the columns.  Only valid for 1-dimensional columns.
-func (ix *IndexView) SortColumns(colIndexes []int, ascending bool) {
-	ix.Sort(func(et *Table, i, j int) bool {
+func (ix *Indexed) SortColumns(colIndexes []int, ascending, stable bool) {
+	sf := ix.SortFunc
+	if stable {
+		sf = ix.SortStableFunc
+	}
+	sf(func(dt *Table, i, j int) int {
 		for _, ci := range colIndexes {
 			cl := ix.Table.Columns[ci]
 			if cl.IsString() {
 				if ascending {
 					if cl.String1D(i) < cl.String1D(j) {
-						return true
+						return 1
 					} else if cl.String1D(i) > cl.String1D(j) {
-						return false
+						return -1
 					} // if equal, fallthrough to next col
 				} else {
 					if cl.String1D(i) > cl.String1D(j) {
-						return true
+						return 1
 					} else if cl.String1D(i) < cl.String1D(j) {
-						return false
+						return -1
 					} // if equal, fallthrough to next col
 				}
 			} else {
 				if ascending {
 					if cl.Float1D(i) < cl.Float1D(j) {
-						return true
+						return 1
 					} else if cl.Float1D(i) > cl.Float1D(j) {
-						return false
+						return -1
 					} // if equal, fallthrough to next col
 				} else {
 					if cl.Float1D(i) > cl.Float1D(j) {
-						return true
+						return 1
 					} else if cl.Float1D(i) < cl.Float1D(j) {
-						return false
+						return -1
 					} // if equal, fallthrough to next col
 				}
 			}
 		}
-		return false
+		return 0
 	})
 }
 
 /////////////////////////////////////////////////////////////////////////
 //  Stable sorts -- sometimes essential..
 
-// SortStable stably sorts the indexes into our Table using given Less function.
-// The Less function operates directly on row numbers into the Table
+// SortStableFunc stably sorts the indexes into our Table using given compare function.
+// The compare function operates directly on row numbers into the Table
 // as these row numbers have already been projected through the indexes.
-// It is *essential* that it always returns false when the two are equal
+// cmp(a, b) should return a negative number when a < b, a positive
+// number when a > b and zero when a == b.
+// It is *essential* that it always returns 0 when the two are equal
 // for the stable function to actually work.
-func (ix *IndexView) SortStable(lessFunc func(et *Table, i, j int) bool) {
-	ix.lessFunc = lessFunc
-	sort.Stable(ix)
+func (ix *Indexed) SortStableFunc(cmp func(dt *Table, i, j int) int) {
+	slices.SortStableFunc(ix.Indexes, func(a, b int) int {
+		return cmp(ix.Table, ix.Indexes[a], ix.Indexes[b])
+	})
 }
 
 // SortStableColumnName sorts the indexes into our Table according to values in
 // given column name, using either ascending or descending order.
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
-func (ix *IndexView) SortStableColumnName(column string, ascending bool) error {
+func (ix *Indexed) SortStableColumnName(column string, ascending bool) error {
 	ci, err := ix.Table.ColumnIndex(column)
 	if err != nil {
 		log.Println(err)
@@ -260,94 +248,28 @@ func (ix *IndexView) SortStableColumnName(column string, ascending bool) error {
 // SortStableColumn sorts the indexes into our Table according to values in
 // given column index, using either ascending or descending order.
 // Only valid for 1-dimensional columns.
-func (ix *IndexView) SortStableColumn(colIndex int, ascending bool) {
+func (ix *Indexed) SortStableColumn(colIndex int, ascending bool) {
 	cl := ix.Table.Columns[colIndex]
 	if cl.IsString() {
-		ix.SortStable(func(et *Table, i, j int) bool {
-			if ascending {
-				return cl.String1D(i) < cl.String1D(j)
-			} else {
-				return cl.String1D(i) > cl.String1D(j)
-			}
+		ix.SortStableFunc(func(dt *Table, i, j int) int {
+			return tensor.CompareStrings(cl.String1D(i), cl.String1D(j), ascending)
 		})
 	} else {
-		ix.SortStable(func(et *Table, i, j int) bool {
-			if ascending {
-				return cl.Float1D(i) < cl.Float1D(j)
-			} else {
-				return cl.Float1D(i) > cl.Float1D(j)
-			}
+		ix.SortStableFunc(func(dt *Table, i, j int) int {
+			return tensor.CompareNumbers(cl.Float1D(i), cl.Float1D(j), ascending)
 		})
 	}
 }
 
-// SortStableColumnNames sorts the indexes into our Table according to values in
-// given column names, using either ascending or descending order.
-// Only valid for 1-dimensional columns.
-// Returns error if column name not found.
-func (ix *IndexView) SortStableColumnNames(columns []string, ascending bool) error {
-	nc := len(columns)
-	if nc == 0 {
-		return fmt.Errorf("table.IndexView.SortStableColumnNames: no column names provided")
-	}
-	cis := make([]int, nc)
-	for i, cn := range columns {
-		ci, err := ix.Table.ColumnIndex(cn)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-		cis[i] = ci
-	}
-	ix.SortStableColumns(cis, ascending)
-	return nil
-}
-
-// SortStableColumns sorts the indexes into our Table according to values in
-// given list of column indexes, using either ascending or descending order for
-// all of the columns.  Only valid for 1-dimensional columns.
-func (ix *IndexView) SortStableColumns(colIndexes []int, ascending bool) {
-	ix.SortStable(func(et *Table, i, j int) bool {
-		for _, ci := range colIndexes {
-			cl := ix.Table.Columns[ci]
-			if cl.IsString() {
-				if ascending {
-					if cl.String1D(i) < cl.String1D(j) {
-						return true
-					} else if cl.String1D(i) > cl.String1D(j) {
-						return false
-					} // if equal, fallthrough to next col
-				} else {
-					if cl.String1D(i) > cl.String1D(j) {
-						return true
-					} else if cl.String1D(i) < cl.String1D(j) {
-						return false
-					} // if equal, fallthrough to next col
-				}
-			} else {
-				if ascending {
-					if cl.Float1D(i) < cl.Float1D(j) {
-						return true
-					} else if cl.Float1D(i) > cl.Float1D(j) {
-						return false
-					} // if equal, fallthrough to next col
-				} else {
-					if cl.Float1D(i) > cl.Float1D(j) {
-						return true
-					} else if cl.Float1D(i) < cl.Float1D(j) {
-						return false
-					} // if equal, fallthrough to next col
-				}
-			}
-		}
-		return false
-	})
-}
+// FilterFunc is a function used for filtering that returns
+// true if Table row should be included in the current filtered
+// view of the table, and false if it should be removed.
+type FilterFunc func(dt *Table, row int) bool
 
 // Filter filters the indexes into our Table using given Filter function.
 // The Filter function operates directly on row numbers into the Table
 // as these row numbers have already been projected through the indexes.
-func (ix *IndexView) Filter(filterer func(et *Table, row int) bool) {
+func (ix *Indexed) Filter(filterer func(dt *Table, row int) bool) {
 	sz := len(ix.Indexes)
 	for i := sz - 1; i >= 0; i-- { // always go in reverse for filtering
 		if !filterer(ix.Table, ix.Indexes[i]) { // delete
@@ -363,7 +285,7 @@ func (ix *IndexView) Filter(filterer func(et *Table, row int) bool) {
 // Use named args for greater clarity.
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
-func (ix *IndexView) FilterColumnName(column string, str string, exclude, contains, ignoreCase bool) error { //types:add
+func (ix *Indexed) FilterColumnName(column string, str string, exclude, contains, ignoreCase bool) error { //types:add
 	ci, err := ix.Table.ColumnIndex(column)
 	if err != nil {
 		log.Println(err)
@@ -379,10 +301,10 @@ func (ix *IndexView) FilterColumnName(column string, str string, exclude, contai
 // If contains, only checks if row contains string; if ignoreCase, ignores case.
 // Use named args for greater clarity.
 // Only valid for 1-dimensional columns.
-func (ix *IndexView) FilterColumn(colIndex int, str string, exclude, contains, ignoreCase bool) {
+func (ix *Indexed) FilterColumn(colIndex int, str string, exclude, contains, ignoreCase bool) {
 	col := ix.Table.Columns[colIndex]
 	lowstr := strings.ToLower(str)
-	ix.Filter(func(et *Table, row int) bool {
+	ix.Filter(func(dt *Table, row int) bool {
 		val := col.String1D(row)
 		has := false
 		switch {
@@ -404,7 +326,7 @@ func (ix *IndexView) FilterColumn(colIndex int, str string, exclude, contains, i
 
 // NewTable returns a new table with column data organized according to
 // the indexes
-func (ix *IndexView) NewTable() *Table {
+func (ix *Indexed) NewTable() *Table {
 	rows := len(ix.Indexes)
 	nt := ix.Table.Clone()
 	nt.SetNumRows(rows)
@@ -423,20 +345,20 @@ func (ix *IndexView) NewTable() *Table {
 }
 
 // Clone returns a copy of the current index view with its own index memory
-func (ix *IndexView) Clone() *IndexView {
-	nix := &IndexView{}
+func (ix *Indexed) Clone() *Indexed {
+	nix := &Indexed{}
 	nix.CopyFrom(ix)
 	return nix
 }
 
-// CopyFrom copies from given other IndexView (we have our own unique copy of indexes)
-func (ix *IndexView) CopyFrom(oix *IndexView) {
+// CopyFrom copies from given other Indexed (we have our own unique copy of indexes)
+func (ix *Indexed) CopyFrom(oix *Indexed) {
 	ix.Table = oix.Table
 	ix.Indexes = slices.Clone(oix.Indexes)
 }
 
 // AddRows adds n rows to end of underlying Table, and to the indexes in this view
-func (ix *IndexView) AddRows(n int) { //types:add
+func (ix *Indexed) AddRows(n int) { //types:add
 	stidx := ix.Table.Rows
 	ix.Table.SetNumRows(stidx + n)
 	for i := stidx; i < stidx+n; i++ {
@@ -446,7 +368,7 @@ func (ix *IndexView) AddRows(n int) { //types:add
 
 // InsertRows adds n rows to end of underlying Table, and to the indexes starting at
 // given index in this view
-func (ix *IndexView) InsertRows(at, n int) {
+func (ix *Indexed) InsertRows(at, n int) {
 	stidx := ix.Table.Rows
 	ix.Table.SetNumRows(stidx + n)
 	nw := make([]int, n, n+len(ix.Indexes)-at)
@@ -457,7 +379,7 @@ func (ix *IndexView) InsertRows(at, n int) {
 }
 
 // DeleteRows deletes n rows of indexes starting at given index in the list of indexes
-func (ix *IndexView) DeleteRows(at, n int) {
+func (ix *Indexed) DeleteRows(at, n int) {
 	ix.Indexes = append(ix.Indexes[:at], ix.Indexes[at+n:]...)
 }
 
@@ -465,11 +387,11 @@ func (ix *IndexView) DeleteRows(at, n int) {
 // given string value in given column index (de-reference our indexes to get actual row).
 // if contains, only checks if row contains string; if ignoreCase, ignores case.
 // Use named args for greater clarity.
-func (ix *IndexView) RowsByStringIndex(colIndex int, str string, contains, ignoreCase bool) []int {
+func (ix *Indexed) RowsByStringIndex(colIndex int, str string, contains, ignoreCase bool) []int {
 	dt := ix.Table
 	col := dt.Columns[colIndex]
 	lowstr := strings.ToLower(str)
-	var idxs []int
+	var indexes []int
 	for idx, srw := range ix.Indexes {
 		val := col.String1D(srw)
 		has := false
@@ -484,10 +406,10 @@ func (ix *IndexView) RowsByStringIndex(colIndex int, str string, contains, ignor
 			has = (val == str)
 		}
 		if has {
-			idxs = append(idxs, idx)
+			indexes = append(indexes, idx)
 		}
 	}
-	return idxs
+	return indexes
 }
 
 // RowsByString returns the list of *our indexes* whose row in the table has
@@ -495,7 +417,7 @@ func (ix *IndexView) RowsByStringIndex(colIndex int, str string, contains, ignor
 // if contains, only checks if row contains string; if ignoreCase, ignores case.
 // returns error message for invalid column name.
 // Use named args for greater clarity.
-func (ix *IndexView) RowsByString(column string, str string, contains, ignoreCase bool) ([]int, error) {
+func (ix *Indexed) RowsByString(column string, str string, contains, ignoreCase bool) ([]int, error) {
 	dt := ix.Table
 	ci, err := dt.ColumnIndex(column)
 	if err != nil {
@@ -505,16 +427,11 @@ func (ix *IndexView) RowsByString(column string, str string, contains, ignoreCas
 }
 
 // Len returns the length of the index list
-func (ix *IndexView) Len() int {
+func (ix *Indexed) Len() int {
 	return len(ix.Indexes)
 }
 
-// Less calls the LessFunc for sorting
-func (ix *IndexView) Less(i, j int) bool {
-	return ix.lessFunc(ix.Table, ix.Indexes[i], ix.Indexes[j])
-}
-
 // Swap switches the indexes for i and j
-func (ix *IndexView) Swap(i, j int) {
+func (ix *Indexed) Swap(i, j int) {
 	ix.Indexes[i], ix.Indexes[j] = ix.Indexes[j], ix.Indexes[i]
 }

@@ -25,7 +25,7 @@ func TestSVDIris(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 	pc := &SVD{}
 	pc.Init()
 	pc.Kind = mat.SVDFull

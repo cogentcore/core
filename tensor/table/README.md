@@ -14,13 +14,13 @@ The following packages are included:
 
 * [etensor](etensor) is a Tensor (n-dimensional array) object.  `etensor.Tensor` is an interface that applies to many different type-specific instances, such as `etensor.Float32`.  A tensor is just a `etensor.Shape` plus a slice holding the specific data type.  Our tensor is based directly on the [Apache Arrow](https://github.com/apache/arrow/tree/master/go) project's tensor, and it fully interoperates with it.  Arrow tensors are designed to be read-only, and we needed some extra support to make our `etable.Table` work well, so we had to roll our own.  Our tensors also interoperate fully with Gonum's 2D-specific Matrix type for the 2D case.
 
-* [etable](etable) has the `etable.Table` DataTable / DataFrame object, which is useful for many different data analysis and database functions, and also for holding patterns to present to a neural network, and logs of output from the models, etc.  A `etable.Table` is just a slice of `etensor.Tensor` columns, that are all aligned along the outer-most *row* dimension.  Index-based indirection, which is essential for efficient Sort, Filter etc, is provided by the `etable.IndexView` type, which is an indexed view into a Table.  All data processing operations are defined on the IndexView.
+* [etable](etable) has the `etable.Table` DataTable / DataFrame object, which is useful for many different data analysis and database functions, and also for holding patterns to present to a neural network, and logs of output from the models, etc.  A `etable.Table` is just a slice of `etensor.Tensor` columns, that are all aligned along the outer-most *row* dimension.  Index-based indirection, which is essential for efficient Sort, Filter etc, is provided by the `etable.Indexed` type, which is an indexed view into a Table.  All data processing operations are defined on the Indexed.
 
 * [eplot](eplot) provides an interactive 2D plotting GUI in [GoGi](https://cogentcore.org/core/gi) for Table data, using the [gonum plot](https://github.com/gonum/plot) plotting package.  You can select which columns to plot and specify various basic plot parameters.
 
 * [tensorcore](tensorcore) provides an interactive tabular, spreadsheet-style GUI using [GoGi](https://cogentcore.org/core/gi) for viewing and editing `etable.Table` and `etable.Tensor` objects.  The `tensorcore.TensorGrid` also provides a colored grid display higher-dimensional tensor data.
 
-* [agg](agg) provides standard aggregation functions (`Sum`, `Mean`, `Var`, `Std` etc) operating over `etable.IndexView` views of Table data.  It also defines standard `AggFunc` functions such as `SumFunc` which can be used for `Agg` functions on either a Tensor or IndexView.
+* [agg](agg) provides standard aggregation functions (`Sum`, `Mean`, `Var`, `Std` etc) operating over `etable.Indexed` views of Table data.  It also defines standard `AggFunc` functions such as `SumFunc` which can be used for `Agg` functions on either a Tensor or Indexed.
 
 * [tsragg](tsragg) provides the same agg functions as in `agg`, but operating on all the values in a given `Tensor`.  Because of the indexed, row-based nature of tensors in a Table, these are not the same as the `agg` functions.
 
@@ -96,17 +96,17 @@ Other options are `etable.Equals` instead of `Contains` to search for an exact f
 
 ## Index Views (Sort, Filter, etc)
 
-The [IndexView](https://godoc.org/github.com/goki/etable/v2/etable#IndexView) provides a list of row-wise indexes into a table, and Sorting, Filtering and Splitting all operate on this index view without changing the underlying table data, for maximum efficiency and flexibility.
+The [Indexed](https://godoc.org/github.com/goki/etable/v2/etable#Indexed) provides a list of row-wise indexes into a table, and Sorting, Filtering and Splitting all operate on this index view without changing the underlying table data, for maximum efficiency and flexibility.
 
 ```Go
-ix := etable.NewIndexView(et) // new view with all rows
+ix := etable.NewIndexed(et) // new view with all rows
 ```
 
 ### Sort
 
 ```Go
 ix.SortColumnName("Name", etable.Ascending) // etable.Ascending or etable.Descending
-SortedTable := ix.NewTable() // turn an IndexView back into a new Table organized in order of indexes
+SortedTable := ix.NewTable() // turn an Indexed back into a new Table organized in order of indexes
 ```
 
 or:
@@ -142,7 +142,7 @@ gps := byNm.AggsToTable(etable.AddAggName) // etable.AddAggName or etable.ColNam
 Describe (basic stats) all columns in a table:
 
 ```Go
-ix := etable.NewIndexView(et) // new view with all rows
+ix := etable.NewIndexed(et) // new view with all rows
 desc := agg.DescAll(ix) // summary stats of all columns
 // get value at given column name (from original table), row "Mean"
 mean := desc.Float("ColNm", desc.RowsByString("Agg", "Mean", etable.Equals, etable.UseCase)[0])

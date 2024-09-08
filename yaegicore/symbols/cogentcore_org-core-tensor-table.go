@@ -3,8 +3,9 @@
 package symbols
 
 import (
-	"cogentcore.org/core/tensor/table"
 	"reflect"
+
+	"cogentcore.org/core/tensor/table"
 )
 
 func init() {
@@ -27,7 +28,7 @@ func init() {
 		"Headers":                reflect.ValueOf(table.Headers),
 		"IgnoreCase":             reflect.ValueOf(table.IgnoreCase),
 		"InferDataType":          reflect.ValueOf(table.InferDataType),
-		"NewIndexView":           reflect.ValueOf(table.NewIndexView),
+		"NewIndexed":             reflect.ValueOf(table.NewIndexed),
 		"NewSliceTable":          reflect.ValueOf(table.NewSliceTable),
 		"NewTable":               reflect.ValueOf(table.NewTable),
 		"NoHeaders":              reflect.ValueOf(table.NoHeaders),
@@ -43,7 +44,7 @@ func init() {
 		// type definitions
 		"Delims":         reflect.ValueOf((*table.Delims)(nil)),
 		"Filterer":       reflect.ValueOf((*table.Filterer)(nil)),
-		"IndexView":      reflect.ValueOf((*table.IndexView)(nil)),
+		"Indexed":        reflect.ValueOf((*table.Indexed)(nil)),
 		"LessFunc":       reflect.ValueOf((*table.LessFunc)(nil)),
 		"SplitAgg":       reflect.ValueOf((*table.SplitAgg)(nil)),
 		"Splits":         reflect.ValueOf((*table.Splits)(nil)),

@@ -12,12 +12,12 @@ import (
 )
 
 // QuantilesIndex returns the given quantile(s) of non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
+// Indexed indexed view of an table.Table, for given column index.
 // Column must be a 1d Column -- returns nil for n-dimensional columns.
 // qs are 0-1 values, 0 = min, 1 = max, .5 = median, etc.  Uses linear interpolation.
 // Because this requires a sort, it is more efficient to get as many quantiles
 // as needed in one pass.
-func QuantilesIndex(ix *table.IndexView, colIndex int, qs []float64) []float64 {
+func QuantilesIndex(ix *table.Indexed, colIndex int, qs []float64) []float64 {
 	nq := len(qs)
 	if nq == 0 {
 		return nil
@@ -58,13 +58,13 @@ func QuantilesIndex(ix *table.IndexView, colIndex int, qs []float64) []float64 {
 }
 
 // Quantiles returns the given quantile(s) of non-Null, non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
+// Indexed indexed view of an table.Table, for given column name.
 // If name not found, nil is returned -- use Try version for error message.
 // Column must be a 1d Column -- returns nil for n-dimensional columns.
 // qs are 0-1 values, 0 = min, 1 = max, .5 = median, etc.  Uses linear interpolation.
 // Because this requires a sort, it is more efficient to get as many quantiles
 // as needed in one pass.
-func Quantiles(ix *table.IndexView, column string, qs []float64) []float64 {
+func Quantiles(ix *table.Indexed, column string, qs []float64) []float64 {
 	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
 	if colIndex == -1 {
 		return nil

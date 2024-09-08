@@ -24,7 +24,7 @@ func TestPCAIris(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 	pc := &PCA{}
 	// pc.TableColumn(ix, "data", metric.Covariance64)
 	// fmt.Printf("covar: %v\n", pc.Covar)

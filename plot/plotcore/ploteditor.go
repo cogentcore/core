@@ -32,14 +32,14 @@ import (
 )
 
 // PlotEditor is a widget that provides an interactive 2D plot
-// of selected columns of tabular data, represented by a [table.IndexView] into
+// of selected columns of tabular data, represented by a [table.Indexed] into
 // a [table.Table]. Other types of tabular data can be converted into this format.
 // The user can change various options for the plot and also modify the underlying data.
 type PlotEditor struct { //types:add
 	core.Frame
 
 	// table is the table of data being plotted.
-	table *table.IndexView
+	table *table.Indexed
 
 	// Options are the overall plot options.
 	Options PlotOptions
@@ -67,7 +67,7 @@ func (pl *PlotEditor) CopyFieldsFrom(frm tree.Node) {
 	fr := frm.(*PlotEditor)
 	pl.Frame.CopyFieldsFrom(&fr.Frame)
 	pl.Options = fr.Options
-	pl.setIndexView(fr.table)
+	pl.setIndexed(fr.table)
 	mx := min(len(pl.Columns), len(fr.Columns))
 	for i := 0; i < mx; i++ {
 		*pl.Columns[i] = *fr.Columns[i]
@@ -131,11 +131,11 @@ func (pl *PlotEditor) Init() {
 	})
 }
 
-// setIndexView sets the table to view and does Update
+// setIndexed sets the table to view and does Update
 // to update the Column list, which will also trigger a Layout
 // and updating of the plot on next render pass.
 // This is safe to call from a different goroutine.
-func (pl *PlotEditor) setIndexView(tab *table.IndexView) *PlotEditor {
+func (pl *PlotEditor) setIndexed(tab *table.Indexed) *PlotEditor {
 	pl.table = tab
 	pl.Update()
 	return pl
@@ -146,7 +146,7 @@ func (pl *PlotEditor) setIndexView(tab *table.IndexView) *PlotEditor {
 // and updating of the plot on next render pass.
 // This is safe to call from a different goroutine.
 func (pl *PlotEditor) SetTable(tab *table.Table) *PlotEditor {
-	pl.table = table.NewIndexView(tab)
+	pl.table = table.NewIndexed(tab)
 	pl.Update()
 	return pl
 }
@@ -271,9 +271,9 @@ func (pl *PlotEditor) xLabel() string {
 	return "X"
 }
 
-// GoUpdatePlot updates the display based on current IndexView into table.
+// GoUpdatePlot updates the display based on current Indexed into table.
 // This version can be called from goroutines. It does Sequential() on
-// the [table.IndexView], under the assumption that it is used for tracking a
+// the [table.Indexed], under the assumption that it is used for tracking a
 // the latest updates of a running process.
 func (pl *PlotEditor) GoUpdatePlot() {
 	if pl == nil || pl.This == nil {
@@ -292,8 +292,8 @@ func (pl *PlotEditor) GoUpdatePlot() {
 	pl.Scene.AsyncUnlock()
 }
 
-// UpdatePlot updates the display based on current IndexView into table.
-// It does not automatically update the [table.IndexView] unless it is
+// UpdatePlot updates the display based on current Indexed into table.
+// It does not automatically update the [table.Indexed] unless it is
 // nil or out date.
 func (pl *PlotEditor) UpdatePlot() {
 	if pl == nil || pl.This == nil {
@@ -377,7 +377,7 @@ func (pl *PlotEditor) configPlot(plt *plot.Plot) {
 }
 
 // plotXAxis processes the XAxis and returns its index
-func (pl *PlotEditor) plotXAxis(plt *plot.Plot, ixvw *table.IndexView) (xi int, xview *table.IndexView, err error) {
+func (pl *PlotEditor) plotXAxis(plt *plot.Plot, ixvw *table.Indexed) (xi int, xview *table.Indexed, err error) {
 	xi, err = ixvw.Table.ColumnIndex(pl.Options.XAxis)
 	if err != nil {
 		// log.Println("plot.PlotXAxis: " + err.Error())

@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIndexView(t *testing.T) {
+func TestIndexed(t *testing.T) {
 	dt := table.NewTable().SetNumRows(5)
 	dt.AddFloat64Column("data")
 	dt.SetFloat("data", 0, 1)
@@ -24,7 +24,7 @@ func TestIndexView(t *testing.T) {
 	dt.SetFloat("data", 3, 4)
 	dt.SetFloat("data", 4, 5)
 
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 
 	results := []float64{5, 15, 120, 1, 5, 1, 5, 3, 2.5, math.Sqrt(2.5), math.Sqrt(2.5) / math.Sqrt(5),
 		15, 55, math.Sqrt(55), 2, math.Sqrt(2), math.Sqrt(2) / math.Sqrt(5), 3, 2, 4}

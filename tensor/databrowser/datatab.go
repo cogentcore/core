@@ -28,9 +28,9 @@ func NewTab[T any](br *Browser, label string, mkfun func(tab *core.Frame) T) T {
 }
 
 // NewTabTensorTable creates a tab with a tensorcore.Table widget
-// to view given table.Table, using its own table.IndexView as tv.Table.
+// to view given table.Table, using its own table.Indexed as tv.Table.
 // Use tv.Table.Table to get the underlying *table.Table
-// Use tv.Table.Sequential to update the IndexView to view
+// Use tv.Table.Sequential to update the Indexed to view
 // all of the rows when done updating the Table, and then call br.Update()
 func (br *Browser) NewTabTensorTable(label string, dt *table.Table) *tensorcore.Table {
 	tv := NewTab[*tensorcore.Table](br, label, func(tab *core.Frame) *tensorcore.Table {

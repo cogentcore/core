@@ -18,7 +18,7 @@ import (
 // linear model, which is a general form of multivariate linear
 // regression, supporting multiple independent and dependent
 // variables.  Make a NewGLM and then do Run() on a tensor
-// table.IndexView with the relevant data in columns of the table.
+// table.Indexed with the relevant data in columns of the table.
 // Batch-mode gradient descent is used and the relevant parameters
 // can be altered from defaults before calling Run as needed.
 type GLM struct {
@@ -85,7 +85,7 @@ type GLM struct {
 	// Cached values from the table
 
 	// Table of data
-	Table *table.IndexView
+	Table *table.Indexed
 
 	// tensor columns from table with the respective variables
 	IndepVars, DepVars, PredVars, ErrVars tensor.Tensor
@@ -122,7 +122,7 @@ func (glm *GLM) init(nIv, nDv int) {
 // each of the Vars args specifies a column in the table, which can have either a
 // single scalar value for each row, or a tensor cell with multiple values.
 // predVars and errVars (predicted values and error values) are optional.
-func (glm *GLM) SetTable(ix *table.IndexView, indepVars, depVars, predVars, errVars string) error {
+func (glm *GLM) SetTable(ix *table.Indexed, indepVars, depVars, predVars, errVars string) error {
 	dt := ix.Table
 	iv, err := dt.ColumnByName(indepVars)
 	if err != nil {

@@ -21,7 +21,7 @@ import (
 type tableXY struct {
 
 	// the index view of data table to plot from
-	table *table.IndexView
+	table *table.Indexed
 
 	// the indexes of the tensor columns to use for the X and Y data, respectively
 	xColumn, yColumn int
@@ -47,18 +47,18 @@ var _ plot.Valuer = &tableXY{}
 var _ plot.Labeler = &tableXY{}
 var _ plots.YErrorer = &tableXY{}
 
-// newTableXY returns a new XY plot view onto the given IndexView of table.Table (makes a copy),
+// newTableXY returns a new XY plot view onto the given Indexed of table.Table (makes a copy),
 // from given column indexes, and tensor indexes within each cell.
 // Column indexes are enforced to be valid, with an error message if they are not.
-func newTableXY(dt *table.IndexView, xcol, xtsrIndex, ycol, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
+func newTableXY(dt *table.Indexed, xcol, xtsrIndex, ycol, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
 	txy := &tableXY{table: dt.Clone(), xColumn: xcol, yColumn: ycol, xIndex: xtsrIndex, yIndex: ytsrIndex, yRange: yrng}
 	return txy, txy.validate()
 }
 
-// newTableXYName returns a new XY plot view onto the given IndexView of table.Table (makes a copy),
+// newTableXYName returns a new XY plot view onto the given Indexed of table.Table (makes a copy),
 // from given column name and tensor indexes within each cell.
 // Column indexes are enforced to be valid, with an error message if they are not.
-func newTableXYName(dt *table.IndexView, xi, xtsrIndex int, ycol string, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
+func newTableXYName(dt *table.Indexed, xi, xtsrIndex int, ycol string, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
 	yi, err := dt.Table.ColumnIndex(ycol)
 	if errors.Log(err) != nil {
 		return nil, err

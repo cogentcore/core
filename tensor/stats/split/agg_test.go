@@ -25,7 +25,7 @@ func TestAgg(t *testing.T) {
 		dt.SetString("Group", i, gp)
 		dt.SetFloat("Value", i, float64(i))
 	}
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 	spl := GroupBy(ix, "Group")
 	assert.Equal(t, 2, len(spl.Splits))
 
@@ -50,7 +50,7 @@ func TestAggEmpty(t *testing.T) {
 		dt.SetString("Group", i, gp)
 		dt.SetFloat("Value", i, float64(i))
 	}
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 	ix.Filter(func(et *table.Table, row int) bool {
 		return false // exclude all
 	})

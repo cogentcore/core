@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"testing"
 
+	"cogentcore.org/core/base/metadata"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -55,12 +56,12 @@ func TestTensorString(t *testing.T) {
 	tsr.SetNumRows(5)
 	assert.Equal(t, 20, tsr.Len())
 
-	tsr.SetMetaData("name", "test")
-	nm, has := tsr.MetaData("name")
+	tsr.Metadata().Set("name", "test")
+	nm, err := metadata.Get[string](*tsr.Metadata(), "name")
 	assert.Equal(t, "test", nm)
-	assert.Equal(t, true, has)
-	_, has = tsr.MetaData("type")
-	assert.Equal(t, false, has)
+	assert.NoError(t, err)
+	_, err = metadata.Get[string](*tsr.Metadata(), "type")
+	assert.Error(t, err)
 
 	var flt []float64
 	cln.SetString1D(0, "3.14")
@@ -114,13 +115,6 @@ func TestTensorFloat64(t *testing.T) {
 
 	tsr.SetNumRows(5)
 	assert.Equal(t, 20, tsr.Len())
-
-	tsr.SetMetaData("name", "test")
-	nm, has := tsr.MetaData("name")
-	assert.Equal(t, "test", nm)
-	assert.Equal(t, true, has)
-	_, has = tsr.MetaData("type")
-	assert.Equal(t, false, has)
 
 	var flt []float64
 	cln.SetString1D(0, "3.14")

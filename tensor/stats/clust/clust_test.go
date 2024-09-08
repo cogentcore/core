@@ -33,7 +33,7 @@ func TestClust(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ix := table.NewIndexView(dt)
+	ix := table.NewIndexed(dt)
 	smat := &simat.SimMat{}
 	smat.TableColumn(ix, "Input", "Name", false, metric.Euclidean64)
 

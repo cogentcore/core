@@ -145,7 +145,7 @@ func AvgByColumn(files []string, column string) {
 			fmt.Printf("File %v empty\n", fn)
 			continue
 		}
-		ix := table.NewIndexView(dt)
+		ix := table.NewIndexed(dt)
 		var spl *table.Splits
 		if column == "" {
 			spl = split.All(ix)

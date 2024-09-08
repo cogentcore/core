@@ -6,7 +6,7 @@ The `stats` package provides standard statistic computations operating over floa
 
 * `tensor.Float32`, `tensor.Float64` using the underlying `Values` slice, and other generic `Tensor` using the `Floats` interface (less efficient).
 
-* `table.IndexView` indexed views of `table.Table` data, with `*Column` functions (e.g., `MeanColumn`) using names to specify columns, and `*Index` versions operating on column indexes.  Also available for this type are `CountIf*`, `PctIf*`, `PropIf*` functions that return count, percentage, or propoprtion of values according to given function.
+* `table.Indexed` indexed views of `table.Table` data, with `*Column` functions (e.g., `MeanColumn`) using names to specify columns, and `*Index` versions operating on column indexes.  Also available for this type are `CountIf*`, `PctIf*`, `PropIf*` functions that return count, percentage, or propoprtion of values according to given function.
 
 ## Stats
 
@@ -29,8 +29,8 @@ The following statistics are supported (per the `Stats` enum in `stats.go`):
 * `VarPop`:  population variance (squared diffs from mean, divided by n)
 * `StdPop`:  population standard deviation (sqrt of VarPop)
 * `SemPop`:  population standard error of the mean (StdPop divided by sqrt(n))
-* `Median`:  middle value in sorted ordering (only for IndexView)
-* `Q1`:  Q1 first quartile = 25%ile value = .25 quantile value (only for IndexView)
-* `Q3`:  Q3 third quartile = 75%ile value = .75 quantile value (only for IndexView)
+* `Median`:  middle value in sorted ordering (only for Indexed)
+* `Q1`:  Q1 first quartile = 25%ile value = .25 quantile value (only for Indexed)
+* `Q3`:  Q3 third quartile = 75%ile value = .75 quantile value (only for Indexed)
  
 

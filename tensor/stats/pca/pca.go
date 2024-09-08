@@ -48,7 +48,7 @@ func (pa *PCA) Init() {
 // This is the input to the PCA eigenvalue decomposition of the resulting
 // covariance matrix, which extracts the eigenvectors as directions with maximal
 // variance in this matrix.
-func (pa *PCA) TableColumn(ix *table.IndexView, column string, mfun metric.Func64) error {
+func (pa *PCA) TableColumn(ix *table.Indexed, column string, mfun metric.Func64) error {
 	if pa.Covar == nil {
 		pa.Init()
 	}
@@ -97,7 +97,7 @@ func (pa *PCA) Tensor(tsr tensor.Tensor, mfun metric.Func64) error {
 // covariance matrix, which extracts the eigenvectors as directions with maximal
 // variance in this matrix.
 // This Std version is usable e.g., in Python where the func cannot be passed.
-func (pa *PCA) TableColumnStd(ix *table.IndexView, column string, met metric.StdMetrics) error {
+func (pa *PCA) TableColumnStd(ix *table.Indexed, column string, met metric.StdMetrics) error {
 	return pa.TableColumn(ix, column, metric.StdFunc64(met))
 }
 
@@ -145,10 +145,10 @@ func (pa *PCA) PCA() error {
 	return nil
 }
 
-// ProjectColumn projects values from the given column of given table (via IndexView)
+// ProjectColumn projects values from the given column of given table (via Indexed)
 // onto the idx'th eigenvector (0 = largest eigenvalue, 1 = next, etc).
 // Must have already called PCA() method.
-func (pa *PCA) ProjectColumn(vals *[]float64, ix *table.IndexView, column string, idx int) error {
+func (pa *PCA) ProjectColumn(vals *[]float64, ix *table.Indexed, column string, idx int) error {
 	col, err := ix.Table.ColumnByName(column)
 	if err != nil {
 		return err
@@ -188,11 +188,11 @@ func (pa *PCA) ProjectColumn(vals *[]float64, ix *table.IndexView, column string
 	return nil
 }
 
-// ProjectColumnToTable projects values from the given column of given table (via IndexView)
+// ProjectColumnToTable projects values from the given column of given table (via Indexed)
 // onto the given set of eigenvectors (idxs, 0 = largest eigenvalue, 1 = next, etc),
 // and stores results along with labels from column labNm into results table.
 // Must have already called PCA() method.
-func (pa *PCA) ProjectColumnToTable(projections *table.Table, ix *table.IndexView, column, labNm string, idxs []int) error {
+func (pa *PCA) ProjectColumnToTable(projections *table.Table, ix *table.Indexed, column, labNm string, idxs []int) error {
 	_, err := ix.Table.ColumnByName(column)
 	if err != nil {
 		return err

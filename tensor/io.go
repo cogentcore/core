@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/core"
 )
 
@@ -53,8 +54,8 @@ func OpenCSV(tsr Tensor, filename core.Filename, delim rune) error {
 // Reading just grabs all values and doesn't care about shape.
 func WriteCSV(tsr Tensor, w io.Writer, delim rune) error {
 	prec := -1
-	if ps, ok := tsr.MetaData("precision"); ok {
-		prec, _ = strconv.Atoi(ps)
+	if ps, err := metadata.Get[int](*tsr.Metadata(), "precision"); err == nil {
+		prec = ps
 	}
 	cw := csv.NewWriter(w)
 	if delim != 0 {
