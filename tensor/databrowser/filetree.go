@@ -5,7 +5,6 @@
 package databrowser
 
 import (
-	"fmt"
 	"log"
 	"reflect"
 	"strings"
@@ -242,7 +241,6 @@ func (fn *FileNode) PlotFile() {
 	if dt == nil {
 		return
 	}
-	fmt.Println(ptab)
 	pl := br.NewTabPlot(ptab, dt)
 	pl.Options.Title = df
 	// TODO: apply column and plot level options.
