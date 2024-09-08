@@ -119,10 +119,11 @@ type Tree struct {
 	// it defaults to [icons.Blank].
 	IconLeaf icons.Icon
 
-	// TreeInit is a function set on the root node that is called
-	// with each child tree node when it is initialized (but not
-	// with the root node itself).
-	TreeInit func(tr *Tree)
+	// TreeInit is a function that can be set on the root node that is called
+	// with each child tree node when it is initialized. It is only
+	// called with the root node itself in [Tree.SetTreeInit], so you
+	// should typically call that instead of setting this directly.
+	TreeInit func(tr *Tree) `set:"-"`
 
 	// Indent is the amount to indent children relative to this node.
 	// It should be set in a Styler like all other style properties.
@@ -487,6 +488,17 @@ func (tr *Tree) OnAdd() {
 	if tr.root.TreeInit != nil {
 		tr.root.TreeInit(tr)
 	}
+}
+
+// SetTreeInit sets the [Tree.TreeInit]:
+// TreeInit is a function that can be set on the root node that is called
+// with each child tree node when it is initialized. It is only
+// called with the root node itself in this function, SetTreeInit, so you
+// should typically call this instead of setting it directly.
+func (tr *Tree) SetTreeInit(v func(tr *Tree)) *Tree {
+	tr.TreeInit = v
+	v(tr)
+	return tr
 }
 
 // rootIsReadOnly returns the ReadOnly status of the root node,
