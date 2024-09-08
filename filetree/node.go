@@ -225,14 +225,6 @@ func (fn *Node) Init() {
 				w.FileRoot = fn.FileRoot
 				w.Filepath = core.Filename(fpath)
 				w.This.(Filer).GetFileInfo()
-				// if w.FileRoot.FSys != nil {
-				// 	if fi.IsDir() {
-				// 		fn.Info.SetFileInfo(fi)
-				// 	} else {
-				// 		w.initFileInfo()
-				// 	}
-				// } else {
-				// 	w.initFileInfo()
 				if w.FileRoot.FSys == nil {
 					if w.IsDir() && repo == nil {
 						w.detectVCSRepo(true) // update files

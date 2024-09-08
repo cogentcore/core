@@ -33,10 +33,13 @@ func (d *Data) Open(name string) (fs.File, error) {
 	fm := sd.filemap()
 	itm, ok := fm[file]
 	if !ok {
-		if dir == "" && file == d.name {
-			return &File{Reader: *bytes.NewReader(itm.Bytes()), Data: d}, nil
+		if dir == "" && (file == d.name || file == ".") {
+			return &DirFile{File: File{Reader: *bytes.NewReader(d.Bytes()), Data: d}}, nil
 		}
 		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("file not found")}
+	}
+	if itm.IsDir() {
+		return &DirFile{File: File{Reader: *bytes.NewReader(itm.Bytes()), Data: itm}}, nil
 	}
 	return &File{Reader: *bytes.NewReader(itm.Bytes()), Data: itm}, nil
 }
@@ -55,7 +58,7 @@ func (d *Data) Stat(name string) (fs.FileInfo, error) {
 	fm := sd.filemap()
 	itm, ok := fm[file]
 	if !ok {
-		if dir == "" && file == d.name {
+		if dir == "" && (file == d.name || file == ".") {
 			return d, nil
 		}
 		return nil, &fs.PathError{Op: "stat", Path: name, Err: errors.New("file not found")}
