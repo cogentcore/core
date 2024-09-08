@@ -111,6 +111,7 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 		} else {
 			dt := errors.Log1(datafs.NewData(logd, st.Name()))
 			tsr := tensor.NewOfType(st.DataType(), []int{nctr}, "row")
+			// todo: set level counter as default x axis in plot config
 			dt.Value = tsr
 			dt.Meta.Copy(st.Meta)
 			dt.SetCalcFunc(func() error {
