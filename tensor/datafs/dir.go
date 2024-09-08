@@ -177,7 +177,7 @@ func (d *Data) DirAtPath(dir string) (*Data, error) {
 // Path returns the full path to this data item
 func (d *Data) Path() string {
 	pt := d.name
-	cur := d.parent
+	cur := d.Parent
 	loops := make(map[*Data]struct{})
 	for {
 		if cur == nil {
@@ -188,7 +188,7 @@ func (d *Data) Path() string {
 		}
 		pt = path.Join(cur.name, pt)
 		loops[cur] = struct{}{}
-		cur = cur.parent
+		cur = cur.Parent
 	}
 }
 

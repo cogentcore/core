@@ -105,7 +105,11 @@ func (d *Data) DirTable(fun func(item *Data) bool) *table.Table {
 		if dt.Rows == 0 {
 			dt.Rows = tsr.DimSize(0)
 		}
-		dt.AddColumn(tsr, fsx.DirAndFile(string(it.Path())))
+		nm := it.Name()
+		if it.Parent != d {
+			nm = fsx.DirAndFile(string(it.Path()))
+		}
+		dt.AddColumn(tsr, nm)
 	}
 	d.Meta.Set("DirTable", dt)
 	return dt

@@ -21,7 +21,7 @@ import (
 // A directory has the Item = map[string]*Data
 type Data struct {
 	// parent is the parent data directory
-	parent *Data
+	Parent *Data
 
 	// name is the name of this item.  it is not a path.
 	name string
@@ -43,7 +43,7 @@ type Data struct {
 // The modTime is automatically set to now, and can be used for sorting
 // by order created.  name must be unique within parent.
 func NewData(dir *Data, name string) (*Data, error) {
-	d := &Data{parent: dir, name: name, modTime: time.Now()}
+	d := &Data{Parent: dir, name: name, modTime: time.Now()}
 	var err error
 	if dir != nil {
 		err = dir.Add(d)
