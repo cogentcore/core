@@ -41,6 +41,22 @@ tree.NewNodeBase(c2)
 core.NewTree(b).SyncTree(n).SetReadOnly(true)
 ```
 
+You can add an initialization function that is called automatically with each tree node:
+
+```Go
+n := tree.NewNodeBase()
+tree.NewNodeBase(n)
+c2 := tree.NewNodeBase(n)
+tree.NewNodeBase(c2)
+tr := core.NewTree(b)
+tr.SetTreeInit(func(tr *core.Tree) {
+    tr.AddContextMenu(func(m *core.Scene) {
+        core.NewButton(m).SetText("My button")
+    })
+})
+tr.SyncTree(n)
+```
+
 You can make a button that opens an interactive inspector of a tree:
 
 ```Go
