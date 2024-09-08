@@ -1771,7 +1771,7 @@ func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2
 	if lg.NeedsRebuild() { // rebuilding = reset
 		lg.rowHeight = rht
 	} else {
-		lg.rowHeight = max(lg.rowHeight, rht)
+		lg.rowHeight = rht // max(lg.rowHeight, rht) // todo: we are currently testing not having this.
 	}
 	if lg.rowHeight == 0 {
 		// fmt.Println("ListGrid Sizing Error: RowHeight should not be 0!", sg)
