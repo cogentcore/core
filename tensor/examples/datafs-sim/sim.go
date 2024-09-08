@@ -6,6 +6,7 @@ package main
 
 import (
 	"math/rand/v2"
+	"reflect"
 	"strconv"
 
 	"cogentcore.org/core/base/errors"
@@ -52,7 +53,7 @@ func (ss *Sim) ConfigStats(dir *datafs.Data) *datafs.Data {
 
 // ConfigLogs adds first-level logging of stats into tensors
 func (ss *Sim) ConfigLogs(dir *datafs.Data) *datafs.Data {
-	logd := errors.Log1(dir.Mkdir("log"))
+	logd := errors.Log1(dir.Mkdir("Log"))
 	trial := ss.ConfigTrialLog(logd)
 	ss.ConfigAggLog(logd, "Epoch", trial, stats.Mean, stats.Sem, stats.Min)
 	return logd
@@ -93,15 +94,28 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 			continue
 		}
 		src := from.Item(st.Name()).AsTensor()
-		dd := errors.Log1(logd.Mkdir(st.Name()))
-		for _, ag := range aggs { // key advantage of dir structure: multiple stats per item
-			dt := errors.Log1(datafs.NewData(dd, ag.String()))
+		if st.DataType() >= reflect.Float32 {
+			dd := errors.Log1(logd.Mkdir(st.Name()))
+			for _, ag := range aggs { // key advantage of dir structure: multiple stats per item
+				dt := errors.Log1(datafs.NewData(dd, ag.String()))
+				tsr := tensor.NewOfType(st.DataType(), []int{nctr}, "row")
+				dt.Value = tsr
+				dt.Meta.Copy(st.Meta)
+				dt.SetCalcFunc(func() error {
+					ctr, _ := ss.Stats.Item(level).AsInt()
+					v := stats.StatTensor(src, ag)
+					tsr.SetFloat1D(ctr, v)
+					return nil
+				})
+			}
+		} else {
+			dt := errors.Log1(datafs.NewData(logd, st.Name()))
 			tsr := tensor.NewOfType(st.DataType(), []int{nctr}, "row")
 			dt.Value = tsr
 			dt.Meta.Copy(st.Meta)
 			dt.SetCalcFunc(func() error {
 				ctr, _ := ss.Stats.Item(level).AsInt()
-				v := stats.StatTensor(src, ag)
+				v, _ := st.AsFloat64()
 				tsr.SetFloat1D(ctr, v)
 				return nil
 			})

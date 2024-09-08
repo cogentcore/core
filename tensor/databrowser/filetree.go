@@ -5,6 +5,7 @@
 package databrowser
 
 import (
+	"fmt"
 	"log"
 	"reflect"
 	"strings"
@@ -205,20 +206,20 @@ func (fn *FileNode) PlotFiles() { //types:add
 
 // PlotFile pulls up this file in Code
 func (fn *FileNode) PlotFile() {
-	if fn.IsDir() {
-		return
-	}
 	br, ok := ParentBrowser(fn.This)
 	if !ok {
 		return
 	}
+	d := DataFS(fn.AsNode())
 	df := fsx.DirAndFile(string(fn.Filepath))
+	ptab := df + " Plot"
 	var dt *table.Table
 	switch {
+	case fn.IsDir():
+		dt = d.DirTable(nil)
 	case fn.Info.Cat == fileinfo.Data:
 		switch fn.Info.Known {
 		case fileinfo.Tensor:
-			d := DataFS(fn.AsNode())
 			tsr := d.AsTensor()
 			dt = table.NewTable(df)
 			dt.Rows = tsr.DimSize(0)
@@ -228,7 +229,6 @@ func (fn *FileNode) PlotFile() {
 			}
 			dt.AddColumn(tsr, fn.Name)
 		case fileinfo.Table:
-			d := DataFS(fn.AsNode())
 			dt = d.AsTable()
 		default:
 			dt = table.NewTable(df)
@@ -236,15 +236,14 @@ func (fn *FileNode) PlotFile() {
 			if err != nil {
 				core.ErrorSnackbar(br, err)
 				dt = nil
-			} else {
-				br.NewTabTensorTable(df, dt)
 			}
 		}
 	}
 	if dt == nil {
 		return
 	}
-	pl := br.NewTabPlot(df+" Plot", dt)
+	fmt.Println(ptab)
+	pl := br.NewTabPlot(ptab, dt)
 	pl.Options.Title = df
 	br.Update()
 }

@@ -44,7 +44,7 @@ func (d *Data) Item(name string) *Data {
 // Items returns data items in given directory by name.
 // error reports any items not found, or if not a directory.
 func (d *Data) Items(names ...string) ([]*Data, error) {
-	if err := d.mustDir("items", ""); err != nil {
+	if err := d.mustDir("Items", ""); err != nil {
 		return nil, err
 	}
 	fm := d.filemap()
@@ -64,9 +64,11 @@ func (d *Data) Items(names ...string) ([]*Data, error) {
 
 // ItemsFunc returns data items in given directory
 // filtered by given function, in alpha order.
-// if func is nil, all items are returned.
+// If func is nil, all items are returned.
+// Any directories within this directory are returned,
+// unless specifically filtered.
 func (d *Data) ItemsFunc(fun func(item *Data) bool) []*Data {
-	if err := d.mustDir("items-func", ""); err != nil {
+	if err := d.mustDir("ItemsFunc", ""); err != nil {
 		return nil
 	}
 	fm := d.filemap()
@@ -84,9 +86,11 @@ func (d *Data) ItemsFunc(fun func(item *Data) bool) []*Data {
 
 // ItemsByTimeFunc returns data items in given directory
 // filtered by given function, in time order (i.e., order added).
-// if func is nil, all items are returned.
+// If func is nil, all items are returned.
+// Any directories within this directory are returned,
+// unless specifically filtered.
 func (d *Data) ItemsByTimeFunc(fun func(item *Data) bool) []*Data {
-	if err := d.mustDir("items-added-func", ""); err != nil {
+	if err := d.mustDir("ItemsByTimeFunc", ""); err != nil {
 		return nil
 	}
 	fm := d.filemap()
@@ -98,6 +102,62 @@ func (d *Data) ItemsByTimeFunc(fun func(item *Data) bool) []*Data {
 			continue
 		}
 		its = append(its, dt)
+	}
+	return its
+}
+
+// FlatItemsFunc returns all "leaf" (non directory) data items
+// in given directory, recursively descending into directories
+// to return a flat list of the entire subtree,
+// filtered by given function, in alpha order.  The function can
+// filter out directories to prune the tree.
+// If func is nil, all items are returned.
+func (d *Data) FlatItemsFunc(fun func(item *Data) bool) []*Data {
+	if err := d.mustDir("FlatItemsFunc", ""); err != nil {
+		return nil
+	}
+	fm := d.filemap()
+	names := d.DirNamesAlpha()
+	var its []*Data
+	for _, nm := range names {
+		dt := fm[nm]
+		if fun != nil && !fun(dt) {
+			continue
+		}
+		if dt.IsDir() {
+			subs := dt.FlatItemsFunc(fun)
+			its = append(its, subs...)
+		} else {
+			its = append(its, dt)
+		}
+	}
+	return its
+}
+
+// FlatItemsByTimeFunc returns all "leaf" (non directory) data items
+// in given directory, recursively descending into directories
+// to return a flat list of the entire subtree,
+// filtered by given function, in time order (i.e., order added).
+// The function can filter out directories to prune the tree.
+// If func is nil, all items are returned.
+func (d *Data) FlatItemsByTimeFunc(fun func(item *Data) bool) []*Data {
+	if err := d.mustDir("FlatItemsByTimeFunc", ""); err != nil {
+		return nil
+	}
+	fm := d.filemap()
+	names := d.DirNamesByTime()
+	var its []*Data
+	for _, nm := range names {
+		dt := fm[nm]
+		if fun != nil && !fun(dt) {
+			continue
+		}
+		if dt.IsDir() {
+			subs := dt.FlatItemsByTimeFunc(fun)
+			its = append(its, subs...)
+		} else {
+			its = append(its, dt)
+		}
 	}
 	return its
 }
@@ -165,7 +225,7 @@ func (d *Data) DirNamesByTime() []string {
 // if this data item is not a directory.
 func (d *Data) mustDir(op, path string) error {
 	if !d.IsDir() {
-		return &fs.PathError{Op: "open", Path: path, Err: errors.New("datafs item is not a directory")}
+		return &fs.PathError{Op: op, Path: path, Err: errors.New("datafs item is not a directory")}
 	}
 	return nil
 }
@@ -175,7 +235,7 @@ func (d *Data) mustDir(op, path string) error {
 // or the name already exists.
 // Names must be unique within a directory.
 func (d *Data) Add(it *Data) error {
-	if err := d.mustDir("add", it.name); err != nil {
+	if err := d.mustDir("Add", it.name); err != nil {
 		return err
 	}
 	fm := d.filemap()
@@ -190,7 +250,7 @@ func (d *Data) Add(it *Data) error {
 // Mkdir creates a new directory with the specified name.
 // The only error is if this item is not a directory.
 func (d *Data) Mkdir(name string) (*Data, error) {
-	if err := d.mustDir("mkdir", name); err != nil {
+	if err := d.mustDir("Mkdir", name); err != nil {
 		return nil, err
 	}
 	return NewDir(name, d)

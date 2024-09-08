@@ -6,8 +6,10 @@ package datafs
 
 import (
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/plot/plotcore"
+	"cogentcore.org/core/tensor/table"
 )
 
 // This file provides standardized metadata options for frequent
@@ -59,10 +61,12 @@ func (d *Data) Calc() error {
 	return fun()
 }
 
-// CalcAll calls function set by [Data.SetCalcFunc] for all items in this directory
+// CalcAll calls function set by [Data.SetCalcFunc] for all items
+// in this directory and all of its subdirectories.
+// Calls Calc on items from FlatItemsByTimeFunc(nil)
 func (d *Data) CalcAll() error {
 	var errs []error
-	items := d.ItemsByTimeFunc(nil)
+	items := d.FlatItemsByTimeFunc(nil)
 	for _, it := range items {
 		err := it.Calc()
 		if err != nil {
@@ -70,4 +74,39 @@ func (d *Data) CalcAll() error {
 		}
 	}
 	return errors.Join(errs...)
+}
+
+// DirTable returns a table.Table for this directory item, with columns
+// as the Tensor elements in the directory and any subdirectories,
+// from FlatItemsByTimeFunc using given filter function.
+// This is a convenient mechanism for creating a plot of all the data
+// in a given directory.
+// If such was previously constructed, it is returned from "DirTable"
+// Metadata key where the table is stored.
+// Row count is updated to current max row.
+// Delete that key to reconstruct if items have changed.
+func (d *Data) DirTable(fun func(item *Data) bool) *table.Table {
+	dt, err := metadata.Get[*table.Table](d.Meta, "DirTable")
+	if err == nil {
+		var maxRow int
+		for _, tsr := range dt.Columns {
+			maxRow = max(maxRow, tsr.DimSize(0))
+		}
+		dt.Rows = maxRow
+		return dt
+	}
+	items := d.FlatItemsByTimeFunc(fun)
+	dt = table.NewTable(fsx.DirAndFile(string(d.Path())))
+	for _, it := range items {
+		tsr := it.AsTensor()
+		if tsr == nil {
+			continue
+		}
+		if dt.Rows == 0 {
+			dt.Rows = tsr.DimSize(0)
+		}
+		dt.AddColumn(tsr, fsx.DirAndFile(string(it.Path())))
+	}
+	d.Meta.Set("DirTable", dt)
+	return dt
 }
