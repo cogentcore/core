@@ -5,14 +5,13 @@
 package table
 
 import (
-	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"slices"
 	"sort"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 )
 
@@ -95,6 +94,23 @@ func (ix *Indexed) AddIndex(idx int) {
 	ix.Indexes = append(ix.Indexes, idx)
 }
 
+// IndexedColumnName returns a tensor.Indexed view of given column name,
+// using our current indexes.
+func (ix *Indexed) IndexedColumnName(column string) (*tensor.Indexed, error) { //types:add
+	ci, err := ix.Table.ColumnIndex(column)
+	if errors.Log(err) != nil {
+		return nil, err
+	}
+	return ix.IndexedColumn(ci), nil
+}
+
+// IndexedColumnName returns a tensor.Indexed view of given column,
+// using our current indexes.
+func (ix *Indexed) IndexedColumn(colIndex int) *tensor.Indexed {
+	cl := ix.Table.Columns[colIndex]
+	return tensor.NewIndexed(cl, ix.Indexes)
+}
+
 // SortFunc sorts the indexes into our Table using given compare function.
 // The compare function operates directly on row numbers into the Table
 // as these row numbers have already been projected through the indexes.
@@ -119,8 +135,7 @@ func (ix *Indexed) SortIndexes() {
 // Returns error if column name not found.
 func (ix *Indexed) SortColumnName(column string, ascending bool) error { //types:add
 	ci, err := ix.Table.ColumnIndex(column)
-	if err != nil {
-		log.Println(err)
+	if errors.Log(err) != nil {
 		return err
 	}
 	ix.SortColumn(ci, ascending)
@@ -160,8 +175,7 @@ func (ix *Indexed) SortColumnNames(columns []string, ascending, stable bool) err
 	cis := make([]int, nc)
 	for i, cn := range columns {
 		ci, err := ix.Table.ColumnIndex(cn)
-		if err != nil {
-			log.Println(err)
+		if errors.Log(err) != nil {
 			return err
 		}
 		cis[i] = ci
@@ -237,8 +251,7 @@ func (ix *Indexed) SortStableFunc(cmp func(dt *Table, i, j int) int) {
 // Returns error if column name not found.
 func (ix *Indexed) SortStableColumnName(column string, ascending bool) error {
 	ci, err := ix.Table.ColumnIndex(column)
-	if err != nil {
-		log.Println(err)
+	if errors.Log(err) != nil {
 		return err
 	}
 	ix.SortStableColumn(ci, ascending)
@@ -287,8 +300,7 @@ func (ix *Indexed) Filter(filterer func(dt *Table, row int) bool) {
 // Returns error if column name not found.
 func (ix *Indexed) FilterColumnName(column string, str string, exclude, contains, ignoreCase bool) error { //types:add
 	ci, err := ix.Table.ColumnIndex(column)
-	if err != nil {
-		log.Println(err)
+	if errors.Log(err) != nil {
 		return err
 	}
 	ix.FilterColumn(ci, str, exclude, contains, ignoreCase)
@@ -420,7 +432,7 @@ func (ix *Indexed) RowsByStringIndex(colIndex int, str string, contains, ignoreC
 func (ix *Indexed) RowsByString(column string, str string, contains, ignoreCase bool) ([]int, error) {
 	dt := ix.Table
 	ci, err := dt.ColumnIndex(column)
-	if err != nil {
+	if errors.Log(err) != nil {
 		return nil, err
 	}
 	return ix.RowsByStringIndex(ci, str, contains, ignoreCase), nil
