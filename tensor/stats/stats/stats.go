@@ -4,7 +4,31 @@
 
 package stats
 
+import "cogentcore.org/core/tensor"
+
 //go:generate core generate
+
+// StatsFuncs is a registry of named stats functions,
+// which can then be called by standard enum or
+// string name for custom functions.
+var StatsFuncs map[string]StatsFunc
+
+func init() {
+	StatsFuncs = make(map[string]StatsFunc)
+	StatsFuncs[Count.String()] = CountFunc
+	StatsFuncs[Sum.String()] = SumFunc
+	StatsFuncs[Prod.String()] = ProdFunc
+	StatsFuncs[Min.String()] = MinFunc
+	StatsFuncs[Max.String()] = MaxFunc
+	StatsFuncs[MinAbs.String()] = MinAbsFunc
+	StatsFuncs[MaxAbs.String()] = MaxAbsFunc
+}
+
+// Standard calls a standard stats function on given tensors.
+// Output results are in the out tensor.
+func Standard(stat Stats, in, out *tensor.Indexed) {
+	StatsFuncs[stat.String()](in, out)
+}
 
 // Stats is a list of different standard aggregation functions, which can be used
 // to choose an aggregation function

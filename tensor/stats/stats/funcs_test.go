@@ -21,23 +21,25 @@ func TestFuncs(t *testing.T) {
 
 	results := []float64{11, 5.5, 0, 0, 1, 0, 1, 0.5, 0.11, math.Sqrt(0.11), math.Sqrt(0.11) / math.Sqrt(11), 5.5, 3.85, math.Sqrt(3.85), 0.1, math.Sqrt(0.1), math.Sqrt(0.1) / math.Sqrt(11)}
 
-	// assert.Equal(t, results[Count], Count64(vals))
-	tensor.Vectorize(NFunc, SumFunc, ix, oix)
+	CountFunc(ix, oix)
+	assert.Equal(t, results[Count], out.Values[0])
+
+	SumFunc(ix, oix)
 	assert.Equal(t, results[Sum], out.Values[0])
 
-	tensor.Vectorize(NFunc, ProdFunc, ix, oix)
+	ProdFunc(ix, oix)
 	assert.Equal(t, results[Prod], out.Values[0])
 
-	tensor.Vectorize(NFunc, MinFunc, ix, oix)
+	MinFunc(ix, oix)
 	assert.Equal(t, results[Min], out.Values[0])
 
-	tensor.Vectorize(NFunc, MaxFunc, ix, oix)
+	MaxFunc(ix, oix)
 	assert.Equal(t, results[Max], out.Values[0])
 
-	tensor.Vectorize(NFunc, MinAbsFunc, ix, oix)
+	MinAbsFunc(ix, oix)
 	assert.Equal(t, results[MinAbs], out.Values[0])
 
-	tensor.Vectorize(NFunc, MaxAbsFunc, ix, oix)
+	MaxAbsFunc(ix, oix)
 	assert.Equal(t, results[MaxAbs], out.Values[0])
 
 	// assert.Equal(t, results[Mean], Mean64(vals))
