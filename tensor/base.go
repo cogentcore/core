@@ -15,14 +15,14 @@ import (
 	"cogentcore.org/core/base/slicesx"
 )
 
-// Base is an n-dim array of float64s.
+// Base is the base Tensor implementation for given type.
 type Base[T any] struct {
 	shape  Shape
 	Values []T
 	Meta   metadata.Data
 }
 
-// Shape returns a pointer to the shape that fully parametrizes the tensor shape
+// Shape returns a pointer to the shape that fully parametrizes the tensor shape.
 func (tsr *Base[T]) Shape() *Shape { return &tsr.shape }
 
 // Metadata returns the metadata for this tensor, which can be used
@@ -35,7 +35,7 @@ func (tsr *Base[T]) Len() int { return tsr.shape.Len() }
 // NumDims returns the total number of dimensions.
 func (tsr *Base[T]) NumDims() int { return tsr.shape.NumDims() }
 
-// DimSize returns size of given dimension
+// DimSize returns size of given dimension.
 func (tsr *Base[T]) DimSize(dim int) int { return tsr.shape.DimSize(dim) }
 
 // RowCellSize returns the size of the outer-most Row shape dimension,

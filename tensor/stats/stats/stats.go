@@ -17,11 +17,22 @@ func init() {
 	StatsFuncs = make(map[string]StatsFunc)
 	StatsFuncs[Count.String()] = CountFunc
 	StatsFuncs[Sum.String()] = SumFunc
+	StatsFuncs[SumAbs.String()] = SumAbsFunc
+	StatsFuncs[L1Norm.String()] = SumAbsFunc
 	StatsFuncs[Prod.String()] = ProdFunc
 	StatsFuncs[Min.String()] = MinFunc
 	StatsFuncs[Max.String()] = MaxFunc
 	StatsFuncs[MinAbs.String()] = MinAbsFunc
 	StatsFuncs[MaxAbs.String()] = MaxAbsFunc
+	StatsFuncs[Mean.String()] = MeanFunc
+	StatsFuncs[Var.String()] = VarFunc
+	StatsFuncs[Std.String()] = StdFunc
+	StatsFuncs[Sem.String()] = SemFunc
+	StatsFuncs[SumSq.String()] = SumSqFunc
+	StatsFuncs[L2Norm.String()] = L2NormFunc
+	StatsFuncs[VarPop.String()] = VarPopFunc
+	StatsFuncs[StdPop.String()] = StdPopFunc
+	StatsFuncs[SemPop.String()] = SemPopFunc
 }
 
 // Standard calls a standard stats function on given tensors.
@@ -35,63 +46,66 @@ func Standard(stat Stats, in, out *tensor.Indexed) {
 type Stats int32 //enums:enum
 
 const (
-	// count of number of elements
+	// count of number of elements.
 	Count Stats = iota
 
-	// sum of elements
+	// sum of elements.
 	Sum
 
-	// product of elements
-	Prod
+	// sum of absolute-value-of elements (= L1Norm).
+	SumAbs
 
-	// minimum value
-	Min
-
-	// max maximum value
-	Max
-
-	// minimum absolute value
-	MinAbs
-
-	// maximum absolute value
-	MaxAbs
-
-	// mean mean value
-	Mean
-
-	// sample variance (squared diffs from mean, divided by n-1)
-	Var
-
-	// sample standard deviation (sqrt of Var)
-	Std
-
-	// sample standard error of the mean (Std divided by sqrt(n))
-	Sem
-
-	// L1 Norm: sum of absolute values
+	// L1 Norm: sum of absolute values (= SumAbs).
 	L1Norm
 
-	// sum of squared values
+	// product of elements.
+	Prod
+
+	// minimum value.
+	Min
+
+	// maximum value.
+	Max
+
+	// minimum of absolute values.
+	MinAbs
+
+	// maximum of absolute values.
+	MaxAbs
+
+	// mean value = sum / count.
+	Mean
+
+	// sample variance (squared deviations from mean, divided by n-1).
+	Var
+
+	// sample standard deviation (sqrt of Var).
+	Std
+
+	// sample standard error of the mean (Std divided by sqrt(n)).
+	Sem
+
+	// sum of squared values.
 	SumSq
 
-	// L2 Norm: square-root of sum-of-squares
+	// L2 Norm: square-root of sum-of-squares.
 	L2Norm
 
-	// population variance (squared diffs from mean, divided by n)
+	// population variance (squared diffs from mean, divided by n).
 	VarPop
 
-	// population standard deviation (sqrt of VarPop)
+	// population standard deviation (sqrt of VarPop).
 	StdPop
 
-	// population standard error of the mean (StdPop divided by sqrt(n))
+	// population standard error of the mean (StdPop divided by sqrt(n)).
 	SemPop
 
-	// middle value in sorted ordering
+	// middle value in sorted ordering.
 	Median
 
-	// Q1 first quartile = 25%ile value = .25 quantile value
+	// Q1 first quartile = 25%ile value = .25 quantile value.
 	Q1
 
-	// Q3 third quartile = 75%ile value = .75 quantile value
+	// Q3 third quartile = 75%ile value = .75 quantile value.
 	Q3
 )

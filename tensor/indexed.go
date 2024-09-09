@@ -7,6 +7,7 @@ package tensor
 import (
 	"cmp"
 	"errors"
+	"math"
 	"math/rand"
 	"slices"
 	"sort"
@@ -15,19 +16,21 @@ import (
 
 // Indexed is an indexed wrapper around a tensor.Tensor that provides a
 // specific view onto the Tensor defined by the set of indexes, which
-// apply to the outer-most ("row") dimension.
+// apply to the outer-most row dimension (with default row-major indexing).
 // This provides an efficient way of sorting and filtering a tensor by only
 // updating the indexes while doing nothing to the Tensor itself.
 // To produce a tensor that has data actually organized according to the
 // indexed order, call the NewTensor method.
-// Indexed views on a tensor can also be organized together as Splits
-// of the tensor rows, e.g., by grouping values along a given column.
+// Use the [Set]FloatRowCell methods wherever possible, for the most efficient
+// and natural indirection through the indexes.  The 1D methods on underlying
+// tensor data do not indirect through the indexes and must be called directly
+// on the [Tensor].
 type Indexed struct { //types:add
 
-	// Tensor that we are an indexed view onto
+	// Tensor that we are an indexed view onto.
 	Tensor Tensor
 
-	// current indexes into Tensor
+	// Indexes are the indexes into Tensor rows.
 	Indexes []int
 }
 
@@ -81,6 +84,24 @@ func (ix *Indexed) Sequential() { //types:add
 	ix.Indexes = make([]int, ix.Tensor.DimSize(0))
 	for i := range ix.Indexes {
 		ix.Indexes[i] = i
+	}
+}
+
+// ExcludeMissing1D deletes indexes for a 1D tensor (only) where
+// the values are missing, as indicated by NaN.
+func (ix *Indexed) ExcludeMissing1D() { //types:add
+	if ix.Tensor == nil || ix.Tensor.DimSize(0) <= 0 {
+		ix.Indexes = nil
+		return
+	}
+	if ix.Tensor.NumDims() > 1 {
+		return
+	}
+	ni := ix.Len()
+	for i := ni - 1; i >= 0; i-- {
+		if math.IsNaN(ix.Tensor.Float1D(ix.Indexes[i])) {
+			ix.Indexes = append(ix.Indexes[:i], ix.Indexes[i+1:]...)
+		}
 	}
 }
 
@@ -272,4 +293,36 @@ func (ix *Indexed) DeleteRows(at, n int) {
 // Swap switches the indexes for i and j
 func (ix *Indexed) Swap(i, j int) {
 	ix.Indexes[i], ix.Indexes[j] = ix.Indexes[j], ix.Indexes[i]
+}
+
+// Float returns the value of given index as a float64.
+// The first index value is indirected through the indexes.
+func (ix *Indexed) Float(i []int) float64 {
+	ic := slices.Clone(i)
+	ic[0] = ix.Indexes[ic[0]]
+	return ix.Tensor.Float(ic)
+}
+
+// SetFloat sets the value of given index as a float64
+// The first index value is indirected through the [Indexes].
+func (ix *Indexed) SetFloat(i []int, val float64) {
+	ic := slices.Clone(i)
+	ic[0] = ix.Indexes[ic[0]]
+	ix.Tensor.SetFloat(ic, val)
+}
+
+// FloatRowCell returns the value at given row and cell,
+// where row is outer-most dim, and cell is 1D index into remaining inner dims.
+// Row is indirected through the [Indexes].
+// This is the preferred interface for all Indexed operations.
+func (ix *Indexed) FloatRowCell(row, cell int) float64 {
+	return ix.Tensor.FloatRowCell(ix.Indexes[row], cell)
+}
+
+// SetFloatRowCell sets the value at given row and cell,
+// where row is outer-most dim, and cell is 1D index into remaining inner dims.
+// Row is indirected through the [Indexes].
+// This is the preferred interface for all Indexed operations.
+func (ix *Indexed) SetFloatRowCell(row, cell int, val float64) {
+	ix.Tensor.SetFloatRowCell(ix.Indexes[row], cell, val)
 }
