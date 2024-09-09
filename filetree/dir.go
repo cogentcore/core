@@ -17,10 +17,10 @@ const (
 	dirIsOpen dirFlags = iota
 
 	// dirSortByName means sort the directory entries by name.
-	// this is mutex with other sorts -- keeping option open for non-binary sort choices.
+	// this overrides SortByModTime default on Tree if set.
 	dirSortByName
 
-	// dirSortByModTime means sort the directory entries by modification time
+	// dirSortByModTime means sort the directory entries by modification time.
 	dirSortByModTime
 )
 

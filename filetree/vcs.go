@@ -22,6 +22,9 @@ import (
 // FirstVCS returns the first VCS repository starting from this node and going down.
 // also returns the node having that repository
 func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
+	if fn.FileRoot.FS != nil {
+		return nil, nil
+	}
 	var repo vcs.Repo
 	var rnode *Node
 	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
@@ -70,7 +73,7 @@ func (fn *Node) detectVCSRepo(updateFiles bool) bool {
 // and the node for the directory where the repo is based.
 // Goes up the tree until a repository is found.
 func (fn *Node) Repo() (vcs.Repo, *Node) {
-	if fn.isExternal() {
+	if fn.isExternal() || fn.FileRoot.FS != nil {
 		return nil, nil
 	}
 	if fn.DirRepo != nil {
@@ -120,7 +123,7 @@ func (fn *Node) AddToVCS() {
 	err := repo.Add(string(fn.Filepath))
 	if errors.Log(err) == nil {
 		fn.Info.VCS = vcs.Added
-		fn.NeedsRender()
+		fn.Update()
 	}
 }
 
@@ -141,7 +144,7 @@ func (fn *Node) deleteFromVCS() {
 	err := repo.DeleteRemote(string(fn.Filepath))
 	if fn != nil && errors.Log(err) == nil {
 		fn.Info.VCS = vcs.Deleted
-		fn.NeedsRender()
+		fn.Update()
 	}
 }
 
@@ -170,7 +173,7 @@ func (fn *Node) commitToVCS(message string) (err error) {
 		return err
 	}
 	fn.Info.VCS = vcs.Stored
-	fn.NeedsRender()
+	fn.Update()
 	return err
 }
 
@@ -202,7 +205,7 @@ func (fn *Node) revertVCS() (err error) {
 	if fn.Buffer != nil {
 		fn.Buffer.Revert()
 	}
-	fn.NeedsRender()
+	fn.Update()
 	return err
 }
 

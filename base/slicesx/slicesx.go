@@ -6,7 +6,10 @@
 // beyond those in the standard [slices] package.
 package slicesx
 
-import "slices"
+import (
+	"slices"
+	"unsafe"
+)
 
 // GrowTo increases the slice's capacity, if necessary,
 // so that it can hold at least n elements.
@@ -121,4 +124,16 @@ func Search[E any](slice []E, match func(e E) bool, startIndex ...int) int {
 		}
 	}
 	return -1
+}
+
+// ToBytes returns the underlying bytes of given slice.
+// for items not in a slice, make one of length 1.
+// This is copied from webgpu.
+func ToBytes[E any](src []E) []byte {
+	l := uintptr(len(src))
+	if l == 0 {
+		return nil
+	}
+	elmSize := unsafe.Sizeof(src[0])
+	return unsafe.Slice((*byte)(unsafe.Pointer(&src[0])), l*elmSize)
 }

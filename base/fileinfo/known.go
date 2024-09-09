@@ -230,6 +230,11 @@ const (
 	Color
 	Yaml
 	Toml
+	// special support for data fs
+	Number
+	String
+	Tensor
+	Table
 
 	// Text is some other kind of text file
 	AnyText

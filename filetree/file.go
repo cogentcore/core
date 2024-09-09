@@ -27,6 +27,12 @@ type Filer interface { //types:add
 
 	// RenameFiles renames any selected files.
 	RenameFiles()
+
+	// GetFileInfo updates the .Info for this file
+	GetFileInfo() error
+
+	// OpenFile opens the file for node. This is called by OpenFilesDefault
+	OpenFile() error
 }
 
 var _ Filer = (*Node)(nil)
@@ -35,13 +41,18 @@ var _ Filer = (*Node)(nil)
 // runs open on Mac, xdg-open on Linux, and start on Windows
 func (fn *Node) OpenFilesDefault() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
-		sn.openFileDefault()
+		sn.This.(Filer).OpenFile()
 	})
 }
 
-// openFileDefault opens file with default app for that file type (os defined)
+// OpenFile just does OpenFileDefault
+func (fn *Node) OpenFile() error {
+	return fn.OpenFileDefault()
+}
+
+// OpenFileDefault opens file with default app for that file type (os defined)
 // runs open on Mac, xdg-open on Linux, and start on Windows
-func (fn *Node) openFileDefault() error {
+func (fn *Node) OpenFileDefault() error {
 	core.TheApp.OpenURL("file://" + string(fn.Filepath))
 	return nil
 }

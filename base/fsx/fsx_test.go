@@ -26,3 +26,14 @@ func TestGoSrcDir(t *testing.T) {
 	assert.Error(t, err)
 	assert.EqualError(t, err, fmt.Sprintf("fsx.GoSrcDir: unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir2, os.Getenv("GOPATH"), os.Getenv("GOROOT")))
 }
+
+func TestSplitRootPathFS(t *testing.T) {
+	type tst struct{ p, root, rest string }
+	cases := []tst{{"/a/b/c", "/", "a/b/c"}, {"a/b/c", "a", "b/c"}, {"a", "a", ""}, {"a/", "a", ""}}
+
+	for _, ts := range cases {
+		root, rest := SplitRootPathFS(ts.p)
+		assert.Equal(t, ts.root, root)
+		assert.Equal(t, ts.rest, rest)
+	}
+}

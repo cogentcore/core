@@ -26,8 +26,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -65,7 +67,7 @@ type FileInfo struct { //types:add
 	Known Known `table:"-"`
 
 	// file mode bits
-	Mode os.FileMode `table:"-"`
+	Mode fs.FileMode `table:"-"`
 
 	// time that contents (only) were last modified
 	ModTime time.Time `label:"Last modified"`
@@ -91,51 +93,77 @@ func NewFileInfoType(ftyp Known) *FileInfo {
 	return fi
 }
 
-// InitFile initializes a FileInfo based on a filename, which is
-// updated to full path using filepath.Abs.  Returns error from
-// filepath.Abs and / or os.Stat error on the given file,
+// InitFile initializes a FileInfo for os file based on a filename,
+// which is updated to full path using filepath.Abs.
+// Returns error from filepath.Abs and / or fs.Stat error on the given file,
 // but file info will be updated based on the filename even if
 // the file does not exist.
 func (fi *FileInfo) InitFile(fname string) error {
+	var errs []error
 	path, err := filepath.Abs(fname)
 	if err == nil {
 		fi.Path = path
 	} else {
-		fi.Path = fname // robust to
+		fi.Path = fname
 	}
 	_, fi.Name = filepath.Split(path)
-	serr := fi.Stat()
-	if err == nil {
-		return serr
+	fi.SetMimeInfo()
+	info, err := os.Stat(fi.Path)
+	if err != nil {
+		errs = append(errs, err)
+	} else {
+		fi.SetFileInfo(info)
 	}
-	return errors.Join(err, serr)
+	return errors.Join(errs...)
 }
 
-// Stat runs os.Stat on file, returns any error directly but otherwise updates
-// file info, including mime type, which then drives Kind and Icon -- this is
-// the main function to call to update state.
-func (fi *FileInfo) Stat() error {
+// InitFileFS initializes a FileInfo based on filename in given fs.FS.
+// Returns error from fs.Stat error on the given file,
+// but file info will be updated based on the filename even if
+// the file does not exist.
+func (fi *FileInfo) InitFileFS(fsys fs.FS, fname string) error {
+	var errs []error
+	fi.Path = fname
+	_, fi.Name = path.Split(fname)
+	fi.SetMimeInfo()
+	info, err := fs.Stat(fsys, fi.Path)
+	if err != nil {
+		errs = append(errs, err)
+	} else {
+		fi.SetFileInfo(info)
+	}
+	return errors.Join(errs...)
+}
+
+// SetMimeInfo parses the file name to set mime type,
+// which then drives Kind and Icon.
+func (fi *FileInfo) SetMimeInfo() error {
+	if fi.Path == "" || fi.Path == "." || fi.IsDir() {
+		return nil
+	}
 	fi.Cat = UnknownCategory
 	fi.Known = Unknown
 	fi.Kind = ""
 	mtyp, _, err := MimeFromFile(fi.Path)
-	if err == nil {
-		fi.Mime = mtyp
-		fi.Cat = CategoryFromMime(fi.Mime)
-		fi.Known = MimeKnown(fi.Mime)
-		if fi.Cat != UnknownCategory {
-			fi.Kind = fi.Cat.String() + ": "
-		}
-		if fi.Known != Unknown {
-			fi.Kind += fi.Known.String()
-		} else {
-			fi.Kind += MimeSub(fi.Mime)
-		}
-	}
-	info, err := os.Stat(fi.Path)
 	if err != nil {
 		return err
 	}
+	fi.Mime = mtyp
+	fi.Cat = CategoryFromMime(fi.Mime)
+	fi.Known = MimeKnown(fi.Mime)
+	if fi.Cat != UnknownCategory {
+		fi.Kind = fi.Cat.String() + ": "
+	}
+	if fi.Known != Unknown {
+		fi.Kind += fi.Known.String()
+	} else {
+		fi.Kind += MimeSub(fi.Mime)
+	}
+	return nil
+}
+
+// SetFileInfo updates from given [fs.FileInfo]
+func (fi *FileInfo) SetFileInfo(info fs.FileInfo) {
 	fi.Size = datasize.Size(info.Size())
 	fi.Mode = info.Mode()
 	fi.ModTime = info.ModTime()
@@ -153,7 +181,6 @@ func (fi *FileInfo) Stat() error {
 	}
 	icn, _ := fi.FindIcon()
 	fi.Ic = icn
-	return nil
 }
 
 // SetType sets file type information for given Known file type
