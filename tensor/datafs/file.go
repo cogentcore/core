@@ -10,8 +10,8 @@ import (
 	"io/fs"
 )
 
-// File represents a data item for reading, as fs.File.
-// All io functionality is handled by bytes.Reader
+// File represents a data item for reading, as an [fs.File].
+// All io functionality is handled by [bytes.Reader].
 type File struct {
 	bytes.Reader
 	Data       *Data

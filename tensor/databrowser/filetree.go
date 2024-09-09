@@ -205,7 +205,7 @@ func (fn *FileNode) PlotFiles() { //types:add
 	})
 }
 
-// PlotFile pulls up this file in Code
+// PlotFile pulls up this file in a texteditor.
 func (fn *FileNode) PlotFile() {
 	br := ParentBrowser(fn.This)
 	if br == nil {
