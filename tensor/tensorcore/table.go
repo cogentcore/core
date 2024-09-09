@@ -396,7 +396,7 @@ func (tb *Table) GetColumnTensorDisplay(col int) *TensorDisplay {
 	}
 	if tb.Table != nil {
 		cl := tb.Table.Table.Columns[col]
-		if len(cl.MetaDataMap()) > 0 {
+		if len(*cl.Metadata()) > 0 {
 			return tb.SetColumnTensorDisplay(col)
 		}
 	}

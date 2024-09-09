@@ -34,7 +34,7 @@ func NewSimMat() *SimMat {
 // Init initializes SimMat with default Matrix and nil rows, cols
 func (smat *SimMat) Init() {
 	smat.Mat = &tensor.Float64{}
-	smat.Mat.SetMetaData("grid-fill", "1") // best for sim mats -- can override later if need to
+	smat.Mat.Metadata().Set("grid-fill", float32(1)) // best for sim mats -- can override later if need to
 	smat.Rows = nil
 	smat.Columns = nil
 }
@@ -105,12 +105,12 @@ func (smat *SimMat) TableColumn(ix *table.Indexed, column, labNm string, blankRe
 	}
 
 	if nm, has := ix.Table.MetaData["name"]; has {
-		sm.SetMetaData("name", nm+"_"+column)
+		sm.Metadata().Set("name", nm+"_"+column)
 	} else {
-		sm.SetMetaData("name", column)
+		sm.Metadata().Set("name", column)
 	}
 	if ds, has := ix.Table.MetaData["desc"]; has {
-		sm.SetMetaData("desc", ds)
+		sm.Metadata().Set("desc", ds)
 	}
 
 	if labNm == "" {
