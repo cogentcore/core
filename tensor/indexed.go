@@ -52,6 +52,11 @@ func (ix *Indexed) SetTensor(tsr Tensor) {
 	ix.Sequential()
 }
 
+// Len returns the length of the index list
+func (ix *Indexed) Len() int {
+	return len(ix.Indexes)
+}
+
 // DeleteInvalid deletes all invalid indexes from the list.
 // Call this if rows (could) have been deleted from tensor.
 func (ix *Indexed) DeleteInvalid() {
@@ -262,11 +267,6 @@ func (ix *Indexed) InsertRows(at, n int) {
 // DeleteRows deletes n rows of indexes starting at given index in the list of indexes
 func (ix *Indexed) DeleteRows(at, n int) {
 	ix.Indexes = append(ix.Indexes[:at], ix.Indexes[at+n:]...)
-}
-
-// Len returns the length of the index list
-func (ix *Indexed) Len() int {
-	return len(ix.Indexes)
 }
 
 // Swap switches the indexes for i and j

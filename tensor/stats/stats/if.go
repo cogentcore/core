@@ -4,10 +4,7 @@
 
 package stats
 
-import (
-	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/tensor/table"
-)
+/*
 
 // IfFunc is used for the *If aggregators -- counted if it returns true
 type IfFunc func(idx int, val float64) bool
@@ -114,3 +111,5 @@ func PctIfColumn(ix *table.Indexed, column string, iffun IfFunc) []float64 {
 	}
 	return PctIfIndex(ix, colIndex, iffun)
 }
+
+*/

@@ -4,11 +4,7 @@
 
 package stats
 
-import (
-	"math"
-
-	"cogentcore.org/core/tensor"
-)
+/*
 
 // StatTensor returns Tensor statistic according to given Stats type applied
 // to all non-NaN elements in given Tensor
@@ -214,3 +210,4 @@ func SemPopTensor(tsr tensor.Tensor) float64 {
 	}
 	return StdPopTensor(tsr) / math.Sqrt(cnt)
 }
+*/
