@@ -42,7 +42,7 @@ func KindIsBasic(vk reflect.Kind) bool {
 	return vk >= reflect.Bool && vk <= reflect.Complex128
 }
 
-// KindIsNumber returns whether the given [reflect.Kind] is a numeric,
+// KindIsNumber returns whether the given [reflect.Kind] is a numeric
 // type such as Int, Float, etc.
 func KindIsNumber(vk reflect.Kind) bool {
 	return vk >= reflect.Int && vk <= reflect.Complex128

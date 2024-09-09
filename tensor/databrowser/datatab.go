@@ -18,8 +18,7 @@ import (
 // with given type of widget within it. mkfun function is called to create
 // and configure a new widget if not already existing.
 func NewTab[T any](br *Browser, label string, mkfun func(tab *core.Frame) T) T {
-	tabs := br.Tabs()
-	tab := tabs.RecycleTab(label)
+	tab := br.tabs.RecycleTab(label)
 	if tab.HasChildren() {
 		return tab.Child(1).(T)
 	}

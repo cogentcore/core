@@ -44,7 +44,7 @@ func Get[T any](md Data, key string) (T, error) {
 // Copy does a shallow copy of metadata from source.
 // Any pointer-based values will still point to the same
 // underlying data as the source, but the two maps remain
-// distinct.  Uses maps.Copy
+// distinct.  It uses maps.Copy
 func (md *Data) Copy(src Data) {
 	if src == nil {
 		return

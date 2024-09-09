@@ -26,13 +26,16 @@ import (
 type Browser struct {
 	core.Frame
 
-	// Filesystem, if browsing an FS
-	FSys fs.FS
+	// FS is the filesystem, if browsing an FS
+	FS fs.FS
 
 	// DataRoot is the path to the root of the data to browse
 	DataRoot string
 
 	toolbar *core.Toolbar
+	splits  *core.Splits
+	files   *filetree.Tree
+	tabs    *core.Tabs
 }
 
 // Init initializes with the data and script directories
@@ -47,6 +50,7 @@ func (br *Browser) Init() {
 	})
 
 	tree.AddChildAt(br, "splits", func(w *core.Splits) {
+		br.splits = w
 		w.SetSplits(.15, .85)
 		tree.AddChildAt(w, "fileframe", func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
@@ -55,6 +59,7 @@ func (br *Browser) Init() {
 				s.Grow.Set(1, 1)
 			})
 			tree.AddChildAt(w, "filetree", func(w *filetree.Tree) {
+				br.files = w
 				w.FileNodeType = types.For[FileNode]()
 				// w.OnSelect(func(e events.Event) {
 				// 	e.SetHandled()
@@ -66,6 +71,7 @@ func (br *Browser) Init() {
 			})
 		})
 		tree.AddChildAt(w, "tabs", func(w *core.Tabs) {
+			br.tabs = w
 			w.Type = core.FunctionalTabs
 		})
 	})
@@ -76,7 +82,7 @@ func (br *Browser) Init() {
 func NewBrowserWindow(fsys fs.FS, dataDir string) *Browser {
 	b := core.NewBody("Cogent Data Browser: " + fsx.DirAndFile(dataDir))
 	br := NewBrowser(b)
-	br.FSys = fsys
+	br.FS = fsys
 	ddr := dataDir
 	if fsys == nil {
 		ddr = errors.Log1(filepath.Abs(dataDir))
@@ -92,7 +98,7 @@ func NewBrowserWindow(fsys fs.FS, dataDir string) *Browser {
 }
 
 // ParentBrowser returns the Browser parent of given node
-func ParentBrowser(tn tree.Node) (*Browser, bool) {
+func ParentBrowser(tn tree.Node) *Browser {
 	var res *Browser
 	tn.AsTree().WalkUp(func(n tree.Node) bool {
 		if c, ok := n.(*Browser); ok {
@@ -101,28 +107,15 @@ func ParentBrowser(tn tree.Node) (*Browser, bool) {
 		}
 		return true
 	})
-	return res, res != nil
+	return res
 }
 
-func (br *Browser) Splits() *core.Splits {
-	return br.FindPath("splits").(*core.Splits)
-}
-
-func (br *Browser) FileTree() *filetree.Tree {
-	sp := br.Splits()
-	return sp.Child(0).AsTree().Child(0).(*filetree.Tree)
-}
-
-func (br *Browser) Tabs() *core.Tabs {
-	return br.FindPath("splits/tabs").(*core.Tabs)
-}
-
-// UpdateFiles Updates the file picker with current files in DataRoot,
+// UpdateFiles Updates the files list.
 func (br *Browser) UpdateFiles() { //types:add
-	files := br.FileTree()
-	if br.FSys != nil {
+	files := br.files
+	if br.FS != nil {
 		files.SortByModTime = true
-		files.OpenPathFS(br.FSys, br.DataRoot)
+		files.OpenPathFS(br.FS, br.DataRoot)
 	} else {
 		files.OpenPath(br.DataRoot)
 	}

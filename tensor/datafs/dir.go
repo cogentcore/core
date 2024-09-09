@@ -17,11 +17,12 @@ import (
 
 // NewDir returns a new datafs directory with given name.
 // if parent != nil and a directory, this dir is added to it.
-// if name is empty, then it is set to "/", the root directory.
+// if name is empty, then it is set to "root", the root directory.
+// Note that "/" is not allowed for the root directory in Go [fs].
 // Names must be unique within a directory.
 func NewDir(name string, parent ...*Data) (*Data, error) {
 	if name == "" {
-		name = "/"
+		name = "root"
 	}
 	var par *Data
 	if len(parent) == 1 {

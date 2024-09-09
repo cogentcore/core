@@ -9,16 +9,16 @@ import (
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.Browser", IDName: "browser", Doc: "Browser is a data browser, for browsing data either on an os filesystem\nor as a datafs virtual data filesystem.", Methods: []types.Method{{Name: "UpdateFiles", Doc: "UpdateFiles Updates the file picker with current files in DataRoot,", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "FSys", Doc: "Filesystem, if browsing an FS"}, {Name: "DataRoot", Doc: "DataRoot is the path to the root of the data to browse"}, {Name: "toolbar"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.Browser", IDName: "browser", Doc: "Browser is a data browser, for browsing data either on an os filesystem\nor as a datafs virtual data filesystem.", Methods: []types.Method{{Name: "UpdateFiles", Doc: "UpdateFiles Updates the file picker with current files in DataRoot,", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "FS", Doc: "Filesystem, if browsing an FS"}, {Name: "DataRoot", Doc: "DataRoot is the path to the root of the data to browse"}, {Name: "toolbar"}}})
 
 // NewBrowser returns a new [Browser] with the given optional parent:
 // Browser is a data browser, for browsing data either on an os filesystem
 // or as a datafs virtual data filesystem.
 func NewBrowser(parent ...tree.Node) *Browser { return tree.New[Browser](parent...) }
 
-// SetFSys sets the [Browser.FSys]:
+// SetFS sets the [Browser.FS]:
 // Filesystem, if browsing an FS
-func (t *Browser) SetFSys(v fs.FS) *Browser { t.FSys = v; return t }
+func (t *Browser) SetFS(v fs.FS) *Browser { t.FS = v; return t }
 
 // SetDataRoot sets the [Browser.DataRoot]:
 // DataRoot is the path to the root of the data to browse

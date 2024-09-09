@@ -225,7 +225,7 @@ func (fn *Node) Init() {
 				w.FileRoot = fn.FileRoot
 				w.Filepath = core.Filename(fpath)
 				w.This.(Filer).GetFileInfo()
-				if w.FileRoot.FSys == nil {
+				if w.FileRoot.FS == nil {
 					if w.IsDir() && repo == nil {
 						w.detectVCSRepo(true) // update files
 					}
@@ -297,10 +297,10 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 	var files []fs.FileInfo
 	var dirs []fs.FileInfo // for DirsOnTop mode
 	var di []fs.DirEntry
-	if fn.FileRoot.FSys == nil {
+	if fn.FileRoot.FS == nil {
 		di = errors.Log1(os.ReadDir(path))
 	} else {
-		di = errors.Log1(fs.ReadDir(fn.FileRoot.FSys, path))
+		di = errors.Log1(fs.ReadDir(fn.FileRoot.FS, path))
 	}
 	for _, d := range di {
 		info := errors.Log1(d.Info())
@@ -371,7 +371,7 @@ func (fn *Node) InitFileInfo() error {
 		return nil
 	}
 	var err error
-	if fn.FileRoot.FSys == nil { // deal with symlinks
+	if fn.FileRoot.FS == nil { // deal with symlinks
 		ls, err := os.Lstat(string(fn.Filepath))
 		if errors.Log(err) != nil {
 			return err
@@ -387,7 +387,7 @@ func (fn *Node) InitFileInfo() error {
 		}
 		err = fn.Info.InitFile(string(fn.Filepath))
 	} else {
-		err = fn.Info.InitFileFS(fn.FileRoot.FSys, string(fn.Filepath))
+		err = fn.Info.InitFileFS(fn.FileRoot.FS, string(fn.Filepath))
 	}
 	if err != nil {
 		emsg := fmt.Errorf("filetree.Node InitFileInfo Path %q: Error: %v", fn.Filepath, err)

@@ -17,10 +17,9 @@ import (
 	"cogentcore.org/core/tensor/table"
 )
 
-// Data is a single item of data, the "file" in the data filesystem.
-// A directory has the Item = map[string]*Data
+// Data is a single item of data, the "file" or "directory" in the data filesystem.
 type Data struct {
-	// parent is the parent data directory
+	// Parent is the parent data directory
 	Parent *Data
 
 	// name is the name of this item.  it is not a path.
@@ -41,7 +40,7 @@ type Data struct {
 // NewData returns a new Data item in given directory Data item,
 // which can be nil. If not a directory, an error will be generated.
 // The modTime is automatically set to now, and can be used for sorting
-// by order created.  name must be unique within parent.
+// by order created. The name must be unique within parent.
 func NewData(dir *Data, name string) (*Data, error) {
 	d := &Data{Parent: dir, name: name, modTime: time.Now()}
 	var err error
@@ -80,7 +79,7 @@ func New[T any](dir *Data, names ...string) (*Data, error) {
 
 // NewTensor returns a new Tensor of given data type, shape sizes,
 // and optional dimension names, in given directory Data item.
-// name must be unique in the directory.
+// The name must be unique in the directory.
 func NewTensor[T string | bool | float32 | float64 | int | int32 | byte](dir *Data, name string, sizes []int, names ...string) (tensor.Tensor, error) {
 	tsr := tensor.New[T](sizes, names...)
 	d, err := NewData(dir, name)
