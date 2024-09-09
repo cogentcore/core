@@ -119,7 +119,7 @@ func ReduceTensor(dest, src tensor.Tensor, comm *mpi.Comm, op mpi.Op) error {
 	}
 	slen := src.Len()
 	if slen != dest.Len() {
-		dest.CopyShapeFrom(src)
+		dest.SetShapeFrom(src)
 	}
 	var err error
 	switch dt {

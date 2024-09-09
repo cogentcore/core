@@ -8,66 +8,66 @@ import (
 	"math"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/tensor/table"
+	"cogentcore.org/core/tensor"
 )
 
-// QuantilesIndex returns the given quantile(s) of non-NaN elements in given
-// Indexed indexed view of an table.Table, for given column index.
-// Column must be a 1d Column -- returns nil for n-dimensional columns.
-// qs are 0-1 values, 0 = min, 1 = max, .5 = median, etc.  Uses linear interpolation.
+// QuantilesFunc returns the given quantile(s) of non-NaN elements in given
+// 1D tensor. Because sorting uses indexes, this only works for 1D case.
+// If needed for a sub-space of values, that can be extracted through slicing
+// and then used. Returns and logs an error if not 1D.
+// qs are 0-1 values, 0 = min, 1 = max, .5 = median, etc.
+// Uses linear interpolation.
 // Because this requires a sort, it is more efficient to get as many quantiles
 // as needed in one pass.
-func QuantilesIndex(ix *table.Indexed, colIndex int, qs []float64) []float64 {
-	nq := len(qs)
-	if nq == 0 {
-		return nil
+func QuantilesFunc(in, qs, out *tensor.Indexed) error {
+	if in.Tensor.NumDims() != 1 {
+		return errors.Log(errors.New("stats.QuantilesFunc: only 1D input tensors allowed"))
 	}
-	col := ix.Table.Columns[colIndex]
-	if col.NumDims() > 1 { // only valid for 1D
-		return nil
+	if qs.Tensor.NumDims() != 1 {
+		return errors.Log(errors.New("stats.QuantilesFunc: only 1D quantile tensors allowed"))
 	}
-	rvs := make([]float64, nq)
-	six := ix.Clone()                                // leave original indexes intact
-	six.Filter(func(et *table.Table, row int) bool { // get rid of NaNs in this column
-		if math.IsNaN(col.Float1D(row)) {
-			return false
-		}
-		return true
-	})
-	six.SortColumn(colIndex, true)
-	sz := len(six.Indexes) - 1 // length of our own index list
+	sin := in.Clone()
+	sin.ExcludeMissing1D()
+	sin.Sort(tensor.Ascending)
+	sz := len(sin.Indexes) - 1 // length of our own index list
 	fsz := float64(sz)
-	for i, q := range qs {
+	out.Tensor.SetShapeFrom(qs.Tensor)
+	nq := qs.Tensor.Len()
+	for i := range nq {
+		q := qs.Tensor.Float1D(i)
 		val := 0.0
 		qi := q * fsz
 		lwi := math.Floor(qi)
 		lwii := int(lwi)
 		if lwii >= sz {
-			val = col.Float1D(six.Indexes[sz])
+			val = sin.FloatRowCell(sz, 0)
 		} else if lwii < 0 {
-			val = col.Float1D(six.Indexes[0])
+			val = sin.FloatRowCell(0, 0)
 		} else {
 			phi := qi - lwi
-			lwv := col.Float1D(six.Indexes[lwii])
-			hiv := col.Float1D(six.Indexes[lwii+1])
+			lwv := sin.FloatRowCell(lwii, 0)
+			hiv := sin.FloatRowCell(lwii+1, 0)
 			val = (1-phi)*lwv + phi*hiv
 		}
-		rvs[i] = val
+		out.Tensor.SetFloat1D(i, val)
 	}
-	return rvs
+	return nil
 }
 
-// Quantiles returns the given quantile(s) of non-Null, non-NaN elements in given
-// Indexed indexed view of an table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
-// Column must be a 1d Column -- returns nil for n-dimensional columns.
-// qs are 0-1 values, 0 = min, 1 = max, .5 = median, etc.  Uses linear interpolation.
-// Because this requires a sort, it is more efficient to get as many quantiles
-// as needed in one pass.
-func Quantiles(ix *table.Indexed, column string, qs []float64) []float64 {
-	colIndex := errors.Log1(ix.Table.ColumnIndex(column))
-	if colIndex == -1 {
-		return nil
-	}
-	return QuantilesIndex(ix, colIndex, qs)
+// MedianFunc computes the median (50% quantile) of tensor values.
+// See [StatsFunc] for general information.
+func MedianFunc(in, out *tensor.Indexed) {
+	QuantilesFunc(in, tensor.NewIndexed(tensor.NewNumberFromSlice([]float64{.5})), out)
+}
+
+// Q1Func computes the first quantile (25%) of tensor values.
+// See [StatsFunc] for general information.
+func Q1Func(in, out *tensor.Indexed) {
+	QuantilesFunc(in, tensor.NewIndexed(tensor.NewNumberFromSlice([]float64{.25})), out)
+}
+
+// Q3Func computes the third quantile (75%) of tensor values.
+// See [StatsFunc] for general information.
+func Q3Func(in, out *tensor.Indexed) {
+	QuantilesFunc(in, tensor.NewIndexed(tensor.NewNumberFromSlice([]float64{.75})), out)
 }

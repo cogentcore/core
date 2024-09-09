@@ -146,9 +146,9 @@ type Tensor interface {
 	// otherwise it goes through appropriate standard type.
 	CopyFrom(from Tensor)
 
-	// CopyShapeFrom copies just the shape from given source tensor
+	// SetShapeFrom copies just the shape from given source tensor
 	// calling SetShape with the shape params from source (see for more docs).
-	CopyShapeFrom(from Tensor)
+	SetShapeFrom(from Tensor)
 
 	// CopyCellsFrom copies given range of values from other tensor into this tensor,
 	// using flat 1D indexes: to = starting index in this Tensor to start copying into,

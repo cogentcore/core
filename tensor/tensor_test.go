@@ -46,7 +46,7 @@ func TestTensorString(t *testing.T) {
 	assert.Equal(t, "testing", tsr.StringValue([]int{1, 1}))
 
 	cln.SetString1D(5, "ctesting")
-	cln.CopyShapeFrom(tsr)
+	cln.SetShapeFrom(tsr)
 	assert.Equal(t, "ctesting", cln.StringValue([]int{1, 1}))
 
 	cln.CopyCellsFrom(tsr, 5, 4, 2)
@@ -106,7 +106,7 @@ func TestTensorFloat64(t *testing.T) {
 	assert.Equal(t, 2.17, tsr.Float([]int{1, 1}))
 
 	cln.SetFloat1D(5, 9.9)
-	cln.CopyShapeFrom(tsr)
+	cln.SetShapeFrom(tsr)
 	assert.Equal(t, 9.9, cln.Float([]int{1, 1}))
 
 	cln.CopyCellsFrom(tsr, 5, 4, 2)

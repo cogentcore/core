@@ -33,6 +33,9 @@ func init() {
 	StatsFuncs[VarPop.String()] = VarPopFunc
 	StatsFuncs[StdPop.String()] = StdPopFunc
 	StatsFuncs[SemPop.String()] = SemPopFunc
+	StatsFuncs[Median.String()] = MedianFunc
+	StatsFuncs[Q1.String()] = Q1Func
+	StatsFuncs[Q3.String()] = Q3Func
 }
 
 // Standard calls a standard stats function on given tensors.

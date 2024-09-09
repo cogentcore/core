@@ -51,19 +51,19 @@ func NewFloat64(sizes []int, names ...string) *Float64 {
 // NewInt returns a new Int tensor
 // with the given sizes per dimension (shape), and optional dimension names.
 func NewInt(sizes []int, names ...string) *Int {
-	return New[float64](sizes, names...).(*Int)
+	return New[int](sizes, names...).(*Int)
 }
 
 // NewInt32 returns a new Int32 tensor
 // with the given sizes per dimension (shape), and optional dimension names.
 func NewInt32(sizes []int, names ...string) *Int32 {
-	return New[float64](sizes, names...).(*Int32)
+	return New[int32](sizes, names...).(*Int32)
 }
 
 // NewByte returns a new Byte tensor
 // with the given sizes per dimension (shape), and optional dimension names.
 func NewByte(sizes []int, names ...string) *Byte {
-	return New[float64](sizes, names...).(*Byte)
+	return New[uint8](sizes, names...).(*Byte)
 }
 
 // NewNumber returns a new n-dimensional tensor of numerical values
@@ -288,9 +288,9 @@ func (tsr *Number[T]) CopyFrom(frm Tensor) {
 	}
 }
 
-// CopyShapeFrom copies just the shape from given source tensor
+// SetShapeFrom copies just the shape from given source tensor
 // calling SetShape with the shape params from source (see for more docs).
-func (tsr *Number[T]) CopyShapeFrom(frm Tensor) {
+func (tsr *Number[T]) SetShapeFrom(frm Tensor) {
 	tsr.SetShape(frm.Shape().Sizes, frm.Shape().Names...)
 }
 

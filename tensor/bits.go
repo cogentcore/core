@@ -249,9 +249,9 @@ func (tsr *Bits) CopyFrom(frm Tensor) {
 	}
 }
 
-// CopyShapeFrom copies just the shape from given source tensor
+// SetShapeFrom copies just the shape from given source tensor
 // calling SetShape with the shape params from source (see for more docs).
-func (tsr *Bits) CopyShapeFrom(frm Tensor) {
+func (tsr *Bits) SetShapeFrom(frm Tensor) {
 	tsr.SetShape(frm.Shape().Sizes, frm.Shape().Names...)
 }
 

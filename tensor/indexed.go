@@ -251,7 +251,8 @@ func (ix *Indexed) NewTensor() Tensor {
 	return nt
 }
 
-// Clone returns a copy of the current index view with its own index memory.
+// Clone returns a copy of the current Indexed view into the same
+// underlying Tensor as the source, with its own index memory.
 func (ix *Indexed) Clone() *Indexed {
 	nix := &Indexed{}
 	nix.CopyFrom(ix)
