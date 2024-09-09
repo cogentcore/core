@@ -35,7 +35,7 @@ func (fn *FileNode) Init() {
 }
 
 func (fn *FileNode) WidgetTooltip(pos image.Point) (string, image.Point) {
-	res := m.Tooltip
+	res := fn.Tooltip
 	if fn.Info.Cat == fileinfo.Data {
 		ofn := fn.AsNode()
 		switch fn.Info.Known {
@@ -48,7 +48,7 @@ func (fn *FileNode) WidgetTooltip(pos image.Point) (string, image.Point) {
 			res += v
 		}
 	}
-	return res, m.DefaultTooltipPos()
+	return res, fn.DefaultTooltipPos()
 }
 
 // DataFS returns the datafs representation of this item.
