@@ -56,8 +56,8 @@ type Tree struct {
 	// return true to include, false to not.  This applies to files and directories alike.
 	FilterFunc func(path string, info fs.FileInfo) bool
 
-	// FSys is the file system we are browsing, if it is an FSys (nil = os filesystem)
-	FSys fs.FS
+	// FS is the file system we are browsing, if it is an FS (nil = os filesystem)
+	FS fs.FS
 
 	// inOpenAll indicates whether we are in midst of an OpenAll call; nodes should open all dirs.
 	inOpenAll bool
@@ -125,7 +125,7 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	if errors.Log(err) != nil {
 		abs = effpath
 	}
-	ft.FSys = nil
+	ft.FS = nil
 	ft.Filepath = core.Filename(abs)
 	ft.setDirOpen(core.Filename(abs))
 	ft.detectVCSRepo(true)
@@ -135,14 +135,14 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	return ft
 }
 
-// OpenPathFS opens the filetree at the given io/fs file system directory path.
+// OpenPathFS opens the filetree at the given [fs] file system directory path.
 // It reads all the files at the given path into this tree.
 // Only paths listed in [Tree.Dirs] will be opened.
 func (ft *Tree) OpenPathFS(fsys fs.FS, path string) *Tree {
 	if ft.FileNodeType == nil {
 		ft.FileNodeType = types.For[Node]()
 	}
-	ft.FSys = fsys
+	ft.FS = fsys
 	ft.Filepath = core.Filename(path)
 	ft.setDirOpen(core.Filename(path))
 	ft.This.(Filer).GetFileInfo()

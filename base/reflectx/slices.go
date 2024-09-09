@@ -26,28 +26,22 @@ func SliceElementType(sl any) reflect.Type {
 
 // SliceElementValue returns a new [reflect.Value] of the [SliceElementType].
 func SliceElementValue(sl any) reflect.Value {
-	typ := SliceElementType(sl)
-	isPointer := typ.Kind() == reflect.Pointer
-	val := reflect.New(NonPointerType(typ)) // make the concrete element
-	if !isPointer {
-		val = val.Elem() // use concrete value
-	}
-	return val
+	return NonNilNew(SliceElementType(sl)).Elem()
 }
 
 // SliceNewAt inserts a new blank element at the given index in the given slice.
 // -1 means the end.
 func SliceNewAt(sl any, idx int) {
-	svl := UnderlyingPointer(reflect.ValueOf(sl))
-	svnp := NonPointerValue(svl)
+	up := UnderlyingPointer(reflect.ValueOf(sl))
+	np := up.Elem()
 	val := SliceElementValue(sl)
-	sz := svnp.Len()
-	svnp = reflect.Append(svnp, val)
+	sz := np.Len()
+	np = reflect.Append(np, val)
 	if idx >= 0 && idx < sz {
-		reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
-		svnp.Index(idx).Set(val)
+		reflect.Copy(np.Slice(idx+1, sz+1), np.Slice(idx, sz))
+		np.Index(idx).Set(val)
 	}
-	svl.Elem().Set(svnp)
+	up.Elem().Set(np)
 }
 
 // SliceDeleteAt deletes the element at the given index in the given slice.

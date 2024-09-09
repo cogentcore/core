@@ -5,6 +5,7 @@
 package databrowser
 
 import (
+	"image"
 	"log"
 	"reflect"
 	"strings"
@@ -30,29 +31,30 @@ type FileNode struct {
 
 func (fn *FileNode) Init() {
 	fn.Node.Init()
-	fn.Updater(func() {
-		fn.UpdateTooltip()
-	})
 	fn.AddContextMenu(fn.ContextMenu)
 }
 
-func (fn *FileNode) UpdateTooltip() {
-	if fn.Info.Cat != fileinfo.Data {
-		return
+func (fn *FileNode) WidgetTooltip(pos image.Point) (string, image.Point) {
+	res := fn.Tooltip
+	if fn.Info.Cat == fileinfo.Data {
+		ofn := fn.AsNode()
+		switch fn.Info.Known {
+		case fileinfo.Number, fileinfo.String:
+			dv := DataFS(ofn)
+			v, _ := dv.AsString()
+			if res != "" {
+				res += " "
+			}
+			res += v
+		}
 	}
-	ofn := fn.AsNode()
-	switch fn.Info.Known {
-	case fileinfo.Number, fileinfo.String:
-		dv := DataFS(ofn)
-		v, _ := dv.AsString()
-		fn.SetTooltip(v)
-	}
+	return res, fn.DefaultTooltipPos()
 }
 
 // DataFS returns the datafs representation of this item.
 // returns nil if not a dataFS item.
 func DataFS(fn *filetree.Node) *datafs.Data {
-	dfs, ok := fn.FileRoot.FSys.(*datafs.Data)
+	dfs, ok := fn.FileRoot.FS.(*datafs.Data)
 	if !ok {
 		return nil
 	}
@@ -65,7 +67,7 @@ func DataFS(fn *filetree.Node) *datafs.Data {
 
 func (fn *FileNode) GetFileInfo() error {
 	err := fn.InitFileInfo()
-	if fn.FileRoot.FSys == nil {
+	if fn.FileRoot.FS == nil {
 		return err
 	}
 	d := DataFS(fn.AsNode())
@@ -90,8 +92,8 @@ func (fn *FileNode) GetFileInfo() error {
 
 func (fn *FileNode) OpenFile() error {
 	ofn := fn.AsNode()
-	br, ok := ParentBrowser(fn.This)
-	if !ok {
+	br := ParentBrowser(fn.This)
+	if br == nil {
 		return nil
 	}
 	df := fsx.DirAndFile(string(fn.Filepath))
@@ -176,14 +178,14 @@ func (fn *FileNode) EditFiles() { //types:add
 	})
 }
 
-// EditFile pulls up this file in Code
+// EditFile pulls up this file in a texteditor
 func (fn *FileNode) EditFile() {
 	if fn.IsDir() {
 		log.Printf("FileNode Edit -- cannot view (edit) directories!\n")
 		return
 	}
-	br, ok := ParentBrowser(fn.This)
-	if !ok {
+	br := ParentBrowser(fn.This)
+	if br == nil {
 		return
 	}
 	if fn.Info.Cat == fileinfo.Data {
@@ -203,10 +205,10 @@ func (fn *FileNode) PlotFiles() { //types:add
 	})
 }
 
-// PlotFile pulls up this file in Code
+// PlotFile pulls up this file in a texteditor.
 func (fn *FileNode) PlotFile() {
-	br, ok := ParentBrowser(fn.This)
-	if !ok {
+	br := ParentBrowser(fn.This)
+	if br == nil {
 		return
 	}
 	d := DataFS(fn.AsNode())

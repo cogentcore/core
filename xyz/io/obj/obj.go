@@ -39,8 +39,8 @@ func init() {
 // It also implements the xyz.Decoder interface and an instance
 // is registered to handle .obj files.
 type Decoder struct {
-	FSys          fs.FS                // filesystem, used for all loading
-	Objfile       string               // .obj filename within FSys
+	FS            fs.FS                // filesystem, used for all loading
+	Objfile       string               // .obj filename within FS
 	Objects       []Object             // decoded objects
 	Matlib        string               // name of the material lib
 	Materials     map[string]*Material // maps material name to object
@@ -91,13 +91,13 @@ func (dec *Decoder) HasScene() bool {
 }
 
 func (dec *Decoder) SetFileFS(fsys fs.FS, fname string) ([]string, error) {
-	dec.FSys = fsys
-	exists, err := fsx.FileExistsFS(dec.FSys, fname)
+	dec.FS = fsys
+	exists, err := fsx.FileExistsFS(dec.FS, fname)
 	if !exists {
 		return nil, errors.New("xyz obj.Decoder: " + err.Error())
 	}
 	mtlf := strings.TrimSuffix(fname, ".obj") + ".mtl"
-	exists, _ = fsx.FileExistsFS(dec.FSys, fname)
+	exists, _ = fsx.FileExistsFS(dec.FS, fname)
 	if exists {
 		return []string{fname, mtlf}, nil
 	} else {
@@ -344,7 +344,7 @@ func (dec *Decoder) loadTex(sc *xyz.Scene, sld *xyz.Solid, texfn string, mat *Ma
 	_, tfn := filepath.Split(texfn)
 	tf, err := sc.TextureByName(tfn)
 	if err != nil {
-		tf = xyz.NewTextureFileFS(dec.FSys, sc, tfn, texfn)
+		tf = xyz.NewTextureFileFS(dec.FS, sc, tfn, texfn)
 	}
 	sld.Material.SetTexture(tf)
 	if mat.Tiling.Repeat.X > 0 {

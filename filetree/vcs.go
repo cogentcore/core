@@ -22,7 +22,7 @@ import (
 // FirstVCS returns the first VCS repository starting from this node and going down.
 // also returns the node having that repository
 func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
-	if fn.FileRoot.FSys != nil {
+	if fn.FileRoot.FS != nil {
 		return nil, nil
 	}
 	var repo vcs.Repo
@@ -73,7 +73,7 @@ func (fn *Node) detectVCSRepo(updateFiles bool) bool {
 // and the node for the directory where the repo is based.
 // Goes up the tree until a repository is found.
 func (fn *Node) Repo() (vcs.Repo, *Node) {
-	if fn.isExternal() || fn.FileRoot.FSys != nil {
+	if fn.isExternal() || fn.FileRoot.FS != nil {
 		return nil, nil
 	}
 	if fn.DirRepo != nil {

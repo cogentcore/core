@@ -61,7 +61,7 @@ type Style struct { //types:add
 	Direction Directions
 
 	// Wrap causes elements to wrap around in the CrossAxis dimension
-	// to fit within sizing constraints (on by default).
+	// to fit within sizing constraints.
 	Wrap bool
 
 	// Justify specifies the distribution of elements along the main axis,
