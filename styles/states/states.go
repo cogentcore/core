@@ -38,7 +38,7 @@ const (
 	// Active elements are currently being interacted with,
 	// usually involving a mouse button being pressed in the element.
 	// A text field will be active while being clicked on, and this
-	// can also result in a Focused state.
+	// can also result in a [Focused] state.
 	// If further movement happens, an element can also end up being
 	// Dragged or Sliding.
 	Active
@@ -51,7 +51,7 @@ const (
 	// Sliding means this element is currently being manipulated
 	// via mouse to change the slider state, which will continue
 	// until the mouse is released, even if it goes off the element.
-	// It should also still be Active.
+	// It should also still be [Active].
 	Sliding
 
 	// Focused elements receive keyboard input.
@@ -67,7 +67,7 @@ const (
 	Indeterminate
 
 	// Hovered indicates that a mouse pointer has entered the space over
-	// an element, but it is not Active (nor DragHovered).
+	// an element, but it is not [Active] (nor [DragHovered]).
 	Hovered
 
 	// LongHovered indicates a Hover event that persists without significant
