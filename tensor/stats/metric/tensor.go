@@ -4,12 +4,7 @@
 
 package metric
 
-import (
-	"math"
-
-	"cogentcore.org/core/tensor"
-)
-
+/*
 // ClosestRow32 returns the closest fit between probe pattern and patterns in
 // an tensor with float32 data where the outer-most dimension is assumed to be a row
 // (e.g., as a column in an table), using the given metric function,
@@ -65,28 +60,4 @@ func ClosestRow64(probe tensor.Tensor, col tensor.Tensor, mfun Func64) (int, flo
 	}
 	return ci, minv
 }
-
-// ClosestRow32Py returns the closest fit between probe pattern and patterns in
-// an tensor.Float32 where the outer-most dimension is assumed to be a row
-// (e.g., as a column in an table), using the given metric function,
-// *which must have the Increasing property* -- i.e., larger = further.
-// returns the row and metric value for that row.
-// Col cell sizes must match size of probe (panics if not).
-// Py version is for Python, returns a slice with row, cor, takes std metric
-func ClosestRow32Py(probe tensor.Tensor, col tensor.Tensor, std StdMetrics) []float32 {
-	row, cor := ClosestRow32(probe, col, StdFunc32(std))
-	return []float32{float32(row), cor}
-}
-
-// ClosestRow64Py returns the closest fit between probe pattern and patterns in
-// an tensor.Tensor where the outer-most dimension is assumed to be a row
-// (e.g., as a column in an table), using the given metric function,
-// *which must have the Increasing property* -- i.e., larger = further.
-// returns the row and metric value for that row.
-// Col cell sizes must match size of probe (panics if not).
-// Optimized for tensor.Float64 but works for any tensor.
-// Py version is for Python, returns a slice with row, cor, takes std metric
-func ClosestRow64Py(probe tensor.Tensor, col tensor.Tensor, std StdMetrics) []float64 {
-	row, cor := ClosestRow64(probe, col, StdFunc64(std))
-	return []float64{float64(row), cor}
-}
+*/

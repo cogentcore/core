@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package stats
+package datafs
 
 import (
+	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
 )
 
 // StdStats are the standard descriptive stats computed in StdStatsData,
-// for one-dimensional tensors.  For higher-dimensional cases, the last 3 
+// for one-dimensional tensors.  For higher-dimensional cases, the last 3
 // quartile-based ones are excluded because they are not compatible.
-var StdStats = []Stats{Count, Mean, Std, Sem, Min, Max, Q1, Median, Q3}
+var StdStats = []Stats{stats.Count, stats.Mean, stats.Std, stats.Sem, stats.Min, stats.Max, stats.Q1, stats.Median, stats.Q3}
 
 // StdStatsData adds standard descriptive statistics for given tensor
 // to the given [datafs] directory.
 // This is an easy way to provide a comprehensive description of data.
 // Stats are in StdStats list: Count, Mean, Std, Sem, Min, Max, Q1, Median, Q3
 func StdStatsData(dir *datafs.Data, tsr *tensor.Indexed) {
-	
+	/*
 		st := ix.Table
 		col := st.Columns[colIndex]
 		stats := DescStats
@@ -53,7 +55,6 @@ func StdStatsData(dir *datafs.Data, tsr *tensor.Indexed) {
 	*/
 	return ix.Table // dt
 }
-
 
 // DescAll returns a table of standard descriptive stats for
 // all numeric columns in given table, operating over all non-Null, non-NaN elements
@@ -105,6 +106,3 @@ func DescAll(ix *table.Indexed) *table.Table {
 	*/
 	return ix.Table // dt
 }
-
-
-

@@ -6,17 +6,44 @@
 
 package metric
 
-// Func32 is a distance / similarity metric operating on slices of float32 numbers
-type Func32 func(a, b []float32) float32
+import (
+	"fmt"
 
-// Func64 is a distance / similarity metric operating on slices of float64 numbers
-type Func64 func(a, b []float64) float64
+	"cogentcore.org/core/tensor"
+)
 
-// StdMetrics are standard metric functions
-type StdMetrics int32 //enums:enum
+// Funcs is a registry of named metric functions,
+// which can then be called by standard enum or
+// string name for custom functions.
+var Funcs map[string]MetricFunc
+
+func init() {
+	Funcs = make(map[string]MetricFunc)
+}
+
+// Standard calls a standard Metrics enum function on given tensors.
+// Output results are in the out tensor.
+func Standard(metric Metrics, a, b, out *tensor.Indexed) {
+	Funcs[metric.String()](a, b, out)
+}
+
+// Call calls a registered stats function on given tensors.
+// Output results are in the out tensor.  Returns an
+// error if name not found.
+func Call(name string, a, b, out *tensor.Indexed) error {
+	f, ok := Funcs[name]
+	if !ok {
+		return fmt.Errorf("metric.Call: function %q not registered", name)
+	}
+	f(a, b, out)
+	return nil
+}
+
+// Metrics are standard metric functions
+type Metrics int32 //enums:enum
 
 const (
-	Euclidean StdMetrics = iota
+	Euclidean Metrics = iota
 	SumSquares
 	Abs
 	Hamming
@@ -43,75 +70,9 @@ const (
 // values increase as a function of distance (e.g., Euclidean)
 // and false if metric values decrease as a function of distance
 // (e.g., Cosine, Correlation)
-func Increasing(std StdMetrics) bool {
-	if std >= InnerProduct {
+func (m Metrics) Increasing() bool {
+	if m >= InnerProduct {
 		return false
 	}
 	return true
-}
-
-// StdFunc32 returns a standard metric function as specified
-func StdFunc32(std StdMetrics) Func32 {
-	switch std {
-	case Euclidean:
-		return Euclidean32
-	case SumSquares:
-		return SumSquares32
-	case Abs:
-		return Abs32
-	case Hamming:
-		return Hamming32
-	case EuclideanBinTol:
-		return EuclideanBinTol32
-	case SumSquaresBinTol:
-		return SumSquaresBinTol32
-	case InvCorrelation:
-		return InvCorrelation32
-	case InvCosine:
-		return InvCosine32
-	case CrossEntropy:
-		return CrossEntropy32
-	case InnerProduct:
-		return InnerProduct32
-	case Covariance:
-		return Covariance32
-	case Correlation:
-		return Correlation32
-	case Cosine:
-		return Cosine32
-	}
-	return nil
-}
-
-// StdFunc64 returns a standard metric function as specified
-func StdFunc64(std StdMetrics) Func64 {
-	switch std {
-	case Euclidean:
-		return Euclidean64
-	case SumSquares:
-		return SumSquares64
-	case Abs:
-		return Abs64
-	case Hamming:
-		return Hamming64
-	case EuclideanBinTol:
-		return EuclideanBinTol64
-	case SumSquaresBinTol:
-		return SumSquaresBinTol64
-	case InvCorrelation:
-		return InvCorrelation64
-	case InvCosine:
-		return InvCosine64
-	case CrossEntropy:
-		return CrossEntropy64
-	case InnerProduct:
-		return InnerProduct64
-	case Covariance:
-		return Covariance64
-	case Correlation:
-		return Correlation64
-	case Cosine:
-		return Cosine64
-	}
-	return nil
 }

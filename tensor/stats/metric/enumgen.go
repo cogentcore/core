@@ -6,45 +6,43 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _StdMetricsValues = []StdMetrics{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+var _MetricsValues = []Metrics{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
 
-// StdMetricsN is the highest valid value for type StdMetrics, plus one.
-const StdMetricsN StdMetrics = 13
+// MetricsN is the highest valid value for type Metrics, plus one.
+const MetricsN Metrics = 13
 
-var _StdMetricsValueMap = map[string]StdMetrics{`Euclidean`: 0, `SumSquares`: 1, `Abs`: 2, `Hamming`: 3, `EuclideanBinTol`: 4, `SumSquaresBinTol`: 5, `InvCosine`: 6, `InvCorrelation`: 7, `CrossEntropy`: 8, `InnerProduct`: 9, `Covariance`: 10, `Correlation`: 11, `Cosine`: 12}
+var _MetricsValueMap = map[string]Metrics{`Euclidean`: 0, `SumSquares`: 1, `Abs`: 2, `Hamming`: 3, `EuclideanBinTol`: 4, `SumSquaresBinTol`: 5, `InvCosine`: 6, `InvCorrelation`: 7, `CrossEntropy`: 8, `InnerProduct`: 9, `Covariance`: 10, `Correlation`: 11, `Cosine`: 12}
 
-var _StdMetricsDescMap = map[StdMetrics]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: `InvCosine is 1-Cosine -- useful to convert into an Increasing metric`, 7: `InvCorrelation is 1-Correlation -- useful to convert into an Increasing metric`, 8: ``, 9: `Everything below here is !Increasing -- larger = closer, not farther`, 10: ``, 11: ``, 12: ``}
+var _MetricsDescMap = map[Metrics]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: `InvCosine is 1-Cosine -- useful to convert into an Increasing metric`, 7: `InvCorrelation is 1-Correlation -- useful to convert into an Increasing metric`, 8: ``, 9: `Everything below here is !Increasing -- larger = closer, not farther`, 10: ``, 11: ``, 12: ``}
 
-var _StdMetricsMap = map[StdMetrics]string{0: `Euclidean`, 1: `SumSquares`, 2: `Abs`, 3: `Hamming`, 4: `EuclideanBinTol`, 5: `SumSquaresBinTol`, 6: `InvCosine`, 7: `InvCorrelation`, 8: `CrossEntropy`, 9: `InnerProduct`, 10: `Covariance`, 11: `Correlation`, 12: `Cosine`}
+var _MetricsMap = map[Metrics]string{0: `Euclidean`, 1: `SumSquares`, 2: `Abs`, 3: `Hamming`, 4: `EuclideanBinTol`, 5: `SumSquaresBinTol`, 6: `InvCosine`, 7: `InvCorrelation`, 8: `CrossEntropy`, 9: `InnerProduct`, 10: `Covariance`, 11: `Correlation`, 12: `Cosine`}
 
-// String returns the string representation of this StdMetrics value.
-func (i StdMetrics) String() string { return enums.String(i, _StdMetricsMap) }
+// String returns the string representation of this Metrics value.
+func (i Metrics) String() string { return enums.String(i, _MetricsMap) }
 
-// SetString sets the StdMetrics value from its string representation,
+// SetString sets the Metrics value from its string representation,
 // and returns an error if the string is invalid.
-func (i *StdMetrics) SetString(s string) error {
-	return enums.SetString(i, s, _StdMetricsValueMap, "StdMetrics")
+func (i *Metrics) SetString(s string) error {
+	return enums.SetString(i, s, _MetricsValueMap, "Metrics")
 }
 
-// Int64 returns the StdMetrics value as an int64.
-func (i StdMetrics) Int64() int64 { return int64(i) }
+// Int64 returns the Metrics value as an int64.
+func (i Metrics) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the StdMetrics value from an int64.
-func (i *StdMetrics) SetInt64(in int64) { *i = StdMetrics(in) }
+// SetInt64 sets the Metrics value from an int64.
+func (i *Metrics) SetInt64(in int64) { *i = Metrics(in) }
 
-// Desc returns the description of the StdMetrics value.
-func (i StdMetrics) Desc() string { return enums.Desc(i, _StdMetricsDescMap) }
+// Desc returns the description of the Metrics value.
+func (i Metrics) Desc() string { return enums.Desc(i, _MetricsDescMap) }
 
-// StdMetricsValues returns all possible values for the type StdMetrics.
-func StdMetricsValues() []StdMetrics { return _StdMetricsValues }
+// MetricsValues returns all possible values for the type Metrics.
+func MetricsValues() []Metrics { return _MetricsValues }
 
-// Values returns all possible values for the type StdMetrics.
-func (i StdMetrics) Values() []enums.Enum { return enums.Values(_StdMetricsValues) }
+// Values returns all possible values for the type Metrics.
+func (i Metrics) Values() []enums.Enum { return enums.Values(_MetricsValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i StdMetrics) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+func (i Metrics) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *StdMetrics) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "StdMetrics")
-}
+func (i *Metrics) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Metrics") }

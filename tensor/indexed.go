@@ -20,7 +20,7 @@ import (
 // This is the universal representation of a homogenous data type in the
 // [tensor] package framework, from scalar to vector, matrix, and beyond,
 // because it can efficiently represent any kind of element with sufficient
-// flexibility to enable a huge range of computations to be elegantly expressed.
+// flexibility to enable a full range of computations to be elegantly expressed.
 // For example, sorting and filtering a tensor only requires
 // updating the indexes while doing nothing to the Tensor itself.
 // To produce a new [Tensor] that has its raw data actually organized according
@@ -35,16 +35,18 @@ type Indexed struct { //types:add
 	Tensor Tensor
 
 	// Indexes are the indexes into Tensor rows.
+	// Only set if order is different from default sequential order.
+	// Use the Index() method for nil-aware logic.
 	Indexes []int
 }
 
 // NewIndexed returns a new Indexed based on given tensor.
 // If a list of indexes is passed, then our indexes are initialized
-// as a copy of those.  This is used e.g. from a Indext Table column.
-// Otherwise it is initialized with sequential indexes.
+// as a copy of those.  This is used e.g. from a Indexed Table column.
+// Otherwise it is initialized with default sequential indexes.
 func NewIndexed(tsr Tensor, idxs ...[]int) *Indexed {
 	ix := &Indexed{}
-	if len(idxs) == 1 {
+	if len(idxs) == 1 { // indexes were passed
 		ix.Tensor = tsr
 		ix.Indexes = slices.Clone(idxs[0])
 	} else {
@@ -59,15 +61,27 @@ func (ix *Indexed) SetTensor(tsr Tensor) {
 	ix.Sequential()
 }
 
-// Len returns the length of the index list
+// Index returns the actual index into underlying tensor based on given
+// index value.  If Indexes == nil, index is passed through.
+func (ix *Indexed) Index(idx int) int {
+	if ix.Indexes == nil {
+		return idx
+	}
+	return ix.Indexes[idx]
+}
+
+// Len returns the length of the index list or number of outer rows dimension.
 func (ix *Indexed) Len() int {
+	if ix.Indexes == nil {
+		return ix.Tensor.DimSize(0)
+	}
 	return len(ix.Indexes)
 }
 
 // DeleteInvalid deletes all invalid indexes from the list.
 // Call this if rows (could) have been deleted from tensor.
 func (ix *Indexed) DeleteInvalid() {
-	if ix.Tensor == nil || ix.Tensor.DimSize(0) <= 0 {
+	if ix.Tensor == nil || ix.Tensor.DimSize(0) <= 0 || ix.Indexes == nil {
 		ix.Indexes = nil
 		return
 	}
@@ -79,10 +93,28 @@ func (ix *Indexed) DeleteInvalid() {
 	}
 }
 
-// Sequential sets indexes to sequential row-wise indexes into tensor.
+// Sequential sets Indexes to nil, resulting in sequential row-wise access into tensor.
 func (ix *Indexed) Sequential() { //types:add
+	if ix.Tensor == nil || ix.Tensor.DimSize(0) <= 0 || ix.Indexes == nil {
+		ix.Indexes = nil
+		return
+	}
+	ix.Indexes = make([]int, ix.Tensor.DimSize(0))
+	for i := range ix.Indexes {
+		ix.Indexes[i] = i
+	}
+}
+
+// IndexesNeeded is called prior to an operation that needs actual indexes,
+// e.g., Sort, Filter.  If Indexes == nil, they are set to all rows, otherwise
+// current indexes are left as is. Use Sequential, then IndexesNeeded to ensure
+// all rows are represented.
+func (ix *Indexed) IndexesNeeded() { //types:add
 	if ix.Tensor == nil || ix.Tensor.DimSize(0) <= 0 {
 		ix.Indexes = nil
+		return
+	}
+	if ix.Indexes != nil {
 		return
 	}
 	ix.Indexes = make([]int, ix.Tensor.DimSize(0))
@@ -101,6 +133,7 @@ func (ix *Indexed) ExcludeMissing1D() { //types:add
 	if ix.Tensor.NumDims() > 1 {
 		return
 	}
+	ix.IndexesNeeded()
 	ni := ix.Len()
 	for i := ni - 1; i >= 0; i-- {
 		if math.IsNaN(ix.Tensor.Float1D(ix.Indexes[i])) {
@@ -109,7 +142,7 @@ func (ix *Indexed) ExcludeMissing1D() { //types:add
 	}
 }
 
-// Permuted sets indexes to a permuted order -- if indexes already exist
+// Permuted sets indexes to a permuted order.  If indexes already exist
 // then existing list of indexes is permuted, otherwise a new set of
 // permuted indexes are generated
 func (ix *Indexed) Permuted() {
@@ -117,7 +150,7 @@ func (ix *Indexed) Permuted() {
 		ix.Indexes = nil
 		return
 	}
-	if len(ix.Indexes) == 0 {
+	if ix.Indexes == nil {
 		ix.Indexes = rand.Perm(ix.Tensor.DimSize(0))
 	} else {
 		rand.Shuffle(len(ix.Indexes), func(i, j int) {
@@ -149,6 +182,7 @@ func (ix *Indexed) SortFunc(cmp func(tsr Tensor, i, j int) int) error {
 	if ix.Tensor.NumDims() > 1 {
 		return errors.New("tensor Sorting is only for 1D tensors")
 	}
+	ix.IndexesNeeded()
 	slices.SortFunc(ix.Indexes, func(a, b int) int {
 		return cmp(ix.Tensor, ix.Indexes[a], ix.Indexes[b])
 	})
@@ -159,6 +193,9 @@ func (ix *Indexed) SortFunc(cmp func(tsr Tensor, i, j int) int) error {
 // numerical order, producing the native ordering, while preserving
 // any filtering that might have occurred.
 func (ix *Indexed) SortIndexes() {
+	if ix.Indexes == nil {
+		return
+	}
 	sort.Ints(ix.Indexes)
 }
 
@@ -182,9 +219,6 @@ func CompareNumbers(a, b float64, ascending bool) int {
 // Sort does default alpha or numeric sort of 1D tensor based on data type.
 // Returns an error if called on a higher-dimensional tensor.
 func (ix *Indexed) Sort(ascending bool) error {
-	if ix.Tensor.NumDims() > 1 {
-		return errors.New("tensor Sorting is only for 1D tensors")
-	}
 	if ix.Tensor.IsString() {
 		ix.SortFunc(func(tsr Tensor, i, j int) int {
 			return CompareStrings(tsr.String1D(i), tsr.String1D(j), ascending)
@@ -204,19 +238,21 @@ func (ix *Indexed) Sort(ascending bool) error {
 // number when a > b and zero when a == b.
 // It is *essential* that it always returns 0 when the two are equal
 // for the stable function to actually work.
-func (ix *Indexed) SortStableFunc(cmp func(tsr Tensor, i, j int) int) {
+func (ix *Indexed) SortStableFunc(cmp func(tsr Tensor, i, j int) int) error {
+	if ix.Tensor.NumDims() > 1 {
+		return errors.New("tensor Sorting is only for 1D tensors")
+	}
+	ix.IndexesNeeded()
 	slices.SortStableFunc(ix.Indexes, func(a, b int) int {
 		return cmp(ix.Tensor, ix.Indexes[a], ix.Indexes[b])
 	})
+	return nil
 }
 
 // SortStable does default alpha or numeric stable sort
 // of 1D tensor based on data type.
 // Returns an error if called on a higher-dimensional tensor.
 func (ix *Indexed) SortStable(ascending bool) error {
-	if ix.Tensor.NumDims() > 1 {
-		return errors.New("tensor Sorting is only for 1D tensors")
-	}
 	if ix.Tensor.IsString() {
 		ix.SortStableFunc(func(tsr Tensor, i, j int) int {
 			return CompareStrings(tsr.String1D(i), tsr.String1D(j), ascending)
@@ -238,6 +274,7 @@ type FilterFunc func(tsr Tensor, row int) bool
 // The Filter function operates directly on row numbers into the Tensor
 // as these row numbers have already been projected through the indexes.
 func (ix *Indexed) Filter(filterer func(tsr Tensor, row int) bool) {
+	ix.IndexesNeeded()
 	sz := len(ix.Indexes)
 	for i := sz - 1; i >= 0; i-- { // always go in reverse for filtering
 		if !filterer(ix.Tensor, ix.Indexes[i]) { // delete
@@ -247,16 +284,32 @@ func (ix *Indexed) Filter(filterer func(tsr Tensor, row int) bool) {
 }
 
 // NewTensor returns a new tensor with column data organized according to
-// the indexes.
+// the Indexes.  If Indexes are nil, a clone of the current tensor is returned
+// but this function is only sensible if there is an indexed view in place.
 func (ix *Indexed) NewTensor() Tensor {
-	rows := len(ix.Indexes)
 	nt := ix.Tensor.Clone()
+	if ix.Indexes == nil {
+		return nt
+	}
+	rows := len(ix.Indexes)
 	nt.SetNumRows(rows)
+	_, cells := ix.Tensor.RowCellSize()
+	str := ix.Tensor.IsString()
+	for r := range rows {
+		for c := range cells {
+			if str {
+				nt.SetStringRowCell(r, c, ix.StringRowCell(r, c))
+			} else {
+				nt.SetFloatRowCell(r, c, ix.FloatRowCell(r, c))
+			}
+		}
+	}
 	return nt
 }
 
 // Clone returns a copy of the current Indexed view into the same
-// underlying Tensor as the source, with its own index memory.
+// underlying Tensor as the source, with its own copy of Indexes
+// if they were present in source.
 func (ix *Indexed) Clone() *Indexed {
 	nix := &Indexed{}
 	nix.CopyFrom(ix)
@@ -266,15 +319,21 @@ func (ix *Indexed) Clone() *Indexed {
 // CopyFrom copies from given other Indexed (we have our own unique copy of indexes).
 func (ix *Indexed) CopyFrom(oix *Indexed) {
 	ix.Tensor = oix.Tensor
-	ix.Indexes = slices.Clone(oix.Indexes)
+	if oix.Indexes == nil {
+		ix.Indexes = nil
+	} else {
+		ix.Indexes = slices.Clone(oix.Indexes)
+	}
 }
 
 // AddRows adds n rows to end of underlying Tensor, and to the indexes in this view
 func (ix *Indexed) AddRows(n int) { //types:add
 	stidx := ix.Tensor.DimSize(0)
 	ix.Tensor.SetNumRows(stidx + n)
-	for i := stidx; i < stidx+n; i++ {
-		ix.Indexes = append(ix.Indexes, i)
+	if ix.Indexes != nil {
+		for i := stidx; i < stidx+n; i++ {
+			ix.Indexes = append(ix.Indexes, i)
+		}
 	}
 }
 
@@ -283,26 +342,40 @@ func (ix *Indexed) AddRows(n int) { //types:add
 func (ix *Indexed) InsertRows(at, n int) {
 	stidx := ix.Tensor.DimSize(0)
 	ix.Tensor.SetNumRows(stidx + n)
-	nw := make([]int, n, n+len(ix.Indexes)-at)
-	for i := 0; i < n; i++ {
-		nw[i] = stidx + i
+	if ix.Indexes != nil {
+		nw := make([]int, n, n+len(ix.Indexes)-at)
+		for i := 0; i < n; i++ {
+			nw[i] = stidx + i
+		}
+		ix.Indexes = append(ix.Indexes[:at], append(nw, ix.Indexes[at:]...)...)
 	}
-	ix.Indexes = append(ix.Indexes[:at], append(nw, ix.Indexes[at:]...)...)
 }
 
 // DeleteRows deletes n rows of indexes starting at given index in the list of indexes
 func (ix *Indexed) DeleteRows(at, n int) {
+	if ix.Indexes == nil {
+		return
+	}
 	ix.Indexes = append(ix.Indexes[:at], ix.Indexes[at+n:]...)
 }
 
 // Swap switches the indexes for i and j
 func (ix *Indexed) Swap(i, j int) {
+	if ix.Indexes == nil {
+		return
+	}
 	ix.Indexes[i], ix.Indexes[j] = ix.Indexes[j], ix.Indexes[i]
 }
+
+///////////////////////////////////////////////
+// Indexed access
 
 // Float returns the value of given index as a float64.
 // The first index value is indirected through the indexes.
 func (ix *Indexed) Float(i []int) float64 {
+	if ix.Indexes == nil {
+		return ix.Tensor.Float(i)
+	}
 	ic := slices.Clone(i)
 	ic[0] = ix.Indexes[ic[0]]
 	return ix.Tensor.Float(ic)
@@ -311,6 +384,9 @@ func (ix *Indexed) Float(i []int) float64 {
 // SetFloat sets the value of given index as a float64
 // The first index value is indirected through the [Indexes].
 func (ix *Indexed) SetFloat(i []int, val float64) {
+	if ix.Indexes == nil {
+		ix.Tensor.SetFloat(i, val)
+	}
 	ic := slices.Clone(i)
 	ic[0] = ix.Indexes[ic[0]]
 	ix.Tensor.SetFloat(ic, val)
@@ -321,7 +397,7 @@ func (ix *Indexed) SetFloat(i []int, val float64) {
 // Row is indirected through the [Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) FloatRowCell(row, cell int) float64 {
-	return ix.Tensor.FloatRowCell(ix.Indexes[row], cell)
+	return ix.Tensor.FloatRowCell(ix.Index(row), cell)
 }
 
 // SetFloatRowCell sets the value at given row and cell,
@@ -329,5 +405,43 @@ func (ix *Indexed) FloatRowCell(row, cell int) float64 {
 // Row is indirected through the [Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) SetFloatRowCell(row, cell int, val float64) {
-	ix.Tensor.SetFloatRowCell(ix.Indexes[row], cell, val)
+	ix.Tensor.SetFloatRowCell(ix.Index(row), cell, val)
+}
+
+// StringValue returns the value of given index as a string.
+// The first index value is indirected through the indexes.
+func (ix *Indexed) StringValue(i []int) string {
+	if ix.Indexes == nil {
+		return ix.Tensor.StringValue(i)
+	}
+	ic := slices.Clone(i)
+	ic[0] = ix.Indexes[ic[0]]
+	return ix.Tensor.StringValue(ic)
+}
+
+// SetString sets the value of given index as a string
+// The first index value is indirected through the [Indexes].
+func (ix *Indexed) SetString(i []int, val string) {
+	if ix.Indexes == nil {
+		ix.Tensor.SetString(i, val)
+	}
+	ic := slices.Clone(i)
+	ic[0] = ix.Indexes[ic[0]]
+	ix.Tensor.SetString(ic, val)
+}
+
+// StringRowCell returns the value at given row and cell,
+// where row is outer-most dim, and cell is 1D index into remaining inner dims.
+// Row is indirected through the [Indexes].
+// This is the preferred interface for all Indexed operations.
+func (ix *Indexed) StringRowCell(row, cell int) string {
+	return ix.Tensor.StringRowCell(ix.Index(row), cell)
+}
+
+// SetStringRowCell sets the value at given row and cell,
+// where row is outer-most dim, and cell is 1D index into remaining inner dims.
+// Row is indirected through the [Indexes].
+// This is the preferred interface for all Indexed operations.
+func (ix *Indexed) SetStringRowCell(row, cell int, val string) {
+	ix.Tensor.SetStringRowCell(ix.Index(row), cell, val)
 }

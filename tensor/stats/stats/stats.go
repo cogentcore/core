@@ -4,44 +4,60 @@
 
 package stats
 
-import "cogentcore.org/core/tensor"
+import (
+	"fmt"
+
+	"cogentcore.org/core/tensor"
+)
 
 //go:generate core generate
 
-// StatsFuncs is a registry of named stats functions,
+// Funcs is a registry of named stats functions,
 // which can then be called by standard enum or
 // string name for custom functions.
-var StatsFuncs map[string]StatsFunc
+var Funcs map[string]StatsFunc
 
 func init() {
-	StatsFuncs = make(map[string]StatsFunc)
-	StatsFuncs[Count.String()] = CountFunc
-	StatsFuncs[Sum.String()] = SumFunc
-	StatsFuncs[SumAbs.String()] = SumAbsFunc
-	StatsFuncs[L1Norm.String()] = SumAbsFunc
-	StatsFuncs[Prod.String()] = ProdFunc
-	StatsFuncs[Min.String()] = MinFunc
-	StatsFuncs[Max.String()] = MaxFunc
-	StatsFuncs[MinAbs.String()] = MinAbsFunc
-	StatsFuncs[MaxAbs.String()] = MaxAbsFunc
-	StatsFuncs[Mean.String()] = MeanFunc
-	StatsFuncs[Var.String()] = VarFunc
-	StatsFuncs[Std.String()] = StdFunc
-	StatsFuncs[Sem.String()] = SemFunc
-	StatsFuncs[SumSq.String()] = SumSqFunc
-	StatsFuncs[L2Norm.String()] = L2NormFunc
-	StatsFuncs[VarPop.String()] = VarPopFunc
-	StatsFuncs[StdPop.String()] = StdPopFunc
-	StatsFuncs[SemPop.String()] = SemPopFunc
-	StatsFuncs[Median.String()] = MedianFunc
-	StatsFuncs[Q1.String()] = Q1Func
-	StatsFuncs[Q3.String()] = Q3Func
+	Funcs = make(map[string]StatsFunc)
+	Funcs[Count.String()] = CountFunc
+	Funcs[Sum.String()] = SumFunc
+	Funcs[SumAbs.String()] = SumAbsFunc
+	Funcs[L1Norm.String()] = SumAbsFunc
+	Funcs[Prod.String()] = ProdFunc
+	Funcs[Min.String()] = MinFunc
+	Funcs[Max.String()] = MaxFunc
+	Funcs[MinAbs.String()] = MinAbsFunc
+	Funcs[MaxAbs.String()] = MaxAbsFunc
+	Funcs[Mean.String()] = MeanFunc
+	Funcs[Var.String()] = VarFunc
+	Funcs[Std.String()] = StdFunc
+	Funcs[Sem.String()] = SemFunc
+	Funcs[SumSq.String()] = SumSqFunc
+	Funcs[L2Norm.String()] = L2NormFunc
+	Funcs[VarPop.String()] = VarPopFunc
+	Funcs[StdPop.String()] = StdPopFunc
+	Funcs[SemPop.String()] = SemPopFunc
+	Funcs[Median.String()] = MedianFunc
+	Funcs[Q1.String()] = Q1Func
+	Funcs[Q3.String()] = Q3Func
 }
 
 // Standard calls a standard Stats enum function on given tensors.
 // Output results are in the out tensor.
 func Standard(stat Stats, in, out *tensor.Indexed) {
-	StatsFuncs[stat.String()](in, out)
+	Funcs[stat.String()](in, out)
+}
+
+// Call calls a registered stats function on given tensors.
+// Output results are in the out tensor.  Returns an
+// error if name not found.
+func Call(name string, in, out *tensor.Indexed) error {
+	f, ok := Funcs[name]
+	if !ok {
+		return fmt.Errorf("stats.Call: function %q not registered", name)
+	}
+	f(in, out)
+	return nil
 }
 
 // Stats is a list of different standard aggregation functions, which can be used
