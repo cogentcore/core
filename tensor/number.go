@@ -274,6 +274,10 @@ func (tsr *Number[T]) Clone() Tensor {
 	return csr
 }
 
+func (tsr *Number[T]) View() Tensor {
+	return &Number[T]{*tsr.view()}
+}
+
 // CopyFrom copies all avail values from other tensor into this tensor, with an
 // optimized implementation if the other tensor is of the same type, and
 // otherwise it goes through appropriate standard type.

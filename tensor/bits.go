@@ -235,6 +235,14 @@ func (tsr *Bits) Clone() Tensor {
 	return csr
 }
 
+func (tsr *Bits) View() Tensor {
+	nw := &Bits{}
+	nw.shape.CopyShape(&tsr.shape)
+	nw.Values = tsr.Values
+	nw.Meta = tsr.Meta
+	return nw
+}
+
 // CopyFrom copies all avail values from other tensor into this tensor, with an
 // optimized implementation if the other tensor is of the same type, and
 // otherwise it goes through appropriate standard type.

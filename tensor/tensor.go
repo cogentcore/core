@@ -141,6 +141,12 @@ type Tensor interface {
 	// that as a Tensor (which can be converted into the known type as needed).
 	Clone() Tensor
 
+	// View clones this tensor, *keeping the same underlying Values slice*,
+	// instead of making a copy like Clone() does.  The main point of this
+	// is to then change the shape of the view to provide a different way
+	// of accessing the same data.  See [New1DViewOf] for example.
+	View() Tensor
+
 	// CopyFrom copies all avail values from other tensor into this tensor, with an
 	// optimized implementation if the other tensor is of the same type, and
 	// otherwise it goes through appropriate standard type.
@@ -211,6 +217,16 @@ func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
 	default:
 		panic(fmt.Sprintf("tensor.NewOfType: type not supported: %v", typ))
 	}
+}
+
+// New1DViewOf returns a 1D view into the given tensor, using the same
+// underlying values, and just changing the shape to a 1D view.
+// This can be useful e.g., for stats and metric functions that report
+// on the 1D list of values.
+func New1DViewOf(tsr Tensor) Tensor {
+	vw := tsr.View()
+	vw.SetShape([]int{tsr.Len()})
+	return vw
 }
 
 // CopyDense copies a gonum mat.Dense matrix into given Tensor

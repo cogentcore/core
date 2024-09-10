@@ -34,6 +34,16 @@ The following statistics are supported (per the `Stats` enum in `stats.go`):
 * `Median`:  middle value in sorted ordering (only for Indexed)
 * `Q1`:  Q1 first quartile = 25%ile value = .25 quantile value (only for Indexed)
 * `Q3`:  Q3 third quartile = 75%ile value = .75 quantile value (only for Indexed)
+
+Here is the general info associated with these function calls:
+
+`StatsFunc` is the function signature for a stats function, where the output has the same shape as the input but with the outer-most row dimension size of 1, and contains the stat value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
+
+Critically, the stat is always computed over the outer row dimension, so each cell in a higher-dimensional output reflects the _row-wise_ stat for that cell across the different rows.  To compute a stat on the `tensor.SubSpace` cells themselves, must call on a [tensor.New1DViewOf] the sub space.  
+
+All stats functions skip over NaN's, as a missing value.
+
+Stats functions cannot be computed in parallel, e.g., using VectorizeThreaded or GPU, due to shared writing to the same output values.  Special implementations are required if that is needed.
  
 ## Vectorize functions
 

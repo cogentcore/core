@@ -16,12 +16,11 @@ import (
 // and computing values, and then copies the results back to the
 // original output.  This allows stats functions to operate directly
 // on integer valued inputs and produce sensible results.
-// It automatically calls NFunc for the nfun function,
 // and returns the Float64 output tensor for further processing as needed.
 // It uses the _last_ tensor as the output, allowing for multiple inputs,
 // as in the case of VarVecFun.
-func VectorizeOut64(fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.Indexed) *tensor.Indexed {
-	n := NFunc(tsr...)
+func VectorizeOut64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.Indexed) *tensor.Indexed {
+	n := nfunc(tsr...)
 	if n <= 0 {
 		return nil
 	}
@@ -43,9 +42,8 @@ func VectorizeOut64(fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.In
 // Vectorize2Out64 is a version of the [tensor.Vectorize] function
 // for stats, which makes two Float64 output tensors for aggregating
 // and computing values, returning them for final computation.
-// It automatically calls NFunc for the nfun function.
-func Vectorize2Out64(fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.Indexed) (out1, out2 *tensor.Indexed) {
-	n := NFunc(tsr...)
+func Vectorize2Out64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.Indexed) (out1, out2 *tensor.Indexed) {
+	n := nfunc(tsr...)
 	if n <= 0 {
 		return nil, nil
 	}

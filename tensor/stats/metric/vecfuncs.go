@@ -14,9 +14,8 @@ import (
 // Vectorize3Out64 is a version of the [tensor.Vectorize] function
 // for metrics, which makes three Float64 output tensors for aggregating
 // and computing values, returning them for final computation.
-// It automatically calls NFunc for the nfun function.
-func Vectorize3Out64(fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.Indexed) (out1, out2, out3 *tensor.Indexed) {
-	n := NFunc(tsr...)
+func Vectorize3Out64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.Indexed) (out1, out2, out3 *tensor.Indexed) {
+	n := nfunc(tsr...)
 	if n <= 0 {
 		return nil, nil, nil
 	}

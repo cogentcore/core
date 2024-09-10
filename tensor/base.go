@@ -66,6 +66,15 @@ func (tsr *Base[T]) Value1D(i int) T    { return tsr.Values[i] }
 func (tsr *Base[T]) Set(i []int, val T) { j := tsr.shape.Offset(i); tsr.Values[j] = val }
 func (tsr *Base[T]) Set1D(i int, val T) { tsr.Values[i] = val }
 
+// view is implementation of View -- needs final casting
+func (tsr *Base[T]) view() *Base[T] {
+	nw := &Base[T]{}
+	nw.shape.CopyShape(&tsr.shape)
+	nw.Values = tsr.Values
+	nw.Meta = tsr.Meta
+	return nw
+}
+
 // SetShape sets the shape params, resizing backing storage appropriately
 func (tsr *Base[T]) SetShape(sizes []int, names ...string) {
 	tsr.shape.SetShape(sizes, names...)

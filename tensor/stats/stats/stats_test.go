@@ -20,6 +20,8 @@ func TestFuncs64(t *testing.T) {
 
 	results := []float64{11, 5.5, 5.5, 5.5, 0, 0, 1, 0, 1, 0.5, 0.11, math.Sqrt(0.11), math.Sqrt(0.11) / math.Sqrt(11), 3.85, math.Sqrt(3.85), 0.1, math.Sqrt(0.1), math.Sqrt(0.1) / math.Sqrt(11), 0.5, 0.25, 0.75}
 
+	tol := 1.0e-8
+
 	CountFunc(ix, oix)
 	assert.Equal(t, results[Count], out.Values[0])
 
@@ -48,41 +50,41 @@ func TestFuncs64(t *testing.T) {
 	assert.Equal(t, results[Mean], out.Values[0])
 
 	VarFunc(ix, oix)
-	assert.InDelta(t, results[Var], out.Values[0], 1.0e-8)
+	assert.InDelta(t, results[Var], out.Values[0], tol)
 
 	StdFunc(ix, oix)
-	assert.InDelta(t, results[Std], out.Values[0], 1.0e-8)
+	assert.InDelta(t, results[Std], out.Values[0], tol)
 
 	SemFunc(ix, oix)
-	assert.InDelta(t, results[Sem], out.Values[0], 1.0e-8)
+	assert.InDelta(t, results[Sem], out.Values[0], tol)
 
 	VarPopFunc(ix, oix)
-	assert.InDelta(t, results[VarPop], out.Values[0], 1.0e-8)
+	assert.InDelta(t, results[VarPop], out.Values[0], tol)
 
 	StdPopFunc(ix, oix)
-	assert.InDelta(t, results[StdPop], out.Values[0], 1.0e-8)
+	assert.InDelta(t, results[StdPop], out.Values[0], tol)
 
 	SemPopFunc(ix, oix)
-	assert.InDelta(t, results[SemPop], out.Values[0], 1.0e-8)
+	assert.InDelta(t, results[SemPop], out.Values[0], tol)
 
 	SumSqFunc(ix, oix)
-	assert.InDelta(t, results[SumSq], out.Values[0], 1.0e-8)
+	assert.InDelta(t, results[SumSq], out.Values[0], tol)
 
 	L2NormFunc(ix, oix)
-	assert.InDelta(t, results[L2Norm], out.Values[0], 1.0e-8)
+	assert.InDelta(t, results[L2Norm], out.Values[0], tol)
 
 	MedianFunc(ix, oix)
-	assert.InDelta(t, results[Median], out.Values[0], 1.0e-8)
+	assert.InDelta(t, results[Median], out.Values[0], tol)
 
 	Q1Func(ix, oix)
-	assert.InDelta(t, results[Q1], out.Values[0], 1.0e-8)
+	assert.InDelta(t, results[Q1], out.Values[0], tol)
 
 	Q3Func(ix, oix)
-	assert.InDelta(t, results[Q3], out.Values[0], 1.0e-8)
+	assert.InDelta(t, results[Q3], out.Values[0], tol)
 
-	for stat := Count; stat <= Q3; stat++ {
+	for stat := Count; stat < StatsN; stat++ {
 		Standard(stat, ix, oix)
-		assert.InDelta(t, results[stat], out.Values[0], 1.0e-8)
+		assert.InDelta(t, results[stat], out.Values[0], tol)
 	}
 }
 
