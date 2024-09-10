@@ -53,8 +53,10 @@ func Vectorize2Out64(fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.I
 	out := tsr[nt-1]
 	out1 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes))
 	out2 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes))
+	tsrs := slices.Clone(tsr[:nt-1])
+	tsrs = append(tsrs, out1, out2)
 	for idx := range n {
-		fun(idx, tsr[0], out1, out2)
+		fun(idx, tsrs...)
 	}
 	return out1, out2
 }
@@ -84,10 +86,10 @@ func NFunc(tsr ...*tensor.Indexed) int {
 	return n
 }
 
-// StatVecFunc is a helper function for stats functions, dealing with iterating over
+// VecFunc is a helper function for stats functions, dealing with iterating over
 // the Cell subspace per row and initializing the aggregation values for first index.
 // It also skips over NaN missing values.
-func StatVecFunc(idx int, in, out *tensor.Indexed, ini float64, fun func(val, agg float64) float64) {
+func VecFunc(idx int, in, out *tensor.Indexed, ini float64, fun func(val, agg float64) float64) {
 	nsub := out.Tensor.Len()
 	for i := range nsub {
 		if idx == 0 {
@@ -101,15 +103,12 @@ func StatVecFunc(idx int, in, out *tensor.Indexed, ini float64, fun func(val, ag
 	}
 }
 
-/////////////////////////////////////////////////////\
-//		Two input Tensors
-
-// StatVec2inFunc is a helper function for stats functions, dealing with iterating over
+// Vec2inFunc is a helper function for stats functions, dealing with iterating over
 // the Cell subspace per row and initializing the aggregation values for first index.
 // This version has 2 input vectors, the second input being the output of another stat
 // e.g., the mean for Var.
 // It also skips over NaN missing values.
-func StatVec2inFunc(idx int, in1, in2, out *tensor.Indexed, ini float64, fun func(val1, val2, agg float64) float64) {
+func Vec2inFunc(idx int, in1, in2, out *tensor.Indexed, ini float64, fun func(val1, val2, agg float64) float64) {
 	nsub := out.Tensor.Len()
 	for i := range nsub {
 		if idx == 0 {
@@ -124,14 +123,11 @@ func StatVec2inFunc(idx int, in1, in2, out *tensor.Indexed, ini float64, fun fun
 	}
 }
 
-/////////////////////////////////////////////////////\
-//		Two output Tensors
-
-// StatVec2outFunc is a helper function for stats functions, dealing with iterating over
+// Vec2outFunc is a helper function for stats functions, dealing with iterating over
 // the Cell subspace per row and initializing the aggregation values for first index.
 // This version has 2 output vectors, for separate integration of scale sum squared
 // It also skips over NaN missing values.
-func StatVec2outFunc(idx int, in, out1, out2 *tensor.Indexed, ini1, ini2 float64, fun func(val, agg1, agg2 float64) (float64, float64)) {
+func Vec2outFunc(idx int, in, out1, out2 *tensor.Indexed, ini1, ini2 float64, fun func(val, agg1, agg2 float64) (float64, float64)) {
 	nsub := out2.Tensor.Len()
 	for i := range nsub {
 		if idx == 0 {

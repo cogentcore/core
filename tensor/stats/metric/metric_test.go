@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAll(t *testing.T) {
+func TestFuncs(t *testing.T) {
 	a64 := []float64{.5, .2, .1, .7, math.NaN(), .5}
 	b64 := []float64{.2, .9, .1, .7, 0, .2}
 
-	results := []float64{math.Sqrt(0.67), 0.67, 0.9, 3, 0.7, 0.49, 1 - 0.7319115529256469, 1 - 0.11189084777289171, 0, 0.88, 0.008, 0.11189084777289171, 0.7319115529256469}
+	results := []float64{math.Sqrt(0.67), 0.67, 0.9, 3, 0.7, 0.49, 1 - 0.7319115529256469, 1 - 0.11189084777289171, 1.8090248566170337, 0.88, 0.008, 0.11189084777289171, 0.7319115529256469}
 
 	atsr := tensor.NewIndexed(tensor.NewNumberFromSlice(a64))
 	btsr := tensor.NewIndexed(tensor.NewNumberFromSlice(b64))
@@ -30,7 +30,7 @@ func TestAll(t *testing.T) {
 	assert.InDelta(t, results[SumSquares], out.Values[0], 1.0e-8)
 
 	EuclideanBinTolFunc(atsr, btsr, oix)
-	assert.Equal(t, results[EuclideanBinTol], out.Values[0])
+	assert.InDelta(t, results[EuclideanBinTol], out.Values[0], 1.0e-8)
 
 	SumSquaresBinTolFunc(atsr, btsr, oix)
 	assert.InDelta(t, results[SumSquaresBinTol], out.Values[0], 1.0e-8)
@@ -39,19 +39,22 @@ func TestAll(t *testing.T) {
 	assert.InDelta(t, results[Covariance], out.Values[0], 1.0e-8)
 
 	CorrelationFunc(atsr, btsr, oix)
-	assert.Equal(t, results[Correlation], out.Values[0])
+	assert.InDelta(t, results[Correlation], out.Values[0], 1.0e-8)
 
 	InvCorrelationFunc(atsr, btsr, oix)
-	assert.Equal(t, results[InvCorrelation], out.Values[0])
+	assert.InDelta(t, results[InvCorrelation], out.Values[0], 1.0e-8)
 
-	CosineFunc(atsr, btsr, oix)
-	assert.Equal(t, results[Cosine], out.Values[0])
-
-	InvCosineFunc(atsr, btsr, oix)
-	assert.Equal(t, results[InvCosine], out.Values[0])
+	CrossEntropyFunc(atsr, btsr, oix)
+	assert.InDelta(t, results[CrossEntropy], out.Values[0], 1.0e-8)
 
 	InnerProductFunc(atsr, btsr, oix)
-	assert.Equal(t, results[InnerProduct], out.Values[0])
+	assert.InDelta(t, results[InnerProduct], out.Values[0], 1.0e-8)
+
+	CosineFunc(atsr, btsr, oix)
+	assert.InDelta(t, results[Cosine], out.Values[0], 1.0e-8)
+
+	InvCosineFunc(atsr, btsr, oix)
+	assert.InDelta(t, results[InvCosine], out.Values[0], 1.0e-8)
 
 	/*
 		ab := Abs64(a64, b64)

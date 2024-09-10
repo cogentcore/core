@@ -804,6 +804,17 @@ func ClampInt(x, a, b int) int {
 	return x
 }
 
+// Clamp64 clamps x to the provided closed interval [a, b]
+func Clamp64(x, a, b float64) float64 {
+	if x < a {
+		return a
+	}
+	if x > b {
+		return b
+	}
+	return x
+}
+
 // MinPos returns the minimum of the two values, excluding any that are <= 0
 func MinPos(a, b float32) float32 {
 	if a > 0 && b > 0 {
