@@ -96,7 +96,7 @@ func EuclideanBinTolFunc(a, b, out *tensor.Indexed) {
 
 // SumSquaresBinTolFunc computes the sum of squares differences between tensor values,
 // with binary tolerance: differences < 0.5 are thresholded to 0.
-func SumSquaresBinTolFunc(a, b, out *tensor.Indexed) *tensor.Indexed {
+func SumSquaresBinTolFunc(a, b, out *tensor.Indexed) {
 	scale64, ss64 := Vectorize2Out64(SumSquaresBinTolVecFunc, a, b, out)
 	nsub := out.Tensor.Len()
 	for i := range nsub {
@@ -111,7 +111,6 @@ func SumSquaresBinTolFunc(a, b, out *tensor.Indexed) *tensor.Indexed {
 		scale64.Tensor.SetFloat1D(i, v)
 		out.Tensor.SetFloat1D(i, v)
 	}
-	return scale64
 }
 
 // CovarianceFunc computes the covariance between two vectors,

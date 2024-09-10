@@ -19,6 +19,16 @@ var Funcs map[string]MetricFunc
 
 func init() {
 	Funcs = make(map[string]MetricFunc)
+	Funcs[Euclidean.String()] = EuclideanFunc
+	Funcs[SumSquares.String()] = SumSquaresFunc
+	Funcs[EuclideanBinTol.String()] = EuclideanBinTolFunc
+	Funcs[SumSquaresBinTol.String()] = SumSquaresBinTolFunc
+	Funcs[InvCosine.String()] = InvCosineFunc
+	Funcs[InvCorrelation.String()] = InvCorrelationFunc
+	Funcs[InnerProduct.String()] = InnerProductFunc
+	Funcs[Covariance.String()] = CovarianceFunc
+	Funcs[Correlation.String()] = CorrelationFunc
+	Funcs[Cosine.String()] = CosineFunc
 }
 
 // Standard calls a standard Metrics enum function on given tensors.
