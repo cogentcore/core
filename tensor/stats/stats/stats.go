@@ -38,7 +38,7 @@ func init() {
 	StatsFuncs[Q3.String()] = Q3Func
 }
 
-// Standard calls a standard stats function on given tensors.
+// Standard calls a standard Stats enum function on given tensors.
 // Output results are in the out tensor.
 func Standard(stat Stats, in, out *tensor.Indexed) {
 	StatsFuncs[stat.String()](in, out)

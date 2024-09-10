@@ -17,10 +17,14 @@ import (
 // Indexed is an indexed wrapper around a tensor.Tensor that provides a
 // specific view onto the Tensor defined by the set of indexes, which
 // apply to the outer-most row dimension (with default row-major indexing).
-// This provides an efficient way of sorting and filtering a tensor by only
+// This is the universal representation of a homogenous data type in the
+// [tensor] package framework, from scalar to vector, matrix, and beyond,
+// because it can efficiently represent any kind of element with sufficient
+// flexibility to enable a huge range of computations to be elegantly expressed.
+// For example, sorting and filtering a tensor only requires
 // updating the indexes while doing nothing to the Tensor itself.
-// To produce a tensor that has data actually organized according to the
-// indexed order, call the NewTensor method.
+// To produce a new [Tensor] that has its raw data actually organized according
+// to the indexed order, call the [NewTensor] method.
 // Use the [Set]FloatRowCell methods wherever possible, for the most efficient
 // and natural indirection through the indexes.  The 1D methods on underlying
 // tensor data do not indirect through the indexes and must be called directly
