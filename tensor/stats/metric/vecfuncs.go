@@ -58,26 +58,6 @@ func Vectorize2Out64(fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.I
 	return out1, out2
 }
 
-// Vectorize2in3Out64 is a version of the [tensor.Vectorize] function
-// for metrics, which makes three Float64 output tensors for aggregating
-// and computing values, returning them for final computation.
-// It automatically calls NFunc for the nfun function.
-func Vectorize2in3Out64(fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.Indexed) (out1, out2, out3 *tensor.Indexed) {
-	n := NFunc(tsr...)
-	if n <= 0 {
-		return nil, nil, nil
-	}
-	nt := len(tsr)
-	out := tsr[nt-1]
-	out1 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes))
-	out2 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes))
-	out3 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes))
-	for idx := range n {
-		fun(idx, tsr[0], tsr[1], tsr[2], tsr[3], out1, out2, out3)
-	}
-	return out1, out2, out3
-}
-
 // Vectorize3Out64 is a version of the [tensor.Vectorize] function
 // for metrics, which makes three Float64 output tensors for aggregating
 // and computing values, returning them for final computation.
@@ -92,8 +72,10 @@ func Vectorize3Out64(fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.I
 	out1 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes))
 	out2 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes))
 	out3 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes))
+	tsrs := tsr[:nt-1]
+	tsrs = append(tsrs, out1, out2, out3)
 	for idx := range n {
-		fun(idx, tsr[0], tsr[1], out1, out2, out3)
+		fun(idx, tsrs...)
 	}
 	return out1, out2, out3
 }
@@ -180,32 +162,6 @@ func MetricVecSSFunc(idx int, a, b, out1, out2 *tensor.Indexed, ini1, ini2 float
 	}
 }
 
-// SumSquaresVecFunc computes the sum-of-squares distance between two vectors.
-func SumSquaresVecFunc(idx int, tsr ...*tensor.Indexed) {
-	MetricVecSSFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], 0, 1, func(a, b float64) float64 {
-		return a - b
-	})
-}
-
-// SumSquaresBinTolVecFunc computes the sum-of-squares distance between two vectors,
-// with binary tolerance: differences < 0.5 are thresholded to 0.
-func SumSquaresBinTolVecFunc(idx int, tsr ...*tensor.Indexed) {
-	MetricVecSSFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], 0, 1, func(a, b float64) float64 {
-		d := a - b
-		if math.Abs(d) < 0.5 {
-			d = 0
-		}
-		return d
-	})
-}
-
-// InnerProductVecFunc is a Vectorize function for computing the inner product.
-func InnerProductVecFunc(idx int, tsr ...*tensor.Indexed) {
-	MetricVecFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(a, b, agg float64) float64 {
-		return agg + a*b
-	})
-}
-
 // MetricVec2inFunc is a helper function for stats functions, dealing with iterating over
 // the Cell subspace per row and initializing the aggregation values for first index.
 // This version has 2 input vectors, the second input being the output of another stat
@@ -228,15 +184,6 @@ func MetricVec2inFunc(idx int, a, b, a2, b2, out *tensor.Indexed, ini float64, f
 		bv2 := b2.Tensor.Float1D(i)
 		out.Tensor.SetFloat1D(i, fun(av, bv, av2, bv2, out.Tensor.Float1D(i)))
 	}
-}
-
-// CovarianceVecFunc is a Vectorize function for computing the covariance between
-// two vectors, i.e., the mean of the co-product of each vector element minus
-// the mean of that vector: cov(A,B) = E[(A - E(A))(B - E(B))]
-func CovarianceVecFunc(idx int, tsr ...*tensor.Indexed) {
-	MetricVec2inFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4], 0, func(a, b, a2, b2, agg float64) float64 {
-		return agg + (a-a2)*(b-b2)
-	})
 }
 
 // MetricVec2in3outFunc is a helper function for stats functions, dealing with iterating over
@@ -271,23 +218,6 @@ func MetricVec2in3outFunc(idx int, a, b, a2, b2, out1, out2, out3 *tensor.Indexe
 	}
 }
 
-// CorrelationVecFunc is a Vectorize function for computing the correlation between
-// two vectors, in range (-1..1) as the mean of the co-product of each vector
-// element minus the mean of that vector, normalized by the product of their
-// standard deviations: cor(A,B) = E[(A - E(A))(B - E(B))] / sigma(A) sigma(B).
-// (i.e., the standardized covariance). Equivalent to the cosine of mean-normalized
-// vectors.
-func CorrelationVecFunc(idx int, tsr ...*tensor.Indexed) {
-	MetricVec2in3outFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4], tsr[5], tsr[6], 0, func(a, b, am, bm, ss, avar, bvar float64) (float64, float64, float64) {
-		ad := a - am
-		bd := b - bm
-		ss += ad * bd   // between
-		avar += ad * ad // within
-		bvar += bd * bd
-		return ss, avar, bvar
-	})
-}
-
 // MetricVec3outFunc is a helper function for stats functions, dealing with iterating over
 // the Cell subspace per row and initializing the aggregation values for first index.
 // This version has 3 output vectors. It also skips over NaN missing values.
@@ -315,16 +245,4 @@ func MetricVec3outFunc(idx int, a, b, out1, out2, out3 *tensor.Indexed, ini floa
 		out2.Tensor.SetFloat1D(i, o2)
 		out3.Tensor.SetFloat1D(i, o3)
 	}
-}
-
-// CosineVecFunc is a Vectorize function for computing the cosine between
-// two vectors, in range (-1..1) as the normalized inner product:
-// inner product / sqrt(ssA * ssB).
-func CosineVecFunc(idx int, tsr ...*tensor.Indexed) {
-	MetricVec3outFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4], 0, func(a, b, ss, avar, bvar float64) (float64, float64, float64) {
-		ss += a * b
-		avar += a * a
-		bvar += b * b
-		return ss, avar, bvar
-	})
 }

@@ -23,10 +23,11 @@ import (
 // if that is needed.
 type MetricFunc func(a, b, out *tensor.Indexed)
 
-// InnerProductFunc computes the sum of the co-products of the two on-NaN tensor values.
-// See [MetricFunc] for general information.
-func InnerProductFunc(a, b, out *tensor.Indexed) {
-	VectorizeOut64(InnerProductVecFunc, a, b, out)
+// SumSquaresVecFunc computes the sum-of-squares distance between two vectors.
+func SumSquaresVecFunc(idx int, tsr ...*tensor.Indexed) {
+	MetricVecSSFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], 0, 1, func(a, b float64) float64 {
+		return a - b
+	})
 }
 
 // SumSquaresFunc computes the sum of squares differences between tensor values,
@@ -74,6 +75,18 @@ func EuclideanFunc(a, b, out *tensor.Indexed) {
 	}
 }
 
+// SumSquaresBinTolVecFunc computes the sum-of-squares distance between two vectors,
+// with binary tolerance: differences < 0.5 are thresholded to 0.
+func SumSquaresBinTolVecFunc(idx int, tsr ...*tensor.Indexed) {
+	MetricVecSSFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], 0, 1, func(a, b float64) float64 {
+		d := a - b
+		if math.Abs(d) < 0.5 {
+			d = 0
+		}
+		return d
+	})
+}
+
 // EuclideanBinTolFunc computes the Euclidean square root of the sum of squares
 // differences between tensor values, with binary tolerance:
 // differences < 0.5 are thresholded to 0.
@@ -113,6 +126,28 @@ func SumSquaresBinTolFunc(a, b, out *tensor.Indexed) {
 	}
 }
 
+// InnerProductVecFunc is a Vectorize function for computing the inner product.
+func InnerProductVecFunc(idx int, tsr ...*tensor.Indexed) {
+	MetricVecFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(a, b, agg float64) float64 {
+		return agg + a*b
+	})
+}
+
+// InnerProductFunc computes the sum of the co-products of the two on-NaN tensor values.
+// See [MetricFunc] for general information.
+func InnerProductFunc(a, b, out *tensor.Indexed) {
+	VectorizeOut64(InnerProductVecFunc, a, b, out)
+}
+
+// CovarianceVecFunc is a Vectorize function for computing the covariance between
+// two vectors, i.e., the mean of the co-product of each vector element minus
+// the mean of that vector: cov(A,B) = E[(A - E(A))(B - E(B))]
+func CovarianceVecFunc(idx int, tsr ...*tensor.Indexed) {
+	MetricVec2inFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4], 0, func(a, b, am, bm, agg float64) float64 {
+		return agg + (a-am)*(b-bm)
+	})
+}
+
 // CovarianceFunc computes the covariance between two vectors,
 // i.e., the mean of the co-product of each vector element minus
 // the mean of that vector: cov(A,B) = E[(A - E(A))(B - E(B))].
@@ -131,26 +166,33 @@ func CovarianceFunc(a, b, out *tensor.Indexed) {
 	}
 }
 
-// CorrelationFunc computes the correlation between two vectors,
-// in range (-1..1) as the mean of the co-product of each vector
+// CorrelationVecFunc is a Vectorize function for computing the correlation between
+// two vectors, in range (-1..1) as the mean of the co-product of each vector
 // element minus the mean of that vector, normalized by the product of their
 // standard deviations: cor(A,B) = E[(A - E(A))(B - E(B))] / sigma(A) sigma(B).
-// (i.e., the standardized covariance). Equivalent to the cosine of mean-normalized
-// vectors.
-func CorrelationFunc(a, b, out *tensor.Indexed) {
-	CorrelationFuncOut64(a, b, out)
+// (i.e., the standardized covariance).
+// Equivalent to the cosine of mean-normalized vectors.
+func CorrelationVecFunc(idx int, tsr ...*tensor.Indexed) {
+	MetricVec2in3outFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4], tsr[5], tsr[6], 0, func(a, b, am, bm, ss, avar, bvar float64) (float64, float64, float64) {
+		ad := a - am
+		bd := b - bm
+		ss += ad * bd   // between
+		avar += ad * ad // within
+		bvar += bd * bd
+		return ss, avar, bvar
+	})
 }
 
 // CorrelationFuncOut64 computes the correlation between two vectors,
 // in range (-1..1) as the mean of the co-product of each vector
 // element minus the mean of that vector, normalized by the product of their
 // standard deviations: cor(A,B) = E[(A - E(A))(B - E(B))] / sigma(A) sigma(B).
-// (i.e., the standardized covariance). Equivalent to the cosine of mean-normalized
-// vectors.
+// (i.e., the standardized covariance).
+// Equivalent to the cosine of mean-normalized vectors.
 func CorrelationFuncOut64(a, b, out *tensor.Indexed) *tensor.Indexed {
 	amean, _ := stats.MeanFuncOut64(a, out)
 	bmean, _ := stats.MeanFuncOut64(b, out)
-	ss64, avar64, bvar64 := Vectorize2in3Out64(CorrelationVecFunc, a, b, amean, bmean, out)
+	ss64, avar64, bvar64 := Vectorize3Out64(CorrelationVecFunc, a, b, amean, bmean, out)
 	nsub := out.Tensor.Len()
 	for i := range nsub {
 		ss := ss64.Tensor.Float1D(i)
@@ -164,12 +206,24 @@ func CorrelationFuncOut64(a, b, out *tensor.Indexed) *tensor.Indexed {
 	return ss64
 }
 
+// CorrelationFunc computes the correlation between two vectors,
+// in range (-1..1) as the mean of the co-product of each vector
+// element minus the mean of that vector, normalized by the product of their
+// standard deviations: cor(A,B) = E[(A - E(A))(B - E(B))] / sigma(A) sigma(B).
+// (i.e., the standardized covariance).
+// Equivalent to the cosine of mean-normalized vectors.
+func CorrelationFunc(a, b, out *tensor.Indexed) {
+	CorrelationFuncOut64(a, b, out)
+}
+
 // InvCorrelationFunc computes 1 minus the correlation between two vectors,
 // in range (-1..1) as the mean of the co-product of each vector
 // element minus the mean of that vector, normalized by the product of their
 // standard deviations: cor(A,B) = E[(A - E(A))(B - E(B))] / sigma(A) sigma(B).
-// (i.e., the standardized covariance). Equivalent to the cosine of mean-normalized
-// vectors. This is useful for a difference measure instead of similarity.
+// (i.e., the standardized covariance).
+// Equivalent to the cosine of mean-normalized vectors.
+// This is useful for a difference measure instead of similarity,
+// where more different vectors have larger metric values.
 func InvCorrelationFunc(a, b, out *tensor.Indexed) {
 	cor64 := CorrelationFuncOut64(a, b, out)
 	nsub := out.Tensor.Len()
@@ -179,11 +233,16 @@ func InvCorrelationFunc(a, b, out *tensor.Indexed) {
 	}
 }
 
-// CosineFunc computes the correlation between two vectors,
-// in range (-1..1) as the normalized inner product:
+// CosineVecFunc is a Vectorize function for computing the cosine between
+// two vectors, in range (-1..1) as the normalized inner product:
 // inner product / sqrt(ssA * ssB).
-func CosineFunc(a, b, out *tensor.Indexed) {
-	CosineFuncOut64(a, b, out)
+func CosineVecFunc(idx int, tsr ...*tensor.Indexed) {
+	MetricVec3outFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4], 0, func(a, b, ss, avar, bvar float64) (float64, float64, float64) {
+		ss += a * b
+		avar += a * a
+		bvar += b * b
+		return ss, avar, bvar
+	})
 }
 
 // CosineFuncOut64 computes the correlation between two vectors,
@@ -204,10 +263,18 @@ func CosineFuncOut64(a, b, out *tensor.Indexed) *tensor.Indexed {
 	return ss64
 }
 
+// CosineFunc computes the correlation between two vectors,
+// in range (-1..1) as the normalized inner product:
+// inner product / sqrt(ssA * ssB).
+func CosineFunc(a, b, out *tensor.Indexed) {
+	CosineFuncOut64(a, b, out)
+}
+
 // InvCosineFunc computes 1 minus the cosine between two vectors,
 // in range (-1..1) as the normalized inner product:
 // inner product / sqrt(ssA * ssB).
-// This is useful for a difference measure instead of similarity.
+// This is useful for a difference measure instead of similarity,
+// where more different vectors have larger metric values.
 func InvCosineFunc(a, b, out *tensor.Indexed) {
 	cos64 := CosineFuncOut64(a, b, out)
 	nsub := out.Tensor.Len()

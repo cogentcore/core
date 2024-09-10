@@ -22,16 +22,38 @@ import (
 // if that is needed.
 type StatsFunc func(in, out *tensor.Indexed)
 
+// CountVecFunc is a Vectorize function for computing the count.
+func CountVecFunc(idx int, tsr ...*tensor.Indexed) {
+	StatVecFunc(idx, tsr[0], tsr[1], 0, func(val, agg float64) float64 {
+		return agg + 1
+	})
+}
+
 // CountFunc computes the count of non-NaN tensor values.
 // See [StatsFunc] for general information.
 func CountFunc(in, out *tensor.Indexed) {
 	VectorizeOut64(CountVecFunc, in, out)
 }
 
+// SumVecFunc is a Vectorize function for computing the sum.
+func SumVecFunc(idx int, tsr ...*tensor.Indexed) {
+	StatVecFunc(idx, tsr[0], tsr[1], 0, func(val, agg float64) float64 {
+		return agg + val
+	})
+}
+
 // SumFunc computes the sum of tensor values.
 // See [StatsFunc] for general information.
 func SumFunc(in, out *tensor.Indexed) {
 	VectorizeOut64(SumVecFunc, in, out)
+}
+
+// SumAbsVecFunc is a Vectorize function for computing the sum of abs values.
+// This is also known as the L1 norm.
+func SumAbsVecFunc(idx int, tsr ...*tensor.Indexed) {
+	StatVecFunc(idx, tsr[0], tsr[1], 0, func(val, agg float64) float64 {
+		return agg + math.Abs(val)
+	})
 }
 
 // SumAbsFunc computes the sum of absolute-value-of tensor values.
@@ -41,10 +63,24 @@ func SumAbsFunc(in, out *tensor.Indexed) {
 	VectorizeOut64(SumAbsVecFunc, in, out)
 }
 
+// ProdVecFunc is a Vectorize function for computing the product.
+func ProdVecFunc(idx int, tsr ...*tensor.Indexed) {
+	StatVecFunc(idx, tsr[0], tsr[1], 1, func(val, agg float64) float64 {
+		return agg * val
+	})
+}
+
 // ProdFunc computes the product of tensor values.
 // See [StatsFunc] for general information.
 func ProdFunc(in, out *tensor.Indexed) {
 	VectorizeOut64(ProdVecFunc, in, out)
+}
+
+// MinVecFunc is a Vectorize function for computing the min.
+func MinVecFunc(idx int, tsr ...*tensor.Indexed) {
+	StatVecFunc(idx, tsr[0], tsr[1], math.MaxFloat64, func(val, agg float64) float64 {
+		return math.Min(agg, val)
+	})
 }
 
 // MinFunc computes the min of tensor values.
@@ -53,10 +89,24 @@ func MinFunc(in, out *tensor.Indexed) {
 	VectorizeOut64(MinVecFunc, in, out)
 }
 
+// MaxVecFunc is a Vectorize function for computing the max.
+func MaxVecFunc(idx int, tsr ...*tensor.Indexed) {
+	StatVecFunc(idx, tsr[0], tsr[1], -math.MaxFloat64, func(val, agg float64) float64 {
+		return math.Max(agg, val)
+	})
+}
+
 // MaxFunc computes the max of tensor values.
 // See [StatsFunc] for general information.
 func MaxFunc(in, out *tensor.Indexed) {
 	VectorizeOut64(MaxVecFunc, in, out)
+}
+
+// MinAbsVecFunc is a Vectorize function for computing the min of abs.
+func MinAbsVecFunc(idx int, tsr ...*tensor.Indexed) {
+	StatVecFunc(idx, tsr[0], tsr[1], math.MaxFloat64, func(val, agg float64) float64 {
+		return math.Min(agg, math.Abs(val))
+	})
 }
 
 // MinAbsFunc computes the min of absolute-value-of tensor values.
@@ -65,16 +115,17 @@ func MinAbsFunc(in, out *tensor.Indexed) {
 	VectorizeOut64(MinAbsVecFunc, in, out)
 }
 
+// MaxAbsVecFunc is a Vectorize function for computing the max of abs.
+func MaxAbsVecFunc(idx int, tsr ...*tensor.Indexed) {
+	StatVecFunc(idx, tsr[0], tsr[1], -math.MaxFloat64, func(val, agg float64) float64 {
+		return math.Max(agg, math.Abs(val))
+	})
+}
+
 // MaxAbsFunc computes the max of absolute-value-of tensor values.
 // See [StatsFunc] for general information.
 func MaxAbsFunc(in, out *tensor.Indexed) {
 	VectorizeOut64(MaxAbsVecFunc, in, out)
-}
-
-// MeanFunc computes the mean of tensor values.
-// See [StatsFunc] for general information.
-func MeanFunc(in, out *tensor.Indexed) {
-	MeanFuncOut64(in, out)
 }
 
 // MeanFuncOut64 computes the mean of tensor values,
@@ -96,11 +147,19 @@ func MeanFuncOut64(in, out *tensor.Indexed) (mean64, count64 *tensor.Indexed) {
 	return sum64, count64
 }
 
-// VarFunc computes the sample variance of tensor values.
-// Squared deviations from mean, divided by n-1. See also [VarPopFunc].
+// MeanFunc computes the mean of tensor values.
 // See [StatsFunc] for general information.
-func VarFunc(in, out *tensor.Indexed) {
-	VarFuncOut64(in, out)
+func MeanFunc(in, out *tensor.Indexed) {
+	MeanFuncOut64(in, out)
+}
+
+// VarVecFunc is a Vectorize function for computing the variance,
+// using 3 tensors: in, mean, out.
+func VarVecFunc(idx int, tsr ...*tensor.Indexed) {
+	StatVec2inFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(val1, val2, agg float64) float64 {
+		dv := val1 - val2
+		return agg + dv*dv
+	})
 }
 
 // VarFuncOut64 computes the sample variance of tensor values.
@@ -119,6 +178,13 @@ func VarFuncOut64(in, out *tensor.Indexed) (var64, mean64, count64 *tensor.Index
 		out.Tensor.SetFloat1D(i, var64.Tensor.Float1D(i))
 	}
 	return
+}
+
+// VarFunc computes the sample variance of tensor values.
+// Squared deviations from mean, divided by n-1. See also [VarPopFunc].
+// See [StatsFunc] for general information.
+func VarFunc(in, out *tensor.Indexed) {
+	VarFuncOut64(in, out)
 }
 
 // StdFunc computes the sample standard deviation of tensor values.
@@ -148,13 +214,6 @@ func SemFunc(in, out *tensor.Indexed) {
 	}
 }
 
-// VarPopFunc computes the population variance of tensor values.
-// Squared deviations from mean, divided by n. See also [VarFunc].
-// See [StatsFunc] for general information.
-func VarPopFunc(in, out *tensor.Indexed) {
-	VarPopFuncOut64(in, out)
-}
-
 // VarPopFuncOut64 computes the population variance of tensor values.
 // and returns the Float64 output values for
 // use in subsequent computations.
@@ -171,6 +230,13 @@ func VarPopFuncOut64(in, out *tensor.Indexed) (var64, mean64, count64 *tensor.In
 		out.Tensor.SetFloat1D(i, var64.Tensor.Float1D(i))
 	}
 	return
+}
+
+// VarPopFunc computes the population variance of tensor values.
+// Squared deviations from mean, divided by n. See also [VarFunc].
+// See [StatsFunc] for general information.
+func VarPopFunc(in, out *tensor.Indexed) {
+	VarPopFuncOut64(in, out)
 }
 
 // StdPopFunc computes the population standard deviation of tensor values.
@@ -200,10 +266,22 @@ func SemPopFunc(in, out *tensor.Indexed) {
 	}
 }
 
-// SumSqFunc computes the sum of squares of tensor values,
-// See [StatsFunc] for general information.
-func SumSqFunc(in, out *tensor.Indexed) {
-	SumSqFuncOut64(in, out)
+// SumSqVecFunc is a Vectorize function for computing the sum of squares,
+// using 2 separate aggregation tensors.
+func SumSqVecFunc(idx int, tsr ...*tensor.Indexed) {
+	StatVec2outFunc(idx, tsr[0], tsr[1], tsr[2], 0, 1, func(val, scale, ss float64) (float64, float64) {
+		if val == 0 {
+			return scale, ss
+		}
+		absxi := math.Abs(val)
+		if scale < absxi {
+			ss = 1 + ss*(scale/absxi)*(scale/absxi)
+			scale = absxi
+		} else {
+			ss = ss + (absxi/scale)*(absxi/scale)
+		}
+		return scale, ss
+	})
 }
 
 // SumSqFuncOut64 computes the sum of squares of tensor values,
@@ -227,11 +305,10 @@ func SumSqFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
 	return scale64
 }
 
-// L2NormFunc computes the square root of the sum of squares of tensor values,
-// known as the L2 norm.
+// SumSqFunc computes the sum of squares of tensor values,
 // See [StatsFunc] for general information.
-func L2NormFunc(in, out *tensor.Indexed) {
-	L2NormFuncOut64(in, out)
+func SumSqFunc(in, out *tensor.Indexed) {
+	SumSqFuncOut64(in, out)
 }
 
 // L2NormFuncOut64 computes the square root of the sum of squares of tensor values,
@@ -253,4 +330,11 @@ func L2NormFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
 		out.Tensor.SetFloat1D(i, v)
 	}
 	return scale64
+}
+
+// L2NormFunc computes the square root of the sum of squares of tensor values,
+// known as the L2 norm.
+// See [StatsFunc] for general information.
+func L2NormFunc(in, out *tensor.Indexed) {
+	L2NormFuncOut64(in, out)
 }

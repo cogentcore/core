@@ -101,63 +101,6 @@ func StatVecFunc(idx int, in, out *tensor.Indexed, ini float64, fun func(val, ag
 	}
 }
 
-// SumVecFunc is a Vectorize function for computing the sum.
-func SumVecFunc(idx int, tsr ...*tensor.Indexed) {
-	StatVecFunc(idx, tsr[0], tsr[1], 0, func(val, agg float64) float64 {
-		return agg + val
-	})
-}
-
-// SumAbsVecFunc is a Vectorize function for computing the sum of abs values.
-// This is also known as the L1 norm.
-func SumAbsVecFunc(idx int, tsr ...*tensor.Indexed) {
-	StatVecFunc(idx, tsr[0], tsr[1], 0, func(val, agg float64) float64 {
-		return agg + math.Abs(val)
-	})
-}
-
-// CountVecFunc is a Vectorize function for computing the count.
-func CountVecFunc(idx int, tsr ...*tensor.Indexed) {
-	StatVecFunc(idx, tsr[0], tsr[1], 0, func(val, agg float64) float64 {
-		return agg + 1
-	})
-}
-
-// ProdVecFunc is a Vectorize function for computing the product.
-func ProdVecFunc(idx int, tsr ...*tensor.Indexed) {
-	StatVecFunc(idx, tsr[0], tsr[1], 1, func(val, agg float64) float64 {
-		return agg * val
-	})
-}
-
-// MinVecFunc is a Vectorize function for computing the min.
-func MinVecFunc(idx int, tsr ...*tensor.Indexed) {
-	StatVecFunc(idx, tsr[0], tsr[1], math.MaxFloat64, func(val, agg float64) float64 {
-		return math.Min(agg, val)
-	})
-}
-
-// MaxVecFunc is a Vectorize function for computing the max.
-func MaxVecFunc(idx int, tsr ...*tensor.Indexed) {
-	StatVecFunc(idx, tsr[0], tsr[1], -math.MaxFloat64, func(val, agg float64) float64 {
-		return math.Max(agg, val)
-	})
-}
-
-// MinAbsVecFunc is a Vectorize function for computing the min of abs.
-func MinAbsVecFunc(idx int, tsr ...*tensor.Indexed) {
-	StatVecFunc(idx, tsr[0], tsr[1], math.MaxFloat64, func(val, agg float64) float64 {
-		return math.Min(agg, math.Abs(val))
-	})
-}
-
-// MaxAbsVecFunc is a Vectorize function for computing the max of abs.
-func MaxAbsVecFunc(idx int, tsr ...*tensor.Indexed) {
-	StatVecFunc(idx, tsr[0], tsr[1], -math.MaxFloat64, func(val, agg float64) float64 {
-		return math.Max(agg, math.Abs(val))
-	})
-}
-
 /////////////////////////////////////////////////////\
 //		Two input Tensors
 
@@ -179,15 +122,6 @@ func StatVec2inFunc(idx int, in1, in2, out *tensor.Indexed, ini float64, fun fun
 		val2 := in2.Tensor.Float1D(i)
 		out.Tensor.SetFloat1D(i, fun(val1, val2, out.Tensor.Float1D(i)))
 	}
-}
-
-// VarVecFunc is a Vectorize function for computing the variance,
-// using 3 tensors: in, mean, out.
-func VarVecFunc(idx int, tsr ...*tensor.Indexed) {
-	StatVec2inFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(val1, val2, agg float64) float64 {
-		dv := val1 - val2
-		return agg + dv*dv
-	})
 }
 
 /////////////////////////////////////////////////////\
@@ -213,22 +147,4 @@ func StatVec2outFunc(idx int, in, out1, out2 *tensor.Indexed, ini1, ini2 float64
 		out1.Tensor.SetFloat1D(i, ag1)
 		out2.Tensor.SetFloat1D(i, ag2)
 	}
-}
-
-// SumSqVecFunc is a Vectorize function for computing the sum of squares,
-// using 2 separate aggregation tensors.
-func SumSqVecFunc(idx int, tsr ...*tensor.Indexed) {
-	StatVec2outFunc(idx, tsr[0], tsr[1], tsr[2], 0, 1, func(val, scale, ss float64) (float64, float64) {
-		if val == 0 {
-			return scale, ss
-		}
-		absxi := math.Abs(val)
-		if scale < absxi {
-			ss = 1 + ss*(scale/absxi)*(scale/absxi)
-			scale = absxi
-		} else {
-			ss = ss + (absxi/scale)*(absxi/scale)
-		}
-		return scale, ss
-	})
 }
