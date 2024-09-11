@@ -54,6 +54,12 @@ func NewIndexed(tsr Tensor, idxs ...[]int) *Indexed {
 	return ix
 }
 
+// NewFloatScalar is a convenience method to quickly get an Indexed
+// representation of a single float64 scalar value, for use in math routines etc.
+func NewFloatScalar(val float64) *Indexed {
+	return &Indexed{Tensor: NewNumberFromSlice([]float64{val})}
+}
+
 // SetTensor sets as indexes into given tensor with sequential initial indexes
 func (ix *Indexed) SetTensor(tsr Tensor) {
 	ix.Tensor = tsr

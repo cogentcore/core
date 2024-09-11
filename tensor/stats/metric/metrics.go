@@ -7,51 +7,36 @@
 package metric
 
 import (
-	"fmt"
-
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 )
 
-// Funcs is a registry of named metric functions,
-// which can then be called by standard enum or
-// string name for custom functions.
-var Funcs map[string]MetricFunc
-
 func init() {
-	Funcs = make(map[string]MetricFunc)
-	Funcs[Euclidean.String()] = EuclideanFunc
-	Funcs[L2Norm.String()] = EuclideanFunc
-	Funcs[SumSquares.String()] = SumSquaresFunc
-	Funcs[Abs.String()] = AbsFunc
-	Funcs[L1Norm.String()] = AbsFunc
-	Funcs[Hamming.String()] = HammingFunc
-	Funcs[EuclideanBinTol.String()] = EuclideanBinTolFunc
-	Funcs[SumSquaresBinTol.String()] = SumSquaresBinTolFunc
-	Funcs[InvCosine.String()] = InvCosineFunc
-	Funcs[InvCorrelation.String()] = InvCorrelationFunc
-	Funcs[InnerProduct.String()] = InnerProductFunc
-	Funcs[CrossEntropy.String()] = CrossEntropyFunc
-	Funcs[Covariance.String()] = CovarianceFunc
-	Funcs[Correlation.String()] = CorrelationFunc
-	Funcs[Cosine.String()] = CosineFunc
+	tensor.AddFunc(Euclidean.String(), EuclideanFunc, 1)
+	tensor.AddFunc(SumSquares.String(), SumSquaresFunc, 1)
+	tensor.AddFunc(Abs.String(), AbsFunc, 1)
+	tensor.AddFunc(Hamming.String(), HammingFunc, 1)
+	tensor.AddFunc(EuclideanBinTol.String(), EuclideanBinTolFunc, 1)
+	tensor.AddFunc(SumSquaresBinTol.String(), SumSquaresBinTolFunc, 1)
+	tensor.AddFunc(InvCosine.String(), InvCosineFunc, 1)
+	tensor.AddFunc(InvCorrelation.String(), InvCorrelationFunc, 1)
+	tensor.AddFunc(InnerProduct.String(), InnerProductFunc, 1)
+	tensor.AddFunc(CrossEntropy.String(), CrossEntropyFunc, 1)
+	tensor.AddFunc(Covariance.String(), CovarianceFunc, 1)
+	tensor.AddFunc(Correlation.String(), CorrelationFunc, 1)
+	tensor.AddFunc(Cosine.String(), CosineFunc, 1)
 }
 
 // Standard calls a standard Metrics enum function on given tensors.
 // Output results are in the out tensor.
 func Standard(metric Metrics, a, b, out *tensor.Indexed) {
-	Funcs[metric.String()](a, b, out)
+	tensor.Call(metric.String(), a, b, out)
 }
 
-// Call calls a registered stats function on given tensors.
-// Output results are in the out tensor.  Returns an
-// error if name not found.
-func Call(name string, a, b, out *tensor.Indexed) error {
-	f, ok := Funcs[name]
-	if !ok {
-		return fmt.Errorf("metric.Call: function %q not registered", name)
-	}
-	f(a, b, out)
-	return nil
+// StandardOut calls a standard Metrics enum function on given tensors,
+// returning output as a newly created tensor.
+func StandardOut(metric Metrics, a, b *tensor.Indexed) *tensor.Indexed {
+	return errors.Log1(tensor.CallOut(metric.String(), a, b))[0] // note: error should never happen
 }
 
 // Metrics are standard metric functions
@@ -59,23 +44,15 @@ type Metrics int32 //enums:enum
 
 const (
 	// Euclidean is the square root of the sum of squares differences
-	// between tensor values, aka the [L2Norm].
+	// between tensor values, aka the L2Norm.
 	Euclidean Metrics = iota
-
-	// L2Norm is the square root of the sum of squares differences
-	// between tensor values, aka [Euclidean] distance.
-	L2Norm
 
 	// SumSquares is the sum of squares differences between tensor values.
 	SumSquares
 
 	// Abs is the sum of the absolute value of differences
-	// between tensor values, aka the [L1Norm].
+	// between tensor values, aka the L1Norm.
 	Abs
-
-	// L1Norm is the sum of the absolute value of differences
-	// between tensor values (same as [Abs]).
-	L1Norm
 
 	// Hamming is the sum of 1s for every element that is different,
 	// i.e., "city block" distance.

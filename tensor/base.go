@@ -77,6 +77,9 @@ func (tsr *Base[T]) view() *Base[T] {
 
 // SetShape sets the shape params, resizing backing storage appropriately
 func (tsr *Base[T]) SetShape(sizes []int, names ...string) {
+	if len(sizes) == 0 {
+		sizes = []int{0}
+	}
 	tsr.shape.SetShape(sizes, names...)
 	nln := tsr.Len()
 	tsr.Values = slicesx.SetLength(tsr.Values, nln)

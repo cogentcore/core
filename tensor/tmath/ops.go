@@ -117,6 +117,7 @@ func SubScalar(sign float64, scalar float64, a, out *tensor.Indexed) {
 
 // SubSubSpace subtracts the subspace tensor to each row in the given tensor,
 // into the output tensor.
+// sign determines which way the subtraction goes: 1 = a-sub, -1 = sub-a
 func SubSubSpace(sign float64, a, sub, out *tensor.Indexed) {
 	out.SetShapeFrom(a)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
@@ -235,7 +236,8 @@ func DivScalar(scalar float64, a, out *tensor.Indexed) {
 	}, a, out)
 }
 
-// DivScalarInv divides scalar by given tensor elements into output.
+// DivScalarInv divides scalar by given tensor elements into output
+// (inverse of [DivScalar]).
 func DivScalarInv(scalar float64, a, out *tensor.Indexed) {
 	out.SetShapeFrom(a)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
@@ -256,7 +258,7 @@ func DivSubSpace(a, sub, out *tensor.Indexed) {
 }
 
 // DivSubSpaceInv divides the subspace tensor by each row of the given tensor,
-// into the output tensor.
+// into the output tensor (inverse of [DivSubSpace])
 func DivSubSpaceInv(a, sub, out *tensor.Indexed) {
 	out.SetShapeFrom(a)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {

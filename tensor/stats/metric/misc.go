@@ -34,22 +34,3 @@ func ClosestRow(probe *tensor.Indexed, vocab *tensor.Indexed, mfun MetricFunc) (
 	}
 	return mi, mind
 }
-
-// todo:
-
-// Tolerance64 sets a = b for any element where |a-b| <= tol.
-// This can be called prior to any metric function.
-func Tolerance64(a, b []float64, tol float64) {
-	if len(a) != len(b) {
-		panic("metric: slice lengths do not match")
-	}
-	for i, av := range a {
-		bv := b[i]
-		if math.IsNaN(av) || math.IsNaN(bv) {
-			continue
-		}
-		if math.Abs(av-bv) <= tol {
-			a[i] = bv
-		}
-	}
-}

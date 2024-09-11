@@ -5,10 +5,10 @@
 package tmath
 
 import (
-	"fmt"
 	"testing"
 
 	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/stats/stats"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -129,9 +129,32 @@ func TestAdd(t *testing.T) {
 	}
 
 	ZScore(oned, oneout)
-	fmt.Println(oneout.Tensor)
+	mout := tensor.NewIndexed(tensor.NewFloat64(nil))
+	std, mean, _ := stats.StdFuncOut64(oneout, mout)
+	assert.InDelta(t, 1.0, std.Tensor.Float1D(0), 1.0e-6)
+	assert.InDelta(t, 0.0, mean.Tensor.Float1D(0), 1.0e-6)
 
 	UnitNorm(oned, oneout)
-	fmt.Println(oneout.Tensor)
+	stats.MinFunc(oneout, mout)
+	assert.InDelta(t, 0.0, mout.Tensor.Float1D(0), 1.0e-6)
+	stats.MaxFunc(oneout, mout)
+	assert.InDelta(t, 1.0, mout.Tensor.Float1D(0), 1.0e-6)
+	// fmt.Println(oneout.Tensor)
 
+	minv := tensor.NewFloatScalar(0)
+	maxv := tensor.NewFloatScalar(1)
+	Clamp(oned, minv, maxv, oneout)
+	stats.MinFunc(oneout, mout)
+	assert.InDelta(t, 0.0, mout.Tensor.Float1D(0), 1.0e-6)
+	stats.MaxFunc(oneout, mout)
+	assert.InDelta(t, 1.0, mout.Tensor.Float1D(0), 1.0e-6)
+	// fmt.Println(oneout.Tensor)
+
+	thr := tensor.NewFloatScalar(0.5)
+	Binarize(oned, thr, oneout)
+	stats.MinFunc(oneout, mout)
+	assert.InDelta(t, 0.0, mout.Tensor.Float1D(0), 1.0e-6)
+	stats.MaxFunc(oneout, mout)
+	assert.InDelta(t, 1.0, mout.Tensor.Float1D(0), 1.0e-6)
+	// fmt.Println(oneout.Tensor)
 }
