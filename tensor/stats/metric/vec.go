@@ -41,7 +41,7 @@ func OutShape(ish *tensor.Shape) *tensor.Shape {
 	return osh
 }
 
-// NFunc is the nfun for metrics functions, returning the min length across the
+// NFunc is the nfun for metrics functions, returning the min number of rows across the
 // two input tensors, and initializing the _last_ one to hold the output
 // with the first, row dimension set to 1.
 func NFunc(tsr ...*tensor.Indexed) int {
@@ -50,7 +50,7 @@ func NFunc(tsr ...*tensor.Indexed) int {
 		return 0
 	}
 	a, b, out := tsr[0], tsr[1], tsr[nt-1]
-	na, nb := a.Len(), b.Len()
+	na, nb := a.Rows(), b.Rows()
 	osh := OutShape(a.Tensor.Shape())
 	out.Tensor.SetShape(osh.Sizes, osh.Names...)
 	out.Indexes = []int{0}

@@ -112,30 +112,28 @@ func NFirstRows(tsr ...*Indexed) int {
 	if len(tsr) == 0 {
 		return 0
 	}
-	return tsr[0].Len()
+	return tsr[0].Rows()
 }
 
 // NFirstLen is an N function for Vectorize that returns the number of
-// elements in the tensor, including the Indexes view.
+// elements in the tensor, taking into account the Indexes view.
 func NFirstLen(tsr ...*Indexed) int {
 	if len(tsr) == 0 {
 		return 0
 	}
-	ft := tsr[0]
-	_, cells := ft.Tensor.RowCellSize()
-	return cells * ft.Len()
+	return tsr[0].Len()
 }
 
-// NMinNotLast is an N function for Vectorize that returns the min number of
-// indexes of all but the last tensor.  This is used when the last tensor is
-// the output of the function, operating on the prior vector(s).
-func NMinNotLast(tsr ...*Indexed) int {
-	nt := len(tsr)
-	if nt < 2 {
+// NMinLen is an N function for Vectorize that returns the min number of
+// elements across given number of tensors in the list.  Use a closure
+// to call this with the nt.
+func NMinLen(nt int, tsr ...*Indexed) int {
+	nt = min(len(tsr), nt)
+	if nt == 0 {
 		return 0
 	}
 	n := tsr[0].Len()
-	for i := 1; i < nt-1; i++ {
+	for i := 1; i < nt; i++ {
 		n = min(n, tsr[0].Len())
 	}
 	return n

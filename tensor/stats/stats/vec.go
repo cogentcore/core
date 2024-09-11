@@ -68,7 +68,7 @@ func OutShape(ish *tensor.Shape) *tensor.Shape {
 	return osh
 }
 
-// NFunc is the nfun for stats functions, returning the length of the
+// NFunc is the nfun for stats functions, returning number of rows of the
 // first tensor, and initializing the _last_ one to hold the output
 // with the first, row dimension set to 1.
 func NFunc(tsr ...*tensor.Indexed) int {
@@ -77,7 +77,7 @@ func NFunc(tsr ...*tensor.Indexed) int {
 		return 0
 	}
 	in, out := tsr[0], tsr[nt-1]
-	n := in.Len()
+	n := in.Rows()
 	osh := OutShape(in.Tensor.Shape())
 	out.Tensor.SetShape(osh.Sizes, osh.Names...)
 	out.Indexes = []int{0}

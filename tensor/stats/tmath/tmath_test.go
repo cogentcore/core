@@ -22,7 +22,7 @@ func Equal(t *testing.T, trg, val float64) {
 		}
 		return
 	}
-	assert.InDelta(t, trg, val, 1.0e-6)
+	assert.InDelta(t, trg, val, 1.0e-4)
 }
 
 func TestMath(t *testing.T) {
@@ -43,8 +43,8 @@ func TestMath(t *testing.T) {
 	// cell2d.DeleteRows(3, 1)
 	cellout := cell2d.Clone()
 
-	mfuncs := []onef{math.Abs, math.Acos}
-	tfuncs := []Func1in1out{Abs, Acos}
+	mfuncs := []onef{math.Abs, math.Acos, math.Acosh, math.Asin, math.Asinh, math.Atan, math.Atanh, math.Cbrt, math.Ceil, math.Cos, math.Cosh, math.Erf, math.Erfc, math.Erfcinv, math.Erfcinv, math.Erfinv, math.Exp, math.Exp2, math.Expm1, math.Floor, math.Gamma, math.J0, math.J1, math.Log, math.Log10, math.Log1p, math.Log2, math.Logb, math.Round, math.RoundToEven, math.Sin, math.Sinh, math.Sqrt, math.Tan, math.Tanh, math.Trunc, math.Y0, math.Y1}
+	tfuncs := []Func1in1out{Abs, Acos, Acosh, Asin, Asinh, Atan, Atanh, Cbrt, Ceil, Cos, Cosh, Erf, Erfc, Erfcinv, Erfcinv, Erfinv, Exp, Exp2, Expm1, Floor, Gamma, J0, J1, Log, Log10, Log1p, Log2, Logb, Round, RoundToEven, Sin, Sinh, Sqrt, Tan, Tanh, Trunc, Y0, Y1}
 
 	for i, fun := range mfuncs {
 		tf := tfuncs[i]

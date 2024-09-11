@@ -91,12 +91,23 @@ func (ix *Indexed) RowCellIndex(idx int) (i1d, ri, ci int) {
 	return
 }
 
-// Len returns the length of the index list or number of outer rows dimension.
-func (ix *Indexed) Len() int {
+// Rows returns the effective number of rows in this Indexed view,
+// which is the length of the index list or number of outer
+// rows dimension of tensor if no indexes.
+func (ix *Indexed) Rows() int {
 	if ix.Indexes == nil {
 		return ix.Tensor.DimSize(0)
 	}
 	return len(ix.Indexes)
+}
+
+// Len returns the total number of elements in the tensor,
+// taking into account the Indexes via [Rows],
+// as Rows() * cell size.
+func (ix *Indexed) Len() int {
+	rows := ix.Rows()
+	_, cells := ix.Tensor.RowCellSize()
+	return cells * rows
 }
 
 // DeleteInvalid deletes all invalid indexes from the list.
@@ -106,7 +117,7 @@ func (ix *Indexed) DeleteInvalid() {
 		ix.Indexes = nil
 		return
 	}
-	ni := ix.Len()
+	ni := ix.Rows()
 	for i := ni - 1; i >= 0; i-- {
 		if ix.Indexes[i] >= ix.Tensor.DimSize(0) {
 			ix.Indexes = append(ix.Indexes[:i], ix.Indexes[i+1:]...)
@@ -155,7 +166,7 @@ func (ix *Indexed) ExcludeMissing1D() { //types:add
 		return
 	}
 	ix.IndexesNeeded()
-	ni := ix.Len()
+	ni := ix.Rows()
 	for i := ni - 1; i >= 0; i-- {
 		if math.IsNaN(ix.Tensor.Float1D(ix.Indexes[i])) {
 			ix.Indexes = append(ix.Indexes[:i], ix.Indexes[i+1:]...)
