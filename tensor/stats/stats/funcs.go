@@ -180,15 +180,24 @@ func VarFunc(in, out *tensor.Indexed) {
 	VarFuncOut64(in, out)
 }
 
+// StdFuncOut64 computes the sample standard deviation of tensor values.
+// and returns the Float64 output values for subsequent use.
+func StdFuncOut64(in, out *tensor.Indexed) (std64, mean64, count64 *tensor.Indexed) {
+	std64, mean64, count64 = VarFuncOut64(in, out)
+	nsub := out.Tensor.Len()
+	for i := range nsub {
+		std := math.Sqrt(std64.Tensor.Float1D(i))
+		std64.Tensor.SetFloat1D(i, std)
+		out.Tensor.SetFloat1D(i, std)
+	}
+	return
+}
+
 // StdFunc computes the sample standard deviation of tensor values.
 // Sqrt of variance from [VarFunc]. See also [StdPopFunc].
 // See [StatsFunc] for general information.
 func StdFunc(in, out *tensor.Indexed) {
-	var64, _, _ := VarFuncOut64(in, out)
-	nsub := out.Tensor.Len()
-	for i := range nsub {
-		out.Tensor.SetFloat1D(i, math.Sqrt(var64.Tensor.Float1D(i)))
-	}
+	StdFuncOut64(in, out)
 }
 
 // SemFunc computes the sample standard error of the mean of tensor values.

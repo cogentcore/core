@@ -5,6 +5,7 @@
 package tmath
 
 import (
+	"fmt"
 	"testing"
 
 	"cogentcore.org/core/tensor"
@@ -126,4 +127,11 @@ func TestAdd(t *testing.T) {
 			assert.InDelta(t, v/v, cellout.Tensor.FloatRowCell(ri, i), 1.0e-6)
 		}
 	}
+
+	ZScore(oned, oneout)
+	fmt.Println(oneout.Tensor)
+
+	UnitNorm(oned, oneout)
+	fmt.Println(oneout.Tensor)
+
 }
