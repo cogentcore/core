@@ -15,14 +15,13 @@ import (
 // Per C / Go / Python conventions, indexes are Row-Major, ordered from
 // outer to inner left-to-right, so the inner-most is right-most.
 type Shape struct {
-
-	// size per dimension
+	// size per dimension.
 	Sizes []int
 
-	// offsets for each dimension
+	// offsets for each dimension.
 	Strides []int `display:"-"`
 
-	// names of each dimension
+	// names of each dimension.
 	Names []string `display:"-"`
 }
 

@@ -30,7 +30,6 @@ import (
 // tensor data do not indirect through the indexes and must be called directly
 // on the [Tensor].
 type Indexed struct { //types:add
-
 	// Tensor that we are an indexed view onto.
 	Tensor Tensor
 
@@ -61,13 +60,35 @@ func (ix *Indexed) SetTensor(tsr Tensor) {
 	ix.Sequential()
 }
 
-// Index returns the actual index into underlying tensor based on given
+// SetShapeFrom sets our shape from given source, calling
+// [Tensor.SetShape] with the shape params from source,
+// and copying the indexes if present.
+func (ix *Indexed) SetShapeFrom(src *Indexed) {
+	ix.Tensor.SetShapeFrom(src.Tensor)
+	if src.Indexes == nil {
+		ix.Indexes = nil
+	} else {
+		ix.Indexes = slices.Clone(src.Indexes)
+	}
+}
+
+// Index returns the actual index into underlying tensor row based on given
 // index value.  If Indexes == nil, index is passed through.
 func (ix *Indexed) Index(idx int) int {
 	if ix.Indexes == nil {
 		return idx
 	}
 	return ix.Indexes[idx]
+}
+
+// RowCellIndex returns the direct Values index into underlying tensor
+// based on given overall row * cell index.
+func (ix *Indexed) RowCellIndex(idx int) (i1d, ri, ci int) {
+	_, cells := ix.Tensor.RowCellSize()
+	ri = idx / cells
+	ci = idx % cells
+	i1d = ix.Index(ri)*cells + ci
+	return
 }
 
 // Len returns the length of the index list or number of outer rows dimension.
@@ -307,18 +328,26 @@ func (ix *Indexed) NewTensor() Tensor {
 	return nt
 }
 
-// Clone returns a copy of the current Indexed view into the same
-// underlying Tensor as the source, with its own copy of Indexes
-// if they were present in source.
+// Clone returns a copy of the current Indexed view with a cloned copy of
+// the underlying Tensor and copy of the indexes.
 func (ix *Indexed) Clone() *Indexed {
 	nix := &Indexed{}
-	nix.CopyFrom(ix)
+	nix.Tensor = ix.Tensor.Clone()
+	nix.CopyIndexes(ix)
 	return nix
 }
 
-// CopyFrom copies from given other Indexed (we have our own unique copy of indexes).
-func (ix *Indexed) CopyFrom(oix *Indexed) {
-	ix.Tensor = oix.Tensor
+// CloneIndexes returns a copy of the current Indexed view with new indexes,
+// with a pointer to the same underlying Tensor as the source.
+func (ix *Indexed) CloneIndexes() *Indexed {
+	nix := &Indexed{}
+	nix.Tensor = ix.Tensor
+	nix.CopyIndexes(ix)
+	return nix
+}
+
+// CopyIndexes copies indexes from other Indexed view.
+func (ix *Indexed) CopyIndexes(oix *Indexed) {
 	if oix.Indexes == nil {
 		ix.Indexes = nil
 	} else {
@@ -353,9 +382,7 @@ func (ix *Indexed) InsertRows(at, n int) {
 
 // DeleteRows deletes n rows of indexes starting at given index in the list of indexes
 func (ix *Indexed) DeleteRows(at, n int) {
-	if ix.Indexes == nil {
-		return
-	}
+	ix.IndexesNeeded()
 	ix.Indexes = append(ix.Indexes[:at], ix.Indexes[at+n:]...)
 }
 

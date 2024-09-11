@@ -6,7 +6,20 @@ package tensor
 
 import (
 	"math"
+	"runtime"
 	"sync"
+)
+
+var (
+	// ThreadingThreshod is the threshold in number of tensor elements
+	// to engage actual parallel processing.
+	// Heuristically, numbers below this threshold do not result in
+	// an overall speedup, due to overhead costs.
+	ThreadingThreshold = 100_000
+
+	// NumThreads is the number of threads to use for parallel threading.
+	// The default of 0 causes the [runtime.GOMAXPROCS] to be used.
+	NumThreads = 0
 )
 
 // Vectorize applies given function 'fun' to tensor elements indexed
@@ -32,7 +45,45 @@ func Vectorize(nfun func(tsr ...*Indexed) int, fun func(idx int, tsr ...*Indexed
 	}
 }
 
-func VectorizeThreaded(threads int, nfun func(tsr ...*Indexed) int, fun func(idx int, tsr ...*Indexed), tsr ...*Indexed) {
+// VectorizeThreaded is a version of [Vectorize] that will automatically
+// distribute the computation in parallel across multiple "threads" (goroutines)
+// if the number of elements to be computed times the given flops
+// (floating point operations) for the function exceeds the [ThreadingThreshold].
+// Heuristically, numbers below this threshold do not result
+// in an overall speedup, due to overhead costs.
+func VectorizeThreaded(flops int, nfun func(tsr ...*Indexed) int, fun func(idx int, tsr ...*Indexed), tsr ...*Indexed) {
+	n := nfun(tsr...)
+	if n <= 0 {
+		return
+	}
+	if flops < 0 {
+		flops = 1
+	}
+	if n*flops < ThreadingThreshold {
+		Vectorize(nfun, fun, tsr...)
+		return
+	}
+	VectorizeOnThreads(0, nfun, fun, tsr...)
+}
+
+// DefaultNumThreads returns the default number of threads to use:
+// NumThreads if non-zero, otherwise [runtime.GOMAXPROCS].
+func DefaultNumThreads() int {
+	if NumThreads > 0 {
+		return NumThreads
+	}
+	return runtime.GOMAXPROCS(0)
+}
+
+// VectorizeOnThreads runs given [Vectorize] function on given number
+// of threads.  Use [VectorizeThreaded] to only use parallel threads when
+// it is likely to be beneficial, in terms of the ThreadingThreshold.
+// If threads is 0, then the [DefaultNumThreads] will be used:
+// GOMAXPROCS subject to NumThreads constraint if non-zero.
+func VectorizeOnThreads(threads int, nfun func(tsr ...*Indexed) int, fun func(idx int, tsr ...*Indexed), tsr ...*Indexed) {
+	if threads == 0 {
+		threads = DefaultNumThreads()
+	}
 	n := nfun(tsr...)
 	if n <= 0 {
 		return
@@ -55,13 +106,24 @@ func VectorizeThreaded(threads int, nfun func(tsr ...*Indexed) int, fun func(idx
 	wait.Wait()
 }
 
-// NFirst is an N function for Vectorize that returns the number of
-// indexes of the first tensor.
-func NFirst(tsr ...*Indexed) int {
+// NFirstRows is an N function for Vectorize that returns the number of
+// outer-dimension rows (or Indexes) of the first tensor.
+func NFirstRows(tsr ...*Indexed) int {
 	if len(tsr) == 0 {
 		return 0
 	}
 	return tsr[0].Len()
+}
+
+// NFirstLen is an N function for Vectorize that returns the number of
+// elements in the tensor, including the Indexes view.
+func NFirstLen(tsr ...*Indexed) int {
+	if len(tsr) == 0 {
+		return 0
+	}
+	ft := tsr[0]
+	_, cells := ft.Tensor.RowCellSize()
+	return cells * ft.Len()
 }
 
 // NMinNotLast is an N function for Vectorize that returns the min number of

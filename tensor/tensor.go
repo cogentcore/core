@@ -152,8 +152,8 @@ type Tensor interface {
 	// otherwise it goes through appropriate standard type.
 	CopyFrom(from Tensor)
 
-	// SetShapeFrom copies just the shape from given source tensor
-	// calling SetShape with the shape params from source (see for more docs).
+	// SetShapeFrom sets our shape from given source tensor, calling
+	// [Tensor.SetShape] with the shape params from source.
 	SetShapeFrom(from Tensor)
 
 	// CopyCellsFrom copies given range of values from other tensor into this tensor,
