@@ -35,15 +35,15 @@ func init() {
 	tensor.AddFunc(Q3.String(), Q3Func, 1)
 }
 
-// Standard calls a standard Stats enum function on given tensors.
+// Stat calls a standard Stats enum function on given tensors.
 // Output results are in the out tensor.
-func Standard(stat Stats, in, out *tensor.Indexed) {
+func Stat(stat Stats, in, out *tensor.Indexed) {
 	tensor.Call(stat.String(), in, out)
 }
 
-// StandardOut calls a standard Stats enum function on given tensor,
+// StatOut calls a standard Stats enum function on given tensor,
 // returning output as a newly created tensor.
-func StandardOut(stat Stats, in *tensor.Indexed) *tensor.Indexed {
+func StatOut(stat Stats, in *tensor.Indexed) *tensor.Indexed {
 	return errors.Log1(tensor.CallOut(stat.String(), in))[0] // note: error should never happen
 }
 

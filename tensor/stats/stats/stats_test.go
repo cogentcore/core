@@ -83,7 +83,7 @@ func TestFuncs64(t *testing.T) {
 	assert.InDelta(t, results[Q3], out.Values[0], tol)
 
 	for stat := Count; stat < StatsN; stat++ {
-		Standard(stat, ix, oix)
+		Stat(stat, ix, oix)
 		assert.InDelta(t, results[stat], out.Values[0], tol)
 	}
 }
@@ -149,7 +149,7 @@ func TestFuncsInt(t *testing.T) {
 	assert.Equal(t, results[L2Norm], out.Values[0])
 
 	for stat := Count; stat <= SemPop; stat++ {
-		Standard(stat, ix, oix)
+		Stat(stat, ix, oix)
 		assert.Equal(t, results[stat], out.Values[0])
 	}
 }
@@ -182,39 +182,3 @@ func TestFuncsCell(t *testing.T) {
 		assert.InDelta(t, 0.0, out.FloatRowCell(0, i), 1.0e-7)
 	}
 }
-
-/*
-func TestIndexed(t *testing.T) {
-	desc := DescAll(ix)
-	assert.Equal(t, len(DescStats), desc.Rows)
-	assert.Equal(t, 2, desc.NumColumns())
-
-	for ri, stat := range DescStats {
-		dv := desc.Float("data", ri)
-		// fmt.Println(ri, ag.String(), dv, results[ag])
-		assert.Equal(t, results[stat], dv)
-	}
-
-	desc, err := DescColumn(ix, "data")
-	if err != nil {
-		t.Error(err)
-	}
-	assert.Equal(t, len(DescStats), desc.Rows)
-	assert.Equal(t, 2, desc.NumColumns())
-	for ri, stat := range DescStats {
-		dv := desc.Float("data", ri)
-		// fmt.Println(ri, ag.String(), dv, results[ag])
-		assert.Equal(t, results[stat], dv)
-	}
-
-	pcts := PctIfColumn(ix, "data", func(idx int, val float64) bool {
-		return val > 2
-	})
-	assert.Equal(t, []float64{60}, pcts)
-
-	props := PropIfColumn(ix, "data", func(idx int, val float64) bool {
-		return val > 2
-	})
-	assert.Equal(t, []float64{0.6}, props)
-}
-*/

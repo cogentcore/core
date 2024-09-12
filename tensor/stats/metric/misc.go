@@ -23,7 +23,7 @@ func ClosestRow(probe, vocab *tensor.Indexed, mfun MetricFunc) (int, float64) {
 	mind := math.MaxFloat64
 	prview := tensor.NewIndexed(tensor.New1DViewOf(probe.Tensor))
 	for ri := range rows {
-		sub := tensor.NewIndexed(tensor.New1DViewOf(vocab.Tensor.SubSpace([]int{vocab.Index(ri)})))
+		sub := tensor.NewIndexed(tensor.New1DViewOf(vocab.SubSpace(ri)))
 		mfun(prview, sub, out)
 		d := out.Tensor.Float1D(0)
 		if d < mind {

@@ -55,8 +55,8 @@ func SumSquaresFuncOut64(a, b, out *tensor.Indexed) *tensor.Indexed {
 		} else {
 			v = scale * scale * ss
 		}
-		scale64.Tensor.SetFloat1D(i, v)
-		out.Tensor.SetFloat1D(i, v)
+		scale64.Tensor.SetFloat1D(v, i)
+		out.Tensor.SetFloat1D(v, i)
 	}
 	return scale64
 }
@@ -81,8 +81,8 @@ func EuclideanFunc(a, b, out *tensor.Indexed) {
 		} else {
 			v = scale * math.Sqrt(ss)
 		}
-		scale64.Tensor.SetFloat1D(i, v)
-		out.Tensor.SetFloat1D(i, v)
+		scale64.Tensor.SetFloat1D(v, i)
+		out.Tensor.SetFloat1D(v, i)
 	}
 }
 
@@ -142,8 +142,8 @@ func EuclideanBinTolFunc(a, b, out *tensor.Indexed) {
 		} else {
 			v = scale * math.Sqrt(ss)
 		}
-		scale64.Tensor.SetFloat1D(i, v)
-		out.Tensor.SetFloat1D(i, v)
+		scale64.Tensor.SetFloat1D(v, i)
+		out.Tensor.SetFloat1D(v, i)
 	}
 }
 
@@ -161,8 +161,8 @@ func SumSquaresBinTolFunc(a, b, out *tensor.Indexed) {
 		} else {
 			v = scale * scale * ss
 		}
-		scale64.Tensor.SetFloat1D(i, v)
-		out.Tensor.SetFloat1D(i, v)
+		scale64.Tensor.SetFloat1D(v, i)
+		out.Tensor.SetFloat1D(v, i)
 	}
 }
 
@@ -216,8 +216,8 @@ func CovarianceFunc(a, b, out *tensor.Indexed) {
 		if c == 0 {
 			continue
 		}
-		cov64.Tensor.SetFloat1D(i, cov64.Tensor.Float1D(i)/c)
-		out.Tensor.SetFloat1D(i, cov64.Tensor.Float1D(i))
+		cov64.Tensor.SetFloat1D(cov64.Tensor.Float1D(i)/c, i)
+		out.Tensor.SetFloat1D(cov64.Tensor.Float1D(i), i)
 	}
 }
 
@@ -249,8 +249,8 @@ func CorrelationFuncOut64(a, b, out *tensor.Indexed) *tensor.Indexed {
 		if vp > 0 {
 			ss /= vp
 		}
-		ss64.Tensor.SetFloat1D(i, ss)
-		out.Tensor.SetFloat1D(i, ss)
+		ss64.Tensor.SetFloat1D(ss, i)
+		out.Tensor.SetFloat1D(ss, i)
 	}
 	return ss64
 }
@@ -278,7 +278,7 @@ func InvCorrelationFunc(a, b, out *tensor.Indexed) {
 	nsub := out.Tensor.Len()
 	for i := range nsub {
 		cor := cor64.Tensor.Float1D(i)
-		out.Tensor.SetFloat1D(i, 1-cor)
+		out.Tensor.SetFloat1D(1-cor, i)
 	}
 }
 
@@ -301,8 +301,8 @@ func CosineFuncOut64(a, b, out *tensor.Indexed) *tensor.Indexed {
 		if vp > 0 {
 			ss /= vp
 		}
-		ss64.Tensor.SetFloat1D(i, ss)
-		out.Tensor.SetFloat1D(i, ss)
+		ss64.Tensor.SetFloat1D(ss, i)
+		out.Tensor.SetFloat1D(ss, i)
 	}
 	return ss64
 }
@@ -324,6 +324,6 @@ func InvCosineFunc(a, b, out *tensor.Indexed) {
 	nsub := out.Tensor.Len()
 	for i := range nsub {
 		cos := cos64.Tensor.Float1D(i)
-		out.Tensor.SetFloat1D(i, 1-cos)
+		out.Tensor.SetFloat1D(1-cos, i)
 	}
 }

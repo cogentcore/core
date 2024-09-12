@@ -177,9 +177,11 @@ func (sh *Shape) Index(offset int) []int {
 func (sh *Shape) String() string {
 	str := "["
 	for i := range sh.Sizes {
-		nm := sh.Names[i]
-		if nm != "" {
-			str += nm + ": "
+		if sh.Names != nil {
+			nm := sh.Names[i]
+			if nm != "" {
+				str += nm + ": "
+			}
 		}
 		str += fmt.Sprintf("%d", sh.Sizes[i])
 		if i < len(sh.Sizes)-1 {

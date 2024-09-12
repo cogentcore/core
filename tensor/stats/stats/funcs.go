@@ -167,8 +167,9 @@ func VarFuncOut64(in, out *tensor.Indexed) (var64, mean64, count64 *tensor.Index
 		if c < 2 {
 			continue
 		}
-		var64.Tensor.SetFloat1D(var64.Tensor.Float1D(i)/(c-1), i)
-		out.Tensor.SetFloat1D(var64.Tensor.Float1D(i), i)
+		vr := var64.Tensor.Float1D(i) / (c - 1)
+		var64.Tensor.SetFloat1D(vr, i)
+		out.Tensor.SetFloat1D(vr, i)
 	}
 	return
 }

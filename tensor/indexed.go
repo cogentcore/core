@@ -499,3 +499,19 @@ func (ix *Indexed) StringRowCell(row, cell int) string {
 func (ix *Indexed) SetStringRowCell(val string, row, cell int) {
 	ix.Tensor.SetStringRowCell(val, ix.Index(row), cell)
 }
+
+// SubSpace returns a new tensor with innermost subspace at given
+// offset(s) in outermost dimension(s) (len(offs) < NumDims).
+// The new tensor points to the values of the this tensor (i.e., modifications
+// will affect both), as its Values slice is a view onto the original (which
+// is why only inner-most contiguous supsaces are supported).
+// Use Clone() method to separate the two.
+// Indexed version does indexed indirection of the outer-most row dimension
+// of the offsets.
+func (ix *Indexed) SubSpace(offs ...int) Tensor {
+	if len(offs) == 0 {
+		return nil
+	}
+	offs[0] = ix.Index(offs[0])
+	return ix.Tensor.SubSpace(offs...)
+}

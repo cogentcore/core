@@ -13,7 +13,7 @@ import (
 // ZScore computes Z-normalized values into given output tensor,
 // subtracting the Mean and dividing by the standard deviation.
 func ZScore(a, out *tensor.Indexed) {
-	mout := tensor.NewIndexed(tensor.NewFloat64(nil))
+	mout := tensor.NewIndexed(tensor.NewFloat64())
 	std, mean, _ := stats.StdFuncOut64(a, mout)
 	Sub(a, mean, out)
 	Div(out, std, out)
@@ -22,7 +22,7 @@ func ZScore(a, out *tensor.Indexed) {
 // UnitNorm computes unit normalized values into given output tensor,
 // subtracting the Min value and dividing by the Max of the remaining numbers.
 func UnitNorm(a, out *tensor.Indexed) {
-	mout := tensor.NewIndexed(tensor.NewFloat64(nil))
+	mout := tensor.NewIndexed(tensor.NewFloat64())
 	stats.MinFunc(a, mout)
 	Sub(a, mout, out)
 	stats.MaxFunc(out, mout)
@@ -38,7 +38,7 @@ func Clamp(in, minv, maxv, out *tensor.Indexed) {
 	mx := maxv.Tensor.Float1D(0)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].Tensor.SetFloat1D(i, math32.Clamp64(tsr[0].Tensor.Float1D(i), mn, mx))
+		tsr[1].Tensor.SetFloat1D(math32.Clamp64(tsr[0].Tensor.Float1D(i), mn, mx), i)
 	}, in, out)
 }
 
@@ -56,6 +56,6 @@ func Binarize(in, threshold, out *tensor.Indexed) {
 		} else {
 			v = 0
 		}
-		tsr[1].Tensor.SetFloat1D(i, v)
+		tsr[1].Tensor.SetFloat1D(v, i)
 	}, in, out)
 }

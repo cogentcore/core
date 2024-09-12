@@ -24,7 +24,7 @@ func TestFuncs(t *testing.T) {
 
 	atsr := tensor.NewIndexed(tensor.NewNumberFromSlice(a64))
 	btsr := tensor.NewIndexed(tensor.NewNumberFromSlice(b64))
-	out := tensor.NewFloat64([]int{1})
+	out := tensor.NewFloat64(1)
 	oix := tensor.NewIndexed(out)
 
 	EuclideanFunc(atsr, btsr, oix)
@@ -67,7 +67,7 @@ func TestFuncs(t *testing.T) {
 	assert.InDelta(t, results[InvCosine], out.Values[0], tol)
 
 	for met := Euclidean; met < MetricsN; met++ {
-		Standard(met, atsr, btsr, oix)
+		Metric(met, atsr, btsr, oix)
 		assert.InDelta(t, results[met], out.Values[0], tol)
 	}
 }
@@ -92,7 +92,7 @@ func TestMatrix(t *testing.T) {
 	assert.NoError(t, err)
 	// smat.TableColumn(ix, "Input", "Name", false, metric.Euclidean64)
 	in := tensor.NewIndexed(errors.Log1(dt.ColumnByName("Input")))
-	out := tensor.NewIndexed(tensor.NewFloat64(nil))
+	out := tensor.NewIndexed(tensor.NewFloat64())
 	Matrix(in, out, EuclideanFunc)
 	// fmt.Println(out.Tensor)
 	assert.Equal(t, simres, out.Tensor.String())

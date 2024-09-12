@@ -24,7 +24,7 @@ func TestBitSlice10(t *testing.T) {
 		t.Errorf("empty != %v", out)
 	}
 
-	bs.Set(2, true)
+	bs.Set(true, 2)
 	// fmt.Printf("2=true: %v\n", bs.String())
 	ex = "[0 0 1 0 0 0 0 0 0 0 ]"
 	out = bs.String()
@@ -32,7 +32,7 @@ func TestBitSlice10(t *testing.T) {
 		t.Errorf("2=true != %v", out)
 	}
 
-	bs.Set(4, true)
+	bs.Set(true, 4)
 	// fmt.Printf("4=true: %v\n", bs.String())
 	ex = "[0 0 1 0 1 0 0 0 0 0 ]"
 	out = bs.String()
@@ -40,7 +40,7 @@ func TestBitSlice10(t *testing.T) {
 		t.Errorf("4=true != %v", out)
 	}
 
-	bs.Set(9, true)
+	bs.Set(true, 9)
 	// fmt.Printf("9=true: %v\n", bs.String())
 	ex = "[0 0 1 0 1 0 0 0 0 1 ]"
 	out = bs.String()

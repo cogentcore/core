@@ -76,7 +76,7 @@ func (bs *Slice) SetLen(ln int) {
 }
 
 // Set sets value of given bit index -- no extra range checking is performed -- will panic if out of range
-func (bs *Slice) Set(idx int, val bool) {
+func (bs *Slice) Set(val bool, idx int) {
 	by, bi := BitIndex(idx)
 	if val {
 		(*bs)[by+1] |= 1 << bi
@@ -95,7 +95,7 @@ func (bs *Slice) Index(idx int) bool {
 func (bs *Slice) Append(val bool) Slice {
 	if len(*bs) == 0 {
 		*bs = Make(1, 0)
-		bs.Set(0, val)
+		bs.Set(val, 0)
 		return *bs
 	}
 	ln := bs.Len()
@@ -108,7 +108,7 @@ func (bs *Slice) Append(val bool) Slice {
 	} else {
 		(*bs)[0] = 0
 	}
-	bs.Set(ln, val)
+	bs.Set(val, ln)
 	return *bs
 }
 
@@ -161,7 +161,7 @@ func (bs *Slice) SubSlice(start, end int) Slice {
 	}
 	ss := Make(nln, 0)
 	for i := 0; i < nln; i++ {
-		ss.Set(i, bs.Index(i+start))
+		ss.Set(bs.Index(i+start), i)
 	}
 	return ss
 }
@@ -186,10 +186,10 @@ func (bs *Slice) Delete(start, n int) Slice {
 	}
 	ss := Make(nln, 0)
 	for i := 0; i < start; i++ {
-		ss.Set(i, bs.Index(i))
+		ss.Set(bs.Index(i), i)
 	}
 	for i := end; i < ln; i++ {
-		ss.Set(i-n, bs.Index(i))
+		ss.Set(bs.Index(i), i-n)
 	}
 	return ss
 }
@@ -207,10 +207,10 @@ func (bs *Slice) Insert(start, n int) Slice {
 	nln := ln + n
 	ss := Make(nln, 0)
 	for i := 0; i < start; i++ {
-		ss.Set(i, bs.Index(i))
+		ss.Set(bs.Index(i), i)
 	}
 	for i := start; i < ln; i++ {
-		ss.Set(i+n, bs.Index(i))
+		ss.Set(bs.Index(i), i+n)
 	}
 	return ss
 }

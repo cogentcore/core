@@ -27,15 +27,15 @@ func init() {
 	tensor.AddFunc(Cosine.String(), CosineFunc, 1)
 }
 
-// Standard calls a standard Metrics enum function on given tensors.
+// Metric calls a standard Metrics enum function on given tensors.
 // Output results are in the out tensor.
-func Standard(metric Metrics, a, b, out *tensor.Indexed) {
+func Metric(metric Metrics, a, b, out *tensor.Indexed) {
 	tensor.Call(metric.String(), a, b, out)
 }
 
-// StandardOut calls a standard Metrics enum function on given tensors,
+// MetricOut calls a standard Metrics enum function on given tensors,
 // returning output as a newly created tensor.
-func StandardOut(metric Metrics, a, b *tensor.Indexed) *tensor.Indexed {
+func MetricOut(metric Metrics, a, b *tensor.Indexed) *tensor.Indexed {
 	return errors.Log1(tensor.CallOut(metric.String(), a, b))[0] // note: error should never happen
 }
 

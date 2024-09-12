@@ -109,10 +109,10 @@ func (tsr *Bits) Value(i ...int) bool {
 func (tsr *Bits) Value1D(i int) bool { return tsr.Values.Index(i) }
 
 func (tsr *Bits) Set(val bool, i ...int) {
-	tsr.Values.Set(tsr.shape.Offset(i...), val)
+	tsr.Values.Set(val, tsr.shape.Offset(i...))
 }
 
-func (tsr *Bits) Set1D(val bool, i int) { tsr.Values.Set(i, val) }
+func (tsr *Bits) Set1D(val bool, i int) { tsr.Values.Set(val, i) }
 
 // SetShape sets the shape params, resizing backing storage appropriately
 func (tsr *Bits) SetShape(sizes ...int) {
@@ -145,7 +145,7 @@ func (tsr *Bits) Float(i ...int) float64 {
 }
 
 func (tsr *Bits) SetFloat(val float64, i ...int) {
-	tsr.Values.Set(tsr.shape.Offset(i...), Float64ToBool(val))
+	tsr.Values.Set(Float64ToBool(val), tsr.shape.Offset(i...))
 }
 
 func (tsr *Bits) StringValue(i ...int) string {
@@ -154,7 +154,7 @@ func (tsr *Bits) StringValue(i ...int) string {
 
 func (tsr *Bits) SetString(val string, i ...int) {
 	if bv, err := reflectx.ToBool(val); err == nil {
-		tsr.Values.Set(tsr.shape.Offset(i...), bv)
+		tsr.Values.Set(bv, tsr.shape.Offset(i...))
 	}
 }
 
@@ -163,7 +163,7 @@ func (tsr *Bits) Float1D(off int) float64 {
 }
 
 func (tsr *Bits) SetFloat1D(val float64, off int) {
-	tsr.Values.Set(off, Float64ToBool(val))
+	tsr.Values.Set(Float64ToBool(val), off)
 }
 
 func (tsr *Bits) FloatRowCell(row, cell int) float64 {
@@ -173,7 +173,7 @@ func (tsr *Bits) FloatRowCell(row, cell int) float64 {
 
 func (tsr *Bits) SetFloatRowCell(val float64, row, cell int) {
 	_, sz := tsr.RowCellSize()
-	tsr.Values.Set(row*sz+cell, Float64ToBool(val))
+	tsr.Values.Set(Float64ToBool(val), row*sz+cell)
 }
 
 func (tsr *Bits) Floats(flt *[]float64) {
@@ -188,7 +188,7 @@ func (tsr *Bits) Floats(flt *[]float64) {
 func (tsr *Bits) SetFloats(vals ...float64) {
 	sz := min(tsr.Len(), len(vals))
 	for j := 0; j < sz; j++ {
-		tsr.Values.Set(j, Float64ToBool(vals[j]))
+		tsr.Values.Set(Float64ToBool(vals[j]), j)
 	}
 }
 
@@ -198,7 +198,7 @@ func (tsr *Bits) String1D(off int) string {
 
 func (tsr *Bits) SetString1D(val string, off int) {
 	if bv, err := reflectx.ToBool(val); err == nil {
-		tsr.Values.Set(off, bv)
+		tsr.Values.Set(bv, off)
 	}
 }
 
@@ -210,7 +210,7 @@ func (tsr *Bits) StringRowCell(row, cell int) string {
 func (tsr *Bits) SetStringRowCell(val string, row, cell int) {
 	if bv, err := reflectx.ToBool(val); err == nil {
 		_, sz := tsr.RowCellSize()
-		tsr.Values.Set(row*sz+cell, bv)
+		tsr.Values.Set(bv, row*sz+cell)
 	}
 }
 
@@ -230,7 +230,7 @@ func (tsr *Bits) Range() (min, max float64, minIndex, maxIndex int) {
 func (tsr *Bits) SetZeros() {
 	ln := tsr.Len()
 	for j := 0; j < ln; j++ {
-		tsr.Values.Set(j, false)
+		tsr.Values.Set(false, j)
 	}
 }
 
@@ -261,7 +261,7 @@ func (tsr *Bits) CopyFrom(frm Tensor) {
 	}
 	sz := min(len(tsr.Values), frm.Len())
 	for i := 0; i < sz; i++ {
-		tsr.Values.Set(i, Float64ToBool(frm.Float1D(i)))
+		tsr.Values.Set(Float64ToBool(frm.Float1D(i)), i)
 	}
 }
 
@@ -281,12 +281,12 @@ func (tsr *Bits) SetShapeFrom(frm Tensor) {
 func (tsr *Bits) CopyCellsFrom(frm Tensor, to, start, n int) {
 	if fsm, ok := frm.(*Bits); ok {
 		for i := 0; i < n; i++ {
-			tsr.Values.Set(to+i, fsm.Values.Index(start+i))
+			tsr.Values.Set(fsm.Values.Index(start+i), to+i)
 		}
 		return
 	}
 	for i := 0; i < n; i++ {
-		tsr.Values.Set(to+i, Float64ToBool(frm.Float1D(start+i)))
+		tsr.Values.Set(Float64ToBool(frm.Float1D(start+i)), to+i)
 	}
 }
 

@@ -26,7 +26,8 @@ func VectorizeOut64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, ts
 	}
 	nt := len(tsr)
 	out := tsr[nt-1]
-	o64 := tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes...))
+	osz := out.Tensor.Shape().Sizes
+	o64 := tensor.NewIndexed(tensor.NewFloat64(osz...))
 	etsr := slices.Clone(tsr)
 	etsr[nt-1] = o64
 	for idx := range n {
@@ -49,8 +50,9 @@ func Vectorize2Out64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, t
 	}
 	nt := len(tsr)
 	out := tsr[nt-1]
-	out1 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes...))
-	out2 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes...))
+	osz := out.Tensor.Shape().Sizes
+	out1 = tensor.NewIndexed(tensor.NewFloat64(osz...))
+	out2 = tensor.NewIndexed(tensor.NewFloat64(osz...))
 	tsrs := slices.Clone(tsr[:nt-1])
 	tsrs = append(tsrs, out1, out2)
 	for idx := range n {
@@ -81,7 +83,7 @@ func NFunc(tsr ...*tensor.Indexed) int {
 	osh := OutShape(in.Tensor.Shape())
 	out.Tensor.SetShape(osh.Sizes...)
 	out.Tensor.SetNames(osh.Names...)
-	out.Indexes = []int{0}
+	out.Indexes = nil
 	return n
 }
 
@@ -113,11 +115,11 @@ func Vec2inFunc(idx int, in1, in2, out *tensor.Indexed, ini float64, fun func(va
 		if idx == 0 {
 			out.Tensor.SetFloat1D(ini, i)
 		}
-		val1 := in1.FloatRowCell(i, idx)
+		val1 := in1.FloatRowCell(idx, i)
 		if math.IsNaN(val1) {
 			continue
 		}
-		val2 := in2.Tensor.Float1D(i)
+		val2 := in2.Tensor.Float1D(i) // output = not nan
 		out.Tensor.SetFloat1D(fun(val1, val2, out.Tensor.Float1D(i)), i)
 	}
 }

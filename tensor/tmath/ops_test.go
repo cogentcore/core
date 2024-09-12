@@ -13,10 +13,9 @@ import (
 )
 
 func TestAdd(t *testing.T) {
-	scalar := tensor.NewIndexed(tensor.NewFloat64([]int{1}))
-	scalar.Tensor.SetFloat1D(0, -5.5)
+	scalar := tensor.NewFloatScalar(-5.5)
 	scb := scalar.Clone()
-	scb.Tensor.SetFloat1D(0, -4.0)
+	scb.Tensor.SetFloat1D(-4.0, 0)
 	scout := scalar.Clone()
 
 	vals := []float64{-1.507556722888818, -1.2060453783110545, -0.9045340337332908, -0.6030226891555273, -0.3015113445777635, 0.1, 0.3015113445777635, 0.603022689155527, 0.904534033733291, 1.2060453783110545, 1.507556722888818, .3}
@@ -24,10 +23,10 @@ func TestAdd(t *testing.T) {
 	oned := tensor.NewIndexed(tensor.NewNumberFromSlice(vals))
 	oneout := oned.Clone()
 
-	cell2d := tensor.NewIndexed(tensor.NewFloat32([]int{5, 2, 6}))
+	cell2d := tensor.NewIndexed(tensor.NewFloat32(5, 2, 6))
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i1d, _, ci := cell2d.RowCellIndex(idx)
-		cell2d.Tensor.SetFloat1D(i1d, oned.Tensor.Float1D(ci))
+		i, _, ci := cell2d.RowCellIndex(idx)
+		cell2d.Tensor.SetFloat1D(oned.Tensor.Float1D(ci), i)
 	}, cell2d)
 	// cell2d.DeleteRows(3, 1)
 	cellout := cell2d.Clone()
@@ -129,7 +128,7 @@ func TestAdd(t *testing.T) {
 	}
 
 	ZScore(oned, oneout)
-	mout := tensor.NewIndexed(tensor.NewFloat64(nil))
+	mout := tensor.NewIndexed(tensor.NewFloat64())
 	std, mean, _ := stats.StdFuncOut64(oneout, mout)
 	assert.InDelta(t, 1.0, std.Tensor.Float1D(0), 1.0e-6)
 	assert.InDelta(t, 0.0, mean.Tensor.Float1D(0), 1.0e-6)

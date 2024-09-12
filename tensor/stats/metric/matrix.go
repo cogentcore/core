@@ -57,8 +57,7 @@ func Matrix(in, out *tensor.Indexed, mfun MetricFunc) {
 	if rows == 0 || cells == 0 {
 		return
 	}
-	msz := []int{rows, rows}
-	out.Tensor.SetShape(msz)
+	out.Tensor.SetShape(rows, rows)
 	mout := tensor.NewFloatScalar(0.0)
 	coords := TriangularLIndicies(rows)
 	nc := len(coords)
@@ -66,16 +65,16 @@ func Matrix(in, out *tensor.Indexed, mfun MetricFunc) {
 	tensor.VectorizeThreaded(cells*3, func(tsr ...*tensor.Indexed) int { return nc },
 		func(idx int, tsr ...*tensor.Indexed) {
 			c := coords[idx]
-			sa := tensor.NewIndexed(tensor.New1DViewOf(tsr[0].Tensor.SubSpace([]int{tsr[0].Index(c.X)})))
-			sb := tensor.NewIndexed(tensor.New1DViewOf(tsr[0].Tensor.SubSpace([]int{tsr[0].Index(c.Y)})))
+			sa := tensor.NewIndexed(tensor.New1DViewOf(tsr[0].SubSpace(c.X)))
+			sb := tensor.NewIndexed(tensor.New1DViewOf(tsr[0].SubSpace(c.Y)))
 			mfun(sa, sb, mout)
-			tsr[1].SetFloat([]int{c.X, c.Y}, mout.Tensor.Float1D(0))
+			tsr[1].SetFloat(mout.Tensor.Float1D(0), c.X, c.Y)
 		}, in, out)
 	for _, c := range coords { // copy to upper
 		if c.X == c.Y { // exclude diag
 			continue
 		}
-		out.Tensor.SetFloat([]int{c.Y, c.X}, out.Tensor.Float([]int{c.X, c.Y}))
+		out.Tensor.SetFloat(out.Tensor.Float(c.X, c.Y), c.Y, c.X)
 	}
 }
 
@@ -97,8 +96,7 @@ func CrossMatrix(a, b, out *tensor.Indexed, mfun MetricFunc) {
 	if brows == 0 || bcells == 0 {
 		return
 	}
-	msz := []int{arows, brows}
-	out.Tensor.SetShape(msz)
+	out.Tensor.SetShape(arows, brows)
 	mout := tensor.NewFloatScalar(0.0)
 	// note: flops estimating 3 per item on average -- different for different metrics.
 	flops := min(acells, bcells) * 3
@@ -107,9 +105,9 @@ func CrossMatrix(a, b, out *tensor.Indexed, mfun MetricFunc) {
 		func(idx int, tsr ...*tensor.Indexed) {
 			ar := idx / brows
 			br := idx % brows
-			sa := tensor.NewIndexed(tensor.New1DViewOf(tsr[0].Tensor.SubSpace([]int{tsr[0].Index(ar)})))
-			sb := tensor.NewIndexed(tensor.New1DViewOf(tsr[1].Tensor.SubSpace([]int{tsr[1].Index(br)})))
+			sa := tensor.NewIndexed(tensor.New1DViewOf(tsr[0].SubSpace(ar)))
+			sb := tensor.NewIndexed(tensor.New1DViewOf(tsr[1].SubSpace(br)))
 			mfun(sa, sb, mout)
-			tsr[2].SetFloat([]int{ar, br}, mout.Tensor.Float1D(0))
+			tsr[2].SetFloat(mout.Tensor.Float1D(0), ar, br)
 		}, a, b, out)
 }
