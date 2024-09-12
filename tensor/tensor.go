@@ -36,8 +36,10 @@ type Tensor interface {
 
 	// SetShape sets the sizes parameters of the tensor, and resizes
 	// backing storage appropriately.
-	// Existing names will be preserved if not presented.
-	SetShape(sizes []int, names ...string)
+	SetShape(sizes ...int)
+
+	// SetNames sets the dimension names of the tensor shape.
+	SetNames(names ...string)
 
 	// Len returns the number of elements in the tensor,
 	// which is the product of all shape dimensions.
@@ -72,24 +74,24 @@ type Tensor interface {
 	IsString() bool
 
 	// Float returns the value of given index as a float64.
-	Float(i []int) float64
+	Float(i ...int) float64
 
-	// SetFloat sets the value of given index as a float64
-	SetFloat(i []int, val float64)
+	// SetFloat sets the value of given index as a float64.
+	SetFloat(val float64, i ...int)
 
 	// NOTE: String conflicts with [fmt.Stringer], so we have to use StringValue
 
-	// StringValue returns the value of given index as a string
-	StringValue(i []int) string
+	// StringValue returns the value of given index as a string.
+	StringValue(i ...int) string
 
-	// SetString sets the value of given index as a string
-	SetString(i []int, val string)
+	// SetString sets the value of given index as a string.
+	SetString(val string, i ...int)
 
-	// Float1D returns the value of given 1-dimensional index (0-Len()-1) as a float64
+	// Float1D returns the value of given 1-dimensional index (0-Len()-1) as a float64.
 	Float1D(i int) float64
 
-	// SetFloat1D sets the value of given 1-dimensional index (0-Len()-1) as a float64
-	SetFloat1D(i int, val float64)
+	// SetFloat1D sets the value of given 1-dimensional index (0-Len()-1) as a float64.
+	SetFloat1D(val float64, i int)
 
 	// FloatRowCell returns the value at given row and cell, where row is outer-most dim,
 	// and cell is 1D index into remaining inner dims. For Table columns.
@@ -97,7 +99,7 @@ type Tensor interface {
 
 	// SetFloatRowCell sets the value at given row and cell, where row is outer-most dim,
 	// and cell is 1D index into remaining inner dims. For Table columns.
-	SetFloatRowCell(row, cell int, val float64)
+	SetFloatRowCell(val float64, row, cell int)
 
 	// Floats sets []float64 slice of all elements in the tensor
 	// (length is ensured to be sufficient).
@@ -106,13 +108,13 @@ type Tensor interface {
 	Floats(flt *[]float64)
 
 	// SetFloats sets tensor values from a []float64 slice (copies values).
-	SetFloats(vals []float64)
+	SetFloats(vals ...float64)
 
 	// String1D returns the value of given 1-dimensional index (0-Len()-1) as a string
 	String1D(i int) string
 
 	// SetString1D sets the value of given 1-dimensional index (0-Len()-1) as a string
-	SetString1D(i int, val string)
+	SetString1D(val string, i int)
 
 	// StringRowCell returns the value at given row and cell, where row is outer-most dim,
 	// and cell is 1D index into remaining inner dims. For Table columns.
@@ -120,7 +122,7 @@ type Tensor interface {
 
 	// SetStringRowCell sets the value at given row and cell, where row is outer-most dim,
 	// and cell is 1D index into remaining inner dims. For Table columns.
-	SetStringRowCell(row, cell int, val string)
+	SetStringRowCell(val string, row, cell int)
 
 	// SubSpace returns a new tensor with innermost subspace at given
 	// offset(s) in outermost dimension(s) (len(offs) < NumDims).
@@ -128,7 +130,7 @@ type Tensor interface {
 	// will affect both), as its Values slice is a view onto the original (which
 	// is why only inner-most contiguous supsaces are supported).
 	// Use Clone() method to separate the two.
-	SubSpace(offs []int) Tensor
+	SubSpace(offs ...int) Tensor
 
 	// Range returns the min, max (and associated indexes, -1 = no values) for the tensor.
 	// This is needed for display and is thus in the core api in optimized form
@@ -174,48 +176,48 @@ type Tensor interface {
 }
 
 // New returns a new n-dimensional tensor of given value type
-// with the given sizes per dimension (shape), and optional dimension names.
-func New[T string | bool | float32 | float64 | int | int32 | byte](sizes []int, names ...string) Tensor {
+// with the given sizes per dimension (shape).
+func New[T string | bool | float32 | float64 | int | int32 | byte](sizes ...int) Tensor {
 	var v T
 	switch any(v).(type) {
 	case string:
-		return NewString(sizes, names...)
+		return NewString(sizes...)
 	case bool:
-		return NewBits(sizes, names...)
+		return NewBits(sizes...)
 	case float64:
-		return NewNumber[float64](sizes, names...)
+		return NewNumber[float64](sizes...)
 	case float32:
-		return NewNumber[float32](sizes, names...)
+		return NewNumber[float32](sizes...)
 	case int:
-		return NewNumber[int](sizes, names...)
+		return NewNumber[int](sizes...)
 	case int32:
-		return NewNumber[int32](sizes, names...)
+		return NewNumber[int32](sizes...)
 	case byte:
-		return NewNumber[byte](sizes, names...)
+		return NewNumber[byte](sizes...)
 	default:
 		panic("tensor.New: unexpected error: type not supported")
 	}
 }
 
 // NewOfType returns a new n-dimensional tensor of given reflect.Kind type
-// with the given sizes per dimension (shape), and optional dimension names.
+// with the given sizes per dimension (shape).
 // Supported types are string, bool (for [Bits]), float32, float64, int, int32, and byte.
-func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
+func NewOfType(typ reflect.Kind, sizes ...int) Tensor {
 	switch typ {
 	case reflect.String:
-		return NewString(sizes, names...)
+		return NewString(sizes...)
 	case reflect.Bool:
-		return NewBits(sizes, names...)
+		return NewBits(sizes...)
 	case reflect.Float64:
-		return NewNumber[float64](sizes, names...)
+		return NewNumber[float64](sizes...)
 	case reflect.Float32:
-		return NewNumber[float32](sizes, names...)
+		return NewNumber[float32](sizes...)
 	case reflect.Int:
-		return NewNumber[int](sizes, names...)
+		return NewNumber[int](sizes...)
 	case reflect.Int32:
-		return NewNumber[int32](sizes, names...)
+		return NewNumber[int32](sizes...)
 	case reflect.Uint8:
-		return NewNumber[byte](sizes, names...)
+		return NewNumber[byte](sizes...)
 	default:
 		panic(fmt.Sprintf("tensor.NewOfType: type not supported: %v", typ))
 	}
@@ -227,7 +229,7 @@ func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
 // on the 1D list of values.
 func New1DViewOf(tsr Tensor) Tensor {
 	vw := tsr.View()
-	vw.SetShape([]int{tsr.Len()})
+	vw.SetShape(tsr.Len())
 	return vw
 }
 
@@ -235,12 +237,12 @@ func New1DViewOf(tsr Tensor) Tensor {
 // using standard Float64 interface
 func CopyDense(to Tensor, dm *mat.Dense) {
 	nr, nc := dm.Dims()
-	to.SetShape([]int{nr, nc})
+	to.SetShape(nr, nc)
 	idx := 0
 	for ri := 0; ri < nr; ri++ {
 		for ci := 0; ci < nc; ci++ {
 			v := dm.At(ri, ci)
-			to.SetFloat1D(idx, v)
+			to.SetFloat1D(v, idx)
 			idx++
 		}
 	}

@@ -105,7 +105,7 @@ func ReadCSV(tsr Tensor, r io.Reader, delim rune) error {
 	for ri := 0; ri < rows; ri++ {
 		for ci := 0; ci < cols; ci++ {
 			str := rec[ri][ci]
-			tsr.SetString1D(idx, str)
+			tsr.SetString1D(str, idx)
 			idx++
 			if idx >= sz {
 				goto done

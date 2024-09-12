@@ -61,10 +61,17 @@ func (tsr *Base[T]) Bytes() []byte {
 	return slicesx.ToBytes(tsr.Values)
 }
 
-func (tsr *Base[T]) Value(i []int) T    { j := tsr.shape.Offset(i); return tsr.Values[j] }
-func (tsr *Base[T]) Value1D(i int) T    { return tsr.Values[i] }
-func (tsr *Base[T]) Set(i []int, val T) { j := tsr.shape.Offset(i); tsr.Values[j] = val }
-func (tsr *Base[T]) Set1D(i int, val T) { tsr.Values[i] = val }
+func (tsr *Base[T]) Value(i ...int) T {
+	return tsr.Values[tsr.shape.Offset(i...)]
+}
+
+func (tsr *Base[T]) Value1D(i int) T { return tsr.Values[i] }
+
+func (tsr *Base[T]) Set(val T, i ...int) {
+	tsr.Values[tsr.shape.Offset(i...)] = val
+}
+
+func (tsr *Base[T]) Set1D(val T, i int) { tsr.Values[i] = val }
 
 // view is implementation of View -- needs final casting
 func (tsr *Base[T]) view() *Base[T] {
@@ -75,14 +82,16 @@ func (tsr *Base[T]) view() *Base[T] {
 	return nw
 }
 
-// SetShape sets the shape params, resizing backing storage appropriately
-func (tsr *Base[T]) SetShape(sizes []int, names ...string) {
-	if len(sizes) == 0 {
-		sizes = []int{0}
-	}
-	tsr.shape.SetShape(sizes, names...)
+// SetShape sets the shape params, resizing backing storage appropriately.
+func (tsr *Base[T]) SetShape(sizes ...int) {
+	tsr.shape.SetShape(sizes...)
 	nln := tsr.Len()
 	tsr.Values = slicesx.SetLength(tsr.Values, nln)
+}
+
+// SetNames sets the dimension names of the tensor shape.
+func (tsr *Base[T]) SetNames(names ...string) {
+	tsr.shape.SetNames(names...)
 }
 
 // SetNumRows sets the number of rows (outer-most dimension) in a RowMajor organized tensor.
@@ -100,26 +109,29 @@ func (tsr *Base[T]) SetNumRows(rows int) {
 // will affect both), as its Values slice is a view onto the original (which
 // is why only inner-most contiguous supsaces are supported).
 // Use Clone() method to separate the two.
-func (tsr *Base[T]) subSpaceImpl(offs []int) *Base[T] {
+func (tsr *Base[T]) subSpaceImpl(offs ...int) *Base[T] {
 	nd := tsr.NumDims()
 	od := len(offs)
 	if od >= nd {
 		return nil
 	}
 	stsr := &Base[T]{}
-	stsr.SetShape(tsr.shape.Sizes[od:], tsr.shape.Names[od:]...)
+	stsr.SetShape(tsr.shape.Sizes[od:]...)
+	if tsr.shape.Names != nil {
+		stsr.shape.SetNames(tsr.shape.Names...)
+	}
 	sti := make([]int, nd)
 	copy(sti, offs)
-	stoff := tsr.shape.Offset(sti)
+	stoff := tsr.shape.Offset(sti...)
 	sln := stsr.Len()
 	stsr.Values = tsr.Values[stoff : stoff+sln]
 	return stsr
 }
 
-func (tsr *Base[T]) StringValue(i []int) string {
-	j := tsr.shape.Offset(i)
-	return reflectx.ToString(tsr.Values[j])
+func (tsr *Base[T]) StringValue(i ...int) string {
+	return reflectx.ToString(tsr.Values[tsr.shape.Offset(i...)])
 }
+
 func (tsr *Base[T]) String1D(off int) string { return reflectx.ToString(tsr.Values[off]) }
 
 func (tsr *Base[T]) StringRowCell(row, cell int) string {

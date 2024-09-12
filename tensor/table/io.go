@@ -200,12 +200,12 @@ func (dt *Table) ReadCSVRow(rec []string, row int) {
 			str := rec[ci]
 			if !tsr.IsString() {
 				if str == "" || str == "NaN" || str == "-NaN" || str == "Inf" || str == "-Inf" {
-					tsr.SetFloat1D(stoff+cc, nan)
+					tsr.SetFloat1D(nan, stoff+cc)
 				} else {
-					tsr.SetString1D(stoff+cc, strings.TrimSpace(str))
+					tsr.SetString1D(strings.TrimSpace(str), stoff+cc)
 				}
 			} else {
-				tsr.SetString1D(stoff+cc, strings.TrimSpace(str))
+				tsr.SetString1D(strings.TrimSpace(str), stoff+cc)
 			}
 			ci++
 			if ci >= len(rec) {
@@ -256,7 +256,7 @@ func ConfigFromTableHeaders(dt *Table, hdrs []string) error {
 			hd = hd[:lbst]
 			csh := ShapeFromString(dims)
 			// new tensor starting
-			dt.AddTensorColumnOfType(typ, hd, csh, "Row")
+			dt.AddTensorColumnOfType(typ, hd, csh...)
 			continue
 		}
 		dimst = strings.Index(hd, "[")
@@ -502,7 +502,7 @@ func (dt *Table) WriteCSVRowWriter(cw *csv.Writer, row int, ncol int) error {
 			}
 			rc++
 		} else {
-			csh := tensor.NewShape(tsr.Shape().Sizes[1:]) // cell shape
+			csh := tensor.NewShape(tsr.Shape().Sizes[1:]...) // cell shape
 			tc := csh.Len()
 			for ti := 0; ti < tc; ti++ {
 				vl := ""
@@ -535,7 +535,7 @@ func (dt *Table) TableHeaders() []string {
 		if tsr.NumDims() == 1 {
 			hdrs = append(hdrs, nm)
 		} else {
-			csh := tensor.NewShape(tsr.Shape().Sizes[1:]) // cell shape
+			csh := tensor.NewShape(tsr.Shape().Sizes[1:]...) // cell shape
 			tc := csh.Len()
 			nd := csh.NumDims()
 			fnm := nm + fmt.Sprintf("[%v:", nd)

@@ -49,7 +49,7 @@ func QuantilesFunc(in, qs, out *tensor.Indexed) error {
 			hiv := sin.FloatRowCell(lwii+1, 0)
 			val = (1-phi)*lwv + phi*hiv
 		}
-		out.Tensor.SetFloat1D(i, val)
+		out.Tensor.SetFloat1D(val, i)
 	}
 	return nil
 }

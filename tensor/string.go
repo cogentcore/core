@@ -21,10 +21,10 @@ type String struct {
 }
 
 // NewString returns a new n-dimensional tensor of string values
-// with the given sizes per dimension (shape), and optional dimension names.
-func NewString(sizes []int, names ...string) *String {
+// with the given sizes per dimension (shape).
+func NewString(sizes ...int) *String {
 	tsr := &String{}
-	tsr.SetShape(sizes, names...)
+	tsr.SetShape(sizes...)
 	tsr.Values = make([]string, tsr.Len())
 	return tsr
 }
@@ -41,12 +41,11 @@ func NewStringShape(shape *Shape) *String {
 // NewStringFromSlice returns a new 1-dimensional tensor of given value type
 // initialized directly from the given slice values, which are not copied.
 // The resulting Tensor thus "wraps" the given values.
-func NewStringFromSlice(vals []string) Tensor {
+func NewStringFromSlice(vals ...string) Tensor {
 	n := len(vals)
-	sizes := []int{n}
 	tsr := &String{}
 	tsr.Values = vals
-	tsr.SetShape(sizes)
+	tsr.SetShape(n)
 	return tsr
 }
 
@@ -68,30 +67,16 @@ func (tsr *String) IsString() bool {
 	return true
 }
 
-func (tsr *String) AddScalar(i []int, val float64) float64 {
-	j := tsr.shape.Offset(i)
-	fv := StringToFloat64(tsr.Values[j]) + val
-	tsr.Values[j] = Float64ToString(fv)
-	return fv
-}
-
-func (tsr *String) MulScalar(i []int, val float64) float64 {
-	j := tsr.shape.Offset(i)
-	fv := StringToFloat64(tsr.Values[j]) * val
-	tsr.Values[j] = Float64ToString(fv)
-	return fv
-}
-
-func (tsr *String) SetString(i []int, val string) {
-	j := tsr.shape.Offset(i)
+func (tsr *String) SetString(val string, i ...int) {
+	j := tsr.shape.Offset(i...)
 	tsr.Values[j] = val
 }
 
-func (tsr String) SetString1D(off int, val string) {
+func (tsr String) SetString1D(val string, off int) {
 	tsr.Values[off] = val
 }
 
-func (tsr *String) SetStringRowCell(row, cell int, val string) {
+func (tsr *String) SetStringRowCell(val string, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = val
 }
@@ -121,21 +106,19 @@ func (tsr *String) String() string {
 	return b.String()
 }
 
-func (tsr *String) Float(i []int) float64 {
-	j := tsr.shape.Offset(i)
-	return StringToFloat64(tsr.Values[j])
+func (tsr *String) Float(i ...int) float64 {
+	return StringToFloat64(tsr.Values[tsr.shape.Offset(i...)])
 }
 
-func (tsr *String) SetFloat(i []int, val float64) {
-	j := tsr.shape.Offset(i)
-	tsr.Values[j] = Float64ToString(val)
+func (tsr *String) SetFloat(val float64, i ...int) {
+	tsr.Values[tsr.shape.Offset(i...)] = Float64ToString(val)
 }
 
 func (tsr *String) Float1D(off int) float64 {
 	return StringToFloat64(tsr.Values[off])
 }
 
-func (tsr *String) SetFloat1D(off int, val float64) {
+func (tsr *String) SetFloat1D(val float64, off int) {
 	tsr.Values[off] = Float64ToString(val)
 }
 
@@ -144,7 +127,7 @@ func (tsr *String) FloatRowCell(row, cell int) float64 {
 	return StringToFloat64(tsr.Values[row*sz+cell])
 }
 
-func (tsr *String) SetFloatRowCell(row, cell int, val float64) {
+func (tsr *String) SetFloatRowCell(val float64, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = Float64ToString(val)
 }
@@ -161,7 +144,7 @@ func (tsr *String) Floats(flt *[]float64) {
 }
 
 // SetFloats sets tensor values from a []float64 slice (copies values).
-func (tsr *String) SetFloats(flt []float64) {
+func (tsr *String) SetFloats(flt ...float64) {
 	for i, v := range flt {
 		tsr.Values[i] = Float64ToString(v)
 	}
@@ -175,12 +158,12 @@ func (tsr *String) At(i, j int) float64 {
 		log.Println("tensor Dims gonum Matrix call made on Tensor with dims < 2")
 		return 0
 	} else if nd == 2 {
-		return tsr.Float([]int{i, j})
+		return tsr.Float(i, j)
 	} else {
 		ix := make([]int, nd)
 		ix[nd-2] = i
 		ix[nd-1] = j
-		return tsr.Float(ix)
+		return tsr.Float(ix...)
 	}
 }
 
@@ -250,7 +233,9 @@ func (tsr *String) CopyFrom(frm Tensor) {
 // SetShapeFrom copies just the shape from given source tensor
 // calling SetShape with the shape params from source (see for more docs).
 func (tsr *String) SetShapeFrom(frm Tensor) {
-	tsr.SetShape(frm.Shape().Sizes, frm.Shape().Names...)
+	sh := frm.Shape()
+	tsr.SetShape(sh.Sizes...)
+	tsr.SetNames(sh.Names...)
 }
 
 // CopyCellsFrom copies given range of values from other tensor into this tensor,
@@ -276,8 +261,8 @@ func (tsr *String) CopyCellsFrom(frm Tensor, to, start, n int) {
 // will affect both), as its Values slice is a view onto the original (which
 // is why only inner-most contiguous supsaces are supported).
 // Use Clone() method to separate the two.
-func (tsr *String) SubSpace(offs []int) Tensor {
-	b := tsr.subSpaceImpl(offs)
+func (tsr *String) SubSpace(offs ...int) Tensor {
+	b := tsr.subSpaceImpl(offs...)
 	rt := &String{Base: *b}
 	return rt
 }

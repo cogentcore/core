@@ -38,39 +38,39 @@ type Byte = Number[byte]
 
 // NewFloat32 returns a new Float32 tensor
 // with the given sizes per dimension (shape), and optional dimension names.
-func NewFloat32(sizes []int, names ...string) *Float32 {
-	return New[float32](sizes, names...).(*Float32)
+func NewFloat32(sizes ...int) *Float32 {
+	return New[float32](sizes...).(*Float32)
 }
 
 // NewFloat64 returns a new Float64 tensor
 // with the given sizes per dimension (shape), and optional dimension names.
-func NewFloat64(sizes []int, names ...string) *Float64 {
-	return New[float64](sizes, names...).(*Float64)
+func NewFloat64(sizes ...int) *Float64 {
+	return New[float64](sizes...).(*Float64)
 }
 
 // NewInt returns a new Int tensor
 // with the given sizes per dimension (shape), and optional dimension names.
-func NewInt(sizes []int, names ...string) *Int {
-	return New[int](sizes, names...).(*Int)
+func NewInt(sizes ...int) *Int {
+	return New[int](sizes...).(*Int)
 }
 
 // NewInt32 returns a new Int32 tensor
 // with the given sizes per dimension (shape), and optional dimension names.
-func NewInt32(sizes []int, names ...string) *Int32 {
-	return New[int32](sizes, names...).(*Int32)
+func NewInt32(sizes ...int) *Int32 {
+	return New[int32](sizes...).(*Int32)
 }
 
 // NewByte returns a new Byte tensor
 // with the given sizes per dimension (shape), and optional dimension names.
-func NewByte(sizes []int, names ...string) *Byte {
-	return New[uint8](sizes, names...).(*Byte)
+func NewByte(sizes ...int) *Byte {
+	return New[uint8](sizes...).(*Byte)
 }
 
 // NewNumber returns a new n-dimensional tensor of numerical values
 // with the given sizes per dimension (shape), and optional dimension names.
-func NewNumber[T num.Number](sizes []int, names ...string) *Number[T] {
+func NewNumber[T num.Number](sizes ...int) *Number[T] {
 	tsr := &Number[T]{}
-	tsr.SetShape(sizes, names...)
+	tsr.SetShape(sizes...)
 	tsr.Values = make([]T, tsr.Len())
 	return tsr
 }
@@ -89,10 +89,9 @@ func NewNumberShape[T num.Number](shape *Shape) *Number[T] {
 // The resulting Tensor thus "wraps" the given values.
 func NewNumberFromSlice[T num.Number](vals []T) Tensor {
 	n := len(vals)
-	sizes := []int{n}
 	tsr := &Number[T]{}
 	tsr.Values = vals
-	tsr.SetShape(sizes)
+	tsr.SetShape(n)
 	return tsr
 }
 
@@ -100,31 +99,19 @@ func (tsr *Number[T]) IsString() bool {
 	return false
 }
 
-func (tsr *Number[T]) AddScalar(i []int, val float64) float64 {
-	j := tsr.shape.Offset(i)
-	tsr.Values[j] += T(val)
-	return float64(tsr.Values[j])
-}
-
-func (tsr *Number[T]) MulScalar(i []int, val float64) float64 {
-	j := tsr.shape.Offset(i)
-	tsr.Values[j] *= T(val)
-	return float64(tsr.Values[j])
-}
-
-func (tsr *Number[T]) SetString(i []int, val string) {
+func (tsr *Number[T]) SetString(val string, i ...int) {
 	if fv, err := strconv.ParseFloat(val, 64); err == nil {
-		j := tsr.shape.Offset(i)
-		tsr.Values[j] = T(fv)
+		tsr.Values[tsr.shape.Offset(i...)] = T(fv)
 	}
 }
 
-func (tsr Number[T]) SetString1D(off int, val string) {
+func (tsr Number[T]) SetString1D(val string, off int) {
 	if fv, err := strconv.ParseFloat(val, 64); err == nil {
 		tsr.Values[off] = T(fv)
 	}
 }
-func (tsr *Number[T]) SetStringRowCell(row, cell int, val string) {
+
+func (tsr *Number[T]) SetStringRowCell(val string, row, cell int) {
 	if fv, err := strconv.ParseFloat(val, 64); err == nil {
 		_, sz := tsr.shape.RowCellSize()
 		tsr.Values[row*sz+cell] = T(fv)
@@ -155,21 +142,19 @@ func (tsr *Number[T]) String() string {
 	return b.String()
 }
 
-func (tsr *Number[T]) Float(i []int) float64 {
-	j := tsr.shape.Offset(i)
-	return float64(tsr.Values[j])
+func (tsr *Number[T]) Float(i ...int) float64 {
+	return float64(tsr.Values[tsr.shape.Offset(i...)])
 }
 
-func (tsr *Number[T]) SetFloat(i []int, val float64) {
-	j := tsr.shape.Offset(i)
-	tsr.Values[j] = T(val)
+func (tsr *Number[T]) SetFloat(val float64, i ...int) {
+	tsr.Values[tsr.shape.Offset(i...)] = T(val)
 }
 
 func (tsr *Number[T]) Float1D(i int) float64 {
 	return float64(tsr.Values[i])
 }
 
-func (tsr *Number[T]) SetFloat1D(i int, val float64) {
+func (tsr *Number[T]) SetFloat1D(val float64, i int) {
 	tsr.Values[i] = T(val)
 }
 
@@ -179,7 +164,7 @@ func (tsr *Number[T]) FloatRowCell(row, cell int) float64 {
 	return float64(tsr.Values[i])
 }
 
-func (tsr *Number[T]) SetFloatRowCell(row, cell int, val float64) {
+func (tsr *Number[T]) SetFloatRowCell(val float64, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = T(val)
 }
@@ -201,7 +186,7 @@ func (tsr *Number[T]) Floats(flt *[]float64) {
 }
 
 // SetFloats sets tensor values from a []float64 slice (copies values).
-func (tsr *Number[T]) SetFloats(flt []float64) {
+func (tsr *Number[T]) SetFloats(flt ...float64) {
 	switch vals := any(tsr.Values).(type) {
 	case []float64:
 		copy(vals, flt)
@@ -220,12 +205,12 @@ func (tsr *Number[T]) At(i, j int) float64 {
 		log.Println("tensor Dims gonum Matrix call made on Tensor with dims < 2")
 		return 0
 	} else if nd == 2 {
-		return tsr.Float([]int{i, j})
+		return tsr.Float(i, j)
 	} else {
 		ix := make([]int, nd)
 		ix[nd-2] = i
 		ix[nd-1] = j
-		return tsr.Float(ix)
+		return tsr.Float(ix...)
 	}
 }
 
@@ -295,7 +280,9 @@ func (tsr *Number[T]) CopyFrom(frm Tensor) {
 // SetShapeFrom copies just the shape from given source tensor
 // calling SetShape with the shape params from source (see for more docs).
 func (tsr *Number[T]) SetShapeFrom(frm Tensor) {
-	tsr.SetShape(frm.Shape().Sizes, frm.Shape().Names...)
+	sh := frm.Shape()
+	tsr.SetShape(sh.Sizes...)
+	tsr.SetNames(sh.Names...)
 }
 
 // CopyCellsFrom copies given range of values from other tensor into this tensor,
@@ -321,8 +308,8 @@ func (tsr *Number[T]) CopyCellsFrom(frm Tensor, to, start, n int) {
 // will affect both), as its Values slice is a view onto the original (which
 // is why only inner-most contiguous supsaces are supported).
 // Use Clone() method to separate the two.
-func (tsr *Number[T]) SubSpace(offs []int) Tensor {
-	b := tsr.subSpaceImpl(offs)
+func (tsr *Number[T]) SubSpace(offs ...int) Tensor {
+	b := tsr.subSpaceImpl(offs...)
 	rt := &Number[T]{Base: *b}
 	return rt
 }

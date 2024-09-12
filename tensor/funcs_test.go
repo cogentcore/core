@@ -15,7 +15,7 @@ func abs(in, out *Indexed) {
 	out.SetShapeFrom(in)
 	VectorizeThreaded(1, NFirstLen, func(idx int, tsr ...*Indexed) {
 		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].Tensor.SetFloat1D(i, math.Abs(tsr[0].Tensor.Float1D(i)))
+		tsr[1].Tensor.SetFloat1D(math.Abs(tsr[0].Tensor.Float1D(i)), i)
 	}, in, out)
 }
 

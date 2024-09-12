@@ -345,9 +345,9 @@ func (ix *Indexed) NewTensor() Tensor {
 	for r := range rows {
 		for c := range cells {
 			if str {
-				nt.SetStringRowCell(r, c, ix.StringRowCell(r, c))
+				nt.SetStringRowCell(ix.StringRowCell(r, c), r, c)
 			} else {
-				nt.SetFloatRowCell(r, c, ix.FloatRowCell(r, c))
+				nt.SetFloatRowCell(ix.FloatRowCell(r, c), r, c)
 			}
 		}
 	}
@@ -425,25 +425,25 @@ func (ix *Indexed) Swap(i, j int) {
 
 // Float returns the value of given index as a float64.
 // The first index value is indirected through the indexes.
-func (ix *Indexed) Float(i []int) float64 {
+func (ix *Indexed) Float(i ...int) float64 {
 	if ix.Indexes == nil {
-		return ix.Tensor.Float(i)
+		return ix.Tensor.Float(i...)
 	}
 	ic := slices.Clone(i)
 	ic[0] = ix.Indexes[ic[0]]
-	return ix.Tensor.Float(ic)
+	return ix.Tensor.Float(ic...)
 }
 
 // SetFloat sets the value of given index as a float64
 // The first index value is indirected through the [Indexes].
-func (ix *Indexed) SetFloat(i []int, val float64) {
+func (ix *Indexed) SetFloat(val float64, i ...int) {
 	if ix.Indexes == nil {
-		ix.Tensor.SetFloat(i, val)
+		ix.Tensor.SetFloat(val, i...)
 		return
 	}
 	ic := slices.Clone(i)
 	ic[0] = ix.Indexes[ic[0]]
-	ix.Tensor.SetFloat(ic, val)
+	ix.Tensor.SetFloat(val, ic...)
 }
 
 // FloatRowCell returns the value at given row and cell,
@@ -458,30 +458,30 @@ func (ix *Indexed) FloatRowCell(row, cell int) float64 {
 // where row is outer-most dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Indexes].
 // This is the preferred interface for all Indexed operations.
-func (ix *Indexed) SetFloatRowCell(row, cell int, val float64) {
-	ix.Tensor.SetFloatRowCell(ix.Index(row), cell, val)
+func (ix *Indexed) SetFloatRowCell(val float64, row, cell int) {
+	ix.Tensor.SetFloatRowCell(val, ix.Index(row), cell)
 }
 
 // StringValue returns the value of given index as a string.
 // The first index value is indirected through the indexes.
-func (ix *Indexed) StringValue(i []int) string {
+func (ix *Indexed) StringValue(i ...int) string {
 	if ix.Indexes == nil {
-		return ix.Tensor.StringValue(i)
+		return ix.Tensor.StringValue(i...)
 	}
 	ic := slices.Clone(i)
 	ic[0] = ix.Indexes[ic[0]]
-	return ix.Tensor.StringValue(ic)
+	return ix.Tensor.StringValue(ic...)
 }
 
 // SetString sets the value of given index as a string
 // The first index value is indirected through the [Indexes].
-func (ix *Indexed) SetString(i []int, val string) {
+func (ix *Indexed) SetString(val string, i ...int) {
 	if ix.Indexes == nil {
-		ix.Tensor.SetString(i, val)
+		ix.Tensor.SetString(val, i...)
 	}
 	ic := slices.Clone(i)
 	ic[0] = ix.Indexes[ic[0]]
-	ix.Tensor.SetString(ic, val)
+	ix.Tensor.SetString(val, ic...)
 }
 
 // StringRowCell returns the value at given row and cell,
@@ -496,6 +496,6 @@ func (ix *Indexed) StringRowCell(row, cell int) string {
 // where row is outer-most dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Indexes].
 // This is the preferred interface for all Indexed operations.
-func (ix *Indexed) SetStringRowCell(row, cell int, val string) {
-	ix.Tensor.SetStringRowCell(ix.Index(row), cell, val)
+func (ix *Indexed) SetStringRowCell(val string, row, cell int) {
+	ix.Tensor.SetStringRowCell(val, ix.Index(row), cell)
 }

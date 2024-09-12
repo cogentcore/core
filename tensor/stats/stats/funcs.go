@@ -132,8 +132,8 @@ func MeanFuncOut64(in, out *tensor.Indexed) (mean64, count64 *tensor.Indexed) {
 		if c == 0 {
 			continue
 		}
-		sum64.Tensor.SetFloat1D(i, sum64.Tensor.Float1D(i)/c)
-		out.Tensor.SetFloat1D(i, sum64.Tensor.Float1D(i))
+		sum64.Tensor.SetFloat1D(sum64.Tensor.Float1D(i)/c, i)
+		out.Tensor.SetFloat1D(sum64.Tensor.Float1D(i), i)
 	}
 	return sum64, count64
 }
@@ -167,8 +167,8 @@ func VarFuncOut64(in, out *tensor.Indexed) (var64, mean64, count64 *tensor.Index
 		if c < 2 {
 			continue
 		}
-		var64.Tensor.SetFloat1D(i, var64.Tensor.Float1D(i)/(c-1))
-		out.Tensor.SetFloat1D(i, var64.Tensor.Float1D(i))
+		var64.Tensor.SetFloat1D(var64.Tensor.Float1D(i)/(c-1), i)
+		out.Tensor.SetFloat1D(var64.Tensor.Float1D(i), i)
 	}
 	return
 }
@@ -187,8 +187,8 @@ func StdFuncOut64(in, out *tensor.Indexed) (std64, mean64, count64 *tensor.Index
 	nsub := out.Tensor.Len()
 	for i := range nsub {
 		std := math.Sqrt(std64.Tensor.Float1D(i))
-		std64.Tensor.SetFloat1D(i, std)
-		out.Tensor.SetFloat1D(i, std)
+		std64.Tensor.SetFloat1D(std, i)
+		out.Tensor.SetFloat1D(std, i)
 	}
 	return
 }
@@ -209,9 +209,9 @@ func SemFunc(in, out *tensor.Indexed) {
 	for i := range nsub {
 		c := count64.Tensor.Float1D(i)
 		if c < 2 {
-			out.Tensor.SetFloat1D(i, math.Sqrt(var64.Tensor.Float1D(i)))
+			out.Tensor.SetFloat1D(math.Sqrt(var64.Tensor.Float1D(i)), i)
 		} else {
-			out.Tensor.SetFloat1D(i, math.Sqrt(var64.Tensor.Float1D(i))/math.Sqrt(c))
+			out.Tensor.SetFloat1D(math.Sqrt(var64.Tensor.Float1D(i))/math.Sqrt(c), i)
 		}
 	}
 }
@@ -226,8 +226,8 @@ func VarPopFuncOut64(in, out *tensor.Indexed) (var64, mean64, count64 *tensor.In
 		if c == 0 {
 			continue
 		}
-		var64.Tensor.SetFloat1D(i, var64.Tensor.Float1D(i)/c)
-		out.Tensor.SetFloat1D(i, var64.Tensor.Float1D(i))
+		var64.Tensor.SetFloat1D(var64.Tensor.Float1D(i)/c, i)
+		out.Tensor.SetFloat1D(var64.Tensor.Float1D(i), i)
 	}
 	return
 }
@@ -246,7 +246,7 @@ func StdPopFunc(in, out *tensor.Indexed) {
 	var64, _, _ := VarPopFuncOut64(in, out)
 	nsub := out.Tensor.Len()
 	for i := range nsub {
-		out.Tensor.SetFloat1D(i, math.Sqrt(var64.Tensor.Float1D(i)))
+		out.Tensor.SetFloat1D(math.Sqrt(var64.Tensor.Float1D(i)), i)
 	}
 }
 
@@ -259,9 +259,9 @@ func SemPopFunc(in, out *tensor.Indexed) {
 	for i := range nsub {
 		c := count64.Tensor.Float1D(i)
 		if c < 2 {
-			out.Tensor.SetFloat1D(i, math.Sqrt(var64.Tensor.Float1D(i)))
+			out.Tensor.SetFloat1D(math.Sqrt(var64.Tensor.Float1D(i)), i)
 		} else {
-			out.Tensor.SetFloat1D(i, math.Sqrt(var64.Tensor.Float1D(i))/math.Sqrt(c))
+			out.Tensor.SetFloat1D(math.Sqrt(var64.Tensor.Float1D(i))/math.Sqrt(c), i)
 		}
 	}
 }
@@ -302,8 +302,8 @@ func SumSqFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
 		} else {
 			v = scale * scale * ss
 		}
-		scale64.Tensor.SetFloat1D(i, v)
-		out.Tensor.SetFloat1D(i, v)
+		scale64.Tensor.SetFloat1D(v, i)
+		out.Tensor.SetFloat1D(v, i)
 	}
 	return scale64
 }
@@ -329,8 +329,8 @@ func L2NormFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
 		} else {
 			v = scale * math.Sqrt(ss)
 		}
-		scale64.Tensor.SetFloat1D(i, v)
-		out.Tensor.SetFloat1D(i, v)
+		scale64.Tensor.SetFloat1D(v, i)
+		out.Tensor.SetFloat1D(v, i)
 	}
 	return scale64
 }

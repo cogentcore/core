@@ -26,7 +26,7 @@ func VectorizeOut64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, ts
 	}
 	nt := len(tsr)
 	out := tsr[nt-1]
-	o64 := tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes))
+	o64 := tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes...))
 	etsr := slices.Clone(tsr)
 	etsr[nt-1] = o64
 	for idx := range n {
@@ -34,7 +34,7 @@ func VectorizeOut64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, ts
 	}
 	nsub := out.Tensor.Len()
 	for i := range nsub {
-		out.Tensor.SetFloat1D(i, o64.Tensor.Float1D(i))
+		out.Tensor.SetFloat1D(o64.Tensor.Float1D(i), i)
 	}
 	return o64
 }
@@ -49,8 +49,8 @@ func Vectorize2Out64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, t
 	}
 	nt := len(tsr)
 	out := tsr[nt-1]
-	out1 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes))
-	out2 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes))
+	out1 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes...))
+	out2 = tensor.NewIndexed(tensor.NewFloat64(out.Tensor.Shape().Sizes...))
 	tsrs := slices.Clone(tsr[:nt-1])
 	tsrs = append(tsrs, out1, out2)
 	for idx := range n {
@@ -79,7 +79,8 @@ func NFunc(tsr ...*tensor.Indexed) int {
 	in, out := tsr[0], tsr[nt-1]
 	n := in.Rows()
 	osh := OutShape(in.Tensor.Shape())
-	out.Tensor.SetShape(osh.Sizes, osh.Names...)
+	out.Tensor.SetShape(osh.Sizes...)
+	out.Tensor.SetNames(osh.Names...)
 	out.Indexes = []int{0}
 	return n
 }
@@ -91,13 +92,13 @@ func VecFunc(idx int, in, out *tensor.Indexed, ini float64, fun func(val, agg fl
 	nsub := out.Tensor.Len()
 	for i := range nsub {
 		if idx == 0 {
-			out.Tensor.SetFloat1D(i, ini)
+			out.Tensor.SetFloat1D(ini, i)
 		}
 		val := in.FloatRowCell(idx, i)
 		if math.IsNaN(val) {
 			continue
 		}
-		out.Tensor.SetFloat1D(i, fun(val, out.Tensor.Float1D(i)))
+		out.Tensor.SetFloat1D(fun(val, out.Tensor.Float1D(i)), i)
 	}
 }
 
@@ -110,14 +111,14 @@ func Vec2inFunc(idx int, in1, in2, out *tensor.Indexed, ini float64, fun func(va
 	nsub := out.Tensor.Len()
 	for i := range nsub {
 		if idx == 0 {
-			out.Tensor.SetFloat1D(i, ini)
+			out.Tensor.SetFloat1D(ini, i)
 		}
-		val1 := in1.FloatRowCell(idx, i)
+		val1 := in1.FloatRowCell(i, idx)
 		if math.IsNaN(val1) {
 			continue
 		}
 		val2 := in2.Tensor.Float1D(i)
-		out.Tensor.SetFloat1D(i, fun(val1, val2, out.Tensor.Float1D(i)))
+		out.Tensor.SetFloat1D(fun(val1, val2, out.Tensor.Float1D(i)), i)
 	}
 }
 
@@ -129,8 +130,8 @@ func Vec2outFunc(idx int, in, out1, out2 *tensor.Indexed, ini1, ini2 float64, fu
 	nsub := out2.Tensor.Len()
 	for i := range nsub {
 		if idx == 0 {
-			out1.Tensor.SetFloat1D(i, ini1)
-			out2.Tensor.SetFloat1D(i, ini2)
+			out1.Tensor.SetFloat1D(ini1, i)
+			out2.Tensor.SetFloat1D(ini2, i)
 		}
 		val := in.FloatRowCell(idx, i)
 		if math.IsNaN(val) {
@@ -138,7 +139,7 @@ func Vec2outFunc(idx int, in, out1, out2 *tensor.Indexed, ini1, ini2 float64, fu
 		}
 		ag1, ag2 := out1.Tensor.Float1D(i), out2.Tensor.Float1D(i)
 		ag1, ag2 = fun(val, ag1, ag2)
-		out1.Tensor.SetFloat1D(i, ag1)
-		out2.Tensor.SetFloat1D(i, ag2)
+		out1.Tensor.SetFloat1D(ag1, i)
+		out2.Tensor.SetFloat1D(ag2, i)
 	}
 }

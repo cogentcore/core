@@ -7,6 +7,8 @@ package tensor
 import (
 	"fmt"
 	"slices"
+
+	"cogentcore.org/core/base/slicesx"
 )
 
 // Shape manages a tensor's shape information, including strides and dimension names
@@ -21,26 +23,31 @@ type Shape struct {
 	// offsets for each dimension.
 	Strides []int `display:"-"`
 
-	// names of each dimension.
+	// optional names of each dimension.
 	Names []string `display:"-"`
 }
 
-// NewShape returns a new shape with given sizes and optional dimension names.
+// NewShape returns a new shape with given sizes.
 // RowMajor ordering is used by default.
-func NewShape(sizes []int, names ...string) *Shape {
+func NewShape(sizes ...int) *Shape {
 	sh := &Shape{}
-	sh.SetShape(sizes, names...)
+	sh.SetShape(sizes...)
 	return sh
 }
 
 // SetShape sets the shape size and optional names
 // RowMajor ordering is used by default.
-func (sh *Shape) SetShape(sizes []int, names ...string) {
+func (sh *Shape) SetShape(sizes ...int) {
 	sh.Sizes = slices.Clone(sizes)
 	sh.Strides = RowMajorStrides(sizes)
-	sh.Names = make([]string, len(sh.Sizes))
-	if len(names) == len(sizes) {
-		copy(sh.Names, names)
+}
+
+// SetNames sets the shape dimension names.
+func (sh *Shape) SetNames(names ...string) {
+	if len(names) == 0 {
+		sh.Names = nil
+	} else {
+		sh.Names = slicesx.SetLength(names, len(sh.Sizes))
 	}
 }
 
@@ -49,7 +56,11 @@ func (sh *Shape) SetShape(sizes []int, names ...string) {
 func (sh *Shape) CopyShape(cp *Shape) {
 	sh.Sizes = slices.Clone(cp.Sizes)
 	sh.Strides = slices.Clone(cp.Strides)
-	sh.Names = slices.Clone(cp.Names)
+	if cp.Names == nil {
+		sh.Names = nil
+	} else {
+		sh.Names = slices.Clone(cp.Names)
+	}
 }
 
 // Len returns the total length of elements in the tensor
@@ -69,10 +80,20 @@ func (sh *Shape) Len() int {
 func (sh *Shape) NumDims() int { return len(sh.Sizes) }
 
 // DimSize returns the size of given dimension.
-func (sh *Shape) DimSize(i int) int { return sh.Sizes[i] }
+func (sh *Shape) DimSize(i int) int {
+	if sh.Sizes == nil {
+		return 0
+	}
+	return sh.Sizes[i]
+}
 
 // DimName returns the name of given dimension.
-func (sh *Shape) DimName(i int) string { return sh.Names[i] }
+func (sh *Shape) DimName(i int) string {
+	if sh.Names == nil {
+		return ""
+	}
+	return sh.Names[i]
+}
 
 // DimByName returns the index of the given dimension name.
 // returns -1 if not found.
@@ -130,7 +151,7 @@ func (sh *Shape) RowCellSize() (rows, cells int) {
 
 // Offset returns the "flat" 1D array index into an element at the given n-dimensional index.
 // No checking is done on the length or size of the index values relative to the shape of the tensor.
-func (sh *Shape) Offset(index []int) int {
+func (sh *Shape) Offset(index ...int) int {
 	var offset int
 	for i, v := range index {
 		offset += v * sh.Strides[i]
@@ -236,8 +257,12 @@ func AddShapes(shape1, shape2 *Shape) *Shape {
 	nsh := make([]int, len(sh1)+len(sh2))
 	copy(nsh, sh1)
 	copy(nsh[len(sh1):], sh2)
-	nms := make([]string, len(sh1)+len(sh2))
-	copy(nms, shape1.Names)
-	copy(nms[len(sh1):], shape2.Names)
-	return NewShape(nsh, nms...)
+	sh := NewShape(nsh...)
+	if shape1.Names != nil || shape2.Names != nil {
+		nms := make([]string, len(sh1)+len(sh2))
+		copy(nms, shape1.Names)
+		copy(nms[len(sh1):], shape2.Names)
+		sh.SetNames(nms...)
+	}
+	return sh
 }

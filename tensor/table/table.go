@@ -133,7 +133,8 @@ func (dt *Table) UpdateColumnNameMap() error {
 // see AddColumnTensor for n-dimensional cells.
 func AddColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Table, name string) tensor.Tensor {
 	rows := max(1, dt.Rows)
-	tsr := tensor.New[T]([]int{rows}, "Row")
+	tsr := tensor.New[T](rows)
+	tsr.SetNames("Row")
 	dt.AddColumn(tsr, name)
 	return tsr
 }
@@ -143,7 +144,8 @@ func AddColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Tab
 // The cells of this column hold a single scalar value.
 func InsertColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Table, name string, idx int) tensor.Tensor {
 	rows := max(1, dt.Rows)
-	tsr := tensor.New[T]([]int{rows}, "Row")
+	tsr := tensor.New[T](rows)
+	tsr.SetNames("Row")
 	dt.InsertColumn(tsr, name, idx)
 	return tsr
 }
@@ -152,11 +154,11 @@ func InsertColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *
 // (which must be unique), and dimensionality of each _cell_.
 // An outer-most Row dimension will be added to this dimensionality to create
 // the tensor column.
-func AddTensorColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Table, name string, cellSizes []int, dimNames ...string) tensor.Tensor {
+func AddTensorColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Table, name string, cellSizes ...int) tensor.Tensor {
 	rows := max(1, dt.Rows)
 	sz := append([]int{rows}, cellSizes...)
-	nms := append([]string{"Row"}, dimNames...)
-	tsr := tensor.New[T](sz, nms...)
+	tsr := tensor.New[T](sz...)
+	tsr.SetNames("Row")
 	dt.AddColumn(tsr, name)
 	return tsr
 }
@@ -200,7 +202,8 @@ func (dt *Table) InsertColumn(tsr tensor.Tensor, name string, idx int) error {
 // Supported types are string, bool (for [tensor.Bits]), float32, float64, int, int32, and byte.
 func (dt *Table) AddColumnOfType(typ reflect.Kind, name string) tensor.Tensor {
 	rows := max(1, dt.Rows)
-	tsr := tensor.NewOfType(typ, []int{rows}, "Row")
+	tsr := tensor.NewOfType(typ, rows)
+	tsr.SetNames("Row")
 	dt.AddColumn(tsr, name)
 	return tsr
 }
@@ -210,11 +213,11 @@ func (dt *Table) AddColumnOfType(typ reflect.Kind, name string) tensor.Tensor {
 // An outer-most Row dimension will be added to this dimensionality to create
 // the tensor column.
 // Supported types are string, bool (for [tensor.Bits]), float32, float64, int, int32, and byte.
-func (dt *Table) AddTensorColumnOfType(typ reflect.Kind, name string, cellSizes []int, dimNames ...string) tensor.Tensor {
+func (dt *Table) AddTensorColumnOfType(typ reflect.Kind, name string, cellSizes ...int) tensor.Tensor {
 	rows := max(1, dt.Rows)
 	sz := append([]int{rows}, cellSizes...)
-	nms := append([]string{"Row"}, dimNames...)
-	tsr := tensor.NewOfType(typ, sz, nms...)
+	tsr := tensor.NewOfType(typ, sz...)
+	tsr.SetNames("Row")
 	dt.AddColumn(tsr, name)
 	return tsr
 }
@@ -235,8 +238,8 @@ func (dt *Table) AddFloat64Column(name string) *tensor.Float64 {
 // and dimensionality of each _cell_.
 // An outer-most Row dimension will be added to this dimensionality to create
 // the tensor column.
-func (dt *Table) AddFloat64TensorColumn(name string, cellSizes []int, dimNames ...string) *tensor.Float64 {
-	return AddTensorColumn[float64](dt, name, cellSizes, dimNames...).(*tensor.Float64)
+func (dt *Table) AddFloat64TensorColumn(name string, cellSizes ...int) *tensor.Float64 {
+	return AddTensorColumn[float64](dt, name, cellSizes...).(*tensor.Float64)
 }
 
 // AddFloat32Column adds a new float32 column with given name.
@@ -249,8 +252,8 @@ func (dt *Table) AddFloat32Column(name string) *tensor.Float32 {
 // and dimensionality of each _cell_.
 // An outer-most Row dimension will be added to this dimensionality to create
 // the tensor column.
-func (dt *Table) AddFloat32TensorColumn(name string, cellSizes []int, dimNames ...string) *tensor.Float32 {
-	return AddTensorColumn[float32](dt, name, cellSizes, dimNames...).(*tensor.Float32)
+func (dt *Table) AddFloat32TensorColumn(name string, cellSizes ...int) *tensor.Float32 {
+	return AddTensorColumn[float32](dt, name, cellSizes...).(*tensor.Float32)
 }
 
 // AddIntColumn adds a new int column with given name.
@@ -263,8 +266,8 @@ func (dt *Table) AddIntColumn(name string) *tensor.Int {
 // and dimensionality of each _cell_.
 // An outer-most Row dimension will be added to this dimensionality to create
 // the tensor column.
-func (dt *Table) AddIntTensorColumn(name string, cellSizes []int, dimNames ...string) *tensor.Int {
-	return AddTensorColumn[int](dt, name, cellSizes, dimNames...).(*tensor.Int)
+func (dt *Table) AddIntTensorColumn(name string, cellSizes ...int) *tensor.Int {
+	return AddTensorColumn[int](dt, name, cellSizes...).(*tensor.Int)
 }
 
 // DeleteColumnName deletes column of given name.
@@ -503,7 +506,7 @@ func (dt *Table) TensorIndex(column, row int) tensor.Tensor {
 	if ct.NumDims() == 1 {
 		return nil
 	}
-	return ct.SubSpace([]int{row})
+	return ct.SubSpace(row)
 }
 
 // Tensor returns the tensor SubSpace for given column (by name), row index
@@ -521,7 +524,7 @@ func (dt *Table) Tensor(column string, row int) tensor.Tensor {
 	if ct.NumDims() == 1 {
 		return nil
 	}
-	return ct.SubSpace([]int{row})
+	return ct.SubSpace(row)
 }
 
 // TensorFloat1D returns the float value of a Tensor cell's cell at given
@@ -561,7 +564,7 @@ func (dt *Table) SetFloatIndex(column, row int, val float64) error {
 	if ct.NumDims() != 1 {
 		return fmt.Errorf("table.Table SetFloatIndex: Column %d is a tensor, must use SetTensorFloat1D", column)
 	}
-	ct.SetFloat1D(row, val)
+	ct.SetFloat1D(val, row)
 	return nil
 }
 
@@ -578,7 +581,7 @@ func (dt *Table) SetFloat(column string, row int, val float64) error {
 	if ct.NumDims() != 1 {
 		return fmt.Errorf("table.Table SetFloat: Column %s is a tensor, must use SetTensorFloat1D", column)
 	}
-	ct.SetFloat1D(row, val)
+	ct.SetFloat1D(val, row)
 	return nil
 }
 
@@ -592,7 +595,7 @@ func (dt *Table) SetStringIndex(column, row int, val string) error {
 	if ct.NumDims() != 1 {
 		return fmt.Errorf("table.Table SetStringIndex: Column %d is a tensor, must use SetTensorFloat1D", column)
 	}
-	ct.SetString1D(row, val)
+	ct.SetString1D(val, row)
 	return nil
 }
 
@@ -609,7 +612,7 @@ func (dt *Table) SetString(column string, row int, val string) error {
 	if ct.NumDims() != 1 {
 		return fmt.Errorf("table.Table SetString: Column %s is a tensor, must use SetTensorFloat1D", column)
 	}
-	ct.SetString1D(row, val)
+	ct.SetString1D(val, row)
 	return nil
 }
 
@@ -625,11 +628,11 @@ func (dt *Table) SetTensorIndex(column, row int, val tensor.Tensor) error {
 	sz := min(csz, val.Len())
 	if ct.IsString() {
 		for j := 0; j < sz; j++ {
-			ct.SetString1D(st+j, val.String1D(j))
+			ct.SetString1D(val.String1D(j), st+j)
 		}
 	} else {
 		for j := 0; j < sz; j++ {
-			ct.SetFloat1D(st+j, val.Float1D(j))
+			ct.SetFloat1D(val.Float1D(j), st+j)
 		}
 	}
 	return nil
@@ -664,7 +667,7 @@ func (dt *Table) SetTensorFloat1D(column string, row int, idx int, val float64) 
 		return fmt.Errorf("table.Table IsValidRow: index %d is out of valid range [0..%d]", idx, sz)
 	}
 	off := row*sz + idx
-	ct.SetFloat1D(off, val)
+	ct.SetFloat1D(val, off)
 	return nil
 }
 
@@ -686,10 +689,10 @@ func (dt *Table) CopyCell(column string, row int, cpt *Table, cpColNm string, cp
 	_, sz := ct.RowCellSize()
 	if sz == 1 {
 		if ct.IsString() {
-			ct.SetString1D(row, cpct.String1D(cpRow))
+			ct.SetString1D(cpct.String1D(cpRow), row)
 			return nil
 		}
-		ct.SetFloat1D(row, cpct.Float1D(cpRow))
+		ct.SetFloat1D(cpct.Float1D(cpRow), row)
 		return nil
 	}
 	_, cpsz := cpct.RowCellSize()
@@ -698,11 +701,11 @@ func (dt *Table) CopyCell(column string, row int, cpt *Table, cpColNm string, cp
 	msz := min(sz, cpsz)
 	if ct.IsString() {
 		for j := 0; j < msz; j++ {
-			ct.SetString1D(st+j, cpct.String1D(cst+j))
+			ct.SetString1D(cpct.String1D(cst+j), st+j)
 		}
 	} else {
 		for j := 0; j < msz; j++ {
-			ct.SetFloat1D(st+j, cpct.Float1D(cst+j))
+			ct.SetFloat1D(cpct.Float1D(cst+j), st+j)
 		}
 	}
 	return nil

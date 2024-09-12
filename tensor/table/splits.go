@@ -404,13 +404,13 @@ func (spl *Splits) AggsToTable(colName bool) *Table {
 		if colName == AddAggName {
 			an += ":" + ag.Name
 		}
-		st.AddFloat64TensorColumn(an, col.Shape().Sizes[1:], col.Shape().Names[1:]...)
+		st.AddFloat64TensorColumn(an, col.Shape().Sizes[1:]...)
 	}
 	for si := range spl.Splits {
 		cidx := 0
 		for ci := range spl.Levels {
 			col := st.Columns[cidx]
-			col.SetString1D(si, spl.Values[si][ci])
+			col.SetString1D(spl.Values[si][ci], si)
 			cidx++
 		}
 		for _, ag := range spl.Aggs {
@@ -419,7 +419,7 @@ func (spl *Splits) AggsToTable(colName bool) *Table {
 			sti := si * csz
 			av := ag.Aggs[si]
 			for j, a := range av {
-				col.SetFloat1D(sti+j, a)
+				col.SetFloat1D(a, sti+j)
 			}
 			cidx++
 		}
@@ -453,7 +453,7 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 		if colName == AddAggName {
 			an += ":" + ag.Name
 		}
-		st.AddFloat64TensorColumn(an, col.Shape().Sizes[1:], col.Shape().Names[1:]...)
+		st.AddFloat64TensorColumn(an, col.Shape().Sizes[1:]...)
 	}
 	var cpcol []string
 	for _, cn := range dt.ColumnNames {
@@ -467,7 +467,7 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 		cidx := 0
 		for ci := range spl.Levels {
 			col := st.Columns[cidx]
-			col.SetString1D(si, spl.Values[si][ci])
+			col.SetString1D(spl.Values[si][ci], si)
 			cidx++
 		}
 		for _, ag := range spl.Aggs {
@@ -476,7 +476,7 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 			sti := si * csz
 			av := ag.Aggs[si]
 			for j, a := range av {
-				col.SetFloat1D(sti+j, a)
+				col.SetFloat1D(a, sti+j)
 			}
 			cidx++
 		}

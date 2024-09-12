@@ -68,18 +68,18 @@ func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
 			return col
 		}
 	case 2:
-		return shp.Offset([]int{row, col})
+		return shp.Offset(row, col)
 	case 3:
 		if oddRow {
 			ny := shp.DimSize(1)
 			yy := row / ny
 			y := row % ny
-			return shp.Offset([]int{yy, y, col})
+			return shp.Offset(yy, y, col)
 		} else {
 			nx := shp.DimSize(2)
 			xx := col / nx
 			x := col % nx
-			return shp.Offset([]int{xx, row, x})
+			return shp.Offset(xx, row, x)
 		}
 	case 4:
 		ny := shp.DimSize(2)
@@ -88,7 +88,7 @@ func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
 		nx := shp.DimSize(3)
 		xx := col / nx
 		x := col % nx
-		return shp.Offset([]int{yy, xx, y, x})
+		return shp.Offset(yy, xx, y, x)
 	case 5:
 		// todo: oddRows version!
 		nyy := shp.DimSize(1)
@@ -100,7 +100,7 @@ func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
 		nx := shp.DimSize(4)
 		xx := col / nx
 		x := col % nx
-		return shp.Offset([]int{yyy, yy, xx, y, x})
+		return shp.Offset(yyy, yy, xx, y, x)
 	}
 	return 0
 }
@@ -166,7 +166,7 @@ func Projection2DString(tsr Tensor, oddRow bool, row, col int) string {
 // Even multiples of inner-most dimensions are assumed to be row, then column.
 func Projection2DSet(tsr Tensor, oddRow bool, row, col int, val float64) {
 	idx := Projection2DIndex(tsr.Shape(), oddRow, row, col)
-	tsr.SetFloat1D(idx, val)
+	tsr.SetFloat1D(val, idx)
 }
 
 // Projection2DSetString sets a string value at given row, col coords for a 2D projection
@@ -176,5 +176,5 @@ func Projection2DSet(tsr Tensor, oddRow bool, row, col int, val float64) {
 // Even multiples of inner-most dimensions are assumed to be row, then column.
 func Projection2DSetString(tsr Tensor, oddRow bool, row, col int, val string) {
 	idx := Projection2DIndex(tsr.Shape(), oddRow, row, col)
-	tsr.SetString1D(idx, val)
+	tsr.SetString1D(val, idx)
 }

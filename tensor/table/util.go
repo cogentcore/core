@@ -27,7 +27,7 @@ func (dt *Table) InsertKeyColumns(args ...string) *Table {
 	for j := range nc {
 		colNm := args[2*j]
 		val := args[2*j+1]
-		col := tensor.NewString([]int{c.Rows})
+		col := tensor.NewString(c.Rows)
 		c.InsertColumn(col, colNm, 0)
 		for i := range col.Values {
 			col.Values[i] = val

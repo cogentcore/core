@@ -58,7 +58,7 @@ func MeanTables(dts []*table.Table) *table.Table {
 					ci := si + j
 					cv := cl.Float1D(ci)
 					cv += dc.Float1D(ci)
-					cl.SetFloat1D(ci, cv)
+					cl.SetFloat1D(cv, ci)
 				}
 			}
 		}
@@ -69,7 +69,7 @@ func MeanTables(dts []*table.Table) *table.Table {
 				cv := cl.Float1D(ci)
 				if rns[ri] > 0 {
 					cv /= float64(rns[ri])
-					cl.SetFloat1D(ci, cv)
+					cl.SetFloat1D(cv, ci)
 				}
 			}
 		}

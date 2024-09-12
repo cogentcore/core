@@ -180,7 +180,7 @@ func (fn *Func) CallOut(tsr ...*Indexed) ([]*Indexed, error) {
 	}
 	outs := make([]*Indexed, fn.Out)
 	for i := range outs {
-		outs[i] = NewIndexed(NewOfType(typ, nil))
+		outs[i] = NewIndexed(NewOfType(typ))
 	}
 	tsr = append(tsr, outs...)
 	err := fn.Call(tsr...)
