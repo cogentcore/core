@@ -11,7 +11,7 @@ import (
 )
 
 // ClosestRow returns the closest fit between probe pattern and patterns in
-// a "vocabulary" tensor with outer-most row dimension, using given metric
+// a "vocabulary" tensor with outermost row dimension, using given metric
 // function, *which must have the Increasing property*, i.e., larger = further.
 // returns the row and metric value for that row.
 // note: this does _not_ use any existing Indexes for the probe (but does for the vocab).

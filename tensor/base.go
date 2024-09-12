@@ -38,7 +38,7 @@ func (tsr *Base[T]) NumDims() int { return tsr.shape.NumDims() }
 // DimSize returns size of given dimension.
 func (tsr *Base[T]) DimSize(dim int) int { return tsr.shape.DimSize(dim) }
 
-// RowCellSize returns the size of the outer-most Row shape dimension,
+// RowCellSize returns the size of the outermost Row shape dimension,
 // and the size of all the remaining inner dimensions (the "cell" size).
 // Used for Tensors that are columns in a data table.
 func (tsr *Base[T]) RowCellSize() (rows, cells int) {
@@ -94,7 +94,7 @@ func (tsr *Base[T]) SetNames(names ...string) {
 	tsr.shape.SetNames(names...)
 }
 
-// SetNumRows sets the number of rows (outer-most dimension) in a RowMajor organized tensor.
+// SetNumRows sets the number of rows (outermost dimension) in a RowMajor organized tensor.
 func (tsr *Base[T]) SetNumRows(rows int) {
 	rows = max(1, rows) // must be > 0
 	_, cells := tsr.shape.RowCellSize()

@@ -16,7 +16,7 @@ import (
 
 // todo: add a conversion function to copy data from Column-Major to a tensor:
 // It is also possible to use Column-Major order, which is used in R, Julia, and MATLAB
-// where the inner-most index is first and outer-most last.
+// where the inner-most index is first and outermost last.
 
 // Tensor is the interface for n-dimensional tensors.
 // Per C / Go / Python conventions, indexes are Row-Major, ordered from
@@ -51,7 +51,7 @@ type Tensor interface {
 	// DimSize returns size of given dimension
 	DimSize(dim int) int
 
-	// RowCellSize returns the size of the outer-most Row shape dimension,
+	// RowCellSize returns the size of the outermost Row shape dimension,
 	// and the size of all the remaining inner dimensions (the "cell" size).
 	// Commonly used to organize multiple instances (rows) of higher-dimensional
 	// patterns (cells), and the [Indexed] type operates on the outer row dimension.
@@ -93,11 +93,11 @@ type Tensor interface {
 	// SetFloat1D sets the value of given 1-dimensional index (0-Len()-1) as a float64.
 	SetFloat1D(val float64, i int)
 
-	// FloatRowCell returns the value at given row and cell, where row is outer-most dim,
+	// FloatRowCell returns the value at given row and cell, where row is outermost dim,
 	// and cell is 1D index into remaining inner dims. For Table columns.
 	FloatRowCell(row, cell int) float64
 
-	// SetFloatRowCell sets the value at given row and cell, where row is outer-most dim,
+	// SetFloatRowCell sets the value at given row and cell, where row is outermost dim,
 	// and cell is 1D index into remaining inner dims. For Table columns.
 	SetFloatRowCell(val float64, row, cell int)
 
@@ -116,11 +116,11 @@ type Tensor interface {
 	// SetString1D sets the value of given 1-dimensional index (0-Len()-1) as a string
 	SetString1D(val string, i int)
 
-	// StringRowCell returns the value at given row and cell, where row is outer-most dim,
+	// StringRowCell returns the value at given row and cell, where row is outermost dim,
 	// and cell is 1D index into remaining inner dims. For Table columns.
 	StringRowCell(row, cell int) string
 
-	// SetStringRowCell sets the value at given row and cell, where row is outer-most dim,
+	// SetStringRowCell sets the value at given row and cell, where row is outermost dim,
 	// and cell is 1D index into remaining inner dims. For Table columns.
 	SetStringRowCell(val string, row, cell int)
 
@@ -167,7 +167,7 @@ type Tensor interface {
 	// of the same type, and otherwise it goes through appropriate standard type.
 	CopyCellsFrom(from Tensor, to, start, n int)
 
-	// SetNumRows sets the number of rows (outer-most dimension).
+	// SetNumRows sets the number of rows (outermost dimension).
 	SetNumRows(rows int)
 
 	// Metadata returns the metadata for this tensor, which can be used

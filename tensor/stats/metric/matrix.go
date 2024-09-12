@@ -45,7 +45,7 @@ func TriangularLIndicies(n int) []vecint.Vector2i {
 
 // Matrix computes the rows x rows distance / similarity matrix between
 // all sub-space cells of the given higher dimensional input tensor,
-// which must have at least 2 dimensions: the outer-most rows,
+// which must have at least 2 dimensions: the outermost rows,
 // and within that, 1+dimensional patterns that the given distance metric
 // function is applied to, with the results filling the elements of the output matrix.
 // The resulting matrix is symmetric, and only the lower triangular part
@@ -81,7 +81,7 @@ func Matrix(in, out *tensor.Indexed, mfun MetricFunc) {
 // CrossMatrix computes the distance / similarity matrix between
 // two different sets of patterns in the two input tensors, where
 // the patterns are in the sub-space cells of the tensors,
-// which must have at least 2 dimensions: the outer-most rows,
+// which must have at least 2 dimensions: the outermost rows,
 // and within that, 1+dimensional patterns that the given distance metric
 // function is applied to, with the results filling in the cells of the output matrix.
 // The rows of the output matrix are the rows of the first input tensor,

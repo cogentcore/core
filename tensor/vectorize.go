@@ -32,7 +32,7 @@ var (
 // inputs and outputs, and the output could be effectively scalar,
 // as in a sum operation.  The interpretation of the index is
 // function dependent as well, but often is used to iterate over
-// the outer-most row dimension of the tensor.
+// the outermost row dimension of the tensor.
 // This version runs purely sequentially on on this go routine.
 // See VectorizeThreaded and VectorizeGPU for other versions.
 func Vectorize(nfun func(tsr ...*Indexed) int, fun func(idx int, tsr ...*Indexed), tsr ...*Indexed) {

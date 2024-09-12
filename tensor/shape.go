@@ -136,7 +136,7 @@ func (sh *Shape) IsEqual(oth *Shape) bool {
 	return true
 }
 
-// RowCellSize returns the size of the outer-most Row shape dimension,
+// RowCellSize returns the size of the outermost Row shape dimension,
 // and the size of all the remaining inner dimensions (the "cell" size).
 // Used for Tensors that are columns in a data table.
 func (sh *Shape) RowCellSize() (rows, cells int) {
@@ -192,7 +192,7 @@ func (sh *Shape) String() string {
 	return str
 }
 
-// RowMajorStrides returns strides for sizes where the first dimension is outer-most
+// RowMajorStrides returns strides for sizes where the first dimension is outermost
 // and subsequent dimensions are progressively inner.
 func RowMajorStrides(sizes []int) []int {
 	rem := int(1)

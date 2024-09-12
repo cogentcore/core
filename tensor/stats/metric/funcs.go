@@ -14,7 +14,7 @@ import (
 
 // MetricFunc is the function signature for a metric function,
 // where the output has the same shape as the inputs but with
-// the outer-most row dimension size of 1, and contains
+// the outermost row dimension size of 1, and contains
 // the metric value(s) for the "cells" in higher-dimensional tensors,
 // and a single scalar value for a 1D input tensor.
 // Critically, the metric is always computed over the outer row dimension,

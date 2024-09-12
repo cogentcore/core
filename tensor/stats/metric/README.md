@@ -27,7 +27,7 @@ The `Matrix` function returns a distance / similarity matrix computed from the n
 
 Here is general info about these functions:
 
-`MetricFunc` is the function signature for a metric function, where the output has the same shape as the inputs but with the outer-most row dimension size of 1, and contains the metric value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
+`MetricFunc` is the function signature for a metric function, where the output has the same shape as the inputs but with the outermost row dimension size of 1, and contains the metric value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
 
 Critically, the metric is always computed over the outer row dimension, so each cell in a higher-dimensional output reflects the _row-wise_ metric for that cell across the different rows.  To compute a metric on the `tensor.SubSpace` cells themselves, must call on a `tensor.New1DViewOf` the sub space.  See [simat](../simat) package.
 

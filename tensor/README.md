@@ -2,7 +2,7 @@
 
 Tensor and related sub-packages provide a simple yet powerful framework for representing n-dimensional data of various types, providing similar functionality to the widely used `numpy` and `pandas` libraries in python, and the commercial MATLAB framework.
 
-The `tensor.Indexed` type provides the universal representation of a homogenous data type throughout all the packages here, from scalar to vector, matrix, and beyond, because it can efficiently represent any kind of element with sufficient flexibility to enable a huge range of computations to be elegantly expressed.  The indexes provide a specific view onto the underlying [Tensor] data, applying to the outer-most _row_ dimension (with default row-major indexing).  For example, sorting and filtering a tensor only requires updating the indexes while doing nothing to the Tensor itself.
+The `tensor.Indexed` type provides the universal representation of a homogenous data type throughout all the packages here, from scalar to vector, matrix, and beyond, because it can efficiently represent any kind of element with sufficient flexibility to enable a huge range of computations to be elegantly expressed.  The indexes provide a specific view onto the underlying [Tensor] data, applying to the outermost _row_ dimension (with default row-major indexing).  For example, sorting and filtering a tensor only requires updating the indexes while doing nothing to the Tensor itself.
 
 The `float64` ("Float") and `string` types are used as universal input / output types, and for intermediate computation in the math functions. Any performance-critical code can be optimized for a specific data type, but these universal interfaces are suitable for misc ad-hoc data analysis.
 
@@ -24,9 +24,16 @@ All tensor package functions are registered using a single name to function map 
 
 * [tmath](tmath) implements all standard math functions on `tensor.Indexed` data, including the standard `+, -, *, /` operators.  `cosl` then calls these functions.
 
-* [stats](stats) implements a number of different ways of analyzing tensor and table data
-
 * [plot/plotcore](../plot/plotcore) supports interactive plotting of `Table` data.
+
+* [bitslice](bitslice) is a Go slice of bytes `[]byte` that has methods for setting individual bits, as if it was a slice of bools, while being 8x more memory efficient.  This is used for encoding null entries in  `etensor`, and as a Tensor of bool / bits there as well, and is generally very useful for binary (boolean) data.
+
+* [stats](stats) implements a number of different ways of analyzing tensor and table data, including:
+    - [split](split) supports splitting a Table into any number of indexed sub-views and aggregating over those (i.e., pivot tables), grouping, summarizing data, etc.
+    - [metric](metric) provides similarity / distance metrics such as `Euclidean`, `Cosine`, or `Correlation` that operate on slices of `[]float64` or `[]float32`.
+    - TODO: now in metric: [simat](simat) provides similarity / distance matrix computation methods operating on `etensor.Tensor` or `etable.Table` data.  The `SimMat` type holds the resulting matrix and labels for the rows and columns, which has a special `SimMatGrid` view in `etview` for visualizing labeled similarity matricies.
+    - TODO: where? [pca](pca) provides principal-components-analysis (PCA) and covariance matrix computation functions.
+    - TODO: in metric? [clust](clust) provides standard agglomerative hierarchical clustering including ability to plot results in an eplot.
 
 
 # History

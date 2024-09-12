@@ -5,7 +5,7 @@ The `stats` package provides standard statistic computations operating on the `t
 type StatsFunc func(in, out *tensor.Indexed)
 ```
 
-For 1D data, the output is a scalar value in the out tensor, and otherwise it is an n-dimensional "cell" with outer-most row dimension set to 1.
+For 1D data, the output is a scalar value in the out tensor, and otherwise it is an n-dimensional "cell" with outermost row dimension set to 1.
 
 There is a `StatsFuncs` map of named stats funcs, which is initialized with the standard Stats per below, and any additional user-defined functions can be added to.
 
@@ -37,7 +37,7 @@ The following statistics are supported (per the `Stats` enum in `stats.go`):
 
 Here is the general info associated with these function calls:
 
-`StatsFunc` is the function signature for a stats function, where the output has the same shape as the input but with the outer-most row dimension size of 1, and contains the stat value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
+`StatsFunc` is the function signature for a stats function, where the output has the same shape as the input but with the outermost row dimension size of 1, and contains the stat value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
 
 Critically, the stat is always computed over the outer row dimension, so each cell in a higher-dimensional output reflects the _row-wise_ stat for that cell across the different rows.  To compute a stat on the `tensor.SubSpace` cells themselves, must call on a [tensor.New1DViewOf] the sub space.  
 

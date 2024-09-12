@@ -6,82 +6,56 @@
 
 See [examples/dataproc](examples/dataproc) for a demo of how to use this system for data analysis, paralleling the example in [Python Data Science](https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html) using pandas, to see directly how that translates into this framework.
 
-As a general convention, it is safest, clearest, and quite fast to access columns by name instead of index (there is a map that caches the column indexes), so the base access method names generally take a column name argument, and those that take a column index have an `Index` suffix.  In addition, we use the `Try` suffix for versions that return an error message.  It is a bit painful for the writer of these methods but very convenient for the users.
+Whereas an individual `Tensor` can only hold one data type, the `table` allows coordinated storage and processing of heterogeneous data types, aligned by the outermost row dimension. While the main data processing functions are defined on the individual tensors (which are the universal computational element in the `tensor` system), the coordinated row-wise indexing in the table is important for sorting or filtering a collection of data in the same way, and grouping data by a common set of "splits" for data analysis.  Plotting is also driven by the table, with one column providing a shared X axis for the rest of the columns.
 
-The following packages are included:
+As a general convention, it is safest, clearest, and quite fast to access columns by name instead of index (there is a map that caches the column indexes), so the base access method names generally take a column name argument, and those that take a column index have an `Index` suffix.
 
-* [bitslice](bitslice) is a Go slice of bytes `[]byte` that has methods for setting individual bits, as if it was a slice of bools, while being 8x more memory efficient.  This is used for encoding null entries in  `etensor`, and as a Tensor of bool / bits there as well, and is generally very useful for binary (boolean) data.
-
-* [etensor](etensor) is a Tensor (n-dimensional array) object.  `etensor.Tensor` is an interface that applies to many different type-specific instances, such as `etensor.Float32`.  A tensor is just a `etensor.Shape` plus a slice holding the specific data type.  Our tensor is based directly on the [Apache Arrow](https://github.com/apache/arrow/tree/master/go) project's tensor, and it fully interoperates with it.  Arrow tensors are designed to be read-only, and we needed some extra support to make our `etable.Table` work well, so we had to roll our own.  Our tensors also interoperate fully with Gonum's 2D-specific Matrix type for the 2D case.
-
-* [etable](etable) has the `etable.Table` DataTable / DataFrame object, which is useful for many different data analysis and database functions, and also for holding patterns to present to a neural network, and logs of output from the models, etc.  A `etable.Table` is just a slice of `etensor.Tensor` columns, that are all aligned along the outer-most *row* dimension.  Index-based indirection, which is essential for efficient Sort, Filter etc, is provided by the `etable.Indexed` type, which is an indexed view into a Table.  All data processing operations are defined on the Indexed.
-
-* [eplot](eplot) provides an interactive 2D plotting GUI in [GoGi](https://cogentcore.org/core/gi) for Table data, using the [gonum plot](https://github.com/gonum/plot) plotting package.  You can select which columns to plot and specify various basic plot parameters.
-
-* [tensorcore](tensorcore) provides an interactive tabular, spreadsheet-style GUI using [GoGi](https://cogentcore.org/core/gi) for viewing and editing `etable.Table` and `etable.Tensor` objects.  The `tensorcore.TensorGrid` also provides a colored grid display higher-dimensional tensor data.
-
-* [agg](agg) provides standard aggregation functions (`Sum`, `Mean`, `Var`, `Std` etc) operating over `etable.Indexed` views of Table data.  It also defines standard `AggFunc` functions such as `SumFunc` which can be used for `Agg` functions on either a Tensor or Indexed.
-
-* [tsragg](tsragg) provides the same agg functions as in `agg`, but operating on all the values in a given `Tensor`.  Because of the indexed, row-based nature of tensors in a Table, these are not the same as the `agg` functions.
-
-* [split](split) supports splitting a Table into any number of indexed sub-views and aggregating over those (i.e., pivot tables), grouping, summarizing data, etc.
-
-* [metric](metric) provides similarity / distance metrics such as `Euclidean`, `Cosine`, or `Correlation` that operate on slices of `[]float64` or `[]float32`.
-
-* [simat](simat) provides similarity / distance matrix computation methods operating on `etensor.Tensor` or `etable.Table` data.  The `SimMat` type holds the resulting matrix and labels for the rows and columns, which has a special `SimMatGrid` view in `etview` for visualizing labeled similarity matricies.
-
-* [pca](pca) provides principal-components-analysis (PCA) and covariance matrix computation functions.
-
-* [clust](clust) provides standard agglomerative hierarchical clustering including ability to plot results in an eplot.
-
-* [minmax](minmax) is home of basic Min / Max range struct, and `norm` has lots of good functions for computing standard norms and normalizing vectors.
-
-* [utils](utils) has various table-related utility command-line utility tools, including `etcat` which combines multiple table files into one file, including option for averaging column data.
+The table itself stores raw data `tensor.Tensor` values, and the `Column` (by index) and `ColumnByName` methods return a `tensor.Indexed` with the `Indexes` pointing to the shared table-wide `Indexes` (which can be `nil` if standard sequential order is being used).  It is best to use the table-wise `Sort` and `Filter` methods (and any others that affect the indexes) to ensure the indexes are properly coordinated.  Resetting the column tensor indexes to `nil` (via the `Sequential` method) will break any connection to the table indexes, so that any subsequent index-altering operations on that indexed tensor will be fine.
 
 # Cheat Sheet
 
-`et` is the etable pointer variable for examples below:
+`dt` is the etable pointer variable for examples below:
 
 ## Table Access
 
 Scalar columns:
 
 ```Go
-val := et.Float("ColName", row)
+val := dt.Float("ColName", row)
 ```
 
 ```Go
-str := et.StringValue("ColName", row)
+str := dt.StringValue("ColName", row)
 ```
 
 Tensor (higher-dimensional) columns:
 
 ```Go
-tsr := et.Tensor("ColName", row) // entire tensor at cell (a row-level SubSpace of column tensor)
+tsr := dt.Tensor("ColName", row) // entire tensor at cell (a row-level SubSpace of column tensor)
 ```
 
 ```Go
-val := et.TensorFloat1D("ColName", row, cellidx) // idx is 1D index into cell tensor
+val := dt.TensorFloat1D("ColName", row, cellidx) // idx is 1D index into cell tensor
 ```
 
 ## Set Table Value
 
 ```Go
-et.SetFloat("ColName", row, val)
+dt.SetFloat("ColName", row, val)
 ```
 
 ```Go
-et.SetString("ColName", row, str)
+dt.SetString("ColName", row, str)
 ```
 
 Tensor (higher-dimensional) columns:
 
 ```Go
-et.SetTensor("ColName", row, tsr) // set entire tensor at cell 
+dt.SetTensor("ColName", row, tsr) // set entire tensor at cell 
 ```
 
 ```Go
-et.SetTensorFloat1D("ColName", row, cellidx, val) // idx is 1D index into cell tensor
+dt.SetTensorFloat1D("ColName", row, cellidx, val) // idx is 1D index into cell tensor
 ```
 
 ## Find Value(s) in Column
@@ -89,7 +63,7 @@ et.SetTensorFloat1D("ColName", row, cellidx, val) // idx is 1D index into cell t
 Returns all rows where value matches given value, in string form (any number will convert to a string)
 
 ```Go
-rows := et.RowsByString("ColName", "value", etable.Contains, etable.IgnoreCase)
+rows := dt.RowsByString("ColName", "value", etable.Contains, etable.IgnoreCase)
 ```
 
 Other options are `etable.Equals` instead of `Contains` to search for an exact full string, and `etable.UseCase` if case should be used instead of ignored.
@@ -112,7 +86,7 @@ SortedTable := ix.NewTable() // turn an Indexed back into a new Table organized 
 or:
 
 ```Go
-nmcl := et.ColumnByName("Name") // nmcl is an etensor of the Name column, cached
+nmcl := dt.ColumnByName("Name") // nmcl is an etensor of the Name column, cached
 ix.Sort(func(t *Table, i, j int) bool {
 	return nmcl.StringValue1D(i) < nmcl.StringValue1D(j)
 })
@@ -121,7 +95,7 @@ ix.Sort(func(t *Table, i, j int) bool {
 ### Filter
 
 ```Go
-nmcl := et.ColumnByName("Name") // column we're filtering on
+nmcl := dt.ColumnByName("Name") // column we're filtering on
 ix.Filter(func(t *Table, row int) bool {
 	// filter return value is for what to *keep* (=true), not exclude
 	// here we keep any row with a name that contains the string "in"

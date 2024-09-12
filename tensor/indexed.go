@@ -16,7 +16,7 @@ import (
 
 // Indexed is an indexed wrapper around a tensor.Tensor that provides a
 // specific view onto the Tensor defined by the set of indexes, which
-// apply to the outer-most row dimension (with default row-major indexing).
+// apply to the outermost row dimension (with default row-major indexing).
 // This is the universal representation of a homogenous data type in the
 // [tensor] package framework, from scalar to vector, matrix, and beyond,
 // because it can efficiently represent any kind of element with sufficient
@@ -87,7 +87,7 @@ func (ix *Indexed) Index(idx int) int {
 	return ix.Indexes[idx]
 }
 
-// RowCellSize returns the size of the outer-most Row shape dimension
+// RowCellSize returns the size of the outermost Row shape dimension
 // (via [Indexed.Rows] method), and the size of all the remaining
 // inner dimensions (the "cell" size).
 func (ix *Indexed) RowCellSize() (rows, cells int) {
@@ -142,14 +142,7 @@ func (ix *Indexed) DeleteInvalid() {
 
 // Sequential sets Indexes to nil, resulting in sequential row-wise access into tensor.
 func (ix *Indexed) Sequential() { //types:add
-	if ix.Tensor == nil || ix.Tensor.DimSize(0) <= 0 || ix.Indexes == nil {
-		ix.Indexes = nil
-		return
-	}
-	ix.Indexes = make([]int, ix.Tensor.DimSize(0))
-	for i := range ix.Indexes {
-		ix.Indexes[i] = i
-	}
+	ix.Indexes = nil
 }
 
 // IndexesNeeded is called prior to an operation that needs actual indexes,
@@ -447,7 +440,7 @@ func (ix *Indexed) SetFloat(val float64, i ...int) {
 }
 
 // FloatRowCell returns the value at given row and cell,
-// where row is outer-most dim, and cell is 1D index into remaining inner dims.
+// where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) FloatRowCell(row, cell int) float64 {
@@ -455,7 +448,7 @@ func (ix *Indexed) FloatRowCell(row, cell int) float64 {
 }
 
 // SetFloatRowCell sets the value at given row and cell,
-// where row is outer-most dim, and cell is 1D index into remaining inner dims.
+// where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) SetFloatRowCell(val float64, row, cell int) {
@@ -485,7 +478,7 @@ func (ix *Indexed) SetString(val string, i ...int) {
 }
 
 // StringRowCell returns the value at given row and cell,
-// where row is outer-most dim, and cell is 1D index into remaining inner dims.
+// where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) StringRowCell(row, cell int) string {
@@ -493,7 +486,7 @@ func (ix *Indexed) StringRowCell(row, cell int) string {
 }
 
 // SetStringRowCell sets the value at given row and cell,
-// where row is outer-most dim, and cell is 1D index into remaining inner dims.
+// where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) SetStringRowCell(val string, row, cell int) {
@@ -506,7 +499,7 @@ func (ix *Indexed) SetStringRowCell(val string, row, cell int) {
 // will affect both), as its Values slice is a view onto the original (which
 // is why only inner-most contiguous supsaces are supported).
 // Use Clone() method to separate the two.
-// Indexed version does indexed indirection of the outer-most row dimension
+// Indexed version does indexed indirection of the outermost row dimension
 // of the offsets.
 func (ix *Indexed) SubSpace(offs ...int) Tensor {
 	if len(offs) == 0 {

@@ -19,7 +19,7 @@ import (
 )
 
 // Table is a table of data, with columns of tensors,
-// each with the same number of Rows (outer-most dimension).
+// each with the same number of Rows (outermost dimension).
 type Table struct { //types:add
 
 	// columns of data, as tensor.Tensor tensors
@@ -28,7 +28,7 @@ type Table struct { //types:add
 	// the names of the columns
 	ColumnNames []string
 
-	// number of rows, which is enforced to be the size of the outer-most dimension of the column tensors
+	// number of rows, which is enforced to be the size of the outermost dimension of the column tensors
 	Rows int `edit:"-"`
 
 	// the map of column names to column numbers
@@ -152,7 +152,7 @@ func InsertColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *
 
 // AddTensorColumn adds a new n-dimensional column to the table, of given type, column name
 // (which must be unique), and dimensionality of each _cell_.
-// An outer-most Row dimension will be added to this dimensionality to create
+// An outermost Row dimension will be added to this dimensionality to create
 // the tensor column.
 func AddTensorColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Table, name string, cellSizes ...int) tensor.Tensor {
 	rows := max(1, dt.Rows)
@@ -210,7 +210,7 @@ func (dt *Table) AddColumnOfType(typ reflect.Kind, name string) tensor.Tensor {
 
 // AddTensorColumnOfType adds a new n-dimensional column to the table, of given reflect type,
 // column name (which must be unique), and dimensionality of each _cell_.
-// An outer-most Row dimension will be added to this dimensionality to create
+// An outermost Row dimension will be added to this dimensionality to create
 // the tensor column.
 // Supported types are string, bool (for [tensor.Bits]), float32, float64, int, int32, and byte.
 func (dt *Table) AddTensorColumnOfType(typ reflect.Kind, name string, cellSizes ...int) tensor.Tensor {
@@ -236,7 +236,7 @@ func (dt *Table) AddFloat64Column(name string) *tensor.Float64 {
 
 // AddFloat64TensorColumn adds a new n-dimensional float64 column with given name
 // and dimensionality of each _cell_.
-// An outer-most Row dimension will be added to this dimensionality to create
+// An outermost Row dimension will be added to this dimensionality to create
 // the tensor column.
 func (dt *Table) AddFloat64TensorColumn(name string, cellSizes ...int) *tensor.Float64 {
 	return AddTensorColumn[float64](dt, name, cellSizes...).(*tensor.Float64)
@@ -250,7 +250,7 @@ func (dt *Table) AddFloat32Column(name string) *tensor.Float32 {
 
 // AddFloat32TensorColumn adds a new n-dimensional float32 column with given name
 // and dimensionality of each _cell_.
-// An outer-most Row dimension will be added to this dimensionality to create
+// An outermost Row dimension will be added to this dimensionality to create
 // the tensor column.
 func (dt *Table) AddFloat32TensorColumn(name string, cellSizes ...int) *tensor.Float32 {
 	return AddTensorColumn[float32](dt, name, cellSizes...).(*tensor.Float32)
@@ -264,7 +264,7 @@ func (dt *Table) AddIntColumn(name string) *tensor.Int {
 
 // AddIntTensorColumn adds a new n-dimensional int column with given name
 // and dimensionality of each _cell_.
-// An outer-most Row dimension will be added to this dimensionality to create
+// An outermost Row dimension will be added to this dimensionality to create
 // the tensor column.
 func (dt *Table) AddIntTensorColumn(name string, cellSizes ...int) *tensor.Int {
 	return AddTensorColumn[int](dt, name, cellSizes...).(*tensor.Int)

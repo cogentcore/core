@@ -12,7 +12,7 @@ import (
 
 // StatsFunc is the function signature for a stats function,
 // where the output has the same shape as the input but with
-// the outer-most row dimension size of 1, and contains
+// the outermost row dimension size of 1, and contains
 // the stat value(s) for the "cells" in higher-dimensional tensors,
 // and a single scalar value for a 1D input tensor.
 // Critically, the stat is always computed over the outer row dimension,

@@ -93,7 +93,7 @@ func (tsr *Bits) NumDims() int { return tsr.shape.NumDims() }
 // DimSize returns size of given dimension
 func (tsr *Bits) DimSize(dim int) int { return tsr.shape.DimSize(dim) }
 
-// RowCellSize returns the size of the outer-most Row shape dimension,
+// RowCellSize returns the size of the outermost Row shape dimension,
 // and the size of all the remaining inner dimensions (the "cell" size).
 // Used for Tensors that are columns in a data table.
 func (tsr *Bits) RowCellSize() (rows, cells int) {
@@ -126,7 +126,7 @@ func (tsr *Bits) SetNames(names ...string) {
 	tsr.shape.SetNames(names...)
 }
 
-// SetNumRows sets the number of rows (outer-most dimension) in a RowMajor organized tensor.
+// SetNumRows sets the number of rows (outermost dimension) in a RowMajor organized tensor.
 func (tsr *Bits) SetNumRows(rows int) {
 	rows = max(1, rows) // must be > 0
 	_, cells := tsr.shape.RowCellSize()
