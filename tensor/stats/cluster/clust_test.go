@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package clust
+package cluster
 
 import (
 	"testing"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/tolassert"
+	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/metric"
-	"cogentcore.org/core/tensor/stats/simat"
 	"cogentcore.org/core/tensor/table"
 )
 
@@ -33,15 +34,11 @@ func TestClust(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ix := table.NewIndexed(dt)
-	smat := &simat.SimMat{}
-	smat.TableColumn(ix, "Input", "Name", false, metric.Euclidean64)
+	in := tensor.NewIndexed(errors.Log1(dt.ColumnByName("Input")))
+	out := tensor.NewIndexed(tensor.NewFloat64())
+	metric.Matrix(metric.Euclidean.String(), in, out)
 
-	// fmt.Printf("%v\n", smat.Mat)
-	// cl := Glom(smat, MinDist)
-	cl := Glom(smat, AvgDist)
-	// s := cl.Sprint(smat, 0)
-	// fmt.Println(s)
+	cl := Cluster(Avg.String(), out, tensor.NewIndexed(errors.Log1(dt.ColumnByName("Name"))))
 
 	var dists []float64
 

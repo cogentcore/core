@@ -9,6 +9,84 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
+func init() {
+	tensor.AddFunc("metric.Matrix", Matrix, 1, tensor.StringFirstArg)
+	tensor.AddFunc("metric.CrossMatrix", CrossMatrix, 1, tensor.StringFirstArg)
+}
+
+// Matrix computes the rows x rows distance / similarity matrix between
+// all sub-space cells of the given higher dimensional input tensor,
+// which must have at least 2 dimensions: the outermost rows,
+// and within that, 1+dimensional patterns.
+// The metric function registered in tensor Funcs can be passed as Metrics.String().
+// The results fill in the elements of the output matrix, which is symmetric,
+// and only the lower triangular part is computed, with results copied
+// to the upper triangular region, for maximum efficiency.
+func Matrix(funcName string, in, out *tensor.Indexed) {
+	rows, cells := in.RowCellSize()
+	if rows == 0 || cells == 0 {
+		return
+	}
+	out.Tensor.SetShape(rows, rows)
+	mout := tensor.NewFloatScalar(0.0)
+	coords := TriangularLIndicies(rows)
+	nc := len(coords)
+	// note: flops estimating 3 per item on average -- different for different metrics.
+	tensor.VectorizeThreaded(cells*3, func(tsr ...*tensor.Indexed) int { return nc },
+		func(idx int, tsr ...*tensor.Indexed) {
+			c := coords[idx]
+			sa := tsr[0].Cells1D(c.X)
+			sb := tsr[0].Cells1D(c.Y)
+			tensor.Call(funcName, sa, sb, mout)
+			tsr[1].SetFloat(mout.Tensor.Float1D(0), c.X, c.Y)
+		}, in, out)
+	for _, c := range coords { // copy to upper
+		if c.X == c.Y { // exclude diag
+			continue
+		}
+		out.Tensor.SetFloat(out.Tensor.Float(c.X, c.Y), c.Y, c.X)
+	}
+}
+
+// CrossMatrix computes the distance / similarity matrix between
+// two different sets of patterns in the two input tensors, where
+// the patterns are in the sub-space cells of the tensors,
+// which must have at least 2 dimensions: the outermost rows,
+// and within that, 1+dimensional patterns that the given distance metric
+// function is applied to, with the results filling in the cells of the output matrix.
+// The rows of the output matrix are the rows of the first input tensor,
+// and the columns of the output are the rows of the second input tensor.
+// See also [LabeledMatrix] struct which can add labels for displaying the matrix.
+func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
+	arows, acells := a.RowCellSize()
+	if arows == 0 || acells == 0 {
+		return
+	}
+	brows, bcells := b.RowCellSize()
+	if brows == 0 || bcells == 0 {
+		return
+	}
+	out.Tensor.SetShape(arows, brows)
+	mout := tensor.NewFloatScalar(0.0)
+	// note: flops estimating 3 per item on average -- different for different metrics.
+	flops := min(acells, bcells) * 3
+	nc := arows * brows
+	tensor.VectorizeThreaded(flops, func(tsr ...*tensor.Indexed) int { return nc },
+		func(idx int, tsr ...*tensor.Indexed) {
+			ar := idx / brows
+			br := idx % brows
+			sa := tsr[0].Cells1D(ar)
+			sb := tsr[1].Cells1D(br)
+			tensor.Call(funcName, sa, sb, mout)
+			tsr[2].SetFloat(mout.Tensor.Float1D(0), ar, br)
+		}, a, b, out)
+}
+
+////////////////////////////////////////////
+// 	Triangular square matrix functions
+
+// TODO: move these somewhere more appropriate
+
 // note: this answer gives an index into the upper triangular
 // https://math.stackexchange.com/questions/2134011/conversion-of-upper-triangle-linear-index-from-index-on-symmetrical-array
 // return TriangularN(n) - ((n-c)*(n-c-1))/2 + r - c - 1 <- this works for lower excluding diag
@@ -41,73 +119,4 @@ func TriangularLIndicies(n int) []vecint.Vector2i {
 		}
 	}
 	return coords
-}
-
-// Matrix computes the rows x rows distance / similarity matrix between
-// all sub-space cells of the given higher dimensional input tensor,
-// which must have at least 2 dimensions: the outermost rows,
-// and within that, 1+dimensional patterns that the given distance metric
-// function is applied to, with the results filling the elements of the output matrix.
-// The resulting matrix is symmetric, and only the lower triangular part
-// is computed, with results copied to the upper triangular region,
-// for maximum efficiency.
-// See also [LabeledMatrix] struct which can add labels for displaying the matrix.
-func Matrix(in, out *tensor.Indexed, mfun MetricFunc) {
-	rows, cells := in.RowCellSize()
-	if rows == 0 || cells == 0 {
-		return
-	}
-	out.Tensor.SetShape(rows, rows)
-	mout := tensor.NewFloatScalar(0.0)
-	coords := TriangularLIndicies(rows)
-	nc := len(coords)
-	// note: flops estimating 3 per item on average -- different for different metrics.
-	tensor.VectorizeThreaded(cells*3, func(tsr ...*tensor.Indexed) int { return nc },
-		func(idx int, tsr ...*tensor.Indexed) {
-			c := coords[idx]
-			sa := tensor.NewIndexed(tensor.New1DViewOf(tsr[0].SubSpace(c.X)))
-			sb := tensor.NewIndexed(tensor.New1DViewOf(tsr[0].SubSpace(c.Y)))
-			mfun(sa, sb, mout)
-			tsr[1].SetFloat(mout.Tensor.Float1D(0), c.X, c.Y)
-		}, in, out)
-	for _, c := range coords { // copy to upper
-		if c.X == c.Y { // exclude diag
-			continue
-		}
-		out.Tensor.SetFloat(out.Tensor.Float(c.X, c.Y), c.Y, c.X)
-	}
-}
-
-// CrossMatrix computes the distance / similarity matrix between
-// two different sets of patterns in the two input tensors, where
-// the patterns are in the sub-space cells of the tensors,
-// which must have at least 2 dimensions: the outermost rows,
-// and within that, 1+dimensional patterns that the given distance metric
-// function is applied to, with the results filling in the cells of the output matrix.
-// The rows of the output matrix are the rows of the first input tensor,
-// and the columns of the output are the rows of the second input tensor.
-// See also [LabeledMatrix] struct which can add labels for displaying the matrix.
-func CrossMatrix(a, b, out *tensor.Indexed, mfun MetricFunc) {
-	arows, acells := a.RowCellSize()
-	if arows == 0 || acells == 0 {
-		return
-	}
-	brows, bcells := b.RowCellSize()
-	if brows == 0 || bcells == 0 {
-		return
-	}
-	out.Tensor.SetShape(arows, brows)
-	mout := tensor.NewFloatScalar(0.0)
-	// note: flops estimating 3 per item on average -- different for different metrics.
-	flops := min(acells, bcells) * 3
-	nc := arows * brows
-	tensor.VectorizeThreaded(flops, func(tsr ...*tensor.Indexed) int { return nc },
-		func(idx int, tsr ...*tensor.Indexed) {
-			ar := idx / brows
-			br := idx % brows
-			sa := tensor.NewIndexed(tensor.New1DViewOf(tsr[0].SubSpace(ar)))
-			sb := tensor.NewIndexed(tensor.New1DViewOf(tsr[1].SubSpace(br)))
-			mfun(sa, sb, mout)
-			tsr[2].SetFloat(mout.Tensor.Float1D(0), ar, br)
-		}, a, b, out)
 }

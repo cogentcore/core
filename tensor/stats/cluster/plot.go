@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package clust
+package cluster
 
 import (
-	"cogentcore.org/core/tensor/stats/simat"
+	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 )
 
 // Plot sets the rows of given data table to trace out lines with labels that
 // will render cluster plot starting at root node when plotted with a standard plotting package.
 // The lines double-back on themselves to form a continuous line to be plotted.
-func Plot(pt *table.Table, root *Node, smat *simat.SimMat) {
+func Plot(pt *table.Table, root *Node, dmat, labels *tensor.Indexed) {
 	pt.DeleteAll()
 	pt.AddFloat64Column("X")
 	pt.AddFloat64Column("Y")
@@ -20,20 +20,20 @@ func Plot(pt *table.Table, root *Node, smat *simat.SimMat) {
 	nextY := 0.5
 	root.SetYs(&nextY)
 	root.SetParDist(0.0)
-	root.Plot(pt, smat)
+	root.Plot(pt, dmat, labels)
 }
 
 // Plot sets the rows of given data table to trace out lines with labels that
 // will render this node in a cluster plot when plotted with a standard plotting package.
 // The lines double-back on themselves to form a continuous line to be plotted.
-func (nn *Node) Plot(pt *table.Table, smat *simat.SimMat) {
+func (nn *Node) Plot(pt *table.Table, dmat, labels *tensor.Indexed) {
 	row := pt.Rows
 	if nn.IsLeaf() {
 		pt.SetNumRows(row + 1)
 		pt.SetFloatIndex(0, row, nn.ParDist)
 		pt.SetFloatIndex(1, row, nn.Y)
-		if len(smat.Rows) > nn.Index {
-			pt.SetStringIndex(2, row, smat.Rows[nn.Index])
+		if labels.Len() > nn.Index {
+			pt.SetStringIndex(2, row, labels.StringValue(nn.Index))
 		}
 	} else {
 		for _, kn := range nn.Kids {
@@ -43,7 +43,7 @@ func (nn *Node) Plot(pt *table.Table, smat *simat.SimMat) {
 			row++
 			pt.SetFloatIndex(0, row, nn.ParDist+nn.Dist)
 			pt.SetFloatIndex(1, row, kn.Y)
-			kn.Plot(pt, smat)
+			kn.Plot(pt, dmat, labels)
 			row = pt.Rows
 			pt.SetNumRows(row + 1)
 			pt.SetFloatIndex(0, row, nn.ParDist)

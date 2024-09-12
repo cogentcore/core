@@ -508,3 +508,10 @@ func (ix *Indexed) SubSpace(offs ...int) Tensor {
 	offs[0] = ix.Index(offs[0])
 	return ix.Tensor.SubSpace(offs...)
 }
+
+// Cells1D returns a flat 1D [tensor.Indexed] view of the cells for given row
+// index (indirected through our Indexes).  This is useful for passing to
+// other functions e.g., in stats or metrics that process a 1D tensor.
+func (ix *Indexed) Cells1D(row int) *Indexed {
+	return NewIndexed(New1DViewOf(ix.SubSpace(row)))
+}

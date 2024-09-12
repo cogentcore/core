@@ -88,12 +88,12 @@ func TestMatrix(t *testing.T) {
 [11]: 6.324555320336759 5.291502622129181 9.899494936611665 9.273618495495704 9.38083151964686 8.94427190999916 5.477225575051661 4.242640687119285 9.695359714832659       9 3.4641016151377544       0 
 `
 	dt := &table.Table{}
-	err := dt.OpenCSV("../clust/testdata/faces.dat", table.Tab)
+	err := dt.OpenCSV("../cluster/testdata/faces.dat", table.Tab)
 	assert.NoError(t, err)
 	// smat.TableColumn(ix, "Input", "Name", false, metric.Euclidean64)
 	in := tensor.NewIndexed(errors.Log1(dt.ColumnByName("Input")))
 	out := tensor.NewIndexed(tensor.NewFloat64())
-	Matrix(in, out, EuclideanFunc)
+	Matrix(Euclidean.String(), in, out)
 	// fmt.Println(out.Tensor)
 	assert.Equal(t, simres, out.Tensor.String())
 }
