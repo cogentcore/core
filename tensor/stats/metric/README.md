@@ -2,6 +2,8 @@
 
 `metric` provides various similarity / distance metrics for comparing tensors, operating on the `tensor.Indexed` standard data representation.
 
+The `Matrix` function returns a distance / similarity matrix computed from the n-dimensional "cells" of row-organized tensor data, and the `SimMat` type provides labels for displaying such matricies.
+
 ## Metrics
 
 ### Value _increases_ with increasing distance (i.e., difference metric)

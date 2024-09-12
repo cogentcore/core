@@ -87,6 +87,15 @@ func (ix *Indexed) Index(idx int) int {
 	return ix.Indexes[idx]
 }
 
+// RowCellSize returns the size of the outer-most Row shape dimension
+// (via [Indexed.Rows] method), and the size of all the remaining
+// inner dimensions (the "cell" size).
+func (ix *Indexed) RowCellSize() (rows, cells int) {
+	_, cells = ix.Tensor.RowCellSize()
+	rows = ix.Rows()
+	return
+}
+
 // RowCellIndex returns the direct Values index into underlying tensor
 // based on given overall row * cell index.
 func (ix *Indexed) RowCellIndex(idx int) (i1d, ri, ci int) {
@@ -430,6 +439,7 @@ func (ix *Indexed) Float(i []int) float64 {
 func (ix *Indexed) SetFloat(i []int, val float64) {
 	if ix.Indexes == nil {
 		ix.Tensor.SetFloat(i, val)
+		return
 	}
 	ic := slices.Clone(i)
 	ic[0] = ix.Indexes[ic[0]]

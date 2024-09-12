@@ -39,7 +39,8 @@ type Tensor interface {
 	// Existing names will be preserved if not presented.
 	SetShape(sizes []int, names ...string)
 
-	// Len returns the number of elements in the tensor (product of shape dimensions).
+	// Len returns the number of elements in the tensor,
+	// which is the product of all shape dimensions.
 	Len() int
 
 	// NumDims returns the total number of dimensions.
@@ -50,7 +51,8 @@ type Tensor interface {
 
 	// RowCellSize returns the size of the outer-most Row shape dimension,
 	// and the size of all the remaining inner dimensions (the "cell" size).
-	// Used for Tensors that are columns in a data table.
+	// Commonly used to organize multiple instances (rows) of higher-dimensional
+	// patterns (cells), and the [Indexed] type operates on the outer row dimension.
 	RowCellSize() (rows, cells int)
 
 	// DataType returns the type of the data elements in the tensor.
