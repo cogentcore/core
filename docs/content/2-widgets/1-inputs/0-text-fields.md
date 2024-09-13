@@ -1,5 +1,7 @@
 Cogent Core provides highly customizable text fields with powerful selection, navigation, and editing functionality built in, including undo and redo, copy and paste, and word-based navigation, selection, and deletion.
 
+Text fields should mainly be used for relatively short and simple text. For more advanced use cases such as code editing, see [text editors](text-editors).
+
 You can make a text field without any custom options:
 
 ```Go
