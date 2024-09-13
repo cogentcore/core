@@ -14,10 +14,10 @@ func init() {
 	tensor.AddFunc("metric.CrossMatrix", CrossMatrix, 1, tensor.StringFirstArg)
 }
 
-// Matrix computes the rows x rows distance / similarity matrix between
-// all sub-space cells of the given higher dimensional input tensor,
+// Matrix computes the rows x rows square distance / similarity matrix
+// between the patterns for each row of the given higher dimensional input tensor,
 // which must have at least 2 dimensions: the outermost rows,
-// and within that, 1+dimensional patterns.
+// and within that, 1+dimensional patterns (cells).
 // The metric function registered in tensor Funcs can be passed as Metrics.String().
 // The results fill in the elements of the output matrix, which is symmetric,
 // and only the lower triangular part is computed, with results copied
@@ -54,9 +54,9 @@ func Matrix(funcName string, in, out *tensor.Indexed) {
 // which must have at least 2 dimensions: the outermost rows,
 // and within that, 1+dimensional patterns that the given distance metric
 // function is applied to, with the results filling in the cells of the output matrix.
+// The metric function registered in tensor Funcs can be passed as Metrics.String().
 // The rows of the output matrix are the rows of the first input tensor,
 // and the columns of the output are the rows of the second input tensor.
-// See also [LabeledMatrix] struct which can add labels for displaying the matrix.
 func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
 	arows, acells := a.RowCellSize()
 	if arows == 0 || acells == 0 {
@@ -80,6 +80,64 @@ func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
 			tensor.Call(funcName, sa, sb, mout)
 			tsr[2].SetFloat(mout.Tensor.Float1D(0), ar, br)
 		}, a, b, out)
+}
+
+// CovarMatrix generates the cells x cells square covariance matrix
+// for all per-row cells of the given higher dimensional input tensor,
+// which must have at least 2 dimensions: the outermost rows,
+// and within that, 1+dimensional patterns (cells).
+// Each value in the resulting matrix represents the extent to which the
+// value of a given cell covaries across the rows of the tensor with the
+// value of another cell.
+// Uses the given metric function, typically [Covariance] or [Correlation],
+// which must be registered in tensor Funcs, and can be passed as Metrics.String().
+// Use Covariance if vars have similar overall scaling,
+// which is typical in neural network models, and use
+// Correlation if they are on very different scales, because it effectively rescales).
+// The resulting matrix can be used as the input to PCA or SVD eigenvalue decomposition.
+func CovarMatrix(funcName string, in, out *tensor.Indexed) {
+	rows, cells := in.RowCellSize()
+	if rows == 0 || cells == 0 {
+		return
+	}
+	mout := tensor.NewFloatScalar(0.0)
+	out.Tensor.SetShape(cells, cells)
+	av := tensor.NewIndexed(tensor.NewFloat64(rows))
+	bv := tensor.NewIndexed(tensor.NewFloat64(rows))
+
+	coords := TriangularLIndicies(cells)
+	nc := len(coords)
+	// note: flops estimating 3 per item on average -- different for different metrics.
+	tensor.VectorizeThreaded(rows*3, func(tsr ...*tensor.Indexed) int { return nc },
+		func(idx int, tsr ...*tensor.Indexed) {
+			// c := coords[idx]
+			// todo: vectorize: only get new data if diff!
+			for ai := 0; ai < cells; ai++ {
+				// todo: extract data from given cell into av
+				// TableColumnRowsVec(av, ix, col, ai)
+				for bi := 0; bi <= ai; bi++ { // lower diag
+					// TableColumnRowsVec(bv, ix, col, bi)
+					// likewise
+					tensor.Call(funcName, av, bv, mout)
+					tsr[1].SetFloat(mout.Tensor.Float1D(0), ai, bi)
+				}
+			}
+		}, in, out)
+	for _, c := range coords { // copy to upper
+		if c.X == c.Y { // exclude diag
+			continue
+		}
+		out.Tensor.SetFloat(out.Tensor.Float(c.X, c.Y), c.Y, c.X)
+	}
+	// if nm, has := ix.Table.MetaData["name"]; has {
+	// 	cmat.SetMetaData("name", nm+"_"+column)
+	// } else {
+	// 	cmat.SetMetaData("name", column)
+	// }
+	// if ds, has := ix.Table.MetaData["desc"]; has {
+	// 	cmat.SetMetaData("desc", ds)
+	// }
+	// return nil
 }
 
 ////////////////////////////////////////////
