@@ -7,11 +7,13 @@ package metric
 import (
 	"cogentcore.org/core/math32/vecint"
 	"cogentcore.org/core/tensor"
+	"gonum.org/v1/gonum/mat"
 )
 
 func init() {
 	tensor.AddFunc("metric.Matrix", Matrix, 1, tensor.StringFirstArg)
 	tensor.AddFunc("metric.CrossMatrix", CrossMatrix, 1, tensor.StringFirstArg)
+	tensor.AddFunc("metric.CovarMatrix", CovarMatrix, 1, tensor.StringFirstArg)
 }
 
 // Matrix computes the rows x rows square distance / similarity matrix
@@ -100,45 +102,189 @@ func CovarMatrix(funcName string, in, out *tensor.Indexed) {
 	if rows == 0 || cells == 0 {
 		return
 	}
+
+	flatsz := []int{in.Tensor.DimSize(0), cells}
+	flatvw := in.Tensor.View()
+	flatvw.SetShape(flatsz...)
+	flatix := tensor.NewIndexed(flatvw)
+	flatix.Indexes = in.Indexes
+
 	mout := tensor.NewFloatScalar(0.0)
 	out.Tensor.SetShape(cells, cells)
 	av := tensor.NewIndexed(tensor.NewFloat64(rows))
 	bv := tensor.NewIndexed(tensor.NewFloat64(rows))
+	curCoords := vecint.Vector2i{-1, -1}
 
 	coords := TriangularLIndicies(cells)
 	nc := len(coords)
 	// note: flops estimating 3 per item on average -- different for different metrics.
 	tensor.VectorizeThreaded(rows*3, func(tsr ...*tensor.Indexed) int { return nc },
 		func(idx int, tsr ...*tensor.Indexed) {
-			// c := coords[idx]
-			// todo: vectorize: only get new data if diff!
-			for ai := 0; ai < cells; ai++ {
-				// todo: extract data from given cell into av
-				// TableColumnRowsVec(av, ix, col, ai)
-				for bi := 0; bi <= ai; bi++ { // lower diag
-					// TableColumnRowsVec(bv, ix, col, bi)
-					// likewise
-					tensor.Call(funcName, av, bv, mout)
-					tsr[1].SetFloat(mout.Tensor.Float1D(0), ai, bi)
-				}
+			c := coords[idx]
+			if c.X != curCoords.X {
+				tensor.Slice(tsr[0], av, tensor.Range{}, tensor.Range{Start: c.X, End: c.X + 1})
+				curCoords.X = c.X
 			}
-		}, in, out)
+			if c.Y != curCoords.Y {
+				tensor.Slice(tsr[0], bv, tensor.Range{}, tensor.Range{Start: c.Y, End: c.Y + 1})
+				curCoords.Y = c.Y
+			}
+			tensor.Call(funcName, av, bv, mout)
+			tsr[1].SetFloat(mout.Tensor.Float1D(0), c.X, c.Y)
+		}, flatix, out)
 	for _, c := range coords { // copy to upper
 		if c.X == c.Y { // exclude diag
 			continue
 		}
 		out.Tensor.SetFloat(out.Tensor.Float(c.X, c.Y), c.Y, c.X)
 	}
-	// if nm, has := ix.Table.MetaData["name"]; has {
-	// 	cmat.SetMetaData("name", nm+"_"+column)
-	// } else {
-	// 	cmat.SetMetaData("name", column)
-	// }
-	// if ds, has := ix.Table.MetaData["desc"]; has {
-	// 	cmat.SetMetaData("desc", ds)
-	// }
-	// return nil
 }
+
+// PCA performs the eigen decomposition of the given CovarMatrix,
+// using principal components analysis (PCA), which is slower than [SVD].
+// The eigenvectors are same size as Covar. Each eigenvector is a column
+// in this 2D square matrix, ordered *lowest* to *highest* across the columns,
+// i.e., maximum eigenvector is the last column.
+// The eigenvalues are the size of one row, ordered *lowest* to *highest*.
+func PCA(covar, eigenvecs, vals *tensor.Indexed) {
+	n := covar.Tensor.DimSize(0)
+	cv, ok := covar.Tensor.(*tensor.Float64)
+	if !ok {
+		cv = tensor.NewFloat64(covar.Tensor.Shape().Sizes...)
+		cv.CopyFrom(covar.Tensor)
+	}
+	eigenvecs.Tensor.SetShape(n, n)
+	eigenvecs.Sequential()
+	vals.Tensor.SetShape(n)
+	vals.Sequential()
+	var eig mat.EigenSym
+	// note: MUST be a Float64 otherwise doesn't have Symmetric function
+	eig.Factorize(cv, true)
+	// if !ok {
+	// 	return fmt.Errorf("gonum EigenSym Factorize failed")
+	// }
+	var ev mat.Dense
+	eig.VectorsTo(&ev)
+	tensor.CopyDense(eigenvecs.Tensor, &ev)
+	eig.Values(vals.Tensor.(*tensor.Float64).Values)
+}
+
+// SVD performs the eigen decomposition of the given CovarMatrix,
+// using singular value decomposition (SVD), which is faster than [PCA].
+// The eigenvectors are same size as Covar. Each eigenvector is a column
+// in this 2D square matrix, ordered *lowest* to *highest* across the columns,
+// i.e., maximum eigenvector is the last column.
+// The eigenvalues are the size of one row, ordered *lowest* to *highest*.
+func SVD(covar, eigenvecs, vals *tensor.Indexed) {
+	n := covar.Tensor.DimSize(0)
+	cv, ok := covar.Tensor.(*tensor.Float64)
+	if !ok {
+		cv = tensor.NewFloat64(covar.Tensor.Shape().Sizes...)
+		cv.CopyFrom(covar.Tensor)
+	}
+	eigenvecs.Tensor.SetShape(n, n)
+	eigenvecs.Sequential()
+	vals.Tensor.SetShape(n)
+	vals.Sequential()
+	var eig mat.SVD
+	eig.Factorize(cv, mat.SVDFull) // todo: test weaker versions than SVDFull
+	// note: MUST be a Float64 otherwise doesn't have Symmetric function
+	// if !ok {
+	// 	return fmt.Errorf("gonum EigenSym Factorize failed")
+	// }
+	var ev mat.Dense
+	eig.UTo(&ev)
+	tensor.CopyDense(eigenvecs.Tensor, &ev)
+	eig.Values(vals.Tensor.(*tensor.Float64).Values)
+}
+
+// TODO: simple projection function
+
+/*
+// ProjectColumn projects values from the given column of given table (via Indexed)
+// onto the idx'th eigenvector (0 = largest eigenvalue, 1 = next, etc).
+// Must have already called PCA() method.
+func (pa *PCA) ProjectColumn(vals *[]float64, ix *table.Indexed, column string, idx int) error {
+	col, err := ix.Table.ColumnByName(column)
+	if err != nil {
+		return err
+	}
+	if pa.Vectors == nil {
+		return fmt.Errorf("PCA.ProjectColumn Vectors are nil -- must call PCA first")
+	}
+	nr := pa.Vectors.DimSize(0)
+	if idx >= nr {
+		return fmt.Errorf("PCA.ProjectColumn eigenvector index > rank of matrix")
+	}
+	cvec := make([]float64, nr)
+	eidx := nr - 1 - idx // eigens in reverse order
+	vec := pa.Vectors.(*tensor.Float64)
+	for ri := 0; ri < nr; ri++ {
+		cvec[ri] = vec.Value([]int{ri, eidx}) // vecs are in columns, reverse magnitude order
+	}
+	rows := ix.Len()
+	if len(*vals) != rows {
+		*vals = make([]float64, rows)
+	}
+	ln := col.Len()
+	sz := ln / col.DimSize(0) // size of cell
+	if sz != nr {
+		return fmt.Errorf("PCA.ProjectColumn column cell size != pca eigenvectors")
+	}
+	rdim := []int{0}
+	for row := 0; row < rows; row++ {
+		sum := 0.0
+		rdim[0] = ix.Indexes[row]
+		rt := col.SubSpace(rdim)
+		for ci := 0; ci < sz; ci++ {
+			sum += cvec[ci] * rt.Float1D(ci)
+		}
+		(*vals)[row] = sum
+	}
+	return nil
+}
+
+// ProjectColumnToTable projects values from the given column of given table (via Indexed)
+// onto the given set of eigenvectors (idxs, 0 = largest eigenvalue, 1 = next, etc),
+// and stores results along with labels from column labNm into results table.
+// Must have already called PCA() method.
+func (pa *PCA) ProjectColumnToTable(projections *table.Table, ix *table.Indexed, column, labNm string, idxs []int) error {
+	_, err := ix.Table.ColumnByName(column)
+	if err != nil {
+		return err
+	}
+	if pa.Vectors == nil {
+		return fmt.Errorf("PCA.ProjectColumn Vectors are nil -- must call PCA first")
+	}
+	rows := ix.Len()
+	projections.DeleteAll()
+	pcolSt := 0
+	if labNm != "" {
+		projections.AddStringColumn(labNm)
+		pcolSt = 1
+	}
+	for _, idx := range idxs {
+		projections.AddFloat64Column(fmt.Sprintf("Projection%v", idx))
+	}
+	projections.SetNumRows(rows)
+
+	for ii, idx := range idxs {
+		pcol := projections.Columns[pcolSt+ii].(*tensor.Float64)
+		pa.ProjectColumn(&pcol.Values, ix, column, idx)
+	}
+
+	if labNm != "" {
+		lcol, err := ix.Table.ColumnByName(labNm)
+		if err == nil {
+			plcol := projections.Columns[0]
+			for row := 0; row < rows; row++ {
+				plcol.SetString1D(row, lcol.String1D(row))
+			}
+		}
+	}
+	return nil
+}
+*/
 
 ////////////////////////////////////////////
 // 	Triangular square matrix functions

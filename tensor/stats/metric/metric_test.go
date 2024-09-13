@@ -97,3 +97,49 @@ func TestMatrix(t *testing.T) {
 	// fmt.Println(out.Tensor)
 	assert.Equal(t, simres, out.Tensor.String())
 }
+
+func TestPCAIris(t *testing.T) {
+	// note: these results are verified against this example:
+	// https://plot.ly/ipython-notebooks/principal-component-analysis/
+
+	dt := table.NewTable()
+	dt.AddFloat64TensorColumn("data", 4)
+	dt.AddStringColumn("class")
+	err := dt.OpenCSV("testdata/iris.data", table.Comma)
+	if err != nil {
+		t.Error(err)
+	}
+	// pc.TableColumn(ix, "data", metric.Covariance64)
+	// fmt.Printf("covar: %v\n", pc.Covar)
+	data := tensor.NewIndexed(errors.Log1(dt.ColumnByName("data")))
+	covar := tensor.NewIndexed(tensor.NewFloat64())
+	CovarMatrix("Correlation", data, covar)
+	// fmt.Printf("correl: %s\n", covar.Tensor.String())
+
+	vecs := tensor.NewIndexed(tensor.NewFloat64())
+	vals := tensor.NewIndexed(tensor.NewFloat64())
+	PCA(covar, vecs, vals)
+
+	// fmt.Printf("correl vec: %v\n", vecs)
+	// fmt.Printf("correl val: %v\n", vals)
+	errtol := 1.0e-9
+	corvals := []float64{0.020607707235624825, 0.14735327830509573, 0.9212209307072254, 2.910818083752054}
+	for i, v := range vals.Tensor.(*tensor.Float64).Values {
+		assert.InDelta(t, corvals[i], v, errtol)
+	}
+
+	// prjt := &table.Table{}
+	// err = pc.ProjectColumnToTable(prjt, ix, "data", "class", []int{0, 1})
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	// prjt.SaveCSV("test_data/projection01.csv", table.Comma, true)
+
+	SVD(covar, vecs, vals)
+	// fmt.Printf("correl vec: %v\n", vecs)
+	// fmt.Printf("correl val: %v\n", vals)
+	for i, v := range vals.Tensor.(*tensor.Float64).Values {
+		assert.InDelta(t, corvals[3-i], v, errtol) // opposite order
+	}
+
+}

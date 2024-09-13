@@ -48,17 +48,17 @@ func (rn *Range) Size(size int) int {
 	return (e - rn.Start) / i
 }
 
-// Slice returns a new shape applying the ranges, in order, to
-// the dimensions. It is important that all dimensions are non-zero,
-// otherwise nothing will be included.  An error is returned if this
-// is the case.  Dimensions beyond the ranges specified are
-// automatically included.
-func (sh *Shape) Slice(ranges ...Range) ([]int, error) {
-	nsz := slices.Clone(sh.Sizes)
-	mx := min(len(ranges), len(sh.Sizes))
+// SliceSize returns a set of sizes applying the ranges, in order, to
+// the given dimension sizes. It is important that all dimensions
+// are non-zero, otherwise nothing will be included.
+// An error is returned if this is the case.
+// Dimensions beyond the ranges specified are automatically included.
+func SliceSize(sizes []int, ranges ...Range) ([]int, error) {
+	nsz := slices.Clone(sizes)
+	mx := min(len(ranges), len(sizes))
 	var zd []int
 	for i := range mx {
-		nsz[i] = ranges[i].Size(sh.Sizes[i])
+		nsz[i] = ranges[i].Size(sizes[i])
 		if nsz[i] == 0 {
 			zd = append(zd, i)
 		}
@@ -81,18 +81,21 @@ func (sh *Shape) Slice(ranges ...Range) ([]int, error) {
 // copies of the original, not a slice pointer into them,
 // which is necessary to allow discontinuous ranges to be extracted.
 // Use the [SliceSet] function to copy sliced values back to the original.
-func Slice(tsr, out Tensor, ranges ...Range) error {
-	nsz, err := tsr.Shape().Slice(ranges...)
+func Slice(tsr, out *Indexed, ranges ...Range) error {
+	sizes := slices.Clone(tsr.Tensor.Shape().Sizes)
+	sizes[0] = tsr.Rows() // takes into account indexes
+	nsz, err := SliceSize(sizes, ranges...)
 	if err != nil {
 		return err
 	}
 	ndim := len(nsz)
-	out.SetShape(nsz...)
+	out.Tensor.SetShape(nsz...)
+	out.Sequential()
 	nl := out.Len()
 	oc := make([]int, ndim) // orig coords
 	nr := len(ranges)
 	for ni := range nl {
-		nc := out.Shape().Index(ni)
+		nc := out.Tensor.Shape().Index(ni)
 		for i := range ndim {
 			c := nc[i]
 			if i < nr {
@@ -102,11 +105,12 @@ func Slice(tsr, out Tensor, ranges ...Range) error {
 				oc[i] = c
 			}
 		}
-		oi := tsr.Shape().Offset(oc...)
-		if out.IsString() {
-			out.SetString1D(tsr.String1D(oi), ni)
+		oc[0] = tsr.Index(oc[0])
+		oi := tsr.Tensor.Shape().Offset(oc...)
+		if out.Tensor.IsString() {
+			out.Tensor.SetString1D(tsr.Tensor.String1D(oi), ni)
 		} else {
-			out.SetFloat1D(tsr.Float1D(oi), ni)
+			out.Tensor.SetFloat1D(tsr.Tensor.Float1D(oi), ni)
 		}
 	}
 	return nil
@@ -116,12 +120,14 @@ func Slice(tsr, out Tensor, ranges ...Range) error {
 // Slice tensor must have been created with the [Slice]
 // function using the same Range sizes (Start offsets
 // can be different).
-func SliceSet(tsr, slc Tensor, ranges ...Range) error {
-	nsz, err := tsr.Shape().Slice(ranges...)
+func SliceSet(tsr, slc *Indexed, ranges ...Range) error {
+	sizes := slices.Clone(tsr.Tensor.Shape().Sizes)
+	sizes[0] = tsr.Rows() // takes into account indexes
+	nsz, err := SliceSize(sizes, ranges...)
 	if err != nil {
 		return err
 	}
-	if slices.Compare(nsz, slc.Shape().Sizes) != 0 {
+	if slices.Compare(nsz, slc.Tensor.Shape().Sizes) != 0 {
 		return fmt.Errorf("tensor.SliceSet size from ranges is not the same as the slice tensor")
 	}
 	ndim := len(nsz)
@@ -129,7 +135,7 @@ func SliceSet(tsr, slc Tensor, ranges ...Range) error {
 	oc := make([]int, ndim) // orig coords
 	nr := len(ranges)
 	for ni := range nl {
-		nc := slc.Shape().Index(ni)
+		nc := slc.Tensor.Shape().Index(ni)
 		for i := range ndim {
 			c := nc[i]
 			if i < nr {
@@ -139,11 +145,12 @@ func SliceSet(tsr, slc Tensor, ranges ...Range) error {
 				oc[i] = c
 			}
 		}
-		oi := tsr.Shape().Offset(oc...)
-		if slc.IsString() {
-			tsr.SetString1D(slc.String1D(ni), oi)
+		oc[0] = tsr.Index(oc[0])
+		oi := tsr.Tensor.Shape().Offset(oc...)
+		if slc.Tensor.IsString() {
+			tsr.Tensor.SetString1D(slc.Tensor.String1D(ni), oi)
 		} else {
-			tsr.SetFloat1D(slc.Float1D(ni), oi)
+			tsr.Tensor.SetFloat1D(slc.Tensor.Float1D(ni), oi)
 		}
 	}
 	return nil
