@@ -69,9 +69,18 @@ func (sh *Shape) Slice(ranges ...Range) ([]int, error) {
 	return nsz, nil
 }
 
+// note: the only way to allow arbitrary slicing with shared access
+// is with a bitmask.  but bitmask is not computationally or memory
+// efficient, relative to indexes, and it is simpler to only support one.
+// also, the need for direct shared access is limited.
+
 // Slice extracts a subset of values from the given tensor into the
 // output tensor, according to the provided ranges.
 // Dimensions beyond the ranges specified are automatically included.
+// Unlike the [Tensor.SubSlice] function, the values extracted here are
+// copies of the original, not a slice pointer into them,
+// which is necessary to allow discontinuous ranges to be extracted.
+// Use the [SliceSet] function to copy sliced values back to the original.
 func Slice(tsr, out Tensor, ranges ...Range) error {
 	nsz, err := tsr.Shape().Slice(ranges...)
 	if err != nil {
@@ -98,6 +107,43 @@ func Slice(tsr, out Tensor, ranges ...Range) error {
 			out.SetString1D(tsr.String1D(oi), ni)
 		} else {
 			out.SetFloat1D(tsr.Float1D(oi), ni)
+		}
+	}
+	return nil
+}
+
+// SliceSet sets values from the slice into the given tensor.
+// Slice tensor must have been created with the [Slice]
+// function using the same Range sizes (Start offsets
+// can be different).
+func SliceSet(tsr, slc Tensor, ranges ...Range) error {
+	nsz, err := tsr.Shape().Slice(ranges...)
+	if err != nil {
+		return err
+	}
+	if slices.Compare(nsz, slc.Shape().Sizes) != 0 {
+		return fmt.Errorf("tensor.SliceSet size from ranges is not the same as the slice tensor")
+	}
+	ndim := len(nsz)
+	nl := slc.Len()
+	oc := make([]int, ndim) // orig coords
+	nr := len(ranges)
+	for ni := range nl {
+		nc := slc.Shape().Index(ni)
+		for i := range ndim {
+			c := nc[i]
+			if i < nr {
+				r := ranges[i]
+				oc[i] = r.Start + c*r.IncrActual()
+			} else {
+				oc[i] = c
+			}
+		}
+		oi := tsr.Shape().Offset(oc...)
+		if slc.IsString() {
+			tsr.SetString1D(slc.String1D(ni), oi)
+		} else {
+			tsr.SetFloat1D(slc.Float1D(ni), oi)
 		}
 	}
 	return nil

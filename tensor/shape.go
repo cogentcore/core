@@ -127,10 +127,10 @@ func (sh *Shape) IndexIsValid(idx ...int) bool {
 
 // IsEqual returns true if this shape is same as other (does not compare names)
 func (sh *Shape) IsEqual(oth *Shape) bool {
-	if !EqualInts(sh.Sizes, oth.Sizes) {
+	if slices.Compare(sh.Sizes, oth.Sizes) != 0 {
 		return false
 	}
-	if !EqualInts(sh.Strides, oth.Strides) {
+	if slices.Compare(sh.Strides, oth.Strides) != 0 {
 		return false
 	}
 	return true
@@ -237,19 +237,6 @@ func ColMajorStrides(sizes ...int) []int {
 		total *= v
 	}
 	return strides
-}
-
-// EqualInts compares two int slices and returns true if they are equal
-func EqualInts(a, b []int) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
 }
 
 // AddShapes returns a new shape by adding two shapes one after the other.
