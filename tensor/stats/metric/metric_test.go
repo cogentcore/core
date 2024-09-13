@@ -130,8 +130,21 @@ func TestPCAIris(t *testing.T) {
 
 	colidx := tensor.NewFloat64Scalar(3) // strongest at end
 	prjns := tensor.NewFloat64Indexed()
-	ProjectOnMatrixColumn(covar, data, colidx, prjns)
-	tensor.SaveCSV(prjns.Tensor, "testdata/pca_projection.csv", tensor.Comma)
+	ProjectOnMatrixColumn(vecs, data, colidx, prjns)
+	// tensor.SaveCSV(prjns.Tensor, "testdata/pca_projection.csv", tensor.Comma)
+	trgprjns := []float64{
+		2.6692308782935146,
+		2.696434011868953,
+		2.4811633041648684,
+		2.5715124347750256,
+		2.5906582247213543,
+		3.0080988099460613,
+		2.490941664609344,
+		2.7014546083439073,
+		2.4615836931965167,
+		2.6716628159090594,
+	}
+	assert.Equal(t, trgprjns, tensor.AsFloat64(prjns.Tensor).Values[:10])
 
 	////////////////////////////////////////////////////////////
 	//  	SVD
@@ -143,4 +156,20 @@ func TestPCAIris(t *testing.T) {
 		assert.InDelta(t, corvals[3-i], v, errtol) // opposite order
 	}
 
+	colidx.Tensor.SetFloat1D(0, 0) // strongest at start
+	ProjectOnMatrixColumn(vecs, data, colidx, prjns)
+	tensor.SaveCSV(prjns.Tensor, "testdata/svd_projection.csv", tensor.Comma)
+	trgprjns = []float64{
+		-2.6692308782935172,
+		-2.696434011868955,
+		-2.48116330416487,
+		-2.5715124347750273,
+		-2.590658224721357,
+		-3.008098809946064,
+		-2.4909416646093456,
+		-2.70145460834391,
+		-2.4615836931965185,
+		-2.671662815909061,
+	}
+	assert.Equal(t, trgprjns, tensor.AsFloat64(prjns.Tensor).Values[:10])
 }
