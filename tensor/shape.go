@@ -39,7 +39,7 @@ func NewShape(sizes ...int) *Shape {
 // RowMajor ordering is used by default.
 func (sh *Shape) SetShape(sizes ...int) {
 	sh.Sizes = slices.Clone(sizes)
-	sh.Strides = RowMajorStrides(sizes)
+	sh.Strides = RowMajorStrides(sizes...)
 }
 
 // SetNames sets the shape dimension names.
@@ -113,7 +113,7 @@ func (sh *Shape) DimSizeByName(name string) int {
 }
 
 // IndexIsValid() returns true if given index is valid (within ranges for all dimensions)
-func (sh *Shape) IndexIsValid(idx []int) bool {
+func (sh *Shape) IndexIsValid(idx ...int) bool {
 	if len(idx) != sh.NumDims() {
 		return false
 	}
@@ -194,7 +194,7 @@ func (sh *Shape) String() string {
 
 // RowMajorStrides returns strides for sizes where the first dimension is outermost
 // and subsequent dimensions are progressively inner.
-func RowMajorStrides(sizes []int) []int {
+func RowMajorStrides(sizes ...int) []int {
 	rem := int(1)
 	for _, v := range sizes {
 		rem *= v
@@ -219,7 +219,7 @@ func RowMajorStrides(sizes []int) []int {
 
 // ColMajorStrides returns strides for sizes where the first dimension is inner-most
 // and subsequent dimensions are progressively outer
-func ColMajorStrides(sizes []int) []int {
+func ColMajorStrides(sizes ...int) []int {
 	total := int(1)
 	for _, v := range sizes {
 		if v == 0 {

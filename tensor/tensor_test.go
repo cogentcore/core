@@ -124,3 +124,43 @@ func TestTensorFloat64(t *testing.T) {
 	assert.Equal(t, 3.14, flt[0])
 	assert.Equal(t, 0.0, flt[1])
 }
+
+func TestSlice(t *testing.T) {
+	ft := NewFloat64(3, 4, 5)
+	for r := range 3 {
+		for y := range 4 {
+			for x := range 5 {
+				v := (r+1)*100 + y*10 + x
+				ft.SetFloat(float64(v), r, y, x)
+			}
+		}
+	}
+	// fmt.Println(ft.String())
+	sf := NewFloat64()
+	Slice(ft, sf, Range{}, Range{Start: 1, End: 2})
+	// fmt.Println(sf.String())
+	res := `Tensor: [3, 1, 5]
+[0 0]:     110     111     112     113     114 
+[1 0]:     210     211     212     213     214 
+[2 0]:     310     311     312     313     314 
+`
+	assert.Equal(t, res, sf.String())
+
+	Slice(ft, sf, Range{}, Range{}, Range{Start: 1, End: 2})
+	// fmt.Println(sf.String())
+	res = `Tensor: [3, 4, 1]
+[0 0]:     101 
+[0 1]:     111 
+[0 2]:     121 
+[0 3]:     131 
+[1 0]:     201 
+[1 1]:     211 
+[1 2]:     221 
+[1 3]:     231 
+[2 0]:     301 
+[2 1]:     311 
+[2 2]:     321 
+[2 3]:     331 
+`
+	assert.Equal(t, res, sf.String())
+}
