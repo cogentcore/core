@@ -22,9 +22,9 @@ func Vectorize3Out64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, t
 	nt := len(tsr)
 	out := tsr[nt-1]
 	osz := out.Tensor.Shape().Sizes
-	out1 = tensor.NewIndexed(tensor.NewFloat64(osz...))
-	out2 = tensor.NewIndexed(tensor.NewFloat64(osz...))
-	out3 = tensor.NewIndexed(tensor.NewFloat64(osz...))
+	out1 = tensor.NewFloat64Indexed(osz...)
+	out2 = tensor.NewFloat64Indexed(osz...)
+	out3 = tensor.NewFloat64Indexed(osz...)
 	tsrs := slices.Clone(tsr[:nt-1])
 	tsrs = append(tsrs, out1, out2, out3)
 	for idx := range n {

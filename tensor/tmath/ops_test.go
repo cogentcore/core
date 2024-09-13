@@ -13,7 +13,7 @@ import (
 )
 
 func TestAdd(t *testing.T) {
-	scalar := tensor.NewFloatScalar(-5.5)
+	scalar := tensor.NewFloat64Scalar(-5.5)
 	scb := scalar.Clone()
 	scb.Tensor.SetFloat1D(-4.0, 0)
 	scout := scalar.Clone()
@@ -140,8 +140,8 @@ func TestAdd(t *testing.T) {
 	assert.InDelta(t, 1.0, mout.Tensor.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout.Tensor)
 
-	minv := tensor.NewFloatScalar(0)
-	maxv := tensor.NewFloatScalar(1)
+	minv := tensor.NewFloat64Scalar(0)
+	maxv := tensor.NewFloat64Scalar(1)
 	Clamp(oned, minv, maxv, oneout)
 	stats.MinFunc(oneout, mout)
 	assert.InDelta(t, 0.0, mout.Tensor.Float1D(0), 1.0e-6)
@@ -149,7 +149,7 @@ func TestAdd(t *testing.T) {
 	assert.InDelta(t, 1.0, mout.Tensor.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout.Tensor)
 
-	thr := tensor.NewFloatScalar(0.5)
+	thr := tensor.NewFloat64Scalar(0.5)
 	Binarize(oned, thr, oneout)
 	stats.MinFunc(oneout, mout)
 	assert.InDelta(t, 0.0, mout.Tensor.Float1D(0), 1.0e-6)

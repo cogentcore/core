@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/base/slicesx"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -132,24 +131,6 @@ func (tsr *String) SetFloatRowCell(val float64, row, cell int) {
 	tsr.Values[row*sz+cell] = Float64ToString(val)
 }
 
-// Floats sets []float64 slice of all elements in the tensor
-// (length is ensured to be sufficient).
-// This can be used for all of the gonum/floats methods
-// for basic math, gonum/stats, etc.
-func (tsr *String) Floats(flt *[]float64) {
-	*flt = slicesx.SetLength(*flt, len(tsr.Values))
-	for i, v := range tsr.Values {
-		(*flt)[i] = StringToFloat64(v)
-	}
-}
-
-// SetFloats sets tensor values from a []float64 slice (copies values).
-func (tsr *String) SetFloats(flt ...float64) {
-	for i, v := range flt {
-		tsr.Values[i] = Float64ToString(v)
-	}
-}
-
 // At is the gonum/mat.Matrix interface method for returning 2D matrix element at given
 // row, column index.  Assumes Row-major ordering and logs an error if NumDims < 2.
 func (tsr *String) At(i, j int) float64 {
@@ -196,7 +177,8 @@ func (tsr *String) Range() (min, max float64, minIndex, maxIndex int) {
 	return
 }
 
-// SetZeros is simple convenience function initialize all values to 0
+// SetZeros is a simple convenience function initialize all values to the
+// zero value of the type (empty strings for string type).
 func (tsr *String) SetZeros() {
 	for j := range tsr.Values {
 		tsr.Values[j] = ""

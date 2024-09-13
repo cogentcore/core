@@ -678,7 +678,7 @@ func (tb *Table) CopySelectToMime() mimedata.Mimes {
 	}
 	ix.Indexes = iidx
 	var b bytes.Buffer
-	ix.WriteCSV(&b, table.Tab, table.Headers)
+	ix.WriteCSV(&b, tensor.Tab, table.Headers)
 	md := mimedata.NewTextBytes(b.Bytes())
 	md[0].Type = fileinfo.DataCsv
 	return md
@@ -691,7 +691,7 @@ func (tb *Table) FromMimeData(md mimedata.Mimes) [][]string {
 		if d.Type == fileinfo.DataCsv {
 			b := bytes.NewBuffer(d.Data)
 			cr := csv.NewReader(b)
-			cr.Comma = table.Tab.Rune()
+			cr.Comma = tensor.Tab.Rune()
 			rec, err := cr.ReadAll()
 			if err != nil || len(rec) == 0 {
 				log.Printf("Error reading CSV from clipboard: %s\n", err)

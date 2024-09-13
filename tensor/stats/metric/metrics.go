@@ -12,31 +12,31 @@ import (
 )
 
 func init() {
-	tensor.AddFunc(Euclidean.String(), EuclideanFunc, 1)
-	tensor.AddFunc(SumSquares.String(), SumSquaresFunc, 1)
-	tensor.AddFunc(Abs.String(), AbsFunc, 1)
-	tensor.AddFunc(Hamming.String(), HammingFunc, 1)
-	tensor.AddFunc(EuclideanBinTol.String(), EuclideanBinTolFunc, 1)
-	tensor.AddFunc(SumSquaresBinTol.String(), SumSquaresBinTolFunc, 1)
-	tensor.AddFunc(InvCosine.String(), InvCosineFunc, 1)
-	tensor.AddFunc(InvCorrelation.String(), InvCorrelationFunc, 1)
-	tensor.AddFunc(InnerProduct.String(), InnerProductFunc, 1)
-	tensor.AddFunc(CrossEntropy.String(), CrossEntropyFunc, 1)
-	tensor.AddFunc(Covariance.String(), CovarianceFunc, 1)
-	tensor.AddFunc(Correlation.String(), CorrelationFunc, 1)
-	tensor.AddFunc(Cosine.String(), CosineFunc, 1)
+	tensor.AddFunc(Euclidean.FuncName(), EuclideanFunc, 1)
+	tensor.AddFunc(SumSquares.FuncName(), SumSquaresFunc, 1)
+	tensor.AddFunc(Abs.FuncName(), AbsFunc, 1)
+	tensor.AddFunc(Hamming.FuncName(), HammingFunc, 1)
+	tensor.AddFunc(EuclideanBinTol.FuncName(), EuclideanBinTolFunc, 1)
+	tensor.AddFunc(SumSquaresBinTol.FuncName(), SumSquaresBinTolFunc, 1)
+	tensor.AddFunc(InvCosine.FuncName(), InvCosineFunc, 1)
+	tensor.AddFunc(InvCorrelation.FuncName(), InvCorrelationFunc, 1)
+	tensor.AddFunc(InnerProduct.FuncName(), InnerProductFunc, 1)
+	tensor.AddFunc(CrossEntropy.FuncName(), CrossEntropyFunc, 1)
+	tensor.AddFunc(Covariance.FuncName(), CovarianceFunc, 1)
+	tensor.AddFunc(Correlation.FuncName(), CorrelationFunc, 1)
+	tensor.AddFunc(Cosine.FuncName(), CosineFunc, 1)
 }
 
 // Metric calls a standard Metrics enum function on given tensors.
 // Output results are in the out tensor.
 func Metric(metric Metrics, a, b, out *tensor.Indexed) {
-	tensor.Call(metric.String(), a, b, out)
+	tensor.Call(metric.FuncName(), a, b, out)
 }
 
 // MetricOut calls a standard Metrics enum function on given tensors,
 // returning output as a newly created tensor.
 func MetricOut(metric Metrics, a, b *tensor.Indexed) *tensor.Indexed {
-	return errors.Log1(tensor.CallOut(metric.String(), a, b))[0] // note: error should never happen
+	return errors.Log1(tensor.CallOut(metric.FuncName(), a, b))[0] // note: error should never happen
 }
 
 // Metrics are standard metric functions
@@ -106,6 +106,12 @@ const (
 	// inner product / sqrt(ssA * ssB).  See also [Correlation].
 	Cosine
 )
+
+// FuncName returns the package-qualified function name to use
+// in tensor.Call to call this function.
+func (m Metrics) FuncName() string {
+	return "metric." + m.String()
+}
 
 // Increasing returns true if the distance metric is such that metric
 // values increase as a function of distance (e.g., Euclidean)

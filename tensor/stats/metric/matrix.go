@@ -5,8 +5,12 @@
 package metric
 
 import (
+	"log/slog"
+
 	"cogentcore.org/core/math32/vecint"
 	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/stats/stats"
+	"cogentcore.org/core/tensor/tmath"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -20,7 +24,7 @@ func init() {
 // between the patterns for each row of the given higher dimensional input tensor,
 // which must have at least 2 dimensions: the outermost rows,
 // and within that, 1+dimensional patterns (cells).
-// The metric function registered in tensor Funcs can be passed as Metrics.String().
+// The metric function registered in tensor Funcs can be passed as Metrics.FuncName().
 // The results fill in the elements of the output matrix, which is symmetric,
 // and only the lower triangular part is computed, with results copied
 // to the upper triangular region, for maximum efficiency.
@@ -30,7 +34,7 @@ func Matrix(funcName string, in, out *tensor.Indexed) {
 		return
 	}
 	out.Tensor.SetShape(rows, rows)
-	mout := tensor.NewFloatScalar(0.0)
+	mout := tensor.NewFloat64Scalar(0.0)
 	coords := TriangularLIndicies(rows)
 	nc := len(coords)
 	// note: flops estimating 3 per item on average -- different for different metrics.
@@ -56,7 +60,7 @@ func Matrix(funcName string, in, out *tensor.Indexed) {
 // which must have at least 2 dimensions: the outermost rows,
 // and within that, 1+dimensional patterns that the given distance metric
 // function is applied to, with the results filling in the cells of the output matrix.
-// The metric function registered in tensor Funcs can be passed as Metrics.String().
+// The metric function registered in tensor Funcs can be passed as Metrics.FuncName().
 // The rows of the output matrix are the rows of the first input tensor,
 // and the columns of the output are the rows of the second input tensor.
 func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
@@ -69,7 +73,7 @@ func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
 		return
 	}
 	out.Tensor.SetShape(arows, brows)
-	mout := tensor.NewFloatScalar(0.0)
+	mout := tensor.NewFloat64Scalar(0.0)
 	// note: flops estimating 3 per item on average -- different for different metrics.
 	flops := min(acells, bcells) * 3
 	nc := arows * brows
@@ -92,7 +96,7 @@ func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
 // value of a given cell covaries across the rows of the tensor with the
 // value of another cell.
 // Uses the given metric function, typically [Covariance] or [Correlation],
-// which must be registered in tensor Funcs, and can be passed as Metrics.String().
+// which must be registered in tensor Funcs, and can be passed as Metrics.FuncName().
 // Use Covariance if vars have similar overall scaling,
 // which is typical in neural network models, and use
 // Correlation if they are on very different scales, because it effectively rescales).
@@ -109,10 +113,10 @@ func CovarMatrix(funcName string, in, out *tensor.Indexed) {
 	flatix := tensor.NewIndexed(flatvw)
 	flatix.Indexes = in.Indexes
 
-	mout := tensor.NewFloatScalar(0.0)
+	mout := tensor.NewFloat64Scalar(0.0)
 	out.Tensor.SetShape(cells, cells)
-	av := tensor.NewIndexed(tensor.NewFloat64(rows))
-	bv := tensor.NewIndexed(tensor.NewFloat64(rows))
+	av := tensor.NewFloat64Indexed(rows)
+	bv := tensor.NewFloat64Indexed(rows)
 	curCoords := vecint.Vector2i{-1, -1}
 
 	coords := TriangularLIndicies(cells)
@@ -146,145 +150,89 @@ func CovarMatrix(funcName string, in, out *tensor.Indexed) {
 // in this 2D square matrix, ordered *lowest* to *highest* across the columns,
 // i.e., maximum eigenvector is the last column.
 // The eigenvalues are the size of one row, ordered *lowest* to *highest*.
+// Note that PCA produces results in the *opposite* order of [SVD].
 func PCA(covar, eigenvecs, vals *tensor.Indexed) {
 	n := covar.Tensor.DimSize(0)
-	cv, ok := covar.Tensor.(*tensor.Float64)
-	if !ok {
-		cv = tensor.NewFloat64(covar.Tensor.Shape().Sizes...)
-		cv.CopyFrom(covar.Tensor)
-	}
+	cv := tensor.AsFloat64(covar.Tensor)
 	eigenvecs.Tensor.SetShape(n, n)
 	eigenvecs.Sequential()
 	vals.Tensor.SetShape(n)
 	vals.Sequential()
 	var eig mat.EigenSym
-	// note: MUST be a Float64 otherwise doesn't have Symmetric function
-	eig.Factorize(cv, true)
-	// if !ok {
-	// 	return fmt.Errorf("gonum EigenSym Factorize failed")
-	// }
+	ok := eig.Factorize(cv, true)
+	if !ok {
+		slog.Error("gonum mat.EigenSym Factorize failed")
+		return
+	}
 	var ev mat.Dense
 	eig.VectorsTo(&ev)
 	tensor.CopyDense(eigenvecs.Tensor, &ev)
-	eig.Values(vals.Tensor.(*tensor.Float64).Values)
+	fv := tensor.AsFloat64(vals.Tensor)
+	eig.Values(fv.Values)
+	if fv != vals.Tensor {
+		vals.Tensor.CopyFrom(fv)
+	}
 }
 
 // SVD performs the eigen decomposition of the given CovarMatrix,
 // using singular value decomposition (SVD), which is faster than [PCA].
 // The eigenvectors are same size as Covar. Each eigenvector is a column
-// in this 2D square matrix, ordered *lowest* to *highest* across the columns,
+// in this 2D square matrix, ordered *highest* to *lowest* across the columns,
 // i.e., maximum eigenvector is the last column.
-// The eigenvalues are the size of one row, ordered *lowest* to *highest*.
+// The eigenvalues are the size of one row, ordered *highest* to *lowest*.
+// Note that SVD produces results in the *opposite* order of [PCA].
 func SVD(covar, eigenvecs, vals *tensor.Indexed) {
 	n := covar.Tensor.DimSize(0)
-	cv, ok := covar.Tensor.(*tensor.Float64)
-	if !ok {
-		cv = tensor.NewFloat64(covar.Tensor.Shape().Sizes...)
-		cv.CopyFrom(covar.Tensor)
-	}
+	cv := tensor.AsFloat64(covar.Tensor)
 	eigenvecs.Tensor.SetShape(n, n)
 	eigenvecs.Sequential()
 	vals.Tensor.SetShape(n)
 	vals.Sequential()
 	var eig mat.SVD
-	eig.Factorize(cv, mat.SVDFull) // todo: test weaker versions than SVDFull
-	// note: MUST be a Float64 otherwise doesn't have Symmetric function
-	// if !ok {
-	// 	return fmt.Errorf("gonum EigenSym Factorize failed")
-	// }
+	ok := eig.Factorize(cv, mat.SVDFull) // todo: benchmark different versions
+	if !ok {
+		slog.Error("gonum mat.SVD Factorize failed")
+		return
+	}
 	var ev mat.Dense
 	eig.UTo(&ev)
 	tensor.CopyDense(eigenvecs.Tensor, &ev)
-	eig.Values(vals.Tensor.(*tensor.Float64).Values)
+	fv := tensor.AsFloat64(vals.Tensor)
+	eig.Values(fv.Values)
+	if fv != vals.Tensor {
+		vals.Tensor.CopyFrom(fv)
+	}
 }
 
-// TODO: simple projection function
-
-/*
-// ProjectColumn projects values from the given column of given table (via Indexed)
-// onto the idx'th eigenvector (0 = largest eigenvalue, 1 = next, etc).
-// Must have already called PCA() method.
-func (pa *PCA) ProjectColumn(vals *[]float64, ix *table.Indexed, column string, idx int) error {
-	col, err := ix.Table.ColumnByName(column)
-	if err != nil {
-		return err
-	}
-	if pa.Vectors == nil {
-		return fmt.Errorf("PCA.ProjectColumn Vectors are nil -- must call PCA first")
-	}
-	nr := pa.Vectors.DimSize(0)
-	if idx >= nr {
-		return fmt.Errorf("PCA.ProjectColumn eigenvector index > rank of matrix")
-	}
-	cvec := make([]float64, nr)
-	eidx := nr - 1 - idx // eigens in reverse order
-	vec := pa.Vectors.(*tensor.Float64)
-	for ri := 0; ri < nr; ri++ {
-		cvec[ri] = vec.Value([]int{ri, eidx}) // vecs are in columns, reverse magnitude order
-	}
-	rows := ix.Len()
-	if len(*vals) != rows {
-		*vals = make([]float64, rows)
-	}
-	ln := col.Len()
-	sz := ln / col.DimSize(0) // size of cell
-	if sz != nr {
-		return fmt.Errorf("PCA.ProjectColumn column cell size != pca eigenvectors")
-	}
-	rdim := []int{0}
-	for row := 0; row < rows; row++ {
-		sum := 0.0
-		rdim[0] = ix.Indexes[row]
-		rt := col.SubSpace(rdim)
-		for ci := 0; ci < sz; ci++ {
-			sum += cvec[ci] * rt.Float1D(ci)
+// ProjectOnMatrixColumn is a convenience function for projecting given vector
+// of values along a specific column (2nd dimension) of the given 2D matrix,
+// specified by the scalar colindex, putting results into out.
+// If the vec is more than 1 dimensional, then it is treated as rows x cells,
+// and each row of cells is projected through the matrix column, producing a
+// 1D output with the number of rows.  Otherwise a single number is produced.
+// This is typically done with results from SVD or PCA.
+func ProjectOnMatrixColumn(mtx, vec, colindex, out *tensor.Indexed) {
+	ci := int(colindex.Tensor.Float1D(0))
+	col := tensor.NewFloat64Indexed()
+	tensor.Slice(mtx, col, tensor.Range{}, tensor.Range{Start: ci, End: ci + 1})
+	// fmt.Println(mtx.Tensor.String(), col.Tensor.String())
+	rows, cells := vec.RowCellSize()
+	mout := tensor.NewFloat64Indexed()
+	if rows > 0 && cells > 0 {
+		msum := tensor.NewFloat64Scalar(0)
+		out.Tensor.SetShape(rows)
+		out.Sequential()
+		for i := range rows {
+			tmath.Mul(vec.Cells1D(i), col, mout)
+			stats.SumFunc(mout, msum)
+			// fmt.Println(vec.Cells1D(i).Tensor.String(), mout.Tensor.String(), msum.Tensor.String())
+			out.Tensor.SetFloat1D(msum.Tensor.Float1D(0), i)
 		}
-		(*vals)[row] = sum
+	} else {
+		tmath.Mul(vec, col, mout)
+		stats.SumFunc(mout, out)
 	}
-	return nil
 }
-
-// ProjectColumnToTable projects values from the given column of given table (via Indexed)
-// onto the given set of eigenvectors (idxs, 0 = largest eigenvalue, 1 = next, etc),
-// and stores results along with labels from column labNm into results table.
-// Must have already called PCA() method.
-func (pa *PCA) ProjectColumnToTable(projections *table.Table, ix *table.Indexed, column, labNm string, idxs []int) error {
-	_, err := ix.Table.ColumnByName(column)
-	if err != nil {
-		return err
-	}
-	if pa.Vectors == nil {
-		return fmt.Errorf("PCA.ProjectColumn Vectors are nil -- must call PCA first")
-	}
-	rows := ix.Len()
-	projections.DeleteAll()
-	pcolSt := 0
-	if labNm != "" {
-		projections.AddStringColumn(labNm)
-		pcolSt = 1
-	}
-	for _, idx := range idxs {
-		projections.AddFloat64Column(fmt.Sprintf("Projection%v", idx))
-	}
-	projections.SetNumRows(rows)
-
-	for ii, idx := range idxs {
-		pcol := projections.Columns[pcolSt+ii].(*tensor.Float64)
-		pa.ProjectColumn(&pcol.Values, ix, column, idx)
-	}
-
-	if labNm != "" {
-		lcol, err := ix.Table.ColumnByName(labNm)
-		if err == nil {
-			plcol := projections.Columns[0]
-			for row := 0; row < rows; row++ {
-				plcol.SetString1D(row, lcol.String1D(row))
-			}
-		}
-	}
-	return nil
-}
-*/
 
 ////////////////////////////////////////////
 // 	Triangular square matrix functions

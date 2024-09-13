@@ -88,12 +88,12 @@ func TestMatrix(t *testing.T) {
 [11]: 6.324555320336759 5.291502622129181 9.899494936611665 9.273618495495704 9.38083151964686 8.94427190999916 5.477225575051661 4.242640687119285 9.695359714832659       9 3.4641016151377544       0 
 `
 	dt := &table.Table{}
-	err := dt.OpenCSV("../cluster/testdata/faces.dat", table.Tab)
+	err := dt.OpenCSV("../cluster/testdata/faces.dat", tensor.Tab)
 	assert.NoError(t, err)
 	// smat.TableColumn(ix, "Input", "Name", false, metric.Euclidean64)
 	in := tensor.NewIndexed(errors.Log1(dt.ColumnByName("Input")))
-	out := tensor.NewIndexed(tensor.NewFloat64())
-	Matrix(Euclidean.String(), in, out)
+	out := tensor.NewFloat64Indexed()
+	Matrix(Euclidean.FuncName(), in, out)
 	// fmt.Println(out.Tensor)
 	assert.Equal(t, simres, out.Tensor.String())
 }
@@ -105,19 +105,19 @@ func TestPCAIris(t *testing.T) {
 	dt := table.NewTable()
 	dt.AddFloat64TensorColumn("data", 4)
 	dt.AddStringColumn("class")
-	err := dt.OpenCSV("testdata/iris.data", table.Comma)
+	err := dt.OpenCSV("testdata/iris.data", tensor.Comma)
 	if err != nil {
 		t.Error(err)
 	}
 	// pc.TableColumn(ix, "data", metric.Covariance64)
 	// fmt.Printf("covar: %v\n", pc.Covar)
 	data := tensor.NewIndexed(errors.Log1(dt.ColumnByName("data")))
-	covar := tensor.NewIndexed(tensor.NewFloat64())
-	CovarMatrix("Correlation", data, covar)
+	covar := tensor.NewFloat64Indexed()
+	CovarMatrix(Correlation.FuncName(), data, covar)
 	// fmt.Printf("correl: %s\n", covar.Tensor.String())
 
-	vecs := tensor.NewIndexed(tensor.NewFloat64())
-	vals := tensor.NewIndexed(tensor.NewFloat64())
+	vecs := tensor.NewFloat64Indexed()
+	vals := tensor.NewFloat64Indexed()
 	PCA(covar, vecs, vals)
 
 	// fmt.Printf("correl vec: %v\n", vecs)
@@ -128,12 +128,13 @@ func TestPCAIris(t *testing.T) {
 		assert.InDelta(t, corvals[i], v, errtol)
 	}
 
-	// prjt := &table.Table{}
-	// err = pc.ProjectColumnToTable(prjt, ix, "data", "class", []int{0, 1})
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// prjt.SaveCSV("test_data/projection01.csv", table.Comma, true)
+	colidx := tensor.NewFloat64Scalar(3) // strongest at end
+	prjns := tensor.NewFloat64Indexed()
+	ProjectOnMatrixColumn(covar, data, colidx, prjns)
+	tensor.SaveCSV(prjns.Tensor, "testdata/pca_projection.csv", tensor.Comma)
+
+	////////////////////////////////////////////////////////////
+	//  	SVD
 
 	SVD(covar, vecs, vals)
 	// fmt.Printf("correl vec: %v\n", vecs)

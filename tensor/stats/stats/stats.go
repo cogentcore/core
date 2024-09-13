@@ -12,39 +12,27 @@ import (
 //go:generate core generate
 
 func init() {
-	tensor.AddFunc(Count.String(), CountFunc, 1)
-	tensor.AddFunc(Sum.String(), SumFunc, 1)
-	tensor.AddFunc(SumAbs.String(), SumAbsFunc, 1)
-	tensor.AddFunc(L1Norm.String(), SumAbsFunc, 1)
-	tensor.AddFunc(Prod.String(), ProdFunc, 1)
-	tensor.AddFunc(Min.String(), MinFunc, 1)
-	tensor.AddFunc(Max.String(), MaxFunc, 1)
-	tensor.AddFunc(MinAbs.String(), MinAbsFunc, 1)
-	tensor.AddFunc(MaxAbs.String(), MaxAbsFunc, 1)
-	tensor.AddFunc(Mean.String(), MeanFunc, 1)
-	tensor.AddFunc(Var.String(), VarFunc, 1)
-	tensor.AddFunc(Std.String(), StdFunc, 1)
-	tensor.AddFunc(Sem.String(), SemFunc, 1)
-	tensor.AddFunc(SumSq.String(), SumSqFunc, 1)
-	tensor.AddFunc(L2Norm.String(), L2NormFunc, 1)
-	tensor.AddFunc(VarPop.String(), VarPopFunc, 1)
-	tensor.AddFunc(StdPop.String(), StdPopFunc, 1)
-	tensor.AddFunc(SemPop.String(), SemPopFunc, 1)
-	tensor.AddFunc(Median.String(), MedianFunc, 1)
-	tensor.AddFunc(Q1.String(), Q1Func, 1)
-	tensor.AddFunc(Q3.String(), Q3Func, 1)
-}
-
-// Stat calls a standard Stats enum function on given tensors.
-// Output results are in the out tensor.
-func Stat(stat Stats, in, out *tensor.Indexed) {
-	tensor.Call(stat.String(), in, out)
-}
-
-// StatOut calls a standard Stats enum function on given tensor,
-// returning output as a newly created tensor.
-func StatOut(stat Stats, in *tensor.Indexed) *tensor.Indexed {
-	return errors.Log1(tensor.CallOut(stat.String(), in))[0] // note: error should never happen
+	tensor.AddFunc(Count.FuncName(), CountFunc, 1)
+	tensor.AddFunc(Sum.FuncName(), SumFunc, 1)
+	tensor.AddFunc(SumAbs.FuncName(), SumAbsFunc, 1)
+	tensor.AddFunc(L1Norm.FuncName(), SumAbsFunc, 1)
+	tensor.AddFunc(Prod.FuncName(), ProdFunc, 1)
+	tensor.AddFunc(Min.FuncName(), MinFunc, 1)
+	tensor.AddFunc(Max.FuncName(), MaxFunc, 1)
+	tensor.AddFunc(MinAbs.FuncName(), MinAbsFunc, 1)
+	tensor.AddFunc(MaxAbs.FuncName(), MaxAbsFunc, 1)
+	tensor.AddFunc(Mean.FuncName(), MeanFunc, 1)
+	tensor.AddFunc(Var.FuncName(), VarFunc, 1)
+	tensor.AddFunc(Std.FuncName(), StdFunc, 1)
+	tensor.AddFunc(Sem.FuncName(), SemFunc, 1)
+	tensor.AddFunc(SumSq.FuncName(), SumSqFunc, 1)
+	tensor.AddFunc(L2Norm.FuncName(), L2NormFunc, 1)
+	tensor.AddFunc(VarPop.FuncName(), VarPopFunc, 1)
+	tensor.AddFunc(StdPop.FuncName(), StdPopFunc, 1)
+	tensor.AddFunc(SemPop.FuncName(), SemPopFunc, 1)
+	tensor.AddFunc(Median.FuncName(), MedianFunc, 1)
+	tensor.AddFunc(Q1.FuncName(), Q1Func, 1)
+	tensor.AddFunc(Q3.FuncName(), Q3Func, 1)
 }
 
 // Stats is a list of different standard aggregation functions, which can be used
@@ -115,3 +103,21 @@ const (
 	// Q3 third quartile = 75%ile value = .75 quantile value.
 	Q3
 )
+
+// FuncName returns the package-qualified function name to use
+// in tensor.Call to call this function.
+func (s Stats) FuncName() string {
+	return "stats." + s.String()
+}
+
+// Stat calls a standard Stats enum function on given tensors.
+// Output results are in the out tensor.
+func Stat(stat Stats, in, out *tensor.Indexed) {
+	tensor.Call(stat.FuncName(), in, out)
+}
+
+// StatOut calls a standard Stats enum function on given tensor,
+// returning output as a newly created tensor.
+func StatOut(stat Stats, in *tensor.Indexed) *tensor.Indexed {
+	return errors.Log1(tensor.CallOut(stat.FuncName(), in))[0] // note: error should never happen
+}

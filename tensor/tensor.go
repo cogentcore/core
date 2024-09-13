@@ -35,7 +35,7 @@ type Tensor interface {
 	Shape() *Shape
 
 	// SetShape sets the sizes parameters of the tensor, and resizes
-	// backing storage appropriately.
+	// backing storage appropriately, retaining all existing data that fits.
 	SetShape(sizes ...int)
 
 	// SetNames sets the dimension names of the tensor shape.
@@ -48,7 +48,7 @@ type Tensor interface {
 	// NumDims returns the total number of dimensions.
 	NumDims() int
 
-	// DimSize returns size of given dimension
+	// DimSize returns size of given dimension.
 	DimSize(dim int) int
 
 	// RowCellSize returns the size of the outermost Row shape dimension,
@@ -62,7 +62,7 @@ type Tensor interface {
 	DataType() reflect.Kind
 
 	// Sizeof returns the number of bytes contained in the Values of this tensor.
-	// for String types, this is just the string pointers.
+	// For String types, this is just the string pointers, not the string content.
 	Sizeof() int64
 
 	// Bytes returns the underlying byte representation of the tensor values.
@@ -70,22 +70,16 @@ type Tensor interface {
 	// unintentionally modified or retained more than for immediate use.
 	Bytes() []byte
 
-	// returns true if the data type is a String. otherwise is numeric.
+	// IsString returns true if the data type is a String; otherwise it is numeric.
 	IsString() bool
 
-	// Float returns the value of given index as a float64.
+	// Float returns the value of given n-dimensional index (matching Shape) as a float64.
 	Float(i ...int) float64
 
-	// SetFloat sets the value of given index as a float64.
+	// SetFloat sets the value of given n-dimensional index (matching Shape) as a float64.
 	SetFloat(val float64, i ...int)
 
 	// NOTE: String conflicts with [fmt.Stringer], so we have to use StringValue
-
-	// StringValue returns the value of given index as a string.
-	StringValue(i ...int) string
-
-	// SetString sets the value of given index as a string.
-	SetString(val string, i ...int)
 
 	// Float1D returns the value of given 1-dimensional index (0-Len()-1) as a float64.
 	Float1D(i int) float64
@@ -94,50 +88,55 @@ type Tensor interface {
 	SetFloat1D(val float64, i int)
 
 	// FloatRowCell returns the value at given row and cell, where row is outermost dim,
-	// and cell is 1D index into remaining inner dims. For Table columns.
+	// and cell is 1D index into remaining inner dims. This is useful for lists of
+	// patterns, and the [table.Table] container. [Indexed] tensors index along the row,
+	// and use this interface extensively.
 	FloatRowCell(row, cell int) float64
 
 	// SetFloatRowCell sets the value at given row and cell, where row is outermost dim,
-	// and cell is 1D index into remaining inner dims. For Table columns.
+	// and cell is 1D index into remaining inner dims. This is useful for lists of
+	// patterns, and the [table.Table] container. [Indexed] tensors index along the row,
+	// and use this interface extensively.
 	SetFloatRowCell(val float64, row, cell int)
 
-	// Floats sets []float64 slice of all elements in the tensor
-	// (length is ensured to be sufficient).
-	// This can be used for all of the gonum/floats methods
-	// for basic math, gonum/stats, etc.
-	Floats(flt *[]float64)
+	// StringValue returns the value of given n-dimensional index (matching Shape) as a string.
+	StringValue(i ...int) string
 
-	// SetFloats sets tensor values from a []float64 slice (copies values).
-	SetFloats(vals ...float64)
+	// SetString sets the value of given n-dimensional index (matching Shape) as a string.
+	SetString(val string, i ...int)
 
-	// String1D returns the value of given 1-dimensional index (0-Len()-1) as a string
+	// String1D returns the value of given 1-dimensional index (0-Len()-1) as a string.
 	String1D(i int) string
 
-	// SetString1D sets the value of given 1-dimensional index (0-Len()-1) as a string
+	// SetString1D sets the value of given 1-dimensional index (0-Len()-1) as a string.
 	SetString1D(val string, i int)
 
 	// StringRowCell returns the value at given row and cell, where row is outermost dim,
-	// and cell is 1D index into remaining inner dims. For Table columns.
+	// and cell is 1D index into remaining inner dims. [Indexed] tensors index along the row,
+	// and use this interface extensively.
 	StringRowCell(row, cell int) string
 
 	// SetStringRowCell sets the value at given row and cell, where row is outermost dim,
-	// and cell is 1D index into remaining inner dims. For Table columns.
+	// and cell is 1D index into remaining inner dims. [Indexed] tensors index along the row,
+	// and use this interface extensively.
 	SetStringRowCell(val string, row, cell int)
 
 	// SubSpace returns a new tensor with innermost subspace at given
-	// offset(s) in outermost dimension(s) (len(offs) < NumDims).
+	// offset(s) in outermost dimension(s) (len(offs) < [NumDims]).
 	// The new tensor points to the values of the this tensor (i.e., modifications
 	// will affect both), as its Values slice is a view onto the original (which
 	// is why only inner-most contiguous supsaces are supported).
-	// Use Clone() method to separate the two.
+	// Use Clone() method to separate the two. See [Slice] function to
+	// extract arbitrary subspaces along ranges of each dimension.
 	SubSpace(offs ...int) Tensor
 
 	// Range returns the min, max (and associated indexes, -1 = no values) for the tensor.
-	// This is needed for display and is thus in the core api in optimized form
-	// Other math operations can be done using gonum/floats package.
+	// This is needed for display and is thus in the core api in optimized form.
+	// See the [stats] package for many more statistics functions.
 	Range() (min, max float64, minIndex, maxIndex int)
 
-	// SetZeros is simple convenience function initialize all values to 0.
+	// SetZeros is a simple convenience function initialize all values to the
+	// zero value of the type (empty strings for string type).
 	SetZeros()
 
 	// Clone clones this tensor, creating a duplicate copy of itself with its
@@ -146,14 +145,14 @@ type Tensor interface {
 	Clone() Tensor
 
 	// View clones this tensor, *keeping the same underlying Values slice*,
-	// instead of making a copy like Clone() does.  The main point of this
+	// instead of making a copy like Clone() does. A major use of this
 	// is to then change the shape of the view to provide a different way
 	// of accessing the same data.  See [New1DViewOf] for example.
 	View() Tensor
 
-	// CopyFrom copies all avail values from other tensor into this tensor, with an
+	// CopyFrom copies all values from other tensor into this tensor, with an
 	// optimized implementation if the other tensor is of the same type, and
-	// otherwise it goes through appropriate standard type.
+	// otherwise it goes through the appropriate standard type (Float or String).
 	CopyFrom(from Tensor)
 
 	// SetShapeFrom sets our shape from given source tensor, calling

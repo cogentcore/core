@@ -22,35 +22,6 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-// Delim are standard CSV delimiter options (Tab, Comma, Space)
-type Delims int32 //enums:enum
-
-const (
-	// Tab is the tab rune delimiter, for TSV tab separated values
-	Tab Delims = iota
-
-	// Comma is the comma rune delimiter, for CSV comma separated values
-	Comma
-
-	// Space is the space rune delimiter, for SSV space separated value
-	Space
-
-	// Detect is used during reading a file -- reads the first line and detects tabs or commas
-	Detect
-)
-
-func (dl Delims) Rune() rune {
-	switch dl {
-	case Tab:
-		return '\t'
-	case Comma:
-		return ','
-	case Space:
-		return ' '
-	}
-	return '\t'
-}
-
 const (
 	//	Headers is passed to CSV methods for the headers arg, to use headers
 	// that capture full type and tensor shape information.
@@ -66,7 +37,7 @@ const (
 // and tensor cell geometry of the columns, enabling full reloading
 // of exactly the same table format and data (recommended).
 // Otherwise, only the data is written.
-func (dt *Table) SaveCSV(filename core.Filename, delim Delims, headers bool) error { //types:add
+func (dt *Table) SaveCSV(filename core.Filename, delim tensor.Delims, headers bool) error { //types:add
 	fp, err := os.Create(string(filename))
 	defer fp.Close()
 	if err != nil {
@@ -85,7 +56,7 @@ func (dt *Table) SaveCSV(filename core.Filename, delim Delims, headers bool) err
 // and tensor cell geometry of the columns, enabling full reloading
 // of exactly the same table format and data (recommended).
 // Otherwise, only the data is written.
-func (ix *Indexed) SaveCSV(filename core.Filename, delim Delims, headers bool) error { //types:add
+func (ix *Indexed) SaveCSV(filename core.Filename, delim tensor.Delims, headers bool) error { //types:add
 	fp, err := os.Create(string(filename))
 	defer fp.Close()
 	if err != nil {
@@ -107,7 +78,7 @@ func (ix *Indexed) SaveCSV(filename core.Filename, delim Delims, headers bool) e
 // information for tensor type and dimensionality.
 // If the table DOES have existing columns, then those are used robustly
 // for whatever information fits from each row of the file.
-func (dt *Table) OpenCSV(filename core.Filename, delim Delims) error { //types:add
+func (dt *Table) OpenCSV(filename core.Filename, delim tensor.Delims) error { //types:add
 	fp, err := os.Open(string(filename))
 	if err != nil {
 		return errors.Log(err)
@@ -117,7 +88,7 @@ func (dt *Table) OpenCSV(filename core.Filename, delim Delims) error { //types:a
 }
 
 // OpenFS is the version of [Table.OpenCSV] that uses an [fs.FS] filesystem.
-func (dt *Table) OpenFS(fsys fs.FS, filename string, delim Delims) error {
+func (dt *Table) OpenFS(fsys fs.FS, filename string, delim tensor.Delims) error {
 	fp, err := fsys.Open(filename)
 	if err != nil {
 		return errors.Log(err)
@@ -135,14 +106,14 @@ func (dt *Table) OpenFS(fsys fs.FS, filename string, delim Delims) error {
 // information for tensor type and dimensionality.
 // If the table DOES have existing columns, then those are used robustly
 // for whatever information fits from each row of the file.
-func (ix *Indexed) OpenCSV(filename core.Filename, delim Delims) error { //types:add
+func (ix *Indexed) OpenCSV(filename core.Filename, delim tensor.Delims) error { //types:add
 	err := ix.Table.OpenCSV(filename, delim)
 	ix.Sequential()
 	return err
 }
 
 // OpenFS is the version of [Indexed.OpenCSV] that uses an [fs.FS] filesystem.
-func (ix *Indexed) OpenFS(fsys fs.FS, filename string, delim Delims) error {
+func (ix *Indexed) OpenFS(fsys fs.FS, filename string, delim tensor.Delims) error {
 	err := ix.Table.OpenFS(fsys, filename, delim)
 	ix.Sequential()
 	return err
@@ -157,7 +128,7 @@ func (ix *Indexed) OpenFS(fsys fs.FS, filename string, delim Delims) error {
 // information for tensor type and dimensionality.
 // If the table DOES have existing columns, then those are used robustly
 // for whatever information fits from each row of the file.
-func (dt *Table) ReadCSV(r io.Reader, delim Delims) error {
+func (dt *Table) ReadCSV(r io.Reader, delim tensor.Delims) error {
 	cr := csv.NewReader(r)
 	cr.Comma = delim.Rune()
 	rec, err := cr.ReadAll() // todo: lazy, avoid resizing
@@ -393,7 +364,7 @@ func InferDataType(str string) reflect.Kind {
 // and tensor cell geometry of the columns, enabling full reloading
 // of exactly the same table format and data (recommended).
 // Otherwise, only the data is written.
-func (dt *Table) WriteCSV(w io.Writer, delim Delims, headers bool) error {
+func (dt *Table) WriteCSV(w io.Writer, delim tensor.Delims, headers bool) error {
 	ncol := 0
 	var err error
 	if headers {
@@ -422,7 +393,7 @@ func (dt *Table) WriteCSV(w io.Writer, delim Delims, headers bool) error {
 // and tensor cell geometry of the columns, enabling full reloading
 // of exactly the same table format and data (recommended).
 // Otherwise, only the data is written.
-func (ix *Indexed) WriteCSV(w io.Writer, delim Delims, headers bool) error {
+func (ix *Indexed) WriteCSV(w io.Writer, delim tensor.Delims, headers bool) error {
 	ncol := 0
 	var err error
 	if headers {
@@ -449,7 +420,7 @@ func (ix *Indexed) WriteCSV(w io.Writer, delim Delims, headers bool) error {
 // WriteCSVHeaders writes headers to a comma-separated-values (CSV) file
 // (where comma = any delimiter, specified in the delim arg).
 // Returns number of columns in header
-func (dt *Table) WriteCSVHeaders(w io.Writer, delim Delims) (int, error) {
+func (dt *Table) WriteCSVHeaders(w io.Writer, delim tensor.Delims) (int, error) {
 	cw := csv.NewWriter(w)
 	cw.Comma = delim.Rune()
 	hdrs := dt.TableHeaders()
@@ -464,7 +435,7 @@ func (dt *Table) WriteCSVHeaders(w io.Writer, delim Delims) (int, error) {
 
 // WriteCSVRow writes given row to a comma-separated-values (CSV) file
 // (where comma = any delimiter, specified in the delim arg)
-func (dt *Table) WriteCSVRow(w io.Writer, row int, delim Delims) error {
+func (dt *Table) WriteCSVRow(w io.Writer, row int, delim tensor.Delims) error {
 	cw := csv.NewWriter(w)
 	cw.Comma = delim.Rune()
 	err := dt.WriteCSVRowWriter(cw, row, 0)

@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/num"
-	"cogentcore.org/core/base/slicesx"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -36,16 +35,44 @@ type Int32 = Number[int32]
 // Byte is an alias for Number[byte].
 type Byte = Number[byte]
 
-// NewFloat32 returns a new Float32 tensor
+// NewFloat32 returns a new [Float32] tensor
 // with the given sizes per dimension (shape), and optional dimension names.
 func NewFloat32(sizes ...int) *Float32 {
 	return New[float32](sizes...).(*Float32)
 }
 
-// NewFloat64 returns a new Float64 tensor
+// AsFloat32 returns the tensor as a [Float32] tensor.
+// If already is a Float32, it is returned as such.
+// Otherwise, a new Float32 tensor is created and values are copied.
+func AsFloat32(tsr Tensor) *Float32 {
+	if f, ok := tsr.(*Float32); ok {
+		return f
+	}
+	f := NewFloat32(tsr.Shape().Sizes...)
+	f.SetNames(tsr.Shape().Names...)
+	f.CopyFrom(tsr)
+	return f
+}
+
+// NewFloat64 returns a new [Float64] tensor
 // with the given sizes per dimension (shape), and optional dimension names.
 func NewFloat64(sizes ...int) *Float64 {
 	return New[float64](sizes...).(*Float64)
+}
+
+// AsFloat64 returns the tensor as a [Float64] tensor.
+// If already is a Float64, it is returned as such.
+// Otherwise, a new Float64 tensor is created and values are copied.
+// Use this function for interfacing with gonum or other apis that
+// only operate on float64 types.
+func AsFloat64(tsr Tensor) *Float64 {
+	if f, ok := tsr.(*Float64); ok {
+		return f
+	}
+	f := NewFloat64(tsr.Shape().Sizes...)
+	f.SetNames(tsr.Shape().Names...)
+	f.CopyFrom(tsr)
+	return f
 }
 
 // NewInt returns a new Int tensor
@@ -167,34 +194,6 @@ func (tsr *Number[T]) FloatRowCell(row, cell int) float64 {
 func (tsr *Number[T]) SetFloatRowCell(val float64, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = T(val)
-}
-
-// Floats sets []float64 slice of all elements in the tensor
-// (length is ensured to be sufficient).
-// This can be used for all of the gonum/floats methods
-// for basic math, gonum/stats, etc.
-func (tsr *Number[T]) Floats(flt *[]float64) {
-	*flt = slicesx.SetLength(*flt, len(tsr.Values))
-	switch vals := any(tsr.Values).(type) {
-	case []float64:
-		copy(*flt, vals)
-	default:
-		for i, v := range tsr.Values {
-			(*flt)[i] = float64(v)
-		}
-	}
-}
-
-// SetFloats sets tensor values from a []float64 slice (copies values).
-func (tsr *Number[T]) SetFloats(flt ...float64) {
-	switch vals := any(tsr.Values).(type) {
-	case []float64:
-		copy(vals, flt)
-	default:
-		for i, v := range flt {
-			tsr.Values[i] = T(v)
-		}
-	}
 }
 
 // At is the gonum/mat.Matrix interface method for returning 2D matrix element at given

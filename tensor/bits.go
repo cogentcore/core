@@ -176,22 +176,6 @@ func (tsr *Bits) SetFloatRowCell(val float64, row, cell int) {
 	tsr.Values.Set(Float64ToBool(val), row*sz+cell)
 }
 
-func (tsr *Bits) Floats(flt *[]float64) {
-	sz := tsr.Len()
-	*flt = slicesx.SetLength(*flt, sz)
-	for j := 0; j < sz; j++ {
-		(*flt)[j] = BoolToFloat64(tsr.Values.Index(j))
-	}
-}
-
-// SetFloats sets tensor values from a []float64 slice (copies values).
-func (tsr *Bits) SetFloats(vals ...float64) {
-	sz := min(tsr.Len(), len(vals))
-	for j := 0; j < sz; j++ {
-		tsr.Values.Set(Float64ToBool(vals[j]), j)
-	}
-}
-
 func (tsr *Bits) String1D(off int) string {
 	return reflectx.ToString(tsr.Values.Index(off))
 }

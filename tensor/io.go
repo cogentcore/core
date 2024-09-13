@@ -15,11 +15,40 @@ import (
 	"cogentcore.org/core/core"
 )
 
+// Delim are standard CSV delimiter options (Tab, Comma, Space)
+type Delims int32 //enums:enum
+
+const (
+	// Tab is the tab rune delimiter, for TSV tab separated values
+	Tab Delims = iota
+
+	// Comma is the comma rune delimiter, for CSV comma separated values
+	Comma
+
+	// Space is the space rune delimiter, for SSV space separated value
+	Space
+
+	// Detect is used during reading a file -- reads the first line and detects tabs or commas
+	Detect
+)
+
+func (dl Delims) Rune() rune {
+	switch dl {
+	case Tab:
+		return '\t'
+	case Comma:
+		return ','
+	case Space:
+		return ' '
+	}
+	return '\t'
+}
+
 // SaveCSV writes a tensor to a comma-separated-values (CSV) file
 // (where comma = any delimiter, specified in the delim arg).
 // Outer-most dims are rows in the file, and inner-most is column --
 // Reading just grabs all values and doesn't care about shape.
-func SaveCSV(tsr Tensor, filename core.Filename, delim rune) error {
+func SaveCSV(tsr Tensor, filename core.Filename, delim Delims) error {
 	fp, err := os.Create(string(filename))
 	defer fp.Close()
 	if err != nil {
@@ -35,7 +64,7 @@ func SaveCSV(tsr Tensor, filename core.Filename, delim rune) error {
 // using the Go standard encoding/csv reader conforming
 // to the official CSV standard.
 // Reads all values and assigns as many as fit.
-func OpenCSV(tsr Tensor, filename core.Filename, delim rune) error {
+func OpenCSV(tsr Tensor, filename core.Filename, delim Delims) error {
 	fp, err := os.Open(string(filename))
 	defer fp.Close()
 	if err != nil {
@@ -52,15 +81,13 @@ func OpenCSV(tsr Tensor, filename core.Filename, delim rune) error {
 // (where comma = any delimiter, specified in the delim arg).
 // Outer-most dims are rows in the file, and inner-most is column --
 // Reading just grabs all values and doesn't care about shape.
-func WriteCSV(tsr Tensor, w io.Writer, delim rune) error {
+func WriteCSV(tsr Tensor, w io.Writer, delim Delims) error {
 	prec := -1
 	if ps, err := metadata.Get[int](*tsr.Metadata(), "precision"); err == nil {
 		prec = ps
 	}
 	cw := csv.NewWriter(w)
-	if delim != 0 {
-		cw.Comma = delim
-	}
+	cw.Comma = delim.Rune()
 	nrow := tsr.DimSize(0)
 	nin := tsr.Len() / nrow
 	rec := make([]string, nin)
@@ -89,11 +116,9 @@ func WriteCSV(tsr Tensor, w io.Writer, delim rune) error {
 // using the Go standard encoding/csv reader conforming
 // to the official CSV standard.
 // Reads all values and assigns as many as fit.
-func ReadCSV(tsr Tensor, r io.Reader, delim rune) error {
+func ReadCSV(tsr Tensor, r io.Reader, delim Delims) error {
 	cr := csv.NewReader(r)
-	if delim != 0 {
-		cr.Comma = delim
-	}
+	cr.Comma = delim.Rune()
 	rec, err := cr.ReadAll() // todo: lazy, avoid resizing
 	if err != nil || len(rec) == 0 {
 		return err

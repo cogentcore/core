@@ -25,7 +25,7 @@ func init() {
 func ClosestRow(funcName string, probe, vocab, out *tensor.Indexed) {
 	rows, _ := vocab.Tensor.RowCellSize()
 	mi := -1
-	mout := tensor.NewFloatScalar(0.0)
+	mout := tensor.NewFloat64Scalar(0.0)
 	mind := math.MaxFloat64
 	pr1d := tensor.NewIndexed(tensor.New1DViewOf(probe.Tensor))
 	for ri := range rows {
