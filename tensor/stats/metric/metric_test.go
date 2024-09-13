@@ -158,7 +158,7 @@ func TestPCAIris(t *testing.T) {
 
 	colidx.Tensor.SetFloat1D(0, 0) // strongest at start
 	ProjectOnMatrixColumn(vecs, data, colidx, prjns)
-	tensor.SaveCSV(prjns.Tensor, "testdata/svd_projection.csv", tensor.Comma)
+	// tensor.SaveCSV(prjns.Tensor, "testdata/svd_projection.csv", tensor.Comma)
 	trgprjns = []float64{
 		-2.6692308782935172,
 		-2.696434011868955,

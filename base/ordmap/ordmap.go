@@ -35,7 +35,6 @@ type KeyValue[K comparable, V any] struct {
 // and the fast key lookup of a map. A map stores an index
 // into a slice that has the value and key associated with the value.
 type Map[K comparable, V any] struct {
-
 	// Order is an ordered list of values and associated keys, in the order added.
 	Order []KeyValue[K, V]
 
