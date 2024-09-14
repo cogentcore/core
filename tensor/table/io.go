@@ -97,7 +97,6 @@ func (dt *Table) ReadCSV(r io.Reader, delim tensor.Delims) error {
 		return err
 	}
 	rows := len(rec)
-	// cols := len(rec[0])
 	strow := 0
 	if dt.NumColumns() == 0 || DetectTableHeaders(rec[0]) {
 		dt.DeleteAll()
@@ -186,7 +185,7 @@ func ConfigFromTableHeaders(dt *Table, hdrs []string) error {
 			hd = hd[:lbst]
 			csh := ShapeFromString(dims)
 			// new tensor starting
-			dt.AddTensorColumnOfType(hd, typ, csh...)
+			dt.AddColumnOfType(hd, typ, csh...)
 			continue
 		}
 		dimst = strings.Index(hd, "[")

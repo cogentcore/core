@@ -66,7 +66,7 @@ func VecFunc(idx int, a, b, out *tensor.Indexed, ini float64, fun func(a, b, agg
 	nsub := out.Tensor.Len()
 	for i := range nsub {
 		if idx == 0 {
-			out.Tensor.SetFloat1D(ini, i)
+			out.SetFloat1D(ini, i)
 		}
 		av := a.FloatRowCell(idx, i)
 		if math.IsNaN(av) {
@@ -76,7 +76,7 @@ func VecFunc(idx int, a, b, out *tensor.Indexed, ini float64, fun func(a, b, agg
 		if math.IsNaN(bv) {
 			continue
 		}
-		out.Tensor.SetFloat1D(fun(av, bv, out.Tensor.Float1D(i)), i)
+		out.SetFloat1D(fun(av, bv, out.Float1D(i)), i)
 	}
 }
 
@@ -88,8 +88,8 @@ func VecSSFunc(idx int, a, b, out1, out2 *tensor.Indexed, ini1, ini2 float64, fu
 	nsub := out2.Tensor.Len()
 	for i := range nsub {
 		if idx == 0 {
-			out1.Tensor.SetFloat1D(ini1, i)
-			out2.Tensor.SetFloat1D(ini2, i)
+			out1.SetFloat1D(ini1, i)
+			out2.SetFloat1D(ini2, i)
 		}
 		av := a.FloatRowCell(idx, i)
 		if math.IsNaN(av) {
@@ -99,7 +99,7 @@ func VecSSFunc(idx int, a, b, out1, out2 *tensor.Indexed, ini1, ini2 float64, fu
 		if math.IsNaN(bv) {
 			continue
 		}
-		scale, ss := out1.Tensor.Float1D(i), out2.Tensor.Float1D(i)
+		scale, ss := out1.Float1D(i), out2.Float1D(i)
 		d := fun(av, bv)
 		if d == 0 {
 			continue
@@ -111,8 +111,8 @@ func VecSSFunc(idx int, a, b, out1, out2 *tensor.Indexed, ini1, ini2 float64, fu
 		} else {
 			ss = ss + (absxi/scale)*(absxi/scale)
 		}
-		out1.Tensor.SetFloat1D(scale, i)
-		out2.Tensor.SetFloat1D(ss, i)
+		out1.SetFloat1D(scale, i)
+		out2.SetFloat1D(ss, i)
 	}
 }
 
@@ -124,7 +124,7 @@ func Vec2inFunc(idx int, a, b, a2, b2, out *tensor.Indexed, ini float64, fun fun
 	nsub := out.Tensor.Len()
 	for i := range nsub {
 		if idx == 0 {
-			out.Tensor.SetFloat1D(ini, i)
+			out.SetFloat1D(ini, i)
 		}
 		av := a.FloatRowCell(idx, i)
 		if math.IsNaN(av) {
@@ -134,9 +134,9 @@ func Vec2inFunc(idx int, a, b, a2, b2, out *tensor.Indexed, ini float64, fun fun
 		if math.IsNaN(bv) {
 			continue
 		}
-		av2 := a2.Tensor.Float1D(i)
-		bv2 := b2.Tensor.Float1D(i)
-		out.Tensor.SetFloat1D(fun(av, bv, av2, bv2, out.Tensor.Float1D(i)), i)
+		av2 := a2.Float1D(i)
+		bv2 := b2.Float1D(i)
+		out.SetFloat1D(fun(av, bv, av2, bv2, out.Float1D(i)), i)
 	}
 }
 
@@ -148,9 +148,9 @@ func Vec2in3outFunc(idx int, a, b, a2, b2, out1, out2, out3 *tensor.Indexed, ini
 	nsub := out1.Tensor.Len()
 	for i := range nsub {
 		if idx == 0 {
-			out1.Tensor.SetFloat1D(ini, i)
-			out2.Tensor.SetFloat1D(ini, i)
-			out3.Tensor.SetFloat1D(ini, i)
+			out1.SetFloat1D(ini, i)
+			out2.SetFloat1D(ini, i)
+			out3.SetFloat1D(ini, i)
 		}
 		av := a.FloatRowCell(idx, i)
 		if math.IsNaN(av) {
@@ -160,15 +160,15 @@ func Vec2in3outFunc(idx int, a, b, a2, b2, out1, out2, out3 *tensor.Indexed, ini
 		if math.IsNaN(bv) {
 			continue
 		}
-		av2 := a2.Tensor.Float1D(i)
-		bv2 := b2.Tensor.Float1D(i)
-		o1 := out1.Tensor.Float1D(i)
-		o2 := out2.Tensor.Float1D(i)
-		o3 := out3.Tensor.Float1D(i)
+		av2 := a2.Float1D(i)
+		bv2 := b2.Float1D(i)
+		o1 := out1.Float1D(i)
+		o2 := out2.Float1D(i)
+		o3 := out3.Float1D(i)
 		o1, o2, o3 = fun(av, bv, av2, bv2, o1, o2, o3)
-		out1.Tensor.SetFloat1D(o1, i)
-		out2.Tensor.SetFloat1D(o2, i)
-		out3.Tensor.SetFloat1D(o3, i)
+		out1.SetFloat1D(o1, i)
+		out2.SetFloat1D(o2, i)
+		out3.SetFloat1D(o3, i)
 	}
 }
 
@@ -179,9 +179,9 @@ func Vec3outFunc(idx int, a, b, out1, out2, out3 *tensor.Indexed, ini float64, f
 	nsub := out1.Tensor.Len()
 	for i := range nsub {
 		if idx == 0 {
-			out1.Tensor.SetFloat1D(ini, i)
-			out2.Tensor.SetFloat1D(ini, i)
-			out3.Tensor.SetFloat1D(ini, i)
+			out1.SetFloat1D(ini, i)
+			out2.SetFloat1D(ini, i)
+			out3.SetFloat1D(ini, i)
 		}
 		av := a.FloatRowCell(idx, i)
 		if math.IsNaN(av) {
@@ -191,12 +191,12 @@ func Vec3outFunc(idx int, a, b, out1, out2, out3 *tensor.Indexed, ini float64, f
 		if math.IsNaN(bv) {
 			continue
 		}
-		o1 := out1.Tensor.Float1D(i)
-		o2 := out2.Tensor.Float1D(i)
-		o3 := out3.Tensor.Float1D(i)
+		o1 := out1.Float1D(i)
+		o2 := out2.Float1D(i)
+		o3 := out3.Float1D(i)
 		o1, o2, o3 = fun(av, bv, o1, o2, o3)
-		out1.Tensor.SetFloat1D(o1, i)
-		out2.Tensor.SetFloat1D(o2, i)
-		out3.Tensor.SetFloat1D(o3, i)
+		out1.SetFloat1D(o1, i)
+		out2.SetFloat1D(o2, i)
+		out3.SetFloat1D(o3, i)
 	}
 }

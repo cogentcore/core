@@ -41,7 +41,7 @@ func Add(a, b, out *tensor.Indexed) {
 		func(idx int, tsr ...*tensor.Indexed) {
 			ia, _, _ := tsr[0].RowCellIndex(idx)
 			ib, _, _ := tsr[1].RowCellIndex(idx)
-			out.Tensor.SetFloat1D(tsr[0].Tensor.Float1D(ia)+tsr[1].Tensor.Float1D(ib), ia)
+			out.SetFloat1D(tsr[0].Float1D(ia)+tsr[1].Float1D(ib), ia)
 		}, a, b, out)
 }
 
@@ -50,7 +50,7 @@ func AddScalar(scalar float64, a, out *tensor.Indexed) {
 	out.SetShapeFrom(a)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		ia, _, _ := a.RowCellIndex(idx)
-		out.Tensor.SetFloat1D(a.Tensor.Float1D(ia)+scalar, ia)
+		out.SetFloat1D(a.Float1D(ia)+scalar, ia)
 	}, a, out)
 }
 
@@ -61,7 +61,7 @@ func AddSubSpace(a, sub, out *tensor.Indexed) {
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		ia, _, ci := a.RowCellIndex(idx)
 		si, _, _ := sub.RowCellIndex(ci)
-		out.Tensor.SetFloat1D(a.Tensor.Float1D(ia)+sub.Tensor.Float1D(si), ia)
+		out.SetFloat1D(a.Float1D(ia)+sub.Float1D(si), ia)
 	}, a, sub, out)
 }
 
@@ -101,7 +101,7 @@ func Sub(a, b, out *tensor.Indexed) {
 		func(idx int, tsr ...*tensor.Indexed) {
 			ia, _, _ := tsr[0].RowCellIndex(idx)
 			ib, _, _ := tsr[1].RowCellIndex(idx)
-			out.Tensor.SetFloat1D(tsr[0].Tensor.Float1D(ia)-tsr[1].Tensor.Float1D(ib), ia)
+			out.SetFloat1D(tsr[0].Float1D(ia)-tsr[1].Float1D(ib), ia)
 		}, a, b, out)
 }
 
@@ -111,7 +111,7 @@ func SubScalar(sign float64, scalar float64, a, out *tensor.Indexed) {
 	out.SetShapeFrom(a)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		ia, _, _ := a.RowCellIndex(idx)
-		out.Tensor.SetFloat1D(sign*(a.Tensor.Float1D(ia)-scalar), ia)
+		out.SetFloat1D(sign*(a.Float1D(ia)-scalar), ia)
 	}, a, out)
 }
 
@@ -123,7 +123,7 @@ func SubSubSpace(sign float64, a, sub, out *tensor.Indexed) {
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		ia, _, ci := a.RowCellIndex(idx)
 		si, _, _ := sub.RowCellIndex(ci)
-		out.Tensor.SetFloat1D(sign*(a.Tensor.Float1D(ia)-sub.Tensor.Float1D(si)), ia)
+		out.SetFloat1D(sign*(a.Float1D(ia)-sub.Float1D(si)), ia)
 	}, a, sub, out)
 }
 
@@ -163,7 +163,7 @@ func Mul(a, b, out *tensor.Indexed) {
 		func(idx int, tsr ...*tensor.Indexed) {
 			ia, _, _ := tsr[0].RowCellIndex(idx)
 			ib, _, _ := tsr[1].RowCellIndex(idx)
-			out.Tensor.SetFloat1D(tsr[0].Tensor.Float1D(ia)*tsr[1].Tensor.Float1D(ib), ia)
+			out.SetFloat1D(tsr[0].Float1D(ia)*tsr[1].Float1D(ib), ia)
 		}, a, b, out)
 }
 
@@ -172,7 +172,7 @@ func MulScalar(scalar float64, a, out *tensor.Indexed) {
 	out.SetShapeFrom(a)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		ia, _, _ := a.RowCellIndex(idx)
-		out.Tensor.SetFloat1D(a.Tensor.Float1D(ia)*scalar, ia)
+		out.SetFloat1D(a.Float1D(ia)*scalar, ia)
 	}, a, out)
 }
 
@@ -183,7 +183,7 @@ func MulSubSpace(a, sub, out *tensor.Indexed) {
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		ia, _, ci := a.RowCellIndex(idx)
 		si, _, _ := sub.RowCellIndex(ci)
-		out.Tensor.SetFloat1D(a.Tensor.Float1D(ia)*sub.Tensor.Float1D(si), ia)
+		out.SetFloat1D(a.Float1D(ia)*sub.Float1D(si), ia)
 	}, a, sub, out)
 }
 
@@ -223,7 +223,7 @@ func Div(a, b, out *tensor.Indexed) {
 		func(idx int, tsr ...*tensor.Indexed) {
 			ia, _, _ := tsr[0].RowCellIndex(idx)
 			ib, _, _ := tsr[1].RowCellIndex(idx)
-			out.Tensor.SetFloat1D(tsr[0].Tensor.Float1D(ia)/tsr[1].Tensor.Float1D(ib), ia)
+			out.SetFloat1D(tsr[0].Float1D(ia)/tsr[1].Float1D(ib), ia)
 		}, a, b, out)
 }
 
@@ -232,7 +232,7 @@ func DivScalar(scalar float64, a, out *tensor.Indexed) {
 	out.SetShapeFrom(a)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		ia, _, _ := a.RowCellIndex(idx)
-		out.Tensor.SetFloat1D(a.Tensor.Float1D(ia)/scalar, ia)
+		out.SetFloat1D(a.Float1D(ia)/scalar, ia)
 	}, a, out)
 }
 
@@ -242,7 +242,7 @@ func DivScalarInv(scalar float64, a, out *tensor.Indexed) {
 	out.SetShapeFrom(a)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		ia, _, _ := a.RowCellIndex(idx)
-		out.Tensor.SetFloat1D(scalar/a.Tensor.Float1D(ia), ia)
+		out.SetFloat1D(scalar/a.Float1D(ia), ia)
 	}, a, out)
 }
 
@@ -253,7 +253,7 @@ func DivSubSpace(a, sub, out *tensor.Indexed) {
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		ia, _, ci := a.RowCellIndex(idx)
 		si, _, _ := sub.RowCellIndex(ci)
-		out.Tensor.SetFloat1D(a.Tensor.Float1D(ia)/sub.Tensor.Float1D(si), ia)
+		out.SetFloat1D(a.Float1D(ia)/sub.Float1D(si), ia)
 	}, a, sub, out)
 }
 
@@ -264,6 +264,6 @@ func DivSubSpaceInv(a, sub, out *tensor.Indexed) {
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		ia, _, ci := a.RowCellIndex(idx)
 		si, _, _ := sub.RowCellIndex(ci)
-		out.Tensor.SetFloat1D(sub.Tensor.Float1D(si)/a.Tensor.Float1D(ia), ia)
+		out.SetFloat1D(sub.Float1D(si)/a.Float1D(ia), ia)
 	}, a, sub, out)
 }

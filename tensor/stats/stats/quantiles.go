@@ -34,7 +34,7 @@ func QuantilesFunc(in, qs, out *tensor.Indexed) error {
 	out.Tensor.SetShapeFrom(qs.Tensor)
 	nq := qs.Tensor.Len()
 	for i := range nq {
-		q := qs.Tensor.Float1D(i)
+		q := qs.Float1D(i)
 		val := 0.0
 		qi := q * fsz
 		lwi := math.Floor(qi)
@@ -49,7 +49,7 @@ func QuantilesFunc(in, qs, out *tensor.Indexed) error {
 			hiv := sin.FloatRowCell(lwii+1, 0)
 			val = (1-phi)*lwv + phi*hiv
 		}
-		out.Tensor.SetFloat1D(val, i)
+		out.SetFloat1D(val, i)
 	}
 	return nil
 }

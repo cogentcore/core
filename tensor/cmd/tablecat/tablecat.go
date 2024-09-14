@@ -110,7 +110,7 @@ func RawCat(files []string) {
 func AvgCat(files []string) {
 	dts := make([]*table.Table, 0, len(files))
 	for _, fn := range files {
-		dt := &table.Table{}
+		dt := table.NewTable()
 		err := dt.OpenCSV(core.Filename(fn), table.Tab)
 		if err != nil {
 			fmt.Println("Error opening file: ", err)

@@ -34,11 +34,11 @@ func UnitNorm(a, out *tensor.Indexed) {
 // treated as scalars (first value used).
 func Clamp(in, minv, maxv, out *tensor.Indexed) {
 	out.SetShapeFrom(in)
-	mn := minv.Tensor.Float1D(0)
-	mx := maxv.Tensor.Float1D(0)
+	mn := minv.Float1D(0)
+	mx := maxv.Float1D(0)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].Tensor.SetFloat1D(math32.Clamp64(tsr[0].Tensor.Float1D(i), mn, mx), i)
+		tsr[1].SetFloat1D(math32.Clamp64(tsr[0].Float1D(i), mn, mx), i)
 	}, in, out)
 }
 
@@ -47,15 +47,15 @@ func Clamp(in, minv, maxv, out *tensor.Indexed) {
 // treated as a scalar (first value used).
 func Binarize(in, threshold, out *tensor.Indexed) {
 	out.SetShapeFrom(in)
-	thr := threshold.Tensor.Float1D(0)
+	thr := threshold.Float1D(0)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		i, _, _ := tsr[0].RowCellIndex(idx)
-		v := tsr[0].Tensor.Float1D(i)
+		v := tsr[0].Float1D(i)
 		if v >= thr {
 			v = 1
 		} else {
 			v = 0
 		}
-		tsr[1].Tensor.SetFloat1D(v, i)
+		tsr[1].SetFloat1D(v, i)
 	}, in, out)
 }

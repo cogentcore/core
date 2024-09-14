@@ -113,9 +113,9 @@ func InitAllLeaves(ntot int) *Node {
 // to start with predefined clusters.
 func Glom(root *Node, funcName string, dmat *tensor.Indexed) *Node {
 	ntot := dmat.Tensor.DimSize(0) // number of leaves
-	mout := tensor.NewFloatScalar(0)
+	mout := tensor.NewFloat64Scalar(0)
 	stats.MaxFunc(tensor.NewIndexed(tensor.New1DViewOf(dmat.Tensor)), mout)
-	maxd := mout.Tensor.Float1D(0)
+	maxd := mout.Float1D(0)
 	// indexes in each group
 	aidx := make([]int, ntot)
 	bidx := make([]int, ntot)

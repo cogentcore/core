@@ -26,5 +26,5 @@ func TestSliceTable(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	assert.Equal(t, 2, dt.Rows)
+	assert.Equal(t, 2, dt.Rows())
 }

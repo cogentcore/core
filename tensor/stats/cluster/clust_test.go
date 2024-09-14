@@ -7,7 +7,6 @@ package cluster
 import (
 	"testing"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/metric"
@@ -29,16 +28,16 @@ var clustres = `
 			3.605551275463989: Wendy_sad Wendy_happy `
 
 func TestClust(t *testing.T) {
-	dt := &table.Table{}
-	err := dt.OpenCSV("testdata/faces.dat", table.Tab)
+	dt := table.NewTable()
+	err := dt.OpenCSV("testdata/faces.dat", tensor.Tab)
 	if err != nil {
 		t.Error(err)
 	}
-	in := tensor.NewIndexed(errors.Log1(dt.ColumnByName("Input")))
-	out := tensor.NewIndexed(tensor.NewFloat64())
-	metric.Matrix(metric.Euclidean.String(), in, out)
+	in := dt.Column("Input")
+	out := tensor.NewFloat64Indexed()
+	metric.Matrix(metric.Euclidean.FuncName(), in, out)
 
-	cl := Cluster(Avg.String(), out, tensor.NewIndexed(errors.Log1(dt.ColumnByName("Name"))))
+	cl := Cluster(Avg.String(), out, dt.Column("Name"))
 
 	var dists []float64
 

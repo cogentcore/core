@@ -24,26 +24,27 @@ func TestTableHeaders(t *testing.T) {
 	if dt.NumColumns() != 3 {
 		t.Errorf("TableHeaders: len != 3\n")
 	}
-	if dt.Columns[0].DataType() != reflect.String {
-		t.Errorf("TableHeaders: dt.Columns[0] != STRING\n")
+	cols := dt.Columns.Values
+	if cols[0].DataType() != reflect.String {
+		t.Errorf("TableHeaders: cols[0] != STRING\n")
 	}
-	if dt.Columns[1].DataType() != reflect.Float32 {
-		t.Errorf("TableHeaders: dt.Columns[1] != FLOAT32\n")
+	if cols[1].DataType() != reflect.Float32 {
+		t.Errorf("TableHeaders: cols[1] != FLOAT32\n")
 	}
-	if dt.Columns[2].DataType() != reflect.Float32 {
-		t.Errorf("TableHeaders: dt.Columns[2] != FLOAT32\n")
+	if cols[2].DataType() != reflect.Float32 {
+		t.Errorf("TableHeaders: cols[2] != FLOAT32\n")
 	}
-	if dt.Columns[1].Shape().Sizes[1] != 5 {
-		t.Errorf("TableHeaders: dt.Columns[1].Shape().Sizes[1] != 5\n")
+	if cols[1].Shape().Sizes[1] != 5 {
+		t.Errorf("TableHeaders: cols[1].Shape().Sizes[1] != 5\n")
 	}
-	if dt.Columns[1].Shape().Sizes[2] != 5 {
-		t.Errorf("TableHeaders: dt.Columns[1].Shape().Sizes[2] != 5\n")
+	if cols[1].Shape().Sizes[2] != 5 {
+		t.Errorf("TableHeaders: cols[1].Shape().Sizes[2] != 5\n")
 	}
-	if dt.Columns[2].Shape().Sizes[1] != 5 {
-		t.Errorf("TableHeaders: dt.Columns[2].Shape().Sizes[1] != 5\n")
+	if cols[2].Shape().Sizes[1] != 5 {
+		t.Errorf("TableHeaders: cols[2].Shape().Sizes[1] != 5\n")
 	}
-	if dt.Columns[2].Shape().Sizes[2] != 5 {
-		t.Errorf("TableHeaders: dt.Columns[2].Shape().Sizes[2] != 5\n")
+	if cols[2].Shape().Sizes[2] != 5 {
+		t.Errorf("TableHeaders: cols[2].Shape().Sizes[2] != 5\n")
 	}
 	outh := dt.TableHeaders()
 	// fmt.Printf("headers out:\n%v\n", outh)
@@ -66,12 +67,12 @@ func TestReadTableDat(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		dt := &Table{}
+		dt := NewTable()
 		err = dt.ReadCSV(fp, '\t') // tsv
 		if err != nil {
 			t.Error(err)
 		}
-		sc := dt.Columns
+		sc := dt.Columns.Values
 		if len(sc) != 3 {
 			t.Errorf("TableHeaders: len != 3\n")
 		}

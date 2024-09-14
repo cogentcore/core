@@ -44,7 +44,7 @@ func Matrix(funcName string, in, out *tensor.Indexed) {
 			sa := tsr[0].Cells1D(c.X)
 			sb := tsr[0].Cells1D(c.Y)
 			tensor.Call(funcName, sa, sb, mout)
-			tsr[1].SetFloat(mout.Tensor.Float1D(0), c.X, c.Y)
+			tsr[1].SetFloat(mout.Float1D(0), c.X, c.Y)
 		}, in, out)
 	for _, c := range coords { // copy to upper
 		if c.X == c.Y { // exclude diag
@@ -84,7 +84,7 @@ func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
 			sa := tsr[0].Cells1D(ar)
 			sb := tsr[1].Cells1D(br)
 			tensor.Call(funcName, sa, sb, mout)
-			tsr[2].SetFloat(mout.Tensor.Float1D(0), ar, br)
+			tsr[2].SetFloat(mout.Float1D(0), ar, br)
 		}, a, b, out)
 }
 
@@ -134,7 +134,7 @@ func CovarMatrix(funcName string, in, out *tensor.Indexed) {
 				curCoords.Y = c.Y
 			}
 			tensor.Call(funcName, av, bv, mout)
-			tsr[1].SetFloat(mout.Tensor.Float1D(0), c.X, c.Y)
+			tsr[1].SetFloat(mout.Float1D(0), c.X, c.Y)
 		}, flatix, out)
 	for _, c := range coords { // copy to upper
 		if c.X == c.Y { // exclude diag
@@ -212,7 +212,7 @@ func SVD(covar, eigenvecs, vals *tensor.Indexed) {
 // 1D output with the number of rows.  Otherwise a single number is produced.
 // This is typically done with results from SVD or PCA.
 func ProjectOnMatrixColumn(mtx, vec, colindex, out *tensor.Indexed) {
-	ci := int(colindex.Tensor.Float1D(0))
+	ci := int(colindex.Float1D(0))
 	col := tensor.NewFloat64Indexed()
 	tensor.Slice(mtx, col, tensor.Range{}, tensor.Range{Start: ci, End: ci + 1})
 	// fmt.Println(mtx.Tensor.String(), col.Tensor.String())
@@ -226,7 +226,7 @@ func ProjectOnMatrixColumn(mtx, vec, colindex, out *tensor.Indexed) {
 			tmath.Mul(vec.Cells1D(i), col, mout)
 			stats.SumFunc(mout, msum)
 			// fmt.Println(vec.Cells1D(i).Tensor.String(), mout.Tensor.String(), msum.Tensor.String())
-			out.Tensor.SetFloat1D(msum.Tensor.Float1D(0), i)
+			out.SetFloat1D(msum.Float1D(0), i)
 		}
 	} else {
 		tmath.Mul(vec, col, mout)

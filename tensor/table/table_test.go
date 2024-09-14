@@ -13,12 +13,9 @@ import (
 
 func TestAdd3DCol(t *testing.T) {
 	dt := NewTable()
-	dt.AddFloat32TensorColumn("Values", []int{11, 1, 16})
+	dt.AddFloat32Column("Values", 11, 1, 16)
 
-	col, err := dt.Column("Values")
-	if err != nil {
-		t.Error(err)
-	}
+	col := dt.Column("Values").Tensor
 	if col.NumDims() != 4 {
 		t.Errorf("Add4DCol: # of dims != 4\n")
 	}
@@ -46,10 +43,10 @@ func NewTestTable() *Table {
 	dt.AddFloat64Column("Flt64")
 	dt.AddIntColumn("Int")
 	dt.SetNumRows(3)
-	for i := 0; i < dt.Rows; i++ {
-		dt.SetString("Str", i, strconv.Itoa(i))
-		dt.SetFloat("Flt64", i, float64(i))
-		dt.SetFloat("Int", i, float64(i))
+	for i := range dt.Rows() {
+		dt.Column("Str").SetStringRowCell(strconv.Itoa(i), i, 0)
+		dt.Column("Flt64").SetFloatRowCell(float64(i), i, 0)
+		dt.Column("Int").SetFloatRowCell(float64(i), i, 0)
 	}
 	return dt
 }
@@ -60,19 +57,19 @@ func TestAppendRows(t *testing.T) {
 	dt.AppendRows(st)
 	dt.AppendRows(st)
 	dt.AppendRows(st)
-	for j := 0; j < 3; j++ {
-		for i := 0; i < st.Rows; i++ {
+	for j := range 3 {
+		for i := range st.Rows() {
 			sr := j*3 + i
-			ss := st.StringValue("Str", i)
-			ds := dt.StringValue("Str", sr)
+			ss := st.Column("Str").StringRowCell(i, 0)
+			ds := dt.Column("Str").StringRowCell(sr, 0)
 			assert.Equal(t, ss, ds)
 
-			sf := st.Float("Flt64", i)
-			df := dt.Float("Flt64", sr)
+			sf := st.Column("Flt64").FloatRowCell(i, 0)
+			df := dt.Column("Flt64").FloatRowCell(sr, 0)
 			assert.Equal(t, sf, df)
 
-			sf = st.Float("Int", i)
-			df = dt.Float("Int", sr)
+			sf = st.Column("Int").FloatRowCell(i, 0)
+			df = dt.Column("Int").FloatRowCell(sr, 0)
 			assert.Equal(t, sf, df)
 		}
 	}

@@ -117,7 +117,7 @@ func Slice(tsr, out *Indexed, ranges ...Range) error {
 		if out.Tensor.IsString() {
 			out.Tensor.SetString1D(tsr.Tensor.String1D(oi), ni)
 		} else {
-			out.Tensor.SetFloat1D(tsr.Tensor.Float1D(oi), ni)
+			out.SetFloat1D(tsr.Float1D(oi), ni)
 		}
 	}
 	return nil
@@ -157,7 +157,7 @@ func SliceSet(tsr, slc *Indexed, ranges ...Range) error {
 		if slc.Tensor.IsString() {
 			tsr.Tensor.SetString1D(slc.Tensor.String1D(ni), oi)
 		} else {
-			tsr.Tensor.SetFloat1D(slc.Tensor.Float1D(ni), oi)
+			tsr.SetFloat1D(slc.Float1D(ni), oi)
 		}
 	}
 	return nil

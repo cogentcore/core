@@ -31,7 +31,7 @@ func ClosestRow(funcName string, probe, vocab, out *tensor.Indexed) {
 	for ri := range rows {
 		sub := vocab.Cells1D(ri)
 		tensor.Call(funcName, pr1d, sub, mout)
-		d := mout.Tensor.Float1D(0)
+		d := mout.Float1D(0)
 		if d < mind {
 			mi = ri
 			mind = d
@@ -39,6 +39,6 @@ func ClosestRow(funcName string, probe, vocab, out *tensor.Indexed) {
 	}
 	out.Tensor.SetShape(2)
 	out.Sequential()
-	out.Tensor.SetFloat1D(float64(mi), 0)
-	out.Tensor.SetFloat1D(mind, 1)
+	out.SetFloat1D(float64(mi), 0)
+	out.SetFloat1D(mind, 1)
 }

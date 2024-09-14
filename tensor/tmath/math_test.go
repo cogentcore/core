@@ -38,7 +38,7 @@ func TestMath(t *testing.T) {
 	cell2d := tensor.NewIndexed(tensor.NewFloat32(5, 2, 6))
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		i, _, ci := cell2d.RowCellIndex(idx)
-		cell2d.Tensor.SetFloat1D(oned.Tensor.Float1D(ci), i)
+		cell2d.SetFloat1D(oned.Float1D(ci), i)
 	}, cell2d)
 	// cell2d.DeleteRows(3, 1)
 	cellout := cell2d.Clone()
@@ -52,9 +52,9 @@ func TestMath(t *testing.T) {
 		tf(oned, oneout)
 		tf(cell2d, cellout)
 
-		Equal(t, fun(scalar.Tensor.Float1D(0)), scout.Tensor.Float1D(0))
+		Equal(t, fun(scalar.Float1D(0)), scout.Float1D(0))
 		for i, v := range vals {
-			Equal(t, fun(v), oneout.Tensor.Float1D(i))
+			Equal(t, fun(v), oneout.Float1D(i))
 		}
 		lv := len(vals)
 		for r := range 5 {

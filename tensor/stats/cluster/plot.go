@@ -27,32 +27,35 @@ func Plot(pt *table.Table, root *Node, dmat, labels *tensor.Indexed) {
 // will render this node in a cluster plot when plotted with a standard plotting package.
 // The lines double-back on themselves to form a continuous line to be plotted.
 func (nn *Node) Plot(pt *table.Table, dmat, labels *tensor.Indexed) {
-	row := pt.Rows
+	row := pt.Rows()
+	xc := pt.ColumnIndex(0)
+	yc := pt.ColumnIndex(1)
+	lbl := pt.ColumnIndex(2)
 	if nn.IsLeaf() {
 		pt.SetNumRows(row + 1)
-		pt.SetFloatIndex(0, row, nn.ParDist)
-		pt.SetFloatIndex(1, row, nn.Y)
+		xc.SetFloatRowCell(nn.ParDist, row, 0)
+		yc.SetFloatRowCell(nn.Y, row, 0)
 		if labels.Len() > nn.Index {
-			pt.SetStringIndex(2, row, labels.StringValue(nn.Index))
+			lbl.SetStringRowCell(labels.StringValue(nn.Index), row, 0)
 		}
 	} else {
 		for _, kn := range nn.Kids {
 			pt.SetNumRows(row + 2)
-			pt.SetFloatIndex(0, row, nn.ParDist)
-			pt.SetFloatIndex(1, row, kn.Y)
+			xc.SetFloatRowCell(nn.ParDist, row, 0)
+			yc.SetFloatRowCell(kn.Y, row, 0)
 			row++
-			pt.SetFloatIndex(0, row, nn.ParDist+nn.Dist)
-			pt.SetFloatIndex(1, row, kn.Y)
+			xc.SetFloatRowCell(nn.ParDist+nn.Dist, row, 0)
+			yc.SetFloatRowCell(kn.Y, row, 0)
 			kn.Plot(pt, dmat, labels)
-			row = pt.Rows
+			row = pt.Rows()
 			pt.SetNumRows(row + 1)
-			pt.SetFloatIndex(0, row, nn.ParDist)
-			pt.SetFloatIndex(1, row, kn.Y)
+			xc.SetFloatRowCell(nn.ParDist, row, 0)
+			yc.SetFloatRowCell(kn.Y, row, 0)
 			row++
 		}
 		pt.SetNumRows(row + 1)
-		pt.SetFloatIndex(0, row, nn.ParDist)
-		pt.SetFloatIndex(1, row, nn.Y)
+		xc.SetFloatRowCell(nn.ParDist, row, 0)
+		yc.SetFloatRowCell(nn.Y, row, 0)
 	}
 }
 

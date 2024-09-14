@@ -47,16 +47,16 @@ func SumSquaresFuncOut64(a, b, out *tensor.Indexed) *tensor.Indexed {
 	scale64, ss64 := SumSquaresScaleFuncOut64(a, b, out)
 	nsub := out.Tensor.Len()
 	for i := range nsub {
-		scale := scale64.Tensor.Float1D(i)
-		ss := ss64.Tensor.Float1D(i)
+		scale := scale64.Float1D(i)
+		ss := ss64.Float1D(i)
 		v := 0.0
 		if math.IsInf(scale, 1) {
 			v = math.Inf(1)
 		} else {
 			v = scale * scale * ss
 		}
-		scale64.Tensor.SetFloat1D(v, i)
-		out.Tensor.SetFloat1D(v, i)
+		scale64.SetFloat1D(v, i)
+		out.SetFloat1D(v, i)
 	}
 	return scale64
 }
@@ -73,16 +73,16 @@ func EuclideanFunc(a, b, out *tensor.Indexed) {
 	scale64, ss64 := SumSquaresScaleFuncOut64(a, b, out)
 	nsub := out.Tensor.Len()
 	for i := range nsub {
-		scale := scale64.Tensor.Float1D(i)
-		ss := ss64.Tensor.Float1D(i)
+		scale := scale64.Float1D(i)
+		ss := ss64.Float1D(i)
 		v := 0.0
 		if math.IsInf(scale, 1) {
 			v = math.Inf(1)
 		} else {
 			v = scale * math.Sqrt(ss)
 		}
-		scale64.Tensor.SetFloat1D(v, i)
-		out.Tensor.SetFloat1D(v, i)
+		scale64.SetFloat1D(v, i)
+		out.SetFloat1D(v, i)
 	}
 }
 
@@ -134,16 +134,16 @@ func EuclideanBinTolFunc(a, b, out *tensor.Indexed) {
 	scale64, ss64 := SumSquaresBinTolScaleFuncOut64(a, b, out)
 	nsub := out.Tensor.Len()
 	for i := range nsub {
-		scale := scale64.Tensor.Float1D(i)
-		ss := ss64.Tensor.Float1D(i)
+		scale := scale64.Float1D(i)
+		ss := ss64.Float1D(i)
 		v := 0.0
 		if math.IsInf(scale, 1) {
 			v = math.Inf(1)
 		} else {
 			v = scale * math.Sqrt(ss)
 		}
-		scale64.Tensor.SetFloat1D(v, i)
-		out.Tensor.SetFloat1D(v, i)
+		scale64.SetFloat1D(v, i)
+		out.SetFloat1D(v, i)
 	}
 }
 
@@ -153,16 +153,16 @@ func SumSquaresBinTolFunc(a, b, out *tensor.Indexed) {
 	scale64, ss64 := SumSquaresBinTolScaleFuncOut64(a, b, out)
 	nsub := out.Tensor.Len()
 	for i := range nsub {
-		scale := scale64.Tensor.Float1D(i)
-		ss := ss64.Tensor.Float1D(i)
+		scale := scale64.Float1D(i)
+		ss := ss64.Float1D(i)
 		v := 0.0
 		if math.IsInf(scale, 1) {
 			v = math.Inf(1)
 		} else {
 			v = scale * scale * ss
 		}
-		scale64.Tensor.SetFloat1D(v, i)
-		out.Tensor.SetFloat1D(v, i)
+		scale64.SetFloat1D(v, i)
+		out.SetFloat1D(v, i)
 	}
 }
 
@@ -212,12 +212,12 @@ func CovarianceFunc(a, b, out *tensor.Indexed) {
 	}, a, b, amean, bmean, out)
 	nsub := out.Tensor.Len()
 	for i := range nsub {
-		c := acount.Tensor.Float1D(i)
+		c := acount.Float1D(i)
 		if c == 0 {
 			continue
 		}
-		cov64.Tensor.SetFloat1D(cov64.Tensor.Float1D(i)/c, i)
-		out.Tensor.SetFloat1D(cov64.Tensor.Float1D(i), i)
+		cov64.SetFloat1D(cov64.Float1D(i)/c, i)
+		out.SetFloat1D(cov64.Float1D(i), i)
 	}
 }
 
@@ -244,13 +244,13 @@ func CorrelationFuncOut64(a, b, out *tensor.Indexed) *tensor.Indexed {
 
 	nsub := out.Tensor.Len()
 	for i := range nsub {
-		ss := ss64.Tensor.Float1D(i)
-		vp := math.Sqrt(avar64.Tensor.Float1D(i) * bvar64.Tensor.Float1D(i))
+		ss := ss64.Float1D(i)
+		vp := math.Sqrt(avar64.Float1D(i) * bvar64.Float1D(i))
 		if vp > 0 {
 			ss /= vp
 		}
-		ss64.Tensor.SetFloat1D(ss, i)
-		out.Tensor.SetFloat1D(ss, i)
+		ss64.SetFloat1D(ss, i)
+		out.SetFloat1D(ss, i)
 	}
 	return ss64
 }
@@ -277,8 +277,8 @@ func InvCorrelationFunc(a, b, out *tensor.Indexed) {
 	cor64 := CorrelationFuncOut64(a, b, out)
 	nsub := out.Tensor.Len()
 	for i := range nsub {
-		cor := cor64.Tensor.Float1D(i)
-		out.Tensor.SetFloat1D(1-cor, i)
+		cor := cor64.Float1D(i)
+		out.SetFloat1D(1-cor, i)
 	}
 }
 
@@ -296,13 +296,13 @@ func CosineFuncOut64(a, b, out *tensor.Indexed) *tensor.Indexed {
 	}, a, b, out)
 	nsub := out.Tensor.Len()
 	for i := range nsub {
-		ss := ss64.Tensor.Float1D(i)
-		vp := math.Sqrt(avar64.Tensor.Float1D(i) * bvar64.Tensor.Float1D(i))
+		ss := ss64.Float1D(i)
+		vp := math.Sqrt(avar64.Float1D(i) * bvar64.Float1D(i))
 		if vp > 0 {
 			ss /= vp
 		}
-		ss64.Tensor.SetFloat1D(ss, i)
-		out.Tensor.SetFloat1D(ss, i)
+		ss64.SetFloat1D(ss, i)
+		out.SetFloat1D(ss, i)
 	}
 	return ss64
 }
@@ -323,7 +323,7 @@ func InvCosineFunc(a, b, out *tensor.Indexed) {
 	cos64 := CosineFuncOut64(a, b, out)
 	nsub := out.Tensor.Len()
 	for i := range nsub {
-		cos := cos64.Tensor.Float1D(i)
-		out.Tensor.SetFloat1D(1-cos, i)
+		cos := cos64.Float1D(i)
+		out.SetFloat1D(1-cos, i)
 	}
 }

@@ -27,8 +27,8 @@ func (dt *Table) InsertKeyColumns(args ...string) *Table {
 	for j := range nc {
 		colNm := args[2*j]
 		val := args[2*j+1]
-		col := tensor.NewString(c.Rows)
-		c.InsertColumn(col, colNm, 0)
+		col := tensor.NewString(c.Columns.Rows)
+		c.InsertColumn(0, colNm, col)
 		for i := range col.Values {
 			col.Values[i] = val
 		}
@@ -40,10 +40,10 @@ func (dt *Table) InsertKeyColumns(args ...string) *Table {
 // values in the first two columns of given format table, conventionally named
 // Name, Type (but names are not used), which must be of the string type.
 func (dt *Table) ConfigFromTable(ft *Table) error {
-	nmcol := ft.Columns[0]
-	tycol := ft.Columns[1]
+	nmcol := ft.ColumnIndex(0)
+	tycol := ft.ColumnIndex(1)
 	var errs []error
-	for i := range ft.Rows {
+	for i := range ft.Rows() {
 		name := nmcol.String1D(i)
 		typ := strings.ToLower(tycol.String1D(i))
 		kind := reflect.Float64
@@ -66,7 +66,7 @@ func (dt *Table) ConfigFromTable(ft *Table) error {
 			err := fmt.Errorf("ConfigFromTable: type string %q not recognized", typ)
 			errs = append(errs, err)
 		}
-		dt.AddColumnOfType(kind, name)
+		dt.AddColumnOfType(name, kind)
 	}
 	return errors.Join(errs...)
 }

@@ -182,7 +182,7 @@ func (ix *Indexed) ExcludeMissing1D() { //types:add
 	ix.IndexesNeeded()
 	ni := ix.Rows()
 	for i := ni - 1; i >= 0; i-- {
-		if math.IsNaN(ix.Tensor.Float1D(ix.Indexes[i])) {
+		if math.IsNaN(ix.Float1D(ix.Indexes[i])) {
 			ix.Indexes = append(ix.Indexes[:i], ix.Indexes[i+1:]...)
 		}
 	}
@@ -433,7 +433,7 @@ func (ix *Indexed) Float(i ...int) float64 {
 }
 
 // SetFloat sets the value of given index as a float64
-// The first index value is indirected through the [Indexes].
+// The first index value is indirected through the [Indexed.Indexes].
 func (ix *Indexed) SetFloat(val float64, i ...int) {
 	if ix.Indexes == nil {
 		ix.Tensor.SetFloat(val, i...)
@@ -446,7 +446,7 @@ func (ix *Indexed) SetFloat(val float64, i ...int) {
 
 // FloatRowCell returns the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
-// Row is indirected through the [Indexes].
+// Row is indirected through the [Indexed.Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) FloatRowCell(row, cell int) float64 {
 	return ix.Tensor.FloatRowCell(ix.Index(row), cell)
@@ -454,10 +454,24 @@ func (ix *Indexed) FloatRowCell(row, cell int) float64 {
 
 // SetFloatRowCell sets the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
-// Row is indirected through the [Indexes].
+// Row is indirected through the [Indexed.Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) SetFloatRowCell(val float64, row, cell int) {
 	ix.Tensor.SetFloatRowCell(val, ix.Index(row), cell)
+}
+
+// Float1D returns the value of given 1-dimensional index (0-Len()-1) as a float64.
+// This is just a convenience pass-through to the Tensor, and does _not_ use
+// the [Indexed.Indexes].
+func (ix *Indexed) Float1D(i int) float64 {
+	return ix.Tensor.Float1D(i)
+}
+
+// SetFloat1D sets the value of given 1-dimensional index (0-Len()-1) as a float64.
+// This is just a convenience pass-through to the Tensor, and does _not_ use
+// the [Indexed.Indexes].
+func (ix *Indexed) SetFloat1D(val float64, i int) {
+	ix.Tensor.SetFloat1D(val, i)
 }
 
 // StringValue returns the value of given index as a string.
@@ -472,7 +486,7 @@ func (ix *Indexed) StringValue(i ...int) string {
 }
 
 // SetString sets the value of given index as a string
-// The first index value is indirected through the [Indexes].
+// The first index value is indirected through the [Indexed.Indexes].
 func (ix *Indexed) SetString(val string, i ...int) {
 	if ix.Indexes == nil {
 		ix.Tensor.SetString(val, i...)
@@ -484,7 +498,7 @@ func (ix *Indexed) SetString(val string, i ...int) {
 
 // StringRowCell returns the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
-// Row is indirected through the [Indexes].
+// Row is indirected through the [Indexed.Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) StringRowCell(row, cell int) string {
 	return ix.Tensor.StringRowCell(ix.Index(row), cell)
@@ -492,10 +506,24 @@ func (ix *Indexed) StringRowCell(row, cell int) string {
 
 // SetStringRowCell sets the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
-// Row is indirected through the [Indexes].
+// Row is indirected through the [Indexed.Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) SetStringRowCell(val string, row, cell int) {
 	ix.Tensor.SetStringRowCell(val, ix.Index(row), cell)
+}
+
+// String1D returns the value of given 1-dimensional index (0-Len()-1) as a string.
+// This is just a convenience pass-through to the Tensor, and does _not_ use
+// the [Indexed.Indexes].
+func (ix *Indexed) String1D(i int) string {
+	return ix.Tensor.String1D(i)
+}
+
+// SetString1D sets the value of given 1-dimensional index (0-Len()-1) as a string.
+// This is just a convenience pass-through to the Tensor, and does _not_ use
+// the [Indexed.Indexes].
+func (ix *Indexed) SetString1D(val string, i int) {
+	ix.Tensor.SetString1D(val, i)
 }
 
 // SubSpace returns a new tensor with innermost subspace at given
