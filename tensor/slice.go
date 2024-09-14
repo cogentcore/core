@@ -74,6 +74,13 @@ func SliceSize(sizes []int, ranges ...Range) ([]int, error) {
 // efficient, relative to indexes, and it is simpler to only support one.
 // also, the need for direct shared access is limited.
 
+// todo: make a version of these functions that takes
+// a standard Indexed tensor with n x 3 shape, where the 3 inner values
+// specify the Range Start, End, Incr values, across n ranges.
+// these would convert to the current Range-based format that does the impl,
+// using the Range helper functions, which are also easier and more explicit
+// to use in Go code.
+
 // Slice extracts a subset of values from the given tensor into the
 // output tensor, according to the provided ranges.
 // Dimensions beyond the ranges specified are automatically included.
@@ -154,4 +161,26 @@ func SliceSet(tsr, slc *Indexed, ranges ...Range) error {
 		}
 	}
 	return nil
+}
+
+// RowCellSplit splits the given tensor into a standard 2D row, cell
+// shape at the given split dimension index.  All dimensions prior to
+// split are collapsed into the row dimension, and from split onward
+// form the cells dimension.  The resulting tensor is a re-shaped view
+// of the original tensor, sharing the same underlying data.
+func RowCellSplit(tsr Tensor, split int) Tensor {
+	sizes := tsr.Shape().Sizes
+	rows := sizes[:split]
+	cells := sizes[split:]
+	nr := 1
+	for _, r := range rows {
+		nr *= r
+	}
+	nc := 1
+	for _, c := range cells {
+		nc *= c
+	}
+	vw := tsr.View()
+	vw.SetShape(nr, nc)
+	return vw
 }

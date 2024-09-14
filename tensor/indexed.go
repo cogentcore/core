@@ -33,7 +33,7 @@ type Indexed struct { //types:add
 	// Tensor that we are an indexed view onto.
 	Tensor Tensor
 
-	// Indexes are the indexes into Tensor rows.
+	// Indexes are the indexes into Tensor rows, with nil = sequential.
 	// Only set if order is different from default sequential order.
 	// Use the Index() method for nil-aware logic.
 	Indexes []int
@@ -395,14 +395,13 @@ func (ix *Indexed) AddRows(n int) { //types:add
 // given index in this view
 func (ix *Indexed) InsertRows(at, n int) {
 	stidx := ix.Tensor.DimSize(0)
+	ix.IndexesNeeded()
 	ix.Tensor.SetNumRows(stidx + n)
-	if ix.Indexes != nil {
-		nw := make([]int, n, n+len(ix.Indexes)-at)
-		for i := 0; i < n; i++ {
-			nw[i] = stidx + i
-		}
-		ix.Indexes = append(ix.Indexes[:at], append(nw, ix.Indexes[at:]...)...)
+	nw := make([]int, n, n+len(ix.Indexes)-at)
+	for i := 0; i < n; i++ {
+		nw[i] = stidx + i
 	}
+	ix.Indexes = append(ix.Indexes[:at], append(nw, ix.Indexes[at:]...)...)
 }
 
 // DeleteRows deletes n rows of indexes starting at given index in the list of indexes

@@ -7,82 +7,109 @@ package table
 //go:generate core generate
 
 import (
-	"errors"
 	"fmt"
-	"log/slog"
 	"math"
 	"reflect"
 	"slices"
-	"strings"
 
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/tensor"
 )
 
-// Table is a table of data, with columns of tensors,
-// each with the same number of Rows (outermost dimension).
+// Table is a table of Tensor columns aligned by a common outermost row dimension.
+// Use the Column (by name) and ColumnIndex methods to obtain a `tensor.Indexed` view of
+// the column, using the shared Indexes of the Table. Thus, a coordinated
+// sorting and filtered view of the column data is automatically available for
+// any of the tensor package functions that use `tensor.Indexed` as the one
+// common data representation for all operations.
 type Table struct { //types:add
+	// Columns has the list of column tensor data for this table.
+	// Different tables can have
+	Columns *Columns
 
-	// columns of data, as tensor.Tensor tensors
-	Columns []tensor.Tensor `display:"no-inline"`
+	// Indexes are the indexes into Tensor rows, with nil = sequential.
+	// Only set if order is different from default sequential order.
+	// These indexes are shared into the `tensor.Indexed` Column values
+	// to provide a coordinated indexed view into the underlying data.
+	Indexes []int
 
-	// the names of the columns
-	ColumnNames []string
-
-	// number of rows, which is enforced to be the size of the outermost dimension of the column tensors
-	Rows int `edit:"-"`
-
-	// the map of column names to column numbers
-	ColumnNameMap map[string]int `display:"-"`
-
-	// misc meta data for the table.  We use lower-case key names following the struct tag convention:  name = name of table; desc = description; read-only = gui is read-only; precision = n for precision to write out floats in csv.  For Column-specific data, we look for ColumnName: prefix, specifically ColumnName:desc = description of the column contents, which is shown as tooltip in the tensorcore.Table, and :width for width of a column
-	MetaData map[string]string
+	// Meta is misc metadata for the table. Use lower-case key names
+	// following the struct tag convention:
+	//	- name string = name of table
+	//	- doc string = documentation, description
+	//	- read-only bool = gui is read-only
+	//	- precision int = n for precision to write out floats in csv.
+	Meta metadata.Data
 }
 
+// NewTable returnes a new Table with its own (empty) set of Columns.
+// Can pass an optional name.
 func NewTable(name ...string) *Table {
 	dt := &Table{}
+	dt.Columns = NewColumns()
 	if len(name) > 0 {
-		dt.SetMetaData("name", name[0])
+		dt.Meta.Set("name", name[0])
 	}
+	return dt
+}
+
+// NewTableView returns a new Table with its own Indexed view into the
+// same underlying set of Column tensor data as the source table.
+// Indexes are nil in the new Table, resulting in default full sequential view.
+func NewTableView(src *Table) *Table {
+	dt := &Table{Columns: src.Columns}
+	dt.Meta.Copy(src.Meta)
 	return dt
 }
 
 // IsValidRow returns error if the row is invalid
 func (dt *Table) IsValidRow(row int) error {
-	if row < 0 || row >= dt.Rows {
-		return fmt.Errorf("table.Table IsValidRow: row %d is out of valid range [0..%d]", row, dt.Rows)
+	if row < 0 || row >= dt.Rows() {
+		return fmt.Errorf("table.Table IsValidRow: row %d is out of valid range [0..%d]", row, dt.Rows())
 	}
 	return nil
 }
 
-// NumRows returns the number of rows
-func (dt *Table) NumRows() int { return dt.Rows }
+// NumRows returns the number of rows.
+func (dt *Table) NumRows() int { return dt.Columns.Rows }
 
-// NumColumns returns the number of columns
-func (dt *Table) NumColumns() int { return len(dt.Columns) }
+// NumColumns returns the number of columns.
+func (dt *Table) NumColumns() int { return dt.Columns.Len() }
 
-// Column returns the tensor at given column index
-func (dt *Table) Column(i int) tensor.Tensor { return dt.Columns[i] }
-
-// ColumnByName returns the tensor at given column name, with error message if not found.
-// Returns nil if not found
-func (dt *Table) ColumnByName(name string) (tensor.Tensor, error) {
-	i, ok := dt.ColumnNameMap[name]
-	if !ok {
-		return nil, fmt.Errorf("table.Table ColumnByNameTry: column named: %v not found", name)
+// Column returns the tensor with given column name, as a [tensor.Indexed]
+// with the shared [Indexes] from this table. It is best practice to
+// access columns by name, and direct access through Columns does not
+// provide the shared table-wide Indexes.
+// Returns nil if not found.
+func (dt *Table) Column(name string) *tensor.Indexed {
+	cl := dt.Columns.ValueByKey(name)
+	if cl == nil {
+		return nil
 	}
-	return dt.Columns[i], nil
+	return tensor.NewIndexed(cl, dt.Indexes)
 }
 
-// ColumnIndex returns the index of the given column name,
-// along with an error if not found.
-func (dt *Table) ColumnIndex(name string) (int, error) {
-	i, ok := dt.ColumnNameMap[name]
-	if !ok {
-		return 0, fmt.Errorf("table.Table ColumnIndex: column named: %v not found", name)
+// ColumnTry is a version of [Column] that also returns an error
+// if the column name is not found, for cases when error is needed.
+func (dt *Table) ColumnTry(name string) (*tensor.Indexed, error) {
+	cl := dt.Column(name)
+	if cl != nil {
+		return cl, nil
 	}
-	return i, nil
+	return nil, fmt.Errorf("table.Table: Column named %q not found", name)
 }
 
+// ColumnIndex returns the tensor at the given index, as a [tensor.Indexed]
+// with the shared [Indexes] from this table. It is best practice to
+// access columns by name using [Column] method instead.
+// Direct access through Columns does not provide the shared table-wide Indexes.
+// Returns nil if not found.
+func (dt *Table) ColumnIndex(idx int) *tensor.Indexed {
+	cl := dt.Columns.List.List[idx]
+	return tensor.NewIndexed(cl, dt.Indexes)
+}
+
+/*
 // ColumnIndexesByNames returns the indexes of the given column names.
 // idxs have -1 if name not found.
 func (dt *Table) ColumnIndexesByNames(names ...string) ([]int, error) {
@@ -101,52 +128,32 @@ func (dt *Table) ColumnIndexesByNames(names ...string) ([]int, error) {
 	}
 	return cidx, errors.Join(errs...)
 }
+*/
 
 // ColumnName returns the name of given column
 func (dt *Table) ColumnName(i int) string {
 	return dt.ColumnNames[i]
 }
 
-// UpdateColumnNameMap updates the column name map, returning an error
-// if any of the column names are duplicates.
-func (dt *Table) UpdateColumnNameMap() error {
-	nc := dt.NumColumns()
-	dt.ColumnNameMap = make(map[string]int, nc)
-	var errs []error
-	for i, nm := range dt.ColumnNames {
-		if _, has := dt.ColumnNameMap[nm]; has {
-			err := fmt.Errorf("table.Table duplicate column name: %s", nm)
-			slog.Warn(err.Error())
-			errs = append(errs, err)
-		} else {
-			dt.ColumnNameMap[nm] = i
-		}
-	}
-	if len(errs) > 0 {
-		return errors.Join(errs...)
-	}
-	return nil
-}
-
 // AddColumn adds a new column to the table, of given type and column name
 // (which must be unique).  The cells of this column hold a single scalar value:
 // see AddColumnTensor for n-dimensional cells.
-func AddColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Table, name string) tensor.Tensor {
-	rows := max(1, dt.Rows)
+func AddColumn[T tensor.DataTypes](dt *Table, name string) tensor.Tensor {
+	rows := max(1, dt.Columns.Rows)
 	tsr := tensor.New[T](rows)
 	tsr.SetNames("Row")
-	dt.AddColumn(tsr, name)
+	dt.AddColumn(name, tsr)
 	return tsr
 }
 
 // InsertColumn inserts a new column to the table, of given type and column name
 // (which must be unique), at given index.
 // The cells of this column hold a single scalar value.
-func InsertColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Table, name string, idx int) tensor.Tensor {
-	rows := max(1, dt.Rows)
+func InsertColumn[T tensor.DataTypes](dt *Table, name string, idx int) tensor.Tensor {
+	rows := max(1, dt.Columns.Rows)
 	tsr := tensor.New[T](rows)
 	tsr.SetNames("Row")
-	dt.InsertColumn(tsr, name, idx)
+	dt.InsertColumn(idx, name, tsr)
 	return tsr
 }
 
@@ -154,57 +161,38 @@ func InsertColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *
 // (which must be unique), and dimensionality of each _cell_.
 // An outermost Row dimension will be added to this dimensionality to create
 // the tensor column.
-func AddTensorColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Table, name string, cellSizes ...int) tensor.Tensor {
-	rows := max(1, dt.Rows)
+func AddTensorColumn[T tensor.DataTypes](dt *Table, name string, cellSizes ...int) tensor.Tensor {
+	rows := max(1, dt.Columns.Rows)
 	sz := append([]int{rows}, cellSizes...)
 	tsr := tensor.New[T](sz...)
 	tsr.SetNames("Row")
-	dt.AddColumn(tsr, name)
+	dt.AddColumn(name, tsr)
 	return tsr
 }
 
 // AddColumn adds the given tensor as a column to the table,
 // returning an error and not adding if the name is not unique.
 // Automatically adjusts the shape to fit the current number of rows.
-func (dt *Table) AddColumn(tsr tensor.Tensor, name string) error {
-	dt.ColumnNames = append(dt.ColumnNames, name)
-	err := dt.UpdateColumnNameMap()
-	if err != nil {
-		dt.ColumnNames = dt.ColumnNames[:len(dt.ColumnNames)-1]
-		return err
-	}
-	dt.Columns = append(dt.Columns, tsr)
-	rows := max(1, dt.Rows)
-	tsr.SetNumRows(rows)
-	return nil
+func (dt *Table) AddColumn(name string, tsr tensor.Tensor) error {
+	return dt.Columns.AddColumn(name, tsr)
 }
 
 // InsertColumn inserts the given tensor as a column to the table at given index,
 // returning an error and not adding if the name is not unique.
 // Automatically adjusts the shape to fit the current number of rows.
-func (dt *Table) InsertColumn(tsr tensor.Tensor, name string, idx int) error {
-	if _, has := dt.ColumnNameMap[name]; has {
-		err := fmt.Errorf("table.Table duplicate column name: %s", name)
-		slog.Warn(err.Error())
-		return err
-	}
-	dt.ColumnNames = slices.Insert(dt.ColumnNames, idx, name)
-	dt.UpdateColumnNameMap()
-	dt.Columns = slices.Insert(dt.Columns, idx, tsr)
-	rows := max(1, dt.Rows)
-	tsr.SetNumRows(rows)
-	return nil
+func (dt *Table) InsertColumn(idx int, name string, tsr tensor.Tensor) error {
+	return dt.Columns.InsertColumn(idx, name, tsr)
 }
 
 // AddColumnOfType adds a new scalar column to the table, of given reflect type,
 // column name (which must be unique),
 // The cells of this column hold a single (scalar) value of given type.
 // Supported types are string, bool (for [tensor.Bits]), float32, float64, int, int32, and byte.
-func (dt *Table) AddColumnOfType(typ reflect.Kind, name string) tensor.Tensor {
-	rows := max(1, dt.Rows)
+func (dt *Table) AddColumnOfType(name string, typ reflect.Kind) tensor.Tensor {
+	rows := max(1, dt.Columns.Rows)
 	tsr := tensor.NewOfType(typ, rows)
 	tsr.SetNames("Row")
-	dt.AddColumn(tsr, name)
+	dt.AddColumn(name, tsr)
 	return tsr
 }
 
@@ -213,12 +201,12 @@ func (dt *Table) AddColumnOfType(typ reflect.Kind, name string) tensor.Tensor {
 // An outermost Row dimension will be added to this dimensionality to create
 // the tensor column.
 // Supported types are string, bool (for [tensor.Bits]), float32, float64, int, int32, and byte.
-func (dt *Table) AddTensorColumnOfType(typ reflect.Kind, name string, cellSizes ...int) tensor.Tensor {
-	rows := max(1, dt.Rows)
+func (dt *Table) AddTensorColumnOfType(name string, typ reflect.Kind, cellSizes ...int) tensor.Tensor {
+	rows := max(1, dt.Columns.Rows)
 	sz := append([]int{rows}, cellSizes...)
 	tsr := tensor.NewOfType(typ, sz...)
 	tsr.SetNames("Row")
-	dt.AddColumn(tsr, name)
+	dt.AddColumn(name, tsr)
 	return tsr
 }
 
@@ -271,161 +259,72 @@ func (dt *Table) AddIntTensorColumn(name string, cellSizes ...int) *tensor.Int {
 }
 
 // DeleteColumnName deletes column of given name.
-// returns error if not found.
-func (dt *Table) DeleteColumnName(name string) error {
-	ci, err := dt.ColumnIndex(name)
-	if err != nil {
-		return err
-	}
-	dt.DeleteColumnIndex(ci)
-	return nil
+// returns false if not found.
+func (dt *Table) DeleteColumnName(name string) bool {
+	return dt.Columns.DeleteKey(name)
 }
 
-// DeleteColumnIndex deletes column of given index
-func (dt *Table) DeleteColumnIndex(idx int) {
-	dt.Columns = append(dt.Columns[:idx], dt.Columns[idx+1:]...)
-	dt.ColumnNames = append(dt.ColumnNames[:idx], dt.ColumnNames[idx+1:]...)
-	dt.UpdateColumnNameMap()
+// DeleteColumnIndex deletes column within the index range [i:j].
+func (dt *Table) DeleteColumnIndex(i, j int) {
+	dt.Columns.DeleteIndex(i, j)
 }
 
-// DeleteAll deletes all columns -- full reset
+// DeleteAll deletes all columns, does full reset.
 func (dt *Table) DeleteAll() {
-	dt.Columns = nil
-	dt.ColumnNames = nil
-	dt.Rows = 0
-	dt.ColumnNameMap = nil
+	dt.Columns.Reset()
 }
 
-// AddRows adds n rows to each of the columns
+// AddRows adds n rows to end of underlying Table, and to the indexes in this view
 func (dt *Table) AddRows(n int) { //types:add
-	dt.SetNumRows(dt.Rows + n)
+	stidx := dt.Columns.Rows
+	dt.Columns.SetNumRows(stidx + n)
+	for i := stidx; i < stidx+n; i++ {
+		dt.Indexes = append(dt.Indexes, i)
+	}
+}
+
+// InsertRows adds n rows to end of underlying Table, and to the indexes starting at
+// given index in this view
+func (dt *Table) InsertRows(at, n int) {
+	stidx := dt.Columns.Rows
+	dt.Columns.SetNumRows(stidx + n)
+	if dt.Indexes != nil {
+		nw := make([]int, n, n+len(dt.Indexes)-at)
+		for i := 0; i < n; i++ {
+			nw[i] = stidx + i
+		}
+		dt.Indexes = append(dt.Indexes[:at], append(nw, dt.Indexes[at:]...)...)
+	}
 }
 
 // SetNumRows sets the number of rows in the table, across all columns
 // if rows = 0 then effective number of rows in tensors is 1, as this dim cannot be 0
 func (dt *Table) SetNumRows(rows int) *Table { //types:add
-	dt.Rows = rows // can be 0
-	rows = max(1, rows)
-	for _, tsr := range dt.Columns {
-		tsr.SetNumRows(rows)
-	}
+	dt.Columns.SetNumRows(rows)
 	return dt
 }
 
 // note: no really clean definition of CopyFrom -- no point of re-using existing
 // table -- just clone it.
 
-// Clone returns a complete copy of this table
+// Clone returns a complete copy of this table,
+// including cloning the underlying Columns tensors.
 func (dt *Table) Clone() *Table {
-	cp := NewTable().SetNumRows(dt.Rows)
-	cp.CopyMetaDataFrom(dt)
-	for i, cl := range dt.Columns {
-		cp.AddColumn(cl.Clone(), dt.ColumnNames[i])
+	cp := &Table{}
+	cp.Columns = dt.Columns.Clone()
+	cp.Meta.Copy(dt.Meta)
+	if dt.Indexes != nil {
+		cp.Indexes = slices.Clone(dt.Indexes)
 	}
 	return cp
 }
 
 // AppendRows appends shared columns in both tables with input table rows
 func (dt *Table) AppendRows(dt2 *Table) {
-	shared := false
-	strow := dt.Rows
-	for iCol := range dt.Columns {
-		colName := dt.ColumnName(iCol)
-		_, err := dt2.ColumnIndex(colName)
-		if err != nil {
-			continue
-		}
-		if !shared {
-			shared = true
-			dt.AddRows(dt2.Rows)
-		}
-		for iRow := 0; iRow < dt2.Rows; iRow++ {
-			dt.CopyCell(colName, iRow+strow, dt2, colName, iRow)
-		}
-	}
+	dt.Columns.AppendRows(dt2.Columns)
 }
 
-// SetMetaData sets given meta-data key to given value, safely creating the
-// map if not yet initialized.  Standard Keys are:
-// * name -- name of table
-// * desc -- description of table
-// * read-only  -- makes gui read-only (inactive edits) for tensorcore.Table
-// * ColumnName:* -- prefix for all column-specific meta-data
-//   - desc -- description of column
-func (dt *Table) SetMetaData(key, val string) {
-	if dt.MetaData == nil {
-		dt.MetaData = make(map[string]string)
-	}
-	dt.MetaData[key] = val
-}
-
-// CopyMetaDataFrom copies meta data from other table
-func (dt *Table) CopyMetaDataFrom(cp *Table) {
-	nm := len(cp.MetaData)
-	if nm == 0 {
-		return
-	}
-	if dt.MetaData == nil {
-		dt.MetaData = make(map[string]string, nm)
-	}
-	for k, v := range cp.MetaData {
-		dt.MetaData[k] = v
-	}
-}
-
-// Named arg values for Contains, IgnoreCase
-const (
-	// Contains means the string only needs to contain the target string (see Equals)
-	Contains bool = true
-	// Equals means the string must equal the target string (see Contains)
-	Equals = false
-	// IgnoreCase means that differences in case are ignored in comparing strings
-	IgnoreCase = true
-	// UseCase means that case matters when comparing strings
-	UseCase = false
-)
-
-// RowsByStringIndex returns the list of rows that have given
-// string value in given column index.
-// if contains, only checks if row contains string; if ignoreCase, ignores case.
-// Use named args for greater clarity.
-func (dt *Table) RowsByStringIndex(column int, str string, contains, ignoreCase bool) []int {
-	col := dt.Columns[column]
-	lowstr := strings.ToLower(str)
-	var idxs []int
-	for i := 0; i < dt.Rows; i++ {
-		val := col.String1D(i)
-		has := false
-		switch {
-		case contains && ignoreCase:
-			has = strings.Contains(strings.ToLower(val), lowstr)
-		case contains:
-			has = strings.Contains(val, str)
-		case ignoreCase:
-			has = strings.EqualFold(val, str)
-		default:
-			has = (val == str)
-		}
-		if has {
-			idxs = append(idxs, i)
-		}
-	}
-	return idxs
-}
-
-// RowsByString returns the list of rows that have given
-// string value in given column name.  returns nil & error if name invalid.
-// if contains, only checks if row contains string; if ignoreCase, ignores case.
-// Use named args for greater clarity.
-func (dt *Table) RowsByString(column string, str string, contains, ignoreCase bool) ([]int, error) {
-	ci, err := dt.ColumnIndex(column)
-	if err != nil {
-		return nil, err
-	}
-	return dt.RowsByStringIndex(ci, str, contains, ignoreCase), nil
-}
-
-//////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 //  Cell convenience access methods
 
 // FloatIndex returns the float64 value of cell at given column, row index
@@ -435,7 +334,7 @@ func (dt *Table) FloatIndex(column, row int) float64 {
 	if dt.IsValidRow(row) != nil {
 		return math.NaN()
 	}
-	ct := dt.Columns[column]
+	ct := dt.Columns.List.List[column]
 	if ct.NumDims() != 1 {
 		return math.NaN()
 	}
@@ -450,14 +349,14 @@ func (dt *Table) Float(column string, row int) float64 {
 	if dt.IsValidRow(row) != nil {
 		return math.NaN()
 	}
-	ct, err := dt.ColumnByName(column)
-	if err != nil {
+	ct := dt.Column(column)
+	if ct == nil {
 		return math.NaN()
 	}
-	if ct.NumDims() != 1 {
+	if ct.Tensor.NumDims() != 1 {
 		return math.NaN()
 	}
-	return ct.Float1D(row)
+	return ct.Tensor.Float1D(row)
 }
 
 // StringIndex returns the string value of cell at given column, row index
@@ -467,7 +366,7 @@ func (dt *Table) StringIndex(column, row int) string {
 	if dt.IsValidRow(row) != nil {
 		return ""
 	}
-	ct := dt.Columns[column]
+	ct := dt.Columns.List.List[column]
 	if ct.NumDims() != 1 {
 		return ""
 	}
@@ -483,14 +382,14 @@ func (dt *Table) StringValue(column string, row int) string {
 	if dt.IsValidRow(row) != nil {
 		return ""
 	}
-	ct, err := dt.ColumnByName(column)
-	if err != nil {
+	ct := dt.Column(column)
+	if ct == nil {
 		return ""
 	}
-	if ct.NumDims() != 1 {
+	if ct.Tensor.NumDims() != 1 {
 		return ""
 	}
-	return ct.String1D(row)
+	return ct.Tensor.String1D(row)
 }
 
 // TensorIndex returns the tensor SubSpace for given column, row index
@@ -502,7 +401,7 @@ func (dt *Table) TensorIndex(column, row int) tensor.Tensor {
 	if dt.IsValidRow(row) != nil {
 		return nil
 	}
-	ct := dt.Columns[column]
+	ct := dt.Columns.List.List[column]
 	if ct.NumDims() == 1 {
 		return nil
 	}
@@ -517,11 +416,11 @@ func (dt *Table) Tensor(column string, row int) tensor.Tensor {
 	if dt.IsValidRow(row) != nil {
 		return nil
 	}
-	ct, err := dt.ColumnByName(column)
-	if err != nil {
+	ct := dt.Column(column)
+	if ct == nil {
 		return nil
 	}
-	if ct.NumDims() == 1 {
+	if ct.Tensor.NumDims() == 1 {
 		return nil
 	}
 	return ct.SubSpace(row)
@@ -536,11 +435,11 @@ func (dt *Table) TensorFloat1D(column string, row int, idx int) float64 {
 	if dt.IsValidRow(row) != nil {
 		return math.NaN()
 	}
-	ct, err := dt.ColumnByName(column)
-	if err != nil {
+	ct := dt.Column(column)
+	if ct == nil {
 		return math.NaN()
 	}
-	if ct.NumDims() == 1 {
+	if ct.Tensor.NumDims() == 1 {
 		return math.NaN()
 	}
 	_, sz := ct.RowCellSize()
@@ -548,7 +447,7 @@ func (dt *Table) TensorFloat1D(column string, row int, idx int) float64 {
 		return math.NaN()
 	}
 	off := row*sz + idx
-	return ct.Float1D(off)
+	return ct.Tensor.Float1D(off)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -560,7 +459,7 @@ func (dt *Table) SetFloatIndex(column, row int, val float64) error {
 	if err := dt.IsValidRow(row); err != nil {
 		return err
 	}
-	ct := dt.Columns[column]
+	ct := dt.Columns.List.List[column]
 	if ct.NumDims() != 1 {
 		return fmt.Errorf("table.Table SetFloatIndex: Column %d is a tensor, must use SetTensorFloat1D", column)
 	}
@@ -574,14 +473,14 @@ func (dt *Table) SetFloat(column string, row int, val float64) error {
 	if err := dt.IsValidRow(row); err != nil {
 		return err
 	}
-	ct, err := dt.ColumnByName(column)
+	ct, err := dt.ColumnTry(column)
 	if err != nil {
 		return err
 	}
-	if ct.NumDims() != 1 {
+	if ct.Tensor.NumDims() != 1 {
 		return fmt.Errorf("table.Table SetFloat: Column %s is a tensor, must use SetTensorFloat1D", column)
 	}
-	ct.SetFloat1D(val, row)
+	ct.Tensor.SetFloat1D(val, row)
 	return nil
 }
 
@@ -591,7 +490,7 @@ func (dt *Table) SetStringIndex(column, row int, val string) error {
 	if err := dt.IsValidRow(row); err != nil {
 		return err
 	}
-	ct := dt.Columns[column]
+	ct := dt.Columns.List.List[column]
 	if ct.NumDims() != 1 {
 		return fmt.Errorf("table.Table SetStringIndex: Column %d is a tensor, must use SetTensorFloat1D", column)
 	}
@@ -605,14 +504,14 @@ func (dt *Table) SetString(column string, row int, val string) error {
 	if err := dt.IsValidRow(row); err != nil {
 		return err
 	}
-	ct, err := dt.ColumnByName(column)
+	ct, err := dt.ColumnTry(column)
 	if err != nil {
 		return err
 	}
-	if ct.NumDims() != 1 {
+	if ct.Tensor.NumDims() != 1 {
 		return fmt.Errorf("table.Table SetString: Column %s is a tensor, must use SetTensorFloat1D", column)
 	}
-	ct.SetString1D(val, row)
+	ct.Tensor.SetString1D(val, row)
 	return nil
 }
 
@@ -622,7 +521,7 @@ func (dt *Table) SetTensorIndex(column, row int, val tensor.Tensor) error {
 	if err := dt.IsValidRow(row); err != nil {
 		return err
 	}
-	ct := dt.Columns[column]
+	ct := dt.Columns.List.List[column]
 	_, csz := ct.RowCellSize()
 	st := row * csz
 	sz := min(csz, val.Len())
@@ -644,8 +543,8 @@ func (dt *Table) SetTensor(column string, row int, val tensor.Tensor) error {
 	if err := dt.IsValidRow(row); err != nil {
 		return err
 	}
-	ci, err := dt.ColumnIndex(column)
-	if err != nil {
+	ci := dt.Columns.IndexByKey(column)
+	if ci == nil {
 		return err
 	}
 	return dt.SetTensorIndex(ci, row, val)
@@ -658,7 +557,7 @@ func (dt *Table) SetTensorFloat1D(column string, row int, idx int, val float64) 
 	if err := dt.IsValidRow(row); err != nil {
 		return err
 	}
-	ct, err := dt.ColumnByName(column)
+	ct, err := dt.ColumnTry(column)
 	if err != nil {
 		return err
 	}
@@ -667,7 +566,7 @@ func (dt *Table) SetTensorFloat1D(column string, row int, idx int, val float64) 
 		return fmt.Errorf("table.Table IsValidRow: index %d is out of valid range [0..%d]", idx, sz)
 	}
 	off := row*sz + idx
-	ct.SetFloat1D(val, off)
+	ct.Tensor.SetFloat1D(val, off)
 	return nil
 }
 
@@ -678,21 +577,21 @@ func (dt *Table) SetTensorFloat1D(column string, row int, idx int, val float64) 
 // It is robust to differences in type; uses destination cell type.
 // Returns error if column names are invalid.
 func (dt *Table) CopyCell(column string, row int, cpt *Table, cpColNm string, cpRow int) error {
-	ct, err := dt.ColumnByName(column)
+	ct, err := dt.ColumnTry(column)
 	if err != nil {
 		return err
 	}
-	cpct, err := cpt.ColumnByName(cpColNm)
+	cpct, err := cpt.ColumnTry(cpColNm)
 	if err != nil {
 		return err
 	}
 	_, sz := ct.RowCellSize()
 	if sz == 1 {
-		if ct.IsString() {
+		if ct.Tensor.IsString() {
 			ct.SetString1D(cpct.String1D(cpRow), row)
 			return nil
 		}
-		ct.SetFloat1D(cpct.Float1D(cpRow), row)
+		ct.Tensor.SetFloat1D(cpct.Float1D(cpRow), row)
 		return nil
 	}
 	_, cpsz := cpct.RowCellSize()

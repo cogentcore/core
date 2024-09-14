@@ -91,7 +91,7 @@ func TestMatrix(t *testing.T) {
 	err := dt.OpenCSV("../cluster/testdata/faces.dat", tensor.Tab)
 	assert.NoError(t, err)
 	// smat.TableColumn(ix, "Input", "Name", false, metric.Euclidean64)
-	in := tensor.NewIndexed(errors.Log1(dt.ColumnByName("Input")))
+	in := tensor.NewIndexed(errors.Log1(dt.Column("Input")))
 	out := tensor.NewFloat64Indexed()
 	Matrix(Euclidean.FuncName(), in, out)
 	// fmt.Println(out.Tensor)
@@ -111,7 +111,7 @@ func TestPCAIris(t *testing.T) {
 	}
 	// pc.TableColumn(ix, "data", metric.Covariance64)
 	// fmt.Printf("covar: %v\n", pc.Covar)
-	data := tensor.NewIndexed(errors.Log1(dt.ColumnByName("data")))
+	data := tensor.NewIndexed(errors.Log1(dt.Column("data")))
 	covar := tensor.NewFloat64Indexed()
 	CovarMatrix(Correlation.FuncName(), data, covar)
 	// fmt.Printf("correl: %s\n", covar.Tensor.String())

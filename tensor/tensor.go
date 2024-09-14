@@ -10,9 +10,17 @@ import (
 	"fmt"
 	"reflect"
 
+	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/base/metadata"
 	"gonum.org/v1/gonum/mat"
 )
+
+// DataTypes are the primary tensor data types with specific support.
+// Any numerical type can also be used.  bool is represented using an
+// efficient bit slice.
+type DataTypes interface {
+	string | bool | float32 | float64 | int | int32 | byte
+}
 
 // todo: add a conversion function to copy data from Column-Major to a tensor:
 // It is also possible to use Column-Major order, which is used in R, Julia, and MATLAB
@@ -155,6 +163,11 @@ type Tensor interface {
 	// otherwise it goes through the appropriate standard type (Float or String).
 	CopyFrom(from Tensor)
 
+	// AppendFrom appends all values from other tensor into this tensor, with an
+	// optimized implementation if the other tensor is of the same type, and
+	// otherwise it goes through the appropriate standard type (Float or String).
+	AppendFrom(from Tensor) error
+
 	// SetShapeFrom sets our shape from given source tensor, calling
 	// [Tensor.SetShape] with the shape params from source.
 	SetShapeFrom(from Tensor)
@@ -176,7 +189,7 @@ type Tensor interface {
 
 // New returns a new n-dimensional tensor of given value type
 // with the given sizes per dimension (shape).
-func New[T string | bool | float32 | float64 | int | int32 | byte](sizes ...int) Tensor {
+func New[T DataTypes](sizes ...int) Tensor {
 	var v T
 	switch any(v).(type) {
 	case string:
@@ -246,3 +259,6 @@ func CopyDense(to Tensor, dm *mat.Dense) {
 		}
 	}
 }
+
+// List is an ordered list of Tensors with name lookup.
+type List = keylist.List[string, Tensor]

@@ -27,7 +27,7 @@ func TestKeyList(t *testing.T) {
 	assert.Equal(t, 2, om.List[1])
 	assert.Equal(t, 1, om.IndexByKey("key2"))
 
-	om.InsertAtIndex(0, "new0", 3)
+	om.Insert(0, "new0", 3)
 	assert.Equal(t, 3, om.List[0])
 	assert.Equal(t, 0, om.List[1])
 	assert.Equal(t, 2, om.IndexByKey("key2"))

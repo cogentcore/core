@@ -14,7 +14,7 @@ The `Vectorize` function and its variants provide a universal "apply function to
 
 All tensor package functions are registered using a single name to function map (`Funcs`).
 
-* [table](table) organizes multiple Tensors as columns in a data `Table`, aligned by a common outer row dimension.  Because the columns are tensors, each cell (value associated with a given row) can also be n-dimensional, allowing efficient representation of patterns and other high-dimensional data.  Furthermore, the entire column is organized as a single contiguous slice of data, so it can be efficiently processed.  The `table` package also has an `Indexed` that provides a shared index for the column tensors.
+* [table](table) organizes multiple Tensors as columns in a data `Table`, aligned by a common outer row dimension.  Because the columns are tensors, each cell (value associated with a given row) can also be n-dimensional, allowing efficient representation of patterns and other high-dimensional data.  Furthermore, the entire column is organized as a single contiguous slice of data, so it can be efficiently processed.  A `Table` automatically supplies a shared list of row Indexes for its `Indexed` columns, efficiently allowing all the heterogeneous data columns to be sorted and filtered together.
 
     Data that is encoded as a slice of `struct`s can be bidirectionally converted to / from a Table, which then provides more powerful sorting, filtering and other functionality, including [plot/plotcore](../plot/plotcore).
 
@@ -34,6 +34,19 @@ All tensor package functions are registered using a single name to function map 
     - TODO: now in metric: [simat](simat) provides similarity / distance matrix computation methods operating on `etensor.Tensor` or `etable.Table` data.  The `SimMat` type holds the resulting matrix and labels for the rows and columns, which has a special `SimMatGrid` view in `etview` for visualizing labeled similarity matricies.
     - TODO: where? [pca](pca) provides principal-components-analysis (PCA) and covariance matrix computation functions.
     - TODO: in metric? [clust](clust) provides standard agglomerative hierarchical clustering including ability to plot results in an eplot.
+
+# Standard shapes
+
+There are various standard shapes of tensor data that different functions expect:
+
+* **Flat, 1D**: this is the simplest data shape.  For example, the [stats](stats) functions report summary statistics for all values of such data, across the one row-wise dimension.  `Indexed` views of this 1D data provide fine-grained filtering and sorting of all the data (indexes are only available for the outermost row dimension).
+
+* **Row, Cell 2D**: The outermost row dimension can be sorted, filtered in an `Indexed` view, and the inner "cells" of data are organized in a simple flat 1D `SubSpace`, so they can be easily processed.  In most packages including [tmath](tmath) and [stats](stats), 2+ dimensional data will be automatically re-shaped into this Row, Cell format, and processed as row-wise list of cell-wise patterns.  For example, `stats` will aggregate each cell separately across rows, so you end up with the "average pattern" when you do `stats.Mean` for example.
+
+    A higher-dimensional tensor can also be re-shaped into this row, cell format by collapsing any number of additional outer dimensions into a longer, effective "row" index, with the remaining inner dimensions forming the cell-wise patterns.  You can decide where to make the cut, and the `RowCellSplit` function makes it easy to create a new view of an existing tensor with this split made at a given dimension.
+
+* **Matrix 2D**: For matrix algebra functions, a 2D tensor is treated as a standard row-major 2D matrix, which can be processed using `gonum` based matrix and vector operations.
+
 
 
 # History

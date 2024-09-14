@@ -124,23 +124,23 @@ func (glm *GLM) init(nIv, nDv int) {
 // predVars and errVars (predicted values and error values) are optional.
 func (glm *GLM) SetTable(ix *table.Indexed, indepVars, depVars, predVars, errVars string) error {
 	dt := ix.Table
-	iv, err := dt.ColumnByName(indepVars)
+	iv, err := dt.Column(indepVars)
 	if err != nil {
 		return err
 	}
-	dv, err := dt.ColumnByName(depVars)
+	dv, err := dt.Column(depVars)
 	if err != nil {
 		return err
 	}
 	var pv, ev tensor.Tensor
 	if predVars != "" {
-		pv, err = dt.ColumnByName(predVars)
+		pv, err = dt.Column(predVars)
 		if err != nil {
 			return err
 		}
 	}
 	if errVars != "" {
-		ev, err = dt.ColumnByName(errVars)
+		ev, err = dt.Column(errVars)
 		if err != nil {
 			return err
 		}

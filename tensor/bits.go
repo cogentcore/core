@@ -249,6 +249,30 @@ func (tsr *Bits) CopyFrom(frm Tensor) {
 	}
 }
 
+// AppendFrom appends values from other tensor into this tensor,
+// which must have the same cell size as this tensor.
+// It uses and optimized implementation if the other tensor
+// is of the same type, and otherwise it goes through
+// appropriate standard type.
+func (tsr *Bits) AppendFrom(frm Tensor) error {
+	rows, cell := tsr.RowCellSize()
+	frows, fcell := frm.RowCellSize()
+	if cell != fcell {
+		return fmt.Errorf("tensor.AppendFrom: cell sizes do not match: %d != %d", cell, fcell)
+	}
+	tsr.SetNumRows(rows + frows)
+	st := rows * cell
+	fsz := frows * fcell
+	if fsm, ok := frm.(*Bits); ok {
+		copy(tsr.Values[st:st+fsz], fsm.Values)
+		return nil
+	}
+	for i := 0; i < fsz; i++ {
+		tsr.Values.Set(Float64ToBool(frm.Float1D(i)), st+i)
+	}
+	return nil
+}
+
 // SetShapeFrom copies just the shape from given source tensor
 // calling SetShape with the shape params from source (see for more docs).
 func (tsr *Bits) SetShapeFrom(frm Tensor) {

@@ -12,9 +12,11 @@ As a general convention, it is safest, clearest, and quite fast to access column
 
 The table itself stores raw data `tensor.Tensor` values, and the `Column` (by index) and `ColumnByName` methods return a `tensor.Indexed` with the `Indexes` pointing to the shared table-wide `Indexes` (which can be `nil` if standard sequential order is being used).  It is best to use the table-wise `Sort` and `Filter` methods (and any others that affect the indexes) to ensure the indexes are properly coordinated.  Resetting the column tensor indexes to `nil` (via the `Sequential` method) will break any connection to the table indexes, so that any subsequent index-altering operations on that indexed tensor will be fine.
 
+It is very low-cost to create a new View of a 
+
 # Cheat Sheet
 
-`dt` is the etable pointer variable for examples below:
+`dt` is the Table pointer variable for examples below:
 
 ## Table Access
 
@@ -86,7 +88,7 @@ SortedTable := ix.NewTable() // turn an Indexed back into a new Table organized 
 or:
 
 ```Go
-nmcl := dt.ColumnByName("Name") // nmcl is an etensor of the Name column, cached
+nmcl := dt.Column("Name") // nmcl is an etensor of the Name column, cached
 ix.Sort(func(t *Table, i, j int) bool {
 	return nmcl.StringValue1D(i) < nmcl.StringValue1D(j)
 })
@@ -95,7 +97,7 @@ ix.Sort(func(t *Table, i, j int) bool {
 ### Filter
 
 ```Go
-nmcl := dt.ColumnByName("Name") // column we're filtering on
+nmcl := dt.Column("Name") // column we're filtering on
 ix.Filter(func(t *Table, row int) bool {
 	// filter return value is for what to *keep* (=true), not exclude
 	// here we keep any row with a name that contains the string "in"

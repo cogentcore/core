@@ -20,6 +20,8 @@ import (
 	"slices"
 )
 
+// TODO: probably want to consolidate ordmap and keylist
+
 // List implements an ordered list (slice) of items,
 // with a map from a key (e.g., names) to indexes,
 // to support fast lookup by name.
@@ -89,11 +91,11 @@ func (kl *List[K, V]) AddReplace(key K, val V) {
 	kl.List = append(kl.List, val)
 }
 
-// InsertAtIndex inserts the given value with the given key at the given index.
+// Insert inserts the given value with the given key at the given index.
 // This is relatively slow because it needs regenerate the keys list.
 // It returns an error if the key already exists because
 // the behavior is undefined in that situation.
-func (kl *List[K, V]) InsertAtIndex(idx int, key K, val V) error {
+func (kl *List[K, V]) Insert(idx int, key K, val V) error {
 	if _, has := kl.indexes[key]; has {
 		return fmt.Errorf("keylist.Add: key %v is already on the list", key)
 	}
