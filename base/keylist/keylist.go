@@ -6,12 +6,10 @@
 package keylist implements an ordered list (slice) of items,
 with a map from a key (e.g., names) to indexes,
 to support fast lookup by name.
-Compared to the [ordmap] package, this is not as efficient
-for operations such as deletion and insertion, but it
-has the advantage of providing a simple slice of the target
-items that can be used directly in many cases.
-Thus, it is more suitable for largely static lists, which
-are constructed by adding items to the end of the list.
+This is a different implementation of the [ordmap] package,
+that has separate slices for Values and Keys, instead of
+using a tuple list of both. The awkwardness of value access
+through the tuple is the major problem with ordmap.
 */
 package keylist
 
@@ -22,12 +20,14 @@ import (
 
 // TODO: probably want to consolidate ordmap and keylist
 
-// List implements an ordered list (slice) of items,
+// List implements an ordered list (slice) of Values,
 // with a map from a key (e.g., names) to indexes,
 // to support fast lookup by name.
 type List[K comparable, V any] struct { //types:add
 	// List is the ordered slice of items.
-	List []V
+	Values []V
+
+	Keys []K
 
 	// indexes is the key-to-index mapping.
 	indexes map[K]int
@@ -53,17 +53,9 @@ func (kl *List[K, V]) initIndexes() {
 
 // Reset resets the list, removing any existing elements.
 func (kl *List[K, V]) Reset() {
-	kl.List = nil
+	kl.Values = nil
+	kl.Keys = nil
 	kl.newIndexes()
-}
-
-// Keys returns the list of keys in List sequential order.
-func (kl *List[K, V]) Keys() []K {
-	keys := make([]K, len(kl.indexes))
-	for k, i := range kl.indexes {
-		keys[i] = k
-	}
-	return keys
 }
 
 // Add adds an item to the list with given key.
@@ -74,8 +66,9 @@ func (kl *List[K, V]) Add(key K, val V) error {
 	if _, ok := kl.indexes[key]; ok {
 		return fmt.Errorf("keylist.Add: key %v is already on the list", key)
 	}
-	kl.indexes[key] = len(kl.List)
-	kl.List = append(kl.List, val)
+	kl.indexes[key] = len(kl.Values)
+	kl.Values = append(kl.Values, val)
+	kl.Keys = append(kl.Keys, key)
 	return nil
 }
 
@@ -84,11 +77,13 @@ func (kl *List[K, V]) Add(key K, val V) error {
 func (kl *List[K, V]) AddReplace(key K, val V) {
 	kl.initIndexes()
 	if idx, ok := kl.indexes[key]; ok {
-		kl.List[idx] = val
+		kl.Values[idx] = val
+		kl.Keys[idx] = key
 		return
 	}
-	kl.indexes[key] = len(kl.List)
-	kl.List = append(kl.List, val)
+	kl.indexes[key] = len(kl.Values)
+	kl.Values = append(kl.Values, val)
+	kl.Keys = append(kl.Keys, key)
 }
 
 // Insert inserts the given value with the given key at the given index.
@@ -100,11 +95,10 @@ func (kl *List[K, V]) Insert(idx int, key K, val V) error {
 		return fmt.Errorf("keylist.Add: key %v is already on the list", key)
 	}
 
-	keys := kl.Keys()
-	keys = slices.Insert(keys, idx, key)
-	kl.List = slices.Insert(kl.List, idx, val)
+	kl.Keys = slices.Insert(kl.Keys, idx, key)
+	kl.Values = slices.Insert(kl.Values, idx, val)
 	kl.newIndexes()
-	for i, k := range keys {
+	for i, k := range kl.Keys {
 		kl.indexes[k] = i
 	}
 	return nil
@@ -116,7 +110,7 @@ func (kl *List[K, V]) Insert(idx int, key K, val V) error {
 func (kl *List[K, V]) ValueByKey(key K) V {
 	idx, ok := kl.indexes[key]
 	if ok {
-		return kl.List[idx]
+		return kl.Values[idx]
 	}
 	var zv V
 	return zv
@@ -128,16 +122,16 @@ func (kl *List[K, V]) ValueByKey(key K) V {
 func (kl *List[K, V]) ValueByKeyTry(key K) (V, bool) {
 	idx, ok := kl.indexes[key]
 	if ok {
-		return kl.List[idx], true
+		return kl.Values[idx], true
 	}
 	var zv V
 	return zv, false
 }
 
-// IndexIsValid returns an error if the given index is invalid
+// IndexIsValid returns an error if the given index is invalid.
 func (kl *List[K, V]) IndexIsValid(idx int) error {
-	if idx >= len(kl.List) || idx < 0 {
-		return fmt.Errorf("keylist.List: IndexIsValid: index %d is out of range of a list of length %d", idx, len(kl.List))
+	if idx >= len(kl.Values) || idx < 0 {
+		return fmt.Errorf("keylist.List: IndexIsValid: index %d is out of range of a list of length %d", idx, len(kl.Values))
 	}
 	return nil
 }
@@ -156,7 +150,7 @@ func (kl *List[K, V]) Len() int {
 	if kl == nil {
 		return 0
 	}
-	return len(kl.List)
+	return len(kl.Values)
 }
 
 // DeleteIndex deletes item(s) within the index range [i:j].
@@ -167,11 +161,10 @@ func (kl *List[K, V]) DeleteIndex(i, j int) {
 	if ndel <= 0 {
 		panic("index range is <= 0")
 	}
-	keys := kl.Keys()
-	keys = slices.Delete(keys, i, j)
-	kl.List = slices.Delete(kl.List, i, j)
+	kl.Keys = slices.Delete(kl.Keys, i, j)
+	kl.Values = slices.Delete(kl.Values, i, j)
 	kl.newIndexes()
-	for i, k := range keys {
+	for i, k := range kl.Keys {
 		kl.indexes[k] = i
 	}
 
@@ -195,18 +188,16 @@ func (kl *List[K, V]) DeleteKey(key K) bool {
 // list unless they also exist in the given list, in which case
 // they are overwritten.  Use [Reset] first to get an exact copy.
 func (kl *List[K, V]) Copy(from *List[K, V]) {
-	keys := from.Keys()
-	for i, v := range from.List {
-		kl.AddReplace(keys[i], v)
+	for i, v := range from.Values {
+		kl.AddReplace(kl.Keys[i], v)
 	}
 }
 
 // String returns a string representation of the list.
 func (kl *List[K, V]) String() string {
 	sv := "{"
-	keys := kl.Keys()
-	for i, v := range kl.List {
-		sv += fmt.Sprintf("%v", keys[i]) + ": " + fmt.Sprintf("%v", v) + ", "
+	for i, v := range kl.Values {
+		sv += fmt.Sprintf("%v", kl.Keys[i]) + ": " + fmt.Sprintf("%v", v) + ", "
 	}
 	sv += "}"
 	return sv

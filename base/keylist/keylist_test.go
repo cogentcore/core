@@ -11,29 +11,29 @@ import (
 )
 
 func TestKeyList(t *testing.T) {
-	om := New[string, int]()
-	om.Add("key0", 0)
-	om.Add("key1", 1)
-	om.Add("key2", 2)
+	kl := New[string, int]()
+	kl.Add("key0", 0)
+	kl.Add("key1", 1)
+	kl.Add("key2", 2)
 
-	assert.Equal(t, 1, om.ValueByKey("key1"))
-	assert.Equal(t, 2, om.IndexByKey("key2"))
+	assert.Equal(t, 1, kl.ValueByKey("key1"))
+	assert.Equal(t, 2, kl.IndexByKey("key2"))
 
-	assert.Equal(t, 1, om.List[1])
+	assert.Equal(t, 1, kl.Values[1])
 
-	assert.Equal(t, 3, om.Len())
+	assert.Equal(t, 3, kl.Len())
 
-	om.DeleteIndex(1, 2)
-	assert.Equal(t, 2, om.List[1])
-	assert.Equal(t, 1, om.IndexByKey("key2"))
+	kl.DeleteIndex(1, 2)
+	assert.Equal(t, 2, kl.Values[1])
+	assert.Equal(t, 1, kl.IndexByKey("key2"))
 
-	om.Insert(0, "new0", 3)
-	assert.Equal(t, 3, om.List[0])
-	assert.Equal(t, 0, om.List[1])
-	assert.Equal(t, 2, om.IndexByKey("key2"))
+	kl.Insert(0, "new0", 3)
+	assert.Equal(t, 3, kl.Values[0])
+	assert.Equal(t, 0, kl.Values[1])
+	assert.Equal(t, 2, kl.IndexByKey("key2"))
 
 	//	nm := Make([]KeyValue[string, int]{{"one", 1}, {"two", 2}, {"three", 3}})
-	// assert.Equal(t, 3, nm.List[2])
-	// assert.Equal(t, 2, nm.List[1])
+	// assert.Equal(t, 3, nm.Values[2])
+	// assert.Equal(t, 2, nm.Values[1])
 	// assert.Equal(t, 3, nm.ValueByKey("three"))
 }

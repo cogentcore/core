@@ -520,3 +520,15 @@ func (ix *Indexed) SubSpace(offs ...int) Tensor {
 func (ix *Indexed) Cells1D(row int) *Indexed {
 	return NewIndexed(New1DViewOf(ix.SubSpace(row)))
 }
+
+// RowTensor is a convenience version of [Indexed.SubSpace] to return the
+// SubSpace for the outermost row dimension, indirected through the indexes.
+func (ix *Indexed) RowTensor(row int) Tensor {
+	return ix.Tensor.RowTensor(ix.Index(row))
+}
+
+// SetRowTensor sets the values of the SubSpace at given row to given values,
+// with row indirected through the indexes.
+func (ix *Indexed) SetRowTensor(val Tensor, row int) {
+	ix.Tensor.SetRowTensor(val, ix.Index(row))
+}

@@ -148,7 +148,7 @@ func (dt *Table) SortColumnIndexes(ascending, stable bool, colIndexes ...int) {
 	}
 	sf(func(dt *Table, i, j int) int {
 		for _, ci := range colIndexes {
-			cl := dt.Columns.List.List[ci]
+			cl := dt.Columns.Values[ci]
 			if cl.IsString() {
 				if ascending {
 					if cl.String1D(i) < cl.String1D(j) {
@@ -279,8 +279,8 @@ func (dt *Table) NewTable() *Table {
 	if rows == 0 {
 		return nt
 	}
-	for ci, cl := range nt.Columns.List.List {
-		scl := dt.Columns.List.List[ci]
+	for ci, cl := range nt.Columns.Values {
+		scl := dt.Columns.Values[ci]
 		_, csz := cl.RowCellSize()
 		for i, srw := range dt.Indexes {
 			cl.CopyCellsFrom(scl, i*csz, srw*csz, csz)

@@ -17,14 +17,14 @@ import (
 )
 
 // Table is a table of Tensor columns aligned by a common outermost row dimension.
-// Use the Column (by name) and ColumnIndex methods to obtain a `tensor.Indexed` view of
-// the column, using the shared Indexes of the Table. Thus, a coordinated
-// sorting and filtered view of the column data is automatically available for
-// any of the tensor package functions that use `tensor.Indexed` as the one
+// Use the [Table.Column] (by name) and [Table.ColumnIndex] methods to obtain a 
+// [tensor.Indexed] view of the column, using the shared [Table.Indexes] of the Table.
+// Thus, a coordinated sorting and filtered view of the column data is automatically 
+// available for any of the tensor package functions that use [tensor.Indexed] as the one
 // common data representation for all operations.
 type Table struct { //types:add
 	// Columns has the list of column tensor data for this table.
-	// Different tables can have
+	// Different tables can provide different indexed views onto the same Columns.
 	Columns *Columns
 
 	// Indexes are the indexes into Tensor rows, with nil = sequential.
@@ -42,8 +42,8 @@ type Table struct { //types:add
 	Meta metadata.Data
 }
 
-// NewTable returnes a new Table with its own (empty) set of Columns.
-// Can pass an optional name.
+// NewTable returns a new Table with its own (empty) set of Columns.
+// Can pass an optional name which sets metadata.
 func NewTable(name ...string) *Table {
 	dt := &Table{}
 	dt.Columns = NewColumns()
@@ -62,7 +62,7 @@ func NewTableView(src *Table) *Table {
 	return dt
 }
 
-// IsValidRow returns error if the row is invalid
+// IsValidRow returns error if the row is invalid, if error checking is needed.
 func (dt *Table) IsValidRow(row int) error {
 	if row < 0 || row >= dt.Rows() {
 		return fmt.Errorf("table.Table IsValidRow: row %d is out of valid range [0..%d]", row, dt.Rows())
@@ -77,7 +77,7 @@ func (dt *Table) NumRows() int { return dt.Columns.Rows }
 func (dt *Table) NumColumns() int { return dt.Columns.Len() }
 
 // Column returns the tensor with given column name, as a [tensor.Indexed]
-// with the shared [Indexes] from this table. It is best practice to
+// with the shared [Table.Indexes] from this table. It is best practice to
 // access columns by name, and direct access through Columns does not
 // provide the shared table-wide Indexes.
 // Returns nil if not found.
@@ -89,7 +89,7 @@ func (dt *Table) Column(name string) *tensor.Indexed {
 	return tensor.NewIndexed(cl, dt.Indexes)
 }
 
-// ColumnTry is a version of [Column] that also returns an error
+// ColumnTry is a version of [Table.Column] that also returns an error
 // if the column name is not found, for cases when error is needed.
 func (dt *Table) ColumnTry(name string) (*tensor.Indexed, error) {
 	cl := dt.Column(name)
@@ -100,12 +100,12 @@ func (dt *Table) ColumnTry(name string) (*tensor.Indexed, error) {
 }
 
 // ColumnIndex returns the tensor at the given index, as a [tensor.Indexed]
-// with the shared [Indexes] from this table. It is best practice to
-// access columns by name using [Column] method instead.
+// with the shared [Table.Indexes] from this table. It is best practice to
+// access columns by name using [Table.Column] method instead.
 // Direct access through Columns does not provide the shared table-wide Indexes.
 // Returns nil if not found.
 func (dt *Table) ColumnIndex(idx int) *tensor.Indexed {
-	cl := dt.Columns.List.List[idx]
+	cl := dt.Columns.Values[idx]
 	return tensor.NewIndexed(cl, dt.Indexes)
 }
 
@@ -132,12 +132,12 @@ func (dt *Table) ColumnIndexesByNames(names ...string) ([]int, error) {
 
 // ColumnName returns the name of given column
 func (dt *Table) ColumnName(i int) string {
-	return dt.ColumnNames[i]
+	return dt.Columns.Keys[i]
 }
 
 // AddColumn adds a new column to the table, of given type and column name
 // (which must be unique).  The cells of this column hold a single scalar value:
-// see AddColumnTensor for n-dimensional cells.
+// see [Table.AddColumnTensor] for n-dimensional cells.
 func AddColumn[T tensor.DataTypes](dt *Table, name string) tensor.Tensor {
 	rows := max(1, dt.Columns.Rows)
 	tsr := tensor.New[T](rows)
@@ -275,40 +275,47 @@ func (dt *Table) DeleteAll() {
 }
 
 // AddRows adds n rows to end of underlying Table, and to the indexes in this view
-func (dt *Table) AddRows(n int) { //types:add
-	stidx := dt.Columns.Rows
-	dt.Columns.SetNumRows(stidx + n)
-	for i := stidx; i < stidx+n; i++ {
-		dt.Indexes = append(dt.Indexes, i)
-	}
+func (dt *Table) AddRows(n int) *Table { //types:add
+	dt.Columns.SetNumRows(dt.Columns.Rows + n)
+	return dt
 }
 
 // InsertRows adds n rows to end of underlying Table, and to the indexes starting at
-// given index in this view
-func (dt *Table) InsertRows(at, n int) {
-	stidx := dt.Columns.Rows
-	dt.Columns.SetNumRows(stidx + n)
-	if dt.Indexes != nil {
-		nw := make([]int, n, n+len(dt.Indexes)-at)
-		for i := 0; i < n; i++ {
-			nw[i] = stidx + i
-		}
-		dt.Indexes = append(dt.Indexes[:at], append(nw, dt.Indexes[at:]...)...)
-	}
+// given index in this view, providing an efficient insertion operation that only
+// exists in the indexed view.  To create an in-memory ordering, use [Table.NewTable].
+func (dt *Table) InsertRows(at, n int) *Table {
+	dt.IndexesNeeded()
+	strow := dt.Columns.Rows
+	stidx := len(dt.Indexes)
+	dt.Columns.SetNumRows(strow + n) // adds n indexes to end of list
+	// move those indexes to at:at+n in index list
+	dt.Indexes = append(dt.Indexes[:at], append(dt.Indexes[stidx:], dt.Indexes[at:]...)...)
 }
 
 // SetNumRows sets the number of rows in the table, across all columns
 // if rows = 0 then effective number of rows in tensors is 1, as this dim cannot be 0
 func (dt *Table) SetNumRows(rows int) *Table { //types:add
+	strow := dt.Columns.Rows
 	dt.Columns.SetNumRows(rows)
+	if dt.Indexes == nil {
+		return dt
+	}
+	if rows > strow {
+		for i := range rows - strow {
+			dt.Indexes = append(dt.Indexes, strow+i)
+		}
+	} else {
+		dt.DeleteInvalid()
+	}
 	return dt
 }
 
 // note: no really clean definition of CopyFrom -- no point of re-using existing
 // table -- just clone it.
 
-// Clone returns a complete copy of this table,
-// including cloning the underlying Columns tensors.
+// Clone returns a complete copy of this table, including cloning
+// the underlying Columns tensors, and the current [Table.Indexes].
+// See also [Table.NewTable] to flatten the current indexes.
 func (dt *Table) Clone() *Table {
 	cp := &Table{}
 	cp.Columns = dt.Columns.Clone()
@@ -321,7 +328,16 @@ func (dt *Table) Clone() *Table {
 
 // AppendRows appends shared columns in both tables with input table rows
 func (dt *Table) AppendRows(dt2 *Table) {
+	strow := dt.Columns.Rows
+	n := dt2.Columns.Rows
 	dt.Columns.AppendRows(dt2.Columns)
+	if dt.Indexes == nil {
+		return
+	}
+	if rows > strow {
+		for i := range rows - strow {
+			dt.Indexes = append(dt.Indexes, strow+i)
+		}
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -334,7 +350,7 @@ func (dt *Table) FloatIndex(column, row int) float64 {
 	if dt.IsValidRow(row) != nil {
 		return math.NaN()
 	}
-	ct := dt.Columns.List.List[column]
+	ct := dt.Columns.Values[column]
 	if ct.NumDims() != 1 {
 		return math.NaN()
 	}
@@ -366,7 +382,7 @@ func (dt *Table) StringIndex(column, row int) string {
 	if dt.IsValidRow(row) != nil {
 		return ""
 	}
-	ct := dt.Columns.List.List[column]
+	ct := dt.Columns.Values[column]
 	if ct.NumDims() != 1 {
 		return ""
 	}
@@ -401,7 +417,7 @@ func (dt *Table) TensorIndex(column, row int) tensor.Tensor {
 	if dt.IsValidRow(row) != nil {
 		return nil
 	}
-	ct := dt.Columns.List.List[column]
+	ct := dt.Columns.Values[column]
 	if ct.NumDims() == 1 {
 		return nil
 	}
@@ -459,7 +475,7 @@ func (dt *Table) SetFloatIndex(column, row int, val float64) error {
 	if err := dt.IsValidRow(row); err != nil {
 		return err
 	}
-	ct := dt.Columns.List.List[column]
+	ct := dt.Columns.Values[column]
 	if ct.NumDims() != 1 {
 		return fmt.Errorf("table.Table SetFloatIndex: Column %d is a tensor, must use SetTensorFloat1D", column)
 	}
@@ -490,7 +506,7 @@ func (dt *Table) SetStringIndex(column, row int, val string) error {
 	if err := dt.IsValidRow(row); err != nil {
 		return err
 	}
-	ct := dt.Columns.List.List[column]
+	ct := dt.Columns.Values[column]
 	if ct.NumDims() != 1 {
 		return fmt.Errorf("table.Table SetStringIndex: Column %d is a tensor, must use SetTensorFloat1D", column)
 	}
@@ -521,7 +537,7 @@ func (dt *Table) SetTensorIndex(column, row int, val tensor.Tensor) error {
 	if err := dt.IsValidRow(row); err != nil {
 		return err
 	}
-	ct := dt.Columns.List.List[column]
+	ct := dt.Columns.Values[column]
 	_, csz := ct.RowCellSize()
 	st := row * csz
 	sz := min(csz, val.Len())

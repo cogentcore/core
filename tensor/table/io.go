@@ -123,7 +123,7 @@ func (dt *Table) ReadCSVRow(rec []string, row int) {
 		ci++
 	}
 	nan := math.NaN()
-	for _, tsr := range dt.Columns.List.List {
+	for _, tsr := range dt.Columns.Values {
 		_, csz := tsr.RowCellSize()
 		stoff := row * csz
 		for cc := 0; cc < csz; cc++ {
@@ -387,7 +387,7 @@ func (dt *Table) WriteCSVRowWriter(cw *csv.Writer, row int, ncol int) error {
 		rec = make([]string, 0)
 	}
 	rc := 0
-	for _, tsr := range dt.Columns.List.List {
+	for _, tsr := range dt.Columns.Values {
 		nd := tsr.NumDims()
 		if nd == 1 {
 			vl := ""
@@ -429,9 +429,8 @@ func (dt *Table) WriteCSVRowWriter(cw *csv.Writer, row int, ncol int) error {
 // with full information about type and tensor cell dimensionality.
 func (dt *Table) TableHeaders() []string {
 	hdrs := []string{}
-	names := dt.Columns.Keys()
-	for i, nm := range names {
-		tsr := dt.Columns.List.List[i]
+	for i, nm := range dt.Columns.Keys {
+		tsr := dt.Columns.Values[i]
 		nm = string([]byte{TableHeaderChar(tsr.DataType())}) + nm
 		if tsr.NumDims() == 1 {
 			hdrs = append(hdrs, nm)

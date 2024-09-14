@@ -35,7 +35,9 @@ All tensor package functions are registered using a single name to function map 
     - TODO: where? [pca](pca) provides principal-components-analysis (PCA) and covariance matrix computation functions.
     - TODO: in metric? [clust](clust) provides standard agglomerative hierarchical clustering including ability to plot results in an eplot.
 
-# Standard shapes
+# Standard shapes and dimensional terminology
+
+In general, **1D** refers to a flat, 1-dimensional list, and **ND** is used by contrast to refer to the _2+_ dimensional case.
 
 There are various standard shapes of tensor data that different functions expect:
 

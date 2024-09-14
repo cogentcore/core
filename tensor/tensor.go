@@ -87,8 +87,6 @@ type Tensor interface {
 	// SetFloat sets the value of given n-dimensional index (matching Shape) as a float64.
 	SetFloat(val float64, i ...int)
 
-	// NOTE: String conflicts with [fmt.Stringer], so we have to use StringValue
-
 	// Float1D returns the value of given 1-dimensional index (0-Len()-1) as a float64.
 	Float1D(i int) float64
 
@@ -107,7 +105,10 @@ type Tensor interface {
 	// and use this interface extensively.
 	SetFloatRowCell(val float64, row, cell int)
 
+	/////////////////////  Strings
+
 	// StringValue returns the value of given n-dimensional index (matching Shape) as a string.
+	// 'String' conflicts with [fmt.Stringer], so we have to use StringValue here.
 	StringValue(i ...int) string
 
 	// SetString sets the value of given n-dimensional index (matching Shape) as a string.
@@ -138,6 +139,14 @@ type Tensor interface {
 	// extract arbitrary subspaces along ranges of each dimension.
 	SubSpace(offs ...int) Tensor
 
+	// RowTensor is a convenience version of [Tensor.SubSpace] to return the
+	// SubSpace for the outermost row dimension. [Indexed] defines a version
+	// of this that indirects through the row indexes.
+	RowTensor(row int) Tensor
+
+	// SetRowTensor sets the values of the [Tensor.SubSpace] at given row to given values.
+	SetRowTensor(val Tensor, row int)
+
 	// Range returns the min, max (and associated indexes, -1 = no values) for the tensor.
 	// This is needed for display and is thus in the core api in optimized form.
 	// See the [stats] package for many more statistics functions.
@@ -153,7 +162,7 @@ type Tensor interface {
 	Clone() Tensor
 
 	// View clones this tensor, *keeping the same underlying Values slice*,
-	// instead of making a copy like Clone() does. A major use of this
+	// instead of making a copy like [Tensor.Clone] does. A major use of this
 	// is to then change the shape of the view to provide a different way
 	// of accessing the same data.  See [New1DViewOf] for example.
 	View() Tensor

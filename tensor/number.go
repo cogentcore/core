@@ -315,12 +315,12 @@ func (tsr *Number[T]) SetShapeFrom(frm Tensor) {
 // of the same type, and otherwise it goes through appropriate standard type.
 func (tsr *Number[T]) CopyCellsFrom(frm Tensor, to, start, n int) {
 	if fsm, ok := frm.(*Number[T]); ok {
-		for i := 0; i < n; i++ {
+		for i := range n {
 			tsr.Values[to+i] = fsm.Values[start+i]
 		}
 		return
 	}
-	for i := 0; i < n; i++ {
+	for i := range n {
 		tsr.Values[to+i] = T(frm.Float1D(start + i))
 	}
 }
@@ -335,4 +335,19 @@ func (tsr *Number[T]) SubSpace(offs ...int) Tensor {
 	b := tsr.subSpaceImpl(offs...)
 	rt := &Number[T]{Base: *b}
 	return rt
+}
+
+// RowTensor is a convenience version of [Tensor.SubSpace] to return the
+// SubSpace for the outermost row dimension. [Indexed] defines a version
+// of this that indirects through the row indexes.
+func (tsr *Number[T]) RowTensor(row int) Tensor {
+	return tsr.SubSpace(row)
+}
+
+// SetRowTensor sets the values of the SubSpace at given row to given values.
+func (tsr *Number[T]) SetRowTensor(val Tensor, row int) {
+	_, cells := tsr.RowCellSize()
+	st := row * cells
+	mx := min(val.Len(), cells)
+	tsr.CopyCellsFrom(val, st, 0, mx)
 }

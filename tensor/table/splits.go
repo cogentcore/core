@@ -397,7 +397,7 @@ func (spl *Splits) AggsToTable(colName bool) *Table {
 		}
 	}
 	for _, ag := range spl.Aggs {
-		col := dt.Columns.List.List[ag.ColumnIndex]
+		col := dt.Columns.Values[ag.ColumnIndex]
 		an := "" // dt.ColumnNames[ag.ColumnIndex] // todo: need fast access!
 		if colName == AddAggName {
 			an += ":" + ag.Name
@@ -407,12 +407,12 @@ func (spl *Splits) AggsToTable(colName bool) *Table {
 	for si := range spl.Splits {
 		cidx := 0
 		for ci := range spl.Levels {
-			col := st.Columns.List.List[cidx]
+			col := st.Columns.Values[cidx]
 			col.SetString1D(spl.Values[si][ci], si)
 			cidx++
 		}
 		for _, ag := range spl.Aggs {
-			col := st.Columns.List.List[cidx]
+			col := st.Columns.Values[cidx]
 			_, csz := col.RowCellSize()
 			sti := si * csz
 			av := ag.Aggs[si]
@@ -445,7 +445,7 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 		exmap[cn] = struct{}{}
 	}
 	for _, ag := range spl.Aggs {
-		col := dt.Columns.List.List[ag.ColumnIndex]
+		col := dt.Columns.Values[ag.ColumnIndex]
 		an := "" // dt.ColumnNames[ag.ColumnIndex]
 		exmap[an] = struct{}{}
 		if colName == AddAggName {
@@ -454,8 +454,7 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 		st.AddFloat64TensorColumn(an, col.Shape().Sizes[1:]...)
 	}
 	var cpcol []string
-	names := dt.Columns.Keys()
-	for _, cn := range names {
+	for _, cn := range dt.Columns.Keys {
 		if _, ok := exmap[cn]; !ok {
 			cpcol = append(cpcol, cn)
 			col := dt.Column(cn)
@@ -465,12 +464,12 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 	for si, sidx := range spl.Splits {
 		cidx := 0
 		for ci := range spl.Levels {
-			col := st.Columns.List.List[cidx]
+			col := st.Columns.Values[cidx]
 			col.SetString1D(spl.Values[si][ci], si)
 			cidx++
 		}
 		for _, ag := range spl.Aggs {
-			col := st.Columns.List.List[cidx]
+			col := st.Columns.Values[cidx]
 			_, csz := col.RowCellSize()
 			sti := si * csz
 			av := ag.Aggs[si]

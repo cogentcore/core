@@ -1,9 +1,6 @@
 # keylist
 
-keylist implements an ordered list (slice) of items, with a map from a key (e.g., names) to indexes, to support fast lookup by name.
+keylist implements an ordered list (slice) of items (Values), with a map from a Key (e.g., names) to indexes, to support fast lookup by name.  There is also a Keys slice.
 
-Compared to the [ordmap](../ordmap) package, this is not as efficient for operations such as deletion and insertion, but it has the advantage of providing a simple slice of the target items that can be used directly in many cases.
-
-Thus, it is more suitable for largely static lists, which are constructed by adding items to the end of the list.
-
+This is a different implementation of the [ordmap](../ordmap) package, and has the advantage of direct slice access to the values, instead of having to go through the KeyValue tuple struct in ordmap.
 

@@ -38,7 +38,7 @@ func (cl *Columns) IsValidRow(row int) error {
 func (cl *Columns) SetNumRows(rows int) *Columns { //types:add
 	cl.Rows = rows // can be 0
 	rows = max(1, rows)
-	for _, tsr := range cl.List.List {
+	for _, tsr := range cl.Values {
 		tsr.SetNumRows(rows)
 	}
 	return cl
@@ -73,23 +73,21 @@ func (cl *Columns) InsertColumn(idx int, name string, tsr tensor.Tensor) error {
 // Clone returns a complete copy of this set of columns.
 func (cl *Columns) Clone() *Columns {
 	cp := NewColumns().SetNumRows(cl.Rows)
-	keys := cl.Keys()
-	for i, nm := range keys {
-		tsr := cl.List.List[i]
+	for i, nm := range cl.Keys {
+		tsr := cl.Values[i]
 		cp.AddColumn(nm, tsr.Clone())
 	}
 	return cl
 }
 
-// AppendRows appends shared columns in both tables with input table rows
+// AppendRows appends shared columns in both tables with input table rows.
 func (cl *Columns) AppendRows(cl2 *Columns) {
-	keys := cl.Keys()
-	for i, nm := range keys {
+	for i, nm := range cl.Keys {
 		c2 := cl2.ValueByKey(nm)
 		if c2 == nil {
 			continue
 		}
-		c1 := cl.List.List[i]
+		c1 := cl.Values[i]
 		c1.AppendFrom(c2)
 	}
 	cl.SetNumRows(cl.Rows + cl2.Rows)

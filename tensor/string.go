@@ -272,3 +272,18 @@ func (tsr *String) SubSpace(offs ...int) Tensor {
 	rt := &String{Base: *b}
 	return rt
 }
+
+// RowTensor is a convenience version of [Tensor.SubSpace] to return the
+// SubSpace for the outermost row dimension. [Indexed] defines a version
+// of this that indirects through the row indexes.
+func (tsr *String) RowTensor(row int) Tensor {
+	return tsr.SubSpace(row)
+}
+
+// SetRowTensor sets the values of the SubSpace at given row to given values.
+func (tsr *String) SetRowTensor(val Tensor, row int) {
+	_, cells := tsr.RowCellSize()
+	st := row * cells
+	mx := min(val.Len(), cells)
+	tsr.CopyCellsFrom(val, st, 0, mx)
+}

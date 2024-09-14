@@ -17,8 +17,9 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// Bits is a tensor of bits backed by a bitslice.Slice for efficient storage
-// of binary data
+// Bits is a tensor of bits backed by a [bitslice.Slice] for efficient storage
+// of binary data.  Bits does not support [Tensor.SubSpace] access and related
+// methods due to the nature of the underlying data representation.
 type Bits struct {
 	shape  Shape
 	Values bitslice.Slice
@@ -135,9 +136,19 @@ func (tsr *Bits) SetNumRows(rows int) {
 	tsr.Values.SetLen(nln)
 }
 
-// SubSpace is not possible with Bits
+// SubSpace is not possible with Bits.
 func (tsr *Bits) SubSpace(offs ...int) Tensor {
 	return nil
+}
+
+// RowTensor not possible with Bits.
+func (tsr *Bits) RowTensor(row int) Tensor {
+	return nil
+}
+
+// SetRowTensor not possible with Bits.
+func (tsr *Bits) SetRowTensor(val Tensor, row int) {
+
 }
 
 func (tsr *Bits) Float(i ...int) float64 {
