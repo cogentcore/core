@@ -51,6 +51,7 @@ var _ core.Lister = (*TensorEditor)(nil)
 
 func (tb *TensorEditor) Init() {
 	tb.ListBase.Init()
+	tb.Layout.OddRow = true
 	tb.Makers.Normal[0] = func(p *tree.Plan) { // TODO: reduce redundancy with ListBase Maker
 		svi := tb.This.(core.Lister)
 		svi.UpdateSliceSize()

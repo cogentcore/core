@@ -20,7 +20,7 @@ import (
 // Open opens the given data Value within this datafs filesystem.
 func (d *Data) Open(name string) (fs.File, error) {
 	if !fs.ValidPath(name) {
-		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("invalid name")}
+		return nil, &fs.PathError{Op: "Open", Path: name, Err: errors.New("invalid name")}
 	}
 	dir, file := path.Split(name)
 	sd, err := d.DirAtPath(dir)
@@ -32,7 +32,7 @@ func (d *Data) Open(name string) (fs.File, error) {
 		if dir == "" && (file == d.name || file == ".") {
 			return &DirFile{File: File{Reader: *bytes.NewReader(d.Bytes()), Data: d}}, nil
 		}
-		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("file not found")}
+		return nil, &fs.PathError{Op: "Open", Path: name, Err: errors.New("file not found")}
 	}
 	if itm.IsDir() {
 		return &DirFile{File: File{Reader: *bytes.NewReader(itm.Bytes()), Data: itm}}, nil
@@ -44,7 +44,7 @@ func (d *Data) Open(name string) (fs.File, error) {
 // If there is an error, it should be of type *PathError.
 func (d *Data) Stat(name string) (fs.FileInfo, error) {
 	if !fs.ValidPath(name) {
-		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("invalid name")}
+		return nil, &fs.PathError{Op: "Open", Path: name, Err: errors.New("invalid name")}
 	}
 	dir, file := path.Split(name)
 	sd, err := d.DirAtPath(dir)
@@ -56,7 +56,7 @@ func (d *Data) Stat(name string) (fs.FileInfo, error) {
 		if dir == "" && (file == d.name || file == ".") {
 			return d, nil
 		}
-		return nil, &fs.PathError{Op: "stat", Path: name, Err: errors.New("file not found")}
+		return nil, &fs.PathError{Op: "Stat", Path: name, Err: errors.New("file not found")}
 	}
 	return itm, nil
 }
@@ -87,12 +87,12 @@ func (d *Data) Sub(dir string) (fs.FS, error) {
 			return cur, nil
 		}
 		cd = rest
-		sd, ok := d.Dir.ValueByKeyTry(root)
+		sd, ok := cur.Dir.ValueByKeyTry(root)
 		if !ok {
-			return nil, &fs.PathError{Op: "sub", Path: dir, Err: errors.New("directory not found")}
+			return nil, &fs.PathError{Op: "Sub", Path: dir, Err: errors.New("directory not found")}
 		}
 		if !sd.IsDir() {
-			return nil, &fs.PathError{Op: "sub", Path: dir, Err: errors.New("is not a directory")}
+			return nil, &fs.PathError{Op: "Sub", Path: dir, Err: errors.New("is not a directory")}
 		}
 		cur = sd
 	}
@@ -121,7 +121,7 @@ func (d *Data) ReadDir(dir string) ([]fs.DirEntry, error) {
 // The caller is permitted to modify the returned byte slice.
 // This method should return a copy of the underlying data.
 func (d *Data) ReadFile(name string) ([]byte, error) {
-	if err := d.mustDir("readFile", name); err != nil {
+	if err := d.mustDir("ReadFile", name); err != nil {
 		return nil, err
 	}
 	if !fs.ValidPath(name) {
