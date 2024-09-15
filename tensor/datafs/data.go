@@ -5,9 +5,9 @@
 package datafs
 
 import (
-	"errors"
 	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
@@ -28,10 +28,11 @@ type Data struct {
 	// modTime tracks time added to directory, used for ordering.
 	modTime time.Time
 
-	// Value is represented using the universal [tensor] data type of
+	// Data is the data value for "files" / "leaves" in the FS,
+	// represented using the universal [tensor] data type of
 	// [tensor.Indexed], which can represent anything from a scalar
 	// to n-dimensional data, in a range of data types.
-	Value *tensor.Indexed
+	Data *tensor.Indexed
 
 	// Dir is for directory nodes, with all the items in the directory.
 	Dir *Dir
@@ -58,21 +59,22 @@ func newData(dir *Data, name string) (*Data, error) {
 // NewValue returns a new Data value as an [tensor.Indexed] [tensor.Tensor]
 // of given data type and shape sizes, in given directory Data item.
 // The name must be unique in the directory.
-func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.Indexed {
+func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) *tensor.Indexed {
 	tsr := tensor.New[T](sizes...)
+	tsr.Metadata().SetName(name)
 	d, err := newData(dir, name)
 	if errors.Log(err) != nil {
 		return nil
 	}
-	d.Value = tensor.NewIndexed(tsr)
-	return tsr
+	d.Data = tensor.NewIndexed(tsr)
+	return d.Data
 }
 
 func (d *Data) KnownFileInfo() fileinfo.Known {
-	if d.Value == nil {
+	if d.Data == nil {
 		return fileinfo.Unknown
 	}
-	tsr := d.Value.Tensor
+	tsr := d.Data.Tensor
 	if tsr.Len() > 1 {
 		return fileinfo.Tensor
 	}
@@ -86,8 +88,8 @@ func (d *Data) KnownFileInfo() fileinfo.Known {
 // This is the actual underlying data, so make a copy if it can be
 // unintentionally modified or retained more than for immediate use.
 func (d *Data) Bytes() []byte {
-	if d.Value == nil {
+	if d.Data == nil {
 		return nil
 	}
-	return d.Value.Tensor.Bytes()
+	return d.Data.Tensor.Bytes()
 }

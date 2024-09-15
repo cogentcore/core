@@ -54,7 +54,7 @@ func (d *Data) Item(name string) *Data {
 // found, and will return nil if it is not a Value
 // (i.e., it is a directory).
 func (d *Data) Value(name string) *tensor.Indexed {
-	return d.Dir.ValueByKey(name).Value
+	return d.Dir.ValueByKey(name).Data
 }
 
 // Items returns data items in given directory by name.
@@ -87,8 +87,8 @@ func (d *Data) Values(names ...string) ([]*tensor.Indexed, error) {
 	var its []*tensor.Indexed
 	for _, nm := range names {
 		it := d.Dir.ValueByKey(nm)
-		if it != nil && it.Value != nil {
-			its = append(its, it.Value)
+		if it != nil && it.Data != nil {
+			its = append(its, it.Data)
 		} else {
 			err := fmt.Errorf("datafs Dir %q item not found: %q", d.Path(), nm)
 			errs = append(errs, err)
@@ -125,13 +125,13 @@ func (d *Data) ValuesFunc(fun func(item *Data) bool) []*tensor.Indexed {
 	}
 	var its []*tensor.Indexed
 	for _, it := range d.Dir.Values {
-		if it.Value == nil {
+		if it.Data == nil {
 			continue
 		}
 		if fun != nil && !fun(it) {
 			continue
 		}
-		its = append(its, it.Value)
+		its = append(its, it.Data)
 	}
 	return its
 }
@@ -176,7 +176,32 @@ func (d *Data) FlatValuesFunc(fun func(item *Data) bool) []*tensor.Indexed {
 			subs := it.FlatValuesFunc(fun)
 			its = append(its, subs...)
 		} else {
-			its = append(its, it.Value)
+			its = append(its, it.Data)
+		}
+	}
+	return its
+}
+
+// FlatItemsFunc returns all Value items (tensor) as Data items
+// in given directory, recursively descending into directories
+// to return a flat list of the entire subtree, filtered by
+// given function, in directory order (e.g., order added).
+// The function can filter out directories to prune the tree.
+// If func is nil, all Value items are returned.
+func (d *Data) FlatItemsFunc(fun func(item *Data) bool) []*Data {
+	if err := d.mustDir("FlatItemsFunc", ""); err != nil {
+		return nil
+	}
+	var its []*Data
+	for _, it := range d.Dir.Values {
+		if fun != nil && !fun(it) {
+			continue
+		}
+		if it.IsDir() {
+			subs := it.FlatItemsFunc(fun)
+			its = append(its, subs...)
+		} else {
+			its = append(its, it)
 		}
 	}
 	return its
@@ -202,7 +227,7 @@ func (d *Data) FlatValuesAlphaFunc(fun func(item *Data) bool) []*tensor.Indexed 
 			subs := it.FlatValuesAlphaFunc(fun)
 			its = append(its, subs...)
 		} else {
-			its = append(its, it.Value)
+			its = append(its, it.Data)
 		}
 	}
 	return its
@@ -273,7 +298,7 @@ func (d *Data) Add(it *Data) error {
 	if err := d.mustDir("Add", it.name); err != nil {
 		return err
 	}
-	err := d.Dir.Add(name, it)
+	err := d.Dir.Add(it.name, it)
 	if err != nil {
 		return &fs.PathError{Op: "Add", Path: it.name, Err: errors.New("data item already exists; names must be unique")}
 	}
@@ -291,7 +316,7 @@ func (d *Data) Mkdir(name string) (*Data, error) {
 
 // GetDirTable gets the DirTable as a [table.Table] for this directory item,
 // with columns as the Tensor values elements in the directory
-// and any subdirectories, from FlatValuesFunc using given filter function.
+// and any subdirectories, from FlatItemsFunc using given filter function.
 // This is a convenient mechanism for creating a plot of all the data
 // in a given directory.
 // If such was previously constructed, it is returned from "DirTable"
@@ -301,21 +326,22 @@ func (d *Data) Mkdir(name string) (*Data, error) {
 func (d *Data) GetDirTable(fun func(item *Data) bool) *table.Table {
 	if d.DirTable != nil {
 		d.DirTable.SetNumRowsToMax()
-		return dt
+		return d.DirTable
 	}
-	tsrs := d.FlatValuesFunc(fun)
+	its := d.FlatItemsFunc(fun)
 	dt := table.NewTable(fsx.DirAndFile(string(d.Path())))
-	for _, tsr := range tsrs {
-		rows := tsr.Tensor.Rows()
+	for _, it := range its {
+		tsr := it.Data
+		rows := tsr.NumRows()
 		if dt.Columns.Rows < rows {
 			dt.Columns.Rows = rows
 			dt.SetNumRows(dt.Columns.Rows)
 		}
-		nm := it.Name()
+		nm := it.name
 		if it.Parent != d {
 			nm = fsx.DirAndFile(string(it.Path()))
 		}
-		dt.AddColumn(tsr.Tensor, nm)
+		dt.AddColumn(nm, tsr.Tensor)
 	}
 	d.DirTable = dt
 	return dt

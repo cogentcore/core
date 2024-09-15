@@ -11,7 +11,6 @@ import (
 	"path"
 	"slices"
 	"time"
-	"unsafe"
 
 	"cogentcore.org/core/base/fsx"
 )
@@ -146,34 +145,15 @@ func (d *Data) ReadFile(name string) ([]byte, error) {
 ///////////////////////////////
 // FileInfo interface:
 
-// Sizer is an interface to allow an arbitrary data Value
-// to report its size in bytes.  Size is automatically computed for
-// known basic data Values supported by datafs directly.
-type Sizer interface {
-	Sizeof() int64
-}
-
 func (d *Data) Name() string { return d.name }
 
 // Size returns the size of known data Values, or it uses
 // the Sizer interface, otherwise returns 0.
 func (d *Data) Size() int64 {
-	if szr, ok := d.Value.(Sizer); ok { // tensor implements Sizer
-		return szr.Sizeof()
+	if d.Data == nil {
+		return 0
 	}
-	switch x := d.Value.(type) {
-	case float32, int32, uint32:
-		return 4
-	case float64, int64:
-		return 8
-	case int:
-		return int64(unsafe.Sizeof(x))
-	case complex64:
-		return 16
-	case complex128:
-		return 32
-	}
-	return 0
+	return d.Data.Tensor.Sizeof()
 }
 
 func (d *Data) IsDir() bool {

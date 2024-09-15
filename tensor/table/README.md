@@ -14,7 +14,7 @@ As a general convention, it is safest, clearest, and quite fast to access column
 
 The table itself stores raw data `tensor.Tensor` values, and the `Column` (by name) and `ColumnByIndex` methods return a `tensor.Indexed` with the `Indexes` pointing to the shared table-wide `Indexes` (which can be `nil` if standard sequential order is being used).  
 
-If you call Sort, Filter or other routines on an individual column tensor, then you can grab the updated indexes via the `IndexesFromTensor` method so that they apply to the entire table.
+If you call Sort, Filter or other routines on an individual column tensor, then you can grab the updated indexes via the `IndexesFromTensor` method so that they apply to the entire table.  The `SortColumn` and `FilterString` methods do this for you.
 
 There are also multi-column `Sort` and `Filter` methods on the Table itself.
 

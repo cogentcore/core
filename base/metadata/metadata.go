@@ -2,15 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package metadata provides a map of named any elements
+// with generic support for type-safe Get and nil-safe Set.
+// Metadata keys often function as optional fields in a struct,
+// and therefore a CamelCase naming convention is typical.
+// Provides default support for "Name" and "Doc" standard keys.
 package metadata
 
 import (
 	"fmt"
 	"maps"
+
+	"cogentcore.org/core/base/errors"
 )
 
 // Data is metadata as a map of named any elements
 // with generic support for type-safe Get and nil-safe Set.
+// Metadata keys often function as optional fields in a struct,
+// and therefore a CamelCase naming convention is typical.
+// Provides default support for "Name" and "Doc" standard keys.
+// In general it is good practice to provide access functions
+// that establish standard key names, to avoid issues with typos.
 type Data map[string]any
 
 func (md *Data) init() {
@@ -51,4 +63,24 @@ func (md *Data) Copy(src Data) {
 	}
 	md.init()
 	maps.Copy(*md, src)
+}
+
+// SetName sets the "Name" standard key.
+func (md *Data) SetName(name string) {
+	md.Set("Name", name)
+}
+
+// GetName returns the "Name" standard key value (empty if not set).
+func (md *Data) GetName() string {
+	return errors.Ignore1(Get[string](*md, "Name"))
+}
+
+// SetDoc sets the "Doc" standard key.
+func (md *Data) SetDoc(doc string) {
+	md.Set("Doc", doc)
+}
+
+// GetDoc returns the "Doc" standard key value (empty if not set).
+func (md *Data) GetDoc() string {
+	return errors.Ignore1(Get[string](*md, "Doc"))
 }
