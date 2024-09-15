@@ -28,7 +28,7 @@ type Sim struct {
 func (ss *Sim) ConfigAll() {
 	ss.Root = errors.Log1(datafs.NewDir("Root"))
 	ss.Config = errors.Log1(ss.Root.Mkdir("Config"))
-	errors.Log1(datafs.New[int](ss.Config, "NRun", "NEpoch", "NTrial"))
+	datafs.New[int](ss.Config, "NRun", "NEpoch", "NTrial")
 	ss.Config.Item("NRun").SetInt(5)
 	ss.Config.Item("NEpoch").SetInt(20)
 	ss.Config.Item("NTrial").SetInt(25)

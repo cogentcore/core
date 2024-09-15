@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package table
+package split
 
 import (
 	"fmt"
@@ -95,7 +95,7 @@ func (spl *Splits) Table() *Table {
 // Any existing Aggs are deleted by this.
 func (spl *Splits) New(dt *Table, values []string, rows ...int) *Table {
 	spl.Aggs = nil
-	ix := NewTableView(dt)
+	ix := NewView(dt)
 	spl.Splits = append(spl.Splits, ix)
 	if len(rows) > 0 {
 		ix.Indexes = append(ix.Indexes, slices.Clone(rows)...)

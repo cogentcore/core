@@ -52,10 +52,10 @@ func NewTable(name ...string) *Table {
 	return dt
 }
 
-// NewTableView returns a new Table with its own Indexed view into the
+// NewView returns a new Table with its own Indexed view into the
 // same underlying set of Column tensor data as the source table.
 // Indexes are nil in the new Table, resulting in default full sequential view.
-func NewTableView(src *Table) *Table {
+func NewView(src *Table) *Table {
 	dt := &Table{Columns: src.Columns}
 	dt.Meta.Copy(src.Meta)
 	return dt
@@ -244,6 +244,19 @@ func (dt *Table) SetNumRows(rows int) *Table { //types:add
 		dt.DeleteInvalid()
 	}
 	return dt
+}
+
+// SetNumRowsToMax gets the current max number of rows across all the column tensors,
+// and sets the number of rows to that. This will automatically pad shorter columns
+// so they all have the same number of rows. If a table has columns that are not fully
+// under its own control, they can change size, so this reestablishes
+// a common row dimension.
+func (dt *Table) SetNumRowsToMax() {
+	var maxRow int
+	for _, tsr := range dt.Columns.Values {
+		maxRow = max(maxRow, tsr.DimSize(0))
+	}
+	dt.SetNumRows(maxRow)
 }
 
 // note: no really clean definition of CopyFrom -- no point of re-using existing

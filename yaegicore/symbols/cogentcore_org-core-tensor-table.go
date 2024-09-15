@@ -5,6 +5,7 @@ package symbols
 import (
 	"reflect"
 
+	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 )
 
@@ -19,8 +20,8 @@ func init() {
 		"ConfigFromHeaders":      reflect.ValueOf(table.ConfigFromHeaders),
 		"ConfigFromTableHeaders": reflect.ValueOf(table.ConfigFromTableHeaders),
 		"Contains":               reflect.ValueOf(table.Contains),
-		"DelimsN":                reflect.ValueOf(table.DelimsN),
-		"DelimsValues":           reflect.ValueOf(table.DelimsValues),
+		"DelimsN":                reflect.ValueOf(tensor.DelimsN),
+		"DelimsValues":           reflect.ValueOf(tensor.DelimsValues),
 		"Descending":             reflect.ValueOf(table.Descending),
 		"Detect":                 reflect.ValueOf(table.Detect),
 		"DetectTableHeaders":     reflect.ValueOf(table.DetectTableHeaders),
@@ -42,9 +43,9 @@ func init() {
 		"UseCase":                reflect.ValueOf(table.UseCase),
 
 		// type definitions
-		"Delims":         reflect.ValueOf((*table.Delims)(nil)),
+		"Delims":         reflect.ValueOf((*tensor.Delims)(nil)),
 		"Filterer":       reflect.ValueOf((*table.Filterer)(nil)),
-		"Indexed":        reflect.ValueOf((*table.Indexed)(nil)),
+		"Indexed":        reflect.ValueOf((*table.Table)(nil)),
 		"LessFunc":       reflect.ValueOf((*table.LessFunc)(nil)),
 		"SplitAgg":       reflect.ValueOf((*table.SplitAgg)(nil)),
 		"Splits":         reflect.ValueOf((*table.Splits)(nil)),

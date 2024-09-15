@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tree"
 )
 
@@ -372,7 +371,7 @@ func (tb *TensorEditor) SizeFinal() {
 // Outer-most dims are rows in the file, and inner-most is column --
 // Reading just grabs all values and doesn't care about shape.
 func (tb *TensorEditor) SaveCSV(filename core.Filename) error { //types:add
-	return tensor.SaveCSV(tb.Tensor, filename, table.Tab.Rune())
+	return tensor.SaveCSV(tb.Tensor, filename, tensor.Tab)
 }
 
 // OpenTSV reads a tensor from a tab-separated-values (TSV) file.
@@ -380,7 +379,7 @@ func (tb *TensorEditor) SaveCSV(filename core.Filename) error { //types:add
 // to the official CSV standard.
 // Reads all values and assigns as many as fit.
 func (tb *TensorEditor) OpenCSV(filename core.Filename) error { //types:add
-	return tensor.OpenCSV(tb.Tensor, filename, table.Tab.Rune())
+	return tensor.OpenCSV(tb.Tensor, filename, tensor.Tab)
 }
 
 func (tb *TensorEditor) MakeToolbar(p *tree.Plan) {

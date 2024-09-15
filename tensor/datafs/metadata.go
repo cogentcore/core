@@ -15,12 +15,12 @@ import (
 // This file provides standardized metadata options for frequent
 // use cases, using codified key names to eliminate typos.
 
-// SetMetaItems sets given metadata for items in given directory
+// SetMetaItems sets given metadata for Value items in given directory
 // with given names.  Returns error for any items not found.
 func (d *Data) SetMetaItems(key string, value any, names ...string) error {
-	its, err := d.Items(names...)
-	for _, it := range its {
-		it.Meta.Set(key, value)
+	tsrs, err := d.Value(names...)
+	for _, tsr := range tsrs {
+		tsr.Tensor.Meta.Set(key, value)
 	}
 	return err
 }
@@ -41,20 +41,29 @@ func (d *Data) SetPlotColumnOptions(opts *plotcore.ColumnOptions, names ...strin
 
 // PlotColumnOptions returns plotting options if they have been set, else nil.
 func (d *Data) PlotColumnOptions() *plotcore.ColumnOptions {
-	return errors.Ignore1(metadata.Get[*plotcore.ColumnOptions](d.Meta, "PlotColumnOptions"))
+	if d.Value == nil {
+		return
+	}
+	return errors.Ignore1(metadata.Get[*plotcore.ColumnOptions](d.Value.Tensor.Meta, "PlotColumnOptions"))
 }
 
-// SetCalcFunc sets a function to compute an updated Value for this data item.
+// SetCalcFunc sets a function to compute an updated Value for this Value item.
 // Function is stored as CalcFunc in Metadata.  Can be called by [Data.Calc] method.
 func (d *Data) SetCalcFunc(fun func() error) {
-	d.Meta.Set("CalcFunc", fun)
+	if d.Value == nil {
+		return
+	}
+	d.Value.Tensor.Meta.Set("CalcFunc", fun)
 }
 
 // Calc calls function set by [Data.SetCalcFunc] to compute an updated Value
 // for this data item. Returns an error if func not set, or any error from func itself.
 // Function is stored as CalcFunc in Metadata.
 func (d *Data) Calc() error {
-	fun, err := metadata.Get[func() error](d.Meta, "CalcFunc")
+	if d.Value == nil {
+		return
+	}
+	fun, err := metadata.Get[func() error](d.Value.Tensor.Meta, "CalcFunc")
 	if err != nil {
 		return err
 	}
@@ -63,10 +72,10 @@ func (d *Data) Calc() error {
 
 // CalcAll calls function set by [Data.SetCalcFunc] for all items
 // in this directory and all of its subdirectories.
-// Calls Calc on items from FlatItemsByTimeFunc(nil)
+// Calls Calc on items from FlatValuesFunc(nil)
 func (d *Data) CalcAll() error {
 	var errs []error
-	items := d.FlatItemsByTimeFunc(nil)
+	items := d.FlatValuesFunc(nil)
 	for _, it := range items {
 		err := it.Calc()
 		if err != nil {
@@ -76,41 +85,34 @@ func (d *Data) CalcAll() error {
 	return errors.Join(errs...)
 }
 
-// DirTable returns a table.Table for this directory item, with columns
-// as the Tensor elements in the directory and any subdirectories,
-// from FlatItemsByTimeFunc using given filter function.
+// GetDirTable gets the DirTable as a [table.Table] for this directory item,
+// with columns as the Tensor values elements in the directory
+// and any subdirectories, from FlatValuesFunc using given filter function.
 // This is a convenient mechanism for creating a plot of all the data
 // in a given directory.
 // If such was previously constructed, it is returned from "DirTable"
-// Metadata key where the table is stored.
+// where it is stored for later use.
 // Row count is updated to current max row.
-// Delete that key to reconstruct if items have changed.
-func (d *Data) DirTable(fun func(item *Data) bool) *table.Table {
-	dt, err := metadata.Get[*table.Table](d.Meta, "DirTable")
-	if err == nil {
-		var maxRow int
-		for _, tsr := range dt.Columns {
-			maxRow = max(maxRow, tsr.DimSize(0))
-		}
-		dt.Rows = maxRow
+// Set DirTable = nil to regenerate.
+func (d *Data) GetDirTable(fun func(item *Data) bool) *table.Table {
+	if d.DirTable != nil {
+		d.DirTable.SetNumRowsToMax()
 		return dt
 	}
-	items := d.FlatItemsByTimeFunc(fun)
-	dt = table.NewTable(fsx.DirAndFile(string(d.Path())))
-	for _, it := range items {
-		tsr := it.AsTensor()
-		if tsr == nil {
-			continue
-		}
-		if dt.Rows == 0 {
-			dt.Rows = tsr.DimSize(0)
+	tsrs := d.FlatValuesFunc(fun)
+	dt := table.NewTable(fsx.DirAndFile(string(d.Path())))
+	for _, tsr := range tsrs {
+		rows := tsr.Tensor.Rows()
+		if dt.Columns.Rows < rows {
+			dt.Columns.Rows = rows
+			dt.SetNumRows(dt.Columns.Rows)
 		}
 		nm := it.Name()
 		if it.Parent != d {
 			nm = fsx.DirAndFile(string(it.Path()))
 		}
-		dt.AddColumn(tsr, nm)
+		dt.AddColumn(tsr.Tensor, nm)
 	}
-	d.Meta.Set("DirTable", dt)
+	d.DirTable = dt
 	return dt
 }

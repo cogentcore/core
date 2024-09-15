@@ -6,10 +6,9 @@ package plotcore
 
 import (
 	"image"
-	"strings"
 
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/option"
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/plot/plots"
@@ -95,77 +94,54 @@ func (po *PlotOptions) defaults() {
 
 // fromMeta sets plot options from meta data.
 func (po *PlotOptions) fromMeta(dt *table.Table) {
-	po.FromMetaMap(dt.MetaData)
-}
-
-// metaMapLower tries meta data access by lower-case version of key too
-func metaMapLower(meta map[string]string, key string) (string, bool) {
-	vl, has := meta[key]
-	if has {
-		return vl, has
-	}
-	vl, has = meta[strings.ToLower(key)]
-	return vl, has
+	po.FromMetaMap(dt.Meta)
 }
 
 // FromMetaMap sets plot options from meta data map.
-func (po *PlotOptions) FromMetaMap(meta map[string]string) {
-	if typ, has := metaMapLower(meta, "Type"); has {
+func (po *PlotOptions) FromMetaMap(meta metadata.Data) {
+	if typ, err := metadata.Get[string](meta, "Type"); err == nil {
 		po.Type.SetString(typ)
 	}
-	if op, has := metaMapLower(meta, "Lines"); has {
-		if op == "+" || op == "true" {
-			po.Lines = true
-		} else {
-			po.Lines = false
-		}
+	if op, err := metadata.Get[bool](meta, "Lines"); err == nil {
+		po.Lines = op
 	}
-	if op, has := metaMapLower(meta, "Points"); has {
-		if op == "+" || op == "true" {
-			po.Points = true
-		} else {
-			po.Points = false
-		}
+	if op, err := metadata.Get[bool](meta, "Points"); err == nil {
+		po.Points = op
 	}
-	if lw, has := metaMapLower(meta, "LineWidth"); has {
-		po.LineWidth, _ = reflectx.ToFloat32(lw)
+	if lw, err := metadata.Get[float64](meta, "LineWidth"); err == nil {
+		po.LineWidth = float32(lw)
 	}
-	if ps, has := metaMapLower(meta, "PointSize"); has {
-		po.PointSize, _ = reflectx.ToFloat32(ps)
+	if ps, err := metadata.Get[float64](meta, "PointSize"); err == nil {
+		po.PointSize = float32(ps)
 	}
-	if bw, has := metaMapLower(meta, "BarWidth"); has {
-		po.BarWidth, _ = reflectx.ToFloat32(bw)
+	if bw, err := metadata.Get[float64](meta, "BarWidth"); err == nil {
+		po.BarWidth = float32(bw)
 	}
-	if op, has := metaMapLower(meta, "NegativeXDraw"); has {
-		if op == "+" || op == "true" {
-			po.NegativeXDraw = true
-		} else {
-			po.NegativeXDraw = false
-		}
+	if op, err := metadata.Get[bool](meta, "NegativeXDraw"); err == nil {
+		po.NegativeXDraw = op
 	}
-	if scl, has := metaMapLower(meta, "Scale"); has {
-		po.Scale, _ = reflectx.ToFloat32(scl)
+	if scl, err := metadata.Get[float64](meta, "Scale"); err == nil {
+		po.Scale = float32(scl)
 	}
-	if xc, has := metaMapLower(meta, "XAxis"); has {
+	if xc, err := metadata.Get[string](meta, "XAxis"); err == nil {
 		po.XAxis = xc
 	}
-	if lc, has := metaMapLower(meta, "Legend"); has {
+	if lc, err := metadata.Get[string](meta, "Legend"); err == nil {
 		po.Legend = lc
 	}
-	if xrot, has := metaMapLower(meta, "XAxisRotation"); has {
-		po.XAxisRotation, _ = reflectx.ToFloat32(xrot)
+	if xrot, err := metadata.Get[float64](meta, "XAxisRotation"); err == nil {
+		po.XAxisRotation = float32(xrot)
 	}
-	if lb, has := metaMapLower(meta, "XAxisLabel"); has {
+	if lb, err := metadata.Get[string](meta, "XAxisLabel"); err == nil {
 		po.XAxisLabel = lb
 	}
-	if lb, has := metaMapLower(meta, "YAxisLabel"); has {
+	if lb, err := metadata.Get[string](meta, "YAxisLabel"); err == nil {
 		po.YAxisLabel = lb
 	}
 }
 
 // ColumnOptions are options for plotting one column of data.
 type ColumnOptions struct { //types:add
-
 	// whether to plot this column
 	On bool
 
@@ -228,64 +204,39 @@ func (co *ColumnOptions) getLabel() string {
 }
 
 // fromMetaMap sets column options from meta data map.
-func (co *ColumnOptions) fromMetaMap(meta map[string]string) {
-	if op, has := metaMapLower(meta, co.Column+":On"); has {
-		if op == "+" || op == "true" || op == "" {
-			co.On = true
-		} else {
-			co.On = false
-		}
+func (co *ColumnOptions) fromMetaMap(meta metadata.Data) {
+	if op, err := metadata.Get[bool](meta, co.Column+":On"); err == nil {
+		co.On = op
 	}
-	if op, has := metaMapLower(meta, co.Column+":Off"); has {
-		if op == "+" || op == "true" || op == "" {
-			co.On = false
-		} else {
-			co.On = true
-		}
+	if op, err := metadata.Get[bool](meta, co.Column+":Off"); err == nil {
+		co.On = op
 	}
-	if op, has := metaMapLower(meta, co.Column+":FixMin"); has {
-		if op == "+" || op == "true" {
-			co.Range.FixMin = true
-		} else {
-			co.Range.FixMin = false
-		}
+	if op, err := metadata.Get[bool](meta, co.Column+":FixMin"); err == nil {
+		co.Range.FixMin = op
 	}
-	if op, has := metaMapLower(meta, co.Column+":FixMax"); has {
-		if op == "+" || op == "true" {
-			co.Range.FixMax = true
-		} else {
-			co.Range.FixMax = false
-		}
+	if op, err := metadata.Get[bool](meta, co.Column+":FixMax"); err == nil {
+		co.Range.FixMax = op
 	}
-	if op, has := metaMapLower(meta, co.Column+":FloatMin"); has {
-		if op == "+" || op == "true" {
-			co.Range.FixMin = false
-		} else {
-			co.Range.FixMin = true
-		}
+	if op, err := metadata.Get[bool](meta, co.Column+":FloatMin"); err == nil {
+		co.Range.FixMin = op
 	}
-	if op, has := metaMapLower(meta, co.Column+":FloatMax"); has {
-		if op == "+" || op == "true" {
-			co.Range.FixMax = false
-		} else {
-			co.Range.FixMax = true
-		}
+	if op, err := metadata.Get[bool](meta, co.Column+":FloatMax"); err == nil {
+		co.Range.FixMax = op
 	}
-	if vl, has := metaMapLower(meta, co.Column+":Max"); has {
-		co.Range.Max, _ = reflectx.ToFloat32(vl)
+	if vl, err := metadata.Get[float64](meta, co.Column+":Max"); err == nil {
+		co.Range.Max = float32(vl)
 	}
-	if vl, has := metaMapLower(meta, co.Column+":Min"); has {
-		co.Range.Min, _ = reflectx.ToFloat32(vl)
+	if vl, err := metadata.Get[float64](meta, co.Column+":Min"); err == nil {
+		co.Range.Min = float32(vl)
 	}
-	if lb, has := metaMapLower(meta, co.Column+":Label"); has {
+	if lb, err := metadata.Get[string](meta, co.Column+":Label"); err == nil {
 		co.Label = lb
 	}
-	if lb, has := metaMapLower(meta, co.Column+":ErrColumn"); has {
+	if lb, err := metadata.Get[string](meta, co.Column+":ErrColumn"); err == nil {
 		co.ErrColumn = lb
 	}
-	if vl, has := metaMapLower(meta, co.Column+":TensorIndex"); has {
-		iv, _ := reflectx.ToInt(vl)
-		co.TensorIndex = int(iv)
+	if vl, err := metadata.Get[int](meta, co.Column+":TensorIndex"); err == nil {
+		co.TensorIndex = vl
 	}
 }
 

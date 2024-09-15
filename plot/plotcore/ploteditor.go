@@ -17,6 +17,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -26,20 +27,21 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tensor/tensorcore"
 	"cogentcore.org/core/tree"
 )
 
 // PlotEditor is a widget that provides an interactive 2D plot
-// of selected columns of tabular data, represented by a [table.Indexed] into
+// of selected columns of tabular data, represented by a [table.Table] into
 // a [table.Table]. Other types of tabular data can be converted into this format.
 // The user can change various options for the plot and also modify the underlying data.
 type PlotEditor struct { //types:add
 	core.Frame
 
 	// table is the table of data being plotted.
-	table *table.Indexed
+	table *table.Table
 
 	// Options are the overall plot options.
 	Options PlotOptions
@@ -104,8 +106,8 @@ func (pl *PlotEditor) Init() {
 	})
 
 	pl.Updater(func() {
-		if pl.table != nil && pl.table.Table != nil {
-			pl.Options.fromMeta(pl.table.Table)
+		if pl.table != nil {
+			pl.Options.fromMeta(pl.table)
 		}
 	})
 	tree.AddChildAt(pl, "columns", func(w *core.Frame) {
@@ -135,7 +137,7 @@ func (pl *PlotEditor) Init() {
 // to update the Column list, which will also trigger a Layout
 // and updating of the plot on next render pass.
 // This is safe to call from a different goroutine.
-func (pl *PlotEditor) setIndexed(tab *table.Indexed) *PlotEditor {
+func (pl *PlotEditor) setIndexed(tab *table.Table) *PlotEditor {
 	pl.table = tab
 	pl.Update()
 	return pl
@@ -146,7 +148,7 @@ func (pl *PlotEditor) setIndexed(tab *table.Indexed) *PlotEditor {
 // and updating of the plot on next render pass.
 // This is safe to call from a different goroutine.
 func (pl *PlotEditor) SetTable(tab *table.Table) *PlotEditor {
-	pl.table = table.NewIndexed(tab)
+	pl.table = table.NewView(tab)
 	pl.Update()
 	return pl
 }
@@ -213,7 +215,7 @@ func (pl *PlotEditor) SavePNG(fname core.Filename) { //types:add
 }
 
 // SaveCSV saves the Table data to a csv (comma-separated values) file with headers (any delim)
-func (pl *PlotEditor) SaveCSV(fname core.Filename, delim table.Delims) { //types:add
+func (pl *PlotEditor) SaveCSV(fname core.Filename, delim tensor.Delims) { //types:add
 	pl.table.SaveCSV(fname, delim, table.Headers)
 	pl.dataFile = fname
 }
@@ -223,22 +225,22 @@ func (pl *PlotEditor) SaveCSV(fname core.Filename, delim table.Delims) { //types
 func (pl *PlotEditor) SaveAll(fname core.Filename) { //types:add
 	fn := string(fname)
 	fn = strings.TrimSuffix(fn, filepath.Ext(fn))
-	pl.SaveCSV(core.Filename(fn+".tsv"), table.Tab)
+	pl.SaveCSV(core.Filename(fn+".tsv"), tensor.Tab)
 	pl.SavePNG(core.Filename(fn + ".png"))
 	pl.SaveSVG(core.Filename(fn + ".svg"))
 }
 
 // OpenCSV opens the Table data from a csv (comma-separated values) file (or any delim)
-func (pl *PlotEditor) OpenCSV(filename core.Filename, delim table.Delims) { //types:add
-	pl.table.Table.OpenCSV(filename, delim)
+func (pl *PlotEditor) OpenCSV(filename core.Filename, delim tensor.Delims) { //types:add
+	pl.table.OpenCSV(filename, delim)
 	pl.dataFile = filename
 	pl.UpdatePlot()
 }
 
 // OpenFS opens the Table data from a csv (comma-separated values) file (or any delim)
 // from the given filesystem.
-func (pl *PlotEditor) OpenFS(fsys fs.FS, filename core.Filename, delim table.Delims) {
-	pl.table.Table.OpenFS(fsys, string(filename), delim)
+func (pl *PlotEditor) OpenFS(fsys fs.FS, filename core.Filename, delim tensor.Delims) {
+	pl.table.OpenFS(fsys, string(filename), delim)
 	pl.dataFile = filename
 	pl.UpdatePlot()
 }
@@ -273,7 +275,7 @@ func (pl *PlotEditor) xLabel() string {
 
 // GoUpdatePlot updates the display based on current Indexed into table.
 // This version can be called from goroutines. It does Sequential() on
-// the [table.Indexed], under the assumption that it is used for tracking a
+// the [table.Table], under the assumption that it is used for tracking a
 // the latest updates of a running process.
 func (pl *PlotEditor) GoUpdatePlot() {
 	if pl == nil || pl.This == nil {
@@ -282,7 +284,7 @@ func (pl *PlotEditor) GoUpdatePlot() {
 	if core.TheApp.Platform() == system.Web {
 		time.Sleep(time.Millisecond) // critical to prevent hanging!
 	}
-	if !pl.IsVisible() || pl.table == nil || pl.table.Table == nil || pl.inPlot {
+	if !pl.IsVisible() || pl.table == nil || pl.table == nil || pl.inPlot {
 		return
 	}
 	pl.Scene.AsyncLock()
@@ -293,19 +295,19 @@ func (pl *PlotEditor) GoUpdatePlot() {
 }
 
 // UpdatePlot updates the display based on current Indexed into table.
-// It does not automatically update the [table.Indexed] unless it is
+// It does not automatically update the [table.Table] unless it is
 // nil or out date.
 func (pl *PlotEditor) UpdatePlot() {
 	if pl == nil || pl.This == nil {
 		return
 	}
-	if pl.table == nil || pl.table.Table == nil || pl.inPlot {
+	if pl.table == nil || pl.inPlot {
 		return
 	}
-	if len(pl.Children) != 2 || len(pl.Columns) != pl.table.Table.NumColumns() {
+	if len(pl.Children) != 2 || len(pl.Columns) != pl.table.NumColumns() {
 		pl.Update()
 	}
-	if pl.table.Len() == 0 {
+	if pl.table.NumRows() == 0 {
 		pl.table.Sequential()
 	}
 	pl.genPlot()
@@ -326,8 +328,8 @@ func (pl *PlotEditor) genPlot() {
 	if len(pl.table.Indexes) == 0 {
 		pl.table.Sequential()
 	} else {
-		lsti := pl.table.Indexes[pl.table.Len()-1]
-		if lsti >= pl.table.Table.Rows { // out of date
+		lsti := pl.table.Indexes[pl.table.NumRows()-1]
+		if lsti >= pl.table.NumRows() { // out of date
 			pl.table.Sequential()
 		}
 	}
@@ -341,8 +343,8 @@ func (pl *PlotEditor) genPlot() {
 	pl.plotWidget.Scale = pl.Options.Scale
 	pl.plotWidget.SetRangesFunc = func() {
 		plt := pl.plotWidget.Plot
-		xi, err := pl.table.Table.ColumnIndex(pl.Options.XAxis)
-		if err == nil {
+		xi := pl.table.Columns.IndexByKey(pl.Options.XAxis)
+		if xi >= 0 {
 			xp := pl.Columns[xi]
 			if xp.Range.FixMin {
 				plt.X.Min = math32.Min(plt.X.Min, float32(xp.Range.Min))
@@ -377,14 +379,14 @@ func (pl *PlotEditor) configPlot(plt *plot.Plot) {
 }
 
 // plotXAxis processes the XAxis and returns its index
-func (pl *PlotEditor) plotXAxis(plt *plot.Plot, ixvw *table.Indexed) (xi int, xview *table.Indexed, err error) {
-	xi, err = ixvw.Table.ColumnIndex(pl.Options.XAxis)
-	if err != nil {
+func (pl *PlotEditor) plotXAxis(plt *plot.Plot, ixvw *table.Table) (xi int, xview *table.Table, err error) {
+	xi = ixvw.Columns.IndexByKey(pl.Options.XAxis)
+	if xi < 0 {
 		// log.Println("plot.PlotXAxis: " + err.Error())
 		return
 	}
 	xview = ixvw
-	xc := ixvw.Table.Columns[xi]
+	xc := ixvw.ColumnIndex(xi)
 	xp := pl.Columns[xi]
 	sz := 1
 	if xp.Range.FixMin {
@@ -393,8 +395,8 @@ func (pl *PlotEditor) plotXAxis(plt *plot.Plot, ixvw *table.Indexed) (xi int, xv
 	if xp.Range.FixMax {
 		plt.X.Max = math32.Max(plt.X.Max, float32(xp.Range.Max))
 	}
-	if xc.NumDims() > 1 {
-		sz = xc.Len() / xc.DimSize(0)
+	if xc.Tensor.NumDims() > 1 {
+		sz = xc.NumRows() / xc.Tensor.DimSize(0)
 		if xp.TensorIndex > sz || xp.TensorIndex < 0 {
 			slog.Error("plotcore.PlotEditor.plotXAxis: TensorIndex invalid -- reset to 0")
 			xp.TensorIndex = 0
@@ -407,11 +409,11 @@ const plotColumnsHeaderN = 2
 
 // columnsListUpdate updates the list of columns
 func (pl *PlotEditor) columnsListUpdate() {
-	if pl.table == nil || pl.table.Table == nil {
+	if pl.table == nil {
 		pl.Columns = nil
 		return
 	}
-	dt := pl.table.Table
+	dt := pl.table
 	nc := dt.NumColumns()
 	if nc == len(pl.Columns) {
 		return
@@ -426,8 +428,9 @@ func (pl *PlotEditor) columnsListUpdate() {
 		}
 		cp := &ColumnOptions{Column: cn}
 		cp.defaults()
-		tcol := dt.Columns[ci]
-		if tcol.IsString() {
+		tcol := dt.ColumnIndex(ci)
+		tc := tcol.Tensor
+		if tc.IsString() {
 			cp.IsString = true
 		} else {
 			cp.IsString = false
@@ -437,9 +440,9 @@ func (pl *PlotEditor) columnsListUpdate() {
 				hasOn = true
 			}
 		}
-		cp.fromMetaMap(pl.table.Table.MetaData)
+		cp.fromMetaMap(pl.table.Meta)
 		inc := 1
-		if cn == pl.Options.XAxis || tcol.IsString() || tcol.DataType() == reflect.Int || tcol.DataType() == reflect.Int64 || tcol.DataType() == reflect.Int32 || tcol.DataType() == reflect.Uint8 {
+		if cn == pl.Options.XAxis || tc.IsString() || tc.DataType() == reflect.Int || tc.DataType() == reflect.Int64 || tc.DataType() == reflect.Int32 || tc.DataType() == reflect.Uint8 {
 			inc = 0
 		}
 		cp.Color = colors.Uniform(colors.Spaced(clri))
@@ -449,7 +452,7 @@ func (pl *PlotEditor) columnsListUpdate() {
 }
 
 // ColumnsFromMetaMap updates all the column settings from given meta map
-func (pl *PlotEditor) ColumnsFromMetaMap(meta map[string]string) {
+func (pl *PlotEditor) ColumnsFromMetaMap(meta metadata.Data) {
 	for _, cp := range pl.Columns {
 		cp.fromMetaMap(meta)
 	}
@@ -630,7 +633,7 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 			SetTooltip("open a Table window of the data").
 			OnClick(func(e events.Event) {
 				d := core.NewBody(pl.Name + " Data")
-				tv := tensorcore.NewTable(d).SetTable(pl.table.Table)
+				tv := tensorcore.NewTable(d).SetTable(pl.table)
 				d.AddTopBar(func(bar *core.Frame) {
 					core.NewToolbar(bar).Maker(tv.MakeToolbar)
 				})
@@ -652,10 +655,10 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 		w.SetFunc(pl.OpenCSV).SetIcon(icons.Open)
 	})
 	tree.Add(p, func(w *core.Separator) {})
-	tree.Add(p, func(w *core.FuncButton) {
-		w.SetFunc(pl.table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
-		w.SetAfterFunc(pl.UpdatePlot)
-	})
+	// tree.Add(p, func(w *core.FuncButton) { // TODO
+	// 	w.SetFunc(pl.table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
+	// 	w.SetAfterFunc(pl.UpdatePlot)
+	// })
 	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(pl.table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
 		w.SetAfterFunc(pl.UpdatePlot)

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build not
+
 package datafs
 
 import (
@@ -9,6 +11,8 @@ import (
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
 )
+
+/*
 
 // StdStats are the standard descriptive stats computed in StdStatsData,
 // for one-dimensional tensors.  For higher-dimensional cases, the last 3
@@ -59,7 +63,7 @@ func StdStatsData(dir *datafs.Data, tsr *tensor.Indexed) {
 // DescAll returns a table of standard descriptive stats for
 // all numeric columns in given table, operating over all non-Null, non-NaN elements
 // in each column.
-func DescAll(ix *table.Indexed) *table.Table {
+func DescAll(ix *table.Table) *table.Table {
 	/*
 		st := ix.Table
 		nAgg := len(DescStats)
@@ -106,3 +110,6 @@ func DescAll(ix *table.Indexed) *table.Table {
 	*/
 	return ix.Table // dt
 }
+
+*/
+

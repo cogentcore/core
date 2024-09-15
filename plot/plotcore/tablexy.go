@@ -21,7 +21,7 @@ import (
 type tableXY struct {
 
 	// the index view of data table to plot from
-	table *table.Indexed
+	table *table.Table
 
 	// the indexes of the tensor columns to use for the X and Y data, respectively
 	xColumn, yColumn int
@@ -50,7 +50,7 @@ var _ plots.YErrorer = &tableXY{}
 // newTableXY returns a new XY plot view onto the given Indexed of table.Table (makes a copy),
 // from given column indexes, and tensor indexes within each cell.
 // Column indexes are enforced to be valid, with an error message if they are not.
-func newTableXY(dt *table.Indexed, xcol, xtsrIndex, ycol, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
+func newTableXY(dt *table.Table, xcol, xtsrIndex, ycol, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
 	txy := &tableXY{table: dt.Clone(), xColumn: xcol, yColumn: ycol, xIndex: xtsrIndex, yIndex: ytsrIndex, yRange: yrng}
 	return txy, txy.validate()
 }
@@ -58,10 +58,10 @@ func newTableXY(dt *table.Indexed, xcol, xtsrIndex, ycol, ytsrIndex int, yrng mi
 // newTableXYName returns a new XY plot view onto the given Indexed of table.Table (makes a copy),
 // from given column name and tensor indexes within each cell.
 // Column indexes are enforced to be valid, with an error message if they are not.
-func newTableXYName(dt *table.Indexed, xi, xtsrIndex int, ycol string, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
-	yi, err := dt.Table.ColumnIndex(ycol)
-	if errors.Log(err) != nil {
-		return nil, err
+func newTableXYName(dt *table.Table, xi, xtsrIndex int, ycol string, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
+	yi := dt.Columns.IndexByKey(ycol)
+	if yi < 0 {
+		return nil, nil // todo: err
 	}
 	txy := &tableXY{table: dt.Clone(), xColumn: xi, yColumn: yi, xIndex: xtsrIndex, yIndex: ytsrIndex, yRange: yrng}
 	return txy, txy.validate()
@@ -73,7 +73,7 @@ func (txy *tableXY) validate() error {
 	if txy.table == nil {
 		return errors.New("eplot.TableXY table is nil")
 	}
-	nc := txy.table.Table.NumColumns()
+	nc := txy.table.NumColumns()
 	if txy.xColumn >= nc || txy.xColumn < 0 {
 		txy.xColumn = 0
 		return errors.New("eplot.TableXY XColumn index invalid -- reset to 0")
@@ -82,13 +82,13 @@ func (txy *tableXY) validate() error {
 		txy.yColumn = 0
 		return errors.New("eplot.TableXY YColumn index invalid -- reset to 0")
 	}
-	xc := txy.table.Table.Columns[txy.xColumn]
-	yc := txy.table.Table.Columns[txy.yColumn]
-	if xc.NumDims() > 1 {
+	xc := txy.table.ColumnIndex(txy.xColumn)
+	yc := txy.table.ColumnIndex(txy.yColumn)
+	if xc.Tensor.NumDims() > 1 {
 		_, txy.xRowSize = xc.RowCellSize()
 		// note: index already validated
 	}
-	if yc.NumDims() > 1 {
+	if yc.Tensor.NumDims() > 1 {
 		_, txy.yRowSize = yc.RowCellSize()
 		if txy.yIndex >= txy.yRowSize || txy.yIndex < 0 {
 			txy.yIndex = 0
@@ -119,20 +119,20 @@ func (txy *tableXY) filterValues() {
 
 // Len returns the number of rows in the view of table
 func (txy *tableXY) Len() int {
-	if txy.table == nil || txy.table.Table == nil {
+	if txy.table == nil {
 		return 0
 	}
-	return txy.table.Len()
+	return txy.table.NumRows()
 }
 
 // tRowValue returns the y value at given true table row in table
 func (txy *tableXY) tRowValue(row int) float32 {
-	yc := txy.table.Table.Columns[txy.yColumn]
+	yc := txy.table.ColumnIndex(txy.yColumn)
 	y := float32(0.0)
 	switch {
-	case yc.IsString():
+	case yc.Tensor.IsString():
 		y = float32(row)
-	case yc.NumDims() > 1:
+	case yc.Tensor.NumDims() > 1:
 		_, sz := yc.RowCellSize()
 		if txy.yIndex < sz && txy.yIndex >= 0 {
 			y = float32(yc.FloatRowCell(row, txy.yIndex))
@@ -145,16 +145,16 @@ func (txy *tableXY) tRowValue(row int) float32 {
 
 // Value returns the y value at given row in table
 func (txy *tableXY) Value(row int) float32 {
-	if txy.table == nil || txy.table.Table == nil || row >= txy.table.Len() {
+	if txy.table == nil || row >= txy.table.NumRows() {
 		return 0
 	}
 	trow := txy.table.Indexes[row] // true table row
-	yc := txy.table.Table.Columns[txy.yColumn]
+	yc := txy.table.ColumnIndex(txy.yColumn)
 	y := float32(0.0)
 	switch {
-	case yc.IsString():
+	case yc.Tensor.IsString():
 		y = float32(row)
-	case yc.NumDims() > 1:
+	case yc.Tensor.NumDims() > 1:
 		_, sz := yc.RowCellSize()
 		if txy.yIndex < sz && txy.yIndex >= 0 {
 			y = float32(yc.FloatRowCell(trow, txy.yIndex))
@@ -167,15 +167,15 @@ func (txy *tableXY) Value(row int) float32 {
 
 // tRowXValue returns an x value at given actual row in table
 func (txy *tableXY) tRowXValue(row int) float32 {
-	if txy.table == nil || txy.table.Table == nil {
+	if txy.table == nil || txy.table == nil {
 		return 0
 	}
-	xc := txy.table.Table.Columns[txy.xColumn]
+	xc := txy.table.ColumnIndex(txy.xColumn)
 	x := float32(0.0)
 	switch {
-	case xc.IsString():
+	case xc.Tensor.IsString():
 		x = float32(row)
-	case xc.NumDims() > 1:
+	case xc.Tensor.NumDims() > 1:
 		_, sz := xc.RowCellSize()
 		if txy.xIndex < sz && txy.xIndex >= 0 {
 			x = float32(xc.FloatRowCell(row, txy.xIndex))
@@ -188,16 +188,16 @@ func (txy *tableXY) tRowXValue(row int) float32 {
 
 // xValue returns an x value at given row in table
 func (txy *tableXY) xValue(row int) float32 {
-	if txy.table == nil || txy.table.Table == nil || row >= txy.table.Len() {
+	if txy.table == nil || row >= txy.table.NumRows() {
 		return 0
 	}
 	trow := txy.table.Indexes[row] // true table row
-	xc := txy.table.Table.Columns[txy.xColumn]
+	xc := txy.table.ColumnIndex(txy.xColumn)
 	x := float32(0.0)
 	switch {
-	case xc.IsString():
+	case xc.Tensor.IsString():
 		x = float32(row)
-	case xc.NumDims() > 1:
+	case xc.Tensor.NumDims() > 1:
 		_, sz := xc.RowCellSize()
 		if txy.xIndex < sz && txy.xIndex >= 0 {
 			x = float32(xc.FloatRowCell(trow, txy.xIndex))
@@ -210,7 +210,7 @@ func (txy *tableXY) xValue(row int) float32 {
 
 // XY returns an x, y pair at given row in table
 func (txy *tableXY) XY(row int) (x, y float32) {
-	if txy.table == nil || txy.table.Table == nil {
+	if txy.table == nil || txy.table == nil {
 		return 0, 0
 	}
 	x = txy.xValue(row)
@@ -220,25 +220,25 @@ func (txy *tableXY) XY(row int) (x, y float32) {
 
 // Label returns a label for given row in table, implementing [plot.Labeler] interface
 func (txy *tableXY) Label(row int) string {
-	if txy.table == nil || txy.table.Table == nil || row >= txy.table.Len() {
+	if txy.table == nil || row >= txy.table.NumRows() {
 		return ""
 	}
 	trow := txy.table.Indexes[row] // true table row
-	return txy.table.Table.Columns[txy.labelColumn].String1D(trow)
+	return txy.table.ColumnIndex(txy.labelColumn).String1D(trow)
 }
 
 // YError returns error bars, implementing [plots.YErrorer] interface.
 func (txy *tableXY) YError(row int) (float32, float32) {
-	if txy.table == nil || txy.table.Table == nil || row >= txy.table.Len() {
+	if txy.table == nil || row >= txy.table.NumRows() {
 		return 0, 0
 	}
 	trow := txy.table.Indexes[row] // true table row
-	ec := txy.table.Table.Columns[txy.errColumn]
+	ec := txy.table.ColumnIndex(txy.errColumn)
 	eval := float32(0.0)
 	switch {
-	case ec.IsString():
+	case ec.Tensor.IsString():
 		eval = float32(row)
-	case ec.NumDims() > 1:
+	case ec.Tensor.NumDims() > 1:
 		_, sz := ec.RowCellSize()
 		if txy.yIndex < sz && txy.yIndex >= 0 {
 			eval = float32(ec.FloatRowCell(trow, txy.yIndex))

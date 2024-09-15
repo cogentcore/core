@@ -8,14 +8,11 @@ import (
 	"fmt"
 	"log"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/plot/plots"
-	"cogentcore.org/core/tensor/stats/split"
-	"cogentcore.org/core/tensor/table"
 )
 
 // bar plot is on integer positions, with different Y values and / or
@@ -35,16 +32,16 @@ func (pl *PlotEditor) genPlotBar() {
 	}
 	xp := pl.Columns[xi]
 
-	var lsplit *table.Splits
+	// var lsplit *table.Splits
 	nleg := 1
 	if pl.Options.Legend != "" {
-		_, err = pl.table.Table.ColumnIndex(pl.Options.Legend)
-		if err != nil {
-			log.Println("plot.Legend: " + err.Error())
+		lcol := pl.table.Columns.IndexByKey(pl.Options.Legend)
+		if lcol < 0 {
+			log.Println("plot.Legend not found: " + pl.Options.Legend)
 		} else {
-			xview.SortColumnNames([]string{pl.Options.Legend, xp.Column}, table.Ascending) // make it fit!
-			lsplit = split.GroupBy(xview, pl.Options.Legend)
-			nleg = max(lsplit.Len(), 1)
+			// xview.SortColumnNames([]string{pl.Options.Legend, xp.Column}, tensor.Ascending) // make it fit!
+			// lsplit = split.GroupBy(xview, pl.Options.Legend)
+			// nleg = max(lsplit.Len(), 1)
 		}
 	}
 
@@ -60,7 +57,7 @@ func (pl *PlotEditor) genPlotBar() {
 			continue
 		}
 		if cp.TensorIndex < 0 {
-			yc := errors.Log1(pl.table.Table.ColumnByName(cp.Column))
+			yc := pl.table.Column(cp.Column)
 			_, sz := yc.RowCellSize()
 			nys += sz
 		} else {
@@ -91,14 +88,14 @@ func (pl *PlotEditor) genPlotBar() {
 		for li := 0; li < nleg; li++ {
 			lview := xview
 			leg := ""
-			if lsplit != nil && len(lsplit.Values) > li {
-				leg = lsplit.Values[li][0]
-				lview = lsplit.Splits[li]
-			}
+			// if lsplit != nil && len(lsplit.Values) > li {
+			// 	leg = lsplit.Values[li][0]
+			// 	lview = lsplit.Splits[li]
+			// }
 			nidx := 1
 			stidx := cp.TensorIndex
 			if cp.TensorIndex < 0 { // do all
-				yc := errors.Log1(pl.table.Table.ColumnByName(cp.Column))
+				yc := pl.table.Column(cp.Column)
 				_, sz := yc.RowCellSize()
 				nidx = sz
 				stidx = 0
@@ -109,7 +106,7 @@ func (pl *PlotEditor) genPlotBar() {
 				if xy == nil {
 					continue
 				}
-				maxx = max(maxx, lview.Len())
+				maxx = max(maxx, lview.NumRows())
 				if firstXY == nil {
 					firstXY = xy
 				}
@@ -128,7 +125,7 @@ func (pl *PlotEditor) genPlotBar() {
 				}
 				ec := -1
 				if cp.ErrColumn != "" {
-					ec, _ = pl.table.Table.ColumnIndex(cp.ErrColumn)
+					ec = pl.table.Columns.IndexByKey(cp.ErrColumn)
 				}
 				var bar *plots.BarChart
 				if ec >= 0 {
@@ -163,10 +160,10 @@ func (pl *PlotEditor) genPlotBar() {
 	}
 	if firstXY != nil && len(strCols) > 0 {
 		firstXY.table = xview
-		n := xview.Len()
+		n := xview.NumRows()
 		for _, cp := range strCols {
 			xy, _ := newTableXY(xview, xi, xp.TensorIndex, firstXY.yColumn, cp.TensorIndex, firstXY.yRange)
-			xy.labelColumn, _ = xview.Table.ColumnIndex(cp.Column)
+			xy.labelColumn = xview.Columns.IndexByKey(cp.Column)
 			xy.yIndex = firstXY.yIndex
 
 			xyl := plots.XYLabels{}
@@ -186,8 +183,8 @@ func (pl *PlotEditor) genPlotBar() {
 		}
 	}
 
-	netn := pl.table.Len() * stride
-	xc := pl.table.Table.Columns[xi]
+	netn := pl.table.NumRows() * stride
+	xc := pl.table.ColumnIndex(xi)
 	vals := make([]string, netn)
 	for i, dx := range pl.table.Indexes {
 		pi := mid + i*stride

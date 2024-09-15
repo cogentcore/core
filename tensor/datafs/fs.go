@@ -10,12 +10,10 @@ import (
 	"io/fs"
 	"path"
 	"slices"
-	"sort"
 	"time"
 	"unsafe"
 
 	"cogentcore.org/core/base/fsx"
-	"golang.org/x/exp/maps"
 )
 
 // fs.go contains all the io/fs interface implementations
@@ -30,8 +28,7 @@ func (d *Data) Open(name string) (fs.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	fm := sd.filemap()
-	itm, ok := fm[file]
+	itm, ok := sd.Dir.ValueByKeyTry(file)
 	if !ok {
 		if dir == "" && (file == d.name || file == ".") {
 			return &DirFile{File: File{Reader: *bytes.NewReader(d.Bytes()), Data: d}}, nil
@@ -55,8 +52,7 @@ func (d *Data) Stat(name string) (fs.FileInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	fm := sd.filemap()
-	itm, ok := fm[file]
+	itm, ok := sd.Dir.ValueByKeyTry(file)
 	if !ok {
 		if dir == "" && (file == d.name || file == ".") {
 			return d, nil
@@ -68,11 +64,11 @@ func (d *Data) Stat(name string) (fs.FileInfo, error) {
 
 // Sub returns a data FS corresponding to the subtree rooted at dir.
 func (d *Data) Sub(dir string) (fs.FS, error) {
-	if err := d.mustDir("sub", dir); err != nil {
+	if err := d.mustDir("Sub", dir); err != nil {
 		return nil, err
 	}
 	if !fs.ValidPath(dir) {
-		return nil, &fs.PathError{Op: "sub", Path: dir, Err: errors.New("invalid name")}
+		return nil, &fs.PathError{Op: "Sub", Path: dir, Err: errors.New("invalid name")}
 	}
 	if dir == "." || dir == "" || dir == d.name {
 		return d, nil
@@ -92,8 +88,7 @@ func (d *Data) Sub(dir string) (fs.FS, error) {
 			return cur, nil
 		}
 		cd = rest
-		fm := cur.filemap()
-		sd, ok := fm[root]
+		sd, ok := d.Dir.ValueByKeyTry(root)
 		if !ok {
 			return nil, &fs.PathError{Op: "sub", Path: dir, Err: errors.New("directory not found")}
 		}
@@ -111,12 +106,10 @@ func (d *Data) ReadDir(dir string) ([]fs.DirEntry, error) {
 	if err != nil {
 		return nil, err
 	}
-	fm := sd.filemap()
-	names := maps.Keys(fm)
-	sort.Strings(names)
+	names := sd.DirNamesAlpha()
 	ents := make([]fs.DirEntry, len(names))
 	for i, nm := range names {
-		ents[i] = fm[nm]
+		ents[i] = sd.Dir.ValueByKey(nm)
 	}
 	return ents, nil
 }
@@ -140,8 +133,7 @@ func (d *Data) ReadFile(name string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	fm := sd.filemap()
-	itm, ok := fm[file]
+	itm, ok := sd.Dir.ValueByKeyTry(file)
 	if !ok {
 		return nil, &fs.PathError{Op: "readFile", Path: name, Err: errors.New("file not found")}
 	}
@@ -185,8 +177,7 @@ func (d *Data) Size() int64 {
 }
 
 func (d *Data) IsDir() bool {
-	_, ok := d.Value.(map[string]*Data)
-	return ok
+	return d.Dir != nil
 }
 
 func (d *Data) ModTime() time.Time {
@@ -200,8 +191,13 @@ func (d *Data) Mode() fs.FileMode {
 	return 0444
 }
 
-// Sys returns the metadata for Value
-func (d *Data) Sys() any { return d.Meta }
+// Sys returns the Dir or Value
+func (d *Data) Sys() any {
+	if d.Value != nil {
+		return d.Value
+	}
+	return d.Dir
+}
 
 ///////////////////////////////
 // DirEntry interface

@@ -5,18 +5,10 @@ package tensorcore
 import (
 	"cogentcore.org/core/colors/colormap"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/stats/simat"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.SimMatGrid", IDName: "sim-mat-grid", Doc: "SimMatGrid is a widget that displays a similarity / distance matrix\nwith tensor values as a grid of colored squares, and labels for rows and columns.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "TensorGrid"}}, Fields: []types.Field{{Name: "SimMat", Doc: "the similarity / distance matrix"}, {Name: "rowMaxSz"}, {Name: "rowMinBlank"}, {Name: "rowNGps"}, {Name: "colMaxSz"}, {Name: "colMinBlank"}, {Name: "colNGps"}}})
-
-// NewSimMatGrid returns a new [SimMatGrid] with the given optional parent:
-// SimMatGrid is a widget that displays a similarity / distance matrix
-// with tensor values as a grid of colored squares, and labels for rows and columns.
-func NewSimMatGrid(parent ...tree.Node) *SimMatGrid { return tree.New[SimMatGrid](parent...) }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.Table", IDName: "table", Doc: "Table provides a GUI widget for representing [table.Table] values.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "Table", Doc: "the idx view of the table that we're a view of"}, {Name: "TensorDisplay", Doc: "overall display options for tensor display"}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params"}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDescending", Doc: "whether current sort order is descending"}, {Name: "headerWidths", Doc: "headerWidths has number of characters in each header, per visfields"}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}})
 
@@ -98,12 +90,3 @@ func NewTableButton(parent ...tree.Node) *TableButton { return tree.New[TableBut
 
 // SetTable sets the [TableButton.Table]
 func (t *TableButton) SetTable(v *table.Table) *TableButton { t.Table = v; return t }
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.SimMatButton", IDName: "sim-mat-button", Doc: "SimMatValue presents a button that pulls up the [SimMatGrid] viewer for a [table.Table].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "SimMat"}}})
-
-// NewSimMatButton returns a new [SimMatButton] with the given optional parent:
-// SimMatValue presents a button that pulls up the [SimMatGrid] viewer for a [table.Table].
-func NewSimMatButton(parent ...tree.Node) *SimMatButton { return tree.New[SimMatButton](parent...) }
-
-// SetSimMat sets the [SimMatButton.SimMat]
-func (t *SimMatButton) SetSimMat(v *simat.SimMat) *SimMatButton { t.SimMat = v; return t }

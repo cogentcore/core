@@ -18,7 +18,7 @@ If you call Sort, Filter or other routines on an individual column tensor, then 
 
 There are also multi-column `Sort` and `Filter` methods on the Table itself.
 
-It is very low-cost to create a new View of an existing Table, via `NewTableView`, as they can share the underlying `Columns` data.
+It is very low-cost to create a new View of an existing Table, via `NewView`, as they can share the underlying `Columns` data.
 
 # Cheat Sheet
 
