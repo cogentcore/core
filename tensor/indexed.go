@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"slices"
 	"sort"
+	"strings"
 )
 
 // Indexed is an indexed wrapper around a tensor.Tensor that provides a
@@ -310,7 +311,7 @@ func (ix *Indexed) SortStable(ascending bool) error {
 // view of the tensor, and false if it should be removed.
 type FilterFunc func(tsr Tensor, row int) bool
 
-// Filter filters the indexes into our Tensor using given Filter function.
+// Filter filters the indexes using given Filter function.
 // The Filter function operates directly on row numbers into the Tensor
 // as these row numbers have already been projected through the indexes.
 func (ix *Indexed) Filter(filterer func(tsr Tensor, row int) bool) {
@@ -321,6 +322,50 @@ func (ix *Indexed) Filter(filterer func(tsr Tensor, row int) bool) {
 			ix.Indexes = append(ix.Indexes[:i], ix.Indexes[i+1:]...)
 		}
 	}
+}
+
+// Named arg values for Contains, IgnoreCase
+const (
+	// Include means include matches
+	Include = false
+	// Exclude means exclude matches
+	Exclude = true
+	// Contains means the string only needs to contain the target string (see Equals)
+	Contains = true
+	// Equals means the string must equal the target string (see Contains)
+	Equals = false
+	// IgnoreCase means that differences in case are ignored in comparing strings
+	IgnoreCase = true
+	// UseCase means that case matters when comparing strings
+	UseCase = false
+)
+
+// FilterString filters the indexes using string values compared to given
+// string. Includes rows with matching values unless exclude is set.
+// If contains, only checks if row contains string; if ignoreCase, ignores case.
+// Use the named const args [Include], [Exclude], [Contains], [Equals],
+// [IgnoreCase], [UseCase] for greater clarity.
+// Only valid for 1-dimensional columns.
+func (ix *Indexed) FilterString(str string, exclude, contains, ignoreCase bool) { //types:add
+	lowstr := strings.ToLower(str)
+	ix.Filter(func(tsr Tensor, row int) bool {
+		val := tsr.StringRowCell(row, 0)
+		has := false
+		switch {
+		case contains && ignoreCase:
+			has = strings.Contains(strings.ToLower(val), lowstr)
+		case contains:
+			has = strings.Contains(val, str)
+		case ignoreCase:
+			has = strings.EqualFold(val, str)
+		default:
+			has = (val == str)
+		}
+		if exclude {
+			return !has
+		}
+		return has
+	})
 }
 
 // NewTensor returns a new tensor with column data organized according to

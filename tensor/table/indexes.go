@@ -40,7 +40,7 @@ func (dt *Table) Sequential() { //types:add
 // e.g., Sort, Filter.  If Indexes == nil, they are set to all rows, otherwise
 // current indexes are left as is. Use Sequential, then IndexesNeeded to ensure
 // all rows are represented.
-func (dt *Table) IndexesNeeded() { //types:add
+func (dt *Table) IndexesNeeded() {
 	if dt.Indexes != nil {
 		return
 	}
@@ -48,6 +48,13 @@ func (dt *Table) IndexesNeeded() { //types:add
 	for i := range dt.Indexes {
 		dt.Indexes[i] = i
 	}
+}
+
+// IndexesFromTensor copies Indexes from the given [tensor.Indexed] tensor,
+// including if they are nil. This allows column-specific Sort, Filter and
+// other such methods to be applied to the entire table.
+func (dt *Table) IndexesFromTensor(ix *tensor.Indexed) {
+	dt.Indexes = ix.Indexes
 }
 
 // DeleteInvalid deletes all invalid indexes from the list.
@@ -94,18 +101,23 @@ func (dt *Table) SortFunc(cmp func(dt *Table, i, j int) int) {
 	})
 }
 
-// SortIndexes sorts the indexes into our Table directly in
-// numerical order, producing the native ordering, while preserving
-// any filtering that might have occurred.
-func (dt *Table) SortIndexes() {
-	if dt.Indexes == nil {
-		return
-	}
-	sort.Ints(dt.Indexes)
+// SortStableFunc stably sorts the indexes into our Table using given compare function.
+// The compare function operates directly on row numbers into the Table
+// as these row numbers have already been projected through the indexes.
+// cmp(a, b) should return a negative number when a < b, a positive
+// number when a > b and zero when a == b.
+// It is *essential* that it always returns 0 when the two are equal
+// for the stable function to actually work.
+func (dt *Table) SortStableFunc(cmp func(dt *Table, i, j int) int) {
+	dt.IndexesNeeded()
+	slices.SortStableFunc(dt.Indexes, func(a, b int) int {
+		return cmp(dt, a, b) // key point: these are already indirected through indexes!!
+	})
 }
 
 // SortColumns sorts the indexes into our Table according to values in
 // given column names, using either ascending or descending order,
+// (use [tensor.Ascending] or [tensor.Descending] for self-documentation,
 // and optionally using a stable sort.
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
@@ -149,34 +161,14 @@ func (dt *Table) SortColumnIndexes(ascending, stable bool, colIndexes ...int) {
 	})
 }
 
-/////////////////////////////////////////////////////////////////////////
-//  Stable sorts -- sometimes essential..
-
-// SortStableFunc stably sorts the indexes into our Table using given compare function.
-// The compare function operates directly on row numbers into the Table
-// as these row numbers have already been projected through the indexes.
-// cmp(a, b) should return a negative number when a < b, a positive
-// number when a > b and zero when a == b.
-// It is *essential* that it always returns 0 when the two are equal
-// for the stable function to actually work.
-func (dt *Table) SortStableFunc(cmp func(dt *Table, i, j int) int) {
-	dt.IndexesNeeded()
-	slices.SortStableFunc(dt.Indexes, func(a, b int) int {
-		return cmp(dt, a, b) // key point: these are already indirected through indexes!!
-	})
-}
-
-// SortStableColumn sorts the indexes into our Table according to values in
-// given column name, using either ascending or descending order.
-// Only valid for 1-dimensional columns.
-// Returns error if column name not found.
-func (dt *Table) SortStableColumn(column string, ascending bool) error {
-	dt.IndexesNeeded()
-	cl, err := dt.ColumnTry(column) // has our indexes
-	if err != nil {
-		return err
+// SortIndexes sorts the indexes into our Table directly in
+// numerical order, producing the native ordering, while preserving
+// any filtering that might have occurred.
+func (dt *Table) SortIndexes() {
+	if dt.Indexes == nil {
+		return
 	}
-	return cl.SortStable(ascending)
+	sort.Ints(dt.Indexes)
 }
 
 // FilterFunc is a function used for filtering that returns
@@ -195,40 +187,6 @@ func (dt *Table) Filter(filterer func(dt *Table, row int) bool) {
 			dt.Indexes = append(dt.Indexes[:i], dt.Indexes[i+1:]...)
 		}
 	}
-}
-
-// FilterColumn filters the indexes into our Table according to values in
-// given column name, using string representation of column values.
-// Includes rows with matching values unless exclude is set.
-// If contains, only checks if row contains string; if ignoreCase, ignores case.
-// Use named args for greater clarity.
-// Only valid for 1-dimensional columns.
-// Returns error if column name not found.
-func (dt *Table) FilterColumn(column string, str string, exclude, contains, ignoreCase bool) error { //types:add
-	col, err := dt.ColumnTry(column)
-	if err != nil {
-		return err
-	}
-	lowstr := strings.ToLower(str)
-	dt.Filter(func(dt *Table, row int) bool {
-		val := col.StringRowCell(row, 0)
-		has := false
-		switch {
-		case contains && ignoreCase:
-			has = strings.Contains(strings.ToLower(val), lowstr)
-		case contains:
-			has = strings.Contains(val, str)
-		case ignoreCase:
-			has = strings.EqualFold(val, str)
-		default:
-			has = (val == str)
-		}
-		if exclude {
-			return !has
-		}
-		return has
-	})
-	return nil
 }
 
 // NewTable returns a new table with column data organized according to
@@ -263,23 +221,12 @@ func (dt *Table) DeleteRows(at, n int) {
 	dt.Indexes = append(dt.Indexes[:at], dt.Indexes[at+n:]...)
 }
 
-// Named arg values for Contains, IgnoreCase
-const (
-	// Contains means the string only needs to contain the target string (see Equals)
-	Contains bool = true
-	// Equals means the string must equal the target string (see Contains)
-	Equals = false
-	// IgnoreCase means that differences in case are ignored in comparing strings
-	IgnoreCase = true
-	// UseCase means that case matters when comparing strings
-	UseCase = false
-)
-
 // RowsByString returns the list of row _indexes_ (not necessarily underlying row numbers,
 // if Indexes are in place) whose row in the table has given string value in given column name.
 // The results can be used as row indexes to Indexed tensor column data.
 // If contains, only checks if row contains string; if ignoreCase, ignores case.
-// Use the named const args [Contains], [Equals], [IgnoreCase], [UseCase] for greater clarity.
+// Use the named const args [tensor.Contains], [tensor.Equals], [tensor.IgnoreCase],
+// [tensor.UseCase] for greater clarity.
 func (dt *Table) RowsByString(colname string, str string, contains, ignoreCase bool) []int {
 	col := dt.Column(colname)
 	if col == nil {

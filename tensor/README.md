@@ -37,9 +37,7 @@ All tensor package functions are registered using a single name to function map 
 
 # Standard shapes and dimensional terminology
 
-In general, **1D** refers to a flat, 1-dimensional list, and **ND** is used by contrast to refer to the _2+_ dimensional case.
-
-There are various standard shapes of tensor data that different functions expect:
+In general, **1D** refers to a flat, 1-dimensional list.  There are various standard shapes of tensor data that different functions expect:
 
 * **Flat, 1D**: this is the simplest data shape.  For example, the [stats](stats) functions report summary statistics for all values of such data, across the one row-wise dimension.  `Indexed` views of this 1D data provide fine-grained filtering and sorting of all the data (indexes are only available for the outermost row dimension).
 
@@ -49,7 +47,59 @@ There are various standard shapes of tensor data that different functions expect
 
 * **Matrix 2D**: For matrix algebra functions, a 2D tensor is treated as a standard row-major 2D matrix, which can be processed using `gonum` based matrix and vector operations.
 
+# Cheat Sheet
 
+`ix` is the `Indexed` tensor for these examples:
+
+## Table Access
+
+### 1D
+
+```Go
+// 5th element in tensor regardless of shape:
+val := ix.Float1D(5)
+```
+
+```Go
+// value as a string regardless of underlying data type; numbers converted to strings.
+str := ix.String1D(2)
+```
+
+### 2D Row, Cell
+
+```Go
+// value at row 3, cell 2 (flat index into entire `SubSpace` tensor for this row)
+// The row index will be indirected through any `Indexes` present on the Indexed view.
+val := ix.FloatRowCell(3, 2)
+// string value at row 2, cell 0. this is safe for 1D and 2D+ shapes
+// and is a robust way to get 1D data from tensors of unknown shapes.
+str := ix.FloatRowCell(2, 0)
+```
+
+```Go
+// get the whole n-dimensional tensor of data cells at given row.
+// row is indirected through indexes.
+// the resulting tensor is a "subslice" view into the underlying data
+// so changes to it will automatically update the parent tensor.
+tsr := ix.RowTensor(4)
+....
+// set all n-dimensional tensor values at given row from given tensor.
+ix.SetRowTensor(tsr, 4) 
+```
+
+```Go
+// returns a flat, 1D Indexed view into n-dimensional tensor values at 
+// given row.  This is used in compute routines that operate generically
+// on the entire row as a flat pattern.
+ci := ix.Cells1D(5)
+```
+
+### Full N-dimensional Indexes
+
+```Go
+// for 3D data
+val := ix.Float(3,2,1)
+```
 
 # History
 

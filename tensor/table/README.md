@@ -6,13 +6,19 @@
 
 See [examples/dataproc](examples/dataproc) for a demo of how to use this system for data analysis, paralleling the example in [Python Data Science](https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html) using pandas, to see directly how that translates into this framework.
 
-Whereas an individual `Tensor` can only hold one data type, the `table` allows coordinated storage and processing of heterogeneous data types, aligned by the outermost row dimension. While the main data processing functions are defined on the individual tensors (which are the universal computational element in the `tensor` system), the coordinated row-wise indexing in the table is important for sorting or filtering a collection of data in the same way, and grouping data by a common set of "splits" for data analysis.  Plotting is also driven by the table, with one column providing a shared X axis for the rest of the columns.
+Whereas an individual `Tensor` can only hold one data type, the `Table` allows coordinated storage and processing of heterogeneous data types, aligned by the outermost row dimension. The main `tensor` data processing functions are defined on the individual tensors (which are the universal computational element in the `tensor` system), but the coordinated row-wise indexing in the table is important for sorting or filtering a collection of data in the same way, and grouping data by a common set of "splits" for data analysis.  Plotting is also driven by the table, with one column providing a shared X axis for the rest of the columns.
 
-As a general convention, it is safest, clearest, and quite fast to access columns by name instead of index (there is a map that caches the column indexes), so the base access method names generally take a column name argument, and those that take a column index have an `Index` suffix.
+The `Table` mainly provides "infrastructure" methods for adding tensor columns and CSV (comma separated values, and related tab separated values, TSV) file reading and writing.  Any function that can be performed on an individual column should be done using the `tensor.Indexed` and `Tensor` methods directly.
 
-The table itself stores raw data `tensor.Tensor` values, and the `Column` (by index) and `ColumnByName` methods return a `tensor.Indexed` with the `Indexes` pointing to the shared table-wide `Indexes` (which can be `nil` if standard sequential order is being used).  It is best to use the table-wise `Sort` and `Filter` methods (and any others that affect the indexes) to ensure the indexes are properly coordinated.  Resetting the column tensor indexes to `nil` (via the `Sequential` method) will break any connection to the table indexes, so that any subsequent index-altering operations on that indexed tensor will be fine.
+As a general convention, it is safest, clearest, and quite fast to access columns by name instead of index (there is a `map` from name to index), so the base access method names generally take a column name argument, and those that take a column index have an `Index` suffix.
 
-It is very low-cost to create a new View of a 
+The table itself stores raw data `tensor.Tensor` values, and the `Column` (by name) and `ColumnIndex` methods return a `tensor.Indexed` with the `Indexes` pointing to the shared table-wide `Indexes` (which can be `nil` if standard sequential order is being used).  
+
+If you call Sort, Filter or other routines on an individual column tensor, then you can grab the updated indexes via the `IndexesFromTensor` method so that they apply to the entire table.
+
+There are also multi-column `Sort` and `Filter` methods on the Table itself.
+
+It is very low-cost to create a new View of an existing Table, via `NewTableView`, as they can share the underlying `Columns` data.
 
 # Cheat Sheet
 
@@ -20,92 +26,25 @@ It is very low-cost to create a new View of a
 
 ## Table Access
 
-Scalar columns:
+Column data access:
 
 ```Go
-val := dt.Float("ColName", row)
+// FloatRowCell is method on the `tensor.Indexed` returned from `Column` method.
+// This is the best method to use in general for generic 1D data access,
+// as it works on any data from 1D on up (although it only samples the first value
+// from higher dimensional data) .
+val := dt.Column("Values").FloatRowCell(3, 0)
 ```
 
 ```Go
-str := dt.StringValue("ColName", row)
+dt.Column("Name").SetStringRowCell(4, 0)
 ```
 
-Tensor (higher-dimensional) columns:
+todo: more
 
-```Go
-tsr := dt.Tensor("ColName", row) // entire tensor at cell (a row-level SubSpace of column tensor)
-```
+## Sorting and Filtering
 
-```Go
-val := dt.TensorFloat1D("ColName", row, cellidx) // idx is 1D index into cell tensor
-```
-
-## Set Table Value
-
-```Go
-dt.SetFloat("ColName", row, val)
-```
-
-```Go
-dt.SetString("ColName", row, str)
-```
-
-Tensor (higher-dimensional) columns:
-
-```Go
-dt.SetTensor("ColName", row, tsr) // set entire tensor at cell 
-```
-
-```Go
-dt.SetTensorFloat1D("ColName", row, cellidx, val) // idx is 1D index into cell tensor
-```
-
-## Find Value(s) in Column
-
-Returns all rows where value matches given value, in string form (any number will convert to a string)
-
-```Go
-rows := dt.RowsByString("ColName", "value", etable.Contains, etable.IgnoreCase)
-```
-
-Other options are `etable.Equals` instead of `Contains` to search for an exact full string, and `etable.UseCase` if case should be used instead of ignored.
-
-## Index Views (Sort, Filter, etc)
-
-The [Indexed](https://godoc.org/github.com/goki/etable/v2/etable#Indexed) provides a list of row-wise indexes into a table, and Sorting, Filtering and Splitting all operate on this index view without changing the underlying table data, for maximum efficiency and flexibility.
-
-```Go
-ix := etable.NewIndexed(et) // new view with all rows
-```
-
-### Sort
-
-```Go
-ix.SortColumnName("Name", etable.Ascending) // etable.Ascending or etable.Descending
-SortedTable := ix.NewTable() // turn an Indexed back into a new Table organized in order of indexes
-```
-
-or:
-
-```Go
-nmcl := dt.Column("Name") // nmcl is an etensor of the Name column, cached
-ix.Sort(func(t *Table, i, j int) bool {
-	return nmcl.StringValue1D(i) < nmcl.StringValue1D(j)
-})
-```
-
-### Filter
-
-```Go
-nmcl := dt.Column("Name") // column we're filtering on
-ix.Filter(func(t *Table, row int) bool {
-	// filter return value is for what to *keep* (=true), not exclude
-	// here we keep any row with a name that contains the string "in"
-	return strings.Contains(nmcl.StringValue1D(row), "in")
-})
-```
-
-### Splits ("pivot tables" etc), Aggregation
+## Splits ("pivot tables" etc), Aggregation
 
 Create a table of mean values of "Data" column grouped by unique entries in "Name" column, resulting table will be called "DataMean":
 
