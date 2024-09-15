@@ -65,14 +65,15 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 	ntrial := ss.Config.Item("NTrial").AsInt()
 	sitems := ss.Stats.ValuesFunc(nil)
 	for _, st := range sitems {
-		lt := logd.NewOfType(st.Tensor.Metadata().GetName(), st.Tensor.DataType(), ntrial)
+		nm := st.Tensor.Metadata().GetName()
+		lt := logd.NewOfType(nm, st.Tensor.DataType(), ntrial)
 		lt.Tensor.Metadata().Copy(*st.Tensor.Metadata()) // key affordance: we get meta data from source
 		tensor.SetCalcFunc(lt.Tensor, func() error {
 			trl := ss.Stats.Item("Trial").AsInt()
 			if st.Tensor.IsString() {
-				lt.SetString1D(st.StringRowCell(0, 0), trl)
+				lt.SetStringRowCell(st.StringRowCell(0, 0), trl, 0)
 			} else {
-				lt.SetFloat1D(st.FloatRowCell(0, 0), trl)
+				lt.SetFloatRowCell(st.FloatRowCell(0, 0), trl, 0)
 			}
 			return nil
 		})
@@ -85,7 +86,7 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 	logd, _ := dir.Mkdir(level)
 	sitems := ss.Stats.ValuesFunc(nil)
 	nctr := ss.Config.Item("N" + level).AsInt()
-	stout := tensor.NewFloat64Scalar(0)
+	stout := tensor.NewFloat64Scalar(0) // tmp stat output
 	for _, st := range sitems {
 		if st.Tensor.IsString() {
 			continue
