@@ -101,7 +101,7 @@ func TestPCAIris(t *testing.T) {
 	// https://plot.ly/ipython-notebooks/principal-component-analysis/
 
 	dt := table.NewTable()
-	dt.AddFloat64TensorColumn("data", 4)
+	dt.AddFloat64Column("data", 4)
 	dt.AddStringColumn("class")
 	err := dt.OpenCSV("testdata/iris.data", tensor.Comma)
 	if err != nil {

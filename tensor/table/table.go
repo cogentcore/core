@@ -63,21 +63,18 @@ func NewTableView(src *Table) *Table {
 
 // IsValidRow returns error if the row is invalid, if error checking is needed.
 func (dt *Table) IsValidRow(row int) error {
-	if row < 0 || row >= dt.Rows() {
-		return fmt.Errorf("table.Table IsValidRow: row %d is out of valid range [0..%d]", row, dt.Rows())
+	if row < 0 || row >= dt.NumRows() {
+		return fmt.Errorf("table.Table IsValidRow: row %d is out of valid range [0..%d]", row, dt.NumRows())
 	}
 	return nil
 }
-
-// NumRows returns the number of rows.
-func (dt *Table) NumRows() int { return dt.Columns.Rows }
 
 // NumColumns returns the number of columns.
 func (dt *Table) NumColumns() int { return dt.Columns.Len() }
 
 // Column returns the tensor with given column name, as a [tensor.Indexed]
 // with the shared [Table.Indexes] from this table. It is best practice to
-// access columns by name, and direct access through Columns does not
+// access columns by name, and direct access through [Table.Columns] does not
 // provide the shared table-wide Indexes.
 // Returns nil if not found.
 func (dt *Table) Column(name string) *tensor.Indexed {
@@ -98,11 +95,11 @@ func (dt *Table) ColumnTry(name string) (*tensor.Indexed, error) {
 	return nil, fmt.Errorf("table.Table: Column named %q not found", name)
 }
 
-// ColumnIndex returns the tensor at the given index, as a [tensor.Indexed]
-// with the shared [Table.Indexes] from this table. It is best practice to
-// access columns by name using [Table.Column] method instead.
-// Direct access through Columns does not provide the shared table-wide Indexes.
-// Returns nil if not found.
+// ColumnIndex returns the tensor at the given column index,
+// as a [tensor.Indexed] with the shared [Table.Indexes] from this table.
+// It is best practice to instead access columns by name using [Table.Column].
+// Direct access through [Table.Columns} does not provide the shared table-wide Indexes.
+// Will panic if out of range.
 func (dt *Table) ColumnIndex(idx int) *tensor.Indexed {
 	cl := dt.Columns.Values[idx]
 	return tensor.NewIndexed(cl, dt.Indexes)
@@ -207,30 +204,32 @@ func (dt *Table) DeleteColumnIndex(i, j int) {
 
 // DeleteAll deletes all columns, does full reset.
 func (dt *Table) DeleteAll() {
+	dt.Indexes = nil
 	dt.Columns.Reset()
 }
 
-// AddRows adds n rows to end of underlying Table, and to the indexes in this view
+// AddRows adds n rows to end of underlying Table, and to the indexes in this view.
 func (dt *Table) AddRows(n int) *Table { //types:add
-	dt.Columns.SetNumRows(dt.Columns.Rows + n)
-	return dt
+	return dt.SetNumRows(dt.Columns.Rows + n)
 }
 
 // InsertRows adds n rows to end of underlying Table, and to the indexes starting at
 // given index in this view, providing an efficient insertion operation that only
-// exists in the indexed view.  To create an in-memory ordering, use [Table.NewTable].
+// exists in the indexed view. To create an in-memory ordering, use [Table.NewTable].
 func (dt *Table) InsertRows(at, n int) *Table {
 	dt.IndexesNeeded()
 	strow := dt.Columns.Rows
 	stidx := len(dt.Indexes)
-	dt.Columns.SetNumRows(strow + n) // adds n indexes to end of list
+	dt.SetNumRows(strow + n) // adds n indexes to end of list
 	// move those indexes to at:at+n in index list
 	dt.Indexes = append(dt.Indexes[:at], append(dt.Indexes[stidx:], dt.Indexes[at:]...)...)
+	dt.Indexes = dt.Indexes[:strow+n]
 	return dt
 }
 
-// SetNumRows sets the number of rows in the table, across all columns
-// if rows = 0 then effective number of rows in tensors is 1, as this dim cannot be 0
+// SetNumRows sets the number of rows in the table, across all columns.
+// If rows = 0 then effective number of rows in tensors is 1, as this dim cannot be 0.
+// If indexes are in place and rows are added, indexes for the new rows are added.
 func (dt *Table) SetNumRows(rows int) *Table { //types:add
 	strow := dt.Columns.Rows
 	dt.Columns.SetNumRows(rows)

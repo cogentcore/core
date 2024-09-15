@@ -63,13 +63,12 @@ func TestTensorString(t *testing.T) {
 	_, err = metadata.Get[string](*tsr.Metadata(), "type")
 	assert.Error(t, err)
 
-	var flt []float64
 	cln.SetString1D("3.14", 0)
 	assert.Equal(t, 3.14, cln.Float1D(0))
 
-	cln.Floats(&flt)
-	assert.Equal(t, 3.14, flt[0])
-	assert.Equal(t, 0.0, flt[1])
+	af := AsFloat64(cln)
+	assert.Equal(t, 3.14, af.Float1D(0))
+	assert.Equal(t, 0.0, af.Float1D(1))
 }
 
 func TestTensorFloat64(t *testing.T) {
@@ -116,17 +115,16 @@ func TestTensorFloat64(t *testing.T) {
 	tsr.SetNumRows(5)
 	assert.Equal(t, 20, tsr.Len())
 
-	var flt []float64
 	cln.SetString1D("3.14", 0)
 	assert.Equal(t, 3.14, cln.Float1D(0))
 
-	cln.Floats(&flt)
-	assert.Equal(t, 3.14, flt[0])
-	assert.Equal(t, 0.0, flt[1])
+	af := AsFloat64(cln)
+	assert.Equal(t, 3.14, af.Float1D(0))
+	assert.Equal(t, 0.0, af.Float1D(1))
 }
 
 func TestSlice(t *testing.T) {
-	ft := NewFloat64(3, 4, 5)
+	ft := NewFloat64Indexed(3, 4, 5)
 	for r := range 3 {
 		for y := range 4 {
 			for x := range 5 {
@@ -136,7 +134,7 @@ func TestSlice(t *testing.T) {
 		}
 	}
 	// fmt.Println(ft.String())
-	sf := NewFloat64()
+	sf := NewFloat64Indexed()
 	Slice(ft, sf, Range{}, Range{Start: 1, End: 2})
 	// fmt.Println(sf.String())
 	res := `Tensor: [3, 1, 5]
@@ -144,7 +142,7 @@ func TestSlice(t *testing.T) {
 [1 0]:     210     211     212     213     214 
 [2 0]:     310     311     312     313     314 
 `
-	assert.Equal(t, res, sf.String())
+	assert.Equal(t, res, sf.Tensor.String())
 
 	Slice(ft, sf, Range{}, Range{}, Range{Start: 1, End: 2})
 	// fmt.Println(sf.String())
@@ -162,5 +160,16 @@ func TestSlice(t *testing.T) {
 [2 2]:     321 
 [2 3]:     331 
 `
-	assert.Equal(t, res, sf.String())
+	assert.Equal(t, res, sf.Tensor.String())
+}
+
+func TestSortFilter(t *testing.T) {
+	tsr := NewFloat64Indexed(5)
+	for i := range 5 {
+		tsr.SetFloatRowCell(float64(i), i, 0)
+	}
+	tsr.Sort(Ascending)
+	assert.Equal(t, []int{0, 1, 2, 3, 4}, tsr.Indexes)
+	tsr.Sort(Descending)
+	assert.Equal(t, []int{4, 3, 2, 1, 0}, tsr.Indexes)
 }

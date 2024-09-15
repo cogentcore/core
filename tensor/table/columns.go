@@ -5,13 +5,11 @@
 package table
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/tensor"
 )
 
 // Columns is the underlying column list and number of rows for Table.
-// Table is an Indexed view onto the Columns.
+// [Table] is an Indexed view onto the Columns.
 type Columns struct {
 	tensor.List
 
@@ -25,16 +23,9 @@ func NewColumns() *Columns {
 	return &Columns{}
 }
 
-// IsValidRow returns error if the row is invalid
-func (cl *Columns) IsValidRow(row int) error {
-	if row < 0 || row >= cl.Rows {
-		return fmt.Errorf("table.Table IsValidRow: row %d is out of valid range [0..%d]", row, cl.Rows)
-	}
-	return nil
-}
-
-// SetNumRows sets the number of rows in the table, across all columns
-// if rows = 0 then effective number of rows in tensors is 1, as this dim cannot be 0
+// SetNumRows sets the number of rows in the table, across all columns.
+// If rows = 0 then the effective number of rows in tensors is 1,
+// as this dim cannot be 0.
 func (cl *Columns) SetNumRows(rows int) *Columns { //types:add
 	cl.Rows = rows // can be 0
 	rows = max(1, rows)

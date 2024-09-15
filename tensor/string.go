@@ -9,7 +9,6 @@ import (
 	"log"
 	"math"
 	"strconv"
-	"strings"
 
 	"gonum.org/v1/gonum/mat"
 )
@@ -62,6 +61,11 @@ func Float64ToString(val float64) string {
 	return strconv.FormatFloat(val, 'g', -1, 64)
 }
 
+// String satisfies the fmt.Stringer interface for string of tensor data.
+func (tsr *String) String() string {
+	return stringIndexed(tsr, nil)
+}
+
 func (tsr *String) IsString() bool {
 	return true
 }
@@ -78,31 +82,6 @@ func (tsr String) SetString1D(val string, off int) {
 func (tsr *String) SetStringRowCell(val string, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = val
-}
-
-// String satisfies the fmt.Stringer interface for string of tensor data
-func (tsr *String) String() string {
-	str := tsr.Label()
-	sz := len(tsr.Values)
-	if sz > 1000 {
-		return str
-	}
-	var b strings.Builder
-	b.WriteString(str)
-	b.WriteString("\n")
-	oddRow := true
-	rows, cols, _, _ := Projection2DShape(&tsr.shape, oddRow)
-	for r := 0; r < rows; r++ {
-		rc, _ := Projection2DCoords(&tsr.shape, oddRow, r, 0)
-		b.WriteString(fmt.Sprintf("%v: ", rc))
-		for c := 0; c < cols; c++ {
-			idx := Projection2DIndex(tsr.Shape(), oddRow, r, c)
-			vl := tsr.Values[idx]
-			b.WriteString(vl)
-		}
-		b.WriteString("\n")
-	}
-	return b.String()
 }
 
 func (tsr *String) Float(i ...int) float64 {

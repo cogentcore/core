@@ -38,6 +38,9 @@ type Tensor interface {
 	fmt.Stringer
 	mat.Matrix
 
+	// Label satisfies the core.Labeler interface for a summary description of the tensor.
+	Label() string
+
 	// Shape returns a pointer to the Shape that fully parametrizes
 	// the tensor shape.
 	Shape() *Shape

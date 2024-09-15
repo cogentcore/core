@@ -43,7 +43,7 @@ func (dt *Table) ConfigFromTable(ft *Table) error {
 	nmcol := ft.ColumnIndex(0)
 	tycol := ft.ColumnIndex(1)
 	var errs []error
-	for i := range ft.Rows() {
+	for i := range ft.NumRows() {
 		name := nmcol.String1D(i)
 		typ := strings.ToLower(tycol.String1D(i))
 		kind := reflect.Float64

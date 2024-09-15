@@ -51,7 +51,7 @@ func NFunc(tsr ...*tensor.Indexed) int {
 		return 0
 	}
 	a, b, out := tsr[0], tsr[1], tsr[nt-1]
-	na, nb := a.Rows(), b.Rows()
+	na, nb := a.NumRows(), b.NumRows()
 	osh := OutShape(a.Tensor.Shape())
 	out.Tensor.SetShape(osh.Sizes...)
 	out.Tensor.SetNames(osh.Names...)

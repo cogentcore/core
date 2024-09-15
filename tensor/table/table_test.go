@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"testing"
 
+	"cogentcore.org/core/tensor"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,7 +44,7 @@ func NewTestTable() *Table {
 	dt.AddFloat64Column("Flt64")
 	dt.AddIntColumn("Int")
 	dt.SetNumRows(3)
-	for i := range dt.Rows() {
+	for i := range dt.NumRows() {
 		dt.Column("Str").SetStringRowCell(strconv.Itoa(i), i, 0)
 		dt.Column("Flt64").SetFloatRowCell(float64(i), i, 0)
 		dt.Column("Int").SetFloatRowCell(float64(i), i, 0)
@@ -51,14 +52,14 @@ func NewTestTable() *Table {
 	return dt
 }
 
-func TestAppendRows(t *testing.T) {
+func TestAppendRowsEtc(t *testing.T) {
 	st := NewTestTable()
 	dt := NewTestTable()
 	dt.AppendRows(st)
 	dt.AppendRows(st)
 	dt.AppendRows(st)
 	for j := range 3 {
-		for i := range st.Rows() {
+		for i := range st.NumRows() {
 			sr := j*3 + i
 			ss := st.Column("Str").StringRowCell(i, 0)
 			ds := dt.Column("Str").StringRowCell(sr, 0)
@@ -73,4 +74,30 @@ func TestAppendRows(t *testing.T) {
 			assert.Equal(t, sf, df)
 		}
 	}
+	ixs := dt.RowsByString("Str", "1", Equals, UseCase)
+	assert.Equal(t, []int{1, 4, 7, 10}, ixs)
+
+	dt.IndexesNeeded()
+	dt.SortColumns(tensor.Descending, true, "Int", "Flt64")
+	assert.Equal(t, []int{2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9}, dt.Indexes)
+}
+
+func TestSetNumRows(t *testing.T) {
+	st := NewTestTable()
+	dt := NewTestTable()
+	dt.AppendRows(st)
+	dt.AppendRows(st)
+	dt.AppendRows(st)
+	dt.IndexesNeeded()
+	dt.SetNumRows(3)
+	assert.Equal(t, []int{0, 1, 2}, dt.Indexes)
+}
+
+func TestInsertDeleteRows(t *testing.T) {
+	dt := NewTestTable()
+	dt.IndexesNeeded()
+	dt.InsertRows(1, 2)
+	assert.Equal(t, []int{0, 3, 4, 1, 2}, dt.Indexes)
+	dt.DeleteRows(1, 2)
+	assert.Equal(t, []int{0, 1, 2}, dt.Indexes)
 }

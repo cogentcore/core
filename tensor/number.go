@@ -9,7 +9,6 @@ import (
 	"log"
 	"math"
 	"strconv"
-	"strings"
 
 	"cogentcore.org/core/base/num"
 	"gonum.org/v1/gonum/mat"
@@ -122,6 +121,11 @@ func NewNumberFromSlice[T num.Number](vals []T) Tensor {
 	return tsr
 }
 
+// String satisfies the fmt.Stringer interface for string of tensor data.
+func (tsr *Number[T]) String() string {
+	return stringIndexed(tsr, nil)
+}
+
 func (tsr *Number[T]) IsString() bool {
 	return false
 }
@@ -143,30 +147,6 @@ func (tsr *Number[T]) SetStringRowCell(val string, row, cell int) {
 		_, sz := tsr.shape.RowCellSize()
 		tsr.Values[row*sz+cell] = T(fv)
 	}
-}
-
-// String satisfies the fmt.Stringer interface for string of tensor data
-func (tsr *Number[T]) String() string {
-	str := tsr.Label()
-	sz := len(tsr.Values)
-	if sz > 1000 {
-		return str
-	}
-	var b strings.Builder
-	b.WriteString(str)
-	b.WriteString("\n")
-	oddRow := true
-	rows, cols, _, _ := Projection2DShape(&tsr.shape, oddRow)
-	for r := 0; r < rows; r++ {
-		rc, _ := Projection2DCoords(&tsr.shape, oddRow, r, 0)
-		b.WriteString(fmt.Sprintf("%v: ", rc))
-		for c := 0; c < cols; c++ {
-			vl := Projection2DValue(tsr, oddRow, r, c)
-			b.WriteString(fmt.Sprintf("%7g ", vl))
-		}
-		b.WriteString("\n")
-	}
-	return b.String()
 }
 
 func (tsr *Number[T]) Float(i ...int) float64 {

@@ -90,7 +90,7 @@ func SliceSize(sizes []int, ranges ...Range) ([]int, error) {
 // Use the [SliceSet] function to copy sliced values back to the original.
 func Slice(tsr, out *Indexed, ranges ...Range) error {
 	sizes := slices.Clone(tsr.Tensor.Shape().Sizes)
-	sizes[0] = tsr.Rows() // takes into account indexes
+	sizes[0] = tsr.NumRows() // takes into account indexes
 	nsz, err := SliceSize(sizes, ranges...)
 	if err != nil {
 		return err
@@ -129,7 +129,7 @@ func Slice(tsr, out *Indexed, ranges ...Range) error {
 // can be different).
 func SliceSet(tsr, slc *Indexed, ranges ...Range) error {
 	sizes := slices.Clone(tsr.Tensor.Shape().Sizes)
-	sizes[0] = tsr.Rows() // takes into account indexes
+	sizes[0] = tsr.NumRows() // takes into account indexes
 	nsz, err := SliceSize(sizes, ranges...)
 	if err != nil {
 		return err

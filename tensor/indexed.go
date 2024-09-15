@@ -11,7 +11,6 @@ import (
 	"math/rand"
 	"slices"
 	"sort"
-	"strings"
 )
 
 // Indexed is an indexed wrapper around a tensor.Tensor that provides a
@@ -93,12 +92,22 @@ func (ix *Indexed) Index(idx int) int {
 	return ix.Indexes[idx]
 }
 
+// String satisfies the fmt.Stringer interface for string of tensor data.
+func (ix *Indexed) String() string {
+	return stringIndexed(ix.Tensor, ix.Indexes)
+}
+
+// Label satisfies the core.Labeler interface for a summary description of the tensor.
+func (ix *Indexed) Label() string {
+	return ix.Tensor.Label()
+}
+
 // RowCellSize returns the size of the outermost Row shape dimension
 // (via [Indexed.Rows] method), and the size of all the remaining
 // inner dimensions (the "cell" size).
 func (ix *Indexed) RowCellSize() (rows, cells int) {
 	_, cells = ix.Tensor.RowCellSize()
-	rows = ix.Rows()
+	rows = ix.NumRows()
 	return
 }
 
@@ -112,10 +121,10 @@ func (ix *Indexed) RowCellIndex(idx int) (i1d, ri, ci int) {
 	return
 }
 
-// Rows returns the effective number of rows in this Indexed view,
+// NumRows returns the effective number of rows in this Indexed view,
 // which is the length of the index list or number of outer
-// rows dimension of tensor if no indexes.
-func (ix *Indexed) Rows() int {
+// rows dimension of tensor if no indexes (full sequential view).
+func (ix *Indexed) NumRows() int {
 	if ix.Indexes == nil {
 		return ix.Tensor.DimSize(0)
 	}
@@ -126,7 +135,7 @@ func (ix *Indexed) Rows() int {
 // taking into account the Indexes via [Rows],
 // as Rows() * cell size.
 func (ix *Indexed) Len() int {
-	rows := ix.Rows()
+	rows := ix.NumRows()
 	_, cells := ix.Tensor.RowCellSize()
 	return cells * rows
 }
@@ -138,7 +147,7 @@ func (ix *Indexed) DeleteInvalid() {
 		ix.Indexes = nil
 		return
 	}
-	ni := ix.Rows()
+	ni := ix.NumRows()
 	for i := ni - 1; i >= 0; i-- {
 		if ix.Indexes[i] >= ix.Tensor.DimSize(0) {
 			ix.Indexes = append(ix.Indexes[:i], ix.Indexes[i+1:]...)
@@ -180,7 +189,7 @@ func (ix *Indexed) ExcludeMissing1D() { //types:add
 		return
 	}
 	ix.IndexesNeeded()
-	ni := ix.Rows()
+	ni := ix.NumRows()
 	for i := ni - 1; i >= 0; i-- {
 		if math.IsNaN(ix.Float1D(ix.Indexes[i])) {
 			ix.Indexes = append(ix.Indexes[:i], ix.Indexes[i+1:]...)
@@ -205,11 +214,6 @@ func (ix *Indexed) Permuted() {
 	}
 }
 
-// AddIndex adds a new index to the list
-func (ix *Indexed) AddIndex(idx int) {
-	ix.Indexes = append(ix.Indexes, idx)
-}
-
 const (
 	// Ascending specifies an ascending sort direction for tensor Sort routines
 	Ascending = true
@@ -230,7 +234,7 @@ func (ix *Indexed) SortFunc(cmp func(tsr Tensor, i, j int) int) error {
 	}
 	ix.IndexesNeeded()
 	slices.SortFunc(ix.Indexes, func(a, b int) int {
-		return cmp(ix.Tensor, ix.Indexes[a], ix.Indexes[b])
+		return cmp(ix.Tensor, a, b) // key point: these are already indirected through indexes!!
 	})
 	return nil
 }
@@ -245,21 +249,11 @@ func (ix *Indexed) SortIndexes() {
 	sort.Ints(ix.Indexes)
 }
 
-// Sort compare function for string values.
-func CompareStrings(a, b string, ascending bool) int {
-	cmp := strings.Compare(a, b)
-	if !ascending {
-		cmp = -cmp
+func CompareAscending[T cmp.Ordered](a, b T, ascending bool) int {
+	if ascending {
+		return cmp.Compare(a, b)
 	}
-	return cmp
-}
-
-func CompareNumbers(a, b float64, ascending bool) int {
-	cmp := cmp.Compare(a, b)
-	if !ascending {
-		cmp = -cmp
-	}
-	return cmp
+	return cmp.Compare(b, a)
 }
 
 // Sort does default alpha or numeric sort of 1D tensor based on data type.
@@ -267,11 +261,11 @@ func CompareNumbers(a, b float64, ascending bool) int {
 func (ix *Indexed) Sort(ascending bool) error {
 	if ix.Tensor.IsString() {
 		ix.SortFunc(func(tsr Tensor, i, j int) int {
-			return CompareStrings(tsr.String1D(i), tsr.String1D(j), ascending)
+			return CompareAscending(tsr.String1D(i), tsr.String1D(j), ascending)
 		})
 	} else {
 		ix.SortFunc(func(tsr Tensor, i, j int) int {
-			return CompareNumbers(tsr.Float1D(i), tsr.Float1D(j), ascending)
+			return CompareAscending(tsr.Float1D(i), tsr.Float1D(j), ascending)
 		})
 	}
 	return nil
@@ -290,7 +284,7 @@ func (ix *Indexed) SortStableFunc(cmp func(tsr Tensor, i, j int) int) error {
 	}
 	ix.IndexesNeeded()
 	slices.SortStableFunc(ix.Indexes, func(a, b int) int {
-		return cmp(ix.Tensor, ix.Indexes[a], ix.Indexes[b])
+		return cmp(ix.Tensor, a, b) // key point: these are already indirected through indexes!!
 	})
 	return nil
 }
@@ -301,11 +295,11 @@ func (ix *Indexed) SortStableFunc(cmp func(tsr Tensor, i, j int) int) error {
 func (ix *Indexed) SortStable(ascending bool) error {
 	if ix.Tensor.IsString() {
 		ix.SortStableFunc(func(tsr Tensor, i, j int) int {
-			return CompareStrings(tsr.String1D(i), tsr.String1D(j), ascending)
+			return CompareAscending(tsr.String1D(i), tsr.String1D(j), ascending)
 		})
 	} else {
 		ix.SortStableFunc(func(tsr Tensor, i, j int) int {
-			return CompareNumbers(tsr.Float1D(i), tsr.Float1D(j), ascending)
+			return CompareAscending(tsr.Float1D(i), tsr.Float1D(j), ascending)
 		})
 	}
 	return nil

@@ -9,6 +9,8 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	"cogentcore.org/core/tensor"
 )
 
 // Index returns the actual index into underlying tensor row based on given
@@ -20,9 +22,9 @@ func (dt *Table) Index(idx int) int {
 	return dt.Indexes[idx]
 }
 
-// Rows returns the number of rows, which is the number of Indexes if present,
-// else actual number of rows in Tensor data.
-func (dt *Table) Rows() int {
+// NumRows returns the number of rows, which is the number of Indexes if present,
+// else actual number of [Columns.Rows].
+func (dt *Table) NumRows() int {
 	if dt.Indexes == nil {
 		return dt.Columns.Rows
 	}
@@ -55,7 +57,7 @@ func (dt *Table) DeleteInvalid() {
 		dt.Indexes = nil
 		return
 	}
-	ni := dt.Rows()
+	ni := dt.NumRows()
 	for i := ni - 1; i >= 0; i-- {
 		if dt.Indexes[i] >= dt.Columns.Rows {
 			dt.Indexes = append(dt.Indexes[:i], dt.Indexes[i+1:]...)
@@ -80,11 +82,6 @@ func (dt *Table) Permuted() {
 	}
 }
 
-// AddIndex adds a new index to the list
-func (dt *Table) AddIndex(idx int) {
-	dt.Indexes = append(dt.Indexes, idx)
-}
-
 // SortFunc sorts the indexes into our Table using given compare function.
 // The compare function operates directly on row numbers into the Table
 // as these row numbers have already been projected through the indexes.
@@ -93,7 +90,7 @@ func (dt *Table) AddIndex(idx int) {
 func (dt *Table) SortFunc(cmp func(dt *Table, i, j int) int) {
 	dt.IndexesNeeded()
 	slices.SortFunc(dt.Indexes, func(a, b int) int {
-		return cmp(dt, dt.Indexes[a], dt.Indexes[b])
+		return cmp(dt, a, b) // key point: these are already indirected through indexes!!
 	})
 }
 
@@ -105,19 +102,6 @@ func (dt *Table) SortIndexes() {
 		return
 	}
 	sort.Ints(dt.Indexes)
-}
-
-// SortColumn sorts the indexes into our Table according to values in
-// given column name, using either ascending or descending order.
-// Only valid for 1-dimensional columns.
-// Returns error if column name not found or column is not 1D.
-func (dt *Table) SortColumn(column string, ascending bool) error { //types:add
-	dt.IndexesNeeded()
-	cl, err := dt.ColumnTry(column) // has our indexes
-	if err != nil {
-		return err
-	}
-	return cl.Sort(ascending)
 }
 
 // SortColumns sorts the indexes into our Table according to values in
@@ -148,34 +132,16 @@ func (dt *Table) SortColumnIndexes(ascending, stable bool, colIndexes ...int) {
 	}
 	sf(func(dt *Table, i, j int) int {
 		for _, ci := range colIndexes {
-			cl := dt.Columns.Values[ci]
+			cl := dt.ColumnIndex(ci).Tensor
 			if cl.IsString() {
-				if ascending {
-					if cl.String1D(i) < cl.String1D(j) {
-						return 1
-					} else if cl.String1D(i) > cl.String1D(j) {
-						return -1
-					} // if equal, fallthrough to next col
-				} else {
-					if cl.String1D(i) > cl.String1D(j) {
-						return 1
-					} else if cl.String1D(i) < cl.String1D(j) {
-						return -1
-					} // if equal, fallthrough to next col
+				v := tensor.CompareAscending(cl.StringRowCell(i, 0), cl.StringRowCell(j, 0), ascending)
+				if v != 0 {
+					return v
 				}
 			} else {
-				if ascending {
-					if cl.Float1D(i) < cl.Float1D(j) {
-						return 1
-					} else if cl.Float1D(i) > cl.Float1D(j) {
-						return -1
-					} // if equal, fallthrough to next col
-				} else {
-					if cl.Float1D(i) > cl.Float1D(j) {
-						return 1
-					} else if cl.Float1D(i) < cl.Float1D(j) {
-						return -1
-					} // if equal, fallthrough to next col
+				v := tensor.CompareAscending(cl.FloatRowCell(i, 0), cl.FloatRowCell(j, 0), ascending)
+				if v != 0 {
+					return v
 				}
 			}
 		}
@@ -196,7 +162,7 @@ func (dt *Table) SortColumnIndexes(ascending, stable bool, colIndexes ...int) {
 func (dt *Table) SortStableFunc(cmp func(dt *Table, i, j int) int) {
 	dt.IndexesNeeded()
 	slices.SortStableFunc(dt.Indexes, func(a, b int) int {
-		return cmp(dt, dt.Indexes[a], dt.Indexes[b])
+		return cmp(dt, a, b) // key point: these are already indirected through indexes!!
 	})
 }
 
@@ -289,7 +255,9 @@ func (dt *Table) NewTable() *Table {
 	return nt
 }
 
-// DeleteRows deletes n rows of indexes starting at given index in the list of indexes
+// DeleteRows deletes n rows of Indexes starting at given index in the list of indexes.
+// This does not affect the underlying tensor data; To create an actual in-memory
+// ordering with rows deleted, use [Table.NewTable].
 func (dt *Table) DeleteRows(at, n int) {
 	dt.IndexesNeeded()
 	dt.Indexes = append(dt.Indexes[:at], dt.Indexes[at+n:]...)
@@ -307,10 +275,11 @@ const (
 	UseCase = false
 )
 
-// RowsByString returns the list of *our indexes* whose row in the table has
-// given string value in given column name (de-reference our indexes to get actual row).
-// if contains, only checks if row contains string; if ignoreCase, ignores case.
-// Use named args for greater clarity.
+// RowsByString returns the list of row _indexes_ (not necessarily underlying row numbers,
+// if Indexes are in place) whose row in the table has given string value in given column name.
+// The results can be used as row indexes to Indexed tensor column data.
+// If contains, only checks if row contains string; if ignoreCase, ignores case.
+// Use the named const args [Contains], [Equals], [IgnoreCase], [UseCase] for greater clarity.
 func (dt *Table) RowsByString(colname string, str string, contains, ignoreCase bool) []int {
 	col := dt.Column(colname)
 	if col == nil {
@@ -318,10 +287,10 @@ func (dt *Table) RowsByString(colname string, str string, contains, ignoreCase b
 	}
 	lowstr := strings.ToLower(str)
 	var indexes []int
-	rows := dt.Rows()
+	rows := dt.NumRows()
 	for idx := range rows {
 		srw := dt.Index(idx)
-		val := col.Tensor.String1D(srw)
+		val := col.Tensor.StringRowCell(srw, 0)
 		has := false
 		switch {
 		case contains && ignoreCase:

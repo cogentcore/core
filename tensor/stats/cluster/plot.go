@@ -27,7 +27,7 @@ func Plot(pt *table.Table, root *Node, dmat, labels *tensor.Indexed) {
 // will render this node in a cluster plot when plotted with a standard plotting package.
 // The lines double-back on themselves to form a continuous line to be plotted.
 func (nn *Node) Plot(pt *table.Table, dmat, labels *tensor.Indexed) {
-	row := pt.Rows()
+	row := pt.NumRows()
 	xc := pt.ColumnIndex(0)
 	yc := pt.ColumnIndex(1)
 	lbl := pt.ColumnIndex(2)
@@ -47,7 +47,7 @@ func (nn *Node) Plot(pt *table.Table, dmat, labels *tensor.Indexed) {
 			xc.SetFloatRowCell(nn.ParDist+nn.Dist, row, 0)
 			yc.SetFloatRowCell(kn.Y, row, 0)
 			kn.Plot(pt, dmat, labels)
-			row = pt.Rows()
+			row = pt.NumRows()
 			pt.SetNumRows(row + 1)
 			xc.SetFloatRowCell(nn.ParDist, row, 0)
 			yc.SetFloatRowCell(kn.Y, row, 0)

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
-	"strings"
 
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/reflectx"
@@ -58,6 +57,11 @@ func BoolToFloat64(bv bool) float64 {
 	} else {
 		return 0
 	}
+}
+
+// String satisfies the fmt.Stringer interface for string of tensor data.
+func (tsr *Bits) String() string {
+	return stringIndexed(tsr, nil)
 }
 
 func (tsr *Bits) IsString() bool {
@@ -328,28 +332,4 @@ func (tsr *Bits) At(i, j int) float64 {
 func (tsr *Bits) T() mat.Matrix {
 	slog.Error("tensor T gonum Matrix call made on Bits Tensor; not supported")
 	return mat.Transpose{tsr}
-}
-
-// String satisfies the fmt.Stringer interface for string of tensor data
-func (tsr *Bits) String() string {
-	str := tsr.Label()
-	sz := tsr.Len()
-	if sz > 1000 {
-		return str
-	}
-	var b strings.Builder
-	b.WriteString(str)
-	b.WriteString("\n")
-	oddRow := true
-	rows, cols, _, _ := Projection2DShape(&tsr.shape, oddRow)
-	for r := 0; r < rows; r++ {
-		rc, _ := Projection2DCoords(&tsr.shape, oddRow, r, 0)
-		b.WriteString(fmt.Sprintf("%v: ", rc))
-		for c := 0; c < cols; c++ {
-			vl := Projection2DValue(tsr, oddRow, r, c)
-			b.WriteString(fmt.Sprintf("%g ", vl))
-		}
-		b.WriteString("\n")
-	}
-	return b.String()
 }

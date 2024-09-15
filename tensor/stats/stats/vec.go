@@ -79,7 +79,7 @@ func NFunc(tsr ...*tensor.Indexed) int {
 		return 0
 	}
 	in, out := tsr[0], tsr[nt-1]
-	n := in.Rows()
+	n := in.NumRows()
 	osh := OutShape(in.Tensor.Shape())
 	out.Tensor.SetShape(osh.Sizes...)
 	out.Tensor.SetNames(osh.Names...)

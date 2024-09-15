@@ -334,7 +334,7 @@ func (dt *Table) WriteCSV(w io.Writer, delim tensor.Delims, headers bool) error 
 	}
 	cw := csv.NewWriter(w)
 	cw.Comma = delim.Rune()
-	nrow := dt.Rows()
+	nrow := dt.NumRows()
 	for ri := range nrow {
 		ix := dt.Index(ri)
 		err = dt.WriteCSVRowWriter(cw, ix, ncol)

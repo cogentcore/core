@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 	"unsafe"
 
 	"cogentcore.org/core/base/metadata"
@@ -139,9 +140,15 @@ func (tsr *Base[T]) StringRowCell(row, cell int) string {
 	return reflectx.ToString(tsr.Values[row*sz+cell])
 }
 
-// Label satisfies the core.Labeler interface for a summary description of the tensor
+// Label satisfies the core.Labeler interface for a summary description of the tensor.
 func (tsr *Base[T]) Label() string {
-	return fmt.Sprintf("Tensor: %s", tsr.shape.String())
+	nm, _ := metadata.Get[string](tsr.Meta, "name")
+	if nm != "" {
+		nm += " " + tsr.shape.String()
+	} else {
+		nm = tsr.shape.String()
+	}
+	return fmt.Sprintf("Tensor: %s", nm)
 }
 
 // Dims is the gonum/mat.Matrix interface method for returning the dimensionality of the
@@ -182,4 +189,39 @@ func (tsr *Base[T]) SymmetricDim() int {
 		return 0
 	}
 	return tsr.shape.DimSize(nd - 1)
+}
+
+// stringIndexed is the underlying impl of String that works for indexed
+// data as well.
+func stringIndexed(tsr Tensor, idxs []int) string {
+	str := tsr.Label()
+	sz := tsr.Len()
+	if sz > 1000 {
+		return str
+	}
+	var b strings.Builder
+	b.WriteString(str)
+	b.WriteString("\n")
+	oddRow := true
+	rows, cols, _, _ := Projection2DShape(tsr.Shape(), oddRow)
+	if idxs != nil {
+		rows = min(rows, len(idxs))
+	}
+	for r := range rows {
+		rc, _ := Projection2DCoords(tsr.Shape(), oddRow, r, 0)
+		b.WriteString(fmt.Sprintf("%v: ", rc))
+		ri := r
+		if idxs != nil {
+			ri = idxs[r]
+		}
+		for c := 0; c < cols; c++ {
+			if tsr.IsString() {
+				b.WriteString(fmt.Sprintf("%s ", Projection2DString(tsr, oddRow, ri, c)))
+			} else {
+				b.WriteString(fmt.Sprintf("%7g ", Projection2DValue(tsr, oddRow, ri, c)))
+			}
+		}
+		b.WriteString("\n")
+	}
+	return b.String()
 }

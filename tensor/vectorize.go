@@ -112,7 +112,7 @@ func NFirstRows(tsr ...*Indexed) int {
 	if len(tsr) == 0 {
 		return 0
 	}
-	return tsr[0].Rows()
+	return tsr[0].NumRows()
 }
 
 // NFirstLen is an N function for Vectorize that returns the number of
