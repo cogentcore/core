@@ -130,6 +130,8 @@ func (tsr *Number[T]) IsString() bool {
 	return false
 }
 
+/////////////////////  Strings
+
 func (tsr *Number[T]) SetString(val string, i ...int) {
 	if fv, err := strconv.ParseFloat(val, 64); err == nil {
 		tsr.Values[tsr.shape.Offset(i...)] = T(fv)
@@ -148,6 +150,8 @@ func (tsr *Number[T]) SetStringRowCell(val string, row, cell int) {
 		tsr.Values[row*sz+cell] = T(fv)
 	}
 }
+
+/////////////////////  Floats
 
 func (tsr *Number[T]) Float(i ...int) float64 {
 	return float64(tsr.Values[tsr.shape.Offset(i...)])
@@ -172,6 +176,35 @@ func (tsr *Number[T]) FloatRowCell(row, cell int) float64 {
 }
 
 func (tsr *Number[T]) SetFloatRowCell(val float64, row, cell int) {
+	_, sz := tsr.shape.RowCellSize()
+	tsr.Values[row*sz+cell] = T(val)
+}
+
+/////////////////////  Ints
+
+func (tsr *Number[T]) Int(i ...int) int {
+	return int(tsr.Values[tsr.shape.Offset(i...)])
+}
+
+func (tsr *Number[T]) SetInt(val int, i ...int) {
+	tsr.Values[tsr.shape.Offset(i...)] = T(val)
+}
+
+func (tsr *Number[T]) Int1D(i int) int {
+	return int(tsr.Values[i])
+}
+
+func (tsr *Number[T]) SetInt1D(val int, i int) {
+	tsr.Values[i] = T(val)
+}
+
+func (tsr *Number[T]) IntRowCell(row, cell int) int {
+	_, sz := tsr.shape.RowCellSize()
+	i := row*sz + cell
+	return int(tsr.Values[i])
+}
+
+func (tsr *Number[T]) SetIntRowCell(val int, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = T(val)
 }

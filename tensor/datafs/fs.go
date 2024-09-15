@@ -173,8 +173,8 @@ func (d *Data) Mode() fs.FileMode {
 
 // Sys returns the Dir or Value
 func (d *Data) Sys() any {
-	if d.Value != nil {
-		return d.Value
+	if d.Data != nil {
+		return d.Data
 	}
 	return d.Dir
 }

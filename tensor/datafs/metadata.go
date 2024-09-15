@@ -6,7 +6,7 @@ package datafs
 
 import (
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/metadata"
+	"cogentcore.org/core/tensor"
 )
 
 // This file provides standardized metadata options for frequent
@@ -22,37 +22,14 @@ func (d *Data) SetMetaItems(key string, value any, names ...string) error {
 	return err
 }
 
-// SetCalcFunc sets a function to compute an updated Value for this Value item.
-// Function is stored as CalcFunc in Metadata.  Can be called by [Data.Calc] method.
-func (d *Data) SetCalcFunc(fun func() error) {
-	if d.Data == nil {
-		return
-	}
-	d.Data.Tensor.Metadata().Set("CalcFunc", fun)
-}
-
-// Calc calls function set by [Data.SetCalcFunc] to compute an updated Value
-// for this data item. Returns an error if func not set, or any error from func itself.
-// Function is stored as CalcFunc in Metadata.
-func (d *Data) Calc() error {
-	if d.Data == nil {
-		return nil
-	}
-	fun, err := metadata.Get[func() error](*d.Data.Tensor.Metadata(), "CalcFunc")
-	if err != nil {
-		return err
-	}
-	return fun()
-}
-
 // CalcAll calls function set by [Data.SetCalcFunc] for all items
 // in this directory and all of its subdirectories.
 // Calls Calc on items from FlatItemsFunc(nil)
 func (d *Data) CalcAll() error {
 	var errs []error
-	items := d.FlatItemsFunc(nil)
+	items := d.FlatValuesFunc(nil)
 	for _, it := range items {
-		err := it.Calc()
+		err := tensor.Calc(it.Tensor)
 		if err != nil {
 			errs = append(errs, err)
 		}

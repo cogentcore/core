@@ -101,12 +101,13 @@ func (co *ColumnOptions) fromMetaMap(meta metadata.Data) {
 	}
 }
 
-// PlotColumnZeroOne returns plot options with a fixed 0-1 range
-func PlotColumnZeroOne() *ColumnOptions {
+// PlotColumnZeroOne returns plot options with a fixed 0-1 range,
+// and the standard key: "PlotColumnOptions"
+func PlotColumnZeroOne() (*ColumnOptions, string) {
 	opts := &ColumnOptions{}
 	opts.Range.SetMin(0)
 	opts.Range.SetMax(1)
-	return opts
+	return opts, "PlotColumnOptions"
 }
 
 // SetPlotColumnOptions sets given plotting options for named items

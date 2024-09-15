@@ -10,6 +10,7 @@ import (
 	"reflect"
 
 	"cogentcore.org/core/base/metadata"
+	"cogentcore.org/core/base/num"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/tensor/bitslice"
@@ -43,20 +44,24 @@ func NewBitsShape(shape *Shape) *Bits {
 	return tsr
 }
 
+// Float64ToBool converts float64 value to bool.
 func Float64ToBool(val float64) bool {
-	bv := true
-	if val == 0 {
-		bv = false
-	}
-	return bv
+	return num.ToBool(val)
 }
 
+// BoolToFloat64 converts bool to float64 value.
 func BoolToFloat64(bv bool) float64 {
-	if bv {
-		return 1
-	} else {
-		return 0
-	}
+	return num.FromBool[float64](bv)
+}
+
+// IntToBool converts int value to bool.
+func IntToBool(val int) bool {
+	return num.ToBool(val)
+}
+
+// BoolToInt converts bool to int value.
+func BoolToInt(bv bool) int {
+	return num.FromBool[int](bv)
 }
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
@@ -155,12 +160,16 @@ func (tsr *Bits) SetRowTensor(val Tensor, row int) {
 
 }
 
-func (tsr *Bits) Float(i ...int) float64 {
-	return BoolToFloat64(tsr.Values.Index(tsr.shape.Offset(i...)))
+/////////////////////  Strings
+
+func (tsr *Bits) String1D(off int) string {
+	return reflectx.ToString(tsr.Values.Index(off))
 }
 
-func (tsr *Bits) SetFloat(val float64, i ...int) {
-	tsr.Values.Set(Float64ToBool(val), tsr.shape.Offset(i...))
+func (tsr *Bits) SetString1D(val string, off int) {
+	if bv, err := reflectx.ToBool(val); err == nil {
+		tsr.Values.Set(bv, off)
+	}
 }
 
 func (tsr *Bits) StringValue(i ...int) string {
@@ -171,6 +180,28 @@ func (tsr *Bits) SetString(val string, i ...int) {
 	if bv, err := reflectx.ToBool(val); err == nil {
 		tsr.Values.Set(bv, tsr.shape.Offset(i...))
 	}
+}
+
+func (tsr *Bits) StringRowCell(row, cell int) string {
+	_, sz := tsr.RowCellSize()
+	return reflectx.ToString(tsr.Values.Index(row*sz + cell))
+}
+
+func (tsr *Bits) SetStringRowCell(val string, row, cell int) {
+	if bv, err := reflectx.ToBool(val); err == nil {
+		_, sz := tsr.RowCellSize()
+		tsr.Values.Set(bv, row*sz+cell)
+	}
+}
+
+/////////////////////  Floats
+
+func (tsr *Bits) Float(i ...int) float64 {
+	return BoolToFloat64(tsr.Values.Index(tsr.shape.Offset(i...)))
+}
+
+func (tsr *Bits) SetFloat(val float64, i ...int) {
+	tsr.Values.Set(Float64ToBool(val), tsr.shape.Offset(i...))
 }
 
 func (tsr *Bits) Float1D(off int) float64 {
@@ -191,26 +222,32 @@ func (tsr *Bits) SetFloatRowCell(val float64, row, cell int) {
 	tsr.Values.Set(Float64ToBool(val), row*sz+cell)
 }
 
-func (tsr *Bits) String1D(off int) string {
-	return reflectx.ToString(tsr.Values.Index(off))
+/////////////////////  Ints
+
+func (tsr *Bits) Int(i ...int) int {
+	return BoolToInt(tsr.Values.Index(tsr.shape.Offset(i...)))
 }
 
-func (tsr *Bits) SetString1D(val string, off int) {
-	if bv, err := reflectx.ToBool(val); err == nil {
-		tsr.Values.Set(bv, off)
-	}
+func (tsr *Bits) SetInt(val int, i ...int) {
+	tsr.Values.Set(IntToBool(val), tsr.shape.Offset(i...))
 }
 
-func (tsr *Bits) StringRowCell(row, cell int) string {
+func (tsr *Bits) Int1D(off int) int {
+	return BoolToInt(tsr.Values.Index(off))
+}
+
+func (tsr *Bits) SetInt1D(val int, off int) {
+	tsr.Values.Set(IntToBool(val), off)
+}
+
+func (tsr *Bits) IntRowCell(row, cell int) int {
 	_, sz := tsr.RowCellSize()
-	return reflectx.ToString(tsr.Values.Index(row*sz + cell))
+	return BoolToInt(tsr.Values.Index(row*sz + cell))
 }
 
-func (tsr *Bits) SetStringRowCell(val string, row, cell int) {
-	if bv, err := reflectx.ToBool(val); err == nil {
-		_, sz := tsr.RowCellSize()
-		tsr.Values.Set(bv, row*sz+cell)
-	}
+func (tsr *Bits) SetIntRowCell(val int, row, cell int) {
+	_, sz := tsr.RowCellSize()
+	tsr.Values.Set(IntToBool(val), row*sz+cell)
 }
 
 // Label satisfies the core.Labeler interface for a summary description of the tensor

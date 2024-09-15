@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/metadata"
 )
 
 // StringFirstArg should be used to set StringFirst functions
@@ -264,4 +265,22 @@ func (fn *Func) CallOut(tsr ...*Indexed) ([]*Indexed, error) {
 	tsr = append(tsr, outs...)
 	err := fn.Call(tsr...)
 	return outs, err
+}
+
+// SetCalcFunc sets a function to calculate updated value for given tensor,
+// storing the function pointer in the Metadata "CalcFunc" key for the tensor.
+// Can be called by [Calc] function.
+func SetCalcFunc(tsr Tensor, fun func() error) {
+	tsr.Metadata().Set("CalcFunc", fun)
+}
+
+// Calc calls function set by [SetCalcFunc] to compute an updated value for
+// given tensor. Returns an error if func not set, or any error from func itself.
+// Function is stored as CalcFunc in Metadata.
+func Calc(tsr Tensor) error {
+	fun, err := metadata.Get[func() error](*tsr.Metadata(), "CalcFunc")
+	if err != nil {
+		return err
+	}
+	return fun()
 }

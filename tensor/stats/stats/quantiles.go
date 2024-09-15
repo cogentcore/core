@@ -27,7 +27,7 @@ func QuantilesFunc(in, qs, out *tensor.Indexed) error {
 		return errors.Log(errors.New("stats.QuantilesFunc: only 1D quantile tensors allowed"))
 	}
 	sin := in.Clone()
-	sin.ExcludeMissing1D()
+	sin.ExcludeMissing()
 	sin.Sort(tensor.Ascending)
 	sz := len(sin.Indexes) - 1 // length of our own index list
 	fsz := float64(sz)

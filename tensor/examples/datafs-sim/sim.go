@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/databrowser"
 	"cogentcore.org/core/tensor/datafs"
@@ -26,9 +26,9 @@ type Sim struct {
 
 // ConfigAll configures the sim
 func (ss *Sim) ConfigAll() {
-	ss.Root = errors.Log1(datafs.NewDir("Root"))
-	ss.Config = errors.Log1(ss.Root.Mkdir("Config"))
-	datafs.New[int](ss.Config, "NRun", "NEpoch", "NTrial")
+	ss.Root, _ = datafs.NewDir("Root")
+	ss.Config, _ = ss.Root.Mkdir("Config")
+	datafs.NewScalar[int](ss.Config, "NRun", "NEpoch", "NTrial")
 	ss.Config.Item("NRun").SetInt(5)
 	ss.Config.Item("NEpoch").SetInt(20)
 	ss.Config.Item("NTrial").SetInt(25)
@@ -39,21 +39,21 @@ func (ss *Sim) ConfigAll() {
 
 // ConfigStats adds basic stats that we record for our simulation.
 func (ss *Sim) ConfigStats(dir *datafs.Data) *datafs.Data {
-	stats := errors.Log1(dir.Mkdir("Stats"))
-	errors.Log1(datafs.New[int](stats, "Run", "Epoch", "Trial")) // counters
-	errors.Log1(datafs.New[string](stats, "TrialName"))
-	errors.Log1(datafs.New[float32](stats, "SSE", "AvgSSE", "TrlErr"))
-	z1 := datafs.PlotColumnZeroOne()
-	stats.SetPlotColumnOptions(z1, "AvgErr", "TrlErr")
-	zmax := datafs.PlotColumnZeroOne()
+	stats, _ := dir.Mkdir("Stats")
+	datafs.NewScalar[int](stats, "Run", "Epoch", "Trial") // counters
+	datafs.NewScalar[string](stats, "TrialName")
+	datafs.NewScalar[float32](stats, "SSE", "AvgSSE", "TrlErr")
+	z1, key := plotcore.PlotColumnZeroOne()
+	stats.SetMetaItems(key, z1, "AvgErr", "TrlErr")
+	zmax, _ := plotcore.PlotColumnZeroOne()
 	zmax.Range.FixMax = false
-	stats.SetPlotColumnOptions(z1, "SSE")
+	stats.SetMetaItems(key, z1, "SSE")
 	return stats
 }
 
 // ConfigLogs adds first-level logging of stats into tensors
 func (ss *Sim) ConfigLogs(dir *datafs.Data) *datafs.Data {
-	logd := errors.Log1(dir.Mkdir("Log"))
+	logd, _ := dir.Mkdir("Log")
 	trial := ss.ConfigTrialLog(logd)
 	ss.ConfigAggLog(logd, "Epoch", trial, stats.Mean, stats.Sem, stats.Min)
 	return logd
@@ -61,22 +61,18 @@ func (ss *Sim) ConfigLogs(dir *datafs.Data) *datafs.Data {
 
 // ConfigTrialLog adds first-level logging of stats into tensors
 func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
-	logd := errors.Log1(dir.Mkdir("Trial"))
-	ntrial, _ := ss.Config.Item("NTrial").AsInt()
-	sitems := ss.Stats.ItemsByTimeFunc(nil)
+	logd, _ := dir.Mkdir("Trial")
+	ntrial := ss.Config.Item("NTrial").AsInt()
+	sitems := ss.Stats.ValuesFunc(nil)
 	for _, st := range sitems {
-		dt := errors.Log1(datafs.NewData(logd, st.Name()))
-		tsr := tensor.NewOfType(st.DataType(), []int{ntrial}, "row")
-		dt.Value = tsr
-		dt.Meta.Copy(st.Meta) // key affordance: we get meta data from source
-		dt.SetCalcFunc(func() error {
-			trl, _ := ss.Stats.Item("Trial").AsInt()
-			if st.IsNumeric() {
-				v, _ := st.AsFloat64()
-				tsr.SetFloat1D(trl, v)
+		lt := logd.NewOfType(st.Tensor.Metadata().GetName(), st.Tensor.DataType(), ntrial)
+		lt.Tensor.Metadata().Copy(*st.Tensor.Metadata()) // key affordance: we get meta data from source
+		tensor.SetCalcFunc(lt.Tensor, func() error {
+			trl := ss.Stats.Item("Trial").AsInt()
+			if st.Tensor.IsString() {
+				lt.SetString1D(st.StringRowCell(0, 0), trl)
 			} else {
-				v, _ := st.AsString()
-				tsr.SetString1D(trl, v)
+				lt.SetFloat1D(st.FloatRowCell(0, 0), trl)
 			}
 			return nil
 		})
@@ -86,38 +82,35 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 
 // ConfigAggLog adds a higher-level logging of lower-level into higher-level tensors
 func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, aggs ...stats.Stats) *datafs.Data {
-	logd := errors.Log1(dir.Mkdir(level))
-	sitems := ss.Stats.ItemsByTimeFunc(nil)
-	nctr, _ := ss.Config.Item("N" + level).AsInt()
+	logd, _ := dir.Mkdir(level)
+	sitems := ss.Stats.ValuesFunc(nil)
+	nctr := ss.Config.Item("N" + level).AsInt()
+	stout := tensor.NewFloat64Scalar(0)
 	for _, st := range sitems {
-		if !st.IsNumeric() {
+		if st.Tensor.IsString() {
 			continue
 		}
-		src := from.Item(st.Name()).AsTensor()
-		if st.DataType() >= reflect.Float32 {
-			dd := errors.Log1(logd.Mkdir(st.Name()))
+		nm := st.Tensor.Metadata().GetName()
+		src := from.Value(nm)
+		if st.Tensor.DataType() >= reflect.Float32 {
+			dd, _ := logd.Mkdir(nm)
 			for _, ag := range aggs { // key advantage of dir structure: multiple stats per item
-				dt := errors.Log1(datafs.NewData(dd, ag.String()))
-				tsr := tensor.NewOfType(st.DataType(), []int{nctr}, "row")
-				dt.Value = tsr
-				dt.Meta.Copy(st.Meta)
-				dt.SetCalcFunc(func() error {
-					ctr, _ := ss.Stats.Item(level).AsInt()
-					v := stats.StatTensor(src, ag)
-					tsr.SetFloat1D(ctr, v)
+				lt := dd.NewOfType(ag.String(), st.Tensor.DataType(), nctr)
+				lt.Tensor.Metadata().Copy(*st.Tensor.Metadata())
+				tensor.SetCalcFunc(lt.Tensor, func() error {
+					stats.Stat(ag, src, stout)
+					ctr := ss.Stats.Item(level).AsInt()
+					lt.SetFloatRowCell(stout.FloatRowCell(0, 0), ctr, 0)
 					return nil
 				})
 			}
 		} else {
-			dt := errors.Log1(datafs.NewData(logd, st.Name()))
-			tsr := tensor.NewOfType(st.DataType(), []int{nctr}, "row")
-			// todo: set level counter as default x axis in plot config
-			dt.Value = tsr
-			dt.Meta.Copy(st.Meta)
-			dt.SetCalcFunc(func() error {
-				ctr, _ := ss.Stats.Item(level).AsInt()
-				v, _ := st.AsFloat64()
-				tsr.SetFloat1D(ctr, v)
+			lt := logd.NewOfType(nm, st.Tensor.DataType(), nctr)
+			lt.Tensor.Metadata().Copy(*st.Tensor.Metadata())
+			tensor.SetCalcFunc(lt.Tensor, func() error {
+				v := st.FloatRowCell(0, 0)
+				ctr := ss.Stats.Item(level).AsInt()
+				lt.SetFloatRowCell(v, ctr, 0)
 				return nil
 			})
 		}
@@ -126,8 +119,8 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 }
 
 func (ss *Sim) Run() {
-	nepc, _ := ss.Config.Item("NEpoch").AsInt()
-	ntrl, _ := ss.Config.Item("NTrial").AsInt()
+	nepc := ss.Config.Item("NEpoch").AsInt()
+	ntrl := ss.Config.Item("NTrial").AsInt()
 	for epc := range nepc {
 		ss.Stats.Item("Epoch").SetInt(epc)
 		for trl := range ntrl {

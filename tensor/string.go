@@ -10,6 +10,7 @@ import (
 	"math"
 	"strconv"
 
+	"cogentcore.org/core/base/errors"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -70,6 +71,8 @@ func (tsr *String) IsString() bool {
 	return true
 }
 
+/////////////////////  Strings
+
 func (tsr *String) SetString(val string, i ...int) {
 	j := tsr.shape.Offset(i...)
 	tsr.Values[j] = val
@@ -83,6 +86,8 @@ func (tsr *String) SetStringRowCell(val string, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = val
 }
+
+/////////////////////  Floats
 
 func (tsr *String) Float(i ...int) float64 {
 	return StringToFloat64(tsr.Values[tsr.shape.Offset(i...)])
@@ -108,6 +113,34 @@ func (tsr *String) FloatRowCell(row, cell int) float64 {
 func (tsr *String) SetFloatRowCell(val float64, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = Float64ToString(val)
+}
+
+/////////////////////  Ints
+
+func (tsr *String) Int(i ...int) int {
+	return errors.Ignore1(strconv.Atoi(tsr.Values[tsr.shape.Offset(i...)]))
+}
+
+func (tsr *String) SetInt(val int, i ...int) {
+	tsr.Values[tsr.shape.Offset(i...)] = strconv.Itoa(val)
+}
+
+func (tsr *String) Int1D(off int) int {
+	return errors.Ignore1(strconv.Atoi(tsr.Values[off]))
+}
+
+func (tsr *String) SetInt1D(val int, off int) {
+	tsr.Values[off] = strconv.Itoa(val)
+}
+
+func (tsr *String) IntRowCell(row, cell int) int {
+	_, sz := tsr.shape.RowCellSize()
+	return errors.Ignore1(strconv.Atoi(tsr.Values[row*sz+cell]))
+}
+
+func (tsr *String) SetIntRowCell(val int, row, cell int) {
+	_, sz := tsr.shape.RowCellSize()
+	tsr.Values[row*sz+cell] = strconv.Itoa(val)
 }
 
 // At is the gonum/mat.Matrix interface method for returning 2D matrix element at given

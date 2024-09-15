@@ -7,7 +7,6 @@ package databrowser
 import (
 	"image"
 	"log"
-	"reflect"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -19,6 +18,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/texteditor/diffbrowser"
@@ -41,7 +41,7 @@ func (fn *FileNode) WidgetTooltip(pos image.Point) (string, image.Point) {
 		switch fn.Info.Known {
 		case fileinfo.Number, fileinfo.String:
 			dv := DataFS(ofn)
-			v, _ := dv.AsString()
+			v := dv.AsString()
 			if res != "" {
 				res += " "
 			}
@@ -102,20 +102,15 @@ func (fn *FileNode) OpenFile() error {
 		switch fn.Info.Known {
 		case fileinfo.Tensor:
 			d := DataFS(ofn)
-			tsr := d.AsTensor()
-			if tsr.IsString() || tsr.DataType() < reflect.Float32 {
-				br.NewTabTensorEditor(df, tsr)
-			} else {
-				br.NewTabTensorGrid(df, tsr)
-			}
-		case fileinfo.Table:
-			d := DataFS(ofn)
-			dt := d.AsTable()
-			br.NewTabTensorTable(df, dt)
-			br.Update()
+			br.NewTabTensorEditor(df, d.Data.Tensor)
+		// case fileinfo.Table:
+		// 	d := DataFS(ofn)
+		// 	dt := d.AsTable()
+		// 	br.NewTabTensorTable(df, dt)
+		// 	br.Update()
 		case fileinfo.Number:
 			dv := DataFS(ofn)
-			v, _ := dv.AsFloat32()
+			v := dv.AsFloat32()
 			d := core.NewBody(df)
 			core.NewText(d).SetType(core.TextSupporting).SetText(df)
 			sp := core.NewSpinner(d).SetValue(v)
@@ -128,7 +123,7 @@ func (fn *FileNode) OpenFile() error {
 			d.RunDialog(br)
 		case fileinfo.String:
 			dv := DataFS(ofn)
-			v, _ := dv.AsString()
+			v := dv.AsString()
 			d := core.NewBody(df)
 			core.NewText(d).SetType(core.TextSupporting).SetText(df)
 			tf := core.NewTextField(d).SetText(v)
@@ -142,7 +137,7 @@ func (fn *FileNode) OpenFile() error {
 
 		default:
 			dt := table.NewTable()
-			err := dt.OpenCSV(fn.Filepath, table.Tab) // todo: need more flexible data handling mode
+			err := dt.OpenCSV(fn.Filepath, tensor.Tab) // todo: need more flexible data handling mode
 			if err != nil {
 				core.ErrorSnackbar(br, err)
 			} else {
@@ -217,23 +212,24 @@ func (fn *FileNode) PlotFile() {
 	var dt *table.Table
 	switch {
 	case fn.IsDir():
-		dt = d.DirTable(nil)
+		dt = d.GetDirTable(nil)
 	case fn.Info.Cat == fileinfo.Data:
 		switch fn.Info.Known {
 		case fileinfo.Tensor:
-			tsr := d.AsTensor()
+			tsr := d.Data
 			dt = table.NewTable(df)
-			dt.Rows = tsr.DimSize(0)
+			dt.Columns.Rows = tsr.NumRows()
+			dt.Indexes = tsr.Indexes
 			rc := dt.AddIntColumn("Row")
-			for r := range dt.Rows {
+			for r := range dt.Columns.Rows {
 				rc.Values[r] = r
 			}
-			dt.AddColumn(tsr, fn.Name)
-		case fileinfo.Table:
-			dt = d.AsTable()
+			dt.AddColumn(fn.Name, tsr.Tensor)
+		// case fileinfo.Table:
+		// 	dt = d.AsTable()
 		default:
 			dt = table.NewTable(df)
-			err := dt.OpenCSV(fn.Filepath, table.Tab) // todo: need more flexible data handling mode
+			err := dt.OpenCSV(fn.Filepath, tensor.Tab) // todo: need more flexible data handling mode
 			if err != nil {
 				core.ErrorSnackbar(br, err)
 				dt = nil

@@ -129,6 +129,8 @@ func (tsr *Base[T]) subSpaceImpl(offs ...int) *Base[T] {
 	return stsr
 }
 
+/////////////////////  Strings
+
 func (tsr *Base[T]) StringValue(i ...int) string {
 	return reflectx.ToString(tsr.Values[tsr.shape.Offset(i...)])
 }

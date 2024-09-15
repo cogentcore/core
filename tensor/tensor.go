@@ -84,6 +84,8 @@ type Tensor interface {
 	// IsString returns true if the data type is a String; otherwise it is numeric.
 	IsString() bool
 
+	/////////////////////  Floats
+
 	// Float returns the value of given n-dimensional index (matching Shape) as a float64.
 	Float(i ...int) float64
 
@@ -132,6 +134,34 @@ type Tensor interface {
 	// and cell is 1D index into remaining inner dims. [Indexed] tensors index along the row,
 	// and use this interface extensively.
 	SetStringRowCell(val string, row, cell int)
+
+	/////////////////////  Ints
+
+	// Int returns the value of given n-dimensional index (matching Shape) as a int.
+	Int(i ...int) int
+
+	// SetInt sets the value of given n-dimensional index (matching Shape) as a int.
+	SetInt(val int, i ...int)
+
+	// Int1D returns the value of given 1-dimensional index (0-Len()-1) as a int.
+	Int1D(i int) int
+
+	// SetInt1D sets the value of given 1-dimensional index (0-Len()-1) as a int.
+	SetInt1D(val int, i int)
+
+	// IntRowCell returns the value at given row and cell, where row is outermost dim,
+	// and cell is 1D index into remaining inner dims. This is useful for lists of
+	// patterns, and the [table.Table] container. [Indexed] tensors index along the row,
+	// and use this interface extensively.
+	IntRowCell(row, cell int) int
+
+	// SetIntRowCell sets the value at given row and cell, where row is outermost dim,
+	// and cell is 1D index into remaining inner dims. This is useful for lists of
+	// patterns, and the [table.Table] container. [Indexed] tensors index along the row,
+	// and use this interface extensively.
+	SetIntRowCell(val int, row, cell int)
+
+	/////////////////////  SubSpaces
 
 	// SubSpace returns a new tensor with innermost subspace at given
 	// offset(s) in outermost dimension(s) (len(offs) < [NumDims]).
