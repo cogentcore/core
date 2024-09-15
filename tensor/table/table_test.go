@@ -74,14 +74,8 @@ func TestAppendRowsEtc(t *testing.T) {
 			assert.Equal(t, sf, df)
 		}
 	}
-	ixs := dt.RowsByString("Str", "1", tensor.Equals, tensor.UseCase)
-	assert.Equal(t, []int{1, 4, 7, 10}, ixs)
-
 	dt.Sequential()
-	dt.IndexesNeeded()
-	ic := dt.Column("Int")
-	ic.Sort(tensor.Descending)
-	dt.IndexesFromTensor(ic)
+	dt.SortColumn("Int", tensor.Descending)
 	assert.Equal(t, []int{2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9}, dt.Indexes)
 
 	dt.Sequential()
@@ -89,9 +83,7 @@ func TestAppendRowsEtc(t *testing.T) {
 	assert.Equal(t, []int{2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9}, dt.Indexes)
 
 	dt.Sequential()
-	ic = dt.Column("Int") // note: important to re-get with current indexes
-	ic.FilterString("1", tensor.Include, tensor.Contains, tensor.IgnoreCase)
-	dt.IndexesFromTensor(ic)
+	dt.FilterString("Int", "1", tensor.Include, tensor.Contains, tensor.IgnoreCase)
 	assert.Equal(t, []int{1, 4, 7, 10}, dt.Indexes)
 
 	dt.Sequential()

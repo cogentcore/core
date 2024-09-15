@@ -110,8 +110,8 @@ func (tb *Table) Init() {
 func (tb *Table) SliceIndex(i int) (si, vi int, invis bool) {
 	si = tb.StartIndex + i
 	vi = -1
-	if si < len(tb.Table.Indexes) {
-		vi = tb.Table.Indexes[si]
+	if si < tb.Table.NumRows() {
+		vi = tb.Table.Index(si)
 	}
 	invis = vi < 0
 	return
@@ -464,7 +464,7 @@ func (tb *Table) SortSliceAction(fldIndex int) {
 		tb.Table.SortIndexes()
 	} else {
 		tb.Table.IndexesNeeded()
-		col := tb.Table.ColumnIndex(tb.SortIndex)
+		col := tb.Table.ColumnByIndex(tb.SortIndex)
 		col.Sort(!tb.SortDescending)
 		tb.Table.IndexesFromTensor(col)
 	}
@@ -641,15 +641,14 @@ func (tb *Table) MakeToolbar(p *tree.Plan) {
 		w.SetFunc(tb.Table.AddRows).SetIcon(icons.Add)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
-	// todo:
-	// tree.Add(p, func(w *core.FuncButton) {
-	// 	w.SetFunc(tb.Table.SortColumnName).SetText("Sort").SetIcon(icons.Sort)
-	// 	w.SetAfterFunc(func() { tb.Update() })
-	// })
-	// tree.Add(p, func(w *core.FuncButton) {
-	// 	w.SetFunc(tb.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
-	// 	w.SetAfterFunc(func() { tb.Update() })
-	// })
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(tb.Table.SortColumns).SetText("Sort").SetIcon(icons.Sort)
+		w.SetAfterFunc(func() { tb.Update() })
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(tb.Table.FilterString).SetText("Filter").SetIcon(icons.FilterAlt)
+		w.SetAfterFunc(func() { tb.Update() })
+	})
 	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
 		w.SetAfterFunc(func() { tb.Update() })
@@ -678,7 +677,7 @@ func (tb *Table) CopySelectToMime() mimedata.Mimes {
 	idx := tb.SelectedIndexesList(false) // ascending
 	iidx := make([]int, len(idx))
 	for i, di := range idx {
-		iidx[i] = tb.Table.Indexes[di]
+		iidx[i] = tb.Table.Index(di)
 	}
 	ix.Indexes = iidx
 	var b bytes.Buffer
@@ -713,7 +712,7 @@ func (tb *Table) PasteAssign(md mimedata.Mimes, idx int) {
 	if len(recs) == 0 {
 		return
 	}
-	tb.Table.ReadCSVRow(recs[1], tb.Table.Indexes[idx])
+	tb.Table.ReadCSVRow(recs[1], tb.Table.Index(idx))
 	tb.UpdateChange()
 }
 
@@ -728,7 +727,7 @@ func (tb *Table) PasteAtIndex(md mimedata.Mimes, idx int) {
 	tb.Table.InsertRows(idx, nr)
 	for ri := 0; ri < nr; ri++ {
 		rec := recs[1+ri]
-		rw := tb.Table.Indexes[idx+ri]
+		rw := tb.Table.Index(idx + ri)
 		tb.Table.ReadCSVRow(rec, rw)
 	}
 	tb.SendChange()

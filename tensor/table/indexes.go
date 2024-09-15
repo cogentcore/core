@@ -8,7 +8,6 @@ import (
 	"math/rand"
 	"slices"
 	"sort"
-	"strings"
 
 	"cogentcore.org/core/tensor"
 )
@@ -89,6 +88,22 @@ func (dt *Table) Permuted() {
 	}
 }
 
+// SortColumn sorts the indexes into our Table according to values in
+// given column, using either ascending or descending order,
+// (use [tensor.Ascending] or [tensor.Descending] for self-documentation).
+// Uses first cell of higher dimensional data.
+// Returns error if column name not found.
+func (dt *Table) SortColumn(columnName string, ascending bool) error { //types:add
+	dt.IndexesNeeded()
+	cl, err := dt.ColumnTry(columnName)
+	if err != nil {
+		return err
+	}
+	cl.Sort(ascending)
+	dt.IndexesFromTensor(cl)
+	return nil
+}
+
 // SortFunc sorts the indexes into our Table using given compare function.
 // The compare function operates directly on row numbers into the Table
 // as these row numbers have already been projected through the indexes.
@@ -119,13 +134,12 @@ func (dt *Table) SortStableFunc(cmp func(dt *Table, i, j int) int) {
 // given column names, using either ascending or descending order,
 // (use [tensor.Ascending] or [tensor.Descending] for self-documentation,
 // and optionally using a stable sort.
-// Only valid for 1-dimensional columns.
-// Returns error if column name not found.
-func (dt *Table) SortColumns(ascending, stable bool, columns ...string) {
+// Uses first cell of higher dimensional data.
+func (dt *Table) SortColumns(ascending, stable bool, columns ...string) { //types:add
 	nc := len(columns)
 	cis := make([]int, 0, nc)
 	for _, cn := range columns {
-		ci := dt.Columns.IndexByKey(cn)
+		ci := dt.ColumnIndex(cn)
 		if ci >= 0 {
 			cis = append(cis, ci)
 		}
@@ -135,7 +149,7 @@ func (dt *Table) SortColumns(ascending, stable bool, columns ...string) {
 
 // SortColumnIndexes sorts the indexes into our Table according to values in
 // given list of column indexes, using either ascending or descending order for
-// all of the columns.  Only valid for 1-dimensional columns.
+// all of the columns. Uses first cell of higher dimensional data.
 func (dt *Table) SortColumnIndexes(ascending, stable bool, colIndexes ...int) {
 	dt.IndexesNeeded()
 	sf := dt.SortFunc
@@ -144,7 +158,7 @@ func (dt *Table) SortColumnIndexes(ascending, stable bool, colIndexes ...int) {
 	}
 	sf(func(dt *Table, i, j int) int {
 		for _, ci := range colIndexes {
-			cl := dt.ColumnIndex(ci).Tensor
+			cl := dt.ColumnByIndex(ci).Tensor
 			if cl.IsString() {
 				v := tensor.CompareAscending(cl.StringRowCell(i, 0), cl.StringRowCell(j, 0), ascending)
 				if v != 0 {
@@ -189,6 +203,24 @@ func (dt *Table) Filter(filterer func(dt *Table, row int) bool) {
 	}
 }
 
+// FilterString filters the indexes using string values in column compared to given
+// string. Includes rows with matching values unless exclude is set.
+// If contains, only checks if row contains string; if ignoreCase, ignores case.
+// Use the named const args [tensor.Include], [tensor.Exclude], [tensor.Contains],
+// [tensor.Equals], [tensor.IgnoreCase], [tensor.UseCase] for greater clarity.
+// Uses first cell from higher dimensions.
+// Returns error if column name not found.
+func (dt *Table) FilterString(columnName string, str string, exclude, contains, ignoreCase bool) error { //types:add
+	dt.IndexesNeeded()
+	cl, err := dt.ColumnTry(columnName)
+	if err != nil {
+		return err
+	}
+	cl.FilterString(str, exclude, contains, ignoreCase)
+	dt.IndexesFromTensor(cl)
+	return nil
+}
+
 // NewTable returns a new table with column data organized according to
 // the indexes.  If Indexes are nil, a clone of the current tensor is returned
 // but this function is only sensible if there is an indexed view in place.
@@ -219,41 +251,6 @@ func (dt *Table) NewTable() *Table {
 func (dt *Table) DeleteRows(at, n int) {
 	dt.IndexesNeeded()
 	dt.Indexes = append(dt.Indexes[:at], dt.Indexes[at+n:]...)
-}
-
-// RowsByString returns the list of row _indexes_ (not necessarily underlying row numbers,
-// if Indexes are in place) whose row in the table has given string value in given column name.
-// The results can be used as row indexes to Indexed tensor column data.
-// If contains, only checks if row contains string; if ignoreCase, ignores case.
-// Use the named const args [tensor.Contains], [tensor.Equals], [tensor.IgnoreCase],
-// [tensor.UseCase] for greater clarity.
-func (dt *Table) RowsByString(colname string, str string, contains, ignoreCase bool) []int {
-	col := dt.Column(colname)
-	if col == nil {
-		return nil
-	}
-	lowstr := strings.ToLower(str)
-	var indexes []int
-	rows := dt.NumRows()
-	for idx := range rows {
-		srw := dt.Index(idx)
-		val := col.Tensor.StringRowCell(srw, 0)
-		has := false
-		switch {
-		case contains && ignoreCase:
-			has = strings.Contains(strings.ToLower(val), lowstr)
-		case contains:
-			has = strings.Contains(val, str)
-		case ignoreCase:
-			has = strings.EqualFold(val, str)
-		default:
-			has = (val == str)
-		}
-		if has {
-			indexes = append(indexes, idx)
-		}
-	}
-	return indexes
 }
 
 // Swap switches the indexes for i and j

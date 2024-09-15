@@ -35,7 +35,7 @@ func (pl *PlotEditor) genPlotBar() {
 	// var lsplit *table.Splits
 	nleg := 1
 	if pl.Options.Legend != "" {
-		lcol := pl.table.Columns.IndexByKey(pl.Options.Legend)
+		lcol := pl.table.ColumnIndex(pl.Options.Legend)
 		if lcol < 0 {
 			log.Println("plot.Legend not found: " + pl.Options.Legend)
 		} else {
@@ -125,7 +125,7 @@ func (pl *PlotEditor) genPlotBar() {
 				}
 				ec := -1
 				if cp.ErrColumn != "" {
-					ec = pl.table.Columns.IndexByKey(cp.ErrColumn)
+					ec = pl.table.ColumnIndex(cp.ErrColumn)
 				}
 				var bar *plots.BarChart
 				if ec >= 0 {
@@ -163,7 +163,7 @@ func (pl *PlotEditor) genPlotBar() {
 		n := xview.NumRows()
 		for _, cp := range strCols {
 			xy, _ := newTableXY(xview, xi, xp.TensorIndex, firstXY.yColumn, cp.TensorIndex, firstXY.yRange)
-			xy.labelColumn = xview.Columns.IndexByKey(cp.Column)
+			xy.labelColumn = xview.ColumnIndex(cp.Column)
 			xy.yIndex = firstXY.yIndex
 
 			xyl := plots.XYLabels{}
@@ -184,7 +184,7 @@ func (pl *PlotEditor) genPlotBar() {
 	}
 
 	netn := pl.table.NumRows() * stride
-	xc := pl.table.ColumnIndex(xi)
+	xc := pl.table.ColumnByIndex(xi)
 	vals := make([]string, netn)
 	for i, dx := range pl.table.Indexes {
 		pi := mid + i*stride

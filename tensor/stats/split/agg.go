@@ -31,7 +31,7 @@ func AggColumn(spl *table.Splits, column string, stat stats.Stats) (*table.Split
 	if dt == nil {
 		return nil, fmt.Errorf("split.AggTry: No splits to aggregate over")
 	}
-	colIndex, err := dt.ColumnIndex(column)
+	colIndex, err := dt.ColumnByIndex(column)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func DescColumn(spl *table.Splits, column string) error {
 	if dt == nil {
 		return fmt.Errorf("split.DescTry: No splits to aggregate over")
 	}
-	colIndex, err := dt.ColumnIndex(column)
+	colIndex, err := dt.ColumnByIndex(column)
 	if err != nil {
 		return err
 	}

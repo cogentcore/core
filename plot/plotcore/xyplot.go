@@ -28,7 +28,7 @@ func (pl *PlotEditor) genPlotXY() {
 	// var lsplit *table.Splits
 	nleg := 1
 	if pl.Options.Legend != "" {
-		ix := pl.table.Columns.IndexByKey(pl.Options.Legend)
+		ix := pl.table.ColumnIndex(pl.Options.Legend)
 		if ix < 0 {
 			slog.Error("plot.Legend", "err", err.Error())
 		} else {
@@ -140,7 +140,7 @@ func (pl *PlotEditor) genPlotXY() {
 					}
 				}
 				if cp.ErrColumn != "" {
-					ec := pl.table.Columns.IndexByKey(cp.ErrColumn)
+					ec := pl.table.ColumnIndex(cp.ErrColumn)
 					if ec >= 0 {
 						xy.errColumn = ec
 						eb, _ := plots.NewYErrorBars(xy)
@@ -155,7 +155,7 @@ func (pl *PlotEditor) genPlotXY() {
 	if firstXY != nil && len(strCols) > 0 {
 		for _, cp := range strCols {
 			xy, _ := newTableXY(xview, xi, xp.TensorIndex, firstXY.yColumn, cp.TensorIndex, firstXY.yRange)
-			xy.labelColumn = xview.Columns.IndexByKey(cp.Column)
+			xy.labelColumn = xview.ColumnIndex(cp.Column)
 			xy.yIndex = firstXY.yIndex
 			lbls, _ := plots.NewLabels(xy)
 			if lbls != nil {
@@ -165,7 +165,7 @@ func (pl *PlotEditor) genPlotXY() {
 	}
 
 	// Use string labels for X axis if X is a string
-	xc := pl.table.ColumnIndex(xi)
+	xc := pl.table.ColumnByIndex(xi)
 	if xc.Tensor.IsString() {
 		xcs := xc.Tensor.(*tensor.String)
 		vals := make([]string, pl.table.NumRows())

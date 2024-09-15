@@ -40,8 +40,8 @@ func (dt *Table) InsertKeyColumns(args ...string) *Table {
 // values in the first two columns of given format table, conventionally named
 // Name, Type (but names are not used), which must be of the string type.
 func (dt *Table) ConfigFromTable(ft *Table) error {
-	nmcol := ft.ColumnIndex(0)
-	tycol := ft.ColumnIndex(1)
+	nmcol := ft.ColumnByIndex(0)
+	tycol := ft.ColumnByIndex(1)
 	var errs []error
 	for i := range ft.NumRows() {
 		name := nmcol.String1D(i)

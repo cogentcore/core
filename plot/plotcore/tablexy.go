@@ -59,7 +59,7 @@ func newTableXY(dt *table.Table, xcol, xtsrIndex, ycol, ytsrIndex int, yrng minm
 // from given column name and tensor indexes within each cell.
 // Column indexes are enforced to be valid, with an error message if they are not.
 func newTableXYName(dt *table.Table, xi, xtsrIndex int, ycol string, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
-	yi := dt.Columns.IndexByKey(ycol)
+	yi := dt.ColumnIndex(ycol)
 	if yi < 0 {
 		return nil, nil // todo: err
 	}
@@ -82,8 +82,8 @@ func (txy *tableXY) validate() error {
 		txy.yColumn = 0
 		return errors.New("eplot.TableXY YColumn index invalid -- reset to 0")
 	}
-	xc := txy.table.ColumnIndex(txy.xColumn)
-	yc := txy.table.ColumnIndex(txy.yColumn)
+	xc := txy.table.ColumnByIndex(txy.xColumn)
+	yc := txy.table.ColumnByIndex(txy.yColumn)
 	if xc.Tensor.NumDims() > 1 {
 		_, txy.xRowSize = xc.RowCellSize()
 		// note: index already validated
@@ -127,7 +127,7 @@ func (txy *tableXY) Len() int {
 
 // tRowValue returns the y value at given true table row in table
 func (txy *tableXY) tRowValue(row int) float32 {
-	yc := txy.table.ColumnIndex(txy.yColumn)
+	yc := txy.table.ColumnByIndex(txy.yColumn)
 	y := float32(0.0)
 	switch {
 	case yc.Tensor.IsString():
@@ -149,7 +149,7 @@ func (txy *tableXY) Value(row int) float32 {
 		return 0
 	}
 	trow := txy.table.Indexes[row] // true table row
-	yc := txy.table.ColumnIndex(txy.yColumn)
+	yc := txy.table.ColumnByIndex(txy.yColumn)
 	y := float32(0.0)
 	switch {
 	case yc.Tensor.IsString():
@@ -170,7 +170,7 @@ func (txy *tableXY) tRowXValue(row int) float32 {
 	if txy.table == nil || txy.table == nil {
 		return 0
 	}
-	xc := txy.table.ColumnIndex(txy.xColumn)
+	xc := txy.table.ColumnByIndex(txy.xColumn)
 	x := float32(0.0)
 	switch {
 	case xc.Tensor.IsString():
@@ -192,7 +192,7 @@ func (txy *tableXY) xValue(row int) float32 {
 		return 0
 	}
 	trow := txy.table.Indexes[row] // true table row
-	xc := txy.table.ColumnIndex(txy.xColumn)
+	xc := txy.table.ColumnByIndex(txy.xColumn)
 	x := float32(0.0)
 	switch {
 	case xc.Tensor.IsString():
@@ -224,7 +224,7 @@ func (txy *tableXY) Label(row int) string {
 		return ""
 	}
 	trow := txy.table.Indexes[row] // true table row
-	return txy.table.ColumnIndex(txy.labelColumn).String1D(trow)
+	return txy.table.ColumnByIndex(txy.labelColumn).String1D(trow)
 }
 
 // YError returns error bars, implementing [plots.YErrorer] interface.
@@ -233,7 +233,7 @@ func (txy *tableXY) YError(row int) (float32, float32) {
 		return 0, 0
 	}
 	trow := txy.table.Indexes[row] // true table row
-	ec := txy.table.ColumnIndex(txy.errColumn)
+	ec := txy.table.ColumnByIndex(txy.errColumn)
 	eval := float32(0.0)
 	switch {
 	case ec.Tensor.IsString():

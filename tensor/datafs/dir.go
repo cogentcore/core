@@ -12,8 +12,10 @@ import (
 	"slices"
 	"sort"
 
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/table"
 )
 
 // Dir is a map of directory entry names to Data nodes.
@@ -285,4 +287,36 @@ func (d *Data) Mkdir(name string) (*Data, error) {
 		return nil, err
 	}
 	return NewDir(name, d)
+}
+
+// GetDirTable gets the DirTable as a [table.Table] for this directory item,
+// with columns as the Tensor values elements in the directory
+// and any subdirectories, from FlatValuesFunc using given filter function.
+// This is a convenient mechanism for creating a plot of all the data
+// in a given directory.
+// If such was previously constructed, it is returned from "DirTable"
+// where it is stored for later use.
+// Row count is updated to current max row.
+// Set DirTable = nil to regenerate.
+func (d *Data) GetDirTable(fun func(item *Data) bool) *table.Table {
+	if d.DirTable != nil {
+		d.DirTable.SetNumRowsToMax()
+		return dt
+	}
+	tsrs := d.FlatValuesFunc(fun)
+	dt := table.NewTable(fsx.DirAndFile(string(d.Path())))
+	for _, tsr := range tsrs {
+		rows := tsr.Tensor.Rows()
+		if dt.Columns.Rows < rows {
+			dt.Columns.Rows = rows
+			dt.SetNumRows(dt.Columns.Rows)
+		}
+		nm := it.Name()
+		if it.Parent != d {
+			nm = fsx.DirAndFile(string(it.Path()))
+		}
+		dt.AddColumn(tsr.Tensor, nm)
+	}
+	d.DirTable = dt
+	return dt
 }

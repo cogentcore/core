@@ -345,7 +345,7 @@ func (spl *Splits) AggByColumnName(name string) (*SplitAgg, error) {
 		return nil, fmt.Errorf("table.Splits AggByColumnName: table nil")
 	}
 	nmsp := strings.Split(name, ":")
-	colIndex := dt.Columns.IndexByKey(nmsp[0])
+	colIndex := dt.ColumnIndex(nmsp[0])
 	if colIndex < 0 {
 		return nil, nil
 	}

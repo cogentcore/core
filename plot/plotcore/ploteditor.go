@@ -343,7 +343,7 @@ func (pl *PlotEditor) genPlot() {
 	pl.plotWidget.Scale = pl.Options.Scale
 	pl.plotWidget.SetRangesFunc = func() {
 		plt := pl.plotWidget.Plot
-		xi := pl.table.Columns.IndexByKey(pl.Options.XAxis)
+		xi := pl.table.ColumnIndex(pl.Options.XAxis)
 		if xi >= 0 {
 			xp := pl.Columns[xi]
 			if xp.Range.FixMin {
@@ -380,13 +380,13 @@ func (pl *PlotEditor) configPlot(plt *plot.Plot) {
 
 // plotXAxis processes the XAxis and returns its index
 func (pl *PlotEditor) plotXAxis(plt *plot.Plot, ixvw *table.Table) (xi int, xview *table.Table, err error) {
-	xi = ixvw.Columns.IndexByKey(pl.Options.XAxis)
+	xi = ixvw.ColumnIndex(pl.Options.XAxis)
 	if xi < 0 {
 		// log.Println("plot.PlotXAxis: " + err.Error())
 		return
 	}
 	xview = ixvw
-	xc := ixvw.ColumnIndex(xi)
+	xc := ixvw.ColumnByIndex(xi)
 	xp := pl.Columns[xi]
 	sz := 1
 	if xp.Range.FixMin {
@@ -428,7 +428,7 @@ func (pl *PlotEditor) columnsListUpdate() {
 		}
 		cp := &ColumnOptions{Column: cn}
 		cp.defaults()
-		tcol := dt.ColumnIndex(ci)
+		tcol := dt.ColumnByIndex(ci)
 		tc := tcol.Tensor
 		if tc.IsString() {
 			cp.IsString = true
@@ -655,10 +655,10 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 		w.SetFunc(pl.OpenCSV).SetIcon(icons.Open)
 	})
 	tree.Add(p, func(w *core.Separator) {})
-	// tree.Add(p, func(w *core.FuncButton) { // TODO
-	// 	w.SetFunc(pl.table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
-	// 	w.SetAfterFunc(pl.UpdatePlot)
-	// })
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(pl.table.FilterString).SetText("Filter").SetIcon(icons.FilterAlt)
+		w.SetAfterFunc(pl.UpdatePlot)
+	})
 	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(pl.table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
 		w.SetAfterFunc(pl.UpdatePlot)

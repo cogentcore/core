@@ -12,7 +12,7 @@ The `Table` mainly provides "infrastructure" methods for adding tensor columns a
 
 As a general convention, it is safest, clearest, and quite fast to access columns by name instead of index (there is a `map` from name to index), so the base access method names generally take a column name argument, and those that take a column index have an `Index` suffix.
 
-The table itself stores raw data `tensor.Tensor` values, and the `Column` (by name) and `ColumnIndex` methods return a `tensor.Indexed` with the `Indexes` pointing to the shared table-wide `Indexes` (which can be `nil` if standard sequential order is being used).  
+The table itself stores raw data `tensor.Tensor` values, and the `Column` (by name) and `ColumnByIndex` methods return a `tensor.Indexed` with the `Indexes` pointing to the shared table-wide `Indexes` (which can be `nil` if standard sequential order is being used).  
 
 If you call Sort, Filter or other routines on an individual column tensor, then you can grab the updated indexes via the `IndexesFromTensor` method so that they apply to the entire table.
 
@@ -29,7 +29,7 @@ It is very low-cost to create a new View of an existing Table, via `NewView`, as
 Column data access:
 
 ```Go
-// FloatRowCell is method on the `tensor.Indexed` returned from `Column` method.
+// FloatRowCell is a method on the `tensor.Indexed` returned from the `Column` method.
 // This is the best method to use in general for generic 1D data access,
 // as it works on any data from 1D on up (although it only samples the first value
 // from higher dimensional data) .

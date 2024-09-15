@@ -28,9 +28,9 @@ func Plot(pt *table.Table, root *Node, dmat, labels *tensor.Indexed) {
 // The lines double-back on themselves to form a continuous line to be plotted.
 func (nn *Node) Plot(pt *table.Table, dmat, labels *tensor.Indexed) {
 	row := pt.NumRows()
-	xc := pt.ColumnIndex(0)
-	yc := pt.ColumnIndex(1)
-	lbl := pt.ColumnIndex(2)
+	xc := pt.ColumnByIndex(0)
+	yc := pt.ColumnByIndex(1)
+	lbl := pt.ColumnByIndex(2)
 	if nn.IsLeaf() {
 		pt.SetNumRows(row + 1)
 		xc.SetFloatRowCell(nn.ParDist, row, 0)

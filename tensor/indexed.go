@@ -6,7 +6,6 @@ package tensor
 
 import (
 	"cmp"
-	"errors"
 	"math"
 	"math/rand"
 	"slices"
@@ -179,20 +178,17 @@ func (ix *Indexed) IndexesNeeded() { //types:add
 	}
 }
 
-// ExcludeMissing1D deletes indexes for a 1D tensor (only) where
-// the values are missing, as indicated by NaN.
-func (ix *Indexed) ExcludeMissing1D() { //types:add
+// ExcludeMissing deletes indexes where the values are missing, as indicated by NaN.
+// Uses first cell of higher dimensional data.
+func (ix *Indexed) ExcludeMissing() { //types:add
 	if ix.Tensor == nil || ix.Tensor.DimSize(0) <= 0 {
 		ix.Indexes = nil
-		return
-	}
-	if ix.Tensor.NumDims() > 1 {
 		return
 	}
 	ix.IndexesNeeded()
 	ni := ix.NumRows()
 	for i := ni - 1; i >= 0; i-- {
-		if math.IsNaN(ix.Float1D(ix.Indexes[i])) {
+		if math.IsNaN(ix.Tensor.FloatRowCell(ix.Indexes[i], 0)) {
 			ix.Indexes = append(ix.Indexes[:i], ix.Indexes[i+1:]...)
 		}
 	}
@@ -223,21 +219,16 @@ const (
 	Descending = false
 )
 
-// SortFunc sorts the indexes into 1D Tensor using given compare function.
-// Returns an error if called on a higher-dimensional tensor.
+// SortFunc sorts the row-wise indexes using given compare function.
 // The compare function operates directly on row numbers into the Tensor
 // as these row numbers have already been projected through the indexes.
 // cmp(a, b) should return a negative number when a < b, a positive
 // number when a > b and zero when a == b.
-func (ix *Indexed) SortFunc(cmp func(tsr Tensor, i, j int) int) error {
-	if ix.Tensor.NumDims() > 1 {
-		return errors.New("tensor Sorting is only for 1D tensors")
-	}
+func (ix *Indexed) SortFunc(cmp func(tsr Tensor, i, j int) int) {
 	ix.IndexesNeeded()
 	slices.SortFunc(ix.Indexes, func(a, b int) int {
 		return cmp(ix.Tensor, a, b) // key point: these are already indirected through indexes!!
 	})
-	return nil
 }
 
 // SortIndexes sorts the indexes into our Tensor directly in
@@ -257,53 +248,46 @@ func CompareAscending[T cmp.Ordered](a, b T, ascending bool) int {
 	return cmp.Compare(b, a)
 }
 
-// Sort does default alpha or numeric sort of 1D tensor based on data type.
-// Returns an error if called on a higher-dimensional tensor.
-func (ix *Indexed) Sort(ascending bool) error {
+// Sort does default alpha or numeric sort of row-wise data.
+// Uses first cell of higher dimensional data.
+func (ix *Indexed) Sort(ascending bool) {
 	if ix.Tensor.IsString() {
 		ix.SortFunc(func(tsr Tensor, i, j int) int {
-			return CompareAscending(tsr.String1D(i), tsr.String1D(j), ascending)
+			return CompareAscending(tsr.StringRowCell(i, 0), tsr.StringRowCell(j, 0), ascending)
 		})
 	} else {
 		ix.SortFunc(func(tsr Tensor, i, j int) int {
-			return CompareAscending(tsr.Float1D(i), tsr.Float1D(j), ascending)
+			return CompareAscending(tsr.FloatRowCell(i, 0), tsr.FloatRowCell(j, 0), ascending)
 		})
 	}
-	return nil
 }
 
-// SortStableFunc stably sorts the indexes of 1D Tensor using given compare function.
+// SortStableFunc stably sorts the row-wise indexes using given compare function.
 // The compare function operates directly on row numbers into the Tensor
 // as these row numbers have already been projected through the indexes.
 // cmp(a, b) should return a negative number when a < b, a positive
 // number when a > b and zero when a == b.
 // It is *essential* that it always returns 0 when the two are equal
 // for the stable function to actually work.
-func (ix *Indexed) SortStableFunc(cmp func(tsr Tensor, i, j int) int) error {
-	if ix.Tensor.NumDims() > 1 {
-		return errors.New("tensor Sorting is only for 1D tensors")
-	}
+func (ix *Indexed) SortStableFunc(cmp func(tsr Tensor, i, j int) int) {
 	ix.IndexesNeeded()
 	slices.SortStableFunc(ix.Indexes, func(a, b int) int {
 		return cmp(ix.Tensor, a, b) // key point: these are already indirected through indexes!!
 	})
-	return nil
 }
 
-// SortStable does default alpha or numeric stable sort
-// of 1D tensor based on data type.
-// Returns an error if called on a higher-dimensional tensor.
-func (ix *Indexed) SortStable(ascending bool) error {
+// SortStable does stable default alpha or numeric sort.
+// Uses first cell of higher dimensional data.
+func (ix *Indexed) SortStable(ascending bool) {
 	if ix.Tensor.IsString() {
 		ix.SortStableFunc(func(tsr Tensor, i, j int) int {
-			return CompareAscending(tsr.String1D(i), tsr.String1D(j), ascending)
+			return CompareAscending(tsr.StringRowCell(i, 0), tsr.StringRowCell(j, 0), ascending)
 		})
 	} else {
 		ix.SortStableFunc(func(tsr Tensor, i, j int) int {
-			return CompareAscending(tsr.Float1D(i), tsr.Float1D(j), ascending)
+			return CompareAscending(tsr.FloatRowCell(i, 0), tsr.FloatRowCell(j, 0), ascending)
 		})
 	}
-	return nil
 }
 
 // FilterFunc is a function used for filtering that returns
@@ -324,7 +308,7 @@ func (ix *Indexed) Filter(filterer func(tsr Tensor, row int) bool) {
 	}
 }
 
-// Named arg values for Contains, IgnoreCase
+// Named arg values for FilterString
 const (
 	// Include means include matches
 	Include = false
@@ -345,7 +329,7 @@ const (
 // If contains, only checks if row contains string; if ignoreCase, ignores case.
 // Use the named const args [Include], [Exclude], [Contains], [Equals],
 // [IgnoreCase], [UseCase] for greater clarity.
-// Only valid for 1-dimensional columns.
+// Uses first cell of higher dimensional data.
 func (ix *Indexed) FilterString(str string, exclude, contains, ignoreCase bool) { //types:add
 	lowstr := strings.ToLower(str)
 	ix.Filter(func(tsr Tensor, row int) bool {

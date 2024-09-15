@@ -100,14 +100,19 @@ func (dt *Table) ColumnTry(name string) (*tensor.Indexed, error) {
 // It is best practice to instead access columns by name using [Table.Column].
 // Direct access through [Table.Columns} does not provide the shared table-wide Indexes.
 // Will panic if out of range.
-func (dt *Table) ColumnIndex(idx int) *tensor.Indexed {
+func (dt *Table) ColumnByIndex(idx int) *tensor.Indexed {
 	cl := dt.Columns.Values[idx]
 	return tensor.NewIndexed(cl, dt.Indexes)
 }
 
-// ColumnName returns the name of given column
+// ColumnName returns the name of given column.
 func (dt *Table) ColumnName(i int) string {
 	return dt.Columns.Keys[i]
+}
+
+// ColumnIndex returns the index for given column name.
+func (dt *Table) ColumnIndex(name string) int {
+	return dt.Columns.IndexByKey(name)
 }
 
 // AddColumn adds a new column to the table, of given type and column name
@@ -198,7 +203,7 @@ func (dt *Table) DeleteColumnName(name string) bool {
 }
 
 // DeleteColumnIndex deletes column within the index range [i:j].
-func (dt *Table) DeleteColumnIndex(i, j int) {
+func (dt *Table) DeleteColumnByIndex(i, j int) {
 	dt.Columns.DeleteIndex(i, j)
 }
 

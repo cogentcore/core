@@ -22,7 +22,7 @@ type Table interface {
 	PlotData(column, row int) float32
 }
 
-func TableColumnIndex(tab Table, name string) int {
+func TableColumnByIndex(tab Table, name string) int {
 	for i := range tab.NumColumns() {
 		if tab.ColumnName(i) == name {
 			return i
