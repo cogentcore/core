@@ -70,6 +70,9 @@ func (tb *TensorEditor) Init() {
 		tb.UpdateMaxWidths()
 
 		tb.Updater(func() {
+			if tb.Tensor.NumDims() == 1 {
+				tb.Layout.TopZero = true
+			}
 			tb.UpdateStartIndex()
 			tb.UpdateMaxWidths()
 		})

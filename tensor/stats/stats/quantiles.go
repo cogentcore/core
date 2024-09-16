@@ -44,13 +44,13 @@ func QuantilesFunc(in, qs, out *tensor.Indexed) error {
 		lwi := math.Floor(qi)
 		lwii := int(lwi)
 		if lwii >= sz {
-			val = sin.FloatRowCell(sz, 0)
+			val = sin.FloatRow(sz)
 		} else if lwii < 0 {
-			val = sin.FloatRowCell(0, 0)
+			val = sin.FloatRow(0)
 		} else {
 			phi := qi - lwi
-			lwv := sin.FloatRowCell(lwii, 0)
-			hiv := sin.FloatRowCell(lwii+1, 0)
+			lwv := sin.FloatRow(lwii)
+			hiv := sin.FloatRow(lwii + 1)
 			val = (1-phi)*lwv + phi*hiv
 		}
 		out.SetFloat1D(val, i)

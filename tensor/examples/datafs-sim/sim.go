@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/tensor"
@@ -72,13 +73,14 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 		tensor.SetCalcFunc(lt.Tensor, func() error {
 			trl := ss.Stats.Item("Trial").AsInt()
 			if st.Tensor.IsString() {
-				lt.SetStringRowCell(st.StringRowCell(0, 0), trl, 0)
+				lt.SetStringRow(st.StringRow(0), trl)
 			} else {
-				lt.SetFloatRowCell(st.FloatRowCell(0, 0), trl, 0)
+				lt.SetFloatRow(st.FloatRow(0), trl)
 			}
 			return nil
 		})
 	}
+	errors.Log(dir.Copy(datafs.Preserve, "AllTrials", "Trial"))
 	return logd
 }
 
@@ -102,7 +104,7 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 				tensor.SetCalcFunc(lt.Tensor, func() error {
 					stats.Stat(ag, src, stout)
 					ctr := ss.Stats.Item(level).AsInt()
-					lt.SetFloatRowCell(stout.FloatRowCell(0, 0), ctr, 0)
+					lt.SetFloatRow(stout.FloatRow(0), ctr)
 					return nil
 				})
 			}
@@ -110,9 +112,9 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 			lt := logd.NewOfType(nm, st.Tensor.DataType(), nctr)
 			lt.Tensor.Metadata().Copy(*st.Tensor.Metadata())
 			tensor.SetCalcFunc(lt.Tensor, func() error {
-				v := st.FloatRowCell(0, 0)
+				v := st.FloatRow(0)
 				ctr := ss.Stats.Item(level).AsInt()
-				lt.SetFloatRowCell(v, ctr, 0)
+				lt.SetFloatRow(v, ctr)
 				return nil
 			})
 		}
@@ -152,8 +154,6 @@ func (ss *Sim) EpochDone() {
 }
 
 func main() {
-	testGroup()
-	return
 	ss := &Sim{}
 	ss.ConfigAll()
 	ss.Run()
@@ -171,8 +171,8 @@ func testGroup() {
 		if i >= 2 {
 			gp = "B"
 		}
-		dt.Column("Name").SetStringRowCell(gp, i, 0)
-		dt.Column("Value").SetFloatRowCell(float64(10*(i+1)), i, 0)
+		dt.Column("Name").SetStringRow(gp, i)
+		dt.Column("Value").SetFloatRow(float64(10*(i+1)), i)
 	}
 	dir, _ := datafs.NewDir("Group")
 	stats.TableGroups(dir, dt, "Name")

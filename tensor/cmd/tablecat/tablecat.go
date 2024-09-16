@@ -10,12 +10,12 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strconv"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/tensor/stats/split"
+	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
+	"github.com/emer/etable/v2/split"
 )
 
 var (
@@ -127,7 +127,7 @@ func AvgCat(files []string) {
 		return
 	}
 	avgdt := stats.MeanTables(dts)
-	avgdt.SetMetaData("precision", strconv.Itoa(LogPrec))
+	tensor.SetPrecision(avgdt, LogPrec)
 	avgdt.SaveCSV(core.Filename(Output), table.Tab, table.Headers)
 }
 
@@ -159,7 +159,7 @@ func AvgByColumn(files []string, column string) {
 			split.AggIndex(spl, ci, stats.Mean)
 		}
 		avgdt := spl.AggsToTable(table.ColumnNameOnly)
-		avgdt.SetMetaData("precision", strconv.Itoa(LogPrec))
+		tensor.SetPrecision(avgdt, LogPrec)
 		avgdt.SaveCSV(core.Filename(Output), table.Tab, table.Headers)
 	}
 }

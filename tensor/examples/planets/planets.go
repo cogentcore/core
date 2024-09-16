@@ -37,7 +37,7 @@ func AnalyzePlanets(dir *datafs.Data) {
 	decade := Planets.AddFloat64Column("decade")
 	year := Planets.Column("year")
 	for row := range Planets.NumRows() {
-		yr := year.FloatRowCell(row, 0)
+		yr := year.FloatRow(row)
 		dec := math.Floor(yr/10) * 10
 		decade.SetFloatRowCell(dec, row, 0)
 	}

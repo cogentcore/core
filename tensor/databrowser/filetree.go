@@ -6,7 +6,6 @@ package databrowser
 
 import (
 	"image"
-	"log"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -98,6 +97,11 @@ func (fn *FileNode) OpenFile() error {
 	}
 	df := fsx.DirAndFile(string(fn.Filepath))
 	switch {
+	case fn.IsDir():
+		d := DataFS(ofn)
+		dt := d.GetDirTable(nil)
+		br.NewTabTensorTable(df, dt)
+		br.Update()
 	case fn.Info.Cat == fileinfo.Data:
 		switch fn.Info.Known {
 		case fileinfo.Tensor:
@@ -176,7 +180,7 @@ func (fn *FileNode) EditFiles() { //types:add
 // EditFile pulls up this file in a texteditor
 func (fn *FileNode) EditFile() {
 	if fn.IsDir() {
-		log.Printf("FileNode Edit -- cannot view (edit) directories!\n")
+		fn.OpenFile()
 		return
 	}
 	br := ParentBrowser(fn.This)

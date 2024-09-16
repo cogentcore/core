@@ -49,7 +49,7 @@ func Groups(dir *datafs.Data, tsrs ...*tensor.Indexed) {
 		n := r - start
 		it := datafs.NewValue[int](dir, val, n)
 		for j := range n {
-			it.SetIntRowCell(srt.Indexes[start+j], j, 0) // key to indirect through sort indexes
+			it.SetIntRow(srt.Indexes[start+j], j) // key to indirect through sort indexes
 		}
 	}
 
@@ -67,9 +67,9 @@ func Groups(dir *datafs.Data, tsrs ...*tensor.Indexed) {
 		srt.SortStable(tensor.Ascending)
 		start := 0
 		if tsr.Tensor.IsString() {
-			lastVal := srt.StringRowCell(0, 0)
+			lastVal := srt.StringRow(0)
 			for r := range nr {
-				v := srt.StringRowCell(r, 0)
+				v := srt.StringRow(r)
 				if v != lastVal {
 					makeIdxs(td, srt, lastVal, start, r)
 					start = r
@@ -80,9 +80,9 @@ func Groups(dir *datafs.Data, tsrs ...*tensor.Indexed) {
 				makeIdxs(td, srt, lastVal, start, nr)
 			}
 		} else {
-			lastVal := srt.FloatRowCell(0, 0)
+			lastVal := srt.FloatRow(0)
 			for r := range nr {
-				v := srt.FloatRowCell(r, 0)
+				v := srt.FloatRow(r)
 				if v != lastVal {
 					makeIdxs(td, srt, tensor.Float64ToString(lastVal), start, r)
 					start = r
@@ -145,7 +145,7 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...*tensor.Indexed) {
 		if gv == nil {
 			gtsr := datafs.NewValue[string](sgd, gpnm, nv)
 			for i, v := range vals {
-				gtsr.SetStringRowCell(v.Tensor.Metadata().GetName(), i, 0)
+				gtsr.SetStringRow(v.Tensor.Metadata().GetName(), i)
 			}
 		}
 		for _, tsr := range tsrs {
@@ -155,7 +155,7 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...*tensor.Indexed) {
 				idx := v.Tensor.(*tensor.Int).Values
 				sg := tensor.NewIndexed(tsr.Tensor, idx)
 				tensor.Call(stat, sg, stout)
-				sv.SetFloatRowCell(stout.Float1D(0), i, 0)
+				sv.SetFloatRow(stout.Float1D(0), i)
 			}
 		}
 	}

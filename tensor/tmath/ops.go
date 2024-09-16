@@ -16,11 +16,11 @@ import (
 // for overlapping cells.
 func Add(a, b, out *tensor.Indexed) {
 	if b.Len() == 1 {
-		AddScalar(b.FloatRowCell(0, 0), a, out)
+		AddScalar(b.FloatRow(0), a, out)
 		return
 	}
 	if a.Len() == 1 {
-		AddScalar(a.FloatRowCell(0, 0), b, out)
+		AddScalar(a.FloatRow(0), b, out)
 		return
 	}
 	arows, acells := a.Tensor.RowCellSize()
@@ -76,11 +76,11 @@ func AddSubSpace(a, sub, out *tensor.Indexed) {
 // for overlapping cells.
 func Sub(a, b, out *tensor.Indexed) {
 	if b.Len() == 1 {
-		SubScalar(1, b.FloatRowCell(0, 0), a, out)
+		SubScalar(1, b.FloatRow(0), a, out)
 		return
 	}
 	if a.Len() == 1 {
-		SubScalar(-1, a.FloatRowCell(0, 0), b, out)
+		SubScalar(-1, a.FloatRow(0), b, out)
 		return
 	}
 	arows, acells := a.Tensor.RowCellSize()
@@ -138,11 +138,11 @@ func SubSubSpace(sign float64, a, sub, out *tensor.Indexed) {
 // for overlapping cells.
 func Mul(a, b, out *tensor.Indexed) {
 	if b.Len() == 1 {
-		MulScalar(b.FloatRowCell(0, 0), a, out)
+		MulScalar(b.FloatRow(0), a, out)
 		return
 	}
 	if a.Len() == 1 {
-		MulScalar(a.FloatRowCell(0, 0), b, out)
+		MulScalar(a.FloatRow(0), b, out)
 		return
 	}
 	arows, acells := a.Tensor.RowCellSize()
@@ -198,11 +198,11 @@ func MulSubSpace(a, sub, out *tensor.Indexed) {
 // for overlapping cells.
 func Div(a, b, out *tensor.Indexed) {
 	if b.Len() == 1 {
-		DivScalar(b.FloatRowCell(0, 0), a, out)
+		DivScalar(b.FloatRow(0), a, out)
 		return
 	}
 	if a.Len() == 1 {
-		DivScalarInv(a.FloatRowCell(0, 0), b, out)
+		DivScalarInv(a.FloatRow(0), b, out)
 		return
 	}
 	arows, acells := a.Tensor.RowCellSize()

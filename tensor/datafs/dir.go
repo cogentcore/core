@@ -232,6 +232,8 @@ func (d *Data) FlatValuesAlphaFunc(fun func(item *Data) bool) []*tensor.Indexed 
 	return its
 }
 
+// todo: these must handle going up the tree using ..
+
 // DirAtPath returns directory at given relative path
 // from this starting dir.
 func (d *Data) DirAtPath(dir string) (*Data, error) {
@@ -242,6 +244,30 @@ func (d *Data) DirAtPath(dir string) (*Data, error) {
 		return nil, err
 	}
 	return sdf.(*Data), nil
+}
+
+// ItemAtPath returns item at given relative path
+// from this starting dir.
+func (d *Data) ItemAtPath(name string) (*Data, error) {
+	if err := d.mustDir("ItemAtPath", name); err != nil {
+		return nil, err
+	}
+	if !fs.ValidPath(name) {
+		return nil, &fs.PathError{Op: "ItemAtPath", Path: name, Err: errors.New("invalid path")}
+	}
+	dir, file := path.Split(name)
+	sd, err := d.DirAtPath(dir)
+	if err != nil {
+		return nil, err
+	}
+	itm, ok := sd.Dir.ValueByKeyTry(file)
+	if !ok {
+		if dir == "" && (file == d.name || file == ".") {
+			return d, nil
+		}
+		return nil, &fs.PathError{Op: "ItemAtPath", Path: name, Err: errors.New("file not found")}
+	}
+	return itm, nil
 }
 
 // Path returns the full path to this data item

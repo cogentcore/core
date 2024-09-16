@@ -18,7 +18,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tensor"
 )
@@ -376,7 +375,7 @@ func (dt *Table) WriteCSVRow(w io.Writer, row int, delim tensor.Delims) error {
 // WriteCSVRowWriter uses csv.Writer to write one row
 func (dt *Table) WriteCSVRowWriter(cw *csv.Writer, row int, ncol int) error {
 	prec := -1
-	if ps, err := metadata.Get[int](dt.Meta, "precision"); err == nil {
+	if ps, err := tensor.GetPrecision(dt.Meta); err == nil {
 		prec = ps
 	}
 	var rec []string

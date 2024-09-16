@@ -44,6 +44,19 @@ func (dl Delims) Rune() rune {
 	return '\t'
 }
 
+// SetPrecision sets the "precision" metadata value that determines
+// the precision to use in writing floating point numbers to files.
+func SetPrecision(md metadata.Data, prec int) {
+	md.Set("precision", prec)
+}
+
+// GetPrecision gets the "precision" metadata value that determines
+// the precision to use in writing floating point numbers to files.
+// returns an error if not set.
+func GetPrecision(md metadata.Data) (int, error) {
+	return metadata.Get[int](md, "precision")
+}
+
 // SaveCSV writes a tensor to a comma-separated-values (CSV) file
 // (where comma = any delimiter, specified in the delim arg).
 // Outer-most dims are rows in the file, and inner-most is column --
@@ -83,7 +96,7 @@ func OpenCSV(tsr Tensor, filename core.Filename, delim Delims) error {
 // Reading just grabs all values and doesn't care about shape.
 func WriteCSV(tsr Tensor, w io.Writer, delim Delims) error {
 	prec := -1
-	if ps, err := metadata.Get[int](*tsr.Metadata(), "precision"); err == nil {
+	if ps, err := GetPrecision(*tsr.Metadata()); err == nil {
 		prec = ps
 	}
 	cw := csv.NewWriter(w)

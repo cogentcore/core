@@ -54,10 +54,10 @@ func UpdateSliceTable(st any, dt *Table) {
 			val := npv.Index(ri).Field(i).Interface()
 			cl := dt.Column(f.Name)
 			if kind == reflect.String {
-				cl.SetStringRowCell(val.(string), ri, 0)
+				cl.SetStringRow(val.(string), ri)
 			} else {
 				fv, _ := reflectx.ToFloat(val)
-				cl.SetFloatRowCell(fv, ri, 0)
+				cl.SetFloatRow(fv, ri)
 			}
 		}
 	}

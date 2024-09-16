@@ -1,6 +1,6 @@
 # stats
 
-There are several packages here for operating on vector, [tensor](../), and [table](../table) data, for computing standard statistics and performing related computations, such as normalizing the data.
+There are several packages here for operating on [tensor](../), and [table](../table) data, for computing standard statistics and performing related computations, such as normalizing the data.
 
 * [cluster](cluster) implements agglomerative clustering of items based on [metric](metric) distance / similarity matrix data.
 * [convolve](convolve) convolves data (e.g., for smoothing).

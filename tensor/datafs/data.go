@@ -137,7 +137,7 @@ func (d *Data) AsString() string {
 	if d.Data == nil {
 		return ""
 	}
-	return d.Data.StringRowCell(0, 0)
+	return d.Data.StringRow(0)
 }
 
 // SetString sets scalar data value from given string.
@@ -145,7 +145,7 @@ func (d *Data) SetString(v string) {
 	if d.Data == nil {
 		return
 	}
-	d.Data.SetStringRowCell(v, 0, 0)
+	d.Data.SetStringRow(v, 0)
 }
 
 // AsFloat64 returns data as a scalar float64 (first element of tensor).
@@ -153,7 +153,7 @@ func (d *Data) AsFloat64() float64 {
 	if d.Data == nil {
 		return 0
 	}
-	return d.Data.FloatRowCell(0, 0)
+	return d.Data.FloatRow(0)
 }
 
 // SetFloat64 sets scalar data value from given float64.
@@ -161,7 +161,7 @@ func (d *Data) SetFloat64(v float64) {
 	if d.Data == nil {
 		return
 	}
-	d.Data.SetFloatRowCell(v, 0, 0)
+	d.Data.SetFloatRow(v, 0)
 }
 
 // AsFloat32 returns data as a scalar float32 (first element of tensor).
@@ -179,7 +179,7 @@ func (d *Data) AsInt() int {
 	if d.Data == nil {
 		return 0
 	}
-	return d.Data.IntRowCell(0, 0)
+	return d.Data.IntRow(0)
 }
 
 // SetInt sets scalar data value from given int.
@@ -187,5 +187,5 @@ func (d *Data) SetInt(v int) {
 	if d.Data == nil {
 		return
 	}
-	d.Data.SetIntRowCell(v, 0, 0)
+	d.Data.SetIntRow(v, 0)
 }

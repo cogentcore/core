@@ -98,16 +98,16 @@ type Tensor interface {
 	// SetFloat1D sets the value of given 1-dimensional index (0-Len()-1) as a float64.
 	SetFloat1D(val float64, i int)
 
-	// FloatRowCell returns the value at given row and cell, where row is outermost dim,
-	// and cell is 1D index into remaining inner dims. This is useful for lists of
-	// patterns, and the [table.Table] container. [Indexed] tensors index along the row,
-	// and use this interface extensively.
+	// FloatRowCell returns the value at given row and cell, where row is the outermost
+	// dimension, and cell is a 1D index into remaining inner dimensions.
+	// [Indexed] tensors index along the row, and use this interface extensively.
+	// This is useful for lists of patterns, and the [table.Table] container.
 	FloatRowCell(row, cell int) float64
 
-	// SetFloatRowCell sets the value at given row and cell, where row is outermost dim,
-	// and cell is 1D index into remaining inner dims. This is useful for lists of
-	// patterns, and the [table.Table] container. [Indexed] tensors index along the row,
-	// and use this interface extensively.
+	// SetFloatRowCell sets the value at given row and cell, where row is the outermost
+	// dimension, and cell is a 1D index into remaining inner dimensions.
+	// [Indexed] tensors index along the row, and use this interface extensively.
+	// This is useful for lists of patterns, and the [table.Table] container.
 	SetFloatRowCell(val float64, row, cell int)
 
 	/////////////////////  Strings
@@ -125,14 +125,16 @@ type Tensor interface {
 	// SetString1D sets the value of given 1-dimensional index (0-Len()-1) as a string.
 	SetString1D(val string, i int)
 
-	// StringRowCell returns the value at given row and cell, where row is outermost dim,
-	// and cell is 1D index into remaining inner dims. [Indexed] tensors index along the row,
-	// and use this interface extensively.
+	// StringRowCell returns the value at given row and cell, where row is the outermost
+	// dimension, and cell is a 1D index into remaining inner dimensions.
+	// [Indexed] tensors index along the row, and use this interface extensively.
+	// This is useful for lists of patterns, and the [table.Table] container.
 	StringRowCell(row, cell int) string
 
-	// SetStringRowCell sets the value at given row and cell, where row is outermost dim,
-	// and cell is 1D index into remaining inner dims. [Indexed] tensors index along the row,
-	// and use this interface extensively.
+	// SetStringRowCell sets the value at given row and cell, where row is the outermost
+	// dimension, and cell is a 1D index into remaining inner dimensions.
+	// [Indexed] tensors index along the row, and use this interface extensively.
+	// This is useful for lists of patterns, and the [table.Table] container.
 	SetStringRowCell(val string, row, cell int)
 
 	/////////////////////  Ints
@@ -149,16 +151,16 @@ type Tensor interface {
 	// SetInt1D sets the value of given 1-dimensional index (0-Len()-1) as a int.
 	SetInt1D(val int, i int)
 
-	// IntRowCell returns the value at given row and cell, where row is outermost dim,
-	// and cell is 1D index into remaining inner dims. This is useful for lists of
-	// patterns, and the [table.Table] container. [Indexed] tensors index along the row,
-	// and use this interface extensively.
+	// IntRowCell returns the value at given row and cell, where row is the outermost
+	// dimension, and cell is a 1D index into remaining inner dimensions.
+	// [Indexed] tensors index along the row, and use this interface extensively.
+	// This is useful for lists of patterns, and the [table.Table] container.
 	IntRowCell(row, cell int) int
 
-	// SetIntRowCell sets the value at given row and cell, where row is outermost dim,
-	// and cell is 1D index into remaining inner dims. This is useful for lists of
-	// patterns, and the [table.Table] container. [Indexed] tensors index along the row,
-	// and use this interface extensively.
+	// SetIntRowCell sets the value at given row and cell, where row is the outermost
+	// dimension, and cell is a 1D index into remaining inner dimensions.
+	// [Indexed] tensors index along the row, and use this interface extensively.
+	// This is useful for lists of patterns, and the [table.Table] container.
 	SetIntRowCell(val int, row, cell int)
 
 	/////////////////////  SubSpaces
@@ -202,12 +204,12 @@ type Tensor interface {
 
 	// CopyFrom copies all values from other tensor into this tensor, with an
 	// optimized implementation if the other tensor is of the same type, and
-	// otherwise it goes through the appropriate standard type (Float or String).
+	// otherwise it goes through the appropriate standard type (Float, Int, String).
 	CopyFrom(from Tensor)
 
 	// AppendFrom appends all values from other tensor into this tensor, with an
 	// optimized implementation if the other tensor is of the same type, and
-	// otherwise it goes through the appropriate standard type (Float or String).
+	// otherwise it goes through the appropriate standard type (Float, Int, String).
 	AppendFrom(from Tensor) error
 
 	// SetShapeFrom sets our shape from given source tensor, calling
