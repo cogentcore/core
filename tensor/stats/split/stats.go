@@ -4,32 +4,6 @@
 
 package split
 
-import (
-	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/datafs"
-	"cogentcore.org/core/tensor/table"
-)
-
-func TableStats(dir *datafs.Data, dt *table.Table, columns ...string) {
-	dv := table.NewView(dt)
-	// important for consistency across columns, to do full outer product sort first.
-	dv.SortColumns(tensor.Ascending, tensor.Stable, columns...)
-	Groups(dir, dv.ColumnList(columns...)...)
-}
-
-// Stats computes the given stats function on the unique grouped values of the
-// first tensor passed (the Group tensor), for each of the additional
-// tensors passed (the Value tensors).
-// It creates a subdirectory in given directory with the name of each value tensor,
-// (if it does not yet exist), and then creates a subdirectory within that
-// for the statistic name.  Within that statistic directory, it creates
-// a String tensor with the unique values of the Group tensor, and a
-// Float64 tensor with the statistics results for each such unique group value.
-// It calls the Groups function on the Group tensor first.
-func Stats(dir *datafs.Data, stat string, tsrs ...*tensor.Indexed) {
-
-}
-
 /*
 
 // AggIndex performs aggregation using given standard statistic (e.g., Mean) across

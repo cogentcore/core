@@ -43,8 +43,7 @@ func NewDir(name string, parent ...*Data) (*Data, error) {
 
 // Item returns data item in given directory by name.
 // This is for fast access and direct usage of known
-// items, and it will panic if item is not found or
-// this data is not a directory.
+// items, and it will panic if this data is not a directory.
 func (d *Data) Item(name string) *Data {
 	return d.Dir.ValueByKey(name)
 }
@@ -306,10 +305,26 @@ func (d *Data) Add(it *Data) error {
 }
 
 // Mkdir creates a new directory with the specified name.
-// The only error is if this item is not a directory.
+// Returns an error if this item is not a directory,
+// or if the name is already used within this directory.
+// See [Data.RecycleDir] for a version ensures a directory
+// exists whether it needs to be made or already does.
 func (d *Data) Mkdir(name string) (*Data, error) {
 	if err := d.mustDir("Mkdir", name); err != nil {
 		return nil, err
+	}
+	return NewDir(name, d)
+}
+
+// RecycleDir creates a new directory with the specified name
+// if it doesn't already exist, otherwise returns the existing one.
+// It only returns an error is if this item is not a directory.
+func (d *Data) RecycleDir(name string) (*Data, error) {
+	if err := d.mustDir("RecycleDir", name); err != nil {
+		return nil, err
+	}
+	if cd := d.Dir.ValueByKey(name); cd != nil {
+		return cd, nil
 	}
 	return NewDir(name, d)
 }

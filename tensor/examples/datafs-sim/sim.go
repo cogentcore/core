@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/databrowser"
 	"cogentcore.org/core/tensor/datafs"
-	"cogentcore.org/core/tensor/stats/split"
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
 )
@@ -153,8 +152,8 @@ func (ss *Sim) EpochDone() {
 }
 
 func main() {
-	testGroup()
-	return
+	// testGroup()
+	// return
 	ss := &Sim{}
 	ss.ConfigAll()
 	ss.Run()
@@ -176,7 +175,9 @@ func testGroup() {
 		dt.Column("Value").SetFloatRowCell(float64(i), i, 0)
 	}
 	dir, _ := datafs.NewDir("Group")
-	split.TableGroups(dir, dt, "Name")
+	stats.TableGroups(dir, dt, "Name")
+
+	stats.TableGroupStats(dir, stats.Mean.FuncName(), dt, "Value")
 
 	databrowser.NewBrowserWindow(dir, "Group")
 	core.Wait()

@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package split
-
-//go:generate core generate
+package stats
 
 import (
 	"strconv"
+	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
@@ -71,7 +70,7 @@ func Groups(dir *datafs.Data, tsrs ...*tensor.Indexed) {
 		if nm == "" {
 			nm = strconv.Itoa(i)
 		}
-		td, _ := dir.Mkdir(gd)
+		td, _ := gd.Mkdir(nm)
 		srt := tsr.CloneIndexes()
 		srt.SortStable(tensor.Ascending)
 		start := 0
@@ -106,3 +105,60 @@ func Groups(dir *datafs.Data, tsrs ...*tensor.Indexed) {
 }
 
 // todo: make an outer-product function?
+
+func TableGroupStats(dir *datafs.Data, stat string, dt *table.Table, columns ...string) {
+	GroupStats(dir, stat, dt.ColumnList(columns...)...)
+}
+
+// GroupStats computes the given stats function on the unique grouped indexes
+// in the "Groups" directory found within the given directory, applied to each
+// of the value tensors passed here.
+// It creates a "Stats" subdirectory in given directory, with
+// subdirectories with the name of each value tensor (if it does not
+// yet exist), and then creates a subdirectory within that
+// for the statistic name.  Within that statistic directory, it creates
+// a String "Group" tensor with the unique values of the Group tensor,
+// and a aligned Float64 tensor with the statistics results for each such unique group value.
+func GroupStats(dir *datafs.Data, stat string, tsrs ...*tensor.Indexed) {
+	gd, err := dir.RecycleDir("Groups")
+	if errors.Log(err) != nil {
+		return
+	}
+	sd, err := dir.RecycleDir("Stats")
+	if errors.Log(err) != nil {
+		return
+	}
+	stnm := stat
+	spl := strings.Split(stat, ".")
+	if len(spl) == 2 {
+		stnm = spl[1]
+	}
+	stout := tensor.NewFloat64Scalar(0)
+	groups := gd.ItemsFunc(nil)
+	for _, gp := range groups {
+		ggd, _ := gd.RecycleDir(gp.Name())
+		vals := ggd.ValuesFunc(nil)
+		nv := len(vals)
+		if nv == 0 {
+			continue
+		}
+		sgd, _ := sd.RecycleDir(gp.Name())
+		gv := sgd.Item("Group")
+		if gv == nil {
+			gtsr := datafs.NewValue[string](sgd, "Group", nv)
+			for i, v := range vals {
+				gtsr.SetStringRowCell(v.Tensor.Metadata().GetName(), i, 0)
+			}
+		}
+		for _, tsr := range tsrs {
+			vd, _ := sgd.RecycleDir(tsr.Tensor.Metadata().GetName())
+			sv := datafs.NewValue[float64](vd, stnm, nv)
+			for i, v := range vals {
+				idx := v.Tensor.(*tensor.Int).Values
+				sg := tensor.NewIndexed(tsr.Tensor, idx)
+				tensor.Call(stat, sg, stout)
+				sv.SetFloatRowCell(stout.Float1D(0), i, 0)
+			}
+		}
+	}
+}
