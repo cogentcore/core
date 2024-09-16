@@ -17,7 +17,7 @@ import (
 func init() {
 	tensor.AddFunc("metric.Matrix", Matrix, 1, tensor.StringFirstArg)
 	tensor.AddFunc("metric.CrossMatrix", CrossMatrix, 1, tensor.StringFirstArg)
-	tensor.AddFunc("metric.CovarMatrix", CovarMatrix, 1, tensor.StringFirstArg)
+	tensor.AddFunc("metric.CovarianceMatrix", CovarianceMatrix, 1, tensor.StringFirstArg)
 }
 
 // Matrix computes the rows x rows square distance / similarity matrix
@@ -88,7 +88,7 @@ func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
 		}, a, b, out)
 }
 
-// CovarMatrix generates the cells x cells square covariance matrix
+// CovarianceMatrix generates the cells x cells square covariance matrix
 // for all per-row cells of the given higher dimensional input tensor,
 // which must have at least 2 dimensions: the outermost rows,
 // and within that, 1+dimensional patterns (cells).
@@ -101,7 +101,7 @@ func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
 // which is typical in neural network models, and use
 // Correlation if they are on very different scales, because it effectively rescales).
 // The resulting matrix can be used as the input to PCA or SVD eigenvalue decomposition.
-func CovarMatrix(funcName string, in, out *tensor.Indexed) {
+func CovarianceMatrix(funcName string, in, out *tensor.Indexed) {
 	rows, cells := in.RowCellSize()
 	if rows == 0 || cells == 0 {
 		return
@@ -144,7 +144,7 @@ func CovarMatrix(funcName string, in, out *tensor.Indexed) {
 	}
 }
 
-// PCA performs the eigen decomposition of the given CovarMatrix,
+// PCA performs the eigen decomposition of the given CovarianceMatrix,
 // using principal components analysis (PCA), which is slower than [SVD].
 // The eigenvectors are same size as Covar. Each eigenvector is a column
 // in this 2D square matrix, ordered *lowest* to *highest* across the columns,
@@ -174,7 +174,7 @@ func PCA(covar, eigenvecs, vals *tensor.Indexed) {
 	}
 }
 
-// SVD performs the eigen decomposition of the given CovarMatrix,
+// SVD performs the eigen decomposition of the given CovarianceMatrix,
 // using singular value decomposition (SVD), which is faster than [PCA].
 // The eigenvectors are same size as Covar. Each eigenvector is a column
 // in this 2D square matrix, ordered *highest* to *lowest* across the columns,

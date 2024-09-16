@@ -152,8 +152,8 @@ func (ss *Sim) EpochDone() {
 }
 
 func main() {
-	// testGroup()
-	// return
+	testGroup()
+	return
 	ss := &Sim{}
 	ss.ConfigAll()
 	ss.Run()
@@ -172,12 +172,13 @@ func testGroup() {
 			gp = "B"
 		}
 		dt.Column("Name").SetStringRowCell(gp, i, 0)
-		dt.Column("Value").SetFloatRowCell(float64(i), i, 0)
+		dt.Column("Value").SetFloatRowCell(float64(10*(i+1)), i, 0)
 	}
 	dir, _ := datafs.NewDir("Group")
 	stats.TableGroups(dir, dt, "Name")
 
 	stats.TableGroupStats(dir, stats.Mean.FuncName(), dt, "Value")
+	stats.TableGroupStats(dir, stats.Sem.FuncName(), dt, "Value")
 
 	databrowser.NewBrowserWindow(dir, "Group")
 	core.Wait()

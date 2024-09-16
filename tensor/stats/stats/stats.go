@@ -5,6 +5,8 @@
 package stats
 
 import (
+	"strings"
+
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 )
@@ -108,6 +110,17 @@ const (
 // in tensor.Call to call this function.
 func (s Stats) FuncName() string {
 	return "stats." + s.String()
+}
+
+// StripPackage removes any package name from given string,
+// used for naming based on FuncName() which could be custom
+// or have a package prefix.
+func StripPackage(name string) string {
+	spl := strings.Split(name, ".")
+	if len(spl) > 1 {
+		return spl[len(spl)-1]
+	}
+	return name
 }
 
 // Stat calls a standard Stats enum function on given tensors.

@@ -23,20 +23,12 @@ import (
 // 	return spl
 // }
 
-// TableGroups does [Groups] on given columns from table.
-func TableGroups(dir *datafs.Data, dt *table.Table, columns ...string) {
-	dv := table.NewView(dt)
-	// important for consistency across columns, to do full outer product sort first.
-	dv.SortColumns(tensor.Ascending, tensor.Stable, columns...)
-	Groups(dir, dv.ColumnList(columns...)...)
-}
-
 // Groups generates indexes for each unique value in each of the given tensors.
 // One can then use the resulting indexes for the [tensor.Indexed] indexes to
 // perform computations restricted to grouped subsets of data, as in the
-// [Stats] function. See [GroupCombined] for function that makes a combined
+// [GroupStats] function. See [GroupCombined] for function that makes a
 // "Combined" Group that has a unique group for each _combination_ of
-// the groups created by this function.
+// the separate, independent groups created by this function.
 // It creates subdirectories in a "Groups" directory within given [datafs],
 // for each tensor passed in here, using the metadata Name property for
 // names (index if empty).
@@ -104,21 +96,26 @@ func Groups(dir *datafs.Data, tsrs ...*tensor.Indexed) {
 	}
 }
 
-// todo: make an outer-product function?
-
-func TableGroupStats(dir *datafs.Data, stat string, dt *table.Table, columns ...string) {
-	GroupStats(dir, stat, dt.ColumnList(columns...)...)
+// TableGroups runs [Groups] on the given columns from given [table.Table].
+func TableGroups(dir *datafs.Data, dt *table.Table, columns ...string) {
+	dv := table.NewView(dt)
+	// important for consistency across columns, to do full outer product sort first.
+	dv.SortColumns(tensor.Ascending, tensor.Stable, columns...)
+	Groups(dir, dv.ColumnList(columns...)...)
 }
 
+// todo: GroupCombined
+
 // GroupStats computes the given stats function on the unique grouped indexes
-// in the "Groups" directory found within the given directory, applied to each
-// of the value tensors passed here.
+// produced by the [Groups] function, in the given [datafs] directory,
+// applied to each of the tensors passed here.
 // It creates a "Stats" subdirectory in given directory, with
 // subdirectories with the name of each value tensor (if it does not
 // yet exist), and then creates a subdirectory within that
 // for the statistic name.  Within that statistic directory, it creates
-// a String "Group" tensor with the unique values of the Group tensor,
-// and a aligned Float64 tensor with the statistics results for each such unique group value.
+// a String tensor with the unique values of each source [Groups] tensor,
+// and a aligned Float64 tensor with the statistics results for each such
+// unique group value. See the README.md file for a diagram of the results.
 func GroupStats(dir *datafs.Data, stat string, tsrs ...*tensor.Indexed) {
 	gd, err := dir.RecycleDir("Groups")
 	if errors.Log(err) != nil {
@@ -128,7 +125,7 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...*tensor.Indexed) {
 	if errors.Log(err) != nil {
 		return
 	}
-	stnm := stat
+	stnm := StripPackage(stat)
 	spl := strings.Split(stat, ".")
 	if len(spl) == 2 {
 		stnm = spl[1]
@@ -136,16 +133,17 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...*tensor.Indexed) {
 	stout := tensor.NewFloat64Scalar(0)
 	groups := gd.ItemsFunc(nil)
 	for _, gp := range groups {
-		ggd, _ := gd.RecycleDir(gp.Name())
+		gpnm := gp.Name()
+		ggd, _ := gd.RecycleDir(gpnm)
 		vals := ggd.ValuesFunc(nil)
 		nv := len(vals)
 		if nv == 0 {
 			continue
 		}
-		sgd, _ := sd.RecycleDir(gp.Name())
-		gv := sgd.Item("Group")
+		sgd, _ := sd.RecycleDir(gpnm)
+		gv := sgd.Item(gpnm)
 		if gv == nil {
-			gtsr := datafs.NewValue[string](sgd, "Group", nv)
+			gtsr := datafs.NewValue[string](sgd, gpnm, nv)
 			for i, v := range vals {
 				gtsr.SetStringRowCell(v.Tensor.Metadata().GetName(), i, 0)
 			}
@@ -161,4 +159,22 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...*tensor.Indexed) {
 			}
 		}
 	}
+}
+
+// TableGroupStats runs [GroupStats] on the given columns from given [table.Table].
+func TableGroupStats(dir *datafs.Data, stat string, dt *table.Table, columns ...string) {
+	GroupStats(dir, stat, dt.ColumnList(columns...)...)
+}
+
+// GroupDescribe runs standard descriptive statistics on given tensor data
+// using [GroupStats] function, with [DescriptiveStats] list of stats.
+func GroupDescribe(dir *datafs.Data, tsrs ...*tensor.Indexed) {
+	for _, st := range DescriptiveStats {
+		GroupStats(dir, st.FuncName(), tsrs...)
+	}
+}
+
+// TableGroupDescribe runs [GroupDescribe] on the given columns from given [table.Table].
+func TableGroupDescribe(dir *datafs.Data, dt *table.Table, columns ...string) {
+	GroupDescribe(dir, dt.ColumnList(columns...)...)
 }

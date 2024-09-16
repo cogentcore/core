@@ -29,9 +29,13 @@ func QuantilesFunc(in, qs, out *tensor.Indexed) error {
 	sin := in.Clone()
 	sin.ExcludeMissing()
 	sin.Sort(tensor.Ascending)
-	sz := len(sin.Indexes) - 1 // length of our own index list
-	fsz := float64(sz)
 	out.Tensor.SetShapeFrom(qs.Tensor)
+	sz := len(sin.Indexes) - 1 // length of our own index list
+	if sz <= 0 {
+		out.Tensor.SetZeros()
+		return nil
+	}
+	fsz := float64(sz)
 	nq := qs.Tensor.Len()
 	for i := range nq {
 		q := qs.Float1D(i)

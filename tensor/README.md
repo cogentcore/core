@@ -12,7 +12,7 @@ Use the `[Set]FloatRowCell` methods wherever possible, for the most efficient an
 
 The `Vectorize` function and its variants provide a universal "apply function to tensor data" mechanism (often called a "map" function, but that name is already taken in Go).  It takes an `N` function that determines how many indexes to iterate over (and this function can also do any initialization prior to iterating), a compute function that gets an index and a list of tensors, which is applied to every index, and a varargs list of indexed tensors.  It is completely up to the compute function how to interpret the index.  There is a Threaded version of this for parallelizable functions, and a GPU version.
 
-All tensor package functions are registered using a single name to function map (`Funcs`).
+All tensor package functions are registered using a global name-to-function map (`Funcs`), and can be called by name via `tensor.Call` or `tensor.CallOut` (creates the appropriate output tensors for you). Standard enumerated functions in `stats` and `metrics` have a `FuncName` method that appends the package name, which is how they are registered and called.
 
 * [table](table) organizes multiple Tensors as columns in a data `Table`, aligned by a common outer row dimension.  Because the columns are tensors, each cell (value associated with a given row) can also be n-dimensional, allowing efficient representation of patterns and other high-dimensional data.  Furthermore, the entire column is organized as a single contiguous slice of data, so it can be efficiently processed.  A `Table` automatically supplies a shared list of row Indexes for its `Indexed` columns, efficiently allowing all the heterogeneous data columns to be sorted and filtered together.
 
@@ -29,11 +29,12 @@ All tensor package functions are registered using a single name to function map 
 * [bitslice](bitslice) is a Go slice of bytes `[]byte` that has methods for setting individual bits, as if it was a slice of bools, while being 8x more memory efficient.  This is used for encoding null entries in  `etensor`, and as a Tensor of bool / bits there as well, and is generally very useful for binary (boolean) data.
 
 * [stats](stats) implements a number of different ways of analyzing tensor and table data, including:
-    - [split](split) supports splitting a Table into any number of indexed sub-views and aggregating over those (i.e., pivot tables), grouping, summarizing data, etc.
-    - [metric](metric) provides similarity / distance metrics such as `Euclidean`, `Cosine`, or `Correlation` that operate on slices of `[]float64` or `[]float32`.
-    - TODO: now in metric: [simat](simat) provides similarity / distance matrix computation methods operating on `etensor.Tensor` or `etable.Table` data.  The `SimMat` type holds the resulting matrix and labels for the rows and columns, which has a special `SimMatGrid` view in `etview` for visualizing labeled similarity matricies.
-    - TODO: where? [pca](pca) provides principal-components-analysis (PCA) and covariance matrix computation functions.
-    - TODO: in metric? [clust](clust) provides standard agglomerative hierarchical clustering including ability to plot results in an eplot.
+    - [cluster](cluster) implements agglomerative clustering of items based on [metric](metric) distance / similarity matrix data.
+    - [convolve](convolve) convolves data (e.g., for smoothing).
+    - [glm](glm) fits a general linear model for one or more dependent variables as a function of one or more independent variables.  This encompasses all forms of regression.
+    - [histogram](histogram) bins data into groups and reports the frequency of elements in the bins.
+    - [metric](metric) computes similarity / distance metrics for comparing two tensors, and associated distance / similarity matrix functions, including PCA and SVD analysis functions that operate on a covariance matrix.
+    - [stats](stats) provides a set of standard summary statistics on a range of different data types, including basic slices of floats, to tensor and table data.  It also includes the ability to extract Groups of values and generate statistics for each group, as in a "pivot table" in a spreadsheet.
 
 # Standard shapes and dimensional terminology
 

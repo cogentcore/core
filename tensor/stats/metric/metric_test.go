@@ -109,7 +109,7 @@ func TestPCAIris(t *testing.T) {
 	}
 	data := dt.Column("data")
 	covar := tensor.NewFloat64Indexed()
-	CovarMatrix(Correlation.FuncName(), data, covar)
+	CovarianceMatrix(Correlation.FuncName(), data, covar)
 	// fmt.Printf("correl: %s\n", covar.Tensor.String())
 
 	vecs := tensor.NewFloat64Indexed()
