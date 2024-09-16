@@ -6,7 +6,6 @@ package datafs
 
 import (
 	"errors"
-	"fmt"
 	"io/fs"
 	"time"
 )
@@ -54,6 +53,7 @@ func (d *Data) Copy(overwrite bool, to string, from ...string) error {
 	case len(from) == 0:
 		return &fs.PathError{Op: "Copy", Path: to, Err: errors.New("no from sources specified")}
 	}
+	// todo: check for to conflict first here..
 	tod, _ := d.ItemAtPath(to)
 	var errs []error
 	if len(from) > 1 && tod != nil && !tod.IsDir() {
@@ -72,26 +72,27 @@ func (d *Data) Copy(overwrite bool, to string, from ...string) error {
 			errs = append(errs, err)
 			continue
 		}
-		if trg, ok := targd.Dir.ValueByKeyTry(frd.name); ok { // target exists
-			switch {
-			case trg.IsDir() && frd.IsDir():
-				// todo: copy all items from frd into trg
-			case trg.IsDir(): // frd is not
-				errs = append(errs, &fs.PathError{Op: "Copy", Path: opstr, Err: errors.New("cannot copy from Value onto directory of same name")})
-			case frd.IsDir(): // trg is not
-				errs = append(errs, &fs.PathError{Op: "Copy", Path: opstr, Err: errors.New("cannot copy from Directory onto Value of same name")})
-			default: // both nodes
-				if overwrite { // todo: interactive!?
-					trg.CopyFromValue(frd)
+		if targf == "" {
+			if trg, ok := targd.Dir.ValueByKeyTry(frd.name); ok { // target exists
+				switch {
+				case trg.IsDir() && frd.IsDir():
+					// todo: copy all items from frd into trg
+				case trg.IsDir(): // frd is not
+					errs = append(errs, &fs.PathError{Op: "Copy", Path: opstr, Err: errors.New("cannot copy from Value onto directory of same name")})
+				case frd.IsDir(): // trg is not
+					errs = append(errs, &fs.PathError{Op: "Copy", Path: opstr, Err: errors.New("cannot copy from Directory onto Value of same name")})
+				default: // both nodes
+					if overwrite { // todo: interactive!?
+						trg.CopyFromValue(frd)
+					}
 				}
+				continue
 			}
-			continue
 		}
 		nw := frd.Clone()
 		if targf != "" {
 			nw.name = targf
 		}
-		fmt.Println("adding new:", nw.name, nw.String())
 		targd.Add(nw)
 	}
 	return errors.Join(errs...)

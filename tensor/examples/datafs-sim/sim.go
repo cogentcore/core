@@ -9,14 +9,12 @@ import (
 	"reflect"
 	"strconv"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/databrowser"
 	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/stats/stats"
-	"cogentcore.org/core/tensor/table"
 )
 
 type Sim struct {
@@ -80,7 +78,28 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 			return nil
 		})
 	}
-	errors.Log(dir.Copy(datafs.Preserve, "AllTrials", "Trial"))
+	alllogd, _ := dir.Mkdir("AllTrials")
+	for _, st := range sitems {
+		nm := st.Tensor.Metadata().GetName()
+		lt := alllogd.NewOfType(nm, st.Tensor.DataType())
+		lt.Tensor.Metadata().Copy(*st.Tensor.Metadata()) // key affordance: we get meta data from source
+		tensor.SetCalcFunc(lt.Tensor, func() error {
+			// todo: helper for below
+			row := 0
+			if lt.Tensor.NumDims() == 0 {
+				lt.Tensor.SetShape(1)
+			} else {
+				row = lt.Tensor.DimSize(0)
+				lt.Tensor.SetShape(row + 1)
+			}
+			if st.Tensor.IsString() {
+				lt.SetStringRow(st.StringRow(0), row)
+			} else {
+				lt.SetFloatRow(st.FloatRow(0), row)
+			}
+			return nil
+		})
+	}
 	return logd
 }
 
@@ -97,6 +116,7 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 		nm := st.Tensor.Metadata().GetName()
 		src := from.Value(nm)
 		if st.Tensor.DataType() >= reflect.Float32 {
+			// todo: pct correct etc
 			dd, _ := logd.Mkdir(nm)
 			for _, ag := range aggs { // key advantage of dir structure: multiple stats per item
 				lt := dd.NewOfType(ag.String(), st.Tensor.DataType(), nctr)
@@ -123,16 +143,27 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 }
 
 func (ss *Sim) Run() {
+	nrun := ss.Config.Item("NRun").AsInt()
 	nepc := ss.Config.Item("NEpoch").AsInt()
 	ntrl := ss.Config.Item("NTrial").AsInt()
-	for epc := range nepc {
-		ss.Stats.Item("Epoch").SetInt(epc)
-		for trl := range ntrl {
-			ss.Stats.Item("Trial").SetInt(trl)
-			ss.RunTrial(trl)
+	for run := range nrun {
+		ss.Stats.Item("Run").SetInt(run)
+		for epc := range nepc {
+			ss.Stats.Item("Epoch").SetInt(epc)
+			for trl := range ntrl {
+				ss.Stats.Item("Trial").SetInt(trl)
+				ss.RunTrial(trl)
+			}
+			ss.EpochDone()
 		}
-		ss.EpochDone()
 	}
+	alldt := ss.Logs.Item("AllTrials").GetDirTable(nil)
+	dir, _ := ss.Logs.Mkdir("Stats")
+	stats.TableGroups(dir, alldt, "Run", "Epoch", "Trial")
+	sts := []string{"SSE", "AvgSSE", "TrlErr"}
+	stats.TableGroupStats(dir, stats.Mean.FuncName(), alldt, sts...)
+	stats.TableGroupStats(dir, stats.Sem.FuncName(), alldt, sts...)
+
 }
 
 func (ss *Sim) RunTrial(trl int) {
@@ -147,6 +178,7 @@ func (ss *Sim) RunTrial(trl int) {
 	}
 	ss.Stats.Item("TrlErr").SetFloat32(trlErr)
 	ss.Logs.Item("Trial").CalcAll()
+	ss.Logs.Item("AllTrials").CalcAll()
 }
 
 func (ss *Sim) EpochDone() {
@@ -159,27 +191,5 @@ func main() {
 	ss.Run()
 
 	databrowser.NewBrowserWindow(ss.Root, "Root")
-	core.Wait()
-}
-
-func testGroup() {
-	dt := table.NewTable().SetNumRows(4)
-	dt.AddStringColumn("Name")
-	dt.AddFloat32Column("Value")
-	for i := range dt.NumRows() {
-		gp := "A"
-		if i >= 2 {
-			gp = "B"
-		}
-		dt.Column("Name").SetStringRow(gp, i)
-		dt.Column("Value").SetFloatRow(float64(10*(i+1)), i)
-	}
-	dir, _ := datafs.NewDir("Group")
-	stats.TableGroups(dir, dt, "Name")
-
-	stats.TableGroupStats(dir, stats.Mean.FuncName(), dt, "Value")
-	stats.TableGroupStats(dir, stats.Sem.FuncName(), dt, "Value")
-
-	databrowser.NewBrowserWindow(dir, "Group")
 	core.Wait()
 }

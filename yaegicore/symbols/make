@@ -8,4 +8,4 @@ command extract {
     }
 }
 
-extract core icons events styles styles/states styles/abilities styles/units tree keymap colors colors/gradient filetree texteditor htmlcore pages paint math32 plot plot/plots plot/plotcore tensor/table base/errors base/fsx base/reflectx base/labels base/fileinfo
+extract core icons events styles styles/states styles/abilities styles/units tree keymap colors colors/gradient filetree texteditor htmlcore pages paint math32 plot plot/plots plot/plotcore tensor tensor/table tensor/stats/stats tensor/stats/metric tensor/datafs tensor/databrowser base/errors base/fsx base/reflectx base/labels base/fileinfo

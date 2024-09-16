@@ -33,16 +33,15 @@ func (d *Data) List(long, recursive bool) string {
 func (d *Data) ListShort(recursive bool, indent int) string {
 	var b strings.Builder
 	items := d.ItemsFunc(nil)
-	// todo: dirs first, then items
 	for _, it := range items {
 		if it.IsDir() {
 			if recursive {
-				b.WriteString(d.ListShort(recursive, indent+1))
+				b.WriteString("\n" + it.ListShort(recursive, indent+1))
 			} else {
-				b.WriteString(d.name + " ")
+				b.WriteString(it.name + "/ ")
 			}
 		} else {
-			b.WriteString(d.name + " ")
+			b.WriteString(it.name + " ")
 		}
 	}
 	return b.String()
@@ -54,7 +53,7 @@ func (d *Data) ListLong(recursive bool, indent int) string {
 	for _, it := range items {
 		if it.IsDir() {
 		} else {
-			b.WriteString(d.String() + "\n")
+			b.WriteString(it.String() + "\n")
 		}
 	}
 	return b.String()

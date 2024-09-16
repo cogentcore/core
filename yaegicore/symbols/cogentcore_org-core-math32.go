@@ -30,6 +30,7 @@ func init() {
 		"Cbrt":                     reflect.ValueOf(math32.Cbrt),
 		"Ceil":                     reflect.ValueOf(math32.Ceil),
 		"Clamp":                    reflect.ValueOf(math32.Clamp),
+		"Clamp64":                  reflect.ValueOf(math32.Clamp64),
 		"ClampInt":                 reflect.ValueOf(math32.ClampInt),
 		"ContainsPoint":            reflect.ValueOf(math32.ContainsPoint),
 		"CopyFloat32s":             reflect.ValueOf(math32.CopyFloat32s),
