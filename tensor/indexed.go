@@ -217,6 +217,12 @@ const (
 
 	// Descending specifies a descending sort direction for tensor Sort routines
 	Descending = false
+
+	//	Stable specifies using stable, original order-preserving sort, which is slower.
+	Stable = true
+
+	//	Unstable specifies using faster but unstable sorting.
+	Unstable = false
 )
 
 // SortFunc sorts the row-wise indexes using given compare function.

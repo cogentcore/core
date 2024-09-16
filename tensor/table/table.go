@@ -42,21 +42,25 @@ type Table struct { //types:add
 }
 
 // NewTable returns a new Table with its own (empty) set of Columns.
-// Can pass an optional name which sets metadata.
+// Can pass an optional name which calls metadata SetName.
 func NewTable(name ...string) *Table {
 	dt := &Table{}
 	dt.Columns = NewColumns()
 	if len(name) > 0 {
-		dt.Meta.Set("name", name[0])
+		dt.Meta.SetName(name[0])
 	}
 	return dt
 }
 
 // NewView returns a new Table with its own Indexed view into the
 // same underlying set of Column tensor data as the source table.
-// Indexes are nil in the new Table, resulting in default full sequential view.
+// Indexes are copied from the existing table -- use Sequential
+// to reset to full sequential view.
 func NewView(src *Table) *Table {
 	dt := &Table{Columns: src.Columns}
+	if src.Indexes != nil {
+		dt.Indexes = slices.Clone(src.Indexes)
+	}
 	dt.Meta.Copy(src.Meta)
 	return dt
 }
@@ -105,6 +109,19 @@ func (dt *Table) ColumnByIndex(idx int) *tensor.Indexed {
 	return tensor.NewIndexed(cl, dt.Indexes)
 }
 
+// ColumnList returns a list of tensors with given column names,
+// as [tensor.Indexed] with the shared [Table.Indexes] from this table.
+func (dt *Table) ColumnList(names ...string) []*tensor.Indexed {
+	list := make([]*tensor.Indexed, 0, len(names))
+	for _, nm := range names {
+		cl := dt.Column(nm)
+		if cl != nil {
+			list = append(list, cl)
+		}
+	}
+	return list
+}
+
 // ColumnName returns the name of given column.
 func (dt *Table) ColumnName(i int) string {
 	return dt.Columns.Keys[i]
@@ -113,6 +130,18 @@ func (dt *Table) ColumnName(i int) string {
 // ColumnIndex returns the index for given column name.
 func (dt *Table) ColumnIndex(name string) int {
 	return dt.Columns.IndexByKey(name)
+}
+
+// ColumnIndexList returns a list of indexes to columns of given names.
+func (dt *Table) ColumnIndexList(names ...string) []int {
+	list := make([]int, 0, len(names))
+	for _, nm := range names {
+		ci := dt.ColumnIndex(nm)
+		if ci >= 0 {
+			list = append(list, ci)
+		}
+	}
+	return list
 }
 
 // AddColumn adds a new column to the table, of given type and column name

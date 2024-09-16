@@ -136,15 +136,7 @@ func (dt *Table) SortStableFunc(cmp func(dt *Table, i, j int) int) {
 // and optionally using a stable sort.
 // Uses first cell of higher dimensional data.
 func (dt *Table) SortColumns(ascending, stable bool, columns ...string) { //types:add
-	nc := len(columns)
-	cis := make([]int, 0, nc)
-	for _, cn := range columns {
-		ci := dt.ColumnIndex(cn)
-		if ci >= 0 {
-			cis = append(cis, ci)
-		}
-	}
-	dt.SortColumnIndexes(ascending, stable, cis...)
+	dt.SortColumnIndexes(ascending, stable, dt.ColumnIndexList(columns...)...)
 }
 
 // SortColumnIndexes sorts the indexes into our Table according to values in

@@ -4,14 +4,7 @@
 
 package split
 
-import (
-	"fmt"
-	"math"
-
-	"cogentcore.org/core/tensor/table"
-	"gonum.org/v1/gonum/floats"
-)
-
+/*
 // Permuted generates permuted random splits of table rows, using given list of probabilities,
 // which will be normalized to sum to 1 (error returned if sum = 0)
 // names are optional names for each split (e.g., Train, Test) which will be
@@ -61,3 +54,4 @@ func Permuted(ix *table.Table, probs []float64, names []string) (*table.Splits, 
 	}
 	return spl, nil
 }
+*/

@@ -7,130 +7,95 @@ package split
 //go:generate core generate
 
 import (
-	"log"
-	"slices"
+	"strconv"
 
-	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
 )
 
 // All returns a single "split" with all of the rows in given view
 // useful for leveraging the aggregation management functions in splits
-func All(ix *table.Table) *table.Splits {
-	spl := &table.Splits{}
-	spl.Levels = []string{"All"}
-	spl.New(ix.Table, []string{"All"}, ix.Indexes...)
-	return spl
+// func All(ix *table.Table) *table.Splits {
+// 	spl := &table.Splits{}
+// 	spl.Levels = []string{"All"}
+// 	spl.New(ix.Table, []string{"All"}, ix.Indexes...)
+// 	return spl
+// }
+
+// TableGroups does [Groups] on given columns from table.
+func TableGroups(dir *datafs.Data, dt *table.Table, columns ...string) {
+	dv := table.NewView(dt)
+	// important for consistency across columns, to do full outer product sort first.
+	dv.SortColumns(tensor.Ascending, tensor.Stable, columns...)
+	Groups(dir, dv.ColumnList(columns...)...)
 }
 
-// GroupByIndex returns a new Splits set based on the groups of values
-// across the given set of column indexes.
+// Groups generates indexes for each unique value in each of the given tensors.
+// One can then use the resulting indexes for the [tensor.Indexed] indexes to
+// perform computations restricted to grouped subsets of data, as in the
+// [Stats] function.
+// It creates subdirectories in given [datafs] for each tensor
+// passed in here, using the metadata Name property for names (index if empty).
+// Within each subdirectory there are int value tensors for each unique 1D
+// row-wise value of elements in the input tensor, named as the string
+// representation of the value, where the int tensor contains a list of
+// row-wise indexes corresponding to the source rows having that value.
+// Note that these indexes are directly in terms of the underlying [Tensor] data
+// rows, indirected through any existing indexes on the inputs, so that
+// the results can be used directly as indexes into the corresponding tensor data.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
-func GroupByIndex(ix *table.Table, colIndexes []int) *table.Splits {
-	nc := len(colIndexes)
-	if nc == 0 || ix.Table == nil {
-		return nil
-	}
-	if ix.Table.ColumnNames == nil {
-		log.Println("split.GroupBy: Table does not have any column names -- will not work")
-		return nil
-	}
-	spl := &table.Splits{}
-	spl.Levels = make([]string, nc)
-	for i, ci := range colIndexes {
-		spl.Levels[i] = ix.Table.ColumnNames[ci]
-	}
-	srt := ix.Clone()
-	srt.SortStableColumns(colIndexes, true) // important for consistency
-	lstValues := make([]string, nc)
-	curValues := make([]string, nc)
-	var curIx *table.Table
-	for _, rw := range srt.Indexes {
-		diff := false
-		for i, ci := range colIndexes {
-			cl := ix.Table.Columns[ci]
-			cv := cl.String1D(rw)
-			curValues[i] = cv
-			if cv != lstValues[i] {
-				diff = true
-			}
-		}
-		if diff || curIx == nil {
-			curIx = spl.New(ix.Table, curValues, rw)
-			copy(lstValues, curValues)
-		} else {
-			curIx.AddIndex(rw)
+func Groups(dir *datafs.Data, tsrs ...*tensor.Indexed) {
+
+	makeIdxs := func(dir *datafs.Data, srt *tensor.Indexed, val string, start, r int) {
+		n := r - start
+		it := datafs.NewValue[int](dir, val, n)
+		for j := range n {
+			it.SetIntRowCell(srt.Indexes[start+j], j, 0) // key to indirect through sort indexes
 		}
 	}
-	if spl.Len() == 0 { // prevent crashing from subsequent ops: add an empty split
-		spl.New(ix.Table, curValues) // no rows added here
-	}
-	return spl
-}
 
-// GroupBy returns a new Splits set based on the groups of values
-// across the given set of column names.
-// Uses a stable sort on columns, so ordering of other dimensions is preserved.
-func GroupBy(ix *table.Table, columns ...string) *table.Splits {
-	return GroupByIndex(ix, errors.Log1(ix.Table.ColumnIndexesByNames(columns...)))
-}
-
-// GroupByFunc returns a new Splits set based on the given function
-// which returns value(s) to group on for each row of the table.
-// The function should always return the same number of values -- if
-// it doesn't behavior is undefined.
-// Uses a stable sort on columns, so ordering of other dimensions is preserved.
-func GroupByFunc(ix *table.Table, fun func(row int) []string) *table.Splits {
-	if ix.Table == nil {
-		return nil
-	}
-
-	// save function values
-	funvals := make(map[int][]string, ix.Len())
-	nv := 0 // number of valeus
-	for _, rw := range ix.Indexes {
-		sv := fun(rw)
-		if nv == 0 {
-			nv = len(sv)
+	for i, tsr := range tsrs {
+		nr := tsr.NumRows()
+		if nr == 0 {
+			continue
 		}
-		funvals[rw] = slices.Clone(sv)
-	}
-
-	srt := ix.Clone()
-	srt.SortStable(func(et *table.Table, i, j int) bool { // sort based on given function values
-		fvi := funvals[i]
-		fvj := funvals[j]
-		for fi := 0; fi < nv; fi++ {
-			if fvi[fi] < fvj[fi] {
-				return true
-			} else if fvi[fi] > fvj[fi] {
-				return false
-			}
+		nm := tsr.Tensor.Metadata().GetName()
+		if nm == "" {
+			nm = strconv.Itoa(i)
 		}
-		return false
-	})
-
-	// now do our usual grouping operation
-	spl := &table.Splits{}
-	lstValues := make([]string, nv)
-	var curIx *table.Table
-	for _, rw := range srt.Indexes {
-		curValues := funvals[rw]
-		diff := (curIx == nil)
-		if !diff {
-			for fi := 0; fi < nv; fi++ {
-				if lstValues[fi] != curValues[fi] {
-					diff = true
-					break
+		td, _ := dir.Mkdir(nm)
+		srt := tsr.CloneIndexes()
+		srt.SortStable(tensor.Ascending)
+		start := 0
+		if tsr.Tensor.IsString() {
+			lastVal := srt.StringRowCell(0, 0)
+			for r := range nr {
+				v := srt.StringRowCell(r, 0)
+				if v != lastVal {
+					makeIdxs(td, srt, lastVal, start, r)
+					start = r
+					lastVal = v
 				}
 			}
-		}
-		if diff {
-			curIx = spl.New(ix.Table, curValues, rw)
-			copy(lstValues, curValues)
+			if start != nr-1 {
+				makeIdxs(td, srt, lastVal, start, nr)
+			}
 		} else {
-			curIx.AddIndex(rw)
+			lastVal := srt.FloatRowCell(0, 0)
+			for r := range nr {
+				v := srt.FloatRowCell(r, 0)
+				if v != lastVal {
+					makeIdxs(td, srt, tensor.Float64ToString(lastVal), start, r)
+					start = r
+					lastVal = v
+				}
+			}
+			if start != nr-1 {
+				makeIdxs(td, srt, tensor.Float64ToString(lastVal), start, nr)
+			}
 		}
 	}
-	return spl
 }
+
+// todo: make an outer-product function?
