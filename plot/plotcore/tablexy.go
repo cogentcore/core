@@ -167,7 +167,7 @@ func (txy *tableXY) Value(row int) float32 {
 
 // tRowXValue returns an x value at given actual row in table
 func (txy *tableXY) tRowXValue(row int) float32 {
-	if txy.table == nil || txy.table == nil {
+	if txy.table == nil {
 		return 0
 	}
 	xc := txy.table.ColumnByIndex(txy.xColumn)
@@ -210,7 +210,7 @@ func (txy *tableXY) xValue(row int) float32 {
 
 // XY returns an x, y pair at given row in table
 func (txy *tableXY) XY(row int) (x, y float32) {
-	if txy.table == nil || txy.table == nil {
+	if txy.table == nil {
 		return 0, 0
 	}
 	x = txy.xValue(row)

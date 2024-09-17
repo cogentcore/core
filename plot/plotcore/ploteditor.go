@@ -284,7 +284,7 @@ func (pl *PlotEditor) GoUpdatePlot() {
 	if core.TheApp.Platform() == system.Web {
 		time.Sleep(time.Millisecond) // critical to prevent hanging!
 	}
-	if !pl.IsVisible() || pl.table == nil || pl.table == nil || pl.inPlot {
+	if !pl.IsVisible() || pl.table == nil || pl.inPlot {
 		return
 	}
 	pl.Scene.AsyncLock()
