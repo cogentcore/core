@@ -195,14 +195,27 @@ func (tsr *Base[T]) SymmetricDim() int {
 	return tsr.shape.DimSize(nd - 1)
 }
 
+// Sprint returns a string representation of the given tensor,
+// with a maximum length of as given: output is terminated
+// when it exceeds that length. If maxLen = 0, [MaxSprintLength] is used.
+func Sprint(tsr Tensor, maxLen int) string {
+	return stringIndexed(tsr, maxLen, nil)
+}
+
+// SprintIndexed returns a string representation of the given Indexed tensor,
+// with a maximum length of as given: output is terminated
+// when it exceeds that length. If maxLen = 0, [MaxSprintLength] is used.
+func SprintIndexed(tsr *Indexed, maxLen int) string {
+	return stringIndexed(tsr.Tensor, maxLen, tsr.Indexes)
+}
+
 // stringIndexed is the underlying impl of String that works for indexed
 // data as well.
-func stringIndexed(tsr Tensor, idxs []int) string {
-	str := tsr.Label()
-	sz := tsr.Len()
-	if sz > 1000 {
-		return str
+func stringIndexed(tsr Tensor, maxLen int, idxs []int) string {
+	if maxLen == 0 {
+		maxLen = MaxSprintLength
 	}
+	str := tsr.Label()
 	var b strings.Builder
 	b.WriteString(str)
 	b.WriteString("\n")
@@ -211,6 +224,7 @@ func stringIndexed(tsr Tensor, idxs []int) string {
 	if idxs != nil {
 		rows = min(rows, len(idxs))
 	}
+	ctr := 0
 	for r := range rows {
 		rc, _ := Projection2DCoords(tsr.Shape(), oddRow, r, 0)
 		b.WriteString(fmt.Sprintf("%v: ", rc))
@@ -226,6 +240,11 @@ func stringIndexed(tsr Tensor, idxs []int) string {
 			}
 		}
 		b.WriteString("\n")
+		ctr += cols
+		if ctr > maxLen {
+			b.WriteString("...\n")
+			break
+		}
 	}
 	return b.String()
 }

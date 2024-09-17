@@ -123,7 +123,7 @@ func NewNumberFromSlice[T num.Number](vals []T) Tensor {
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
 func (tsr *Number[T]) String() string {
-	return stringIndexed(tsr, nil)
+	return stringIndexed(tsr, 0, nil)
 }
 
 func (tsr *Number[T]) IsString() bool {

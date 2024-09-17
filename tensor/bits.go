@@ -66,7 +66,7 @@ func BoolToInt(bv bool) int {
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
 func (tsr *Bits) String() string {
-	return stringIndexed(tsr, nil)
+	return stringIndexed(tsr, 0, nil)
 }
 
 func (tsr *Bits) IsString() bool {

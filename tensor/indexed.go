@@ -94,7 +94,7 @@ func (ix *Indexed) Index(idx int) int {
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
 func (ix *Indexed) String() string {
-	return stringIndexed(ix.Tensor, ix.Indexes)
+	return stringIndexed(ix.Tensor, 0, ix.Indexes)
 }
 
 // Label satisfies the core.Labeler interface for a summary description of the tensor.
