@@ -210,9 +210,9 @@ All elements of a _Goal_ math expression are [tensors](../tensor), specifically 
 
 Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html)
 
-| Goal | Python | MATLAB | Notes |
------------------------------------
-| same:            | `np.ndim(a)` or `a.ndim`   | `ndims(a)` | number of dimensions of array `a` |
+| Goal  | Python | MATLAB | Notes  |
+| ----- | ------ | ------ | ------ |
+| same: | `np.ndim(a)` or `a.ndim`   | `ndims(a)` | number of dimensions of array `a` |
 | `len(a)` or `a.len` or: | `np.size(a)` or `a.size`   | `numel(a)` | number of elements of array `a` |
 | same: | `np.shape(a)` or `a.shape` | `size(a)`  | "size" of each dimension in a; `shape` returns a 1D `int` array |
 | same: | `a.shape[n-1]` | `size(a,n)` | the number of elements of the n-th dimension of array a |
