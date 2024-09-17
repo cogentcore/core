@@ -10,27 +10,27 @@ import (
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.Table", IDName: "table", Doc: "Table provides a GUI widget for representing [table.Table] values.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "Table", Doc: "the idx view of the table that we're a view of"}, {Name: "TensorDisplay", Doc: "overall display options for tensor display"}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params"}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDescending", Doc: "whether current sort order is descending"}, {Name: "headerWidths", Doc: "headerWidths has number of characters in each header, per visfields"}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.Table", IDName: "table", Doc: "Table provides a GUI widget for representing [table.Table] values.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "Table", Doc: "Table is the table that we're a view of."}, {Name: "TensorDisplay", Doc: "overall display options for tensor display."}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params."}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values."}, {Name: "NCols", Doc: "number of columns in table (as of last update)."}, {Name: "SortIndex", Doc: "current sort index."}, {Name: "SortDescending", Doc: "whether current sort order is descending."}, {Name: "headerWidths", Doc: "headerWidths has number of characters in each header, per visfields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows."}, {Name: "BlankFloat"}}})
 
 // NewTable returns a new [Table] with the given optional parent:
 // Table provides a GUI widget for representing [table.Table] values.
 func NewTable(parent ...tree.Node) *Table { return tree.New[Table](parent...) }
 
 // SetNCols sets the [Table.NCols]:
-// number of columns in table (as of last update)
+// number of columns in table (as of last update).
 func (t *Table) SetNCols(v int) *Table { t.NCols = v; return t }
 
 // SetSortIndex sets the [Table.SortIndex]:
-// current sort index
+// current sort index.
 func (t *Table) SetSortIndex(v int) *Table { t.SortIndex = v; return t }
 
 // SetSortDescending sets the [Table.SortDescending]:
-// whether current sort order is descending
+// whether current sort order is descending.
 func (t *Table) SetSortDescending(v bool) *Table { t.SortDescending = v; return t }
 
 // SetBlankString sets the [Table.BlankString]:
 //
-//	blank values for out-of-range rows
+//	blank values for out-of-range rows.
 func (t *Table) SetBlankString(v string) *Table { t.BlankString = v; return t }
 
 // SetBlankFloat sets the [Table.BlankFloat]

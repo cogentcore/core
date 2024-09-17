@@ -634,7 +634,7 @@ func (tb *Table) SelectedColumnStrings(colName string) []string {
 //    Copy / Cut / Paste
 
 func (tb *Table) MakeToolbar(p *tree.Plan) {
-	if tb.Table == nil || tb.Table == nil {
+	if tb.Table == nil {
 		return
 	}
 	tree.Add(p, func(w *core.FuncButton) {

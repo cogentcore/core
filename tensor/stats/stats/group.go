@@ -14,15 +14,6 @@ import (
 	"cogentcore.org/core/tensor/table"
 )
 
-// All returns a single "split" with all of the rows in given view
-// useful for leveraging the aggregation management functions in splits
-// func All(ix *table.Table) *table.Splits {
-// 	spl := &table.Splits{}
-// 	spl.Levels = []string{"All"}
-// 	spl.New(ix.Table, []string{"All"}, ix.Indexes...)
-// 	return spl
-// }
-
 // Groups generates indexes for each unique value in each of the given tensors.
 // One can then use the resulting indexes for the [tensor.Indexed] indexes to
 // perform computations restricted to grouped subsets of data, as in the
@@ -102,6 +93,27 @@ func TableGroups(dir *datafs.Data, dt *table.Table, columns ...string) {
 	// important for consistency across columns, to do full outer product sort first.
 	dv.SortColumns(tensor.Ascending, tensor.Stable, columns...)
 	Groups(dir, dv.ColumnList(columns...)...)
+}
+
+// GroupAll copies all indexes from the first given tensor,
+// into an "All/All" tensor in the given [datafs], which can then
+// be used with [GroupStats] to generate summary statistics across
+// all the data. See [Groups] for more general documentation.
+func GroupAll(dir *datafs.Data, tsrs ...*tensor.Indexed) {
+	gd, err := dir.RecycleDir("Groups")
+	if errors.Log(err) != nil {
+		return
+	}
+	tsr := tsrs[0]
+	nr := tsr.NumRows()
+	if nr == 0 {
+		return
+	}
+	td, _ := gd.Mkdir("All")
+	it := datafs.NewValue[int](td, "All", nr)
+	for j := range nr {
+		it.SetIntRow(tsr.Index(j), j) // key to indirect through any existing indexes
+	}
 }
 
 // todo: GroupCombined

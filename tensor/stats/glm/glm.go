@@ -88,7 +88,7 @@ type GLM struct {
 	Table *table.Table
 
 	// tensor columns from table with the respective variables
-	IndepVars, DepVars, PredVars, ErrVars tensor.Tensor
+	IndepVars, DepVars, PredVars, ErrVars *tensor.Indexed
 
 	// Number of independent and dependent variables
 	NIndepVars, NDepVars int
@@ -110,7 +110,8 @@ func (glm *GLM) Defaults() {
 func (glm *GLM) init(nIv, nDv int) {
 	glm.NIndepVars = nIv
 	glm.NDepVars = nDv
-	glm.Coeff.SetShape([]int{nDv, nIv + 1}, "DepVars", "IndepVars")
+	glm.Coeff.SetShape(nDv, nIv+1)
+	glm.Coeff.SetNames("DepVars", "IndepVars")
 	glm.R2 = make([]float64, nDv)
 	glm.ObsVariance = make([]float64, nDv)
 	glm.ErrVariance = make([]float64, nDv)
@@ -122,39 +123,26 @@ func (glm *GLM) init(nIv, nDv int) {
 // each of the Vars args specifies a column in the table, which can have either a
 // single scalar value for each row, or a tensor cell with multiple values.
 // predVars and errVars (predicted values and error values) are optional.
-func (glm *GLM) SetTable(ix *table.Table, indepVars, depVars, predVars, errVars string) error {
-	dt := ix.Table
-	iv, err := dt.Column(indepVars)
-	if err != nil {
-		return err
-	}
-	dv, err := dt.Column(depVars)
-	if err != nil {
-		return err
-	}
-	var pv, ev tensor.Tensor
+func (glm *GLM) SetTable(dt *table.Table, indepVars, depVars, predVars, errVars string) error {
+	iv := dt.Column(indepVars)
+	dv := dt.Column(depVars)
+	var pv, ev *tensor.Indexed
 	if predVars != "" {
-		pv, err = dt.Column(predVars)
-		if err != nil {
-			return err
-		}
+		pv = dt.Column(predVars)
 	}
 	if errVars != "" {
-		ev, err = dt.Column(errVars)
-		if err != nil {
-			return err
-		}
+		ev = dt.Column(errVars)
 	}
-	if pv != nil && !pv.Shape().IsEqual(dv.Shape()) {
+	if pv != nil && !pv.Tensor.Shape().IsEqual(dv.Tensor.Shape()) {
 		return fmt.Errorf("predVars must have same shape as depVars")
 	}
-	if ev != nil && !ev.Shape().IsEqual(dv.Shape()) {
+	if ev != nil && !ev.Tensor.Shape().IsEqual(dv.Tensor.Shape()) {
 		return fmt.Errorf("errVars must have same shape as depVars")
 	}
 	_, nIv := iv.RowCellSize()
 	_, nDv := dv.RowCellSize()
 	glm.init(nIv, nDv)
-	glm.Table = ix
+	glm.Table = dt
 	glm.IndepVars = iv
 	glm.DepVars = dv
 	glm.PredVars = pv
@@ -168,7 +156,7 @@ func (glm *GLM) SetTable(ix *table.Table, indepVars, depVars, predVars, errVars 
 // Initial values of the coefficients, and other parameters for the regression,
 // should be set prior to running.
 func (glm *GLM) Run() {
-	ix := glm.Table
+	dt := glm.Table
 	iv := glm.IndepVars
 	dv := glm.DepVars
 	pv := glm.PredVars
@@ -190,7 +178,7 @@ func (glm *GLM) Run() {
 	lastItr := false
 	sse := 0.0
 	prevmse := 0.0
-	n := ix.Len()
+	n := dt.NumRows()
 	norm := 1.0 / float64(n)
 	lrate := norm * glm.LRate
 	for itr := 0; itr < glm.MaxIters; itr++ {
@@ -202,14 +190,14 @@ func (glm *GLM) Run() {
 			lrate *= 0.5
 		}
 		for i := 0; i < n; i++ {
-			row := ix.Indexes[i]
+			row := dt.Index(i)
 			for di := 0; di < nDv; di++ {
 				pred := 0.0
 				for ii := 0; ii < nIv; ii++ {
-					pred += glm.Coeff.Value([]int{di, ii}) * iv.FloatRowCell(row, ii)
+					pred += glm.Coeff.Float(di, ii) * iv.FloatRowCell(row, ii)
 				}
 				if !glm.ZeroOffset {
-					pred += glm.Coeff.Value([]int{di, nIv})
+					pred += glm.Coeff.Float(di, nIv)
 				}
 				targ := dv.FloatRowCell(row, di)
 				err := targ - pred
@@ -221,9 +209,9 @@ func (glm *GLM) Run() {
 					dc.Values[di*nCi+nIv] += err
 				}
 				if lastItr {
-					pv.SetFloatRowCell(row, di, pred)
+					pv.SetFloatRowCell(pred, row, di)
 					if ev != nil {
-						ev.SetFloatRowCell(row, di, err)
+						ev.SetFloatRowCell(err, row, di)
 					}
 				}
 			}
@@ -262,7 +250,7 @@ func (glm *GLM) Run() {
 	obsMeans := make([]float64, nDv)
 	errMeans := make([]float64, nDv)
 	for i := 0; i < n; i++ {
-		row := ix.Indexes[i]
+		row := dt.Indexes[i]
 		for di := 0; di < nDv; di++ {
 			obsMeans[di] += dv.FloatRowCell(row, di)
 			errMeans[di] += ev.FloatRowCell(row, di)
@@ -275,7 +263,7 @@ func (glm *GLM) Run() {
 		glm.ErrVariance[di] = 0
 	}
 	for i := 0; i < n; i++ {
-		row := ix.Indexes[i]
+		row := dt.Indexes[i]
 		for di := 0; di < nDv; di++ {
 			o := dv.FloatRowCell(row, di) - obsMeans[di]
 			glm.ObsVariance[di] += o * o
@@ -317,7 +305,7 @@ func (glm *GLM) Coeffs() string {
 		}
 		str += " = "
 		for ii := 0; ii <= glm.NIndepVars; ii++ {
-			str += fmt.Sprintf("\t%8.6g", glm.Coeff.Value([]int{di, ii}))
+			str += fmt.Sprintf("\t%8.6g", glm.Coeff.Float(di, ii))
 			if ii < glm.NIndepVars {
 				str += " * "
 				if len(glm.IndepNames) > ii && glm.IndepNames[di] != "" {

@@ -13,15 +13,15 @@ import (
 // dest will have np * src.Rows Rows, filled with each processor's data, in order.
 // dest must be a clone of src: if not same number of cols, will be configured from src.
 func GatherTableRows(dest, src *table.Table, comm *mpi.Comm) {
-	sr := src.Rows
+	sr := src.NumRows()
 	np := mpi.WorldSize()
 	dr := np * sr
-	if len(dest.Columns) != len(src.Columns) {
+	if dest.NumColumns() != src.NumColumns() {
 		*dest = *src.Clone()
 	}
 	dest.SetNumRows(dr)
-	for ci, st := range src.Columns {
-		dt := dest.Columns[ci]
+	for ci, st := range src.Columns.Values {
+		dt := dest.Columns.Values[ci]
 		GatherTensorRows(dt, st, comm)
 	}
 }
@@ -33,13 +33,13 @@ func GatherTableRows(dest, src *table.Table, comm *mpi.Comm) {
 // dest will be a clone of src if not the same (cos & rows),
 // does nothing for strings.
 func ReduceTable(dest, src *table.Table, comm *mpi.Comm, op mpi.Op) {
-	sr := src.Rows
-	if len(dest.Columns) != len(src.Columns) {
+	sr := src.NumRows()
+	if dest.NumColumns() != src.NumColumns() {
 		*dest = *src.Clone()
 	}
 	dest.SetNumRows(sr)
-	for ci, st := range src.Columns {
-		dt := dest.Columns[ci]
+	for ci, st := range src.Columns.Values {
+		dt := dest.Columns.Values[ci]
 		ReduceTensor(dt, st, comm, op)
 	}
 }
