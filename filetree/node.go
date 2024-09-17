@@ -337,7 +337,7 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 
 func sortByModTime(files []fs.FileInfo) {
 	slices.SortFunc(files, func(a, b fs.FileInfo) int {
-		return a.ModTime().Compare(b.ModTime())
+		return -a.ModTime().Compare(b.ModTime())
 	})
 }
 

@@ -48,6 +48,10 @@ In general, **1D** refers to a flat, 1-dimensional list.  There are various stan
 
 * **Matrix 2D**: For matrix algebra functions, a 2D tensor is treated as a standard row-major 2D matrix, which can be processed using `gonum` based matrix and vector operations.
 
+## Dynamic row sizing (e.g., for logs)
+
+The `SetNumRows` method can be used to progressively increase the number of rows to fit more data, as is typically the case when logging data (often using a [table](table)). You can set the row dimension to 0 to start -- that is (now) safe. However, for greatest efficiency, it is best to set the number of rows to the largest expected size first, and _then_ set it back to 0. The underlying slice of data retains its capacity when sized back down. During incremental increasing of the slice size, if it runs out of capacity, all the elements need to be copied, so it is more efficient to establish the capacity up front instead of having multiple incremental re-allocations.
+
 # Cheat Sheet
 
 `ix` is the `Indexed` tensor for these examples:
