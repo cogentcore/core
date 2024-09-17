@@ -192,10 +192,10 @@ const (
 	// selection state.
 	Select
 
-	// Focus is sent when Focsable element receives Focus
+	// Focus is sent when a Focusable element receives keyboard focus (ie: by tabbing).
 	Focus
 
-	// FocusLost is sent when Focsable element loses Focus
+	// FocusLost is sent when a Focusable element loses keyboard focus.
 	FocusLost
 
 	// Change is when a value represented by the element has been changed

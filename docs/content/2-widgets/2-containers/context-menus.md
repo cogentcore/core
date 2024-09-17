@@ -10,8 +10,15 @@ tf.AddContextMenu(func(m *core.Scene) {
 })
 ```
 
-All widgets inherit the [[core.Scene]] context menu items, which consist of various important actions by default. You can remove these items if you want:
+You can remove all of the context menu buttons of a widget:
+
+```Go
+tf := core.NewTextField(b)
+tf.ContextMenus = nil
+```
+
+Note that there is still a context menu in the example above since all widgets inherit the [[core.Scene]] context menu items, which consist of various important actions by default. You can remove these items if you want:
 
 ```go
-b.Scene.ContextMenus = nil
+myWidget.Scene.ContextMenus = nil
 ```

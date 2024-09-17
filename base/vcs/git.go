@@ -191,6 +191,15 @@ func (gr *GitRepo) RevertFile(fname string) error {
 	return nil
 }
 
+// UpdateVersion sets the version of a package currently checked out via Git.
+func (s *GitRepo) UpdateVersion(version string) error {
+	out, err := s.RunFromDir("git", "switch", "--detach", version)
+	if err != nil {
+		return vcs.NewLocalError("Unable to update checked out version", err, string(out))
+	}
+	return nil
+}
+
 // FileContents returns the contents of given file, as a []byte array
 // at given revision specifier. -1, -2 etc also work as universal
 // ways of specifying prior revisions.

@@ -63,10 +63,7 @@ func (bl *Blinker) blinkLoop() {
 			return // shutdown..
 		}
 		bl.Unlock()
-		select {
-		case <-bl.Ticker.C:
-			return
-		}
+		<-bl.Ticker.C
 		bl.Lock()
 		if bl.Widget == nil {
 			bl.Unlock()
