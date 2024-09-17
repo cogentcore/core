@@ -133,11 +133,37 @@ func TestSlice(t *testing.T) {
 			}
 		}
 	}
+
+	res := `Tensor: [20]
+[0]:     200 
+[1]:     201 
+[2]:     202 
+[3]:     203 
+[4]:     204 
+[5]:     210 
+[6]:     211 
+[7]:     212 
+[8]:     213 
+[9]:     214 
+[10]:     220 
+[11]:     221 
+[12]:     222 
+[13]:     223 
+[14]:     224 
+[15]:     230 
+[16]:     231 
+[17]:     232 
+[18]:     233 
+[19]:     234 
+`
+	// fmt.Println(ft.Cells1D(1))
+	assert.Equal(t, res, ft.Cells1D(1).String())
+
 	// fmt.Println(ft.String())
 	sf := NewFloat64Indexed()
 	Slice(ft, sf, Range{}, Range{Start: 1, End: 2})
 	// fmt.Println(sf.String())
-	res := `Tensor: [3, 1, 5]
+	res = `Tensor: [3, 1, 5]
 [0 0]:     110     111     112     113     114 
 [1 0]:     210     211     212     213     214 
 [2 0]:     310     311     312     313     314 
