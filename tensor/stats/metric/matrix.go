@@ -5,7 +5,6 @@
 package metric
 
 import (
-	"fmt"
 	"log/slog"
 
 	"cogentcore.org/core/math32/vecint"
@@ -31,7 +30,6 @@ func init() {
 // to the upper triangular region, for maximum efficiency.
 func Matrix(funcName string, in, out *tensor.Indexed) {
 	rows, cells := in.RowCellSize()
-	fmt.Println(rows, cells)
 	if rows == 0 || cells == 0 {
 		return
 	}

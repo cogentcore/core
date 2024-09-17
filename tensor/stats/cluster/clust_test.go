@@ -5,7 +5,6 @@
 package cluster
 
 import (
-	"fmt"
 	"testing"
 
 	"cogentcore.org/core/base/tolassert"
@@ -37,8 +36,6 @@ func TestClust(t *testing.T) {
 	in := dt.Column("Input")
 	out := tensor.NewFloat64Indexed()
 	metric.Matrix(metric.Euclidean.FuncName(), in, out)
-
-	fmt.Println(out.String())
 
 	cl := Cluster(Avg.String(), out, dt.Column("Name"))
 
