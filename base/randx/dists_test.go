@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
 )
@@ -25,18 +25,15 @@ func TestGaussianGen(t *testing.T) {
 
 	for i := 0; i < nsamp; i++ {
 		vl := GaussianGen(mean, sig)
-		dt.SetFloat("Val", i, vl)
+		dt.Column("Val").SetFloatRow(vl, i)
 	}
-	ix := table.NewIndexed(dt)
-	desc := stats.DescAll(ix)
+	dir, _ := datafs.NewDir("Desc")
+	stats.DescribeTableAll(dir, dt)
+	desc := dir.GetDirTable(nil)
+	// fmt.Println(desc.Columns.Keys)
 
-	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
-	stdRow := errors.Log1(desc.RowsByString("Stat", "Std", table.Equals, table.UseCase))[0]
-	// minRow := errors.Log1(desc.RowsByString("Stat", "Min", table.Equals, table.UseCase))[0]
-	// maxRow := errors.Log1(desc.RowsByString("Stat", "Max", table.Equals, table.UseCase))[0]
-
-	actMean := desc.Float("Val", meanRow)
-	actStd := desc.Float("Val", stdRow)
+	actMean := desc.Column("Val/Mean").FloatRow(0)
+	actStd := desc.Column("Val/Std").FloatRow(0)
 
 	if math.Abs(actMean-mean) > tol {
 		t.Errorf("Gaussian: mean %g\t out of tolerance vs target: %g\n", actMean, mean)
@@ -44,9 +41,6 @@ func TestGaussianGen(t *testing.T) {
 	if math.Abs(actStd-sig) > tol {
 		t.Errorf("Gaussian: stdev %g\t out of tolerance vs target: %g\n", actStd, sig)
 	}
-	// b := bytes.NewBuffer(nil)
-	// desc.WriteCSV(b, table.Tab, table.Headers)
-	// fmt.Printf("%s\n", string(b.Bytes()))
 }
 
 func TestBinomialGen(t *testing.T) {
@@ -61,21 +55,15 @@ func TestBinomialGen(t *testing.T) {
 
 	for i := 0; i < nsamp; i++ {
 		vl := BinomialGen(n, p)
-		dt.SetFloat("Val", i, vl)
+		dt.Column("Val").SetFloat(vl, i)
 	}
-	ix := table.NewIndexed(dt)
-	desc := stats.DescAll(ix)
-
-	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
-	stdRow := errors.Log1(desc.RowsByString("Stat", "Std", table.Equals, table.UseCase))[0]
-	minRow := errors.Log1(desc.RowsByString("Stat", "Min", table.Equals, table.UseCase))[0]
-	maxRow := errors.Log1(desc.RowsByString("Stat", "Max", table.Equals, table.UseCase))[0]
-
-	actMean := desc.Float("Val", meanRow)
-	actStd := desc.Float("Val", stdRow)
-	actMin := desc.Float("Val", minRow)
-	actMax := desc.Float("Val", maxRow)
-
+	dir, _ := datafs.NewDir("Desc")
+	stats.DescribeTableAll(dir, dt)
+	desc := dir.GetDirTable(nil)
+	actMean := desc.Column("Val/Mean").FloatRow(0)
+	actStd := desc.Column("Val/Std").FloatRow(0)
+	actMin := desc.Column("Val/Min").FloatRow(0)
+	actMax := desc.Column("Val/Max").FloatRow(0)
 	mean := n * p
 	if math.Abs(actMean-mean) > tol {
 		t.Errorf("Binomial: mean %g\t out of tolerance vs target: %g\n", actMean, mean)
@@ -90,9 +78,6 @@ func TestBinomialGen(t *testing.T) {
 	if actMax < 0 {
 		t.Errorf("Binomial: max %g\t should not be > 1\n", actMax)
 	}
-	// b := bytes.NewBuffer(nil)
-	// desc.WriteCSV(b, table.Tab, table.Headers)
-	// fmt.Printf("%s\n", string(b.Bytes()))
 }
 
 func TestPoissonGen(t *testing.T) {
@@ -106,20 +91,15 @@ func TestPoissonGen(t *testing.T) {
 
 	for i := 0; i < nsamp; i++ {
 		vl := PoissonGen(lambda)
-		dt.SetFloat("Val", i, vl)
+		dt.Column("Val").SetFloatRow(vl, i)
 	}
-	ix := table.NewIndexed(dt)
-	desc := stats.DescAll(ix)
-
-	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
-	stdRow := errors.Log1(desc.RowsByString("Stat", "Std", table.Equals, table.UseCase))[0]
-	minRow := errors.Log1(desc.RowsByString("Stat", "Min", table.Equals, table.UseCase))[0]
-	// maxRow := errors.Log1(desc.RowsByString("Stat", "Max", table.Equals, table.UseCase))[0]
-
-	actMean := desc.Float("Val", meanRow)
-	actStd := desc.Float("Val", stdRow)
-	actMin := desc.Float("Val", minRow)
-	// actMax := desc.Float("Val", maxRow)
+	dir, _ := datafs.NewDir("Desc")
+	stats.DescribeTableAll(dir, dt)
+	desc := dir.GetDirTable(nil)
+	actMean := desc.Column("Val/Mean").FloatRow(0)
+	actStd := desc.Column("Val/Std").FloatRow(0)
+	actMin := desc.Column("Val/Min").FloatRow(0)
+	// actMax := desc.Column("Val/Max").FloatRow(0)
 
 	mean := lambda
 	if math.Abs(actMean-mean) > tol {
@@ -135,9 +115,6 @@ func TestPoissonGen(t *testing.T) {
 	// if actMax < 0 {
 	// 	t.Errorf("Poisson: max %g\t should not be > 1\n", actMax)
 	// }
-	// b := bytes.NewBuffer(nil)
-	// desc.WriteCSV(b, table.Tab, table.Headers)
-	// fmt.Printf("%s\n", string(b.Bytes()))
 }
 
 func TestGammaGen(t *testing.T) {
@@ -152,17 +129,15 @@ func TestGammaGen(t *testing.T) {
 
 	for i := 0; i < nsamp; i++ {
 		vl := GammaGen(alpha, beta)
-		dt.SetFloat("Val", i, vl)
+		dt.Column("Val").SetFloatRow(vl, i)
 	}
-	ix := table.NewIndexed(dt)
-	desc := stats.DescAll(ix)
-
-	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
-	stdRow := errors.Log1(desc.RowsByString("Stat", "Std", table.Equals, table.UseCase))[0]
-
-	actMean := desc.Float("Val", meanRow)
-	actStd := desc.Float("Val", stdRow)
-
+	dir, _ := datafs.NewDir("Desc")
+	stats.DescribeTableAll(dir, dt)
+	desc := dir.GetDirTable(nil)
+	actMean := desc.Column("Val/Mean").FloatRow(0)
+	actStd := desc.Column("Val/Std").FloatRow(0)
+	// actMin := desc.Column("Val/Min").FloatRow(0)
+	// actMax := desc.Column("Val/Max").FloatRow(0)
 	mean := alpha / beta
 	if math.Abs(actMean-mean) > tol {
 		t.Errorf("Gamma: mean %g\t out of tolerance vs target: %g\n", actMean, mean)
@@ -171,9 +146,6 @@ func TestGammaGen(t *testing.T) {
 	if math.Abs(actStd-sig) > tol {
 		t.Errorf("Gamma: stdev %g\t out of tolerance vs target: %g\n", actStd, sig)
 	}
-	// b := bytes.NewBuffer(nil)
-	// desc.WriteCSV(b, table.Tab, table.Headers)
-	// fmt.Printf("%s\n", string(b.Bytes()))
 }
 
 func TestBetaGen(t *testing.T) {
@@ -188,17 +160,15 @@ func TestBetaGen(t *testing.T) {
 
 	for i := 0; i < nsamp; i++ {
 		vl := BetaGen(alpha, beta)
-		dt.SetFloat("Val", i, vl)
+		dt.Column("Val").SetFloatRow(vl, i)
 	}
-	ix := table.NewIndexed(dt)
-	desc := stats.DescAll(ix)
-
-	meanRow := errors.Log1(desc.RowsByString("Stat", "Mean", table.Equals, table.UseCase))[0]
-	stdRow := errors.Log1(desc.RowsByString("Stat", "Std", table.Equals, table.UseCase))[0]
-
-	actMean := desc.Float("Val", meanRow)
-	actStd := desc.Float("Val", stdRow)
-
+	dir, _ := datafs.NewDir("Desc")
+	stats.DescribeTableAll(dir, dt)
+	desc := dir.GetDirTable(nil)
+	actMean := desc.Column("Val/Mean").FloatRow(0)
+	actStd := desc.Column("Val/Std").FloatRow(0)
+	// actMin := desc.Column("Val/Min").FloatRow(0)
+	// actMax := desc.Column("Val/Max").FloatRow(0)
 	mean := alpha / (alpha + beta)
 	if math.Abs(actMean-mean) > tol {
 		t.Errorf("Beta: mean %g\t out of tolerance vs target: %g\n", actMean, mean)
@@ -208,7 +178,4 @@ func TestBetaGen(t *testing.T) {
 	if math.Abs(actStd-sig) > tol {
 		t.Errorf("Beta: stdev %g\t out of tolerance vs target: %g\n", actStd, sig)
 	}
-	// b := bytes.NewBuffer(nil)
-	// desc.WriteCSV(b, table.Tab, table.Headers)
-	// fmt.Printf("%s\n", string(b.Bytes()))
 }
