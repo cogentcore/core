@@ -48,6 +48,7 @@ func (sh *Shape) SetNames(names ...string) {
 		sh.Names = nil
 	} else {
 		sh.Names = slicesx.SetLength(names, len(sh.Sizes))
+		copy(sh.Names, names)
 	}
 }
 
@@ -69,11 +70,11 @@ func (sh *Shape) Len() int {
 	if len(sh.Sizes) == 0 {
 		return 0
 	}
-	o := int(1)
+	ln := 1
 	for _, v := range sh.Sizes {
-		o *= v
+		ln *= v
 	}
-	return int(o)
+	return ln
 }
 
 // NumDims returns the total number of dimensions.
@@ -143,8 +144,14 @@ func (sh *Shape) RowCellSize() (rows, cells int) {
 	rows = sh.Sizes[0]
 	if len(sh.Sizes) == 1 {
 		cells = 1
-	} else {
+	} else if rows > 0 {
 		cells = sh.Len() / rows
+	} else {
+		ln := 1
+		for _, v := range sh.Sizes[1:] {
+			ln *= v
+		}
+		cells = ln
 	}
 	return
 }
@@ -166,6 +173,9 @@ func (sh *Shape) Index(offset int) []int {
 	rem := offset
 	for i := nd - 1; i >= 0; i-- {
 		s := sh.Sizes[i]
+		if s == 0 {
+			return index
+		}
 		iv := rem % s
 		rem /= s
 		index[i] = iv

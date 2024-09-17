@@ -24,11 +24,11 @@ func NewColumns() *Columns {
 }
 
 // SetNumRows sets the number of rows in the table, across all columns.
-// If rows = 0 then the effective number of rows in tensors is 1,
-// as this dim cannot be 0.
+// It is safe to set this to 0. For incrementally growing tables (e.g., a log)
+// it is best to first set the anticipated full size, which allocates the
+// full amount of memory, and then set to 0 and grow incrementally.
 func (cl *Columns) SetNumRows(rows int) *Columns { //types:add
 	cl.Rows = rows // can be 0
-	rows = max(1, rows)
 	for _, tsr := range cl.Values {
 		tsr.SetNumRows(rows)
 	}
@@ -44,8 +44,7 @@ func (cl *Columns) AddColumn(name string, tsr tensor.Tensor) error {
 	if err != nil {
 		return err
 	}
-	rows := max(1, cl.Rows)
-	tsr.SetNumRows(rows)
+	tsr.SetNumRows(cl.Rows)
 	tsr.Metadata().SetName(name)
 	return nil
 }
@@ -58,8 +57,7 @@ func (cl *Columns) InsertColumn(idx int, name string, tsr tensor.Tensor) error {
 	if err != nil {
 		return err
 	}
-	rows := max(1, cl.Rows)
-	tsr.SetNumRows(rows)
+	tsr.SetNumRows(cl.Rows)
 	return nil
 }
 

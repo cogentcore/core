@@ -52,7 +52,7 @@ In general, **1D** refers to a flat, 1-dimensional list.  There are various stan
 
 `ix` is the `Indexed` tensor for these examples:
 
-## Table Access
+## Tensor Access
 
 ### 1D
 

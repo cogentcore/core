@@ -148,7 +148,7 @@ func (dt *Table) ColumnIndexList(names ...string) []int {
 // (which must be unique). If no cellSizes are specified, it holds scalar values,
 // otherwise the cells are n-dimensional tensors of given size.
 func AddColumn[T tensor.DataTypes](dt *Table, name string, cellSizes ...int) tensor.Tensor {
-	rows := max(1, dt.Columns.Rows)
+	rows := dt.Columns.Rows
 	sz := append([]int{rows}, cellSizes...)
 	tsr := tensor.New[T](sz...)
 	tsr.SetNames("Row")
@@ -161,7 +161,7 @@ func AddColumn[T tensor.DataTypes](dt *Table, name string, cellSizes ...int) ten
 // If no cellSizes are specified, it holds scalar values,
 // otherwise the cells are n-dimensional tensors of given size.
 func InsertColumn[T tensor.DataTypes](dt *Table, name string, idx int, cellSizes ...int) tensor.Tensor {
-	rows := max(1, dt.Columns.Rows)
+	rows := dt.Columns.Rows
 	sz := append([]int{rows}, cellSizes...)
 	tsr := tensor.New[T](sz...)
 	tsr.SetNames("Row")
@@ -189,7 +189,7 @@ func (dt *Table) InsertColumn(idx int, name string, tsr tensor.Tensor) error {
 // otherwise the cells are n-dimensional tensors of given size.
 // Supported types include string, bool (for [tensor.Bits]), float32, float64, int, int32, and byte.
 func (dt *Table) AddColumnOfType(name string, typ reflect.Kind, cellSizes ...int) tensor.Tensor {
-	rows := max(1, dt.Columns.Rows)
+	rows := dt.Columns.Rows
 	sz := append([]int{rows}, cellSizes...)
 	tsr := tensor.NewOfType(typ, sz...)
 	tsr.SetNames("Row")

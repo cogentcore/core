@@ -81,17 +81,13 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 	alllogd, _ := dir.Mkdir("AllTrials")
 	for _, st := range sitems {
 		nm := st.Tensor.Metadata().GetName()
-		lt := alllogd.NewOfType(nm, st.Tensor.DataType())
+		// allocate full size
+		lt := alllogd.NewOfType(nm, st.Tensor.DataType(), ntrial*ss.Config.Item("NEpoch").AsInt()*ss.Config.Item("NRun").AsInt())
+		lt.Tensor.SetShape(0)                            // then truncate to 0
 		lt.Tensor.Metadata().Copy(*st.Tensor.Metadata()) // key affordance: we get meta data from source
 		tensor.SetCalcFunc(lt.Tensor, func() error {
-			// todo: helper for below
-			row := 0
-			if lt.Tensor.NumDims() == 0 {
-				lt.Tensor.SetShape(1)
-			} else {
-				row = lt.Tensor.DimSize(0)
-				lt.Tensor.SetShape(row + 1)
-			}
+			row := lt.Tensor.DimSize(0)
+			lt.Tensor.SetShape(row + 1)
 			if st.Tensor.IsString() {
 				lt.SetStringRow(st.StringRow(0), row)
 			} else {

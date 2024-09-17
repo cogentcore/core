@@ -96,8 +96,10 @@ func (tsr *Base[T]) SetNames(names ...string) {
 }
 
 // SetNumRows sets the number of rows (outermost dimension) in a RowMajor organized tensor.
+// It is safe to set this to 0. For incrementally growing tensors (e.g., a log)
+// it is best to first set the anticipated full size, which allocates the
+// full amount of memory, and then set to 0 and grow incrementally.
 func (tsr *Base[T]) SetNumRows(rows int) {
-	rows = max(1, rows) // must be > 0
 	_, cells := tsr.shape.RowCellSize()
 	nln := rows * cells
 	tsr.shape.Sizes[0] = rows

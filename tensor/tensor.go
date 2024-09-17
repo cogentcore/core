@@ -224,6 +224,9 @@ type Tensor interface {
 	CopyCellsFrom(from Tensor, to, start, n int)
 
 	// SetNumRows sets the number of rows (outermost dimension).
+	// It is safe to set this to 0. For incrementally growing tensors (e.g., a log)
+	// it is best to first set the anticipated full size, which allocates the
+	// full amount of memory, and then set to 0 and grow incrementally.
 	SetNumRows(rows int)
 
 	// Metadata returns the metadata for this tensor, which can be used

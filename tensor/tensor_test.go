@@ -15,6 +15,7 @@ import (
 func TestTensorString(t *testing.T) {
 	tsr := New[string](4, 2)
 	tsr.SetNames("Row", "Vals")
+	assert.Equal(t, []string{"Row", "Vals"}, tsr.Shape().Names)
 	assert.Equal(t, 8, tsr.Len())
 	assert.Equal(t, true, tsr.IsString())
 	assert.Equal(t, reflect.String, tsr.DataType())
@@ -73,7 +74,8 @@ func TestTensorString(t *testing.T) {
 
 func TestTensorFloat64(t *testing.T) {
 	tsr := New[float64](4, 2)
-	tsr.SetNames("Row", "Vals")
+	tsr.SetNames("Row")
+	assert.Equal(t, []string{"Row", ""}, tsr.Shape().Names)
 	assert.Equal(t, 8, tsr.Len())
 	assert.Equal(t, false, tsr.IsString())
 	assert.Equal(t, reflect.Float64, tsr.DataType())
@@ -180,4 +182,33 @@ func TestSortFilter(t *testing.T) {
 	tsr.Sequential()
 	tsr.FilterString("1", Exclude, Equals, UseCase)
 	assert.Equal(t, []int{0, 2, 3, 4}, tsr.Indexes)
+}
+
+func TestGrowRow(t *testing.T) {
+	tsr := NewFloat64(1000)
+	assert.Equal(t, 1000, cap(tsr.Values))
+	assert.Equal(t, 1000, tsr.Len())
+	tsr.SetNumRows(0)
+	assert.Equal(t, 1000, cap(tsr.Values))
+	assert.Equal(t, 0, tsr.Len())
+	tsr.SetNumRows(1)
+	assert.Equal(t, 1000, cap(tsr.Values))
+	assert.Equal(t, 1, tsr.Len())
+
+	tsr2 := NewFloat64(1000, 10, 10)
+	assert.Equal(t, 100000, cap(tsr2.Values))
+	assert.Equal(t, 100000, tsr2.Len())
+	tsr2.SetNumRows(0)
+	assert.Equal(t, 100000, cap(tsr2.Values))
+	assert.Equal(t, 0, tsr2.Len())
+	tsr2.SetNumRows(1)
+	assert.Equal(t, 100000, cap(tsr2.Values))
+	assert.Equal(t, 100, tsr2.Len())
+
+	bits := NewBits(1000)
+	assert.Equal(t, 1000, bits.Len())
+	bits.SetNumRows(0)
+	assert.Equal(t, 0, bits.Len())
+	bits.SetNumRows(1)
+	assert.Equal(t, 1, bits.Len())
 }
