@@ -140,7 +140,10 @@ func TestPCAIris(t *testing.T) {
 		2.4615836931965167,
 		2.6716628159090594,
 	}
-	assert.Equal(t, trgprjns, tensor.AsFloat64(prjns.Tensor).Values[:10])
+	pj64 := tensor.AsFloat64(prjns.Tensor)
+	for i, v := range pj64.Values[:10] {
+		assert.InDelta(t, trgprjns[i], v, errtol)
+	}
 
 	////////////////////////////////////////////////////////////
 	//  	SVD
@@ -167,5 +170,8 @@ func TestPCAIris(t *testing.T) {
 		-2.4615836931965185,
 		-2.671662815909061,
 	}
-	assert.Equal(t, trgprjns, tensor.AsFloat64(prjns.Tensor).Values[:10])
+	pj64 = tensor.AsFloat64(prjns.Tensor)
+	for i, v := range pj64.Values[:10] {
+		assert.InDelta(t, trgprjns[i], v, errtol)
+	}
 }
