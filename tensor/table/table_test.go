@@ -21,8 +21,8 @@ func TestAdd3DCol(t *testing.T) {
 		t.Errorf("Add4DCol: # of dims != 4\n")
 	}
 
-	if col.Shape().DimSize(0) != 1 {
-		t.Errorf("Add4DCol: dim 0 len != 1, was: %v\n", col.Shape().DimSize(0))
+	if col.Shape().DimSize(0) != 0 {
+		t.Errorf("Add4DCol: dim 0 len != 0, was: %v\n", col.Shape().DimSize(0))
 	}
 
 	if col.Shape().DimSize(1) != 11 {
@@ -111,4 +111,24 @@ func TestInsertDeleteRows(t *testing.T) {
 	assert.Equal(t, []int{0, 3, 4, 1, 2}, dt.Indexes)
 	dt.DeleteRows(1, 2)
 	assert.Equal(t, []int{0, 1, 2}, dt.Indexes)
+}
+
+func TestCells(t *testing.T) {
+	dt := NewTable()
+	err := dt.OpenCSV("../stats/cluster/testdata/faces.dat", tensor.Tab)
+	assert.NoError(t, err)
+	in := dt.Column("Input")
+	for i := range 10 {
+		vals := make([]float32, 16)
+		for j := range 16 {
+			vals[j] = float32(in.FloatRowCell(i, j))
+		}
+		// fmt.Println(s)
+		ss := in.Tensor.SubSpace(i).(*tensor.Float32)
+		// fmt.Println(ss.Values[:16])
+		cl := in.Cells1D(i).Tensor.(*tensor.Float32)
+		// fmt.Println(cl.Values[:16])
+		assert.Equal(t, vals, ss.Values[:16])
+		assert.Equal(t, vals, cl.Values[:16])
+	}
 }

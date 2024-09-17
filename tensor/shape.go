@@ -205,6 +205,10 @@ func (sh *Shape) String() string {
 // RowMajorStrides returns strides for sizes where the first dimension is outermost
 // and subsequent dimensions are progressively inner.
 func RowMajorStrides(sizes ...int) []int {
+	if len(sizes) == 0 {
+		return nil
+	}
+	sizes[0] = max(1, sizes[0]) // critical for strides to not be nil due to rows = 0
 	rem := int(1)
 	for _, v := range sizes {
 		rem *= v
@@ -212,7 +216,6 @@ func RowMajorStrides(sizes ...int) []int {
 
 	if rem == 0 {
 		strides := make([]int, len(sizes))
-		rem := int(1)
 		for i := range strides {
 			strides[i] = rem
 		}
