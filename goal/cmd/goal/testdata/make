@@ -1,5 +1,5 @@
-#!/usr/bin/env cosh
-// test makefile for cosh.
+#!/usr/bin/env goal
+// test makefile for goal.
 // example usage:
 // ./make build
 

@@ -66,7 +66,7 @@ func NewFunc(name string, fun any, out int, stringFirst ...bool) (*Func, error) 
 var Funcs map[string]*Func
 
 // AddFunc adds given named function to the global tensor named function
-// registry, which is used in cosl to call functions by name, and
+// registry, which is used in goal to call functions by name, and
 // in specific packages to call functions by enum String() names.
 // Use the standard Go CamelCase name -- will be auto-lowercased.
 // The number of output arguments must be provided here,

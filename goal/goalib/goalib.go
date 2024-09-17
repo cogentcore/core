@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package cosh defines convenient utility functions for
-// use in the cosh shell, available with the cosh prefix.
-package cosh
+// Package goalib defines convenient utility functions for
+// use in the goal shell, available with the goalib prefix.
+package goalib
 
 import (
 	"io/fs"

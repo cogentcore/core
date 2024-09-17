@@ -6,7 +6,7 @@ The `tensor.Indexed` type provides the universal representation of a homogenous 
 
 The `float64` ("Float"), `int` ("Int"), and `string` ("String") types are used as universal input / output types, and for intermediate computation in the math functions. Any performance-critical code can be optimized for a specific data type, but these universal interfaces are suitable for misc ad-hoc data analysis.
 
-The [cosl](../cosl) _Cogent [Scripting, Science, Statistics, Shell...] Language_ uses `tensor.Indexed` data types exclusively to allow simple intuitive math expressions to be transpiled into corresponding Go code, providing an efficient, elegant, yet type-safe and computationally powerful framework for data processing of all sorts.  All of the standard math, statistics, etc functionality is available using the [tmath](tmath), [stats](stats), and other associated packages described below.  
+The [goal](../goal) _Cogent [Scripting, Science, Statistics, Shell...] Language_ uses `tensor.Indexed` data types exclusively to allow simple intuitive math expressions to be transpiled into corresponding Go code, providing an efficient, elegant, yet type-safe and computationally powerful framework for data processing of all sorts.  All of the standard math, statistics, etc functionality is available using the [tmath](tmath), [stats](stats), and other associated packages described below.  
 
 Use the `[Set]FloatRow[Cell]` methods wherever possible, for the most efficient and natural indirection through the `tensor.Indexed` indexes.  The 1D methods on underlying tensor data do not indirect through the indexes.
 
@@ -18,11 +18,11 @@ All tensor package functions are registered using a global name-to-function map 
 
     Data that is encoded as a slice of `struct`s can be bidirectionally converted to / from a Table, which then provides more powerful sorting, filtering and other functionality, including [plot/plotcore](../plot/plotcore).
 
-* [datafs](datafs) provides a virtual filesystem (FS) for organizing arbitrary collections of data, supporting interactive, ad-hoc (notebook style) as well as systematic data processing. Interactive [cosl](../cosl) shell commands (`cd`, `ls`, `mkdir` etc) can be used to navigate the data space, with numerical expressions immediately available to operate on the data and save results back to the filesystem.  Furthermore, the data can be directly copied to / from the OS filesystem to persist it, and `cosl` can transparently access data on remote systems through ssh.  Furthermore, the [databrowser](databrowser) provides a fully interactive GUI for inspecting and plotting data.
+* [datafs](datafs) provides a virtual filesystem (FS) for organizing arbitrary collections of data, supporting interactive, ad-hoc (notebook style) as well as systematic data processing. Interactive [goal](../goal) shell commands (`cd`, `ls`, `mkdir` etc) can be used to navigate the data space, with numerical expressions immediately available to operate on the data and save results back to the filesystem.  Furthermore, the data can be directly copied to / from the OS filesystem to persist it, and `goal` can transparently access data on remote systems through ssh.  Furthermore, the [databrowser](databrowser) provides a fully interactive GUI for inspecting and plotting data.
 
 * [tensorcore](tensorcore) provides core widgets for graphically displaying the `Tensor` and `Table` data, which are used in `datafs`.
 
-* [tmath](tmath) implements all standard math functions on `tensor.Indexed` data, including the standard `+, -, *, /` operators.  `cosl` then calls these functions.
+* [tmath](tmath) implements all standard math functions on `tensor.Indexed` data, including the standard `+, -, *, /` operators.  `goal` then calls these functions.
 
 * [plot/plotcore](../plot/plotcore) supports interactive plotting of `Table` data.
 
