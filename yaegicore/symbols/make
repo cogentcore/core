@@ -1,4 +1,4 @@
-#!/usr/bin/env cosh
+#!/usr/bin/env goal
 
 yaegi extract fmt strconv strings image image/color image/draw time log/slog reflect
 

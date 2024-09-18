@@ -22,6 +22,7 @@ func init() {
 		"Calc":                  reflect.ValueOf(tensor.Calc),
 		"Call":                  reflect.ValueOf(tensor.Call),
 		"CallOut":               reflect.ValueOf(tensor.CallOut),
+		"CallOutMulti":          reflect.ValueOf(tensor.CallOutMulti),
 		"CallString":            reflect.ValueOf(tensor.CallString),
 		"ColMajorStrides":       reflect.ValueOf(tensor.ColMajorStrides),
 		"Comma":                 reflect.ValueOf(tensor.Comma),
