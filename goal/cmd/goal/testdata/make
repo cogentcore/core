@@ -11,5 +11,5 @@ command test {
 	println("running the test command")
 }
 
-shell.RunCommands(args)
+goal.RunCommands(args)
 

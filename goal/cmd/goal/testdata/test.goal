@@ -3,7 +3,7 @@
 // todo: doesn't work: #1152
 // echo {args}
 
-for i, fn := range cosh.SplitLines(`/bin/ls -1`) {
+for i, fn := range goalib.SplitLines(`/bin/ls -1`) {
 	fmt.Println(i, fn)
 }
 

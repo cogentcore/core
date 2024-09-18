@@ -18,6 +18,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/goal"
+	"cogentcore.org/core/yaegicore/symbols"
 	"github.com/cogentcore/yaegi/interp"
 	"github.com/cogentcore/yaegi/stdlib"
 	"github.com/ergochat/readline"
@@ -62,8 +63,8 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	options.Stderr = in.Goal.StdIOWrappers.Err
 	options.Stdin = in.Goal.StdIOWrappers.In
 	in.Interp = interp.New(options)
-	errors.Log(in.Interp.Use(stdlib.Symbols))
-	errors.Log(in.Interp.Use(Symbols))
+	// errors.Log(in.Interp.Use(stdlib.Symbols))
+	errors.Log(in.Interp.Use(symbols.Symbols))
 	in.ImportGoal()
 	go in.MonitorSignals()
 	return in

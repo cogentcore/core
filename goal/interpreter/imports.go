@@ -9,7 +9,6 @@ package interpreter
 import (
 	"reflect"
 
-	_ "cogentcore.org/core/yaegicore/symbols"
 	"github.com/cogentcore/yaegi/interp"
 )
 
