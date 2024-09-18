@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shell
+package goal
 
 import (
 	"os"
@@ -16,14 +16,14 @@ import (
 )
 
 // CompleteMatch is the [complete.MatchFunc] for the shell.
-func (sh *Shell) CompleteMatch(data any, text string, posLine, posChar int) (md complete.Matches) {
+func (gl *Goal) CompleteMatch(data any, text string, posLine, posChar int) (md complete.Matches) {
 	comps := complete.Completions{}
 	text = text[:posChar]
 	md.Seed = complete.SeedPath(text)
 	fullPath := complete.SeedSpace(text)
 	fullPath = errors.Log1(homedir.Expand(fullPath))
 	parent := strings.TrimSuffix(fullPath, md.Seed)
-	dir := filepath.Join(sh.Config.Dir, parent)
+	dir := filepath.Join(gl.Config.Dir, parent)
 	if filepath.IsAbs(parent) {
 		dir = parent
 	}
@@ -37,18 +37,18 @@ func (sh *Shell) CompleteMatch(data any, text string, posLine, posChar int) (md 
 		comps = append(comps, complete.Completion{
 			Text: name,
 			Icon: icon,
-			Desc: filepath.Join(sh.Config.Dir, name),
+			Desc: filepath.Join(gl.Config.Dir, name),
 		})
 	}
 	if parent == "" {
-		for cmd := range sh.Builtins {
+		for cmd := range gl.Builtins {
 			comps = append(comps, complete.Completion{
 				Text: cmd,
 				Icon: icons.Terminal,
 				Desc: "Builtin command: " + cmd,
 			})
 		}
-		for cmd := range sh.Commands {
+		for cmd := range gl.Commands {
 			comps = append(comps, complete.Completion{
 				Text: cmd,
 				Icon: icons.Terminal,
@@ -63,18 +63,18 @@ func (sh *Shell) CompleteMatch(data any, text string, posLine, posChar int) (md 
 }
 
 // CompleteEdit is the [complete.EditFunc] for the shell.
-func (sh *Shell) CompleteEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
+func (gl *Goal) CompleteEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
 	return complete.EditWord(text, cursorPos, completion.Text, seed)
 }
 
 // ReadlineCompleter implements [github.com/ergochat/readline.AutoCompleter].
 type ReadlineCompleter struct {
-	Shell *Shell
+	Goal *Goal
 }
 
 func (rc *ReadlineCompleter) Do(line []rune, pos int) (newLine [][]rune, length int) {
 	text := string(line)
-	md := rc.Shell.CompleteMatch(nil, text, 0, pos)
+	md := rc.Goal.CompleteMatch(nil, text, 0, pos)
 	res := [][]rune{}
 	for _, match := range md.Matches {
 		after := strings.TrimPrefix(match.Text, md.Seed)

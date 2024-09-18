@@ -1,12 +1,14 @@
 # Goal: Go augmented language
 
-_Goal_ is an augmented version of the _Go_ language, that transpiles directly into Go, so it automatically leverages all the great features of Go, and remains fully compatible with it.  The augmentation is designed to overcome some of the limitations of Go in specific domains:
+_Goal_ is an augmented version of the _Go_ language, which combines the best parts of _Go_, `bash`, and Python, to provide and integrated shell and numerical expression processing experience.
+
+_Goal_ transpiles directly into Go, so it automatically leverages all the great features of Go, and remains fully compatible with it.  The augmentation is designed to overcome some of the limitations of Go in specific domains:
 
 * Shell scripting, where you want to be able to directly call other executable programs with arguments, without having to navigate all the complexity of the standard [os.exec](https://pkg.go.dev/os/exec) package.
 
 * Numerical / math / data processing, where you want to be able to write simple mathematical expressions operating on vectors, matricies and other more powerful data types, without having to constantly worry about type conversions and iterators etc. Python is the dominant language here precisely because it lets you ignore type information and write such expressions.
 
-The main goal of _Goal_ is to achieve a "best of both worlds" solution that retains all the type safety and explicitness of Go for all the surrounding control flow and large-scale application logic, while also allowing for a more relaxed syntax in specific, well-defined domains where it is particularly important.  Thus, unlike Python where there are various weak attempts to try to encourage better coding habits, _Goal_ retains in its _Go_ foundation a fundamentally scalable, "industrial strength" language that has already proven its worth in countless real-world applications.
+The main goal of _Goal_ is to achieve a "best of both worlds" solution that retains all the type safety and explicitness of Go for all the surrounding control flow and large-scale application logic, while also allowing for a more relaxed syntax in specific, well-defined domains where the Go language has been a barrier.  Thus, unlike Python where there are various weak attempts to try to encourage better coding habits, _Goal_ retains in its _Go_ foundation a fundamentally scalable, "industrial strength" language that has already proven its worth in countless real-world applications.
 
 For the shell scripting aspect of _Goal_, the simple idea is that each line of code is either Go or shell commands, determined in a fairly intuitive way mostly by the content at the start of the line (formal rules below). If a line starts off with something like `ls -la...` then it is clear that it is not valid Go code, and it is therefore processed as a shell command.
 

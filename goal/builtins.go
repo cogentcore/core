@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shell
+package goal
 
 import (
 	"context"
@@ -20,24 +20,24 @@ import (
 )
 
 // InstallBuiltins adds the builtin shell commands to [Shell.Builtins].
-func (sh *Shell) InstallBuiltins() {
-	sh.Builtins = make(map[string]func(cmdIO *exec.CmdIO, args ...string) error)
-	sh.Builtins["cd"] = sh.Cd
-	sh.Builtins["exit"] = sh.Exit
-	sh.Builtins["jobs"] = sh.JobsCmd
-	sh.Builtins["kill"] = sh.Kill
-	sh.Builtins["set"] = sh.Set
-	sh.Builtins["add-path"] = sh.AddPath
-	sh.Builtins["which"] = sh.Which
-	sh.Builtins["source"] = sh.Source
-	sh.Builtins["cossh"] = sh.CoSSH
-	sh.Builtins["scp"] = sh.Scp
-	sh.Builtins["debug"] = sh.Debug
-	sh.Builtins["history"] = sh.History
+func (gl *Goal) InstallBuiltins() {
+	gl.Builtins = make(map[string]func(cmdIO *exec.CmdIO, args ...string) error)
+	gl.Builtins["cd"] = gl.Cd
+	gl.Builtins["exit"] = gl.Exit
+	gl.Builtins["jobs"] = gl.JobsCmd
+	gl.Builtins["kill"] = gl.Kill
+	gl.Builtins["set"] = gl.Set
+	gl.Builtins["add-path"] = gl.AddPath
+	gl.Builtins["which"] = gl.Which
+	gl.Builtins["source"] = gl.Source
+	gl.Builtins["cossh"] = gl.CoSSH
+	gl.Builtins["scp"] = gl.Scp
+	gl.Builtins["debug"] = gl.Debug
+	gl.Builtins["history"] = gl.History
 }
 
 // Cd changes the current directory.
-func (sh *Shell) Cd(cmdIO *exec.CmdIO, args ...string) error {
+func (gl *Goal) Cd(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) > 1 {
 		return fmt.Errorf("no more than one argument can be passed to cd")
 	}
@@ -63,18 +63,18 @@ func (sh *Shell) Cd(cmdIO *exec.CmdIO, args ...string) error {
 	if err != nil {
 		return err
 	}
-	sh.Config.Dir = dir
+	gl.Config.Dir = dir
 	return nil
 }
 
 // Exit exits the shell.
-func (sh *Shell) Exit(cmdIO *exec.CmdIO, args ...string) error {
+func (gl *Goal) Exit(cmdIO *exec.CmdIO, args ...string) error {
 	os.Exit(0)
 	return nil
 }
 
 // Set sets the given environment variable to the given value.
-func (sh *Shell) Set(cmdIO *exec.CmdIO, args ...string) error {
+func (gl *Goal) Set(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("expected two arguments, got %d", len(args))
 	}
@@ -82,8 +82,8 @@ func (sh *Shell) Set(cmdIO *exec.CmdIO, args ...string) error {
 }
 
 // JobsCmd is the builtin jobs command
-func (sh *Shell) JobsCmd(cmdIO *exec.CmdIO, args ...string) error {
-	for i, jb := range sh.Jobs {
+func (gl *Goal) JobsCmd(cmdIO *exec.CmdIO, args ...string) error {
+	for i, jb := range gl.Jobs {
 		cmdIO.Printf("[%d]  %s\n", i+1, jb.String())
 	}
 	return nil
@@ -91,27 +91,27 @@ func (sh *Shell) JobsCmd(cmdIO *exec.CmdIO, args ...string) error {
 
 // Kill kills a job by job number or PID.
 // Just expands the job id expressions %n into PIDs and calls system kill.
-func (sh *Shell) Kill(cmdIO *exec.CmdIO, args ...string) error {
+func (gl *Goal) Kill(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("cosh kill: expected at least one argument")
 	}
-	sh.JobIDExpand(args)
-	sh.Config.RunIO(cmdIO, "kill", args...)
+	gl.JobIDExpand(args)
+	gl.Config.RunIO(cmdIO, "kill", args...)
 	return nil
 }
 
 // Fg foregrounds a job by job number
-func (sh *Shell) Fg(cmdIO *exec.CmdIO, args ...string) error {
+func (gl *Goal) Fg(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("cosh fg: requires exactly one job id argument")
 	}
 	jid := args[0]
-	exp := sh.JobIDExpand(args)
+	exp := gl.JobIDExpand(args)
 	if exp != 1 {
 		return fmt.Errorf("cosh fg: argument was not a job id in the form %%n")
 	}
 	jno, _ := strconv.Atoi(jid[1:]) // guaranteed good
-	job := sh.Jobs[jno]
+	job := gl.Jobs[jno]
 	cmdIO.Printf("foregrounding job [%d]\n", jno)
 	_ = job
 	// todo: the problem here is we need to change the stdio for running job
@@ -123,7 +123,7 @@ func (sh *Shell) Fg(cmdIO *exec.CmdIO, args ...string) error {
 }
 
 // AddPath adds the given path(s) to $PATH.
-func (sh *Shell) AddPath(cmdIO *exec.CmdIO, args ...string) error {
+func (gl *Goal) AddPath(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("cosh add-path expected at least one argument")
 	}
@@ -141,30 +141,30 @@ func (sh *Shell) AddPath(cmdIO *exec.CmdIO, args ...string) error {
 // Which reports the executable associated with the given command.
 // Processes builtins and commands, and if not found, then passes on
 // to exec which.
-func (sh *Shell) Which(cmdIO *exec.CmdIO, args ...string) error {
+func (gl *Goal) Which(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("cosh which: requires one argument")
 	}
 	cmd := args[0]
-	if _, hasCmd := sh.Commands[cmd]; hasCmd {
+	if _, hasCmd := gl.Commands[cmd]; hasCmd {
 		cmdIO.Println(cmd, "is a user-defined command")
 		return nil
 	}
-	if _, hasBlt := sh.Builtins[cmd]; hasBlt {
+	if _, hasBlt := gl.Builtins[cmd]; hasBlt {
 		cmdIO.Println(cmd, "is a cosh builtin command")
 		return nil
 	}
-	sh.Config.RunIO(cmdIO, "which", args...)
+	gl.Config.RunIO(cmdIO, "which", args...)
 	return nil
 }
 
 // Source loads and evaluates the given file(s)
-func (sh *Shell) Source(cmdIO *exec.CmdIO, args ...string) error {
+func (gl *Goal) Source(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("cosh source: requires at least one argument")
 	}
 	for _, fn := range args {
-		sh.TranspileCodeFromFile(fn)
+		gl.TranspileCodeFromFile(fn)
 	}
 	// note that we do not execute the file -- just loads it in
 	return nil
@@ -176,18 +176,18 @@ func (sh *Shell) Source(cmdIO *exec.CmdIO, args ...string) error {
 //   - host [name] -- connects to a server specified in first arg and switches
 //     to using it, with optional name instead of default sequential number.
 //   - close -- closes all open connections, or the specified one
-func (sh *Shell) CoSSH(cmdIO *exec.CmdIO, args ...string) error {
+func (gl *Goal) CoSSH(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) < 1 {
 		return fmt.Errorf("cossh: requires at least one argument")
 	}
 	cmd := args[0]
 	var err error
 	host := ""
-	name := fmt.Sprintf("%d", 1+len(sh.SSHClients))
+	name := fmt.Sprintf("%d", 1+len(gl.SSHClients))
 	con := false
 	switch {
 	case cmd == "close":
-		sh.CloseSSH()
+		gl.CloseSSH()
 		return nil
 	case cmd == "@" && len(args) == 2:
 		name = args[1]
@@ -200,19 +200,19 @@ func (sh *Shell) CoSSH(cmdIO *exec.CmdIO, args ...string) error {
 		host = args[0]
 	}
 	if con {
-		cl := sshclient.NewClient(sh.SSH)
+		cl := sshclient.NewClient(gl.SSH)
 		err = cl.Connect(host)
 		if err != nil {
 			return err
 		}
-		sh.SSHClients[name] = cl
-		sh.SSHActive = name
+		gl.SSHClients[name] = cl
+		gl.SSHActive = name
 	} else {
 		if name == "0" {
-			sh.SSHActive = ""
+			gl.SSHActive = ""
 		} else {
-			sh.SSHActive = name
-			cl := sh.ActiveSSH()
+			gl.SSHActive = name
+			cl := gl.ActiveSSH()
 			if cl == nil {
 				err = fmt.Errorf("cosh: ssh connection named: %q not found", name)
 			}
@@ -226,7 +226,7 @@ func (sh *Shell) CoSSH(cmdIO *exec.CmdIO, args ...string) error {
 // The order is from -> to, as in standard cp.
 // The remote filename is automatically relative to the current working
 // directory on the remote host.
-func (sh *Shell) Scp(cmdIO *exec.CmdIO, args ...string) error {
+func (gl *Goal) Scp(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("scp: requires exactly two arguments")
 	}
@@ -250,12 +250,12 @@ func (sh *Shell) Scp(cmdIO *exec.CmdIO, args ...string) error {
 	host := hfn[1:ci]
 	hfn = hfn[ci+1:]
 
-	cl, err := sh.SSHByHost(host)
+	cl, err := gl.SSHByHost(host)
 	if err != nil {
 		return err
 	}
 
-	ctx := sh.Ctx
+	ctx := gl.Ctx
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -269,7 +269,7 @@ func (sh *Shell) Scp(cmdIO *exec.CmdIO, args ...string) error {
 }
 
 // Debug changes log level
-func (sh *Shell) Debug(cmdIO *exec.CmdIO, args ...string) error {
+func (gl *Goal) Debug(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) == 0 {
 		if logx.UserLevel == slog.LevelDebug {
 			logx.UserLevel = slog.LevelInfo
@@ -289,8 +289,8 @@ func (sh *Shell) Debug(cmdIO *exec.CmdIO, args ...string) error {
 }
 
 // History shows history
-func (sh *Shell) History(cmdIO *exec.CmdIO, args ...string) error {
-	n := len(sh.Hist)
+func (gl *Goal) History(cmdIO *exec.CmdIO, args ...string) error {
+	n := len(gl.Hist)
 	nh := n
 	if len(args) == 1 {
 		an, err := strconv.Atoi(args[0])
@@ -302,7 +302,7 @@ func (sh *Shell) History(cmdIO *exec.CmdIO, args ...string) error {
 		return fmt.Errorf("history: uses at most one argument")
 	}
 	for i := n - nh; i < n; i++ {
-		cmdIO.Printf("%d:\t%s\n", i, sh.Hist[i])
+		cmdIO.Printf("%d:\t%s\n", i, gl.Hist[i])
 	}
 	return nil
 }

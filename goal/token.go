@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shell
+package goal
 
 import (
 	"go/scanner"
@@ -309,11 +309,11 @@ func (tk Tokens) BracketDepths() (paren, brace, brack int) {
 }
 
 // Tokens converts the string into tokens
-func (sh *Shell) Tokens(ln string) Tokens {
+func (gl *Goal) Tokens(ln string) Tokens {
 	fset := token.NewFileSet()
 	f := fset.AddFile("", fset.Base(), len(ln))
 	var sc scanner.Scanner
-	sc.Init(f, []byte(ln), sh.errHandler, scanner.ScanComments|2) // 2 is non-exported dontInsertSemis
+	sc.Init(f, []byte(ln), gl.errHandler, scanner.ScanComments|2) // 2 is non-exported dontInsertSemis
 	// note to Go team: just export this stuff.  seriously.
 
 	var toks Tokens
@@ -328,6 +328,6 @@ func (sh *Shell) Tokens(ln string) Tokens {
 	return toks
 }
 
-func (sh *Shell) errHandler(pos token.Position, msg string) {
+func (gl *Goal) errHandler(pos token.Position, msg string) {
 	logx.PrintlnDebug("Scan Error:", pos, msg)
 }

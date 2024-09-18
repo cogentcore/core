@@ -4,12 +4,10 @@
 
 package goal
 
-import (
-	"testing"
+import "fmt"
 
-	"github.com/stretchr/testify/assert"
-)
+func (gl *Goal) TranspileMath(toks Tokens) Tokens {
+	fmt.Printf("in math")
 
-func TestExec(t *testing.T) {
-	assert.Equal(t, "hi", NewGoal().Output("echo", "hi"))
+	return toks
 }

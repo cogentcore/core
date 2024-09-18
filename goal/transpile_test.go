@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shell
+package goal
 
 import (
 	"testing"
@@ -74,9 +74,9 @@ func TestPaths(t *testing.T) {
 		{"../an-other/dir/", `../an-other/dir/`},
 		{"https://google.com/search?q=hello%20world#body", `https://google.com/search?q=hello%20world#body`},
 	}
-	sh := NewShell()
+	gl := NewGoal()
 	for _, test := range tests {
-		toks := sh.Tokens(test.i)
+		toks := gl.Tokens(test.i)
 		p, _ := toks.Path(false)
 		assert.Equal(t, test.e, p)
 	}
@@ -170,9 +170,9 @@ func TestTranspile(t *testing.T) {
 		{"var data map[string]any", "var data map[string]any"},
 	}
 
-	sh := NewShell()
+	gl := NewGoal()
 	for _, test := range tests {
-		o := sh.TranspileLine(test.i)
+		o := gl.TranspileLine(test.i)
 		assert.Equal(t, test.e, o)
 	}
 }
@@ -190,10 +190,23 @@ shell.Run("ls", "-la", "args...")
 })`},
 	}
 
-	sh := NewShell()
+	gl := NewGoal()
 	for _, test := range tests {
-		sh.TranspileCode(test.i)
-		o := sh.Code()
+		gl.TranspileCode(test.i)
+		o := gl.Code()
+		assert.Equal(t, test.e, o)
+	}
+}
+
+func TestMath(t *testing.T) {
+	// logx.UserLevel = slog.LevelDebug
+	tests := []exIn{
+		{"$x := 1", `x := tensor.NewFloat64Scalar(1)`},
+	}
+
+	gl := NewGoal()
+	for _, test := range tests {
+		o := gl.TranspileLine(test.i)
 		assert.Equal(t, test.e, o)
 	}
 }

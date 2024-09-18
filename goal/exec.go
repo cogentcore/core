@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shell
+package goal
 
 import (
 	"bytes"
@@ -26,17 +26,17 @@ import (
 //   - start = calls Start on the command, which then runs asynchronously, with
 //     a goroutine forked to Wait for it and close its IO
 //   - output = return the output of the command as a string (otherwise return is "")
-func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
+func (gl *Goal) Exec(errOk, start, output bool, cmd any, args ...any) string {
 	out := ""
-	if !errOk && len(sh.Errors) > 0 {
+	if !errOk && len(gl.Errors) > 0 {
 		return out
 	}
-	cmdIO := exec.NewCmdIO(&sh.Config)
+	cmdIO := exec.NewCmdIO(&gl.Config)
 	cmdIO.StackStart()
 	if start {
 		cmdIO.PushIn(nil) // no stdin for bg
 	}
-	cl, scmd, sargs := sh.ExecArgs(cmdIO, errOk, cmd, args...)
+	cl, scmd, sargs := gl.ExecArgs(cmdIO, errOk, cmd, args...)
 	if scmd == "" {
 		return out
 	}
@@ -52,35 +52,35 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 			err = cl.Run(&cmdIO.StdIOState, scmd, sargs...)
 		}
 		if !errOk {
-			sh.AddError(err)
+			gl.AddError(err)
 		}
 	} else {
 		ran := false
-		ran, out = sh.RunBuiltinOrCommand(cmdIO, errOk, output, scmd, sargs...)
+		ran, out = gl.RunBuiltinOrCommand(cmdIO, errOk, output, scmd, sargs...)
 		if !ran {
-			sh.isCommand.Push(false)
+			gl.isCommand.Push(false)
 			switch {
 			case start:
-				err = sh.Config.StartIO(cmdIO, scmd, sargs...)
-				sh.Jobs.Push(cmdIO)
+				err = gl.Config.StartIO(cmdIO, scmd, sargs...)
+				gl.Jobs.Push(cmdIO)
 				go func() {
 					if !cmdIO.OutIsPipe() {
-						fmt.Printf("[%d]  %s\n", len(sh.Jobs), cmdIO.String())
+						fmt.Printf("[%d]  %s\n", len(gl.Jobs), cmdIO.String())
 					}
 					cmdIO.Cmd.Wait()
 					cmdIO.PopToStart()
-					sh.DeleteJob(cmdIO)
+					gl.DeleteJob(cmdIO)
 				}()
 			case output:
 				cmdIO.PushOut(nil)
-				out, err = sh.Config.OutputIO(cmdIO, scmd, sargs...)
+				out, err = gl.Config.OutputIO(cmdIO, scmd, sargs...)
 			default:
-				err = sh.Config.RunIO(cmdIO, scmd, sargs...)
+				err = gl.Config.RunIO(cmdIO, scmd, sargs...)
 			}
 			if !errOk {
-				sh.AddError(err)
+				gl.AddError(err)
 			}
-			sh.isCommand.Pop()
+			gl.isCommand.Pop()
 		}
 	}
 	if !start {
@@ -91,64 +91,64 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 
 // RunBuiltinOrCommand runs a builtin or a command, returning true if it ran,
 // and the output string if running in output mode.
-func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, errOk, output bool, cmd string, args ...string) (bool, string) {
+func (gl *Goal) RunBuiltinOrCommand(cmdIO *exec.CmdIO, errOk, output bool, cmd string, args ...string) (bool, string) {
 	out := ""
-	cmdFun, hasCmd := sh.Commands[cmd]
-	bltFun, hasBlt := sh.Builtins[cmd]
+	cmdFun, hasCmd := gl.Commands[cmd]
+	bltFun, hasBlt := gl.Builtins[cmd]
 
 	if !hasCmd && !hasBlt {
 		return false, out
 	}
 
 	if hasCmd {
-		sh.commandArgs.Push(args)
-		sh.isCommand.Push(true)
+		gl.commandArgs.Push(args)
+		gl.isCommand.Push(true)
 	}
 
 	// note: we need to set both os. and wrapper versions, so it works the same
 	// in compiled vs. interpreted mode
-	oldsh := sh.Config.StdIO.Set(&cmdIO.StdIO)
-	oldwrap := sh.StdIOWrappers.SetWrappers(&cmdIO.StdIO)
+	oldsh := gl.Config.StdIO.Set(&cmdIO.StdIO)
+	oldwrap := gl.StdIOWrappers.SetWrappers(&cmdIO.StdIO)
 	oldstd := cmdIO.SetToOS()
 	if output {
 		obuf := &bytes.Buffer{}
 		// os.Stdout = obuf // needs a file
-		sh.Config.StdIO.Out = obuf
-		sh.StdIOWrappers.SetWrappedOut(obuf)
+		gl.Config.StdIO.Out = obuf
+		gl.StdIOWrappers.SetWrappedOut(obuf)
 		cmdIO.PushOut(obuf)
 		if hasCmd {
 			cmdFun(args...)
 		} else {
-			sh.AddError(bltFun(cmdIO, args...))
+			gl.AddError(bltFun(cmdIO, args...))
 		}
 		out = strings.TrimSuffix(obuf.String(), "\n")
 	} else {
 		if hasCmd {
 			cmdFun(args...)
 		} else {
-			sh.AddError(bltFun(cmdIO, args...))
+			gl.AddError(bltFun(cmdIO, args...))
 		}
 	}
 
 	if hasCmd {
-		sh.isCommand.Pop()
-		sh.commandArgs.Pop()
+		gl.isCommand.Pop()
+		gl.commandArgs.Pop()
 	}
 	oldstd.SetToOS()
-	sh.StdIOWrappers.SetWrappers(oldwrap)
-	sh.Config.StdIO = *oldsh
+	gl.StdIOWrappers.SetWrappers(oldwrap)
+	gl.Config.StdIO = *oldsh
 
 	return true, out
 }
 
-func (sh *Shell) HandleArgErr(errok bool, err error) error {
+func (gl *Goal) HandleArgErr(errok bool, err error) error {
 	if err == nil {
 		return err
 	}
 	if errok {
-		sh.Config.StdIO.ErrPrintln(err.Error())
+		gl.Config.StdIO.ErrPrintln(err.Error())
 	} else {
-		sh.AddError(err)
+		gl.AddError(err)
 	}
 	return err
 }
@@ -156,16 +156,16 @@ func (sh *Shell) HandleArgErr(errok bool, err error) error {
 // ExecArgs processes the args to given exec command,
 // handling all of the input / output redirection and
 // file globbing, homedir expansion, etc.
-func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (*sshclient.Client, string, []string) {
-	if len(sh.Jobs) > 0 {
-		jb := sh.Jobs.Peek()
+func (gl *Goal) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (*sshclient.Client, string, []string) {
+	if len(gl.Jobs) > 0 {
+		jb := gl.Jobs.Peek()
 		if jb.OutIsPipe() {
 			cmdIO.PushIn(jb.PipeIn.Peek())
 		}
 	}
 	scmd := reflectx.ToString(cmd)
-	cl := sh.ActiveSSH()
-	isCmd := sh.isCommand.Peek()
+	cl := gl.ActiveSSH()
+	isCmd := gl.isCommand.Peek()
 	sargs := make([]string, 0, len(args))
 	var err error
 	for _, a := range args {
@@ -175,7 +175,7 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 		}
 		if cl == nil {
 			s, err = homedir.Expand(s)
-			sh.HandleArgErr(errOk, err)
+			gl.HandleArgErr(errOk, err)
 			// note: handling globbing in a later pass, to not clutter..
 		} else {
 			if s[0] == '~' {
@@ -190,18 +190,18 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 			cl = nil
 		} else {
 			hnm := scmd[1:]
-			if scl, ok := sh.SSHClients[hnm]; ok {
+			if scl, ok := gl.SSHClients[hnm]; ok {
 				newHost = hnm
 				cl = scl
 			} else {
-				sh.HandleArgErr(errOk, fmt.Errorf("cosh: ssh connection named: %q not found", hnm))
+				gl.HandleArgErr(errOk, fmt.Errorf("cosh: ssh connection named: %q not found", hnm))
 			}
 		}
 		if len(sargs) > 0 {
 			scmd = sargs[0]
 			sargs = sargs[1:]
 		} else { // just a ssh switch
-			sh.SSHActive = newHost
+			gl.SSHActive = newHost
 			return nil, "", nil
 		}
 	}
@@ -209,11 +209,11 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 		s := sargs[i]
 		switch {
 		case s[0] == '>':
-			sargs = sh.OutToFile(cl, cmdIO, errOk, sargs, i)
+			sargs = gl.OutToFile(cl, cmdIO, errOk, sargs, i)
 		case s[0] == '|':
-			sargs = sh.OutToPipe(cl, cmdIO, errOk, sargs, i)
+			sargs = gl.OutToPipe(cl, cmdIO, errOk, sargs, i)
 		case cl == nil && isCmd && strings.HasPrefix(s, "args"):
-			sargs = sh.CmdArgs(errOk, sargs, i)
+			sargs = gl.CmdArgs(errOk, sargs, i)
 			i-- // back up because we consume this one
 		}
 	}
@@ -235,7 +235,7 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 }
 
 // OutToFile processes the > arg that sends output to a file
-func (sh *Shell) OutToFile(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
+func (gl *Goal) OutToFile(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
 	n := len(sargs)
 	s := sargs[i]
 	sn := len(s)
@@ -260,7 +260,7 @@ func (sh *Shell) OutToFile(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, 
 		narg = 1
 	}
 	if fn == "" {
-		sh.HandleArgErr(errOk, fmt.Errorf("cosh: no output file specified"))
+		gl.HandleArgErr(errOk, fmt.Errorf("cosh: no output file specified"))
 		return sargs
 	}
 	if cl != nil {
@@ -285,13 +285,13 @@ func (sh *Shell) OutToFile(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, 
 			cmdIO.PushErr(f)
 		}
 	} else {
-		sh.HandleArgErr(errOk, err)
+		gl.HandleArgErr(errOk, err)
 	}
 	return sargs
 }
 
 // OutToPipe processes the | arg that sends output to a pipe
-func (sh *Shell) OutToPipe(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
+func (gl *Goal) OutToPipe(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
 	s := sargs[i]
 	sn := len(s)
 	errf := false
@@ -309,11 +309,11 @@ func (sh *Shell) OutToPipe(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, 
 }
 
 // CmdArgs processes expressions involving "args" for commands
-func (sh *Shell) CmdArgs(errOk bool, sargs []string, i int) []string {
+func (gl *Goal) CmdArgs(errOk bool, sargs []string, i int) []string {
 	// n := len(sargs)
 	// s := sargs[i]
 	// sn := len(s)
-	args := sh.commandArgs.Peek()
+	args := gl.commandArgs.Peek()
 
 	// fmt.Println("command args:", args)
 
@@ -327,8 +327,8 @@ func (sh *Shell) CmdArgs(errOk bool, sargs []string, i int) []string {
 }
 
 // CancelExecution calls the Cancel() function if set.
-func (sh *Shell) CancelExecution() {
-	if sh.Cancel != nil {
-		sh.Cancel()
+func (gl *Goal) CancelExecution() {
+	if gl.Cancel != nil {
+		gl.Cancel()
 	}
 }
