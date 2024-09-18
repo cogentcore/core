@@ -76,7 +76,7 @@ func (gl *Goal) TranspileLineTokens(code string) Tokens {
 	case t0.Tok == token.ILLEGAL:
 		if t0.Str == "#" {
 			logx.PrintlnDebug("math #")
-			return gl.TranspileMath(toks[1:], code)
+			return gl.TranspileMath(toks[1:], code, true)
 		}
 		return gl.TranspileExec(ewords, false)
 	case t0.Tok == token.LBRACE:
@@ -157,7 +157,7 @@ func (gl *Goal) TranspileGo(toks Tokens, code string) Tokens {
 			et := toks[i:].ModeEnd()
 			if et > 0 {
 				if tok.Str == "#" {
-					gtoks.AddTokens(gl.TranspileMath(toks[i+1:i+et], code)...)
+					gtoks.AddTokens(gl.TranspileMath(toks[i+1:i+et], code, false)...)
 				} else {
 					gtoks.AddTokens(gl.TranspileExecTokens(toks[i+1:i+et+1], code, true)...)
 				}

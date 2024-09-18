@@ -20,20 +20,79 @@ import (
 	"strings"
 )
 
+// ParseLine parses a line of code that could contain one or more statements
+func ParseLine(code string, mode Mode) (stmts []ast.Stmt, err error) {
+	fset := token.NewFileSet()
+	var p parser
+	defer func() {
+		if e := recover(); e != nil {
+			// resume same panic if it's not a bailout
+			bail, ok := e.(bailout)
+			if !ok {
+				panic(e)
+			} else if bail.msg != "" {
+				p.errors.Add(p.file.Position(bail.pos), bail.msg)
+			}
+		}
+		p.errors.Sort()
+		err = p.errors.Err()
+	}()
+	p.init(fset, "", []byte(code), mode)
+
+	stmts = p.parseStmtList()
+
+	// If a semicolon was inserted, consume it;
+	// report an error if there's more tokens.
+	if p.tok == token.SEMICOLON && p.lit == "\n" {
+		p.next()
+	}
+	p.expect(token.EOF)
+
+	return
+}
+
+// ParseExpr parses an expression
+func ParseExpr(code string, mode Mode) (expr ast.Expr, err error) {
+	fset := token.NewFileSet()
+	var p parser
+	defer func() {
+		if e := recover(); e != nil {
+			// resume same panic if it's not a bailout
+			bail, ok := e.(bailout)
+			if !ok {
+				panic(e)
+			} else if bail.msg != "" {
+				p.errors.Add(p.file.Position(bail.pos), bail.msg)
+			}
+		}
+		p.errors.Sort()
+		err = p.errors.Err()
+	}()
+	p.init(fset, "", []byte(code), mode)
+
+	expr = p.parseRhs()
+
+	// If a semicolon was inserted, consume it;
+	// report an error if there's more tokens.
+	if p.tok == token.SEMICOLON && p.lit == "\n" {
+		p.next()
+	}
+	p.expect(token.EOF)
+
+	return
+}
+
 // A Mode value is a set of flags (or 0).
 // They control the amount of source code parsed and other optional
 // parser functionality.
 type Mode uint
 
 const (
-	PackageClauseOnly    Mode             = 1 << iota // stop parsing after package clause
-	ImportsOnly                                       // stop parsing after import declarations
-	ParseComments                                     // parse comments and add them to AST
-	Trace                                             // print a trace of parsed productions
-	DeclarationErrors                                 // report declaration errors
-	SpuriousErrors                                    // same as AllErrors, for backward-compatibility
-	SkipObjectResolution                              // skip deprecated identifier resolution; see ParseFile
-	AllErrors            = SpuriousErrors             // report all errors (not just the first 10 on different lines)
+	ParseComments     Mode             = 1 << iota // parse comments and add them to AST
+	Trace                                          // print a trace of parsed productions
+	DeclarationErrors                              // report declaration errors
+	SpuriousErrors                                 // same as AllErrors, for backward-compatibility
+	AllErrors         = SpuriousErrors             // report all errors (not just the first 10 on different lines)
 )
 
 // The parser structure holds the parser's internal state.
@@ -2847,71 +2906,4 @@ func (p *parser) parseDecl(sync map[token.Token]bool) ast.Decl {
 	}
 
 	return p.parseGenDecl(p.tok, f)
-}
-
-// ----------------------------------------------------------------------------
-// Source files
-
-func (p *parser) parseFile() *ast.File {
-	if p.trace {
-		defer un(trace(p, "File"))
-	}
-
-	// Don't bother parsing the rest if we had errors scanning the first token.
-	// Likely not a Go source file at all.
-	if p.errors.Len() != 0 {
-		return nil
-	}
-
-	// package clause
-	doc := p.leadComment
-	pos := p.expect(token.PACKAGE)
-	// Go spec: The package clause is not a declaration;
-	// the package name does not appear in any scope.
-	ident := p.parseIdent()
-	if ident.Name == "_" && p.mode&DeclarationErrors != 0 {
-		p.error(p.pos, "invalid package name _")
-	}
-	p.expectSemi()
-
-	// Don't bother parsing the rest if we had errors parsing the package clause.
-	// Likely not a Go source file at all.
-	if p.errors.Len() != 0 {
-		return nil
-	}
-
-	var decls []ast.Decl
-	if p.mode&PackageClauseOnly == 0 {
-		// import decls
-		for p.tok == token.IMPORT {
-			decls = append(decls, p.parseGenDecl(token.IMPORT, p.parseImportSpec))
-		}
-
-		if p.mode&ImportsOnly == 0 {
-			// rest of package body
-			prev := token.IMPORT
-			for p.tok != token.EOF {
-				// Continue to accept import declarations for error tolerance, but complain.
-				if p.tok == token.IMPORT && prev != token.IMPORT {
-					p.error(p.pos, "imports must appear before other declarations")
-				}
-				prev = p.tok
-
-				decls = append(decls, p.parseDecl(declStart))
-			}
-		}
-	}
-
-	f := &ast.File{
-		Doc:       doc,
-		Package:   pos,
-		Name:      ident,
-		Decls:     decls,
-		FileStart: token.Pos(p.file.Base()),
-		FileEnd:   token.Pos(p.file.Base() + p.file.Size()),
-		Imports:   p.imports,
-		Comments:  p.comments,
-		GoVersion: p.goVersion,
-	}
-	return f
 }
