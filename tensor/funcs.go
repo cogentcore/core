@@ -18,7 +18,7 @@ const StringFirstArg = true
 
 // Func represents a registered tensor function, which has
 // In number of input *tensor.Indexed arguments, and Out
-// number of output arguments.  There can also be an optional
+// number of output arguments (typically 1). There can also be an optional
 // string first argument, which is used to specify the name of
 // another function in some cases (e.g., a stat or metric function).
 type Func struct {
@@ -120,12 +120,28 @@ func CallString(name, first string, tsr ...*Indexed) error {
 }
 
 // CallOut calls function of given name, with given set of _input_
-// arguments appropriate for the given function, returning newly created
-// output tensors.
+// arguments appropriate for the given function, returning a created
+// output tensor, for the common case with just one return value.
 // An error is logged if the function name has not been registered
 // in the Funcs global function registry, or the argument count
 // does not match.
-func CallOut(name string, tsr ...*Indexed) []*Indexed {
+func CallOut(name string, tsr ...*Indexed) *Indexed {
+	nm := strings.ToLower(name)
+	fn, ok := Funcs[nm]
+	if !ok {
+		errors.Log(fmt.Errorf("tensor.CallOut: function of name %q not registered", name))
+		return nil
+	}
+	return errors.Log1(fn.CallOut(tsr...))[0]
+}
+
+// CallOutMulti calls function of given name, with given set of _input_
+// arguments appropriate for the given function, returning newly created
+// output tensors, for the rare case of multiple return values.
+// An error is logged if the function name has not been registered
+// in the Funcs global function registry, or the argument count
+// does not match.
+func CallOutMulti(name string, tsr ...*Indexed) []*Indexed {
 	nm := strings.ToLower(name)
 	fn, ok := Funcs[nm]
 	if !ok {

@@ -131,5 +131,5 @@ func Stat(stat Stats, in, out *tensor.Indexed) {
 // StatOut calls a standard Stats enum function on given tensor,
 // returning output as a newly created tensor.
 func StatOut(stat Stats, in *tensor.Indexed) *tensor.Indexed {
-	return tensor.CallOut(stat.FuncName(), in)[0]
+	return tensor.CallOut(stat.FuncName(), in)
 }

@@ -71,9 +71,9 @@ func TestMath(t *testing.T) {
 func TestOps(t *testing.T) {
 	x := tensor.NewIntScalar(1)
 	y := tensor.NewIntScalar(4)
-	a := tensor.CallOut("Mul", x, tensor.NewIntScalar(2))[0]
-	b := tensor.CallOut("Add", x, y)[0]
-	c := tensor.CallOut("Add", tensor.CallOut("Mul", x, y)[0], tensor.CallOut("Mul", a, b)[0])[0]
+	a := tensor.CallOut("Mul", x, tensor.NewIntScalar(2))
+	b := tensor.CallOut("Add", x, y)
+	c := tensor.CallOut("Add", tensor.CallOut("Mul", x, y), tensor.CallOut("Mul", a, b))
 
 	assert.Equal(t, 14, c.IntRow(0))
 }

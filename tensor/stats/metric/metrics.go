@@ -35,7 +35,7 @@ func Metric(metric Metrics, a, b, out *tensor.Indexed) {
 // MetricOut calls a standard Metrics enum function on given tensors,
 // returning output as a newly created tensor.
 func MetricOut(metric Metrics, a, b *tensor.Indexed) *tensor.Indexed {
-	return tensor.CallOut(metric.FuncName(), a, b)[0]
+	return tensor.CallOut(metric.FuncName(), a, b)
 }
 
 // Metrics are standard metric functions

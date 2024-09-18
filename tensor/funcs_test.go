@@ -44,5 +44,5 @@ func TestFuncs(t *testing.T) {
 
 	out := CallOut("Abs", oned)
 	// assert.NoError(t, err)
-	assert.Equal(t, oneout.Tensor.(*Float64).Values, out[0].Tensor.(*Float64).Values)
+	assert.Equal(t, oneout.Tensor.(*Float64).Values, out.Tensor.(*Float64).Values)
 }

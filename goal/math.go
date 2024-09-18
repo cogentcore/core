@@ -148,9 +148,6 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 	mp.curIdx++
 	mp.expr(ex.Y)
 	mp.toks.Add(token.RPAREN)
-	mp.toks.Add(token.LBRACK)
-	mp.toks.Add(token.INT, "0")
-	mp.toks.Add(token.RBRACK)
 }
 
 func (mp *mathParse) basicLit(lit *ast.BasicLit) {
