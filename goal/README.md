@@ -218,7 +218,7 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 | `len(a)` or `a.len` or: | `np.size(a)` or `a.size`   | `numel(a)` | number of elements of array `a` |
 | same: | `np.shape(a)` or `a.shape` | `size(a)`  | "size" of each dimension in a; `shape` returns a 1D `int` array |
 | same: | `a.shape[n-1]` | `size(a,n)` | the number of elements of the n-th dimension of array a |
-| `tensor([[1., 2., 3.], [4., 5., 6.]])` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D array |
+| `[[1., 2., 3.], [4., 5., 6.]]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D array |
 | same: | `np.block([[a, b], [c, d]])` | `[ a b; c d ]` | construct a matrix from blocks a, b, c, and d |
 | same: | `a[-1]` | `a(end)` | access last element |
 | same: | `a[1, 4]` | `a(2,5)` | access element in second row, fifth column in 2D array a |

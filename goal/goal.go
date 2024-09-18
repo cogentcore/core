@@ -354,7 +354,14 @@ func (gl *Goal) TranspileFile(in string, out string) error {
 	if hasPackage {
 		gl.Lines = slices.Insert(gl.Lines, 0, gen)
 	} else {
-		gl.Lines = slices.Insert(gl.Lines, 0, gen, "package main", "", "func main() {", "goal := goal.NewGoal()")
+		gl.Lines = slices.Insert(gl.Lines, 0, gen, "package main", "import (",
+			`	"cogentcore.org/core/goal"`,
+			`	"cogentcore.org/core/goal/goalib"`,
+			`	"cogentcore.org/core/tensor"`,
+			`	_ "cogentcore.org/core/tensor/tmath"`,
+			`	_ "cogentcore.org/core/tensor/stats/stats"`,
+			`	_ "cogentcore.org/core/tensor/stats/metric"`,
+			")", "func main() {", "goal := goal.NewGoal()")
 		gl.Lines = append(gl.Lines, "}")
 	}
 	src := []byte(gl.Code())

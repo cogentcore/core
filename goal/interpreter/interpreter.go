@@ -18,6 +18,9 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/goal"
+	_ "cogentcore.org/core/tensor/stats/metric"
+	_ "cogentcore.org/core/tensor/stats/stats"
+	_ "cogentcore.org/core/tensor/tmath"
 	"cogentcore.org/core/yaegicore/symbols"
 	"github.com/cogentcore/yaegi/interp"
 	"github.com/cogentcore/yaegi/stdlib"

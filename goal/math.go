@@ -22,13 +22,17 @@ type mathParse struct {
 }
 
 func (mp *mathParse) addCur() {
-	mp.toks.AddTokens(mp.curToks[mp.curIdx])
-	mp.curIdx++
+	if len(mp.curToks) > mp.curIdx {
+		mp.toks.AddTokens(mp.curToks[mp.curIdx])
+		mp.curIdx++
+		return
+	}
+	fmt.Println("out of toks:", mp.curToks)
 }
 
 func (gl *Goal) TranspileMath(toks Tokens, ln string) Tokens {
-	// fmt.Println("in math")
 	nt := len(toks)
+	// fmt.Println(nt, toks)
 
 	mp := mathParse{}
 
@@ -43,7 +47,7 @@ func (gl *Goal) TranspileMath(toks Tokens, ln string) Tokens {
 	if assignIdx >= 0 {
 		mp.lhsToks = toks[0:assignIdx]
 		mp.lhs = ln[toks[0].Pos-1 : toks[assignIdx].Pos-1]
-		mp.rhsToks = toks[assignIdx+1 : nt-1]
+		mp.rhsToks = toks[assignIdx+1 : nt]
 		mp.rhs = ln[toks[assignIdx+1].Pos-1 : toks[nt-1].Pos]
 		lex, err := parser.ParseExpr(mp.lhs)
 		if err != nil {
@@ -54,10 +58,11 @@ func (gl *Goal) TranspileMath(toks Tokens, ln string) Tokens {
 		if err != nil {
 			fmt.Println("rhs:", mp.rhs)
 			fmt.Println("rhs parse err:", err)
+			fmt.Printf("%#v\n", rex)
 		}
 		mp.assignStmt(toks[assignIdx], lex, rex)
 	} else {
-		mp.rhsToks = toks[0 : nt-1]
+		mp.rhsToks = toks[0:nt]
 		mp.curToks = mp.rhsToks
 		mp.rhs = ln[toks[0].Pos-1 : toks[nt-1].Pos]
 		ex, err := parser.ParseExpr(mp.rhs)
@@ -113,6 +118,12 @@ func (mp *mathParse) expr(ex ast.Expr) {
 
 	case *ast.CallExpr:
 
+	case *ast.ArrayType:
+		// basically at this point we have a bad expression and
+		// need to do our own parsing.
+		// it is unclear if perhaps we just need to do that from the start.
+		fmt.Println("array type:", x, x.Len)
+		fmt.Printf("%#v\n", x.Len)
 	}
 }
 
@@ -133,11 +144,13 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 	mp.toks.Add(token.STRING, `"`+fn+`"`)
 	mp.toks.Add(token.COMMA)
 	mp.expr(ex.X)
-	mp.curIdx++
 	mp.toks.Add(token.COMMA)
+	mp.curIdx++
 	mp.expr(ex.Y)
 	mp.toks.Add(token.RPAREN)
-	// todo: need elipses if part of something bigger
+	mp.toks.Add(token.LBRACK)
+	mp.toks.Add(token.INT, "0")
+	mp.toks.Add(token.RBRACK)
 }
 
 func (mp *mathParse) basicLit(lit *ast.BasicLit) {
@@ -158,4 +171,5 @@ func (mp *mathParse) selectorExpr(ex *ast.SelectorExpr) {
 }
 
 func (mp *mathParse) sliceExpr(se *ast.SliceExpr) {
+	fmt.Println("slice expr", se)
 }
