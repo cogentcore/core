@@ -11,7 +11,6 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"slices"
@@ -21,13 +20,11 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
-	"cogentcore.org/core/base/num"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/sshclient"
 	"cogentcore.org/core/base/stack"
-	"cogentcore.org/core/base/stringsx"
+	"cogentcore.org/core/goal/transpile"
 	"github.com/mitchellh/go-homedir"
-	"golang.org/x/tools/imports"
 )
 
 // Goal represents one running Goal language context.
@@ -50,21 +47,6 @@ type Goal struct {
 	// SSHActive is the name of the active SSH client
 	SSHActive string
 
-	// depth of delim at the end of the current line. if 0, was complete.
-	ParenDepth, BraceDepth, BrackDepth, TypeDepth, DeclDepth int
-
-	// Chunks of code lines that are accumulated during Transpile,
-	// each of which should be evaluated separately, to avoid
-	// issues with contextual effects from import, package etc.
-	Chunks []string
-
-	// current stack of transpiled lines, that are accumulated into
-	// code Chunks
-	Lines []string
-
-	// stack of runtime errors
-	Errors []error
-
 	// Builtins are all the builtin shell commands
 	Builtins map[string]func(cmdIO *exec.CmdIO, args ...string) error
 
@@ -81,6 +63,9 @@ type Goal struct {
 	// Both can be nil.
 	Cancel func()
 
+	// Errors is a stack of runtime errors
+	Errors []error
+
 	// Ctx is the context used for cancelling current shell running
 	// a single chunk of code, typically from the interpreter.
 	// We are not able to pass the context around so it is set here,
@@ -95,12 +80,8 @@ type Goal struct {
 	// and saved / restored from ~/.goalhist file
 	Hist []string
 
-	// FuncToVar translates function definitions into variable definitions,
-	// which is the default for interactive use of random code fragments
-	// without the complete go formatting.
-	// For pure transpiling of a complete codebase with full proper Go formatting
-	// this should be turned off.
-	FuncToVar bool
+	// transpiling state
+	TrState transpile.State
 
 	// commandArgs is a stack of args passed to a command, used for simplified
 	// processing of args expressions.
@@ -109,10 +90,6 @@ type Goal struct {
 	// isCommand is a stack of bools indicating whether the _immediate_ run context
 	// is a command, which affects the way that args are processed.
 	isCommand stack.Stack[bool]
-
-	// if this is non-empty, it is the name of the last command defined.
-	// triggers insertion of the AddCommand call to add to list of defined commands.
-	lastCommand string
 }
 
 // NewGoal returns a new [Goal] with default options.
@@ -124,7 +101,7 @@ func NewGoal() *Goal {
 			Buffer: false,
 		},
 	}
-	gl.FuncToVar = true
+	gl.TrState.FuncToVar = true
 	gl.Config.StdIO.SetFromOS()
 	gl.SSH = sshclient.NewConfig(&gl.Config)
 	gl.SSHClients = make(map[string]*sshclient.Client)
@@ -226,92 +203,10 @@ func (gl *Goal) SSHByHost(host string) (*sshclient.Client, error) {
 	return nil, fmt.Errorf("ssh connection named: %q not found", host)
 }
 
-// TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.
-func (gl *Goal) TotalDepth() int {
-	return num.Abs(gl.ParenDepth) + num.Abs(gl.BraceDepth) + num.Abs(gl.BrackDepth)
-}
-
-// ResetCode resets the stack of transpiled code
-func (gl *Goal) ResetCode() {
-	gl.Chunks = nil
-	gl.Lines = nil
-}
-
-// ResetDepth resets the current depths to 0
-func (gl *Goal) ResetDepth() {
-	gl.ParenDepth, gl.BraceDepth, gl.BrackDepth, gl.TypeDepth, gl.DeclDepth = 0, 0, 0, 0, 0
-}
-
-// DepthError reports an error if any of the parsing depths are not zero,
-// to be called at the end of transpiling a complete block of code.
-func (gl *Goal) DepthError() error {
-	if gl.TotalDepth() == 0 {
-		return nil
-	}
-	str := ""
-	if gl.ParenDepth != 0 {
-		str += fmt.Sprintf("Incomplete parentheses (), remaining depth: %d\n", gl.ParenDepth)
-	}
-	if gl.BraceDepth != 0 {
-		str += fmt.Sprintf("Incomplete braces [], remaining depth: %d\n", gl.BraceDepth)
-	}
-	if gl.BrackDepth != 0 {
-		str += fmt.Sprintf("Incomplete brackets {}, remaining depth: %d\n", gl.BrackDepth)
-	}
-	if str != "" {
-		slog.Error(str)
-		return errors.New(str)
-	}
-	return nil
-}
-
-// AddLine adds line on the stack
-func (gl *Goal) AddLine(ln string) {
-	gl.Lines = append(gl.Lines, ln)
-}
-
-// Code returns the current transpiled lines,
-// split into chunks that should be compiled separately.
-func (gl *Goal) Code() string {
-	gl.AddChunk()
-	if len(gl.Chunks) == 0 {
-		return ""
-	}
-	return strings.Join(gl.Chunks, "\n")
-}
-
-// AddChunk adds current lines into a chunk of code
-// that should be compiled separately.
-func (gl *Goal) AddChunk() {
-	if len(gl.Lines) == 0 {
-		return
-	}
-	gl.Chunks = append(gl.Chunks, strings.Join(gl.Lines, "\n"))
-	gl.Lines = nil
-}
-
 // TranspileCode processes each line of given code,
 // adding the results to the LineStack
 func (gl *Goal) TranspileCode(code string) {
-	lns := strings.Split(code, "\n")
-	n := len(lns)
-	if n == 0 {
-		return
-	}
-	for _, ln := range lns {
-		hasDecl := gl.DeclDepth > 0
-		tl := gl.TranspileLine(ln)
-		gl.AddLine(tl)
-		if gl.BraceDepth == 0 && gl.BrackDepth == 0 && gl.ParenDepth == 1 && gl.lastCommand != "" {
-			gl.lastCommand = ""
-			nl := len(gl.Lines)
-			gl.Lines[nl-1] = gl.Lines[nl-1] + ")"
-			gl.ParenDepth--
-		}
-		if hasDecl && gl.DeclDepth == 0 { // break at decl
-			gl.AddChunk()
-		}
-	}
+	gl.TrState.TranspileCode(code)
 }
 
 // TranspileCodeFromFile transpiles the code in given file
@@ -329,51 +224,7 @@ func (gl *Goal) TranspileCodeFromFile(file string) error {
 // is found, then package main and func main declarations are
 // added. This also affects how functions are interpreted.
 func (gl *Goal) TranspileFile(in string, out string) error {
-	b, err := os.ReadFile(in)
-	if err != nil {
-		return err
-	}
-	code := string(b)
-	lns := stringsx.SplitLines(code)
-	hasPackage := false
-	for _, ln := range lns {
-		if strings.HasPrefix(ln, "package ") {
-			hasPackage = true
-			break
-		}
-	}
-	if hasPackage {
-		gl.FuncToVar = false // use raw functions
-	}
-	gl.TranspileCode(code)
-	gl.FuncToVar = true
-	if err != nil {
-		return err
-	}
-	gen := "// Code generated by \"goal build\"; DO NOT EDIT.\n\n"
-	if hasPackage {
-		gl.Lines = slices.Insert(gl.Lines, 0, gen)
-	} else {
-		gl.Lines = slices.Insert(gl.Lines, 0, gen, "package main", "import (",
-			`	"cogentcore.org/core/goal"`,
-			`	"cogentcore.org/core/goal/goalib"`,
-			`	"cogentcore.org/core/tensor"`,
-			`	_ "cogentcore.org/core/tensor/tmath"`,
-			`	_ "cogentcore.org/core/tensor/stats/stats"`,
-			`	_ "cogentcore.org/core/tensor/stats/metric"`,
-			")", "func main() {", "goal := goal.NewGoal()")
-		gl.Lines = append(gl.Lines, "}")
-	}
-	src := []byte(gl.Code())
-	res, err := imports.Process(out, src, nil)
-	if err != nil {
-		res = src
-		slog.Error(err.Error())
-	} else {
-		err = gl.DepthError()
-	}
-	werr := os.WriteFile(out, res, 0666)
-	return errors.Join(err, werr)
+	return gl.TrState.TranspileFile(in, out)
 }
 
 // AddError adds the given error to the error stack if it is non-nil,

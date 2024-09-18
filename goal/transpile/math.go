@@ -2,15 +2,44 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package goal
+package transpile
 
 import (
 	"fmt"
 	"go/ast"
 	"go/token"
-
-	"cogentcore.org/core/goal/mparse"
 )
+
+func MathParse(toks Tokens, code string, fullLine bool) Tokens {
+	nt := len(toks)
+	if nt == 0 {
+		return nil
+	}
+	// fmt.Println(nt, toks)
+
+	str := code[toks[0].Pos-1 : toks[nt-1].Pos]
+	mp := mathParse{toks: toks, code: code}
+
+	mods := AllErrors | Trace
+
+	if fullLine {
+		stmts, err := ParseLine(str, mods)
+		if err != nil {
+			fmt.Println("line code:", str)
+			fmt.Println("parse err:", err)
+		}
+		mp.stmtList(stmts)
+	} else {
+		ex, err := ParseExpr(str, mods)
+		if err != nil {
+			fmt.Println("expr:", str)
+			fmt.Println("parse err:", err)
+		}
+		mp.expr(ex)
+	}
+
+	return mp.out
+}
 
 type mathParse struct {
 	code string // code string
@@ -32,37 +61,6 @@ func (mp *mathParse) addCur() {
 		return
 	}
 	fmt.Println("out of tokens!", mp.idx, mp.toks)
-}
-
-// TranspileMath does math mode transpiling. fullLine indicates code should be
-// full statement(s).
-func (gl *Goal) TranspileMath(toks Tokens, code string, fullLine bool) Tokens {
-	nt := len(toks)
-	if nt == 0 {
-		return nil
-	}
-	// fmt.Println(nt, toks)
-
-	str := code[toks[0].Pos-1 : toks[nt-1].Pos]
-	mp := mathParse{toks: toks, code: code}
-
-	if fullLine {
-		stmts, err := mparse.ParseLine(str, mparse.AllErrors)
-		if err != nil {
-			fmt.Println("line code:", str)
-			fmt.Println("parse err:", err)
-		}
-		mp.stmtList(stmts)
-	} else {
-		ex, err := mparse.ParseExpr(str, mparse.AllErrors)
-		if err != nil {
-			fmt.Println("expr:", str)
-			fmt.Println("parse err:", err)
-		}
-		mp.expr(ex)
-	}
-
-	return mp.out
 }
 
 func (mp *mathParse) stmtList(sts []ast.Stmt) {
@@ -168,11 +166,15 @@ func (mp *mathParse) expr(ex ast.Expr) {
 	case *ast.TypeAssertExpr:
 
 	case *ast.IndexListExpr:
-		fmt.Println("index!")
+		if x.X == nil { // array literal
+			mp.arrayLiteral(x)
+		} else {
+			mp.indexListExpr(x)
+		}
 
 	case *ast.SliceExpr:
-		mp.sliceExpr(x)
-		// todo: we'll need to work on this!
+		// mp.sliceExpr(x)
+		// todo: probably this is subsumed in indexListExpr
 
 	case *ast.CallExpr:
 
@@ -242,8 +244,12 @@ func (mp *mathParse) basicLit(lit *ast.BasicLit) {
 func (mp *mathParse) selectorExpr(ex *ast.SelectorExpr) {
 }
 
-func (mp *mathParse) sliceExpr(se *ast.SliceExpr) {
-	fmt.Println("slice expr", se)
+func (mp *mathParse) indexListExpr(il *ast.IndexListExpr) {
+	// fmt.Println("slice expr", se)
+}
+
+func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
+
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {

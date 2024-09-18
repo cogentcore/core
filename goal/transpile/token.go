@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package goal
+package transpile
 
 import (
 	"go/scanner"
@@ -26,6 +26,30 @@ type Token struct {
 	// this is only set for the original parse,
 	// not for transpiled additions.
 	Pos token.Pos
+}
+
+// Tokens converts the string into tokens
+func TokensFromString(ln string) Tokens {
+	fset := token.NewFileSet()
+	f := fset.AddFile("", fset.Base(), len(ln))
+	var sc scanner.Scanner
+	sc.Init(f, []byte(ln), errHandler, scanner.ScanComments|2) // 2 is non-exported dontInsertSemis
+	// note to Go team: just export this stuff.  seriously.
+
+	var toks Tokens
+	for {
+		pos, tok, lit := sc.Scan()
+		if tok == token.EOF {
+			break
+		}
+		// logx.PrintfDebug("	token: %s\t%s\t%q\n", fset.Position(pos), tok, lit)
+		toks = append(toks, &Token{Tok: tok, Pos: pos, Str: lit})
+	}
+	return toks
+}
+
+func errHandler(pos token.Position, msg string) {
+	logx.PrintlnDebug("Scan Error:", pos, msg)
 }
 
 // Tokens is a slice of Token
@@ -326,28 +350,4 @@ func (tk Tokens) ModeEnd() int {
 		}
 	}
 	return -1
-}
-
-// Tokens converts the string into tokens
-func (gl *Goal) Tokens(ln string) Tokens {
-	fset := token.NewFileSet()
-	f := fset.AddFile("", fset.Base(), len(ln))
-	var sc scanner.Scanner
-	sc.Init(f, []byte(ln), gl.errHandler, scanner.ScanComments|2) // 2 is non-exported dontInsertSemis
-	// note to Go team: just export this stuff.  seriously.
-
-	var toks Tokens
-	for {
-		pos, tok, lit := sc.Scan()
-		if tok == token.EOF {
-			break
-		}
-		// logx.PrintfDebug("	token: %s\t%s\t%q\n", fset.Position(pos), tok, lit)
-		toks = append(toks, &Token{Tok: tok, Pos: pos, Str: lit})
-	}
-	return toks
-}
-
-func (gl *Goal) errHandler(pos token.Position, msg string) {
-	logx.PrintlnDebug("Scan Error:", pos, msg)
 }

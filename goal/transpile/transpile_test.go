@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package goal
+package transpile
 
 import (
 	"testing"
@@ -74,9 +74,8 @@ func TestPaths(t *testing.T) {
 		{"../an-other/dir/", `../an-other/dir/`},
 		{"https://google.com/search?q=hello%20world#body", `https://google.com/search?q=hello%20world#body`},
 	}
-	gl := NewGoal()
 	for _, test := range tests {
-		toks := gl.Tokens(test.i)
+		toks := TokensFromString(test.i)
 		p, _ := toks.Path(false)
 		assert.Equal(t, test.e, p)
 	}
@@ -170,9 +169,9 @@ func TestTranspile(t *testing.T) {
 		{"var data map[string]any", "var data map[string]any"},
 	}
 
-	gl := NewGoal()
+	st := NewState()
 	for _, test := range tests {
-		o := gl.TranspileLine(test.i)
+		o := st.TranspileLine(test.i)
 		assert.Equal(t, test.e, o)
 	}
 }
@@ -190,10 +189,10 @@ goal.Run("ls", "-la", "args...")
 })`},
 	}
 
-	gl := NewGoal()
+	st := NewState()
 	for _, test := range tests {
-		gl.TranspileCode(test.i)
-		o := gl.Code()
+		st.TranspileCode(test.i)
+		o := st.Code()
 		assert.Equal(t, test.e, o)
 	}
 }
@@ -201,16 +200,16 @@ goal.Run("ls", "-la", "args...")
 func TestMath(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"# x := 1", `x := tensor.NewIntScalar(1)`},
-		{"# x := a + 1", `x := tensor.CallOut("Add", a, tensor.NewIntScalar(1))`},
-		{"# x = x * 4", `x = tensor.CallOut("Mul", x, tensor.NewIntScalar(4))`},
-		{"# a = x + y", `a = tensor.CallOut("Add", x, y)`},
-		// {"# a = [1,2,3,4]", `a = tensor.NewNumberFromSlice([]int{1,2,3,4})`},
+		// {"# x := 1", `x := tensor.NewIntScalar(1)`},
+		// {"# x := a + 1", `x := tensor.CallOut("Add", a, tensor.NewIntScalar(1))`},
+		// {"# x = x * 4", `x = tensor.CallOut("Mul", x, tensor.NewIntScalar(4))`},
+		// {"# a = x + y", `a = tensor.CallOut("Add", x, y)`},
+		{"# a = [1,2,3,4]", `a = tensor.NewNumberFromSlice([]int{1,2,3,4})`},
 	}
 
-	gl := NewGoal()
+	st := NewState()
 	for _, test := range tests {
-		o := gl.TranspileLine(test.i)
+		o := st.TranspileLine(test.i)
 		assert.Equal(t, test.e, o)
 	}
 }

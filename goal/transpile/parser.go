@@ -7,9 +7,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package mparse is a hacked version of go/parser to support
-// the additional math mode syntax for goal.
-package mparse
+package transpile
 
 import (
 	"fmt"
@@ -443,7 +441,7 @@ func (p *parser) atComma(context string, follow token.Token) bool {
 	return false
 }
 
-func assert(cond bool, msg string) {
+func passert(cond bool, msg string) {
 	if !cond {
 		panic("go/parser internal error: " + msg)
 	}
@@ -584,6 +582,19 @@ func (p *parser) parseList(inRhs bool) []ast.Expr {
 	list := p.parseExprList()
 	p.inRhs = old
 	return list
+}
+
+// math: allow full array list expressions
+func (p *parser) parseArrayList(lbrack token.Pos) *ast.IndexListExpr {
+	if p.trace {
+		defer un(trace(p, "ArrayList"))
+	}
+	p.exprLev++
+	// x := p.parseRhs()
+	x := p.parseExprList()
+	p.exprLev--
+	rbrack := p.expect(token.RBRACK)
+	return &ast.IndexListExpr{Lbrack: lbrack, Indices: x, Rbrack: rbrack}
 }
 
 // ----------------------------------------------------------------------------
@@ -1079,7 +1090,7 @@ func (p *parser) parseParameterList(name0 *ast.Ident, typ0 ast.Expr, closing tok
 	if named == 0 {
 		// parameter list consists of types only
 		for _, par := range list {
-			assert(par.typ != nil, "nil type in unnamed parameter list")
+			passert(par.typ != nil, "nil type in unnamed parameter list")
 			params = append(params, &ast.Field{Type: par.typ})
 		}
 		return
@@ -1090,7 +1101,7 @@ func (p *parser) parseParameterList(name0 *ast.Ident, typ0 ast.Expr, closing tok
 	var names []*ast.Ident
 	var typ ast.Expr
 	addParams := func() {
-		assert(typ != nil, "nil type in named parameter list")
+		passert(typ != nil, "nil type in named parameter list")
 		field := &ast.Field{Names: names, Type: typ}
 		params = append(params, field)
 		names = nil
@@ -1434,7 +1445,8 @@ func (p *parser) tryIdentOrType() ast.Expr {
 		return typ
 	case token.LBRACK:
 		lbrack := p.expect(token.LBRACK)
-		return p.parseArrayType(lbrack, nil)
+		return p.parseArrayList(lbrack) // math: full array exprs
+		//		return p.parseArrayType(lbrack, nil)
 	case token.STRUCT:
 		return p.parseStructType()
 	case token.MUL:
@@ -1552,7 +1564,7 @@ func (p *parser) parseOperand() ast.Expr {
 	if typ := p.tryIdentOrType(); typ != nil { // do not consume trailing type parameters
 		// could be type for composite literal or conversion
 		_, isIdent := typ.(*ast.Ident)
-		assert(!isIdent, "type cannot be identifier")
+		passert(!isIdent, "type cannot be identifier")
 		return typ
 	}
 

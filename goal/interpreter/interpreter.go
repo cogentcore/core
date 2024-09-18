@@ -75,7 +75,7 @@ func NewInterpreter(options interp.Options) *Interpreter {
 
 // Prompt returns the appropriate REPL prompt to show the user.
 func (in *Interpreter) Prompt() string {
-	dp := in.Goal.TotalDepth()
+	dp := in.Goal.TrState.TotalDepth()
 	if dp == 0 {
 		return in.Goal.HostAndDir() + " > "
 	}
@@ -98,10 +98,10 @@ func (in *Interpreter) Eval(code string) (v reflect.Value, hasPrint bool, err er
 	if in.Goal.SSHActive == "" {
 		source = strings.HasPrefix(code, "source")
 	}
-	if in.Goal.TotalDepth() == 0 {
-		nl := len(in.Goal.Lines)
+	if in.Goal.TrState.TotalDepth() == 0 {
+		nl := len(in.Goal.TrState.Lines)
 		if nl > 0 {
-			ln := in.Goal.Lines[nl-1]
+			ln := in.Goal.TrState.Lines[nl-1]
 			if strings.Contains(strings.ToLower(ln), "print") {
 				hasPrint = true
 			}
@@ -122,9 +122,9 @@ func (in *Interpreter) RunCode() (reflect.Value, error) {
 	if len(in.Goal.Errors) > 0 {
 		return reflect.Value{}, errors.Join(in.Goal.Errors...)
 	}
-	in.Goal.AddChunk()
-	code := in.Goal.Chunks
-	in.Goal.ResetCode()
+	in.Goal.TrState.AddChunk()
+	code := in.Goal.TrState.Chunks
+	in.Goal.TrState.ResetCode()
 	var v reflect.Value
 	var err error
 	for _, ch := range code {
@@ -135,7 +135,7 @@ func (in *Interpreter) RunCode() (reflect.Value, error) {
 			cancelled := errors.Is(err, context.Canceled)
 			// fmt.Println("cancelled:", cancelled)
 			in.Goal.RestoreOrigStdIO()
-			in.Goal.ResetDepth()
+			in.Goal.TrState.ResetDepth()
 			if !cancelled {
 				in.Goal.AddError(err)
 			} else {
