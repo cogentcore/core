@@ -1,8 +1,11 @@
-// test file for cosh cli
+// test file for goal cli
 
 // todo: doesn't work: #1152
-echo {args}
+// echo {args}
 
 for i, fn := range cosh.SplitLines(`/bin/ls -1`) {
 	fmt.Println(i, fn)
 }
+
+$ x := 1
+

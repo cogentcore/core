@@ -21,8 +21,8 @@ func TestFuncs(t *testing.T) {
 
 	tol := 1.0e-8
 
-	atsr := tensor.NewIndexed(tensor.NewNumberFromSlice(a64))
-	btsr := tensor.NewIndexed(tensor.NewNumberFromSlice(b64))
+	atsr := tensor.NewIndexed(tensor.NewNumberFromSlice(a64...))
+	btsr := tensor.NewIndexed(tensor.NewNumberFromSlice(b64...))
 	out := tensor.NewFloat64(1)
 	oix := tensor.NewIndexed(out)
 

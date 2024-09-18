@@ -139,7 +139,7 @@ func ExecWords(ln string) ([]string, error) {
 	}
 	addWord()
 	if dQuote || bQuote || brack > 0 {
-		return words, fmt.Errorf("cosh: exec command has unterminated quotes (\": %v, `: %v) or brackets [ %v ]", dQuote, bQuote, brack > 0)
+		return words, fmt.Errorf("goal: exec command has unterminated quotes (\": %v, `: %v) or brackets [ %v ]", dQuote, bQuote, brack > 0)
 	}
 	return words, nil
 }

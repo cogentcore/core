@@ -9,22 +9,23 @@ package interpreter
 import (
 	"reflect"
 
+	_ "cogentcore.org/core/yaegicore/symbols"
 	"github.com/cogentcore/yaegi/interp"
 )
 
 var Symbols = map[string]map[string]reflect.Value{}
 
-// ImportShell imports special symbols from the shell package.
-func (in *Interpreter) ImportShell() {
+// ImportGoal imports special symbols from the goal package.
+func (in *Interpreter) ImportGoal() {
 	in.Interp.Use(interp.Exports{
-		"cogentcore.org/core/shell/shell": map[string]reflect.Value{
-			"Run":         reflect.ValueOf(in.Shell.Run),
-			"RunErrOK":    reflect.ValueOf(in.Shell.RunErrOK),
-			"Output":      reflect.ValueOf(in.Shell.Output),
-			"OutputErrOK": reflect.ValueOf(in.Shell.OutputErrOK),
-			"Start":       reflect.ValueOf(in.Shell.Start),
-			"AddCommand":  reflect.ValueOf(in.Shell.AddCommand),
-			"RunCommands": reflect.ValueOf(in.Shell.RunCommands),
+		"cogentcore.org/core/goal/goal": map[string]reflect.Value{
+			"Run":         reflect.ValueOf(in.Goal.Run),
+			"RunErrOK":    reflect.ValueOf(in.Goal.RunErrOK),
+			"Output":      reflect.ValueOf(in.Goal.Output),
+			"OutputErrOK": reflect.ValueOf(in.Goal.OutputErrOK),
+			"Start":       reflect.ValueOf(in.Goal.Start),
+			"AddCommand":  reflect.ValueOf(in.Goal.AddCommand),
+			"RunCommands": reflect.ValueOf(in.Goal.RunCommands),
 		},
 	})
 }

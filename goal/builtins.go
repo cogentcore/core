@@ -19,7 +19,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-// InstallBuiltins adds the builtin shell commands to [Shell.Builtins].
+// InstallBuiltins adds the builtin goal commands to [Goal.Builtins].
 func (gl *Goal) InstallBuiltins() {
 	gl.Builtins = make(map[string]func(cmdIO *exec.CmdIO, args ...string) error)
 	gl.Builtins["cd"] = gl.Cd
@@ -93,7 +93,7 @@ func (gl *Goal) JobsCmd(cmdIO *exec.CmdIO, args ...string) error {
 // Just expands the job id expressions %n into PIDs and calls system kill.
 func (gl *Goal) Kill(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("cosh kill: expected at least one argument")
+		return fmt.Errorf("goal kill: expected at least one argument")
 	}
 	gl.JobIDExpand(args)
 	gl.Config.RunIO(cmdIO, "kill", args...)
@@ -103,12 +103,12 @@ func (gl *Goal) Kill(cmdIO *exec.CmdIO, args ...string) error {
 // Fg foregrounds a job by job number
 func (gl *Goal) Fg(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) != 1 {
-		return fmt.Errorf("cosh fg: requires exactly one job id argument")
+		return fmt.Errorf("goal fg: requires exactly one job id argument")
 	}
 	jid := args[0]
 	exp := gl.JobIDExpand(args)
 	if exp != 1 {
-		return fmt.Errorf("cosh fg: argument was not a job id in the form %%n")
+		return fmt.Errorf("goal fg: argument was not a job id in the form %%n")
 	}
 	jno, _ := strconv.Atoi(jid[1:]) // guaranteed good
 	job := gl.Jobs[jno]
@@ -125,7 +125,7 @@ func (gl *Goal) Fg(cmdIO *exec.CmdIO, args ...string) error {
 // AddPath adds the given path(s) to $PATH.
 func (gl *Goal) AddPath(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("cosh add-path expected at least one argument")
+		return fmt.Errorf("goal add-path expected at least one argument")
 	}
 	path := os.Getenv("PATH")
 	for _, arg := range args {
@@ -143,7 +143,7 @@ func (gl *Goal) AddPath(cmdIO *exec.CmdIO, args ...string) error {
 // to exec which.
 func (gl *Goal) Which(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) != 1 {
-		return fmt.Errorf("cosh which: requires one argument")
+		return fmt.Errorf("goal which: requires one argument")
 	}
 	cmd := args[0]
 	if _, hasCmd := gl.Commands[cmd]; hasCmd {
@@ -151,7 +151,7 @@ func (gl *Goal) Which(cmdIO *exec.CmdIO, args ...string) error {
 		return nil
 	}
 	if _, hasBlt := gl.Builtins[cmd]; hasBlt {
-		cmdIO.Println(cmd, "is a cosh builtin command")
+		cmdIO.Println(cmd, "is a goal builtin command")
 		return nil
 	}
 	gl.Config.RunIO(cmdIO, "which", args...)
@@ -161,7 +161,7 @@ func (gl *Goal) Which(cmdIO *exec.CmdIO, args ...string) error {
 // Source loads and evaluates the given file(s)
 func (gl *Goal) Source(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("cosh source: requires at least one argument")
+		return fmt.Errorf("goal source: requires at least one argument")
 	}
 	for _, fn := range args {
 		gl.TranspileCodeFromFile(fn)
@@ -214,7 +214,7 @@ func (gl *Goal) CoSSH(cmdIO *exec.CmdIO, args ...string) error {
 			gl.SSHActive = name
 			cl := gl.ActiveSSH()
 			if cl == nil {
-				err = fmt.Errorf("cosh: ssh connection named: %q not found", name)
+				err = fmt.Errorf("goal: ssh connection named: %q not found", name)
 			}
 		}
 	}

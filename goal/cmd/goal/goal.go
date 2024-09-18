@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Command cosh is an interactive cli for running and compiling Cogent Shell (cosh).
+// Command goal is an interactive cli for running and compiling Goal code.
 package main
 
 import (
@@ -14,14 +14,14 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/shell"
-	"cogentcore.org/core/shell/interpreter"
+	"cogentcore.org/core/goal"
+	"cogentcore.org/core/goal/interpreter"
 	"github.com/cogentcore/yaegi/interp"
 )
 
 //go:generate core generate -add-types -add-funcs
 
-// Config is the configuration information for the cosh cli.
+// Config is the configuration information for the goal cli.
 type Config struct {
 
 	// Input is the input file to run/compile.
@@ -37,7 +37,7 @@ type Config struct {
 	Expr string `flag:"e,expr"`
 
 	// Args is an optional list of arguments to pass in the run command.
-	// These arguments will be turned into an "args" local variable in the shell.
+	// These arguments will be turned into an "args" local variable in the goal.
 	// These are automatically processed from any leftover arguments passed, so
 	// you should not need to specify this flag manually.
 	Args []string `cmd:"run" posarg:"leftover" required:"-"`
@@ -49,17 +49,17 @@ type Config struct {
 }
 
 func main() { //types:skip
-	opts := cli.DefaultOptions("cosh", "An interactive tool for running and compiling Cogent Shell (cosh).")
+	opts := cli.DefaultOptions("goal", "An interactive tool for running and compiling Goal (Go augmented language).")
 	cli.Run(opts, &Config{}, Run, Build)
 }
 
-// Run runs the specified cosh file. If no file is specified,
-// it runs an interactive shell that allows the user to input cosh.
+// Run runs the specified goal file. If no file is specified,
+// it runs an interactive shell that allows the user to input goal.
 func Run(c *Config) error { //cli:cmd -root
 	in := interpreter.NewInterpreter(interp.Options{})
 	in.Config()
 	if len(c.Args) > 0 {
-		in.Eval("args := cosh.StringsToAnys(" + fmt.Sprintf("%#v)", c.Args))
+		in.Eval("args := goalib.StringsToAnys(" + fmt.Sprintf("%#v)", c.Args))
 	}
 
 	if c.Input == "" {
@@ -82,7 +82,7 @@ func Run(c *Config) error { //cli:cmd -root
 
 	_, _, err := in.Eval(code)
 	if err == nil {
-		err = in.Shell.DepthError()
+		err = in.Goal.DepthError()
 	}
 	if c.Interactive {
 		return Interactive(c, in)
@@ -90,7 +90,7 @@ func Run(c *Config) error { //cli:cmd -root
 	return err
 }
 
-// Interactive runs an interactive shell that allows the user to input cosh.
+// Interactive runs an interactive shell that allows the user to input goal.
 func Interactive(c *Config, in *interpreter.Interpreter) error {
 	if c.Expr != "" {
 		in.Eval(c.Expr)
@@ -99,7 +99,7 @@ func Interactive(c *Config, in *interpreter.Interpreter) error {
 	return nil
 }
 
-// Build builds the specified input cosh file, or all .cosh files in the current
+// Build builds the specified input goal file, or all .goal files in the current
 // directory if no input is specified, to corresponding .go file name(s).
 // If the file does not already contain a "package" specification, then
 // "package main; func main()..." wrappers are added, which allows the same
@@ -109,12 +109,12 @@ func Build(c *Config) error {
 	if c.Input != "" {
 		fns = []string{c.Input}
 	} else {
-		fns = fsx.Filenames(".", ".cosh")
+		fns = fsx.Filenames(".", ".goal")
 	}
 	var errs []error
 	for _, fn := range fns {
 		ofn := strings.TrimSuffix(fn, filepath.Ext(fn)) + ".go"
-		err := shell.NewShell().TranspileFile(fn, ofn)
+		err := goal.NewGoal().TranspileFile(fn, ofn)
 		if err != nil {
 			errs = append(errs, err)
 		}

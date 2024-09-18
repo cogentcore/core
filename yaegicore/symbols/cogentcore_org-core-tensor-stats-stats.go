@@ -17,6 +17,7 @@ func init() {
 		"DescribeTable":       reflect.ValueOf(stats.DescribeTable),
 		"DescribeTableAll":    reflect.ValueOf(stats.DescribeTableAll),
 		"DescriptiveStats":    reflect.ValueOf(&stats.DescriptiveStats).Elem(),
+		"GroupAll":            reflect.ValueOf(stats.GroupAll),
 		"GroupDescribe":       reflect.ValueOf(stats.GroupDescribe),
 		"GroupStats":          reflect.ValueOf(stats.GroupStats),
 		"Groups":              reflect.ValueOf(stats.Groups),

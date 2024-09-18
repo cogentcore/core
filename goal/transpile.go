@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/base/logx"
 )
 
-// TranspileLine is the main function for parsing a single line of shell input,
+// TranspileLine is the main function for parsing a single line of goal input,
 // returning a new transpiled line of code that converts Exec code into corresponding
 // Go function calls.
 func (gl *Goal) TranspileLine(ln string) string {
@@ -76,7 +76,7 @@ func (gl *Goal) TranspileLineTokens(ln string) Tokens {
 	case t0.Tok == token.ILLEGAL:
 		fmt.Println(t0.Str)
 		if t0.Str != "" && t0.Str[:1] == "$" {
-			return gl.TranspileMath(toks[1:])
+			return gl.TranspileMath(toks[1:], ln)
 		}
 	case t0.Tok == token.LBRACE:
 		logx.PrintlnDebug("go:   { } line")
@@ -91,13 +91,13 @@ func (gl *Goal) TranspileLineTokens(ln string) Tokens {
 		logx.PrintlnDebug("exec: backquoted string")
 		exe := gl.TranspileExecString(t0.Str, false)
 		if n > 1 { // todo: is this an error?
-			exe.AddTokens(gl.TranspileGo(toks[1:]))
+			exe.AddTokens(gl.TranspileGo(toks[1:])...)
 		}
 		return exe
 	case t0.Tok == token.IDENT && t0.Str == "command":
 		gl.lastCommand = toks[1].Str // 1 is the name -- triggers AddCommand
 		toks = toks[2:]              // get rid of first
-		toks.Insert(0, token.IDENT, "shell.AddCommand")
+		toks.Insert(0, token.IDENT, "goal.AddCommand")
 		toks.Insert(1, token.LPAREN)
 		toks.Insert(2, token.STRING, `"`+gl.lastCommand+`"`)
 		toks.Insert(3, token.COMMA)
@@ -107,7 +107,7 @@ func (gl *Goal) TranspileLineTokens(ln string) Tokens {
 		toks.Insert(7, token.ELLIPSIS)
 		toks.Insert(8, token.IDENT, "string")
 		toks.Insert(9, token.RPAREN)
-		toks.AddTokens(gl.TranspileGo(toks[11:]))
+		toks.AddTokens(gl.TranspileGo(toks[11:])...)
 	case t0.IsGo():
 		if t0.Tok == token.GO {
 			if !toks.Contains(token.LPAREN) {
@@ -201,7 +201,7 @@ func (gl *Goal) TranspileExec(ewords []string, output bool) Tokens {
 	}
 	startExec := func() {
 		bgJob = false
-		etoks.Add(token.IDENT, "shell")
+		etoks.Add(token.IDENT, "goal")
 		etoks.Add(token.PERIOD)
 		switch {
 		case output && noStop:
@@ -230,10 +230,10 @@ func (gl *Goal) TranspileExec(ewords []string, output bool) Tokens {
 		switch {
 		case f == "{": // embedded go
 			if n < i+3 {
-				gl.AddError(fmt.Errorf("cosh: no matching right brace } found in exec command line"))
+				gl.AddError(fmt.Errorf("goal: no matching right brace } found in exec command line"))
 			} else {
 				gstr := ewords[i+1]
-				etoks.AddTokens(gl.TranspileGo(gl.Tokens(gstr)))
+				etoks.AddTokens(gl.TranspileGo(gl.Tokens(gstr))...)
 				etoks.Add(token.COMMA)
 				i += 2
 			}
@@ -250,12 +250,12 @@ func (gl *Goal) TranspileExec(ewords []string, output bool) Tokens {
 			etoks.Add(token.COMMA)
 			endExec()
 			etoks.Add(token.SEMICOLON)
-			etoks.AddTokens(gl.TranspileExec(ewords[i+1:], output))
+			etoks.AddTokens(gl.TranspileExec(ewords[i+1:], output)...)
 			return etoks
 		case f == ";":
 			endExec()
 			etoks.Add(token.SEMICOLON)
-			etoks.AddTokens(gl.TranspileExec(ewords[i+1:], output))
+			etoks.AddTokens(gl.TranspileExec(ewords[i+1:], output)...)
 			return etoks
 		default:
 			if f[0] == '"' || f[0] == '`' {

@@ -14,7 +14,7 @@ import (
 
 func TestFuncs64(t *testing.T) {
 	vals := []float64{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1}
-	ix := tensor.NewIndexed(tensor.NewNumberFromSlice(vals))
+	ix := tensor.NewIndexed(tensor.NewNumberFromSlice(vals...))
 	out := tensor.NewFloat64(1)
 	oix := tensor.NewIndexed(out)
 
@@ -90,7 +90,7 @@ func TestFuncs64(t *testing.T) {
 
 func TestFuncsInt(t *testing.T) {
 	vals := []int{0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100}
-	tsr := tensor.NewNumberFromSlice(vals)
+	tsr := tensor.NewNumberFromSlice(vals...)
 	ix := tensor.NewIndexed(tsr)
 	out := tensor.NewInt(1)
 	oix := tensor.NewIndexed(out)

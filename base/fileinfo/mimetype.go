@@ -316,7 +316,7 @@ var StandardMimes = []MimeType{
 	{"text/x-forth", []string{".frt"}, Code, Forth},                       // note: ".fs" conflicts with fsharp
 	{"text/x-fortran", []string{".f", ".F"}, Code, Fortran},
 	{"text/x-fsharp", []string{".fs", ".fsi"}, Code, FSharp},
-	{"text/x-gosrc", []string{".go", ".mod", ".work", ".cosh"}, Code, Go},
+	{"text/x-gosrc", []string{".go", ".mod", ".work", ".goal"}, Code, Go},
 	{"text/x-haskell", []string{".hs", ".lhs"}, Code, Haskell},
 	{"text/x-literate-haskell", nil, Code, Haskell}, // todo: not sure if same or not
 

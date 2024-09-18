@@ -113,7 +113,7 @@ func NewNumberShape[T num.Number](shape *Shape) *Number[T] {
 // NewNumberFromSlice returns a new 1-dimensional tensor of given value type
 // initialized directly from the given slice values, which are not copied.
 // The resulting Tensor thus "wraps" the given values.
-func NewNumberFromSlice[T num.Number](vals []T) Tensor {
+func NewNumberFromSlice[T num.Number](vals ...T) Tensor {
 	n := len(vals)
 	tsr := &Number[T]{}
 	tsr.Values = vals

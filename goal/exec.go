@@ -21,7 +21,7 @@ import (
 // Exec handles command execution for all cases, parameterized by the args.
 // It executes the given command string, waiting for the command to finish,
 // handling the given arguments appropriately.
-// If there is any error, it adds it to the shell, and triggers CancelExecution.
+// If there is any error, it adds it to the goal, and triggers CancelExecution.
 //   - errOk = don't call AddError so execution will not stop on error
 //   - start = calls Start on the command, which then runs asynchronously, with
 //     a goroutine forked to Wait for it and close its IO
@@ -194,7 +194,7 @@ func (gl *Goal) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (*
 				newHost = hnm
 				cl = scl
 			} else {
-				gl.HandleArgErr(errOk, fmt.Errorf("cosh: ssh connection named: %q not found", hnm))
+				gl.HandleArgErr(errOk, fmt.Errorf("goal: ssh connection named: %q not found", hnm))
 			}
 		}
 		if len(sargs) > 0 {
@@ -260,7 +260,7 @@ func (gl *Goal) OutToFile(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, s
 		narg = 1
 	}
 	if fn == "" {
-		gl.HandleArgErr(errOk, fmt.Errorf("cosh: no output file specified"))
+		gl.HandleArgErr(errOk, fmt.Errorf("goal: no output file specified"))
 		return sargs
 	}
 	if cl != nil {

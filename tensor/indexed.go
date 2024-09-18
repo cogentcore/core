@@ -62,7 +62,19 @@ func NewFloat64Indexed(sizes ...int) *Indexed {
 // NewFloat64Scalar is a convenience method to quickly get an Indexed
 // representation of a single float64 scalar value, for use in math routines etc.
 func NewFloat64Scalar(val float64) *Indexed {
-	return &Indexed{Tensor: NewNumberFromSlice([]float64{val})}
+	return &Indexed{Tensor: NewNumberFromSlice(val)}
+}
+
+// NewIntScalar is a convenience method to quickly get an Indexed
+// representation of a single int scalar value, for use in math routines etc.
+func NewIntScalar(val int) *Indexed {
+	return &Indexed{Tensor: NewNumberFromSlice(val)}
+}
+
+// NewStringScalar is a convenience method to quickly get an Indexed
+// representation of a single string scalar value, for use in math routines etc.
+func NewStringScalar(val string) *Indexed {
+	return &Indexed{Tensor: NewStringFromSlice(val)}
 }
 
 // SetTensor sets as indexes into given tensor with sequential initial indexes

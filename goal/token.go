@@ -48,7 +48,7 @@ func (tk *Tokens) Add(tok token.Token, str ...string) *Token {
 }
 
 // AddTokens adds given tokens to our list
-func (tk *Tokens) AddTokens(toks Tokens) *Tokens {
+func (tk *Tokens) AddTokens(toks ...*Token) *Tokens {
 	*tk = append(*tk, toks...)
 	return tk
 }

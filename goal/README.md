@@ -29,7 +29,7 @@ for _, x := range $[1,2,3]$ {
 
 In general, _Goal_ is designed to be as compatible with Python numpy / scipy syntax as possible, while also adding a few Go-specific additions as well.  All elements of a _Goal_ math expression are [tensors](../tensor), specifically `*tensor.Indexed`, which can represent everything from a scalar to an n-dimenstional tensor.  These are called an "array" in numpy terms.
 
-We henceforth refer to shell code as `exec` code (in reference to the Go & Cogent `exec` package that we use to execute programs), given the potential ambituity of the entire `cosh` language being the shell. There are different syntactic formatting rules for these two domains of Go and Exec, within cosh:
+We henceforth refer to shell code as `exec` code (in reference to the Go & Cogent `exec` package that we use to execute programs), given the potential ambituity of the entire `goal` language being the shell. There are different syntactic formatting rules for these two domains of Go and Exec, within goal:
 
 * Go code is processed and formatted as usual (e.g., white space is irrelevant, etc).
 * Exec code is space separated, like normal command-line invocations.
@@ -89,10 +89,10 @@ The command function name is registered so that the standard shell execution cod
 
 # Script Files and Makefile-like functionality
 
-As with most scripting languages, a file of cosh code can be made directly executable by appending a "shebang" expression at the start of the file:
+As with most scripting languages, a file of goal code can be made directly executable by appending a "shebang" expression at the start of the file:
 
 ```sh
-#!/usr/bin/env cosh
+#!/usr/bin/env goal
 ```
 
 When executed this way, any additional args are available via an `args []any` variable, which can be passed to a command as follows:
@@ -104,10 +104,10 @@ or by referring to specific arg indexes etc.
 To make a script behave like a standard Makefile, you can define different `command`s for each of the make commands, and then add the following at the end of the file to use the args to run commands:
 
 ```go
-shell.RunCommands(args)
+goal.RunCommands(args)
 ```
 
-See [make](cmd/cosh/testdata/make) for an example, in `cmd/cosh/testdata/make`, which can be run for example using:
+See [make](cmd/goal/testdata/make) for an example, in `cmd/goal/testdata/make`, which can be run for example using:
 
 ```sh
 ./make build
@@ -115,7 +115,7 @@ See [make](cmd/cosh/testdata/make) for an example, in `cmd/cosh/testdata/make`, 
 
 Note that there is nothing special about the name `make` here, so this can be done with any file.
 
-The `make` package defines a number of useful utility functions that accomplish the standard dependency and file timestamp checking functionality from the standard `make` command, as in the [magefile](https://magefile.org/dependencies/) system.  Note that the cosh direct exec command syntax makes the resulting make files much closer to a standard bash-like Makefile, while still having all the benefits of Go control and expressions, compared to magefile.
+The `make` package defines a number of useful utility functions that accomplish the standard dependency and file timestamp checking functionality from the standard `make` command, as in the [magefile](https://magefile.org/dependencies/) system.  Note that the goal direct exec command syntax makes the resulting make files much closer to a standard bash-like Makefile, while still having all the benefits of Go control and expressions, compared to magefile.
 
 TODO: implement and document above.
 
@@ -127,7 +127,7 @@ Each host maintains its own working directory and environment variables, which c
 
 * `cossh hostname.org [name]`  establishes a connection, using given optional name to refer to this connection.  If the name is not provided, a sequential number will be used, starting with 1, with 0 referring always to the local host.
 
-* `@name` then refers to the given host in all subsequent commands, with `@0` referring to the local host where the cosh script is running.
+* `@name` then refers to the given host in all subsequent commands, with `@0` referring to the local host where the goal script is running.
 
 ### Explicit per-command specification of host
 

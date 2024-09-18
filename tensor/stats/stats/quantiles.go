@@ -61,17 +61,17 @@ func QuantilesFunc(in, qs, out *tensor.Indexed) error {
 // MedianFunc computes the median (50% quantile) of tensor values.
 // See [StatsFunc] for general information.
 func MedianFunc(in, out *tensor.Indexed) {
-	QuantilesFunc(in, tensor.NewIndexed(tensor.NewNumberFromSlice([]float64{.5})), out)
+	QuantilesFunc(in, tensor.NewFloat64Scalar(.5), out)
 }
 
 // Q1Func computes the first quantile (25%) of tensor values.
 // See [StatsFunc] for general information.
 func Q1Func(in, out *tensor.Indexed) {
-	QuantilesFunc(in, tensor.NewIndexed(tensor.NewNumberFromSlice([]float64{.25})), out)
+	QuantilesFunc(in, tensor.NewFloat64Scalar(.25), out)
 }
 
 // Q3Func computes the third quantile (75%) of tensor values.
 // See [StatsFunc] for general information.
 func Q3Func(in, out *tensor.Indexed) {
-	QuantilesFunc(in, tensor.NewIndexed(tensor.NewNumberFromSlice([]float64{.75})), out)
+	QuantilesFunc(in, tensor.NewFloat64Scalar(.75), out)
 }
