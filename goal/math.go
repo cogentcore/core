@@ -30,7 +30,7 @@ func (mp *mathParse) addCur() {
 	fmt.Println("out of toks:", mp.curToks)
 }
 
-func (gl *Goal) TranspileMath(toks Tokens, ln string) Tokens {
+func (gl *Goal) TranspileMath(toks Tokens, code string) Tokens {
 	nt := len(toks)
 	// fmt.Println(nt, toks)
 
@@ -46,9 +46,9 @@ func (gl *Goal) TranspileMath(toks Tokens, ln string) Tokens {
 	}
 	if assignIdx >= 0 {
 		mp.lhsToks = toks[0:assignIdx]
-		mp.lhs = ln[toks[0].Pos-1 : toks[assignIdx].Pos-1]
+		mp.lhs = code[toks[0].Pos-1 : toks[assignIdx].Pos-1]
 		mp.rhsToks = toks[assignIdx+1 : nt]
-		mp.rhs = ln[toks[assignIdx+1].Pos-1 : toks[nt-1].Pos]
+		mp.rhs = code[toks[assignIdx+1].Pos-1 : toks[nt-1].Pos]
 		lex, err := parser.ParseExpr(mp.lhs)
 		if err != nil {
 			fmt.Println("lhs:", mp.lhs)
@@ -64,7 +64,7 @@ func (gl *Goal) TranspileMath(toks Tokens, ln string) Tokens {
 	} else {
 		mp.rhsToks = toks[0:nt]
 		mp.curToks = mp.rhsToks
-		mp.rhs = ln[toks[0].Pos-1 : toks[nt-1].Pos]
+		mp.rhs = code[toks[0].Pos-1 : toks[nt-1].Pos]
 		ex, err := parser.ParseExpr(mp.rhs)
 		if err != nil {
 			fmt.Println("expr:", mp.rhs)

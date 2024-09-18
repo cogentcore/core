@@ -17,6 +17,21 @@ func ExecWords(ln string) ([]string, error) {
 		return nil, nil
 	}
 
+	if ln[0] == '$' {
+		ln = strings.TrimSpace(ln[1:])
+		n = len(ln)
+		if n == 0 {
+			return nil, nil
+		}
+		if ln[n-1] == '$' {
+			ln = strings.TrimSpace(ln[:n-1])
+			n = len(ln)
+			if n == 0 {
+				return nil, nil
+			}
+		}
+	}
+
 	word := ""
 	esc := false
 	dQuote := false

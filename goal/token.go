@@ -308,6 +308,26 @@ func (tk Tokens) BracketDepths() (paren, brace, brack int) {
 	return
 }
 
+// ModeEnd returns the position (or -1 if not found) for the
+// next ILLEGAL mode token ($ or #) given the starting one that
+// is at the 0 position of the current set of tokens.
+func (tk Tokens) ModeEnd() int {
+	n := len(tk)
+	if n == 0 {
+		return -1
+	}
+	st := tk[0].Str
+	for i := 1; i < n; i++ {
+		if tk[i].Tok != token.ILLEGAL {
+			continue
+		}
+		if tk[i].Str == st {
+			return i
+		}
+	}
+	return -1
+}
+
 // Tokens converts the string into tokens
 func (gl *Goal) Tokens(ln string) Tokens {
 	fset := token.NewFileSet()

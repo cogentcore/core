@@ -1,38 +1,55 @@
 # Goal: Go augmented language
 
-_Goal_ is an augmented version of the _Go_ language, which combines the best parts of _Go_, `bash`, and Python, to provide and integrated shell and numerical expression processing experience.
+_Goal_ is an augmented version of the _Go_ language, which combines the best parts of _Go_, `bash`, and Python, to provide and integrated shell and numerical expression processing experience, which can be combined with the [yaegi](https://github.com/traefik/yaegi) interpreter to provide an interactive "REPL" (read, evaluate, print loop).
 
 _Goal_ transpiles directly into Go, so it automatically leverages all the great features of Go, and remains fully compatible with it.  The augmentation is designed to overcome some of the limitations of Go in specific domains:
 
 * Shell scripting, where you want to be able to directly call other executable programs with arguments, without having to navigate all the complexity of the standard [os.exec](https://pkg.go.dev/os/exec) package.
 
-* Numerical / math / data processing, where you want to be able to write simple mathematical expressions operating on vectors, matricies and other more powerful data types, without having to constantly worry about type conversions and iterators etc. Python is the dominant language here precisely because it lets you ignore type information and write such expressions.
+* Numerical / math / data processing, where you want to be able to write simple mathematical expressions operating on vectors, matricies and other more powerful data types, without having to constantly worry about type conversions and need extended indexing and slicing expressions. Python is the dominant language here precisely because it lets you ignore type information and write such expressions.
 
 The main goal of _Goal_ is to achieve a "best of both worlds" solution that retains all the type safety and explicitness of Go for all the surrounding control flow and large-scale application logic, while also allowing for a more relaxed syntax in specific, well-defined domains where the Go language has been a barrier.  Thus, unlike Python where there are various weak attempts to try to encourage better coding habits, _Goal_ retains in its _Go_ foundation a fundamentally scalable, "industrial strength" language that has already proven its worth in countless real-world applications.
 
 For the shell scripting aspect of _Goal_, the simple idea is that each line of code is either Go or shell commands, determined in a fairly intuitive way mostly by the content at the start of the line (formal rules below). If a line starts off with something like `ls -la...` then it is clear that it is not valid Go code, and it is therefore processed as a shell command.
 
-You can intermix Go within a shell line by wrapping an expression with `{ }` braces, and a Go expression can contain shell code by using backticks (\`) (raw quoted strings use double-backticks \`\`).  Here's an example:
+You can intermix Go within a shell line by wrapping an expression with `{ }` braces, and a Go expression can contain shell code by using `$`.  Here's an example:
 ```go
-for i, f := range goal.SplitLines(`ls -la`) {  // `ls` executes, returns string
-    echo {i} {strings.ToLower(f)}               // {} surrounds Go within shell
+for i, f := range goalib.SplitLines($ls -la$) {  // ls executes, returns string
+    echo {i} {strings.ToLower(f)}              // {} surrounds Go within shell
 }
 ```
-where `goal.SplitLines` is a function that runs `strings.Split(arg, "\n")`, defined in the `goal` standard library of such frequently-used helper functions.
+where `goalib.SplitLines` is a function that runs `strings.Split(arg, "\n")`, defined in the `goalib` standard library of such frequently-used helper functions.
 
-For the mathematical expressions, we use `$` symbols (as in markdown) to demarcate such expressions:
+For cases where most of the code is standard Go with relatively infrequent use of shell expressions, or in the rare cases where the default interpretation doesn't work, you can explicitly tag a line as shell code using `$`:
+
 ```go
-for _, x := range $[1,2,3]$ {
-    fmt.Println($x^2$)
+$ chmod +x *.goal
+```
+
+For mathematical expressions, we use `#` symbols (`#` = number) to demarcate such expressions. Often you will write entire lines of such expressions:
+```go
+# x := 1. / (1. + exp(-wts[:, :, :n] * acts[:]))
+```
+You can also intermix within Go code:
+```go
+for _, x := range #[1,2,3]# {
+    fmt.Println(#x^2#)
 }
 ```
 
-In general, _Goal_ is designed to be as compatible with Python numpy / scipy syntax as possible, while also adding a few Go-specific additions as well.  All elements of a _Goal_ math expression are [tensors](../tensor), specifically `*tensor.Indexed`, which can represent everything from a scalar to an n-dimenstional tensor.  These are called an "array" in numpy terms.
+In general, the math mode syntax in _Goal_ is designed to be as compatible with Python numpy / scipy syntax as possible, while also adding a few Go-specific additions as well -- see [Math mode](#math-mode) for details.  All elements of a _Goal_ math expression are [tensors](../tensor), specifically `*tensor.Indexed`, which can represent everything from a scalar to an n-dimenstional tensor.  These are called an "array" in numpy terms.
 
-We henceforth refer to shell code as `exec` code (in reference to the Go & Cogent `exec` package that we use to execute programs), given the potential ambituity of the entire `goal` language being the shell. There are different syntactic formatting rules for these two domains of Go and Exec, within goal:
+The rationale and mnemonics for using `$` and `#` are as follows:
 
-* Go code is processed and formatted as usual (e.g., white space is irrelevant, etc).
-* Exec code is space separated, like normal command-line invocations.
+* These are two of the three symbols that are not part of standard Go syntax (`@` being the other).
+
+* `$` can be thought of as "S" in _S_hell, and is often used for a `bash` prompt, and many bash examples use it as a prefix. Furthermore, in bash, `$( )` is used to wrap shell expressions.
+
+* `#` is commonly used to refer to numbers. It is also often used as a comment syntax, but on balance the number semantics and uniqueness relative to Go syntax outweigh that issue.
+
+# Examples
+
+Here are a few useful examples of _Goal_ code:
 
 You can easily perform handy duration and data size formatting:
 
@@ -41,16 +58,11 @@ You can easily perform handy duration and data size formatting:
 datasize.Size(44610930)     // 42.5 MB
 ```
 
-# Special syntax
-
-## Multiple statements per line
-
-* Multiple statements can be combined on one line, separated by `;` as in regular Go and shell languages.  Critically, the language determination for the first statement determines the language for the remaining statements; you cannot intermix the two on one line, when using `;` 
-# Exec mode
+# Shell mode
 
 ## Environment variables
 
-* `set <var> <value>` (space delimited as in all exec mode, no equals)
+* `set <var> <value>` (space delimited as in all shell mode, no equals)
 
 ## Output redirction
 
@@ -68,9 +80,9 @@ cd some; [mkdir sub]; cd sub
 
 * `jobs`, `fg`, `bg`, and `kill` builtin commands function as in usual bash.
 
-## Exec functions (aliases)
+## Shell functions (aliases)
 
-Use the `command` keyword to define new functions for Exec mode execution, which can then be used like any other command, for example:
+Use the `command` keyword to define new functions for Shell mode execution, which can then be used like any other command, for example:
 
 ```sh
 command list {
@@ -87,7 +99,7 @@ The `command` is transpiled into a Go function that takes `args ...string`.  In 
 
 The command function name is registered so that the standard shell execution code can run the function, passing the args.  You can also call it directly from Go code using the standard parentheses expression.
 
-# Script Files and Makefile-like functionality
+## Script Files and Makefile-like functionality
 
 As with most scripting languages, a file of goal code can be made directly executable by appending a "shebang" expression at the start of the file:
 
@@ -115,11 +127,11 @@ See [make](cmd/goal/testdata/make) for an example, in `cmd/goal/testdata/make`, 
 
 Note that there is nothing special about the name `make` here, so this can be done with any file.
 
-The `make` package defines a number of useful utility functions that accomplish the standard dependency and file timestamp checking functionality from the standard `make` command, as in the [magefile](https://magefile.org/dependencies/) system.  Note that the goal direct exec command syntax makes the resulting make files much closer to a standard bash-like Makefile, while still having all the benefits of Go control and expressions, compared to magefile.
+The `make` package defines a number of useful utility functions that accomplish the standard dependency and file timestamp checking functionality from the standard `make` command, as in the [magefile](https://magefile.org/dependencies/) system.  Note that the goal direct shell command syntax makes the resulting make files much closer to a standard bash-like Makefile, while still having all the benefits of Go control and expressions, compared to magefile.
 
 TODO: implement and document above.
 
-# SSH connections to remote hosts
+## SSH connections to remote hosts
 
 Any number of active SSH connections can be maintained and used dynamically within a script, including simple ways of copying data among the different hosts (including the local host).  The Go mode execution is always on the local host in one running process, and only the shell commands are executed remotely, enabling a unique ability to easily coordinate and distribute processing and data across various hosts.
 
@@ -167,7 +179,7 @@ The builtin `scp` function allows easy copying of files across hosts, using the 
 scp @name:hostfile.tsv localfile.tsv
 ```
 
-TODO: Importantly, file wildcard globbing works as expected:
+Importantly, file wildcard globbing works as expected:
 ```sh
 scp @name:*.tsv @0:data/
 ```
@@ -182,29 +194,32 @@ cossh close
 
 Will close all active connections and return the default host to @0.  All active connections are also automatically closed when the shell terminates.
 
-# Other Utilties
+## Other Utilties
 
-** need a replacement for findnm -- very powerful but garbage..
+** TODO: need a replacement for findnm -- very powerful but garbage..
 
-# Rules for Go vs. Shell determination
+## Rules for Go vs. Shell determination
 
-The critical extension from standard Go syntax is for lines that are processed by the `Exec` functions, used for running arbitrary programs on the user's executable path.  Here are the rules (word = IDENT token):
+These are the rules used to determine whether a line is Go vs. Shell (word = IDENT token):
 
-* Backticks "``" anywhere:  Exec.  Returns a `string`.
-* Within Exec, `{}`: Go
-* Line starts with `Go` Keyword: Go
-* Line is one word: Exec
-* Line starts with `path`: Exec
-* Line starts with `"string"`: Exec
-* Line starts with `word word`: Exec
-* Line starts with `word {`: Exec
+* `$` at the start: Shell.
+* Within Shell, `{}`: Go
+* Within Go, `$ $`: Shell
+* Line starts with `go` keyword: if no `( )` then Shell, else Go
+* Line is one word: Shell
+* Line starts with `path` expression (e.g., `./myexec`) : Shell
+* Line starts with `"string"`: Shell
+* Line starts with `word word`: Shell
+* Line starts with `word {`: Shell
 * Otherwise: Go
 
-# TODO:
+TODO: update aboven
 
-* likewise, need to run everything effectively as a bg job with our own explicit Wait, which we can then communicate with to move from fg to bg.
+## Multiple statements per line
 
-# Math Expression Details
+* Multiple statements can be combined on one line, separated by `;` as in regular Go and shell languages.  Critically, the language determination for the first statement determines the language for the remaining statements; you cannot intermix the two on one line, when using `;` 
+
+# Math mode
 
 In general, _Goal_ is designed to be as compatible with Python numpy / scipy syntax as possible, while also adding a few Go-specific additions as well.  The `np.` prefix on numpy global functions is optional, and corresponding field-like properties of tensors turn into the appropriate methods during the transpiling process.
 

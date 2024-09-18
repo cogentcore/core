@@ -87,7 +87,7 @@ func TestTranspile(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
 		{"ls", `goal.Run("ls")`},
-		{"`ls -la`", `goal.Run("ls", "-la")`},
+		{"$ls -la$", `goal.Run("ls", "-la")`},
 		{"ls -la", `goal.Run("ls", "-la")`},
 		{"ls --help", `goal.Run("ls", "--help")`},
 		{"ls go", `goal.Run("ls", "go")`},
@@ -102,9 +102,9 @@ func TestTranspile(t *testing.T) {
 		{`println("hi")`, `println("hi")`},
 		{`fmt.Println("hi")`, `fmt.Println("hi")`},
 		{`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},
-		{"for i, v := range `ls -la` {", `for i, v := range goal.Output("ls", "-la") {`},
+		{"for i, v := range $ls -la$ {", `for i, v := range goal.Output("ls", "-la") {`},
 		{`// todo: fixit`, `// todo: fixit`},
-		{"`go build`", `goal.Run("go", "build")`},
+		{"$go build$", `goal.Run("go", "build")`},
 		{"{go build()}", `go build()`},
 		{"go build", `goal.Run("go", "build")`},
 		{"go build()", `go build()`},
@@ -201,11 +201,11 @@ goal.Run("ls", "-la", "args...")
 func TestMath(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"$ x := 1", `x := tensor.NewIntScalar(1)`},
-		{"$ x := a + 1", `x := tensor.CallOut("Add", a, tensor.NewIntScalar(1))`},
-		{"$ x = x * 4", `x = tensor.CallOut("Mul", x, tensor.NewIntScalar(4))`},
-		{"$ a = x + y", `a = tensor.CallOut("Add", x, y)`},
-		// {"$ a = [1,2,3,4]", `a = tensor.NewNumberFromSlice([]int{1,2,3,4})`},
+		{"# x := 1", `x := tensor.NewIntScalar(1)`},
+		{"# x := a + 1", `x := tensor.CallOut("Add", a, tensor.NewIntScalar(1))`},
+		{"# x = x * 4", `x = tensor.CallOut("Mul", x, tensor.NewIntScalar(4))`},
+		{"# a = x + y", `a = tensor.CallOut("Add", x, y)`},
+		// {"# a = [1,2,3,4]", `a = tensor.NewNumberFromSlice([]int{1,2,3,4})`},
 	}
 
 	gl := NewGoal()
