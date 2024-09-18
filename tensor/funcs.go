@@ -122,16 +122,17 @@ func CallString(name, first string, tsr ...*Indexed) error {
 // CallOut calls function of given name, with given set of _input_
 // arguments appropriate for the given function, returning newly created
 // output tensors.
-// An error is returned if the function name has not been registered
+// An error is logged if the function name has not been registered
 // in the Funcs global function registry, or the argument count
 // does not match.
-func CallOut(name string, tsr ...*Indexed) ([]*Indexed, error) {
+func CallOut(name string, tsr ...*Indexed) []*Indexed {
 	nm := strings.ToLower(name)
 	fn, ok := Funcs[nm]
 	if !ok {
-		return nil, errors.Log(fmt.Errorf("tensor.CallOut: function of name %q not registered", name))
+		errors.Log(fmt.Errorf("tensor.CallOut: function of name %q not registered", name))
+		return nil
 	}
-	return fn.CallOut(tsr...)
+	return errors.Log1(fn.CallOut(tsr...))
 }
 
 // ArgCount returns the number of tensor arguments the function takes,

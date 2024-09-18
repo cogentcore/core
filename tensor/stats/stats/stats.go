@@ -7,7 +7,6 @@ package stats
 import (
 	"strings"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 )
 
@@ -132,5 +131,5 @@ func Stat(stat Stats, in, out *tensor.Indexed) {
 // StatOut calls a standard Stats enum function on given tensor,
 // returning output as a newly created tensor.
 func StatOut(stat Stats, in *tensor.Indexed) *tensor.Indexed {
-	return errors.Log1(tensor.CallOut(stat.FuncName(), in))[0] // note: error should never happen
+	return tensor.CallOut(stat.FuncName(), in)[0]
 }

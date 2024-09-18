@@ -202,6 +202,7 @@ func TestMath(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
 		{"$x := 1", `x := tensor.NewIntScalar(1)`},
+		{"$x := a + 1", `x := tensor.CallOut("Add", a, tensor.NewIntScalar(1))`},
 	}
 
 	gl := NewGoal()

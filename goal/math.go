@@ -43,16 +43,16 @@ func (gl *Goal) TranspileMath(toks Tokens, ln string) Tokens {
 	if assignIdx >= 0 {
 		mp.lhsToks = toks[0:assignIdx]
 		mp.lhs = ln[toks[0].Pos-1 : toks[assignIdx].Pos-1]
-		fmt.Println("lhs:", mp.lhs)
 		mp.rhsToks = toks[assignIdx+1 : nt-1]
 		mp.rhs = ln[toks[assignIdx+1].Pos-1 : toks[nt-1].Pos]
-		fmt.Println("rhs:", mp.rhs)
 		lex, err := parser.ParseExpr(mp.lhs)
 		if err != nil {
+			fmt.Println("lhs:", mp.lhs)
 			fmt.Println("lhs parse err:", err)
 		}
 		rex, err := parser.ParseExpr(mp.rhs)
 		if err != nil {
+			fmt.Println("rhs:", mp.rhs)
 			fmt.Println("rhs parse err:", err)
 		}
 		mp.assignStmt(toks[assignIdx], lex, rex)
@@ -62,9 +62,9 @@ func (gl *Goal) TranspileMath(toks Tokens, ln string) Tokens {
 		mp.rhs = ln[toks[0].Pos-1 : toks[nt-1].Pos]
 		ex, err := parser.ParseExpr(mp.rhs)
 		if err != nil {
+			fmt.Println("expr:", mp.rhs)
 			fmt.Println("expr parse err:", err)
 		}
-		fmt.Println("expr:", mp.rhs)
 		mp.expr(ex)
 	}
 
@@ -117,6 +117,27 @@ func (mp *mathParse) expr(ex ast.Expr) {
 }
 
 func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
+	fn := ""
+	switch ex.Op {
+	case token.ADD:
+		fn = "Add"
+	case token.SUB:
+		fn = "Sub"
+	case token.MUL:
+		fn = "Mul"
+	case token.QUO:
+		fn = "Div"
+	}
+	mp.toks.Add(token.IDENT, "tensor.CallOut")
+	mp.toks.Add(token.LPAREN)
+	mp.toks.Add(token.STRING, `"`+fn+`"`)
+	mp.toks.Add(token.COMMA)
+	mp.expr(ex.X)
+	mp.curIdx++
+	mp.toks.Add(token.COMMA)
+	mp.expr(ex.Y)
+	mp.toks.Add(token.RPAREN)
+	// todo: need elipses if part of something bigger
 }
 
 func (mp *mathParse) basicLit(lit *ast.BasicLit) {

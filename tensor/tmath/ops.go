@@ -8,6 +8,13 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
+func init() {
+	tensor.AddFunc("Add", Add, 1)
+	tensor.AddFunc("Sub", Sub, 1)
+	tensor.AddFunc("Mul", Mul, 1)
+	tensor.AddFunc("Div", Div, 1)
+}
+
 // Add adds two tensors into output.
 // If one is a scalar, it is added to all elements.
 // If one is the same size as the Cell SubSpace of the other

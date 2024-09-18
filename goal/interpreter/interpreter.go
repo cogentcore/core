@@ -63,7 +63,7 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	options.Stderr = in.Goal.StdIOWrappers.Err
 	options.Stdin = in.Goal.StdIOWrappers.In
 	in.Interp = interp.New(options)
-	// errors.Log(in.Interp.Use(stdlib.Symbols))
+	// errors.Log(in.Interp.Use(stdlib.Symbols)) // note: yaegicore/symbols gets just a few key things
 	errors.Log(in.Interp.Use(symbols.Symbols))
 	in.ImportGoal()
 	go in.MonitorSignals()

@@ -7,7 +7,6 @@
 package metric
 
 import (
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 )
 
@@ -36,7 +35,7 @@ func Metric(metric Metrics, a, b, out *tensor.Indexed) {
 // MetricOut calls a standard Metrics enum function on given tensors,
 // returning output as a newly created tensor.
 func MetricOut(metric Metrics, a, b *tensor.Indexed) *tensor.Indexed {
-	return errors.Log1(tensor.CallOut(metric.FuncName(), a, b))[0] // note: error should never happen
+	return tensor.CallOut(metric.FuncName(), a, b)[0]
 }
 
 // Metrics are standard metric functions

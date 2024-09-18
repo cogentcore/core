@@ -74,7 +74,6 @@ func (gl *Goal) TranspileLineTokens(ln string) Tokens {
 
 	switch {
 	case t0.Tok == token.ILLEGAL:
-		fmt.Println(t0.Str)
 		if t0.Str != "" && t0.Str[:1] == "$" {
 			return gl.TranspileMath(toks[1:], ln)
 		}
