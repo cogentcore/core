@@ -205,7 +205,8 @@ func TestMath(t *testing.T) {
 		// {"# x = x * 4", `x = tensor.CallOut("Mul", x, tensor.NewIntScalar(4))`},
 		// {"# a = x + y", `a = tensor.CallOut("Add", x, y)`},
 		// {"# a := [1,2,3,4]", `a := tensor.NewIntFromSlice([]int { 1, 2, 3, 4 }  ...)`},
-		{"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},
+		// {"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},
+		{"# a := zeros(3, 4)", `a := tensor.NewFloat64Indexed(3, 4)`},
 	}
 
 	st := NewState()

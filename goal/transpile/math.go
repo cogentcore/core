@@ -187,6 +187,7 @@ func (mp *mathParse) expr(ex ast.Expr) {
 		// todo: probably this is subsumed in indexListExpr
 
 	case *ast.CallExpr:
+		mp.callExpr(x)
 
 	case *ast.ArrayType:
 		// basically at this point we have a bad expression and
@@ -260,7 +261,7 @@ type funWrap struct {
 	wrap string
 }
 
-// nis: NewIntScalar
+// nis: NewIntScalar, nifs: NewIntFromSlice
 var numpyProps = map[string]funWrap{
 	"ndim":  {"NumDims()", "nis"},
 	"len":   {"Len()", "nis"},
@@ -336,10 +337,30 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 	mp.goLiteral = false
 	mp.addToken(token.RBRACE)
 	mp.addToken(token.ELLIPSIS)
-	mp.out.Add(token.RPAREN, ")")
+	mp.out.Add(token.RPAREN)
+}
+
+var numpyFuncs = map[string]funWrap{
+	"zeros": {"tensor.NewFloat64Indexed", ""},
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {
+	if fnm, ok := ex.Fun.(*ast.Ident); ok {
+		if fw, ok := numpyFuncs[fnm.Name]; ok {
+			// todo: wrap
+			mp.out.Add(token.IDENT, fw.fun)
+		} else {
+			mp.out.Add(token.IDENT, fnm.Name)
+		}
+	} else {
+		mp.expr(ex.Fun)
+	}
+	mp.addToken(token.LPAREN)
+	mp.goLiteral = true
+	mp.exprList(ex.Args)
+	mp.goLiteral = false
+	// todo: ellipsis
+	mp.addToken(token.RPAREN)
 }
 
 func (mp *mathParse) ident(id *ast.Ident) {

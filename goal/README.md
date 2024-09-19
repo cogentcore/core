@@ -273,7 +273,7 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 | same: | `np.diag(v, 0)` | `diag(v,0)` | returns a square diagonal matrix whose nonzero values are the elements of vector, v |
 | same: | `np.linspace(1,3,4)` | `linspace(1,3,4)` | 4 equally spaced samples between 1 and 3, inclusive |
 | same: | `np.mgrid[0:9.,0:6.] or np.meshgrid(r_[0:9.],r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D arrays: one of x values, the other of y values |
-|       | `ogrid[0:9.,0:6.]` or `np.ix_(np.r_[0:9.],np.r_[0:6.]` | the best way to eval functions on a grid |
+|       | `ogrid[0:9.,0:6.]` or `np.ix_(np.r_[0:9.],np.r_[0:6.]` | | the best way to eval functions on a grid |
 | same: | `np.meshgrid([1,2,4],[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
 | same: | `np.ix_([1,2,4],[2,4,5])`    |  | the best way to eval functions on a grid |
 | same: | `np.tile(a, (m, n))`    | `repmat(a, m, n)` | create m by n copies of a |

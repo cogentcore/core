@@ -12,7 +12,8 @@ import (
 )
 
 var test = `
-# x := [3, 5, 4]
+// # x := [3, 5, 4]
+# x := zeros(3, 4)
 # nd := x.ndim
 # sz := x.size
 # sh := x.shape
