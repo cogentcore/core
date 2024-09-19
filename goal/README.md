@@ -227,8 +227,8 @@ All elements of a _Goal_ math expression are [tensors](../tensor), specifically 
 
 Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html)
 
-| Goal     | Python | MATLAB | Notes  |
-| -------- | ------ | ------ | ------ |
+| Goal                       | Python | MATLAB | Notes  |
+| -------------------------- | ------ | ------ | ------ |
 | `ndim(a)` or `a.ndim` | `np.ndim(a)` or `a.ndim`   | `ndims(a)` | number of dimensions of tensor `a` |
 | `len(a)` or `a.len` or `size(a)` or `a.size` | `np.size(a)` or `a.size`   | `numel(a)` | number of elements of tensor `a` |
 | `shape(a)` or `a.shape` | `np.shape(a)` or `a.shape` | `size(a)`  | "size" of each dimension in a; `shape` returns a 1D `int` tensor |
@@ -318,11 +318,11 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  | `D,V = linalg.eig(a)` | `[V,D]=eig(a)` | eigenvalues and eigenvectors of `a`, where `[V,D]=eig(a,b)` eigenvalues and eigenvectors of `a, b` where |
 |  | `D,V = eigs(a, k=3)`  | `D,V = linalg.eig(a, b)` |  `[V,D]=eigs(a,3)` | find the k=3 largest eigenvalues and eigenvectors of 2D tensor, a |
 |  | `Q,R = linalg.qr(a)`  | `[Q,R]=qr(a,0)` | QR decomposition
-|  | `P,L,U = linalg.lu(a) where a == P@L@U`  | `[L,U,P]=lu(a) where a==P'*L*U` | LU decomposition with partial pivoting (note: P(MATLAB) == transpose(P(NumPy))) | 
+|  | `P,L,U = linalg.lu(a)` where `a == P@L@U`  | `[L,U,P]=lu(a)` where `a==P'*L*U` | LU decomposition with partial pivoting (note: P(MATLAB) == transpose(P(NumPy))) | 
 | | | |
 | **Statistics** | | |
 | `a.max()` or `max(a)` or `stats.Max(a)` | `a.max()` or `np.nanmax(a)` | `max(max(a))` | maximum element of `a`, _Goal_ always ignores `NaN` as missing data |
-| `stats.Max(a[) | `a.max(0)` | `max(a)` | maximum element of each column of tensor `a` |
+|  | `a.max(0)` | `max(a)` | maximum element of each column of tensor `a` |
 |  | `a.max(1)` | `max(a,[],2)` | maximum element of each row of tensor `a` |
 |  | `np.maximum(a, b)` | `max(a,b)` | compares a and b element-wise, and returns the maximum value from each pair |
 | `stats.L2Norm(a)` | `np.sqrt(v @ v)` or `np.linalg.norm(v)` | `norm(v)` | L2 norm of vector v |
