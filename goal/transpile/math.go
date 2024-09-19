@@ -249,7 +249,11 @@ func (mp *mathParse) indexListExpr(il *ast.IndexListExpr) {
 }
 
 func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
-
+	kind := inferKindExprList(il.Indices)
+	if kind == token.ILLEGAL {
+		kind = token.FLOAT // default
+	}
+	// todo: make it!
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {
