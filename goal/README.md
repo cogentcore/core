@@ -277,9 +277,9 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 | **Boolean Tensors** | | |
 | `(a > 0.5)` | `(a > 0.5)` | `(a > 0.5)` | `bool` tensor of shape `a` with elements `(v > 0.5)` |
 | `a && b` | `logical_and(a,b)` | `a & b` | element-wise AND operator on `bool` tensors |
-| `a || b` | `np.logical_or(a,b)` | `a \| b` | element-wise OR operator on `bool` tensors | 
+| `a \|\| b` | `np.logical_or(a,b)` | `a \| b` | element-wise OR operator on `bool` tensors | 
 | `a & b`  | `a & b` | `bitand(a,b)` | element bitwise AND operator on `bool` or `int` tensors | 
-| `a | b`  | `a \| b` | `bitor(a,b)` | element bitwise OR operator on `bool` or `int` tensors |
+| `a \| b`  | `a \| b` | `bitor(a,b)` | element bitwise OR operator on `bool` or `int` tensors |
 |  | `a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
 | | | |
 | **Indexed Sorting and Filtering** | | |
