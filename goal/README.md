@@ -37,7 +37,7 @@ for _, x := range #[1,2,3]# {
 }
 ```
 
-In general, the math mode syntax in _Goal_ is designed to be as compatible with Python numpy / scipy syntax as possible, while also adding a few Go-specific additions as well -- see [Math mode](#math-mode) for details.  All elements of a _Goal_ math expression are [tensors](../tensor), specifically `*tensor.Indexed`, which can represent everything from a scalar to an n-dimenstional tensor.  These are called an "array" in numpy terms.
+In general, the math mode syntax in _Goal_ is designed to be as compatible with Python NumPy / scipy syntax as possible, while also adding a few Go-specific additions as well -- see [Math mode](#math-mode) for details.  All elements of a _Goal_ math expression are [tensors](../tensor), specifically `*tensor.Indexed`, which can represent everything from a scalar to an n-dimenstional tensor.  These are called an "array" in NumPy terms.
 
 The rationale and mnemonics for using `$` and `#` are as follows:
 
@@ -221,106 +221,116 @@ TODO: update aboven
 
 # Math mode
 
-In general, _Goal_ is designed to be as compatible with Python numpy / scipy syntax as possible, while also adding a few Go-specific additions as well.  The Goal global functions are named the same as numpy, without the `np.` prefix, so existing code can easily be converted by just removing that.  Corresponding field-like properties of tensors are converted into into appropriate method calls.
+In general, _Goal_ is designed to be as compatible with Python NumPy / SciPy syntax as possible, while also adding a few Go-specific additions as well.  The Goal global functions are named the same as NumPy, without the `np.` prefix, so existing code can be converted by just removing that prefix.  Corresponding field-like properties of tensors are converted into into appropriate method calls.
 
-All elements of a _Goal_ math expression are [tensors](../tensor), specifically `*tensor.Indexed`, which can represent everything from a scalar to an n-dimenstional tensor.  These are called an "array" in numpy terms.
+All elements of a _Goal_ math expression are [tensors](../tensor), specifically `*tensor.Indexed`, which can represent everything from a scalar to an n-dimenstional tensor, and directly supports an indexed view of the outermost row dimension, for optimized sorting and filtering operations.  These are called an "array" in NumPy terms.  See [array vs. tensor](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html#array-or-matrix-which-should-i-use) NumPy docs for more information (_Goal_ does not support `matrix`).
 
 Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html)
 
-| Goal  | Python | MATLAB | Notes  |
-| ----- | ------ | ------ | ------ |
-| `ndim(a)` or `a.ndim` | `np.ndim(a)` or `a.ndim`   | `ndims(a)` | number of dimensions of array `a` |
-| `len(a)` or `a.len` or `size(a)` or `a.size` | `np.size(a)` or `a.size`   | `numel(a)` | number of elements of array `a` |
-| `shape(a)` or `a.shape` | `np.shape(a)` or `a.shape` | `size(a)`  | "size" of each dimension in a; `shape` returns a 1D `int` array |
-| `a.shape[n-1]` | `a.shape[n-1]` | `size(a,n)` | the number of elements of the n-th dimension of array a |
-| | _Construction_ | |
-| `[[1., 2., 3.], [4., 5., 6.]]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D array |
-| `[[a, b], [c, d]]` or `block([[a, b], [c, d]])` | `np.block([[a, b], [c, d]])` | `[ a b; c d ]` | construct a matrix from blocks a, b, c, and d |
-|  | `np.zeros((3, 4))` | `zeros(3,4)` | 3x4 two-dimensional array full of 64-bit floating point zeros |
-|  | `np.zeros((3, 4, 5))` | `zeros(3,4,5)` | 3x4x5 three-dimensional array full of 64-bit floating point zeros |
-|  | `np.ones((3, 4))` | `ones(3,4)` | 3x4 two-dimensional array full of 64-bit floating point ones |
+| Goal     | Python | MATLAB | Notes  |
+| -------- | ------ | ------ | ------ |
+| `ndim(a)` or `a.ndim` | `np.ndim(a)` or `a.ndim`   | `ndims(a)` | number of dimensions of tensor `a` |
+| `len(a)` or `a.len` or `size(a)` or `a.size` | `np.size(a)` or `a.size`   | `numel(a)` | number of elements of tensor `a` |
+| `shape(a)` or `a.shape` | `np.shape(a)` or `a.shape` | `size(a)`  | "size" of each dimension in a; `shape` returns a 1D `int` tensor |
+| `a.shape[n-1]` | `a.shape[n-1]` | `size(a,n)` | the number of elements of the n-th dimension of tensor `a` |
+| `a.reshape([10, 2])` or `a.reshape(10, 2)` or `reshape(a, [10, 2])` | `a.reshape(10, 2)` or `np.reshape(a, 10, 2` | `reshape(a,10,2)` | set the shape of `a`, preserving existing values (and adding zeros if larger, in _Goal_) |
+|  | `y = x.flatten()`   | `y=x(:)` | turn tensor into vector (forces a copy in NumPy). |
 | | | |
-|  | `a[-1]` | `a(end)` | access last element |
-|  | `a[1, 4]` | `a(2,5)` | access element in second row, fifth column in 2D array a |
-|  | `a[1]` or `a[1, :]` | `a(2,:)` | entire second row of 2D array a; unspecified dimensions are equivalent to `:` |
-|  | `a[0:5]` or `a[:5]` or `a[0:5, :]` | `a(1:5,:)` | same as Go slice ranging |
-|  | `a[-5:]` | `a(end-4:end,:)` | last 5 rows of 2D array a |
-|  | `a[0:3, 4:9]` | `a(1:3,5:9)` | The first through third rows and fifth through ninth columns of a 2D array, a. |
-|  | `a[np.ix_([1, 3, 4], [0, 2])]` | `a([2,4,5],[1,3])` | rows 2,4 and 5 and columns 1 and 3. |
-|  (makes a copy) | `a[2:21:2,:]` | `a(3:2:21,:)` | every other row of a, starting with the third and going to the twenty-first |
-|  | `a[::2, :]`  | `a(1:2:end,:)` | every other row of a, starting with the first |
-|  | `a[::-1,:]`  | `a(end:-1:1,:) or flipud(a)` | a with rows in reverse order |
-|  | `a[np.r_[:len(a),0]]`  | `a([1:end 1],:)`  | a with copy of the first row appended to the end |
+| **Construction** | | |
+| `[[1., 2., 3.], [4., 5., 6.]]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
+| `[[a, b], [c, d]]` or `block([[a, b], [c, d]])` | `np.block([[a, b], [c, d]])` | `[ a b; c d ]` | construct a matrix from blocks `a`, `b`, `c`, and `d` |
+| `zeros([3,4]` or `zeros(3, 4)` | `np.zeros((3, 4))` | `zeros(3,4)` | 3x4 two-dimensional tensor of float64 zeros |
+| `zeros([3, 4, 5])` or `zeros(3, 4, 5)` | `np.zeros((3, 4, 5))` | `zeros(3,4,5)` | 3x4x5 three-dimensional tensor of float64 zeros |
+| `ones([3, 4])` or `ones(3, 4)`  | `np.ones((3, 4))` | `ones(3,4)` | 3x4 two-dimensional tensor of 64-bit floating point ones |
+| `rand([3, 4])` or `slrand([3,4], c, fi)` | `rng.random(3, 4)` | `rand(3,4)` | 3x4 2D float64 tensor with uniform random 0..1 elements; `rand` uses current Go `rand` source, while `slrand` uses [gosl](../gpu/gosl/slrand) GPU-safe call with counter `c` and function index `fi` and key = index of element |
+|  | `np.concatenate((a,b),1)` or `np.hstack((a,b))` or `np.column_stack((a,b))` or `np.c_[a,b]` | `[a b]` | concatenate columns of a and b |
+|  | `np.concatenate((a,b))` or `np.vstack((a,b))` or `np.r_[a,b]` | `[a; b]` | concatenate rows of a and b |
+|  | `np.tile(a, (m, n))`    | `repmat(a, m, n)` | create m by n copies of a |
+|  | `a.squeeze()` | `squeeze(a)` | remove singleton dimensions of tensor `a`. Note that MATLAB will always return tensors of 2D or higher while NumPy will return tensors of 0D or higher |
+|  | `a[np.r_[:len(a),0]]`  | `a([1:end 1],:)`  | `a` with copy of the first row appended to the end |
 | | | |
-|  | `a.transpose() or a.T` | `a.'` | transpose of a |
-|  | `a.conj().transpose() or a.conj().T` | `a'` | conjugate transpose of a |
-|  | `a @ b` | `a * b` | matrix multiply |
-|  | `a * b` | `a .* b` | element-wise multiply |
-|  | `a/b`   | `a./b` | element-wise divide |
-| `a^3` or: | `a**3`  | `a.^3` | element-wise exponentiation |
-|  | `(a > 0.5)` | `(a > 0.5)` | matrix whose `i,jth` element is `(a_ij > 0.5)`. The MATLAB result is an array of logical values 0 and 1. The NumPy result is an array of the boolean values False and True.
-|  | `np.nonzero(a > 0.5)` | `find(a > 0.5)` | find the indices where (a > 0.5) |
-|  | `a[:,np.nonzero(v > 0.5)[0]]` | `a(:,find(v > 0.5))` | extract the columns of a where vector v > 0.5 |
-|  | `a[:, v.T > 0.5]` | `a(:,find(v>0.5))` | extract the columns of a where column vector v > 0.5 |
-|  | `a[a < 0.5]=0` | `a(a<0.5)=0` | a with elements less than 0.5 zeroed out |
-|  | `a * (a > 0.5)` | `a .* (a>0.5)` | a with elements less than 0.5 zeroed out |
-|  | `a[:] = 3` | `a(:) = 3` | set all values to the same scalar value |
-|  | `y = x.copy()` | `y=x`  | NumPy assigns by reference |
-|  | `y = x[1, :].copy()` | `y=x(2,:)` | NumPy slices are by reference |
-|  | `y = x.flatten()`   | `y=x(:)` | turn array into vector (note that this forces a copy). To obtain the same data ordering as in MATLAB, use x.flatten('F'). |
+| **Ranges and Grids** [numpy](https://numpy.org/doc/stable/user/how-to-partition.html) | | |
 |  | `np.arange(1., 11.) or np.r_[1.:11.] or np.r_[1:10:10j]` | `1:10` | create an increasing vector (see note RANGES) |
 |  | `np.arange(10.) or np.r_[:10.] or np.r_[:9:10j]` | `0:9` | create an increasing vector (see note RANGES) |
 |  | `np.arange(1.,11.)[:, np.newaxis]` | `[1:10]'` | create a column vector |
-|  | `np.eye(3)` | `eye(3)` | 3x3 identity matrix |
-|  | `np.diag(a)` | `diag(a)` | returns a vector of the diagonal elements of 2D array, a |
-|  | `np.diag(v, 0)` | `diag(v,0)` | returns a square diagonal matrix whose nonzero values are the elements of vector, v |
 |  | `np.linspace(1,3,4)` | `linspace(1,3,4)` | 4 equally spaced samples between 1 and 3, inclusive |
-|  | `np.mgrid[0:9.,0:6.] or np.meshgrid(r_[0:9.],r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D arrays: one of x values, the other of y values |
+|  | `np.mgrid[0:9.,0:6.] or np.meshgrid(r_[0:9.],r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D tensors: one of x values, the other of y values |
 |  | `ogrid[0:9.,0:6.]` or `np.ix_(np.r_[0:9.],np.r_[0:6.]` | | the best way to eval functions on a grid |
 |  | `np.meshgrid([1,2,4],[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
 |  | `np.ix_([1,2,4],[2,4,5])`    |  | the best way to eval functions on a grid |
-|  | `np.tile(a, (m, n))`    | `repmat(a, m, n)` | create m by n copies of a |
-|  | `np.concatenate((a,b),1)` or `np.hstack((a,b))` or `np.column_stack((a,b))` or `np.c_[a,b]` | `[a b]` | concatenate columns of a and b |
-|  | `np.concatenate((a,b))` or `np.vstack((a,b))` or `np.r_[a,b]` | `[a; b]` | concatenate rows of a and b |
-|  | `a.max()` or `np.nanmax(a)` | `max(max(a))` | maximum element of a (with ndims(a)<=2 for MATLAB, if there are NaN’s, nanmax will ignore these and return largest value) |
-|  | `a.max(0)` | `max(a)` | maximum element of each column of array a |
-|  | `a.max(1)` | `max(a,[],2)` | maximum element of each row of array a |
-|  | `np.maximum(a, b)` | `max(a,b)` | compares a and b element-wise, and returns the maximum value from each pair |
-|  | `np.sqrt(v @ v)` or `np.linalg.norm(v)` | `norm(v)` | L2 norm of vector v |
-|  | `logical_and(a,b)` | `a & b` | element-by-element AND operator (NumPy ufunc) See note LOGICOPS |
-|  | `np.logical_or(a,b)` | `a \| b` | element-by-element OR operator (NumPy ufunc) | 
-|  | `a & b` | `bitand(a,b)` | bitwise AND operator (Python native and NumPy ufunc) | 
-|  | `a &#124; b` | `bitor(a,b)` | bitwise OR operator (Python native and NumPy ufunc) |
-|  | `linalg.inv(a)` | `inv(a)` | inverse of square 2D array a |
-|  | `linalg.pinv(a)` | `pinv(a)` | pseudo-inverse of 2D array a |
-|  | `np.linalg.matrix_rank(a)` | `rank(a)` | matrix rank of a 2D array a |
+| | | |
+| **Access** | | |
+| (returns a _copy_, use `copy` to assign back) | (returns a _reference_, changes modify original) | (returns a _copy_) | |
+|  | `y = x.copy()` | `y=x`  | NumPy assigns by reference |
+|  | `y = x[1, :].copy()` | `y=x(2,:)` | NumPy slices are by reference |
+|  | `a[-1]` | `a(end)` | access last element |
+|  | `a[1, 4]` | `a(2,5)` | access element in second row, fifth column in 2D tensor `a` |
+|  | `a[1]` or `a[1, :]` | `a(2,:)` | entire second row of 2D tensor `a`; unspecified dimensions are equivalent to `:` |
+|  | `a[0:5]` or `a[:5]` or `a[0:5, :]` | `a(1:5,:)` | same as Go slice ranging |
+|  | `a[-5:]` | `a(end-4:end,:)` | last 5 rows of 2D tensor `a` |
+|  | `a[0:3, 4:9]` | `a(1:3,5:9)` | The first through third rows and fifth through ninth columns of a 2D tensor, `a`. |
+|  | `a[np.ix_([1, 3, 4], [0, 2])]` | `a([2,4,5],[1,3])` | rows 2,4 and 5 and columns 1 and 3. |
+|  | `a[2:21:2,:]` | `a(3:2:21,:)` | every other row of `a`, starting with the third and going to the twenty-first |
+|  | `a[::2, :]`  | `a(1:2:end,:)` | every other row of `a`, starting with the first |
+|  | `a[::-1,:]`  | `a(end:-1:1,:) or flipud(a)` | `a` with rows in reverse order |
+| | | |
+| **Boolean Tensors** | | |
+| `(a > 0.5)` | `(a > 0.5)` | `(a > 0.5)` | `bool` tensor of shape `a` with elements `(v > 0.5)` |
+| `a && b` | `logical_and(a,b)` | `a & b` | element-wise AND operator on `bool` tensors |
+| `a || b` | `np.logical_or(a,b)` | `a \| b` | element-wise OR operator on `bool` tensors | 
+| `a & b`  | `a & b` | `bitand(a,b)` | element bitwise AND operator on `bool` or `int` tensors | 
+| `a | b`  | `a \| b` | `bitor(a,b)` | element bitwise OR operator on `bool` or `int` tensors |
+|  | `a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
+| | | |
+| **Indexed Sorting and Filtering** | | |
+| (indexes only on outer row dim) | index on all elements | | |
+|  | `np.nonzero(a > 0.5)` | `find(a > 0.5)` | find the indices where (a > 0.5) |
+|  | `a[:, v.T > 0.5]` | `a(:,find(v>0.5))` | extract the columns of `a` where column vector `v` > 0.5 |
+|  | `a[:,np.nonzero(v > 0.5)[0]]` | `a(:,find(v > 0.5))` | extract the columns of a where vector v > 0.5 |
+|  | `a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
+|  | `a[:] = 3` | `a(:) = 3` | set all values to the same scalar value |
+|  | `np.sort(a)` or `a.sort(axis=0)` | `sort(a)` | sort each column of a 2D tensor, a |
+|  | `np.sort(a, axis=1)` or `a.sort(axis=1)` | `sort(a, 2)` | sort the each row of 2D tensor, a |
+|  | `I = np.argsort(a[:, 0]); b = a[I,:]` | `[b,I]=sortrows(a,1)`  | save the tensor `a` as tensor `b` with rows sorted by the first column |
+|  | `np.unique(a)` | `unique(a)` | a vector of unique values in tensor `a` |
+| | | |
+| **Math** | | |
+|  | `a * b` | `a .* b` | element-wise multiply |
+|  | `a/b`   | `a./b` | element-wise divide |
+| `a^3` or `a**3` | `a**3`  | `a.^3` | element-wise exponentiation |
+| `cos(a)` | `cos(a)` | `cos(a)` | element-wise function application |
+| | | |
+| **2D Matrix Linear Algebra** | | |
+| (n-dimensional tensors resliced as lists of 2D matricies) | | |
+|  | `a @ b` | `a * b` | matrix multiply |
+|  | `a.transpose() or a.T` | `a.'` | transpose of a |
+|  | `a.conj().transpose() or a.conj().T` | `a'` | conjugate transpose of `a` |
+|  | `np.eye(3)` | `eye(3)` | 3x3 identity matrix |
+|  | `np.diag(a)` | `diag(a)` | returns a vector of the diagonal elements of 2D tensor, `a` |
+|  | `np.diag(v, 0)` | `diag(v,0)` | returns a square diagonal matrix whose nonzero values are the elements of vector, v |
+|  | `linalg.inv(a)` | `inv(a)` | inverse of square 2D tensor a |
+|  | `linalg.pinv(a)` | `pinv(a)` | pseudo-inverse of 2D tensor a |
+|  | `np.linalg.matrix_rank(a)` | `rank(a)` | matrix rank of a 2D tensor a |
 |  | `linalg.solve(a, b)` if `a` is square; `linalg.lstsq(a, b)` otherwise | `a\b` | solution of `a x = b` for x |
 |  | Solve `a.T x.T = b.T` instead | `b/a` | solution of x a = b for x |
 |  | `U, S, Vh = linalg.svd(a); V = Vh.T` | `[U,S,V]=svd(a)` | singular value decomposition of a |
-|  | `linalg.cholesky(a)` | `chol(a)` | Cholesky factorization of a 2D array |
+|  | `linalg.cholesky(a)` | `chol(a)` | Cholesky factorization of a 2D tensor |
 |  | `D,V = linalg.eig(a)` | `[V,D]=eig(a)` | eigenvalues and eigenvectors of `a`, where `[V,D]=eig(a,b)` eigenvalues and eigenvectors of `a, b` where |
-|  | `D,V = eigs(a, k=3)`  | `D,V = linalg.eig(a, b)` |  `[V,D]=eigs(a,3)` | find the k=3 largest eigenvalues and eigenvectors of 2D array, a |
+|  | `D,V = eigs(a, k=3)`  | `D,V = linalg.eig(a, b)` |  `[V,D]=eigs(a,3)` | find the k=3 largest eigenvalues and eigenvectors of 2D tensor, a |
 |  | `Q,R = linalg.qr(a)`  | `[Q,R]=qr(a,0)` | QR decomposition
 |  | `P,L,U = linalg.lu(a) where a == P@L@U`  | `[L,U,P]=lu(a) where a==P'*L*U` | LU decomposition with partial pivoting (note: P(MATLAB) == transpose(P(NumPy))) | 
+| | | |
+| **Statistics** | | |
+| `a.max()` or `max(a)` or `stats.Max(a)` | `a.max()` or `np.nanmax(a)` | `max(max(a))` | maximum element of `a`, _Goal_ always ignores `NaN` as missing data |
+| `stats.Max(a[) | `a.max(0)` | `max(a)` | maximum element of each column of tensor `a` |
+|  | `a.max(1)` | `max(a,[],2)` | maximum element of each row of tensor `a` |
+|  | `np.maximum(a, b)` | `max(a,b)` | compares a and b element-wise, and returns the maximum value from each pair |
+| `stats.L2Norm(a)` | `np.sqrt(v @ v)` or `np.linalg.norm(v)` | `norm(v)` | L2 norm of vector v |
 |  | `cg`  | `conjgrad` | conjugate gradients solver |
-|  | `np.fft.fft(a)` | `fft(a)` | Fourier transform of a |
-|  | `np.fft.ifft(a)` | `ifft(a)` | inverse Fourier transform of a |
-|  | `np.sort(a)` or `a.sort(axis=0)` | `sort(a)` | sort each column of a 2D array, a |
-|  | `np.sort(a, axis=1)` or `a.sort(axis=1)` | `sort(a, 2)` | sort the each row of 2D array, a |
-|  | `I = np.argsort(a[:, 0]); b = a[I,:]` | `[b,I]=sortrows(a,1)`  | save the array a as array b with rows sorted by the first column |
+| | | |
+| **Misc Functions** | | |
+|  | `np.fft.fft(a)` | `fft(a)` | Fourier transform of `a` |
+|  | `np.fft.ifft(a)` | `ifft(a)` | inverse Fourier transform of `a` |
 |  | `x = linalg.lstsq(Z, y)` | `x = Z\y` | perform a linear regression of the form |
 |  | `signal.resample(x, np.ceil(len(x)/q))` |  `decimate(x, q)` | downsample with low-pass filtering |
-|  | `np.unique(a)` | `unique(a)` | a vector of unique values in array a |
-|  | `a.squeeze()` | `squeeze(a)` | remove singleton dimensions of array a. Note that MATLAB will always return arrays of 2D or higher while NumPy will return arrays of 0D or higher |
-
-
-
-rng(42,'twister')
-rand(3,4)
-from numpy.random import default_rng
-rng = default_rng(42)
-rng.random(3, 4)
-or older version: random.rand((3, 4))
-
-generate a random 3x4 array with default random number generator and seed = 42
 
