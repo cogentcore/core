@@ -65,7 +65,7 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 	ntrial := ss.Config.Item("NTrial").AsInt()
 	sitems := ss.Stats.ValuesFunc(nil)
 	for _, st := range sitems {
-		nm := st.Tensor.Metadata().GetName()
+		nm := st.Tensor.Metadata().Name()
 		lt := logd.NewOfType(nm, st.Tensor.DataType(), ntrial)
 		lt.Tensor.Metadata().Copy(*st.Tensor.Metadata()) // key affordance: we get meta data from source
 		tensor.SetCalcFunc(lt.Tensor, func() error {
@@ -80,7 +80,7 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 	}
 	alllogd, _ := dir.Mkdir("AllTrials")
 	for _, st := range sitems {
-		nm := st.Tensor.Metadata().GetName()
+		nm := st.Tensor.Metadata().Name()
 		// allocate full size
 		lt := alllogd.NewOfType(nm, st.Tensor.DataType(), ntrial*ss.Config.Item("NEpoch").AsInt()*ss.Config.Item("NRun").AsInt())
 		lt.Tensor.SetShape(0)                            // then truncate to 0
@@ -109,7 +109,7 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 		if st.Tensor.IsString() {
 			continue
 		}
-		nm := st.Tensor.Metadata().GetName()
+		nm := st.Tensor.Metadata().Name()
 		src := from.Value(nm)
 		if st.Tensor.DataType() >= reflect.Float32 {
 			// todo: pct correct etc

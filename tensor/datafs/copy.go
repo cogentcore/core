@@ -73,7 +73,7 @@ func (d *Data) Copy(overwrite bool, to string, from ...string) error {
 			continue
 		}
 		if targf == "" {
-			if trg, ok := targd.Dir.ValueByKeyTry(frd.name); ok { // target exists
+			if trg, ok := targd.Dir.AtTry(frd.name); ok { // target exists
 				switch {
 				case trg.IsDir() && frd.IsDir():
 					// todo: copy all items from frd into trg

@@ -70,8 +70,8 @@ func (md *Data) SetName(name string) {
 	md.Set("Name", name)
 }
 
-// GetName returns the "Name" standard key value (empty if not set).
-func (md *Data) GetName() string {
+// Name returns the "Name" standard key value (empty if not set).
+func (md *Data) Name() string {
 	return errors.Ignore1(Get[string](*md, "Name"))
 }
 
@@ -80,7 +80,7 @@ func (md *Data) SetDoc(doc string) {
 	md.Set("Doc", doc)
 }
 
-// GetDoc returns the "Doc" standard key value (empty if not set).
-func (md *Data) GetDoc() string {
+// Doc returns the "Doc" standard key value (empty if not set).
+func (md *Data) Doc() string {
 	return errors.Ignore1(Get[string](*md, "Doc"))
 }

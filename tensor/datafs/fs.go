@@ -60,7 +60,7 @@ func (d *Data) Sub(dir string) (fs.FS, error) {
 			return cur, nil
 		}
 		cd = rest
-		sd, ok := cur.Dir.ValueByKeyTry(root)
+		sd, ok := cur.Dir.AtTry(root)
 		if !ok {
 			return nil, &fs.PathError{Op: "Sub", Path: dir, Err: errors.New("directory not found")}
 		}
@@ -81,7 +81,7 @@ func (d *Data) ReadDir(dir string) ([]fs.DirEntry, error) {
 	names := sd.DirNamesAlpha()
 	ents := make([]fs.DirEntry, len(names))
 	for i, nm := range names {
-		ents[i] = sd.Dir.ValueByKey(nm)
+		ents[i] = sd.Dir.At(nm)
 	}
 	return ents, nil
 }

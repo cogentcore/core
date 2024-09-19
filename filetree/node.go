@@ -335,9 +335,10 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 	return files
 }
 
+// sortByModTime sorts by _reverse_ mod time (newest first)
 func sortByModTime(files []fs.FileInfo) {
 	slices.SortFunc(files, func(a, b fs.FileInfo) int {
-		return -a.ModTime().Compare(b.ModTime())
+		return b.ModTime().Compare(a.ModTime()) // reverse order
 	})
 }
 

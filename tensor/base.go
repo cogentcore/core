@@ -146,7 +146,7 @@ func (tsr *Base[T]) StringRowCell(row, cell int) string {
 
 // Label satisfies the core.Labeler interface for a summary description of the tensor.
 func (tsr *Base[T]) Label() string {
-	nm := tsr.Meta.GetName()
+	nm := tsr.Meta.Name()
 	if nm != "" {
 		nm += " " + tsr.shape.String()
 	} else {

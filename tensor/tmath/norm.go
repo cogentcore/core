@@ -38,7 +38,7 @@ func Clamp(in, minv, maxv, out *tensor.Indexed) {
 	mx := maxv.Float1D(0)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
 		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math32.Clamp64(tsr[0].Float1D(i), mn, mx), i)
+		tsr[1].SetFloat1D(math32.Clamp(tsr[0].Float1D(i), mn, mx), i)
 	}, in, out)
 }
 

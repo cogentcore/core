@@ -15,6 +15,7 @@ package math32
 //go:generate core generate
 
 import (
+	"cmp"
 	"math"
 	"strconv"
 
@@ -783,29 +784,7 @@ func Yn(n int, x float32) float32 {
 // Special additions to math. functions
 
 // Clamp clamps x to the provided closed interval [a, b]
-func Clamp(x, a, b float32) float32 {
-	if x < a {
-		return a
-	}
-	if x > b {
-		return b
-	}
-	return x
-}
-
-// ClampInt clamps x to the provided closed interval [a, b]
-func ClampInt(x, a, b int) int {
-	if x < a {
-		return a
-	}
-	if x > b {
-		return b
-	}
-	return x
-}
-
-// Clamp64 clamps x to the provided closed interval [a, b]
-func Clamp64(x, a, b float64) float64 {
+func Clamp[T cmp.Ordered](x, a, b T) T {
 	if x < a {
 		return a
 	}

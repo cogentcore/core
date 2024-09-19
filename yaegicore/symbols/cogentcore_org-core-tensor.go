@@ -3,10 +3,11 @@
 package symbols
 
 import (
+	"reflect"
+
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/tensor"
 	"gonum.org/v1/gonum/mat"
-	"reflect"
 )
 
 func init() {
