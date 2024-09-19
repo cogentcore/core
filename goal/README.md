@@ -250,8 +250,8 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  | `a[np.r_[:len(a),0]]`  | `a([1:end 1],:)`  | `a` with copy of the first row appended to the end |
 | | | |
 | **Ranges and Grids** [numpy](https://numpy.org/doc/stable/user/how-to-partition.html) | | |
-|  | `np.arange(1., 11.) or np.r_[1.:11.] or np.r_[1:10:10j]` | `1:10` | create an increasing vector (see note RANGES) |
-|  | `np.arange(10.) or np.r_[:10.] or np.r_[:9:10j]` | `0:9` | create an increasing vector (see note RANGES) |
+|  | `np.arange(1., 11.) or np.r_[1.:11.] or np.r_[1:10:10j]` | `1:10` | create an increasing vector |
+|  | `np.arange(10.) or np.r_[:10.] or np.r_[:9:10j]` | `0:9` | create an increasing vector |
 |  | `np.arange(1.,11.)[:, np.newaxis]` | `[1:10]'` | create a column vector |
 |  | `np.linspace(1,3,4)` | `linspace(1,3,4)` | 4 equally spaced samples between 1 and 3, inclusive |
 |  | `np.mgrid[0:9.,0:6.] or np.meshgrid(r_[0:9.],r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D tensors: one of x values, the other of y values |
@@ -275,19 +275,20 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  | `a[::-1,:]`  | `a(end:-1:1,:) or flipud(a)` | `a` with rows in reverse order |
 | | | |
 | **Boolean Tensors** | | |
+| (bool tensor of same shape can filter access to other tensor) | | |
 | `(a > 0.5)` | `(a > 0.5)` | `(a > 0.5)` | `bool` tensor of shape `a` with elements `(v > 0.5)` |
 | `a && b` | `logical_and(a,b)` | `a & b` | element-wise AND operator on `bool` tensors |
 | `a \|\| b` | `np.logical_or(a,b)` | `a \| b` | element-wise OR operator on `bool` tensors | 
 | `a & b`  | `a & b` | `bitand(a,b)` | element bitwise AND operator on `bool` or `int` tensors | 
 | `a \| b`  | `a \| b` | `bitor(a,b)` | element bitwise OR operator on `bool` or `int` tensors |
 |  | `a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
+|  | `a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
 | | | |
-| **Indexed Sorting and Filtering** | | |
+| **Indexed Filtering and Sorting** | | |
 | (indexes only on outer row dim) | index on all elements | | |
 |  | `np.nonzero(a > 0.5)` | `find(a > 0.5)` | find the indices where (a > 0.5) |
 |  | `a[:, v.T > 0.5]` | `a(:,find(v>0.5))` | extract the columns of `a` where column vector `v` > 0.5 |
-|  | `a[:,np.nonzero(v > 0.5)[0]]` | `a(:,find(v > 0.5))` | extract the columns of a where vector v > 0.5 |
-|  | `a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
+|  | `a[:,np.nonzero(v > 0.5)[0]]` | `a(:,find(v > 0.5))` | extract the columns of `a` where vector `v` > 0.5 |
 |  | `a[:] = 3` | `a(:) = 3` | set all values to the same scalar value |
 |  | `np.sort(a)` or `a.sort(axis=0)` | `sort(a)` | sort each column of a 2D tensor, a |
 |  | `np.sort(a, axis=1)` or `a.sort(axis=1)` | `sort(a, 2)` | sort the each row of 2D tensor, a |
