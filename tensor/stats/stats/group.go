@@ -49,7 +49,7 @@ func Groups(dir *datafs.Data, tsrs ...*tensor.Indexed) {
 		if nr == 0 {
 			continue
 		}
-		nm := tsr.Tensor.Metadata().GetName()
+		nm := tsr.Tensor.Metadata().Name()
 		if nm == "" {
 			nm = strconv.Itoa(i)
 		}
@@ -157,11 +157,11 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...*tensor.Indexed) {
 		if gv == nil {
 			gtsr := datafs.NewValue[string](sgd, gpnm, nv)
 			for i, v := range vals {
-				gtsr.SetStringRow(v.Tensor.Metadata().GetName(), i)
+				gtsr.SetStringRow(v.Tensor.Metadata().Name(), i)
 			}
 		}
 		for _, tsr := range tsrs {
-			vd, _ := sgd.RecycleDir(tsr.Tensor.Metadata().GetName())
+			vd, _ := sgd.RecycleDir(tsr.Tensor.Metadata().Name())
 			sv := datafs.NewValue[float64](vd, stnm, nv)
 			for i, v := range vals {
 				idx := v.Tensor.(*tensor.Int).Values

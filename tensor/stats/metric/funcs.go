@@ -176,7 +176,7 @@ func SumSquaresBinTolFunc(a, b, out *tensor.Indexed) {
 func CrossEntropyFunc(a, b, out *tensor.Indexed) {
 	stats.VectorizeOut64(NFunc, func(idx int, tsr ...*tensor.Indexed) {
 		VecFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(a, b, agg float64) float64 {
-			b = math32.Clamp64(b, 0.000001, 0.999999)
+			b = math32.Clamp(b, 0.000001, 0.999999)
 			if a >= 1.0 {
 				agg += -math.Log(b)
 			} else if a <= 0.0 {

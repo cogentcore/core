@@ -82,7 +82,7 @@ func (dt *Table) NumColumns() int { return dt.Columns.Len() }
 // provide the shared table-wide Indexes.
 // Returns nil if not found.
 func (dt *Table) Column(name string) *tensor.Indexed {
-	cl := dt.Columns.ValueByKey(name)
+	cl := dt.Columns.At(name)
 	if cl == nil {
 		return nil
 	}
@@ -228,12 +228,12 @@ func (dt *Table) AddIntColumn(name string, cellSizes ...int) *tensor.Int {
 // DeleteColumnName deletes column of given name.
 // returns false if not found.
 func (dt *Table) DeleteColumnName(name string) bool {
-	return dt.Columns.DeleteKey(name)
+	return dt.Columns.DeleteByKey(name)
 }
 
 // DeleteColumnIndex deletes column within the index range [i:j].
 func (dt *Table) DeleteColumnByIndex(i, j int) {
-	dt.Columns.DeleteIndex(i, j)
+	dt.Columns.DeleteByIndex(i, j)
 }
 
 // DeleteAll deletes all columns, does full reset.

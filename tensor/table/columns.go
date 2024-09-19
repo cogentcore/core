@@ -53,10 +53,7 @@ func (cl *Columns) AddColumn(name string, tsr tensor.Tensor) error {
 // returning an error and not adding if the name is not unique.
 // Automatically adjusts the shape to fit the current number of rows.
 func (cl *Columns) InsertColumn(idx int, name string, tsr tensor.Tensor) error {
-	err := cl.Insert(idx, name, tsr)
-	if err != nil {
-		return err
-	}
+	cl.Insert(idx, name, tsr)
 	tsr.SetNumRows(cl.Rows)
 	return nil
 }
@@ -74,7 +71,7 @@ func (cl *Columns) Clone() *Columns {
 // AppendRows appends shared columns in both tables with input table rows.
 func (cl *Columns) AppendRows(cl2 *Columns) {
 	for i, nm := range cl.Keys {
-		c2 := cl2.ValueByKey(nm)
+		c2 := cl2.At(nm)
 		if c2 == nil {
 			continue
 		}

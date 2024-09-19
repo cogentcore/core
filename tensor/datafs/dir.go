@@ -45,7 +45,7 @@ func NewDir(name string, parent ...*Data) (*Data, error) {
 // This is for fast access and direct usage of known
 // items, and it will panic if this data is not a directory.
 func (d *Data) Item(name string) *Data {
-	return d.Dir.ValueByKey(name)
+	return d.Dir.At(name)
 }
 
 // Value returns the [tensor.Indexed] Value for given item
@@ -53,7 +53,7 @@ func (d *Data) Item(name string) *Data {
 // found, and will return nil if it is not a Value
 // (i.e., it is a directory).
 func (d *Data) Value(name string) *tensor.Indexed {
-	return d.Dir.ValueByKey(name).Data
+	return d.Dir.At(name).Data
 }
 
 // Items returns data items in given directory by name.
@@ -65,7 +65,7 @@ func (d *Data) Items(names ...string) ([]*Data, error) {
 	var errs []error
 	var its []*Data
 	for _, nm := range names {
-		dt := d.Dir.ValueByKey(nm)
+		dt := d.Dir.At(nm)
 		if dt != nil {
 			its = append(its, dt)
 		} else {
@@ -85,7 +85,7 @@ func (d *Data) Values(names ...string) ([]*tensor.Indexed, error) {
 	var errs []error
 	var its []*tensor.Indexed
 	for _, nm := range names {
-		it := d.Dir.ValueByKey(nm)
+		it := d.Dir.At(nm)
 		if it != nil && it.Data != nil {
 			its = append(its, it.Data)
 		} else {
@@ -147,7 +147,7 @@ func (d *Data) ItemsAlphaFunc(fun func(item *Data) bool) []*Data {
 	names := d.DirNamesAlpha()
 	var its []*Data
 	for _, nm := range names {
-		it := d.Dir.ValueByKey(nm)
+		it := d.Dir.At(nm)
 		if fun != nil && !fun(it) {
 			continue
 		}
@@ -218,7 +218,7 @@ func (d *Data) FlatValuesAlphaFunc(fun func(item *Data) bool) []*tensor.Indexed 
 	names := d.DirNamesAlpha()
 	var its []*tensor.Indexed
 	for _, nm := range names {
-		it := d.Dir.ValueByKey(nm)
+		it := d.Dir.At(nm)
 		if fun != nil && !fun(it) {
 			continue
 		}
@@ -260,7 +260,7 @@ func (d *Data) ItemAtPath(name string) (*Data, error) {
 	if err != nil {
 		return nil, err
 	}
-	itm, ok := sd.Dir.ValueByKeyTry(file)
+	itm, ok := sd.Dir.AtTry(file)
 	if !ok {
 		if dir == "" && (file == d.name || file == ".") {
 			return d, nil
@@ -301,7 +301,7 @@ func (d *Data) DirNamesAlpha() []string {
 func (d *Data) DirNamesByTime() []string {
 	names := slices.Clone(d.Dir.Keys)
 	slices.SortFunc(names, func(a, b string) int {
-		return d.Dir.ValueByKey(a).ModTime().Compare(d.Dir.ValueByKey(b).ModTime())
+		return d.Dir.At(a).ModTime().Compare(d.Dir.At(b).ModTime())
 	})
 	return names
 }
@@ -349,7 +349,7 @@ func (d *Data) RecycleDir(name string) (*Data, error) {
 	if err := d.mustDir("RecycleDir", name); err != nil {
 		return nil, err
 	}
-	if cd := d.Dir.ValueByKey(name); cd != nil {
+	if cd := d.Dir.At(name); cd != nil {
 		return cd, nil
 	}
 	return NewDir(name, d)

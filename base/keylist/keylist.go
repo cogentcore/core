@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-package keylist implements an ordered list (slice) of items,
+Package keylist implements an ordered list (slice) of items,
 with a map from a key (e.g., names) to indexes,
 to support fast lookup by name.
 This is a different implementation of the [ordmap] package,
@@ -18,7 +18,7 @@ import (
 	"slices"
 )
 
-// TODO: probably want to consolidate ordmap and keylist
+// TODO: probably want to consolidate ordmap and keylist: https://github.com/cogentcore/core/issues/1224
 
 // List implements an ordered list (slice) of Values,
 // with a map from a key (e.g., names) to indexes,
@@ -27,27 +27,28 @@ type List[K comparable, V any] struct { //types:add
 	// List is the ordered slice of items.
 	Values []V
 
+	// Keys is the ordered list of keys, in same order as [List.Values]
 	Keys []K
 
 	// indexes is the key-to-index mapping.
 	indexes map[K]int
 }
 
-// New returns a new Key List.  Zero value
+// New returns a new [List].  The zero value
 // is usable without initialization, so this is
 // just a simple standard convenience method.
 func New[K comparable, V any]() *List[K, V] {
 	return &List[K, V]{}
 }
 
-func (kl *List[K, V]) newIndexes() {
+func (kl *List[K, V]) makeIndexes() {
 	kl.indexes = make(map[K]int)
 }
 
 // initIndexes ensures that the index map exists.
 func (kl *List[K, V]) initIndexes() {
 	if kl.indexes == nil {
-		kl.newIndexes()
+		kl.makeIndexes()
 	}
 }
 
@@ -55,26 +56,14 @@ func (kl *List[K, V]) initIndexes() {
 func (kl *List[K, V]) Reset() {
 	kl.Values = nil
 	kl.Keys = nil
-	kl.newIndexes()
+	kl.makeIndexes()
 }
 
-// Add adds an item to the list with given key.
-// An error is returned if the key is already on the list.
-// See [AddReplace] for a method that automatically replaces.
-func (kl *List[K, V]) Add(key K, val V) error {
-	kl.initIndexes()
-	if _, ok := kl.indexes[key]; ok {
-		return fmt.Errorf("keylist.Add: key %v is already on the list", key)
-	}
-	kl.indexes[key] = len(kl.Values)
-	kl.Values = append(kl.Values, val)
-	kl.Keys = append(kl.Keys, key)
-	return nil
-}
-
-// AddReplace adds an item to the list with given key,
-// replacing any existing item with the same key.
-func (kl *List[K, V]) AddReplace(key K, val V) {
+// Set sets given key to given value, adding to the end of the list
+// if not already present, and otherwise replacing with this new value.
+// This is the same semantics as a Go map.
+// See [List.Add] for version that only adds and does not replace.
+func (kl *List[K, V]) Set(key K, val V) {
 	kl.initIndexes()
 	if idx, ok := kl.indexes[key]; ok {
 		kl.Values[idx] = val
@@ -86,28 +75,42 @@ func (kl *List[K, V]) AddReplace(key K, val V) {
 	kl.Keys = append(kl.Keys, key)
 }
 
+// Add adds an item to the list with given key,
+// An error is returned if the key is already on the list.
+// See [List.Set] for a method that automatically replaces.
+func (kl *List[K, V]) Add(key K, val V) error {
+	kl.initIndexes()
+	if _, ok := kl.indexes[key]; ok {
+		return fmt.Errorf("keylist.Add: key %v is already on the list", key)
+	}
+	kl.indexes[key] = len(kl.Values)
+	kl.Values = append(kl.Values, val)
+	kl.Keys = append(kl.Keys, key)
+	return nil
+}
+
 // Insert inserts the given value with the given key at the given index.
 // This is relatively slow because it needs regenerate the keys list.
-// It returns an error if the key already exists because
-// the behavior is undefined in that situation.
-func (kl *List[K, V]) Insert(idx int, key K, val V) error {
+// It panics if the key already exists because the behavior is undefined
+// in that situation.
+func (kl *List[K, V]) Insert(idx int, key K, val V) {
 	if _, has := kl.indexes[key]; has {
-		return fmt.Errorf("keylist.Add: key %v is already on the list", key)
+		panic("keylist.Add: key is already on the list")
 	}
 
 	kl.Keys = slices.Insert(kl.Keys, idx, key)
 	kl.Values = slices.Insert(kl.Values, idx, val)
-	kl.newIndexes()
+	kl.makeIndexes()
 	for i, k := range kl.Keys {
 		kl.indexes[k] = i
 	}
-	return nil
 }
 
-// ValueByKey returns the value corresponding to the given key,
-// with a zero value returned for a missing key. See [List.ValueByKeyTry]
+// At returns the value corresponding to the given key,
+// with a zero value returned for a missing key. See [List.AtTry]
 // for one that returns a bool for missing keys.
-func (kl *List[K, V]) ValueByKey(key K) V {
+// For index-based access, use [List.Values] or [List.Keys] slices directly.
+func (kl *List[K, V]) At(key K) V {
 	idx, ok := kl.indexes[key]
 	if ok {
 		return kl.Values[idx]
@@ -116,10 +119,10 @@ func (kl *List[K, V]) ValueByKey(key K) V {
 	return zv
 }
 
-// ValueByKeyTry returns the value corresponding to the given key,
+// AtTry returns the value corresponding to the given key,
 // with false returned for a missing key, in case the zero value
 // is not diagnostic.
-func (kl *List[K, V]) ValueByKeyTry(key K) (V, bool) {
+func (kl *List[K, V]) AtTry(key K) (V, bool) {
 	idx, ok := kl.indexes[key]
 	if ok {
 		return kl.Values[idx], true
@@ -153,43 +156,43 @@ func (kl *List[K, V]) Len() int {
 	return len(kl.Values)
 }
 
-// DeleteIndex deletes item(s) within the index range [i:j].
+// DeleteByIndex deletes item(s) within the index range [i:j].
 // This is relatively slow because it needs to regenerate the
 // index map.
-func (kl *List[K, V]) DeleteIndex(i, j int) {
+func (kl *List[K, V]) DeleteByIndex(i, j int) {
 	ndel := j - i
 	if ndel <= 0 {
 		panic("index range is <= 0")
 	}
 	kl.Keys = slices.Delete(kl.Keys, i, j)
 	kl.Values = slices.Delete(kl.Values, i, j)
-	kl.newIndexes()
+	kl.makeIndexes()
 	for i, k := range kl.Keys {
 		kl.indexes[k] = i
 	}
 
 }
 
-// DeleteKey deletes the item with the given key,
+// DeleteByKey deletes the item with the given key,
 // returning false if it does not find it.
 // This is relatively slow because it needs to regenerate the
 // index map.
-func (kl *List[K, V]) DeleteKey(key K) bool {
+func (kl *List[K, V]) DeleteByKey(key K) bool {
 	idx, ok := kl.indexes[key]
 	if !ok {
 		return false
 	}
-	kl.DeleteIndex(idx, idx+1)
+	kl.DeleteByIndex(idx, idx+1)
 	return true
 }
 
-// Copy copies all of the entries from the given keyed list
+// Copy copies all of the entries from the given key list
 // into this list. It keeps existing entries in this
 // list unless they also exist in the given list, in which case
-// they are overwritten.  Use [Reset] first to get an exact copy.
+// they are overwritten.  Use [List.Reset] first to get an exact copy.
 func (kl *List[K, V]) Copy(from *List[K, V]) {
 	for i, v := range from.Values {
-		kl.AddReplace(kl.Keys[i], v)
+		kl.Set(kl.Keys[i], v)
 	}
 }
 

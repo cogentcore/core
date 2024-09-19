@@ -16,14 +16,14 @@ func TestKeyList(t *testing.T) {
 	kl.Add("key1", 1)
 	kl.Add("key2", 2)
 
-	assert.Equal(t, 1, kl.ValueByKey("key1"))
+	assert.Equal(t, 1, kl.At("key1"))
 	assert.Equal(t, 2, kl.IndexByKey("key2"))
 
 	assert.Equal(t, 1, kl.Values[1])
 
 	assert.Equal(t, 3, kl.Len())
 
-	kl.DeleteIndex(1, 2)
+	kl.DeleteByIndex(1, 2)
 	assert.Equal(t, 2, kl.Values[1])
 	assert.Equal(t, 1, kl.IndexByKey("key2"))
 
@@ -35,5 +35,5 @@ func TestKeyList(t *testing.T) {
 	//	nm := Make([]KeyValue[string, int]{{"one", 1}, {"two", 2}, {"three", 3}})
 	// assert.Equal(t, 3, nm.Values[2])
 	// assert.Equal(t, 2, nm.Values[1])
-	// assert.Equal(t, 3, nm.ValueByKey("three"))
+	// assert.Equal(t, 3, nm.At("three"))
 }

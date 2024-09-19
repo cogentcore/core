@@ -33,7 +33,7 @@ func Describe(dir *datafs.Data, tsrs ...*tensor.Indexed) {
 		if nr == 0 {
 			continue
 		}
-		nm := tsr.Tensor.Metadata().GetName()
+		nm := tsr.Tensor.Metadata().Name()
 		if nm == "" {
 			nm = strconv.Itoa(i)
 		}
