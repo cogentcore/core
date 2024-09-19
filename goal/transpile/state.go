@@ -114,7 +114,7 @@ func (st *State) TranspileFile(in string, out string) error {
 			`	_ "cogentcore.org/core/tensor/tmath"`,
 			`	_ "cogentcore.org/core/tensor/stats/stats"`,
 			`	_ "cogentcore.org/core/tensor/stats/metric"`,
-			")", "func main() {", "goal := goal.NewGoal()")
+			")", "func main() {", "goal := goal.NewGoal()", "_ = goal")
 		st.Lines = append(st.Lines, "}")
 	}
 	src := []byte(st.Code())

@@ -37,10 +37,10 @@ func NewStringShape(shape *Shape) *String {
 	return tsr
 }
 
-// NewStringFromSlice returns a new 1-dimensional tensor of given value type
+// NewStringTensorFromSlice returns a new 1-dimensional tensor of given value type
 // initialized directly from the given slice values, which are not copied.
 // The resulting Tensor thus "wraps" the given values.
-func NewStringFromSlice(vals ...string) Tensor {
+func NewStringTensorFromSlice(vals ...string) Tensor {
 	n := len(vals)
 	tsr := &String{}
 	tsr.Values = vals

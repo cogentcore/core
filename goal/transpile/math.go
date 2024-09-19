@@ -18,9 +18,13 @@ func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 	// fmt.Println(nt, toks)
 
 	str := code[toks[0].Pos-1 : toks[nt-1].Pos]
+	if toks[nt-1].Str != "" {
+		str += toks[nt-1].Str[1:]
+	}
+	// fmt.Println(str)
 	mp := mathParse{toks: toks, code: code}
 
-	mods := AllErrors | Trace
+	mods := AllErrors // | Trace
 
 	if fullLine {
 		stmts, err := ParseLine(str, mods)
@@ -41,11 +45,17 @@ func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 	return mp.out
 }
 
+// mathParse has the parsing state
 type mathParse struct {
 	code string // code string
 	toks Tokens // source tokens we are parsing
 	idx  int    //  current index in source tokens
 	out  Tokens // output tokens we generate
+
+	// goLiteral means generate basic literals as standard go literals instead of
+	// wrapping them in tensor constructors.  for inner expressions contstructing go
+	// objects etc.
+	goLiteral bool
 }
 
 // addToken adds output token and increments idx
@@ -228,6 +238,10 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 }
 
 func (mp *mathParse) basicLit(lit *ast.BasicLit) {
+	if mp.goLiteral {
+		mp.out.Add(lit.Kind, lit.Value)
+		return
+	}
 	switch lit.Kind {
 	case token.INT:
 		mp.out.Add(token.IDENT, "tensor.NewIntScalar("+lit.Value+")")
@@ -241,7 +255,55 @@ func (mp *mathParse) basicLit(lit *ast.BasicLit) {
 	}
 }
 
+type funWrap struct {
+	fun  string
+	wrap string
+}
+
+// nis: NewIntScalar
+var numpyProps = map[string]funWrap{
+	"ndim":  {"NumDims()", "nis"},
+	"len":   {"Len()", "nis"},
+	"size":  {"Len()", "nis"},
+	"shape": {"Shape().Sizes", "nifs"},
+}
+
 func (mp *mathParse) selectorExpr(ex *ast.SelectorExpr) {
+	fw, ok := numpyProps[ex.Sel.Name]
+	if !ok {
+		mp.expr(ex.X)
+		mp.addToken(token.PERIOD)
+		mp.out.Add(token.IDENT, ex.Sel.Name)
+		mp.idx++
+		return
+	}
+	elip := false
+	switch fw.wrap {
+	case "nis":
+		mp.out.Add(token.IDENT, "tensor.NewIntScalar")
+	case "nfs":
+		mp.out.Add(token.IDENT, "tensor.NewFloat64Scalar")
+	case "nss":
+		mp.out.Add(token.IDENT, "tensor.NewStringScalar")
+	case "nifs":
+		mp.out.Add(token.IDENT, "tensor.NewIntFromSlice")
+		elip = true
+	case "nffs":
+		mp.out.Add(token.IDENT, "tensor.NewFloat64FromSlice")
+		elip = true
+	case "nsfs":
+		mp.out.Add(token.IDENT, "tensor.NewStringFromSlice")
+		elip = true
+	}
+	mp.out.Add(token.LPAREN)
+	mp.expr(ex.X)
+	mp.addToken(token.PERIOD)
+	mp.out.Add(token.IDENT, fw.fun)
+	mp.idx++
+	if elip {
+		mp.out.Add(token.ELLIPSIS)
+	}
+	mp.out.Add(token.RPAREN)
 }
 
 func (mp *mathParse) indexListExpr(il *ast.IndexListExpr) {
@@ -253,7 +315,28 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 	if kind == token.ILLEGAL {
 		kind = token.FLOAT // default
 	}
-	// todo: make it!
+	// todo: look for sub-arrays etc.
+	typ := "float64"
+	fun := "Float"
+	switch kind {
+	case token.FLOAT:
+	case token.INT:
+		typ = "int"
+		fun = "Int"
+	case token.STRING:
+		typ = "string"
+		fun = "String"
+	}
+	mp.out.Add(token.IDENT, "tensor.New"+fun+"FromSlice")
+	mp.out.Add(token.LPAREN)
+	mp.out.Add(token.IDENT, "[]"+typ)
+	mp.addToken(token.LBRACE)
+	mp.goLiteral = true
+	mp.exprList(il.Indices)
+	mp.goLiteral = false
+	mp.addToken(token.RBRACE)
+	mp.addToken(token.ELLIPSIS)
+	mp.out.Add(token.RPAREN, ")")
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {

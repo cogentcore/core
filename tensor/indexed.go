@@ -11,6 +11,8 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	"cogentcore.org/core/base/metadata"
 )
 
 // Indexed is an indexed wrapper around a tensor.Tensor that provides a
@@ -74,7 +76,28 @@ func NewIntScalar(val int) *Indexed {
 // NewStringScalar is a convenience method to quickly get an Indexed
 // representation of a single string scalar value, for use in math routines etc.
 func NewStringScalar(val string) *Indexed {
-	return &Indexed{Tensor: NewStringFromSlice(val)}
+	return &Indexed{Tensor: NewStringTensorFromSlice(val)}
+}
+
+// NewFloat64FromSlice returns a new 1-dimensional tensor of given value type
+// initialized directly from the given slice values, which are not copied.
+// The resulting Tensor thus "wraps" the given values.
+func NewFloat64FromSlice(vals ...float64) *Indexed {
+	return &Indexed{Tensor: NewNumberFromSlice(vals...)}
+}
+
+// NewIntFromSlice returns a new 1-dimensional tensor of given value type
+// initialized directly from the given slice values, which are not copied.
+// The resulting Tensor thus "wraps" the given values.
+func NewIntFromSlice(vals ...int) *Indexed {
+	return &Indexed{Tensor: NewNumberFromSlice(vals...)}
+}
+
+// NewStringFromSlice returns a new 1-dimensional tensor of given value type
+// initialized directly from the given slice values, which are not copied.
+// The resulting Tensor thus "wraps" the given values.
+func NewStringFromSlice(vals ...string) *Indexed {
+	return &Indexed{Tensor: NewStringTensorFromSlice(vals...)}
 }
 
 // SetTensor sets as indexes into given tensor with sequential initial indexes
@@ -113,6 +136,22 @@ func (ix *Indexed) String() string {
 func (ix *Indexed) Label() string {
 	return ix.Tensor.Label()
 }
+
+// note: goal transpiling needs all expressions to work directly on Indexed
+// so we need wrappers for everything.
+
+// Shape returns a pointer to the shape that fully parametrizes the tensor shape.
+func (ix *Indexed) Shape() *Shape { return ix.Tensor.Shape() }
+
+// Metadata returns the metadata for this tensor, which can be used
+// to encode plotting options, etc.
+func (ix *Indexed) Metadata() *metadata.Data { return ix.Tensor.Metadata() }
+
+// NumDims returns the total number of dimensions.
+func (ix *Indexed) NumDims() int { return ix.Tensor.NumDims() }
+
+// DimSize returns size of given dimension.
+func (ix *Indexed) DimSize(dim int) int { return ix.Tensor.DimSize(dim) }
 
 // RowCellSize returns the size of the outermost Row shape dimension
 // (via [Indexed.Rows] method), and the size of all the remaining

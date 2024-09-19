@@ -110,6 +110,9 @@ func NewNumberShape[T num.Number](shape *Shape) *Number[T] {
 	return tsr
 }
 
+// todo: this should in principle work with yaegi:add but it is crashing
+// will come back to it later.
+
 // NewNumberFromSlice returns a new 1-dimensional tensor of given value type
 // initialized directly from the given slice values, which are not copied.
 // The resulting Tensor thus "wraps" the given values.

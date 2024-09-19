@@ -215,11 +215,9 @@ func stringIndexed(tsr Tensor, maxLen int, idxs []int) string {
 	if maxLen == 0 {
 		maxLen = MaxSprintLength
 	}
-	str := tsr.Label()
 	var b strings.Builder
-	b.WriteString(str)
-	b.WriteString("\n")
-	oddRow := true
+	b.WriteString(tsr.Shape().String() + " ")
+	oddRow := false
 	rows, cols, _, _ := Projection2DShape(tsr.Shape(), oddRow)
 	if idxs != nil {
 		rows = min(rows, len(idxs))
