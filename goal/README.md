@@ -239,186 +239,78 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 | same: | `a[1, 4]` | `a(2,5)` | access element in second row, fifth column in 2D array a |
 | same: | `a[1]` or `a[1, :]` | `a(2,:)` | entire second row of 2D array a; unspecified dimensions are equivalent to `:` |
 | same: | `a[0:5]` or `a[:5]` or `a[0:5, :]` | `a(1:5,:)` | same as Go slice ranging |
-| same: | `a[-5:]` | `a(end-4:end,:)` | first 5 rows of 2D array a |
-| same: | `a[0:3, 4:9]` | `a(1:3,5:9)` | last 5 rows of 2D array a |
-| same: | `a[np.ix_([1, 3, 4], [0, 2])]` | `a([2,4,5],[1,3])` | The first through third rows and fifth through ninth columns of a 2D array, a. |
+| same: | `a[-5:]` | `a(end-4:end,:)` | last 5 rows of 2D array a |
+| same: | `a[0:3, 4:9]` | `a(1:3,5:9)` | The first through third rows and fifth through ninth columns of a 2D array, a. |
+| same: | `a[np.ix_([1, 3, 4], [0, 2])]` | `a([2,4,5],[1,3])` | rows 2,4 and 5 and columns 1 and 3. |
+| same: (makes a copy) | `a[2:21:2,:]` | `a(3:2:21,:)` | every other row of a, starting with the third and going to the twenty-first |
+| same: | `a[::2, :]`  | `a(1:2:end,:)` | every other row of a, starting with the first |
+| same: | `a[::-1,:]`  | `a(end:-1:1,:) or flipud(a)` | a with rows in reverse order |
+| same: | `a[np.r_[:len(a),0]]`  | `a([1:end 1],:)`  | a with copy of the first row appended to the end |
+| same: | `a.transpose() or a.T` | `a.'` | transpose of a |
+| same: | `a.conj().transpose() or a.conj().T` | `a'` | conjugate transpose of a |
+| same: | `a @ b` | `a * b` | matrix multiply |
+| same: | `a * b` | `a .* b` | element-wise multiply |
+| same: | `a/b`   | `a./b` | element-wise divide |
+| `a^3` or: | `a**3`  | `a.^3` | element-wise exponentiation |
+| same: | `(a > 0.5)` | `(a > 0.5)` | matrix whose `i,jth` element is `(a_ij > 0.5)`. The MATLAB result is an array of logical values 0 and 1. The NumPy result is an array of the boolean values False and True.
+| same: | `np.nonzero(a > 0.5)` | `find(a > 0.5)` | find the indices where (a > 0.5) |
+| same: | `a[:,np.nonzero(v > 0.5)[0]]` | `a(:,find(v > 0.5))` | extract the columns of a where vector v > 0.5 |
+| same: | `a[:, v.T > 0.5]` | `a(:,find(v>0.5))` | extract the columns of a where column vector v > 0.5 |
+| same: | `a[a < 0.5]=0` | `a(a<0.5)=0` | a with elements less than 0.5 zeroed out |
+| same: | `a * (a > 0.5)` | `a .* (a>0.5)` | a with elements less than 0.5 zeroed out |
+| same: | `a[:] = 3` | `a(:) = 3` | set all values to the same scalar value |
+| same: | `y = x.copy()` | `y=x`  | NumPy assigns by reference |
+| same: | `y = x[1, :].copy()` | `y=x(2,:)` | NumPy slices are by reference |
+| same: | `y = x.flatten()`   | `y=x(:)` | turn array into vector (note that this forces a copy). To obtain the same data ordering as in MATLAB, use x.flatten('F'). |
+| same: | `np.arange(1., 11.) or np.r_[1.:11.] or np.r_[1:10:10j]` | `1:10` | create an increasing vector (see note RANGES) |
+| same: | `np.arange(10.) or np.r_[:10.] or np.r_[:9:10j]` | `0:9` | create an increasing vector (see note RANGES) |
+| same: | `np.arange(1.,11.)[:, np.newaxis]` | `[1:10]'` | create a column vector |
+| same: | `np.zeros((3, 4))` | `zeros(3,4)` | 3x4 two-dimensional array full of 64-bit floating point zeros |
+| same: | `np.zeros((3, 4, 5))` | `zeros(3,4,5)` | 3x4x5 three-dimensional array full of 64-bit floating point zeros |
+| same: | `np.ones((3, 4))` | `ones(3,4)` | 3x4 two-dimensional array full of 64-bit floating point ones |
+| same: | `np.eye(3)` | `eye(3)` | 3x3 identity matrix |
+| same: | `np.diag(a)` | `diag(a)` | returns a vector of the diagonal elements of 2D array, a |
+| same: | `np.diag(v, 0)` | `diag(v,0)` | returns a square diagonal matrix whose nonzero values are the elements of vector, v |
+| same: | `np.linspace(1,3,4)` | `linspace(1,3,4)` | 4 equally spaced samples between 1 and 3, inclusive |
+| same: | `np.mgrid[0:9.,0:6.] or np.meshgrid(r_[0:9.],r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D arrays: one of x values, the other of y values |
+|       | `ogrid[0:9.,0:6.]` or `np.ix_(np.r_[0:9.],np.r_[0:6.]` | the best way to eval functions on a grid |
+| same: | `np.meshgrid([1,2,4],[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
+| same: | `np.ix_([1,2,4],[2,4,5])`    |  | the best way to eval functions on a grid |
+| same: | `np.tile(a, (m, n))`    | `repmat(a, m, n)` | create m by n copies of a |
+| same: | `np.concatenate((a,b),1)` or `np.hstack((a,b))` or `np.column_stack((a,b))` or `np.c_[a,b]` | `[a b]` | concatenate columns of a and b |
+| same: | `np.concatenate((a,b))` or `np.vstack((a,b))` or `np.r_[a,b]` | `[a; b]` | concatenate rows of a and b |
+| same: | `a.max()` or `np.nanmax(a)` | `max(max(a))` | maximum element of a (with ndims(a)<=2 for MATLAB, if there are NaN’s, nanmax will ignore these and return largest value) |
+| same: | `a.max(0)` | `max(a)` | maximum element of each column of array a |
+| same: | `a.max(1)` | `max(a,[],2)` | maximum element of each row of array a |
+| same: | `np.maximum(a, b)` | `max(a,b)` | compares a and b element-wise, and returns the maximum value from each pair |
+| same: | `np.sqrt(v @ v)` or `np.linalg.norm(v)` | `norm(v)` | L2 norm of vector v |
+| same: | `logical_and(a,b)` | `a & b` | element-by-element AND operator (NumPy ufunc) See note LOGICOPS |
+| same: | `np.logical_or(a,b)` | `a | b` | element-by-element OR operator (NumPy ufunc) | 
+| same: | `a & b` | `bitand(a,b)` | bitwise AND operator (Python native and NumPy ufunc) | 
+| same: | `a | b` | `bitor(a,b)` | bitwise OR operator (Python native and NumPy ufunc) |
+| same: | `linalg.inv(a)` | `inv(a)` | inverse of square 2D array a |
+| same: | `linalg.pinv(a)` | `pinv(a)` | pseudo-inverse of 2D array a |
+| same: | `np.linalg.matrix_rank(a)` | `rank(a)` | matrix rank of a 2D array a |
+| same: | `linalg.solve(a, b)` if `a` is square; `linalg.lstsq(a, b)` otherwise | `a\b` | solution of `a x = b` for x |
+| same: | Solve `a.T x.T = b.T` instead | `b/a` | solution of x a = b for x |
+| same: | `U, S, Vh = linalg.svd(a); V = Vh.T` | `[U,S,V]=svd(a)` | singular value decomposition of a |
+| same: | `linalg.cholesky(a)` | `chol(a)` | Cholesky factorization of a 2D array |
+| same: | `D,V = linalg.eig(a)` | `[V,D]=eig(a)` | eigenvalues and eigenvectors of `a`, where `[V,D]=eig(a,b)` eigenvalues and eigenvectors of `a, b` where |
+| same: | `D,V = eigs(a, k=3)`  | `D,V = linalg.eig(a, b)` |  `[V,D]=eigs(a,3)` | find the k=3 largest eigenvalues and eigenvectors of 2D array, a |
+| same: | `Q,R = linalg.qr(a)`  | `[Q,R]=qr(a,0)` | QR decomposition
+| same: | `P,L,U = linalg.lu(a) where a == P@L@U`  | `[L,U,P]=lu(a) where a==P'*L*U` | LU decomposition with partial pivoting (note: P(MATLAB) == transpose(P(NumPy))) | 
+| same: | `cg`  | `conjgrad` | conjugate gradients solver |
+| same: | `np.fft.fft(a)` | `fft(a)` | Fourier transform of a |
+| same: | `np.fft.ifft(a)` | `ifft(a)` | inverse Fourier transform of a |
+| same: | `np.sort(a)` or `a.sort(axis=0)` | `sort(a)` | sort each column of a 2D array, a |
+| same: | `np.sort(a, axis=1)` or `a.sort(axis=1)` | `sort(a, 2)` | sort the each row of 2D array, a |
+| same: | `I = np.argsort(a[:, 0]); b = a[I,:]` | `[b,I]=sortrows(a,1)`  | save the array a as array b with rows sorted by the first column |
+| same: | `x = linalg.lstsq(Z, y)` | `x = Z\y` | perform a linear regression of the form |
+| same: | `signal.resample(x, np.ceil(len(x)/q))` |  `decimate(x, q)` | downsample with low-pass filtering |
+| same: | `np.unique(a)` | `unique(a)` | a vector of unique values in array a |
+| same: | `a.squeeze()` | `squeeze(a)` | remove singleton dimensions of array a. Note that MATLAB will always return arrays of 2D or higher while NumPy will return arrays of 0D or higher |
 
 
-rows 2,4 and 5 and columns 1 and 3. This allows the matrix to be modified, and doesn’t require a regular slice.
-
-a(3:2:21,:)
-
-a[2:21:2,:]
-
-every other row of a, starting with the third and going to the twenty-first
-
-a(1:2:end,:)
-
-a[::2, :]
-
-every other row of a, starting with the first
-
-a(end:-1:1,:) or flipud(a)
-
-a[::-1,:]
-
-a with rows in reverse order
-
-a([1:end 1],:)
-
-a[np.r_[:len(a),0]]
-
-a with copy of the first row appended to the end
-
-a.'
-
-a.transpose() or a.T
-
-transpose of a
-
-a'
-
-a.conj().transpose() or a.conj().T
-
-conjugate transpose of a
-
-a * b
-
-a @ b
-
-matrix multiply
-
-a .* b
-
-a * b
-
-element-wise multiply
-
-a./b
-
-a/b
-
-element-wise divide
-
-a.^3
-
-a**3
-
-element-wise exponentiation
-
-(a > 0.5)
-
-(a > 0.5)
-
-matrix whose i,jth element is (a_ij > 0.5). The MATLAB result is an array of logical values 0 and 1. The NumPy result is an array of the boolean values False and True.
-
-find(a > 0.5)
-
-np.nonzero(a > 0.5)
-
-find the indices where (a > 0.5)
-
-a(:,find(v > 0.5))
-
-a[:,np.nonzero(v > 0.5)[0]]
-
-extract the columns of a where vector v > 0.5
-
-a(:,find(v>0.5))
-
-a[:, v.T > 0.5]
-
-extract the columns of a where column vector v > 0.5
-
-a(a<0.5)=0
-
-a[a < 0.5]=0
-
-a with elements less than 0.5 zeroed out
-
-a .* (a>0.5)
-
-a * (a > 0.5)
-
-a with elements less than 0.5 zeroed out
-
-a(:) = 3
-
-a[:] = 3
-
-set all values to the same scalar value
-
-y=x
-
-y = x.copy()
-
-NumPy assigns by reference
-
-y=x(2,:)
-
-y = x[1, :].copy()
-
-NumPy slices are by reference
-
-y=x(:)
-
-y = x.flatten()
-
-turn array into vector (note that this forces a copy). To obtain the same data ordering as in MATLAB, use x.flatten('F').
-
-1:10
-
-np.arange(1., 11.) or np.r_[1.:11.] or np.r_[1:10:10j]
-
-create an increasing vector (see note RANGES)
-
-0:9
-
-np.arange(10.) or np.r_[:10.] or np.r_[:9:10j]
-
-create an increasing vector (see note RANGES)
-
-[1:10]'
-
-np.arange(1.,11.)[:, np.newaxis]
-
-create a column vector
-
-zeros(3,4)
-
-np.zeros((3, 4))
-
-3x4 two-dimensional array full of 64-bit floating point zeros
-
-zeros(3,4,5)
-
-np.zeros((3, 4, 5))
-
-3x4x5 three-dimensional array full of 64-bit floating point zeros
-
-ones(3,4)
-
-np.ones((3, 4))
-
-3x4 two-dimensional array full of 64-bit floating point ones
-
-eye(3)
-
-np.eye(3)
-
-3x3 identity matrix
-
-diag(a)
-
-np.diag(a)
-
-returns a vector of the diagonal elements of 2D array, a
-
-diag(v,0)
-
-np.diag(v, 0)
-
-returns a square diagonal matrix whose nonzero values are the elements of vector, v
 
 rng(42,'twister')
 rand(3,4)
@@ -428,237 +320,4 @@ rng.random(3, 4)
 or older version: random.rand((3, 4))
 
 generate a random 3x4 array with default random number generator and seed = 42
-
-linspace(1,3,4)
-
-np.linspace(1,3,4)
-
-4 equally spaced samples between 1 and 3, inclusive
-
-[x,y]=meshgrid(0:8,0:5)
-
-np.mgrid[0:9.,0:6.] or np.meshgrid(r_[0:9.],r_[0:6.])
-
-two 2D arrays: one of x values, the other of y values
-
-ogrid[0:9.,0:6.] or np.ix_(np.r_[0:9.],np.r_[0:6.]
-
-the best way to eval functions on a grid
-
-[x,y]=meshgrid([1,2,4],[2,4,5])
-
-np.meshgrid([1,2,4],[2,4,5])
-
-np.ix_([1,2,4],[2,4,5])
-
-the best way to eval functions on a grid
-
-repmat(a, m, n)
-
-np.tile(a, (m, n))
-
-create m by n copies of a
-
-[a b]
-
-np.concatenate((a,b),1) or np.hstack((a,b)) or np.column_stack((a,b)) or np.c_[a,b]
-
-concatenate columns of a and b
-
-[a; b]
-
-np.concatenate((a,b)) or np.vstack((a,b)) or np.r_[a,b]
-
-concatenate rows of a and b
-
-max(max(a))
-
-a.max() or np.nanmax(a)
-
-maximum element of a (with ndims(a)<=2 for MATLAB, if there are NaN’s, nanmax will ignore these and return largest value)
-
-max(a)
-
-a.max(0)
-
-maximum element of each column of array a
-
-max(a,[],2)
-
-a.max(1)
-
-maximum element of each row of array a
-
-max(a,b)
-
-np.maximum(a, b)
-
-compares a and b element-wise, and returns the maximum value from each pair
-
-norm(v)
-
-np.sqrt(v @ v) or np.linalg.norm(v)
-
-L2 norm of vector v
-
-a & b
-
-logical_and(a,b)
-
-element-by-element AND operator (NumPy ufunc) See note LOGICOPS
-
-a | b
-
-np.logical_or(a,b)
-
-element-by-element OR operator (NumPy ufunc) See note LOGICOPS
-
-bitand(a,b)
-
-a & b
-
-bitwise AND operator (Python native and NumPy ufunc)
-
-bitor(a,b)
-
-a | b
-
-bitwise OR operator (Python native and NumPy ufunc)
-
-inv(a)
-
-linalg.inv(a)
-
-inverse of square 2D array a
-
-pinv(a)
-
-linalg.pinv(a)
-
-pseudo-inverse of 2D array a
-
-rank(a)
-
-np.linalg.matrix_rank(a)
-
-matrix rank of a 2D array a
-
-a\b
-
-linalg.solve(a, b) if a is square; linalg.lstsq(a, b) otherwise
-
-solution of a x = b for x
-
-b/a
-
-Solve a.T x.T = b.T instead
-
-solution of x a = b for x
-
-[U,S,V]=svd(a)
-
-U, S, Vh = linalg.svd(a); V = Vh.T
-
-singular value decomposition of a
-
-chol(a)
-
-linalg.cholesky(a)
-
-Cholesky factorization of a 2D array
-
-[V,D]=eig(a)
-
-D,V = linalg.eig(a)
-
-eigenvalues 
- and eigenvectors 
- of a, where 
-
-[V,D]=eig(a,b)
-
-D,V = linalg.eig(a, b)
-
-eigenvalues 
- and eigenvectors 
- of a, b where 
-
-[V,D]=eigs(a,3)
-
-D,V = eigs(a, k=3)
-
-find the k=3 largest eigenvalues and eigenvectors of 2D array, a
-
-[Q,R]=qr(a,0)
-
-Q,R = linalg.qr(a)
-
-QR decomposition
-
-[L,U,P]=lu(a) where a==P'*L*U
-
-P,L,U = linalg.lu(a) where a == P@L@U
-
-LU decomposition with partial pivoting (note: P(MATLAB) == transpose(P(NumPy)))
-
-conjgrad
-
-cg
-
-conjugate gradients solver
-
-fft(a)
-
-np.fft.fft(a)
-
-Fourier transform of a
-
-ifft(a)
-
-np.fft.ifft(a)
-
-inverse Fourier transform of a
-
-sort(a)
-
-np.sort(a) or a.sort(axis=0)
-
-sort each column of a 2D array, a
-
-sort(a, 2)
-
-np.sort(a, axis=1) or a.sort(axis=1)
-
-sort the each row of 2D array, a
-
-[b,I]=sortrows(a,1)
-
-I = np.argsort(a[:, 0]); b = a[I,:]
-
-save the array a as array b with rows sorted by the first column
-
-x = Z\y
-
-x = linalg.lstsq(Z, y)
-
-perform a linear regression of the form 
-
-decimate(x, q)
-
-signal.resample(x, np.ceil(len(x)/q))
-
-downsample with low-pass filtering
-
-unique(a)
-
-np.unique(a)
-
-a vector of unique values in array a
-
-squeeze(a)
-
-a.squeeze()
-
-remove singleton dimensions of array a. Note that MATLAB will always return arrays of 2D or higher while NumPy will return arrays of 0D or higher
-
 
