@@ -3,6 +3,6 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package metric provides various similarity / distance metrics for comparing tensors, operating on the tensor.Indexed standard data representation.
+Package metric provides various similarity / distance metrics for comparing tensors, operating on the tensor.Tensor standard data representation.
 */
 package metric

@@ -1,8 +1,8 @@
 # stats
 
-The `stats` package provides standard statistic computations operating on the `tensor.Indexed` standard data representation, using this standard function:
+The `stats` package provides standard statistic computations operating on the `tensor.Tensor` standard data representation, using this standard function:
 ```Go
-type StatsFunc func(in, out *tensor.Indexed)
+type StatsFunc func(in, out tensor.Tensor)
 ```
 
 For 1D data, the output is a scalar value in the out tensor, and otherwise it is an n-dimensional "cell" with outermost row dimension set to 1.

@@ -15,7 +15,7 @@ import (
 )
 
 // Data is a single item of data, the "file" or "directory" in the data filesystem.
-// Data is represented using the [tensor] package universal data type: the [tensor.Indexed]
+// Data is represented using the [tensor] package universal data type: the
 // [tensor.Tensor], which can represent everything from a single scalar value up to
 // n-dimensional collections of patterns, in a range of data types.
 // Directories have an ordered map of items.
@@ -31,7 +31,7 @@ type Data struct {
 
 	// Data is the data value for "files" / "leaves" in the FS,
 	// represented using the universal [tensor] data type of
-	// [tensor.Indexed], which can represent anything from a scalar
+	// [tensor.Tensor], which can represent anything from a scalar
 	// to n-dimensional data, in a range of data types.
 	Data tensor.Tensor
 
@@ -57,7 +57,7 @@ func newData(dir *Data, name string) (*Data, error) {
 	return d, err
 }
 
-// NewScalar returns new scalar Data value(s) (as a [tensor.Indexed])
+// NewScalar returns new scalar Data value(s) (as a [tensor.Tensor])
 // of given data type, in given directory.
 // The names must be unique in the directory.
 // Returns the first item created, for immediate use of one value.
@@ -70,7 +70,7 @@ func NewScalar[T tensor.DataTypes](dir *Data, names ...string) tensor.Tensor {
 		if errors.Log(err) != nil {
 			return nil
 		}
-		d.Data = tensor.NewIndexed(tsr)
+		d.Data = tsr
 		if first == nil {
 			first = d.Data
 		}
@@ -78,7 +78,7 @@ func NewScalar[T tensor.DataTypes](dir *Data, names ...string) tensor.Tensor {
 	return first
 }
 
-// NewValue returns a new Data value as a [tensor.Indexed] [tensor.Tensor]
+// NewValue returns a new Data value as a [tensor.Tensor]
 // of given data type and shape sizes, in given directory Data item.
 // The name must be unique in the directory.
 func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.Tensor {
@@ -88,11 +88,11 @@ func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.T
 	if errors.Log(err) != nil {
 		return nil
 	}
-	d.Data = tensor.NewIndexed(tsr)
+	d.Data = tsr
 	return d.Data
 }
 
-// NewOfType returns a new Data value as a [tensor.Indexed]
+// NewOfType returns a new Data value as a [tensor.Tensor]
 // of given reflect.Kind type and shape sizes per dimension, in given directory Data item.
 // Supported types are string, bool (for [Bits]), float32, float64, int, int32, and byte.
 // The name must be unique in the directory.
@@ -103,7 +103,7 @@ func (d *Data) NewOfType(name string, typ reflect.Kind, sizes ...int) tensor.Ten
 	if errors.Log(err) != nil {
 		return nil
 	}
-	nd.Data = tensor.NewIndexed(tsr)
+	nd.Data = tsr
 	return nd.Data
 }
 

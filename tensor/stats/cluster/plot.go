@@ -12,7 +12,7 @@ import (
 // Plot sets the rows of given data table to trace out lines with labels that
 // will render cluster plot starting at root node when plotted with a standard plotting package.
 // The lines double-back on themselves to form a continuous line to be plotted.
-func Plot(pt *table.Table, root *Node, dmat, labels *tensor.Indexed) {
+func Plot(pt *table.Table, root *Node, dmat, labels tensor.Tensor) {
 	pt.DeleteAll()
 	pt.AddFloat64Column("X")
 	pt.AddFloat64Column("Y")
@@ -26,7 +26,7 @@ func Plot(pt *table.Table, root *Node, dmat, labels *tensor.Indexed) {
 // Plot sets the rows of given data table to trace out lines with labels that
 // will render this node in a cluster plot when plotted with a standard plotting package.
 // The lines double-back on themselves to form a continuous line to be plotted.
-func (nn *Node) Plot(pt *table.Table, dmat, labels *tensor.Indexed) {
+func (nn *Node) Plot(pt *table.Table, dmat, labels tensor.Tensor) {
 	row := pt.NumRows()
 	xc := pt.ColumnByIndex(0)
 	yc := pt.ColumnByIndex(1)

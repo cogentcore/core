@@ -2,7 +2,7 @@
 
 `datafs` is a virtual file system that implements the Go `fs` interface, and can be accessed using fs-general tools, including the cogent core `filetree` and the `goal` shell.
 
-Data is represented using the [tensor] package universal data type: the `tensor.Indexed` `Tensor`, which can represent everything from a single scalar value up to n-dimensional collections of patterns, in a range of data types.
+Data is represented using the [tensor] package universal data type: the `tensor.Tensor`, which can represent everything from a single scalar value up to n-dimensional collections of patterns, in a range of data types.
 
 A given `Data` node is either:
 * A _Value_, with a tensor encoding its `Data` value. These are terminal "leaves" in the hierarchical data tree, equivalent to "files" in a standard filesystem.

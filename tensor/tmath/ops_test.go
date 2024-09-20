@@ -20,13 +20,15 @@ func TestAdd(t *testing.T) {
 
 	vals := []float64{-1.507556722888818, -1.2060453783110545, -0.9045340337332908, -0.6030226891555273, -0.3015113445777635, 0.1, 0.3015113445777635, 0.603022689155527, 0.904534033733291, 1.2060453783110545, 1.507556722888818, .3}
 
-	oned := tensor.NewIndexed(tensor.NewNumberFromSlice(vals...))
+	oned := tensor.NewNumberFromSlice(vals...)
 	oneout := oned.Clone()
 
-	cell2d := tensor.NewIndexed(tensor.NewFloat32(5, 2, 6))
+	cell2d := tensor.NewFloat32(5, 2, 6)
+	_, cells := cell2d.RowCellSize()
+	assert.Equal(t, cells, 12)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		i, _, ci := cell2d.RowCellIndex(idx)
-		cell2d.SetFloat1D(oned.Float1D(ci), i)
+		ci := idx % cells
+		cell2d.SetFloat1D(oned.Float1D(ci), idx)
 	}, cell2d)
 	// cell2d.DeleteRows(3, 1)
 	cellout := cell2d.Clone()

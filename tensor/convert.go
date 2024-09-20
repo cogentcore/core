@@ -21,6 +21,28 @@ func Cells1D(tsr Tensor, row int) Tensor {
 	return New1DViewOf(tsr.SubSpace(row))
 }
 
+// RowCellSplit splits the given tensor into a standard 2D row, cell
+// shape at the given split dimension index.  All dimensions prior to
+// split are collapsed into the row dimension, and from split onward
+// form the cells dimension.  The resulting tensor is a re-shaped view
+// of the original tensor, sharing the same underlying data.
+func RowCellSplit(tsr Tensor, split int) Tensor {
+	sizes := tsr.ShapeInts()
+	rows := sizes[:split]
+	cells := sizes[split:]
+	nr := 1
+	for _, r := range rows {
+		nr *= r
+	}
+	nc := 1
+	for _, c := range cells {
+		nc *= c
+	}
+	vw := tsr.View()
+	vw.SetShapeInts(nr, nc)
+	return vw
+}
+
 // NewFloat64Scalar is a convenience method for a Tensor
 // representation of a single float64 scalar value.
 func NewFloat64Scalar(val float64) Tensor {

@@ -223,7 +223,15 @@ TODO: update aboven
 
 In general, _Goal_ is designed to be as compatible with Python NumPy / SciPy syntax as possible, while also adding a few Go-specific additions as well.  The Goal global functions are named the same as NumPy, without the `np.` prefix, so existing code can be converted by just removing that prefix.  Corresponding field-like properties of tensors are converted into into appropriate method calls.
 
-All elements of a _Goal_ math expression are [tensors](../tensor), specifically `*tensor.Indexed`, which can represent everything from a scalar to an n-dimenstional tensor, and directly supports an indexed view of the outermost row dimension, for optimized sorting and filtering operations.  These are called an "array" in NumPy terms.  See [array vs. tensor](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html#array-or-matrix-which-should-i-use) NumPy docs for more information (_Goal_ does not support `matrix`).
+All elements of a _Goal_ math expression are [tensors](../tensor) (i.e., `tensor.Tensor`), which can represent everything from a scalar to an n-dimenstional tensor, with different _views_ that support the arbitrary slicing and flexible forms of indexing documented in the table below.  These are called an "array" in NumPy terms.  See [array vs. tensor](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html#array-or-matrix-which-should-i-use) NumPy docs for more information.  Note that _Goal_ does not have a distinct `matrix` type; everything is a tensor, and when these are 2D, they function appropriately.
+
+The _view_ versions of `Tensor` include `tensor.Sliced`, `tensor.Masked`, and `tensor.Indexed`, each of which wraps around another "source" `Tensor`, and provides its own way of accessing the underlying data:
+
+* `Sliced` has an arbitrary set of indexes for each dimension, so access to values along that dimension go through the indexes.  Thus, you could reverse the order of the columns (dimension 1), or only operate on a subset of them.
+
+* `Masked` has a `tensor.Bool` tensor that filters access to the underlying source tensor through a mask: anywhere the bool value is `false`, the corresponding source value is not settable, and returns `NaN` (missing value) when accessed.
+
+* `Indexed` is an optimized version of `Sliced` with indexes only for the first, outermost, _row_ dimension, which 
 
 Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html)
 
@@ -259,10 +267,10 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  | `np.meshgrid([1,2,4],[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
 |  | `np.ix_([1,2,4],[2,4,5])`    |  | the best way to eval functions on a grid |
 | | | |
-| **Access** | | |
-| (returns a _copy_, use `copy` to assign back) | (returns a _reference_, changes modify original) | (returns a _copy_) | |
-|  | `y = x.copy()` | `y=x`  | NumPy assigns by reference |
-|  | `y = x[1, :].copy()` | `y=x(2,:)` | NumPy slices are by reference |
+| **Access and Slicing** | | |
+| (returns a _view_, changes modify original) | (returns a _reference_, changes modify original) | (returns a _copy_) | |
+| `y = x.copy()` or `y = x.Clone()` | `y = x.copy()` | `y=x`  | `y=x` just assigns `y` to point to `x`, so that changes to `y` also change `x`; need to make a `copy` to get distinct values |
+| `y = x[1, :].copy()` or `y = x[1, :].Clone()` | `y = x[1, :].copy()` | `y=x(2,:)` | without the copy, `y` would point to a view of values in `x`; `copy` creates distinct values, in this case of _only_ the 2nd row of `x` -- i.e., it "concretizes" a given view into a literal, memory-continuous set of values for that view. |
 |  | `a[-1]` | `a(end)` | access last element |
 |  | `a[1, 4]` | `a(2,5)` | access element in second row, fifth column in 2D tensor `a` |
 |  | `a[1]` or `a[1, :]` | `a(2,:)` | entire second row of 2D tensor `a`; unspecified dimensions are equivalent to `:` |
@@ -290,8 +298,8 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  | `a[:, v.T > 0.5]` | `a(:,find(v>0.5))` | extract the columns of `a` where column vector `v` > 0.5 |
 |  | `a[:,np.nonzero(v > 0.5)[0]]` | `a(:,find(v > 0.5))` | extract the columns of `a` where vector `v` > 0.5 |
 |  | `a[:] = 3` | `a(:) = 3` | set all values to the same scalar value |
-|  | `np.sort(a)` or `a.sort(axis=0)` | `sort(a)` | sort each column of a 2D tensor, a |
-|  | `np.sort(a, axis=1)` or `a.sort(axis=1)` | `sort(a, 2)` | sort the each row of 2D tensor, a |
+|  | `np.sort(a)` or `a.sort(axis=0)` | `sort(a)` | sort each column of a 2D tensor, `a` |
+|  | `np.sort(a, axis=1)` or `a.sort(axis=1)` | `sort(a, 2)` | sort the each row of 2D tensor, `a` |
 |  | `I = np.argsort(a[:, 0]); b = a[I,:]` | `[b,I]=sortrows(a,1)`  | save the tensor `a` as tensor `b` with rows sorted by the first column |
 |  | `np.unique(a)` | `unique(a)` | a vector of unique values in tensor `a` |
 | | | |

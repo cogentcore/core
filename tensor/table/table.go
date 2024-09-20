@@ -19,7 +19,7 @@ import (
 // Use the [Table.Column] (by name) and [Table.ColumnIndex] methods to obtain a
 // [tensor.Indexed] view of the column, using the shared [Table.Indexes] of the Table.
 // Thus, a coordinated sorting and filtered view of the column data is automatically
-// available for any of the tensor package functions that use [tensor.Indexed] as the one
+// available for any of the tensor package functions that use [tensor.Tensor] as the one
 // common data representation for all operations.
 type Table struct { //types:add
 	// Columns has the list of column tensor data for this table.
@@ -275,7 +275,7 @@ func (dt *Table) SetNumRows(rows int) *Table { //types:add
 			dt.Indexes = append(dt.Indexes, strow+i)
 		}
 	} else {
-		dt.DeleteInvalid()
+		dt.ValidIndexes()
 	}
 	return dt
 }

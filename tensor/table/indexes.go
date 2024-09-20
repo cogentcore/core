@@ -56,9 +56,9 @@ func (dt *Table) IndexesFromTensor(ix *tensor.Indexed) {
 	dt.Indexes = ix.Indexes
 }
 
-// DeleteInvalid deletes all invalid indexes from the list.
+// ValidIndexes deletes all invalid indexes from the list.
 // Call this if rows (could) have been deleted from table.
-func (dt *Table) DeleteInvalid() {
+func (dt *Table) ValidIndexes() {
 	if dt.Columns.Rows <= 0 || dt.Indexes == nil {
 		dt.Indexes = nil
 		return

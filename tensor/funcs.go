@@ -17,15 +17,15 @@ import (
 const StringFirstArg = true
 
 // Func represents a registered tensor function, which has
-// In number of input *tensor.Indexed arguments, and Out
-// number of output arguments (typically 1). There can also be an optional
+// In number of input Tensor arguments, and Out number of output
+// arguments (typically 1). There can also be an optional
 // string first argument, which is used to specify the name of
 // another function in some cases (e.g., a stat or metric function).
 type Func struct {
 	// Name is the original CamelCase Go name for function
 	Name string
 
-	// Fun is the function, which must _only_ take some number of *tensor.Indexed
+	// Fun is the function, which must _only_ take some number of Tensor
 	// args, with an optional first string arg per [StringFirst].
 	Fun any
 
@@ -60,8 +60,8 @@ func NewFunc(name string, fun any, out int, stringFirst ...bool) (*Func, error) 
 }
 
 // Funcs is the global tensor named function registry.
-// All functions must be of the form: func(a, b *tensor.Indexed)
-// i.e., taking some specific number of Indexed arguments,
+// All functions must be of the form: func(a, b tensor.Tensor)
+// i.e., taking some specific number of Tensor arguments,
 // with the number of output vs. input arguments registered.
 var Funcs map[string]*Func
 

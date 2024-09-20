@@ -18,13 +18,13 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// Indexed is an indexed wrapper around a tensor.Tensor that provides a
-// specific view onto the Tensor defined by the set of indexes, which
-// apply to the outermost row dimension (with default row-major indexing).
+// Indexed is an indexed wrapper around another [Tensor] that provides a
+// specific view onto the Tensor defined by the set of [Indexed.Indexes],
+// which apply to the outermost row dimension (with default row-major indexing).
 // Sorting and filtering a tensor only requires updating the indexes while
 // leaving the underlying Tensor alone.
 // To produce a new [Tensor] that has its raw data actually organized according
-// to the indexed order (i.e., the copy function of numpy), call the [NewTensor] method.
+// to the indexed order (i.e., the copy function of numpy), call [Indexed.NewTensor].
 // Use the [Set]FloatRow[Cell] methods wherever possible, for the most efficient
 // and natural indirection through the indexes.
 type Indexed struct { //types:add
@@ -38,14 +38,14 @@ type Indexed struct { //types:add
 	Indexes []int
 }
 
-// NewIndexed returns a new Indexed based on given tensor,
+// NewIndexed returns a new [Indexed] view of given tensor,
 // with optional list of indexes (none / nil = sequential).
 func NewIndexed(tsr Tensor, idxs ...int) *Indexed {
 	ix := &Indexed{Tensor: tsr, Indexes: idxs}
 	return ix
 }
 
-// AsIndexed returns the tensor as an Indexed view.
+// AsIndexed returns the tensor as an [Indexed[] view.
 // If it already is one, then it is returned, otherwise it is wrapped.
 func AsIndexed(tsr Tensor) *Indexed {
 	if ix, ok := tsr.(*Indexed); ok {
@@ -178,7 +178,7 @@ func (ix *Indexed) DimSize(dim int) int {
 }
 
 // RowCellSize returns the size of the outermost Row shape dimension
-// (via [Indexed.Rows] method), and the size of all the remaining
+// (via [Indexed.NumRows] method), and the size of all the remaining
 // inner dimensions (the "cell" size).
 func (ix *Indexed) RowCellSize() (rows, cells int) {
 	_, cells = ix.Tensor.RowCellSize()
@@ -186,20 +186,10 @@ func (ix *Indexed) RowCellSize() (rows, cells int) {
 	return
 }
 
-// RowCellIndex returns the direct Values index into underlying tensor
-// based on given overall row * cell index.
-func (ix *Indexed) RowCellIndex(idx int) (i1d, ri, ci int) {
-	_, cells := ix.Tensor.RowCellSize()
-	ri = idx / cells
-	ci = idx % cells
-	i1d = ix.RowIndex(ri)*cells + ci
-	return
-}
-
-// DeleteInvalid deletes all invalid indexes from the list.
+// ValidIndexes deletes all invalid indexes from the list.
 // Call this if rows (could) have been deleted from tensor.
-func (ix *Indexed) DeleteInvalid() {
-	if ix.Tensor == nil || ix.Tensor.DimSize(0) <= 0 || ix.Indexes == nil {
+func (ix *Indexed) ValidIndexes() {
+	if ix.Tensor.DimSize(0) <= 0 || ix.Indexes == nil {
 		ix.Indexes = nil
 		return
 	}
@@ -220,8 +210,8 @@ func (ix *Indexed) Sequential() { //types:add
 // e.g., Sort, Filter.  If Indexes == nil, they are set to all rows, otherwise
 // current indexes are left as is. Use Sequential, then IndexesNeeded to ensure
 // all rows are represented.
-func (ix *Indexed) IndexesNeeded() { //types:add
-	if ix.Tensor == nil || ix.Tensor.DimSize(0) <= 0 {
+func (ix *Indexed) IndexesNeeded() {
+	if ix.Tensor.DimSize(0) <= 0 {
 		ix.Indexes = nil
 		return
 	}
@@ -237,7 +227,7 @@ func (ix *Indexed) IndexesNeeded() { //types:add
 // ExcludeMissing deletes indexes where the values are missing, as indicated by NaN.
 // Uses first cell of higher dimensional data.
 func (ix *Indexed) ExcludeMissing() { //types:add
-	if ix.Tensor == nil || ix.Tensor.DimSize(0) <= 0 {
+	if ix.Tensor.DimSize(0) <= 0 {
 		ix.Indexes = nil
 		return
 	}
@@ -254,7 +244,7 @@ func (ix *Indexed) ExcludeMissing() { //types:add
 // then existing list of indexes is permuted, otherwise a new set of
 // permuted indexes are generated
 func (ix *Indexed) Permuted() {
-	if ix.Tensor == nil || ix.Tensor.DimSize(0) <= 0 {
+	if ix.Tensor.DimSize(0) <= 0 {
 		ix.Indexes = nil
 		return
 	}

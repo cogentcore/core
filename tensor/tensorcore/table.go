@@ -183,7 +183,7 @@ func (tb *Table) SetIndexed(ix *table.Table) *Table {
 }
 
 func (tb *Table) UpdateSliceSize() int {
-	tb.Table.DeleteInvalid() // table could have changed
+	tb.Table.ValidIndexes() // table could have changed
 	if tb.Table.NumRows() == 0 {
 		tb.Table.Sequential()
 	}
