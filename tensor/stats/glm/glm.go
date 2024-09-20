@@ -88,7 +88,7 @@ type GLM struct {
 	Table *table.Table
 
 	// tensor columns from table with the respective variables
-	IndepVars, DepVars, PredVars, ErrVars *tensor.Indexed
+	IndepVars, DepVars, PredVars, ErrVars tensor.Tensor
 
 	// Number of independent and dependent variables
 	NIndepVars, NDepVars int
@@ -110,8 +110,8 @@ func (glm *GLM) Defaults() {
 func (glm *GLM) init(nIv, nDv int) {
 	glm.NIndepVars = nIv
 	glm.NDepVars = nDv
-	glm.Coeff.SetShape(nDv, nIv+1)
-	glm.Coeff.SetNames("DepVars", "IndepVars")
+	glm.Coeff.SetShapeInts(nDv, nIv+1)
+	// glm.Coeff.SetNames("DepVars", "IndepVars")
 	glm.R2 = make([]float64, nDv)
 	glm.ObsVariance = make([]float64, nDv)
 	glm.ErrVariance = make([]float64, nDv)
@@ -126,17 +126,17 @@ func (glm *GLM) init(nIv, nDv int) {
 func (glm *GLM) SetTable(dt *table.Table, indepVars, depVars, predVars, errVars string) error {
 	iv := dt.Column(indepVars)
 	dv := dt.Column(depVars)
-	var pv, ev *tensor.Indexed
+	var pv, ev tensor.Tensor
 	if predVars != "" {
 		pv = dt.Column(predVars)
 	}
 	if errVars != "" {
 		ev = dt.Column(errVars)
 	}
-	if pv != nil && !pv.Tensor.Shape().IsEqual(dv.Tensor.Shape()) {
+	if pv != nil && !pv.Shape().IsEqual(dv.Shape()) {
 		return fmt.Errorf("predVars must have same shape as depVars")
 	}
-	if ev != nil && !ev.Tensor.Shape().IsEqual(dv.Tensor.Shape()) {
+	if ev != nil && !ev.Shape().IsEqual(dv.Shape()) {
 		return fmt.Errorf("errVars must have same shape as depVars")
 	}
 	_, nIv := iv.RowCellSize()
@@ -190,7 +190,7 @@ func (glm *GLM) Run() {
 			lrate *= 0.5
 		}
 		for i := 0; i < n; i++ {
-			row := dt.Index(i)
+			row := dt.RowIndex(i)
 			for di := 0; di < nDv; di++ {
 				pred := 0.0
 				for ii := 0; ii < nIv; ii++ {

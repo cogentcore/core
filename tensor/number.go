@@ -40,36 +40,10 @@ func NewFloat32(sizes ...int) *Float32 {
 	return New[float32](sizes...).(*Float32)
 }
 
-// AsFloat32 returns the tensor as a [Float32] tensor.
-// If already is a Float32, it is returned as such.
-// Otherwise, a new Float32 tensor is created and values are copied.
-func AsFloat32(tsr Tensor) *Float32 {
-	if f, ok := tsr.(*Float32); ok {
-		return f
-	}
-	f := NewFloat32(AsInts(tsr.ShapeSizes())...)
-	f.CopyFrom(tsr)
-	return f
-}
-
 // NewFloat64 returns a new [Float64] tensor
 // with the given sizes per dimension (shape), and optional dimension names.
 func NewFloat64(sizes ...int) *Float64 {
 	return New[float64](sizes...).(*Float64)
-}
-
-// AsFloat64Tensor returns the tensor as a [Float64] tensor.
-// If already is a Float64, it is returned as such.
-// Otherwise, a new Float64 tensor is created and values are copied.
-// Use this function for interfacing with gonum or other apis that
-// only operate on float64 types.
-func AsFloat64Tensor(tsr Tensor) *Float64 {
-	if f, ok := tsr.(*Float64); ok {
-		return f
-	}
-	f := NewFloat64(AsInts(tsr.ShapeSizes())...)
-	f.CopyFrom(tsr)
-	return f
 }
 
 // NewInt returns a new Int tensor

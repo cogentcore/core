@@ -124,12 +124,12 @@ func StripPackage(name string) string {
 
 // Stat calls a standard Stats enum function on given tensors.
 // Output results are in the out tensor.
-func Stat(stat Stats, in, out *tensor.Indexed) {
+func Stat(stat Stats, in, out tensor.Tensor) {
 	tensor.Call(stat.FuncName(), in, out)
 }
 
 // StatOut calls a standard Stats enum function on given tensor,
 // returning output as a newly created tensor.
-func StatOut(stat Stats, in *tensor.Indexed) *tensor.Indexed {
+func StatOut(stat Stats, in tensor.Tensor) tensor.Tensor {
 	return tensor.CallOut(stat.FuncName(), in)
 }

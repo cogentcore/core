@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/math32/vecint"
 	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/matrix"
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/tmath"
 	"gonum.org/v1/gonum/mat"
@@ -28,21 +29,21 @@ func init() {
 // The results fill in the elements of the output matrix, which is symmetric,
 // and only the lower triangular part is computed, with results copied
 // to the upper triangular region, for maximum efficiency.
-func Matrix(funcName string, in, out *tensor.Indexed) {
+func Matrix(funcName string, in, out tensor.Tensor) {
 	rows, cells := in.RowCellSize()
 	if rows == 0 || cells == 0 {
 		return
 	}
-	out.Tensor.SetShape(rows, rows)
+	out.SetShapeInts(rows, rows)
 	mout := tensor.NewFloat64Scalar(0.0)
 	coords := TriangularLIndicies(rows)
 	nc := len(coords)
 	// note: flops estimating 3 per item on average -- different for different metrics.
-	tensor.VectorizeThreaded(cells*3, func(tsr ...*tensor.Indexed) int { return nc },
-		func(idx int, tsr ...*tensor.Indexed) {
+	tensor.VectorizeThreaded(cells*3, func(tsr ...tensor.Tensor) int { return nc },
+		func(idx int, tsr ...tensor.Tensor) {
 			c := coords[idx]
-			sa := tsr[0].Cells1D(c.X)
-			sb := tsr[0].Cells1D(c.Y)
+			sa := tensor.Cells1D(tsr[0], c.X)
+			sb := tensor.Cells1D(tsr[0], c.Y)
 			tensor.Call(funcName, sa, sb, mout)
 			tsr[1].SetFloat(mout.Float1D(0), c.X, c.Y)
 		}, in, out)
@@ -50,7 +51,7 @@ func Matrix(funcName string, in, out *tensor.Indexed) {
 		if c.X == c.Y { // exclude diag
 			continue
 		}
-		out.Tensor.SetFloat(out.Tensor.Float(c.X, c.Y), c.Y, c.X)
+		out.SetFloat(out.Float(c.X, c.Y), c.Y, c.X)
 	}
 }
 
@@ -63,7 +64,7 @@ func Matrix(funcName string, in, out *tensor.Indexed) {
 // The metric function registered in tensor Funcs can be passed as Metrics.FuncName().
 // The rows of the output matrix are the rows of the first input tensor,
 // and the columns of the output are the rows of the second input tensor.
-func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
+func CrossMatrix(funcName string, a, b, out tensor.Tensor) {
 	arows, acells := a.RowCellSize()
 	if arows == 0 || acells == 0 {
 		return
@@ -72,17 +73,17 @@ func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
 	if brows == 0 || bcells == 0 {
 		return
 	}
-	out.Tensor.SetShape(arows, brows)
+	out.SetShapeInts(arows, brows)
 	mout := tensor.NewFloat64Scalar(0.0)
 	// note: flops estimating 3 per item on average -- different for different metrics.
 	flops := min(acells, bcells) * 3
 	nc := arows * brows
-	tensor.VectorizeThreaded(flops, func(tsr ...*tensor.Indexed) int { return nc },
-		func(idx int, tsr ...*tensor.Indexed) {
+	tensor.VectorizeThreaded(flops, func(tsr ...tensor.Tensor) int { return nc },
+		func(idx int, tsr ...tensor.Tensor) {
 			ar := idx / brows
 			br := idx % brows
-			sa := tsr[0].Cells1D(ar)
-			sb := tsr[1].Cells1D(br)
+			sa := tensor.Cells1D(tsr[0], ar)
+			sb := tensor.Cells1D(tsr[1], br)
 			tensor.Call(funcName, sa, sb, mout)
 			tsr[2].SetFloat(mout.Float1D(0), ar, br)
 		}, a, b, out)
@@ -101,46 +102,46 @@ func CrossMatrix(funcName string, a, b, out *tensor.Indexed) {
 // which is typical in neural network models, and use
 // Correlation if they are on very different scales, because it effectively rescales).
 // The resulting matrix can be used as the input to PCA or SVD eigenvalue decomposition.
-func CovarianceMatrix(funcName string, in, out *tensor.Indexed) {
+func CovarianceMatrix(funcName string, in, out tensor.Tensor) {
 	rows, cells := in.RowCellSize()
 	if rows == 0 || cells == 0 {
 		return
 	}
 
-	flatsz := []int{in.Tensor.DimSize(0), cells}
-	flatvw := in.Tensor.View()
-	flatvw.SetShape(flatsz...)
-	flatix := tensor.NewIndexed(flatvw)
-	flatix.Indexes = in.Indexes
+	flatsz := []int{in.DimSize(0), cells}
+	flatvw := in.View()
+	flatvw.SetShapeInts(flatsz...)
+	// flatix := tensor.NewIndexed(flatvw)
+	// flatix.Indexes = in.Indexes
 
 	mout := tensor.NewFloat64Scalar(0.0)
-	out.Tensor.SetShape(cells, cells)
-	av := tensor.NewFloat64Indexed(rows)
-	bv := tensor.NewFloat64Indexed(rows)
+	out.SetShapeInts(cells, cells)
+	av := tensor.NewFloat64(rows)
+	bv := tensor.NewFloat64(rows)
 	curCoords := vecint.Vector2i{-1, -1}
 
 	coords := TriangularLIndicies(cells)
 	nc := len(coords)
 	// note: flops estimating 3 per item on average -- different for different metrics.
-	tensor.VectorizeThreaded(rows*3, func(tsr ...*tensor.Indexed) int { return nc },
-		func(idx int, tsr ...*tensor.Indexed) {
+	tensor.VectorizeThreaded(rows*3, func(tsr ...tensor.Tensor) int { return nc },
+		func(idx int, tsr ...tensor.Tensor) {
 			c := coords[idx]
 			if c.X != curCoords.X {
-				tensor.Slice(tsr[0], av, tensor.Range{}, tensor.Range{Start: c.X, End: c.X + 1})
+				// tensor.Slice(tsr[0], av, tensor.Range{}, tensor.Range{Start: c.X, End: c.X + 1})
 				curCoords.X = c.X
 			}
 			if c.Y != curCoords.Y {
-				tensor.Slice(tsr[0], bv, tensor.Range{}, tensor.Range{Start: c.Y, End: c.Y + 1})
+				// tensor.Slice(tsr[0], bv, tensor.Range{}, tensor.Range{Start: c.Y, End: c.Y + 1})
 				curCoords.Y = c.Y
 			}
 			tensor.Call(funcName, av, bv, mout)
 			tsr[1].SetFloat(mout.Float1D(0), c.X, c.Y)
-		}, flatix, out)
+		}, flatvw, out)
 	for _, c := range coords { // copy to upper
 		if c.X == c.Y { // exclude diag
 			continue
 		}
-		out.Tensor.SetFloat(out.Tensor.Float(c.X, c.Y), c.Y, c.X)
+		out.SetFloat(out.Float(c.X, c.Y), c.Y, c.X)
 	}
 }
 
@@ -151,13 +152,11 @@ func CovarianceMatrix(funcName string, in, out *tensor.Indexed) {
 // i.e., maximum eigenvector is the last column.
 // The eigenvalues are the size of one row, ordered *lowest* to *highest*.
 // Note that PCA produces results in the *opposite* order of [SVD].
-func PCA(covar, eigenvecs, vals *tensor.Indexed) {
-	n := covar.Tensor.DimSize(0)
-	cv := tensor.AsFloat64(covar.Tensor)
-	eigenvecs.Tensor.SetShape(n, n)
-	eigenvecs.Sequential()
-	vals.Tensor.SetShape(n)
-	vals.Sequential()
+func PCA(covar, eigenvecs, vals tensor.Tensor) {
+	n := covar.DimSize(0)
+	cv := tensor.AsFloat64Tensor(covar)
+	eigenvecs.SetShapeInts(n, n)
+	vals.SetShapeInts(n)
 	var eig mat.EigenSym
 	ok := eig.Factorize(cv, true)
 	if !ok {
@@ -166,11 +165,11 @@ func PCA(covar, eigenvecs, vals *tensor.Indexed) {
 	}
 	var ev mat.Dense
 	eig.VectorsTo(&ev)
-	tensor.CopyDense(eigenvecs.Tensor, &ev)
-	fv := tensor.AsFloat64(vals.Tensor)
+	matrix.CopyDense(eigenvecs, &ev)
+	fv := tensor.AsFloat64Tensor(vals)
 	eig.Values(fv.Values)
-	if fv != vals.Tensor {
-		vals.Tensor.CopyFrom(fv)
+	if fv != vals {
+		vals.CopyFrom(fv)
 	}
 }
 
@@ -181,13 +180,11 @@ func PCA(covar, eigenvecs, vals *tensor.Indexed) {
 // i.e., maximum eigenvector is the last column.
 // The eigenvalues are the size of one row, ordered *highest* to *lowest*.
 // Note that SVD produces results in the *opposite* order of [PCA].
-func SVD(covar, eigenvecs, vals *tensor.Indexed) {
-	n := covar.Tensor.DimSize(0)
-	cv := tensor.AsFloat64(covar.Tensor)
-	eigenvecs.Tensor.SetShape(n, n)
-	eigenvecs.Sequential()
-	vals.Tensor.SetShape(n)
-	vals.Sequential()
+func SVD(covar, eigenvecs, vals tensor.Tensor) {
+	n := covar.DimSize(0)
+	cv := tensor.AsFloat64Tensor(covar)
+	eigenvecs.SetShapeInts(n, n)
+	vals.SetShapeInts(n)
 	var eig mat.SVD
 	ok := eig.Factorize(cv, mat.SVDFull) // todo: benchmark different versions
 	if !ok {
@@ -196,11 +193,11 @@ func SVD(covar, eigenvecs, vals *tensor.Indexed) {
 	}
 	var ev mat.Dense
 	eig.UTo(&ev)
-	tensor.CopyDense(eigenvecs.Tensor, &ev)
-	fv := tensor.AsFloat64(vals.Tensor)
+	matrix.CopyDense(eigenvecs, &ev)
+	fv := tensor.AsFloat64Tensor(vals)
 	eig.Values(fv.Values)
-	if fv != vals.Tensor {
-		vals.Tensor.CopyFrom(fv)
+	if fv != vals {
+		vals.CopyFrom(fv)
 	}
 }
 
@@ -211,21 +208,21 @@ func SVD(covar, eigenvecs, vals *tensor.Indexed) {
 // and each row of cells is projected through the matrix column, producing a
 // 1D output with the number of rows.  Otherwise a single number is produced.
 // This is typically done with results from SVD or PCA.
-func ProjectOnMatrixColumn(mtx, vec, colindex, out *tensor.Indexed) {
+func ProjectOnMatrixColumn(mtx, vec, colindex, out tensor.Tensor) {
 	ci := int(colindex.Float1D(0))
-	col := tensor.NewFloat64Indexed()
-	tensor.Slice(mtx, col, tensor.Range{}, tensor.Range{Start: ci, End: ci + 1})
-	// fmt.Println(mtx.Tensor.String(), col.Tensor.String())
+	_ = ci
+	col := tensor.NewFloat64()
+	// tensor.Slice(mtx, col, tensor.Range{}, tensor.Range{Start: ci, End: ci + 1})
+	// fmt.Println(mtx.String(), col.String())
 	rows, cells := vec.RowCellSize()
-	mout := tensor.NewFloat64Indexed()
+	mout := tensor.NewFloat64()
 	if rows > 0 && cells > 0 {
 		msum := tensor.NewFloat64Scalar(0)
-		out.Tensor.SetShape(rows)
-		out.Sequential()
+		out.SetShapeInts(rows)
 		for i := range rows {
-			tmath.Mul(vec.Cells1D(i), col, mout)
+			tmath.Mul(tensor.Cells1D(vec, i), col, mout)
 			stats.SumFunc(mout, msum)
-			// fmt.Println(vec.Cells1D(i).Tensor.String(), mout.Tensor.String(), msum.Tensor.String())
+			// fmt.Println(tensor.Cells1D(vec, i).String(), mout.String(), msum.String())
 			out.SetFloat1D(msum.Float1D(0), i)
 		}
 	} else {

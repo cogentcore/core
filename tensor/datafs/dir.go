@@ -52,7 +52,7 @@ func (d *Data) Item(name string) *Data {
 // within this directory. This will panic if item is not
 // found, and will return nil if it is not a Value
 // (i.e., it is a directory).
-func (d *Data) Value(name string) *tensor.Indexed {
+func (d *Data) Value(name string) tensor.Tensor {
 	return d.Dir.At(name).Data
 }
 
@@ -78,12 +78,12 @@ func (d *Data) Items(names ...string) ([]*Data, error) {
 
 // Values returns Value items (tensors) in given directory by name.
 // error reports any items not found, or if not a directory.
-func (d *Data) Values(names ...string) ([]*tensor.Indexed, error) {
+func (d *Data) Values(names ...string) ([]tensor.Tensor, error) {
 	if err := d.mustDir("Values", ""); err != nil {
 		return nil, err
 	}
 	var errs []error
-	var its []*tensor.Indexed
+	var its []tensor.Tensor
 	for _, nm := range names {
 		it := d.Dir.At(nm)
 		if it != nil && it.Data != nil {
@@ -118,11 +118,11 @@ func (d *Data) ItemsFunc(fun func(item *Data) bool) []*Data {
 // ValuesFunc returns Value items (tensors) in given directory
 // filtered by given function, in directory order (e.g., order added).
 // If func is nil, all values are returned.
-func (d *Data) ValuesFunc(fun func(item *Data) bool) []*tensor.Indexed {
+func (d *Data) ValuesFunc(fun func(item *Data) bool) []tensor.Tensor {
 	if err := d.mustDir("ItemsFunc", ""); err != nil {
 		return nil
 	}
-	var its []*tensor.Indexed
+	var its []tensor.Tensor
 	for _, it := range d.Dir.Values {
 		if it.Data == nil {
 			continue
@@ -162,11 +162,11 @@ func (d *Data) ItemsAlphaFunc(fun func(item *Data) bool) []*Data {
 // (e.g., order added).
 // The function can filter out directories to prune the tree.
 // If func is nil, all Value items are returned.
-func (d *Data) FlatValuesFunc(fun func(item *Data) bool) []*tensor.Indexed {
+func (d *Data) FlatValuesFunc(fun func(item *Data) bool) []tensor.Tensor {
 	if err := d.mustDir("FlatValuesFunc", ""); err != nil {
 		return nil
 	}
-	var its []*tensor.Indexed
+	var its []tensor.Tensor
 	for _, it := range d.Dir.Values {
 		if fun != nil && !fun(it) {
 			continue
@@ -211,12 +211,12 @@ func (d *Data) FlatItemsFunc(fun func(item *Data) bool) []*Data {
 // the entire subtree, filtered by given function, in alphabetical order.
 // The function can filter out directories to prune the tree.
 // If func is nil, all items are returned.
-func (d *Data) FlatValuesAlphaFunc(fun func(item *Data) bool) []*tensor.Indexed {
+func (d *Data) FlatValuesAlphaFunc(fun func(item *Data) bool) []tensor.Tensor {
 	if err := d.mustDir("FlatValuesFunc", ""); err != nil {
 		return nil
 	}
 	names := d.DirNamesAlpha()
-	var its []*tensor.Indexed
+	var its []tensor.Tensor
 	for _, nm := range names {
 		it := d.Dir.At(nm)
 		if fun != nil && !fun(it) {
@@ -373,7 +373,7 @@ func (d *Data) GetDirTable(fun func(item *Data) bool) *table.Table {
 	dt := table.NewTable(fsx.DirAndFile(string(d.Path())))
 	for _, it := range its {
 		tsr := it.Data
-		rows := tsr.NumRows()
+		rows := tsr.DimSize(0)
 		if dt.Columns.Rows < rows {
 			dt.Columns.Rows = rows
 			dt.SetNumRows(dt.Columns.Rows)
@@ -382,7 +382,7 @@ func (d *Data) GetDirTable(fun func(item *Data) bool) *table.Table {
 		if it.Parent != d {
 			nm = fsx.DirAndFile(string(it.Path()))
 		}
-		dt.AddColumn(nm, tsr.Tensor)
+		dt.AddColumn(nm, tsr)
 	}
 	d.DirTable = dt
 	return dt

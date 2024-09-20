@@ -33,7 +33,7 @@ type Data struct {
 	// represented using the universal [tensor] data type of
 	// [tensor.Indexed], which can represent anything from a scalar
 	// to n-dimensional data, in a range of data types.
-	Data *tensor.Indexed
+	Data tensor.Tensor
 
 	// Dir is for directory nodes, with all the items in the directory.
 	Dir *Dir
@@ -61,8 +61,8 @@ func newData(dir *Data, name string) (*Data, error) {
 // of given data type, in given directory.
 // The names must be unique in the directory.
 // Returns the first item created, for immediate use of one value.
-func NewScalar[T tensor.DataTypes](dir *Data, names ...string) *tensor.Indexed {
-	var first *tensor.Indexed
+func NewScalar[T tensor.DataTypes](dir *Data, names ...string) tensor.Tensor {
+	var first tensor.Tensor
 	for _, nm := range names {
 		tsr := tensor.New[T](1)
 		tsr.Metadata().SetName(nm)
@@ -81,7 +81,7 @@ func NewScalar[T tensor.DataTypes](dir *Data, names ...string) *tensor.Indexed {
 // NewValue returns a new Data value as a [tensor.Indexed] [tensor.Tensor]
 // of given data type and shape sizes, in given directory Data item.
 // The name must be unique in the directory.
-func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) *tensor.Indexed {
+func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.Tensor {
 	tsr := tensor.New[T](sizes...)
 	tsr.Metadata().SetName(name)
 	d, err := newData(dir, name)
@@ -96,7 +96,7 @@ func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) *tensor.
 // of given reflect.Kind type and shape sizes per dimension, in given directory Data item.
 // Supported types are string, bool (for [Bits]), float32, float64, int, int32, and byte.
 // The name must be unique in the directory.
-func (d *Data) NewOfType(name string, typ reflect.Kind, sizes ...int) *tensor.Indexed {
+func (d *Data) NewOfType(name string, typ reflect.Kind, sizes ...int) tensor.Tensor {
 	tsr := tensor.NewOfType(typ, sizes...)
 	tsr.Metadata().SetName(name)
 	nd, err := newData(d, name)
@@ -111,7 +111,7 @@ func (d *Data) KnownFileInfo() fileinfo.Known {
 	if d.Data == nil {
 		return fileinfo.Unknown
 	}
-	tsr := d.Data.Tensor
+	tsr := d.Data
 	if tsr.Len() > 1 {
 		return fileinfo.Tensor
 	}
@@ -129,7 +129,7 @@ func (d *Data) Bytes() []byte {
 	if d.Data == nil {
 		return nil
 	}
-	return d.Data.Tensor.Bytes()
+	return d.Data.Bytes()
 }
 
 // AsString returns data as scalar string.

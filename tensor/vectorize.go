@@ -35,7 +35,7 @@ var (
 // the outermost row dimension of the tensor.
 // This version runs purely sequentially on on this go routine.
 // See VectorizeThreaded and VectorizeGPU for other versions.
-func Vectorize(nfun func(tsr ...*Indexed) int, fun func(idx int, tsr ...*Indexed), tsr ...*Indexed) {
+func Vectorize(nfun func(tsr ...Tensor) int, fun func(idx int, tsr ...Tensor), tsr ...Tensor) {
 	n := nfun(tsr...)
 	if n <= 0 {
 		return
@@ -51,7 +51,7 @@ func Vectorize(nfun func(tsr ...*Indexed) int, fun func(idx int, tsr ...*Indexed
 // (floating point operations) for the function exceeds the [ThreadingThreshold].
 // Heuristically, numbers below this threshold do not result
 // in an overall speedup, due to overhead costs.
-func VectorizeThreaded(flops int, nfun func(tsr ...*Indexed) int, fun func(idx int, tsr ...*Indexed), tsr ...*Indexed) {
+func VectorizeThreaded(flops int, nfun func(tsr ...Tensor) int, fun func(idx int, tsr ...Tensor), tsr ...Tensor) {
 	n := nfun(tsr...)
 	if n <= 0 {
 		return
@@ -80,7 +80,7 @@ func DefaultNumThreads() int {
 // it is likely to be beneficial, in terms of the ThreadingThreshold.
 // If threads is 0, then the [DefaultNumThreads] will be used:
 // GOMAXPROCS subject to NumThreads constraint if non-zero.
-func VectorizeOnThreads(threads int, nfun func(tsr ...*Indexed) int, fun func(idx int, tsr ...*Indexed), tsr ...*Indexed) {
+func VectorizeOnThreads(threads int, nfun func(tsr ...Tensor) int, fun func(idx int, tsr ...Tensor), tsr ...Tensor) {
 	if threads == 0 {
 		threads = DefaultNumThreads()
 	}
@@ -108,16 +108,16 @@ func VectorizeOnThreads(threads int, nfun func(tsr ...*Indexed) int, fun func(id
 
 // NFirstRows is an N function for Vectorize that returns the number of
 // outer-dimension rows (or Indexes) of the first tensor.
-func NFirstRows(tsr ...*Indexed) int {
+func NFirstRows(tsr ...Tensor) int {
 	if len(tsr) == 0 {
 		return 0
 	}
-	return tsr[0].NumRows()
+	return tsr[0].DimSize(0)
 }
 
 // NFirstLen is an N function for Vectorize that returns the number of
 // elements in the tensor, taking into account the Indexes view.
-func NFirstLen(tsr ...*Indexed) int {
+func NFirstLen(tsr ...Tensor) int {
 	if len(tsr) == 0 {
 		return 0
 	}
@@ -127,7 +127,7 @@ func NFirstLen(tsr ...*Indexed) int {
 // NMinLen is an N function for Vectorize that returns the min number of
 // elements across given number of tensors in the list.  Use a closure
 // to call this with the nt.
-func NMinLen(nt int, tsr ...*Indexed) int {
+func NMinLen(nt int, tsr ...Tensor) int {
 	nt = min(len(tsr), nt)
 	if nt == 0 {
 		return 0

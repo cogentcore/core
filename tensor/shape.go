@@ -41,7 +41,7 @@ func (sh *Shape) SetShapeInts(sizes ...int) {
 // SetShape sets the shape sizes from int values from Tensor.
 // RowMajor ordering is used by default.
 func (sh *Shape) SetShape(shp Tensor) {
-	sh.SetShapeInts(AsInts(shp)...)
+	sh.SetShapeInts(AsIntSlice(shp)...)
 }
 
 // AsTensor returns shape sizes as an Int Tensor.

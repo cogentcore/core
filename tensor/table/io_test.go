@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"cogentcore.org/core/tensor"
 )
 
 func TestTableHeaders(t *testing.T) {
@@ -34,14 +36,14 @@ func TestTableHeaders(t *testing.T) {
 	if cols[2].DataType() != reflect.Float32 {
 		t.Errorf("TableHeaders: cols[2] != FLOAT32\n")
 	}
-	shsz := AsInts(cols[1].ShapeSizes())
+	shsz := tensor.AsIntSlice(cols[1].ShapeSizes())
 	if shsz[1] != 5 {
 		t.Errorf("TableHeaders: cols[1].ShapeSizes[1] != 5\n")
 	}
 	if shsz[2] != 5 {
 		t.Errorf("TableHeaders: cols[1].ShapeSizes[2] != 5\n")
 	}
-	shsz = AsInts(cols[2].ShapeSizes())
+	shsz = tensor.AsIntSlice(cols[2].ShapeSizes())
 	if shsz[1] != 5 {
 		t.Errorf("TableHeaders: cols[2].ShapeSizes[1] != 5\n")
 	}

@@ -13,7 +13,7 @@ import (
 )
 
 type onef func(x float64) float64
-type tonef func(in, out *tensor.Indexed)
+type tonef func(in, out tensor.Tensor)
 
 // Equal does equal testing taking into account NaN
 func Equal(t *testing.T, trg, val float64) {
@@ -36,7 +36,7 @@ func TestMath(t *testing.T) {
 	oneout := oned.Clone()
 
 	cell2d := tensor.NewIndexed(tensor.NewFloat32(5, 2, 6))
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		i, _, ci := cell2d.RowCellIndex(idx)
 		cell2d.SetFloat1D(oned.Float1D(ci), i)
 	}, cell2d)
@@ -61,7 +61,7 @@ func TestMath(t *testing.T) {
 			// fmt.Println(r)
 			si := lv * r
 			for c, v := range vals {
-				ov := cellout.Tensor.(*tensor.Float32).Values[si+c]
+				ov := tensor.AsFloat32Tensor(cellout).Values[si+c]
 				Equal(t, fun(v), float64(ov))
 			}
 		}

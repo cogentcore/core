@@ -106,7 +106,7 @@ func (fn *FileNode) OpenFile() error {
 		switch fn.Info.Known {
 		case fileinfo.Tensor:
 			d := DataFS(ofn)
-			br.NewTabTensorEditor(df, d.Data.Tensor)
+			br.NewTabTensorEditor(df, d.Data)
 		// case fileinfo.Table:
 		// 	d := DataFS(ofn)
 		// 	dt := d.AsTable()
@@ -222,13 +222,15 @@ func (fn *FileNode) PlotFile() {
 		case fileinfo.Tensor:
 			tsr := d.Data
 			dt = table.NewTable(df)
-			dt.Columns.Rows = tsr.NumRows()
-			dt.Indexes = tsr.Indexes
+			dt.Columns.Rows = tsr.DimSize(0)
+			if ix, ok := tsr.(*tensor.Indexed); ok {
+				dt.Indexes = ix.Indexes
+			}
 			rc := dt.AddIntColumn("Row")
 			for r := range dt.Columns.Rows {
 				rc.Values[r] = r
 			}
-			dt.AddColumn(fn.Name, tsr.Tensor)
+			dt.AddColumn(fn.Name, tsr)
 		// case fileinfo.Table:
 		// 	dt = d.AsTable()
 		default:

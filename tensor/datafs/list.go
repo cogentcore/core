@@ -18,7 +18,7 @@ const (
 
 func (d *Data) String() string {
 	if !d.IsDir() {
-		return d.Data.Tensor.Label()
+		return d.Data.Label()
 	}
 	return d.List(Short, DirOnly)
 }

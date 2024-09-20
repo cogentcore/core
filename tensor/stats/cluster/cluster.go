@@ -47,9 +47,9 @@ func (nn *Node) IsLeaf() bool {
 }
 
 // Sprint prints to string
-func (nn *Node) Sprint(labels *tensor.Indexed, depth int) string {
+func (nn *Node) Sprint(labels tensor.Tensor, depth int) string {
 	if nn.IsLeaf() && labels != nil {
-		return labels.Tensor.String1D(nn.Index) + " "
+		return labels.String1D(nn.Index) + " "
 	}
 	sv := fmt.Sprintf("\n%v%v: ", indent.Tabs(depth), nn.Dist)
 	for _, kn := range nn.Kids {
@@ -89,8 +89,8 @@ func NewNode(na, nb *Node, dst float64) *Node {
 // and then Glom to do the iterative agglomerative clustering process.
 // If you want to start with pre-defined initial clusters,
 // then call Glom with a root node so-initialized.
-func Cluster(funcName string, dmat, labels *tensor.Indexed) *Node {
-	ntot := dmat.Tensor.DimSize(0) // number of leaves
+func Cluster(funcName string, dmat, labels tensor.Tensor) *Node {
+	ntot := dmat.DimSize(0) // number of leaves
 	root := InitAllLeaves(ntot)
 	return Glom(root, funcName, dmat)
 }
@@ -111,10 +111,10 @@ func InitAllLeaves(ntot int) *Node {
 // with the starting clusters, which is all of the
 // leaves by default, but could be anything if you want
 // to start with predefined clusters.
-func Glom(root *Node, funcName string, dmat *tensor.Indexed) *Node {
-	ntot := dmat.Tensor.DimSize(0) // number of leaves
+func Glom(root *Node, funcName string, dmat tensor.Tensor) *Node {
+	ntot := dmat.DimSize(0) // number of leaves
 	mout := tensor.NewFloat64Scalar(0)
-	stats.MaxFunc(tensor.NewIndexed(tensor.New1DViewOf(dmat.Tensor)), mout)
+	stats.MaxFunc(tensor.New1DViewOf(dmat), mout)
 	maxd := mout.Float1D(0)
 	// indexes in each group
 	aidx := make([]int, ntot)
@@ -131,7 +131,7 @@ func Glom(root *Node, funcName string, dmat *tensor.Indexed) *Node {
 				bctr := 0
 				kb.Indexes(bidx, &bctr)
 				bix := bidx[0:bctr]
-				dv := Call(funcName, aix, bix, ntot, maxd, dmat.Tensor)
+				dv := Call(funcName, aix, bix, ntot, maxd, dmat)
 				if dv < mval {
 					mval = dv
 					ma = []int{ai}

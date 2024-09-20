@@ -50,304 +50,267 @@ func init() {
 	tensor.AddFunc("Y1", Y1, 1)
 }
 
-func Abs(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Abs(tsr[0].Float1D(i)), i)
+func Abs(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Abs(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Acos(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Acos(tsr[0].Float1D(i)), i)
+func Acos(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Acos(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Acosh(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Acosh(tsr[0].Float1D(i)), i)
+func Acosh(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Acosh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Asin(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Asin(tsr[0].Float1D(i)), i)
+func Asin(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Asin(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Asinh(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Asinh(tsr[0].Float1D(i)), i)
+func Asinh(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Asinh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Atan(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Atan(tsr[0].Float1D(i)), i)
+func Atan(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Atan(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Atanh(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Atanh(tsr[0].Float1D(i)), i)
+func Atanh(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Atanh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Cbrt(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Cbrt(tsr[0].Float1D(i)), i)
+func Cbrt(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Cbrt(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Ceil(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Ceil(tsr[0].Float1D(i)), i)
+func Ceil(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Ceil(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Cos(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Cos(tsr[0].Float1D(i)), i)
+func Cos(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Cos(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Cosh(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Cosh(tsr[0].Float1D(i)), i)
+func Cosh(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Cosh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Erf(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Erf(tsr[0].Float1D(i)), i)
+func Erf(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Erf(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Erfc(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Erfc(tsr[0].Float1D(i)), i)
+func Erfc(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Erfc(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Erfcinv(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Erfcinv(tsr[0].Float1D(i)), i)
+func Erfcinv(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Erfcinv(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Erfinv(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Erfinv(tsr[0].Float1D(i)), i)
+func Erfinv(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Erfinv(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Exp(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Exp(tsr[0].Float1D(i)), i)
+func Exp(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Exp(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Exp2(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Exp2(tsr[0].Float1D(i)), i)
+func Exp2(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Exp2(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Expm1(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Expm1(tsr[0].Float1D(i)), i)
+func Expm1(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Expm1(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Floor(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Floor(tsr[0].Float1D(i)), i)
+func Floor(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Floor(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Gamma(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Gamma(tsr[0].Float1D(i)), i)
+func Gamma(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Gamma(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func J0(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.J0(tsr[0].Float1D(i)), i)
+func J0(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.J0(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func J1(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.J1(tsr[0].Float1D(i)), i)
+func J1(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.J1(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Log(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Log(tsr[0].Float1D(i)), i)
+func Log(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Log(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Log10(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Log10(tsr[0].Float1D(i)), i)
+func Log10(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Log10(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Log1p(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Log1p(tsr[0].Float1D(i)), i)
+func Log1p(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Log1p(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Log2(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Log2(tsr[0].Float1D(i)), i)
+func Log2(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Log2(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Logb(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Logb(tsr[0].Float1D(i)), i)
+func Logb(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Logb(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Round(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Round(tsr[0].Float1D(i)), i)
+func Round(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Round(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func RoundToEven(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.RoundToEven(tsr[0].Float1D(i)), i)
+func RoundToEven(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.RoundToEven(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Sin(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Sin(tsr[0].Float1D(i)), i)
+func Sin(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Sin(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Sinh(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Sinh(tsr[0].Float1D(i)), i)
+func Sinh(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Sinh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Sqrt(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Sqrt(tsr[0].Float1D(i)), i)
+func Sqrt(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Sqrt(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Tan(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Tan(tsr[0].Float1D(i)), i)
+func Tan(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Tan(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Tanh(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Tanh(tsr[0].Float1D(i)), i)
+func Tanh(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Tanh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Trunc(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Trunc(tsr[0].Float1D(i)), i)
+func Trunc(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Trunc(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Y0(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Y0(tsr[0].Float1D(i)), i)
+func Y0(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Y0(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
-func Y1(in, out *tensor.Indexed) {
-	out.SetShapeFrom(in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
-		i, _, _ := tsr[0].RowCellIndex(idx)
-		tsr[1].SetFloat1D(math.Y1(tsr[0].Float1D(i)), i)
+func Y1(in, out tensor.Tensor) {
+	tensor.SetShapeFrom(out, in)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		tsr[1].SetFloat1D(math.Y1(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 /*
-func Atan2(y, in, out *tensor.Indexed)
+func Atan2(y, in, out tensor.Tensor)
 func Copysign(f, sign float64) float64
 func Dim(x, y float64) float64
 func Hypot(p, q float64) float64
@@ -372,8 +335,8 @@ func Float64frombits(b uint64) float64
 
 func FMA(x, y, z float64) float64
 
-func Jn(n int, in, out *tensor.Indexed)
-func Yn(n int, in, out *tensor.Indexed)
+func Jn(n int, in, out tensor.Tensor)
+func Yn(n int, in, out tensor.Tensor)
 
 func Ldexp(frac float64, exp int) float64
 

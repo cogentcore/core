@@ -12,9 +12,9 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-// Index returns the actual index into underlying tensor row based on given
+// RowIndex returns the actual index into underlying tensor row based on given
 // index value.  If Indexes == nil, index is passed through.
-func (dt *Table) Index(idx int) int {
+func (dt *Table) RowIndex(idx int) int {
 	if dt.Indexes == nil {
 		return idx
 	}

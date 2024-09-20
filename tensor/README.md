@@ -106,7 +106,7 @@ ix.SetRowTensor(tsr, 4)
 // returns a flat, 1D Indexed view into n-dimensional tensor values at 
 // given row.  This is used in compute routines that operate generically
 // on the entire row as a flat pattern.
-ci := ix.Cells1D(5)
+ci := tensor.Cells1D(ix, 5)
 ```
 
 ### Full N-dimensional Indexes

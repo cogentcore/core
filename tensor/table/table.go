@@ -86,7 +86,7 @@ func (dt *Table) Column(name string) *tensor.Indexed {
 	if cl == nil {
 		return nil
 	}
-	return tensor.NewIndexed(cl, dt.Indexes)
+	return tensor.NewIndexed(cl, dt.Indexes...)
 }
 
 // ColumnTry is a version of [Table.Column] that also returns an error
@@ -106,13 +106,13 @@ func (dt *Table) ColumnTry(name string) (*tensor.Indexed, error) {
 // Will panic if out of range.
 func (dt *Table) ColumnByIndex(idx int) *tensor.Indexed {
 	cl := dt.Columns.Values[idx]
-	return tensor.NewIndexed(cl, dt.Indexes)
+	return tensor.NewIndexed(cl, dt.Indexes...)
 }
 
 // ColumnList returns a list of tensors with given column names,
 // as [tensor.Indexed] with the shared [Table.Indexes] from this table.
-func (dt *Table) ColumnList(names ...string) []*tensor.Indexed {
-	list := make([]*tensor.Indexed, 0, len(names))
+func (dt *Table) ColumnList(names ...string) []tensor.Tensor {
+	list := make([]tensor.Tensor, 0, len(names))
 	for _, nm := range names {
 		cl := dt.Column(nm)
 		if cl != nil {
@@ -151,7 +151,7 @@ func AddColumn[T tensor.DataTypes](dt *Table, name string, cellSizes ...int) ten
 	rows := dt.Columns.Rows
 	sz := append([]int{rows}, cellSizes...)
 	tsr := tensor.New[T](sz...)
-	tsr.SetNames("Row")
+	// tsr.SetNames("Row")
 	dt.AddColumn(name, tsr)
 	return tsr
 }
@@ -164,7 +164,7 @@ func InsertColumn[T tensor.DataTypes](dt *Table, name string, idx int, cellSizes
 	rows := dt.Columns.Rows
 	sz := append([]int{rows}, cellSizes...)
 	tsr := tensor.New[T](sz...)
-	tsr.SetNames("Row")
+	// tsr.SetNames("Row")
 	dt.InsertColumn(idx, name, tsr)
 	return tsr
 }
@@ -192,7 +192,7 @@ func (dt *Table) AddColumnOfType(name string, typ reflect.Kind, cellSizes ...int
 	rows := dt.Columns.Rows
 	sz := append([]int{rows}, cellSizes...)
 	tsr := tensor.NewOfType(typ, sz...)
-	tsr.SetNames("Row")
+	// tsr.SetNames("Row")
 	dt.AddColumn(name, tsr)
 	return tsr
 }

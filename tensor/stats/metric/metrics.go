@@ -28,13 +28,13 @@ func init() {
 
 // Metric calls a standard Metrics enum function on given tensors.
 // Output results are in the out tensor.
-func Metric(metric Metrics, a, b, out *tensor.Indexed) {
+func Metric(metric Metrics, a, b, out tensor.Tensor) {
 	tensor.Call(metric.FuncName(), a, b, out)
 }
 
 // MetricOut calls a standard Metrics enum function on given tensors,
 // returning output as a newly created tensor.
-func MetricOut(metric Metrics, a, b *tensor.Indexed) *tensor.Indexed {
+func MetricOut(metric Metrics, a, b tensor.Tensor) tensor.Tensor {
 	return tensor.CallOut(metric.FuncName(), a, b)
 }
 

@@ -45,6 +45,15 @@ func NewIndexed(tsr Tensor, idxs ...int) *Indexed {
 	return ix
 }
 
+// AsIndexed returns the tensor as an Indexed view.
+// If it already is one, then it is returned, otherwise it is wrapped.
+func AsIndexed(tsr Tensor) *Indexed {
+	if ix, ok := tsr.(*Indexed); ok {
+		return ix
+	}
+	return NewIndexed(tsr)
+}
+
 // SetTensor sets as indexes into given tensor with sequential initial indexes.
 func (ix *Indexed) SetTensor(tsr Tensor) {
 	ix.Tensor = tsr
@@ -144,7 +153,7 @@ func (ix *Indexed) SetNumRows(rows int) {
 // SetShape sets our shape to given sizes.
 // See [Indexed.SetShapeInts] for details.
 func (ix *Indexed) SetShape(sizes Tensor) {
-	ix.SetShapeInts(AsInts(sizes)...)
+	ix.SetShapeInts(AsIntSlice(sizes)...)
 }
 
 // Len returns the total number of elements in the tensor,
@@ -720,13 +729,6 @@ func (ix *Indexed) SubSpace(offs ...int) Tensor {
 	}
 	offs[0] = ix.RowIndex(offs[0])
 	return ix.Tensor.SubSpace(offs...)
-}
-
-// Cells1D returns a flat 1D [tensor.Indexed] view of the cells for given row
-// index (indirected through our Indexes).  This is useful for passing to
-// other functions e.g., in stats or metrics that process a 1D tensor.
-func (ix *Indexed) Cells1D(row int) *Indexed {
-	return NewIndexed(New1DViewOf(ix.SubSpace(row)))
 }
 
 // RowTensor is a convenience version of [Indexed.SubSpace] to return the

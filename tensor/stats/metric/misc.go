@@ -22,14 +22,14 @@ func init() {
 // Note: this does _not_ use any existing Indexes for the probe,
 // but does for the vocab, and the returned index is the logical index
 // into any existing Indexes.
-func ClosestRow(funcName string, probe, vocab, out *tensor.Indexed) {
-	rows, _ := vocab.Tensor.RowCellSize()
+func ClosestRow(funcName string, probe, vocab, out tensor.Tensor) {
+	rows, _ := vocab.RowCellSize()
 	mi := -1
 	mout := tensor.NewFloat64Scalar(0.0)
 	mind := math.MaxFloat64
-	pr1d := tensor.NewIndexed(tensor.New1DViewOf(probe.Tensor))
+	pr1d := tensor.New1DViewOf(probe)
 	for ri := range rows {
-		sub := vocab.Cells1D(ri)
+		sub := tensor.Cells1D(vocab, ri)
 		tensor.Call(funcName, pr1d, sub, mout)
 		d := mout.Float1D(0)
 		if d < mind {
@@ -37,8 +37,7 @@ func ClosestRow(funcName string, probe, vocab, out *tensor.Indexed) {
 			mind = d
 		}
 	}
-	out.Tensor.SetShape(2)
-	out.Sequential()
+	out.SetShapeInts(2)
 	out.SetFloat1D(float64(mi), 0)
 	out.SetFloat1D(mind, 1)
 }

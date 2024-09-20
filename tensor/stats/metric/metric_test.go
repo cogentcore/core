@@ -72,8 +72,7 @@ func TestFuncs(t *testing.T) {
 }
 
 func TestMatrix(t *testing.T) {
-	var simres = `Tensor: [12, 12]
-[0]:       0 3.4641016151377544 8.831760866327848 9.273618495495704 8.717797887081348 9.38083151964686 4.69041575982343 5.830951894845301 8.12403840463596 8.54400374531753 5.291502622129181 6.324555320336759 
+	var simres = `[12, 12] [0]:       0 3.4641016151377544 8.831760866327848 9.273618495495704 8.717797887081348 9.38083151964686 4.69041575982343 5.830951894845301 8.12403840463596 8.54400374531753 5.291502622129181 6.324555320336759 
 [1]: 3.4641016151377544       0 9.38083151964686 8.717797887081348 9.273618495495704 8.831760866327848 5.830951894845301 4.69041575982343 8.717797887081348 7.937253933193772 6.324555320336759 5.291502622129181 
 [2]: 8.831760866327848 9.38083151964686       0 3.4641016151377544 4.242640687119285 5.0990195135927845 9.38083151964686 9.899494936611665 4.47213595499958 5.744562646538029 9.38083151964686 9.899494936611665 
 [3]: 9.273618495495704 8.717797887081348 3.4641016151377544       0 5.477225575051661 3.7416573867739413 9.797958971132712 9.273618495495704 5.656854249492381 4.58257569495584 9.797958971132712 9.273618495495704 
@@ -90,10 +89,10 @@ func TestMatrix(t *testing.T) {
 	err := dt.OpenCSV("../cluster/testdata/faces.dat", tensor.Tab)
 	assert.NoError(t, err)
 	in := dt.Column("Input")
-	out := tensor.NewFloat64Indexed()
+	out := tensor.NewFloat64()
 	Matrix(Euclidean.FuncName(), in, out)
 	// fmt.Println(out.Tensor)
-	assert.Equal(t, simres, out.Tensor.String())
+	assert.Equal(t, simres, out.String())
 }
 
 func TestPCAIris(t *testing.T) {
@@ -108,26 +107,26 @@ func TestPCAIris(t *testing.T) {
 		t.Error(err)
 	}
 	data := dt.Column("data")
-	covar := tensor.NewFloat64Indexed()
+	covar := tensor.NewFloat64()
 	CovarianceMatrix(Correlation.FuncName(), data, covar)
-	// fmt.Printf("correl: %s\n", covar.Tensor.String())
+	// fmt.Printf("correl: %s\n", covar.String())
 
-	vecs := tensor.NewFloat64Indexed()
-	vals := tensor.NewFloat64Indexed()
+	vecs := tensor.NewFloat64()
+	vals := tensor.NewFloat64()
 	PCA(covar, vecs, vals)
 
 	// fmt.Printf("correl vec: %v\n", vecs)
 	// fmt.Printf("correl val: %v\n", vals)
 	errtol := 1.0e-9
 	corvals := []float64{0.020607707235624825, 0.14735327830509573, 0.9212209307072254, 2.910818083752054}
-	for i, v := range vals.Tensor.(*tensor.Float64).Values {
+	for i, v := range vals.Values {
 		assert.InDelta(t, corvals[i], v, errtol)
 	}
 
 	colidx := tensor.NewFloat64Scalar(3) // strongest at end
-	prjns := tensor.NewFloat64Indexed()
+	prjns := tensor.NewFloat64()
 	ProjectOnMatrixColumn(vecs, data, colidx, prjns)
-	// tensor.SaveCSV(prjns.Tensor, "testdata/pca_projection.csv", tensor.Comma)
+	// tensor.SaveCSV(prjns, "testdata/pca_projection.csv", tensor.Comma)
 	trgprjns := []float64{
 		2.6692308782935146,
 		2.696434011868953,
@@ -140,8 +139,7 @@ func TestPCAIris(t *testing.T) {
 		2.4615836931965167,
 		2.6716628159090594,
 	}
-	pj64 := tensor.AsFloat64(prjns.Tensor)
-	for i, v := range pj64.Values[:10] {
+	for i, v := range prjns.Values[:10] {
 		assert.InDelta(t, trgprjns[i], v, errtol)
 	}
 
@@ -151,13 +149,13 @@ func TestPCAIris(t *testing.T) {
 	SVD(covar, vecs, vals)
 	// fmt.Printf("correl vec: %v\n", vecs)
 	// fmt.Printf("correl val: %v\n", vals)
-	for i, v := range vals.Tensor.(*tensor.Float64).Values {
+	for i, v := range vals.Values {
 		assert.InDelta(t, corvals[3-i], v, errtol) // opposite order
 	}
 
 	colidx.SetFloat1D(0, 0) // strongest at start
 	ProjectOnMatrixColumn(vecs, data, colidx, prjns)
-	// tensor.SaveCSV(prjns.Tensor, "testdata/svd_projection.csv", tensor.Comma)
+	// tensor.SaveCSV(prjns, "testdata/svd_projection.csv", tensor.Comma)
 	trgprjns = []float64{
 		-2.6692308782935172,
 		-2.696434011868955,
@@ -170,8 +168,7 @@ func TestPCAIris(t *testing.T) {
 		-2.4615836931965185,
 		-2.671662815909061,
 	}
-	pj64 = tensor.AsFloat64(prjns.Tensor)
-	for i, v := range pj64.Values[:10] {
+	for i, v := range prjns.Values[:10] {
 		assert.InDelta(t, trgprjns[i], v, errtol)
 	}
 }

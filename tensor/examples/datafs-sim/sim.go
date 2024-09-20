@@ -65,12 +65,12 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 	ntrial := ss.Config.Item("NTrial").AsInt()
 	sitems := ss.Stats.ValuesFunc(nil)
 	for _, st := range sitems {
-		nm := st.Tensor.Metadata().Name()
-		lt := logd.NewOfType(nm, st.Tensor.DataType(), ntrial)
-		lt.Tensor.Metadata().Copy(*st.Tensor.Metadata()) // key affordance: we get meta data from source
-		tensor.SetCalcFunc(lt.Tensor, func() error {
+		nm := st.Metadata().Name()
+		lt := logd.NewOfType(nm, st.DataType(), ntrial)
+		lt.Metadata().Copy(*st.Metadata()) // key affordance: we get meta data from source
+		tensor.SetCalcFunc(lt, func() error {
 			trl := ss.Stats.Item("Trial").AsInt()
-			if st.Tensor.IsString() {
+			if st.IsString() {
 				lt.SetStringRow(st.StringRow(0), trl)
 			} else {
 				lt.SetFloatRow(st.FloatRow(0), trl)
@@ -80,15 +80,15 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 	}
 	alllogd, _ := dir.Mkdir("AllTrials")
 	for _, st := range sitems {
-		nm := st.Tensor.Metadata().Name()
+		nm := st.Metadata().Name()
 		// allocate full size
-		lt := alllogd.NewOfType(nm, st.Tensor.DataType(), ntrial*ss.Config.Item("NEpoch").AsInt()*ss.Config.Item("NRun").AsInt())
-		lt.Tensor.SetShape(0)                            // then truncate to 0
-		lt.Tensor.Metadata().Copy(*st.Tensor.Metadata()) // key affordance: we get meta data from source
-		tensor.SetCalcFunc(lt.Tensor, func() error {
-			row := lt.Tensor.DimSize(0)
-			lt.Tensor.SetShape(row + 1)
-			if st.Tensor.IsString() {
+		lt := alllogd.NewOfType(nm, st.DataType(), ntrial*ss.Config.Item("NEpoch").AsInt()*ss.Config.Item("NRun").AsInt())
+		lt.SetShapeInts(0)                 // then truncate to 0
+		lt.Metadata().Copy(*st.Metadata()) // key affordance: we get meta data from source
+		tensor.SetCalcFunc(lt, func() error {
+			row := lt.DimSize(0)
+			lt.SetShapeInts(row + 1)
+			if st.IsString() {
 				lt.SetStringRow(st.StringRow(0), row)
 			} else {
 				lt.SetFloatRow(st.FloatRow(0), row)
@@ -106,18 +106,18 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 	nctr := ss.Config.Item("N" + level).AsInt()
 	stout := tensor.NewFloat64Scalar(0) // tmp stat output
 	for _, st := range sitems {
-		if st.Tensor.IsString() {
+		if st.IsString() {
 			continue
 		}
-		nm := st.Tensor.Metadata().Name()
+		nm := st.Metadata().Name()
 		src := from.Value(nm)
-		if st.Tensor.DataType() >= reflect.Float32 {
+		if st.DataType() >= reflect.Float32 {
 			// todo: pct correct etc
 			dd, _ := logd.Mkdir(nm)
 			for _, ag := range aggs { // key advantage of dir structure: multiple stats per item
-				lt := dd.NewOfType(ag.String(), st.Tensor.DataType(), nctr)
-				lt.Tensor.Metadata().Copy(*st.Tensor.Metadata())
-				tensor.SetCalcFunc(lt.Tensor, func() error {
+				lt := dd.NewOfType(ag.String(), st.DataType(), nctr)
+				lt.Metadata().Copy(*st.Metadata())
+				tensor.SetCalcFunc(lt, func() error {
 					stats.Stat(ag, src, stout)
 					ctr := ss.Stats.Item(level).AsInt()
 					lt.SetFloatRow(stout.FloatRow(0), ctr)
@@ -125,9 +125,9 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 				})
 			}
 		} else {
-			lt := logd.NewOfType(nm, st.Tensor.DataType(), nctr)
-			lt.Tensor.Metadata().Copy(*st.Tensor.Metadata())
-			tensor.SetCalcFunc(lt.Tensor, func() error {
+			lt := logd.NewOfType(nm, st.DataType(), nctr)
+			lt.Metadata().Copy(*st.Metadata())
+			tensor.SetCalcFunc(lt, func() error {
 				v := st.FloatRow(0)
 				ctr := ss.Stats.Item(level).AsInt()
 				lt.SetFloatRow(v, ctr)

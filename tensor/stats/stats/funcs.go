@@ -25,12 +25,12 @@ import (
 // e.g., using VectorizeThreaded or GPU, due to shared writing
 // to the same output values.  Special implementations are required
 // if that is needed.
-type StatsFunc func(in, out *tensor.Indexed)
+type StatsFunc func(in, out tensor.Tensor)
 
 // CountFuncOut64 computes the count of non-NaN tensor values,
 // and returns the Float64 output values for subsequent use.
-func CountFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
-	return VectorizeOut64(NFunc, func(idx int, tsr ...*tensor.Indexed) {
+func CountFuncOut64(in, out tensor.Tensor) tensor.Tensor {
+	return VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], 0, func(val, agg float64) float64 {
 			return agg + 1
 		})
@@ -39,14 +39,14 @@ func CountFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
 
 // CountFunc computes the count of non-NaN tensor values.
 // See [StatsFunc] for general information.
-func CountFunc(in, out *tensor.Indexed) {
+func CountFunc(in, out tensor.Tensor) {
 	CountFuncOut64(in, out)
 }
 
 // SumFuncOut64 computes the sum of tensor values,
 // and returns the Float64 output values for subsequent use.
-func SumFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
-	return VectorizeOut64(NFunc, func(idx int, tsr ...*tensor.Indexed) {
+func SumFuncOut64(in, out tensor.Tensor) tensor.Tensor {
+	return VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], 0, func(val, agg float64) float64 {
 			return agg + val
 		})
@@ -55,15 +55,15 @@ func SumFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
 
 // SumFunc computes the sum of tensor values.
 // See [StatsFunc] for general information.
-func SumFunc(in, out *tensor.Indexed) {
+func SumFunc(in, out tensor.Tensor) {
 	SumFuncOut64(in, out)
 }
 
 // SumAbsFunc computes the sum of absolute-value-of tensor values.
 // This is also known as the L1 norm.
 // See [StatsFunc] for general information.
-func SumAbsFunc(in, out *tensor.Indexed) {
-	VectorizeOut64(NFunc, func(idx int, tsr ...*tensor.Indexed) {
+func SumAbsFunc(in, out tensor.Tensor) {
+	VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], 0, func(val, agg float64) float64 {
 			return agg + math.Abs(val)
 		})
@@ -72,8 +72,8 @@ func SumAbsFunc(in, out *tensor.Indexed) {
 
 // ProdFunc computes the product of tensor values.
 // See [StatsFunc] for general information.
-func ProdFunc(in, out *tensor.Indexed) {
-	VectorizeOut64(NFunc, func(idx int, tsr ...*tensor.Indexed) {
+func ProdFunc(in, out tensor.Tensor) {
+	VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], 1, func(val, agg float64) float64 {
 			return agg * val
 		})
@@ -82,8 +82,8 @@ func ProdFunc(in, out *tensor.Indexed) {
 
 // MinFunc computes the min of tensor values.
 // See [StatsFunc] for general information.
-func MinFunc(in, out *tensor.Indexed) {
-	VectorizeOut64(NFunc, func(idx int, tsr ...*tensor.Indexed) {
+func MinFunc(in, out tensor.Tensor) {
+	VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], math.MaxFloat64, func(val, agg float64) float64 {
 			return math.Min(agg, val)
 		})
@@ -92,8 +92,8 @@ func MinFunc(in, out *tensor.Indexed) {
 
 // MaxFunc computes the max of tensor values.
 // See [StatsFunc] for general information.
-func MaxFunc(in, out *tensor.Indexed) {
-	VectorizeOut64(NFunc, func(idx int, tsr ...*tensor.Indexed) {
+func MaxFunc(in, out tensor.Tensor) {
+	VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], -math.MaxFloat64, func(val, agg float64) float64 {
 			return math.Max(agg, val)
 		})
@@ -102,8 +102,8 @@ func MaxFunc(in, out *tensor.Indexed) {
 
 // MinAbsFunc computes the min of absolute-value-of tensor values.
 // See [StatsFunc] for general information.
-func MinAbsFunc(in, out *tensor.Indexed) {
-	VectorizeOut64(NFunc, func(idx int, tsr ...*tensor.Indexed) {
+func MinAbsFunc(in, out tensor.Tensor) {
+	VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], math.MaxFloat64, func(val, agg float64) float64 {
 			return math.Min(agg, math.Abs(val))
 		})
@@ -112,8 +112,8 @@ func MinAbsFunc(in, out *tensor.Indexed) {
 
 // MaxAbsFunc computes the max of absolute-value-of tensor values.
 // See [StatsFunc] for general information.
-func MaxAbsFunc(in, out *tensor.Indexed) {
-	VectorizeOut64(NFunc, func(idx int, tsr ...*tensor.Indexed) {
+func MaxAbsFunc(in, out tensor.Tensor) {
+	VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], -math.MaxFloat64, func(val, agg float64) float64 {
 			return math.Max(agg, math.Abs(val))
 		})
@@ -122,11 +122,11 @@ func MaxAbsFunc(in, out *tensor.Indexed) {
 
 // MeanFuncOut64 computes the mean of tensor values,
 // and returns the Float64 output values for subsequent use.
-func MeanFuncOut64(in, out *tensor.Indexed) (mean64, count64 *tensor.Indexed) {
+func MeanFuncOut64(in, out tensor.Tensor) (mean64, count64 tensor.Tensor) {
 	sum64 := SumFuncOut64(in, out)
-	count := tensor.NewIndexed(out.Tensor.Clone())
+	count := tensor.NewIndexed(out.Clone())
 	count64 = CountFuncOut64(in, count)
-	nsub := out.Tensor.Len()
+	nsub := out.Len()
 	for i := range nsub {
 		c := count64.Float1D(i)
 		if c == 0 {
@@ -140,15 +140,15 @@ func MeanFuncOut64(in, out *tensor.Indexed) (mean64, count64 *tensor.Indexed) {
 
 // MeanFunc computes the mean of tensor values.
 // See [StatsFunc] for general information.
-func MeanFunc(in, out *tensor.Indexed) {
+func MeanFunc(in, out tensor.Tensor) {
 	MeanFuncOut64(in, out)
 }
 
 // SumSqDevFuncOut64 computes the sum of squared mean deviates of tensor values,
 // and returns the Float64 output values for subsequent use.
-func SumSqDevFuncOut64(in, out *tensor.Indexed) (ssd64, mean64, count64 *tensor.Indexed) {
+func SumSqDevFuncOut64(in, out tensor.Tensor) (ssd64, mean64, count64 tensor.Tensor) {
 	mean64, count64 = MeanFuncOut64(in, out)
-	ssd64 = VectorizeOut64(NFunc, func(idx int, tsr ...*tensor.Indexed) {
+	ssd64 = VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		Vec2inFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(val1, val2, agg float64) float64 {
 			dv := val1 - val2
 			return agg + dv*dv
@@ -159,9 +159,9 @@ func SumSqDevFuncOut64(in, out *tensor.Indexed) (ssd64, mean64, count64 *tensor.
 
 // VarFuncOut64 computes the sample variance of tensor values,
 // and returns the Float64 output values for subsequent use.
-func VarFuncOut64(in, out *tensor.Indexed) (var64, mean64, count64 *tensor.Indexed) {
+func VarFuncOut64(in, out tensor.Tensor) (var64, mean64, count64 tensor.Tensor) {
 	var64, mean64, count64 = SumSqDevFuncOut64(in, out)
-	nsub := out.Tensor.Len()
+	nsub := out.Len()
 	for i := range nsub {
 		c := count64.Float1D(i)
 		if c < 2 {
@@ -177,15 +177,15 @@ func VarFuncOut64(in, out *tensor.Indexed) (var64, mean64, count64 *tensor.Index
 // VarFunc computes the sample variance of tensor values.
 // Squared deviations from mean, divided by n-1. See also [VarPopFunc].
 // See [StatsFunc] for general information.
-func VarFunc(in, out *tensor.Indexed) {
+func VarFunc(in, out tensor.Tensor) {
 	VarFuncOut64(in, out)
 }
 
 // StdFuncOut64 computes the sample standard deviation of tensor values.
 // and returns the Float64 output values for subsequent use.
-func StdFuncOut64(in, out *tensor.Indexed) (std64, mean64, count64 *tensor.Indexed) {
+func StdFuncOut64(in, out tensor.Tensor) (std64, mean64, count64 tensor.Tensor) {
 	std64, mean64, count64 = VarFuncOut64(in, out)
-	nsub := out.Tensor.Len()
+	nsub := out.Len()
 	for i := range nsub {
 		std := math.Sqrt(std64.Float1D(i))
 		std64.SetFloat1D(std, i)
@@ -197,16 +197,16 @@ func StdFuncOut64(in, out *tensor.Indexed) (std64, mean64, count64 *tensor.Index
 // StdFunc computes the sample standard deviation of tensor values.
 // Sqrt of variance from [VarFunc]. See also [StdPopFunc].
 // See [StatsFunc] for general information.
-func StdFunc(in, out *tensor.Indexed) {
+func StdFunc(in, out tensor.Tensor) {
 	StdFuncOut64(in, out)
 }
 
 // SemFunc computes the sample standard error of the mean of tensor values.
 // Standard deviation [StdFunc] / sqrt(n). See also [SemPopFunc].
 // See [StatsFunc] for general information.
-func SemFunc(in, out *tensor.Indexed) {
+func SemFunc(in, out tensor.Tensor) {
 	var64, _, count64 := VarFuncOut64(in, out)
-	nsub := out.Tensor.Len()
+	nsub := out.Len()
 	for i := range nsub {
 		c := count64.Float1D(i)
 		if c < 2 {
@@ -219,9 +219,9 @@ func SemFunc(in, out *tensor.Indexed) {
 
 // VarPopFuncOut64 computes the population variance of tensor values.
 // and returns the Float64 output values for subsequent use.
-func VarPopFuncOut64(in, out *tensor.Indexed) (var64, mean64, count64 *tensor.Indexed) {
+func VarPopFuncOut64(in, out tensor.Tensor) (var64, mean64, count64 tensor.Tensor) {
 	var64, mean64, count64 = SumSqDevFuncOut64(in, out)
-	nsub := out.Tensor.Len()
+	nsub := out.Len()
 	for i := range nsub {
 		c := count64.Float1D(i)
 		if c == 0 {
@@ -236,16 +236,16 @@ func VarPopFuncOut64(in, out *tensor.Indexed) (var64, mean64, count64 *tensor.In
 // VarPopFunc computes the population variance of tensor values.
 // Squared deviations from mean, divided by n. See also [VarFunc].
 // See [StatsFunc] for general information.
-func VarPopFunc(in, out *tensor.Indexed) {
+func VarPopFunc(in, out tensor.Tensor) {
 	VarPopFuncOut64(in, out)
 }
 
 // StdPopFunc computes the population standard deviation of tensor values.
 // Sqrt of variance from [VarPopFunc]. See also [StdFunc].
 // See [StatsFunc] for general information.
-func StdPopFunc(in, out *tensor.Indexed) {
+func StdPopFunc(in, out tensor.Tensor) {
 	var64, _, _ := VarPopFuncOut64(in, out)
-	nsub := out.Tensor.Len()
+	nsub := out.Len()
 	for i := range nsub {
 		out.SetFloat1D(math.Sqrt(var64.Float1D(i)), i)
 	}
@@ -254,9 +254,9 @@ func StdPopFunc(in, out *tensor.Indexed) {
 // SemPopFunc computes the population standard error of the mean of tensor values.
 // Standard deviation [StdPopFunc] / sqrt(n). See also [SemFunc].
 // See [StatsFunc] for general information.
-func SemPopFunc(in, out *tensor.Indexed) {
+func SemPopFunc(in, out tensor.Tensor) {
 	var64, _, count64 := VarPopFuncOut64(in, out)
-	nsub := out.Tensor.Len()
+	nsub := out.Len()
 	for i := range nsub {
 		c := count64.Float1D(i)
 		if c < 2 {
@@ -270,8 +270,8 @@ func SemPopFunc(in, out *tensor.Indexed) {
 // SumSqScaleFuncOut64 is a helper for sum-of-squares, returning scale and ss
 // factors aggregated separately for better numerical stability, per BLAS.
 // Returns the Float64 output values for subsequent use.
-func SumSqScaleFuncOut64(in, out *tensor.Indexed) (scale64, ss64 *tensor.Indexed) {
-	scale64, ss64 = Vectorize2Out64(NFunc, func(idx int, tsr ...*tensor.Indexed) {
+func SumSqScaleFuncOut64(in, out tensor.Tensor) (scale64, ss64 tensor.Tensor) {
+	scale64, ss64 = Vectorize2Out64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		Vec2outFunc(idx, tsr[0], tsr[1], tsr[2], 0, 1, func(val, scale, ss float64) (float64, float64) {
 			if val == 0 {
 				return scale, ss
@@ -291,9 +291,9 @@ func SumSqScaleFuncOut64(in, out *tensor.Indexed) (scale64, ss64 *tensor.Indexed
 
 // SumSqFuncOut64 computes the sum of squares of tensor values,
 // and returns the Float64 output values for subsequent use.
-func SumSqFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
+func SumSqFuncOut64(in, out tensor.Tensor) tensor.Tensor {
 	scale64, ss64 := SumSqScaleFuncOut64(in, out)
-	nsub := out.Tensor.Len()
+	nsub := out.Len()
 	for i := range nsub {
 		scale := scale64.Float1D(i)
 		ss := ss64.Float1D(i)
@@ -311,16 +311,16 @@ func SumSqFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
 
 // SumSqFunc computes the sum of squares of tensor values,
 // See [StatsFunc] for general information.
-func SumSqFunc(in, out *tensor.Indexed) {
+func SumSqFunc(in, out tensor.Tensor) {
 	SumSqFuncOut64(in, out)
 }
 
 // L2NormFuncOut64 computes the square root of the sum of squares of tensor values,
 // known as the L2 norm, and returns the Float64 output values for
 // use in subsequent computations.
-func L2NormFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
+func L2NormFuncOut64(in, out tensor.Tensor) tensor.Tensor {
 	scale64, ss64 := SumSqScaleFuncOut64(in, out)
-	nsub := out.Tensor.Len()
+	nsub := out.Len()
 	for i := range nsub {
 		scale := scale64.Float1D(i)
 		ss := ss64.Float1D(i)
@@ -339,6 +339,6 @@ func L2NormFuncOut64(in, out *tensor.Indexed) *tensor.Indexed {
 // L2NormFunc computes the square root of the sum of squares of tensor values,
 // known as the L2 norm.
 // See [StatsFunc] for general information.
-func L2NormFunc(in, out *tensor.Indexed) {
+func L2NormFunc(in, out tensor.Tensor) {
 	L2NormFuncOut64(in, out)
 }

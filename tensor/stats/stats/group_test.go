@@ -29,8 +29,8 @@ func TestGroup(t *testing.T) {
 	TableGroups(dir, dt, "Name")
 
 	ixs := dir.FlatValuesFunc(nil)
-	assert.Equal(t, []int{0, 1}, ixs[0].Tensor.(*tensor.Int).Values)
-	assert.Equal(t, []int{2, 3}, ixs[1].Tensor.(*tensor.Int).Values)
+	assert.Equal(t, []int{0, 1}, tensor.AsIntTensor(ixs[0]).Values)
+	assert.Equal(t, []int{2, 3}, tensor.AsIntTensor(ixs[1]).Values)
 
 	TableGroupStats(dir, Mean.FuncName(), dt, "Value")
 

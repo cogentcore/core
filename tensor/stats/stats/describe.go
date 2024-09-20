@@ -23,17 +23,17 @@ var DescriptiveStats = []Stats{Count, Mean, Std, Sem, Min, Max, Q1, Median, Q3}
 // This is an easy way to provide a comprehensive description of data.
 // The [DescriptiveStats] list is: [Count], [Mean], [Std], [Sem],
 // [Min], [Max], [Q1], [Median], [Q3]
-func Describe(dir *datafs.Data, tsrs ...*tensor.Indexed) {
+func Describe(dir *datafs.Data, tsrs ...tensor.Tensor) {
 	dd, err := dir.RecycleDir("Describe")
 	if errors.Log(err) != nil {
 		return
 	}
 	for i, tsr := range tsrs {
-		nr := tsr.NumRows()
+		nr := tsr.DimSize(0)
 		if nr == 0 {
 			continue
 		}
-		nm := tsr.Tensor.Metadata().Name()
+		nm := tsr.Metadata().Name()
 		if nm == "" {
 			nm = strconv.Itoa(i)
 		}

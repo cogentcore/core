@@ -115,7 +115,7 @@ func (d *Data) Size() int64 {
 	if d.Data == nil {
 		return 0
 	}
-	return d.Data.Tensor.Sizeof()
+	return d.Data.Sizeof()
 }
 
 func (d *Data) IsDir() bool {

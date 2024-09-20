@@ -14,17 +14,17 @@ import (
 // Vectorize3Out64 is a version of the [tensor.Vectorize] function
 // for metrics, which makes three Float64 output tensors for aggregating
 // and computing values, returning them for final computation.
-func Vectorize3Out64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, tsr ...*tensor.Indexed), tsr ...*tensor.Indexed) (out1, out2, out3 *tensor.Indexed) {
+func Vectorize3Out64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr ...tensor.Tensor), tsr ...tensor.Tensor) (out1, out2, out3 tensor.Tensor) {
 	n := nfunc(tsr...)
 	if n <= 0 {
 		return nil, nil, nil
 	}
 	nt := len(tsr)
 	out := tsr[nt-1]
-	osz := out.Tensor.ShapeInts()
-	out1 = tensor.NewFloat64Indexed(osz...)
-	out2 = tensor.NewFloat64Indexed(osz...)
-	out3 = tensor.NewFloat64Indexed(osz...)
+	osz := out.ShapeInts()
+	out1 = tensor.NewFloat64(osz...)
+	out2 = tensor.NewFloat64(osz...)
+	out3 = tensor.NewFloat64(osz...)
 	tsrs := slices.Clone(tsr[:nt-1])
 	tsrs = append(tsrs, out1, out2, out3)
 	for idx := range n {
@@ -36,30 +36,30 @@ func Vectorize3Out64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, t
 // OutShape returns the output shape based on given input
 // shape ints, with outer row dim = 1.
 func OutShape(ish ...int) []int {
-	ish[0] = 1
-	return ish
+	osh := slices.Clone(ish)
+	osh[0] = 1
+	return osh
 }
 
 // NFunc is the nfun for metrics functions, returning the min number of rows across the
 // two input tensors, and initializing the _last_ one to hold the output
 // with the first, row dimension set to 1.
-func NFunc(tsr ...*tensor.Indexed) int {
+func NFunc(tsr ...tensor.Tensor) int {
 	nt := len(tsr)
 	if nt < 3 {
 		return 0
 	}
 	a, b, out := tsr[0], tsr[1], tsr[nt-1]
-	na, nb := a.NumRows(), b.NumRows()
-	out.Tensor.SetShape(OutShape(a.Tensor.ShapeInts()...))
-	out.Indexes = nil
+	na, nb := a.DimSize(0), b.DimSize(0)
+	out.SetShapeInts(OutShape(a.ShapeInts()...)...)
 	return min(na, nb)
 }
 
 // VecFunc is a helper function for metrics functions, dealing with iterating over
 // the Cell subspace per row and initializing the aggregation values for first index.
 // It also skips over NaN missing values.
-func VecFunc(idx int, a, b, out *tensor.Indexed, ini float64, fun func(a, b, agg float64) float64) {
-	nsub := out.Tensor.Len()
+func VecFunc(idx int, a, b, out tensor.Tensor, ini float64, fun func(a, b, agg float64) float64) {
+	nsub := out.Len()
 	for i := range nsub {
 		if idx == 0 {
 			out.SetFloat1D(ini, i)
@@ -80,8 +80,8 @@ func VecFunc(idx int, a, b, out *tensor.Indexed, ini float64, fun func(a, b, agg
 // the Cell subspace per row and initializing the aggregation values for first index.
 // This version does sum-of-squares integration over 2 output vectors,
 // It also skips over NaN missing values.
-func VecSSFunc(idx int, a, b, out1, out2 *tensor.Indexed, ini1, ini2 float64, fun func(a, b float64) float64) {
-	nsub := out2.Tensor.Len()
+func VecSSFunc(idx int, a, b, out1, out2 tensor.Tensor, ini1, ini2 float64, fun func(a, b float64) float64) {
+	nsub := out2.Len()
 	for i := range nsub {
 		if idx == 0 {
 			out1.SetFloat1D(ini1, i)
@@ -116,8 +116,8 @@ func VecSSFunc(idx int, a, b, out1, out2 *tensor.Indexed, ini1, ini2 float64, fu
 // the Cell subspace per row and initializing the aggregation values for first index.
 // This version has 2 input vectors, the second input being the output of another stat
 // e.g., the mean. It also skips over NaN missing values.
-func Vec2inFunc(idx int, a, b, a2, b2, out *tensor.Indexed, ini float64, fun func(a, b, a2, b2, agg float64) float64) {
-	nsub := out.Tensor.Len()
+func Vec2inFunc(idx int, a, b, a2, b2, out tensor.Tensor, ini float64, fun func(a, b, a2, b2, agg float64) float64) {
+	nsub := out.Len()
 	for i := range nsub {
 		if idx == 0 {
 			out.SetFloat1D(ini, i)
@@ -140,8 +140,8 @@ func Vec2inFunc(idx int, a, b, a2, b2, out *tensor.Indexed, ini float64, fun fun
 // the Cell subspace per row and initializing the aggregation values for first index.
 // This version has 2 input, 3 output vectors. The second input being the output of another stat
 // e.g., the mean. It also skips over NaN missing values.
-func Vec2in3outFunc(idx int, a, b, a2, b2, out1, out2, out3 *tensor.Indexed, ini float64, fun func(a, b, a2, b2, out1, out2, out3 float64) (float64, float64, float64)) {
-	nsub := out1.Tensor.Len()
+func Vec2in3outFunc(idx int, a, b, a2, b2, out1, out2, out3 tensor.Tensor, ini float64, fun func(a, b, a2, b2, out1, out2, out3 float64) (float64, float64, float64)) {
+	nsub := out1.Len()
 	for i := range nsub {
 		if idx == 0 {
 			out1.SetFloat1D(ini, i)
@@ -171,8 +171,8 @@ func Vec2in3outFunc(idx int, a, b, a2, b2, out1, out2, out3 *tensor.Indexed, ini
 // Vec3outFunc is a helper function for stats functions, dealing with iterating over
 // the Cell subspace per row and initializing the aggregation values for first index.
 // This version has 3 output vectors. It also skips over NaN missing values.
-func Vec3outFunc(idx int, a, b, out1, out2, out3 *tensor.Indexed, ini float64, fun func(a, b, out1, out2, out3 float64) (float64, float64, float64)) {
-	nsub := out1.Tensor.Len()
+func Vec3outFunc(idx int, a, b, out1, out2, out3 tensor.Tensor, ini float64, fun func(a, b, out1, out2, out3 float64) (float64, float64, float64)) {
+	nsub := out1.Len()
 	for i := range nsub {
 		if idx == 0 {
 			out1.SetFloat1D(ini, i)

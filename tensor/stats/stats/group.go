@@ -31,7 +31,7 @@ import (
 // rows, indirected through any existing indexes on the inputs, so that
 // the results can be used directly as Indexes into the corresponding tensor data.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
-func Groups(dir *datafs.Data, tsrs ...*tensor.Indexed) {
+func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) {
 	gd, err := dir.RecycleDir("Groups")
 	if errors.Log(err) != nil {
 		return
@@ -45,19 +45,19 @@ func Groups(dir *datafs.Data, tsrs ...*tensor.Indexed) {
 	}
 
 	for i, tsr := range tsrs {
-		nr := tsr.NumRows()
+		nr := tsr.DimSize(0)
 		if nr == 0 {
 			continue
 		}
-		nm := tsr.Tensor.Metadata().Name()
+		nm := tsr.Metadata().Name()
 		if nm == "" {
 			nm = strconv.Itoa(i)
 		}
 		td, _ := gd.Mkdir(nm)
-		srt := tsr.CloneIndexes()
+		srt := tensor.AsIndexed(tsr).CloneIndexes()
 		srt.SortStable(tensor.Ascending)
 		start := 0
-		if tsr.Tensor.IsString() {
+		if tsr.IsString() {
 			lastVal := srt.StringRow(0)
 			for r := range nr {
 				v := srt.StringRow(r)
@@ -99,12 +99,12 @@ func TableGroups(dir *datafs.Data, dt *table.Table, columns ...string) {
 // into an "All/All" tensor in the given [datafs], which can then
 // be used with [GroupStats] to generate summary statistics across
 // all the data. See [Groups] for more general documentation.
-func GroupAll(dir *datafs.Data, tsrs ...*tensor.Indexed) {
+func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) {
 	gd, err := dir.RecycleDir("Groups")
 	if errors.Log(err) != nil {
 		return
 	}
-	tsr := tsrs[0]
+	tsr := tensor.AsIndexed(tsrs[0])
 	nr := tsr.NumRows()
 	if nr == 0 {
 		return
@@ -112,7 +112,7 @@ func GroupAll(dir *datafs.Data, tsrs ...*tensor.Indexed) {
 	td, _ := gd.Mkdir("All")
 	it := datafs.NewValue[int](td, "All", nr)
 	for j := range nr {
-		it.SetIntRow(tsr.Index(j), j) // key to indirect through any existing indexes
+		it.SetIntRow(tsr.RowIndex(j), j) // key to indirect through any existing indexes
 	}
 }
 
@@ -128,7 +128,7 @@ func GroupAll(dir *datafs.Data, tsrs ...*tensor.Indexed) {
 // a String tensor with the unique values of each source [Groups] tensor,
 // and a aligned Float64 tensor with the statistics results for each such
 // unique group value. See the README.md file for a diagram of the results.
-func GroupStats(dir *datafs.Data, stat string, tsrs ...*tensor.Indexed) {
+func GroupStats(dir *datafs.Data, stat string, tsrs ...tensor.Tensor) {
 	gd, err := dir.RecycleDir("Groups")
 	if errors.Log(err) != nil {
 		return
@@ -157,15 +157,15 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...*tensor.Indexed) {
 		if gv == nil {
 			gtsr := datafs.NewValue[string](sgd, gpnm, nv)
 			for i, v := range vals {
-				gtsr.SetStringRow(v.Tensor.Metadata().Name(), i)
+				gtsr.SetStringRow(v.Metadata().Name(), i)
 			}
 		}
 		for _, tsr := range tsrs {
-			vd, _ := sgd.RecycleDir(tsr.Tensor.Metadata().Name())
+			vd, _ := sgd.RecycleDir(tsr.Metadata().Name())
 			sv := datafs.NewValue[float64](vd, stnm, nv)
 			for i, v := range vals {
-				idx := v.Tensor.(*tensor.Int).Values
-				sg := tensor.NewIndexed(tsr.Tensor, idx)
+				idx := tensor.AsIntSlice(v)
+				sg := tensor.NewIndexed(tsr, idx...)
 				tensor.Call(stat, sg, stout)
 				sv.SetFloatRow(stout.Float1D(0), i)
 			}
@@ -180,7 +180,7 @@ func TableGroupStats(dir *datafs.Data, stat string, dt *table.Table, columns ...
 
 // GroupDescribe runs standard descriptive statistics on given tensor data
 // using [GroupStats] function, with [DescriptiveStats] list of stats.
-func GroupDescribe(dir *datafs.Data, tsrs ...*tensor.Indexed) {
+func GroupDescribe(dir *datafs.Data, tsrs ...tensor.Tensor) {
 	for _, st := range DescriptiveStats {
 		GroupStats(dir, st.FuncName(), tsrs...)
 	}

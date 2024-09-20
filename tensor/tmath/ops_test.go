@@ -24,7 +24,7 @@ func TestAdd(t *testing.T) {
 	oneout := oned.Clone()
 
 	cell2d := tensor.NewIndexed(tensor.NewFloat32(5, 2, 6))
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...*tensor.Indexed) {
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		i, _, ci := cell2d.RowCellIndex(idx)
 		cell2d.SetFloat1D(oned.Float1D(ci), i)
 	}, cell2d)
@@ -47,7 +47,7 @@ func TestAdd(t *testing.T) {
 	Add(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
-			assert.InDelta(t, v+v, cellout.Tensor.FloatRowCell(ri, i), 1.0e-6)
+			assert.InDelta(t, v+v, cellout.FloatRowCell(ri, i), 1.0e-6)
 		}
 	}
 
@@ -75,7 +75,7 @@ func TestAdd(t *testing.T) {
 	Sub(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
-			assert.InDelta(t, v-v, cellout.Tensor.FloatRowCell(ri, i), 1.0e-6)
+			assert.InDelta(t, v-v, cellout.FloatRowCell(ri, i), 1.0e-6)
 		}
 	}
 
@@ -95,7 +95,7 @@ func TestAdd(t *testing.T) {
 	Mul(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
-			assert.InDelta(t, v*v, cellout.Tensor.FloatRowCell(ri, i), 1.0e-6)
+			assert.InDelta(t, v*v, cellout.FloatRowCell(ri, i), 1.0e-6)
 		}
 	}
 
@@ -123,7 +123,7 @@ func TestAdd(t *testing.T) {
 	Div(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
-			assert.InDelta(t, v/v, cellout.Tensor.FloatRowCell(ri, i), 1.0e-6)
+			assert.InDelta(t, v/v, cellout.FloatRowCell(ri, i), 1.0e-6)
 		}
 	}
 
@@ -138,7 +138,7 @@ func TestAdd(t *testing.T) {
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
 	stats.MaxFunc(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
-	// fmt.Println(oneout.Tensor)
+	// fmt.Println(oneout)
 
 	minv := tensor.NewFloat64Scalar(0)
 	maxv := tensor.NewFloat64Scalar(1)
@@ -147,7 +147,7 @@ func TestAdd(t *testing.T) {
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
 	stats.MaxFunc(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
-	// fmt.Println(oneout.Tensor)
+	// fmt.Println(oneout)
 
 	thr := tensor.NewFloat64Scalar(0.5)
 	Binarize(oned, thr, oneout)
@@ -155,5 +155,5 @@ func TestAdd(t *testing.T) {
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
 	stats.MaxFunc(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
-	// fmt.Println(oneout.Tensor)
+	// fmt.Println(oneout)
 }

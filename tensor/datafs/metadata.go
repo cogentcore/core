@@ -17,7 +17,7 @@ import (
 func (d *Data) SetMetaItems(key string, value any, names ...string) error {
 	tsrs, err := d.Values(names...)
 	for _, tsr := range tsrs {
-		tsr.Tensor.Metadata().Set(key, value)
+		tsr.Metadata().Set(key, value)
 	}
 	return err
 }
@@ -29,7 +29,7 @@ func (d *Data) CalcAll() error {
 	var errs []error
 	items := d.FlatValuesFunc(nil)
 	for _, it := range items {
-		err := tensor.Calc(it.Tensor)
+		err := tensor.Calc(it)
 		if err != nil {
 			errs = append(errs, err)
 		}

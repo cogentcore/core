@@ -13,7 +13,7 @@ import (
 // using standard Float64 interface
 func CopyDense(to tensor.Tensor, dm *mat.Dense) {
 	nr, nc := dm.Dims()
-	to.SetShape(nr, nc)
+	to.SetShapeInts(nr, nc)
 	idx := 0
 	for ri := 0; ri < nr; ri++ {
 		for ci := 0; ci < nc; ci++ {
