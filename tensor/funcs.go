@@ -277,7 +277,7 @@ func (fn *Func) CallOut(tsr ...Tensor) ([]Tensor, error) {
 	}
 	outs := make([]Tensor, fn.Out)
 	for i := range outs {
-		outs[i] = NewIndexed(NewOfType(typ))
+		outs[i] = NewOfType(typ)
 	}
 	tsr = append(tsr, outs...)
 	err := fn.Call(tsr...)

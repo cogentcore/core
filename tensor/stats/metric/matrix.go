@@ -111,8 +111,6 @@ func CovarianceMatrix(funcName string, in, out tensor.Tensor) {
 	flatsz := []int{in.DimSize(0), cells}
 	flatvw := in.View()
 	flatvw.SetShapeInts(flatsz...)
-	// flatix := tensor.NewIndexed(flatvw)
-	// flatix.Indexes = in.Indexes
 
 	mout := tensor.NewFloat64Scalar(0.0)
 	out.SetShapeInts(cells, cells)

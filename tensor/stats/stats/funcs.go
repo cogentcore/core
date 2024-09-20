@@ -124,7 +124,7 @@ func MaxAbsFunc(in, out tensor.Tensor) {
 // and returns the Float64 output values for subsequent use.
 func MeanFuncOut64(in, out tensor.Tensor) (mean64, count64 tensor.Tensor) {
 	sum64 := SumFuncOut64(in, out)
-	count := tensor.NewIndexed(out.Clone())
+	count := out.Clone()
 	count64 = CountFuncOut64(in, count)
 	nsub := out.Len()
 	for i := range nsub {

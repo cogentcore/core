@@ -1,6 +1,6 @@
 # metric
 
-`metric` provides various similarity / distance metrics for comparing tensors, operating on the `tensor.Indexed` standard data representation.
+`metric` provides various similarity / distance metrics for comparing tensors, operating on the `tensor.Tensor` standard data representation.
 
 The `Matrix` function returns a distance / similarity matrix computed from the n-dimensional "cells" of row-organized tensor data, and the `LabeledMatrix` type provides labels for displaying such matricies.
 

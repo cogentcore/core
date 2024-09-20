@@ -130,7 +130,7 @@ func TestAdd(t *testing.T) {
 	}
 
 	ZScore(oned, oneout)
-	mout := tensor.NewIndexed(tensor.NewFloat64())
+	mout := tensor.NewFloat64()
 	std, mean, _ := stats.StdFuncOut64(oneout, mout)
 	assert.InDelta(t, 1.0, std.Float1D(0), 1.0e-6)
 	assert.InDelta(t, 0.0, mean.Float1D(0), 1.0e-6)

@@ -10,7 +10,6 @@ import (
 	"reflect"
 	"slices"
 	"sort"
-	"strings"
 
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/slicesx"
@@ -26,7 +25,7 @@ import (
 // Use the [SliceSet] function to copy sliced values back to the original.
 func Slice(tsr, out *Sliced, ranges ...Range) error {
 	sizes := slices.Clone(tsr.Tensor.ShapeInts())
-	sizes[0] = tsr.NumRows() // takes into account indexes
+	sizes[0] = tsr.DimSize(0) // takes into account indexes
 	nsz, err := SliceSize(sizes, ranges...)
 	if err != nil {
 		return err
@@ -159,6 +158,11 @@ func (sl *Sliced) Label() string {
 	return sl.Tensor.Label()
 }
 
+// String satisfies the fmt.Stringer interface for string of tensor data.
+func (sl *Sliced) String() string {
+	return sprint(sl.Tensor, 0) // todo: no need
+}
+
 // Metadata returns the metadata for this tensor, which can be used
 // to encode plotting options, etc.
 func (sl *Sliced) Metadata() *metadata.Data { return sl.Tensor.Metadata() }
@@ -204,6 +208,13 @@ func (sl *Sliced) SetShape(sizes Tensor) {
 	sl.SetShapeInts(AsIntSlice(sizes)...)
 }
 
+// SetNumRows sets the number of rows (outermost dimension) in a RowMajor organized tensor.
+// This invalidates the indexes.
+func (sl *Sliced) SetNumRows(rows int) {
+	sl.Sequential()
+	sl.Tensor.SetNumRows(rows)
+}
+
 // Len returns the total number of elements in our view of the tensor.
 func (sl *Sliced) Len() int {
 	return sl.Shape().Len()
@@ -233,7 +244,7 @@ func (sl *Sliced) RowCellSize() (rows, cells int) {
 	} else {
 		ln := 1
 		for d := 1; d < nd; d++ {
-			ln *= sl.DimSize()
+			ln *= sl.DimSize(d)
 		}
 		cells = ln
 	}
@@ -281,86 +292,35 @@ func (sl *Sliced) SortIndexes(dim int) {
 	sl.Indexes[dim] = ix
 }
 
-// Sort does default alpha or numeric sort along given dimension of data.
-func (sl *Sliced) Sort(dim int, ascending bool) {
-	if sl.Tensor.IsString() {
-		sl.SortFunc(dim, func(tsr Tensor, dim, i, j int) int {
-			return CompareAscending(tsr.StringRowCell(i, 0), tsr.StringRowCell(j, 0), ascending)
-		})
-	} else {
-		sl.SortFunc(func(tsr Tensor, i, j int) int {
-			return CompareAscending(tsr.FloatRowCell(i, 0), tsr.FloatRowCell(j, 0), ascending)
-		})
-	}
-}
-
-// SortStableFunc stably sorts the row-wise indexes using given compare function.
+// SortStableFunc stably sorts along given dimension using given compare function.
 // The compare function operates directly on row numbers into the Tensor
 // as these row numbers have already been projected through the indexes.
 // cmp(a, b) should return a negative number when a < b, a positive
 // number when a > b and zero when a == b.
 // It is *essential* that it always returns 0 when the two are equal
 // for the stable function to actually work.
-func (sl *Sliced) SortStableFunc(cmp func(tsr Tensor, i, j int) int) {
-	sl.IndexesNeeded()
-	slices.SortStableFunc(sl.Indexes, func(a, b int) int {
-		return cmp(sl.Tensor, a, b) // key point: these are already indirected through indexes!!
+func (sl *Sliced) SortStableFunc(dim int, cmp func(tsr Tensor, dim, i, j int) int) {
+	sl.IndexesNeeded(dim)
+	ix := sl.Indexes[dim]
+	slices.SortStableFunc(ix, func(a, b int) int {
+		return cmp(sl.Tensor, dim, a, b) // key point: these are already indirected through indexes!!
 	})
-}
-
-// SortStable does stable default alpha or numeric sort.
-// Uses first cell of higher dimensional data.
-func (sl *Sliced) SortStable(ascending bool) {
-	if sl.Tensor.IsString() {
-		sl.SortStableFunc(func(tsr Tensor, i, j int) int {
-			return CompareAscending(tsr.StringRowCell(i, 0), tsr.StringRowCell(j, 0), ascending)
-		})
-	} else {
-		sl.SortStableFunc(func(tsr Tensor, i, j int) int {
-			return CompareAscending(tsr.FloatRowCell(i, 0), tsr.FloatRowCell(j, 0), ascending)
-		})
-	}
+	sl.Indexes[dim] = ix
 }
 
 // Filter filters the indexes using given Filter function.
 // The Filter function operates directly on row numbers into the Tensor
 // as these row numbers have already been projected through the indexes.
-func (sl *Sliced) Filter(filterer func(tsr Tensor, row int) bool) {
-	sl.IndexesNeeded()
-	sz := len(sl.Indexes)
+func (sl *Sliced) Filter(dim int, filterer func(tsr Tensor, dim, idx int) bool) {
+	sl.IndexesNeeded(dim)
+	ix := sl.Indexes[dim]
+	sz := len(ix)
 	for i := sz - 1; i >= 0; i-- { // always go in reverse for filtering
-		if !filterer(sl.Tensor, sl.Indexes[i]) { // delete
-			sl.Indexes = append(sl.Indexes[:i], sl.Indexes[i+1:]...)
+		if !filterer(sl, dim, ix[i]) { // delete
+			ix = append(ix[:i], ix[i+1:]...)
 		}
 	}
-}
-
-// FilterString filters the indexes using string values compared to given
-// string. Includes rows with matching values unless exclude is set.
-// If contains, only checks if row contains string; if ignoreCase, ignores case.
-// Use the named const args [Include], [Exclude], [Contains], [Equals],
-// [IgnoreCase], [UseCase] for greater clarity.
-// Uses first cell of higher dimensional data.
-func (sl *Sliced) FilterString(str string, exclude, contains, ignoreCase bool) { //types:add
-	lowstr := strings.ToLower(str)
-	sl.Filter(func(tsr Tensor, row int) bool {
-		val := tsr.StringRowCell(row, 0)
-		has := false
-		switch {
-		case contains && ignoreCase:
-			has = strings.Contains(strings.ToLower(val), lowstr)
-		case contains:
-			has = strings.Contains(val, str)
-		case ignoreCase:
-			has = strings.EqualFold(val, str)
-		default:
-			has = (val == str)
-		}
-		if exclude {
-			return !has
-		}
-		return has
-	})
+	sl.Indexes[dim] = ix
 }
 
 // NewTensor returns a new tensor with column data organized according to
@@ -421,42 +381,16 @@ func (sl *Sliced) CopyIndexes(oix *Sliced) {
 	}
 }
 
-// AddRows adds n rows to end of underlying Tensor, and to the indexes in this view
-func (sl *Sliced) AddRows(n int) { //types:add
-	stidx := sl.Tensor.DimSize(0)
-	sl.Tensor.SetNumRows(stidx + n)
-	if sl.Indexes != nil {
-		for i := stidx; i < stidx+n; i++ {
-			sl.Indexes = append(sl.Indexes, i)
-		}
-	}
+// AppendFrom appends all values from other tensor into this tensor.
+// This invalidates the indexes which are reset.
+func (sl *Sliced) AppendFrom(from Tensor) error {
+	sl.Sequential()
+	return sl.Tensor.AppendFrom(from)
 }
 
-// InsertRows adds n rows to end of underlying Tensor, and to the indexes starting at
-// given index in this view
-func (sl *Sliced) InsertRows(at, n int) {
-	stidx := sl.Tensor.DimSize(0)
-	sl.IndexesNeeded()
-	sl.Tensor.SetNumRows(stidx + n)
-	nw := make([]int, n, n+len(sl.Indexes)-at)
-	for i := 0; i < n; i++ {
-		nw[i] = stidx + i
-	}
-	sl.Indexes = append(sl.Indexes[:at], append(nw, sl.Indexes[at:]...)...)
-}
-
-// DeleteRows deletes n rows of indexes starting at given index in the list of indexes
-func (sl *Sliced) DeleteRows(at, n int) {
-	sl.IndexesNeeded()
-	sl.Indexes = append(sl.Indexes[:at], sl.Indexes[at+n:]...)
-}
-
-// Swap switches the indexes for i and j
-func (sl *Sliced) Swap(i, j int) {
-	if sl.Indexes == nil {
-		return
-	}
-	sl.Indexes[i], sl.Indexes[j] = sl.Indexes[j], sl.Indexes[i]
+// CopyCellsFrom copies given range of values from other tensor into this tensor,
+func (sl *Sliced) CopyCellsFrom(from Tensor, to, start, n int) {
+	sl.Tensor.CopyCellsFrom(from, to, start, n)
 }
 
 ///////////////////////////////////////////////
@@ -464,27 +398,20 @@ func (sl *Sliced) Swap(i, j int) {
 
 /////////////////////  Floats
 
+// todo: these are not the right functions
+
 // Float returns the value of given index as a float64.
 // The first index value is indirected through the indexes.
 func (sl *Sliced) Float(i ...int) float64 {
-	if sl.Indexes == nil {
-		return sl.Tensor.Float(i...)
-	}
-	ic := slices.Clone(i)
-	ic[0] = sl.Indexes[ic[0]]
-	return sl.Tensor.Float(ic...)
+	sh := sl.Shape()
+	return sl.Tensor.Float1D(sh.IndexTo1D())
 }
 
 // SetFloat sets the value of given index as a float64
 // The first index value is indirected through the [Sliced.Indexes].
 func (sl *Sliced) SetFloat(val float64, i ...int) {
-	if sl.Indexes == nil {
-		sl.Tensor.SetFloat(val, i...)
-		return
-	}
-	ic := slices.Clone(i)
-	ic[0] = sl.Indexes[ic[0]]
-	sl.Tensor.SetFloat(val, ic...)
+	sh := sl.Shape()
+	sl.Tensor.SetFloat1D(val, sh.IndexTo1D())
 }
 
 // FloatRowCell returns the value at given row and cell,
@@ -492,6 +419,10 @@ func (sl *Sliced) SetFloat(val float64, i ...int) {
 // Row is indirected through the [Sliced.Indexes].
 // This is the preferred interface for all Sliced operations.
 func (sl *Sliced) FloatRowCell(row, cell int) float64 {
+	sh := sl.Shape()
+	_, sz := sh.RowCellSize()
+	i := row*sz + cell
+	return float64(tsr.Values[i])
 	return sl.Tensor.FloatRowCell(sl.RowIndex(row), cell)
 }
 
@@ -703,20 +634,6 @@ func (sl *Sliced) CopyFrom(from Tensor) {
 	}
 	sl.Sequential()
 	sl.Tensor.CopyFrom(from)
-}
-
-// AppendFrom appends all values from other tensor into this tensor.
-// This invalidates the indexes which are reset.
-func (sl *Sliced) AppendFrom(from Tensor) error {
-	sl.Sequential()
-	return sl.Tensor.AppendFrom(from)
-}
-
-// CopyCellsFrom copies given range of values from other tensor into this tensor,
-// This invalidates the indexes which are reset.
-func (sl *Sliced) CopyCellsFrom(from Tensor, to, start, n int) {
-	sl.Sequential()
-	sl.Tensor.CopyCellsFrom(from, to, start, n)
 }
 
 func (sl *Sliced) Sizeof() int64 {

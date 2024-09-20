@@ -27,7 +27,7 @@ var (
 // to vectorize over, and initializing any output vectors.
 // Thus the nfun is often specific to a particular class of functions.
 // Both functions are called with the same set
-// of Indexed Tensors passed as the final argument(s).
+// of Tensors passed as the final argument(s).
 // The role of each tensor is function-dependent: there could be multiple
 // inputs and outputs, and the output could be effectively scalar,
 // as in a sum operation.  The interpretation of the index is

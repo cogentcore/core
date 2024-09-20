@@ -98,7 +98,7 @@ func NewNumberFromSlice[T num.Number](vals ...T) Tensor {
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
 func (tsr *Number[T]) String() string {
-	return stringIndexed(tsr, 0, nil)
+	return sprint(tsr, 0)
 }
 
 func (tsr *Number[T]) IsString() bool {
@@ -367,7 +367,7 @@ func (tsr *Number[T]) SubSpace(offs ...int) Tensor {
 }
 
 // RowTensor is a convenience version of [Tensor.SubSpace] to return the
-// SubSpace for the outermost row dimension. [Indexed] defines a version
+// SubSpace for the outermost row dimension. [Rows] defines a version
 // of this that indirects through the row indexes.
 func (tsr *Number[T]) RowTensor(row int) Tensor {
 	return tsr.SubSpace(row)

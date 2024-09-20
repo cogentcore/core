@@ -131,7 +131,7 @@ func (tb *Table) StyleValue(w core.Widget, s *styles.Style, row, col int) {
 	s.SetTextWrap(false)
 }
 
-// SetTable sets the source table that we are viewing, using a sequential Indexed
+// SetTable sets the source table that we are viewing, using a sequential view,
 // and then configures the display
 func (tb *Table) SetTable(dt *table.Table) *Table {
 	if dt == nil {
@@ -158,28 +158,6 @@ func (tb *Table) AsyncUpdateTable() {
 	tb.ScrollToIndexNoUpdate(tb.SliceSize - 1)
 	tb.Update()
 	tb.AsyncUnlock()
-}
-
-// SetIndexed sets the source Indexed of a table (using a copy so original is not modified)
-// and then configures the display
-func (tb *Table) SetIndexed(ix *table.Table) *Table {
-	if ix == nil {
-		return tb
-	}
-
-	tb.Table = ix.Clone() // always copy
-
-	tb.This.(core.Lister).UpdateSliceSize()
-	tb.StartIndex = 0
-	tb.VisibleRows = tb.MinRows
-	if !tb.IsReadOnly() {
-		tb.SelectedIndex = -1
-	}
-	tb.ResetSelectedIndexes()
-	tb.SelectMode = false
-	tb.MakeIter = 0
-	tb.Update()
-	return tb
 }
 
 func (tb *Table) UpdateSliceSize() int {

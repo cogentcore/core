@@ -14,7 +14,6 @@ import (
 
 func TestFuncs64(t *testing.T) {
 	vals := []float64{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1}
-	// ix := tensor.NewIndexed(tensor.NewNumberFromSlice(vals...))
 	ix := tensor.NewNumberFromSlice(vals...)
 	out := tensor.NewFloat64(1)
 
@@ -91,7 +90,7 @@ func TestFuncs64(t *testing.T) {
 func TestFuncsInt(t *testing.T) {
 	vals := []int{0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100}
 	tsr := tensor.NewNumberFromSlice(vals...)
-	ix := tensor.NewIndexed(tsr)
+	ix := tensor.NewRows(tsr)
 	out := tensor.NewInt(1)
 
 	results := []int{11, 550, 550, 550, 0, 0, 100, 0, 100, 50, 1100, int(math.Sqrt(1100)), int(math.Sqrt(1100) / math.Sqrt(11)), 38500, 196, 1000, int(math.Sqrt(1000)), int(math.Sqrt(1000) / math.Sqrt(11))}
@@ -163,7 +162,7 @@ func TestFuncsCell(t *testing.T) {
 		}
 	}
 
-	ix := tensor.NewIndexed(tsr)
+	ix := tensor.NewRows(tsr)
 	out := tensor.NewFloat32(20, 10)
 
 	CountFunc(ix, out)

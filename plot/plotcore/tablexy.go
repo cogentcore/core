@@ -47,7 +47,7 @@ var _ plot.Valuer = &tableXY{}
 var _ plot.Labeler = &tableXY{}
 var _ plots.YErrorer = &tableXY{}
 
-// newTableXY returns a new XY plot view onto the given Indexed of table.Table (makes a copy),
+// newTableXY returns a new XY plot view onto the given Indexed view of table.Table (makes a copy),
 // from given column indexes, and tensor indexes within each cell.
 // Column indexes are enforced to be valid, with an error message if they are not.
 func newTableXY(dt *table.Table, xcol, xtsrIndex, ycol, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {
@@ -55,7 +55,7 @@ func newTableXY(dt *table.Table, xcol, xtsrIndex, ycol, ytsrIndex int, yrng minm
 	return txy, txy.validate()
 }
 
-// newTableXYName returns a new XY plot view onto the given Indexed of table.Table (makes a copy),
+// newTableXYName returns a new XY plot view onto the given Indexed view of table.Table (makes a copy),
 // from given column name and tensor indexes within each cell.
 // Column indexes are enforced to be valid, with an error message if they are not.
 func newTableXYName(dt *table.Table, xi, xtsrIndex int, ycol string, ytsrIndex int, yrng minmax.Range32) (*tableXY, error) {

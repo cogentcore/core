@@ -37,7 +37,7 @@ for _, x := range #[1,2,3]# {
 }
 ```
 
-In general, the math mode syntax in _Goal_ is designed to be as compatible with Python NumPy / scipy syntax as possible, while also adding a few Go-specific additions as well -- see [Math mode](#math-mode) for details.  All elements of a _Goal_ math expression are [tensors](../tensor), specifically `*tensor.Indexed`, which can represent everything from a scalar to an n-dimenstional tensor.  These are called an "array" in NumPy terms.
+In general, the math mode syntax in _Goal_ is designed to be as compatible with Python NumPy / scipy syntax as possible, while also adding a few Go-specific additions as well -- see [Math mode](#math-mode) for details.  All elements of a _Goal_ math expression are [tensors](../tensor), which can represent everything from a scalar to an n-dimenstional tensor.  These are called an "ndarray" in NumPy terms.
 
 The rationale and mnemonics for using `$` and `#` are as follows:
 
@@ -225,13 +225,15 @@ In general, _Goal_ is designed to be as compatible with Python NumPy / SciPy syn
 
 All elements of a _Goal_ math expression are [tensors](../tensor) (i.e., `tensor.Tensor`), which can represent everything from a scalar to an n-dimenstional tensor, with different _views_ that support the arbitrary slicing and flexible forms of indexing documented in the table below.  These are called an "array" in NumPy terms.  See [array vs. tensor](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html#array-or-matrix-which-should-i-use) NumPy docs for more information.  Note that _Goal_ does not have a distinct `matrix` type; everything is a tensor, and when these are 2D, they function appropriately.
 
-The _view_ versions of `Tensor` include `tensor.Sliced`, `tensor.Masked`, and `tensor.Indexed`, each of which wraps around another "source" `Tensor`, and provides its own way of accessing the underlying data:
+The _view_ versions of `Tensor` include `tensor.Sliced`, `tensor.Rows`, `tensor.Masked`, and `tensor.Indexed`, each of which wraps around another "source" `Tensor`, and provides its own way of accessing the underlying data:
 
 * `Sliced` has an arbitrary set of indexes for each dimension, so access to values along that dimension go through the indexes.  Thus, you could reverse the order of the columns (dimension 1), or only operate on a subset of them.
 
+* `Rows` is an optimized version of `Sliced` with indexes only for the first, outermost, _row_ dimension, which 
+
 * `Masked` has a `tensor.Bool` tensor that filters access to the underlying source tensor through a mask: anywhere the bool value is `false`, the corresponding source value is not settable, and returns `NaN` (missing value) when accessed.
 
-* `Indexed` is an optimized version of `Sliced` with indexes only for the first, outermost, _row_ dimension, which 
+* `Indexed` uses a tensor of indexes where the final, innermost dimension is the same size as the number of dimensions in the wrapped source tensor. The overall shape of this view is that of the remaining outer dimensions of the Indexes tensor, and like other views, assignment and return values are taken from the corresponding indexed value in the wrapped source tensor.
 
 Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html)
 

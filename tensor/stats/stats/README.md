@@ -34,9 +34,9 @@ The following statistics are supported (per the `Stats` enum in `stats.go`):
 * `VarPop`:  population variance (squared diffs from mean, divided by n)
 * `StdPop`:  population standard deviation (sqrt of VarPop)
 * `SemPop`:  population standard error of the mean (StdPop divided by sqrt(n))
-* `Median`:  middle value in sorted ordering (only for Indexed)
-* `Q1`:  Q1 first quartile = 25%ile value = .25 quantile value (only for Indexed)
-* `Q3`:  Q3 third quartile = 75%ile value = .75 quantile value (only for Indexed)
+* `Median`:  middle value in sorted ordering (uses a `Rows` view)
+* `Q1`:  Q1 first quartile = 25%ile value = .25 quantile value (uses `Rows`)
+* `Q3`:  Q3 third quartile = 75%ile value = .75 quantile value (uses `Rows`)
 
 Here is the general info associated with these function calls:
 

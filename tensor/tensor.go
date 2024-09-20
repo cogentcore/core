@@ -87,7 +87,7 @@ type Tensor interface {
 	// RowCellSize returns the size of the outermost Row shape dimension,
 	// and the size of all the remaining inner dimensions (the "cell" size).
 	// Commonly used to organize multiple instances (rows) of higher-dimensional
-	// patterns (cells), and the [Indexed] type operates on the outer row dimension.
+	// patterns (cells), and the [Rows] type operates on the outer row dimension.
 	RowCellSize() (rows, cells int)
 
 	// DataType returns the type of the data elements in the tensor.
@@ -115,25 +115,25 @@ type Tensor interface {
 	SetFloat(val float64, i ...int)
 
 	// Float1D returns the value of given 1-dimensional index (0-Len()-1) as a float64.
-	// This can be somewhat expensive in wrapper views ([Indexed], [Sliced]), which
+	// This can be somewhat expensive in wrapper views ([Rows], [Sliced]), which
 	// convert the flat index back into a full n-dimensional index and use that api.
 	// [Tensor.FloatRowCell] is preferred.
 	Float1D(i int) float64
 
 	// SetFloat1D sets the value of given 1-dimensional index (0-Len()-1) as a float64.
-	// This can be somewhat expensive in the commonly-used [Indexed] view;
+	// This can be somewhat expensive in the commonly-used [Rows] view;
 	// [Tensor.SetFloatRowCell] is preferred.
 	SetFloat1D(val float64, i int)
 
 	// FloatRowCell returns the value at given row and cell, where row is the outermost
 	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Indexed] tensors index along the row, and use this interface extensively.
+	// [Rows] tensors index along the row, and use this interface extensively.
 	// This is useful for lists of patterns, and the [table.Table] container.
 	FloatRowCell(row, cell int) float64
 
 	// SetFloatRowCell sets the value at given row and cell, where row is the outermost
 	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Indexed] tensors index along the row, and use this interface extensively.
+	// [Rows] tensors index along the row, and use this interface extensively.
 	// This is useful for lists of patterns, and the [table.Table] container.
 	SetFloatRowCell(val float64, row, cell int)
 
@@ -166,13 +166,13 @@ type Tensor interface {
 
 	// StringRowCell returns the value at given row and cell, where row is the outermost
 	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Indexed] tensors index along the row, and use this interface extensively.
+	// [Rows] tensors index along the row, and use this interface extensively.
 	// This is useful for lists of patterns, and the [table.Table] container.
 	StringRowCell(row, cell int) string
 
 	// SetStringRowCell sets the value at given row and cell, where row is the outermost
 	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Indexed] tensors index along the row, and use this interface extensively.
+	// [Rows] tensors index along the row, and use this interface extensively.
 	// This is useful for lists of patterns, and the [table.Table] container.
 	SetStringRowCell(val string, row, cell int)
 
@@ -204,13 +204,13 @@ type Tensor interface {
 
 	// IntRowCell returns the value at given row and cell, where row is the outermost
 	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Indexed] tensors index along the row, and use this interface extensively.
+	// [Rows] tensors index along the row, and use this interface extensively.
 	// This is useful for lists of patterns, and the [table.Table] container.
 	IntRowCell(row, cell int) int
 
 	// SetIntRowCell sets the value at given row and cell, where row is the outermost
 	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Indexed] tensors index along the row, and use this interface extensively.
+	// [Rows] tensors index along the row, and use this interface extensively.
 	// This is useful for lists of patterns, and the [table.Table] container.
 	SetIntRowCell(val int, row, cell int)
 
@@ -238,7 +238,7 @@ type Tensor interface {
 	SubSpace(offs ...int) Tensor
 
 	// RowTensor is a convenience version of [Tensor.SubSpace] to return the
-	// SubSpace for the outermost row dimension. [Indexed] defines a version
+	// SubSpace for the outermost row dimension. [Rows] defines a version
 	// of this that indirects through the row indexes.
 	RowTensor(row int) Tensor
 

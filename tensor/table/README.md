@@ -8,11 +8,11 @@ See [examples/dataproc](examples/dataproc) for a demo of how to use this system 
 
 Whereas an individual `Tensor` can only hold one data type, the `Table` allows coordinated storage and processing of heterogeneous data types, aligned by the outermost row dimension. The main `tensor` data processing functions are defined on the individual tensors (which are the universal computational element in the `tensor` system), but the coordinated row-wise indexing in the table is important for sorting or filtering a collection of data in the same way, and grouping data by a common set of "splits" for data analysis.  Plotting is also driven by the table, with one column providing a shared X axis for the rest of the columns.
 
-The `Table` mainly provides "infrastructure" methods for adding tensor columns and CSV (comma separated values, and related tab separated values, TSV) file reading and writing.  Any function that can be performed on an individual column should be done using the `tensor.Indexed` and `Tensor` methods directly.
+The `Table` mainly provides "infrastructure" methods for adding tensor columns and CSV (comma separated values, and related tab separated values, TSV) file reading and writing.  Any function that can be performed on an individual column should be done using the `tensor.Rows` and `Tensor` methods directly.
 
 As a general convention, it is safest, clearest, and quite fast to access columns by name instead of index (there is a `map` from name to index), so the base access method names generally take a column name argument, and those that take a column index have an `Index` suffix.
 
-The table itself stores raw data `tensor.Tensor` values, and the `Column` (by name) and `ColumnByIndex` methods return a `tensor.Indexed` with the `Indexes` pointing to the shared table-wide `Indexes` (which can be `nil` if standard sequential order is being used).  
+The table itself stores raw data `tensor.Tensor` values, and the `Column` (by name) and `ColumnByIndex` methods return a `tensor.Rows` with the `Indexes` pointing to the shared table-wide `Indexes` (which can be `nil` if standard sequential order is being used).  
 
 If you call Sort, Filter or other routines on an individual column tensor, then you can grab the updated indexes via the `IndexesFromTensor` method so that they apply to the entire table.  The `SortColumn` and `FilterString` methods do this for you.
 
@@ -29,7 +29,7 @@ It is very low-cost to create a new View of an existing Table, via `NewView`, as
 Column data access:
 
 ```Go
-// FloatRow is a method on the `tensor.Indexed` returned from the `Column` method.
+// FloatRow is a method on the `tensor.Rows` returned from the `Column` method.
 // This is the best method to use in general for generic 1D data access,
 // as it works on any data from 1D on up (although it only samples the first value
 // from higher dimensional data) .
@@ -43,7 +43,7 @@ dt.Column("Name").SetStringRow(4)
 To access higher-dimensional "cell" level data using a simple 1D index into the cell patterns:
 
 ```Go
-// FloatRowCell is a method on the `tensor.Indexed` returned from the `Column` method.
+// FloatRowCell is a method on the `tensor.Rows` returned from the `Column` method.
 // This is the best method to use in general for generic 1D data access,
 // as it works on any data from 1D on up (although it only samples the first value
 // from higher dimensional data) .
@@ -71,7 +71,7 @@ gps := byNm.AggsToTable(etable.AddAggName) // etable.AddAggName or etable.ColNam
 Describe (basic stats) all columns in a table:
 
 ```Go
-ix := etable.NewIndexed(et) // new view with all rows
+ix := etable.NewRows(et) // new view with all rows
 desc := agg.DescAll(ix) // summary stats of all columns
 // get value at given column name (from original table), row "Mean"
 mean := desc.Float("ColNm", desc.RowsByString("Agg", "Mean", etable.Equals, etable.UseCase)[0])

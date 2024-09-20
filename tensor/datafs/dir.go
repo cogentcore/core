@@ -48,7 +48,7 @@ func (d *Data) Item(name string) *Data {
 	return d.Dir.At(name)
 }
 
-// Value returns the [tensor.Indexed] Value for given item
+// Value returns the [tensor.Tensor] Value for given item
 // within this directory. This will panic if item is not
 // found, and will return nil if it is not a Value
 // (i.e., it is a directory).

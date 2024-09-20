@@ -49,10 +49,10 @@ func (dt *Table) IndexesNeeded() {
 	}
 }
 
-// IndexesFromTensor copies Indexes from the given [tensor.Indexed] tensor,
+// IndexesFromTensor copies Indexes from the given [tensor.Rows] tensor,
 // including if they are nil. This allows column-specific Sort, Filter and
 // other such methods to be applied to the entire table.
-func (dt *Table) IndexesFromTensor(ix *tensor.Indexed) {
+func (dt *Table) IndexesFromTensor(ix *tensor.Rows) {
 	dt.Indexes = ix.Indexes
 }
 

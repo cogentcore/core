@@ -341,7 +341,7 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 }
 
 var numpyFuncs = map[string]funWrap{
-	"zeros": {"tensor.NewFloat64Indexed", ""},
+	"zeros": {"tensor.NewFloat64", ""},
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {

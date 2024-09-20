@@ -50,23 +50,23 @@ All tensor package functions are registered using a global name-to-function map 
 
 In general, **1D** refers to a flat, 1-dimensional list. There are various standard shapes of tensor data that different functions expect:
 
-* **Flat, 1D**: this is the simplest data shape. For example, the [stats](stats) functions report summary statistics for all values of such data, across the one dimension. `Indexed` views of this 1D data provide fine-grained filtering and sorting of all the data. Any `Tensor` can be accessed via a flat 1D index, which goes directly into the underlying Go slice for the basic types, and is appropriately (though somewhat expensively in some cases) indirected through the effective geometry in `Sliced` and `Indexed` types.
+* **Flat, 1D**: this is the simplest data shape. For example, the [stats](stats) functions report summary statistics for all values of such data, across the one dimension. `Rows` views of this 1D data provide fine-grained filtering and sorting of all the data. Any `Tensor` can be accessed via a flat 1D index, which goes directly into the underlying Go slice for the basic types, and is appropriately (though somewhat expensively in some cases) indirected through the effective geometry in `Sliced` and `Rows` types.
 
-* **Row, Cell 2D**: The outermost row dimension can be sorted, filtered in an `Indexed` view, and the inner "cells" of data are organized in a simple flat 1D `SubSpace`, so they can be easily processed. In most packages including [tmath](tmath) and [stats](stats), 2+ dimensional data will be automatically re-shaped into this Row, Cell format, and processed as row-wise list of cell-wise patterns. For example, `stats` will aggregate each cell separately across rows, so you end up with the "average pattern" when you do `stats.Mean` for example.
+* **Row, Cell 2D**: The outermost row dimension can be sorted, filtered in an `Rows` view, and the inner "cells" of data are organized in a simple flat 1D `SubSpace`, so they can be easily processed. In the [stats](stats) and [metric](metric) packages, 2+ dimensional data will be automatically re-shaped into this Row, Cell format, and processed as row-wise list of cell-wise patterns. For example, `stats` will aggregate each cell separately across rows, so you end up with the "average pattern" when you do `stats.Mean` for example. The [tmath](tmath) package, which defines binary functions, uses the [broadcasting](#broadcasting) logic to align n-dimensional data, and the row, cell structure provides a concrete simplification for thinking about how that works.
 
     A higher-dimensional tensor can also be re-shaped into this row, cell format by collapsing any number of additional outer dimensions into a longer, effective "row" index, with the remaining inner dimensions forming the cell-wise patterns. You can decide where to make the cut, and the `RowCellSplit` function makes it easy to create a new view of an existing tensor with this split made at a given dimension.
 
-* **Matrix 2D**: For matrix algebra functions, a 2D tensor is treated as a standard row-major 2D matrix, which can be processed using `gonum` based matrix and vector operations.
+* **Matrix 2D**: For matrix algebra functions, a 2D tensor is treated as a standard row-major 2D matrix, which can be processed using `gonum` based matrix and vector operations, as in the [matrix](matrix) package.
 
-* **Matrix 3D**: For functions that specifically process 2D matricies, a 3D shape can be used as well, which iterates over the outer row-wise dimension to process the inner 2D matricies.
+* **Matrix 3+D**: For functions that specifically process 2D matricies, a 3+D shape can be used as well, which iterates over the outer dimensions to process the inner 2D matricies.
 
 ## Dynamic row sizing (e.g., for logs)
 
-The `SetNumRows` method can be used to progressively increase the number of rows to fit more data, as is typically the case when logging data (often using a [table](table)). You can set the row dimension to 0 to start -- that is (now) safe. However, for greatest efficiency, it is best to set the number of rows to the largest expected size first, and _then_ set it back to 0. The underlying slice of data retains its capacity when sized back down. During incremental increasing of the slice size, if it runs out of capacity, all the elements need to be copied, so it is more efficient to establish the capacity up front instead of having multiple incremental re-allocations.
+The `SetNumRows` function can be used to progressively increase the number of rows to fit more data, as is typically the case when logging data (often using a [table](table)). You can set the row dimension to 0 to start -- that is (now) safe. However, for greatest efficiency, it is best to set the number of rows to the largest expected size first, and _then_ set it back to 0. The underlying slice of data retains its capacity when sized back down. During incremental increasing of the slice size, if it runs out of capacity, all the elements need to be copied, so it is more efficient to establish the capacity up front instead of having multiple incremental re-allocations.
 
 # Cheat Sheet
 
-`ix` is the `Indexed` tensor for these examples:
+`ix` is the `Rows` tensor for these examples:
 
 ## Tensor Access
 
@@ -86,7 +86,7 @@ str := ix.String1D(2)
 
 ```Go
 // value at row 3, cell 2 (flat index into entire `SubSpace` tensor for this row)
-// The row index will be indirected through any `Indexes` present on the Indexed view.
+// The row index will be indirected through any `Indexes` present on the Rows view.
 val := ix.FloatRowCell(3, 2)
 // string value at row 2, cell 0. this is safe for 1D and 2D+ shapes
 // and is a robust way to get 1D data from tensors of unknown shapes.
@@ -105,7 +105,7 @@ ix.SetRowTensor(tsr, 4)
 ```
 
 ```Go
-// returns a flat, 1D Indexed view into n-dimensional tensor values at 
+// returns a flat, 1D Rows view into n-dimensional tensor values at 
 // given row. This is used in compute routines that operate generically
 // on the entire row as a flat pattern.
 ci := tensor.Cells1D(ix, 5)

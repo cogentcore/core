@@ -15,7 +15,7 @@ import (
 )
 
 // Groups generates indexes for each unique value in each of the given tensors.
-// One can then use the resulting indexes for the [tensor.Indexed] indexes to
+// One can then use the resulting indexes for the [tensor.Rows] indexes to
 // perform computations restricted to grouped subsets of data, as in the
 // [GroupStats] function. See [GroupCombined] for function that makes a
 // "Combined" Group that has a unique group for each _combination_ of
@@ -36,7 +36,7 @@ func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) {
 	if errors.Log(err) != nil {
 		return
 	}
-	makeIdxs := func(dir *datafs.Data, srt *tensor.Indexed, val string, start, r int) {
+	makeIdxs := func(dir *datafs.Data, srt *tensor.Rows, val string, start, r int) {
 		n := r - start
 		it := datafs.NewValue[int](dir, val, n)
 		for j := range n {
@@ -54,7 +54,7 @@ func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) {
 			nm = strconv.Itoa(i)
 		}
 		td, _ := gd.Mkdir(nm)
-		srt := tensor.AsIndexed(tsr).CloneIndexes()
+		srt := tensor.AsRows(tsr).CloneIndexes()
 		srt.SortStable(tensor.Ascending)
 		start := 0
 		if tsr.IsString() {
@@ -104,7 +104,7 @@ func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) {
 	if errors.Log(err) != nil {
 		return
 	}
-	tsr := tensor.AsIndexed(tsrs[0])
+	tsr := tensor.AsRows(tsrs[0])
 	nr := tsr.NumRows()
 	if nr == 0 {
 		return
@@ -165,7 +165,7 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...tensor.Tensor) {
 			sv := datafs.NewValue[float64](vd, stnm, nv)
 			for i, v := range vals {
 				idx := tensor.AsIntSlice(v)
-				sg := tensor.NewIndexed(tsr, idx...)
+				sg := tensor.NewRows(tsr, idx...)
 				tensor.Call(stat, sg, stout)
 				sv.SetFloatRow(stout.Float1D(0), i)
 			}

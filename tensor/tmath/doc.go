@@ -3,6 +3,6 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package tmath provides basic math operations and functions that operate on tensor.Indexed.
+Package tmath provides basic math operations and functions that operate on tensor.Tensor.
 */
 package tmath

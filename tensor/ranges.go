@@ -10,7 +10,7 @@ import (
 )
 
 // todo: make a version of these functions that takes
-// a standard Indexed tensor with n x 3 shape, where the 3 inner values
+// a tensor with n x 3 shape, where the 3 inner values
 // specify the Range Start, End, Incr values, across n ranges.
 // these would convert to the current Range-based format that does the impl,
 // using the Range helper functions, which are also easier and more explicit

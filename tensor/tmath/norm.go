@@ -13,7 +13,7 @@ import (
 // ZScore computes Z-normalized values into given output tensor,
 // subtracting the Mean and dividing by the standard deviation.
 func ZScore(a, out tensor.Tensor) {
-	mout := tensor.NewIndexed(tensor.NewFloat64())
+	mout := tensor.NewFloat64()
 	std, mean, _ := stats.StdFuncOut64(a, mout)
 	Sub(a, mean, out)
 	Div(out, std, out)
@@ -22,7 +22,7 @@ func ZScore(a, out tensor.Tensor) {
 // UnitNorm computes unit normalized values into given output tensor,
 // subtracting the Min value and dividing by the Max of the remaining numbers.
 func UnitNorm(a, out tensor.Tensor) {
-	mout := tensor.NewIndexed(tensor.NewFloat64())
+	mout := tensor.NewFloat64()
 	stats.MinFunc(a, mout)
 	Sub(a, mout, out)
 	stats.MaxFunc(out, mout)

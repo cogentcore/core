@@ -69,7 +69,7 @@ func (pl *PlotEditor) CopyFieldsFrom(frm tree.Node) {
 	fr := frm.(*PlotEditor)
 	pl.Frame.CopyFieldsFrom(&fr.Frame)
 	pl.Options = fr.Options
-	pl.setIndexed(fr.table)
+	pl.setTable(fr.table)
 	mx := min(len(pl.Columns), len(fr.Columns))
 	for i := 0; i < mx; i++ {
 		*pl.Columns[i] = *fr.Columns[i]
@@ -133,11 +133,11 @@ func (pl *PlotEditor) Init() {
 	})
 }
 
-// setIndexed sets the table to view and does Update
+// setTable sets the table to view and does Update
 // to update the Column list, which will also trigger a Layout
 // and updating of the plot on next render pass.
 // This is safe to call from a different goroutine.
-func (pl *PlotEditor) setIndexed(tab *table.Table) *PlotEditor {
+func (pl *PlotEditor) setTable(tab *table.Table) *PlotEditor {
 	pl.table = tab
 	pl.Update()
 	return pl
@@ -273,7 +273,7 @@ func (pl *PlotEditor) xLabel() string {
 	return "X"
 }
 
-// GoUpdatePlot updates the display based on current Indexed into table.
+// GoUpdatePlot updates the display based on current Indexed view into table.
 // This version can be called from goroutines. It does Sequential() on
 // the [table.Table], under the assumption that it is used for tracking a
 // the latest updates of a running process.
@@ -294,7 +294,7 @@ func (pl *PlotEditor) GoUpdatePlot() {
 	pl.Scene.AsyncUnlock()
 }
 
-// UpdatePlot updates the display based on current Indexed into table.
+// UpdatePlot updates the display based on current Indexed view into table.
 // It does not automatically update the [table.Table] unless it is
 // nil or out date.
 func (pl *PlotEditor) UpdatePlot() {

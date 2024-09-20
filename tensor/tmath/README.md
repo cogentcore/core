@@ -2,7 +2,7 @@
 
 # math functions
 
-All the standard library [math](https://pkg.go.dev/math) functions are implemented on `*tensor.Indexed`.
+All the standard library [math](https://pkg.go.dev/math) functions are implemented on `*tensor.Tensor`.
 
 To properly handle the row-wise indexes, all processing is done using row, cell indexes, with the row indirected through the indexes.
 

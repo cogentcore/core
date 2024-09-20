@@ -17,7 +17,7 @@ import (
 
 // Table is a table of Tensor columns aligned by a common outermost row dimension.
 // Use the [Table.Column] (by name) and [Table.ColumnIndex] methods to obtain a
-// [tensor.Indexed] view of the column, using the shared [Table.Indexes] of the Table.
+// [tensor.Rows] view of the column, using the shared [Table.Indexes] of the Table.
 // Thus, a coordinated sorting and filtered view of the column data is automatically
 // available for any of the tensor package functions that use [tensor.Tensor] as the one
 // common data representation for all operations.
@@ -28,7 +28,7 @@ type Table struct { //types:add
 
 	// Indexes are the indexes into Tensor rows, with nil = sequential.
 	// Only set if order is different from default sequential order.
-	// These indexes are shared into the `tensor.Indexed` Column values
+	// These indexes are shared into the `tensor.Rows` Column values
 	// to provide a coordinated indexed view into the underlying data.
 	Indexes []int
 
@@ -52,7 +52,7 @@ func NewTable(name ...string) *Table {
 	return dt
 }
 
-// NewView returns a new Table with its own Indexed view into the
+// NewView returns a new Table with its own Rows view into the
 // same underlying set of Column tensor data as the source table.
 // Indexes are copied from the existing table -- use Sequential
 // to reset to full sequential view.
@@ -76,22 +76,22 @@ func (dt *Table) IsValidRow(row int) error {
 // NumColumns returns the number of columns.
 func (dt *Table) NumColumns() int { return dt.Columns.Len() }
 
-// Column returns the tensor with given column name, as a [tensor.Indexed]
+// Column returns the tensor with given column name, as a [tensor.Rows]
 // with the shared [Table.Indexes] from this table. It is best practice to
 // access columns by name, and direct access through [Table.Columns] does not
 // provide the shared table-wide Indexes.
 // Returns nil if not found.
-func (dt *Table) Column(name string) *tensor.Indexed {
+func (dt *Table) Column(name string) *tensor.Rows {
 	cl := dt.Columns.At(name)
 	if cl == nil {
 		return nil
 	}
-	return tensor.NewIndexed(cl, dt.Indexes...)
+	return tensor.NewRows(cl, dt.Indexes...)
 }
 
 // ColumnTry is a version of [Table.Column] that also returns an error
 // if the column name is not found, for cases when error is needed.
-func (dt *Table) ColumnTry(name string) (*tensor.Indexed, error) {
+func (dt *Table) ColumnTry(name string) (*tensor.Rows, error) {
 	cl := dt.Column(name)
 	if cl != nil {
 		return cl, nil
@@ -100,17 +100,17 @@ func (dt *Table) ColumnTry(name string) (*tensor.Indexed, error) {
 }
 
 // ColumnIndex returns the tensor at the given column index,
-// as a [tensor.Indexed] with the shared [Table.Indexes] from this table.
+// as a [tensor.Rows] with the shared [Table.Indexes] from this table.
 // It is best practice to instead access columns by name using [Table.Column].
 // Direct access through [Table.Columns} does not provide the shared table-wide Indexes.
 // Will panic if out of range.
-func (dt *Table) ColumnByIndex(idx int) *tensor.Indexed {
+func (dt *Table) ColumnByIndex(idx int) *tensor.Rows {
 	cl := dt.Columns.Values[idx]
-	return tensor.NewIndexed(cl, dt.Indexes...)
+	return tensor.NewRows(cl, dt.Indexes...)
 }
 
 // ColumnList returns a list of tensors with given column names,
-// as [tensor.Indexed] with the shared [Table.Indexes] from this table.
+// as [tensor.Rows] with the shared [Table.Indexes] from this table.
 func (dt *Table) ColumnList(names ...string) []tensor.Tensor {
 	list := make([]tensor.Tensor, 0, len(names))
 	for _, nm := range names {
