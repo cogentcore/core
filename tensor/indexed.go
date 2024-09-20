@@ -6,31 +6,29 @@ package tensor
 
 import (
 	"cmp"
+	"log"
 	"math"
 	"math/rand"
+	"reflect"
 	"slices"
 	"sort"
 	"strings"
 
 	"cogentcore.org/core/base/metadata"
+	"gonum.org/v1/gonum/mat"
 )
 
 // Indexed is an indexed wrapper around a tensor.Tensor that provides a
 // specific view onto the Tensor defined by the set of indexes, which
 // apply to the outermost row dimension (with default row-major indexing).
-// This is the universal representation of a homogenous data type in the
-// [tensor] package framework, from scalar to vector, matrix, and beyond,
-// because it can efficiently represent any kind of element with sufficient
-// flexibility to enable a full range of computations to be elegantly expressed.
-// For example, sorting and filtering a tensor only requires
-// updating the indexes while doing nothing to the Tensor itself.
+// Sorting and filtering a tensor only requires updating the indexes while
+// leaving the underlying Tensor alone.
 // To produce a new [Tensor] that has its raw data actually organized according
-// to the indexed order, call the [NewTensor] method.
-// Use the [Set]FloatRowCell methods wherever possible, for the most efficient
-// and natural indirection through the indexes.  The 1D methods on underlying
-// tensor data do not indirect through the indexes and must be called directly
-// on the [Tensor].
+// to the indexed order (i.e., the copy function of numpy), call the [NewTensor] method.
+// Use the [Set]FloatRow[Cell] methods wherever possible, for the most efficient
+// and natural indirection through the indexes.
 type Indexed struct { //types:add
+
 	// Tensor that we are an indexed view onto.
 	Tensor Tensor
 
@@ -40,96 +38,41 @@ type Indexed struct { //types:add
 	Indexes []int
 }
 
-// NewIndexed returns a new Indexed based on given tensor.
-// If a list of indexes is passed, then our indexes are initialized
-// as a copy of those.  This is used e.g. from a Indexed Table column.
-// Otherwise it is initialized with default sequential indexes.
-func NewIndexed(tsr Tensor, idxs ...[]int) *Indexed {
-	ix := &Indexed{}
-	if len(idxs) == 1 { // indexes were passed
-		ix.Tensor = tsr
-		ix.Indexes = slices.Clone(idxs[0])
-	} else {
-		ix.SetTensor(tsr)
-	}
+// NewIndexed returns a new Indexed based on given tensor,
+// with optional list of indexes (none / nil = sequential).
+func NewIndexed(tsr Tensor, idxs ...int) *Indexed {
+	ix := &Indexed{Tensor: tsr, Indexes: idxs}
 	return ix
 }
 
-// NewFloat64Indexed is a convenience method to quickly get an Indexed
-// representation of [Float64] tensor of given shape, for use in math routines etc.
-func NewFloat64Indexed(sizes ...int) *Indexed {
-	return &Indexed{Tensor: NewFloat64(sizes...)}
-}
-
-// NewFloat64Scalar is a convenience method to quickly get an Indexed
-// representation of a single float64 scalar value, for use in math routines etc.
-func NewFloat64Scalar(val float64) *Indexed {
-	return &Indexed{Tensor: NewNumberFromSlice(val)}
-}
-
-// NewIntScalar is a convenience method to quickly get an Indexed
-// representation of a single int scalar value, for use in math routines etc.
-func NewIntScalar(val int) *Indexed {
-	return &Indexed{Tensor: NewNumberFromSlice(val)}
-}
-
-// NewStringScalar is a convenience method to quickly get an Indexed
-// representation of a single string scalar value, for use in math routines etc.
-func NewStringScalar(val string) *Indexed {
-	return &Indexed{Tensor: NewStringTensorFromSlice(val)}
-}
-
-// NewFloat64FromSlice returns a new 1-dimensional tensor of given value type
-// initialized directly from the given slice values, which are not copied.
-// The resulting Tensor thus "wraps" the given values.
-func NewFloat64FromSlice(vals ...float64) *Indexed {
-	return &Indexed{Tensor: NewNumberFromSlice(vals...)}
-}
-
-// NewIntFromSlice returns a new 1-dimensional tensor of given value type
-// initialized directly from the given slice values, which are not copied.
-// The resulting Tensor thus "wraps" the given values.
-func NewIntFromSlice(vals ...int) *Indexed {
-	return &Indexed{Tensor: NewNumberFromSlice(vals...)}
-}
-
-// NewStringFromSlice returns a new 1-dimensional tensor of given value type
-// initialized directly from the given slice values, which are not copied.
-// The resulting Tensor thus "wraps" the given values.
-func NewStringFromSlice(vals ...string) *Indexed {
-	return &Indexed{Tensor: NewStringTensorFromSlice(vals...)}
-}
-
-// SetTensor sets as indexes into given tensor with sequential initial indexes
+// SetTensor sets as indexes into given tensor with sequential initial indexes.
 func (ix *Indexed) SetTensor(tsr Tensor) {
 	ix.Tensor = tsr
 	ix.Sequential()
 }
 
-// SetShapeFrom sets our shape from given source, calling
-// [Tensor.SetShape] with the shape params from source,
-// and copying the indexes if present.
-func (ix *Indexed) SetShapeFrom(src *Indexed) {
-	ix.Tensor.SetShapeFrom(src.Tensor)
-	if src.Indexes == nil {
-		ix.Indexes = nil
-	} else {
-		ix.Indexes = slices.Clone(src.Indexes)
-	}
-}
-
-// Index returns the actual index into underlying tensor row based on given
+// RowIndex returns the actual index into underlying tensor row based on given
 // index value.  If Indexes == nil, index is passed through.
-func (ix *Indexed) Index(idx int) int {
+func (ix *Indexed) RowIndex(idx int) int {
 	if ix.Indexes == nil {
 		return idx
 	}
 	return ix.Indexes[idx]
 }
 
+// NumRows returns the effective number of rows in this Indexed view,
+// which is the length of the index list or number of outer
+// rows dimension of tensor if no indexes (full sequential view).
+func (ix *Indexed) NumRows() int {
+	if ix.Indexes == nil {
+		return ix.Tensor.DimSize(0)
+	}
+	return len(ix.Indexes)
+}
+
 // String satisfies the fmt.Stringer interface for string of tensor data.
 func (ix *Indexed) String() string {
-	return stringIndexed(ix.Tensor, 0, ix.Indexes)
+	return stringIndexed(ix.Tensor, 0, ix.Indexes) // todo: no need
 }
 
 // Label satisfies the core.Labeler interface for a summary description of the tensor.
@@ -137,21 +80,93 @@ func (ix *Indexed) Label() string {
 	return ix.Tensor.Label()
 }
 
-// note: goal transpiling needs all expressions to work directly on Indexed
-// so we need wrappers for everything.
-
-// Shape returns a pointer to the shape that fully parametrizes the tensor shape.
-func (ix *Indexed) Shape() *Shape { return ix.Tensor.Shape() }
-
 // Metadata returns the metadata for this tensor, which can be used
 // to encode plotting options, etc.
 func (ix *Indexed) Metadata() *metadata.Data { return ix.Tensor.Metadata() }
 
+// If we have Indexes, this is the effective shape sizes using
+// the current number of indexes as the outermost row dimension size.
+func (ix *Indexed) ShapeInts() []int {
+	if ix.Indexes == nil || ix.Tensor.NumDims() == 0 {
+		return ix.Tensor.ShapeInts()
+	}
+	sh := slices.Clone(ix.Tensor.ShapeInts())
+	sh[0] = len(ix.Indexes)
+	return sh
+}
+
+func (ix *Indexed) ShapeSizes() Tensor {
+	if ix.Indexes == nil {
+		return ix.Tensor.ShapeSizes()
+	}
+	return NewIntFromSlice(ix.ShapeInts()...)
+}
+
+// Shape() returns a [Shape] representation of the tensor shape
+// (dimension sizes). If we have Indexes, this is the effective
+// shape using the current number of indexes as the outermost row dimension size.
+func (ix *Indexed) Shape() *Shape {
+	if ix.Indexes == nil {
+		return ix.Tensor.Shape()
+	}
+	return NewShape(ix.ShapeInts()...)
+}
+
+// SetShapeInts sets our shape to given sizes.
+// If we do not have indexes, or the row-wise shape dimension
+// in the new shape is the same as current, then we set the shape
+// of the wrapped Tensor accordingly.
+// This allows reshaping of inner dimensions while preserving indexes,
+// e.g., for computational routines that use a 1D cell view.
+// Otherwise, we reset the indexes and then set the wrapped shape,
+// because our current indexes are now invalidated.
+func (ix *Indexed) SetShapeInts(sizes ...int) {
+	if ix.Indexes == nil || ix.Tensor.NumDims() == 0 {
+		ix.Tensor.SetShapeInts(sizes...)
+		return
+	}
+	sh := ix.Tensor.ShapeInts()
+	if sizes[0] == sh[0] { // keep our indexes
+		ix.Tensor.SetShapeInts(sizes...)
+		return
+	}
+	ix.Indexes = nil // now invalid
+	ix.Tensor.SetShapeInts(sizes...)
+}
+
+// SetNumRows sets the number of rows (outermost dimension) in a RowMajor organized tensor.
+// This invalidates the indexes.
+func (ix *Indexed) SetNumRows(rows int) {
+	ix.Sequential()
+	ix.Tensor.SetNumRows(rows)
+}
+
+// SetShape sets our shape to given sizes.
+// See [Indexed.SetShapeInts] for details.
+func (ix *Indexed) SetShape(sizes Tensor) {
+	ix.SetShapeInts(AsInts(sizes)...)
+}
+
+// Len returns the total number of elements in the tensor,
+// taking into account the Indexes via [Rows],
+// as NumRows() * cell size.
+func (ix *Indexed) Len() int {
+	rows := ix.NumRows()
+	_, cells := ix.Tensor.RowCellSize()
+	return cells * rows
+}
+
 // NumDims returns the total number of dimensions.
 func (ix *Indexed) NumDims() int { return ix.Tensor.NumDims() }
 
-// DimSize returns size of given dimension.
-func (ix *Indexed) DimSize(dim int) int { return ix.Tensor.DimSize(dim) }
+// DimSize returns size of given dimension, returning NumRows()
+// for first dimension.
+func (ix *Indexed) DimSize(dim int) int {
+	if dim == 0 {
+		return ix.NumRows()
+	}
+	return ix.Tensor.DimSize(dim)
+}
 
 // RowCellSize returns the size of the outermost Row shape dimension
 // (via [Indexed.Rows] method), and the size of all the remaining
@@ -168,27 +183,8 @@ func (ix *Indexed) RowCellIndex(idx int) (i1d, ri, ci int) {
 	_, cells := ix.Tensor.RowCellSize()
 	ri = idx / cells
 	ci = idx % cells
-	i1d = ix.Index(ri)*cells + ci
+	i1d = ix.RowIndex(ri)*cells + ci
 	return
-}
-
-// NumRows returns the effective number of rows in this Indexed view,
-// which is the length of the index list or number of outer
-// rows dimension of tensor if no indexes (full sequential view).
-func (ix *Indexed) NumRows() int {
-	if ix.Indexes == nil {
-		return ix.Tensor.DimSize(0)
-	}
-	return len(ix.Indexes)
-}
-
-// Len returns the total number of elements in the tensor,
-// taking into account the Indexes via [Rows],
-// as Rows() * cell size.
-func (ix *Indexed) Len() int {
-	rows := ix.NumRows()
-	_, cells := ix.Tensor.RowCellSize()
-	return cells * rows
 }
 
 // DeleteInvalid deletes all invalid indexes from the list.
@@ -435,9 +431,16 @@ func (ix *Indexed) NewTensor() Tensor {
 
 // Clone returns a copy of the current Indexed view with a cloned copy of
 // the underlying Tensor and copy of the indexes.
-func (ix *Indexed) Clone() *Indexed {
+func (ix *Indexed) Clone() Tensor {
 	nix := &Indexed{}
 	nix.Tensor = ix.Tensor.Clone()
+	nix.CopyIndexes(ix)
+	return nix
+}
+
+func (ix *Indexed) View() Tensor {
+	nix := &Indexed{}
+	nix.Tensor = ix.Tensor.View()
 	nix.CopyIndexes(ix)
 	return nix
 }
@@ -526,30 +529,12 @@ func (ix *Indexed) SetFloat(val float64, i ...int) {
 	ix.Tensor.SetFloat(val, ic...)
 }
 
-// FloatRow returns the value at given row (outermost dimension).
-// Row is indirected through the [Indexed.Indexes].
-// It is a convenience wrapper for FloatRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (ix *Indexed) FloatRow(row int) float64 {
-	return ix.Tensor.FloatRowCell(ix.Index(row), 0)
-}
-
-// SetFloatRow sets the value at given row (outermost dimension).
-// Row is indirected through the [Indexed.Indexes].
-// It is a convenience wrapper for SetFloatRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (ix *Indexed) SetFloatRow(val float64, row int) {
-	ix.Tensor.SetFloatRowCell(val, ix.Index(row), 0)
-}
-
 // FloatRowCell returns the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Indexed.Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) FloatRowCell(row, cell int) float64 {
-	return ix.Tensor.FloatRowCell(ix.Index(row), cell)
+	return ix.Tensor.FloatRowCell(ix.RowIndex(row), cell)
 }
 
 // SetFloatRowCell sets the value at given row and cell,
@@ -557,21 +542,33 @@ func (ix *Indexed) FloatRowCell(row, cell int) float64 {
 // Row is indirected through the [Indexed.Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) SetFloatRowCell(val float64, row, cell int) {
-	ix.Tensor.SetFloatRowCell(val, ix.Index(row), cell)
+	ix.Tensor.SetFloatRowCell(val, ix.RowIndex(row), cell)
 }
 
-// Float1D returns the value of given 1-dimensional index (0-Len()-1) as a float64.
-// This is just a convenience pass-through to the Tensor, and does _not_ use
-// the [Indexed.Indexes].
+// Float1D is somewhat expensive if indexes are set, because it needs to convert
+// the flat index back into a full n-dimensional index and then use that api.
 func (ix *Indexed) Float1D(i int) float64 {
-	return ix.Tensor.Float1D(i)
+	if ix.Indexes == nil {
+		return ix.Tensor.Float1D(i)
+	}
+	return ix.Float(ix.Tensor.Shape().IndexFrom1D(i)...)
 }
 
-// SetFloat1D sets the value of given 1-dimensional index (0-Len()-1) as a float64.
-// This is just a convenience pass-through to the Tensor, and does _not_ use
-// the [Indexed.Indexes].
+// SetFloat1D is somewhat expensive if indexes are set, because it needs to convert
+// the flat index back into a full n-dimensional index and then use that api.
 func (ix *Indexed) SetFloat1D(val float64, i int) {
-	ix.Tensor.SetFloat1D(val, i)
+	if ix.Indexes == nil {
+		ix.Tensor.SetFloat1D(val, i)
+	}
+	ix.SetFloat(val, ix.Tensor.Shape().IndexFrom1D(i)...)
+}
+
+func (ix *Indexed) FloatRow(row int) float64 {
+	return ix.FloatRowCell(row, 0)
+}
+
+func (ix *Indexed) SetFloatRow(val float64, row int) {
+	ix.SetFloatRowCell(val, row, 0)
 }
 
 /////////////////////  Strings
@@ -598,30 +595,12 @@ func (ix *Indexed) SetString(val string, i ...int) {
 	ix.Tensor.SetString(val, ic...)
 }
 
-// StringRow returns the value at given row (outermost dimension).
-// Row is indirected through the [Indexed.Indexes].
-// It is a convenience wrapper for StringRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (ix *Indexed) StringRow(row int) string {
-	return ix.Tensor.StringRowCell(ix.Index(row), 0)
-}
-
-// SetStringRow sets the value at given row (outermost dimension).
-// Row is indirected through the [Indexed.Indexes].
-// It is a convenience wrapper for SetStringRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (ix *Indexed) SetStringRow(val string, row int) {
-	ix.Tensor.SetStringRowCell(val, ix.Index(row), 0)
-}
-
 // StringRowCell returns the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Indexed.Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) StringRowCell(row, cell int) string {
-	return ix.Tensor.StringRowCell(ix.Index(row), cell)
+	return ix.Tensor.StringRowCell(ix.RowIndex(row), cell)
 }
 
 // SetStringRowCell sets the value at given row and cell,
@@ -629,21 +608,33 @@ func (ix *Indexed) StringRowCell(row, cell int) string {
 // Row is indirected through the [Indexed.Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) SetStringRowCell(val string, row, cell int) {
-	ix.Tensor.SetStringRowCell(val, ix.Index(row), cell)
+	ix.Tensor.SetStringRowCell(val, ix.RowIndex(row), cell)
 }
 
-// String1D returns the value of given 1-dimensional index (0-Len()-1) as a string.
-// This is just a convenience pass-through to the Tensor, and does _not_ use
-// the [Indexed.Indexes].
+// String1D is somewhat expensive if indexes are set, because it needs to convert
+// the flat index back into a full n-dimensional index and then use that api.
 func (ix *Indexed) String1D(i int) string {
-	return ix.Tensor.String1D(i)
+	if ix.Indexes == nil {
+		return ix.Tensor.String1D(i)
+	}
+	return ix.StringValue(ix.Tensor.Shape().IndexFrom1D(i)...)
 }
 
-// SetString1D sets the value of given 1-dimensional index (0-Len()-1) as a string.
-// This is just a convenience pass-through to the Tensor, and does _not_ use
-// the [Indexed.Indexes].
+// SetString1D is somewhat expensive if indexes are set, because it needs to convert
+// the flat index back into a full n-dimensional index and then use that api.
 func (ix *Indexed) SetString1D(val string, i int) {
-	ix.Tensor.SetString1D(val, i)
+	if ix.Indexes == nil {
+		ix.Tensor.SetString1D(val, i)
+	}
+	ix.SetString(val, ix.Tensor.Shape().IndexFrom1D(i)...)
+}
+
+func (ix *Indexed) StringRow(row int) string {
+	return ix.StringRowCell(row, 0)
+}
+
+func (ix *Indexed) SetStringRow(val string, row int) {
+	ix.SetStringRowCell(val, row, 0)
 }
 
 /////////////////////  Ints
@@ -671,30 +662,12 @@ func (ix *Indexed) SetInt(val int, i ...int) {
 	ix.Tensor.SetInt(val, ic...)
 }
 
-// IntRow returns the value at given row (outermost dimension).
-// Row is indirected through the [Indexed.Indexes].
-// It is a convenience wrapper for IntRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (ix *Indexed) IntRow(row int) int {
-	return ix.Tensor.IntRowCell(ix.Index(row), 0)
-}
-
-// SetIntRow sets the value at given row (outermost dimension).
-// Row is indirected through the [Indexed.Indexes].
-// It is a convenience wrapper for SetIntRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (ix *Indexed) SetIntRow(val int, row int) {
-	ix.Tensor.SetIntRowCell(val, ix.Index(row), 0)
-}
-
 // IntRowCell returns the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Indexed.Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) IntRowCell(row, cell int) int {
-	return ix.Tensor.IntRowCell(ix.Index(row), cell)
+	return ix.Tensor.IntRowCell(ix.RowIndex(row), cell)
 }
 
 // SetIntRowCell sets the value at given row and cell,
@@ -702,21 +675,33 @@ func (ix *Indexed) IntRowCell(row, cell int) int {
 // Row is indirected through the [Indexed.Indexes].
 // This is the preferred interface for all Indexed operations.
 func (ix *Indexed) SetIntRowCell(val int, row, cell int) {
-	ix.Tensor.SetIntRowCell(val, ix.Index(row), cell)
+	ix.Tensor.SetIntRowCell(val, ix.RowIndex(row), cell)
 }
 
-// Int1D returns the value of given 1-dimensional index (0-Len()-1) as a int.
-// This is just a convenience pass-through to the Tensor, and does _not_ use
-// the [Indexed.Indexes].
+// Int1D is somewhat expensive if indexes are set, because it needs to convert
+// the flat index back into a full n-dimensional index and then use that api.
 func (ix *Indexed) Int1D(i int) int {
-	return ix.Tensor.Int1D(i)
+	if ix.Indexes == nil {
+		return ix.Tensor.Int1D(i)
+	}
+	return ix.Int(ix.Tensor.Shape().IndexFrom1D(i)...)
 }
 
-// SetInt1D sets the value of given 1-dimensional index (0-Len()-1) as a int.
-// This is just a convenience pass-through to the Tensor, and does _not_ use
-// the [Indexed.Indexes].
+// SetInt1D is somewhat expensive if indexes are set, because it needs to convert
+// the flat index back into a full n-dimensional index and then use that api.
 func (ix *Indexed) SetInt1D(val int, i int) {
-	ix.Tensor.SetInt1D(val, i)
+	if ix.Indexes == nil {
+		ix.Tensor.SetInt1D(val, i)
+	}
+	ix.SetInt(val, ix.Tensor.Shape().IndexFrom1D(i)...)
+}
+
+func (ix *Indexed) IntRow(row int) int {
+	return ix.IntRowCell(row, 0)
+}
+
+func (ix *Indexed) SetIntRow(val int, row int) {
+	ix.SetIntRowCell(val, row, 0)
 }
 
 /////////////////////  SubSpaces
@@ -733,7 +718,7 @@ func (ix *Indexed) SubSpace(offs ...int) Tensor {
 	if len(offs) == 0 {
 		return nil
 	}
-	offs[0] = ix.Index(offs[0])
+	offs[0] = ix.RowIndex(offs[0])
 	return ix.Tensor.SubSpace(offs...)
 }
 
@@ -747,11 +732,130 @@ func (ix *Indexed) Cells1D(row int) *Indexed {
 // RowTensor is a convenience version of [Indexed.SubSpace] to return the
 // SubSpace for the outermost row dimension, indirected through the indexes.
 func (ix *Indexed) RowTensor(row int) Tensor {
-	return ix.Tensor.RowTensor(ix.Index(row))
+	return ix.Tensor.RowTensor(ix.RowIndex(row))
 }
 
 // SetRowTensor sets the values of the SubSpace at given row to given values,
 // with row indirected through the indexes.
 func (ix *Indexed) SetRowTensor(val Tensor, row int) {
-	ix.Tensor.SetRowTensor(val, ix.Index(row))
+	ix.Tensor.SetRowTensor(val, ix.RowIndex(row))
 }
+
+// CopyFrom copies all values from other tensor into this tensor.
+// Checks if source is an Indexed and copies indexes too,
+// otherwise underlying tensor copies from and indexes are reset.
+func (ix *Indexed) CopyFrom(from Tensor) {
+	if fix, ok := from.(*Indexed); ok {
+		ix.Tensor.CopyFrom(fix.Tensor)
+		ix.CopyIndexes(fix)
+		return
+	}
+	ix.Sequential()
+	ix.Tensor.CopyFrom(from)
+}
+
+// AppendFrom appends all values from other tensor into this tensor.
+// This invalidates the indexes which are reset.
+func (ix *Indexed) AppendFrom(from Tensor) error {
+	ix.Sequential()
+	return ix.Tensor.AppendFrom(from)
+}
+
+// CopyCellsFrom copies given range of values from other tensor into this tensor,
+// This invalidates the indexes which are reset.
+func (ix *Indexed) CopyCellsFrom(from Tensor, to, start, n int) {
+	ix.Sequential()
+	ix.Tensor.CopyCellsFrom(from, to, start, n)
+}
+
+func (ix *Indexed) Sizeof() int64 {
+	return ix.Tensor.Sizeof() // todo: could be out of sync with shape!
+}
+
+func (ix *Indexed) Bytes() []byte {
+	return ix.Tensor.Bytes() // todo: could be out of sync with shape!
+}
+
+func (ix *Indexed) IsString() bool {
+	return ix.Tensor.IsString()
+}
+
+func (ix *Indexed) DataType() reflect.Kind {
+	return ix.Tensor.DataType()
+}
+
+func (ix *Indexed) Range() (min, max float64, minIndex, maxIndex int) {
+	return ix.Tensor.Range()
+}
+
+func (ix *Indexed) SetZeros() {
+	ix.Tensor.SetZeros()
+}
+
+//////////////////////////  gonum matrix api
+
+// Dims is the gonum/mat.Matrix interface method for returning the dimensionality of the
+// 2D Matrix.  Assumes Row-major ordering and logs an error if NumDims < 2.
+func (ix *Indexed) Dims() (r, c int) {
+	nd := ix.NumDims()
+	if nd < 2 {
+		log.Println("tensor Dims gonum Matrix call made on Tensor with dims < 2")
+		return 0, 0
+	}
+	return ix.DimSize(nd - 2), ix.DimSize(nd - 1)
+}
+
+// Symmetric is the gonum/mat.Matrix interface method for returning the dimensionality of a symmetric
+// 2D Matrix.
+func (ix *Indexed) Symmetric() (r int) {
+	nd := ix.NumDims()
+	if nd < 2 {
+		log.Println("tensor Symmetric gonum Matrix call made on Tensor with dims < 2")
+		return 0
+	}
+	if ix.DimSize(nd-2) != ix.DimSize(nd-1) {
+		log.Println("tensor Symmetric gonum Matrix call made on Tensor that is not symmetric")
+		return 0
+	}
+	return ix.DimSize(nd - 1)
+}
+
+// SymmetricDim returns the number of rows/columns in the matrix.
+func (ix *Indexed) SymmetricDim() int {
+	nd := ix.NumDims()
+	if nd < 2 {
+		log.Println("tensor Symmetric gonum Matrix call made on Tensor with dims < 2")
+		return 0
+	}
+	if ix.DimSize(nd-2) != ix.DimSize(nd-1) {
+		log.Println("tensor Symmetric gonum Matrix call made on Tensor that is not symmetric")
+		return 0
+	}
+	return ix.DimSize(nd - 1)
+}
+
+// At is the gonum/mat.Matrix interface method for returning 2D matrix element at given
+// row, column index.  Assumes Row-major ordering and logs an error if NumDims < 2.
+func (ix *Indexed) At(i, j int) float64 {
+	nd := ix.NumDims()
+	if nd < 2 {
+		log.Println("tensor Dims gonum Matrix call made on Tensor with dims < 2")
+		return 0
+	} else if nd == 2 {
+		return ix.Float(i, j)
+	} else {
+		nix := make([]int, nd)
+		nix[nd-2] = i
+		nix[nd-1] = j
+		return ix.Float(nix...)
+	}
+}
+
+// T is the gonum/mat.Matrix transpose method.
+// It performs an implicit transpose by returning the receiver inside a Transpose.
+func (ix *Indexed) T() mat.Matrix {
+	return mat.Transpose{ix}
+}
+
+// check for interface impl
+var _ Tensor = (*Indexed)(nil)

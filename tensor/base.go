@@ -23,12 +23,34 @@ type Base[T any] struct {
 	Meta   metadata.Data
 }
 
-// Shape returns a pointer to the shape that fully parametrizes the tensor shape.
-func (tsr *Base[T]) Shape() *Shape { return &tsr.shape }
-
 // Metadata returns the metadata for this tensor, which can be used
 // to encode plotting options, etc.
 func (tsr *Base[T]) Metadata() *metadata.Data { return &tsr.Meta }
+
+func (tsr *Base[T]) Shape() *Shape { return &tsr.shape }
+
+// ShapeSizes returns the sizes of each dimension as an int tensor.
+func (tsr *Base[T]) ShapeSizes() Tensor { return tsr.shape.AsTensor() }
+
+// ShapeInts returns the sizes of each dimension as a slice of ints.
+// This is the preferred access for Go code.
+func (tsr *Base[T]) ShapeInts() []int { return tsr.shape.Sizes }
+
+// SetShape sets the dimension sizes as 1D int values from given tensor.
+// The backing storage is resized appropriately, retaining all existing data that fits.
+func (tsr *Base[T]) SetShape(sizes Tensor) {
+	tsr.shape.SetShape(sizes)
+	nln := tsr.Len()
+	tsr.Values = slicesx.SetLength(tsr.Values, nln)
+}
+
+// SetShapeInts sets the dimension sizes of the tensor, and resizes
+// backing storage appropriately, retaining all existing data that fits.
+func (tsr *Base[T]) SetShapeInts(sizes ...int) {
+	tsr.shape.SetShapeInts(sizes...)
+	nln := tsr.Len()
+	tsr.Values = slicesx.SetLength(tsr.Values, nln)
+}
 
 // Len returns the number of elements in the tensor (product of shape dimensions).
 func (tsr *Base[T]) Len() int { return tsr.shape.Len() }
@@ -63,36 +85,24 @@ func (tsr *Base[T]) Bytes() []byte {
 }
 
 func (tsr *Base[T]) Value(i ...int) T {
-	return tsr.Values[tsr.shape.Offset(i...)]
+	return tsr.Values[tsr.shape.IndexTo1D(i...)]
 }
 
 func (tsr *Base[T]) Value1D(i int) T { return tsr.Values[i] }
 
 func (tsr *Base[T]) Set(val T, i ...int) {
-	tsr.Values[tsr.shape.Offset(i...)] = val
+	tsr.Values[tsr.shape.IndexTo1D(i...)] = val
 }
 
 func (tsr *Base[T]) Set1D(val T, i int) { tsr.Values[i] = val }
 
-// view is implementation of View -- needs final casting
+// view is implementation of View -- needs final casting to tensor type.
 func (tsr *Base[T]) view() *Base[T] {
 	nw := &Base[T]{}
 	nw.shape.CopyShape(&tsr.shape)
 	nw.Values = tsr.Values
 	nw.Meta = tsr.Meta
 	return nw
-}
-
-// SetShape sets the shape params, resizing backing storage appropriately.
-func (tsr *Base[T]) SetShape(sizes ...int) {
-	tsr.shape.SetShape(sizes...)
-	nln := tsr.Len()
-	tsr.Values = slicesx.SetLength(tsr.Values, nln)
-}
-
-// SetNames sets the dimension names of the tensor shape.
-func (tsr *Base[T]) SetNames(names ...string) {
-	tsr.shape.SetNames(names...)
 }
 
 // SetNumRows sets the number of rows (outermost dimension) in a RowMajor organized tensor.
@@ -119,13 +129,10 @@ func (tsr *Base[T]) subSpaceImpl(offs ...int) *Base[T] {
 		return nil
 	}
 	stsr := &Base[T]{}
-	stsr.SetShape(tsr.shape.Sizes[od:]...)
-	if tsr.shape.Names != nil {
-		stsr.shape.SetNames(tsr.shape.Names...)
-	}
+	stsr.SetShapeInts(tsr.shape.Sizes[od:]...)
 	sti := make([]int, nd)
 	copy(sti, offs)
-	stoff := tsr.shape.Offset(sti...)
+	stoff := tsr.shape.IndexTo1D(sti...)
 	sln := stsr.Len()
 	stsr.Values = tsr.Values[stoff : stoff+sln]
 	return stsr
@@ -134,7 +141,7 @@ func (tsr *Base[T]) subSpaceImpl(offs ...int) *Base[T] {
 /////////////////////  Strings
 
 func (tsr *Base[T]) StringValue(i ...int) string {
-	return reflectx.ToString(tsr.Values[tsr.shape.Offset(i...)])
+	return reflectx.ToString(tsr.Values[tsr.shape.IndexTo1D(i...)])
 }
 
 func (tsr *Base[T]) String1D(off int) string { return reflectx.ToString(tsr.Values[off]) }
@@ -216,15 +223,16 @@ func stringIndexed(tsr Tensor, maxLen int, idxs []int) string {
 		maxLen = MaxSprintLength
 	}
 	var b strings.Builder
-	b.WriteString(tsr.Shape().String() + " ")
+	sh := tsr.Shape()
+	b.WriteString(sh.String() + " ")
 	oddRow := false
-	rows, cols, _, _ := Projection2DShape(tsr.Shape(), oddRow)
+	rows, cols, _, _ := Projection2DShape(sh, oddRow)
 	if idxs != nil {
 		rows = min(rows, len(idxs))
 	}
 	ctr := 0
 	for r := range rows {
-		rc, _ := Projection2DCoords(tsr.Shape(), oddRow, r, 0)
+		rc, _ := Projection2DCoords(sh, oddRow, r, 0)
 		b.WriteString(fmt.Sprintf("%v: ", rc))
 		ri := r
 		if idxs != nil {

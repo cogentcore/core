@@ -12,7 +12,7 @@ import (
 )
 
 func abs(in, out *Indexed) {
-	out.SetShapeFrom(in)
+	SetShapeFrom(out, in)
 	VectorizeThreaded(1, NFirstLen, func(idx int, tsr ...*Indexed) {
 		i, _, _ := tsr[0].RowCellIndex(idx)
 		tsr[1].SetFloat1D(math.Abs(tsr[0].Float1D(i)), i)
@@ -44,5 +44,5 @@ func TestFuncs(t *testing.T) {
 
 	out := CallOut("Abs", oned)
 	// assert.NoError(t, err)
-	assert.Equal(t, oneout.Tensor.(*Float64).Values, out.Tensor.(*Float64).Values)
+	assert.Equal(t, AsFloat64(oneout), AsFloat64(out))
 }

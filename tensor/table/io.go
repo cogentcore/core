@@ -335,7 +335,7 @@ func (dt *Table) WriteCSV(w io.Writer, delim tensor.Delims, headers bool) error 
 	cw.Comma = delim.Rune()
 	nrow := dt.NumRows()
 	for ri := range nrow {
-		ix := dt.Index(ri)
+		ix := dt.RowIndex(ri)
 		err = dt.WriteCSVRowWriter(cw, ix, ncol)
 		if err != nil {
 			log.Println(err)
@@ -401,7 +401,7 @@ func (dt *Table) WriteCSVRowWriter(cw *csv.Writer, row int, ncol int) error {
 			}
 			rc++
 		} else {
-			csh := tensor.NewShape(tsr.Shape().Sizes[1:]...) // cell shape
+			csh := tensor.NewShape(tsr.ShapeInts[1:]...) // cell shape
 			tc := csh.Len()
 			for ti := 0; ti < tc; ti++ {
 				vl := ""
@@ -433,7 +433,7 @@ func (dt *Table) TableHeaders() []string {
 		if tsr.NumDims() == 1 {
 			hdrs = append(hdrs, nm)
 		} else {
-			csh := tensor.NewShape(tsr.Shape().Sizes[1:]...) // cell shape
+			csh := tensor.NewShape(tsr.ShapeInts[1:]...) // cell shape
 			tc := csh.Len()
 			nd := csh.NumDims()
 			fnm := nm + fmt.Sprintf("[%v:", nd)

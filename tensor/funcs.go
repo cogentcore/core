@@ -95,7 +95,7 @@ func AddFunc(name string, fun any, out int, stringFirst ...bool) error {
 // An error is returned if the function name has not been registered
 // in the Funcs global function registry, or the argument count
 // does not match.
-func Call(name string, tsr ...*Indexed) error {
+func Call(name string, tsr ...Tensor) error {
 	nm := strings.ToLower(name)
 	fn, ok := Funcs[nm]
 	if !ok {
@@ -110,7 +110,7 @@ func Call(name string, tsr ...*Indexed) error {
 // in the Funcs global function registry, or the argument count
 // does not match.  This version of [Call] is for functions that
 // have an initial string argument
-func CallString(name, first string, tsr ...*Indexed) error {
+func CallString(name, first string, tsr ...Tensor) error {
 	nm := strings.ToLower(name)
 	fn, ok := Funcs[nm]
 	if !ok {
@@ -125,7 +125,7 @@ func CallString(name, first string, tsr ...*Indexed) error {
 // An error is logged if the function name has not been registered
 // in the Funcs global function registry, or the argument count
 // does not match.
-func CallOut(name string, tsr ...*Indexed) *Indexed {
+func CallOut(name string, tsr ...Tensor) Tensor {
 	nm := strings.ToLower(name)
 	fn, ok := Funcs[nm]
 	if !ok {
@@ -141,7 +141,7 @@ func CallOut(name string, tsr ...*Indexed) *Indexed {
 // An error is logged if the function name has not been registered
 // in the Funcs global function registry, or the argument count
 // does not match.
-func CallOutMulti(name string, tsr ...*Indexed) []*Indexed {
+func CallOutMulti(name string, tsr ...Tensor) []Tensor {
 	nm := strings.ToLower(name)
 	fn, ok := Funcs[nm]
 	if !ok {
@@ -156,26 +156,26 @@ func CallOutMulti(name string, tsr ...*Indexed) []*Indexed {
 func (fn *Func) ArgCount() int {
 	nargs := -1
 	switch fn.Fun.(type) {
-	case func(a *Indexed):
+	case func(a Tensor):
 		nargs = 1
-	case func(a, b *Indexed):
+	case func(a, b Tensor):
 		nargs = 2
-	case func(a, b, c *Indexed):
+	case func(a, b, c Tensor):
 		nargs = 3
-	case func(a, b, c, d *Indexed):
+	case func(a, b, c, d Tensor):
 		nargs = 4
-	case func(a, b, c, d, e *Indexed):
+	case func(a, b, c, d, e Tensor):
 		nargs = 5
 	// string cases:
-	case func(s string, a *Indexed):
+	case func(s string, a Tensor):
 		nargs = 1
-	case func(s string, a, b *Indexed):
+	case func(s string, a, b Tensor):
 		nargs = 2
-	case func(s string, a, b, c *Indexed):
+	case func(s string, a, b, c Tensor):
 		nargs = 3
-	case func(s string, a, b, c, d *Indexed):
+	case func(s string, a, b, c, d Tensor):
 		nargs = 4
-	case func(s string, a, b, c, d, e *Indexed):
+	case func(s string, a, b, c, d, e Tensor):
 		nargs = 5
 	}
 	return nargs
@@ -183,7 +183,7 @@ func (fn *Func) ArgCount() int {
 
 // ArgCheck returns an error if the number of args in list does not
 // match the number required as specified.
-func (fn *Func) ArgCheck(n int, tsr ...*Indexed) error {
+func (fn *Func) ArgCheck(n int, tsr ...Tensor) error {
 	if len(tsr) != n {
 		return fmt.Errorf("tensor.Call: args passed to %q: %d does not match required: %d", fn.Name, len(tsr), n)
 	}
@@ -192,32 +192,32 @@ func (fn *Func) ArgCheck(n int, tsr ...*Indexed) error {
 
 // Call calls function with given set of input & output arguments
 // appropriate for the given function (error if not).
-func (fn *Func) Call(tsr ...*Indexed) error {
+func (fn *Func) Call(tsr ...Tensor) error {
 	if fn.StringFirst {
 		return fmt.Errorf("tensor.Call: function %q: requires a first string argument", fn.Name)
 	}
 	switch f := fn.Fun.(type) {
-	case func(a *Indexed):
+	case func(a Tensor):
 		if err := fn.ArgCheck(1, tsr...); err != nil {
 			return err
 		}
 		f(tsr[0])
-	case func(a, b *Indexed):
+	case func(a, b Tensor):
 		if err := fn.ArgCheck(2, tsr...); err != nil {
 			return err
 		}
 		f(tsr[0], tsr[1])
-	case func(a, b, c *Indexed):
+	case func(a, b, c Tensor):
 		if err := fn.ArgCheck(3, tsr...); err != nil {
 			return err
 		}
 		f(tsr[0], tsr[1], tsr[2])
-	case func(a, b, c, d *Indexed):
+	case func(a, b, c, d Tensor):
 		if err := fn.ArgCheck(4, tsr...); err != nil {
 			return err
 		}
 		f(tsr[0], tsr[1], tsr[2], tsr[3])
-	case func(a, b, c, d, e *Indexed):
+	case func(a, b, c, d, e Tensor):
 		if err := fn.ArgCheck(5, tsr...); err != nil {
 			return err
 		}
@@ -229,32 +229,32 @@ func (fn *Func) Call(tsr ...*Indexed) error {
 // CallString calls function with given set of input & output arguments
 // appropriate for the given function (error if not),
 // with an initial string argument.
-func (fn *Func) CallString(s string, tsr ...*Indexed) error {
+func (fn *Func) CallString(s string, tsr ...Tensor) error {
 	if !fn.StringFirst {
 		return fmt.Errorf("tensor.CallString: function %q: does not take a first string argument", fn.Name)
 	}
 	switch f := fn.Fun.(type) {
-	case func(s string, a *Indexed):
+	case func(s string, a Tensor):
 		if err := fn.ArgCheck(1, tsr...); err != nil {
 			return err
 		}
 		f(s, tsr[0])
-	case func(s string, a, b *Indexed):
+	case func(s string, a, b Tensor):
 		if err := fn.ArgCheck(2, tsr...); err != nil {
 			return err
 		}
 		f(s, tsr[0], tsr[1])
-	case func(s string, a, b, c *Indexed):
+	case func(s string, a, b, c Tensor):
 		if err := fn.ArgCheck(3, tsr...); err != nil {
 			return err
 		}
 		f(s, tsr[0], tsr[1], tsr[2])
-	case func(s string, a, b, c, d *Indexed):
+	case func(s string, a, b, c, d Tensor):
 		if err := fn.ArgCheck(4, tsr...); err != nil {
 			return err
 		}
 		f(s, tsr[0], tsr[1], tsr[2], tsr[3])
-	case func(s string, a, b, c, d, e *Indexed):
+	case func(s string, a, b, c, d, e Tensor):
 		if err := fn.ArgCheck(5, tsr...); err != nil {
 			return err
 		}
@@ -266,16 +266,16 @@ func (fn *Func) CallString(s string, tsr ...*Indexed) error {
 // CallOut calls function with given set of _input_ arguments
 // appropriate for the given function (error if not).
 // Newly-created output values are returned.
-func (fn *Func) CallOut(tsr ...*Indexed) ([]*Indexed, error) {
+func (fn *Func) CallOut(tsr ...Tensor) ([]Tensor, error) {
 	if fn.Out == 0 {
 		err := fn.Call(tsr...)
 		return nil, err
 	}
 	typ := reflect.Float64
 	if fn.In > 0 {
-		typ = tsr[0].Tensor.DataType()
+		typ = tsr[0].DataType()
 	}
-	outs := make([]*Indexed, fn.Out)
+	outs := make([]Tensor, fn.Out)
 	for i := range outs {
 		outs[i] = NewIndexed(NewOfType(typ))
 	}

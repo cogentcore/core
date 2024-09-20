@@ -47,8 +47,7 @@ func AsFloat32(tsr Tensor) *Float32 {
 	if f, ok := tsr.(*Float32); ok {
 		return f
 	}
-	f := NewFloat32(tsr.Shape().Sizes...)
-	f.SetNames(tsr.Shape().Names...)
+	f := NewFloat32(AsInts(tsr.ShapeSizes())...)
 	f.CopyFrom(tsr)
 	return f
 }
@@ -59,17 +58,16 @@ func NewFloat64(sizes ...int) *Float64 {
 	return New[float64](sizes...).(*Float64)
 }
 
-// AsFloat64 returns the tensor as a [Float64] tensor.
+// AsFloat64Tensor returns the tensor as a [Float64] tensor.
 // If already is a Float64, it is returned as such.
 // Otherwise, a new Float64 tensor is created and values are copied.
 // Use this function for interfacing with gonum or other apis that
 // only operate on float64 types.
-func AsFloat64(tsr Tensor) *Float64 {
+func AsFloat64Tensor(tsr Tensor) *Float64 {
 	if f, ok := tsr.(*Float64); ok {
 		return f
 	}
-	f := NewFloat64(tsr.Shape().Sizes...)
-	f.SetNames(tsr.Shape().Names...)
+	f := NewFloat64(AsInts(tsr.ShapeSizes())...)
 	f.CopyFrom(tsr)
 	return f
 }
@@ -96,7 +94,7 @@ func NewByte(sizes ...int) *Byte {
 // with the given sizes per dimension (shape), and optional dimension names.
 func NewNumber[T num.Number](sizes ...int) *Number[T] {
 	tsr := &Number[T]{}
-	tsr.SetShape(sizes...)
+	tsr.SetShapeInts(sizes...)
 	tsr.Values = make([]T, tsr.Len())
 	return tsr
 }
@@ -120,7 +118,7 @@ func NewNumberFromSlice[T num.Number](vals ...T) Tensor {
 	n := len(vals)
 	tsr := &Number[T]{}
 	tsr.Values = vals
-	tsr.SetShape(n)
+	tsr.SetShapeInts(n)
 	return tsr
 }
 
@@ -137,7 +135,7 @@ func (tsr *Number[T]) IsString() bool {
 
 func (tsr *Number[T]) SetString(val string, i ...int) {
 	if fv, err := strconv.ParseFloat(val, 64); err == nil {
-		tsr.Values[tsr.shape.Offset(i...)] = T(fv)
+		tsr.Values[tsr.shape.IndexTo1D(i...)] = T(fv)
 	}
 }
 
@@ -154,14 +152,30 @@ func (tsr *Number[T]) SetStringRowCell(val string, row, cell int) {
 	}
 }
 
+// StringRow returns the value at given row (outermost dimension).
+// It is a convenience wrapper for StringRowCell(row, 0), providing robust
+// operations on 1D and higher-dimensional data (which nevertheless should
+// generally be processed separately in ways that treat it properly).
+func (tsr *Number[T]) StringRow(row int) string {
+	return tsr.StringRowCell(row, 0)
+}
+
+// SetStringRow sets the value at given row (outermost dimension).
+// It is a convenience wrapper for SetStringRowCell(row, 0), providing robust
+// operations on 1D and higher-dimensional data (which nevertheless should
+// generally be processed separately in ways that treat it properly).
+func (tsr *Number[T]) SetStringRow(val string, row int) {
+	tsr.SetStringRowCell(val, row, 0)
+}
+
 /////////////////////  Floats
 
 func (tsr *Number[T]) Float(i ...int) float64 {
-	return float64(tsr.Values[tsr.shape.Offset(i...)])
+	return float64(tsr.Values[tsr.shape.IndexTo1D(i...)])
 }
 
 func (tsr *Number[T]) SetFloat(val float64, i ...int) {
-	tsr.Values[tsr.shape.Offset(i...)] = T(val)
+	tsr.Values[tsr.shape.IndexTo1D(i...)] = T(val)
 }
 
 func (tsr *Number[T]) Float1D(i int) float64 {
@@ -183,14 +197,31 @@ func (tsr *Number[T]) SetFloatRowCell(val float64, row, cell int) {
 	tsr.Values[row*sz+cell] = T(val)
 }
 
+// FloatRow returns the value at given row (outermost dimension).
+// It is a convenience wrapper for FloatRowCell(row, 0), providing robust
+// operations on 1D and higher-dimensional data (which nevertheless should
+// generally be processed separately in ways that treat it properly).
+func (tsr *Number[T]) FloatRow(row int) float64 {
+	return tsr.FloatRowCell(row, 0)
+}
+
+// SetFloatRow sets the value at given row (outermost dimension).
+// Row is indirected through the [Indexed.Indexes].
+// It is a convenience wrapper for SetFloatRowCell(row, 0), providing robust
+// operations on 1D and higher-dimensional data (which nevertheless should
+// generally be processed separately in ways that treat it properly).
+func (tsr *Number[T]) SetFloatRow(val float64, row int) {
+	tsr.SetFloatRowCell(val, row, 0)
+}
+
 /////////////////////  Ints
 
 func (tsr *Number[T]) Int(i ...int) int {
-	return int(tsr.Values[tsr.shape.Offset(i...)])
+	return int(tsr.Values[tsr.shape.IndexTo1D(i...)])
 }
 
 func (tsr *Number[T]) SetInt(val int, i ...int) {
-	tsr.Values[tsr.shape.Offset(i...)] = T(val)
+	tsr.Values[tsr.shape.IndexTo1D(i...)] = T(val)
 }
 
 func (tsr *Number[T]) Int1D(i int) int {
@@ -210,6 +241,22 @@ func (tsr *Number[T]) IntRowCell(row, cell int) int {
 func (tsr *Number[T]) SetIntRowCell(val int, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = T(val)
+}
+
+// IntRow returns the value at given row (outermost dimension).
+// It is a convenience wrapper for IntRowCell(row, 0), providing robust
+// operations on 1D and higher-dimensional data (which nevertheless should
+// generally be processed separately in ways that treat it properly).
+func (tsr *Number[T]) IntRow(row int) int {
+	return tsr.IntRowCell(row, 0)
+}
+
+// SetIntRow sets the value at given row (outermost dimension).
+// It is a convenience wrapper for SetIntRowCell(row, 0), providing robust
+// operations on 1D and higher-dimensional data (which nevertheless should
+// generally be processed separately in ways that treat it properly).
+func (tsr *Number[T]) SetIntRow(val int, row int) {
+	tsr.SetIntRowCell(val, row, 0)
 }
 
 // At is the gonum/mat.Matrix interface method for returning 2D matrix element at given
@@ -314,14 +361,6 @@ func (tsr *Number[T]) AppendFrom(frm Tensor) error {
 		tsr.Values[st+i] = T(frm.Float1D(i))
 	}
 	return nil
-}
-
-// SetShapeFrom copies just the shape from given source tensor
-// calling SetShape with the shape params from source (see for more docs).
-func (tsr *Number[T]) SetShapeFrom(frm Tensor) {
-	sh := frm.Shape()
-	tsr.SetShape(sh.Sizes...)
-	tsr.SetNames(sh.Names...)
 }
 
 // CopyCellsFrom copies given range of values from other tensor into this tensor,

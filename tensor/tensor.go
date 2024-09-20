@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/base/metadata"
 	"gonum.org/v1/gonum/mat"
@@ -45,19 +46,36 @@ type Tensor interface {
 	// Label satisfies the core.Labeler interface for a summary description of the tensor.
 	Label() string
 
-	// Shape returns a pointer to the Shape that fully parametrizes
-	// the tensor shape.
+	// Metadata returns the metadata for this tensor, which can be used
+	// to encode name, docs, shape dimension names, plotting options, etc.
+	Metadata() *metadata.Data
+
+	// Shape() returns a [Shape] representation of the tensor shape
+	// (dimension sizes). For tensors that present a view onto another
+	// tensor, this typically must be constructed on the fly.
+	// In general, it is much better to access [Tensor.ShapeSizes],
+	// [Tensor.ShapeInts], [Tensor.DimSize] etc information as neeed.
 	Shape() *Shape
 
-	// SetShape sets the sizes parameters of the tensor, and resizes
+	// ShapeSizes returns the sizes of each dimension as an int tensor.
+	ShapeSizes() Tensor
+
+	// ShapeInts returns the sizes of each dimension as a slice of ints.
+	// This is the preferred access for Go code.
+	ShapeInts() []int
+
+	// SetShape sets the dimension sizes as 1D int values from given tensor.
+	// The backing storage is resized appropriately, retaining all existing data that fits.
+	SetShape(sizes Tensor)
+
+	// SetShapeInts sets the dimension sizes of the tensor, and resizes
 	// backing storage appropriately, retaining all existing data that fits.
-	SetShape(sizes ...int)
+	SetShapeInts(sizes ...int)
 
-	// SetNames sets the dimension names of the tensor shape.
-	SetNames(names ...string)
-
-	// Len returns the number of elements in the tensor,
-	// which is the product of all shape dimensions.
+	// Len returns the total number of elements in the tensor,
+	// i.e., the product of all shape dimensions.
+	// Len must always be such that the 1D() accessors return
+	// values using indexes from 0..Len()-1.
 	Len() int
 
 	// NumDims returns the total number of dimensions.
@@ -97,9 +115,14 @@ type Tensor interface {
 	SetFloat(val float64, i ...int)
 
 	// Float1D returns the value of given 1-dimensional index (0-Len()-1) as a float64.
+	// This can be somewhat expensive in wrapper views ([Indexed], [Sliced]), which
+	// convert the flat index back into a full n-dimensional index and use that api.
+	// [Tensor.FloatRowCell] is preferred.
 	Float1D(i int) float64
 
 	// SetFloat1D sets the value of given 1-dimensional index (0-Len()-1) as a float64.
+	// This can be somewhat expensive in the commonly-used [Indexed] view;
+	// [Tensor.SetFloatRowCell] is preferred.
 	SetFloat1D(val float64, i int)
 
 	// FloatRowCell returns the value at given row and cell, where row is the outermost
@@ -113,6 +136,18 @@ type Tensor interface {
 	// [Indexed] tensors index along the row, and use this interface extensively.
 	// This is useful for lists of patterns, and the [table.Table] container.
 	SetFloatRowCell(val float64, row, cell int)
+
+	// FloatRow returns the value at given row (outermost dimension).
+	// It is a convenience wrapper for FloatRowCell(row, 0), providing robust
+	// operations on 1D and higher-dimensional data (which nevertheless should
+	// generally be processed separately in ways that treat it properly).
+	FloatRow(row int) float64
+
+	// SetFloatRow sets the value at given row (outermost dimension).
+	// It is a convenience wrapper for SetFloatRowCell(row, 0), providing robust
+	// operations on 1D and higher-dimensional data (which nevertheless should
+	// generally be processed separately in ways that treat it properly).
+	SetFloatRow(val float64, row int)
 
 	/////////////////////  Strings
 
@@ -141,6 +176,18 @@ type Tensor interface {
 	// This is useful for lists of patterns, and the [table.Table] container.
 	SetStringRowCell(val string, row, cell int)
 
+	// StringRow returns the value at given row (outermost dimension).
+	// It is a convenience wrapper for StringRowCell(row, 0), providing robust
+	// operations on 1D and higher-dimensional data (which nevertheless should
+	// generally be processed separately in ways that treat it properly).
+	StringRow(row int) string
+
+	// SetStringRow sets the value at given row (outermost dimension).
+	// It is a convenience wrapper for SetStringRowCell(row, 0), providing robust
+	// operations on 1D and higher-dimensional data (which nevertheless should
+	// generally be processed separately in ways that treat it properly).
+	SetStringRow(val string, row int)
+
 	/////////////////////  Ints
 
 	// Int returns the value of given n-dimensional index (matching Shape) as a int.
@@ -166,6 +213,18 @@ type Tensor interface {
 	// [Indexed] tensors index along the row, and use this interface extensively.
 	// This is useful for lists of patterns, and the [table.Table] container.
 	SetIntRowCell(val int, row, cell int)
+
+	// IntRow returns the value at given row (outermost dimension).
+	// It is a convenience wrapper for IntRowCell(row, 0), providing robust
+	// operations on 1D and higher-dimensional data (which nevertheless should
+	// generally be processed separately in ways that treat it properly).
+	IntRow(row int) int
+
+	// SetIntRow sets the value at given row (outermost dimension).
+	// It is a convenience wrapper for SetIntRowCell(row, 0), providing robust
+	// operations on 1D and higher-dimensional data (which nevertheless should
+	// generally be processed separately in ways that treat it properly).
+	SetIntRow(val int, row int)
 
 	/////////////////////  SubSpaces
 
@@ -216,10 +275,6 @@ type Tensor interface {
 	// otherwise it goes through the appropriate standard type (Float, Int, String).
 	AppendFrom(from Tensor) error
 
-	// SetShapeFrom sets our shape from given source tensor, calling
-	// [Tensor.SetShape] with the shape params from source.
-	SetShapeFrom(from Tensor)
-
 	// CopyCellsFrom copies given range of values from other tensor into this tensor,
 	// using flat 1D indexes: to = starting index in this Tensor to start copying into,
 	// start = starting index on from Tensor to start copying from, and n = number of
@@ -232,10 +287,6 @@ type Tensor interface {
 	// it is best to first set the anticipated full size, which allocates the
 	// full amount of memory, and then set to 0 and grow incrementally.
 	SetNumRows(rows int)
-
-	// Metadata returns the metadata for this tensor, which can be used
-	// to encode plotting options, etc.
-	Metadata() *metadata.Data
 }
 
 // New returns a new n-dimensional tensor of given value type
@@ -286,29 +337,21 @@ func NewOfType(typ reflect.Kind, sizes ...int) Tensor {
 	}
 }
 
-// New1DViewOf returns a 1D view into the given tensor, using the same
-// underlying values, and just changing the shape to a 1D view.
-// This can be useful e.g., for stats and metric functions that report
-// on the 1D list of values.
-func New1DViewOf(tsr Tensor) Tensor {
-	vw := tsr.View()
-	vw.SetShape(tsr.Len())
-	return vw
+// SetShapeFrom sets shape of given tensor from a source tensor.
+func SetShapeFrom(tsr, from Tensor) {
+	tsr.SetShapeInts(from.ShapeInts()...)
 }
 
-// CopyDense copies a gonum mat.Dense matrix into given Tensor
-// using standard Float64 interface
-func CopyDense(to Tensor, dm *mat.Dense) {
-	nr, nc := dm.Dims()
-	to.SetShape(nr, nc)
-	idx := 0
-	for ri := 0; ri < nr; ri++ {
-		for ci := 0; ci < nc; ci++ {
-			v := dm.At(ri, ci)
-			to.SetFloat1D(v, idx)
-			idx++
-		}
-	}
+// metadata helpers
+
+// SetShapeNames sets the tensor shape dimension names into given metadata.
+func SetShapeNames(md *metadata.Data, names ...string) {
+	md.Set("ShapeNames", names)
+}
+
+// ShapeNames gets the tensor shape dimension names from given metadata.
+func ShapeNames(md *metadata.Data) []string {
+	return errors.Log1(metadata.Get[[]string](*md, "ShapeNames"))
 }
 
 // List is an ordered list of Tensors with name lookup.

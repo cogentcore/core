@@ -23,7 +23,7 @@ type String struct {
 // with the given sizes per dimension (shape).
 func NewString(sizes ...int) *String {
 	tsr := &String{}
-	tsr.SetShape(sizes...)
+	tsr.SetShapeInts(sizes...)
 	tsr.Values = make([]string, tsr.Len())
 	return tsr
 }
@@ -34,17 +34,6 @@ func NewStringShape(shape *Shape) *String {
 	tsr := &String{}
 	tsr.shape.CopyShape(shape)
 	tsr.Values = make([]string, tsr.Len())
-	return tsr
-}
-
-// NewStringTensorFromSlice returns a new 1-dimensional tensor of given value type
-// initialized directly from the given slice values, which are not copied.
-// The resulting Tensor thus "wraps" the given values.
-func NewStringTensorFromSlice(vals ...string) Tensor {
-	n := len(vals)
-	tsr := &String{}
-	tsr.Values = vals
-	tsr.SetShape(n)
 	return tsr
 }
 
@@ -74,7 +63,7 @@ func (tsr *String) IsString() bool {
 /////////////////////  Strings
 
 func (tsr *String) SetString(val string, i ...int) {
-	j := tsr.shape.Offset(i...)
+	j := tsr.shape.IndexTo1D(i...)
 	tsr.Values[j] = val
 }
 
@@ -87,14 +76,22 @@ func (tsr *String) SetStringRowCell(val string, row, cell int) {
 	tsr.Values[row*sz+cell] = val
 }
 
+func (tsr *String) StringRow(row int) string {
+	return tsr.StringRowCell(row, 0)
+}
+
+func (tsr *String) SetStringRow(val string, row int) {
+	tsr.SetStringRowCell(val, row, 0)
+}
+
 /////////////////////  Floats
 
 func (tsr *String) Float(i ...int) float64 {
-	return StringToFloat64(tsr.Values[tsr.shape.Offset(i...)])
+	return StringToFloat64(tsr.Values[tsr.shape.IndexTo1D(i...)])
 }
 
 func (tsr *String) SetFloat(val float64, i ...int) {
-	tsr.Values[tsr.shape.Offset(i...)] = Float64ToString(val)
+	tsr.Values[tsr.shape.IndexTo1D(i...)] = Float64ToString(val)
 }
 
 func (tsr *String) Float1D(off int) float64 {
@@ -115,14 +112,22 @@ func (tsr *String) SetFloatRowCell(val float64, row, cell int) {
 	tsr.Values[row*sz+cell] = Float64ToString(val)
 }
 
+func (tsr *String) FloatRow(row int) float64 {
+	return tsr.FloatRowCell(row, 0)
+}
+
+func (tsr *String) SetFloatRow(val float64, row int) {
+	tsr.SetFloatRowCell(val, row, 0)
+}
+
 /////////////////////  Ints
 
 func (tsr *String) Int(i ...int) int {
-	return errors.Ignore1(strconv.Atoi(tsr.Values[tsr.shape.Offset(i...)]))
+	return errors.Ignore1(strconv.Atoi(tsr.Values[tsr.shape.IndexTo1D(i...)]))
 }
 
 func (tsr *String) SetInt(val int, i ...int) {
-	tsr.Values[tsr.shape.Offset(i...)] = strconv.Itoa(val)
+	tsr.Values[tsr.shape.IndexTo1D(i...)] = strconv.Itoa(val)
 }
 
 func (tsr *String) Int1D(off int) int {
@@ -141,6 +146,14 @@ func (tsr *String) IntRowCell(row, cell int) int {
 func (tsr *String) SetIntRowCell(val int, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[row*sz+cell] = strconv.Itoa(val)
+}
+
+func (tsr *String) IntRow(row int) int {
+	return tsr.IntRowCell(row, 0)
+}
+
+func (tsr *String) SetIntRow(val int, row int) {
+	tsr.SetIntRowCell(val, row, 0)
 }
 
 // At is the gonum/mat.Matrix interface method for returning 2D matrix element at given
@@ -246,14 +259,6 @@ func (tsr *String) AppendFrom(frm Tensor) error {
 		tsr.Values[st+i] = Float64ToString(frm.Float1D(i))
 	}
 	return nil
-}
-
-// SetShapeFrom copies just the shape from given source tensor
-// calling SetShape with the shape params from source (see for more docs).
-func (tsr *String) SetShapeFrom(frm Tensor) {
-	sh := frm.Shape()
-	tsr.SetShape(sh.Sizes...)
-	tsr.SetNames(sh.Names...)
 }
 
 // CopyCellsFrom copies given range of values from other tensor into this tensor,

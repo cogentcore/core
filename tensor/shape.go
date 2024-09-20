@@ -7,49 +7,46 @@ package tensor
 import (
 	"fmt"
 	"slices"
-
-	"cogentcore.org/core/base/slicesx"
 )
 
 // Shape manages a tensor's shape information, including strides and dimension names
 // and can compute the flat index into an underlying 1D data storage array based on an
 // n-dimensional index (and vice-versa).
-// Per C / Go / Python conventions, indexes are Row-Major, ordered from
+// Per Go / C / Python conventions, indexes are Row-Major, ordered from
 // outer to inner left-to-right, so the inner-most is right-most.
 type Shape struct {
+
 	// size per dimension.
 	Sizes []int
 
 	// offsets for each dimension.
 	Strides []int `display:"-"`
-
-	// optional names of each dimension.
-	Names []string `display:"-"`
 }
 
 // NewShape returns a new shape with given sizes.
 // RowMajor ordering is used by default.
 func NewShape(sizes ...int) *Shape {
 	sh := &Shape{}
-	sh.SetShape(sizes...)
+	sh.SetShapeInts(sizes...)
 	return sh
 }
 
-// SetShape sets the shape size and optional names
+// SetShapeInts sets the shape sizes from list of ints.
 // RowMajor ordering is used by default.
-func (sh *Shape) SetShape(sizes ...int) {
-	sh.Sizes = slices.Clone(sizes)
+func (sh *Shape) SetShapeInts(sizes ...int) {
+	sh.Sizes = sizes
 	sh.Strides = RowMajorStrides(sizes...)
 }
 
-// SetNames sets the shape dimension names.
-func (sh *Shape) SetNames(names ...string) {
-	if len(names) == 0 {
-		sh.Names = nil
-	} else {
-		sh.Names = slicesx.SetLength(names, len(sh.Sizes))
-		copy(sh.Names, names)
-	}
+// SetShape sets the shape sizes from int values from Tensor.
+// RowMajor ordering is used by default.
+func (sh *Shape) SetShape(shp Tensor) {
+	sh.SetShapeInts(AsInts(shp)...)
+}
+
+// AsTensor returns shape sizes as an Int Tensor.
+func (sh *Shape) AsTensor() Tensor {
+	return NewIntFromSlice(sh.Sizes...)
 }
 
 // CopyShape copies the shape parameters from another Shape struct.
@@ -57,15 +54,10 @@ func (sh *Shape) SetNames(names ...string) {
 func (sh *Shape) CopyShape(cp *Shape) {
 	sh.Sizes = slices.Clone(cp.Sizes)
 	sh.Strides = slices.Clone(cp.Strides)
-	if cp.Names == nil {
-		sh.Names = nil
-	} else {
-		sh.Names = slices.Clone(cp.Names)
-	}
 }
 
 // Len returns the total length of elements in the tensor
-// (i.e., the product of the shape sizes)
+// (i.e., the product of the shape sizes).
 func (sh *Shape) Len() int {
 	if len(sh.Sizes) == 0 {
 		return 0
@@ -86,31 +78,6 @@ func (sh *Shape) DimSize(i int) int {
 		return 0
 	}
 	return sh.Sizes[i]
-}
-
-// DimName returns the name of given dimension.
-func (sh *Shape) DimName(i int) string {
-	if sh.Names == nil {
-		return ""
-	}
-	return sh.Names[i]
-}
-
-// DimByName returns the index of the given dimension name.
-// returns -1 if not found.
-func (sh *Shape) DimByName(name string) int {
-	for i, nm := range sh.Names {
-		if nm == name {
-			return i
-		}
-	}
-	return -1
-}
-
-// DimSizeByName returns the size of given dimension, specified by name.
-// will crash if name not found.
-func (sh *Shape) DimSizeByName(name string) int {
-	return sh.DimSize(sh.DimByName(name))
 }
 
 // IndexIsValid() returns true if given index is valid (within ranges for all dimensions)
@@ -156,21 +123,22 @@ func (sh *Shape) RowCellSize() (rows, cells int) {
 	return
 }
 
-// Offset returns the "flat" 1D array index into an element at the given n-dimensional index.
-// No checking is done on the length or size of the index values relative to the shape of the tensor.
-func (sh *Shape) Offset(index ...int) int {
-	var offset int
+// IndexTo1D returns the flat 1D index from given n-dimensional indicies.
+// No checking is done on the length or size of the index values relative
+// to the shape of the tensor.
+func (sh *Shape) IndexTo1D(index ...int) int {
+	var oned int
 	for i, v := range index {
-		offset += v * sh.Strides[i]
+		oned += v * sh.Strides[i]
 	}
-	return offset
+	return oned
 }
 
-// Index returns the n-dimensional index from a "flat" 1D array index.
-func (sh *Shape) Index(offset int) []int {
+// IndexFrom1D returns the n-dimensional index from a "flat" 1D array index.
+func (sh *Shape) IndexFrom1D(oned int) []int {
 	nd := len(sh.Sizes)
 	index := make([]int, nd)
-	rem := offset
+	rem := oned
 	for i := nd - 1; i >= 0; i-- {
 		s := sh.Sizes[i]
 		if s == 0 {
@@ -187,12 +155,6 @@ func (sh *Shape) Index(offset int) []int {
 func (sh *Shape) String() string {
 	str := "["
 	for i := range sh.Sizes {
-		if sh.Names != nil {
-			nm := sh.Names[i]
-			if nm != "" {
-				str += nm + ": "
-			}
-		}
 		str += fmt.Sprintf("%d", sh.Sizes[i])
 		if i < len(sh.Sizes)-1 {
 			str += ", "
@@ -260,11 +222,5 @@ func AddShapes(shape1, shape2 *Shape) *Shape {
 	copy(nsh, sh1)
 	copy(nsh[len(sh1):], sh2)
 	sh := NewShape(nsh...)
-	if shape1.Names != nil || shape2.Names != nil {
-		nms := make([]string, len(sh1)+len(sh2))
-		copy(nms, shape1.Names)
-		copy(nms[len(sh1):], shape2.Names)
-		sh.SetNames(nms...)
-	}
 	return sh
 }

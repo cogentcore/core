@@ -14,8 +14,8 @@ import (
 
 func TestTensorString(t *testing.T) {
 	tsr := New[string](4, 2)
-	tsr.SetNames("Row", "Vals")
-	assert.Equal(t, []string{"Row", "Vals"}, tsr.Shape().Names)
+	// tsr.SetNames("Row", "Vals")
+	// assert.Equal(t, []string{"Row", "Vals"}, tsr.Shape().Names)
 	assert.Equal(t, 8, tsr.Len())
 	assert.Equal(t, true, tsr.IsString())
 	assert.Equal(t, reflect.String, tsr.DataType())
@@ -41,13 +41,13 @@ func TestTensorString(t *testing.T) {
 	assert.Equal(t, "", cln.StringValue(2, 1))
 	assert.Equal(t, "testing", tsr.StringValue(2, 1))
 
-	tsr.SetShape(2, 4)
-	tsr.SetNames("Vals", "Row")
+	tsr.SetShapeInts(2, 4)
+	// tsr.SetNames("Vals", "Row")
 	assert.Equal(t, "test", tsr.StringValue(1, 0))
 	assert.Equal(t, "testing", tsr.StringValue(1, 1))
 
 	cln.SetString1D("ctesting", 5)
-	cln.SetShapeFrom(tsr)
+	SetShapeFrom(cln, tsr)
 	assert.Equal(t, "ctesting", cln.StringValue(1, 1))
 
 	cln.CopyCellsFrom(tsr, 5, 4, 2)
@@ -57,25 +57,24 @@ func TestTensorString(t *testing.T) {
 	tsr.SetNumRows(5)
 	assert.Equal(t, 20, tsr.Len())
 
-	tsr.Metadata().Set("name", "test")
-	nm, err := metadata.Get[string](*tsr.Metadata(), "name")
+	tsr.Metadata().SetName("test")
+	nm := tsr.Metadata().Name()
 	assert.Equal(t, "test", nm)
-	assert.NoError(t, err)
-	_, err = metadata.Get[string](*tsr.Metadata(), "type")
+	_, err := metadata.Get[string](*tsr.Metadata(), "type")
 	assert.Error(t, err)
 
 	cln.SetString1D("3.14", 0)
 	assert.Equal(t, 3.14, cln.Float1D(0))
 
-	af := AsFloat64(cln)
-	assert.Equal(t, 3.14, af.Float1D(0))
-	assert.Equal(t, 0.0, af.Float1D(1))
+	af := AsFloat64s(cln)
+	assert.Equal(t, 3.14, af[0])
+	assert.Equal(t, 0.0, af[1])
 }
 
 func TestTensorFloat64(t *testing.T) {
 	tsr := New[float64](4, 2)
-	tsr.SetNames("Row")
-	assert.Equal(t, []string{"Row", ""}, tsr.Shape().Names)
+	// tsr.SetNames("Row")
+	// assert.Equal(t, []string{"Row", ""}, tsr.Shape().Names)
 	assert.Equal(t, 8, tsr.Len())
 	assert.Equal(t, false, tsr.IsString())
 	assert.Equal(t, reflect.Float64, tsr.DataType())
@@ -101,13 +100,12 @@ func TestTensorFloat64(t *testing.T) {
 	assert.Equal(t, 0.0, cln.Float(2, 1))
 	assert.Equal(t, 2.17, tsr.Float(2, 1))
 
-	tsr.SetShape(2, 4)
-	tsr.SetNames("Vals", "Row")
+	tsr.SetShapeInts(2, 4)
 	assert.Equal(t, 3.14, tsr.Float(1, 0))
 	assert.Equal(t, 2.17, tsr.Float(1, 1))
 
 	cln.SetFloat1D(9.9, 5)
-	cln.SetShapeFrom(tsr)
+	SetShapeFrom(cln, tsr)
 	assert.Equal(t, 9.9, cln.Float(1, 1))
 
 	cln.CopyCellsFrom(tsr, 5, 4, 2)
@@ -120,13 +118,13 @@ func TestTensorFloat64(t *testing.T) {
 	cln.SetString1D("3.14", 0)
 	assert.Equal(t, 3.14, cln.Float1D(0))
 
-	af := AsFloat64(cln)
-	assert.Equal(t, 3.14, af.Float1D(0))
-	assert.Equal(t, 0.0, af.Float1D(1))
+	af := AsFloat64s(cln)
+	assert.Equal(t, 3.14, af[0])
+	assert.Equal(t, 0.0, af[1])
 }
 
 func TestSlice(t *testing.T) {
-	ft := NewFloat64Indexed(3, 4, 5)
+	ft := NewFloat64(3, 4, 5)
 	for r := range 3 {
 		for y := range 4 {
 			for x := range 5 {
@@ -162,7 +160,7 @@ func TestSlice(t *testing.T) {
 	assert.Equal(t, res, ft.Cells1D(1).String())
 
 	// fmt.Println(ft.String())
-	sf := NewFloat64Indexed()
+	sf := NewFloat64()
 	Slice(ft, sf, Range{}, Range{Start: 1, End: 2})
 	// fmt.Println(sf.String())
 	res = `Tensor: [3, 1, 5]

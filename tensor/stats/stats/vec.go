@@ -26,7 +26,7 @@ func VectorizeOut64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, ts
 	}
 	nt := len(tsr)
 	out := tsr[nt-1]
-	osz := out.Tensor.Shape().Sizes
+	osz := out.Tensor.ShapeInts()
 	o64 := tensor.NewIndexed(tensor.NewFloat64(osz...))
 	etsr := slices.Clone(tsr)
 	etsr[nt-1] = o64
@@ -50,7 +50,7 @@ func Vectorize2Out64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, t
 	}
 	nt := len(tsr)
 	out := tsr[nt-1]
-	osz := out.Tensor.Shape().Sizes
+	osz := out.Tensor.ShapeInts()
 	out1 = tensor.NewIndexed(tensor.NewFloat64(osz...))
 	out2 = tensor.NewIndexed(tensor.NewFloat64(osz...))
 	tsrs := slices.Clone(tsr[:nt-1])
@@ -62,12 +62,10 @@ func Vectorize2Out64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, t
 }
 
 // OutShape returns the output shape based on given input
-// tensor, with outer row dim = 1.
-func OutShape(ish *tensor.Shape) *tensor.Shape {
-	osh := &tensor.Shape{}
-	osh.CopyShape(ish)
-	osh.Sizes[0] = 1
-	return osh
+// shape ints, with outer row dim = 1.
+func OutShape(ish ...int) []int {
+	ish[0] = 1
+	return ish
 }
 
 // NFunc is the nfun for stats functions, returning number of rows of the
@@ -80,9 +78,7 @@ func NFunc(tsr ...*tensor.Indexed) int {
 	}
 	in, out := tsr[0], tsr[nt-1]
 	n := in.NumRows()
-	osh := OutShape(in.Tensor.Shape())
-	out.Tensor.SetShape(osh.Sizes...)
-	out.Tensor.SetNames(osh.Names...)
+	out.Tensor.SetShape(OutShape(in.Tensor.ShapeInts()...)...)
 	out.Indexes = nil
 	return n
 }

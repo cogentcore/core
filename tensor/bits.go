@@ -30,7 +30,7 @@ type Bits struct {
 // with the given sizes per dimension (shape), and optional dimension names.
 func NewBits(sizes ...int) *Bits {
 	tsr := &Bits{}
-	tsr.SetShape(sizes...)
+	tsr.SetShapeInts(sizes...)
 	tsr.Values = bitslice.Make(tsr.Len(), 0)
 	return tsr
 }
@@ -87,8 +87,14 @@ func (tsr *Bits) Bytes() []byte {
 	return slicesx.ToBytes(tsr.Values)
 }
 
-// Shape returns a pointer to the shape that fully parametrizes the tensor shape
 func (tsr *Bits) Shape() *Shape { return &tsr.shape }
+
+// ShapeSizes returns the sizes of each dimension as an int tensor.
+func (tsr *Bits) ShapeSizes() Tensor { return tsr.shape.AsTensor() }
+
+// ShapeInts returns the sizes of each dimension as a slice of ints.
+// This is the preferred access for Go code.
+func (tsr *Bits) ShapeInts() []int { return tsr.shape.Sizes }
 
 // Metadata returns the metadata for this tensor, which can be used
 // to encode plotting options, etc.
@@ -112,28 +118,28 @@ func (tsr *Bits) RowCellSize() (rows, cells int) {
 
 // Value returns value at given tensor index
 func (tsr *Bits) Value(i ...int) bool {
-	return tsr.Values.Index(tsr.shape.Offset(i...))
+	return tsr.Values.Index(tsr.shape.IndexTo1D(i...))
 }
 
 // Value1D returns value at given tensor 1D (flat) index
 func (tsr *Bits) Value1D(i int) bool { return tsr.Values.Index(i) }
 
 func (tsr *Bits) Set(val bool, i ...int) {
-	tsr.Values.Set(val, tsr.shape.Offset(i...))
+	tsr.Values.Set(val, tsr.shape.IndexTo1D(i...))
 }
 
 func (tsr *Bits) Set1D(val bool, i int) { tsr.Values.Set(val, i) }
 
-// SetShape sets the shape params, resizing backing storage appropriately
-func (tsr *Bits) SetShape(sizes ...int) {
-	tsr.shape.SetShape(sizes...)
+func (tsr *Bits) SetShape(sizes Tensor) {
+	tsr.shape.SetShape(sizes)
 	nln := tsr.Len()
 	tsr.Values.SetLen(nln)
 }
 
-// SetNames sets the dimension names of the tensor shape.
-func (tsr *Bits) SetNames(names ...string) {
-	tsr.shape.SetNames(names...)
+func (tsr *Bits) SetShapeInts(sizes ...int) {
+	tsr.shape.SetShapeInts(sizes...)
+	nln := tsr.Len()
+	tsr.Values.SetLen(nln)
 }
 
 // SetNumRows sets the number of rows (outermost dimension) in a RowMajor organized tensor.
@@ -175,12 +181,12 @@ func (tsr *Bits) SetString1D(val string, off int) {
 }
 
 func (tsr *Bits) StringValue(i ...int) string {
-	return reflectx.ToString(tsr.Values.Index(tsr.shape.Offset(i...)))
+	return reflectx.ToString(tsr.Values.Index(tsr.shape.IndexTo1D(i...)))
 }
 
 func (tsr *Bits) SetString(val string, i ...int) {
 	if bv, err := reflectx.ToBool(val); err == nil {
-		tsr.Values.Set(bv, tsr.shape.Offset(i...))
+		tsr.Values.Set(bv, tsr.shape.IndexTo1D(i...))
 	}
 }
 
@@ -196,14 +202,22 @@ func (tsr *Bits) SetStringRowCell(val string, row, cell int) {
 	}
 }
 
+func (tsr *Bits) StringRow(row int) string {
+	return tsr.StringRowCell(row, 0)
+}
+
+func (tsr *Bits) SetStringRow(val string, row int) {
+	tsr.SetStringRowCell(val, row, 0)
+}
+
 /////////////////////  Floats
 
 func (tsr *Bits) Float(i ...int) float64 {
-	return BoolToFloat64(tsr.Values.Index(tsr.shape.Offset(i...)))
+	return BoolToFloat64(tsr.Values.Index(tsr.shape.IndexTo1D(i...)))
 }
 
 func (tsr *Bits) SetFloat(val float64, i ...int) {
-	tsr.Values.Set(Float64ToBool(val), tsr.shape.Offset(i...))
+	tsr.Values.Set(Float64ToBool(val), tsr.shape.IndexTo1D(i...))
 }
 
 func (tsr *Bits) Float1D(off int) float64 {
@@ -224,14 +238,22 @@ func (tsr *Bits) SetFloatRowCell(val float64, row, cell int) {
 	tsr.Values.Set(Float64ToBool(val), row*sz+cell)
 }
 
+func (tsr *Bits) FloatRow(row int) float64 {
+	return tsr.FloatRowCell(row, 0)
+}
+
+func (tsr *Bits) SetFloatRow(val float64, row int) {
+	tsr.SetFloatRowCell(val, row, 0)
+}
+
 /////////////////////  Ints
 
 func (tsr *Bits) Int(i ...int) int {
-	return BoolToInt(tsr.Values.Index(tsr.shape.Offset(i...)))
+	return BoolToInt(tsr.Values.Index(tsr.shape.IndexTo1D(i...)))
 }
 
 func (tsr *Bits) SetInt(val int, i ...int) {
-	tsr.Values.Set(IntToBool(val), tsr.shape.Offset(i...))
+	tsr.Values.Set(IntToBool(val), tsr.shape.IndexTo1D(i...))
 }
 
 func (tsr *Bits) Int1D(off int) int {
@@ -250,6 +272,14 @@ func (tsr *Bits) IntRowCell(row, cell int) int {
 func (tsr *Bits) SetIntRowCell(val int, row, cell int) {
 	_, sz := tsr.RowCellSize()
 	tsr.Values.Set(IntToBool(val), row*sz+cell)
+}
+
+func (tsr *Bits) IntRow(row int) int {
+	return tsr.IntRowCell(row, 0)
+}
+
+func (tsr *Bits) SetIntRow(val int, row int) {
+	tsr.SetIntRowCell(val, row, 0)
 }
 
 // Label satisfies the core.Labeler interface for a summary description of the tensor
@@ -325,14 +355,6 @@ func (tsr *Bits) AppendFrom(frm Tensor) error {
 		tsr.Values.Set(Float64ToBool(frm.Float1D(i)), st+i)
 	}
 	return nil
-}
-
-// SetShapeFrom copies just the shape from given source tensor
-// calling SetShape with the shape params from source (see for more docs).
-func (tsr *Bits) SetShapeFrom(frm Tensor) {
-	sh := frm.Shape()
-	tsr.SetShape(sh.Sizes...)
-	tsr.SetNames(sh.Names...)
 }
 
 // CopyCellsFrom copies given range of values from other tensor into this tensor,

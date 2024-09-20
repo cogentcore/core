@@ -89,20 +89,20 @@ func SliceSize(sizes []int, ranges ...Range) ([]int, error) {
 // which is necessary to allow discontinuous ranges to be extracted.
 // Use the [SliceSet] function to copy sliced values back to the original.
 func Slice(tsr, out *Indexed, ranges ...Range) error {
-	sizes := slices.Clone(tsr.Tensor.Shape().Sizes)
+	sizes := slices.Clone(tsr.Tensor.ShapeInts())
 	sizes[0] = tsr.NumRows() // takes into account indexes
 	nsz, err := SliceSize(sizes, ranges...)
 	if err != nil {
 		return err
 	}
 	ndim := len(nsz)
-	out.Tensor.SetShape(nsz...)
+	out.Tensor.SetShapeInts(nsz...)
 	out.Sequential()
 	nl := out.Len()
 	oc := make([]int, ndim) // orig coords
 	nr := len(ranges)
 	for ni := range nl {
-		nc := out.Tensor.Shape().Index(ni)
+		nc := out.Tensor.Shape().IndexFrom1D(ni)
 		for i := range ndim {
 			c := nc[i]
 			if i < nr {
@@ -112,8 +112,8 @@ func Slice(tsr, out *Indexed, ranges ...Range) error {
 				oc[i] = c
 			}
 		}
-		oc[0] = tsr.Index(oc[0])
-		oi := tsr.Tensor.Shape().Offset(oc...)
+		oc[0] = tsr.RowIndex(oc[0])
+		oi := tsr.Tensor.Shape().IndexTo1D(oc...)
 		if out.Tensor.IsString() {
 			out.Tensor.SetString1D(tsr.Tensor.String1D(oi), ni)
 		} else {
@@ -128,13 +128,13 @@ func Slice(tsr, out *Indexed, ranges ...Range) error {
 // function using the same Range sizes (Start offsets
 // can be different).
 func SliceSet(tsr, slc *Indexed, ranges ...Range) error {
-	sizes := slices.Clone(tsr.Tensor.Shape().Sizes)
+	sizes := slices.Clone(tsr.Tensor.ShapeInts())
 	sizes[0] = tsr.NumRows() // takes into account indexes
 	nsz, err := SliceSize(sizes, ranges...)
 	if err != nil {
 		return err
 	}
-	if slices.Compare(nsz, slc.Tensor.Shape().Sizes) != 0 {
+	if slices.Compare(nsz, slc.Tensor.ShapeInts()) != 0 {
 		return fmt.Errorf("tensor.SliceSet size from ranges is not the same as the slice tensor")
 	}
 	ndim := len(nsz)
@@ -142,7 +142,7 @@ func SliceSet(tsr, slc *Indexed, ranges ...Range) error {
 	oc := make([]int, ndim) // orig coords
 	nr := len(ranges)
 	for ni := range nl {
-		nc := slc.Tensor.Shape().Index(ni)
+		nc := slc.Tensor.Shape().IndexFrom1D(ni)
 		for i := range ndim {
 			c := nc[i]
 			if i < nr {
@@ -152,8 +152,8 @@ func SliceSet(tsr, slc *Indexed, ranges ...Range) error {
 				oc[i] = c
 			}
 		}
-		oc[0] = tsr.Index(oc[0])
-		oi := tsr.Tensor.Shape().Offset(oc...)
+		oc[0] = tsr.RowIndex(oc[0])
+		oi := tsr.Tensor.Shape().IndexTo1D(oc...)
 		if slc.Tensor.IsString() {
 			tsr.Tensor.SetString1D(slc.Tensor.String1D(ni), oi)
 		} else {
@@ -169,7 +169,7 @@ func SliceSet(tsr, slc *Indexed, ranges ...Range) error {
 // form the cells dimension.  The resulting tensor is a re-shaped view
 // of the original tensor, sharing the same underlying data.
 func RowCellSplit(tsr Tensor, split int) Tensor {
-	sizes := tsr.Shape().Sizes
+	sizes := tsr.ShapeInts()
 	rows := sizes[:split]
 	cells := sizes[split:]
 	nr := 1
@@ -181,6 +181,6 @@ func RowCellSplit(tsr Tensor, split int) Tensor {
 		nc *= c
 	}
 	vw := tsr.View()
-	vw.SetShape(nr, nc)
+	vw.SetShapeInts(nr, nc)
 	return vw
 }

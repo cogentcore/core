@@ -21,7 +21,7 @@ func Vectorize3Out64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, t
 	}
 	nt := len(tsr)
 	out := tsr[nt-1]
-	osz := out.Tensor.Shape().Sizes
+	osz := out.Tensor.ShapeInts()
 	out1 = tensor.NewFloat64Indexed(osz...)
 	out2 = tensor.NewFloat64Indexed(osz...)
 	out3 = tensor.NewFloat64Indexed(osz...)
@@ -34,12 +34,10 @@ func Vectorize3Out64(nfunc func(tsr ...*tensor.Indexed) int, fun func(idx int, t
 }
 
 // OutShape returns the output shape based on given input
-// tensor, with outer row dim = 1.
-func OutShape(ish *tensor.Shape) *tensor.Shape {
-	osh := &tensor.Shape{}
-	osh.CopyShape(ish)
-	osh.Sizes[0] = 1
-	return osh
+// shape ints, with outer row dim = 1.
+func OutShape(ish ...int) []int {
+	ish[0] = 1
+	return ish
 }
 
 // NFunc is the nfun for metrics functions, returning the min number of rows across the
@@ -52,9 +50,7 @@ func NFunc(tsr ...*tensor.Indexed) int {
 	}
 	a, b, out := tsr[0], tsr[1], tsr[nt-1]
 	na, nb := a.NumRows(), b.NumRows()
-	osh := OutShape(a.Tensor.Shape())
-	out.Tensor.SetShape(osh.Sizes...)
-	out.Tensor.SetNames(osh.Names...)
+	out.Tensor.SetShape(OutShape(a.Tensor.ShapeInts()...))
 	out.Indexes = nil
 	return min(na, nb)
 }

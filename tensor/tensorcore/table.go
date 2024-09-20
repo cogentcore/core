@@ -111,7 +111,7 @@ func (tb *Table) SliceIndex(i int) (si, vi int, invis bool) {
 	si = tb.StartIndex + i
 	vi = -1
 	if si < tb.Table.NumRows() {
-		vi = tb.Table.Index(si)
+		vi = tb.Table.RowIndex(si)
 	}
 	invis = vi < 0
 	return
@@ -383,7 +383,7 @@ func (tb *Table) ColTensorBlank(cidx int, col tensor.Tensor) *tensor.Float64 {
 	if ctb, has := tb.ColumnTensorBlank[cidx]; has {
 		return ctb
 	}
-	ctb := tensor.New[float64](col.Shape().Sizes...).(*tensor.Float64)
+	ctb := tensor.New[float64](col.ShapeInts()...).(*tensor.Float64)
 	tb.ColumnTensorBlank[cidx] = ctb
 	return ctb
 }
@@ -677,7 +677,7 @@ func (tb *Table) CopySelectToMime() mimedata.Mimes {
 	idx := tb.SelectedIndexesList(false) // ascending
 	iidx := make([]int, len(idx))
 	for i, di := range idx {
-		iidx[i] = tb.Table.Index(di)
+		iidx[i] = tb.Table.RowIndex(di)
 	}
 	ix.Indexes = iidx
 	var b bytes.Buffer
@@ -712,7 +712,7 @@ func (tb *Table) PasteAssign(md mimedata.Mimes, idx int) {
 	if len(recs) == 0 {
 		return
 	}
-	tb.Table.ReadCSVRow(recs[1], tb.Table.Index(idx))
+	tb.Table.ReadCSVRow(recs[1], tb.Table.RowIndex(idx))
 	tb.UpdateChange()
 }
 
@@ -727,7 +727,7 @@ func (tb *Table) PasteAtIndex(md mimedata.Mimes, idx int) {
 	tb.Table.InsertRows(idx, nr)
 	for ri := 0; ri < nr; ri++ {
 		rec := recs[1+ri]
-		rw := tb.Table.Index(idx + ri)
+		rw := tb.Table.RowIndex(idx + ri)
 		tb.Table.ReadCSVRow(rec, rw)
 	}
 	tb.SendChange()

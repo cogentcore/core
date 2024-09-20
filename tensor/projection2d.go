@@ -68,18 +68,18 @@ func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
 			return col
 		}
 	case 2:
-		return shp.Offset(row, col)
+		return shp.IndexTo1D(row, col)
 	case 3:
 		if oddRow {
 			ny := shp.DimSize(1)
 			yy := row / ny
 			y := row % ny
-			return shp.Offset(yy, y, col)
+			return shp.IndexTo1D(yy, y, col)
 		} else {
 			nx := shp.DimSize(2)
 			xx := col / nx
 			x := col % nx
-			return shp.Offset(xx, row, x)
+			return shp.IndexTo1D(xx, row, x)
 		}
 	case 4:
 		ny := shp.DimSize(2)
@@ -88,7 +88,7 @@ func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
 		nx := shp.DimSize(3)
 		xx := col / nx
 		x := col % nx
-		return shp.Offset(yy, xx, y, x)
+		return shp.IndexTo1D(yy, xx, y, x)
 	case 5:
 		// todo: oddRows version!
 		nyy := shp.DimSize(1)
@@ -100,7 +100,7 @@ func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
 		nx := shp.DimSize(4)
 		xx := col / nx
 		x := col % nx
-		return shp.Offset(yyy, yy, xx, y, x)
+		return shp.IndexTo1D(yyy, yy, xx, y, x)
 	}
 	return 0
 }
@@ -110,7 +110,7 @@ func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
 // collapsing higher dimensions down to 2D (and 1D up to 2D).
 func Projection2DCoords(shp *Shape, oddRow bool, row, col int) (rowCoords, colCoords []int) {
 	idx := Projection2DIndex(shp, oddRow, row, col)
-	dims := shp.Index(idx)
+	dims := shp.IndexFrom1D(idx)
 	nd := shp.NumDims()
 	switch nd {
 	case 1:
