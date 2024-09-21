@@ -207,6 +207,16 @@ func (sc *Scene) Init() {
 		st := sm.stack.ValueByIndex(sm.stack.Len() - 2)
 		currentRenderWindow.SetStageTitle(st.Title)
 	})
+	sc.Updater(func() {
+		// At the scene level, we reset the shortcuts and add our context menu
+		// shortcuts every time. This clears the way for buttons to add their
+		// shortcuts in their own Updaters. We must get the shortcuts every time
+		// since buttons may be added or removed dynamically.
+		sc.Events.shortcuts = nil
+		tmps := NewScene()
+		sc.applyContextMenus(tmps)
+		sc.Events.getShortcutsIn(tmps)
+	})
 	if TheApp.SceneInit != nil {
 		TheApp.SceneInit(sc)
 	}
