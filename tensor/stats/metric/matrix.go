@@ -125,11 +125,11 @@ func CovarianceMatrix(funcName string, in, out tensor.Tensor) {
 		func(idx int, tsr ...tensor.Tensor) {
 			c := coords[idx]
 			if c.X != curCoords.X {
-				// tensor.Slice(tsr[0], av, tensor.Range{}, tensor.Range{Start: c.X, End: c.X + 1})
+				tensor.Slice(tsr[0], av, tensor.Range{}, tensor.Range{Start: c.X, End: c.X + 1})
 				curCoords.X = c.X
 			}
 			if c.Y != curCoords.Y {
-				// tensor.Slice(tsr[0], bv, tensor.Range{}, tensor.Range{Start: c.Y, End: c.Y + 1})
+				tensor.Slice(tsr[0], bv, tensor.Range{}, tensor.Range{Start: c.Y, End: c.Y + 1})
 				curCoords.Y = c.Y
 			}
 			tensor.Call(funcName, av, bv, mout)

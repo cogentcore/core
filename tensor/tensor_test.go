@@ -123,7 +123,7 @@ func TestTensorFloat64(t *testing.T) {
 	assert.Equal(t, 0.0, af[1])
 }
 
-func TestSlice(t *testing.T) {
+func TestSliced(t *testing.T) {
 	ft := NewFloat64(3, 4)
 	for y := range 3 {
 		for x := range 4 {
@@ -145,7 +145,7 @@ func TestSlice(t *testing.T) {
 [1]:      13      12 
 `
 
-	sl := NewSliced(ft, []int{2, 1}, []int{3, 2})
+	sl := NewSlicedIndexes(ft, []int{2, 1}, []int{3, 2})
 	// fmt.Println(sl)
 	assert.Equal(t, res, sl.String())
 

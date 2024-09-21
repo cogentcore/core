@@ -5,6 +5,7 @@
 package metric
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -21,58 +22,58 @@ func TestFuncs(t *testing.T) {
 
 	tol := 1.0e-8
 
-	atsr := tensor.NewIndexed(tensor.NewNumberFromSlice(a64...))
-	btsr := tensor.NewIndexed(tensor.NewNumberFromSlice(b64...))
+	atsr := tensor.NewNumberFromSlice(a64...)
+	btsr := tensor.NewNumberFromSlice(b64...)
 	out := tensor.NewFloat64(1)
-	oix := tensor.NewIndexed(out)
 
-	EuclideanFunc(atsr, btsr, oix)
+	EuclideanFunc(atsr, btsr, out)
 	assert.InDelta(t, results[Euclidean], out.Values[0], tol)
 
-	SumSquaresFunc(atsr, btsr, oix)
+	SumSquaresFunc(atsr, btsr, out)
 	assert.InDelta(t, results[SumSquares], out.Values[0], tol)
 
-	EuclideanBinTolFunc(atsr, btsr, oix)
+	EuclideanBinTolFunc(atsr, btsr, out)
 	assert.InDelta(t, results[EuclideanBinTol], out.Values[0], tol)
 
-	AbsFunc(atsr, btsr, oix)
+	AbsFunc(atsr, btsr, out)
 	assert.InDelta(t, results[Abs], out.Values[0], tol)
 
-	HammingFunc(atsr, btsr, oix)
+	HammingFunc(atsr, btsr, out)
 	assert.Equal(t, results[Hamming], out.Values[0])
 
-	SumSquaresBinTolFunc(atsr, btsr, oix)
+	SumSquaresBinTolFunc(atsr, btsr, out)
 	assert.InDelta(t, results[SumSquaresBinTol], out.Values[0], tol)
 
-	CovarianceFunc(atsr, btsr, oix)
+	CovarianceFunc(atsr, btsr, out)
 	assert.InDelta(t, results[Covariance], out.Values[0], tol)
 
-	CorrelationFunc(atsr, btsr, oix)
+	CorrelationFunc(atsr, btsr, out)
 	assert.InDelta(t, results[Correlation], out.Values[0], tol)
 
-	InvCorrelationFunc(atsr, btsr, oix)
+	InvCorrelationFunc(atsr, btsr, out)
 	assert.InDelta(t, results[InvCorrelation], out.Values[0], tol)
 
-	CrossEntropyFunc(atsr, btsr, oix)
+	CrossEntropyFunc(atsr, btsr, out)
 	assert.InDelta(t, results[CrossEntropy], out.Values[0], tol)
 
-	InnerProductFunc(atsr, btsr, oix)
+	InnerProductFunc(atsr, btsr, out)
 	assert.InDelta(t, results[InnerProduct], out.Values[0], tol)
 
-	CosineFunc(atsr, btsr, oix)
+	CosineFunc(atsr, btsr, out)
 	assert.InDelta(t, results[Cosine], out.Values[0], tol)
 
-	InvCosineFunc(atsr, btsr, oix)
+	InvCosineFunc(atsr, btsr, out)
 	assert.InDelta(t, results[InvCosine], out.Values[0], tol)
 
 	for met := Euclidean; met < MetricsN; met++ {
-		Metric(met, atsr, btsr, oix)
+		Metric(met, atsr, btsr, out)
 		assert.InDelta(t, results[met], out.Values[0], tol)
 	}
 }
 
 func TestMatrix(t *testing.T) {
-	var simres = `[12, 12] [0]:       0 3.4641016151377544 8.831760866327848 9.273618495495704 8.717797887081348 9.38083151964686 4.69041575982343 5.830951894845301 8.12403840463596 8.54400374531753 5.291502622129181 6.324555320336759 
+	var simres = `[12, 12]
+[0]:       0 3.4641016151377544 8.831760866327848 9.273618495495704 8.717797887081348 9.38083151964686 4.69041575982343 5.830951894845301 8.12403840463596 8.54400374531753 5.291502622129181 6.324555320336759 
 [1]: 3.4641016151377544       0 9.38083151964686 8.717797887081348 9.273618495495704 8.831760866327848 5.830951894845301 4.69041575982343 8.717797887081348 7.937253933193772 6.324555320336759 5.291502622129181 
 [2]: 8.831760866327848 9.38083151964686       0 3.4641016151377544 4.242640687119285 5.0990195135927845 9.38083151964686 9.899494936611665 4.47213595499958 5.744562646538029 9.38083151964686 9.899494936611665 
 [3]: 9.273618495495704 8.717797887081348 3.4641016151377544       0 5.477225575051661 3.7416573867739413 9.797958971132712 9.273618495495704 5.656854249492381 4.58257569495584 9.797958971132712 9.273618495495704 
@@ -109,14 +110,14 @@ func TestPCAIris(t *testing.T) {
 	data := dt.Column("data")
 	covar := tensor.NewFloat64()
 	CovarianceMatrix(Correlation.FuncName(), data, covar)
-	// fmt.Printf("correl: %s\n", covar.String())
+	fmt.Printf("correl: %s\n", covar.String())
 
 	vecs := tensor.NewFloat64()
 	vals := tensor.NewFloat64()
 	PCA(covar, vecs, vals)
 
-	// fmt.Printf("correl vec: %v\n", vecs)
-	// fmt.Printf("correl val: %v\n", vals)
+	fmt.Printf("correl vec: %v\n", vecs)
+	fmt.Printf("correl val: %v\n", vals)
 	errtol := 1.0e-9
 	corvals := []float64{0.020607707235624825, 0.14735327830509573, 0.9212209307072254, 2.910818083752054}
 	for i, v := range vals.Values {

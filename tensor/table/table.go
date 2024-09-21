@@ -21,6 +21,7 @@ import (
 // Thus, a coordinated sorting and filtered view of the column data is automatically
 // available for any of the tensor package functions that use [tensor.Tensor] as the one
 // common data representation for all operations.
+// Tensor Columns are always raw value types and support SubSpace operations on cells.
 type Table struct { //types:add
 	// Columns has the list of column tensor data for this table.
 	// Different tables can provide different indexed views onto the same Columns.
