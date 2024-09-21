@@ -5,7 +5,6 @@
 package metric
 
 import (
-	"fmt"
 	"math"
 	"testing"
 
@@ -110,14 +109,14 @@ func TestPCAIris(t *testing.T) {
 	data := dt.Column("data")
 	covar := tensor.NewFloat64()
 	CovarianceMatrix(Correlation.FuncName(), data, covar)
-	fmt.Printf("correl: %s\n", covar.String())
+	// fmt.Printf("correl: %s\n", covar.String())
 
 	vecs := tensor.NewFloat64()
 	vals := tensor.NewFloat64()
 	PCA(covar, vecs, vals)
 
-	fmt.Printf("correl vec: %v\n", vecs)
-	fmt.Printf("correl val: %v\n", vals)
+	// fmt.Printf("correl vec: %v\n", vecs)
+	// fmt.Printf("correl val: %v\n", vals)
 	errtol := 1.0e-9
 	corvals := []float64{0.020607707235624825, 0.14735327830509573, 0.9212209307072254, 2.910818083752054}
 	for i, v := range vals.Values {

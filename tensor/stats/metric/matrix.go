@@ -108,14 +108,12 @@ func CovarianceMatrix(funcName string, in, out tensor.Tensor) {
 		return
 	}
 
-	flatsz := []int{in.DimSize(0), cells}
 	flatvw := in.View()
-	flatvw.SetShapeInts(flatsz...)
+	flatvw.SetShapeInts(in.DimSize(0), cells)
 
 	mout := tensor.NewFloat64Scalar(0.0)
 	out.SetShapeInts(cells, cells)
-	av := tensor.NewFloat64(rows)
-	bv := tensor.NewFloat64(rows)
+	var av, bv tensor.Tensor
 	curCoords := vecint.Vector2i{-1, -1}
 
 	coords := TriangularLIndicies(cells)
@@ -125,11 +123,11 @@ func CovarianceMatrix(funcName string, in, out tensor.Tensor) {
 		func(idx int, tsr ...tensor.Tensor) {
 			c := coords[idx]
 			if c.X != curCoords.X {
-				tensor.Slice(tsr[0], av, tensor.Range{}, tensor.Range{Start: c.X, End: c.X + 1})
+				av = tensor.NewSliced(tsr[0], tensor.Slice{}, tensor.Slice{Start: c.X, Stop: c.X + 1})
 				curCoords.X = c.X
 			}
 			if c.Y != curCoords.Y {
-				tensor.Slice(tsr[0], bv, tensor.Range{}, tensor.Range{Start: c.Y, End: c.Y + 1})
+				bv = tensor.NewSliced(tsr[0], tensor.Slice{}, tensor.Slice{Start: c.Y, Stop: c.Y + 1})
 				curCoords.Y = c.Y
 			}
 			tensor.Call(funcName, av, bv, mout)
@@ -208,9 +206,7 @@ func SVD(covar, eigenvecs, vals tensor.Tensor) {
 // This is typically done with results from SVD or PCA.
 func ProjectOnMatrixColumn(mtx, vec, colindex, out tensor.Tensor) {
 	ci := int(colindex.Float1D(0))
-	_ = ci
-	col := tensor.NewFloat64()
-	// tensor.Slice(mtx, col, tensor.Range{}, tensor.Range{Start: ci, End: ci + 1})
+	col := tensor.NewSliced(mtx, tensor.Slice{}, tensor.Slice{Start: ci, Stop: ci + 1})
 	// fmt.Println(mtx.String(), col.String())
 	rows, cells := vec.RowCellSize()
 	mout := tensor.NewFloat64()

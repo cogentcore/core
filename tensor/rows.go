@@ -41,7 +41,7 @@ type Rows struct { //types:add
 // NewRows returns a new [Rows] view of given tensor,
 // with optional list of indexes (none / nil = sequential).
 func NewRows(tsr Tensor, idxs ...int) *Rows {
-	ix := &Rows{Tensor: tsr, Indexes: idxs}
+	ix := &Rows{Tensor: tsr, Indexes: slices.Clone(idxs)}
 	return ix
 }
 

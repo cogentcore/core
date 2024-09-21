@@ -223,7 +223,7 @@ func (fn *FileNode) PlotFile() {
 			tsr := d.Data
 			dt = table.NewTable(df)
 			dt.Columns.Rows = tsr.DimSize(0)
-			if ix, ok := tsr.(*tensor.Indexed); ok {
+			if ix, ok := tsr.(*tensor.Rows); ok {
 				dt.Indexes = ix.Indexes
 			}
 			rc := dt.AddIntColumn("Row")
