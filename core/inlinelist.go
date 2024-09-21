@@ -31,7 +31,7 @@ func (il *InlineList) WidgetValue() any { return &il.Slice }
 func (il *InlineList) Init() {
 	il.Frame.Init()
 	il.Maker(func(p *tree.Plan) {
-		sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(il.Slice)))
+		sl := reflectx.Underlying(reflect.ValueOf(il.Slice))
 
 		sz := min(sl.Len(), SystemSettings.SliceInlineLength)
 		for i := 0; i < sz; i++ {
