@@ -826,8 +826,9 @@ func (tr *Tree) selectUpdate(mode events.SelectModes) bool {
 	return sel
 }
 
-// sendSelectEvent sends an [events.Select] event on the root node.
+// sendSelectEvent sends an [events.Select] event on both this node and the root node.
 func (tr *Tree) sendSelectEvent(original ...events.Event) {
+	tr.Send(events.Select, original...)
 	tr.root.Send(events.Select, original...)
 }
 
