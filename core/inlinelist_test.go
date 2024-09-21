@@ -16,10 +16,9 @@ func TestInlineList(t *testing.T) {
 
 func TestInlineListUpdate(t *testing.T) {
 	b := NewBody()
-	sl := []int{1, 2, 3}
-	il := NewInlineList(b).SetSlice(&sl)
+	il := NewInlineList(b).SetSlice(&[]int{1, 2, 3})
 	il.Update()
-	sl = []int{4, 5, 6}
+	il.SetSlice(&[]int{4, 5, 6})
 	il.Update()
 	b.AssertRender(t, "inline-list/update")
 }

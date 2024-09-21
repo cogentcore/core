@@ -36,8 +36,8 @@ func (il *InlineList) Init() {
 		sz := min(sl.Len(), SystemSettings.SliceInlineLength)
 		for i := 0; i < sz; i++ {
 			itxt := strconv.Itoa(i)
-			val := reflectx.UnderlyingPointer(sl.Index(i)) // deal with pointer lists
 			tree.AddNew(p, "value-"+itxt, func() Value {
+				val := reflectx.UnderlyingPointer(sl.Index(i))
 				return NewValue(val.Interface(), "")
 			}, func(w Value) {
 				wb := w.AsWidget()
@@ -53,6 +53,9 @@ func (il *InlineList) Init() {
 					})
 				}
 				wb.Updater(func() {
+					// We need to get the current value each time:
+					sl := reflectx.Underlying(reflect.ValueOf(il.Slice))
+					val := reflectx.UnderlyingPointer(sl.Index(i))
 					Bind(val.Interface(), w)
 					wb.SetReadOnly(il.IsReadOnly())
 				})
