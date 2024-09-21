@@ -16,6 +16,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+/*
 // Slice extracts a subset of values from the given tensor into the
 // output tensor, according to the provided ranges.
 // Dimensions beyond the ranges specified are automatically included.
@@ -57,6 +58,7 @@ func Slice(tsr, out *Sliced, ranges ...Range) error {
 	}
 	return nil
 }
+*/
 
 // Sliced is a fully indexed wrapper around another [Tensor] that provides a
 // re-sliced view onto the Tensor defined by the set of [SlicedIndexes],
@@ -102,6 +104,44 @@ func AsSliced(tsr Tensor) *Sliced {
 func (sl *Sliced) SetTensor(tsr Tensor) {
 	sl.Tensor = tsr
 	sl.Sequential()
+}
+
+// SliceIndex returns the actual index into underlying tensor dimension
+// based on given index value.
+func (sl *Sliced) SliceIndex(dim, idx int) int {
+	ix := sl.Indexes[dim]
+	if ix == nil {
+		return idx
+	}
+	return ix[idx]
+}
+
+// SliceIndexes returns the actual indexes into underlying tensor
+// based on given list of indexes.
+func (sl *Sliced) SliceIndexes(i ...int) []int {
+	ix := slices.Clone(i)
+	for d, idx := range i {
+		ix[d] = sl.SliceIndex(d, idx)
+	}
+	return ix
+}
+
+// IndexFrom1D returns the full indexes into source tensor based on the
+// given 1d index.
+func (sl *Sliced) IndexFrom1D(oned int) []int {
+	sh := sl.Shape()
+	oix := sh.IndexFrom1D(oned) // full indexes in our coords
+	return sl.SliceIndexes(oix...)
+}
+
+// RowCellIndex returns the full indexes into source tensor based on the
+// row and cell index.  Maps through 1D index.
+func (sl *Sliced) RowCellIndex(row, cell int) []int {
+	sh := sl.Shape()
+	_, csz := sh.RowCellSize() // using our shape
+	oned := row*csz + cell
+	oix := sh.IndexFrom1D(oned) // full indexes in our coords
+	return sl.SliceIndexes(oix...)
 }
 
 // ValidIndexes ensures that [Sliced.Indexes] are valid,
@@ -398,32 +438,23 @@ func (sl *Sliced) CopyCellsFrom(from Tensor, to, start, n int) {
 
 /////////////////////  Floats
 
-// todo: these are not the right functions
-
 // Float returns the value of given index as a float64.
-// The first index value is indirected through the indexes.
+// The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) Float(i ...int) float64 {
-	sh := sl.Shape()
-	return sl.Tensor.Float1D(sh.IndexTo1D())
+	return sl.Tensor.Float(sl.SliceIndexes(i...)...)
 }
 
 // SetFloat sets the value of given index as a float64
-// The first index value is indirected through the [Sliced.Indexes].
+// The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) SetFloat(val float64, i ...int) {
-	sh := sl.Shape()
-	sl.Tensor.SetFloat1D(val, sh.IndexTo1D())
+	sl.Tensor.SetFloat(val, sl.SliceIndexes(i...)...)
 }
 
 // FloatRowCell returns the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
-// Row is indirected through the [Sliced.Indexes].
-// This is the preferred interface for all Sliced operations.
+// The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) FloatRowCell(row, cell int) float64 {
-	sh := sl.Shape()
-	_, sz := sh.RowCellSize()
-	i := row*sz + cell
-	return float64(tsr.Values[i])
-	return sl.Tensor.FloatRowCell(sl.RowIndex(row), cell)
+	return sl.Float(sl.RowCellIndex(row, cell)...)
 }
 
 // SetFloatRowCell sets the value at given row and cell,
@@ -431,25 +462,19 @@ func (sl *Sliced) FloatRowCell(row, cell int) float64 {
 // Row is indirected through the [Sliced.Indexes].
 // This is the preferred interface for all Sliced operations.
 func (sl *Sliced) SetFloatRowCell(val float64, row, cell int) {
-	sl.Tensor.SetFloatRowCell(val, sl.RowIndex(row), cell)
+	sl.SetFloat(val, sl.RowCellIndex(row, cell)...)
 }
 
 // Float1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) Float1D(i int) float64 {
-	if sl.Indexes == nil {
-		return sl.Tensor.Float1D(i)
-	}
-	return sl.Float(sl.Tensor.Shape().IndexFrom1D(i)...)
+	return sl.Float(sl.IndexFrom1D(i)...)
 }
 
 // SetFloat1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) SetFloat1D(val float64, i int) {
-	if sl.Indexes == nil {
-		sl.Tensor.SetFloat1D(val, i)
-	}
-	sl.SetFloat(val, sl.Tensor.Shape().IndexFrom1D(i)...)
+	sl.SetFloat(val, sl.IndexFrom1D(i)...)
 }
 
 func (sl *Sliced) FloatRow(row int) float64 {
@@ -465,23 +490,13 @@ func (sl *Sliced) SetFloatRow(val float64, row int) {
 // StringValue returns the value of given index as a string.
 // The first index value is indirected through the indexes.
 func (sl *Sliced) StringValue(i ...int) string {
-	if sl.Indexes == nil {
-		return sl.Tensor.StringValue(i...)
-	}
-	ic := slices.Clone(i)
-	ic[0] = sl.Indexes[ic[0]]
-	return sl.Tensor.StringValue(ic...)
+	return sl.Tensor.StringValue(sl.SliceIndexes(i...)...)
 }
 
 // SetString sets the value of given index as a string
 // The first index value is indirected through the [Sliced.Indexes].
 func (sl *Sliced) SetString(val string, i ...int) {
-	if sl.Indexes == nil {
-		sl.Tensor.SetString(val, i...)
-	}
-	ic := slices.Clone(i)
-	ic[0] = sl.Indexes[ic[0]]
-	sl.Tensor.SetString(val, ic...)
+	sl.Tensor.SetString(val, sl.SliceIndexes(i...)...)
 }
 
 // StringRowCell returns the value at given row and cell,
@@ -489,7 +504,7 @@ func (sl *Sliced) SetString(val string, i ...int) {
 // Row is indirected through the [Sliced.Indexes].
 // This is the preferred interface for all Sliced operations.
 func (sl *Sliced) StringRowCell(row, cell int) string {
-	return sl.Tensor.StringRowCell(sl.RowIndex(row), cell)
+	return sl.StringValue(sl.RowCellIndex(row, cell)...)
 }
 
 // SetStringRowCell sets the value at given row and cell,
@@ -497,25 +512,19 @@ func (sl *Sliced) StringRowCell(row, cell int) string {
 // Row is indirected through the [Sliced.Indexes].
 // This is the preferred interface for all Sliced operations.
 func (sl *Sliced) SetStringRowCell(val string, row, cell int) {
-	sl.Tensor.SetStringRowCell(val, sl.RowIndex(row), cell)
+	sl.SetString(val, sl.RowCellIndex(row, cell)...)
 }
 
 // String1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) String1D(i int) string {
-	if sl.Indexes == nil {
-		return sl.Tensor.String1D(i)
-	}
-	return sl.StringValue(sl.Tensor.Shape().IndexFrom1D(i)...)
+	return sl.StringValue(sl.IndexFrom1D(i)...)
 }
 
 // SetString1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) SetString1D(val string, i int) {
-	if sl.Indexes == nil {
-		sl.Tensor.SetString1D(val, i)
-	}
-	sl.SetString(val, sl.Tensor.Shape().IndexFrom1D(i)...)
+	sl.SetString(val, sl.IndexFrom1D(i)...)
 }
 
 func (sl *Sliced) StringRow(row int) string {
@@ -531,24 +540,13 @@ func (sl *Sliced) SetStringRow(val string, row int) {
 // Int returns the value of given index as an int.
 // The first index value is indirected through the indexes.
 func (sl *Sliced) Int(i ...int) int {
-	if sl.Indexes == nil {
-		return sl.Tensor.Int(i...)
-	}
-	ic := slices.Clone(i)
-	ic[0] = sl.Indexes[ic[0]]
-	return sl.Tensor.Int(ic...)
+	return sl.Tensor.Int(sl.SliceIndexes(i...)...)
 }
 
 // SetInt sets the value of given index as an int
 // The first index value is indirected through the [Sliced.Indexes].
 func (sl *Sliced) SetInt(val int, i ...int) {
-	if sl.Indexes == nil {
-		sl.Tensor.SetInt(val, i...)
-		return
-	}
-	ic := slices.Clone(i)
-	ic[0] = sl.Indexes[ic[0]]
-	sl.Tensor.SetInt(val, ic...)
+	sl.Tensor.SetInt(val, sl.SliceIndexes(i...)...)
 }
 
 // IntRowCell returns the value at given row and cell,
@@ -556,7 +554,7 @@ func (sl *Sliced) SetInt(val int, i ...int) {
 // Row is indirected through the [Sliced.Indexes].
 // This is the preferred interface for all Sliced operations.
 func (sl *Sliced) IntRowCell(row, cell int) int {
-	return sl.Tensor.IntRowCell(sl.RowIndex(row), cell)
+	return sl.Int(sl.RowCellIndex(row, cell)...)
 }
 
 // SetIntRowCell sets the value at given row and cell,
@@ -564,25 +562,19 @@ func (sl *Sliced) IntRowCell(row, cell int) int {
 // Row is indirected through the [Sliced.Indexes].
 // This is the preferred interface for all Sliced operations.
 func (sl *Sliced) SetIntRowCell(val int, row, cell int) {
-	sl.Tensor.SetIntRowCell(val, sl.RowIndex(row), cell)
+	sl.SetInt(val, sl.RowCellIndex(row, cell)...)
 }
 
 // Int1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) Int1D(i int) int {
-	if sl.Indexes == nil {
-		return sl.Tensor.Int1D(i)
-	}
-	return sl.Int(sl.Tensor.Shape().IndexFrom1D(i)...)
+	return sl.Int(sl.IndexFrom1D(i)...)
 }
 
 // SetInt1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) SetInt1D(val int, i int) {
-	if sl.Indexes == nil {
-		sl.Tensor.SetInt1D(val, i)
-	}
-	sl.SetInt(val, sl.Tensor.Shape().IndexFrom1D(i)...)
+	sl.SetInt(val, sl.IndexFrom1D(i)...)
 }
 
 func (sl *Sliced) IntRow(row int) int {
@@ -595,38 +587,25 @@ func (sl *Sliced) SetIntRow(val int, row int) {
 
 /////////////////////  SubSpaces
 
-// SubSpace returns a new tensor with innermost subspace at given
-// offset(s) in outermost dimension(s) (len(offs) < NumDims).
-// The new tensor points to the values of the this tensor (i.e., modifications
-// will affect both), as its Values slice is a view onto the original (which
-// is why only inner-most contiguous supsaces are supported).
-// Use Clone() method to separate the two.
-// Sliced version does indexed indirection of the outermost row dimension
-// of the offsets.
+// SubSpace is not supported by Sliced.
 func (sl *Sliced) SubSpace(offs ...int) Tensor {
-	if len(offs) == 0 {
-		return nil
-	}
-	offs[0] = sl.RowIndex(offs[0])
-	return sl.Tensor.SubSpace(offs...)
+	return nil
 }
 
-// RowTensor is a convenience version of [Sliced.SubSpace] to return the
-// SubSpace for the outermost row dimension, indirected through the indexes.
+// RowTensor is not supported by Sliced.
 func (sl *Sliced) RowTensor(row int) Tensor {
-	return sl.Tensor.RowTensor(sl.RowIndex(row))
+	return nil
 }
 
-// SetRowTensor sets the values of the SubSpace at given row to given values,
-// with row indirected through the indexes.
+// RowTensor is not supported by Sliced.
 func (sl *Sliced) SetRowTensor(val Tensor, row int) {
-	sl.Tensor.SetRowTensor(val, sl.RowIndex(row))
 }
 
 // CopyFrom copies all values from other tensor into this tensor.
 // Checks if source is an Sliced and copies indexes too,
 // otherwise underlying tensor copies from and indexes are reset.
 func (sl *Sliced) CopyFrom(from Tensor) {
+	// todo: what should this do?
 	if fix, ok := from.(*Sliced); ok {
 		sl.Tensor.CopyFrom(fix.Tensor)
 		sl.CopyIndexes(fix)

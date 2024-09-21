@@ -53,7 +53,7 @@ func Float64ToString(val float64) string {
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
 func (tsr *String) String() string {
-	return stringIndexed(tsr, 0, nil)
+	return sprint(tsr, 0)
 }
 
 func (tsr *String) IsString() bool {
