@@ -75,3 +75,14 @@ func RangeSizes(sizes []int, ranges ...Range) ([]int, error) {
 	}
 	return nsz, nil
 }
+
+func IntRangeTensor(start, end, incr int) *Int {
+	rn := Range{Start: start, End: end, Incr: incr}
+	tsr := NewInt(rn.Size(end))
+	idx := 0
+	for i := start; i < end; i += incr {
+		tsr.Values[idx] = i
+		idx++
+	}
+	return tsr
+}

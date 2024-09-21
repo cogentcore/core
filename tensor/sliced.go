@@ -16,50 +16,6 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-/*
-// Slice extracts a subset of values from the given tensor into the
-// output tensor, according to the provided ranges.
-// Dimensions beyond the ranges specified are automatically included.
-// Unlike the [Tensor.SubSlice] function, the values extracted here are
-// copies of the original, not a slice pointer into them,
-// which is necessary to allow discontinuous ranges to be extracted.
-// Use the [SliceSet] function to copy sliced values back to the original.
-func Slice(tsr, out *Sliced, ranges ...Range) error {
-	sizes := slices.Clone(tsr.Tensor.ShapeInts())
-	sizes[0] = tsr.DimSize(0) // takes into account indexes
-	nsz, err := SliceSize(sizes, ranges...)
-	if err != nil {
-		return err
-	}
-	ndim := len(nsz)
-	out.Tensor.SetShapeInts(nsz...)
-	out.Sequential()
-	nl := out.Len()
-	oc := make([]int, ndim) // orig coords
-	nr := len(ranges)
-	for ni := range nl {
-		nc := out.Tensor.Shape().IndexFrom1D(ni)
-		for i := range ndim {
-			c := nc[i]
-			if i < nr {
-				r := ranges[i]
-				oc[i] = r.Start + c*r.IncrActual()
-			} else {
-				oc[i] = c
-			}
-		}
-		oc[0] = tsr.RowIndex(oc[0])
-		oi := tsr.Tensor.Shape().IndexTo1D(oc...)
-		if out.Tensor.IsString() {
-			out.Tensor.SetString1D(tsr.Tensor.String1D(oi), ni)
-		} else {
-			out.SetFloat1D(tsr.Float1D(oi), ni)
-		}
-	}
-	return nil
-}
-*/
-
 // Sliced is a fully indexed wrapper around another [Tensor] that provides a
 // re-sliced view onto the Tensor defined by the set of [SlicedIndexes],
 // for each dimension (must have at least 1 per dimension).
@@ -200,7 +156,7 @@ func (sl *Sliced) Label() string {
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
 func (sl *Sliced) String() string {
-	return sprint(sl.Tensor, 0) // todo: no need
+	return sprint(sl, 0)
 }
 
 // Metadata returns the metadata for this tensor, which can be used
@@ -454,7 +410,7 @@ func (sl *Sliced) SetFloat(val float64, i ...int) {
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
 // The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) FloatRowCell(row, cell int) float64 {
-	return sl.Float(sl.RowCellIndex(row, cell)...)
+	return sl.Tensor.Float(sl.RowCellIndex(row, cell)...)
 }
 
 // SetFloatRowCell sets the value at given row and cell,
@@ -462,19 +418,19 @@ func (sl *Sliced) FloatRowCell(row, cell int) float64 {
 // Row is indirected through the [Sliced.Indexes].
 // This is the preferred interface for all Sliced operations.
 func (sl *Sliced) SetFloatRowCell(val float64, row, cell int) {
-	sl.SetFloat(val, sl.RowCellIndex(row, cell)...)
+	sl.Tensor.SetFloat(val, sl.RowCellIndex(row, cell)...)
 }
 
 // Float1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) Float1D(i int) float64 {
-	return sl.Float(sl.IndexFrom1D(i)...)
+	return sl.Tensor.Float(sl.IndexFrom1D(i)...)
 }
 
 // SetFloat1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) SetFloat1D(val float64, i int) {
-	sl.SetFloat(val, sl.IndexFrom1D(i)...)
+	sl.Tensor.SetFloat(val, sl.IndexFrom1D(i)...)
 }
 
 func (sl *Sliced) FloatRow(row int) float64 {

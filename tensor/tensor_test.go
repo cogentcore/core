@@ -123,76 +123,56 @@ func TestTensorFloat64(t *testing.T) {
 	assert.Equal(t, 0.0, af[1])
 }
 
-/*
 func TestSlice(t *testing.T) {
-	ft := NewFloat64(3, 4, 5)
-	for r := range 3 {
-		for y := range 4 {
-			for x := range 5 {
-				v := (r+1)*100 + y*10 + x
-				ft.SetFloat(float64(v), r, y, x)
-			}
+	ft := NewFloat64(3, 4)
+	for y := range 3 {
+		for x := range 4 {
+			v := y*10 + x
+			ft.SetFloat(float64(v), y, x)
 		}
 	}
 
-	res := `Tensor: [20]
-[0]:     200
-[1]:     201
-[2]:     202
-[3]:     203
-[4]:     204
-[5]:     210
-[6]:     211
-[7]:     212
-[8]:     213
-[9]:     214
-[10]:     220
-[11]:     221
-[12]:     222
-[13]:     223
-[14]:     224
-[15]:     230
-[16]:     231
-[17]:     232
-[18]:     233
-[19]:     234
+	res := `[3, 4]
+[0]:       0       1       2       3 
+[1]:      10      11      12      13 
+[2]:      20      21      22      23 
 `
-	// fmt.Println(Cells1D(ft, 1))
-	assert.Equal(t, res, Cells1D(ft, 1).String())
+	assert.Equal(t, res, ft.String())
+	// fmt.Println(ft)
 
-	// fmt.Println(ft.String())
-	sf := NewFloat64()
-	Slice(ft, sf, Range{}, Range{Start: 1, End: 2})
-	// fmt.Println(sf.String())
-	res = `Tensor: [3, 1, 5]
-[0 0]:     110     111     112     113     114
-[1 0]:     210     211     212     213     214
-[2 0]:     310     311     312     313     314
+	res = `[2, 2]
+[0]:      23      22 
+[1]:      13      12 
 `
-	assert.Equal(t, res, sf.Tensor.String())
 
-	Slice(ft, sf, Range{}, Range{}, Range{Start: 1, End: 2})
-	// fmt.Println(sf.String())
-	res = `Tensor: [3, 4, 1]
-[0 0]:     101
-[0 1]:     111
-[0 2]:     121
-[0 3]:     131
-[1 0]:     201
-[1 1]:     211
-[1 2]:     221
-[1 3]:     231
-[2 0]:     301
-[2 1]:     311
-[2 2]:     321
-[2 3]:     331
-`
-	assert.Equal(t, res, sf.Tensor.String())
+	sl := NewSliced(ft, []int{2, 1}, []int{3, 2})
+	// fmt.Println(sl)
+	assert.Equal(t, res, sl.String())
+
+	/*
+
+		ft := NewFloat64(2, 3, 4)
+		for r := range 2 {
+			for y := range 3 {
+				for x := range 4 {
+					v := (r+1)*100 + y*10 + x
+					ft.SetFloat(float64(v), r, y, x)
+				}
+			}
+		}
+
+		fmt.Println(ft)
+
+		sl := NewSliced(ft, []int{1, 0}, []int{1, 0}, []int{1, 0})
+		fmt.Println(sl)
+
+				assert.Equal(t, res, sf.Tensor.String())
+	*/
+
 }
-*/
 
 func TestSortFilter(t *testing.T) {
-	tsr := NewIndexed(NewFloat64(5))
+	tsr := NewRows(NewFloat64(5))
 	for i := range 5 {
 		tsr.SetFloatRowCell(float64(i), i, 0)
 	}

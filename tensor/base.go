@@ -216,7 +216,7 @@ func sprint(tsr Tensor, maxLen int) string {
 	}
 	var b strings.Builder
 	sh := tsr.Shape()
-	b.WriteString(sh.String() + " ")
+	b.WriteString(sh.String() + "\n")
 	oddRow := false
 	rows, cols, _, _ := Projection2DShape(sh, oddRow)
 	ctr := 0

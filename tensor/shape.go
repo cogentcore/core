@@ -34,7 +34,7 @@ func NewShape(sizes ...int) *Shape {
 // SetShapeInts sets the shape sizes from list of ints.
 // RowMajor ordering is used by default.
 func (sh *Shape) SetShapeInts(sizes ...int) {
-	sh.Sizes = sizes
+	sh.Sizes = slices.Clone(sizes)
 	sh.Strides = RowMajorStrides(sizes...)
 }
 
