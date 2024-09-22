@@ -16,8 +16,8 @@ import (
 )
 
 // Bool is a tensor of bits backed by a [bitslice.Slice] for efficient storage
-// of binary data.  Bool does not support [Tensor.SubSpace] access and related
-// methods due to the nature of the underlying data representation.
+// of binary, boolean data. Bool does not support [Tensor.SubSpace] access
+// and related methods due to the nature of the underlying data representation.
 type Bool struct {
 	shape  Shape
 	Values bitslice.Slice
@@ -63,34 +63,29 @@ func BoolToInt(bv bool) int {
 }
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
-func (tsr *Bool) String() string {
-	return sprint(tsr, 0)
+func (tsr *Bool) String() string { return sprint(tsr, 0) }
+
+// Label satisfies the core.Labeler interface for a summary description of the tensor
+func (tsr *Bool) Label() string {
+	return label(tsr.Metadata().Name(), tsr.Shape())
 }
 
-func (tsr *Bool) IsString() bool {
-	return false
-}
+func (tsr *Bool) IsString() bool { return false }
 
 func (tsr *Bool) AsValues() Values { return tsr }
 
 // DataType returns the type of the data elements in the tensor.
 // Bool is returned for the Bool tensor type.
-func (tsr *Bool) DataType() reflect.Kind {
-	return reflect.Bool
-}
+func (tsr *Bool) DataType() reflect.Kind { return reflect.Bool }
 
-func (tsr *Bool) Sizeof() int64 {
-	return int64(len(tsr.Values))
-}
+func (tsr *Bool) Sizeof() int64 { return int64(len(tsr.Values)) }
 
-func (tsr *Bool) Bytes() []byte {
-	return slicesx.ToBytes(tsr.Values)
-}
+func (tsr *Bool) Bytes() []byte { return slicesx.ToBytes(tsr.Values) }
 
 func (tsr *Bool) Shape() *Shape { return &tsr.shape }
 
 // ShapeSizes returns the sizes of each dimension as an int tensor.
-func (tsr *Bool) ShapeSizes() Tensor { return tsr.shape.AsTensor() }
+func (tsr *Bool) ShapeSizes() *Int { return tsr.shape.AsTensor() }
 
 // ShapeInts returns the sizes of each dimension as a slice of ints.
 // This is the preferred access for Go code.
@@ -140,19 +135,13 @@ func (tsr *Bool) SetNumRows(rows int) {
 }
 
 // SubSpace is not possible with Bool.
-func (tsr *Bool) SubSpace(offs ...int) Values {
-	return nil
-}
+func (tsr *Bool) SubSpace(offs ...int) Values { return nil }
 
 // RowTensor not possible with Bool.
-func (tsr *Bool) RowTensor(row int) Values {
-	return nil
-}
+func (tsr *Bool) RowTensor(row int) Values { return nil }
 
 // SetRowTensor not possible with Bool.
-func (tsr *Bool) SetRowTensor(val Values, row int) {
-
-}
+func (tsr *Bool) SetRowTensor(val Values, row int) {}
 
 /////////////////////  Strings
 
@@ -268,16 +257,37 @@ func (tsr *Bool) SetIntRow(val int, row int) {
 	tsr.SetIntRowCell(val, row, 0)
 }
 
-// Label satisfies the core.Labeler interface for a summary description of the tensor
-func (tsr *Bool) Label() string {
-	return fmt.Sprintf("tensor.Bool: %s", tsr.shape.String())
+/////////////////////  Bools
+
+func (tsr *Bool) Bool(i ...int) bool {
+	return tsr.Values.Index(tsr.shape.IndexTo1D(i...))
 }
 
-// SetZeros is simple convenience function initialize all values to 0
+func (tsr *Bool) SetBool(val bool, i ...int) {
+	tsr.Values.Set(val, tsr.shape.IndexTo1D(i...))
+}
+
+func (tsr *Bool) Bool1D(off int) bool {
+	return tsr.Values.Index(off)
+}
+
+func (tsr *Bool) SetBool1D(val bool, off int) {
+	tsr.Values.Set(val, off)
+}
+
+// SetZeros is a convenience function initialize all values to 0 (false).
 func (tsr *Bool) SetZeros() {
 	ln := tsr.Len()
 	for j := 0; j < ln; j++ {
 		tsr.Values.Set(false, j)
+	}
+}
+
+// SetTrue is simple convenience function initialize all values to 0
+func (tsr *Bool) SetTrue() {
+	ln := tsr.Len()
+	for j := 0; j < ln; j++ {
+		tsr.Values.Set(true, j)
 	}
 }
 

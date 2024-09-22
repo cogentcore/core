@@ -171,6 +171,43 @@ func TestSliced(t *testing.T) {
 
 }
 
+func TestMasked(t *testing.T) {
+	ft := NewFloat64(3, 4)
+	for y := range 3 {
+		for x := range 4 {
+			v := y*10 + x
+			ft.SetFloat(float64(v), y, x)
+		}
+	}
+	ms := NewMasked(ft)
+
+	res := `[3, 4]
+[0]:       0       1       2       3 
+[1]:      10      11      12      13 
+[2]:      20      21      22      23 
+`
+	assert.Equal(t, res, ms.String())
+
+	ms.Filter(func(tsr Tensor, idx int) bool {
+		val := tsr.Float1D(idx)
+		return int(val)%10 == 2
+	})
+	res = `[3, 4]
+[0]:     NaN     NaN       2     NaN 
+[1]:     NaN     NaN      12     NaN 
+[2]:     NaN     NaN      22     NaN 
+`
+	// fmt.Println(ms.String())
+	assert.Equal(t, res, ms.String())
+
+	res = `[3]       2      12      22 
+`
+
+	vl := ms.AsValues()
+	// fmt.Println(vl.String())
+	assert.Equal(t, res, vl.String())
+}
+
 func TestSortFilter(t *testing.T) {
 	tsr := NewRows(NewFloat64(5))
 	for i := range 5 {

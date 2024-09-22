@@ -30,7 +30,7 @@ func (tsr *Base[T]) Metadata() *metadata.Data { return &tsr.Meta }
 func (tsr *Base[T]) Shape() *Shape { return &tsr.shape }
 
 // ShapeSizes returns the sizes of each dimension as an int tensor.
-func (tsr *Base[T]) ShapeSizes() Tensor { return tsr.shape.AsTensor() }
+func (tsr *Base[T]) ShapeSizes() *Int { return tsr.shape.AsTensor() }
 
 // ShapeInts returns the sizes of each dimension as a slice of ints.
 // This is the preferred access for Go code.
@@ -180,8 +180,10 @@ func sprint(tsr Tensor, maxLen int) string {
 	var b strings.Builder
 	sh := tsr.Shape()
 	b.WriteString(tsr.Label())
+	noidx := false
 	if tsr.NumDims() == 1 && tsr.Len() < 8 {
 		b.WriteString(" ")
+		noidx = true
 	} else {
 		b.WriteString("\n")
 	}
@@ -190,7 +192,9 @@ func sprint(tsr Tensor, maxLen int) string {
 	ctr := 0
 	for r := range rows {
 		rc, _ := Projection2DCoords(sh, oddRow, r, 0)
-		b.WriteString(fmt.Sprintf("%v: ", rc))
+		if !noidx {
+			b.WriteString(fmt.Sprintf("%v: ", rc))
+		}
 		ri := r
 		for c := 0; c < cols; c++ {
 			if tsr.IsString() {

@@ -108,7 +108,7 @@ func (rw *Rows) ShapeInts() []int {
 	return sh
 }
 
-func (rw *Rows) ShapeSizes() Tensor {
+func (rw *Rows) ShapeSizes() *Int {
 	if rw.Indexes == nil {
 		return rw.Tensor.ShapeSizes()
 	}

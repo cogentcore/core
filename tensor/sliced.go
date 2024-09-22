@@ -16,15 +16,15 @@ import (
 )
 
 // Sliced is a fully indexed wrapper around another [Tensor] that provides a
-// re-sliced view onto the Tensor defined by the set of [SlicedIndexes],
+// re-sliced view onto the Tensor defined by the set of [Sliced.Indexes],
 // for each dimension (must have at least 1 per dimension).
 // Thus, every dimension can be transformed in arbitrary ways relative
 // to the original tensor. There is some additional cost for every
 // access operation associated with the additional indexed indirection.
 // See also [Indexed] for a version that only indexes the outermost row dimension,
 // which is much more efficient for this common use-case.
-// To produce a new [Tensor] that has its raw data actually organized according
-// to the indexed order (i.e., the copy function of numpy), call [Sliced.NewTensor].
+// To produce a new concrete [Values] that has raw data actually organized according
+// to the indexed order (i.e., the copy function of numpy), call [Sliced.CloneValues].
 type Sliced struct { //types:add
 
 	// Tensor that we are an indexed view onto.
@@ -192,7 +192,7 @@ func (sl *Sliced) ShapeInts() []int {
 	return sh
 }
 
-func (sl *Sliced) ShapeSizes() Tensor {
+func (sl *Sliced) ShapeSizes() *Int {
 	return NewIntFromSlice(sl.ShapeInts()...)
 }
 
@@ -295,13 +295,13 @@ func (sl *Sliced) SetFloat1D(val float64, i int) {
 /////////////////////  Strings
 
 // StringValue returns the value of given index as a string.
-// The first index value is indirected through the indexes.
+// The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) StringValue(i ...int) string {
 	return sl.Tensor.StringValue(sl.SliceIndexes(i...)...)
 }
 
 // SetString sets the value of given index as a string
-// The first index value is indirected through the [Sliced.Indexes].
+// The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) SetString(val string, i ...int) {
 	sl.Tensor.SetString(val, sl.SliceIndexes(i...)...)
 }
@@ -321,13 +321,13 @@ func (sl *Sliced) SetString1D(val string, i int) {
 /////////////////////  Ints
 
 // Int returns the value of given index as an int.
-// The first index value is indirected through the indexes.
+// The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) Int(i ...int) int {
 	return sl.Tensor.Int(sl.SliceIndexes(i...)...)
 }
 
 // SetInt sets the value of given index as an int
-// The first index value is indirected through the [Sliced.Indexes].
+// The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) SetInt(val int, i ...int) {
 	sl.Tensor.SetInt(val, sl.SliceIndexes(i...)...)
 }
@@ -401,9 +401,9 @@ func (sl *Sliced) SortStableFunc(dim int, cmp func(tsr Tensor, dim, i, j int) in
 	sl.Indexes[dim] = ix
 }
 
-// Filter filters the indexes using given Filter function.
-// The Filter function operates directly on row numbers into the Tensor
-// as these row numbers have already been projected through the indexes.
+// Filter filters the indexes using the given Filter function
+// for setting the indexes for given dimension, and index into the
+// source data.
 func (sl *Sliced) Filter(dim int, filterer func(tsr Tensor, dim, idx int) bool) {
 	sl.IndexesNeeded(dim)
 	ix := sl.Indexes[dim]

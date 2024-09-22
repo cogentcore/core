@@ -45,7 +45,7 @@ func (sh *Shape) SetShape(shp Tensor) {
 }
 
 // AsTensor returns shape sizes as an Int Tensor.
-func (sh *Shape) AsTensor() Tensor {
+func (sh *Shape) AsTensor() *Int {
 	return NewIntFromSlice(sh.Sizes...)
 }
 

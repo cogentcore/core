@@ -62,7 +62,7 @@ type Tensor interface {
 	Shape() *Shape
 
 	// ShapeSizes returns the sizes of each dimension as an int tensor.
-	ShapeSizes() Tensor
+	ShapeSizes() *Int
 
 	// ShapeInts returns the sizes of each dimension as a slice of ints.
 	// This is the preferred access for Go code.
