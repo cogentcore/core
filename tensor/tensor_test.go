@@ -41,7 +41,7 @@ func TestTensorString(t *testing.T) {
 	assert.Equal(t, "", cln.StringValue(2, 1))
 	assert.Equal(t, "testing", tsr.StringValue(2, 1))
 
-	tsr.SetShapeInts(2, 4)
+	tsr.SetShapeSizes(2, 4)
 	// tsr.SetNames("Vals", "Row")
 	assert.Equal(t, "test", tsr.StringValue(1, 0))
 	assert.Equal(t, "testing", tsr.StringValue(1, 1))
@@ -100,7 +100,7 @@ func TestTensorFloat64(t *testing.T) {
 	assert.Equal(t, 0.0, cln.Float(2, 1))
 	assert.Equal(t, 2.17, tsr.Float(2, 1))
 
-	tsr.SetShapeInts(2, 4)
+	tsr.SetShapeSizes(2, 4)
 	assert.Equal(t, 3.14, tsr.Float(1, 0))
 	assert.Equal(t, 2.17, tsr.Float(1, 1))
 

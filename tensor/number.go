@@ -67,7 +67,7 @@ func NewByte(sizes ...int) *Byte {
 // with the given sizes per dimension (shape), and optional dimension names.
 func NewNumber[T num.Number](sizes ...int) *Number[T] {
 	tsr := &Number[T]{}
-	tsr.SetShapeInts(sizes...)
+	tsr.SetShapeSizes(sizes...)
 	tsr.Values = make([]T, tsr.Len())
 	return tsr
 }
@@ -91,7 +91,7 @@ func NewNumberFromSlice[T num.Number](vals ...T) *Number[T] {
 	n := len(vals)
 	tsr := &Number[T]{}
 	tsr.Values = vals
-	tsr.SetShapeInts(n)
+	tsr.SetShapeSizes(n)
 	return tsr
 }
 

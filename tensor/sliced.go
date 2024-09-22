@@ -21,10 +21,10 @@ import (
 // Thus, every dimension can be transformed in arbitrary ways relative
 // to the original tensor. There is some additional cost for every
 // access operation associated with the additional indexed indirection.
-// See also [Indexed] for a version that only indexes the outermost row dimension,
+// See also [Rows] for a version that only indexes the outermost row dimension,
 // which is much more efficient for this common use-case.
 // To produce a new concrete [Values] that has raw data actually organized according
-// to the indexed order (i.e., the copy function of numpy), call [Sliced.CloneValues].
+// to the indexed order (i.e., the copy function of numpy), call [Sliced.AsValues].
 type Sliced struct { //types:add
 
 	// Tensor that we are an indexed view onto.
@@ -77,9 +77,9 @@ func (sl *Sliced) SetTensor(tsr Tensor) {
 	sl.Sequential()
 }
 
-// SliceIndex returns the actual index into underlying tensor dimension
+// SourceIndex returns the actual index into underlying tensor dimension
 // based on given index value.
-func (sl *Sliced) SliceIndex(dim, idx int) int {
+func (sl *Sliced) SourceIndex(dim, idx int) int {
 	ix := sl.Indexes[dim]
 	if ix == nil {
 		return idx
@@ -87,22 +87,22 @@ func (sl *Sliced) SliceIndex(dim, idx int) int {
 	return ix[idx]
 }
 
-// SliceIndexes returns the actual indexes into underlying tensor
+// SourceIndexes returns the actual indexes into underlying tensor
 // based on given list of indexes.
-func (sl *Sliced) SliceIndexes(i ...int) []int {
+func (sl *Sliced) SourceIndexes(i ...int) []int {
 	ix := slices.Clone(i)
 	for d, idx := range i {
-		ix[d] = sl.SliceIndex(d, idx)
+		ix[d] = sl.SourceIndex(d, idx)
 	}
 	return ix
 }
 
-// IndexFrom1D returns the full indexes into source tensor based on the
+// SourceIndexesFrom1D returns the full indexes into source tensor based on the
 // given 1d index.
-func (sl *Sliced) IndexFrom1D(oned int) []int {
+func (sl *Sliced) SourceIndexesFrom1D(oned int) []int {
 	sh := sl.Shape()
 	oix := sh.IndexFrom1D(oned) // full indexes in our coords
-	return sl.SliceIndexes(oix...)
+	return sl.SourceIndexes(oix...)
 }
 
 // ValidIndexes ensures that [Sliced.Indexes] are valid,
@@ -160,30 +160,22 @@ func (sl *Sliced) Label() string {
 }
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
-func (sl *Sliced) String() string {
-	return sprint(sl, 0)
-}
+func (sl *Sliced) String() string { return sprint(sl, 0) }
 
-// Metadata returns the metadata for this tensor, which can be used
-// to encode plotting options, etc.
 func (sl *Sliced) Metadata() *metadata.Data { return sl.Tensor.Metadata() }
 
-func (sl *Sliced) IsString() bool {
-	return sl.Tensor.IsString()
-}
+func (sl *Sliced) IsString() bool { return sl.Tensor.IsString() }
 
-func (sl *Sliced) DataType() reflect.Kind {
-	return sl.Tensor.DataType()
-}
+func (sl *Sliced) DataType() reflect.Kind { return sl.Tensor.DataType() }
 
 // For each dimension, we return the effective shape sizes using
 // the current number of indexes per dimension.
-func (sl *Sliced) ShapeInts() []int {
+func (sl *Sliced) ShapeSizes() []int {
 	nd := sl.Tensor.NumDims()
 	if nd == 0 {
-		return sl.Tensor.ShapeInts()
+		return sl.Tensor.ShapeSizes()
 	}
-	sh := slices.Clone(sl.Tensor.ShapeInts())
+	sh := slices.Clone(sl.Tensor.ShapeSizes())
 	for d := range nd {
 		if sl.Indexes[d] != nil {
 			sh[d] = len(sl.Indexes[d])
@@ -192,15 +184,11 @@ func (sl *Sliced) ShapeInts() []int {
 	return sh
 }
 
-func (sl *Sliced) ShapeSizes() *Int {
-	return NewIntFromSlice(sl.ShapeInts()...)
-}
-
 // Shape() returns a [Shape] representation of the tensor shape
 // (dimension sizes). If we have Indexes, this is the effective
 // shape using the current number of indexes per dimension.
 func (sl *Sliced) Shape() *Shape {
-	return NewShape(sl.ShapeInts()...)
+	return NewShape(sl.ShapeSizes()...)
 }
 
 // Len returns the total number of elements in our view of the tensor.
@@ -226,7 +214,7 @@ func (sl *Sliced) DimSize(dim int) int {
 // functionality provided by the [Values] interface.
 func (sl *Sliced) AsValues() Values {
 	dt := sl.Tensor.DataType()
-	vt := NewOfType(dt, sl.ShapeInts()...)
+	vt := NewOfType(dt, sl.ShapeSizes()...)
 	n := sl.Len()
 	switch {
 	case sl.Tensor.IsString():
@@ -271,25 +259,25 @@ func (sl *Sliced) AsValues() Values {
 // Float returns the value of given index as a float64.
 // The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) Float(i ...int) float64 {
-	return sl.Tensor.Float(sl.SliceIndexes(i...)...)
+	return sl.Tensor.Float(sl.SourceIndexes(i...)...)
 }
 
 // SetFloat sets the value of given index as a float64
 // The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) SetFloat(val float64, i ...int) {
-	sl.Tensor.SetFloat(val, sl.SliceIndexes(i...)...)
+	sl.Tensor.SetFloat(val, sl.SourceIndexes(i...)...)
 }
 
 // Float1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) Float1D(i int) float64 {
-	return sl.Tensor.Float(sl.IndexFrom1D(i)...)
+	return sl.Tensor.Float(sl.SourceIndexesFrom1D(i)...)
 }
 
 // SetFloat1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) SetFloat1D(val float64, i int) {
-	sl.Tensor.SetFloat(val, sl.IndexFrom1D(i)...)
+	sl.Tensor.SetFloat(val, sl.SourceIndexesFrom1D(i)...)
 }
 
 /////////////////////  Strings
@@ -297,25 +285,25 @@ func (sl *Sliced) SetFloat1D(val float64, i int) {
 // StringValue returns the value of given index as a string.
 // The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) StringValue(i ...int) string {
-	return sl.Tensor.StringValue(sl.SliceIndexes(i...)...)
+	return sl.Tensor.StringValue(sl.SourceIndexes(i...)...)
 }
 
 // SetString sets the value of given index as a string
 // The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) SetString(val string, i ...int) {
-	sl.Tensor.SetString(val, sl.SliceIndexes(i...)...)
+	sl.Tensor.SetString(val, sl.SourceIndexes(i...)...)
 }
 
 // String1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) String1D(i int) string {
-	return sl.Tensor.StringValue(sl.IndexFrom1D(i)...)
+	return sl.Tensor.StringValue(sl.SourceIndexesFrom1D(i)...)
 }
 
 // SetString1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) SetString1D(val string, i int) {
-	sl.Tensor.SetString(val, sl.IndexFrom1D(i)...)
+	sl.Tensor.SetString(val, sl.SourceIndexesFrom1D(i)...)
 }
 
 /////////////////////  Ints
@@ -323,25 +311,25 @@ func (sl *Sliced) SetString1D(val string, i int) {
 // Int returns the value of given index as an int.
 // The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) Int(i ...int) int {
-	return sl.Tensor.Int(sl.SliceIndexes(i...)...)
+	return sl.Tensor.Int(sl.SourceIndexes(i...)...)
 }
 
 // SetInt sets the value of given index as an int
 // The indexes are indirected through the [Sliced.Indexes].
 func (sl *Sliced) SetInt(val int, i ...int) {
-	sl.Tensor.SetInt(val, sl.SliceIndexes(i...)...)
+	sl.Tensor.SetInt(val, sl.SourceIndexes(i...)...)
 }
 
 // Int1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) Int1D(i int) int {
-	return sl.Tensor.Int(sl.IndexFrom1D(i)...)
+	return sl.Tensor.Int(sl.SourceIndexesFrom1D(i)...)
 }
 
 // SetInt1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (sl *Sliced) SetInt1D(val int, i int) {
-	sl.Tensor.SetInt(val, sl.IndexFrom1D(i)...)
+	sl.Tensor.SetInt(val, sl.SourceIndexesFrom1D(i)...)
 }
 
 // Permuted sets indexes in given dimension to a permuted order.

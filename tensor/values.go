@@ -22,9 +22,9 @@ type Values interface {
 	// The backing storage is resized appropriately, retaining all existing data that fits.
 	SetShape(sizes Tensor)
 
-	// SetShapeInts sets the dimension sizes of the tensor, and resizes
+	// SetShapeSizes sets the dimension sizes of the tensor, and resizes
 	// backing storage appropriately, retaining all existing data that fits.
-	SetShapeInts(sizes ...int)
+	SetShapeSizes(sizes ...int)
 
 	// SetNumRows sets the number of rows (outermost dimension).
 	// It is safe to set this to 0. For incrementally growing tensors (e.g., a log)

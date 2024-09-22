@@ -58,15 +58,12 @@ type Tensor interface {
 	// (dimension sizes). For tensors that present a view onto another
 	// tensor, this typically must be constructed.
 	// In general, it is better to use the specific [Tensor.ShapeSizes],
-	// [Tensor.ShapeInts], [Tensor.DimSize] etc as neeed.
+	// [Tensor.ShapeSizes], [Tensor.DimSize] etc as neeed.
 	Shape() *Shape
 
-	// ShapeSizes returns the sizes of each dimension as an int tensor.
-	ShapeSizes() *Int
-
-	// ShapeInts returns the sizes of each dimension as a slice of ints.
+	// ShapeSizes returns the sizes of each dimension as a slice of ints.
 	// This is the preferred access for Go code.
-	ShapeInts() []int
+	ShapeSizes() []int
 
 	// Len returns the total number of elements in the tensor,
 	// i.e., the product of all shape dimensions.

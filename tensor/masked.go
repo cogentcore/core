@@ -18,7 +18,7 @@ import (
 // then the corresponding value cannot be set and Float access returns
 // NaN indicating missing data.
 // To produce a new [Values] tensor with only the 'true' cases,
-// (i.e., the copy function of numpy), call [Masked.CloneValues].
+// (i.e., the copy function of numpy), call [Masked.AsValues].
 type Masked struct { //types:add
 
 	// Tensor that we are a masked view onto.
@@ -83,9 +83,7 @@ func (ms *Masked) IsString() bool { return ms.Tensor.IsString() }
 
 func (ms *Masked) DataType() reflect.Kind { return ms.Tensor.DataType() }
 
-func (ms *Masked) ShapeInts() []int { return ms.Tensor.ShapeInts() }
-
-func (ms *Masked) ShapeSizes() *Int { return ms.Tensor.ShapeSizes() }
+func (ms *Masked) ShapeSizes() []int { return ms.Tensor.ShapeSizes() }
 
 func (ms *Masked) Shape() *Shape { return ms.Tensor.Shape() }
 

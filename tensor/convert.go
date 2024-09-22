@@ -8,7 +8,7 @@ import "cogentcore.org/core/base/errors"
 
 // Clone returns a copy of the given tensor.
 // If it is raw [Values] then a [Values.Clone] is returned.
-// Otherwise if it is a view, then [Tensor.CloneValues] is returned.
+// Otherwise if it is a view, then [Tensor.AsValues] is returned.
 func Clone(tsr Tensor) Values {
 	if vl, ok := tsr.(Values); ok {
 		return vl.Clone()
@@ -25,7 +25,7 @@ func SetShapeFrom(tsr, from Tensor) error {
 	if !ok {
 		return errors.Log(errors.New("tensor.SetShapeFrom: tensor must be a Values type to have shape modified. All function output tensors must be Values!"))
 	}
-	vl.SetShapeInts(from.ShapeInts()...)
+	vl.SetShapeSizes(from.ShapeSizes()...)
 	return nil
 }
 
@@ -35,7 +35,7 @@ func SetShapeFrom(tsr, from Tensor) error {
 // on the 1D list of values.
 func New1DViewOf(tsr Values) Values {
 	vw := tsr.View()
-	vw.SetShapeInts(tsr.Len())
+	vw.SetShapeSizes(tsr.Len())
 	return vw
 }
 
@@ -52,7 +52,7 @@ func Cells1D(tsr RowMajor, row int) Values {
 // form the cells dimension.  The resulting tensor is a re-shaped view
 // of the original tensor, sharing the same underlying data.
 func RowCellSplit(tsr Values, split int) Values {
-	sizes := tsr.ShapeInts()
+	sizes := tsr.ShapeSizes()
 	rows := sizes[:split]
 	cells := sizes[split:]
 	nr := 1
@@ -64,7 +64,7 @@ func RowCellSplit(tsr Values, split int) Values {
 		nc *= c
 	}
 	vw := tsr.View()
-	vw.SetShapeInts(nr, nc)
+	vw.SetShapeSizes(nr, nc)
 	return vw
 }
 
@@ -107,7 +107,7 @@ func NewStringFromSlice(vals ...string) *String {
 	n := len(vals)
 	tsr := &String{}
 	tsr.Values = vals
-	tsr.SetShapeInts(n)
+	tsr.SetShapeSizes(n)
 	return tsr
 }
 
@@ -192,7 +192,7 @@ func AsFloat64Tensor(tsr Tensor) *Float64 {
 	if f, ok := tsr.(*Float64); ok {
 		return f
 	}
-	f := NewFloat64(tsr.ShapeInts()...)
+	f := NewFloat64(tsr.ShapeSizes()...)
 	f.CopyFrom(tsr.AsValues())
 	return f
 }
@@ -204,7 +204,7 @@ func AsFloat32Tensor(tsr Tensor) *Float32 {
 	if f, ok := tsr.(*Float32); ok {
 		return f
 	}
-	f := NewFloat32(AsIntSlice(tsr.ShapeSizes())...)
+	f := NewFloat32(tsr.ShapeSizes()...)
 	f.CopyFrom(tsr.AsValues())
 	return f
 }
@@ -218,7 +218,7 @@ func AsStringTensor(tsr Tensor) *String {
 	if f, ok := tsr.(*String); ok {
 		return f
 	}
-	f := NewString(tsr.ShapeInts()...)
+	f := NewString(tsr.ShapeSizes()...)
 	f.CopyFrom(tsr.AsValues())
 	return f
 }
@@ -232,7 +232,7 @@ func AsIntTensor(tsr Tensor) *Int {
 	if f, ok := tsr.(*Int); ok {
 		return f
 	}
-	f := NewInt(tsr.ShapeInts()...)
+	f := NewInt(tsr.ShapeSizes()...)
 	f.CopyFrom(tsr.AsValues())
 	return f
 }

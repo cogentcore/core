@@ -21,7 +21,7 @@ import (
 // which apply to the outermost row dimension (with default row-major indexing).
 // Sorting and filtering a tensor only requires updating the indexes while
 // leaving the underlying Tensor alone.
-// Use [CloneValues] to obtain a concrete [Values] representation with the current row
+// Use [AsValues] to obtain a concrete [Values] representation with the current row
 // sorting. Use the [Set]FloatRow[Cell] methods wherever possible,
 // for the most efficient and natural indirection through the indexes.
 type Rows struct { //types:add
@@ -99,20 +99,13 @@ func (rw *Rows) Metadata() *metadata.Data { return rw.Tensor.Metadata() }
 
 // If we have Indexes, this is the effective shape sizes using
 // the current number of indexes as the outermost row dimension size.
-func (rw *Rows) ShapeInts() []int {
+func (rw *Rows) ShapeSizes() []int {
 	if rw.Indexes == nil || rw.Tensor.NumDims() == 0 {
-		return rw.Tensor.ShapeInts()
-	}
-	sh := slices.Clone(rw.Tensor.ShapeInts())
-	sh[0] = len(rw.Indexes)
-	return sh
-}
-
-func (rw *Rows) ShapeSizes() *Int {
-	if rw.Indexes == nil {
 		return rw.Tensor.ShapeSizes()
 	}
-	return NewIntFromSlice(rw.ShapeInts()...)
+	sh := slices.Clone(rw.Tensor.ShapeSizes())
+	sh[0] = len(rw.Indexes)
+	return sh
 }
 
 // Shape() returns a [Shape] representation of the tensor shape
@@ -122,7 +115,7 @@ func (rw *Rows) Shape() *Shape {
 	if rw.Indexes == nil {
 		return rw.Tensor.Shape()
 	}
-	return NewShape(rw.ShapeInts()...)
+	return NewShape(rw.ShapeSizes()...)
 }
 
 // Len returns the total number of elements in the tensor,
@@ -383,7 +376,7 @@ func (rw *Rows) AsValues() Values {
 	if rw.Indexes == nil {
 		return rw.Tensor
 	}
-	vt := NewOfType(rw.Tensor.DataType(), rw.ShapeInts()...)
+	vt := NewOfType(rw.Tensor.DataType(), rw.ShapeSizes()...)
 	rows := rw.NumRows()
 	for r := range rows {
 		vt.SetRowTensor(rw.RowTensor(r), r)

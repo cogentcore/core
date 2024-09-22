@@ -28,7 +28,7 @@ type Bool struct {
 // with the given sizes per dimension (shape), and optional dimension names.
 func NewBool(sizes ...int) *Bool {
 	tsr := &Bool{}
-	tsr.SetShapeInts(sizes...)
+	tsr.SetShapeSizes(sizes...)
 	tsr.Values = bitslice.Make(tsr.Len(), 0)
 	return tsr
 }
@@ -84,12 +84,9 @@ func (tsr *Bool) Bytes() []byte { return slicesx.ToBytes(tsr.Values) }
 
 func (tsr *Bool) Shape() *Shape { return &tsr.shape }
 
-// ShapeSizes returns the sizes of each dimension as an int tensor.
-func (tsr *Bool) ShapeSizes() *Int { return tsr.shape.AsTensor() }
-
-// ShapeInts returns the sizes of each dimension as a slice of ints.
+// ShapeSizes returns the sizes of each dimension as a slice of ints.
 // This is the preferred access for Go code.
-func (tsr *Bool) ShapeInts() []int { return tsr.shape.Sizes }
+func (tsr *Bool) ShapeSizes() []int { return tsr.shape.Sizes }
 
 // Metadata returns the metadata for this tensor, which can be used
 // to encode plotting options, etc.
@@ -117,8 +114,8 @@ func (tsr *Bool) SetShape(sizes Tensor) {
 	tsr.Values.SetLen(nln)
 }
 
-func (tsr *Bool) SetShapeInts(sizes ...int) {
-	tsr.shape.SetShapeInts(sizes...)
+func (tsr *Bool) SetShapeSizes(sizes ...int) {
+	tsr.shape.SetShapeSizes(sizes...)
 	nln := tsr.Len()
 	tsr.Values.SetLen(nln)
 }

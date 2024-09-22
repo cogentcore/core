@@ -361,7 +361,7 @@ func (tb *Table) ColTensorBlank(cidx int, col tensor.Tensor) *tensor.Float64 {
 	if ctb, has := tb.ColumnTensorBlank[cidx]; has {
 		return ctb
 	}
-	ctb := tensor.New[float64](col.ShapeInts()...).(*tensor.Float64)
+	ctb := tensor.New[float64](col.ShapeSizes()...).(*tensor.Float64)
 	tb.ColumnTensorBlank[cidx] = ctb
 	return ctb
 }

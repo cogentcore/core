@@ -29,12 +29,9 @@ func (tsr *Base[T]) Metadata() *metadata.Data { return &tsr.Meta }
 
 func (tsr *Base[T]) Shape() *Shape { return &tsr.shape }
 
-// ShapeSizes returns the sizes of each dimension as an int tensor.
-func (tsr *Base[T]) ShapeSizes() *Int { return tsr.shape.AsTensor() }
-
-// ShapeInts returns the sizes of each dimension as a slice of ints.
+// ShapeSizes returns the sizes of each dimension as a slice of ints.
 // This is the preferred access for Go code.
-func (tsr *Base[T]) ShapeInts() []int { return slices.Clone(tsr.shape.Sizes) }
+func (tsr *Base[T]) ShapeSizes() []int { return slices.Clone(tsr.shape.Sizes) }
 
 // SetShape sets the dimension sizes as 1D int values from given tensor.
 // The backing storage is resized appropriately, retaining all existing data that fits.
@@ -44,10 +41,10 @@ func (tsr *Base[T]) SetShape(sizes Tensor) {
 	tsr.Values = slicesx.SetLength(tsr.Values, nln)
 }
 
-// SetShapeInts sets the dimension sizes of the tensor, and resizes
+// SetShapeSizes sets the dimension sizes of the tensor, and resizes
 // backing storage appropriately, retaining all existing data that fits.
-func (tsr *Base[T]) SetShapeInts(sizes ...int) {
-	tsr.shape.SetShapeInts(sizes...)
+func (tsr *Base[T]) SetShapeSizes(sizes ...int) {
+	tsr.shape.SetShapeSizes(sizes...)
 	nln := tsr.Len()
 	tsr.Values = slicesx.SetLength(tsr.Values, nln)
 }
@@ -129,7 +126,7 @@ func (tsr *Base[T]) subSpaceImpl(offs ...int) *Base[T] {
 		return nil
 	}
 	stsr := &Base[T]{}
-	stsr.SetShapeInts(tsr.shape.Sizes[od:]...)
+	stsr.SetShapeSizes(tsr.shape.Sizes[od:]...)
 	sti := make([]int, nd)
 	copy(sti, offs)
 	stoff := tsr.shape.IndexTo1D(sti...)

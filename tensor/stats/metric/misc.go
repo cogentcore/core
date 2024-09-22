@@ -37,7 +37,7 @@ func ClosestRow(funcName string, probe, vocab, out tensor.Tensor) {
 			mind = d
 		}
 	}
-	out.SetShapeInts(2)
+	out.SetShapeSizes(2)
 	out.SetFloat1D(float64(mi), 0)
 	out.SetFloat1D(mind, 1)
 }

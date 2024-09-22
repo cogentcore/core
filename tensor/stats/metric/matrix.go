@@ -34,7 +34,7 @@ func Matrix(funcName string, in, out tensor.Tensor) {
 	if rows == 0 || cells == 0 {
 		return
 	}
-	out.SetShapeInts(rows, rows)
+	out.SetShapeSizes(rows, rows)
 	mout := tensor.NewFloat64Scalar(0.0)
 	coords := TriangularLIndicies(rows)
 	nc := len(coords)
@@ -73,7 +73,7 @@ func CrossMatrix(funcName string, a, b, out tensor.Tensor) {
 	if brows == 0 || bcells == 0 {
 		return
 	}
-	out.SetShapeInts(arows, brows)
+	out.SetShapeSizes(arows, brows)
 	mout := tensor.NewFloat64Scalar(0.0)
 	// note: flops estimating 3 per item on average -- different for different metrics.
 	flops := min(acells, bcells) * 3
@@ -109,10 +109,10 @@ func CovarianceMatrix(funcName string, in, out tensor.Tensor) {
 	}
 
 	flatvw := in.View()
-	flatvw.SetShapeInts(in.DimSize(0), cells)
+	flatvw.SetShapeSizes(in.DimSize(0), cells)
 
 	mout := tensor.NewFloat64Scalar(0.0)
-	out.SetShapeInts(cells, cells)
+	out.SetShapeSizes(cells, cells)
 	var av, bv tensor.Tensor
 	curCoords := vecint.Vector2i{-1, -1}
 
@@ -151,8 +151,8 @@ func CovarianceMatrix(funcName string, in, out tensor.Tensor) {
 func PCA(covar, eigenvecs, vals tensor.Tensor) {
 	n := covar.DimSize(0)
 	cv := tensor.AsFloat64Tensor(covar)
-	eigenvecs.SetShapeInts(n, n)
-	vals.SetShapeInts(n)
+	eigenvecs.SetShapeSizes(n, n)
+	vals.SetShapeSizes(n)
 	var eig mat.EigenSym
 	ok := eig.Factorize(cv, true)
 	if !ok {
@@ -179,8 +179,8 @@ func PCA(covar, eigenvecs, vals tensor.Tensor) {
 func SVD(covar, eigenvecs, vals tensor.Tensor) {
 	n := covar.DimSize(0)
 	cv := tensor.AsFloat64Tensor(covar)
-	eigenvecs.SetShapeInts(n, n)
-	vals.SetShapeInts(n)
+	eigenvecs.SetShapeSizes(n, n)
+	vals.SetShapeSizes(n)
 	var eig mat.SVD
 	ok := eig.Factorize(cv, mat.SVDFull) // todo: benchmark different versions
 	if !ok {
@@ -212,7 +212,7 @@ func ProjectOnMatrixColumn(mtx, vec, colindex, out tensor.Tensor) {
 	mout := tensor.NewFloat64()
 	if rows > 0 && cells > 0 {
 		msum := tensor.NewFloat64Scalar(0)
-		out.SetShapeInts(rows)
+		out.SetShapeSizes(rows)
 		for i := range rows {
 			tmath.Mul(tensor.Cells1D(vec, i), col, mout)
 			stats.SumFunc(mout, msum)

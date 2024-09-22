@@ -20,7 +20,7 @@ type String struct {
 // with the given sizes per dimension (shape).
 func NewString(sizes ...int) *String {
 	tsr := &String{}
-	tsr.SetShapeInts(sizes...)
+	tsr.SetShapeSizes(sizes...)
 	tsr.Values = make([]string, tsr.Len())
 	return tsr
 }

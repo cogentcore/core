@@ -110,7 +110,7 @@ func (glm *GLM) Defaults() {
 func (glm *GLM) init(nIv, nDv int) {
 	glm.NIndepVars = nIv
 	glm.NDepVars = nDv
-	glm.Coeff.SetShapeInts(nDv, nIv+1)
+	glm.Coeff.SetShapeSizes(nDv, nIv+1)
 	// glm.Coeff.SetNames("DepVars", "IndepVars")
 	glm.R2 = make([]float64, nDv)
 	glm.ObsVariance = make([]float64, nDv)

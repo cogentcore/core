@@ -21,7 +21,7 @@ func Vectorize3Out64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr
 	}
 	nt := len(tsr)
 	out := tsr[nt-1]
-	osz := out.ShapeInts()
+	osz := out.ShapeSizes()
 	out1 = tensor.NewFloat64(osz...)
 	out2 = tensor.NewFloat64(osz...)
 	out3 = tensor.NewFloat64(osz...)
@@ -51,7 +51,7 @@ func NFunc(tsr ...tensor.Tensor) int {
 	}
 	a, b, out := tsr[0], tsr[1], tsr[nt-1]
 	na, nb := a.DimSize(0), b.DimSize(0)
-	out.SetShapeInts(OutShape(a.ShapeInts()...)...)
+	out.SetShapeSizes(OutShape(a.ShapeSizes()...)...)
 	return min(na, nb)
 }
 

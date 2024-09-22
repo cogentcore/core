@@ -27,13 +27,13 @@ type Shape struct {
 // RowMajor ordering is used by default.
 func NewShape(sizes ...int) *Shape {
 	sh := &Shape{}
-	sh.SetShapeInts(sizes...)
+	sh.SetShapeSizes(sizes...)
 	return sh
 }
 
-// SetShapeInts sets the shape sizes from list of ints.
+// SetShapeSizes sets the shape sizes from list of ints.
 // RowMajor ordering is used by default.
-func (sh *Shape) SetShapeInts(sizes ...int) {
+func (sh *Shape) SetShapeSizes(sizes ...int) {
 	sh.Sizes = slices.Clone(sizes)
 	sh.Strides = RowMajorStrides(sizes...)
 }
@@ -41,7 +41,7 @@ func (sh *Shape) SetShapeInts(sizes ...int) {
 // SetShape sets the shape sizes from int values from Tensor.
 // RowMajor ordering is used by default.
 func (sh *Shape) SetShape(shp Tensor) {
-	sh.SetShapeInts(AsIntSlice(shp)...)
+	sh.SetShapeSizes(AsIntSlice(shp)...)
 }
 
 // AsTensor returns shape sizes as an Int Tensor.
