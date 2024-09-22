@@ -7,6 +7,7 @@ package tmath
 import (
 	"math"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 )
 
@@ -51,259 +52,333 @@ func init() {
 }
 
 func Abs(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Abs(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Acos(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Acos(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Acosh(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Acosh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Asin(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Asin(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Asinh(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Asinh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Atan(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Atan(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Atanh(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Atanh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Cbrt(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Cbrt(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Ceil(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Ceil(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Cos(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Cos(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Cosh(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Cosh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Erf(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Erf(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Erfc(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Erfc(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Erfcinv(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Erfcinv(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Erfinv(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Erfinv(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Exp(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Exp(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Exp2(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Exp2(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Expm1(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Expm1(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Floor(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Floor(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Gamma(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Gamma(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func J0(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.J0(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func J1(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.J1(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Log(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Log(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Log10(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Log10(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Log1p(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Log1p(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Log2(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Log2(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Logb(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Logb(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Round(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Round(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func RoundToEven(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.RoundToEven(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Sin(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Sin(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Sinh(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Sinh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Sqrt(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Sqrt(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Tan(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Tan(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Tanh(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Tanh(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Trunc(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Trunc(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Y0(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Y0(tsr[0].Float1D(idx)), idx)
 	}, in, out)
 }
 
 func Y1(in, out tensor.Tensor) {
-	tensor.SetShapeFrom(out, in)
+	if err := tensor.SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
+		return
+	}
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		tsr[1].SetFloat1D(math.Y1(tsr[0].Float1D(idx)), idx)
 	}, in, out)

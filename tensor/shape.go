@@ -74,9 +74,9 @@ func (sh *Shape) NumDims() int { return len(sh.Sizes) }
 
 // DimSize returns the size of given dimension.
 func (sh *Shape) DimSize(i int) int {
-	if sh.Sizes == nil {
-		return 0
-	}
+	// if sh.Sizes == nil {
+	// 	return 0
+	// }
 	return sh.Sizes[i]
 }
 

@@ -16,16 +16,56 @@ func Clone(tsr Tensor) Values {
 	return tsr.AsValues()
 }
 
-// SetShapeFrom sets shape of given tensor from a source tensor.
-// This will return an error if the destination tensor is not a Values type.
-// This is used extensively for output tensors in functions, and all such
-// output tensors _must_ be Values tensors.
-func SetShapeFrom(tsr, from Tensor) error {
+// MustBeValues returns the given tensor as a [Values] subtype, or nil and
+// an error if it is not one. Typically outputs of compute operations must
+// be values, and are reshaped to hold the results as needed.
+func MustBeValues(tsr Tensor) (Values, error) {
 	vl, ok := tsr.(Values)
 	if !ok {
-		return errors.Log(errors.New("tensor.SetShapeFrom: tensor must be a Values type to have shape modified. All function output tensors must be Values!"))
+		return nil, errors.New("tensor.MustBeValues: tensor must be a Values type")
 	}
-	vl.SetShapeSizes(from.ShapeSizes()...)
+	return vl, nil
+}
+
+// SetShape sets the dimension sizes from given Shape
+func SetShape(vals Values, sh *Shape) {
+	vals.SetShapeSizes(sh.Sizes...)
+}
+
+// SetShapeMustBeValues sets the dimension sizes from given Shape,
+// calling [MustBeValues] on the destination tensor to ensure it is a [Values],
+// type, returning an error if not. This is used extensively for output
+// tensors in functions, and all such output tensors _must_ be Values tensors.
+func SetShapeMustBeValues(tsr Tensor, sh *Shape) error {
+	vals, err := MustBeValues(tsr)
+	if err != nil {
+		return err
+	}
+	vals.SetShapeSizes(sh.Sizes...)
+	return nil
+}
+
+// SetShapeSizesFromTensor sets the dimension sizes as 1D int values from given tensor.
+// The backing storage is resized appropriately, retaining all existing data that fits.
+func SetShapeSizesFromTensor(vals Values, sizes Tensor) {
+	vals.SetShapeSizes(AsIntSlice(sizes)...)
+}
+
+// SetShapeFrom sets shape of given tensor from a source tensor.
+func SetShapeFrom(vals Values, from Tensor) {
+	vals.SetShapeSizes(from.ShapeSizes()...)
+}
+
+// SetShapeFromMustBeValues sets shape of given tensor from a source tensor,
+// calling [MustBeValues] on the destination tensor to ensure it is a [Values],
+// type, returning an error if not. This is used extensively for output
+// tensors in functions, and all such output tensors _must_ be Values tensors.
+func SetShapeFromMustBeValues(tsr, from Tensor) error {
+	vals, err := MustBeValues(tsr)
+	if err != nil {
+		return err
+	}
+	vals.SetShapeSizes(from.ShapeSizes()...)
 	return nil
 }
 

@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/stats/stats"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +22,7 @@ func TestAdd(t *testing.T) {
 	oned := tensor.NewNumberFromValues(vals...)
 	oneout := oned.Clone()
 
-	cell2d := tensor.NewFloat32(5, 2, 6)
+	cell2d := tensor.NewFloat32(5, 12)
 	_, cells := cell2d.RowCellSize()
 	assert.Equal(t, cells, 12)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
@@ -32,6 +31,7 @@ func TestAdd(t *testing.T) {
 	}, cell2d)
 	// cell2d.DeleteRows(3, 1)
 	cellout := cell2d.Clone()
+	_ = cellout
 
 	Add(scalar, scb, scout)
 	assert.Equal(t, -5.5+-4, scout.Float1D(0))
@@ -129,33 +129,4 @@ func TestAdd(t *testing.T) {
 		}
 	}
 
-	ZScore(oned, oneout)
-	mout := tensor.NewFloat64()
-	std, mean, _ := stats.StdFuncOut64(oneout, mout)
-	assert.InDelta(t, 1.0, std.Float1D(0), 1.0e-6)
-	assert.InDelta(t, 0.0, mean.Float1D(0), 1.0e-6)
-
-	UnitNorm(oned, oneout)
-	stats.MinFunc(oneout, mout)
-	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	stats.MaxFunc(oneout, mout)
-	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
-	// fmt.Println(oneout)
-
-	minv := tensor.NewFloat64Scalar(0)
-	maxv := tensor.NewFloat64Scalar(1)
-	Clamp(oned, minv, maxv, oneout)
-	stats.MinFunc(oneout, mout)
-	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	stats.MaxFunc(oneout, mout)
-	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
-	// fmt.Println(oneout)
-
-	thr := tensor.NewFloat64Scalar(0.5)
-	Binarize(oned, thr, oneout)
-	stats.MinFunc(oneout, mout)
-	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	stats.MaxFunc(oneout, mout)
-	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
-	// fmt.Println(oneout)
 }

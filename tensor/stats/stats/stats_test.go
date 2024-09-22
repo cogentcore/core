@@ -179,3 +179,40 @@ func TestFuncsCell(t *testing.T) {
 		assert.InDelta(t, 0.0, out.FloatRowCell(0, i), 1.0e-7)
 	}
 }
+
+func TestNorm(t *testing.T) {
+	vals := []float64{-1.507556722888818, -1.2060453783110545, -0.9045340337332908, -0.6030226891555273, -0.3015113445777635, 0.1, 0.3015113445777635, 0.603022689155527, 0.904534033733291, 1.2060453783110545, 1.507556722888818, .3}
+
+	oned := tensor.NewNumberFromValues(vals...)
+	oneout := oned.Clone()
+
+	ZScore(oned, oneout)
+	mout := tensor.NewFloat64()
+	std, mean, _ := stats.StdFuncOut64(oneout, mout)
+	assert.InDelta(t, 1.0, std.Float1D(0), 1.0e-6)
+	assert.InDelta(t, 0.0, mean.Float1D(0), 1.0e-6)
+
+	UnitNorm(oned, oneout)
+	stats.MinFunc(oneout, mout)
+	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
+	stats.MaxFunc(oneout, mout)
+	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
+	// fmt.Println(oneout)
+
+	minv := tensor.NewFloat64Scalar(0)
+	maxv := tensor.NewFloat64Scalar(1)
+	Clamp(oned, minv, maxv, oneout)
+	stats.MinFunc(oneout, mout)
+	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
+	stats.MaxFunc(oneout, mout)
+	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
+	// fmt.Println(oneout)
+
+	thr := tensor.NewFloat64Scalar(0.5)
+	Binarize(oned, thr, oneout)
+	stats.MinFunc(oneout, mout)
+	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
+	stats.MaxFunc(oneout, mout)
+	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
+	// fmt.Println(oneout)
+}

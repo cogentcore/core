@@ -76,5 +76,5 @@ func TestOps(t *testing.T) {
 	b := tensor.CallOut("Add", x, y)
 	c := tensor.CallOut("Add", tensor.CallOut("Mul", x, y), tensor.CallOut("Mul", a, b))
 
-	assert.Equal(t, 14, c.IntRow(0))
+	assert.Equal(t, 14.0, c.Float1D(0))
 }

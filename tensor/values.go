@@ -129,9 +129,3 @@ func SetShapeNames(md *metadata.Data, names ...string) {
 func ShapeNames(md *metadata.Data) []string {
 	return errors.Log1(metadata.Get[[]string](*md, "ShapeNames"))
 }
-
-// SetShapeSizesFromTensor sets the dimension sizes as 1D int values from given tensor.
-// The backing storage is resized appropriately, retaining all existing data that fits.
-func SetShapeSizesFromTensor(vals Values, sizes Tensor) {
-	vals.SetShapeSizes(AsIntSlice(sizes)...)
-}

@@ -2,31 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tmath
+package stats
 
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/stats/stats"
 )
 
 // ZScore computes Z-normalized values into given output tensor,
 // subtracting the Mean and dividing by the standard deviation.
 func ZScore(a, out tensor.Tensor) {
 	mout := tensor.NewFloat64()
-	std, mean, _ := stats.StdFuncOut64(a, mout)
-	Sub(a, mean, out)
-	Div(out, std, out)
+	std, mean, _ := StdFuncOut64(a, mout)
+	tmath.Sub(a, mean, out)
+	tmath.Div(out, std, out)
 }
 
 // UnitNorm computes unit normalized values into given output tensor,
 // subtracting the Min value and dividing by the Max of the remaining numbers.
 func UnitNorm(a, out tensor.Tensor) {
 	mout := tensor.NewFloat64()
-	stats.MinFunc(a, mout)
-	Sub(a, mout, out)
-	stats.MaxFunc(out, mout)
-	Div(out, mout, out)
+	MinFunc(a, mout)
+	tmath.Sub(a, mout, out)
+	MaxFunc(out, mout)
+	tmath.Div(out, mout, out)
 }
 
 // Clamp ensures that all values are within min, max limits, clamping

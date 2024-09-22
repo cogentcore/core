@@ -48,6 +48,13 @@ All stats functions skip over NaN's, as a missing value.
 
 Stats functions cannot be computed in parallel, e.g., using VectorizeThreaded or GPU, due to shared writing to the same output values.  Special implementations are required if that is needed.
 
+## norm functions
+
+* `UnitNorm` subtracts `min` and divides by resulting `max` to normalize to 0..1 unit range.
+* `ZScore` subtracts the mean and divides by the standard deviation.
+* `Clamp` enforces min, max range, clamping values to those bounds if they exceed them.
+* `Binarize` sets all values below a given threshold to 0, and those above to 1.
+
 ## Groups
 
 The `Groups` function (and `TableGroups` convenience function for `table.Table` columns) creates lists of indexes for each unique value in a 1D tensor, and `GroupStats` calls a stats function on those groups, thereby creating a "pivot table" that summarizes data in terms of the groups present within it. The data is stored in a [datafs](../datafs) data filesystem, which can be visualized and further manipulated.
