@@ -170,17 +170,17 @@ func InsertColumn[T tensor.DataTypes](dt *Table, name string, idx int, cellSizes
 	return tsr
 }
 
-// AddColumn adds the given tensor as a column to the table,
+// AddColumn adds the given [tensor.Values] as a column to the table,
 // returning an error and not adding if the name is not unique.
 // Automatically adjusts the shape to fit the current number of rows.
-func (dt *Table) AddColumn(name string, tsr tensor.Tensor) error {
+func (dt *Table) AddColumn(name string, tsr tensor.Values) error {
 	return dt.Columns.AddColumn(name, tsr)
 }
 
-// InsertColumn inserts the given tensor as a column to the table at given index,
+// InsertColumn inserts the given [tensor.Values] as a column to the table at given index,
 // returning an error and not adding if the name is not unique.
 // Automatically adjusts the shape to fit the current number of rows.
-func (dt *Table) InsertColumn(idx int, name string, tsr tensor.Tensor) error {
+func (dt *Table) InsertColumn(idx int, name string, tsr tensor.Values) error {
 	return dt.Columns.InsertColumn(idx, name, tsr)
 }
 

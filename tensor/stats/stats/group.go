@@ -165,7 +165,7 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...tensor.Tensor) {
 			sv := datafs.NewValue[float64](vd, stnm, nv)
 			for i, v := range vals {
 				idx := tensor.AsIntSlice(v)
-				sg := tensor.NewRows(tsr, idx...)
+				sg := tensor.NewRows(tsr.AsValues(), idx...)
 				tensor.Call(stat, sg, stout)
 				sv.SetFloatRow(stout.Float1D(0), i)
 			}

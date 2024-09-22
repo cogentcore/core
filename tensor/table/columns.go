@@ -5,13 +5,15 @@
 package table
 
 import (
+	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/tensor"
 )
 
 // Columns is the underlying column list and number of rows for Table.
-// [Table] is an Indexed view onto the Columns.
+// Each column is a raw [tensor.Values] tensor, and [Table]
+// provides a [tensor.Rows] indexed view onto the Columns.
 type Columns struct {
-	tensor.List
+	keylist.List[string, tensor.Values]
 
 	// number of rows, which is enforced to be the size of the
 	// outermost row dimension of the column tensors.
@@ -35,11 +37,11 @@ func (cl *Columns) SetNumRows(rows int) *Columns { //types:add
 	return cl
 }
 
-// AddColumn adds the given tensor as a column,
+// AddColumn adds the given tensor (as a [tensor.Values]) as a column,
 // returning an error and not adding if the name is not unique.
 // Automatically adjusts the shape to fit the current number of rows,
 // and calls the metadata SetName with column name.
-func (cl *Columns) AddColumn(name string, tsr tensor.Tensor) error {
+func (cl *Columns) AddColumn(name string, tsr tensor.Values) error {
 	err := cl.Add(name, tsr)
 	if err != nil {
 		return err
@@ -52,7 +54,7 @@ func (cl *Columns) AddColumn(name string, tsr tensor.Tensor) error {
 // InsertColumn inserts the given tensor as a column at given index,
 // returning an error and not adding if the name is not unique.
 // Automatically adjusts the shape to fit the current number of rows.
-func (cl *Columns) InsertColumn(idx int, name string, tsr tensor.Tensor) error {
+func (cl *Columns) InsertColumn(idx int, name string, tsr tensor.Values) error {
 	cl.Insert(idx, name, tsr)
 	tsr.SetNumRows(cl.Rows)
 	return nil

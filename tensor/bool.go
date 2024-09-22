@@ -6,7 +6,6 @@ package tensor
 
 import (
 	"fmt"
-	"log/slog"
 	"reflect"
 
 	"cogentcore.org/core/base/metadata"
@@ -14,7 +13,6 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/tensor/bitslice"
-	"gonum.org/v1/gonum/mat"
 )
 
 // Bits is a tensor of bits backed by a [bitslice.Slice] for efficient storage
@@ -73,6 +71,8 @@ func (tsr *Bits) IsString() bool {
 	return false
 }
 
+func (tsr *Bits) AsValues() Values { return tsr }
+
 // DataType returns the type of the data elements in the tensor.
 // Bool is returned for the Bits tensor type.
 func (tsr *Bits) DataType() reflect.Kind {
@@ -116,20 +116,6 @@ func (tsr *Bits) RowCellSize() (rows, cells int) {
 	return tsr.shape.RowCellSize()
 }
 
-// Value returns value at given tensor index
-func (tsr *Bits) Value(i ...int) bool {
-	return tsr.Values.Index(tsr.shape.IndexTo1D(i...))
-}
-
-// Value1D returns value at given tensor 1D (flat) index
-func (tsr *Bits) Value1D(i int) bool { return tsr.Values.Index(i) }
-
-func (tsr *Bits) Set(val bool, i ...int) {
-	tsr.Values.Set(val, tsr.shape.IndexTo1D(i...))
-}
-
-func (tsr *Bits) Set1D(val bool, i int) { tsr.Values.Set(val, i) }
-
 func (tsr *Bits) SetShape(sizes Tensor) {
 	tsr.shape.SetShape(sizes)
 	nln := tsr.Len()
@@ -154,17 +140,17 @@ func (tsr *Bits) SetNumRows(rows int) {
 }
 
 // SubSpace is not possible with Bits.
-func (tsr *Bits) SubSpace(offs ...int) Tensor {
+func (tsr *Bits) SubSpace(offs ...int) Values {
 	return nil
 }
 
 // RowTensor not possible with Bits.
-func (tsr *Bits) RowTensor(row int) Tensor {
+func (tsr *Bits) RowTensor(row int) Values {
 	return nil
 }
 
 // SetRowTensor not possible with Bits.
-func (tsr *Bits) SetRowTensor(val Tensor, row int) {
+func (tsr *Bits) SetRowTensor(val Values, row int) {
 
 }
 
@@ -287,13 +273,6 @@ func (tsr *Bits) Label() string {
 	return fmt.Sprintf("tensor.Bits: %s", tsr.shape.String())
 }
 
-// Range is not applicable to Bits tensor
-func (tsr *Bits) Range() (min, max float64, minIndex, maxIndex int) {
-	minIndex = -1
-	maxIndex = -1
-	return
-}
-
 // SetZeros is simple convenience function initialize all values to 0
 func (tsr *Bits) SetZeros() {
 	ln := tsr.Len()
@@ -305,13 +284,13 @@ func (tsr *Bits) SetZeros() {
 // Clone clones this tensor, creating a duplicate copy of itself with its
 // own separate memory representation of all the values, and returns
 // that as a Tensor (which can be converted into the known type as needed).
-func (tsr *Bits) Clone() Tensor {
+func (tsr *Bits) Clone() Values {
 	csr := NewBitsShape(&tsr.shape)
 	csr.Values = tsr.Values.Clone()
 	return csr
 }
 
-func (tsr *Bits) View() Tensor {
+func (tsr *Bits) View() Values {
 	nw := &Bits{}
 	nw.shape.CopyShape(&tsr.shape)
 	nw.Values = tsr.Values
@@ -322,7 +301,7 @@ func (tsr *Bits) View() Tensor {
 // CopyFrom copies all avail values from other tensor into this tensor, with an
 // optimized implementation if the other tensor is of the same type, and
 // otherwise it goes through appropriate standard type.
-func (tsr *Bits) CopyFrom(frm Tensor) {
+func (tsr *Bits) CopyFrom(frm Values) {
 	if fsm, ok := frm.(*Bits); ok {
 		copy(tsr.Values, fsm.Values)
 		return
@@ -338,7 +317,7 @@ func (tsr *Bits) CopyFrom(frm Tensor) {
 // It uses and optimized implementation if the other tensor
 // is of the same type, and otherwise it goes through
 // appropriate standard type.
-func (tsr *Bits) AppendFrom(frm Tensor) error {
+func (tsr *Bits) AppendFrom(frm Values) error {
 	rows, cell := tsr.RowCellSize()
 	frows, fcell := frm.RowCellSize()
 	if cell != fcell {
@@ -362,7 +341,7 @@ func (tsr *Bits) AppendFrom(frm Tensor) error {
 // start = starting index on from Tensor to start copying from, and n = number of
 // values to copy.  Uses an optimized implementation if the other tensor is
 // of the same type, and otherwise it goes through appropriate standard type.
-func (tsr *Bits) CopyCellsFrom(frm Tensor, to, start, n int) {
+func (tsr *Bits) CopyCellsFrom(frm Values, to, start, n int) {
 	if fsm, ok := frm.(*Bits); ok {
 		for i := 0; i < n; i++ {
 			tsr.Values.Set(fsm.Values.Index(start+i), to+i)
@@ -372,25 +351,4 @@ func (tsr *Bits) CopyCellsFrom(frm Tensor, to, start, n int) {
 	for i := 0; i < n; i++ {
 		tsr.Values.Set(Float64ToBool(frm.Float1D(start+i)), to+i)
 	}
-}
-
-// Dims is the gonum/mat.Matrix interface method for returning the dimensionality of the
-// 2D Matrix.  Not supported for Bits -- do not call!
-func (tsr *Bits) Dims() (r, c int) {
-	slog.Error("tensor Dims gonum Matrix call made on Bits Tensor; not supported")
-	return 0, 0
-}
-
-// At is the gonum/mat.Matrix interface method for returning 2D matrix element at given
-// row, column index.  Not supported for Bits -- do not call!
-func (tsr *Bits) At(i, j int) float64 {
-	slog.Error("tensor At gonum Matrix call made on Bits Tensor; not supported")
-	return 0
-}
-
-// T is the gonum/mat.Matrix transpose method.
-// Not supported for Bits -- do not call!
-func (tsr *Bits) T() mat.Matrix {
-	slog.Error("tensor T gonum Matrix call made on Bits Tensor; not supported")
-	return mat.Transpose{tsr}
 }

@@ -115,7 +115,7 @@ func (d *Data) Size() int64 {
 	if d.Data == nil {
 		return 0
 	}
-	return d.Data.Sizeof()
+	return d.Data.AsValues().Sizeof()
 }
 
 func (d *Data) IsDir() bool {

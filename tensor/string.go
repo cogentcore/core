@@ -6,12 +6,9 @@ package tensor
 
 import (
 	"fmt"
-	"log"
-	"math"
 	"strconv"
 
 	"cogentcore.org/core/base/errors"
-	"gonum.org/v1/gonum/mat"
 )
 
 // String is a tensor of string values
@@ -59,6 +56,8 @@ func (tsr *String) String() string {
 func (tsr *String) IsString() bool {
 	return true
 }
+
+func (tsr *String) AsValues() Values { return tsr }
 
 /////////////////////  Strings
 
@@ -156,52 +155,6 @@ func (tsr *String) SetIntRow(val int, row int) {
 	tsr.SetIntRowCell(val, row, 0)
 }
 
-// At is the gonum/mat.Matrix interface method for returning 2D matrix element at given
-// row, column index.  Assumes Row-major ordering and logs an error if NumDims < 2.
-func (tsr *String) At(i, j int) float64 {
-	nd := tsr.NumDims()
-	if nd < 2 {
-		log.Println("tensor Dims gonum Matrix call made on Tensor with dims < 2")
-		return 0
-	} else if nd == 2 {
-		return tsr.Float(i, j)
-	} else {
-		ix := make([]int, nd)
-		ix[nd-2] = i
-		ix[nd-1] = j
-		return tsr.Float(ix...)
-	}
-}
-
-// T is the gonum/mat.Matrix transpose method.
-// It performs an implicit transpose by returning the receiver inside a Transpose.
-func (tsr *String) T() mat.Matrix {
-	return mat.Transpose{tsr}
-}
-
-// Range returns the min, max (and associated indexes, -1 = no values) for the tensor.
-// This is needed for display and is thus in the core api in optimized form
-// Other math operations can be done using gonum/floats package.
-func (tsr *String) Range() (min, max float64, minIndex, maxIndex int) {
-	minIndex = -1
-	maxIndex = -1
-	for j, vl := range tsr.Values {
-		fv := StringToFloat64(vl)
-		if math.IsNaN(fv) {
-			continue
-		}
-		if fv < min || minIndex < 0 {
-			min = fv
-			minIndex = j
-		}
-		if fv > max || maxIndex < 0 {
-			max = fv
-			maxIndex = j
-		}
-	}
-	return
-}
-
 // SetZeros is a simple convenience function initialize all values to the
 // zero value of the type (empty strings for string type).
 func (tsr *String) SetZeros() {
@@ -213,20 +166,20 @@ func (tsr *String) SetZeros() {
 // Clone clones this tensor, creating a duplicate copy of itself with its
 // own separate memory representation of all the values, and returns
 // that as a Tensor (which can be converted into the known type as needed).
-func (tsr *String) Clone() Tensor {
+func (tsr *String) Clone() Values {
 	csr := NewStringShape(&tsr.shape)
 	copy(csr.Values, tsr.Values)
 	return csr
 }
 
-func (tsr *String) View() Tensor {
+func (tsr *String) View() Values {
 	return &String{*tsr.view()}
 }
 
 // CopyFrom copies all avail values from other tensor into this tensor, with an
 // optimized implementation if the other tensor is of the same type, and
 // otherwise it goes through appropriate standard type.
-func (tsr *String) CopyFrom(frm Tensor) {
+func (tsr *String) CopyFrom(frm Values) {
 	if fsm, ok := frm.(*String); ok {
 		copy(tsr.Values, fsm.Values)
 		return
@@ -242,7 +195,7 @@ func (tsr *String) CopyFrom(frm Tensor) {
 // It uses and optimized implementation if the other tensor
 // is of the same type, and otherwise it goes through
 // appropriate standard type.
-func (tsr *String) AppendFrom(frm Tensor) error {
+func (tsr *String) AppendFrom(frm Values) error {
 	rows, cell := tsr.RowCellSize()
 	frows, fcell := frm.RowCellSize()
 	if cell != fcell {
@@ -266,7 +219,7 @@ func (tsr *String) AppendFrom(frm Tensor) error {
 // start = starting index on from Tensor to start copying from, and n = number of
 // values to copy.  Uses an optimized implementation if the other tensor is
 // of the same type, and otherwise it goes through appropriate standard type.
-func (tsr *String) CopyCellsFrom(frm Tensor, to, start, n int) {
+func (tsr *String) CopyCellsFrom(frm Values, to, start, n int) {
 	if fsm, ok := frm.(*String); ok {
 		for i := 0; i < n; i++ {
 			tsr.Values[to+i] = fsm.Values[start+i]
@@ -284,7 +237,7 @@ func (tsr *String) CopyCellsFrom(frm Tensor, to, start, n int) {
 // will affect both), as its Values slice is a view onto the original (which
 // is why only inner-most contiguous supsaces are supported).
 // Use Clone() method to separate the two.
-func (tsr *String) SubSpace(offs ...int) Tensor {
+func (tsr *String) SubSpace(offs ...int) Values {
 	b := tsr.subSpaceImpl(offs...)
 	rt := &String{Base: *b}
 	return rt
@@ -293,12 +246,12 @@ func (tsr *String) SubSpace(offs ...int) Tensor {
 // RowTensor is a convenience version of [Tensor.SubSpace] to return the
 // SubSpace for the outermost row dimension. [Rows] defines a version
 // of this that indirects through the row indexes.
-func (tsr *String) RowTensor(row int) Tensor {
+func (tsr *String) RowTensor(row int) Values {
 	return tsr.SubSpace(row)
 }
 
 // SetRowTensor sets the values of the SubSpace at given row to given values.
-func (tsr *String) SetRowTensor(val Tensor, row int) {
+func (tsr *String) SetRowTensor(val Values, row int) {
 	_, cells := tsr.RowCellSize()
 	st := row * cells
 	mx := min(val.Len(), cells)

@@ -8,6 +8,8 @@ import (
 	"errors"
 	"io/fs"
 	"time"
+
+	"cogentcore.org/core/tensor"
 )
 
 const (
@@ -21,7 +23,7 @@ const (
 // CopyFromValue copies value from given source data node, cloning it.
 func (d *Data) CopyFromValue(frd *Data) {
 	d.modTime = time.Now()
-	d.Data = frd.Data.Clone()
+	d.Data = tensor.Clone(frd.Data)
 }
 
 // Clone returns a copy of this data item, recursively cloning directory items
@@ -29,7 +31,7 @@ func (d *Data) CopyFromValue(frd *Data) {
 func (d *Data) Clone() *Data {
 	if !d.IsDir() {
 		cp, _ := newData(nil, d.name)
-		cp.Data = d.Data.Clone()
+		cp.Data = tensor.Clone(d.Data)
 		return cp
 	}
 	items := d.ItemsFunc(nil)

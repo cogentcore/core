@@ -6,8 +6,8 @@ package tensor
 
 import (
 	"fmt"
-	"log"
 	"reflect"
+	"slices"
 	"strings"
 	"unsafe"
 
@@ -34,7 +34,7 @@ func (tsr *Base[T]) ShapeSizes() Tensor { return tsr.shape.AsTensor() }
 
 // ShapeInts returns the sizes of each dimension as a slice of ints.
 // This is the preferred access for Go code.
-func (tsr *Base[T]) ShapeInts() []int { return tsr.shape.Sizes }
+func (tsr *Base[T]) ShapeInts() []int { return slices.Clone(tsr.shape.Sizes) }
 
 // SetShape sets the dimension sizes as 1D int values from given tensor.
 // The backing storage is resized appropriately, retaining all existing data that fits.
@@ -121,7 +121,7 @@ func (tsr *Base[T]) SetNumRows(rows int) {
 // The new tensor points to the values of the this tensor (i.e., modifications
 // will affect both), as its Values slice is a view onto the original (which
 // is why only inner-most contiguous supsaces are supported).
-// Use Clone() method to separate the two.
+// Use AsValues() method to separate the two.
 func (tsr *Base[T]) subSpaceImpl(offs ...int) *Base[T] {
 	nd := tsr.NumDims()
 	od := len(offs)
@@ -153,53 +153,7 @@ func (tsr *Base[T]) StringRowCell(row, cell int) string {
 
 // Label satisfies the core.Labeler interface for a summary description of the tensor.
 func (tsr *Base[T]) Label() string {
-	nm := tsr.Meta.Name()
-	if nm != "" {
-		nm += " " + tsr.shape.String()
-	} else {
-		nm = tsr.shape.String()
-	}
-	return fmt.Sprintf("Tensor: %s", nm)
-}
-
-// Dims is the gonum/mat.Matrix interface method for returning the dimensionality of the
-// 2D Matrix.  Assumes Row-major ordering and logs an error if NumDims < 2.
-func (tsr *Base[T]) Dims() (r, c int) {
-	nd := tsr.NumDims()
-	if nd < 2 {
-		log.Println("tensor Dims gonum Matrix call made on Tensor with dims < 2")
-		return 0, 0
-	}
-	return tsr.shape.DimSize(nd - 2), tsr.shape.DimSize(nd - 1)
-}
-
-// Symmetric is the gonum/mat.Matrix interface method for returning the dimensionality of a symmetric
-// 2D Matrix.
-func (tsr *Base[T]) Symmetric() (r int) {
-	nd := tsr.NumDims()
-	if nd < 2 {
-		log.Println("tensor Symmetric gonum Matrix call made on Tensor with dims < 2")
-		return 0
-	}
-	if tsr.shape.DimSize(nd-2) != tsr.shape.DimSize(nd-1) {
-		log.Println("tensor Symmetric gonum Matrix call made on Tensor that is not symmetric")
-		return 0
-	}
-	return tsr.shape.DimSize(nd - 1)
-}
-
-// SymmetricDim returns the number of rows/columns in the matrix.
-func (tsr *Base[T]) SymmetricDim() int {
-	nd := tsr.NumDims()
-	if nd < 2 {
-		log.Println("tensor Symmetric gonum Matrix call made on Tensor with dims < 2")
-		return 0
-	}
-	if tsr.shape.DimSize(nd-2) != tsr.shape.DimSize(nd-1) {
-		log.Println("tensor Symmetric gonum Matrix call made on Tensor that is not symmetric")
-		return 0
-	}
-	return tsr.shape.DimSize(nd - 1)
+	return label(tsr.Meta.Name(), &tsr.shape)
 }
 
 // Sprint returns a string representation of the given tensor,
@@ -209,6 +163,15 @@ func Sprint(tsr Tensor, maxLen int) string {
 	return sprint(tsr, maxLen)
 }
 
+func label(nm string, sh *Shape) string {
+	if nm != "" {
+		nm += " " + sh.String()
+	} else {
+		nm = sh.String()
+	}
+	return nm
+}
+
 // sprint is the underlying impl of String
 func sprint(tsr Tensor, maxLen int) string {
 	if maxLen == 0 {
@@ -216,7 +179,12 @@ func sprint(tsr Tensor, maxLen int) string {
 	}
 	var b strings.Builder
 	sh := tsr.Shape()
-	b.WriteString(sh.String() + "\n")
+	b.WriteString(tsr.Label())
+	if tsr.NumDims() == 1 && tsr.Len() < 8 {
+		b.WriteString(" ")
+	} else {
+		b.WriteString("\n")
+	}
 	oddRow := false
 	rows, cols, _, _ := Projection2DShape(sh, oddRow)
 	ctr := 0

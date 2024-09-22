@@ -26,7 +26,7 @@ func QuantilesFunc(in, qs, out tensor.Tensor) error {
 	if qs.NumDims() != 1 {
 		return errors.Log(errors.New("stats.QuantilesFunc: only 1D quantile tensors allowed"))
 	}
-	sin := tensor.AsRows(in.Clone())
+	sin := tensor.AsRows(in.AsValues())
 	sin.ExcludeMissing()
 	sin.Sort(tensor.Ascending)
 	tensor.SetShapeFrom(out, qs)

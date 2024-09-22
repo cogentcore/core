@@ -6,12 +6,13 @@ package tensor
 
 // Slice represents a slice of index values, for extracting slices of data,
 // along a dimension of a given size, which is provided separately as an argument.
-// using standard 'for' loop logic with a Start and _exclusive_ Stop value,
-// and an increment: for i := Start; i < Stop; i += Step.
+// Uses standard 'for' loop logic with a Start and _exclusive_ Stop value,
+// and a Step increment: for i := Start; i < Stop; i += Step.
 // The values stored in this struct are the _inputs_ for computing the actual
-// slice ranges based on an additional actual size parameter for the dimension.
+// slice values based on the actual size parameter for the dimension.
 // Negative numbers count back from the end (i.e., size + val), and
-// the zero value results in all values in the dimension, with Step = 1 if 0.
+// the zero value results in a list of all values in the dimension, with Step = 1 if 0.
+// The behavior is identical to the NumPy slice.
 type Slice struct {
 	// Starting value. If 0 and Step < 0, = size-1;
 	// If negative, = size+Start.
@@ -27,9 +28,9 @@ type Slice struct {
 	Step int
 }
 
-// NewSlice returns a new Slice with given values.
-func NewSlice(start, end, incr int) Slice {
-	return Slice{Start: start, Stop: end, Step: incr}
+// NewSlice returns a new Slice with given srat, stop, step values.
+func NewSlice(start, stop, step int) Slice {
+	return Slice{Start: start, Stop: stop, Step: step}
 }
 
 // StartActual is the actual start value given the size of the dimension.
@@ -138,9 +139,9 @@ func (sl Slice) IntTensor(size int) *Int {
 	return tsr
 }
 
-// IntSlice returns a new [Int] [Tensor] with given [Slice] values.
-// Stop must be an actual end value and not a size-relative number (such as -1).
-func IntSlice(start, end, incr int) *Int {
-	sl := NewSlice(start, end, incr)
-	return sl.IntTensor(end)
+// NewSliceInts returns a new [Int] [Tensor] with given [Slice] start, stop, step values,
+// for given dimension size.
+func NewSliceInts(size, start, stop, step int) *Int {
+	sl := NewSlice(start, stop, step)
+	return sl.IntTensor(size)
 }

@@ -4,20 +4,45 @@
 
 package tensor
 
+import "cogentcore.org/core/base/errors"
+
+// Clone returns a copy of the given tensor.
+// If it is raw [Values] then a [Values.Clone] is returned.
+// Otherwise if it is a view, then [Tensor.CloneValues] is returned.
+func Clone(tsr Tensor) Values {
+	if vl, ok := tsr.(Values); ok {
+		return vl.Clone()
+	}
+	return tsr.AsValues()
+}
+
+// SetShapeFrom sets shape of given tensor from a source tensor.
+// This will return an error if the destination tensor is not a Values type.
+// This is used extensively for output tensors in functions, and all such
+// output tensors _must_ be Values tensors.
+func SetShapeFrom(tsr, from Tensor) error {
+	vl, ok := tsr.(Values)
+	if !ok {
+		return errors.Log(errors.New("tensor.SetShapeFrom: tensor must be a Values type to have shape modified. All function output tensors must be Values!"))
+	}
+	vl.SetShapeInts(from.ShapeInts()...)
+	return nil
+}
+
 // New1DViewOf returns a 1D view into the given tensor, using the same
 // underlying values, and just changing the shape to a 1D view.
 // This can be useful e.g., for stats and metric functions that report
 // on the 1D list of values.
-func New1DViewOf(tsr Tensor) Tensor {
+func New1DViewOf(tsr Values) Values {
 	vw := tsr.View()
 	vw.SetShapeInts(tsr.Len())
 	return vw
 }
 
-// Cells1D returns a flat 1D [Tensor] view of the cells for given row
-// index.  This is useful for passing to other functions e.g.,
+// Cells1D returns a flat 1D [Values] view of the cells for given row index.
+// This is useful for passing to other functions e.g.,
 // in stats or metrics that process a 1D tensor.
-func Cells1D(tsr Tensor, row int) Tensor {
+func Cells1D(tsr RowCell, row int) Values {
 	return New1DViewOf(tsr.SubSpace(row))
 }
 
@@ -26,7 +51,7 @@ func Cells1D(tsr Tensor, row int) Tensor {
 // split are collapsed into the row dimension, and from split onward
 // form the cells dimension.  The resulting tensor is a re-shaped view
 // of the original tensor, sharing the same underlying data.
-func RowCellSplit(tsr Tensor, split int) Tensor {
+func RowCellSplit(tsr Values, split int) Values {
 	sizes := tsr.ShapeInts()
 	rows := sizes[:split]
 	cells := sizes[split:]
@@ -45,40 +70,40 @@ func RowCellSplit(tsr Tensor, split int) Tensor {
 
 // NewFloat64Scalar is a convenience method for a Tensor
 // representation of a single float64 scalar value.
-func NewFloat64Scalar(val float64) Tensor {
+func NewFloat64Scalar(val float64) *Float64 {
 	return NewNumberFromSlice(val)
 }
 
 // NewIntScalar is a convenience method for a Tensor
 // representation of a single int scalar value.
-func NewIntScalar(val int) Tensor {
+func NewIntScalar(val int) *Int {
 	return NewNumberFromSlice(val)
 }
 
 // NewStringScalar is a convenience method for a Tensor
 // representation of a single string scalar value.
-func NewStringScalar(val string) Tensor {
+func NewStringScalar(val string) *String {
 	return NewStringFromSlice(val)
 }
 
 // NewFloat64FromSlice returns a new 1-dimensional tensor of given value type
 // initialized directly from the given slice values, which are not copied.
 // The resulting Tensor thus "wraps" the given values.
-func NewFloat64FromSlice(vals ...float64) Tensor {
+func NewFloat64FromSlice(vals ...float64) *Float64 {
 	return NewNumberFromSlice(vals...)
 }
 
 // NewIntFromSlice returns a new 1-dimensional tensor of given value type
 // initialized directly from the given slice values, which are not copied.
 // The resulting Tensor thus "wraps" the given values.
-func NewIntFromSlice(vals ...int) Tensor {
+func NewIntFromSlice(vals ...int) *Int {
 	return NewNumberFromSlice(vals...)
 }
 
 // NewStringFromSlice returns a new 1-dimensional tensor of given value type
 // initialized directly from the given slice values, which are not copied.
 // The resulting Tensor thus "wraps" the given values.
-func NewStringFromSlice(vals ...string) Tensor {
+func NewStringFromSlice(vals ...string) *String {
 	n := len(vals)
 	tsr := &String{}
 	tsr.Values = vals
@@ -168,7 +193,7 @@ func AsFloat64Tensor(tsr Tensor) *Float64 {
 		return f
 	}
 	f := NewFloat64(tsr.ShapeInts()...)
-	f.CopyFrom(tsr)
+	f.CopyFrom(tsr.AsValues())
 	return f
 }
 
@@ -180,7 +205,7 @@ func AsFloat32Tensor(tsr Tensor) *Float32 {
 		return f
 	}
 	f := NewFloat32(AsIntSlice(tsr.ShapeSizes())...)
-	f.CopyFrom(tsr)
+	f.CopyFrom(tsr.AsValues())
 	return f
 }
 
@@ -194,7 +219,7 @@ func AsStringTensor(tsr Tensor) *String {
 		return f
 	}
 	f := NewString(tsr.ShapeInts()...)
-	f.CopyFrom(tsr)
+	f.CopyFrom(tsr.AsValues())
 	return f
 }
 
@@ -208,6 +233,6 @@ func AsIntTensor(tsr Tensor) *Int {
 		return f
 	}
 	f := NewInt(tsr.ShapeInts()...)
-	f.CopyFrom(tsr)
+	f.CopyFrom(tsr.AsValues())
 	return f
 }

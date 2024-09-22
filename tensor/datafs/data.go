@@ -81,7 +81,7 @@ func NewScalar[T tensor.DataTypes](dir *Data, names ...string) tensor.Tensor {
 // NewValue returns a new Data value as a [tensor.Tensor]
 // of given data type and shape sizes, in given directory Data item.
 // The name must be unique in the directory.
-func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.Tensor {
+func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.Values {
 	tsr := tensor.New[T](sizes...)
 	tsr.Metadata().SetName(name)
 	d, err := newData(dir, name)
@@ -89,14 +89,14 @@ func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.T
 		return nil
 	}
 	d.Data = tsr
-	return d.Data
+	return tsr
 }
 
 // NewOfType returns a new Data value as a [tensor.Tensor]
 // of given reflect.Kind type and shape sizes per dimension, in given directory Data item.
 // Supported types are string, bool (for [Bits]), float32, float64, int, int32, and byte.
 // The name must be unique in the directory.
-func (d *Data) NewOfType(name string, typ reflect.Kind, sizes ...int) tensor.Tensor {
+func (d *Data) NewOfType(name string, typ reflect.Kind, sizes ...int) tensor.Values {
 	tsr := tensor.NewOfType(typ, sizes...)
 	tsr.Metadata().SetName(name)
 	nd, err := newData(d, name)
@@ -104,7 +104,7 @@ func (d *Data) NewOfType(name string, typ reflect.Kind, sizes ...int) tensor.Ten
 		return nil
 	}
 	nd.Data = tsr
-	return nd.Data
+	return tsr
 }
 
 func (d *Data) KnownFileInfo() fileinfo.Known {
@@ -129,7 +129,7 @@ func (d *Data) Bytes() []byte {
 	if d.Data == nil {
 		return nil
 	}
-	return d.Data.Bytes()
+	return d.Data.AsValues().Bytes()
 }
 
 // AsString returns data as scalar string.
@@ -137,7 +137,7 @@ func (d *Data) AsString() string {
 	if d.Data == nil {
 		return ""
 	}
-	return d.Data.StringRow(0)
+	return d.Data.String1D(0)
 }
 
 // SetString sets scalar data value from given string.
@@ -145,7 +145,7 @@ func (d *Data) SetString(v string) {
 	if d.Data == nil {
 		return
 	}
-	d.Data.SetStringRow(v, 0)
+	d.Data.SetString1D(v, 0)
 }
 
 // AsFloat64 returns data as a scalar float64 (first element of tensor).
@@ -153,7 +153,7 @@ func (d *Data) AsFloat64() float64 {
 	if d.Data == nil {
 		return 0
 	}
-	return d.Data.FloatRow(0)
+	return d.Data.Float1D(0)
 }
 
 // SetFloat64 sets scalar data value from given float64.
@@ -161,7 +161,7 @@ func (d *Data) SetFloat64(v float64) {
 	if d.Data == nil {
 		return
 	}
-	d.Data.SetFloatRow(v, 0)
+	d.Data.SetFloat1D(v, 0)
 }
 
 // AsFloat32 returns data as a scalar float32 (first element of tensor).
@@ -179,7 +179,7 @@ func (d *Data) AsInt() int {
 	if d.Data == nil {
 		return 0
 	}
-	return d.Data.IntRow(0)
+	return d.Data.Int1D(0)
 }
 
 // SetInt sets scalar data value from given int.
@@ -187,5 +187,5 @@ func (d *Data) SetInt(v int) {
 	if d.Data == nil {
 		return
 	}
-	d.Data.SetIntRow(v, 0)
+	d.Data.SetInt1D(v, 0)
 }

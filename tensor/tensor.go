@@ -10,10 +10,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/base/metadata"
-	"gonum.org/v1/gonum/mat"
 )
 
 // DataTypes are the primary tensor data types with specific support.
@@ -31,19 +28,26 @@ var MaxSprintLength = 1000
 // It is also possible to use Column-Major order, which is used in R, Julia, and MATLAB
 // where the inner-most index is first and outermost last.
 
-// Tensor is the interface for n-dimensional tensors.
+// Tensor is the most general interface for n-dimensional tensors.
 // Per C / Go / Python conventions, indexes are Row-Major, ordered from
 // outer to inner left-to-right, so the inner-most is right-most.
-// It is implemented by the Base and Number generic types specialized
-// by different concrete types: float64, float32, int, int32, byte,
-// string, bits (bools).
-// For float32 and float64 values, use NaN to indicate missing values.
-// All of the data analysis and plot packages skip NaNs.
+// It is implemented for raw [Values] with direct integer indexing
+// by the [Number], [String], and [Bool] types, covering the different
+// concrete types specified by [DataTypes] (see [Values] for
+// additional interface methods for raw value types).
+// For float32 and float64 values, use NaN to indicate missing values,
+// as all of the data analysis and plot packages skip NaNs.
+// View Tensor types provide different ways of viewing a source tensor,
+// including [Sliced] for arbitrary slices of dimension indexes,
+// [Masked] for boolean masked access and setting of individual indexes,
+// and [Indexed] for arbitrary indexes of values, organized into the
+// shape of the indexes, not the original source data.
+// The [Rows] view provides an optimized row-indexed view for [table.Table] data.
 type Tensor interface {
 	fmt.Stringer
-	mat.Matrix
 
-	// Label satisfies the core.Labeler interface for a summary description of the tensor.
+	// Label satisfies the core.Labeler interface for a summary
+	// description of the tensor, including metadata Name if set.
 	Label() string
 
 	// Metadata returns the metadata for this tensor, which can be used
@@ -52,9 +56,9 @@ type Tensor interface {
 
 	// Shape() returns a [Shape] representation of the tensor shape
 	// (dimension sizes). For tensors that present a view onto another
-	// tensor, this typically must be constructed on the fly.
-	// In general, it is much better to access [Tensor.ShapeSizes],
-	// [Tensor.ShapeInts], [Tensor.DimSize] etc information as neeed.
+	// tensor, this typically must be constructed.
+	// In general, it is better to use the specific [Tensor.ShapeSizes],
+	// [Tensor.ShapeInts], [Tensor.DimSize] etc as neeed.
 	Shape() *Shape
 
 	// ShapeSizes returns the sizes of each dimension as an int tensor.
@@ -63,14 +67,6 @@ type Tensor interface {
 	// ShapeInts returns the sizes of each dimension as a slice of ints.
 	// This is the preferred access for Go code.
 	ShapeInts() []int
-
-	// SetShape sets the dimension sizes as 1D int values from given tensor.
-	// The backing storage is resized appropriately, retaining all existing data that fits.
-	SetShape(sizes Tensor)
-
-	// SetShapeInts sets the dimension sizes of the tensor, and resizes
-	// backing storage appropriately, retaining all existing data that fits.
-	SetShapeInts(sizes ...int)
 
 	// Len returns the total number of elements in the tensor,
 	// i.e., the product of all shape dimensions.
@@ -84,27 +80,19 @@ type Tensor interface {
 	// DimSize returns size of given dimension.
 	DimSize(dim int) int
 
-	// RowCellSize returns the size of the outermost Row shape dimension,
-	// and the size of all the remaining inner dimensions (the "cell" size).
-	// Commonly used to organize multiple instances (rows) of higher-dimensional
-	// patterns (cells), and the [Rows] type operates on the outer row dimension.
-	RowCellSize() (rows, cells int)
-
 	// DataType returns the type of the data elements in the tensor.
 	// Bool is returned for the Bits tensor type.
 	DataType() reflect.Kind
 
-	// Sizeof returns the number of bytes contained in the Values of this tensor.
-	// For String types, this is just the string pointers, not the string content.
-	Sizeof() int64
-
-	// Bytes returns the underlying byte representation of the tensor values.
-	// This is the actual underlying data, so make a copy if it can be
-	// unintentionally modified or retained more than for immediate use.
-	Bytes() []byte
-
 	// IsString returns true if the data type is a String; otherwise it is numeric.
 	IsString() bool
+
+	// AsValues returns this tensor as raw [Values]. If it already is,
+	// it is returned directly. If it is a View tensor, the view is
+	// "rendered" into a fully contiguous and optimized [Values] representation
+	// of that view, which will be faster to access for further processing,
+	// and enables all the additional functionality provided by the [Values] interface.
+	AsValues() Values
 
 	/////////////////////  Floats
 
@@ -125,30 +113,6 @@ type Tensor interface {
 	// [Tensor.SetFloatRowCell] is preferred.
 	SetFloat1D(val float64, i int)
 
-	// FloatRowCell returns the value at given row and cell, where row is the outermost
-	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Rows] tensors index along the row, and use this interface extensively.
-	// This is useful for lists of patterns, and the [table.Table] container.
-	FloatRowCell(row, cell int) float64
-
-	// SetFloatRowCell sets the value at given row and cell, where row is the outermost
-	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Rows] tensors index along the row, and use this interface extensively.
-	// This is useful for lists of patterns, and the [table.Table] container.
-	SetFloatRowCell(val float64, row, cell int)
-
-	// FloatRow returns the value at given row (outermost dimension).
-	// It is a convenience wrapper for FloatRowCell(row, 0), providing robust
-	// operations on 1D and higher-dimensional data (which nevertheless should
-	// generally be processed separately in ways that treat it properly).
-	FloatRow(row int) float64
-
-	// SetFloatRow sets the value at given row (outermost dimension).
-	// It is a convenience wrapper for SetFloatRowCell(row, 0), providing robust
-	// operations on 1D and higher-dimensional data (which nevertheless should
-	// generally be processed separately in ways that treat it properly).
-	SetFloatRow(val float64, row int)
-
 	/////////////////////  Strings
 
 	// StringValue returns the value of given n-dimensional index (matching Shape) as a string.
@@ -164,30 +128,6 @@ type Tensor interface {
 	// SetString1D sets the value of given 1-dimensional index (0-Len()-1) as a string.
 	SetString1D(val string, i int)
 
-	// StringRowCell returns the value at given row and cell, where row is the outermost
-	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Rows] tensors index along the row, and use this interface extensively.
-	// This is useful for lists of patterns, and the [table.Table] container.
-	StringRowCell(row, cell int) string
-
-	// SetStringRowCell sets the value at given row and cell, where row is the outermost
-	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Rows] tensors index along the row, and use this interface extensively.
-	// This is useful for lists of patterns, and the [table.Table] container.
-	SetStringRowCell(val string, row, cell int)
-
-	// StringRow returns the value at given row (outermost dimension).
-	// It is a convenience wrapper for StringRowCell(row, 0), providing robust
-	// operations on 1D and higher-dimensional data (which nevertheless should
-	// generally be processed separately in ways that treat it properly).
-	StringRow(row int) string
-
-	// SetStringRow sets the value at given row (outermost dimension).
-	// It is a convenience wrapper for SetStringRowCell(row, 0), providing robust
-	// operations on 1D and higher-dimensional data (which nevertheless should
-	// generally be processed separately in ways that treat it properly).
-	SetStringRow(val string, row int)
-
 	/////////////////////  Ints
 
 	// Int returns the value of given n-dimensional index (matching Shape) as a int.
@@ -201,158 +141,4 @@ type Tensor interface {
 
 	// SetInt1D sets the value of given 1-dimensional index (0-Len()-1) as a int.
 	SetInt1D(val int, i int)
-
-	// IntRowCell returns the value at given row and cell, where row is the outermost
-	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Rows] tensors index along the row, and use this interface extensively.
-	// This is useful for lists of patterns, and the [table.Table] container.
-	IntRowCell(row, cell int) int
-
-	// SetIntRowCell sets the value at given row and cell, where row is the outermost
-	// dimension, and cell is a 1D index into remaining inner dimensions.
-	// [Rows] tensors index along the row, and use this interface extensively.
-	// This is useful for lists of patterns, and the [table.Table] container.
-	SetIntRowCell(val int, row, cell int)
-
-	// IntRow returns the value at given row (outermost dimension).
-	// It is a convenience wrapper for IntRowCell(row, 0), providing robust
-	// operations on 1D and higher-dimensional data (which nevertheless should
-	// generally be processed separately in ways that treat it properly).
-	IntRow(row int) int
-
-	// SetIntRow sets the value at given row (outermost dimension).
-	// It is a convenience wrapper for SetIntRowCell(row, 0), providing robust
-	// operations on 1D and higher-dimensional data (which nevertheless should
-	// generally be processed separately in ways that treat it properly).
-	SetIntRow(val int, row int)
-
-	/////////////////////  SubSpaces
-
-	// SubSpace returns a new tensor with innermost subspace at given
-	// offset(s) in outermost dimension(s) (len(offs) < [NumDims]).
-	// The new tensor points to the values of the this tensor (i.e., modifications
-	// will affect both), as its Values slice is a view onto the original (which
-	// is why only inner-most contiguous supsaces are supported).
-	// Use Clone() method to separate the two. See [Slice] function to
-	// extract arbitrary subspaces along ranges of each dimension.
-	SubSpace(offs ...int) Tensor
-
-	// RowTensor is a convenience version of [Tensor.SubSpace] to return the
-	// SubSpace for the outermost row dimension. [Rows] defines a version
-	// of this that indirects through the row indexes.
-	RowTensor(row int) Tensor
-
-	// SetRowTensor sets the values of the [Tensor.SubSpace] at given row to given values.
-	SetRowTensor(val Tensor, row int)
-
-	// Range returns the min, max (and associated indexes, -1 = no values) for the tensor.
-	// This is needed for display and is thus in the core api in optimized form.
-	// See the [stats] package for many more statistics functions.
-	Range() (min, max float64, minIndex, maxIndex int)
-
-	// SetZeros is a simple convenience function initialize all values to the
-	// zero value of the type (empty strings for string type).
-	SetZeros()
-
-	// Clone clones this tensor, creating a duplicate copy of itself with its
-	// own separate memory representation of all the values, and returns
-	// that as a Tensor (which can be converted into the known type as needed).
-	Clone() Tensor
-
-	// View clones this tensor, *keeping the same underlying Values slice*,
-	// instead of making a copy like [Tensor.Clone] does. A major use of this
-	// is to then change the shape of the view to provide a different way
-	// of accessing the same data.  See [New1DViewOf] for example.
-	View() Tensor
-
-	// CopyFrom copies all values from other tensor into this tensor, with an
-	// optimized implementation if the other tensor is of the same type, and
-	// otherwise it goes through the appropriate standard type (Float, Int, String).
-	CopyFrom(from Tensor)
-
-	// AppendFrom appends all values from other tensor into this tensor, with an
-	// optimized implementation if the other tensor is of the same type, and
-	// otherwise it goes through the appropriate standard type (Float, Int, String).
-	AppendFrom(from Tensor) error
-
-	// CopyCellsFrom copies given range of values from other tensor into this tensor,
-	// using flat 1D indexes: to = starting index in this Tensor to start copying into,
-	// start = starting index on from Tensor to start copying from, and n = number of
-	// values to copy.  Uses an optimized implementation if the other tensor is
-	// of the same type, and otherwise it goes through appropriate standard type.
-	CopyCellsFrom(from Tensor, to, start, n int)
-
-	// SetNumRows sets the number of rows (outermost dimension).
-	// It is safe to set this to 0. For incrementally growing tensors (e.g., a log)
-	// it is best to first set the anticipated full size, which allocates the
-	// full amount of memory, and then set to 0 and grow incrementally.
-	SetNumRows(rows int)
 }
-
-// New returns a new n-dimensional tensor of given value type
-// with the given sizes per dimension (shape).
-func New[T DataTypes](sizes ...int) Tensor {
-	var v T
-	switch any(v).(type) {
-	case string:
-		return NewString(sizes...)
-	case bool:
-		return NewBits(sizes...)
-	case float64:
-		return NewNumber[float64](sizes...)
-	case float32:
-		return NewNumber[float32](sizes...)
-	case int:
-		return NewNumber[int](sizes...)
-	case int32:
-		return NewNumber[int32](sizes...)
-	case byte:
-		return NewNumber[byte](sizes...)
-	default:
-		panic("tensor.New: unexpected error: type not supported")
-	}
-}
-
-// NewOfType returns a new n-dimensional tensor of given reflect.Kind type
-// with the given sizes per dimension (shape).
-// Supported types are string, bool (for [Bits]), float32, float64, int, int32, and byte.
-func NewOfType(typ reflect.Kind, sizes ...int) Tensor {
-	switch typ {
-	case reflect.String:
-		return NewString(sizes...)
-	case reflect.Bool:
-		return NewBits(sizes...)
-	case reflect.Float64:
-		return NewNumber[float64](sizes...)
-	case reflect.Float32:
-		return NewNumber[float32](sizes...)
-	case reflect.Int:
-		return NewNumber[int](sizes...)
-	case reflect.Int32:
-		return NewNumber[int32](sizes...)
-	case reflect.Uint8:
-		return NewNumber[byte](sizes...)
-	default:
-		panic(fmt.Sprintf("tensor.NewOfType: type not supported: %v", typ))
-	}
-}
-
-// SetShapeFrom sets shape of given tensor from a source tensor.
-func SetShapeFrom(tsr, from Tensor) {
-	tsr.SetShapeInts(from.ShapeInts()...)
-}
-
-// metadata helpers
-
-// SetShapeNames sets the tensor shape dimension names into given metadata.
-func SetShapeNames(md *metadata.Data, names ...string) {
-	md.Set("ShapeNames", names)
-}
-
-// ShapeNames gets the tensor shape dimension names from given metadata.
-func ShapeNames(md *metadata.Data) []string {
-	return errors.Log1(metadata.Get[[]string](*md, "ShapeNames"))
-}
-
-// List is an ordered list of Tensors with name lookup.
-type List = keylist.List[string, Tensor]

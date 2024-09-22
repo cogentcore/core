@@ -382,7 +382,7 @@ func (d *Data) GetDirTable(fun func(item *Data) bool) *table.Table {
 		if it.Parent != d {
 			nm = fsx.DirAndFile(string(it.Path()))
 		}
-		dt.AddColumn(nm, tsr)
+		dt.AddColumn(nm, tsr.AsValues())
 	}
 	d.DirTable = dt
 	return dt
