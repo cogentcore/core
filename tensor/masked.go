@@ -12,11 +12,12 @@ import (
 	"cogentcore.org/core/base/reflectx"
 )
 
-// Masked is a wrapper around another [Tensor] that provides a
-// bit-masked view onto the Tensor defined by a [Bool] [Values]
+// Masked is a filtering wrapper around another "source" [Tensor],
+// that provides a bit-masked view onto the Tensor defined by a [Bool] [Values]
 // tensor with a matching shape. If the bool mask has a 'false'
-// then the corresponding value cannot be set and Float access returns
-// NaN indicating missing data.
+// then the corresponding value cannot be Set, and Float access returns
+// NaN indicating missing data (other type access returns the zero value).
+// A new Masked view defaults to a full transparent view of the source tensor.
 // To produce a new [Values] tensor with only the 'true' cases,
 // (i.e., the copy function of numpy), call [Masked.AsValues].
 type Masked struct { //types:add
@@ -29,7 +30,8 @@ type Masked struct { //types:add
 }
 
 // NewMasked returns a new [Masked] view of given tensor,
-// with given [Bool] mask values.
+// with given [Bool] mask values. If no mask is provided,
+// a default full transparent (all bool values = true) mask is used.
 func NewMasked(tsr Tensor, mask ...*Bool) *Masked {
 	ms := &Masked{Tensor: tsr}
 	if len(mask) == 1 {
@@ -44,7 +46,7 @@ func NewMasked(tsr Tensor, mask ...*Bool) *Masked {
 
 // AsMasked returns the tensor as a [Masked] view.
 // If it already is one, then it is returned, otherwise it is wrapped
-// with an initially transparent mask.
+// with an initially fully transparent mask.
 func AsMasked(tsr Tensor) *Masked {
 	if ms, ok := tsr.(*Masked); ok {
 		return ms
@@ -52,31 +54,32 @@ func AsMasked(tsr Tensor) *Masked {
 	return NewMasked(tsr)
 }
 
-// SetTensor sets as indexes into given tensor with sequential initial indexes.
+// SetTensor sets the given source tensor. If the shape does not match
+// the current Mask, then a new transparent mask is established.
 func (ms *Masked) SetTensor(tsr Tensor) {
 	ms.Tensor = tsr
 	ms.SyncShape()
 }
 
 // SyncShape ensures that [Masked.Mask] shape is the same as source tensor.
+// If the Mask does not exist or is a different shape from the source,
+// then it is created or reshaped, and all values set to true ("transparent").
 func (ms *Masked) SyncShape() {
 	if ms.Mask == nil {
 		ms.Mask = NewBoolShape(ms.Tensor.Shape())
+		ms.Mask.SetTrue()
 		return
 	}
-	SetShapeFrom(ms.Mask, ms.Tensor)
+	if !ms.Mask.Shape().IsEqual(ms.Tensor.Shape()) {
+		SetShapeFrom(ms.Mask, ms.Tensor)
+		ms.Mask.SetTrue()
+	}
 }
 
-// Label satisfies the core.Labeler interface for a summary description of the tensor.
-func (ms *Masked) Label() string {
-	return label(ms.Metadata().Name(), ms.Shape())
-}
+func (ms *Masked) Label() string { return label(ms.Metadata().Name(), ms.Shape()) }
 
-// String satisfies the fmt.Stringer interface for string of tensor data.
 func (ms *Masked) String() string { return sprint(ms, 0) }
 
-// Metadata returns the metadata for this tensor, which can be used
-// to encode plotting options, etc.
 func (ms *Masked) Metadata() *metadata.Data { return ms.Tensor.Metadata() }
 
 func (ms *Masked) IsString() bool { return ms.Tensor.IsString() }
@@ -87,13 +90,10 @@ func (ms *Masked) ShapeSizes() []int { return ms.Tensor.ShapeSizes() }
 
 func (ms *Masked) Shape() *Shape { return ms.Tensor.Shape() }
 
-// Len returns the total number of elements in our view of the tensor.
 func (ms *Masked) Len() int { return ms.Tensor.Len() }
 
-// NumDims returns the total number of dimensions.
 func (ms *Masked) NumDims() int { return ms.Tensor.NumDims() }
 
-// DimSize returns the effective view size of given dimension.
 func (ms *Masked) DimSize(dim int) int { return ms.Tensor.DimSize(dim) }
 
 // AsValues returns a copy of this tensor as raw [Values].
@@ -112,7 +112,7 @@ func (ms *Masked) AsValues() Values {
 			}
 			vals = append(vals, ms.Tensor.String1D(i))
 		}
-		return NewStringFromSlice(vals...)
+		return NewStringFromValues(vals...)
 	case reflectx.KindIsFloat(dt):
 		vals := make([]float64, 0, n)
 		for i := range n {
@@ -121,7 +121,7 @@ func (ms *Masked) AsValues() Values {
 			}
 			vals = append(vals, ms.Tensor.Float1D(i))
 		}
-		return NewFloat64FromSlice(vals...)
+		return NewFloat64FromValues(vals...)
 	default:
 		vals := make([]int, 0, n)
 		for i := range n {
@@ -130,12 +130,31 @@ func (ms *Masked) AsValues() Values {
 			}
 			vals = append(vals, ms.Tensor.Int1D(i))
 		}
-		return NewIntFromSlice(vals...)
+		return NewIntFromValues(vals...)
 	}
 }
 
-///////////////////////////////////////////////
-// Masked access
+// SourceIndexes returns a flat [Int] tensor of the mask values
+// that match the given getTrue argument state.
+// These can be used as indexes in the [Indexed] view, for example.
+// The resulting tensor is 2D with inner dimension = number of source
+// tensor dimensions, to hold the indexes, and outer dimension = number
+// of indexes.
+func (ms *Masked) SourceIndexes(getTrue bool) *Int {
+	n := ms.Len()
+	nd := ms.Tensor.NumDims()
+	idxs := make([]int, 0, n*nd)
+	for i := range n {
+		if ms.Mask.Bool1D(i) != getTrue {
+			continue
+		}
+		ix := ms.Tensor.Shape().IndexFrom1D(i)
+		idxs = append(idxs, ix...)
+	}
+	it := NewIntFromValues(idxs...)
+	it.SetShapeSizes(len(idxs)/nd, nd)
+	return it
+}
 
 /////////////////////  Floats
 

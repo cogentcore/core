@@ -261,7 +261,7 @@ type funWrap struct {
 	wrap string
 }
 
-// nis: NewIntScalar, nifs: NewIntFromSlice
+// nis: NewIntScalar, nifs: NewIntFromValues
 var numpyProps = map[string]funWrap{
 	"ndim":  {"NumDims()", "nis"},
 	"len":   {"Len()", "nis"},
@@ -287,13 +287,13 @@ func (mp *mathParse) selectorExpr(ex *ast.SelectorExpr) {
 	case "nss":
 		mp.out.Add(token.IDENT, "tensor.NewStringScalar")
 	case "nifs":
-		mp.out.Add(token.IDENT, "tensor.NewIntFromSlice")
+		mp.out.Add(token.IDENT, "tensor.NewIntFromValues")
 		elip = true
 	case "nffs":
-		mp.out.Add(token.IDENT, "tensor.NewFloat64FromSlice")
+		mp.out.Add(token.IDENT, "tensor.NewFloat64FromValues")
 		elip = true
 	case "nsfs":
-		mp.out.Add(token.IDENT, "tensor.NewStringFromSlice")
+		mp.out.Add(token.IDENT, "tensor.NewStringFromValues")
 		elip = true
 	}
 	mp.out.Add(token.LPAREN)
@@ -328,7 +328,7 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 		typ = "string"
 		fun = "String"
 	}
-	mp.out.Add(token.IDENT, "tensor.New"+fun+"FromSlice")
+	mp.out.Add(token.IDENT, "tensor.New"+fun+"FromValues")
 	mp.out.Add(token.LPAREN)
 	mp.out.Add(token.IDENT, "[]"+typ)
 	mp.addToken(token.LBRACE)

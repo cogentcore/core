@@ -207,7 +207,7 @@ func TestIndexed(t *testing.T) {
 			ft.SetFloat(float64(v), y, x)
 		}
 	}
-	ixs := NewIntFromSlice([]int{
+	ixs := NewIntFromValues(
 		0, 1,
 		0, 1,
 		0, 2,
@@ -216,7 +216,7 @@ func TestIndexed(t *testing.T) {
 		1, 1,
 		2, 2,
 		2, 2,
-	}...)
+	)
 
 	ixs.SetShapeSizes(2, 2, 2, 2)
 	ix := NewIndexed(ft, ixs)

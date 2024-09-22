@@ -46,7 +46,7 @@ func (sh *Shape) SetShape(shp Tensor) {
 
 // AsTensor returns shape sizes as an Int Tensor.
 func (sh *Shape) AsTensor() *Int {
-	return NewIntFromSlice(sh.Sizes...)
+	return NewIntFromValues(sh.Sizes...)
 }
 
 // CopyShape copies the shape parameters from another Shape struct.

@@ -22,7 +22,7 @@ import (
 // to the original tensor (filtered subsets, reversals, sorting, etc).
 // This view is not memory-contiguous and does not support the [RowMajor]
 // interface or efficient access to inner-dimensional subspaces.
-// A new Sliced view defaults to a full transparent view of the ource tensor.
+// A new Sliced view defaults to a full transparent view of the source tensor.
 // There is additional cost for every access operation associated with the
 // indexed indirection, and access is always via the full n-dimensional indexes.
 // See also [Rows] for a version that only indexes the outermost row dimension,
@@ -44,6 +44,7 @@ type Sliced struct { //types:add
 
 // NewSlicedIndexes returns a new [Sliced] view of given tensor,
 // with optional list of indexes for each dimension (none / nil = sequential).
+// Any dimensions without indexes default to nil = full sequential view.
 func NewSlicedIndexes(tsr Tensor, idxs ...[]int) *Sliced {
 	sl := &Sliced{Tensor: tsr, Indexes: idxs}
 	sl.ValidIndexes()
@@ -52,6 +53,7 @@ func NewSlicedIndexes(tsr Tensor, idxs ...[]int) *Sliced {
 
 // NewSliced returns a new [Sliced] view of given tensor,
 // with given slices for each dimension (none / nil = sequential).
+// Any dimensions without indexes default to nil = full sequential view.
 func NewSliced(tsr Tensor, sls ...Slice) *Sliced {
 	ns := len(sls)
 	if ns == 0 {
@@ -67,7 +69,8 @@ func NewSliced(tsr Tensor, sls ...Slice) *Sliced {
 }
 
 // AsSliced returns the tensor as a [Sliced] view.
-// If it already is one, then it is returned, otherwise it is wrapped.
+// If it already is one, then it is returned, otherwise it is wrapped
+// in a new Sliced, with default full sequential ("transparent") view.
 func AsSliced(tsr Tensor) *Sliced {
 	if sl, ok := tsr.(*Sliced); ok {
 		return sl

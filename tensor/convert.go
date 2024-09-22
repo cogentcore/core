@@ -71,39 +71,39 @@ func RowCellSplit(tsr Values, split int) Values {
 // NewFloat64Scalar is a convenience method for a Tensor
 // representation of a single float64 scalar value.
 func NewFloat64Scalar(val float64) *Float64 {
-	return NewNumberFromSlice(val)
+	return NewNumberFromValues(val)
 }
 
 // NewIntScalar is a convenience method for a Tensor
 // representation of a single int scalar value.
 func NewIntScalar(val int) *Int {
-	return NewNumberFromSlice(val)
+	return NewNumberFromValues(val)
 }
 
 // NewStringScalar is a convenience method for a Tensor
 // representation of a single string scalar value.
 func NewStringScalar(val string) *String {
-	return NewStringFromSlice(val)
+	return NewStringFromValues(val)
 }
 
-// NewFloat64FromSlice returns a new 1-dimensional tensor of given value type
+// NewFloat64FromValues returns a new 1-dimensional tensor of given value type
 // initialized directly from the given slice values, which are not copied.
 // The resulting Tensor thus "wraps" the given values.
-func NewFloat64FromSlice(vals ...float64) *Float64 {
-	return NewNumberFromSlice(vals...)
+func NewFloat64FromValues(vals ...float64) *Float64 {
+	return NewNumberFromValues(vals...)
 }
 
-// NewIntFromSlice returns a new 1-dimensional tensor of given value type
+// NewIntFromValues returns a new 1-dimensional tensor of given value type
 // initialized directly from the given slice values, which are not copied.
 // The resulting Tensor thus "wraps" the given values.
-func NewIntFromSlice(vals ...int) *Int {
-	return NewNumberFromSlice(vals...)
+func NewIntFromValues(vals ...int) *Int {
+	return NewNumberFromValues(vals...)
 }
 
-// NewStringFromSlice returns a new 1-dimensional tensor of given value type
+// NewStringFromValues returns a new 1-dimensional tensor of given value type
 // initialized directly from the given slice values, which are not copied.
 // The resulting Tensor thus "wraps" the given values.
-func NewStringFromSlice(vals ...string) *String {
+func NewStringFromValues(vals ...string) *String {
 	n := len(vals)
 	tsr := &String{}
 	tsr.Values = vals

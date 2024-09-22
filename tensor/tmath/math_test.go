@@ -32,7 +32,7 @@ func TestMath(t *testing.T) {
 
 	vals := []float64{-1.507556722888818, -1.2060453783110545, -0.9045340337332908, -0.6030226891555273, -0.3015113445777635, 0, 0.3015113445777635, 0.603022689155527, 0.904534033733291, 1.2060453783110545, 1.507556722888818, .3}
 
-	oned := tensor.NewNumberFromSlice(vals...)
+	oned := tensor.NewNumberFromValues(vals...)
 	oneout := oned.Clone()
 
 	cell2d := tensor.NewFloat32(5, 2, 6)

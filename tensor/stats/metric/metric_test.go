@@ -21,8 +21,8 @@ func TestFuncs(t *testing.T) {
 
 	tol := 1.0e-8
 
-	atsr := tensor.NewNumberFromSlice(a64...)
-	btsr := tensor.NewNumberFromSlice(b64...)
+	atsr := tensor.NewNumberFromValues(a64...)
+	btsr := tensor.NewNumberFromValues(b64...)
 	out := tensor.NewFloat64(1)
 
 	EuclideanFunc(atsr, btsr, out)

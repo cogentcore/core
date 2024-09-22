@@ -14,7 +14,7 @@ import (
 
 func TestFuncs64(t *testing.T) {
 	vals := []float64{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1}
-	ix := tensor.NewNumberFromSlice(vals...)
+	ix := tensor.NewNumberFromValues(vals...)
 	out := tensor.NewFloat64(1)
 
 	results := []float64{11, 5.5, 5.5, 5.5, 0, 0, 1, 0, 1, 0.5, 0.11, math.Sqrt(0.11), math.Sqrt(0.11) / math.Sqrt(11), 3.85, math.Sqrt(3.85), 0.1, math.Sqrt(0.1), math.Sqrt(0.1) / math.Sqrt(11), 0.5, 0.25, 0.75}
@@ -89,7 +89,7 @@ func TestFuncs64(t *testing.T) {
 
 func TestFuncsInt(t *testing.T) {
 	vals := []int{0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100}
-	tsr := tensor.NewNumberFromSlice(vals...)
+	tsr := tensor.NewNumberFromValues(vals...)
 	ix := tensor.NewRows(tsr)
 	out := tensor.NewInt(1)
 

@@ -39,7 +39,7 @@ var MaxSprintLength = 1000
 // as all of the data analysis and plot packages skip NaNs.
 // View Tensor types provide different ways of viewing a source tensor,
 // including [Sliced] for arbitrary slices of dimension indexes,
-// [Masked] for boolean masked access and setting of individual indexes,
+// [Masked] for boolean masked access of individual elements,
 // and [Indexed] for arbitrary indexes of values, organized into the
 // shape of the indexes, not the original source data.
 // The [Rows] view provides an optimized row-indexed view for [table.Table] data.
