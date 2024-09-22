@@ -828,19 +828,24 @@ func (tr *Tree) selectUpdate(mode events.SelectModes) bool {
 
 // sendSelectEvent sends an [events.Select] event on both this node and the root node.
 func (tr *Tree) sendSelectEvent(original ...events.Event) {
-	tr.Send(events.Select, original...)
+	if tr.This != tr.root.This {
+		tr.Send(events.Select, original...)
+	}
 	tr.root.Send(events.Select, original...)
 }
 
-// sendChangeEvent sends an [events.Change] event on the root node.
+// sendChangeEvent sends an [events.Change] event on both this node and the root node.
 func (tr *Tree) sendChangeEvent(original ...events.Event) {
+	if tr.This != tr.root.This {
+		tr.SendChange(original...)
+	}
 	tr.root.SendChange(original...)
 }
 
 // sendChangeEventReSync sends an [events.Change] event on the RootView node.
 // If SyncNode != nil, it also does a re-sync from root.
 func (tr *Tree) sendChangeEventReSync(original ...events.Event) {
-	tr.root.SendChange(original...)
+	tr.sendChangeEvent(original...)
 	if tr.root.SyncNode != nil {
 		tr.root.Resync()
 	}
