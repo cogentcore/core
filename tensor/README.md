@@ -173,7 +173,7 @@ A      (2d array):      2 x 1
 B      (3d array):  8 x 4 x 3 # second from last dimensions mismatched
 ```
 
-Computationally, the broadcast logic is straightforward to implement, in terms of computing the resulting shape. Any missing outer dimensions can be replaced with 1s, and the full 1D product index on the result shape can be applied directly to the source shapes, using the modulo operator on length so it just repeatedly samples as needed (the computation routines automatically apply this modulo operator). 
+Computationally, the broadcast logic is straightforward to implement, in terms of computing the resulting shape. Any missing outer dimensions are implicitly 1s, and any singleton dimension wraps around during the indexing process.
 
 # History
 

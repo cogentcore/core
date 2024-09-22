@@ -42,7 +42,9 @@ var MaxSprintLength = 1000
 // [Masked] for boolean masked access of individual elements,
 // and [Indexed] for arbitrary indexes of values, organized into the
 // shape of the indexes, not the original source data.
-// The [Rows] view provides an optimized row-indexed view for [table.Table] data.
+// [Reshaped] provides length preserving reshaping (mostly for computational
+// alignment purposes), and [Rows] provides an optimized row-indexed
+// view for [table.Table] data.
 type Tensor interface {
 	fmt.Stringer
 

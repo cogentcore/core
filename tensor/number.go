@@ -76,7 +76,7 @@ func NewNumber[T num.Number](sizes ...int) *Number[T] {
 // using given shape.
 func NewNumberShape[T num.Number](shape *Shape) *Number[T] {
 	tsr := &Number[T]{}
-	tsr.shape.CopyShape(shape)
+	tsr.shape.CopyFrom(shape)
 	tsr.Values = make([]T, tsr.Len())
 	return tsr
 }

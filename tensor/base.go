@@ -33,14 +33,6 @@ func (tsr *Base[T]) Shape() *Shape { return &tsr.shape }
 // This is the preferred access for Go code.
 func (tsr *Base[T]) ShapeSizes() []int { return slices.Clone(tsr.shape.Sizes) }
 
-// SetShape sets the dimension sizes as 1D int values from given tensor.
-// The backing storage is resized appropriately, retaining all existing data that fits.
-func (tsr *Base[T]) SetShape(sizes Tensor) {
-	tsr.shape.SetShape(sizes)
-	nln := tsr.Len()
-	tsr.Values = slicesx.SetLength(tsr.Values, nln)
-}
-
 // SetShapeSizes sets the dimension sizes of the tensor, and resizes
 // backing storage appropriately, retaining all existing data that fits.
 func (tsr *Base[T]) SetShapeSizes(sizes ...int) {
@@ -96,7 +88,7 @@ func (tsr *Base[T]) Set1D(val T, i int) { tsr.Values[i] = val }
 // view is implementation of View -- needs final casting to tensor type.
 func (tsr *Base[T]) view() *Base[T] {
 	nw := &Base[T]{}
-	nw.shape.CopyShape(&tsr.shape)
+	nw.shape.CopyFrom(&tsr.shape)
 	nw.Values = tsr.Values
 	nw.Meta = tsr.Meta
 	return nw

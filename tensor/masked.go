@@ -22,7 +22,7 @@ import (
 // (i.e., the copy function of numpy), call [Masked.AsValues].
 type Masked struct { //types:add
 
-	// Tensor that we are a masked view onto.
+	// Tensor source that we are a masked view onto.
 	Tensor Tensor
 
 	// Bool tensor with same shape as source tensor, providing mask.
@@ -76,25 +76,16 @@ func (ms *Masked) SyncShape() {
 	}
 }
 
-func (ms *Masked) Label() string { return label(ms.Metadata().Name(), ms.Shape()) }
-
-func (ms *Masked) String() string { return sprint(ms, 0) }
-
+func (ms *Masked) Label() string            { return label(ms.Metadata().Name(), ms.Shape()) }
+func (ms *Masked) String() string           { return sprint(ms, 0) }
 func (ms *Masked) Metadata() *metadata.Data { return ms.Tensor.Metadata() }
-
-func (ms *Masked) IsString() bool { return ms.Tensor.IsString() }
-
-func (ms *Masked) DataType() reflect.Kind { return ms.Tensor.DataType() }
-
-func (ms *Masked) ShapeSizes() []int { return ms.Tensor.ShapeSizes() }
-
-func (ms *Masked) Shape() *Shape { return ms.Tensor.Shape() }
-
-func (ms *Masked) Len() int { return ms.Tensor.Len() }
-
-func (ms *Masked) NumDims() int { return ms.Tensor.NumDims() }
-
-func (ms *Masked) DimSize(dim int) int { return ms.Tensor.DimSize(dim) }
+func (ms *Masked) IsString() bool           { return ms.Tensor.IsString() }
+func (ms *Masked) DataType() reflect.Kind   { return ms.Tensor.DataType() }
+func (ms *Masked) ShapeSizes() []int        { return ms.Tensor.ShapeSizes() }
+func (ms *Masked) Shape() *Shape            { return ms.Tensor.Shape() }
+func (ms *Masked) Len() int                 { return ms.Tensor.Len() }
+func (ms *Masked) NumDims() int             { return ms.Tensor.NumDims() }
+func (ms *Masked) DimSize(dim int) int      { return ms.Tensor.DimSize(dim) }
 
 // AsValues returns a copy of this tensor as raw [Values].
 // This "renders" the Masked view into a fully contiguous

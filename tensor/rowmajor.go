@@ -4,13 +4,13 @@
 
 package tensor
 
-// RowMajor is subclass of [Tensor] that maintains a row major memory organization
+// RowMajor is subtype of [Tensor] that maintains a row major memory organization
 // that thereby supports efficient access via the outermost 'row' dimension,
 // with all remaining inner dimensions comprising the 'cells' of data per row
 // (1 scalar value in the case of a 1D tensor).
 // It is implemented by raw [Values] tensors, and the [Rows] indexed view of
 // raw Values tensors. Other views however do not retain the underlying
-// outer to inner row major memory structure and thus do not benefit from this interface.
+// outer to inner row major memory structure and thus do not implement this interface.
 type RowMajor interface {
 	Tensor
 

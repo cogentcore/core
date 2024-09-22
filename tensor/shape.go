@@ -38,20 +38,20 @@ func (sh *Shape) SetShapeSizes(sizes ...int) {
 	sh.Strides = RowMajorStrides(sizes...)
 }
 
-// SetShape sets the shape sizes from int values from Tensor.
+// SetShapeSizesFromTensor sets the shape sizes from given tensor.
 // RowMajor ordering is used by default.
-func (sh *Shape) SetShape(shp Tensor) {
-	sh.SetShapeSizes(AsIntSlice(shp)...)
+func (sh *Shape) SetShapeSizesFromTensor(sizes Tensor) {
+	sh.SetShapeSizes(AsIntSlice(sizes)...)
 }
 
-// AsTensor returns shape sizes as an Int Tensor.
-func (sh *Shape) AsTensor() *Int {
+// SizesAsTensor returns shape sizes as an Int Tensor.
+func (sh *Shape) SizesAsTensor() *Int {
 	return NewIntFromValues(sh.Sizes...)
 }
 
-// CopyShape copies the shape parameters from another Shape struct.
+// CopyFrom copies the shape parameters from another Shape struct.
 // copies the data so it is not accidentally subject to updates.
-func (sh *Shape) CopyShape(cp *Shape) {
+func (sh *Shape) CopyFrom(cp *Shape) {
 	sh.Sizes = slices.Clone(cp.Sizes)
 	sh.Strides = slices.Clone(cp.Strides)
 }

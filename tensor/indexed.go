@@ -79,28 +79,20 @@ func (ix *Indexed) SourceIndexesFrom1D(oned int) []int {
 	return ix.Indexes.Values[oned : oned+nd]
 }
 
-func (ix *Indexed) Label() string { return label(ix.Metadata().Name(), ix.Shape()) }
-
-func (ix *Indexed) String() string { return sprint(ix, 0) }
-
+func (ix *Indexed) Label() string            { return label(ix.Metadata().Name(), ix.Shape()) }
+func (ix *Indexed) String() string           { return sprint(ix, 0) }
 func (ix *Indexed) Metadata() *metadata.Data { return ix.Tensor.Metadata() }
-
-func (ix *Indexed) IsString() bool { return ix.Tensor.IsString() }
-
-func (ix *Indexed) DataType() reflect.Kind { return ix.Tensor.DataType() }
+func (ix *Indexed) IsString() bool           { return ix.Tensor.IsString() }
+func (ix *Indexed) DataType() reflect.Kind   { return ix.Tensor.DataType() }
+func (ix *Indexed) Shape() *Shape            { return NewShape(ix.ShapeSizes()...) }
+func (ix *Indexed) Len() int                 { return ix.Shape().Len() }
+func (ix *Indexed) NumDims() int             { return ix.Indexes.NumDims() - 1 }
+func (ix *Indexed) DimSize(dim int) int      { return ix.Indexes.DimSize(dim) }
 
 func (ix *Indexed) ShapeSizes() []int {
 	si := slices.Clone(ix.Indexes.ShapeSizes())
 	return si[:len(si)-1] // exclude last dim
 }
-
-func (ix *Indexed) Shape() *Shape { return NewShape(ix.ShapeSizes()...) }
-
-func (ix *Indexed) Len() int { return ix.Shape().Len() }
-
-func (ix *Indexed) NumDims() int { return ix.Indexes.NumDims() - 1 }
-
-func (ix *Indexed) DimSize(dim int) int { return ix.Indexes.DimSize(dim) }
 
 // AsValues returns a copy of this tensor as raw [Values].
 // This "renders" the Indexed view into a fully contiguous

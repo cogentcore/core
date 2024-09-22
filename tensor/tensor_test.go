@@ -232,6 +232,35 @@ func TestIndexed(t *testing.T) {
 	assert.Equal(t, res, vl.String())
 }
 
+func TestReshaped(t *testing.T) {
+	ft := NewFloat64(3, 4)
+	for y := range 3 {
+		for x := range 4 {
+			v := y*10 + x
+			ft.SetFloat(float64(v), y, x)
+		}
+	}
+
+	res := `[4, 3]
+[0]:       0       1       2 
+[1]:       3      10      11 
+[2]:      12      13      20 
+[3]:      21      22      23 
+`
+	rs := NewReshaped(ft, 4, 3)
+	// fmt.Println(rs)
+	assert.Equal(t, res, rs.String())
+
+	res = `[1, 3, 4]
+[0]:       0       1       2       3 
+[0]:      10      11      12      13 
+[0]:      20      21      22      23 
+`
+	rs = NewReshaped(ft, NewAxis, 3, 4)
+	// fmt.Println(rs)
+	assert.Equal(t, res, rs.String())
+}
+
 func TestSortFilter(t *testing.T) {
 	tsr := NewRows(NewFloat64(5))
 	for i := range 5 {

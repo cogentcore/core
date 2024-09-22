@@ -86,11 +86,10 @@ func (rw *Rows) NumRows() int {
 	return len(rw.Indexes)
 }
 
-func (rw *Rows) String() string { return sprint(rw.Tensor, 0) }
-
-func (rw *Rows) Label() string { return rw.Tensor.Label() }
-
+func (rw *Rows) String() string           { return sprint(rw.Tensor, 0) }
+func (rw *Rows) Label() string            { return rw.Tensor.Label() }
 func (rw *Rows) Metadata() *metadata.Data { return rw.Tensor.Metadata() }
+func (rw *Rows) NumDims() int             { return rw.Tensor.NumDims() }
 
 // If we have Indexes, this is the effective shape sizes using
 // the current number of indexes as the outermost row dimension size.
@@ -121,9 +120,6 @@ func (rw *Rows) Len() int {
 	_, cells := rw.Tensor.RowCellSize()
 	return cells * rows
 }
-
-// NumDims returns the total number of dimensions.
-func (rw *Rows) NumDims() int { return rw.Tensor.NumDims() }
 
 // DimSize returns size of given dimension, returning NumRows()
 // for first dimension.

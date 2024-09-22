@@ -18,10 +18,6 @@ import (
 type Values interface {
 	RowMajor
 
-	// SetShape sets the dimension sizes as 1D int values from given tensor.
-	// The backing storage is resized appropriately, retaining all existing data that fits.
-	SetShape(sizes Tensor)
-
 	// SetShapeSizes sets the dimension sizes of the tensor, and resizes
 	// backing storage appropriately, retaining all existing data that fits.
 	SetShapeSizes(sizes ...int)
@@ -132,4 +128,10 @@ func SetShapeNames(md *metadata.Data, names ...string) {
 // ShapeNames gets the tensor shape dimension names from given metadata.
 func ShapeNames(md *metadata.Data) []string {
 	return errors.Log1(metadata.Get[[]string](*md, "ShapeNames"))
+}
+
+// SetShapeSizesFromTensor sets the dimension sizes as 1D int values from given tensor.
+// The backing storage is resized appropriately, retaining all existing data that fits.
+func SetShapeSizesFromTensor(vals Values, sizes Tensor) {
+	vals.SetShapeSizes(AsIntSlice(sizes)...)
 }

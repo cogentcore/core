@@ -37,7 +37,7 @@ func NewBool(sizes ...int) *Bool {
 // using given shape.
 func NewBoolShape(shape *Shape) *Bool {
 	tsr := &Bool{}
-	tsr.shape.CopyShape(shape)
+	tsr.shape.CopyFrom(shape)
 	tsr.Values = bitslice.Make(tsr.Len(), 0)
 	return tsr
 }
@@ -106,12 +106,6 @@ func (tsr *Bool) DimSize(dim int) int { return tsr.shape.DimSize(dim) }
 // Used for Tensors that are columns in a data table.
 func (tsr *Bool) RowCellSize() (rows, cells int) {
 	return tsr.shape.RowCellSize()
-}
-
-func (tsr *Bool) SetShape(sizes Tensor) {
-	tsr.shape.SetShape(sizes)
-	nln := tsr.Len()
-	tsr.Values.SetLen(nln)
 }
 
 func (tsr *Bool) SetShapeSizes(sizes ...int) {
@@ -299,7 +293,7 @@ func (tsr *Bool) Clone() Values {
 
 func (tsr *Bool) View() Values {
 	nw := &Bool{}
-	nw.shape.CopyShape(&tsr.shape)
+	nw.shape.CopyFrom(&tsr.shape)
 	nw.Values = tsr.Values
 	nw.Meta = tsr.Meta
 	return nw

@@ -29,7 +29,7 @@ func NewString(sizes ...int) *String {
 // using given shape.
 func NewStringShape(shape *Shape) *String {
 	tsr := &String{}
-	tsr.shape.CopyShape(shape)
+	tsr.shape.CopyFrom(shape)
 	tsr.Values = make([]string, tsr.Len())
 	return tsr
 }

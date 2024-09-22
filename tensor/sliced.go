@@ -162,15 +162,14 @@ func (sl *Sliced) IndexesNeeded(d int) {
 	sl.Indexes[d] = ix
 }
 
-func (sl *Sliced) Label() string { return label(sl.Metadata().Name(), sl.Shape()) }
-
-func (sl *Sliced) String() string { return sprint(sl, 0) }
-
+func (sl *Sliced) Label() string            { return label(sl.Metadata().Name(), sl.Shape()) }
+func (sl *Sliced) String() string           { return sprint(sl, 0) }
 func (sl *Sliced) Metadata() *metadata.Data { return sl.Tensor.Metadata() }
-
-func (sl *Sliced) IsString() bool { return sl.Tensor.IsString() }
-
-func (sl *Sliced) DataType() reflect.Kind { return sl.Tensor.DataType() }
+func (sl *Sliced) IsString() bool           { return sl.Tensor.IsString() }
+func (sl *Sliced) DataType() reflect.Kind   { return sl.Tensor.DataType() }
+func (sl *Sliced) Shape() *Shape            { return NewShape(sl.ShapeSizes()...) }
+func (sl *Sliced) Len() int                 { return sl.Shape().Len() }
+func (sl *Sliced) NumDims() int             { return sl.Tensor.NumDims() }
 
 // For each dimension, we return the effective shape sizes using
 // the current number of indexes per dimension.
@@ -187,12 +186,6 @@ func (sl *Sliced) ShapeSizes() []int {
 	}
 	return sh
 }
-
-func (sl *Sliced) Shape() *Shape { return NewShape(sl.ShapeSizes()...) }
-
-func (sl *Sliced) Len() int { return sl.Shape().Len() }
-
-func (sl *Sliced) NumDims() int { return sl.Tensor.NumDims() }
 
 // DimSize returns the effective view size of given dimension.
 func (sl *Sliced) DimSize(dim int) int {
