@@ -81,7 +81,7 @@ type Tensor interface {
 	DimSize(dim int) int
 
 	// DataType returns the type of the data elements in the tensor.
-	// Bool is returned for the Bits tensor type.
+	// Bool is returned for the Bool tensor type.
 	DataType() reflect.Kind
 
 	// IsString returns true if the data type is a String; otherwise it is numeric.

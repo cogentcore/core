@@ -20,7 +20,7 @@ func init() {
 	core.AddValueType[tensor.Int32, TensorButton]()
 	core.AddValueType[tensor.Byte, TensorButton]()
 	core.AddValueType[tensor.String, TensorButton]()
-	core.AddValueType[tensor.Bits, TensorButton]()
+	core.AddValueType[tensor.Bool, TensorButton]()
 	// core.AddValueType[simat.SimMat, SimMatButton]()
 }
 

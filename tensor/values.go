@@ -82,7 +82,7 @@ func New[T DataTypes](sizes ...int) Values {
 	case string:
 		return NewString(sizes...)
 	case bool:
-		return NewBits(sizes...)
+		return NewBool(sizes...)
 	case float64:
 		return NewNumber[float64](sizes...)
 	case float32:
@@ -106,7 +106,7 @@ func NewOfType(typ reflect.Kind, sizes ...int) Values {
 	case reflect.String:
 		return NewString(sizes...)
 	case reflect.Bool:
-		return NewBits(sizes...)
+		return NewBool(sizes...)
 	case reflect.Float64:
 		return NewNumber[float64](sizes...)
 	case reflect.Float32:

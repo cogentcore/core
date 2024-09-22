@@ -124,8 +124,8 @@ func ReduceTensor(dest, src tensor.Tensor, comm *mpi.Comm, op mpi.Op) error {
 	var err error
 	switch dt {
 	case reflect.Bool:
-		dt := dest.(*tensor.Bits)
-		st := src.(*tensor.Bits)
+		dt := dest.(*tensor.Bool)
+		st := src.(*tensor.Bool)
 		err = comm.AllReduceU8(op, dt.Values, st.Values)
 	case reflect.Uint8:
 		dt := dest.(*tensor.Byte)

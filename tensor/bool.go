@@ -15,28 +15,28 @@ import (
 	"cogentcore.org/core/tensor/bitslice"
 )
 
-// Bits is a tensor of bits backed by a [bitslice.Slice] for efficient storage
-// of binary data.  Bits does not support [Tensor.SubSpace] access and related
+// Bool is a tensor of bits backed by a [bitslice.Slice] for efficient storage
+// of binary data.  Bool does not support [Tensor.SubSpace] access and related
 // methods due to the nature of the underlying data representation.
-type Bits struct {
+type Bool struct {
 	shape  Shape
 	Values bitslice.Slice
 	Meta   metadata.Data
 }
 
-// NewBits returns a new n-dimensional tensor of bit values
+// NewBool returns a new n-dimensional tensor of bit values
 // with the given sizes per dimension (shape), and optional dimension names.
-func NewBits(sizes ...int) *Bits {
-	tsr := &Bits{}
+func NewBool(sizes ...int) *Bool {
+	tsr := &Bool{}
 	tsr.SetShapeInts(sizes...)
 	tsr.Values = bitslice.Make(tsr.Len(), 0)
 	return tsr
 }
 
-// NewBitsShape returns a new n-dimensional tensor of bit values
+// NewBoolShape returns a new n-dimensional tensor of bit values
 // using given shape.
-func NewBitsShape(shape *Shape) *Bits {
-	tsr := &Bits{}
+func NewBoolShape(shape *Shape) *Bool {
+	tsr := &Bool{}
 	tsr.shape.CopyShape(shape)
 	tsr.Values = bitslice.Make(tsr.Len(), 0)
 	return tsr
@@ -63,66 +63,66 @@ func BoolToInt(bv bool) int {
 }
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
-func (tsr *Bits) String() string {
+func (tsr *Bool) String() string {
 	return sprint(tsr, 0)
 }
 
-func (tsr *Bits) IsString() bool {
+func (tsr *Bool) IsString() bool {
 	return false
 }
 
-func (tsr *Bits) AsValues() Values { return tsr }
+func (tsr *Bool) AsValues() Values { return tsr }
 
 // DataType returns the type of the data elements in the tensor.
-// Bool is returned for the Bits tensor type.
-func (tsr *Bits) DataType() reflect.Kind {
+// Bool is returned for the Bool tensor type.
+func (tsr *Bool) DataType() reflect.Kind {
 	return reflect.Bool
 }
 
-func (tsr *Bits) Sizeof() int64 {
+func (tsr *Bool) Sizeof() int64 {
 	return int64(len(tsr.Values))
 }
 
-func (tsr *Bits) Bytes() []byte {
+func (tsr *Bool) Bytes() []byte {
 	return slicesx.ToBytes(tsr.Values)
 }
 
-func (tsr *Bits) Shape() *Shape { return &tsr.shape }
+func (tsr *Bool) Shape() *Shape { return &tsr.shape }
 
 // ShapeSizes returns the sizes of each dimension as an int tensor.
-func (tsr *Bits) ShapeSizes() Tensor { return tsr.shape.AsTensor() }
+func (tsr *Bool) ShapeSizes() Tensor { return tsr.shape.AsTensor() }
 
 // ShapeInts returns the sizes of each dimension as a slice of ints.
 // This is the preferred access for Go code.
-func (tsr *Bits) ShapeInts() []int { return tsr.shape.Sizes }
+func (tsr *Bool) ShapeInts() []int { return tsr.shape.Sizes }
 
 // Metadata returns the metadata for this tensor, which can be used
 // to encode plotting options, etc.
-func (tsr *Bits) Metadata() *metadata.Data { return &tsr.Meta }
+func (tsr *Bool) Metadata() *metadata.Data { return &tsr.Meta }
 
 // Len returns the number of elements in the tensor (product of shape dimensions).
-func (tsr *Bits) Len() int { return tsr.shape.Len() }
+func (tsr *Bool) Len() int { return tsr.shape.Len() }
 
 // NumDims returns the total number of dimensions.
-func (tsr *Bits) NumDims() int { return tsr.shape.NumDims() }
+func (tsr *Bool) NumDims() int { return tsr.shape.NumDims() }
 
 // DimSize returns size of given dimension
-func (tsr *Bits) DimSize(dim int) int { return tsr.shape.DimSize(dim) }
+func (tsr *Bool) DimSize(dim int) int { return tsr.shape.DimSize(dim) }
 
 // RowCellSize returns the size of the outermost Row shape dimension,
 // and the size of all the remaining inner dimensions (the "cell" size).
 // Used for Tensors that are columns in a data table.
-func (tsr *Bits) RowCellSize() (rows, cells int) {
+func (tsr *Bool) RowCellSize() (rows, cells int) {
 	return tsr.shape.RowCellSize()
 }
 
-func (tsr *Bits) SetShape(sizes Tensor) {
+func (tsr *Bool) SetShape(sizes Tensor) {
 	tsr.shape.SetShape(sizes)
 	nln := tsr.Len()
 	tsr.Values.SetLen(nln)
 }
 
-func (tsr *Bits) SetShapeInts(sizes ...int) {
+func (tsr *Bool) SetShapeInts(sizes ...int) {
 	tsr.shape.SetShapeInts(sizes...)
 	nln := tsr.Len()
 	tsr.Values.SetLen(nln)
@@ -132,149 +132,149 @@ func (tsr *Bits) SetShapeInts(sizes ...int) {
 // It is safe to set this to 0. For incrementally growing tensors (e.g., a log)
 // it is best to first set the anticipated full size, which allocates the
 // full amount of memory, and then set to 0 and grow incrementally.
-func (tsr *Bits) SetNumRows(rows int) {
+func (tsr *Bool) SetNumRows(rows int) {
 	_, cells := tsr.shape.RowCellSize()
 	nln := rows * cells
 	tsr.shape.Sizes[0] = rows
 	tsr.Values.SetLen(nln)
 }
 
-// SubSpace is not possible with Bits.
-func (tsr *Bits) SubSpace(offs ...int) Values {
+// SubSpace is not possible with Bool.
+func (tsr *Bool) SubSpace(offs ...int) Values {
 	return nil
 }
 
-// RowTensor not possible with Bits.
-func (tsr *Bits) RowTensor(row int) Values {
+// RowTensor not possible with Bool.
+func (tsr *Bool) RowTensor(row int) Values {
 	return nil
 }
 
-// SetRowTensor not possible with Bits.
-func (tsr *Bits) SetRowTensor(val Values, row int) {
+// SetRowTensor not possible with Bool.
+func (tsr *Bool) SetRowTensor(val Values, row int) {
 
 }
 
 /////////////////////  Strings
 
-func (tsr *Bits) String1D(off int) string {
+func (tsr *Bool) String1D(off int) string {
 	return reflectx.ToString(tsr.Values.Index(off))
 }
 
-func (tsr *Bits) SetString1D(val string, off int) {
+func (tsr *Bool) SetString1D(val string, off int) {
 	if bv, err := reflectx.ToBool(val); err == nil {
 		tsr.Values.Set(bv, off)
 	}
 }
 
-func (tsr *Bits) StringValue(i ...int) string {
+func (tsr *Bool) StringValue(i ...int) string {
 	return reflectx.ToString(tsr.Values.Index(tsr.shape.IndexTo1D(i...)))
 }
 
-func (tsr *Bits) SetString(val string, i ...int) {
+func (tsr *Bool) SetString(val string, i ...int) {
 	if bv, err := reflectx.ToBool(val); err == nil {
 		tsr.Values.Set(bv, tsr.shape.IndexTo1D(i...))
 	}
 }
 
-func (tsr *Bits) StringRowCell(row, cell int) string {
+func (tsr *Bool) StringRowCell(row, cell int) string {
 	_, sz := tsr.RowCellSize()
 	return reflectx.ToString(tsr.Values.Index(row*sz + cell))
 }
 
-func (tsr *Bits) SetStringRowCell(val string, row, cell int) {
+func (tsr *Bool) SetStringRowCell(val string, row, cell int) {
 	if bv, err := reflectx.ToBool(val); err == nil {
 		_, sz := tsr.RowCellSize()
 		tsr.Values.Set(bv, row*sz+cell)
 	}
 }
 
-func (tsr *Bits) StringRow(row int) string {
+func (tsr *Bool) StringRow(row int) string {
 	return tsr.StringRowCell(row, 0)
 }
 
-func (tsr *Bits) SetStringRow(val string, row int) {
+func (tsr *Bool) SetStringRow(val string, row int) {
 	tsr.SetStringRowCell(val, row, 0)
 }
 
 /////////////////////  Floats
 
-func (tsr *Bits) Float(i ...int) float64 {
+func (tsr *Bool) Float(i ...int) float64 {
 	return BoolToFloat64(tsr.Values.Index(tsr.shape.IndexTo1D(i...)))
 }
 
-func (tsr *Bits) SetFloat(val float64, i ...int) {
+func (tsr *Bool) SetFloat(val float64, i ...int) {
 	tsr.Values.Set(Float64ToBool(val), tsr.shape.IndexTo1D(i...))
 }
 
-func (tsr *Bits) Float1D(off int) float64 {
+func (tsr *Bool) Float1D(off int) float64 {
 	return BoolToFloat64(tsr.Values.Index(off))
 }
 
-func (tsr *Bits) SetFloat1D(val float64, off int) {
+func (tsr *Bool) SetFloat1D(val float64, off int) {
 	tsr.Values.Set(Float64ToBool(val), off)
 }
 
-func (tsr *Bits) FloatRowCell(row, cell int) float64 {
+func (tsr *Bool) FloatRowCell(row, cell int) float64 {
 	_, sz := tsr.RowCellSize()
 	return BoolToFloat64(tsr.Values.Index(row*sz + cell))
 }
 
-func (tsr *Bits) SetFloatRowCell(val float64, row, cell int) {
+func (tsr *Bool) SetFloatRowCell(val float64, row, cell int) {
 	_, sz := tsr.RowCellSize()
 	tsr.Values.Set(Float64ToBool(val), row*sz+cell)
 }
 
-func (tsr *Bits) FloatRow(row int) float64 {
+func (tsr *Bool) FloatRow(row int) float64 {
 	return tsr.FloatRowCell(row, 0)
 }
 
-func (tsr *Bits) SetFloatRow(val float64, row int) {
+func (tsr *Bool) SetFloatRow(val float64, row int) {
 	tsr.SetFloatRowCell(val, row, 0)
 }
 
 /////////////////////  Ints
 
-func (tsr *Bits) Int(i ...int) int {
+func (tsr *Bool) Int(i ...int) int {
 	return BoolToInt(tsr.Values.Index(tsr.shape.IndexTo1D(i...)))
 }
 
-func (tsr *Bits) SetInt(val int, i ...int) {
+func (tsr *Bool) SetInt(val int, i ...int) {
 	tsr.Values.Set(IntToBool(val), tsr.shape.IndexTo1D(i...))
 }
 
-func (tsr *Bits) Int1D(off int) int {
+func (tsr *Bool) Int1D(off int) int {
 	return BoolToInt(tsr.Values.Index(off))
 }
 
-func (tsr *Bits) SetInt1D(val int, off int) {
+func (tsr *Bool) SetInt1D(val int, off int) {
 	tsr.Values.Set(IntToBool(val), off)
 }
 
-func (tsr *Bits) IntRowCell(row, cell int) int {
+func (tsr *Bool) IntRowCell(row, cell int) int {
 	_, sz := tsr.RowCellSize()
 	return BoolToInt(tsr.Values.Index(row*sz + cell))
 }
 
-func (tsr *Bits) SetIntRowCell(val int, row, cell int) {
+func (tsr *Bool) SetIntRowCell(val int, row, cell int) {
 	_, sz := tsr.RowCellSize()
 	tsr.Values.Set(IntToBool(val), row*sz+cell)
 }
 
-func (tsr *Bits) IntRow(row int) int {
+func (tsr *Bool) IntRow(row int) int {
 	return tsr.IntRowCell(row, 0)
 }
 
-func (tsr *Bits) SetIntRow(val int, row int) {
+func (tsr *Bool) SetIntRow(val int, row int) {
 	tsr.SetIntRowCell(val, row, 0)
 }
 
 // Label satisfies the core.Labeler interface for a summary description of the tensor
-func (tsr *Bits) Label() string {
-	return fmt.Sprintf("tensor.Bits: %s", tsr.shape.String())
+func (tsr *Bool) Label() string {
+	return fmt.Sprintf("tensor.Bool: %s", tsr.shape.String())
 }
 
 // SetZeros is simple convenience function initialize all values to 0
-func (tsr *Bits) SetZeros() {
+func (tsr *Bool) SetZeros() {
 	ln := tsr.Len()
 	for j := 0; j < ln; j++ {
 		tsr.Values.Set(false, j)
@@ -284,14 +284,14 @@ func (tsr *Bits) SetZeros() {
 // Clone clones this tensor, creating a duplicate copy of itself with its
 // own separate memory representation of all the values, and returns
 // that as a Tensor (which can be converted into the known type as needed).
-func (tsr *Bits) Clone() Values {
-	csr := NewBitsShape(&tsr.shape)
+func (tsr *Bool) Clone() Values {
+	csr := NewBoolShape(&tsr.shape)
 	csr.Values = tsr.Values.Clone()
 	return csr
 }
 
-func (tsr *Bits) View() Values {
-	nw := &Bits{}
+func (tsr *Bool) View() Values {
+	nw := &Bool{}
 	nw.shape.CopyShape(&tsr.shape)
 	nw.Values = tsr.Values
 	nw.Meta = tsr.Meta
@@ -301,8 +301,8 @@ func (tsr *Bits) View() Values {
 // CopyFrom copies all avail values from other tensor into this tensor, with an
 // optimized implementation if the other tensor is of the same type, and
 // otherwise it goes through appropriate standard type.
-func (tsr *Bits) CopyFrom(frm Values) {
-	if fsm, ok := frm.(*Bits); ok {
+func (tsr *Bool) CopyFrom(frm Values) {
+	if fsm, ok := frm.(*Bool); ok {
 		copy(tsr.Values, fsm.Values)
 		return
 	}
@@ -317,7 +317,7 @@ func (tsr *Bits) CopyFrom(frm Values) {
 // It uses and optimized implementation if the other tensor
 // is of the same type, and otherwise it goes through
 // appropriate standard type.
-func (tsr *Bits) AppendFrom(frm Values) error {
+func (tsr *Bool) AppendFrom(frm Values) error {
 	rows, cell := tsr.RowCellSize()
 	frows, fcell := frm.RowCellSize()
 	if cell != fcell {
@@ -326,7 +326,7 @@ func (tsr *Bits) AppendFrom(frm Values) error {
 	tsr.SetNumRows(rows + frows)
 	st := rows * cell
 	fsz := frows * fcell
-	if fsm, ok := frm.(*Bits); ok {
+	if fsm, ok := frm.(*Bool); ok {
 		copy(tsr.Values[st:st+fsz], fsm.Values)
 		return nil
 	}
@@ -341,8 +341,8 @@ func (tsr *Bits) AppendFrom(frm Values) error {
 // start = starting index on from Tensor to start copying from, and n = number of
 // values to copy.  Uses an optimized implementation if the other tensor is
 // of the same type, and otherwise it goes through appropriate standard type.
-func (tsr *Bits) CopyCellsFrom(frm Values, to, start, n int) {
-	if fsm, ok := frm.(*Bits); ok {
+func (tsr *Bool) CopyCellsFrom(frm Values, to, start, n int) {
+	if fsm, ok := frm.(*Bool); ok {
 		for i := 0; i < n; i++ {
 			tsr.Values.Set(fsm.Values.Index(start+i), to+i)
 		}

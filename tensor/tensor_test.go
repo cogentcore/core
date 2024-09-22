@@ -211,7 +211,7 @@ func TestGrowRow(t *testing.T) {
 	assert.Equal(t, 100000, cap(tsr2.Values))
 	assert.Equal(t, 100, tsr2.Len())
 
-	bits := NewBits(1000)
+	bits := NewBool(1000)
 	assert.Equal(t, 1000, bits.Len())
 	bits.SetNumRows(0)
 	assert.Equal(t, 0, bits.Len())

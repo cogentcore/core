@@ -69,7 +69,7 @@ func (tsr *Base[T]) RowCellSize() (rows, cells int) {
 }
 
 // DataType returns the type of the data elements in the tensor.
-// Bool is returned for the Bits tensor type.
+// Bool is returned for the Bool tensor type.
 func (tsr *Base[T]) DataType() reflect.Kind {
 	var v T
 	return reflect.TypeOf(v).Kind()

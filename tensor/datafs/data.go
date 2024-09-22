@@ -94,7 +94,7 @@ func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.V
 
 // NewOfType returns a new Data value as a [tensor.Tensor]
 // of given reflect.Kind type and shape sizes per dimension, in given directory Data item.
-// Supported types are string, bool (for [Bits]), float32, float64, int, int32, and byte.
+// Supported types are string, bool (for [Bool]), float32, float64, int, int32, and byte.
 // The name must be unique in the directory.
 func (d *Data) NewOfType(name string, typ reflect.Kind, sizes ...int) tensor.Values {
 	tsr := tensor.NewOfType(typ, sizes...)

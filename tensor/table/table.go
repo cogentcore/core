@@ -188,7 +188,7 @@ func (dt *Table) InsertColumn(idx int, name string, tsr tensor.Values) error {
 // column name (which must be unique),
 // If no cellSizes are specified, it holds scalar values,
 // otherwise the cells are n-dimensional tensors of given size.
-// Supported types include string, bool (for [tensor.Bits]), float32, float64, int, int32, and byte.
+// Supported types include string, bool (for [tensor.Bool]), float32, float64, int, int32, and byte.
 func (dt *Table) AddColumnOfType(name string, typ reflect.Kind, cellSizes ...int) tensor.Tensor {
 	rows := dt.Columns.Rows
 	sz := append([]int{rows}, cellSizes...)
