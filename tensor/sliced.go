@@ -15,26 +15,30 @@ import (
 	"cogentcore.org/core/base/slicesx"
 )
 
-// Sliced is a fully indexed wrapper around another [Tensor] that provides a
-// re-sliced view onto the Tensor defined by the set of [Sliced.Indexes],
-// for each dimension (must have at least 1 per dimension).
-// Thus, every dimension can be transformed in arbitrary ways relative
-// to the original tensor. There is some additional cost for every
-// access operation associated with the additional indexed indirection.
+// Sliced provides a re-sliced view onto another "source" [Tensor],
+// defined by a set of [Sliced.Indexes] for each dimension (must have
+// at least 1 index per dimension to avoid a null view).
+// Thus, each dimension can be transformed in arbitrary ways relative
+// to the original tensor (filtered subsets, reversals, sorting, etc).
+// This view is not memory-contiguous and does not support the [RowMajor]
+// interface or efficient access to inner-dimensional subspaces.
+// A new Sliced view defaults to a full transparent view of the ource tensor.
+// There is additional cost for every access operation associated with the
+// indexed indirection, and access is always via the full n-dimensional indexes.
 // See also [Rows] for a version that only indexes the outermost row dimension,
-// which is much more efficient for this common use-case.
+// which is much more efficient for this common use-case, and does support [RowMajor].
 // To produce a new concrete [Values] that has raw data actually organized according
 // to the indexed order (i.e., the copy function of numpy), call [Sliced.AsValues].
 type Sliced struct { //types:add
 
-	// Tensor that we are an indexed view onto.
+	// Tensor source that we are an indexed view onto.
 	Tensor Tensor
 
 	// Indexes are the indexes for each dimension, with dimensions as the outer
 	// slice (enforced to be the same length as the NumDims of the source Tensor),
 	// and a list of dimension index values (within range of DimSize(d)).
-	// A nil list of indexes automatically provides a full, sequential view of that
-	// dimension.
+	// A nil list of indexes for a dimension automatically provides a full,
+	// sequential view of that dimension.
 	Indexes [][]int
 }
 
@@ -71,13 +75,14 @@ func AsSliced(tsr Tensor) *Sliced {
 	return NewSliced(tsr)
 }
 
-// SetTensor sets as indexes into given tensor with sequential initial indexes.
+// SetTensor sets tensor as source for this view, and initializes a full
+// transparent view onto source (calls [Sliced.Sequential]).
 func (sl *Sliced) SetTensor(tsr Tensor) {
 	sl.Tensor = tsr
 	sl.Sequential()
 }
 
-// SourceIndex returns the actual index into underlying tensor dimension
+// SourceIndex returns the actual index into source tensor dimension
 // based on given index value.
 func (sl *Sliced) SourceIndex(dim, idx int) int {
 	ix := sl.Indexes[dim]
@@ -87,8 +92,8 @@ func (sl *Sliced) SourceIndex(dim, idx int) int {
 	return ix[idx]
 }
 
-// SourceIndexes returns the actual indexes into underlying tensor
-// based on given list of indexes.
+// SourceIndexes returns the actual n-dimensional indexes into source tensor
+// based on given list of indexes based on the Sliced view shape.
 func (sl *Sliced) SourceIndexes(i ...int) []int {
 	ix := slices.Clone(i)
 	for d, idx := range i {
@@ -97,8 +102,8 @@ func (sl *Sliced) SourceIndexes(i ...int) []int {
 	return ix
 }
 
-// SourceIndexesFrom1D returns the full indexes into source tensor based on the
-// given 1d index.
+// SourceIndexesFrom1D returns the n-dimensional indexes into source tensor
+// based on the given 1D index based on the Sliced view shape.
 func (sl *Sliced) SourceIndexesFrom1D(oned int) []int {
 	sh := sl.Shape()
 	oix := sh.IndexFrom1D(oned) // full indexes in our coords
@@ -154,12 +159,8 @@ func (sl *Sliced) IndexesNeeded(d int) {
 	sl.Indexes[d] = ix
 }
 
-// Label satisfies the core.Labeler interface for a summary description of the tensor.
-func (sl *Sliced) Label() string {
-	return label(sl.Metadata().Name(), sl.Shape())
-}
+func (sl *Sliced) Label() string { return label(sl.Metadata().Name(), sl.Shape()) }
 
-// String satisfies the fmt.Stringer interface for string of tensor data.
 func (sl *Sliced) String() string { return sprint(sl, 0) }
 
 func (sl *Sliced) Metadata() *metadata.Data { return sl.Tensor.Metadata() }
@@ -184,19 +185,10 @@ func (sl *Sliced) ShapeSizes() []int {
 	return sh
 }
 
-// Shape() returns a [Shape] representation of the tensor shape
-// (dimension sizes). If we have Indexes, this is the effective
-// shape using the current number of indexes per dimension.
-func (sl *Sliced) Shape() *Shape {
-	return NewShape(sl.ShapeSizes()...)
-}
+func (sl *Sliced) Shape() *Shape { return NewShape(sl.ShapeSizes()...) }
 
-// Len returns the total number of elements in our view of the tensor.
-func (sl *Sliced) Len() int {
-	return sl.Shape().Len()
-}
+func (sl *Sliced) Len() int { return sl.Shape().Len() }
 
-// NumDims returns the total number of dimensions.
 func (sl *Sliced) NumDims() int { return sl.Tensor.NumDims() }
 
 // DimSize returns the effective view size of given dimension.
@@ -232,27 +224,6 @@ func (sl *Sliced) AsValues() Values {
 	}
 	return vt
 }
-
-// // CloneIndexes returns a copy of the current Sliced view with new indexes,
-// // with a pointer to the same underlying Tensor as the source.
-// func (sl *Sliced) CloneIndexes() *Sliced {
-// 	nix := &Sliced{}
-// 	nix.Tensor = sl.Tensor
-// 	nix.CopyIndexes(sl)
-// 	return nix
-// }
-//
-// // CopyIndexes copies indexes from other Sliced view.
-// func (sl *Sliced) CopyIndexes(oix *Sliced) {
-// 	if oix.Indexes == nil {
-// 		sl.Indexes = nil
-// 	} else {
-// 		sl.Indexes = slices.Clone(oix.Indexes)
-// 	}
-// }
-
-///////////////////////////////////////////////
-// Sliced access
 
 /////////////////////  Floats
 

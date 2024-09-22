@@ -10,54 +10,53 @@ import (
 
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/base/slicesx"
 )
 
-// Indexed is a wrapper around another [Tensor] that provides a
-// indexed view onto the Tensor provided by an [Int] tensor with
-// index coordinates into the source tensor. The innermost dimension
-// size of the indexes is equal to the number of dimensions in
-// the source tensor, and the remaining outer dimensions provide the
-// shape for the [Indexed] tensor view.
+// Indexed provides an arbitrarily indexed view onto another "source" [Tensor]
+// with each index value providing a full n-dimensional index into the source.
+// The shape of this view is determined by the shape of the [Indexed.Indexes]
+// tensor up to the final innermost dimension, which holds the index values.
+// Thus the innermost dimension size of the indexes is equal to the number
+// of dimensions in the source tensor. Given the essential role of the
+// indexes in this view, it is not usable without the indexes.
+// This view is not memory-contiguous and does not support the [RowMajor]
+// interface or efficient access to inner-dimensional subspaces.
 // To produce a new concrete [Values] that has raw data actually
 // organized according to the indexed order (i.e., the copy function
 // of numpy), call [Indexed.AsValues].
 type Indexed struct { //types:add
 
-	// Tensor that we are an indexed view onto.
+	// Tensor source that we are an indexed view onto.
 	Tensor Tensor
 
 	// Indexes is the list of indexes into the source tensor,
-	// with the innermost dimension size equal to the number of
-	// dimensions in the source tensor, and the remaining outer
-	// dimensions providing the shape for the [Indexed] tensor.
+	// with the innermost dimension providing the index values
+	// (size = number of dimensions in the source tensor), and
+	// the remaining outer dimensions determine the shape
+	// of this [Indexed] tensor view.
 	Indexes *Int
 }
 
 // NewIndexed returns a new [Indexed] view of given tensor,
-// with optional tensor of indexes into the source tensor.
-func NewIndexed(tsr Tensor, idx ...*Int) *Indexed {
+// with tensor of indexes into the source tensor.
+func NewIndexed(tsr Tensor, idx *Int) *Indexed {
 	ix := &Indexed{Tensor: tsr}
-	if len(idx) == 1 {
-		ix.Indexes = idx[0]
-	}
-	ix.ValidIndexes()
+	ix.Indexes = idx
 	return ix
 }
 
-// AsIndexed returns the tensor as a [Indexed] view.
-// If it already is one, then it is returned, otherwise it is wrapped.
+// AsIndexed returns the tensor as a [Indexed] view, if it is one.
+// Otherwise, it returns nil; there is no usable "null" Indexed view.
 func AsIndexed(tsr Tensor) *Indexed {
 	if ix, ok := tsr.(*Indexed); ok {
 		return ix
 	}
-	return NewIndexed(tsr)
+	return nil
 }
 
 // SetTensor sets as indexes into given tensor with sequential initial indexes.
 func (ix *Indexed) SetTensor(tsr Tensor) {
 	ix.Tensor = tsr
-	ix.ValidIndexes()
 }
 
 // SourceIndexes returns the actual indexes into underlying source tensor
@@ -80,38 +79,8 @@ func (ix *Indexed) SourceIndexesFrom1D(oned int) []int {
 	return ix.Indexes.Values[oned : oned+nd]
 }
 
-// todo: do this:
+func (ix *Indexed) Label() string { return label(ix.Metadata().Name(), ix.Shape()) }
 
-// ValidIndexes ensures that [Indexed.Indexes] are valid,
-// removing any out-of-range values and setting the view to nil (full sequential)
-// for any dimension with no indexes (which is an invalid condition).
-// Call this when any structural changes are made to underlying Tensor.
-func (ix *Indexed) ValidIndexes() {
-	nd := ix.Tensor.NumDims()
-	ix.Indexes = slicesx.SetLength(ix.Indexes, nd)
-	for d := range nd {
-		ni := len(ix.Indexes[d])
-		if ni == 0 { // invalid
-			ix.Indexes[d] = nil // full
-			continue
-		}
-		ds := ix.Tensor.DimSize(d)
-		ix := ix.Indexes[d]
-		for i := ni - 1; i >= 0; i-- {
-			if ix[i] >= ds {
-				ix = append(ix[:i], ix[i+1:]...)
-			}
-		}
-		ix.Indexes[d] = ix
-	}
-}
-
-// Label satisfies the core.Labeler interface for a summary description of the tensor.
-func (ix *Indexed) Label() string {
-	return label(ix.Metadata().Name(), ix.Shape())
-}
-
-// String satisfies the fmt.Stringer interface for string of tensor data.
 func (ix *Indexed) String() string { return sprint(ix, 0) }
 
 func (ix *Indexed) Metadata() *metadata.Data { return ix.Tensor.Metadata() }
@@ -120,32 +89,18 @@ func (ix *Indexed) IsString() bool { return ix.Tensor.IsString() }
 
 func (ix *Indexed) DataType() reflect.Kind { return ix.Tensor.DataType() }
 
-// For each dimension, we return the effective shape sizes using
-// the current number of indexes per dimension.
 func (ix *Indexed) ShapeSizes() []int {
 	si := slices.Clone(ix.Indexes.ShapeSizes())
 	return si[:len(si)-1] // exclude last dim
 }
 
-// Shape() returns a [Shape] representation of the tensor shape
-// (dimension sizes). If we have Indexes, this is the effective
-// shape using the current number of indexes per dimension.
-func (ix *Indexed) Shape() *Shape {
-	return NewShape(ix.ShapeSizes()...)
-}
+func (ix *Indexed) Shape() *Shape { return NewShape(ix.ShapeSizes()...) }
 
-// Len returns the total number of elements in our view of the tensor.
 func (ix *Indexed) Len() int { return ix.Shape().Len() }
 
-// NumDims returns the total number of dimensions.
 func (ix *Indexed) NumDims() int { return ix.Indexes.NumDims() - 1 }
 
-// DimSize returns the effective view size of given dimension.
-func (ix *Indexed) DimSize(dim int) int {
-	return ix.Indexes.DimSize(dim)
-}
-
-// todo:
+func (ix *Indexed) DimSize(dim int) int { return ix.Indexes.DimSize(dim) }
 
 // AsValues returns a copy of this tensor as raw [Values].
 // This "renders" the Indexed view into a fully contiguous
@@ -172,9 +127,6 @@ func (ix *Indexed) AsValues() Values {
 	}
 	return vt
 }
-
-///////////////////////////////////////////////
-// Indexed access
 
 /////////////////////  Floats
 

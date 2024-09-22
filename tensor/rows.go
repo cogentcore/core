@@ -16,22 +16,25 @@ import (
 	"cogentcore.org/core/base/metadata"
 )
 
-// Rows is a row-indexed wrapper around a [Values] [Tensor] that provides a
-// specific view onto the Tensor defined by the set of [Rows.Indexes],
-// which apply to the outermost row dimension (with default row-major indexing).
-// Sorting and filtering a tensor only requires updating the indexes while
-// leaving the underlying Tensor alone.
-// Use [AsValues] to obtain a concrete [Values] representation with the current row
-// sorting. Use the [Set]FloatRow[Cell] methods wherever possible,
-// for the most efficient and natural indirection through the indexes.
+// Rows is a row-indexed wrapper view around a [Values] [Tensor] that allows
+// arbitrary row-wise ordering and filtering according to the [Rows.Indexes].
+// Sorting and filtering a tensor along this outermost row dimension only
+// requires updating the indexes while leaving the underlying Tensor alone.
+// Unlike the more general [Sliced] view, Rows maintains memory contiguity
+// for the inner dimensions ("cells") within each row, and supports the [RowMajor]
+// interface, with the [Set]FloatRow[Cell] methods providing efficient access.
+// Use [Rows.AsValues] to obtain a concrete [Values] representation with the
+// current row sorting.
 type Rows struct { //types:add
 
-	// Tensor that we are an indexed view onto.
+	// Tensor source that we are an indexed view onto.
+	// Note that this must be a concrete [Values] tensor, to enable efficient
+	// [RowMajor] access and subspace functions.
 	Tensor Values
 
 	// Indexes are the indexes into Tensor rows, with nil = sequential.
 	// Only set if order is different from default sequential order.
-	// Use the Index() method for nil-aware logic.
+	// Use the [Rows.RowIndex] method for nil-aware logic.
 	Indexes []int
 }
 
@@ -83,18 +86,10 @@ func (rw *Rows) NumRows() int {
 	return len(rw.Indexes)
 }
 
-// String satisfies the fmt.Stringer interface for string of tensor data.
-func (rw *Rows) String() string {
-	return sprint(rw.Tensor, 0) // todo: no need
-}
+func (rw *Rows) String() string { return sprint(rw.Tensor, 0) }
 
-// Label satisfies the core.Labeler interface for a summary description of the tensor.
-func (rw *Rows) Label() string {
-	return rw.Tensor.Label()
-}
+func (rw *Rows) Label() string { return rw.Tensor.Label() }
 
-// Metadata returns the metadata for this tensor, which can be used
-// to encode plotting options, etc.
 func (rw *Rows) Metadata() *metadata.Data { return rw.Tensor.Metadata() }
 
 // If we have Indexes, this is the effective shape sizes using

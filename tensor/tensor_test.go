@@ -144,31 +144,23 @@ func TestSliced(t *testing.T) {
 [0]:      23      22 
 [1]:      13      12 
 `
-
 	sl := NewSlicedIndexes(ft, []int{2, 1}, []int{3, 2})
 	// fmt.Println(sl)
 	assert.Equal(t, res, sl.String())
 
-	/*
+	vl := sl.AsValues()
+	assert.Equal(t, res, vl.String())
+	res = `[3, 1]
+[0]:       2 
+[1]:      12 
+[2]:      22 
+`
+	sl = NewSliced(ft, Slice{}, Slice{2, 3, 0})
+	// fmt.Println(sl)
+	assert.Equal(t, res, sl.String())
 
-		ft := NewFloat64(2, 3, 4)
-		for r := range 2 {
-			for y := range 3 {
-				for x := range 4 {
-					v := (r+1)*100 + y*10 + x
-					ft.SetFloat(float64(v), r, y, x)
-				}
-			}
-		}
-
-		fmt.Println(ft)
-
-		sl := NewSliced(ft, []int{1, 0}, []int{1, 0}, []int{1, 0})
-		fmt.Println(sl)
-
-				assert.Equal(t, res, sf.Tensor.String())
-	*/
-
+	vl = sl.AsValues()
+	assert.Equal(t, res, vl.String())
 }
 
 func TestMasked(t *testing.T) {
@@ -204,7 +196,39 @@ func TestMasked(t *testing.T) {
 `
 
 	vl := ms.AsValues()
-	// fmt.Println(vl.String())
+	assert.Equal(t, res, vl.String())
+}
+
+func TestIndexed(t *testing.T) {
+	ft := NewFloat64(3, 4)
+	for y := range 3 {
+		for x := range 4 {
+			v := y*10 + x
+			ft.SetFloat(float64(v), y, x)
+		}
+	}
+	ixs := NewIntFromSlice([]int{
+		0, 1,
+		0, 1,
+		0, 2,
+		0, 2,
+		1, 1,
+		1, 1,
+		2, 2,
+		2, 2,
+	}...)
+
+	ixs.SetShapeSizes(2, 2, 2, 2)
+	ix := NewIndexed(ft, ixs)
+
+	res := `[2, 2, 2]
+[0]:       1       1      11      11 
+[0]:       2       2      22      22 
+`
+	// fmt.Println(ix.String())
+	assert.Equal(t, res, ix.String())
+
+	vl := ix.AsValues()
 	assert.Equal(t, res, vl.String())
 }
 
