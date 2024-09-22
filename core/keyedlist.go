@@ -154,13 +154,13 @@ func (kl *KeyedList) Init() {
 					})
 				})
 			}
-			tree.AddAt(p, "edit-button", func(w *Button) {
-				w.SetIcon(icons.Edit).SetType(ButtonTonal)
-				w.Tooltip = "Edit in a dialog"
+			tree.AddAt(p, "open-button", func(w *Button) {
+				w.SetIcon(icons.OpenInFull).SetType(ButtonTonal)
+				w.Tooltip = "Open in a dialog"
 				w.OnClick(func(e events.Event) {
 					d := NewBody(kl.ValueTitle)
 					NewText(d).SetType(TextSupporting).SetText(kl.Tooltip)
-					NewKeyedList(d).SetMap(kl.Map).SetValueTitle(kl.ValueTitle)
+					NewKeyedList(d).SetMap(kl.Map).SetValueTitle(kl.ValueTitle).SetReadOnly(kl.IsReadOnly())
 					d.OnClose(func(e events.Event) {
 						kl.UpdateChange(e)
 					})

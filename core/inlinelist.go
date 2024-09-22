@@ -70,21 +70,19 @@ func (il *InlineList) Init() {
 				})
 			})
 		}
-		if !il.IsReadOnly() {
-			tree.AddAt(p, "edit-button", func(w *Button) {
-				w.SetIcon(icons.Edit).SetType(ButtonTonal)
-				w.Tooltip = "Edit list in a dialog"
-				w.OnClick(func(e events.Event) {
-					d := NewBody(il.ValueTitle)
-					NewText(d).SetType(TextSupporting).SetText(il.Tooltip)
-					NewList(d).SetSlice(il.Slice).SetValueTitle(il.ValueTitle)
-					d.OnClose(func(e events.Event) {
-						il.UpdateChange()
-					})
-					d.RunFullDialog(il)
+		tree.AddAt(p, "open-button", func(w *Button) {
+			w.SetIcon(icons.OpenInFull).SetType(ButtonTonal)
+			w.Tooltip = "Open in a dialog"
+			w.OnClick(func(e events.Event) {
+				d := NewBody(il.ValueTitle)
+				NewText(d).SetType(TextSupporting).SetText(il.Tooltip)
+				NewList(d).SetSlice(il.Slice).SetValueTitle(il.ValueTitle).SetReadOnly(il.IsReadOnly())
+				d.OnClose(func(e events.Event) {
+					il.UpdateChange()
 				})
+				d.RunFullDialog(il)
 			})
-		}
+		})
 	})
 }
 
