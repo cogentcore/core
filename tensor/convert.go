@@ -42,7 +42,7 @@ func New1DViewOf(tsr Values) Values {
 // Cells1D returns a flat 1D [Values] view of the cells for given row index.
 // This is useful for passing to other functions e.g.,
 // in stats or metrics that process a 1D tensor.
-func Cells1D(tsr RowCell, row int) Values {
+func Cells1D(tsr RowMajor, row int) Values {
 	return New1DViewOf(tsr.SubSpace(row))
 }
 

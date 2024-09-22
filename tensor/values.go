@@ -16,7 +16,7 @@ import (
 // This supports direct setting of the shape of the underlying values,
 // sub-space access to inner-dimensional subspaces of values, etc.
 type Values interface {
-	RowCell
+	RowMajor
 
 	// SetShape sets the dimension sizes as 1D int values from given tensor.
 	// The backing storage is resized appropriately, retaining all existing data that fits.

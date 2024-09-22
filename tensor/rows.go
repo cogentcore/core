@@ -681,4 +681,4 @@ func (rw *Rows) SetRowTensor(val Values, row int) {
 }
 
 // check for interface impl
-var _ RowCell = (*Rows)(nil)
+var _ RowMajor = (*Rows)(nil)
