@@ -15,7 +15,7 @@ import (
 
 func TestGaussianGen(t *testing.T) {
 	nsamp := int(1e6)
-	dt := table.NewTable()
+	dt := table.New()
 	dt.AddFloat32Column("Val")
 	dt.SetNumRows(nsamp)
 
@@ -45,7 +45,7 @@ func TestGaussianGen(t *testing.T) {
 
 func TestBinomialGen(t *testing.T) {
 	nsamp := int(1e6)
-	dt := table.NewTable()
+	dt := table.New()
 	dt.AddFloat32Column("Val")
 	dt.SetNumRows(nsamp)
 
@@ -82,7 +82,7 @@ func TestBinomialGen(t *testing.T) {
 
 func TestPoissonGen(t *testing.T) {
 	nsamp := int(1e6)
-	dt := table.NewTable()
+	dt := table.New()
 	dt.AddFloat32Column("Val")
 	dt.SetNumRows(nsamp)
 
@@ -119,7 +119,7 @@ func TestPoissonGen(t *testing.T) {
 
 func TestGammaGen(t *testing.T) {
 	nsamp := int(1e6)
-	dt := table.NewTable()
+	dt := table.New()
 	dt.AddFloat32Column("Val")
 	dt.SetNumRows(nsamp)
 
@@ -150,7 +150,7 @@ func TestGammaGen(t *testing.T) {
 
 func TestBetaGen(t *testing.T) {
 	nsamp := int(1e6)
-	dt := table.NewTable()
+	dt := table.New()
 	dt.AddFloat32Column("Val")
 	dt.SetNumRows(nsamp)
 

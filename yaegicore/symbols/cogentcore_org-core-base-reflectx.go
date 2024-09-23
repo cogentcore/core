@@ -17,6 +17,8 @@ func init() {
 		"CopySliceRobust":    reflect.ValueOf(reflectx.CopySliceRobust),
 		"FormatDefault":      reflect.ValueOf(reflectx.FormatDefault),
 		"KindIsBasic":        reflect.ValueOf(reflectx.KindIsBasic),
+		"KindIsFloat":        reflect.ValueOf(reflectx.KindIsFloat),
+		"KindIsInt":          reflect.ValueOf(reflectx.KindIsInt),
 		"KindIsNumber":       reflect.ValueOf(reflectx.KindIsNumber),
 		"LongTypeName":       reflect.ValueOf(reflectx.LongTypeName),
 		"MapAdd":             reflect.ValueOf(reflectx.MapAdd),

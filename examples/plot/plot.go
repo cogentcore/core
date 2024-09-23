@@ -19,7 +19,7 @@ var tsv embed.FS
 func main() {
 	b := core.NewBody("Plot Example")
 
-	epc := table.NewTable("epc")
+	epc := table.New("epc")
 	epc.OpenFS(tsv, "ra25epoch.tsv", tensor.Tab)
 
 	pl := plotcore.NewPlotEditor(b)
