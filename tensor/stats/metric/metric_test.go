@@ -90,7 +90,8 @@ func TestMatrix(t *testing.T) {
 	assert.NoError(t, err)
 	in := dt.Column("Input")
 	out := tensor.NewFloat64()
-	Matrix(Euclidean.FuncName(), in, out)
+	err = Matrix(Euclidean.FuncName(), in, out)
+	assert.NoError(t, err)
 	// fmt.Println(out.Tensor)
 	assert.Equal(t, simres, out.String())
 }
@@ -108,7 +109,8 @@ func TestPCAIris(t *testing.T) {
 	}
 	data := dt.Column("data")
 	covar := tensor.NewFloat64()
-	CovarianceMatrix(Correlation.FuncName(), data, covar)
+	err = CovarianceMatrix(Correlation.FuncName(), data, covar)
+	assert.NoError(t, err)
 	// fmt.Printf("correl: %s\n", covar.String())
 
 	vecs := tensor.NewFloat64()
@@ -125,7 +127,8 @@ func TestPCAIris(t *testing.T) {
 
 	colidx := tensor.NewFloat64Scalar(3) // strongest at end
 	prjns := tensor.NewFloat64()
-	ProjectOnMatrixColumn(vecs, data, colidx, prjns)
+	err = ProjectOnMatrixColumn(vecs, data, colidx, prjns)
+	assert.NoError(t, err)
 	// tensor.SaveCSV(prjns, "testdata/pca_projection.csv", tensor.Comma)
 	trgprjns := []float64{
 		2.6692308782935146,
@@ -146,7 +149,8 @@ func TestPCAIris(t *testing.T) {
 	////////////////////////////////////////////////////////////
 	//  	SVD
 
-	SVD(covar, vecs, vals)
+	err = SVD(covar, vecs, vals)
+	assert.NoError(t, err)
 	// fmt.Printf("correl vec: %v\n", vecs)
 	// fmt.Printf("correl val: %v\n", vals)
 	for i, v := range vals.Values {
@@ -154,7 +158,8 @@ func TestPCAIris(t *testing.T) {
 	}
 
 	colidx.SetFloat1D(0, 0) // strongest at start
-	ProjectOnMatrixColumn(vecs, data, colidx, prjns)
+	err = ProjectOnMatrixColumn(vecs, data, colidx, prjns)
+	assert.NoError(t, err)
 	// tensor.SaveCSV(prjns, "testdata/svd_projection.csv", tensor.Comma)
 	trgprjns = []float64{
 		-2.6692308782935172,

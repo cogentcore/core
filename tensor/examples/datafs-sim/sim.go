@@ -157,8 +157,8 @@ func (ss *Sim) Run() {
 	dir, _ := ss.Logs.Mkdir("Stats")
 	stats.TableGroups(dir, alldt, "Run", "Epoch", "Trial")
 	sts := []string{"SSE", "AvgSSE", "TrlErr"}
-	stats.TableGroupStats(dir, stats.Mean.FuncName(), alldt, sts...)
-	stats.TableGroupStats(dir, stats.Sem.FuncName(), alldt, sts...)
+	stats.TableGroupStats(dir, stats.Mean, alldt, sts...)
+	stats.TableGroupStats(dir, stats.Sem, alldt, sts...)
 
 }
 

@@ -26,13 +26,15 @@ func TestGroup(t *testing.T) {
 		dt.Column("Value").SetFloatRow(float64(i), i)
 	}
 	dir, _ := datafs.NewDir("Group")
-	TableGroups(dir, dt, "Name")
+	err := TableGroups(dir, dt, "Name")
+	assert.NoError(t, err)
 
 	ixs := dir.FlatValuesFunc(nil)
 	assert.Equal(t, []int{0, 1}, tensor.AsIntTensor(ixs[0]).Values)
 	assert.Equal(t, []int{2, 3}, tensor.AsIntTensor(ixs[1]).Values)
 
-	TableGroupStats(dir, Mean.FuncName(), dt, "Value")
+	err = TableGroupStats(dir, Mean, dt, "Value")
+	assert.NoError(t, err)
 
 	// AggColumn(spl, "Value", stats.Mean)
 	// st := spl.AggsToTable(table.ColumnNameOnly)

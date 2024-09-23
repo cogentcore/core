@@ -98,11 +98,17 @@ func (tsr *Base[T]) SetNumRows(rows int) {
 func (tsr *Base[T]) subSpaceImpl(offs ...int) *Base[T] {
 	nd := tsr.NumDims()
 	od := len(offs)
-	if od >= nd {
+	if od > nd {
 		return nil
 	}
+	var ssz []int
+	if od == nd { // scalar subspace
+		ssz = []int{1}
+	} else {
+		ssz = tsr.shape.Sizes[od:]
+	}
 	stsr := &Base[T]{}
-	stsr.SetShapeSizes(tsr.shape.Sizes[od:]...)
+	stsr.SetShapeSizes(ssz...)
 	sti := make([]int, nd)
 	copy(sti, offs)
 	stoff := tsr.shape.IndexTo1D(sti...)

@@ -2,15 +2,25 @@
 
 The `stats` package provides standard statistic computations operating on the `tensor.Tensor` standard data representation, using this standard function:
 ```Go
-type StatsFunc func(in, out tensor.Tensor)
+type StatsFunc func(in, out tensor.Tensor) error
 ```
 
-For 1D data, the output is a scalar value in the out tensor, and otherwise it is an n-dimensional "cell" with outermost row dimension set to 1. This is
+The stats functions always operate on the outermost _row_ dimension, and it is up to the caller to reshape the tensor to accomplish the desired results.
 
-All stats are registered in the `tensor.Funcs` global list, and can be called using the `FuncName` method, e.g.,:
+* To obtain a single summary statistic across all values, use `tensor.As1D`
+
+* For `RowMajor` data that is naturally organized as a single outer _rows_ dimension with the remaining inner dimensions comprising the _cells_, the results are the statistic for each such cell computed across the outer rows dimension (e.g., the "average" cell pattern for the `Mean` statistic).
+
+* Use `tensor.NewRowCellsView` to reshape any tensor into a 2D rows x cells shape, with the cells starting at a given dimension. Thus, any number of outer dimensions can be collapsed into the outer row dimension, and the remaining dimensions become the cells.
+
+By contrast, the [NumPy Statistics](https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean) functions take an `axis` dimension to compute over, but passing such arguments via the universal function calling api for tensors introduces complications, so it is simpler to just have a single designated behavior and reshape the data to achieve the desired results.
+
+All stats are registered in the `tensor.Funcs` global list (for use in Goal), and can be called through the `Stats` enum:
 ```Go
-tensor.Call(Mean.FuncName(), in, out)
+stats.Mean.Call(in, out)
 ```
+
+All stats functions (and all tensor functions more generally) skip over NaN's as a missing value, so they are equivalent to the `nanmean` etc versions in NumPy.
 
 ## Stats
 
@@ -40,15 +50,13 @@ The following statistics are supported (per the `Stats` enum in `stats.go`):
 
 Here is the general info associated with these function calls:
 
-`StatsFunc` is the function signature for a stats function, where the output has the same shape as the input but with the outermost row dimension size of 1, and contains the stat value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
-
-Critically, the stat is always computed over the outer row dimension, so each cell in a higher-dimensional output reflects the _row-wise_ stat for that cell across the different rows.  To compute a stat on the `tensor.SubSpace` cells themselves, must call on a `tensor.New1DViewOf` the `RowTensor`.  
-
-All stats functions skip over NaN's, as a missing value.
+`StatsFunc` is the function signature for a stats function, where the output must be a `tensor.Values` tensor, and is automatically shaped to hold the stat value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
 
 Stats functions cannot be computed in parallel, e.g., using VectorizeThreaded or GPU, due to shared writing to the same output values.  Special implementations are required if that is needed.
 
-## norm functions
+## Normalization functions
+
+The stats package also has the following standard normalization functions for transforming data into standard ranges in various ways:
 
 * `UnitNorm` subtracts `min` and divides by resulting `max` to normalize to 0..1 unit range.
 * `ZScore` subtracts the mean and divides by the standard deviation.
@@ -95,5 +103,5 @@ See the [examples/planets](../examples/planets) example for an interactive explo
 
 ## Vectorize functions
 
-See [vecfuncs.go](vecfuncs.go) for corresponding `tensor.Vectorize` functions that are used in performing the computations.  These cannot be parallelized directly due to shared writing to output accumulators, and other ordering constraints.  If needed, special atomic-locking or other such techniques would be required.
+See [vec.go](vec.go) for corresponding `tensor.Vectorize` functions that are used in performing the computations.  These cannot be parallelized directly due to shared writing to output accumulators, and other ordering constraints.  If needed, special atomic-locking or other such techniques would be required.
 

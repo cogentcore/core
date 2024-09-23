@@ -159,7 +159,7 @@ func AvgByColumn(files []string, column string) {
 			}
 			cols = append(cols, dt.Columns.Keys[ci])
 		}
-		stats.TableGroupStats(dir, stats.Mean.FuncName(), dt, cols...)
+		stats.TableGroupStats(dir, stats.Mean, dt, cols...)
 		std := dir.Item("Stats")
 		avgdt := std.GetDirTable(nil) // todo: has stat name slash
 		tensor.SetPrecision(avgdt.Meta, LogPrec)

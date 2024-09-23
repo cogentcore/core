@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
@@ -31,10 +30,10 @@ import (
 // rows, indirected through any existing indexes on the inputs, so that
 // the results can be used directly as Indexes into the corresponding tensor data.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
-func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) {
+func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 	gd, err := dir.RecycleDir("Groups")
-	if errors.Log(err) != nil {
-		return
+	if err != nil {
+		return err
 	}
 	makeIdxs := func(dir *datafs.Data, srt *tensor.Rows, val string, start, r int) {
 		n := r - start
@@ -85,35 +84,37 @@ func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) {
 			}
 		}
 	}
+	return nil
 }
 
 // TableGroups runs [Groups] on the given columns from given [table.Table].
-func TableGroups(dir *datafs.Data, dt *table.Table, columns ...string) {
+func TableGroups(dir *datafs.Data, dt *table.Table, columns ...string) error {
 	dv := table.NewView(dt)
 	// important for consistency across columns, to do full outer product sort first.
 	dv.SortColumns(tensor.Ascending, tensor.Stable, columns...)
-	Groups(dir, dv.ColumnList(columns...)...)
+	return Groups(dir, dv.ColumnList(columns...)...)
 }
 
 // GroupAll copies all indexes from the first given tensor,
 // into an "All/All" tensor in the given [datafs], which can then
 // be used with [GroupStats] to generate summary statistics across
 // all the data. See [Groups] for more general documentation.
-func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) {
+func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 	gd, err := dir.RecycleDir("Groups")
-	if errors.Log(err) != nil {
-		return
+	if err != nil {
+		return err
 	}
 	tsr := tensor.AsRows(tsrs[0])
 	nr := tsr.NumRows()
 	if nr == 0 {
-		return
+		return nil
 	}
 	td, _ := gd.Mkdir("All")
 	it := datafs.NewValue[int](td, "All", nr)
 	for j := range nr {
 		it.SetIntRow(tsr.RowIndex(j), j) // key to indirect through any existing indexes
 	}
+	return nil
 }
 
 // todo: GroupCombined
@@ -128,14 +129,14 @@ func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) {
 // a String tensor with the unique values of each source [Groups] tensor,
 // and a aligned Float64 tensor with the statistics results for each such
 // unique group value. See the README.md file for a diagram of the results.
-func GroupStats(dir *datafs.Data, stat string, tsrs ...tensor.Tensor) {
+func GroupStats(dir *datafs.Data, stat string, tsrs ...tensor.Tensor) error {
 	gd, err := dir.RecycleDir("Groups")
-	if errors.Log(err) != nil {
-		return
+	if err != nil {
+		return err
 	}
 	sd, err := dir.RecycleDir("Stats")
-	if errors.Log(err) != nil {
-		return
+	if err != nil {
+		return err
 	}
 	stnm := StripPackage(stat)
 	spl := strings.Split(stat, ".")
@@ -171,22 +172,28 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...tensor.Tensor) {
 			}
 		}
 	}
+	return nil
 }
 
-// TableGroupStats runs [GroupStats] on the given columns from given [table.Table].
-func TableGroupStats(dir *datafs.Data, stat string, dt *table.Table, columns ...string) {
-	GroupStats(dir, stat, dt.ColumnList(columns...)...)
+// TableGroupStats runs [GroupStats] using standard [Stats]
+// on the given columns from given [table.Table].
+func TableGroupStats(dir *datafs.Data, stat Stats, dt *table.Table, columns ...string) error {
+	return GroupStats(dir, stat.FuncName(), dt.ColumnList(columns...)...)
 }
 
 // GroupDescribe runs standard descriptive statistics on given tensor data
 // using [GroupStats] function, with [DescriptiveStats] list of stats.
-func GroupDescribe(dir *datafs.Data, tsrs ...tensor.Tensor) {
+func GroupDescribe(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 	for _, st := range DescriptiveStats {
-		GroupStats(dir, st.FuncName(), tsrs...)
+		err := GroupStats(dir, st.FuncName(), tsrs...)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // TableGroupDescribe runs [GroupDescribe] on the given columns from given [table.Table].
-func TableGroupDescribe(dir *datafs.Data, dt *table.Table, columns ...string) {
-	GroupDescribe(dir, dt.ColumnList(columns...)...)
+func TableGroupDescribe(dir *datafs.Data, dt *table.Table, columns ...string) error {
+	return GroupDescribe(dir, dt.ColumnList(columns...)...)
 }

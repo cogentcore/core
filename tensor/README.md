@@ -56,7 +56,7 @@ All tensor package functions are registered using a global name-to-function map 
 
 In general, **1D** refers to a flat, 1-dimensional list. There are various standard shapes of tensor data that different functions expect:
 
-* **Flat, 1D**: this is the simplest data shape, and any tensor can be turned into a flat 1D list using the `New1DView` function, which returns a `Reshaped` view. The [stats](stats) functions for example report summary statistics across the outermost row dimension, so converting data to this 1D view gives stats across all the data.
+* **Flat, 1D**: this is the simplest data shape, and any tensor can be turned into a flat 1D list using the `As1D` function, which either returns the tensor itself it is already 1D, or a `Reshaped` 1D view. The [stats](stats) functions for example report summary statistics across the outermost row dimension, so converting data to this 1D view gives stats across all the data.
 
 * **Row, Cell 2D**: This is the natural shape for tabular data, and the `RowMajor` type and `Rows` view provide methods for efficiently accessing data in this way. In addition, the [stats](stats) and [metric](metric) packages automatically compute statistics across the outermost row dimension, aggregating results across rows for each cell. Thus, you end up with the "average cell-wise pattern" when you do `stats.Mean` for example. The `NewRowCellsView` function returns a `Reshaped` view of any tensor organized into this 2D shape, with the row vs. cell split specified at any point in the list of dimensions, which can be useful in obtaining the desired results.
 

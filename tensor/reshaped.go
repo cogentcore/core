@@ -48,7 +48,7 @@ func NewReshaped(tsr Tensor, sizes ...int) *Reshaped {
 // and the remainder are collapsed to form the 1D cells dimension.
 // This is useful for stats, metrics and other packages that operate
 // on data in this shape.
-func NewRowCellsView(tsr Values, split int) *Reshaped {
+func NewRowCellsView(tsr Tensor, split int) *Reshaped {
 	sizes := tsr.ShapeSizes()
 	rows := sizes[:split]
 	cells := sizes[split:]
