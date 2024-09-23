@@ -19,6 +19,9 @@ func Vectorize3Out64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr
 	if n <= 0 {
 		return nil, nil, nil, nil
 	}
+	if err = tensor.MustBeSameShape(tsr[0], tsr[1]); err != nil {
+		return
+	}
 	nt := len(tsr)
 	osz := tensor.CellsSize(tsr[0].ShapeSizes())
 	out := tsr[nt-1]

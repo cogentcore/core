@@ -1,8 +1,17 @@
 # metric
 
-`metric` provides various similarity / distance metrics for comparing tensors, operating on the `tensor.Tensor` standard data representation.
+`metric` provides various similarity / distance metrics for comparing two tensors, operating on the `tensor.Tensor` standard data representation, using this standard function:
+```Go
+type MetricFunc func(a, b, out tensor.Tensor) error
+```
 
-The `Matrix` function returns a distance / similarity matrix computed from the n-dimensional "cells" of row-organized tensor data, and the `LabeledMatrix` type provides labels for displaying such matricies.
+The metric functions always operate on the outermost _row_ dimension, and it is up to the caller to reshape the tensors to accomplish the desired results. The two tensors must have the same shape.
+
+* To obtain a single summary metric across all values, use `tensor.As1D`.
+
+* For `RowMajor` data that is naturally organized as a single outer _rows_ dimension with the remaining inner dimensions comprising the _cells_, the results are the metric for each such cell computed across the outer rows dimension.  For the `Euclidean` metric for example, each cell has the difference for that cell value across all the rows between the two tensors. See [Matrix functions](#matrix-functions) below for a function that computes the distances _between each cell pattern and all the others_, as a distance or similarity matrix.
+
+* Use `tensor.NewRowCellsView` to reshape any tensor into a 2D rows x cells shape, with the cells starting at a given dimension. Thus, any number of outer dimensions can be collapsed into the outer row dimension, and the remaining dimensions become the cells.
 
 ## Metrics
 
@@ -27,15 +36,13 @@ The `Matrix` function returns a distance / similarity matrix computed from the n
 
 Here is general info about these functions:
 
-`MetricFunc` is the function signature for a metric function, where the output has the same shape as the inputs but with the outermost row dimension size of 1, and contains the metric value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
+The output must be a `tensor.Values` tensor, and it is automatically shaped to hold the stat value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
 
-Critically, the metric is always computed over the outer row dimension, so each cell in a higher-dimensional output reflects the _row-wise_ metric for that cell across the different rows.  To compute a metric on the `tensor.SubSpace` cells themselves, must call on a `tensor.New1DViewOf` the sub space.  See [simat](../simat) package.
-
-All metric functions skip over NaN's, as a missing value, and use the min of the length of the two tensors.
+All metric functions skip over NaN's, as a missing value.
 
 Metric functions cannot be computed in parallel, e.g., using VectorizeThreaded or GPU, due to shared writing to the same output values.  Special implementations are required if that is needed.
 
-## Matrix functions
+# Matrix functions
 
 * `Matrix` computes a distance / similarity matrix using a metric function, operating on the n-dimensional sub-space patterns on a given tensor (i.e., a row-wise list of patterns). The result is a square rows x rows matrix where each cell is the metric value for the pattern at the given row. The diagonal contains the self-similarity metric.
 

@@ -31,6 +31,14 @@ func MustBeValues(tsr Tensor) (Values, error) {
 	return vl, nil
 }
 
+// MustBeSameShape returns an error if the two tensors do not have the same shape.
+func MustBeSameShape(a, b Tensor) error {
+	if !a.Shape().IsEqual(b.Shape()) {
+		return errors.New("tensor.MustBeSameShape: tensors must have the same shape")
+	}
+	return nil
+}
+
 // SetShape sets the dimension sizes from given Shape
 func SetShape(vals Values, sh *Shape) {
 	vals.SetShapeSizes(sh.Sizes...)

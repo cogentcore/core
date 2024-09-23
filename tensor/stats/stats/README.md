@@ -4,18 +4,18 @@ The `stats` package provides standard statistic computations operating on the `t
 ```Go
 type StatsFunc func(in, out tensor.Tensor) error
 ```
-
+n
 The stats functions always operate on the outermost _row_ dimension, and it is up to the caller to reshape the tensor to accomplish the desired results.
 
-* To obtain a single summary statistic across all values, use `tensor.As1D`
+* To obtain a single summary statistic across all values, use `tensor.As1D`.
 
-* For `RowMajor` data that is naturally organized as a single outer _rows_ dimension with the remaining inner dimensions comprising the _cells_, the results are the statistic for each such cell computed across the outer rows dimension (e.g., the "average" cell pattern for the `Mean` statistic).
+* For `RowMajor` data that is naturally organized as a single outer _rows_ dimension with the remaining inner dimensions comprising the _cells_, the results are the statistic for each such cell computed across the outer rows dimension. For the `Mean` statistic for example, each cell contains the average of that cell across all the rows.
 
 * Use `tensor.NewRowCellsView` to reshape any tensor into a 2D rows x cells shape, with the cells starting at a given dimension. Thus, any number of outer dimensions can be collapsed into the outer row dimension, and the remaining dimensions become the cells.
 
 By contrast, the [NumPy Statistics](https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean) functions take an `axis` dimension to compute over, but passing such arguments via the universal function calling api for tensors introduces complications, so it is simpler to just have a single designated behavior and reshape the data to achieve the desired results.
 
-All stats are registered in the `tensor.Funcs` global list (for use in Goal), and can be called through the `Stats` enum:
+All stats are registered in the `tensor.Funcs` global list (for use in Goal), and can be called through the `Stats` enum e.g.:
 ```Go
 stats.Mean.Call(in, out)
 ```
@@ -50,7 +50,7 @@ The following statistics are supported (per the `Stats` enum in `stats.go`):
 
 Here is the general info associated with these function calls:
 
-`StatsFunc` is the function signature for a stats function, where the output must be a `tensor.Values` tensor, and is automatically shaped to hold the stat value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
+The output must be a `tensor.Values` tensor, and it is automatically shaped to hold the stat value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
 
 Stats functions cannot be computed in parallel, e.g., using VectorizeThreaded or GPU, due to shared writing to the same output values.  Special implementations are required if that is needed.
 

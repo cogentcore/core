@@ -13,15 +13,10 @@ import (
 )
 
 // MetricFunc is the function signature for a metric function,
-// where the output has the same shape as the inputs but with
-// the outermost row dimension size of 1, and contains
-// the metric value(s) for the "cells" in higher-dimensional tensors,
-// and a single scalar value for a 1D input tensor.
-// Critically, the metric is always computed over the outer row dimension,
-// so each cell in a higher-dimensional output reflects the _row-wise_
-// metric for that cell across the different rows.  To compute a metric
-// on the [tensor.SubSpace] cells themselves, must call on a
-// [tensor.New1DViewOf] the sub space.  See [simat] package.
+// which is computed over the outermost row dimension and the
+// output is the shape of the remaining inner cells (a scalar for 1D inputs).
+// Use [tensor.As1D], [tensor.NewRowCellsView], [tensor.Cells1D] etc
+// to reshape and reslice the data as needed.
 // All metric functions skip over NaN's, as a missing value,
 // and use the min of the length of the two tensors.
 // Metric functions cannot be computed in parallel,
@@ -33,6 +28,9 @@ type MetricFunc func(a, b, out tensor.Tensor) error
 // SumSquaresScaleOut64 computes the sum of squares differences between tensor values,
 // returning scale and ss factors aggregated separately for better numerical stability, per BLAS.
 func SumSquaresScaleOut64(a, b, out tensor.Tensor) (scale64, ss64 tensor.Tensor, err error) {
+	if err = tensor.MustBeSameShape(a, b); err != nil {
+		return
+	}
 	scale64, ss64, err = stats.Vectorize2Out64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecSSFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], 0, 1, func(a, b float64) float64 {
 			return a - b
@@ -98,6 +96,9 @@ func EuclideanFunc(a, b, out tensor.Tensor) error {
 // tensor values, aka the L1 Norm.
 // See [MetricFunc] for general information.
 func AbsFunc(a, b, out tensor.Tensor) error {
+	if err := tensor.MustBeSameShape(a, b); err != nil {
+		return err
+	}
 	_, err := stats.VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(a, b, agg float64) float64 {
 			return agg + math.Abs(a-b)
@@ -110,6 +111,9 @@ func AbsFunc(a, b, out tensor.Tensor) error {
 // i.e., "city block" distance.
 // See [MetricFunc] for general information.
 func HammingFunc(a, b, out tensor.Tensor) error {
+	if err := tensor.MustBeSameShape(a, b); err != nil {
+		return err
+	}
 	_, err := stats.VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(a, b, agg float64) float64 {
 			if a != b {
@@ -125,6 +129,9 @@ func HammingFunc(a, b, out tensor.Tensor) error {
 // with binary tolerance: differences < 0.5 are thresholded to 0.
 // returning scale and ss factors aggregated separately for better numerical stability, per BLAS.
 func SumSquaresBinTolScaleOut64(a, b, out tensor.Tensor) (scale64, ss64 tensor.Tensor, err error) {
+	if err = tensor.MustBeSameShape(a, b); err != nil {
+		return
+	}
 	scale64, ss64, err = stats.Vectorize2Out64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecSSFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], 0, 1, func(a, b float64) float64 {
 			d := a - b
@@ -192,6 +199,9 @@ func SumSquaresBinTolFunc(a, b, out tensor.Tensor) error {
 // a * log(a/b) + (1-a) * log(1-a/1-b).
 // See [MetricFunc] for general information.
 func CrossEntropyFunc(a, b, out tensor.Tensor) error {
+	if err := tensor.MustBeSameShape(a, b); err != nil {
+		return err
+	}
 	_, err := stats.VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(a, b, agg float64) float64 {
 			b = math32.Clamp(b, 0.000001, 0.999999)
@@ -211,6 +221,9 @@ func CrossEntropyFunc(a, b, out tensor.Tensor) error {
 // InnerProductFunc computes the sum of the co-products of the two on-NaN tensor values.
 // See [MetricFunc] for general information.
 func InnerProductFunc(a, b, out tensor.Tensor) error {
+	if err := tensor.MustBeSameShape(a, b); err != nil {
+		return err
+	}
 	_, err := stats.VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(a, b, agg float64) float64 {
 			return agg + a*b
@@ -223,6 +236,9 @@ func InnerProductFunc(a, b, out tensor.Tensor) error {
 // i.e., the mean of the co-product of each vector element minus
 // the mean of that vector: cov(A,B) = E[(A - E(A))(B - E(B))].
 func CovarianceFunc(a, b, out tensor.Tensor) error {
+	if err := tensor.MustBeSameShape(a, b); err != nil {
+		return err
+	}
 	amean, acount, err := stats.MeanOut64(a, out)
 	if err != nil {
 		return err
@@ -253,6 +269,9 @@ func CovarianceFunc(a, b, out tensor.Tensor) error {
 // Equivalent to the cosine of mean-normalized vectors.
 // Returns the Float64 output values for subsequent use.
 func CorrelationOut64(a, b, out tensor.Tensor) (tensor.Tensor, error) {
+	if err := tensor.MustBeSameShape(a, b); err != nil {
+		return nil, err
+	}
 	amean, _, err := stats.MeanOut64(a, out)
 	if err != nil {
 		return nil, err

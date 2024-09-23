@@ -11,14 +11,10 @@ import (
 )
 
 // StatsFunc is the function signature for a stats function,
-// where the output has the same shape as the input but with
-// the outermost row dimension size of 1, and contains
-// the stat value(s) for the "cells" in higher-dimensional tensors,
-// and a single scalar value for a 1D input tensor.
-// Critically, the stat is always computed over the outer row dimension,
-// so each cell in a higher-dimensional output reflects the _row-wise_
-// stat for that cell across the different rows. Use [tensor.NewRowCellsView],
-// [tensor.Cells1D], and [tensor.As1D] to reshape and reslice the data as needed.
+// which is computed over the outermost row dimension and the
+// output is the shape of the remaining inner cells (a scalar for 1D inputs).
+// Use [tensor.As1D], [tensor.NewRowCellsView], [tensor.Cells1D] etc
+// to reshape and reslice the data as needed.
 // All stats functions skip over NaN's, as a missing value.
 // Stats functions cannot be computed in parallel,
 // e.g., using VectorizeThreaded or GPU, due to shared writing
