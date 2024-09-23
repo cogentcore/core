@@ -217,11 +217,11 @@ const (
 	// Descending specifies a descending sort direction for tensor Sort routines
 	Descending = false
 
-	//	Stable specifies using stable, original order-preserving sort, which is slower.
-	Stable = true
+	// StableSort specifies using stable, original order-preserving sort, which is slower.
+	StableSort = true
 
-	//	Unstable specifies using faster but unstable sorting.
-	Unstable = false
+	// Unstable specifies using faster but unstable sorting.
+	UnstableSort = false
 )
 
 // SortFunc sorts the row-wise indexes using given compare function.
@@ -246,6 +246,8 @@ func (rw *Rows) SortIndexes() {
 	sort.Ints(rw.Indexes)
 }
 
+// CompareAscending is a sort compare function that reverses direction
+// based on the ascending bool.
 func CompareAscending[T cmp.Ordered](a, b T, ascending bool) int {
 	if ascending {
 		return cmp.Compare(a, b)
@@ -313,44 +315,44 @@ func (rw *Rows) Filter(filterer func(tsr Values, row int) bool) {
 	}
 }
 
-// Named arg values for FilterString
-const (
-	// Include means include matches
-	Include = false
-	// Exclude means exclude matches
-	Exclude = true
-	// Contains means the string only needs to contain the target string (see Equals)
-	Contains = true
-	// Equals means the string must equal the target string (see Contains)
-	Equals = false
-	// IgnoreCase means that differences in case are ignored in comparing strings
-	IgnoreCase = true
-	// UseCase means that case matters when comparing strings
-	UseCase = false
-)
+// FilterOptions are options to a Filter function
+// determining how the string filter value is used for matching.
+type FilterOptions struct { //types:add
+
+	// Exclude means to exclude matches,
+	// with the default (false) being to include
+	Exclude bool
+
+	// Contains means the string only needs to contain the target string,
+	// with the default (false) requiring a complete match to entire string.
+	Contains bool
+
+	// IgnoreCase means that differences in case are ignored in comparing strings,
+	// with the default (false) using case.
+	IgnoreCase bool
+}
 
 // FilterString filters the indexes using string values compared to given
-// string. Includes rows with matching values unless exclude is set.
-// If contains, only checks if row contains string; if ignoreCase, ignores case.
-// Use the named const args [Include], [Exclude], [Contains], [Equals],
-// [IgnoreCase], [UseCase] for greater clarity.
+// string. Includes rows with matching values unless the Exclude option is set.
+// If Contains option is set, it only checks if row contains string;
+// if IgnoreCase, ignores case, otherwise filtering is case sensitive.
 // Uses first cell of higher dimensional data.
-func (rw *Rows) FilterString(str string, exclude, contains, ignoreCase bool) { //types:add
+func (rw *Rows) FilterString(str string, opts FilterOptions) { //types:add
 	lowstr := strings.ToLower(str)
 	rw.Filter(func(tsr Values, row int) bool {
 		val := tsr.StringRowCell(row, 0)
 		has := false
 		switch {
-		case contains && ignoreCase:
+		case opts.Contains && opts.IgnoreCase:
 			has = strings.Contains(strings.ToLower(val), lowstr)
-		case contains:
+		case opts.Contains:
 			has = strings.Contains(val, str)
-		case ignoreCase:
+		case opts.IgnoreCase:
 			has = strings.EqualFold(val, str)
 		default:
 			has = (val == str)
 		}
-		if exclude {
+		if opts.Exclude {
 			return !has
 		}
 		return has

@@ -196,19 +196,18 @@ func (dt *Table) Filter(filterer func(dt *Table, row int) bool) {
 }
 
 // FilterString filters the indexes using string values in column compared to given
-// string. Includes rows with matching values unless exclude is set.
-// If contains, only checks if row contains string; if ignoreCase, ignores case.
-// Use the named const args [tensor.Include], [tensor.Exclude], [tensor.Contains],
-// [tensor.Equals], [tensor.IgnoreCase], [tensor.UseCase] for greater clarity.
+// string. Includes rows with matching values unless the Exclude option is set.
+// If Contains option is set, it only checks if row contains string;
+// if IgnoreCase, ignores case, otherwise filtering is case sensitive.
 // Uses first cell from higher dimensions.
 // Returns error if column name not found.
-func (dt *Table) FilterString(columnName string, str string, exclude, contains, ignoreCase bool) error { //types:add
+func (dt *Table) FilterString(columnName string, str string, opts tensor.FilterOptions) error { //types:add
 	dt.IndexesNeeded()
 	cl, err := dt.ColumnTry(columnName)
 	if err != nil {
 		return err
 	}
-	cl.FilterString(str, exclude, contains, ignoreCase)
+	cl.FilterString(str, opts)
 	dt.IndexesFromTensor(cl)
 	return nil
 }

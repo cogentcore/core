@@ -98,7 +98,7 @@ func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 func TableGroups(dir *datafs.Data, dt *table.Table, columns ...string) error {
 	dv := table.NewView(dt)
 	// important for consistency across columns, to do full outer product sort first.
-	dv.SortColumns(tensor.Ascending, tensor.Stable, columns...)
+	dv.SortColumns(tensor.Ascending, tensor.StableSort, columns...)
 	return Groups(dir, dv.ColumnList(columns...)...)
 }
 
