@@ -213,10 +213,10 @@ func (dt *Table) FilterString(columnName string, str string, exclude, contains, 
 	return nil
 }
 
-// NewTable returns a new table with column data organized according to
+// New returns a new table with column data organized according to
 // the indexes.  If Indexes are nil, a clone of the current tensor is returned
 // but this function is only sensible if there is an indexed view in place.
-func (dt *Table) NewTable() *Table {
+func (dt *Table) New() *Table {
 	if dt.Indexes == nil {
 		return dt.Clone()
 	}
@@ -239,7 +239,7 @@ func (dt *Table) NewTable() *Table {
 
 // DeleteRows deletes n rows of Indexes starting at given index in the list of indexes.
 // This does not affect the underlying tensor data; To create an actual in-memory
-// ordering with rows deleted, use [Table.NewTable].
+// ordering with rows deleted, use [Table.New].
 func (dt *Table) DeleteRows(at, n int) {
 	dt.IndexesNeeded()
 	dt.Indexes = append(dt.Indexes[:at], dt.Indexes[at+n:]...)

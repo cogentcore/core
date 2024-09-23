@@ -7,6 +7,7 @@ package stats
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/tmath"
 )
 
 // ZScore computes Z-normalized values into given output tensor,

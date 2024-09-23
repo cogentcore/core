@@ -110,7 +110,7 @@ func RawCat(files []string) {
 func AvgCat(files []string) {
 	dts := make([]*table.Table, 0, len(files))
 	for _, fn := range files {
-		dt := table.NewTable()
+		dt := table.New()
 		err := dt.OpenCSV(core.Filename(fn), tensor.Tab)
 		if err != nil {
 			fmt.Println("Error opening file: ", err)
@@ -136,7 +136,7 @@ func AvgCat(files []string) {
 // If column is empty, averages across all rows.
 func AvgByColumn(files []string, column string) {
 	for _, fn := range files {
-		dt := table.NewTable()
+		dt := table.New()
 		err := dt.OpenCSV(core.Filename(fn), tensor.Tab)
 		if err != nil {
 			fmt.Println("Error opening file: ", err)

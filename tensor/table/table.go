@@ -42,9 +42,9 @@ type Table struct { //types:add
 	Meta metadata.Data
 }
 
-// NewTable returns a new Table with its own (empty) set of Columns.
+// New returns a new Table with its own (empty) set of Columns.
 // Can pass an optional name which calls metadata SetName.
-func NewTable(name ...string) *Table {
+func New(name ...string) *Table {
 	dt := &Table{}
 	dt.Columns = NewColumns()
 	if len(name) > 0 {
@@ -250,7 +250,7 @@ func (dt *Table) AddRows(n int) *Table { //types:add
 
 // InsertRows adds n rows to end of underlying Table, and to the indexes starting at
 // given index in this view, providing an efficient insertion operation that only
-// exists in the indexed view. To create an in-memory ordering, use [Table.NewTable].
+// exists in the indexed view. To create an in-memory ordering, use [Table.New].
 func (dt *Table) InsertRows(at, n int) *Table {
 	dt.IndexesNeeded()
 	strow := dt.Columns.Rows
@@ -299,7 +299,7 @@ func (dt *Table) SetNumRowsToMax() {
 
 // Clone returns a complete copy of this table, including cloning
 // the underlying Columns tensors, and the current [Table.Indexes].
-// See also [Table.NewTable] to flatten the current indexes.
+// See also [Table.New] to flatten the current indexes.
 func (dt *Table) Clone() *Table {
 	cp := &Table{}
 	cp.Columns = dt.Columns.Clone()

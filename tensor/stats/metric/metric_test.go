@@ -85,7 +85,7 @@ func TestMatrix(t *testing.T) {
 [10]: 5.291502622129181 6.324555320336759 9.38083151964686 9.797958971132712 8.831760866327848 9.486832980505138 4.242640687119285 5.477225575051661 9.16515138991168 9.539392014169456       0 3.4641016151377544 
 [11]: 6.324555320336759 5.291502622129181 9.899494936611665 9.273618495495704 9.38083151964686 8.94427190999916 5.477225575051661 4.242640687119285 9.695359714832659       9 3.4641016151377544       0 
 `
-	dt := table.NewTable()
+	dt := table.New()
 	err := dt.OpenCSV("../cluster/testdata/faces.dat", tensor.Tab)
 	assert.NoError(t, err)
 	in := dt.Column("Input")
@@ -99,7 +99,7 @@ func TestPCAIris(t *testing.T) {
 	// note: these results are verified against this example:
 	// https://plot.ly/ipython-notebooks/principal-component-analysis/
 
-	dt := table.NewTable()
+	dt := table.New()
 	dt.AddFloat64Column("data", 4)
 	dt.AddStringColumn("class")
 	err := dt.OpenCSV("testdata/iris.data", tensor.Comma)

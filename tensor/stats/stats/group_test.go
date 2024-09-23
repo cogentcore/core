@@ -14,7 +14,7 @@ import (
 )
 
 func TestGroup(t *testing.T) {
-	dt := table.NewTable().SetNumRows(4)
+	dt := table.New().SetNumRows(4)
 	dt.AddStringColumn("Name")
 	dt.AddFloat32Column("Value")
 	for i := range dt.NumRows() {
@@ -44,7 +44,7 @@ func TestGroup(t *testing.T) {
 
 /*
 func TestAggEmpty(t *testing.T) {
-	dt := table.NewTable().SetNumRows(4)
+	dt := table.New().SetNumRows(4)
 	dt.AddStringColumn("Group")
 	dt.AddFloat32Column("Value")
 	for i := 0; i < dt.Rows; i++ {

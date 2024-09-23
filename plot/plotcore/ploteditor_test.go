@@ -21,7 +21,7 @@ type Data struct {
 func TestTablePlotEditor(t *testing.T) {
 	b := core.NewBody()
 
-	epc := table.NewTable("epc")
+	epc := table.New("epc")
 	epc.OpenCSV("testdata/ra25epoch.tsv", tensor.Tab)
 
 	pl := NewPlotEditor(b)

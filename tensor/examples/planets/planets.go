@@ -27,7 +27,7 @@ var csv embed.FS
 //
 //	https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html
 func AnalyzePlanets(dir *datafs.Data) {
-	Planets := table.NewTable("planets")
+	Planets := table.New("planets")
 	Planets.OpenFS(csv, "planets.csv", tensor.Comma)
 
 	vals := []string{"number", "orbital_period", "mass", "distance", "year"}

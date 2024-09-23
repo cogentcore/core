@@ -15,7 +15,7 @@ func TestTableHeaders(t *testing.T) {
 	hdrstr := `$Name	%Input[2:0,0]<2:5,5>	%Input[2:1,0]	%Input[2:2,0]	%Input[2:3,0]	%Input[2:4,0]	%Input[2:0,1]	%Input[2:1,1]	%Input[2:2,1]	%Input[2:3,1]	%Input[2:4,1]	%Input[2:0,2]	%Input[2:1,2]	%Input[2:2,2]	%Input[2:3,2]	%Input[2:4,2]	%Input[2:0,3]	%Input[2:1,3]	%Input[2:2,3]	%Input[2:3,3]	%Input[2:4,3]	%Input[2:0,4]	%Input[2:1,4]	%Input[2:2,4]	%Input[2:3,4]	%Input[2:4,4]	%Output[2:0,0]<2:5,5>	%Output[2:1,0]	%Output[2:2,0]	%Output[2:3,0]	%Output[2:4,0]	%Output[2:0,1]	%Output[2:1,1]	%Output[2:2,1]	%Output[2:3,1]	%Output[2:4,1]	%Output[2:0,2]	%Output[2:1,2]	%Output[2:2,2]	%Output[2:3,2]	%Output[2:4,2]	%Output[2:0,3]	%Output[2:1,3]	%Output[2:2,3]	%Output[2:3,3]	%Output[2:4,3]	%Output[2:0,4]	%Output[2:1,4]	%Output[2:2,4]	%Output[2:3,4]	%Output[2:4,4]	`
 
 	hdrs := strings.Split(hdrstr, "\t")
-	dt := NewTable()
+	dt := New()
 	err := ConfigFromHeaders(dt, hdrs, nil)
 	if err != nil {
 		t.Error(err)
@@ -69,7 +69,7 @@ func TestReadTableDat(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		dt := NewTable()
+		dt := New()
 		err = dt.ReadCSV(fp, '\t') // tsv
 		if err != nil {
 			t.Error(err)

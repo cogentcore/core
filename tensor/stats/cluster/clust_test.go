@@ -28,7 +28,7 @@ var clustres = `
 			3.605551275463989: Wendy_sad Wendy_happy `
 
 func TestClust(t *testing.T) {
-	dt := table.NewTable()
+	dt := table.New()
 	err := dt.OpenCSV("testdata/faces.dat", tensor.Tab)
 	if err != nil {
 		t.Error(err)

@@ -370,7 +370,7 @@ func (d *Data) GetDirTable(fun func(item *Data) bool) *table.Table {
 		return d.DirTable
 	}
 	its := d.FlatItemsFunc(fun)
-	dt := table.NewTable(fsx.DirAndFile(string(d.Path())))
+	dt := table.New(fsx.DirAndFile(string(d.Path())))
 	for _, it := range its {
 		tsr := it.Data
 		rows := tsr.DimSize(0)

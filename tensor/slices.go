@@ -14,7 +14,7 @@ package tensor
 // the zero value results in a list of all values in the dimension, with Step = 1 if 0.
 // The behavior is identical to the NumPy slice.
 type Slice struct {
-	// Starting value. If 0 and Step < 0, = size-1;
+	// Start is the starting value. If 0 and Step < 0, = size-1;
 	// If negative, = size+Start.
 	Start int
 
@@ -33,8 +33,8 @@ func NewSlice(start, stop, step int) Slice {
 	return Slice{Start: start, Stop: stop, Step: step}
 }
 
-// StartActual is the actual start value given the size of the dimension.
-func (sl Slice) StartActual(size int) int {
+// GetStart is the actual start value given the size of the dimension.
+func (sl Slice) GetStart(size int) int {
 	if sl.Start == 0 && sl.Step < 0 {
 		return size - 1
 	}
@@ -44,8 +44,8 @@ func (sl Slice) StartActual(size int) int {
 	return sl.Start
 }
 
-// StopActual is the actual end value given the size of the dimension.
-func (sl Slice) StopActual(size int) int {
+// GetStop is the actual end value given the size of the dimension.
+func (sl Slice) GetStop(size int) int {
 	if sl.Stop == 0 && sl.Step >= 0 {
 		return size
 	}
@@ -58,8 +58,8 @@ func (sl Slice) StopActual(size int) int {
 	return min(sl.Stop, size)
 }
 
-// StepActual is the actual increment value.
-func (sl Slice) StepActual() int {
+// GetStep is the actual increment value.
+func (sl Slice) GetStep() int {
 	if sl.Step == 0 {
 		return 1
 	}
@@ -69,9 +69,9 @@ func (sl Slice) StepActual() int {
 // Len is the number of elements in the actual slice given
 // size of the dimension.
 func (sl Slice) Len(size int) int {
-	s := sl.StartActual(size)
-	e := sl.StopActual(size)
-	i := sl.StepActual()
+	s := sl.GetStart(size)
+	e := sl.GetStop(size)
+	i := sl.GetStep()
 	n := max((e-s)/i, 0)
 	pe := s + n*i
 	if i < 0 {
@@ -94,9 +94,9 @@ func (sl Slice) ToIntSlice(size int, ints []int) {
 	if n == 0 {
 		return
 	}
-	s := sl.StartActual(size)
-	e := sl.StopActual(size)
-	inc := sl.StepActual()
+	s := sl.GetStart(size)
+	e := sl.GetStop(size)
+	inc := sl.GetStep()
 	idx := 0
 	if inc < 0 {
 		for i := s; i > e; i += inc {

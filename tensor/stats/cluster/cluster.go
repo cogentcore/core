@@ -19,7 +19,7 @@ import (
 // todo: all of this data goes into the datafs
 // Cluster makes a new dir, stuffs results in there!
 // need a global "cwd" that it uses, so basically you cd
-// to a dir, then cal it.
+// to a dir, then call it.
 
 // Node is one node in the cluster
 type Node struct {

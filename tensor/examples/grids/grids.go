@@ -18,7 +18,7 @@ import (
 var tsv embed.FS
 
 func main() {
-	pats := table.NewTable("TrainPats")
+	pats := table.New("TrainPats")
 	pats.Meta.SetDoc("Training patterns")
 	// todo: meta data for grid size
 	errors.Log(pats.OpenFS(tsv, "random_5x5_25.tsv", tensor.Tab))

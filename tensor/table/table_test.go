@@ -13,7 +13,7 @@ import (
 )
 
 func TestAdd3DCol(t *testing.T) {
-	dt := NewTable()
+	dt := New()
 	dt.AddFloat32Column("Values", 11, 1, 16)
 
 	col := dt.Column("Values").Tensor
@@ -39,7 +39,7 @@ func TestAdd3DCol(t *testing.T) {
 }
 
 func NewTestTable() *Table {
-	dt := NewTable()
+	dt := New()
 	dt.AddStringColumn("Str")
 	dt.AddFloat64Column("Flt64")
 	dt.AddIntColumn("Int")
@@ -114,7 +114,7 @@ func TestInsertDeleteRows(t *testing.T) {
 }
 
 func TestCells(t *testing.T) {
-	dt := NewTable()
+	dt := New()
 	err := dt.OpenCSV("../stats/cluster/testdata/faces.dat", tensor.Tab)
 	assert.NoError(t, err)
 	in := dt.Column("Input")

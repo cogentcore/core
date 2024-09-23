@@ -22,7 +22,7 @@ func NewSliceTable(st any) (*Table, error) {
 	if eltyp.Kind() != reflect.Struct {
 		return nil, fmt.Errorf("NewSliceTable: element type is not a struct")
 	}
-	dt := NewTable()
+	dt := New()
 
 	for i := 0; i < eltyp.NumField(); i++ {
 		f := eltyp.Field(i)

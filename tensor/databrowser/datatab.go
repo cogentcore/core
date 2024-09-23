@@ -34,7 +34,7 @@ func NewTab[T any](br *Browser, label string, mkfun func(tab *core.Frame) T) T {
 func (br *Browser) NewTabTensorTable(label string, dt *table.Table) *tensorcore.Table {
 	tv := NewTab[*tensorcore.Table](br, label, func(tab *core.Frame) *tensorcore.Table {
 		tb := core.NewToolbar(tab)
-		tv := tensorcore.NewTable(tab)
+		tv := tensorcore.New(tab)
 		tb.Maker(tv.MakeToolbar)
 		return tv
 	})
@@ -85,7 +85,7 @@ func (br *Browser) NewTabPlot(label string, dt *table.Table) *plotcore.PlotEdito
 // to view the given slice of structs.
 func (br *Browser) NewTabSliceTable(label string, slc any) *core.Table {
 	tv := NewTab[*core.Table](br, label, func(tab *core.Frame) *core.Table {
-		return core.NewTable(tab)
+		return core.New(tab)
 	})
 	tv.SetSlice(slc)
 	br.Update()

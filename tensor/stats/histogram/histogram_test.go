@@ -20,7 +20,7 @@ func TestHistogram64(t *testing.T) {
 	assert.Equal(t, ex, res)
 
 	// exvals := []float64{0, 0.3333, 0.6667}
-	// dt := table.NewTable()
+	// dt := table.New()
 	// F64Table(dt, vals, 3, 0, 1)
 	// for ri, v := range ex {
 	// 	vv := dt.Float("Value", ri)
