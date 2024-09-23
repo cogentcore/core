@@ -71,9 +71,9 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 		tensor.SetCalcFunc(lt, func() error {
 			trl := ss.Stats.Item("Trial").AsInt()
 			if st.IsString() {
-				lt.SetStringRow(st.StringRow(0), trl)
+				lt.SetStringRow(st.String1D(0), trl)
 			} else {
-				lt.SetFloatRow(st.FloatRow(0), trl)
+				lt.SetFloatRow(st.Float1D(0), trl)
 			}
 			return nil
 		})
@@ -89,9 +89,9 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 			row := lt.DimSize(0)
 			lt.SetShapeSizes(row + 1)
 			if st.IsString() {
-				lt.SetStringRow(st.StringRow(0), row)
+				lt.SetStringRow(st.String1D(0), row)
 			} else {
-				lt.SetFloatRow(st.FloatRow(0), row)
+				lt.SetFloatRow(st.Float1D(0), row)
 			}
 			return nil
 		})
@@ -118,7 +118,7 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 				lt := dd.NewOfType(ag.String(), st.DataType(), nctr)
 				lt.Metadata().Copy(*st.Metadata())
 				tensor.SetCalcFunc(lt, func() error {
-					stats.Stat(ag, src, stout)
+					ag.Call(src, stout)
 					ctr := ss.Stats.Item(level).AsInt()
 					lt.SetFloatRow(stout.FloatRow(0), ctr)
 					return nil
@@ -128,7 +128,7 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 			lt := logd.NewOfType(nm, st.DataType(), nctr)
 			lt.Metadata().Copy(*st.Metadata())
 			tensor.SetCalcFunc(lt, func() error {
-				v := st.FloatRow(0)
+				v := st.Float1D(0)
 				ctr := ss.Stats.Item(level).AsInt()
 				lt.SetFloatRow(v, ctr)
 				return nil

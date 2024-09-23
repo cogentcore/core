@@ -23,7 +23,7 @@ func TestOps(t *testing.T) {
 	oneout := oned.Clone()
 
 	cell2d := tensor.NewFloat32(5, 12)
-	_, cells := cell2d.RowCellSize()
+	_, cells := cell2d.Shape().RowCellSize()
 	assert.Equal(t, cells, 12)
 	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
 		ci := idx % cells

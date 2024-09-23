@@ -88,7 +88,7 @@ type GLM struct {
 	Table *table.Table
 
 	// tensor columns from table with the respective variables
-	IndepVars, DepVars, PredVars, ErrVars tensor.Tensor
+	IndepVars, DepVars, PredVars, ErrVars tensor.RowMajor
 
 	// Number of independent and dependent variables
 	NIndepVars, NDepVars int
@@ -126,7 +126,7 @@ func (glm *GLM) init(nIv, nDv int) {
 func (glm *GLM) SetTable(dt *table.Table, indepVars, depVars, predVars, errVars string) error {
 	iv := dt.Column(indepVars)
 	dv := dt.Column(depVars)
-	var pv, ev tensor.Tensor
+	var pv, ev *tensor.Rows
 	if predVars != "" {
 		pv = dt.Column(predVars)
 	}
@@ -139,8 +139,8 @@ func (glm *GLM) SetTable(dt *table.Table, indepVars, depVars, predVars, errVars 
 	if ev != nil && !ev.Shape().IsEqual(dv.Shape()) {
 		return fmt.Errorf("errVars must have same shape as depVars")
 	}
-	_, nIv := iv.RowCellSize()
-	_, nDv := dv.RowCellSize()
+	_, nIv := iv.Shape().RowCellSize()
+	_, nDv := dv.Shape().RowCellSize()
 	glm.init(nIv, nDv)
 	glm.Table = dt
 	glm.IndepVars = iv
@@ -163,10 +163,10 @@ func (glm *GLM) Run() {
 	ev := glm.ErrVars
 
 	if pv == nil {
-		pv = dv.Clone()
+		pv = tensor.Clone(dv)
 	}
 	if ev == nil {
-		ev = dv.Clone()
+		ev = tensor.Clone(dv)
 	}
 
 	nDv := glm.NDepVars

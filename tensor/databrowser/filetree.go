@@ -140,7 +140,7 @@ func (fn *FileNode) OpenFile() error {
 			d.RunDialog(br)
 
 		default:
-			dt := table.NewTable()
+			dt := table.New()
 			err := dt.OpenCSV(fn.Filepath, tensor.Tab) // todo: need more flexible data handling mode
 			if err != nil {
 				core.ErrorSnackbar(br, err)
@@ -221,7 +221,7 @@ func (fn *FileNode) PlotFile() {
 		switch fn.Info.Known {
 		case fileinfo.Tensor:
 			tsr := d.Data
-			dt = table.NewTable(df)
+			dt = table.New(df)
 			dt.Columns.Rows = tsr.DimSize(0)
 			if ix, ok := tsr.(*tensor.Rows); ok {
 				dt.Indexes = ix.Indexes
@@ -230,11 +230,11 @@ func (fn *FileNode) PlotFile() {
 			for r := range dt.Columns.Rows {
 				rc.Values[r] = r
 			}
-			dt.AddColumn(fn.Name, tsr)
+			dt.AddColumn(fn.Name, tsr.AsValues())
 		// case fileinfo.Table:
 		// 	dt = d.AsTable()
 		default:
-			dt = table.NewTable(df)
+			dt = table.New(df)
 			err := dt.OpenCSV(fn.Filepath, tensor.Tab) // todo: need more flexible data handling mode
 			if err != nil {
 				core.ErrorSnackbar(br, err)

@@ -229,22 +229,25 @@ func SVD(covar, eigenvecs, vals tensor.Tensor) error {
 // This is typically done with results from SVD or PCA.
 func ProjectOnMatrixColumn(mtx, vec, colindex, out tensor.Tensor) error {
 	ci := int(colindex.Float1D(0))
-	col := tensor.NewSliced(mtx, tensor.Slice{}, tensor.Slice{Start: ci, Stop: ci + 1})
+	col := tensor.As1D(tensor.NewSliced(mtx, tensor.Slice{}, tensor.Slice{Start: ci, Stop: ci + 1}))
 	// fmt.Println(mtx.String(), col.String())
 	rows, cells := vec.Shape().RowCellSize()
-	mout := tensor.NewFloat64()
 	if rows > 0 && cells > 0 {
 		msum := tensor.NewFloat64Scalar(0)
 		if err := tensor.SetShapeSizesMustBeValues(out, rows); err != nil {
 			return err
 		}
+		mout := tensor.NewFloat64(cells)
 		for i := range rows {
-			tmath.Mul(tensor.Cells1D(vec, i), col, mout)
+			err := tmath.Mul(tensor.Cells1D(vec, i), col, mout)
+			if err != nil {
+				return err
+			}
 			stats.SumFunc(mout, msum)
-			// fmt.Println(tensor.Cells1D(vec, i).String(), mout.String(), msum.String())
 			out.SetFloat1D(msum.Float1D(0), i)
 		}
 	} else {
+		mout := tensor.NewFloat64(1)
 		tmath.Mul(vec, col, mout)
 		stats.SumFunc(mout, out)
 	}

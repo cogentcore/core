@@ -15,13 +15,13 @@ import (
 // using a row-based tensor organization (as in an table.Table).
 // dest will have np * src.Rows Rows, filled with each processor's data, in order.
 // dest must have same overall shape as src at start, but rows will be enforced.
-func GatherTensorRows(dest, src tensor.Tensor, comm *mpi.Comm) error {
+func GatherTensorRows(dest, src tensor.Values, comm *mpi.Comm) error {
 	dt := src.DataType()
 	if dt == reflect.String {
 		return GatherTensorRowsString(dest.(*tensor.String), src.(*tensor.String), comm)
 	}
-	sr, _ := src.RowCellSize()
-	dr, _ := dest.RowCellSize()
+	sr, _ := src.Shape().RowCellSize()
+	dr, _ := dest.Shape().RowCellSize()
 	np := mpi.WorldSize()
 	dl := np * sr
 	if dr != dl {
@@ -62,8 +62,8 @@ func GatherTensorRows(dest, src tensor.Tensor, comm *mpi.Comm) error {
 // dest will have np * src.Rows Rows, filled with each processor's data, in order.
 // dest must have same overall shape as src at start, but rows will be enforced.
 func GatherTensorRowsString(dest, src *tensor.String, comm *mpi.Comm) error {
-	sr, _ := src.RowCellSize()
-	dr, _ := dest.RowCellSize()
+	sr, _ := src.Shape().RowCellSize()
+	dr, _ := dest.Shape().RowCellSize()
 	np := mpi.WorldSize()
 	dl := np * sr
 	if dr != dl {
@@ -112,14 +112,14 @@ func GatherTensorRowsString(dest, src *tensor.String, comm *mpi.Comm) error {
 // IMPORTANT: src and dest must be different slices!
 // each processor must have the same shape and organization for this to make sense.
 // does nothing for strings.
-func ReduceTensor(dest, src tensor.Tensor, comm *mpi.Comm, op mpi.Op) error {
+func ReduceTensor(dest, src tensor.Values, comm *mpi.Comm, op mpi.Op) error {
 	dt := src.DataType()
 	if dt == reflect.String {
 		return nil
 	}
 	slen := src.Len()
 	if slen != dest.Len() {
-		tensor.SetShapeFromMustBeValues(dest, src)
+		tensor.SetShapeFrom(dest, src)
 	}
 	var err error
 	switch dt {
