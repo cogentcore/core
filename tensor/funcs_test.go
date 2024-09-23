@@ -36,16 +36,18 @@ func TestFuncs(t *testing.T) {
 	oned := NewNumberFromValues(vals...)
 	oneout := oned.Clone()
 
-	err = Call("Abs", oned, oneout)
+	fn, err := FuncByName("Abs")
+	assert.NoError(t, err)
+	err = fn.Call(oned, oneout)
 	assert.NoError(t, err)
 
 	assert.Equal(t, 1.507556722888818, oneout.Float1D(0))
 
-	err = Call("Abs", oned)
+	err = fn.Call(oned)
 	assert.Error(t, err)
 
-	out := CallOut("Abs", oned)
-	// assert.NoError(t, err)
+	out, err := fn.CallOut(oned)
+	assert.NoError(t, err)
 	assert.Equal(t, AsFloat64Scalar(oneout), AsFloat64Scalar(out))
 }
 

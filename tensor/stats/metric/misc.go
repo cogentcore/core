@@ -11,19 +11,23 @@ import (
 )
 
 func init() {
-	tensor.AddFunc("ClosestRow", ClosestRow, 1, tensor.StringFirstArg)
+	tensor.AddFunc("metric.ClosestRow", ClosestRow, 1, tensor.AnyFirstArg)
 }
 
 // ClosestRow returns the closest fit between probe pattern and patterns in
 // a "vocabulary" tensor with outermost row dimension, using given metric
-// function registered in tensor Funcs (e.g., use String() method on Metrics enum).
+// function, which must fit the MetricFunc signature.
 // The metric *must have the Increasing property*, i.e., larger = further.
 // Output is a 1D tensor with 2 elements: the row index and metric value for that row.
 // Note: this does _not_ use any existing Indexes for the probe,
 // but does for the vocab, and the returned index is the logical index
 // into any existing Indexes.
-func ClosestRow(funcName string, probe, vocab, out tensor.Tensor) error {
+func ClosestRow(fun any, probe, vocab, out tensor.Tensor) error {
 	if err := tensor.SetShapeSizesMustBeValues(out, 2); err != nil {
+		return err
+	}
+	mfun, err := AsMetricFunc(fun)
+	if err != nil {
 		return err
 	}
 	rows, _ := vocab.Shape().RowCellSize()
@@ -33,7 +37,7 @@ func ClosestRow(funcName string, probe, vocab, out tensor.Tensor) error {
 	pr1d := tensor.As1D(probe)
 	for ri := range rows {
 		sub := tensor.Cells1D(vocab, ri)
-		tensor.Call(funcName, pr1d, sub, mout)
+		mfun(pr1d, sub, mout)
 		d := mout.Float1D(0)
 		if d < mind {
 			mi = ri

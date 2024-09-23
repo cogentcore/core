@@ -16,9 +16,12 @@ import (
 )
 
 func init() {
-	tensor.AddFunc("metric.Matrix", Matrix, 1, tensor.StringFirstArg)
-	tensor.AddFunc("metric.CrossMatrix", CrossMatrix, 1, tensor.StringFirstArg)
-	tensor.AddFunc("metric.CovarianceMatrix", CovarianceMatrix, 1, tensor.StringFirstArg)
+	tensor.AddFunc("metric.Matrix", Matrix, 1, tensor.AnyFirstArg)
+	tensor.AddFunc("metric.CrossMatrix", CrossMatrix, 1, tensor.AnyFirstArg)
+	tensor.AddFunc("metric.CovarianceMatrix", CovarianceMatrix, 1, tensor.AnyFirstArg)
+	tensor.AddFunc("metric.PCA", PCA, 2)
+	tensor.AddFunc("metric.SVD", SVD, 2)
+	tensor.AddFunc("metric.ProjectOnMatrixColumn", ProjectOnMatrixColumn, 1)
 }
 
 // Matrix computes the rows x rows square distance / similarity matrix
@@ -27,11 +30,15 @@ func init() {
 // and within that, 1+dimensional patterns (cells). Use [tensor.NewRowCellsView]
 // to organize data into the desired split between a 1D outermost Row dimension
 // and the remaining Cells dimension.
-// The metric function registered in tensor Funcs can be passed as Metrics.FuncName().
+// The metric function must have the [MetricFunc] signature.
 // The results fill in the elements of the output matrix, which is symmetric,
 // and only the lower triangular part is computed, with results copied
 // to the upper triangular region, for maximum efficiency.
-func Matrix(funcName string, in, out tensor.Tensor) error {
+func Matrix(fun any, in, out tensor.Tensor) error {
+	mfun, err := AsMetricFunc(fun)
+	if err != nil {
+		return err
+	}
 	rows, cells := in.Shape().RowCellSize()
 	if rows == 0 || cells == 0 {
 		return nil
@@ -48,7 +55,7 @@ func Matrix(funcName string, in, out tensor.Tensor) error {
 			c := coords[idx]
 			sa := tensor.Cells1D(tsr[0], c.X)
 			sb := tensor.Cells1D(tsr[0], c.Y)
-			tensor.Call(funcName, sa, sb, mout)
+			mfun(sa, sb, mout)
 			tsr[1].SetFloat(mout.Float1D(0), c.X, c.Y)
 		}, in, out)
 	for _, c := range coords { // copy to upper
@@ -66,10 +73,14 @@ func Matrix(funcName string, in, out tensor.Tensor) error {
 // which must have at least 2 dimensions: the outermost rows,
 // and within that, 1+dimensional patterns that the given distance metric
 // function is applied to, with the results filling in the cells of the output matrix.
-// The metric function registered in tensor Funcs can be passed as Metrics.FuncName().
+// The metric function must have the [MetricFunc] signature.
 // The rows of the output matrix are the rows of the first input tensor,
 // and the columns of the output are the rows of the second input tensor.
-func CrossMatrix(funcName string, a, b, out tensor.Tensor) error {
+func CrossMatrix(fun any, a, b, out tensor.Tensor) error {
+	mfun, err := AsMetricFunc(fun)
+	if err != nil {
+		return err
+	}
 	arows, acells := a.Shape().RowCellSize()
 	if arows == 0 || acells == 0 {
 		return nil
@@ -91,7 +102,7 @@ func CrossMatrix(funcName string, a, b, out tensor.Tensor) error {
 			br := idx % brows
 			sa := tensor.Cells1D(tsr[0], ar)
 			sb := tensor.Cells1D(tsr[1], br)
-			tensor.Call(funcName, sa, sb, mout)
+			mfun(sa, sb, mout)
 			tsr[2].SetFloat(mout.Float1D(0), ar, br)
 		}, a, b, out)
 	return nil
@@ -105,12 +116,16 @@ func CrossMatrix(funcName string, a, b, out tensor.Tensor) error {
 // value of a given cell covaries across the rows of the tensor with the
 // value of another cell.
 // Uses the given metric function, typically [Covariance] or [Correlation],
-// which must be registered in tensor Funcs, and can be passed as Metrics.FuncName().
+// The metric function must have the [MetricFunc] signature.
 // Use Covariance if vars have similar overall scaling,
 // which is typical in neural network models, and use
 // Correlation if they are on very different scales, because it effectively rescales).
 // The resulting matrix can be used as the input to PCA or SVD eigenvalue decomposition.
-func CovarianceMatrix(funcName string, in, out tensor.Tensor) error {
+func CovarianceMatrix(fun any, in, out tensor.Tensor) error {
+	mfun, err := AsMetricFunc(fun)
+	if err != nil {
+		return err
+	}
 	rows, cells := in.Shape().RowCellSize()
 	if rows == 0 || cells == 0 {
 		return nil
@@ -138,7 +153,7 @@ func CovarianceMatrix(funcName string, in, out tensor.Tensor) error {
 				bv = tensor.NewSliced(tsr[0], tensor.Slice{}, tensor.Slice{Start: c.Y, Stop: c.Y + 1})
 				curCoords.Y = c.Y
 			}
-			tensor.Call(funcName, av, bv, mout)
+			mfun(av, bv, mout)
 			tsr[1].SetFloat(mout.Float1D(0), c.X, c.Y)
 		}, flatvw, out)
 	for _, c := range coords { // copy to upper
@@ -243,13 +258,13 @@ func ProjectOnMatrixColumn(mtx, vec, colindex, out tensor.Tensor) error {
 			if err != nil {
 				return err
 			}
-			stats.SumFunc(mout, msum)
+			stats.Sum(mout, msum)
 			out.SetFloat1D(msum.Float1D(0), i)
 		}
 	} else {
 		mout := tensor.NewFloat64(1)
 		tmath.Mul(vec, col, mout)
-		stats.SumFunc(mout, out)
+		stats.Sum(mout, out)
 	}
 	return nil
 }

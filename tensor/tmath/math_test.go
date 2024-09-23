@@ -68,13 +68,3 @@ func TestMath(t *testing.T) {
 		}
 	}
 }
-
-func TestOpsCall(t *testing.T) {
-	x := tensor.NewIntScalar(1)
-	y := tensor.NewIntScalar(4)
-	a := tensor.CallOut("Mul", x, tensor.NewIntScalar(2))
-	b := tensor.CallOut("Add", x, y)
-	c := tensor.CallOut("Add", tensor.CallOut("Mul", x, y), tensor.CallOut("Mul", a, b))
-
-	assert.Equal(t, 14.0, c.Float1D(0))
-}

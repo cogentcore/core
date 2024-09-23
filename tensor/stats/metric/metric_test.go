@@ -25,46 +25,46 @@ func TestFuncs(t *testing.T) {
 	btsr := tensor.NewNumberFromValues(b64...)
 	out := tensor.NewFloat64(1)
 
-	EuclideanFunc(atsr, btsr, out)
-	assert.InDelta(t, results[Euclidean], out.Values[0], tol)
+	Euclidean(atsr, btsr, out)
+	assert.InDelta(t, results[MetricEuclidean], out.Values[0], tol)
 
-	SumSquaresFunc(atsr, btsr, out)
-	assert.InDelta(t, results[SumSquares], out.Values[0], tol)
+	SumSquares(atsr, btsr, out)
+	assert.InDelta(t, results[MetricSumSquares], out.Values[0], tol)
 
-	EuclideanBinTolFunc(atsr, btsr, out)
-	assert.InDelta(t, results[EuclideanBinTol], out.Values[0], tol)
+	EuclideanBinTol(atsr, btsr, out)
+	assert.InDelta(t, results[MetricEuclideanBinTol], out.Values[0], tol)
 
-	AbsFunc(atsr, btsr, out)
-	assert.InDelta(t, results[Abs], out.Values[0], tol)
+	Abs(atsr, btsr, out)
+	assert.InDelta(t, results[MetricAbs], out.Values[0], tol)
 
-	HammingFunc(atsr, btsr, out)
-	assert.Equal(t, results[Hamming], out.Values[0])
+	Hamming(atsr, btsr, out)
+	assert.Equal(t, results[MetricHamming], out.Values[0])
 
-	SumSquaresBinTolFunc(atsr, btsr, out)
-	assert.InDelta(t, results[SumSquaresBinTol], out.Values[0], tol)
+	SumSquaresBinTol(atsr, btsr, out)
+	assert.InDelta(t, results[MetricSumSquaresBinTol], out.Values[0], tol)
 
-	CovarianceFunc(atsr, btsr, out)
-	assert.InDelta(t, results[Covariance], out.Values[0], tol)
+	Covariance(atsr, btsr, out)
+	assert.InDelta(t, results[MetricCovariance], out.Values[0], tol)
 
-	CorrelationFunc(atsr, btsr, out)
-	assert.InDelta(t, results[Correlation], out.Values[0], tol)
+	Correlation(atsr, btsr, out)
+	assert.InDelta(t, results[MetricCorrelation], out.Values[0], tol)
 
-	InvCorrelationFunc(atsr, btsr, out)
-	assert.InDelta(t, results[InvCorrelation], out.Values[0], tol)
+	InvCorrelation(atsr, btsr, out)
+	assert.InDelta(t, results[MetricInvCorrelation], out.Values[0], tol)
 
-	CrossEntropyFunc(atsr, btsr, out)
-	assert.InDelta(t, results[CrossEntropy], out.Values[0], tol)
+	CrossEntropy(atsr, btsr, out)
+	assert.InDelta(t, results[MetricCrossEntropy], out.Values[0], tol)
 
-	InnerProductFunc(atsr, btsr, out)
-	assert.InDelta(t, results[InnerProduct], out.Values[0], tol)
+	InnerProduct(atsr, btsr, out)
+	assert.InDelta(t, results[MetricInnerProduct], out.Values[0], tol)
 
-	CosineFunc(atsr, btsr, out)
-	assert.InDelta(t, results[Cosine], out.Values[0], tol)
+	Cosine(atsr, btsr, out)
+	assert.InDelta(t, results[MetricCosine], out.Values[0], tol)
 
-	InvCosineFunc(atsr, btsr, out)
-	assert.InDelta(t, results[InvCosine], out.Values[0], tol)
+	InvCosine(atsr, btsr, out)
+	assert.InDelta(t, results[MetricInvCosine], out.Values[0], tol)
 
-	for met := Euclidean; met < MetricsN; met++ {
+	for met := MetricEuclidean; met < MetricsN; met++ {
 		met.Call(atsr, btsr, out)
 		assert.InDelta(t, results[met], out.Values[0], tol)
 	}
@@ -90,7 +90,7 @@ func TestMatrix(t *testing.T) {
 	assert.NoError(t, err)
 	in := dt.Column("Input")
 	out := tensor.NewFloat64()
-	err = Matrix(Euclidean.FuncName(), in, out)
+	err = Matrix(Euclidean, in, out)
 	assert.NoError(t, err)
 	// fmt.Println(out.Tensor)
 	assert.Equal(t, simres, out.String())
@@ -109,7 +109,7 @@ func TestPCAIris(t *testing.T) {
 	}
 	data := dt.Column("data")
 	covar := tensor.NewFloat64()
-	err = CovarianceMatrix(Correlation.FuncName(), data, covar)
+	err = CovarianceMatrix(Correlation, data, covar)
 	assert.NoError(t, err)
 	// fmt.Printf("correl: %s\n", covar.String())
 

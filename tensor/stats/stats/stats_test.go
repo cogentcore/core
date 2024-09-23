@@ -21,70 +21,74 @@ func TestFuncs64(t *testing.T) {
 
 	tol := 1.0e-8
 
-	CountFunc(ix, out)
-	assert.Equal(t, results[Count], out.Values[0])
+	Count(ix, out)
+	assert.Equal(t, results[StatCount], out.Values[0])
 
-	SumFunc(ix, out)
-	assert.Equal(t, results[Sum], out.Values[0])
+	Sum(ix, out)
+	assert.Equal(t, results[StatSum], out.Values[0])
 
-	SumAbsFunc(ix, out)
-	assert.Equal(t, results[SumAbs], out.Values[0])
+	SumAbs(ix, out)
+	assert.Equal(t, results[StatSumAbs], out.Values[0])
 
-	ProdFunc(ix, out)
-	assert.Equal(t, results[Prod], out.Values[0])
+	Prod(ix, out)
+	assert.Equal(t, results[StatProd], out.Values[0])
 
-	MinFunc(ix, out)
-	assert.Equal(t, results[Min], out.Values[0])
+	Min(ix, out)
+	assert.Equal(t, results[StatMin], out.Values[0])
 
-	MaxFunc(ix, out)
-	assert.Equal(t, results[Max], out.Values[0])
+	Max(ix, out)
+	assert.Equal(t, results[StatMax], out.Values[0])
 
-	MinAbsFunc(ix, out)
-	assert.Equal(t, results[MinAbs], out.Values[0])
+	MinAbs(ix, out)
+	assert.Equal(t, results[StatMinAbs], out.Values[0])
 
-	MaxAbsFunc(ix, out)
-	assert.Equal(t, results[MaxAbs], out.Values[0])
+	MaxAbs(ix, out)
+	assert.Equal(t, results[StatMaxAbs], out.Values[0])
 
-	MeanFunc(ix, out)
-	assert.Equal(t, results[Mean], out.Values[0])
+	Mean(ix, out)
+	assert.Equal(t, results[StatMean], out.Values[0])
 
-	VarFunc(ix, out)
-	assert.InDelta(t, results[Var], out.Values[0], tol)
+	Var(ix, out)
+	assert.InDelta(t, results[StatVar], out.Values[0], tol)
 
-	StdFunc(ix, out)
-	assert.InDelta(t, results[Std], out.Values[0], tol)
+	Std(ix, out)
+	assert.InDelta(t, results[StatStd], out.Values[0], tol)
 
-	SemFunc(ix, out)
-	assert.InDelta(t, results[Sem], out.Values[0], tol)
+	Sem(ix, out)
+	assert.InDelta(t, results[StatSem], out.Values[0], tol)
 
-	VarPopFunc(ix, out)
-	assert.InDelta(t, results[VarPop], out.Values[0], tol)
+	VarPop(ix, out)
+	assert.InDelta(t, results[StatVarPop], out.Values[0], tol)
 
-	StdPopFunc(ix, out)
-	assert.InDelta(t, results[StdPop], out.Values[0], tol)
+	StdPop(ix, out)
+	assert.InDelta(t, results[StatStdPop], out.Values[0], tol)
 
-	SemPopFunc(ix, out)
-	assert.InDelta(t, results[SemPop], out.Values[0], tol)
+	SemPop(ix, out)
+	assert.InDelta(t, results[StatSemPop], out.Values[0], tol)
 
-	SumSqFunc(ix, out)
-	assert.InDelta(t, results[SumSq], out.Values[0], tol)
+	SumSq(ix, out)
+	assert.InDelta(t, results[StatSumSq], out.Values[0], tol)
 
-	L2NormFunc(ix, out)
-	assert.InDelta(t, results[L2Norm], out.Values[0], tol)
+	L2Norm(ix, out)
+	assert.InDelta(t, results[StatL2Norm], out.Values[0], tol)
 
-	MedianFunc(ix, out)
-	assert.InDelta(t, results[Median], out.Values[0], tol)
+	Median(ix, out)
+	assert.InDelta(t, results[StatMedian], out.Values[0], tol)
 
-	Q1Func(ix, out)
-	assert.InDelta(t, results[Q1], out.Values[0], tol)
+	Q1(ix, out)
+	assert.InDelta(t, results[StatQ1], out.Values[0], tol)
 
-	Q3Func(ix, out)
-	assert.InDelta(t, results[Q3], out.Values[0], tol)
+	Q3(ix, out)
+	assert.InDelta(t, results[StatQ3], out.Values[0], tol)
 
-	for stat := Count; stat < StatsN; stat++ {
-		stat.Call(ix, out)
+	for stat := StatCount; stat < StatsN; stat++ {
+		err := stat.Call(ix, out)
+		assert.NoError(t, err)
 		assert.InDelta(t, results[stat], out.Values[0], tol)
 	}
+	err := tensor.Call("stats.Mean", ix, out) // ensure plain name is registered.
+	assert.NoError(t, err)
+	assert.InDelta(t, results[StatMean], out.Values[0], tol)
 }
 
 func TestFuncsInt(t *testing.T) {
@@ -95,58 +99,58 @@ func TestFuncsInt(t *testing.T) {
 
 	results := []int{11, 550, 550, 550, 0, 0, 100, 0, 100, 50, 1100, int(math.Sqrt(1100)), int(math.Sqrt(1100) / math.Sqrt(11)), 38500, 196, 1000, int(math.Sqrt(1000)), int(math.Sqrt(1000) / math.Sqrt(11))}
 
-	CountFunc(ix, out)
-	assert.Equal(t, results[Count], out.Values[0])
+	Count(ix, out)
+	assert.Equal(t, results[StatCount], out.Values[0])
 
-	SumFunc(ix, out)
-	assert.Equal(t, results[Sum], out.Values[0])
+	Sum(ix, out)
+	assert.Equal(t, results[StatSum], out.Values[0])
 
-	SumAbsFunc(ix, out)
-	assert.Equal(t, results[SumAbs], out.Values[0])
+	SumAbs(ix, out)
+	assert.Equal(t, results[StatSumAbs], out.Values[0])
 
-	ProdFunc(ix, out)
-	assert.Equal(t, results[Prod], out.Values[0])
+	Prod(ix, out)
+	assert.Equal(t, results[StatProd], out.Values[0])
 
-	MinFunc(ix, out)
-	assert.Equal(t, results[Min], out.Values[0])
+	Min(ix, out)
+	assert.Equal(t, results[StatMin], out.Values[0])
 
-	MaxFunc(ix, out)
-	assert.Equal(t, results[Max], out.Values[0])
+	Max(ix, out)
+	assert.Equal(t, results[StatMax], out.Values[0])
 
-	MinAbsFunc(ix, out)
-	assert.Equal(t, results[MinAbs], out.Values[0])
+	MinAbs(ix, out)
+	assert.Equal(t, results[StatMinAbs], out.Values[0])
 
-	MaxAbsFunc(ix, out)
-	assert.Equal(t, results[MaxAbs], out.Values[0])
+	MaxAbs(ix, out)
+	assert.Equal(t, results[StatMaxAbs], out.Values[0])
 
-	MeanFunc(ix, out)
-	assert.Equal(t, results[Mean], out.Values[0])
+	Mean(ix, out)
+	assert.Equal(t, results[StatMean], out.Values[0])
 
-	VarFunc(ix, out)
-	assert.Equal(t, results[Var], out.Values[0])
+	Var(ix, out)
+	assert.Equal(t, results[StatVar], out.Values[0])
 
-	StdFunc(ix, out)
-	assert.Equal(t, results[Std], out.Values[0])
+	Std(ix, out)
+	assert.Equal(t, results[StatStd], out.Values[0])
 
-	SemFunc(ix, out)
-	assert.Equal(t, results[Sem], out.Values[0])
+	Sem(ix, out)
+	assert.Equal(t, results[StatSem], out.Values[0])
 
-	VarPopFunc(ix, out)
-	assert.Equal(t, results[VarPop], out.Values[0])
+	VarPop(ix, out)
+	assert.Equal(t, results[StatVarPop], out.Values[0])
 
-	StdPopFunc(ix, out)
-	assert.Equal(t, results[StdPop], out.Values[0])
+	StdPop(ix, out)
+	assert.Equal(t, results[StatStdPop], out.Values[0])
 
-	SemPopFunc(ix, out)
-	assert.Equal(t, results[SemPop], out.Values[0])
+	SemPop(ix, out)
+	assert.Equal(t, results[StatSemPop], out.Values[0])
 
-	SumSqFunc(ix, out)
-	assert.Equal(t, results[SumSq], out.Values[0])
+	SumSq(ix, out)
+	assert.Equal(t, results[StatSumSq], out.Values[0])
 
-	L2NormFunc(ix, out)
-	assert.Equal(t, results[L2Norm], out.Values[0])
+	L2Norm(ix, out)
+	assert.Equal(t, results[StatL2Norm], out.Values[0])
 
-	for stat := Count; stat <= SemPop; stat++ {
+	for stat := StatCount; stat <= StatSemPop; stat++ {
 		stat.Call(ix, out)
 		assert.Equal(t, results[stat], out.Values[0])
 	}
@@ -165,16 +169,16 @@ func TestFuncsCell(t *testing.T) {
 	ix := tensor.NewRows(tsr)
 	out := tensor.NewFloat32(20, 10)
 
-	CountFunc(ix, out)
+	Count(ix, out)
 	nsub := out.Len()
 	for i := range nsub {
 		assert.Equal(t, 20.0, out.FloatRowCell(0, i))
 	}
-	MeanFunc(ix, out)
+	Mean(ix, out)
 	for i := range nsub {
 		assert.InDelta(t, vals[i], out.FloatRowCell(0, i), 1.0e-7) // lower tol, using float32
 	}
-	VarFunc(ix, out)
+	Var(ix, out)
 	for i := range nsub {
 		assert.InDelta(t, 0.0, out.FloatRowCell(0, i), 1.0e-7)
 	}
@@ -194,26 +198,26 @@ func TestNorm(t *testing.T) {
 	assert.InDelta(t, 0.0, mean.Float1D(0), 1.0e-6)
 
 	UnitNorm(oned, oneout)
-	MinFunc(oneout, mout)
+	Min(oneout, mout)
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	MaxFunc(oneout, mout)
+	Max(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout)
 
 	minv := tensor.NewFloat64Scalar(0)
 	maxv := tensor.NewFloat64Scalar(1)
 	Clamp(oned, minv, maxv, oneout)
-	MinFunc(oneout, mout)
+	Min(oneout, mout)
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	MaxFunc(oneout, mout)
+	Max(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout)
 
 	thr := tensor.NewFloat64Scalar(0.5)
 	Binarize(oned, thr, oneout)
-	MinFunc(oneout, mout)
+	Min(oneout, mout)
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	MaxFunc(oneout, mout)
+	Max(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout)
 }

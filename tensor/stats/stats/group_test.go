@@ -33,7 +33,7 @@ func TestGroup(t *testing.T) {
 	assert.Equal(t, []int{0, 1}, tensor.AsIntTensor(ixs[0]).Values)
 	assert.Equal(t, []int{2, 3}, tensor.AsIntTensor(ixs[1]).Values)
 
-	err = TableGroupStats(dir, Mean, dt, "Value")
+	err = TableGroupStats(dir, StatMean, dt, "Value")
 	assert.NoError(t, err)
 
 	// AggColumn(spl, "Value", stats.Mean)

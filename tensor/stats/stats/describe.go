@@ -15,7 +15,7 @@ import (
 
 // DescriptiveStats are the standard descriptive stats used in Describe function.
 // Cannot apply the final 3 sort-based stats to higher-dimensional data.
-var DescriptiveStats = []Stats{Count, Mean, Std, Sem, Min, Max, Q1, Median, Q3}
+var DescriptiveStats = []Stats{StatCount, StatMean, StatStd, StatSem, StatMin, StatMax, StatQ1, StatMedian, StatQ3}
 
 // Describe adds standard descriptive statistics for given tensor
 // to the given [datafs] directory, adding a directory for each tensor

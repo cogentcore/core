@@ -13,6 +13,13 @@ import (
 	"cogentcore.org/core/tensor/table"
 )
 
+// note: we cannot register these functions because they take vararg tensors!!
+//
+// func init() {
+// 	tensor.AddFunc("stats.Groups", Groups, 0, tensor.AnyFirstArg)
+// 	tensor.AddFunc("stats.GroupAll", GroupAll, 0, tensor.AnyFirstArg)
+// }
+
 // Groups generates indexes for each unique value in each of the given tensors.
 // One can then use the resulting indexes for the [tensor.Rows] indexes to
 // perform computations restricted to grouped subsets of data, as in the
@@ -118,6 +125,10 @@ func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 }
 
 // todo: GroupCombined
+
+// note: we have to pass stat as a string here because we need the name
+// to record the results in the datafs, and we can't get the name directly.
+// also we need _2_ anys, and varargs!
 
 // GroupStats computes the given stats function on the unique grouped indexes
 // produced by the [Groups] function, in the given [datafs] directory,

@@ -7,102 +7,103 @@ package stats
 import (
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 )
 
 //go:generate core generate
 
 func init() {
-	tensor.AddFunc(Count.FuncName(), CountFunc, 1)
-	tensor.AddFunc(Sum.FuncName(), SumFunc, 1)
-	tensor.AddFunc(SumAbs.FuncName(), SumAbsFunc, 1)
-	tensor.AddFunc(L1Norm.FuncName(), SumAbsFunc, 1)
-	tensor.AddFunc(Prod.FuncName(), ProdFunc, 1)
-	tensor.AddFunc(Min.FuncName(), MinFunc, 1)
-	tensor.AddFunc(Max.FuncName(), MaxFunc, 1)
-	tensor.AddFunc(MinAbs.FuncName(), MinAbsFunc, 1)
-	tensor.AddFunc(MaxAbs.FuncName(), MaxAbsFunc, 1)
-	tensor.AddFunc(Mean.FuncName(), MeanFunc, 1)
-	tensor.AddFunc(Var.FuncName(), VarFunc, 1)
-	tensor.AddFunc(Std.FuncName(), StdFunc, 1)
-	tensor.AddFunc(Sem.FuncName(), SemFunc, 1)
-	tensor.AddFunc(SumSq.FuncName(), SumSqFunc, 1)
-	tensor.AddFunc(L2Norm.FuncName(), L2NormFunc, 1)
-	tensor.AddFunc(VarPop.FuncName(), VarPopFunc, 1)
-	tensor.AddFunc(StdPop.FuncName(), StdPopFunc, 1)
-	tensor.AddFunc(SemPop.FuncName(), SemPopFunc, 1)
-	tensor.AddFunc(Median.FuncName(), MedianFunc, 1)
-	tensor.AddFunc(Q1.FuncName(), Q1Func, 1)
-	tensor.AddFunc(Q3.FuncName(), Q3Func, 1)
+	tensor.AddFunc(StatCount.FuncName(), Count, 1)
+	tensor.AddFunc(StatSum.FuncName(), Sum, 1)
+	tensor.AddFunc(StatSumAbs.FuncName(), SumAbs, 1)
+	tensor.AddFunc(StatL1Norm.FuncName(), SumAbs, 1)
+	tensor.AddFunc(StatProd.FuncName(), Prod, 1)
+	tensor.AddFunc(StatMin.FuncName(), Min, 1)
+	tensor.AddFunc(StatMax.FuncName(), Max, 1)
+	tensor.AddFunc(StatMinAbs.FuncName(), MinAbs, 1)
+	tensor.AddFunc(StatMaxAbs.FuncName(), MaxAbs, 1)
+	tensor.AddFunc(StatMean.FuncName(), Mean, 1)
+	tensor.AddFunc(StatVar.FuncName(), Var, 1)
+	tensor.AddFunc(StatStd.FuncName(), Std, 1)
+	tensor.AddFunc(StatSem.FuncName(), Sem, 1)
+	tensor.AddFunc(StatSumSq.FuncName(), SumSq, 1)
+	tensor.AddFunc(StatL2Norm.FuncName(), L2Norm, 1)
+	tensor.AddFunc(StatVarPop.FuncName(), VarPop, 1)
+	tensor.AddFunc(StatStdPop.FuncName(), StdPop, 1)
+	tensor.AddFunc(StatSemPop.FuncName(), SemPop, 1)
+	tensor.AddFunc(StatMedian.FuncName(), Median, 1)
+	tensor.AddFunc(StatQ1.FuncName(), Q1, 1)
+	tensor.AddFunc(StatQ3.FuncName(), Q3, 1)
 }
 
 // Stats is a list of different standard aggregation functions, which can be used
 // to choose an aggregation function
-type Stats int32 //enums:enum
+type Stats int32 //enums:enum -trim-prefix Stat
 
 const (
 	// count of number of elements.
-	Count Stats = iota
+	StatCount Stats = iota
 
 	// sum of elements.
-	Sum
+	StatSum
 
 	// sum of absolute-value-of elements (= L1Norm).
-	SumAbs
+	StatSumAbs
 
 	// L1 Norm: sum of absolute values (= SumAbs).
-	L1Norm
+	StatL1Norm
 
 	// product of elements.
-	Prod
+	StatProd
 
 	// minimum value.
-	Min
+	StatMin
 
 	// maximum value.
-	Max
+	StatMax
 
 	// minimum of absolute values.
-	MinAbs
+	StatMinAbs
 
 	// maximum of absolute values.
-	MaxAbs
+	StatMaxAbs
 
 	// mean value = sum / count.
-	Mean
+	StatMean
 
 	// sample variance (squared deviations from mean, divided by n-1).
-	Var
+	StatVar
 
 	// sample standard deviation (sqrt of Var).
-	Std
+	StatStd
 
 	// sample standard error of the mean (Std divided by sqrt(n)).
-	Sem
+	StatSem
 
 	// sum of squared values.
-	SumSq
+	StatSumSq
 
 	// L2 Norm: square-root of sum-of-squares.
-	L2Norm
+	StatL2Norm
 
 	// population variance (squared diffs from mean, divided by n).
-	VarPop
+	StatVarPop
 
 	// population standard deviation (sqrt of VarPop).
-	StdPop
+	StatStdPop
 
 	// population standard error of the mean (StdPop divided by sqrt(n)).
-	SemPop
+	StatSemPop
 
 	// middle value in sorted ordering.
-	Median
+	StatMedian
 
 	// Q1 first quartile = 25%ile value = .25 quantile value.
-	Q1
+	StatQ1
 
 	// Q3 third quartile = 75%ile value = .75 quantile value.
-	Q3
+	StatQ3
 )
 
 // FuncName returns the package-qualified function name to use
@@ -111,13 +112,19 @@ func (s Stats) FuncName() string {
 	return "stats." + s.String()
 }
 
-// Call calls this statistic function on given tensors.
-// Output results are in the out tensor.
-func (s Stats) Call(in, out tensor.Tensor) {
-	tensor.Call(s.FuncName(), in, out)
+// Func returns function for given stat.
+func (s Stats) Func() StatsFunc {
+	fn := errors.Log1(tensor.FuncByName(s.FuncName()))
+	return fn.Fun.(StatsFunc)
 }
 
-// StatOut calls a standard Stats enum function on given tensor,
+// Call calls this statistic function on given tensors.
+// Output results are in the out tensor.
+func (s Stats) Call(in, out tensor.Tensor) error {
+	return tensor.Call(s.FuncName(), in, out)
+}
+
+// CallOut calls a standard Stats enum function on given tensor,
 // returning output as a newly created tensor.
 func (s Stats) CallOut(in tensor.Tensor) tensor.Tensor {
 	return tensor.CallOut(s.FuncName(), in)
@@ -132,4 +139,14 @@ func StripPackage(name string) string {
 		return spl[len(spl)-1]
 	}
 	return name
+}
+
+// AsStatsFunc returns given function as a [StatsFunc] function,
+// or an error if it does not fit that signature.
+func AsStatsFunc(fun any) (StatsFunc, error) {
+	sfun, ok := fun.(StatsFunc)
+	if !ok {
+		return nil, errors.New("metric.AsStatsFunc: function does not fit the StatsFunc signature")
+	}
+	return sfun, nil
 }

@@ -27,12 +27,12 @@ func ZScore(a, out tensor.Tensor) error {
 // subtracting the Min value and dividing by the Max of the remaining numbers.
 func UnitNorm(a, out tensor.Tensor) error {
 	mout := tensor.NewFloat64()
-	err := MinFunc(a, mout)
+	err := Min(a, mout)
 	if err != nil {
 		return err
 	}
 	tmath.Sub(a, mout, out)
-	MaxFunc(out, mout)
+	Max(out, mout)
 	tmath.Div(out, mout, out)
 	return nil
 }

@@ -23,7 +23,7 @@ import (
 // e.g., using VectorizeThreaded or GPU, due to shared writing
 // to the same output values.  Special implementations are required
 // if that is needed.
-type MetricFunc func(a, b, out tensor.Tensor) error
+type MetricFunc = func(a, b, out tensor.Tensor) error
 
 // SumSquaresScaleOut64 computes the sum of squares differences between tensor values,
 // returning scale and ss factors aggregated separately for better numerical stability, per BLAS.
@@ -62,16 +62,16 @@ func SumSquaresOut64(a, b, out tensor.Tensor) (tensor.Tensor, error) {
 	return scale64, err
 }
 
-// SumSquaresFunc computes the sum of squares differences between tensor values,
+// SumSquares computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
-func SumSquaresFunc(a, b, out tensor.Tensor) error {
+func SumSquares(a, b, out tensor.Tensor) error {
 	_, err := SumSquaresOut64(a, b, out)
 	return err
 }
 
-// EuclideanFunc computes the Euclidean square root of the sum of squares
+// Euclidean computes the Euclidean square root of the sum of squares
 // differences between tensor values, aka the L2 Norm.
-func EuclideanFunc(a, b, out tensor.Tensor) error {
+func Euclidean(a, b, out tensor.Tensor) error {
 	scale64, ss64, err := SumSquaresScaleOut64(a, b, out)
 	if err != nil {
 		return err
@@ -92,10 +92,10 @@ func EuclideanFunc(a, b, out tensor.Tensor) error {
 	return nil
 }
 
-// AbsFunc computes the sum of the absolute value of differences between the
+// Abs computes the sum of the absolute value of differences between the
 // tensor values, aka the L1 Norm.
 // See [MetricFunc] for general information.
-func AbsFunc(a, b, out tensor.Tensor) error {
+func Abs(a, b, out tensor.Tensor) error {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return err
 	}
@@ -107,10 +107,10 @@ func AbsFunc(a, b, out tensor.Tensor) error {
 	return err
 }
 
-// HammingFunc computes the sum of 1s for every element that is different,
+// Hamming computes the sum of 1s for every element that is different,
 // i.e., "city block" distance.
 // See [MetricFunc] for general information.
-func HammingFunc(a, b, out tensor.Tensor) error {
+func Hamming(a, b, out tensor.Tensor) error {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return err
 	}
@@ -144,10 +144,10 @@ func SumSquaresBinTolScaleOut64(a, b, out tensor.Tensor) (scale64, ss64 tensor.T
 	return
 }
 
-// EuclideanBinTolFunc computes the Euclidean square root of the sum of squares
+// EuclideanBinTol computes the Euclidean square root of the sum of squares
 // differences between tensor values, with binary tolerance:
 // differences < 0.5 are thresholded to 0.
-func EuclideanBinTolFunc(a, b, out tensor.Tensor) error {
+func EuclideanBinTol(a, b, out tensor.Tensor) error {
 	scale64, ss64, err := SumSquaresBinTolScaleOut64(a, b, out)
 	if err != nil {
 		return err
@@ -168,9 +168,9 @@ func EuclideanBinTolFunc(a, b, out tensor.Tensor) error {
 	return nil
 }
 
-// SumSquaresBinTolFunc computes the sum of squares differences between tensor values,
+// SumSquaresBinTol computes the sum of squares differences between tensor values,
 // with binary tolerance: differences < 0.5 are thresholded to 0.
-func SumSquaresBinTolFunc(a, b, out tensor.Tensor) error {
+func SumSquaresBinTol(a, b, out tensor.Tensor) error {
 	scale64, ss64, err := SumSquaresBinTolScaleOut64(a, b, out)
 	if err != nil {
 		return err
@@ -191,14 +191,14 @@ func SumSquaresBinTolFunc(a, b, out tensor.Tensor) error {
 	return nil
 }
 
-// CrossEntropyFunc is a standard measure of the difference between two
+// CrossEntropy is a standard measure of the difference between two
 // probabilty distributions, reflecting the additional entropy (uncertainty) associated
 // with measuring probabilities under distribution b when in fact they come from
 // distribution a.  It is also the entropy of a plus the divergence between a from b,
 // using Kullback-Leibler (KL) divergence.  It is computed as:
 // a * log(a/b) + (1-a) * log(1-a/1-b).
 // See [MetricFunc] for general information.
-func CrossEntropyFunc(a, b, out tensor.Tensor) error {
+func CrossEntropy(a, b, out tensor.Tensor) error {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return err
 	}
@@ -218,9 +218,9 @@ func CrossEntropyFunc(a, b, out tensor.Tensor) error {
 	return err
 }
 
-// InnerProductFunc computes the sum of the co-products of the two on-NaN tensor values.
+// InnerProduct computes the sum of the co-products of the two on-NaN tensor values.
 // See [MetricFunc] for general information.
-func InnerProductFunc(a, b, out tensor.Tensor) error {
+func InnerProduct(a, b, out tensor.Tensor) error {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return err
 	}
@@ -232,10 +232,10 @@ func InnerProductFunc(a, b, out tensor.Tensor) error {
 	return err
 }
 
-// CovarianceFunc computes the co-variance between two vectors,
+// Covariance computes the co-variance between two vectors,
 // i.e., the mean of the co-product of each vector element minus
 // the mean of that vector: cov(A,B) = E[(A - E(A))(B - E(B))].
-func CovarianceFunc(a, b, out tensor.Tensor) error {
+func Covariance(a, b, out tensor.Tensor) error {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return err
 	}
@@ -304,18 +304,18 @@ func CorrelationOut64(a, b, out tensor.Tensor) (tensor.Tensor, error) {
 	return ss64, nil
 }
 
-// CorrelationFunc computes the correlation between two vectors,
+// Correlation computes the correlation between two vectors,
 // in range (-1..1) as the mean of the co-product of each vector
 // element minus the mean of that vector, normalized by the product of their
 // standard deviations: cor(A,B) = E[(A - E(A))(B - E(B))] / sigma(A) sigma(B).
 // (i.e., the standardized [CovarianceFunc]).
 // Equivalent to the [CosineFunc] of mean-normalized vectors.
-func CorrelationFunc(a, b, out tensor.Tensor) error {
+func Correlation(a, b, out tensor.Tensor) error {
 	_, err := CorrelationOut64(a, b, out)
 	return err
 }
 
-// InvCorrelationFunc computes 1 minus the correlation between two vectors,
+// InvCorrelation computes 1 minus the correlation between two vectors,
 // in range (-1..1) as the mean of the co-product of each vector
 // element minus the mean of that vector, normalized by the product of their
 // standard deviations: cor(A,B) = E[(A - E(A))(B - E(B))] / sigma(A) sigma(B).
@@ -323,7 +323,7 @@ func CorrelationFunc(a, b, out tensor.Tensor) error {
 // Equivalent to the [CosineFunc] of mean-normalized vectors.
 // This is useful for a difference measure instead of similarity,
 // where more different vectors have larger metric values.
-func InvCorrelationFunc(a, b, out tensor.Tensor) error {
+func InvCorrelation(a, b, out tensor.Tensor) error {
 	cor64, err := CorrelationOut64(a, b, out)
 	if err != nil {
 		return err
@@ -364,20 +364,20 @@ func CosineOut64(a, b, out tensor.Tensor) (tensor.Tensor, error) {
 	return ss64, nil
 }
 
-// CosineFunc computes the high-dimensional angle between two vectors,
+// Cosine computes the high-dimensional angle between two vectors,
 // in range (-1..1) as the normalized inner product:
 // inner product / sqrt(ssA * ssB).  See also [CorrelationFunc]
-func CosineFunc(a, b, out tensor.Tensor) error {
+func Cosine(a, b, out tensor.Tensor) error {
 	_, err := CosineOut64(a, b, out)
 	return err
 }
 
-// InvCosineFunc computes 1 minus the cosine between two vectors,
+// InvCosine computes 1 minus the cosine between two vectors,
 // in range (-1..1) as the normalized inner product:
 // inner product / sqrt(ssA * ssB).
 // This is useful for a difference measure instead of similarity,
 // where more different vectors have larger metric values.
-func InvCosineFunc(a, b, out tensor.Tensor) error {
+func InvCosine(a, b, out tensor.Tensor) error {
 	cos64, err := CosineOut64(a, b, out)
 	if err != nil {
 		return err

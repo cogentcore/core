@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-// QuantilesFunc returns the given quantile(s) of non-NaN elements in given
+// Quantiles returns the given quantile(s) of non-NaN elements in given
 // 1D tensor. Because sorting uses indexes, this only works for 1D case.
 // If needed for a sub-space of values, that can be extracted through slicing
 // and then used. Returns and logs an error if not 1D.
@@ -19,7 +19,7 @@ import (
 // Uses linear interpolation.
 // Because this requires a sort, it is more efficient to get as many quantiles
 // as needed in one pass.
-func QuantilesFunc(in, qs, out tensor.Tensor) error {
+func Quantiles(in, qs, out tensor.Tensor) error {
 	if in.NumDims() != 1 {
 		return errors.Log(errors.New("stats.QuantilesFunc: only 1D input tensors allowed"))
 	}
@@ -60,20 +60,20 @@ func QuantilesFunc(in, qs, out tensor.Tensor) error {
 	return nil
 }
 
-// MedianFunc computes the median (50% quantile) of tensor values.
+// Median computes the median (50% quantile) of tensor values.
 // See [StatsFunc] for general information.
-func MedianFunc(in, out tensor.Tensor) error {
-	return QuantilesFunc(in, tensor.NewFloat64Scalar(.5), out)
+func Median(in, out tensor.Tensor) error {
+	return Quantiles(in, tensor.NewFloat64Scalar(.5), out)
 }
 
-// Q1Func computes the first quantile (25%) of tensor values.
+// Q1 computes the first quantile (25%) of tensor values.
 // See [StatsFunc] for general information.
-func Q1Func(in, out tensor.Tensor) error {
-	return QuantilesFunc(in, tensor.NewFloat64Scalar(.25), out)
+func Q1(in, out tensor.Tensor) error {
+	return Quantiles(in, tensor.NewFloat64Scalar(.25), out)
 }
 
-// Q3Func computes the third quantile (75%) of tensor values.
+// Q3 computes the third quantile (75%) of tensor values.
 // See [StatsFunc] for general information.
-func Q3Func(in, out tensor.Tensor) error {
-	return QuantilesFunc(in, tensor.NewFloat64Scalar(.75), out)
+func Q3(in, out tensor.Tensor) error {
+	return Quantiles(in, tensor.NewFloat64Scalar(.75), out)
 }
