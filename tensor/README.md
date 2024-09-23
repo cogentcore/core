@@ -6,15 +6,19 @@ The [Goal](../goal) augmented version of the _Go_ language directly supports Num
 
 The `Tensor` interface is implemented at the basic level with n-dimensional indexing into flat Go slices of any numeric data type (by `Number`), along with `String`, and `Bool` (which uses [bitslice](bitslice) for maximum efficiency). These implementations satisfy the `Values` sub-interface of Tensor, which supports the most direct and efficient operations on contiguous memory data. The `Shape` type provides all the n-dimensional indexing with arbitrary strides to allow any ordering, although _row major_ is the default and other orders have to be manually imposed.
 
-In addition, there are four important "view" implementations of `Tensor` that wrap another "source" Tensor to provide more flexible and efficient access to the data, consistent with the NumPy functionality.  See [Basic and Advanced Indexing](#basic-and-advanced-indexing) below for more info.
+In addition, there are five important "view" implementations of `Tensor` that wrap another "source" Tensor to provide more flexible and efficient access to the data, consistent with the NumPy functionality.  See [Basic and Advanced Indexing](#basic-and-advanced-indexing) below for more info.
 
-* `Rows` provides a row index-based view, with the `Indexes` applying to the outermost _row_ dimension, which allows sorting and filtering to operate only on the indexes, leaving the underlying Tensor unchanged. This view is returned by the [table](table) data table, which organizes multiple heterogenous Tensor columns along a common outer row dimension, and provides similar functionality to pandas and particularly [xarray](http://xarray.pydata.org/en/stable/) in Python. Organizing data systematically along the row dimension eliminates many sources of ambiguity about how to process higher-dimensional data, and any given n-dimensional structure can be reshaped to fit in this row-based format.
-
-* `Sliced` is a more general version of `Rows` that provides a sub-sliced view into the wrapped `Tensor` source, using an indexed list along each dimension, not just the outermost one. Thus, it can provide a reordered and filtered view onto the raw data, and it has a well-defined shape in terms of the number of indexes per dimension. This corresponds to the NumPy basic sliced indexing model.
+* `Sliced` provides a sub-sliced view into the wrapped `Tensor` source, using an indexed list along each dimension. Thus, it can provide a reordered and filtered view onto the raw data, and it has a well-defined shape in terms of the number of indexes per dimension. This corresponds to the NumPy basic sliced indexing model.
 
 * `Masked` provides a `Bool` masked view onto each element in the wrapped `Tensor`, where the two maintain the same shape).  Any cell with a `false` value in the bool mask returns a `NaN` (missing data), and `Set` functions are no-ops, such that the tensor functions automatically only process the mask-filtered data.
 
 * `Indexed` has a tensor of indexes into the source data, where the final, innermost dimension of the indexes is the same size as the number of dimensions in the wrapped source tensor. The overall shape of this view is that of the remaining outer dimensions of the Indexes tensor, and like other views, assignment and return values are taken from the corresponding indexed value in the wrapped source tensor.
+
+* `Reshaped` applies a different `Shape` to the source tensor, with the constraint that the new shape has the same length of total elements as the source tensor. It is particularly useful for aligning different tensors binary operation between them produces the desired results, for example by adding a new axis or collapsing multiple dimensions into one.
+
+* `Rows` is a specialized version of `Sliced` that provides a row index-based view, with the `Indexes` applying to the outermost _row_ dimension, which allows sorting and filtering to operate only on the indexes, leaving the underlying Tensor unchanged. This view is returned by the [table](table) data table, which organizes multiple heterogenous Tensor columns along a common outer row dimension, and provides similar functionality to pandas and particularly [xarray](http://xarray.pydata.org/en/stable/) in Python. 
+
+Note that any view can be "stacked" on top of another, to produce more complex net views.
 
 Each view type implements the `AsValues` method to create a concrete "rendered" version of the view (as a `Values` tensor) where the actual underlying data is organized as it appears in the view. This is like the `copy` function in NumPy, disconnecting the view from the original source data. Note that unlike NumPy, `Masked` and `Indexed` remain views into the underlying source data -- see [Basic and Advanced Indexing](#basic-and-advanced-indexing) below.
 
@@ -67,6 +71,8 @@ In general, **1D** refers to a flat, 1-dimensional list. There are various stand
 The `SetNumRows` function can be used to progressively increase the number of rows to fit more data, as is typically the case when logging data (often using a [table](table)). You can set the row dimension to 0 to start -- that is (now) safe. However, for greatest efficiency, it is best to set the number of rows to the largest expected size first, and _then_ set it back to 0. The underlying slice of data retains its capacity when sized back down. During incremental increasing of the slice size, if it runs out of capacity, all the elements need to be copied, so it is more efficient to establish the capacity up front instead of having multiple incremental re-allocations.
 
 # Cheat Sheet
+
+TODO: update
 
 `ix` is the `Rows` tensor for these examples:
 
@@ -122,7 +128,7 @@ val := ix.Float(3,2,1)
 
 # `Tensor` vs. Python NumPy
 
-The [Goal](../goal) language provides a reasonably faithful translation of NumPy `array` syntax into the corresponding Go tensor package implementations. For those already familiar with NumPy, it should mostly "just work", but the following provides a more in-depth explanation for how the two relate, and when you might get different results.
+The [Goal](../goal) language provides a reasonably faithful translation of NumPy `ndarray` syntax into the corresponding Go tensor package implementations. For those already familiar with NumPy, it should mostly "just work", but the following provides a more in-depth explanation for how the two relate, and when you might get different results.
 
 ## Basic and Advanced Indexing
 
@@ -136,7 +142,7 @@ a[a > 0.5] = 1          # boolean advanced indexing
 
 Although powerful, the semantics of all of this is a bit confusing. In the `tensor` package, we provide what are hopefully more clear and concrete _view_ types that have well-defined semantics, and cover the relevant functionality, while perhaps being a bit easier to reason with. These were described at the start of this README.  The correspondence to NumPy indexing is as follows:
 
-* Basic indexing by individual integer index coordinate values is supported by the basic `Number`, `String`, `Bool` `Values` Tensors.  For example, `Float(3,1,2)` returns the value at the given coordinates.  The `Sliced` (and `Rows`) view then completes the basic indexing with arbitrary reordering and filtering along entire dimension values.
+* Basic indexing by individual integer index coordinate values is supported by the `Number`, `String`, `Bool` `Values` Tensors.  For example, `Float(3,1,2)` returns the value at the given coordinates.  The `Sliced` (and `Rows`) and `Reshaped` views then complete the basic indexing with arbitrary reordering and filtering along entire dimension values, and reshaping dimensions.
 
 * The `Masked` view corresponds to the NumPy _advanced_ indexing using a same-shape boolean mask, although in the NumPy case it makes a copy (although practically it is widely used for direct assignment as shown above.) Critically, you can always extract just the `true` values from a Masked view by using the `AsValues` method on the view, which returns a 1D tensor of those values, similar to what the boolean advanced indexing produces in NumPy. In addition, the `SourceIndexes` method returns a 1D list of indexes of the `true` (or `false`) values, which can be used for the `Indexed` view.
     
@@ -173,7 +179,7 @@ A      (2d array):      2 x 1
 B      (3d array):  8 x 4 x 3 # second from last dimensions mismatched
 ```
 
-Computationally, the broadcast logic is straightforward to implement, in terms of computing the resulting shape. Any missing outer dimensions are implicitly 1s, and any singleton dimension wraps around during the indexing process.
+The `AlignShapes` function performs this shape alignment logic, and the `WrapIndex1D` function is used to compute a 1D index into a given shape, based on the total output shape sizes, wrapping any singleton dimensions around as needed. These are used in the [tmath](tmath) package for example to implement the basic binary math operators.
 
 # History
 
