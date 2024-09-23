@@ -42,12 +42,6 @@ type Values interface {
 	// New tensors always start out with zeros.
 	SetZeros()
 
-	// View clones this tensor, *keeping the same underlying Values slice*,
-	// instead of making a copy like [Values.Clone] does. A major use of this
-	// is to then change the shape of the view to provide a different way
-	// of accessing the same data.  See [New1DViewOf] for example.
-	View() Values
-
 	// Clone clones this tensor, creating a duplicate copy of itself with its
 	// own separate memory representation of all the values.
 	Clone() Values

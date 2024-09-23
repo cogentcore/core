@@ -4,7 +4,11 @@
 
 package tensor
 
-import "cogentcore.org/core/base/errors"
+import (
+	"math"
+
+	"cogentcore.org/core/base/errors"
+)
 
 // Clone returns a copy of the given tensor.
 // If it is raw [Values] then a [Values.Clone] is returned.
@@ -32,19 +36,6 @@ func SetShape(vals Values, sh *Shape) {
 	vals.SetShapeSizes(sh.Sizes...)
 }
 
-// SetShapeMustBeValues sets the dimension sizes from given Shape,
-// calling [MustBeValues] on the destination tensor to ensure it is a [Values],
-// type, returning an error if not. This is used extensively for output
-// tensors in functions, and all such output tensors _must_ be Values tensors.
-func SetShapeMustBeValues(tsr Tensor, sh *Shape) error {
-	vals, err := MustBeValues(tsr)
-	if err != nil {
-		return err
-	}
-	vals.SetShapeSizes(sh.Sizes...)
-	return nil
-}
-
 // SetShapeSizesFromTensor sets the dimension sizes as 1D int values from given tensor.
 // The backing storage is resized appropriately, retaining all existing data that fits.
 func SetShapeSizesFromTensor(vals Values, sizes Tensor) {
@@ -60,52 +51,43 @@ func SetShapeFrom(vals Values, from Tensor) {
 // calling [MustBeValues] on the destination tensor to ensure it is a [Values],
 // type, returning an error if not. This is used extensively for output
 // tensors in functions, and all such output tensors _must_ be Values tensors.
-func SetShapeFromMustBeValues(tsr, from Tensor) error {
+func SetShapeFromMustBeValues(tsr Tensor, from Tensor) error {
+	return SetShapeSizesMustBeValues(tsr, from.ShapeSizes()...)
+}
+
+// SetShapeSizesMustBeValues sets shape of given tensor from given sizes,
+// calling [MustBeValues] on the destination tensor to ensure it is a [Values],
+// type, returning an error if not. This is used extensively for output
+// tensors in functions, and all such output tensors _must_ be Values tensors.
+func SetShapeSizesMustBeValues(tsr Tensor, sizes ...int) error {
 	vals, err := MustBeValues(tsr)
 	if err != nil {
 		return err
 	}
-	vals.SetShapeSizes(from.ShapeSizes()...)
+	vals.SetShapeSizes(sizes...)
 	return nil
 }
 
-// New1DViewOf returns a 1D view into the given tensor, using the same
-// underlying values, and just changing the shape to a 1D view.
-// This can be useful e.g., for stats and metric functions that report
-// on the 1D list of values.
-func New1DViewOf(tsr Values) Values {
-	vw := tsr.View()
-	vw.SetShapeSizes(tsr.Len())
-	return vw
+// As1D returns a 1D tensor, which is either the input tensor if it is
+// already 1D, or a new [Reshaped] 1D view of it.
+// This can be useful e.g., for stats and metric functions that operate
+// on a 1D list of values.
+func As1D(tsr Tensor) Tensor {
+	if tsr.NumDims() == 1 {
+		return tsr
+	}
+	return NewReshaped(tsr, tsr.Len())
 }
 
-// Cells1D returns a flat 1D [Values] view of the cells for given row index.
-// This is useful for passing to other functions e.g.,
-// in stats or metrics that process a 1D tensor.
-func Cells1D(tsr RowMajor, row int) Values {
-	return New1DViewOf(tsr.SubSpace(row))
-}
-
-// RowCellSplit splits the given tensor into a standard 2D row, cell
-// shape at the given split dimension index.  All dimensions prior to
-// split are collapsed into the row dimension, and from split onward
-// form the cells dimension.  The resulting tensor is a re-shaped view
-// of the original tensor, sharing the same underlying data.
-func RowCellSplit(tsr Values, split int) Values {
-	sizes := tsr.ShapeSizes()
-	rows := sizes[:split]
-	cells := sizes[split:]
-	nr := 1
-	for _, r := range rows {
-		nr *= r
+// Cells1D returns a flat 1D view of the innermost cells for given row index.
+// For a [RowMajor] tensor, it uses the [RowTensor] subspace directly,
+// otherwise it uses [Sliced] to extract the cells. In either case,
+// [As1D] is used to ensure the result is a 1D tensor.
+func Cells1D(tsr Tensor, row int) Tensor {
+	if rm, ok := tsr.(RowMajor); ok {
+		return As1D(rm.RowTensor(row))
 	}
-	nc := 1
-	for _, c := range cells {
-		nc *= c
-	}
-	vw := tsr.View()
-	vw.SetShapeSizes(nr, nc)
-	return vw
+	return As1D(NewSlicedIndexes(tsr, []int{row}))
 }
 
 // NewFloat64Scalar is a convenience method for a Tensor
@@ -275,4 +257,27 @@ func AsIntTensor(tsr Tensor) *Int {
 	f := NewInt(tsr.ShapeSizes()...)
 	f.CopyFrom(tsr.AsValues())
 	return f
+}
+
+// Range returns the min, max (and associated indexes, -1 = no values) for the tensor.
+// This is needed for display and is thus in the tensor api on Values.
+func Range(vals Values) (min, max float64, minIndex, maxIndex int) {
+	minIndex = -1
+	maxIndex = -1
+	n := vals.Len()
+	for j := range n {
+		fv := vals.Float1D(n)
+		if math.IsNaN(fv) {
+			continue
+		}
+		if fv < min || minIndex < 0 {
+			min = fv
+			minIndex = j
+		}
+		if fv > max || maxIndex < 0 {
+			max = fv
+			maxIndex = j
+		}
+	}
+	return
 }

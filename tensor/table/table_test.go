@@ -126,6 +126,7 @@ func TestCells(t *testing.T) {
 		// fmt.Println(s)
 		ss := in.Tensor.SubSpace(i).(*tensor.Float32)
 		// fmt.Println(ss.Values[:16])
+
 		cl := tensor.AsFloat32Tensor(tensor.Cells1D(in, i))
 		// fmt.Println(cl.Values[:16])
 		assert.Equal(t, vals, ss.Values[:16])

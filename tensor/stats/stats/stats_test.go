@@ -82,7 +82,7 @@ func TestFuncs64(t *testing.T) {
 	assert.InDelta(t, results[Q3], out.Values[0], tol)
 
 	for stat := Count; stat < StatsN; stat++ {
-		Stat(stat, ix, out)
+		stat.Call(ix, out)
 		assert.InDelta(t, results[stat], out.Values[0], tol)
 	}
 }
@@ -147,7 +147,7 @@ func TestFuncsInt(t *testing.T) {
 	assert.Equal(t, results[L2Norm], out.Values[0])
 
 	for stat := Count; stat <= SemPop; stat++ {
-		Stat(stat, ix, out)
+		stat.Call(ix, out)
 		assert.Equal(t, results[stat], out.Values[0])
 	}
 }
@@ -188,31 +188,32 @@ func TestNorm(t *testing.T) {
 
 	ZScore(oned, oneout)
 	mout := tensor.NewFloat64()
-	std, mean, _ := stats.StdFuncOut64(oneout, mout)
+	std, mean, _, err := StdOut64(oneout, mout)
+	assert.NoError(t, err)
 	assert.InDelta(t, 1.0, std.Float1D(0), 1.0e-6)
 	assert.InDelta(t, 0.0, mean.Float1D(0), 1.0e-6)
 
 	UnitNorm(oned, oneout)
-	stats.MinFunc(oneout, mout)
+	MinFunc(oneout, mout)
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	stats.MaxFunc(oneout, mout)
+	MaxFunc(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout)
 
 	minv := tensor.NewFloat64Scalar(0)
 	maxv := tensor.NewFloat64Scalar(1)
 	Clamp(oned, minv, maxv, oneout)
-	stats.MinFunc(oneout, mout)
+	MinFunc(oneout, mout)
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	stats.MaxFunc(oneout, mout)
+	MaxFunc(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout)
 
 	thr := tensor.NewFloat64Scalar(0.5)
 	Binarize(oned, thr, oneout)
-	stats.MinFunc(oneout, mout)
+	MinFunc(oneout, mout)
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	stats.MaxFunc(oneout, mout)
+	MaxFunc(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout)
 }

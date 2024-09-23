@@ -111,6 +111,18 @@ func (s Stats) FuncName() string {
 	return "stats." + s.String()
 }
 
+// Call calls this statistic function on given tensors.
+// Output results are in the out tensor.
+func (s Stats) Call(in, out tensor.Tensor) {
+	tensor.Call(s.FuncName(), in, out)
+}
+
+// StatOut calls a standard Stats enum function on given tensor,
+// returning output as a newly created tensor.
+func (s Stats) CallOut(in tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut(s.FuncName(), in)
+}
+
 // StripPackage removes any package name from given string,
 // used for naming based on FuncName() which could be custom
 // or have a package prefix.
@@ -120,16 +132,4 @@ func StripPackage(name string) string {
 		return spl[len(spl)-1]
 	}
 	return name
-}
-
-// Stat calls a standard Stats enum function on given tensors.
-// Output results are in the out tensor.
-func Stat(stat Stats, in, out tensor.Tensor) {
-	tensor.Call(stat.FuncName(), in, out)
-}
-
-// StatOut calls a standard Stats enum function on given tensor,
-// returning output as a newly created tensor.
-func StatOut(stat Stats, in tensor.Tensor) tensor.Tensor {
-	return tensor.CallOut(stat.FuncName(), in)
 }

@@ -8,17 +8,17 @@ import (
 	"math"
 	"testing"
 
-	"cogentcore.org/core/base/errors"
 	"github.com/stretchr/testify/assert"
 )
 
-func abs(in, out Tensor) {
-	if err := SetShapeFromMustBeValues(out, in); errors.Log(err) != nil {
-		return
+func abs(in, out Tensor) error {
+	if err := SetShapeFromMustBeValues(out, in); err != nil {
+		return err
 	}
 	VectorizeThreaded(1, NFirstLen, func(idx int, tsr ...Tensor) {
 		tsr[1].SetFloat1D(math.Abs(tsr[0].Float1D(idx)), idx)
 	}, in, out)
+	return nil
 }
 
 func TestFuncs(t *testing.T) {

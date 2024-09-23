@@ -7,7 +7,6 @@ package tensor
 import (
 	"fmt"
 	"reflect"
-	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/metadata"
@@ -68,7 +67,7 @@ var Funcs map[string]*Func
 // AddFunc adds given named function to the global tensor named function
 // registry, which is used in goal to call functions by name, and
 // in specific packages to call functions by enum String() names.
-// Use the standard Go CamelCase name -- will be auto-lowercased.
+// Use the standard Go CamelCase name.
 // The number of output arguments must be provided here,
 // along with an optional first string argument if present;
 // the number of input arguments is automatically set from that.
@@ -76,8 +75,7 @@ func AddFunc(name string, fun any, out int, stringFirst ...bool) error {
 	if Funcs == nil {
 		Funcs = make(map[string]*Func)
 	}
-	nm := strings.ToLower(name)
-	_, ok := Funcs[nm]
+	_, ok := Funcs[name]
 	if ok {
 		return errors.Log(fmt.Errorf("tensor.AddFunc: function of name %q already exists, not added", name))
 	}
@@ -85,7 +83,7 @@ func AddFunc(name string, fun any, out int, stringFirst ...bool) error {
 	if errors.Log(err) != nil {
 		return err
 	}
-	Funcs[nm] = fn
+	Funcs[name] = fn
 	// note: can record orig camel name if needed for docs etc later.
 	return nil
 }
@@ -96,8 +94,7 @@ func AddFunc(name string, fun any, out int, stringFirst ...bool) error {
 // in the Funcs global function registry, or the argument count
 // does not match.
 func Call(name string, tsr ...Tensor) error {
-	nm := strings.ToLower(name)
-	fn, ok := Funcs[nm]
+	fn, ok := Funcs[name]
 	if !ok {
 		return errors.Log(fmt.Errorf("tensor.Call: function of name %q not registered", name))
 	}
@@ -111,8 +108,7 @@ func Call(name string, tsr ...Tensor) error {
 // does not match.  This version of [Call] is for functions that
 // have an initial string argument
 func CallString(name, first string, tsr ...Tensor) error {
-	nm := strings.ToLower(name)
-	fn, ok := Funcs[nm]
+	fn, ok := Funcs[name]
 	if !ok {
 		return errors.Log(fmt.Errorf("tensor.Call: function of name %q not registered", name))
 	}
@@ -124,10 +120,9 @@ func CallString(name, first string, tsr ...Tensor) error {
 // output tensor, for the common case with just one return value.
 // An error is logged if the function name has not been registered
 // in the Funcs global function registry, or the argument count
-// does not match.
+// does not match, or an error is returned by the function.
 func CallOut(name string, tsr ...Tensor) Tensor {
-	nm := strings.ToLower(name)
-	fn, ok := Funcs[nm]
+	fn, ok := Funcs[name]
 	if !ok {
 		errors.Log(fmt.Errorf("tensor.CallOut: function of name %q not registered", name))
 		return nil
@@ -140,10 +135,9 @@ func CallOut(name string, tsr ...Tensor) Tensor {
 // output tensors, for the rare case of multiple return values.
 // An error is logged if the function name has not been registered
 // in the Funcs global function registry, or the argument count
-// does not match.
+// does not match, or an error is returned by the function.
 func CallOutMulti(name string, tsr ...Tensor) []Tensor {
-	nm := strings.ToLower(name)
-	fn, ok := Funcs[nm]
+	fn, ok := Funcs[name]
 	if !ok {
 		errors.Log(fmt.Errorf("tensor.CallOut: function of name %q not registered", name))
 		return nil
@@ -156,34 +150,34 @@ func CallOutMulti(name string, tsr ...Tensor) []Tensor {
 func (fn *Func) ArgCount() int {
 	nargs := -1
 	switch fn.Fun.(type) {
-	case func(a Tensor):
+	case func(a Tensor) error:
 		nargs = 1
-	case func(a, b Tensor):
+	case func(a, b Tensor) error:
 		nargs = 2
-	case func(a, b, c Tensor):
+	case func(a, b, c Tensor) error:
 		nargs = 3
-	case func(a, b, c, d Tensor):
+	case func(a, b, c, d Tensor) error:
 		nargs = 4
-	case func(a, b, c, d, e Tensor):
+	case func(a, b, c, d, e Tensor) error:
 		nargs = 5
 	// string cases:
-	case func(s string, a Tensor):
+	case func(s string, a Tensor) error:
 		nargs = 1
-	case func(s string, a, b Tensor):
+	case func(s string, a, b Tensor) error:
 		nargs = 2
-	case func(s string, a, b, c Tensor):
+	case func(s string, a, b, c Tensor) error:
 		nargs = 3
-	case func(s string, a, b, c, d Tensor):
+	case func(s string, a, b, c, d Tensor) error:
 		nargs = 4
-	case func(s string, a, b, c, d, e Tensor):
+	case func(s string, a, b, c, d, e Tensor) error:
 		nargs = 5
 	}
 	return nargs
 }
 
-// ArgCheck returns an error if the number of args in list does not
+// argCheck returns an error if the number of args in list does not
 // match the number required as specified.
-func (fn *Func) ArgCheck(n int, tsr ...Tensor) error {
+func (fn *Func) argCheck(n int, tsr ...Tensor) error {
 	if len(tsr) != n {
 		return fmt.Errorf("tensor.Call: args passed to %q: %d does not match required: %d", fn.Name, len(tsr), n)
 	}
@@ -197,31 +191,31 @@ func (fn *Func) Call(tsr ...Tensor) error {
 		return fmt.Errorf("tensor.Call: function %q: requires a first string argument", fn.Name)
 	}
 	switch f := fn.Fun.(type) {
-	case func(a Tensor):
-		if err := fn.ArgCheck(1, tsr...); err != nil {
+	case func(a Tensor) error:
+		if err := fn.argCheck(1, tsr...); err != nil {
 			return err
 		}
-		f(tsr[0])
-	case func(a, b Tensor):
-		if err := fn.ArgCheck(2, tsr...); err != nil {
+		return f(tsr[0])
+	case func(a, b Tensor) error:
+		if err := fn.argCheck(2, tsr...); err != nil {
 			return err
 		}
-		f(tsr[0], tsr[1])
-	case func(a, b, c Tensor):
-		if err := fn.ArgCheck(3, tsr...); err != nil {
+		return f(tsr[0], tsr[1])
+	case func(a, b, c Tensor) error:
+		if err := fn.argCheck(3, tsr...); err != nil {
 			return err
 		}
-		f(tsr[0], tsr[1], tsr[2])
-	case func(a, b, c, d Tensor):
-		if err := fn.ArgCheck(4, tsr...); err != nil {
+		return f(tsr[0], tsr[1], tsr[2])
+	case func(a, b, c, d Tensor) error:
+		if err := fn.argCheck(4, tsr...); err != nil {
 			return err
 		}
-		f(tsr[0], tsr[1], tsr[2], tsr[3])
-	case func(a, b, c, d, e Tensor):
-		if err := fn.ArgCheck(5, tsr...); err != nil {
+		return f(tsr[0], tsr[1], tsr[2], tsr[3])
+	case func(a, b, c, d, e Tensor) error:
+		if err := fn.argCheck(5, tsr...); err != nil {
 			return err
 		}
-		f(tsr[0], tsr[1], tsr[2], tsr[3], tsr[4])
+		return f(tsr[0], tsr[1], tsr[2], tsr[3], tsr[4])
 	}
 	return nil
 }
@@ -234,31 +228,31 @@ func (fn *Func) CallString(s string, tsr ...Tensor) error {
 		return fmt.Errorf("tensor.CallString: function %q: does not take a first string argument", fn.Name)
 	}
 	switch f := fn.Fun.(type) {
-	case func(s string, a Tensor):
-		if err := fn.ArgCheck(1, tsr...); err != nil {
+	case func(s string, a Tensor) error:
+		if err := fn.argCheck(1, tsr...); err != nil {
 			return err
 		}
-		f(s, tsr[0])
-	case func(s string, a, b Tensor):
-		if err := fn.ArgCheck(2, tsr...); err != nil {
+		return f(s, tsr[0])
+	case func(s string, a, b Tensor) error:
+		if err := fn.argCheck(2, tsr...); err != nil {
 			return err
 		}
-		f(s, tsr[0], tsr[1])
-	case func(s string, a, b, c Tensor):
-		if err := fn.ArgCheck(3, tsr...); err != nil {
+		return f(s, tsr[0], tsr[1])
+	case func(s string, a, b, c Tensor) error:
+		if err := fn.argCheck(3, tsr...); err != nil {
 			return err
 		}
-		f(s, tsr[0], tsr[1], tsr[2])
-	case func(s string, a, b, c, d Tensor):
-		if err := fn.ArgCheck(4, tsr...); err != nil {
+		return f(s, tsr[0], tsr[1], tsr[2])
+	case func(s string, a, b, c, d Tensor) error:
+		if err := fn.argCheck(4, tsr...); err != nil {
 			return err
 		}
-		f(s, tsr[0], tsr[1], tsr[2], tsr[3])
-	case func(s string, a, b, c, d, e Tensor):
-		if err := fn.ArgCheck(5, tsr...); err != nil {
+		return f(s, tsr[0], tsr[1], tsr[2], tsr[3])
+	case func(s string, a, b, c, d, e Tensor) error:
+		if err := fn.argCheck(5, tsr...); err != nil {
 			return err
 		}
-		f(s, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4])
+		return f(s, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4])
 	}
 	return nil
 }

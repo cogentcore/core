@@ -24,7 +24,9 @@ func init() {
 // Matrix computes the rows x rows square distance / similarity matrix
 // between the patterns for each row of the given higher dimensional input tensor,
 // which must have at least 2 dimensions: the outermost rows,
-// and within that, 1+dimensional patterns (cells).
+// and within that, 1+dimensional patterns (cells). Use [tensor.NewRowCellsView]
+// to organize data into the desired split between a 1D outermost Row dimension
+// and the remaining Cells dimension.
 // The metric function registered in tensor Funcs can be passed as Metrics.FuncName().
 // The results fill in the elements of the output matrix, which is symmetric,
 // and only the lower triangular part is computed, with results copied
@@ -42,8 +44,8 @@ func Matrix(funcName string, in, out tensor.Tensor) {
 	tensor.VectorizeThreaded(cells*3, func(tsr ...tensor.Tensor) int { return nc },
 		func(idx int, tsr ...tensor.Tensor) {
 			c := coords[idx]
-			sa := tensor.Cells1D(tsr[0], c.X)
-			sb := tensor.Cells1D(tsr[0], c.Y)
+			sa := tensor.NewRowCellsSliced(tsr[0], c.X)
+			sb := tensor.NewRowCellsSliced(tsr[0], c.Y)
 			tensor.Call(funcName, sa, sb, mout)
 			tsr[1].SetFloat(mout.Float1D(0), c.X, c.Y)
 		}, in, out)

@@ -41,6 +41,28 @@ func NewReshaped(tsr Tensor, sizes ...int) *Reshaped {
 	return rs
 }
 
+// NewRowCellsView returns a 2D [Reshaped] view onto the given tensor,
+// with a single outer "row" dimension and a single inner "cells" dimension,
+// with the given 'split' dimension specifying where the cells start.
+// All dimensions prior to split are collapsed to form the new outer row dimension,
+// and the remainder are collapsed to form the 1D cells dimension.
+// This is useful for stats, metrics and other packages that operate
+// on data in this shape.
+func NewRowCellsView(tsr Values, split int) *Reshaped {
+	sizes := tsr.ShapeSizes()
+	rows := sizes[:split]
+	cells := sizes[split:]
+	nr := 1
+	for _, r := range rows {
+		nr *= r
+	}
+	nc := 1
+	for _, c := range cells {
+		nc *= c
+	}
+	return NewReshaped(tsr, nr, nc)
+}
+
 // AsReshaped returns the tensor as a [Reshaped] view.
 // If it already is one, then it is returned, otherwise it is wrapped
 // with an initial shape equal to the source tensor.

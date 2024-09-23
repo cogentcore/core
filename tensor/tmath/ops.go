@@ -5,7 +5,6 @@
 package tmath
 
 import (
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 )
 
@@ -17,13 +16,13 @@ func init() {
 }
 
 // Add adds two tensors into output.
-func Add(a, b, out tensor.Tensor) {
+func Add(a, b, out tensor.Tensor) error {
 	as, bs, os, err := tensor.AlignShapes(a, b)
-	if errors.Log(err) != nil {
-		return
+	if err != nil {
+		return err
 	}
-	if err := tensor.SetShapeMustBeValues(out, os); errors.Log(err) != nil {
-		return
+	if err := tensor.SetShapeSizesMustBeValues(out, os.Sizes...); err != nil {
+		return err
 	}
 	olen := os.Len()
 	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int {
@@ -35,16 +34,17 @@ func Add(a, b, out tensor.Tensor) {
 			bi := tensor.WrapIndex1D(bs, oi...)
 			out.SetFloat1D(tsr[0].Float1D(ai)+tsr[1].Float1D(bi), idx)
 		}, a, b, out)
+	return nil
 }
 
 // Sub subtracts two tensors into output.
-func Sub(a, b, out tensor.Tensor) {
+func Sub(a, b, out tensor.Tensor) error {
 	as, bs, os, err := tensor.AlignShapes(a, b)
-	if errors.Log(err) != nil {
-		return
+	if err != nil {
+		return err
 	}
-	if err := tensor.SetShapeMustBeValues(out, os); errors.Log(err) != nil {
-		return
+	if err := tensor.SetShapeSizesMustBeValues(out, os.Sizes...); err != nil {
+		return err
 	}
 	olen := os.Len()
 	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int {
@@ -56,16 +56,17 @@ func Sub(a, b, out tensor.Tensor) {
 			bi := tensor.WrapIndex1D(bs, oi...)
 			out.SetFloat1D(tsr[0].Float1D(ai)-tsr[1].Float1D(bi), idx)
 		}, a, b, out)
+	return nil
 }
 
 // Mul multiplies two tensors into output.
-func Mul(a, b, out tensor.Tensor) {
+func Mul(a, b, out tensor.Tensor) error {
 	as, bs, os, err := tensor.AlignShapes(a, b)
-	if errors.Log(err) != nil {
-		return
+	if err != nil {
+		return err
 	}
-	if err := tensor.SetShapeMustBeValues(out, os); errors.Log(err) != nil {
-		return
+	if err := tensor.SetShapeSizesMustBeValues(out, os.Sizes...); err != nil {
+		return err
 	}
 	olen := os.Len()
 	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int {
@@ -77,16 +78,17 @@ func Mul(a, b, out tensor.Tensor) {
 			bi := tensor.WrapIndex1D(bs, oi...)
 			out.SetFloat1D(tsr[0].Float1D(ai)*tsr[1].Float1D(bi), idx)
 		}, a, b, out)
+	return nil
 }
 
 // Div divides two tensors into output.
-func Div(a, b, out tensor.Tensor) {
+func Div(a, b, out tensor.Tensor) error {
 	as, bs, os, err := tensor.AlignShapes(a, b)
-	if errors.Log(err) != nil {
-		return
+	if err != nil {
+		return err
 	}
-	if err := tensor.SetShapeMustBeValues(out, os); errors.Log(err) != nil {
-		return
+	if err := tensor.SetShapeSizesMustBeValues(out, os.Sizes...); err != nil {
+		return err
 	}
 	olen := os.Len()
 	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int {
@@ -98,4 +100,5 @@ func Div(a, b, out tensor.Tensor) {
 			bi := tensor.WrapIndex1D(bs, oi...)
 			out.SetFloat1D(tsr[0].Float1D(ai)/tsr[1].Float1D(bi), idx)
 		}, a, b, out)
+	return nil
 }

@@ -274,7 +274,7 @@ func (tg *TensorGrid) Color(val float64) (norm float64, clr color.Color) {
 
 func (tg *TensorGrid) UpdateRange() {
 	if !tg.Display.Range.FixMin || !tg.Display.Range.FixMax {
-		min, max, _, _ := tg.Tensor.Range()
+		min, max, _, _ := tensor.Range(tg.Tensor.AsValues())
 		if !tg.Display.Range.FixMin {
 			nmin := minmax.NiceRoundNumber(min, true) // true = below #
 			tg.Display.Range.Min = nmin

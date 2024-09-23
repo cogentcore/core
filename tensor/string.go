@@ -172,10 +172,6 @@ func (tsr *String) Clone() Values {
 	return csr
 }
 
-func (tsr *String) View() Values {
-	return &String{*tsr.view()}
-}
-
 // CopyFrom copies all avail values from other tensor into this tensor, with an
 // optimized implementation if the other tensor is of the same type, and
 // otherwise it goes through appropriate standard type.

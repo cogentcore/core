@@ -6,7 +6,6 @@ package tensor
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 
 	"cogentcore.org/core/base/num"
@@ -237,10 +236,6 @@ func (tsr *Number[T]) SetZeros() {
 	}
 }
 
-func (tsr *Number[T]) View() Values {
-	return &Number[T]{*tsr.view()}
-}
-
 // Clone clones this tensor, creating a duplicate copy of itself with its
 // own separate memory representation of all the values.
 func (tsr *Number[T]) Clone() Values {
@@ -333,26 +328,4 @@ func (tsr *Number[T]) SetRowTensor(val Values, row int) {
 	st := row * cells
 	mx := min(val.Len(), cells)
 	tsr.CopyCellsFrom(val, st, 0, mx)
-}
-
-// Range returns the min, max (and associated indexes, -1 = no values) for the tensor.
-// This is needed for display and is thus in the core api in optimized form
-func (tsr *Number[T]) Range() (min, max float64, minIndex, maxIndex int) {
-	minIndex = -1
-	maxIndex = -1
-	for j, vl := range tsr.Values {
-		fv := float64(vl)
-		if math.IsNaN(fv) {
-			continue
-		}
-		if fv < min || minIndex < 0 {
-			min = fv
-			minIndex = j
-		}
-		if fv > max || maxIndex < 0 {
-			max = fv
-			maxIndex = j
-		}
-	}
-	return
 }

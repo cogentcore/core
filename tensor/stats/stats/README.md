@@ -5,7 +5,7 @@ The `stats` package provides standard statistic computations operating on the `t
 type StatsFunc func(in, out tensor.Tensor)
 ```
 
-For 1D data, the output is a scalar value in the out tensor, and otherwise it is an n-dimensional "cell" with outermost row dimension set to 1.
+For 1D data, the output is a scalar value in the out tensor, and otherwise it is an n-dimensional "cell" with outermost row dimension set to 1. This is
 
 All stats are registered in the `tensor.Funcs` global list, and can be called using the `FuncName` method, e.g.,:
 ```Go

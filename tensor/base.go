@@ -85,15 +85,6 @@ func (tsr *Base[T]) Set(val T, i ...int) {
 
 func (tsr *Base[T]) Set1D(val T, i int) { tsr.Values[i] = val }
 
-// view is implementation of View -- needs final casting to tensor type.
-func (tsr *Base[T]) view() *Base[T] {
-	nw := &Base[T]{}
-	nw.shape.CopyFrom(&tsr.shape)
-	nw.Values = tsr.Values
-	nw.Meta = tsr.Meta
-	return nw
-}
-
 // SetNumRows sets the number of rows (outermost dimension) in a RowMajor organized tensor.
 // It is safe to set this to 0. For incrementally growing tensors (e.g., a log)
 // it is best to first set the anticipated full size, which allocates the

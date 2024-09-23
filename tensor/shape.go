@@ -224,3 +224,16 @@ func AddShapes(shape1, shape2 *Shape) *Shape {
 	sh := NewShape(nsh...)
 	return sh
 }
+
+// CellsSizes returns the sizes of inner cells dimensions given
+// overall tensor sizes.  It returns []int{1} for the 1D case.
+// Used for ensuring cell-wise outputs are the right size.
+func CellsSize(sizes []int) []int {
+	csz := slices.Clone(sizes)
+	if len(csz) == 1 {
+		csz[0] = 1
+	} else {
+		csz = csz[1:]
+	}
+	return csz
+}

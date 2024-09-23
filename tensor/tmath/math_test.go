@@ -13,7 +13,7 @@ import (
 )
 
 type onef func(x float64) float64
-type tonef func(in, out tensor.Tensor)
+type tonef func(in, out tensor.Tensor) error
 
 // Equal does equal testing taking into account NaN
 func Equal(t *testing.T, trg, val float64) {
@@ -69,7 +69,7 @@ func TestMath(t *testing.T) {
 	}
 }
 
-func TestOps(t *testing.T) {
+func TestOpsCall(t *testing.T) {
 	x := tensor.NewIntScalar(1)
 	y := tensor.NewIntScalar(4)
 	a := tensor.CallOut("Mul", x, tensor.NewIntScalar(2))

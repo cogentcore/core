@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAdd(t *testing.T) {
+func TestOps(t *testing.T) {
 	scalar := tensor.NewFloat64Scalar(-5.5)
 	scb := scalar.Clone()
 	scb.SetFloat1D(-4.0, 0)
