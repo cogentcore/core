@@ -65,7 +65,7 @@ func TestFuncs(t *testing.T) {
 	assert.InDelta(t, results[InvCosine], out.Values[0], tol)
 
 	for met := Euclidean; met < MetricsN; met++ {
-		Metric(met, atsr, btsr, out)
+		met.Call(atsr, btsr, out)
 		assert.InDelta(t, results[met], out.Values[0], tol)
 	}
 }

@@ -26,18 +26,6 @@ func init() {
 	tensor.AddFunc(Cosine.FuncName(), CosineFunc, 1)
 }
 
-// Metric calls a standard Metrics enum function on given tensors.
-// Output results are in the out tensor.
-func Metric(metric Metrics, a, b, out tensor.Tensor) {
-	tensor.Call(metric.FuncName(), a, b, out)
-}
-
-// MetricOut calls a standard Metrics enum function on given tensors,
-// returning output as a newly created tensor.
-func MetricOut(metric Metrics, a, b tensor.Tensor) tensor.Tensor {
-	return tensor.CallOut(metric.FuncName(), a, b)
-}
-
 // Metrics are standard metric functions
 type Metrics int32 //enums:enum
 
@@ -110,6 +98,18 @@ const (
 // in tensor.Call to call this function.
 func (m Metrics) FuncName() string {
 	return "metric." + m.String()
+}
+
+// Call calls a standard Metrics enum function on given tensors.
+// Output results are in the out tensor.
+func (m Metrics) Call(a, b, out tensor.Tensor) {
+	tensor.Call(m.FuncName(), a, b, out)
+}
+
+// CallOut calls a standard Metrics enum function on given tensors,
+// returning output as a newly created tensor.
+func (m Metrics) CallOut(a, b tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut(m.FuncName(), a, b)
 }
 
 // Increasing returns true if the distance metric is such that metric
