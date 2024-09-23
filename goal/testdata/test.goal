@@ -1,0 +1,11 @@
+
+// # x := [3, 5, 4]
+# x := zeros(3, 4)
+# nd := x.ndim
+# sz := x.size
+# sh := x.shape
+
+fmt.Println(x)
+fmt.Println(nd)
+fmt.Println(sz)
+fmt.Println(sh)
