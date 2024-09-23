@@ -192,8 +192,8 @@ func (tsr *String) CopyFrom(frm Values) {
 // is of the same type, and otherwise it goes through
 // appropriate standard type.
 func (tsr *String) AppendFrom(frm Values) error {
-	rows, cell := tsr.RowCellSize()
-	frows, fcell := frm.RowCellSize()
+	rows, cell := tsr.shape.RowCellSize()
+	frows, fcell := frm.Shape().RowCellSize()
 	if cell != fcell {
 		return fmt.Errorf("tensor.AppendFrom: cell sizes do not match: %d != %d", cell, fcell)
 	}
@@ -248,7 +248,7 @@ func (tsr *String) RowTensor(row int) Values {
 
 // SetRowTensor sets the values of the SubSpace at given row to given values.
 func (tsr *String) SetRowTensor(val Values, row int) {
-	_, cells := tsr.RowCellSize()
+	_, cells := tsr.shape.RowCellSize()
 	st := row * cells
 	mx := min(val.Len(), cells)
 	tsr.CopyCellsFrom(val, st, 0, mx)

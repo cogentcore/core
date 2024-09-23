@@ -50,13 +50,6 @@ func (tsr *Base[T]) NumDims() int { return tsr.shape.NumDims() }
 // DimSize returns size of given dimension.
 func (tsr *Base[T]) DimSize(dim int) int { return tsr.shape.DimSize(dim) }
 
-// RowCellSize returns the size of the outermost Row shape dimension,
-// and the size of all the remaining inner dimensions (the "cell" size).
-// Used for Tensors that are columns in a data table.
-func (tsr *Base[T]) RowCellSize() (rows, cells int) {
-	return tsr.shape.RowCellSize()
-}
-
 // DataType returns the type of the data elements in the tensor.
 // Bool is returned for the Bool tensor type.
 func (tsr *Base[T]) DataType() reflect.Kind {

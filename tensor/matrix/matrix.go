@@ -29,13 +29,13 @@ func NewMatrix(tsr tensor.Tensor) (*Matrix, error) {
 		err := errors.New("matrix.NewMatrix: tensor is not 2D")
 		return nil, err
 	}
-	return &Matrix{Tensor: tsr}
+	return &Matrix{Tensor: tsr}, nil
 }
 
 // Dims is the gonum/mat.Matrix interface method for returning the
 // dimension sizes of the 2D Matrix.  Assumes Row-major ordering.
 func (mx *Matrix) Dims() (r, c int) {
-	return tsr.shape.DimSize(0), tsr.shape.DimSize(1)
+	return mx.Tensor.DimSize(0), mx.Tensor.DimSize(1)
 }
 
 // At is the gonum/mat.Matrix interface method for returning 2D
@@ -47,7 +47,7 @@ func (mx *Matrix) At(i, j int) float64 {
 // T is the gonum/mat.Matrix transpose method.
 // It performs an implicit transpose by returning the receiver inside a Transpose.
 func (mx *Matrix) T() mat.Matrix {
-	return mat.Transpose{tsr}
+	return mat.Transpose{mx}
 }
 
 /////////////////////////  Symmetric
@@ -76,7 +76,7 @@ func NewSymmetric(tsr tensor.Tensor) (*Symmetric, error) {
 	}
 	sy := &Symmetric{}
 	sy.Tensor = tsr
-	return sy
+	return sy, nil
 }
 
 // SymmetricDim is the gonum/mat.Matrix interface method for returning the
@@ -89,7 +89,7 @@ func (sy *Symmetric) SymmetricDim() (r int) {
 // using standard Float64 interface
 func CopyDense(to tensor.Tensor, dm *mat.Dense) {
 	nr, nc := dm.Dims()
-	to.SetShapeSizes(nr, nc)
+	tensor.SetShapeSizesMustBeValues(to, nr, nc)
 	idx := 0
 	for ri := 0; ri < nr; ri++ {
 		for ci := 0; ci < nc; ci++ {

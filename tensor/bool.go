@@ -101,13 +101,6 @@ func (tsr *Bool) NumDims() int { return tsr.shape.NumDims() }
 // DimSize returns size of given dimension
 func (tsr *Bool) DimSize(dim int) int { return tsr.shape.DimSize(dim) }
 
-// RowCellSize returns the size of the outermost Row shape dimension,
-// and the size of all the remaining inner dimensions (the "cell" size).
-// Used for Tensors that are columns in a data table.
-func (tsr *Bool) RowCellSize() (rows, cells int) {
-	return tsr.shape.RowCellSize()
-}
-
 func (tsr *Bool) SetShapeSizes(sizes ...int) {
 	tsr.shape.SetShapeSizes(sizes...)
 	nln := tsr.Len()
@@ -157,13 +150,13 @@ func (tsr *Bool) SetString(val string, i ...int) {
 }
 
 func (tsr *Bool) StringRowCell(row, cell int) string {
-	_, sz := tsr.RowCellSize()
+	_, sz := tsr.shape.RowCellSize()
 	return reflectx.ToString(tsr.Values.Index(row*sz + cell))
 }
 
 func (tsr *Bool) SetStringRowCell(val string, row, cell int) {
 	if bv, err := reflectx.ToBool(val); err == nil {
-		_, sz := tsr.RowCellSize()
+		_, sz := tsr.shape.RowCellSize()
 		tsr.Values.Set(bv, row*sz+cell)
 	}
 }
@@ -195,12 +188,12 @@ func (tsr *Bool) SetFloat1D(val float64, off int) {
 }
 
 func (tsr *Bool) FloatRowCell(row, cell int) float64 {
-	_, sz := tsr.RowCellSize()
+	_, sz := tsr.shape.RowCellSize()
 	return BoolToFloat64(tsr.Values.Index(row*sz + cell))
 }
 
 func (tsr *Bool) SetFloatRowCell(val float64, row, cell int) {
-	_, sz := tsr.RowCellSize()
+	_, sz := tsr.shape.RowCellSize()
 	tsr.Values.Set(Float64ToBool(val), row*sz+cell)
 }
 
@@ -231,12 +224,12 @@ func (tsr *Bool) SetInt1D(val int, off int) {
 }
 
 func (tsr *Bool) IntRowCell(row, cell int) int {
-	_, sz := tsr.RowCellSize()
+	_, sz := tsr.shape.RowCellSize()
 	return BoolToInt(tsr.Values.Index(row*sz + cell))
 }
 
 func (tsr *Bool) SetIntRowCell(val int, row, cell int) {
-	_, sz := tsr.RowCellSize()
+	_, sz := tsr.shape.RowCellSize()
 	tsr.Values.Set(IntToBool(val), row*sz+cell)
 }
 
@@ -311,8 +304,8 @@ func (tsr *Bool) CopyFrom(frm Values) {
 // is of the same type, and otherwise it goes through
 // appropriate standard type.
 func (tsr *Bool) AppendFrom(frm Values) error {
-	rows, cell := tsr.RowCellSize()
-	frows, fcell := frm.RowCellSize()
+	rows, cell := tsr.shape.RowCellSize()
+	frows, fcell := frm.Shape().RowCellSize()
 	if cell != fcell {
 		return fmt.Errorf("tensor.AppendFrom: cell sizes do not match: %d != %d", cell, fcell)
 	}

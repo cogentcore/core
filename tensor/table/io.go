@@ -122,7 +122,7 @@ func (dt *Table) ReadCSVRow(rec []string, row int) {
 	}
 	nan := math.NaN()
 	for _, tsr := range dt.Columns.Values {
-		_, csz := tsr.RowCellSize()
+		_, csz := tsr.Shape().RowCellSize()
 		stoff := row * csz
 		for cc := 0; cc < csz; cc++ {
 			str := rec[ci]

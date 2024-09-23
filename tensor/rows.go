@@ -117,7 +117,7 @@ func (rw *Rows) Shape() *Shape {
 // as NumRows() * cell size.
 func (rw *Rows) Len() int {
 	rows := rw.NumRows()
-	_, cells := rw.Tensor.RowCellSize()
+	_, cells := rw.Tensor.Shape().RowCellSize()
 	return cells * rows
 }
 
@@ -134,7 +134,7 @@ func (rw *Rows) DimSize(dim int) int {
 // (via [Rows.NumRows] method), and the size of all the remaining
 // inner dimensions (the "cell" size).
 func (rw *Rows) RowCellSize() (rows, cells int) {
-	_, cells = rw.Tensor.RowCellSize()
+	_, cells = rw.Tensor.Shape().RowCellSize()
 	rows = rw.NumRows()
 	return
 }

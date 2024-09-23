@@ -14,12 +14,6 @@ package tensor
 type RowMajor interface {
 	Tensor
 
-	// RowCellSize returns the size of the outermost Row shape dimension,
-	// and the size of all the remaining inner dimensions (the "cell" size).
-	// Commonly used to organize multiple instances (rows) of higher-dimensional
-	// patterns (cells), and the [Rows] type operates on the outer row dimension.
-	RowCellSize() (rows, cells int)
-
 	// SubSpace returns a new tensor with innermost subspace at given
 	// offset(s) in outermost dimension(s) (len(offs) < [NumDims]).
 	// The new tensor points to the values of the this tensor (i.e., modifications

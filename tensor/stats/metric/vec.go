@@ -14,14 +14,17 @@ import (
 // Vectorize3Out64 is a version of the [tensor.Vectorize] function
 // for metrics, which makes three Float64 output tensors for aggregating
 // and computing values, returning them for final computation.
-func Vectorize3Out64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr ...tensor.Tensor), tsr ...tensor.Tensor) (out1, out2, out3 tensor.Tensor) {
+func Vectorize3Out64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr ...tensor.Tensor), tsr ...tensor.Tensor) (out1, out2, out3 tensor.Tensor, err error) {
 	n := nfunc(tsr...)
 	if n <= 0 {
-		return nil, nil, nil
+		return nil, nil, nil, nil
 	}
 	nt := len(tsr)
+	osz := tensor.CellsSize(tsr[0].ShapeSizes())
 	out := tsr[nt-1]
-	osz := out.ShapeSizes()
+	if err := tensor.SetShapeSizesMustBeValues(out, osz...); err != nil {
+		return nil, nil, nil, err
+	}
 	out1 = tensor.NewFloat64(osz...)
 	out2 = tensor.NewFloat64(osz...)
 	out3 = tensor.NewFloat64(osz...)
@@ -30,15 +33,7 @@ func Vectorize3Out64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr
 	for idx := range n {
 		fun(idx, tsrs...)
 	}
-	return out1, out2, out3
-}
-
-// OutShape returns the output shape based on given input
-// shape ints, with outer row dim = 1.
-func OutShape(ish ...int) []int {
-	osh := slices.Clone(ish)
-	osh[0] = 1
-	return osh
+	return out1, out2, out3, nil
 }
 
 // NFunc is the nfun for metrics functions, returning the min number of rows across the
@@ -49,9 +44,8 @@ func NFunc(tsr ...tensor.Tensor) int {
 	if nt < 3 {
 		return 0
 	}
-	a, b, out := tsr[0], tsr[1], tsr[nt-1]
+	a, b := tsr[0], tsr[1]
 	na, nb := a.DimSize(0), b.DimSize(0)
-	out.SetShapeSizes(OutShape(a.ShapeSizes()...)...)
 	return min(na, nb)
 }
 
@@ -60,15 +54,16 @@ func NFunc(tsr ...tensor.Tensor) int {
 // It also skips over NaN missing values.
 func VecFunc(idx int, a, b, out tensor.Tensor, ini float64, fun func(a, b, agg float64) float64) {
 	nsub := out.Len()
+	si := idx * nsub // 1D start of sub
 	for i := range nsub {
 		if idx == 0 {
 			out.SetFloat1D(ini, i)
 		}
-		av := a.FloatRowCell(idx, i)
+		av := a.Float1D(si + i)
 		if math.IsNaN(av) {
 			continue
 		}
-		bv := b.FloatRowCell(idx, i)
+		bv := b.Float1D(si + i)
 		if math.IsNaN(bv) {
 			continue
 		}
@@ -82,16 +77,17 @@ func VecFunc(idx int, a, b, out tensor.Tensor, ini float64, fun func(a, b, agg f
 // It also skips over NaN missing values.
 func VecSSFunc(idx int, a, b, out1, out2 tensor.Tensor, ini1, ini2 float64, fun func(a, b float64) float64) {
 	nsub := out2.Len()
+	si := idx * nsub // 1D start of sub
 	for i := range nsub {
 		if idx == 0 {
 			out1.SetFloat1D(ini1, i)
 			out2.SetFloat1D(ini2, i)
 		}
-		av := a.FloatRowCell(idx, i)
+		av := a.Float1D(si + i)
 		if math.IsNaN(av) {
 			continue
 		}
-		bv := b.FloatRowCell(idx, i)
+		bv := b.Float1D(si + i)
 		if math.IsNaN(bv) {
 			continue
 		}
@@ -118,15 +114,16 @@ func VecSSFunc(idx int, a, b, out1, out2 tensor.Tensor, ini1, ini2 float64, fun 
 // e.g., the mean. It also skips over NaN missing values.
 func Vec2inFunc(idx int, a, b, a2, b2, out tensor.Tensor, ini float64, fun func(a, b, a2, b2, agg float64) float64) {
 	nsub := out.Len()
+	si := idx * nsub // 1D start of sub
 	for i := range nsub {
 		if idx == 0 {
 			out.SetFloat1D(ini, i)
 		}
-		av := a.FloatRowCell(idx, i)
+		av := a.Float1D(si + i)
 		if math.IsNaN(av) {
 			continue
 		}
-		bv := b.FloatRowCell(idx, i)
+		bv := b.Float1D(si + i)
 		if math.IsNaN(bv) {
 			continue
 		}
@@ -142,17 +139,18 @@ func Vec2inFunc(idx int, a, b, a2, b2, out tensor.Tensor, ini float64, fun func(
 // e.g., the mean. It also skips over NaN missing values.
 func Vec2in3outFunc(idx int, a, b, a2, b2, out1, out2, out3 tensor.Tensor, ini float64, fun func(a, b, a2, b2, out1, out2, out3 float64) (float64, float64, float64)) {
 	nsub := out1.Len()
+	si := idx * nsub // 1D start of sub
 	for i := range nsub {
 		if idx == 0 {
 			out1.SetFloat1D(ini, i)
 			out2.SetFloat1D(ini, i)
 			out3.SetFloat1D(ini, i)
 		}
-		av := a.FloatRowCell(idx, i)
+		av := a.Float1D(si + i)
 		if math.IsNaN(av) {
 			continue
 		}
-		bv := b.FloatRowCell(idx, i)
+		bv := b.Float1D(si + i)
 		if math.IsNaN(bv) {
 			continue
 		}
@@ -173,17 +171,18 @@ func Vec2in3outFunc(idx int, a, b, a2, b2, out1, out2, out3 tensor.Tensor, ini f
 // This version has 3 output vectors. It also skips over NaN missing values.
 func Vec3outFunc(idx int, a, b, out1, out2, out3 tensor.Tensor, ini float64, fun func(a, b, out1, out2, out3 float64) (float64, float64, float64)) {
 	nsub := out1.Len()
+	si := idx * nsub // 1D start of sub
 	for i := range nsub {
 		if idx == 0 {
 			out1.SetFloat1D(ini, i)
 			out2.SetFloat1D(ini, i)
 			out3.SetFloat1D(ini, i)
 		}
-		av := a.FloatRowCell(idx, i)
+		av := a.Float1D(si + i)
 		if math.IsNaN(av) {
 			continue
 		}
-		bv := b.FloatRowCell(idx, i)
+		bv := b.Float1D(si + i)
 		if math.IsNaN(bv) {
 			continue
 		}

@@ -229,7 +229,7 @@ func (dt *Table) New() *Table {
 	}
 	for ci, cl := range nt.Columns.Values {
 		scl := dt.Columns.Values[ci]
-		_, csz := cl.RowCellSize()
+		_, csz := cl.Shape().RowCellSize()
 		for i, srw := range dt.Indexes {
 			cl.CopyCellsFrom(scl, i*csz, srw*csz, csz)
 		}
