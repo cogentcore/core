@@ -83,7 +83,7 @@ func TestAppendRowsEtc(t *testing.T) {
 	assert.Equal(t, []int{2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9}, dt.Indexes)
 
 	dt.Sequential()
-	dt.FilterString("Int", "1", tensor.Include, tensor.Contains, tensor.IgnoreCase)
+	dt.FilterString("Int", "1", tensor.FilterOptions{Contains: true, IgnoreCase: true})
 	assert.Equal(t, []int{1, 4, 7, 10}, dt.Indexes)
 
 	dt.Sequential()

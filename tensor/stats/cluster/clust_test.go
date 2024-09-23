@@ -35,7 +35,7 @@ func TestClust(t *testing.T) {
 	}
 	in := dt.Column("Input")
 	out := tensor.NewFloat64()
-	metric.Matrix(metric.Euclidean.FuncName(), in, out)
+	metric.Matrix(metric.Euclidean, in, out)
 
 	cl := Cluster(Avg.String(), out, dt.Column("Name"))
 

@@ -272,11 +272,11 @@ func TestSortFilter(t *testing.T) {
 	assert.Equal(t, []int{4, 3, 2, 1, 0}, tsr.Indexes)
 
 	tsr.Sequential()
-	tsr.FilterString("1", Include, Equals, UseCase)
+	tsr.FilterString("1", FilterOptions{})
 	assert.Equal(t, []int{1}, tsr.Indexes)
 
 	tsr.Sequential()
-	tsr.FilterString("1", Exclude, Equals, UseCase)
+	tsr.FilterString("1", FilterOptions{Exclude: true})
 	assert.Equal(t, []int{0, 2, 3, 4}, tsr.Indexes)
 }
 

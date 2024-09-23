@@ -55,7 +55,7 @@ func (ss *Sim) ConfigStats(dir *datafs.Data) *datafs.Data {
 func (ss *Sim) ConfigLogs(dir *datafs.Data) *datafs.Data {
 	logd, _ := dir.Mkdir("Log")
 	trial := ss.ConfigTrialLog(logd)
-	ss.ConfigAggLog(logd, "Epoch", trial, stats.Mean, stats.Sem, stats.Min)
+	ss.ConfigAggLog(logd, "Epoch", trial, stats.StatMean, stats.StatSem, stats.StatMin)
 	return logd
 }
 
@@ -157,8 +157,8 @@ func (ss *Sim) Run() {
 	dir, _ := ss.Logs.Mkdir("Stats")
 	stats.TableGroups(dir, alldt, "Run", "Epoch", "Trial")
 	sts := []string{"SSE", "AvgSSE", "TrlErr"}
-	stats.TableGroupStats(dir, stats.Mean, alldt, sts...)
-	stats.TableGroupStats(dir, stats.Sem, alldt, sts...)
+	stats.TableGroupStats(dir, stats.StatMean, alldt, sts...)
+	stats.TableGroupStats(dir, stats.StatSem, alldt, sts...)
 
 }
 

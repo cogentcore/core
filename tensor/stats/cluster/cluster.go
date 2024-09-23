@@ -114,7 +114,7 @@ func InitAllLeaves(ntot int) *Node {
 func Glom(root *Node, funcName string, dmat tensor.Tensor) *Node {
 	ntot := dmat.DimSize(0) // number of leaves
 	mout := tensor.NewFloat64Scalar(0)
-	stats.MaxFunc(tensor.As1D(dmat), mout)
+	stats.Max(tensor.As1D(dmat), mout)
 	maxd := mout.Float1D(0)
 	// indexes in each group
 	aidx := make([]int, ntot)
