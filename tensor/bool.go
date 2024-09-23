@@ -25,7 +25,7 @@ type Bool struct {
 }
 
 // NewBool returns a new n-dimensional tensor of bit values
-// with the given sizes per dimension (shape), and optional dimension names.
+// with the given sizes per dimension (shape).
 func NewBool(sizes ...int) *Bool {
 	tsr := &Bool{}
 	tsr.SetShapeSizes(sizes...)

@@ -23,9 +23,8 @@ import (
 var csv embed.FS
 
 // AnalyzePlanets analyzes planets.csv data following some of the examples
-// given here, using pandas:
-//
-//	https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html
+// in pandas from:
+// https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html
 func AnalyzePlanets(dir *datafs.Data) {
 	Planets := table.New("planets")
 	Planets.OpenFS(csv, "planets.csv", tensor.Comma)

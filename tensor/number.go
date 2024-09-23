@@ -34,37 +34,37 @@ type Int32 = Number[int32]
 type Byte = Number[byte]
 
 // NewFloat32 returns a new [Float32] tensor
-// with the given sizes per dimension (shape), and optional dimension names.
+// with the given sizes per dimension (shape).
 func NewFloat32(sizes ...int) *Float32 {
 	return New[float32](sizes...).(*Float32)
 }
 
 // NewFloat64 returns a new [Float64] tensor
-// with the given sizes per dimension (shape), and optional dimension names.
+// with the given sizes per dimension (shape).
 func NewFloat64(sizes ...int) *Float64 {
 	return New[float64](sizes...).(*Float64)
 }
 
 // NewInt returns a new Int tensor
-// with the given sizes per dimension (shape), and optional dimension names.
+// with the given sizes per dimension (shape).
 func NewInt(sizes ...int) *Int {
 	return New[int](sizes...).(*Int)
 }
 
 // NewInt32 returns a new Int32 tensor
-// with the given sizes per dimension (shape), and optional dimension names.
+// with the given sizes per dimension (shape).
 func NewInt32(sizes ...int) *Int32 {
 	return New[int32](sizes...).(*Int32)
 }
 
 // NewByte returns a new Byte tensor
-// with the given sizes per dimension (shape), and optional dimension names.
+// with the given sizes per dimension (shape).
 func NewByte(sizes ...int) *Byte {
 	return New[uint8](sizes...).(*Byte)
 }
 
 // NewNumber returns a new n-dimensional tensor of numerical values
-// with the given sizes per dimension (shape), and optional dimension names.
+// with the given sizes per dimension (shape).
 func NewNumber[T num.Number](sizes ...int) *Number[T] {
 	tsr := &Number[T]{}
 	tsr.SetShapeSizes(sizes...)

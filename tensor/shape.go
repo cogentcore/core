@@ -9,7 +9,7 @@ import (
 	"slices"
 )
 
-// Shape manages a tensor's shape information, including strides and dimension names
+// Shape manages a tensor's shape information, including sizes and strides,
 // and can compute the flat index into an underlying 1D data storage array based on an
 // n-dimensional index (and vice-versa).
 // Per Go / C / Python conventions, indexes are Row-Major, ordered from
@@ -192,9 +192,9 @@ func RowMajorStrides(sizes ...int) []int {
 	return strides
 }
 
-// ColMajorStrides returns strides for sizes where the first dimension is inner-most
+// ColumnMajorStrides returns strides for sizes where the first dimension is inner-most
 // and subsequent dimensions are progressively outer
-func ColMajorStrides(sizes ...int) []int {
+func ColumnMajorStrides(sizes ...int) []int {
 	total := int(1)
 	for _, v := range sizes {
 		if v == 0 {
