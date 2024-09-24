@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+
+	"cogentcore.org/core/base/stack"
+	"cogentcore.org/core/tensor"
 )
 
 func MathParse(toks Tokens, code string, fullLine bool) Tokens {
@@ -45,17 +48,39 @@ func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 	return mp.out
 }
 
+// funcInfo is info about the function being processed
+type funcInfo struct {
+	tensor.Func
+
+	//	true if this function takes tensor args
+	tensorArgs bool
+}
+
 // mathParse has the parsing state
 type mathParse struct {
 	code string // code string
 	toks Tokens // source tokens we are parsing
-	idx  int    //  current index in source tokens
+	idx  int    // current index in source tokens -- critical to sync as we "use" source
 	out  Tokens // output tokens we generate
 
-	// goLiteral means generate basic literals as standard go literals instead of
-	// wrapping them in tensor constructors.  for inner expressions contstructing go
-	// objects etc.
-	goLiteral bool
+	// stack of function info -- top of stack reflects the current function
+	funcs stack.Stack[*funcInfo]
+}
+
+// startFunc is called when starting a new function -- sets context
+func (mp *mathParse) startFunc(name string, tensorArgs bool) *funcInfo {
+	fn := &funcInfo{}
+	fn.Name = name
+	fn.tensorArgs = tensorArgs
+	mp.funcs.Push(fn)
+	if name != "" {
+		mp.out.Add(token.IDENT, name)
+	}
+	return fn
+}
+
+func (mp *mathParse) endFunc() {
+	mp.funcs.Pop()
 }
 
 // addToken adds output token and increments idx
@@ -102,9 +127,12 @@ func (mp *mathParse) stmt(st ast.Stmt) {
 		mp.addToken(x.Tok)
 
 	case *ast.AssignStmt:
-		mp.exprList(x.Lhs)
-		mp.addToken(x.Tok)
-		mp.exprList(x.Rhs)
+		switch x.Tok {
+		case token.DEFINE:
+			mp.defineStmt(x)
+		case token.ASSIGN:
+			mp.assignStmt(x)
+		}
 
 	case *ast.GoStmt:
 		mp.addToken(token.GO)
@@ -232,7 +260,7 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 	case token.QUO:
 		fn = "Div"
 	}
-	mp.out.Add(token.IDENT, "tensor.CallOut")
+	mp.startFunc("tensor.CallOut", true) // yes tensor args
 	mp.out.Add(token.LPAREN)
 	mp.out.Add(token.STRING, `"`+fn+`"`)
 	mp.out.Add(token.COMMA)
@@ -241,6 +269,7 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 	mp.idx++
 	mp.expr(ex.Y)
 	mp.out.Add(token.RPAREN)
+	mp.endFunc()
 }
 
 func (mp *mathParse) unaryExpr(ex *ast.UnaryExpr) {
@@ -248,11 +277,34 @@ func (mp *mathParse) unaryExpr(ex *ast.UnaryExpr) {
 	mp.expr(ex.X)
 }
 
+func (mp *mathParse) defineStmt(as *ast.AssignStmt) {
+	mp.exprList(as.Lhs)
+	mp.addToken(as.Tok)
+	mp.startFunc("", true) // just to trigger tensor args
+	mp.exprList(as.Rhs)
+	mp.endFunc()
+}
+
+func (mp *mathParse) assignStmt(as *ast.AssignStmt) {
+	// todo: use assign op if lhs is not ident
+	mp.exprList(as.Lhs)
+	mp.addToken(as.Tok)
+	mp.startFunc("", true) // just to trigger tensor args
+	mp.exprList(as.Rhs)
+	mp.endFunc()
+}
+
 func (mp *mathParse) basicLit(lit *ast.BasicLit) {
-	if mp.goLiteral {
-		mp.out.Add(lit.Kind, lit.Value)
+	cfun := mp.funcs.Peek()
+	if cfun != nil && cfun.tensorArgs {
+		mp.tensorLit(lit)
 		return
 	}
+	mp.out.Add(lit.Kind, lit.Value)
+	return
+}
+
+func (mp *mathParse) tensorLit(lit *ast.BasicLit) {
 	switch lit.Kind {
 	case token.INT:
 		mp.out.Add(token.IDENT, "tensor.NewIntScalar("+lit.Value+")")
@@ -322,17 +374,20 @@ func (mp *mathParse) indexListExpr(il *ast.IndexListExpr) {
 }
 
 func (mp *mathParse) indexExpr(il *ast.IndexExpr) {
-	if iil, ok := il.Index.(*ast.IndexListExpr); ok {
-		// todo: need to analyze and see what kind of expr it is
-		mp.out.Add(token.IDENT, "tensor.NewSliced")
-		mp.out.Add(token.LPAREN)
-		mp.expr(il.X)
-		mp.addToken(token.COMMA) // use the [
-		mp.goLiteral = true
-		mp.exprList(iil.Indices)
-		mp.goLiteral = true
-		mp.addToken(token.RPAREN) // replaces ]
+	if _, ok := il.Index.(*ast.IndexListExpr); ok {
+		mp.basicSlicingExpr(il)
 	}
+}
+
+func (mp *mathParse) basicSlicingExpr(il *ast.IndexExpr) {
+	iil := il.Index.(*ast.IndexListExpr)
+	mp.startFunc("tensor.NewSliced", false)
+	mp.out.Add(token.LPAREN)
+	mp.expr(il.X)
+	mp.addToken(token.COMMA) // use the [
+	mp.exprList(iil.Indices)
+	mp.addToken(token.RPAREN) // replaces ]
+	mp.endFunc()
 }
 
 func (mp *mathParse) sliceExpr(se *ast.SliceExpr) {
@@ -379,16 +434,15 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 		typ = "string"
 		fun = "String"
 	}
-	mp.out.Add(token.IDENT, "tensor.New"+fun+"FromValues")
+	mp.startFunc("tensor.New"+fun+"FromValues", false)
 	mp.out.Add(token.LPAREN)
 	mp.out.Add(token.IDENT, "[]"+typ)
 	mp.addToken(token.LBRACE)
-	mp.goLiteral = true
 	mp.exprList(il.Indices)
-	mp.goLiteral = false
 	mp.addToken(token.RBRACE)
 	mp.addToken(token.ELLIPSIS)
 	mp.out.Add(token.RPAREN)
+	mp.endFunc()
 }
 
 var numpyFuncs = map[string]funWrap{
@@ -401,21 +455,21 @@ func (mp *mathParse) callExpr(ex *ast.CallExpr) {
 	if fnm, ok := ex.Fun.(*ast.Ident); ok {
 		if fw, ok := numpyFuncs[fnm.Name]; ok {
 			// todo: wrap
-			mp.out.Add(token.IDENT, fw.fun)
-			mp.idx++
+			mp.startFunc(fw.fun, false)
+			mp.addToken(token.LPAREN) // use the (
+			mp.idx++                  // paren too
 		} else {
-			mp.out.Add(token.IDENT, fnm.Name)
+			mp.startFunc(fnm.Name, false)
+			mp.addToken(token.LPAREN) // use the (
 			mp.idx++
 		}
 	} else {
 		mp.expr(ex.Fun)
 	}
-	mp.addToken(token.LPAREN)
-	mp.goLiteral = true // todo: need a stack for this.
 	mp.exprList(ex.Args)
-	mp.goLiteral = false
 	// todo: ellipsis
 	mp.addToken(token.RPAREN)
+	mp.endFunc()
 }
 
 func (mp *mathParse) ident(id *ast.Ident) {
