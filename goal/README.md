@@ -1,16 +1,16 @@
 # Goal: Go augmented language
 
-_Goal_ is an augmented version of the _Go_ language, which combines the best parts of _Go_, `bash`, and Python, to provide and integrated shell and numerical expression processing experience, which can be combined with the [yaegi](https://github.com/traefik/yaegi) interpreter to provide an interactive "REPL" (read, evaluate, print loop).
+Goal is an augmented version of the Go language, which combines the best parts of Go, `bash`, and Python, to provide and integrated shell and numerical expression processing experience, which can be combined with the [yaegi](https://github.com/traefik/yaegi) interpreter to provide an interactive "REPL" (read, evaluate, print loop).
 
-_Goal_ transpiles directly into Go, so it automatically leverages all the great features of Go, and remains fully compatible with it.  The augmentation is designed to overcome some of the limitations of Go in specific domains:
+Goal transpiles directly into Go, so it automatically leverages all the great features of Go, and remains fully compatible with it.  The augmentation is designed to overcome some of the limitations of Go in specific domains:
 
 * Shell scripting, where you want to be able to directly call other executable programs with arguments, without having to navigate all the complexity of the standard [os.exec](https://pkg.go.dev/os/exec) package.
 
 * Numerical / math / data processing, where you want to be able to write simple mathematical expressions operating on vectors, matricies and other more powerful data types, without having to constantly worry about type conversions and need extended indexing and slicing expressions. Python is the dominant language here precisely because it lets you ignore type information and write such expressions.
 
-The main goal of _Goal_ is to achieve a "best of both worlds" solution that retains all the type safety and explicitness of Go for all the surrounding control flow and large-scale application logic, while also allowing for a more relaxed syntax in specific, well-defined domains where the Go language has been a barrier.  Thus, unlike Python where there are various weak attempts to try to encourage better coding habits, _Goal_ retains in its _Go_ foundation a fundamentally scalable, "industrial strength" language that has already proven its worth in countless real-world applications.
+The main goal of Goal is to achieve a "best of both worlds" solution that retains all the type safety and explicitness of Go for all the surrounding control flow and large-scale application logic, while also allowing for a more relaxed syntax in specific, well-defined domains where the Go language has been a barrier.  Thus, unlike Python where there are various weak attempts to try to encourage better coding habits, Goal retains in its Go foundation a fundamentally scalable, "industrial strength" language that has already proven its worth in countless real-world applications.
 
-For the shell scripting aspect of _Goal_, the simple idea is that each line of code is either Go or shell commands, determined in a fairly intuitive way mostly by the content at the start of the line (formal rules below). If a line starts off with something like `ls -la...` then it is clear that it is not valid Go code, and it is therefore processed as a shell command.
+For the shell scripting aspect of Goal, the simple idea is that each line of code is either Go or shell commands, determined in a fairly intuitive way mostly by the content at the start of the line (formal rules below). If a line starts off with something like `ls -la...` then it is clear that it is not valid Go code, and it is therefore processed as a shell command.
 
 You can intermix Go within a shell line by wrapping an expression with `{ }` braces, and a Go expression can contain shell code by using `$`.  Here's an example:
 ```go
@@ -37,7 +37,7 @@ for _, x := range #[1,2,3]# {
 }
 ```
 
-In general, the math mode syntax in _Goal_ is designed to be as compatible with Python NumPy / scipy syntax as possible, while also adding a few Go-specific additions as well -- see [Math mode](#math-mode) for details.  All elements of a _Goal_ math expression are [tensors](../tensor), which can represent everything from a scalar to an n-dimenstional tensor.  These are called an "ndarray" in NumPy terms.
+In general, the math mode syntax in Goal is designed to be as compatible with Python NumPy / scipy syntax as possible, while also adding a few Go-specific additions as well -- see [Math mode](#math-mode) for details.  All elements of a Goal math expression are [tensors](../tensor), which can represent everything from a scalar to an n-dimenstional tensor.  These are called an "ndarray" in NumPy terms.
 
 The rationale and mnemonics for using `$` and `#` are as follows:
 
@@ -49,7 +49,7 @@ The rationale and mnemonics for using `$` and `#` are as follows:
 
 # Examples
 
-Here are a few useful examples of _Goal_ code:
+Here are a few useful examples of Goal code:
 
 You can easily perform handy duration and data size formatting:
 
@@ -221,19 +221,21 @@ TODO: update aboven
 
 # Math mode
 
-In general, _Goal_ is designed to be as compatible with Python NumPy / SciPy syntax as possible, while also adding a few Go-specific additions as well.  The Goal global functions are named the same as NumPy, without the `np.` prefix, so existing code can be converted by just removing that prefix.  Corresponding field-like properties of tensors are converted into into appropriate method calls.
+In general, Goal is designed to be as compatible with Python NumPy / SciPy syntax as possible, while also adding a few Go-specific additions as well.  The Goal global functions are named the same as NumPy, without the `np.` prefix, so existing code can be converted by just removing that prefix.  Corresponding field-like properties of tensors are converted into into appropriate method calls.
 
-All elements of a _Goal_ math expression are [tensors](../tensor) (i.e., `tensor.Tensor`), which can represent everything from a scalar to an n-dimenstional tensor, with different _views_ that support the arbitrary slicing and flexible forms of indexing documented in the table below.  These are called an "array" in NumPy terms.  See [array vs. tensor](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html#array-or-matrix-which-should-i-use) NumPy docs for more information.  Note that _Goal_ does not have a distinct `matrix` type; everything is a tensor, and when these are 2D, they function appropriately.
+All elements of a Goal math expression are [tensors](../tensor) (i.e., `tensor.Tensor`), which can represent everything from a scalar to an n-dimenstional tensor, with different _views_ that support the arbitrary slicing and flexible forms of indexing documented in the table below.  These are called an "array" in NumPy terms.  See [array vs. tensor](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html#array-or-matrix-which-should-i-use) NumPy docs for more information.  Note that Goal does not have a distinct `matrix` type; everything is a tensor, and when these are 2D, they function appropriately.
 
-The _view_ versions of `Tensor` include `tensor.Sliced`, `tensor.Rows`, `tensor.Masked`, and `tensor.Indexed`, each of which wraps around another "source" `Tensor`, and provides its own way of accessing the underlying data:
+The _view_ versions of `Tensor` include `Sliced`, `Reshaped`,  `Masked`, `Indexed`, and `Rows`, each of which wraps around another "source" `Tensor`, and provides its own way of accessing the underlying data:
 
 * `Sliced` has an arbitrary set of indexes for each dimension, so access to values along that dimension go through the indexes.  Thus, you could reverse the order of the columns (dimension 1), or only operate on a subset of them.
-
-* `Rows` is an optimized version of `Sliced` with indexes only for the first, outermost, _row_ dimension, which 
 
 * `Masked` has a `tensor.Bool` tensor that filters access to the underlying source tensor through a mask: anywhere the bool value is `false`, the corresponding source value is not settable, and returns `NaN` (missing value) when accessed.
 
 * `Indexed` uses a tensor of indexes where the final, innermost dimension is the same size as the number of dimensions in the wrapped source tensor. The overall shape of this view is that of the remaining outer dimensions of the Indexes tensor, and like other views, assignment and return values are taken from the corresponding indexed value in the wrapped source tensor.
+
+    The current NumPy version of indexed is rather complex and difficult for many people to understand, as articulated in this [NEP 21 proposal](https://numpy.org/neps/nep-0021-advanced-indexing.html). We probably want to fix.
+
+* `Rows` is an optimized version of `Sliced` with indexes only for the first, outermost, _row_ dimension.
 
 Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html)
 
@@ -243,8 +245,8 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 | `len(a)` or `a.len` or `size(a)` or `a.size` | `np.size(a)` or `a.size`   | `numel(a)` | number of elements of tensor `a` |
 | `shape(a)` or `a.shape` | `np.shape(a)` or `a.shape` | `size(a)`  | "size" of each dimension in a; `shape` returns a 1D `int` tensor |
 | `a.shape[n-1]` | `a.shape[n-1]` | `size(a,n)` | the number of elements of the n-th dimension of tensor `a` |
-| `a.reshape([10, 2])` or `a.reshape(10, 2)` or `reshape(a, [10, 2])` | `a.reshape(10, 2)` or `np.reshape(a, 10, 2` | `reshape(a,10,2)` | set the shape of `a`, preserving existing values (and adding zeros if larger, in _Goal_) |
-|  | `y = x.flatten()`   | `y=x(:)` | turn tensor into vector (forces a copy in NumPy). |
+| `tensor.NewReshaped(a, 10, 2)` or `a.reshape([10, 2])` or `reshape(a, [10, 2])` or: | `a.reshape(10, 2)` or `np.reshape(a, 10, 2)` or `a.shape = (10,2)` | `reshape(a,10,2)` | set the shape of `a` to a new shape that has the same total number of values (len or size); No option to change order in Goal: always row major. |
+| `tensor.Clone(tensor.As1D(a))` or: | `y = x.flatten()`   | `y=x(:)` | turn tensor into a 1D vector (forces a copy) |.
 | | | |
 | **Construction** | | |
 | `[[1., 2., 3.], [4., 5., 6.]]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
@@ -269,22 +271,22 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  | `np.meshgrid([1,2,4],[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
 |  | `np.ix_([1,2,4],[2,4,5])`    |  | the best way to eval functions on a grid |
 | | | |
-| **Access and Slicing** | | |
-| (returns a _view_, changes modify original) | (returns a _reference_, changes modify original) | (returns a _copy_) | |
-| `y = x.copy()` or `y = x.Clone()` | `y = x.copy()` | `y=x`  | `y=x` just assigns `y` to point to `x`, so that changes to `y` also change `x`; need to make a `copy` to get distinct values |
-| `y = x[1, :].copy()` or `y = x[1, :].Clone()` | `y = x[1, :].copy()` | `y=x(2,:)` | without the copy, `y` would point to a view of values in `x`; `copy` creates distinct values, in this case of _only_ the 2nd row of `x` -- i.e., it "concretizes" a given view into a literal, memory-continuous set of values for that view. |
-|  | `a[-1]` | `a(end)` | access last element |
+| **Basic Indexing** | | |
 |  | `a[1, 4]` | `a(2,5)` | access element in second row, fifth column in 2D tensor `a` |
+|  | `a[-1]` | `a(end)` | access last element |
 |  | `a[1]` or `a[1, :]` | `a(2,:)` | entire second row of 2D tensor `a`; unspecified dimensions are equivalent to `:` |
 |  | `a[0:5]` or `a[:5]` or `a[0:5, :]` | `a(1:5,:)` | same as Go slice ranging |
 |  | `a[-5:]` | `a(end-4:end,:)` | last 5 rows of 2D tensor `a` |
 |  | `a[0:3, 4:9]` | `a(1:3,5:9)` | The first through third rows and fifth through ninth columns of a 2D tensor, `a`. |
-|  | `a[np.ix_([1, 3, 4], [0, 2])]` | `a([2,4,5],[1,3])` | rows 2,4 and 5 and columns 1 and 3. |
 |  | `a[2:21:2,:]` | `a(3:2:21,:)` | every other row of `a`, starting with the third and going to the twenty-first |
 |  | `a[::2, :]`  | `a(1:2:end,:)` | every other row of `a`, starting with the first |
 |  | `a[::-1,:]`  | `a(end:-1:1,:) or flipud(a)` | `a` with rows in reverse order |
 | | | |
-| **Boolean Tensors** | | |
+| **Advanced Indexing** | | |
+| if indexes are themselves an array | then advanced indexing takes place | | indexes are parallel lists of dimension coordinates; not the clearest |
+|  | `a[np.ix_([1, 3, 4], [0, 2])]` | `a([2,4,5],[1,3])` | rows 2,4 and 5 and columns 1 and 3. |
+| | | |
+| **Boolean Tensors and Indexing** | | |
 | (bool tensor of same shape can filter access to other tensor) | | |
 | `(a > 0.5)` | `(a > 0.5)` | `(a > 0.5)` | `bool` tensor of shape `a` with elements `(v > 0.5)` |
 | `a && b` | `logical_and(a,b)` | `a & b` | element-wise AND operator on `bool` tensors |
@@ -304,6 +306,10 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  | `np.sort(a, axis=1)` or `a.sort(axis=1)` | `sort(a, 2)` | sort the each row of 2D tensor, `a` |
 |  | `I = np.argsort(a[:, 0]); b = a[I,:]` | `[b,I]=sortrows(a,1)`  | save the tensor `a` as tensor `b` with rows sorted by the first column |
 |  | `np.unique(a)` | `unique(a)` | a vector of unique values in tensor `a` |
+| | | |
+| **Copy vs. View** | | |
+| `y = x.copy()` or `y = x.Clone()` | `y = x.copy()` | `y=x`  | `y=x` just assigns `y` to point to `x`, so that changes to `y` also change `x`; need to make a `copy` to get distinct values |
+| `y = x[1, :].copy()` or `y = x[1, :].Clone()` | `y = x[1, :].copy()` | `y=x(2,:)` | without the copy, `y` would point to a view of values in `x`; `copy` creates distinct values, in this case of _only_ the 2nd row of `x` -- i.e., it "concretizes" a given view into a literal, memory-continuous set of values for that view. |
 | | | |
 | **Math** | | |
 |  | `a * b` | `a .* b` | element-wise multiply |
@@ -332,7 +338,7 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  | `P,L,U = linalg.lu(a)` where `a == P@L@U`  | `[L,U,P]=lu(a)` where `a==P'*L*U` | LU decomposition with partial pivoting (note: P(MATLAB) == transpose(P(NumPy))) | 
 | | | |
 | **Statistics** | | |
-| `a.max()` or `max(a)` or `stats.Max(a)` | `a.max()` or `np.nanmax(a)` | `max(max(a))` | maximum element of `a`, _Goal_ always ignores `NaN` as missing data |
+| `a.max()` or `max(a)` or `stats.Max(a)` | `a.max()` or `np.nanmax(a)` | `max(max(a))` | maximum element of `a`, Goal always ignores `NaN` as missing data |
 |  | `a.max(0)` | `max(a)` | maximum element of each column of tensor `a` |
 |  | `a.max(1)` | `max(a,[],2)` | maximum element of each row of tensor `a` |
 |  | `np.maximum(a, b)` | `max(a,b)` | compares a and b element-wise, and returns the maximum value from each pair |

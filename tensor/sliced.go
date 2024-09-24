@@ -52,18 +52,39 @@ func NewSlicedIndexes(tsr Tensor, idxs ...[]int) *Sliced {
 }
 
 // NewSliced returns a new [Sliced] view of given tensor,
-// with given slices for each dimension (none / nil = sequential).
-// Any dimensions without indexes default to nil = full sequential view.
-func NewSliced(tsr Tensor, sls ...Slice) *Sliced {
+// with given slice expressions for each dimension, which can be:
+//   - an integer, indicating a specific index value along that dimension.
+//   - a [Slice] object expressing a range of indexes.
+//   - [Elipses] which acts as a kind of "spacer" to include all dimensions
+//     up to the next expression.
+//   - any remaining dimensions without indexes default to nil = full sequential view.
+func NewSliced(tsr Tensor, sls ...any) *Sliced {
 	ns := len(sls)
 	if ns == 0 {
 		return NewSlicedIndexes(tsr)
 	}
-	ns = min(ns, tsr.NumDims())
-	ixs := make([][]int, ns)
+	nd := tsr.NumDims()
+	ed := nd - ns // extra dimensions
+	ixs := make([][]int, nd)
+	ci := 0
 	for d := range ns {
-		sl := sls[d]
-		ixs[d] = sl.IntSlice(tsr.DimSize(d))
+		s := sls[d]
+		switch x := s.(type) {
+		case int:
+			if x < 0 {
+				ixs[ci] = []int{tsr.DimSize(ci) + x}
+			} else {
+				ixs[ci] = []int{x}
+			}
+		case Slice:
+			ixs[ci] = x.IntSlice(tsr.DimSize(ci))
+		case ElipsesType:
+			for range ed {
+				ixs[ci] = Slice{}.IntSlice(tsr.DimSize(ci))
+				ci++
+			}
+		}
+		ci++
 	}
 	return NewSlicedIndexes(tsr, ixs...)
 }

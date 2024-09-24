@@ -146,11 +146,11 @@ func CovarianceMatrix(fun any, in, out tensor.Tensor) error {
 		func(idx int, tsr ...tensor.Tensor) {
 			c := coords[idx]
 			if c.X != curCoords.X {
-				av = tensor.NewSliced(tsr[0], tensor.Slice{}, tensor.Slice{Start: c.X, Stop: c.X + 1})
+				av = tensor.NewSliced(tsr[0], tensor.Elipses, c.X)
 				curCoords.X = c.X
 			}
 			if c.Y != curCoords.Y {
-				bv = tensor.NewSliced(tsr[0], tensor.Slice{}, tensor.Slice{Start: c.Y, Stop: c.Y + 1})
+				bv = tensor.NewSliced(tsr[0], tensor.Elipses, c.Y)
 				curCoords.Y = c.Y
 			}
 			mfun(av, bv, mout)
@@ -244,7 +244,7 @@ func SVD(covar, eigenvecs, vals tensor.Tensor) error {
 // This is typically done with results from SVD or PCA.
 func ProjectOnMatrixColumn(mtx, vec, colindex, out tensor.Tensor) error {
 	ci := int(colindex.Float1D(0))
-	col := tensor.As1D(tensor.NewSliced(mtx, tensor.Slice{}, tensor.Slice{Start: ci, Stop: ci + 1}))
+	col := tensor.As1D(tensor.NewSliced(mtx, tensor.Slice{}, ci))
 	// fmt.Println(mtx.String(), col.String())
 	rows, cells := vec.Shape().RowCellSize()
 	if rows > 0 && cells > 0 {

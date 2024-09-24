@@ -319,6 +319,7 @@ func (mp *mathParse) indexExpr(il *ast.IndexExpr) {
 
 	if iil, ok := il.Index.(*ast.IndexListExpr); ok {
 		// todo: need to analyze and see what kind of expr it is
+		mp.out.Add(token.IDENT, "token.NewSliced")
 		mp.expr(il.X)
 		mp.out.Add(token.PERIOD)
 		// note: we do not know what type to use, so use float

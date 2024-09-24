@@ -207,6 +207,7 @@ func TestMath(t *testing.T) {
 		// {"# a := [1,2,3,4]", `a := tensor.NewIntFromValues([]int { 1, 2, 3, 4 }  ...)`},
 		// {"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},
 		// {"# a := zeros(3, 4)", `a := tensor.NewFloat64(3, 4)`},
+		{"# a[1,2]", `tensor.NewSliced(a, 1, 2)`},
 		{"# a[1,2]", `a.Float(1, 2)`},
 	}
 

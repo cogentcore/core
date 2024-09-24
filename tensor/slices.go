@@ -4,6 +4,12 @@
 
 package tensor
 
+// ElipsesType is a special type for marking the Elipses in [Sliced] expressions.
+type ElipsesType int
+
+// Elipses is used in [Sliced] expressions to stretch between elements.
+const Elipses ElipsesType = 0
+
 // Slice represents a slice of index values, for extracting slices of data,
 // along a dimension of a given size, which is provided separately as an argument.
 // Uses standard 'for' loop logic with a Start and _exclusive_ Stop value,
