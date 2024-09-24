@@ -24,7 +24,7 @@ func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 	// fmt.Println(str)
 	mp := mathParse{toks: toks, code: code}
 
-	mods := AllErrors | Trace
+	mods := AllErrors // | Trace
 
 	if fullLine {
 		stmts, err := ParseLine(str, mods)
@@ -160,6 +160,9 @@ func (mp *mathParse) expr(ex ast.Expr) {
 	case *ast.Ident:
 		mp.ident(x)
 
+	case *ast.UnaryExpr:
+		mp.unaryExpr(x)
+
 	case *ast.BinaryExpr:
 		mp.binaryExpr(x)
 
@@ -186,8 +189,7 @@ func (mp *mathParse) expr(ex ast.Expr) {
 		}
 
 	case *ast.SliceExpr:
-		// mp.sliceExpr(x)
-		// todo: probably this is subsumed in indexListExpr
+		mp.sliceExpr(x)
 
 	case *ast.CallExpr:
 		mp.callExpr(x)
@@ -239,6 +241,11 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 	mp.idx++
 	mp.expr(ex.Y)
 	mp.out.Add(token.RPAREN)
+}
+
+func (mp *mathParse) unaryExpr(ex *ast.UnaryExpr) {
+	mp.addToken(ex.Op)
+	mp.expr(ex.X)
 }
 
 func (mp *mathParse) basicLit(lit *ast.BasicLit) {
@@ -315,21 +322,44 @@ func (mp *mathParse) indexListExpr(il *ast.IndexListExpr) {
 }
 
 func (mp *mathParse) indexExpr(il *ast.IndexExpr) {
-	fmt.Println("index expr", il)
-
 	if iil, ok := il.Index.(*ast.IndexListExpr); ok {
 		// todo: need to analyze and see what kind of expr it is
-		mp.out.Add(token.IDENT, "token.NewSliced")
+		mp.out.Add(token.IDENT, "tensor.NewSliced")
+		mp.out.Add(token.LPAREN)
 		mp.expr(il.X)
-		mp.out.Add(token.PERIOD)
-		// note: we do not know what type to use, so use float
-		mp.out.Add(token.IDENT, "Float")
-		mp.addToken(token.LPAREN) // replaces [
+		mp.addToken(token.COMMA) // use the [
 		mp.goLiteral = true
 		mp.exprList(iil.Indices)
 		mp.goLiteral = true
 		mp.addToken(token.RPAREN) // replaces ]
 	}
+}
+
+func (mp *mathParse) sliceExpr(se *ast.SliceExpr) {
+	mp.out.Add(token.IDENT, "tensor.Slice")
+	mp.addToken(token.LBRACE)
+	prev := false
+	if se.Low != nil {
+		mp.out.Add(token.IDENT, "Start:")
+		mp.expr(se.Low)
+		prev = true
+	}
+	if se.High != nil {
+		if prev {
+			mp.out.Add(token.COMMA)
+		}
+		mp.out.Add(token.IDENT, "Stop:")
+		mp.expr(se.High)
+		prev = true
+	}
+	if se.Max != nil {
+		if prev {
+			mp.out.Add(token.COMMA)
+		}
+		mp.out.Add(token.IDENT, "Step:")
+		mp.expr(se.Max)
+	}
+	mp.addToken(token.RBRACE)
 }
 
 func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
@@ -362,7 +392,9 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 }
 
 var numpyFuncs = map[string]funWrap{
-	"zeros": {"tensor.NewFloat64", ""},
+	"zeros":   {"tensor.NewFloat64", ""},
+	"arange":  {"tensor.NewSliceInts", ""},
+	"reshape": {"tensor.NewReshaped", ""},
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {
@@ -370,14 +402,16 @@ func (mp *mathParse) callExpr(ex *ast.CallExpr) {
 		if fw, ok := numpyFuncs[fnm.Name]; ok {
 			// todo: wrap
 			mp.out.Add(token.IDENT, fw.fun)
+			mp.idx++
 		} else {
 			mp.out.Add(token.IDENT, fnm.Name)
+			mp.idx++
 		}
 	} else {
 		mp.expr(ex.Fun)
 	}
 	mp.addToken(token.LPAREN)
-	mp.goLiteral = true
+	mp.goLiteral = true // todo: need a stack for this.
 	mp.exprList(ex.Args)
 	mp.goLiteral = false
 	// todo: ellipsis

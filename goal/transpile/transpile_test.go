@@ -200,15 +200,23 @@ goal.Run("ls", "-la", "args...")
 func TestMath(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		// {"# x := 1", `x := tensor.NewIntScalar(1)`},
-		// {"# x := a + 1", `x := tensor.CallOut("Add", a, tensor.NewIntScalar(1))`},
-		// {"# x = x * 4", `x = tensor.CallOut("Mul", x, tensor.NewIntScalar(4))`},
-		// {"# a = x + y", `a = tensor.CallOut("Add", x, y)`},
-		// {"# a := [1,2,3,4]", `a := tensor.NewIntFromValues([]int { 1, 2, 3, 4 }  ...)`},
-		// {"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},
-		// {"# a := zeros(3, 4)", `a := tensor.NewFloat64(3, 4)`},
-		{"# a[1,2]", `tensor.NewSliced(a, 1, 2)`},
-		{"# a[1,2]", `a.Float(1, 2)`},
+		{"# x := 1", `x := tensor.NewIntScalar(1)`},
+		{"# x := a + 1", `x := tensor.CallOut("Add", a, tensor.NewIntScalar(1))`},
+		{"# x = x * 4", `x = tensor.CallOut("Mul", x, tensor.NewIntScalar(4))`},
+		{"# a = x + y", `a = tensor.CallOut("Add", x, y)`},
+		{"# a := [1,2,3,4]", `a := tensor.NewIntFromValues([]int { 1, 2, 3, 4 }  ...)`},
+		{"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},
+		{"# a := zeros(3, 4)", `a := tensor.NewFloat64(3, 4)`},
+		{"# a := arange(36)", `a := tensor.NewSliceInts(36)`},
+		{"# a := arange(36, 0,0,-1)", `a := tensor.NewSliceInts(36, 0, 0,  - 1)`},
+		{"# a := reshape(x, 6, 6)", `a := tensor.NewReshaped(x, 6, 6)`},
+		{"# a := reshape(arange(36), 6, 6)", `a := tensor.NewReshaped(tensor.NewSliceInts(36), 6, 6)`},
+		{"# a[1, 2]", `tensor.NewSliced(a, 1, 2)`},
+		{"# a[:, 2]", `tensor.NewSliced(a, tensor.Slice { } , 2)`},
+		{"# a[1:3:1, 2]", `tensor.NewSliced(a, tensor.Slice { Start:1, Stop:3, Step:1 } , 2)`},
+		{"# a[::-1, 2]", `tensor.NewSliced(a, tensor.Slice { Step: - 1 } , 2)`},
+		{"# a[:3, 2]", `tensor.NewSliced(a, tensor.Slice { Stop:3 } , 2)`},
+		{"# a[2:, 2]", `tensor.NewSliced(a, tensor.Slice { Start:2 } , 2)`},
 	}
 
 	st := NewState()

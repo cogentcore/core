@@ -51,6 +51,7 @@ func init() {
 		"DelimsValues":              reflect.ValueOf(tensor.DelimsValues),
 		"Descending":                reflect.ValueOf(tensor.Descending),
 		"Detect":                    reflect.ValueOf(tensor.Detect),
+		"Elipses":                   reflect.ValueOf(tensor.Elipses),
 		"Float64ToBool":             reflect.ValueOf(tensor.Float64ToBool),
 		"Float64ToString":           reflect.ValueOf(tensor.Float64ToString),
 		"FuncByName":                reflect.ValueOf(tensor.FuncByName),
@@ -131,6 +132,7 @@ func init() {
 		// type definitions
 		"Bool":          reflect.ValueOf((*tensor.Bool)(nil)),
 		"Delims":        reflect.ValueOf((*tensor.Delims)(nil)),
+		"ElipsesType":   reflect.ValueOf((*tensor.ElipsesType)(nil)),
 		"FilterFunc":    reflect.ValueOf((*tensor.FilterFunc)(nil)),
 		"FilterOptions": reflect.ValueOf((*tensor.FilterOptions)(nil)),
 		"Func":          reflect.ValueOf((*tensor.Func)(nil)),

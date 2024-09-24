@@ -262,11 +262,11 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  | `a[np.r_[:len(a),0]]`  | `a([1:end 1],:)`  | `a` with copy of the first row appended to the end |
 | | | |
 | **Ranges and Grids** [numpy](https://numpy.org/doc/stable/user/how-to-partition.html) | | |
-|  | `np.arange(1., 11.) or np.r_[1.:11.] or np.r_[1:10:10j]` | `1:10` | create an increasing vector |
-|  | `np.arange(10.) or np.r_[:10.] or np.r_[:9:10j]` | `0:9` | create an increasing vector |
+|  | `np.arange(1., 11.)` or `np.r_[1.:11.]` or `np.r_[1:10:10j]` | `1:10` | create an increasing vector |
+|  | `np.arange(10.)` or `np.r_[:10.]` or `np.r_[:9:10j]` | `0:9` | create an increasing vector |
 |  | `np.arange(1.,11.)[:, np.newaxis]` | `[1:10]'` | create a column vector |
 |  | `np.linspace(1,3,4)` | `linspace(1,3,4)` | 4 equally spaced samples between 1 and 3, inclusive |
-|  | `np.mgrid[0:9.,0:6.] or np.meshgrid(r_[0:9.],r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D tensors: one of x values, the other of y values |
+|  | `np.mgrid[0:9.,0:6.]` or `np.meshgrid(r_[0:9.],r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D tensors: one of x values, the other of y values |
 |  | `ogrid[0:9.,0:6.]` or `np.ix_(np.r_[0:9.],np.r_[0:6.]` | | the best way to eval functions on a grid |
 |  | `np.meshgrid([1,2,4],[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
 |  | `np.ix_([1,2,4],[2,4,5])`    |  | the best way to eval functions on a grid |

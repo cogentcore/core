@@ -1545,8 +1545,13 @@ func (p *parser) parseOperand() ast.Expr {
 
 	case token.INT, token.FLOAT, token.IMAG, token.CHAR, token.STRING:
 		x := &ast.BasicLit{ValuePos: p.pos, Kind: p.tok, Value: p.lit}
+		// fmt.Println("operand lit:", p.lit)
 		p.next()
-		return x
+		if p.tok == token.COLON {
+			return p.parseSliceExpr(x)
+		} else {
+			return x
+		}
 
 	case token.LPAREN:
 		lparen := p.pos
@@ -1559,6 +1564,10 @@ func (p *parser) parseOperand() ast.Expr {
 
 	case token.FUNC:
 		return p.parseFuncTypeOrLit()
+
+	case token.COLON:
+		p.expect(token.COLON)
+		return p.parseSliceExpr(nil)
 	}
 
 	if typ := p.tryIdentOrType(); typ != nil { // do not consume trailing type parameters
@@ -1630,20 +1639,25 @@ func (p *parser) parseIndexOrSliceOrInstance(x ast.Expr) ast.Expr {
 		Index:  ix,
 		Rbrack: ix.Rbrack,
 	}
+}
 
-	/*  math todo:
+func (p *parser) parseSliceExpr(ex ast.Expr) *ast.SliceExpr {
+	if p.trace {
+		defer un(trace(p, "parseSliceExpr"))
+	}
+	lbrack := p.pos
 	p.exprLev++
 
 	const N = 3 // change the 3 to 2 to disable 3-index slices
-	var args []ast.Expr
 	var index [N]ast.Expr
+	index[0] = ex
 	var colons [N - 1]token.Pos
-	if p.tok != token.COLON {
-		// We can't know if we have an index expression or a type instantiation;
-		// so even if we see a (named) type we are not going to be in type context.
-		index[0] = p.parseRhs()
-	}
 	ncolons := 0
+	if ex == nil {
+		ncolons++
+	}
+	var rpos token.Pos
+	// fmt.Println(ncolons, p.tok)
 	switch p.tok {
 	case token.COLON:
 		// slice expression
@@ -1651,52 +1665,72 @@ func (p *parser) parseIndexOrSliceOrInstance(x ast.Expr) ast.Expr {
 			colons[ncolons] = p.pos
 			ncolons++
 			p.next()
-			if p.tok != token.COLON && p.tok != token.RBRACK && p.tok != token.EOF {
-				index[ncolons] = p.parseRhs()
+			if p.tok != token.COMMA && p.tok != token.COLON && p.tok != token.RBRACK && p.tok != token.EOF {
+				ix := p.parseRhs()
+				if se, ok := ix.(*ast.SliceExpr); ok {
+					index[ncolons] = se.Low
+					if ncolons == 1 && se.High != nil {
+						ncolons++
+						index[ncolons] = se.High
+					}
+					// fmt.Printf("nc: %d low: %#v hi: %#v max: %#v\n", ncolons, se.Low, se.High, se.Max)
+				} else {
+					// fmt.Printf("nc: %d low: %#v\n", ncolons, ix)
+					if _, ok := ix.(*ast.BadExpr); !ok {
+						index[ncolons] = ix
+					}
+				}
+				// } else {
+				// 	fmt.Println(ncolons, "else")
 			}
 		}
 	case token.COMMA:
+		rpos = p.pos // expect(token.COMMA)
+	case token.RBRACK:
+		rpos = p.pos // expect(token.RBRACK)
 		// instance expression
-		args = append(args, index[0])
-		for p.tok == token.COMMA {
-			p.next()
-			if p.tok != token.RBRACK && p.tok != token.EOF {
-				args = append(args, p.parseType())
-			}
-		}
+		// args = append(args, index[0])
+		// for p.tok == token.COMMA {
+		// 	p.next()
+		// if p.tok != token.RBRACK && p.tok != token.EOF {
+		// 	args = append(args, p.parseType())
+		// }
+		// }
+	default:
+		ix := p.parseRhs()
+		// fmt.Printf("nc: %d ix: %#v\n", ncolons, ix)
+		index[ncolons] = ix
 	}
 
 	p.exprLev--
-	rbrack := p.expect(token.RBRACK)
+	// rbrack := p.expect(token.RBRACK)
 
-	if ncolons > 0 {
-		// slice expression
-		slice3 := false
-		if ncolons == 2 {
-			slice3 = true
-			// Check presence of middle and final index here rather than during type-checking
-			// to prevent erroneous programs from passing through gofmt (was go.dev/issue/7305).
-			if index[1] == nil {
-				p.error(colons[0], "middle index required in 3-index slice")
-				index[1] = &ast.BadExpr{From: colons[0] + 1, To: colons[1]}
-			}
-			if index[2] == nil {
-				p.error(colons[1], "final index required in 3-index slice")
-				index[2] = &ast.BadExpr{From: colons[1] + 1, To: rbrack}
-			}
-		}
-		return &ast.SliceExpr{X: x, Lbrack: lbrack, Low: index[0], High: index[1], Max: index[2], Slice3: slice3, Rbrack: rbrack}
+	// slice expression
+	slice3 := false
+	if ncolons == 2 {
+		slice3 = true
+		// Check presence of middle and final index here rather than during type-checking
+		// to prevent erroneous programs from passing through gofmt (was go.dev/issue/7305).
+		// if index[1] == nil {
+		// 	p.error(colons[0], "middle index required in 3-index slice")
+		// 	index[1] = &ast.BadExpr{From: colons[0] + 1, To: colons[1]}
+		// }
+		// if index[2] == nil {
+		// 	p.error(colons[1], "final index required in 3-index slice")
+		// 	index[2] = &ast.BadExpr{From: colons[1] + 1} // , To: rbrack
+		// }
 	}
-
-	if len(args) == 0 {
-		// index expression
-		return &ast.IndexExpr{X: x, Lbrack: lbrack, Index: index[0], Rbrack: rbrack}
-	}
+	se := &ast.SliceExpr{Lbrack: lbrack, Low: index[0], High: index[1], Max: index[2], Slice3: slice3, Rbrack: rpos}
+	// fmt.Printf("final: %#v\n", se)
+	return se
+	//
+	// 	if len(args) == 0 {
+	// 		// index expression
+	// 		return &ast.IndexExpr{X: x, Lbrack: lbrack, Index: index[0], Rbrack: rbrack}
+	// 	}
 
 	// instance expression
 	return nil // typeparams.PackIndexExpr(x, lbrack, args, rbrack)
-	*/
-
 }
 
 func (p *parser) parseCallOrConversion(fun ast.Expr) *ast.CallExpr {
