@@ -44,3 +44,46 @@ func (i Delims) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Delims) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Delims") }
+
+var _SlicesMagicValues = []SlicesMagic{0, 1, 2}
+
+// SlicesMagicN is the highest valid value for type SlicesMagic, plus one.
+const SlicesMagicN SlicesMagic = 3
+
+var _SlicesMagicValueMap = map[string]SlicesMagic{`FullAxis`: 0, `NewAxis`: 1, `Ellipsis`: 2}
+
+var _SlicesMagicDescMap = map[SlicesMagic]string{0: `FullAxis indicates that the full existing axis length should be used. This is equivalent to Slice{}, but is more semantic. In NumPy it is equivalent to a single : colon.`, 1: `NewAxis creates a new singleton (length=1) axis, used to to reshape without changing the size. Can also be used in [Reshaped].`, 2: `Ellipsis (...) is used in [NewSliced] expressions to produce a flexibly-sized stretch of FullAxis dimensions, which automatically aligns the remaining slice elements based on the source dimensionality.`}
+
+var _SlicesMagicMap = map[SlicesMagic]string{0: `FullAxis`, 1: `NewAxis`, 2: `Ellipsis`}
+
+// String returns the string representation of this SlicesMagic value.
+func (i SlicesMagic) String() string { return enums.String(i, _SlicesMagicMap) }
+
+// SetString sets the SlicesMagic value from its string representation,
+// and returns an error if the string is invalid.
+func (i *SlicesMagic) SetString(s string) error {
+	return enums.SetString(i, s, _SlicesMagicValueMap, "SlicesMagic")
+}
+
+// Int64 returns the SlicesMagic value as an int64.
+func (i SlicesMagic) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the SlicesMagic value from an int64.
+func (i *SlicesMagic) SetInt64(in int64) { *i = SlicesMagic(in) }
+
+// Desc returns the description of the SlicesMagic value.
+func (i SlicesMagic) Desc() string { return enums.Desc(i, _SlicesMagicDescMap) }
+
+// SlicesMagicValues returns all possible values for the type SlicesMagic.
+func SlicesMagicValues() []SlicesMagic { return _SlicesMagicValues }
+
+// Values returns all possible values for the type SlicesMagic.
+func (i SlicesMagic) Values() []enums.Enum { return enums.Values(_SlicesMagicValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i SlicesMagic) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *SlicesMagic) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "SlicesMagic")
+}

@@ -4,11 +4,25 @@
 
 package tensor
 
-// ElipsesType is a special type for marking the Elipses in [Sliced] expressions.
-type ElipsesType int
+// SlicesMagic are special elements in slice expressions, including
+// NewAxis, FullAxis, and Ellipsis in [NewSliced] expressions.
+type SlicesMagic int //enums:enum
 
-// Elipses is used in [Sliced] expressions to stretch between elements.
-const Elipses ElipsesType = 0
+const (
+	// FullAxis indicates that the full existing axis length should be used.
+	// This is equivalent to Slice{}, but is more semantic. In NumPy it is
+	// equivalent to a single : colon.
+	FullAxis SlicesMagic = iota
+
+	// NewAxis creates a new singleton (length=1) axis, used to to reshape
+	// without changing the size. Can also be used in [Reshaped].
+	NewAxis
+
+	// Ellipsis (...) is used in [NewSliced] expressions to produce
+	// a flexibly-sized stretch of FullAxis dimensions, which automatically
+	// aligns the remaining slice elements based on the source dimensionality.
+	Ellipsis
+)
 
 // Slice represents a slice of index values, for extracting slices of data,
 // along a dimension of a given size, which is provided separately as an argument.

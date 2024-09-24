@@ -73,10 +73,6 @@ func AsReshaped(tsr Tensor) *Reshaped {
 	return NewReshaped(tsr)
 }
 
-// NewAxis can be used in [Reshaped.SetShapeSizes] to indicate where a
-// new dimension (axis) is being added relative to the source shape.
-const NewAxis = 1
-
 // SetShapeSizes sets our shape sizes to the given values, which must result in
 // the same length as the source tensor. An error is returned if not.
 // If a different subset of content is desired, use another view such as [Sliced].

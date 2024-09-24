@@ -146,11 +146,11 @@ func CovarianceMatrix(fun any, in, out tensor.Tensor) error {
 		func(idx int, tsr ...tensor.Tensor) {
 			c := coords[idx]
 			if c.X != curCoords.X {
-				av = tensor.NewSliced(tsr[0], tensor.Elipses, c.X)
+				av = tensor.NewSliced(tsr[0], tensor.FullAxis, c.X)
 				curCoords.X = c.X
 			}
 			if c.Y != curCoords.Y {
-				bv = tensor.NewSliced(tsr[0], tensor.Elipses, c.Y)
+				bv = tensor.NewSliced(tsr[0], tensor.FullAxis, c.Y)
 				curCoords.Y = c.Y
 			}
 			mfun(av, bv, mout)

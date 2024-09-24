@@ -155,11 +155,11 @@ func TestSliced(t *testing.T) {
 [1]:      12 
 [2]:      22 
 `
-	sl = NewSliced(ft, Slice{}, Slice{2, 3, 0})
+	sl2 := NewSliced(ft, FullAxis, Slice{2, 3, 0})
 	// fmt.Println(sl)
-	assert.Equal(t, res, sl.String())
+	assert.Equal(t, res, sl2.String())
 
-	vl = sl.AsValues()
+	vl = sl2.AsValues()
 	assert.Equal(t, res, vl.String())
 }
 
@@ -256,7 +256,7 @@ func TestReshaped(t *testing.T) {
 [0]:      10      11      12      13 
 [0]:      20      21      22      23 
 `
-	rs = NewReshaped(ft, NewAxis, 3, 4)
+	rs = NewReshaped(ft, int(NewAxis), 3, 4)
 	// fmt.Println(rs)
 	assert.Equal(t, res, rs.String())
 }

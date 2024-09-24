@@ -51,14 +51,20 @@ func NewSlicedIndexes(tsr Tensor, idxs ...[]int) *Sliced {
 	return sl
 }
 
-// NewSliced returns a new [Sliced] view of given tensor,
+// NewSliced returns a new [Sliced] (and potentially [Reshaped]) view of given tensor,
 // with given slice expressions for each dimension, which can be:
 //   - an integer, indicating a specific index value along that dimension.
+//     Can use negative numbers to index from the end.
+//     This axis will also be removed using a [Reshaped].
 //   - a [Slice] object expressing a range of indexes.
-//   - [Elipses] which acts as a kind of "spacer" to include all dimensions
-//     up to the next expression.
+//   - [FullAxis] includes the full original axis (equivalent to `Slice{}`).
+//   - [Ellipsis] creates a flexibly-sized stretch of FullAxis dimensions,
+//     which automatically aligns the remaining slice elements based on the source
+//     dimensionality.
+//   - [NewAxis] creates a new singleton (length=1) axis, used to to reshape
+//     without changing the size. This triggers a [Reshaped].
 //   - any remaining dimensions without indexes default to nil = full sequential view.
-func NewSliced(tsr Tensor, sls ...any) *Sliced {
+func NewSliced(tsr Tensor, sls ...any) Tensor {
 	ns := len(sls)
 	if ns == 0 {
 		return NewSlicedIndexes(tsr)
@@ -66,11 +72,14 @@ func NewSliced(tsr Tensor, sls ...any) *Sliced {
 	nd := tsr.NumDims()
 	ed := nd - ns // extra dimensions
 	ixs := make([][]int, nd)
+	doReshape := false              // indicates if we need a Reshaped
+	reshape := make([]int, 0, nd+2) // if we need one, this is the target shape
 	ci := 0
 	for d := range ns {
 		s := sls[d]
 		switch x := s.(type) {
 		case int:
+			doReshape = true // doesn't add to new shape.
 			if x < 0 {
 				ixs[ci] = []int{tsr.DimSize(ci) + x}
 			} else {
@@ -78,15 +87,45 @@ func NewSliced(tsr Tensor, sls ...any) *Sliced {
 			}
 		case Slice:
 			ixs[ci] = x.IntSlice(tsr.DimSize(ci))
-		case ElipsesType:
-			for range ed {
+			reshape = append(reshape, len(ixs[ci]))
+		case SlicesMagic:
+			switch x {
+			case FullAxis:
 				ixs[ci] = Slice{}.IntSlice(tsr.DimSize(ci))
-				ci++
+				reshape = append(reshape, len(ixs[ci]))
+			case NewAxis:
+				ed++ // we are not real
+				doReshape = true
+				reshape = append(reshape, 1)
+				continue // skip the increment in ci
+			case Ellipsis:
+				ed++ // extra for us
+				for range ed {
+					ixs[ci] = Slice{}.IntSlice(tsr.DimSize(ci))
+					reshape = append(reshape, len(ixs[ci]))
+					ci++
+				}
+				if ed > 0 {
+					ci--
+				}
+				ed = 0 // ate them up
 			}
 		}
 		ci++
 	}
-	return NewSlicedIndexes(tsr, ixs...)
+	for range ed { // fill any extra dimensions
+		ixs[ci] = Slice{}.IntSlice(tsr.DimSize(ci))
+		reshape = append(reshape, len(ixs[ci]))
+		ci++
+	}
+	sl := NewSlicedIndexes(tsr, ixs...)
+	if doReshape {
+		if len(reshape) == 0 { // all indexes
+			reshape = []int{1}
+		}
+		return NewReshaped(sl, reshape...)
+	}
+	return sl
 }
 
 // AsSliced returns the tensor as a [Sliced] view.
@@ -96,7 +135,7 @@ func AsSliced(tsr Tensor) *Sliced {
 	if sl, ok := tsr.(*Sliced); ok {
 		return sl
 	}
-	return NewSliced(tsr)
+	return NewSlicedIndexes(tsr)
 }
 
 // SetTensor sets tensor as source for this view, and initializes a full
