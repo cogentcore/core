@@ -5,8 +5,6 @@ package symbols
 import (
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/tensor"
-	"go/constant"
-	"go/token"
 	"reflect"
 )
 
@@ -51,9 +49,10 @@ func init() {
 		"DelimsValues":              reflect.ValueOf(tensor.DelimsValues),
 		"Descending":                reflect.ValueOf(tensor.Descending),
 		"Detect":                    reflect.ValueOf(tensor.Detect),
-		"Elipses":                   reflect.ValueOf(tensor.Elipses),
+		"Ellipsis":                  reflect.ValueOf(tensor.Ellipsis),
 		"Float64ToBool":             reflect.ValueOf(tensor.Float64ToBool),
 		"Float64ToString":           reflect.ValueOf(tensor.Float64ToString),
+		"FullAxis":                  reflect.ValueOf(tensor.FullAxis),
 		"FuncByName":                reflect.ValueOf(tensor.FuncByName),
 		"Funcs":                     reflect.ValueOf(&tensor.Funcs).Elem(),
 		"IntToBool":                 reflect.ValueOf(tensor.IntToBool),
@@ -63,7 +62,7 @@ func init() {
 		"NFirstLen":                 reflect.ValueOf(tensor.NFirstLen),
 		"NFirstRows":                reflect.ValueOf(tensor.NFirstRows),
 		"NMinLen":                   reflect.ValueOf(tensor.NMinLen),
-		"NewAxis":                   reflect.ValueOf(constant.MakeFromLiteral("1", token.INT, 0)),
+		"NewAxis":                   reflect.ValueOf(tensor.NewAxis),
 		"NewBool":                   reflect.ValueOf(tensor.NewBool),
 		"NewBoolShape":              reflect.ValueOf(tensor.NewBoolShape),
 		"NewByte":                   reflect.ValueOf(tensor.NewByte),
@@ -116,6 +115,8 @@ func init() {
 		"SetShapeSizesFromTensor":   reflect.ValueOf(tensor.SetShapeSizesFromTensor),
 		"SetShapeSizesMustBeValues": reflect.ValueOf(tensor.SetShapeSizesMustBeValues),
 		"ShapeNames":                reflect.ValueOf(tensor.ShapeNames),
+		"SlicesMagicN":              reflect.ValueOf(tensor.SlicesMagicN),
+		"SlicesMagicValues":         reflect.ValueOf(tensor.SlicesMagicValues),
 		"Space":                     reflect.ValueOf(tensor.Space),
 		"Sprint":                    reflect.ValueOf(tensor.Sprint),
 		"StableSort":                reflect.ValueOf(tensor.StableSort),
@@ -132,7 +133,6 @@ func init() {
 		// type definitions
 		"Bool":          reflect.ValueOf((*tensor.Bool)(nil)),
 		"Delims":        reflect.ValueOf((*tensor.Delims)(nil)),
-		"ElipsesType":   reflect.ValueOf((*tensor.ElipsesType)(nil)),
 		"FilterFunc":    reflect.ValueOf((*tensor.FilterFunc)(nil)),
 		"FilterOptions": reflect.ValueOf((*tensor.FilterOptions)(nil)),
 		"Func":          reflect.ValueOf((*tensor.Func)(nil)),
@@ -144,6 +144,7 @@ func init() {
 		"Shape":         reflect.ValueOf((*tensor.Shape)(nil)),
 		"Slice":         reflect.ValueOf((*tensor.Slice)(nil)),
 		"Sliced":        reflect.ValueOf((*tensor.Sliced)(nil)),
+		"SlicesMagic":   reflect.ValueOf((*tensor.SlicesMagic)(nil)),
 		"String":        reflect.ValueOf((*tensor.String)(nil)),
 		"Tensor":        reflect.ValueOf((*tensor.Tensor)(nil)),
 		"Values":        reflect.ValueOf((*tensor.Values)(nil)),
