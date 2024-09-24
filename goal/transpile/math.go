@@ -24,7 +24,7 @@ func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 	// fmt.Println(str)
 	mp := mathParse{toks: toks, code: code}
 
-	mods := AllErrors // | Trace
+	mods := AllErrors | Trace
 
 	if fullLine {
 		stmts, err := ParseLine(str, mods)
@@ -175,6 +175,9 @@ func (mp *mathParse) expr(ex ast.Expr) {
 
 	case *ast.TypeAssertExpr:
 
+	case *ast.IndexExpr:
+		mp.indexExpr(x)
+
 	case *ast.IndexListExpr:
 		if x.X == nil { // array literal
 			mp.arrayLiteral(x)
@@ -309,6 +312,23 @@ func (mp *mathParse) selectorExpr(ex *ast.SelectorExpr) {
 
 func (mp *mathParse) indexListExpr(il *ast.IndexListExpr) {
 	// fmt.Println("slice expr", se)
+}
+
+func (mp *mathParse) indexExpr(il *ast.IndexExpr) {
+	fmt.Println("index expr", il)
+
+	if iil, ok := il.Index.(*ast.IndexListExpr); ok {
+		// todo: need to analyze and see what kind of expr it is
+		mp.expr(il.X)
+		mp.out.Add(token.PERIOD)
+		// note: we do not know what type to use, so use float
+		mp.out.Add(token.IDENT, "Float")
+		mp.addToken(token.LPAREN) // replaces [
+		mp.goLiteral = true
+		mp.exprList(iil.Indices)
+		mp.goLiteral = true
+		mp.addToken(token.RPAREN) // replaces ]
+	}
 }
 
 func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {

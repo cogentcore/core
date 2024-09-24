@@ -1622,6 +1622,16 @@ func (p *parser) parseIndexOrSliceOrInstance(x ast.Expr) ast.Expr {
 			Rbrack: rbrack,
 		}
 	}
+
+	ix := p.parseArrayList(lbrack)
+	return &ast.IndexExpr{
+		X:      x,
+		Lbrack: lbrack,
+		Index:  ix,
+		Rbrack: ix.Rbrack,
+	}
+
+	/*  math todo:
 	p.exprLev++
 
 	const N = 3 // change the 3 to 2 to disable 3-index slices
@@ -1685,6 +1695,8 @@ func (p *parser) parseIndexOrSliceOrInstance(x ast.Expr) ast.Expr {
 
 	// instance expression
 	return nil // typeparams.PackIndexExpr(x, lbrack, args, rbrack)
+	*/
+
 }
 
 func (p *parser) parseCallOrConversion(fun ast.Expr) *ast.CallExpr {
