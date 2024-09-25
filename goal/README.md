@@ -233,24 +233,31 @@ The _view_ versions of `Tensor` include `Sliced`, `Reshaped`,  `Masked`, `Indexe
 
 * `Indexed` uses a tensor of indexes where the final, innermost dimension is the same size as the number of dimensions in the wrapped source tensor. The overall shape of this view is that of the remaining outer dimensions of the Indexes tensor, and like other views, assignment and return values are taken from the corresponding indexed value in the wrapped source tensor.
 
-    The current NumPy version of indexed is rather complex and difficult for many people to understand, as articulated in this [NEP 21 proposal](https://numpy.org/neps/nep-0021-advanced-indexing.html). We probably want to fix.
+    The current NumPy version of indexed is rather complex and difficult for many people to understand, as articulated in this [NEP 21 proposal](https://numpy.org/neps/nep-0021-advanced-indexing.html). The `Indexed` view at least provides a simpler way of representing the indexes into the source tensor, instead of requiring multiple parallel 1D arrays.
 
 * `Rows` is an optimized version of `Sliced` with indexes only for the first, outermost, _row_ dimension.
 
-Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html)
+The following sections provide a full list of equivalents between the `tensor` Go code, Goal, NumPy, and MATLAB, based on the table in [numpy-for-matlab-users](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html).
+* The _same:_ in Goal means that the same NumPy syntax works in Goal, minus the `np.` prefix, and likewise for _or:_ (where Goal also has additional syntax).
 
-| tensor       |   Goal      | Python | MATLAB | Notes            |
+## Tensor shape
+
+| `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
 | `a.NumDim()` | `ndim(a)` or `a.ndim` | `np.ndim(a)` or `a.ndim`   | `ndims(a)` | number of dimensions of tensor `a` |
 | `a.Len()`    | `len(a)` or `a.len` or: | `np.size(a)` or `a.size`   | `numel(a)` | number of elements of tensor `a` |
 | `a.Shape().Sizes` | same: | `np.shape(a)` or `a.shape` | `size(a)`  | "size" of each dimension in a; `shape` returns a 1D `int` tensor |
-| `a.Shape().Sizes[n-1]` | same: | `a.shape[n-1]` | `size(a,n)` | the number of elements of the n-th dimension of tensor `a` |
+| `a.Shape().Sizes[1]` | same: | `a.shape[1]` | `size(a,2)` | the number of elements of the 2nd dimension of tensor `a` |
 | `tensor.Reshape(a, 10, 2)` | `a.reshape([10, 2])` or `reshape(a, [10, 2])` or: | `a.reshape(10, 2)` or `np.reshape(a, 10, 2)` or `a.shape = (10,2)` | `reshape(a,10,2)` | set the shape of `a` to a new shape that has the same total number of values (len or size); No option to change order in Goal: always row major. |
 | `tensor.Reshape(a, -1)` or `tensor.As1D(a)` | same: | `a.reshape(-1)` or `np.reshape(a, -1)` | `reshape(a,-1)` | a 1D vector view of `a`; Goal does not support `ravel`, which is nearly identical. |
 | `tensor.Flatten(a)` | same: | `b = a.flatten()`   | `b=a(:)` | turn tensor into a 1D vector, and force a copy |
 | `b := tensor.Clone(a)` | `b := copy(a)` or: | `b = a.copy()` | `b=a`  | direct assignment `b = a` in Goal or NumPy just makes variable b point to tensor a; `copy` is needed to generate new underlying values (MATLAB always makes a copy) |
-| | | | |
-| **Construction** | | | |
+
+
+## Constructing new tensors
+
+| `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
+| ------------ | ----------- | ------ | ------ | ---------------- |
 | `[[1., 2., 3.], [4., 5., 6.]]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
 | `[[a, b], [c, d]]` or `block([[a, b], [c, d]])` | `np.block([[a, b], [c, d]])` | `[ a b; c d ]` | construct a matrix from blocks `a`, `b`, `c`, and `d` |
 | `zeros([3,4]` or `zeros(3, 4)` | `np.zeros((3, 4))` | `zeros(3,4)` | 3x4 two-dimensional tensor of float64 zeros |
@@ -262,8 +269,13 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  |  |`np.tile(a, (m, n))`    | `repmat(a, m, n)` | create m by n copies of a |
 |  |  |`a.squeeze()` | `squeeze(a)` | remove singleton dimensions of tensor `a`. Note that MATLAB will always return tensors of 2D or higher while NumPy will return tensors of 0D or higher |
 |  |  |`a[np.r_[:len(a),0]]`  | `a([1:end 1],:)`  | `a` with copy of the first row appended to the end |
-| | | | |
-| **Ranges and Grids** [numpy](https://numpy.org/doc/stable/user/how-to-partition.html) | | | |
+
+## Ranges and grids
+
+See [NumPy](https://numpy.org/doc/stable/user/how-to-partition.html) docs for details.
+
+| `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
+| ------------ | ----------- | ------ | ------ | ---------------- |
 |  |  |`np.arange(1., 11.)` or `np.r_[1.:11.]` or `np.r_[1:10:10j]` | `1:10` | create an increasing vector |
 |  |  |`np.arange(10.)` or `np.r_[:10.]` or `np.r_[:9:10j]` | `0:9` | create an increasing vector |
 |  |  |`np.arange(1.,11.)[:, np.newaxis]` | `[1:10]'` | create a column vector |
@@ -272,8 +284,13 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  |  |`ogrid[0:9.,0:6.]` or `np.ix_(np.r_[0:9.],np.r_[0:6.]` | | the best way to eval functions on a grid |
 |  |  |`np.meshgrid([1,2,4],[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
 |  |  |`np.ix_([1,2,4],[2,4,5])`    |  | the best way to eval functions on a grid |
-| | | | |
-| **Basic Indexing** | | | |
+
+## Basic indexing
+
+See [NumPy basic indexing](https://numpy.org/doc/stable/user/basics.indexing.html#basic-indexing)
+
+| `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
+| ------------ | ----------- | ------ | ------ | ---------------- |
 |  |  |`a[1, 4]` | `a(2,5)` | access element in second row, fifth column in 2D tensor `a` |
 |  |  |`a[-1]` | `a(end)` | access last element |
 |  |  |`a[1]` or `a[1, :]` | `a(2,:)` | entire second row of 2D tensor `a`; unspecified dimensions are equivalent to `:` |
@@ -284,9 +301,13 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  |  |`a[::2, :]`  | `a(1:2:end,:)` | every other row of `a`, starting with the first |
 |  |  |`a[::-1,:]`  | `a(end:-1:1,:) or flipud(a)` | `a` with rows in reverse order |
 | `y = x[1, :].copy()` or `y = x[1, :].Clone()` | `y = x[1, :].copy()` | `y=x(2,:)` | without the copy, `y` would point to a view of values in `x`; `copy` creates distinct values, in this case of _only_ the 2nd row of `x` -- i.e., it "concretizes" a given view into a literal, memory-continuous set of values for that view. |
-| | | | |
-| **Boolean Tensors and Indexing** | | | |
-| (bool tensor of same shape can filter access to other tensor) | | |
+
+## Boolean tensors and indexing
+
+See [NumPy boolean indexing](https://numpy.org/doc/stable/user/basics.indexing.html#boolean-array-indexing)
+
+| `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
+| ------------ | ----------- | ------ | ------ | ---------------- |
 | `(a > 0.5)` | `(a > 0.5)` | `(a > 0.5)` | `bool` tensor of shape `a` with elements `(v > 0.5)` |
 | `a && b` | `logical_and(a,b)` | `a & b` | element-wise AND operator on `bool` tensors |
 | `a \|\| b` | `np.logical_or(a,b)` | `a \| b` | element-wise OR operator on `bool` tensors | 
@@ -294,13 +315,14 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 | `a \| b`  | `a \| b` | `bitor(a,b)` | element bitwise OR operator on `bool` or `int` tensors |
 |  |  |`a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
 |  |  |`a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
-| | | | |
-| **Advanced Indexing** | | | |
-| if indexes are themselves an array | then advanced indexing takes place | | indexes are parallel lists of dimension coordinates; not the clearest |
+
+## Advanced index-based indexing
+
+See [NumPy integer indexing](https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing).  Note that the current NumPy version of indexed is rather complex and difficult for many people to understand, as articulated in this [NEP 21 proposal](https://numpy.org/neps/nep-0021-advanced-indexing.html). 
+
+| `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
+| ------------ | ----------- | ------ | ------ | ---------------- |
 |  |  |`a[np.ix_([1, 3, 4], [0, 2])]` | `a([2,4,5],[1,3])` | rows 2,4 and 5 and columns 1 and 3. |
-| | | | |
-| **Indexed Filtering and Sorting** | | | |
-| (indexes only on outer row dim) | index on all elements | | |
 |  |  |`np.nonzero(a > 0.5)` | `find(a > 0.5)` | find the indices where (a > 0.5) |
 |  |  |`a[:, v.T > 0.5]` | `a(:,find(v>0.5))` | extract the columns of `a` where column vector `v` > 0.5 |
 |  |  |`a[:,np.nonzero(v > 0.5)[0]]` | `a(:,find(v > 0.5))` | extract the columns of `a` where vector `v` > 0.5 |
@@ -309,15 +331,20 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  |  |`np.sort(a, axis=1)` or `a.sort(axis=1)` | `sort(a, 2)` | sort the each row of 2D tensor, `a` |
 |  |  |`I = np.argsort(a[:, 0]); b = a[I,:]` | `[b,I]=sortrows(a,1)`  | save the tensor `a` as tensor `b` with rows sorted by the first column |
 |  |  |`np.unique(a)` | `unique(a)` | a vector of unique values in tensor `a` |
-| | | | |
-| **Math** | | | |
+
+## Basic math operations (add, multiply, etc)
+
+| `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
+| ------------ | ----------- | ------ | ------ | ---------------- |
 |  |  |`a * b` | `a .* b` | element-wise multiply |
 |  |  |`a/b`   | `a./b` | element-wise divide |
 | `a^3` or `a**3` | `a**3`  | `a.^3` | element-wise exponentiation |
 | `cos(a)` | `cos(a)` | `cos(a)` | element-wise function application |
-| | | | |
-| **2D Matrix Linear Algebra** | | | |
-| (n-dimensional tensors resliced as lists of 2D matricies) | | | |
+
+## 2D Matrix Linear Algebra
+
+| `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
+| ------------ | ----------- | ------ | ------ | ---------------- |
 |  |  |`a @ b` | `a * b` | matrix multiply |
 |  |  |`a.transpose() or a.T` | `a.'` | transpose of a |
 |  |  |`a.conj().transpose() or a.conj().T` | `a'` | conjugate transpose of `a` |
@@ -335,18 +362,26 @@ Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.o
 |  |  |`D,V = eigs(a, k=3)`  | `D,V = linalg.eig(a, b)` |  `[V,D]=eigs(a,3)` | find the k=3 largest eigenvalues and eigenvectors of 2D tensor, a |
 |  |  |`Q,R = linalg.qr(a)`  | `[Q,R]=qr(a,0)` | QR decomposition
 |  |  |`P,L,U = linalg.lu(a)` where `a == P@L@U`  | `[L,U,P]=lu(a)` where `a==P'*L*U` | LU decomposition with partial pivoting (note: P(MATLAB) == transpose(P(NumPy))) | 
-| | | | |
-| **Statistics** | | | |
+|  |  |`x = linalg.lstsq(Z, y)` | `x = Z\y` | perform a linear regression of the form |
+
+## Statistics
+
+| `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
+| ------------ | ----------- | ------ | ------ | ---------------- |
 | `a.max()` or `max(a)` or `stats.Max(a)` | `a.max()` or `np.nanmax(a)` | `max(max(a))` | maximum element of `a`, Goal always ignores `NaN` as missing data |
 |  |  |`a.max(0)` | `max(a)` | maximum element of each column of tensor `a` |
 |  |  |`a.max(1)` | `max(a,[],2)` | maximum element of each row of tensor `a` |
 |  |  |`np.maximum(a, b)` | `max(a,b)` | compares a and b element-wise, and returns the maximum value from each pair |
 | `stats.L2Norm(a)` | `np.sqrt(v @ v)` or `np.linalg.norm(v)` | `norm(v)` | L2 norm of vector v |
 |  |  |`cg`  | `conjgrad` | conjugate gradients solver |
-| | | | |
-| **Misc Functions** | | | |
+
+## FFT and complex numbers
+
+todo: huge amount of work needed to support complex numbers throughout!
+
+| `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
+| ------------ | ----------- | ------ | ------ | ---------------- |
 |  |  |`np.fft.fft(a)` | `fft(a)` | Fourier transform of `a` |
 |  |  |`np.fft.ifft(a)` | `ifft(a)` | inverse Fourier transform of `a` |
-|  |  |`x = linalg.lstsq(Z, y)` | `x = Z\y` | perform a linear regression of the form |
 |  |  |`signal.resample(x, np.ceil(len(x)/q))` |  `decimate(x, q)` | downsample with low-pass filtering |
 
