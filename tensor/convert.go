@@ -149,6 +149,68 @@ func NewStringFromValues(vals ...string) *String {
 	return tsr
 }
 
+// SetAllFloat64 sets all values of given tensor to given value.
+func SetAllFloat64(tsr Tensor, val float64) {
+	VectorizeThreaded(1, func(tsr ...Tensor) int {
+		return tsr[0].Len()
+	},
+		func(idx int, tsr ...Tensor) {
+			tsr[0].SetFloat1D(val, idx)
+		}, tsr)
+}
+
+// SetAllInt sets all values of given tensor to given value.
+func SetAllInt(tsr Tensor, val int) {
+	VectorizeThreaded(1, func(tsr ...Tensor) int {
+		return tsr[0].Len()
+	},
+		func(idx int, tsr ...Tensor) {
+			tsr[0].SetInt1D(val, idx)
+		}, tsr)
+}
+
+// SetAllString sets all values of given tensor to given value.
+func SetAllString(tsr Tensor, val string) {
+	VectorizeThreaded(1, func(tsr ...Tensor) int {
+		return tsr[0].Len()
+	},
+		func(idx int, tsr ...Tensor) {
+			tsr[0].SetString1D(val, idx)
+		}, tsr)
+}
+
+// NewFloat64Full returns a new tensor full of given scalar value,
+// of given shape sizes.
+func NewFloat64Full(val float64, sizes ...int) *Float64 {
+	tsr := NewFloat64(sizes...)
+	SetAllFloat64(tsr, val)
+	return tsr
+}
+
+// NewFloat64Ones returns a new tensor full of 1s,
+// of given shape sizes.
+func NewFloat64Ones(sizes ...int) *Float64 {
+	tsr := NewFloat64(sizes...)
+	SetAllFloat64(tsr, 1.0)
+	return tsr
+}
+
+// NewIntFull returns a new tensor full of given scalar value,
+// of given shape sizes.
+func NewIntFull(val int, sizes ...int) *Int {
+	tsr := NewInt(sizes...)
+	SetAllInt(tsr, val)
+	return tsr
+}
+
+// NewStringFull returns a new tensor full of given scalar value,
+// of given shape sizes.
+func NewStringFull(val string, sizes ...int) *String {
+	tsr := NewString(sizes...)
+	SetAllString(tsr, val)
+	return tsr
+}
+
 // AsFloat64Scalar returns the first value of tensor as a float64 scalar.
 // Returns 0 if no values.
 func AsFloat64Scalar(tsr Tensor) float64 {

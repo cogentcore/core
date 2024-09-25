@@ -211,9 +211,12 @@ func TestMath(t *testing.T) {
 		{"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},
 		{"# ndim(a)", `tensor.NewIntScalar(a.NumDims())`},
 		{"# a := zeros(3, 4)", `a := tensor.NewFloat64(3, 4)`},
+		{"# a := full(5.5, 3, 4)", `a := tensor.NewFloat64Full(5.5, 3, 4)`},
+		// {"# a := zeros(sh)", `a := tensor.NewFloat64(tensor.AsIntSlice(sh) ...)`}, // TODO: not yet
 		{"# a := arange(36)", `a := tensor.NewSliceInts(36)`},
 		{"# a := arange(36, 0,0,-1)", `a := tensor.NewSliceInts(36, 0, 0,  - 1)`},
 		{"# a := reshape(x, 6, 6)", `a := tensor.Reshape(x, 6, 6)`},
+		// {"# a := reshape(x, sh)", `a := tensor.Reshape(x, tensor.AsIntSlice(sh) ...)`}, // TODO: not yet
 		{"# a := reshape(arange(36), 6, 6)", `a := tensor.Reshape(tensor.NewSliceInts(36), 6, 6)`},
 		{"# y := a.reshape(6, 6)", `y := tensor.Reshape(a, 6, 6)`},
 		{"# a[1, 2]", `tensor.Reslice(a, 1, 2)`},

@@ -505,6 +505,11 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 		typ = "string"
 		fun = "String"
 	}
+	// cfun := mp.funcs.Peek()
+	// if cfun != nil && !cfun.tensorArgs { // we need int values
+	// 	mp.exprList(il.Indices)
+	// 	return
+	// }
 	mp.startFunc("tensor.New"+fun+"FromValues", false)
 	mp.out.Add(token.LPAREN)
 	mp.out.Add(token.IDENT, "[]"+typ)
@@ -517,7 +522,10 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 }
 
 var numpyFuncs = map[string]funWrap{
+	"array":   {"tensor.NewFloat64", ""},
 	"zeros":   {"tensor.NewFloat64", ""},
+	"full":    {"tensor.NewFloat64Full", ""},
+	"ones":    {"tensor.NewFloat64Ones", ""},
 	"arange":  {"tensor.NewSliceInts", ""},
 	"reshape": {"tensor.Reshape", ""},
 	"copy":    {"tensor.Clone", ""},
@@ -616,6 +624,17 @@ func (mp *mathParse) ident(id *ast.Ident) {
 	if id == nil {
 		return
 	}
-	// fmt.Println("ident:", x.Name)
+	/* TODO: this requires tracking of each arg to determine needed type
+	cfun := mp.funcs.Peek()
+	if cfun != nil && !cfun.tensorArgs { // we need the numbers from it, usually ints
+		mp.out.Add(token.IDENT, "tensor.AsIntSlice")
+		mp.out.Add(token.LPAREN)
+		mp.addCur()
+		mp.out.Add(token.RPAREN)
+		mp.out.Add(token.ELLIPSIS)
+	} else {
+		mp.addCur()
+	}
+	*/
 	mp.addCur()
 }

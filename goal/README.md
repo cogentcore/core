@@ -248,27 +248,30 @@ The following sections provide a full list of equivalents between the `tensor` G
 | `a.Len()`    | `len(a)` or `a.len` or: | `np.size(a)` or `a.size`   | `numel(a)` | number of elements of tensor `a` |
 | `a.Shape().Sizes` | same: | `np.shape(a)` or `a.shape` | `size(a)`  | "size" of each dimension in a; `shape` returns a 1D `int` tensor |
 | `a.Shape().Sizes[1]` | same: | `a.shape[1]` | `size(a,2)` | the number of elements of the 2nd dimension of tensor `a` |
-| `tensor.Reshape(a, 10, 2)` | `a.reshape([10, 2])` or `reshape(a, [10, 2])` or: | `a.reshape(10, 2)` or `np.reshape(a, 10, 2)` or `a.shape = (10,2)` | `reshape(a,10,2)` | set the shape of `a` to a new shape that has the same total number of values (len or size); No option to change order in Goal: always row major. |
+| `tensor.Reshape(a, 10, 2)` | same except no `a.shape = (10,2)`: | `a.reshape(10, 2)` or `np.reshape(a, 10, 2)` or `a.shape = (10,2)` | `reshape(a,10,2)` | set the shape of `a` to a new shape that has the same total number of values (len or size); No option to change order in Goal: always row major; Goal does _not_ support direct shape assignment version. |
+| `tensor.Reshape(a, tensor.AsIntSlice(sh)...)` | same: | `a.reshape(10, sh)` or `np.reshape(a, sh)` |  `reshape(a,sh)` | **TODO:** set shape based on list of dimension sizes in tensor `sh` |
 | `tensor.Reshape(a, -1)` or `tensor.As1D(a)` | same: | `a.reshape(-1)` or `np.reshape(a, -1)` | `reshape(a,-1)` | a 1D vector view of `a`; Goal does not support `ravel`, which is nearly identical. |
 | `tensor.Flatten(a)` | same: | `b = a.flatten()`   | `b=a(:)` | turn tensor into a 1D vector, and force a copy |
 | `b := tensor.Clone(a)` | `b := copy(a)` or: | `b = a.copy()` | `b=a`  | direct assignment `b = a` in Goal or NumPy just makes variable b point to tensor a; `copy` is needed to generate new underlying values (MATLAB always makes a copy) |
+|  |  |`a.squeeze()` | `squeeze(a)` | remove singleton dimensions of tensor `a`. Note that MATLAB will always return tensors of 2D or higher while NumPy will return tensors of 0D or higher |
 
 
-## Constructing new tensors
+## Constructing
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
-| `[[1., 2., 3.], [4., 5., 6.]]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
-| `[[a, b], [c, d]]` or `block([[a, b], [c, d]])` | `np.block([[a, b], [c, d]])` | `[ a b; c d ]` | construct a matrix from blocks `a`, `b`, `c`, and `d` |
-| `zeros([3,4]` or `zeros(3, 4)` | `np.zeros((3, 4))` | `zeros(3,4)` | 3x4 two-dimensional tensor of float64 zeros |
-| `zeros([3, 4, 5])` or `zeros(3, 4, 5)` | `np.zeros((3, 4, 5))` | `zeros(3,4,5)` | 3x4x5 three-dimensional tensor of float64 zeros |
-| `ones([3, 4])` or `ones(3, 4)`  | `np.ones((3, 4))` | `ones(3,4)` | 3x4 two-dimensional tensor of 64-bit floating point ones |
-| `rand([3, 4])` or `slrand([3,4], c, fi)` | `rng.random(3, 4)` | `rand(3,4)` | 3x4 2D float64 tensor with uniform random 0..1 elements; `rand` uses current Go `rand` source, while `slrand` uses [gosl](../gpu/gosl/slrand) GPU-safe call with counter `c` and function index `fi` and key = index of element |
-|  |  |`np.concatenate((a,b),1)` or `np.hstack((a,b))` or `np.column_stack((a,b))` or `np.c_[a,b]` | `[a b]` | concatenate columns of a and b |
-|  |  |`np.concatenate((a,b))` or `np.vstack((a,b))` or `np.r_[a,b]` | `[a; b]` | concatenate rows of a and b |
-|  |  |`np.tile(a, (m, n))`    | `repmat(a, m, n)` | create m by n copies of a |
-|  |  |`a.squeeze()` | `squeeze(a)` | remove singleton dimensions of tensor `a`. Note that MATLAB will always return tensors of 2D or higher while NumPy will return tensors of 0D or higher |
-|  |  |`a[np.r_[:len(a),0]]`  | `a([1:end 1],:)`  | `a` with copy of the first row appended to the end |
+| `tensor.NewFloat64FromValues([]float64{1, 2, 3})` | `[1., 2., 3.]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
+| TODO: (does reshape of flat literal) | `[[1., 2., 3.], [4., 5., 6.]]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
+| TODO: |  | `[[a, b], [c, d]]` or `block([[a, b], [c, d]])` | `np.block([[a, b], [c, d]])` | `[ a b; c d ]` | construct a matrix from blocks `a`, `b`, `c`, and `d` |
+| `tensor.NewFloat64(3,4)` | `zeros(3,4)` | `np.zeros((3, 4))` | `zeros(3,4)` | 3x4 2D tensor of float64 zeros; Goal does not use "tuple" so no double parens |
+| `tensor.NewFloat64(3,4,5)` | `zeros(3, 4, 5)` | `np.zeros((3, 4, 5))` | `zeros(3,4,5)` | 3x4x5 three-dimensional tensor of float64 zeros |
+| `tensor.NewFloat64Ones(3,4)` | `ones(3, 4)`  | `np.ones((3, 4))` | `ones(3,4)` | 3x4 2D tensor of 64-bit floating point ones |
+| `tensor.NewFloat64Full(5.5, 3,4)` | `full(5.5, 3, 4)` | `np.full((3, 4), 5.5)` | ? | 3x4 2D tensor of 5.5; Goal variadic arg structure requires value to come first |
+| TODO: |  | `rand([3, 4])` or `slrand([3,4], c, fi)` | `rng.random(3, 4)` | `rand(3,4)` | 3x4 2D float64 tensor with uniform random 0..1 elements; `rand` uses current Go `rand` source, while `slrand` uses [gosl](../gpu/gosl/slrand) GPU-safe call with counter `c` and function index `fi` and key = index of element |
+| TODO: |  |`np.concatenate((a,b),1)` or `np.hstack((a,b))` or `np.column_stack((a,b))` or `np.c_[a,b]` | `[a b]` | concatenate columns of a and b |
+| TODO: |  |`np.concatenate((a,b))` or `np.vstack((a,b))` or `np.r_[a,b]` | `[a; b]` | concatenate rows of a and b |
+| TODO: |  |`np.tile(a, (m, n))`    | `repmat(a, m, n)` | create m by n copies of a |
+| TODO: |  |`a[np.r_[:len(a),0]]`  | `a([1:end 1],:)`  | `a` with copy of the first row appended to the end |
 
 ## Ranges and grids
 
