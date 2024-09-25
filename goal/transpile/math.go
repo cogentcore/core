@@ -27,6 +27,7 @@ func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 	}
 	// fmt.Println(str)
 	mp := mathParse{toks: toks, code: code}
+	// mp.trace = true
 
 	mods := AllErrors // | Trace
 
@@ -46,6 +47,12 @@ func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 		mp.expr(ex)
 	}
 
+	if mp.idx != len(toks) {
+		fmt.Println(code)
+		fmt.Println(mp.out.Code())
+		fmt.Printf("parsing error: index: %d != len(toks): %d\n", mp.idx, len(toks))
+	}
+
 	return mp.out
 }
 
@@ -59,10 +66,11 @@ type funcInfo struct {
 
 // mathParse has the parsing state
 type mathParse struct {
-	code string // code string
-	toks Tokens // source tokens we are parsing
-	idx  int    // current index in source tokens -- critical to sync as we "use" source
-	out  Tokens // output tokens we generate
+	code  string // code string
+	toks  Tokens // source tokens we are parsing
+	idx   int    // current index in source tokens -- critical to sync as we "use" source
+	out   Tokens // output tokens we generate
+	trace bool   // trace of parsing -- turn on to see alignment
 
 	// stack of function info -- top of stack reflects the current function
 	funcs stack.Stack[*funcInfo]
@@ -87,6 +95,13 @@ func (mp *mathParse) endFunc() {
 // addToken adds output token and increments idx
 func (mp *mathParse) addToken(tok token.Token) {
 	mp.out.Add(tok)
+	if mp.trace {
+		ctok := &Token{}
+		if mp.idx < len(mp.toks) {
+			ctok = mp.toks[mp.idx]
+		}
+		fmt.Printf("%d\ttok: %s \t replaces: %s\n", mp.idx, tok, ctok)
+	}
 	mp.idx++
 }
 
@@ -305,6 +320,10 @@ func (mp *mathParse) basicLit(lit *ast.BasicLit) {
 		return
 	}
 	mp.out.Add(lit.Kind, lit.Value)
+	if mp.trace {
+		fmt.Printf("%d\ttok: %s literal\n", mp.idx, lit.Value)
+	}
+	mp.idx++
 	return
 }
 
@@ -344,7 +363,7 @@ func (mp *mathParse) selectorExpr(ex *ast.SelectorExpr) {
 		mp.idx++
 		return
 	}
-	elip := false
+	ellip := false
 	switch fw.wrap {
 	case "nis":
 		mp.out.Add(token.IDENT, "tensor.NewIntScalar")
@@ -354,20 +373,20 @@ func (mp *mathParse) selectorExpr(ex *ast.SelectorExpr) {
 		mp.out.Add(token.IDENT, "tensor.NewStringScalar")
 	case "nifs":
 		mp.out.Add(token.IDENT, "tensor.NewIntFromValues")
-		elip = true
+		ellip = true
 	case "nffs":
 		mp.out.Add(token.IDENT, "tensor.NewFloat64FromValues")
-		elip = true
+		ellip = true
 	case "nsfs":
 		mp.out.Add(token.IDENT, "tensor.NewStringFromValues")
-		elip = true
+		ellip = true
 	}
 	mp.out.Add(token.LPAREN)
 	mp.expr(ex.X)
 	mp.addToken(token.PERIOD)
 	mp.out.Add(token.IDENT, fw.fun)
 	mp.idx++
-	if elip {
+	if ellip {
 		mp.out.Add(token.ELLIPSIS)
 	}
 	mp.out.Add(token.RPAREN)
@@ -388,26 +407,35 @@ func (mp *mathParse) basicSlicingExpr(il *ast.IndexExpr) {
 	mp.startFunc("tensor.Reslice", false)
 	mp.out.Add(token.LPAREN)
 	mp.expr(il.X)
-	mp.addToken(token.COMMA) // use the [
+	mp.addToken(token.COMMA) // use the [ -- can't use ( to preserve X
 	mp.exprList(iil.Indices)
 	mp.addToken(token.RPAREN) // replaces ]
 	mp.endFunc()
 }
 
 func (mp *mathParse) sliceExpr(se *ast.SliceExpr) {
+	if se.Low == nil && se.High == nil && se.Max == nil {
+		mp.out.Add(token.IDENT, "tensor.FullAxis")
+		mp.idx++
+		return
+	}
 	mp.out.Add(token.IDENT, "tensor.Slice")
-	mp.addToken(token.LBRACE)
+	mp.out.Add(token.LBRACE)
 	prev := false
 	if se.Low != nil {
 		mp.out.Add(token.IDENT, "Start:")
 		mp.expr(se.Low)
 		prev = true
+		if se.High == nil && se.Max == nil {
+			mp.idx++
+		}
 	}
 	if se.High != nil {
 		if prev {
 			mp.out.Add(token.COMMA)
 		}
 		mp.out.Add(token.IDENT, "Stop:")
+		mp.idx++
 		mp.expr(se.High)
 		prev = true
 	}
@@ -415,10 +443,14 @@ func (mp *mathParse) sliceExpr(se *ast.SliceExpr) {
 		if prev {
 			mp.out.Add(token.COMMA)
 		}
+		mp.idx++
+		if se.Low == nil && se.High == nil {
+			mp.idx++
+		}
 		mp.out.Add(token.IDENT, "Step:")
 		mp.expr(se.Max)
 	}
-	mp.addToken(token.RBRACE)
+	mp.out.Add(token.RBRACE)
 }
 
 func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
@@ -444,7 +476,7 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 	mp.addToken(token.LBRACE)
 	mp.exprList(il.Indices)
 	mp.addToken(token.RBRACE)
-	mp.addToken(token.ELLIPSIS)
+	mp.out.Add(token.ELLIPSIS)
 	mp.out.Add(token.RPAREN)
 	mp.endFunc()
 }

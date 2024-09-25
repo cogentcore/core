@@ -215,7 +215,7 @@ func TestMath(t *testing.T) {
 		{"# a := reshape(x, 6, 6)", `a := tensor.Reshape(x, 6, 6)`},
 		{"# a := reshape(arange(36), 6, 6)", `a := tensor.Reshape(tensor.NewSliceInts(36), 6, 6)`},
 		{"# a[1, 2]", `tensor.Reslice(a, 1, 2)`},
-		{"# a[:, 2]", `tensor.Reslice(a, tensor.Slice { } , 2)`},
+		{"# a[:, 2]", `tensor.Reslice(a, tensor.FullAxis, 2)`},
 		{"# a[1:3:1, 2]", `tensor.Reslice(a, tensor.Slice { Start:1, Stop:3, Step:1 } , 2)`},
 		{"# a[::-1, 2]", `tensor.Reslice(a, tensor.Slice { Step: - 1 } , 2)`},
 		{"# a[:3, 2]", `tensor.Reslice(a, tensor.Slice { Stop:3 } , 2)`},
