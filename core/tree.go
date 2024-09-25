@@ -453,7 +453,9 @@ func (tr *Tree) Init() {
 		if tr.Icon.IsSet() {
 			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
-					s.Font.Size.Dp(16)
+					s.Font.Size.Dp(24)
+					s.Color = colors.Scheme.Primary.Base
+					s.Align.Self = styles.Center
 				})
 				w.Updater(func() {
 					w.SetIcon(tr.Icon)
