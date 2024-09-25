@@ -69,3 +69,42 @@ func WrapIndex1D(sh *Shape, i ...int) int {
 	}
 	return sh.IndexTo1D(ai...)
 }
+
+// AlignForAssign ensures that the shapes of two tensors, a and b
+// have the proper alignment for assigning b into a.
+// Alignment proceeds from the innermost dimension out, with 1s provided
+// beyond the number of dimensions for a or b.
+// An error is returned if the rules of alignment are violated:
+// each dimension size must be either the same, or b is equal to 1.
+// This corresponds to the "broadcasting" logic of NumPy.
+func AlignForAssign(a, b Tensor) (as, bs *Shape, err error) {
+	asz := a.ShapeSizes()
+	bsz := b.ShapeSizes()
+	an := len(asz)
+	bn := len(bsz)
+	n := max(an, bn)
+	asizes := make([]int, n)
+	bsizes := make([]int, n)
+	for d := range n {
+		ai := an - 1 - d
+		bi := bn - 1 - d
+		oi := n - 1 - d
+		ad := 1
+		bd := 1
+		if ai >= 0 {
+			ad = asz[ai]
+		}
+		if bi >= 0 {
+			bd = bsz[bi]
+		}
+		if ad != bd && bd != 1 {
+			err = fmt.Errorf("tensor.AlignShapes: dimension %d does not align for a=%d b=%d: must be either the same or b is a 1", oi, ad, bd)
+			return
+		}
+		asizes[oi] = ad
+		bsizes[oi] = bd
+	}
+	as = NewShape(asizes...)
+	bs = NewShape(bsizes...)
+	return
+}

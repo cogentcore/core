@@ -146,7 +146,7 @@ func (mp *mathParse) stmt(st ast.Stmt) {
 		switch x.Tok {
 		case token.DEFINE:
 			mp.defineStmt(x)
-		case token.ASSIGN:
+		default:
 			mp.assignStmt(x)
 		}
 
@@ -305,11 +305,36 @@ func (mp *mathParse) defineStmt(as *ast.AssignStmt) {
 }
 
 func (mp *mathParse) assignStmt(as *ast.AssignStmt) {
-	// todo: use assign op if lhs is not ident
+	if _, ok := as.Lhs[0].(*ast.Ident); ok {
+		mp.exprList(as.Lhs)
+		mp.addToken(as.Tok)
+		mp.startFunc("", true) // just to trigger tensor args
+		mp.exprList(as.Rhs)
+		mp.endFunc()
+		return
+	}
+	fn := ""
+	switch as.Tok {
+	case token.ASSIGN:
+		fn = "Assign"
+	case token.ADD_ASSIGN:
+		fn = "AddAssign"
+	case token.SUB_ASSIGN:
+		fn = "SubAssign"
+	case token.MUL_ASSIGN:
+		fn = "MulAssign"
+	case token.QUO_ASSIGN:
+		fn = "DivAssign"
+	}
+	mp.startFunc("tensor.Call", true) // yes tensor args
+	mp.out.Add(token.LPAREN)
+	mp.out.Add(token.STRING, `"`+fn+`"`)
+	mp.out.Add(token.COMMA)
 	mp.exprList(as.Lhs)
-	mp.addToken(as.Tok)
-	mp.startFunc("", true) // just to trigger tensor args
+	mp.out.Add(token.COMMA)
+	mp.idx++
 	mp.exprList(as.Rhs)
+	mp.out.Add(token.RPAREN)
 	mp.endFunc()
 }
 
@@ -333,7 +358,7 @@ func (mp *mathParse) tensorLit(lit *ast.BasicLit) {
 		mp.out.Add(token.IDENT, "tensor.NewIntScalar("+lit.Value+")")
 		mp.idx++
 	case token.FLOAT:
-		mp.out.Add(token.IDENT, "tensor.NewFloatScalar("+lit.Value+")")
+		mp.out.Add(token.IDENT, "tensor.NewFloat64Scalar("+lit.Value+")")
 		mp.idx++
 	case token.STRING:
 		mp.out.Add(token.IDENT, "tensor.NewStringScalar("+lit.Value+")")
