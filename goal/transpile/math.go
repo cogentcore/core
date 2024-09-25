@@ -521,21 +521,23 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 	mp.endFunc()
 }
 
+// nofun = do not accept a function version, just a method
 var numpyFuncs = map[string]funWrap{
-	"array":   {"tensor.NewFloat64", ""},
+	// "array":   {"tensor.NewFloatFromValues", ""}, // todo: probably not right, maybe don't have?
 	"zeros":   {"tensor.NewFloat64", ""},
 	"full":    {"tensor.NewFloat64Full", ""},
 	"ones":    {"tensor.NewFloat64Ones", ""},
 	"arange":  {"tensor.NewSliceInts", ""},
 	"reshape": {"tensor.Reshape", ""},
 	"copy":    {"tensor.Clone", ""},
-	"flatten": {"tensor.Flatten", ""},
+	"flatten": {"tensor.Flatten", "nofun"},
+	"squeeze": {"tensor.Squeeze", "nofun"},
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {
 	switch x := ex.Fun.(type) {
 	case *ast.Ident:
-		if fw, ok := numpyProps[x.Name]; ok {
+		if fw, ok := numpyProps[x.Name]; ok && fw.wrap != "nofun" {
 			mp.callPropFun(ex, fw)
 			return
 		}

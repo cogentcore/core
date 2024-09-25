@@ -28,6 +28,45 @@ func Flatten(tsr Tensor) Values {
 	return Clone(As1D(tsr))
 }
 
+// Squeeze a [Reshaped] view of given tensor with all singleton
+// (size = 1) dimensions removed (if none, just returns the tensor).
+func Squeeze(tsr Tensor) Tensor {
+	nd := tsr.NumDims()
+	sh := tsr.ShapeSizes()
+	reshape := make([]int, 0, nd)
+	for _, sz := range sh {
+		if sz > 1 {
+			reshape = append(reshape, sz)
+		}
+	}
+	if len(reshape) == nd {
+		return tsr
+	}
+	return NewReshaped(tsr, reshape...)
+}
+
+// As1D returns a 1D tensor, which is either the input tensor if it is
+// already 1D, or a new [Reshaped] 1D view of it.
+// This can be useful e.g., for stats and metric functions that operate
+// on a 1D list of values. See also [Flatten].
+func As1D(tsr Tensor) Tensor {
+	if tsr.NumDims() == 1 {
+		return tsr
+	}
+	return NewReshaped(tsr, tsr.Len())
+}
+
+// Cells1D returns a flat 1D view of the innermost cells for given row index.
+// For a [RowMajor] tensor, it uses the [RowTensor] subspace directly,
+// otherwise it uses [Sliced] to extract the cells. In either case,
+// [As1D] is used to ensure the result is a 1D tensor.
+func Cells1D(tsr Tensor, row int) Tensor {
+	if rm, ok := tsr.(RowMajor); ok {
+		return As1D(rm.RowTensor(row))
+	}
+	return As1D(NewSliced(tsr, []int{row}))
+}
+
 // MustBeValues returns the given tensor as a [Values] subtype, or nil and
 // an error if it is not one. Typically outputs of compute operations must
 // be values, and are reshaped to hold the results as needed.
@@ -82,28 +121,6 @@ func SetShapeSizesMustBeValues(tsr Tensor, sizes ...int) error {
 	}
 	vals.SetShapeSizes(sizes...)
 	return nil
-}
-
-// As1D returns a 1D tensor, which is either the input tensor if it is
-// already 1D, or a new [Reshaped] 1D view of it.
-// This can be useful e.g., for stats and metric functions that operate
-// on a 1D list of values. See also [Flatten].
-func As1D(tsr Tensor) Tensor {
-	if tsr.NumDims() == 1 {
-		return tsr
-	}
-	return NewReshaped(tsr, tsr.Len())
-}
-
-// Cells1D returns a flat 1D view of the innermost cells for given row index.
-// For a [RowMajor] tensor, it uses the [RowTensor] subspace directly,
-// otherwise it uses [Sliced] to extract the cells. In either case,
-// [As1D] is used to ensure the result is a 1D tensor.
-func Cells1D(tsr Tensor, row int) Tensor {
-	if rm, ok := tsr.(RowMajor); ok {
-		return As1D(rm.RowTensor(row))
-	}
-	return As1D(NewSliced(tsr, []int{row}))
 }
 
 // NewFloat64Scalar is a convenience method for a Tensor

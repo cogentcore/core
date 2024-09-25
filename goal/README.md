@@ -251,16 +251,16 @@ The following sections provide a full list of equivalents between the `tensor` G
 | `tensor.Reshape(a, 10, 2)` | same except no `a.shape = (10,2)`: | `a.reshape(10, 2)` or `np.reshape(a, 10, 2)` or `a.shape = (10,2)` | `reshape(a,10,2)` | set the shape of `a` to a new shape that has the same total number of values (len or size); No option to change order in Goal: always row major; Goal does _not_ support direct shape assignment version. |
 | `tensor.Reshape(a, tensor.AsIntSlice(sh)...)` | same: | `a.reshape(10, sh)` or `np.reshape(a, sh)` |  `reshape(a,sh)` | **TODO:** set shape based on list of dimension sizes in tensor `sh` |
 | `tensor.Reshape(a, -1)` or `tensor.As1D(a)` | same: | `a.reshape(-1)` or `np.reshape(a, -1)` | `reshape(a,-1)` | a 1D vector view of `a`; Goal does not support `ravel`, which is nearly identical. |
-| `tensor.Flatten(a)` | same: | `b = a.flatten()`   | `b=a(:)` | turn tensor into a 1D vector, and force a copy |
+| `tensor.Flatten(a)` | same: | `b = a.flatten()`   | `b=a(:)` | returns a 1D copy of a |
 | `b := tensor.Clone(a)` | `b := copy(a)` or: | `b = a.copy()` | `b=a`  | direct assignment `b = a` in Goal or NumPy just makes variable b point to tensor a; `copy` is needed to generate new underlying values (MATLAB always makes a copy) |
-|  |  |`a.squeeze()` | `squeeze(a)` | remove singleton dimensions of tensor `a`. Note that MATLAB will always return tensors of 2D or higher while NumPy will return tensors of 0D or higher |
+| `tensor.Squeeze(a)` | same: |`a.squeeze()` | `squeeze(a)` | remove singleton dimensions of tensor `a`. |
 
 
 ## Constructing
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
-| `tensor.NewFloat64FromValues([]float64{1, 2, 3})` | `[1., 2., 3.]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
+| `tensor.NewFloat64FromValues(` `[]float64{1, 2, 3})` | `[1., 2., 3.]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
 | TODO: (does reshape of flat literal) | `[[1., 2., 3.], [4., 5., 6.]]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
 | TODO: |  | `[[a, b], [c, d]]` or `block([[a, b], [c, d]])` | `np.block([[a, b], [c, d]])` | `[ a b; c d ]` | construct a matrix from blocks `a`, `b`, `c`, and `d` |
 | `tensor.NewFloat64(3,4)` | `zeros(3,4)` | `np.zeros((3, 4))` | `zeros(3,4)` | 3x4 2D tensor of float64 zeros; Goal does not use "tuple" so no double parens |

@@ -129,6 +129,7 @@ func init() {
 		"SlicesMagicValues":         reflect.ValueOf(tensor.SlicesMagicValues),
 		"Space":                     reflect.ValueOf(tensor.Space),
 		"Sprint":                    reflect.ValueOf(tensor.Sprint),
+		"Squeeze":                   reflect.ValueOf(tensor.Squeeze),
 		"StableSort":                reflect.ValueOf(tensor.StableSort),
 		"StringToFloat64":           reflect.ValueOf(tensor.StringToFloat64),
 		"Tab":                       reflect.ValueOf(tensor.Tab),
