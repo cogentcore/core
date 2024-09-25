@@ -70,19 +70,6 @@ func (il *InlineList) Init() {
 				})
 			})
 		}
-		tree.AddAt(p, "open-button", func(w *Button) {
-			w.SetIcon(icons.OpenInFull).SetType(ButtonTonal)
-			w.Tooltip = "Open in a dialog"
-			w.OnClick(func(e events.Event) {
-				d := NewBody(il.ValueTitle)
-				NewText(d).SetType(TextSupporting).SetText(il.Tooltip)
-				NewList(d).SetSlice(il.Slice).SetValueTitle(il.ValueTitle).SetReadOnly(il.IsReadOnly())
-				d.OnClose(func(e events.Event) {
-					il.UpdateChange()
-				})
-				d.RunFullDialog(il)
-			})
-		})
 	})
 }
 
@@ -135,5 +122,14 @@ func (il *InlineList) contextMenu(m *Scene, idx int) {
 	})
 	NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		il.DeleteAt(idx)
+	})
+	NewButton(m).SetText("Open in dialog").SetIcon(icons.OpenInNew).OnClick(func(e events.Event) {
+		d := NewBody(il.ValueTitle)
+		NewText(d).SetType(TextSupporting).SetText(il.Tooltip)
+		NewList(d).SetSlice(il.Slice).SetValueTitle(il.ValueTitle).SetReadOnly(il.IsReadOnly())
+		d.OnClose(func(e events.Event) {
+			il.UpdateChange()
+		})
+		d.RunFullDialog(il)
 	})
 }
