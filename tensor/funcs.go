@@ -100,7 +100,7 @@ func AddFunc(name string, fun any, out int, anyFirst ...bool) error {
 func FuncByName(name string) (*Func, error) {
 	fn, ok := Funcs[name]
 	if !ok {
-		return nil, errors.Log(fmt.Errorf("tensor.FuncByName: function of name %q not registered", name))
+		return nil, fmt.Errorf("tensor.FuncByName: function of name %q not registered", name)
 	}
 	return fn, nil
 }

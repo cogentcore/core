@@ -7,6 +7,9 @@ package transpile
 import (
 	"testing"
 
+	_ "cogentcore.org/core/tensor/stats/metric"
+	_ "cogentcore.org/core/tensor/stats/stats"
+	_ "cogentcore.org/core/tensor/tmath"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -217,6 +220,10 @@ func TestMath(t *testing.T) {
 		{"# a[::-1, 2]", `tensor.NewSliced(a, tensor.Slice { Step: - 1 } , 2)`},
 		{"# a[:3, 2]", `tensor.NewSliced(a, tensor.Slice { Stop:3 } , 2)`},
 		{"# a[2:, 2]", `tensor.NewSliced(a, tensor.Slice { Start:2 } , 2)`},
+		{"# c := cos(a)", `c := tensor.CallOut("Cos", a)`},
+		{"# m := stats.Mean(a)", `m := tensor.CallOut("stats.Mean", a)`},
+		{"# m := (stats.Mean(a))", `m := (tensor.CallOut("stats.Mean", a))`},
+		{"# m := stats.Mean(reshape(a,36))", `m := tensor.CallOut("stats.Mean", tensor.NewReshaped(a, 36))`},
 	}
 
 	st := NewState()

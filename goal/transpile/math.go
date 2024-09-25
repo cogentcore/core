@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"strings"
 
 	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/tensor"
@@ -200,6 +201,9 @@ func (mp *mathParse) expr(ex ast.Expr) {
 	case *ast.FuncLit:
 
 	case *ast.ParenExpr:
+		mp.addToken(token.LPAREN)
+		mp.expr(x.X)
+		mp.addToken(token.RPAREN)
 
 	case *ast.SelectorExpr:
 		mp.selectorExpr(x)
@@ -452,24 +456,51 @@ var numpyFuncs = map[string]funWrap{
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {
-	if fnm, ok := ex.Fun.(*ast.Ident); ok {
-		if fw, ok := numpyFuncs[fnm.Name]; ok {
-			// todo: wrap
-			mp.startFunc(fw.fun, false)
-			mp.addToken(token.LPAREN) // use the (
-			mp.idx++                  // paren too
+	switch x := ex.Fun.(type) {
+	case *ast.Ident:
+		mp.callName(ex, x.Name)
+	case *ast.SelectorExpr:
+		if pkg, ok := x.X.(*ast.Ident); ok {
+			mp.callName(ex, pkg.Name+"."+x.Sel.Name)
 		} else {
-			mp.startFunc(fnm.Name, false)
-			mp.addToken(token.LPAREN) // use the (
-			mp.idx++
+			fmt.Printf("call, weird sel: %#v\n", x.X)
 		}
-	} else {
+	default:
 		mp.expr(ex.Fun)
 	}
 	mp.exprList(ex.Args)
 	// todo: ellipsis
 	mp.addToken(token.RPAREN)
 	mp.endFunc()
+}
+
+func (mp *mathParse) callName(ex *ast.CallExpr, funName string) {
+	if fw, ok := numpyFuncs[funName]; ok {
+		// todo: wrap
+		mp.startFunc(fw.fun, false)
+		mp.addToken(token.LPAREN) // use the (
+		mp.idx++                  // paren too
+		return
+	}
+	_, err := tensor.FuncByName(funName)
+	if err != nil {
+		funName = strings.ToUpper(funName[:1]) + funName[1:]
+		_, err = tensor.FuncByName(funName)
+	}
+	if err != nil {
+		fmt.Println("name not found:", funName)
+		mp.startFunc(funName, false)
+		mp.addToken(token.LPAREN) // use the (
+		mp.idx++
+		return
+	}
+	mp.startFunc("tensor.CallOut", true) // tensors
+	mp.addToken(token.LPAREN)
+	if strings.Contains(funName, ".") {
+		mp.idx += 2 // . and selector
+	}
+	mp.out.Add(token.IDENT, `"`+funName+`"`)
+	mp.addToken(token.COMMA) // use the name -- need more
 }
 
 func (mp *mathParse) ident(id *ast.Ident) {
