@@ -95,7 +95,7 @@ func Cells1D(tsr Tensor, row int) Tensor {
 	if rm, ok := tsr.(RowMajor); ok {
 		return As1D(rm.RowTensor(row))
 	}
-	return As1D(NewSlicedIndexes(tsr, []int{row}))
+	return As1D(NewSliced(tsr, []int{row}))
 }
 
 // NewFloat64Scalar is a convenience method for a Tensor

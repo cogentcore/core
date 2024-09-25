@@ -42,16 +42,16 @@ type Sliced struct { //types:add
 	Indexes [][]int
 }
 
-// NewSlicedIndexes returns a new [Sliced] view of given tensor,
+// NewSliced returns a new [Sliced] view of given tensor,
 // with optional list of indexes for each dimension (none / nil = sequential).
 // Any dimensions without indexes default to nil = full sequential view.
-func NewSlicedIndexes(tsr Tensor, idxs ...[]int) *Sliced {
+func NewSliced(tsr Tensor, idxs ...[]int) *Sliced {
 	sl := &Sliced{Tensor: tsr, Indexes: idxs}
 	sl.ValidIndexes()
 	return sl
 }
 
-// NewSliced returns a new [Sliced] (and potentially [Reshaped]) view of given tensor,
+// Reslice returns a new [Sliced] (and potentially [Reshaped]) view of given tensor,
 // with given slice expressions for each dimension, which can be:
 //   - an integer, indicating a specific index value along that dimension.
 //     Can use negative numbers to index from the end.
@@ -64,10 +64,10 @@ func NewSlicedIndexes(tsr Tensor, idxs ...[]int) *Sliced {
 //   - [NewAxis] creates a new singleton (length=1) axis, used to to reshape
 //     without changing the size. This triggers a [Reshaped].
 //   - any remaining dimensions without indexes default to nil = full sequential view.
-func NewSliced(tsr Tensor, sls ...any) Tensor {
+func Reslice(tsr Tensor, sls ...any) Tensor {
 	ns := len(sls)
 	if ns == 0 {
-		return NewSlicedIndexes(tsr)
+		return NewSliced(tsr)
 	}
 	nd := tsr.NumDims()
 	ed := nd - ns // extra dimensions
@@ -118,7 +118,7 @@ func NewSliced(tsr Tensor, sls ...any) Tensor {
 		reshape = append(reshape, len(ixs[ci]))
 		ci++
 	}
-	sl := NewSlicedIndexes(tsr, ixs...)
+	sl := NewSliced(tsr, ixs...)
 	if doReshape {
 		if len(reshape) == 0 { // all indexes
 			reshape = []int{1}
@@ -135,7 +135,7 @@ func AsSliced(tsr Tensor) *Sliced {
 	if sl, ok := tsr.(*Sliced); ok {
 		return sl
 	}
-	return NewSlicedIndexes(tsr)
+	return NewSliced(tsr)
 }
 
 // SetTensor sets tensor as source for this view, and initializes a full

@@ -54,9 +54,13 @@ All tensor package functions are registered using a global name-to-function map 
 
 # Standard shapes
 
-In general, **1D** refers to a flat, 1-dimensional list. There are various standard shapes of tensor data that different functions expect:
+There are various standard shapes of tensor data that different functions expect, listed below. The two most general-purpose functions for shaping and slicing any tensor to get it into the right shape for a given computation are:
 
-* **Flat, 1D**: this is the simplest data shape, and any tensor can be turned into a flat 1D list using the `As1D` function, which either returns the tensor itself it is already 1D, or a `Reshaped` 1D view. The [stats](stats) functions for example report summary statistics across the outermost row dimension, so converting data to this 1D view gives stats across all the data.
+* `Reshape` returns a `Reshaped` view with the same total length as the source tensor, functioning like the NumPy `reshape` function.
+
+* `Reslice` returns a re-sliced view of a tensor, extracting or rearranging dimenstions. It supports the full NumPy [basic indexing](https://numpy.org/doc/stable/user/basics.indexing.html#basic-indexing) syntax. It also does reshaping as needed, including processing the `NewAxis` option.
+
+* **Flat, 1D**: this is the simplest data shape, and any tensor can be turned into a flat 1D list using `NewReshaped(-1)` or the `As1D` function, which either returns the tensor itself it is already 1D, or a `Reshaped` 1D view. The [stats](stats) functions for example report summary statistics across the outermost row dimension, so converting data to this 1D view gives stats across all the data.
 
 * **Row, Cell 2D**: This is the natural shape for tabular data, and the `RowMajor` type and `Rows` view provide methods for efficiently accessing data in this way. In addition, the [stats](stats) and [metric](metric) packages automatically compute statistics across the outermost row dimension, aggregating results across rows for each cell. Thus, you end up with the "average cell-wise pattern" when you do `stats.Mean` for example. The `NewRowCellsView` function returns a `Reshaped` view of any tensor organized into this 2D shape, with the row vs. cell split specified at any point in the list of dimensions, which can be useful in obtaining the desired results.
 
@@ -140,7 +144,7 @@ a[a > 0.5] = 1          # boolean advanced indexing
 
 Although powerful, the semantics of all of this is a bit confusing. In the `tensor` package, we provide what are hopefully more clear and concrete _view_ types that have well-defined semantics, and cover the relevant functionality, while perhaps being a bit easier to reason with. These were described at the start of this README.  The correspondence to NumPy indexing is as follows:
 
-* Basic indexing by individual integer index coordinate values is supported by the `Number`, `String`, `Bool` `Values` Tensors.  For example, `Float(3,1,2)` returns the value at the given coordinates.  The `Sliced` (and `Rows`) and `Reshaped` views then complete the basic indexing with arbitrary reordering and filtering along entire dimension values, and reshaping dimensions.
+* Basic indexing by individual integer index coordinate values is supported by the `Number`, `String`, `Bool` `Values` Tensors.  For example, `Float(3,1,2)` returns the value at the given coordinates.  The `Sliced` (and `Rows`) and `Reshaped` views then complete the basic indexing with arbitrary reordering and filtering along entire dimension values, and reshaping dimensions. As noted above, `Reslice` supports the full NumPy basic indexing syntax, and `Reshape` implements the NumPy `reshape` function.
 
 * The `Masked` view corresponds to the NumPy _advanced_ indexing using a same-shape boolean mask, although in the NumPy case it makes a copy (although practically it is widely used for direct assignment as shown above.) Critically, you can always extract just the `true` values from a Masked view by using the `AsValues` method on the view, which returns a 1D tensor of those values, similar to what the boolean advanced indexing produces in NumPy. In addition, the `SourceIndexes` method returns a 1D list of indexes of the `true` (or `false`) values, which can be used for the `Indexed` view.
     

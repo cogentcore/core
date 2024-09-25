@@ -81,18 +81,18 @@ func TestSlicedExpr(t *testing.T) {
 
 	res = `[1]      12 
 `
-	sl := NewSliced(ft, 1, 2)
+	sl := Reslice(ft, 1, 2)
 	// fmt.Println(sl)
 	assert.Equal(t, res, sl.String())
 
 	res = `[4]      10      11      12      13 
 `
-	sl = NewSliced(ft, 1)
+	sl = Reslice(ft, 1)
 	assert.Equal(t, res, sl.String())
 
 	res = `[3]       2      12      22 
 `
-	sl = NewSliced(ft, Ellipsis, 2)
+	sl = Reslice(ft, Ellipsis, 2)
 	assert.Equal(t, res, sl.String())
 
 	res = `[3, 4]
@@ -100,23 +100,23 @@ func TestSlicedExpr(t *testing.T) {
 [1]:      13      12      11      10 
 [2]:      23      22      21      20 
 `
-	sl = NewSliced(ft, Ellipsis, Slice{Step: -1})
+	sl = Reslice(ft, Ellipsis, Slice{Step: -1})
 	assert.Equal(t, res, sl.String())
 
 	res = `[1, 4]
 [0]:      10      11      12      13 
 `
-	sl = NewSliced(ft, NewAxis, 1)
+	sl = Reslice(ft, NewAxis, 1)
 	assert.Equal(t, res, sl.String())
 
 	res = `[1, 3]
 [0]:       1      11      21 
 `
-	sl = NewSliced(ft, NewAxis, FullAxis, 1) // keeps result as a column vector
+	sl = Reslice(ft, NewAxis, FullAxis, 1) // keeps result as a column vector
 	assert.Equal(t, res, sl.String())
 
 	res = `[3]       1      11      21 
 `
-	sl = NewSliced(ft, FullAxis, 1)
+	sl = Reslice(ft, FullAxis, 1)
 	assert.Equal(t, res, sl.String())
 }

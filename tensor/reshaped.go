@@ -6,6 +6,7 @@ package tensor
 
 import (
 	"reflect"
+	"slices"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/metadata"
@@ -28,9 +29,11 @@ type Reshaped struct { //types:add
 	Reshape Shape
 }
 
-// NewReshaped returns a new [Reshaped] view of given tensor,
-// with given shape sizes. If no such sizes are provided,
-// the source shape is used.
+// NewReshaped returns a new [Reshaped] view of given tensor, with given shape
+// sizes. If no such sizes are provided, the source shape is used.
+// A single -1 value can be used to automatically specify the remaining tensor
+// length, as long as the other sizes are an even multiple of the total length.
+// A single -1 returns a 1D view of the entire tensor.
 func NewReshaped(tsr Tensor, sizes ...int) *Reshaped {
 	rs := &Reshaped{Tensor: tsr}
 	if len(sizes) == 0 {
@@ -38,6 +41,27 @@ func NewReshaped(tsr Tensor, sizes ...int) *Reshaped {
 	} else {
 		errors.Log(rs.SetShapeSizes(sizes...))
 	}
+	return rs
+}
+
+// Reshape returns a view of the given tensor with given shape sizes.
+// A single -1 value can be used to automatically specify the remaining tensor
+// length, as long as the other sizes are an even multiple of the total length.
+// A single -1 returns a 1D view of the entire tensor.
+func Reshape(tsr Tensor, sizes ...int) Tensor {
+	if len(sizes) == 0 {
+		err := errors.New("tensor.Reshape: must pass shape sizes")
+		errors.Log(err)
+		return tsr
+	}
+	if len(sizes) == 1 {
+		sz := sizes[0]
+		if sz == -1 {
+			return As1D(tsr)
+		}
+	}
+	rs := &Reshaped{Tensor: tsr}
+	errors.Log(rs.SetShapeSizes(sizes...))
 	return rs
 }
 
@@ -80,10 +104,39 @@ func AsReshaped(tsr Tensor) *Reshaped {
 // the length, and the [NewAxis] value can be used to semantically
 // indicate when such a new dimension is being inserted. This is often useful
 // for aligning two tensors to achieve a desired computation; see [AlignShapes]
-// function.
+// function. A single -1 can be used to specify a dimension size that takes the
+// remaining length, as long as the other sizes are an even multiple of the length.
+// A single -1 indicates to use the full length.
 func (rs *Reshaped) SetShapeSizes(sizes ...int) error {
-	rs.Reshape.SetShapeSizes(sizes...)
-	if rs.Reshape.Len() != rs.Tensor.Len() {
+	sln := rs.Tensor.Len()
+	if sln == 0 {
+		return nil
+	}
+	if sln == 1 {
+		sz := sizes[0]
+		if sz < 0 {
+			rs.Reshape.SetShapeSizes(sln)
+			return nil
+		}
+	}
+	sz := slices.Clone(sizes)
+	ln := 1
+	negIdx := -1
+	for i, s := range sz {
+		if s < 0 {
+			negIdx = i
+		} else {
+			ln *= s
+		}
+	}
+	if negIdx >= 0 {
+		if sln%ln != 0 {
+			return errors.New("tensor.Reshaped SetShapeSizes: -1 cannot be used because the remaining dimensions are not an even multiple of the source tensor length")
+		}
+		sz[negIdx] = sln / ln
+	}
+	rs.Reshape.SetShapeSizes(sz...)
+	if rs.Reshape.Len() != sln {
 		return errors.New("tensor.Reshaped SetShapeSizes: new length is different from source tensor; use Sliced or other views to change view content")
 	}
 	return nil

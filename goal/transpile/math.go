@@ -385,7 +385,7 @@ func (mp *mathParse) indexExpr(il *ast.IndexExpr) {
 
 func (mp *mathParse) basicSlicingExpr(il *ast.IndexExpr) {
 	iil := il.Index.(*ast.IndexListExpr)
-	mp.startFunc("tensor.NewSliced", false)
+	mp.startFunc("tensor.Reslice", false)
 	mp.out.Add(token.LPAREN)
 	mp.expr(il.X)
 	mp.addToken(token.COMMA) // use the [
@@ -452,7 +452,7 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 var numpyFuncs = map[string]funWrap{
 	"zeros":   {"tensor.NewFloat64", ""},
 	"arange":  {"tensor.NewSliceInts", ""},
-	"reshape": {"tensor.NewReshaped", ""},
+	"reshape": {"tensor.Reshape", ""},
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {

@@ -144,7 +144,7 @@ func TestSliced(t *testing.T) {
 [0]:      23      22 
 [1]:      13      12 
 `
-	sl := NewSlicedIndexes(ft, []int{2, 1}, []int{3, 2})
+	sl := NewSliced(ft, []int{2, 1}, []int{3, 2})
 	// fmt.Println(sl)
 	assert.Equal(t, res, sl.String())
 
@@ -155,7 +155,7 @@ func TestSliced(t *testing.T) {
 [1]:      12 
 [2]:      22 
 `
-	sl2 := NewSliced(ft, FullAxis, Slice{2, 3, 0})
+	sl2 := Reslice(ft, FullAxis, Slice{2, 3, 0})
 	// fmt.Println(sl)
 	assert.Equal(t, res, sl2.String())
 
@@ -257,8 +257,26 @@ func TestReshaped(t *testing.T) {
 [0]:      20      21      22      23 
 `
 	rs = NewReshaped(ft, int(NewAxis), 3, 4)
+	assert.Equal(t, res, rs.String())
+
+	res = `[12]
+[0]:       0       1       2       3      10      11      12      13      20      21      22      23 
+`
+	rs = NewReshaped(ft, -1)
+	assert.Equal(t, res, rs.String())
+
+	res = `[4, 3]
+[0]:       0       1       2 
+[1]:       3      10      11 
+[2]:      12      13      20 
+[3]:      21      22      23 
+`
+	rs = NewReshaped(ft, 4, -1)
 	// fmt.Println(rs)
 	assert.Equal(t, res, rs.String())
+
+	err := rs.SetShapeSizes(5, -1)
+	assert.Error(t, err)
 }
 
 func TestSortFilter(t *testing.T) {
