@@ -277,6 +277,8 @@ The following sections provide a full list of equivalents between the `tensor` G
 
 See [NumPy](https://numpy.org/doc/stable/user/how-to-partition.html) docs for details.
 
+TODO:
+
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
 |  |  |`np.arange(1., 11.)` or `np.r_[1.:11.]` or `np.r_[1:10:10j]` | `1:10` | create an increasing vector |
@@ -290,20 +292,20 @@ See [NumPy](https://numpy.org/doc/stable/user/how-to-partition.html) docs for de
 
 ## Basic indexing
 
-See [NumPy basic indexing](https://numpy.org/doc/stable/user/basics.indexing.html#basic-indexing)
+See [NumPy basic indexing](https://numpy.org/doc/stable/user/basics.indexing.html#basic-indexing). Tensor Go uses the `Reslice` function for all cases (repeated `tensor.` prefix replaced with `t.` to take less space).
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
-|  |  |`a[1, 4]` | `a(2,5)` | access element in second row, fifth column in 2D tensor `a` |
-|  |  |`a[-1]` | `a(end)` | access last element |
-|  |  |`a[1]` or `a[1, :]` | `a(2,:)` | entire second row of 2D tensor `a`; unspecified dimensions are equivalent to `:` |
-|  |  |`a[0:5]` or `a[:5]` or `a[0:5, :]` | `a(1:5,:)` | same as Go slice ranging |
-|  |  |`a[-5:]` | `a(end-4:end,:)` | last 5 rows of 2D tensor `a` |
-|  |  |`a[0:3, 4:9]` | `a(1:3,5:9)` | The first through third rows and fifth through ninth columns of a 2D tensor, `a`. |
-|  |  |`a[2:21:2,:]` | `a(3:2:21,:)` | every other row of `a`, starting with the third and going to the twenty-first |
-|  |  |`a[::2, :]`  | `a(1:2:end,:)` | every other row of `a`, starting with the first |
-|  |  |`a[::-1,:]`  | `a(end:-1:1,:) or flipud(a)` | `a` with rows in reverse order |
-| `y = x[1, :].copy()` or `y = x[1, :].Clone()` | `y = x[1, :].copy()` | `y=x(2,:)` | without the copy, `y` would point to a view of values in `x`; `copy` creates distinct values, in this case of _only_ the 2nd row of `x` -- i.e., it "concretizes" a given view into a literal, memory-continuous set of values for that view. |
+| `t.Reslice(a, 1, 4)` | same: |`a[1, 4]` | `a(2,5)` | access element in second row, fifth column in 2D tensor `a` |
+| `t.Reslice(a, -1)` | same: |`a[-1]` | `a(end)` | access last element |
+| `t.Reslice(a,` `1, t.FullAxis)` | same: |`a[1]` or `a[1, :]` | `a(2,:)` | entire second row of 2D tensor `a`; unspecified dimensions are equivalent to `:` (could omit second arg in Reslice too) |
+| `t.Reslice(a,` `Slice{Stop:5})` | same: |`a[0:5]` or `a[:5]` or `a[0:5, :]` | `a(1:5,:)` | 0..4 rows of `a`; uses same Go slice ranging here: (start:stop) where stop is _exclusive_ |
+| `t.Reslice(a,` `Slice{Start:-5})` | same: |`a[-5:]` | `a(end-4:end,:)` | last 5 rows of 2D tensor `a` |
+| `t.Reslice(a,` `Slice{Stop:3},` `Slice{Start:4, Stop:9})` | same: |`a[0:3, 4:9]` | `a(1:3,5:9)` | The first through third rows and fifth through ninth columns of a 2D tensor, `a`. |
+| `t.Reslice(a,` `Slice{Start:2,` `Stop:25,` `Step:2}, t.FullAxis)` | same: |`a[2:21:2,:]` | `a(3:2:21,:)` | every other row of `a`, starting with the third and going to the twenty-first |
+| `t.Reslice(a,` `Slice{Step:2},` `t.FullAxis)` | same: |`a[::2, :]`  | `a(1:2:end,:)` | every other row of `a`, starting with the first |
+| `t.Reslice(a,`, `Slice{Step:-1},` `t.FullAxis)` | same: |`a[::-1,:]`  | `a(end:-1:1,:) or flipud(a)` | `a` with rows in reverse order |
+| `t.Clone(t.Reslice(a,` `1, t.FullAxis))` | `b = copy(a[1, :])` or: | `b = a[1, :].copy()` | `y=x(2,:)` | without the copy, `y` would point to a view of values in `x`; `copy` creates distinct values, in this case of _only_ the 2nd row of `x` -- i.e., it "concretizes" a given view into a literal, memory-continuous set of values for that view. |
 
 ## Boolean tensors and indexing
 
