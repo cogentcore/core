@@ -13,6 +13,7 @@ func init() {
 		// function, constant and variable definitions
 		"AddFunc":                   reflect.ValueOf(tensor.AddFunc),
 		"AddShapes":                 reflect.ValueOf(tensor.AddShapes),
+		"AlignForAssign":            reflect.ValueOf(tensor.AlignForAssign),
 		"AlignShapes":               reflect.ValueOf(tensor.AlignShapes),
 		"AnyFirstArg":               reflect.ValueOf(tensor.AnyFirstArg),
 		"As1D":                      reflect.ValueOf(tensor.As1D),
