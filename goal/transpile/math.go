@@ -366,17 +366,44 @@ func (mp *mathParse) tensorLit(lit *ast.BasicLit) {
 	}
 }
 
+// funWrap is a function wrapper for simple numpy property / functions
 type funWrap struct {
-	fun  string
-	wrap string
+	fun  string // function to call on tensor
+	wrap string // code for wrapping function for results of call
 }
 
-// nis: NewIntScalar, nifs: NewIntFromValues
+// nis: NewIntScalar, niv: NewIntFromValues, etc
 var numpyProps = map[string]funWrap{
 	"ndim":  {"NumDims()", "nis"},
 	"len":   {"Len()", "nis"},
 	"size":  {"Len()", "nis"},
-	"shape": {"Shape().Sizes", "nifs"},
+	"shape": {"Shape().Sizes", "niv"},
+}
+
+// tensorFunc outputs the wrapping function and whether it needs ellipsis
+func (fw *funWrap) wrapFunc(mp *mathParse) bool {
+	ellip := false
+	wrapFun := fw.wrap
+	switch fw.wrap {
+	case "nis":
+		wrapFun = "tensor.NewIntScalar"
+	case "nfs":
+		wrapFun = "tensor.NewFloat64Scalar"
+	case "nss":
+		wrapFun = "tensor.NewStringScalar"
+	case "niv":
+		wrapFun = "tensor.NewIntFromValues"
+		ellip = true
+	case "nfv":
+		wrapFun = "tensor.NewFloat64FromValues"
+		ellip = true
+	case "nsv":
+		wrapFun = "tensor.NewStringFromValues"
+		ellip = true
+	}
+	mp.startFunc(wrapFun, false)
+	mp.out.Add(token.LPAREN)
+	return ellip
 }
 
 func (mp *mathParse) selectorExpr(ex *ast.SelectorExpr) {
@@ -388,25 +415,7 @@ func (mp *mathParse) selectorExpr(ex *ast.SelectorExpr) {
 		mp.idx++
 		return
 	}
-	ellip := false
-	switch fw.wrap {
-	case "nis":
-		mp.out.Add(token.IDENT, "tensor.NewIntScalar")
-	case "nfs":
-		mp.out.Add(token.IDENT, "tensor.NewFloat64Scalar")
-	case "nss":
-		mp.out.Add(token.IDENT, "tensor.NewStringScalar")
-	case "nifs":
-		mp.out.Add(token.IDENT, "tensor.NewIntFromValues")
-		ellip = true
-	case "nffs":
-		mp.out.Add(token.IDENT, "tensor.NewFloat64FromValues")
-		ellip = true
-	case "nsfs":
-		mp.out.Add(token.IDENT, "tensor.NewStringFromValues")
-		ellip = true
-	}
-	mp.out.Add(token.LPAREN)
+	ellip := fw.wrapFunc(mp)
 	mp.expr(ex.X)
 	mp.addToken(token.PERIOD)
 	mp.out.Add(token.IDENT, fw.fun)
@@ -415,6 +424,7 @@ func (mp *mathParse) selectorExpr(ex *ast.SelectorExpr) {
 		mp.out.Add(token.ELLIPSIS)
 	}
 	mp.out.Add(token.RPAREN)
+	mp.endFunc()
 }
 
 func (mp *mathParse) indexListExpr(il *ast.IndexListExpr) {
@@ -510,15 +520,27 @@ var numpyFuncs = map[string]funWrap{
 	"zeros":   {"tensor.NewFloat64", ""},
 	"arange":  {"tensor.NewSliceInts", ""},
 	"reshape": {"tensor.Reshape", ""},
+	"copy":    {"tensor.Clone", ""},
+	"flatten": {"tensor.Flatten", ""},
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {
 	switch x := ex.Fun.(type) {
 	case *ast.Ident:
-		mp.callName(ex, x.Name)
+		if fw, ok := numpyProps[x.Name]; ok {
+			mp.callPropFun(ex, fw)
+			return
+		}
+		mp.callName(ex, x.Name, "")
 	case *ast.SelectorExpr:
 		if pkg, ok := x.X.(*ast.Ident); ok {
-			mp.callName(ex, pkg.Name+"."+x.Sel.Name)
+			fun := x.Sel.Name
+			if fw, ok := numpyFuncs[fun]; ok {
+				mp.callPropSelFun(ex, pkg.Name, fw)
+				return
+			} else {
+				mp.callName(ex, fun, pkg.Name)
+			}
 		} else {
 			fmt.Printf("call, weird sel: %#v\n", x.X)
 		}
@@ -531,21 +553,51 @@ func (mp *mathParse) callExpr(ex *ast.CallExpr) {
 	mp.endFunc()
 }
 
-func (mp *mathParse) callName(ex *ast.CallExpr, funName string) {
+// this calls a "prop" function like ndim(a) on the object.
+func (mp *mathParse) callPropFun(ex *ast.CallExpr, fw funWrap) {
+	ellip := fw.wrapFunc(mp)
+	mp.idx += 2
+	mp.exprList(ex.Args) // this is the tensor
+	mp.addToken(token.PERIOD)
+	mp.out.Add(token.IDENT, fw.fun)
+	if ellip {
+		mp.out.Add(token.ELLIPSIS)
+	}
+	mp.out.Add(token.RPAREN)
+	mp.endFunc()
+}
+
+// this calls global function through selector like: a.reshape()
+func (mp *mathParse) callPropSelFun(ex *ast.CallExpr, obj string, fw funWrap) {
+	mp.startFunc(fw.fun, false)
+	mp.addToken(token.LPAREN) // use the (
+	mp.out.Add(token.IDENT, obj)
+	mp.idx += 2
+	mp.addToken(token.COMMA)
+	mp.exprList(ex.Args)
+	mp.addToken(token.RPAREN)
+	mp.endFunc()
+}
+
+func (mp *mathParse) callName(ex *ast.CallExpr, funName, pkgName string) {
 	if fw, ok := numpyFuncs[funName]; ok {
-		// todo: wrap
 		mp.startFunc(fw.fun, false)
 		mp.addToken(token.LPAREN) // use the (
 		mp.idx++                  // paren too
 		return
 	}
-	_, err := tensor.FuncByName(funName)
-	if err != nil {
-		funName = strings.ToUpper(funName[:1]) + funName[1:]
+	var err error // validate name
+	if pkgName != "" {
+		funName = pkgName + "." + funName
 		_, err = tensor.FuncByName(funName)
+	} else {
+		_, err = tensor.FuncByName(funName)
+		if err != nil {
+			funName = strings.ToUpper(funName[:1]) + funName[1:] // first letter uppercased
+			_, err = tensor.FuncByName(funName)
+		}
 	}
-	if err != nil {
-		fmt.Println("name not found:", funName)
+	if err != nil { // not a registered tensor function
 		mp.startFunc(funName, false)
 		mp.addToken(token.LPAREN) // use the (
 		mp.idx++
@@ -553,7 +605,7 @@ func (mp *mathParse) callName(ex *ast.CallExpr, funName string) {
 	}
 	mp.startFunc("tensor.CallOut", true) // tensors
 	mp.addToken(token.LPAREN)
-	if strings.Contains(funName, ".") {
+	if pkgName != "" {
 		mp.idx += 2 // . and selector
 	}
 	mp.out.Add(token.IDENT, `"`+funName+`"`)

@@ -13,11 +13,19 @@ import (
 // Clone returns a copy of the given tensor.
 // If it is raw [Values] then a [Values.Clone] is returned.
 // Otherwise if it is a view, then [Tensor.AsValues] is returned.
+// This is equivalent to the NumPy copy function.
 func Clone(tsr Tensor) Values {
 	if vl, ok := tsr.(Values); ok {
 		return vl.Clone()
 	}
 	return tsr.AsValues()
+}
+
+// Flatten returns a copy of the given tensor as a 1D flat list
+// of values, by calling Clone(As1D(tsr)).
+// It is equivalent to the NumPy flatten function.
+func Flatten(tsr Tensor) Values {
+	return Clone(As1D(tsr))
 }
 
 // MustBeValues returns the given tensor as a [Values] subtype, or nil and
@@ -79,7 +87,7 @@ func SetShapeSizesMustBeValues(tsr Tensor, sizes ...int) error {
 // As1D returns a 1D tensor, which is either the input tensor if it is
 // already 1D, or a new [Reshaped] 1D view of it.
 // This can be useful e.g., for stats and metric functions that operate
-// on a 1D list of values.
+// on a 1D list of values. See also [Flatten].
 func As1D(tsr Tensor) Tensor {
 	if tsr.NumDims() == 1 {
 		return tsr

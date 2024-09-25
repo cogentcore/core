@@ -221,9 +221,9 @@ TODO: update aboven
 
 # Math mode
 
-In general, Goal is designed to be as compatible with Python NumPy / SciPy syntax as possible, while also adding a few Go-specific additions as well.  The Goal global functions are named the same as NumPy, without the `np.` prefix, so existing code can be converted by just removing that prefix.  Corresponding field-like properties of tensors are converted into into appropriate method calls.
+In general, Goal is designed to be as compatible with Python NumPy / SciPy syntax as possible, while also adding a few Go-specific additions as well.  The Goal global functions are named the same as NumPy, without the `np.` prefix, so existing code can be converted by just removing that prefix. Corresponding field-like properties of tensors are converted into into appropriate method calls.
 
-All elements of a Goal math expression are [tensors](../tensor) (i.e., `tensor.Tensor`), which can represent everything from a scalar to an n-dimenstional tensor, with different _views_ that support the arbitrary slicing and flexible forms of indexing documented in the table below.  These are called an "array" in NumPy terms.  See [array vs. tensor](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html#array-or-matrix-which-should-i-use) NumPy docs for more information.  Note that Goal does not have a distinct `matrix` type; everything is a tensor, and when these are 2D, they function appropriately.
+All elements of a Goal math expression are [tensors](../tensor) (i.e., `tensor.Tensor`), which can represent everything from a scalar to an n-dimenstional tensor, with different _views_ that support the arbitrary slicing and flexible forms of indexing documented in the table below.  These are called an `ndarray` in NumPy terms.  See [array vs. tensor](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html#array-or-matrix-which-should-i-use) NumPy docs for more information.  Note that Goal does not have a distinct `matrix` type; everything is a tensor, and when these are 2D, they function appropriately via the [matrix](../tensor/matrix) package.
 
 The _view_ versions of `Tensor` include `Sliced`, `Reshaped`,  `Masked`, `Indexed`, and `Rows`, each of which wraps around another "source" `Tensor`, and provides its own way of accessing the underlying data:
 
@@ -239,115 +239,114 @@ The _view_ versions of `Tensor` include `Sliced`, `Reshaped`,  `Masked`, `Indexe
 
 Here's a full list of equivalents, from [numpy-for-matlab-users](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html)
 
-| Goal                       | Python | MATLAB | Notes  |
-| -------------------------- | ------ | ------ | ------ |
-| `ndim(a)` or `a.ndim` | `np.ndim(a)` or `a.ndim`   | `ndims(a)` | number of dimensions of tensor `a` |
-| `len(a)` or `a.len` or `size(a)` or `a.size` | `np.size(a)` or `a.size`   | `numel(a)` | number of elements of tensor `a` |
-| `shape(a)` or `a.shape` | `np.shape(a)` or `a.shape` | `size(a)`  | "size" of each dimension in a; `shape` returns a 1D `int` tensor |
-| `a.shape[n-1]` | `a.shape[n-1]` | `size(a,n)` | the number of elements of the n-th dimension of tensor `a` |
-| `tensor.NewReshaped(a, 10, 2)` or `a.reshape([10, 2])` or `reshape(a, [10, 2])` or: | `a.reshape(10, 2)` or `np.reshape(a, 10, 2)` or `a.shape = (10,2)` | `reshape(a,10,2)` | set the shape of `a` to a new shape that has the same total number of values (len or size); No option to change order in Goal: always row major. |
-| `tensor.Clone(tensor.As1D(a))` or: | `y = x.flatten()`   | `y=x(:)` | turn tensor into a 1D vector (forces a copy) |.
-| | | |
-| **Construction** | | |
+| tensor       |   Goal      | Python | MATLAB | Notes            |
+| ------------ | ----------- | ------ | ------ | ---------------- |
+| `a.NumDim()` | `ndim(a)` or `a.ndim` | `np.ndim(a)` or `a.ndim`   | `ndims(a)` | number of dimensions of tensor `a` |
+| `a.Len()`    | `len(a)` or `a.len` or: | `np.size(a)` or `a.size`   | `numel(a)` | number of elements of tensor `a` |
+| `a.Shape().Sizes` | same: | `np.shape(a)` or `a.shape` | `size(a)`  | "size" of each dimension in a; `shape` returns a 1D `int` tensor |
+| `a.Shape().Sizes[n-1]` | same: | `a.shape[n-1]` | `size(a,n)` | the number of elements of the n-th dimension of tensor `a` |
+| `tensor.Reshape(a, 10, 2)` | `a.reshape([10, 2])` or `reshape(a, [10, 2])` or: | `a.reshape(10, 2)` or `np.reshape(a, 10, 2)` or `a.shape = (10,2)` | `reshape(a,10,2)` | set the shape of `a` to a new shape that has the same total number of values (len or size); No option to change order in Goal: always row major. |
+| `tensor.Reshape(a, -1)` or `tensor.As1D(a)` | same: | `a.reshape(-1)` or `np.reshape(a, -1)` | `reshape(a,-1)` | a 1D vector view of `a`; Goal does not support `ravel`, which is nearly identical. |
+| `tensor.Flatten(a)` | same: | `b = a.flatten()`   | `b=a(:)` | turn tensor into a 1D vector, and force a copy |
+| `b := tensor.Clone(a)` | `b := copy(a)` or: | `b = a.copy()` | `b=a`  | direct assignment `b = a` in Goal or NumPy just makes variable b point to tensor a; `copy` is needed to generate new underlying values (MATLAB always makes a copy) |
+| | | | |
+| **Construction** | | | |
 | `[[1., 2., 3.], [4., 5., 6.]]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
 | `[[a, b], [c, d]]` or `block([[a, b], [c, d]])` | `np.block([[a, b], [c, d]])` | `[ a b; c d ]` | construct a matrix from blocks `a`, `b`, `c`, and `d` |
 | `zeros([3,4]` or `zeros(3, 4)` | `np.zeros((3, 4))` | `zeros(3,4)` | 3x4 two-dimensional tensor of float64 zeros |
 | `zeros([3, 4, 5])` or `zeros(3, 4, 5)` | `np.zeros((3, 4, 5))` | `zeros(3,4,5)` | 3x4x5 three-dimensional tensor of float64 zeros |
 | `ones([3, 4])` or `ones(3, 4)`  | `np.ones((3, 4))` | `ones(3,4)` | 3x4 two-dimensional tensor of 64-bit floating point ones |
 | `rand([3, 4])` or `slrand([3,4], c, fi)` | `rng.random(3, 4)` | `rand(3,4)` | 3x4 2D float64 tensor with uniform random 0..1 elements; `rand` uses current Go `rand` source, while `slrand` uses [gosl](../gpu/gosl/slrand) GPU-safe call with counter `c` and function index `fi` and key = index of element |
-|  | `np.concatenate((a,b),1)` or `np.hstack((a,b))` or `np.column_stack((a,b))` or `np.c_[a,b]` | `[a b]` | concatenate columns of a and b |
-|  | `np.concatenate((a,b))` or `np.vstack((a,b))` or `np.r_[a,b]` | `[a; b]` | concatenate rows of a and b |
-|  | `np.tile(a, (m, n))`    | `repmat(a, m, n)` | create m by n copies of a |
-|  | `a.squeeze()` | `squeeze(a)` | remove singleton dimensions of tensor `a`. Note that MATLAB will always return tensors of 2D or higher while NumPy will return tensors of 0D or higher |
-|  | `a[np.r_[:len(a),0]]`  | `a([1:end 1],:)`  | `a` with copy of the first row appended to the end |
-| | | |
-| **Ranges and Grids** [numpy](https://numpy.org/doc/stable/user/how-to-partition.html) | | |
-|  | `np.arange(1., 11.)` or `np.r_[1.:11.]` or `np.r_[1:10:10j]` | `1:10` | create an increasing vector |
-|  | `np.arange(10.)` or `np.r_[:10.]` or `np.r_[:9:10j]` | `0:9` | create an increasing vector |
-|  | `np.arange(1.,11.)[:, np.newaxis]` | `[1:10]'` | create a column vector |
-|  | `np.linspace(1,3,4)` | `linspace(1,3,4)` | 4 equally spaced samples between 1 and 3, inclusive |
-|  | `np.mgrid[0:9.,0:6.]` or `np.meshgrid(r_[0:9.],r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D tensors: one of x values, the other of y values |
-|  | `ogrid[0:9.,0:6.]` or `np.ix_(np.r_[0:9.],np.r_[0:6.]` | | the best way to eval functions on a grid |
-|  | `np.meshgrid([1,2,4],[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
-|  | `np.ix_([1,2,4],[2,4,5])`    |  | the best way to eval functions on a grid |
-| | | |
-| **Basic Indexing** | | |
-|  | `a[1, 4]` | `a(2,5)` | access element in second row, fifth column in 2D tensor `a` |
-|  | `a[-1]` | `a(end)` | access last element |
-|  | `a[1]` or `a[1, :]` | `a(2,:)` | entire second row of 2D tensor `a`; unspecified dimensions are equivalent to `:` |
-|  | `a[0:5]` or `a[:5]` or `a[0:5, :]` | `a(1:5,:)` | same as Go slice ranging |
-|  | `a[-5:]` | `a(end-4:end,:)` | last 5 rows of 2D tensor `a` |
-|  | `a[0:3, 4:9]` | `a(1:3,5:9)` | The first through third rows and fifth through ninth columns of a 2D tensor, `a`. |
-|  | `a[2:21:2,:]` | `a(3:2:21,:)` | every other row of `a`, starting with the third and going to the twenty-first |
-|  | `a[::2, :]`  | `a(1:2:end,:)` | every other row of `a`, starting with the first |
-|  | `a[::-1,:]`  | `a(end:-1:1,:) or flipud(a)` | `a` with rows in reverse order |
-| | | |
-| **Advanced Indexing** | | |
-| if indexes are themselves an array | then advanced indexing takes place | | indexes are parallel lists of dimension coordinates; not the clearest |
-|  | `a[np.ix_([1, 3, 4], [0, 2])]` | `a([2,4,5],[1,3])` | rows 2,4 and 5 and columns 1 and 3. |
-| | | |
-| **Boolean Tensors and Indexing** | | |
+|  |  |`np.concatenate((a,b),1)` or `np.hstack((a,b))` or `np.column_stack((a,b))` or `np.c_[a,b]` | `[a b]` | concatenate columns of a and b |
+|  |  |`np.concatenate((a,b))` or `np.vstack((a,b))` or `np.r_[a,b]` | `[a; b]` | concatenate rows of a and b |
+|  |  |`np.tile(a, (m, n))`    | `repmat(a, m, n)` | create m by n copies of a |
+|  |  |`a.squeeze()` | `squeeze(a)` | remove singleton dimensions of tensor `a`. Note that MATLAB will always return tensors of 2D or higher while NumPy will return tensors of 0D or higher |
+|  |  |`a[np.r_[:len(a),0]]`  | `a([1:end 1],:)`  | `a` with copy of the first row appended to the end |
+| | | | |
+| **Ranges and Grids** [numpy](https://numpy.org/doc/stable/user/how-to-partition.html) | | | |
+|  |  |`np.arange(1., 11.)` or `np.r_[1.:11.]` or `np.r_[1:10:10j]` | `1:10` | create an increasing vector |
+|  |  |`np.arange(10.)` or `np.r_[:10.]` or `np.r_[:9:10j]` | `0:9` | create an increasing vector |
+|  |  |`np.arange(1.,11.)[:, np.newaxis]` | `[1:10]'` | create a column vector |
+|  |  |`np.linspace(1,3,4)` | `linspace(1,3,4)` | 4 equally spaced samples between 1 and 3, inclusive |
+|  |  |`np.mgrid[0:9.,0:6.]` or `np.meshgrid(r_[0:9.],r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D tensors: one of x values, the other of y values |
+|  |  |`ogrid[0:9.,0:6.]` or `np.ix_(np.r_[0:9.],np.r_[0:6.]` | | the best way to eval functions on a grid |
+|  |  |`np.meshgrid([1,2,4],[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
+|  |  |`np.ix_([1,2,4],[2,4,5])`    |  | the best way to eval functions on a grid |
+| | | | |
+| **Basic Indexing** | | | |
+|  |  |`a[1, 4]` | `a(2,5)` | access element in second row, fifth column in 2D tensor `a` |
+|  |  |`a[-1]` | `a(end)` | access last element |
+|  |  |`a[1]` or `a[1, :]` | `a(2,:)` | entire second row of 2D tensor `a`; unspecified dimensions are equivalent to `:` |
+|  |  |`a[0:5]` or `a[:5]` or `a[0:5, :]` | `a(1:5,:)` | same as Go slice ranging |
+|  |  |`a[-5:]` | `a(end-4:end,:)` | last 5 rows of 2D tensor `a` |
+|  |  |`a[0:3, 4:9]` | `a(1:3,5:9)` | The first through third rows and fifth through ninth columns of a 2D tensor, `a`. |
+|  |  |`a[2:21:2,:]` | `a(3:2:21,:)` | every other row of `a`, starting with the third and going to the twenty-first |
+|  |  |`a[::2, :]`  | `a(1:2:end,:)` | every other row of `a`, starting with the first |
+|  |  |`a[::-1,:]`  | `a(end:-1:1,:) or flipud(a)` | `a` with rows in reverse order |
+| `y = x[1, :].copy()` or `y = x[1, :].Clone()` | `y = x[1, :].copy()` | `y=x(2,:)` | without the copy, `y` would point to a view of values in `x`; `copy` creates distinct values, in this case of _only_ the 2nd row of `x` -- i.e., it "concretizes" a given view into a literal, memory-continuous set of values for that view. |
+| | | | |
+| **Boolean Tensors and Indexing** | | | |
 | (bool tensor of same shape can filter access to other tensor) | | |
 | `(a > 0.5)` | `(a > 0.5)` | `(a > 0.5)` | `bool` tensor of shape `a` with elements `(v > 0.5)` |
 | `a && b` | `logical_and(a,b)` | `a & b` | element-wise AND operator on `bool` tensors |
 | `a \|\| b` | `np.logical_or(a,b)` | `a \| b` | element-wise OR operator on `bool` tensors | 
 | `a & b`  | `a & b` | `bitand(a,b)` | element bitwise AND operator on `bool` or `int` tensors | 
 | `a \| b`  | `a \| b` | `bitor(a,b)` | element bitwise OR operator on `bool` or `int` tensors |
-|  | `a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
-|  | `a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
-| | | |
-| **Indexed Filtering and Sorting** | | |
+|  |  |`a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
+|  |  |`a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
+| | | | |
+| **Advanced Indexing** | | | |
+| if indexes are themselves an array | then advanced indexing takes place | | indexes are parallel lists of dimension coordinates; not the clearest |
+|  |  |`a[np.ix_([1, 3, 4], [0, 2])]` | `a([2,4,5],[1,3])` | rows 2,4 and 5 and columns 1 and 3. |
+| | | | |
+| **Indexed Filtering and Sorting** | | | |
 | (indexes only on outer row dim) | index on all elements | | |
-|  | `np.nonzero(a > 0.5)` | `find(a > 0.5)` | find the indices where (a > 0.5) |
-|  | `a[:, v.T > 0.5]` | `a(:,find(v>0.5))` | extract the columns of `a` where column vector `v` > 0.5 |
-|  | `a[:,np.nonzero(v > 0.5)[0]]` | `a(:,find(v > 0.5))` | extract the columns of `a` where vector `v` > 0.5 |
-|  | `a[:] = 3` | `a(:) = 3` | set all values to the same scalar value |
-|  | `np.sort(a)` or `a.sort(axis=0)` | `sort(a)` | sort each column of a 2D tensor, `a` |
-|  | `np.sort(a, axis=1)` or `a.sort(axis=1)` | `sort(a, 2)` | sort the each row of 2D tensor, `a` |
-|  | `I = np.argsort(a[:, 0]); b = a[I,:]` | `[b,I]=sortrows(a,1)`  | save the tensor `a` as tensor `b` with rows sorted by the first column |
-|  | `np.unique(a)` | `unique(a)` | a vector of unique values in tensor `a` |
-| | | |
-| **Copy vs. View** | | |
-| `y = x.copy()` or `y = x.Clone()` | `y = x.copy()` | `y=x`  | `y=x` just assigns `y` to point to `x`, so that changes to `y` also change `x`; need to make a `copy` to get distinct values |
-| `y = x[1, :].copy()` or `y = x[1, :].Clone()` | `y = x[1, :].copy()` | `y=x(2,:)` | without the copy, `y` would point to a view of values in `x`; `copy` creates distinct values, in this case of _only_ the 2nd row of `x` -- i.e., it "concretizes" a given view into a literal, memory-continuous set of values for that view. |
-| | | |
-| **Math** | | |
-|  | `a * b` | `a .* b` | element-wise multiply |
-|  | `a/b`   | `a./b` | element-wise divide |
+|  |  |`np.nonzero(a > 0.5)` | `find(a > 0.5)` | find the indices where (a > 0.5) |
+|  |  |`a[:, v.T > 0.5]` | `a(:,find(v>0.5))` | extract the columns of `a` where column vector `v` > 0.5 |
+|  |  |`a[:,np.nonzero(v > 0.5)[0]]` | `a(:,find(v > 0.5))` | extract the columns of `a` where vector `v` > 0.5 |
+|  |  |`a[:] = 3` | `a(:) = 3` | set all values to the same scalar value |
+|  |  |`np.sort(a)` or `a.sort(axis=0)` | `sort(a)` | sort each column of a 2D tensor, `a` |
+|  |  |`np.sort(a, axis=1)` or `a.sort(axis=1)` | `sort(a, 2)` | sort the each row of 2D tensor, `a` |
+|  |  |`I = np.argsort(a[:, 0]); b = a[I,:]` | `[b,I]=sortrows(a,1)`  | save the tensor `a` as tensor `b` with rows sorted by the first column |
+|  |  |`np.unique(a)` | `unique(a)` | a vector of unique values in tensor `a` |
+| | | | |
+| **Math** | | | |
+|  |  |`a * b` | `a .* b` | element-wise multiply |
+|  |  |`a/b`   | `a./b` | element-wise divide |
 | `a^3` or `a**3` | `a**3`  | `a.^3` | element-wise exponentiation |
 | `cos(a)` | `cos(a)` | `cos(a)` | element-wise function application |
-| | | |
-| **2D Matrix Linear Algebra** | | |
-| (n-dimensional tensors resliced as lists of 2D matricies) | | |
-|  | `a @ b` | `a * b` | matrix multiply |
-|  | `a.transpose() or a.T` | `a.'` | transpose of a |
-|  | `a.conj().transpose() or a.conj().T` | `a'` | conjugate transpose of `a` |
-|  | `np.eye(3)` | `eye(3)` | 3x3 identity matrix |
-|  | `np.diag(a)` | `diag(a)` | returns a vector of the diagonal elements of 2D tensor, `a` |
-|  | `np.diag(v, 0)` | `diag(v,0)` | returns a square diagonal matrix whose nonzero values are the elements of vector, v |
-|  | `linalg.inv(a)` | `inv(a)` | inverse of square 2D tensor a |
-|  | `linalg.pinv(a)` | `pinv(a)` | pseudo-inverse of 2D tensor a |
-|  | `np.linalg.matrix_rank(a)` | `rank(a)` | matrix rank of a 2D tensor a |
-|  | `linalg.solve(a, b)` if `a` is square; `linalg.lstsq(a, b)` otherwise | `a\b` | solution of `a x = b` for x |
-|  | Solve `a.T x.T = b.T` instead | `b/a` | solution of x a = b for x |
-|  | `U, S, Vh = linalg.svd(a); V = Vh.T` | `[U,S,V]=svd(a)` | singular value decomposition of a |
-|  | `linalg.cholesky(a)` | `chol(a)` | Cholesky factorization of a 2D tensor |
-|  | `D,V = linalg.eig(a)` | `[V,D]=eig(a)` | eigenvalues and eigenvectors of `a`, where `[V,D]=eig(a,b)` eigenvalues and eigenvectors of `a, b` where |
-|  | `D,V = eigs(a, k=3)`  | `D,V = linalg.eig(a, b)` |  `[V,D]=eigs(a,3)` | find the k=3 largest eigenvalues and eigenvectors of 2D tensor, a |
-|  | `Q,R = linalg.qr(a)`  | `[Q,R]=qr(a,0)` | QR decomposition
-|  | `P,L,U = linalg.lu(a)` where `a == P@L@U`  | `[L,U,P]=lu(a)` where `a==P'*L*U` | LU decomposition with partial pivoting (note: P(MATLAB) == transpose(P(NumPy))) | 
-| | | |
-| **Statistics** | | |
+| | | | |
+| **2D Matrix Linear Algebra** | | | |
+| (n-dimensional tensors resliced as lists of 2D matricies) | | | |
+|  |  |`a @ b` | `a * b` | matrix multiply |
+|  |  |`a.transpose() or a.T` | `a.'` | transpose of a |
+|  |  |`a.conj().transpose() or a.conj().T` | `a'` | conjugate transpose of `a` |
+|  |  |`np.eye(3)` | `eye(3)` | 3x3 identity matrix |
+|  |  |`np.diag(a)` | `diag(a)` | returns a vector of the diagonal elements of 2D tensor, `a` |
+|  |  |`np.diag(v, 0)` | `diag(v,0)` | returns a square diagonal matrix whose nonzero values are the elements of vector, v |
+|  |  |`linalg.inv(a)` | `inv(a)` | inverse of square 2D tensor a |
+|  |  |`linalg.pinv(a)` | `pinv(a)` | pseudo-inverse of 2D tensor a |
+|  |  |`np.linalg.matrix_rank(a)` | `rank(a)` | matrix rank of a 2D tensor a |
+|  |  |`linalg.solve(a, b)` if `a` is square; `linalg.lstsq(a, b)` otherwise | `a\b` | solution of `a x = b` for x |
+|  |  |Solve `a.T x.T = b.T` instead | `b/a` | solution of x a = b for x |
+|  |  |`U, S, Vh = linalg.svd(a); V = Vh.T` | `[U,S,V]=svd(a)` | singular value decomposition of a |
+|  |  |`linalg.cholesky(a)` | `chol(a)` | Cholesky factorization of a 2D tensor |
+|  |  |`D,V = linalg.eig(a)` | `[V,D]=eig(a)` | eigenvalues and eigenvectors of `a`, where `[V,D]=eig(a,b)` eigenvalues and eigenvectors of `a, b` where |
+|  |  |`D,V = eigs(a, k=3)`  | `D,V = linalg.eig(a, b)` |  `[V,D]=eigs(a,3)` | find the k=3 largest eigenvalues and eigenvectors of 2D tensor, a |
+|  |  |`Q,R = linalg.qr(a)`  | `[Q,R]=qr(a,0)` | QR decomposition
+|  |  |`P,L,U = linalg.lu(a)` where `a == P@L@U`  | `[L,U,P]=lu(a)` where `a==P'*L*U` | LU decomposition with partial pivoting (note: P(MATLAB) == transpose(P(NumPy))) | 
+| | | | |
+| **Statistics** | | | |
 | `a.max()` or `max(a)` or `stats.Max(a)` | `a.max()` or `np.nanmax(a)` | `max(max(a))` | maximum element of `a`, Goal always ignores `NaN` as missing data |
-|  | `a.max(0)` | `max(a)` | maximum element of each column of tensor `a` |
-|  | `a.max(1)` | `max(a,[],2)` | maximum element of each row of tensor `a` |
-|  | `np.maximum(a, b)` | `max(a,b)` | compares a and b element-wise, and returns the maximum value from each pair |
+|  |  |`a.max(0)` | `max(a)` | maximum element of each column of tensor `a` |
+|  |  |`a.max(1)` | `max(a,[],2)` | maximum element of each row of tensor `a` |
+|  |  |`np.maximum(a, b)` | `max(a,b)` | compares a and b element-wise, and returns the maximum value from each pair |
 | `stats.L2Norm(a)` | `np.sqrt(v @ v)` or `np.linalg.norm(v)` | `norm(v)` | L2 norm of vector v |
-|  | `cg`  | `conjgrad` | conjugate gradients solver |
-| | | |
-| **Misc Functions** | | |
-|  | `np.fft.fft(a)` | `fft(a)` | Fourier transform of `a` |
-|  | `np.fft.ifft(a)` | `ifft(a)` | inverse Fourier transform of `a` |
-|  | `x = linalg.lstsq(Z, y)` | `x = Z\y` | perform a linear regression of the form |
-|  | `signal.resample(x, np.ceil(len(x)/q))` |  `decimate(x, q)` | downsample with low-pass filtering |
+|  |  |`cg`  | `conjgrad` | conjugate gradients solver |
+| | | | |
+| **Misc Functions** | | | |
+|  |  |`np.fft.fft(a)` | `fft(a)` | Fourier transform of `a` |
+|  |  |`np.fft.ifft(a)` | `ifft(a)` | inverse Fourier transform of `a` |
+|  |  |`x = linalg.lstsq(Z, y)` | `x = Z\y` | perform a linear regression of the form |
+|  |  |`signal.resample(x, np.ceil(len(x)/q))` |  `decimate(x, q)` | downsample with low-pass filtering |
 

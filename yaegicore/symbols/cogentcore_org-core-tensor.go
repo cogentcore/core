@@ -51,6 +51,7 @@ func init() {
 		"Descending":                reflect.ValueOf(tensor.Descending),
 		"Detect":                    reflect.ValueOf(tensor.Detect),
 		"Ellipsis":                  reflect.ValueOf(tensor.Ellipsis),
+		"Flatten":                   reflect.ValueOf(tensor.Flatten),
 		"Float64ToBool":             reflect.ValueOf(tensor.Float64ToBool),
 		"Float64ToString":           reflect.ValueOf(tensor.Float64ToString),
 		"FullAxis":                  reflect.ValueOf(tensor.FullAxis),
