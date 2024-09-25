@@ -27,6 +27,9 @@ type State struct {
 	// this should be turned off.
 	FuncToVar bool
 
+	// MathMode is on when math mode is turned on.
+	MathMode bool
+
 	// depth of delim at the end of the current line. if 0, was complete.
 	ParenDepth, BraceDepth, BrackDepth, TypeDepth, DeclDepth int
 
@@ -36,10 +39,10 @@ type State struct {
 	Chunks []string
 
 	// current stack of transpiled lines, that are accumulated into
-	// code Chunks
+	// code Chunks.
 	Lines []string
 
-	// stack of runtime errors
+	// stack of runtime errors.
 	Errors []error
 
 	// if this is non-empty, it is the name of the last command defined.

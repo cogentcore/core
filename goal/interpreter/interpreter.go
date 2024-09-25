@@ -76,10 +76,14 @@ func NewInterpreter(options interp.Options) *Interpreter {
 // Prompt returns the appropriate REPL prompt to show the user.
 func (in *Interpreter) Prompt() string {
 	dp := in.Goal.TrState.TotalDepth()
-	if dp == 0 {
-		return in.Goal.HostAndDir() + " > "
+	pc := ">"
+	if in.Goal.TrState.MathMode {
+		pc = "#"
 	}
-	res := "> "
+	if dp == 0 {
+		return in.Goal.HostAndDir() + " " + pc + " "
+	}
+	res := pc + " "
 	for range dp {
 		res += "    " // note: /t confuses readline
 	}

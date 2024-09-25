@@ -47,6 +47,15 @@ func (st *State) TranspileLineTokens(code string) Tokens {
 	if n == 0 {
 		return toks
 	}
+	if st.MathMode {
+		if len(toks) >= 2 {
+			if toks[0].Tok == token.ILLEGAL && toks[0].Str == "#" && toks[1].Tok == token.ILLEGAL && toks[1].Str == "#" {
+				st.MathMode = false
+				return nil
+			}
+		}
+		return st.TranspileMath(toks, code, true)
+	}
 	ewords, err := ExecWords(code)
 	if err != nil {
 		st.AddError(err)
@@ -76,6 +85,10 @@ func (st *State) TranspileLineTokens(code string) Tokens {
 	case t0.Tok == token.ILLEGAL:
 		if t0.Str == "#" {
 			logx.PrintlnDebug("math #")
+			if toks[1].Tok == token.ILLEGAL && toks[1].Str == "#" {
+				st.MathMode = true
+				return nil
+			}
 			return st.TranspileMath(toks[1:], code, true)
 		}
 		return st.TranspileExec(ewords, false)
