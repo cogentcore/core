@@ -315,12 +315,13 @@ See [NumPy boolean indexing](https://numpy.org/doc/stable/user/basics.indexing.h
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
-| `(a > 0.5)` | `(a > 0.5)` | `(a > 0.5)` | `bool` tensor of shape `a` with elements `(v > 0.5)` |
+| `tmath.Greater(a, 0.5)` | same: | `(a > 0.5)` | `(a > 0.5)` | `bool` tensor of shape `a` with elements `(v > 0.5)` |
 | `a && b` | `logical_and(a,b)` | `a & b` | element-wise AND operator on `bool` tensors |
 | `a \|\| b` | `np.logical_or(a,b)` | `a \| b` | element-wise OR operator on `bool` tensors | 
 | `a & b`  | `a & b` | `bitand(a,b)` | element bitwise AND operator on `bool` or `int` tensors | 
 | `a \| b`  | `a \| b` | `bitor(a,b)` | element bitwise OR operator on `bool` or `int` tensors |
-|  |  |`a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
+| `tensor.Mask(a,` `tmath.Less(a, 0.5)` | same: |`a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
+| `tensor.Flatten(tensor.Mask(a,` `tmath.Less(a, 0.5))` | same: |`a[a < 0.5].flatten()` | ? | a 1D list of the elements of `a` < 0.5 |
 |  |  |`a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
 
 ## Advanced index-based indexing
@@ -340,6 +341,8 @@ See [NumPy integer indexing](https://numpy.org/doc/stable/user/basics.indexing.h
 |  |  |`np.unique(a)` | `unique(a)` | a vector of unique values in tensor `a` |
 
 ## Basic math operations (add, multiply, etc)
+
+In Goal and NumPy, the standard `+, -, *, /` operators perform _element-wise_ operations because those are well-defined for all dimensionalities and are consistent across the different operators, whereas matrix multiplication is specifically used in a 2D linear algebra context, and is not well defined for the other operators.
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
