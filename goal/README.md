@@ -221,7 +221,9 @@ TODO: update above
 
 # Math mode
 
-In general, Goal is designed to be as compatible with Python NumPy / SciPy syntax as possible, while also adding a few Go-specific additions as well.  The Goal global functions are named the same as NumPy, without the `np.` prefix, so existing code can be converted by just removing that prefix. Corresponding field-like properties of tensors are converted into into appropriate method calls.
+The math mode in Goal is designed to be generally compatible with Python NumPy / SciPy syntax, so that the widespread experience with that syntax transfers well to Goal. This syntax is also largely compatible with MATLAB and other languages as well. However, we did not fully replicate the NumPy syntax, instead choosing to clean up a few things and generally increase consistency with Go.
+
+In general the Goal global functions are named the same as NumPy, without the `np.` prefix, which improves readability. It should be very straightforward to write a conversion utility that converts existing NumPy code into Goal code, and that is a better process than trying to make Goal itself perfectly compatible.
 
 All elements of a Goal math expression are [tensors](../tensor) (i.e., `tensor.Tensor`), which can represent everything from a scalar to an n-dimenstional tensor, with different _views_ that support the arbitrary slicing and flexible forms of indexing documented in the table below.  These are called an `ndarray` in NumPy terms.  See [array vs. tensor](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html#array-or-matrix-which-should-i-use) NumPy docs for more information.  Note that Goal does not have a distinct `matrix` type; everything is a tensor, and when these are 2D, they function appropriately via the [matrix](../tensor/matrix) package.
 
@@ -321,7 +323,7 @@ See [NumPy boolean indexing](https://numpy.org/doc/stable/user/basics.indexing.h
 | `a & b`  | `a & b` | `bitand(a,b)` | element bitwise AND operator on `bool` or `int` tensors | 
 | `a \| b`  | `a \| b` | `bitor(a,b)` | element bitwise OR operator on `bool` or `int` tensors |
 | `tensor.Mask(a,` `tmath.Less(a, 0.5)` | same: |`a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
-| `tensor.Flatten(tensor.Mask(a,` `tmath.Less(a, 0.5))` | same: |`a[a < 0.5].flatten()` | ? | a 1D list of the elements of `a` < 0.5 |
+| `tensor.Flatten(` `tensor.Mask(a,` `tmath.Less(a, 0.5))` | same: |`a[a < 0.5].flatten()` | ? | a 1D list of the elements of `a` < 0.5 (as a copy, not a view) |
 |  |  |`a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
 
 ## Advanced index-based indexing
