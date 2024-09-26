@@ -25,6 +25,9 @@ func Clone(tsr Tensor) Values {
 // of values, by calling Clone(As1D(tsr)).
 // It is equivalent to the NumPy flatten function.
 func Flatten(tsr Tensor) Values {
+	if msk, ok := tsr.(*Masked); ok {
+		return msk.AsValues()
+	}
 	return Clone(As1D(tsr))
 }
 

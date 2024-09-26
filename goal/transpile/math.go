@@ -17,6 +17,7 @@ import (
 func init() {
 	tensor.AddFunc("tensor.Reshape", tensor.Reshape)
 	tensor.AddFunc("tensor.Reslice", tensor.Reslice)
+	tensor.AddFunc("tensor.Mask", tensor.Mask)
 	tensor.AddFunc("tensor.NewFloat64", tensor.NewFloat64)
 	tensor.AddFunc("tensor.NewIntScalar", tensor.NewIntScalar)
 	tensor.AddFunc("tensor.NewFloat64Scalar", tensor.NewFloat64Scalar)
@@ -307,9 +308,7 @@ func (mp *mathParse) expr(ex ast.Expr) {
 		mp.callExpr(x)
 
 	case *ast.ArrayType:
-		// basically at this point we have a bad expression and
-		// need to do our own parsing.
-		// it is unclear if perhaps we just need to do that from the start.
+		// note: shouldn't happen normally:
 		fmt.Println("array type:", x, x.Len)
 		fmt.Printf("%#v\n", x.Len)
 	}
@@ -354,6 +353,27 @@ func (mp *mathParse) argsList(ex []ast.Expr) {
 	}
 }
 
+func (mp *mathParse) exprIsBool(ex ast.Expr) bool {
+	switch x := ex.(type) {
+	case *ast.BinaryExpr:
+		if (x.Op >= token.EQL && x.Op <= token.GTR) || (x.Op >= token.NEQ && x.Op <= token.GEQ) {
+			return true
+		}
+	case *ast.ParenExpr:
+		return mp.exprIsBool(x.X)
+	}
+	return false
+}
+
+func (mp *mathParse) exprsAreBool(ex []ast.Expr) bool {
+	for _, x := range ex {
+		if mp.exprIsBool(x) {
+			return true
+		}
+	}
+	return false
+}
+
 func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 	fn := ""
 	switch ex.Op {
@@ -365,10 +385,18 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 		fn = "Mul"
 	case token.QUO:
 		fn = "Div"
+	case token.EQL:
+		fn = "Equal"
 	case token.LSS:
 		fn = "Less"
 	case token.GTR:
 		fn = "Greater"
+	case token.NEQ:
+		fn = "NotEqual"
+	case token.LEQ:
+		fn = "LessEqual"
+	case token.GEQ:
+		fn = "GreaterEqual"
 	default:
 		fmt.Println("binary token:", ex.Op)
 	}
@@ -527,7 +555,11 @@ func (mp *mathParse) indexExpr(il *ast.IndexExpr) {
 
 func (mp *mathParse) basicSlicingExpr(il *ast.IndexExpr) {
 	iil := il.Index.(*ast.IndexListExpr)
-	mp.startFunc("tensor.Reslice")
+	fun := "tensor.Reslice"
+	if mp.exprsAreBool(iil.Indices) {
+		fun = "tensor.Mask"
+	}
+	mp.startFunc(fun)
 	mp.out.Add(token.LPAREN)
 	mp.expr(il.X)
 	mp.nextArg()

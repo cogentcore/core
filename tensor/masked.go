@@ -8,6 +8,7 @@ import (
 	"math"
 	"reflect"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/reflectx"
 )
@@ -42,6 +43,17 @@ func NewMasked(tsr Tensor, mask ...*Bool) *Masked {
 		ms.Mask.SetTrue()
 	}
 	return ms
+}
+
+// Mask is the general purpose masking function, which checks
+// if the mask arg is a Bool and uses if so.
+// Otherwise, it logs an error.
+func Mask(tsr, mask Tensor) *Masked {
+	if mb, ok := mask.(*Bool); ok {
+		return NewMasked(tsr, mb)
+	}
+	errors.Log(errors.New("tensor.Mask: provided tensor is not a Bool tensor"))
+	return NewMasked(tsr)
 }
 
 // AsMasked returns the tensor as a [Masked] view.
