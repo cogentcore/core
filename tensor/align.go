@@ -7,7 +7,18 @@ package tensor
 import (
 	"fmt"
 	"slices"
+
+	"cogentcore.org/core/base/errors"
 )
+
+func init() {
+	AddFunc("tensor.FloatAssignFunc", FloatAssignFunc)
+	AddFunc("tensor.StringAssignFunc", StringAssignFunc)
+	AddFunc("tensor.FloatBinaryFunc", FloatBinaryFunc)
+	AddFunc("tensor.StringBinaryFunc", StringBinaryFunc)
+	AddFunc("tensor.BoolStringsFunc", BoolStringsFunc)
+	AddFunc("tensor.BoolFloatsFunc", BoolFloatsFunc)
+}
 
 // AlignShapes aligns the shapes of two tensors, a and b for a binary
 // computation producing an output, returning the effective aligned shapes
@@ -107,4 +118,150 @@ func AlignForAssign(a, b Tensor) (as, bs *Shape, err error) {
 	as = NewShape(asizes...)
 	bs = NewShape(bsizes...)
 	return
+}
+
+// FloatAssignFunc sets a to a binary function of a and b float64 values.
+func FloatAssignFunc(fun func(a, b float64) float64, a, b Tensor) error {
+	as, bs, err := AlignForAssign(a, b)
+	if err != nil {
+		return err
+	}
+	alen := as.Len()
+	VectorizeThreaded(1, func(tsr ...Tensor) int {
+		return alen
+	},
+		func(idx int, tsr ...Tensor) {
+			ai := as.IndexFrom1D(idx)
+			bi := WrapIndex1D(bs, ai...)
+			tsr[0].SetFloat1D(fun(tsr[0].Float1D(idx), tsr[1].Float1D(bi)), idx)
+		}, a, b)
+	return nil
+}
+
+// StringAssignFunc sets a to a binary function of a and b string values.
+func StringAssignFunc(fun func(a, b string) string, a, b Tensor) error {
+	as, bs, err := AlignForAssign(a, b)
+	if err != nil {
+		return err
+	}
+	alen := as.Len()
+	VectorizeThreaded(1, func(tsr ...Tensor) int {
+		return alen
+	},
+		func(idx int, tsr ...Tensor) {
+			ai := as.IndexFrom1D(idx)
+			bi := WrapIndex1D(bs, ai...)
+			tsr[0].SetString1D(fun(tsr[0].String1D(idx), tsr[1].String1D(bi)), idx)
+		}, a, b)
+	return nil
+}
+
+// FloatBinaryFunc sets output to a binary function of a, b float64 values.
+func FloatBinaryFunc(fun func(a, b float64) float64, a, b Tensor) Tensor {
+	return CallOut2Gen1(FloatBinaryFuncOut, fun, a, b)
+}
+
+// FloatBinaryFuncOut sets output to a binary function of a, b float64 values.
+func FloatBinaryFuncOut(fun func(a, b float64) float64, a, b Tensor, out Values) error {
+	as, bs, os, err := AlignShapes(a, b)
+	if err != nil {
+		return err
+	}
+	out.SetShapeSizes(os.Sizes...)
+	olen := os.Len()
+	VectorizeThreaded(1, func(tsr ...Tensor) int {
+		return olen
+	},
+		func(idx int, tsr ...Tensor) {
+			oi := os.IndexFrom1D(idx)
+			ai := WrapIndex1D(as, oi...)
+			bi := WrapIndex1D(bs, oi...)
+			out.SetFloat1D(fun(tsr[0].Float1D(ai), tsr[1].Float1D(bi)), idx)
+		}, a, b, out)
+	return nil
+}
+
+// StringBinaryFunc sets output to a binary function of a, b string values.
+func StringBinaryFunc(fun func(a, b string) string, a, b Tensor) Tensor {
+	return CallOut2Gen1(StringBinaryFuncOut, fun, a, b)
+}
+
+// StringBinaryFuncOut sets output to a binary function of a, b string values.
+func StringBinaryFuncOut(fun func(a, b string) string, a, b Tensor, out Values) error {
+	as, bs, os, err := AlignShapes(a, b)
+	if err != nil {
+		return err
+	}
+	out.SetShapeSizes(os.Sizes...)
+	olen := os.Len()
+	VectorizeThreaded(1, func(tsr ...Tensor) int {
+		return olen
+	},
+		func(idx int, tsr ...Tensor) {
+			oi := os.IndexFrom1D(idx)
+			ai := WrapIndex1D(as, oi...)
+			bi := WrapIndex1D(bs, oi...)
+			out.SetString1D(fun(tsr[0].String1D(ai), tsr[1].String1D(bi)), idx)
+		}, a, b, out)
+	return nil
+}
+
+//////////////////////////	Bool
+
+// BoolStringsFunc sets boolean output value based on a function involving
+// string values from the two tensors.
+func BoolStringsFunc(fun func(a, b string) bool, a, b Tensor) *Bool {
+	out := NewBool()
+	errors.Log(BoolStringsFuncOut(fun, a, b, out))
+	return out
+}
+
+// BoolStringsFuncOut sets boolean output value based on a function involving
+// string values from the two tensors.
+func BoolStringsFuncOut(fun func(a, b string) bool, a, b Tensor, out *Bool) error {
+	as, bs, os, err := AlignShapes(a, b)
+	if err != nil {
+		return err
+	}
+	out.SetShapeSizes(os.Sizes...)
+	olen := os.Len()
+	VectorizeThreaded(5, func(tsr ...Tensor) int {
+		return olen
+	},
+		func(idx int, tsr ...Tensor) {
+			oi := os.IndexFrom1D(idx)
+			ai := WrapIndex1D(as, oi...)
+			bi := WrapIndex1D(bs, oi...)
+			out.SetBool1D(fun(tsr[0].String1D(ai), tsr[1].String1D(bi)), idx)
+		}, a, b, out)
+	return nil
+}
+
+// BoolFloatsFunc sets boolean output value based on a function involving
+// float64 values from the two tensors.
+func BoolFloatsFunc(fun func(a, b float64) bool, a, b Tensor) *Bool {
+	out := NewBool()
+	errors.Log(BoolFloatsFuncOut(fun, a, b, out))
+	return out
+}
+
+// BoolFloatsFuncOut sets boolean output value based on a function involving
+// float64 values from the two tensors.
+func BoolFloatsFuncOut(fun func(a, b float64) bool, a, b Tensor, out *Bool) error {
+	as, bs, os, err := AlignShapes(a, b)
+	if err != nil {
+		return err
+	}
+	out.SetShapeSizes(os.Sizes...)
+	olen := os.Len()
+	VectorizeThreaded(5, func(tsr ...Tensor) int {
+		return olen
+	},
+		func(idx int, tsr ...Tensor) {
+			oi := os.IndexFrom1D(idx)
+			ai := WrapIndex1D(as, oi...)
+			bi := WrapIndex1D(bs, oi...)
+			out.SetBool1D(fun(tsr[0].Float1D(ai), tsr[1].Float1D(bi)), idx)
+		}, a, b, out)
+	return nil
 }

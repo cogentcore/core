@@ -15,8 +15,8 @@ import (
 type onef func(x float64) float64
 type tonef func(in tensor.Tensor, out tensor.Values) error
 
-// Equal does equal testing taking into account NaN
-func Equal(t *testing.T, trg, val float64) {
+// testEqual does equal testing taking into account NaN
+func testEqual(t *testing.T, trg, val float64) {
 	if math.IsNaN(trg) {
 		if !math.IsNaN(val) {
 			t.Error("target is NaN but actual is not")
@@ -53,9 +53,9 @@ func TestMath(t *testing.T) {
 		tf(oned, oneout)
 		tf(cell2d, cellout)
 
-		Equal(t, fun(scalar.Float1D(0)), scout.Float1D(0))
+		testEqual(t, fun(scalar.Float1D(0)), scout.Float1D(0))
 		for i, v := range vals {
-			Equal(t, fun(v), oneout.Float1D(i))
+			testEqual(t, fun(v), oneout.Float1D(i))
 		}
 		lv := len(vals)
 		for r := range 5 {
@@ -63,7 +63,7 @@ func TestMath(t *testing.T) {
 			si := lv * r
 			for c, v := range vals {
 				ov := tensor.AsFloat32Tensor(cellout).Values[si+c]
-				Equal(t, fun(v), float64(ov))
+				testEqual(t, fun(v), float64(ov))
 			}
 		}
 	}

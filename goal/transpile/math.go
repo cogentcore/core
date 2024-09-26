@@ -365,6 +365,12 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 		fn = "Mul"
 	case token.QUO:
 		fn = "Div"
+	case token.LSS:
+		fn = "Less"
+	case token.GTR:
+		fn = "Greater"
+	default:
+		fmt.Println("binary token:", ex.Op)
 	}
 	mp.startFunc("tmath." + fn)
 	mp.out.Add(token.LPAREN)

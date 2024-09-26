@@ -160,22 +160,3 @@ func TestOps(t *testing.T) {
 		assert.InDelta(t, v, onedc.Float1D(i), 1.0e-7)
 	}
 }
-
-func TestBoolOps(t *testing.T) {
-	ar := tensor.NewSliceInts(12)
-	// fmt.Println(v)
-	bo := tensor.NewBool()
-	sc := tensor.NewIntScalar(6)
-
-	GreaterOut(ar, sc, bo)
-	// fmt.Println(bo)
-	for i, v := range ar.Values {
-		assert.Equal(t, v > 6, bo.Bool1D(i))
-	}
-
-	LessOut(ar, sc, bo)
-	// fmt.Println(bo)
-	for i, v := range ar.Values {
-		assert.Equal(t, v < 6, bo.Bool1D(i))
-	}
-}
