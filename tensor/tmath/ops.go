@@ -9,19 +9,19 @@ import (
 )
 
 func init() {
-	tensor.AddFunc("Assign", Assign)
-	tensor.AddFunc("AddAssign", AddAssign)
-	tensor.AddFunc("SubAssign", SubAssign)
-	tensor.AddFunc("MulAssign", MulAssign)
-	tensor.AddFunc("DivAssign", DivAssign)
+	tensor.AddFunc("tmath.Assign", Assign)
+	tensor.AddFunc("tmath.AddAssign", AddAssign)
+	tensor.AddFunc("tmath.SubAssign", SubAssign)
+	tensor.AddFunc("tmath.MulAssign", MulAssign)
+	tensor.AddFunc("tmath.DivAssign", DivAssign)
 
-	tensor.AddFunc("Inc", Inc)
-	tensor.AddFunc("Dec", Dec)
+	tensor.AddFunc("tmath.Inc", Inc)
+	tensor.AddFunc("tmath.Dec", Dec)
 
-	tensor.AddFunc("Add", Add)
-	tensor.AddFunc("Sub", Sub)
-	tensor.AddFunc("Mul", Mul)
-	tensor.AddFunc("Div", Div)
+	tensor.AddFunc("tmath.Add", Add)
+	tensor.AddFunc("tmath.Sub", Sub)
+	tensor.AddFunc("tmath.Mul", Mul)
+	tensor.AddFunc("tmath.Div", Div)
 }
 
 // Assign assigns values from b into a.

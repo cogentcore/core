@@ -380,9 +380,7 @@ func VarPopOut(in tensor.Tensor, out tensor.Values) error {
 // Sqrt of variance from [VarPopFunc]. See also [StdFunc].
 // See [StatsFunc] for general information.
 func StdPop(in tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(in.DataType())
-	errors.Log(StdPopOut(in, out))
-	return out
+	return tensor.CallOut1(StdPopOut, in)
 }
 
 // StdPopOut computes the population standard deviation of tensor values.
@@ -404,9 +402,7 @@ func StdPopOut(in tensor.Tensor, out tensor.Values) error {
 // Standard deviation [StdPopFunc] / sqrt(n). See also [SemFunc].
 // See [StatsFunc] for general information.
 func SemPop(in tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(in.DataType())
-	errors.Log(SemPopOut(in, out))
-	return out
+	return tensor.CallOut1(SemPopOut, in)
 }
 
 // SemPopOut computes the population standard error of the mean of tensor values.

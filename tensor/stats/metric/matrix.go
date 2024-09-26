@@ -74,9 +74,7 @@ func MatrixOut(fun any, in tensor.Tensor, out tensor.Values) error {
 // and only the lower triangular part is computed, with results copied
 // to the upper triangular region, for maximum efficiency.
 func Matrix(fun any, in tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(in.DataType())
-	errors.Log(MatrixOut(fun, in, out))
-	return out
+	return tensor.CallOut1Gen1(MatrixOut, fun, in)
 }
 
 // CrossMatrixOut computes the distance / similarity matrix between
@@ -127,9 +125,7 @@ func CrossMatrixOut(fun any, a, b tensor.Tensor, out tensor.Values) error {
 // The rows of the output matrix are the rows of the first input tensor,
 // and the columns of the output are the rows of the second input tensor.
 func CrossMatrix(fun any, a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(CrossMatrixOut(fun, a, b, out))
-	return out
+	return tensor.CallOut2Gen1(CrossMatrixOut, fun, a, b)
 }
 
 // CovarianceMatrixOut generates the cells x cells square covariance matrix
@@ -200,9 +196,7 @@ func CovarianceMatrixOut(fun any, in tensor.Tensor, out tensor.Values) error {
 // Correlation if they are on very different scales, because it effectively rescales).
 // The resulting matrix can be used as the input to PCA or SVD eigenvalue decomposition.
 func CovarianceMatrix(fun any, in tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(in.DataType())
-	errors.Log(CovarianceMatrixOut(fun, in, out))
-	return out
+	return tensor.CallOut1Gen1(CovarianceMatrixOut, fun, in)
 }
 
 // PCA performs the eigen decomposition of the given CovarianceMatrix,

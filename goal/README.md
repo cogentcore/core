@@ -213,7 +213,7 @@ These are the rules used to determine whether a line is Go vs. Shell (word = IDE
 * Line starts with `word {`: Shell
 * Otherwise: Go
 
-TODO: update aboven
+TODO: update above
 
 ## Multiple statements per line
 
@@ -249,7 +249,7 @@ The following sections provide a full list of equivalents between the `tensor` G
 | `a.Shape().Sizes` | same: | `np.shape(a)` or `a.shape` | `size(a)`  | "size" of each dimension in a; `shape` returns a 1D `int` tensor |
 | `a.Shape().Sizes[1]` | same: | `a.shape[1]` | `size(a,2)` | the number of elements of the 2nd dimension of tensor `a` |
 | `tensor.Reshape(a, 10, 2)` | same except no `a.shape = (10,2)`: | `a.reshape(10, 2)` or `np.reshape(a, 10, 2)` or `a.shape = (10,2)` | `reshape(a,10,2)` | set the shape of `a` to a new shape that has the same total number of values (len or size); No option to change order in Goal: always row major; Goal does _not_ support direct shape assignment version. |
-| `tensor.Reshape(a, tensor.AsIntSlice(sh)...)` | same: | `a.reshape(10, sh)` or `np.reshape(a, sh)` |  `reshape(a,sh)` | **TODO:** set shape based on list of dimension sizes in tensor `sh` |
+| `tensor.Reshape(a, tensor.AsIntSlice(sh)...)` | same: | `a.reshape(10, sh)` or `np.reshape(a, sh)` |  `reshape(a,sh)` | set shape based on list of dimension sizes in tensor `sh` |
 | `tensor.Reshape(a, -1)` or `tensor.As1D(a)` | same: | `a.reshape(-1)` or `np.reshape(a, -1)` | `reshape(a,-1)` | a 1D vector view of `a`; Goal does not support `ravel`, which is nearly identical. |
 | `tensor.Flatten(a)` | same: | `b = a.flatten()`   | `b=a(:)` | returns a 1D copy of a |
 | `b := tensor.Clone(a)` | `b := copy(a)` or: | `b = a.copy()` | `b=a`  | direct assignment `b = a` in Goal or NumPy just makes variable b point to tensor a; `copy` is needed to generate new underlying values (MATLAB always makes a copy) |

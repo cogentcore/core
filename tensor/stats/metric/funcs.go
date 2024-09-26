@@ -110,9 +110,7 @@ func EuclideanOut(a, b tensor.Tensor, out tensor.Values) error {
 // Euclidean computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func Euclidean(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(EuclideanOut(a, b, out))
-	return out
+	return tensor.CallOut2(EuclideanOut, a, b)
 }
 
 // AbsOut computes the sum of the absolute value of differences between the
@@ -133,9 +131,7 @@ func AbsOut(a, b tensor.Tensor, out tensor.Values) error {
 // Abs computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func Abs(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(AbsOut(a, b, out))
-	return out
+	return tensor.CallOut2(AbsOut, a, b)
 }
 
 // HammingOut computes the sum of 1s for every element that is different,
@@ -159,9 +155,7 @@ func HammingOut(a, b tensor.Tensor, out tensor.Values) error {
 // Hamming computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func Hamming(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(HammingOut(a, b, out))
-	return out
+	return tensor.CallOut2(HammingOut, a, b)
 }
 
 // SumSquaresBinTolScaleOut64 computes the sum of squares differences between tensor values,
@@ -210,9 +204,7 @@ func EuclideanBinTolOut(a, b tensor.Tensor, out tensor.Values) error {
 // EuclideanBinTol computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func EuclideanBinTol(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(EuclideanBinTolOut(a, b, out))
-	return out
+	return tensor.CallOut2(EuclideanBinTolOut, a, b)
 }
 
 // SumSquaresBinTolOut computes the sum of squares differences between tensor values,
@@ -241,9 +233,7 @@ func SumSquaresBinTolOut(a, b tensor.Tensor, out tensor.Values) error {
 // SumSquaresBinTol computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func SumSquaresBinTol(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(SumSquaresBinTolOut(a, b, out))
-	return out
+	return tensor.CallOut2(SumSquaresBinTolOut, a, b)
 }
 
 // CrossEntropyOut is a standard measure of the difference between two
@@ -276,9 +266,7 @@ func CrossEntropyOut(a, b tensor.Tensor, out tensor.Values) error {
 // CrossEntropy computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func CrossEntropy(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(CrossEntropyOut(a, b, out))
-	return out
+	return tensor.CallOut2(CrossEntropyOut, a, b)
 }
 
 // InnerProductOut computes the sum of the co-products of the two on-NaN tensor values.
@@ -298,9 +286,7 @@ func InnerProductOut(a, b tensor.Tensor, out tensor.Values) error {
 // InnerProduct computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func InnerProduct(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(InnerProductOut(a, b, out))
-	return out
+	return tensor.CallOut2(InnerProductOut, a, b)
 }
 
 // CovarianceOut computes the co-variance between two vectors,
@@ -335,9 +321,7 @@ func CovarianceOut(a, b tensor.Tensor, out tensor.Values) error {
 // Covariance computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func Covariance(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(CovarianceOut(a, b, out))
-	return out
+	return tensor.CallOut2(CovarianceOut, a, b)
 }
 
 // CorrelationOut64 computes the correlation between two vectors,
@@ -397,9 +381,7 @@ func CorrelationOut(a, b tensor.Tensor, out tensor.Values) error {
 // Correlation computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func Correlation(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(CorrelationOut(a, b, out))
-	return out
+	return tensor.CallOut2(CorrelationOut, a, b)
 }
 
 // InvCorrelationOut computes 1 minus the correlation between two vectors,
@@ -426,9 +408,7 @@ func InvCorrelationOut(a, b tensor.Tensor, out tensor.Values) error {
 // InvCorrelation computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func InvCorrelation(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(InvCorrelationOut(a, b, out))
-	return out
+	return tensor.CallOut2(InvCorrelationOut, a, b)
 }
 
 // CosineOut64 computes the high-dimensional angle between two vectors,
@@ -470,9 +450,7 @@ func CosineOut(a, b tensor.Tensor, out tensor.Values) error {
 // Cosine computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func Cosine(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(CosineOut(a, b, out))
-	return out
+	return tensor.CallOut2(CosineOut, a, b)
 }
 
 // InvCosineOut computes 1 minus the cosine between two vectors,
@@ -496,7 +474,5 @@ func InvCosineOut(a, b tensor.Tensor, out tensor.Values) error {
 // InvCosine computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func InvCosine(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(InvCosineOut(a, b, out))
-	return out
+	return tensor.CallOut2(InvCosineOut, a, b)
 }

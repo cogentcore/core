@@ -14,6 +14,18 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
+func init() {
+	tensor.AddFunc("tensor.Reshape", tensor.Reshape)
+	tensor.AddFunc("tensor.Reslice", tensor.Reslice)
+	tensor.AddFunc("tensor.NewFloat64", tensor.NewFloat64)
+	tensor.AddFunc("tensor.NewIntScalar", tensor.NewIntScalar)
+	tensor.AddFunc("tensor.NewFloat64Scalar", tensor.NewFloat64Scalar)
+	tensor.AddFunc("tensor.NewStringScalar", tensor.NewStringScalar)
+	tensor.AddFunc("tensor.NewIntFromValues", tensor.NewIntFromValues)
+	tensor.AddFunc("tensor.NewFloat64FromValues", tensor.NewFloat64FromValues)
+	tensor.AddFunc("tensor.NewStringFromValues", tensor.NewStringFromValues)
+}
+
 func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 	nt := len(toks)
 	if nt == 0 {
@@ -60,8 +72,8 @@ func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 type funcInfo struct {
 	tensor.Func
 
-	//	true if this function takes tensor args
-	tensorArgs bool
+	// current arg index we are processing
+	curArg int
 }
 
 // mathParse has the parsing state
@@ -76,16 +88,69 @@ type mathParse struct {
 	funcs stack.Stack[*funcInfo]
 }
 
-// startFunc is called when starting a new function -- sets context
-func (mp *mathParse) startFunc(name string, tensorArgs bool) *funcInfo {
-	fn := &funcInfo{}
-	fn.Name = name
-	fn.tensorArgs = tensorArgs
-	mp.funcs.Push(fn)
+// returns the current argument for current function
+func (mp *mathParse) curArg() *tensor.Arg {
+	cfun := mp.funcs.Peek()
+	if cfun == nil {
+		return nil
+	}
+	if cfun.curArg < len(cfun.Args) {
+		return cfun.Args[cfun.curArg]
+	}
+	return nil
+}
+
+func (mp *mathParse) nextArg() {
+	cfun := mp.funcs.Peek()
+	if cfun == nil || len(cfun.Args) == 0 {
+		// fmt.Println("next arg no fun or no args")
+		return
+	}
+	n := len(cfun.Args)
+	if cfun.curArg == n-1 {
+		carg := cfun.Args[n-1]
+		if !carg.IsVariadic {
+			fmt.Println("math transpile: args exceed registered function number:", cfun)
+		}
+		return
+	}
+	cfun.curArg++
+}
+
+func (mp *mathParse) curArgIsTensor() bool {
+	carg := mp.curArg()
+	if carg == nil {
+		return false
+	}
+	return carg.IsTensor
+}
+
+func (mp *mathParse) curArgIsInts() bool {
+	carg := mp.curArg()
+	if carg == nil {
+		return false
+	}
+	return carg.IsInt && carg.IsVariadic
+}
+
+// startFunc is called when starting a new function.
+// empty is "dummy" assign case using Inc
+func (mp *mathParse) startFunc(name string) *funcInfo {
+	fi := &funcInfo{}
+	sname := name
+	if name == "" {
+		sname = "tmath.Inc"
+	}
+	if tf, err := tensor.FuncByName(sname); err == nil {
+		fi.Func = *tf
+	} else {
+		fi.Name = name // not clear what point is
+	}
+	mp.funcs.Push(fi)
 	if name != "" {
 		mp.out.Add(token.IDENT, name)
 	}
-	return fn
+	return fi
 }
 
 func (mp *mathParse) endFunc() {
@@ -267,6 +332,28 @@ func (mp *mathParse) exprList(ex []ast.Expr) {
 	}
 }
 
+func (mp *mathParse) argsList(ex []ast.Expr) {
+	n := len(ex)
+	if n == 0 {
+		return
+	}
+	if n == 1 {
+		mp.expr(ex[0])
+		return
+	}
+	for i := range n {
+		// cfun := mp.funcs.Peek()
+		// if i != cfun.curArg {
+		// 	fmt.Println(cfun, "arg should be:", i, "is:", cfun.curArg)
+		// }
+		mp.expr(ex[i])
+		if i < n-1 {
+			mp.nextArg()
+			mp.addToken(token.COMMA)
+		}
+	}
+}
+
 func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 	fn := ""
 	switch ex.Op {
@@ -279,7 +366,7 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 	case token.QUO:
 		fn = "Div"
 	}
-	mp.startFunc("tmath."+fn, true) // yes tensor args
+	mp.startFunc("tmath." + fn)
 	mp.out.Add(token.LPAREN)
 	mp.expr(ex.X)
 	mp.out.Add(token.COMMA)
@@ -297,7 +384,7 @@ func (mp *mathParse) unaryExpr(ex *ast.UnaryExpr) {
 func (mp *mathParse) defineStmt(as *ast.AssignStmt) {
 	mp.exprList(as.Lhs)
 	mp.addToken(as.Tok)
-	mp.startFunc("", true) // just to trigger tensor args
+	mp.startFunc("") // dummy single arg tensor function
 	mp.exprList(as.Rhs)
 	mp.endFunc()
 }
@@ -306,7 +393,7 @@ func (mp *mathParse) assignStmt(as *ast.AssignStmt) {
 	if _, ok := as.Lhs[0].(*ast.Ident); ok {
 		mp.exprList(as.Lhs)
 		mp.addToken(as.Tok)
-		mp.startFunc("", true) // just to trigger tensor args
+		mp.startFunc("")
 		mp.exprList(as.Rhs)
 		mp.endFunc()
 		return
@@ -324,7 +411,7 @@ func (mp *mathParse) assignStmt(as *ast.AssignStmt) {
 	case token.QUO_ASSIGN:
 		fn = "DivAssign"
 	}
-	mp.startFunc("tmath."+fn, true) // yes tensor args
+	mp.startFunc("tmath." + fn)
 	mp.out.Add(token.LPAREN)
 	mp.exprList(as.Lhs)
 	mp.out.Add(token.COMMA)
@@ -335,8 +422,7 @@ func (mp *mathParse) assignStmt(as *ast.AssignStmt) {
 }
 
 func (mp *mathParse) basicLit(lit *ast.BasicLit) {
-	cfun := mp.funcs.Peek()
-	if cfun != nil && cfun.tensorArgs {
+	if mp.curArgIsTensor() {
 		mp.tensorLit(lit)
 		return
 	}
@@ -397,7 +483,7 @@ func (fw *funWrap) wrapFunc(mp *mathParse) bool {
 		wrapFun = "tensor.NewStringFromValues"
 		ellip = true
 	}
-	mp.startFunc(wrapFun, false)
+	mp.startFunc(wrapFun)
 	mp.out.Add(token.LPAREN)
 	return ellip
 }
@@ -435,9 +521,10 @@ func (mp *mathParse) indexExpr(il *ast.IndexExpr) {
 
 func (mp *mathParse) basicSlicingExpr(il *ast.IndexExpr) {
 	iil := il.Index.(*ast.IndexListExpr)
-	mp.startFunc("tensor.Reslice", false)
+	mp.startFunc("tensor.Reslice")
 	mp.out.Add(token.LPAREN)
 	mp.expr(il.X)
+	mp.nextArg()
 	mp.addToken(token.COMMA) // use the [ -- can't use ( to preserve X
 	mp.exprList(iil.Indices)
 	mp.addToken(token.RPAREN) // replaces ]
@@ -501,12 +588,13 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 		typ = "string"
 		fun = "String"
 	}
-	// cfun := mp.funcs.Peek()
-	// if cfun != nil && !cfun.tensorArgs { // we need int values
-	// 	mp.exprList(il.Indices)
-	// 	return
-	// }
-	mp.startFunc("tensor.New"+fun+"FromValues", false)
+	if mp.curArgIsInts() {
+		mp.idx++ // opening brace we're not using
+		mp.exprList(il.Indices)
+		mp.idx++ // closing brace we're not using
+		return
+	}
+	mp.startFunc("tensor.New" + fun + "FromValues")
 	mp.out.Add(token.LPAREN)
 	mp.out.Add(token.IDENT, "[]"+typ)
 	mp.addToken(token.LBRACE)
@@ -553,7 +641,7 @@ func (mp *mathParse) callExpr(ex *ast.CallExpr) {
 	default:
 		mp.expr(ex.Fun)
 	}
-	mp.exprList(ex.Args)
+	mp.argsList(ex.Args)
 	// todo: ellipsis
 	mp.addToken(token.RPAREN)
 	mp.endFunc()
@@ -575,19 +663,20 @@ func (mp *mathParse) callPropFun(ex *ast.CallExpr, fw funWrap) {
 
 // this calls global function through selector like: a.reshape()
 func (mp *mathParse) callPropSelFun(ex *ast.CallExpr, obj string, fw funWrap) {
-	mp.startFunc(fw.fun, false)
+	mp.startFunc(fw.fun)
 	mp.addToken(token.LPAREN) // use the (
 	mp.out.Add(token.IDENT, obj)
+	mp.nextArg() // did first
 	mp.idx += 2
 	mp.addToken(token.COMMA)
-	mp.exprList(ex.Args)
+	mp.argsList(ex.Args)
 	mp.addToken(token.RPAREN)
 	mp.endFunc()
 }
 
 func (mp *mathParse) callName(ex *ast.CallExpr, funName, pkgName string) {
 	if fw, ok := numpyFuncs[funName]; ok {
-		mp.startFunc(fw.fun, false)
+		mp.startFunc(fw.fun)
 		mp.addToken(token.LPAREN) // use the (
 		mp.idx++                  // paren too
 		return
@@ -607,12 +696,12 @@ func (mp *mathParse) callName(ex *ast.CallExpr, funName, pkgName string) {
 		}
 	}
 	if err != nil { // not a registered tensor function
-		mp.startFunc(funName, false)
+		mp.startFunc(funName)
 		mp.addToken(token.LPAREN) // use the (
 		mp.idx++
 		return
 	}
-	mp.startFunc(funName, true) // tensors
+	mp.startFunc(funName)
 	mp.idx += 1
 	if pkgName != "" {
 		mp.idx += 2 // . and selector
@@ -624,9 +713,7 @@ func (mp *mathParse) ident(id *ast.Ident) {
 	if id == nil {
 		return
 	}
-	/* TODO: this requires tracking of each arg to determine needed type
-	cfun := mp.funcs.Peek()
-	if cfun != nil && !cfun.tensorArgs { // we need the numbers from it, usually ints
+	if mp.curArgIsInts() {
 		mp.out.Add(token.IDENT, "tensor.AsIntSlice")
 		mp.out.Add(token.LPAREN)
 		mp.addCur()
@@ -635,6 +722,4 @@ func (mp *mathParse) ident(id *ast.Ident) {
 	} else {
 		mp.addCur()
 	}
-	*/
-	mp.addCur()
 }

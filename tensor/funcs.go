@@ -6,6 +6,7 @@ package tensor
 
 import (
 	"fmt"
+	"reflect"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/metadata"
@@ -24,11 +25,24 @@ type Func struct {
 	// args, with an optional any first arg.
 	Fun any
 
-	// In is number of input tensor args
-	In int
+	// Args has parsed information about the function args, for Goal.
+	Args []*Arg
+}
 
-	// Out is number of output tensor args
-	Out int
+// Arg has key information that Goal needs about each arg, for converting
+// expressions into the appropriate type.
+type Arg struct {
+	// Type has full reflection type info.
+	Type reflect.Type
+
+	// IsTensor is true if it satisfies the Tensor interface.
+	IsTensor bool
+
+	// IsInt is true if Kind = Int, for shape, slice etc params.
+	IsInt bool
+
+	// IsVariadic is true if this is the last arg and has ...; type will be an array.
+	IsVariadic bool
 }
 
 // NewFunc creates a new Func desciption of the given
@@ -44,9 +58,52 @@ type Func struct {
 // determined) are classified as input arguments.
 func NewFunc(name string, fun any) (*Func, error) {
 	fn := &Func{Name: name, Fun: fun}
-	// fn.In = 1 - out
-	// todo: get signature
+	fn.GetArgs()
 	return fn, nil
+}
+
+// GetArgs gets key info about each arg, for use by Goal transpiler.
+func (fn *Func) GetArgs() {
+	ft := reflect.TypeOf(fn.Fun)
+	n := ft.NumIn()
+	if n == 0 {
+		return
+	}
+	fn.Args = make([]*Arg, n)
+	tsrt := reflect.TypeFor[Tensor]()
+	for i := range n {
+		at := ft.In(i)
+		ag := &Arg{Type: at}
+		if ft.IsVariadic() && i == n-1 {
+			ag.IsVariadic = true
+		}
+		if at.Kind() == reflect.Int || (at.Kind() == reflect.Slice && at.Elem().Kind() == reflect.Int) {
+			ag.IsInt = true
+		} else if at.Implements(tsrt) {
+			ag.IsTensor = true
+		}
+		fn.Args[i] = ag
+	}
+}
+
+func (fn *Func) String() string {
+	s := fn.Name + "("
+	na := len(fn.Args)
+	for i, a := range fn.Args {
+		if a.IsVariadic {
+			s += "..."
+		}
+		ts := a.Type.String()
+		if ts == "interface {}" {
+			ts = "any"
+		}
+		s += ts
+		if i < na-1 {
+			s += ", "
+		}
+	}
+	s += ")"
+	return s
 }
 
 // Funcs is the global tensor named function registry.
@@ -62,7 +119,7 @@ var Funcs map[string]*Func
 
 // AddFunc adds given named function to the global tensor named function
 // registry, which is used by Goal to call functions by name.
-// See [NewFunc] for more information.
+// See [NewFunc] for more informa.tion.
 func AddFunc(name string, fun any) error {
 	if Funcs == nil {
 		Funcs = make(map[string]*Func)
@@ -88,47 +145,6 @@ func FuncByName(name string) (*Func, error) {
 		return nil, fmt.Errorf("tensor.FuncByName: function of name %q not registered", name)
 	}
 	return fn, nil
-}
-
-// todo: definitely switch over to reflection here:
-
-// ArgCount returns the number of tensor arguments the function takes,
-// using a type switch.
-func (fn *Func) ArgCount() int {
-	nargs := -1
-	switch fn.Fun.(type) {
-	case func(a Tensor) error:
-		nargs = 1
-	case func(a, b Tensor) error:
-		nargs = 2
-	case func(a, b, c Tensor) error:
-		nargs = 3
-	case func(a, b, c, d Tensor) error:
-		nargs = 4
-	case func(a, b, c, d, e Tensor) error:
-		nargs = 5
-	// any cases:
-	case func(first any, a Tensor) error:
-		nargs = 1
-	case func(first any, a, b Tensor) error:
-		nargs = 2
-	case func(first any, a, b, c Tensor) error:
-		nargs = 3
-	case func(first any, a, b, c, d Tensor) error:
-		nargs = 4
-	case func(first any, a, b, c, d, e Tensor) error:
-		nargs = 5
-	}
-	return nargs
-}
-
-// ArgCheck returns an error if the number of args in list does not
-// match the number required as specified.
-func (fn *Func) ArgCheck(n int, tsr ...Tensor) error {
-	if len(tsr) != n {
-		return fmt.Errorf("tensor.Call: args passed to %q: %d does not match required: %d", fn.Name, len(tsr), n)
-	}
-	return nil
 }
 
 // These generic functions provide a one liner for wrapping functions

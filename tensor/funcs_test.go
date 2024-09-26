@@ -32,11 +32,16 @@ func TestFuncs(t *testing.T) {
 	oned := NewNumberFromValues(vals...)
 	oneout := oned.Clone()
 
-	_, err = FuncByName("Abs")
+	fn, err := FuncByName("Abs")
 	assert.NoError(t, err)
 
-	absout(oned, oneout)
+	// fmt.Println(fn.Args[0], fn.Args[1])
+	assert.Equal(t, true, fn.Args[0].IsTensor)
+	assert.Equal(t, true, fn.Args[1].IsTensor)
+	assert.Equal(t, false, fn.Args[0].IsInt)
+	assert.Equal(t, false, fn.Args[1].IsInt)
 
+	absout(oned, oneout)
 	assert.Equal(t, 1.507556722888818, oneout.Float1D(0))
 }
 
