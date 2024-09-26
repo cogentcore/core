@@ -21,74 +21,70 @@ func TestFuncs64(t *testing.T) {
 
 	tol := 1.0e-8
 
-	Count(ix, out)
+	CountOut(ix, out)
 	assert.Equal(t, results[StatCount], out.Values[0])
 
-	Sum(ix, out)
+	SumOut(ix, out)
 	assert.Equal(t, results[StatSum], out.Values[0])
 
-	SumAbs(ix, out)
+	SumAbsOut(ix, out)
 	assert.Equal(t, results[StatSumAbs], out.Values[0])
 
-	Prod(ix, out)
+	ProdOut(ix, out)
 	assert.Equal(t, results[StatProd], out.Values[0])
 
-	Min(ix, out)
+	MinOut(ix, out)
 	assert.Equal(t, results[StatMin], out.Values[0])
 
-	Max(ix, out)
+	MaxOut(ix, out)
 	assert.Equal(t, results[StatMax], out.Values[0])
 
-	MinAbs(ix, out)
+	MinAbsOut(ix, out)
 	assert.Equal(t, results[StatMinAbs], out.Values[0])
 
-	MaxAbs(ix, out)
+	MaxAbsOut(ix, out)
 	assert.Equal(t, results[StatMaxAbs], out.Values[0])
 
-	Mean(ix, out)
+	MeanOut(ix, out)
 	assert.Equal(t, results[StatMean], out.Values[0])
 
-	Var(ix, out)
+	VarOut(ix, out)
 	assert.InDelta(t, results[StatVar], out.Values[0], tol)
 
-	Std(ix, out)
+	StdOut(ix, out)
 	assert.InDelta(t, results[StatStd], out.Values[0], tol)
 
-	Sem(ix, out)
+	SemOut(ix, out)
 	assert.InDelta(t, results[StatSem], out.Values[0], tol)
 
-	VarPop(ix, out)
+	VarPopOut(ix, out)
 	assert.InDelta(t, results[StatVarPop], out.Values[0], tol)
 
-	StdPop(ix, out)
+	StdPopOut(ix, out)
 	assert.InDelta(t, results[StatStdPop], out.Values[0], tol)
 
-	SemPop(ix, out)
+	SemPopOut(ix, out)
 	assert.InDelta(t, results[StatSemPop], out.Values[0], tol)
 
-	SumSq(ix, out)
+	SumSqOut(ix, out)
 	assert.InDelta(t, results[StatSumSq], out.Values[0], tol)
 
-	L2Norm(ix, out)
+	L2NormOut(ix, out)
 	assert.InDelta(t, results[StatL2Norm], out.Values[0], tol)
 
-	Median(ix, out)
+	MedianOut(ix, out)
 	assert.InDelta(t, results[StatMedian], out.Values[0], tol)
 
-	Q1(ix, out)
+	Q1Out(ix, out)
 	assert.InDelta(t, results[StatQ1], out.Values[0], tol)
 
-	Q3(ix, out)
+	Q3Out(ix, out)
 	assert.InDelta(t, results[StatQ3], out.Values[0], tol)
 
 	for stat := StatCount; stat < StatsN; stat++ {
-		err := stat.Call(ix, out)
-		assert.NoError(t, err)
-		assert.InDelta(t, results[stat], out.Values[0], tol)
+		out := stat.Call(ix)
+		assert.InDelta(t, results[stat], out.Float1D(0), tol)
 	}
-	err := tensor.Call("stats.Mean", ix, out) // ensure plain name is registered.
-	assert.NoError(t, err)
-	assert.InDelta(t, results[StatMean], out.Values[0], tol)
 }
 
 func TestFuncsInt(t *testing.T) {
@@ -99,60 +95,60 @@ func TestFuncsInt(t *testing.T) {
 
 	results := []int{11, 550, 550, 550, 0, 0, 100, 0, 100, 50, 1100, int(math.Sqrt(1100)), int(math.Sqrt(1100) / math.Sqrt(11)), 38500, 196, 1000, int(math.Sqrt(1000)), int(math.Sqrt(1000) / math.Sqrt(11))}
 
-	Count(ix, out)
+	CountOut(ix, out)
 	assert.Equal(t, results[StatCount], out.Values[0])
 
-	Sum(ix, out)
+	SumOut(ix, out)
 	assert.Equal(t, results[StatSum], out.Values[0])
 
-	SumAbs(ix, out)
+	SumAbsOut(ix, out)
 	assert.Equal(t, results[StatSumAbs], out.Values[0])
 
-	Prod(ix, out)
+	ProdOut(ix, out)
 	assert.Equal(t, results[StatProd], out.Values[0])
 
-	Min(ix, out)
+	MinOut(ix, out)
 	assert.Equal(t, results[StatMin], out.Values[0])
 
-	Max(ix, out)
+	MaxOut(ix, out)
 	assert.Equal(t, results[StatMax], out.Values[0])
 
-	MinAbs(ix, out)
+	MinAbsOut(ix, out)
 	assert.Equal(t, results[StatMinAbs], out.Values[0])
 
-	MaxAbs(ix, out)
+	MaxAbsOut(ix, out)
 	assert.Equal(t, results[StatMaxAbs], out.Values[0])
 
-	Mean(ix, out)
+	MeanOut(ix, out)
 	assert.Equal(t, results[StatMean], out.Values[0])
 
-	Var(ix, out)
+	VarOut(ix, out)
 	assert.Equal(t, results[StatVar], out.Values[0])
 
-	Std(ix, out)
+	StdOut(ix, out)
 	assert.Equal(t, results[StatStd], out.Values[0])
 
-	Sem(ix, out)
+	SemOut(ix, out)
 	assert.Equal(t, results[StatSem], out.Values[0])
 
-	VarPop(ix, out)
+	VarPopOut(ix, out)
 	assert.Equal(t, results[StatVarPop], out.Values[0])
 
-	StdPop(ix, out)
+	StdPopOut(ix, out)
 	assert.Equal(t, results[StatStdPop], out.Values[0])
 
-	SemPop(ix, out)
+	SemPopOut(ix, out)
 	assert.Equal(t, results[StatSemPop], out.Values[0])
 
-	SumSq(ix, out)
+	SumSqOut(ix, out)
 	assert.Equal(t, results[StatSumSq], out.Values[0])
 
-	L2Norm(ix, out)
+	L2NormOut(ix, out)
 	assert.Equal(t, results[StatL2Norm], out.Values[0])
 
 	for stat := StatCount; stat <= StatSemPop; stat++ {
-		stat.Call(ix, out)
-		assert.Equal(t, results[stat], out.Values[0])
+		out := stat.Call(ix)
+		assert.Equal(t, results[stat], out.Int1D(0))
 	}
 }
 
@@ -169,16 +165,16 @@ func TestFuncsCell(t *testing.T) {
 	ix := tensor.NewRows(tsr)
 	out := tensor.NewFloat32(20, 10)
 
-	Count(ix, out)
+	CountOut(ix, out)
 	nsub := out.Len()
 	for i := range nsub {
 		assert.Equal(t, 20.0, out.FloatRowCell(0, i))
 	}
-	Mean(ix, out)
+	MeanOut(ix, out)
 	for i := range nsub {
 		assert.InDelta(t, vals[i], out.FloatRowCell(0, i), 1.0e-7) // lower tol, using float32
 	}
-	Var(ix, out)
+	VarOut(ix, out)
 	for i := range nsub {
 		assert.InDelta(t, 0.0, out.FloatRowCell(0, i), 1.0e-7)
 	}
@@ -190,34 +186,34 @@ func TestNorm(t *testing.T) {
 	oned := tensor.NewNumberFromValues(vals...)
 	oneout := oned.Clone()
 
-	ZScore(oned, oneout)
+	ZScoreOut(oned, oneout)
 	mout := tensor.NewFloat64()
 	std, mean, _, err := StdOut64(oneout, mout)
 	assert.NoError(t, err)
 	assert.InDelta(t, 1.0, std.Float1D(0), 1.0e-6)
 	assert.InDelta(t, 0.0, mean.Float1D(0), 1.0e-6)
 
-	UnitNorm(oned, oneout)
-	Min(oneout, mout)
+	UnitNormOut(oned, oneout)
+	MinOut(oneout, mout)
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	Max(oneout, mout)
+	MaxOut(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout)
 
 	minv := tensor.NewFloat64Scalar(0)
 	maxv := tensor.NewFloat64Scalar(1)
-	Clamp(oned, minv, maxv, oneout)
-	Min(oneout, mout)
+	ClampOut(oned, minv, maxv, oneout)
+	MinOut(oneout, mout)
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	Max(oneout, mout)
+	MaxOut(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout)
 
 	thr := tensor.NewFloat64Scalar(0.5)
-	Binarize(oned, thr, oneout)
-	Min(oneout, mout)
+	BinarizeOut(oned, thr, oneout)
+	MinOut(oneout, mout)
 	assert.InDelta(t, 0.0, mout.Float1D(0), 1.0e-6)
-	Max(oneout, mout)
+	MaxOut(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout)
 }

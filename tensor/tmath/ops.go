@@ -9,19 +9,19 @@ import (
 )
 
 func init() {
-	tensor.AddFunc("Assign", Assign, 0)
-	tensor.AddFunc("AddAssign", AddAssign, 0)
-	tensor.AddFunc("SubAssign", SubAssign, 0)
-	tensor.AddFunc("MulAssign", MulAssign, 0)
-	tensor.AddFunc("DivAssign", DivAssign, 0)
+	tensor.AddFunc("Assign", Assign)
+	tensor.AddFunc("AddAssign", AddAssign)
+	tensor.AddFunc("SubAssign", SubAssign)
+	tensor.AddFunc("MulAssign", MulAssign)
+	tensor.AddFunc("DivAssign", DivAssign)
 
-	tensor.AddFunc("Inc", Inc, 0)
-	tensor.AddFunc("Dec", Dec, 0)
+	tensor.AddFunc("Inc", Inc)
+	tensor.AddFunc("Dec", Dec)
 
-	tensor.AddFunc("Add", Add, 1)
-	tensor.AddFunc("Sub", Sub, 1)
-	tensor.AddFunc("Mul", Mul, 1)
-	tensor.AddFunc("Div", Div, 1)
+	tensor.AddFunc("Add", Add)
+	tensor.AddFunc("Sub", Sub)
+	tensor.AddFunc("Mul", Mul)
+	tensor.AddFunc("Div", Div)
 }
 
 // Assign assigns values from b into a.
@@ -139,14 +139,17 @@ func Dec(a tensor.Tensor) error {
 }
 
 // Add adds two tensors into output.
-func Add(a, b, out tensor.Tensor) error {
+func Add(a, b tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut2(AddOut, a, b)
+}
+
+// AddOut adds two tensors into output.
+func AddOut(a, b tensor.Tensor, out tensor.Values) error {
 	as, bs, os, err := tensor.AlignShapes(a, b)
 	if err != nil {
 		return err
 	}
-	if err := tensor.SetShapeSizesMustBeValues(out, os.Sizes...); err != nil {
-		return err
-	}
+	out.SetShapeSizes(os.Sizes...)
 	olen := os.Len()
 	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int {
 		return olen
@@ -160,15 +163,18 @@ func Add(a, b, out tensor.Tensor) error {
 	return nil
 }
 
-// Sub subtracts two tensors into output.
-func Sub(a, b, out tensor.Tensor) error {
+// Sub subtracts tensors into output.
+func Sub(a, b tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut2(SubOut, a, b)
+}
+
+// SubOut subtracts two tensors into output.
+func SubOut(a, b tensor.Tensor, out tensor.Values) error {
 	as, bs, os, err := tensor.AlignShapes(a, b)
 	if err != nil {
 		return err
 	}
-	if err := tensor.SetShapeSizesMustBeValues(out, os.Sizes...); err != nil {
-		return err
-	}
+	out.SetShapeSizes(os.Sizes...)
 	olen := os.Len()
 	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int {
 		return olen
@@ -182,15 +188,18 @@ func Sub(a, b, out tensor.Tensor) error {
 	return nil
 }
 
-// Mul multiplies two tensors into output.
-func Mul(a, b, out tensor.Tensor) error {
+// Mul multiplies tensors into output.
+func Mul(a, b tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut2(MulOut, a, b)
+}
+
+// MulOut multiplies two tensors into output.
+func MulOut(a, b tensor.Tensor, out tensor.Values) error {
 	as, bs, os, err := tensor.AlignShapes(a, b)
 	if err != nil {
 		return err
 	}
-	if err := tensor.SetShapeSizesMustBeValues(out, os.Sizes...); err != nil {
-		return err
-	}
+	out.SetShapeSizes(os.Sizes...)
 	olen := os.Len()
 	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int {
 		return olen
@@ -204,15 +213,18 @@ func Mul(a, b, out tensor.Tensor) error {
 	return nil
 }
 
-// Div divides two tensors into output.
-func Div(a, b, out tensor.Tensor) error {
+// Div divides tensors into output.
+func Div(a, b tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut2(DivOut, a, b)
+}
+
+// DivOut divides two tensors into output.
+func DivOut(a, b tensor.Tensor, out tensor.Values) error {
 	as, bs, os, err := tensor.AlignShapes(a, b)
 	if err != nil {
 		return err
 	}
-	if err := tensor.SetShapeSizesMustBeValues(out, os.Sizes...); err != nil {
-		return err
-	}
+	out.SetShapeSizes(os.Sizes...)
 	olen := os.Len()
 	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int {
 		return olen
@@ -222,6 +234,56 @@ func Div(a, b, out tensor.Tensor) error {
 			ai := tensor.WrapIndex1D(as, oi...)
 			bi := tensor.WrapIndex1D(bs, oi...)
 			out.SetFloat1D(tsr[0].Float1D(ai)/tsr[1].Float1D(bi), idx)
+		}, a, b, out)
+	return nil
+}
+
+// Greater stores in the output the bool value a > b.
+func Greater(a, b tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut2Bool(GreaterOut, a, b)
+}
+
+// GreaterOut stores in the output the bool value a > b.
+func GreaterOut(a, b tensor.Tensor, out *tensor.Bool) error {
+	as, bs, os, err := tensor.AlignShapes(a, b)
+	if err != nil {
+		return err
+	}
+	out.SetShapeSizes(os.Sizes...)
+	olen := os.Len()
+	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int {
+		return olen
+	},
+		func(idx int, tsr ...tensor.Tensor) {
+			oi := os.IndexFrom1D(idx)
+			ai := tensor.WrapIndex1D(as, oi...)
+			bi := tensor.WrapIndex1D(bs, oi...)
+			out.SetBool1D(tsr[0].Float1D(ai) > tsr[1].Float1D(bi), idx)
+		}, a, b, out)
+	return nil
+}
+
+// Less stores in the output the bool value a > b.
+func Less(a, b tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut2Bool(LessOut, a, b)
+}
+
+// LessOut stores in the output the bool value a > b.
+func LessOut(a, b tensor.Tensor, out *tensor.Bool) error {
+	as, bs, os, err := tensor.AlignShapes(a, b)
+	if err != nil {
+		return err
+	}
+	out.SetShapeSizes(os.Sizes...)
+	olen := os.Len()
+	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int {
+		return olen
+	},
+		func(idx int, tsr ...tensor.Tensor) {
+			oi := os.IndexFrom1D(idx)
+			ai := tensor.WrapIndex1D(as, oi...)
+			bi := tensor.WrapIndex1D(bs, oi...)
+			out.SetBool1D(tsr[0].Float1D(ai) < tsr[1].Float1D(bi), idx)
 		}, a, b, out)
 	return nil
 }

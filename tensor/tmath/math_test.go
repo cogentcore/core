@@ -13,7 +13,7 @@ import (
 )
 
 type onef func(x float64) float64
-type tonef func(in, out tensor.Tensor) error
+type tonef func(in tensor.Tensor, out tensor.Values) error
 
 // Equal does equal testing taking into account NaN
 func Equal(t *testing.T, trg, val float64) {
@@ -45,7 +45,7 @@ func TestMath(t *testing.T) {
 	cellout := cell2d.Clone()
 
 	mfuncs := []onef{math.Abs, math.Acos, math.Acosh, math.Asin, math.Asinh, math.Atan, math.Atanh, math.Cbrt, math.Ceil, math.Cos, math.Cosh, math.Erf, math.Erfc, math.Erfcinv, math.Erfinv, math.Exp, math.Exp2, math.Expm1, math.Floor, math.Gamma, math.J0, math.J1, math.Log, math.Log10, math.Log1p, math.Log2, math.Logb, math.Round, math.RoundToEven, math.Sin, math.Sinh, math.Sqrt, math.Tan, math.Tanh, math.Trunc, math.Y0, math.Y1}
-	tfuncs := []tonef{Abs, Acos, Acosh, Asin, Asinh, Atan, Atanh, Cbrt, Ceil, Cos, Cosh, Erf, Erfc, Erfcinv, Erfinv, Exp, Exp2, Expm1, Floor, Gamma, J0, J1, Log, Log10, Log1p, Log2, Logb, Round, RoundToEven, Sin, Sinh, Sqrt, Tan, Tanh, Trunc, Y0, Y1}
+	tfuncs := []tonef{AbsOut, AcosOut, AcoshOut, AsinOut, AsinhOut, AtanOut, AtanhOut, CbrtOut, CeilOut, CosOut, CoshOut, ErfOut, ErfcOut, ErfcinvOut, ErfinvOut, ExpOut, Exp2Out, Expm1Out, FloorOut, GammaOut, J0Out, J1Out, LogOut, Log10Out, Log1pOut, Log2Out, LogbOut, RoundOut, RoundToEvenOut, SinOut, SinhOut, SqrtOut, TanOut, TanhOut, TruncOut, Y0Out, Y1Out}
 
 	for i, fun := range mfuncs {
 		tf := tfuncs[i]

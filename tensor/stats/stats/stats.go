@@ -14,27 +14,27 @@ import (
 //go:generate core generate
 
 func init() {
-	tensor.AddFunc(StatCount.FuncName(), Count, 1)
-	tensor.AddFunc(StatSum.FuncName(), Sum, 1)
-	tensor.AddFunc(StatSumAbs.FuncName(), SumAbs, 1)
-	tensor.AddFunc(StatL1Norm.FuncName(), SumAbs, 1)
-	tensor.AddFunc(StatProd.FuncName(), Prod, 1)
-	tensor.AddFunc(StatMin.FuncName(), Min, 1)
-	tensor.AddFunc(StatMax.FuncName(), Max, 1)
-	tensor.AddFunc(StatMinAbs.FuncName(), MinAbs, 1)
-	tensor.AddFunc(StatMaxAbs.FuncName(), MaxAbs, 1)
-	tensor.AddFunc(StatMean.FuncName(), Mean, 1)
-	tensor.AddFunc(StatVar.FuncName(), Var, 1)
-	tensor.AddFunc(StatStd.FuncName(), Std, 1)
-	tensor.AddFunc(StatSem.FuncName(), Sem, 1)
-	tensor.AddFunc(StatSumSq.FuncName(), SumSq, 1)
-	tensor.AddFunc(StatL2Norm.FuncName(), L2Norm, 1)
-	tensor.AddFunc(StatVarPop.FuncName(), VarPop, 1)
-	tensor.AddFunc(StatStdPop.FuncName(), StdPop, 1)
-	tensor.AddFunc(StatSemPop.FuncName(), SemPop, 1)
-	tensor.AddFunc(StatMedian.FuncName(), Median, 1)
-	tensor.AddFunc(StatQ1.FuncName(), Q1, 1)
-	tensor.AddFunc(StatQ3.FuncName(), Q3, 1)
+	tensor.AddFunc(StatCount.FuncName(), Count)
+	tensor.AddFunc(StatSum.FuncName(), Sum)
+	tensor.AddFunc(StatSumAbs.FuncName(), SumAbs)
+	tensor.AddFunc(StatL1Norm.FuncName(), SumAbs)
+	tensor.AddFunc(StatProd.FuncName(), Prod)
+	tensor.AddFunc(StatMin.FuncName(), Min)
+	tensor.AddFunc(StatMax.FuncName(), Max)
+	tensor.AddFunc(StatMinAbs.FuncName(), MinAbs)
+	tensor.AddFunc(StatMaxAbs.FuncName(), MaxAbs)
+	tensor.AddFunc(StatMean.FuncName(), Mean)
+	tensor.AddFunc(StatVar.FuncName(), Var)
+	tensor.AddFunc(StatStd.FuncName(), Std)
+	tensor.AddFunc(StatSem.FuncName(), Sem)
+	tensor.AddFunc(StatSumSq.FuncName(), SumSq)
+	tensor.AddFunc(StatL2Norm.FuncName(), L2Norm)
+	tensor.AddFunc(StatVarPop.FuncName(), VarPop)
+	tensor.AddFunc(StatStdPop.FuncName(), StdPop)
+	tensor.AddFunc(StatSemPop.FuncName(), SemPop)
+	tensor.AddFunc(StatMedian.FuncName(), Median)
+	tensor.AddFunc(StatQ1.FuncName(), Q1)
+	tensor.AddFunc(StatQ3.FuncName(), Q3)
 }
 
 // Stats is a list of different standard aggregation functions, which can be used
@@ -119,15 +119,9 @@ func (s Stats) Func() StatsFunc {
 }
 
 // Call calls this statistic function on given tensors.
-// Output results are in the out tensor.
-func (s Stats) Call(in, out tensor.Tensor) error {
-	return tensor.Call(s.FuncName(), in, out)
-}
-
-// CallOut calls a standard Stats enum function on given tensor,
 // returning output as a newly created tensor.
-func (s Stats) CallOut(in tensor.Tensor) tensor.Tensor {
-	return tensor.CallOut(s.FuncName(), in)
+func (s Stats) Call(in tensor.Tensor) tensor.Values {
+	return s.Func()(in)
 }
 
 // StripPackage removes any package name from given string,

@@ -292,7 +292,7 @@ TODO:
 
 ## Basic indexing
 
-See [NumPy basic indexing](https://numpy.org/doc/stable/user/basics.indexing.html#basic-indexing). Tensor Go uses the `Reslice` function for all cases (repeated `tensor.` prefix replaced with `t.` to take less space).
+See [NumPy basic indexing](https://numpy.org/doc/stable/user/basics.indexing.html#basic-indexing). Tensor Go uses the `Reslice` function for all cases (repeated `tensor.` prefix replaced with `t.` to take less space). Here you can clearly see the advantage of Goal in allowing significantly more succinct expressions to be written for accomplishing critical tensor functionality.
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
@@ -306,6 +306,8 @@ See [NumPy basic indexing](https://numpy.org/doc/stable/user/basics.indexing.htm
 | `t.Reslice(a,` `Slice{Step:2},` `t.FullAxis)` | same: |`a[::2, :]`  | `a(1:2:end,:)` | every other row of `a`, starting with the first |
 | `t.Reslice(a,`, `Slice{Step:-1},` `t.FullAxis)` | same: |`a[::-1,:]`  | `a(end:-1:1,:) or flipud(a)` | `a` with rows in reverse order |
 | `t.Clone(t.Reslice(a,` `1, t.FullAxis))` | `b = copy(a[1, :])` or: | `b = a[1, :].copy()` | `y=x(2,:)` | without the copy, `y` would point to a view of values in `x`; `copy` creates distinct values, in this case of _only_ the 2nd row of `x` -- i.e., it "concretizes" a given view into a literal, memory-continuous set of values for that view. |
+| `tmath.Assign(` `t.Reslice(a,` `Slice{Stop:5}),` `t.NewIntScalar(2))` | same: |`a[:5] = 2` | `a(1:5,:) = 2` | assign the value 2 to 0..4 rows of `a` |
+| (you get the idea) | same: |`a[:5] = b[:, :5]` | `a(1:5,:) = b(:, 1:5)` | assign the values in the first 5 columns of `b` to the first 5 rows of `a` |
 
 ## Boolean tensors and indexing
 

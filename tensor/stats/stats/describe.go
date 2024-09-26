@@ -41,7 +41,8 @@ func Describe(dir *datafs.Data, tsrs ...tensor.Tensor) {
 		for _, st := range DescriptiveStats {
 			stnm := st.String()
 			sv := datafs.NewValue[float64](td, stnm, 1)
-			st.Call(tsr, sv)
+			stout := st.Call(tsr)
+			sv.CopyFrom(stout)
 		}
 	}
 }

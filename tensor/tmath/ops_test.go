@@ -11,17 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestOpsCall(t *testing.T) {
-	x := tensor.NewIntScalar(1)
-	y := tensor.NewIntScalar(4)
-
-	a := tensor.CallOut("Mul", x, tensor.NewIntScalar(2))
-	b := tensor.CallOut("Add", x, y)
-	c := tensor.CallOut("Add", tensor.CallOut("Mul", x, y), tensor.CallOut("Mul", a, b))
-
-	assert.Equal(t, 14.0, c.Float1D(0))
-}
-
 func TestOps(t *testing.T) {
 	scalar := tensor.NewFloat64Scalar(-5.5)
 	scb := scalar.Clone()
@@ -44,100 +33,149 @@ func TestOps(t *testing.T) {
 	cellout := cell2d.Clone()
 	_ = cellout
 
-	Add(scalar, scb, scout)
+	AddOut(scalar, scb, scout)
 	assert.Equal(t, -5.5+-4, scout.Float1D(0))
 
-	Add(scalar, oned, oneout)
+	AddOut(scalar, oned, oneout)
 	for i, v := range vals {
 		assert.Equal(t, v+-5.5, oneout.Float1D(i))
 	}
 
-	Add(oned, oned, oneout)
+	AddOut(oned, oned, oneout)
 	for i, v := range vals {
 		assert.Equal(t, v+v, oneout.Float1D(i))
 	}
 
-	Add(cell2d, oned, cellout)
+	AddOut(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
 			assert.InDelta(t, v+v, cellout.FloatRowCell(ri, i), 1.0e-6)
 		}
 	}
 
-	Sub(scalar, scb, scout)
+	SubOut(scalar, scb, scout)
 	assert.Equal(t, -5.5 - -4, scout.Float1D(0))
 
-	Sub(scb, scalar, scout)
+	SubOut(scb, scalar, scout)
 	assert.Equal(t, -4 - -5.5, scout.Float1D(0))
 
-	Sub(scalar, oned, oneout)
+	SubOut(scalar, oned, oneout)
 	for i, v := range vals {
 		assert.Equal(t, -5.5-v, oneout.Float1D(i))
 	}
 
-	Sub(oned, scalar, oneout)
+	SubOut(oned, scalar, oneout)
 	for i, v := range vals {
 		assert.Equal(t, v - -5.5, oneout.Float1D(i))
 	}
 
-	Sub(oned, oned, oneout)
+	SubOut(oned, oned, oneout)
 	for i, v := range vals {
 		assert.Equal(t, v-v, oneout.Float1D(i))
 	}
 
-	Sub(cell2d, oned, cellout)
+	SubOut(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
 			assert.InDelta(t, v-v, cellout.FloatRowCell(ri, i), 1.0e-6)
 		}
 	}
 
-	Mul(scalar, scb, scout)
+	MulOut(scalar, scb, scout)
 	assert.Equal(t, -5.5*-4, scout.Float1D(0))
 
-	Mul(scalar, oned, oneout)
+	MulOut(scalar, oned, oneout)
 	for i, v := range vals {
 		assert.Equal(t, v*-5.5, oneout.Float1D(i))
 	}
 
-	Mul(oned, oned, oneout)
+	MulOut(oned, oned, oneout)
 	for i, v := range vals {
 		assert.Equal(t, v*v, oneout.Float1D(i))
 	}
 
-	Mul(cell2d, oned, cellout)
+	MulOut(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
 			assert.InDelta(t, v*v, cellout.FloatRowCell(ri, i), 1.0e-6)
 		}
 	}
 
-	Div(scalar, scb, scout)
+	DivOut(scalar, scb, scout)
 	assert.Equal(t, -5.5/-4, scout.Float1D(0))
 
-	Div(scb, scalar, scout)
+	DivOut(scb, scalar, scout)
 	assert.Equal(t, -4/-5.5, scout.Float1D(0))
 
-	Div(scalar, oned, oneout)
+	DivOut(scalar, oned, oneout)
 	for i, v := range vals {
 		assert.Equal(t, -5.5/v, oneout.Float1D(i))
 	}
 
-	Div(oned, scalar, oneout)
+	DivOut(oned, scalar, oneout)
 	for i, v := range vals {
 		assert.Equal(t, v/-5.5, oneout.Float1D(i))
 	}
 
-	Div(oned, oned, oneout)
+	DivOut(oned, oned, oneout)
 	for i, v := range vals {
 		assert.Equal(t, v/v, oneout.Float1D(i))
 	}
 
-	Div(cell2d, oned, cellout)
+	DivOut(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
 			assert.InDelta(t, v/v, cellout.FloatRowCell(ri, i), 1.0e-6)
 		}
 	}
 
+	onedc := tensor.Clone(oned)
+	AddAssign(onedc, scalar)
+	for i, v := range vals {
+		assert.Equal(t, v+-5.5, onedc.Float1D(i))
+	}
+
+	SubAssign(onedc, scalar)
+	for i, v := range vals {
+		assert.InDelta(t, v, onedc.Float1D(i), 1.0e-8)
+	}
+
+	MulAssign(onedc, scalar)
+	for i, v := range vals {
+		assert.InDelta(t, v*-5.5, onedc.Float1D(i), 1.0e-7)
+	}
+
+	DivAssign(onedc, scalar)
+	for i, v := range vals {
+		assert.InDelta(t, v, onedc.Float1D(i), 1.0e-7)
+	}
+
+	Inc(onedc)
+	for i, v := range vals {
+		assert.InDelta(t, v+1, onedc.Float1D(i), 1.0e-7)
+	}
+
+	Dec(onedc)
+	for i, v := range vals {
+		assert.InDelta(t, v, onedc.Float1D(i), 1.0e-7)
+	}
+}
+
+func TestBoolOps(t *testing.T) {
+	ar := tensor.NewSliceInts(12)
+	// fmt.Println(v)
+	bo := tensor.NewBool()
+	sc := tensor.NewIntScalar(6)
+
+	GreaterOut(ar, sc, bo)
+	// fmt.Println(bo)
+	for i, v := range ar.Values {
+		assert.Equal(t, v > 6, bo.Bool1D(i))
+	}
+
+	LessOut(ar, sc, bo)
+	// fmt.Println(bo)
+	for i, v := range ar.Values {
+		assert.Equal(t, v < 6, bo.Bool1D(i))
+	}
 }

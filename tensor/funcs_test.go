@@ -11,10 +11,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func abs(in, out Tensor) error {
-	if err := SetShapeFromMustBeValues(out, in); err != nil {
-		return err
-	}
+// prototype of a simple compute function:
+func absout(in Tensor, out Values) error {
+	SetShapeFrom(out, in)
 	VectorizeThreaded(1, NFirstLen, func(idx int, tsr ...Tensor) {
 		tsr[1].SetFloat1D(math.Abs(tsr[0].Float1D(idx)), idx)
 	}, in, out)
@@ -22,33 +21,23 @@ func abs(in, out Tensor) error {
 }
 
 func TestFuncs(t *testing.T) {
-	err := AddFunc("Abs", abs, 1)
+	err := AddFunc("Abs", absout)
 	assert.NoError(t, err)
 
-	err = AddFunc("Abs", abs, 1)
-	assert.Error(t, err)
-
-	err = AddFunc("Abs3", abs, 3)
-	assert.Error(t, err)
+	err = AddFunc("Abs", absout)
+	assert.Error(t, err) // already
 
 	vals := []float64{-1.507556722888818, -1.2060453783110545, -0.9045340337332908, -0.6030226891555273, -0.3015113445777635, 0, 0.3015113445777635, 0.603022689155527, 0.904534033733291, 1.2060453783110545, 1.507556722888818, .3}
 
 	oned := NewNumberFromValues(vals...)
 	oneout := oned.Clone()
 
-	fn, err := FuncByName("Abs")
+	_, err = FuncByName("Abs")
 	assert.NoError(t, err)
-	err = fn.Call(oned, oneout)
-	assert.NoError(t, err)
+
+	absout(oned, oneout)
 
 	assert.Equal(t, 1.507556722888818, oneout.Float1D(0))
-
-	err = fn.Call(oned)
-	assert.Error(t, err)
-
-	out, err := fn.CallOut(oned)
-	assert.NoError(t, err)
-	assert.Equal(t, AsFloat64Scalar(oneout), AsFloat64Scalar(out))
 }
 
 func TestAlign(t *testing.T) {

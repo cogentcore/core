@@ -24,10 +24,8 @@ func Vectorize3Out64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr
 	}
 	nt := len(tsr)
 	osz := tensor.CellsSize(tsr[0].ShapeSizes())
-	out := tsr[nt-1]
-	if err := tensor.SetShapeSizesMustBeValues(out, osz...); err != nil {
-		return nil, nil, nil, err
-	}
+	out := tsr[nt-1].(tensor.Values)
+	out.SetShapeSizes(osz...)
 	out1 = tensor.NewFloat64(osz...)
 	out2 = tensor.NewFloat64(osz...)
 	out3 = tensor.NewFloat64(osz...)

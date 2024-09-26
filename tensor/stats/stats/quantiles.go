@@ -14,21 +14,31 @@ import (
 // Quantiles returns the given quantile(s) of non-NaN elements in given
 // 1D tensor. Because sorting uses indexes, this only works for 1D case.
 // If needed for a sub-space of values, that can be extracted through slicing
+// and then used. Logs an error if not 1D.
+// qs are 0-1 values, 0 = min, 1 = max, .5 = median, etc.
+// Uses linear interpolation.
+// Because this requires a sort, it is more efficient to get as many quantiles
+// as needed in one pass.
+func Quantiles(in, qs tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(QuantilesOut, in, qs)
+}
+
+// QuantilesOut returns the given quantile(s) of non-NaN elements in given
+// 1D tensor. Because sorting uses indexes, this only works for 1D case.
+// If needed for a sub-space of values, that can be extracted through slicing
 // and then used. Returns and logs an error if not 1D.
 // qs are 0-1 values, 0 = min, 1 = max, .5 = median, etc.
 // Uses linear interpolation.
 // Because this requires a sort, it is more efficient to get as many quantiles
 // as needed in one pass.
-func Quantiles(in, qs, out tensor.Tensor) error {
+func QuantilesOut(in, qs tensor.Tensor, out tensor.Values) error {
 	if in.NumDims() != 1 {
 		return errors.Log(errors.New("stats.QuantilesFunc: only 1D input tensors allowed"))
 	}
 	if qs.NumDims() != 1 {
 		return errors.Log(errors.New("stats.QuantilesFunc: only 1D quantile tensors allowed"))
 	}
-	if err := tensor.SetShapeFromMustBeValues(out, in); err != nil {
-		return err
-	}
+	tensor.SetShapeFrom(out, in)
 	sin := tensor.AsRows(in.AsValues())
 	sin.ExcludeMissing()
 	sin.Sort(tensor.Ascending)
@@ -62,18 +72,36 @@ func Quantiles(in, qs, out tensor.Tensor) error {
 
 // Median computes the median (50% quantile) of tensor values.
 // See [StatsFunc] for general information.
-func Median(in, out tensor.Tensor) error {
-	return Quantiles(in, tensor.NewFloat64Scalar(.5), out)
+func Median(in tensor.Tensor) tensor.Values {
+	return Quantiles(in, tensor.NewFloat64Scalar(.5))
 }
 
 // Q1 computes the first quantile (25%) of tensor values.
 // See [StatsFunc] for general information.
-func Q1(in, out tensor.Tensor) error {
-	return Quantiles(in, tensor.NewFloat64Scalar(.25), out)
+func Q1(in tensor.Tensor) tensor.Values {
+	return Quantiles(in, tensor.NewFloat64Scalar(.25))
 }
 
 // Q3 computes the third quantile (75%) of tensor values.
 // See [StatsFunc] for general information.
-func Q3(in, out tensor.Tensor) error {
-	return Quantiles(in, tensor.NewFloat64Scalar(.75), out)
+func Q3(in tensor.Tensor) tensor.Values {
+	return Quantiles(in, tensor.NewFloat64Scalar(.75))
+}
+
+// MedianOut computes the median (50% quantile) of tensor values.
+// See [StatsFunc] for general information.
+func MedianOut(in tensor.Tensor, out tensor.Values) error {
+	return QuantilesOut(in, tensor.NewFloat64Scalar(.5), out)
+}
+
+// Q1Out computes the first quantile (25%) of tensor values.
+// See [StatsFunc] for general information.
+func Q1Out(in tensor.Tensor, out tensor.Values) error {
+	return QuantilesOut(in, tensor.NewFloat64Scalar(.25), out)
+}
+
+// Q3Out computes the third quantile (75%) of tensor values.
+// See [StatsFunc] for general information.
+func Q3Out(in tensor.Tensor, out tensor.Values) error {
+	return QuantilesOut(in, tensor.NewFloat64Scalar(.75), out)
 }

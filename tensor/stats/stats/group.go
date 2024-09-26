@@ -6,7 +6,6 @@ package stats
 
 import (
 	"strconv"
-	"strings"
 
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/datafs"
@@ -126,10 +125,6 @@ func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 
 // todo: GroupCombined
 
-// note: we have to pass stat as a string here because we need the name
-// to record the results in the datafs, and we can't get the name directly.
-// also we need _2_ anys, and varargs!
-
 // GroupStats computes the given stats function on the unique grouped indexes
 // produced by the [Groups] function, in the given [datafs] directory,
 // applied to each of the tensors passed here.
@@ -140,7 +135,7 @@ func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 // a String tensor with the unique values of each source [Groups] tensor,
 // and a aligned Float64 tensor with the statistics results for each such
 // unique group value. See the README.md file for a diagram of the results.
-func GroupStats(dir *datafs.Data, stat string, tsrs ...tensor.Tensor) error {
+func GroupStats(dir *datafs.Data, stat Stats, tsrs ...tensor.Tensor) error {
 	gd, err := dir.RecycleDir("Groups")
 	if err != nil {
 		return err
@@ -149,12 +144,7 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...tensor.Tensor) error {
 	if err != nil {
 		return err
 	}
-	stnm := StripPackage(stat)
-	spl := strings.Split(stat, ".")
-	if len(spl) == 2 {
-		stnm = spl[1]
-	}
-	stout := tensor.NewFloat64Scalar(0)
+	stnm := StripPackage(stat.String())
 	groups := gd.ItemsFunc(nil)
 	for _, gp := range groups {
 		gpnm := gp.Name()
@@ -178,7 +168,7 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...tensor.Tensor) error {
 			for i, v := range vals {
 				idx := tensor.AsIntSlice(v)
 				sg := tensor.NewRows(tsr.AsValues(), idx...)
-				tensor.Call(stat, sg, stout)
+				stout := stat.Call(sg)
 				sv.SetFloatRow(stout.Float1D(0), i)
 			}
 		}
@@ -189,14 +179,14 @@ func GroupStats(dir *datafs.Data, stat string, tsrs ...tensor.Tensor) error {
 // TableGroupStats runs [GroupStats] using standard [Stats]
 // on the given columns from given [table.Table].
 func TableGroupStats(dir *datafs.Data, stat Stats, dt *table.Table, columns ...string) error {
-	return GroupStats(dir, stat.FuncName(), dt.ColumnList(columns...)...)
+	return GroupStats(dir, stat, dt.ColumnList(columns...)...)
 }
 
 // GroupDescribe runs standard descriptive statistics on given tensor data
 // using [GroupStats] function, with [DescriptiveStats] list of stats.
 func GroupDescribe(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 	for _, st := range DescriptiveStats {
-		err := GroupStats(dir, st.FuncName(), tsrs...)
+		err := GroupStats(dir, st, tsrs...)
 		if err != nil {
 			return err
 		}

@@ -12,19 +12,19 @@ import (
 )
 
 func init() {
-	tensor.AddFunc(MetricEuclidean.FuncName(), Euclidean, 1)
-	tensor.AddFunc(MetricSumSquares.FuncName(), SumSquares, 1)
-	tensor.AddFunc(MetricAbs.FuncName(), Abs, 1)
-	tensor.AddFunc(MetricHamming.FuncName(), Hamming, 1)
-	tensor.AddFunc(MetricEuclideanBinTol.FuncName(), EuclideanBinTol, 1)
-	tensor.AddFunc(MetricSumSquaresBinTol.FuncName(), SumSquaresBinTol, 1)
-	tensor.AddFunc(MetricInvCosine.FuncName(), InvCosine, 1)
-	tensor.AddFunc(MetricInvCorrelation.FuncName(), InvCorrelation, 1)
-	tensor.AddFunc(MetricInnerProduct.FuncName(), InnerProduct, 1)
-	tensor.AddFunc(MetricCrossEntropy.FuncName(), CrossEntropy, 1)
-	tensor.AddFunc(MetricCovariance.FuncName(), Covariance, 1)
-	tensor.AddFunc(MetricCorrelation.FuncName(), Correlation, 1)
-	tensor.AddFunc(MetricCosine.FuncName(), Cosine, 1)
+	tensor.AddFunc(MetricEuclidean.FuncName(), Euclidean)
+	tensor.AddFunc(MetricSumSquares.FuncName(), SumSquares)
+	tensor.AddFunc(MetricAbs.FuncName(), Abs)
+	tensor.AddFunc(MetricHamming.FuncName(), Hamming)
+	tensor.AddFunc(MetricEuclideanBinTol.FuncName(), EuclideanBinTol)
+	tensor.AddFunc(MetricSumSquaresBinTol.FuncName(), SumSquaresBinTol)
+	tensor.AddFunc(MetricInvCosine.FuncName(), InvCosine)
+	tensor.AddFunc(MetricInvCorrelation.FuncName(), InvCorrelation)
+	tensor.AddFunc(MetricInnerProduct.FuncName(), InnerProduct)
+	tensor.AddFunc(MetricCrossEntropy.FuncName(), CrossEntropy)
+	tensor.AddFunc(MetricCovariance.FuncName(), Covariance)
+	tensor.AddFunc(MetricCorrelation.FuncName(), Correlation)
+	tensor.AddFunc(MetricCosine.FuncName(), Cosine)
 }
 
 // Metrics are standard metric functions
@@ -109,14 +109,8 @@ func (m Metrics) Func() MetricFunc {
 
 // Call calls a standard Metrics enum function on given tensors.
 // Output results are in the out tensor.
-func (m Metrics) Call(a, b, out tensor.Tensor) error {
-	return tensor.Call(m.FuncName(), a, b, out)
-}
-
-// CallOut calls a standard Metrics enum function on given tensors,
-// returning output as a newly created tensor.
-func (m Metrics) CallOut(a, b tensor.Tensor) tensor.Tensor {
-	return tensor.CallOut(m.FuncName(), a, b)
+func (m Metrics) Call(a, b tensor.Tensor) tensor.Values {
+	return m.Func()(a, b)
 }
 
 // Increasing returns true if the distance metric is such that metric
@@ -136,6 +130,16 @@ func AsMetricFunc(fun any) (MetricFunc, error) {
 	mfun, ok := fun.(MetricFunc)
 	if !ok {
 		return nil, errors.New("metric.AsMetricFunc: function does not fit the MetricFunc signature")
+	}
+	return mfun, nil
+}
+
+// AsMetricOutFunc returns given function as a [MetricFunc] function,
+// or an error if it does not fit that signature.
+func AsMetricOutFunc(fun any) (MetricOutFunc, error) {
+	mfun, ok := fun.(MetricOutFunc)
+	if !ok {
+		return nil, errors.New("metric.AsMetricOutFunc: function does not fit the MetricOutFunc signature")
 	}
 	return mfun, nil
 }

@@ -6,22 +6,16 @@ package tensor
 
 import (
 	"fmt"
-	"reflect"
-	"slices"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/metadata"
 )
 
-// AnyFirstArg should be used to set AnyFirst functions
-const AnyFirstArg = true
-
 // Func represents a registered tensor function, which has
 // In number of input Tensor arguments, and Out number of output
 // arguments (typically 1). There can also be an 'any' first
 // argument to support other kinds of parameters.
-// This is used to make tensor functions available to the Goal
-// language.
+// This is used to make tensor functions available to the Goal language.
 type Func struct {
 	// Name is the original CamelCase Go name for function
 	Name string
@@ -30,14 +24,11 @@ type Func struct {
 	// args, with an optional any first arg.
 	Fun any
 
-	// In is number of input args
+	// In is number of input tensor args
 	In int
 
-	// Out is number of output args
+	// Out is number of output tensor args
 	Out int
-
-	// AnyFirst indicates if there is an 'any' first argument.
-	AnyFirst bool
 }
 
 // NewFunc creates a new Func desciption of the given
@@ -51,16 +42,10 @@ type Func struct {
 // and an optional arg indicating an 'any' first argument.
 // The remaining arguments in the function (automatically
 // determined) are classified as input arguments.
-func NewFunc(name string, fun any, out int, anyFirst ...bool) (*Func, error) {
-	fn := &Func{Name: name, Fun: fun, Out: out}
-	if len(anyFirst) == 1 && anyFirst[0] {
-		fn.AnyFirst = true
-	}
-	nargs := fn.ArgCount()
-	if out > nargs {
-		return nil, fmt.Errorf("tensor.NewFunc: too many output args for function %q, which takes %d (-1 means function signature is not recognized)", name, nargs)
-	}
-	fn.In = 1 - out
+func NewFunc(name string, fun any) (*Func, error) {
+	fn := &Func{Name: name, Fun: fun}
+	// fn.In = 1 - out
+	// todo: get signature
 	return fn, nil
 }
 
@@ -78,7 +63,7 @@ var Funcs map[string]*Func
 // AddFunc adds given named function to the global tensor named function
 // registry, which is used by Goal to call functions by name.
 // See [NewFunc] for more information.
-func AddFunc(name string, fun any, out int, anyFirst ...bool) error {
+func AddFunc(name string, fun any) error {
 	if Funcs == nil {
 		Funcs = make(map[string]*Func)
 	}
@@ -86,7 +71,7 @@ func AddFunc(name string, fun any, out int, anyFirst ...bool) error {
 	if ok {
 		return errors.Log(fmt.Errorf("tensor.AddFunc: function of name %q already exists, not added", name))
 	}
-	fn, err := NewFunc(name, fun, out, anyFirst...)
+	fn, err := NewFunc(name, fun)
 	if errors.Log(err) != nil {
 		return err
 	}
@@ -104,6 +89,8 @@ func FuncByName(name string) (*Func, error) {
 	}
 	return fn, nil
 }
+
+// todo: definitely switch over to reflection here:
 
 // ArgCount returns the number of tensor arguments the function takes,
 // using a type switch.
@@ -144,170 +131,60 @@ func (fn *Func) ArgCheck(n int, tsr ...Tensor) error {
 	return nil
 }
 
-// Call calls function with given set of input & output arguments
-// appropriate for the given function (error if not).
-func (fn *Func) Call(tsr ...Tensor) error {
-	if fn.AnyFirst {
-		return fmt.Errorf("tensor.Call: function %q: requires a first string argument", fn.Name)
-	}
-	switch f := fn.Fun.(type) {
-	case func(a Tensor) error:
-		if err := fn.ArgCheck(1, tsr...); err != nil {
-			return err
-		}
-		return f(tsr[0])
-	case func(a, b Tensor) error:
-		if err := fn.ArgCheck(2, tsr...); err != nil {
-			return err
-		}
-		return f(tsr[0], tsr[1])
-	case func(a, b, c Tensor) error:
-		if err := fn.ArgCheck(3, tsr...); err != nil {
-			return err
-		}
-		return f(tsr[0], tsr[1], tsr[2])
-	case func(a, b, c, d Tensor) error:
-		if err := fn.ArgCheck(4, tsr...); err != nil {
-			return err
-		}
-		return f(tsr[0], tsr[1], tsr[2], tsr[3])
-	case func(a, b, c, d, e Tensor) error:
-		if err := fn.ArgCheck(5, tsr...); err != nil {
-			return err
-		}
-		return f(tsr[0], tsr[1], tsr[2], tsr[3], tsr[4])
-	}
-	return nil
+// These generic functions provide a one liner for wrapping functions
+// that take an output Tensor as the last argument, which is important
+// for memory re-use of the output in performance-critical cases.
+// The names indicate the number of input tensor arguments.
+// Additional generic non-Tensor inputs are supported up to 2,
+// with Gen1 and Gen2 versions.
+
+// CallOut1 adds output [Values] tensor for function.
+func CallOut1(fun func(a Tensor, out Values) error, a Tensor) Values {
+	out := NewOfType(a.DataType())
+	errors.Log(fun(a, out))
+	return out
 }
 
-// CallAny calls function with given set of input & output arguments
-// appropriate for the given function (error if not),
-// with a first 'any' argument.
-func (fn *Func) CallAny(first any, tsr ...Tensor) error {
-	if !fn.AnyFirst {
-		return fmt.Errorf("tensor.CallAny: function %q: does not take a first 'any' argument", fn.Name)
-	}
-	switch f := fn.Fun.(type) {
-	case func(first any, a Tensor) error:
-		if err := fn.ArgCheck(1, tsr...); err != nil {
-			return err
-		}
-		return f(first, tsr[0])
-	case func(first any, a, b Tensor) error:
-		if err := fn.ArgCheck(2, tsr...); err != nil {
-			return err
-		}
-		return f(first, tsr[0], tsr[1])
-	case func(first any, a, b, c Tensor) error:
-		if err := fn.ArgCheck(3, tsr...); err != nil {
-			return err
-		}
-		return f(first, tsr[0], tsr[1], tsr[2])
-	case func(first any, a, b, c, d Tensor) error:
-		if err := fn.ArgCheck(4, tsr...); err != nil {
-			return err
-		}
-		return f(first, tsr[0], tsr[1], tsr[2], tsr[3])
-	case func(first any, a, b, c, d, e Tensor) error:
-		if err := fn.ArgCheck(5, tsr...); err != nil {
-			return err
-		}
-		return f(first, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4])
-	}
-	return nil
+func CallOut2(fun func(a, b Tensor, out Values) error, a, b Tensor) Values {
+	out := NewOfType(a.DataType())
+	errors.Log(fun(a, b, out))
+	return out
 }
 
-// CallOut is like [Call] but it automatically creates an output
-// tensor of the same type as the first input tensor passed,
-// and returns the output as return values, along with any error.
-func (fn *Func) CallOut(tsr ...Tensor) (Tensor, error) {
-	if fn.Out == 0 {
-		err := fn.Call(tsr...)
-		return nil, err
-	}
-	typ := reflect.Float64
-	if fn.In > 0 {
-		typ = tsr[0].DataType()
-	}
-	out := NewOfType(typ)
-	tlist := slices.Clone(tsr)
-	tlist = append(tlist, out)
-	err := fn.Call(tlist...)
-	return out, err
+func CallOut3(fun func(a, b, c Tensor, out Values) error, a, b, c Tensor) Values {
+	out := NewOfType(a.DataType())
+	errors.Log(fun(a, b, c, out))
+	return out
 }
 
-// CallOutMulti is like [CallOut] but deals with multiple output tensors.
-func (fn *Func) CallOutMulti(tsr ...Tensor) ([]Tensor, error) {
-	if fn.Out == 0 {
-		err := fn.Call(tsr...)
-		return nil, err
-	}
-	typ := reflect.Float64
-	if fn.In > 0 {
-		typ = tsr[0].DataType()
-	}
-	outs := make([]Tensor, fn.Out)
-	for i := range outs {
-		outs[i] = NewOfType(typ)
-	}
-	tsr = append(tsr, outs...)
-	err := fn.Call(tsr...)
-	return outs, err
+func CallOut2Bool(fun func(a, b Tensor, out *Bool) error, a, b Tensor) *Bool {
+	out := NewBool()
+	errors.Log(fun(a, b, out))
+	return out
 }
 
-// Call calls function of given name, with given set of _input_
-// and output arguments appropriate for the given function.
-// An error is logged if the function name has not been registered
-// in the Funcs global function registry, or the argument count
-// does not match, or an error is returned by the function.
-func Call(name string, tsr ...Tensor) error {
-	fn, err := FuncByName(name)
-	if err != nil {
-		return err
-	}
-	return fn.Call(tsr...)
+func CallOut1Gen1[T any](fun func(g T, a Tensor, out Values) error, g T, a Tensor) Values {
+	out := NewOfType(a.DataType())
+	errors.Log(fun(g, a, out))
+	return out
 }
 
-// CallOut calls function of given name, with given set of _input_
-// arguments appropriate for the given function, returning a created
-// output tensor, for the common case with just one return value.
-// An error is logged if the function name has not been registered
-// in the Funcs global function registry, or the argument count
-// does not match, or an error is returned by the function.
-func CallOut(name string, tsr ...Tensor) Tensor {
-	fn, err := FuncByName(name)
-	if errors.Log(err) != nil {
-		return nil
-	}
-	return errors.Log1(fn.CallOut(tsr...))
+func CallOut1Gen2[T any, S any](fun func(g T, h S, a Tensor, out Values) error, g T, h S, a Tensor) Values {
+	out := NewOfType(a.DataType())
+	errors.Log(fun(g, h, a, out))
+	return out
 }
 
-// CallAny calls function of given name, with given set of arguments
-// (any, input and output) appropriate for the given function.
-// An error is returned if the function name has not been registered
-// in the Funcs global function registry, or the argument count
-// does not match.  This version of [Call] is for functions that
-// have an initial string argument
-func CallAny(name string, first any, tsr ...Tensor) error {
-	fn, err := FuncByName(name)
-	if err != nil {
-		return err
-	}
-	return fn.CallAny(first, tsr...)
+func CallOut2Gen1[T any](fun func(g T, a, b Tensor, out Values) error, g T, a, b Tensor) Values {
+	out := NewOfType(a.DataType())
+	errors.Log(fun(g, a, b, out))
+	return out
 }
 
-// CallOutMulti calls function of given name, with given set of _input_
-// arguments appropriate for the given function, returning newly created
-// output tensors, for the rare case of multiple return values.
-// An error is logged if the function name has not been registered
-// in the Funcs global function registry, or the argument count
-// does not match, or an error is returned by the function.
-func CallOutMulti(name string, tsr ...Tensor) []Tensor {
-	fn, err := FuncByName(name)
-	if errors.Log(err) != nil {
-		return nil
-	}
-	return errors.Log1(fn.CallOutMulti(tsr...))
+func CallOut2Gen2[T any, S any](fun func(g T, h S, a, b Tensor, out Values) error, g T, h S, a, b Tensor) Values {
+	out := NewOfType(a.DataType())
+	errors.Log(fun(g, h, a, b, out))
+	return out
 }
 
 // SetCalcFunc sets a function to calculate updated value for given tensor,

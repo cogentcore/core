@@ -102,27 +102,6 @@ func SetShapeFrom(vals Values, from Tensor) {
 	vals.SetShapeSizes(from.ShapeSizes()...)
 }
 
-// SetShapeFromMustBeValues sets shape of given tensor from a source tensor,
-// calling [MustBeValues] on the destination tensor to ensure it is a [Values],
-// type, returning an error if not. This is used extensively for output
-// tensors in functions, and all such output tensors _must_ be Values tensors.
-func SetShapeFromMustBeValues(tsr Tensor, from Tensor) error {
-	return SetShapeSizesMustBeValues(tsr, from.ShapeSizes()...)
-}
-
-// SetShapeSizesMustBeValues sets shape of given tensor from given sizes,
-// calling [MustBeValues] on the destination tensor to ensure it is a [Values],
-// type, returning an error if not. This is used extensively for output
-// tensors in functions, and all such output tensors _must_ be Values tensors.
-func SetShapeSizesMustBeValues(tsr Tensor, sizes ...int) error {
-	vals, err := MustBeValues(tsr)
-	if err != nil {
-		return err
-	}
-	vals.SetShapeSizes(sizes...)
-	return nil
-}
-
 // NewFloat64Scalar is a convenience method for a Tensor
 // representation of a single float64 scalar value.
 func NewFloat64Scalar(val float64) *Float64 {

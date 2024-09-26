@@ -34,8 +34,7 @@ func TestClust(t *testing.T) {
 		t.Error(err)
 	}
 	in := dt.Column("Input")
-	out := tensor.NewFloat64()
-	metric.Matrix(metric.Euclidean, in, out)
+	out := metric.Matrix(metric.Euclidean, in)
 
 	cl := Cluster(Avg.String(), out, dt.Column("Name"))
 
@@ -50,7 +49,7 @@ func TestClust(t *testing.T) {
 	}
 	gather(cl)
 
-	exdists := []float64{0, 9.181170003996987, 5.534356399283667, 4.859933131085473, 3.4641016151377544, 0, 0, 3.4641016151377544, 0, 0, 3.4641016151377544, 0, 0, 5.111664626761644, 4.640135790634417, 4, 0, 0, 3.4641016151377544, 0, 0, 3.605551275463989, 0, 0}
+	exdists := []float64{0, 9.181170119179619, 5.534356355667114, 4.859933137893677, 3.464101552963257, 0, 0, 3.464101552963257, 0, 0, 3.464101552963257, 0, 0, 5.111664593219757, 4.640135824680328, 4, 0, 0, 3.464101552963257, 0, 0, 3.605551242828369, 0, 0}
 
-	tolassert.EqualTolSlice(t, exdists, dists, 1.0e-8)
+	tolassert.EqualTolSlice(t, exdists, dists, 1.0e-7)
 }

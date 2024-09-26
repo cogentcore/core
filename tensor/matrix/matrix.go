@@ -87,9 +87,9 @@ func (sy *Symmetric) SymmetricDim() (r int) {
 
 // CopyDense copies a gonum mat.Dense matrix into given Tensor
 // using standard Float64 interface
-func CopyDense(to tensor.Tensor, dm *mat.Dense) {
+func CopyDense(to tensor.Values, dm *mat.Dense) {
 	nr, nc := dm.Dims()
-	tensor.SetShapeSizesMustBeValues(to, nr, nc)
+	to.SetShapeSizes(nr, nc)
 	idx := 0
 	for ri := 0; ri < nr; ri++ {
 		for ci := 0; ci < nc; ci++ {

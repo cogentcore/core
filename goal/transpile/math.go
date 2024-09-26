@@ -279,10 +279,8 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 	case token.QUO:
 		fn = "Div"
 	}
-	mp.startFunc("tensor.CallOut", true) // yes tensor args
+	mp.startFunc("tmath."+fn, true) // yes tensor args
 	mp.out.Add(token.LPAREN)
-	mp.out.Add(token.STRING, `"`+fn+`"`)
-	mp.out.Add(token.COMMA)
 	mp.expr(ex.X)
 	mp.out.Add(token.COMMA)
 	mp.idx++
@@ -326,10 +324,8 @@ func (mp *mathParse) assignStmt(as *ast.AssignStmt) {
 	case token.QUO_ASSIGN:
 		fn = "DivAssign"
 	}
-	mp.startFunc("tensor.Call", true) // yes tensor args
+	mp.startFunc("tmath."+fn, true) // yes tensor args
 	mp.out.Add(token.LPAREN)
-	mp.out.Add(token.STRING, `"`+fn+`"`)
-	mp.out.Add(token.COMMA)
 	mp.exprList(as.Lhs)
 	mp.out.Add(token.COMMA)
 	mp.idx++
@@ -613,13 +609,11 @@ func (mp *mathParse) callName(ex *ast.CallExpr, funName, pkgName string) {
 		mp.idx++
 		return
 	}
-	mp.startFunc("tensor.CallOut", true) // tensors
+	mp.startFunc(funName, true) // tensors
 	mp.addToken(token.LPAREN)
 	if pkgName != "" {
 		mp.idx += 2 // . and selector
 	}
-	mp.out.Add(token.IDENT, `"`+funName+`"`)
-	mp.addToken(token.COMMA) // use the name -- need more
 }
 
 func (mp *mathParse) ident(id *ast.Ident) {

@@ -26,10 +26,8 @@ func VectorizeOut64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr 
 	}
 	nt := len(tsr)
 	osz := tensor.CellsSize(tsr[0].ShapeSizes())
-	out := tsr[nt-1]
-	if err := tensor.SetShapeSizesMustBeValues(out, osz...); err != nil {
-		return nil, err
-	}
+	out := tsr[nt-1].(tensor.Values)
+	out.SetShapeSizes(osz...)
 	o64 := tensor.NewFloat64(osz...)
 	etsr := slices.Clone(tsr)
 	etsr[nt-1] = o64
@@ -53,10 +51,8 @@ func Vectorize2Out64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr
 	}
 	nt := len(tsr)
 	osz := tensor.CellsSize(tsr[0].ShapeSizes())
-	out := tsr[nt-1]
-	if err = tensor.SetShapeSizesMustBeValues(out, osz...); err != nil {
-		return
-	}
+	out := tsr[nt-1].(tensor.Values)
+	out.SetShapeSizes(osz...)
 	out1 = tensor.NewFloat64(osz...)
 	out2 = tensor.NewFloat64(osz...)
 	tsrs := slices.Clone(tsr[:nt-1])

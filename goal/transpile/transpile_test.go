@@ -204,9 +204,9 @@ func TestMath(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
 		{"# x := 1", `x := tensor.NewIntScalar(1)`},
-		{"# x := a + 1", `x := tensor.CallOut("Add", a, tensor.NewIntScalar(1))`},
-		{"# x = x * 4", `x = tensor.CallOut("Mul", x, tensor.NewIntScalar(4))`},
-		{"# a = x + y", `a = tensor.CallOut("Add", x, y)`},
+		{"# x := a + 1", `x := tmath.Add(a, tensor.NewIntScalar(1))`},
+		{"# x = x * 4", `x = tmath.Mul(x, tensor.NewIntScalar(4))`},
+		{"# a = x + y", `a = tmath.Add(x, y)`},
 		{"# a := [1,2,3,4]", `a := tensor.NewIntFromValues([]int { 1, 2, 3, 4 }  ...)`},
 		{"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},
 		{"# ndim(a)", `tensor.NewIntScalar(a.NumDims())`},
@@ -225,13 +225,14 @@ func TestMath(t *testing.T) {
 		{"# a[::-1, 2]", `tensor.Reslice(a, tensor.Slice { Step: - 1 } , 2)`},
 		{"# a[:3, 2]", `tensor.Reslice(a, tensor.Slice { Stop:3 } , 2)`},
 		{"# a[2:, 2]", `tensor.Reslice(a, tensor.Slice { Start:2 } , 2)`},
-		{"# c := cos(a)", `c := tensor.CallOut("Cos", a)`},
-		{"# m := stats.Mean(a)", `m := tensor.CallOut("stats.Mean", a)`},
-		{"# m := (stats.Mean(a))", `m := (tensor.CallOut("stats.Mean", a))`},
-		{"# m := stats.Mean(reshape(a,36))", `m := tensor.CallOut("stats.Mean", tensor.Reshape(a, 36))`},
-		{"# z = a[1:5,1:5] - stats.Mean(ra)", `z = tensor.CallOut("Sub", tensor.Reslice(a, tensor.Slice { Start:1, Stop:5 } , tensor.Slice { Start:1, Stop:5 } ), tensor.CallOut("stats.Mean", ra))`},
-		{"# a[:, 2] = b", `tensor.Call("Assign", tensor.Reslice(a, tensor.FullAxis, 2), b)`},
-		{"# a[:, 2] += b", `tensor.Call("AddAssign", tensor.Reslice(a, tensor.FullAxis, 2), b)`},
+		{"# a[:, 2] = b", `tmath.Assign(tensor.Reslice(a, tensor.FullAxis, 2), b)`},
+		{"# a[:, 2] += b", `tmath.AddAssign(tensor.Reslice(a, tensor.FullAxis, 2), b)`},
+		{"# c := cos(a)", `c := tmath.Cos(a)`},
+		{"# m := stats.Mean(a)", `m := stats.Mean(a)`},
+		{"# m := (stats.Mean(a))", `m := (stats.Mean(a))`},
+		{"# m := stats.Mean(reshape(a,36))", `m := stats.Mean(tensor.Reshape(a, 36))`},
+		{"# z = a[1:5,1:5] - stats.Mean(ra)", `z = tmath.Sub(tensor.Reslice(a, tensor.Slice { Start:1, Stop:5 } , tensor.Slice { Start:1, Stop:5 } ), stats.Mean(ra))`},
+		{"# m := metric.Matrix(metric.Cosine, a)", `m := metric.Matrix(metric.Cosine, a)`},
 	}
 
 	st := NewState()
