@@ -596,11 +596,14 @@ func (mp *mathParse) callName(ex *ast.CallExpr, funName, pkgName string) {
 	if pkgName != "" {
 		funName = pkgName + "." + funName
 		_, err = tensor.FuncByName(funName)
-	} else {
+	} else { // non-package qualified names are _only_ in tmath! can be lowercase
 		_, err = tensor.FuncByName(funName)
 		if err != nil {
 			funName = strings.ToUpper(funName[:1]) + funName[1:] // first letter uppercased
 			_, err = tensor.FuncByName(funName)
+		}
+		if err == nil { // registered, must be in tmath
+			funName = "tmath." + funName
 		}
 	}
 	if err != nil { // not a registered tensor function
@@ -610,10 +613,11 @@ func (mp *mathParse) callName(ex *ast.CallExpr, funName, pkgName string) {
 		return
 	}
 	mp.startFunc(funName, true) // tensors
-	mp.addToken(token.LPAREN)
+	mp.idx += 1
 	if pkgName != "" {
 		mp.idx += 2 // . and selector
 	}
+	mp.addToken(token.LPAREN)
 }
 
 func (mp *mathParse) ident(id *ast.Ident) {
