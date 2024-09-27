@@ -48,12 +48,12 @@ func NewMasked(tsr Tensor, mask ...*Bool) *Masked {
 // Mask is the general purpose masking function, which checks
 // if the mask arg is a Bool and uses if so.
 // Otherwise, it logs an error.
-func Mask(tsr, mask Tensor) *Masked {
+func Mask(tsr, mask Tensor) Tensor {
 	if mb, ok := mask.(*Bool); ok {
 		return NewMasked(tsr, mb)
 	}
 	errors.Log(errors.New("tensor.Mask: provided tensor is not a Bool tensor"))
-	return NewMasked(tsr)
+	return tsr
 }
 
 // AsMasked returns the tensor as a [Masked] view.

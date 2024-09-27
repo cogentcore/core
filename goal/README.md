@@ -323,7 +323,7 @@ See [NumPy boolean indexing](https://numpy.org/doc/stable/user/basics.indexing.h
 | `a & b`  | `a & b` | `bitand(a,b)` | element bitwise AND operator on `bool` or `int` tensors | 
 | `a \| b`  | `a \| b` | `bitor(a,b)` | element bitwise OR operator on `bool` or `int` tensors |
 | `tensor.Mask(a,` `tmath.Less(a, 0.5)` | same: |`a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
-| `tensor.Flatten(` `tensor.Mask(a,` `tmath.Less(a, 0.5))` | same: |`a[a < 0.5].flatten()` | ? | a 1D list of the elements of `a` < 0.5 (as a copy, not a view) |
+| `tensor.Flatten(` `tensor.Mask(a,` `tmath.Less(a, 0.5)))` | same: |`a[a < 0.5].flatten()` | ? | a 1D list of the elements of `a` < 0.5 (as a copy, not a view) |
 |  |  |`a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
 
 ## Advanced index-based indexing
@@ -396,4 +396,17 @@ todo: huge amount of work needed to support complex numbers throughout!
 |  |  |`np.fft.fft(a)` | `fft(a)` | Fourier transform of `a` |
 |  |  |`np.fft.ifft(a)` | `ifft(a)` | inverse Fourier transform of `a` |
 |  |  |`signal.resample(x, np.ceil(len(x)/q))` |  `decimate(x, q)` | downsample with low-pass filtering |
+
+## TODO
+
+* bool &&, || !
+* flatten etc selector calls work with complex exprs.
+* basic go expressions in math mode -- see how that works
+* # # surrounding in go, shell modes
+* more creation routines
+* update readme table
+* record to datafs
+* make a simple tutorial example showing basic ops
+
+
 
