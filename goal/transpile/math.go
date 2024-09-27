@@ -742,14 +742,16 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 // nofun = do not accept a function version, just a method
 var numpyFuncs = map[string]funWrap{
 	// "array":   {"tensor.NewFloatFromValues", ""}, // todo: probably not right, maybe don't have?
-	"zeros":   {"tensor.NewFloat64", ""},
-	"full":    {"tensor.NewFloat64Full", ""},
-	"ones":    {"tensor.NewFloat64Ones", ""},
-	"arange":  {"tensor.NewSliceInts", ""},
-	"reshape": {"tensor.Reshape", ""},
-	"copy":    {"tensor.Clone", ""},
-	"flatten": {"tensor.Flatten", "nofun"},
-	"squeeze": {"tensor.Squeeze", "nofun"},
+	"zeros":    {"tensor.NewFloat64", ""},
+	"full":     {"tensor.NewFloat64Full", ""},
+	"ones":     {"tensor.NewFloat64Ones", ""},
+	"rand":     {"tensor.NewFloat64Rand", ""},
+	"arange":   {"tensor.NewIntRange", ""},
+	"linspace": {"tensor.NewFloat64SpacedLinear", ""},
+	"reshape":  {"tensor.Reshape", ""},
+	"copy":     {"tensor.Clone", ""},
+	"flatten":  {"tensor.Flatten", "nofun"},
+	"squeeze":  {"tensor.Squeeze", "nofun"},
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {

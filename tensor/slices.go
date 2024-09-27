@@ -158,19 +158,3 @@ func (sl Slice) IntTensor(size int) *Int {
 	sl.ToIntSlice(size, tsr.Values)
 	return tsr
 }
-
-// NewSliceInts returns a new [Int] [Tensor] with given [Slice]
-// start, stop, step values (optional), for given dimension size.
-func NewSliceInts(size int, svals ...int) *Int {
-	sl := Slice{}
-	if len(svals) > 0 {
-		sl.Start = svals[0]
-	}
-	if len(svals) > 1 {
-		sl.Stop = svals[1]
-	}
-	if len(svals) > 2 {
-		sl.Step = svals[2]
-	}
-	return sl.IntTensor(size)
-}

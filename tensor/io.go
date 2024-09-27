@@ -6,13 +6,17 @@ package tensor
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"cogentcore.org/core/base/metadata"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/math32"
 )
 
 // Delim are standard CSV delimiter options (Tab, Comma, Space)
@@ -152,4 +156,110 @@ func ReadCSV(tsr Tensor, r io.Reader, delim Delims) error {
 	}
 done:
 	return nil
+}
+
+func label(nm string, sh *Shape) string {
+	if nm != "" {
+		nm += " " + sh.String()
+	} else {
+		nm = sh.String()
+	}
+	return nm
+}
+
+// Sprintf returns a string representation of the given tensor,
+// with a maximum length of as given: output is terminated
+// when it exceeds that length. If maxLen = 0, [MaxSprintLength] is used.
+// The format is the per-element format string, which should include
+// any delimiter or spacing between elements (which will apply to last
+// element too).  If empty it uses compact defaults for the data type.
+func Sprintf(tsr Tensor, maxLen int, format string) string {
+	if maxLen == 0 {
+		maxLen = MaxSprintLength
+	}
+	colWd := 1 // column width in tabs
+	defFmt := format == ""
+	isint := false
+	if defFmt {
+		switch {
+		case tsr.IsString():
+			format = "%15s\t"
+		case reflectx.KindIsInt(tsr.DataType()):
+			isint = true
+			format = "%7g\t"
+		default:
+			format = "%7.3g\t"
+		}
+	}
+	mxlen := 0
+	for i := range maxLen {
+		s := ""
+		if tsr.IsString() {
+			s = fmt.Sprintf(format, tsr.String1D(i))
+		} else {
+			s = fmt.Sprintf(format, tsr.Float1D(i))
+		}
+		if len(s) > mxlen {
+			mxlen = len(s)
+		}
+	}
+	colWd = int(math32.IntMultipleGE(float32(mxlen), 8)) / 8
+	if colWd > 1 && !tsr.IsString() && defFmt { // should be 2
+		if isint {
+			format = "%15g\t"
+		} else {
+			format = "%15.7g\t"
+		}
+	}
+	sh := tsr.Shape()
+	oddRow := false
+	rows, cols, _, _ := Projection2DShape(sh, oddRow)
+	var b strings.Builder
+	b.WriteString(tsr.Label())
+	noidx := false
+	if tsr.NumDims() == 1 && tsr.Len() < 8 {
+		b.WriteString(" ")
+		noidx = true
+	} else {
+		b.WriteString("\n")
+	}
+	if !noidx && tsr.NumDims() > 1 && cols > 1 {
+		b.WriteString("\t")
+		for c := 0; c < cols; c++ {
+			_, cc := Projection2DCoords(sh, oddRow, 0, c)
+			b.WriteString(fmt.Sprintf("%v:\t", cc))
+			if colWd > 1 {
+				b.WriteString(strings.Repeat("\t", colWd-1))
+			}
+		}
+		b.WriteString("\n")
+	}
+	ctr := 0
+	for r := range rows {
+		rc, _ := Projection2DCoords(sh, oddRow, r, 0)
+		if !noidx {
+			b.WriteString(fmt.Sprintf("%v:\t", rc))
+		}
+		ri := r
+		for c := 0; c < cols; c++ {
+			s := ""
+			if tsr.IsString() {
+				s = fmt.Sprintf(format, Projection2DString(tsr, oddRow, ri, c))
+			} else {
+				s = fmt.Sprintf(format, Projection2DValue(tsr, oddRow, ri, c))
+			}
+			b.WriteString(s)
+			nt := int(math32.IntMultipleGE(float32(len(s)), 8)) / 8
+			if nt < colWd {
+				b.WriteString(strings.Repeat("\t", nt-colWd))
+			}
+		}
+		b.WriteString("\n")
+		ctr += cols
+		if ctr > maxLen {
+			b.WriteString("...\n")
+			break
+		}
+	}
+	return b.String()
 }

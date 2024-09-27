@@ -5,10 +5,8 @@
 package tensor
 
 import (
-	"fmt"
 	"reflect"
 	"slices"
-	"strings"
 	"unsafe"
 
 	"cogentcore.org/core/base/metadata"
@@ -133,61 +131,4 @@ func (tsr *Base[T]) StringRowCell(row, cell int) string {
 // Label satisfies the core.Labeler interface for a summary description of the tensor.
 func (tsr *Base[T]) Label() string {
 	return label(tsr.Meta.Name(), &tsr.shape)
-}
-
-// Sprint returns a string representation of the given tensor,
-// with a maximum length of as given: output is terminated
-// when it exceeds that length. If maxLen = 0, [MaxSprintLength] is used.
-func Sprint(tsr Tensor, maxLen int) string {
-	return sprint(tsr, maxLen)
-}
-
-func label(nm string, sh *Shape) string {
-	if nm != "" {
-		nm += " " + sh.String()
-	} else {
-		nm = sh.String()
-	}
-	return nm
-}
-
-// sprint is the underlying impl of String
-func sprint(tsr Tensor, maxLen int) string {
-	if maxLen == 0 {
-		maxLen = MaxSprintLength
-	}
-	var b strings.Builder
-	sh := tsr.Shape()
-	b.WriteString(tsr.Label())
-	noidx := false
-	if tsr.NumDims() == 1 && tsr.Len() < 8 {
-		b.WriteString(" ")
-		noidx = true
-	} else {
-		b.WriteString("\n")
-	}
-	oddRow := false
-	rows, cols, _, _ := Projection2DShape(sh, oddRow)
-	ctr := 0
-	for r := range rows {
-		rc, _ := Projection2DCoords(sh, oddRow, r, 0)
-		if !noidx {
-			b.WriteString(fmt.Sprintf("%v: ", rc))
-		}
-		ri := r
-		for c := 0; c < cols; c++ {
-			if tsr.IsString() {
-				b.WriteString(fmt.Sprintf("%s ", Projection2DString(tsr, oddRow, ri, c)))
-			} else {
-				b.WriteString(fmt.Sprintf("%7g ", Projection2DValue(tsr, oddRow, ri, c)))
-			}
-		}
-		b.WriteString("\n")
-		ctr += cols
-		if ctr > maxLen {
-			b.WriteString("...\n")
-			break
-		}
-	}
-	return b.String()
 }

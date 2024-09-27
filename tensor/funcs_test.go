@@ -69,3 +69,24 @@ func TestAlign(t *testing.T) {
 	assert.Equal(t, []int{3, 1, 4}, as.Sizes)
 	assert.Equal(t, []int{1, 3, 4}, bs.Sizes)
 }
+
+func TestCreate(t *testing.T) {
+	ar := NewIntRange(5)
+	assert.Equal(t, []int{0, 1, 2, 3, 4}, AsIntSlice(ar))
+
+	ar = NewIntRange(2, 5)
+	assert.Equal(t, []int{2, 3, 4}, AsIntSlice(ar))
+
+	ar = NewIntRange(0, 5, 2)
+	assert.Equal(t, []int{0, 2, 4}, AsIntSlice(ar))
+
+	lr := NewFloat64SpacedLinear(NewFloat64Scalar(0), NewFloat64Scalar(5), 6, true)
+	assert.Equal(t, []float64{0, 1, 2, 3, 4, 5}, AsFloat64Slice(lr))
+
+	lr = NewFloat64SpacedLinear(NewFloat64Scalar(0), NewFloat64Scalar(5), 5, false)
+	assert.Equal(t, []float64{0, 1, 2, 3, 4}, AsFloat64Slice(lr))
+
+	lr2 := NewFloat64SpacedLinear(NewFloat64FromValues(0, 2), NewFloat64FromValues(5, 7), 5, false)
+	// fmt.Println(lr2)
+	assert.Equal(t, []float64{0, 2, 1, 3, 2, 4, 3, 5, 4, 6}, AsFloat64Slice(lr2))
+}

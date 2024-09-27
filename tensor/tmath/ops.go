@@ -123,11 +123,5 @@ func Negate(a tensor.Tensor) tensor.Tensor {
 
 // NegateOut stores in the output the bool value -a.
 func NegateOut(a tensor.Tensor, out tensor.Values) error {
-	out.SetShapeSizes(a.Shape().Sizes...)
-	alen := a.Len()
-	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int { return alen },
-		func(idx int, tsr ...tensor.Tensor) {
-			out.SetFloat1D(-tsr[0].Float1D(idx), idx)
-		}, a, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(in float64) float64 { return -in }, a, out)
 }

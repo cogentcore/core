@@ -211,6 +211,20 @@ func FloatFuncOut(flops int, fun func(in float64) float64, in Tensor, out Values
 	return nil
 }
 
+// FloatSetFunc sets tensor float64 values from a function,
+// which gets the index. Must be parallel threadsafe.
+// The flops (floating point operations) estimate is used to control parallel
+// threading using goroutines, and should reflect number of flops in the function.
+// See [VectorizeThreaded] for more information.
+func FloatSetFunc(flops int, fun func(idx int) float64, a Tensor) error {
+	n := a.Len()
+	VectorizeThreaded(flops, func(tsr ...Tensor) int { return n },
+		func(idx int, tsr ...Tensor) {
+			tsr[0].SetFloat1D(fun(idx), idx)
+		}, a)
+	return nil
+}
+
 //////////////////////////	Bool
 
 // BoolStringsFunc sets boolean output value based on a function involving

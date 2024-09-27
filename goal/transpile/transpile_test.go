@@ -204,7 +204,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"# a := x ** 2", `a := tmath.Pow(x, tensor.NewIntScalar(2))`},
+		{"# a := linspace(0, 5, 6, true)", `a := tensor.NewFloat64SpacedLinear(tensor.NewIntScalar(0), tensor.NewIntScalar(5), 6, true)`},
 	}
 	st := NewState()
 	for _, test := range tests {
@@ -228,12 +228,13 @@ func TestMath(t *testing.T) {
 		{"# a := zeros(3, 4)", `a := tensor.NewFloat64(3, 4)`},
 		{"# a := full(5.5, 3, 4)", `a := tensor.NewFloat64Full(5.5, 3, 4)`},
 		{"# a := zeros(sh)", `a := tensor.NewFloat64(tensor.AsIntSlice(sh) ...)`},
-		{"# a := arange(36)", `a := tensor.NewSliceInts(36)`},
-		{"# a := arange(36, 0,0,-1)", `a := tensor.NewSliceInts(36, 0, 0,  - 1)`},
+		{"# a := arange(36)", `a := tensor.NewIntRange(36)`},
+		{"# a := arange(36, 0, -1)", `a := tensor.NewIntRange(36, 0, - 1)`},
+		{"# a := linspace(0, 5, 6, true)", `a := tensor.NewFloat64SpacedLinear(tensor.NewIntScalar(0), tensor.NewIntScalar(5), 6, true)`},
 		{"# a := reshape(x, 6, 6)", `a := tensor.Reshape(x, 6, 6)`},
 		{"# a := reshape(x, [6, 6])", `a := tensor.Reshape(x, 6, 6)`},
 		{"# a := reshape(x, sh)", `a := tensor.Reshape(x, tensor.AsIntSlice(sh) ...)`},
-		{"# a := reshape(arange(36), 6, 6)", `a := tensor.Reshape(tensor.NewSliceInts(36), 6, 6)`},
+		{"# a := reshape(arange(36), 6, 6)", `a := tensor.Reshape(tensor.NewIntRange(36), 6, 6)`},
 		{"# y := a.reshape(6, 6)", `y := tensor.Reshape(a, 6, 6)`},
 		{"# a[1, 2]", `tensor.Reslice(a, 1, 2)`},
 		{"# a[:, 2]", `tensor.Reslice(a, tensor.FullAxis, 2)`},
