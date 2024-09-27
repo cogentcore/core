@@ -14,15 +14,6 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-func init() {
-	tensor.AddFunc("metric.Matrix", Matrix)
-	tensor.AddFunc("metric.CrossMatrix", CrossMatrix)
-	tensor.AddFunc("metric.CovarianceMatrix", CovarianceMatrix)
-	tensor.AddFunc("metric.PCA", PCA)
-	tensor.AddFunc("metric.SVD", SVD)
-	tensor.AddFunc("metric.ProjectOnMatrixColumn", ProjectOnMatrixColumn)
-}
-
 // MatrixOut computes the rows x rows square distance / similarity matrix
 // between the patterns for each row of the given higher dimensional input tensor,
 // which must have at least 2 dimensions: the outermost rows,

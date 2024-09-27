@@ -12,13 +12,6 @@ import (
 	"cogentcore.org/core/tensor/table"
 )
 
-// note: we cannot register these functions because they take vararg tensors!!
-//
-// func init() {
-// 	tensor.AddFunc("stats.Groups", Groups, 0, tensor.AnyFirstArg)
-// 	tensor.AddFunc("stats.GroupAll", GroupAll, 0, tensor.AnyFirstArg)
-// }
-
 // Groups generates indexes for each unique value in each of the given tensors.
 // One can then use the resulting indexes for the [tensor.Rows] indexes to
 // perform computations restricted to grouped subsets of data, as in the

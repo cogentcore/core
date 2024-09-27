@@ -10,26 +10,6 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-func init() {
-	tensor.AddFunc("tmath.Assign", Assign)
-	tensor.AddFunc("tmath.AddAssign", AddAssign)
-	tensor.AddFunc("tmath.SubAssign", SubAssign)
-	tensor.AddFunc("tmath.MulAssign", MulAssign)
-	tensor.AddFunc("tmath.DivAssign", DivAssign)
-	tensor.AddFunc("tmath.ModAssign", ModAssign)
-
-	tensor.AddFunc("tmath.Inc", Inc)
-	tensor.AddFunc("tmath.Dec", Dec)
-
-	tensor.AddFunc("tmath.Add", Add)
-	tensor.AddFunc("tmath.Sub", Sub)
-	tensor.AddFunc("tmath.Mul", Mul)
-	tensor.AddFunc("tmath.Div", Div)
-	tensor.AddFunc("tmath.Mod", Mod)
-
-	tensor.AddFunc("tmath.Negate", Negate)
-}
-
 // Assign assigns values from b into a.
 func Assign(a, b tensor.Tensor) error {
 	return tensor.FloatAssignFunc(func(a, b float64) float64 { return b }, a, b)

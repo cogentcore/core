@@ -14,19 +14,6 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-func init() {
-	tensor.AddFunc("tensor.Reshape", tensor.Reshape)
-	tensor.AddFunc("tensor.Reslice", tensor.Reslice)
-	tensor.AddFunc("tensor.Mask", tensor.Mask)
-	tensor.AddFunc("tensor.NewFloat64", tensor.NewFloat64)
-	tensor.AddFunc("tensor.NewIntScalar", tensor.NewIntScalar)
-	tensor.AddFunc("tensor.NewFloat64Scalar", tensor.NewFloat64Scalar)
-	tensor.AddFunc("tensor.NewStringScalar", tensor.NewStringScalar)
-	tensor.AddFunc("tensor.NewIntFromValues", tensor.NewIntFromValues)
-	tensor.AddFunc("tensor.NewFloat64FromValues", tensor.NewFloat64FromValues)
-	tensor.AddFunc("tensor.NewStringFromValues", tensor.NewStringFromValues)
-}
-
 func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 	nt := len(toks)
 	if nt == 0 {
@@ -804,9 +791,9 @@ func (mp *mathParse) callPropSelFun(cf *ast.CallExpr, ex ast.Expr, fw funWrap) {
 	mp.startFunc(fw.fun)
 	mp.out.Add(token.LPAREN) // use the (
 	mp.expr(ex)
-	mp.nextArg() // did first
 	mp.idx += 2
 	if len(cf.Args) > 0 {
+		mp.nextArg() // did first
 		mp.addToken(token.COMMA)
 		mp.argsList(cf.Args)
 	} else {
@@ -828,10 +815,10 @@ func (mp *mathParse) callName(cf *ast.CallExpr, funName, pkgName string) {
 		funName = pkgName + "." + funName
 		_, err = tensor.FuncByName(funName)
 	} else { // non-package qualified names are _only_ in tmath! can be lowercase
-		_, err = tensor.FuncByName(funName)
+		_, err = tensor.FuncByName("tmath." + funName)
 		if err != nil {
 			funName = strings.ToUpper(funName[:1]) + funName[1:] // first letter uppercased
-			_, err = tensor.FuncByName(funName)
+			_, err = tensor.FuncByName("tmath." + funName)
 		}
 		if err == nil { // registered, must be in tmath
 			funName = "tmath." + funName

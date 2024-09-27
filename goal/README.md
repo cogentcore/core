@@ -241,6 +241,8 @@ The _view_ versions of `Tensor` include `Sliced`, `Reshaped`,  `Masked`, `Indexe
 
 The following sections provide a full list of equivalents between the `tensor` Go code, Goal, NumPy, and MATLAB, based on the table in [numpy-for-matlab-users](https://numpy.org/doc/stable/user/numpy-for-matlab-users.html).
 * The _same:_ in Goal means that the same NumPy syntax works in Goal, minus the `np.` prefix, and likewise for _or:_ (where Goal also has additional syntax).
+* In the `tensor.Go` code, we sometimes just write a scalar number for simplicity, but these are actually `tensor.NewFloat64Scalar` etc.
+* Goal also has support for `string` tensors, e.g., for labels, and operators such as addition that make sense for strings are supported. Otherwise, strings are automatically converted to numbers using the `tensor.Float` interface. If you have any doubt about whether you've got a `tensor.Float64` when you expect one, use `tensor.AsFloat64Tensor` which makes sure.
 
 ## Tensor shape
 
@@ -323,13 +325,15 @@ Note that Goal only supports boolean logical operators (`&&` and `||`) on boolea
 | `tmath.And(a, b)` | `a && b` | `logical_and(a,b)` | `a & b` | element-wise AND operator on `bool` tensors |
 | `tmath.Or(a, b)` | `a \|\| b` | `np.logical_or(a,b)` | `a \| b` | element-wise OR operator on `bool` tensors | 
 | `tmath.Negate(a)` | `!a` | ? | ? | element-wise negation on `bool` tensors | 
-| `tensor.Mask(a,` `tmath.Less(a, 0.5)` | same: |`a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
+| `tmath.Assign(` `tensor.Mask(a,` `tmath.Less(a, 0.5),` `0)` | same: |`a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
 | `tensor.Flatten(` `tensor.Mask(a,` `tmath.Less(a, 0.5)))` | same: |`a[a < 0.5].flatten()` | ? | a 1D list of the elements of `a` < 0.5 (as a copy, not a view) |
-|  |  |`a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
+| `tensor.Mul(a,` `tmath.Greater(a, 0.5))` | same: |`a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
 
 ## Advanced index-based indexing
 
 See [NumPy integer indexing](https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing).  Note that the current NumPy version of indexed is rather complex and difficult for many people to understand, as articulated in this [NEP 21 proposal](https://numpy.org/neps/nep-0021-advanced-indexing.html). 
+
+**TODO:** not yet implemented:
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
@@ -349,8 +353,10 @@ In Goal and NumPy, the standard `+, -, *, /` operators perform _element-wise_ op
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
+| `tmath.Add(a,b)` | same: |`a + b` | `a .+ b` | element-wise addition; Goal does this string-wise for string tensors |
 | `tmath.Mul(a,b)` | same: |`a * b` | `a .* b` | element-wise multiply |
 | `tmath.Div(a,b)` | same: |`a/b`   | `a./b` | element-wise divide |
+| `tmath.Mod(a,b)` | same: |`a%b`   | `a./b` | element-wise modulous (works for float and int) |
 | `tmath.Pow(a,3)` | same: | `a^3` or `a**3` | `a**3`  | `a.^3` | element-wise exponentiation |
 | `tmath.Cos(a)`   | same: | `cos(a)` | `cos(a)` | element-wise function application |
 

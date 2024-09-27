@@ -10,10 +10,6 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-func init() {
-	tensor.AddFunc("metric.ClosestRow", ClosestRow)
-}
-
 // ClosestRow returns the closest fit between probe pattern and patterns in
 // a "vocabulary" tensor with outermost row dimension, using given metric
 // function, which must fit the MetricFunc signature.

@@ -126,7 +126,7 @@ func AddFunc(name string, fun any) error {
 	}
 	_, ok := Funcs[name]
 	if ok {
-		return errors.Log(fmt.Errorf("tensor.AddFunc: function of name %q already exists, not added", name))
+		return fmt.Errorf("tensor.AddFunc: function of name %q already exists, not added", name)
 	}
 	fn, err := NewFunc(name, fun)
 	if errors.Log(err) != nil {

@@ -9,18 +9,6 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-func init() {
-	tensor.AddFunc("tmath.Equal", Equal)
-	tensor.AddFunc("tmath.Less", Less)
-	tensor.AddFunc("tmath.Greater", Greater)
-	tensor.AddFunc("tmath.NotEqual", NotEqual)
-	tensor.AddFunc("tmath.LessEqual", LessEqual)
-	tensor.AddFunc("tmath.GreaterEqual", GreaterEqual)
-	tensor.AddFunc("tmath.Or", Or)
-	tensor.AddFunc("tmath.And", And)
-	tensor.AddFunc("tmath.Not", Not)
-}
-
 // Equal stores in the output the bool value a == b.
 func Equal(a, b tensor.Tensor) *tensor.Bool {
 	return tensor.CallOut2Bool(EqualOut, a, b)

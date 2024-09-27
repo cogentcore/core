@@ -11,15 +11,6 @@ import (
 	"cogentcore.org/core/base/errors"
 )
 
-func init() {
-	AddFunc("tensor.FloatAssignFunc", FloatAssignFunc)
-	AddFunc("tensor.StringAssignFunc", StringAssignFunc)
-	AddFunc("tensor.FloatBinaryFunc", FloatBinaryFunc)
-	AddFunc("tensor.StringBinaryFunc", StringBinaryFunc)
-	AddFunc("tensor.BoolStringsFunc", BoolStringsFunc)
-	AddFunc("tensor.BoolFloatsFunc", BoolFloatsFunc)
-}
-
 // AlignShapes aligns the shapes of two tensors, a and b for a binary
 // computation producing an output, returning the effective aligned shapes
 // for a, b, and the output, all with the same number of dimensions.

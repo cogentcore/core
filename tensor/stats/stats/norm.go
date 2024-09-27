@@ -10,13 +10,6 @@ import (
 	"cogentcore.org/core/tensor/tmath"
 )
 
-func init() {
-	tensor.AddFunc("stats.ZScore", ZScore)
-	tensor.AddFunc("stats.UnitNorm", UnitNorm)
-	tensor.AddFunc("stats.Clamp", Clamp)
-	tensor.AddFunc("stats.Binarize", Binarize)
-}
-
 // ZScore computes Z-normalized values into given output tensor,
 // subtracting the Mean and dividing by the standard deviation.
 func ZScore(a tensor.Tensor) tensor.Values {
