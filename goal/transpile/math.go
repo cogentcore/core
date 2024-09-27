@@ -397,6 +397,10 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 		fn = "LessEqual"
 	case token.GEQ:
 		fn = "GreaterEqual"
+	case token.LOR:
+		fn = "Or"
+	case token.LAND:
+		fn = "And"
 	default:
 		fmt.Println("binary token:", ex.Op)
 	}
@@ -411,8 +415,23 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 }
 
 func (mp *mathParse) unaryExpr(ex *ast.UnaryExpr) {
-	mp.addToken(ex.Op)
+	if _, isbl := ex.X.(*ast.BasicLit); isbl {
+		mp.addToken(ex.Op)
+		mp.expr(ex.X)
+		return
+	}
+	fn := ""
+	switch ex.Op {
+	case token.NOT:
+		fn = "Not"
+	case token.SUB:
+		fn = "Negate"
+	}
+	mp.startFunc("tmath." + fn)
+	mp.addToken(token.LPAREN)
 	mp.expr(ex.X)
+	mp.out.Add(token.RPAREN)
+	mp.endFunc()
 }
 
 func (mp *mathParse) defineStmt(as *ast.AssignStmt) {

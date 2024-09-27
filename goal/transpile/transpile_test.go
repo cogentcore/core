@@ -207,6 +207,7 @@ func TestMath(t *testing.T) {
 		{"# x := a + 1", `x := tmath.Add(a, tensor.NewIntScalar(1))`},
 		{"# x = x * 4", `x = tmath.Mul(x, tensor.NewIntScalar(4))`},
 		{"# a = x + y", `a = tmath.Add(x, y)`},
+		{"# a = -x", `a = tmath.Negate(x)`},
 		{"# a := [1,2,3,4]", `a := tensor.NewIntFromValues([]int { 1, 2, 3, 4 }  ...)`},
 		{"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},
 		{"# ndim(a)", `tensor.NewIntScalar(a.NumDims())`},
@@ -235,7 +236,9 @@ func TestMath(t *testing.T) {
 		{"# z = a[1:5,1:5] - stats.Mean(ra)", `z = tmath.Sub(tensor.Reslice(a, tensor.Slice { Start:1, Stop:5 } , tensor.Slice { Start:1, Stop:5 } ), stats.Mean(ra))`},
 		{"# m := metric.Matrix(metric.Cosine, a)", `m := metric.Matrix(metric.Cosine, a)`},
 		{"# b := a > 5", `b := tmath.Greater(a, tensor.NewIntScalar(5))`},
+		{"# b := !a", `b := tmath.Not(a)`},
 		{"# b := a[a > 5]", `b := tensor.Mask(a, tmath.Greater(a, tensor.NewIntScalar(5)))`},
+		{"# a > 5 || a < 1", `tmath.Or(tmath.Greater(a, tensor.NewIntScalar(5)), tmath.Less(a, tensor.NewIntScalar(1)))`},
 	}
 
 	st := NewState()

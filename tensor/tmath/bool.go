@@ -5,6 +5,7 @@
 package tmath
 
 import (
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 )
 
@@ -15,6 +16,9 @@ func init() {
 	tensor.AddFunc("tmath.NotEqual", NotEqual)
 	tensor.AddFunc("tmath.LessEqual", LessEqual)
 	tensor.AddFunc("tmath.GreaterEqual", GreaterEqual)
+	tensor.AddFunc("tmath.Or", Or)
+	tensor.AddFunc("tmath.And", And)
+	tensor.AddFunc("tmath.Not", Not)
 }
 
 // Equal stores in the output the bool value a == b.
@@ -93,4 +97,42 @@ func GreaterEqualOut(a, b tensor.Tensor, out *tensor.Bool) error {
 		return tensor.BoolStringsFuncOut(func(a, b string) bool { return a >= b }, a, b, out)
 	}
 	return tensor.BoolFloatsFuncOut(func(a, b float64) bool { return a >= b }, a, b, out)
+}
+
+// Or stores in the output the bool value a || b.
+func Or(a, b tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut2Bool(OrOut, a, b)
+}
+
+// OrOut stores in the output the bool value a || b.
+func OrOut(a, b tensor.Tensor, out *tensor.Bool) error {
+	return tensor.BoolIntsFuncOut(func(a, b int) bool { return a > 0 || b > 0 }, a, b, out)
+}
+
+// And stores in the output the bool value a || b.
+func And(a, b tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut2Bool(AndOut, a, b)
+}
+
+// AndOut stores in the output the bool value a || b.
+func AndOut(a, b tensor.Tensor, out *tensor.Bool) error {
+	return tensor.BoolIntsFuncOut(func(a, b int) bool { return a > 0 && b > 0 }, a, b, out)
+}
+
+// Not stores in the output the bool value !a.
+func Not(a tensor.Tensor) tensor.Tensor {
+	out := tensor.NewBool()
+	errors.Log(NotOut(a, out))
+	return out
+}
+
+// NotOut stores in the output the bool value !a.
+func NotOut(a tensor.Tensor, out *tensor.Bool) error {
+	out.SetShapeSizes(a.Shape().Sizes...)
+	alen := a.Len()
+	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int { return alen },
+		func(idx int, tsr ...tensor.Tensor) {
+			out.SetBool1D(tsr[0].Int1D(idx) == 0, idx)
+		}, a, out)
+	return nil
 }

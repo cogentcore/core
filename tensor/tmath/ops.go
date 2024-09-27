@@ -5,6 +5,8 @@
 package tmath
 
 import (
+	"math"
+
 	"cogentcore.org/core/tensor"
 )
 
@@ -14,6 +16,7 @@ func init() {
 	tensor.AddFunc("tmath.SubAssign", SubAssign)
 	tensor.AddFunc("tmath.MulAssign", MulAssign)
 	tensor.AddFunc("tmath.DivAssign", DivAssign)
+	tensor.AddFunc("tmath.ModAssign", ModAssign)
 
 	tensor.AddFunc("tmath.Inc", Inc)
 	tensor.AddFunc("tmath.Dec", Dec)
@@ -22,7 +25,9 @@ func init() {
 	tensor.AddFunc("tmath.Sub", Sub)
 	tensor.AddFunc("tmath.Mul", Mul)
 	tensor.AddFunc("tmath.Div", Div)
+	tensor.AddFunc("tmath.Mod", Mod)
 
+	tensor.AddFunc("tmath.Negate", Negate)
 }
 
 // Assign assigns values from b into a.
@@ -51,6 +56,11 @@ func MulAssign(a, b tensor.Tensor) error {
 // DivAssign does /= divide assign values from b into a.
 func DivAssign(a, b tensor.Tensor) error {
 	return tensor.FloatAssignFunc(func(a, b float64) float64 { return a / b }, a, b)
+}
+
+// ModAssign does %= modulus assign values from b into a.
+func ModAssign(a, b tensor.Tensor) error {
+	return tensor.FloatAssignFunc(func(a, b float64) float64 { return math.Mod(a, b) }, a, b)
 }
 
 // Inc increments values in given tensor by 1.
@@ -114,4 +124,30 @@ func Div(a, b tensor.Tensor) tensor.Tensor {
 // DivOut divides two tensors into output.
 func DivOut(a, b tensor.Tensor, out tensor.Values) error {
 	return tensor.FloatBinaryFuncOut(func(a, b float64) float64 { return a / b }, a, b, out)
+}
+
+// Mod performs modulus a%b on tensors into output.
+func Mod(a, b tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut2(ModOut, a, b)
+}
+
+// ModOut performs modulus a%b on tensors into output.
+func ModOut(a, b tensor.Tensor, out tensor.Values) error {
+	return tensor.FloatBinaryFuncOut(func(a, b float64) float64 { return math.Mod(a, b) }, a, b, out)
+}
+
+// Negate stores in the output the bool value -a.
+func Negate(a tensor.Tensor) tensor.Tensor {
+	return tensor.CallOut1(NegateOut, a)
+}
+
+// NegateOut stores in the output the bool value -a.
+func NegateOut(a tensor.Tensor, out tensor.Values) error {
+	out.SetShapeSizes(a.Shape().Sizes...)
+	alen := a.Len()
+	tensor.VectorizeThreaded(1, func(tsr ...tensor.Tensor) int { return alen },
+		func(idx int, tsr ...tensor.Tensor) {
+			out.SetFloat1D(-tsr[0].Float1D(idx), idx)
+		}, a, out)
+	return nil
 }

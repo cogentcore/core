@@ -34,6 +34,8 @@ func init() {
 		"Ascending":               reflect.ValueOf(tensor.Ascending),
 		"BoolFloatsFunc":          reflect.ValueOf(tensor.BoolFloatsFunc),
 		"BoolFloatsFuncOut":       reflect.ValueOf(tensor.BoolFloatsFuncOut),
+		"BoolIntsFunc":            reflect.ValueOf(tensor.BoolIntsFunc),
+		"BoolIntsFuncOut":         reflect.ValueOf(tensor.BoolIntsFuncOut),
 		"BoolStringsFunc":         reflect.ValueOf(tensor.BoolStringsFunc),
 		"BoolStringsFuncOut":      reflect.ValueOf(tensor.BoolStringsFuncOut),
 		"BoolToFloat64":           reflect.ValueOf(tensor.BoolToFloat64),
