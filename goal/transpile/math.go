@@ -335,6 +335,10 @@ func (mp *mathParse) expr(ex ast.Expr) {
 	case *ast.UnaryExpr:
 		mp.unaryExpr(x)
 
+	case *ast.StarExpr:
+		mp.addToken(token.MUL)
+		mp.expr(x.X)
+
 	case *ast.BinaryExpr:
 		mp.binaryExpr(x)
 
@@ -445,6 +449,10 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 		fn = "Sub"
 	case token.MUL:
 		fn = "Mul"
+		if un, ok := ex.Y.(*ast.StarExpr); ok { // ** power operator
+			ex.Y = un.X
+			fn = "Pow"
+		}
 	case token.QUO:
 		fn = "Div"
 	case token.EQL:
@@ -471,6 +479,9 @@ func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
 	mp.expr(ex.X)
 	mp.out.Add(token.COMMA)
 	mp.idx++
+	if fn == "Pow" {
+		mp.idx++
+	}
 	mp.expr(ex.Y)
 	mp.out.Add(token.RPAREN)
 	mp.endFunc()
@@ -488,6 +499,10 @@ func (mp *mathParse) unaryExpr(ex *ast.UnaryExpr) {
 		fn = "Not"
 	case token.SUB:
 		fn = "Negate"
+	default: // * goes to StarExpr -- not sure what else could happen here?
+		mp.addToken(ex.Op)
+		mp.expr(ex.X)
+		return
 	}
 	mp.startFunc("tmath." + fn)
 	mp.addToken(token.LPAREN)

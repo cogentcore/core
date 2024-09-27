@@ -62,6 +62,8 @@ func init() {
 		"FloatAssignFunc":         reflect.ValueOf(tensor.FloatAssignFunc),
 		"FloatBinaryFunc":         reflect.ValueOf(tensor.FloatBinaryFunc),
 		"FloatBinaryFuncOut":      reflect.ValueOf(tensor.FloatBinaryFuncOut),
+		"FloatFunc":               reflect.ValueOf(tensor.FloatFunc),
+		"FloatFuncOut":            reflect.ValueOf(tensor.FloatFuncOut),
 		"FullAxis":                reflect.ValueOf(tensor.FullAxis),
 		"FuncByName":              reflect.ValueOf(tensor.FuncByName),
 		"Funcs":                   reflect.ValueOf(&tensor.Funcs).Elem(),

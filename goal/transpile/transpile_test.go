@@ -200,6 +200,19 @@ goal.Run("ls", "-la", "args...")
 	}
 }
 
+// Use this for testing the current thing working on.
+func TestCur(t *testing.T) {
+	// logx.UserLevel = slog.LevelDebug
+	tests := []exIn{
+		{"# a := x ** 2", `a := tmath.Pow(x, tensor.NewIntScalar(2))`},
+	}
+	st := NewState()
+	for _, test := range tests {
+		o := st.TranspileLine(test.i)
+		assert.Equal(t, test.e, o)
+	}
+}
+
 func TestMath(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
@@ -207,6 +220,7 @@ func TestMath(t *testing.T) {
 		{"# x := a + 1", `x := tmath.Add(a, tensor.NewIntScalar(1))`},
 		{"# x = x * 4", `x = tmath.Mul(x, tensor.NewIntScalar(4))`},
 		{"# a = x + y", `a = tmath.Add(x, y)`},
+		{"# a := x ** 2", `a := tmath.Pow(x, tensor.NewIntScalar(2))`},
 		{"# a = -x", `a = tmath.Negate(x)`},
 		{"# a := [1,2,3,4]", `a := tensor.NewIntFromValues([]int { 1, 2, 3, 4 }  ...)`},
 		{"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},
