@@ -44,6 +44,9 @@ func ParseLine(code string, mode Mode) (stmts []ast.Stmt, err error) {
 	if p.tok == token.SEMICOLON && p.lit == "\n" {
 		p.next()
 	}
+	if p.tok == token.RBRACE {
+		return
+	}
 	p.expect(token.EOF)
 
 	return
@@ -419,8 +422,9 @@ func (p *parser) expectSemi() (comment *ast.CommentGroup) {
 			}
 			return comment
 		default:
-			p.errorExpected(p.pos, "';'")
-			p.advance(stmtStart)
+			// math: allow unexpected endings..
+			// p.errorExpected(p.pos, "';'")
+			// p.advance(stmtStart)
 		}
 	}
 	return nil
@@ -1504,6 +1508,9 @@ func (p *parser) parseBlockStmt() *ast.BlockStmt {
 	}
 
 	lbrace := p.expect(token.LBRACE)
+	if p.tok == token.EOF { // math: allow start only
+		return &ast.BlockStmt{Lbrace: lbrace}
+	}
 	list := p.parseStmtList()
 	rbrace := p.expect2(token.RBRACE)
 

@@ -50,6 +50,9 @@ func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 			fmt.Println("line code:", str)
 			fmt.Println("parse err:", err)
 		}
+		if len(stmts) == 0 {
+			return toks
+		}
 		mp.stmtList(stmts)
 	} else {
 		ex, err := ParseExpr(str, mods)
@@ -244,10 +247,13 @@ func (mp *mathParse) stmt(st ast.Stmt) {
 			mp.addToken(token.SEMICOLON)
 		}
 		mp.expr(x.Cond)
-		if x.Body != nil {
+		mp.out.Add(token.IDENT, ".Bool1D(0)") // turn bool expr into actual bool
+		if x.Body != nil && len(x.Body.List) > 0 {
 			mp.addToken(token.LBRACE)
 			mp.stmtList(x.Body.List)
 			mp.addToken(token.RBRACE)
+		} else {
+			mp.addToken(token.LBRACE)
 		}
 		if x.Else != nil {
 			mp.addToken(token.ELSE)
@@ -684,16 +690,22 @@ func (mp *mathParse) callExpr(ex *ast.CallExpr) {
 		}
 		mp.callName(ex, x.Name, "")
 	case *ast.SelectorExpr:
+		fun := x.Sel.Name
 		if pkg, ok := x.X.(*ast.Ident); ok {
-			fun := x.Sel.Name
 			if fw, ok := numpyFuncs[fun]; ok {
-				mp.callPropSelFun(ex, pkg.Name, fw)
+				mp.callPropSelFun(ex, x.X, fw)
 				return
 			} else {
+				// fmt.Println("call name:", fun, pkg.Name)
 				mp.callName(ex, fun, pkg.Name)
 			}
 		} else {
-			fmt.Printf("call, weird sel: %#v\n", x.X)
+			if fw, ok := numpyFuncs[fun]; ok {
+				mp.callPropSelFun(ex, x.X, fw)
+				return
+			}
+			// todo: dot fun?
+			mp.expr(ex)
 		}
 	default:
 		mp.expr(ex.Fun)
@@ -705,10 +717,10 @@ func (mp *mathParse) callExpr(ex *ast.CallExpr) {
 }
 
 // this calls a "prop" function like ndim(a) on the object.
-func (mp *mathParse) callPropFun(ex *ast.CallExpr, fw funWrap) {
+func (mp *mathParse) callPropFun(cf *ast.CallExpr, fw funWrap) {
 	ellip := fw.wrapFunc(mp)
 	mp.idx += 2
-	mp.exprList(ex.Args) // this is the tensor
+	mp.exprList(cf.Args) // this is the tensor
 	mp.addToken(token.PERIOD)
 	mp.out.Add(token.IDENT, fw.fun)
 	if ellip {
@@ -719,19 +731,23 @@ func (mp *mathParse) callPropFun(ex *ast.CallExpr, fw funWrap) {
 }
 
 // this calls global function through selector like: a.reshape()
-func (mp *mathParse) callPropSelFun(ex *ast.CallExpr, obj string, fw funWrap) {
+func (mp *mathParse) callPropSelFun(cf *ast.CallExpr, ex ast.Expr, fw funWrap) {
 	mp.startFunc(fw.fun)
-	mp.addToken(token.LPAREN) // use the (
-	mp.out.Add(token.IDENT, obj)
+	mp.out.Add(token.LPAREN) // use the (
+	mp.expr(ex)
 	mp.nextArg() // did first
 	mp.idx += 2
-	mp.addToken(token.COMMA)
-	mp.argsList(ex.Args)
+	if len(cf.Args) > 0 {
+		mp.addToken(token.COMMA)
+		mp.argsList(cf.Args)
+	} else {
+		mp.idx++
+	}
 	mp.addToken(token.RPAREN)
 	mp.endFunc()
 }
 
-func (mp *mathParse) callName(ex *ast.CallExpr, funName, pkgName string) {
+func (mp *mathParse) callName(cf *ast.CallExpr, funName, pkgName string) {
 	if fw, ok := numpyFuncs[funName]; ok {
 		mp.startFunc(fw.fun)
 		mp.addToken(token.LPAREN) // use the (
@@ -753,9 +769,10 @@ func (mp *mathParse) callName(ex *ast.CallExpr, funName, pkgName string) {
 		}
 	}
 	if err != nil { // not a registered tensor function
+		// fmt.Println("regular fun", funName)
 		mp.startFunc(funName)
 		mp.addToken(token.LPAREN) // use the (
-		mp.idx++
+		mp.idx += 3
 		return
 	}
 	mp.startFunc(funName)

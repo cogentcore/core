@@ -22,7 +22,7 @@ func init() {
 }
 
 // Equal stores in the output the bool value a == b.
-func Equal(a, b tensor.Tensor) tensor.Tensor {
+func Equal(a, b tensor.Tensor) *tensor.Bool {
 	return tensor.CallOut2Bool(EqualOut, a, b)
 }
 
@@ -35,7 +35,7 @@ func EqualOut(a, b tensor.Tensor, out *tensor.Bool) error {
 }
 
 // Less stores in the output the bool value a < b.
-func Less(a, b tensor.Tensor) tensor.Tensor {
+func Less(a, b tensor.Tensor) *tensor.Bool {
 	return tensor.CallOut2Bool(LessOut, a, b)
 }
 
@@ -48,7 +48,7 @@ func LessOut(a, b tensor.Tensor, out *tensor.Bool) error {
 }
 
 // Greater stores in the output the bool value a > b.
-func Greater(a, b tensor.Tensor) tensor.Tensor {
+func Greater(a, b tensor.Tensor) *tensor.Bool {
 	return tensor.CallOut2Bool(GreaterOut, a, b)
 }
 
@@ -61,7 +61,7 @@ func GreaterOut(a, b tensor.Tensor, out *tensor.Bool) error {
 }
 
 // NotEqual stores in the output the bool value a != b.
-func NotEqual(a, b tensor.Tensor) tensor.Tensor {
+func NotEqual(a, b tensor.Tensor) *tensor.Bool {
 	return tensor.CallOut2Bool(NotEqualOut, a, b)
 }
 
@@ -74,7 +74,7 @@ func NotEqualOut(a, b tensor.Tensor, out *tensor.Bool) error {
 }
 
 // LessEqual stores in the output the bool value a <= b.
-func LessEqual(a, b tensor.Tensor) tensor.Tensor {
+func LessEqual(a, b tensor.Tensor) *tensor.Bool {
 	return tensor.CallOut2Bool(LessEqualOut, a, b)
 }
 
@@ -87,7 +87,7 @@ func LessEqualOut(a, b tensor.Tensor, out *tensor.Bool) error {
 }
 
 // GreaterEqual stores in the output the bool value a >= b.
-func GreaterEqual(a, b tensor.Tensor) tensor.Tensor {
+func GreaterEqual(a, b tensor.Tensor) *tensor.Bool {
 	return tensor.CallOut2Bool(GreaterEqualOut, a, b)
 }
 
@@ -100,7 +100,7 @@ func GreaterEqualOut(a, b tensor.Tensor, out *tensor.Bool) error {
 }
 
 // Or stores in the output the bool value a || b.
-func Or(a, b tensor.Tensor) tensor.Tensor {
+func Or(a, b tensor.Tensor) *tensor.Bool {
 	return tensor.CallOut2Bool(OrOut, a, b)
 }
 
@@ -110,7 +110,7 @@ func OrOut(a, b tensor.Tensor, out *tensor.Bool) error {
 }
 
 // And stores in the output the bool value a || b.
-func And(a, b tensor.Tensor) tensor.Tensor {
+func And(a, b tensor.Tensor) *tensor.Bool {
 	return tensor.CallOut2Bool(AndOut, a, b)
 }
 
@@ -120,7 +120,7 @@ func AndOut(a, b tensor.Tensor, out *tensor.Bool) error {
 }
 
 // Not stores in the output the bool value !a.
-func Not(a tensor.Tensor) tensor.Tensor {
+func Not(a tensor.Tensor) *tensor.Bool {
 	out := tensor.NewBool()
 	errors.Log(NotOut(a, out))
 	return out

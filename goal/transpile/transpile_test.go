@@ -238,7 +238,13 @@ func TestMath(t *testing.T) {
 		{"# b := a > 5", `b := tmath.Greater(a, tensor.NewIntScalar(5))`},
 		{"# b := !a", `b := tmath.Not(a)`},
 		{"# b := a[a > 5]", `b := tensor.Mask(a, tmath.Greater(a, tensor.NewIntScalar(5)))`},
+		{"# b := a[a > 5].flatten()", `b := tensor.Flatten(tensor.Mask(a, tmath.Greater(a, tensor.NewIntScalar(5))))`},
+		{"# a[:3, 2].copy()", `tensor.Clone(tensor.Reslice(a, tensor.Slice { Stop:3 } , 2))`},
+		{"# a[:3, 2].reshape(4,2)", `tensor.Reshape(tensor.Reslice(a, tensor.Slice { Stop:3 } , 2), 4, 2)`},
 		{"# a > 5 || a < 1", `tmath.Or(tmath.Greater(a, tensor.NewIntScalar(5)), tmath.Less(a, tensor.NewIntScalar(1)))`},
+		{"# if a[1,2] == 2 {", `if tmath.Equal(tensor.Reslice(a, 1, 2), tensor.NewIntScalar(2)) {`},
+		{"# fmt.Println(a)", `fmt.Println(a)`},
+		{"# }", `}`},
 	}
 
 	st := NewState()

@@ -7,11 +7,19 @@ for i, fn := range goalib.SplitLines(`/bin/ls -1`) {
 	fmt.Println(i, fn)
 }
 
-#  x := 1
-#  y := 4
-#  a := x * 2
-#  b := x + y
-#  c := x * y + a * b
+##
+
+x := 1
+y := 4
+a := x * 2
+b := x + y
+c := x * y + a * b
 
 fmt.Println(c)
+
+if 1 == 1 {
+	fmt.Println(true)
+}
+
+##
 

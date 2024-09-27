@@ -399,14 +399,11 @@ todo: huge amount of work needed to support complex numbers throughout!
 
 ## TODO
 
-* bool &&, || !
-* flatten etc selector calls work with complex exprs.
 * basic go expressions in math mode -- see how that works
 * # # surrounding in go, shell modes
 * more creation routines
 * update readme table
 * record to datafs
 * make a simple tutorial example showing basic ops
-
 
 
