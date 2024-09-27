@@ -177,12 +177,12 @@ func AsStringSlice(tsr Tensor) []string {
 	return slc
 }
 
-// AsFloat64Tensor returns the tensor as a [Float64] tensor.
+// AsFloat64 returns the tensor as a [Float64] tensor.
 // If already is a Float64, it is returned as such.
 // Otherwise, a new Float64 tensor is created and values are copied.
 // Use this function for interfacing with gonum or other apis that
 // only operate on float64 types.
-func AsFloat64Tensor(tsr Tensor) *Float64 {
+func AsFloat64(tsr Tensor) *Float64 {
 	if f, ok := tsr.(*Float64); ok {
 		return f
 	}
@@ -191,10 +191,10 @@ func AsFloat64Tensor(tsr Tensor) *Float64 {
 	return f
 }
 
-// AsFloat32Tensor returns the tensor as a [Float32] tensor.
+// AsFloat32 returns the tensor as a [Float32] tensor.
 // If already is a Float32, it is returned as such.
 // Otherwise, a new Float32 tensor is created and values are copied.
-func AsFloat32Tensor(tsr Tensor) *Float32 {
+func AsFloat32(tsr Tensor) *Float32 {
 	if f, ok := tsr.(*Float32); ok {
 		return f
 	}
@@ -203,12 +203,10 @@ func AsFloat32Tensor(tsr Tensor) *Float32 {
 	return f
 }
 
-// AsStringTensor returns the tensor as a [String] tensor.
+// AsString returns the tensor as a [String] tensor.
 // If already is a String, it is returned as such.
 // Otherwise, a new String tensor is created and values are copied.
-// Use this function for interfacing with gonum or other apis that
-// only operate on float64 types.
-func AsStringTensor(tsr Tensor) *String {
+func AsString(tsr Tensor) *String {
 	if f, ok := tsr.(*String); ok {
 		return f
 	}
@@ -217,12 +215,10 @@ func AsStringTensor(tsr Tensor) *String {
 	return f
 }
 
-// AsIntTensor returns the tensor as a [Int] tensor.
+// AsInt returns the tensor as a [Int] tensor.
 // If already is a Int, it is returned as such.
 // Otherwise, a new Int tensor is created and values are copied.
-// Use this function for interfacing with gonum or other apis that
-// only operate on float64 types.
-func AsIntTensor(tsr Tensor) *Int {
+func AsInt(tsr Tensor) *Int {
 	if f, ok := tsr.(*Int); ok {
 		return f
 	}

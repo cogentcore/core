@@ -104,7 +104,6 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 	logd, _ := dir.Mkdir(level)
 	sitems := ss.Stats.ValuesFunc(nil)
 	nctr := ss.Config.Item("N" + level).AsInt()
-	stout := tensor.NewFloat64Scalar(0) // tmp stat output
 	for _, st := range sitems {
 		if st.IsString() {
 			continue
@@ -118,7 +117,7 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 				lt := dd.NewOfType(ag.String(), st.DataType(), nctr)
 				lt.Metadata().Copy(*st.Metadata())
 				tensor.SetCalcFunc(lt, func() error {
-					ag.Call(src, stout)
+					stout := ag.Call(src)
 					ctr := ss.Stats.Item(level).AsInt()
 					lt.SetFloatRow(stout.FloatRow(0), ctr)
 					return nil

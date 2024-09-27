@@ -199,7 +199,7 @@ func CovarianceMatrix(fun any, in tensor.Tensor) tensor.Values {
 // Note that PCA produces results in the *opposite* order of [SVD].
 func PCA(covar tensor.Tensor, eigenvecs, vals tensor.Values) error {
 	n := covar.DimSize(0)
-	cv, err := matrix.NewSymmetric(tensor.AsFloat64Tensor(covar))
+	cv, err := matrix.NewSymmetric(tensor.AsFloat64(covar))
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func PCA(covar tensor.Tensor, eigenvecs, vals tensor.Values) error {
 	var ev mat.Dense
 	eig.VectorsTo(&ev)
 	matrix.CopyDense(eigenvecs, &ev)
-	fv := tensor.AsFloat64Tensor(vals)
+	fv := tensor.AsFloat64(vals)
 	eig.Values(fv.Values)
 	if fv != vals {
 		vals.(tensor.Values).CopyFrom(fv)
@@ -230,7 +230,7 @@ func PCA(covar tensor.Tensor, eigenvecs, vals tensor.Values) error {
 // Note that SVD produces results in the *opposite* order of [PCA].
 func SVD(covar tensor.Tensor, eigenvecs, vals tensor.Values) error {
 	n := covar.DimSize(0)
-	cv, err := matrix.NewSymmetric(tensor.AsFloat64Tensor(covar))
+	cv, err := matrix.NewSymmetric(tensor.AsFloat64(covar))
 	if err != nil {
 		return err
 	}
@@ -244,7 +244,7 @@ func SVD(covar tensor.Tensor, eigenvecs, vals tensor.Values) error {
 	var ev mat.Dense
 	eig.UTo(&ev)
 	matrix.CopyDense(eigenvecs, &ev)
-	fv := tensor.AsFloat64Tensor(vals)
+	fv := tensor.AsFloat64(vals)
 	eig.Values(fv.Values)
 	if fv != vals {
 		vals.(tensor.Values).CopyFrom(fv)
