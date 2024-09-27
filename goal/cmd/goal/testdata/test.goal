@@ -17,15 +17,15 @@ c := x * y + a * b
 
 fmt.Println(c)
 
-if 1 == 1 {
+m := reshape(arange(36),6,6)
+
+if m[1,1] == 7 {
 	fmt.Println(true)
 }
 
 for i := 0; i < 3; i++ {
 	fmt.Println(i)
 }
-
-m := reshape(arange(36),6,6)
 
 for i, v := range m {
 	fmt.Println(i, v)
