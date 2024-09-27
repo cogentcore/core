@@ -313,15 +313,16 @@ See [NumPy basic indexing](https://numpy.org/doc/stable/user/basics.indexing.htm
 
 ## Boolean tensors and indexing
 
-See [NumPy boolean indexing](https://numpy.org/doc/stable/user/basics.indexing.html#boolean-array-indexing)
+See [NumPy boolean indexing](https://numpy.org/doc/stable/user/basics.indexing.html#boolean-array-indexing).
+
+Note that Goal only supports boolean logical operators (`&&` and `||`) on boolean tensors, not the single bitwise operators `&` and `|`.
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
 | `tmath.Greater(a, 0.5)` | same: | `(a > 0.5)` | `(a > 0.5)` | `bool` tensor of shape `a` with elements `(v > 0.5)` |
-| `a && b` | `logical_and(a,b)` | `a & b` | element-wise AND operator on `bool` tensors |
-| `a \|\| b` | `np.logical_or(a,b)` | `a \| b` | element-wise OR operator on `bool` tensors | 
-| `a & b`  | `a & b` | `bitand(a,b)` | element bitwise AND operator on `bool` or `int` tensors | 
-| `a \| b`  | `a \| b` | `bitor(a,b)` | element bitwise OR operator on `bool` or `int` tensors |
+| `tmath.And(a, b)` | `a && b` | `logical_and(a,b)` | `a & b` | element-wise AND operator on `bool` tensors |
+| `tmath.Or(a, b)` | `a \|\| b` | `np.logical_or(a,b)` | `a \| b` | element-wise OR operator on `bool` tensors | 
+| `tmath.Negate(a)` | `!a` | ? | ? | element-wise negation on `bool` tensors | 
 | `tensor.Mask(a,` `tmath.Less(a, 0.5)` | same: |`a[a < 0.5]=0` | `a(a<0.5)=0` | `a` with elements less than 0.5 zeroed out |
 | `tensor.Flatten(` `tensor.Mask(a,` `tmath.Less(a, 0.5)))` | same: |`a[a < 0.5].flatten()` | ? | a 1D list of the elements of `a` < 0.5 (as a copy, not a view) |
 |  |  |`a * (a > 0.5)` | `a .* (a>0.5)` | `a` with elements less than 0.5 zeroed out |
@@ -348,10 +349,10 @@ In Goal and NumPy, the standard `+, -, *, /` operators perform _element-wise_ op
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
-|  |  |`a * b` | `a .* b` | element-wise multiply |
-|  |  |`a/b`   | `a./b` | element-wise divide |
-| `a^3` or `a**3` | `a**3`  | `a.^3` | element-wise exponentiation |
-| `cos(a)` | `cos(a)` | `cos(a)` | element-wise function application |
+| `tmath.Mul(a,b)` | same: |`a * b` | `a .* b` | element-wise multiply |
+| `tmath.Div(a,b)` | same: |`a/b`   | `a./b` | element-wise divide |
+| `tmath.Pow(a,3)` | same: | `a^3` or `a**3` | `a**3`  | `a.^3` | element-wise exponentiation |
+| `tmath.Cos(a)`   | same: | `cos(a)` | `cos(a)` | element-wise function application |
 
 ## 2D Matrix Linear Algebra
 
@@ -399,7 +400,6 @@ todo: huge amount of work needed to support complex numbers throughout!
 
 ## TODO
 
-* basic go expressions in math mode -- see how that works
 * # # surrounding in go, shell modes
 * more creation routines
 * update readme table
