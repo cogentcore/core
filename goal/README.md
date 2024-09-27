@@ -281,14 +281,12 @@ The following sections provide a full list of equivalents between the `tensor` G
 
 See [NumPy](https://numpy.org/doc/stable/user/how-to-partition.html) docs for details.
 
-TODO:
-
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
-|  |  |`np.arange(1., 11.)` or `np.r_[1.:11.]` or `np.r_[1:10:10j]` | `1:10` | create an increasing vector |
-|  |  |`np.arange(10.)` or `np.r_[:10.]` or `np.r_[:9:10j]` | `0:9` | create an increasing vector |
+| `tensor.NewIntRange(1, 11)` | same: |`np.arange(1., 11.)` or `np.r_[1.:11.]` or `np.r_[1:10:10j]` | `1:10` | create an increasing vector; `arange` in goal is always ints; use `linspace` or `tensor.AsFloat64` for floats |
+|  | same: |`np.arange(10.)` or `np.r_[:10.]` or `np.r_[:9:10j]` | `0:9` | create an increasing vector; 1 arg is the stop value in a slice |
 |  |  |`np.arange(1.,11.)[:, np.newaxis]` | `[1:10]'` | create a column vector |
-|  |  |`np.linspace(1,3,4)` | `linspace(1,3,4)` | 4 equally spaced samples between 1 and 3, inclusive |
+| `tensor.NewFloat64SpacedLinear(` `1, 3, 4, true)` | `linspace(1,3,4,true)` |`np.linspace(1,3,4)` | `linspace(1,3,4)` | 4 equally spaced samples between 1 and 3, inclusive |
 |  |  |`np.mgrid[0:9.,0:6.]` or `np.meshgrid(r_[0:9.],r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D tensors: one of x values, the other of y values |
 |  |  |`ogrid[0:9.,0:6.]` or `np.ix_(np.r_[0:9.],np.r_[0:6.]` | | the best way to eval functions on a grid |
 |  |  |`np.meshgrid([1,2,4],[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
@@ -357,7 +355,7 @@ In Goal and NumPy, the standard `+, -, *, /` operators perform _element-wise_ op
 | `tmath.Mul(a,b)` | same: |`a * b` | `a .* b` | element-wise multiply |
 | `tmath.Div(a,b)` | same: |`a/b`   | `a./b` | element-wise divide |
 | `tmath.Mod(a,b)` | same: |`a%b`   | `a./b` | element-wise modulous (works for float and int) |
-| `tmath.Pow(a,3)` | same: | `a^3` or `a**3` | `a**3`  | `a.^3` | element-wise exponentiation |
+| `tmath.Pow(a,3)` | same: | `a**3`  | `a.^3` | element-wise exponentiation |
 | `tmath.Cos(a)`   | same: | `cos(a)` | `cos(a)` | element-wise function application |
 
 ## 2D Matrix Linear Algebra
@@ -406,9 +404,11 @@ todo: huge amount of work needed to support complex numbers throughout!
 
 ## TODO
 
-* # # surrounding in go, shell modes
+* newaxis -> tensor.NewAxis constant; ... -> tensor.Ellipsis in Reslice
 * more creation routines
 * update readme table
+
+* # # surrounding in go, shell modes
 * record to datafs
 * make a simple tutorial example showing basic ops
 
