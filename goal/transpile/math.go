@@ -208,8 +208,14 @@ func (mp *mathParse) stmt(st ast.Stmt) {
 		mp.expr(x.Value)
 
 	case *ast.IncDecStmt:
+		fn := "Inc"
+		if x.Tok == token.DEC {
+			fn = "Dec"
+		}
+		mp.startFunc("tmath." + fn)
+		mp.out.Add(token.LPAREN)
 		mp.expr(x.X)
-		mp.addToken(x.Tok)
+		mp.addToken(token.RPAREN)
 
 	case *ast.AssignStmt:
 		switch x.Tok {
@@ -260,8 +266,71 @@ func (mp *mathParse) stmt(st ast.Stmt) {
 			mp.stmt(x.Else)
 		}
 
+	case *ast.ForStmt:
+		mp.addToken(token.FOR)
+		mp.stmt(x.Init)
+		if x.Init != nil {
+			mp.addToken(token.SEMICOLON)
+		}
+		mp.expr(x.Cond)
+		if x.Cond != nil {
+			mp.out.Add(token.IDENT, ".Bool1D(0)") // turn bool expr into actual bool
+			mp.addToken(token.SEMICOLON)
+		}
+		mp.stmt(x.Post)
+		if x.Body != nil && len(x.Body.List) > 0 {
+			mp.addToken(token.LBRACE)
+			mp.stmtList(x.Body.List)
+			mp.addToken(token.RBRACE)
+		} else {
+			mp.addToken(token.LBRACE)
+		}
+
+	case *ast.RangeStmt:
+		if x.Key == nil || x.Value == nil {
+			fmt.Println("for range statement requires both index and value variables")
+			return
+		}
+		knm := x.Key.(*ast.Ident).Name
+		vnm := x.Value.(*ast.Ident).Name
+		enm := x.X.(*ast.Ident).Name
+
+		mp.addToken(token.FOR)
+		mp.expr(x.Key)
+		mp.idx += 2
+		mp.addToken(token.DEFINE)
+		mp.out.Add(token.IDENT, "0")
+		mp.out.Add(token.SEMICOLON)
+		mp.out.Add(token.IDENT, knm)
+		mp.out.Add(token.IDENT, "<")
+		mp.out.Add(token.IDENT, enm)
+		mp.out.Add(token.PERIOD)
+		mp.out.Add(token.IDENT, "Len")
+		mp.idx++
+		mp.out.Add(token.LPAREN)
+		mp.out.Add(token.RPAREN)
+		mp.idx++
+		mp.out.Add(token.SEMICOLON)
+		mp.idx++
+		mp.out.Add(token.IDENT, knm)
+		mp.out.Add(token.INC)
+		mp.out.Add(token.LBRACE)
+
+		mp.out.Add(token.IDENT, vnm)
+		mp.out.Add(token.DEFINE)
+		mp.out.Add(token.IDENT, enm)
+		mp.out.Add(token.IDENT, ".Float1D")
+		mp.out.Add(token.LPAREN)
+		mp.out.Add(token.IDENT, knm)
+		mp.out.Add(token.RPAREN)
+
+		if x.Body != nil && len(x.Body.List) > 0 {
+			mp.stmtList(x.Body.List)
+			mp.addToken(token.RBRACE)
+		}
+
 		// TODO
-		// CaseClause: SwitchStmt:, TypeSwitchStmt:, CommClause:, SelectStmt:, ForStmt:, RangeStmt:
+		// CaseClause: SwitchStmt:, TypeSwitchStmt:, CommClause:, SelectStmt:
 	}
 }
 
