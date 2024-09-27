@@ -161,9 +161,14 @@ func NewFloat64SpacedLinear(start, stop Tensor, num int, endpoint bool) *Float64
 	for i := range n {
 		step.SetFloat1D((stop.Float1D(i)-start.Float1D(i))/fnum, i)
 	}
-	tsz := slices.Clone(start.Shape().Sizes)
-	tsz = append([]int{num}, tsz...)
-	tsr := NewFloat64(tsz...)
+	var tsr *Float64
+	if start.Len() == 1 {
+		tsr = NewFloat64(num)
+	} else {
+		tsz := slices.Clone(start.Shape().Sizes)
+		tsz = append([]int{num}, tsz...)
+		tsr = NewFloat64(tsz...)
+	}
 	for r := range num {
 		for i := range n {
 			tsr.SetFloatRowCell(start.Float1D(i)+float64(r)*step.Float1D(i), r, i)

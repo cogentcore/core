@@ -191,19 +191,20 @@ func Sprintf(tsr Tensor, maxLen int, format string) string {
 			format = "%7.3g\t"
 		}
 	}
-	mxlen := 0
-	for i := range maxLen {
+	mxwd := 0
+	n := min(tsr.Len(), maxLen)
+	for i := range n {
 		s := ""
 		if tsr.IsString() {
 			s = fmt.Sprintf(format, tsr.String1D(i))
 		} else {
 			s = fmt.Sprintf(format, tsr.Float1D(i))
 		}
-		if len(s) > mxlen {
-			mxlen = len(s)
+		if len(s) > mxwd {
+			mxwd = len(s)
 		}
 	}
-	colWd = int(math32.IntMultipleGE(float32(mxlen), 8)) / 8
+	colWd = int(math32.IntMultipleGE(float32(mxwd), 8)) / 8
 	if colWd > 1 && !tsr.IsString() && defFmt { // should be 2
 		if isint {
 			format = "%15g\t"
@@ -234,6 +235,7 @@ func Sprintf(tsr Tensor, maxLen int, format string) string {
 		}
 		b.WriteString("\n")
 	}
+	// todo: could do something better for large numbers of columns..
 	ctr := 0
 	for r := range rows {
 		rc, _ := Projection2DCoords(sh, oddRow, r, 0)
