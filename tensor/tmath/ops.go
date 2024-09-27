@@ -73,7 +73,7 @@ func AddOut(a, b tensor.Tensor, out tensor.Values) error {
 	if a.IsString() {
 		return tensor.StringBinaryFuncOut(func(a, b string) string { return a + b }, a, b, out)
 	}
-	return tensor.FloatBinaryFuncOut(func(a, b float64) float64 { return a + b }, a, b, out)
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return a + b }, a, b, out)
 }
 
 // Sub subtracts tensors into output.
@@ -83,7 +83,7 @@ func Sub(a, b tensor.Tensor) tensor.Tensor {
 
 // SubOut subtracts two tensors into output.
 func SubOut(a, b tensor.Tensor, out tensor.Values) error {
-	return tensor.FloatBinaryFuncOut(func(a, b float64) float64 { return a - b }, a, b, out)
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return a - b }, a, b, out)
 }
 
 // Mul multiplies tensors into output.
@@ -93,7 +93,7 @@ func Mul(a, b tensor.Tensor) tensor.Tensor {
 
 // MulOut multiplies two tensors into output.
 func MulOut(a, b tensor.Tensor, out tensor.Values) error {
-	return tensor.FloatBinaryFuncOut(func(a, b float64) float64 { return a * b }, a, b, out)
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return a * b }, a, b, out)
 }
 
 // Div divides tensors into output.
@@ -103,7 +103,7 @@ func Div(a, b tensor.Tensor) tensor.Tensor {
 
 // DivOut divides two tensors into output.
 func DivOut(a, b tensor.Tensor, out tensor.Values) error {
-	return tensor.FloatBinaryFuncOut(func(a, b float64) float64 { return a / b }, a, b, out)
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return a / b }, a, b, out)
 }
 
 // Mod performs modulus a%b on tensors into output.
@@ -113,7 +113,7 @@ func Mod(a, b tensor.Tensor) tensor.Tensor {
 
 // ModOut performs modulus a%b on tensors into output.
 func ModOut(a, b tensor.Tensor, out tensor.Values) error {
-	return tensor.FloatBinaryFuncOut(func(a, b float64) float64 { return math.Mod(a, b) }, a, b, out)
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return math.Mod(a, b) }, a, b, out)
 }
 
 // Negate stores in the output the bool value -a.

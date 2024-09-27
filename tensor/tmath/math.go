@@ -15,11 +15,7 @@ func Abs(in tensor.Tensor) tensor.Values {
 }
 
 func AbsOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Abs(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Abs(a) }, in, out)
 }
 
 func Acos(in tensor.Tensor) tensor.Values {
@@ -27,11 +23,7 @@ func Acos(in tensor.Tensor) tensor.Values {
 }
 
 func AcosOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Acos(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Acos(a) }, in, out)
 }
 
 func Acosh(in tensor.Tensor) tensor.Values {
@@ -39,11 +31,7 @@ func Acosh(in tensor.Tensor) tensor.Values {
 }
 
 func AcoshOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Acosh(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Acosh(a) }, in, out)
 }
 
 func Asin(in tensor.Tensor) tensor.Values {
@@ -51,11 +39,7 @@ func Asin(in tensor.Tensor) tensor.Values {
 }
 
 func AsinOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Asin(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Asin(a) }, in, out)
 }
 
 func Asinh(in tensor.Tensor) tensor.Values {
@@ -63,11 +47,7 @@ func Asinh(in tensor.Tensor) tensor.Values {
 }
 
 func AsinhOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Asinh(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Asinh(a) }, in, out)
 }
 
 func Atan(in tensor.Tensor) tensor.Values {
@@ -75,11 +55,7 @@ func Atan(in tensor.Tensor) tensor.Values {
 }
 
 func AtanOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Atan(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Atan(a) }, in, out)
 }
 
 func Atanh(in tensor.Tensor) tensor.Values {
@@ -87,11 +63,7 @@ func Atanh(in tensor.Tensor) tensor.Values {
 }
 
 func AtanhOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Atanh(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Atanh(a) }, in, out)
 }
 
 func Cbrt(in tensor.Tensor) tensor.Values {
@@ -99,11 +71,7 @@ func Cbrt(in tensor.Tensor) tensor.Values {
 }
 
 func CbrtOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Cbrt(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Cbrt(a) }, in, out)
 }
 
 func Ceil(in tensor.Tensor) tensor.Values {
@@ -111,11 +79,7 @@ func Ceil(in tensor.Tensor) tensor.Values {
 }
 
 func CeilOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Ceil(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Ceil(a) }, in, out)
 }
 
 func Cos(in tensor.Tensor) tensor.Values {
@@ -123,11 +87,7 @@ func Cos(in tensor.Tensor) tensor.Values {
 }
 
 func CosOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Cos(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Cos(a) }, in, out)
 }
 
 func Cosh(in tensor.Tensor) tensor.Values {
@@ -135,11 +95,7 @@ func Cosh(in tensor.Tensor) tensor.Values {
 }
 
 func CoshOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Cosh(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Cosh(a) }, in, out)
 }
 
 func Erf(in tensor.Tensor) tensor.Values {
@@ -147,11 +103,7 @@ func Erf(in tensor.Tensor) tensor.Values {
 }
 
 func ErfOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Erf(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Erf(a) }, in, out)
 }
 
 func Erfc(in tensor.Tensor) tensor.Values {
@@ -159,11 +111,7 @@ func Erfc(in tensor.Tensor) tensor.Values {
 }
 
 func ErfcOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Erfc(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Erfc(a) }, in, out)
 }
 
 func Erfcinv(in tensor.Tensor) tensor.Values {
@@ -171,11 +119,7 @@ func Erfcinv(in tensor.Tensor) tensor.Values {
 }
 
 func ErfcinvOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Erfcinv(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Erfcinv(a) }, in, out)
 }
 
 func Erfinv(in tensor.Tensor) tensor.Values {
@@ -183,11 +127,7 @@ func Erfinv(in tensor.Tensor) tensor.Values {
 }
 
 func ErfinvOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Erfinv(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Erfinv(a) }, in, out)
 }
 
 func Exp(in tensor.Tensor) tensor.Values {
@@ -195,11 +135,7 @@ func Exp(in tensor.Tensor) tensor.Values {
 }
 
 func ExpOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Exp(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Exp(a) }, in, out)
 }
 
 func Exp2(in tensor.Tensor) tensor.Values {
@@ -207,11 +143,7 @@ func Exp2(in tensor.Tensor) tensor.Values {
 }
 
 func Exp2Out(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Exp2(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Exp2(a) }, in, out)
 }
 
 func Expm1(in tensor.Tensor) tensor.Values {
@@ -219,11 +151,7 @@ func Expm1(in tensor.Tensor) tensor.Values {
 }
 
 func Expm1Out(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Expm1(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Expm1(a) }, in, out)
 }
 
 func Floor(in tensor.Tensor) tensor.Values {
@@ -231,11 +159,7 @@ func Floor(in tensor.Tensor) tensor.Values {
 }
 
 func FloorOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Floor(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Floor(a) }, in, out)
 }
 
 func Gamma(in tensor.Tensor) tensor.Values {
@@ -243,11 +167,7 @@ func Gamma(in tensor.Tensor) tensor.Values {
 }
 
 func GammaOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Gamma(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Gamma(a) }, in, out)
 }
 
 func J0(in tensor.Tensor) tensor.Values {
@@ -255,11 +175,7 @@ func J0(in tensor.Tensor) tensor.Values {
 }
 
 func J0Out(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.J0(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.J0(a) }, in, out)
 }
 
 func J1(in tensor.Tensor) tensor.Values {
@@ -267,11 +183,7 @@ func J1(in tensor.Tensor) tensor.Values {
 }
 
 func J1Out(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.J1(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.J1(a) }, in, out)
 }
 
 func Log(in tensor.Tensor) tensor.Values {
@@ -279,11 +191,7 @@ func Log(in tensor.Tensor) tensor.Values {
 }
 
 func LogOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Log(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Log(a) }, in, out)
 }
 
 func Log10(in tensor.Tensor) tensor.Values {
@@ -291,11 +199,7 @@ func Log10(in tensor.Tensor) tensor.Values {
 }
 
 func Log10Out(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Log10(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Log10(a) }, in, out)
 }
 
 func Log1p(in tensor.Tensor) tensor.Values {
@@ -303,11 +207,7 @@ func Log1p(in tensor.Tensor) tensor.Values {
 }
 
 func Log1pOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Log1p(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Log1p(a) }, in, out)
 }
 
 func Log2(in tensor.Tensor) tensor.Values {
@@ -315,11 +215,7 @@ func Log2(in tensor.Tensor) tensor.Values {
 }
 
 func Log2Out(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Log2(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Log2(a) }, in, out)
 }
 
 func Logb(in tensor.Tensor) tensor.Values {
@@ -327,11 +223,7 @@ func Logb(in tensor.Tensor) tensor.Values {
 }
 
 func LogbOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Logb(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Logb(a) }, in, out)
 }
 
 func Round(in tensor.Tensor) tensor.Values {
@@ -339,11 +231,7 @@ func Round(in tensor.Tensor) tensor.Values {
 }
 
 func RoundOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Round(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Round(a) }, in, out)
 }
 
 func RoundToEven(in tensor.Tensor) tensor.Values {
@@ -351,11 +239,7 @@ func RoundToEven(in tensor.Tensor) tensor.Values {
 }
 
 func RoundToEvenOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.RoundToEven(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.RoundToEven(a) }, in, out)
 }
 
 func Sin(in tensor.Tensor) tensor.Values {
@@ -363,11 +247,7 @@ func Sin(in tensor.Tensor) tensor.Values {
 }
 
 func SinOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Sin(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Sin(a) }, in, out)
 }
 
 func Sinh(in tensor.Tensor) tensor.Values {
@@ -375,11 +255,7 @@ func Sinh(in tensor.Tensor) tensor.Values {
 }
 
 func SinhOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Sinh(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Sinh(a) }, in, out)
 }
 
 func Sqrt(in tensor.Tensor) tensor.Values {
@@ -387,11 +263,7 @@ func Sqrt(in tensor.Tensor) tensor.Values {
 }
 
 func SqrtOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Sqrt(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Sqrt(a) }, in, out)
 }
 
 func Tan(in tensor.Tensor) tensor.Values {
@@ -399,11 +271,7 @@ func Tan(in tensor.Tensor) tensor.Values {
 }
 
 func TanOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Tan(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Tan(a) }, in, out)
 }
 
 func Tanh(in tensor.Tensor) tensor.Values {
@@ -411,11 +279,7 @@ func Tanh(in tensor.Tensor) tensor.Values {
 }
 
 func TanhOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Tanh(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Tanh(a) }, in, out)
 }
 
 func Trunc(in tensor.Tensor) tensor.Values {
@@ -423,11 +287,7 @@ func Trunc(in tensor.Tensor) tensor.Values {
 }
 
 func TruncOut(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Trunc(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Trunc(a) }, in, out)
 }
 
 func Y0(in tensor.Tensor) tensor.Values {
@@ -435,11 +295,7 @@ func Y0(in tensor.Tensor) tensor.Values {
 }
 
 func Y0Out(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Y0(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Y0(a) }, in, out)
 }
 
 func Y1(in tensor.Tensor) tensor.Values {
@@ -447,25 +303,85 @@ func Y1(in tensor.Tensor) tensor.Values {
 }
 
 func Y1Out(in tensor.Tensor, out tensor.Values) error {
-	tensor.SetShapeFrom(out, in)
-	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
-		tsr[1].SetFloat1D(math.Y1(tsr[0].Float1D(idx)), idx)
-	}, in, out)
-	return nil
+	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Y1(a) }, in, out)
+}
+
+//////////////////////// Binary
+
+func Atan2(y, x tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(Atan2Out, y, x)
+}
+
+func Atan2Out(y, x tensor.Tensor, out tensor.Values) error {
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return math.Atan2(a, b) }, y, x, out)
+}
+
+func Copysign(x, y tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(CopysignOut, x, y)
+}
+
+func CopysignOut(x, y tensor.Tensor, out tensor.Values) error {
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return math.Copysign(a, b) }, x, y, out)
+}
+
+func Dim(x, y tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(DimOut, x, y)
+}
+
+func DimOut(x, y tensor.Tensor, out tensor.Values) error {
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return math.Dim(a, b) }, x, y, out)
+}
+
+func Hypot(x, y tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(HypotOut, x, y)
+}
+
+func HypotOut(x, y tensor.Tensor, out tensor.Values) error {
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return math.Hypot(a, b) }, x, y, out)
+}
+
+func Max(x, y tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(MaxOut, x, y)
+}
+
+func MaxOut(x, y tensor.Tensor, out tensor.Values) error {
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return math.Max(a, b) }, x, y, out)
+}
+
+func Min(x, y tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(MinOut, x, y)
+}
+
+func MinOut(x, y tensor.Tensor, out tensor.Values) error {
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return math.Min(a, b) }, x, y, out)
+}
+
+func Nextafter(x, y tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(NextafterOut, x, y)
+}
+
+func NextafterOut(x, y tensor.Tensor, out tensor.Values) error {
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return math.Nextafter(a, b) }, x, y, out)
+}
+
+func Pow(x, y tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(PowOut, x, y)
+}
+
+func PowOut(x, y tensor.Tensor, out tensor.Values) error {
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return math.Pow(a, b) }, x, y, out)
+}
+
+func Remainder(x, y tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(RemainderOut, x, y)
+}
+
+func RemainderOut(x, y tensor.Tensor, out tensor.Values) error {
+	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return math.Remainder(a, b) }, x, y, out)
 }
 
 /*
-func Atan2(y, in tensor.Tensor, out tensor.Values)
-func Copysign(f, sign float64) float64
-func Dim(x, y float64) float64
-func Hypot(p, q float64) float64
-func Max(x, y float64) float64
-func Min(x, y float64) float64
-func Mod(x, y float64) float64
-func Nextafter(x, y float64) (r float64)
 func Nextafter32(x, y float32) (r float32)
-func Pow(x, y float64) float64
-func Remainder(x, y float64) float64
 
 func Inf(sign int) float64
 func IsInf(f float64, sign int) bool

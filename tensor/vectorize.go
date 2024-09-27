@@ -11,11 +11,11 @@ import (
 )
 
 var (
-	// ThreadingThreshod is the threshold in number of tensor elements
-	// to engage actual parallel processing.
+	// ThreadingThreshod is the threshold in number of flops (floating point ops),
+	// computed as tensor N * flops per element, to engage actual parallel processing.
 	// Heuristically, numbers below this threshold do not result in
 	// an overall speedup, due to overhead costs.
-	ThreadingThreshold = 100_000
+	ThreadingThreshold = 10_000
 
 	// NumThreads is the number of threads to use for parallel threading.
 	// The default of 0 causes the [runtime.GOMAXPROCS] to be used.
@@ -51,6 +51,8 @@ func Vectorize(nfun func(tsr ...Tensor) int, fun func(idx int, tsr ...Tensor), t
 // (floating point operations) for the function exceeds the [ThreadingThreshold].
 // Heuristically, numbers below this threshold do not result
 // in an overall speedup, due to overhead costs.
+// Each elemental math operation in the function adds a flop.
+// See estimates in [tmath] for basic math functions.
 func VectorizeThreaded(flops int, nfun func(tsr ...Tensor) int, fun func(idx int, tsr ...Tensor), tsr ...Tensor) {
 	n := nfun(tsr...)
 	if n <= 0 {

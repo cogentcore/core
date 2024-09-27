@@ -144,12 +144,15 @@ func StringAssignFunc(fun func(a, b string) string, a, b Tensor) error {
 }
 
 // FloatBinaryFunc sets output to a binary function of a, b float64 values.
-func FloatBinaryFunc(fun func(a, b float64) float64, a, b Tensor) Tensor {
-	return CallOut2Gen1(FloatBinaryFuncOut, fun, a, b)
+// The flops (floating point operations) estimate is used to control parallel
+// threading using goroutines, and should reflect number of flops in the function.
+// See [VectorizeThreaded] for more information.
+func FloatBinaryFunc(flops int, fun func(a, b float64) float64, a, b Tensor) Tensor {
+	return CallOut2Gen2(FloatBinaryFuncOut, flops, fun, a, b)
 }
 
 // FloatBinaryFuncOut sets output to a binary function of a, b float64 values.
-func FloatBinaryFuncOut(fun func(a, b float64) float64, a, b Tensor, out Values) error {
+func FloatBinaryFuncOut(flops int, fun func(a, b float64) float64, a, b Tensor, out Values) error {
 	as, bs, os, err := AlignShapes(a, b)
 	if err != nil {
 		return err
@@ -186,6 +189,25 @@ func StringBinaryFuncOut(fun func(a, b string) string, a, b Tensor, out Values) 
 			bi := WrapIndex1D(bs, oi...)
 			out.SetString1D(fun(tsr[0].String1D(ai), tsr[1].String1D(bi)), idx)
 		}, a, b, out)
+	return nil
+}
+
+// FloatFunc sets output to a function of tensor float64 values.
+// The flops (floating point operations) estimate is used to control parallel
+// threading using goroutines, and should reflect number of flops in the function.
+// See [VectorizeThreaded] for more information.
+func FloatFunc(flops int, fun func(in float64) float64, in Tensor) Values {
+	return CallOut1Gen2(FloatFuncOut, flops, fun, in)
+}
+
+// FloatFuncOut sets output to a function of tensor float64 values.
+func FloatFuncOut(flops int, fun func(in float64) float64, in Tensor, out Values) error {
+	SetShapeFrom(out, in)
+	n := in.Len()
+	VectorizeThreaded(flops, func(tsr ...Tensor) int { return n },
+		func(idx int, tsr ...Tensor) {
+			tsr[1].SetFloat1D(fun(tsr[0].Float1D(idx)), idx)
+		}, in, out)
 	return nil
 }
 

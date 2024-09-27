@@ -68,3 +68,49 @@ func TestMath(t *testing.T) {
 		}
 	}
 }
+
+type twof func(x, y float64) float64
+type ttwof func(x, y tensor.Tensor, out tensor.Values) error
+
+func TestMathBinary(t *testing.T) {
+	scalar := tensor.NewFloat64Scalar(-5.5)
+	scout := scalar.Clone()
+
+	vals := []float64{-1.507556722888818, -1.2060453783110545, -0.9045340337332908, -0.6030226891555273, -0.3015113445777635, 0, 0.3015113445777635, 0.603022689155527, 0.904534033733291, 1.2060453783110545, 1.507556722888818, .3}
+
+	oned := tensor.NewNumberFromValues(vals...)
+	oneout := oned.Clone()
+
+	cell2d := tensor.NewFloat32(5, 2, 6)
+	_, cells := cell2d.Shape().RowCellSize()
+	assert.Equal(t, cells, 12)
+	tensor.VectorizeThreaded(1, tensor.NFirstLen, func(idx int, tsr ...tensor.Tensor) {
+		ci := idx % cells
+		cell2d.SetFloat1D(oned.Float1D(ci), idx)
+	}, cell2d)
+	cellout := cell2d.Clone()
+
+	mfuncs := []twof{math.Atan2, math.Copysign, math.Dim, math.Hypot, math.Max, math.Min, math.Nextafter, math.Pow, math.Remainder}
+	tfuncs := []ttwof{Atan2Out, CopysignOut, DimOut, HypotOut, MaxOut, MinOut, NextafterOut, PowOut, RemainderOut}
+
+	for i, fun := range mfuncs {
+		tf := tfuncs[i]
+		tf(scalar, scalar, scout)
+		tf(oned, oned, oneout)
+		tf(cell2d, cell2d, cellout)
+
+		testEqual(t, fun(scalar.Float1D(0), scalar.Float1D(0)), scout.Float1D(0))
+		for i, v := range vals {
+			testEqual(t, fun(v, v), oneout.Float1D(i))
+		}
+		lv := len(vals)
+		for r := range 5 {
+			// fmt.Println(r)
+			si := lv * r
+			for c, v := range vals {
+				ov := tensor.AsFloat32Tensor(cellout).Values[si+c]
+				testEqual(t, fun(v, v), float64(ov))
+			}
+		}
+	}
+}
