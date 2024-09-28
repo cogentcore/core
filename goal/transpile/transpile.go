@@ -298,9 +298,3 @@ func (st *State) TranspileExec(ewords []string, output bool) Tokens {
 	endExec()
 	return etoks
 }
-
-// TranspileMath does math mode transpiling. fullLine indicates code should be
-// full statement(s).
-func (st *State) TranspileMath(toks Tokens, code string, fullLine bool) Tokens {
-	return MathParse(toks, code, fullLine)
-}

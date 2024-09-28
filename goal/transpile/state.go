@@ -30,6 +30,10 @@ type State struct {
 	// MathMode is on when math mode is turned on.
 	MathMode bool
 
+	// MathRecord is state of auto-recording of data into current directory
+	// in math mode.
+	MathRecord bool
+
 	// depth of delim at the end of the current line. if 0, was complete.
 	ParenDepth, BraceDepth, BrackDepth, TypeDepth, DeclDepth int
 
@@ -52,7 +56,7 @@ type State struct {
 
 // NewState returns a new transpiling state; mostly for testing
 func NewState() *State {
-	st := &State{FuncToVar: true}
+	st := &State{FuncToVar: true, MathRecord: true}
 	return st
 }
 

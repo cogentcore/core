@@ -102,6 +102,7 @@ func NewGoal() *Goal {
 		},
 	}
 	gl.TrState.FuncToVar = true
+	gl.TrState.MathRecord = true
 	gl.Config.StdIO.SetFromOS()
 	gl.SSH = sshclient.NewConfig(&gl.Config)
 	gl.SSHClients = make(map[string]*sshclient.Client)

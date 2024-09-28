@@ -14,7 +14,9 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-func MathParse(toks Tokens, code string, fullLine bool) Tokens {
+// TranspileMath does math mode transpiling. fullLine indicates code should be
+// full statement(s).
+func (st *State) TranspileMath(toks Tokens, code string, fullLine bool) Tokens {
 	nt := len(toks)
 	if nt == 0 {
 		return nil
@@ -26,12 +28,24 @@ func MathParse(toks Tokens, code string, fullLine bool) Tokens {
 		str += toks[nt-1].Str[1:]
 	}
 	// fmt.Println(str)
-	mp := mathParse{toks: toks, code: code}
+	mp := mathParse{state: st, toks: toks, code: code}
 	// mp.trace = true
 
 	mods := AllErrors // | Trace
 
 	if fullLine {
+		ewords, err := ExecWords(str)
+		if len(ewords) > 0 {
+			if cmd, ok := datafsCommands[ewords[0]]; ok {
+				mp.ewords = ewords
+				err := cmd(&mp)
+				if err != nil {
+					fmt.Println(ewords[0]+":", err.Error())
+				}
+				return nil
+			}
+		}
+
 		stmts, err := ParseLine(str, mods)
 		if err != nil {
 			fmt.Println("line code:", str)
@@ -69,11 +83,13 @@ type funcInfo struct {
 
 // mathParse has the parsing state
 type mathParse struct {
-	code  string // code string
-	toks  Tokens // source tokens we are parsing
-	idx   int    // current index in source tokens -- critical to sync as we "use" source
-	out   Tokens // output tokens we generate
-	trace bool   // trace of parsing -- turn on to see alignment
+	state  *State
+	code   string   // code string
+	toks   Tokens   // source tokens we are parsing
+	ewords []string // exec words
+	idx    int      // current index in source tokens -- critical to sync as we "use" source
+	out    Tokens   // output tokens we generate
+	trace  bool     // trace of parsing -- turn on to see alignment
 
 	// stack of function info -- top of stack reflects the current function
 	funcs stack.Stack[*funcInfo]
@@ -519,11 +535,19 @@ func (mp *mathParse) unaryExpr(ex *ast.UnaryExpr) {
 }
 
 func (mp *mathParse) defineStmt(as *ast.AssignStmt) {
+	firstStmt := mp.idx == 0
 	mp.exprList(as.Lhs)
 	mp.addToken(as.Tok)
 	mp.startFunc("") // dummy single arg tensor function
 	mp.exprList(as.Rhs)
 	mp.endFunc()
+	if firstStmt && mp.state.MathRecord {
+		nvar, ok := as.Lhs[0].(*ast.Ident)
+		if ok {
+			mp.out.Add(token.SEMICOLON)
+			mp.out.Add(token.IDENT, "datafs.Record("+nvar.Name+",`"+nvar.Name+"`)")
+		}
+	}
 }
 
 func (mp *mathParse) assignStmt(as *ast.AssignStmt) {

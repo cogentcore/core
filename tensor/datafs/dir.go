@@ -18,6 +18,43 @@ import (
 	"cogentcore.org/core/tensor/table"
 )
 
+var (
+	// CurDir is the current working directory.
+	CurDir *Data
+
+	// CurRoot is the current root datafs system.
+	// A default root datafs is created at startup.
+	CurRoot *Data
+)
+
+func init() {
+	CurRoot, _ = NewDir("root")
+	CurDir = CurRoot
+}
+
+// Record saves given tensor to current directory with given name.
+func Record(tsr tensor.Tensor, name string) error {
+	_, err := CurDir.NewData(tsr, name)
+	return err // todo: could prompt about conficts, or always overwrite existing?
+}
+
+// Chdir changes the current working datafs directory to the named directory.
+func Chdir(dir string) error {
+	if CurDir == nil {
+		CurDir = CurRoot
+	}
+	if dir == "" {
+		CurDir = CurRoot
+		return nil
+	}
+	ndir, err := CurDir.DirAtPath(dir)
+	if err != nil {
+		return err
+	}
+	CurDir = ndir
+	return nil
+}
+
 // Dir is a map of directory entry names to Data nodes.
 // It retains the order that items were added in, which is
 // the natural order items are processed in.

@@ -107,6 +107,17 @@ func (d *Data) NewOfType(name string, typ reflect.Kind, sizes ...int) tensor.Val
 	return tsr
 }
 
+// NewData creates a new Data node for given tensor with given name.
+// returns an error if the data name already exists
+func (d *Data) NewData(tsr tensor.Tensor, name string) (*Data, error) {
+	nd, err := newData(d, name)
+	if err != nil {
+		return nil, err
+	}
+	nd.Data = tsr
+	return nd, nil
+}
+
 func (d *Data) KnownFileInfo() fileinfo.Known {
 	if d.Data == nil {
 		return fileinfo.Unknown

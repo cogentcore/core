@@ -207,6 +207,7 @@ func TestCur(t *testing.T) {
 		{"# a := linspace(0, 5, 6, true)", `a := tensor.NewFloat64SpacedLinear(tensor.NewIntScalar(0), tensor.NewIntScalar(5), 6, true)`},
 	}
 	st := NewState()
+	st.MathRecord = false
 	for _, test := range tests {
 		o := st.TranspileLine(test.i)
 		assert.Equal(t, test.e, o)
@@ -229,7 +230,7 @@ func TestMath(t *testing.T) {
 		{"# a := full(5.5, 3, 4)", `a := tensor.NewFloat64Full(5.5, 3, 4)`},
 		{"# a := zeros(sh)", `a := tensor.NewFloat64(tensor.AsIntSlice(sh) ...)`},
 		{"# a := arange(36)", `a := tensor.NewIntRange(36)`},
-		{"# a := arange(36, 0, -1)", `a := tensor.NewIntRange(36, 0, - 1)`},
+		{"# a := arange(36, 0, -1)", `a := tensor.NewIntRange(36, 0,  - 1)`},
 		{"# a := linspace(0, 5, 6, true)", `a := tensor.NewFloat64SpacedLinear(tensor.NewIntScalar(0), tensor.NewIntScalar(5), 6, true)`},
 		{"# a := reshape(x, 6, 6)", `a := tensor.Reshape(x, 6, 6)`},
 		{"# a := reshape(x, [6, 6])", `a := tensor.Reshape(x, 6, 6)`},
@@ -265,6 +266,7 @@ func TestMath(t *testing.T) {
 	}
 
 	st := NewState()
+	st.MathRecord = false
 	for _, test := range tests {
 		o := st.TranspileLine(test.i)
 		assert.Equal(t, test.e, o)

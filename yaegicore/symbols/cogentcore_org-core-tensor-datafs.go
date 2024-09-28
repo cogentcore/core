@@ -10,11 +10,15 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/tensor/datafs/datafs"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"Chdir":     reflect.ValueOf(datafs.Chdir),
+		"CurDir":    reflect.ValueOf(&datafs.CurDir).Elem(),
+		"CurRoot":   reflect.ValueOf(&datafs.CurRoot).Elem(),
 		"DirOnly":   reflect.ValueOf(datafs.DirOnly),
 		"Long":      reflect.ValueOf(datafs.Long),
 		"NewDir":    reflect.ValueOf(datafs.NewDir),
 		"Overwrite": reflect.ValueOf(datafs.Overwrite),
 		"Preserve":  reflect.ValueOf(datafs.Preserve),
+		"Record":    reflect.ValueOf(datafs.Record),
 		"Recursive": reflect.ValueOf(datafs.Recursive),
 		"Short":     reflect.ValueOf(datafs.Short),
 
