@@ -12,7 +12,7 @@ import (
 )
 
 func TestBoolOps(t *testing.T) {
-	ar := tensor.NewSliceInts(12)
+	ar := tensor.NewIntRange(12)
 	// fmt.Println(v)
 	bo := tensor.NewBool()
 	sc := tensor.NewIntScalar(6)

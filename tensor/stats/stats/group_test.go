@@ -30,8 +30,8 @@ func TestGroup(t *testing.T) {
 	assert.NoError(t, err)
 
 	ixs := dir.FlatValuesFunc(nil)
-	assert.Equal(t, []int{0, 1}, tensor.AsIntTensor(ixs[0]).Values)
-	assert.Equal(t, []int{2, 3}, tensor.AsIntTensor(ixs[1]).Values)
+	assert.Equal(t, []int{0, 1}, tensor.AsInt(ixs[0]).Values)
+	assert.Equal(t, []int{2, 3}, tensor.AsInt(ixs[1]).Values)
 
 	err = TableGroupStats(dir, StatMean, dt, "Value")
 	assert.NoError(t, err)

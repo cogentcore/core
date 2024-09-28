@@ -62,7 +62,7 @@ func TestMath(t *testing.T) {
 			// fmt.Println(r)
 			si := lv * r
 			for c, v := range vals {
-				ov := tensor.AsFloat32Tensor(cellout).Values[si+c]
+				ov := tensor.AsFloat32(cellout).Values[si+c]
 				testEqual(t, fun(v), float64(ov))
 			}
 		}
@@ -108,7 +108,7 @@ func TestMathBinary(t *testing.T) {
 			// fmt.Println(r)
 			si := lv * r
 			for c, v := range vals {
-				ov := tensor.AsFloat32Tensor(cellout).Values[si+c]
+				ov := tensor.AsFloat32(cellout).Values[si+c]
 				testEqual(t, fun(v, v), float64(ov))
 			}
 		}
