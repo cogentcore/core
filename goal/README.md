@@ -287,10 +287,10 @@ See [NumPy](https://numpy.org/doc/stable/user/how-to-partition.html) docs for de
 |  | same: |`np.arange(10.)` or `np.r_[:10.]` or `np.r_[:9:10j]` | `0:9` | create an increasing vector; 1 arg is the stop value in a slice |
 |  |  |`np.arange(1.,11.)[:, np.newaxis]` | `[1:10]'` | create a column vector |
 | `t.NewFloat64` `SpacedLinear(` `1, 3, 4, true)` | `linspace(1,3,4,true)` |`np.linspace(1,3,4)` | `linspace(1,3,4)` | 4 equally spaced samples between 1 and 3, inclusive of end (use `false` at end for exclusive) |
-|  |  |`np.mgrid[0:9.,0:6.]` or `np.meshgrid(r_[0:9.],r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D tensors: one of x values, the other of y values |
-|  |  |`ogrid[0:9.,0:6.]` or `np.ix_(np.r_[0:9.],np.r_[0:6.]` | | the best way to eval functions on a grid |
-|  |  |`np.meshgrid([1,2,4],[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
-|  |  |`np.ix_([1,2,4],[2,4,5])`    |  | the best way to eval functions on a grid |
+|  |  |`np.mgrid[0:9.,0:6.]` or `np.meshgrid(r_[0:9.],` `r_[0:6.])` | `[x,y]=meshgrid(0:8,0:5)` | two 2D tensors: one of x values, the other of y values |
+|  |  |`ogrid[0:9.,0:6.]` or `np.ix_(np.r_[0:9.],` `np.r_[0:6.]` | | the best way to eval functions on a grid |
+|  |  |`np.meshgrid([1,2,4],` `[2,4,5])` | `[x,y]=meshgrid([1,2,4],[2,4,5])` |  |
+|  |  |`np.ix_([1,2,4],` `[2,4,5])`    |  | the best way to eval functions on a grid |
 
 ## Basic indexing
 
