@@ -278,9 +278,16 @@ func (mp *mathParse) stmt(st ast.Stmt) {
 			fmt.Println("for range statement requires both index and value variables")
 			return
 		}
-		knm := x.Key.(*ast.Ident).Name
-		vnm := x.Value.(*ast.Ident).Name
-		enm := x.X.(*ast.Ident).Name
+		ki, _ := x.Key.(*ast.Ident)
+		vi, _ := x.Value.(*ast.Ident)
+		ei, _ := x.X.(*ast.Ident)
+		if ki == nil || vi == nil || ei == nil {
+			fmt.Println("for range statement requires all variables (index, value, range) to be variable names, not other expressions")
+			return
+		}
+		knm := ki.Name
+		vnm := vi.Name
+		enm := ei.Name
 
 		mp.addToken(token.FOR)
 		mp.expr(x.Key)
