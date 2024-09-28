@@ -56,7 +56,7 @@ type State struct {
 
 // NewState returns a new transpiling state; mostly for testing
 func NewState() *State {
-	st := &State{FuncToVar: true, MathRecord: true}
+	st := &State{FuncToVar: true}
 	return st
 }
 

@@ -213,6 +213,7 @@ func (in *Interpreter) SaveHistory() error {
 // Interactive runs an interactive shell that allows the user to input goal.
 // Must have done in.Config() prior to calling.
 func (in *Interpreter) Interactive() error {
+	in.Goal.TrState.MathRecord = true
 	rl, err := readline.NewFromConfig(&readline.Config{
 		AutoComplete: &goal.ReadlineCompleter{Goal: in.Goal},
 		Undo:         true,

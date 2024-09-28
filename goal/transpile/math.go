@@ -143,17 +143,23 @@ func (mp *mathParse) curArgIsInts() bool {
 }
 
 // startFunc is called when starting a new function.
-// empty is "dummy" assign case using Inc
-func (mp *mathParse) startFunc(name string) *funcInfo {
+// empty is "dummy" assign case using Inc.
+// optional noLookup indicates to not lookup type and just
+// push the name -- for internal cases to prevent arg conversions.
+func (mp *mathParse) startFunc(name string, noLookup ...bool) *funcInfo {
 	fi := &funcInfo{}
 	sname := name
 	if name == "" {
 		sname = "tmath.Inc"
 	}
-	if tf, err := tensor.FuncByName(sname); err == nil {
-		fi.Func = *tf
+	if len(noLookup) == 1 && noLookup[0] {
+		fi.Name = name
 	} else {
-		fi.Name = name // not clear what point is
+		if tf, err := tensor.FuncByName(sname); err == nil {
+			fi.Func = *tf
+		} else {
+			fi.Name = name
+		}
 	}
 	mp.funcs.Push(fi)
 	if name != "" {
@@ -653,7 +659,7 @@ func (fw *funWrap) wrapFunc(mp *mathParse) bool {
 		wrapFun = "tensor.NewStringFromValues"
 		ellip = true
 	}
-	mp.startFunc(wrapFun)
+	mp.startFunc(wrapFun, true) // don't lookup -- don't auto-convert args
 	mp.out.Add(token.LPAREN)
 	return ellip
 }
