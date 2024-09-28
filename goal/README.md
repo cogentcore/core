@@ -403,12 +403,25 @@ todo: huge amount of work needed to support complex numbers throughout!
 |  |  |`np.fft.ifft(a)` | `ifft(a)` | inverse Fourier transform of `a` |
 |  |  |`signal.resample(x, np.ceil(len(x)/q))` |  `decimate(x, q)` | downsample with low-pass filtering |
 
-## TODO
+## datafs
 
-* more creation routines
-* update readme table
+The [datafs](../tensor/datafs) data filesystem provides a global filesystem-like workspace for storing tensor data, and Goal has special commands and functions to facilitate interacting with it. In an interactive `goal` shell, when you do `##` to switch into math mode, the prompt changes to show your current directory in the datafs, not the regular OS filesystem, and the final prompt character turns into a `#`.
 
-* # # surrounding in go, shell modes
-* make a simple tutorial example showing basic ops
+Use `get` and `set` (aliases for `datafs.Get` and `datafs.Set`) to retrieve and store data in the datafs:
+
+* `x := get("path/to/item")` retrieves the tensor data value at given path, which can then be used directly in an expression or saved to a new variable as in this example.
+
+* `set("path/to/item", x)` saves tensor data to given path, overwriting any existing value for that item if it already exists, and creating a new one if not. `x` can be any data expression.
+
+You can use the standard shell commands to navigate around the data filesystem:
+
+* `cd <dir>` to change the current working directory. By default, new variables created in the shell are also recorded into the current working directory for later access.
+
+* `ls [-l,r] [dir]` list the contents of a directory; without arguments, it shows the current directory. The `-l` option shows each element on a separate line with its shape. `-r` does a recursive list through subdirectories.
+
+* `mkdir <dir>` makes a new subdirectory.
+
+TODO: other commands, etc.
+
 
 

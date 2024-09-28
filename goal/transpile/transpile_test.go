@@ -204,7 +204,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"# sh := x.shape", `sh := tensor.NewIntFromValues(x.Shape().Sizes ...)`},
+		{`# set("item", 5)`, `datafs.Set("item", tensor.NewIntScalar(5))`},
 	}
 	st := NewState()
 	st.MathRecord = false
@@ -266,6 +266,9 @@ func TestMath(t *testing.T) {
 		{"# if a[1,2] == 2 {", `if tmath.Equal(tensor.Reslice(a, 1, 2), tensor.NewIntScalar(2)).Bool1D(0) {`},
 		{"# for i := 0; i < 3; i++ {", `for i := tensor.NewIntScalar(0); tmath.Less(i, tensor.NewIntScalar(3)).Bool1D(0); tmath.Inc(i) {`},
 		{"# for i, v := range a {", `for i := 0; i < a.Len(); i++ { v := a .Float1D(i)`},
+		{`# x := get("item")`, `x := datafs.Get("item")`},
+		{`# set("item", x)`, `datafs.Set("item", x)`},
+		{`# set("item", 5)`, `datafs.Set("item", tensor.NewIntScalar(5))`},
 	}
 
 	st := NewState()

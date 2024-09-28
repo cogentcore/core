@@ -795,6 +795,8 @@ var numpyFuncs = map[string]funWrap{
 	"linspace": {"tensor.NewFloat64SpacedLinear", ""},
 	"reshape":  {"tensor.Reshape", ""},
 	"copy":     {"tensor.Clone", ""},
+	"get":      {"datafs.Get", ""},
+	"set":      {"datafs.Set", ""},
 	"flatten":  {"tensor.Flatten", "nofun"},
 	"squeeze":  {"tensor.Squeeze", "nofun"},
 }
