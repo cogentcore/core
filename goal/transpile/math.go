@@ -358,6 +358,15 @@ func (mp *mathParse) expr(ex ast.Expr) {
 	case *ast.UnaryExpr:
 		mp.unaryExpr(x)
 
+	case *ast.Ellipsis:
+		cfun := mp.funcs.Peek()
+		if cfun != nil && cfun.Name == "tensor.Reslice" {
+			mp.out.Add(token.IDENT, "tensor.Ellipsis")
+			mp.idx++
+		} else {
+			mp.addToken(token.ELLIPSIS)
+		}
+
 	case *ast.StarExpr:
 		mp.addToken(token.MUL)
 		mp.expr(x.X)
@@ -888,6 +897,11 @@ func (mp *mathParse) callName(cf *ast.CallExpr, funName, pkgName string) {
 
 func (mp *mathParse) ident(id *ast.Ident) {
 	if id == nil {
+		return
+	}
+	if id.Name == "newaxis" {
+		mp.out.Add(token.IDENT, "tensor.NewAxis")
+		mp.idx++
 		return
 	}
 	if mp.curArgIsInts() {

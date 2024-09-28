@@ -303,6 +303,7 @@ See [NumPy basic indexing](https://numpy.org/doc/stable/user/basics.indexing.htm
 | `t.Reslice(a,` `1, t.FullAxis)` | same: |`a[1]` or `a[1, :]` | `a(2,:)` | entire second row of 2D tensor `a`; unspecified dimensions are equivalent to `:` (could omit second arg in Reslice too) |
 | `t.Reslice(a,` `Slice{Stop:5})` | same: |`a[0:5]` or `a[:5]` or `a[0:5, :]` | `a(1:5,:)` | 0..4 rows of `a`; uses same Go slice ranging here: (start:stop) where stop is _exclusive_ |
 | `t.Reslice(a,` `Slice{Start:-5})` | same: |`a[-5:]` | `a(end-4:end,:)` | last 5 rows of 2D tensor `a` |
+| `t.Reslice(a,` `t.NewAxis,` `Slice{Start:-5})` | same: |`a[newaxis, -5:]` | ? | last 5 rows of 2D tensor `a`, as a column vector |
 | `t.Reslice(a,` `Slice{Stop:3},` `Slice{Start:4, Stop:9})` | same: |`a[0:3, 4:9]` | `a(1:3,5:9)` | The first through third rows and fifth through ninth columns of a 2D tensor, `a`. |
 | `t.Reslice(a,` `Slice{Start:2,` `Stop:25,` `Step:2}, t.FullAxis)` | same: |`a[2:21:2,:]` | `a(3:2:21,:)` | every other row of `a`, starting with the third and going to the twenty-first |
 | `t.Reslice(a,` `Slice{Step:2},` `t.FullAxis)` | same: |`a[::2, :]`  | `a(1:2:end,:)` | every other row of `a`, starting with the first |
@@ -404,12 +405,10 @@ todo: huge amount of work needed to support complex numbers throughout!
 
 ## TODO
 
-* newaxis -> tensor.NewAxis constant; ... -> tensor.Ellipsis in Reslice
 * more creation routines
 * update readme table
 
 * # # surrounding in go, shell modes
-* record to datafs
 * make a simple tutorial example showing basic ops
 
 

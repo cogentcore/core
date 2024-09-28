@@ -1834,6 +1834,12 @@ func (p *parser) parsePrimaryExpr(x ast.Expr) ast.Expr {
 		defer un(trace(p, "PrimaryExpr"))
 	}
 
+	// math: ellipses can show up in index expression.
+	if p.tok == token.ELLIPSIS {
+		p.next()
+		return &ast.Ellipsis{Ellipsis: p.pos}
+	}
+
 	if x == nil {
 		x = p.parseOperand()
 	}
