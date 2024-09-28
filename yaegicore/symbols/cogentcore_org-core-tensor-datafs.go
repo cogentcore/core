@@ -14,12 +14,16 @@ func init() {
 		"CurDir":    reflect.ValueOf(&datafs.CurDir).Elem(),
 		"CurRoot":   reflect.ValueOf(&datafs.CurRoot).Elem(),
 		"DirOnly":   reflect.ValueOf(datafs.DirOnly),
+		"Get":       reflect.ValueOf(datafs.Get),
+		"List":      reflect.ValueOf(datafs.List),
 		"Long":      reflect.ValueOf(datafs.Long),
+		"Mkdir":     reflect.ValueOf(datafs.Mkdir),
 		"NewDir":    reflect.ValueOf(datafs.NewDir),
 		"Overwrite": reflect.ValueOf(datafs.Overwrite),
 		"Preserve":  reflect.ValueOf(datafs.Preserve),
 		"Record":    reflect.ValueOf(datafs.Record),
 		"Recursive": reflect.ValueOf(datafs.Recursive),
+		"Set":       reflect.ValueOf(datafs.Set),
 		"Short":     reflect.ValueOf(datafs.Short),
 
 		// type definitions

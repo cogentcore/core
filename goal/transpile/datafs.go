@@ -6,9 +6,7 @@ package transpile
 
 import (
 	"errors"
-	"fmt"
-
-	"cogentcore.org/core/tensor/datafs"
+	"go/token"
 )
 
 var datafsCommands = map[string]func(mp *mathParse) error{
@@ -22,7 +20,11 @@ func cd(mp *mathParse) error {
 	if len(mp.ewords) > 1 {
 		dir = mp.ewords[1]
 	}
-	return datafs.Chdir(dir)
+	mp.out.Add(token.IDENT, "datafs.Chdir")
+	mp.out.Add(token.LPAREN)
+	mp.out.Add(token.STRING, `"`+dir+`"`)
+	mp.out.Add(token.RPAREN)
+	return nil
 }
 
 func mkdir(mp *mathParse) error {
@@ -30,16 +32,19 @@ func mkdir(mp *mathParse) error {
 		return errors.New("datafs mkdir requires a directory name")
 	}
 	dir := mp.ewords[1]
-	_, err := datafs.CurDir.Mkdir(dir)
-	return err
+	mp.out.Add(token.IDENT, "datafs.Mkdir")
+	mp.out.Add(token.LPAREN)
+	mp.out.Add(token.STRING, `"`+dir+`"`)
+	mp.out.Add(token.RPAREN)
+	return nil
 }
 
 func ls(mp *mathParse) error {
-	var dir string
-	if len(mp.ewords) > 1 {
-		dir = mp.ewords[1]
+	mp.out.Add(token.IDENT, "datafs.List")
+	mp.out.Add(token.LPAREN)
+	for i := 1; i < len(mp.ewords); i++ {
+		mp.out.Add(token.STRING, `"`+mp.ewords[i]+`"`)
 	}
-	_ = dir
-	fmt.Println(datafs.CurDir.ListShort(false, 0))
+	mp.out.Add(token.RPAREN)
 	return nil
 }

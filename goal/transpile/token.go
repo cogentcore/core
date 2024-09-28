@@ -71,6 +71,13 @@ func (tk *Tokens) Add(tok token.Token, str ...string) *Token {
 	return nt
 }
 
+// AddMulti adds new basic tokens (not IDENT).
+func (tk *Tokens) AddMulti(tok ...token.Token) {
+	for _, t := range tok {
+		tk.Add(t)
+	}
+}
+
 // AddTokens adds given tokens to our list
 func (tk *Tokens) AddTokens(toks ...*Token) *Tokens {
 	*tk = append(*tk, toks...)

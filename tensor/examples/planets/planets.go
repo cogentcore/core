@@ -8,8 +8,10 @@ import (
 	"embed"
 	"math"
 
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/goal/interpreter"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/databrowser"
@@ -80,10 +82,17 @@ func AnalyzePlanets(dir *datafs.Data) {
 }
 
 func main() {
-	dir, _ := datafs.NewDir("Planets")
+	dir := datafs.Mkdir("Planets")
 	AnalyzePlanets(dir)
 
-	br := databrowser.NewBrowserWindow(dir, "Planets")
+	opts := cli.DefaultOptions("planets", "interactive data analysis.")
+	cfg := &interpreter.Config{}
+	cfg.InteractiveFunc = Interactive
+	cli.Run(opts, cfg, interpreter.Run, interpreter.Build)
+}
+
+func Interactive(c *interpreter.Config, in *interpreter.Interpreter) error {
+	br := databrowser.NewBrowserWindow(datafs.CurRoot, "Planets")
 	b := br.Parent.(*core.Body)
 	b.AddTopBar(func(bar *core.Frame) {
 		tb := core.NewToolbar(bar)
@@ -97,5 +106,14 @@ func main() {
 			})
 		})
 	})
+	b.OnShow(func(e events.Event) {
+		go func() {
+			if c.Expr != "" {
+				in.Eval(c.Expr)
+			}
+			in.Interactive()
+		}()
+	})
 	core.Wait()
+	return nil
 }

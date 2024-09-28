@@ -4,7 +4,11 @@
 
 package datafs
 
-import "strings"
+import (
+	"strings"
+
+	"cogentcore.org/core/base/indent"
+)
 
 const (
 	Short = false
@@ -30,13 +34,14 @@ func (d *Data) List(long, recursive bool) string {
 	return d.ListShort(recursive, 0)
 }
 
-func (d *Data) ListShort(recursive bool, indent int) string {
+func (d *Data) ListShort(recursive bool, ident int) string {
 	var b strings.Builder
 	items := d.ItemsFunc(nil)
 	for _, it := range items {
+		b.WriteString(indent.Tabs(ident))
 		if it.IsDir() {
 			if recursive {
-				b.WriteString("\n" + it.ListShort(recursive, indent+1))
+				b.WriteString("\n" + it.ListShort(recursive, ident+1))
 			} else {
 				b.WriteString(it.name + "/ ")
 			}
@@ -47,13 +52,18 @@ func (d *Data) ListShort(recursive bool, indent int) string {
 	return b.String()
 }
 
-func (d *Data) ListLong(recursive bool, indent int) string {
+func (d *Data) ListLong(recursive bool, ident int) string {
 	var b strings.Builder
 	items := d.ItemsFunc(nil)
 	for _, it := range items {
+		b.WriteString(indent.Tabs(ident))
 		if it.IsDir() {
+			b.WriteString(it.name + "/\n")
+			if recursive {
+				b.WriteString(it.ListLong(recursive, ident+1))
+			}
 		} else {
-			b.WriteString(it.String() + "\n")
+			b.WriteString(it.name + "\t" + it.String() + "\n")
 		}
 	}
 	return b.String()

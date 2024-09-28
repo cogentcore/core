@@ -18,6 +18,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/goal"
+	"cogentcore.org/core/tensor/datafs"
 	_ "cogentcore.org/core/tensor/stats/metric"
 	_ "cogentcore.org/core/tensor/stats/stats"
 	_ "cogentcore.org/core/tensor/tmath"
@@ -77,11 +78,13 @@ func NewInterpreter(options interp.Options) *Interpreter {
 func (in *Interpreter) Prompt() string {
 	dp := in.Goal.TrState.TotalDepth()
 	pc := ">"
+	dir := in.Goal.HostAndDir()
 	if in.Goal.TrState.MathMode {
 		pc = "#"
+		dir = datafs.CurDir.Path()
 	}
 	if dp == 0 {
-		return in.Goal.HostAndDir() + " " + pc + " "
+		return dir + " " + pc + " "
 	}
 	res := pc + " "
 	for range dp {

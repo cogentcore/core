@@ -4,8 +4,6 @@
 
 package interpreter
 
-//go:generate ./make
-
 import (
 	"reflect"
 

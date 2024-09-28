@@ -41,8 +41,10 @@ func (st *State) TranspileMath(toks Tokens, code string, fullLine bool) Tokens {
 				err := cmd(&mp)
 				if err != nil {
 					fmt.Println(ewords[0]+":", err.Error())
+					return nil
+				} else {
+					return mp.out
 				}
-				return nil
 			}
 		}
 
@@ -317,14 +319,12 @@ func (mp *mathParse) stmt(st ast.Stmt) {
 		mp.out.Add(token.PERIOD)
 		mp.out.Add(token.IDENT, "Len")
 		mp.idx++
-		mp.out.Add(token.LPAREN)
-		mp.out.Add(token.RPAREN)
+		mp.out.AddMulti(token.LPAREN, token.RPAREN)
 		mp.idx++
 		mp.out.Add(token.SEMICOLON)
 		mp.idx++
 		mp.out.Add(token.IDENT, knm)
-		mp.out.Add(token.INC)
-		mp.out.Add(token.LBRACE)
+		mp.out.AddMulti(token.INC, token.LBRACE)
 
 		mp.out.Add(token.IDENT, vnm)
 		mp.out.Add(token.DEFINE)
@@ -765,8 +765,7 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 	mp.addToken(token.LBRACE)
 	mp.exprList(il.Indices)
 	mp.addToken(token.RBRACE)
-	mp.out.Add(token.ELLIPSIS)
-	mp.out.Add(token.RPAREN)
+	mp.out.AddMulti(token.ELLIPSIS, token.RPAREN)
 	mp.endFunc()
 }
 
@@ -895,8 +894,7 @@ func (mp *mathParse) ident(id *ast.Ident) {
 		mp.out.Add(token.IDENT, "tensor.AsIntSlice")
 		mp.out.Add(token.LPAREN)
 		mp.addCur()
-		mp.out.Add(token.RPAREN)
-		mp.out.Add(token.ELLIPSIS)
+		mp.out.AddMulti(token.RPAREN, token.ELLIPSIS)
 	} else {
 		mp.addCur()
 	}
