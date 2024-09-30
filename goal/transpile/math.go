@@ -150,8 +150,8 @@ func (mp *mathParse) curArgIsInts() bool {
 func (mp *mathParse) startFunc(name string, noLookup ...bool) *funcInfo {
 	fi := &funcInfo{}
 	sname := name
-	if name == "" {
-		sname = "tmath.Inc"
+	if name == "" || name == "tensor.Tensor" {
+		sname = "tmath.Inc" // one arg tensor fun
 	}
 	if len(noLookup) == 1 && noLookup[0] {
 		fi.Name = name
@@ -554,8 +554,10 @@ func (mp *mathParse) defineStmt(as *ast.AssignStmt) {
 	firstStmt := mp.idx == 0
 	mp.exprList(as.Lhs)
 	mp.addToken(as.Tok)
-	mp.startFunc("") // dummy single arg tensor function
+	mp.startFunc("tensor.Tensor")
+	mp.out.Add(token.LPAREN)
 	mp.exprList(as.Rhs)
+	mp.out.Add(token.RPAREN)
 	mp.endFunc()
 	if firstStmt && mp.state.MathRecord {
 		nvar, ok := as.Lhs[0].(*ast.Ident)
