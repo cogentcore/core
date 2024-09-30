@@ -758,7 +758,7 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 	}
 	// todo: look for sub-arrays etc.
 	typ := "float64"
-	fun := "Float"
+	fun := "Float64"
 	switch kind {
 	case token.FLOAT:
 	case token.INT:

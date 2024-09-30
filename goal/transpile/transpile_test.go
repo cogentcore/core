@@ -224,6 +224,7 @@ func TestMath(t *testing.T) {
 		{"# a := x ** 2", `a := tmath.Pow(x, tensor.NewIntScalar(2))`},
 		{"# a = -x", `a = tmath.Negate(x)`},
 		{"# a := [1,2,3,4]", `a := tensor.NewIntFromValues([]int { 1, 2, 3, 4 }  ...)`},
+		{"# a := [1.,2,3,4]", `a := tensor.NewFloat64FromValues([]float64 { 1., 2, 3, 4 }  ...)`},
 		{"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},
 		{"# ndim(a)", `tensor.NewIntScalar(a.NumDims())`},
 		{"# sh := x.shape", `sh := tensor.NewIntFromValues(x.Shape().Sizes ...)`},
