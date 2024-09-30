@@ -24,7 +24,7 @@ var (
 )
 
 func init() {
-	CurRoot, _ = NewDir("root")
+	CurRoot, _ = NewDir("data")
 	CurDir = CurRoot
 }
 

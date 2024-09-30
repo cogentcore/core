@@ -179,13 +179,11 @@ func Sprintf(tsr Tensor, maxLen int, format string) string {
 	}
 	colWd := 1 // column width in tabs
 	defFmt := format == ""
-	isint := false
 	if defFmt {
 		switch {
 		case tsr.IsString():
 			format = "%s\t"
 		case reflectx.KindIsInt(tsr.DataType()):
-			isint = true
 			format = "%g\t"
 		default:
 			format = "%g\t"
@@ -212,13 +210,7 @@ func Sprintf(tsr Tensor, maxLen int, format string) string {
 		}
 	}
 	colWd = int(math32.IntMultipleGE(float32(mxwd), 8)) / 8
-	if colWd > 1 && !tsr.IsString() && defFmt { // should be 2
-		if isint {
-			format = "%15g\t"
-		} else {
-			format = "%15.7g\t"
-		}
-	}
+	fmt.Println("col wd:", colWd)
 	sh := tsr.Shape()
 	oddRow := false
 	rows, cols, _, _ := Projection2DShape(sh, oddRow)
@@ -260,7 +252,7 @@ func Sprintf(tsr Tensor, maxLen int, format string) string {
 			b.WriteString(s)
 			nt := int(math32.IntMultipleGE(float32(len(s)), 8)) / 8
 			if nt < colWd {
-				b.WriteString(strings.Repeat("\t", nt-colWd))
+				b.WriteString(strings.Repeat("\t", colWd-nt))
 			}
 		}
 		b.WriteString("\n")
