@@ -25,17 +25,17 @@ func TestFuncs(t *testing.T) {
 	btsr := tensor.NewNumberFromValues(b64...)
 	out := tensor.NewFloat64(1)
 
-	EuclideanOut(atsr, btsr, out)
-	assert.InDelta(t, results[MetricEuclidean], out.Values[0], tol)
+	NormL2Out(atsr, btsr, out)
+	assert.InDelta(t, results[MetricNormL2], out.Values[0], tol)
 
 	SumSquaresOut(atsr, btsr, out)
 	assert.InDelta(t, results[MetricSumSquares], out.Values[0], tol)
 
-	EuclideanBinTolOut(atsr, btsr, out)
-	assert.InDelta(t, results[MetricEuclideanBinTol], out.Values[0], tol)
+	NormL2BinTolOut(atsr, btsr, out)
+	assert.InDelta(t, results[MetricNormL2BinTol], out.Values[0], tol)
 
-	AbsOut(atsr, btsr, out)
-	assert.InDelta(t, results[MetricAbs], out.Values[0], tol)
+	NormL1Out(atsr, btsr, out)
+	assert.InDelta(t, results[MetricNormL1], out.Values[0], tol)
 
 	HammingOut(atsr, btsr, out)
 	assert.Equal(t, results[MetricHamming], out.Values[0])
@@ -55,8 +55,8 @@ func TestFuncs(t *testing.T) {
 	CrossEntropyOut(atsr, btsr, out)
 	assert.InDelta(t, results[MetricCrossEntropy], out.Values[0], tol)
 
-	InnerProductOut(atsr, btsr, out)
-	assert.InDelta(t, results[MetricInnerProduct], out.Values[0], tol)
+	DotProductOut(atsr, btsr, out)
+	assert.InDelta(t, results[MetricDotProduct], out.Values[0], tol)
 
 	CosineOut(atsr, btsr, out)
 	assert.InDelta(t, results[MetricCosine], out.Values[0], tol)
@@ -64,7 +64,7 @@ func TestFuncs(t *testing.T) {
 	InvCosineOut(atsr, btsr, out)
 	assert.InDelta(t, results[MetricInvCosine], out.Values[0], tol)
 
-	for met := MetricEuclidean; met < MetricsN; met++ {
+	for met := MetricNormL2; met < MetricsN; met++ {
 		out := met.Call(atsr, btsr)
 		assert.InDelta(t, results[met], out.Float1D(0), tol)
 	}
@@ -79,7 +79,7 @@ func TestMatrix(t *testing.T) {
 	assert.NoError(t, err)
 	in := dt.Column("Input")
 	out := tensor.NewFloat64()
-	err = MatrixOut(Euclidean, in, out)
+	err = MatrixOut(NormL2, in, out)
 	assert.NoError(t, err)
 	// fmt.Println(out.Tensor)
 	for i, v := range simres {

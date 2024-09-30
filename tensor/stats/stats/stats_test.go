@@ -17,7 +17,7 @@ func TestFuncs64(t *testing.T) {
 	ix := tensor.NewNumberFromValues(vals...)
 	out := tensor.NewFloat64(1)
 
-	results := []float64{11, 5.5, 5.5, 5.5, 0, 0, 1, 0, 1, 0.5, 0.11, math.Sqrt(0.11), math.Sqrt(0.11) / math.Sqrt(11), 3.85, math.Sqrt(3.85), 0.1, math.Sqrt(0.1), math.Sqrt(0.1) / math.Sqrt(11), 0.5, 0.25, 0.75}
+	results := []float64{11, 5.5, 5.5, 0, 0, 1, 0, 1, 0.5, 0.11, math.Sqrt(0.11), math.Sqrt(0.11) / math.Sqrt(11), 3.85, math.Sqrt(3.85), 0.1, math.Sqrt(0.1), math.Sqrt(0.1) / math.Sqrt(11), 0.5, 0.25, 0.75}
 
 	tol := 1.0e-8
 
@@ -27,8 +27,8 @@ func TestFuncs64(t *testing.T) {
 	SumOut(ix, out)
 	assert.Equal(t, results[StatSum], out.Values[0])
 
-	SumAbsOut(ix, out)
-	assert.Equal(t, results[StatSumAbs], out.Values[0])
+	NormL1Out(ix, out)
+	assert.Equal(t, results[StatNormL1], out.Values[0])
 
 	ProdOut(ix, out)
 	assert.Equal(t, results[StatProd], out.Values[0])
@@ -69,8 +69,8 @@ func TestFuncs64(t *testing.T) {
 	SumSqOut(ix, out)
 	assert.InDelta(t, results[StatSumSq], out.Values[0], tol)
 
-	L2NormOut(ix, out)
-	assert.InDelta(t, results[StatL2Norm], out.Values[0], tol)
+	NormL2Out(ix, out)
+	assert.InDelta(t, results[StatNormL2], out.Values[0], tol)
 
 	MedianOut(ix, out)
 	assert.InDelta(t, results[StatMedian], out.Values[0], tol)
@@ -93,7 +93,7 @@ func TestFuncsInt(t *testing.T) {
 	ix := tensor.NewRows(tsr)
 	out := tensor.NewInt(1)
 
-	results := []int{11, 550, 550, 550, 0, 0, 100, 0, 100, 50, 1100, int(math.Sqrt(1100)), int(math.Sqrt(1100) / math.Sqrt(11)), 38500, 196, 1000, int(math.Sqrt(1000)), int(math.Sqrt(1000) / math.Sqrt(11))}
+	results := []int{11, 550, 550, 0, 0, 100, 0, 100, 50, 1100, int(math.Sqrt(1100)), int(math.Sqrt(1100) / math.Sqrt(11)), 38500, 196, 1000, int(math.Sqrt(1000)), int(math.Sqrt(1000) / math.Sqrt(11))}
 
 	CountOut(ix, out)
 	assert.Equal(t, results[StatCount], out.Values[0])
@@ -101,8 +101,8 @@ func TestFuncsInt(t *testing.T) {
 	SumOut(ix, out)
 	assert.Equal(t, results[StatSum], out.Values[0])
 
-	SumAbsOut(ix, out)
-	assert.Equal(t, results[StatSumAbs], out.Values[0])
+	NormL1Out(ix, out)
+	assert.Equal(t, results[StatNormL1], out.Values[0])
 
 	ProdOut(ix, out)
 	assert.Equal(t, results[StatProd], out.Values[0])
@@ -143,8 +143,8 @@ func TestFuncsInt(t *testing.T) {
 	SumSqOut(ix, out)
 	assert.Equal(t, results[StatSumSq], out.Values[0])
 
-	L2NormOut(ix, out)
-	assert.Equal(t, results[StatL2Norm], out.Values[0])
+	NormL2Out(ix, out)
+	assert.Equal(t, results[StatNormL2], out.Values[0])
 
 	for stat := StatCount; stat <= StatSemPop; stat++ {
 		out := stat.Call(ix)

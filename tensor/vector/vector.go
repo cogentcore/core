@@ -43,7 +43,7 @@ func Dot(a, b tensor.Tensor) tensor.Values {
 	return Sum(Mul(a, b))
 }
 
-// NormL2 returns the length of the vector as the L2Norm:
+// NormL2 returns the length of the vector as the L2 Norm:
 // square root of the sum of squared values of the vector, as a scalar.
 // This is the Sqrt of the [Dot] product of the vector with itself.
 func NormL2(a tensor.Tensor) tensor.Values {
@@ -51,7 +51,7 @@ func NormL2(a tensor.Tensor) tensor.Values {
 	return tensor.NewFloat64Scalar(math.Sqrt(dot))
 }
 
-// NormL1 returns the length of the vector as the L1Norm:
+// NormL1 returns the length of the vector as the L1 Norm:
 // sum of the absolute values of the tensor, as a scalar.
 func NormL1(a tensor.Tensor) tensor.Values {
 	n := a.Len()

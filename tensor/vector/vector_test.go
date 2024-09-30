@@ -14,7 +14,7 @@ import (
 
 func TestVector(t *testing.T) {
 	v := tensor.NewFloat64FromValues(1, 2, 3)
-	ip := Inner(v, v).(*tensor.Float64)
+	ip := Mul(v, v).(*tensor.Float64)
 	assert.Equal(t, []float64{1, 4, 9}, ip.Values)
 
 	smv := Sum(ip).(*tensor.Float64)

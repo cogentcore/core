@@ -390,7 +390,7 @@ In Goal and NumPy, the standard `+, -, *, /` operators perform _element-wise_ op
 |  |  |`a.max(0)` | `max(a)` | maximum element of each column of tensor `a` |
 |  |  |`a.max(1)` | `max(a,[],2)` | maximum element of each row of tensor `a` |
 |  |  |`np.maximum(a, b)` | `max(a,b)` | compares a and b element-wise, and returns the maximum value from each pair |
-| `stats.L2Norm(a)` | `np.sqrt(v @ v)` or `np.linalg.norm(v)` | `norm(v)` | L2 norm of vector v |
+| `stats.NormL2(a)` | `np.sqrt(v @ v)` or `np.linalg.norm(v)` | `norm(v)` | L2 norm of vector v |
 |  |  |`cg`  | `conjgrad` | conjugate gradients solver |
 
 ## FFT and complex numbers

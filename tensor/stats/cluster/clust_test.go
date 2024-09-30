@@ -34,7 +34,7 @@ func TestClust(t *testing.T) {
 		t.Error(err)
 	}
 	in := dt.Column("Input")
-	out := metric.Matrix(metric.Euclidean, in)
+	out := metric.Matrix(metric.NormL2, in)
 
 	cl := Cluster(Avg.String(), out, dt.Column("Name"))
 

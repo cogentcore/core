@@ -28,8 +28,7 @@ The following statistics are supported (per the `Stats` enum in `stats.go`):
 
 * `Count`:  count of number of elements
 * `Sum`:  sum of elements
-* `SumAbs`:  sum of absolute-value-of elements (same as L1Norm)
-* `L1Norm`: L1 Norm: sum of absolute values (same as SumAbs)
+* `NormL1`: L1 Norm: sum of absolute values
 * `Prod`:  product of elements
 * `Min`:  minimum value
 * `Max`:  maximum value
@@ -40,7 +39,7 @@ The following statistics are supported (per the `Stats` enum in `stats.go`):
 * `Std`:  sample standard deviation (sqrt of Var)
 * `Sem`:  sample standard error of the mean (Std divided by sqrt(n))
 * `SumSq`:  sum of squared element values
-* `L2Norm`:  L2 Norm: square-root of sum-of-squares
+* `NormL2`:  L2 Norm: square-root of sum-of-squares
 * `VarPop`:  population variance (squared diffs from mean, divided by n)
 * `StdPop`:  population standard deviation (sqrt of VarPop)
 * `SemPop`:  population standard error of the mean (StdPop divided by sqrt(n))

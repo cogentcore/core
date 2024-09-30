@@ -6,16 +6,16 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _StatsValues = []Stats{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+var _StatsValues = []Stats{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}
 
 // StatsN is the highest valid value for type Stats, plus one.
-const StatsN Stats = 21
+const StatsN Stats = 20
 
-var _StatsValueMap = map[string]Stats{`Count`: 0, `Sum`: 1, `SumAbs`: 2, `L1Norm`: 3, `Prod`: 4, `Min`: 5, `Max`: 6, `MinAbs`: 7, `MaxAbs`: 8, `Mean`: 9, `Var`: 10, `Std`: 11, `Sem`: 12, `SumSq`: 13, `L2Norm`: 14, `VarPop`: 15, `StdPop`: 16, `SemPop`: 17, `Median`: 18, `Q1`: 19, `Q3`: 20}
+var _StatsValueMap = map[string]Stats{`Count`: 0, `Sum`: 1, `NormL1`: 2, `Prod`: 3, `Min`: 4, `Max`: 5, `MinAbs`: 6, `MaxAbs`: 7, `Mean`: 8, `Var`: 9, `Std`: 10, `Sem`: 11, `SumSq`: 12, `NormL2`: 13, `VarPop`: 14, `StdPop`: 15, `SemPop`: 16, `Median`: 17, `Q1`: 18, `Q3`: 19}
 
-var _StatsDescMap = map[Stats]string{0: `count of number of elements.`, 1: `sum of elements.`, 2: `sum of absolute-value-of elements (= L1Norm).`, 3: `L1 Norm: sum of absolute values (= SumAbs).`, 4: `product of elements.`, 5: `minimum value.`, 6: `maximum value.`, 7: `minimum of absolute values.`, 8: `maximum of absolute values.`, 9: `mean value = sum / count.`, 10: `sample variance (squared deviations from mean, divided by n-1).`, 11: `sample standard deviation (sqrt of Var).`, 12: `sample standard error of the mean (Std divided by sqrt(n)).`, 13: `sum of squared values.`, 14: `L2 Norm: square-root of sum-of-squares.`, 15: `population variance (squared diffs from mean, divided by n).`, 16: `population standard deviation (sqrt of VarPop).`, 17: `population standard error of the mean (StdPop divided by sqrt(n)).`, 18: `middle value in sorted ordering.`, 19: `Q1 first quartile = 25%ile value = .25 quantile value.`, 20: `Q3 third quartile = 75%ile value = .75 quantile value.`}
+var _StatsDescMap = map[Stats]string{0: `count of number of elements.`, 1: `sum of elements.`, 2: `L1 Norm: sum of absolute values of elements.`, 3: `product of elements.`, 4: `minimum value.`, 5: `maximum value.`, 6: `minimum of absolute values.`, 7: `maximum of absolute values.`, 8: `mean value = sum / count.`, 9: `sample variance (squared deviations from mean, divided by n-1).`, 10: `sample standard deviation (sqrt of Var).`, 11: `sample standard error of the mean (Std divided by sqrt(n)).`, 12: `sum of squared values.`, 13: `L2 Norm: square-root of sum-of-squares.`, 14: `population variance (squared diffs from mean, divided by n).`, 15: `population standard deviation (sqrt of VarPop).`, 16: `population standard error of the mean (StdPop divided by sqrt(n)).`, 17: `middle value in sorted ordering.`, 18: `Q1 first quartile = 25%ile value = .25 quantile value.`, 19: `Q3 third quartile = 75%ile value = .75 quantile value.`}
 
-var _StatsMap = map[Stats]string{0: `Count`, 1: `Sum`, 2: `SumAbs`, 3: `L1Norm`, 4: `Prod`, 5: `Min`, 6: `Max`, 7: `MinAbs`, 8: `MaxAbs`, 9: `Mean`, 10: `Var`, 11: `Std`, 12: `Sem`, 13: `SumSq`, 14: `L2Norm`, 15: `VarPop`, 16: `StdPop`, 17: `SemPop`, 18: `Median`, 19: `Q1`, 20: `Q3`}
+var _StatsMap = map[Stats]string{0: `Count`, 1: `Sum`, 2: `NormL1`, 3: `Prod`, 4: `Min`, 5: `Max`, 6: `MinAbs`, 7: `MaxAbs`, 8: `Mean`, 9: `Var`, 10: `Std`, 11: `Sem`, 12: `SumSq`, 13: `NormL2`, 14: `VarPop`, 15: `StdPop`, 16: `SemPop`, 17: `Median`, 18: `Q1`, 19: `Q3`}
 
 // String returns the string representation of this Stats value.
 func (i Stats) String() string { return enums.String(i, _StatsMap) }

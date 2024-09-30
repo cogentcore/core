@@ -9,7 +9,7 @@ The metric functions always operate on the outermost _row_ dimension, and it is 
 
 * To obtain a single summary metric across all values, use `tensor.As1D`.
 
-* For `RowMajor` data that is naturally organized as a single outer _rows_ dimension with the remaining inner dimensions comprising the _cells_, the results are the metric for each such cell computed across the outer rows dimension.  For the `Euclidean` metric for example, each cell has the difference for that cell value across all the rows between the two tensors. See [Matrix functions](#matrix-functions) below for a function that computes the distances _between each cell pattern and all the others_, as a distance or similarity matrix.
+* For `RowMajor` data that is naturally organized as a single outer _rows_ dimension with the remaining inner dimensions comprising the _cells_, the results are the metric for each such cell computed across the outer rows dimension.  For the `NormL2` metric for example, each cell has the difference for that cell value across all the rows between the two tensors. See [Matrix functions](#matrix-functions) below for a function that computes the distances _between each cell pattern and all the others_, as a distance or similarity matrix.
 
 * Use `tensor.NewRowCellsView` to reshape any tensor into a 2D rows x cells shape, with the cells starting at a given dimension. Thus, any number of outer dimensions can be collapsed into the outer row dimension, and the remaining dimensions become the cells.
 
@@ -17,11 +17,11 @@ The metric functions always operate on the outermost _row_ dimension, and it is 
 
 ### Value _increases_ with increasing distance (i.e., difference metric)
 
-* `Euclidean` or `L2Norm`: the square root of the sum of squares differences between tensor values.
+* `NormL2`: the square root of the sum of squares differences between tensor values.
 * `SumSquares`:  the sum of squares differences between tensor values.
-* `Abs`or `L2Norm`: the sum of the absolute value of differences between tensor values.
+* `Abs`or `NormL2`: the sum of the absolute value of differences between tensor values.
 * `Hamming`: the sum of 1s for every element that is different, i.e., "city block" distance.
-* `EuclideanBinTol`:  the `Euclidean` square root of the sum of squares differences between tensor values, with binary tolerance: differences < 0.5 are thresholded to 0.
+* `NormL2BinTol`:  the `NormL2` square root of the sum of squares differences between tensor values, with binary tolerance: differences < 0.5 are thresholded to 0.
 * `SumSquaresBinTol`: the `SumSquares` differences between tensor values,  with binary tolerance: differences < 0.5 are thresholded to 0.
 * `InvCosine`: is 1-`Cosine`, which is useful to convert it to an Increasing metric where more different vectors have larger metric values.
 * `InvCorrelation`: is 1-`Correlation`, which is useful to convert it to an Increasing metric where more different vectors have larger metric values.
@@ -29,10 +29,10 @@ The metric functions always operate on the outermost _row_ dimension, and it is 
 
 ### Value _decreases_ with increasing distance (i.e., similarity metric)
 
-* `InnerProduct`:  the sum of the co-products of the tensor values.
+* `DotProduct`:  the sum of the co-products of the tensor values.
 * `Covariance`: the co-variance between two vectors, i.e., the mean of the co-product of each vector element minus the mean of that vector: cov(A,B) = E[(A - E(A))(B - E(B))].
 * `Correlation`: the standardized `Covariance` in the range (-1..1), computed as the mean of the co-product of each vector element minus the mean of that vector, normalized by the product of their standard deviations: cor(A,B) = E[(A - E(A))(B - E(B))] / sigma(A) sigma(B). Equivalent to the `Cosine` of mean-normalized vectors.
-* `Cosine`: the high-dimensional angle between two vectors, in range (-1..1) as the normalized `InnerProduct`: inner product / sqrt(ssA * ssB).  See also `Correlation`.
+* `Cosine`: the high-dimensional angle between two vectors, in range (-1..1) as the normalized `DotProduct`: inner product / sqrt(ssA * ssB).  See also `Correlation`.
 
 Here is general info about these functions:
 

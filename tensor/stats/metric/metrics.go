@@ -12,15 +12,15 @@ import (
 )
 
 func init() {
-	tensor.AddFunc(MetricEuclidean.FuncName(), Euclidean)
+	tensor.AddFunc(MetricNormL2.FuncName(), NormL2)
 	tensor.AddFunc(MetricSumSquares.FuncName(), SumSquares)
-	tensor.AddFunc(MetricAbs.FuncName(), Abs)
+	tensor.AddFunc(MetricNormL1.FuncName(), NormL1)
 	tensor.AddFunc(MetricHamming.FuncName(), Hamming)
-	tensor.AddFunc(MetricEuclideanBinTol.FuncName(), EuclideanBinTol)
+	tensor.AddFunc(MetricNormL2BinTol.FuncName(), NormL2BinTol)
 	tensor.AddFunc(MetricSumSquaresBinTol.FuncName(), SumSquaresBinTol)
 	tensor.AddFunc(MetricInvCosine.FuncName(), InvCosine)
 	tensor.AddFunc(MetricInvCorrelation.FuncName(), InvCorrelation)
-	tensor.AddFunc(MetricInnerProduct.FuncName(), InnerProduct)
+	tensor.AddFunc(MetricDotProduct.FuncName(), DotProduct)
 	tensor.AddFunc(MetricCrossEntropy.FuncName(), CrossEntropy)
 	tensor.AddFunc(MetricCovariance.FuncName(), Covariance)
 	tensor.AddFunc(MetricCorrelation.FuncName(), Correlation)
@@ -31,25 +31,25 @@ func init() {
 type Metrics int32 //enums:enum -trim-prefix Metric
 
 const (
-	// Euclidean is the square root of the sum of squares differences
-	// between tensor values, aka the L2Norm.
-	MetricEuclidean Metrics = iota
+	// NormL2 is the square root of the sum of squares differences
+	// between tensor values, aka the L2 Norm.
+	MetricNormL2 Metrics = iota
 
 	// SumSquares is the sum of squares differences between tensor values.
 	MetricSumSquares
 
-	// Abs is the sum of the absolute value of differences
-	// between tensor values, aka the L1Norm.
-	MetricAbs
+	// NormL1 is the sum of the absolute value of differences
+	// between tensor values, the L1 Norm.
+	MetricNormL1
 
 	// Hamming is the sum of 1s for every element that is different,
 	// i.e., "city block" distance.
 	MetricHamming
 
-	// EuclideanBinTol is the [Euclidean] square root of the sum of squares
+	// NormL2BinTol is the [NormL2] square root of the sum of squares
 	// differences between tensor values, with binary tolerance:
 	// differences < 0.5 are thresholded to 0.
-	MetricEuclideanBinTol
+	MetricNormL2BinTol
 
 	// SumSquaresBinTol is the [SumSquares] differences between tensor values,
 	// with binary tolerance: differences < 0.5 are thresholded to 0.
@@ -74,8 +74,8 @@ const (
 	/////////////////////////////////////////////////////////////////////////
 	// Everything below here is !Increasing -- larger = closer, not farther
 
-	// InnerProduct is the sum of the co-products of the tensor values.
-	MetricInnerProduct
+	// DotProduct is the sum of the co-products of the tensor values.
+	MetricDotProduct
 
 	// Covariance is co-variance between two vectors,
 	// i.e., the mean of the co-product of each vector element minus
@@ -90,7 +90,7 @@ const (
 	MetricCorrelation
 
 	// Cosine is high-dimensional angle between two vectors,
-	// in range (-1..1) as the normalized [InnerProduct]:
+	// in range (-1..1) as the normalized [DotProduct]:
 	// inner product / sqrt(ssA * ssB).  See also [Correlation].
 	MetricCosine
 )
@@ -114,11 +114,11 @@ func (m Metrics) Call(a, b tensor.Tensor) tensor.Values {
 }
 
 // Increasing returns true if the distance metric is such that metric
-// values increase as a function of distance (e.g., Euclidean)
+// values increase as a function of distance (e.g., NormL2)
 // and false if metric values decrease as a function of distance
 // (e.g., Cosine, Correlation)
 func (m Metrics) Increasing() bool {
-	if m >= MetricInnerProduct {
+	if m >= MetricDotProduct {
 		return false
 	}
 	return true
