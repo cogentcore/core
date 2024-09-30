@@ -135,13 +135,13 @@ func (pl *PlotEditor) genPlotBar() {
 					exy, _ := newTableXY(lview, ec, 0, ec, 0, minmax.Range32{})
 					bar, err = plots.NewBarChart(xy, exy)
 					if err != nil {
-						log.Println(err)
+						// log.Println(err)
 						continue
 					}
 				} else {
 					bar, err = plots.NewBarChart(xy, nil)
 					if err != nil {
-						log.Println(err)
+						// log.Println(err)
 						continue
 					}
 				}
