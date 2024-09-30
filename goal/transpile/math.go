@@ -903,12 +903,18 @@ func (mp *mathParse) callName(cf *ast.CallExpr, funName, pkgName string) {
 	mp.addToken(token.LPAREN)
 }
 
+// basic ident replacements
+var consts = map[string]string{
+	"newaxis": "tensor.NewAxis",
+	"pi":      "tensor.NewFloat64Scalar(math.Pi)",
+}
+
 func (mp *mathParse) ident(id *ast.Ident) {
 	if id == nil {
 		return
 	}
-	if id.Name == "newaxis" {
-		mp.out.Add(token.IDENT, "tensor.NewAxis")
+	if cn, ok := consts[id.Name]; ok {
+		mp.out.Add(token.IDENT, cn)
 		mp.idx++
 		return
 	}
