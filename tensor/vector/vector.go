@@ -14,15 +14,15 @@ import (
 	"cogentcore.org/core/tensor/tmath"
 )
 
-// Inner multiplies two vectors element-wise, using a 1D vector
+// Mul multiplies two vectors element-wise, using a 1D vector
 // view of the two vectors, returning the output 1D vector.
-func Inner(a, b tensor.Tensor) tensor.Values {
-	return tensor.CallOut2Float64(InnerOut, a, b)
+func Mul(a, b tensor.Tensor) tensor.Values {
+	return tensor.CallOut2Float64(MulOut, a, b)
 }
 
-// InnerOut multiplies two vectors element-wise, using a 1D vector
+// MulOut multiplies two vectors element-wise, using a 1D vector
 // view of the two vectors, filling in values in the output 1D vector.
-func InnerOut(a, b tensor.Tensor, out tensor.Values) error {
+func MulOut(a, b tensor.Tensor, out tensor.Values) error {
 	return tmath.MulOut(tensor.As1D(a), tensor.As1D(b), out)
 }
 
@@ -37,10 +37,10 @@ func Sum(a tensor.Tensor) tensor.Values {
 	return tensor.NewFloat64Scalar(sum)
 }
 
-// Dot performs the dot product: the [Sum] of the [Inner] product
+// Dot performs the vector dot product: the [Sum] of the [Mul] product
 // of the two tensors, returning a scalar value.
 func Dot(a, b tensor.Tensor) tensor.Values {
-	return Sum(Inner(a, b))
+	return Sum(Mul(a, b))
 }
 
 // NormL2 returns the length of the vector as the L2Norm:
