@@ -154,6 +154,22 @@ func FuncByName(name string) (*Func, error) {
 // Additional generic non-Tensor inputs are supported up to 2,
 // with Gen1 and Gen2 versions.
 
+// FloatPromoteType returns the DataType for Tensor(s) that promotes
+// the Float type if any of the elements are of that type.
+// Otherwise it returns the type of the first tensor.
+func FloatPromoteType(tsr ...Tensor) reflect.Kind {
+	ft := tsr[0].DataType()
+	for i := 1; i < len(tsr); i++ {
+		t := tsr[i].DataType()
+		if t == reflect.Float64 {
+			ft = t
+		} else if t == reflect.Float32 && ft != reflect.Float64 {
+			ft = t
+		}
+	}
+	return ft
+}
+
 // CallOut1 adds output [Values] tensor for function.
 func CallOut1(fun func(a Tensor, out Values) error, a Tensor) Values {
 	out := NewOfType(a.DataType())
@@ -161,14 +177,21 @@ func CallOut1(fun func(a Tensor, out Values) error, a Tensor) Values {
 	return out
 }
 
+// CallOut1Float64 adds Float64 output [Values] tensor for function.
+func CallOut1Float64(fun func(a Tensor, out Values) error, a Tensor) Values {
+	out := NewFloat64()
+	errors.Log(fun(a, out))
+	return out
+}
+
 func CallOut2(fun func(a, b Tensor, out Values) error, a, b Tensor) Values {
-	out := NewOfType(a.DataType())
+	out := NewOfType(FloatPromoteType(a, b))
 	errors.Log(fun(a, b, out))
 	return out
 }
 
 func CallOut3(fun func(a, b, c Tensor, out Values) error, a, b, c Tensor) Values {
-	out := NewOfType(a.DataType())
+	out := NewOfType(FloatPromoteType(a, b, c))
 	errors.Log(fun(a, b, c, out))
 	return out
 }
@@ -192,13 +215,13 @@ func CallOut1Gen2[T any, S any](fun func(g T, h S, a Tensor, out Values) error, 
 }
 
 func CallOut2Gen1[T any](fun func(g T, a, b Tensor, out Values) error, g T, a, b Tensor) Values {
-	out := NewOfType(a.DataType())
+	out := NewOfType(FloatPromoteType(a, b))
 	errors.Log(fun(g, a, b, out))
 	return out
 }
 
 func CallOut2Gen2[T any, S any](fun func(g T, h S, a, b Tensor, out Values) error, g T, h S, a, b Tensor) Values {
-	out := NewOfType(a.DataType())
+	out := NewOfType(FloatPromoteType(a, b))
 	errors.Log(fun(g, h, a, b, out))
 	return out
 }

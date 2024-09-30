@@ -11,7 +11,7 @@ import (
 )
 
 func Abs(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(AbsOut, in)
+	return tensor.CallOut1Float64(AbsOut, in)
 }
 
 func AbsOut(in tensor.Tensor, out tensor.Values) error {
@@ -19,7 +19,7 @@ func AbsOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Acos(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(AcosOut, in)
+	return tensor.CallOut1Float64(AcosOut, in)
 }
 
 func AcosOut(in tensor.Tensor, out tensor.Values) error {
@@ -27,7 +27,7 @@ func AcosOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Acosh(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(AcoshOut, in)
+	return tensor.CallOut1Float64(AcoshOut, in)
 }
 
 func AcoshOut(in tensor.Tensor, out tensor.Values) error {
@@ -35,7 +35,7 @@ func AcoshOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Asin(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(AsinOut, in)
+	return tensor.CallOut1Float64(AsinOut, in)
 }
 
 func AsinOut(in tensor.Tensor, out tensor.Values) error {
@@ -43,7 +43,7 @@ func AsinOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Asinh(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(AsinhOut, in)
+	return tensor.CallOut1Float64(AsinhOut, in)
 }
 
 func AsinhOut(in tensor.Tensor, out tensor.Values) error {
@@ -51,7 +51,7 @@ func AsinhOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Atan(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(AtanOut, in)
+	return tensor.CallOut1Float64(AtanOut, in)
 }
 
 func AtanOut(in tensor.Tensor, out tensor.Values) error {
@@ -59,7 +59,7 @@ func AtanOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Atanh(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(AtanhOut, in)
+	return tensor.CallOut1Float64(AtanhOut, in)
 }
 
 func AtanhOut(in tensor.Tensor, out tensor.Values) error {
@@ -67,7 +67,7 @@ func AtanhOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Cbrt(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(CbrtOut, in)
+	return tensor.CallOut1Float64(CbrtOut, in)
 }
 
 func CbrtOut(in tensor.Tensor, out tensor.Values) error {
@@ -75,7 +75,7 @@ func CbrtOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Ceil(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(CeilOut, in)
+	return tensor.CallOut1Float64(CeilOut, in)
 }
 
 func CeilOut(in tensor.Tensor, out tensor.Values) error {
@@ -83,7 +83,7 @@ func CeilOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Cos(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(CosOut, in)
+	return tensor.CallOut1Float64(CosOut, in)
 }
 
 func CosOut(in tensor.Tensor, out tensor.Values) error {
@@ -91,7 +91,7 @@ func CosOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Cosh(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(CoshOut, in)
+	return tensor.CallOut1Float64(CoshOut, in)
 }
 
 func CoshOut(in tensor.Tensor, out tensor.Values) error {
@@ -99,7 +99,7 @@ func CoshOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Erf(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(ErfOut, in)
+	return tensor.CallOut1Float64(ErfOut, in)
 }
 
 func ErfOut(in tensor.Tensor, out tensor.Values) error {
@@ -107,7 +107,7 @@ func ErfOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Erfc(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(ErfcOut, in)
+	return tensor.CallOut1Float64(ErfcOut, in)
 }
 
 func ErfcOut(in tensor.Tensor, out tensor.Values) error {
@@ -115,7 +115,7 @@ func ErfcOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Erfcinv(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(ErfcinvOut, in)
+	return tensor.CallOut1Float64(ErfcinvOut, in)
 }
 
 func ErfcinvOut(in tensor.Tensor, out tensor.Values) error {
@@ -123,7 +123,7 @@ func ErfcinvOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Erfinv(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(ErfinvOut, in)
+	return tensor.CallOut1Float64(ErfinvOut, in)
 }
 
 func ErfinvOut(in tensor.Tensor, out tensor.Values) error {
@@ -131,7 +131,7 @@ func ErfinvOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Exp(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(ExpOut, in)
+	return tensor.CallOut1Float64(ExpOut, in)
 }
 
 func ExpOut(in tensor.Tensor, out tensor.Values) error {
@@ -139,7 +139,7 @@ func ExpOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Exp2(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(Exp2Out, in)
+	return tensor.CallOut1Float64(Exp2Out, in)
 }
 
 func Exp2Out(in tensor.Tensor, out tensor.Values) error {
@@ -147,7 +147,7 @@ func Exp2Out(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Expm1(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(Expm1Out, in)
+	return tensor.CallOut1Float64(Expm1Out, in)
 }
 
 func Expm1Out(in tensor.Tensor, out tensor.Values) error {
@@ -155,7 +155,7 @@ func Expm1Out(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Floor(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(FloorOut, in)
+	return tensor.CallOut1Float64(FloorOut, in)
 }
 
 func FloorOut(in tensor.Tensor, out tensor.Values) error {
@@ -163,7 +163,7 @@ func FloorOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Gamma(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(GammaOut, in)
+	return tensor.CallOut1Float64(GammaOut, in)
 }
 
 func GammaOut(in tensor.Tensor, out tensor.Values) error {
@@ -171,7 +171,7 @@ func GammaOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func J0(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(J0Out, in)
+	return tensor.CallOut1Float64(J0Out, in)
 }
 
 func J0Out(in tensor.Tensor, out tensor.Values) error {
@@ -179,7 +179,7 @@ func J0Out(in tensor.Tensor, out tensor.Values) error {
 }
 
 func J1(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(J1Out, in)
+	return tensor.CallOut1Float64(J1Out, in)
 }
 
 func J1Out(in tensor.Tensor, out tensor.Values) error {
@@ -187,7 +187,7 @@ func J1Out(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Log(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(LogOut, in)
+	return tensor.CallOut1Float64(LogOut, in)
 }
 
 func LogOut(in tensor.Tensor, out tensor.Values) error {
@@ -195,7 +195,7 @@ func LogOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Log10(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(Log10Out, in)
+	return tensor.CallOut1Float64(Log10Out, in)
 }
 
 func Log10Out(in tensor.Tensor, out tensor.Values) error {
@@ -203,7 +203,7 @@ func Log10Out(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Log1p(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(Log1pOut, in)
+	return tensor.CallOut1Float64(Log1pOut, in)
 }
 
 func Log1pOut(in tensor.Tensor, out tensor.Values) error {
@@ -211,7 +211,7 @@ func Log1pOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Log2(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(Log2Out, in)
+	return tensor.CallOut1Float64(Log2Out, in)
 }
 
 func Log2Out(in tensor.Tensor, out tensor.Values) error {
@@ -219,7 +219,7 @@ func Log2Out(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Logb(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(LogbOut, in)
+	return tensor.CallOut1Float64(LogbOut, in)
 }
 
 func LogbOut(in tensor.Tensor, out tensor.Values) error {
@@ -227,7 +227,7 @@ func LogbOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Round(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(RoundOut, in)
+	return tensor.CallOut1Float64(RoundOut, in)
 }
 
 func RoundOut(in tensor.Tensor, out tensor.Values) error {
@@ -235,7 +235,7 @@ func RoundOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func RoundToEven(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(RoundToEvenOut, in)
+	return tensor.CallOut1Float64(RoundToEvenOut, in)
 }
 
 func RoundToEvenOut(in tensor.Tensor, out tensor.Values) error {
@@ -243,7 +243,7 @@ func RoundToEvenOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Sin(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(SinOut, in)
+	return tensor.CallOut1Float64(SinOut, in)
 }
 
 func SinOut(in tensor.Tensor, out tensor.Values) error {
@@ -251,7 +251,7 @@ func SinOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Sinh(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(SinhOut, in)
+	return tensor.CallOut1Float64(SinhOut, in)
 }
 
 func SinhOut(in tensor.Tensor, out tensor.Values) error {
@@ -259,7 +259,7 @@ func SinhOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Sqrt(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(SqrtOut, in)
+	return tensor.CallOut1Float64(SqrtOut, in)
 }
 
 func SqrtOut(in tensor.Tensor, out tensor.Values) error {
@@ -267,7 +267,7 @@ func SqrtOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Tan(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(TanOut, in)
+	return tensor.CallOut1Float64(TanOut, in)
 }
 
 func TanOut(in tensor.Tensor, out tensor.Values) error {
@@ -275,7 +275,7 @@ func TanOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Tanh(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(TanhOut, in)
+	return tensor.CallOut1Float64(TanhOut, in)
 }
 
 func TanhOut(in tensor.Tensor, out tensor.Values) error {
@@ -283,7 +283,7 @@ func TanhOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Trunc(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(TruncOut, in)
+	return tensor.CallOut1Float64(TruncOut, in)
 }
 
 func TruncOut(in tensor.Tensor, out tensor.Values) error {
@@ -291,7 +291,7 @@ func TruncOut(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Y0(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(Y0Out, in)
+	return tensor.CallOut1Float64(Y0Out, in)
 }
 
 func Y0Out(in tensor.Tensor, out tensor.Values) error {
@@ -299,7 +299,7 @@ func Y0Out(in tensor.Tensor, out tensor.Values) error {
 }
 
 func Y1(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(Y1Out, in)
+	return tensor.CallOut1Float64(Y1Out, in)
 }
 
 func Y1Out(in tensor.Tensor, out tensor.Values) error {
