@@ -172,7 +172,7 @@ func label(nm string, sh *Shape) string {
 // when it exceeds that length. If maxLen = 0, [MaxSprintLength] is used.
 // The format is the per-element format string, which should include
 // any delimiter or spacing between elements (which will apply to last
-// element too).  If empty it uses compact defaults for the data type.
+// element too).  If empty it uses general %g or %s defaults with a tab separator.
 func Sprintf(tsr Tensor, maxLen int, format string) string {
 	if maxLen == 0 {
 		maxLen = MaxSprintLength
@@ -183,12 +183,12 @@ func Sprintf(tsr Tensor, maxLen int, format string) string {
 	if defFmt {
 		switch {
 		case tsr.IsString():
-			format = "%15s\t"
+			format = "%s\t"
 		case reflectx.KindIsInt(tsr.DataType()):
 			isint = true
-			format = "%7g\t"
+			format = "%g\t"
 		default:
-			format = "%7.3g\t"
+			format = "%g\t"
 		}
 	}
 	if tsr.NumDims() == 1 && tsr.DimSize(0) == 1 { // scalar special case

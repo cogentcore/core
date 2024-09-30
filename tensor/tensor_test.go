@@ -134,17 +134,16 @@ func TestSliced(t *testing.T) {
 
 	res := `[3, 4]
 	[0]:	[1]:	[2]:	[3]:	
-[0]:	      0	      1	      2	      3	
-[1]:	     10	     11	     12	     13	
-[2]:	     20	     21	     22	     23	
+[0]:	0	1	2	3	
+[1]:	10	11	12	13	
+[2]:	20	21	22	23	
 `
 	assert.Equal(t, res, ft.String())
-	// fmt.Println(ft)
 
 	res = `[2, 2]
 	[0]:	[1]:	
-[0]:	     23	     22	
-[1]:	     13	     12	
+[0]:	23	22	
+[1]:	13	12	
 `
 	sl := NewSliced(ft, []int{2, 1}, []int{3, 2})
 	assert.Equal(t, res, sl.String())
@@ -152,9 +151,9 @@ func TestSliced(t *testing.T) {
 	vl := sl.AsValues()
 	assert.Equal(t, res, vl.String())
 	res = `[3, 1]
-[0]:	      2	
-[1]:	     12	
-[2]:	     22	
+[0]:	2	
+[1]:	12	
+[2]:	22	
 `
 	sl2 := Reslice(ft, FullAxis, Slice{2, 3, 0})
 	assert.Equal(t, res, sl2.String())
@@ -175,9 +174,9 @@ func TestMasked(t *testing.T) {
 
 	res := `[3, 4]
 	[0]:	[1]:	[2]:	[3]:	
-[0]:	      0	      1	      2	      3	
-[1]:	     10	     11	     12	     13	
-[2]:	     20	     21	     22	     23	
+[0]:	0	1	2	3	
+[1]:	10	11	12	13	
+[2]:	20	21	22	23	
 `
 	assert.Equal(t, res, ms.String())
 
@@ -187,13 +186,13 @@ func TestMasked(t *testing.T) {
 	})
 	res = `[3, 4]
 	[0]:	[1]:	[2]:	[3]:	
-[0]:	    NaN	    NaN	      2	    NaN	
-[1]:	    NaN	    NaN	     12	    NaN	
-[2]:	    NaN	    NaN	     22	    NaN	
+[0]:	NaN	NaN	2	NaN	
+[1]:	NaN	NaN	12	NaN	
+[2]:	NaN	NaN	22	NaN	
 `
 	assert.Equal(t, res, ms.String())
 
-	res = `[3]       2	     12	     22	
+	res = `[3] 2	12	22	
 `
 	vl := ms.AsValues()
 	assert.Equal(t, res, vl.String())
@@ -223,8 +222,8 @@ func TestIndexed(t *testing.T) {
 
 	res := `[2, 2, 2]
 	[0 0]:	[0 1]:	[0 0]:	[0 1]:	
-[0]:	      1	      1	     11	     11	
-[0]:	      2	      2	     22	     22	
+[0]:	1	1	11	11	
+[0]:	2	2	22	22	
 `
 	assert.Equal(t, res, ix.String())
 
@@ -243,38 +242,37 @@ func TestReshaped(t *testing.T) {
 
 	res := `[4, 3]
 	[0]:	[1]:	[2]:	
-[0]:	      0	      1	      2	
-[1]:	      3	     10	     11	
-[2]:	     12	     13	     20	
-[3]:	     21	     22	     23	
+[0]:	0	1	2	
+[1]:	3	10	11	
+[2]:	12	13	20	
+[3]:	21	22	23	
 `
 	rs := NewReshaped(ft, 4, 3)
 	assert.Equal(t, res, rs.String())
 
 	res = `[1, 3, 4]
 	[0 0]:	[0 1]:	[0 2]:	[0 3]:	
-[0]:	      0	      1	      2	      3	
-[0]:	     10	     11	     12	     13	
-[0]:	     20	     21	     22	     23	
+[0]:	0	1	2	3	
+[0]:	10	11	12	13	
+[0]:	20	21	22	23	
 `
 	rs = NewReshaped(ft, int(NewAxis), 3, 4)
 	assert.Equal(t, res, rs.String())
 
 	res = `[12]
-[0]:	      0	      1	      2	      3	     10	     11	     12	     13	     20	     21	     22	     23	
+[0]:	0	1	2	3	10	11	12	13	20	21	22	23	
 `
 	rs = NewReshaped(ft, -1)
 	assert.Equal(t, res, rs.String())
 
 	res = `[4, 3]
 	[0]:	[1]:	[2]:	
-[0]:	      0	      1	      2	
-[1]:	      3	     10	     11	
-[2]:	     12	     13	     20	
-[3]:	     21	     22	     23	
+[0]:	0	1	2	
+[1]:	3	10	11	
+[2]:	12	13	20	
+[3]:	21	22	23	
 `
 	rs = NewReshaped(ft, 4, -1)
-	// fmt.Println(rs)
 	assert.Equal(t, res, rs.String())
 
 	err := rs.SetShapeSizes(5, -1)
