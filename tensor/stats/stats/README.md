@@ -20,7 +20,7 @@ All stats are registered in the `tensor.Funcs` global list (for use in Goal), an
 stats.Mean.Call(in, out)
 ```
 
-All stats functions (and all tensor functions more generally) skip over NaN's as a missing value, so they are equivalent to the `nanmean` etc versions in NumPy.
+All stats functions skip over `NaN`s as a missing value, so they are equivalent to the `nanmean` etc versions in NumPy.
 
 ## Stats
 
@@ -28,7 +28,7 @@ The following statistics are supported (per the `Stats` enum in `stats.go`):
 
 * `Count`:  count of number of elements
 * `Sum`:  sum of elements
-* `NormL1`: L1 Norm: sum of absolute values
+* `L1Norm`: L1 Norm: sum of absolute values
 * `Prod`:  product of elements
 * `Min`:  minimum value
 * `Max`:  maximum value
@@ -39,7 +39,7 @@ The following statistics are supported (per the `Stats` enum in `stats.go`):
 * `Std`:  sample standard deviation (sqrt of Var)
 * `Sem`:  sample standard error of the mean (Std divided by sqrt(n))
 * `SumSq`:  sum of squared element values
-* `NormL2`:  L2 Norm: square-root of sum-of-squares
+* `L2Norm`:  L2 Norm: square-root of sum-of-squares
 * `VarPop`:  population variance (squared diffs from mean, divided by n)
 * `StdPop`:  population standard deviation (sqrt of VarPop)
 * `SemPop`:  population standard error of the mean (StdPop divided by sqrt(n))

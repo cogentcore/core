@@ -84,9 +84,9 @@ func SumSquares(a, b tensor.Tensor) tensor.Values {
 	return out
 }
 
-// NormL2Out computes the L2 Norm: square root of the sum of squares
+// L2NormOut computes the L2 Norm: square root of the sum of squares
 // differences between tensor values, aka the Euclidean distance.
-func NormL2Out(a, b tensor.Tensor, out tensor.Values) error {
+func L2NormOut(a, b tensor.Tensor, out tensor.Values) error {
 	scale64, ss64, err := SumSquaresScaleOut64(a, b, out)
 	if err != nil {
 		return err
@@ -107,17 +107,17 @@ func NormL2Out(a, b tensor.Tensor, out tensor.Values) error {
 	return nil
 }
 
-// NormL2 computes the L2 Norm: square root of the sum of squares
+// L2Norm computes the L2 Norm: square root of the sum of squares
 // differences between tensor values, aka the Euclidean distance.
 // See [MetricFunc] for general information.
-func NormL2(a, b tensor.Tensor) tensor.Values {
-	return tensor.CallOut2(NormL2Out, a, b)
+func L2Norm(a, b tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(L2NormOut, a, b)
 }
 
-// NormL1Out computes the sum of the absolute value of differences between the
+// L1NormOut computes the sum of the absolute value of differences between the
 // tensor values, the L1 Norm.
 // See [MetricOutFunc] for general information.
-func NormL1Out(a, b tensor.Tensor, out tensor.Values) error {
+func L1NormOut(a, b tensor.Tensor, out tensor.Values) error {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return err
 	}
@@ -129,11 +129,11 @@ func NormL1Out(a, b tensor.Tensor, out tensor.Values) error {
 	return err
 }
 
-// NormL1 computes the sum of the absolute value of differences between the
+// L1Norm computes the sum of the absolute value of differences between the
 // tensor values, the L1 Norm.
 // See [MetricFunc] for general information.
-func NormL1(a, b tensor.Tensor) tensor.Values {
-	return tensor.CallOut2(NormL1Out, a, b)
+func L1Norm(a, b tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(L1NormOut, a, b)
 }
 
 // HammingOut computes the sum of 1s for every element that is different,
@@ -180,10 +180,10 @@ func SumSquaresBinTolScaleOut64(a, b tensor.Tensor, out tensor.Values) (scale64,
 	return
 }
 
-// NormL2BinTolOut computes the L2 Norm square root of the sum of squares
+// L2NormBinTolOut computes the L2 Norm square root of the sum of squares
 // differences between tensor values (aka Euclidean distance), with binary tolerance:
 // differences < 0.5 are thresholded to 0.
-func NormL2BinTolOut(a, b tensor.Tensor, out tensor.Values) error {
+func L2NormBinTolOut(a, b tensor.Tensor, out tensor.Values) error {
 	scale64, ss64, err := SumSquaresBinTolScaleOut64(a, b, out)
 	if err != nil {
 		return err
@@ -204,12 +204,12 @@ func NormL2BinTolOut(a, b tensor.Tensor, out tensor.Values) error {
 	return nil
 }
 
-// NormL2BinTol computes the L2 Norm square root of the sum of squares
+// L2NormBinTol computes the L2 Norm square root of the sum of squares
 // differences between tensor values (aka Euclidean distance), with binary tolerance:
 // differences < 0.5 are thresholded to 0.
 // See [MetricFunc] for general information.
-func NormL2BinTol(a, b tensor.Tensor) tensor.Values {
-	return tensor.CallOut2(NormL2BinTolOut, a, b)
+func L2NormBinTol(a, b tensor.Tensor) tensor.Values {
+	return tensor.CallOut2(L2NormBinTolOut, a, b)
 }
 
 // SumSquaresBinTolOut computes the sum of squares differences between tensor values,

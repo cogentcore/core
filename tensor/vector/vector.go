@@ -38,22 +38,22 @@ func Sum(a tensor.Tensor) tensor.Values {
 }
 
 // Dot performs the vector dot product: the [Sum] of the [Mul] product
-// of the two tensors, returning a scalar value.
+// of the two tensors, returning a scalar value. Also known as the inner product.
 func Dot(a, b tensor.Tensor) tensor.Values {
 	return Sum(Mul(a, b))
 }
 
-// NormL2 returns the length of the vector as the L2 Norm:
+// L2Norm returns the length of the vector as the L2 Norm:
 // square root of the sum of squared values of the vector, as a scalar.
 // This is the Sqrt of the [Dot] product of the vector with itself.
-func NormL2(a tensor.Tensor) tensor.Values {
+func L2Norm(a tensor.Tensor) tensor.Values {
 	dot := Dot(a, a).Float1D(0)
 	return tensor.NewFloat64Scalar(math.Sqrt(dot))
 }
 
-// NormL1 returns the length of the vector as the L1 Norm:
+// L1Norm returns the length of the vector as the L1 Norm:
 // sum of the absolute values of the tensor, as a scalar.
-func NormL1(a tensor.Tensor) tensor.Values {
+func L1Norm(a tensor.Tensor) tensor.Values {
 	n := a.Len()
 	sum := 0.0
 	tensor.Vectorize(func(tsr ...tensor.Tensor) int { return n },

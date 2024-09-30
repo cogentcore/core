@@ -82,17 +82,15 @@ func Sum(in tensor.Tensor) tensor.Values {
 	return out
 }
 
-// NormL1 computes the sum of absolute-value-of tensor values.
-// This is also known as the L1 norm.
+// L1Norm computes the sum of absolute-value-of tensor values.
 // See [StatsFunc] for general information.
-func NormL1(in tensor.Tensor) tensor.Values {
-	return tensor.CallOut1(NormL1Out, in)
+func L1Norm(in tensor.Tensor) tensor.Values {
+	return tensor.CallOut1(L1NormOut, in)
 }
 
-// NormL1Out computes the sum of absolute-value-of tensor values.
-// This is also known as the L1 norm.
+// L1NormOut computes the sum of absolute-value-of tensor values.
 // See [StatsFunc] for general information.
-func NormL1Out(in tensor.Tensor, out tensor.Values) error {
+func L1NormOut(in tensor.Tensor, out tensor.Values) error {
 	_, err := VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
 		VecFunc(idx, tsr[0], tsr[1], 0, func(val, agg float64) float64 {
 			return agg + math.Abs(val)
@@ -485,10 +483,10 @@ func SumSqOut(in tensor.Tensor, out tensor.Values) error {
 	return err
 }
 
-// NormL2Out64 computes the square root of the sum of squares of tensor values,
+// L2NormOut64 computes the square root of the sum of squares of tensor values,
 // known as the L2 norm, and returns the Float64 output values for
 // use in subsequent computations.
-func NormL2Out64(in tensor.Tensor, out tensor.Values) (tensor.Tensor, error) {
+func L2NormOut64(in tensor.Tensor, out tensor.Values) (tensor.Tensor, error) {
 	scale64, ss64, err := SumSqScaleOut64(in, out)
 	if err != nil {
 		return nil, err
@@ -509,19 +507,19 @@ func NormL2Out64(in tensor.Tensor, out tensor.Values) (tensor.Tensor, error) {
 	return scale64, nil
 }
 
-// NormL2 computes the square root of the sum of squares of tensor values,
+// L2Norm computes the square root of the sum of squares of tensor values,
 // known as the L2 norm.
 // See [StatsFunc] for general information.
-func NormL2(in tensor.Tensor) tensor.Values {
+func L2Norm(in tensor.Tensor) tensor.Values {
 	out := tensor.NewOfType(in.DataType())
-	errors.Log1(NormL2Out64(in, out))
+	errors.Log1(L2NormOut64(in, out))
 	return out
 }
 
-// NormL2Out computes the square root of the sum of squares of tensor values,
+// L2NormOut computes the square root of the sum of squares of tensor values,
 // known as the L2 norm.
 // See [StatsOutFunc] for general information.
-func NormL2Out(in tensor.Tensor, out tensor.Values) error {
-	_, err := NormL2Out64(in, out)
+func L2NormOut(in tensor.Tensor, out tensor.Values) error {
+	_, err := L2NormOut64(in, out)
 	return err
 }

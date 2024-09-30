@@ -12,11 +12,11 @@ import (
 )
 
 func init() {
-	tensor.AddFunc(MetricNormL2.FuncName(), NormL2)
+	tensor.AddFunc(MetricL2Norm.FuncName(), L2Norm)
 	tensor.AddFunc(MetricSumSquares.FuncName(), SumSquares)
-	tensor.AddFunc(MetricNormL1.FuncName(), NormL1)
+	tensor.AddFunc(MetricL1Norm.FuncName(), L1Norm)
 	tensor.AddFunc(MetricHamming.FuncName(), Hamming)
-	tensor.AddFunc(MetricNormL2BinTol.FuncName(), NormL2BinTol)
+	tensor.AddFunc(MetricL2NormBinTol.FuncName(), L2NormBinTol)
 	tensor.AddFunc(MetricSumSquaresBinTol.FuncName(), SumSquaresBinTol)
 	tensor.AddFunc(MetricInvCosine.FuncName(), InvCosine)
 	tensor.AddFunc(MetricInvCorrelation.FuncName(), InvCorrelation)
@@ -31,25 +31,25 @@ func init() {
 type Metrics int32 //enums:enum -trim-prefix Metric
 
 const (
-	// NormL2 is the square root of the sum of squares differences
+	// L2Norm is the square root of the sum of squares differences
 	// between tensor values, aka the L2 Norm.
-	MetricNormL2 Metrics = iota
+	MetricL2Norm Metrics = iota
 
 	// SumSquares is the sum of squares differences between tensor values.
 	MetricSumSquares
 
-	// NormL1 is the sum of the absolute value of differences
+	// L1Norm is the sum of the absolute value of differences
 	// between tensor values, the L1 Norm.
-	MetricNormL1
+	MetricL1Norm
 
 	// Hamming is the sum of 1s for every element that is different,
 	// i.e., "city block" distance.
 	MetricHamming
 
-	// NormL2BinTol is the [NormL2] square root of the sum of squares
+	// L2NormBinTol is the [L2Norm] square root of the sum of squares
 	// differences between tensor values, with binary tolerance:
 	// differences < 0.5 are thresholded to 0.
-	MetricNormL2BinTol
+	MetricL2NormBinTol
 
 	// SumSquaresBinTol is the [SumSquares] differences between tensor values,
 	// with binary tolerance: differences < 0.5 are thresholded to 0.
@@ -114,7 +114,7 @@ func (m Metrics) Call(a, b tensor.Tensor) tensor.Values {
 }
 
 // Increasing returns true if the distance metric is such that metric
-// values increase as a function of distance (e.g., NormL2)
+// values increase as a function of distance (e.g., L2Norm)
 // and false if metric values decrease as a function of distance
 // (e.g., Cosine, Correlation)
 func (m Metrics) Increasing() bool {

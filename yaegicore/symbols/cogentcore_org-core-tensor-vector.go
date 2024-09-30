@@ -11,10 +11,10 @@ func init() {
 	Symbols["cogentcore.org/core/tensor/vector/vector"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Dot":    reflect.ValueOf(vector.Dot),
+		"L1Norm": reflect.ValueOf(vector.L1Norm),
+		"L2Norm": reflect.ValueOf(vector.L2Norm),
 		"Mul":    reflect.ValueOf(vector.Mul),
 		"MulOut": reflect.ValueOf(vector.MulOut),
-		"NormL1": reflect.ValueOf(vector.NormL1),
-		"NormL2": reflect.ValueOf(vector.NormL2),
 		"Sum":    reflect.ValueOf(vector.Sum),
 	}
 }

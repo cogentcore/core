@@ -25,17 +25,17 @@ func TestFuncs(t *testing.T) {
 	btsr := tensor.NewNumberFromValues(b64...)
 	out := tensor.NewFloat64(1)
 
-	NormL2Out(atsr, btsr, out)
-	assert.InDelta(t, results[MetricNormL2], out.Values[0], tol)
+	L2NormOut(atsr, btsr, out)
+	assert.InDelta(t, results[MetricL2Norm], out.Values[0], tol)
 
 	SumSquaresOut(atsr, btsr, out)
 	assert.InDelta(t, results[MetricSumSquares], out.Values[0], tol)
 
-	NormL2BinTolOut(atsr, btsr, out)
-	assert.InDelta(t, results[MetricNormL2BinTol], out.Values[0], tol)
+	L2NormBinTolOut(atsr, btsr, out)
+	assert.InDelta(t, results[MetricL2NormBinTol], out.Values[0], tol)
 
-	NormL1Out(atsr, btsr, out)
-	assert.InDelta(t, results[MetricNormL1], out.Values[0], tol)
+	L1NormOut(atsr, btsr, out)
+	assert.InDelta(t, results[MetricL1Norm], out.Values[0], tol)
 
 	HammingOut(atsr, btsr, out)
 	assert.Equal(t, results[MetricHamming], out.Values[0])
@@ -64,7 +64,7 @@ func TestFuncs(t *testing.T) {
 	InvCosineOut(atsr, btsr, out)
 	assert.InDelta(t, results[MetricInvCosine], out.Values[0], tol)
 
-	for met := MetricNormL2; met < MetricsN; met++ {
+	for met := MetricL2Norm; met < MetricsN; met++ {
 		out := met.Call(atsr, btsr)
 		assert.InDelta(t, results[met], out.Float1D(0), tol)
 	}
@@ -79,7 +79,7 @@ func TestMatrix(t *testing.T) {
 	assert.NoError(t, err)
 	in := dt.Column("Input")
 	out := tensor.NewFloat64()
-	err = MatrixOut(NormL2, in, out)
+	err = MatrixOut(L2Norm, in, out)
 	assert.NoError(t, err)
 	// fmt.Println(out.Tensor)
 	for i, v := range simres {

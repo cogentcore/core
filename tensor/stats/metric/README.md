@@ -9,7 +9,7 @@ The metric functions always operate on the outermost _row_ dimension, and it is 
 
 * To obtain a single summary metric across all values, use `tensor.As1D`.
 
-* For `RowMajor` data that is naturally organized as a single outer _rows_ dimension with the remaining inner dimensions comprising the _cells_, the results are the metric for each such cell computed across the outer rows dimension.  For the `NormL2` metric for example, each cell has the difference for that cell value across all the rows between the two tensors. See [Matrix functions](#matrix-functions) below for a function that computes the distances _between each cell pattern and all the others_, as a distance or similarity matrix.
+* For `RowMajor` data that is naturally organized as a single outer _rows_ dimension with the remaining inner dimensions comprising the _cells_, the results are the metric for each such cell computed across the outer rows dimension.  For the `L2Norm` metric for example, each cell has the difference for that cell value across all the rows between the two tensors. See [Matrix functions](#matrix-functions) below for a function that computes the distances _between each cell pattern and all the others_, as a distance or similarity matrix.
 
 * Use `tensor.NewRowCellsView` to reshape any tensor into a 2D rows x cells shape, with the cells starting at a given dimension. Thus, any number of outer dimensions can be collapsed into the outer row dimension, and the remaining dimensions become the cells.
 
@@ -17,11 +17,11 @@ The metric functions always operate on the outermost _row_ dimension, and it is 
 
 ### Value _increases_ with increasing distance (i.e., difference metric)
 
-* `NormL2`: the square root of the sum of squares differences between tensor values.
+* `L2Norm`: the square root of the sum of squares differences between tensor values.
 * `SumSquares`:  the sum of squares differences between tensor values.
-* `Abs`or `NormL2`: the sum of the absolute value of differences between tensor values.
+* `Abs`or `L2Norm`: the sum of the absolute value of differences between tensor values.
 * `Hamming`: the sum of 1s for every element that is different, i.e., "city block" distance.
-* `NormL2BinTol`:  the `NormL2` square root of the sum of squares differences between tensor values, with binary tolerance: differences < 0.5 are thresholded to 0.
+* `L2NormBinTol`:  the `L2Norm` square root of the sum of squares differences between tensor values, with binary tolerance: differences < 0.5 are thresholded to 0.
 * `SumSquaresBinTol`: the `SumSquares` differences between tensor values,  with binary tolerance: differences < 0.5 are thresholded to 0.
 * `InvCosine`: is 1-`Cosine`, which is useful to convert it to an Increasing metric where more different vectors have larger metric values.
 * `InvCorrelation`: is 1-`Correlation`, which is useful to convert it to an Increasing metric where more different vectors have larger metric values.
@@ -38,7 +38,7 @@ Here is general info about these functions:
 
 The output must be a `tensor.Values` tensor, and it is automatically shaped to hold the stat value(s) for the "cells" in higher-dimensional tensors, and a single scalar value for a 1D input tensor.
 
-All metric functions skip over NaN's, as a missing value.
+All metric functions skip over `NaN`'s, as a missing value.
 
 Metric functions cannot be computed in parallel, e.g., using VectorizeThreaded or GPU, due to shared writing to the same output values.  Special implementations are required if that is needed.
 

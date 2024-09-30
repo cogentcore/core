@@ -16,7 +16,7 @@ import (
 func init() {
 	tensor.AddFunc(StatCount.FuncName(), Count)
 	tensor.AddFunc(StatSum.FuncName(), Sum)
-	tensor.AddFunc(StatNormL1.FuncName(), NormL1)
+	tensor.AddFunc(StatL1Norm.FuncName(), L1Norm)
 	tensor.AddFunc(StatProd.FuncName(), Prod)
 	tensor.AddFunc(StatMin.FuncName(), Min)
 	tensor.AddFunc(StatMax.FuncName(), Max)
@@ -27,7 +27,7 @@ func init() {
 	tensor.AddFunc(StatStd.FuncName(), Std)
 	tensor.AddFunc(StatSem.FuncName(), Sem)
 	tensor.AddFunc(StatSumSq.FuncName(), SumSq)
-	tensor.AddFunc(StatNormL2.FuncName(), NormL2)
+	tensor.AddFunc(StatL2Norm.FuncName(), L2Norm)
 	tensor.AddFunc(StatVarPop.FuncName(), VarPop)
 	tensor.AddFunc(StatStdPop.FuncName(), StdPop)
 	tensor.AddFunc(StatSemPop.FuncName(), SemPop)
@@ -48,7 +48,7 @@ const (
 	StatSum
 
 	// L1 Norm: sum of absolute values of elements.
-	StatNormL1
+	StatL1Norm
 
 	// product of elements.
 	StatProd
@@ -81,7 +81,7 @@ const (
 	StatSumSq
 
 	// L2 Norm: square-root of sum-of-squares.
-	StatNormL2
+	StatL2Norm
 
 	// population variance (squared diffs from mean, divided by n).
 	StatVarPop

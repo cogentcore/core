@@ -10,7 +10,7 @@ In addition, there are five important "view" implementations of `Tensor` that wr
 
 * `Sliced` provides a sub-sliced view into the wrapped `Tensor` source, using an indexed list along each dimension. Thus, it can provide a reordered and filtered view onto the raw data, and it has a well-defined shape in terms of the number of indexes per dimension. This corresponds to the NumPy basic sliced indexing model.
 
-* `Masked` provides a `Bool` masked view onto each element in the wrapped `Tensor`, where the two maintain the same shape).  Any cell with a `false` value in the bool mask returns a `NaN` (missing data), and `Set` functions are no-ops, such that the tensor functions automatically only process the mask-filtered data.
+* `Masked` provides a `Bool` masked view onto each element in the wrapped `Tensor`, where the two maintain the same shape).  Any cell with a `false` value in the bool mask returns a `NaN` (missing data), and `Set` functions are no-ops. The [stats](stats) packages treat `NaN` as missing data, but [tmath](tmath), [vector](vector), and [matrix](matrix) packages do not, so it is best to call `.AsValues()` on masked data prior to operating on it, in a basic math context (i.e., `copy` in Goal).
 
 * `Indexed` has a tensor of indexes into the source data, where the final, innermost dimension of the indexes is the same size as the number of dimensions in the wrapped source tensor. The overall shape of this view is that of the remaining outer dimensions of the Indexes tensor, and like other views, assignment and return values are taken from the corresponding indexed value in the wrapped source tensor.
 
