@@ -204,7 +204,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{`fmt.Println(#zeros(3,4)#)`, `fmt.Println(tensor.NewFloat64(3, 4))`},
+		{"# x += 1", `tmath.AddAssign(x, tensor.NewIntScalar(1))`},
 	}
 	st := NewState()
 	st.MathRecord = false
@@ -223,6 +223,7 @@ func TestMath(t *testing.T) {
 		{"# a = x + y", `a = tmath.Add(x, y)`},
 		{"# a := x ** 2", `a := tmath.Pow(x, tensor.NewIntScalar(2))`},
 		{"# a = -x", `a = tmath.Negate(x)`},
+		{"# x += 1", `tmath.AddAssign(x, tensor.NewIntScalar(1))`},
 		{"# a := [1,2,3,4]", `a := tensor.NewIntFromValues([]int { 1, 2, 3, 4 }  ...)`},
 		{"# a := [1.,2,3,4]", `a := tensor.NewFloat64FromValues([]float64 { 1., 2, 3, 4 }  ...)`},
 		{"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},

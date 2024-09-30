@@ -83,7 +83,8 @@ type funcInfo struct {
 	curArg int
 }
 
-// mathParse has the parsing state
+// mathParse has the parsing state, active only during a parsing pass
+// on one specific chunk of code and tokens.
 type mathParse struct {
 	state  *State
 	code   string   // code string
@@ -566,13 +567,15 @@ func (mp *mathParse) defineStmt(as *ast.AssignStmt) {
 }
 
 func (mp *mathParse) assignStmt(as *ast.AssignStmt) {
-	if _, ok := as.Lhs[0].(*ast.Ident); ok {
-		mp.exprList(as.Lhs)
-		mp.addToken(as.Tok)
-		mp.startFunc("")
-		mp.exprList(as.Rhs)
-		mp.endFunc()
-		return
+	if as.Tok == token.ASSIGN {
+		if _, ok := as.Lhs[0].(*ast.Ident); ok {
+			mp.exprList(as.Lhs)
+			mp.addToken(as.Tok)
+			mp.startFunc("")
+			mp.exprList(as.Rhs)
+			mp.endFunc()
+			return
+		}
 	}
 	fn := ""
 	switch as.Tok {
