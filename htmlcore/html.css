@@ -29,6 +29,10 @@ ol, ul {
     padding: 0dp, 0dp, 0dp, 16dp;
 }
 
+blockquote {
+    margin: 1em 40dp 1em 40dp;
+}
+
 ruby > rt {
     display: block;
     font-size: 50%;

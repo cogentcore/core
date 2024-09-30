@@ -453,7 +453,9 @@ func (tr *Tree) Init() {
 		if tr.Icon.IsSet() {
 			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
-					s.Font.Size.Dp(16)
+					s.Font.Size.Dp(24)
+					s.Color = colors.Scheme.Primary.Base
+					s.Align.Self = styles.Center
 				})
 				w.Updater(func() {
 					w.SetIcon(tr.Icon)
@@ -826,27 +828,26 @@ func (tr *Tree) selectUpdate(mode events.SelectModes) bool {
 	return sel
 }
 
-// sendSelectEvent sends an [events.Select] event on the root node.
+// sendSelectEvent sends an [events.Select] event on both this node and the root node.
 func (tr *Tree) sendSelectEvent(original ...events.Event) {
+	if tr.This != tr.root.This {
+		tr.Send(events.Select, original...)
+	}
 	tr.root.Send(events.Select, original...)
 }
 
-// sendChangeEvent sends an [events.Change] event on the root node.
+// sendChangeEvent sends an [events.Change] event on both this node and the root node.
 func (tr *Tree) sendChangeEvent(original ...events.Event) {
+	if tr.This != tr.root.This {
+		tr.SendChange(original...)
+	}
 	tr.root.SendChange(original...)
-}
-
-// treeChanged must be called after any structural
-// change to the [Tree] (adding or deleting nodes).
-// It calls SendChangeEvent to notify of changes.
-func (tr *Tree) treeChanged(original ...events.Event) {
-	tr.sendChangeEvent(original...)
 }
 
 // sendChangeEventReSync sends an [events.Change] event on the RootView node.
 // If SyncNode != nil, it also does a re-sync from root.
 func (tr *Tree) sendChangeEventReSync(original ...events.Event) {
-	tr.root.SendChange(original...)
+	tr.sendChangeEvent(original...)
 	if tr.root.SyncNode != nil {
 		tr.root.Resync()
 	}
@@ -1331,7 +1332,7 @@ func (tr *Tree) Cut() { //types:add
 		sn.AsTree().Delete()
 	}
 	root.Update()
-	root.treeChanged()
+	root.sendChangeEvent()
 }
 
 // Paste pastes clipboard at given node.
@@ -1400,7 +1401,7 @@ func (tr *Tree) pasteAssign(md mimedata.Mimes) {
 	tr.setScene(tr.Scene) // ensure children have scene
 	tr.Update()           // could have children
 	tr.Open()
-	tr.treeChanged()
+	tr.sendChangeEvent()
 }
 
 // pasteBefore inserts object(s) from mime data before this node.
@@ -1469,7 +1470,7 @@ func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 			selTv = ntv
 		}
 	}
-	tr.treeChanged()
+	tr.sendChangeEvent()
 	parent.NeedsLayout()
 	if selTv != nil {
 		selTv.SelectEvent(events.SelectOne)
@@ -1494,7 +1495,7 @@ func (tr *Tree) pasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	}
 	tr.Update()
 	tr.Open()
-	tr.treeChanged()
+	tr.sendChangeEvent()
 }
 
 //////////////////////////////////////////////////////////////////////////////

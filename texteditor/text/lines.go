@@ -167,7 +167,7 @@ func (ls *Lines) SetLanguage(ftyp fileinfo.Known) {
 
 // SetFileExt sets syntax highlighting and other parameters
 // based on the given file extension (without the . prefix),
-// for cases where an actual file with fileinfo.FileInfo is not
+// for cases where an actual file with [fileinfo.FileInfo] is not
 // available.
 func (ls *Lines) SetFileExt(ext string) {
 	if len(ext) == 0 {

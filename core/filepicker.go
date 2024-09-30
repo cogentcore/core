@@ -123,7 +123,8 @@ func (fp *FilePicker) Init() {
 		fp.readFiles()
 
 		if fp.prevPath != fp.directory {
-			if TheApp.Platform() != system.MacOS {
+			// TODO(#424): disable for all platforms for now; causing issues
+			if false && TheApp.Platform() != system.MacOS {
 				// mac is not supported in a high-capacity fashion at this point
 				if fp.prevPath == "" {
 					fp.configWatcher()

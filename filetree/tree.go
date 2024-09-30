@@ -248,7 +248,7 @@ func (ft *Tree) watchUpdate(path string) {
 
 // watchPath adds given path to those watched
 func (ft *Tree) watchPath(path core.Filename) error {
-	return nil // TODO: disable for all platforms for now -- getting some issues
+	return nil // TODO(#424): disable for all platforms for now; causing issues
 	if core.TheApp.Platform() == system.MacOS {
 		return nil // mac is not supported in a high-capacity fashion at this point
 	}

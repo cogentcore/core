@@ -13,3 +13,12 @@ func TestInlineList(t *testing.T) {
 	NewInlineList(b).SetSlice(&[]int{1, 3, 5})
 	b.AssertRender(t, "inline-list/basic")
 }
+
+func TestInlineListUpdate(t *testing.T) {
+	b := NewBody()
+	il := NewInlineList(b).SetSlice(&[]int{1, 2, 3})
+	il.Update()
+	il.SetSlice(&[]int{4, 5, 6})
+	il.Update()
+	b.AssertRender(t, "inline-list/update")
+}
