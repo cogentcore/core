@@ -191,6 +191,13 @@ func Sprintf(tsr Tensor, maxLen int, format string) string {
 			format = "%7.3g\t"
 		}
 	}
+	if tsr.NumDims() == 1 && tsr.DimSize(0) == 1 { // scalar special case
+		if tsr.IsString() {
+			return fmt.Sprintf(format, tsr.String1D(0))
+		} else {
+			return fmt.Sprintf(format, tsr.Float1D(0))
+		}
+	}
 	mxwd := 0
 	n := min(tsr.Len(), maxLen)
 	for i := range n {
