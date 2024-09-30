@@ -1134,17 +1134,6 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 	}
 }
 
-// getShortcuts gathers all [Button]s in the [Scene] with a shortcut specified.
-// It recursively navigates [Button.Menu]s. It also gathers shortcuts from the
-// [Scene.ContextMenus].
-func (em *Events) getShortcuts() {
-	em.shortcuts = nil
-	tmps := NewScene()
-	em.scene.applyContextMenus(tmps)
-	em.getShortcutsIn(tmps)
-	em.getShortcutsIn(em.scene)
-}
-
 // getShortcutsIn gathers all [Button]s in the given parent widget with
 // a shortcut specified. It recursively navigates [Button.Menu]s.
 func (em *Events) getShortcutsIn(parent Widget) {
@@ -1161,7 +1150,7 @@ func (em *Events) getShortcutsIn(parent Widget) {
 			bt.Menu(tmps)
 			em.getShortcutsIn(tmps)
 		}
-		return tree.Continue
+		return tree.Break // there are no buttons in buttons
 	})
 }
 
@@ -1177,7 +1166,7 @@ func (em *Events) getShortcutsIn(parent Widget) {
 // processing.
 type shortcuts map[key.Chord]*Button
 
-// addShortcut adds given shortcut to given button.
+// addShortcut adds the given shortcut for the given button.
 func (em *Events) addShortcut(chord key.Chord, bt *Button) {
 	if chord == "" {
 		return

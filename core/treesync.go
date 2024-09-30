@@ -166,7 +166,7 @@ func (tr *Tree) addTreeNodes(rel, myidx int, typ *types.Type, n int) {
 	}
 	tr.Update()
 	tr.Open()
-	tr.treeChanged(nil)
+	tr.sendChangeEvent()
 	if stv != nil {
 		stv.SelectEvent(events.SelectOne)
 	}
@@ -289,7 +289,7 @@ func (tr *Tree) DeleteNode() { //types:add
 		parent := AsTree(tr.Parent)
 		tr.Delete()
 		parent.Update()
-		parent.treeChanged(nil)
+		parent.sendChangeEvent()
 	}
 }
 
@@ -321,7 +321,7 @@ func (tr *Tree) Duplicate() { //types:add
 	parent.InsertChild(nwkid, myidx+1)
 	ntv.Update()
 	parent.Update()
-	parent.treeChanged(nil)
+	parent.sendChangeEvent()
 	// ntv.SelectEvent(events.SelectOne)
 }
 
@@ -419,7 +419,7 @@ func (tr *Tree) pasteAssignSync(md mimedata.Mimes) {
 	}
 	tr.SyncNode.AsTree().CopyFrom(sl[0])
 	tr.NeedsLayout()
-	tr.sendChangeEvent(nil)
+	tr.sendChangeEvent()
 }
 
 // pasteAtSync inserts object(s) from mime data at rel position to this node.

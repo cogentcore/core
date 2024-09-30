@@ -258,7 +258,6 @@ func (sm *stages) sendShowEvents() {
 				sc.setFlag(true, sceneHasShown)
 				// profile.Profiling = true
 				// pr := profile.Start("send show")
-				sc.Events.getShortcuts()
 				sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 					cwb.Send(events.Show)
 					return tree.Continue

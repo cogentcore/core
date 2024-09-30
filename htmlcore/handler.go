@@ -90,7 +90,7 @@ func handleElement(ctx *Context) {
 		ctx.addStyle(string(b))
 	case "style":
 		ctx.addStyle(ExtractText(ctx))
-	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul":
+	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul", "blockquote":
 		w := New[core.Frame](ctx)
 		ctx.NewParent = w
 		if tag == "body" {

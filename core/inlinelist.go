@@ -31,13 +31,13 @@ func (il *InlineList) WidgetValue() any { return &il.Slice }
 func (il *InlineList) Init() {
 	il.Frame.Init()
 	il.Maker(func(p *tree.Plan) {
-		sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(il.Slice)))
+		sl := reflectx.Underlying(reflect.ValueOf(il.Slice))
 
 		sz := min(sl.Len(), SystemSettings.SliceInlineLength)
 		for i := 0; i < sz; i++ {
 			itxt := strconv.Itoa(i)
-			val := reflectx.UnderlyingPointer(sl.Index(i)) // deal with pointer lists
 			tree.AddNew(p, "value-"+itxt, func() Value {
+				val := reflectx.UnderlyingPointer(sl.Index(i))
 				return NewValue(val.Interface(), "")
 			}, func(w Value) {
 				wb := w.AsWidget()
@@ -53,12 +53,15 @@ func (il *InlineList) Init() {
 					})
 				}
 				wb.Updater(func() {
+					// We need to get the current value each time:
+					sl := reflectx.Underlying(reflect.ValueOf(il.Slice))
+					val := reflectx.UnderlyingPointer(sl.Index(i))
 					Bind(val.Interface(), w)
 					wb.SetReadOnly(il.IsReadOnly())
 				})
 			})
 		}
-		if !il.isArray {
+		if !il.isArray && !il.IsReadOnly() {
 			tree.AddAt(p, "add-button", func(w *Button) {
 				w.SetIcon(icons.Add).SetType(ButtonTonal)
 				w.Tooltip = "Add an element to the list"
@@ -67,19 +70,6 @@ func (il *InlineList) Init() {
 				})
 			})
 		}
-		tree.AddAt(p, "edit-button", func(w *Button) {
-			w.SetIcon(icons.Edit).SetType(ButtonTonal)
-			w.Tooltip = "Edit list in a dialog"
-			w.OnClick(func(e events.Event) {
-				d := NewBody(il.ValueTitle)
-				NewText(d).SetType(TextSupporting).SetText(il.Tooltip)
-				NewList(d).SetSlice(il.Slice).SetValueTitle(il.ValueTitle)
-				d.OnClose(func(e events.Event) {
-					il.UpdateChange()
-				})
-				d.RunFullDialog(il)
-			})
-		})
 	})
 }
 
@@ -132,5 +122,14 @@ func (il *InlineList) contextMenu(m *Scene, idx int) {
 	})
 	NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		il.DeleteAt(idx)
+	})
+	NewButton(m).SetText("Open in dialog").SetIcon(icons.OpenInNew).OnClick(func(e events.Event) {
+		d := NewBody(il.ValueTitle)
+		NewText(d).SetType(TextSupporting).SetText(il.Tooltip)
+		NewList(d).SetSlice(il.Slice).SetValueTitle(il.ValueTitle).SetReadOnly(il.IsReadOnly())
+		d.OnClose(func(e events.Event) {
+			il.UpdateChange()
+		})
+		d.RunFullDialog(il)
 	})
 }

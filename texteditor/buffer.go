@@ -279,6 +279,10 @@ func (tb *Buffer) ConfigKnown() bool {
 	return false
 }
 
+// SetFileExt sets syntax highlighting and other parameters
+// based on the given file extension (without the . prefix),
+// for cases where an actual file with [fileinfo.FileInfo] is not
+// available.
 func (tb *Buffer) SetFileExt(ext string) *Buffer {
 	tb.Lines.SetFileExt(ext)
 	return tb

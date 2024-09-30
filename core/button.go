@@ -184,6 +184,11 @@ func (bt *Button) Init() {
 		bt.Send(events.Click, e)
 	})
 
+	bt.Updater(func() {
+		// We must get the shortcuts every time since buttons
+		// may be added or removed dynamically.
+		bt.Events().getShortcutsIn(bt)
+	})
 	bt.Maker(func(p *tree.Plan) {
 		// we check if the icons are unset, not if they are nil, so
 		// that people can manually set it to [icons.None]

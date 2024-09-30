@@ -144,27 +144,12 @@ func (kl *KeyedList) Init() {
 				})
 			}
 		}
-		if kl.Inline {
-			if !kl.IsReadOnly() {
-				tree.AddAt(p, "add-button", func(w *Button) {
-					w.SetIcon(icons.Add).SetType(ButtonTonal)
-					w.Tooltip = "Add an element"
-					w.OnClick(func(e events.Event) {
-						kl.AddItem()
-					})
-				})
-			}
-			tree.AddAt(p, "edit-button", func(w *Button) {
-				w.SetIcon(icons.Edit).SetType(ButtonTonal)
-				w.Tooltip = "Edit in a dialog"
+		if kl.Inline && !kl.IsReadOnly() {
+			tree.AddAt(p, "add-button", func(w *Button) {
+				w.SetIcon(icons.Add).SetType(ButtonTonal)
+				w.Tooltip = "Add an element"
 				w.OnClick(func(e events.Event) {
-					d := NewBody(kl.ValueTitle)
-					NewText(d).SetType(TextSupporting).SetText(kl.Tooltip)
-					NewKeyedList(d).SetMap(kl.Map).SetValueTitle(kl.ValueTitle)
-					d.OnClose(func(e events.Event) {
-						kl.UpdateChange(e)
-					})
-					d.RunFullDialog(kl)
+					kl.AddItem()
 				})
 			})
 		}
@@ -181,6 +166,17 @@ func (kl *KeyedList) contextMenu(m *Scene, keyv reflect.Value) {
 	NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		kl.DeleteItem(keyv)
 	})
+	if kl.Inline {
+		NewButton(m).SetText("Open in dialog").SetIcon(icons.OpenInNew).OnClick(func(e events.Event) {
+			d := NewBody(kl.ValueTitle)
+			NewText(d).SetType(TextSupporting).SetText(kl.Tooltip)
+			NewKeyedList(d).SetMap(kl.Map).SetValueTitle(kl.ValueTitle).SetReadOnly(kl.IsReadOnly())
+			d.OnClose(func(e events.Event) {
+				kl.UpdateChange(e)
+			})
+			d.RunFullDialog(kl)
+		})
+	}
 }
 
 // toggleSort toggles sorting by values vs. keys
