@@ -354,7 +354,7 @@ In Goal and NumPy, the standard `+, -, *, /` operators perform _element-wise_ op
 | ------------ | ----------- | ------ | ------ | ---------------- |
 | `tmath.Add(a,b)` | same: |`a + b` | `a .+ b` | element-wise addition; Goal does this string-wise for string tensors |
 | `tmath.Mul(a,b)` | same: |`a * b` | `a .* b` | element-wise multiply |
-| `tmath.Div(a,b)` | same: |`a/b`   | `a./b` | element-wise divide |
+| `tmath.Div(a,b)` | same: |`a/b`   | `a./b` | element-wise divide. _important:_ this always produces a floating point result. |
 | `tmath.Mod(a,b)` | same: |`a%b`   | `a./b` | element-wise modulous (works for float and int) |
 | `tmath.Pow(a,3)` | same: | `a**3`  | `a.^3` | element-wise exponentiation |
 | `tmath.Cos(a)`   | same: | `cos(a)` | `cos(a)` | element-wise function application |

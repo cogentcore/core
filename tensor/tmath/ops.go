@@ -96,9 +96,10 @@ func MulOut(a, b tensor.Tensor, out tensor.Values) error {
 	return tensor.FloatBinaryFuncOut(1, func(a, b float64) float64 { return a * b }, a, b, out)
 }
 
-// Div divides tensors into output.
+// Div divides tensors into output. always does floating point division,
+// even with integer operands.
 func Div(a, b tensor.Tensor) tensor.Tensor {
-	return tensor.CallOut2(DivOut, a, b)
+	return tensor.CallOut2Float64(DivOut, a, b)
 }
 
 // DivOut divides two tensors into output.

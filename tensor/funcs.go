@@ -184,6 +184,12 @@ func CallOut1Float64(fun func(a Tensor, out Values) error, a Tensor) Values {
 	return out
 }
 
+func CallOut2Float64(fun func(a, b Tensor, out Values) error, a, b Tensor) Values {
+	out := NewFloat64()
+	errors.Log(fun(a, b, out))
+	return out
+}
+
 func CallOut2(fun func(a, b Tensor, out Values) error, a, b Tensor) Values {
 	out := NewOfType(FloatPromoteType(a, b))
 	errors.Log(fun(a, b, out))
