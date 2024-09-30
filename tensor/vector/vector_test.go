@@ -5,6 +5,7 @@
 package vector
 
 import (
+	"math"
 	"testing"
 
 	"cogentcore.org/core/tensor"
@@ -22,4 +23,9 @@ func TestVector(t *testing.T) {
 	dpv := Dot(v, v).(*tensor.Float64)
 	assert.Equal(t, 14.0, dpv.Values[0])
 
+	nl2v := NormL2(v).(*tensor.Float64)
+	assert.Equal(t, math.Sqrt(14.0), nl2v.Values[0])
+
+	nl1v := NormL1(v).(*tensor.Float64)
+	assert.Equal(t, 6.0, nl1v.Values[0])
 }
