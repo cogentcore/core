@@ -63,7 +63,7 @@ func BoolToInt(bv bool) int {
 }
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
-func (tsr *Bool) String() string { return Sprintf(tsr, 0, "") }
+func (tsr *Bool) String() string { return Sprintf("", tsr, 0) }
 
 // Label satisfies the core.Labeler interface for a summary description of the tensor
 func (tsr *Bool) Label() string {

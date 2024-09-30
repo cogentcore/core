@@ -173,7 +173,7 @@ func label(nm string, sh *Shape) string {
 // The format is the per-element format string, which should include
 // any delimiter or spacing between elements (which will apply to last
 // element too).  If empty it uses general %g or %s defaults with a tab separator.
-func Sprintf(tsr Tensor, maxLen int, format string) string {
+func Sprintf(format string, tsr Tensor, maxLen int) string {
 	if maxLen == 0 {
 		maxLen = MaxSprintLength
 	}
@@ -210,7 +210,6 @@ func Sprintf(tsr Tensor, maxLen int, format string) string {
 		}
 	}
 	colWd = int(math32.IntMultipleGE(float32(mxwd), 8)) / 8
-	fmt.Println("col wd:", colWd)
 	sh := tsr.Shape()
 	oddRow := false
 	rows, cols, _, _ := Projection2DShape(sh, oddRow)

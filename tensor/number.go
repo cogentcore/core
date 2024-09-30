@@ -95,7 +95,7 @@ func NewNumberFromValues[T num.Number](vals ...T) *Number[T] {
 }
 
 // String satisfies the fmt.Stringer interface for string of tensor data.
-func (tsr *Number[T]) String() string { return Sprintf(tsr, 0, "") }
+func (tsr *Number[T]) String() string { return Sprintf("", tsr, 0) }
 
 func (tsr *Number[T]) IsString() bool { return false }
 
