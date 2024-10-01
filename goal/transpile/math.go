@@ -801,6 +801,12 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 		mp.idx++ // closing brace we're not using
 		return
 	}
+	var sh []int
+	mp.arrayShape(il.Indices, &sh)
+	if len(sh) > 1 {
+		mp.startFunc("tensor.Reshape")
+		mp.out.Add(token.LPAREN)
+	}
 	mp.startFunc("tensor.New" + fun + "FromValues")
 	mp.out.Add(token.LPAREN)
 	mp.out.Add(token.IDENT, "[]"+typ)
@@ -809,6 +815,32 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 	mp.addToken(token.RBRACE)
 	mp.out.AddMulti(token.ELLIPSIS, token.RPAREN)
 	mp.endFunc()
+	if len(sh) > 1 {
+		mp.out.Add(token.COMMA)
+		nsh := len(sh)
+		for i, s := range sh {
+			mp.out.Add(token.INT, fmt.Sprintf("%d", s))
+			if i < nsh-1 {
+				mp.out.Add(token.COMMA)
+			}
+		}
+		mp.out.Add(token.RPAREN)
+		mp.endFunc()
+	}
+}
+
+func (mp *mathParse) arrayShape(ex []ast.Expr, sh *[]int) {
+	n := len(ex)
+	if n == 0 {
+		return
+	}
+	*sh = append(*sh, n)
+	for i := range n {
+		if il, ok := ex[i].(*ast.IndexListExpr); ok {
+			mp.arrayShape(il.Indices, sh)
+			return
+		}
+	}
 }
 
 // nofun = do not accept a function version, just a method
