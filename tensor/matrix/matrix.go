@@ -17,11 +17,17 @@ type Matrix struct {
 	Tensor tensor.Tensor
 }
 
+func StringCheck(tsr tensor.Tensor) error {
+	if tsr.IsString() {
+		return errors.New("matrix: tensor has string values; must be numeric")
+	}
+	return nil
+}
+
 // NewMatrix returns given [tensor.Tensor] as a [gonum] [mat.Matrix].
 // It returns an error if the tensor is not 2D.
 func NewMatrix(tsr tensor.Tensor) (*Matrix, error) {
-	if tsr.IsString() {
-		err := errors.New("matrix.NewMatrix: tensor has string values; must be numeric")
+	if err := StringCheck(tsr); err != nil {
 		return nil, err
 	}
 	nd := tsr.NumDims()
@@ -85,9 +91,23 @@ func (sy *Symmetric) SymmetricDim() (r int) {
 	return sy.Tensor.DimSize(0)
 }
 
-// CopyDense copies a gonum mat.Dense matrix into given Tensor
+// NewDense returns given [tensor.Float64] as a [gonum] [mat.Dense]
+// Matrix, on which many of the matrix operations are defined.
+// It functions similar to the [tensor.Values] type, as the output
+// of matrix operations. The Dense type serves as a view onto
+// the tensor's data, so operations directly modify it.
+func NewDense(tsr *tensor.Float64) (*mat.Dense, error) {
+	nd := tsr.NumDims()
+	if nd != 2 {
+		err := errors.New("matrix.NewDense: tensor is not 2D")
+		return nil, err
+	}
+	return mat.NewDense(tsr.DimSize(0), tsr.DimSize(1), tsr.Values), nil
+}
+
+// CopyFromDense copies a gonum mat.Dense matrix into given Tensor
 // using standard Float64 interface
-func CopyDense(to tensor.Values, dm *mat.Dense) {
+func CopyFromDense(to tensor.Values, dm *mat.Dense) {
 	nr, nc := dm.Dims()
 	to.SetShapeSizes(nr, nc)
 	idx := 0

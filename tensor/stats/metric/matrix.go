@@ -212,7 +212,7 @@ func PCA(covar tensor.Tensor, eigenvecs, vals tensor.Values) error {
 	}
 	var ev mat.Dense
 	eig.VectorsTo(&ev)
-	matrix.CopyDense(eigenvecs, &ev)
+	matrix.CopyFromDense(eigenvecs, &ev)
 	fv := tensor.AsFloat64(vals)
 	eig.Values(fv.Values)
 	if fv != vals {
@@ -243,7 +243,7 @@ func SVD(covar tensor.Tensor, eigenvecs, vals tensor.Values) error {
 	}
 	var ev mat.Dense
 	eig.UTo(&ev)
-	matrix.CopyDense(eigenvecs, &ev)
+	matrix.CopyFromDense(eigenvecs, &ev)
 	fv := tensor.AsFloat64(vals)
 	eig.Values(fv.Values)
 	if fv != vals {

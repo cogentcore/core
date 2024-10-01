@@ -111,6 +111,28 @@ func AlignForAssign(a, b Tensor) (as, bs *Shape, err error) {
 	return
 }
 
+// SplitAtInnerDims returns the sizes of the given tensor's shape
+// with the given number of inner-most dimensions retained as is,
+// and those above collapsed to a single dimension.
+// If the total number of dimensions is < nInner the result is nil.
+func SplitAtInnerDims(tsr Tensor, nInner int) []int {
+	sizes := tsr.ShapeSizes()
+	nd := len(sizes)
+	if nd < nInner {
+		return nil
+	}
+	rsz := make([]int, nInner+1)
+	split := nd - nInner
+	rows := sizes[:split]
+	copy(rsz[1:], sizes[split:])
+	nr := 1
+	for _, r := range rows {
+		nr *= r
+	}
+	rsz[0] = nr
+	return rsz
+}
+
 // FloatAssignFunc sets a to a binary function of a and b float64 values.
 func FloatAssignFunc(fun func(a, b float64) float64, a, b Tensor) error {
 	as, bs, err := AlignForAssign(a, b)
