@@ -16,7 +16,7 @@ const (
 
 // Projection2DShape returns the size of a 2D projection of the given tensor Shape,
 // collapsing higher dimensions down to 2D (and 1D up to 2D).
-// For any odd number of dimensions, the remaining outer-most dimension
+// For any odd number of dimensions, the remaining outermost dimension
 // can either be multipliexed across the row or column, given the oddRow arg.
 // Even multiples of inner-most dimensions are assumed to be row, then column.
 // rowEx returns the number of "extra" (higher dimensional) rows
@@ -55,7 +55,7 @@ func Projection2DShape(shp *Shape, oddRow bool) (rows, cols, rowEx, colEx int) {
 
 // Projection2DIndex returns the flat 1D index for given row, col coords for a 2D projection
 // of the given tensor shape, collapsing higher dimensions down to 2D (and 1D up to 2D).
-// For any odd number of dimensions, the remaining outer-most dimension
+// For any odd number of dimensions, the remaining outermost dimension
 // can either be multipliexed across the row or column, given the oddRow arg.
 // Even multiples of inner-most dimensions are assumed to be row, then column.
 func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
@@ -68,18 +68,18 @@ func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
 			return col
 		}
 	case 2:
-		return shp.Offset([]int{row, col})
+		return shp.Offset(row, col)
 	case 3:
 		if oddRow {
 			ny := shp.DimSize(1)
 			yy := row / ny
 			y := row % ny
-			return shp.Offset([]int{yy, y, col})
+			return shp.Offset(yy, y, col)
 		} else {
 			nx := shp.DimSize(2)
 			xx := col / nx
 			x := col % nx
-			return shp.Offset([]int{xx, row, x})
+			return shp.Offset(xx, row, x)
 		}
 	case 4:
 		ny := shp.DimSize(2)
@@ -88,7 +88,7 @@ func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
 		nx := shp.DimSize(3)
 		xx := col / nx
 		x := col % nx
-		return shp.Offset([]int{yy, xx, y, x})
+		return shp.Offset(yy, xx, y, x)
 	case 5:
 		// todo: oddRows version!
 		nyy := shp.DimSize(1)
@@ -100,7 +100,7 @@ func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
 		nx := shp.DimSize(4)
 		xx := col / nx
 		x := col % nx
-		return shp.Offset([]int{yyy, yy, xx, y, x})
+		return shp.Offset(yyy, yy, xx, y, x)
 	}
 	return 0
 }
@@ -141,7 +141,7 @@ func Projection2DCoords(shp *Shape, oddRow bool, row, col int) (rowCoords, colCo
 
 // Projection2DValue returns the float64 value at given row, col coords for a 2D projection
 // of the given tensor, collapsing higher dimensions down to 2D (and 1D up to 2D).
-// For any odd number of dimensions, the remaining outer-most dimension
+// For any odd number of dimensions, the remaining outermost dimension
 // can either be multipliexed across the row or column, given the oddRow arg.
 // Even multiples of inner-most dimensions are assumed to be row, then column.
 func Projection2DValue(tsr Tensor, oddRow bool, row, col int) float64 {
@@ -151,7 +151,7 @@ func Projection2DValue(tsr Tensor, oddRow bool, row, col int) float64 {
 
 // Projection2DString returns the string value at given row, col coords for a 2D projection
 // of the given tensor, collapsing higher dimensions down to 2D (and 1D up to 2D).
-// For any odd number of dimensions, the remaining outer-most dimension
+// For any odd number of dimensions, the remaining outermost dimension
 // can either be multipliexed across the row or column, given the oddRow arg.
 // Even multiples of inner-most dimensions are assumed to be row, then column.
 func Projection2DString(tsr Tensor, oddRow bool, row, col int) string {
@@ -161,20 +161,20 @@ func Projection2DString(tsr Tensor, oddRow bool, row, col int) string {
 
 // Projection2DSet sets a float64 value at given row, col coords for a 2D projection
 // of the given tensor, collapsing higher dimensions down to 2D (and 1D up to 2D).
-// For any odd number of dimensions, the remaining outer-most dimension
+// For any odd number of dimensions, the remaining outermost dimension
 // can either be multipliexed across the row or column, given the oddRow arg.
 // Even multiples of inner-most dimensions are assumed to be row, then column.
 func Projection2DSet(tsr Tensor, oddRow bool, row, col int, val float64) {
 	idx := Projection2DIndex(tsr.Shape(), oddRow, row, col)
-	tsr.SetFloat1D(idx, val)
+	tsr.SetFloat1D(val, idx)
 }
 
 // Projection2DSetString sets a string value at given row, col coords for a 2D projection
 // of the given tensor, collapsing higher dimensions down to 2D (and 1D up to 2D).
-// For any odd number of dimensions, the remaining outer-most dimension
+// For any odd number of dimensions, the remaining outermost dimension
 // can either be multipliexed across the row or column, given the oddRow arg.
 // Even multiples of inner-most dimensions are assumed to be row, then column.
 func Projection2DSetString(tsr Tensor, oddRow bool, row, col int, val string) {
 	idx := Projection2DIndex(tsr.Shape(), oddRow, row, col)
-	tsr.SetString1D(idx, val)
+	tsr.SetString1D(val, idx)
 }

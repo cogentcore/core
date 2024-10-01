@@ -5,10 +5,10 @@
 package tensorcore
 
 import (
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/stats/simat"
 	"cogentcore.org/core/tensor/table"
 )
 
@@ -21,7 +21,7 @@ func init() {
 	core.AddValueType[tensor.Byte, TensorButton]()
 	core.AddValueType[tensor.String, TensorButton]()
 	core.AddValueType[tensor.Bits, TensorButton]()
-	core.AddValueType[simat.SimMat, SimMatButton]()
+	// core.AddValueType[simat.SimMat, SimMatButton]()
 }
 
 // TensorButton represents a Tensor with a button for making a [TensorGrid]
@@ -62,7 +62,7 @@ func (tb *TableButton) Init() {
 	tb.Updater(func() {
 		text := "None"
 		if tb.Table != nil {
-			if nm, has := tb.Table.MetaData["name"]; has {
+			if nm, err := metadata.Get[string](tb.Table.Meta, "name"); err == nil {
 				text = nm
 			} else {
 				text = "Table"
@@ -75,6 +75,7 @@ func (tb *TableButton) Init() {
 	})
 }
 
+/*
 // SimMatValue presents a button that pulls up the [SimMatGrid] viewer for a [table.Table].
 type SimMatButton struct {
 	core.Button
@@ -101,3 +102,4 @@ func (tb *SimMatButton) Init() {
 		NewSimMatGrid(d).SetSimMat(tb.SimMat)
 	})
 }
+*/
