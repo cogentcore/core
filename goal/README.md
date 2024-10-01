@@ -264,9 +264,9 @@ The following sections provide a full list of equivalents between the `tensor` G
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
-| `tensor.NewFloat64FromValues(` `[]float64{1, 2, 3})` | `[1., 2., 3.]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
-| TODO: (does reshape of flat literal) | `[[1., 2., 3.], [4., 5., 6.]]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
-| TODO: |  | `[[a, b], [c, d]]` or `block([[a, b], [c, d]])` | `np.block([[a, b], [c, d]])` | `[ a b; c d ]` | construct a matrix from blocks `a`, `b`, `c`, and `d` |
+| `tensor.NewFloat64FromValues(` `[]float64{1, 2, 3})` | `[1., 2., 3.]` | `np.array([1., 2., 3.])` | `[ 1 2 3 ]` | define a 1D tensor |
+|  | `[[1., 2., 3.], [4., 5., 6.]]` or: | `(np.array([[1., 2., 3.], [4., 5., 6.]])` | `[ 1 2 3; 4 5 6 ]` | define a 2x3 2D tensor |
+|  |  | `[[a, b], [c, d]]` or `block([[a, b], [c, d]])` | `np.block([[a, b], [c, d]])` | `[ a b; c d ]` | construct a matrix from blocks `a`, `b`, `c`, and `d` |
 | `tensor.NewFloat64(3,4)` | `zeros(3,4)` | `np.zeros((3, 4))` | `zeros(3,4)` | 3x4 2D tensor of float64 zeros; Goal does not use "tuple" so no double parens |
 | `tensor.NewFloat64(3,4,5)` | `zeros(3, 4, 5)` | `np.zeros((3, 4, 5))` | `zeros(3,4,5)` | 3x4x5 three-dimensional tensor of float64 zeros |
 | `tensor.NewFloat64Ones(3,4)` | `ones(3, 4)`  | `np.ones((3, 4))` | `ones(3,4)` | 3x4 2D tensor of 64-bit floating point ones |
