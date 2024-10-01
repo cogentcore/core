@@ -23,11 +23,11 @@ func TestMatrix(t *testing.T) {
 
 	o = Mul(a, v).(*tensor.Float64)
 	assert.Equal(t, []float64{8, 18}, o.Values)
-	assert.Equal(t, []int{2, 1}, o.Shape().Sizes)
+	assert.Equal(t, []int{2}, o.Shape().Sizes)
 
 	o = Mul(v, a).(*tensor.Float64)
 	assert.Equal(t, []float64{11, 16}, o.Values)
-	assert.Equal(t, []int{1, 2}, o.Shape().Sizes)
+	assert.Equal(t, []int{2}, o.Shape().Sizes)
 
 	nr := 3
 	b := tensor.NewFloat64(nr, 2, 2)
@@ -50,11 +50,11 @@ func TestMatrix(t *testing.T) {
 
 	o = Mul(v, b).(*tensor.Float64)
 	assert.Equal(t, []float64{11, 16, 11, 16, 11, 16}, o.Values)
-	assert.Equal(t, []int{3, 1, 2}, o.Shape().Sizes)
+	assert.Equal(t, []int{3, 2}, o.Shape().Sizes)
 
 	o = Mul(b, v).(*tensor.Float64)
 	assert.Equal(t, []float64{8, 18, 8, 18, 8, 18}, o.Values)
-	assert.Equal(t, []int{3, 2, 1}, o.Shape().Sizes)
+	assert.Equal(t, []int{3, 2}, o.Shape().Sizes)
 
 	o = Mul(a, tensor.Transpose(a)).(*tensor.Float64)
 	assert.Equal(t, []float64{5, 11, 11, 25}, o.Values)

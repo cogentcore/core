@@ -5,6 +5,8 @@
 package matrix
 
 import (
+	"slices"
+
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 	"gonum.org/v1/gonum/mat"
@@ -56,12 +58,18 @@ func MulOut(a, b tensor.Tensor, out *tensor.Float64) error {
 	nb := b.NumDims()
 	ea := a
 	eb := b
+	collapse := false
+	colDim := 0
 	if na == 1 {
 		ea = tensor.Reshape(a, 1, a.DimSize(0))
+		collapse = true
+		colDim = -2
 		na = 2
 	}
 	if nb == 1 {
 		eb = tensor.Reshape(b, b.DimSize(0), 1)
+		collapse = true
+		colDim = -1
 		nb = 2
 	}
 	if na > 2 {
@@ -121,6 +129,15 @@ func MulOut(a, b tensor.Tensor, out *tensor.Float64) error {
 		}
 	default:
 		return errors.New("matrix.Mul: input dimensions do not align")
+	}
+	if collapse {
+		nd := out.NumDims()
+		sz := slices.Clone(out.Shape().Sizes)
+		if colDim == -1 {
+			out.SetShapeSizes(sz[:nd-1]...)
+		} else {
+			out.SetShapeSizes(append(sz[:nd-2], sz[nd-1])...)
+		}
 	}
 	return nil
 }
