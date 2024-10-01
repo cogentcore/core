@@ -65,6 +65,16 @@ func Reshape(tsr Tensor, sizes ...int) Tensor {
 	return rs
 }
 
+// Transpose returns a new [Reshaped] tensor with the strides
+// switched so that rows and column dimensions are effectively
+// reversed.
+func Transpose(tsr Tensor) Tensor {
+	rs := &Reshaped{Tensor: tsr}
+	rs.Reshape.CopyFrom(tsr.Shape())
+	rs.Reshape.Strides = ColumnMajorStrides(rs.Reshape.Sizes...)
+	return rs
+}
+
 // NewRowCellsView returns a 2D [Reshaped] view onto the given tensor,
 // with a single outer "row" dimension and a single inner "cells" dimension,
 // with the given 'split' dimension specifying where the cells start.

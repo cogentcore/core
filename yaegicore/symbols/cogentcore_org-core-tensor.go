@@ -153,6 +153,7 @@ func init() {
 		"StringToFloat64":         reflect.ValueOf(tensor.StringToFloat64),
 		"Tab":                     reflect.ValueOf(tensor.Tab),
 		"ThreadingThreshold":      reflect.ValueOf(&tensor.ThreadingThreshold).Elem(),
+		"Transpose":               reflect.ValueOf(tensor.Transpose),
 		"UnstableSort":            reflect.ValueOf(tensor.UnstableSort),
 		"Vectorize":               reflect.ValueOf(tensor.Vectorize),
 		"VectorizeOnThreads":      reflect.ValueOf(tensor.VectorizeOnThreads),

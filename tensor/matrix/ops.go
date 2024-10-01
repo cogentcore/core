@@ -7,6 +7,7 @@ package matrix
 import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
+	"gonum.org/v1/gonum/mat"
 )
 
 // CallOut2 calls an Out function with 2 input args. All matrix functions
@@ -122,4 +123,29 @@ func MulOut(a, b tensor.Tensor, out *tensor.Float64) error {
 		return errors.New("matrix.Mul: input dimensions do not align")
 	}
 	return nil
+}
+
+// Det returns the determinant of the given tensor.
+// For a 2D matrix [[a, b], [c, d]] it this is ad - bc.
+// See also [LogDet] for a version that is more numerically
+// stable for large matricies.
+func Det(a tensor.Tensor) tensor.Tensor {
+	m, err := NewMatrix(a)
+	if errors.Log(err) != nil {
+		return tensor.NewFloat64Scalar(0)
+	}
+	return tensor.NewFloat64Scalar(mat.Det(m))
+}
+
+// LogDet returns the determinant of the given tensor,
+// as the log and sign of the value, which is more
+// numerically stable. The return is a 1D vector of length 2,
+// with the first value being the log, and the second the sign.
+func LogDet(a tensor.Tensor) tensor.Tensor {
+	m, err := NewMatrix(a)
+	if errors.Log(err) != nil {
+		return tensor.NewFloat64Scalar(0)
+	}
+	l, s := mat.LogDet(m)
+	return tensor.NewFloat64FromValues(l, s)
 }

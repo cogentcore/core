@@ -363,9 +363,10 @@ In Goal and NumPy, the standard `+, -, *, /` operators perform _element-wise_ op
 
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
-|  |  |`a @ b` | `a * b` | matrix multiply |
-|  |  |`a.transpose() or a.T` | `a.'` | transpose of a |
-|  |  |`a.conj().transpose() or a.conj().T` | `a'` | conjugate transpose of `a` |
+| `matrix.Mul(a,b)` | same: |`a @ b` | `a * b` | matrix multiply |
+| `tensor.Transpose(a)` | same: |`a.transpose() or a.T` | `a.'` | transpose of `a` |
+| TODO: |  |`a.conj().transpose() or a.conj().T` | `a'` | conjugate transpose of `a` |
+| `matrix.Det(a)` | `matrix.Det(a)` | `np.linalg.det(a)` | ? | determinant of `a` |
 |  |  |`np.eye(3)` | `eye(3)` | 3x3 identity matrix |
 |  |  |`np.diag(a)` | `diag(a)` | returns a vector of the diagonal elements of 2D tensor, `a` |
 |  |  |`np.diag(v, 0)` | `diag(v,0)` | returns a square diagonal matrix whose nonzero values are the elements of vector, v |

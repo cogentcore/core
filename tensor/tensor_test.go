@@ -277,6 +277,17 @@ func TestReshaped(t *testing.T) {
 
 	err := rs.SetShapeSizes(5, -1)
 	assert.Error(t, err)
+
+	res = `[3, 4]
+	[0]:	[3]:	[2]:	[1]:	
+[0]:	0	3	12	21	
+[0]:	1	10	13	22	
+[0]:	2	11	20	23	
+`
+	tr := Transpose(ft)
+	// fmt.Println(tr)
+	assert.Equal(t, res, tr.String())
+
 }
 
 func TestSortFilter(t *testing.T) {

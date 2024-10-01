@@ -204,7 +204,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"# x @ a", `matrix.Mul(x, a)`},
+		{"# x.T", `tensor.Transpose(x)`},
 	}
 	st := NewState()
 	st.MathRecord = false
@@ -223,12 +223,14 @@ func TestMath(t *testing.T) {
 		{"# a = x + y", `a = tmath.Add(x, y)`},
 		{"# a := x ** 2", `a := tensor.Tensor(tmath.Pow(x, tensor.NewIntScalar(2)))`},
 		{"# a = -x", `a = tmath.Negate(x)`},
+		{"# x @ a", `matrix.Mul(x, a)`},
 		{"# x += 1", `tmath.AddAssign(x, tensor.NewIntScalar(1))`},
 		{"# a := [1,2,3,4]", `a := tensor.Tensor(tensor.NewIntFromValues([]int { 1, 2, 3, 4 }  ...))`},
 		{"# a := [1.,2,3,4]", `a := tensor.Tensor(tensor.NewFloat64FromValues([]float64 { 1., 2, 3, 4 }  ...))`},
 		{"# a.ndim", `tensor.NewIntScalar(a.NumDims())`},
 		{"# ndim(a)", `tensor.NewIntScalar(a.NumDims())`},
 		{"# x.shape", `tensor.NewIntFromValues(x.Shape().Sizes ...)`},
+		{"# x.T", `tensor.Transpose(x)`},
 		{"# zeros(3, 4)", `tensor.NewFloat64(3, 4)`},
 		{"# full(5.5, 3, 4)", `tensor.NewFloat64Full(5.5, 3, 4)`},
 		{"# zeros(sh)", `tensor.NewFloat64(tensor.AsIntSlice(sh) ...)`},

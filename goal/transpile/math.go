@@ -656,6 +656,7 @@ var numpyProps = map[string]funWrap{
 	"len":   {"Len()", "nis"},
 	"size":  {"Len()", "nis"},
 	"shape": {"Shape().Sizes", "niv"},
+	"T":     {"", "tensor.Transpose"},
 }
 
 // tensorFunc outputs the wrapping function and whether it needs ellipsis
@@ -678,6 +679,8 @@ func (fw *funWrap) wrapFunc(mp *mathParse) bool {
 	case "nsv":
 		wrapFun = "tensor.NewStringFromValues"
 		ellip = true
+	default:
+		wrapFun = fw.wrap
 	}
 	mp.startFunc(wrapFun, true) // don't lookup -- don't auto-convert args
 	mp.out.Add(token.LPAREN)
@@ -695,9 +698,13 @@ func (mp *mathParse) selectorExpr(ex *ast.SelectorExpr) {
 	}
 	ellip := fw.wrapFunc(mp)
 	mp.expr(ex.X)
-	mp.addToken(token.PERIOD)
-	mp.out.Add(token.IDENT, fw.fun)
-	mp.idx++
+	if fw.fun != "" {
+		mp.addToken(token.PERIOD)
+		mp.out.Add(token.IDENT, fw.fun)
+		mp.idx++
+	} else {
+		mp.idx += 2
+	}
 	if ellip {
 		mp.out.Add(token.ELLIPSIS)
 	}
@@ -807,18 +814,19 @@ func (mp *mathParse) arrayLiteral(il *ast.IndexListExpr) {
 // nofun = do not accept a function version, just a method
 var numpyFuncs = map[string]funWrap{
 	// "array":   {"tensor.NewFloatFromValues", ""}, // todo: probably not right, maybe don't have?
-	"zeros":    {"tensor.NewFloat64", ""},
-	"full":     {"tensor.NewFloat64Full", ""},
-	"ones":     {"tensor.NewFloat64Ones", ""},
-	"rand":     {"tensor.NewFloat64Rand", ""},
-	"arange":   {"tensor.NewIntRange", ""},
-	"linspace": {"tensor.NewFloat64SpacedLinear", ""},
-	"reshape":  {"tensor.Reshape", ""},
-	"copy":     {"tensor.Clone", ""},
-	"get":      {"datafs.Get", ""},
-	"set":      {"datafs.Set", ""},
-	"flatten":  {"tensor.Flatten", "nofun"},
-	"squeeze":  {"tensor.Squeeze", "nofun"},
+	"zeros":     {"tensor.NewFloat64", ""},
+	"full":      {"tensor.NewFloat64Full", ""},
+	"ones":      {"tensor.NewFloat64Ones", ""},
+	"rand":      {"tensor.NewFloat64Rand", ""},
+	"arange":    {"tensor.NewIntRange", ""},
+	"linspace":  {"tensor.NewFloat64SpacedLinear", ""},
+	"transpose": {"tensor.Transpose", ""},
+	"reshape":   {"tensor.Reshape", ""},
+	"copy":      {"tensor.Clone", ""},
+	"get":       {"datafs.Get", ""},
+	"set":       {"datafs.Set", ""},
+	"flatten":   {"tensor.Flatten", "nofun"},
+	"squeeze":   {"tensor.Squeeze", "nofun"},
 }
 
 func (mp *mathParse) callExpr(ex *ast.CallExpr) {
