@@ -204,7 +204,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"# x += 1", `tmath.AddAssign(x, tensor.NewIntScalar(1))`},
+		{"# x @ a", `matrix.Mul(x, a)`},
 	}
 	st := NewState()
 	st.MathRecord = false

@@ -480,6 +480,18 @@ func (mp *mathParse) exprsAreBool(ex []ast.Expr) bool {
 }
 
 func (mp *mathParse) binaryExpr(ex *ast.BinaryExpr) {
+	if ex.Op == token.ILLEGAL { // @ = matmul
+		mp.startFunc("matrix.Mul")
+		mp.out.Add(token.LPAREN)
+		mp.expr(ex.X)
+		mp.out.Add(token.COMMA)
+		mp.idx++
+		mp.expr(ex.Y)
+		mp.out.Add(token.RPAREN)
+		mp.endFunc()
+		return
+	}
+
 	fn := ""
 	switch ex.Op {
 	case token.ADD:
@@ -538,6 +550,9 @@ func (mp *mathParse) unaryExpr(ex *ast.UnaryExpr) {
 		fn = "Not"
 	case token.SUB:
 		fn = "Negate"
+	case token.ADD:
+		mp.expr(ex.X)
+		return
 	default: // * goes to StarExpr -- not sure what else could happen here?
 		mp.addToken(ex.Op)
 		mp.expr(ex.X)

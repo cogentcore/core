@@ -139,7 +139,11 @@ type parser struct {
 
 func (p *parser) init(fset *token.FileSet, filename string, src []byte, mode Mode) {
 	p.file = fset.AddFile(filename, -1, len(src))
-	eh := func(pos token.Position, msg string) { p.errors.Add(pos, msg) }
+	eh := func(pos token.Position, msg string) {
+		if !strings.Contains(msg, "@") {
+			p.errors.Add(pos, msg)
+		}
+	}
 	p.scanner.Init(p.file, src, eh, scanner.ScanComments)
 
 	p.top = true
@@ -1984,6 +1988,10 @@ func (p *parser) tokPrec() (token.Token, int) {
 	if p.inRhs && tok == token.ASSIGN {
 		tok = token.EQL
 	}
+	if p.tok == token.ILLEGAL && p.lit == "@" {
+		// fmt.Println("@ token")
+		return token.ILLEGAL, 5
+	}
 	return tok, tok.Precedence()
 }
 
@@ -2010,7 +2018,12 @@ func (p *parser) parseBinaryExpr(x ast.Expr, prec1 int) ast.Expr {
 		if oprec < prec1 {
 			return x
 		}
-		pos := p.expect(op)
+		pos := p.pos
+		if op == token.ILLEGAL {
+			p.next()
+		} else {
+			pos = p.expect(op)
+		}
 		y := p.parseBinaryExpr(nil, oprec+1)
 		x = &ast.BinaryExpr{X: x, OpPos: pos, Op: op, Y: y}
 	}
