@@ -1,12 +1,12 @@
-# gosl
+# gosl: Go as a shader language
 
 `gosl` implements _Go as a shader language_ for GPU compute shaders (using [WebGPU](https://www.w3.org/TR/webgpu/)), **enabling standard Go code to run on the GPU**.
+
+`gosl` converts Go code to WGSL which can then be loaded directly into a WebGPU compute shader. It operates within the overall [Goal](../README.md) framework of an augmented version of the Go langauge. See the [GPU](../GPU.md) documentation for an overview.
 
 The relevant subsets of Go code are specifically marked using `//gosl:` comment directives, and this code must only use basic expressions and concrete types that will compile correctly in a shader (see [Restrictions](#restrictions) below).  Method functions and pass-by-reference pointer arguments to `struct` types are supported and incur no additional compute cost due to inlining (see notes below for more detail).
 
 A large and complex biologically-based neural network simulation framework called [axon](https://github.com/emer/axon) has been implemented using `gosl`, allowing 1000's of lines of equations and data structures to run through standard Go on the CPU, and accelerated significantly on the GPU.  This allows efficient debugging and unit testing of the code in Go, whereas debugging on the GPU is notoriously difficult.
-
-`gosl` converts Go code to WGSL which can then be loaded directly into a WebGPU compute shader.
 
 See [examples/basic](examples/basic) and [rand](examples/rand) for examples, using the [gpu](../../gpu) GPU compute shader system.  It is also possible in principle to use gosl to generate shader files for any other WebGPU application, but this has not been tested.
 
@@ -22,14 +22,18 @@ $ go install cogentcore.org/core/vgpu/gosl@latest
 
 In your Go code, use these comment directives:
 ```
-//gosl:start <filename>
+//gosl:start
 
 < Go code to be translated >
 
-//gosl:end <filename>
+//gosl:end
 ```
 
-to bracket code to be processed.  The resulting converted code is copied into a `shaders` subdirectory created under the current directory where the `gosl` command is run, using the filenames specified in the comment directives.  Each such filename should correspond to a complete shader program (i.e., a "kernel"), or a file that can be included into other shader programs.  Code is appended to the target file names in the order of the source .go files on the command line, so multiple .go files can be combined into one resulting WGSL file.
+to bracket code to be processed for GPU. The resulting converted code is copied into a `shaders` subdirectory created under the current directory where the `gosl` command is run, using the filenames specified in the comment directives, or the name of the current file if not specified.
+
+Use the `//gosl:import package` directive to include files from other packages, similar to the standard Go import directive. It is assumed that many other Go imports are not GPU relevant, so this separate directive is required.
+
+Each such filename should correspond to a complete shader program (i.e., a "kernel"), or a file that can be included into other shader programs.  Code is appended to the target file names in the order of the source .go files on the command line, so multiple .go files can be combined into one resulting WGSL file.
 
 WGSL specific code, e.g., for the `main` compute function or to specify `#include` files, can be included either by specifying files with a `.wgsl` extension as arguments to the `gosl` command, or by using a `//gosl:wgsl` comment directive as follows:
 ```
