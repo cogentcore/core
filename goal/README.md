@@ -364,12 +364,16 @@ In Goal and NumPy, the standard `+, -, *, /` operators perform _element-wise_ op
 | `tensor` Go  |   Goal      | NumPy  | MATLAB | Notes            |
 | ------------ | ----------- | ------ | ------ | ---------------- |
 | `matrix.Mul(a,b)` | same: |`a @ b` | `a * b` | matrix multiply |
-| `tensor.Transpose(a)` | same: |`a.transpose() or a.T` | `a.'` | transpose of `a` |
+| `tensor.Transpose(a)` | <- or `a.T` |`a.transpose()` or `a.T` | `a.'` | transpose of `a` |
 | TODO: |  |`a.conj().transpose() or a.conj().T` | `a'` | conjugate transpose of `a` |
 | `matrix.Det(a)` | `matrix.Det(a)` | `np.linalg.det(a)` | ? | determinant of `a` |
-|  |  |`np.eye(3)` | `eye(3)` | 3x3 identity matrix |
-|  |  |`np.diag(a)` | `diag(a)` | returns a vector of the diagonal elements of 2D tensor, `a` |
+| `matrix.Identity(3)` | <- |`np.eye(3)` | `eye(3)` | 3x3 identity matrix |
+| `matrix.Diagonal(a)` | <- |`np.diag(a)` | `diag(a)` | returns a vector of the diagonal elements of 2D tensor, `a`. Goal returns a read / write view. |
 |  |  |`np.diag(v, 0)` | `diag(v,0)` | returns a square diagonal matrix whose nonzero values are the elements of vector, v |
+| `matrix.Trace(a)` | <- |`np.trace(a)` | `trace(a)` | returns the sum of the elements along the diagonal of `a`. |
+| `matrix.Tri()` | <- |`np.tri()` | `tri()` | returns a new 2D Float64 matrix with 1s in the lower triangular region (including the diagonal) and the remaining upper triangular elements zero |
+| `matrix.TriL(a)` | <- |`np.tril(a)` | `tril(a)` | returns a copy of `a` with the lower triangular elements (including the diagonal) from `a` and the remaining upper triangular elements zeroed out |
+| `matrix.TriU(a)` | <- |`np.triu(a)` | `triu(a)` | returns a copy of `a` with the upper triangular elements (including the diagonal) from `a` and the remaining lower triangular elements zeroed out |
 |  |  |`linalg.inv(a)` | `inv(a)` | inverse of square 2D tensor a |
 |  |  |`linalg.pinv(a)` | `pinv(a)` | pseudo-inverse of 2D tensor a |
 |  |  |`np.linalg.matrix_rank(a)` | `rank(a)` | matrix rank of a 2D tensor a |

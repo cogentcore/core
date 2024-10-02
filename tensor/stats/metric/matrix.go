@@ -34,22 +34,25 @@ func MatrixOut(fun any, in tensor.Tensor, out tensor.Values) error {
 		return nil
 	}
 	out.SetShapeSizes(rows, rows)
-	coords := TriangularLIndicies(rows)
-	nc := len(coords)
+	coords := matrix.TriLIndicies(rows)
+	nc := coords.DimSize(0)
 	// note: flops estimating 3 per item on average -- different for different metrics.
 	tensor.VectorizeThreaded(cells*3, func(tsr ...tensor.Tensor) int { return nc },
 		func(idx int, tsr ...tensor.Tensor) {
-			c := coords[idx]
-			sa := tensor.Cells1D(tsr[0], c.X)
-			sb := tensor.Cells1D(tsr[0], c.Y)
+			cx := coords.Int(idx, 0)
+			cy := coords.Int(idx, 1)
+			sa := tensor.Cells1D(tsr[0], cx)
+			sb := tensor.Cells1D(tsr[0], cy)
 			mout := mfun(sa, sb)
-			tsr[1].SetFloat(mout.Float1D(0), c.X, c.Y)
+			tsr[1].SetFloat(mout.Float1D(0), cx, cy)
 		}, in, out)
-	for _, c := range coords { // copy to upper
-		if c.X == c.Y { // exclude diag
+	for idx := range nc { // copy to upper
+		cx := coords.Int(idx, 0)
+		cy := coords.Int(idx, 1)
+		if cx == cy { // exclude diag
 			continue
 		}
-		out.SetFloat(out.Float(c.X, c.Y), c.Y, c.X)
+		out.SetFloat(out.Float(cx, cy), cy, cx)
 	}
 	return nil
 }
@@ -147,28 +150,31 @@ func CovarianceMatrixOut(fun any, in tensor.Tensor, out tensor.Values) error {
 	var av, bv tensor.Tensor
 	curCoords := vecint.Vector2i{-1, -1}
 
-	coords := TriangularLIndicies(cells)
-	nc := len(coords)
+	coords := matrix.TriLIndicies(cells)
+	nc := coords.DimSize(0)
 	// note: flops estimating 3 per item on average -- different for different metrics.
 	tensor.VectorizeThreaded(rows*3, func(tsr ...tensor.Tensor) int { return nc },
 		func(idx int, tsr ...tensor.Tensor) {
-			c := coords[idx]
-			if c.X != curCoords.X {
-				av = tensor.Reslice(tsr[0], tensor.FullAxis, c.X)
-				curCoords.X = c.X
+			cx := coords.Int(idx, 0)
+			cy := coords.Int(idx, 1)
+			if cx != curCoords.X {
+				av = tensor.Reslice(tsr[0], tensor.FullAxis, cx)
+				curCoords.X = cx
 			}
-			if c.Y != curCoords.Y {
-				bv = tensor.Reslice(tsr[0], tensor.FullAxis, c.Y)
-				curCoords.Y = c.Y
+			if cy != curCoords.Y {
+				bv = tensor.Reslice(tsr[0], tensor.FullAxis, cy)
+				curCoords.Y = cy
 			}
 			mout := mfun(av, bv)
-			tsr[1].SetFloat(mout.Float1D(0), c.X, c.Y)
+			tsr[1].SetFloat(mout.Float1D(0), cx, cy)
 		}, flatvw, out)
-	for _, c := range coords { // copy to upper
-		if c.X == c.Y { // exclude diag
+	for idx := range nc { // copy to upper
+		cx := coords.Int(idx, 0)
+		cy := coords.Int(idx, 1)
+		if cx == cy { // exclude diag
 			continue
 		}
-		out.SetFloat(out.Float(c.X, c.Y), c.Y, c.X)
+		out.SetFloat(out.Float(cx, cy), cy, cx)
 	}
 	return nil
 }

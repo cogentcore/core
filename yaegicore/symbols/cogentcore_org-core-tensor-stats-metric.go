@@ -70,8 +70,6 @@ func init() {
 		"SumSquaresOut":              reflect.ValueOf(metric.SumSquaresOut),
 		"SumSquaresOut64":            reflect.ValueOf(metric.SumSquaresOut64),
 		"SumSquaresScaleOut64":       reflect.ValueOf(metric.SumSquaresScaleOut64),
-		"TriangularLIndicies":        reflect.ValueOf(metric.TriangularLIndicies),
-		"TriangularN":                reflect.ValueOf(metric.TriangularN),
 		"Vec2in3outFunc":             reflect.ValueOf(metric.Vec2in3outFunc),
 		"Vec2inFunc":                 reflect.ValueOf(metric.Vec2inFunc),
 		"Vec3outFunc":                reflect.ValueOf(metric.Vec3outFunc),
