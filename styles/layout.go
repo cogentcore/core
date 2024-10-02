@@ -113,6 +113,19 @@ const (
 	// which can then be managed via custom code.
 	NoLayout
 
+	// Block implements the HTML / CSS Block (vs. Inline) layout logic.
+	// It is not recommended for GUI applications but is needed for
+	// HTML rendering in htmlcore. A Block container establishes the
+	// outer context in which block vs. inline formatting takes place.
+	Block
+
+	// Inline implements the HTML / CSS Inline layout logic, within a
+	// surrounding Block element (does not work in other layout types).
+	// It is not recommended for GUI applications but is needed for
+	// HTML rendering in htmlcore. A Block container establishes the
+	// outer context in which block vs. inline formatting takes place.
+	Inline
+
 	// None means the item is not displayed: sets the Invisible state
 	DisplayNone
 )

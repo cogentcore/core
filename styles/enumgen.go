@@ -366,16 +366,16 @@ func (i *Directions) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "Directions")
 }
 
-var _DisplaysValues = []Displays{0, 1, 2, 3, 4}
+var _DisplaysValues = []Displays{0, 1, 2, 3, 4, 5, 6}
 
 // DisplaysN is the highest valid value for type Displays, plus one.
-const DisplaysN Displays = 5
+const DisplaysN Displays = 7
 
-var _DisplaysValueMap = map[string]Displays{`flex`: 0, `stacked`: 1, `grid`: 2, `no-layout`: 3, `none`: 4}
+var _DisplaysValueMap = map[string]Displays{`flex`: 0, `stacked`: 1, `grid`: 2, `no-layout`: 3, `block`: 4, `inline`: 5, `none`: 6}
 
-var _DisplaysDescMap = map[Displays]string{0: `Flex is the default layout model, based on a simplified version of the CSS flex layout: uses MainAxis to specify the direction, Wrap for wrapping of elements, and Min, Max, and Grow values on elements to determine sizing.`, 1: `Stacked is a stack of elements, with one on top that is visible`, 2: `Grid is the X, Y grid layout, with Columns specifying the number of elements in the X axis.`, 3: `NoLayout means that no automatic layout will be applied to elements, which can then be managed via custom code.`, 4: `None means the item is not displayed: sets the Invisible state`}
+var _DisplaysDescMap = map[Displays]string{0: `Flex is the default layout model, based on a simplified version of the CSS flex layout: uses MainAxis to specify the direction, Wrap for wrapping of elements, and Min, Max, and Grow values on elements to determine sizing.`, 1: `Stacked is a stack of elements, with one on top that is visible`, 2: `Grid is the X, Y grid layout, with Columns specifying the number of elements in the X axis.`, 3: `NoLayout means that no automatic layout will be applied to elements, which can then be managed via custom code.`, 4: `Block implements the HTML / CSS Block (vs. Inline) layout logic. It is not recommended for GUI applications but is needed for HTML rendering in htmlcore. A Block container establishes the outer context in which block vs. inline formatting takes place.`, 5: `Inline implements the HTML / CSS Inline layout logic, within a surrounding Block element (does not work in other layout types). It is not recommended for GUI applications but is needed for HTML rendering in htmlcore. A Block container establishes the outer context in which block vs. inline formatting takes place.`, 6: `None means the item is not displayed: sets the Invisible state`}
 
-var _DisplaysMap = map[Displays]string{0: `flex`, 1: `stacked`, 2: `grid`, 3: `no-layout`, 4: `none`}
+var _DisplaysMap = map[Displays]string{0: `flex`, 1: `stacked`, 2: `grid`, 3: `no-layout`, 4: `block`, 5: `inline`, 6: `none`}
 
 // String returns the string representation of this Displays value.
 func (i Displays) String() string { return enums.String(i, _DisplaysMap) }
