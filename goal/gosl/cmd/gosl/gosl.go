@@ -6,11 +6,11 @@ package main
 
 import (
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/goal/gosl/parse"
+	"cogentcore.org/core/goal/gosl/gotosl"
 )
 
 func main() { //types:skip
 	opts := cli.DefaultOptions("gosl", "Go as a shader language converts Go code to WGSL WebGPU shader code, which can be run on the GPU through WebGPU.")
-	cfg := &parse.Config{}
-	cli.Run(opts, cfg, parse.Run)
+	cfg := &gotosl.Config{}
+	cli.Run(opts, cfg, gotosl.Run)
 }

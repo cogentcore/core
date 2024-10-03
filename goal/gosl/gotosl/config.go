@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package parse
+package gotosl
 
 //go:generate core generate -add-types -add-funcs
 
