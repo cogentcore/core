@@ -35,13 +35,19 @@ type Kernel struct {
 
 	Args string
 
-	// accumulating lines of code for the wgsl file.
-	FileLines [][]byte
+	// function code
+	FuncCode string
+
+	// Lines is full shader code
+	Lines [][]byte
 }
 
 // Var represents one global system buffer variable.
 type Var struct {
 	Name string
+
+	// comment docs about this var.
+	Doc string
 
 	// Type of variable: either []Type or tensor.Float32, tensor.Int32
 	Type string
@@ -126,6 +132,12 @@ func (st *State) Run() error {
 	st.ExtractFiles()   // get .go from project files
 	st.ExtractImports() // get .go from imports
 	st.TranslateDir("./" + st.ImportsDir)
+
+	for _, sy := range st.Systems {
+		for _, kn := range sy.Kernels {
+			st.GenKernel(sy, kn)
+		}
+	}
 
 	return nil
 }

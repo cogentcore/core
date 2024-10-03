@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Cogent Core. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -56,7 +56,7 @@ func (st *State) ExtractGosl(lines [][]byte) [][]byte {
 	inHlsl := false
 	inNoHlsl := false
 	var outLns [][]byte
-	for _, ln := range lines {
+	for li, ln := range lines {
 		tln := bytes.TrimSpace(ln)
 		isKey := bytes.HasPrefix(tln, key)
 		var keyStr []byte
@@ -86,7 +86,15 @@ func (st *State) ExtractGosl(lines [][]byte) [][]byte {
 				rp := strings.LastIndex(fcall, ")")
 				args := fcall[lp+1 : rp]
 				fnm := fcall[:lp]
-				kn := &Kernel{Name: fnm, Args: args}
+				funcode := ""
+				for ki := li + 1; ki < len(lines); ki++ {
+					kl := lines[ki]
+					if len(kl) > 0 && kl[0] == '}' {
+						break
+					}
+					funcode += string(kl) + "\n"
+				}
+				kn := &Kernel{Name: fnm, Args: args, FuncCode: funcode}
 				sy.Kernels[fnm] = kn
 				if st.Config.Debug {
 					fmt.Println("\tAdded kernel:", fnm, "args:", args, "system:", sy.Name)

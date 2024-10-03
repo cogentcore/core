@@ -100,7 +100,7 @@ func (st *State) TranslateDir(pf string) error {
 			os.Remove(fpos.Filename)
 		}
 
-		slfn := filepath.Join(st.Config.Output, wgfn)
+		slfn := filepath.Join(st.ImportsDir, wgfn)
 		ioutil.WriteFile(slfn, bytes.Join(exsl, nl), 0644)
 
 		st.SLImportFiles = append(st.SLImportFiles, &File{Name: wgfn, Lines: exsl})
