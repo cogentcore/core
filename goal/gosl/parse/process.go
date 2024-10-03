@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
+package parse
 
 import (
 	"bytes"
@@ -18,16 +18,16 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/goal/gosl/alignsl"
 	"cogentcore.org/core/gpu"
-	"cogentcore.org/core/gpu/gosl/alignsl"
-	"cogentcore.org/core/gpu/gosl/slprint"
 	"golang.org/x/tools/go/packages"
 )
 
 // does all the file processing
-func ProcessFiles(paths []string) (map[string][]byte, error) {
-	fls := FilesFromPaths(paths)
-	gosls := ExtractGoFiles(fls) // extract Go files to shader/*.go
+func (cfg *Config) ProcessFiles() (map[string][]byte, error) {
+	paths := cfg.Inputs
+	fls := cfg.FilesFromPaths(paths)
+	gosls := cfg.ExtractGoFiles(fls) // extract Go files to shader/*.go
 
 	wgslFiles := []string{}
 	for _, fn := range fls {
@@ -36,7 +36,7 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 		}
 	}
 
-	pf := "./" + *outDir
+	pf := "./" + cfg.Output
 	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles | packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesSizes | packages.NeedTypesInfo}, pf)
 	if err != nil {
 		log.Println(err)
@@ -69,7 +69,7 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 	sltypeCopied := false
 	for fn := range gosls {
 		gofn := fn + ".go"
-		if *debug {
+		if cfg.Debug {
 			fmt.Printf("###################################\nProcessing Go file: %s\n", gofn)
 		}
 
@@ -90,32 +90,32 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 		}
 
 		var buf bytes.Buffer
-		cfg := slprint.Config{Mode: printerMode, Tabwidth: tabWidth, ExcludeFunctions: excludeFunctionMap}
-		cfg.Fprint(&buf, pkg, afile)
+		pcfg := PrintConfig{Mode: printerMode, Tabwidth: tabWidth, ExcludeFunctions: cfg.ExcludeMap}
+		pcfg.Fprint(&buf, pkg, afile)
 		// ioutil.WriteFile(filepath.Join(*outDir, fn+".tmp"), buf.Bytes(), 0644)
 		slfix, hasSltype, hasSlrand := SlEdits(buf.Bytes())
 		if hasSlrand && !slrandCopied {
 			hasSltype = true
-			if *debug {
+			if cfg.Debug {
 				fmt.Printf("\tcopying slrand.wgsl to shaders\n")
 			}
-			CopyPackageFile("slrand.wgsl", "cogentcore.org/core/gpu/gosl/slrand")
+			cfg.CopyPackageFile("slrand.wgsl", "cogentcore.org/core/gpu/gosl/slrand")
 			slrandCopied = true
 		}
 		if hasSltype && !sltypeCopied {
-			if *debug {
+			if cfg.Debug {
 				fmt.Printf("\tcopying sltype.wgsl to shaders\n")
 			}
-			CopyPackageFile("sltype.wgsl", "cogentcore.org/core/gpu/gosl/sltype")
+			cfg.CopyPackageFile("sltype.wgsl", "cogentcore.org/core/gpu/gosl/sltype")
 			sltypeCopied = true
 		}
-		exsl, hasMain := ExtractWGSL(slfix)
+		exsl, hasMain := cfg.ExtractWGSL(slfix)
 		gosls[fn] = exsl
 
 		if hasMain {
 			needsCompile[fn] = true
 		}
-		if !*keepTmp {
+		if !cfg.Keep {
 			os.Remove(fpos.Filename)
 		}
 
@@ -136,7 +136,7 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 			break
 		}
 
-		slfn := filepath.Join(*outDir, fn+".wgsl")
+		slfn := filepath.Join(cfg.Output, fn+".wgsl")
 		ioutil.WriteFile(slfn, exsl, 0644)
 	}
 
@@ -153,20 +153,20 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 			continue
 		}
 		_, slfno := filepath.Split(slfn) // could be in a subdir
-		tofn := filepath.Join(*outDir, slfno)
+		tofn := filepath.Join(cfg.Output, slfno)
 		CopyFile(slfn, tofn)
 		fn := strings.TrimSuffix(slfno, ".wgsl")
 		needsCompile[fn] = true // assume any standalone wgsl is a main
 	}
 
 	for fn := range needsCompile {
-		CompileFile(fn + ".wgsl")
+		cfg.CompileFile(fn + ".wgsl")
 	}
 	return gosls, nil
 }
 
-func CompileFile(fn string) error {
-	dir, _ := filepath.Abs(*outDir)
+func (cfg *Config) CompileFile(fn string) error {
+	dir, _ := filepath.Abs(cfg.Output)
 	fsys := os.DirFS(dir)
 	b, err := fs.ReadFile(fsys, fn)
 	if errors.Log(err) != nil {

@@ -2,11 +2,9 @@
 
 `gosl` implements _Go as a shader language_ for GPU compute shaders (using [WebGPU](https://www.w3.org/TR/webgpu/)), **enabling standard Go code to run on the GPU**.
 
-`gosl` converts Go code to WGSL which can then be loaded directly into a WebGPU compute shader. It operates within the overall [Goal](../README.md) framework of an augmented version of the Go langauge. See the [GPU](../GPU.md) documentation for an overview.
+`gosl` converts Go code to WGSL which can then be loaded directly into a WebGPU compute shader. It operates within the overall [Goal](../README.md) framework of an augmented version of the Go langauge. See the [GPU](../GPU.md) documentation for an overview. The `goal` command processes more compact math-mode expressions that 
 
 The relevant subsets of Go code are specifically marked using `//gosl:` comment directives, and this code must only use basic expressions and concrete types that will compile correctly in a shader (see [Restrictions](#restrictions) below).  Method functions and pass-by-reference pointer arguments to `struct` types are supported and incur no additional compute cost due to inlining (see notes below for more detail).
-
-A large and complex biologically-based neural network simulation framework called [axon](https://github.com/emer/axon) has been implemented using `gosl`, allowing 1000's of lines of equations and data structures to run through standard Go on the CPU, and accelerated significantly on the GPU.  This allows efficient debugging and unit testing of the code in Go, whereas debugging on the GPU is notoriously difficult.
 
 See [examples/basic](examples/basic) and [rand](examples/rand) for examples, using the [gpu](../../gpu) GPU compute shader system.  It is also possible in principle to use gosl to generate shader files for any other WebGPU application, but this has not been tested.
 
@@ -17,7 +15,7 @@ $ go install golang.org/x/tools/cmd/goimports@latest
 
 To install the `gosl` command, do:
 ```bash
-$ go install cogentcore.org/core/vgpu/gosl@latest
+$ go install cogentcore.org/core/gpu/gosl@latest
 ```
 
 In your Go code, use these comment directives:

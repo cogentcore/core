@@ -1,8 +1,15 @@
+// Copyright (c) 2024, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// This file is largely copied from the Go source,
+// src/go/printer/comment.go:
+
 // Copyright 2022 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package slprint
+package parse
 
 import (
 	"go/ast"

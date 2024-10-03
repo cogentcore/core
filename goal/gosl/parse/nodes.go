@@ -1,3 +1,10 @@
+// Copyright (c) 2024, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// This file is largely copied from the Go source,
+// src/go/printer/nodes.go:
+
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -6,7 +13,7 @@
 // expressions, statements, declarations, and files. It uses
 // the print functionality implemented in printer.go.
 
-package slprint
+package parse
 
 import (
 	"fmt"
@@ -1102,7 +1109,7 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		}
 
 	case *ast.BasicLit:
-		if p.Config.Mode&normalizeNumbers != 0 {
+		if p.PrintConfig.Mode&normalizeNumbers != 0 {
 			x = normalizedNumber(x)
 		}
 		p.print(x)
@@ -2322,7 +2329,7 @@ func (p *printer) nodeSize(n ast.Node, maxSize int) (size int) {
 	// nodeSize computation must be independent of particular
 	// style so that we always get the same decision; print
 	// in RawFormat
-	cfg := Config{Mode: RawFormat}
+	cfg := PrintConfig{Mode: RawFormat}
 	var counter sizeCounter
 	if err := cfg.fprint(&counter, p.pkg, n, p.nodeSizes); err != nil {
 		return

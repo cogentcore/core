@@ -2,7 +2,7 @@
 
 The use of massively parallel _Graphical Processsing Unit_ (_GPU_) hardware has revolutionized machine learning and other fields, producing many factors of speedup relative to traditional _CPU_ (_Central Processing Unit_) computation. However, there are numerous challenges for supporting GPU-based computation, relative to the more flexible CPU coding.
 
-Goal provides a solution to these challenges that enables the same Go-based code to work efficiently and reasonably naturally on both the GPU and CPU (i.e., standard Go execution), for maximum portability. The ability to run the same code on both types of hardware is also critical for debugging the otherwise difficult to debug GPU version, and avoiding bugs in the first place by catching them first on the CPU, while providing known correct comparison results.
+Goal provides a solution to these challenges that enables the same Go-based code to work efficiently and reasonably naturally on both the GPU and CPU (i.e., standard Go execution), for maximum portability. The ability to run the same code on both types of hardware is also critical for debugging the otherwise difficult to debug GPU version, and for avoiding bugs in the first place by catching them first on the CPU, while providing known correct comparison results.
 
 The two most important challenges are:
 
@@ -27,6 +27,10 @@ In many cases, a human programmer can most likely out-perform the automatic comp
 The role of Goal is to allow you to express the full computation in the clear, simple, Go language, using intuitive data structures that minimize the need for additional boilerplate to run efficiently on CPU and GPU. This ability to write a single codebase that runs efficiently on CPU and GPU is similar to the [SYCL](https://en.wikipedia.org/wiki/SYCL) framework (and several others discussed on that wikipedia page), which builds on [OpenCL](https://en.wikipedia.org/wiki/OpenCL), both of which are based on the C / C++ programming language.
 
 In addition to the critical differences between Go and C++ as languages, Goal targets only one hardware platform: WebGPU (via our [gpu](../gpu) package), so it is more specifically optimized for this use-case. Furthermore, SYCL and other approaches require you to write GPU-like code that can also run on the CPU (with lots of explicit fine-grained memory and compute management), whereas Goal provides a more natural CPU-like programming model, while imposing some stronger constraints that encourage more efficient implementations.
+
+The bottom line is that the fantasy of being able to write CPU-native code and have it magically "just work" on the GPU with high levels of efficiency is just that: a fantasy. The reality is that code must be specifically structured and organized to work efficiently on the GPU. Goal just makes this process relatively clean and efficient and easy to read, with a minimum of extra boilerplate. The resulting code should be easily understood by anyone familiar with the Go language, even if that isn't the way you would have written it in the first place. The reward is that you can get highly efficient results with significant GPU-accelerated speedups that works on _any platform_, including the web and mobile phones, all with a single easy-to-read codebase.
+
+## Gosl: go shader language
 
 The [gosl](gosl) (_Go shader language_) package within Goal does the heavy lifting of translating Go code into WGSL shader language code that can run on the WebGPU, and generally manages most of the gpu-specific functionality.  It has various important functions defined in the `gosl.` package space, and a number of `//gosl:` comment directives described below, that make everything work.
 
@@ -146,6 +150,12 @@ Furthermore:
 > Pointer-based access of global variables is not supported in GPU mode.
 
 You have to use _indexes_ into arrays exclusively. Thus, some of the data structures you may need to copy up to the GPU include index variables that determine how to access other variables. TODO: do we need helpers for any of this?
+
+# Examples
+
+A large and complex biologically-based neural network simulation framework called [axon](https://github.com/emer/axon) has been implemented using `gosl`, allowing 1000's of lines of equations and data structures to run through standard Go on the CPU, and accelerated significantly on the GPU.  This allows efficient debugging and unit testing of the code in Go, whereas debugging on the GPU is notoriously difficult.
+
+# TODO
 
 ## Optimization
 

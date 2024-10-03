@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
+package parse
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ import (
 	"slices"
 )
 
-func ReadFileLines(fn string) ([][]byte, error) {
+func (cfg *Config) ReadFileLines(fn string) ([][]byte, error) {
 	nl := []byte("\n")
 	buf, err := os.ReadFile(fn)
 	if err != nil {
@@ -27,7 +27,7 @@ func ReadFileLines(fn string) ([][]byte, error) {
 }
 
 // Extracts comment-directive tagged regions from .go files
-func ExtractGoFiles(files []string) map[string][]byte {
+func (cfg *Config) ExtractGoFiles(files []string) map[string][]byte {
 	sls := map[string][][]byte{}
 	key := []byte("//gosl:")
 	start := []byte("start")
@@ -41,7 +41,7 @@ func ExtractGoFiles(files []string) map[string][]byte {
 		if !strings.HasSuffix(fn, ".go") {
 			continue
 		}
-		lines, err := ReadFileLines(fn)
+		lines, err := cfg.ReadFileLines(fn)
 		if err != nil {
 			continue
 		}
@@ -97,7 +97,7 @@ func ExtractGoFiles(files []string) map[string][]byte {
 
 	rsls := make(map[string][]byte)
 	for fn, lns := range sls {
-		outfn := filepath.Join(*outDir, fn+".go")
+		outfn := filepath.Join(cfg.Output, fn+".go")
 		olns := [][]byte{}
 		olns = append(olns, []byte("package main"))
 		olns = append(olns, []byte(`import (
@@ -128,7 +128,7 @@ func ExtractGoFiles(files []string) map[string][]byte {
 
 // ExtractWGSL extracts the WGSL code embedded within .Go files.
 // Returns true if WGSL contains a void main( function.
-func ExtractWGSL(buf []byte) ([]byte, bool) {
+func (cfg *Config) ExtractWGSL(buf []byte) ([]byte, bool) {
 	key := []byte("//gosl:")
 	wgsl := []byte("wgsl")
 	nowgsl := []byte("nowgsl")

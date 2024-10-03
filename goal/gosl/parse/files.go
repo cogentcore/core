@@ -1,8 +1,8 @@
-// Copyright (c) 2022, Cogent Core. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
+package parse
 
 import (
 	"fmt"
@@ -35,7 +35,7 @@ func IsSPVFile(f fs.DirEntry) bool {
 	return !strings.HasPrefix(name, ".") && strings.HasSuffix(name, ".spv") && !f.IsDir()
 }
 
-func AddFile(fn string, fls []string, procd map[string]bool) []string {
+func (cfg *Config) AddFile(fn string, fls []string, procd map[string]bool) []string {
 	if _, has := procd[fn]; has {
 		return fls
 	}
@@ -60,7 +60,7 @@ func AddFile(fn string, fls []string, procd map[string]bool) []string {
 
 // FilesFromPaths processes all paths and returns a full unique list of files
 // for subsequent processing.
-func FilesFromPaths(paths []string) []string {
+func (cfg *Config) FilesFromPaths(paths []string) []string {
 	fls := make([]string, 0, len(paths))
 	procd := make(map[string]bool)
 	for _, path := range paths {
@@ -86,20 +86,20 @@ func FilesFromPaths(paths []string) []string {
 			if fl != "" {
 				for _, gf := range gofls {
 					if strings.HasSuffix(gf, fl) {
-						fls = AddFile(gf, fls, procd)
+						fls = cfg.AddFile(gf, fls, procd)
 						// fmt.Printf("added file: %s from package: %s\n", gf, path)
 						break
 					}
 				}
 			} else {
 				for _, gf := range gofls {
-					fls = AddFile(gf, fls, procd)
+					fls = cfg.AddFile(gf, fls, procd)
 					// fmt.Printf("added file: %s from package: %s\n", gf, path)
 				}
 			}
 		case !info.IsDir():
 			path := path
-			fls = AddFile(path, fls, procd)
+			fls = cfg.AddFile(path, fls, procd)
 		default:
 			// Directories are walked, ignoring non-Go, non-WGSL files.
 			err := filepath.WalkDir(path, func(path string, f fs.DirEntry, err error) error {
@@ -110,7 +110,7 @@ func FilesFromPaths(paths []string) []string {
 				if err != nil {
 					return nil
 				}
-				fls = AddFile(path, fls, procd)
+				fls = cfg.AddFile(path, fls, procd)
 				return nil
 			})
 			if err != nil {
@@ -139,8 +139,8 @@ func CopyFile(src, dst string) error {
 // CopyPackageFile copies given file name from given package path
 // into the current output directory.
 // e.g., "slrand.wgsl", "cogentcore.org/core/gpu/gosl/slrand"
-func CopyPackageFile(fnm, packagePath string) error {
-	tofn := filepath.Join(*outDir, fnm)
+func (cfg *Config) CopyPackageFile(fnm, packagePath string) error {
+	tofn := filepath.Join(cfg.Output, fnm)
 	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, packagePath)
 	if err != nil {
 		fmt.Println(err)

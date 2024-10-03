@@ -1,8 +1,15 @@
+// Copyright (c) 2024, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// This file is largely copied from the Go source,
+// src/go/printer/printer.go:
+
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package slprint
+package parse
 
 import (
 	"fmt"
@@ -54,7 +61,7 @@ type commentInfo struct {
 
 type printer struct {
 	// Configuration (does not change after initialization)
-	Config
+	PrintConfig
 	fset *token.FileSet
 	pkg  *packages.Package // gosl: extra
 
@@ -225,7 +232,7 @@ func (p *printer) writeLineDirective(pos token.Position) {
 func (p *printer) writeIndent() {
 	// use "hard" htabs - indentation columns
 	// must not be discarded by the tabwriter
-	n := p.Config.Indent + p.indent // include base indentation
+	n := p.PrintConfig.Indent + p.indent // include base indentation
 	for i := 0; i < n; i++ {
 		p.output = append(p.output, '\t')
 	}
@@ -287,7 +294,7 @@ func (p *printer) writeByte(ch byte, n int) {
 // printer benchmark by up to 10%.
 func (p *printer) writeString(pos token.Position, s string, isLit bool) {
 	if p.out.Column == 1 {
-		if p.Config.Mode&SourcePos != 0 {
+		if p.PrintConfig.Mode&SourcePos != 0 {
 			p.writeLineDirective(pos)
 		}
 		p.writeIndent()
@@ -1321,8 +1328,8 @@ const (
 	normalizeNumbers Mode = 1 << 30
 )
 
-// A Config node controls the output of Fprint.
-type Config struct {
+// A PrintConfig node controls the output of Fprint.
+type PrintConfig struct {
 	Mode     Mode // default: 0
 	Tabwidth int  // default: 8
 	Indent   int  // default: 0 (all code is indented at least by this much)
@@ -1342,18 +1349,18 @@ var printerPool = sync.Pool{
 	},
 }
 
-func newPrinter(cfg *Config, pkg *packages.Package, nodeSizes map[ast.Node]int) *printer {
+func newPrinter(cfg *PrintConfig, pkg *packages.Package, nodeSizes map[ast.Node]int) *printer {
 	p := printerPool.Get().(*printer)
 	*p = printer{
-		Config:    *cfg,
-		pkg:       pkg,
-		fset:      pkg.Fset,
-		pos:       token.Position{Line: 1, Column: 1},
-		out:       token.Position{Line: 1, Column: 1},
-		wsbuf:     p.wsbuf[:0],
-		nodeSizes: nodeSizes,
-		cachedPos: -1,
-		output:    p.output[:0],
+		PrintConfig: *cfg,
+		pkg:         pkg,
+		fset:        pkg.Fset,
+		pos:         token.Position{Line: 1, Column: 1},
+		out:         token.Position{Line: 1, Column: 1},
+		wsbuf:       p.wsbuf[:0],
+		nodeSizes:   nodeSizes,
+		cachedPos:   -1,
+		output:      p.output[:0],
 	}
 	return p
 }
@@ -1368,7 +1375,7 @@ func (p *printer) free() {
 }
 
 // fprint implements Fprint and takes a nodesSizes map for setting up the printer state.
-func (cfg *Config) fprint(output io.Writer, pkg *packages.Package, node any, nodeSizes map[ast.Node]int) (err error) {
+func (cfg *PrintConfig) fprint(output io.Writer, pkg *packages.Package, node any, nodeSizes map[ast.Node]int) (err error) {
 	// print node
 	p := newPrinter(cfg, pkg, nodeSizes)
 	defer p.free()
@@ -1431,14 +1438,14 @@ type CommentedNode struct {
 // Position information is interpreted relative to the file set fset.
 // The node type must be *[ast.File], *[CommentedNode], [][ast.Decl], [][ast.Stmt],
 // or assignment-compatible to [ast.Expr], [ast.Decl], [ast.Spec], or [ast.Stmt].
-func (cfg *Config) Fprint(output io.Writer, pkg *packages.Package, node any) error {
+func (cfg *PrintConfig) Fprint(output io.Writer, pkg *packages.Package, node any) error {
 	return cfg.fprint(output, pkg, node, make(map[ast.Node]int))
 }
 
 // Fprint "pretty-prints" an AST node to output.
-// It calls [Config.Fprint] with default settings.
+// It calls [PrintConfig.Fprint] with default settings.
 // Note that gofmt uses tabs for indentation but spaces for alignment;
 // use format.Node (package go/format) for output that matches gofmt.
 func Fprint(output io.Writer, pkg *packages.Package, node any) error {
-	return (&Config{Tabwidth: 8}).Fprint(output, pkg, node)
+	return (&PrintConfig{Tabwidth: 8}).Fprint(output, pkg, node)
 }
