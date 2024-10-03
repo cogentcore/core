@@ -11,27 +11,32 @@ import (
 	"slices"
 )
 
+// ExtractFiles processes all the package files and saves the corresponding
+// .go files with simple go header.
+func (st *State) ExtractFiles() {
+	for fn, fl := range st.GoFiles {
+		fl.Lines = st.ExtractGosl(fl.Lines)
+		st.WriteFileLines(filepath.Join(st.ImportsDir, fn), st.AppendGoHeader(fl.Lines))
+	}
+}
+
 // ExtractImports processes all the imported files and saves the corresponding
-// .go files, and
+// .go files with simple go header.
 func (st *State) ExtractImports() {
-	if len(st.Imports) == 0 {
+	if len(st.GoImports) == 0 {
 		return
 	}
 	st.ImportPackages = make(map[string]bool)
-	for impath := range st.Imports {
+	for impath := range st.GoImports {
 		_, pkg := filepath.Split(impath)
 		st.ImportPackages[pkg] = true
 	}
-	for _, im := range st.Imports {
+	for _, im := range st.GoImports {
 		for fn, fl := range im {
 			fl.Lines = st.ExtractGosl(fl.Lines)
-			lns := st.AppendGoHeader(fl.Lines)
-			ifn := filepath.Join("imports", fn)
-			st.WriteFileLines(ifn, lns)
+			st.WriteFileLines(filepath.Join(st.ImportsDir, fn), st.AppendGoHeader(fl.Lines))
 		}
 	}
-	pdir := "./" + filepath.Join(st.Config.Output, "imports")
-	st.ProcessDir(pdir)
 }
 
 // ExtractGosl gosl comment-directive tagged regions from given file.
@@ -101,9 +106,9 @@ func (st *State) AppendGoHeader(lines [][]byte) [][]byte {
 	return olns
 }
 
-// ExtractWGSL extracts the WGSL code embedded within .Go files.
-// Returns true if WGSL contains a void main( function.
-func (st *State) ExtractWGSL(b []byte) ([][]byte, bool) {
+// ExtractWGSL extracts the WGSL code embedded within .Go files,
+// which is commented out in the Go code -- remove comments.
+func (st *State) ExtractWGSL(lines [][]byte) [][]byte {
 	key := []byte("//gosl:")
 	wgsl := []byte("wgsl")
 	nowgsl := []byte("nowgsl")
@@ -113,12 +118,8 @@ func (st *State) ExtractWGSL(b []byte) ([][]byte, bool) {
 	comment := []byte("// ")
 	pack := []byte("package")
 	imp := []byte("import")
-	main := []byte("void main(")
 	lparen := []byte("(")
 	rparen := []byte(")")
-	nl := []byte("\n")
-
-	lines := bytes.Split(b, nl)
 
 	mx := min(10, len(lines))
 	stln := 0
@@ -141,7 +142,6 @@ func (st *State) ExtractWGSL(b []byte) ([][]byte, bool) {
 
 	lines = lines[stln:] // get rid of package, import
 
-	hasMain := false
 	inHlsl := false
 	inNoHlsl := false
 	noHlslStart := 0
@@ -163,19 +163,12 @@ func (st *State) ExtractWGSL(b []byte) ([][]byte, bool) {
 			li--
 			inHlsl = false
 		case inHlsl:
-			del := false
 			switch {
 			case bytes.HasPrefix(ln, stComment) || bytes.HasPrefix(ln, edComment):
 				lines = slices.Delete(lines, li, li+1)
 				li--
-				del = true
 			case bytes.HasPrefix(ln, comment):
 				lines[li] = ln[3:]
-			}
-			if !del {
-				if bytes.HasPrefix(lines[li], main) {
-					hasMain = true
-				}
 			}
 		case isKey && bytes.HasPrefix(keyStr, wgsl):
 			inHlsl = true
@@ -186,5 +179,5 @@ func (st *State) ExtractWGSL(b []byte) ([][]byte, bool) {
 			noHlslStart = li
 		}
 	}
-	return lines, hasMain
+	return lines
 }

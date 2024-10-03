@@ -21,19 +21,15 @@ func MoveLines(lines *[][]byte, to, st, ed int) {
 	*lines = nln
 }
 
-// SlEdits performs post-generation edits for wgsl
-// * moves wgsl segments around, e.g., methods
-// into their proper classes
-// * fixes printf, slice other common code
+// SlEdits performs post-generation edits for wgsl,
+// replacing type names, slbool, function calls, etc.
 // returns true if a slrand. or sltype. prefix was found,
 // driveing copying of those files.
-func SlEdits(src []byte) ([]byte, bool, bool) {
-	// return src // uncomment to show original without edits
+func SlEdits(src []byte) (lines [][]byte, hasSlrand bool, hasSltype bool) {
 	nl := []byte("\n")
-	lines := bytes.Split(src, nl)
-	hasSlrand, hasSltype := SlEditsReplace(lines)
-
-	return bytes.Join(lines, nl), hasSlrand, hasSltype
+	lines = bytes.Split(src, nl)
+	hasSlrand, hasSltype = SlEditsReplace(lines)
+	return
 }
 
 type Replace struct {

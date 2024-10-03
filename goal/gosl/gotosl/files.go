@@ -7,6 +7,7 @@ package gotosl
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -41,9 +42,8 @@ func ReadFileLines(fn string) ([][]byte, error) {
 }
 
 func (st *State) WriteFileLines(fn string, lines [][]byte) error {
-	outfn := filepath.Join(st.Config.Output, fn)
 	res := bytes.Join(lines, []byte("\n"))
-	return os.WriteFile(outfn, res, 0644)
+	return os.WriteFile(fn, res, 0644)
 }
 
 // HasGoslTag returns true if given file has a //gosl: tag
@@ -58,10 +58,6 @@ func HasGoslTag(lines [][]byte) bool {
 	return false
 }
 
-// LoadedPackageNames are single prefix names of packages that were
-// loaded in the list of files to process
-var LoadedPackageNames = map[string]bool{}
-
 func IsGoFile(f fs.DirEntry) bool {
 	name := f.Name()
 	return !strings.HasPrefix(name, ".") && strings.HasSuffix(name, ".go") && !f.IsDir()
@@ -72,15 +68,10 @@ func IsWGSLFile(f fs.DirEntry) bool {
 	return !strings.HasPrefix(name, ".") && strings.HasSuffix(name, ".wgsl") && !f.IsDir()
 }
 
-func IsSPVFile(f fs.DirEntry) bool {
-	name := f.Name()
-	return !strings.HasPrefix(name, ".") && strings.HasSuffix(name, ".spv") && !f.IsDir()
-}
-
 // ProjectFiles gets the files in the current directory.
 func (st *State) ProjectFiles() {
 	fls := fsx.Filenames(".", ".go")
-	st.Files = make(map[string]*File)
+	st.GoFiles = make(map[string]*File)
 	for _, fn := range fls {
 		fl := &File{Name: fn}
 		var err error
@@ -91,7 +82,7 @@ func (st *State) ProjectFiles() {
 		if !HasGoslTag(fl.Lines) {
 			continue
 		}
-		st.Files[fn] = fl
+		st.GoFiles[fn] = fl
 		st.ImportFiles(fl.Lines)
 	}
 }
@@ -112,7 +103,7 @@ func (st *State) ImportFiles(lines [][]byte) {
 		if impath[len(impath)-1] == '"' {
 			impath = impath[:len(impath)-1]
 		}
-		_, ok := st.Imports[impath]
+		_, ok := st.GoImports[impath]
 		if ok {
 			continue
 		}
@@ -124,7 +115,7 @@ func (st *State) ImportFiles(lines [][]byte) {
 			continue
 		}
 		pfls := make(map[string]*File)
-		st.Imports[impath] = pfls
+		st.GoImports[impath] = pfls
 		pkg := pkgs[0]
 		gofls := pkg.GoFiles
 		if len(gofls) == 0 {
@@ -143,7 +134,7 @@ func (st *State) ImportFiles(lines [][]byte) {
 			st.ImportFiles(lns)
 			// fmt.Printf("added file: %s from package: %s\n", gf, impath)
 		}
-		st.Imports[impath] = pfls
+		st.GoImports[impath] = pfls
 	}
 }
 
@@ -153,7 +144,7 @@ func RemoveGenFiles(dir string) {
 		if err != nil {
 			return err
 		}
-		if IsGoFile(f) || IsWGSLFile(f) || IsSPVFile(f) {
+		if IsGoFile(f) || IsWGSLFile(f) {
 			os.Remove(path)
 		}
 		return nil
@@ -161,4 +152,51 @@ func RemoveGenFiles(dir string) {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+// CopyPackageFile copies given file name from given package path
+// into the current imports directory.
+// e.g., "slrand.wgsl", "cogentcore.org/core/goal/gosl/slrand"
+func (st *State) CopyPackageFile(fnm, packagePath string) error {
+	tofn := filepath.Join(st.ImportsDir, fnm)
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, packagePath)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	if len(pkgs) != 1 {
+		err = fmt.Errorf("%s package not found", packagePath)
+		fmt.Println(err)
+		return err
+	}
+	pkg := pkgs[0]
+	var fn string
+	if len(pkg.GoFiles) > 0 {
+		fn = pkg.GoFiles[0]
+	} else if len(pkg.OtherFiles) > 0 {
+		fn = pkg.GoFiles[0]
+	} else {
+		err = fmt.Errorf("No files found in package: %s", packagePath)
+		fmt.Println(err)
+		return err
+	}
+	dir, _ := filepath.Split(fn)
+	fmfn := filepath.Join(dir, fnm)
+	CopyFile(fmfn, tofn)
+	return nil
+}
+
+func CopyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	_, err = io.Copy(out, in)
+	return err
 }
