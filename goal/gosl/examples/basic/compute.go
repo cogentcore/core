@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Cogent Core. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -6,11 +6,16 @@ package main
 
 import "cogentcore.org/core/math32"
 
-//gosl:wgsl basic
-// #include "fastexp.wgsl"
-//gosl:end basic
+//gosl:start
+//gosl:import "cogentcore.org/core/math32"
 
-//gosl:start basic
+var ( //gosl:vars
+	// Params are the parameters for the computation
+	Params []ParamStruct
+
+	// Data is the data on which the computation operates
+	Data []DataStruct
+)
 
 // DataStruct has the test data
 type DataStruct struct {
@@ -47,7 +52,12 @@ func (ps *ParamStruct) IntegFromRaw(ds *DataStruct) {
 	ds.Exp = math32.FastExp(-ds.Integ)
 }
 
-//gosl:end basic
+// Compute does the main computation
+func Compute(i int32) { //gosl:kernel
+	Params[0].IntegFromRaw(&Data[i])
+}
+
+//gosl:end
 
 // note: only core compute code needs to be in shader -- all init is done CPU-side
 
@@ -59,22 +69,3 @@ func (ps *ParamStruct) Defaults() {
 func (ps *ParamStruct) Update() {
 	ps.Dt = 1.0 / ps.Tau
 }
-
-//gosl:wgsl basic
-/*
-@group(0) @binding(0)
-var<storage, read_write> Params: array<ParamStruct>;
-
-@group(0) @binding(1)
-var<storage, read_write> Data: array<DataStruct>;
-
-@compute
-@workgroup_size(64)
-fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
-	var pars = Params[0];
-	var data = Data[idx.x];
-	ParamStruct_IntegFromRaw(&pars, &data);
-	Data[idx.x] = data;
-}
-*/
-//gosl:end basic

@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Cogent Core. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/gpu"
 )
 
-//go:generate ../../gosl cogentcore.org/core/math32/fastexp.go compute.go
+//go:generate gosl .
 
 //go:embed shaders/basic.wgsl shaders/fastexp.wgsl
 var shaders embed.FS
@@ -51,12 +51,12 @@ func main() {
 	pvl := pv.Values.Values[0]
 	dvl := dv.Values.Values[0]
 
-	pars := make([]ParamStruct, 1)
-	pars[0].Defaults()
+	Params = make([]ParamStruct, 1)
+	Params[0].Defaults()
 
-	cd := make([]DataStruct, n)
-	for i := range cd {
-		cd[i].Raw = rand.Float32()
+	Data = make([]DataStruct, n)
+	for i := range Data {
+		Data[i].Raw = rand.Float32()
 	}
 
 	sd := make([]DataStruct, n)
@@ -66,32 +66,43 @@ func main() {
 
 	cpuTmr := timer.Time{}
 	cpuTmr.Start()
-	for i := range cd {
-		pars[0].IntegFromRaw(&cd[i])
+
+	gosl.UseCPU()
+	for i := range parallel(Data) {
+		Compute(i)
 	}
 	cpuTmr.Stop()
+
+	cd := Data
+	Data = sd
 
 	gpuFullTmr := timer.Time{}
 	gpuFullTmr.Start()
 
-	gpu.SetValueFrom(pvl, pars)
-	gpu.SetValueFrom(dvl, sd)
-
-	sgp.CreateReadBuffers()
+	gosl.ToGPU(Params, Data)
+	// gpu.SetValueFrom(pvl, pars)
+	// gpu.SetValueFrom(dvl, sd)
+	// sgp.CreateReadBuffers()
 
 	gpuTmr := timer.Time{}
 	gpuTmr.Start()
 
-	ce, _ := sy.BeginComputePass()
-	pl.Dispatch1D(ce, n, threads)
-	ce.End()
-	dvl.GPUToRead(sy.CommandEncoder)
-	sy.EndComputePass(ce)
+	gosl.UseGPU()
+	for i := range parallel(Data) {
+		Compute(i)
+	}
+
+	// ce, _ := sy.BeginComputePass()
+	// pl.Dispatch1D(ce, n, threads)
+	// ce.End()
+	// dvl.GPUToRead(sy.CommandEncoder)
+	// sy.EndComputePass(ce)
 
 	gpuTmr.Stop()
 
-	dvl.ReadSync()
-	gpu.ReadToBytes(dvl, sd)
+	gosl.FromCPU(Data)
+	// dvl.ReadSync()
+	// gpu.ReadToBytes(dvl, sd)
 
 	gpuFullTmr.Stop()
 

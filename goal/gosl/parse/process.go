@@ -15,7 +15,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/goal/gosl/alignsl"
@@ -23,53 +22,42 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// does all the file processing
-func (cfg *Config) ProcessFiles() (map[string][]byte, error) {
-	paths := cfg.Inputs
-	fls := cfg.FilesFromPaths(paths)
-	gosls := cfg.ExtractGoFiles(fls) // extract Go files to shader/*.go
-
-	wgslFiles := []string{}
-	for _, fn := range fls {
-		if strings.HasSuffix(fn, ".wgsl") {
-			wgslFiles = append(wgslFiles, fn)
-		}
-	}
-
-	pf := "./" + cfg.Output
+// ProcessDir process files in given directory.
+func (st *State) ProcessDir(pf string) error {
+	nl := []byte("\n")
 	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles | packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesSizes | packages.NeedTypesInfo}, pf)
 	if err != nil {
-		log.Println(err)
-		return nil, err
+		return errors.Log(err)
 	}
 	if len(pkgs) != 1 {
 		err := fmt.Errorf("More than one package for path: %v", pf)
-		log.Println(err)
-		return nil, err
+		return errors.Log(err)
 	}
 	pkg := pkgs[0]
-
 	if len(pkg.GoFiles) == 0 {
 		err := fmt.Errorf("No Go files found in package: %+v", pkg)
-		log.Println(err)
-		return nil, err
+		return errors.Log(err)
 	}
 	// fmt.Printf("go files: %+v", pkg.GoFiles)
 	// return nil, err
+	files := pkg.GoFiles
 
 	// map of files with a main function that needs to be compiled
 	needsCompile := map[string]bool{}
 
 	serr := alignsl.CheckPackage(pkg)
+
 	if serr != nil {
 		fmt.Println(serr)
 	}
 
 	slrandCopied := false
 	sltypeCopied := false
-	for fn := range gosls {
-		gofn := fn + ".go"
-		if cfg.Debug {
+
+	for _, gofp := range files {
+		_, gofn := filepath.Split(gofp)
+		wgfn := wgslFile(gofn)
+		if st.Config.Debug {
 			fmt.Printf("###################################\nProcessing Go file: %s\n", gofn)
 		}
 
@@ -90,83 +78,86 @@ func (cfg *Config) ProcessFiles() (map[string][]byte, error) {
 		}
 
 		var buf bytes.Buffer
-		pcfg := PrintConfig{Mode: printerMode, Tabwidth: tabWidth, ExcludeFunctions: cfg.ExcludeMap}
+		pcfg := PrintConfig{Mode: printerMode, Tabwidth: tabWidth, ExcludeFunctions: st.ExcludeMap}
 		pcfg.Fprint(&buf, pkg, afile)
 		// ioutil.WriteFile(filepath.Join(*outDir, fn+".tmp"), buf.Bytes(), 0644)
 		slfix, hasSltype, hasSlrand := SlEdits(buf.Bytes())
+		_ = slfix
 		if hasSlrand && !slrandCopied {
 			hasSltype = true
-			if cfg.Debug {
+			if st.Config.Debug {
 				fmt.Printf("\tcopying slrand.wgsl to shaders\n")
 			}
-			cfg.CopyPackageFile("slrand.wgsl", "cogentcore.org/core/gpu/gosl/slrand")
+			// st.CopyPackageFile("slrand.wgsl", "cogentcore.org/core/goal/gosl/slrand")
 			slrandCopied = true
 		}
 		if hasSltype && !sltypeCopied {
-			if cfg.Debug {
+			if st.Config.Debug {
 				fmt.Printf("\tcopying sltype.wgsl to shaders\n")
 			}
-			cfg.CopyPackageFile("sltype.wgsl", "cogentcore.org/core/gpu/gosl/sltype")
+			// st.CopyPackageFile("sltype.wgsl", "cogentcore.org/core/goal/gosl/sltype")
 			sltypeCopied = true
 		}
-		exsl, hasMain := cfg.ExtractWGSL(slfix)
-		gosls[fn] = exsl
+		exsl, hasMain := st.ExtractWGSL(slfix)
+		_ = hasMain
+		// gosls[fn] = exsl
 
-		if hasMain {
-			needsCompile[fn] = true
-		}
-		if !cfg.Keep {
+		// if hasMain {
+		// 	needsCompile[fn] = true
+		// }
+		if !st.Config.Keep {
 			os.Remove(fpos.Filename)
 		}
 
 		// add wgsl code
-		for _, slfn := range wgslFiles {
-			if fn+".wgsl" != slfn {
-				continue
-			}
-			buf, err := os.ReadFile(slfn)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			exsl = append(exsl, []byte(fmt.Sprintf("\n// from file: %s\n", slfn))...)
-			exsl = append(exsl, buf...)
-			gosls[fn] = exsl
-			needsCompile[fn] = true // assume any standalone has main
-			break
-		}
+		// for _, slfn := range wgslFiles {
+		// 	if fn+".wgsl" != slfn {
+		// 		continue
+		// 	}
+		// 	buf, err := os.ReadFile(slfn)
+		// 	if err != nil {
+		// 		fmt.Println(err)
+		// 		continue
+		// 	}
+		// 	exsl = append(exsl, []byte(fmt.Sprintf("\n// from file: %s\n", slfn))...)
+		// 	exsl = append(exsl, buf...)
+		// 	gosls[fn] = exsl
+		// 	needsCompile[fn] = true // assume any standalone has main
+		// 	break
+		// }
 
-		slfn := filepath.Join(cfg.Output, fn+".wgsl")
-		ioutil.WriteFile(slfn, exsl, 0644)
+		slfn := filepath.Join(st.Config.Output, wgfn)
+		ioutil.WriteFile(slfn, bytes.Join(exsl, nl), 0644)
 	}
 
 	// check for wgsl files that had no go equivalent
-	for _, slfn := range wgslFiles {
-		hasGo := false
-		for fn := range gosls {
-			if fn+".wgsl" == slfn {
-				hasGo = true
-				break
-			}
-		}
-		if hasGo {
-			continue
-		}
-		_, slfno := filepath.Split(slfn) // could be in a subdir
-		tofn := filepath.Join(cfg.Output, slfno)
-		CopyFile(slfn, tofn)
-		fn := strings.TrimSuffix(slfno, ".wgsl")
-		needsCompile[fn] = true // assume any standalone wgsl is a main
-	}
+
+	// for _, slfn := range wgslFiles {
+	// 	hasGo := false
+	// 	for fn := range gosls {
+	// 		if fn+".wgsl" == slfn {
+	// 			hasGo = true
+	// 			break
+	// 		}
+	// 	}
+	// 	if hasGo {
+	// 		continue
+	// 	}
+	// 	_, slfno := filepath.Split(slfn) // could be in a subdir
+	// 	tofn := filepath.Join(st.Config.Output, slfno)
+	// 	CopyFile(slfn, tofn)
+	// 	fn := strings.TrimSuffix(slfno, ".wgsl")
+	// 	needsCompile[fn] = true // assume any standalone wgsl is a main
+	// }
 
 	for fn := range needsCompile {
-		cfg.CompileFile(fn + ".wgsl")
+		st.CompileFile(fn + ".wgsl")
 	}
-	return gosls, nil
+	return nil
 }
 
-func (cfg *Config) CompileFile(fn string) error {
-	dir, _ := filepath.Abs(cfg.Output)
+func (st *State) CompileFile(fn string) error {
+	dir, _ := filepath.Abs(st.Config.Output)
 	fsys := os.DirFS(dir)
 	b, err := fs.ReadFile(fsys, fn)
 	if errors.Log(err) != nil {

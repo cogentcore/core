@@ -46,7 +46,7 @@ The GPU-specific computation is organized into some (hopefully small) number of 
 
 ```Go
 for i := range parallel(data) {
-    MyCompute(i)
+    Compute(i)
 }
 ```
 
@@ -60,7 +60,14 @@ Even though the GPU kernels must each be compiled separately into a single disti
 
 The GPU code can only handle a highly restricted _subset_ of Go code, with data structures having strict alignment requirements, and no `string` or other composite variable-length data structures (maps, slices etc). Thus, the [gosl](gosl) package recognizes `//gosl:start` and `//gosl:end` comment directives surrounding the GPU-safe (and relevant) portions of the overall code. Any `.go` or `.goal` file can contribute GPU relevant code, including in other packages, and the gosl system automatically builds a shadow package-based set of `.wgsl` files accordingly.
 
-> Each kernel must be written in a separate `.goal` file, marked with the `//gosl:kernel` directive at the top. There must be a "main" function entry point for each kernel, marked with the //gosl:main directive, which takes the index argument as shown in the code example above.
+> Each kernel function is marked with a `//gosl:kernel` directive, and the name of the function is used to create the name of the GPU shader file.
+
+```Go
+// Compute does the main computation.
+func Compute(i int32) { //gosl:kernel
+	Params[0].IntegFromRaw(&Data[i])
+}
+```
 
 For CPU (regular Go) mode, the parallel `for range` loop as shown above translates into a  `tensor.VectorizeThreaded` call of the named Go function. For GPU mode, it launches the kernel on the GPU.
 

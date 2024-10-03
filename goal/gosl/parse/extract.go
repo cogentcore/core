@@ -6,134 +6,108 @@ package parse
 
 import (
 	"bytes"
-	"fmt"
-	"io/ioutil"
-	"os"
 	"path/filepath"
-	"strings"
 
 	"slices"
 )
 
-func (cfg *Config) ReadFileLines(fn string) ([][]byte, error) {
-	nl := []byte("\n")
-	buf, err := os.ReadFile(fn)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
+// ExtractImports processes all the imported files and saves the corresponding
+// .go files, and
+func (st *State) ExtractImports() {
+	if len(st.Imports) == 0 {
+		return
 	}
-	lines := bytes.Split(buf, nl)
-	return lines, nil
+	st.ImportPackages = make(map[string]bool)
+	for impath := range st.Imports {
+		_, pkg := filepath.Split(impath)
+		st.ImportPackages[pkg] = true
+	}
+	for _, im := range st.Imports {
+		for fn, fl := range im {
+			fl.Lines = st.ExtractGosl(fl.Lines)
+			lns := st.AppendGoHeader(fl.Lines)
+			ifn := filepath.Join("imports", fn)
+			st.WriteFileLines(ifn, lns)
+		}
+	}
+	pdir := "./" + filepath.Join(st.Config.Output, "imports")
+	st.ProcessDir(pdir)
 }
 
-// Extracts comment-directive tagged regions from .go files
-func (cfg *Config) ExtractGoFiles(files []string) map[string][]byte {
-	sls := map[string][][]byte{}
+// ExtractGosl gosl comment-directive tagged regions from given file.
+func (st *State) ExtractGosl(lines [][]byte) [][]byte {
 	key := []byte("//gosl:")
 	start := []byte("start")
 	wgsl := []byte("wgsl")
 	nowgsl := []byte("nowgsl")
 	end := []byte("end")
-	nl := []byte("\n")
-	include := []byte("#include")
+	imp := []byte("import")
 
-	for _, fn := range files {
-		if !strings.HasSuffix(fn, ".go") {
-			continue
+	inReg := false
+	inHlsl := false
+	inNoHlsl := false
+	var outLns [][]byte
+	for _, ln := range lines {
+		tln := bytes.TrimSpace(ln)
+		isKey := bytes.HasPrefix(tln, key)
+		var keyStr []byte
+		if isKey {
+			keyStr = tln[len(key):]
+			// fmt.Printf("key: %s\n", string(keyStr))
 		}
-		lines, err := cfg.ReadFileLines(fn)
-		if err != nil {
-			continue
-		}
-
-		inReg := false
-		inHlsl := false
-		inNoHlsl := false
-		var outLns [][]byte
-		slFn := ""
-		for _, ln := range lines {
-			tln := bytes.TrimSpace(ln)
-			isKey := bytes.HasPrefix(tln, key)
-			var keyStr []byte
-			if isKey {
-				keyStr = tln[len(key):]
-				// fmt.Printf("key: %s\n", string(keyStr))
-			}
-			switch {
-			case inReg && isKey && bytes.HasPrefix(keyStr, end):
-				if inHlsl || inNoHlsl {
-					outLns = append(outLns, ln)
-				}
-				sls[slFn] = outLns
-				inReg = false
-				inHlsl = false
-				inNoHlsl = false
-			case inReg:
-				for pkg := range LoadedPackageNames { // remove package prefixes
-					if !bytes.Contains(ln, include) {
-						ln = bytes.ReplaceAll(ln, []byte(pkg+"."), []byte{})
-					}
-				}
-				outLns = append(outLns, ln)
-			case isKey && bytes.HasPrefix(keyStr, start):
-				inReg = true
-				slFn = string(keyStr[len(start)+1:])
-				outLns = sls[slFn]
-			case isKey && bytes.HasPrefix(keyStr, nowgsl):
-				inReg = true
-				inNoHlsl = true
-				slFn = string(keyStr[len(nowgsl)+1:])
-				outLns = sls[slFn]
-				outLns = append(outLns, ln) // key to include self here
-			case isKey && bytes.HasPrefix(keyStr, wgsl):
-				inReg = true
-				inHlsl = true
-				slFn = string(keyStr[len(wgsl)+1:])
-				outLns = sls[slFn]
+		switch {
+		case inReg && isKey && bytes.HasPrefix(keyStr, end):
+			if inHlsl || inNoHlsl {
 				outLns = append(outLns, ln)
 			}
+			inReg = false
+			inHlsl = false
+			inNoHlsl = false
+		case inReg:
+			for pkg := range st.ImportPackages { // remove package prefixes
+				if !bytes.Contains(ln, imp) {
+					ln = bytes.ReplaceAll(ln, []byte(pkg+"."), []byte{})
+				}
+			}
+			outLns = append(outLns, ln)
+		case isKey && bytes.HasPrefix(keyStr, start):
+			inReg = true
+		case isKey && bytes.HasPrefix(keyStr, nowgsl):
+			inReg = true
+			inNoHlsl = true
+			outLns = append(outLns, ln) // key to include self here
+		case isKey && bytes.HasPrefix(keyStr, wgsl):
+			inReg = true
+			inHlsl = true
+			outLns = append(outLns, ln)
 		}
 	}
+	return outLns
+}
 
-	rsls := make(map[string][]byte)
-	for fn, lns := range sls {
-		outfn := filepath.Join(cfg.Output, fn+".go")
-		olns := [][]byte{}
-		olns = append(olns, []byte("package main"))
-		olns = append(olns, []byte(`import (
+// AppendGoHeader appends Go header
+func (st *State) AppendGoHeader(lines [][]byte) [][]byte {
+	olns := make([][]byte, 0, len(lines)+10)
+	olns = append(olns, []byte("package main"))
+	olns = append(olns, []byte(`import (
 	"math"
-	"cogentcore.org/core/gpu/gosl/slbool"
-	"cogentcore.org/core/gpu/gosl/slrand"
-	"cogentcore.org/core/gpu/gosl/sltype"
+	"cogentcore.org/core/goal/gosl/slbool"
+	"cogentcore.org/core/goal/gosl/slrand"
+	"cogentcore.org/core/goal/gosl/sltype"
 )
 `))
-		olns = append(olns, lns...)
-		SlBoolReplace(olns)
-		res := bytes.Join(olns, nl)
-		ioutil.WriteFile(outfn, res, 0644)
-		// not necessary and super slow:
-		// cmd := exec.Command("goimports", "-w", fn+".go") // get imports
-		// cmd.Dir, _ = filepath.Abs(*outDir)
-		// out, err := cmd.CombinedOutput()
-		// _ = out
-		// // fmt.Printf("\n################\ngoimports output for: %s\n%s\n", outfn, out)
-		// if err != nil {
-		// 	log.Println(err)
-		// }
-		rsls[fn] = bytes.Join(lns, nl)
-	}
-
-	return rsls
+	olns = append(olns, lines...)
+	SlBoolReplace(olns)
+	return olns
 }
 
 // ExtractWGSL extracts the WGSL code embedded within .Go files.
 // Returns true if WGSL contains a void main( function.
-func (cfg *Config) ExtractWGSL(buf []byte) ([]byte, bool) {
+func (st *State) ExtractWGSL(b []byte) ([][]byte, bool) {
 	key := []byte("//gosl:")
 	wgsl := []byte("wgsl")
 	nowgsl := []byte("nowgsl")
 	end := []byte("end")
-	nl := []byte("\n")
 	stComment := []byte("/*")
 	edComment := []byte("*/")
 	comment := []byte("// ")
@@ -142,8 +116,9 @@ func (cfg *Config) ExtractWGSL(buf []byte) ([]byte, bool) {
 	main := []byte("void main(")
 	lparen := []byte("(")
 	rparen := []byte(")")
+	nl := []byte("\n")
 
-	lines := bytes.Split(buf, nl)
+	lines := bytes.Split(b, nl)
 
 	mx := min(10, len(lines))
 	stln := 0
@@ -211,5 +186,5 @@ func (cfg *Config) ExtractWGSL(buf []byte) ([]byte, bool) {
 			noHlslStart = li
 		}
 	}
-	return bytes.Join(lines, nl), hasMain
+	return lines, hasMain
 }

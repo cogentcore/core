@@ -6,7 +6,7 @@ import (
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/parse.Config", IDName: "config", Doc: "Config has the configuration info for the gosl system", Fields: []types.Field{{Name: "Inputs", Doc: "Inputs are the input files to run/compile."}, {Name: "Output", Doc: "Output is the output directory for shader code,\nrelative to where gosl is invoked; must not be an empty string."}, {Name: "Exclude", Doc: "Exclude is a comma-separated list of names of functions to exclude from exporting to WGSL."}, {Name: "Keep", Doc: "Keep keeps temporary converted versions of the source files, for debugging."}, {Name: "Debug", Doc: "\tDebug enables debugging messages while running."}, {Name: "ExcludeMap", Doc: "ExcludeMap is the compiled map of functions to exclude."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/parse.Config", IDName: "config", Doc: "Config has the configuration info for the gosl system.", Fields: []types.Field{{Name: "Output", Doc: "Output is the output directory for shader code,\nrelative to where gosl is invoked; must not be an empty string."}, {Name: "Exclude", Doc: "Exclude is a comma-separated list of names of functions to exclude from exporting to WGSL."}, {Name: "Keep", Doc: "Keep keeps temporary converted versions of the source files, for debugging."}, {Name: "Debug", Doc: "\tDebug enables debugging messages while running."}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/parse.exprListMode", IDName: "expr-list-mode"})
 
@@ -32,6 +32,18 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/parse.Com
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/parse.Replace", IDName: "replace", Fields: []types.Field{{Name: "From"}, {Name: "To"}}})
 
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/parse.Var", IDName: "var", Doc: "Var represents one variable", Fields: []types.Field{{Name: "Name"}, {Name: "Type"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/parse.Group", IDName: "group", Doc: "Group represents one variable group.", Fields: []types.Field{{Name: "Vars"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/parse.System", IDName: "system", Doc: "System represents a ComputeSystem, and its variables.", Fields: []types.Field{{Name: "Name"}, {Name: "Groups"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/parse.Kernel", IDName: "kernel", Doc: "Kernel represents a kernel function, which is the basis for\neach wgsl generated code file.", Fields: []types.Field{{Name: "Name"}, {Name: "FileLines", Doc: "accumulating lines of code for the wgsl file."}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/parse.File", IDName: "file", Doc: "File has info for a file being processed", Fields: []types.Field{{Name: "Name"}, {Name: "Lines"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/parse.State", IDName: "state", Doc: "State holds the current processing state", Fields: []types.Field{{Name: "Config", Doc: "Config options"}, {Name: "Files", Doc: "files with gosl content in current directory"}, {Name: "Imports"}, {Name: "Kernels"}, {Name: "Systems"}, {Name: "ExcludeMap", Doc: "ExcludeMap is the compiled map of functions to exclude."}}})
+
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.formatDocComment", Doc: "formatDocComment reformats the doc comment list,\nreturning the canonical formatting.", Args: []string{"list"}, Returns: []string{"Comment"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.isDirective", Doc: "isDirective reports whether c is a comment directive.\nSee go.dev/issue/37974.\nThis code is also in go/ast.", Args: []string{"c"}, Returns: []string{"bool"}})
@@ -40,13 +52,15 @@ var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.all
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.Run", Directives: []types.Directive{{Tool: "cli", Directive: "cmd", Args: []string{"-root"}}, {Tool: "types", Directive: "add"}}, Args: []string{"cfg"}, Returns: []string{"error"}})
 
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.ReadFileLines", Args: []string{"fn"}, Returns: []string{"[][]byte", "error"}})
+
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.HasGoslTag", Doc: "HasGoslTag returns true if given file has a //gosl: tag", Args: []string{"lines"}, Returns: []string{"bool"}})
+
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.IsGoFile", Args: []string{"f"}, Returns: []string{"bool"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.IsWGSLFile", Args: []string{"f"}, Returns: []string{"bool"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.IsSPVFile", Args: []string{"f"}, Returns: []string{"bool"}})
-
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.CopyFile", Args: []string{"src", "dst"}, Returns: []string{"error"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.RemoveGenFiles", Doc: "RemoveGenFiles removes .go, .wgsl, .spv files in shader generated dir", Args: []string{"dir"}})
 
@@ -109,6 +123,10 @@ var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.get
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.newPrinter", Args: []string{"cfg", "pkg", "nodeSizes"}, Returns: []string{"printer"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.Fprint", Doc: "Fprint \"pretty-prints\" an AST node to output.\nIt calls [PrintConfig.Fprint] with default settings.\nNote that gofmt uses tabs for indentation but spaces for alignment;\nuse format.Node (package go/format) for output that matches gofmt.", Args: []string{"output", "pkg", "node"}, Returns: []string{"error"}})
+
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.wgslFile", Doc: "wgslFile returns the file with a \".wgsl\" extension", Args: []string{"fn"}, Returns: []string{"string"}})
+
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.bareFile", Doc: "bareFile returns the file with no extention", Args: []string{"fn"}, Returns: []string{"string"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/parse.MoveLines", Doc: "MoveLines moves the st,ed region to 'to' line", Args: []string{"lines", "to", "st", "ed"}})
 
