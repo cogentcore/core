@@ -90,19 +90,18 @@ The following comment directive can be used in any kernel file to specify which 
 
 To define the global variables for each system, use a standard Go `var` block declaration (with optional system name qualifier):
 ```Go
-var ( //gosl:vars [system name]
-
-    //gosl:group -uniform Params
-
+//gosl:vars [system name]
+var (
     // Layer-level parameters
+    //gosl:group -uniform Params
     Layers   []LayerParam // note: struct with appropriate memory alignment
 
     // Path-level parameters
     Paths    []PathParam  
 
-    //gosl:group Units
 
     // Unit state values
+    //gosl:group Units
     Units    tensor.Float32
     
     // Synapse weight state values

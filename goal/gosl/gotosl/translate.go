@@ -75,7 +75,7 @@ func (st *State) TranslateDir(pf string) error {
 		}
 
 		var buf bytes.Buffer
-		pcfg := PrintConfig{Mode: printerMode, Tabwidth: tabWidth, ExcludeFunctions: st.ExcludeMap}
+		pcfg := PrintConfig{GoToSL: st, Mode: printerMode, Tabwidth: tabWidth, ExcludeFunctions: st.ExcludeMap}
 		pcfg.Fprint(&buf, pkg, afile)
 		// ioutil.WriteFile(filepath.Join(*outDir, fn+".tmp"), buf.Bytes(), 0644)
 		slfix, hasSltype, hasSlrand := SlEdits(buf.Bytes())

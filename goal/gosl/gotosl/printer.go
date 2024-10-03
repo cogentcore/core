@@ -62,6 +62,7 @@ type commentInfo struct {
 type printer struct {
 	// Configuration (does not change after initialization)
 	PrintConfig
+
 	fset *token.FileSet
 	pkg  *packages.Package // gosl: extra
 
@@ -1330,9 +1331,10 @@ const (
 
 // A PrintConfig node controls the output of Fprint.
 type PrintConfig struct {
-	Mode     Mode // default: 0
-	Tabwidth int  // default: 8
-	Indent   int  // default: 0 (all code is indented at least by this much)
+	Mode     Mode   // default: 0
+	Tabwidth int    // default: 8
+	Indent   int    // default: 0 (all code is indented at least by this much)
+	GoToSL   *State // gosl:
 
 	ExcludeFunctions map[string]bool
 }

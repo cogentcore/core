@@ -27,6 +27,8 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"cogentcore.org/core/base/errors"
 )
 
 // Formatting issues:
@@ -66,6 +68,21 @@ func (p *printer) linebreak(line, min int, ws whiteSpace, newSection bool) (nbre
 		nbreaks += n
 		for ; n > 0; n-- {
 			p.print(newline)
+		}
+	}
+	return
+}
+
+// gosl: find any gosl directive in given comments, returns directive and remaining docs
+func (p *printer) findDirective(g *ast.CommentGroup) (dir string, docs string) {
+	if g == nil {
+		return
+	}
+	for _, c := range g.List {
+		if strings.HasPrefix(c.Text, "//gosl:") {
+			dir = c.Text[7:]
+		} else {
+			docs += c.Text + " "
 		}
 	}
 	return
@@ -1432,7 +1449,7 @@ func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, pa
 			break
 		}
 		err = fmt.Errorf("gosl methodPath ERROR: path for method call must be simple list of fields, not %#v:", cur.X)
-		fmt.Println(err.Error())
+		errors.Log(err)
 		return
 	}
 	if p.isPtrArg(baseRecv) {
@@ -1452,7 +1469,7 @@ func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, pa
 		f := fieldByName(curt, p)
 		if f == nil {
 			err = fmt.Errorf("gosl ERROR: field not found %q in type: %q:", p, curt.String())
-			fmt.Println(err.Error())
+			errors.Log(err)
 			return
 		}
 		if pi == 0 {
@@ -1503,8 +1520,7 @@ func getStructType(typ types.Type) (*types.Struct, error) {
 		}
 	}
 	err := fmt.Errorf("gosl ERROR: type is not a struct and it should be: %q %+t", typ.String(), typ)
-	fmt.Println(err.Error())
-	return nil, err
+	return nil, errors.Log(err)
 }
 
 func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
@@ -1537,7 +1553,7 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 		}
 	} else {
 		err := fmt.Errorf("gosl methodExpr ERROR: path expression for method call must be simple list of fields, not %#v:", path.X)
-		fmt.Println(err.Error())
+		errors.Log(err)
 		return
 	}
 	if pathIsPackage {
@@ -2233,6 +2249,69 @@ func (p *printer) spec(spec ast.Spec, n int, doIndent bool, tok token.Token) {
 	}
 }
 
+// gosl: process system vars
+func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
+	sy := p.GoToSL.System(sysname)
+	var gp *Group
+	for _, s := range d.Specs {
+		vs := s.(*ast.ValueSpec)
+		dir, docs := p.findDirective(vs.Doc)
+		if strings.HasPrefix(dir, "group") {
+			gpnm := strings.TrimSpace(dir[5:])
+			if gpnm == "" {
+				gp = &Group{Name: fmt.Sprintf("Group_%d", len(sy.Groups)), Doc: docs}
+				sy.Groups = append(sy.Groups, gp)
+			} else {
+				gps := strings.Fields(gpnm)
+				gp = &Group{Doc: docs}
+				if gps[0] == "-uniform" {
+					gp.Uniform = true
+					if len(gps) > 1 {
+						gp.Name = gps[1]
+					}
+				} else {
+					gp.Name = gps[0]
+				}
+				sy.Groups = append(sy.Groups, gp)
+			}
+		}
+		if gp == nil {
+			gp = &Group{Name: fmt.Sprintf("Group_%d", len(sy.Groups)), Doc: docs}
+			sy.Groups = append(sy.Groups, gp)
+		}
+		if len(vs.Names) != 1 {
+			errors.Log(fmt.Errorf("gosl: system %q: vars must have only 1 variable per line", sysname))
+		}
+		nm := vs.Names[0].Name
+		typ := ""
+		if sl, ok := vs.Type.(*ast.ArrayType); ok {
+			id, ok := sl.Elt.(*ast.Ident)
+			if !ok {
+				errors.Log(fmt.Errorf("gosl: system %q: Var type not recognized: %#v", sysname, sl.Elt))
+				continue
+			}
+			typ = "[]" + id.Name
+		} else {
+			sel, ok := vs.Type.(*ast.SelectorExpr)
+			if !ok {
+				errors.Log(fmt.Errorf("gosl: system %q: Var types must be []slices or tensor.Float32,  tensor.Int32", sysname))
+				continue
+			}
+			sid, ok := sel.X.(*ast.Ident)
+			if !ok {
+				errors.Log(fmt.Errorf("gosl: system %q: Var type selector is not recognized: %#v", sysname, sel.X))
+				continue
+			}
+			typ = sid.Name + "." + sel.Sel.Name
+		}
+		vr := &Var{Name: nm, Type: typ}
+		gp.Vars = append(gp.Vars, vr)
+		if p.GoToSL.Config.Debug {
+			fmt.Println("\tAdded var:", nm, typ, "to group:", gp.Name)
+		}
+	}
+}
+
 func (p *printer) genDecl(d *ast.GenDecl) {
 	p.setComment(d.Doc)
 	// note: critical to print here to trigger comment generation in right place
@@ -2251,6 +2330,13 @@ func (p *printer) genDecl(d *ast.GenDecl) {
 			// p.print(indent, formfeed)
 			if n > 1 && (d.Tok == token.CONST || d.Tok == token.VAR) {
 				// two or more grouped const/var declarations:
+				if d.Tok == token.VAR {
+					dir, _ := p.findDirective(d.Doc)
+					if strings.HasPrefix(dir, "vars") {
+						p.systemVars(d, strings.TrimSpace(dir[4:]))
+						return
+					}
+				}
 				// determine if the type column must be kept
 				keepType := keepTypeColumn(d.Specs)
 				firstSpec := d.Specs[0].(*ast.ValueSpec)
@@ -2264,11 +2350,13 @@ func (p *printer) genDecl(d *ast.GenDecl) {
 				}
 				var line int
 				for i, s := range d.Specs {
+					vs := s.(*ast.ValueSpec)
+					// p.findDirective(vs.Doc)
 					if i > 0 {
 						p.linebreak(p.lineFor(s.Pos()), 1, ignore, p.linesFrom(line) > 0)
 					}
 					p.recordLine(&line)
-					p.valueSpec(s.(*ast.ValueSpec), keepType[i], d.Tok, firstSpec, isIota, i)
+					p.valueSpec(vs, keepType[i], d.Tok, firstSpec, isIota, i)
 				}
 			} else {
 				var line int

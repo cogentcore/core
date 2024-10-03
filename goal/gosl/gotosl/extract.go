@@ -6,7 +6,9 @@ package gotosl
 
 import (
 	"bytes"
+	"fmt"
 	"path/filepath"
+	"strings"
 
 	"slices"
 )
@@ -47,6 +49,8 @@ func (st *State) ExtractGosl(lines [][]byte) [][]byte {
 	nowgsl := []byte("nowgsl")
 	end := []byte("end")
 	imp := []byte("import")
+	kernel := []byte("//gosl:kernel")
+	fnc := []byte("func")
 
 	inReg := false
 	inHlsl := false
@@ -72,6 +76,20 @@ func (st *State) ExtractGosl(lines [][]byte) [][]byte {
 			for pkg := range st.ImportPackages { // remove package prefixes
 				if !bytes.Contains(ln, imp) {
 					ln = bytes.ReplaceAll(ln, []byte(pkg+"."), []byte{})
+				}
+			}
+			if bytes.HasPrefix(ln, fnc) && bytes.Contains(ln, kernel) {
+				sysnm := strings.TrimSpace(string(ln[bytes.LastIndex(ln, kernel)+len(kernel):]))
+				sy := st.System(sysnm)
+				fcall := string(ln[5:])
+				lp := strings.Index(fcall, "(")
+				rp := strings.LastIndex(fcall, ")")
+				args := fcall[lp+1 : rp]
+				fnm := fcall[:lp]
+				kn := &Kernel{Name: fnm, Args: args}
+				sy.Kernels[fnm] = kn
+				if st.Config.Debug {
+					fmt.Println("\tAdded kernel:", fnm, "args:", args, "system:", sy.Name)
 				}
 			}
 			outLns = append(outLns, ln)

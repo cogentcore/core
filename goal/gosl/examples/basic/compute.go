@@ -9,11 +9,12 @@ import "cogentcore.org/core/math32"
 //gosl:start
 //gosl:import "cogentcore.org/core/math32"
 
-var ( //gosl:vars
-	// Params are the parameters for the computation
+//gosl:vars
+var (
+	// Params are the parameters for the computation.
 	Params []ParamStruct
 
-	// Data is the data on which the computation operates
+	// Data is the data on which the computation operates.
 	Data []DataStruct
 )
 

@@ -25,7 +25,6 @@ type System struct {
 func NewSystem(name string) *System {
 	sy := &System{Name: name}
 	sy.Kernels = make(map[string]*Kernel)
-	sy.Groups = append(sy.Groups, &Group{})
 	return sy
 }
 
@@ -34,19 +33,30 @@ func NewSystem(name string) *System {
 type Kernel struct {
 	Name string
 
+	Args string
+
 	// accumulating lines of code for the wgsl file.
 	FileLines [][]byte
 }
 
-// Var represents one variable
+// Var represents one global system buffer variable.
 type Var struct {
 	Name string
 
+	// Type of variable: either []Type or tensor.Float32, tensor.Int32
 	Type string
 }
 
 // Group represents one variable group.
 type Group struct {
+	Name string
+
+	// comment docs about this group
+	Doc string
+
+	// Uniform indicates a uniform group; else default is Storage
+	Uniform bool
+
 	Vars []*Var
 }
 
@@ -118,4 +128,19 @@ func (st *State) Run() error {
 	st.TranslateDir("./" + st.ImportsDir)
 
 	return nil
+}
+
+// System returns the given system by name, making if not made.
+// if name is empty, "Default" is used.
+func (st *State) System(sysname string) *System {
+	if sysname == "" {
+		sysname = "Default"
+	}
+	sy, ok := st.Systems[sysname]
+	if ok {
+		return sy
+	}
+	sy = NewSystem(sysname)
+	st.Systems[sysname] = sy
+	return sy
 }
