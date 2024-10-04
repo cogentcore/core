@@ -65,7 +65,7 @@ func main() {
 	pl.Dispatch1D(ce, n, threads)
 	ce.End()
 	dvl.GPUToRead(sy.CommandEncoder)
-	sy.EndComputePass(ce)
+	sy.EndComputePass()
 
 	dvl.ReadSync()
 	gpu.ReadToBytes(dvl, sd)

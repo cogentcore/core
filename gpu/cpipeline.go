@@ -43,6 +43,7 @@ func NewComputePipelineShaderFS(fsys fs.FS, fname string, sy *ComputeSystem) *Co
 	sh := pl.AddShader(name)
 	errors.Log(sh.OpenFileFS(fsys, fname))
 	pl.AddEntry(sh, ComputeShader, "main")
+	sy.ComputePipelines[pl.Name] = pl
 	return pl
 }
 

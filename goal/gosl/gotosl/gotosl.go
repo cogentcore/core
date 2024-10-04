@@ -35,6 +35,9 @@ type Kernel struct {
 
 	Args string
 
+	// Filename is the name of the kernel shader file, e.g., shaders/Compute.wgsl
+	Filename string
+
 	// function code
 	FuncCode string
 
@@ -98,6 +101,9 @@ type State struct {
 	// which are copied into the generated shader kernel files.
 	SLImportFiles []*File
 
+	// generated Go GPU gosl.go file contents
+	GPUFile File
+
 	// ExcludeMap is the compiled map of functions to exclude in Go -> WGSL translation.
 	ExcludeMap map[string]bool
 }
@@ -138,6 +144,8 @@ func (st *State) Run() error {
 			st.GenKernel(sy, kn)
 		}
 	}
+
+	st.GenGPU()
 
 	return nil
 }

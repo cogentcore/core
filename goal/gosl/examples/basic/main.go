@@ -7,20 +7,14 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"math/rand"
 	"runtime"
-	"unsafe"
 
 	"cogentcore.org/core/base/timer"
-	"cogentcore.org/core/gpu"
 )
 
 //go:generate gosl .
-
-//go:embed shaders/Compute.wgsl
-var shaders embed.FS
 
 func init() {
 	// must lock main thread for gpu!
@@ -28,28 +22,7 @@ func init() {
 }
 
 func main() {
-	gpu.Debug = true
-	gp := gpu.NewComputeGPU()
-	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
-
-	// gp.PropertiesString(true) // print
-
-	sy := gpu.NewComputeSystem(gp, "compute")
-	pl := gpu.NewComputePipelineShaderFS(shaders, "shaders/basic.wgsl", sy)
-	vars := sy.Vars()
-	sgp := vars.AddGroup(gpu.Storage)
-
 	n := 2000000 // note: not necc to spec up-front, but easier if so
-	threads := 64
-
-	pv := sgp.AddStruct("Params", int(unsafe.Sizeof(ParamStruct{})), 1, gpu.ComputeShader)
-	dv := sgp.AddStruct("Data", int(unsafe.Sizeof(DataStruct{})), n, gpu.ComputeShader)
-
-	sgp.SetNValues(1)
-	sy.Config()
-
-	pvl := pv.Values.Values[0]
-	dvl := dv.Values.Values[0]
 
 	Params = make([]ParamStruct, 1)
 	Params[0].Defaults()
@@ -61,16 +34,17 @@ func main() {
 
 	sd := make([]DataStruct, n)
 	for i := range sd {
-		sd[i].Raw = cd[i].Raw
+		sd[i].Raw = Data[i].Raw
 	}
+
+	GPUInit()
 
 	cpuTmr := timer.Time{}
 	cpuTmr.Start()
 
-	gosl.UseCPU()
-	for i := range parallel(Data) {
-		Compute(i)
-	}
+	UseGPU = false
+	RunCompute(n)
+
 	cpuTmr.Stop()
 
 	cd := Data
@@ -79,30 +53,15 @@ func main() {
 	gpuFullTmr := timer.Time{}
 	gpuFullTmr.Start()
 
-	gosl.ToGPU(Params, Data)
-	// gpu.SetValueFrom(pvl, pars)
-	// gpu.SetValueFrom(dvl, sd)
-	// sgp.CreateReadBuffers()
+	ToGPU(ParamsVar, DataVar)
 
 	gpuTmr := timer.Time{}
 	gpuTmr.Start()
 
-	gosl.UseGPU()
-	for i := range parallel(Data) {
-		Compute(i)
-	}
-
-	// ce, _ := sy.BeginComputePass()
-	// pl.Dispatch1D(ce, n, threads)
-	// ce.End()
-	// dvl.GPUToRead(sy.CommandEncoder)
-	// sy.EndComputePass(ce)
+	UseGPU = true
+	RunCompute(n, DataVar)
 
 	gpuTmr.Stop()
-
-	gosl.FromCPU(Data)
-	// dvl.ReadSync()
-	// gpu.ReadToBytes(dvl, sd)
 
 	gpuFullTmr.Stop()
 
@@ -118,6 +77,5 @@ func main() {
 	gpuFull := gpuFullTmr.Total
 	fmt.Printf("N: %d\t CPU: %v\t GPU: %v\t Full: %v\t CPU/GPU: %6.4g\n", n, cpu, gpu, gpuFull, float64(cpu)/float64(gpu))
 
-	sy.Release()
-	gp.Release()
+	GPURelease()
 }

@@ -25,8 +25,12 @@ type ComputeSystem struct {
 	// Access through the System.Vars() method.
 	vars Vars
 
-	// ComputePipelines by name
+	// ComputePipelines by name.
 	ComputePipelines map[string]*ComputePipeline
+
+	// ComputeEncoder is the compute specific command encoder for the
+	// current [BeginComputePass], and released in [EndComputePass].
+	ComputeEncoder *wgpu.ComputePassEncoder
 
 	// CommandEncoder is the command encoder created in
 	// [BeginComputePass], and released in [EndComputePass].
@@ -122,16 +126,19 @@ func (sy *ComputeSystem) BeginComputePass() (*wgpu.ComputePassEncoder, error) {
 		return nil, err
 	}
 	sy.CommandEncoder = cmd
-	return cmd.BeginComputePass(nil), nil // note: optional name in the descriptor
+	sy.ComputeEncoder = cmd.BeginComputePass(nil) // optional name in the encoder
+	return sy.ComputeEncoder, nil
 }
 
 // EndComputePass submits the current compute commands to the device
-// Queue and releases the [CommandEncoder] and the given
-// ComputePassEncoder.  You must call ce.End prior to calling this.
+// Queue and releases the [ComputeSystem.CommandEncoder] and
+// [ComputeSystem.ComputeEncoder].  You must call ce.End prior to calling this.
 // Can insert other commands after ce.End, e.g., to copy data back
 // from the GPU, prior to calling EndComputePass.
-func (sy *ComputeSystem) EndComputePass(ce *wgpu.ComputePassEncoder) error {
+func (sy *ComputeSystem) EndComputePass() error {
+	ce := sy.ComputeEncoder
 	cmd := sy.CommandEncoder
+	sy.ComputeEncoder = nil
 	sy.CommandEncoder = nil
 	cmdBuffer, err := cmd.Finish(nil)
 	if errors.Log(err) != nil {
