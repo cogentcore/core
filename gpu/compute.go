@@ -120,7 +120,14 @@ func (sy *ComputeSystem) NewCommandEncoder() (*wgpu.CommandEncoder, error) {
 // to start the compute pass, returning the encoder object
 // to which further compute commands should be added.
 // Call [EndComputePass] when done.
+// If an existing [ComputeSystem.ComputeEncoder] is already set from
+// a prior BeginComputePass call, then that is returned, so this
+// is safe and efficient to call for every compute shader dispatch,
+// where the first call will create and the rest add to the ongoing job.
 func (sy *ComputeSystem) BeginComputePass() (*wgpu.ComputePassEncoder, error) {
+	if sy.ComputeEncoder != nil {
+		return sy.ComputeEncoder, nil
+	}
 	cmd, err := sy.NewCommandEncoder()
 	if errors.Log(err) != nil {
 		return nil, err

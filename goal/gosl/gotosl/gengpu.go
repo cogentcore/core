@@ -53,7 +53,7 @@ var UseGPU bool
 	b.WriteString(fmt.Sprintf(header, st.Config.Output))
 
 	for _, sy := range st.Systems {
-		b.WriteString(fmt.Sprintf("// %s is a GPU compute System with kernels operating on the\nsame set of data variables.\n", st.genSysVar(sy)))
+		b.WriteString(fmt.Sprintf("// %s is a GPU compute System with kernels operating on the\n// same set of data variables.\n", st.genSysVar(sy)))
 		b.WriteString(fmt.Sprintf("var %s *gpu.ComputeSystem\n", st.genSysVar(sy)))
 	}
 
@@ -154,38 +154,68 @@ func (st *State) GenGPUSystemOps(sy *System) string {
 	syvar := st.genSysVar(sy)
 	synm := st.genSysName(sy)
 
-	// 1 = kernel, 2 = system, 3 = sysname
+	// 1 = kernel, 2 = system var, 3 = sysname (blank for 1 default)
 	run := `
 // Run%[1]s runs the %[1]s kernel with given number of elements,
 // on either the CPU or GPU depending on the UseGPU variable.
-// Pass *Var variable enums to sync those variables back from the GPU
-// after running (irrelevant for CPU).
-func Run%[1]s(n int, syncVars ...GPUVars) {
+// Can call multiple Run* kernels in a row, which are then all launched
+// in the same command submission on the GPU, which is by far the most efficient.
+// MUST call RunDone (with optional vars to sync) after all Run calls.
+// Alternatively, a single-shot RunOne%[1]s call does Run and Done for a
+// single run-and-sync case.
+func Run%[1]s(n int) {
 	if UseGPU {
-		Run%[1]sGPU(n, syncVars...)
+		Run%[1]sGPU(n)
 	} else {
 		Run%[1]sCPU(n)
 	}
 }
 
-// Run%[1]sGPU runs the %[1]s kernel on the GPU.
-func Run%[1]sGPU(n int, syncVars ...GPUVars) {
+// Run%[1]sGPU runs the %[1]s kernel on the GPU. See [Run%[1]s] for more info.
+func Run%[1]sGPU(n int) {
 	sy := %[2]s
 	pl := sy.ComputePipelines[%[1]q]
 	ce, _ := sy.BeginComputePass()
 	pl.Dispatch1D(ce, n, 64)
-	ce.End()
-	%[3]sReadFromGPU(syncVars...)
-	sy.EndComputePass()
-	%[3]sSyncFromGPU(syncVars...)
 }
 
 // Run%[1]sCPU runs the %[1]s kernel on the CPU.
 func Run%[1]sCPU(n int) {
-	// todo: need flops, need threaded api -- not tensor
+	// todo: need threaded api -- not tensor
 	for i := range n {
 		%[1]s(uint32(i))
 	}
+}
+
+// RunOne%[1]s runs the %[1]s kernel with given number of elements,
+// on either the CPU or GPU depending on the UseGPU variable.
+// This version then calls RunDone with the given variables to sync
+// after the Run, for a single-shot Run-and-Done call. If multiple kernels
+// can be run in sequence, it is much more efficient to do multiple Run*
+// calls followed by a RunDone call.
+func RunOne%[1]s(n int, syncVars ...GPUVars) {
+	if UseGPU {
+		Run%[1]sGPU(n)
+		RunDone%[3]s(syncVars...)
+	} else {
+		Run%[1]sCPU(n)
+	}
+}
+
+// RunDone%[3]s must be called after Run* calls to start compute kernels.
+// This actually submits the kernel jobs to the GPU, and adds commands
+// to synchronize the given variables back from the GPU to the CPU.
+// After this function completes, the GPU results will be available in 
+// the specified variables.
+func RunDone%[3]s(syncVars ...GPUVars) {
+	if !UseGPU {
+		return
+	}
+	sy := %[2]s
+	sy.ComputeEncoder.End()
+	%[3]sReadFromGPU(syncVars...)
+	sy.EndComputePass()
+	%[3]sSyncFromGPU(syncVars...)
 }
 
 `

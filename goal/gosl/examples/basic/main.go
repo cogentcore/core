@@ -45,7 +45,7 @@ func main() {
 	cpuTmr.Start()
 
 	UseGPU = false
-	RunCompute(n)
+	RunOneCompute(n)
 
 	cpuTmr.Stop()
 
@@ -61,7 +61,7 @@ func main() {
 	gpuTmr.Start()
 
 	UseGPU = true
-	RunCompute(n, DataVar)
+	RunOneCompute(n, DataVar)
 
 	gpuTmr.Stop()
 

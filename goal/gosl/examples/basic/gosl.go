@@ -18,7 +18,7 @@ var ComputeGPU *gpu.GPU
 var UseGPU bool
 
 // GPUSystem is a GPU compute System with kernels operating on the
-same set of data variables.
+// same set of data variables.
 var GPUSystem *gpu.ComputeSystem
 
 // GPUVars is an enum for GPU variables, for specifying what to sync.
@@ -60,34 +60,64 @@ func GPURelease() {
 
 // RunCompute runs the Compute kernel with given number of elements,
 // on either the CPU or GPU depending on the UseGPU variable.
-// Pass *Var variable enums to sync those variables back from the GPU
-// after running (irrelevant for CPU).
-func RunCompute(n int, syncVars ...GPUVars) {
+// Can call multiple Run* kernels in a row, which are then all launched
+// in the same command submission on the GPU, which is by far the most efficient.
+// MUST call RunDone (with optional vars to sync) after all Run calls.
+// Alternatively, a single-shot RunOneCompute call does Run and Done for a
+// single run-and-sync case.
+func RunCompute(n int) {
 	if UseGPU {
-		RunComputeGPU(n, syncVars...)
+		RunComputeGPU(n)
 	} else {
 		RunComputeCPU(n)
 	}
 }
 
-// RunComputeGPU runs the Compute kernel on the GPU.
-func RunComputeGPU(n int, syncVars ...GPUVars) {
+// RunComputeGPU runs the Compute kernel on the GPU. See [RunCompute] for more info.
+func RunComputeGPU(n int) {
 	sy := GPUSystem
 	pl := sy.ComputePipelines["Compute"]
 	ce, _ := sy.BeginComputePass()
 	pl.Dispatch1D(ce, n, 64)
-	ce.End()
-	ReadFromGPU(syncVars...)
-	sy.EndComputePass()
-	SyncFromGPU(syncVars...)
 }
 
 // RunComputeCPU runs the Compute kernel on the CPU.
 func RunComputeCPU(n int) {
-	// todo: need flops, need threaded api -- not tensor
+	// todo: need threaded api -- not tensor
 	for i := range n {
 		Compute(uint32(i))
 	}
+}
+
+// RunOneCompute runs the Compute kernel with given number of elements,
+// on either the CPU or GPU depending on the UseGPU variable.
+// This version then calls RunDone with the given variables to sync
+// after the Run, for a single-shot Run-and-Done call. If multiple kernels
+// can be run in sequence, it is much more efficient to do multiple Run*
+// calls followed by a RunDone call.
+func RunOneCompute(n int, syncVars ...GPUVars) {
+	if UseGPU {
+		RunComputeGPU(n)
+		RunDone(syncVars...)
+	} else {
+		RunComputeCPU(n)
+	}
+}
+
+// RunDone must be called after Run* calls to start compute kernels.
+// This actually submits the kernel jobs to the GPU, and adds commands
+// to synchronize the given variables back from the GPU to the CPU.
+// After this function completes, the GPU results will be available in 
+// the specified variables.
+func RunDone(syncVars ...GPUVars) {
+	if !UseGPU {
+		return
+	}
+	sy := GPUSystem
+	sy.ComputeEncoder.End()
+	ReadFromGPU(syncVars...)
+	sy.EndComputePass()
+	SyncFromGPU(syncVars...)
 }
 
 
