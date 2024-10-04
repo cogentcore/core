@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/gpu"
 )
 
-//go:generate gosl .
+//go:generate gosl
 
 func init() {
 	// must lock main thread for gpu!

@@ -41,14 +41,15 @@ func GPUInit() {
 		vars := sy.Vars()
 		{
 			sgp := vars.AddGroup(gpu.Storage)
-			sgp.AddStruct("Params", int(unsafe.Sizeof(ParamStruct{})), len(Params), gpu.ComputeShader)
-			sgp.AddStruct("Data", int(unsafe.Sizeof(DataStruct{})), len(Data), gpu.ComputeShader)
+			var vr *gpu.Var
+			vr = sgp.AddStruct("Params", int(unsafe.Sizeof(ParamStruct{})), len(Params), gpu.ComputeShader)
+			vr.ReadOnly = true
+			vr = sgp.AddStruct("Data", int(unsafe.Sizeof(DataStruct{})), len(Data), gpu.ComputeShader)
 			sgp.SetNValues(1)
 		}
 		sy.Config()
 	}
 }
-
 
 // GPURelease releases the GPU compute system resources.
 // Call this at program exit.
@@ -56,7 +57,6 @@ func GPURelease() {
 	GPUSystem.Release()
 	ComputeGPU.Release()
 }
-
 
 // RunCompute runs the Compute kernel with given number of elements,
 // on either the CPU or GPU depending on the UseGPU variable.
@@ -125,8 +125,8 @@ func RunDone(syncVars ...GPUVars) {
 func ToGPU(vars ...GPUVars) {
 	sy := GPUSystem
 	syVars := sy.Vars()
-	for _, v := range vars {
-		switch v {
+	for _, vr := range vars {
+		switch vr {
 		case ParamsVar:
 			v, _ := syVars.ValueByIndex(0, "Params", 0)
 			gpu.SetValueFrom(v, Params)
@@ -141,8 +141,8 @@ func ToGPU(vars ...GPUVars) {
 func ReadFromGPU(vars ...GPUVars) {
 	sy := GPUSystem
 	syVars := sy.Vars()
-	for _, v := range vars {
-		switch v {
+	for _, vr := range vars {
+		switch vr {
 		case ParamsVar:
 			v, _ := syVars.ValueByIndex(0, "Params", 0)
 			v.GPUToRead(sy.CommandEncoder)
@@ -157,8 +157,8 @@ func ReadFromGPU(vars ...GPUVars) {
 func SyncFromGPU(vars ...GPUVars) {
 	sy := GPUSystem
 	syVars := sy.Vars()
-	for _, v := range vars {
-		switch v {
+	for _, vr := range vars {
+		switch vr {
 		case ParamsVar:
 			v, _ := syVars.ValueByIndex(0, "Params", 0)
 			v.ReadSync()

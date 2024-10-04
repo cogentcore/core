@@ -92,8 +92,7 @@ func GPUInit() {
 	}
 	b.WriteString("}\n\n")
 
-	release := `
-// GPURelease releases the GPU compute system resources.
+	release := `// GPURelease releases the GPU compute system resources.
 // Call this at program exit.
 func GPURelease() {
 `
@@ -135,9 +134,13 @@ func (st *State) GenGPUSystemInit(sy *System) string {
 			gtyp = "gpu.Uniform"
 		}
 		b.WriteString(fmt.Sprintf("\t\t\tsgp := vars.AddGroup(%s)\n", gtyp))
+		b.WriteString("\t\t\tvar vr *gpu.Var\n")
 		for _, vr := range gp.Vars {
 			// todo: tensor
-			b.WriteString(fmt.Sprintf("\t\t\tsgp.AddStruct(%q, int(unsafe.Sizeof(%s{})), len(%s), gpu.ComputeShader)\n", vr.Name, vr.Type[2:], vr.Name))
+			b.WriteString(fmt.Sprintf("\t\t\tvr = sgp.AddStruct(%q, int(unsafe.Sizeof(%s{})), len(%s), gpu.ComputeShader)\n", vr.Name, vr.Type[2:], vr.Name))
+			if vr.ReadOnly {
+				b.WriteString("\t\t\tvr.ReadOnly = true\n")
+			}
 		}
 		b.WriteString("\t\t\tsgp.SetNValues(1)\n")
 		b.WriteString("\t\t}\n")
@@ -155,8 +158,7 @@ func (st *State) GenGPUSystemOps(sy *System) string {
 	synm := st.genSysName(sy)
 
 	// 1 = kernel, 2 = system var, 3 = sysname (blank for 1 default)
-	run := `
-// Run%[1]s runs the %[1]s kernel with given number of elements,
+	run := `// Run%[1]s runs the %[1]s kernel with given number of elements,
 // on either the CPU or GPU depending on the UseGPU variable.
 // Can call multiple Run* kernels in a row, which are then all launched
 // in the same command submission on the GPU, which is by far the most efficient.
@@ -229,8 +231,8 @@ func RunDone%[3]s(syncVars ...GPUVars) {
 func %[1]sToGPU(vars ...GPUVars) {
 	sy := %[2]s
 	syVars := sy.Vars()
-	for _, v := range vars {
-		switch v {
+	for _, vr := range vars {
+		switch vr {
 `
 	b.WriteString(fmt.Sprintf(toGPU, synm, syvar))
 
@@ -248,8 +250,8 @@ func %[1]sToGPU(vars ...GPUVars) {
 func %[1]sReadFromGPU(vars ...GPUVars) {
 	sy := %[2]s
 	syVars := sy.Vars()
-	for _, v := range vars {
-		switch v {
+	for _, vr := range vars {
+		switch vr {
 `
 
 	b.WriteString(fmt.Sprintf(fmGPU, synm, syvar))
@@ -268,8 +270,8 @@ func %[1]sReadFromGPU(vars ...GPUVars) {
 func %[1]sSyncFromGPU(vars ...GPUVars) {
 	sy := %[2]s
 	syVars := sy.Vars()
-	for _, v := range vars {
-		switch v {
+	for _, vr := range vars {
+		switch vr {
 `
 
 	b.WriteString(fmt.Sprintf(syncGPU, synm, syvar))

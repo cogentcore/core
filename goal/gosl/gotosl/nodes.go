@@ -2259,6 +2259,10 @@ func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 	for _, s := range d.Specs {
 		vs := s.(*ast.ValueSpec)
 		dir, docs := p.findDirective(vs.Doc)
+		readOnly := false
+		if strings.Contains(dir, "read-only") {
+			readOnly = true
+		}
 		if strings.HasPrefix(dir, "group") {
 			gpnm := strings.TrimSpace(dir[5:])
 			if gpnm == "" {
@@ -2307,7 +2311,7 @@ func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 			}
 			typ = sid.Name + "." + sel.Sel.Name
 		}
-		vr := &Var{Name: nm, Type: typ}
+		vr := &Var{Name: nm, Type: typ, ReadOnly: readOnly}
 		gp.Vars = append(gp.Vars, vr)
 		if p.GoToSL.Config.Debug {
 			fmt.Println("\tAdded var:", nm, typ, "to group:", gp.Name)
