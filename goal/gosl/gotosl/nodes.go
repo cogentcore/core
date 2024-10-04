@@ -1546,6 +1546,7 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 				recvType = id.Name // is a package path
 			} else {
 				pathType = typ
+				recvPath = "&" + recvPath
 			}
 		} else {
 			pathIsPackage = true
@@ -1556,11 +1557,13 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 		errors.Log(err)
 		return
 	}
+	// fmt.Println(pathIsPackage, recvType, methName, recvPath)
 	if pathIsPackage {
 		p.print(recvType + "." + methName)
 		p.setPos(x.Lparen)
 		p.print(token.LPAREN)
 	} else {
+		recvType = strings.TrimPrefix(recvType, "imports.") // no!
 		p.print(recvType + "_" + methName)
 		p.setPos(x.Lparen)
 		p.print(token.LPAREN)

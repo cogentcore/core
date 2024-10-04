@@ -5,19 +5,20 @@ package main
 import (
 	"embed"
 	"unsafe"
-
 	"cogentcore.org/core/gpu"
 )
 
 //go:embed shaders/*.wgsl
 var shaders embed.FS
 
-// GPU is the compute gpu device
+// ComputeGPU is the compute gpu device
 var ComputeGPU *gpu.GPU
 
 // UseGPU indicates whether to use GPU vs. CPU.
 var UseGPU bool
 
+// GPUSystem is a GPU compute System with kernels operating on the
+same set of data variables.
 var GPUSystem *gpu.ComputeSystem
 
 // GPUVars is an enum for GPU variables, for specifying what to sync.
@@ -25,11 +26,11 @@ type GPUVars int32 //enums:enum
 
 const (
 	ParamsVar GPUVars = 0
-	DataVar   GPUVars = 1
+	DataVar GPUVars = 1
 )
 
-// GPUInit initializes the GPU compute system
-// Configuring Systems, variables and kernels.
+// GPUInit initializes the GPU compute system,
+// configuring system(s), variables and kernels.
 func GPUInit() {
 	gp := gpu.NewComputeGPU()
 	ComputeGPU = gp
@@ -48,15 +49,18 @@ func GPUInit() {
 	}
 }
 
-// GPURelease releases the GPU compute system.
+
+// GPURelease releases the GPU compute system resources.
+// Call this at program exit.
 func GPURelease() {
 	GPUSystem.Release()
 	ComputeGPU.Release()
 }
 
-// RunCompute runs the Compute kernel with given number of items,
-// on either the CPU or GPU depending on the UseGPU.
-// Pass *Var variable names to sync those variables back from the GPU
+
+// RunCompute runs the Compute kernel with given number of elements,
+// on either the CPU or GPU depending on the UseGPU variable.
+// Pass *Var variable enums to sync those variables back from the GPU
 // after running (irrelevant for CPU).
 func RunCompute(n int, syncVars ...GPUVars) {
 	if UseGPU {
@@ -85,6 +89,7 @@ func RunComputeCPU(n int) {
 		Compute(uint32(i))
 	}
 }
+
 
 // ToGPU copies given variables to the GPU for the system.
 func ToGPU(vars ...GPUVars) {
