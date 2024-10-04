@@ -54,6 +54,11 @@ type Var struct {
 
 	// Type of variable: either []Type or tensor.Float32, tensor.Int32
 	Type string
+
+	// ReadOnly indicates that this variable is never read back from GPU,
+	// specified by the gosl:read-only property in the variable comments.
+	// It is important to optimize GPU memory usage to indicate this.
+	ReadOnly bool
 }
 
 // Group represents one variable group.

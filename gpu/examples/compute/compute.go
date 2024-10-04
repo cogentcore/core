@@ -59,8 +59,6 @@ func main() {
 	}
 	gpu.SetValueFrom(dvl, sd)
 
-	sgp.CreateReadBuffers()
-
 	ce, _ := sy.BeginComputePass()
 	pl.Dispatch1D(ce, n, threads)
 	ce.End()

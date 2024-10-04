@@ -35,13 +35,12 @@ type Var struct {
 	// automatically be sent as 4 interleaved Float32Vector4 chuncks.
 	Type Types
 
-	// number of elements, which is 1 for a single element, or a constant
-	// number for a fixed array of elements.  For Vertex variables, the
-	// number is dynamic and does not need to be specified in advance,
-	// so you can leave it at 1. There can be alignment issues with arrays
+	// ArrayN is the number of elements in an array, only if there is a
+	// fixed array size. Otherwise, for single elements or dynamic arrays
+	// use a value of 1. There can be alignment issues with arrays
 	// so make sure your elemental types are compatible.
 	// Note that DynamicOffset variables can have Value buffers with multiple
-	// instances of the variable (with proper alignment stride), which is
+	// instances of the variable (with proper alignment stride),
 	// which goes on top of any array value for the variable itself.
 	ArrayN int
 
@@ -86,6 +85,11 @@ type Var struct {
 	// variables within each group (as few as 4).
 	// Only for Uniform and Storage variables.
 	DynamicOffset bool
+
+	// ReadOnly applies only to [Storage] variables, and indicates that
+	// they are never read back from the GPU, so the additional staging
+	// buffers needed to do so are not created for these variables.
+	ReadOnly bool
 
 	// Values is the the array of Values allocated for this variable.
 	// Each value has its own corresponding Buffer or Texture.
@@ -145,7 +149,6 @@ func (vr *Var) MemSize() int {
 	if vr.ArrayN < 1 {
 		vr.ArrayN = 1
 	}
-	// todo: may need to diagnose alignments here..
 	switch {
 	case vr.Role >= SampledTexture:
 		return 0
@@ -157,7 +160,6 @@ func (vr *Var) MemSize() int {
 // Release resets the MemPtr for values, resets any self-owned resources (Textures)
 func (vr *Var) Release() {
 	vr.Values.Release()
-	// todo: free anything in var
 }
 
 // SetNValues sets specified number of Values for this var.

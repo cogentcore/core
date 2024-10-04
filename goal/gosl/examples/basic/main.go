@@ -12,6 +12,7 @@ import (
 	"runtime"
 
 	"cogentcore.org/core/base/timer"
+	"cogentcore.org/core/gpu"
 )
 
 //go:generate gosl .
@@ -22,6 +23,9 @@ func init() {
 }
 
 func main() {
+	gpu.Debug = true
+	GPUInit()
+
 	n := 2000000 // note: not necc to spec up-front, but easier if so
 
 	Params = make([]ParamStruct, 1)
@@ -36,8 +40,6 @@ func main() {
 	for i := range sd {
 		sd[i].Raw = Data[i].Raw
 	}
-
-	GPUInit()
 
 	cpuTmr := timer.Time{}
 	cpuTmr.Start()

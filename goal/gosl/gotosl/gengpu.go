@@ -42,7 +42,7 @@ import (
 //go:embed %s/*.wgsl
 var shaders embed.FS
 
-// GPU is the compute gpu device
+// ComputeGPU is the compute gpu device
 var ComputeGPU *gpu.GPU
 
 // UseGPU indicates whether to use GPU vs. CPU.
@@ -53,6 +53,7 @@ var UseGPU bool
 	b.WriteString(fmt.Sprintf(header, st.Config.Output))
 
 	for _, sy := range st.Systems {
+		b.WriteString(fmt.Sprintf("// %s is a GPU compute System with kernels operating on the\nsame set of data variables.\n", st.genSysVar(sy)))
 		b.WriteString(fmt.Sprintf("var %s *gpu.ComputeSystem\n", st.genSysVar(sy)))
 	}
 
@@ -77,8 +78,8 @@ const (
 	b.WriteString(")\n")
 
 	initf := `
-// GPUInit initializes the GPU compute system
-// Configuring Systems, variables and kernels.
+// GPUInit initializes the GPU compute system,
+// configuring system(s), variables and kernels.
 func GPUInit() {
 	gp := gpu.NewComputeGPU()
 	ComputeGPU = gp
@@ -92,7 +93,8 @@ func GPUInit() {
 	b.WriteString("}\n\n")
 
 	release := `
-// GPURelease releases the GPU compute system.
+// GPURelease releases the GPU compute system resources.
+// Call this at program exit.
 func GPURelease() {
 `
 
@@ -138,9 +140,6 @@ func (st *State) GenGPUSystemInit(sy *System) string {
 			b.WriteString(fmt.Sprintf("\t\t\tsgp.AddStruct(%q, int(unsafe.Sizeof(%s{})), len(%s), gpu.ComputeShader)\n", vr.Name, vr.Type[2:], vr.Name))
 		}
 		b.WriteString("\t\t\tsgp.SetNValues(1)\n")
-		if !gp.Uniform {
-			b.WriteString("\t\t\tsgp.CreateReadBuffers()\n")
-		}
 		b.WriteString("\t\t}\n")
 	}
 	b.WriteString("\t\tsy.Config()\n")
@@ -157,9 +156,9 @@ func (st *State) GenGPUSystemOps(sy *System) string {
 
 	// 1 = kernel, 2 = system, 3 = sysname
 	run := `
-// Run%[1]s runs the %[1]s kernel with given number of items,
-// on either the CPU or GPU depending on the UseGPU.
-// Pass *Var variable names to sync those variables back from the GPU
+// Run%[1]s runs the %[1]s kernel with given number of elements,
+// on either the CPU or GPU depending on the UseGPU variable.
+// Pass *Var variable enums to sync those variables back from the GPU
 // after running (irrelevant for CPU).
 func Run%[1]s(n int, syncVars ...GPUVars) {
 	if UseGPU {

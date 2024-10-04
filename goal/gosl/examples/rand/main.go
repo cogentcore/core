@@ -70,8 +70,6 @@ func main() {
 	gpu.SetValueFrom(cvl, []uint64{seed})
 	gpu.SetValueFrom(dvl, dataG)
 
-	sgp.CreateReadBuffers()
-
 	gpuTmr := timer.Time{}
 	gpuTmr.Start()
 
