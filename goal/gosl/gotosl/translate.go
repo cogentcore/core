@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
@@ -18,7 +17,6 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/goal/gosl/alignsl"
-	"cogentcore.org/core/gpu"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -110,17 +108,7 @@ func (st *State) TranslateDir(pf string) error {
 
 func (st *State) CompileFile(fn string) error {
 	dir, _ := filepath.Abs(st.Config.Output)
-	fsys := os.DirFS(dir)
-	b, err := fs.ReadFile(fsys, fn)
-	if errors.Log(err) != nil {
-		return err
-	}
-	is := gpu.IncludeFS(fsys, "", string(b))
-	ofn := filepath.Join(dir, fn)
-	err = os.WriteFile(ofn, []byte(is), 0666)
-	if errors.Log(err) != nil {
-		return err
-	}
+	// cmd := exec.Command("naga", "--compact", fn, fn) // produces some pretty weird code actually
 	cmd := exec.Command("naga", fn)
 	cmd.Dir = dir
 	out, err := cmd.CombinedOutput()

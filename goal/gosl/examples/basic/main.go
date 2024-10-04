@@ -19,7 +19,7 @@ import (
 
 //go:generate gosl .
 
-//go:embed shaders/basic.wgsl shaders/fastexp.wgsl
+//go:embed shaders/Compute.wgsl
 var shaders embed.FS
 
 func init() {

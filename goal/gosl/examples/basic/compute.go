@@ -54,8 +54,12 @@ func (ps *ParamStruct) IntegFromRaw(ds *DataStruct) {
 }
 
 // Compute does the main computation
-func Compute(i int32) { //gosl:kernel
-	Params[0].IntegFromRaw(&Data[i])
+func Compute(i uint32) { //gosl:kernel
+	// Params[0].IntegFromRaw(&Data[i])
+	var params = Params[0]
+	var data = Data[i]
+	params.IntegFromRaw(&data)
+	Data[i] = data
 }
 
 //gosl:end

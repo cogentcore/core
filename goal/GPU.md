@@ -64,7 +64,7 @@ The GPU code can only handle a highly restricted _subset_ of Go code, with data 
 
 ```Go
 // Compute does the main computation.
-func Compute(i int32) { //gosl:kernel
+func Compute(i uint32) { //gosl:kernel
 	Params[0].IntegFromRaw(&Data[i])
 }
 ```
