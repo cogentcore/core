@@ -61,11 +61,9 @@ fn ParamStruct_IntegFromRaw(ps: ptr<function,ParamStruct>, ds: ptr<function,Data
 
 // Compute does the main computation
 fn Compute(i: u32) { //gosl:kernel
-	var params=Params[0]; ParamStruct_IntegFromRaw(&params, &Data[i]);
-	// var params = Params[0]
-	// var data = Data[i]
-	// params.IntegFromRaw(&data)
-	// Data[i] = data
+	var params=Params[0]; var data=Data[i];
+	ParamStruct_IntegFromRaw(&params, &data);
+	Data[i]=data;
 }
 
 

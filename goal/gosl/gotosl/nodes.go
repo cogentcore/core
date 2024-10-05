@@ -454,24 +454,67 @@ func (p *printer) parameters(fields *ast.FieldList, mode paramMode) {
 	p.print(closeTok)
 }
 
+type rwArg struct {
+	idx    *ast.IndexExpr
+	tmpVar string
+}
+
+func (p *printer) assignRwArgs(rwargs []rwArg) {
+	nrw := len(rwargs)
+	if nrw == 0 {
+		return
+	}
+	p.print(token.SEMICOLON, blank, formfeed)
+	for i, rw := range rwargs {
+		p.expr(rw.idx)
+		p.print(token.ASSIGN)
+		tv := rw.tmpVar
+		if tv[0] == '&' {
+			tv = tv[1:]
+		}
+		p.print(tv)
+		if i < nrw-1 {
+			p.print(token.SEMICOLON, blank)
+		}
+	}
+}
+
 // gosl: ensure basic literals are properly cast
-func (p *printer) matchLiteralArgs(args []ast.Expr, params *types.Tuple) []ast.Expr {
+func (p *printer) goslFixArgs(args []ast.Expr, params *types.Tuple) ([]ast.Expr, []rwArg) {
 	ags := slices.Clone(args)
 	mx := min(len(args), params.Len())
+	var rwargs []rwArg
 	for i := 0; i < mx; i++ {
 		ag := args[i]
 		pr := params.At(i)
-		lit, ok := ag.(*ast.BasicLit)
-		if !ok {
-			continue
+		switch x := ag.(type) {
+		case *ast.BasicLit:
+			typ := pr.Type()
+			tnm := getLocalTypeName(typ)
+			nn := normalizedNumber(x)
+			nn.Value = tnm + "(" + nn.Value + ")"
+			ags[i] = nn
+		case *ast.IndexExpr:
+			isGlobal, tmpVar, _, _, isReadOnly := p.globalVar(x)
+			if isGlobal {
+				ags[i] = &ast.Ident{Name: tmpVar}
+				if !isReadOnly {
+					rwargs = append(rwargs, rwArg{idx: x, tmpVar: tmpVar})
+				}
+			}
+		case *ast.UnaryExpr:
+			if idx, ok := x.X.(*ast.IndexExpr); ok {
+				isGlobal, tmpVar, _, _, isReadOnly := p.globalVar(idx)
+				if isGlobal {
+					ags[i] = &ast.Ident{Name: tmpVar}
+					if !isReadOnly {
+						rwargs = append(rwargs, rwArg{idx: idx, tmpVar: tmpVar})
+					}
+				}
+			}
 		}
-		typ := pr.Type()
-		tnm := getLocalTypeName(typ)
-		nn := normalizedNumber(lit)
-		nn.Value = tnm + "(" + nn.Value + ")"
-		ags[i] = nn
 	}
-	return ags
+	return ags, rwargs
 }
 
 // gosl: ensure basic literals are properly cast
@@ -1250,21 +1293,22 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 			p.methodExpr(x, depth)
 			break // handles everything, break out of case
 		}
+		args := x.Args
+		var rwargs []rwArg
+		if fid, ok := x.Fun.(*ast.Ident); ok {
+			if obj, ok := p.pkg.TypesInfo.Uses[fid]; ok {
+				if ft, ok := obj.(*types.Func); ok {
+					sig := ft.Type().(*types.Signature)
+					args, rwargs = p.goslFixArgs(x.Args, sig.Params())
+				}
+			}
+		}
 		p.expr1(x.Fun, token.HighestPrec, depth)
 		if paren {
 			p.print(token.RPAREN)
 		}
 		p.setPos(x.Lparen)
 		p.print(token.LPAREN)
-		args := x.Args
-		if fid, ok := x.Fun.(*ast.Ident); ok {
-			if obj, ok := p.pkg.TypesInfo.Uses[fid]; ok {
-				if ft, ok := obj.(*types.Func); ok {
-					sig := ft.Type().(*types.Signature)
-					args = p.matchLiteralArgs(x.Args, sig.Params())
-				}
-			}
-		}
 		if x.Ellipsis.IsValid() {
 			p.exprList(x.Lparen, args, depth, 0, x.Ellipsis, false)
 			p.setPos(x.Ellipsis)
@@ -1277,6 +1321,7 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		}
 		p.setPos(x.Rparen)
 		p.print(token.RPAREN)
+		p.assignRwArgs(rwargs)
 
 	case *ast.CompositeLit:
 		// composite literal elements that are composite literals themselves may have the type omitted
@@ -1529,6 +1574,27 @@ func getStructType(typ types.Type) (*types.Struct, error) {
 	return nil, errors.Log(err)
 }
 
+func getNamedType(typ types.Type) (*types.Named, error) {
+	if nmd, ok := typ.(*types.Named); ok {
+		return nmd, nil
+	}
+	typ = typ.Underlying()
+	if ptr, ok := typ.(*types.Pointer); ok {
+		typ = ptr.Elem()
+		if nmd, ok := typ.(*types.Named); ok {
+			return nmd, nil
+		}
+	}
+	if sl, ok := typ.(*types.Slice); ok {
+		typ = sl.Elem()
+		if nmd, ok := typ.(*types.Named); ok {
+			return nmd, nil
+		}
+	}
+	err := fmt.Errorf("gosl ERROR: type is not a named type: %q %+t", typ.String(), typ)
+	return nil, errors.Log(err)
+}
+
 // gosl: globalVar looks up whether the id in an IndexExpr is a global gosl variable.
 // in which case it returns a temp variable name to use, and the type info.
 func (p *printer) globalVar(idx *ast.IndexExpr) (isGlobal bool, tmpVar, typName string, vtyp types.Type, isReadOnly bool) {
@@ -1543,7 +1609,11 @@ func (p *printer) globalVar(idx *ast.IndexExpr) (isGlobal bool, tmpVar, typName 
 	isGlobal = true
 	isReadOnly = gvr.ReadOnly
 	tmpVar = strings.ToLower(id.Name)
-	vtyp, _ = getStructType(p.getIdType(id))
+	vtyp = p.getIdType(id)
+	nmd, err := getNamedType(vtyp)
+	if err == nil {
+		vtyp = nmd
+	}
 	typName = gvr.Type[2:]
 	p.print("var ", tmpVar, token.ASSIGN)
 	p.expr(idx)
@@ -1612,6 +1682,20 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 		errors.Log(err)
 		return
 	}
+	args := x.Args
+	var rwargs []rwArg
+	if pathType != nil {
+		meth, _, _ := types.LookupFieldOrMethod(pathType, true, p.pkg.Types, methName)
+		if meth != nil {
+			if ft, ok := meth.(*types.Func); ok {
+				sig := ft.Type().(*types.Signature)
+				args, rwargs = p.goslFixArgs(x.Args, sig.Params())
+			}
+		}
+		if len(rwargs) > 0 {
+			p.print(formfeed)
+		}
+	}
 	// fmt.Println(pathIsPackage, recvType, methName, recvPath)
 	if pathIsPackage {
 		p.print(recvType + "." + methName)
@@ -1627,16 +1711,6 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 			p.print(token.COMMA, blank)
 		}
 	}
-	args := x.Args
-	if pathType != nil {
-		meth, _, _ := types.LookupFieldOrMethod(pathType, true, p.pkg.Types, methName)
-		if meth != nil {
-			if ft, ok := meth.(*types.Func); ok {
-				sig := ft.Type().(*types.Signature)
-				args = p.matchLiteralArgs(x.Args, sig.Params())
-			}
-		}
-	}
 	if x.Ellipsis.IsValid() {
 		p.exprList(x.Lparen, args, depth, 0, x.Ellipsis, false)
 		p.setPos(x.Ellipsis)
@@ -1650,6 +1724,7 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 	p.setPos(x.Rparen)
 	p.print(token.RPAREN)
 
+	p.assignRwArgs(rwargs)
 }
 
 func (p *printer) expr0(x ast.Expr, depth int) {
