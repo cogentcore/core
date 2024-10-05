@@ -52,13 +52,19 @@ type Var struct {
 	// comment docs about this var.
 	Doc string
 
-	// Type of variable: either []Type or tensor.Float32, tensor.Int32
+	// Type of variable: either []Type or F32, U32 for tensors
 	Type string
 
 	// ReadOnly indicates that this variable is never read back from GPU,
 	// specified by the gosl:read-only property in the variable comments.
 	// It is important to optimize GPU memory usage to indicate this.
 	ReadOnly bool
+
+	// True if a tensor type
+	Tensor bool
+
+	// Number of dimensions
+	TensorDims int
 }
 
 // Group represents one variable group.
@@ -172,6 +178,12 @@ func (st *State) System(sysname string) *System {
 
 // GlobalVar returns global variable of given name, if found.
 func (st *State) GlobalVar(vrnm string) *Var {
+	if st == nil {
+		return nil
+	}
+	if st.Systems == nil {
+		return nil
+	}
 	for _, sy := range st.Systems {
 		for _, gp := range sy.Groups {
 			for _, vr := range gp.Vars {

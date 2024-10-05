@@ -136,8 +136,9 @@ func (st *State) GenGPUSystemInit(sy *System) string {
 		b.WriteString(fmt.Sprintf("\t\t\tsgp := vars.AddGroup(%s)\n", gtyp))
 		b.WriteString("\t\t\tvar vr *gpu.Var\n")
 		for _, vr := range gp.Vars {
+			if 
 			// todo: tensor
-			b.WriteString(fmt.Sprintf("\t\t\tvr = sgp.AddStruct(%q, int(unsafe.Sizeof(%s{})), len(%s), gpu.ComputeShader)\n", vr.Name, vr.Type[2:], vr.Name))
+			b.WriteString(fmt.Sprintf("\t\t\tvr = sgp.AddStruct(%q, int(unsafe.Sizeof(%s{})), 1, gpu.ComputeShader)\n", vr.Name, vr.Type[2:], vr.Name))
 			if vr.ReadOnly {
 				b.WriteString("\t\t\tvr.ReadOnly = true\n")
 			}

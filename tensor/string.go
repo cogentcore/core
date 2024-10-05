@@ -30,7 +30,7 @@ func NewString(sizes ...int) *String {
 func NewStringShape(shape *Shape) *String {
 	tsr := &String{}
 	tsr.shape.CopyFrom(shape)
-	tsr.Values = make([]string, tsr.Len())
+	tsr.Values = make([]string, shape.Header+tsr.Len())
 	return tsr
 }
 
@@ -62,17 +62,16 @@ func (tsr *String) AsValues() Values { return tsr }
 /////////////////////  Strings
 
 func (tsr *String) SetString(val string, i ...int) {
-	j := tsr.shape.IndexTo1D(i...)
-	tsr.Values[j] = val
+	tsr.Values[tsr.shape.IndexTo1D(i...)] = val
 }
 
-func (tsr String) SetString1D(val string, off int) {
-	tsr.Values[off] = val
+func (tsr String) SetString1D(val string, i int) {
+	tsr.Values[tsr.shape.Header+i] = val
 }
 
 func (tsr *String) SetStringRowCell(val string, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
-	tsr.Values[row*sz+cell] = val
+	tsr.Values[tsr.shape.Header+row*sz+cell] = val
 }
 
 func (tsr *String) StringRow(row int) string {
@@ -93,22 +92,22 @@ func (tsr *String) SetFloat(val float64, i ...int) {
 	tsr.Values[tsr.shape.IndexTo1D(i...)] = Float64ToString(val)
 }
 
-func (tsr *String) Float1D(off int) float64 {
-	return StringToFloat64(tsr.Values[off])
+func (tsr *String) Float1D(i int) float64 {
+	return StringToFloat64(tsr.Values[tsr.shape.Header+i])
 }
 
-func (tsr *String) SetFloat1D(val float64, off int) {
-	tsr.Values[off] = Float64ToString(val)
+func (tsr *String) SetFloat1D(val float64, i int) {
+	tsr.Values[tsr.shape.Header+i] = Float64ToString(val)
 }
 
 func (tsr *String) FloatRowCell(row, cell int) float64 {
 	_, sz := tsr.shape.RowCellSize()
-	return StringToFloat64(tsr.Values[row*sz+cell])
+	return StringToFloat64(tsr.Values[tsr.shape.Header+row*sz+cell])
 }
 
 func (tsr *String) SetFloatRowCell(val float64, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
-	tsr.Values[row*sz+cell] = Float64ToString(val)
+	tsr.Values[tsr.shape.Header+row*sz+cell] = Float64ToString(val)
 }
 
 func (tsr *String) FloatRow(row int) float64 {
@@ -129,22 +128,22 @@ func (tsr *String) SetInt(val int, i ...int) {
 	tsr.Values[tsr.shape.IndexTo1D(i...)] = strconv.Itoa(val)
 }
 
-func (tsr *String) Int1D(off int) int {
-	return errors.Ignore1(strconv.Atoi(tsr.Values[off]))
+func (tsr *String) Int1D(i int) int {
+	return errors.Ignore1(strconv.Atoi(tsr.Values[tsr.shape.Header+i]))
 }
 
-func (tsr *String) SetInt1D(val int, off int) {
-	tsr.Values[off] = strconv.Itoa(val)
+func (tsr *String) SetInt1D(val int, i int) {
+	tsr.Values[tsr.shape.Header+i] = strconv.Itoa(val)
 }
 
 func (tsr *String) IntRowCell(row, cell int) int {
 	_, sz := tsr.shape.RowCellSize()
-	return errors.Ignore1(strconv.Atoi(tsr.Values[row*sz+cell]))
+	return errors.Ignore1(strconv.Atoi(tsr.Values[tsr.shape.Header+row*sz+cell]))
 }
 
 func (tsr *String) SetIntRowCell(val int, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
-	tsr.Values[row*sz+cell] = strconv.Itoa(val)
+	tsr.Values[tsr.shape.Header+row*sz+cell] = strconv.Itoa(val)
 }
 
 func (tsr *String) IntRow(row int) int {
@@ -158,7 +157,8 @@ func (tsr *String) SetIntRow(val int, row int) {
 // SetZeros is a simple convenience function initialize all values to the
 // zero value of the type (empty strings for string type).
 func (tsr *String) SetZeros() {
-	for j := range tsr.Values {
+	n := len(tsr.Values)
+	for j := tsr.shape.Header; j < n; j++ {
 		tsr.Values[j] = ""
 	}
 }
@@ -177,12 +177,12 @@ func (tsr *String) Clone() Values {
 // otherwise it goes through appropriate standard type.
 func (tsr *String) CopyFrom(frm Values) {
 	if fsm, ok := frm.(*String); ok {
-		copy(tsr.Values, fsm.Values)
+		copy(tsr.Values[tsr.shape.Header:], fsm.Values[fsm.shape.Header:])
 		return
 	}
-	sz := min(len(tsr.Values), frm.Len())
+	sz := min(tsr.Len(), frm.Len())
 	for i := 0; i < sz; i++ {
-		tsr.Values[i] = Float64ToString(frm.Float1D(i))
+		tsr.Values[tsr.shape.Header+i] = Float64ToString(frm.Float1D(i))
 	}
 }
 
@@ -198,10 +198,10 @@ func (tsr *String) AppendFrom(frm Values) error {
 		return fmt.Errorf("tensor.AppendFrom: cell sizes do not match: %d != %d", cell, fcell)
 	}
 	tsr.SetNumRows(rows + frows)
-	st := rows * cell
+	st := tsr.shape.Header + rows*cell
 	fsz := frows * fcell
 	if fsm, ok := frm.(*String); ok {
-		copy(tsr.Values[st:st+fsz], fsm.Values)
+		copy(tsr.Values[st:st+fsz], fsm.Values[fsm.shape.Header:])
 		return nil
 	}
 	for i := 0; i < fsz; i++ {
@@ -216,7 +216,9 @@ func (tsr *String) AppendFrom(frm Values) error {
 // values to copy.  Uses an optimized implementation if the other tensor is
 // of the same type, and otherwise it goes through appropriate standard type.
 func (tsr *String) CopyCellsFrom(frm Values, to, start, n int) {
+	to += tsr.shape.Header
 	if fsm, ok := frm.(*String); ok {
+		start += fsm.shape.Header
 		for i := 0; i < n; i++ {
 			tsr.Values[to+i] = fsm.Values[start+i]
 		}

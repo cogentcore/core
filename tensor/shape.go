@@ -21,6 +21,11 @@ type Shape struct {
 
 	// offsets for each dimension.
 	Strides []int `display:"-"`
+
+	// Header is an extra indexing offset at the start of the slice
+	// for special data. This is used for GPU tensor access, to store
+	// the strides at the start. Not supported for bool type.
+	Header int
 }
 
 // NewShape returns a new shape with given sizes.
@@ -54,6 +59,7 @@ func (sh *Shape) SizesAsTensor() *Int {
 func (sh *Shape) CopyFrom(cp *Shape) {
 	sh.Sizes = slices.Clone(cp.Sizes)
 	sh.Strides = slices.Clone(cp.Strides)
+	sh.Header = cp.Header
 }
 
 // Len returns the total length of elements in the tensor
@@ -74,9 +80,6 @@ func (sh *Shape) NumDims() int { return len(sh.Sizes) }
 
 // DimSize returns the size of given dimension.
 func (sh *Shape) DimSize(i int) int {
-	// if sh.Sizes == nil {
-	// 	return 0
-	// }
 	return sh.Sizes[i]
 }
 
@@ -127,7 +130,7 @@ func (sh *Shape) RowCellSize() (rows, cells int) {
 // No checking is done on the length or size of the index values relative
 // to the shape of the tensor.
 func (sh *Shape) IndexTo1D(index ...int) int {
-	var oned int
+	oned := sh.Header
 	for i, v := range index {
 		oned += v * sh.Strides[i]
 	}

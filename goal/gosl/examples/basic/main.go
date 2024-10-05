@@ -12,7 +12,9 @@ import (
 	"runtime"
 
 	"cogentcore.org/core/base/timer"
+	"cogentcore.org/core/goal/gosl/sltensor"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/tensor"
 )
 
 //go:generate gosl
@@ -26,19 +28,22 @@ func main() {
 	gpu.Debug = true
 	GPUInit()
 
-	n := 2000000 // note: not necc to spec up-front, but easier if so
+	n := 20_000 // note: not necc to spec up-front, but easier if so
 
 	Params = make([]ParamStruct, 1)
 	Params[0].Defaults()
 
-	Data = make([]DataStruct, n)
-	for i := range Data {
-		Data[i].Raw = rand.Float32()
+	sltensor.SetShapeSizes(&Data, n, 3) // critically, makes GPU compatible Header with strides
+	nt := Data.Len()
+
+	for i := range nt {
+		Data.Set1D(rand.Float32(), i)
 	}
 
-	sd := make([]DataStruct, n)
-	for i := range sd {
-		sd[i].Raw = Data[i].Raw
+	var sd tensor.Float32
+	sltensor.SetShapeSizes(&sd, n, 3)
+	for i := range nt {
+		sd.Set1D(Data.Value1D(i), i)
 	}
 
 	cpuTmr := timer.Time{}
@@ -69,8 +74,8 @@ func main() {
 
 	mx := min(n, 5)
 	for i := 0; i < mx; i++ {
-		d := cd[i].Exp - sd[i].Exp
-		fmt.Printf("%d\t Raw: %g\t Integ: %g\t Exp: %6.4g\tTrg: %6.4g\tDiff: %g\n", i, sd[i].Raw, sd[i].Integ, sd[i].Exp, cd[i].Exp, d)
+		d := cd.Value(i, Exp) - sd.Value(i, Exp)
+		fmt.Printf("%d\t Raw: %g\t Integ: %g\t Exp: %6.4g\tTrg: %6.4g\tDiff: %g\n", i, sd.Value(i, Raw), sd.Value(i, Integ), sd.Value(i, Exp), cd.Value(i, Exp), d)
 	}
 	fmt.Printf("\n")
 

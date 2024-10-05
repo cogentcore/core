@@ -17,7 +17,7 @@ import (
 // Any numerical type can also be used.  bool is represented using an
 // efficient bit slice.
 type DataTypes interface {
-	string | bool | float32 | float64 | int | int32 | byte
+	string | bool | float32 | float64 | int | int32 | uint32 | byte
 }
 
 // MaxSprintLength is the default maximum length of a String() representation

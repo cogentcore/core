@@ -4,7 +4,10 @@
 
 package main
 
-import "cogentcore.org/core/math32"
+import (
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/tensor"
+)
 
 //gosl:start
 //gosl:import "cogentcore.org/core/math32"
@@ -16,24 +19,16 @@ var (
 	Params []ParamStruct
 
 	// Data is the data on which the computation operates.
-	Data []DataStruct
+	// 2D: outer index is data, inner index is: Raw, Integ, Exp vars.
+	//gosl:2D
+	Data tensor.Float32
 )
 
-// DataStruct has the test data
-type DataStruct struct {
-
-	// raw value
-	Raw float32
-
-	// integrated value
-	Integ float32
-
-	// exp of integ
-	Exp float32
-
-	// must pad to multiple of 4 floats for arrays
-	pad float32
-}
+const (
+	Raw int = iota
+	Integ
+	Exp
+)
 
 // ParamStruct has the test params
 type ParamStruct struct {
@@ -49,14 +44,16 @@ type ParamStruct struct {
 }
 
 // IntegFromRaw computes integrated value from current raw value
-func (ps *ParamStruct) IntegFromRaw(ds *DataStruct) {
-	ds.Integ += ps.Dt * (ds.Raw - ds.Integ)
-	ds.Exp = math32.FastExp(-ds.Integ)
+func (ps *ParamStruct) IntegFromRaw(idx int) {
+	integ := Data.Value(idx, Integ)
+	integ += ps.Dt * (Data.Value(idx, Raw) - integ)
+	Data.Set(integ, idx, Integ)
+	Data.Set(math32.FastExp(-integ), idx, Exp)
 }
 
 // Compute does the main computation
 func Compute(i uint32) { //gosl:kernel
-	Params[0].IntegFromRaw(&Data[i])
+	Params[0].IntegFromRaw(int(i))
 }
 
 //gosl:end

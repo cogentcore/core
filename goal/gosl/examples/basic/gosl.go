@@ -5,6 +5,7 @@ package main
 import (
 	"embed"
 	"unsafe"
+
 	"cogentcore.org/core/gpu"
 )
 
@@ -26,7 +27,7 @@ type GPUVars int32 //enums:enum
 
 const (
 	ParamsVar GPUVars = 0
-	DataVar GPUVars = 1
+	DataVar   GPUVars = 1
 )
 
 // GPUInit initializes the GPU compute system,
@@ -42,9 +43,9 @@ func GPUInit() {
 		{
 			sgp := vars.AddGroup(gpu.Storage)
 			var vr *gpu.Var
-			vr = sgp.AddStruct("Params", int(unsafe.Sizeof(ParamStruct{})), len(Params), gpu.ComputeShader)
+			vr = sgp.AddStruct("Params", int(unsafe.Sizeof(ParamStruct{})), 1, gpu.ComputeShader)
 			vr.ReadOnly = true
-			vr = sgp.AddStruct("Data", int(unsafe.Sizeof(DataStruct{})), len(Data), gpu.ComputeShader)
+			vr = sgp.Add("Data", gpu.Float32, 1, gpu.ComputeShader)
 			sgp.SetNValues(1)
 		}
 		sy.Config()
@@ -107,7 +108,7 @@ func RunOneCompute(n int, syncVars ...GPUVars) {
 // RunDone must be called after Run* calls to start compute kernels.
 // This actually submits the kernel jobs to the GPU, and adds commands
 // to synchronize the given variables back from the GPU to the CPU.
-// After this function completes, the GPU results will be available in 
+// After this function completes, the GPU results will be available in
 // the specified variables.
 func RunDone(syncVars ...GPUVars) {
 	if !UseGPU {
@@ -120,7 +121,6 @@ func RunDone(syncVars ...GPUVars) {
 	SyncFromGPU(syncVars...)
 }
 
-
 // ToGPU copies given variables to the GPU for the system.
 func ToGPU(vars ...GPUVars) {
 	sy := GPUSystem
@@ -132,7 +132,7 @@ func ToGPU(vars ...GPUVars) {
 			gpu.SetValueFrom(v, Params)
 		case DataVar:
 			v, _ := syVars.ValueByIndex(0, "Data", 0)
-			gpu.SetValueFrom(v, Data)
+			gpu.SetValueFrom(v, Data.Values)
 		}
 	}
 }
@@ -166,7 +166,7 @@ func SyncFromGPU(vars ...GPUVars) {
 		case DataVar:
 			v, _ := syVars.ValueByIndex(0, "Data", 0)
 			v.ReadSync()
-			gpu.ReadToBytes(v, Data)
+			gpu.ReadToBytes(v, Data.Values)
 		}
 	}
 }

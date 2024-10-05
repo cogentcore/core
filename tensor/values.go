@@ -81,6 +81,8 @@ func New[T DataTypes](sizes ...int) Values {
 		return NewNumber[int](sizes...)
 	case int32:
 		return NewNumber[int32](sizes...)
+	case uint32:
+		return NewNumber[uint32](sizes...)
 	case byte:
 		return NewNumber[byte](sizes...)
 	default:

@@ -35,7 +35,7 @@ func (tsr *Base[T]) ShapeSizes() []int { return slices.Clone(tsr.shape.Sizes) }
 // backing storage appropriately, retaining all existing data that fits.
 func (tsr *Base[T]) SetShapeSizes(sizes ...int) {
 	tsr.shape.SetShapeSizes(sizes...)
-	nln := tsr.Len()
+	nln := tsr.shape.Header + tsr.shape.Len()
 	tsr.Values = slicesx.SetLength(tsr.Values, nln)
 }
 
@@ -68,13 +68,13 @@ func (tsr *Base[T]) Value(i ...int) T {
 	return tsr.Values[tsr.shape.IndexTo1D(i...)]
 }
 
-func (tsr *Base[T]) Value1D(i int) T { return tsr.Values[i] }
-
 func (tsr *Base[T]) Set(val T, i ...int) {
 	tsr.Values[tsr.shape.IndexTo1D(i...)] = val
 }
 
-func (tsr *Base[T]) Set1D(val T, i int) { tsr.Values[i] = val }
+func (tsr *Base[T]) Value1D(i int) T { return tsr.Values[tsr.shape.Header+i] }
+
+func (tsr *Base[T]) Set1D(val T, i int) { tsr.Values[tsr.shape.Header+i] = val }
 
 // SetNumRows sets the number of rows (outermost dimension) in a RowMajor organized tensor.
 // It is safe to set this to 0. For incrementally growing tensors (e.g., a log)
@@ -82,7 +82,7 @@ func (tsr *Base[T]) Set1D(val T, i int) { tsr.Values[i] = val }
 // full amount of memory, and then set to 0 and grow incrementally.
 func (tsr *Base[T]) SetNumRows(rows int) {
 	_, cells := tsr.shape.RowCellSize()
-	nln := rows * cells
+	nln := tsr.shape.Header + rows*cells
 	tsr.shape.Sizes[0] = rows
 	tsr.Values = slicesx.SetLength(tsr.Values, nln)
 }
@@ -121,11 +121,13 @@ func (tsr *Base[T]) StringValue(i ...int) string {
 	return reflectx.ToString(tsr.Values[tsr.shape.IndexTo1D(i...)])
 }
 
-func (tsr *Base[T]) String1D(off int) string { return reflectx.ToString(tsr.Values[off]) }
+func (tsr *Base[T]) String1D(i int) string {
+	return reflectx.ToString(tsr.Values[tsr.shape.Header+i])
+}
 
 func (tsr *Base[T]) StringRowCell(row, cell int) string {
 	_, sz := tsr.shape.RowCellSize()
-	return reflectx.ToString(tsr.Values[row*sz+cell])
+	return reflectx.ToString(tsr.Values[tsr.shape.Header+row*sz+cell])
 }
 
 // Label satisfies the core.Labeler interface for a summary description of the tensor.
