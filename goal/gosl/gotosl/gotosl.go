@@ -169,3 +169,17 @@ func (st *State) System(sysname string) *System {
 	st.Systems[sysname] = sy
 	return sy
 }
+
+// GlobalVar returns global variable of given name, if found.
+func (st *State) GlobalVar(vrnm string) *Var {
+	for _, sy := range st.Systems {
+		for _, gp := range sy.Groups {
+			for _, vr := range gp.Vars {
+				if vr.Name == vrnm {
+					return vr
+				}
+			}
+		}
+	}
+	return nil
+}

@@ -5,7 +5,7 @@
 package slrand
 
 import (
-	"cogentcore.org/core/gpu/gosl/sltype"
+	"cogentcore.org/core/goal/gosl/sltype"
 	"cogentcore.org/core/math32"
 )
 

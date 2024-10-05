@@ -1519,8 +1519,58 @@ func getStructType(typ types.Type) (*types.Struct, error) {
 			return st, nil
 		}
 	}
+	if sl, ok := typ.(*types.Slice); ok {
+		typ = sl.Elem().Underlying()
+		if st, ok := typ.(*types.Struct); ok {
+			return st, nil
+		}
+	}
 	err := fmt.Errorf("gosl ERROR: type is not a struct and it should be: %q %+t", typ.String(), typ)
 	return nil, errors.Log(err)
+}
+
+// gosl: globalVar looks up whether the id in an IndexExpr is a global gosl variable.
+// in which case it returns a temp variable name to use, and the type info.
+func (p *printer) globalVar(idx *ast.IndexExpr) (isGlobal bool, tmpVar, typName string, vtyp types.Type, isReadOnly bool) {
+	id, ok := idx.X.(*ast.Ident)
+	if !ok {
+		return
+	}
+	gvr := p.GoToSL.GlobalVar(id.Name)
+	if gvr == nil {
+		return
+	}
+	isGlobal = true
+	isReadOnly = gvr.ReadOnly
+	tmpVar = strings.ToLower(id.Name)
+	vtyp, _ = getStructType(p.getIdType(id))
+	typName = gvr.Type[2:]
+	p.print("var ", tmpVar, token.ASSIGN)
+	p.expr(idx)
+	p.print(token.SEMICOLON, blank)
+	tmpVar = "&" + tmpVar
+	return
+}
+
+// gosl: methodIndex processes an index expression as receiver type of method call
+func (p *printer) methodIndex(idx *ast.IndexExpr) (recvPath, recvType string, pathType types.Type, err error) {
+	id, ok := idx.X.(*ast.Ident)
+	if !ok {
+		err = fmt.Errorf("gosl methodIndex ERROR: must have a recv variable identifier, not %#v:", idx.X)
+		errors.Log(err)
+		return
+	}
+	isGlobal, tmpVar, typName, vtyp, isReadOnly := p.globalVar(idx)
+	if isGlobal {
+		recvPath = tmpVar
+		recvType = typName
+		pathType = vtyp
+		_ = isReadOnly
+	} else {
+		_ = id
+		// do above
+	}
+	return
 }
 
 func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
@@ -1551,6 +1601,11 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 		} else {
 			pathIsPackage = true
 			recvType = id.Name // is a package path
+		}
+	} else if idx, ok := path.X.(*ast.IndexExpr); ok {
+		recvPath, recvType, pathType, err = p.methodIndex(idx)
+		if err != nil {
+			return
 		}
 	} else {
 		err := fmt.Errorf("gosl methodExpr ERROR: path expression for method call must be simple list of fields, not %#v:", path.X)
