@@ -52,8 +52,8 @@ struct ParamStruct {
 fn ParamStruct_IntegFromRaw(ps: ptr<function,ParamStruct>, idx: i32) {
 	var integ = Data[IndexF322D(Data[0], Data[1], u32(idx),u32(Integ))];
 	integ += (*ps).Dt * (Data[IndexF322D(Data[0], Data[1], u32(idx),u32(Raw))] - integ);
-	Data[IndexF322D(Data[0], Data[1], u32(idx),u32(Integ))]=integ;
-	Data[IndexF322D(Data[0], Data[1], u32(idx),u32(Exp))]=FastExp(-integ);
+	Data[IndexF322D(Data[0], Data[1], u32(idx),u32(Integ))] = integ;
+	Data[IndexF322D(Data[0], Data[1], u32(idx),u32(Exp))] = FastExp(-integ);
 }
 
 // Compute does the main computation

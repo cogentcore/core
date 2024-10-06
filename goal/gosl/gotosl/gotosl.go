@@ -190,7 +190,13 @@ func (st *State) Run() error {
 	RemoveGenFiles(st.Config.Output)
 	RemoveGenFiles(st.ImportsDir)
 
-	st.ProjectFiles()   // get list of all files, recursively gets imports etc.
+	st.ProjectFiles() // get list of all files, recursively gets imports etc.
+	if len(st.GoFiles) == 0 {
+		if st.Config.Debug {
+			fmt.Println("gosl: no gosl files in current directory")
+		}
+		return nil
+	}
 	st.ExtractFiles()   // get .go from project files
 	st.ExtractImports() // get .go from imports
 	st.TranslateDir("./" + st.ImportsDir)

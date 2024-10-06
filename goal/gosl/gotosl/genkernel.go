@@ -26,7 +26,7 @@ func (st *State) GenKernel(sy *System, kn *Kernel) {
 	kfn := kn.Name + ".wgsl"
 	fn := filepath.Join(st.Config.Output, kfn)
 	kn.Filename = fn
-	st.WriteFileLines(fn, lines)
+	WriteFileLines(fn, lines)
 
 	st.CompileFile(kfn)
 }

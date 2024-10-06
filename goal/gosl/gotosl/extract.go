@@ -18,7 +18,7 @@ import (
 func (st *State) ExtractFiles() {
 	for fn, fl := range st.GoFiles {
 		fl.Lines = st.ExtractGosl(fl.Lines)
-		st.WriteFileLines(filepath.Join(st.ImportsDir, fn), st.AppendGoHeader(fl.Lines))
+		WriteFileLines(filepath.Join(st.ImportsDir, fn), st.AppendGoHeader(fl.Lines))
 	}
 }
 
@@ -36,7 +36,7 @@ func (st *State) ExtractImports() {
 	for _, im := range st.GoImports {
 		for fn, fl := range im {
 			fl.Lines = st.ExtractGosl(fl.Lines)
-			st.WriteFileLines(filepath.Join(st.ImportsDir, fn), st.AppendGoHeader(fl.Lines))
+			WriteFileLines(filepath.Join(st.ImportsDir, fn), st.AppendGoHeader(fl.Lines))
 		}
 	}
 }

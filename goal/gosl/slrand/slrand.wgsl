@@ -9,7 +9,7 @@
 // use on the GPU, with equivalent Go versions available in slrand.go.
 // This is using the Philox2x32 counter-based RNG.
 
-#include "sltype.wgsl"
+// #include "sltype.wgsl"
 
 // Philox2x32round does one round of updating of the counter.
 fn Philox2x32round(counter: su64, key: u32) -> su64 {

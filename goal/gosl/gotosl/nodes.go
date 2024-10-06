@@ -1644,7 +1644,7 @@ func (p *printer) globalVar(idx *ast.IndexExpr) (isGlobal bool, tmpVar, typName 
 }
 
 // gosl: methodIndex processes an index expression as receiver type of method call
-func (p *printer) methodIndex(idx *ast.IndexExpr) (recvPath, recvType string, pathType types.Type, err error) {
+func (p *printer) methodIndex(idx *ast.IndexExpr) (recvPath, recvType string, pathType types.Type, isReadOnly bool, err error) {
 	id, ok := idx.X.(*ast.Ident)
 	if !ok {
 		err = fmt.Errorf("gosl methodIndex ERROR: must have a recv variable identifier, not %#v:", idx.X)
@@ -1656,7 +1656,6 @@ func (p *printer) methodIndex(idx *ast.IndexExpr) (recvPath, recvType string, pa
 		recvPath = tmpVar
 		recvType = typName
 		pathType = vtyp
-		_ = isReadOnly
 	} else {
 		_ = id
 		// do above
@@ -1689,7 +1688,7 @@ func (p *printer) tensorMethod(x *ast.CallExpr, vr *Var, methName string) {
 	}
 	p.print(token.RPAREN, token.RBRACK)
 	if methName == "Set" {
-		p.print(token.ASSIGN)
+		p.print(blank, token.ASSIGN, blank)
 		p.expr(args[0])
 	}
 }
@@ -1701,6 +1700,7 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 	recvType := ""
 	var err error
 	pathIsPackage := false
+	var rwargs []rwArg
 	var pathType types.Type
 	if sl, ok := path.X.(*ast.SelectorExpr); ok { // path is itself a selector
 		recvPath, recvType, pathType, err = p.methodPath(sl)
@@ -1729,9 +1729,13 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 			recvType = id.Name // is a package path
 		}
 	} else if idx, ok := path.X.(*ast.IndexExpr); ok {
-		recvPath, recvType, pathType, err = p.methodIndex(idx)
+		isReadOnly := false
+		recvPath, recvType, pathType, isReadOnly, err = p.methodIndex(idx)
 		if err != nil {
 			return
+		}
+		if !isReadOnly {
+			rwargs = append(rwargs, rwArg{idx: idx, tmpVar: recvPath})
 		}
 	} else {
 		err := fmt.Errorf("gosl methodExpr ERROR: path expression for method call must be simple list of fields, not %#v:", path.X)
@@ -1739,13 +1743,14 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 		return
 	}
 	args := x.Args
-	var rwargs []rwArg
 	if pathType != nil {
 		meth, _, _ := types.LookupFieldOrMethod(pathType, true, p.pkg.Types, methName)
 		if meth != nil {
 			if ft, ok := meth.(*types.Func); ok {
 				sig := ft.Type().(*types.Signature)
-				args, rwargs = p.goslFixArgs(x.Args, sig.Params())
+				var rwa []rwArg
+				args, rwa = p.goslFixArgs(x.Args, sig.Params())
+				rwargs = append(rwargs, rwa...)
 			}
 		}
 		if len(rwargs) > 0 {

@@ -3,16 +3,26 @@ package main
 import (
 	"fmt"
 
-	"cogentcore.org/core/gpu/gosl/slrand"
-	"cogentcore.org/core/gpu/gosl/sltype"
+	"cogentcore.org/core/goal/gosl/slrand"
+	"cogentcore.org/core/goal/gosl/sltype"
 	"cogentcore.org/core/math32"
 )
 
-//gosl:wgsl rand
-// #include "slrand.wgsl"
-//gosl:end rand
+//gosl:start
 
-//gosl:start rand
+//gosl:vars
+var (
+	//gosl:read-only
+	Seed []Seeds
+
+	// Data
+	Data []Rnds
+)
+
+type Seeds struct {
+	Seed      uint64
+	pad, pad1 int32
+}
 
 type Rnds struct {
 	Uints      sltype.Uint32Vec2
@@ -39,7 +49,11 @@ func (r *Rnds) RndGen(counter uint64, idx uint32) {
 	r.Gauss = slrand.Float32NormVec2(counter, uint32(3), idx)
 }
 
-//gosl:end rand
+func Compute(i uint32) { //gosl:kernel
+	Data[i].RndGen(Seed[0].Seed, i)
+}
+
+//gosl:end
 
 const Tol = 1.0e-4 // fails at lower tol eventually -- -6 works for many
 

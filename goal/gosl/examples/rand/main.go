@@ -5,23 +5,15 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"runtime"
-	"unsafe"
 
 	"log/slog"
 
 	"cogentcore.org/core/base/timer"
-	"cogentcore.org/core/gpu"
 )
 
-// note: standard one to use is plain "gosl" which should be go install'd
-
-//go:generate ../../gosl rand.go rand.wgsl
-
-//go:embed shaders/*.wgsl
-var shaders embed.FS
+//go:generate gosl
 
 func init() {
 	// must lock main thread for gpu!
@@ -29,61 +21,40 @@ func init() {
 }
 
 func main() {
-	gpu.Debug = true
-	gp := gpu.NewComputeGPU()
-	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
+	GPUInit()
 
 	// n := 10
 	n := 4_000_000 // 5_000_000 is too much -- 256_000_000 -- up against buf size limit
-	threads := 64
+
+	UseGPU = false
+
+	Seed = make([]Seeds, 1)
 
 	dataC := make([]Rnds, n)
 	dataG := make([]Rnds, n)
 
+	Data = dataC
+
 	cpuTmr := timer.Time{}
 	cpuTmr.Start()
-
-	seed := uint64(0)
-	for i := range dataC {
-		d := &dataC[i]
-		d.RndGen(seed, uint32(i))
-	}
+	RunOneCompute(n)
 	cpuTmr.Stop()
 
-	sy := gpu.NewComputeSystem(gp, "slrand")
-	pl := gpu.NewComputePipelineShaderFS(shaders, "shaders/rand.wgsl", sy)
-	vars := sy.Vars()
-	sgp := vars.AddGroup(gpu.Storage)
-
-	ctrv := sgp.AddStruct("Counter", int(unsafe.Sizeof(seed)), 1, gpu.ComputeShader)
-	datav := sgp.AddStruct("Data", int(unsafe.Sizeof(Rnds{})), n, gpu.ComputeShader)
-
-	sgp.SetNValues(1)
-	sy.Config()
-
-	cvl := ctrv.Values.Values[0]
-	dvl := datav.Values.Values[0]
+	UseGPU = true
+	Data = dataG
 
 	gpuFullTmr := timer.Time{}
 	gpuFullTmr.Start()
 
-	gpu.SetValueFrom(cvl, []uint64{seed})
-	gpu.SetValueFrom(dvl, dataG)
+	ToGPU(SeedVar, DataVar)
 
 	gpuTmr := timer.Time{}
 	gpuTmr.Start()
 
-	ce, _ := sy.BeginComputePass()
-	pl.Dispatch1D(ce, n, threads)
-	ce.End()
-	dvl.GPUToRead(sy.CommandEncoder)
-	sy.EndComputePass(ce)
-
+	RunCompute(n)
 	gpuTmr.Stop()
 
-	dvl.ReadSync()
-	gpu.ReadToBytes(dvl, dataG)
-
+	RunDone(DataVar)
 	gpuFullTmr.Stop()
 
 	anyDiffEx := false
@@ -126,6 +97,5 @@ func main() {
 	gpu := gpuTmr.Total
 	fmt.Printf("N: %d\t CPU: %v\t GPU: %v\t Full: %v\t CPU/GPU: %6.4g\n", n, cpu, gpu, gpuFullTmr.Total, float64(cpu)/float64(gpu))
 
-	sy.Release()
-	gp.Release()
+	GPURelease()
 }

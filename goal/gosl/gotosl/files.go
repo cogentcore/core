@@ -7,7 +7,6 @@ package gotosl
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -41,7 +40,7 @@ func ReadFileLines(fn string) ([][]byte, error) {
 	return lines, nil
 }
 
-func (st *State) WriteFileLines(fn string, lines [][]byte) error {
+func WriteFileLines(fn string, lines [][]byte) error {
 	res := bytes.Join(lines, []byte("\n"))
 	return os.WriteFile(fn, res, 0644)
 }
@@ -182,21 +181,21 @@ func (st *State) CopyPackageFile(fnm, packagePath string) error {
 	}
 	dir, _ := filepath.Split(fn)
 	fmfn := filepath.Join(dir, fnm)
-	CopyFile(fmfn, tofn)
+	lines, err := CopyFile(fmfn, tofn)
+	if err == nil {
+		st.SLImportFiles = append(st.SLImportFiles, &File{Name: fnm, Lines: lines})
+	}
 	return nil
 }
 
-func CopyFile(src, dst string) error {
-	in, err := os.Open(src)
+func CopyFile(src, dst string) ([][]byte, error) {
+	lines, err := ReadFileLines(src)
 	if err != nil {
-		return err
+		return lines, err
 	}
-	defer in.Close()
-	out, err := os.Create(dst)
+	err = WriteFileLines(dst, lines)
 	if err != nil {
-		return err
+		return lines, err
 	}
-	defer out.Close()
-	_, err = io.Copy(out, in)
-	return err
+	return lines, err
 }
