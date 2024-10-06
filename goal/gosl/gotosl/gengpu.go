@@ -140,7 +140,7 @@ func (st *State) GenGPUSystemInit(sy *System) string {
 				typ := strings.TrimPrefix(vr.Type, "tensor.")
 				b.WriteString(fmt.Sprintf("\t\t\tvr = sgp.Add(%q, gpu.%s, 1, gpu.ComputeShader)\n", vr.Name, typ))
 			} else {
-				b.WriteString(fmt.Sprintf("\t\t\tvr = sgp.AddStruct(%q, int(unsafe.Sizeof(%s{})), 1, gpu.ComputeShader)\n", vr.Name, vr.Type[2:]))
+				b.WriteString(fmt.Sprintf("\t\t\tvr = sgp.AddStruct(%q, int(unsafe.Sizeof(%s{})), 1, gpu.ComputeShader)\n", vr.Name, vr.SLType()))
 			}
 			if vr.ReadOnly {
 				b.WriteString("\t\t\tvr.ReadOnly = true\n")

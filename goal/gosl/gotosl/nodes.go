@@ -22,7 +22,6 @@ import (
 	"go/types"
 	"math"
 	"path"
-	"reflect"
 	"slices"
 	"strconv"
 	"strings"
@@ -1636,7 +1635,7 @@ func (p *printer) globalVar(idx *ast.IndexExpr) (isGlobal bool, tmpVar, typName 
 	if err == nil {
 		vtyp = nmd
 	}
-	typName = gvr.Type[2:]
+	typName = gvr.SLType()
 	p.print("var ", tmpVar, token.ASSIGN)
 	p.expr(idx)
 	p.print(token.SEMICOLON, blank)
@@ -1665,6 +1664,36 @@ func (p *printer) methodIndex(idx *ast.IndexExpr) (recvPath, recvType string, pa
 	return
 }
 
+func (p *printer) tensorMethod(x *ast.CallExpr, vr *Var, methName string) {
+	args := x.Args
+
+	stArg := 0
+	if methName == "Set" {
+		stArg = 1
+	}
+	p.print(vr.Name, token.LBRACK)
+	p.print(vr.IndexFunc(), token.LPAREN)
+	nd := vr.TensorDims
+	for d := range nd {
+		p.print(vr.Name, token.LBRACK, strconv.Itoa(d), token.RBRACK, token.COMMA, blank)
+	}
+	n := len(args)
+	for i := stArg; i < n; i++ {
+		ag := args[i]
+		p.print("u32", token.LPAREN)
+		p.expr(ag)
+		p.print(token.RPAREN)
+		if i < n-1 {
+			p.print(token.COMMA)
+		}
+	}
+	p.print(token.RPAREN, token.RBRACK)
+	if methName == "Set" {
+		p.print(token.ASSIGN)
+		p.expr(args[0])
+	}
+}
+
 func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 	path := x.Fun.(*ast.SelectorExpr) // we know fun is selector
 	methName := path.Sel.Name
@@ -1679,6 +1708,11 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 			return
 		}
 	} else if id, ok := path.X.(*ast.Ident); ok {
+		gvr := p.GoToSL.GlobalVar(id.Name)
+		if gvr != nil && gvr.Tensor {
+			p.tensorMethod(x, gvr, methName)
+			return
+		}
 		recvPath = id.Name
 		typ := p.getIdType(id)
 		if typ != nil {
@@ -2465,19 +2499,6 @@ func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 		vr := &Var{Name: nm, Type: typ, ReadOnly: readOnly}
 		if strings.HasPrefix(typ, "tensor.") {
 			vr.Tensor = true
-			kindStr := strings.TrimPrefix(typ, "tensor.")
-			kind := reflect.Float32
-			switch kindStr {
-			case "Float32":
-				kind = reflect.Float32
-			case "Uint32":
-				kind = reflect.Uint32
-			case "Int32":
-				kind = reflect.Int32
-			default:
-				errors.Log(fmt.Errorf("gosl: system %q: variable %q type is not supported: %q", sysname, nm, kindStr))
-				continue
-			}
 			dstr, ok := directiveAfter(dirs, "dims")
 			if !ok {
 				errors.Log(fmt.Errorf("gosl: system %q: variable %q tensor vars require //gosl:dims <n> to specify number of dimensions", sysname, nm))
@@ -2487,7 +2508,7 @@ func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 			if !ok {
 				errors.Log(fmt.Errorf("gosl: system %q: variable %q tensor dims parse error: %s", sysname, nm, err.Error()))
 			}
-			vr.TensorKind = kind
+			vr.SetTensorKind()
 			vr.TensorDims = dims
 		}
 		gp.Vars = append(gp.Vars, vr)

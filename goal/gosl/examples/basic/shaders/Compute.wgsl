@@ -5,10 +5,15 @@
 @group(0) @binding(0)
 var<storage, read_write> Params: array<ParamStruct>;
 @group(0) @binding(1)
-var<storage, read_write> Data: 
+var<storage, read_write> Data: array<f32>;
+
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
 	Compute(idx.x);
+}
+
+fn IndexF322D(s0: f32, s1: f32, i0: u32, i1: u32) -> u32 {
+	return u32(2) + bitcast<u32>(s0) * i0 + bitcast<u32>(s1) * i1;
 }
 
 
@@ -45,10 +50,10 @@ struct ParamStruct {
 
 // IntegFromRaw computes integrated value from current raw value
 fn ParamStruct_IntegFromRaw(ps: ptr<function,ParamStruct>, idx: i32) {
-	var integ = Data.Value(idx, Integ);
-	integ += (*ps).Dt * (Data.Value(idx, Raw) - integ);
-	Data.Set(integ, idx, Integ);
-	Data.Set(FastExp(-integ), idx, Exp);
+	var integ = Data[IndexF322D(Data[0], Data[1], u32(idx),u32(Integ))];
+	integ += (*ps).Dt * (Data[IndexF322D(Data[0], Data[1], u32(idx),u32(Raw))] - integ);
+	Data[IndexF322D(Data[0], Data[1], u32(idx),u32(Integ))]=integ;
+	Data[IndexF322D(Data[0], Data[1], u32(idx),u32(Exp))]=FastExp(-integ);
 }
 
 // Compute does the main computation

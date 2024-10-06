@@ -5,11 +5,13 @@
 package gotosl
 
 import (
-	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
+
+	"cogentcore.org/core/base/errors"
 )
 
 // System represents a ComputeSystem, and its kernels and variables.
@@ -69,6 +71,45 @@ type Var struct {
 
 	// data kind of the tensor
 	TensorKind reflect.Kind
+}
+
+func (vr *Var) SetTensorKind() {
+	kindStr := strings.TrimPrefix(vr.Type, "tensor.")
+	kind := reflect.Float32
+	switch kindStr {
+	case "Float32":
+		kind = reflect.Float32
+	case "Uint32":
+		kind = reflect.Uint32
+	case "Int32":
+		kind = reflect.Int32
+	default:
+		errors.Log(fmt.Errorf("gosl: variable %q type is not supported: %q", vr.Name, kindStr))
+	}
+	vr.TensorKind = kind
+}
+
+// SLType returns the WGSL type string
+func (vr *Var) SLType() string {
+	if vr.Tensor {
+		switch vr.TensorKind {
+		case reflect.Float32:
+			return "f32"
+		case reflect.Int32:
+			return "i32"
+		case reflect.Uint32:
+			return "u32"
+		}
+	} else {
+		return vr.Type[2:]
+	}
+	return ""
+}
+
+// IndexFunc returns the index function name
+func (vr *Var) IndexFunc() string {
+	typ := strings.ToUpper(vr.SLType())
+	return fmt.Sprintf("Index%s%dD", typ, vr.TensorDims)
 }
 
 // Group represents one variable group.
