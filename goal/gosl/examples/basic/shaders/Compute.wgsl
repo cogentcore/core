@@ -5,7 +5,7 @@
 @group(0) @binding(0)
 var<storage, read_write> Params: array<ParamStruct>;
 @group(0) @binding(1)
-var<storage, read_write> Data: array<f32>;
+var<storage, read_write> Data: 
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
 	Compute(idx.x);
@@ -23,11 +23,12 @@ fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
 
 // Data is the data on which the computation operates.
 // 2D: outer index is data, inner index is: Raw, Integ, Exp vars.
-//gosl:2D
+//gosl:dims 2
 
-const  Raw: u32   = 0;
-const  Integ: u32 = 1;
-const  Exp: u32 = 2;
+const  Raw: i32   = 0;
+const  Integ: i32 = 1;
+
+const  Exp: i32 = 2;
 
 // ParamStruct has the test params
 struct ParamStruct {
@@ -43,16 +44,16 @@ struct ParamStruct {
 }
 
 // IntegFromRaw computes integrated value from current raw value
-fn ParamStruct_IntegFromRaw(ps: ptr<function,ParamStruct>, idx: u32) {
-	var integ = Data[F32Index2D(Data[0], Data[1], idx, Integ)]; // .Value(idx, Integ);
-	integ += (*ps).Dt * (Data[F32Index2D(Data[0], Data[1], idx, Raw)] - integ); // .Value(idx, Raw) - integ);
-	Data[F32Index2D(Data[0], Data[1], idx, Integ)] = integ; // .Set(integ, idx, Integ);
-	Data[F32Index2D(Data[0], Data[1], idx, Exp)] = FastExp(-integ); // .Set(FastExp(-integ), idx, Exp);
+fn ParamStruct_IntegFromRaw(ps: ptr<function,ParamStruct>, idx: i32) {
+	var integ = Data.Value(idx, Integ);
+	integ += (*ps).Dt * (Data.Value(idx, Raw) - integ);
+	Data.Set(integ, idx, Integ);
+	Data.Set(FastExp(-integ), idx, Exp);
 }
 
 // Compute does the main computation
 fn Compute(i: u32) { //gosl:kernel
-	var params=Params[0]; ParamStruct_IntegFromRaw(&params, i);
+	var params=Params[0]; ParamStruct_IntegFromRaw(&params, i32(i));
 }
 
 
@@ -71,22 +72,3 @@ fn FastExp(x: f32) -> f32 {
 	i += (((((((((((3537 * m) >> 16) + 13668) * m) >> 18) + 15817) * m) >> 14) - 80470) * m) >> 11);
 	return bitcast<f32>(u32(i));
 }
-
-// sltensor indexing functions
-
-fn F32Index2D(s0: f32, s1: f32, i0: u32, i1: u32) -> u32 {
-	return u32(2) + bitcast<u32>(s0) * i0 + bitcast<u32>(s1) * i1;
-}
-
-fn F32Index3D(s0: f32, s1: f32, s2: f32, i0: u32, i1: u32, i2: u32) -> u32 {
-	return u32(3) + bitcast<u32>(s0) * i0 + bitcast<u32>(s1) * i1 + bitcast<u32>(s2) * i2;
-}
-
-fn U32Index2D(s0: u32, s1: u32, i0: u32, i1: u32) -> u32 {
-	return u32(2) + s0 * i0 + s1 * i1;
-}
-
-fn U32Index3D(s0: u32, s1: u32, s2: u32, i0: u32, i1: u32, i2: u32) -> u32 {
-	return u32(3) + s0 * i0 + s1 * i1 + s2 * i2;
-}
-

@@ -8,6 +8,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 )
 
@@ -65,6 +66,9 @@ type Var struct {
 
 	// Number of dimensions
 	TensorDims int
+
+	// data kind of the tensor
+	TensorKind reflect.Kind
 }
 
 // Group represents one variable group.

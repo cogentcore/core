@@ -20,7 +20,7 @@ var (
 
 	// Data is the data on which the computation operates.
 	// 2D: outer index is data, inner index is: Raw, Integ, Exp vars.
-	//gosl:2D
+	//gosl:dims 2
 	Data tensor.Float32
 )
 

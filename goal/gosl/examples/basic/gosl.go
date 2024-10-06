@@ -5,7 +5,6 @@ package main
 import (
 	"embed"
 	"unsafe"
-
 	"cogentcore.org/core/gpu"
 )
 
@@ -27,7 +26,7 @@ type GPUVars int32 //enums:enum
 
 const (
 	ParamsVar GPUVars = 0
-	DataVar   GPUVars = 1
+	DataVar GPUVars = 1
 )
 
 // GPUInit initializes the GPU compute system,
@@ -108,7 +107,7 @@ func RunOneCompute(n int, syncVars ...GPUVars) {
 // RunDone must be called after Run* calls to start compute kernels.
 // This actually submits the kernel jobs to the GPU, and adds commands
 // to synchronize the given variables back from the GPU to the CPU.
-// After this function completes, the GPU results will be available in
+// After this function completes, the GPU results will be available in 
 // the specified variables.
 func RunDone(syncVars ...GPUVars) {
 	if !UseGPU {
@@ -120,6 +119,7 @@ func RunDone(syncVars ...GPUVars) {
 	sy.EndComputePass()
 	SyncFromGPU(syncVars...)
 }
+
 
 // ToGPU copies given variables to the GPU for the system.
 func ToGPU(vars ...GPUVars) {

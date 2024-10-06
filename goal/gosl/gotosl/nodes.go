@@ -22,6 +22,7 @@ import (
 	"go/types"
 	"math"
 	"path"
+	"reflect"
 	"slices"
 	"strconv"
 	"strings"
@@ -73,19 +74,40 @@ func (p *printer) linebreak(line, min int, ws whiteSpace, newSection bool) (nbre
 	return
 }
 
-// gosl: find any gosl directive in given comments, returns directive and remaining docs
-func (p *printer) findDirective(g *ast.CommentGroup) (dir string, docs string) {
+// gosl: find any gosl directive in given comments, returns directive(s) and remaining docs
+func (p *printer) findDirective(g *ast.CommentGroup) (dirs []string, docs string) {
 	if g == nil {
 		return
 	}
 	for _, c := range g.List {
 		if strings.HasPrefix(c.Text, "//gosl:") {
-			dir = c.Text[7:]
+			dirs = append(dirs, c.Text[7:])
 		} else {
 			docs += c.Text + " "
 		}
 	}
 	return
+}
+
+// gosl: hasDirective returns whether directive(s) contains string
+func hasDirective(dirs []string, dir string) bool {
+	for _, d := range dirs {
+		if strings.Contains(d, dir) {
+			return true
+		}
+	}
+	return false
+}
+
+// gosl: directiveAfter returns the directive after given leading text,
+// and a bool indicating if the string was found.
+func directiveAfter(dirs []string, dir string) (string, bool) {
+	for _, d := range dirs {
+		if strings.HasPrefix(d, dir) {
+			return strings.TrimSpace(strings.TrimPrefix(d, dir)), true
+		}
+	}
+	return "", false
 }
 
 // setComment sets g as the next comment if g != nil and if node comments
@@ -2382,19 +2404,18 @@ func (p *printer) spec(spec ast.Spec, n int, doIndent bool, tok token.Token) {
 	}
 }
 
-// gosl: process system vars
+// gosl: process system global vars
 func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 	sy := p.GoToSL.System(sysname)
 	var gp *Group
 	for _, s := range d.Specs {
 		vs := s.(*ast.ValueSpec)
-		dir, docs := p.findDirective(vs.Doc)
+		dirs, docs := p.findDirective(vs.Doc)
 		readOnly := false
-		if strings.Contains(dir, "read-only") {
+		if hasDirective(dirs, "read-only") {
 			readOnly = true
 		}
-		if strings.HasPrefix(dir, "group") {
-			gpnm := strings.TrimSpace(dir[5:])
+		if gpnm, ok := directiveAfter(dirs, "group"); ok {
 			if gpnm == "" {
 				gp = &Group{Name: fmt.Sprintf("Group_%d", len(sy.Groups)), Doc: docs}
 				sy.Groups = append(sy.Groups, gp)
@@ -2431,7 +2452,7 @@ func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 		} else {
 			sel, ok := vs.Type.(*ast.SelectorExpr)
 			if !ok {
-				errors.Log(fmt.Errorf("gosl: system %q: Var types must be []slices or tensor.Float32,  tensor.Int32", sysname))
+				errors.Log(fmt.Errorf("gosl: system %q: Var types must be []slices or tensor.Float32,  tensor.Uint32", sysname))
 				continue
 			}
 			sid, ok := sel.X.(*ast.Ident)
@@ -2442,6 +2463,33 @@ func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 			typ = sid.Name + "." + sel.Sel.Name
 		}
 		vr := &Var{Name: nm, Type: typ, ReadOnly: readOnly}
+		if strings.HasPrefix(typ, "tensor.") {
+			vr.Tensor = true
+			kindStr := strings.TrimPrefix(typ, "tensor.")
+			kind := reflect.Float32
+			switch kindStr {
+			case "Float32":
+				kind = reflect.Float32
+			case "Uint32":
+				kind = reflect.Uint32
+			case "Int32":
+				kind = reflect.Int32
+			default:
+				errors.Log(fmt.Errorf("gosl: system %q: variable %q type is not supported: %q", sysname, nm, kindStr))
+				continue
+			}
+			dstr, ok := directiveAfter(dirs, "dims")
+			if !ok {
+				errors.Log(fmt.Errorf("gosl: system %q: variable %q tensor vars require //gosl:dims <n> to specify number of dimensions", sysname, nm))
+				continue
+			}
+			dims, err := strconv.Atoi(dstr)
+			if !ok {
+				errors.Log(fmt.Errorf("gosl: system %q: variable %q tensor dims parse error: %s", sysname, nm, err.Error()))
+			}
+			vr.TensorKind = kind
+			vr.TensorDims = dims
+		}
 		gp.Vars = append(gp.Vars, vr)
 		if p.GoToSL.Config.Debug {
 			fmt.Println("\tAdded var:", nm, typ, "to group:", gp.Name)
@@ -2468,9 +2516,9 @@ func (p *printer) genDecl(d *ast.GenDecl) {
 			if n > 1 && (d.Tok == token.CONST || d.Tok == token.VAR) {
 				// two or more grouped const/var declarations:
 				if d.Tok == token.VAR {
-					dir, _ := p.findDirective(d.Doc)
-					if strings.HasPrefix(dir, "vars") {
-						p.systemVars(d, strings.TrimSpace(dir[4:]))
+					dirs, _ := p.findDirective(d.Doc)
+					if sysname, ok := directiveAfter(dirs, "vars"); ok {
+						p.systemVars(d, sysname)
 						return
 					}
 				}
@@ -2488,7 +2536,6 @@ func (p *printer) genDecl(d *ast.GenDecl) {
 				var line int
 				for i, s := range d.Specs {
 					vs := s.(*ast.ValueSpec)
-					// p.findDirective(vs.Doc)
 					if i > 0 {
 						p.linebreak(p.lineFor(s.Pos()), 1, ignore, p.linesFrom(line) > 0)
 					}
