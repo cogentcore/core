@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"cogentcore.org/core/gpu/gosl/sltype"
+	"cogentcore.org/core/goal/gosl/sltype"
 	"github.com/stretchr/testify/assert"
 )
 

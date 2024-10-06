@@ -2,7 +2,9 @@
 
 The use of massively parallel _Graphical Processsing Unit_ (_GPU_) hardware has revolutionized machine learning and other fields, producing many factors of speedup relative to traditional _CPU_ (_Central Processing Unit_) computation. However, there are numerous challenges for supporting GPU-based computation, relative to the more flexible CPU coding.
 
-Goal provides a solution to these challenges that enables the same Go-based code to work efficiently and reasonably naturally on both the GPU and CPU (i.e., standard Go execution), for maximum portability. The ability to run the same code on both types of hardware is also critical for debugging the otherwise difficult to debug GPU version, and for avoiding bugs in the first place by catching them first on the CPU, while providing known correct comparison results.
+The Goal framework provides a solution to these challenges that enables the same Go-based code to work efficiently and reasonably naturally on both the GPU and CPU (i.e., standard Go execution), via the [gosl](gosl) package. Debugging code on the GPU is notoriously difficult because the usual tools are not directly available (not even print statements), so the ability to run exactly the same code on the CPU is invaluable, in addition to the benefits in portability across platforms without GPU hardware.
+
+See the [gosl](gosl) documentation for the details on how to write code that works on the GPU. The remainder of this document provides an overview of the overall approach in relation to other related tools.
 
 The two most important challenges are:
 

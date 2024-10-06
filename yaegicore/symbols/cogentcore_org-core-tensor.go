@@ -112,6 +112,7 @@ func init() {
 		"NewStringFull":           reflect.ValueOf(tensor.NewStringFull),
 		"NewStringScalar":         reflect.ValueOf(tensor.NewStringScalar),
 		"NewStringShape":          reflect.ValueOf(tensor.NewStringShape),
+		"NewUint32":               reflect.ValueOf(tensor.NewUint32),
 		"NumThreads":              reflect.ValueOf(&tensor.NumThreads).Elem(),
 		"OddColumn":               reflect.ValueOf(tensor.OddColumn),
 		"OddRow":                  reflect.ValueOf(tensor.OddRow),

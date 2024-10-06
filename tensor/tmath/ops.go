@@ -64,7 +64,7 @@ func Dec(a tensor.Tensor) error {
 }
 
 // Add adds two tensors into output.
-func Add(a, b tensor.Tensor) tensor.Tensor {
+func Add(a, b tensor.Tensor) tensor.Values {
 	return tensor.CallOut2(AddOut, a, b)
 }
 
@@ -77,7 +77,7 @@ func AddOut(a, b tensor.Tensor, out tensor.Values) error {
 }
 
 // Sub subtracts tensors into output.
-func Sub(a, b tensor.Tensor) tensor.Tensor {
+func Sub(a, b tensor.Tensor) tensor.Values {
 	return tensor.CallOut2(SubOut, a, b)
 }
 
@@ -87,7 +87,7 @@ func SubOut(a, b tensor.Tensor, out tensor.Values) error {
 }
 
 // Mul multiplies tensors into output.
-func Mul(a, b tensor.Tensor) tensor.Tensor {
+func Mul(a, b tensor.Tensor) tensor.Values {
 	return tensor.CallOut2(MulOut, a, b)
 }
 
@@ -98,7 +98,7 @@ func MulOut(a, b tensor.Tensor, out tensor.Values) error {
 
 // Div divides tensors into output. always does floating point division,
 // even with integer operands.
-func Div(a, b tensor.Tensor) tensor.Tensor {
+func Div(a, b tensor.Tensor) tensor.Values {
 	return tensor.CallOut2Float64(DivOut, a, b)
 }
 
@@ -108,7 +108,7 @@ func DivOut(a, b tensor.Tensor, out tensor.Values) error {
 }
 
 // Mod performs modulus a%b on tensors into output.
-func Mod(a, b tensor.Tensor) tensor.Tensor {
+func Mod(a, b tensor.Tensor) tensor.Values {
 	return tensor.CallOut2(ModOut, a, b)
 }
 
@@ -118,7 +118,7 @@ func ModOut(a, b tensor.Tensor, out tensor.Values) error {
 }
 
 // Negate stores in the output the bool value -a.
-func Negate(a tensor.Tensor) tensor.Tensor {
+func Negate(a tensor.Tensor) tensor.Values {
 	return tensor.CallOut1(NegateOut, a)
 }
 
