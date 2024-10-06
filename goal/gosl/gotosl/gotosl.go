@@ -139,6 +139,9 @@ type State struct {
 	// path to shaders/imports directory.
 	ImportsDir string
 
+	// name of the package
+	Package string
+
 	// GoFiles are all the files with gosl content in current directory.
 	GoFiles map[string]*File
 

@@ -3,31 +3,21 @@ package test
 import (
 	"math"
 
+	"cogentcore.org/core/goal/gosl/slbool"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/vgpu/gosl/slbool"
 )
 
-// note: this code is included in the go pre-processing output but
-// then removed from the final wgsl output.
-// Use when you need different versions of the same function for CPU vs. GPU
+//gosl:start
 
-// MyTrickyFun this is the CPU version of the tricky function
-func MyTrickyFun(x float32) float32 {
-	return 10 // ok actually not tricky here, but whatever
-}
+//gosl:vars
+var (
+	// Params are the parameters for the computation.
+	//gosl:read-only
+	Params []ParamStruct
 
-//gosl:wgsl basic
-
-// // note: here is the wgsl version, only included in wgsl
-
-// // MyTrickyFun this is the GPU version of the tricky function
-// fn MyTrickyFun(x: f32) -> f32 {
-// 	return 16.0; // ok actually not tricky here, but whatever
-// }
-
-//gosl:end basic
-
-//gosl:start basic
+	// Data is the data on which the computation operates.
+	Data []DataStruct
+)
 
 // FastExp is a quartic spline approximation to the Exp function, by N.N. Schraudolph
 // It does not have any of the sanity checking of a standard method -- returns
@@ -166,7 +156,12 @@ func (ps *ParamStruct) AnotherMeth(ds *DataStruct, ptrarg *float32) {
 	*ptrarg = -1
 }
 
-//gosl:end basic
+// Compute does the main computation
+func Compute(i uint32) { //gosl:kernel
+	Params[0].IntegFromRaw(&Data[i])
+}
+
+//gosl:end
 
 // note: only core compute code needs to be in shader -- all init is done CPU-side
 
@@ -178,22 +173,3 @@ func (ps *ParamStruct) Defaults() {
 func (ps *ParamStruct) Update() {
 	ps.Dt = 1.0 / ps.Tau
 }
-
-//gosl:wgsl basic
-/*
-@group(0) @binding(0)
-var<storage, read_write> Params: array<ParamStruct>;
-
-@group(0) @binding(1)
-var<storage, read_write> Data: array<DataStruct>;
-
-@compute
-@workgroup_size(64)
-fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
-	var pars = Params[0];
-	var data = Data[idx.x];
-	ParamStruct_IntegFromRaw(&pars, &data);
-	Data[idx.x] = data;
-}
-*/
-//gosl:end basic

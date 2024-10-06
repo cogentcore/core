@@ -46,10 +46,16 @@ func WriteFileLines(fn string, lines [][]byte) error {
 }
 
 // HasGoslTag returns true if given file has a //gosl: tag
-func HasGoslTag(lines [][]byte) bool {
+func (st *State) HasGoslTag(lines [][]byte) bool {
 	key := []byte("//gosl:")
+	pkg := []byte("package ")
 	for _, ln := range lines {
 		tln := bytes.TrimSpace(ln)
+		if st.Package == "" {
+			if bytes.HasPrefix(tln, pkg) {
+				st.Package = string(bytes.TrimPrefix(tln, pkg))
+			}
+		}
 		if bytes.HasPrefix(tln, key) {
 			return true
 		}
@@ -78,7 +84,7 @@ func (st *State) ProjectFiles() {
 		if err != nil {
 			continue
 		}
-		if !HasGoslTag(fl.Lines) {
+		if !st.HasGoslTag(fl.Lines) {
 			continue
 		}
 		st.GoFiles[fn] = fl
@@ -125,7 +131,7 @@ func (st *State) ImportFiles(lines [][]byte) {
 			if err != nil {
 				continue
 			}
-			if !HasGoslTag(lns) {
+			if !st.HasGoslTag(lns) {
 				continue
 			}
 			_, fo := filepath.Split(gf)

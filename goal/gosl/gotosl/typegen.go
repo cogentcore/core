@@ -8,9 +8,23 @@ import (
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.Config", IDName: "config", Doc: "Config has the configuration info for the gosl system.", Fields: []types.Field{{Name: "Output", Doc: "Output is the output directory for shader code,\nrelative to where gosl is invoked; must not be an empty string."}, {Name: "Exclude", Doc: "Exclude is a comma-separated list of names of functions to exclude from exporting to WGSL."}, {Name: "Keep", Doc: "Keep keeps temporary converted versions of the source files, for debugging."}, {Name: "Debug", Doc: "\tDebug enables debugging messages while running."}}})
 
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.System", IDName: "system", Doc: "System represents a ComputeSystem, and its kernels and variables.", Fields: []types.Field{{Name: "Name"}, {Name: "Kernels", Doc: "Kernels are the kernels using this compute system."}, {Name: "Groups", Doc: "Groups are the variables for this compute system."}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.Kernel", IDName: "kernel", Doc: "Kernel represents a kernel function, which is the basis for\neach wgsl generated code file.", Fields: []types.Field{{Name: "Name"}, {Name: "Args"}, {Name: "Filename", Doc: "Filename is the name of the kernel shader file, e.g., shaders/Compute.wgsl"}, {Name: "FuncCode", Doc: "function code"}, {Name: "Lines", Doc: "Lines is full shader code"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.Var", IDName: "var", Doc: "Var represents one global system buffer variable.", Fields: []types.Field{{Name: "Name"}, {Name: "Doc", Doc: "comment docs about this var."}, {Name: "Type", Doc: "Type of variable: either []Type or F32, U32 for tensors"}, {Name: "ReadOnly", Doc: "ReadOnly indicates that this variable is never read back from GPU,\nspecified by the gosl:read-only property in the variable comments.\nIt is important to optimize GPU memory usage to indicate this."}, {Name: "Tensor", Doc: "True if a tensor type"}, {Name: "TensorDims", Doc: "Number of dimensions"}, {Name: "TensorKind", Doc: "data kind of the tensor"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.Group", IDName: "group", Doc: "Group represents one variable group.", Fields: []types.Field{{Name: "Name"}, {Name: "Doc", Doc: "comment docs about this group"}, {Name: "Uniform", Doc: "Uniform indicates a uniform group; else default is Storage"}, {Name: "Vars"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.File", IDName: "file", Doc: "File has contents of a file as lines of bytes.", Fields: []types.Field{{Name: "Name"}, {Name: "Lines"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.State", IDName: "state", Doc: "State holds the current Go -> WGSL processing state.", Fields: []types.Field{{Name: "Config", Doc: "Config options."}, {Name: "ImportsDir", Doc: "path to shaders/imports directory."}, {Name: "Package", Doc: "name of the package"}, {Name: "GoFiles", Doc: "GoFiles are all the files with gosl content in current directory."}, {Name: "GoImports", Doc: "GoImports has all the imported files."}, {Name: "ImportPackages", Doc: "ImportPackages has short package names, to remove from go code\nso everything lives in same main package."}, {Name: "Systems", Doc: "Systems has the kernels and variables for each system.\nThere is an initial \"Default\" system when system is not specified."}, {Name: "SLImportFiles", Doc: "SLImportFiles are all the extracted and translated WGSL files in shaders/imports,\nwhich are copied into the generated shader kernel files."}, {Name: "GPUFile", Doc: "generated Go GPU gosl.go file contents"}, {Name: "ExcludeMap", Doc: "ExcludeMap is the compiled map of functions to exclude in Go -> WGSL translation."}}})
+
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.exprListMode", IDName: "expr-list-mode"})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.paramMode", IDName: "param-mode"})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.rwArg", IDName: "rw-arg", Fields: []types.Field{{Name: "idx"}, {Name: "tmpVar"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.sizeCounter", IDName: "size-counter", Doc: "sizeCounter is an io.Writer which counts the number of bytes written,\nas well as whether a newline character was seen.", Fields: []types.Field{{Name: "hasNewline"}, {Name: "size"}}})
 
@@ -26,23 +40,11 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.tr
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.Mode", IDName: "mode", Doc: "A Mode value is a set of flags (or 0). They control printing."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.PrintConfig", IDName: "print-config", Doc: "A PrintConfig node controls the output of Fprint.", Fields: []types.Field{{Name: "Mode"}, {Name: "Tabwidth"}, {Name: "Indent"}, {Name: "ExcludeFunctions"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.PrintConfig", IDName: "print-config", Doc: "A PrintConfig node controls the output of Fprint.", Fields: []types.Field{{Name: "Mode"}, {Name: "Tabwidth"}, {Name: "Indent"}, {Name: "GoToSL"}, {Name: "ExcludeFunctions"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.CommentedNode", IDName: "commented-node", Doc: "A CommentedNode bundles an AST node and corresponding comments.\nIt may be provided as argument to any of the [Fprint] functions.", Fields: []types.Field{{Name: "Node"}, {Name: "Comments"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.Replace", IDName: "replace", Fields: []types.Field{{Name: "From"}, {Name: "To"}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.Var", IDName: "var", Doc: "Var represents one variable", Fields: []types.Field{{Name: "Name"}, {Name: "Type"}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.Group", IDName: "group", Doc: "Group represents one variable group.", Fields: []types.Field{{Name: "Vars"}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.System", IDName: "system", Doc: "System represents a ComputeSystem, and its variables.", Fields: []types.Field{{Name: "Name"}, {Name: "Groups"}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.Kernel", IDName: "kernel", Doc: "Kernel represents a kernel function, which is the basis for\neach wgsl generated code file.", Fields: []types.Field{{Name: "Name"}, {Name: "FileLines", Doc: "accumulating lines of code for the wgsl file."}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.File", IDName: "file", Doc: "File has info for a file being processed", Fields: []types.Field{{Name: "Name"}, {Name: "Lines"}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/goal/gosl/gotosl.State", IDName: "state", Doc: "State holds the current processing state", Fields: []types.Field{{Name: "Config", Doc: "Config options"}, {Name: "Files", Doc: "files with gosl content in current directory"}, {Name: "Imports"}, {Name: "Kernels"}, {Name: "Systems"}, {Name: "ExcludeMap", Doc: "ExcludeMap is the compiled map of functions to exclude."}}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.formatDocComment", Doc: "formatDocComment reformats the doc comment list,\nreturning the canonical formatting.", Args: []string{"list"}, Returns: []string{"Comment"}})
 
@@ -52,21 +54,31 @@ var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.al
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.Run", Directives: []types.Directive{{Tool: "cli", Directive: "cmd", Args: []string{"-root"}}, {Tool: "types", Directive: "add"}}, Args: []string{"cfg"}, Returns: []string{"error"}})
 
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.wgslFile", Doc: "wgslFile returns the file with a \".wgsl\" extension", Args: []string{"fn"}, Returns: []string{"string"}})
+
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.bareFile", Doc: "bareFile returns the file with no extention", Args: []string{"fn"}, Returns: []string{"string"}})
+
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.ReadFileLines", Args: []string{"fn"}, Returns: []string{"[][]byte", "error"}})
 
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.HasGoslTag", Doc: "HasGoslTag returns true if given file has a //gosl: tag", Args: []string{"lines"}, Returns: []string{"bool"}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.WriteFileLines", Args: []string{"fn", "lines"}, Returns: []string{"error"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.IsGoFile", Args: []string{"f"}, Returns: []string{"bool"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.IsWGSLFile", Args: []string{"f"}, Returns: []string{"bool"}})
 
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.IsSPVFile", Args: []string{"f"}, Returns: []string{"bool"}})
-
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.RemoveGenFiles", Doc: "RemoveGenFiles removes .go, .wgsl, .spv files in shader generated dir", Args: []string{"dir"}})
+
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.CopyFile", Args: []string{"src", "dst"}, Returns: []string{"[][]byte", "error"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.appendLines", Doc: "appendLines is like append(x, y...)\nbut it avoids creating doubled blank lines,\nwhich would not be gofmt-standard output.\nIt assumes that only whole blocks of lines are being appended,\nnot line fragments.", Args: []string{"x", "y"}, Returns: []string{"[]byte"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.isNL", Args: []string{"b"}, Returns: []string{"bool"}})
+
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.NewSystem", Args: []string{"name"}, Returns: []string{"System"}})
+
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.hasDirective", Doc: "gosl: hasDirective returns whether directive(s) contains string", Args: []string{"dirs", "dir"}, Returns: []string{"bool"}})
+
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.directiveAfter", Doc: "gosl: directiveAfter returns the directive after given leading text,\nand a bool indicating if the string was found.", Args: []string{"dirs", "dir"}, Returns: []string{"string", "bool"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.combinesWithName", Doc: "combinesWithName reports whether a name followed by the expression x\nsyntactically combines to another valid (value) expression. For instance\nusing *T for x, \"name *T\" syntactically appears as the expression x*T.\nOn the other hand, using  P|Q or *P|~Q for x, \"name P|Q\" or name *P|~Q\"\ncannot be combined into a valid (value) expression.", Args: []string{"x"}, Returns: []string{"bool"}})
 
@@ -91,6 +103,8 @@ var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.fi
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.getLocalTypeName", Args: []string{"typ"}, Returns: []string{"string"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.getStructType", Args: []string{"typ"}, Returns: []string{"Struct", "error"}})
+
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.getNamedType", Args: []string{"typ"}, Returns: []string{"Named", "error"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.isTypeName", Args: []string{"x"}, Returns: []string{"bool"}})
 
@@ -124,13 +138,9 @@ var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.ne
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.Fprint", Doc: "Fprint \"pretty-prints\" an AST node to output.\nIt calls [PrintConfig.Fprint] with default settings.\nNote that gofmt uses tabs for indentation but spaces for alignment;\nuse format.Node (package go/format) for output that matches gofmt.", Args: []string{"output", "pkg", "node"}, Returns: []string{"error"}})
 
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.wgslFile", Doc: "wgslFile returns the file with a \".wgsl\" extension", Args: []string{"fn"}, Returns: []string{"string"}})
-
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.bareFile", Doc: "bareFile returns the file with no extention", Args: []string{"fn"}, Returns: []string{"string"}})
-
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.MoveLines", Doc: "MoveLines moves the st,ed region to 'to' line", Args: []string{"lines", "to", "st", "ed"}})
 
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.SlEdits", Doc: "SlEdits performs post-generation edits for wgsl\n* moves wgsl segments around, e.g., methods\ninto their proper classes\n* fixes printf, slice other common code\nreturns true if a slrand. or sltype. prefix was found,\ndriveing copying of those files.", Args: []string{"src"}, Returns: []string{"[]byte", "bool", "bool"}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.SlEdits", Doc: "SlEdits performs post-generation edits for wgsl,\nreplacing type names, slbool, function calls, etc.\nreturns true if a slrand. or sltype. prefix was found,\ndriveing copying of those files.", Args: []string{"src"}, Returns: []string{"lines", "hasSlrand", "hasSltype"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.MathReplaceAll", Args: []string{"mat", "ln"}, Returns: []string{"[]byte"}})
 

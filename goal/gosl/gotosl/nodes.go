@@ -1722,7 +1722,7 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 				recvType = id.Name // is a package path
 			} else {
 				pathType = typ
-				recvPath = "&" + recvPath
+				recvPath = recvPath
 			}
 		} else {
 			pathIsPackage = true

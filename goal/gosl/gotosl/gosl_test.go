@@ -5,94 +5,43 @@
 package gotosl
 
 import (
-	"bytes"
-	"flag"
 	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
+	"cogentcore.org/core/cli"
 	"github.com/stretchr/testify/assert"
 )
 
-var update = flag.Bool("update", false, "update .golden files")
+// TestTranslate
+func TestTranslate(t *testing.T) {
+	os.Chdir("testdata")
 
-func runTest(t *testing.T, in, out string) {
-	// process flags
-	_, err := os.Lstat(in)
+	opts := cli.DefaultOptions("gosl", "Go as a shader language converts Go code to WGSL WebGPU shader code, which can be run on the GPU through WebGPU.")
+	cfg := &Config{}
+	cli.Run(opts, cfg, Run)
+
+	exSh, err := os.ReadFile("Compute.golden")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	exGosl, err := os.ReadFile("gosl.golden")
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	sls, err := ProcessFiles([]string{in})
+	gotSh, err := os.ReadFile("shaders/Compute.wgsl")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	gotGosl, err := os.ReadFile("gosl.go")
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	expected, err := os.ReadFile(out)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	var got []byte
-	for _, b := range sls {
-		got = b
-		break
-	}
-
-	if !bytes.Equal(got, expected) {
-		if *update {
-			if in != out {
-				if err := os.WriteFile(out, got, 0666); err != nil {
-					t.Error(err)
-				}
-				return
-			}
-			// in == out: don't accidentally destroy input
-			t.Errorf("WARNING: -update did not rewrite input file %s", in)
-		}
-
-		assert.Equal(t, string(expected), string(got))
-		if err := os.WriteFile(in+".gosl", got, 0666); err != nil {
-			t.Error(err)
-		}
-	}
-}
-
-// TestRewrite processes testdata/*.input files and compares them to the
-// corresponding testdata/*.golden files. The gosl flags used to process
-// a file must be provided via a comment of the form
-//
-//	//gosl flags
-//
-// in the processed file within the first 20 lines, if any.
-func TestRewrite(t *testing.T) {
-	if gomod := os.Getenv("GO111MODULE"); gomod == "off" {
-		t.Error("gosl only works in go modules mode, but GO111MODULE=off")
-		return
-	}
-
-	// determine input files
-	match, err := filepath.Glob("testdata/*.go")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if *outDir != "" {
-		os.MkdirAll(*outDir, 0755)
-	}
-
-	for _, in := range match {
-		name := filepath.Base(in)
-		t.Run(name, func(t *testing.T) {
-			out := in // for files where input and output are identical
-			if strings.HasSuffix(in, ".go") {
-				out = in[:len(in)-len(".go")] + ".golden"
-			}
-			runTest(t, in, out)
-		})
-	}
+	assert.Equal(t, string(exSh), string(gotSh))
+	assert.Equal(t, string(exGosl), string(gotGosl))
 }
