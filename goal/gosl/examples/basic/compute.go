@@ -51,7 +51,7 @@ func (ps *ParamStruct) IntegFromRaw(idx int) {
 	Data.Set(math32.FastExp(-integ), idx, Exp)
 }
 
-// Compute does the main computation
+// Compute does the main computation.
 func Compute(i uint32) { //gosl:kernel
 	Params[0].IntegFromRaw(int(i))
 }

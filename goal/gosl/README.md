@@ -2,23 +2,133 @@
 
 `gosl` implements _Go as a shader language_ for GPU compute shaders (using [WebGPU](https://www.w3.org/TR/webgpu/)), **enabling standard Go code to run on the GPU**.
 
-`gosl` converts Go code to WGSL which can then be loaded directly into a WebGPU compute shader. It operates within the overall [Goal](../README.md) framework of an augmented version of the Go langauge. See the [GPU](../GPU.md) documentation for an overview. The `goal` command processes more compact math-mode expressions that 
+`gosl` converts Go code to WGSL which can then be loaded directly into a WebGPU compute shader, using the [gpu](../../gpu) GPU compute shader system. It operates within the overall [Goal](../README.md) framework of an augmented version of the Go language. See the [GPU](../GPU.md) documentation for an overview of issues in GPU computation. The `goal build` command automatically runs `gosl`, which has no effect if there are no `//gosl:` tags in a given directory.
 
-The relevant subsets of Go code are specifically marked using `//gosl:` comment directives, and this code must only use basic expressions and concrete types that will compile correctly in a shader (see [Restrictions](#restrictions) below).  Method functions and pass-by-reference pointer arguments to `struct` types are supported and incur no additional compute cost due to inlining (see notes below for more detail).
+The relevant regions of Go code to be run on the GPU are tagged using the `//gosl:start` and `//gosl:end` comment directives, and this code must only use basic expressions and concrete types that will compile correctly in a GPU shader (see [Restrictions](#restrictions) below).  Method functions and pass-by-reference pointer arguments to `struct` types are supported and incur no additional compute cost due to inlining (see notes below for more detail).
 
-See [examples/basic](examples/basic) and [rand](examples/rand) for examples, using the [gpu](../../gpu) GPU compute shader system.  It is also possible in principle to use gosl to generate shader files for any other WebGPU application, but this has not been tested.
+See [examples/basic](examples/basic) and [rand](examples/rand) for complete working examples.
 
-You must also install `goimports` which is used on the extracted subset of Go code, to get the imports right:
-```bash
-$ go install golang.org/x/tools/cmd/goimports@latest
-```
-
-To install the `gosl` command, do:
+Although `gosl` is typically run via the `goal build` command, you can also run `gosl` directly.  Here's how to install the standalone `gosl` command:
 ```bash
 $ go install cogentcore.org/core/gpu/gosl@latest
 ```
 
-In your Go code, use these comment directives:
+# Usage
+
+There are two critical elements for GPU-enabled code:
+
+1. One or more [Kernel](#kernels) compute functions that take an _index_ argument and perform computations for that specific index of data, _in parallel_. On the GPU, each such kernel is implemented by its own separate compute shader code, and one of the main functions of `gosl` is to generate this code from the Go sources, in the automatically-created `shaders/` directory.
+
+2. [Global variables](#global-variables) on which the kernel functions _exclusively_ operate: all relevant data must be specifically copied from the CPU to the GPU and back. As explained in the [GPU](../GPU.md) docs, each GPU compute shader is effectively a _standalone_ program operating on these global variables. To replicate this environment on the CPU, so the code is transferrable, we need to make these variables global in the CPU (Go) environment as well.
+
+`gosl` generates a file named `gosl.go` in your package directory that initializes the GPU with all of the global variables, and functions for running the kernels and syncing the gobal variable data back and forth between the CPu and GPU.
+
+## Kernels
+
+Each distinct compute kernel must be tagged with a `//gosl:kernel` comment directive, as in this example:
+```Go
+// Compute does the main computation.
+func Compute(i uint32) { //gosl:kernel
+	Params[0].IntegFromRaw(int(i))
+}
+```
+
+The kernel functions receive a `uint32` index argument, and use this to index into the global variables containing the relevant data. Typically the kernel code itself just calls other relevant function(s) using the index, as in the above example. Critically, _all_ of the data that a kernel function ultimately depends on must be contained with the global variables, and these variables must have been sync'd up to the GPU from the CPU prior to running the kernel (more on this below).
+
+In the CPU mode, the kernel is effectively run in a `for` loop like this:
+```Go
+	for i := range n {
+		Compute(uint32(i))
+	}
+```
+A parallel goroutine-based mechanism is actually used, but conceptually this is what it does, on both the CPU and the GPU: **GPU computation is effectively just a parallel for loop**.
+
+## Global variables
+
+The global variables on which the kernels operate are declared in the usual Go manner, as a single `var` block, which is marked at the top using the `//gosl:vars` comment directive:
+
+```Go
+//gosl:vars
+var (
+	// Params are the parameters for the computation.
+	//gosl:read-only
+	Params []ParamStruct
+
+	// Data is the data on which the computation operates.
+	// 2D: outer index is data, inner index is: Raw, Integ, Exp vars.
+	//gosl:dims 2
+	Data tensor.Float32
+)
+```
+
+All such variables must be either:
+1. A `slice` of basic GPU-compatible data values such as `float32`, or GPU-alignment compatible `struct` types, such as `ParamStruct` in the above example.
+2. A `tensor` of a GPU-compatible data type (`float32`, `uint32`, or `int32`), with the number of dimensions indicated by the `//gosl:dims <n>` tag as shown above.
+
+### Tensor data
+
+On the GPU, the tensor data is represented using a simple flat array of the basic data type, with the _strides_ for each dimension encoded in the first `n` elements. `gosl` automatically generates the appropriate indexing code using these strides (which is why the number of dimensions is needed).
+
+The tensor must be initialized using this special [sltensor](sltensor) function to encode the stride values in the "header" section of the tensor data:
+```Go
+	sltensor.SetShapeSizes(&Data, n, 3) // critically, makes GPU compatible Header with strides
+```
+
+### Systems and Groups
+
+Each kernel belongs to a `gpu.ComputeSystem`, and each such system has one specific configuration of memory variables. In general, it is best to use a single set of global variables, and perform as much of the computation as possible on this set of variables, to minimize the number of memory transfers. However, if necessary, multiple systems can be defined, using an optional additional system name argument for the `args` and `kernel` tags.
+
+In addition, the vars can be organized into _groups_, which generally should have similar memory syncing behavior, as documented in the [gpu](../gpu) system.
+
+Here's an example with multiple groups:
+```Go
+//gosl:vars [system name]
+var (
+    // Layer-level parameters
+    //gosl:group -uniform Params
+    Layers   []LayerParam // note: struct with appropriate memory alignment
+
+    // Path-level parameters
+    Paths    []PathParam  
+
+
+    // Unit state values
+    //gosl:group Units
+    Units    tensor.Float32
+    
+    // Synapse weight state values
+    Weights  tensor.Float32
+)
+```
+
+## Memory syncing
+
+Each global variable gets an automatically-generated `*Var` enum (e.g., `DataVar` for global variable named `Data`), that used for the memory syncing functions, to make it easy to specify any number of such variables to sync, which is by far the most efficient. All of this is in the generated `gosl.go` file. For example:
+
+```Go
+	ToGPU(ParamsVar, DataVar)
+```
+
+Specifies that the current contents of `Params` and `Data` are to be copied up to the GPU, which is guaranteed to complete by the time the next kernel run starts, within a given system.
+
+## Kernel running
+
+As with memory transfers, it is much more efficient to run multiple kernels in sequence, all operating on the current data variables, followed by a single sync of the updated global variable data that has been computed. Thus, there are separate functions for specifying the kernels to run, followed by a single "Done" function that actually submits the entire batch of kernels, along with memory sync commands to get the data back from the GPU. For example:
+
+```Go
+    RunCompute1(n)
+    RunCompute2(n)
+    ...
+    RunDone(Data1Var, Data2Var) // launch all kernels and get data back to given vars
+```
+
+For CPU mode, `RunDone` is a no-op, and it just runs each kernel during each `Run` command.
+
+It is absolutely essential to understand that _all data must already be on the GPU_ at the start of the first Run command, and that any CPU-based computation between these calls is completely irrelevant for the GPU. Thus, it typically makes sense to just have a sequence of Run commands grouped together into a logical unit, with the relevant `ToGPU` calls at the start and the final `RunDone` grabs everything of relevance back from the GPU.
+
+## GPU relevant code taggng
+
+In a large GPU-based application, you should organize your code as you normally would in any standard Go application, distributing it across different files and packages. The GPU-relevant parts of each of those files can be tagged with the gosl tags:
 ```
 //gosl:start
 
@@ -26,31 +136,18 @@ In your Go code, use these comment directives:
 
 //gosl:end
 ```
+to make this code available to all of the shaders that are generated.
 
-to bracket code to be processed for GPU. The resulting converted code is copied into a `shaders` subdirectory created under the current directory where the `gosl` command is run, using the filenames specified in the comment directives, or the name of the current file if not specified.
+Use the `//gosl:import "package/path"` directive to import GPU-relevant code from other packages, similar to the standard Go import directive. It is assumed that many other Go imports are not GPU relevant, so this separate directive is required.
 
-Use the `//gosl:import package` directive to include files from other packages, similar to the standard Go import directive. It is assumed that many other Go imports are not GPU relevant, so this separate directive is required.
-
-Each such filename should correspond to a complete shader program (i.e., a "kernel"), or a file that can be included into other shader programs.  Code is appended to the target file names in the order of the source .go files on the command line, so multiple .go files can be combined into one resulting WGSL file.
-
-WGSL specific code, e.g., for the `main` compute function or to specify `#include` files, can be included either by specifying files with a `.wgsl` extension as arguments to the `gosl` command, or by using a `//gosl:wgsl` comment directive as follows:
-```
-//gosl:wgsl <filename>
-
-// <WGSL shader code to be copied>
-
-//gosl:end <filename>
-```
-where the WGSL shader code is commented out in the .go file -- it will be copied into the target filename and uncommented.  The WGSL code can be surrounded by `/*` `*/` comment blocks (each on a separate line) for multi-line code (though using a separate `.wgsl` file is generally preferable in this case). 
-
-For `.wgsl` files, their filename is used to determine the `shaders` destination file name, and they are automatically appended to the end of the corresponding `.wgsl` file generated from the `Go` files -- this is where the `main` function and associated global variables should be specified.
+`gosl` automatically includes _all_ tagged code with each shader, and lets the compiler sort out the subset of code that is actually relevant to each specific kernel. Ideally, we could do this with a pre-processing step that performs dead code elimination, but that does not appear to be functional yet.
 
 **IMPORTANT:** all `.go` and `.wgsl` files are removed from the `shaders` directory prior to processing to ensure everything there is current -- always specify a different source location for any custom `.wgsl` files that are included.
 
-# Usage
+# Command line usage
 
 ```
-gosl [flags] [path ...]
+gosl [flags] 
 ```
     
 The flags are:
@@ -58,14 +155,14 @@ The flags are:
   -debug
     	enable debugging messages while running
   -exclude string
-    	comma-separated list of names of functions to exclude from exporting to HLSL (default "Update,Defaults")
+    	comma-separated list of names of functions to exclude from exporting to WGSL (default "Update,Defaults")
   -keep
     	keep temporary converted versions of the source files, for debugging
   -out string
     	output directory for shader code, relative to where gosl is invoked -- must not be an empty string (default "shaders")
 ```
 
-`gosl` path args can include filenames, directory names, or Go package paths (e.g., `cogentcore.org/core/math32/fastexp.go` loads just that file from the given package) -- files without any `//gosl:` comment directives will be skipped up front before any expensive processing, so it is not a problem to specify entire directories where only some files are relevant.  Also, you can specify a particular file from a directory, then the entire directory, to ensure that a particular file from that directory appears first -- otherwise alphabetical order is used.  `gosl` ensures that only one copy of each file is included.
+`gosl` always operates on the current directory, looking for all files with `//gosl:` tags, and accumulating all the `import` files that they include, etc.
   
 Any `struct` types encountered will be checked for 16-byte alignment of sub-types and overall sizes as an even multiple of 16 bytes (4 `float32` or `int32` values), which is the alignment used in WGSL and glsl shader languages, and the underlying GPU hardware presumably.  Look for error messages on the output from the gosl run.  This ensures that direct byte-wise copies of data between CPU and GPU will be successful.  The fact that `gosl` operates directly on the original CPU-side Go code uniquely enables it to perform these alignment checks, which are otherwise a major source of difficult-to-diagnose bugs.
 

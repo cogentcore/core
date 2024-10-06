@@ -2,13 +2,13 @@
 
 Goal is an augmented version of the Go language, which combines the best parts of Go, `bash`, and Python, to provide and integrated shell and numerical expression processing experience, which can be combined with the [yaegi](https://github.com/traefik/yaegi) interpreter to provide an interactive "REPL" (read, evaluate, print loop).
 
-Goal transpiles directly into Go, so it automatically leverages all the great features of Go, and remains fully compatible with it.  The augmentation is designed to overcome some of the limitations of Go in specific domains:
+Goal transpiles directly into Go, so it automatically leverages all the great features of Go, and remains fully compatible with it. The augmentation is designed to overcome some of the limitations of Go in specific domains:
 
 * Shell scripting, where you want to be able to directly call other executable programs with arguments, without having to navigate all the complexity of the standard [os.exec](https://pkg.go.dev/os/exec) package.
 
-* Numerical / math / data processing, where you want to be able to write simple mathematical expressions operating on vectors, matricies and other more powerful data types, without having to constantly worry about type conversions and need extended indexing and slicing expressions. Python is the dominant language here precisely because it lets you ignore type information and write such expressions.
+* Numerical / math / data processing, where you want to be able to write simple mathematical expressions operating on vectors, matricies and other more powerful data types, without having to constantly worry about numerical type conversions, and advanced n-dimensional indexing and slicing expressions are critical. Python is the dominant language here precisely because it lets you ignore type information and write such expressions, using operator overloading.
 
-* GPU-based parallel computation, which can greatly speed up some types of parallelizable computations significantly by effectively running many instances of the same code in parallel across a large array of data.  Goal (and [gosl](gosl)) allow you to run the same Go-based code on a GPU or CPU (using parallel goroutines). See the [GPU](GPU.md) docs for full info.
+* GPU-based parallel computation, which can greatly speed up some types of parallelizable computations by effectively running many instances of the same code in parallel across a large array of data.  The [gosl](gosl) package (automatically run in `goal build` mode) allows you to run the same Go-based code on a GPU or CPU (using parallel goroutines). See the [GPU](GPU.md) docs for an overview and comparison to other approaches to GPU computation.
 
 The main goal of Goal is to achieve a "best of both worlds" solution that retains all the type safety and explicitness of Go for all the surrounding control flow and large-scale application logic, while also allowing for a more relaxed syntax in specific, well-defined domains where the Go language has been a barrier.  Thus, unlike Python where there are various weak attempts to try to encourage better coding habits, Goal retains in its Go foundation a fundamentally scalable, "industrial strength" language that has already proven its worth in countless real-world applications.
 
@@ -39,11 +39,11 @@ for _, x := range #[1,2,3]# {
 }
 ```
 
-In general, the math mode syntax in Goal is designed to be as compatible with Python NumPy / scipy syntax as possible, while also adding a few Go-specific additions as well -- see [Math mode](#math-mode) for details.  All elements of a Goal math expression are [tensors](../tensor), which can represent everything from a scalar to an n-dimenstional tensor.  These are called an "ndarray" in NumPy terms.
+In general, the math mode syntax in Goal is designed to be as compatible with Python NumPy / SciPy syntax as possible, while also adding a few Go-specific additions as well: see the [Math mode](#math-mode) section for details.  All elements of a Goal math expression are [tensors](../tensor), which can represent everything from a scalar to an n-dimenstional tensor.  These are called "ndarray" in NumPy terms.
 
 The rationale and mnemonics for using `$` and `#` are as follows:
 
-* These are two of the three symbols that are not part of standard Go syntax (`@` being the other).
+* These are two of the three common ASCII keyboard symbols that are not part of standard Go syntax (`@` being the other).
 
 * `$` can be thought of as "S" in _S_hell, and is often used for a `bash` prompt, and many bash examples use it as a prefix. Furthermore, in bash, `$( )` is used to wrap shell expressions.
 

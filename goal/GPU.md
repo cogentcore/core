@@ -32,31 +32,20 @@ In addition to the critical differences between Go and C++ as languages, Goal ta
 
 The bottom line is that the fantasy of being able to write CPU-native code and have it magically "just work" on the GPU with high levels of efficiency is just that: a fantasy. The reality is that code must be specifically structured and organized to work efficiently on the GPU. Goal just makes this process relatively clean and efficient and easy to read, with a minimum of extra boilerplate. The resulting code should be easily understood by anyone familiar with the Go language, even if that isn't the way you would have written it in the first place. The reward is that you can get highly efficient results with significant GPU-accelerated speedups that works on _any platform_, including the web and mobile phones, all with a single easy-to-read codebase.
 
-## Gosl: go shader language
-
-The [gosl](gosl) (_Go shader language_) package within Goal does the heavy lifting of translating Go code into WGSL shader language code that can run on the WebGPU, and generally manages most of the gpu-specific functionality.  It has various important functions defined in the `gosl.` package space, and a number of `//gosl:` comment directives described below, that make everything work.
-
-Meanwhile, the `goal build` command provides an outer-loop of orchestration and math code transpiling prior to handing off to gosl to run on the relevant files.  
-
-For example, `gosl.UseCPU()` causes subsequent execution to use CPU code, while `gosl.UseGPU()` causes it to use GPU kernels. Other `gosl` calls configure and activate the GPU during an initialization step.
-
-## Overall Code Organization
+# Kernel functions
 
 First, we assume the scope is a single Go package that implements a set of computations on some number of associated data representations. The package will likely contain a lot of CPU-only Go code that manages all the surrounding infrastructure for the computations, in terms of creating and configuring the data in memory, visualization, i/o, etc.
 
-The GPU-specific computation is organized into some (hopefully small) number of **kernel** functions, that are called using a special `parallel` version of a `for range` loop:
-
+The GPU-specific computation is organized into some (hopefully small) number of **kernel** functions, that are conceptually called using a **parallel for loop**, e.g., something like this:
 ```Go
 for i := range parallel(data) {
     Compute(i)
 }
 ```
 
-Where the `parallel` function is a special Goal keyword that triggers GPU vs. CPU execution, depending on prior configuration setup, and `MyCompute` is a kernel function. The `i` index effectively iterates over the range of the values of the `tensor` variable `data` (using specific dimension(s) with optional parameter(s)), with the GPU version launching the kernel on the GPU.
+The `i` index effectively iterates over the range of the values of the `data` variable, with the GPU version launching kernels on the GPU for each different index value. The CPU version actually runs in parallel as well, using goroutines.
 
-We assume that multiple kernels will in general be required, and that there is likely to be a significant amount of shared code infrastructure across these kernels.
-
-> We support multiple CPU-based kernels within a single Go package directory.
+We assume that multiple kernels will in general be required, and that there is likely to be a significant amount of shared code infrastructure across these kernels. Thus, the kernel functions are typically relatively short, and call into a large body of code that is likely shared among the different kernel functions.
 
 Even though the GPU kernels must each be compiled separately into a single distinct WGSL _shader_ file that is run under WebGPU, they can `import` a shared codebase of files, and thus replicate the same overall shared code structure as the CPU versions.
 
@@ -71,8 +60,6 @@ func Compute(i uint32) { //gosl:kernel
 }
 ```
 
-For CPU (regular Go) mode, the parallel `for range` loop as shown above translates into a  `tensor.VectorizeThreaded` call of the named Go function. For GPU mode, it launches the kernel on the GPU.
-
 ## Memory Organization
 
 Perhaps the strongest constraints for GPU programming stem from the need to organize and synchronize all the memory buffers holding the data that the GPU kernel operates on. Furthermore, within a GPU kernel, the variables representing this data are _global variables_, which is sensible given the standalone nature of each kernel.
@@ -85,37 +72,9 @@ Within the [gpu](../gpu) framework, each `ComputeSystem` defines a specific orga
 
 > Kernels and variables both must be defined within a specific system context.
 
-The following comment directive can be used in any kernel file to specify which system it uses, and there is an initial `default` system that is used if none is ever specified.
-```Go
-//gosl:system <system name>
-```
-
-To define the global variables for each system, use a standard Go `var` block declaration (with optional system name qualifier):
-```Go
-//gosl:vars [system name]
-var (
-    // Layer-level parameters
-    //gosl:group -uniform Params
-    Layers   []LayerParam // note: struct with appropriate memory alignment
-
-    // Path-level parameters
-    Paths    []PathParam  
-
-
-    // Unit state values
-    //gosl:group Units
-    Units    tensor.Float32
-    
-    // Synapse weight state values
-    Weights  tensor.Float32
-)
-```
-
-The `//gosl:vars` directive flags this block of variables as GPU-accessible variables, which will drive the automatic generation of [gpu](../gpu) code to define these variables for the current (named) system, and to declare them in each kernel associated with that system.
-
-The `//gosl:group` directives specify groups of variables, which generally should have similar memory syncing behavior, as documented in the [gpu](../gpu) system.
-
 ### datafs mapping
+
+TODO:
 
 The grouped global variables can be mapped directly to a corresponding [datafs](../tensor/datafs) directory, which provides direct accessibility to this data within interactive Goal usage. Further, different sets of variable values can be easily managed by saving and loading different such directories.
 
@@ -126,18 +85,6 @@ The grouped global variables can be mapped directly to a corresponding [datafs](
 ```
 
 These and all such `gosl` functions use the current system if none is explicitly specified, which is settable using the `gosl.SetSystem` call. Any given variable can use the `get` or `set` Goal math mode functions directly.
-
-## Memory syncing
-
-It is up to the programmer to manage the syncing of memory between the CPU and the GPU, using simple `gosl` wrapper functions that manage all the details:
-
-```Go
-    gosl.ToGPU(varName...) // sync current contents of given GPU variable(s) from CPU to GPU
-
-    gosl.FromGPU(varName...) // sync back from GPU to CPU
-```
-
-These are no-ops if operating in CPU mode.
 
 ## Memory access
 
