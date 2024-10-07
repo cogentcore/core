@@ -107,6 +107,7 @@ func Interactive(c *Config, in *Interpreter) error {
 // go build is run after this.
 func Build(c *Config) error {
 	var fns []string
+	verbose := logx.UserLevel <= slog.LevelInfo
 	if c.Input != "" {
 		fns = []string{c.Input}
 	} else {
@@ -114,14 +115,15 @@ func Build(c *Config) error {
 	}
 	var errs []error
 	for _, fn := range fns {
+		if verbose {
+			fmt.Println(fn)
+		}
 		ofn := strings.TrimSuffix(fn, filepath.Ext(fn)) + ".go"
 		err := goal.NewGoal().TranspileFile(fn, ofn)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
-
-	verbose := logx.UserLevel <= slog.LevelInfo
 
 	cfg := &gotosl.Config{}
 	cfg.Debug = verbose
