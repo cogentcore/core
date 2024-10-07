@@ -38,8 +38,11 @@ for _, x := range #[1,2,3]# {
     fmt.Println(#x^2#)
 }
 ```
+Note that you cannot enter math mode directly from shell mode, which is unlikely to be useful anyway (you can wrap in go mode `{ }` if really needed).
 
 In general, the math mode syntax in Goal is designed to be as compatible with Python NumPy / SciPy syntax as possible, while also adding a few Go-specific additions as well: see the [Math mode](#math-mode) section for details.  All elements of a Goal math expression are [tensors](../tensor), which can represent everything from a scalar to an n-dimenstional tensor.  These are called "ndarray" in NumPy terms.
+
+The one special form of tensor processing that is available in regular Go code is _n dimensional indexing_, e.g., `tsr[1,2]`.  This kind of expression with square brackets `[ ]` and a comma is illegal according to standard Go syntax, so when we detect it, we know that it is being used on a tensor object, and can transpile it into the corresponding `tensor.Value` or `tensor.Set*` expression. This is particularly convenient for [gosl](gosl) GPU code that has special support for tensor data. Note that for this GPU use-case, you actually do _not_ want to use math mode, because that engages a different, more complex form of indexing that does _not_ work on the GPU.
 
 The rationale and mnemonics for using `$` and `#` are as follows:
 

@@ -358,3 +358,25 @@ func (tk Tokens) ModeEnd() int {
 	}
 	return -1
 }
+
+// IsAssignExpr checks if there are any Go assignment or define tokens
+// outside of { } Go code.
+func (tk Tokens) IsAssignExpr() bool {
+	n := len(tk)
+	if n == 0 {
+		return false
+	}
+	for i := 1; i < n; i++ {
+		tok := tk[i].Tok
+		if tok == token.ASSIGN || tok == token.DEFINE || (tok >= token.ADD_ASSIGN && tok <= token.AND_NOT_ASSIGN) {
+			return true
+		}
+		if tok == token.LBRACE { // skip Go mode
+			rp := tk[i:n].RightMatching()
+			if rp > 0 {
+				i += rp
+			}
+		}
+	}
+	return false
+}

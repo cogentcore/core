@@ -135,7 +135,7 @@ func (st *State) TranspileLineTokens(code string) Tokens {
 	case !f0exec: // exec must be IDENT
 		logx.PrintlnDebug("go:   not ident")
 		return st.TranspileGo(toks, code)
-	case f0exec && en > 1 && (ewords[1][0] == '=' || ewords[1][0] == ':' || ewords[1][0] == '+' || toks[1].Tok == token.COMMA):
+	case f0exec && en > 1 && ewords[0] != "set" && toks.IsAssignExpr():
 		logx.PrintlnDebug("go:   assignment or defn")
 		return st.TranspileGo(toks, code)
 	case f0exec: // now any ident
@@ -270,7 +270,6 @@ func (st *State) TranspileExec(ewords []string, output bool) Tokens {
 	for i := 0; i < n; i++ {
 		f := ewords[i]
 		switch {
-		// case f == "#": // embedded math TODO
 		case f == "{": // embedded go
 			if n < i+3 {
 				st.AddError(fmt.Errorf("goal: no matching right brace } found in exec command line"))

@@ -91,6 +91,7 @@ func TestTranspile(t *testing.T) {
 		{"ls", `goal.Run("ls")`},
 		{"$ls -la$", `goal.Run("ls", "-la")`},
 		{"ls -la", `goal.Run("ls", "-la")`},
+		{"chmod +x file", `goal.Run("chmod", "+x", "file")`},
 		{"ls --help", `goal.Run("ls", "--help")`},
 		{"ls go", `goal.Run("ls", "go")`},
 		{"cd go", `goal.Run("cd", "go")`},
@@ -174,9 +175,10 @@ func TestTranspile(t *testing.T) {
 		{"x = a[1,f(2,3)]", `x = a.Value(1, f(2, 3))`},
 		{"x = a[1]", `x = a[1]`},
 		{"x = a[f(2,3)]", `x = a[f(2, 3)]`},
-		{"x = a[1,2] = 55", `x = a.Set(55, 1, 2)`},
-		{"x = a[1,2] += f(2,55)", `x = a.SetAdd(f(2, 55), 1, 2)`},
-		{"x = a[1,2] *= f(2,55)", `x = a.SetMul(f(2, 55), 1, 2)`},
+		{"a[1,2] = 55", `a.Set(55, 1, 2)`},
+		{"a[1,2] += f(2,55)", `a.SetAdd(f(2, 55), 1, 2)`},
+		{"a[1,2] *= f(2,55)", `a.SetMul(f(2, 55), 1, 2)`},
+		{"Data[idx, Integ] = integ", `Data.Set(integ, idx, Integ)`},
 	}
 
 	st := NewState()
@@ -211,7 +213,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"x = a[1,2]", `x = a.Value(1, 2)`},
+		{"Data[idx, Integ] = integ", `Data.Set(integ, idx, Integ)`},
 	}
 	st := NewState()
 	st.MathRecord = false
