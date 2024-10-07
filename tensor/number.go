@@ -110,6 +110,19 @@ func (tsr *Number[T]) IsString() bool { return false }
 
 func (tsr *Number[T]) AsValues() Values { return tsr }
 
+func (tsr *Number[T]) SetAdd(val T, i ...int) {
+	tsr.Values[tsr.shape.IndexTo1D(i...)] += val
+}
+func (tsr *Number[T]) SetSub(val T, i ...int) {
+	tsr.Values[tsr.shape.IndexTo1D(i...)] -= val
+}
+func (tsr *Number[T]) SetMul(val T, i ...int) {
+	tsr.Values[tsr.shape.IndexTo1D(i...)] *= val
+}
+func (tsr *Number[T]) SetDiv(val T, i ...int) {
+	tsr.Values[tsr.shape.IndexTo1D(i...)] /= val
+}
+
 /////////////////////  Strings
 
 func (tsr *Number[T]) SetString(val string, i ...int) {

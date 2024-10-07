@@ -170,6 +170,13 @@ func TestTranspile(t *testing.T) {
 		{"stru.ctr++", "stru.ctr++"},
 		{"meta += ln", "meta += ln"},
 		{"var data map[string]any", "var data map[string]any"},
+		// non-math-mode tensor indexing:
+		{"x = a[1,f(2,3)]", `x = a.Value(1, f(2, 3))`},
+		{"x = a[1]", `x = a[1]`},
+		{"x = a[f(2,3)]", `x = a[f(2, 3)]`},
+		{"x = a[1,2] = 55", `x = a.Set(55, 1, 2)`},
+		{"x = a[1,2] += f(2,55)", `x = a.SetAdd(f(2, 55), 1, 2)`},
+		{"x = a[1,2] *= f(2,55)", `x = a.SetMul(f(2, 55), 1, 2)`},
 	}
 
 	st := NewState()
@@ -204,7 +211,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"# a := [[1,2], [3,4]]", `a := tensor.Tensor(tensor.Reshape(tensor.NewIntFromValues([]int { 1, 2, 3, 4 }  ...), 2, 2))`},
+		{"x = a[1,2]", `x = a.Value(1, 2)`},
 	}
 	st := NewState()
 	st.MathRecord = false

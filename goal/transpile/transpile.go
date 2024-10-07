@@ -166,7 +166,8 @@ func (st *State) TranspileGo(toks Tokens, code string) Tokens {
 	gtoks := make(Tokens, 0, len(toks)) // return tokens
 	for i := 0; i < n; i++ {
 		tok := toks[i]
-		if tok.Tok == token.ILLEGAL {
+		switch {
+		case tok.Tok == token.ILLEGAL:
 			et := toks[i:].ModeEnd()
 			if et > 0 {
 				if tok.Str == "#" {
@@ -179,7 +180,20 @@ func (st *State) TranspileGo(toks Tokens, code string) Tokens {
 			} else {
 				gtoks = append(gtoks, tok)
 			}
-		} else {
+		case tok.Tok == token.LBRACK && i > 0 && toks[i-1].Tok == token.IDENT: // index expr
+			ixtoks := toks[i:]
+			rm := ixtoks.RightMatching()
+			if rm < 3 {
+				gtoks = append(gtoks, tok)
+				continue
+			}
+			idx := st.TranspileGoNDimIndex(toks, &gtoks, i-1, rm+i)
+			if idx > 0 {
+				i = idx
+			} else {
+				gtoks = append(gtoks, tok)
+			}
+		default:
 			gtoks = append(gtoks, tok)
 		}
 	}
@@ -297,4 +311,71 @@ func (st *State) TranspileExec(ewords []string, output bool) Tokens {
 	}
 	endExec()
 	return etoks
+}
+
+// TranspileGoNDimIndex processes an ident[*] sequence of tokens,
+// translating it into a corresponding tensor Value or Set expression,
+// if it is a multi-dimensional indexing expression which is not valid in Go,
+// to support simple n-dimensional tensor indexing in Go (not math) mode.
+// Gets the current sequence of toks tokens, where the ident starts at idIdx
+// and the ] is at rbIdx. It puts the results in gtoks generated tokens.
+// Returns a positive index to resume processing at, if it is actually an
+// n-dimensional expr, and -1 if not, in which case the normal process resumes.
+func (st *State) TranspileGoNDimIndex(toks Tokens, gtoks *Tokens, idIdx, rbIdx int) int {
+	nc := 0
+	for i := idIdx + 2; i < rbIdx; i++ {
+		tk := toks[i]
+		if tk.Tok == token.COMMA {
+			nc++
+			break
+		}
+		if tk.Tok == token.LPAREN || tk.Tok == token.LBRACE || tk.Tok == token.LBRACK {
+			rp := toks[i:rbIdx].RightMatching()
+			if rp > 0 {
+				i += rp
+			}
+		}
+	}
+	if nc == 0 { // not multidim
+		return -1
+	}
+	// now we need to determine if it is a Set based on what happens after rb
+	isSet := false
+	stok := token.ILLEGAL
+	n := len(toks)
+	if n-rbIdx > 1 {
+		ntk := toks[rbIdx+1].Tok
+		if ntk == token.ASSIGN || (ntk >= token.ADD_ASSIGN && ntk <= token.QUO_ASSIGN) {
+			isSet = true
+			stok = ntk
+		}
+	}
+	fun := "Value"
+	if isSet {
+		fun = "Set"
+		switch stok {
+		case token.ADD_ASSIGN:
+			fun += "Add"
+		case token.SUB_ASSIGN:
+			fun += "Sub"
+		case token.MUL_ASSIGN:
+			fun += "Mul"
+		case token.QUO_ASSIGN:
+			fun += "Div"
+		}
+	}
+	gtoks.Add(token.PERIOD)
+	gtoks.Add(token.IDENT, fun)
+	gtoks.Add(token.LPAREN)
+	if isSet {
+		gtoks.AddTokens(toks[rbIdx+2:]...)
+		gtoks.Add(token.COMMA)
+	}
+	gtoks.AddTokens(toks[idIdx+2 : rbIdx]...)
+	gtoks.Add(token.RPAREN)
+	if isSet {
+		return n
+	} else {
+		return rbIdx
+	}
 }
