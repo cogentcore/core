@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/yaegicore/symbols"
+	"cogentcore.org/core/yaegicore/nogui"
 )
 
 func init() {
@@ -22,7 +22,7 @@ func init() {
 // properly convert symbols to either tensors or basic literals,
 // depending on the arg types for the current function.
 func AddYaegiTensorFuncs() {
-	for pth, symap := range symbols.Symbols {
+	for pth, symap := range nogui.Symbols {
 		if !strings.Contains(pth, "/core/tensor/") {
 			continue
 		}

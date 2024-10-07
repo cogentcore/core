@@ -141,7 +141,7 @@ func (fn *FileNode) OpenFile() error {
 
 		default:
 			dt := table.New()
-			err := dt.OpenCSV(fn.Filepath, tensor.Tab) // todo: need more flexible data handling mode
+			err := dt.OpenCSV(fsx.Filename(fn.Filepath), tensor.Tab) // todo: need more flexible data handling mode
 			if err != nil {
 				core.ErrorSnackbar(br, err)
 			} else {
@@ -235,7 +235,7 @@ func (fn *FileNode) PlotFile() {
 		// 	dt = d.AsTable()
 		default:
 			dt = table.New(df)
-			err := dt.OpenCSV(fn.Filepath, tensor.Tab) // todo: need more flexible data handling mode
+			err := dt.OpenCSV(fsx.Filename(fn.Filepath), tensor.Tab) // todo: need more flexible data handling mode
 			if err != nil {
 				core.ErrorSnackbar(br, err)
 				dt = nil

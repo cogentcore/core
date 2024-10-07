@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/yaegicore/nogui"
 	"cogentcore.org/core/yaegicore/symbols"
 	"github.com/cogentcore/yaegi/interp"
 )
@@ -26,6 +27,7 @@ var autoPlanNameCounter uint64
 func init() {
 	htmlcore.BindTextEditor = BindTextEditor
 	symbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
+	nogui.Symbols["."] = map[string]reflect.Value{}   // make "." available for use
 }
 
 // BindTextEditor binds the given text editor to a yaegi interpreter

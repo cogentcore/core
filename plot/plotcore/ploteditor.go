@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/colors"
@@ -216,7 +217,7 @@ func (pl *PlotEditor) SavePNG(fname core.Filename) { //types:add
 
 // SaveCSV saves the Table data to a csv (comma-separated values) file with headers (any delim)
 func (pl *PlotEditor) SaveCSV(fname core.Filename, delim tensor.Delims) { //types:add
-	pl.table.SaveCSV(fname, delim, table.Headers)
+	pl.table.SaveCSV(fsx.Filename(fname), delim, table.Headers)
 	pl.dataFile = fname
 }
 
@@ -232,7 +233,7 @@ func (pl *PlotEditor) SaveAll(fname core.Filename) { //types:add
 
 // OpenCSV opens the Table data from a csv (comma-separated values) file (or any delim)
 func (pl *PlotEditor) OpenCSV(filename core.Filename, delim tensor.Delims) { //types:add
-	pl.table.OpenCSV(filename, delim)
+	pl.table.OpenCSV(fsx.Filename(filename), delim)
 	pl.dataFile = filename
 	pl.UpdatePlot()
 }

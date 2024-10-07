@@ -18,7 +18,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/core"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/tensor"
 )
 
@@ -37,7 +37,7 @@ const (
 // and tensor cell geometry of the columns, enabling full reloading
 // of exactly the same table format and data (recommended).
 // Otherwise, only the data is written.
-func (dt *Table) SaveCSV(filename core.Filename, delim tensor.Delims, headers bool) error { //types:add
+func (dt *Table) SaveCSV(filename fsx.Filename, delim tensor.Delims, headers bool) error { //types:add
 	fp, err := os.Create(string(filename))
 	defer fp.Close()
 	if err != nil {
@@ -59,7 +59,7 @@ func (dt *Table) SaveCSV(filename core.Filename, delim tensor.Delims, headers bo
 // information for tensor type and dimensionality.
 // If the table DOES have existing columns, then those are used robustly
 // for whatever information fits from each row of the file.
-func (dt *Table) OpenCSV(filename core.Filename, delim tensor.Delims) error { //types:add
+func (dt *Table) OpenCSV(filename fsx.Filename, delim tensor.Delims) error { //types:add
 	fp, err := os.Open(string(filename))
 	if err != nil {
 		return errors.Log(err)

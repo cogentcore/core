@@ -1,0 +1,12 @@
+#!/usr/bin/env cosh
+
+command extract {
+    for _, pkg := range args {
+        yaegi extract {"cogentcore.org/core/"+pkg}
+    }
+}
+
+yaegi extract fmt strconv strings math time log/slog reflect
+
+extract math32 tensor tensor/tmath tensor/table tensor/vector tensor/matrix tensor/stats/stats tensor/stats/metric tensor/datafs base/errors base/fsx base/reflectx base/labels base/fileinfo base/num goal/goalib 
+

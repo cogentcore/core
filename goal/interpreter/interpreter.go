@@ -22,7 +22,7 @@ import (
 	_ "cogentcore.org/core/tensor/stats/metric"
 	_ "cogentcore.org/core/tensor/stats/stats"
 	_ "cogentcore.org/core/tensor/tmath"
-	"cogentcore.org/core/yaegicore/symbols"
+	"cogentcore.org/core/yaegicore/nogui"
 	"github.com/cogentcore/yaegi/interp"
 	"github.com/cogentcore/yaegi/stdlib"
 	"github.com/ergochat/readline"
@@ -67,8 +67,7 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	options.Stderr = in.Goal.StdIOWrappers.Err
 	options.Stdin = in.Goal.StdIOWrappers.In
 	in.Interp = interp.New(options)
-	// errors.Log(in.Interp.Use(stdlib.Symbols)) // note: yaegicore/symbols gets just a few key things
-	errors.Log(in.Interp.Use(symbols.Symbols))
+	errors.Log(in.Interp.Use(nogui.Symbols))
 	in.ImportGoal()
 	go in.MonitorSignals()
 	return in

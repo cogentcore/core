@@ -13,9 +13,9 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 )
 
@@ -65,7 +65,7 @@ func Precision(md metadata.Data) (int, error) {
 // (where comma = any delimiter, specified in the delim arg).
 // Outer-most dims are rows in the file, and inner-most is column --
 // Reading just grabs all values and doesn't care about shape.
-func SaveCSV(tsr Tensor, filename core.Filename, delim Delims) error {
+func SaveCSV(tsr Tensor, filename fsx.Filename, delim Delims) error {
 	fp, err := os.Create(string(filename))
 	defer fp.Close()
 	if err != nil {
@@ -81,7 +81,7 @@ func SaveCSV(tsr Tensor, filename core.Filename, delim Delims) error {
 // using the Go standard encoding/csv reader conforming
 // to the official CSV standard.
 // Reads all values and assigns as many as fit.
-func OpenCSV(tsr Tensor, filename core.Filename, delim Delims) error {
+func OpenCSV(tsr Tensor, filename fsx.Filename, delim Delims) error {
 	fp, err := os.Open(string(filename))
 	defer fp.Close()
 	if err != nil {
