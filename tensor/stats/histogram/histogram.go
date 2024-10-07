@@ -8,6 +8,9 @@ package histogram
 
 import (
 	"cogentcore.org/core/base/slicesx"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/table"
 )
 
 // F64 generates a histogram of counts of values within given
@@ -33,8 +36,6 @@ func F64(hist *[]float64, vals []float64, nBins int, min, max float64) {
 	}
 }
 
-/*
-
 // F64Table generates an table with a histogram of counts of values within given
 // number of bins and min / max range. The table has columns: Value, Count
 // if value is < min or > max it is ignored.
@@ -45,13 +46,11 @@ func F64Table(dt *table.Table, vals []float64, nBins int, min, max float64) {
 	dt.AddFloat64Column("Value")
 	dt.AddFloat64Column("Count")
 	dt.SetNumRows(nBins)
-	ct := dt.Columns[1].(*tensor.Float64)
+	ct := dt.Columns.Values[1].(*tensor.Float64)
 	F64(&ct.Values, vals, nBins, min, max)
 	inc := (max - min) / float64(nBins)
-	vls := dt.Columns[0].(*tensor.Float64).Values
+	vls := dt.Columns.Values[0].(*tensor.Float64).Values
 	for i := 0; i < nBins; i++ {
 		vls[i] = math32.Truncate64(min+float64(i)*inc, 4)
 	}
 }
-
-*/

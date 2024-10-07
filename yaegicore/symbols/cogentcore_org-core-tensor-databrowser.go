@@ -11,12 +11,18 @@ func init() {
 	Symbols["cogentcore.org/core/tensor/databrowser/databrowser"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"DataFS":             reflect.ValueOf(databrowser.DataFS),
+		"FirstComment":       reflect.ValueOf(databrowser.FirstComment),
 		"IsTableFile":        reflect.ValueOf(databrowser.IsTableFile),
 		"NewBrowser":         reflect.ValueOf(databrowser.NewBrowser),
 		"NewBrowserWindow":   reflect.ValueOf(databrowser.NewBrowserWindow),
 		"NewDiffBrowserDirs": reflect.ValueOf(databrowser.NewDiffBrowserDirs),
 		"NewFileNode":        reflect.ValueOf(databrowser.NewFileNode),
 		"ParentBrowser":      reflect.ValueOf(databrowser.ParentBrowser),
+		"PromptOKCancel":     reflect.ValueOf(databrowser.PromptOKCancel),
+		"PromptString":       reflect.ValueOf(databrowser.PromptString),
+		"PromptStruct":       reflect.ValueOf(databrowser.PromptStruct),
+		"TheBrowser":         reflect.ValueOf(&databrowser.TheBrowser).Elem(),
+		"TrimOrderPrefix":    reflect.ValueOf(databrowser.TrimOrderPrefix),
 
 		// type definitions
 		"Browser":  reflect.ValueOf((*databrowser.Browser)(nil)),

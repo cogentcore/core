@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"log/slog"
 	"math"
 	"os"
 	"reflect"
@@ -19,6 +20,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/tensor"
 )
 
@@ -464,4 +466,45 @@ func (dt *Table) TableHeaders() []string {
 		}
 	}
 	return hdrs
+}
+
+// CleanCatTSV cleans a TSV file formed by concatenating multiple files together.
+// Removes redundant headers and then sorts by given set of columns.
+func CleanCatTSV(filename string, sorts ...string) error {
+	str, err := os.ReadFile(filename)
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+	lns := strings.Split(string(str), "\n")
+	if len(lns) == 0 {
+		return nil
+	}
+	hdr := lns[0]
+	f, err := os.Create(filename)
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+	for i, ln := range lns {
+		if i > 0 && ln == hdr {
+			continue
+		}
+		io.WriteString(f, ln)
+		io.WriteString(f, "\n")
+	}
+	f.Close()
+	dt := New()
+	err = dt.OpenCSV(core.Filename(filename), tensor.Detect)
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+	dt.SortColumns(tensor.Ascending, tensor.StableSort, sorts...)
+	st := dt.New()
+	err = st.SaveCSV(core.Filename(filename), tensor.Tab, true)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	return err
 }
