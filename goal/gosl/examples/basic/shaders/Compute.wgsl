@@ -56,7 +56,7 @@ fn ParamStruct_IntegFromRaw(ps: ptr<function,ParamStruct>, idx: i32) {
 	Data[IndexF322D(Data[0], Data[1], u32(idx),u32(Exp))] = FastExp(-integ);
 }
 
-// Compute does the main computation
+// Compute does the main computation.
 fn Compute(i: u32) { //gosl:kernel
 	var params=Params[0]; ParamStruct_IntegFromRaw(&params, i32(i));
 }

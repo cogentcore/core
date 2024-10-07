@@ -6,13 +6,17 @@ package interpreter
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/fsx"
+	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/goal"
+	"cogentcore.org/core/goal/gosl/gotosl"
 	"github.com/cogentcore/yaegi/interp"
 )
 
@@ -100,6 +104,7 @@ func Interactive(c *Config, in *Interpreter) error {
 // If the file does not already contain a "package" specification, then
 // "package main; func main()..." wrappers are added, which allows the same
 // code to be used in interactive and Go compiled modes.
+// go build is run after this.
 func Build(c *Config) error {
 	var fns []string
 	if c.Input != "" {
@@ -115,5 +120,26 @@ func Build(c *Config) error {
 			errs = append(errs, err)
 		}
 	}
+
+	verbose := logx.UserLevel <= slog.LevelInfo
+
+	cfg := &gotosl.Config{}
+	cfg.Debug = verbose
+	fmt.Println("running gosl...")
+	err := gotosl.Run(cfg)
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	fmt.Println("running go build...")
+	args := []string{"build"}
+	if verbose {
+		args = append(args, "-v")
+	}
+	err = exec.Major().Run("go", args...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+
 	return errors.Join(errs...)
 }
