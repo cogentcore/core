@@ -47,8 +47,8 @@ type ParamStruct struct {
 func (ps *ParamStruct) IntegFromRaw(idx int) {
 	integ := Data[idx, Integ]
 	integ += ps.Dt * (Data[idx, Raw] - integ)
-	{Data[idx, Integ] = integ}
-	{Data[idx, Exp] = math32.FastExp(-integ)}
+	Data[idx, Integ] = integ
+	Data[idx, Exp] = math32.FastExp(-integ)
 }
 
 // Compute does the main computation.
