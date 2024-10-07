@@ -7,9 +7,12 @@ package fileinfo
 import (
 	"fmt"
 	"mime"
+	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"github.com/h2non/filetype"
 )
 
@@ -97,6 +100,19 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 		return MimeString(Makefile), ext, nil
 	}
 	return "", ext, fmt.Errorf("fileinfo.MimeFromFile could not find mime type for ext: %v file: %v", ext, fn)
+}
+
+var generatedRe = regexp.MustCompile(`^// Code generated .* DO NOT EDIT`)
+
+func IsGeneratedFile(fname string) bool {
+	file, err := os.Open(fname)
+	if err != nil {
+		errors.Log(err)
+		return false
+	}
+	head := make([]byte, 2048)
+	file.Read(head)
+	return generatedRe.Match(head)
 }
 
 // todo: use this to check against mime types!

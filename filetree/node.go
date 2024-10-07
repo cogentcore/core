@@ -94,6 +94,9 @@ func (fn *Node) Init() {
 		case status == vcs.Stored:
 			s.Color = colors.Scheme.OnSurface
 		}
+		if fn.Info.Generated {
+			s.Color = errors.Must1(gradient.FromString("#8080C0"))
+		}
 	})
 	fn.On(events.KeyChord, func(e events.Event) {
 		if core.DebugSettings.KeyEventTrace {
