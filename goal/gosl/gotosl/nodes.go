@@ -1680,6 +1680,13 @@ func (p *printer) tensorMethod(x *ast.CallExpr, vr *Var, methName string) {
 	for i := stArg; i < n; i++ {
 		ag := args[i]
 		p.print("u32", token.LPAREN)
+		if ce, ok := ag.(*ast.CallExpr); ok { // get rid of int() wrapper from goal n-dim index
+			if fn, ok := ce.Fun.(*ast.Ident); ok {
+				if fn.Name == "int" {
+					ag = ce.Args[0]
+				}
+			}
+		}
 		p.expr(ag)
 		p.print(token.RPAREN)
 		if i < n-1 {

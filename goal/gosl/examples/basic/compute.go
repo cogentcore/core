@@ -11,6 +11,8 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
+//go:generate gosl
+
 //gosl:start
 //gosl:import "cogentcore.org/core/math32"
 
@@ -49,10 +51,10 @@ type ParamStruct struct {
 
 // IntegFromRaw computes integrated value from current raw value
 func (ps *ParamStruct) IntegFromRaw(idx int) {
-	integ := Data.Value(idx, Integ)
-	integ += ps.Dt * (Data.Value(idx, Raw) - integ)
-	Data.Set(integ, idx, Integ)
-	Data.Set(math32.FastExp(-integ), idx, Exp)
+	integ := Data.Value(int(idx), int(Integ))
+	integ += ps.Dt * (Data.Value(int(idx), int(Raw)) - integ)
+	Data.Set(integ, int(idx), int(Integ))
+	Data.Set(math32.FastExp(-integ), int(idx), int(Exp))
 }
 
 // Compute does the main computation.
