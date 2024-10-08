@@ -5,13 +5,9 @@
 package metric
 
 import (
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32/vecint"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/matrix"
-	"cogentcore.org/core/tensor/stats/stats"
-	"cogentcore.org/core/tensor/tmath"
-	"gonum.org/v1/gonum/mat"
 )
 
 // MatrixOut computes the rows x rows square distance / similarity matrix
@@ -194,111 +190,4 @@ func CovarianceMatrixOut(fun any, in tensor.Tensor, out tensor.Values) error {
 // The resulting matrix can be used as the input to PCA or SVD eigenvalue decomposition.
 func CovarianceMatrix(fun any, in tensor.Tensor) tensor.Values {
 	return tensor.CallOut1Gen1(CovarianceMatrixOut, fun, in)
-}
-
-// PCA performs the eigen decomposition of the given CovarianceMatrix,
-// using principal components analysis (PCA), which is slower than [SVD].
-// The eigenvectors are same size as Covar. Each eigenvector is a column
-// in this 2D square matrix, ordered *lowest* to *highest* across the columns,
-// i.e., maximum eigenvector is the last column.
-// The eigenvalues are the size of one row, ordered *lowest* to *highest*.
-// Note that PCA produces results in the *opposite* order of [SVD].
-func PCA(covar tensor.Tensor, eigenvecs, vals tensor.Values) error {
-	n := covar.DimSize(0)
-	cv, err := matrix.NewSymmetric(tensor.AsFloat64(covar))
-	if err != nil {
-		return err
-	}
-	eigenvecs.SetShapeSizes(n, n)
-	vals.SetShapeSizes(n)
-	var eig mat.EigenSym
-	ok := eig.Factorize(cv, true)
-	if !ok {
-		return errors.New("gonum mat.EigenSym Factorize failed")
-	}
-	var ev mat.Dense
-	eig.VectorsTo(&ev)
-	matrix.CopyFromDense(eigenvecs, &ev)
-	fv := tensor.AsFloat64(vals)
-	eig.Values(fv.Values)
-	if fv != vals {
-		vals.(tensor.Values).CopyFrom(fv)
-	}
-	return nil
-}
-
-// SVD performs the eigen decomposition of the given CovarianceMatrix,
-// using singular value decomposition (SVD), which is faster than [PCA].
-// The eigenvectors are same size as Covar. Each eigenvector is a column
-// in this 2D square matrix, ordered *highest* to *lowest* across the columns,
-// i.e., maximum eigenvector is the last column.
-// The eigenvalues are the size of one row, ordered *highest* to *lowest*.
-// Note that SVD produces results in the *opposite* order of [PCA].
-func SVD(covar tensor.Tensor, eigenvecs, vals tensor.Values) error {
-	n := covar.DimSize(0)
-	cv, err := matrix.NewSymmetric(tensor.AsFloat64(covar))
-	if err != nil {
-		return err
-	}
-	eigenvecs.SetShapeSizes(n, n)
-	vals.SetShapeSizes(n)
-	var eig mat.SVD
-	ok := eig.Factorize(cv, mat.SVDFull) // todo: benchmark different versions
-	if !ok {
-		return errors.New("gonum mat.SVD Factorize failed")
-	}
-	var ev mat.Dense
-	eig.UTo(&ev)
-	matrix.CopyFromDense(eigenvecs, &ev)
-	fv := tensor.AsFloat64(vals)
-	eig.Values(fv.Values)
-	if fv != vals {
-		vals.(tensor.Values).CopyFrom(fv)
-	}
-	return nil
-}
-
-// ProjectOnMatrixColumnOut is a convenience function for projecting given vector
-// of values along a specific column (2nd dimension) of the given 2D matrix,
-// specified by the scalar colindex, putting results into out.
-// If the vec is more than 1 dimensional, then it is treated as rows x cells,
-// and each row of cells is projected through the matrix column, producing a
-// 1D output with the number of rows.  Otherwise a single number is produced.
-// This is typically done with results from SVD or PCA.
-func ProjectOnMatrixColumnOut(mtx, vec, colindex tensor.Tensor, out tensor.Values) error {
-	ci := int(colindex.Float1D(0))
-	col := tensor.As1D(tensor.Reslice(mtx, tensor.Slice{}, ci))
-	// fmt.Println(mtx.String(), col.String())
-	rows, cells := vec.Shape().RowCellSize()
-	if rows > 0 && cells > 0 {
-		msum := tensor.NewFloat64Scalar(0)
-		out.SetShapeSizes(rows)
-		mout := tensor.NewFloat64(cells)
-		for i := range rows {
-			err := tmath.MulOut(tensor.Cells1D(vec, i), col, mout)
-			if err != nil {
-				return err
-			}
-			stats.SumOut(mout, msum)
-			out.SetFloat1D(msum.Float1D(0), i)
-		}
-	} else {
-		mout := tensor.NewFloat64(1)
-		tmath.MulOut(vec, col, mout)
-		stats.SumOut(mout, out)
-	}
-	return nil
-}
-
-// ProjectOnMatrixColumn is a convenience function for projecting given vector
-// of values along a specific column (2nd dimension) of the given 2D matrix,
-// specified by the scalar colindex, putting results into out.
-// If the vec is more than 1 dimensional, then it is treated as rows x cells,
-// and each row of cells is projected through the matrix column, producing a
-// 1D output with the number of rows.  Otherwise a single number is produced.
-// This is typically done with results from SVD or PCA.
-func ProjectOnMatrixColumn(mtx, vec, colindex tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(vec.DataType())
-	errors.Log(ProjectOnMatrixColumnOut(mtx, vec, colindex, out))
-	return out
 }

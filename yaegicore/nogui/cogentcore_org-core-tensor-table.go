@@ -10,6 +10,7 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/tensor/table/table"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"CleanCatTSV":            reflect.ValueOf(table.CleanCatTSV),
 		"ConfigFromDataValues":   reflect.ValueOf(table.ConfigFromDataValues),
 		"ConfigFromHeaders":      reflect.ValueOf(table.ConfigFromHeaders),
 		"ConfigFromTableHeaders": reflect.ValueOf(table.ConfigFromTableHeaders),

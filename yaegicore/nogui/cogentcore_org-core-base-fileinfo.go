@@ -89,6 +89,7 @@ func init() {
 		"Icons":               reflect.ValueOf(&fileinfo.Icons).Elem(),
 		"Image":               reflect.ValueOf(fileinfo.Image),
 		"Ini":                 reflect.ValueOf(fileinfo.Ini),
+		"IsGeneratedFile":     reflect.ValueOf(fileinfo.IsGeneratedFile),
 		"IsMatch":             reflect.ValueOf(fileinfo.IsMatch),
 		"IsMatchList":         reflect.ValueOf(fileinfo.IsMatchList),
 		"Java":                reflect.ValueOf(fileinfo.Java),

@@ -187,19 +187,18 @@ func (st *State) Run() error {
 	if st.Config.Output == "" {
 		st.Config.Output = "shaders"
 	}
+
+	st.ProjectFiles() // get list of all files, recursively gets imports etc.
+	if len(st.GoFiles) == 0 {
+		return nil
+	}
+
 	st.ImportsDir = filepath.Join(st.Config.Output, "imports")
 	os.MkdirAll(st.Config.Output, 0755)
 	os.MkdirAll(st.ImportsDir, 0755)
 	RemoveGenFiles(st.Config.Output)
 	RemoveGenFiles(st.ImportsDir)
 
-	st.ProjectFiles() // get list of all files, recursively gets imports etc.
-	if len(st.GoFiles) == 0 {
-		// if st.Config.Debug {
-		// 	fmt.Println("gosl: no gosl files in current directory")
-		// }
-		return nil
-	}
 	st.ExtractFiles()   // get .go from project files
 	st.ExtractImports() // get .go from imports
 	st.TranslateDir("./" + st.ImportsDir)

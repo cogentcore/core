@@ -20,7 +20,6 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/tensor"
 )
 
@@ -495,14 +494,14 @@ func CleanCatTSV(filename string, sorts ...string) error {
 	}
 	f.Close()
 	dt := New()
-	err = dt.OpenCSV(core.Filename(filename), tensor.Detect)
+	err = dt.OpenCSV(fsx.Filename(filename), tensor.Detect)
 	if err != nil {
 		slog.Error(err.Error())
 		return err
 	}
 	dt.SortColumns(tensor.Ascending, tensor.StableSort, sorts...)
 	st := dt.New()
-	err = st.SaveCSV(core.Filename(filename), tensor.Tab, true)
+	err = st.SaveCSV(fsx.Filename(filename), tensor.Tab, true)
 	if err != nil {
 		slog.Error(err.Error())
 	}
