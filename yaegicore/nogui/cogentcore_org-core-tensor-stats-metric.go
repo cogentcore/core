@@ -13,6 +13,7 @@ func init() {
 		"AsMetricFunc":               reflect.ValueOf(metric.AsMetricFunc),
 		"AsMetricOutFunc":            reflect.ValueOf(metric.AsMetricOutFunc),
 		"ClosestRow":                 reflect.ValueOf(metric.ClosestRow),
+		"ClosestRowOut":              reflect.ValueOf(metric.ClosestRowOut),
 		"Correlation":                reflect.ValueOf(metric.Correlation),
 		"CorrelationOut":             reflect.ValueOf(metric.CorrelationOut),
 		"CorrelationOut64":           reflect.ValueOf(metric.CorrelationOut64),

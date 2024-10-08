@@ -127,6 +127,20 @@ func (tsr *Bool) RowTensor(row int) Values { return nil }
 // SetRowTensor not possible with Bool.
 func (tsr *Bool) SetRowTensor(val Values, row int) {}
 
+/////////////////////  Bool
+
+func (tsr *Bool) Value(i ...int) bool {
+	return tsr.Values.Index(tsr.shape.IndexTo1D(i...))
+}
+
+func (tsr *Bool) Set(val bool, i ...int) {
+	tsr.Values.Set(val, tsr.shape.IndexTo1D(i...))
+}
+
+func (tsr *Bool) Value1D(i int) bool { return tsr.Values.Index(i) }
+
+func (tsr *Bool) Set1D(val bool, i int) { tsr.Values.Set(val, i) }
+
 /////////////////////  Strings
 
 func (tsr *Bool) String1D(off int) string {

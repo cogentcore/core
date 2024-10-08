@@ -18,7 +18,19 @@ import (
 // Note: this does _not_ use any existing Indexes for the probe,
 // but does for the vocab, and the returned index is the logical index
 // into any existing Indexes.
-func ClosestRow(fun any, probe, vocab tensor.Tensor, out tensor.Values) error {
+func ClosestRow(fun any, probe, vocab tensor.Tensor) tensor.Values {
+	return tensor.CallOut2Gen1(ClosestRowOut, fun, probe, vocab)
+}
+
+// ClosestRowOut returns the closest fit between probe pattern and patterns in
+// a "vocabulary" tensor with outermost row dimension, using given metric
+// function, which must fit the MetricFunc signature.
+// The metric *must have the Increasing property*, i.e., larger = further.
+// Output is a 1D tensor with 2 elements: the row index and metric value for that row.
+// Note: this does _not_ use any existing Indexes for the probe,
+// but does for the vocab, and the returned index is the logical index
+// into any existing Indexes.
+func ClosestRowOut(fun any, probe, vocab tensor.Tensor, out tensor.Values) error {
 	out.SetShapeSizes(2)
 	mfun, err := AsMetricFunc(fun)
 	if err != nil {
