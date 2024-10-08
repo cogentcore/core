@@ -77,7 +77,7 @@ func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLocation,
 			// fmt.Printf("dir: %v closed\n", sfn.FPath)
 			return tree.Break // don't go down into closed directories!
 		}
-		if sfn.IsDir() || sfn.IsExec() || sfn.Info.Kind == "octet-stream" || sfn.isAutoSave() {
+		if sfn.IsDir() || sfn.IsExec() || sfn.Info.Kind == "octet-stream" || sfn.isAutoSave() || sfn.Info.Generated {
 			// fmt.Printf("dir: %v opened\n", sfn.Nm)
 			return tree.Continue
 		}
