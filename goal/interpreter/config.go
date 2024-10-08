@@ -16,7 +16,6 @@ import (
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/goal"
-	"cogentcore.org/core/goal/gosl/gotosl"
 	"github.com/cogentcore/yaegi/interp"
 )
 
@@ -125,17 +124,17 @@ func Build(c *Config) error {
 		}
 	}
 
-	cfg := &gotosl.Config{}
-	cfg.Debug = verbose
-	err := gotosl.Run(cfg)
-	if err != nil {
-		errs = append(errs, err)
-	}
+	// cfg := &gotosl.Config{}
+	// cfg.Debug = verbose
+	// err := gotosl.Run(cfg)
+	// if err != nil {
+	// 	errs = append(errs, err)
+	// }
 	args := []string{"build"}
 	if verbose {
 		args = append(args, "-v")
 	}
-	err = exec.Major().Run("go", args...)
+	err := exec.Major().Run("go", args...)
 	if err != nil {
 		errs = append(errs, err)
 	}

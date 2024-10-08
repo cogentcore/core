@@ -20,7 +20,8 @@ import (
 // in this 2D square matrix, ordered *lowest* to *highest* across the columns,
 // i.e., maximum vector is the last column.
 // The values are the size of one row, ordered *lowest* to *highest*.
-// If the input tensor is > 2D, it is treated as a list of 2D matricies.
+// If the input tensor is > 2D, it is treated as a list of 2D matricies,
+// and parallel threading is used where beneficial.
 func Eig(a tensor.Tensor) (vecs, vals *tensor.Float64) {
 	vecs = tensor.NewFloat64()
 	vals = tensor.NewFloat64()
@@ -36,7 +37,8 @@ func Eig(a tensor.Tensor) (vecs, vals *tensor.Float64) {
 // in this 2D square matrix, ordered *lowest* to *highest* across the columns,
 // i.e., maximum vector is the last column.
 // The values are the size of one row, ordered *lowest* to *highest*.
-// If the input tensor is > 2D, it is treated as a list of 2D matricies.
+// If the input tensor is > 2D, it is treated as a list of 2D matricies,
+// and parallel threading is used where beneficial.
 func EigOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 	if err := StringCheck(a); err != nil {
 		return err
@@ -81,19 +83,21 @@ func EigOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 	vecs.SetShapeSizes(nr, sz, sz)
 	vals.SetShapeSizes(nr, sz)
 	var errs []error
-	for r := range nr {
-		sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
-		ma, _ := NewMatrix(sa)
-		do, _ := NewDense(vecs.RowTensor(r).(*tensor.Float64))
-		var eig mat.Eigen
-		ok := eig.Factorize(ma, mat.EigenRight)
-		if !ok {
-			errs = append(errs, errors.New("gonum mat.Eigen Factorize failed"))
-		}
-		_ = do
-		// eig.VectorsTo(do) // todo: requires complex!
-		// eig.Values(vals.Values[r*sz : (r+1)*sz])
-	}
+	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2), // todo: better compute estimate
+		func(tsr ...tensor.Tensor) int { return nr },
+		func(r int, tsr ...tensor.Tensor) {
+			sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
+			ma, _ := NewMatrix(sa)
+			do, _ := NewDense(vecs.RowTensor(r).(*tensor.Float64))
+			var eig mat.Eigen
+			ok := eig.Factorize(ma, mat.EigenRight)
+			if !ok {
+				errs = append(errs, errors.New("gonum mat.Eigen Factorize failed"))
+			}
+			_ = do
+			// eig.VectorsTo(do) // todo: requires complex!
+			// eig.Values(vals.Values[r*sz : (r+1)*sz])
+		})
 	return errors.Join(errs...)
 }
 
@@ -105,7 +109,8 @@ func EigOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 // i.e., maximum vector is the last column.
 // The values are the size of one row, ordered *lowest* to *highest*.
 // Note that Eig produces results in the *opposite* order of [SVD] (which is much faster).
-// If the input tensor is > 2D, it is treated as a list of 2D matricies.
+// If the input tensor is > 2D, it is treated as a list of 2D matricies,
+// and parallel threading is used where beneficial.
 func EigSym(a tensor.Tensor) (vecs, vals *tensor.Float64) {
 	vecs = tensor.NewFloat64()
 	vals = tensor.NewFloat64()
@@ -121,7 +126,8 @@ func EigSym(a tensor.Tensor) (vecs, vals *tensor.Float64) {
 // i.e., maximum vector is the last column.
 // The values are the size of one row, ordered *lowest* to *highest*.
 // Note that Eig produces results in the *opposite* order of [SVD] (which is much faster).
-// If the input tensor is > 2D, it is treated as a list of 2D matricies.
+// If the input tensor is > 2D, it is treated as a list of 2D matricies,
+// and parallel threading is used where beneficial.
 func EigSymOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 	if err := StringCheck(a); err != nil {
 		return err
@@ -165,18 +171,20 @@ func EigSymOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 	vecs.SetShapeSizes(nr, sz, sz)
 	vals.SetShapeSizes(nr, sz)
 	var errs []error
-	for r := range nr {
-		sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
-		ma, _ := NewSymmetric(sa)
-		do, _ := NewDense(vecs.RowTensor(r).(*tensor.Float64))
-		var eig mat.EigenSym
-		ok := eig.Factorize(ma, true)
-		if !ok {
-			errs = append(errs, errors.New("gonum mat.Eigen Factorize failed"))
-		}
-		eig.VectorsTo(do)
-		eig.Values(vals.Values[r*sz : (r+1)*sz])
-	}
+	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2), // todo: better compute estimate
+		func(tsr ...tensor.Tensor) int { return nr },
+		func(r int, tsr ...tensor.Tensor) {
+			sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
+			ma, _ := NewSymmetric(sa)
+			do, _ := NewDense(vecs.RowTensor(r).(*tensor.Float64))
+			var eig mat.EigenSym
+			ok := eig.Factorize(ma, true)
+			if !ok {
+				errs = append(errs, errors.New("gonum mat.Eigen Factorize failed"))
+			}
+			eig.VectorsTo(do)
+			eig.Values(vals.Values[r*sz : (r+1)*sz])
+		})
 	return errors.Join(errs...)
 }
 
@@ -188,7 +196,8 @@ func EigSymOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 // i.e., maximum vector is the first column.
 // The values are the size of one row ordered in alignment with the vectors.
 // Note that SVD produces results in the *opposite* order of [EigSym].
-// If the input tensor is > 2D, it is treated as a list of 2D matricies.
+// If the input tensor is > 2D, it is treated as a list of 2D matricies,
+// and parallel threading is used where beneficial.
 func SVD(a tensor.Tensor) (vecs, vals *tensor.Float64) {
 	vecs = tensor.NewFloat64()
 	vals = tensor.NewFloat64()
@@ -204,7 +213,8 @@ func SVD(a tensor.Tensor) (vecs, vals *tensor.Float64) {
 // i.e., maximum vector is the first column.
 // The values are the size of one row ordered in alignment with the vectors.
 // Note that SVD produces results in the *opposite* order of [EigSym].
-// If the input tensor is > 2D, it is treated as a list of 2D matricies.
+// If the input tensor is > 2D, it is treated as a list of 2D matricies,
+// and parallel threading is used where beneficial.
 func SVDOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 	if err := StringCheck(a); err != nil {
 		return err
@@ -248,18 +258,20 @@ func SVDOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 	vecs.SetShapeSizes(nr, sz, sz)
 	vals.SetShapeSizes(nr, sz)
 	var errs []error
-	for r := range nr {
-		sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
-		ma, _ := NewSymmetric(sa)
-		do, _ := NewDense(vecs.RowTensor(r).(*tensor.Float64))
-		var eig mat.SVD
-		ok := eig.Factorize(ma, mat.SVDFull)
-		if !ok {
-			errs = append(errs, errors.New("gonum mat.SVD Factorize failed"))
-		}
-		eig.UTo(do)
-		eig.Values(vals.Values[r*sz : (r+1)*sz])
-	}
+	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2), // todo: better compute estimate
+		func(tsr ...tensor.Tensor) int { return nr },
+		func(r int, tsr ...tensor.Tensor) {
+			sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
+			ma, _ := NewSymmetric(sa)
+			do, _ := NewDense(vecs.RowTensor(r).(*tensor.Float64))
+			var eig mat.SVD
+			ok := eig.Factorize(ma, mat.SVDFull)
+			if !ok {
+				errs = append(errs, errors.New("gonum mat.SVD Factorize failed"))
+			}
+			eig.UTo(do)
+			eig.Values(vals.Values[r*sz : (r+1)*sz])
+		})
 	return errors.Join(errs...)
 }
 

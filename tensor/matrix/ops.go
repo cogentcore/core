@@ -31,6 +31,7 @@ func CallOut2(fun func(a, b tensor.Tensor, out *tensor.Float64) error, a, b tens
 // Mul performs matrix multiplication, using the following rules based
 // on the shapes of the relevant tensors. If the tensor shapes are not
 // suitable, an error is logged (see [MulOut] for a version returning the error).
+// N > 2 dimensional cases use parallel threading where beneficial.
 //   - If both arguments are 2-D they are multiplied like conventional matrices.
 //   - If either argument is N-D, N > 2, it is treated as a stack of matrices
 //     residing in the last two indexes and broadcast accordingly.
@@ -43,9 +44,9 @@ func Mul(a, b tensor.Tensor) *tensor.Float64 {
 }
 
 // MulOut performs matrix multiplication, into the given output tensor,
-// using the following rules based
-// on the shapes of the relevant tensors. If the tensor shapes are not
-// suitable, a [gonum] [mat.ErrShape] error is returned.
+// using the following rules based on the shapes of the relevant tensors.
+// If the tensor shapes are not suitable, a [gonum] [mat.ErrShape] error is returned.
+// N > 2 dimensional cases use parallel threading where beneficial.
 //   - If both arguments are 2-D they are multiplied like conventional matrices.
 //     The result has shape a.Rows, b.Columns.
 //   - If either argument is N-D, N > 2, it is treated as a stack of matrices
@@ -115,12 +116,14 @@ func MulOut(a, b tensor.Tensor, out *tensor.Float64) error {
 		mb, _ := NewMatrix(eb)
 		nr := ea.DimSize(0)
 		out.SetShapeSizes(nr, ea.DimSize(1), eb.DimSize(1))
-		for r := range nr {
-			sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
-			ma, _ := NewMatrix(sa)
-			do, _ := NewDense(out.RowTensor(r).(*tensor.Float64))
-			do.Mul(ma, mb)
-		}
+		tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2)*eb.Len(),
+			func(tsr ...tensor.Tensor) int { return nr },
+			func(r int, tsr ...tensor.Tensor) {
+				sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
+				ma, _ := NewMatrix(sa)
+				do, _ := NewDense(out.RowTensor(r).(*tensor.Float64))
+				do.Mul(ma, mb)
+			})
 	case nb > 2 && na == 2:
 		if ea.DimSize(1) != eb.DimSize(1) {
 			return mat.ErrShape
@@ -128,12 +131,14 @@ func MulOut(a, b tensor.Tensor, out *tensor.Float64) error {
 		ma, _ := NewMatrix(ea)
 		nr := eb.DimSize(0)
 		out.SetShapeSizes(nr, ea.DimSize(0), eb.DimSize(2))
-		for r := range nr {
-			sb := tensor.Reslice(eb, r, tensor.FullAxis, tensor.FullAxis)
-			mb, _ := NewMatrix(sb)
-			do, _ := NewDense(out.RowTensor(r).(*tensor.Float64))
-			do.Mul(ma, mb)
-		}
+		tensor.VectorizeThreaded(ea.Len()*eb.DimSize(1)*eb.DimSize(2),
+			func(tsr ...tensor.Tensor) int { return nr },
+			func(r int, tsr ...tensor.Tensor) {
+				sb := tensor.Reslice(eb, r, tensor.FullAxis, tensor.FullAxis)
+				mb, _ := NewMatrix(sb)
+				do, _ := NewDense(out.RowTensor(r).(*tensor.Float64))
+				do.Mul(ma, mb)
+			})
 	case na > 2 && nb > 2:
 		if ea.DimSize(0) != eb.DimSize(0) {
 			return errors.New("matrix.Mul: a and b input matricies are > 2 dimensional; must have same outer dimension sizes")
@@ -143,14 +148,16 @@ func MulOut(a, b tensor.Tensor, out *tensor.Float64) error {
 		}
 		nr := ea.DimSize(0)
 		out.SetShapeSizes(nr, ea.DimSize(1), eb.DimSize(2))
-		for r := range nr {
-			sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
-			ma, _ := NewMatrix(sa)
-			sb := tensor.Reslice(eb, r, tensor.FullAxis, tensor.FullAxis)
-			mb, _ := NewMatrix(sb)
-			do, _ := NewDense(out.RowTensor(r).(*tensor.Float64))
-			do.Mul(ma, mb)
-		}
+		tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2)*eb.DimSize(1)*eb.DimSize(2),
+			func(tsr ...tensor.Tensor) int { return nr },
+			func(r int, tsr ...tensor.Tensor) {
+				sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
+				ma, _ := NewMatrix(sa)
+				sb := tensor.Reslice(eb, r, tensor.FullAxis, tensor.FullAxis)
+				mb, _ := NewMatrix(sb)
+				do, _ := NewDense(out.RowTensor(r).(*tensor.Float64))
+				do.Mul(ma, mb)
+			})
 	default:
 		return mat.ErrShape
 	}
@@ -165,6 +172,8 @@ func MulOut(a, b tensor.Tensor, out *tensor.Float64) error {
 	}
 	return nil
 }
+
+// todo: following should handle N>2 dim case.
 
 // Det returns the determinant of the given tensor.
 // For a 2D matrix [[a, b], [c, d]] it this is ad - bc.
@@ -236,14 +245,16 @@ func InverseOut(a tensor.Tensor, out *tensor.Float64) error {
 	nr := ea.DimSize(0)
 	out.SetShapeSizes(nr, ea.DimSize(1), ea.DimSize(2))
 	var errs []error
-	for r := range nr {
-		sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
-		ma, _ := NewMatrix(sa)
-		do, _ := NewDense(out.RowTensor(r).(*tensor.Float64))
-		err := do.Inverse(ma)
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
+	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2), // todo: better compute estimate
+		func(tsr ...tensor.Tensor) int { return nr },
+		func(r int, tsr ...tensor.Tensor) {
+			sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
+			ma, _ := NewMatrix(sa)
+			do, _ := NewDense(out.RowTensor(r).(*tensor.Float64))
+			err := do.Inverse(ma)
+			if err != nil {
+				errs = append(errs, err)
+			}
+		})
 	return errors.Join(errs...)
 }
