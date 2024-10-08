@@ -184,9 +184,9 @@ func Sprintf(format string, tsr Tensor, maxLen int) string {
 		case tsr.IsString():
 			format = "%s\t"
 		case reflectx.KindIsInt(tsr.DataType()):
-			format = "%g\t"
+			format = "%.10g\t"
 		default:
-			format = "%g\t"
+			format = "%.10g\t"
 		}
 	}
 	if tsr.NumDims() == 1 && tsr.DimSize(0) == 1 { // scalar special case
