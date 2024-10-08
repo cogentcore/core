@@ -321,12 +321,11 @@ func (st *State) TranspileExec(ewords []string, output bool) Tokens {
 // Returns a positive index to resume processing at, if it is actually an
 // n-dimensional expr, and -1 if not, in which case the normal process resumes.
 func (st *State) TranspileGoNDimIndex(toks Tokens, gtoks *Tokens, idIdx, rbIdx int) int {
-	nc := 0
+	var commas []int
 	for i := idIdx + 2; i < rbIdx; i++ {
 		tk := toks[i]
 		if tk.Tok == token.COMMA {
-			nc++
-			break
+			commas = append(commas, i)
 		}
 		if tk.Tok == token.LPAREN || tk.Tok == token.LBRACE || tk.Tok == token.LBRACK {
 			rp := toks[i:rbIdx].RightMatching()
@@ -335,13 +334,16 @@ func (st *State) TranspileGoNDimIndex(toks Tokens, gtoks *Tokens, idIdx, rbIdx i
 			}
 		}
 	}
-	if nc == 0 { // not multidim
+	if len(commas) == 0 { // not multidim
 		return -1
 	}
 	// now we need to determine if it is a Set based on what happens after rb
 	isSet := false
 	stok := token.ILLEGAL
 	n := len(toks)
+	if toks[n-1].Tok == token.COMMENT {
+		n--
+	}
 	if n-rbIdx > 1 {
 		ntk := toks[rbIdx+1].Tok
 		if ntk == token.ASSIGN || (ntk >= token.ADD_ASSIGN && ntk <= token.QUO_ASSIGN) {
@@ -367,13 +369,25 @@ func (st *State) TranspileGoNDimIndex(toks Tokens, gtoks *Tokens, idIdx, rbIdx i
 	gtoks.Add(token.IDENT, fun)
 	gtoks.Add(token.LPAREN)
 	if isSet {
-		gtoks.AddTokens(toks[rbIdx+2:]...)
+		gtoks.AddTokens(toks[rbIdx+2 : n]...)
 		gtoks.Add(token.COMMA)
 	}
-	gtoks.AddTokens(toks[idIdx+2 : rbIdx]...)
+	sti := idIdx + 2
+	for _, cp := range commas {
+		gtoks.Add(token.IDENT, "int")
+		gtoks.Add(token.LPAREN)
+		gtoks.AddTokens(toks[sti:cp]...)
+		gtoks.Add(token.RPAREN)
+		gtoks.Add(token.COMMA)
+		sti = cp + 1
+	}
+	gtoks.Add(token.IDENT, "int")
+	gtoks.Add(token.LPAREN)
+	gtoks.AddTokens(toks[sti:rbIdx]...)
+	gtoks.Add(token.RPAREN)
 	gtoks.Add(token.RPAREN)
 	if isSet {
-		return n
+		return len(toks)
 	} else {
 		return rbIdx
 	}

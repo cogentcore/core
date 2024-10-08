@@ -172,13 +172,13 @@ func TestTranspile(t *testing.T) {
 		{"meta += ln", "meta += ln"},
 		{"var data map[string]any", "var data map[string]any"},
 		// non-math-mode tensor indexing:
-		{"x = a[1,f(2,3)]", `x = a.Value(1, f(2, 3))`},
+		{"x = a[1,f(2,3)]", `x = a.Value(int(1), int(f(2, 3)))`},
 		{"x = a[1]", `x = a[1]`},
 		{"x = a[f(2,3)]", `x = a[f(2, 3)]`},
-		{"a[1,2] = 55", `a.Set(55, 1, 2)`},
-		{"a[1,2] += f(2,55)", `a.SetAdd(f(2, 55), 1, 2)`},
-		{"a[1,2] *= f(2,55)", `a.SetMul(f(2, 55), 1, 2)`},
-		{"Data[idx, Integ] = integ", `Data.Set(integ, idx, Integ)`},
+		{"a[1,2] = 55", `a.Set(55, int(1), int(2))`},
+		{"a[1,2] += f(2,55)", `a.SetAdd(f(2, 55), int(1), int(2))`},
+		{"a[1,2] *= f(2,55)", `a.SetMul(f(2, 55), int(1), int(2))`},
+		{"Data[idx, Integ] = integ", `Data.Set(integ, int(idx), int(Integ))`},
 	}
 
 	st := NewState()
@@ -213,7 +213,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"Data[idx, Integ] = integ", `Data.Set(integ, idx, Integ)`},
+		{"Data[idx, Integ] = integ", `Data.Set(integ, int(idx), int(Integ))`},
 	}
 	st := NewState()
 	st.MathRecord = false
