@@ -77,7 +77,7 @@ type FileInfo struct { //types:add
 
 	// Generated indicates that the file is generated and should not be edited.
 	// For Go files, this regex: `^// Code generated .* DO NOT EDIT\.$` is used.
-	Generated bool
+	Generated bool `table:"-"`
 
 	// full path to file, including name; for file functions
 	Path string `table:"-"`

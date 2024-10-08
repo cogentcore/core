@@ -127,13 +127,10 @@ func Build(c *Config) error {
 
 	cfg := &gotosl.Config{}
 	cfg.Debug = verbose
-	fmt.Println("running gosl...")
 	err := gotosl.Run(cfg)
 	if err != nil {
 		errs = append(errs, err)
 	}
-
-	fmt.Println("running go build...")
 	args := []string{"build"}
 	if verbose {
 		args = append(args, "-v")
