@@ -30,7 +30,7 @@ func (st *State) TranspileLine(code string) string {
 	if st.TypeDepth > 0 && st.BraceDepth == 0 {
 		st.TypeDepth = 0
 	}
-	if st.DeclDepth > 0 && st.ParenDepth == 0 {
+	if st.DeclDepth > 0 && (st.ParenDepth == 0 && st.BraceDepth == 0) {
 		st.DeclDepth = 0
 	}
 	// logx.PrintlnDebug("depths: ", sh.ParenDepth, sh.BraceDepth, sh.BrackDepth)

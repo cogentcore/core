@@ -9,3 +9,13 @@ fmt.Println(x)
 fmt.Println(nd)
 fmt.Println(sz)
 fmt.Println(sh)
+
+type MyStru struct {
+	Name string
+	Doc string
+}
+
+var VarCategories = []MyStru{
+	{"Act", "basic activation variables, including conductances, current, Vm, spiking"},
+	{"Learn", "calcium-based learning variables and other related learning factors"},
+}
