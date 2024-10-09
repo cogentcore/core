@@ -213,7 +213,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"Data[idx, Integ] = integ", `Data.Set(integ, int(idx), int(Integ))`},
+		{"Data[Idxs[idx, 25], Integ] = integ", `Data.Set(integ, int(Idxs.Value(int(idx), int(25))), int(Integ))`},
 	}
 	st := NewState()
 	st.MathRecord = false

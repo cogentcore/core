@@ -94,7 +94,7 @@ func (st *State) TranspileLineTokens(code string) Tokens {
 		return st.TranspileExec(ewords, false)
 	case t0.Tok == token.LBRACE:
 		logx.PrintlnDebug("go:   { } line")
-		return st.TranspileGo(toks[1:n-1], code[toks[1].Pos-1:toks[n-1].Pos-1])
+		return st.TranspileGoRange(toks, code, 1, n-1)
 	case t0.Tok == token.LBRACK:
 		logx.PrintlnDebug("exec: [ ] line")
 		return st.TranspileExec(ewords, false) // it processes the [ ]
@@ -148,6 +148,20 @@ func (st *State) TranspileLineTokens(code string) Tokens {
 	return toks
 }
 
+// TranspileGoRange returns transpiled tokens assuming Go code,
+// for given start, end (exclusive) range of given tokens and code.
+// In general the positions in the tokens applies to the _original_ code
+// so you should just keep the original code string. However, this is
+// needed for a specific case.
+func (st *State) TranspileGoRange(toks Tokens, code string, start, end int) Tokens {
+	codeSt := toks[start].Pos - 1
+	codeEd := token.Pos(len(code))
+	if end <= len(toks)-1 {
+		codeEd = toks[end].Pos - 1
+	}
+	return st.TranspileGo(toks[start:end], code[codeSt:codeEd])
+}
+
 // TranspileGo returns transpiled tokens assuming Go code.
 // Unpacks any encapsulated shell or math expressions.
 func (st *State) TranspileGo(toks Tokens, code string) Tokens {
@@ -187,7 +201,7 @@ func (st *State) TranspileGo(toks Tokens, code string) Tokens {
 				gtoks = append(gtoks, tok)
 				continue
 			}
-			idx := st.TranspileGoNDimIndex(toks, &gtoks, i-1, rm+i)
+			idx := st.TranspileGoNDimIndex(toks, code, &gtoks, i-1, rm+i)
 			if idx > 0 {
 				i = idx
 			} else {
@@ -320,7 +334,7 @@ func (st *State) TranspileExec(ewords []string, output bool) Tokens {
 // and the ] is at rbIdx. It puts the results in gtoks generated tokens.
 // Returns a positive index to resume processing at, if it is actually an
 // n-dimensional expr, and -1 if not, in which case the normal process resumes.
-func (st *State) TranspileGoNDimIndex(toks Tokens, gtoks *Tokens, idIdx, rbIdx int) int {
+func (st *State) TranspileGoNDimIndex(toks Tokens, code string, gtoks *Tokens, idIdx, rbIdx int) int {
 	var commas []int
 	for i := idIdx + 2; i < rbIdx; i++ {
 		tk := toks[i]
@@ -369,21 +383,21 @@ func (st *State) TranspileGoNDimIndex(toks Tokens, gtoks *Tokens, idIdx, rbIdx i
 	gtoks.Add(token.IDENT, fun)
 	gtoks.Add(token.LPAREN)
 	if isSet {
-		gtoks.AddTokens(toks[rbIdx+2 : n]...)
+		gtoks.AddTokens(st.TranspileGo(toks[rbIdx+2:n], code)...)
 		gtoks.Add(token.COMMA)
 	}
 	sti := idIdx + 2
 	for _, cp := range commas {
 		gtoks.Add(token.IDENT, "int")
 		gtoks.Add(token.LPAREN)
-		gtoks.AddTokens(toks[sti:cp]...)
+		gtoks.AddTokens(st.TranspileGo(toks[sti:cp], code)...)
 		gtoks.Add(token.RPAREN)
 		gtoks.Add(token.COMMA)
 		sti = cp + 1
 	}
 	gtoks.Add(token.IDENT, "int")
 	gtoks.Add(token.LPAREN)
-	gtoks.AddTokens(toks[sti:rbIdx]...)
+	gtoks.AddTokens(st.TranspileGo(toks[sti:rbIdx], code)...)
 	gtoks.Add(token.RPAREN)
 	gtoks.Add(token.RPAREN)
 	if isSet {
