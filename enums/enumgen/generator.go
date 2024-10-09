@@ -159,9 +159,9 @@ func (g *Generator) Generate() (bool, error) {
 	for _, typ := range g.Types {
 		values := make([]Value, 0, 100)
 		for _, file := range g.Pkg.Syntax {
-			if ast.IsGenerated(file) {
-				continue
-			}
+			// if ast.IsGenerated(file) {
+			// 	continue
+			// }
 			var terr error
 			ast.Inspect(file, func(n ast.Node) bool {
 				if terr != nil {
