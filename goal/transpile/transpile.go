@@ -121,7 +121,7 @@ func (st *State) TranspileLineTokens(code string) Tokens {
 		}
 		logx.PrintlnDebug("go    keyword")
 		return st.TranspileGo(toks, code)
-	case toks[n-1].Tok == token.INC:
+	case toks[n-1].Tok == token.INC || toks[n-1].Tok == token.DEC:
 		return st.TranspileGo(toks, code)
 	case t0pn > 0: // path expr
 		logx.PrintlnDebug("exec: path...")

@@ -168,7 +168,9 @@ func TestTranspile(t *testing.T) {
 		{"type Result struct { JobID string `width:\"60\"`", "type Result struct { JobID string `width:\"60\"`"},
 		{"func RunInExamples(fun func()) {", "RunInExamples := func(fun func()) {"},
 		{"ctr++", "ctr++"},
+		{"ctr--", "ctr--"},
 		{"stru.ctr++", "stru.ctr++"},
+		{"stru.ctr--", "stru.ctr--"},
 		{"meta += ln", "meta += ln"},
 		{"var data map[string]any", "var data map[string]any"},
 		// non-math-mode tensor indexing:
