@@ -2498,8 +2498,16 @@ func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 		} else {
 			sel, ok := vs.Type.(*ast.SelectorExpr)
 			if !ok {
-				errors.Log(fmt.Errorf("gosl: system %q: Var types must be []slices or tensor.Float32,  tensor.Uint32", sysname))
-				continue
+				st, ok := vs.Type.(*ast.StarExpr)
+				if !ok {
+					errors.Log(fmt.Errorf("gosl: system %q: Var types must be []slices or tensor.Float32,  tensor.Uint32", sysname))
+					continue
+				}
+				sel, ok = st.X.(*ast.SelectorExpr)
+				if !ok {
+					errors.Log(fmt.Errorf("gosl: system %q: Var types must be []slices or tensor.Float32,  tensor.Uint32", sysname))
+					continue
+				}
 			}
 			sid, ok := sel.X.(*ast.Ident)
 			if !ok {

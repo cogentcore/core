@@ -33,15 +33,16 @@ func main() {
 	Params = make([]ParamStruct, 1)
 	Params[0].Defaults()
 
-	sltensor.SetShapeSizes(&Data, n, 3) // critically, makes GPU compatible Header with strides
+	Data = tensor.NewFloat32()
+	sltensor.SetShapeSizes(Data, n, 3) // critically, makes GPU compatible Header with strides
 	nt := Data.Len()
 
 	for i := range nt {
 		Data.Set1D(rand.Float32(), i)
 	}
 
-	var sd tensor.Float32
-	sltensor.SetShapeSizes(&sd, n, 3)
+	sd := tensor.NewFloat32()
+	sltensor.SetShapeSizes(sd, n, 3)
 	for i := range nt {
 		sd.Set1D(Data.Value1D(i), i)
 	}

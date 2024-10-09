@@ -11,8 +11,6 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-//go:generate gosl
-
 //gosl:start
 //gosl:import "cogentcore.org/core/math32"
 
@@ -27,7 +25,7 @@ var (
 	// 2D: outer index is data, inner index is: Raw, Integ, Exp vars.
 	//
 	//gosl:dims 2
-	Data tensor.Float32
+	Data *tensor.Float32
 )
 
 const (
