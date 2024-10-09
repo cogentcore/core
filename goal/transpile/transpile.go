@@ -402,10 +402,10 @@ func (st *State) TranspileGoNDimIndex(toks Tokens, code string, gtoks *Tokens, i
 	gtoks.AddTokens(st.TranspileGo(toks[sti:rbIdx], code)...)
 	gtoks.Add(token.RPAREN)
 	gtoks.Add(token.RPAREN)
-	if hasComment {
-		gtoks.AddTokens(toks[len(toks)-1])
-	}
 	if isSet {
+		if hasComment {
+			gtoks.AddTokens(toks[len(toks)-1])
+		}
 		return len(toks)
 	} else {
 		return rbIdx

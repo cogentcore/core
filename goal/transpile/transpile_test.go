@@ -215,7 +215,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"a[1,2] = 55 // and that is good", `a.Set(55, int(1), int(2)) // and that is good`},
+		{"			exVm = 0.5 * (nvm + Neurons[Vm, ni, di]) // midpoint for this", `exVm = 0.5 *(nvm + Neurons.Value(int(Vm), int(ni), int(di))) // midpoint for this`},
 	}
 	st := NewState()
 	st.MathRecord = false

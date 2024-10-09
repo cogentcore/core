@@ -112,10 +112,12 @@ func Build(c *Config) error {
 	} else {
 		fns = fsx.Filenames(".", ".goal")
 	}
+	curpkg, _ := exec.Minor().Output("go", "list", "./")
 	var errs []error
 	for _, fn := range fns {
+		fpath := filepath.Join(curpkg, fn)
 		if verbose {
-			fmt.Println(fn)
+			fmt.Println(fpath)
 		}
 		ofn := strings.TrimSuffix(fn, filepath.Ext(fn)) + ".go"
 		err := goal.NewGoal().TranspileFile(fn, ofn)
@@ -134,7 +136,7 @@ func Build(c *Config) error {
 	if verbose {
 		args = append(args, "-v")
 	}
-	err := exec.Major().Run("go", args...)
+	err := exec.Verbose().Run("go", args...)
 	if err != nil {
 		errs = append(errs, err)
 	}
