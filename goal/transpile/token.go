@@ -205,6 +205,11 @@ func (tk Tokens) Code() string {
 			}
 			str += tok.String()
 			prvIdent = true
+		case tok.Tok == token.COMMENT:
+			if str != "" {
+				str += " "
+			}
+			str += tok.String()
 		case tok.IsGo():
 			if prvIdent {
 				str += " "

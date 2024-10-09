@@ -355,7 +355,9 @@ func (st *State) TranspileGoNDimIndex(toks Tokens, code string, gtoks *Tokens, i
 	isSet := false
 	stok := token.ILLEGAL
 	n := len(toks)
+	hasComment := false
 	if toks[n-1].Tok == token.COMMENT {
+		hasComment = true
 		n--
 	}
 	if n-rbIdx > 1 {
@@ -400,6 +402,9 @@ func (st *State) TranspileGoNDimIndex(toks Tokens, code string, gtoks *Tokens, i
 	gtoks.AddTokens(st.TranspileGo(toks[sti:rbIdx], code)...)
 	gtoks.Add(token.RPAREN)
 	gtoks.Add(token.RPAREN)
+	if hasComment {
+		gtoks.AddTokens(toks[len(toks)-1])
+	}
 	if isSet {
 		return len(toks)
 	} else {

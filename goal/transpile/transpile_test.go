@@ -176,9 +176,11 @@ func TestTranspile(t *testing.T) {
 		{"x = a[1]", `x = a[1]`},
 		{"x = a[f(2,3)]", `x = a[f(2, 3)]`},
 		{"a[1,2] = 55", `a.Set(55, int(1), int(2))`},
+		{"a[1,2] = 55 // and that is good", `a.Set(55, int(1), int(2)) // and that is good`},
 		{"a[1,2] += f(2,55)", `a.SetAdd(f(2, 55), int(1), int(2))`},
 		{"a[1,2] *= f(2,55)", `a.SetMul(f(2, 55), int(1), int(2))`},
 		{"Data[idx, Integ] = integ", `Data.Set(integ, int(idx), int(Integ))`},
+		{"Data[Idxs[idx, 25], Integ] = integ", `Data.Set(integ, int(Idxs.Value(int(idx), int(25))), int(Integ))`},
 	}
 
 	st := NewState()
@@ -213,7 +215,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"Data[Idxs[idx, 25], Integ] = integ", `Data.Set(integ, int(Idxs.Value(int(idx), int(25))), int(Integ))`},
+		{"a[1,2] = 55 // and that is good", `a.Set(55, int(1), int(2)) // and that is good`},
 	}
 	st := NewState()
 	st.MathRecord = false
