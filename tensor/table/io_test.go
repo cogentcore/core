@@ -15,7 +15,7 @@ func TestTableHeaders(t *testing.T) {
 	hdrstr := `$Name	%Input[2:0,0]<2:5,5>	%Input[2:1,0]	%Input[2:2,0]	%Input[2:3,0]	%Input[2:4,0]	%Input[2:0,1]	%Input[2:1,1]	%Input[2:2,1]	%Input[2:3,1]	%Input[2:4,1]	%Input[2:0,2]	%Input[2:1,2]	%Input[2:2,2]	%Input[2:3,2]	%Input[2:4,2]	%Input[2:0,3]	%Input[2:1,3]	%Input[2:2,3]	%Input[2:3,3]	%Input[2:4,3]	%Input[2:0,4]	%Input[2:1,4]	%Input[2:2,4]	%Input[2:3,4]	%Input[2:4,4]	%Output[2:0,0]<2:5,5>	%Output[2:1,0]	%Output[2:2,0]	%Output[2:3,0]	%Output[2:4,0]	%Output[2:0,1]	%Output[2:1,1]	%Output[2:2,1]	%Output[2:3,1]	%Output[2:4,1]	%Output[2:0,2]	%Output[2:1,2]	%Output[2:2,2]	%Output[2:3,2]	%Output[2:4,2]	%Output[2:0,3]	%Output[2:1,3]	%Output[2:2,3]	%Output[2:3,3]	%Output[2:4,3]	%Output[2:0,4]	%Output[2:1,4]	%Output[2:2,4]	%Output[2:3,4]	%Output[2:4,4]	`
 
 	hdrs := strings.Split(hdrstr, "\t")
-	dt := NewTable()
+	dt := New()
 	err := ConfigFromHeaders(dt, hdrs, nil)
 	if err != nil {
 		t.Error(err)
@@ -24,26 +24,29 @@ func TestTableHeaders(t *testing.T) {
 	if dt.NumColumns() != 3 {
 		t.Errorf("TableHeaders: len != 3\n")
 	}
-	if dt.Columns[0].DataType() != reflect.String {
-		t.Errorf("TableHeaders: dt.Columns[0] != STRING\n")
+	cols := dt.Columns.Values
+	if cols[0].DataType() != reflect.String {
+		t.Errorf("TableHeaders: cols[0] != STRING\n")
 	}
-	if dt.Columns[1].DataType() != reflect.Float32 {
-		t.Errorf("TableHeaders: dt.Columns[1] != FLOAT32\n")
+	if cols[1].DataType() != reflect.Float32 {
+		t.Errorf("TableHeaders: cols[1] != FLOAT32\n")
 	}
-	if dt.Columns[2].DataType() != reflect.Float32 {
-		t.Errorf("TableHeaders: dt.Columns[2] != FLOAT32\n")
+	if cols[2].DataType() != reflect.Float32 {
+		t.Errorf("TableHeaders: cols[2] != FLOAT32\n")
 	}
-	if dt.Columns[1].Shape().Sizes[1] != 5 {
-		t.Errorf("TableHeaders: dt.Columns[1].Shape().Sizes[1] != 5\n")
+	shsz := cols[1].ShapeSizes()
+	if shsz[1] != 5 {
+		t.Errorf("TableHeaders: cols[1].ShapeSizes[1] != 5\n")
 	}
-	if dt.Columns[1].Shape().Sizes[2] != 5 {
-		t.Errorf("TableHeaders: dt.Columns[1].Shape().Sizes[2] != 5\n")
+	if shsz[2] != 5 {
+		t.Errorf("TableHeaders: cols[1].ShapeSizes[2] != 5\n")
 	}
-	if dt.Columns[2].Shape().Sizes[1] != 5 {
-		t.Errorf("TableHeaders: dt.Columns[2].Shape().Sizes[1] != 5\n")
+	shsz = cols[2].ShapeSizes()
+	if shsz[1] != 5 {
+		t.Errorf("TableHeaders: cols[2].ShapeSizes[1] != 5\n")
 	}
-	if dt.Columns[2].Shape().Sizes[2] != 5 {
-		t.Errorf("TableHeaders: dt.Columns[2].Shape().Sizes[2] != 5\n")
+	if shsz[2] != 5 {
+		t.Errorf("TableHeaders: cols[2].ShapeSizes[2] != 5\n")
 	}
 	outh := dt.TableHeaders()
 	// fmt.Printf("headers out:\n%v\n", outh)
@@ -66,12 +69,12 @@ func TestReadTableDat(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		dt := &Table{}
+		dt := New()
 		err = dt.ReadCSV(fp, '\t') // tsv
 		if err != nil {
 			t.Error(err)
 		}
-		sc := dt.Columns
+		sc := dt.Columns.Values
 		if len(sc) != 3 {
 			t.Errorf("TableHeaders: len != 3\n")
 		}
@@ -84,16 +87,16 @@ func TestReadTableDat(t *testing.T) {
 		if sc[2].DataType() != reflect.Float32 {
 			t.Errorf("TableHeaders: sc[2] != FLOAT32\n")
 		}
-		if sc[1].Shape().DimSize(0) != 6 {
-			t.Errorf("TableHeaders: sc[1].Dim[0] != 6 = %v\n", sc[1].Shape().DimSize(0))
+		if sc[1].DimSize(0) != 6 {
+			t.Errorf("TableHeaders: sc[1].Dim[0] != 6 = %v\n", sc[1].DimSize(0))
 		}
-		if sc[1].Shape().DimSize(1) != 5 {
+		if sc[1].DimSize(1) != 5 {
 			t.Errorf("TableHeaders: sc[1].Dim[1] != 5\n")
 		}
-		if sc[2].Shape().DimSize(0) != 6 {
-			t.Errorf("TableHeaders: sc[2].Dim[0] != 6 = %v\n", sc[2].Shape().DimSize(0))
+		if sc[2].DimSize(0) != 6 {
+			t.Errorf("TableHeaders: sc[2].Dim[0] != 6 = %v\n", sc[2].DimSize(0))
 		}
-		if sc[2].Shape().DimSize(1) != 5 {
+		if sc[2].DimSize(1) != 5 {
 			t.Errorf("TableHeaders: sc[2].Dim[1] != 5\n")
 		}
 		fo, err := os.Create("testdata/emer_simple_lines_5x5_rec.dat")

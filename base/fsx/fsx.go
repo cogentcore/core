@@ -17,6 +17,10 @@ import (
 	"time"
 )
 
+// Filename is used to open a file picker dialog when used as an argument
+// type in a function, or as a field value.
+type Filename string
+
 // GoSrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
 // full path. GOPATH may contain a list of paths. From Robin Elkind github.com/mewkiz/pkg.
 func GoSrcDir(dir string) (absDir string, err error) {

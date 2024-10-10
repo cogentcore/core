@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strconv"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/tensor/stats/split"
+	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
 )
@@ -110,13 +110,13 @@ func RawCat(files []string) {
 func AvgCat(files []string) {
 	dts := make([]*table.Table, 0, len(files))
 	for _, fn := range files {
-		dt := &table.Table{}
-		err := dt.OpenCSV(core.Filename(fn), table.Tab)
+		dt := table.New()
+		err := dt.OpenCSV(core.Filename(fn), tensor.Tab)
 		if err != nil {
 			fmt.Println("Error opening file: ", err)
 			continue
 		}
-		if dt.Rows == 0 {
+		if dt.NumRows() == 0 {
 			fmt.Printf("File %v empty\n", fn)
 			continue
 		}
@@ -126,40 +126,43 @@ func AvgCat(files []string) {
 		fmt.Println("No files or files are empty, exiting")
 		return
 	}
-	avgdt := stats.MeanTables(dts)
-	avgdt.SetMetaData("precision", strconv.Itoa(LogPrec))
-	avgdt.SaveCSV(core.Filename(Output), table.Tab, table.Headers)
+	// todo: need meantables
+	// avgdt := stats.MeanTables(dts)
+	// tensor.SetPrecision(avgdt, LogPrec)
+	// avgdt.SaveCSV(core.Filename(Output), tensor.Tab, table.Headers)
 }
 
 // AvgByColumn computes average by given column for given files
 // If column is empty, averages across all rows.
 func AvgByColumn(files []string, column string) {
 	for _, fn := range files {
-		dt := table.NewTable()
-		err := dt.OpenCSV(core.Filename(fn), table.Tab)
+		dt := table.New()
+		err := dt.OpenCSV(core.Filename(fn), tensor.Tab)
 		if err != nil {
 			fmt.Println("Error opening file: ", err)
 			continue
 		}
-		if dt.Rows == 0 {
+		if dt.NumRows() == 0 {
 			fmt.Printf("File %v empty\n", fn)
 			continue
 		}
-		ix := table.NewIndexView(dt)
-		var spl *table.Splits
+		dir, _ := datafs.NewDir("Groups")
 		if column == "" {
-			spl = split.All(ix)
+			stats.GroupAll(dir, dt.ColumnByIndex(0))
 		} else {
-			spl = split.GroupBy(ix, column)
+			stats.TableGroups(dir, dt, column)
 		}
-		for ci, cl := range dt.Columns {
-			if cl.IsString() || dt.ColumnNames[ci] == column {
+		var cols []string
+		for ci, cl := range dt.Columns.Values {
+			if cl.IsString() || dt.Columns.Keys[ci] == column {
 				continue
 			}
-			split.AggIndex(spl, ci, stats.Mean)
+			cols = append(cols, dt.Columns.Keys[ci])
 		}
-		avgdt := spl.AggsToTable(table.ColumnNameOnly)
-		avgdt.SetMetaData("precision", strconv.Itoa(LogPrec))
-		avgdt.SaveCSV(core.Filename(Output), table.Tab, table.Headers)
+		stats.TableGroupStats(dir, stats.StatMean, dt, cols...)
+		std := dir.Item("Stats")
+		avgdt := std.GetDirTable(nil) // todo: has stat name slash
+		tensor.SetPrecision(avgdt.Meta, LogPrec)
+		avgdt.SaveCSV(core.Filename(Output), tensor.Tab, table.Headers)
 	}
 }

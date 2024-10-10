@@ -63,9 +63,9 @@ func PrintHeader(w io.Writer, pkg string, imports ...string) {
 // stopped and the error value is returned.
 func Inspect(pkg *packages.Package, f func(n ast.Node) (bool, error)) error {
 	for _, file := range pkg.Syntax {
-		if ast.IsGenerated(file) {
-			continue
-		}
+		// if ast.IsGenerated(file) {
+		// 	continue
+		// }
 		var terr error
 		var terrNode ast.Node
 		ast.Inspect(file, func(n ast.Node) bool {
