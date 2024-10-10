@@ -27,8 +27,6 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
-
-	"cogentcore.org/core/base/errors"
 )
 
 // Formatting issues:
@@ -490,7 +488,7 @@ func (p *printer) assignRwArgs(rwargs []rwArg) {
 		p.expr(rw.idx)
 		p.print(token.ASSIGN)
 		tv := rw.tmpVar
-		if tv[0] == '&' {
+		if len(tv) > 0 && tv[0] == '&' {
 			tv = tv[1:]
 		}
 		p.print(tv)
@@ -620,7 +618,13 @@ func (p *printer) pathType(x *ast.SelectorExpr) (types.Type, error) {
 		return nil, fmt.Errorf("gosl pathType: path not a pure selector path")
 	}
 	np := len(paths)
-	bt, err := getStructType(p.getIdType(paths[np-1]))
+	idt := p.getIdType(paths[np-1])
+	if idt == nil {
+		err := fmt.Errorf("gosl pathType ERROR: cannot find type for name: %q", paths[np-1].Name)
+		p.userError(err)
+		return nil, err
+	}
+	bt, err := p.getStructType(idt)
 	if err != nil {
 		return nil, err
 	}
@@ -633,7 +637,7 @@ func (p *printer) pathType(x *ast.SelectorExpr) (types.Type, error) {
 		if pi == 0 {
 			return f.Type(), nil
 		} else {
-			bt, err = getStructType(f.Type())
+			bt, err = p.getStructType(f.Type())
 			if err != nil {
 				return nil, err
 			}
@@ -1515,7 +1519,7 @@ func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, pa
 			break
 		}
 		err = fmt.Errorf("gosl methodPath ERROR: path for method call must be simple list of fields, not %#v:", cur.X)
-		errors.Log(err)
+		p.userError(err)
 		return
 	}
 	if p.isPtrArg(baseRecv) {
@@ -1523,26 +1527,32 @@ func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, pa
 	} else {
 		recvPath = "&" + baseRecv.Name
 	}
-	bt, err := getStructType(p.getIdType(baseRecv))
+	idt := p.getIdType(baseRecv)
+	if idt == nil {
+		err = fmt.Errorf("gosl methodPath ERROR: cannot find type for name: %q", baseRecv.Name)
+		p.userError(err)
+		return
+	}
+	bt, err := p.getStructType(idt)
 	if err != nil {
 		return
 	}
 	curt := bt
 	np := len(paths)
 	for pi := np - 1; pi >= 0; pi-- {
-		p := paths[pi]
-		recvPath += "." + p
-		f := fieldByName(curt, p)
+		pth := paths[pi]
+		recvPath += "." + pth
+		f := fieldByName(curt, pth)
 		if f == nil {
-			err = fmt.Errorf("gosl ERROR: field not found %q in type: %q:", p, curt.String())
-			errors.Log(err)
+			err = fmt.Errorf("gosl ERROR: field not found %q in type: %q:", pth, curt.String())
+			p.userError(err)
 			return
 		}
 		if pi == 0 {
 			pathType = f.Type()
 			recvType = getLocalTypeName(f.Type())
 		} else {
-			curt, err = getStructType(f.Type())
+			curt, err = p.getStructType(f.Type())
 			if err != nil {
 				return
 			}
@@ -1574,7 +1584,7 @@ func getLocalTypeName(typ types.Type) string {
 	return nm
 }
 
-func getStructType(typ types.Type) (*types.Struct, error) {
+func (p *printer) getStructType(typ types.Type) (*types.Struct, error) {
 	typ = typ.Underlying()
 	if st, ok := typ.(*types.Struct); ok {
 		return st, nil
@@ -1592,10 +1602,11 @@ func getStructType(typ types.Type) (*types.Struct, error) {
 		}
 	}
 	err := fmt.Errorf("gosl ERROR: type is not a struct and it should be: %q %+t", typ.String(), typ)
-	return nil, errors.Log(err)
+	p.userError(err)
+	return nil, err
 }
 
-func getNamedType(typ types.Type) (*types.Named, error) {
+func (p *printer) getNamedType(typ types.Type) (*types.Named, error) {
 	if nmd, ok := typ.(*types.Named); ok {
 		return nmd, nil
 	}
@@ -1613,7 +1624,8 @@ func getNamedType(typ types.Type) (*types.Named, error) {
 		}
 	}
 	err := fmt.Errorf("gosl ERROR: type is not a named type: %q %+t", typ.String(), typ)
-	return nil, errors.Log(err)
+	p.userError(err)
+	return nil, err
 }
 
 // gosl: globalVar looks up whether the id in an IndexExpr is a global gosl variable.
@@ -1631,7 +1643,12 @@ func (p *printer) globalVar(idx *ast.IndexExpr) (isGlobal bool, tmpVar, typName 
 	isReadOnly = gvr.ReadOnly
 	tmpVar = strings.ToLower(id.Name)
 	vtyp = p.getIdType(id)
-	nmd, err := getNamedType(vtyp)
+	if vtyp == nil {
+		err := fmt.Errorf("gosl globalVar ERROR: cannot find type for name: %q", id.Name)
+		p.userError(err)
+		return
+	}
+	nmd, err := p.getNamedType(vtyp)
 	if err == nil {
 		vtyp = nmd
 	}
@@ -1648,7 +1665,7 @@ func (p *printer) methodIndex(idx *ast.IndexExpr) (recvPath, recvType string, pa
 	id, ok := idx.X.(*ast.Ident)
 	if !ok {
 		err = fmt.Errorf("gosl methodIndex ERROR: must have a recv variable identifier, not %#v:", idx.X)
-		errors.Log(err)
+		p.userError(err)
 		return
 	}
 	isGlobal, tmpVar, typName, vtyp, isReadOnly := p.globalVar(idx)
@@ -1746,7 +1763,7 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 		}
 	} else {
 		err := fmt.Errorf("gosl methodExpr ERROR: path expression for method call must be simple list of fields, not %#v:", path.X)
-		errors.Log(err)
+		p.userError(err)
 		return
 	}
 	args := x.Args
@@ -2454,6 +2471,7 @@ func (p *printer) spec(spec ast.Spec, n int, doIndent bool, tok token.Token) {
 func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 	sy := p.GoToSL.System(sysname)
 	var gp *Group
+	var err error
 	for _, s := range d.Specs {
 		vs := s.(*ast.ValueSpec)
 		dirs, docs := p.findDirective(vs.Doc)
@@ -2484,14 +2502,16 @@ func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 			sy.Groups = append(sy.Groups, gp)
 		}
 		if len(vs.Names) != 1 {
-			errors.Log(fmt.Errorf("gosl: system %q: vars must have only 1 variable per line", sysname))
+			err = fmt.Errorf("gosl: system %q: vars must have only 1 variable per line", sysname)
+			p.userError(err)
 		}
 		nm := vs.Names[0].Name
 		typ := ""
 		if sl, ok := vs.Type.(*ast.ArrayType); ok {
 			id, ok := sl.Elt.(*ast.Ident)
 			if !ok {
-				errors.Log(fmt.Errorf("gosl: system %q: Var type not recognized: %#v", sysname, sl.Elt))
+				err = fmt.Errorf("gosl: system %q: Var type not recognized: %#v", sysname, sl.Elt)
+				p.userError(err)
 				continue
 			}
 			typ = "[]" + id.Name
@@ -2500,18 +2520,22 @@ func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 			if !ok {
 				st, ok := vs.Type.(*ast.StarExpr)
 				if !ok {
-					errors.Log(fmt.Errorf("gosl: system %q: Var types must be []slices or tensor.Float32,  tensor.Uint32", sysname))
+					err = fmt.Errorf("gosl: system %q: Var types must be []slices or tensor.Float32,  tensor.Uint32", sysname)
+					p.userError(err)
+
 					continue
 				}
 				sel, ok = st.X.(*ast.SelectorExpr)
 				if !ok {
-					errors.Log(fmt.Errorf("gosl: system %q: Var types must be []slices or tensor.Float32,  tensor.Uint32", sysname))
+					err = fmt.Errorf("gosl: system %q: Var types must be []slices or tensor.Float32,  tensor.Uint32", sysname)
+					p.userError(err)
 					continue
 				}
 			}
 			sid, ok := sel.X.(*ast.Ident)
 			if !ok {
-				errors.Log(fmt.Errorf("gosl: system %q: Var type selector is not recognized: %#v", sysname, sel.X))
+				err = fmt.Errorf("gosl: system %q: Var type selector is not recognized: %#v", sysname, sel.X)
+				p.userError(err)
 				continue
 			}
 			typ = sid.Name + "." + sel.Sel.Name
@@ -2521,12 +2545,14 @@ func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 			vr.Tensor = true
 			dstr, ok := directiveAfter(dirs, "dims")
 			if !ok {
-				errors.Log(fmt.Errorf("gosl: system %q: variable %q tensor vars require //gosl:dims <n> to specify number of dimensions", sysname, nm))
+				err = fmt.Errorf("gosl: system %q: variable %q tensor vars require //gosl:dims <n> to specify number of dimensions", sysname, nm)
+				p.userError(err)
 				continue
 			}
 			dims, err := strconv.Atoi(dstr)
 			if !ok {
-				errors.Log(fmt.Errorf("gosl: system %q: variable %q tensor dims parse error: %s", sysname, nm, err.Error()))
+				err = fmt.Errorf("gosl: system %q: variable %q tensor dims parse error: %s", sysname, nm, err.Error())
+				p.userError(err)
 			}
 			vr.SetTensorKind()
 			vr.TensorDims = dims

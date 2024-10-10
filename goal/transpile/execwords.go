@@ -162,7 +162,7 @@ func ExecWords(ln string) ([]string, error) {
 // ExecWordIsCommand returns true if given exec word is a command-like string
 // (excluding any paths)
 func ExecWordIsCommand(f string) bool {
-	if strings.Contains(f, "(") || strings.Contains(f, "=") {
+	if strings.Contains(f, "(") || strings.Contains(f, "[") || strings.Contains(f, "=") {
 		return false
 	}
 	return true

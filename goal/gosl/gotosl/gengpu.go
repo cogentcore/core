@@ -134,7 +134,7 @@ func (st *State) GenGPUSystemInit(sy *System) string {
 			gtyp = "gpu.Uniform"
 		}
 		b.WriteString(fmt.Sprintf("\t\t\tsgp := vars.AddGroup(%s)\n", gtyp))
-		b.WriteString("\t\t\tvar vr *gpu.Var\n")
+		b.WriteString("\t\t\tvar vr *gpu.Var\n\t\t\t_ = vr\n")
 		for _, vr := range gp.Vars {
 			if vr.Tensor {
 				typ := strings.TrimPrefix(vr.Type, "tensor.")
@@ -207,30 +207,24 @@ func RunOne%[1]s(n int, syncVars ...GPUVars) {
 		Run%[1]sCPU(n)
 	}
 }
-
-// RunDone%[3]s must be called after Run* calls to start compute kernels.
+`
+	// 1 = sysname (blank for 1 default), 2 = system var
+	runDone := `// RunDone%[1]s must be called after Run* calls to start compute kernels.
 // This actually submits the kernel jobs to the GPU, and adds commands
 // to synchronize the given variables back from the GPU to the CPU.
 // After this function completes, the GPU results will be available in 
 // the specified variables.
-func RunDone%[3]s(syncVars ...GPUVars) {
+func RunDone%[1]s(syncVars ...GPUVars) {
 	if !UseGPU {
 		return
 	}
 	sy := %[2]s
 	sy.ComputeEncoder.End()
-	%[3]sReadFromGPU(syncVars...)
+	%[1]sReadFromGPU(syncVars...)
 	sy.EndComputePass()
-	%[3]sSyncFromGPU(syncVars...)
+	%[1]sSyncFromGPU(syncVars...)
 }
 
-`
-
-	for _, kn := range sy.Kernels {
-		b.WriteString(fmt.Sprintf(run, kn.Name, syvar, synm))
-	}
-
-	toGPU := `
 // %[1]sToGPU copies given variables to the GPU for the system.
 func %[1]sToGPU(vars ...GPUVars) {
 	sy := %[2]s
@@ -238,7 +232,11 @@ func %[1]sToGPU(vars ...GPUVars) {
 	for _, vr := range vars {
 		switch vr {
 `
-	b.WriteString(fmt.Sprintf(toGPU, synm, syvar))
+
+	for _, kn := range sy.Kernels {
+		b.WriteString(fmt.Sprintf(run, kn.Name, syvar, synm))
+	}
+	b.WriteString(fmt.Sprintf(runDone, synm, syvar))
 
 	for gi, gp := range sy.Groups {
 		for _, vr := range gp.Vars {

@@ -61,7 +61,7 @@ func (st *State) TranspileLineTokens(code string) Tokens {
 		st.AddError(err)
 		return nil
 	}
-	logx.PrintlnDebug("\n########## line:\n", code, "\nTokens:\n", toks.String(), "\nWords:\n", ewords)
+	logx.PrintlnDebug("\n########## line:\n", code, "\nTokens:", len(toks), "\n", toks.String(), "\nWords:", len(ewords), "\n", ewords)
 
 	if toks[0].Tok == token.TYPE {
 		st.TypeDepth++
@@ -122,6 +122,7 @@ func (st *State) TranspileLineTokens(code string) Tokens {
 		logx.PrintlnDebug("go    keyword")
 		return st.TranspileGo(toks, code)
 	case toks[n-1].Tok == token.INC || toks[n-1].Tok == token.DEC:
+		logx.PrintlnDebug("go    ++ / --")
 		return st.TranspileGo(toks, code)
 	case t0pn > 0: // path expr
 		logx.PrintlnDebug("exec: path...")
@@ -134,6 +135,9 @@ func (st *State) TranspileLineTokens(code string) Tokens {
 		return st.TranspileExec(ewords, false)
 	case !f0exec: // exec must be IDENT
 		logx.PrintlnDebug("go:   not ident")
+		return st.TranspileGo(toks, code)
+	case f0exec && en > 1 && ewords[0] != "set" && toks.IsAssignExpr():
+		logx.PrintlnDebug("go:   assignment or defn")
 		return st.TranspileGo(toks, code)
 	case f0exec && en > 1 && ewords[0] != "set" && toks.IsAssignExpr():
 		logx.PrintlnDebug("go:   assignment or defn")

@@ -42,6 +42,7 @@ func GPUInit() {
 		{
 			sgp := vars.AddGroup(gpu.Storage)
 			var vr *gpu.Var
+			_ = vr
 			vr = sgp.AddStruct("Seed", int(unsafe.Sizeof(Seeds{})), 1, gpu.ComputeShader)
 			vr.ReadOnly = true
 			vr = sgp.AddStruct("Data", int(unsafe.Sizeof(Rnds{})), 1, gpu.ComputeShader)
@@ -103,7 +104,6 @@ func RunOneCompute(n int, syncVars ...GPUVars) {
 		RunComputeCPU(n)
 	}
 }
-
 // RunDone must be called after Run* calls to start compute kernels.
 // This actually submits the kernel jobs to the GPU, and adds commands
 // to synchronize the given variables back from the GPU to the CPU.
@@ -119,7 +119,6 @@ func RunDone(syncVars ...GPUVars) {
 	sy.EndComputePass()
 	SyncFromGPU(syncVars...)
 }
-
 
 // ToGPU copies given variables to the GPU for the system.
 func ToGPU(vars ...GPUVars) {

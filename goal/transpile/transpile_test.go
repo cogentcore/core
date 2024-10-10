@@ -183,6 +183,7 @@ func TestTranspile(t *testing.T) {
 		{"a[1,2] *= f(2,55)", `a.SetMul(f(2, 55), int(1), int(2))`},
 		{"Data[idx, Integ] = integ", `Data.Set(integ, int(idx), int(Integ))`},
 		{"Data[Idxs[idx, 25], Integ] = integ", `Data.Set(integ, int(Idxs.Value(int(idx), int(25))), int(Integ))`},
+		{"Layers[NeuronIxs[NrnLayIndex, ni]].GatherSpikes(&Ctx[0], ni, di)", `Layers[NeuronIxs.Value(int(NrnLayIndex), int(ni))].GatherSpikes( & Ctx[0], ni, di)`},
 	}
 
 	st := NewState()
@@ -217,7 +218,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"			exVm = 0.5 * (nvm + Neurons[Vm, ni, di]) // midpoint for this", `exVm = 0.5 *(nvm + Neurons.Value(int(Vm), int(ni), int(di))) // midpoint for this`},
+		{"Layers[NeuronIxs[NrnLayIndex, ni]].GatherSpikes(&Ctx[0], ni, di)", `Layers[NeuronIxs.Value(int(NrnLayIndex), int(ni))].GatherSpikes( & Ctx[0], ni, di)`},
 	}
 	st := NewState()
 	st.MathRecord = false

@@ -102,10 +102,6 @@ var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.fi
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.getLocalTypeName", Args: []string{"typ"}, Returns: []string{"string"}})
 
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.getStructType", Args: []string{"typ"}, Returns: []string{"Struct", "error"}})
-
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.getNamedType", Args: []string{"typ"}, Returns: []string{"Named", "error"}})
-
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.isTypeName", Args: []string{"x"}, Returns: []string{"bool"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/gosl/gotosl.stripParens", Args: []string{"x"}, Returns: []string{"Expr"}})

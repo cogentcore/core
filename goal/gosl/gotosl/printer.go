@@ -23,6 +23,7 @@ import (
 	"text/tabwriter"
 	"unicode"
 
+	"cogentcore.org/core/base/fsx"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -118,6 +119,12 @@ func (p *printer) internalError(msg ...any) {
 		fmt.Println(msg...)
 		panic("go/printer")
 	}
+}
+
+func (p *printer) userError(err error) {
+	fname := fsx.DirAndFile(p.pos.String())
+	fmt.Print(fname + ": ")
+	fmt.Println(err.Error())
 }
 
 // commentsHaveNewline reports whether a list of comments belonging to
