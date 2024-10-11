@@ -513,6 +513,11 @@ func (p *printer) goslFixArgs(args []ast.Expr, params *types.Tuple) ([]ast.Expr,
 			nn := normalizedNumber(x)
 			nn.Value = tnm + "(" + nn.Value + ")"
 			ags[i] = nn
+		case *ast.Ident:
+			if gvar := p.GoToSL.GetTempVar(x.Name); gvar != nil {
+				x.Name = "&" + x.Name
+				ags[i] = x
+			}
 		case *ast.IndexExpr:
 			isGlobal, tmpVar, _, _, isReadOnly := p.globalVar(x)
 			if isGlobal {
@@ -1301,7 +1306,7 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		if len(x.Args) > 1 {
 			depth++
 		}
-
+		fid, isid := x.Fun.(*ast.Ident)
 		// Conversions to literal function types or <-chan
 		// types require parentheses around the type.
 		paren := false
@@ -1320,7 +1325,7 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		}
 		args := x.Args
 		var rwargs []rwArg
-		if fid, ok := x.Fun.(*ast.Ident); ok {
+		if isid {
 			if obj, ok := p.pkg.TypesInfo.Uses[fid]; ok {
 				if ft, ok := obj.(*types.Func); ok {
 					sig := ft.Type().(*types.Signature)
@@ -1660,6 +1665,34 @@ func (p *printer) globalVar(idx *ast.IndexExpr) (isGlobal bool, tmpVar, typName 
 	return
 }
 
+// gosl: replace GetVar function call with assignment of local var
+func (p *printer) getGlobalVar(ae *ast.AssignStmt, gvr *Var) {
+	tmpVar := ae.Lhs[0].(*ast.Ident).Name
+	cf := ae.Rhs[0].(*ast.CallExpr)
+	p.print("var", blank, tmpVar, blank, token.ASSIGN, blank, gvr.Name, token.LBRACK)
+	p.expr(cf.Args[0])
+	p.print(token.RBRACK, token.SEMICOLON)
+	gvars := p.GoToSL.GetVarStack.Peek()
+	gvars[tmpVar] = &GetGlobalVar{Var: gvr, TmpVar: tmpVar, IdxExpr: cf.Args[0]}
+	p.GoToSL.GetVarStack[len(p.GoToSL.GetVarStack)-1] = gvars
+}
+
+// gosl: set non-read-only global vars back from temp var
+func (p *printer) setGlobalVars(gvrs map[string]*GetGlobalVar) {
+	for _, gvr := range gvrs {
+		if gvr.Var.ReadOnly {
+			continue
+		}
+		p.print(formfeed)
+		p.print(gvr.Var.Name, token.LBRACK)
+		p.expr(gvr.IdxExpr)
+		p.print(token.RBRACK, blank, token.ASSIGN, blank)
+		tmpVar := strings.ToLower(gvr.Var.Name)
+		p.print(tmpVar)
+		p.print(token.SEMICOLON)
+	}
+}
+
 // gosl: methodIndex processes an index expression as receiver type of method call
 func (p *printer) methodIndex(idx *ast.IndexExpr) (recvPath, recvType string, pathType types.Type, isReadOnly bool, err error) {
 	id, ok := idx.X.(*ast.Ident)
@@ -1742,8 +1775,13 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 		if typ != nil {
 			recvType = getLocalTypeName(typ)
 			if strings.HasPrefix(recvType, "invalid") {
-				pathIsPackage = true
-				recvType = id.Name // is a package path
+				if gvar := p.GoToSL.GetTempVar(id.Name); gvar != nil {
+					recvType = gvar.Var.SLType()
+					recvPath = "&" + recvPath
+				} else {
+					pathIsPackage = true
+					recvType = id.Name // is a package path
+				}
 			} else {
 				pathType = typ
 				recvPath = recvPath
@@ -1809,7 +1847,7 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 	p.setPos(x.Rparen)
 	p.print(token.RPAREN)
 
-	p.assignRwArgs(rwargs)
+	p.assignRwArgs(rwargs) // gosl: assign temp var back to global var
 }
 
 func (p *printer) expr0(x ast.Expr, depth int) {
@@ -1866,9 +1904,14 @@ func (p *printer) stmtList(list []ast.Stmt, nindent int, nextIsRBrace bool) {
 
 // block prints an *ast.BlockStmt; it always spans at least two lines.
 func (p *printer) block(b *ast.BlockStmt, nindent int) {
+	p.GoToSL.GetVarStack.Push(make(map[string]*GetGlobalVar))
 	p.setPos(b.Lbrace)
 	p.print(token.LBRACE)
 	p.stmtList(b.List, nindent, true)
+	getVars := p.GoToSL.GetVarStack.Pop()
+	if len(getVars) > 0 { // gosl: set the get vars
+		p.setGlobalVars(getVars)
+	}
 	p.linebreak(p.lineFor(b.Rbrace), 1, ignore, true)
 	p.setPos(b.Rbrace)
 	p.print(token.RBRACE)
@@ -2052,6 +2095,16 @@ func (p *printer) stmt(stmt ast.Stmt, nextIsRBrace bool, nosemi bool) {
 			depth++
 		}
 		if s.Tok == token.DEFINE {
+			if ce, ok := s.Rhs[0].(*ast.CallExpr); ok {
+				if fid, ok := ce.Fun.(*ast.Ident); ok {
+					if strings.HasPrefix(fid.Name, "Get") {
+						if gvr, ok := p.GoToSL.GetFuncs[fid.Name]; ok {
+							p.getGlobalVar(s, gvr) // replace GetVar function call with assignment of local var
+							return
+						}
+					}
+				}
+			}
 			p.print("var", blank) // we don't know if it is var or let..
 		}
 		p.exprList(s.Pos(), s.Lhs, depth, 0, s.TokPos, false)
@@ -2562,6 +2615,7 @@ func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
 			fmt.Println("\tAdded var:", nm, typ, "to group:", gp.Name)
 		}
 	}
+	p.GoToSL.VarsAdded()
 }
 
 func (p *printer) genDecl(d *ast.GenDecl) {

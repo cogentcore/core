@@ -6,12 +6,14 @@ package gotosl
 
 import (
 	"fmt"
+	"go/ast"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/stack"
 )
 
 // System represents a ComputeSystem, and its kernels and variables.
@@ -131,6 +133,16 @@ type File struct {
 	Lines [][]byte
 }
 
+// GetGlobalVar holds GetVar expression, to Set variable back when done.
+type GetGlobalVar struct {
+	// global variable
+	Var *Var
+	// name of temporary variable
+	TmpVar string
+	// index passed to the Get function
+	IdxExpr ast.Expr
+}
+
 // State holds the current Go -> WGSL processing state.
 type State struct {
 	// Config options.
@@ -156,6 +168,9 @@ type State struct {
 	// There is an initial "Default" system when system is not specified.
 	Systems map[string]*System
 
+	// GetFuncs is a map of GetVar, SetVar function names for global vars.
+	GetFuncs map[string]*Var
+
 	// SLImportFiles are all the extracted and translated WGSL files in shaders/imports,
 	// which are copied into the generated shader kernel files.
 	SLImportFiles []*File
@@ -165,6 +180,10 @@ type State struct {
 
 	// ExcludeMap is the compiled map of functions to exclude in Go -> WGSL translation.
 	ExcludeMap map[string]bool
+
+	// GetVarStack is a stack per function definition of GetVar variables
+	// that need to be set at the end.
+	GetVarStack stack.Stack[map[string]*GetGlobalVar]
 }
 
 func (st *State) Init(cfg *Config) {
@@ -247,4 +266,28 @@ func (st *State) GlobalVar(vrnm string) *Var {
 		}
 	}
 	return nil
+}
+
+// GetTempVar returns temp var for global variable of given name, if found.
+func (st *State) GetTempVar(vrnm string) *GetGlobalVar {
+	if st == nil || st.GetVarStack == nil {
+		return nil
+	}
+	gvars := st.GetVarStack.Peek()
+	return gvars[vrnm]
+}
+
+// VarsAdded is called when a set of vars has been added; update relevant maps etc.
+func (st *State) VarsAdded() {
+	st.GetFuncs = make(map[string]*Var)
+	for _, sy := range st.Systems {
+		for _, gp := range sy.Groups {
+			for _, vr := range gp.Vars {
+				if vr.Tensor {
+					continue
+				}
+				st.GetFuncs["Get"+vr.Name] = vr
+			}
+		}
+	}
 }

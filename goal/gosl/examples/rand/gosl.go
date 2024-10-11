@@ -169,3 +169,19 @@ func SyncFromGPU(vars ...GPUVars) {
 		}
 	}
 }
+
+// GetSeed returns a pointer to the given global variable: 
+// [Seed] []Seeds at given index.
+// To ensure that values are updated on the GPU, you must call [SetSeed].
+// after all changes have been made.
+func GetSeed(idx int) *Seeds {
+	return &Seed[idx]
+}
+
+// GetData returns a pointer to the given global variable: 
+// [Data] []Rnds at given index.
+// To ensure that values are updated on the GPU, you must call [SetData].
+// after all changes have been made.
+func GetData(idx int) *Rnds {
+	return &Data[idx]
+}

@@ -15,7 +15,7 @@ import (
 //gosl:vars
 var (
 	// Params are the parameters for the computation.
-	//gosl:read-only
+	//  gosl:read-only
 	Params []ParamStruct
 
 	// Data is the data on which the computation operates.
@@ -53,7 +53,8 @@ func (ps *ParamStruct) IntegFromRaw(idx int) {
 
 // Compute does the main computation.
 func Compute(i uint32) { //gosl:kernel
-	Params[0].IntegFromRaw(int(i))
+	params := GetParams(0)
+	params.IntegFromRaw(int(i))
 }
 
 //gosl:end

@@ -169,3 +169,19 @@ func SyncFromGPU(vars ...GPUVars) {
 		}
 	}
 }
+
+// GetParams returns a pointer to the given global variable: 
+// [Params] []ParamStruct at given index.
+// To ensure that values are updated on the GPU, you must call [SetParams].
+// after all changes have been made.
+func GetParams(idx uint32) *ParamStruct {
+	return &Params[idx]
+}
+
+// GetData returns a pointer to the given global variable: 
+// [Data] []DataStruct at given index.
+// To ensure that values are updated on the GPU, you must call [SetData].
+// after all changes have been made.
+func GetData(idx uint32) *DataStruct {
+	return &Data[idx]
+}

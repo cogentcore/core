@@ -44,7 +44,6 @@ func GPUInit() {
 			var vr *gpu.Var
 			_ = vr
 			vr = sgp.AddStruct("Params", int(unsafe.Sizeof(ParamStruct{})), 1, gpu.ComputeShader)
-			vr.ReadOnly = true
 			vr = sgp.Add("Data", gpu.Float32, 1, gpu.ComputeShader)
 			sgp.SetNValues(1)
 		}
@@ -168,4 +167,12 @@ func SyncFromGPU(vars ...GPUVars) {
 			gpu.ReadToBytes(v, Data.Values)
 		}
 	}
+}
+
+// GetParams returns a pointer to the given global variable: 
+// [Params] []ParamStruct at given index.
+// To ensure that values are updated on the GPU, you must call [SetParams].
+// after all changes have been made.
+func GetParams(idx uint32) *ParamStruct {
+	return &Params[idx]
 }

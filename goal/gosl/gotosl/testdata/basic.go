@@ -156,11 +156,6 @@ func (ps *ParamStruct) AnotherMeth(ds *DataStruct, ptrarg *float32) {
 	*ptrarg = -1
 }
 
-// Compute does the main computation
-func Compute(i uint32) { //gosl:kernel
-	Params[0].IntegFromRaw(&Data[i])
-}
-
 //gosl:end
 
 // note: only core compute code needs to be in shader -- all init is done CPU-side
@@ -173,3 +168,17 @@ func (ps *ParamStruct) Defaults() {
 func (ps *ParamStruct) Update() {
 	ps.Dt = 1.0 / ps.Tau
 }
+
+func (ps *ParamStruct) String() string {
+	return "params!"
+}
+
+//gosl:start
+
+// Compute does the main computation
+func Compute(i uint32) { //gosl:kernel
+	data := GetData(i)
+	Params[0].IntegFromRaw(data)
+}
+
+//gosl:end

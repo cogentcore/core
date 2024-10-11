@@ -166,7 +166,8 @@ fn ParamStruct_AnotherMeth(ps: ptr<function,ParamStruct>, ds: ptr<function,DataS
 
 // Compute does the main computation
 fn Compute(i: u32) { //gosl:kernel
-	var params=Params[0]; var data=Data[i];
-	ParamStruct_IntegFromRaw(&params, &data);
-	Data[i]=data;
+	var data = Data[i];
+	var params=Params[0]; ParamStruct_IntegFromRaw(&params, &data);
+Data[i] = data;
+
 }

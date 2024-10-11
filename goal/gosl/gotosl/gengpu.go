@@ -296,5 +296,23 @@ func %[1]sSyncFromGPU(vars ...GPUVars) {
 	}
 	b.WriteString("\t\t}\n\t}\n}\n")
 
+	getFun := `
+// Get%[1]s returns a pointer to the given global variable: 
+// [%[1]s] []%[2]s at given index.
+// To ensure that values are updated on the GPU, you must call [Set%[1]s].
+// after all changes have been made.
+func Get%[1]s(idx uint32) *%[2]s {
+	return &%[1]s[idx]
+}
+`
+	for _, gp := range sy.Groups {
+		for _, vr := range gp.Vars {
+			if vr.Tensor {
+				continue
+			}
+			b.WriteString(fmt.Sprintf(getFun, vr.Name, vr.SLType()))
+		}
+	}
+
 	return b.String()
 }
