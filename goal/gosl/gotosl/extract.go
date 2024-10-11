@@ -16,6 +16,11 @@ import (
 // ExtractFiles processes all the package files and saves the corresponding
 // .go files with simple go header.
 func (st *State) ExtractFiles() {
+	st.ImportPackages = make(map[string]bool)
+	for impath := range st.GoImports {
+		_, pkg := filepath.Split(impath)
+		st.ImportPackages[pkg] = true
+	}
 	for fn, fl := range st.GoFiles {
 		fl.Lines = st.ExtractGosl(fl.Lines)
 		WriteFileLines(filepath.Join(st.ImportsDir, fn), st.AppendGoHeader(fl.Lines))
@@ -27,11 +32,6 @@ func (st *State) ExtractFiles() {
 func (st *State) ExtractImports() {
 	if len(st.GoImports) == 0 {
 		return
-	}
-	st.ImportPackages = make(map[string]bool)
-	for impath := range st.GoImports {
-		_, pkg := filepath.Split(impath)
-		st.ImportPackages[pkg] = true
 	}
 	for _, im := range st.GoImports {
 		for fn, fl := range im {
