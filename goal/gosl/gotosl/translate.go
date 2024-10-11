@@ -49,8 +49,14 @@ func (st *State) TranslateDir(pf string) error {
 	slrandCopied := false
 	sltypeCopied := false
 
-	for _, gofp := range files {
+	done := make(map[string]bool)
+
+	doFile := func(gofp string) {
 		_, gofn := filepath.Split(gofp)
+		if _, ok := done[gofn]; ok {
+			return
+		}
+		done[gofn] = true
 		wgfn := wgslFile(gofn)
 		if st.Config.Debug {
 			fmt.Printf("###################################\nTranslating Go file: %s\n", gofn)
@@ -69,7 +75,7 @@ func (st *State) TranslateDir(pf string) error {
 		}
 		if afile == nil {
 			fmt.Printf("Warning: File named: %s not found in Loaded package\n", gofn)
-			continue
+			return
 		}
 
 		var buf bytes.Buffer
@@ -102,6 +108,13 @@ func (st *State) TranslateDir(pf string) error {
 		ioutil.WriteFile(slfn, bytes.Join(exsl, nl), 0644)
 
 		st.SLImportFiles = append(st.SLImportFiles, &File{Name: wgfn, Lines: exsl})
+	}
+
+	for fn := range st.GoVarsFiles { // do varsFiles first!!
+		doFile(fn)
+	}
+	for _, gofp := range files {
+		doFile(gofp)
 	}
 	return nil
 }

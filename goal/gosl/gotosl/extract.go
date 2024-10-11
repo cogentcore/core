@@ -19,10 +19,18 @@ func (st *State) ExtractFiles() {
 	st.ImportPackages = make(map[string]bool)
 	for impath := range st.GoImports {
 		_, pkg := filepath.Split(impath)
-		st.ImportPackages[pkg] = true
+		if pkg != "math32" {
+			st.ImportPackages[pkg] = true
+		}
 	}
+
 	for fn, fl := range st.GoFiles {
-		fl.Lines = st.ExtractGosl(fl.Lines)
+		hasVars := false
+		fl.Lines, hasVars = st.ExtractGosl(fl.Lines)
+		if hasVars {
+			st.GoVarsFiles[fn] = fl
+			delete(st.GoFiles, fn)
+		}
 		WriteFileLines(filepath.Join(st.ImportsDir, fn), st.AppendGoHeader(fl.Lines))
 	}
 }
@@ -33,21 +41,23 @@ func (st *State) ExtractImports() {
 	if len(st.GoImports) == 0 {
 		return
 	}
-	for _, im := range st.GoImports {
+	for impath, im := range st.GoImports {
+		_, pkg := filepath.Split(impath)
 		for fn, fl := range im {
-			fl.Lines = st.ExtractGosl(fl.Lines)
-			WriteFileLines(filepath.Join(st.ImportsDir, fn), st.AppendGoHeader(fl.Lines))
+			fl.Lines, _ = st.ExtractGosl(fl.Lines)
+			WriteFileLines(filepath.Join(st.ImportsDir, pkg+"-"+fn), st.AppendGoHeader(fl.Lines))
 		}
 	}
 }
 
 // ExtractGosl gosl comment-directive tagged regions from given file.
-func (st *State) ExtractGosl(lines [][]byte) [][]byte {
+func (st *State) ExtractGosl(lines [][]byte) (outLines [][]byte, hasVars bool) {
 	key := []byte("//gosl:")
 	start := []byte("start")
 	wgsl := []byte("wgsl")
 	nowgsl := []byte("nowgsl")
 	end := []byte("end")
+	vars := []byte("vars")
 	imp := []byte("import")
 	kernel := []byte("//gosl:kernel")
 	fnc := []byte("func")
@@ -55,7 +65,6 @@ func (st *State) ExtractGosl(lines [][]byte) [][]byte {
 	inReg := false
 	inHlsl := false
 	inNoHlsl := false
-	var outLns [][]byte
 	for li, ln := range lines {
 		tln := bytes.TrimSpace(ln)
 		isKey := bytes.HasPrefix(tln, key)
@@ -67,11 +76,14 @@ func (st *State) ExtractGosl(lines [][]byte) [][]byte {
 		switch {
 		case inReg && isKey && bytes.HasPrefix(keyStr, end):
 			if inHlsl || inNoHlsl {
-				outLns = append(outLns, ln)
+				outLines = append(outLines, ln)
 			}
 			inReg = false
 			inHlsl = false
 			inNoHlsl = false
+		case inReg && isKey && bytes.HasPrefix(keyStr, vars):
+			hasVars = true
+			outLines = append(outLines, ln)
 		case inReg:
 			for pkg := range st.ImportPackages { // remove package prefixes
 				if !bytes.Contains(ln, imp) {
@@ -100,20 +112,20 @@ func (st *State) ExtractGosl(lines [][]byte) [][]byte {
 					fmt.Println("\tAdded kernel:", fnm, "args:", args, "system:", sy.Name)
 				}
 			}
-			outLns = append(outLns, ln)
+			outLines = append(outLines, ln)
 		case isKey && bytes.HasPrefix(keyStr, start):
 			inReg = true
 		case isKey && bytes.HasPrefix(keyStr, nowgsl):
 			inReg = true
 			inNoHlsl = true
-			outLns = append(outLns, ln) // key to include self here
+			outLines = append(outLines, ln) // key to include self here
 		case isKey && bytes.HasPrefix(keyStr, wgsl):
 			inReg = true
 			inHlsl = true
-			outLns = append(outLns, ln)
+			outLines = append(outLines, ln)
 		}
 	}
-	return outLns
+	return
 }
 
 // AppendGoHeader appends Go header
@@ -125,6 +137,7 @@ func (st *State) AppendGoHeader(lines [][]byte) [][]byte {
 	"cogentcore.org/core/goal/gosl/slbool"
 	"cogentcore.org/core/goal/gosl/slrand"
 	"cogentcore.org/core/goal/gosl/sltype"
+	"cogentcore.org/core/tensor"
 `))
 	for impath := range st.GoImports {
 		if strings.Contains(impath, "core/goal/gosl") {

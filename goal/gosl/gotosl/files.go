@@ -77,6 +77,7 @@ func IsWGSLFile(f fs.DirEntry) bool {
 func (st *State) ProjectFiles() {
 	fls := fsx.Filenames(".", ".go")
 	st.GoFiles = make(map[string]*File)
+	st.GoVarsFiles = make(map[string]*File)
 	for _, fn := range fls {
 		fl := &File{Name: fn}
 		var err error

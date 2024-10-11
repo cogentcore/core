@@ -1532,7 +1532,15 @@ func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, pa
 	} else {
 		recvPath = "&" + baseRecv.Name
 	}
-	idt := p.getIdType(baseRecv)
+	var idt types.Type
+	if gvar := p.GoToSL.GetTempVar(baseRecv.Name); gvar != nil {
+		id := &ast.Ident{Name: gvar.Var.SLType()}
+		if obj, ok := p.pkg.TypesInfo.Defs[id]; ok {
+			idt = obj.Type()
+		}
+	} else {
+		idt = p.getIdType(baseRecv)
+	}
 	if idt == nil {
 		err = fmt.Errorf("gosl methodPath ERROR: cannot find type for name: %q", baseRecv.Name)
 		p.userError(err)
@@ -1540,6 +1548,7 @@ func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, pa
 	}
 	bt, err := p.getStructType(idt)
 	if err != nil {
+		fmt.Println(baseRecv)
 		return
 	}
 	curt := bt

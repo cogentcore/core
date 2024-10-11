@@ -157,6 +157,10 @@ type State struct {
 	// GoFiles are all the files with gosl content in current directory.
 	GoFiles map[string]*File
 
+	// GoVarsFiles are all the files with gosl:vars content in current directory.
+	// These must be processed first!  they are moved from GoFiles to here.
+	GoVarsFiles map[string]*File
+
 	// GoImports has all the imported files.
 	GoImports map[string]map[string]*File
 
@@ -273,8 +277,14 @@ func (st *State) GetTempVar(vrnm string) *GetGlobalVar {
 	if st == nil || st.GetVarStack == nil {
 		return nil
 	}
-	gvars := st.GetVarStack.Peek()
-	return gvars[vrnm]
+	nv := len(st.GetVarStack)
+	for i := nv - 1; i >= 0; i-- {
+		gvars := st.GetVarStack[i]
+		if gv, ok := gvars[vrnm]; ok {
+			return gv
+		}
+	}
+	return nil
 }
 
 // VarsAdded is called when a set of vars has been added; update relevant maps etc.
