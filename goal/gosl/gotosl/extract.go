@@ -125,8 +125,14 @@ func (st *State) AppendGoHeader(lines [][]byte) [][]byte {
 	"cogentcore.org/core/goal/gosl/slbool"
 	"cogentcore.org/core/goal/gosl/slrand"
 	"cogentcore.org/core/goal/gosl/sltype"
-)
 `))
+	for impath := range st.GoImports {
+		if strings.Contains(impath, "core/goal/gosl") {
+			continue
+		}
+		olns = append(olns, []byte("\t\""+impath+"\""))
+	}
+	olns = append(olns, []byte(")"))
 	olns = append(olns, lines...)
 	SlBoolReplace(olns)
 	return olns
