@@ -2,6 +2,7 @@ package test
 
 import (
 	"math"
+	"sync/atomic"
 
 	"cogentcore.org/core/goal/gosl/slbool"
 	"cogentcore.org/core/math32"
@@ -81,7 +82,7 @@ type DataStruct struct {
 	// exp of integ
 	Exp float32
 
-	pad float32
+	Int int32
 }
 
 // SubParamStruct has the test sub-params
@@ -119,6 +120,7 @@ func (ps *ParamStruct) IntegFromRaw(ds *DataStruct) float32 {
 	if newVal < -10 || ps.Option.IsTrue() {
 		newVal = -10
 	}
+	atomic.AddInt32(&(ds.Int), int32(newVal))
 	ds.Integ += newVal
 	ds.Exp = math32.Exp(-ds.Integ)
 	var a float32

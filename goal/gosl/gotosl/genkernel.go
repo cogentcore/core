@@ -83,6 +83,7 @@ func (st *State) GenTensorFuncs(sy *System) string {
 			if _, ok := done[fn]; ok {
 				continue
 			}
+			done[fn] = true
 			tconv := ""
 			switch vr.TensorKind {
 			case reflect.Float32:

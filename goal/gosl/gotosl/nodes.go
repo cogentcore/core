@@ -1851,7 +1851,14 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 	}
 	// fmt.Println(pathIsPackage, recvType, methName, recvPath)
 	if pathIsPackage {
-		p.print(recvType + "." + methName)
+		if recvType == "atomic" {
+			switch methName {
+			case "AddInt32":
+				p.print("atomicAdd")
+			}
+		} else {
+			p.print(recvType + "." + methName)
+		}
 		p.setPos(x.Lparen)
 		p.print(token.LPAREN)
 	} else {
