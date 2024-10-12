@@ -1117,7 +1117,11 @@ func (p *printer) binaryExpr(x *ast.BinaryExpr, prec1, cutoff, depth int) {
 	xline := p.pos.Line // before the operator (it may be on the next line!)
 	yline := p.lineFor(x.Y.Pos())
 	p.setPos(x.OpPos)
-	p.print(x.Op)
+	if x.Op == token.AND_NOT {
+		p.print(token.AND, blank, token.TILDE)
+	} else {
+		p.print(x.Op)
+	}
 	if xline != yline && xline > 0 && yline > 0 {
 		// at least one line break, but respect an extra empty line
 		// in the source
@@ -1726,7 +1730,7 @@ func (p *printer) tensorMethod(x *ast.CallExpr, vr *Var, methName string) {
 	args := x.Args
 
 	stArg := 0
-	if methName == "Set" {
+	if strings.HasPrefix(methName, "Set") {
 		stArg = 1
 	}
 	p.print(vr.Name, token.LBRACK)
@@ -1753,8 +1757,21 @@ func (p *printer) tensorMethod(x *ast.CallExpr, vr *Var, methName string) {
 		}
 	}
 	p.print(token.RPAREN, token.RBRACK)
-	if methName == "Set" {
-		p.print(blank, token.ASSIGN, blank)
+	if strings.HasPrefix(methName, "Set") {
+		opnm := strings.TrimPrefix(methName, "Set")
+		tok := token.ASSIGN
+		switch opnm {
+		case "Add":
+			tok = token.ADD_ASSIGN
+		case "Sub":
+			tok = token.SUB_ASSIGN
+		case "Mul":
+			tok = token.MUL_ASSIGN
+		case "Div":
+			tok = token.QUO_ASSIGN
+		}
+
+		p.print(blank, tok, blank)
 		p.expr(args[0])
 	}
 }

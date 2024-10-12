@@ -67,12 +67,12 @@ Params[0] = params;
 }
 
 
-///////////// import: "fastexp.wgsl"
+///////////// import: "math32-fastexp.wgsl"
 
 // FastExp is a quartic spline approximation to the Exp function, by N.N. Schraudolph
 // It does not have any of the sanity checking of a standard method -- returns
 // nonsense when arg is out of range.  Runs in 2.23ns vs. 6.3ns for 64bit which is faster
-// than Exp actually.
+// than exp actually.
 fn FastExp(x: f32) -> f32 {
 	if (x <= -88.02969) { // this doesn't add anything and -exp is main use-case anyway
 		return f32(0.0);
