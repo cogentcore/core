@@ -1538,8 +1538,12 @@ func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, pa
 	}
 	var idt types.Type
 	if gvar := p.GoToSL.GetTempVar(baseRecv.Name); gvar != nil {
-		id := &ast.Ident{Name: gvar.Var.SLType()}
-		if obj, ok := p.pkg.TypesInfo.Defs[id]; ok {
+		var id ast.Ident
+		id = *baseRecv
+		id.Name = gvar.Var.SLType()
+		// fmt.Println("type name:", id.Name)
+		obj := p.pkg.Types.Scope().Lookup(id.Name)
+		if obj != nil {
 			idt = obj.Type()
 		}
 	} else {
@@ -1696,7 +1700,7 @@ func (p *printer) setGlobalVars(gvrs map[string]*GetGlobalVar) {
 		if gvr.Var.ReadOnly {
 			continue
 		}
-		p.print(formfeed)
+		p.print(formfeed, "\t")
 		p.print(gvr.Var.Name, token.LBRACK)
 		p.expr(gvr.IdxExpr)
 		p.print(token.RBRACK, blank, token.ASSIGN, blank)
