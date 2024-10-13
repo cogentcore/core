@@ -1705,8 +1705,7 @@ func (p *printer) setGlobalVars(gvrs map[string]*GetGlobalVar) {
 		p.print(gvr.Var.Name, token.LBRACK)
 		p.expr(gvr.IdxExpr)
 		p.print(token.RBRACK, blank, token.ASSIGN, blank)
-		tmpVar := strings.ToLower(gvr.Var.Name)
-		p.print(tmpVar)
+		p.print(gvr.TmpVar)
 		p.print(token.SEMICOLON)
 	}
 }
