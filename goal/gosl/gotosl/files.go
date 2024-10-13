@@ -190,6 +190,7 @@ func (st *State) CopyPackageFile(fnm, packagePath string) error {
 	fmfn := filepath.Join(dir, fnm)
 	lines, err := CopyFile(fmfn, tofn)
 	if err == nil {
+		lines = SlRemoveComments(lines)
 		st.SLImportFiles = append(st.SLImportFiles, &File{Name: fnm, Lines: lines})
 	}
 	return nil

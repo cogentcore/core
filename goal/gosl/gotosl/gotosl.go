@@ -188,6 +188,15 @@ type State struct {
 	// GetVarStack is a stack per function definition of GetVar variables
 	// that need to be set at the end.
 	GetVarStack stack.Stack[map[string]*GetGlobalVar]
+
+	// GetFuncGraph is true if getting the function graph (first pass)
+	GetFuncGraph bool
+
+	// KernelFuncs are the list of functions to include for current kernel.
+	KernelFuncs map[string]*Function
+
+	// FuncGraph is the call graph of functions, for dead code elimination
+	FuncGraph map[string]*Function
 }
 
 func (st *State) Init(cfg *Config) {
@@ -225,12 +234,6 @@ func (st *State) Run() error {
 	st.ExtractFiles()   // get .go from project files
 	st.ExtractImports() // get .go from imports
 	st.TranslateDir("./" + st.ImportsDir)
-
-	for _, sy := range st.Systems {
-		for _, kn := range sy.Kernels {
-			st.GenKernel(sy, kn)
-		}
-	}
 
 	st.GenGPU()
 

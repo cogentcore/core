@@ -684,16 +684,14 @@ func (p *printer) ptrType(x ast.Expr) (ast.Expr, bool) {
 }
 
 // gosl: printMethRecv prints the method recv prefix for function. returns true if recv is ptr
-func (p *printer) printMethRecv() bool {
-	isPtr := false
+func (p *printer) printMethRecv() (isPtr bool, typnm string) {
 	if u, ok := p.curMethRecv.Type.(*ast.StarExpr); ok {
-		p.expr(u.X)
+		typnm = u.X.(*ast.Ident).Name
 		isPtr = true
 	} else {
-		p.expr(p.curMethRecv.Type)
+		typnm = p.curMethRecv.Type.(*ast.Ident).Name
 	}
-	p.print("_")
-	return isPtr
+	return
 }
 
 // combinesWithName reports whether a name followed by the expression x
@@ -1330,6 +1328,9 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		args := x.Args
 		var rwargs []rwArg
 		if isid {
+			if p.curFunc != nil {
+				p.curFunc.Funcs[fid.Name] = p.GoToSL.RecycleFunc(fid.Name)
+			}
 			if obj, ok := p.pkg.TypesInfo.Uses[fid]; ok {
 				if ft, ok := obj.(*types.Func); ok {
 					sig := ft.Type().(*types.Signature)
@@ -1863,7 +1864,11 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 		p.print(token.LPAREN)
 	} else {
 		recvType = strings.TrimPrefix(recvType, "imports.") // no!
-		p.print(recvType + "_" + methName)
+		fname := recvType + "_" + methName
+		if p.curFunc != nil {
+			p.curFunc.Funcs[fname] = p.GoToSL.RecycleFunc(fname)
+		}
+		p.print(fname)
 		p.setPos(x.Lparen)
 		p.print(token.LPAREN)
 		p.print(recvPath)
@@ -2559,6 +2564,9 @@ func (p *printer) spec(spec ast.Spec, n int, doIndent bool, tok token.Token) {
 
 // gosl: process system global vars
 func (p *printer) systemVars(d *ast.GenDecl, sysname string) {
+	if !p.GoToSL.GetFuncGraph {
+		return
+	}
 	sy := p.GoToSL.System(sysname)
 	var gp *Group
 	var err error
@@ -2874,36 +2882,50 @@ func (p *printer) methRecvType(typ ast.Expr) string {
 }
 
 func (p *printer) funcDecl(d *ast.FuncDecl) {
-	p.setComment(d.Doc)
-	p.setPos(d.Pos())
-	// We have to save startCol only after emitting FUNC; otherwise it can be on a
-	// different line (all whitespace preceding the FUNC is emitted only when the
-	// FUNC is emitted).
-	startCol := p.out.Column - len("func ")
+	fname := ""
 	if d.Recv != nil {
 		for ex := range p.ExcludeFunctions {
 			if d.Name.Name == ex {
 				return
 			}
 		}
-		p.print("fn", blank)
 		if d.Recv.List[0].Names != nil {
 			p.curMethRecv = d.Recv.List[0]
-			if p.printMethRecv() {
+			isptr, typnm := p.printMethRecv()
+			if isptr {
 				p.curPtrArgs = []*ast.Ident{p.curMethRecv.Names[0]}
 			}
+			fname = typnm + "_" + d.Name.Name
 			// fmt.Printf("cur func recv: %v\n", p.curMethRecv)
 		}
 		// p.parameters(d.Recv, funcParam) // method: print receiver
 		// p.print(blank)
 	} else {
-		p.print("fn", blank)
+		fname = d.Name.Name
 	}
-	p.expr(d.Name)
+	if p.GoToSL.GetFuncGraph {
+		p.curFunc = p.GoToSL.RecycleFunc(fname)
+	} else {
+		_, ok := p.GoToSL.KernelFuncs[fname]
+		if !ok {
+			return
+		}
+	}
+	p.setComment(d.Doc)
+	p.setPos(d.Pos())
+	// We have to save startCol only after emitting FUNC; otherwise it can be on a
+	// different line (all whitespace preceding the FUNC is emitted only when the
+	// FUNC is emitted).
+	startCol := p.out.Column - len("func ")
+	p.print("fn", blank, fname)
 	p.signature(d.Type, d.Recv)
 	p.funcBody(p.distanceFrom(d.Pos(), startCol), vtab, d.Body)
 	p.curPtrArgs = nil
 	p.curMethRecv = nil
+	if p.GoToSL.GetFuncGraph {
+		p.GoToSL.FuncGraph[fname] = p.curFunc
+		p.curFunc = nil
+	}
 }
 
 func (p *printer) decl(decl ast.Decl) {

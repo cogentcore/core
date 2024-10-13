@@ -5,31 +5,10 @@
 package gotosl
 
 import (
-	"bytes"
 	"fmt"
-	"path/filepath"
 	"reflect"
 	"strings"
 )
-
-// GenKernel generates and writes the WGSL kernel code for given kernel
-func (st *State) GenKernel(sy *System, kn *Kernel) {
-	hdr := st.GenKernelHeader(sy, kn)
-
-	lines := bytes.Split([]byte(hdr), []byte("\n"))
-	for _, im := range st.SLImportFiles {
-		lines = append(lines, []byte(""))
-		lines = append(lines, []byte(fmt.Sprintf("///////////// import: %q", im.Name)))
-		lines = append(lines, im.Lines...)
-	}
-	kn.Lines = lines
-	kfn := kn.Name + ".wgsl"
-	fn := filepath.Join(st.Config.Output, kfn)
-	kn.Filename = fn
-	WriteFileLines(fn, lines)
-
-	st.CompileFile(kfn)
-}
 
 // GenKernelHeader returns the novel generated WGSL kernel code
 // for given kernel, which goes at the top of the resulting file.

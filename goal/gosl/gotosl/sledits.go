@@ -95,6 +95,22 @@ func MathReplaceAll(mat, ln []byte) []byte {
 	}
 }
 
+func SlRemoveComments(lines [][]byte) [][]byte {
+	comm := []byte("//")
+	olns := make([][]byte, 0, len(lines))
+	for _, ln := range lines {
+		ts := bytes.TrimSpace(ln)
+		if len(ts) == 0 {
+			continue
+		}
+		if bytes.HasPrefix(ts, comm) {
+			continue
+		}
+		olns = append(olns, ln)
+	}
+	return olns
+}
+
 // SlEditsReplace replaces Go with equivalent WGSL code
 // returns true if has slrand. or sltype.
 // to auto include that header file if so.

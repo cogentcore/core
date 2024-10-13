@@ -131,7 +131,7 @@ func (st *State) ExtractGosl(lines [][]byte) (outLines [][]byte, hasVars bool) {
 // AppendGoHeader appends Go header
 func (st *State) AppendGoHeader(lines [][]byte) [][]byte {
 	olns := make([][]byte, 0, len(lines)+10)
-	olns = append(olns, []byte("package main"))
+	olns = append(olns, []byte("package imports"))
 	olns = append(olns, []byte(`import (
 	"math"
 	"cogentcore.org/core/goal/gosl/slbool"

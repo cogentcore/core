@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -22,8 +21,8 @@ import (
 
 // TranslateDir translate all .Go files in given directory to WGSL.
 func (st *State) TranslateDir(pf string) error {
-	nl := []byte("\n")
 	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles | packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesSizes | packages.NeedTypesInfo}, pf)
+	// pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax}, pf)
 	if err != nil {
 		return errors.Log(err)
 	}
@@ -36,6 +35,7 @@ func (st *State) TranslateDir(pf string) error {
 		err := fmt.Errorf("No Go files found in package: %+v", pkg)
 		return errors.Log(err)
 	}
+
 	// fmt.Printf("go files: %+v", pkg.GoFiles)
 	// return nil, err
 	files := pkg.GoFiles
@@ -46,22 +46,14 @@ func (st *State) TranslateDir(pf string) error {
 		fmt.Println(serr)
 	}
 
-	slrandCopied := false
-	sltypeCopied := false
+	st.FuncGraph = make(map[string]*Function)
+	st.GetFuncGraph = true
 
-	done := make(map[string]bool)
-
-	doFile := func(gofp string) {
+	doFile := func(gofp string, buf *bytes.Buffer) {
 		_, gofn := filepath.Split(gofp)
-		if _, ok := done[gofn]; ok {
-			return
-		}
-		done[gofn] = true
-		wgfn := wgslFile(gofn)
 		if st.Config.Debug {
 			fmt.Printf("###################################\nTranslating Go file: %s\n", gofn)
 		}
-
 		var afile *ast.File
 		var fpos token.Position
 		for _, sy := range pkg.Syntax {
@@ -78,44 +70,80 @@ func (st *State) TranslateDir(pf string) error {
 			return
 		}
 
-		var buf bytes.Buffer
 		pcfg := PrintConfig{GoToSL: st, Mode: printerMode, Tabwidth: tabWidth, ExcludeFunctions: st.ExcludeMap}
-		pcfg.Fprint(&buf, pkg, afile)
-		// ioutil.WriteFile(filepath.Join(*outDir, fn+".tmp"), buf.Bytes(), 0644)
-		slfix, hasSltype, hasSlrand := SlEdits(buf.Bytes())
-		if hasSlrand && !slrandCopied {
-			hasSltype = true
-			if st.Config.Debug {
-				fmt.Printf("\tcopying slrand.wgsl to shaders\n")
-			}
-			st.CopyPackageFile("slrand.wgsl", "cogentcore.org/core/goal/gosl/slrand")
-			slrandCopied = true
-		}
-		if hasSltype && !sltypeCopied {
-			if st.Config.Debug {
-				fmt.Printf("\tcopying sltype.wgsl to shaders\n")
-			}
-			st.CopyPackageFile("sltype.wgsl", "cogentcore.org/core/goal/gosl/sltype")
-			sltypeCopied = true
-		}
-		exsl := st.ExtractWGSL(slfix)
-
-		if !st.Config.Keep {
+		pcfg.Fprint(buf, pkg, afile)
+		if !st.GetFuncGraph && !st.Config.Keep {
 			os.Remove(fpos.Filename)
 		}
-
-		slfn := filepath.Join(st.ImportsDir, wgfn)
-		ioutil.WriteFile(slfn, bytes.Join(exsl, nl), 0644)
-
-		st.SLImportFiles = append(st.SLImportFiles, &File{Name: wgfn, Lines: exsl})
 	}
 
+	// first pass is just to get the call graph:
 	for fn := range st.GoVarsFiles { // do varsFiles first!!
-		doFile(fn)
+		var buf bytes.Buffer
+		doFile(fn, &buf)
 	}
 	for _, gofp := range files {
-		doFile(gofp)
+		_, gofn := filepath.Split(gofp)
+		if _, ok := st.GoVarsFiles[gofn]; ok {
+			continue
+		}
+		var buf bytes.Buffer
+		doFile(gofp, &buf)
 	}
+
+	// st.PrintFuncGraph()
+
+	st.CopyPackageFile("slrand.wgsl", "cogentcore.org/core/goal/gosl/slrand")
+	st.CopyPackageFile("sltype.wgsl", "cogentcore.org/core/goal/gosl/sltype")
+
+	doKernelFile := func(fname string, lines [][]byte) [][]byte {
+		_, gofn := filepath.Split(fname)
+		var buf bytes.Buffer
+		doFile(fname, &buf)
+		slfix, hasSltype, hasSlrand := SlEdits(buf.Bytes())
+		_ = hasSlrand
+		_ = hasSltype
+		slfix = SlRemoveComments(slfix)
+		exsl := st.ExtractWGSL(slfix)
+		lines = append(lines, []byte(""))
+		lines = append(lines, []byte(fmt.Sprintf("///////////// import: %q", gofn)))
+		lines = append(lines, exsl...)
+		return lines
+	}
+
+	// next pass is per kernel
+	st.GetFuncGraph = false
+	for _, sy := range st.Systems {
+		for _, kn := range sy.Kernels {
+			// if st.Config.Debug {
+			fmt.Printf("###################################\nTranslating Kernel file: %s\n", kn.Name)
+			// }
+			hdr := st.GenKernelHeader(sy, kn)
+			lines := bytes.Split([]byte(hdr), []byte("\n"))
+			st.KernelFuncs = st.AllFuncs(kn.Name)
+			if st.KernelFuncs == nil {
+				continue
+			}
+			for fn := range st.GoVarsFiles { // do varsFiles first!!
+				lines = doKernelFile(fn, lines)
+			}
+			for _, gofp := range files {
+				lines = doKernelFile(gofp, lines)
+			}
+			for _, im := range st.SLImportFiles {
+				lines = append(lines, []byte(""))
+				lines = append(lines, []byte(fmt.Sprintf("///////////// import: %q", im.Name)))
+				lines = append(lines, im.Lines...)
+			}
+			kn.Lines = lines
+			kfn := kn.Name + ".wgsl"
+			fn := filepath.Join(st.Config.Output, kfn)
+			kn.Filename = fn
+			WriteFileLines(fn, lines)
+			st.CompileFile(kfn)
+		}
+	}
+
 	return nil
 }
 
