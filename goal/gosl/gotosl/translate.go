@@ -13,9 +13,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/goal/gosl/alignsl"
+	"golang.org/x/exp/maps"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -113,8 +115,14 @@ func (st *State) TranslateDir(pf string) error {
 
 	// next pass is per kernel
 	st.GetFuncGraph = false
-	for _, sy := range st.Systems {
-		for _, kn := range sy.Kernels {
+	sys := maps.Keys(st.Systems)
+	sort.Strings(sys)
+	for _, snm := range sys {
+		sy := st.Systems[snm]
+		kns := maps.Keys(sy.Kernels)
+		sort.Strings(kns)
+		for _, knm := range kns {
+			kn := sy.Kernels[knm]
 			// if st.Config.Debug {
 			fmt.Printf("###################################\nTranslating Kernel file: %s\n", kn.Name)
 			// }

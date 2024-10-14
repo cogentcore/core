@@ -1953,10 +1953,24 @@ func (p *printer) block(b *ast.BlockStmt, nindent int) {
 	p.GoToSL.GetVarStack.Push(make(map[string]*GetGlobalVar))
 	p.setPos(b.Lbrace)
 	p.print(token.LBRACE)
-	p.stmtList(b.List, nindent, true)
+	nstmt := len(b.List)
+	retLast := false
+	if nstmt > 1 {
+		if _, ok := b.List[nstmt-1].(*ast.ReturnStmt); ok {
+			retLast = true
+		}
+	}
+	if retLast {
+		p.stmtList(b.List[:nstmt-1], nindent, true)
+	} else {
+		p.stmtList(b.List, nindent, true)
+	}
 	getVars := p.GoToSL.GetVarStack.Pop()
 	if len(getVars) > 0 { // gosl: set the get vars
 		p.setGlobalVars(getVars)
+	}
+	if retLast {
+		p.stmt(b.List[nstmt-1], true, false)
 	}
 	p.linebreak(p.lineFor(b.Rbrace), 1, ignore, true)
 	p.setPos(b.Rbrace)
