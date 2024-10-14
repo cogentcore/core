@@ -1858,6 +1858,9 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 			}
 		} else {
 			p.print(recvType + "." + methName)
+			if p.curFunc != nil {
+				p.curFunc.Funcs[methName] = p.GoToSL.RecycleFunc(methName)
+			}
 		}
 		p.setPos(x.Lparen)
 		p.print(token.LPAREN)
