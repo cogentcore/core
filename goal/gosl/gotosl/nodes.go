@@ -1539,14 +1539,7 @@ func (p *printer) methodPath(x *ast.SelectorExpr) (recvPath, recvType string, pa
 	}
 	var idt types.Type
 	if gvar := p.GoToSL.GetTempVar(baseRecv.Name); gvar != nil {
-		var id ast.Ident
-		id = *baseRecv
-		id.Name = gvar.Var.SLType()
-		// fmt.Println("type name:", id.Name)
-		obj := p.pkg.Types.Scope().Lookup(id.Name)
-		if obj != nil {
-			idt = obj.Type()
-		}
+		idt = p.getTypeNameType(gvar.Var.SLType())
 	} else {
 		idt = p.getIdType(baseRecv)
 	}
@@ -1597,6 +1590,14 @@ func fieldByName(st *types.Struct, name string) *types.Var {
 
 func (p *printer) getIdType(id *ast.Ident) types.Type {
 	if obj, ok := p.pkg.TypesInfo.Uses[id]; ok {
+		return obj.Type()
+	}
+	return nil
+}
+
+func (p *printer) getTypeNameType(typeName string) types.Type {
+	obj := p.pkg.Types.Scope().Lookup(typeName)
+	if obj != nil {
 		return obj.Type()
 	}
 	return nil
@@ -1808,6 +1809,7 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 				if gvar := p.GoToSL.GetTempVar(id.Name); gvar != nil {
 					recvType = gvar.Var.SLType()
 					recvPath = "&" + recvPath
+					pathType = p.getTypeNameType(gvar.Var.SLType())
 				} else {
 					pathIsPackage = true
 					recvType = id.Name // is a package path
