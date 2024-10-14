@@ -174,7 +174,7 @@ func SyncFromGPU(vars ...GPUVars) {
 // [Seed] []Seeds at given index.
 // To ensure that values are updated on the GPU, you must call [SetSeed].
 // after all changes have been made.
-func GetSeed(idx int) *Seeds {
+func GetSeed(idx uint32) *Seeds {
 	return &Seed[idx]
 }
 
@@ -182,6 +182,6 @@ func GetSeed(idx int) *Seeds {
 // [Data] []Rnds at given index.
 // To ensure that values are updated on the GPU, you must call [SetData].
 // after all changes have been made.
-func GetData(idx int) *Rnds {
+func GetData(idx uint32) *Rnds {
 	return &Data[idx]
 }

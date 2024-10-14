@@ -136,6 +136,10 @@ func (st *State) TranslateDir(pf string) error {
 				lines = doKernelFile(fn, lines)
 			}
 			for _, gofp := range files {
+				_, gofn := filepath.Split(gofp)
+				if _, ok := st.GoVarsFiles[gofn]; ok {
+					continue
+				}
 				lines = doKernelFile(gofp, lines)
 			}
 			for _, im := range st.SLImportFiles {
