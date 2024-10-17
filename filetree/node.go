@@ -94,6 +94,9 @@ func (fn *Node) Init() {
 		case status == vcs.Stored:
 			s.Color = colors.Scheme.OnSurface
 		}
+		if fn.Info.Generated {
+			s.Color = errors.Must1(gradient.FromString("#8080C0"))
+		}
 	})
 	fn.On(events.KeyChord, func(e events.Event) {
 		if core.DebugSettings.KeyEventTrace {
@@ -335,9 +338,10 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 	return files
 }
 
+// sortByModTime sorts by _reverse_ mod time (newest first)
 func sortByModTime(files []fs.FileInfo) {
 	slices.SortFunc(files, func(a, b fs.FileInfo) int {
-		return a.ModTime().Compare(b.ModTime())
+		return b.ModTime().Compare(a.ModTime()) // reverse order
 	})
 }
 
