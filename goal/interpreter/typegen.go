@@ -14,7 +14,7 @@ var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/interpreter.Ru
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/interpreter.Interactive", Doc: "Interactive runs an interactive shell that allows the user to input goal.", Args: []string{"c", "in"}, Returns: []string{"error"}})
 
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/interpreter.Build", Doc: "Build builds the specified input goal file, or all .goal files in the current\ndirectory if no input is specified, to corresponding .go file name(s).\nIf the file does not already contain a \"package\" specification, then\n\"package main; func main()...\" wrappers are added, which allows the same\ncode to be used in interactive and Go compiled modes.", Args: []string{"c"}, Returns: []string{"error"}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/interpreter.Build", Doc: "Build builds the specified input goal file, or all .goal files in the current\ndirectory if no input is specified, to corresponding .go file name(s).\nIf the file does not already contain a \"package\" specification, then\n\"package main; func main()...\" wrappers are added, which allows the same\ncode to be used in interactive and Go compiled modes.\ngo build is run after this.", Args: []string{"c"}, Returns: []string{"error"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/goal/interpreter.init"})
 
