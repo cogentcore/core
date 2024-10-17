@@ -1456,7 +1456,7 @@ func (tf *TextField) autoScroll() {
 	availSz := sz.Actual.Content.Sub(icsz)
 	tf.configTextSize(availSz)
 	n := len(tf.editText)
-	tf.cursorPos = math32.ClampInt(tf.cursorPos, 0, n)
+	tf.cursorPos = math32.Clamp(tf.cursorPos, 0, n)
 
 	if tf.hasWordWrap() { // does not scroll
 		tf.startPos = 0

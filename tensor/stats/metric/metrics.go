@@ -6,112 +6,120 @@
 
 package metric
 
-// Func32 is a distance / similarity metric operating on slices of float32 numbers
-type Func32 func(a, b []float32) float32
+import (
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/tensor"
+)
 
-// Func64 is a distance / similarity metric operating on slices of float64 numbers
-type Func64 func(a, b []float64) float64
+func init() {
+	tensor.AddFunc(Euclidean.FuncName(), EuclideanFunc, 1)
+	tensor.AddFunc(SumSquares.FuncName(), SumSquaresFunc, 1)
+	tensor.AddFunc(Abs.FuncName(), AbsFunc, 1)
+	tensor.AddFunc(Hamming.FuncName(), HammingFunc, 1)
+	tensor.AddFunc(EuclideanBinTol.FuncName(), EuclideanBinTolFunc, 1)
+	tensor.AddFunc(SumSquaresBinTol.FuncName(), SumSquaresBinTolFunc, 1)
+	tensor.AddFunc(InvCosine.FuncName(), InvCosineFunc, 1)
+	tensor.AddFunc(InvCorrelation.FuncName(), InvCorrelationFunc, 1)
+	tensor.AddFunc(InnerProduct.FuncName(), InnerProductFunc, 1)
+	tensor.AddFunc(CrossEntropy.FuncName(), CrossEntropyFunc, 1)
+	tensor.AddFunc(Covariance.FuncName(), CovarianceFunc, 1)
+	tensor.AddFunc(Correlation.FuncName(), CorrelationFunc, 1)
+	tensor.AddFunc(Cosine.FuncName(), CosineFunc, 1)
+}
 
-// StdMetrics are standard metric functions
-type StdMetrics int32 //enums:enum
+// Metric calls a standard Metrics enum function on given tensors.
+// Output results are in the out tensor.
+func Metric(metric Metrics, a, b, out *tensor.Indexed) {
+	tensor.Call(metric.FuncName(), a, b, out)
+}
+
+// MetricOut calls a standard Metrics enum function on given tensors,
+// returning output as a newly created tensor.
+func MetricOut(metric Metrics, a, b *tensor.Indexed) *tensor.Indexed {
+	return errors.Log1(tensor.CallOut(metric.FuncName(), a, b))[0] // note: error should never happen
+}
+
+// Metrics are standard metric functions
+type Metrics int32 //enums:enum
 
 const (
-	Euclidean StdMetrics = iota
+	// Euclidean is the square root of the sum of squares differences
+	// between tensor values, aka the L2Norm.
+	Euclidean Metrics = iota
+
+	// SumSquares is the sum of squares differences between tensor values.
 	SumSquares
+
+	// Abs is the sum of the absolute value of differences
+	// between tensor values, aka the L1Norm.
 	Abs
+
+	// Hamming is the sum of 1s for every element that is different,
+	// i.e., "city block" distance.
 	Hamming
 
+	// EuclideanBinTol is the [Euclidean] square root of the sum of squares
+	// differences between tensor values, with binary tolerance:
+	// differences < 0.5 are thresholded to 0.
 	EuclideanBinTol
+
+	// SumSquaresBinTol is the [SumSquares] differences between tensor values,
+	// with binary tolerance: differences < 0.5 are thresholded to 0.
 	SumSquaresBinTol
 
-	// InvCosine is 1-Cosine -- useful to convert into an Increasing metric
+	// InvCosine is 1-[Cosine], which is useful to convert it
+	// to an Increasing metric where more different vectors have larger metric values.
 	InvCosine
 
-	// InvCorrelation is 1-Correlation -- useful to convert into an Increasing metric
+	// InvCorrelation is 1-[Correlation], which is useful to convert it
+	// to an Increasing metric where more different vectors have larger metric values.
 	InvCorrelation
 
+	// CrossEntropy is a standard measure of the difference between two
+	// probabilty distributions, reflecting the additional entropy (uncertainty) associated
+	// with measuring probabilities under distribution b when in fact they come from
+	// distribution a.  It is also the entropy of a plus the divergence between a from b,
+	// using Kullback-Leibler (KL) divergence.  It is computed as:
+	// a * log(a/b) + (1-a) * log(1-a/1-b).
 	CrossEntropy
 
+	/////////////////////////////////////////////////////////////////////////
 	// Everything below here is !Increasing -- larger = closer, not farther
+
+	// InnerProduct is the sum of the co-products of the tensor values.
 	InnerProduct
+
+	// Covariance is co-variance between two vectors,
+	// i.e., the mean of the co-product of each vector element minus
+	// the mean of that vector: cov(A,B) = E[(A - E(A))(B - E(B))].
 	Covariance
+
+	// Correlation is the standardized [Covariance] in the range (-1..1),
+	// computed as the mean of the co-product of each vector
+	// element minus the mean of that vector, normalized by the product of their
+	// standard deviations: cor(A,B) = E[(A - E(A))(B - E(B))] / sigma(A) sigma(B).
+	// Equivalent to the [Cosine] of mean-normalized vectors.
 	Correlation
+
+	// Cosine is high-dimensional angle between two vectors,
+	// in range (-1..1) as the normalized [InnerProduct]:
+	// inner product / sqrt(ssA * ssB).  See also [Correlation].
 	Cosine
 )
+
+// FuncName returns the package-qualified function name to use
+// in tensor.Call to call this function.
+func (m Metrics) FuncName() string {
+	return "metric." + m.String()
+}
 
 // Increasing returns true if the distance metric is such that metric
 // values increase as a function of distance (e.g., Euclidean)
 // and false if metric values decrease as a function of distance
 // (e.g., Cosine, Correlation)
-func Increasing(std StdMetrics) bool {
-	if std >= InnerProduct {
+func (m Metrics) Increasing() bool {
+	if m >= InnerProduct {
 		return false
 	}
 	return true
-}
-
-// StdFunc32 returns a standard metric function as specified
-func StdFunc32(std StdMetrics) Func32 {
-	switch std {
-	case Euclidean:
-		return Euclidean32
-	case SumSquares:
-		return SumSquares32
-	case Abs:
-		return Abs32
-	case Hamming:
-		return Hamming32
-	case EuclideanBinTol:
-		return EuclideanBinTol32
-	case SumSquaresBinTol:
-		return SumSquaresBinTol32
-	case InvCorrelation:
-		return InvCorrelation32
-	case InvCosine:
-		return InvCosine32
-	case CrossEntropy:
-		return CrossEntropy32
-	case InnerProduct:
-		return InnerProduct32
-	case Covariance:
-		return Covariance32
-	case Correlation:
-		return Correlation32
-	case Cosine:
-		return Cosine32
-	}
-	return nil
-}
-
-// StdFunc64 returns a standard metric function as specified
-func StdFunc64(std StdMetrics) Func64 {
-	switch std {
-	case Euclidean:
-		return Euclidean64
-	case SumSquares:
-		return SumSquares64
-	case Abs:
-		return Abs64
-	case Hamming:
-		return Hamming64
-	case EuclideanBinTol:
-		return EuclideanBinTol64
-	case SumSquaresBinTol:
-		return SumSquaresBinTol64
-	case InvCorrelation:
-		return InvCorrelation64
-	case InvCosine:
-		return InvCosine64
-	case CrossEntropy:
-		return CrossEntropy64
-	case InnerProduct:
-		return InnerProduct64
-	case Covariance:
-		return Covariance64
-	case Correlation:
-		return Correlation64
-	case Cosine:
-		return Cosine64
-	}
-	return nil
 }

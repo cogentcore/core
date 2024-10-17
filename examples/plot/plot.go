@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/plot/plotcore"
+	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 )
 
@@ -19,7 +20,7 @@ func main() {
 	b := core.NewBody("Plot Example")
 
 	epc := table.NewTable("epc")
-	epc.OpenFS(tsv, "ra25epoch.tsv", table.Tab)
+	epc.OpenFS(tsv, "ra25epoch.tsv", tensor.Tab)
 
 	pl := plotcore.NewPlotEditor(b)
 	pl.Options.Title = "RA25 Epoch Train"

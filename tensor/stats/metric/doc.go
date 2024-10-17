@@ -3,13 +3,6 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package metric provides various similarity / distance metrics for comparing
-floating-point vectors.
-All functions have 32 and 64 bit variants, and skip NaN's (often used for missing)
-and will panic if the lengths of the two slices are unequal (no error return).
-
-The signatures of all such metric functions are identical, captured as types:
-metric.Func32 and metric.Func64 so that other functions that use a metric
-can take a pointer to any such function.
+Package metric provides various similarity / distance metrics for comparing tensors, operating on the tensor.Indexed standard data representation.
 */
 package metric

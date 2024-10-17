@@ -7,6 +7,8 @@ package tensor
 import (
 	"fmt"
 	"slices"
+
+	"cogentcore.org/core/base/slicesx"
 )
 
 // Shape manages a tensor's shape information, including strides and dimension names
@@ -15,32 +17,37 @@ import (
 // Per C / Go / Python conventions, indexes are Row-Major, ordered from
 // outer to inner left-to-right, so the inner-most is right-most.
 type Shape struct {
-
-	// size per dimension
+	// size per dimension.
 	Sizes []int
 
-	// offsets for each dimension
+	// offsets for each dimension.
 	Strides []int `display:"-"`
 
-	// names of each dimension
+	// optional names of each dimension.
 	Names []string `display:"-"`
 }
 
-// NewShape returns a new shape with given sizes and optional dimension names.
+// NewShape returns a new shape with given sizes.
 // RowMajor ordering is used by default.
-func NewShape(sizes []int, names ...string) *Shape {
+func NewShape(sizes ...int) *Shape {
 	sh := &Shape{}
-	sh.SetShape(sizes, names...)
+	sh.SetShape(sizes...)
 	return sh
 }
 
 // SetShape sets the shape size and optional names
 // RowMajor ordering is used by default.
-func (sh *Shape) SetShape(sizes []int, names ...string) {
+func (sh *Shape) SetShape(sizes ...int) {
 	sh.Sizes = slices.Clone(sizes)
-	sh.Strides = RowMajorStrides(sizes)
-	sh.Names = make([]string, len(sh.Sizes))
-	if len(names) == len(sizes) {
+	sh.Strides = RowMajorStrides(sizes...)
+}
+
+// SetNames sets the shape dimension names.
+func (sh *Shape) SetNames(names ...string) {
+	if len(names) == 0 {
+		sh.Names = nil
+	} else {
+		sh.Names = slicesx.SetLength(names, len(sh.Sizes))
 		copy(sh.Names, names)
 	}
 }
@@ -50,7 +57,11 @@ func (sh *Shape) SetShape(sizes []int, names ...string) {
 func (sh *Shape) CopyShape(cp *Shape) {
 	sh.Sizes = slices.Clone(cp.Sizes)
 	sh.Strides = slices.Clone(cp.Strides)
-	sh.Names = slices.Clone(cp.Names)
+	if cp.Names == nil {
+		sh.Names = nil
+	} else {
+		sh.Names = slices.Clone(cp.Names)
+	}
 }
 
 // Len returns the total length of elements in the tensor
@@ -59,21 +70,31 @@ func (sh *Shape) Len() int {
 	if len(sh.Sizes) == 0 {
 		return 0
 	}
-	o := int(1)
+	ln := 1
 	for _, v := range sh.Sizes {
-		o *= v
+		ln *= v
 	}
-	return int(o)
+	return ln
 }
 
 // NumDims returns the total number of dimensions.
 func (sh *Shape) NumDims() int { return len(sh.Sizes) }
 
 // DimSize returns the size of given dimension.
-func (sh *Shape) DimSize(i int) int { return sh.Sizes[i] }
+func (sh *Shape) DimSize(i int) int {
+	if sh.Sizes == nil {
+		return 0
+	}
+	return sh.Sizes[i]
+}
 
 // DimName returns the name of given dimension.
-func (sh *Shape) DimName(i int) string { return sh.Names[i] }
+func (sh *Shape) DimName(i int) string {
+	if sh.Names == nil {
+		return ""
+	}
+	return sh.Names[i]
+}
 
 // DimByName returns the index of the given dimension name.
 // returns -1 if not found.
@@ -93,7 +114,7 @@ func (sh *Shape) DimSizeByName(name string) int {
 }
 
 // IndexIsValid() returns true if given index is valid (within ranges for all dimensions)
-func (sh *Shape) IndexIsValid(idx []int) bool {
+func (sh *Shape) IndexIsValid(idx ...int) bool {
 	if len(idx) != sh.NumDims() {
 		return false
 	}
@@ -107,31 +128,37 @@ func (sh *Shape) IndexIsValid(idx []int) bool {
 
 // IsEqual returns true if this shape is same as other (does not compare names)
 func (sh *Shape) IsEqual(oth *Shape) bool {
-	if !EqualInts(sh.Sizes, oth.Sizes) {
+	if slices.Compare(sh.Sizes, oth.Sizes) != 0 {
 		return false
 	}
-	if !EqualInts(sh.Strides, oth.Strides) {
+	if slices.Compare(sh.Strides, oth.Strides) != 0 {
 		return false
 	}
 	return true
 }
 
-// RowCellSize returns the size of the outer-most Row shape dimension,
+// RowCellSize returns the size of the outermost Row shape dimension,
 // and the size of all the remaining inner dimensions (the "cell" size).
 // Used for Tensors that are columns in a data table.
 func (sh *Shape) RowCellSize() (rows, cells int) {
 	rows = sh.Sizes[0]
 	if len(sh.Sizes) == 1 {
 		cells = 1
-	} else {
+	} else if rows > 0 {
 		cells = sh.Len() / rows
+	} else {
+		ln := 1
+		for _, v := range sh.Sizes[1:] {
+			ln *= v
+		}
+		cells = ln
 	}
 	return
 }
 
 // Offset returns the "flat" 1D array index into an element at the given n-dimensional index.
 // No checking is done on the length or size of the index values relative to the shape of the tensor.
-func (sh *Shape) Offset(index []int) int {
+func (sh *Shape) Offset(index ...int) int {
 	var offset int
 	for i, v := range index {
 		offset += v * sh.Strides[i]
@@ -146,6 +173,9 @@ func (sh *Shape) Index(offset int) []int {
 	rem := offset
 	for i := nd - 1; i >= 0; i-- {
 		s := sh.Sizes[i]
+		if s == 0 {
+			return index
+		}
 		iv := rem % s
 		rem /= s
 		index[i] = iv
@@ -157,9 +187,11 @@ func (sh *Shape) Index(offset int) []int {
 func (sh *Shape) String() string {
 	str := "["
 	for i := range sh.Sizes {
-		nm := sh.Names[i]
-		if nm != "" {
-			str += nm + ": "
+		if sh.Names != nil {
+			nm := sh.Names[i]
+			if nm != "" {
+				str += nm + ": "
+			}
 		}
 		str += fmt.Sprintf("%d", sh.Sizes[i])
 		if i < len(sh.Sizes)-1 {
@@ -170,9 +202,13 @@ func (sh *Shape) String() string {
 	return str
 }
 
-// RowMajorStrides returns strides for sizes where the first dimension is outer-most
+// RowMajorStrides returns strides for sizes where the first dimension is outermost
 // and subsequent dimensions are progressively inner.
-func RowMajorStrides(sizes []int) []int {
+func RowMajorStrides(sizes ...int) []int {
+	if len(sizes) == 0 {
+		return nil
+	}
+	sizes[0] = max(1, sizes[0]) // critical for strides to not be nil due to rows = 0
 	rem := int(1)
 	for _, v := range sizes {
 		rem *= v
@@ -180,7 +216,6 @@ func RowMajorStrides(sizes []int) []int {
 
 	if rem == 0 {
 		strides := make([]int, len(sizes))
-		rem := int(1)
 		for i := range strides {
 			strides[i] = rem
 		}
@@ -197,7 +232,7 @@ func RowMajorStrides(sizes []int) []int {
 
 // ColMajorStrides returns strides for sizes where the first dimension is inner-most
 // and subsequent dimensions are progressively outer
-func ColMajorStrides(sizes []int) []int {
+func ColMajorStrides(sizes ...int) []int {
 	total := int(1)
 	for _, v := range sizes {
 		if v == 0 {
@@ -217,19 +252,6 @@ func ColMajorStrides(sizes []int) []int {
 	return strides
 }
 
-// EqualInts compares two int slices and returns true if they are equal
-func EqualInts(a, b []int) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
 // AddShapes returns a new shape by adding two shapes one after the other.
 func AddShapes(shape1, shape2 *Shape) *Shape {
 	sh1 := shape1.Sizes
@@ -237,8 +259,12 @@ func AddShapes(shape1, shape2 *Shape) *Shape {
 	nsh := make([]int, len(sh1)+len(sh2))
 	copy(nsh, sh1)
 	copy(nsh[len(sh1):], sh2)
-	nms := make([]string, len(sh1)+len(sh2))
-	copy(nms, shape1.Names)
-	copy(nms[len(sh1):], shape2.Names)
-	return NewShape(nsh, nms...)
+	sh := NewShape(nsh...)
+	if shape1.Names != nil || shape2.Names != nil {
+		nms := make([]string, len(sh1)+len(sh2))
+		copy(nms, shape1.Names)
+		copy(nms[len(sh1):], shape2.Names)
+		sh.SetNames(nms...)
+	}
+	return sh
 }

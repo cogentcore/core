@@ -7,8 +7,8 @@ package tensorcore
 import (
 	"image/color"
 	"log"
-	"strconv"
 
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/colormap"
 	"cogentcore.org/core/core"
@@ -108,65 +108,44 @@ func (td *TensorDisplay) Defaults() {
 
 // FromMeta sets display options from Tensor meta-data
 func (td *TensorDisplay) FromMeta(tsr tensor.Tensor) {
-	if op, has := tsr.MetaData("top-zero"); has {
-		if op == "+" || op == "true" {
-			td.TopZero = true
-		}
+	if op, err := metadata.Get[bool](*tsr.Metadata(), "top-zero"); err == nil {
+		td.TopZero = op
 	}
-	if op, has := tsr.MetaData("odd-row"); has {
-		if op == "+" || op == "true" {
-			td.OddRow = true
-		}
+	if op, err := metadata.Get[bool](*tsr.Metadata(), "odd-row"); err == nil {
+		td.OddRow = op
 	}
-	if op, has := tsr.MetaData("image"); has {
-		if op == "+" || op == "true" {
-			td.Image = true
-		}
+	if op, err := metadata.Get[bool](*tsr.Metadata(), "image"); err == nil {
+		td.Image = op
 	}
-	if op, has := tsr.MetaData("min"); has {
-		mv, _ := strconv.ParseFloat(op, 64)
-		td.Range.Min = mv
+	if op, err := metadata.Get[float64](*tsr.Metadata(), "min"); err == nil {
+		td.Range.Min = op
 	}
-	if op, has := tsr.MetaData("max"); has {
-		mv, _ := strconv.ParseFloat(op, 64)
-		td.Range.Max = mv
+	if op, err := metadata.Get[float64](*tsr.Metadata(), "max"); err == nil {
+		td.Range.Max = op
 	}
-	if op, has := tsr.MetaData("fix-min"); has {
-		if op == "+" || op == "true" {
-			td.Range.FixMin = true
-		} else {
-			td.Range.FixMin = false
-		}
+	if op, err := metadata.Get[bool](*tsr.Metadata(), "fix-min"); err == nil {
+		td.Range.FixMin = op
 	}
-	if op, has := tsr.MetaData("fix-max"); has {
-		if op == "+" || op == "true" {
-			td.Range.FixMax = true
-		} else {
-			td.Range.FixMax = false
-		}
+	if op, err := metadata.Get[bool](*tsr.Metadata(), "fix-max"); err == nil {
+		td.Range.FixMax = op
 	}
-	if op, has := tsr.MetaData("colormap"); has {
+	if op, err := metadata.Get[string](*tsr.Metadata(), "colormap"); err == nil {
 		td.ColorMap = core.ColorMapName(op)
 	}
-	if op, has := tsr.MetaData("grid-fill"); has {
-		mv, _ := strconv.ParseFloat(op, 32)
-		td.GridFill = float32(mv)
+	if op, err := metadata.Get[float64](*tsr.Metadata(), "grid-fill"); err == nil {
+		td.GridFill = float32(op)
 	}
-	if op, has := tsr.MetaData("grid-min"); has {
-		mv, _ := strconv.ParseFloat(op, 32)
-		td.GridMinSize = float32(mv)
+	if op, err := metadata.Get[float64](*tsr.Metadata(), "grid-min"); err == nil {
+		td.GridMinSize = float32(op)
 	}
-	if op, has := tsr.MetaData("grid-max"); has {
-		mv, _ := strconv.ParseFloat(op, 32)
-		td.GridMaxSize = float32(mv)
+	if op, err := metadata.Get[float64](*tsr.Metadata(), "grid-max"); err == nil {
+		td.GridMaxSize = float32(op)
 	}
-	if op, has := tsr.MetaData("dim-extra"); has {
-		mv, _ := strconv.ParseFloat(op, 32)
-		td.DimExtra = float32(mv)
+	if op, err := metadata.Get[float64](*tsr.Metadata(), "dim-extra"); err == nil {
+		td.DimExtra = float32(op)
 	}
-	if op, has := tsr.MetaData("font-size"); has {
-		mv, _ := strconv.ParseFloat(op, 32)
-		td.FontSize = float32(mv)
+	if op, err := metadata.Get[float64](*tsr.Metadata(), "font-size"); err == nil {
+		td.FontSize = float32(op)
 	}
 }
 
@@ -351,11 +330,11 @@ func (tg *TensorGrid) Render() {
 				case outclr:
 					var r, g, b, a float64
 					a = 1
-					r = tg.Display.Range.ClipNormValue(tsr.Float([]int{0, y, x}))
-					g = tg.Display.Range.ClipNormValue(tsr.Float([]int{1, y, x}))
-					b = tg.Display.Range.ClipNormValue(tsr.Float([]int{2, y, x}))
+					r = tg.Display.Range.ClipNormValue(tsr.Float(0, y, x))
+					g = tg.Display.Range.ClipNormValue(tsr.Float(1, y, x))
+					b = tg.Display.Range.ClipNormValue(tsr.Float(2, y, x))
 					if nclr > 3 {
-						a = tg.Display.Range.ClipNormValue(tsr.Float([]int{3, y, x}))
+						a = tg.Display.Range.ClipNormValue(tsr.Float(3, y, x))
 					}
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
@@ -364,18 +343,18 @@ func (tg *TensorGrid) Render() {
 				case nclr > 1:
 					var r, g, b, a float64
 					a = 1
-					r = tg.Display.Range.ClipNormValue(tsr.Float([]int{y, x, 0}))
-					g = tg.Display.Range.ClipNormValue(tsr.Float([]int{y, x, 1}))
-					b = tg.Display.Range.ClipNormValue(tsr.Float([]int{y, x, 2}))
+					r = tg.Display.Range.ClipNormValue(tsr.Float(y, x, 0))
+					g = tg.Display.Range.ClipNormValue(tsr.Float(y, x, 1))
+					b = tg.Display.Range.ClipNormValue(tsr.Float(y, x, 2))
 					if nclr > 3 {
-						a = tg.Display.Range.ClipNormValue(tsr.Float([]int{y, x, 3}))
+						a = tg.Display.Range.ClipNormValue(tsr.Float(y, x, 3))
 					}
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
 					pc.StrokeStyle.Color = colors.Uniform(colors.FromFloat64(r, g, b, a))
 					pc.FillBox(pr, gsz, pc.StrokeStyle.Color)
 				default:
-					val := tg.Display.Range.ClipNormValue(tsr.Float([]int{y, x}))
+					val := tg.Display.Range.ClipNormValue(tsr.Float(y, x))
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
 					pc.StrokeStyle.Color = colors.Uniform(colors.FromFloat64(val, val, val, 1))
