@@ -4,6 +4,8 @@
 
 package core
 
+import "cogentcore.org/core/math32"
+
 // SizeClasses are the different size classes that a window can have.
 type SizeClasses int32 //enums:enum -trim-prefix Size
 
@@ -21,17 +23,25 @@ const (
 	SizeExpanded
 )
 
-// SizeClass returns the size class of the scene in which the widget is contained.
-func (wb *WidgetBase) SizeClass() SizeClasses {
-	dots := float32(wb.Scene.SceneGeom.Size.X)
+// SceneSize returns the effective size of the scene in which the widget is contained
+// in terms of dp (density-independent pixels).
+func (wb *WidgetBase) SceneSize() math32.Vector2 {
+	dots := math32.FromPoint(wb.Scene.SceneGeom.Size)
 	if wb.Scene.hasFlag(scenePrefSizing) {
 		if currentRenderWindow != nil {
 			rg := currentRenderWindow.SystemWindow.RenderGeom()
-			dots = float32(rg.Size.X)
+			dots = math32.FromPoint(rg.Size)
 		}
 	}
 	dpd := wb.Scene.Styles.UnitContext.Dp(1) // dots per dp
-	dp := dots / dpd                         // dots / (dots / dp) = dots * (dp / dots) = dp
+	dp := dots.DivScalar(dpd)                // dots / (dots / dp) = dots * (dp / dots) = dp
+	return dp
+}
+
+// SizeClass returns the size class of the scene in which the widget is contained
+// based on [WidgetBase.SceneSize].
+func (wb *WidgetBase) SizeClass() SizeClasses {
+	dp := wb.SceneSize().X
 	switch {
 	case dp < 600:
 		return SizeCompact
