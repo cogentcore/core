@@ -13,7 +13,7 @@ const dirFlagsN dirFlags = 3
 
 var _dirFlagsValueMap = map[string]dirFlags{`IsOpen`: 0, `SortByName`: 1, `SortByModTime`: 2}
 
-var _dirFlagsDescMap = map[dirFlags]string{0: `dirIsOpen means directory is open -- else closed`, 1: `dirSortByName means sort the directory entries by name. this is mutex with other sorts -- keeping option open for non-binary sort choices.`, 2: `dirSortByModTime means sort the directory entries by modification time`}
+var _dirFlagsDescMap = map[dirFlags]string{0: `dirIsOpen means directory is open -- else closed`, 1: `dirSortByName means sort the directory entries by name. this overrides SortByModTime default on Tree if set.`, 2: `dirSortByModTime means sort the directory entries by modification time.`}
 
 var _dirFlagsMap = map[dirFlags]string{0: `IsOpen`, 1: `SortByName`, 2: `SortByModTime`}
 

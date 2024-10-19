@@ -66,12 +66,14 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WDestroy          func()
 	WDragDrop         func(e events.Event)
 	WDropDeleteSource func(e events.Event)
+	WGetFileInfo      func() error
 	WInit             func()
 	WMimeData         func(md *mimedata.Mimes)
 	WNodeWalkDown     func(fun func(n tree.Node) bool)
 	WOnAdd            func()
 	WOnClose          func()
 	WOnOpen           func()
+	WOpenFile         func() error
 	WPaste            func()
 	WPlanName         func() string
 	WPosition         func()
@@ -105,6 +107,7 @@ func (W _cogentcore_org_core_filetree_Filer) Cut()                            { 
 func (W _cogentcore_org_core_filetree_Filer) Destroy()                        { W.WDestroy() }
 func (W _cogentcore_org_core_filetree_Filer) DragDrop(e events.Event)         { W.WDragDrop(e) }
 func (W _cogentcore_org_core_filetree_Filer) DropDeleteSource(e events.Event) { W.WDropDeleteSource(e) }
+func (W _cogentcore_org_core_filetree_Filer) GetFileInfo() error              { return W.WGetFileInfo() }
 func (W _cogentcore_org_core_filetree_Filer) Init()                           { W.WInit() }
 func (W _cogentcore_org_core_filetree_Filer) MimeData(md *mimedata.Mimes)     { W.WMimeData(md) }
 func (W _cogentcore_org_core_filetree_Filer) NodeWalkDown(fun func(n tree.Node) bool) {
@@ -113,6 +116,7 @@ func (W _cogentcore_org_core_filetree_Filer) NodeWalkDown(fun func(n tree.Node) 
 func (W _cogentcore_org_core_filetree_Filer) OnAdd()           { W.WOnAdd() }
 func (W _cogentcore_org_core_filetree_Filer) OnClose()         { W.WOnClose() }
 func (W _cogentcore_org_core_filetree_Filer) OnOpen()          { W.WOnOpen() }
+func (W _cogentcore_org_core_filetree_Filer) OpenFile() error  { return W.WOpenFile() }
 func (W _cogentcore_org_core_filetree_Filer) Paste()           { W.WPaste() }
 func (W _cogentcore_org_core_filetree_Filer) PlanName() string { return W.WPlanName() }
 func (W _cogentcore_org_core_filetree_Filer) Position()        { W.WPosition() }

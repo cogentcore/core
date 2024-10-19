@@ -44,7 +44,7 @@ func init() {
 		"Square":             reflect.ValueOf(plots.Square),
 		"StepKindN":          reflect.ValueOf(plots.StepKindN),
 		"StepKindValues":     reflect.ValueOf(plots.StepKindValues),
-		"TableColumnIndex":   reflect.ValueOf(plots.TableColumnIndex),
+		"TableColumnByIndex": reflect.ValueOf(plots.TableColumnByIndex),
 		"Triangle":           reflect.ValueOf(plots.Triangle),
 
 		// type definitions

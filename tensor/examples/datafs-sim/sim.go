@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/databrowser"
 	"cogentcore.org/core/tensor/datafs"
@@ -26,9 +26,9 @@ type Sim struct {
 
 // ConfigAll configures the sim
 func (ss *Sim) ConfigAll() {
-	ss.Root = errors.Log1(datafs.NewDir("Root"))
-	ss.Config = errors.Log1(ss.Root.Mkdir("Config"))
-	errors.Log1(datafs.New[int](ss.Config, "NRun", "NEpoch", "NTrial"))
+	ss.Root, _ = datafs.NewDir("Root")
+	ss.Config, _ = ss.Root.Mkdir("Config")
+	datafs.NewScalar[int](ss.Config, "NRun", "NEpoch", "NTrial")
 	ss.Config.Item("NRun").SetInt(5)
 	ss.Config.Item("NEpoch").SetInt(20)
 	ss.Config.Item("NTrial").SetInt(25)
@@ -39,44 +39,59 @@ func (ss *Sim) ConfigAll() {
 
 // ConfigStats adds basic stats that we record for our simulation.
 func (ss *Sim) ConfigStats(dir *datafs.Data) *datafs.Data {
-	stats := errors.Log1(dir.Mkdir("Stats"))
-	errors.Log1(datafs.New[int](stats, "Run", "Epoch", "Trial")) // counters
-	errors.Log1(datafs.New[string](stats, "TrialName"))
-	errors.Log1(datafs.New[float32](stats, "SSE", "AvgSSE", "TrlErr"))
-	z1 := datafs.PlotColumnZeroOne()
-	stats.SetPlotColumnOptions(z1, "AvgErr", "TrlErr")
-	zmax := datafs.PlotColumnZeroOne()
+	stats, _ := dir.Mkdir("Stats")
+	datafs.NewScalar[int](stats, "Run", "Epoch", "Trial") // counters
+	datafs.NewScalar[string](stats, "TrialName")
+	datafs.NewScalar[float32](stats, "SSE", "AvgSSE", "TrlErr")
+	z1, key := plotcore.PlotColumnZeroOne()
+	stats.SetMetaItems(key, z1, "AvgErr", "TrlErr")
+	zmax, _ := plotcore.PlotColumnZeroOne()
 	zmax.Range.FixMax = false
-	stats.SetPlotColumnOptions(z1, "SSE")
+	stats.SetMetaItems(key, z1, "SSE")
 	return stats
 }
 
 // ConfigLogs adds first-level logging of stats into tensors
 func (ss *Sim) ConfigLogs(dir *datafs.Data) *datafs.Data {
-	logd := errors.Log1(dir.Mkdir("Log"))
+	logd, _ := dir.Mkdir("Log")
 	trial := ss.ConfigTrialLog(logd)
-	ss.ConfigAggLog(logd, "Epoch", trial, stats.Mean, stats.Sem, stats.Min)
+	ss.ConfigAggLog(logd, "Epoch", trial, stats.StatMean, stats.StatSem, stats.StatMin)
 	return logd
 }
 
 // ConfigTrialLog adds first-level logging of stats into tensors
 func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
-	logd := errors.Log1(dir.Mkdir("Trial"))
-	ntrial, _ := ss.Config.Item("NTrial").AsInt()
-	sitems := ss.Stats.ItemsByTimeFunc(nil)
+	logd, _ := dir.Mkdir("Trial")
+	ntrial := ss.Config.Item("NTrial").AsInt()
+	sitems := ss.Stats.ValuesFunc(nil)
 	for _, st := range sitems {
-		dt := errors.Log1(datafs.NewData(logd, st.Name()))
-		tsr := tensor.NewOfType(st.DataType(), []int{ntrial}, "row")
-		dt.Value = tsr
-		dt.Meta.Copy(st.Meta) // key affordance: we get meta data from source
-		dt.SetCalcFunc(func() error {
-			trl, _ := ss.Stats.Item("Trial").AsInt()
-			if st.IsNumeric() {
-				v, _ := st.AsFloat64()
-				tsr.SetFloat1D(trl, v)
+		nm := st.Metadata().Name()
+		lt := logd.NewOfType(nm, st.DataType(), ntrial)
+		lt.Metadata().Copy(*st.Metadata()) // key affordance: we get meta data from source
+		tensor.SetCalcFunc(lt, func() error {
+			trl := ss.Stats.Item("Trial").AsInt()
+			if st.IsString() {
+				lt.SetStringRow(st.String1D(0), trl)
 			} else {
-				v, _ := st.AsString()
-				tsr.SetString1D(trl, v)
+				lt.SetFloatRow(st.Float1D(0), trl)
+			}
+			return nil
+		})
+	}
+	alllogd, _ := dir.Mkdir("AllTrials")
+	for _, st := range sitems {
+		nm := st.Metadata().Name()
+		// allocate full size
+		lt := alllogd.NewOfType(nm, st.DataType(), ntrial*ss.Config.Item("NEpoch").AsInt()*ss.Config.Item("NRun").AsInt())
+		lt.SetShapeSizes(0)                // then truncate to 0
+		lt.Metadata().Copy(*st.Metadata()) // key affordance: we get meta data from source
+		tensor.SetCalcFunc(lt, func() error {
+			row := lt.DimSize(0)
+			lt.SetShapeSizes(row + 1)
+			if st.IsString() {
+				lt.SetStringRow(st.String1D(0), row)
+			} else {
+				lt.SetFloatRow(st.Float1D(0), row)
 			}
 			return nil
 		})
@@ -86,38 +101,35 @@ func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
 
 // ConfigAggLog adds a higher-level logging of lower-level into higher-level tensors
 func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, aggs ...stats.Stats) *datafs.Data {
-	logd := errors.Log1(dir.Mkdir(level))
-	sitems := ss.Stats.ItemsByTimeFunc(nil)
-	nctr, _ := ss.Config.Item("N" + level).AsInt()
+	logd, _ := dir.Mkdir(level)
+	sitems := ss.Stats.ValuesFunc(nil)
+	nctr := ss.Config.Item("N" + level).AsInt()
 	for _, st := range sitems {
-		if !st.IsNumeric() {
+		if st.IsString() {
 			continue
 		}
-		src := from.Item(st.Name()).AsTensor()
+		nm := st.Metadata().Name()
+		src := from.Value(nm)
 		if st.DataType() >= reflect.Float32 {
-			dd := errors.Log1(logd.Mkdir(st.Name()))
+			// todo: pct correct etc
+			dd, _ := logd.Mkdir(nm)
 			for _, ag := range aggs { // key advantage of dir structure: multiple stats per item
-				dt := errors.Log1(datafs.NewData(dd, ag.String()))
-				tsr := tensor.NewOfType(st.DataType(), []int{nctr}, "row")
-				dt.Value = tsr
-				dt.Meta.Copy(st.Meta)
-				dt.SetCalcFunc(func() error {
-					ctr, _ := ss.Stats.Item(level).AsInt()
-					v := stats.StatTensor(src, ag)
-					tsr.SetFloat1D(ctr, v)
+				lt := dd.NewOfType(ag.String(), st.DataType(), nctr)
+				lt.Metadata().Copy(*st.Metadata())
+				tensor.SetCalcFunc(lt, func() error {
+					stout := ag.Call(src)
+					ctr := ss.Stats.Item(level).AsInt()
+					lt.SetFloatRow(stout.FloatRow(0), ctr)
 					return nil
 				})
 			}
 		} else {
-			dt := errors.Log1(datafs.NewData(logd, st.Name()))
-			tsr := tensor.NewOfType(st.DataType(), []int{nctr}, "row")
-			// todo: set level counter as default x axis in plot config
-			dt.Value = tsr
-			dt.Meta.Copy(st.Meta)
-			dt.SetCalcFunc(func() error {
-				ctr, _ := ss.Stats.Item(level).AsInt()
-				v, _ := st.AsFloat64()
-				tsr.SetFloat1D(ctr, v)
+			lt := logd.NewOfType(nm, st.DataType(), nctr)
+			lt.Metadata().Copy(*st.Metadata())
+			tensor.SetCalcFunc(lt, func() error {
+				v := st.Float1D(0)
+				ctr := ss.Stats.Item(level).AsInt()
+				lt.SetFloatRow(v, ctr)
 				return nil
 			})
 		}
@@ -126,16 +138,27 @@ func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, a
 }
 
 func (ss *Sim) Run() {
-	nepc, _ := ss.Config.Item("NEpoch").AsInt()
-	ntrl, _ := ss.Config.Item("NTrial").AsInt()
-	for epc := range nepc {
-		ss.Stats.Item("Epoch").SetInt(epc)
-		for trl := range ntrl {
-			ss.Stats.Item("Trial").SetInt(trl)
-			ss.RunTrial(trl)
+	nrun := ss.Config.Item("NRun").AsInt()
+	nepc := ss.Config.Item("NEpoch").AsInt()
+	ntrl := ss.Config.Item("NTrial").AsInt()
+	for run := range nrun {
+		ss.Stats.Item("Run").SetInt(run)
+		for epc := range nepc {
+			ss.Stats.Item("Epoch").SetInt(epc)
+			for trl := range ntrl {
+				ss.Stats.Item("Trial").SetInt(trl)
+				ss.RunTrial(trl)
+			}
+			ss.EpochDone()
 		}
-		ss.EpochDone()
 	}
+	alldt := ss.Logs.Item("AllTrials").GetDirTable(nil)
+	dir, _ := ss.Logs.Mkdir("Stats")
+	stats.TableGroups(dir, alldt, "Run", "Epoch", "Trial")
+	sts := []string{"SSE", "AvgSSE", "TrlErr"}
+	stats.TableGroupStats(dir, stats.StatMean, alldt, sts...)
+	stats.TableGroupStats(dir, stats.StatSem, alldt, sts...)
+
 }
 
 func (ss *Sim) RunTrial(trl int) {
@@ -150,6 +173,7 @@ func (ss *Sim) RunTrial(trl int) {
 	}
 	ss.Stats.Item("TrlErr").SetFloat32(trlErr)
 	ss.Logs.Item("Trial").CalcAll()
+	ss.Logs.Item("AllTrials").CalcAll()
 }
 
 func (ss *Sim) EpochDone() {

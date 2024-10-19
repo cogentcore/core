@@ -56,7 +56,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plot", IDName:
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plotter", IDName: "plotter", Doc: "Plotter is an interface that wraps the Plot method.\nSome standard implementations of Plotter can be found in plotters.", Methods: []types.Method{{Name: "Plot", Doc: "Plot draws the data to the Plot Paint", Args: []string{"pt"}}, {Name: "XYData", Doc: "returns the data for this plot as X,Y points,\nincluding corresponding pixel data.\nThis allows gui interface to inspect data etc.", Returns: []string{"data", "pixels"}}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.DataRanger", IDName: "data-ranger", Doc: "DataRanger wraps the DataRange method.", Methods: []types.Method{{Name: "DataRange", Doc: "DataRange returns the range of X and Y values.", Returns: []string{"xmin", "xmax", "ymin", "ymax"}}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.DataRanger", IDName: "data-ranger", Doc: "DataRanger wraps the DataRange method.", Methods: []types.Method{{Name: "DataRange", Doc: "DataRange returns the range of X and Y values.", Args: []string{"pt"}, Returns: []string{"xmin", "xmax", "ymin", "ymax"}}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.TextStyle", IDName: "text-style", Doc: "TextStyle specifies styling parameters for Text elements", Embeds: []types.Field{{Name: "FontRender"}}, Fields: []types.Field{{Name: "Align", Doc: "how to align text along the relevant dimension for the text element"}, {Name: "Padding", Doc: "Padding is used in a case-dependent manner to add space around text elements"}, {Name: "Rotation", Doc: "rotation of the text, in Degrees"}}})
 

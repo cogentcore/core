@@ -147,18 +147,6 @@ func (vs *Values) MemSize() int {
 	return tsz
 }
 
-// CreateReadBuffers creates read buffers for all values.
-func (vs *Values) CreateReadBuffers() error {
-	var errs []error
-	for _, vl := range vs.Values {
-		err := vl.CreateReadBuffer()
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-	return errors.Join(errs...)
-}
-
 // bindGroupEntry returns the BindGroupEntry for Current
 // value for this variable.
 func (vs *Values) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 )
 
@@ -20,8 +21,8 @@ type Data struct {
 func TestTablePlotEditor(t *testing.T) {
 	b := core.NewBody()
 
-	epc := table.NewTable("epc")
-	epc.OpenCSV("testdata/ra25epoch.tsv", table.Tab)
+	epc := table.New("epc")
+	epc.OpenCSV("testdata/ra25epoch.tsv", tensor.Tab)
 
 	pl := NewPlotEditor(b)
 	pl.Options.Title = "RA25 Epoch Train"

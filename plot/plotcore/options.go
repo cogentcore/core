@@ -6,14 +6,11 @@ package plotcore
 
 import (
 	"image"
-	"strings"
 
 	"cogentcore.org/core/base/option"
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/plot/plots"
-	"cogentcore.org/core/tensor/table"
 )
 
 // PlotOptions are options for the overall plot.
@@ -93,83 +90,12 @@ func (po *PlotOptions) defaults() {
 	}
 }
 
-// fromMeta sets plot options from meta data.
-func (po *PlotOptions) fromMeta(dt *table.Table) {
-	po.FromMetaMap(dt.MetaData)
-}
-
-// metaMapLower tries meta data access by lower-case version of key too
-func metaMapLower(meta map[string]string, key string) (string, bool) {
-	vl, has := meta[key]
-	if has {
-		return vl, has
-	}
-	vl, has = meta[strings.ToLower(key)]
-	return vl, has
-}
-
-// FromMetaMap sets plot options from meta data map.
-func (po *PlotOptions) FromMetaMap(meta map[string]string) {
-	if typ, has := metaMapLower(meta, "Type"); has {
-		po.Type.SetString(typ)
-	}
-	if op, has := metaMapLower(meta, "Lines"); has {
-		if op == "+" || op == "true" {
-			po.Lines = true
-		} else {
-			po.Lines = false
-		}
-	}
-	if op, has := metaMapLower(meta, "Points"); has {
-		if op == "+" || op == "true" {
-			po.Points = true
-		} else {
-			po.Points = false
-		}
-	}
-	if lw, has := metaMapLower(meta, "LineWidth"); has {
-		po.LineWidth, _ = reflectx.ToFloat32(lw)
-	}
-	if ps, has := metaMapLower(meta, "PointSize"); has {
-		po.PointSize, _ = reflectx.ToFloat32(ps)
-	}
-	if bw, has := metaMapLower(meta, "BarWidth"); has {
-		po.BarWidth, _ = reflectx.ToFloat32(bw)
-	}
-	if op, has := metaMapLower(meta, "NegativeXDraw"); has {
-		if op == "+" || op == "true" {
-			po.NegativeXDraw = true
-		} else {
-			po.NegativeXDraw = false
-		}
-	}
-	if scl, has := metaMapLower(meta, "Scale"); has {
-		po.Scale, _ = reflectx.ToFloat32(scl)
-	}
-	if xc, has := metaMapLower(meta, "XAxis"); has {
-		po.XAxis = xc
-	}
-	if lc, has := metaMapLower(meta, "Legend"); has {
-		po.Legend = lc
-	}
-	if xrot, has := metaMapLower(meta, "XAxisRotation"); has {
-		po.XAxisRotation, _ = reflectx.ToFloat32(xrot)
-	}
-	if lb, has := metaMapLower(meta, "XAxisLabel"); has {
-		po.XAxisLabel = lb
-	}
-	if lb, has := metaMapLower(meta, "YAxisLabel"); has {
-		po.YAxisLabel = lb
-	}
-}
-
 // ColumnOptions are options for plotting one column of data.
 type ColumnOptions struct { //types:add
-
 	// whether to plot this column
 	On bool
 
-	// name of column being plotting
+	// name of column being plotted
 	Column string
 
 	// whether to plot lines; uses the overall plot option if unset
@@ -225,68 +151,6 @@ func (co *ColumnOptions) getLabel() string {
 		return co.Label
 	}
 	return co.Column
-}
-
-// fromMetaMap sets column options from meta data map.
-func (co *ColumnOptions) fromMetaMap(meta map[string]string) {
-	if op, has := metaMapLower(meta, co.Column+":On"); has {
-		if op == "+" || op == "true" || op == "" {
-			co.On = true
-		} else {
-			co.On = false
-		}
-	}
-	if op, has := metaMapLower(meta, co.Column+":Off"); has {
-		if op == "+" || op == "true" || op == "" {
-			co.On = false
-		} else {
-			co.On = true
-		}
-	}
-	if op, has := metaMapLower(meta, co.Column+":FixMin"); has {
-		if op == "+" || op == "true" {
-			co.Range.FixMin = true
-		} else {
-			co.Range.FixMin = false
-		}
-	}
-	if op, has := metaMapLower(meta, co.Column+":FixMax"); has {
-		if op == "+" || op == "true" {
-			co.Range.FixMax = true
-		} else {
-			co.Range.FixMax = false
-		}
-	}
-	if op, has := metaMapLower(meta, co.Column+":FloatMin"); has {
-		if op == "+" || op == "true" {
-			co.Range.FixMin = false
-		} else {
-			co.Range.FixMin = true
-		}
-	}
-	if op, has := metaMapLower(meta, co.Column+":FloatMax"); has {
-		if op == "+" || op == "true" {
-			co.Range.FixMax = false
-		} else {
-			co.Range.FixMax = true
-		}
-	}
-	if vl, has := metaMapLower(meta, co.Column+":Max"); has {
-		co.Range.Max, _ = reflectx.ToFloat32(vl)
-	}
-	if vl, has := metaMapLower(meta, co.Column+":Min"); has {
-		co.Range.Min, _ = reflectx.ToFloat32(vl)
-	}
-	if lb, has := metaMapLower(meta, co.Column+":Label"); has {
-		co.Label = lb
-	}
-	if lb, has := metaMapLower(meta, co.Column+":ErrColumn"); has {
-		co.ErrColumn = lb
-	}
-	if vl, has := metaMapLower(meta, co.Column+":TensorIndex"); has {
-		iv, _ := reflectx.ToInt(vl)
-		co.TensorIndex = int(iv)
-	}
 }
 
 // PlotTypes are different types of plots.

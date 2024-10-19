@@ -14,7 +14,7 @@ import (
 
 //go:generate core generate -add-types -add-funcs
 
-// Config is the configuration information for the cosh cli.
+// Config is the configuration information for the dict cli.
 type Config struct {
 
 	// InputA is the first input dictionary file

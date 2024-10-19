@@ -4,12 +4,7 @@
 
 package stats
 
-import (
-	"reflect"
-
-	"cogentcore.org/core/tensor/table"
-)
-
+/*
 // MeanTables returns an table.Table with the mean values across all float
 // columns of the input tables, which must have the same columns but not
 // necessarily the same number of rows.
@@ -58,7 +53,7 @@ func MeanTables(dts []*table.Table) *table.Table {
 					ci := si + j
 					cv := cl.Float1D(ci)
 					cv += dc.Float1D(ci)
-					cl.SetFloat1D(ci, cv)
+					cl.SetFloat1D(cv, ci)
 				}
 			}
 		}
@@ -69,10 +64,11 @@ func MeanTables(dts []*table.Table) *table.Table {
 				cv := cl.Float1D(ci)
 				if rns[ri] > 0 {
 					cv /= float64(rns[ri])
-					cl.SetFloat1D(ci, cv)
+					cl.SetFloat1D(cv, ci)
 				}
 			}
 		}
 	}
 	return ot
 }
+*/

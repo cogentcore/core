@@ -17,10 +17,8 @@ func makeTestData(t *testing.T) *Data {
 	assert.NoError(t, err)
 	net, err := dfs.Mkdir("network")
 	assert.NoError(t, err)
-	NewTensor[float32](net, "units", []int{50, 50})
-	log, err := dfs.Mkdir("log")
-	assert.NoError(t, err)
-	_, err = NewTable(log, "Trial")
+	NewValue[float32](net, "units", 50, 50)
+	_, err = dfs.Mkdir("log")
 	assert.NoError(t, err)
 	return dfs
 }
