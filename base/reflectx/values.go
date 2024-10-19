@@ -957,11 +957,18 @@ func SetRobust(to, from any) error {
 				pointer.Elem().Set(fv)
 				return nil
 			}
-			ufv := Underlying(fv)
+			ufvp := UnderlyingPointer(fv)
+			if ufvp.IsValid() && ufvp.Type().AssignableTo(typ) {
+				pointer.Elem().Set(ufvp)
+				return nil
+			}
+			ufv := ufvp.Elem()
 			if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
 				pointer.Elem().Set(ufv)
 				return nil
 			}
+		} else {
+			return nil
 		}
 	}
 
@@ -1034,9 +1041,6 @@ func SetRobust(to, from any) error {
 	}
 
 	ftyp := NonPointerType(reflect.TypeOf(from))
-	if ftyp == nil {
-		return fmt.Errorf("SetRobust: from type is nil")
-	}
 
 	switch {
 	case kind >= reflect.Int && kind <= reflect.Int64:
@@ -1104,5 +1108,5 @@ func SetRobust(to, from any) error {
 
 	tos := elide.End(fmt.Sprintf("%v", to), 40)
 	fms := elide.End(fmt.Sprintf("%v", from), 40)
-	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, typ.String(), fms, from, LongTypeName(reflect.TypeOf(from)))
+	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, typ.String(), fms, from, LongTypeName(Underlying(reflect.ValueOf(from)).Type()))
 }
