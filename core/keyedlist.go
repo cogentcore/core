@@ -279,7 +279,11 @@ func bindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	}
 	wb.ValueOnChange = func() {
 		value := reflectx.NonNilNew(mapv.Type().Elem())
-		ErrorSnackbar(vw, reflectx.SetRobust(value.Interface(), vw.WidgetValue()))
+		err := reflectx.SetRobust(value.Interface(), vw.WidgetValue())
+		if err != nil {
+			ErrorSnackbar(vw, err)
+			return
+		}
 		mapv.SetMapIndex(key, value.Elem())
 	}
 	if alreadyBound {
