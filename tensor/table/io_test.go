@@ -24,7 +24,7 @@ func TestTableHeaders(t *testing.T) {
 	if dt.NumColumns() != 3 {
 		t.Errorf("TableHeaders: len != 3\n")
 	}
-	cols := dt.Columns.Values
+	cols := dt.Columns
 	if cols[0].DataType() != reflect.String {
 		t.Errorf("TableHeaders: cols[0] != STRING\n")
 	}
@@ -74,7 +74,7 @@ func TestReadTableDat(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		sc := dt.Columns.Values
+		sc := dt.Columns
 		if len(sc) != 3 {
 			t.Errorf("TableHeaders: len != 3\n")
 		}

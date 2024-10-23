@@ -25,7 +25,7 @@ func (dt *Table) RowIndex(idx int) int {
 // else actual number of [Columns.Rows].
 func (dt *Table) NumRows() int {
 	if dt.Indexes == nil {
-		return dt.Columns.Rows
+		return dt.Cols.Rows
 	}
 	return len(dt.Indexes)
 }
@@ -43,7 +43,7 @@ func (dt *Table) IndexesNeeded() {
 	if dt.Indexes != nil {
 		return
 	}
-	dt.Indexes = make([]int, dt.Columns.Rows)
+	dt.Indexes = make([]int, dt.Cols.Rows)
 	for i := range dt.Indexes {
 		dt.Indexes[i] = i
 	}
@@ -59,13 +59,13 @@ func (dt *Table) IndexesFromTensor(ix *tensor.Rows) {
 // ValidIndexes deletes all invalid indexes from the list.
 // Call this if rows (could) have been deleted from table.
 func (dt *Table) ValidIndexes() {
-	if dt.Columns.Rows <= 0 || dt.Indexes == nil {
+	if dt.Cols.Rows <= 0 || dt.Indexes == nil {
 		dt.Indexes = nil
 		return
 	}
 	ni := dt.NumRows()
 	for i := ni - 1; i >= 0; i-- {
-		if dt.Indexes[i] >= dt.Columns.Rows {
+		if dt.Indexes[i] >= dt.Cols.Rows {
 			dt.Indexes = append(dt.Indexes[:i], dt.Indexes[i+1:]...)
 		}
 	}
@@ -75,12 +75,12 @@ func (dt *Table) ValidIndexes() {
 // then existing list of indexes is permuted, otherwise a new set of
 // permuted indexes are generated
 func (dt *Table) Permuted() {
-	if dt.Columns.Rows <= 0 {
+	if dt.Cols.Rows <= 0 {
 		dt.Indexes = nil
 		return
 	}
 	if dt.Indexes == nil {
-		dt.Indexes = rand.Perm(dt.Columns.Rows)
+		dt.Indexes = rand.Perm(dt.Cols.Rows)
 	} else {
 		rand.Shuffle(len(dt.Indexes), func(i, j int) {
 			dt.Indexes[i], dt.Indexes[j] = dt.Indexes[j], dt.Indexes[i]
@@ -226,8 +226,8 @@ func (dt *Table) New() *Table {
 	if rows == 0 {
 		return nt
 	}
-	for ci, cl := range nt.Columns.Values {
-		scl := dt.Columns.Values[ci]
+	for ci, cl := range nt.Columns {
+		scl := dt.Columns[ci]
 		_, csz := cl.Shape().RowCellSize()
 		for i, srw := range dt.Indexes {
 			cl.CopyCellsFrom(scl, i*csz, srw*csz, csz)

@@ -222,12 +222,12 @@ func (fn *FileNode) PlotFile() {
 		case fileinfo.Tensor:
 			tsr := d.Data
 			dt = table.New(df)
-			dt.Columns.Rows = tsr.DimSize(0)
+			dt.Cols.Rows = tsr.DimSize(0)
 			if ix, ok := tsr.(*tensor.Rows); ok {
 				dt.Indexes = ix.Indexes
 			}
 			rc := dt.AddIntColumn("Row")
-			for r := range dt.Columns.Rows {
+			for r := range dt.Cols.Rows
 				rc.Values[r] = r
 			}
 			dt.AddColumn(fn.Name, tsr.AsValues())

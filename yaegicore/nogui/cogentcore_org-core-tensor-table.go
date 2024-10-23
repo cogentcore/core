@@ -18,7 +18,7 @@ func init() {
 		"Headers":                reflect.ValueOf(table.Headers),
 		"InferDataType":          reflect.ValueOf(table.InferDataType),
 		"New":                    reflect.ValueOf(table.New),
-		"NewColumns":             reflect.ValueOf(table.NewColumns),
+		"NewCols":                reflect.ValueOf(table.NewCols),
 		"NewSliceTable":          reflect.ValueOf(table.NewSliceTable),
 		"NewView":                reflect.ValueOf(table.NewView),
 		"NoHeaders":              reflect.ValueOf(table.NoHeaders),
@@ -29,7 +29,7 @@ func init() {
 		"UpdateSliceTable":       reflect.ValueOf(table.UpdateSliceTable),
 
 		// type definitions
-		"Columns":    reflect.ValueOf((*table.Columns)(nil)),
+		"Cols":       reflect.ValueOf((*table.Cols)(nil)),
 		"FilterFunc": reflect.ValueOf((*table.FilterFunc)(nil)),
 		"Table":      reflect.ValueOf((*table.Table)(nil)),
 	}

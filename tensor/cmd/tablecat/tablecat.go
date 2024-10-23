@@ -153,11 +153,11 @@ func AvgByColumn(files []string, column string) {
 			stats.TableGroups(dir, dt, column)
 		}
 		var cols []string
-		for ci, cl := range dt.Columns.Values {
-			if cl.IsString() || dt.Columns.Keys[ci] == column {
+		for ci, cl := range dt.Columns {
+			if cl.IsString() || dt.Names[ci] == column {
 				continue
 			}
-			cols = append(cols, dt.Columns.Keys[ci])
+			cols = append(cols, dt.Names[ci])
 		}
 		stats.TableGroupStats(dir, stats.StatMean, dt, cols...)
 		std := dir.Item("Stats")

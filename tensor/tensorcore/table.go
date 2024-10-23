@@ -181,7 +181,7 @@ func (tb *Table) UpdateMaxWidths() {
 	}
 	for fli := 0; fli < tb.NCols; fli++ {
 		tb.colMaxWidths[fli] = 0
-		col := tb.Table.Columns.Values[fli]
+		col := tb.Table.Columns[fli]
 		stsr, isstr := col.(*tensor.String)
 
 		if !isstr {
@@ -217,7 +217,7 @@ func (tb *Table) MakeHeader(p *tree.Plan) {
 				})
 			}
 			for fli := 0; fli < tb.NCols; fli++ {
-				field := tb.Table.Columns.Keys[fli]
+				field := tb.Table.Names[fli]
 				tree.AddAt(p, "head-"+field, func(w *core.Button) {
 					w.SetType(core.ButtonAction)
 					w.Styler(func(s *styles.Style) {
@@ -227,7 +227,7 @@ func (tb *Table) MakeHeader(p *tree.Plan) {
 						tb.SortSliceAction(fli)
 					})
 					w.Updater(func() {
-						field := tb.Table.Columns.Keys[fli]
+						field := tb.Table.Names[fli]
 						w.SetText(field).SetTooltip(field + " (tap to sort by)")
 						tb.headerWidths[fli] = len(field)
 						if fli == tb.SortIndex {
@@ -272,7 +272,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	}
 
 	for fli := 0; fli < tb.NCols; fli++ {
-		col := tb.Table.Columns.Values[fli]
+		col := tb.Table.Columns[fli]
 		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
 
 		_, isstr := col.(*tensor.String)
@@ -373,7 +373,7 @@ func (tb *Table) GetColumnTensorDisplay(col int) *TensorDisplay {
 		return ctd
 	}
 	if tb.Table != nil {
-		cl := tb.Table.Columns.Values[col]
+		cl := tb.Table.Columns[col]
 		if len(*cl.Metadata()) > 0 {
 			return tb.SetColumnTensorDisplay(col)
 		}
@@ -390,7 +390,7 @@ func (tb *Table) SetColumnTensorDisplay(col int) *TensorDisplay {
 	ctd := &TensorDisplay{}
 	*ctd = tb.TensorDisplay
 	if tb.Table != nil {
-		cl := tb.Table.Columns.Values[col]
+		cl := tb.Table.Columns[col]
 		ctd.FromMeta(cl)
 	}
 	tb.ColumnTensorDisplay[col] = ctd
@@ -471,7 +471,7 @@ func (tb *Table) StyleRow(w core.Widget, idx, fidx int) {}
 // :down depending on descending
 func (tb *Table) SortFieldName() string {
 	if tb.SortIndex >= 0 && tb.SortIndex < tb.NCols {
-		nm := tb.Table.Columns.Keys[tb.SortIndex]
+		nm := tb.Table.Names[tb.SortIndex]
 		if tb.SortDescending {
 			nm += ":down"
 		} else {
@@ -491,7 +491,7 @@ func (tb *Table) SetSortFieldName(nm string) {
 	spnm := strings.Split(nm, ":")
 	got := false
 	for fli := 0; fli < tb.NCols; fli++ {
-		fld := tb.Table.Columns.Keys[fli]
+		fld := tb.Table.Names[fli]
 		if fld == spnm[0] {
 			got = true
 			// fmt.Println("sorting on:", fld.Name, fli, "from:", nm)

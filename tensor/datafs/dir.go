@@ -374,9 +374,9 @@ func (d *Data) GetDirTable(fun func(item *Data) bool) *table.Table {
 	for _, it := range its {
 		tsr := it.Data
 		rows := tsr.DimSize(0)
-		if dt.Columns.Rows < rows {
-			dt.Columns.Rows = rows
-			dt.SetNumRows(dt.Columns.Rows)
+		if dt.Cols.Rows < rows {
+			dt.Cols.Rows = rows
+			dt.SetNumRows(dt.Cols.Rows)
 		}
 		nm := it.name
 		if it.Parent != d {

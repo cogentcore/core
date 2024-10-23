@@ -20,8 +20,8 @@ func GatherTableRows(dest, src *table.Table, comm *mpi.Comm) {
 		*dest = *src.Clone()
 	}
 	dest.SetNumRows(dr)
-	for ci, st := range src.Columns.Values {
-		dt := dest.Columns.Values[ci]
+	for ci, st := range src.Columns {
+		dt := dest.Columns[ci]
 		GatherTensorRows(dt, st, comm)
 	}
 }
@@ -38,8 +38,8 @@ func ReduceTable(dest, src *table.Table, comm *mpi.Comm, op mpi.Op) {
 		*dest = *src.Clone()
 	}
 	dest.SetNumRows(sr)
-	for ci, st := range src.Columns.Values {
-		dt := dest.Columns.Values[ci]
+	for ci, st := range src.Columns {
+		dt := dest.Columns[ci]
 		ReduceTensor(dt, st, comm, op)
 	}
 }

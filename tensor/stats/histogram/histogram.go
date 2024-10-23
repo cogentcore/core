@@ -46,7 +46,7 @@ func F64Table(dt *table.Table, vals []float64, nBins int, min, max float64) {
 	dt.AddFloat64Column("Value")
 	dt.AddFloat64Column("Count")
 	dt.SetNumRows(nBins)
-	ct := dt.Columns.Values[1].(*tensor.Float64)
+	ct := dt.Columns[1].(*tensor.Float64)
 	F64(&ct.Values, vals, nBins, min, max)
 	inc := (max - min) / float64(nBins)
 	vls := dt.Columns.Values[0].(*tensor.Float64).Values

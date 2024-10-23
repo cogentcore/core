@@ -55,7 +55,7 @@ func DescribeTable(dir *datafs.Data, dt *table.Table, columns ...string) {
 // DescribeTableAll runs [Describe] on all numeric columns in given table.
 func DescribeTableAll(dir *datafs.Data, dt *table.Table) {
 	var cols []string
-	for i, cl := range dt.Columns.Values {
+	for i, cl := range dt.Columns {
 		if !cl.IsString() {
 			cols = append(cols, dt.ColumnName(i))
 		}

@@ -25,7 +25,7 @@ import (
 type Table struct { //types:add
 	// Columns has the list of column tensor data for this table.
 	// Different tables can provide different indexed views onto the same Columns.
-	Columns *Columns
+	*Cols
 
 	// Indexes are the indexes into Tensor rows, with nil = sequential.
 	// Only set if order is different from default sequential order.
@@ -46,7 +46,7 @@ type Table struct { //types:add
 // Can pass an optional name which calls metadata SetName.
 func New(name ...string) *Table {
 	dt := &Table{}
-	dt.Columns = NewColumns()
+	dt.Cols = NewCols()
 	if len(name) > 0 {
 		dt.Meta.SetName(name[0])
 	}
@@ -58,7 +58,7 @@ func New(name ...string) *Table {
 // Indexes are copied from the existing table -- use Sequential
 // to reset to full sequential view.
 func NewView(src *Table) *Table {
-	dt := &Table{Columns: src.Columns}
+	dt := &Table{Cols: src.Cols}
 	if src.Indexes != nil {
 		dt.Indexes = slices.Clone(src.Indexes)
 	}
@@ -75,7 +75,7 @@ func (dt *Table) IsValidRow(row int) error {
 }
 
 // NumColumns returns the number of columns.
-func (dt *Table) NumColumns() int { return dt.Columns.Len() }
+func (dt *Table) NumColumns() int { return dt.Cols.Len() }
 
 // Column returns the tensor with given column name, as a [tensor.Rows]
 // with the shared [Table.Indexes] from this table. It is best practice to
@@ -83,7 +83,7 @@ func (dt *Table) NumColumns() int { return dt.Columns.Len() }
 // provide the shared table-wide Indexes.
 // Returns nil if not found.
 func (dt *Table) Column(name string) *tensor.Rows {
-	cl := dt.Columns.At(name)
+	cl := dt.Cols.At(name)
 	if cl == nil {
 		return nil
 	}
@@ -106,7 +106,7 @@ func (dt *Table) ColumnTry(name string) (*tensor.Rows, error) {
 // Direct access through [Table.Columns} does not provide the shared table-wide Indexes.
 // Will panic if out of range.
 func (dt *Table) ColumnByIndex(idx int) *tensor.Rows {
-	cl := dt.Columns.Values[idx]
+	cl := dt.Columns[idx]
 	return tensor.NewRows(cl, dt.Indexes...)
 }
 
@@ -125,12 +125,12 @@ func (dt *Table) ColumnList(names ...string) []tensor.Tensor {
 
 // ColumnName returns the name of given column.
 func (dt *Table) ColumnName(i int) string {
-	return dt.Columns.Keys[i]
+	return dt.Cols.Names[i]
 }
 
 // ColumnIndex returns the index for given column name.
 func (dt *Table) ColumnIndex(name string) int {
-	return dt.Columns.IndexByKey(name)
+	return dt.Cols.IndexByKey(name)
 }
 
 // ColumnIndexList returns a list of indexes to columns of given names.
@@ -149,7 +149,7 @@ func (dt *Table) ColumnIndexList(names ...string) []int {
 // (which must be unique). If no cellSizes are specified, it holds scalar values,
 // otherwise the cells are n-dimensional tensors of given size.
 func AddColumn[T tensor.DataTypes](dt *Table, name string, cellSizes ...int) tensor.Tensor {
-	rows := dt.Columns.Rows
+	rows := dt.Cols.Rows
 	sz := append([]int{rows}, cellSizes...)
 	tsr := tensor.New[T](sz...)
 	// tsr.SetNames("Row")
@@ -162,7 +162,7 @@ func AddColumn[T tensor.DataTypes](dt *Table, name string, cellSizes ...int) ten
 // If no cellSizes are specified, it holds scalar values,
 // otherwise the cells are n-dimensional tensors of given size.
 func InsertColumn[T tensor.DataTypes](dt *Table, name string, idx int, cellSizes ...int) tensor.Tensor {
-	rows := dt.Columns.Rows
+	rows := dt.Cols.Rows
 	sz := append([]int{rows}, cellSizes...)
 	tsr := tensor.New[T](sz...)
 	// tsr.SetNames("Row")
@@ -174,14 +174,14 @@ func InsertColumn[T tensor.DataTypes](dt *Table, name string, idx int, cellSizes
 // returning an error and not adding if the name is not unique.
 // Automatically adjusts the shape to fit the current number of rows.
 func (dt *Table) AddColumn(name string, tsr tensor.Values) error {
-	return dt.Columns.AddColumn(name, tsr)
+	return dt.Cols.AddColumn(name, tsr)
 }
 
 // InsertColumn inserts the given [tensor.Values] as a column to the table at given index,
 // returning an error and not adding if the name is not unique.
 // Automatically adjusts the shape to fit the current number of rows.
 func (dt *Table) InsertColumn(idx int, name string, tsr tensor.Values) error {
-	return dt.Columns.InsertColumn(idx, name, tsr)
+	return dt.Cols.InsertColumn(idx, name, tsr)
 }
 
 // AddColumnOfType adds a new scalar column to the table, of given reflect type,
@@ -190,7 +190,7 @@ func (dt *Table) InsertColumn(idx int, name string, tsr tensor.Values) error {
 // otherwise the cells are n-dimensional tensors of given size.
 // Supported types include string, bool (for [tensor.Bool]), float32, float64, int, int32, and byte.
 func (dt *Table) AddColumnOfType(name string, typ reflect.Kind, cellSizes ...int) tensor.Tensor {
-	rows := dt.Columns.Rows
+	rows := dt.Cols.Rows
 	sz := append([]int{rows}, cellSizes...)
 	tsr := tensor.NewOfType(typ, sz...)
 	// tsr.SetNames("Row")
@@ -229,23 +229,23 @@ func (dt *Table) AddIntColumn(name string, cellSizes ...int) *tensor.Int {
 // DeleteColumnName deletes column of given name.
 // returns false if not found.
 func (dt *Table) DeleteColumnName(name string) bool {
-	return dt.Columns.DeleteByKey(name)
+	return dt.Cols.DeleteByKey(name)
 }
 
 // DeleteColumnIndex deletes column within the index range [i:j].
 func (dt *Table) DeleteColumnByIndex(i, j int) {
-	dt.Columns.DeleteByIndex(i, j)
+	dt.Cols.DeleteByIndex(i, j)
 }
 
 // DeleteAll deletes all columns, does full reset.
 func (dt *Table) DeleteAll() {
 	dt.Indexes = nil
-	dt.Columns.Reset()
+	dt.Cols.Reset()
 }
 
 // AddRows adds n rows to end of underlying Table, and to the indexes in this view.
 func (dt *Table) AddRows(n int) *Table { //types:add
-	return dt.SetNumRows(dt.Columns.Rows + n)
+	return dt.SetNumRows(dt.Cols.Rows + n)
 }
 
 // InsertRows adds n rows to end of underlying Table, and to the indexes starting at
@@ -253,7 +253,7 @@ func (dt *Table) AddRows(n int) *Table { //types:add
 // exists in the indexed view. To create an in-memory ordering, use [Table.New].
 func (dt *Table) InsertRows(at, n int) *Table {
 	dt.IndexesNeeded()
-	strow := dt.Columns.Rows
+	strow := dt.Cols.Rows
 	stidx := len(dt.Indexes)
 	dt.SetNumRows(strow + n) // adds n indexes to end of list
 	// move those indexes to at:at+n in index list
@@ -266,8 +266,8 @@ func (dt *Table) InsertRows(at, n int) *Table {
 // If rows = 0 then effective number of rows in tensors is 1, as this dim cannot be 0.
 // If indexes are in place and rows are added, indexes for the new rows are added.
 func (dt *Table) SetNumRows(rows int) *Table { //types:add
-	strow := dt.Columns.Rows
-	dt.Columns.SetNumRows(rows)
+	strow := dt.Cols.Rows
+	dt.Cols.SetNumRows(rows)
 	if dt.Indexes == nil {
 		return dt
 	}
@@ -288,7 +288,7 @@ func (dt *Table) SetNumRows(rows int) *Table { //types:add
 // a common row dimension.
 func (dt *Table) SetNumRowsToMax() {
 	var maxRow int
-	for _, tsr := range dt.Columns.Values {
+	for _, tsr := range dt.Columns {
 		maxRow = max(maxRow, tsr.DimSize(0))
 	}
 	dt.SetNumRows(maxRow)
@@ -302,7 +302,7 @@ func (dt *Table) SetNumRowsToMax() {
 // See also [Table.New] to flatten the current indexes.
 func (dt *Table) Clone() *Table {
 	cp := &Table{}
-	cp.Columns = dt.Columns.Clone()
+	cp.Cols = dt.Cols.Clone()
 	cp.Meta.Copy(dt.Meta)
 	if dt.Indexes != nil {
 		cp.Indexes = slices.Clone(dt.Indexes)
@@ -312,9 +312,9 @@ func (dt *Table) Clone() *Table {
 
 // AppendRows appends shared columns in both tables with input table rows.
 func (dt *Table) AppendRows(dt2 *Table) {
-	strow := dt.Columns.Rows
-	n := dt2.Columns.Rows
-	dt.Columns.AppendRows(dt2.Columns)
+	strow := dt.Cols.Rows
+	n := dt2.Cols.Rows
+	dt.Cols.AppendRows(dt2.Cols)
 	if dt.Indexes == nil {
 		return
 	}
