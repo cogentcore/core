@@ -124,7 +124,8 @@ func (an *Anim) Animate() {
 			an.Gopher.SetPosePos(gp)
 		}
 
-		an.SceneEditor.SceneWidget().UpdateWidget()
+		an.SceneEditor.SceneWidget().UpdateWidget() // note: this is cleanest way to drive updating of xyz
+		// note that any changes to underlying mesh would require Scene.SetMesh calls.
 		an.Ang += an.Speed
 	}
 }
