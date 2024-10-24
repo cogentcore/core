@@ -74,6 +74,7 @@ func (sc *Scene) ConfigFrame(gp *gpu.GPU, dev *gpu.Device) {
 		sc.configNewPhong()
 	} else {
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
+		sc.NeedsUpdate = true
 	}
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 }

@@ -74,17 +74,17 @@ func (sw *Scene) Init() {
 		}
 		sw.XYZ.Geom.Size = sz
 
-		doConfig := sw.NeedsRebuild() // settings full update rebuild
+		doRebuild := sw.NeedsRebuild() // settings-driven full rebuild
 		if sw.XYZ.Frame != nil {
 			cursz := sw.XYZ.Frame.Format.Size
-			if cursz == sz && !doConfig {
+			if cursz == sz && !doRebuild {
 				sw.XYZ.Update()
 				sw.NeedsRender()
 				return
 			}
-			sw.XYZ.Rebuild()
+		} else {
+			doRebuild = false // will be done automatically b/c Frame == nil
 		}
-		// doing a full rebuild here
 
 		win := sw.WidgetBase.Scene.Events.RenderWindow()
 		if win == nil {
@@ -97,8 +97,11 @@ func (sw *Scene) Init() {
 				core.ErrorSnackbar(sw, errors.New("WebGPU not available for 3D rendering"))
 				return
 			}
-			sw.XYZ.ConfigFrameFromSurface(sf) // does a full build, sets needs update
+			sw.XYZ.ConfigFrameFromSurface(sf) // does a full build if Frame == nil, else just new size
 		})
+		if doRebuild {
+			sw.XYZ.Rebuild()
+		}
 		sw.NeedsRender()
 	})
 }
