@@ -104,7 +104,6 @@ func (an *Anim) Animate() {
 		if !an.On || an.SceneEditor.This == nil || an.Torus == nil || an.Gopher == nil {
 			continue
 		}
-		sc := an.SceneEditor.SceneXYZ()
 		radius := float32(0.3)
 
 		if an.DoTorus {
@@ -125,8 +124,8 @@ func (an *Anim) Animate() {
 			an.Gopher.SetPosePos(gp)
 		}
 
-		sc.SetNeedsUpdate()
-		an.SceneEditor.SceneWidget().NeedsRender()
+		an.SceneEditor.SceneWidget().UpdateWidget() // note: this is cleanest way to drive updating of xyz
+		// note that any changes to underlying mesh would require Scene.SetMesh calls.
 		an.Ang += an.Speed
 	}
 }

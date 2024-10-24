@@ -6,6 +6,14 @@
 
 * The [physics](physics) sub-package provides a physics engine for simulating 3D virtual worlds, using xyz.
 
+# Updating
+
+* You must call `SetMesh` or `SetTexture` to update or add a new Mesh or Texture element. Just changing an existing mesh by itself does not trigger the proper updates.
+
+* The `xyz.Scene.Update()` method updates the scenegraph object matricies and triggers re-render.  `.Render()` or `NeedsRender()` just drives a new render if only the camera parameters have changed, but this will not reflect changes in object poses.
+
+* `xyzcore.Scene.UpdateWidget()` is the cleanest way to trigger the `Update` on the underlying xyx.Scene and also a re-render of the `core` widget viewing that scene.  If using an `xyzcore.SceneEditor` then use `Editor.SceneWidget().UpdateWidget()`.
+
 # Basic elements
 
 The 3D scenegraph is rooted at a `xyz.Scene` node, which contains all of the shared `Mesh` and `Texture` elements, along with `Lights`, `Camera` and a `Library` of loaded 3D objects that can be referenced by name.

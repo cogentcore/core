@@ -49,6 +49,7 @@ func (sv *SceneEditor) SceneXYZ() *xyz.Scene {
 func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
+
 	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.Update).SetTooltip("reset to default initial display").
 			OnClick(func(e events.Event) {
