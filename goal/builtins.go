@@ -83,7 +83,7 @@ func (gl *Goal) Set(cmdIO *exec.CmdIO, args ...string) error {
 		return fmt.Errorf("expected two arguments, got %d", len(args))
 	}
 	val := args[1]
-	if strings.Count(val, ":") > 1 {
+	if strings.Count(val, ":") > 1 || strings.Contains(val, "~") {
 		vl := stringsx.DedupeList(strings.Split(val, ":"))
 		vl = AddHomeExpand([]string{}, vl...)
 		val = strings.Join(vl, ":")

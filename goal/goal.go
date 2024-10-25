@@ -322,6 +322,15 @@ func (gl *Goal) RunCommands(cmds []any) error {
 	return nil
 }
 
+// DeleteAllJobs deletes any existing jobs, closing stdio.
+func (gl *Goal) DeleteAllJobs() {
+	n := len(gl.Jobs)
+	for i := n - 1; i >= 0; i-- {
+		jb := gl.Jobs.Pop()
+		jb.CmdIO.PopToStart()
+	}
+}
+
 // DeleteJob deletes the given job and returns true if successful,
 func (gl *Goal) DeleteJob(job *Job) bool {
 	idx := slices.Index(gl.Jobs, job)

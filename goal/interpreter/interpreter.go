@@ -140,6 +140,7 @@ func (in *Interpreter) RunCode() (reflect.Value, error) {
 		if err != nil {
 			cancelled := errors.Is(err, context.Canceled)
 			// fmt.Println("cancelled:", cancelled)
+			in.Goal.DeleteAllJobs()
 			in.Goal.RestoreOrigStdIO()
 			in.Goal.TrState.ResetDepth()
 			if !cancelled {
@@ -169,7 +170,7 @@ func (in *Interpreter) RunConfig() error {
 // It is called automatically in another goroutine in [NewInterpreter].
 func (in *Interpreter) MonitorSignals() {
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGSEGV)
 	for {
 		<-c
 		in.Goal.CancelExecution()
