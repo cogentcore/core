@@ -110,7 +110,7 @@ func NewGoal() *Goal {
 	gl.SSHClients = make(map[string]*sshclient.Client)
 	gl.Commands = make(map[string]func(args ...string))
 	gl.InstallBuiltins()
-	gl.debugTrace, _ = os.Create("goal.debug")
+	// gl.debugTrace, _ = os.Create("goal.debug") // debugging
 	return gl
 }
 

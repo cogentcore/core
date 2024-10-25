@@ -248,6 +248,9 @@ func (st *StdIOState) PopToStart() {
 	for len(st.InStack) > st.InStart {
 		st.PopIn()
 	}
+	for len(st.PipeIn) > 0 {
+		CloseReader(st.PipeIn.Pop())
+	}
 }
 
 // ErrIsInOut returns true if the given Err writer is also present

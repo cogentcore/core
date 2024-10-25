@@ -12,6 +12,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/reflectx"
@@ -62,7 +63,7 @@ func (gl *Goal) Exec(errOk, start, output bool, cmd any, args ...any) string {
 			gl.isCommand.Push(false)
 			switch {
 			case start:
-				fmt.Fprintf(gl.debugTrace, "start exe %s in: %#v  out: %#v  %v\n  ", scmd, cmdIO.In, cmdIO.Out, cmdIO.OutIsPipe())
+				// fmt.Fprintf(gl.debugTrace, "start exe %s in: %#v  out: %#v  %v\n  ", scmd, cmdIO.In, cmdIO.Out, cmdIO.OutIsPipe())
 				err = gl.Config.StartIO(cmdIO, scmd, sargs...)
 				job := &Job{CmdIO: cmdIO}
 				gl.Jobs.Push(job)
@@ -78,7 +79,7 @@ func (gl *Goal) Exec(errOk, start, output bool, cmd any, args ...any) string {
 				cmdIO.PushOut(nil)
 				out, err = gl.Config.OutputIO(cmdIO, scmd, sargs...)
 			default:
-				fmt.Fprintf(gl.debugTrace, "run exe %s in: %#v  out: %#v  %v\n  ", scmd, cmdIO.In, cmdIO.Out, cmdIO.OutIsPipe())
+				// fmt.Fprintf(gl.debugTrace, "run exe %s in: %#v  out: %#v  %v\n  ", scmd, cmdIO.In, cmdIO.Out, cmdIO.OutIsPipe())
 				err = gl.Config.RunIO(cmdIO, scmd, sargs...)
 			}
 			if !errOk {
@@ -109,21 +110,21 @@ func (gl *Goal) RunBuiltinOrCommand(cmdIO *exec.CmdIO, errOk, start, output bool
 		gl.isCommand.Push(true)
 	}
 
-	fmt.Fprintf(gl.debugTrace, "cmd %s push: %#v  out: %#v  %v\n", cmd, cmdIO.In, cmdIO.Out, cmdIO.OutIsPipe())
-
 	// note: we need to set both os. and wrapper versions, so it works the same
 	// in compiled vs. interpreted mode
-	oldsh := gl.Config.StdIO.Set(&cmdIO.StdIO)
-	oldwrap := gl.StdIOWrappers.SetWrappers(&cmdIO.StdIO)
-	oldstd := cmdIO.SetToOS()
-	fmt.Fprintf(gl.debugTrace, "%s oldstd in: %#v  out: %#v\n", cmd, oldstd.In, oldstd.Out)
+	var oldsh, oldwrap, oldstd *exec.StdIO
+	save := func() {
+		oldsh = gl.Config.StdIO.Set(&cmdIO.StdIO)
+		oldwrap = gl.StdIOWrappers.SetWrappers(&cmdIO.StdIO)
+		oldstd = cmdIO.SetToOS()
+	}
 
 	done := func() {
 		if hasCmd {
 			gl.isCommand.Pop()
 			gl.commandArgs.Pop()
 		}
-		fmt.Fprintf(gl.debugTrace, "%s restore %#v\n", cmd, oldstd.In)
+		// fmt.Fprintf(gl.debugTrace, "%s restore %#v\n", cmd, oldstd.In)
 		oldstd.SetToOS()
 		gl.StdIOWrappers.SetWrappers(oldwrap)
 		gl.Config.StdIO = *oldsh
@@ -138,21 +139,30 @@ func (gl *Goal) RunBuiltinOrCommand(cmdIO *exec.CmdIO, errOk, start, output bool
 				fmt.Printf("[%d]  %s\n", len(gl.Jobs), cmd)
 			}
 			if hasCmd {
+				oldwrap = gl.StdIOWrappers.SetWrappers(&cmdIO.StdIO)
+				// oldstd = cmdIO.SetToOS()
+				// fmt.Fprintf(gl.debugTrace, "%s oldstd in: %#v  out: %#v\n", cmd, oldstd.In, oldstd.Out)
 				cmdFun(args...)
+				// oldstd.SetToOS()
+				gl.StdIOWrappers.SetWrappers(oldwrap)
+				gl.isCommand.Pop()
+				gl.commandArgs.Pop()
 			} else {
 				gl.AddError(bltFun(cmdIO, args...))
 			}
+			time.Sleep(time.Millisecond)
 			wg.Done()
 		}()
-		fmt.Fprintf(gl.debugTrace, "%s push: %#v  out: %#v  %v\n", cmd, cmdIO.In, cmdIO.Out, cmdIO.OutIsPipe())
+		// fmt.Fprintf(gl.debugTrace, "%s push: %#v  out: %#v  %v\n", cmd, cmdIO.In, cmdIO.Out, cmdIO.OutIsPipe())
 		job := &Job{CmdIO: cmdIO}
 		gl.Jobs.Push(job)
 		go func() {
 			wg.Wait()
+			cmdIO.PopToStart()
 			gl.DeleteJob(job)
-			done()
 		}()
 	case output:
+		save()
 		obuf := &bytes.Buffer{}
 		// os.Stdout = obuf // needs a file
 		gl.Config.StdIO.Out = obuf
@@ -166,6 +176,7 @@ func (gl *Goal) RunBuiltinOrCommand(cmdIO *exec.CmdIO, errOk, start, output bool
 		out = strings.TrimSuffix(obuf.String(), "\n")
 		done()
 	default:
+		save()
 		if hasCmd {
 			cmdFun(args...)
 		} else {
@@ -194,18 +205,14 @@ func (gl *Goal) HandleArgErr(errok bool, err error) error {
 func (gl *Goal) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (*sshclient.Client, string, []string) {
 	if len(gl.Jobs) > 0 {
 		jb := gl.Jobs.Peek()
-		fmt.Fprintln(gl.debugTrace, "job:", len(gl.Jobs)-1)
 		if jb.OutIsPipe() && !jb.GotPipe {
 			jb.GotPipe = true
-			fmt.Fprintf(gl.debugTrace, "out: %#v  in pipe: %#v\n", jb.Out, jb.PipeIn.Peek())
 			cmdIO.PushIn(jb.PipeIn.Peek())
-		} else {
-			fmt.Fprintf(gl.debugTrace, "not pipe out: %#v\n", jb.Out)
 		}
 	}
 	scmd := reflectx.ToString(cmd)
 	cl := gl.ActiveSSH()
-	isCmd := gl.isCommand.Peek()
+	// isCmd := gl.isCommand.Peek()
 	sargs := make([]string, 0, len(args))
 	var err error
 	for _, a := range args {
@@ -252,7 +259,7 @@ func (gl *Goal) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (*
 			sargs = gl.OutToFile(cl, cmdIO, errOk, sargs, i)
 		case s[0] == '|':
 			sargs = gl.OutToPipe(cl, cmdIO, errOk, sargs, i)
-		case cl == nil && isCmd && strings.HasPrefix(s, "args"):
+		case cl == nil && strings.HasPrefix(s, "args"):
 			sargs = gl.CmdArgs(errOk, sargs, i)
 			i-- // back up because we consume this one
 		}
@@ -338,14 +345,11 @@ func (gl *Goal) OutToPipe(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, s
 	if sn > 1 && s[1] == '&' {
 		errf = true
 	}
-	// todo: what to do here?
 	sargs = slices.Delete(sargs, i, i+1)
 	cmdIO.PushOutPipe()
-	fmt.Fprintf(gl.debugTrace, "pushed pipe in: %#v  out: %#v %v\n", cmdIO.PipeIn.Peek(), cmdIO.Out, cmdIO.OutIsPipe())
 	if errf {
 		cmdIO.PushErr(cmdIO.Out)
 	}
-	// sh.HandleArgErr(errok, err)
 	return sargs
 }
 

@@ -10,14 +10,13 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/base/sshclient"
-	"cogentcore.org/core/core"
-	"cogentcore.org/core/system"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -82,7 +81,7 @@ func (gl *Goal) Set(cmdIO *exec.CmdIO, args ...string) error {
 		return fmt.Errorf("expected two arguments, got %d", len(args))
 	}
 	err := os.Setenv(args[0], args[1])
-	if core.TheApp.Platform() == system.MacOS {
+	if runtime.GOOS == "DARWIN" {
 		gl.Config.RunIO(cmdIO, "/bin/launchctl", "setenv", args[0], args[1])
 	}
 	return err
@@ -94,7 +93,7 @@ func (gl *Goal) Unset(cmdIO *exec.CmdIO, args ...string) error {
 		return fmt.Errorf("expected one argument, got %d", len(args))
 	}
 	err := os.Unsetenv(args[0])
-	if core.TheApp.Platform() == system.MacOS {
+	if runtime.GOOS == "DARWIN" {
 		gl.Config.RunIO(cmdIO, "/bin/launchctl", "unsetenv", args[0])
 	}
 	return err
@@ -155,7 +154,7 @@ func (gl *Goal) AddPath(cmdIO *exec.CmdIO, args ...string) error {
 		path = path + ":" + arg
 	}
 	err := os.Setenv("PATH", path)
-	if core.TheApp.Platform() == system.MacOS {
+	if runtime.GOOS == "DARWIN" {
 		gl.Config.RunIO(cmdIO, "/bin/launchctl", "setenv", "PATH", path)
 	}
 	return err
