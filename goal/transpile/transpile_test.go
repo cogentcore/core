@@ -218,7 +218,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"Layers[NeuronIxs[NrnLayIndex, ni]].GatherSpikes(&Ctx[0], ni, di)", `Layers[NeuronIxs.Value(int(NrnLayIndex), int(ni))].GatherSpikes( & Ctx[0], ni, di)`},
+		{"ls | grep ev", `goal.Start("ls", "|"); goal.Run("grep", "ev")`},
 	}
 	st := NewState()
 	st.MathRecord = false

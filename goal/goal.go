@@ -55,7 +55,7 @@ type Goal struct {
 
 	// Jobs is a stack of commands running in the background
 	// (via Start instead of Run)
-	Jobs stack.Stack[*exec.CmdIO]
+	Jobs stack.Stack[*Job]
 
 	// Cancel, while the interpreter is running, can be called
 	// to stop the code interpreting.
@@ -90,6 +90,9 @@ type Goal struct {
 	// isCommand is a stack of bools indicating whether the _immediate_ run context
 	// is a command, which affects the way that args are processed.
 	isCommand stack.Stack[bool]
+
+	// debugTrace is a file written to for debugging
+	debugTrace *os.File
 }
 
 // NewGoal returns a new [Goal] with default options.
@@ -107,6 +110,7 @@ func NewGoal() *Goal {
 	gl.SSHClients = make(map[string]*sshclient.Client)
 	gl.Commands = make(map[string]func(args ...string))
 	gl.InstallBuiltins()
+	gl.debugTrace, _ = os.Create("goal.debug")
 	return gl
 }
 
@@ -319,8 +323,8 @@ func (gl *Goal) RunCommands(cmds []any) error {
 }
 
 // DeleteJob deletes the given job and returns true if successful,
-func (gl *Goal) DeleteJob(cmdIO *exec.CmdIO) bool {
-	idx := slices.Index(gl.Jobs, cmdIO)
+func (gl *Goal) DeleteJob(job *Job) bool {
+	idx := slices.Index(gl.Jobs, job)
 	if idx >= 0 {
 		gl.Jobs = slices.Delete(gl.Jobs, idx, idx+1)
 		return true
@@ -349,4 +353,11 @@ func (gl *Goal) JobIDExpand(args []string) int {
 		}
 	}
 	return exp
+}
+
+// Job represents a job that has been started and we're waiting for it to finish.
+type Job struct {
+	*exec.CmdIO
+	IsExec  bool
+	GotPipe bool
 }

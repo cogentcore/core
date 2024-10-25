@@ -16,6 +16,8 @@ import (
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/base/sshclient"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/system"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -27,6 +29,7 @@ func (gl *Goal) InstallBuiltins() {
 	gl.Builtins["jobs"] = gl.JobsCmd
 	gl.Builtins["kill"] = gl.Kill
 	gl.Builtins["set"] = gl.Set
+	gl.Builtins["unset"] = gl.Unset
 	gl.Builtins["add-path"] = gl.AddPath
 	gl.Builtins["which"] = gl.Which
 	gl.Builtins["source"] = gl.Source
@@ -78,7 +81,23 @@ func (gl *Goal) Set(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("expected two arguments, got %d", len(args))
 	}
-	return os.Setenv(args[0], args[1])
+	err := os.Setenv(args[0], args[1])
+	if core.TheApp.Platform() == system.MacOS {
+		gl.Config.RunIO(cmdIO, "/bin/launchctl", "setenv", args[0], args[1])
+	}
+	return err
+}
+
+// Unset un-sets the given environment variable.
+func (gl *Goal) Unset(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("expected one argument, got %d", len(args))
+	}
+	err := os.Unsetenv(args[0])
+	if core.TheApp.Platform() == system.MacOS {
+		gl.Config.RunIO(cmdIO, "/bin/launchctl", "unsetenv", args[0])
+	}
+	return err
 }
 
 // JobsCmd is the builtin jobs command
@@ -135,7 +154,11 @@ func (gl *Goal) AddPath(cmdIO *exec.CmdIO, args ...string) error {
 		}
 		path = path + ":" + arg
 	}
-	return os.Setenv("PATH", path)
+	err := os.Setenv("PATH", path)
+	if core.TheApp.Platform() == system.MacOS {
+		gl.Config.RunIO(cmdIO, "/bin/launchctl", "setenv", "PATH", path)
+	}
+	return err
 }
 
 // Which reports the executable associated with the given command.
