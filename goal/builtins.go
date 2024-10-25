@@ -14,9 +14,11 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/base/sshclient"
+	"cogentcore.org/core/base/stringsx"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -80,9 +82,15 @@ func (gl *Goal) Set(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("expected two arguments, got %d", len(args))
 	}
-	err := os.Setenv(args[0], args[1])
-	if runtime.GOOS == "DARWIN" {
-		gl.Config.RunIO(cmdIO, "/bin/launchctl", "setenv", args[0], args[1])
+	val := args[1]
+	if strings.Count(val, ":") > 1 {
+		vl := stringsx.DedupeList(strings.Split(val, ":"))
+		vl = AddHomeExpand([]string{}, vl...)
+		val = strings.Join(vl, ":")
+	}
+	err := os.Setenv(args[0], val)
+	if runtime.GOOS == "darwin" {
+		gl.Config.RunIO(cmdIO, "/bin/launchctl", "setenv", args[0], val)
 	}
 	return err
 }
@@ -93,7 +101,7 @@ func (gl *Goal) Unset(cmdIO *exec.CmdIO, args ...string) error {
 		return fmt.Errorf("expected one argument, got %d", len(args))
 	}
 	err := os.Unsetenv(args[0])
-	if runtime.GOOS == "DARWIN" {
+	if runtime.GOOS == "darwin" {
 		gl.Config.RunIO(cmdIO, "/bin/launchctl", "unsetenv", args[0])
 	}
 	return err
@@ -140,23 +148,42 @@ func (gl *Goal) Fg(cmdIO *exec.CmdIO, args ...string) error {
 	return nil
 }
 
+// AddHomeExpand adds given strings to the given list of strings,
+// expanding any ~ symbols with the home directory,
+// and returns the updated list.
+func AddHomeExpand(list []string, adds ...string) []string {
+	for _, add := range adds {
+		add, err := homedir.Expand(add)
+		errors.Log(err)
+		has := false
+		for _, s := range list {
+			if s == add {
+				has = true
+			}
+		}
+		if !has {
+			list = append(list, add)
+		}
+	}
+	return list
+}
+
 // AddPath adds the given path(s) to $PATH.
 func (gl *Goal) AddPath(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("goal add-path expected at least one argument")
 	}
 	path := os.Getenv("PATH")
-	for _, arg := range args {
-		arg, err := homedir.Expand(arg)
-		if err != nil {
-			return err
-		}
-		path = path + ":" + arg
-	}
+	ps := strings.Split(path, ":")
+	ps = stringsx.DedupeList(ps)
+	ps = AddHomeExpand(ps, args...)
+	path = strings.Join(ps, ":")
 	err := os.Setenv("PATH", path)
-	if runtime.GOOS == "DARWIN" {
-		gl.Config.RunIO(cmdIO, "/bin/launchctl", "setenv", "PATH", path)
-	}
+	// if runtime.GOOS == "darwin" {
+	//    this is what would be required to work:
+	//		sudo launchctl config user path $PATH -- the following does not work:
+	// 	gl.Config.RunIO(cmdIO, "/bin/launchctl", "setenv", "PATH", path)
+	// }
 	return err
 }
 
