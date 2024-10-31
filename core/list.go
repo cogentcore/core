@@ -255,6 +255,8 @@ func (lb *ListBase) Init() {
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
+		svi := lb.This.(Lister)
+		svi.UpdateMaxWidths()
 	})
 	if !lb.IsReadOnly() {
 		lb.On(events.DragStart, func(e events.Event) {
@@ -360,7 +362,6 @@ func (lb *ListBase) Init() {
 
 		lb.Updater(func() {
 			lb.UpdateStartIndex()
-			svi.UpdateMaxWidths()
 		})
 
 		lb.MakeGrid(p, func(p *tree.Plan) {

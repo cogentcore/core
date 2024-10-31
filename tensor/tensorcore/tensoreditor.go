@@ -71,7 +71,6 @@ func (tb *TensorEditor) Init() {
 
 		tb.Updater(func() {
 			tb.UpdateStartIndex()
-			tb.UpdateMaxWidths()
 		})
 
 		tb.MakeHeader(p)

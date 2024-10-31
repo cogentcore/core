@@ -94,7 +94,6 @@ func (tb *Table) Init() {
 
 		tb.Updater(func() {
 			tb.UpdateStartIndex()
-			svi.UpdateMaxWidths()
 		})
 
 		tb.makeHeader(p)
@@ -189,7 +188,7 @@ func (tb *Table) cacheVisibleFields() {
 }
 
 func (tb *Table) UpdateMaxWidths() {
-	if tb.SliceSize == 0 || tb.SliceSize > 10000 {
+	if tb.SliceSize == 0 {
 		return
 	}
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
