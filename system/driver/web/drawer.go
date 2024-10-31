@@ -8,10 +8,12 @@ package web
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 	"strings"
 	"syscall/js"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/math32"
@@ -53,6 +55,7 @@ func (a *App) InitDrawer() {
 	surf := gp.Instance.CreateSurface(nil)
 	sf := gpu.NewSurface(gp, surf, a.Scrn.PixSize, 1, gpu.UndefinedType)
 	a.Draw.wgpu = gpudraw.NewDrawer(gp, sf)
+	a.Draw.wgpu.SetClearColor(colors.ToUniform(colors.Scheme.Background))
 }
 
 var loader = js.Global().Get("document").Call("getElementById", "app-wasm-loader")
@@ -120,4 +123,10 @@ func (dw *Drawer) Renderer() any {
 		return dw.wgpu.Renderer()
 	}
 	return nil
+}
+
+func (dw *Drawer) SetClearColor(clr color.RGBA) {
+	if dw.wgpu != nil {
+		dw.wgpu.SetClearColor(clr)
+	}
 }

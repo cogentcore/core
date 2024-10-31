@@ -8,6 +8,7 @@ package gpudraw
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 	"sync"
 
@@ -93,6 +94,14 @@ func (dw *Drawer) Renderer() any {
 		return nil
 	}
 	return dw.System.Renderer
+}
+
+// SetClearColor sets the underlying background color of the Window
+// that is established prior to any image rendering, by the GPU.
+func (dw *Drawer) SetClearColor(clr color.RGBA) {
+	if dw.System != nil {
+		dw.System.SetClearColor(clr)
+	}
 }
 
 // DestSize returns the size of the render destination

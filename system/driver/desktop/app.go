@@ -14,6 +14,7 @@ import (
 	"log"
 	"runtime"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
@@ -135,6 +136,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 		// no multisample and no depth
 		sf := gpu.NewSurface(a.GPU, surf, fbsz, 1, gpu.UndefinedType)
 		w.Draw = gpudraw.NewDrawer(a.GPU, sf)
+		w.Draw.SetClearColor(colors.ToUniform(colors.Scheme.Background))
 	})
 
 	// w.Flgs.SetFlag(true, system.Focused) // starts out focused

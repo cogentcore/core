@@ -12,6 +12,7 @@ package base
 import (
 	"image"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/system"
 )
@@ -105,6 +106,7 @@ func (w *WindowMulti[A, D]) SetLogicalDPI(dpi float32) {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	w.LogDPI = dpi
+	w.Draw.SetClearColor(colors.ToUniform(colors.Scheme.Background))
 }
 
 func (w *WindowMulti[A, D]) SetWinSize(sz image.Point) {

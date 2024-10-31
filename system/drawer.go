@@ -6,6 +6,7 @@ package system
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 
 	"cogentcore.org/core/math32"
@@ -82,6 +83,10 @@ type Drawer interface {
 	//     from the last time it was used -- saves re-uploading to gpu.
 	Transform(xform math32.Matrix3, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool)
 
+	// SetClearColor sets the underlying background color of the Window
+	// that is established prior to any image rendering, by the GPU.
+	SetClearColor(clr color.RGBA)
+
 	// Renderer is the gpu device being drawn to.
 	// Could be nil on unsupported devices (such as offscreen).
 	Renderer() any
@@ -156,4 +161,7 @@ func (dw *DrawerBase) Start() {
 func (dw *DrawerBase) Renderer() any {
 	// no-op
 	return nil
+}
+
+func (dw *DrawerBase) SetClearColor(clr color.RGBA) {
 }
