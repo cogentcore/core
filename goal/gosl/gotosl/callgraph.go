@@ -13,8 +13,9 @@ import (
 
 // Function represents the call graph of functions
 type Function struct {
-	Name  string
-	Funcs map[string]*Function
+	Name    string
+	Funcs   map[string]*Function
+	Atomics map[string]*Var // variables that have atomic operations in this function
 }
 
 func NewFunction(name string) *Function {
@@ -58,6 +59,21 @@ func (st *State) AllFuncs(name string) map[string]*Function {
 	// 	fmt.Println("\t" + cfnm)
 	// }
 	return all
+}
+
+// AtomicVars returns all the variables marked as atomic
+// within the list of functions.
+func (st *State) AtomicVars(funcs map[string]*Function) map[string]*Var {
+	avars := make(map[string]*Var)
+	for _, fn := range funcs {
+		if fn.Atomics == nil {
+			continue
+		}
+		for vn, v := range fn.Atomics {
+			avars[vn] = v
+		}
+	}
+	return avars
 }
 
 func (st *State) PrintFuncGraph() {

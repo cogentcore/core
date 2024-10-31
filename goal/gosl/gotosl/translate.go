@@ -123,15 +123,16 @@ func (st *State) TranslateDir(pf string) error {
 		sort.Strings(kns)
 		for _, knm := range kns {
 			kn := sy.Kernels[knm]
-			// if st.Config.Debug {
-			fmt.Printf("###################################\nTranslating Kernel file: %s\n", kn.Name)
-			// }
-			hdr := st.GenKernelHeader(sy, kn)
-			lines := bytes.Split([]byte(hdr), []byte("\n"))
 			st.KernelFuncs = st.AllFuncs(kn.Name)
 			if st.KernelFuncs == nil {
 				continue
 			}
+			avars := st.AtomicVars(st.KernelFuncs)
+			// if st.Config.Debug {
+			fmt.Printf("###################################\nTranslating Kernel file: %s\n", kn.Name)
+			// }
+			hdr := st.GenKernelHeader(sy, kn, avars)
+			lines := bytes.Split([]byte(hdr), []byte("\n"))
 			for fn := range st.GoVarsFiles { // do varsFiles first!!
 				lines = doKernelFile(fn, lines)
 			}

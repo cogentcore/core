@@ -108,10 +108,11 @@ type printer struct {
 
 	// current arguments to function that are pointers and thus need dereferencing
 	// when accessing fields
-	curPtrArgs    []*ast.Ident
-	curFunc       *Function
-	curMethRecv   *ast.Field // current method receiver, also included in curPtrArgs if ptr
-	curReturnType *ast.Ident
+	curPtrArgs      []*ast.Ident
+	curFunc         *Function
+	curMethRecv     *ast.Field // current method receiver, also included in curPtrArgs if ptr
+	curReturnType   *ast.Ident
+	curMethIsAtomic bool // current method an atomic.* function -- marks arg as atomic
 }
 
 func (p *printer) internalError(msg ...any) {

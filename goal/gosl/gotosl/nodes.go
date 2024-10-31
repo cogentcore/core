@@ -1738,6 +1738,20 @@ func (p *printer) tensorMethod(x *ast.CallExpr, vr *Var, methName string) {
 	if strings.HasPrefix(methName, "Set") {
 		stArg = 1
 	}
+	if strings.HasSuffix(methName, "Ptr") {
+		p.print(token.AND)
+		if p.curMethIsAtomic {
+			gv := p.GoToSL.GlobalVar(vr.Name)
+			if gv != nil {
+				if p.curFunc != nil {
+					if p.curFunc.Atomics == nil {
+						p.curFunc.Atomics = make(map[string]*Var)
+					}
+					p.curFunc.Atomics[vr.Name] = vr
+				}
+			}
+		}
+	}
 	p.print(vr.Name, token.LBRACK)
 	p.print(vr.IndexFunc(), token.LPAREN)
 	nd := vr.TensorDims
@@ -1854,6 +1868,7 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 	// fmt.Println(pathIsPackage, recvType, methName, recvPath)
 	if pathIsPackage {
 		if recvType == "atomic" {
+			p.curMethIsAtomic = true
 			switch methName {
 			case "AddInt32":
 				p.print("atomicAdd")
@@ -1892,6 +1907,7 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 	}
 	p.setPos(x.Rparen)
 	p.print(token.RPAREN)
+	p.curMethIsAtomic = false
 
 	p.assignRwArgs(rwargs) // gosl: assign temp var back to global var
 }
