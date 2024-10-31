@@ -131,6 +131,7 @@ func TestTranspile(t *testing.T) {
 		{"ls -la >> test.out", `goal.Run("ls", "-la", ">>", "test.out")`},
 		{"ls -la >& test.out", `goal.Run("ls", "-la", ">&", "test.out")`},
 		{"ls -la >>& test.out", `goal.Run("ls", "-la", ">>&", "test.out")`},
+		{"ls | grep ev", `goal.Start("ls", "|"); goal.Run("grep", "ev")`},
 		{"@1 ls -la", `goal.Run("@1", "ls", "-la")`},
 		{"git switch main", `goal.Run("git", "switch", "main")`},
 		{"git checkout 123abc", `goal.Run("git", "checkout", "123abc")`},
@@ -218,7 +219,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"ls | grep ev", `goal.Start("ls", "|"); goal.Run("grep", "ev")`},
+		{"&Data[idx, Integ] = integ", `Data.ValuePtr(int(idx), int(Integ)) = integ`},
 	}
 	st := NewState()
 	st.MathRecord = false

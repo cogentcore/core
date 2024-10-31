@@ -26,6 +26,12 @@ var (
 	//
 	//gosl:dims 2
 	Data *tensor.Float32
+
+	// IntData is the int data on which the computation operates.
+	// 2D: outer index is data, inner index is: Raw, Integ, Exp vars.
+	//
+	//gosl:dims 2
+	IntData *tensor.Int32
 )
 
 const (

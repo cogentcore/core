@@ -68,6 +68,10 @@ func (tsr *Base[T]) Value(i ...int) T {
 	return tsr.Values[tsr.shape.IndexTo1D(i...)]
 }
 
+func (tsr *Base[T]) ValuePtr(i ...int) *T {
+	return &tsr.Values[tsr.shape.IndexTo1D(i...)]
+}
+
 func (tsr *Base[T]) Set(val T, i ...int) {
 	tsr.Values[tsr.shape.IndexTo1D(i...)] = val
 }

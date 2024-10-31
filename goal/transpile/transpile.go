@@ -7,6 +7,7 @@ package transpile
 import (
 	"fmt"
 	"go/token"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/logx"
@@ -355,6 +356,12 @@ func (st *State) TranspileGoNDimIndex(toks Tokens, code string, gtoks *Tokens, i
 	if len(commas) == 0 { // not multidim
 		return -1
 	}
+	isPtr := false
+	if idIdx > 0 && toks[idIdx-1].Tok == token.AND {
+		isPtr = true
+		lgt := len(*gtoks)
+		*gtoks = slices.Delete(*gtoks, lgt-2, lgt-1) // get rid of &
+	}
 	// now we need to determine if it is a Set based on what happens after rb
 	isSet := false
 	stok := token.ILLEGAL
@@ -372,7 +379,10 @@ func (st *State) TranspileGoNDimIndex(toks Tokens, code string, gtoks *Tokens, i
 		}
 	}
 	fun := "Value"
-	if isSet {
+	if isPtr {
+		fun = "ValuePtr"
+		isSet = false
+	} else if isSet {
 		fun = "Set"
 		switch stok {
 		case token.ADD_ASSIGN:

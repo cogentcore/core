@@ -6,6 +6,8 @@
 var<storage, read_write> Params: array<ParamStruct>;
 @group(0) @binding(1)
 var<storage, read_write> Data: array<f32>;
+@group(0) @binding(2)
+var<storage, read_write> IntData: array<i32>;
 
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
@@ -14,6 +16,10 @@ fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
 
 fn IndexF322D(s0: f32, s1: f32, i0: u32, i1: u32) -> u32 {
 	return u32(2) + bitcast<u32>(s0) * i0 + bitcast<u32>(s1) * i1;
+}
+
+fn IndexI322D(s0: i32, s1: i32, i0: u32, i1: u32) -> u32 {
+	return u32(2) + u32(s0) * i0 + u32(s1) * i1;
 }
 
 
@@ -38,6 +44,8 @@ fn Compute(i: u32) { //gosl:kernel
 	ParamStruct_IntegFromRaw(&params, i32(i));
 	Params[0] = params;
 }
+
+///////////// import: "atomic.go"
 
 ///////////// import: "math32-fastexp.go"
 fn FastExp(x: f32) -> f32 {
