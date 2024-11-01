@@ -389,21 +389,12 @@ func collections(ts *core.Tabs) {
 	ktab, _ := vts.NewTab("Keyed lists")
 	core.NewKeyedList(ktab).SetMap(&mp)
 
-	// tbl := make([]*tableStruct, 50)
-	// for i := range tbl {
-	// 	ts := &tableStruct{Age: i, Score: float32(i) / 10}
-	// 	tbl[i] = ts
-	// }
-	// tbl[0].Name = "this is a particularly long field"
-	// ttab, _ := vts.NewTab("Tables")
-	// core.NewTable(ttab).SetSlice(&tbl)
-
-	tbl := make([]*smallStruct, 100_000)
+	tbl := make([]*tableStruct, 50)
 	for i := range tbl {
-		ts := &smallStruct{Value: float32(i)}
+		ts := &tableStruct{Age: i, Score: float32(i) / 10}
 		tbl[i] = ts
 	}
-	// tbl[0].Name = "this is a particularly long field"
+	tbl[0].Name = "this is a particularly long field"
 	ttab, _ := vts.NewTab("Tables")
 	core.NewTable(ttab).SetSlice(&tbl)
 
@@ -535,11 +526,6 @@ func (ts *testStruct) ShouldDisplay(field string) bool {
 		return ts.Condition >= 0
 	}
 	return true
-}
-
-type smallStruct struct { //types:add
-	String string
-	Value  float32
 }
 
 func dialogs(ts *core.Tabs) {
