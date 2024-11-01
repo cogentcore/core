@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package atomiccounter
+package atomicx
 
 import (
 	"testing"
@@ -25,4 +25,14 @@ func TestCounter(t *testing.T) {
 	assert.Equal(t, int64(1), c.Value())
 	c.Set(2)
 	assert.Equal(t, int64(2), c.Value())
+}
+
+func TestMax(t *testing.T) {
+	a := int32(10)
+	MaxInt32(&a, 5)
+	assert.Equal(t, a, int32(10))
+	MaxInt32(&a, 10)
+	assert.Equal(t, a, int32(10))
+	MaxInt32(&a, 11)
+	assert.Equal(t, a, int32(11))
 }

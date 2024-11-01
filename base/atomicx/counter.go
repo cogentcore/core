@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package atomiccounter implements a basic atomic int64 counter.
-package atomiccounter
+// Package atomicx implements misc atomic functions.
+package atomicx
 
 import (
 	"sync/atomic"

@@ -1867,11 +1867,13 @@ func (p *printer) methodExpr(x *ast.CallExpr, depth int) {
 	}
 	// fmt.Println(pathIsPackage, recvType, methName, recvPath)
 	if pathIsPackage {
-		if recvType == "atomic" {
+		if recvType == "atomic" || recvType == "atomicx" {
 			p.curMethIsAtomic = true
-			switch methName {
-			case "AddInt32":
+			switch {
+			case strings.HasPrefix(methName, "Add"):
 				p.print("atomicAdd")
+			case strings.HasPrefix(methName, "Max"):
+				p.print("atomicMax")
 			}
 		} else {
 			p.print(recvType + "." + methName)

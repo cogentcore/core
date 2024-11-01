@@ -27,6 +27,8 @@ fn IndexI322D(s0: i32, s1: i32, i0: u32, i1: u32) -> u32 {
 const  Raw: i32   = 0;
 const  Integ: i32 = 1;
 const  Exp: i32 = 2;
+const  NVars: i32 = 3;
+var testSlice = [NVars]i32{Raw, Integ, Exp};
 struct ParamStruct {
 	Tau: f32,
 	Dt: f32,
