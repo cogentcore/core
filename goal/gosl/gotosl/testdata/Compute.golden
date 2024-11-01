@@ -24,6 +24,7 @@ const  NoEvalMode: Modes = 0;
 const  AllModes: Modes = 1;
 const  Train: Modes = 2;
 const  Test: Modes = 3;
+const testSlice = array(NoEvalMode, AllModes, Train, Test);
 struct DataStruct {
 	Raw: f32,
 	Integ: f32,

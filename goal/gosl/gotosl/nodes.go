@@ -1360,12 +1360,18 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 
 	case *ast.CompositeLit:
 		// composite literal elements that are composite literals themselves may have the type omitted
+		lb := token.LBRACE
+		rb := token.RBRACE
+		if _, isAry := x.Type.(*ast.ArrayType); isAry {
+			lb = token.LPAREN
+			rb = token.RPAREN
+		}
 		if x.Type != nil {
 			p.expr1(x.Type, token.HighestPrec, depth)
 		}
 		p.level++
 		p.setPos(x.Lbrace)
-		p.print(token.LBRACE)
+		p.print(lb)
 		p.exprList(x.Lbrace, x.Elts, 1, commaTerm, x.Rbrace, x.Incomplete)
 		// do not insert extra line break following a /*-style comment
 		// before the closing '}' as it might break the code if there
@@ -1380,7 +1386,7 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		// the proper level of indentation
 		p.print(indent, unindent, mode)
 		p.setPos(x.Rbrace)
-		p.print(token.RBRACE, mode)
+		p.print(rb, mode)
 		p.level--
 
 	case *ast.Ellipsis:
@@ -1390,12 +1396,13 @@ func (p *printer) expr1(expr ast.Expr, prec1, depth int) {
 		}
 
 	case *ast.ArrayType:
-		p.print(token.LBRACK)
-		if x.Len != nil {
-			p.expr(x.Len)
-		}
-		p.print(token.RBRACK)
-		p.expr(x.Elt)
+		p.print("array")
+		// p.print(token.LBRACK)
+		// if x.Len != nil {
+		// 	p.expr(x.Len)
+		// }
+		// p.print(token.RBRACK)
+		// p.expr(x.Elt)
 
 	case *ast.StructType:
 		// p.print(token.STRUCT)
@@ -2745,13 +2752,19 @@ func (p *printer) genDecl(d *ast.GenDecl) {
 					p.valueSpec(vs, keepType[i], d.Tok, firstSpec, isIota, i)
 				}
 			} else {
+				tok := d.Tok
+				if p.curFunc == nil && tok == token.VAR { // only system vars are supported at global scope
+					// could add further comment-directive logic
+					// to specify <private> or <workgroup> scope if needed
+					tok = token.CONST
+				}
 				var line int
 				for i, s := range d.Specs {
 					if i > 0 {
 						p.linebreak(p.lineFor(s.Pos()), 1, ignore, p.linesFrom(line) > 0)
 					}
 					p.recordLine(&line)
-					p.spec(s, n, false, d.Tok)
+					p.spec(s, n, false, tok)
 				}
 			}
 			// p.print(unindent, formfeed)
@@ -2759,8 +2772,12 @@ func (p *printer) genDecl(d *ast.GenDecl) {
 		// p.setPos(d.Rparen)
 		// p.print(token.RPAREN)
 	} else if len(d.Specs) > 0 {
+		tok := d.Tok
+		if p.curFunc == nil && tok == token.VAR { // only system vars are supported at global scope
+			tok = token.CONST
+		}
 		// single declaration
-		p.spec(d.Specs[0], 1, true, d.Tok)
+		p.spec(d.Specs[0], 1, true, tok)
 	}
 }
 
@@ -2942,10 +2959,11 @@ func (p *printer) funcDecl(d *ast.FuncDecl) {
 	if p.GoToSL.GetFuncGraph {
 		p.curFunc = p.GoToSL.RecycleFunc(fname)
 	} else {
-		_, ok := p.GoToSL.KernelFuncs[fname]
+		fn, ok := p.GoToSL.KernelFuncs[fname]
 		if !ok {
 			return
 		}
+		p.curFunc = fn
 	}
 	p.setComment(d.Doc)
 	p.setPos(d.Pos())

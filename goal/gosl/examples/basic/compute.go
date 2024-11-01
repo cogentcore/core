@@ -41,9 +41,6 @@ const (
 	NVars
 )
 
-// testSlice is a global array.
-var testSlice = [NVars]int{Raw, Integ, Exp}
-
 // ParamStruct has the test params
 type ParamStruct struct {
 

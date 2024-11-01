@@ -69,6 +69,9 @@ const (
 	Test
 )
 
+// testSlice is a global array: will be const = array(...);
+var testSlice = [NVars]Modes{NoEvalMode, AllModes, Train, Test}
+
 // DataStruct has the test data
 type DataStruct struct {
 
