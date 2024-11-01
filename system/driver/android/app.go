@@ -10,7 +10,6 @@ import (
 	"image"
 	"unsafe"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
@@ -91,7 +90,6 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	wsf := a.GPU.Instance.CreateSurface(wsd)
 	sf := gpu.NewSurface(a.GPU, wsf, image.Pt(512, 512), 1, gpu.UndefinedType) // placeholder size
 	a.Draw = gpudraw.NewDrawer(a.GPU, sf)
-	a.Draw.SetClearColor(colors.ToUniform(colors.Scheme.Background))
 
 	a.Winptr = winptr
 
