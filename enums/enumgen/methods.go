@@ -45,8 +45,10 @@ func (i {{.Name}}) {{if .IsBitFlag}} BitIndexString {{else}} String {{end}} () s
 `))
 
 var NConstantTmpl = template.Must(template.New("StringNConstant").Parse(
-	`//{{.Name}}N is the highest valid value for type {{.Name}}, plus one.
+	`//gosl:start
+//{{.Name}}N is the highest valid value for type {{.Name}}, plus one.
 const {{.Name}}N {{.Name}} = {{.MaxValueP1}}
+//gosl:end
 `))
 
 var SetStringMethodTmpl = template.Must(template.New("SetStringMethod").Parse(
