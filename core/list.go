@@ -255,8 +255,6 @@ func (lb *ListBase) Init() {
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
-		ls := lb.This.(Lister)
-		ls.UpdateMaxWidths()
 	})
 	if !lb.IsReadOnly() {
 		lb.On(events.DragStart, func(e events.Event) {
@@ -401,6 +399,7 @@ func (lb *ListBase) SetSliceBase() {
 		lb.SelectedIndex = -1
 	}
 	lb.ResetSelectedIndexes()
+	lb.This.(Lister).UpdateMaxWidths()
 }
 
 // SetSlice sets the source slice that we are viewing.
@@ -425,11 +424,11 @@ func (lb *ListBase) SetSlice(sl any) *ListBase {
 		return lb
 	}
 
-	lb.SetSliceBase()
 	lb.Slice = sl
 	lb.sliceUnderlying = reflectx.Underlying(reflect.ValueOf(lb.Slice))
 	lb.isArray = reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
 	lb.elementValue = reflectx.SliceElementValue(sl)
+	lb.SetSliceBase()
 	return lb
 }
 
@@ -604,6 +603,7 @@ func (lb *ListBase) MakeRow(p *tree.Plan, i int) {
 		lb.MakeValue(w, i)
 		if !lb.IsReadOnly() {
 			wb.OnChange(func(e events.Event) {
+				lb.This.(Lister).UpdateMaxWidths()
 				lb.SendChange(e)
 			})
 		}
