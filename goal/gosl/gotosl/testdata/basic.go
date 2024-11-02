@@ -157,6 +157,10 @@ func (ps *ParamStruct) AnotherMeth(ds *DataStruct, ptrarg *float32) {
 	ds.Exp = ps.Subs.SumPlus(b)
 	ds.Integ = a
 
+	for i := range 10 {
+		ds.Exp *= 0.99
+	}
+
 	*ptrarg = -1
 }
 

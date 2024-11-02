@@ -7,6 +7,8 @@ var<storage, read_write> Params: array<ParamStruct>;
 @group(0) @binding(1)
 var<storage, read_write> Data: array<DataStruct>;
 
+alias GPUVars = i32;
+
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
 	Compute(idx.x);
@@ -87,6 +89,9 @@ fn ParamStruct_AnotherMeth(ps: ptr<function,ParamStruct>, ds: ptr<function,DataS
 	a = SubParamStruct_Sum(&(*ps).Subs);
 	(*ds).Exp = SubParamStruct_SumPlus(&(*ps).Subs, b);
 	(*ds).Integ = a;
+	for (var i=0; i<10; i++) {
+		(*ds).Exp *= f32(0.99);
+	}
 	*ptrarg = f32(-1);
 }
 fn Compute(i: u32) { //gosl:kernel

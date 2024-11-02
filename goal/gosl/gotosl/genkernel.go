@@ -39,7 +39,8 @@ func (st *State) GenKernelHeader(sy *System, kn *Kernel, avars map[string]*Var) 
 		}
 	}
 
-	b.WriteString("\n")
+	b.WriteString("\nalias GPUVars = i32;\n\n") // gets included when iteratively processing enumgen.go
+
 	b.WriteString("@compute @workgroup_size(64, 1, 1)\n")
 	// todo: conditional on different index dimensionality
 	b.WriteString("fn main(@builtin(global_invocation_id) idx: vec3<u32>) {\n")

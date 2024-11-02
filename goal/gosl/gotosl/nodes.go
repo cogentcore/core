@@ -2333,22 +2333,31 @@ func (p *printer) stmt(stmt ast.Stmt, nextIsRBrace bool, nosemi bool) {
 		p.block(s.Body, 1)
 
 	case *ast.RangeStmt:
+		// gosl: only supporting the for i := range 10 kind of range loop
 		p.print(token.FOR, blank)
 		if s.Key != nil {
+			p.print(token.LPAREN, "var", blank)
 			p.expr(s.Key)
-			if s.Value != nil {
-				// use position of value following the comma as
-				// comma position for correct comment placement
-				p.setPos(s.Value.Pos())
-				p.print(token.COMMA, blank)
-				p.expr(s.Value)
-			}
-			p.print(blank)
-			p.setPos(s.TokPos)
-			p.print(s.Tok, blank)
+			p.print(token.ASSIGN, "0", token.SEMICOLON, blank)
+			p.expr(s.Key)
+			p.print(token.LSS)
+			p.expr(stripParens(s.X))
+			p.print(token.SEMICOLON, blank)
+			p.expr(s.Key)
+			p.print(token.INC, token.RPAREN)
+			// if s.Value != nil {
+			// 	// use position of value following the comma as
+			// 	// comma position for correct comment placement
+			// 	p.setPos(s.Value.Pos())
+			// 	p.print(token.COMMA, blank)
+			// 	p.expr(s.Value)
+			// }
+			// p.print(blank)
+			// p.setPos(s.TokPos)
+			// p.print(s.Tok, blank)
 		}
-		p.print(token.RANGE, blank)
-		p.expr(stripParens(s.X))
+		// p.print(token.RANGE, blank)
+		// p.expr(stripParens(s.X))
 		p.print(blank)
 		p.block(s.Body, 1)
 
