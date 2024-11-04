@@ -95,7 +95,6 @@ func (tb *Table) Init() {
 
 		tb.Updater(func() {
 			tb.UpdateStartIndex()
-			tb.UpdateMaxWidths()
 		})
 
 		tb.MakeHeader(p)
@@ -137,9 +136,9 @@ func (tb *Table) SetTable(dt *table.Table) *Table {
 	if dt == nil {
 		return nil
 	}
-	tb.SetSliceBase()
 	tb.Table = table.NewView(dt)
 	tb.This.(core.Lister).UpdateSliceSize()
+	tb.SetSliceBase()
 	tb.Update()
 	return tb
 }
@@ -299,6 +298,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 								col.SetFloat1D(fval, vi)
 							}
 						}
+						tb.This.(core.Lister).UpdateMaxWidths()
 						tb.SendChange()
 					})
 				}

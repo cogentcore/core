@@ -11,6 +11,7 @@ import (
 	"image/draw"
 	"sync"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gpu"
 )
 
@@ -111,6 +112,9 @@ func (dw *Drawer) DestBounds() image.Rectangle {
 func (dw *Drawer) Start() {
 	dw.Lock()
 	defer dw.Unlock()
+
+	// always use the default background color for clearing in general
+	dw.System.SetClearColor(colors.ToUniform(colors.Scheme.Background))
 
 	dw.opList = dw.opList[:0]
 	dw.images.start()

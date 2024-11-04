@@ -75,7 +75,6 @@ func (tb *TensorEditor) Init() {
 				tb.Layout.TopZero = true
 			}
 			tb.UpdateStartIndex()
-			tb.UpdateMaxWidths()
 		})
 
 		tb.MakeHeader(p)
@@ -115,9 +114,9 @@ func (tb *TensorEditor) SetTensor(et tensor.Tensor) *TensorEditor {
 		return nil
 	}
 
-	tb.SetSliceBase()
 	tb.Tensor = et
 	tb.This.(core.Lister).UpdateSliceSize()
+	tb.SetSliceBase()
 	tb.Update()
 	return tb
 }
@@ -251,6 +250,7 @@ func (tb *TensorEditor) MakeRow(p *tree.Plan, i int) {
 							tensor.Projection2DSet(tb.Tensor, tb.Layout.OddRow, vi, fli, fval)
 						}
 					}
+					tb.This.(core.Lister).UpdateMaxWidths()
 					tb.SendChange()
 				})
 			}

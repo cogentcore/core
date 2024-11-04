@@ -35,6 +35,7 @@ func NodesUnderPoint(n tree.Node, pt image.Point) []Node {
 			return tree.Break
 		}
 		if pt.In(nb.SceneBBox) {
+			sbwd := nb.SceneBBox.Size().X
 			if nb.isLinear {
 				sp := math32.Vec3(0, 0, 0)
 				ep := math32.Vec3(1, 0, 0)
@@ -42,7 +43,7 @@ func NodesUnderPoint(n tree.Node, pt image.Point) []Node {
 				epr := ep.MulMatrix4(&nb.Pose.MVPMatrix)
 				del := epr.Sub(spr)
 				angxy := math32.RadToDeg(math32.Atan2(del.Y, del.X))
-				if (angxy >= 89 && angxy <= 91) || (angxy >= -91 && angxy <= -89) {
+				if sbwd < 5 && ((angxy >= 89 && angxy <= 91) || (angxy >= -91 && angxy <= -89)) {
 					ns = append(ns, ni)
 					return tree.Continue
 				}

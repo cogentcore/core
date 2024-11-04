@@ -337,8 +337,8 @@ func (lb *ListBase) Init() {
 	})
 
 	lb.Maker(func(p *tree.Plan) {
-		svi := lb.This.(Lister)
-		svi.UpdateSliceSize()
+		ls := lb.This.(Lister)
+		ls.UpdateSliceSize()
 
 		scrollTo := -1
 		if lb.SelectedValue != nil {
@@ -360,12 +360,11 @@ func (lb *ListBase) Init() {
 
 		lb.Updater(func() {
 			lb.UpdateStartIndex()
-			svi.UpdateMaxWidths()
 		})
 
 		lb.MakeGrid(p, func(p *tree.Plan) {
 			for i := 0; i < lb.VisibleRows; i++ {
-				svi.MakeRow(p, i)
+				ls.MakeRow(p, i)
 			}
 		})
 	})
@@ -400,6 +399,7 @@ func (lb *ListBase) SetSliceBase() {
 		lb.SelectedIndex = -1
 	}
 	lb.ResetSelectedIndexes()
+	lb.This.(Lister).UpdateMaxWidths()
 }
 
 // SetSlice sets the source slice that we are viewing.
@@ -424,11 +424,11 @@ func (lb *ListBase) SetSlice(sl any) *ListBase {
 		return lb
 	}
 
-	lb.SetSliceBase()
 	lb.Slice = sl
 	lb.sliceUnderlying = reflectx.Underlying(reflect.ValueOf(lb.Slice))
 	lb.isArray = reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
 	lb.elementValue = reflectx.SliceElementValue(sl)
+	lb.SetSliceBase()
 	return lb
 }
 
@@ -553,7 +553,7 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 }
 
 func (lb *ListBase) MakeValue(w Value, i int) {
-	svi := lb.This.(Lister)
+	ls := lb.This.(Lister)
 	wb := w.AsWidget()
 	wb.SetProperty(ListRowProperty, i)
 	wb.Styler(func(s *styles.Style) {
@@ -564,9 +564,9 @@ func (lb *ListBase) MakeValue(w Value, i int) {
 		}
 		row, col := lb.widgetIndex(w)
 		row += lb.StartIndex
-		svi.StyleValue(w, s, row, col)
+		ls.StyleValue(w, s, row, col)
 		if row < lb.SliceSize {
-			svi.StyleRow(w, row, col)
+			ls.StyleRow(w, row, col)
 		}
 	})
 	wb.OnSelect(func(e events.Event) {
@@ -586,8 +586,8 @@ func (lb *ListBase) MakeValue(w Value, i int) {
 }
 
 func (lb *ListBase) MakeRow(p *tree.Plan, i int) {
-	svi := lb.This.(Lister)
-	si, vi, invis := svi.SliceIndex(i)
+	ls := lb.This.(Lister)
+	si, vi, invis := ls.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 	val := lb.sliceElementValue(vi)
 
@@ -603,12 +603,13 @@ func (lb *ListBase) MakeRow(p *tree.Plan, i int) {
 		lb.MakeValue(w, i)
 		if !lb.IsReadOnly() {
 			wb.OnChange(func(e events.Event) {
+				lb.This.(Lister).UpdateMaxWidths()
 				lb.SendChange(e)
 			})
 		}
 		wb.Updater(func() {
 			wb := w.AsWidget()
-			_, vi, invis := svi.SliceIndex(i)
+			_, vi, invis := ls.SliceIndex(i)
 			val := lb.sliceElementValue(vi)
 			Bind(val.Addr().Interface(), w)
 			wb.SetReadOnly(lb.IsReadOnly())
@@ -1347,23 +1348,23 @@ func (lb *ListBase) pasteIndex(idx int) { //types:add
 
 // makePasteMenu makes the menu of options for paste events
 func (lb *ListBase) makePasteMenu(m *Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
-	svi := lb.This.(Lister)
+	ls := lb.This.(Lister)
 	if mod == events.DropCopy {
 		NewButton(m).SetText("Assign to").OnClick(func(e events.Event) {
-			svi.PasteAssign(md, idx)
+			ls.PasteAssign(md, idx)
 			if fun != nil {
 				fun()
 			}
 		})
 	}
 	NewButton(m).SetText("Insert before").OnClick(func(e events.Event) {
-		svi.PasteAtIndex(md, idx)
+		ls.PasteAtIndex(md, idx)
 		if fun != nil {
 			fun()
 		}
 	})
 	NewButton(m).SetText("Insert after").OnClick(func(e events.Event) {
-		svi.PasteAtIndex(md, idx+1)
+		ls.PasteAtIndex(md, idx+1)
 		if fun != nil {
 			fun()
 		}

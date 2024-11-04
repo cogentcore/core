@@ -36,7 +36,6 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, rd gpu.Renderer) {
 
 	dw.System = gpu.NewGraphicsSystem(gp, "gpudraw", rd)
 	sy := dw.System
-	// sy.SetClearColor(color.RGBA{50, 50, 50, 255})
 
 	// note: requires different pipelines for src vs. over draw op modes
 	dopl := sy.AddGraphicsPipeline("drawover")

@@ -94,7 +94,6 @@ func (tb *Table) Init() {
 
 		tb.Updater(func() {
 			tb.UpdateStartIndex()
-			svi.UpdateMaxWidths()
 		})
 
 		tb.makeHeader(p)
@@ -146,10 +145,10 @@ func (tb *Table) SetSlice(sl any) *Table {
 		return tb
 	}
 
-	tb.SetSliceBase()
 	tb.Slice = sl
 	tb.sliceUnderlying = reflectx.Underlying(reflect.ValueOf(tb.Slice))
 	tb.elementValue = reflectx.Underlying(reflectx.SliceElementValue(sl))
+	tb.SetSliceBase()
 	tb.cacheVisibleFields()
 	return tb
 }
@@ -316,6 +315,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 			w.AsTree().SetProperty(ListColProperty, fli)
 			if !tb.IsReadOnly() && !readOnlyTag {
 				wb.OnChange(func(e events.Event) {
+					tb.This.(Lister).UpdateMaxWidths()
 					tb.SendChange()
 				})
 			}

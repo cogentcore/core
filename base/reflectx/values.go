@@ -969,11 +969,18 @@ func SetRobust(to, from any) error {
 				pointer.Elem().Set(fv)
 				return nil
 			}
-			ufv := Underlying(fv)
+			ufvp := UnderlyingPointer(fv)
+			if ufvp.IsValid() && ufvp.Type().AssignableTo(typ) {
+				pointer.Elem().Set(ufvp)
+				return nil
+			}
+			ufv := ufvp.Elem()
 			if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
 				pointer.Elem().Set(ufv)
 				return nil
 			}
+		} else {
+			return nil
 		}
 	}
 
@@ -1045,6 +1052,8 @@ func SetRobust(to, from any) error {
 		}
 	}
 
+	ftyp := NonPointerType(reflect.TypeOf(from))
+
 	switch {
 	case kind >= reflect.Int && kind <= reflect.Int64:
 		fm, err := ToInt(from)
@@ -1079,7 +1088,7 @@ func SetRobust(to, from any) error {
 		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
 	case kind == reflect.Struct:
-		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
+		if ftyp.Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to) // todo: this is not working -- see what marshal says, etc
 			if err != nil {
 				marsh, _ := json.Marshal(to)
@@ -1088,7 +1097,7 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 	case kind == reflect.Slice:
-		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
+		if ftyp.Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
 				marsh, _ := json.Marshal(to)
@@ -1098,7 +1107,7 @@ func SetRobust(to, from any) error {
 		}
 		return CopySliceRobust(to, from)
 	case kind == reflect.Map:
-		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
+		if ftyp.Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
 				marsh, _ := json.Marshal(to)
@@ -1111,5 +1120,5 @@ func SetRobust(to, from any) error {
 
 	tos := elide.End(fmt.Sprintf("%v", to), 40)
 	fms := elide.End(fmt.Sprintf("%v", from), 40)
-	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, typ.String(), fms, from, LongTypeName(reflect.TypeOf(from)))
+	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, typ.String(), fms, from, LongTypeName(Underlying(reflect.ValueOf(from)).Type()))
 }
