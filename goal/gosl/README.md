@@ -2,7 +2,7 @@
 
 `gosl` implements _Go as a shader language_ for GPU compute shaders (using [WebGPU](https://www.w3.org/TR/webgpu/)), **enabling standard Go code to run on the GPU**.
 
-`gosl` converts Go code to WGSL which can then be loaded directly into a WebGPU compute shader, using the [gpu](../../gpu) GPU compute shader system. It operates within the overall [Goal](../README.md) framework of an augmented version of the Go language. See the [GPU](../GPU.md) documentation for an overview of issues in GPU computation. The `goal build` command automatically runs `gosl`, which has no effect if there are no `//gosl:` tags in a given directory.
+`gosl` converts Go code to WGSL which can then be loaded directly into a WebGPU compute shader, using the [gpu](../../gpu) GPU compute shader system. It operates within the overall [Goal](../README.md) framework of an augmented version of the Go language. See the [GPU](../GPU.md) documentation for an overview of issues in GPU computation.
 
 The relevant regions of Go code to be run on the GPU are tagged using the `//gosl:start` and `//gosl:end` comment directives, and this code must only use basic expressions and concrete types that will compile correctly in a GPU shader (see [Restrictions](#restrictions) below).  Method functions and pass-by-reference pointer arguments to `struct` types are supported and incur no additional compute cost due to inlining (see notes below for more detail).
 
@@ -10,14 +10,14 @@ See [examples/basic](examples/basic) and [rand](examples/rand) for complete work
 
 Although `gosl` is typically run via the `goal build` command, you can also run `gosl` directly.  Here's how to install the standalone `gosl` command:
 ```bash
-$ go install cogentcore.org/core/gpu/gosl@latest
+$ go install cogentcore.org/core/goal/gosl@latest
 ```
 
 # Usage
 
 There are two critical elements for GPU-enabled code:
 
-1. One or more [Kernel](#kernels) compute functions that take an _index_ argument and perform computations for that specific index of data, _in parallel_. On the GPU, each such kernel is implemented by its own separate compute shader code, and one of the main functions of `gosl` is to generate this code from the Go sources, in the automatically-created `shaders/` directory.
+1. One or more [Kernel](#kernels) compute functions that take an _index_ argument and perform computations for that specific index of data, _in parallel_. **GPU computation is effectively just a parallel `for` loop**. On the GPU, each such kernel is implemented by its own separate compute shader code, and one of the main functions of `gosl` is to generate this code from the Go sources, in the automatically created `shaders/` directory.
 
 2. [Global variables](#global-variables) on which the kernel functions _exclusively_ operate: all relevant data must be specifically copied from the CPU to the GPU and back. As explained in the [GPU](../GPU.md) docs, each GPU compute shader is effectively a _standalone_ program operating on these global variables. To replicate this environment on the CPU, so the code is transferrable, we need to make these variables global in the CPU (Go) environment as well.
 
@@ -41,7 +41,7 @@ In the CPU mode, the kernel is effectively run in a `for` loop like this:
 		Compute(uint32(i))
 	}
 ```
-A parallel goroutine-based mechanism is actually used, but conceptually this is what it does, on both the CPU and the GPU: **GPU computation is effectively just a parallel for loop**.
+A parallel goroutine-based mechanism is actually used, but conceptually this is what it does, on both the CPU and the GPU. To reiterate: **GPU computation is effectively just a parallel for loop**.
 
 ## Global variables
 
@@ -62,8 +62,10 @@ var (
 ```
 
 All such variables must be either:
-1. A `slice` of basic GPU-compatible data values such as `float32`, or GPU-alignment compatible `struct` types, such as `ParamStruct` in the above example.
-2. A `tensor` of a GPU-compatible data type (`float32`, `uint32`, or `int32`), with the number of dimensions indicated by the `//gosl:dims <n>` tag as shown above.
+1. A `slice` of GPU-alignment compatible `struct` types, such as `ParamStruct` in the above example.
+2. A `tensor` of a GPU-compatible elemental data type (`float32`, `uint32`, or `int32`), with the number of dimensions indicated by the `//gosl:dims <n>` tag as shown above.
+
+You can also just declare a slice of elemental GPU-compatible data values such as `float32`, but it is generally preferable to use the tensor instead.
 
 ### Tensor data
 
@@ -90,7 +92,6 @@ var (
 
     // Path-level parameters
     Paths    []PathParam  
-
 
     // Unit state values
     //gosl:group Units
@@ -182,17 +183,17 @@ In general shader code should be simple mathematical expressions and data types,
 
 * Cannot use multiple return values, or multiple assignment of variables in a single `=` expression.
 
-* *Can* use multiple variable names with the same type (e.g., `min, max float32`) -- this will be properly converted to the more redundant C form with the type repeated.
+* *Can* use multiple variable names with the same type (e.g., `min, max float32`) -- this will be properly converted to the more redundant form with the type repeated, for WGSL.
 
-* `switch` `case` statements are _purely_ self-contained -- no `fallthrough` allowed!  does support multiple items per `case` however.
-
-* TODO: WGSL does not do multi-pass compiling, so all dependent types must be specified *before* being used in other ones, and this also precludes referencing the *current* type within itself.  todo: can you just use a forward declaration?
+* `switch` `case` statements are _purely_ self-contained -- no `fallthrough` allowed!  does support multiple items per `case` however. Every `switch` _must_ have a `default` case.
 
 * WGSL does specify that new variables are initialized to 0, like Go, but also somehow discourages that use-case.  It is safer to initialize directly:
 ```Go
     val := float32(0) // guaranteed 0 value
     var val float32 // ok but generally avoid
 ```    
+
+* A local variable to a global `struct` array variable (e.g., `par := &Params[i]`) can only be created as a function argument. There are special access restrictions that make it impossible to do otherwise.
 
 ## Other language features
 

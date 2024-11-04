@@ -33,6 +33,8 @@ func NewDevice(gpu *GPU) (*Device, error) {
 	limits.MaxStorageBufferBindingSize = min(gpu.Limits.Limits.MaxStorageBufferBindingSize, maxv)
 	// note: this limit is not working properly:
 	limits.MaxBufferSize = min(gpu.Limits.Limits.MaxBufferSize, maxv)
+	// limits.MaxBindGroups = gpu.Limits.Limits.MaxBindGroups // note: no point in changing -- web constraint
+
 	desc := wgpu.DeviceDescriptor{
 		RequiredLimits: &wgpu.RequiredLimits{
 			Limits: limits,

@@ -80,7 +80,11 @@ const (
 	initf := `
 // GPUInit initializes the GPU compute system,
 // configuring system(s), variables and kernels.
+// It is safe to call multiple times: detects if already run.
 func GPUInit() {
+	if ComputeGPU != nil {
+		return
+	}
 	gp := gpu.NewComputeGPU()
 	ComputeGPU = gp
 `
