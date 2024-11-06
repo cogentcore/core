@@ -13,6 +13,7 @@ import (
 	"errors"
 
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/tensor"
 )
 
 // data defines the main data interfaces for plotting.
@@ -91,6 +92,19 @@ func (vs Values) Value(i int) float32 {
 	return vs[i]
 }
 
+// TensorValues provides a Valuer interface wrapper for a tensor.
+type TensorValues struct {
+	tensor.Tensor
+}
+
+func (vs TensorValues) Len() int {
+	return vs.Tensor.Len()
+}
+
+func (vs TensorValues) Value(i int) float32 {
+	return float32(vs.Tensor.Float1D(i))
+}
+
 // CopyValues returns a Values that is a copy of the values
 // from a Valuer, or an error if there are no values, or if one of
 // the copied values is a Infinity.
@@ -142,6 +156,19 @@ func (xys XYs) Len() int {
 
 func (xys XYs) XY(i int) (float32, float32) {
 	return xys[i].X, xys[i].Y
+}
+
+// TensorXYs provides a XYer interface wrapper for a tensor.
+type TensorXYs struct {
+	X, Y tensor.Tensor
+}
+
+func (xys TensorXYs) Len() int {
+	return xys.X.Len()
+}
+
+func (xys TensorXYs) XY(i int) (float32, float32) {
+	return float32(xys.X.Float1D(i)), float32(xys.Y.Float1D(i))
 }
 
 // CopyXYs returns an XYs that is a copy of the x and y values from

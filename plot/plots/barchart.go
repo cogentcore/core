@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
+	"cogentcore.org/core/tensor"
 )
 
 // A BarChart presents ordinally-organized data with rectangular bars
@@ -83,8 +84,8 @@ type BarChart struct {
 
 // NewBarChart returns a new bar chart with a single bar for each value.
 // The bars heights correspond to the values and their x locations correspond
-// to the index of their value in the Valuer.  Optional error-bar values can be
-// provided.
+// to the index of their value in the Valuer.
+// Optional error-bar values can be provided.
 func NewBarChart(vs, ers plot.Valuer) *BarChart {
 	values, err := plot.CopyValues(vs)
 	if errors.Log(err) != nil {
@@ -103,6 +104,18 @@ func NewBarChart(vs, ers plot.Valuer) *BarChart {
 	}
 	b.Defaults()
 	return b
+}
+
+// NewBarChartTensor returns a new bar chart with a single bar for each value.
+// The bars heights correspond to the values and their x locations correspond
+// to the index of their value in the Valuer.
+// Optional error-bar values can be provided.
+func NewBarChartTensor(vs, ers tensor.Tensor) *BarChart {
+	vt := plot.TensorValues{vs}
+	if ers == nil {
+		return NewBarChart(vt, nil)
+	}
+	return NewBarChart(vt, plot.TensorValues{ers})
 }
 
 func (b *BarChart) Defaults() {

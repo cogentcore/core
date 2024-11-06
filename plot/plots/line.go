@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
+	"cogentcore.org/core/tensor"
 )
 
 // StepKind specifies a form of a connection of two consecutive points.
@@ -84,6 +85,12 @@ func NewLinePoints(xys plot.XYer) (*Line, *Scatter) {
 	ln := &Line{XYs: sc.XYs}
 	ln.Defaults()
 	return ln, sc
+}
+
+// NewLineTensor returns a Line that uses the default line style and
+// does not draw glyphs, based on two tensors for X, Y values.
+func NewLineTensor(x, y tensor.Tensor) *Line {
+	return NewLine(plot.TensorXYs{X: x, Y: y})
 }
 
 func (ln *Line) Defaults() {

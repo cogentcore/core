@@ -56,7 +56,6 @@ type Config struct {
 // it runs an interactive shell that allows the user to input goal.
 func Run(c *Config) error { //cli:cmd -root
 	in := NewInterpreter(interp.Options{})
-	in.Config()
 	if len(c.Args) > 0 {
 		in.Eval("args := goalib.StringsToAnys(" + fmt.Sprintf("%#v)", c.Args))
 	}
@@ -91,6 +90,7 @@ func Run(c *Config) error { //cli:cmd -root
 
 // Interactive runs an interactive shell that allows the user to input goal.
 func Interactive(c *Config, in *Interpreter) error {
+	in.Config()
 	if c.Expr != "" {
 		in.Eval(c.Expr)
 	}

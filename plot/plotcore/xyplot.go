@@ -112,11 +112,11 @@ func (pl *PlotEditor) genPlotXY() {
 					lbl = fmt.Sprintf("%s_%02d", lbl, idx)
 				}
 				if cp.Lines.Or(pl.Options.Lines) && cp.Points.Or(pl.Options.Points) {
-					lns, pts, _ = plots.NewLinePoints(xy)
+					lns, pts = plots.NewLinePoints(xy)
 				} else if cp.Points.Or(pl.Options.Points) {
-					pts, _ = plots.NewScatter(xy)
+					pts = plots.NewScatter(xy)
 				} else {
-					lns, _ = plots.NewLine(xy)
+					lns = plots.NewLine(xy)
 				}
 				if lns != nil {
 					lns.Line.Width.Pt(float32(cp.LineWidth.Or(pl.Options.LineWidth)))
@@ -143,7 +143,7 @@ func (pl *PlotEditor) genPlotXY() {
 					ec := pl.table.ColumnIndex(cp.ErrColumn)
 					if ec >= 0 {
 						xy.errColumn = ec
-						eb, _ := plots.NewYErrorBars(xy)
+						eb := plots.NewYErrorBars(xy)
 						eb.Line.Color = clr
 						plt.Add(eb)
 					}
@@ -157,7 +157,7 @@ func (pl *PlotEditor) genPlotXY() {
 			xy, _ := newTableXY(xview, xi, xp.TensorIndex, firstXY.yColumn, cp.TensorIndex, firstXY.yRange)
 			xy.labelColumn = xview.ColumnIndex(cp.Column)
 			xy.yIndex = firstXY.yIndex
-			lbls, _ := plots.NewLabels(xy)
+			lbls := plots.NewLabels(xy)
 			if lbls != nil {
 				plt.Add(lbls)
 			}

@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/yaegicore/symbols"
 )
 
 //go:embed *.csv
@@ -92,6 +93,8 @@ func main() {
 }
 
 func Interactive(c *interpreter.Config, in *interpreter.Interpreter) error {
+	in.Interp.Use(symbols.Symbols) // gui imports
+	in.Config()
 	br := databrowser.NewBrowserWindow(datafs.CurRoot, "Planets")
 	b := br.Parent.(*core.Body)
 	b.AddTopBar(func(bar *core.Frame) {

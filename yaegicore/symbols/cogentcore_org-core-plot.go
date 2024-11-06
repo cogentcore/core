@@ -42,6 +42,9 @@ func init() {
 		"Normalizer":     reflect.ValueOf((*plot.Normalizer)(nil)),
 		"Plot":           reflect.ValueOf((*plot.Plot)(nil)),
 		"Plotter":        reflect.ValueOf((*plot.Plotter)(nil)),
+		"Stylers":        reflect.ValueOf((*plot.Stylers)(nil)),
+		"TensorValues":   reflect.ValueOf((*plot.TensorValues)(nil)),
+		"TensorXYs":      reflect.ValueOf((*plot.TensorXYs)(nil)),
 		"Text":           reflect.ValueOf((*plot.Text)(nil)),
 		"TextStyle":      reflect.ValueOf((*plot.TextStyle)(nil)),
 		"Thumbnailer":    reflect.ValueOf((*plot.Thumbnailer)(nil)),
@@ -103,11 +106,13 @@ func (W _cogentcore_org_core_plot_Normalizer) Normalize(min float32, max float32
 
 // _cogentcore_org_core_plot_Plotter is an interface wrapper for Plotter type
 type _cogentcore_org_core_plot_Plotter struct {
-	IValue  interface{}
-	WPlot   func(pt *plot.Plot)
-	WXYData func() (data plot.XYer, pixels plot.XYer)
+	IValue      interface{}
+	WApplyStyle func()
+	WPlot       func(pt *plot.Plot)
+	WXYData     func() (data plot.XYer, pixels plot.XYer)
 }
 
+func (W _cogentcore_org_core_plot_Plotter) ApplyStyle()        { W.WApplyStyle() }
 func (W _cogentcore_org_core_plot_Plotter) Plot(pt *plot.Plot) { W.WPlot(pt) }
 func (W _cogentcore_org_core_plot_Plotter) XYData() (data plot.XYer, pixels plot.XYer) {
 	return W.WXYData()

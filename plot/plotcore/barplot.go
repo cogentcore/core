@@ -130,15 +130,13 @@ func (pl *PlotEditor) genPlotBar() {
 				var bar *plots.BarChart
 				if ec >= 0 {
 					exy, _ := newTableXY(lview, ec, 0, ec, 0, minmax.Range32{})
-					bar, err = plots.NewBarChart(xy, exy)
-					if err != nil {
-						// log.Println(err)
+					bar = plots.NewBarChart(xy, exy)
+					if bar == nil {
 						continue
 					}
 				} else {
-					bar, err = plots.NewBarChart(xy, nil)
-					if err != nil {
-						// log.Println(err)
+					bar = plots.NewBarChart(xy, nil)
+					if bar == nil {
 						continue
 					}
 				}
@@ -176,7 +174,7 @@ func (pl *PlotEditor) genPlotBar() {
 				xyl.XYs[i] = math32.Vec2(x, y)
 				xyl.Labels[i] = xy.Label(i)
 			}
-			lbls, _ := plots.NewLabels(xyl)
+			lbls := plots.NewLabels(xyl)
 			if lbls != nil {
 				plt.Add(lbls)
 			}

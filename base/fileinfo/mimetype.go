@@ -12,7 +12,6 @@ import (
 	"regexp"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
 	"github.com/h2non/filetype"
 )
 
@@ -107,7 +106,6 @@ var generatedRe = regexp.MustCompile(`^// Code generated .* DO NOT EDIT`)
 func IsGeneratedFile(fname string) bool {
 	file, err := os.Open(fname)
 	if err != nil {
-		errors.Log(err)
 		return false
 	}
 	head := make([]byte, 2048)
