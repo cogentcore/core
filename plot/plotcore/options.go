@@ -7,6 +7,7 @@ package plotcore
 import (
 	"image"
 
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/option"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
@@ -75,8 +76,8 @@ type PlotOptions struct { //types:add
 	YAxisLabel string
 }
 
-// defaults sets defaults if unset values are present.
-func (po *PlotOptions) defaults() {
+// Defaults sets defaults if unset values are present.
+func (po *PlotOptions) Defaults() {
 	if po.LineWidth == 0 {
 		po.LineWidth = 1
 		po.Lines = true
@@ -138,8 +139,8 @@ type ColumnOptions struct { //types:add
 	IsString bool `edit:"-"`
 }
 
-// defaults sets defaults if unset values are present.
-func (co *ColumnOptions) defaults() {
+// Defaults sets defaults if unset values are present.
+func (co *ColumnOptions) Defaults() {
 	if co.NTicks == 0 {
 		co.NTicks = 10
 	}
@@ -163,3 +164,54 @@ const (
 	// Bar plots vertical bars.
 	Bar
 )
+
+//////// Stylers
+
+// PlotStylers are plot styling functions.
+type PlotStylers struct {
+	Plot   []func(po *PlotOptions)
+	Column map[string][]func(co *ColumnOptions)
+}
+
+// PlotStyler adds a plot styling function.
+func (ps *PlotStylers) PlotStyler(f func(po *PlotOptions)) {
+	ps.Plot = append(ps.Plot, f)
+}
+
+// ColumnStyler adds a column styling function for given column name.
+func (ps *PlotStylers) ColumnStyler(col string, f func(co *ColumnOptions)) {
+	if ps.Column == nil {
+		ps.Column = make(map[string][]func(co *ColumnOptions))
+	}
+	cs := ps.Column[col]
+	ps.Column[col] = append(cs, f)
+}
+
+// ApplyToPlot applies stylers to plot options.
+func (ps *PlotStylers) ApplyToPlot(po *PlotOptions) {
+	for _, f := range ps.Plot {
+		f(po)
+	}
+}
+
+// ApplyToColumn applies stylers to column of given name
+func (ps *PlotStylers) ApplyToColumn(co *ColumnOptions) {
+	if ps.Column == nil {
+		return
+	}
+	fs := ps.Column[co.Column]
+	for _, f := range fs {
+		f(co)
+	}
+}
+
+// SetPlotStylers sets the PlotStylers into given metadata.
+func SetShapeNames(md *metadata.Data, ps *PlotStylers) {
+	md.Set("PlotStylers", ps)
+}
+
+// GetPlotStylers gets the PlotStylers from given metadata (nil if none).
+func GetPlotStylers(md *metadata.Data) *PlotStylers {
+	ps, _ := metadata.Get[*PlotStylers](*md, "PlotStylers")
+	return ps
+}

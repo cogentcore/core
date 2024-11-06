@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/metadata"
 )
 
@@ -123,5 +122,6 @@ func SetShapeNames(md *metadata.Data, names ...string) {
 
 // ShapeNames gets the tensor shape dimension names from given metadata.
 func ShapeNames(md *metadata.Data) []string {
-	return errors.Log1(metadata.Get[[]string](*md, "ShapeNames"))
+	names, _ := metadata.Get[[]string](*md, "ShapeNames")
+	return names
 }

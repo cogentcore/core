@@ -50,6 +50,9 @@ type PlotEditor struct { //types:add
 	// Columns are the options for each column of the table.
 	Columns []*ColumnOptions `set:"-"`
 
+	// Stylers are plot styling functions.
+	Stylers PlotStylers
+
 	// plot is the plot object.
 	plot *plot.Plot
 
@@ -94,7 +97,8 @@ func NewSubPlot(parent ...tree.Node) *PlotEditor {
 func (pl *PlotEditor) Init() {
 	pl.Frame.Init()
 
-	pl.Options.defaults()
+	pl.Options.Defaults()
+	pl.Stylers.ApplyToPlot(&pl.Options)
 	pl.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		if pl.SizeClass() == core.SizeCompact {
@@ -140,6 +144,9 @@ func (pl *PlotEditor) Init() {
 // This is safe to call from a different goroutine.
 func (pl *PlotEditor) setTable(tab *table.Table) *PlotEditor {
 	pl.table = tab
+	if ps := GetPlotStylers(&tab.Meta); ps != nil {
+		pl.Stylers = *ps
+	}
 	pl.Update()
 	return pl
 }
@@ -150,6 +157,9 @@ func (pl *PlotEditor) setTable(tab *table.Table) *PlotEditor {
 // This is safe to call from a different goroutine.
 func (pl *PlotEditor) SetTable(tab *table.Table) *PlotEditor {
 	pl.table = table.NewView(tab)
+	if ps := GetPlotStylers(&tab.Meta); ps != nil {
+		pl.Stylers = *ps
+	}
 	pl.Update()
 	return pl
 }
@@ -428,7 +438,8 @@ func (pl *PlotEditor) columnsListUpdate() {
 			pl.Options.XAxis = cn // x-axis defaults to the first column
 		}
 		cp := &ColumnOptions{Column: cn}
-		cp.defaults()
+		cp.Defaults()
+		pl.Stylers.ApplyToColumn(cp)
 		tcol := dt.ColumnByIndex(ci)
 		tc := tcol.Tensor
 		if tc.IsString() {
