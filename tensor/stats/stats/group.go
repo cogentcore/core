@@ -30,13 +30,10 @@ import (
 // the results can be used directly as Indexes into the corresponding tensor data.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
 func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) error {
-	gd, err := dir.RecycleDir("Groups")
-	if err != nil {
-		return err
-	}
+	gd := dir.RecycleDir("Groups")
 	makeIdxs := func(dir *datafs.Data, srt *tensor.Rows, val string, start, r int) {
 		n := r - start
-		it := datafs.NewValue[int](dir, val, n)
+		it := datafs.Value[int](dir, val, n)
 		for j := range n {
 			it.SetIntRow(srt.Indexes[start+j], j) // key to indirect through sort indexes
 		}
@@ -99,17 +96,14 @@ func TableGroups(dir *datafs.Data, dt *table.Table, columns ...string) error {
 // be used with [GroupStats] to generate summary statistics across
 // all the data. See [Groups] for more general documentation.
 func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) error {
-	gd, err := dir.RecycleDir("Groups")
-	if err != nil {
-		return err
-	}
+	gd := dir.RecycleDir("Groups")
 	tsr := tensor.AsRows(tsrs[0])
 	nr := tsr.NumRows()
 	if nr == 0 {
 		return nil
 	}
 	td, _ := gd.Mkdir("All")
-	it := datafs.NewValue[int](td, "All", nr)
+	it := datafs.Value[int](td, "All", nr)
 	for j := range nr {
 		it.SetIntRow(tsr.RowIndex(j), j) // key to indirect through any existing indexes
 	}
@@ -129,35 +123,29 @@ func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 // and a aligned Float64 tensor with the statistics results for each such
 // unique group value. See the README.md file for a diagram of the results.
 func GroupStats(dir *datafs.Data, stat Stats, tsrs ...tensor.Tensor) error {
-	gd, err := dir.RecycleDir("Groups")
-	if err != nil {
-		return err
-	}
-	sd, err := dir.RecycleDir("Stats")
-	if err != nil {
-		return err
-	}
+	gd := dir.RecycleDir("Groups")
+	sd := dir.RecycleDir("Stats")
 	stnm := StripPackage(stat.String())
 	groups := gd.ItemsFunc(nil)
 	for _, gp := range groups {
 		gpnm := gp.Name()
-		ggd, _ := gd.RecycleDir(gpnm)
+		ggd := gd.RecycleDir(gpnm)
 		vals := ggd.ValuesFunc(nil)
 		nv := len(vals)
 		if nv == 0 {
 			continue
 		}
-		sgd, _ := sd.RecycleDir(gpnm)
+		sgd := sd.RecycleDir(gpnm)
 		gv := sgd.Item(gpnm)
 		if gv == nil {
-			gtsr := datafs.NewValue[string](sgd, gpnm, nv)
+			gtsr := datafs.Value[string](sgd, gpnm, nv)
 			for i, v := range vals {
 				gtsr.SetStringRow(v.Metadata().Name(), i)
 			}
 		}
 		for _, tsr := range tsrs {
-			vd, _ := sgd.RecycleDir(tsr.Metadata().Name())
-			sv := datafs.NewValue[float64](vd, stnm, nv)
+			vd := sgd.RecycleDir(tsr.Metadata().Name())
+			sv := datafs.Value[float64](vd, stnm, nv)
 			for i, v := range vals {
 				idx := tensor.AsIntSlice(v)
 				sg := tensor.NewRows(tsr.AsValues(), idx...)

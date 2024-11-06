@@ -173,6 +173,10 @@ type PlotStylers struct {
 	Column map[string][]func(co *ColumnOptions)
 }
 
+func NewPlotStylers() *PlotStylers {
+	return &PlotStylers{}
+}
+
 // PlotStyler adds a plot styling function.
 func (ps *PlotStylers) PlotStyler(f func(po *PlotOptions)) {
 	ps.Plot = append(ps.Plot, f)
@@ -206,7 +210,7 @@ func (ps *PlotStylers) ApplyToColumn(co *ColumnOptions) {
 }
 
 // SetPlotStylers sets the PlotStylers into given metadata.
-func SetShapeNames(md *metadata.Data, ps *PlotStylers) {
+func SetPlotStylers(md *metadata.Data, ps *PlotStylers) {
 	md.Set("PlotStylers", ps)
 }
 

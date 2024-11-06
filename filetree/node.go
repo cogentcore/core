@@ -300,9 +300,11 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 	var files []fs.FileInfo
 	var dirs []fs.FileInfo // for DirsOnTop mode
 	var di []fs.DirEntry
+	isFS := false
 	if fn.FileRoot.FS == nil {
 		di = errors.Log1(os.ReadDir(path))
 	} else {
+		isFS = true
 		di = errors.Log1(fs.ReadDir(fn.FileRoot.FS, path))
 	}
 	for _, d := range di {
@@ -326,22 +328,26 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 
 	if fn.FileRoot.DirsOnTop {
 		if doModSort {
-			sortByModTime(dirs)
-			sortByModTime(files)
+			sortByModTime(dirs, isFS) // note: FS = ascending, otherwise descending
+			sortByModTime(files, isFS)
 		}
 		files = append(dirs, files...)
 	} else {
 		if doModSort {
-			sortByModTime(files)
+			sortByModTime(files, isFS)
 		}
 	}
 	return files
 }
 
 // sortByModTime sorts by _reverse_ mod time (newest first)
-func sortByModTime(files []fs.FileInfo) {
+func sortByModTime(files []fs.FileInfo, ascending bool) {
 	slices.SortFunc(files, func(a, b fs.FileInfo) int {
-		return b.ModTime().Compare(a.ModTime()) // reverse order
+		if ascending {
+			return a.ModTime().Compare(b.ModTime())
+		} else {
+			return b.ModTime().Compare(a.ModTime())
+		}
 	})
 }
 

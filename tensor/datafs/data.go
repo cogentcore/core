@@ -5,6 +5,7 @@
 package datafs
 
 import (
+	"io/fs"
 	"reflect"
 	"time"
 
@@ -45,43 +46,33 @@ type Data struct {
 }
 
 // newData returns a new Data item in given directory Data item,
-// which can be nil. If not a directory, or the name is not unique,
-// an error will be generated.
+// which can be nil. If dir is not a directory, returns nil and an error.
+// If an item already exists in dir with that name, that item is returned
+// with an [fs.ErrExist] error, and the caller can decide how to proceed.
 // The modTime is set to now. The name must be unique within parent.
 func newData(dir *Data, name string) (*Data, error) {
+	if dir == nil {
+		return &Data{name: name, modTime: time.Now()}, nil
+	}
+	if err := dir.mustDir("newData", name); err != nil {
+		return nil, err
+	}
+	if ex, ok := dir.Dir.AtTry(name); ok {
+		return ex, fs.ErrExist
+	}
 	d := &Data{Parent: dir, name: name, modTime: time.Now()}
-	var err error
-	if dir != nil {
-		err = dir.Add(d)
-	}
-	return d, err
+	dir.Dir.Add(name, d)
+	return d, nil
 }
 
-// NewScalar returns new scalar Data value(s) (as a [tensor.Tensor])
-// of given data type, in given directory.
-// The names must be unique in the directory.
-// Returns the first item created, for immediate use of one value.
-func NewScalar[T tensor.DataTypes](dir *Data, names ...string) tensor.Tensor {
-	var first tensor.Tensor
-	for _, nm := range names {
-		tsr := tensor.New[T](1)
-		tsr.Metadata().SetName(nm)
-		d, err := newData(dir, nm)
-		if errors.Log(err) != nil {
-			return nil
-		}
-		d.Data = tsr
-		if first == nil {
-			first = d.Data
-		}
-	}
-	return first
-}
-
-// NewValue returns a new Data value as a [tensor.Tensor]
+// Value returns a Data value as a [tensor.Tensor]
 // of given data type and shape sizes, in given directory Data item.
-// The name must be unique in the directory.
-func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.Values {
+// If it already exists, it is returned, else a new one is made.
+func Value[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.Values {
+	it := dir.Item(name)
+	if it != nil {
+		return it.Data.(tensor.Values)
+	}
 	tsr := tensor.New[T](sizes...)
 	tsr.Metadata().SetName(name)
 	d, err := newData(dir, name)
@@ -92,11 +83,31 @@ func NewValue[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.V
 	return tsr
 }
 
+// Scalar returns a scalar Data value (as a [tensor.Tensor])
+// of given data type, in given directory and name.
+// If it already exists, it is returned, else a new one is made.
+func Scalar[T tensor.DataTypes](dir *Data, name string) tensor.Values {
+	return Value[T](dir, name, 1)
+}
+
+// NewScalars makes new scalar Data value(s) (as a [tensor.Tensor])
+// of given data type, in given directory.
+// The names must be unique in the directory (existing items are recycled).
+func NewScalars[T tensor.DataTypes](dir *Data, names ...string) {
+	for _, nm := range names {
+		Scalar[T](dir, nm)
+	}
+}
+
 // NewOfType returns a new Data value as a [tensor.Tensor]
 // of given reflect.Kind type and shape sizes per dimension, in given directory Data item.
 // Supported types are string, bool (for [Bool]), float32, float64, int, int32, and byte.
-// The name must be unique in the directory.
+// If an item with that name already exists, then it is returned.
 func (d *Data) NewOfType(name string, typ reflect.Kind, sizes ...int) tensor.Values {
+	it := d.Item(name)
+	if it != nil {
+		return it.Data.(tensor.Values)
+	}
 	tsr := tensor.NewOfType(typ, sizes...)
 	tsr.Metadata().SetName(name)
 	nd, err := newData(d, name)
@@ -108,11 +119,11 @@ func (d *Data) NewOfType(name string, typ reflect.Kind, sizes ...int) tensor.Val
 }
 
 // NewData creates a new Data node for given tensor with given name.
-// returns an error if the data name already exists
+// If the name already exists, that item is returned with [fs.ErrExists] error.
 func (d *Data) NewData(tsr tensor.Tensor, name string) (*Data, error) {
 	nd, err := newData(d, name)
 	if err != nil {
-		return nil, err
+		return nd, err
 	}
 	nd.Data = tsr
 	return nd, nil

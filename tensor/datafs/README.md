@@ -12,4 +12,14 @@ Each Data node has a name which must be unique within the directory. The nodes i
 
 The hierarchical structure of a filesystem naturally supports various kinds of functions, such as various time scales of logging, with lower-level data aggregated into upper levels.  Or hierarchical splits for a pivot-table effect.
 
+# Usage
+
+## Existing items and unique names
+
+As in a real filesystem, names must be unique within each directory, which creates issues for how to manage conflicts between existing and new items. We adopt the same behavior as the Go `os` package in general:
+
+* If an existing item with the same name is present, return that existing item and an `fs.ErrExist` error, so that the caller can decide how to proceed, using `errors.Is(fs.ErrExist)`.
+
+* There are also `Recycle` versions of functions that do not return an error and are preferred when specifically expecting an existing item.
+
 

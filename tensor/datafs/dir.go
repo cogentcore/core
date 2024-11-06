@@ -5,13 +5,13 @@
 package datafs
 
 import (
-	"errors"
 	"fmt"
 	"io/fs"
 	"path"
 	"slices"
 	"sort"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/tensor"
@@ -23,11 +23,12 @@ import (
 // the natural order items are processed in.
 type Dir = keylist.List[string, *Data]
 
-// NewDir returns a new datafs directory with given name.
-// if parent != nil and a directory, this dir is added to it.
-// if name is empty, then it is set to "root", the root directory.
+// NewDir returns a new datafs directory with the given name.
+// If parent != nil and a directory, this dir is added to it.
+// If the parent already has an item of that name, it is returned,
+// with an [fs.ErrExist] error.
+// If the name is empty, then it is set to "root", the root directory.
 // Note that "/" is not allowed for the root directory in Go [fs].
-// Names must be unique within a directory.
 func NewDir(name string, parent ...*Data) (*Data, error) {
 	if name == "" {
 		name = "root"
@@ -37,7 +38,9 @@ func NewDir(name string, parent ...*Data) (*Data, error) {
 		par = parent[0]
 	}
 	d, err := newData(par, name)
-	d.Dir = &Dir{}
+	if d != nil && d.Dir == nil {
+		d.Dir = &Dir{}
+	}
 	return d, err
 }
 
@@ -317,7 +320,7 @@ func (d *Data) mustDir(op, path string) error {
 
 // Add adds an item to this directory data item.
 // The only errors are if this item is not a directory,
-// or the name already exists.
+// or the name already exists, in which case an [fs.ErrExist] is returned.
 // Names must be unique within a directory.
 func (d *Data) Add(it *Data) error {
 	if err := d.mustDir("Add", it.name); err != nil {
@@ -325,16 +328,17 @@ func (d *Data) Add(it *Data) error {
 	}
 	err := d.Dir.Add(it.name, it)
 	if err != nil {
-		return &fs.PathError{Op: "Add", Path: it.name, Err: errors.New("data item already exists; names must be unique")}
+		return fs.ErrExist
 	}
 	return nil
 }
 
 // Mkdir creates a new directory with the specified name.
-// Returns an error if this item is not a directory,
-// or if the name is already used within this directory.
-// See [Data.RecycleDir] for a version ensures a directory
-// exists whether it needs to be made or already does.
+// Returns an error if this parent item is not a directory.
+// Returns existing directory and [fs.ErrExist] if an item
+// with the same name already exists.
+// See [Data.RecycleDir] for a version with no error return
+// that is preferable when expecting an existing directory.
 func (d *Data) Mkdir(name string) (*Data, error) {
 	if err := d.mustDir("Mkdir", name); err != nil {
 		return nil, err
@@ -344,15 +348,32 @@ func (d *Data) Mkdir(name string) (*Data, error) {
 
 // RecycleDir creates a new directory with the specified name
 // if it doesn't already exist, otherwise returns the existing one.
-// It only returns an error is if this item is not a directory.
-func (d *Data) RecycleDir(name string) (*Data, error) {
-	if err := d.mustDir("RecycleDir", name); err != nil {
-		return nil, err
+// It logs an error and returns nil if this parent item is not a directory.
+func (d *Data) RecycleDir(name string) *Data {
+	if err := d.mustDir("RecycleDir", name); errors.Log(err) != nil {
+		return nil
 	}
 	if cd := d.Dir.At(name); cd != nil {
-		return cd, nil
+		return cd
 	}
-	return NewDir(name, d)
+	nd, _ := NewDir(name, d)
+	return nd
+}
+
+// Recycle ensures that an item with the given Data item's name
+// exists within this directory, returning the actual item.
+// If there is no such item already, the given Data item is added,
+// otherwise the existing one is returned.
+// It will log an error and return nil if the parent Data is not a directory.
+func (d *Data) Recycle(it *Data) *Data {
+	if err := d.mustDir("Recycle", it.name); errors.Log(err) != nil {
+		return nil
+	}
+	if ex, ok := d.Dir.AtTry(it.name); ok {
+		return ex
+	}
+	d.Dir.Add(it.name, it)
+	return it
 }
 
 // GetDirTable gets the DirTable as a [table.Table] for this directory item,

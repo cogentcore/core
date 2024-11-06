@@ -7,7 +7,6 @@ package stats
 import (
 	"strconv"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
@@ -24,10 +23,7 @@ var DescriptiveStats = []Stats{StatCount, StatMean, StatStd, StatSem, StatMin, S
 // The [DescriptiveStats] list is: [Count], [Mean], [Std], [Sem],
 // [Min], [Max], [Q1], [Median], [Q3]
 func Describe(dir *datafs.Data, tsrs ...tensor.Tensor) {
-	dd, err := dir.RecycleDir("Describe")
-	if errors.Log(err) != nil {
-		return
-	}
+	dd := dir.RecycleDir("Describe")
 	for i, tsr := range tsrs {
 		nr := tsr.DimSize(0)
 		if nr == 0 {
@@ -40,7 +36,7 @@ func Describe(dir *datafs.Data, tsrs ...tensor.Tensor) {
 		td, _ := dd.Mkdir(nm)
 		for _, st := range DescriptiveStats {
 			stnm := st.String()
-			sv := datafs.NewValue[float64](td, stnm, 1)
+			sv := datafs.Scalar[float64](td, stnm)
 			stout := st.Call(tsr)
 			sv.CopyFrom(stout)
 		}
