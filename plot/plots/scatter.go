@@ -10,6 +10,7 @@
 package plots
 
 import (
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/styles/units"
@@ -34,30 +35,29 @@ type Scatter struct {
 	// Use zero width to disable lines.
 	Line plot.LineStyle
 
-	// Stylers are the styler functions.
-	Stylers plot.Stylers
+	stylers plot.Stylers
 }
 
 // NewScatter returns a Scatter that uses the
 // default glyph style.
-func NewScatter(xys plot.XYer) (*Scatter, error) {
+func NewScatter(xys plot.XYer) *Scatter {
 	data, err := plot.CopyXYs(xys)
-	if err != nil {
-		return nil, err
+	if errors.Log(err) != nil {
+		return nil
 	}
 	sc := &Scatter{XYs: data}
 	sc.Line.Defaults()
 	sc.PointSize.Pt(4)
-	return sc, nil
+	return sc
 }
 
 func (sc *Scatter) Style(f func(s *Scatter)) *Scatter {
-	sc.Stylers.Add(func(p plot.Plotter) { f(p.(*Scatter)) })
+	sc.stylers.Add(func(p plot.Plotter) { f(p.(*Scatter)) })
 	return sc
 }
 
 func (sc *Scatter) ApplyStyle() {
-	sc.Stylers.Run(sc)
+	sc.stylers.Run(sc)
 }
 
 func (sc *Scatter) XYData() (data plot.XYer, pixels plot.XYer) {

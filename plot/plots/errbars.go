@@ -5,6 +5,7 @@
 package plots
 
 import (
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/styles/units"
@@ -80,26 +81,26 @@ func (eb *YErrorBars) Defaults() {
 func NewYErrorBars(yerrs interface {
 	plot.XYer
 	YErrorer
-}) (*YErrorBars, error) {
+}) *YErrorBars {
 
-	errors := make(YErrors, yerrs.Len())
-	for i := range errors {
-		errors[i].Low, errors[i].High = yerrs.YError(i)
-		if err := plot.CheckFloats(errors[i].Low, errors[i].High); err != nil {
-			return nil, err
+	errs := make(YErrors, yerrs.Len())
+	for i := range errs {
+		errs[i].Low, errs[i].High = yerrs.YError(i)
+		if err := plot.CheckFloats(errs[i].Low, errs[i].High); errors.Log(err) != nil {
+			return nil
 		}
 	}
 	xys, err := plot.CopyXYs(yerrs)
-	if err != nil {
-		return nil, err
+	if errors.Log(err) != nil {
+		return nil
 	}
 
 	eb := &YErrorBars{
 		XYs:     xys,
-		YErrors: errors,
+		YErrors: errs,
 	}
 	eb.Defaults()
-	return eb, nil
+	return eb
 }
 
 // Styler adds a style function to set style parameters.
@@ -193,26 +194,26 @@ type XErrorBars struct {
 func NewXErrorBars(xerrs interface {
 	plot.XYer
 	XErrorer
-}) (*XErrorBars, error) {
+}) *XErrorBars {
 
-	errors := make(XErrors, xerrs.Len())
-	for i := range errors {
-		errors[i].Low, errors[i].High = xerrs.XError(i)
-		if err := plot.CheckFloats(errors[i].Low, errors[i].High); err != nil {
-			return nil, err
+	errs := make(XErrors, xerrs.Len())
+	for i := range errs {
+		errs[i].Low, errs[i].High = xerrs.XError(i)
+		if err := plot.CheckFloats(errs[i].Low, errs[i].High); errors.Log(err) != nil {
+			return nil
 		}
 	}
 	xys, err := plot.CopyXYs(xerrs)
-	if err != nil {
-		return nil, err
+	if errors.Log(err) != nil {
+		return nil
 	}
 
 	eb := &XErrorBars{
 		XYs:     xys,
-		XErrors: errors,
+		XErrors: errs,
 	}
 	eb.Defaults()
-	return eb, nil
+	return eb
 }
 
 func (eb *XErrorBars) Defaults() {

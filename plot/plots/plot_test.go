@@ -118,9 +118,9 @@ func TestScatter(t *testing.T) {
 		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
 	}
 
-	l1, err := NewScatter(data)
-	if err != nil {
-		t.Error(err.Error())
+	l1 := NewScatter(data)
+	if l1 == nil {
+		t.Error("bad data")
 	}
 	plt.Add(l1)
 
@@ -150,17 +150,17 @@ func TestLabels(t *testing.T) {
 		labels[i] = fmt.Sprintf("%7.4g", data[i].Y)
 	}
 
-	l1, sc, err := NewLinePoints(data)
-	if err != nil {
-		t.Error(err.Error())
+	l1, sc := NewLinePoints(data)
+	if l1 == nil || sc == nil {
+		t.Error("bad data")
 	}
 	plt.Add(l1)
 	plt.Add(sc)
 	plt.Legend.Add("Sine", l1, sc)
 
-	l2, err := NewLabels(XYLabels{XYs: data, Labels: labels})
-	if err != nil {
-		t.Error(err.Error())
+	l2 := NewLabels(XYLabels{XYs: data, Labels: labels})
+	if l2 == nil {
+		t.Error("bad data")
 	}
 	l2.Offset.X.Dp(6)
 	l2.Offset.Y.Dp(-6)
@@ -191,9 +191,9 @@ func TestBarChart(t *testing.T) {
 		cos[i] = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
 	}
 
-	l1, err := NewBarChart(data, nil)
-	if err != nil {
-		t.Error(err.Error())
+	l1 := NewBarChart(data, nil)
+	if l1 == nil {
+		t.Error("bad data")
 	}
 	l1.Color = colors.Uniform(colors.Red)
 	plt.Add(l1)
@@ -203,9 +203,9 @@ func TestBarChart(t *testing.T) {
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "bar.png")
 
-	l2, err := NewBarChart(cos, nil)
-	if err != nil {
-		t.Error(err.Error())
+	l2 := NewBarChart(cos, nil)
+	if l2 == nil {
+		t.Error("bad data")
 	}
 	l2.Color = colors.Uniform(colors.Blue)
 	plt.Legend.Add("Cosine", l2)
@@ -239,9 +239,9 @@ func TestBarChartErr(t *testing.T) {
 		cos[i] = float32(5) + 4*math32.Cos((x/8)*math32.Pi)
 	}
 
-	l1, err := NewBarChart(data, cos)
-	if err != nil {
-		t.Error(err.Error())
+	l1 := NewBarChart(data, cos)
+	if l1 == nil {
+		t.Error("bad data")
 	}
 	l1.Color = colors.Uniform(colors.Red)
 	plt.Add(l1)
@@ -279,17 +279,17 @@ func TestBarChartStack(t *testing.T) {
 		cos[i] = float32(5) + 4*math32.Cos((x/8)*math32.Pi)
 	}
 
-	l1, err := NewBarChart(data, nil)
-	if err != nil {
-		t.Error(err.Error())
+	l1 := NewBarChart(data, nil)
+	if l1 == nil {
+		t.Error("bad data")
 	}
 	l1.Color = colors.Uniform(colors.Red)
 	plt.Add(l1)
 	plt.Legend.Add("Sine", l1)
 
-	l2, err := NewBarChart(cos, nil)
-	if err != nil {
-		t.Error(err.Error())
+	l2 := NewBarChart(cos, nil)
+	if l2 == nil {
+		t.Error("bad data")
 	}
 	l2.Color = colors.Uniform(colors.Blue)
 	l2.StackedOn = l1
@@ -337,9 +337,9 @@ func TestErrBar(t *testing.T) {
 	plt.Add(l1)
 	plt.Legend.Add("Sine", l1)
 
-	l2, err := NewYErrorBars(xyerr)
-	if err != nil {
-		t.Error(err.Error())
+	l2 := NewYErrorBars(xyerr)
+	if l2 == nil {
+		t.Error("bad data")
 	}
 	plt.Add(l2)
 

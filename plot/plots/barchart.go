@@ -14,6 +14,7 @@ package plots
 import (
 	"image"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
@@ -84,16 +85,16 @@ type BarChart struct {
 // The bars heights correspond to the values and their x locations correspond
 // to the index of their value in the Valuer.  Optional error-bar values can be
 // provided.
-func NewBarChart(vs, ers plot.Valuer) (*BarChart, error) {
+func NewBarChart(vs, ers plot.Valuer) *BarChart {
 	values, err := plot.CopyValues(vs)
-	if err != nil {
-		return nil, err
+	if errors.Log(err) != nil {
+		return nil
 	}
 	var errs plot.Values
 	if ers != nil {
 		errs, err = plot.CopyValues(ers)
-		if err != nil {
-			return nil, err
+		if errors.Log(err) != nil {
+			return nil
 		}
 	}
 	b := &BarChart{
@@ -101,7 +102,7 @@ func NewBarChart(vs, ers plot.Valuer) (*BarChart, error) {
 		Errors: errs,
 	}
 	b.Defaults()
-	return b, nil
+	return b
 }
 
 func (b *BarChart) Defaults() {

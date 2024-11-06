@@ -5,9 +5,9 @@
 package plots
 
 import (
-	"errors"
 	"image"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/styles/units"
@@ -40,14 +40,15 @@ type Labels struct {
 }
 
 // NewLabels returns a new Labels using defaults
-func NewLabels(d XYLabeler) (*Labels, error) {
+func NewLabels(d XYLabeler) *Labels {
 	xys, err := plot.CopyXYs(d)
-	if err != nil {
-		return nil, err
+	if errors.Log(err) != nil {
+		return nil
 	}
 
 	if d.Len() != len(xys) {
-		return nil, errors.New("plotter: number of points does not match the number of labels")
+		errors.Log(errors.New("plotter: number of points does not match the number of labels"))
+		return nil
 	}
 
 	strs := make([]string, d.Len())
@@ -64,7 +65,7 @@ func NewLabels(d XYLabeler) (*Labels, error) {
 		XYs:       xys,
 		Labels:    strs,
 		TextStyle: styles,
-	}, nil
+	}
 }
 
 // Styler adds a style function to set style parameters.

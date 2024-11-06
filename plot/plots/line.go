@@ -79,14 +79,11 @@ func NewLine(xys plot.XYer) *Line {
 
 // NewLinePoints returns both a Line and a
 // Scatter plot for the given point data.
-func NewLinePoints(xys plot.XYer) (*Line, *Scatter, error) {
-	sc, err := NewScatter(xys)
-	if err != nil {
-		return nil, nil, err
-	}
+func NewLinePoints(xys plot.XYer) (*Line, *Scatter) {
+	sc := NewScatter(xys)
 	ln := &Line{XYs: sc.XYs}
 	ln.Defaults()
-	return ln, sc, nil
+	return ln, sc
 }
 
 func (ln *Line) Defaults() {
