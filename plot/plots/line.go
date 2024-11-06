@@ -14,6 +14,7 @@ package plots
 import (
 	"image"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
 )
@@ -47,9 +48,9 @@ type Line struct {
 	// StepStyle is the kind of the step line.
 	StepStyle StepKind
 
-	// LineStyle is the style of the line connecting the points.
+	// Line is the style of the line connecting the points.
 	// Use zero width to disable lines.
-	LineStyle plot.LineStyle
+	Line plot.LineStyle
 
 	// Fill is the color to fill the area below the plot.
 	// Use nil to disable filling, which is the default.
@@ -60,18 +61,20 @@ type Line struct {
 	// default is false, so that repeated series of data across the X axis
 	// are plotted separately.
 	NegativeXDraw bool
+
+	stylers plot.Stylers
 }
 
 // NewLine returns a Line that uses the default line style and
 // does not draw glyphs.
-func NewLine(xys plot.XYer) (*Line, error) {
+func NewLine(xys plot.XYer) *Line {
 	data, err := plot.CopyXYs(xys)
-	if err != nil {
-		return nil, err
+	if errors.Log(err) != nil {
+		return nil
 	}
 	ln := &Line{XYs: data}
 	ln.Defaults()
-	return ln, nil
+	return ln
 }
 
 // NewLinePoints returns both a Line and a
@@ -86,32 +89,40 @@ func NewLinePoints(xys plot.XYer) (*Line, *Scatter, error) {
 	return ln, sc, nil
 }
 
-func (pts *Line) Defaults() {
-	pts.LineStyle.Defaults()
+func (ln *Line) Defaults() {
+	ln.Line.Defaults()
 }
 
-func (pts *Line) XYData() (data plot.XYer, pixels plot.XYer) {
-	data = pts.XYs
-	pixels = pts.PXYs
+// Styler adds a style function to set style parameters.
+func (ln *Line) Styler(f func(s *Line)) *Line {
+	ln.stylers.Add(func(p plot.Plotter) { f(p.(*Line)) })
+	return ln
+}
+
+func (ln *Line) ApplyStyle() { ln.stylers.Run(ln) }
+
+func (ln *Line) XYData() (data plot.XYer, pixels plot.XYer) {
+	data = ln.XYs
+	pixels = ln.PXYs
 	return
 }
 
 // Plot draws the Line, implementing the plot.Plotter interface.
-func (pts *Line) Plot(plt *plot.Plot) {
+func (ln *Line) Plot(plt *plot.Plot) {
 	pc := plt.Paint
 
-	ps := plot.PlotXYs(plt, pts.XYs)
+	ps := plot.PlotXYs(plt, ln.XYs)
 	np := len(ps)
-	pts.PXYs = ps
+	ln.PXYs = ps
 
-	if pts.Fill != nil {
-		pc.FillStyle.Color = pts.Fill
+	if ln.Fill != nil {
+		pc.FillStyle.Color = ln.Fill
 		minY := plt.PY(plt.Y.Min)
 		prev := math32.Vec2(ps[0].X, minY)
 		pc.MoveTo(prev.X, prev.Y)
 		for i := range ps {
 			pt := ps[i]
-			switch pts.StepStyle {
+			switch ln.StepStyle {
 			case NoStep:
 				if pt.X < prev.X {
 					pc.LineTo(prev.X, minY)
@@ -159,16 +170,16 @@ func (pts *Line) Plot(plt *plot.Plot) {
 	}
 	pc.FillStyle.Color = nil
 
-	if !pts.LineStyle.SetStroke(plt) {
+	if !ln.Line.SetStroke(plt) {
 		return
 	}
 	prev := ps[0]
 	pc.MoveTo(prev.X, prev.Y)
 	for i := 1; i < np; i++ {
 		pt := ps[i]
-		if pts.StepStyle != NoStep {
+		if ln.StepStyle != NoStep {
 			if pt.X >= prev.X {
-				switch pts.StepStyle {
+				switch ln.StepStyle {
 				case PreStep:
 					pc.LineTo(prev.X, pt.Y)
 				case MidStep:
@@ -181,7 +192,7 @@ func (pts *Line) Plot(plt *plot.Plot) {
 				pc.MoveTo(pt.X, pt.Y)
 			}
 		}
-		if !pts.NegativeXDraw && pt.X < prev.X {
+		if !ln.NegativeXDraw && pt.X < prev.X {
 			pc.MoveTo(pt.X, pt.Y)
 		} else {
 			pc.LineTo(pt.X, pt.Y)
@@ -193,25 +204,25 @@ func (pts *Line) Plot(plt *plot.Plot) {
 
 // DataRange returns the minimum and maximum
 // x and y values, implementing the plot.DataRanger interface.
-func (pts *Line) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
-	return plot.XYRange(pts)
+func (ln *Line) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
+	return plot.XYRange(ln)
 }
 
 // Thumbnail returns the thumbnail for the LineTo, implementing the plot.Thumbnailer interface.
-func (pts *Line) Thumbnail(plt *plot.Plot) {
+func (ln *Line) Thumbnail(plt *plot.Plot) {
 	pc := plt.Paint
 	ptb := pc.Bounds
 	midY := 0.5 * float32(ptb.Min.Y+ptb.Max.Y)
 
-	if pts.Fill != nil {
+	if ln.Fill != nil {
 		tb := ptb
-		if pts.LineStyle.Width.Value > 0 {
+		if ln.Line.Width.Value > 0 {
 			tb.Min.Y = int(midY)
 		}
-		pc.FillBox(math32.FromPoint(tb.Min), math32.FromPoint(tb.Size()), pts.Fill)
+		pc.FillBox(math32.FromPoint(tb.Min), math32.FromPoint(tb.Size()), ln.Fill)
 	}
 
-	if pts.LineStyle.SetStroke(plt) {
+	if ln.Line.SetStroke(plt) {
 		pc.MoveTo(float32(ptb.Min.X), midY)
 		pc.LineTo(float32(ptb.Max.X), midY)
 		pc.Stroke()

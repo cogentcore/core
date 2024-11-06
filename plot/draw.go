@@ -54,6 +54,9 @@ func (pt *Plot) SVGToFile(filename string) error {
 // drawConfig configures everything for drawing
 func (pt *Plot) drawConfig() {
 	pt.Resize(pt.Size) // ensure
+	for _, plt := range pt.Plotters {
+		plt.ApplyStyle()
+	}
 	pt.Legend.TextStyle.openFont(pt)
 	pt.Paint.ToDots()
 }

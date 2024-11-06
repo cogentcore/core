@@ -58,15 +58,17 @@ type YErrorBars struct {
 	// representing the high, center value of the error bar.
 	PXYs plot.XYs
 
-	// LineStyle is the style used to draw the error bars.
-	LineStyle plot.LineStyle
+	// Line is the style used to draw the error bars.
+	Line plot.LineStyle
 
 	// CapWidth is the width of the caps drawn at the top of each error bar.
 	CapWidth units.Value
+
+	stylers plot.Stylers
 }
 
 func (eb *YErrorBars) Defaults() {
-	eb.LineStyle.Defaults()
+	eb.Line.Defaults()
 	eb.CapWidth.Dp(10)
 }
 
@@ -100,6 +102,14 @@ func NewYErrorBars(yerrs interface {
 	return eb, nil
 }
 
+// Styler adds a style function to set style parameters.
+func (e *YErrorBars) Styler(f func(s *YErrorBars)) *YErrorBars {
+	e.stylers.Add(func(p plot.Plotter) { f(p.(*YErrorBars)) })
+	return e
+}
+
+func (e *YErrorBars) ApplyStyle() { e.stylers.Run(e) }
+
 func (e *YErrorBars) XYData() (data plot.XYer, pixels plot.XYer) {
 	data = e.XYs
 	pixels = e.PXYs
@@ -115,7 +125,7 @@ func (e *YErrorBars) Plot(plt *plot.Plot) {
 	cw := 0.5 * e.CapWidth.Dots
 	nv := len(e.YErrors)
 	e.PXYs = make(plot.XYs, nv)
-	e.LineStyle.SetStroke(plt)
+	e.Line.SetStroke(plt)
 	for i, err := range e.YErrors {
 		x := plt.PX(e.XYs[i].X)
 		ylow := plt.PY(e.XYs[i].Y - math32.Abs(err.Low))
@@ -165,12 +175,14 @@ type XErrorBars struct {
 	// representing the high, center value of the error bar.
 	PXYs plot.XYs
 
-	// LineStyle is the style used to draw the error bars.
-	LineStyle plot.LineStyle
+	// Line is the style used to draw the error bars.
+	Line plot.LineStyle
 
 	// CapWidth is the width of the caps drawn at the top
 	// of each error bar.
 	CapWidth units.Value
+
+	stylers plot.Stylers
 }
 
 // Returns a new XErrorBars plotter, or an error on failure. The error values
@@ -204,9 +216,17 @@ func NewXErrorBars(xerrs interface {
 }
 
 func (eb *XErrorBars) Defaults() {
-	eb.LineStyle.Defaults()
+	eb.Line.Defaults()
 	eb.CapWidth.Dp(10)
 }
+
+// Styler adds a style function to set style parameters.
+func (e *XErrorBars) Styler(f func(s *XErrorBars)) *XErrorBars {
+	e.stylers.Add(func(p plot.Plotter) { f(p.(*XErrorBars)) })
+	return e
+}
+
+func (e *XErrorBars) ApplyStyle() { e.stylers.Run(e) }
 
 func (e *XErrorBars) XYData() (data plot.XYer, pixels plot.XYer) {
 	data = e.XYs
@@ -224,7 +244,7 @@ func (e *XErrorBars) Plot(plt *plot.Plot) {
 
 	nv := len(e.XErrors)
 	e.PXYs = make(plot.XYs, nv)
-	e.LineStyle.SetStroke(plt)
+	e.Line.SetStroke(plt)
 	for i, err := range e.XErrors {
 		y := plt.PY(e.XYs[i].Y)
 		xlow := plt.PX(e.XYs[i].X - math32.Abs(err.Low))

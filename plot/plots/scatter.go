@@ -30,9 +30,12 @@ type Scatter struct {
 	// shape to draw for each point
 	PointShape Shapes
 
-	// LineStyle is the style of the line connecting the points.
+	// Line is the style of the line connecting the points.
 	// Use zero width to disable lines.
-	LineStyle plot.LineStyle
+	Line plot.LineStyle
+
+	// Stylers are the styler functions.
+	Stylers plot.Stylers
 }
 
 // NewScatter returns a Scatter that uses the
@@ -43,51 +46,60 @@ func NewScatter(xys plot.XYer) (*Scatter, error) {
 		return nil, err
 	}
 	sc := &Scatter{XYs: data}
-	sc.LineStyle.Defaults()
+	sc.Line.Defaults()
 	sc.PointSize.Pt(4)
 	return sc, nil
 }
 
-func (pts *Scatter) XYData() (data plot.XYer, pixels plot.XYer) {
-	data = pts.XYs
-	pixels = pts.PXYs
+func (sc *Scatter) Style(f func(s *Scatter)) *Scatter {
+	sc.Stylers.Add(func(p plot.Plotter) { f(p.(*Scatter)) })
+	return sc
+}
+
+func (sc *Scatter) ApplyStyle() {
+	sc.Stylers.Run(sc)
+}
+
+func (sc *Scatter) XYData() (data plot.XYer, pixels plot.XYer) {
+	data = sc.XYs
+	pixels = sc.PXYs
 	return
 }
 
 // Plot draws the Line, implementing the plot.Plotter interface.
-func (pts *Scatter) Plot(plt *plot.Plot) {
+func (sc *Scatter) Plot(plt *plot.Plot) {
 	pc := plt.Paint
-	if !pts.LineStyle.SetStroke(plt) {
+	if !sc.Line.SetStroke(plt) {
 		return
 	}
-	pts.PointSize.ToDots(&pc.UnitContext)
-	pc.FillStyle.Color = pts.LineStyle.Color
-	ps := plot.PlotXYs(plt, pts.XYs)
+	sc.PointSize.ToDots(&pc.UnitContext)
+	pc.FillStyle.Color = sc.Line.Color
+	ps := plot.PlotXYs(plt, sc.XYs)
 	for i := range ps {
 		pt := ps[i]
-		DrawShape(pc, math32.Vec2(pt.X, pt.Y), pts.PointSize.Dots, pts.PointShape)
+		DrawShape(pc, math32.Vec2(pt.X, pt.Y), sc.PointSize.Dots, sc.PointShape)
 	}
 	pc.FillStyle.Color = nil
 }
 
 // DataRange returns the minimum and maximum
 // x and y values, implementing the plot.DataRanger interface.
-func (pts *Scatter) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
-	return plot.XYRange(pts)
+func (sc *Scatter) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
+	return plot.XYRange(sc)
 }
 
 // Thumbnail the thumbnail for the Scatter,
 // implementing the plot.Thumbnailer interface.
-func (pts *Scatter) Thumbnail(plt *plot.Plot) {
-	if !pts.LineStyle.SetStroke(plt) {
+func (sc *Scatter) Thumbnail(plt *plot.Plot) {
+	if !sc.Line.SetStroke(plt) {
 		return
 	}
 	pc := plt.Paint
-	pts.PointSize.ToDots(&pc.UnitContext)
-	pc.FillStyle.Color = pts.LineStyle.Color
+	sc.PointSize.ToDots(&pc.UnitContext)
+	pc.FillStyle.Color = sc.Line.Color
 	ptb := pc.Bounds
 	midX := 0.5 * float32(ptb.Min.X+ptb.Max.X)
 	midY := 0.5 * float32(ptb.Min.Y+ptb.Max.Y)
 
-	DrawShape(pc, math32.Vec2(midX, midY), pts.PointSize.Dots, pts.PointShape)
+	DrawShape(pc, math32.Vec2(midX, midY), sc.PointSize.Dots, sc.PointShape)
 }

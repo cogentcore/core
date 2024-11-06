@@ -36,6 +36,7 @@ type Labels struct {
 	// plot size and number of TextStyle when styles last generated -- don't regen
 	styleSize image.Point
 	styleN    int
+	stylers   plot.Stylers
 }
 
 // NewLabels returns a new Labels using defaults
@@ -64,6 +65,16 @@ func NewLabels(d XYLabeler) (*Labels, error) {
 		Labels:    strs,
 		TextStyle: styles,
 	}, nil
+}
+
+// Styler adds a style function to set style parameters.
+func (l *Labels) Styler(f func(s *Labels)) *Labels {
+	l.stylers.Add(func(p plot.Plotter) { f(p.(*Labels)) })
+	return l
+}
+
+func (l *Labels) ApplyStyle() {
+	l.stylers.Run(l)
 }
 
 func (l *Labels) XYData() (data plot.XYer, pixels plot.XYer) {

@@ -17,20 +17,42 @@ import (
 	"cogentcore.org/core/plot"
 )
 
+func ExampleLine() {
+	data := make(plot.XYs, 42)
+	for i := range data {
+		x := float32(i % 21)
+		data[i].X = x * 5
+		if i < 21 {
+			data[i].Y = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
+		} else {
+			data[i].Y = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
+		}
+	}
+
+	plt := plot.New()
+	plt.Add(NewLine(data).Styler(func(ln *Line) {
+		ln.Line.Color = colors.Uniform(colors.Red)
+		ln.Line.Width.Pt(2)
+	}))
+	plt.Draw()
+	imagex.Save(plt.Pixels, "testdata/ex_line_plot.png")
+	// Output:
+}
+
 func TestMain(m *testing.M) {
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 	os.Exit(m.Run())
 }
 
 func TestLine(t *testing.T) {
-	pt := plot.New()
-	pt.Title.Text = "Test Line"
-	pt.X.Min = 0
-	pt.X.Max = 100
-	pt.X.Label.Text = "X Axis"
-	pt.Y.Min = 0
-	pt.Y.Max = 100
-	pt.Y.Label.Text = "Y Axis"
+	plt := plot.New()
+	plt.Title.Text = "Test Line"
+	plt.X.Min = 0
+	plt.X.Max = 100
+	plt.X.Label.Text = "X Axis"
+	plt.Y.Min = 0
+	plt.Y.Max = 100
+	plt.Y.Label.Text = "Y Axis"
 
 	// note: making two overlapping series
 	data := make(plot.XYs, 42)
@@ -44,51 +66,51 @@ func TestLine(t *testing.T) {
 		}
 	}
 
-	l1, err := NewLine(data)
-	if err != nil {
-		t.Error(err.Error())
+	l1 := NewLine(data)
+	if l1 == nil {
+		t.Error("bad data")
 	}
-	pt.Add(l1)
-	pt.Legend.Add("Sine", l1)
-	pt.Legend.Add("Cos", l1)
+	plt.Add(l1)
+	plt.Legend.Add("Sine", l1)
+	plt.Legend.Add("Cos", l1)
 
-	pt.Resize(image.Point{640, 480})
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "line.png")
+	plt.Resize(image.Point{640, 480})
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "line.png")
 
 	l1.Fill = colors.Uniform(colors.Yellow)
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "line-fill.png")
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "line-fill.png")
 
 	l1.StepStyle = PreStep
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "line-prestep.png")
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "line-prestep.png")
 
 	l1.StepStyle = MidStep
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "line-midstep.png")
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "line-midstep.png")
 
 	l1.StepStyle = PostStep
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "line-poststep.png")
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "line-poststep.png")
 
 	l1.StepStyle = NoStep
 	l1.Fill = nil
 	l1.NegativeXDraw = true
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "line-negx.png")
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "line-negx.png")
 
 }
 
 func TestScatter(t *testing.T) {
-	pt := plot.New()
-	pt.Title.Text = "Test Scatter"
-	pt.X.Min = 0
-	pt.X.Max = 100
-	pt.X.Label.Text = "X Axis"
-	pt.Y.Min = 0
-	pt.Y.Max = 100
-	pt.Y.Label.Text = "Y Axis"
+	plt := plot.New()
+	plt.Title.Text = "Test Scatter"
+	plt.X.Min = 0
+	plt.X.Max = 100
+	plt.X.Label.Text = "X Axis"
+	plt.Y.Min = 0
+	plt.Y.Max = 100
+	plt.Y.Label.Text = "Y Axis"
 
 	data := make(plot.XYs, 21)
 	for i := range data {
@@ -100,23 +122,23 @@ func TestScatter(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	pt.Add(l1)
+	plt.Add(l1)
 
-	pt.Resize(image.Point{640, 480})
+	plt.Resize(image.Point{640, 480})
 
 	shs := ShapesValues()
 	for _, sh := range shs {
 		l1.PointShape = sh
-		pt.Draw()
-		imagex.Assert(t, pt.Pixels, "scatter-"+sh.String()+".png")
+		plt.Draw()
+		imagex.Assert(t, plt.Pixels, "scatter-"+sh.String()+".png")
 	}
 }
 
 func TestLabels(t *testing.T) {
-	pt := plot.New()
-	pt.Title.Text = "Test Labels"
-	pt.X.Label.Text = "X Axis"
-	pt.Y.Label.Text = "Y Axis"
+	plt := plot.New()
+	plt.Title.Text = "Test Labels"
+	plt.X.Label.Text = "X Axis"
+	plt.Y.Label.Text = "Y Axis"
 
 	// note: making two overlapping series
 	data := make(plot.XYs, 12)
@@ -132,9 +154,9 @@ func TestLabels(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	pt.Add(l1)
-	pt.Add(sc)
-	pt.Legend.Add("Sine", l1, sc)
+	plt.Add(l1)
+	plt.Add(sc)
+	plt.Legend.Add("Sine", l1, sc)
 
 	l2, err := NewLabels(XYLabels{XYs: data, Labels: labels})
 	if err != nil {
@@ -142,20 +164,20 @@ func TestLabels(t *testing.T) {
 	}
 	l2.Offset.X.Dp(6)
 	l2.Offset.Y.Dp(-6)
-	pt.Add(l2)
+	plt.Add(l2)
 
-	pt.Resize(image.Point{640, 480})
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "labels.png")
+	plt.Resize(image.Point{640, 480})
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "labels.png")
 }
 
 func TestBarChart(t *testing.T) {
-	pt := plot.New()
-	pt.Title.Text = "Test Bar Chart"
-	pt.X.Label.Text = "X Axis"
-	pt.Y.Min = 0
-	pt.Y.Max = 100
-	pt.Y.Label.Text = "Y Axis"
+	plt := plot.New()
+	plt.Title.Text = "Test Bar Chart"
+	plt.X.Label.Text = "X Axis"
+	plt.Y.Min = 0
+	plt.Y.Max = 100
+	plt.Y.Label.Text = "Y Axis"
 
 	data := make(plot.Values, 21)
 	for i := range data {
@@ -174,36 +196,36 @@ func TestBarChart(t *testing.T) {
 		t.Error(err.Error())
 	}
 	l1.Color = colors.Uniform(colors.Red)
-	pt.Add(l1)
-	pt.Legend.Add("Sine", l1)
+	plt.Add(l1)
+	plt.Legend.Add("Sine", l1)
 
-	pt.Resize(image.Point{640, 480})
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "bar.png")
+	plt.Resize(image.Point{640, 480})
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "bar.png")
 
 	l2, err := NewBarChart(cos, nil)
 	if err != nil {
 		t.Error(err.Error())
 	}
 	l2.Color = colors.Uniform(colors.Blue)
-	pt.Legend.Add("Cosine", l2)
+	plt.Legend.Add("Cosine", l2)
 
 	l1.Stride = 2
 	l2.Stride = 2
 	l2.Offset = 2
 
-	pt.Add(l2) // note: range updated when added!
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "bar-cos.png")
+	plt.Add(l2) // note: range updated when added!
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "bar-cos.png")
 }
 
 func TestBarChartErr(t *testing.T) {
-	pt := plot.New()
-	pt.Title.Text = "Test Bar Chart Errors"
-	pt.X.Label.Text = "X Axis"
-	pt.Y.Min = 0
-	pt.Y.Max = 100
-	pt.Y.Label.Text = "Y Axis"
+	plt := plot.New()
+	plt.Title.Text = "Test Bar Chart Errors"
+	plt.X.Label.Text = "X Axis"
+	plt.Y.Min = 0
+	plt.Y.Max = 100
+	plt.Y.Label.Text = "Y Axis"
 
 	data := make(plot.Values, 21)
 	for i := range data {
@@ -222,28 +244,28 @@ func TestBarChartErr(t *testing.T) {
 		t.Error(err.Error())
 	}
 	l1.Color = colors.Uniform(colors.Red)
-	pt.Add(l1)
-	pt.Legend.Add("Sine", l1)
+	plt.Add(l1)
+	plt.Legend.Add("Sine", l1)
 
-	pt.Resize(image.Point{640, 480})
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "bar-err.png")
+	plt.Resize(image.Point{640, 480})
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "bar-err.png")
 
 	l1.Horizontal = true
-	pt.UpdateRange()
-	pt.X.Min = 0
-	pt.X.Max = 100
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "bar-err-horiz.png")
+	plt.UpdateRange()
+	plt.X.Min = 0
+	plt.X.Max = 100
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "bar-err-horiz.png")
 }
 
 func TestBarChartStack(t *testing.T) {
-	pt := plot.New()
-	pt.Title.Text = "Test Bar Chart Stacked"
-	pt.X.Label.Text = "X Axis"
-	pt.Y.Min = 0
-	pt.Y.Max = 100
-	pt.Y.Label.Text = "Y Axis"
+	plt := plot.New()
+	plt.Title.Text = "Test Bar Chart Stacked"
+	plt.X.Label.Text = "X Axis"
+	plt.Y.Min = 0
+	plt.Y.Max = 100
+	plt.Y.Label.Text = "Y Axis"
 
 	data := make(plot.Values, 21)
 	for i := range data {
@@ -262,8 +284,8 @@ func TestBarChartStack(t *testing.T) {
 		t.Error(err.Error())
 	}
 	l1.Color = colors.Uniform(colors.Red)
-	pt.Add(l1)
-	pt.Legend.Add("Sine", l1)
+	plt.Add(l1)
+	plt.Legend.Add("Sine", l1)
 
 	l2, err := NewBarChart(cos, nil)
 	if err != nil {
@@ -271,12 +293,12 @@ func TestBarChartStack(t *testing.T) {
 	}
 	l2.Color = colors.Uniform(colors.Blue)
 	l2.StackedOn = l1
-	pt.Add(l2)
-	pt.Legend.Add("Cos", l2)
+	plt.Add(l2)
+	plt.Legend.Add("Cos", l2)
 
-	pt.Resize(image.Point{640, 480})
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "bar-stacked.png")
+	plt.Resize(image.Point{640, 480})
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "bar-stacked.png")
 }
 
 type XYErr struct {
@@ -285,12 +307,12 @@ type XYErr struct {
 }
 
 func TestErrBar(t *testing.T) {
-	pt := plot.New()
-	pt.Title.Text = "Test Line Errors"
-	pt.X.Label.Text = "X Axis"
-	pt.Y.Min = 0
-	pt.Y.Max = 100
-	pt.Y.Label.Text = "Y Axis"
+	plt := plot.New()
+	plt.Title.Text = "Test Line Errors"
+	plt.X.Label.Text = "X Axis"
+	plt.Y.Min = 0
+	plt.Y.Max = 100
+	plt.Y.Label.Text = "Y Axis"
 
 	data := make(plot.XYs, 21)
 	for i := range data {
@@ -308,20 +330,20 @@ func TestErrBar(t *testing.T) {
 
 	xyerr := XYErr{XYs: data, YErrors: yerr}
 
-	l1, err := NewLine(data)
-	if err != nil {
-		t.Error(err.Error())
+	l1 := NewLine(data)
+	if l1 == nil {
+		t.Error("bad data")
 	}
-	pt.Add(l1)
-	pt.Legend.Add("Sine", l1)
+	plt.Add(l1)
+	plt.Legend.Add("Sine", l1)
 
 	l2, err := NewYErrorBars(xyerr)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	pt.Add(l2)
+	plt.Add(l2)
 
-	pt.Resize(image.Point{640, 480})
-	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "errbar.png")
+	plt.Resize(image.Point{640, 480})
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "errbar.png")
 }

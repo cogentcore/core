@@ -64,9 +64,9 @@ type BarChart struct {
 	// Color is the fill color of the bars.
 	Color image.Image
 
-	// LineStyle is the style of the line connecting the points.
+	// Line is the style of the line connecting the points.
 	// Use zero width to disable lines.
-	LineStyle plot.LineStyle
+	Line plot.LineStyle
 
 	// Horizontal dictates whether the bars should be in the vertical
 	// (default) or horizontal direction. If Horizontal is true, all
@@ -76,6 +76,8 @@ type BarChart struct {
 
 	// stackedOn is the bar chart upon which this bar chart is stacked.
 	StackedOn *BarChart
+
+	stylers plot.Stylers
 }
 
 // NewBarChart returns a new bar chart with a single bar for each value.
@@ -108,7 +110,16 @@ func (b *BarChart) Defaults() {
 	b.Width = .8
 	b.Pad = 1
 	b.Color = colors.Scheme.OnSurface
-	b.LineStyle.Defaults()
+	b.Line.Defaults()
+}
+
+func (b *BarChart) Styler(f func(s *BarChart)) *BarChart {
+	b.stylers.Add(func(p plot.Plotter) { f(p.(*BarChart)) })
+	return b
+}
+
+func (b *BarChart) ApplyStyle() {
+	b.stylers.Run(b)
 }
 
 func (b *BarChart) XYData() (data plot.XYer, pixels plot.XYer) {
@@ -148,7 +159,7 @@ func (b *BarChart) StackOn(on *BarChart) {
 func (b *BarChart) Plot(plt *plot.Plot) {
 	pc := plt.Paint
 	pc.FillStyle.Color = b.Color
-	b.LineStyle.SetStroke(plt)
+	b.Line.SetStroke(plt)
 
 	nv := len(b.Values)
 	b.XYs = make(plot.XYs, nv)
@@ -233,7 +244,7 @@ func (b *BarChart) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
 func (b *BarChart) Thumbnail(plt *plot.Plot) {
 	pc := plt.Paint
 	pc.FillStyle.Color = b.Color
-	b.LineStyle.SetStroke(plt)
+	b.Line.SetStroke(plt)
 	ptb := pc.Bounds
 	pc.DrawRectangle(float32(ptb.Min.X), float32(ptb.Min.Y), float32(ptb.Size().X), float32(ptb.Size().Y))
 	pc.FillStrokeClear()
