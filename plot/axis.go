@@ -16,7 +16,7 @@ import (
 )
 
 // AxisStyle has style properties for the axis.
-type AxisStyle struct {
+type AxisStyle struct { //types:add -setters
 
 	// Text has the text style parameters for the text label.
 	Text TextStyle

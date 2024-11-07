@@ -6,13 +6,43 @@ import (
 	"image"
 
 	"cogentcore.org/core/math32/minmax"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Normalizer", IDName: "normalizer", Doc: "Normalizer rescales values from the data coordinate system to the\nnormalized coordinate system.", Methods: []types.Method{{Name: "Normalize", Doc: "Normalize transforms a value x in the data coordinate system to\nthe normalized coordinate system.", Args: []string{"min", "max", "x"}, Returns: []string{"float32"}}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.AxisStyle", IDName: "axis-style", Doc: "AxisStyle has style properties for the axis.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Text", Doc: "Text has the text style parameters for the text label."}, {Name: "Line", Doc: "Line has styling properties for the axis line."}, {Name: "Padding", Doc: "Padding between the axis line and the data.  Having\nnon-zero padding ensures that the data is never drawn\non the axis, thus making it easier to see."}, {Name: "TickText", Doc: "TickText has the text style for rendering tick labels,\nand is shared for actual rendering."}, {Name: "TickLine", Doc: "TickLine has line style for drawing tick lines."}, {Name: "TickLength", Doc: "TickLength is the length of tick lines."}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Axis", IDName: "axis", Doc: "Axis represents either a horizontal or vertical\naxis of a plot.", Fields: []types.Field{{Name: "Min", Doc: "Min and Max are the minimum and maximum data\nvalues represented by the axis."}, {Name: "Max", Doc: "Min and Max are the minimum and maximum data\nvalues represented by the axis."}, {Name: "Axis", Doc: "specifies which axis this is: X or Y"}, {Name: "Label", Doc: "Label for the axis"}, {Name: "Line", Doc: "Line styling properties for the axis line."}, {Name: "Padding", Doc: "Padding between the axis line and the data.  Having\nnon-zero padding ensures that the data is never drawn\non the axis, thus making it easier to see."}, {Name: "TickText", Doc: "has the text style for rendering tick labels, and is shared for actual rendering"}, {Name: "TickLine", Doc: "line style for drawing tick lines"}, {Name: "TickLength", Doc: "length of tick lines"}, {Name: "Ticker", Doc: "Ticker generates the tick marks.  Any tick marks\nreturned by the Marker function that are not in\nrange of the axis are not drawn."}, {Name: "Scale", Doc: "Scale transforms a value given in the data coordinate system\nto the normalized coordinate system of the axis—its distance\nalong the axis as a fraction of the axis range."}, {Name: "AutoRescale", Doc: "AutoRescale enables an axis to automatically adapt its minimum\nand maximum boundaries, according to its underlying Ticker."}, {Name: "ticks", Doc: "cached list of ticks, set in size"}}})
+// SetText sets the [AxisStyle.Text]:
+// Text has the text style parameters for the text label.
+func (t *AxisStyle) SetText(v TextStyle) *AxisStyle { t.Text = v; return t }
+
+// SetLine sets the [AxisStyle.Line]:
+// Line has styling properties for the axis line.
+func (t *AxisStyle) SetLine(v LineStyle) *AxisStyle { t.Line = v; return t }
+
+// SetPadding sets the [AxisStyle.Padding]:
+// Padding between the axis line and the data.  Having
+// non-zero padding ensures that the data is never drawn
+// on the axis, thus making it easier to see.
+func (t *AxisStyle) SetPadding(v units.Value) *AxisStyle { t.Padding = v; return t }
+
+// SetTickText sets the [AxisStyle.TickText]:
+// TickText has the text style for rendering tick labels,
+// and is shared for actual rendering.
+func (t *AxisStyle) SetTickText(v TextStyle) *AxisStyle { t.TickText = v; return t }
+
+// SetTickLine sets the [AxisStyle.TickLine]:
+// TickLine has line style for drawing tick lines.
+func (t *AxisStyle) SetTickLine(v LineStyle) *AxisStyle { t.TickLine = v; return t }
+
+// SetTickLength sets the [AxisStyle.TickLength]:
+// TickLength is the length of tick lines.
+func (t *AxisStyle) SetTickLength(v units.Value) *AxisStyle { t.TickLength = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Axis", IDName: "axis", Doc: "Axis represents either a horizontal or vertical\naxis of a plot.", Fields: []types.Field{{Name: "Min", Doc: "Min and Max are the minimum and maximum data\nvalues represented by the axis."}, {Name: "Max", Doc: "Min and Max are the minimum and maximum data\nvalues represented by the axis."}, {Name: "Axis", Doc: "specifies which axis this is: X or Y"}, {Name: "Label", Doc: "Label for the axis"}, {Name: "Style", Doc: "Style has the style parameters for the Axis."}, {Name: "TickText", Doc: "TickText is used for rendering the tick text labels."}, {Name: "Ticker", Doc: "Ticker generates the tick marks.  Any tick marks\nreturned by the Marker function that are not in\nrange of the axis are not drawn."}, {Name: "Scale", Doc: "Scale transforms a value given in the data coordinate system\nto the normalized coordinate system of the axis—its distance\nalong the axis as a fraction of the axis range."}, {Name: "AutoRescale", Doc: "AutoRescale enables an axis to automatically adapt its minimum\nand maximum boundaries, according to its underlying Ticker."}, {Name: "ticks", Doc: "cached list of ticks, set in size"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Normalizer", IDName: "normalizer", Doc: "Normalizer rescales values from the data coordinate system to the\nnormalized coordinate system.", Methods: []types.Method{{Name: "Normalize", Doc: "Normalize transforms a value x in the data coordinate system to\nthe normalized coordinate system.", Args: []string{"min", "max", "x"}, Returns: []string{"float32"}}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.LinearScale", IDName: "linear-scale", Doc: "LinearScale an be used as the value of an Axis.Scale function to\nset the axis to a standard linear scale."})
 
@@ -50,9 +80,32 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.selection", ID
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.weights", IDName: "weights", Doc: "weights is a helper type to calcuate the labelling scheme's total score.", Fields: []types.Field{{Name: "simplicity"}, {Name: "coverage"}, {Name: "density"}, {Name: "legibility"}}})
 
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.LegendStyle", IDName: "legend-style", Doc: "LegendStyle has the styling properties for the Legend.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Column", Doc: "Column is for table-based plotting, specifying the column with legend values."}, {Name: "Text", Doc: "Text is the style given to the legend entry texts."}, {Name: "Position", Doc: "position of the legend"}, {Name: "ThumbnailWidth", Doc: "ThumbnailWidth is the width of legend thumbnails."}, {Name: "Fill", Doc: "Fill specifies the background fill color for the legend box,\nif non-nil."}}})
+
+// SetColumn sets the [LegendStyle.Column]:
+// Column is for table-based plotting, specifying the column with legend values.
+func (t *LegendStyle) SetColumn(v string) *LegendStyle { t.Column = v; return t }
+
+// SetText sets the [LegendStyle.Text]:
+// Text is the style given to the legend entry texts.
+func (t *LegendStyle) SetText(v TextStyle) *LegendStyle { t.Text = v; return t }
+
+// SetPosition sets the [LegendStyle.Position]:
+// position of the legend
+func (t *LegendStyle) SetPosition(v LegendPosition) *LegendStyle { t.Position = v; return t }
+
+// SetThumbnailWidth sets the [LegendStyle.ThumbnailWidth]:
+// ThumbnailWidth is the width of legend thumbnails.
+func (t *LegendStyle) SetThumbnailWidth(v units.Value) *LegendStyle { t.ThumbnailWidth = v; return t }
+
+// SetFill sets the [LegendStyle.Fill]:
+// Fill specifies the background fill color for the legend box,
+// if non-nil.
+func (t *LegendStyle) SetFill(v image.Image) *LegendStyle { t.Fill = v; return t }
+
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.LegendPosition", IDName: "legend-position", Doc: "LegendPosition specifies where to put the legend", Fields: []types.Field{{Name: "Top", Doc: "Top and Left specify the location of the legend."}, {Name: "Left", Doc: "Top and Left specify the location of the legend."}, {Name: "XOffs", Doc: "XOffs and YOffs are added to the legend's final position,\nrelative to the relevant anchor position"}, {Name: "YOffs", Doc: "XOffs and YOffs are added to the legend's final position,\nrelative to the relevant anchor position"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Legend", IDName: "legend", Doc: "A Legend gives a description of the meaning of different\ndata elements of the plot.  Each legend entry has a name\nand a thumbnail, where the thumbnail shows a small\nsample of the display style of the corresponding data.", Fields: []types.Field{{Name: "TextStyle", Doc: "TextStyle is the style given to the legend entry texts."}, {Name: "Position", Doc: "position of the legend"}, {Name: "ThumbnailWidth", Doc: "ThumbnailWidth is the width of legend thumbnails."}, {Name: "Fill", Doc: "Fill specifies the background fill color for the legend box,\nif non-nil."}, {Name: "Entries", Doc: "Entries are all of the LegendEntries described by this legend."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Legend", IDName: "legend", Doc: "A Legend gives a description of the meaning of different\ndata elements of the plot.  Each legend entry has a name\nand a thumbnail, where the thumbnail shows a small\nsample of the display style of the corresponding data.", Fields: []types.Field{{Name: "Style", Doc: "Style has the legend styling parameters."}, {Name: "Entries", Doc: "Entries are all of the LegendEntries described by this legend."}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Thumbnailer", IDName: "thumbnailer", Doc: "Thumbnailer wraps the Thumbnail method, which\ndraws the small image in a legend representing the\nstyle of data.", Methods: []types.Method{{Name: "Thumbnail", Doc: "Thumbnail draws an thumbnail representing\na legend entry.  The thumbnail will usually show\na smaller representation of the style used\nto plot the corresponding data.", Args: []string{"pt"}}}})
 
@@ -98,7 +151,56 @@ func (t *LineStyle) SetStep(v StepKind) *LineStyle { t.Step = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.StepKind", IDName: "step-kind", Doc: "StepKind specifies a form of a connection of two consecutive points."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plot", IDName: "plot", Doc: "Plot is the basic type representing a plot.\nIt renders into its own image.RGBA Pixels image,\nand can also save a corresponding SVG version.\nThe Axis ranges are updated automatically when plots\nare added, so setting a fixed range should happen\nafter that point.  See [UpdateRange] method as well.", Fields: []types.Field{{Name: "Title", Doc: "Title of the plot"}, {Name: "Background", Doc: "Background is the background of the plot.\nThe default is [colors.Scheme.Surface]."}, {Name: "StandardTextStyle", Doc: "standard text style with default options"}, {Name: "X", Doc: "X and Y are the horizontal and vertical axes\nof the plot respectively."}, {Name: "Y", Doc: "X and Y are the horizontal and vertical axes\nof the plot respectively."}, {Name: "Legend", Doc: "Legend is the plot's legend."}, {Name: "Plotters", Doc: "plotters are drawn by calling their Plot method\nafter the axes are drawn."}, {Name: "Size", Doc: "size is the target size of the image to render to"}, {Name: "DPI", Doc: "DPI is the dots per inch for rendering the image.\nLarger numbers result in larger scaling of the plot contents\nwhich is strongly recommended for print (e.g., use 300 for print)"}, {Name: "Paint", Doc: "painter for rendering"}, {Name: "Pixels", Doc: "pixels that we render into"}, {Name: "PlotBox", Doc: "Current plot bounding box in image coordinates, for plotting coordinates"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.PlotStyle", IDName: "plot-style", Doc: "PlotStyle has overall plot level styling parameters.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Title", Doc: "Title is the overall title of the plot."}, {Name: "TitleStyle", Doc: "TitleStyle is the text styling parameters for the title."}, {Name: "Background", Doc: "Background is the background of the plot.\nThe default is [colors.Scheme.Surface]."}, {Name: "Scale", Doc: "Scale multiplies the plot DPI value, to change the overall scale\nof the rendered plot.  Larger numbers produce larger scaling.\nTypically use larger numbers when generating plots for inclusion in\ndocuments or other cases where the overall plot size will be small."}, {Name: "Legend", Doc: "Legend has the styling properties for the Legend."}, {Name: "Axis", Doc: "Axis has the styling properties for the Axes."}, {Name: "XAxis", Doc: "XAxis specifies the column to use for the common X axis in a table based plot.\nif empty or not found, the row number is used.\nThis optional for Bar plots, if present and Legend is also present,\nthen an extra space will be put between X values."}, {Name: "XAxisRotation", Doc: "XAxisRotation is the rotation of the X Axis labels, in degrees."}, {Name: "XAxisLabel", Doc: "XAxisLabel is the optional label to use for the XAxis instead of the default."}, {Name: "YAxisLabel", Doc: "YAxisLabel is the optional label to use for the YAxis instead of the default."}}})
+
+// SetTitle sets the [PlotStyle.Title]:
+// Title is the overall title of the plot.
+func (t *PlotStyle) SetTitle(v string) *PlotStyle { t.Title = v; return t }
+
+// SetTitleStyle sets the [PlotStyle.TitleStyle]:
+// TitleStyle is the text styling parameters for the title.
+func (t *PlotStyle) SetTitleStyle(v TextStyle) *PlotStyle { t.TitleStyle = v; return t }
+
+// SetBackground sets the [PlotStyle.Background]:
+// Background is the background of the plot.
+// The default is [colors.Scheme.Surface].
+func (t *PlotStyle) SetBackground(v image.Image) *PlotStyle { t.Background = v; return t }
+
+// SetScale sets the [PlotStyle.Scale]:
+// Scale multiplies the plot DPI value, to change the overall scale
+// of the rendered plot.  Larger numbers produce larger scaling.
+// Typically use larger numbers when generating plots for inclusion in
+// documents or other cases where the overall plot size will be small.
+func (t *PlotStyle) SetScale(v float32) *PlotStyle { t.Scale = v; return t }
+
+// SetLegend sets the [PlotStyle.Legend]:
+// Legend has the styling properties for the Legend.
+func (t *PlotStyle) SetLegend(v LegendStyle) *PlotStyle { t.Legend = v; return t }
+
+// SetAxis sets the [PlotStyle.Axis]:
+// Axis has the styling properties for the Axes.
+func (t *PlotStyle) SetAxis(v AxisStyle) *PlotStyle { t.Axis = v; return t }
+
+// SetXAxis sets the [PlotStyle.XAxis]:
+// XAxis specifies the column to use for the common X axis in a table based plot.
+// if empty or not found, the row number is used.
+// This optional for Bar plots, if present and Legend is also present,
+// then an extra space will be put between X values.
+func (t *PlotStyle) SetXAxis(v string) *PlotStyle { t.XAxis = v; return t }
+
+// SetXAxisRotation sets the [PlotStyle.XAxisRotation]:
+// XAxisRotation is the rotation of the X Axis labels, in degrees.
+func (t *PlotStyle) SetXAxisRotation(v float32) *PlotStyle { t.XAxisRotation = v; return t }
+
+// SetXAxisLabel sets the [PlotStyle.XAxisLabel]:
+// XAxisLabel is the optional label to use for the XAxis instead of the default.
+func (t *PlotStyle) SetXAxisLabel(v string) *PlotStyle { t.XAxisLabel = v; return t }
+
+// SetYAxisLabel sets the [PlotStyle.YAxisLabel]:
+// YAxisLabel is the optional label to use for the YAxis instead of the default.
+func (t *PlotStyle) SetYAxisLabel(v string) *PlotStyle { t.YAxisLabel = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plot", IDName: "plot", Doc: "Plot is the basic type representing a plot.\nIt renders into its own image.RGBA Pixels image,\nand can also save a corresponding SVG version.\nThe Axis ranges are updated automatically when plots\nare added, so setting a fixed range should happen\nafter that point.  See [UpdateRange] method as well.", Fields: []types.Field{{Name: "Title", Doc: "Title of the plot"}, {Name: "Style", Doc: "Style has the styling properties for the plot."}, {Name: "StandardTextStyle", Doc: "standard text style with default options"}, {Name: "X", Doc: "X and Y are the horizontal and vertical axes\nof the plot respectively."}, {Name: "Y", Doc: "X and Y are the horizontal and vertical axes\nof the plot respectively."}, {Name: "Legend", Doc: "Legend is the plot's legend."}, {Name: "Plotters", Doc: "plotters are drawn by calling their Plot method\nafter the axes are drawn."}, {Name: "Size", Doc: "size is the target size of the image to render to"}, {Name: "DPI", Doc: "DPI is the dots per inch for rendering the image.\nLarger numbers result in larger scaling of the plot contents\nwhich is strongly recommended for print (e.g., use 300 for print)"}, {Name: "Paint", Doc: "painter for rendering"}, {Name: "Pixels", Doc: "pixels that we render into"}, {Name: "PlotBox", Doc: "Current plot bounding box in image coordinates, for plotting coordinates"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plotter", IDName: "plotter", Doc: "Plotter is an interface that wraps the Plot method.\nSome standard implementations of Plotter can be found in plotters.", Methods: []types.Method{{Name: "Plot", Doc: "Plot draws the data to the Plot Paint", Args: []string{"pt"}}, {Name: "XYData", Doc: "returns the data for this plot as X,Y points,\nincluding corresponding pixel data.\nThis allows gui interface to inspect data etc.", Returns: []string{"data", "pixels"}}, {Name: "ApplyStyle", Doc: "ApplyStyle applies any stylers to this element."}}})
 
@@ -206,7 +308,23 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Stylers", IDNa
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.DefaultOffOn", IDName: "default-off-on", Doc: "DefaultOffOn specifies whether to use the default value for a bool option,\nor to override the default and set Off or On."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.TextStyle", IDName: "text-style", Doc: "TextStyle specifies styling parameters for Text elements", Embeds: []types.Field{{Name: "FontRender"}}, Fields: []types.Field{{Name: "Align", Doc: "how to align text along the relevant dimension for the text element"}, {Name: "Padding", Doc: "Padding is used in a case-dependent manner to add space around text elements"}, {Name: "Rotation", Doc: "rotation of the text, in Degrees"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.TextStyle", IDName: "text-style", Doc: "TextStyle specifies styling parameters for Text elements", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "FontRender"}}, Fields: []types.Field{{Name: "Align", Doc: "how to align text along the relevant dimension for the text element"}, {Name: "Padding", Doc: "Padding is used in a case-dependent manner to add space around text elements"}, {Name: "Rotation", Doc: "rotation of the text, in Degrees"}, {Name: "Offset", Doc: "Offset is added directly to the final label location."}}})
+
+// SetAlign sets the [TextStyle.Align]:
+// how to align text along the relevant dimension for the text element
+func (t *TextStyle) SetAlign(v styles.Aligns) *TextStyle { t.Align = v; return t }
+
+// SetPadding sets the [TextStyle.Padding]:
+// Padding is used in a case-dependent manner to add space around text elements
+func (t *TextStyle) SetPadding(v units.Value) *TextStyle { t.Padding = v; return t }
+
+// SetRotation sets the [TextStyle.Rotation]:
+// rotation of the text, in Degrees
+func (t *TextStyle) SetRotation(v float32) *TextStyle { t.Rotation = v; return t }
+
+// SetOffset sets the [TextStyle.Offset]:
+// Offset is added directly to the final label location.
+func (t *TextStyle) SetOffset(v units.XY) *TextStyle { t.Offset = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Text", IDName: "text", Doc: "Text specifies a single text element in a plot", Fields: []types.Field{{Name: "Text", Doc: "text string, which can use HTML formatting"}, {Name: "Style", Doc: "styling for this text element"}, {Name: "PaintText", Doc: "PaintText is the [paint.Text] for the text."}}})
 

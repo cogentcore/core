@@ -13,7 +13,7 @@ import (
 )
 
 // LegendStyle has the styling properties for the Legend.
-type LegendStyle struct {
+type LegendStyle struct { //types:add -setters
 
 	// Column is for table-based plotting, specifying the column with legend values.
 	Column string

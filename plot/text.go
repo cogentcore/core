@@ -17,7 +17,7 @@ import (
 var DefaultFontFamily = ""
 
 // TextStyle specifies styling parameters for Text elements
-type TextStyle struct {
+type TextStyle struct { //types:add -setters
 	styles.FontRender
 
 	// how to align text along the relevant dimension for the text element

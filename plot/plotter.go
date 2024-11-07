@@ -5,7 +5,7 @@
 package plot
 
 // Plotter is an interface that wraps the Plot method.
-// Some standard implementations of Plotter can be found in plotters.
+// Standard implementations of Plotter are in the [plots] package.
 type Plotter interface {
 	// Plot draws the data to the Plot Paint
 	Plot(pt *Plot)
@@ -15,8 +15,13 @@ type Plotter interface {
 	// This allows gui interface to inspect data etc.
 	XYData() (data XYer, pixels XYer)
 
-	// ApplyStyle applies any stylers to this element.
-	ApplyStyle()
+	// Stylers returns the styler functions for this element.
+	Stylers() *Stylers
+
+	// ApplyStyle applies any stylers to this element,
+	// first initializing from the given global plot style, which has
+	// already been styled with defaults and all the plot element stylers.
+	ApplyStyle(plotStyle *PlotStyle)
 }
 
 // DataRanger wraps the DataRange method.

@@ -81,7 +81,10 @@ func (ln *XY) Styler(f func(s *plot.Style)) *XY {
 	return ln
 }
 
-func (ln *XY) ApplyStyle() { ln.stylers.Run(&ln.Style) }
+func (ln *XY) Stylers() { return &ln.stylers }
+func (ln *XY) ApplyStyle(plotStyle *plot.Style) {
+	ln.stylers.Run(&ln.Style)
+}
 
 func (ln *XY) XYData() (data plot.XYer, pixels plot.XYer) {
 	data = ln.XYs

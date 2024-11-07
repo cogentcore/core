@@ -21,6 +21,55 @@ import (
 	"cogentcore.org/core/styles"
 )
 
+// PlotStyle has overall plot level styling parameters.
+type PlotStyle struct { //types:add -setters
+
+	// Title is the overall title of the plot.
+	Title string
+
+	// TitleStyle is the text styling parameters for the title.
+	TitleStyle TextStyle
+
+	// Background is the background of the plot.
+	// The default is [colors.Scheme.Surface].
+	Background image.Image
+
+	// Scale multiplies the plot DPI value, to change the overall scale
+	// of the rendered plot.  Larger numbers produce larger scaling.
+	// Typically use larger numbers when generating plots for inclusion in
+	// documents or other cases where the overall plot size will be small.
+	Scale float32 `default:"1,2"`
+
+	// Legend has the styling properties for the Legend.
+	Legend LegendStyle
+
+	// Axis has the styling properties for the Axes.
+	Axis AxisStyle
+
+	// XAxis specifies the column to use for the common X axis in a table based plot.
+	// if empty or not found, the row number is used.
+	// This optional for Bar plots, if present and Legend is also present,
+	// then an extra space will be put between X values.
+	XAxis string
+
+	// XAxisRotation is the rotation of the X Axis labels, in degrees.
+	XAxisRotation float32
+
+	// XAxisLabel is the optional label to use for the XAxis instead of the default.
+	XAxisLabel string
+
+	// YAxisLabel is the optional label to use for the YAxis instead of the default.
+	YAxisLabel string
+}
+
+func (ps *PlotStyle) Defaults() {
+	ps.Legend.Defaults()
+	ps.Axis.Defaults()
+	ps.TitleStyle.Size.Dp(24)
+	ps.Background = colors.Scheme.Surface
+	ps.Scale = 1
+}
+
 // Plot is the basic type representing a plot.
 // It renders into its own image.RGBA Pixels image,
 // and can also save a corresponding SVG version.
@@ -236,54 +285,4 @@ func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float
 		}
 	}
 	return
-}
-
-//////// PlotStyle
-
-// PlotStyle has overall plot level styling parameters.
-type PlotStyle struct {
-
-	// Title is the overall title of the plot.
-	Title string
-
-	// TitleStyle is the text styling parameters for the title.
-	TitleStyle TextStyle
-
-	// Background is the background of the plot.
-	// The default is [colors.Scheme.Surface].
-	Background image.Image
-
-	// Scale multiplies the plot DPI value, to change the overall scale
-	// of the rendered plot.  Larger numbers produce larger scaling.
-	// Typically use larger numbers when generating plots for inclusion in
-	// documents or other cases where the overall plot size will be small.
-	Scale float32 `default:"1,2"`
-
-	// Legend has the styling properties for the Legend.
-	Legend LegendStyle
-
-	// Axis has the styling properties for the Axes.
-	Axis AxisStyle
-
-	// what column to use for the common X axis. if empty or not found,
-	// the row number is used.  This optional for Bar plots, if present and
-	// Legend is also present, then an extra space will be put between X values.
-	XAxis string
-
-	// XAxisRotation is the rotation of the X Axis labels, in degrees.
-	XAxisRotation float32
-
-	// XAxisLabel is the optional label to use for the XAxis instead of the default.
-	XAxisLabel string
-
-	// YAxisLabel is the optional label to use for the YAxis instead of the default.
-	YAxisLabel string
-}
-
-func (ps *PlotStyle) Defaults() {
-	ps.Legend.Defaults()
-	ps.Axis.Defaults()
-	ps.TitleStyle.Size.Dp(24)
-	ps.Background = colors.Scheme.Surface
-	ps.Scale = 1
 }

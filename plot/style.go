@@ -10,9 +10,14 @@ import (
 )
 
 // Style contains the plot styling properties relevant across
-// most plot types. These properties apply both to individual plot elements
-// and to the plot as a whole.
+// most plot types. These properties apply to individual plot elements
+// while the Plot properties applies to the overall plot itself.
 type Style struct { //types:add -setters
+
+	//	Plot has overall plot-level properties, which can be set by any
+	// plot element, and are updated first, before applying element-wise styles.
+	Plot PlotStyle
+
 	// On specifies whether to plot this item, for cases where it can be turned off.
 	On DefaultOffOn
 
