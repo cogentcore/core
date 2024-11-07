@@ -12,6 +12,35 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
+// LegendStyle has the styling properties for the Legend.
+type LegendStyle struct {
+
+	// Column is for table-based plotting, specifying the column with legend values.
+	Column string
+
+	// Text is the style given to the legend entry texts.
+	Text TextStyle
+
+	// position of the legend
+	Position LegendPosition `display:"inline"`
+
+	// ThumbnailWidth is the width of legend thumbnails.
+	ThumbnailWidth units.Value
+
+	// Fill specifies the background fill color for the legend box,
+	// if non-nil.
+	Fill image.Image
+}
+
+func (ls *LegendStyle) Defaults() {
+	ls.Text.Defaults()
+	ls.Text.Padding.Dp(2)
+	ls.Text.Font.Size.Dp(20)
+	ls.Position.Defaults()
+	ls.ThumbnailWidth.Pt(20)
+	ls.Fill = gradient.ApplyOpacity(colors.Scheme.Surface, 0.75)
+}
+
 // LegendPosition specifies where to put the legend
 type LegendPosition struct {
 	// Top and Left specify the location of the legend.
@@ -31,30 +60,16 @@ func (lg *LegendPosition) Defaults() {
 // and a thumbnail, where the thumbnail shows a small
 // sample of the display style of the corresponding data.
 type Legend struct {
-	// TextStyle is the style given to the legend entry texts.
-	TextStyle TextStyle
 
-	// position of the legend
-	Position LegendPosition `display:"inline"`
-
-	// ThumbnailWidth is the width of legend thumbnails.
-	ThumbnailWidth units.Value
-
-	// Fill specifies the background fill color for the legend box,
-	// if non-nil.
-	Fill image.Image
+	// Style has the legend styling parameters.
+	Style LegendStyle
 
 	// Entries are all of the LegendEntries described by this legend.
 	Entries []LegendEntry
 }
 
 func (lg *Legend) Defaults() {
-	lg.TextStyle.Defaults()
-	lg.TextStyle.Padding.Dp(2)
-	lg.TextStyle.Font.Size.Dp(20)
-	lg.Position.Defaults()
-	lg.ThumbnailWidth.Pt(20)
-	lg.Fill = gradient.ApplyOpacity(colors.Scheme.Surface, 0.75)
+	lg.Style.Defaults()
 }
 
 // Add adds an entry to the legend with the given name.

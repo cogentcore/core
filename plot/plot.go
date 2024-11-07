@@ -31,9 +31,8 @@ type Plot struct {
 	// Title of the plot
 	Title Text
 
-	// Background is the background of the plot.
-	// The default is [colors.Scheme.Surface].
-	Background image.Image
+	// Style has the styling properties for the plot.
+	Style PlotStyle
 
 	// standard text style with default options
 	StandardTextStyle styles.Text
@@ -69,9 +68,9 @@ type Plot struct {
 
 // Defaults sets defaults
 func (pt *Plot) Defaults() {
+	pt.Style.Defaults()
 	pt.Title.Defaults()
 	pt.Title.Style.Size.Dp(24)
-	pt.Background = colors.Scheme.Surface
 	pt.X.Defaults(math32.X)
 	pt.Y.Defaults(math32.Y)
 	pt.Legend.Defaults()
@@ -136,10 +135,10 @@ func (pt *Plot) SaveImage(filename string) error {
 // that do not end up in range of the X axis will not have
 // tick marks.
 func (pt *Plot) NominalX(names ...string) {
-	pt.X.TickLine.Width.Pt(0)
-	pt.X.TickLength.Pt(0)
-	pt.X.Line.Width.Pt(0)
-	// pt.Y.Padding.Pt(pt.X.Tick.Label.Width(names[0]) / 2)
+	pt.X.Style.TickLine.Width.Pt(0)
+	pt.X.Style.TickLength.Pt(0)
+	pt.X.Style.Line.Width.Pt(0)
+	// pt.Y.Padding.Pt(pt.X.Style.Tick.Label.Width(names[0]) / 2)
 	ticks := make([]Tick, len(names))
 	for i, name := range names {
 		ticks[i] = Tick{float32(i), name}
@@ -149,15 +148,15 @@ func (pt *Plot) NominalX(names ...string) {
 
 // HideX configures the X axis so that it will not be drawn.
 func (pt *Plot) HideX() {
-	pt.X.TickLength.Pt(0)
-	pt.X.Line.Width.Pt(0)
+	pt.X.Style.TickLength.Pt(0)
+	pt.X.Style.Line.Width.Pt(0)
 	pt.X.Ticker = ConstantTicks([]Tick{})
 }
 
 // HideY configures the Y axis so that it will not be drawn.
 func (pt *Plot) HideY() {
-	pt.Y.TickLength.Pt(0)
-	pt.Y.Line.Width.Pt(0)
+	pt.Y.Style.TickLength.Pt(0)
+	pt.Y.Style.Line.Width.Pt(0)
 	pt.Y.Ticker = ConstantTicks([]Tick{})
 }
 
@@ -169,9 +168,9 @@ func (pt *Plot) HideAxes() {
 
 // NominalY is like NominalX, but for the Y axis.
 func (pt *Plot) NominalY(names ...string) {
-	pt.Y.TickLine.Width.Pt(0)
-	pt.Y.TickLength.Pt(0)
-	pt.Y.Line.Width.Pt(0)
+	pt.Y.Style.TickLine.Width.Pt(0)
+	pt.Y.Style.TickLength.Pt(0)
+	pt.Y.Style.Line.Width.Pt(0)
 	// pt.X.Padding = pt.Y.Tick.Label.Height(names[0]) / 2
 	ticks := make([]Tick, len(names))
 	for i, name := range names {
@@ -237,4 +236,54 @@ func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float
 		}
 	}
 	return
+}
+
+//////// PlotStyle
+
+// PlotStyle has overall plot level styling parameters.
+type PlotStyle struct {
+
+	// Title is the overall title of the plot.
+	Title string
+
+	// TitleStyle is the text styling parameters for the title.
+	TitleStyle TextStyle
+
+	// Background is the background of the plot.
+	// The default is [colors.Scheme.Surface].
+	Background image.Image
+
+	// Scale multiplies the plot DPI value, to change the overall scale
+	// of the rendered plot.  Larger numbers produce larger scaling.
+	// Typically use larger numbers when generating plots for inclusion in
+	// documents or other cases where the overall plot size will be small.
+	Scale float32 `default:"1,2"`
+
+	// Legend has the styling properties for the Legend.
+	Legend LegendStyle
+
+	// Axis has the styling properties for the Axes.
+	Axis AxisStyle
+
+	// what column to use for the common X axis. if empty or not found,
+	// the row number is used.  This optional for Bar plots, if present and
+	// Legend is also present, then an extra space will be put between X values.
+	XAxis string
+
+	// XAxisRotation is the rotation of the X Axis labels, in degrees.
+	XAxisRotation float32
+
+	// XAxisLabel is the optional label to use for the XAxis instead of the default.
+	XAxisLabel string
+
+	// YAxisLabel is the optional label to use for the YAxis instead of the default.
+	YAxisLabel string
+}
+
+func (ps *PlotStyle) Defaults() {
+	ps.Legend.Defaults()
+	ps.Axis.Defaults()
+	ps.TitleStyle.Size.Dp(24)
+	ps.Background = colors.Scheme.Surface
+	ps.Scale = 1
 }
