@@ -108,12 +108,16 @@ func (a *AppMulti[W]) ContextWindow() system.Window {
 // RemoveWindow removes the given Window from the app's list of windows.
 // It does not actually close it; see [Window.Close] for that.
 func (a *AppMulti[W]) RemoveWindow(w system.Window) {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
 	a.Windows = slices.DeleteFunc(a.Windows, func(ew W) bool {
 		return system.Window(ew) == w
 	})
 }
 
 func (a *AppMulti[W]) QuitClean() bool {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
 	for _, qf := range a.QuitCleanFuncs {
 		qf()
 	}
