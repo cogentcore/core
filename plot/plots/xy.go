@@ -18,9 +18,9 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-// Line draws lines between and / or points for XY data values,
+// XY draws lines between and / or points for XY data values,
 // based on Style properties.
-type Line struct {
+type XY struct {
 	// XYs is a copy of the points for this line.
 	plot.XYs
 
@@ -33,43 +33,64 @@ type Line struct {
 	stylers plot.Stylers
 }
 
-// NewLine returns a Line plot element.
-func NewLine(xys plot.XYer) *Line {
+// NewLine returns an XY plot drawing Lines by default.
+func NewLine(xys plot.XYer) *XY {
 	data, err := plot.CopyXYs(xys)
 	if errors.Log(err) != nil {
 		return nil
 	}
-	ln := &Line{XYs: data}
+	ln := &XY{XYs: data}
 	ln.Defaults()
+	ln.Style.Line.On = plot.On
+	ln.Style.Point.On = plot.Off
 	return ln
 }
 
-// NewLineTensor returns a Line plot element
+// NewLineTensor returns an XY plot drawing Lines,
 // using two tensors for X, Y values.
-func NewLineTensor(x, y tensor.Tensor) *Line {
+func NewLineTensor(x, y tensor.Tensor) *XY {
 	return NewLine(plot.TensorXYs{X: x, Y: y})
 }
 
-func (ln *Line) Defaults() {
+// NewScatter returns an XY scatter plot drawing Points by default.
+func NewScatter(xys plot.XYer) *XY {
+	data, err := plot.CopyXYs(xys)
+	if errors.Log(err) != nil {
+		return nil
+	}
+	ln := &XY{XYs: data}
+	ln.Defaults()
+	ln.Style.Line.On = plot.Off
+	ln.Style.Point.On = plot.On
+	return ln
+}
+
+// NewScatterTensor returns an XY scatter plot drawing Points by default,
+// using two tensors for X, Y values.
+func NewScatterTensor(x, y tensor.Tensor) *XY {
+	return NewScatter(plot.TensorXYs{X: x, Y: y})
+}
+
+func (ln *XY) Defaults() {
 	ln.Style.Defaults()
 }
 
 // Styler adds a style function to set style parameters.
-func (ln *Line) Styler(f func(s *plot.Style)) *Line {
+func (ln *XY) Styler(f func(s *plot.Style)) *XY {
 	ln.stylers.Add(f)
 	return ln
 }
 
-func (ln *Line) ApplyStyle() { ln.stylers.Run(&ln.Style) }
+func (ln *XY) ApplyStyle() { ln.stylers.Run(&ln.Style) }
 
-func (ln *Line) XYData() (data plot.XYer, pixels plot.XYer) {
+func (ln *XY) XYData() (data plot.XYer, pixels plot.XYer) {
 	data = ln.XYs
 	pixels = ln.PXYs
 	return
 }
 
-// Plot draws the Line, implementing the plot.Plotter interface.
-func (ln *Line) Plot(plt *plot.Plot) {
+// Plot does the drawing, implementing the plot.Plotter interface.
+func (ln *XY) Plot(plt *plot.Plot) {
 	pc := plt.Paint
 
 	ps := plot.PlotXYs(plt, ln.XYs)
@@ -171,12 +192,12 @@ func (ln *Line) Plot(plt *plot.Plot) {
 
 // DataRange returns the minimum and maximum
 // x and y values, implementing the plot.DataRanger interface.
-func (ln *Line) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
+func (ln *XY) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
 	return plot.XYRange(ln)
 }
 
-// Thumbnail returns the thumbnail for the LineTo, implementing the plot.Thumbnailer interface.
-func (ln *Line) Thumbnail(plt *plot.Plot) {
+// Thumbnail returns the thumbnail, implementing the plot.Thumbnailer interface.
+func (ln *XY) Thumbnail(plt *plot.Plot) {
 	pc := plt.Paint
 	ptb := pc.Bounds
 	midY := 0.5 * float32(ptb.Min.Y+ptb.Max.Y)

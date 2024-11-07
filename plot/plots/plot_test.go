@@ -102,37 +102,37 @@ func TestLine(t *testing.T) {
 
 }
 
-// func TestScatter(t *testing.T) {
-// 	plt := plot.New()
-// 	plt.Title.Text = "Test Scatter"
-// 	plt.X.Min = 0
-// 	plt.X.Max = 100
-// 	plt.X.Label.Text = "X Axis"
-// 	plt.Y.Min = 0
-// 	plt.Y.Max = 100
-// 	plt.Y.Label.Text = "Y Axis"
-//
-// 	data := make(plot.XYs, 21)
-// 	for i := range data {
-// 		data[i].X = float32(i * 5)
-// 		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
-// 	}
-//
-// 	l1 := NewScatter(data)
-// 	if l1 == nil {
-// 		t.Error("bad data")
-// 	}
-// 	plt.Add(l1)
-//
-// 	plt.Resize(image.Point{640, 480})
-//
-// 	shs := ShapesValues()
-// 	for _, sh := range shs {
-// 		l1.PointShape = sh
-// 		plt.Draw()
-// 		imagex.Assert(t, plt.Pixels, "scatter-"+sh.String()+".png")
-// 	}
-// }
+func TestScatter(t *testing.T) {
+	plt := plot.New()
+	plt.Title.Text = "Test Scatter"
+	plt.X.Min = 0
+	plt.X.Max = 100
+	plt.X.Label.Text = "X Axis"
+	plt.Y.Min = 0
+	plt.Y.Max = 100
+	plt.Y.Label.Text = "Y Axis"
+
+	data := make(plot.XYs, 21)
+	for i := range data {
+		data[i].X = float32(i * 5)
+		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
+	}
+
+	l1 := NewScatter(data)
+	if l1 == nil {
+		t.Error("bad data")
+	}
+	plt.Add(l1)
+
+	plt.Resize(image.Point{640, 480})
+
+	shs := plot.ShapesValues()
+	for _, sh := range shs {
+		l1.Style.Point.Shape = sh
+		plt.Draw()
+		imagex.Assert(t, plt.Pixels, "scatter-"+sh.String()+".png")
+	}
+}
 
 func TestLabels(t *testing.T) {
 	plt := plot.New()
@@ -154,6 +154,7 @@ func TestLabels(t *testing.T) {
 	if l1 == nil {
 		t.Error("bad data")
 	}
+	l1.Style.Point.On = plot.On
 	plt.Add(l1)
 	plt.Legend.Add("Sine", l1)
 

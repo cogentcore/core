@@ -52,8 +52,8 @@ func (dt *TableXYer) XY(i int) (x, y float32) {
 	return dt.Table.PlotData(dt.XColumn, i), dt.Table.PlotData(dt.YColumn, i)
 }
 
-// AddTableLine adds Line with given x, y columns from given tabular data
-func AddTableLine(plt *plot.Plot, tab Table, xcolumn, ycolumn int) *Line {
+// AddTableLine adds XY Line with given x, y columns from given tabular data.
+func AddTableLine(plt *plot.Plot, tab Table, xcolumn, ycolumn int) *XY {
 	txy := NewTableXYer(tab, xcolumn, ycolumn)
 	ln := NewLine(txy)
 	if ln == nil {
