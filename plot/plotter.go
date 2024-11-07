@@ -15,7 +15,7 @@ type Plotter interface {
 	// This allows gui interface to inspect data etc.
 	XYData() (data XYer, pixels XYer)
 
-	// ApplyStyle runs the style functions.
+	// ApplyStyle applies any stylers to this element.
 	ApplyStyle()
 }
 
@@ -23,17 +23,4 @@ type Plotter interface {
 type DataRanger interface {
 	// DataRange returns the range of X and Y values.
 	DataRange(pt *Plot) (xmin, xmax, ymin, ymax float32)
-}
-
-// Stylers implements the styling functions for plotters.
-type Stylers []func(p Plotter)
-
-func (st *Stylers) Add(f func(p Plotter)) {
-	*st = append(*st, f)
-}
-
-func (st *Stylers) Run(p Plotter) {
-	for _, f := range *st {
-		f(p)
-	}
 }

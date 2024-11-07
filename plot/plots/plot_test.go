@@ -30,9 +30,9 @@ func ExampleLine() {
 	}
 
 	plt := plot.New()
-	plt.Add(NewLine(data).Styler(func(ln *Line) {
-		ln.Line.Color = colors.Uniform(colors.Red)
-		ln.Line.Width.Pt(2)
+	plt.Add(NewLine(data).Styler(func(s *plot.Style) {
+		s.Line.Color = colors.Uniform(colors.Red)
+		s.Line.Width.Pt(2)
 	}))
 	plt.Draw()
 	imagex.Save(plt.Pixels, "testdata/ex_line_plot.png")
@@ -78,61 +78,61 @@ func TestLine(t *testing.T) {
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "line.png")
 
-	l1.Fill = colors.Uniform(colors.Yellow)
+	l1.Style.Line.Fill = colors.Uniform(colors.Yellow)
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "line-fill.png")
 
-	l1.StepStyle = PreStep
+	l1.Style.Line.Step = plot.PreStep
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "line-prestep.png")
 
-	l1.StepStyle = MidStep
+	l1.Style.Line.Step = plot.MidStep
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "line-midstep.png")
 
-	l1.StepStyle = PostStep
+	l1.Style.Line.Step = plot.PostStep
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "line-poststep.png")
 
-	l1.StepStyle = NoStep
-	l1.Fill = nil
-	l1.NegativeXDraw = true
+	l1.Style.Line.Step = plot.NoStep
+	l1.Style.Line.Fill = nil
+	l1.Style.Line.NegativeX = true
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "line-negx.png")
 
 }
 
-func TestScatter(t *testing.T) {
-	plt := plot.New()
-	plt.Title.Text = "Test Scatter"
-	plt.X.Min = 0
-	plt.X.Max = 100
-	plt.X.Label.Text = "X Axis"
-	plt.Y.Min = 0
-	plt.Y.Max = 100
-	plt.Y.Label.Text = "Y Axis"
-
-	data := make(plot.XYs, 21)
-	for i := range data {
-		data[i].X = float32(i * 5)
-		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
-	}
-
-	l1 := NewScatter(data)
-	if l1 == nil {
-		t.Error("bad data")
-	}
-	plt.Add(l1)
-
-	plt.Resize(image.Point{640, 480})
-
-	shs := ShapesValues()
-	for _, sh := range shs {
-		l1.PointShape = sh
-		plt.Draw()
-		imagex.Assert(t, plt.Pixels, "scatter-"+sh.String()+".png")
-	}
-}
+// func TestScatter(t *testing.T) {
+// 	plt := plot.New()
+// 	plt.Title.Text = "Test Scatter"
+// 	plt.X.Min = 0
+// 	plt.X.Max = 100
+// 	plt.X.Label.Text = "X Axis"
+// 	plt.Y.Min = 0
+// 	plt.Y.Max = 100
+// 	plt.Y.Label.Text = "Y Axis"
+//
+// 	data := make(plot.XYs, 21)
+// 	for i := range data {
+// 		data[i].X = float32(i * 5)
+// 		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
+// 	}
+//
+// 	l1 := NewScatter(data)
+// 	if l1 == nil {
+// 		t.Error("bad data")
+// 	}
+// 	plt.Add(l1)
+//
+// 	plt.Resize(image.Point{640, 480})
+//
+// 	shs := ShapesValues()
+// 	for _, sh := range shs {
+// 		l1.PointShape = sh
+// 		plt.Draw()
+// 		imagex.Assert(t, plt.Pixels, "scatter-"+sh.String()+".png")
+// 	}
+// }
 
 func TestLabels(t *testing.T) {
 	plt := plot.New()
@@ -150,20 +150,19 @@ func TestLabels(t *testing.T) {
 		labels[i] = fmt.Sprintf("%7.4g", data[i].Y)
 	}
 
-	l1, sc := NewLinePoints(data)
-	if l1 == nil || sc == nil {
+	l1 := NewLine(data)
+	if l1 == nil {
 		t.Error("bad data")
 	}
 	plt.Add(l1)
-	plt.Add(sc)
-	plt.Legend.Add("Sine", l1, sc)
+	plt.Legend.Add("Sine", l1)
 
 	l2 := NewLabels(XYLabels{XYs: data, Labels: labels})
 	if l2 == nil {
 		t.Error("bad data")
 	}
-	l2.Offset.X.Dp(6)
-	l2.Offset.Y.Dp(-6)
+	l2.Style.Offset.X.Dp(6)
+	l2.Style.Offset.Y.Dp(-6)
 	plt.Add(l2)
 
 	plt.Resize(image.Point{640, 480})
@@ -195,7 +194,7 @@ func TestBarChart(t *testing.T) {
 	if l1 == nil {
 		t.Error("bad data")
 	}
-	l1.Color = colors.Uniform(colors.Red)
+	l1.Style.Line.Fill = colors.Uniform(colors.Red)
 	plt.Add(l1)
 	plt.Legend.Add("Sine", l1)
 
@@ -207,12 +206,12 @@ func TestBarChart(t *testing.T) {
 	if l2 == nil {
 		t.Error("bad data")
 	}
-	l2.Color = colors.Uniform(colors.Blue)
+	l2.Style.Line.Fill = colors.Uniform(colors.Blue)
 	plt.Legend.Add("Cosine", l2)
 
-	l1.Stride = 2
-	l2.Stride = 2
-	l2.Offset = 2
+	l1.Style.Width.Stride = 2
+	l2.Style.Width.Stride = 2
+	l2.Style.Width.Offset = 2
 
 	plt.Add(l2) // note: range updated when added!
 	plt.Draw()
@@ -243,7 +242,7 @@ func TestBarChartErr(t *testing.T) {
 	if l1 == nil {
 		t.Error("bad data")
 	}
-	l1.Color = colors.Uniform(colors.Red)
+	l1.Style.Line.Fill = colors.Uniform(colors.Red)
 	plt.Add(l1)
 	plt.Legend.Add("Sine", l1)
 
@@ -283,7 +282,7 @@ func TestBarChartStack(t *testing.T) {
 	if l1 == nil {
 		t.Error("bad data")
 	}
-	l1.Color = colors.Uniform(colors.Red)
+	l1.Style.Line.Fill = colors.Uniform(colors.Red)
 	plt.Add(l1)
 	plt.Legend.Add("Sine", l1)
 
@@ -291,7 +290,7 @@ func TestBarChartStack(t *testing.T) {
 	if l2 == nil {
 		t.Error("bad data")
 	}
-	l2.Color = colors.Uniform(colors.Blue)
+	l2.Style.Line.Fill = colors.Uniform(colors.Blue)
 	l2.StackedOn = l1
 	plt.Add(l2)
 	plt.Legend.Add("Cos", l2)

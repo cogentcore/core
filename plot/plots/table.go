@@ -62,15 +62,3 @@ func AddTableLine(plt *plot.Plot, tab Table, xcolumn, ycolumn int) *Line {
 	plt.Add(ln)
 	return ln
 }
-
-// AddTableLinePoints adds Line w/ Points with given x, y columns from given tabular data
-func AddTableLinePoints(plt *plot.Plot, tab Table, xcolumn, ycolumn int) (*Line, *Scatter) {
-	txy := &TableXYer{Table: tab, XColumn: xcolumn, YColumn: ycolumn}
-	ln, sc := NewLinePoints(txy)
-	if ln == nil || sc == nil {
-		return nil, nil
-	}
-	plt.Add(ln)
-	plt.Add(sc)
-	return ln, sc
-}

@@ -2,44 +2,76 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package plots
+package plot
 
 import (
+	"image"
+
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/styles/units"
 )
 
-type Shapes int32 //enums:enum
+// PointStyle has style properties for drawing points as different shapes.
+type PointStyle struct { //types:add -setters
+	// On indicates whether to plot points.
+	On DefaultOffOn
 
-const (
-	// Ring is the outline of a circle
-	Ring Shapes = iota
+	// Shape to draw.
+	Shape Shapes
 
-	// Circle is a solid circle
-	Circle
+	// Color is the stroke color image specification.
+	// Setting to nil turns line off.
+	Color image.Image
 
-	// Square is the outline of a square
-	Square
+	// Fill is the color to fill solid regions, in a plot-specific
+	// way (e.g., the area below a Line plot, the bar color).
+	// Use nil to disable filling.
+	Fill image.Image
 
-	// Box is a filled square
-	Box
+	// Width is the line width, with a default of 1 Pt (point).
+	// Setting to 0 turns line off.
+	Width units.Value
 
-	// Triangle is the outline of a triangle
-	Triangle
+	// Size of shape to draw for each point.
+	// Defaults to 4 Pt (point).
+	Size units.Value
+}
 
-	// Pyramid is a filled triangle
-	Pyramid
+func (ps *PointStyle) Defaults() {
+	ps.Color = colors.Scheme.OnSurface
+	ps.Width.Pt(1)
+	ps.Size.Pt(4)
+}
 
-	// Plus is a plus sign
-	Plus
-
-	// Cross is a big X
-	Cross
-)
+// SetStroke sets the stroke style in plot paint to current line style.
+// returns false if either the Width = 0 or Color is nil
+func (ps *PointStyle) SetStroke(pt *Plot) bool {
+	if ps.On == Off || ps.Color == nil {
+		return false
+	}
+	pc := pt.Paint
+	uc := &pc.UnitContext
+	ps.Width.ToDots(uc)
+	ps.Size.ToDots(uc)
+	if ps.Width.Dots == 0 || ps.Size.Dots == 0 {
+		return false
+	}
+	pc.StrokeStyle.Width = ps.Width
+	pc.StrokeStyle.Color = ps.Color
+	pc.StrokeStyle.ToDots(uc)
+	pc.FillStyle.Color = ps.Fill
+	return true
+}
 
 // DrawShape draws the given shape
-func DrawShape(pc *paint.Context, pos math32.Vector2, size float32, shape Shapes) {
-	switch shape {
+func (ps *PointStyle) DrawShape(pc *paint.Context, pos math32.Vector2) {
+	size := ps.Size.Dots
+	if size == 0 {
+		return
+	}
+	switch ps.Shape {
 	case Ring:
 		DrawRing(pc, pos, size)
 	case Circle:
@@ -126,3 +158,31 @@ func DrawCross(pc *paint.Context, pos math32.Vector2, size float32) {
 	pc.ClosePath()
 	pc.Stroke()
 }
+
+type Shapes int32 //enums:enum
+
+const (
+	// Ring is the outline of a circle
+	Ring Shapes = iota
+
+	// Circle is a solid circle
+	Circle
+
+	// Square is the outline of a square
+	Square
+
+	// Box is a filled square
+	Box
+
+	// Triangle is the outline of a triangle
+	Triangle
+
+	// Pyramid is a filled triangle
+	Pyramid
+
+	// Plus is a plus sign
+	Plus
+
+	// Cross is a big X
+	Cross
+)

@@ -12,10 +12,7 @@
 package plots
 
 import (
-	"image"
-
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/tensor"
@@ -43,32 +40,8 @@ type BarChart struct {
 	// PXYs is the actual pixel plotting coordinates for each value.
 	PXYs plot.XYs
 
-	// Offset is offset added to each X axis value relative to the
-	// Stride computed value (X = offset + index * Stride)
-	// Defaults to 1.
-	Offset float32
-
-	// Stride is distance between bars. Defaults to 1.
-	Stride float32
-
-	// Width is the width of the bars, which should be less than
-	// the Stride to prevent bar overlap.
-	// Defaults to .8
-	Width float32
-
-	// Pad is additional space at start / end of data range, to keep bars from
-	// overflowing ends.  This amount is subtracted from Offset
-	// and added to (len(Values)-1)*Stride -- no other accommodation for bar
-	// width is provided, so that should be built into this value as well.
-	// Defaults to 1.
-	Pad float32
-
-	// Color is the fill color of the bars.
-	Color image.Image
-
-	// Line is the style of the line connecting the points.
-	// Use zero width to disable lines.
-	Line plot.LineStyle
+	// Style has the properties used to render the bars.
+	Style plot.Style
 
 	// Horizontal dictates whether the bars should be in the vertical
 	// (default) or horizontal direction. If Horizontal is true, all
@@ -119,22 +92,15 @@ func NewBarChartTensor(vs, ers tensor.Tensor) *BarChart {
 }
 
 func (b *BarChart) Defaults() {
-	b.Offset = 1
-	b.Stride = 1
-	b.Width = .8
-	b.Pad = 1
-	b.Color = colors.Scheme.OnSurface
-	b.Line.Defaults()
+	b.Style.Defaults()
 }
 
-func (b *BarChart) Styler(f func(s *BarChart)) *BarChart {
-	b.stylers.Add(func(p plot.Plotter) { f(p.(*BarChart)) })
+func (b *BarChart) Styler(f func(s *plot.Style)) *BarChart {
+	b.stylers.Add(f)
 	return b
 }
 
-func (b *BarChart) ApplyStyle() {
-	b.stylers.Run(b)
-}
+func (b *BarChart) ApplyStyle() { b.stylers.Run(&b.Style) }
 
 func (b *BarChart) XYData() (data plot.XYer, pixels plot.XYer) {
 	data = b.XYs
@@ -163,26 +129,25 @@ func (b *BarChart) BarHeight(i int) float32 {
 // and sets the bar positioning options to that of the
 // chart upon which it is being stacked.
 func (b *BarChart) StackOn(on *BarChart) {
-	b.Offset = on.Offset
-	b.Stride = on.Stride
-	b.Pad = on.Pad
+	b.Style.Width = on.Style.Width
 	b.StackedOn = on
 }
 
 // Plot implements the plot.Plotter interface.
 func (b *BarChart) Plot(plt *plot.Plot) {
 	pc := plt.Paint
-	pc.FillStyle.Color = b.Color
-	b.Line.SetStroke(plt)
+	b.Style.Line.SetStroke(plt)
+	pc.FillStyle.Color = b.Style.Line.Fill
+	bw := b.Style.Width
 
 	nv := len(b.Values)
 	b.XYs = make(plot.XYs, nv)
 	b.PXYs = make(plot.XYs, nv)
 
-	hw := 0.5 * b.Width
-	ew := b.Width / 3
+	hw := 0.5 * bw.Width
+	ew := bw.Width / 3
 	for i, ht := range b.Values {
-		cat := b.Offset + float32(i)*b.Stride
+		cat := bw.Offset + float32(i)*bw.Stride
 		var bottom, catVal, catMin, catMax, valMin, valMax float32
 		var box math32.Box2
 		if b.Horizontal {
@@ -230,12 +195,14 @@ func (b *BarChart) Plot(plt *plot.Plot) {
 			pc.Stroke()
 		}
 	}
+	pc.FillStyle.Color = nil
 }
 
 // DataRange implements the plot.DataRanger interface.
 func (b *BarChart) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
-	catMin := b.Offset - b.Pad
-	catMax := b.Offset + float32(len(b.Values)-1)*b.Stride + b.Pad
+	bw := b.Style.Width
+	catMin := bw.Offset - bw.Pad
+	catMax := bw.Offset + float32(len(b.Values)-1)*bw.Stride + bw.Pad
 
 	valMin := math32.Inf(1)
 	valMax := math32.Inf(-1)
@@ -257,9 +224,10 @@ func (b *BarChart) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
 // Thumbnail fulfills the plot.Thumbnailer interface.
 func (b *BarChart) Thumbnail(plt *plot.Plot) {
 	pc := plt.Paint
-	pc.FillStyle.Color = b.Color
-	b.Line.SetStroke(plt)
+	b.Style.Line.SetStroke(plt)
+	pc.FillStyle.Color = b.Style.Line.Fill
 	ptb := pc.Bounds
 	pc.DrawRectangle(float32(ptb.Min.X), float32(ptb.Min.Y), float32(ptb.Size().X), float32(ptb.Size().Y))
 	pc.FillStrokeClear()
+	pc.FillStyle.Color = nil
 }

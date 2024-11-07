@@ -12,18 +12,36 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// LineStyle has style properties for line drawing
-type LineStyle struct {
+// LineStyle has style properties for drawing lines.
+type LineStyle struct { //types:add -setters
+	// On indicates whether to plot lines.
+	On DefaultOffOn
 
-	// stroke color image specification; stroking is off if nil
+	// Color is the stroke color image specification.
+	// Setting to nil turns line off.
 	Color image.Image
 
-	// line width
+	// Width is the line width, with a default of 1 Pt (point).
+	// Setting to 0 turns line off.
 	Width units.Value
 
 	// Dashes are the dashes of the stroke. Each pair of values specifies
 	// the amount to paint and then the amount to skip.
 	Dashes []float32
+
+	// Fill is the color to fill solid regions, in a plot-specific
+	// way (e.g., the area below a Line plot, the bar color).
+	// Use nil to disable filling.
+	Fill image.Image
+
+	// NegativeX specifies whether to draw lines that connect points with a negative
+	// X-axis direction; otherwise there is a break in the line.
+	// default is false, so that repeated series of data across the X axis
+	// are plotted separately.
+	NegativeX bool
+
+	// Step specifies how to step the line between points.
+	Step StepKind
 }
 
 func (ls *LineStyle) Defaults() {
@@ -34,7 +52,7 @@ func (ls *LineStyle) Defaults() {
 // SetStroke sets the stroke style in plot paint to current line style.
 // returns false if either the Width = 0 or Color is nil
 func (ls *LineStyle) SetStroke(pt *Plot) bool {
-	if ls.Color == nil {
+	if ls.On == Off || ls.Color == nil {
 		return false
 	}
 	pc := pt.Paint
@@ -61,3 +79,21 @@ func (ls *LineStyle) Draw(pt *Plot, start, end math32.Vector2) bool {
 	pc.Stroke()
 	return true
 }
+
+// StepKind specifies a form of a connection of two consecutive points.
+type StepKind int32 //enums:enum
+
+const (
+	// NoStep connects two points by simple line.
+	NoStep StepKind = iota
+
+	// PreStep connects two points by following lines: vertical, horizontal.
+	PreStep
+
+	// MidStep connects two points by following lines: horizontal, vertical, horizontal.
+	// Vertical line is placed in the middle of the interval.
+	MidStep
+
+	// PostStep connects two points by following lines: horizontal, vertical.
+	PostStep
+)

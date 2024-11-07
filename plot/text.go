@@ -28,6 +28,9 @@ type TextStyle struct {
 
 	// rotation of the text, in Degrees
 	Rotation float32
+
+	// Offset is added directly to the final label location.
+	Offset units.XY
 }
 
 func (ts *TextStyle) Defaults() {

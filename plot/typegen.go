@@ -3,6 +3,10 @@
 package plot
 
 import (
+	"image"
+
+	"cogentcore.org/core/math32/minmax"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/types"
 )
 
@@ -20,9 +24,13 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Valuer", IDNam
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Values", IDName: "values", Doc: "Values implements the Valuer interface."})
 
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.TensorValues", IDName: "tensor-values", Doc: "TensorValues provides a Valuer interface wrapper for a tensor.", Embeds: []types.Field{{Name: "Tensor"}}})
+
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.XYer", IDName: "x-yer", Doc: "XYer provides an interface for a list of X,Y data pairs", Methods: []types.Method{{Name: "Len", Doc: "Len returns the number of x, y pairs.", Returns: []string{"int"}}, {Name: "XY", Doc: "XY returns an x, y pair.", Args: []string{"i"}, Returns: []string{"x", "y"}}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.XYs", IDName: "x-ys", Doc: "XYs implements the XYer interface."})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.TensorXYs", IDName: "tensor-x-ys", Doc: "TensorXYs provides a XYer interface wrapper for a tensor.", Fields: []types.Field{{Name: "X"}, {Name: "Y"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.XValues", IDName: "x-values", Doc: "XValues implements the Valuer interface,\nreturning the x value from an XYer.", Embeds: []types.Field{{Name: "XYer"}}})
 
@@ -50,13 +58,153 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Thumbnailer", 
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.LegendEntry", IDName: "legend-entry", Doc: "A LegendEntry represents a single line of a legend, it\nhas a name and an icon.", Fields: []types.Field{{Name: "Text", Doc: "text is the text associated with this entry."}, {Name: "Thumbs", Doc: "thumbs is a slice of all of the thumbnails styles"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.LineStyle", IDName: "line-style", Doc: "LineStyle has style properties for line drawing", Fields: []types.Field{{Name: "Color", Doc: "stroke color image specification; stroking is off if nil"}, {Name: "Width", Doc: "line width"}, {Name: "Dashes", Doc: "Dashes are the dashes of the stroke. Each pair of values specifies\nthe amount to paint and then the amount to skip."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.LineStyle", IDName: "line-style", Doc: "LineStyle has style properties for drawing lines.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "On", Doc: "On indicates whether to plot lines."}, {Name: "Color", Doc: "Color is the stroke color image specification.\nSetting to nil turns line off."}, {Name: "Width", Doc: "Width is the line width, with a default of 1 Pt (point).\nSetting to 0 turns line off."}, {Name: "Dashes", Doc: "Dashes are the dashes of the stroke. Each pair of values specifies\nthe amount to paint and then the amount to skip."}, {Name: "Fill", Doc: "Fill is the color to fill solid regions, in a plot-specific\nway (e.g., the area below a Line plot, the bar color).\nUse nil to disable filling."}, {Name: "NegativeX", Doc: "NegativeX specifies whether to draw lines that connect points with a negative\nX-axis direction; otherwise there is a break in the line.\ndefault is false, so that repeated series of data across the X axis\nare plotted separately."}, {Name: "Step", Doc: "Step specifies how to step the line between points."}}})
+
+// SetOn sets the [LineStyle.On]:
+// On indicates whether to plot lines.
+func (t *LineStyle) SetOn(v DefaultOffOn) *LineStyle { t.On = v; return t }
+
+// SetColor sets the [LineStyle.Color]:
+// Color is the stroke color image specification.
+// Setting to nil turns line off.
+func (t *LineStyle) SetColor(v image.Image) *LineStyle { t.Color = v; return t }
+
+// SetWidth sets the [LineStyle.Width]:
+// Width is the line width, with a default of 1 Pt (point).
+// Setting to 0 turns line off.
+func (t *LineStyle) SetWidth(v units.Value) *LineStyle { t.Width = v; return t }
+
+// SetDashes sets the [LineStyle.Dashes]:
+// Dashes are the dashes of the stroke. Each pair of values specifies
+// the amount to paint and then the amount to skip.
+func (t *LineStyle) SetDashes(v ...float32) *LineStyle { t.Dashes = v; return t }
+
+// SetFill sets the [LineStyle.Fill]:
+// Fill is the color to fill solid regions, in a plot-specific
+// way (e.g., the area below a Line plot, the bar color).
+// Use nil to disable filling.
+func (t *LineStyle) SetFill(v image.Image) *LineStyle { t.Fill = v; return t }
+
+// SetNegativeX sets the [LineStyle.NegativeX]:
+// NegativeX specifies whether to draw lines that connect points with a negative
+// X-axis direction; otherwise there is a break in the line.
+// default is false, so that repeated series of data across the X axis
+// are plotted separately.
+func (t *LineStyle) SetNegativeX(v bool) *LineStyle { t.NegativeX = v; return t }
+
+// SetStep sets the [LineStyle.Step]:
+// Step specifies how to step the line between points.
+func (t *LineStyle) SetStep(v StepKind) *LineStyle { t.Step = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.StepKind", IDName: "step-kind", Doc: "StepKind specifies a form of a connection of two consecutive points."})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plot", IDName: "plot", Doc: "Plot is the basic type representing a plot.\nIt renders into its own image.RGBA Pixels image,\nand can also save a corresponding SVG version.\nThe Axis ranges are updated automatically when plots\nare added, so setting a fixed range should happen\nafter that point.  See [UpdateRange] method as well.", Fields: []types.Field{{Name: "Title", Doc: "Title of the plot"}, {Name: "Background", Doc: "Background is the background of the plot.\nThe default is [colors.Scheme.Surface]."}, {Name: "StandardTextStyle", Doc: "standard text style with default options"}, {Name: "X", Doc: "X and Y are the horizontal and vertical axes\nof the plot respectively."}, {Name: "Y", Doc: "X and Y are the horizontal and vertical axes\nof the plot respectively."}, {Name: "Legend", Doc: "Legend is the plot's legend."}, {Name: "Plotters", Doc: "plotters are drawn by calling their Plot method\nafter the axes are drawn."}, {Name: "Size", Doc: "size is the target size of the image to render to"}, {Name: "DPI", Doc: "DPI is the dots per inch for rendering the image.\nLarger numbers result in larger scaling of the plot contents\nwhich is strongly recommended for print (e.g., use 300 for print)"}, {Name: "Paint", Doc: "painter for rendering"}, {Name: "Pixels", Doc: "pixels that we render into"}, {Name: "PlotBox", Doc: "Current plot bounding box in image coordinates, for plotting coordinates"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plotter", IDName: "plotter", Doc: "Plotter is an interface that wraps the Plot method.\nSome standard implementations of Plotter can be found in plotters.", Methods: []types.Method{{Name: "Plot", Doc: "Plot draws the data to the Plot Paint", Args: []string{"pt"}}, {Name: "XYData", Doc: "returns the data for this plot as X,Y points,\nincluding corresponding pixel data.\nThis allows gui interface to inspect data etc.", Returns: []string{"data", "pixels"}}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plotter", IDName: "plotter", Doc: "Plotter is an interface that wraps the Plot method.\nSome standard implementations of Plotter can be found in plotters.", Methods: []types.Method{{Name: "Plot", Doc: "Plot draws the data to the Plot Paint", Args: []string{"pt"}}, {Name: "XYData", Doc: "returns the data for this plot as X,Y points,\nincluding corresponding pixel data.\nThis allows gui interface to inspect data etc.", Returns: []string{"data", "pixels"}}, {Name: "ApplyStyle", Doc: "ApplyStyle applies any stylers to this element."}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.DataRanger", IDName: "data-ranger", Doc: "DataRanger wraps the DataRange method.", Methods: []types.Method{{Name: "DataRange", Doc: "DataRange returns the range of X and Y values.", Args: []string{"pt"}, Returns: []string{"xmin", "xmax", "ymin", "ymax"}}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.PointStyle", IDName: "point-style", Doc: "PointStyle has style properties for drawing points as different shapes.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "On", Doc: "On indicates whether to plot points."}, {Name: "Shape", Doc: "Shape to draw."}, {Name: "Color", Doc: "Color is the stroke color image specification.\nSetting to nil turns line off."}, {Name: "Fill", Doc: "Fill is the color to fill solid regions, in a plot-specific\nway (e.g., the area below a Line plot, the bar color).\nUse nil to disable filling."}, {Name: "Width", Doc: "Width is the line width, with a default of 1 Pt (point).\nSetting to 0 turns line off."}, {Name: "Size", Doc: "Size of shape to draw for each point.\nDefaults to 4 Pt (point)."}}})
+
+// SetOn sets the [PointStyle.On]:
+// On indicates whether to plot points.
+func (t *PointStyle) SetOn(v DefaultOffOn) *PointStyle { t.On = v; return t }
+
+// SetShape sets the [PointStyle.Shape]:
+// Shape to draw.
+func (t *PointStyle) SetShape(v Shapes) *PointStyle { t.Shape = v; return t }
+
+// SetColor sets the [PointStyle.Color]:
+// Color is the stroke color image specification.
+// Setting to nil turns line off.
+func (t *PointStyle) SetColor(v image.Image) *PointStyle { t.Color = v; return t }
+
+// SetFill sets the [PointStyle.Fill]:
+// Fill is the color to fill solid regions, in a plot-specific
+// way (e.g., the area below a Line plot, the bar color).
+// Use nil to disable filling.
+func (t *PointStyle) SetFill(v image.Image) *PointStyle { t.Fill = v; return t }
+
+// SetWidth sets the [PointStyle.Width]:
+// Width is the line width, with a default of 1 Pt (point).
+// Setting to 0 turns line off.
+func (t *PointStyle) SetWidth(v units.Value) *PointStyle { t.Width = v; return t }
+
+// SetSize sets the [PointStyle.Size]:
+// Size of shape to draw for each point.
+// Defaults to 4 Pt (point).
+func (t *PointStyle) SetSize(v units.Value) *PointStyle { t.Size = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Shapes", IDName: "shapes"})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Style", IDName: "style", Doc: "Style contains the plot styling properties relevant across\nmost plot types. These properties apply both to individual plot elements\nand to the plot as a whole.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "On", Doc: "On specifies whether to plot this item, for cases where it can be turned off."}, {Name: "Range", Doc: "Range is the effective range of data to plot, where either end can be fixed."}, {Name: "Label", Doc: "Label provides an alternative label to use for axis, if set."}, {Name: "NTicks", Doc: "NTicks sets the desired number of ticks for the axis, if > 0."}, {Name: "Line", Doc: "Line has style properties for drawing lines."}, {Name: "Point", Doc: "Point has style properties for drawing points."}, {Name: "Text", Doc: "Text has style properties for rendering text."}, {Name: "Width", Doc: "Width has various plot width properties."}}})
+
+// SetOn sets the [Style.On]:
+// On specifies whether to plot this item, for cases where it can be turned off.
+func (t *Style) SetOn(v DefaultOffOn) *Style { t.On = v; return t }
+
+// SetRange sets the [Style.Range]:
+// Range is the effective range of data to plot, where either end can be fixed.
+func (t *Style) SetRange(v minmax.Range32) *Style { t.Range = v; return t }
+
+// SetLabel sets the [Style.Label]:
+// Label provides an alternative label to use for axis, if set.
+func (t *Style) SetLabel(v string) *Style { t.Label = v; return t }
+
+// SetNTicks sets the [Style.NTicks]:
+// NTicks sets the desired number of ticks for the axis, if > 0.
+func (t *Style) SetNTicks(v int) *Style { t.NTicks = v; return t }
+
+// SetLine sets the [Style.Line]:
+// Line has style properties for drawing lines.
+func (t *Style) SetLine(v LineStyle) *Style { t.Line = v; return t }
+
+// SetPoint sets the [Style.Point]:
+// Point has style properties for drawing points.
+func (t *Style) SetPoint(v PointStyle) *Style { t.Point = v; return t }
+
+// SetText sets the [Style.Text]:
+// Text has style properties for rendering text.
+func (t *Style) SetText(v TextStyle) *Style { t.Text = v; return t }
+
+// SetWidth sets the [Style.Width]:
+// Width has various plot width properties.
+func (t *Style) SetWidth(v WidthStyle) *Style { t.Width = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.WidthStyle", IDName: "width-style", Doc: "WidthStyle contains various plot width properties relevant across\ndifferent plot types.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Cap", Doc: "Cap is the width of the caps drawn at the top of error bars.\nThe default is 10dp"}, {Name: "Offset", Doc: "Offset for Bar plot is the offset added to each X axis value\nrelative to the Stride computed value (X = offset + index * Stride)\nDefaults to 1."}, {Name: "Stride", Doc: "Stride for Bar plot is distance between bars. Defaults to 1."}, {Name: "Width", Doc: "Width for Bar plot is the width of the bars, which should be less than\nthe Stride to prevent bar overlap.\nDefaults to .8"}, {Name: "Pad", Doc: "Pad for Bar plot is additional space at start / end of data range,\nto keep bars from overflowing ends. This amount is subtracted from Offset\nand added to (len(Values)-1)*Stride -- no other accommodation for bar\nwidth is provided, so that should be built into this value as well.\nDefaults to 1."}}})
+
+// SetCap sets the [WidthStyle.Cap]:
+// Cap is the width of the caps drawn at the top of error bars.
+// The default is 10dp
+func (t *WidthStyle) SetCap(v units.Value) *WidthStyle { t.Cap = v; return t }
+
+// SetOffset sets the [WidthStyle.Offset]:
+// Offset for Bar plot is the offset added to each X axis value
+// relative to the Stride computed value (X = offset + index * Stride)
+// Defaults to 1.
+func (t *WidthStyle) SetOffset(v float32) *WidthStyle { t.Offset = v; return t }
+
+// SetStride sets the [WidthStyle.Stride]:
+// Stride for Bar plot is distance between bars. Defaults to 1.
+func (t *WidthStyle) SetStride(v float32) *WidthStyle { t.Stride = v; return t }
+
+// SetWidth sets the [WidthStyle.Width]:
+// Width for Bar plot is the width of the bars, which should be less than
+// the Stride to prevent bar overlap.
+// Defaults to .8
+func (t *WidthStyle) SetWidth(v float32) *WidthStyle { t.Width = v; return t }
+
+// SetPad sets the [WidthStyle.Pad]:
+// Pad for Bar plot is additional space at start / end of data range,
+// to keep bars from overflowing ends. This amount is subtracted from Offset
+// and added to (len(Values)-1)*Stride -- no other accommodation for bar
+// width is provided, so that should be built into this value as well.
+// Defaults to 1.
+func (t *WidthStyle) SetPad(v float32) *WidthStyle { t.Pad = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Stylers", IDName: "stylers", Doc: "Stylers is a list of styling functions that set Style properties.\nThese are called in the order added."})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.DefaultOffOn", IDName: "default-off-on", Doc: "DefaultOffOn specifies whether to use the default value for a bool option,\nor to override the default and set Off or On."})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.TextStyle", IDName: "text-style", Doc: "TextStyle specifies styling parameters for Text elements", Embeds: []types.Field{{Name: "FontRender"}}, Fields: []types.Field{{Name: "Align", Doc: "how to align text along the relevant dimension for the text element"}, {Name: "Padding", Doc: "Padding is used in a case-dependent manner to add space around text elements"}, {Name: "Rotation", Doc: "rotation of the text, in Degrees"}}})
 

@@ -12,33 +12,14 @@ package plots
 //go:generate core generate
 
 import (
-	"image"
-
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/tensor"
 )
 
-// StepKind specifies a form of a connection of two consecutive points.
-type StepKind int32 //enums:enum
-
-const (
-	// NoStep connects two points by simple line
-	NoStep StepKind = iota
-
-	// PreStep connects two points by following lines: vertical, horizontal.
-	PreStep
-
-	// MidStep connects two points by following lines: horizontal, vertical, horizontal.
-	// Vertical line is placed in the middle of the interval.
-	MidStep
-
-	// PostStep connects two points by following lines: horizontal, vertical.
-	PostStep
-)
-
-// Line implements the Plotter interface, drawing a line using XYer data.
+// Line draws lines between and / or points for XY data values,
+// based on Style properties.
 type Line struct {
 	// XYs is a copy of the points for this line.
 	plot.XYs
@@ -46,28 +27,13 @@ type Line struct {
 	// PXYs is the actual pixel plotting coordinates for each XY value.
 	PXYs plot.XYs
 
-	// StepStyle is the kind of the step line.
-	StepStyle StepKind
-
-	// Line is the style of the line connecting the points.
-	// Use zero width to disable lines.
-	Line plot.LineStyle
-
-	// Fill is the color to fill the area below the plot.
-	// Use nil to disable filling, which is the default.
-	Fill image.Image
-
-	// if true, draw lines that connect points with a negative X-axis direction;
-	// otherwise there is a break in the line.
-	// default is false, so that repeated series of data across the X axis
-	// are plotted separately.
-	NegativeXDraw bool
+	// Style is the style for plotting.
+	Style plot.Style
 
 	stylers plot.Stylers
 }
 
-// NewLine returns a Line that uses the default line style and
-// does not draw glyphs.
+// NewLine returns a Line plot element.
 func NewLine(xys plot.XYer) *Line {
 	data, err := plot.CopyXYs(xys)
 	if errors.Log(err) != nil {
@@ -78,32 +44,23 @@ func NewLine(xys plot.XYer) *Line {
 	return ln
 }
 
-// NewLinePoints returns both a Line and a
-// Scatter plot for the given point data.
-func NewLinePoints(xys plot.XYer) (*Line, *Scatter) {
-	sc := NewScatter(xys)
-	ln := &Line{XYs: sc.XYs}
-	ln.Defaults()
-	return ln, sc
-}
-
-// NewLineTensor returns a Line that uses the default line style and
-// does not draw glyphs, based on two tensors for X, Y values.
+// NewLineTensor returns a Line plot element
+// using two tensors for X, Y values.
 func NewLineTensor(x, y tensor.Tensor) *Line {
 	return NewLine(plot.TensorXYs{X: x, Y: y})
 }
 
 func (ln *Line) Defaults() {
-	ln.Line.Defaults()
+	ln.Style.Defaults()
 }
 
 // Styler adds a style function to set style parameters.
-func (ln *Line) Styler(f func(s *Line)) *Line {
-	ln.stylers.Add(func(p plot.Plotter) { f(p.(*Line)) })
+func (ln *Line) Styler(f func(s *plot.Style)) *Line {
+	ln.stylers.Add(f)
 	return ln
 }
 
-func (ln *Line) ApplyStyle() { ln.stylers.Run(ln) }
+func (ln *Line) ApplyStyle() { ln.stylers.Run(&ln.Style) }
 
 func (ln *Line) XYData() (data plot.XYer, pixels plot.XYer) {
 	data = ln.XYs
@@ -119,22 +76,22 @@ func (ln *Line) Plot(plt *plot.Plot) {
 	np := len(ps)
 	ln.PXYs = ps
 
-	if ln.Fill != nil {
-		pc.FillStyle.Color = ln.Fill
+	if ln.Style.Line.Fill != nil {
+		pc.FillStyle.Color = ln.Style.Line.Fill
 		minY := plt.PY(plt.Y.Min)
 		prev := math32.Vec2(ps[0].X, minY)
 		pc.MoveTo(prev.X, prev.Y)
 		for i := range ps {
 			pt := ps[i]
-			switch ln.StepStyle {
-			case NoStep:
+			switch ln.Style.Line.Step {
+			case plot.NoStep:
 				if pt.X < prev.X {
 					pc.LineTo(prev.X, minY)
 					pc.ClosePath()
 					pc.MoveTo(pt.X, minY)
 				}
 				pc.LineTo(pt.X, pt.Y)
-			case PreStep:
+			case plot.PreStep:
 				if i == 0 {
 					continue
 				}
@@ -146,7 +103,7 @@ func (ln *Line) Plot(plt *plot.Plot) {
 					pc.LineTo(prev.X, pt.Y)
 				}
 				pc.LineTo(pt.X, pt.Y)
-			case MidStep:
+			case plot.MidStep:
 				if pt.X < prev.X {
 					pc.LineTo(prev.X, minY)
 					pc.ClosePath()
@@ -156,7 +113,7 @@ func (ln *Line) Plot(plt *plot.Plot) {
 					pc.LineTo(0.5*(prev.X+pt.X), pt.Y)
 				}
 				pc.LineTo(pt.X, pt.Y)
-			case PostStep:
+			case plot.PostStep:
 				if pt.X < prev.X {
 					pc.LineTo(prev.X, minY)
 					pc.ClosePath()
@@ -174,36 +131,42 @@ func (ln *Line) Plot(plt *plot.Plot) {
 	}
 	pc.FillStyle.Color = nil
 
-	if !ln.Line.SetStroke(plt) {
-		return
-	}
-	prev := ps[0]
-	pc.MoveTo(prev.X, prev.Y)
-	for i := 1; i < np; i++ {
-		pt := ps[i]
-		if ln.StepStyle != NoStep {
-			if pt.X >= prev.X {
-				switch ln.StepStyle {
-				case PreStep:
-					pc.LineTo(prev.X, pt.Y)
-				case MidStep:
-					pc.LineTo(0.5*(prev.X+pt.X), prev.Y)
-					pc.LineTo(0.5*(prev.X+pt.X), pt.Y)
-				case PostStep:
-					pc.LineTo(pt.X, prev.Y)
+	if ln.Style.Line.SetStroke(plt) {
+		prev := ps[0]
+		pc.MoveTo(prev.X, prev.Y)
+		for i := 1; i < np; i++ {
+			pt := ps[i]
+			if ln.Style.Line.Step != plot.NoStep {
+				if pt.X >= prev.X {
+					switch ln.Style.Line.Step {
+					case plot.PreStep:
+						pc.LineTo(prev.X, pt.Y)
+					case plot.MidStep:
+						pc.LineTo(0.5*(prev.X+pt.X), prev.Y)
+						pc.LineTo(0.5*(prev.X+pt.X), pt.Y)
+					case plot.PostStep:
+						pc.LineTo(pt.X, prev.Y)
+					}
+				} else {
+					pc.MoveTo(pt.X, pt.Y)
 				}
-			} else {
-				pc.MoveTo(pt.X, pt.Y)
 			}
+			if !ln.Style.Line.NegativeX && pt.X < prev.X {
+				pc.MoveTo(pt.X, pt.Y)
+			} else {
+				pc.LineTo(pt.X, pt.Y)
+			}
+			prev = pt
 		}
-		if !ln.NegativeXDraw && pt.X < prev.X {
-			pc.MoveTo(pt.X, pt.Y)
-		} else {
-			pc.LineTo(pt.X, pt.Y)
-		}
-		prev = pt
+		pc.Stroke()
 	}
-	pc.Stroke()
+	if ln.Style.Point.SetStroke(plt) {
+		for i := range ps {
+			pt := ps[i]
+			ln.Style.Point.DrawShape(pc, math32.Vec2(pt.X, pt.Y))
+		}
+	}
+	pc.FillStyle.Color = nil
 }
 
 // DataRange returns the minimum and maximum
@@ -218,17 +181,23 @@ func (ln *Line) Thumbnail(plt *plot.Plot) {
 	ptb := pc.Bounds
 	midY := 0.5 * float32(ptb.Min.Y+ptb.Max.Y)
 
-	if ln.Fill != nil {
+	if ln.Style.Line.Fill != nil {
 		tb := ptb
-		if ln.Line.Width.Value > 0 {
+		if ln.Style.Line.Width.Value > 0 {
 			tb.Min.Y = int(midY)
 		}
-		pc.FillBox(math32.FromPoint(tb.Min), math32.FromPoint(tb.Size()), ln.Fill)
+		pc.FillBox(math32.FromPoint(tb.Min), math32.FromPoint(tb.Size()), ln.Style.Line.Fill)
 	}
 
-	if ln.Line.SetStroke(plt) {
+	if ln.Style.Line.SetStroke(plt) {
 		pc.MoveTo(float32(ptb.Min.X), midY)
 		pc.LineTo(float32(ptb.Max.X), midY)
 		pc.Stroke()
 	}
+
+	if ln.Style.Point.SetStroke(plt) {
+		midX := 0.5 * float32(ptb.Min.X+ptb.Max.X)
+		ln.Style.Point.DrawShape(pc, math32.Vec2(midX, midY))
+	}
+	pc.FillStyle.Color = nil
 }
