@@ -6,20 +6,20 @@ The `plot` package generates 2D plots of data using the Cogent Core `paint` rend
 
 # Styling
 
-`plot.Style` contains the full set of styling parameters, which can be set using Styler functions that are attached to individual plot elements that drive the content of what is actually plotted (based on the `Plotter` interface).
+`plot.Style` contains the full set of styling parameters, which can be set using Styler functions that are attached to individual plot elements (e.g., lines, points etc) that drive the content of what is actually plotted (based on the `Plotter` interface).
 
-Each such plot element defines the `Styler` method, eg:
+Each such plot element defines a `Styler` method, e.g.,:
 
 ```Go
 plt := plot.NewPlot()
 ln := plots.AddLine.Styler(func(s *plot.Style) {
-    s.Plot.Title = "My Plot"
-    s.Line.Color = colors.Uniform(colors.Red)
+    s.Plot.Title = "My Plot" // overall Plot styles
+    s.Line.Color = colors.Uniform(colors.Red) // line-specific styles
 })
 plt.Add(ln)
 ```
 
-The `Plot` field (of type `PlotStyle`) contains all the settings that apply to the plot as a whole. Each element can set these values, and they are applied in the order the elements are added, so the last one gets final say. Typically you want to just set these plot-level styles on one element only and avoid any conflicts.
+The `Plot` field (of type `PlotStyle`) contains all the properties that apply to the plot as a whole. Each element can set these values, and they are applied in the order the elements are added, so the last one gets final say. Typically you want to just set these plot-level styles on one element only and avoid any conflicts.
 
 The rest of the style properties (e.g., `Line`, `Point`) apply to the element in question. There are also some default plot-level settings in `Plot` that apply to all elements, and the plot-level styles are updated first, so in this way it is possible to have plot-wide settings applied from one styler, that affect all plots (e.g., the line width, and whether lines and / or points are plotted or not).
 

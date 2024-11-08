@@ -104,7 +104,12 @@ func (eb *YErrorBars) Styler(f func(s *plot.Style)) *YErrorBars {
 	return eb
 }
 
-func (eb *YErrorBars) ApplyStyle() { eb.stylers.Run(&eb.Style) }
+func (eb *YErrorBars) ApplyStyle(ps *plot.PlotStyle) {
+	ps.SetElementStyle(&eb.Style)
+	eb.stylers.Run(&eb.Style)
+}
+
+func (eb *YErrorBars) Stylers() *plot.Stylers { return &eb.stylers }
 
 func (eb *YErrorBars) XYData() (data plot.XYer, pixels plot.XYer) {
 	data = eb.XYs
@@ -217,7 +222,12 @@ func (eb *XErrorBars) Styler(f func(s *plot.Style)) *XErrorBars {
 	return eb
 }
 
-func (eb *XErrorBars) ApplyStyle() { eb.stylers.Run(&eb.Style) }
+func (eb *XErrorBars) ApplyStyle(ps *plot.PlotStyle) {
+	ps.SetElementStyle(&eb.Style)
+	eb.stylers.Run(&eb.Style)
+}
+
+func (eb *XErrorBars) Stylers() *plot.Stylers { return &eb.stylers }
 
 // Plot implements the Plotter interface, drawing labels.
 func (eb *XErrorBars) Plot(plt *plot.Plot) {

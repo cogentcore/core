@@ -73,9 +73,8 @@ type WidthStyle struct { //types:add -setters
 	Stride float32
 
 	// Width for Bar plot is the width of the bars, which should be less than
-	// the Stride to prevent bar overlap.
-	// Defaults to .8
-	Width float32
+	// the Stride (1 typically) to prevent bar overlap. Defaults to .8.
+	Width float32 `min:"0.01" max:"1" default:"0.8"`
 
 	// Pad for Bar plot is additional space at start / end of data range,
 	// to keep bars from overflowing ends. This amount is subtracted from Offset
@@ -111,8 +110,9 @@ func (st *Stylers) Run(s *Style) {
 
 // NewStyle returns a new Style object with styling functions applied
 // on top of Style defaults.
-func (st *Stylers) NewStyle() *Style {
+func (st *Stylers) NewStyle(ps *PlotStyle) *Style {
 	s := NewStyle()
+	ps.SetElementStyle(s)
 	st.Run(s)
 	return s
 }

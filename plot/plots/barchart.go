@@ -71,12 +71,12 @@ func NewBarChart(vs, ers plot.Valuer) *BarChart {
 			return nil
 		}
 	}
-	b := &BarChart{
+	bc := &BarChart{
 		Values: values,
 		Errors: errs,
 	}
-	b.Defaults()
-	return b
+	bc.Defaults()
+	return bc
 }
 
 // NewBarChartTensor returns a new bar chart with a single bar for each value.
@@ -91,36 +91,41 @@ func NewBarChartTensor(vs, ers tensor.Tensor) *BarChart {
 	return NewBarChart(vt, plot.TensorValues{ers})
 }
 
-func (b *BarChart) Defaults() {
-	b.Style.Defaults()
+func (bc *BarChart) Defaults() {
+	bc.Style.Defaults()
 }
 
-func (b *BarChart) Styler(f func(s *plot.Style)) *BarChart {
-	b.stylers.Add(f)
-	return b
+func (bc *BarChart) Styler(f func(s *plot.Style)) *BarChart {
+	bc.stylers.Add(f)
+	return bc
 }
 
-func (b *BarChart) ApplyStyle() { b.stylers.Run(&b.Style) }
+func (bc *BarChart) ApplyStyle(ps *plot.PlotStyle) {
+	ps.SetElementStyle(&bc.Style)
+	bc.stylers.Run(&bc.Style)
+}
 
-func (b *BarChart) XYData() (data plot.XYer, pixels plot.XYer) {
-	data = b.XYs
-	pixels = b.PXYs
+func (bc *BarChart) Stylers() *plot.Stylers { return &bc.stylers }
+
+func (bc *BarChart) XYData() (data plot.XYer, pixels plot.XYer) {
+	data = bc.XYs
+	pixels = bc.PXYs
 	return
 }
 
 // BarHeight returns the maximum y value of the
 // ith bar, taking into account any bars upon
 // which it is stacked.
-func (b *BarChart) BarHeight(i int) float32 {
+func (bc *BarChart) BarHeight(i int) float32 {
 	ht := float32(0.0)
-	if b == nil {
+	if bc == nil {
 		return 0
 	}
-	if i >= 0 && i < len(b.Values) {
-		ht += b.Values[i]
+	if i >= 0 && i < len(bc.Values) {
+		ht += bc.Values[i]
 	}
-	if b.StackedOn != nil {
-		ht += b.StackedOn.BarHeight(i)
+	if bc.StackedOn != nil {
+		ht += bc.StackedOn.BarHeight(i)
 	}
 	return ht
 }
@@ -128,48 +133,48 @@ func (b *BarChart) BarHeight(i int) float32 {
 // StackOn stacks a bar chart on top of another,
 // and sets the bar positioning options to that of the
 // chart upon which it is being stacked.
-func (b *BarChart) StackOn(on *BarChart) {
-	b.Style.Width = on.Style.Width
-	b.StackedOn = on
+func (bc *BarChart) StackOn(on *BarChart) {
+	bc.Style.Width = on.Style.Width
+	bc.StackedOn = on
 }
 
 // Plot implements the plot.Plotter interface.
-func (b *BarChart) Plot(plt *plot.Plot) {
+func (bc *BarChart) Plot(plt *plot.Plot) {
 	pc := plt.Paint
-	b.Style.Line.SetStroke(plt)
-	pc.FillStyle.Color = b.Style.Line.Fill
-	bw := b.Style.Width
+	bc.Style.Line.SetStroke(plt)
+	pc.FillStyle.Color = bc.Style.Line.Fill
+	bw := bc.Style.Width
 
-	nv := len(b.Values)
-	b.XYs = make(plot.XYs, nv)
-	b.PXYs = make(plot.XYs, nv)
+	nv := len(bc.Values)
+	bc.XYs = make(plot.XYs, nv)
+	bc.PXYs = make(plot.XYs, nv)
 
 	hw := 0.5 * bw.Width
 	ew := bw.Width / 3
-	for i, ht := range b.Values {
+	for i, ht := range bc.Values {
 		cat := bw.Offset + float32(i)*bw.Stride
 		var bottom, catVal, catMin, catMax, valMin, valMax float32
 		var box math32.Box2
-		if b.Horizontal {
+		if bc.Horizontal {
 			catVal = plt.PY(cat)
 			catMin = plt.PY(cat - hw)
 			catMax = plt.PY(cat + hw)
-			bottom = b.StackedOn.BarHeight(i) // nil safe
+			bottom = bc.StackedOn.BarHeight(i) // nil safe
 			valMin = plt.PX(bottom)
 			valMax = plt.PX(bottom + ht)
-			b.XYs[i] = math32.Vec2(bottom+ht, cat)
-			b.PXYs[i] = math32.Vec2(valMax, catVal)
+			bc.XYs[i] = math32.Vec2(bottom+ht, cat)
+			bc.PXYs[i] = math32.Vec2(valMax, catVal)
 			box.Min.Set(valMin, catMin)
 			box.Max.Set(valMax, catMax)
 		} else {
 			catVal = plt.PX(cat)
 			catMin = plt.PX(cat - hw)
 			catMax = plt.PX(cat + hw)
-			bottom = b.StackedOn.BarHeight(i) // nil safe
+			bottom = bc.StackedOn.BarHeight(i) // nil safe
 			valMin = plt.PY(bottom)
 			valMax = plt.PY(bottom + ht)
-			b.XYs[i] = math32.Vec2(cat, bottom+ht)
-			b.PXYs[i] = math32.Vec2(catVal, valMax)
+			bc.XYs[i] = math32.Vec2(cat, bottom+ht)
+			bc.PXYs[i] = math32.Vec2(catVal, valMax)
 			box.Min.Set(catMin, valMin)
 			box.Max.Set(catMax, valMax)
 		}
@@ -177,9 +182,9 @@ func (b *BarChart) Plot(plt *plot.Plot) {
 		pc.DrawRectangle(box.Min.X, box.Min.Y, box.Size().X, box.Size().Y)
 		pc.FillStrokeClear()
 
-		if i < len(b.Errors) {
-			errval := b.Errors[i]
-			if b.Horizontal {
+		if i < len(bc.Errors) {
+			errval := bc.Errors[i]
+			if bc.Horizontal {
 				eVal := plt.PX(bottom + ht + math32.Abs(errval))
 				pc.MoveTo(valMax, catVal)
 				pc.LineTo(eVal, catVal)
@@ -199,33 +204,33 @@ func (b *BarChart) Plot(plt *plot.Plot) {
 }
 
 // DataRange implements the plot.DataRanger interface.
-func (b *BarChart) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
-	bw := b.Style.Width
+func (bc *BarChart) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
+	bw := bc.Style.Width
 	catMin := bw.Offset - bw.Pad
-	catMax := bw.Offset + float32(len(b.Values)-1)*bw.Stride + bw.Pad
+	catMax := bw.Offset + float32(len(bc.Values)-1)*bw.Stride + bw.Pad
 
 	valMin := math32.Inf(1)
 	valMax := math32.Inf(-1)
-	for i, val := range b.Values {
-		valBot := b.StackedOn.BarHeight(i)
+	for i, val := range bc.Values {
+		valBot := bc.StackedOn.BarHeight(i)
 		valTop := valBot + val
-		if i < len(b.Errors) {
-			valTop += math32.Abs(b.Errors[i])
+		if i < len(bc.Errors) {
+			valTop += math32.Abs(bc.Errors[i])
 		}
 		valMin = math32.Min(valMin, math32.Min(valBot, valTop))
 		valMax = math32.Max(valMax, math32.Max(valBot, valTop))
 	}
-	if !b.Horizontal {
+	if !bc.Horizontal {
 		return catMin, catMax, valMin, valMax
 	}
 	return valMin, valMax, catMin, catMax
 }
 
 // Thumbnail fulfills the plot.Thumbnailer interface.
-func (b *BarChart) Thumbnail(plt *plot.Plot) {
+func (bc *BarChart) Thumbnail(plt *plot.Plot) {
 	pc := plt.Paint
-	b.Style.Line.SetStroke(plt)
-	pc.FillStyle.Color = b.Style.Line.Fill
+	bc.Style.Line.SetStroke(plt)
+	pc.FillStyle.Color = bc.Style.Line.Fill
 	ptb := pc.Bounds
 	pc.DrawRectangle(float32(ptb.Min.X), float32(ptb.Min.Y), float32(ptb.Size().X), float32(ptb.Size().Y))
 	pc.FillStrokeClear()

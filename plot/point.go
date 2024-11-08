@@ -30,7 +30,7 @@ type PointStyle struct { //types:add -setters
 	// Use nil to disable filling.
 	Fill image.Image
 
-	// Width is the line width, with a default of 1 Pt (point).
+	// Width is the line width for point glyphs, with a default of 1 Pt (point).
 	// Setting to 0 turns line off.
 	Width units.Value
 

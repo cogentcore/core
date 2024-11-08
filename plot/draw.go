@@ -51,38 +51,6 @@ func (pt *Plot) SVGToFile(filename string) error {
 	return bw.Flush()
 }
 
-// applyStyle applies all the style parameters
-func (pt *Plot) applyStyle() {
-	// first update the global plot style settings
-	var st Style
-	st.Defaults()
-	st.Plot = pt.Style
-	for _, plt := range pt.Plotters {
-		stlr := plt.Stylers()
-		stlr.Run(&st)
-	}
-	pt.Style = st.Plot
-	// then apply to elements
-	for _, plt := range pt.Plotters {
-		plt.ApplyStyle(&pt.Style)
-	}
-	// now style plot:
-	pt.Title.Style = pt.Style.TitleStyle
-	if pt.Style.Title != "" {
-		pt.Title.Text = pt.Style.Title
-	}
-	pt.Legend.Style = pt.Style.Legend
-	pt.Legend.Style.Text.openFont(pt)
-	pt.X.Style = pt.Style.Axis
-	pt.Y.Style = pt.Style.Axis
-	pt.X.Label.Style = pt.Style.Axis.Text
-	pt.Y.Label.Style = pt.Style.Axis.Text
-	pt.X.TickText.Style = pt.Style.Axis.TickText
-	pt.Y.TickText.Style = pt.Style.Axis.TickText
-	pt.Y.Label.Style.Rotation = -90
-	pt.Y.Style.TickText.Align = styles.End
-}
-
 // drawConfig configures everything for drawing, applying styles etc.
 func (pt *Plot) drawConfig() {
 	pt.Resize(pt.Size) // ensure

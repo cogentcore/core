@@ -19,9 +19,12 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 )
 
-// PlotStyle has overall plot level styling parameters.
+// PlotStyle has overall plot level styling properties.
+// Some properties provide defaults for individual elements, which can
+// then be overwritten by element-level properties.
 type PlotStyle struct { //types:add -setters
 
 	// Title is the overall title of the plot.
@@ -60,14 +63,56 @@ type PlotStyle struct { //types:add -setters
 
 	// YAxisLabel is the optional label to use for the YAxis instead of the default.
 	YAxisLabel string
+
+	// LinesOn determines whether lines are plotted by default,
+	// for elements that plot lines (e.g., plots.XY).
+	LinesOn DefaultOffOn
+
+	// LineWidth sets the default line width for data plotting lines.
+	LineWidth units.Value
+
+	// PointsOn determines whether points are plotted by default,
+	// for elements that plot points (e.g., plots.XY).
+	PointsOn DefaultOffOn
+
+	// PointSize sets the default point size.
+	PointSize units.Value
+
+	// LabelSize sets the default label text size.
+	LabelSize units.Value
+
+	// BarWidth for Bar plot sets the default width of the bars,
+	// which should be less than the Stride (1 typically) to prevent
+	// bar overlap. Defaults to .8.
+	BarWidth float32
 }
 
 func (ps *PlotStyle) Defaults() {
-	ps.Legend.Defaults()
-	ps.Axis.Defaults()
+	ps.TitleStyle.Defaults()
 	ps.TitleStyle.Size.Dp(24)
 	ps.Background = colors.Scheme.Surface
-	ps.Scale = 1
+	ps.Scale = 2
+	ps.Legend.Defaults()
+	ps.Axis.Defaults()
+	ps.LineWidth.Pt(1)
+	ps.PointSize.Pt(4)
+	ps.LabelSize.Dp(16)
+	ps.BarWidth = .8
+}
+
+// SetElementStyle sets the properties for given element's style
+// based on the global default settings in this PlotStyle.
+func (ps *PlotStyle) SetElementStyle(es *Style) {
+	if ps.LinesOn != Default {
+		es.Line.On = ps.LinesOn
+	}
+	if ps.PointsOn != Default {
+		es.Point.On = ps.PointsOn
+	}
+	es.Line.Width = ps.LineWidth
+	es.Point.Size = ps.PointSize
+	es.Width.Width = ps.BarWidth
+	es.Text.Size = ps.LabelSize
 }
 
 // Plot is the basic type representing a plot.
@@ -115,6 +160,13 @@ type Plot struct {
 	PlotBox math32.Box2
 }
 
+// New returns a new plot with some reasonable default settings.
+func New() *Plot {
+	pt := &Plot{}
+	pt.Defaults()
+	return pt
+}
+
 // Defaults sets defaults
 func (pt *Plot) Defaults() {
 	pt.Style.Defaults()
@@ -129,11 +181,36 @@ func (pt *Plot) Defaults() {
 	pt.StandardTextStyle.WhiteSpace = styles.WhiteSpaceNowrap
 }
 
-// New returns a new plot with some reasonable default settings.
-func New() *Plot {
-	pt := &Plot{}
-	pt.Defaults()
-	return pt
+// applyStyle applies all the style parameters
+func (pt *Plot) applyStyle() {
+	// first update the global plot style settings
+	var st Style
+	st.Defaults()
+	st.Plot = pt.Style
+	for _, plt := range pt.Plotters {
+		stlr := plt.Stylers()
+		stlr.Run(&st)
+	}
+	pt.Style = st.Plot
+	// then apply to elements
+	for _, plt := range pt.Plotters {
+		plt.ApplyStyle(&pt.Style)
+	}
+	// now style plot:
+	pt.Title.Style = pt.Style.TitleStyle
+	if pt.Style.Title != "" {
+		pt.Title.Text = pt.Style.Title
+	}
+	pt.Legend.Style = pt.Style.Legend
+	pt.Legend.Style.Text.openFont(pt)
+	pt.X.Style = pt.Style.Axis
+	pt.Y.Style = pt.Style.Axis
+	pt.X.Label.Style = pt.Style.Axis.Text
+	pt.Y.Label.Style = pt.Style.Axis.Text
+	pt.X.TickText.Style = pt.Style.Axis.TickText
+	pt.Y.TickText.Style = pt.Style.Axis.TickText
+	pt.Y.Label.Style.Rotation = -90
+	pt.Y.Style.TickText.Align = styles.End
 }
 
 // Add adds a Plotters to the plot.

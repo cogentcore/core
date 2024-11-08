@@ -81,8 +81,10 @@ func (ln *XY) Styler(f func(s *plot.Style)) *XY {
 	return ln
 }
 
-func (ln *XY) Stylers() { return &ln.stylers }
-func (ln *XY) ApplyStyle(plotStyle *plot.Style) {
+func (ln *XY) Stylers() *plot.Stylers { return &ln.stylers }
+
+func (ln *XY) ApplyStyle(ps *plot.PlotStyle) {
+	ps.SetElementStyle(&ln.Style)
 	ln.stylers.Run(&ln.Style)
 }
 

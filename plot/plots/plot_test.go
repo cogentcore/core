@@ -99,7 +99,6 @@ func TestLine(t *testing.T) {
 	l1.Style.Line.NegativeX = true
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "line-negx.png")
-
 }
 
 func TestScatter(t *testing.T) {

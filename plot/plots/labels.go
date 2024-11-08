@@ -50,8 +50,12 @@ func NewLabels(d XYLabeler) *Labels {
 	}
 
 	lb := &Labels{XYs: xys, Labels: strs}
-	lb.Style.Defaults()
+	lb.Defaults()
 	return lb
+}
+
+func (lb *Labels) Defaults() {
+	lb.Style.Defaults()
 }
 
 // Styler adds a style function to set style parameters.
@@ -60,10 +64,12 @@ func (lb *Labels) Styler(f func(s *plot.Style)) *Labels {
 	return lb
 }
 
-func (lb *Labels) ApplyStyle() {
-	st := lb.stylers.NewStyle()
+func (lb *Labels) ApplyStyle(ps *plot.PlotStyle) {
+	st := lb.stylers.NewStyle(ps)
 	lb.Style = st.Text
 }
+
+func (lb *Labels) Stylers() *plot.Stylers { return &lb.stylers }
 
 func (lb *Labels) XYData() (data plot.XYer, pixels plot.XYer) {
 	data = lb.XYs
