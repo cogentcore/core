@@ -151,7 +151,28 @@ func (t *LineStyle) SetStep(v StepKind) *LineStyle { t.Step = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.StepKind", IDName: "step-kind", Doc: "StepKind specifies a form of a connection of two consecutive points."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.PlotStyle", IDName: "plot-style", Doc: "PlotStyle has overall plot level styling parameters.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Title", Doc: "Title is the overall title of the plot."}, {Name: "TitleStyle", Doc: "TitleStyle is the text styling parameters for the title."}, {Name: "Background", Doc: "Background is the background of the plot.\nThe default is [colors.Scheme.Surface]."}, {Name: "Scale", Doc: "Scale multiplies the plot DPI value, to change the overall scale\nof the rendered plot.  Larger numbers produce larger scaling.\nTypically use larger numbers when generating plots for inclusion in\ndocuments or other cases where the overall plot size will be small."}, {Name: "Legend", Doc: "Legend has the styling properties for the Legend."}, {Name: "Axis", Doc: "Axis has the styling properties for the Axes."}, {Name: "XAxis", Doc: "XAxis specifies the column to use for the common X axis in a table based plot.\nif empty or not found, the row number is used.\nThis optional for Bar plots, if present and Legend is also present,\nthen an extra space will be put between X values."}, {Name: "XAxisRotation", Doc: "XAxisRotation is the rotation of the X Axis labels, in degrees."}, {Name: "XAxisLabel", Doc: "XAxisLabel is the optional label to use for the XAxis instead of the default."}, {Name: "YAxisLabel", Doc: "YAxisLabel is the optional label to use for the YAxis instead of the default."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.XAxisStyle", IDName: "x-axis-style", Doc: "XAxisStyle has overall plot level styling properties for the XAxis.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Column", Doc: "Column specifies the column to use for the common X axis in a table based plot.\nif empty or not found, the row number is used.\nThis optional for Bar plots, if present and Legend is also present,\nthen an extra space will be put between X values."}, {Name: "Rotation", Doc: "Rotation is the rotation of the X Axis labels, in degrees."}, {Name: "Label", Doc: "Label is the optional label to use for the XAxis instead of the default."}, {Name: "Range", Doc: "Range is the effective range of XAxis data to plot, where either end can be fixed."}}})
+
+// SetColumn sets the [XAxisStyle.Column]:
+// Column specifies the column to use for the common X axis in a table based plot.
+// if empty or not found, the row number is used.
+// This optional for Bar plots, if present and Legend is also present,
+// then an extra space will be put between X values.
+func (t *XAxisStyle) SetColumn(v string) *XAxisStyle { t.Column = v; return t }
+
+// SetRotation sets the [XAxisStyle.Rotation]:
+// Rotation is the rotation of the X Axis labels, in degrees.
+func (t *XAxisStyle) SetRotation(v float32) *XAxisStyle { t.Rotation = v; return t }
+
+// SetLabel sets the [XAxisStyle.Label]:
+// Label is the optional label to use for the XAxis instead of the default.
+func (t *XAxisStyle) SetLabel(v string) *XAxisStyle { t.Label = v; return t }
+
+// SetRange sets the [XAxisStyle.Range]:
+// Range is the effective range of XAxis data to plot, where either end can be fixed.
+func (t *XAxisStyle) SetRange(v minmax.Range32) *XAxisStyle { t.Range = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.PlotStyle", IDName: "plot-style", Doc: "PlotStyle has overall plot level styling properties.\nSome properties provide defaults for individual elements, which can\nthen be overwritten by element-level properties.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Title", Doc: "Title is the overall title of the plot."}, {Name: "TitleStyle", Doc: "TitleStyle is the text styling parameters for the title."}, {Name: "Background", Doc: "Background is the background of the plot.\nThe default is [colors.Scheme.Surface]."}, {Name: "Scale", Doc: "Scale multiplies the plot DPI value, to change the overall scale\nof the rendered plot.  Larger numbers produce larger scaling.\nTypically use larger numbers when generating plots for inclusion in\ndocuments or other cases where the overall plot size will be small."}, {Name: "Legend", Doc: "Legend has the styling properties for the Legend."}, {Name: "Axis", Doc: "Axis has the styling properties for the Axes."}, {Name: "XAxis", Doc: "XAxis has plot-level XAxis style properties."}, {Name: "YAxisLabel", Doc: "YAxisLabel is the optional label to use for the YAxis instead of the default."}, {Name: "LinesOn", Doc: "LinesOn determines whether lines are plotted by default,\nfor elements that plot lines (e.g., plots.XY)."}, {Name: "LineWidth", Doc: "LineWidth sets the default line width for data plotting lines."}, {Name: "PointsOn", Doc: "PointsOn determines whether points are plotted by default,\nfor elements that plot points (e.g., plots.XY)."}, {Name: "PointSize", Doc: "PointSize sets the default point size."}, {Name: "LabelSize", Doc: "LabelSize sets the default label text size."}, {Name: "BarWidth", Doc: "BarWidth for Bar plot sets the default width of the bars,\nwhich should be less than the Stride (1 typically) to prevent\nbar overlap. Defaults to .8."}}})
 
 // SetTitle sets the [PlotStyle.Title]:
 // Title is the overall title of the plot.
@@ -182,31 +203,48 @@ func (t *PlotStyle) SetLegend(v LegendStyle) *PlotStyle { t.Legend = v; return t
 func (t *PlotStyle) SetAxis(v AxisStyle) *PlotStyle { t.Axis = v; return t }
 
 // SetXAxis sets the [PlotStyle.XAxis]:
-// XAxis specifies the column to use for the common X axis in a table based plot.
-// if empty or not found, the row number is used.
-// This optional for Bar plots, if present and Legend is also present,
-// then an extra space will be put between X values.
-func (t *PlotStyle) SetXAxis(v string) *PlotStyle { t.XAxis = v; return t }
-
-// SetXAxisRotation sets the [PlotStyle.XAxisRotation]:
-// XAxisRotation is the rotation of the X Axis labels, in degrees.
-func (t *PlotStyle) SetXAxisRotation(v float32) *PlotStyle { t.XAxisRotation = v; return t }
-
-// SetXAxisLabel sets the [PlotStyle.XAxisLabel]:
-// XAxisLabel is the optional label to use for the XAxis instead of the default.
-func (t *PlotStyle) SetXAxisLabel(v string) *PlotStyle { t.XAxisLabel = v; return t }
+// XAxis has plot-level XAxis style properties.
+func (t *PlotStyle) SetXAxis(v XAxisStyle) *PlotStyle { t.XAxis = v; return t }
 
 // SetYAxisLabel sets the [PlotStyle.YAxisLabel]:
 // YAxisLabel is the optional label to use for the YAxis instead of the default.
 func (t *PlotStyle) SetYAxisLabel(v string) *PlotStyle { t.YAxisLabel = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plot", IDName: "plot", Doc: "Plot is the basic type representing a plot.\nIt renders into its own image.RGBA Pixels image,\nand can also save a corresponding SVG version.\nThe Axis ranges are updated automatically when plots\nare added, so setting a fixed range should happen\nafter that point.  See [UpdateRange] method as well.", Fields: []types.Field{{Name: "Title", Doc: "Title of the plot"}, {Name: "Style", Doc: "Style has the styling properties for the plot."}, {Name: "StandardTextStyle", Doc: "standard text style with default options"}, {Name: "X", Doc: "X and Y are the horizontal and vertical axes\nof the plot respectively."}, {Name: "Y", Doc: "X and Y are the horizontal and vertical axes\nof the plot respectively."}, {Name: "Legend", Doc: "Legend is the plot's legend."}, {Name: "Plotters", Doc: "plotters are drawn by calling their Plot method\nafter the axes are drawn."}, {Name: "Size", Doc: "size is the target size of the image to render to"}, {Name: "DPI", Doc: "DPI is the dots per inch for rendering the image.\nLarger numbers result in larger scaling of the plot contents\nwhich is strongly recommended for print (e.g., use 300 for print)"}, {Name: "Paint", Doc: "painter for rendering"}, {Name: "Pixels", Doc: "pixels that we render into"}, {Name: "PlotBox", Doc: "Current plot bounding box in image coordinates, for plotting coordinates"}}})
+// SetLinesOn sets the [PlotStyle.LinesOn]:
+// LinesOn determines whether lines are plotted by default,
+// for elements that plot lines (e.g., plots.XY).
+func (t *PlotStyle) SetLinesOn(v DefaultOffOn) *PlotStyle { t.LinesOn = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plotter", IDName: "plotter", Doc: "Plotter is an interface that wraps the Plot method.\nSome standard implementations of Plotter can be found in plotters.", Methods: []types.Method{{Name: "Plot", Doc: "Plot draws the data to the Plot Paint", Args: []string{"pt"}}, {Name: "XYData", Doc: "returns the data for this plot as X,Y points,\nincluding corresponding pixel data.\nThis allows gui interface to inspect data etc.", Returns: []string{"data", "pixels"}}, {Name: "ApplyStyle", Doc: "ApplyStyle applies any stylers to this element."}}})
+// SetLineWidth sets the [PlotStyle.LineWidth]:
+// LineWidth sets the default line width for data plotting lines.
+func (t *PlotStyle) SetLineWidth(v units.Value) *PlotStyle { t.LineWidth = v; return t }
+
+// SetPointsOn sets the [PlotStyle.PointsOn]:
+// PointsOn determines whether points are plotted by default,
+// for elements that plot points (e.g., plots.XY).
+func (t *PlotStyle) SetPointsOn(v DefaultOffOn) *PlotStyle { t.PointsOn = v; return t }
+
+// SetPointSize sets the [PlotStyle.PointSize]:
+// PointSize sets the default point size.
+func (t *PlotStyle) SetPointSize(v units.Value) *PlotStyle { t.PointSize = v; return t }
+
+// SetLabelSize sets the [PlotStyle.LabelSize]:
+// LabelSize sets the default label text size.
+func (t *PlotStyle) SetLabelSize(v units.Value) *PlotStyle { t.LabelSize = v; return t }
+
+// SetBarWidth sets the [PlotStyle.BarWidth]:
+// BarWidth for Bar plot sets the default width of the bars,
+// which should be less than the Stride (1 typically) to prevent
+// bar overlap. Defaults to .8.
+func (t *PlotStyle) SetBarWidth(v float32) *PlotStyle { t.BarWidth = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plot", IDName: "plot", Doc: "Plot is the basic type representing a plot.\nIt renders into its own image.RGBA Pixels image,\nand can also save a corresponding SVG version.", Fields: []types.Field{{Name: "Title", Doc: "Title of the plot"}, {Name: "Style", Doc: "Style has the styling properties for the plot."}, {Name: "StandardTextStyle", Doc: "standard text style with default options"}, {Name: "X", Doc: "X and Y are the horizontal and vertical axes\nof the plot respectively."}, {Name: "Y", Doc: "X and Y are the horizontal and vertical axes\nof the plot respectively."}, {Name: "Legend", Doc: "Legend is the plot's legend."}, {Name: "Plotters", Doc: "plotters are drawn by calling their Plot method\nafter the axes are drawn."}, {Name: "Size", Doc: "size is the target size of the image to render to"}, {Name: "DPI", Doc: "DPI is the dots per inch for rendering the image.\nLarger numbers result in larger scaling of the plot contents\nwhich is strongly recommended for print (e.g., use 300 for print)"}, {Name: "Paint", Doc: "painter for rendering"}, {Name: "Pixels", Doc: "pixels that we render into"}, {Name: "PlotBox", Doc: "Current plot bounding box in image coordinates, for plotting coordinates"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plotter", IDName: "plotter", Doc: "Plotter is an interface that wraps the Plot method.\nStandard implementations of Plotter are in the [plots] package.", Methods: []types.Method{{Name: "Plot", Doc: "Plot draws the data to the Plot Paint", Args: []string{"pt"}}, {Name: "XYData", Doc: "returns the data for this plot as X,Y points,\nincluding corresponding pixel data.\nThis allows gui interface to inspect data etc.", Returns: []string{"data", "pixels"}}, {Name: "Stylers", Doc: "Stylers returns the styler functions for this element.", Returns: []string{"Stylers"}}, {Name: "ApplyStyle", Doc: "ApplyStyle applies any stylers to this element,\nfirst initializing from the given global plot style, which has\nalready been styled with defaults and all the plot element stylers.", Args: []string{"plotStyle"}}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.DataRanger", IDName: "data-ranger", Doc: "DataRanger wraps the DataRange method.", Methods: []types.Method{{Name: "DataRange", Doc: "DataRange returns the range of X and Y values.", Args: []string{"pt"}, Returns: []string{"xmin", "xmax", "ymin", "ymax"}}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.PointStyle", IDName: "point-style", Doc: "PointStyle has style properties for drawing points as different shapes.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "On", Doc: "On indicates whether to plot points."}, {Name: "Shape", Doc: "Shape to draw."}, {Name: "Color", Doc: "Color is the stroke color image specification.\nSetting to nil turns line off."}, {Name: "Fill", Doc: "Fill is the color to fill solid regions, in a plot-specific\nway (e.g., the area below a Line plot, the bar color).\nUse nil to disable filling."}, {Name: "Width", Doc: "Width is the line width, with a default of 1 Pt (point).\nSetting to 0 turns line off."}, {Name: "Size", Doc: "Size of shape to draw for each point.\nDefaults to 4 Pt (point)."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.PointStyle", IDName: "point-style", Doc: "PointStyle has style properties for drawing points as different shapes.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "On", Doc: "On indicates whether to plot points."}, {Name: "Shape", Doc: "Shape to draw."}, {Name: "Color", Doc: "Color is the stroke color image specification.\nSetting to nil turns line off."}, {Name: "Fill", Doc: "Fill is the color to fill solid regions, in a plot-specific\nway (e.g., the area below a Line plot, the bar color).\nUse nil to disable filling."}, {Name: "Width", Doc: "Width is the line width for point glyphs, with a default of 1 Pt (point).\nSetting to 0 turns line off."}, {Name: "Size", Doc: "Size of shape to draw for each point.\nDefaults to 4 Pt (point)."}}})
 
 // SetOn sets the [PointStyle.On]:
 // On indicates whether to plot points.
@@ -228,7 +266,7 @@ func (t *PointStyle) SetColor(v image.Image) *PointStyle { t.Color = v; return t
 func (t *PointStyle) SetFill(v image.Image) *PointStyle { t.Fill = v; return t }
 
 // SetWidth sets the [PointStyle.Width]:
-// Width is the line width, with a default of 1 Pt (point).
+// Width is the line width for point glyphs, with a default of 1 Pt (point).
 // Setting to 0 turns line off.
 func (t *PointStyle) SetWidth(v units.Value) *PointStyle { t.Width = v; return t }
 
@@ -239,7 +277,14 @@ func (t *PointStyle) SetSize(v units.Value) *PointStyle { t.Size = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Shapes", IDName: "shapes"})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Style", IDName: "style", Doc: "Style contains the plot styling properties relevant across\nmost plot types. These properties apply both to individual plot elements\nand to the plot as a whole.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "On", Doc: "On specifies whether to plot this item, for cases where it can be turned off."}, {Name: "Range", Doc: "Range is the effective range of data to plot, where either end can be fixed."}, {Name: "Label", Doc: "Label provides an alternative label to use for axis, if set."}, {Name: "NTicks", Doc: "NTicks sets the desired number of ticks for the axis, if > 0."}, {Name: "Line", Doc: "Line has style properties for drawing lines."}, {Name: "Point", Doc: "Point has style properties for drawing points."}, {Name: "Text", Doc: "Text has style properties for rendering text."}, {Name: "Width", Doc: "Width has various plot width properties."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Style", IDName: "style", Doc: "Style contains the plot styling properties relevant across\nmost plot types. These properties apply to individual plot elements\nwhile the Plot properties applies to the overall plot itself.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Plot", Doc: "\tPlot has overall plot-level properties, which can be set by any\nplot element, and are updated first, before applying element-wise styles."}, {Name: "On", Doc: "On specifies whether to plot this item, for cases where it can be turned off."}, {Name: "Range", Doc: "Range is the effective range of data to plot, where either end can be fixed."}, {Name: "Label", Doc: "Label provides an alternative label to use for axis, if set."}, {Name: "NTicks", Doc: "NTicks sets the desired number of ticks for the axis, if > 0."}, {Name: "Line", Doc: "Line has style properties for drawing lines."}, {Name: "Point", Doc: "Point has style properties for drawing points."}, {Name: "Text", Doc: "Text has style properties for rendering text."}, {Name: "Width", Doc: "Width has various plot width properties."}}})
+
+// SetPlot sets the [Style.Plot]:
+//
+//	Plot has overall plot-level properties, which can be set by any
+//
+// plot element, and are updated first, before applying element-wise styles.
+func (t *Style) SetPlot(v PlotStyle) *Style { t.Plot = v; return t }
 
 // SetOn sets the [Style.On]:
 // On specifies whether to plot this item, for cases where it can be turned off.
@@ -273,7 +318,7 @@ func (t *Style) SetText(v TextStyle) *Style { t.Text = v; return t }
 // Width has various plot width properties.
 func (t *Style) SetWidth(v WidthStyle) *Style { t.Width = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.WidthStyle", IDName: "width-style", Doc: "WidthStyle contains various plot width properties relevant across\ndifferent plot types.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Cap", Doc: "Cap is the width of the caps drawn at the top of error bars.\nThe default is 10dp"}, {Name: "Offset", Doc: "Offset for Bar plot is the offset added to each X axis value\nrelative to the Stride computed value (X = offset + index * Stride)\nDefaults to 1."}, {Name: "Stride", Doc: "Stride for Bar plot is distance between bars. Defaults to 1."}, {Name: "Width", Doc: "Width for Bar plot is the width of the bars, which should be less than\nthe Stride to prevent bar overlap.\nDefaults to .8"}, {Name: "Pad", Doc: "Pad for Bar plot is additional space at start / end of data range,\nto keep bars from overflowing ends. This amount is subtracted from Offset\nand added to (len(Values)-1)*Stride -- no other accommodation for bar\nwidth is provided, so that should be built into this value as well.\nDefaults to 1."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.WidthStyle", IDName: "width-style", Doc: "WidthStyle contains various plot width properties relevant across\ndifferent plot types.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Cap", Doc: "Cap is the width of the caps drawn at the top of error bars.\nThe default is 10dp"}, {Name: "Offset", Doc: "Offset for Bar plot is the offset added to each X axis value\nrelative to the Stride computed value (X = offset + index * Stride)\nDefaults to 1."}, {Name: "Stride", Doc: "Stride for Bar plot is distance between bars. Defaults to 1."}, {Name: "Width", Doc: "Width for Bar plot is the width of the bars, which should be less than\nthe Stride (1 typically) to prevent bar overlap. Defaults to .8."}, {Name: "Pad", Doc: "Pad for Bar plot is additional space at start / end of data range,\nto keep bars from overflowing ends. This amount is subtracted from Offset\nand added to (len(Values)-1)*Stride -- no other accommodation for bar\nwidth is provided, so that should be built into this value as well.\nDefaults to 1."}}})
 
 // SetCap sets the [WidthStyle.Cap]:
 // Cap is the width of the caps drawn at the top of error bars.
@@ -292,8 +337,7 @@ func (t *WidthStyle) SetStride(v float32) *WidthStyle { t.Stride = v; return t }
 
 // SetWidth sets the [WidthStyle.Width]:
 // Width for Bar plot is the width of the bars, which should be less than
-// the Stride to prevent bar overlap.
-// Defaults to .8
+// the Stride (1 typically) to prevent bar overlap. Defaults to .8.
 func (t *WidthStyle) SetWidth(v float32) *WidthStyle { t.Width = v; return t }
 
 // SetPad sets the [WidthStyle.Pad]:

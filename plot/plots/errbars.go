@@ -149,7 +149,7 @@ func (eb *YErrorBars) Plot(plt *plot.Plot) {
 
 // DataRange implements the plot.DataRanger interface.
 func (eb *YErrorBars) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
-	xmin, xmax = plot.Range(plot.XValues{eb})
+	xmin, xmax = plot.RangeClamp(plot.XValues{eb}, &eb.Style.Range)
 	ymin = math32.Inf(1)
 	ymax = math32.Inf(-1)
 	for i, err := range eb.YErrors {

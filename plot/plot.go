@@ -17,10 +17,29 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 )
+
+// XAxisStyle has overall plot level styling properties for the XAxis.
+type XAxisStyle struct { //types:add -setters
+	// Column specifies the column to use for the common X axis in a table based plot.
+	// if empty or not found, the row number is used.
+	// This optional for Bar plots, if present and Legend is also present,
+	// then an extra space will be put between X values.
+	Column string
+
+	// Rotation is the rotation of the X Axis labels, in degrees.
+	Rotation float32
+
+	// Label is the optional label to use for the XAxis instead of the default.
+	Label string
+
+	// Range is the effective range of XAxis data to plot, where either end can be fixed.
+	Range minmax.Range32 `display:"inline"`
+}
 
 // PlotStyle has overall plot level styling properties.
 // Some properties provide defaults for individual elements, which can
@@ -49,17 +68,8 @@ type PlotStyle struct { //types:add -setters
 	// Axis has the styling properties for the Axes.
 	Axis AxisStyle
 
-	// XAxis specifies the column to use for the common X axis in a table based plot.
-	// if empty or not found, the row number is used.
-	// This optional for Bar plots, if present and Legend is also present,
-	// then an extra space will be put between X values.
-	XAxis string
-
-	// XAxisRotation is the rotation of the X Axis labels, in degrees.
-	XAxisRotation float32
-
-	// XAxisLabel is the optional label to use for the XAxis instead of the default.
-	XAxisLabel string
+	// XAxis has plot-level XAxis style properties.
+	XAxis XAxisStyle
 
 	// YAxisLabel is the optional label to use for the YAxis instead of the default.
 	YAxisLabel string
@@ -91,7 +101,7 @@ func (ps *PlotStyle) Defaults() {
 	ps.TitleStyle.Defaults()
 	ps.TitleStyle.Size.Dp(24)
 	ps.Background = colors.Scheme.Surface
-	ps.Scale = 2
+	ps.Scale = 1
 	ps.Legend.Defaults()
 	ps.Axis.Defaults()
 	ps.LineWidth.Pt(1)
@@ -118,9 +128,6 @@ func (ps *PlotStyle) SetElementStyle(es *Style) {
 // Plot is the basic type representing a plot.
 // It renders into its own image.RGBA Pixels image,
 // and can also save a corresponding SVG version.
-// The Axis ranges are updated automatically when plots
-// are added, so setting a fixed range should happen
-// after that point.  See [UpdateRange] method as well.
 type Plot struct {
 	// Title of the plot
 	Title Text
@@ -197,6 +204,7 @@ func (pt *Plot) applyStyle() {
 		plt.ApplyStyle(&pt.Style)
 	}
 	// now style plot:
+	pt.DPI *= pt.Style.Scale
 	pt.Title.Style = pt.Style.TitleStyle
 	if pt.Style.Title != "" {
 		pt.Title.Text = pt.Style.Title
@@ -205,12 +213,16 @@ func (pt *Plot) applyStyle() {
 	pt.Legend.Style.Text.openFont(pt)
 	pt.X.Style = pt.Style.Axis
 	pt.Y.Style = pt.Style.Axis
+	pt.X.Label.Text = pt.Style.XAxis.Label
+	pt.Y.Label.Text = pt.Style.YAxisLabel
 	pt.X.Label.Style = pt.Style.Axis.Text
 	pt.Y.Label.Style = pt.Style.Axis.Text
 	pt.X.TickText.Style = pt.Style.Axis.TickText
+	pt.X.TickText.Style.Rotation = pt.Style.XAxis.Rotation
 	pt.Y.TickText.Style = pt.Style.Axis.TickText
 	pt.Y.Label.Style.Rotation = -90
 	pt.Y.Style.TickText.Align = styles.End
+	pt.UpdateRange()
 }
 
 // Add adds a Plotters to the plot.
@@ -232,7 +244,6 @@ func (pt *Plot) SetPixels(img *image.RGBA) {
 	pt.Paint = paint.NewContextFromImage(pt.Pixels)
 	pt.Paint.UnitContext.DPI = pt.DPI
 	pt.Size = pt.Pixels.Bounds().Size()
-	pt.UpdateRange() // needs context, to automatically update for labels
 }
 
 // Resize sets the size of the output image to given size.
@@ -326,6 +337,7 @@ func (pt *Plot) UpdateRangeFromPlotter(d Plotter) {
 		pt.Y.Min = math32.Min(pt.Y.Min, ymin)
 		pt.Y.Max = math32.Max(pt.Y.Max, ymax)
 	}
+	pt.X.Min, pt.X.Max = pt.Style.XAxis.Range.Clamp(pt.X.Min, pt.X.Max)
 }
 
 // PX returns the X-axis plotting coordinate for given raw data value

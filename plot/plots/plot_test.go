@@ -44,17 +44,8 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestLine(t *testing.T) {
-	plt := plot.New()
-	plt.Title.Text = "Test Line"
-	plt.X.Min = 0
-	plt.X.Max = 100
-	plt.X.Label.Text = "X Axis"
-	plt.Y.Min = 0
-	plt.Y.Max = 100
-	plt.Y.Label.Text = "Y Axis"
-
-	// note: making two overlapping series
+// sinCosWrapData returns overlapping sin / cos curves in one sequence.
+func sinCosWrapData() plot.XYs {
 	data := make(plot.XYs, 42)
 	for i := range data {
 		x := float32(i % 21)
@@ -65,6 +56,47 @@ func TestLine(t *testing.T) {
 			data[i].Y = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
 		}
 	}
+	return data
+}
+
+func sinDataXY() plot.XYs {
+	data := make(plot.XYs, 21)
+	for i := range data {
+		data[i].X = float32(i * 5)
+		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
+	}
+	return data
+}
+
+func sinData() plot.Values {
+	sin := make(plot.Values, 21)
+	for i := range sin {
+		x := float32(i % 21)
+		sin[i] = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
+	}
+	return sin
+}
+
+func cosData() plot.Values {
+	cos := make(plot.Values, 21)
+	for i := range cos {
+		x := float32(i % 21)
+		cos[i] = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
+	}
+	return cos
+}
+
+func TestLine(t *testing.T) {
+	data := sinCosWrapData()
+
+	plt := plot.New()
+	plt.Title.Text = "Test Line"
+	plt.X.Min = 0
+	plt.X.Max = 100
+	plt.X.Label.Text = "X Axis"
+	plt.Y.Min = 0
+	plt.Y.Max = 100
+	plt.Y.Label.Text = "Y Axis"
 
 	l1 := NewLine(data)
 	if l1 == nil {
@@ -102,6 +134,8 @@ func TestLine(t *testing.T) {
 }
 
 func TestScatter(t *testing.T) {
+	data := sinDataXY()
+
 	plt := plot.New()
 	plt.Title.Text = "Test Scatter"
 	plt.X.Min = 0
@@ -110,12 +144,6 @@ func TestScatter(t *testing.T) {
 	plt.Y.Min = 0
 	plt.Y.Max = 100
 	plt.Y.Label.Text = "Y Axis"
-
-	data := make(plot.XYs, 21)
-	for i := range data {
-		data[i].X = float32(i * 5)
-		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
-	}
 
 	l1 := NewScatter(data)
 	if l1 == nil {
@@ -178,17 +206,8 @@ func TestBarChart(t *testing.T) {
 	plt.Y.Max = 100
 	plt.Y.Label.Text = "Y Axis"
 
-	data := make(plot.Values, 21)
-	for i := range data {
-		x := float32(i % 21)
-		data[i] = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
-	}
-
-	cos := make(plot.Values, 21)
-	for i := range data {
-		x := float32(i % 21)
-		cos[i] = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
-	}
+	data := sinData()
+	cos := cosData()
 
 	l1 := NewBarChart(data, nil)
 	if l1 == nil {
@@ -226,17 +245,8 @@ func TestBarChartErr(t *testing.T) {
 	plt.Y.Max = 100
 	plt.Y.Label.Text = "Y Axis"
 
-	data := make(plot.Values, 21)
-	for i := range data {
-		x := float32(i % 21)
-		data[i] = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
-	}
-
-	cos := make(plot.Values, 21)
-	for i := range data {
-		x := float32(i % 21)
-		cos[i] = float32(5) + 4*math32.Cos((x/8)*math32.Pi)
-	}
+	data := sinData()
+	cos := cosData()
 
 	l1 := NewBarChart(data, cos)
 	if l1 == nil {
@@ -266,17 +276,8 @@ func TestBarChartStack(t *testing.T) {
 	plt.Y.Max = 100
 	plt.Y.Label.Text = "Y Axis"
 
-	data := make(plot.Values, 21)
-	for i := range data {
-		x := float32(i % 21)
-		data[i] = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
-	}
-
-	cos := make(plot.Values, 21)
-	for i := range data {
-		x := float32(i % 21)
-		cos[i] = float32(5) + 4*math32.Cos((x/8)*math32.Pi)
-	}
+	data := sinData()
+	cos := cosData()
 
 	l1 := NewBarChart(data, nil)
 	if l1 == nil {
@@ -345,4 +346,35 @@ func TestErrBar(t *testing.T) {
 	plt.Resize(image.Point{640, 480})
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "errbar.png")
+}
+
+func TestStyle(t *testing.T) {
+	data := sinCosWrapData()
+
+	plt := plot.New()
+	l1 := NewLine(data).Styler(func(s *plot.Style) {
+		s.Plot.Title = "Test Line"
+		s.Plot.XAxis.Label = "X Axis"
+		s.Plot.YAxisLabel = "Y Axis"
+		s.Plot.XAxis.Range.SetMax(105)
+		s.Plot.LineWidth.Pt(2)
+		s.Plot.SetLinesOn(plot.On).SetPointsOn(plot.On)
+		s.Plot.TitleStyle.Size.Dp(48)
+		s.Plot.Legend.Position.Left = true
+		s.Plot.Legend.Text.Size.Dp(24)
+		s.Plot.Axis.Text.Size.Dp(32)
+		s.Plot.Axis.TickText.Size.Dp(24)
+		s.Plot.XAxis.Rotation = -45
+		// s.Line.On = plot.Off
+		s.Line.Color = colors.Uniform(colors.Red)
+		s.Point.Color = colors.Uniform(colors.Blue)
+		s.Range.SetMax(100)
+	})
+	plt.Add(l1)
+	plt.Legend.Add("Sine", l1)
+	plt.Legend.Add("Cos", l1)
+
+	plt.Resize(image.Point{640, 480})
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "style_line_point.png")
 }

@@ -13,6 +13,7 @@ import (
 	"errors"
 
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/tensor"
 )
 
@@ -67,17 +68,24 @@ type Valuer interface {
 }
 
 // Range returns the minimum and maximum values.
-func Range(vs Valuer) (min, max float32) {
-	min = math32.Inf(1)
-	max = math32.Inf(-1)
+func Range(vs Valuer) (mn, mx float32) {
+	mn = math32.Inf(1)
+	mx = math32.Inf(-1)
 	for i := 0; i < vs.Len(); i++ {
 		v := vs.Value(i)
 		if math32.IsNaN(v) {
 			continue
 		}
-		min = math32.Min(min, v)
-		max = math32.Max(max, v)
+		mn = math32.Min(mn, v)
+		mx = math32.Max(mx, v)
 	}
+	return
+}
+
+// RangeClamp returns the minimum and maximum values clamped by given range.
+func RangeClamp(vs Valuer, rng *minmax.Range32) (mn, mx float32) {
+	mn, mx = Range(vs)
+	mn, mx = rng.Clamp(mn, mx)
 	return
 }
 
@@ -139,11 +147,17 @@ type XYer interface {
 	XY(i int) (x, y float32)
 }
 
-// XYRange returns the minimum and maximum
-// x and y values.
+// XYRange returns the minimum and maximum x and y values.
 func XYRange(xys XYer) (xmin, xmax, ymin, ymax float32) {
 	xmin, xmax = Range(XValues{xys})
 	ymin, ymax = Range(YValues{xys})
+	return
+}
+
+// XYRangeClamp returns the data range with Range clamped for Y axis.
+func XYRangeClamp(xys XYer, rng *minmax.Range32) (xmin, xmax, ymin, ymax float32) {
+	xmin, xmax, ymin, ymax = XYRange(xys)
+	ymin, ymax = rng.Clamp(ymin, ymax)
 	return
 }
 

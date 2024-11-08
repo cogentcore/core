@@ -221,8 +221,10 @@ func (bc *BarChart) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
 		valMax = math32.Max(valMax, math32.Max(valBot, valTop))
 	}
 	if !bc.Horizontal {
+		valMin, valMax = bc.Style.Range.Clamp(valMin, valMax)
 		return catMin, catMax, valMin, valMax
 	}
+	catMin, catMax = bc.Style.Range.Clamp(catMin, catMax)
 	return valMin, valMax, catMin, catMax
 }
 

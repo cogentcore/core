@@ -198,7 +198,7 @@ func (ln *XY) Plot(plt *plot.Plot) {
 // DataRange returns the minimum and maximum
 // x and y values, implementing the plot.DataRanger interface.
 func (ln *XY) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
-	return plot.XYRange(ln)
+	return plot.XYRangeClamp(ln, &ln.Style.Range)
 }
 
 // Thumbnail returns the thumbnail, implementing the plot.Thumbnailer interface.

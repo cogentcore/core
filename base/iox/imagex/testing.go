@@ -109,6 +109,7 @@ func Assert(t TestingT, img image.Image, filename string) {
 		if err != nil {
 			t.Errorf("AssertImage: error removing old fail image: %v", err)
 		}
+		os.RemoveAll(diffFilename)
 		return
 	}
 
@@ -164,5 +165,6 @@ func Assert(t TestingT, img image.Image, filename string) {
 		if err != nil {
 			t.Errorf("AssertImage: error removing old fail image: %v", err)
 		}
+		os.RemoveAll(diffFilename)
 	}
 }
