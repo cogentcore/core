@@ -112,7 +112,7 @@ func (ln *XY) Data() (data plot.Data, pixX, pixY []float32) {
 func (ln *XY) Plot(plt *plot.Plot) {
 	pc := plt.Paint
 	ln.PX = plot.PlotX(plt, ln.X)
-	ln.PY = plot.PlotX(plt, ln.Y)
+	ln.PY = plot.PlotY(plt, ln.Y)
 	np := len(ln.PX)
 
 	if ln.Style.Line.Fill != nil {

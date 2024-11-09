@@ -213,8 +213,12 @@ func (pt *Plot) applyStyle() {
 	pt.Legend.Style.Text.openFont(pt)
 	pt.X.Style = pt.Style.Axis
 	pt.Y.Style = pt.Style.Axis
-	pt.X.Label.Text = pt.Style.XAxis.Label
-	pt.Y.Label.Text = pt.Style.YAxisLabel
+	if pt.Style.XAxis.Label != "" {
+		pt.X.Label.Text = pt.Style.XAxis.Label
+	}
+	if pt.Style.YAxisLabel != "" {
+		pt.Y.Label.Text = pt.Style.YAxisLabel
+	}
 	pt.X.Label.Style = pt.Style.Axis.Text
 	pt.Y.Label.Style = pt.Style.Axis.Text
 	pt.X.TickText.Style = pt.Style.Axis.TickText

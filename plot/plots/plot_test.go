@@ -56,22 +56,16 @@ func sinCosWrapData() plot.Data {
 			yd[i] = float64(50) + 40*math.Cos((x/8)*math.Pi)
 		}
 	}
-	data := plot.Data{}
-	data[plot.X] = xd
-	data[plot.Y] = yd
-	return data
+	return plot.Data{plot.X: xd, plot.Y: yd}
 }
 
 func sinDataXY() plot.Data {
 	xd, yd := make(plot.Values, 21), make(plot.Values, 21)
 	for i := range xd {
 		xd[i] = float64(i * 5)
-		xd[i] = float64(50) + 40*math.Sin((float64(i)/8)*math.Pi)
+		yd[i] = float64(50) + 40*math.Sin((float64(i)/8)*math.Pi)
 	}
-	data := plot.Data{}
-	data[plot.X] = xd
-	data[plot.Y] = yd
-	return data
+	return plot.Data{plot.X: xd, plot.Y: yd}
 }
 
 func sinData() plot.Data {
@@ -80,9 +74,7 @@ func sinData() plot.Data {
 		x := float64(i % 21)
 		yd[i] = float64(50) + 40*math.Sin((x/8)*math.Pi)
 	}
-	data := plot.Data{}
-	data[plot.Y] = yd
-	return data
+	return plot.Data{plot.Y: yd}
 }
 
 func cosData() plot.Data {
@@ -91,9 +83,7 @@ func cosData() plot.Data {
 		x := float64(i % 21)
 		yd[i] = float64(50) + 40*math.Cos((x/8)*math.Pi)
 	}
-	data := plot.Data{}
-	data[plot.Y] = yd
-	return data
+	return plot.Data{plot.Y: yd}
 }
 
 func TestLine(t *testing.T) {
@@ -246,7 +236,7 @@ func TestBar(t *testing.T) {
 	l2.Style.Width.Stride = 2
 	l2.Style.Width.Offset = 2
 
-	plt.Add(l2) // note: range updated when added!
+	plt.Add(l2)
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "bar-cos.png")
 }

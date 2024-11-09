@@ -139,6 +139,8 @@ func (bc *Bar) Plot(plt *plot.Plot) {
 	nv := len(bc.Y)
 	bc.X = make(plot.Values, nv)
 	bc.Yp = make(plot.Values, nv)
+	bc.PX = make([]float32, nv)
+	bc.PY = make([]float32, nv)
 
 	hw := 0.5 * bw.Width
 	ew := bw.Width / 3
