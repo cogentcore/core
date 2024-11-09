@@ -4,7 +4,11 @@
 
 package minmax
 
-import "fmt"
+import (
+	"fmt"
+
+	"cogentcore.org/core/math32"
+)
 
 //gosl:start
 
@@ -138,4 +142,21 @@ func (mr *F32) FitInRange(oth F32) bool {
 		adj = true
 	}
 	return adj
+}
+
+// Sanitize ensures that the Min / Max range is not infinite or contradictory.
+func (mr *F32) Sanitize() {
+	if math32.IsInf(mr.Min, 0) {
+		mr.Min = 0
+	}
+	if math32.IsInf(mr.Max, 0) {
+		mr.Max = 0
+	}
+	if mr.Min > mr.Max {
+		mr.Min, mr.Max = mr.Max, mr.Min
+	}
+	if mr.Min == mr.Max {
+		mr.Min--
+		mr.Max++
+	}
 }

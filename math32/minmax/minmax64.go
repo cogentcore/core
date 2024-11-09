@@ -5,6 +5,8 @@
 // Package minmax provides a struct that holds Min and Max values.
 package minmax
 
+import "math"
+
 //go:generate core generate
 
 const (
@@ -26,38 +28,38 @@ func (mr *F64) Set(mn, mx float64) {
 }
 
 // SetInfinity sets the Min to +MaxFloat, Max to -MaxFloat -- suitable for
-// iteratively calling Fit*InRange
+// iteratively calling Fit*InRange.
 func (mr *F64) SetInfinity() {
 	mr.Min = MaxFloat64
 	mr.Max = -MaxFloat64
 }
 
-// IsValid returns true if Min <= Max
+// IsValid returns true if Min <= Max.
 func (mr *F64) IsValid() bool {
 	return mr.Min <= mr.Max
 }
 
-// InRange tests whether value is within the range (>= Min and <= Max)
+// InRange tests whether value is within the range (>= Min and <= Max).
 func (mr *F64) InRange(val float64) bool {
 	return ((val >= mr.Min) && (val <= mr.Max))
 }
 
-// IsLow tests whether value is lower than the minimum
+// IsLow tests whether value is lower than the minimum.
 func (mr *F64) IsLow(val float64) bool {
 	return (val < mr.Min)
 }
 
-// IsHigh tests whether value is higher than the maximum
+// IsHigh tests whether value is higher than the maximum.
 func (mr *F64) IsHigh(val float64) bool {
 	return (val > mr.Min)
 }
 
-// Range returns Max - Min
+// Range returns Max - Min.
 func (mr *F64) Range() float64 {
 	return mr.Max - mr.Min
 }
 
-// Scale returns 1 / Range -- if Range = 0 then returns 0
+// Scale returns 1 / Range -- if Range = 0 then returns 0.
 func (mr *F64) Scale() float64 {
 	r := mr.Range()
 	if r != 0 {
@@ -134,4 +136,21 @@ func (mr *F64) FitInRange(oth F64) bool {
 		adj = true
 	}
 	return adj
+}
+
+// Sanitize ensures that the Min / Max range is not infinite or contradictory.
+func (mr *F64) Sanitize() {
+	if math.IsInf(mr.Min, 0) {
+		mr.Min = 0
+	}
+	if math.IsInf(mr.Max, 0) {
+		mr.Max = 0
+	}
+	if mr.Min > mr.Max {
+		mr.Min, mr.Max = mr.Max, mr.Min
+	}
+	if mr.Min == mr.Max {
+		mr.Min--
+		mr.Max++
+	}
 }

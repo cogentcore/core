@@ -4,16 +4,25 @@
 
 package plot
 
+import (
+	"log/slog"
+
+	"cogentcore.org/core/math32/minmax"
+)
+
 // Plotter is an interface that wraps the Plot method.
 // Standard implementations of Plotter are in the [plots] package.
 type Plotter interface {
-	// Plot draws the data to the Plot Paint
+	// Plot draws the data to the Plot Paint.
 	Plot(pt *Plot)
 
-	// returns the data for this plot as X,Y points,
-	// including corresponding pixel data.
-	// This allows gui interface to inspect data etc.
-	XYData() (data XYer, pixels XYer)
+	// UpdateRange updates the given ranges.
+	UpdateRange(plt *Plot, x, y, z *minmax.F64)
+
+	// Data returns the data by roles for this plot, for both the original
+	// data and the pixel-transformed X,Y coordinates for that data.
+	// This allows a GUI interface to inspect data etc.
+	Data() (data map[Roles]Data, pixX, pixY []float32)
 
 	// Stylers returns the styler functions for this element.
 	Stylers() *Stylers
@@ -24,8 +33,43 @@ type Plotter interface {
 	ApplyStyle(plotStyle *PlotStyle)
 }
 
-// DataRanger wraps the DataRange method.
-type DataRanger interface {
-	// DataRange returns the range of X and Y values.
-	DataRange(pt *Plot) (xmin, xmax, ymin, ymax float32)
+// PlotterType registers a Plotter so that it can be created with appropriate data.
+type PlotterType struct {
+	// Name of the plot type.
+	Name string
+
+	// Doc is the documentation for this Plotter.
+	Doc string
+
+	// Required Data roles for this plot. Data for these Roles must be provided.
+	Required []Roles
+
+	// Optional Data roles for this plot.
+	Optional []Roles
+
+	// New returns a new plotter of this type with given data in given roles.
+	New func(data map[Roles]Data) Plotter
+}
+
+// Plotters is the registry of [Plotter] types.
+var Plotters map[string]PlotterType
+
+// RegisterPlotter registers a plotter type.
+func RegisterPlotter(name, doc string, required, optional []Roles, newFun func(data map[Roles]Data) Plotter) {
+	if Plotters == nil {
+		Plotters = make(map[string]PlotterType)
+	}
+	Plotters[name] = PlotterType{Name: name, Doc: doc, Required: required, Optional: optional, New: newFun}
+}
+
+// NewPlotter returns a new plotter of given type, e.g., "XY", "Bar" etc,
+// for given data roles (which must include Required roles, and may include Optional ones).
+// Logs an error and returns nil if type name is not recognized as a registered type.
+func NewPlotter(typeName string, data map[Roles]Data) Plotter {
+	pt, ok := Plotters[typeName]
+	if !ok {
+		slog.Error("plot.NewPlotter type name is not registered", "typeName", typeName)
+		return nil
+	}
+	return pt.New(data)
 }

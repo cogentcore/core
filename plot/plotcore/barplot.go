@@ -169,7 +169,7 @@ func (pl *PlotEditor) genPlotBar() {
 			xyl.Labels = make([]string, n)
 
 			for i := range xview.Indexes {
-				y := firstXY.Value(i)
+				y := firstXY.Float1D(i)
 				x := float32(mid + (i%maxx)*stride)
 				xyl.XYs[i] = math32.Vec2(x, y)
 				xyl.Labels[i] = xy.Label(i)

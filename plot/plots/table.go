@@ -4,8 +4,6 @@
 
 package plots
 
-import "cogentcore.org/core/plot"
-
 // Table is an interface for tabular data for plotting,
 // with columns of values.
 type Table interface {
@@ -31,34 +29,34 @@ func TableColumnByIndex(tab Table, name string) int {
 	return -1
 }
 
-// TableXYer is an interface for providing XY access to Table data
-type TableXYer struct {
-	Table Table
-
-	// the indexes of the tensor columns to use for the X and Y data, respectively
-	XColumn, YColumn int
-}
-
-func NewTableXYer(tab Table, xcolumn, ycolumn int) *TableXYer {
-	txy := &TableXYer{Table: tab, XColumn: xcolumn, YColumn: ycolumn}
-	return txy
-}
-
-func (dt *TableXYer) Len() int {
-	return dt.Table.NumRows()
-}
-
-func (dt *TableXYer) XY(i int) (x, y float32) {
-	return dt.Table.PlotData(dt.XColumn, i), dt.Table.PlotData(dt.YColumn, i)
-}
-
-// AddTableLine adds XY Line with given x, y columns from given tabular data.
-func AddTableLine(plt *plot.Plot, tab Table, xcolumn, ycolumn int) *XY {
-	txy := NewTableXYer(tab, xcolumn, ycolumn)
-	ln := NewLine(txy)
-	if ln == nil {
-		return nil
-	}
-	plt.Add(ln)
-	return ln
-}
+// // TableXYer is an interface for providing XY access to Table data
+// type TableXYer struct {
+// 	Table Table
+//
+// 	// the indexes of the tensor columns to use for the X and Y data, respectively
+// 	XColumn, YColumn int
+// }
+//
+// func NewTableXYer(tab Table, xcolumn, ycolumn int) *TableXYer {
+// 	txy := &TableXYer{Table: tab, XColumn: xcolumn, YColumn: ycolumn}
+// 	return txy
+// }
+//
+// func (dt *TableXYer) Len() int {
+// 	return dt.Table.NumRows()
+// }
+//
+// func (dt *TableXYer) XY(i int) (x, y float32) {
+// 	return dt.Table.PlotData(dt.XColumn, i), dt.Table.PlotData(dt.YColumn, i)
+// }
+//
+// // AddTableLine adds XY Line with given x, y columns from given tabular data.
+// func AddTableLine(plt *plot.Plot, tab Table, xcolumn, ycolumn int) *XY {
+// 	txy := NewTableXYer(tab, xcolumn, ycolumn)
+// 	ln := NewLine(txy)
+// 	if ln == nil {
+// 		return nil
+// 	}
+// 	plt.Add(ln)
+// 	return ln
+// }

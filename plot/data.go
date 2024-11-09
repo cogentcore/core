@@ -10,30 +10,87 @@
 package plot
 
 import (
-	"errors"
+	"log/slog"
+	"math"
+	"strconv"
 
-	"cogentcore.org/core/math32"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32/minmax"
-	"cogentcore.org/core/tensor"
 )
 
-// data defines the main data interfaces for plotting.
-// Other more specific types of plots define their own interfaces.
-// unlike gonum/plot, NaN values are treated as missing data here.
+// data defines the main data interfaces for plotting
+// and the different Roles for data.
 
 var (
 	ErrInfinity = errors.New("plotter: infinite data point")
 	ErrNoData   = errors.New("plotter: no data points")
 )
 
+// Data is the data interface for plotting, supporting either
+// float64 or string representations. It is satisfied by the tensor.Tensor
+// interface, so a tensor can be used directly for plot Data.
+type Data interface {
+	// Len returns the number of values.
+	Len() int
+
+	// Float1D(i int) returns float64 value at given index.
+	Float1D(i int) float64
+
+	// String1D(i int) returns string value at given index.
+	String1D(i int) string
+}
+
+// Roles are the roles that a given set of data values can play,
+// designed to be sufficiently generalizable across all different
+// types of plots, even if sometimes it is a bit of a stretch.
+type Roles int32 //enums:enum
+
+const (
+	// NoRole is the default no-role specified case.
+	NoRole Roles = iota
+
+	// X axis
+	X
+
+	// Y axis
+	Y
+
+	// Z axis
+	Z
+
+	// U is the X component of a vector or first quartile in Box plot, etc.
+	U
+
+	// V is the Y component of a vector or third quartile in a Box plot, etc.
+	V
+
+	// W is the Z component of a vector
+	W
+
+	// Low is a lower error bar or region.
+	Low
+
+	// High is an upper error bar or region.
+	High
+
+	// Size controls the size of points etc.
+	Size
+
+	// Color controls the color of points or other elements.
+	Color
+
+	// Label renders a label, typically from string data, but can also be used for values.
+	Label
+)
+
 // CheckFloats returns an error if any of the arguments are Infinity.
 // or if there are no non-NaN data points available for plotting.
-func CheckFloats(fs ...float32) error {
+func CheckFloats(fs ...float64) error {
 	n := 0
 	for _, f := range fs {
 		switch {
-		case math32.IsNaN(f):
-		case math32.IsInf(f, 0):
+		case math.IsNaN(f):
+		case math.IsInf(f, 0):
 			return ErrInfinity
 		default:
 			n++
@@ -46,85 +103,64 @@ func CheckFloats(fs ...float32) error {
 }
 
 // CheckNaNs returns true if any of the floats are NaN
-func CheckNaNs(fs ...float32) bool {
+func CheckNaNs(fs ...float64) bool {
 	for _, f := range fs {
-		if math32.IsNaN(f) {
+		if math.IsNaN(f) {
 			return true
 		}
 	}
 	return false
 }
 
-//////////////////////////////////////////////////
-// 	Valuer
-
-// Valuer provides an interface for a list of scalar values
-type Valuer interface {
-	// Len returns the number of values.
-	Len() int
-
-	// Value returns a value.
-	Value(i int) float32
-}
-
-// Range returns the minimum and maximum values.
-func Range(vs Valuer) (mn, mx float32) {
-	mn = math32.Inf(1)
-	mx = math32.Inf(-1)
-	for i := 0; i < vs.Len(); i++ {
-		v := vs.Value(i)
-		if math32.IsNaN(v) {
+// Range updates given Range with values from data.
+func Range(data Data, rng *minmax.F64) {
+	for i := 0; i < data.Len(); i++ {
+		v := data.Float1D(i)
+		if math.IsNaN(v) {
 			continue
 		}
-		mn = math32.Min(mn, v)
-		mx = math32.Max(mx, v)
+		rng.FitValInRange(v)
 	}
-	return
 }
 
-// RangeClamp returns the minimum and maximum values clamped by given range.
-func RangeClamp(vs Valuer, rng *minmax.Range32) (mn, mx float32) {
-	mn, mx = Range(vs)
-	mn, mx = rng.Clamp(mn, mx)
-	return
+// RangeClamp updates the given axis Min, Max range values based
+// on the range of values in the given [Data], and the given style range.
+func RangeClamp(data Data, axisRng *minmax.F64, styleRng *minmax.Range64) {
+	Range(data, axisRng)
+	axisRng.Min, axisRng.Max = styleRng.Clamp(axisRng.Min, axisRng.Max)
 }
 
-// Values implements the Valuer interface.
-type Values []float32
+// Values provides a minimal implementation of the Data interface
+// using a slice of float64.
+type Values []float64
 
 func (vs Values) Len() int {
 	return len(vs)
 }
 
-func (vs Values) Value(i int) float32 {
+func (vs Values) Float1D(i int) float64 {
 	return vs[i]
 }
 
-// TensorValues provides a Valuer interface wrapper for a tensor.
-type TensorValues struct {
-	tensor.Tensor
-}
-
-func (vs TensorValues) Len() int {
-	return vs.Tensor.Len()
-}
-
-func (vs TensorValues) Value(i int) float32 {
-	return float32(vs.Tensor.Float1D(i))
+func (vs Values) String1D(i int) string {
+	return strconv.FormatFloat(vs[i], 'g', -1, 64)
 }
 
 // CopyValues returns a Values that is a copy of the values
-// from a Valuer, or an error if there are no values, or if one of
+// from Data, or an error if there are no values, or if one of
 // the copied values is a Infinity.
 // NaN values are skipped in the copying process.
-func CopyValues(vs Valuer) (Values, error) {
-	if vs.Len() == 0 {
+func CopyValues(data Data) (Values, error) {
+	if data == nil {
 		return nil, ErrNoData
 	}
-	cpy := make(Values, 0, vs.Len())
-	for i := 0; i < vs.Len(); i++ {
-		v := vs.Value(i)
-		if math32.IsNaN(v) {
+	if data.Len() == 0 {
+		return nil, ErrNoData
+	}
+	cpy := make(Values, 0, data.Len())
+	for i := 0; i < data.Len(); i++ {
+		v := data.Float1D(i)
+		if math.IsNaN(v) {
 			continue
 		}
 		if err := CheckFloats(v); err != nil {
@@ -135,179 +171,61 @@ func CopyValues(vs Valuer) (Values, error) {
 	return cpy, nil
 }
 
-//////////////////////////////////////////////////
-// 	XYer
-
-// XYer provides an interface for a list of X,Y data pairs
-type XYer interface {
-	// Len returns the number of x, y pairs.
-	Len() int
-
-	// XY returns an x, y pair.
-	XY(i int) (x, y float32)
-}
-
-// XYRange returns the minimum and maximum x and y values.
-func XYRange(xys XYer) (xmin, xmax, ymin, ymax float32) {
-	xmin, xmax = Range(XValues{xys})
-	ymin, ymax = Range(YValues{xys})
-	return
-}
-
-// XYRangeClamp returns the data range with Range clamped for Y axis.
-func XYRangeClamp(xys XYer, rng *minmax.Range32) (xmin, xmax, ymin, ymax float32) {
-	xmin, xmax, ymin, ymax = XYRange(xys)
-	ymin, ymax = rng.Clamp(ymin, ymax)
-	return
-}
-
-// XYs implements the XYer interface.
-type XYs []math32.Vector2
-
-func (xys XYs) Len() int {
-	return len(xys)
-}
-
-func (xys XYs) XY(i int) (float32, float32) {
-	return xys[i].X, xys[i].Y
-}
-
-// TensorXYs provides a XYer interface wrapper for a tensor.
-type TensorXYs struct {
-	X, Y tensor.Tensor
-}
-
-func (xys TensorXYs) Len() int {
-	return xys.X.Len()
-}
-
-func (xys TensorXYs) XY(i int) (float32, float32) {
-	return float32(xys.X.Float1D(i)), float32(xys.Y.Float1D(i))
-}
-
-// CopyXYs returns an XYs that is a copy of the x and y values from
-// an XYer, or an error if one of the data points contains a NaN or
-// Infinity.
-func CopyXYs(data XYer) (XYs, error) {
-	if data.Len() == 0 {
-		return nil, ErrNoData
+// MustCopyRole returns Values copy of given role from given data map,
+// logging an error and returning nil if not present.
+func MustCopyRole(data map[Roles]Data, role Roles) Values {
+	d, ok := data[role]
+	if !ok {
+		slog.Error("plot Data role not present, but is required", "role:", role)
+		return nil
 	}
-	cpy := make(XYs, 0, data.Len())
-	for i := range data.Len() {
-		x, y := data.XY(i)
-		if CheckNaNs(x, y) {
-			continue
-		}
-		if err := CheckFloats(x, y); err != nil {
-			return nil, err
-		}
-		cpy = append(cpy, math32.Vec2(x, y))
+	v, _ := CopyValues(d)
+	return v
+}
+
+// CopyRole returns Values copy of given role from given data map,
+// returning nil if role not present.
+func CopyRole(data map[Roles]Data, role Roles) Values {
+	d, ok := data[role]
+	if !ok {
+		return nil
 	}
-	return cpy, nil
+	v, _ := CopyValues(d)
+	return v
 }
 
-// PlotXYs returns plot coordinates for given set of XYs
-func PlotXYs(plt *Plot, data XYs) XYs {
-	ps := make(XYs, len(data))
-	for i := range data {
-		ps[i].X, ps[i].Y = plt.PX(data[i].X), plt.PY(data[i].Y)
+// PlotX returns plot pixel X coordinate values for given data.
+func PlotX(plt *Plot, data Data) []float32 {
+	px := make([]float32, data.Len())
+	for i := range px {
+		px[i] = plt.PX(data.Float1D(i))
 	}
-	return ps
+	return px
 }
 
-// XValues implements the Valuer interface,
-// returning the x value from an XYer.
-type XValues struct {
-	XYer
-}
-
-func (xs XValues) Value(i int) float32 {
-	x, _ := xs.XY(i)
-	return x
-}
-
-// YValues implements the Valuer interface,
-// returning the y value from an XYer.
-type YValues struct {
-	XYer
-}
-
-func (ys YValues) Value(i int) float32 {
-	_, y := ys.XY(i)
-	return y
-}
-
-//////////////////////////////////////////////////
-// 	XYer
-
-// XYZer provides an interface for a list of X,Y,Z data triples.
-// It also satisfies the XYer interface for the X,Y pairs.
-type XYZer interface {
-	// Len returns the number of x, y, z triples.
-	Len() int
-
-	// XYZ returns an x, y, z triple.
-	XYZ(i int) (float32, float32, float32)
-
-	// XY returns an x, y pair.
-	XY(i int) (float32, float32)
-}
-
-// XYZs implements the XYZer interface using a slice.
-type XYZs []XYZ
-
-// XYZ is an x, y and z value.
-type XYZ struct{ X, Y, Z float32 }
-
-// Len implements the Len method of the XYZer interface.
-func (xyz XYZs) Len() int {
-	return len(xyz)
-}
-
-// XYZ implements the XYZ method of the XYZer interface.
-func (xyz XYZs) XYZ(i int) (float32, float32, float32) {
-	return xyz[i].X, xyz[i].Y, xyz[i].Z
-}
-
-// XY implements the XY method of the XYer interface.
-func (xyz XYZs) XY(i int) (float32, float32) {
-	return xyz[i].X, xyz[i].Y
-}
-
-// CopyXYZs copies an XYZer.
-func CopyXYZs(data XYZer) (XYZs, error) {
-	if data.Len() == 0 {
-		return nil, ErrNoData
+// PlotY returns plot pixel Y coordinate values for given data.
+func PlotY(plt *Plot, data Data) []float32 {
+	py := make([]float32, data.Len())
+	for i := range py {
+		py[i] = plt.PY(data.Float1D(i))
 	}
-	cpy := make(XYZs, 0, data.Len())
-	for i := range data.Len() {
-		x, y, z := data.XYZ(i)
-		if CheckNaNs(x, y, z) {
-			continue
-		}
-		if err := CheckFloats(x, y, z); err != nil {
-			return nil, err
-		}
-		cpy = append(cpy, XYZ{X: x, Y: y, Z: z})
-	}
-	return cpy, nil
+	return py
 }
 
-// XYValues implements the XYer interface, returning
-// the x and y values from an XYZer.
-type XYValues struct{ XYZer }
+//////// Labels
 
-// XY implements the XY method of the XYer interface.
-func (xy XYValues) XY(i int) (float32, float32) {
-	x, y, _ := xy.XYZ(i)
-	return x, y
+// Labels provides a minimal implementation of the Data interface
+// using a slice of string. It always returns 0 for Float1D.
+type Labels []string
+
+func (lb Labels) Len() int {
+	return len(lb)
 }
 
-//////////////////////////////////////////////////
-// 	Labeler
+func (lb Labels) Float1D(i int) float64 {
+	return 0
+}
 
-// Labeler provides an interface for a list of string labels
-type Labeler interface {
-	// Label returns a label.
-	Label(i int) string
+func (lb Labels) String1D(i int) string {
+	return lb[i]
 }

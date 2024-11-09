@@ -160,6 +160,7 @@ func DrawCross(pc *paint.Context, pos math32.Vector2, size float32) {
 	pc.Stroke()
 }
 
+// Shapes has the options for how to draw points in the plot.
 type Shapes int32 //enums:enum
 
 const (

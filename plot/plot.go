@@ -94,7 +94,7 @@ type PlotStyle struct { //types:add -setters
 	// BarWidth for Bar plot sets the default width of the bars,
 	// which should be less than the Stride (1 typically) to prevent
 	// bar overlap. Defaults to .8.
-	BarWidth float32
+	BarWidth float64
 }
 
 func (ps *PlotStyle) Defaults() {
@@ -138,9 +138,9 @@ type Plot struct {
 	// standard text style with default options
 	StandardTextStyle styles.Text
 
-	// X and Y are the horizontal and vertical axes
+	// X, Y, and Z are the horizontal, vertical, and depth axes
 	// of the plot respectively.
-	X, Y Axis
+	X, Y, Z Axis
 
 	// Legend is the plot's legend.
 	Legend Legend
@@ -225,20 +225,14 @@ func (pt *Plot) applyStyle() {
 	pt.UpdateRange()
 }
 
-// Add adds a Plotters to the plot.
-//
-// If the plotters implements DataRanger then the
-// minimum and maximum values of the X and Y
-// axes are changed if necessary to fit the range of
-// the data.
-//
+// Add adds Plotter element(s) to the plot.
 // When drawing the plot, Plotters are drawn in the
 // order in which they were added to the plot.
 func (pt *Plot) Add(ps ...Plotter) {
 	pt.Plotters = append(pt.Plotters, ps...)
 }
 
-// SetPixels sets the backing pixels image to given image.RGBA
+// SetPixels sets the backing pixels image to given image.RGBA.
 func (pt *Plot) SetPixels(img *image.RGBA) {
 	pt.Pixels = img
 	pt.Paint = paint.NewContextFromImage(pt.Pixels)
@@ -278,7 +272,7 @@ func (pt *Plot) NominalX(names ...string) {
 	// pt.Y.Padding.Pt(pt.X.Style.Tick.Label.Width(names[0]) / 2)
 	ticks := make([]Tick, len(names))
 	for i, name := range names {
-		ticks[i] = Tick{float32(i), name}
+		ticks[i] = Tick{float64(i), name}
 	}
 	pt.X.Ticker = ConstantTicks(ticks)
 }
@@ -311,7 +305,7 @@ func (pt *Plot) NominalY(names ...string) {
 	// pt.X.Padding = pt.Y.Tick.Label.Height(names[0]) / 2
 	ticks := make([]Tick, len(names))
 	for i, name := range names {
-		ticks[i] = Tick{float32(i), name}
+		ticks[i] = Tick{float64(i), name}
 	}
 	pt.Y.Ticker = ConstantTicks(ticks)
 }
@@ -320,46 +314,34 @@ func (pt *Plot) NominalY(names ...string) {
 // This first resets the range so any fixed additional range values should
 // be set after this point.
 func (pt *Plot) UpdateRange() {
-	pt.X.Min = math32.Inf(+1)
-	pt.X.Max = math32.Inf(-1)
-	pt.Y.Min = math32.Inf(+1)
-	pt.Y.Max = math32.Inf(-1)
-	for _, d := range pt.Plotters {
-		pt.UpdateRangeFromPlotter(d)
+	pt.X.Range.SetInfinity()
+	pt.Y.Range.SetInfinity()
+	pt.Z.Range.SetInfinity()
+	for _, pl := range pt.Plotters {
+		pl.UpdateRange(pt, &pt.X.Range, &pt.Y.Range, &pt.Z.Range)
 	}
-}
-
-func (pt *Plot) UpdateRangeFromPlotter(d Plotter) {
-	if x, ok := d.(DataRanger); ok {
-		xmin, xmax, ymin, ymax := x.DataRange(pt)
-		pt.X.Min = math32.Min(pt.X.Min, xmin)
-		pt.X.Max = math32.Max(pt.X.Max, xmax)
-		pt.Y.Min = math32.Min(pt.Y.Min, ymin)
-		pt.Y.Max = math32.Max(pt.Y.Max, ymax)
-	}
-	pt.X.Min, pt.X.Max = pt.Style.XAxis.Range.Clamp(pt.X.Min, pt.X.Max)
 }
 
 // PX returns the X-axis plotting coordinate for given raw data value
 // using the current plot bounding region
-func (pt *Plot) PX(v float32) float32 {
-	return pt.PlotBox.ProjectX(pt.X.Norm(v))
+func (pt *Plot) PX(v float64) float32 {
+	return pt.PlotBox.ProjectX(float32(pt.X.Norm(v)))
 }
 
 // PY returns the Y-axis plotting coordinate for given raw data value
-func (pt *Plot) PY(v float32) float32 {
-	return pt.PlotBox.ProjectY(1 - pt.Y.Norm(v))
+func (pt *Plot) PY(v float64) float32 {
+	return pt.PlotBox.ProjectY(float32(1 - pt.Y.Norm(v)))
 }
 
 // ClosestDataToPixel returns the Plotter data point closest to given pixel point,
 // in the Pixels image.
-func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float32, data, pixel math32.Vector2, legend string) {
+func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float32, pixel math32.Vector2, data map[Roles]Data, legend string) {
 	tp := math32.Vec2(float32(px), float32(py))
 	dist = float32(math32.MaxFloat32)
 	for _, p := range pt.Plotters {
-		dts, pxls := p.XYData()
-		for i := range pxls.Len() {
-			ptx, pty := pxls.XY(i)
+		dts, pxX, pxY := p.Data()
+		for i, ptx := range pxX {
+			pty := pxY[i]
 			pxy := math32.Vec2(ptx, pty)
 			d := pxy.DistanceTo(tp)
 			if d < dist {
@@ -367,8 +349,7 @@ func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float
 				pixel = pxy
 				plt = p
 				idx = i
-				dx, dy := dts.XY(i)
-				data = math32.Vec2(dx, dy)
+				data = dts
 				legend = pt.Legend.LegendForPlotter(p)
 			}
 		}

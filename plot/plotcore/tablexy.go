@@ -213,7 +213,7 @@ func (txy *tableXY) XY(row int) (x, y float32) {
 	if txy.table == nil {
 		return 0, 0
 	}
-	x = txy.xValue(row)
+	x = txy.Value(row)
 	y = txy.Value(row)
 	return
 }

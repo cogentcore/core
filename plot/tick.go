@@ -5,16 +5,15 @@
 package plot
 
 import (
+	"math"
 	"strconv"
 	"time"
-
-	"cogentcore.org/core/math32"
 )
 
 // A Tick is a single tick mark on an axis.
 type Tick struct {
 	// Value is the data value marked by this Tick.
-	Value float32
+	Value float64
 
 	// Label is the text to display at the tick mark.
 	// If Label is an empty string then this is a minor tick mark.
@@ -29,7 +28,7 @@ func (tk *Tick) IsMinor() bool {
 // Ticker creates Ticks in a specified range
 type Ticker interface {
 	// Ticks returns Ticks in a specified range
-	Ticks(min, max float32) []Tick
+	Ticks(min, max float64) []Tick
 }
 
 // DefaultTicks is suitable for the Ticker field of an Axis,
@@ -39,7 +38,7 @@ type DefaultTicks struct{}
 var _ Ticker = DefaultTicks{}
 
 // Ticks returns Ticks in the specified range.
-func (DefaultTicks) Ticks(min, max float32) []Tick {
+func (DefaultTicks) Ticks(min, max float64) []Tick {
 	if max <= min {
 		panic("illegal range")
 	}
@@ -47,7 +46,7 @@ func (DefaultTicks) Ticks(min, max float32) []Tick {
 	const suggestedTicks = 3
 
 	labels, step, q, mag := talbotLinHanrahan(min, max, suggestedTicks, withinData, nil, nil, nil)
-	majorDelta := step * math32.Pow10(mag)
+	majorDelta := step * math.Pow10(mag)
 	if q == 0 {
 		// Simple fall back was chosen, so
 		// majorDelta is the label distance.
@@ -62,16 +61,16 @@ func (DefaultTicks) Ticks(min, max float32) []Tick {
 		off = 1
 		fc = 'g'
 	}
-	if math32.Trunc(q) != q {
+	if math.Trunc(q) != q {
 		off += 2
 	}
 	prec := minInt(6, maxInt(off, -mag))
 	ticks := make([]Tick, len(labels))
 	for i, v := range labels {
-		ticks[i] = Tick{Value: v, Label: strconv.FormatFloat(float64(v), fc, prec, 32)}
+		ticks[i] = Tick{Value: v, Label: strconv.FormatFloat(float64(v), fc, prec, 64)}
 	}
 
-	var minorDelta float32
+	var minorDelta float64
 	// See talbotLinHanrahan for the values used here.
 	switch step {
 	case 1, 2.5:
@@ -87,7 +86,7 @@ func (DefaultTicks) Ticks(min, max float32) []Tick {
 
 	// Find the first minor tick not greater
 	// than the lowest data value.
-	var i float32
+	var i float64
 	for labels[0]+(i-1)*minorDelta > min {
 		i--
 	}
@@ -101,7 +100,7 @@ func (DefaultTicks) Ticks(min, max float32) []Tick {
 		}
 		found := false
 		for _, t := range ticks {
-			if math32.Abs(t.Value-val) < minorDelta/2 {
+			if math.Abs(t.Value-val) < minorDelta/2 {
 				found = true
 			}
 		}
@@ -139,20 +138,20 @@ type LogTicks struct {
 var _ Ticker = LogTicks{}
 
 // Ticks returns Ticks in a specified range
-func (t LogTicks) Ticks(min, max float32) []Tick {
+func (t LogTicks) Ticks(min, max float64) []Tick {
 	if min <= 0 || max <= 0 {
 		panic("Values must be greater than 0 for a log scale.")
 	}
 
-	val := math32.Pow10(int(math32.Log10(min)))
-	max = math32.Pow10(int(math32.Ceil(math32.Log10(max))))
+	val := math.Pow10(int(math.Log10(min)))
+	max = math.Pow10(int(math.Ceil(math.Log10(max))))
 	var ticks []Tick
 	for val < max {
 		for i := 1; i < 10; i++ {
 			if i == 1 {
 				ticks = append(ticks, Tick{Value: val, Label: formatFloatTick(val, t.Prec)})
 			}
-			ticks = append(ticks, Tick{Value: val * float32(i)})
+			ticks = append(ticks, Tick{Value: val * float64(i)})
 		}
 		val *= 10
 	}
@@ -168,13 +167,13 @@ type ConstantTicks []Tick
 var _ Ticker = ConstantTicks{}
 
 // Ticks returns Ticks in a specified range
-func (ts ConstantTicks) Ticks(float32, float32) []Tick {
+func (ts ConstantTicks) Ticks(float64, float64) []Tick {
 	return ts
 }
 
 // UnixTimeIn returns a time conversion function for the given location.
-func UnixTimeIn(loc *time.Location) func(t float32) time.Time {
-	return func(t float32) time.Time {
+func UnixTimeIn(loc *time.Location) func(t float64) time.Time {
+	return func(t float64) time.Time {
 		return time.Unix(int64(t), 0).In(loc)
 	}
 }
@@ -194,13 +193,13 @@ type TimeTicks struct {
 
 	// Time takes a float32 value and converts it into a time.Time.
 	// If nil, UTCUnixTime is used.
-	Time func(t float32) time.Time
+	Time func(t float64) time.Time
 }
 
 var _ Ticker = TimeTicks{}
 
 // Ticks implements plot.Ticker.
-func (t TimeTicks) Ticks(min, max float32) []Tick {
+func (t TimeTicks) Ticks(min, max float64) []Tick {
 	if t.Ticker == nil {
 		t.Ticker = DefaultTicks{}
 	}
@@ -269,17 +268,17 @@ func tickLabelWidth(sty text.Style, ticks []Tick) vg.Length {
 
 // formatFloatTick returns a g-formated string representation of v
 // to the specified precision.
-func formatFloatTick(v float32, prec int) string {
-	return strconv.FormatFloat(float64(v), 'g', prec, 32)
+func formatFloatTick(v float64, prec int) string {
+	return strconv.FormatFloat(float64(v), 'g', prec, 64)
 }
 
 // TickerFunc is suitable for the Ticker field of an Axis.
 // It is an adapter which allows to quickly setup a Ticker using a function with an appropriate signature.
-type TickerFunc func(min, max float32) []Tick
+type TickerFunc func(min, max float64) []Tick
 
 var _ Ticker = TickerFunc(nil)
 
 // Ticks implements plot.Ticker.
-func (f TickerFunc) Ticks(min, max float32) []Tick {
+func (f TickerFunc) Ticks(min, max float64) []Tick {
 	return f(min, max)
 }

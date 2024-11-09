@@ -139,7 +139,7 @@ func (ax *Axis) sizeX(pt *Plot, axw float32) (ht, lpad, rpad int) {
 	pc := pt.Paint
 	uc := &pc.UnitContext
 	ax.Style.TickLength.ToDots(uc)
-	ax.ticks = ax.Ticker.Ticks(ax.Min, ax.Max)
+	ax.ticks = ax.Ticker.Ticks(ax.Range.Min, ax.Range.Max)
 	h := float32(0)
 	if ax.Label.Text != "" { // We assume that the label isn't rotated.
 		ax.Label.Config(pt)
@@ -231,7 +231,7 @@ func (ax *Axis) longestTickLabel() string {
 func (ax *Axis) sizeY(pt *Plot) (ywidth, tickWidth, tpad, bpad int) {
 	pc := pt.Paint
 	uc := &pc.UnitContext
-	ax.ticks = ax.Ticker.Ticks(ax.Min, ax.Max)
+	ax.ticks = ax.Ticker.Ticks(ax.Range.Min, ax.Range.Max)
 	ax.Style.TickLength.ToDots(uc)
 
 	w := float32(0)

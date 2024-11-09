@@ -7,36 +7,36 @@ package plots
 import (
 	"fmt"
 	"image"
+	"math"
 	"os"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/plot"
 )
 
 func ExampleLine() {
-	data := make(plot.XYs, 42)
-	for i := range data {
-		x := float32(i % 21)
-		data[i].X = x * 5
-		if i < 21 {
-			data[i].Y = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
-		} else {
-			data[i].Y = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
-		}
-	}
-
-	plt := plot.New()
-	plt.Add(NewLine(data).Styler(func(s *plot.Style) {
-		s.Line.Color = colors.Uniform(colors.Red)
-		s.Line.Width.Pt(2)
-	}))
-	plt.Draw()
-	imagex.Save(plt.Pixels, "testdata/ex_line_plot.png")
-	// Output:
+	// data := make(plot.XYs, 42)
+	// for i := range data {
+	// 	x := float32(i % 21)
+	// 	data[i].X = x * 5
+	// 	if i < 21 {
+	// 		data[i].Y = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
+	// 	} else {
+	// 		data[i].Y = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
+	// 	}
+	// }
+	//
+	// plt := plot.New()
+	// plt.Add(NewLine(data).Styler(func(s *plot.Style) {
+	// 	s.Line.Color = colors.Uniform(colors.Red)
+	// 	s.Line.Width.Pt(2)
+	// }))
+	// plt.Draw()
+	// imagex.Save(plt.Pixels, "testdata/ex_line_plot.png")
+	// // Output:
 }
 
 func TestMain(m *testing.M) {
@@ -45,45 +45,55 @@ func TestMain(m *testing.M) {
 }
 
 // sinCosWrapData returns overlapping sin / cos curves in one sequence.
-func sinCosWrapData() plot.XYs {
-	data := make(plot.XYs, 42)
-	for i := range data {
-		x := float32(i % 21)
-		data[i].X = x * 5
+func sinCosWrapData() map[plot.Roles]plot.Data {
+	xd, yd := make(plot.Values, 42), make(plot.Values, 42)
+	for i := range xd {
+		x := float64(i % 21)
+		xd[i] = x * 5
 		if i < 21 {
-			data[i].Y = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
+			yd[i] = float64(50) + 40*math.Sin((x/8)*math.Pi)
 		} else {
-			data[i].Y = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
+			yd[i] = float64(50) + 40*math.Cos((x/8)*math.Pi)
 		}
 	}
+	data := map[plot.Roles]plot.Data{}
+	data[plot.X] = xd
+	data[plot.Y] = yd
 	return data
 }
 
-func sinDataXY() plot.XYs {
-	data := make(plot.XYs, 21)
-	for i := range data {
-		data[i].X = float32(i * 5)
-		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
+func sinDataXY() map[plot.Roles]plot.Data {
+	xd, yd := make(plot.Values, 21), make(plot.Values, 21)
+	for i := range xd {
+		xd[i] = float64(i * 5)
+		xd[i] = float64(50) + 40*math.Sin((float64(i)/8)*math.Pi)
 	}
+	data := map[plot.Roles]plot.Data{}
+	data[plot.X] = xd
+	data[plot.Y] = yd
 	return data
 }
 
-func sinData() plot.Values {
-	sin := make(plot.Values, 21)
-	for i := range sin {
-		x := float32(i % 21)
-		sin[i] = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
+func sinData() map[plot.Roles]plot.Data {
+	yd := make(plot.Values, 21)
+	for i := range yd {
+		x := float64(i % 21)
+		yd[i] = float64(50) + 40*math.Sin((x/8)*math.Pi)
 	}
-	return sin
+	data := map[plot.Roles]plot.Data{}
+	data[plot.Y] = yd
+	return data
 }
 
-func cosData() plot.Values {
-	cos := make(plot.Values, 21)
-	for i := range cos {
-		x := float32(i % 21)
-		cos[i] = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
+func cosData() map[plot.Roles]plot.Data {
+	yd := make(plot.Values, 21)
+	for i := range yd {
+		x := float64(i % 21)
+		yd[i] = float64(50) + 40*math.Cos((x/8)*math.Pi)
 	}
-	return cos
+	data := map[plot.Roles]plot.Data{}
+	data[plot.Y] = yd
+	return data
 }
 
 func TestLine(t *testing.T) {
@@ -91,11 +101,11 @@ func TestLine(t *testing.T) {
 
 	plt := plot.New()
 	plt.Title.Text = "Test Line"
-	plt.X.Min = 0
-	plt.X.Max = 100
+	plt.X.Range.Min = 0
+	plt.X.Range.Max = 100
 	plt.X.Label.Text = "X Axis"
-	plt.Y.Min = 0
-	plt.Y.Max = 100
+	plt.Y.Range.Min = 0
+	plt.Y.Range.Max = 100
 	plt.Y.Label.Text = "Y Axis"
 
 	l1 := NewLine(data)
@@ -138,11 +148,11 @@ func TestScatter(t *testing.T) {
 
 	plt := plot.New()
 	plt.Title.Text = "Test Scatter"
-	plt.X.Min = 0
-	plt.X.Max = 100
+	plt.X.Range.Min = 0
+	plt.X.Range.Max = 100
 	plt.X.Label.Text = "X Axis"
-	plt.Y.Min = 0
-	plt.Y.Max = 100
+	plt.Y.Range.Min = 0
+	plt.Y.Range.Max = 100
 	plt.Y.Label.Text = "Y Axis"
 
 	l1 := NewScatter(data)
@@ -168,14 +178,18 @@ func TestLabels(t *testing.T) {
 	plt.Y.Label.Text = "Y Axis"
 
 	// note: making two overlapping series
-	data := make(plot.XYs, 12)
-	labels := make([]string, 12)
-	for i := range data {
-		x := float32(i % 21)
-		data[i].X = x * 5
-		data[i].Y = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
-		labels[i] = fmt.Sprintf("%7.4g", data[i].Y)
+	xd, yd := make(plot.Values, 12), make(plot.Values, 12)
+	labels := make(plot.Labels, 12)
+	for i := range xd {
+		x := float64(i % 21)
+		xd[i] = x * 5
+		yd[i] = float64(50) + 40*math.Sin((x/8)*math.Pi)
+		labels[i] = fmt.Sprintf("%7.4g", yd[i])
 	}
+	data := map[plot.Roles]plot.Data{}
+	data[plot.X] = xd
+	data[plot.Y] = yd
+	data[plot.Label] = labels
 
 	l1 := NewLine(data)
 	if l1 == nil {
@@ -185,7 +199,7 @@ func TestLabels(t *testing.T) {
 	plt.Add(l1)
 	plt.Legend.Add("Sine", l1)
 
-	l2 := NewLabels(XYLabels{XYs: data, Labels: labels})
+	l2 := NewLabels(data)
 	if l2 == nil {
 		t.Error("bad data")
 	}
@@ -198,18 +212,18 @@ func TestLabels(t *testing.T) {
 	imagex.Assert(t, plt.Pixels, "labels.png")
 }
 
-func TestBarChart(t *testing.T) {
+func TestBar(t *testing.T) {
 	plt := plot.New()
 	plt.Title.Text = "Test Bar Chart"
 	plt.X.Label.Text = "X Axis"
-	plt.Y.Min = 0
-	plt.Y.Max = 100
+	plt.Y.Range.Min = 0
+	plt.Y.Range.Max = 100
 	plt.Y.Label.Text = "Y Axis"
 
 	data := sinData()
 	cos := cosData()
 
-	l1 := NewBarChart(data, nil)
+	l1 := NewBar(data)
 	if l1 == nil {
 		t.Error("bad data")
 	}
@@ -221,7 +235,7 @@ func TestBarChart(t *testing.T) {
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "bar.png")
 
-	l2 := NewBarChart(cos, nil)
+	l2 := NewBar(cos)
 	if l2 == nil {
 		t.Error("bad data")
 	}
@@ -237,18 +251,19 @@ func TestBarChart(t *testing.T) {
 	imagex.Assert(t, plt.Pixels, "bar-cos.png")
 }
 
-func TestBarChartErr(t *testing.T) {
+func TestBarErr(t *testing.T) {
 	plt := plot.New()
 	plt.Title.Text = "Test Bar Chart Errors"
 	plt.X.Label.Text = "X Axis"
-	plt.Y.Min = 0
-	plt.Y.Max = 100
+	plt.Y.Range.Min = 0
+	plt.Y.Range.Max = 100
 	plt.Y.Label.Text = "Y Axis"
 
 	data := sinData()
 	cos := cosData()
+	data[plot.High] = cos[plot.Y]
 
-	l1 := NewBarChart(data, cos)
+	l1 := NewBar(data)
 	if l1 == nil {
 		t.Error("bad data")
 	}
@@ -262,24 +277,24 @@ func TestBarChartErr(t *testing.T) {
 
 	l1.Horizontal = true
 	plt.UpdateRange()
-	plt.X.Min = 0
-	plt.X.Max = 100
+	plt.X.Range.Min = 0
+	plt.X.Range.Max = 100
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "bar-err-horiz.png")
 }
 
-func TestBarChartStack(t *testing.T) {
+func TestBarStack(t *testing.T) {
 	plt := plot.New()
 	plt.Title.Text = "Test Bar Chart Stacked"
 	plt.X.Label.Text = "X Axis"
-	plt.Y.Min = 0
-	plt.Y.Max = 100
+	plt.Y.Range.Min = 0
+	plt.Y.Range.Max = 100
 	plt.Y.Label.Text = "Y Axis"
 
 	data := sinData()
 	cos := cosData()
 
-	l1 := NewBarChart(data, nil)
+	l1 := NewBar(data)
 	if l1 == nil {
 		t.Error("bad data")
 	}
@@ -287,7 +302,7 @@ func TestBarChartStack(t *testing.T) {
 	plt.Add(l1)
 	plt.Legend.Add("Sine", l1)
 
-	l2 := NewBarChart(cos, nil)
+	l2 := NewBar(cos)
 	if l2 == nil {
 		t.Error("bad data")
 	}
@@ -301,34 +316,33 @@ func TestBarChartStack(t *testing.T) {
 	imagex.Assert(t, plt.Pixels, "bar-stacked.png")
 }
 
-type XYErr struct {
-	plot.XYs
-	YErrors
-}
-
 func TestErrBar(t *testing.T) {
 	plt := plot.New()
 	plt.Title.Text = "Test Line Errors"
 	plt.X.Label.Text = "X Axis"
-	plt.Y.Min = 0
-	plt.Y.Max = 100
+	plt.Y.Range.Min = 0
+	plt.Y.Range.Max = 100
 	plt.Y.Label.Text = "Y Axis"
 
-	data := make(plot.XYs, 21)
-	for i := range data {
-		x := float32(i % 21)
-		data[i].X = x * 5
-		data[i].Y = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
+	xd, yd := make(plot.Values, 21), make(plot.Values, 21)
+	for i := range xd {
+		x := float64(i % 21)
+		xd[i] = x * 5
+		yd[i] = float64(50) + 40*math.Sin((x/8)*math.Pi)
 	}
 
-	yerr := make(YErrors, 21)
-	for i := range yerr {
-		x := float32(i % 21)
-		yerr[i].High = float32(5) + 4*math32.Cos((x/8)*math32.Pi)
-		yerr[i].Low = -yerr[i].High
+	low, high := make(plot.Values, 21), make(plot.Values, 21)
+	for i := range low {
+		x := float64(i % 21)
+		high[i] = float64(5) + 4*math.Cos((x/8)*math.Pi)
+		low[i] = -high[i]
 	}
 
-	xyerr := XYErr{XYs: data, YErrors: yerr}
+	data := map[plot.Roles]plot.Data{}
+	data[plot.X] = xd
+	data[plot.Y] = yd
+	data[plot.Low] = low
+	data[plot.High] = high
 
 	l1 := NewLine(data)
 	if l1 == nil {
@@ -337,7 +351,7 @@ func TestErrBar(t *testing.T) {
 	plt.Add(l1)
 	plt.Legend.Add("Sine", l1)
 
-	l2 := NewYErrorBars(xyerr)
+	l2 := NewYErrorBars(data)
 	if l2 == nil {
 		t.Error("bad data")
 	}

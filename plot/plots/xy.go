@@ -12,20 +12,27 @@ package plots
 //go:generate core generate
 
 import (
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
-	"cogentcore.org/core/tensor"
 )
 
-// XY draws lines between and / or points for XY data values,
-// based on Style properties.
-type XY struct {
-	// XYs is a copy of the points for this line.
-	plot.XYs
+// XYType is be used for specifying the type name.
+const XYType = "XY"
 
-	// PXYs is the actual pixel plotting coordinates for each XY value.
-	PXYs plot.XYs
+func init() {
+	plot.RegisterPlotter(XYType, "draws lines between and / or points for X,Y data values, using optional Size and Color data for the points, for a bubble plot.", []plot.Roles{plot.X, plot.Y}, []plot.Roles{plot.Size, plot.Color}, func(data map[plot.Roles]plot.Data) plot.Plotter {
+		return NewXY(data)
+	})
+}
+
+// XY draws lines between and / or points for XY data values.
+type XY struct {
+	// copies of data for this line
+	X, Y, Color, Size plot.Values
+
+	// PX, PY are the actual pixel plotting coordinates for each XY value.
+	PX, PY []float32
 
 	// Style is the style for plotting.
 	Style plot.Style
@@ -33,42 +40,40 @@ type XY struct {
 	stylers plot.Stylers
 }
 
-// NewLine returns an XY plot drawing Lines by default.
-func NewLine(xys plot.XYer) *XY {
-	data, err := plot.CopyXYs(xys)
-	if errors.Log(err) != nil {
+// NewXY returns an XY plot.
+func NewXY(data map[plot.Roles]plot.Data) *XY {
+	ln := &XY{}
+	ln.X = plot.MustCopyRole(data, plot.X)
+	ln.Y = plot.MustCopyRole(data, plot.Y)
+	if ln.X == nil || ln.Y == nil {
 		return nil
 	}
-	ln := &XY{XYs: data}
+	ln.Color = plot.CopyRole(data, plot.Color)
+	ln.Size = plot.CopyRole(data, plot.Size)
 	ln.Defaults()
+	return ln
+}
+
+// NewLine returns an XY plot drawing Lines by default.
+func NewLine(data map[plot.Roles]plot.Data) *XY {
+	ln := NewXY(data)
+	if ln == nil {
+		return ln
+	}
 	ln.Style.Line.On = plot.On
 	ln.Style.Point.On = plot.Off
 	return ln
 }
 
-// NewLineTensor returns an XY plot drawing Lines,
-// using two tensors for X, Y values.
-func NewLineTensor(x, y tensor.Tensor) *XY {
-	return NewLine(plot.TensorXYs{X: x, Y: y})
-}
-
 // NewScatter returns an XY scatter plot drawing Points by default.
-func NewScatter(xys plot.XYer) *XY {
-	data, err := plot.CopyXYs(xys)
-	if errors.Log(err) != nil {
-		return nil
+func NewScatter(data map[plot.Roles]plot.Data) *XY {
+	ln := NewXY(data)
+	if ln == nil {
+		return ln
 	}
-	ln := &XY{XYs: data}
-	ln.Defaults()
 	ln.Style.Line.On = plot.Off
 	ln.Style.Point.On = plot.On
 	return ln
-}
-
-// NewScatterTensor returns an XY scatter plot drawing Points by default,
-// using two tensors for X, Y values.
-func NewScatterTensor(x, y tensor.Tensor) *XY {
-	return NewScatter(plot.TensorXYs{X: x, Y: y})
 }
 
 func (ln *XY) Defaults() {
@@ -88,117 +93,127 @@ func (ln *XY) ApplyStyle(ps *plot.PlotStyle) {
 	ln.stylers.Run(&ln.Style)
 }
 
-func (ln *XY) XYData() (data plot.XYer, pixels plot.XYer) {
-	data = ln.XYs
-	pixels = ln.PXYs
+func (ln *XY) Data() (data map[plot.Roles]plot.Data, pixX, pixY []float32) {
+	pixX = ln.PX
+	pixY = ln.PY
+	data = map[plot.Roles]plot.Data{}
+	data[plot.X] = ln.X
+	data[plot.Y] = ln.Y
+	if ln.Size != nil {
+		data[plot.Size] = ln.Size
+	}
+	if ln.Color != nil {
+		data[plot.Color] = ln.Color
+	}
 	return
 }
 
 // Plot does the drawing, implementing the plot.Plotter interface.
 func (ln *XY) Plot(plt *plot.Plot) {
 	pc := plt.Paint
-
-	ps := plot.PlotXYs(plt, ln.XYs)
-	np := len(ps)
-	ln.PXYs = ps
+	ln.PX = plot.PlotX(plt, ln.X)
+	ln.PY = plot.PlotX(plt, ln.Y)
+	np := len(ln.PX)
 
 	if ln.Style.Line.Fill != nil {
 		pc.FillStyle.Color = ln.Style.Line.Fill
-		minY := plt.PY(plt.Y.Min)
-		prev := math32.Vec2(ps[0].X, minY)
-		pc.MoveTo(prev.X, prev.Y)
-		for i := range ps {
-			pt := ps[i]
+		minY := plt.PY(plt.Y.Range.Min)
+		prevX := ln.PX[0]
+		prevY := minY
+		pc.MoveTo(prevX, prevY)
+		for i, ptx := range ln.PX {
+			pty := ln.PY[i]
 			switch ln.Style.Line.Step {
 			case plot.NoStep:
-				if pt.X < prev.X {
-					pc.LineTo(prev.X, minY)
+				if ptx < prevX {
+					pc.LineTo(prevX, minY)
 					pc.ClosePath()
-					pc.MoveTo(pt.X, minY)
+					pc.MoveTo(ptx, minY)
 				}
-				pc.LineTo(pt.X, pt.Y)
+				pc.LineTo(ptx, pty)
 			case plot.PreStep:
 				if i == 0 {
 					continue
 				}
-				if pt.X < prev.X {
-					pc.LineTo(prev.X, minY)
+				if ptx < prevX {
+					pc.LineTo(prevX, minY)
 					pc.ClosePath()
-					pc.MoveTo(pt.X, minY)
+					pc.MoveTo(ptx, minY)
 				} else {
-					pc.LineTo(prev.X, pt.Y)
+					pc.LineTo(prevX, pty)
 				}
-				pc.LineTo(pt.X, pt.Y)
+				pc.LineTo(ptx, pty)
 			case plot.MidStep:
-				if pt.X < prev.X {
-					pc.LineTo(prev.X, minY)
+				if ptx < prevX {
+					pc.LineTo(prevX, minY)
 					pc.ClosePath()
-					pc.MoveTo(pt.X, minY)
+					pc.MoveTo(ptx, minY)
 				} else {
-					pc.LineTo(0.5*(prev.X+pt.X), prev.Y)
-					pc.LineTo(0.5*(prev.X+pt.X), pt.Y)
+					pc.LineTo(0.5*(prevX+ptx), prevY)
+					pc.LineTo(0.5*(prevX+ptx), pty)
 				}
-				pc.LineTo(pt.X, pt.Y)
+				pc.LineTo(ptx, pty)
 			case plot.PostStep:
-				if pt.X < prev.X {
-					pc.LineTo(prev.X, minY)
+				if ptx < prevX {
+					pc.LineTo(prevX, minY)
 					pc.ClosePath()
-					pc.MoveTo(pt.X, minY)
+					pc.MoveTo(ptx, minY)
 				} else {
-					pc.LineTo(pt.X, prev.Y)
+					pc.LineTo(ptx, prevY)
 				}
-				pc.LineTo(pt.X, pt.Y)
+				pc.LineTo(ptx, pty)
 			}
-			prev = pt
+			prevX, prevY = ptx, pty
 		}
-		pc.LineTo(prev.X, minY)
+		pc.LineTo(prevX, minY)
 		pc.ClosePath()
 		pc.Fill()
 	}
 	pc.FillStyle.Color = nil
 
 	if ln.Style.Line.SetStroke(plt) {
-		prev := ps[0]
-		pc.MoveTo(prev.X, prev.Y)
+		prevX, prevY := ln.PX[0], ln.PY[0]
+		pc.MoveTo(prevX, prevY)
 		for i := 1; i < np; i++ {
-			pt := ps[i]
+			ptx, pty := ln.PX[i], ln.PY[i]
 			if ln.Style.Line.Step != plot.NoStep {
-				if pt.X >= prev.X {
+				if ptx >= prevX {
 					switch ln.Style.Line.Step {
 					case plot.PreStep:
-						pc.LineTo(prev.X, pt.Y)
+						pc.LineTo(prevX, pty)
 					case plot.MidStep:
-						pc.LineTo(0.5*(prev.X+pt.X), prev.Y)
-						pc.LineTo(0.5*(prev.X+pt.X), pt.Y)
+						pc.LineTo(0.5*(prevX+ptx), prevY)
+						pc.LineTo(0.5*(prevX+ptx), pty)
 					case plot.PostStep:
-						pc.LineTo(pt.X, prev.Y)
+						pc.LineTo(ptx, prevY)
 					}
 				} else {
-					pc.MoveTo(pt.X, pt.Y)
+					pc.MoveTo(ptx, pty)
 				}
 			}
-			if !ln.Style.Line.NegativeX && pt.X < prev.X {
-				pc.MoveTo(pt.X, pt.Y)
+			if !ln.Style.Line.NegativeX && ptx < prevX {
+				pc.MoveTo(ptx, pty)
 			} else {
-				pc.LineTo(pt.X, pt.Y)
+				pc.LineTo(ptx, pty)
 			}
-			prev = pt
+			prevX, prevY = ptx, pty
 		}
 		pc.Stroke()
 	}
 	if ln.Style.Point.SetStroke(plt) {
-		for i := range ps {
-			pt := ps[i]
-			ln.Style.Point.DrawShape(pc, math32.Vec2(pt.X, pt.Y))
+		for i, ptx := range ln.PX {
+			pty := ln.PY[i]
+			ln.Style.Point.DrawShape(pc, math32.Vec2(ptx, pty))
 		}
 	}
 	pc.FillStyle.Color = nil
 }
 
-// DataRange returns the minimum and maximum
-// x and y values, implementing the plot.DataRanger interface.
-func (ln *XY) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
-	return plot.XYRangeClamp(ln, &ln.Style.Range)
+// UpdateRange updates the given ranges.
+func (ln *XY) UpdateRange(plt *plot.Plot, x, y, z *minmax.F64) {
+	// todo: include point sizes!
+	plot.Range(ln.X, x)
+	plot.RangeClamp(ln.Y, y, &ln.Style.Range)
 }
 
 // Thumbnail returns the thumbnail, implementing the plot.Thumbnailer interface.

@@ -21,8 +21,16 @@ type Style struct { //types:add -setters
 	// On specifies whether to plot this item, for cases where it can be turned off.
 	On DefaultOffOn
 
+	// Role specifies a role for this item, used for table-based plots to indicate
+	// how a particular column of data should be used.
+	Role Roles
+
+	// Group specifies a group of related data items, used for table-based plots
+	// where different columns of data within the same Group play different Roles
+	Group string
+
 	// Range is the effective range of data to plot, where either end can be fixed.
-	Range minmax.Range32 `display:"inline"`
+	Range minmax.Range64 `display:"inline"`
 
 	// Label provides an alternative label to use for axis, if set.
 	Label string
@@ -67,21 +75,21 @@ type WidthStyle struct { //types:add -setters
 	// Offset for Bar plot is the offset added to each X axis value
 	// relative to the Stride computed value (X = offset + index * Stride)
 	// Defaults to 1.
-	Offset float32
+	Offset float64
 
 	// Stride for Bar plot is distance between bars. Defaults to 1.
-	Stride float32
+	Stride float64
 
 	// Width for Bar plot is the width of the bars, which should be less than
 	// the Stride (1 typically) to prevent bar overlap. Defaults to .8.
-	Width float32 `min:"0.01" max:"1" default:"0.8"`
+	Width float64 `min:"0.01" max:"1" default:"0.8"`
 
 	// Pad for Bar plot is additional space at start / end of data range,
 	// to keep bars from overflowing ends. This amount is subtracted from Offset
 	// and added to (len(Values)-1)*Stride -- no other accommodation for bar
 	// width is provided, so that should be built into this value as well.
 	// Defaults to 1.
-	Pad float32
+	Pad float64
 }
 
 func (ws *WidthStyle) Defaults() {
