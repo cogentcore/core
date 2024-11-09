@@ -42,6 +42,9 @@ type XY struct {
 
 // NewXY returns an XY plot.
 func NewXY(data plot.Data) *XY {
+	if data.CheckLengths() != nil {
+		return nil
+	}
 	ln := &XY{}
 	ln.X = plot.MustCopyRole(data, plot.X)
 	ln.Y = plot.MustCopyRole(data, plot.Y)
@@ -210,10 +213,10 @@ func (ln *XY) Plot(plt *plot.Plot) {
 }
 
 // UpdateRange updates the given ranges.
-func (ln *XY) UpdateRange(plt *plot.Plot, x, y, z *minmax.F64) {
+func (ln *XY) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
 	// todo: include point sizes!
-	plot.Range(ln.X, x)
-	plot.RangeClamp(ln.Y, y, &ln.Style.Range)
+	plot.Range(ln.X, xr)
+	plot.RangeClamp(ln.Y, yr, &ln.Style.Range)
 }
 
 // Thumbnail returns the thumbnail, implementing the plot.Thumbnailer interface.

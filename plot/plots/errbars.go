@@ -33,6 +33,9 @@ func (eb *YErrorBars) Defaults() {
 // NewYErrorBars returns a new YErrorBars plotter,
 // using Low, High data roles for error deviations around X, Y coordinates.
 func NewYErrorBars(data plot.Data) *YErrorBars {
+	if data.CheckLengths() != nil {
+		return nil
+	}
 	eb := &YErrorBars{}
 	eb.X = plot.MustCopyRole(data, plot.X)
 	eb.Y = plot.MustCopyRole(data, plot.Y)
@@ -100,12 +103,12 @@ func (eb *YErrorBars) Plot(plt *plot.Plot) {
 }
 
 // UpdateRange updates the given ranges.
-func (eb *YErrorBars) UpdateRange(plt *plot.Plot, x, y, z *minmax.F64) {
-	plot.Range(eb.X, x)
-	for i, yv := range eb.Y {
-		ylow := yv - math.Abs(eb.Low[i])
-		yhigh := yv + math.Abs(eb.High[i])
-		y.FitInRange(minmax.F64{ylow, yhigh})
+func (eb *YErrorBars) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
+	plot.Range(eb.X, xr)
+	for i, y := range eb.Y {
+		ylow := y - math.Abs(eb.Low[i])
+		yhigh := y + math.Abs(eb.High[i])
+		yr.FitInRange(minmax.F64{ylow, yhigh})
 	}
 	return
 }
@@ -134,6 +137,9 @@ func (eb *XErrorBars) Defaults() {
 // NewXErrorBars returns a new XErrorBars plotter,
 // using Low, High data roles for error deviations around X, Y coordinates.
 func NewXErrorBars(data plot.Data) *XErrorBars {
+	if data.CheckLengths() != nil {
+		return nil
+	}
 	eb := &XErrorBars{}
 	eb.X = plot.MustCopyRole(data, plot.X)
 	eb.Y = plot.MustCopyRole(data, plot.Y)

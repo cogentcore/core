@@ -134,6 +134,23 @@ func RangeClamp(data Valuer, axisRng *minmax.F64, styleRng *minmax.Range64) {
 	axisRng.Min, axisRng.Max = styleRng.Clamp(axisRng.Min, axisRng.Max)
 }
 
+// CheckLengths checks that all the data elements have the same length.
+// Logs and returns an error if not.
+func (dt Data) CheckLengths() error {
+	n := 0
+	for _, v := range dt {
+		if n == 0 {
+			n = v.Len()
+		} else {
+			if v.Len() != n {
+				err := errors.New("plot.Data has inconsistent lengths -- all data elements must have the same length -- plotting aborted")
+				return errors.Log(err)
+			}
+		}
+	}
+	return nil
+}
+
 // Values provides a minimal implementation of the Data interface
 // using a slice of float64.
 type Values []float64

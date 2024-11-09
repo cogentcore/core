@@ -17,7 +17,7 @@ type Plotter interface {
 	Plot(pt *Plot)
 
 	// UpdateRange updates the given ranges.
-	UpdateRange(plt *Plot, x, y, z *minmax.F64)
+	UpdateRange(plt *Plot, xr, yr, zr *minmax.F64)
 
 	// Data returns the data by roles for this plot, for both the original
 	// data and the pixel-transformed X,Y coordinates for that data.

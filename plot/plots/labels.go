@@ -32,6 +32,9 @@ type Labels struct {
 
 // NewLabels returns a new Labels using defaults
 func NewLabels(data plot.Data) *Labels {
+	if data.CheckLengths() != nil {
+		return nil
+	}
 	lb := &Labels{}
 	lb.X = plot.MustCopyRole(data, plot.X)
 	lb.Y = plot.MustCopyRole(data, plot.Y)
@@ -42,12 +45,6 @@ func NewLabels(data plot.Data) *Labels {
 	if ld == nil {
 		return nil
 	}
-
-	// todo: in general need length checking on all data maps!
-	// if d.Len() != len(xys) {
-	// 	errors.Log(errors.New("plotter: number of points does not match the number of labels"))
-	// 	return nil
-	// }
 	lb.Labels = make(plot.Labels, lb.X.Len())
 	for i := range ld.Len() {
 		lb.Labels[i] = ld.String1D(i)
@@ -106,13 +103,13 @@ func (lb *Labels) Plot(plt *plot.Plot) {
 }
 
 // UpdateRange updates the given ranges.
-func (lb *Labels) UpdateRange(plt *plot.Plot, x, y, z *minmax.F64) {
+func (lb *Labels) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
 	// todo: include point sizes!
-	plot.Range(lb.X, x)
-	plot.Range(lb.Y, y)
+	plot.Range(lb.X, xr)
+	plot.Range(lb.Y, yr)
 	pxToData := math32.FromPoint(plt.Size)
-	pxToData.X = float32(x.Range()) / pxToData.X
-	pxToData.Y = float32(y.Range()) / pxToData.Y
+	pxToData.X = float32(xr.Range()) / pxToData.X
+	pxToData.Y = float32(yr.Range()) / pxToData.Y
 	var ltxt plot.Text
 	ltxt.Style = lb.Style
 	for i, label := range lb.Labels {
@@ -123,13 +120,11 @@ func (lb *Labels) UpdateRange(plt *plot.Plot, x, y, z *minmax.F64) {
 		ltxt.Config(plt)
 		tht := pxToData.Y * ltxt.PaintText.BBox.Size().Y
 		twd := 1.1 * pxToData.X * ltxt.PaintText.BBox.Size().X
-		xv := lb.X[i]
-		yv := lb.Y[i]
-		minx := xv
-		maxx := xv + float64(pxToData.X*lb.Style.Offset.X.Dots+twd)
-		miny := yv
-		maxy := yv + float64(pxToData.Y*lb.Style.Offset.Y.Dots+tht) // y is up here
-		x.FitInRange(minmax.F64{minx, maxx})
-		y.FitInRange(minmax.F64{miny, maxy})
+		x := lb.X[i]
+		y := lb.Y[i]
+		maxx := x + float64(pxToData.X*lb.Style.Offset.X.Dots+twd)
+		maxy := y + float64(pxToData.Y*lb.Style.Offset.Y.Dots+tht) // y is up here
+		xr.FitInRange(minmax.F64{x, maxx})
+		yr.FitInRange(minmax.F64{y, maxy})
 	}
 }

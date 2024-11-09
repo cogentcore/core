@@ -66,6 +66,9 @@ type Bar struct {
 // to the index of their value in the Valuer.
 // Optional error-bar values can be provided using the High data role.
 func NewBar(data plot.Data) *Bar {
+	if data.CheckLengths() != nil {
+		return nil
+	}
 	bc := &Bar{}
 	bc.Y = plot.MustCopyRole(data, plot.Y)
 	if bc.Y == nil {
@@ -202,7 +205,7 @@ func (bc *Bar) Plot(plt *plot.Plot) {
 }
 
 // UpdateRange updates the given ranges.
-func (bc *Bar) UpdateRange(plt *plot.Plot, x, y, z *minmax.F64) {
+func (bc *Bar) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
 	bw := bc.Style.Width
 	catMin := bw.Offset - bw.Pad
 	catMax := bw.Offset + float64(len(bc.Y)-1)*bw.Stride + bw.Pad
@@ -214,19 +217,19 @@ func (bc *Bar) UpdateRange(plt *plot.Plot, x, y, z *minmax.F64) {
 			valTop += math.Abs(bc.Err[i])
 		}
 		if bc.Horizontal {
-			x.FitValInRange(valBot)
-			x.FitValInRange(valTop)
+			xr.FitValInRange(valBot)
+			xr.FitValInRange(valTop)
 		} else {
-			y.FitValInRange(valBot)
-			y.FitValInRange(valTop)
+			yr.FitValInRange(valBot)
+			yr.FitValInRange(valTop)
 		}
 	}
 	if bc.Horizontal {
-		x.Min, x.Max = bc.Style.Range.Clamp(x.Min, x.Max)
-		y.FitInRange(minmax.F64{catMin, catMax})
+		xr.Min, xr.Max = bc.Style.Range.Clamp(xr.Min, xr.Max)
+		yr.FitInRange(minmax.F64{catMin, catMax})
 	} else {
-		y.Min, y.Max = bc.Style.Range.Clamp(y.Min, y.Max)
-		x.FitInRange(minmax.F64{catMin, catMax})
+		yr.Min, yr.Max = bc.Style.Range.Clamp(yr.Min, yr.Max)
+		xr.FitInRange(minmax.F64{catMin, catMax})
 	}
 }
 
