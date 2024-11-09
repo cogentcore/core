@@ -11,7 +11,19 @@ import (
 	"cogentcore.org/core/plot"
 )
 
-// YErrorBars draws vertical error bars, denoting error in Y values,
+// YErrorBarsType is be used for specifying the type name.
+const YErrorBarsType = "YErrorBars"
+
+func init() {
+	plot.RegisterPlotter(YErrorBarsType, "draws draws vertical error bars, denoting error in Y values, using Low, High data roles for error deviations around X, Y coordinates.", []plot.Roles{plot.X, plot.Y, plot.Low, plot.High}, []plot.Roles{}, func(data plot.Data) plot.Plotter {
+		return NewYErrorBars(data)
+	})
+	plot.RegisterPlotter(XErrorBarsType, "draws draws horizontal error bars, denoting error in X values, using Low, High data roles for error deviations around X, Y coordinates.", []plot.Roles{plot.X, plot.Y, plot.Low, plot.High}, []plot.Roles{}, func(data plot.Data) plot.Plotter {
+		return NewXErrorBars(data)
+	})
+}
+
+// XErrorBars draws vertical error bars, denoting error in Y values,
 // using Low, High data roles for error deviations around X, Y coordinates.
 type YErrorBars struct {
 	// copies of data for this line

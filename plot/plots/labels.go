@@ -12,8 +12,16 @@ import (
 	"cogentcore.org/core/plot"
 )
 
-// Labels implements the Plotter interface,
-// drawing a set of labels at specified points.
+// LabelsType is be used for specifying the type name.
+const LabelsType = "Labels"
+
+func init() {
+	plot.RegisterPlotter(LabelsType, "draws text labels at specified X, Y points.", []plot.Roles{plot.X, plot.Y, plot.Label}, []plot.Roles{}, func(data plot.Data) plot.Plotter {
+		return NewLabels(data)
+	})
+}
+
+// Labels draws text labels at specified X, Y points.
 type Labels struct {
 	// copies of data for this line
 	X, Y   plot.Values
