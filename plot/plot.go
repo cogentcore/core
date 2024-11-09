@@ -38,7 +38,7 @@ type XAxisStyle struct { //types:add -setters
 	Label string
 
 	// Range is the effective range of XAxis data to plot, where either end can be fixed.
-	Range minmax.Range32 `display:"inline"`
+	Range minmax.Range64 `display:"inline"`
 }
 
 // PlotStyle has overall plot level styling properties.
@@ -321,6 +321,12 @@ func (pt *Plot) UpdateRange() {
 	pt.X.Range.SetInfinity()
 	pt.Y.Range.SetInfinity()
 	pt.Z.Range.SetInfinity()
+	if pt.Style.XAxis.Range.FixMin {
+		pt.X.Range.Min = pt.Style.XAxis.Range.Min
+	}
+	if pt.Style.XAxis.Range.FixMax {
+		pt.X.Range.Max = pt.Style.XAxis.Range.Max
+	}
 	for _, pl := range pt.Plotters {
 		pl.UpdateRange(pt, &pt.X.Range, &pt.Y.Range, &pt.Z.Range)
 	}

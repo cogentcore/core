@@ -18,25 +18,33 @@ import (
 )
 
 func ExampleLine() {
-	// data := make(plot.XYs, 42)
-	// for i := range data {
-	// 	x := float32(i % 21)
-	// 	data[i].X = x * 5
-	// 	if i < 21 {
-	// 		data[i].Y = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
-	// 	} else {
-	// 		data[i].Y = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
-	// 	}
-	// }
-	//
-	// plt := plot.New()
-	// plt.Add(NewLine(data).Styler(func(s *plot.Style) {
-	// 	s.Line.Color = colors.Uniform(colors.Red)
-	// 	s.Line.Width.Pt(2)
-	// }))
-	// plt.Draw()
-	// imagex.Save(plt.Pixels, "testdata/ex_line_plot.png")
-	// // Output:
+	xd, yd := make(plot.Values, 21), make(plot.Values, 21)
+	for i := range xd {
+		xd[i] = float64(i * 5)
+		yd[i] = float64(50) + 40*math.Sin((float64(i)/8)*math.Pi)
+	}
+	data := plot.Data{plot.X: xd, plot.Y: yd}
+	plt := plot.New()
+	plt.Add(NewLine(data).Styler(func(s *plot.Style) {
+		s.Plot.Title = "Test Line"
+		s.Plot.XAxis.Label = "X Axis"
+		s.Plot.YAxisLabel = "Y Axis"
+		s.Plot.XAxis.Range.SetMax(105)
+		s.Plot.LineWidth.Pt(2)
+		s.Plot.SetLinesOn(plot.On).SetPointsOn(plot.On)
+		s.Plot.TitleStyle.Size.Dp(48)
+		s.Plot.Legend.Position.Left = true
+		s.Plot.Legend.Text.Size.Dp(24)
+		s.Plot.Axis.Text.Size.Dp(32)
+		s.Plot.Axis.TickText.Size.Dp(24)
+		s.Plot.XAxis.Rotation = -45
+		s.Line.Color = colors.Uniform(colors.Red)
+		s.Point.Color = colors.Uniform(colors.Blue)
+		s.Range.SetMax(100)
+	}))
+	plt.Draw()
+	imagex.Save(plt.Pixels, "testdata/ex_line_plot.png")
+	// Output:
 }
 
 func TestMain(m *testing.M) {
