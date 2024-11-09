@@ -45,7 +45,7 @@ func TestMain(m *testing.M) {
 }
 
 // sinCosWrapData returns overlapping sin / cos curves in one sequence.
-func sinCosWrapData() map[plot.Roles]plot.Data {
+func sinCosWrapData() plot.Data {
 	xd, yd := make(plot.Values, 42), make(plot.Values, 42)
 	for i := range xd {
 		x := float64(i % 21)
@@ -56,42 +56,42 @@ func sinCosWrapData() map[plot.Roles]plot.Data {
 			yd[i] = float64(50) + 40*math.Cos((x/8)*math.Pi)
 		}
 	}
-	data := map[plot.Roles]plot.Data{}
+	data := plot.Data{}
 	data[plot.X] = xd
 	data[plot.Y] = yd
 	return data
 }
 
-func sinDataXY() map[plot.Roles]plot.Data {
+func sinDataXY() plot.Data {
 	xd, yd := make(plot.Values, 21), make(plot.Values, 21)
 	for i := range xd {
 		xd[i] = float64(i * 5)
 		xd[i] = float64(50) + 40*math.Sin((float64(i)/8)*math.Pi)
 	}
-	data := map[plot.Roles]plot.Data{}
+	data := plot.Data{}
 	data[plot.X] = xd
 	data[plot.Y] = yd
 	return data
 }
 
-func sinData() map[plot.Roles]plot.Data {
+func sinData() plot.Data {
 	yd := make(plot.Values, 21)
 	for i := range yd {
 		x := float64(i % 21)
 		yd[i] = float64(50) + 40*math.Sin((x/8)*math.Pi)
 	}
-	data := map[plot.Roles]plot.Data{}
+	data := plot.Data{}
 	data[plot.Y] = yd
 	return data
 }
 
-func cosData() map[plot.Roles]plot.Data {
+func cosData() plot.Data {
 	yd := make(plot.Values, 21)
 	for i := range yd {
 		x := float64(i % 21)
 		yd[i] = float64(50) + 40*math.Cos((x/8)*math.Pi)
 	}
-	data := map[plot.Roles]plot.Data{}
+	data := plot.Data{}
 	data[plot.Y] = yd
 	return data
 }
@@ -186,7 +186,7 @@ func TestLabels(t *testing.T) {
 		yd[i] = float64(50) + 40*math.Sin((x/8)*math.Pi)
 		labels[i] = fmt.Sprintf("%7.4g", yd[i])
 	}
-	data := map[plot.Roles]plot.Data{}
+	data := plot.Data{}
 	data[plot.X] = xd
 	data[plot.Y] = yd
 	data[plot.Label] = labels
@@ -338,11 +338,7 @@ func TestErrBar(t *testing.T) {
 		low[i] = -high[i]
 	}
 
-	data := map[plot.Roles]plot.Data{}
-	data[plot.X] = xd
-	data[plot.Y] = yd
-	data[plot.Low] = low
-	data[plot.High] = high
+	data := plot.Data{plot.X: xd, plot.Y: yd, plot.Low: low, plot.High: high}
 
 	l1 := NewLine(data)
 	if l1 == nil {

@@ -23,7 +23,7 @@ import (
 const BarType = "Bar"
 
 func init() {
-	plot.RegisterPlotter(BarType, "A Bar presents ordinally-organized data with rectangular bars with lengths proportional to the data values, and an optional error bar at the top of the bar using the High data role.", []plot.Roles{plot.Y}, []plot.Roles{plot.High}, func(data map[plot.Roles]plot.Data) plot.Plotter {
+	plot.RegisterPlotter(BarType, "A Bar presents ordinally-organized data with rectangular bars with lengths proportional to the data values, and an optional error bar at the top of the bar using the High data role.", []plot.Roles{plot.Y}, []plot.Roles{plot.High}, func(data plot.Data) plot.Plotter {
 		return NewBar(data)
 	})
 }
@@ -65,7 +65,7 @@ type Bar struct {
 // The bars heights correspond to the values and their x locations correspond
 // to the index of their value in the Valuer.
 // Optional error-bar values can be provided using the High data role.
-func NewBar(data map[plot.Roles]plot.Data) *Bar {
+func NewBar(data plot.Data) *Bar {
 	bc := &Bar{}
 	bc.Y = plot.MustCopyRole(data, plot.Y)
 	if bc.Y == nil {
@@ -92,10 +92,10 @@ func (bc *Bar) ApplyStyle(ps *plot.PlotStyle) {
 
 func (bc *Bar) Stylers() *plot.Stylers { return &bc.stylers }
 
-func (bc *Bar) Data() (data map[plot.Roles]plot.Data, pixX, pixY []float32) {
+func (bc *Bar) Data() (data plot.Data, pixX, pixY []float32) {
 	pixX = bc.PX
 	pixY = bc.PY
-	data = map[plot.Roles]plot.Data{}
+	data = plot.Data{}
 	data[plot.X] = bc.X
 	data[plot.Y] = bc.Y
 	if bc.Err != nil {

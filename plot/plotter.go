@@ -22,7 +22,7 @@ type Plotter interface {
 	// Data returns the data by roles for this plot, for both the original
 	// data and the pixel-transformed X,Y coordinates for that data.
 	// This allows a GUI interface to inspect data etc.
-	Data() (data map[Roles]Data, pixX, pixY []float32)
+	Data() (data Data, pixX, pixY []float32)
 
 	// Stylers returns the styler functions for this element.
 	Stylers() *Stylers
@@ -48,14 +48,14 @@ type PlotterType struct {
 	Optional []Roles
 
 	// New returns a new plotter of this type with given data in given roles.
-	New func(data map[Roles]Data) Plotter
+	New func(data Data) Plotter
 }
 
 // Plotters is the registry of [Plotter] types.
 var Plotters map[string]PlotterType
 
 // RegisterPlotter registers a plotter type.
-func RegisterPlotter(name, doc string, required, optional []Roles, newFun func(data map[Roles]Data) Plotter) {
+func RegisterPlotter(name, doc string, required, optional []Roles, newFun func(data Data) Plotter) {
 	if Plotters == nil {
 		Plotters = make(map[string]PlotterType)
 	}
@@ -65,7 +65,7 @@ func RegisterPlotter(name, doc string, required, optional []Roles, newFun func(d
 // NewPlotter returns a new plotter of given type, e.g., "XY", "Bar" etc,
 // for given data roles (which must include Required roles, and may include Optional ones).
 // Logs an error and returns nil if type name is not recognized as a registered type.
-func NewPlotter(typeName string, data map[Roles]Data) Plotter {
+func NewPlotter(typeName string, data Data) Plotter {
 	pt, ok := Plotters[typeName]
 	if !ok {
 		slog.Error("plot.NewPlotter type name is not registered", "typeName", typeName)

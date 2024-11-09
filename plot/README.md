@@ -13,6 +13,12 @@ The GUI constraint requires a more systematic, factorial organization of the spa
 * Plot content is driven by `Plotter` elements that each consume one or more sets of data, which is provided by a `Data` interface that maps onto a minimal subset of the `tensor.Tensor` interface, so a tensor directly satisfies the interface.
 * Each `Plotter` element can generally handle multiple different data elements, that are index-aligned. For example, the basic `XY` plotter requires `X` and `Y` Valuers, and optionally `Size` or `Color` Valuers that apply to the Point elements, while `Bar` gets at least a `Y` but also optionally a `High` Valuer for an error bar.
 
+Here is a example for how a plotter element is created with the `plot.Data` map of roles to data:
+
+```Go
+plt.Add(plots.NewLine(plot.Data{plot.X: xd, plot.Y: yd, plot.Low: low, plot.High: high}))
+```
+
 The table-driven plotting case uses a `Group` name along with the `Roles` type (`X`, `Y` etc) and Plotter type names to organize different plots based on `Style` settings.  Columns with the same Group name all provide data to the same plotter using their different Roles, making it easy to configure various statistical plots of multiple series of grouped data.
 
 Different plotter types (including custom ones) are registered along with their accepted input roles, to allow any type of plot to be generated.

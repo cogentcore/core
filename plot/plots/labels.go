@@ -31,7 +31,7 @@ type Labels struct {
 }
 
 // NewLabels returns a new Labels using defaults
-func NewLabels(data map[plot.Roles]plot.Data) *Labels {
+func NewLabels(data plot.Data) *Labels {
 	lb := &Labels{}
 	lb.X = plot.MustCopyRole(data, plot.X)
 	lb.Y = plot.MustCopyRole(data, plot.Y)
@@ -74,10 +74,10 @@ func (lb *Labels) ApplyStyle(ps *plot.PlotStyle) {
 
 func (lb *Labels) Stylers() *plot.Stylers { return &lb.stylers }
 
-func (lb *Labels) Data() (data map[plot.Roles]plot.Data, pixX, pixY []float32) {
+func (lb *Labels) Data() (data plot.Data, pixX, pixY []float32) {
 	pixX = lb.PX
 	pixY = lb.PY
-	data = map[plot.Roles]plot.Data{}
+	data = plot.Data{}
 	data[plot.X] = lb.X
 	data[plot.Y] = lb.Y
 	data[plot.Label] = lb.Labels

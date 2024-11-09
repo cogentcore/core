@@ -32,7 +32,7 @@ func (eb *YErrorBars) Defaults() {
 
 // NewYErrorBars returns a new YErrorBars plotter,
 // using Low, High data roles for error deviations around X, Y coordinates.
-func NewYErrorBars(data map[plot.Roles]plot.Data) *YErrorBars {
+func NewYErrorBars(data plot.Data) *YErrorBars {
 	eb := &YErrorBars{}
 	eb.X = plot.MustCopyRole(data, plot.X)
 	eb.Y = plot.MustCopyRole(data, plot.Y)
@@ -58,10 +58,10 @@ func (eb *YErrorBars) ApplyStyle(ps *plot.PlotStyle) {
 
 func (eb *YErrorBars) Stylers() *plot.Stylers { return &eb.stylers }
 
-func (eb *YErrorBars) Data() (data map[plot.Roles]plot.Data, pixX, pixY []float32) {
+func (eb *YErrorBars) Data() (data plot.Data, pixX, pixY []float32) {
 	pixX = eb.PX
 	pixY = eb.PY
-	data = map[plot.Roles]plot.Data{}
+	data = plot.Data{}
 	data[plot.X] = eb.X
 	data[plot.Y] = eb.Y
 	data[plot.Low] = eb.Low
@@ -133,7 +133,7 @@ func (eb *XErrorBars) Defaults() {
 
 // NewXErrorBars returns a new XErrorBars plotter,
 // using Low, High data roles for error deviations around X, Y coordinates.
-func NewXErrorBars(data map[plot.Roles]plot.Data) *XErrorBars {
+func NewXErrorBars(data plot.Data) *XErrorBars {
 	eb := &XErrorBars{}
 	eb.X = plot.MustCopyRole(data, plot.X)
 	eb.Y = plot.MustCopyRole(data, plot.Y)
@@ -159,10 +159,10 @@ func (eb *XErrorBars) ApplyStyle(ps *plot.PlotStyle) {
 
 func (eb *XErrorBars) Stylers() *plot.Stylers { return &eb.stylers }
 
-func (eb *XErrorBars) Data() (data map[plot.Roles]plot.Data, pixX, pixY []float32) {
+func (eb *XErrorBars) Data() (data plot.Data, pixX, pixY []float32) {
 	pixX = eb.PX
 	pixY = eb.PY
-	data = map[plot.Roles]plot.Data{}
+	data = plot.Data{}
 	data[plot.X] = eb.X
 	data[plot.Y] = eb.Y
 	data[plot.Low] = eb.Low

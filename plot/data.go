@@ -26,10 +26,14 @@ var (
 	ErrNoData   = errors.New("plotter: no data points")
 )
 
-// Data is the data interface for plotting, supporting either
+// Data is a map of Roles and Data for that Role, providing the
+// primary way of passing data to a Plotter
+type Data map[Roles]Valuer
+
+// Valuer is the data interface for plotting, supporting either
 // float64 or string representations. It is satisfied by the tensor.Tensor
 // interface, so a tensor can be used directly for plot Data.
-type Data interface {
+type Valuer interface {
 	// Len returns the number of values.
 	Len() int
 
@@ -113,7 +117,7 @@ func CheckNaNs(fs ...float64) bool {
 }
 
 // Range updates given Range with values from data.
-func Range(data Data, rng *minmax.F64) {
+func Range(data Valuer, rng *minmax.F64) {
 	for i := 0; i < data.Len(); i++ {
 		v := data.Float1D(i)
 		if math.IsNaN(v) {
@@ -125,7 +129,7 @@ func Range(data Data, rng *minmax.F64) {
 
 // RangeClamp updates the given axis Min, Max range values based
 // on the range of values in the given [Data], and the given style range.
-func RangeClamp(data Data, axisRng *minmax.F64, styleRng *minmax.Range64) {
+func RangeClamp(data Valuer, axisRng *minmax.F64, styleRng *minmax.Range64) {
 	Range(data, axisRng)
 	axisRng.Min, axisRng.Max = styleRng.Clamp(axisRng.Min, axisRng.Max)
 }
@@ -150,7 +154,7 @@ func (vs Values) String1D(i int) string {
 // from Data, or an error if there are no values, or if one of
 // the copied values is a Infinity.
 // NaN values are skipped in the copying process.
-func CopyValues(data Data) (Values, error) {
+func CopyValues(data Valuer) (Values, error) {
 	if data == nil {
 		return nil, ErrNoData
 	}
@@ -173,7 +177,7 @@ func CopyValues(data Data) (Values, error) {
 
 // MustCopyRole returns Values copy of given role from given data map,
 // logging an error and returning nil if not present.
-func MustCopyRole(data map[Roles]Data, role Roles) Values {
+func MustCopyRole(data Data, role Roles) Values {
 	d, ok := data[role]
 	if !ok {
 		slog.Error("plot Data role not present, but is required", "role:", role)
@@ -185,7 +189,7 @@ func MustCopyRole(data map[Roles]Data, role Roles) Values {
 
 // CopyRole returns Values copy of given role from given data map,
 // returning nil if role not present.
-func CopyRole(data map[Roles]Data, role Roles) Values {
+func CopyRole(data Data, role Roles) Values {
 	d, ok := data[role]
 	if !ok {
 		return nil
@@ -195,7 +199,7 @@ func CopyRole(data map[Roles]Data, role Roles) Values {
 }
 
 // PlotX returns plot pixel X coordinate values for given data.
-func PlotX(plt *Plot, data Data) []float32 {
+func PlotX(plt *Plot, data Valuer) []float32 {
 	px := make([]float32, data.Len())
 	for i := range px {
 		px[i] = plt.PX(data.Float1D(i))
@@ -204,7 +208,7 @@ func PlotX(plt *Plot, data Data) []float32 {
 }
 
 // PlotY returns plot pixel Y coordinate values for given data.
-func PlotY(plt *Plot, data Data) []float32 {
+func PlotY(plt *Plot, data Valuer) []float32 {
 	py := make([]float32, data.Len())
 	for i := range py {
 		py[i] = plt.PY(data.Float1D(i))

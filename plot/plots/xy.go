@@ -21,7 +21,7 @@ import (
 const XYType = "XY"
 
 func init() {
-	plot.RegisterPlotter(XYType, "draws lines between and / or points for X,Y data values, using optional Size and Color data for the points, for a bubble plot.", []plot.Roles{plot.X, plot.Y}, []plot.Roles{plot.Size, plot.Color}, func(data map[plot.Roles]plot.Data) plot.Plotter {
+	plot.RegisterPlotter(XYType, "draws lines between and / or points for X,Y data values, using optional Size and Color data for the points, for a bubble plot.", []plot.Roles{plot.X, plot.Y}, []plot.Roles{plot.Size, plot.Color}, func(data plot.Data) plot.Plotter {
 		return NewXY(data)
 	})
 }
@@ -41,7 +41,7 @@ type XY struct {
 }
 
 // NewXY returns an XY plot.
-func NewXY(data map[plot.Roles]plot.Data) *XY {
+func NewXY(data plot.Data) *XY {
 	ln := &XY{}
 	ln.X = plot.MustCopyRole(data, plot.X)
 	ln.Y = plot.MustCopyRole(data, plot.Y)
@@ -55,7 +55,7 @@ func NewXY(data map[plot.Roles]plot.Data) *XY {
 }
 
 // NewLine returns an XY plot drawing Lines by default.
-func NewLine(data map[plot.Roles]plot.Data) *XY {
+func NewLine(data plot.Data) *XY {
 	ln := NewXY(data)
 	if ln == nil {
 		return ln
@@ -66,7 +66,7 @@ func NewLine(data map[plot.Roles]plot.Data) *XY {
 }
 
 // NewScatter returns an XY scatter plot drawing Points by default.
-func NewScatter(data map[plot.Roles]plot.Data) *XY {
+func NewScatter(data plot.Data) *XY {
 	ln := NewXY(data)
 	if ln == nil {
 		return ln
@@ -93,10 +93,10 @@ func (ln *XY) ApplyStyle(ps *plot.PlotStyle) {
 	ln.stylers.Run(&ln.Style)
 }
 
-func (ln *XY) Data() (data map[plot.Roles]plot.Data, pixX, pixY []float32) {
+func (ln *XY) Data() (data plot.Data, pixX, pixY []float32) {
 	pixX = ln.PX
 	pixY = ln.PY
-	data = map[plot.Roles]plot.Data{}
+	data = plot.Data{}
 	data[plot.X] = ln.X
 	data[plot.Y] = ln.Y
 	if ln.Size != nil {
