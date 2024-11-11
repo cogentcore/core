@@ -39,6 +39,10 @@ type XAxisStyle struct { //types:add -setters
 
 	// Range is the effective range of XAxis data to plot, where either end can be fixed.
 	Range minmax.Range64 `display:"inline"`
+
+	// Scale specifies how values are scaled along the X axis:
+	// Linear, Log, Inverted
+	Scale AxisScales
 }
 
 // PlotStyle has overall plot level styling properties.
@@ -212,6 +216,7 @@ func (pt *Plot) applyStyle() {
 	pt.Legend.Style = pt.Style.Legend
 	pt.Legend.Style.Text.openFont(pt)
 	pt.X.Style = pt.Style.Axis
+	pt.X.Style.Scale = pt.Style.XAxis.Scale
 	pt.Y.Style = pt.Style.Axis
 	if pt.Style.XAxis.Label != "" {
 		pt.X.Label.Text = pt.Style.XAxis.Label

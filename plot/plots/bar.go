@@ -61,10 +61,11 @@ type Bar struct {
 	stylers plot.Stylers
 }
 
-// NewBar returns a new bar chart with a single bar for each value.
+// NewBar returns a new bar plotter with a single bar for each value.
 // The bars heights correspond to the values and their x locations correspond
 // to the index of their value in the Valuer.
 // Optional error-bar values can be provided using the High data role.
+// Styler functions are obtained from the Y metadata if present.
 func NewBar(data plot.Data) *Bar {
 	if data.CheckLengths() != nil {
 		return nil
@@ -74,6 +75,7 @@ func NewBar(data plot.Data) *Bar {
 	if bc.Y == nil {
 		return nil
 	}
+	bc.stylers = plot.GetStylersFromData(data, plot.Y)
 	bc.Err = plot.CopyRole(data, plot.High)
 	bc.Defaults()
 	return bc

@@ -18,6 +18,21 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
+// AxisScales are the scaling options for how values are distributed
+// along an axis: Linear, Log, etc.
+type AxisScales int32 //enums:enum
+
+const (
+	// Linear is a linear axis scale.
+	Linear AxisScales = iota
+
+	// Log is a Logarithmic axis scale.
+	Log
+
+	// Inverted is an inverted axis scale.
+	Inverted
+)
+
 // AxisStyle has style properties for the axis.
 type AxisStyle struct { //types:add -setters
 
@@ -31,6 +46,13 @@ type AxisStyle struct { //types:add -setters
 	// non-zero padding ensures that the data is never drawn
 	// on the axis, thus making it easier to see.
 	Padding units.Value
+
+	// NTicks is the desired number of ticks.
+	NTicks int
+
+	// Scale specifies how values are scaled along the axis:
+	// Linear, Log, Inverted
+	Scale AxisScales
 
 	// TickText has the text style for rendering tick labels,
 	// and is shared for actual rendering.
@@ -48,6 +70,7 @@ func (ax *AxisStyle) Defaults() {
 	ax.Text.Defaults()
 	ax.Text.Size.Dp(20)
 	ax.Padding.Pt(5)
+	ax.NTicks = 3
 	ax.TickText.Defaults()
 	ax.TickText.Size.Dp(16)
 	ax.TickText.Padding.Dp(2)
@@ -104,11 +127,23 @@ func (ax *Axis) Defaults(dim math32.Dims) {
 	ax.Ticker = DefaultTicks{}
 }
 
+// drawConfig configures for drawing.
+func (ax *Axis) drawConfig() {
+	switch ax.Style.Scale {
+	case Linear:
+		ax.Scale = LinearScale{}
+	case Log:
+		ax.Scale = LogScale{}
+	case Inverted:
+		ax.Scale = InvertedScale{}
+	}
+}
+
 // SanitizeRange ensures that the range of the axis makes sense.
 func (ax *Axis) SanitizeRange() {
 	ax.Range.Sanitize()
 	if ax.AutoRescale {
-		marks := ax.Ticker.Ticks(ax.Range.Min, ax.Range.Max)
+		marks := ax.Ticker.Ticks(ax.Range.Min, ax.Range.Max, ax.Style.NTicks)
 		for _, t := range marks {
 			ax.Range.FitValInRange(t.Value)
 		}

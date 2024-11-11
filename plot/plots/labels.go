@@ -39,6 +39,7 @@ type Labels struct {
 }
 
 // NewLabels returns a new Labels using defaults
+// Styler functions are obtained from the Label metadata if present.
 func NewLabels(data plot.Data) *Labels {
 	if data.CheckLengths() != nil {
 		return nil
@@ -53,6 +54,7 @@ func NewLabels(data plot.Data) *Labels {
 	if ld == nil {
 		return nil
 	}
+	lb.stylers = plot.GetStylersFromData(data, plot.Label)
 	lb.Labels = make(plot.Labels, lb.X.Len())
 	for i := range ld.Len() {
 		lb.Labels[i] = ld.String1D(i)

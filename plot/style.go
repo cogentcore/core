@@ -5,6 +5,7 @@
 package plot
 
 import (
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/styles/units"
 )
@@ -124,6 +125,30 @@ func (st *Stylers) NewStyle(ps *PlotStyle) *Style {
 	st.Run(s)
 	return s
 }
+
+// SetStylers sets the [Stylers] into given [metadata.Data].
+func SetStylers(md *metadata.Data, st Stylers) {
+	md.Set("PlotStylers", st)
+}
+
+// GetStylers gets the [Stylers] from given [metadata.Data] (nil if none).
+func GetStylers(md *metadata.Data) Stylers {
+	st, _ := metadata.Get[Stylers](*md, "PlotStylers")
+	return st
+}
+
+// GetStylersFromData returns [Stylers] from given role
+// in given [Data]. nil if not present.
+func GetStylersFromData(data Data, role Roles) Stylers {
+	vr, ok := data[role]
+	if !ok {
+		return nil
+	}
+	st, _ := metadata.GetFrom[Stylers](vr, "PlotStylers")
+	return st
+}
+
+////////
 
 // DefaultOffOn specifies whether to use the default value for a bool option,
 // or to override the default and set Off or On.

@@ -49,6 +49,7 @@ func (eb *YErrorBars) Defaults() {
 
 // NewYErrorBars returns a new YErrorBars plotter,
 // using Low, High data roles for error deviations around X, Y coordinates.
+// Styler functions are obtained from the High data if present.
 func NewYErrorBars(data plot.Data) *YErrorBars {
 	if data.CheckLengths() != nil {
 		return nil
@@ -61,6 +62,7 @@ func NewYErrorBars(data plot.Data) *YErrorBars {
 	if eb.X == nil || eb.Y == nil || eb.Low == nil || eb.High == nil {
 		return nil
 	}
+	eb.stylers = plot.GetStylersFromData(data, plot.High)
 	eb.Defaults()
 	return eb
 }

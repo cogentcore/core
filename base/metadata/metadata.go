@@ -38,8 +38,8 @@ func (md *Data) Set(key string, value any) {
 	(*md)[key] = value
 }
 
-// Get gets metadata value of given type.
-// returns error if not present or item is a different type.
+// Get gets metadata value of given type from given Data.
+// Returns error if not present or item is a different type.
 func Get[T any](md Data, key string) (T, error) {
 	var z T
 	x, ok := md[key]
@@ -83,4 +83,33 @@ func (md *Data) SetDoc(doc string) {
 // Doc returns the "Doc" standard key value (empty if not set).
 func (md *Data) Doc() string {
 	return errors.Ignore1(Get[string](*md, "Doc"))
+}
+
+//////// Metadataer
+
+// Metadataer is an interface for a type that returns associated
+// metadata.Data using a Metadata() method.
+type Metadataer interface {
+	Metadata() *Data
+}
+
+// GetData gets the Data from given object, if it implements the
+// Metadata() method. Returns nil if it does not.
+func GetData(obj any) *Data {
+	if md, ok := obj.(Metadataer); ok {
+		return md.Metadata()
+	}
+	return nil
+}
+
+// GetFrom gets metadata value of given type from given object,
+// if it implements the Metadata() method.
+// Returns error if not present or item is a different type.
+func GetFrom[T any](obj any, key string) (T, error) {
+	md := GetData(obj)
+	if md == nil {
+		var zv T
+		return zv, errors.New("metadata not available for given object type")
+	}
+	return Get[T](*md, key)
 }

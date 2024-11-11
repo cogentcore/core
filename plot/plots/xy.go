@@ -40,7 +40,9 @@ type XY struct {
 	stylers plot.Stylers
 }
 
-// NewXY returns an XY plot.
+// NewXY returns an XY plotter for given X, Y data.
+// data can also include Color and / or Size for the points.
+// Styler functions are obtained from the Y metadata if present.
 func NewXY(data plot.Data) *XY {
 	if data.CheckLengths() != nil {
 		return nil
@@ -51,6 +53,7 @@ func NewXY(data plot.Data) *XY {
 	if ln.X == nil || ln.Y == nil {
 		return nil
 	}
+	ln.stylers = plot.GetStylersFromData(data, plot.Y)
 	ln.Color = plot.CopyRole(data, plot.Color)
 	ln.Size = plot.CopyRole(data, plot.Size)
 	ln.Defaults()
