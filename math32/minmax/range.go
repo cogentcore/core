@@ -16,15 +16,17 @@ type Range32 struct {
 }
 
 // SetMin sets a fixed min value
-func (rr *Range32) SetMin(mn float32) {
+func (rr *Range32) SetMin(mn float32) *Range32 {
 	rr.FixMin = true
 	rr.Min = mn
+	return rr
 }
 
 // SetMax sets a fixed max value
-func (rr *Range32) SetMax(mx float32) {
+func (rr *Range32) SetMax(mx float32) *Range32 {
 	rr.FixMax = true
 	rr.Max = mx
+	return rr
 }
 
 // Range returns Max - Min
@@ -59,15 +61,17 @@ type Range64 struct {
 }
 
 // SetMin sets a fixed min value
-func (rr *Range64) SetMin(mn float64) {
+func (rr *Range64) SetMin(mn float64) *Range64 {
 	rr.FixMin = true
 	rr.Min = mn
+	return rr
 }
 
 // SetMax sets a fixed max value
-func (rr *Range64) SetMax(mx float64) {
+func (rr *Range64) SetMax(mx float64) *Range64 {
 	rr.FixMax = true
 	rr.Max = mx
+	return rr
 }
 
 // Range returns Max - Min

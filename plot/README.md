@@ -46,6 +46,39 @@ The `Plot` field (of type `PlotStyle`) contains all the properties that apply to
 
 The rest of the style properties (e.g., `Line`, `Point`) apply to the element in question. There are also some default plot-level settings in `Plot` that apply to all elements, and the plot-level styles are updated first, so in this way it is possible to have plot-wide settings applied from one styler, that affect all plots (e.g., the line width, and whether lines and / or points are plotted or not).
 
+## Tensor metadata
+
+Styler functions can be attached directly to a `tensor.Tensor` via its metadata, and the `Plotter` elements will automatically grab these functions from any data source that has such metadata set. This allows the data generator to directly set default styling parameters, which can always be overridden later by adding more styler functions. Tying the plot styling directly to the source data allows all of the relevant logic to be put in one place, instead of spreading this logic across different places in the code.
+
+Here is an example of how this works:
+
+```Go
+	tx, ty := tensor.NewFloat64(21), tensor.NewFloat64(21)
+	for i := range tx.DimSize(0) {
+		tx.SetFloat1D(float64(i*5), i)
+		ty.SetFloat1D(50.0+40*math.Sin((float64(i)/8)*math.Pi), i)
+	}
+	// attach stylers to the Y axis data: that is where plotter looks for it
+	plot.SetStylersTo(ty, plot.Stylers{func(s *plot.Style) {
+		s.Plot.Title = "Test Line"
+		s.Plot.XAxis.Label = "X Axis"
+		s.Plot.YAxisLabel = "Y Axis"
+		s.Plot.Scale = 2
+		s.Plot.XAxis.Range.SetMax(105)
+		s.Plot.SetLinesOn(plot.On).SetPointsOn(plot.On)
+		s.Line.Color = colors.Uniform(colors.Red)
+		s.Point.Color = colors.Uniform(colors.Blue)
+		s.Range.SetMin(0).SetMax(100)
+	}})
+
+	// somewhere else in the code:
+
+	plt := plot.New()
+   // NewLine automatically gets stylers from ty tensor metadata
+	plt.Add(plots.NewLine(plot.Data{plot.X: tx, plot.Y: ty}))
+	plt.Draw()
+```
+
 # Plot Types
 
 The following are the builtin standard plot types, in the `plots` package:

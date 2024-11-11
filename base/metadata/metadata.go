@@ -113,3 +113,14 @@ func GetFrom[T any](obj any, key string) (T, error) {
 	}
 	return Get[T](*md, key)
 }
+
+// SetTo sets metadata value on given object, if it implements
+// the Metadata() method. Returns error if no Metadata on object.
+func SetTo(obj any, key string, value any) error {
+	md := GetData(obj)
+	if md == nil {
+		return errors.New("metadata not available for given object type")
+	}
+	md.Set(key, value)
+	return nil
+}

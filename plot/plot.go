@@ -214,7 +214,6 @@ func (pt *Plot) applyStyle() {
 		pt.Title.Text = pt.Style.Title
 	}
 	pt.Legend.Style = pt.Style.Legend
-	pt.Legend.Style.Text.openFont(pt)
 	pt.X.Style = pt.Style.Axis
 	pt.X.Style.Scale = pt.Style.XAxis.Scale
 	pt.Y.Style = pt.Style.Axis

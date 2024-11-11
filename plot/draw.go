@@ -53,8 +53,8 @@ func (pt *Plot) SVGToFile(filename string) error {
 
 // drawConfig configures everything for drawing, applying styles etc.
 func (pt *Plot) drawConfig() {
-	pt.Resize(pt.Size) // ensure
 	pt.applyStyle()
+	pt.Resize(pt.Size) // ensure
 	pt.X.drawConfig()
 	pt.Y.drawConfig()
 	pt.Z.drawConfig()

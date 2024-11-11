@@ -137,6 +137,11 @@ func GetStylers(md *metadata.Data) Stylers {
 	return st
 }
 
+// SetStylersTo sets the [Stylers] into given object that has metadata.
+func SetStylersTo(obj any, st Stylers) {
+	metadata.SetTo(obj, "PlotStylers", st)
+}
+
 // GetStylersFromData returns [Stylers] from given role
 // in given [Data]. nil if not present.
 func GetStylersFromData(data Data, role Roles) Stylers {

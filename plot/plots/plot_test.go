@@ -15,13 +15,14 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/plot"
+	"cogentcore.org/core/tensor"
 )
 
 func ExampleLine() {
 	xd, yd := make(plot.Values, 21), make(plot.Values, 21)
 	for i := range xd {
 		xd[i] = float64(i * 5)
-		yd[i] = float64(50) + 40*math.Sin((float64(i)/8)*math.Pi)
+		yd[i] = 50.0 + 40*math.Sin((float64(i)/8)*math.Pi)
 	}
 	data := plot.Data{plot.X: xd, plot.Y: yd}
 	plt := plot.New()
@@ -40,10 +41,39 @@ func ExampleLine() {
 		s.Plot.XAxis.Rotation = -45
 		s.Line.Color = colors.Uniform(colors.Red)
 		s.Point.Color = colors.Uniform(colors.Blue)
-		s.Range.SetMax(100)
+		s.Range.SetMin(0).SetMax(100)
 	}))
 	plt.Draw()
 	imagex.Save(plt.Pixels, "testdata/ex_line_plot.png")
+	// Output:
+}
+
+func ExampleStylerMetadata() {
+	tx, ty := tensor.NewFloat64(21), tensor.NewFloat64(21)
+	for i := range tx.DimSize(0) {
+		tx.SetFloat1D(float64(i*5), i)
+		ty.SetFloat1D(50.0+40*math.Sin((float64(i)/8)*math.Pi), i)
+	}
+	// attach stylers to the Y axis data: that is where plotter looks for it
+	plot.SetStylersTo(ty, plot.Stylers{func(s *plot.Style) {
+		s.Plot.Title = "Test Line"
+		s.Plot.XAxis.Label = "X Axis"
+		s.Plot.YAxisLabel = "Y Axis"
+		s.Plot.Scale = 2
+		s.Plot.XAxis.Range.SetMax(105)
+		s.Plot.SetLinesOn(plot.On).SetPointsOn(plot.On)
+		s.Line.Color = colors.Uniform(colors.Red)
+		s.Point.Color = colors.Uniform(colors.Blue)
+		s.Range.SetMin(0).SetMax(100)
+	}})
+
+	// somewhere else in the code:
+
+	plt := plot.New()
+	// NewLine automatically gets stylers from ty tensor metadata
+	plt.Add(NewLine(plot.Data{plot.X: tx, plot.Y: ty}))
+	plt.Draw()
+	imagex.Save(plt.Pixels, "testdata/ex_styler_metadata.png")
 	// Output:
 }
 
@@ -359,8 +389,7 @@ func TestErrBar(t *testing.T) {
 func TestStyle(t *testing.T) {
 	data := sinCosWrapData()
 
-	plt := plot.New()
-	l1 := NewLine(data).Styler(func(s *plot.Style) {
+	stf := func(s *plot.Style) {
 		s.Plot.Title = "Test Line"
 		s.Plot.XAxis.Label = "X Axis"
 		s.Plot.YAxisLabel = "Y Axis"
@@ -377,12 +406,28 @@ func TestStyle(t *testing.T) {
 		s.Line.Color = colors.Uniform(colors.Red)
 		s.Point.Color = colors.Uniform(colors.Blue)
 		s.Range.SetMax(100)
-	})
+	}
+
+	plt := plot.New()
+	l1 := NewLine(data).Styler(stf)
 	plt.Add(l1)
-	plt.Legend.Add("Sine", l1)
+	plt.Legend.Add("Sine", l1) // todo: auto-add!
 	plt.Legend.Add("Cos", l1)
 
 	plt.Resize(image.Point{640, 480})
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "style_line_point.png")
+
+	plt = plot.New()
+	tdy := tensor.NewFloat64FromValues(data[plot.Y].(plot.Values)...)
+	plot.SetStylersTo(tdy, plot.Stylers{stf}) // set metadata for tensor
+	tdx := tensor.NewFloat64FromValues(data[plot.X].(plot.Values)...)
+	// NewLine auto-grabs from Y metadata
+	l1 = NewLine(plot.Data{plot.X: tdx, plot.Y: tdy})
+	plt.Add(l1)
+	plt.Legend.Add("Sine", l1) // todo: auto-add!
+	plt.Legend.Add("Cos", l1)
+	plt.Resize(image.Point{640, 480})
+	plt.Draw()
+	imagex.Assert(t, plt.Pixels, "style_line_point_auto.png")
 }
