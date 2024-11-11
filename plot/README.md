@@ -9,13 +9,17 @@ The `plot` package generates 2D plots of data using the Cogent Core `paint` rend
 * GUI-based configuration of plots based on a `tensor.Table` of data columns (via `PlotEditor`).
 
 The GUI constraint requires a more systematic, factorial organization of the space of possible plot data and how it is organized to create a plot, so that it can be configured with a relatively simple set of GUI settings. The overall logic is as follows:
-* The overall plot has a single shared range of X, Y and optionally Z coordinate ranges, that defines where a data value in any plot type is plotted. These ranges are set based on the DataRanger interface.
-* Plot content is driven by `Plotter` elements that each consume one or more sets of data, which is provided by a `Data` interface that maps onto a minimal subset of the `tensor.Tensor` interface, so a tensor directly satisfies the interface.
-* Each `Plotter` element can generally handle multiple different data elements, that are index-aligned. For example, the basic `XY` plotter requires `X` and `Y` Valuers, and optionally `Size` or `Color` Valuers that apply to the Point elements, while `Bar` gets at least a `Y` but also optionally a `High` Valuer for an error bar.
+
+* The overall plot has a single shared range of X, Y and optionally Z coordinate ranges (under the corresponding `Axis` field), that defines where a data value in any plot type is plotted. These ranges are set based on the DataRanger interface.
+
+* Plot content is driven by `Plotter` elements that each consume one or more sets of data, which is provided by a `Valuer` interface that maps onto a minimal subset of the `tensor.Tensor` interface, so a tensor directly satisfies the interface.
+
+* Each `Plotter` element can generally handle multiple different data elements, that are index-aligned. For example, the basic `XY` plotter requires `X` and `Y` Valuers, and optionally `Size` or `Color` Valuers that apply to the Point elements, while `Bar` gets at least a `Y` but also optionally a `High` Valuer for an error bar.  The `plot.Data` = `map[Roles]Valuer` is used to create new Plotter elements, allowing an unordered and explicit way of specifying the `Roles` of each `Valuer` item.
 
 Here is a example for how a plotter element is created with the `plot.Data` map of roles to data:
 
 ```Go
+plt := plot.NewPlot()
 plt.Add(plots.NewLine(plot.Data{plot.X: xd, plot.Y: yd, plot.Low: low, plot.High: high}))
 ```
 
@@ -31,7 +35,7 @@ Each such plot element defines a `Styler` method, e.g.,:
 
 ```Go
 plt := plot.NewPlot()
-ln := plots.AddLine.Styler(func(s *plot.Style) {
+ln := plots.NewLine(data).Styler(func(s *plot.Style) {
     s.Plot.Title = "My Plot" // overall Plot styles
     s.Line.Color = colors.Uniform(colors.Red) // line-specific styles
 })
@@ -76,7 +80,7 @@ To create a plot with multiple error bars, multiple Bar Plotters are created, wi
 
 ### XFill, YFill
 
-`XFill` and `YFill` are used to draw filled regions between pairs of X or Y points, using the `X`, `Y`, and `BoxLow`, `BoxHigh` values to specify the center point (X, Y) and the region below / left and above / right to fill around that central point.
+`XFill` and `YFill` are used to draw filled regions between pairs of X or Y points, using the `X`, `Y`, and `Low`, `High` values to specify the center point (X, Y) and the region below / left and above / right to fill around that central point.
 
 XFill along with an XY line can be used to draw the equivalent of the [matplotlib fill_between](https://matplotlib.org/stable/plot_types/basic/fill_between.html#sphx-glr-plot-types-basic-fill-between-py) plot.
 
@@ -84,7 +88,9 @@ YFill can be used to draw the equivalent of the [matplotlib violin plot](https:/
 
 ### Pie
 
-TODO
+`Pie` takes a list of `Y` values that are plotted as the size of segments of a circular pie plot.  Y values are automatically normalized for plotting.
+
+TODO: implement, details on mapping, 
 
 ## 2D Grid-based
 
@@ -137,5 +143,5 @@ Here is the copyright notice for that package:
 
 # TODO
 
-* Grid?
+* Grid? in styling.
 
