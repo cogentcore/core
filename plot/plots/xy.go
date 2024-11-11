@@ -12,6 +12,8 @@ package plots
 //go:generate core generate
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
@@ -92,7 +94,10 @@ func (ln *XY) Styler(f func(s *plot.Style)) *XY {
 	return ln
 }
 
-func (ln *XY) Stylers() *plot.Stylers { return &ln.stylers }
+func (ln *XY) Stylers() *plot.Stylers {
+	fmt.Println("current ln", ln)
+	return &ln.stylers
+}
 
 func (ln *XY) ApplyStyle(ps *plot.PlotStyle) {
 	ps.SetElementStyle(&ln.Style)

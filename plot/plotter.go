@@ -5,8 +5,9 @@
 package plot
 
 import (
-	"log/slog"
+	"fmt"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32/minmax"
 )
 
@@ -62,13 +63,23 @@ func RegisterPlotter(name, doc string, required, optional []Roles, newFun func(d
 	Plotters[name] = PlotterType{Name: name, Doc: doc, Required: required, Optional: optional, New: newFun}
 }
 
-// NewPlotter returns a new plotter of given type, e.g., "XY", "Bar" etc,
-// for given data roles (which must include Required roles, and may include Optional ones).
-// Logs an error and returns nil if type name is not recognized as a registered type.
-func NewPlotter(typeName string, data Data) Plotter {
+// PlotterByType returns [PlotterType] info for a registered [Plotter]
+// of given type name, e.g., "XY", "Bar" etc,
+// Returns an error and nil if type name is not a registered type.
+func PlotterByType(typeName string) (*PlotterType, error) {
 	pt, ok := Plotters[typeName]
 	if !ok {
-		slog.Error("plot.NewPlotter type name is not registered", "typeName", typeName)
+		return nil, fmt.Errorf("plot.PlotterByType type name is not registered: %s", typeName)
+	}
+	return &pt, nil
+}
+
+// NewPlotter returns a new plotter of given type, e.g., "XY", "Bar" etc,
+// for given data roles (which must include Required roles, and may include Optional ones).
+// Logs an error and returns nil if type name is not a registered type.
+func NewPlotter(typeName string, data Data) Plotter {
+	pt, err := PlotterByType(typeName)
+	if errors.Log(err) != nil {
 		return nil
 	}
 	return pt.New(data)

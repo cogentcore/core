@@ -19,8 +19,12 @@ type Style struct { //types:add -setters
 	// plot element, and are updated first, before applying element-wise styles.
 	Plot PlotStyle
 
-	// On specifies whether to plot this item, for cases where it can be turned off.
+	// On specifies whether to plot this item, for table-based plots.
 	On DefaultOffOn
+
+	// Plotter is the type of plotter to use in plotting this data,
+	// for table-based plots. Blank means use default ([plots.XY] is overall default).
+	Plotter string
 
 	// Role specifies a role for this item, used for table-based plots to indicate
 	// how a particular column of data should be used.
@@ -137,9 +141,16 @@ func GetStylers(md *metadata.Data) Stylers {
 	return st
 }
 
-// SetStylersTo sets the [Stylers] into given object that has metadata.
+// SetStylersTo sets the [Stylers] into given object's [metadata].
 func SetStylersTo(obj any, st Stylers) {
 	metadata.SetTo(obj, "PlotStylers", st)
+}
+
+// GetStylersFrom returns [Stylers] from given object's [metadata].
+// Returns nil if none or no metadata.
+func GetStylersFrom(obj any) Stylers {
+	st, _ := metadata.GetFrom[Stylers](obj, "PlotStylers")
+	return st
 }
 
 // GetStylersFromData returns [Stylers] from given role
@@ -149,8 +160,7 @@ func GetStylersFromData(data Data, role Roles) Stylers {
 	if !ok {
 		return nil
 	}
-	st, _ := metadata.GetFrom[Stylers](vr, "PlotStylers")
-	return st
+	return GetStylersFrom(vr)
 }
 
 ////////

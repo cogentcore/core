@@ -16,6 +16,8 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/table"
+	"github.com/stretchr/testify/assert"
 )
 
 func ExampleLine() {
@@ -430,4 +432,43 @@ func TestStyle(t *testing.T) {
 	plt.Resize(image.Point{640, 480})
 	plt.Draw()
 	imagex.Assert(t, plt.Pixels, "style_line_point_auto.png")
+}
+
+// todo: move into statplot and test everything
+
+func TestTable(t *testing.T) {
+	tx, ty := tensor.NewFloat64(21), tensor.NewFloat64(21)
+	for i := range tx.DimSize(0) {
+		tx.SetFloat1D(float64(i*5), i)
+		ty.SetFloat1D(50.0+40*math.Sin((float64(i)/8)*math.Pi), i)
+	}
+	// attach stylers to the Y axis data: that is where plotter looks for it
+	plot.SetStylersTo(ty, plot.Stylers{func(s *plot.Style) {
+		s.Plot.Title = "Test Line"
+		s.Plot.XAxis.Label = "X Axis"
+		s.Plot.YAxisLabel = "Y Axis"
+		s.Plot.Scale = 2
+		s.Plot.XAxis.Range.SetMax(105)
+		s.Plot.SetLinesOn(plot.On).SetPointsOn(plot.On)
+		s.On = plot.On
+		s.Role = plot.Y
+		s.Line.Color = colors.Uniform(colors.Red)
+		s.Point.Color = colors.Uniform(colors.Blue)
+		s.Range.SetMin(0).SetMax(100)
+	}})
+
+	plot.SetStylersTo(tx, plot.Stylers{func(s *plot.Style) {
+		s.Role = plot.X
+	}})
+
+	dt := table.New("Test Table") // todo: use Name by default for plot.
+	dt.AddColumn("X", tx)
+	dt.AddColumn("Y", ty)
+
+	plt, err := plot.NewTablePlot(dt)
+	assert.NoError(t, err)
+	plt.Resize(image.Point{640, 480})
+	plt.Draw()
+	imagex.Save(plt.Pixels, "testdata/table_xy.png")
+	// Output:
 }
