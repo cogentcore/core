@@ -17,14 +17,14 @@ type Style struct { //types:add -setters
 
 	//	Plot has overall plot-level properties, which can be set by any
 	// plot element, and are updated first, before applying element-wise styles.
-	Plot PlotStyle
+	Plot PlotStyle `display:"-"`
 
 	// On specifies whether to plot this item, for table-based plots.
-	On DefaultOffOn
+	On bool
 
 	// Plotter is the type of plotter to use in plotting this data,
 	// for table-based plots. Blank means use default ([plots.XY] is overall default).
-	Plotter string
+	Plotter PlotterName
 
 	// Role specifies a role for this item, used for table-based plots to indicate
 	// how a particular column of data should be used.
@@ -44,16 +44,16 @@ type Style struct { //types:add -setters
 	NTicks int
 
 	// Line has style properties for drawing lines.
-	Line LineStyle
+	Line LineStyle `display:"add-fields"`
 
 	// Point has style properties for drawing points.
-	Point PointStyle
+	Point PointStyle `display:"add-fields"`
 
 	// Text has style properties for rendering text.
-	Text TextStyle
+	Text TextStyle `display:"add-fields"`
 
 	// Width has various plot width properties.
-	Width WidthStyle
+	Width WidthStyle `display:"inline"`
 }
 
 // NewStyle returns a new Style object with defaults applied.

@@ -67,13 +67,13 @@ type PlotStyle struct { //types:add -setters
 	Scale float32 `default:"1,2"`
 
 	// Legend has the styling properties for the Legend.
-	Legend LegendStyle
+	Legend LegendStyle `display:"add-fields"`
 
 	// Axis has the styling properties for the Axes.
-	Axis AxisStyle
+	Axis AxisStyle `display:"add-fields"`
 
 	// XAxis has plot-level XAxis style properties.
-	XAxis XAxisStyle
+	XAxis XAxisStyle `display:"add-fields"`
 
 	// YAxisLabel is the optional label to use for the YAxis instead of the default.
 	YAxisLabel string

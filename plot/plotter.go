@@ -52,6 +52,9 @@ type PlotterType struct {
 	New func(data Data) Plotter
 }
 
+// PlotterName is the name of a specific plotter type.
+type PlotterName string
+
 // Plotters is the registry of [Plotter] types.
 var Plotters = map[string]PlotterType{}
 

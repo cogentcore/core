@@ -94,12 +94,12 @@ func (pt *Plot) Init() {
 			return
 		}
 		del := e.PrevDelta()
-		dx := -float32(del.X) * (pt.Plot.X.Max - pt.Plot.X.Min) * 0.0008
-		dy := float32(del.Y) * (pt.Plot.Y.Max - pt.Plot.Y.Min) * 0.0008
-		pt.Plot.X.Min += dx
-		pt.Plot.X.Max += dx
-		pt.Plot.Y.Min += dy
-		pt.Plot.Y.Max += dy
+		dx := -float64(del.X) * (pt.Plot.X.Range.Range()) * 0.0008
+		dy := float64(del.Y) * (pt.Plot.Y.Range.Range()) * 0.0008
+		pt.Plot.X.Range.Min += dx
+		pt.Plot.X.Range.Max += dx
+		pt.Plot.Y.Range.Min += dy
+		pt.Plot.Y.Range.Max += dy
 		pt.updatePlot()
 		pt.NeedsRender()
 	})
@@ -110,11 +110,11 @@ func (pt *Plot) Init() {
 			return
 		}
 		se := e.(*events.MouseScroll)
-		sc := 1 + (float32(se.Delta.Y) * 0.002)
-		pt.Plot.X.Min *= sc
-		pt.Plot.X.Max *= sc
-		pt.Plot.Y.Min *= sc
-		pt.Plot.Y.Max *= sc
+		sc := 1 + (float64(se.Delta.Y) * 0.002)
+		pt.Plot.X.Range.Min *= sc
+		pt.Plot.X.Range.Max *= sc
+		pt.Plot.Y.Range.Min *= sc
+		pt.Plot.Y.Range.Max *= sc
 		pt.updatePlot()
 		pt.NeedsRender()
 	})

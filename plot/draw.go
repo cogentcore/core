@@ -394,16 +394,16 @@ func (lg *Legend) draw(pt *Plot) {
 	ptb := pc.Bounds
 
 	lg.Style.ThumbnailWidth.ToDots(uc)
-	lg.Style.Text.ToDots(uc)
 	lg.Style.Position.XOffs.ToDots(uc)
 	lg.Style.Position.YOffs.ToDots(uc)
-	lg.Style.Text.openFont(pt)
-
-	em := lg.Style.Text.Font.Face.Metrics.Em
-	pad := math32.Ceil(lg.Style.Text.Padding.Dots)
 
 	var ltxt Text
+	ltxt.Defaults()
 	ltxt.Style = lg.Style.Text
+	ltxt.ToDots(uc)
+	pad := math32.Ceil(ltxt.Style.Padding.Dots)
+	ltxt.openFont(pt)
+	em := ltxt.font.Face.Metrics.Em
 	var sz image.Point
 	maxTht := 0
 	for _, e := range lg.Entries {

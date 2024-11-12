@@ -244,6 +244,8 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Plotter", IDNa
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.PlotterType", IDName: "plotter-type", Doc: "PlotterType registers a Plotter so that it can be created with appropriate data.", Fields: []types.Field{{Name: "Name", Doc: "Name of the plot type."}, {Name: "Doc", Doc: "Doc is the documentation for this Plotter."}, {Name: "Required", Doc: "Required Data roles for this plot. Data for these Roles must be provided."}, {Name: "Optional", Doc: "Optional Data roles for this plot."}, {Name: "New", Doc: "New returns a new plotter of this type with given data in given roles."}}})
 
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.PlotterName", IDName: "plotter-name", Doc: "PlotterName is the name of a specific plotter type."})
+
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.PointStyle", IDName: "point-style", Doc: "PointStyle has style properties for drawing points as different shapes.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "On", Doc: "On indicates whether to plot points."}, {Name: "Shape", Doc: "Shape to draw."}, {Name: "Color", Doc: "Color is the stroke color image specification.\nSetting to nil turns line off."}, {Name: "Fill", Doc: "Fill is the color to fill solid regions, in a plot-specific\nway (e.g., the area below a Line plot, the bar color).\nUse nil to disable filling."}, {Name: "Width", Doc: "Width is the line width for point glyphs, with a default of 1 Pt (point).\nSetting to 0 turns line off."}, {Name: "Size", Doc: "Size of shape to draw for each point.\nDefaults to 4 Pt (point)."}}})
 
 // SetOn sets the [PointStyle.On]:
@@ -288,12 +290,12 @@ func (t *Style) SetPlot(v PlotStyle) *Style { t.Plot = v; return t }
 
 // SetOn sets the [Style.On]:
 // On specifies whether to plot this item, for table-based plots.
-func (t *Style) SetOn(v DefaultOffOn) *Style { t.On = v; return t }
+func (t *Style) SetOn(v bool) *Style { t.On = v; return t }
 
 // SetPlotter sets the [Style.Plotter]:
 // Plotter is the type of plotter to use in plotting this data,
 // for table-based plots. Blank means use default ([plots.XY] is overall default).
-func (t *Style) SetPlotter(v string) *Style { t.Plotter = v; return t }
+func (t *Style) SetPlotter(v PlotterName) *Style { t.Plotter = v; return t }
 
 // SetRole sets the [Style.Role]:
 // Role specifies a role for this item, used for table-based plots to indicate
@@ -367,25 +369,40 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Stylers", IDNa
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.DefaultOffOn", IDName: "default-off-on", Doc: "DefaultOffOn specifies whether to use the default value for a bool option,\nor to override the default and set Off or On."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.TextStyle", IDName: "text-style", Doc: "TextStyle specifies styling parameters for Text elements", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "FontRender"}}, Fields: []types.Field{{Name: "Align", Doc: "how to align text along the relevant dimension for the text element"}, {Name: "Padding", Doc: "Padding is used in a case-dependent manner to add space around text elements"}, {Name: "Rotation", Doc: "rotation of the text, in Degrees"}, {Name: "Offset", Doc: "Offset is added directly to the final label location."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.TextStyle", IDName: "text-style", Doc: "TextStyle specifies styling parameters for Text elements.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Size", Doc: "Size of font to render. Default is 16dp"}, {Name: "Family", Doc: "Family name for font (inherited): ordered list of comma-separated names\nfrom more general to more specific to use. Use split on, to parse."}, {Name: "Color", Doc: "Color of text."}, {Name: "Align", Doc: "Align specifies how to align text along the relevant\ndimension for the text element."}, {Name: "Padding", Doc: "Padding is used in a case-dependent manner to add\nspace around text elements."}, {Name: "Rotation", Doc: "Rotation of the text, in degrees."}, {Name: "Offset", Doc: "Offset is added directly to the final label location."}}})
+
+// SetSize sets the [TextStyle.Size]:
+// Size of font to render. Default is 16dp
+func (t *TextStyle) SetSize(v units.Value) *TextStyle { t.Size = v; return t }
+
+// SetFamily sets the [TextStyle.Family]:
+// Family name for font (inherited): ordered list of comma-separated names
+// from more general to more specific to use. Use split on, to parse.
+func (t *TextStyle) SetFamily(v string) *TextStyle { t.Family = v; return t }
+
+// SetColor sets the [TextStyle.Color]:
+// Color of text.
+func (t *TextStyle) SetColor(v image.Image) *TextStyle { t.Color = v; return t }
 
 // SetAlign sets the [TextStyle.Align]:
-// how to align text along the relevant dimension for the text element
+// Align specifies how to align text along the relevant
+// dimension for the text element.
 func (t *TextStyle) SetAlign(v styles.Aligns) *TextStyle { t.Align = v; return t }
 
 // SetPadding sets the [TextStyle.Padding]:
-// Padding is used in a case-dependent manner to add space around text elements
+// Padding is used in a case-dependent manner to add
+// space around text elements.
 func (t *TextStyle) SetPadding(v units.Value) *TextStyle { t.Padding = v; return t }
 
 // SetRotation sets the [TextStyle.Rotation]:
-// rotation of the text, in Degrees
+// Rotation of the text, in degrees.
 func (t *TextStyle) SetRotation(v float32) *TextStyle { t.Rotation = v; return t }
 
 // SetOffset sets the [TextStyle.Offset]:
 // Offset is added directly to the final label location.
 func (t *TextStyle) SetOffset(v units.XY) *TextStyle { t.Offset = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Text", IDName: "text", Doc: "Text specifies a single text element in a plot", Fields: []types.Field{{Name: "Text", Doc: "text string, which can use HTML formatting"}, {Name: "Style", Doc: "styling for this text element"}, {Name: "PaintText", Doc: "PaintText is the [paint.Text] for the text."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Text", IDName: "text", Doc: "Text specifies a single text element in a plot", Fields: []types.Field{{Name: "Text", Doc: "text string, which can use HTML formatting"}, {Name: "Style", Doc: "styling for this text element"}, {Name: "font", Doc: "font has the full font rendering styles."}, {Name: "PaintText", Doc: "PaintText is the [paint.Text] for the text."}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Tick", IDName: "tick", Doc: "A Tick is a single tick mark on an axis.", Fields: []types.Field{{Name: "Value", Doc: "Value is the data value marked by this Tick."}, {Name: "Label", Doc: "Label is the text to display at the tick mark.\nIf Label is an empty string then this is a minor tick mark."}}})
 

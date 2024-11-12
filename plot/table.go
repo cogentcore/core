@@ -52,7 +52,7 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 	for ci, cl := range dt.Columns.Values {
 		cnm := dt.Columns.Keys[ci]
 		st := csty[cl]
-		if st == nil || st.On != On || st.Role == X {
+		if st == nil || !st.On || st.Role == X {
 			continue
 		}
 		gp := st.Group
@@ -64,7 +64,7 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 		}
 		ptyp := "XY"
 		if st.Plotter != "" {
-			ptyp = st.Plotter
+			ptyp = string(st.Plotter)
 		}
 		pt, err := PlotterByType(ptyp)
 		if err != nil {

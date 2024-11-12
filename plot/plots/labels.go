@@ -104,9 +104,10 @@ func (lb *Labels) Plot(plt *plot.Plot) {
 	lb.PY = plot.PlotY(plt, lb.Y)
 	st := &lb.Style.Text
 	st.Offset.ToDots(uc)
-	st.ToDots(uc)
 	var ltxt plot.Text
+	ltxt.Defaults()
 	ltxt.Style = *st
+	ltxt.ToDots(uc)
 	for i, label := range lb.Labels {
 		if label == "" {
 			continue

@@ -19,13 +19,13 @@ type LegendStyle struct { //types:add -setters
 	Column string
 
 	// Text is the style given to the legend entry texts.
-	Text TextStyle
+	Text TextStyle `display:"add-fields"`
 
 	// position of the legend
 	Position LegendPosition `display:"inline"`
 
 	// ThumbnailWidth is the width of legend thumbnails.
-	ThumbnailWidth units.Value
+	ThumbnailWidth units.Value `display:"inline"`
 
 	// Fill specifies the background fill color for the legend box,
 	// if non-nil.
@@ -35,7 +35,7 @@ type LegendStyle struct { //types:add -setters
 func (ls *LegendStyle) Defaults() {
 	ls.Text.Defaults()
 	ls.Text.Padding.Dp(2)
-	ls.Text.Font.Size.Dp(20)
+	ls.Text.Size.Dp(20)
 	ls.Position.Defaults()
 	ls.ThumbnailWidth.Pt(20)
 	ls.Fill = gradient.ApplyOpacity(colors.Scheme.Surface, 0.75)

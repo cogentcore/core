@@ -103,7 +103,7 @@ func ExampleTable() {
 		s.Plot.SetLinesOn(plot.On).SetPointsOn(plot.Off)
 	}
 	plot.SetStylersTo(ty, plot.Stylers{genst, func(s *plot.Style) {
-		s.On = plot.On
+		s.On = true
 		s.Plotter = "XY"
 		s.Role = plot.Y
 		s.Line.Color = colors.Uniform(colors.Red)
@@ -114,12 +114,12 @@ func ExampleTable() {
 		s.Role = plot.X
 	}})
 	plot.SetStylersTo(th, plot.Stylers{func(s *plot.Style) {
-		s.On = plot.On
+		s.On = true
 		s.Plotter = "YErrorBars"
 		s.Role = plot.High
 	}})
 	plot.SetStylersTo(lbls, plot.Stylers{func(s *plot.Style) {
-		s.On = plot.On
+		s.On = true
 		s.Plotter = "Labels"
 		s.Role = plot.Label
 		s.Text.Offset.X.Dp(6)
@@ -526,7 +526,7 @@ func TestTable(t *testing.T) {
 			s.Range.SetMin(0).SetMax(100)
 		}
 		plot.SetStylersTo(ty, plot.Stylers{genst, func(s *plot.Style) {
-			s.On = plot.On
+			s.On = true
 			s.Role = plot.Y
 			s.Group = "Y"
 		}})
@@ -540,7 +540,7 @@ func TestTable(t *testing.T) {
 			s.Group = "Y"
 		}})
 		plot.SetStylersTo(th, plot.Stylers{genst, func(s *plot.Style) {
-			s.On = plot.On
+			s.On = true
 			s.Role = plot.High
 			s.Group = "Y"
 		}})
@@ -553,7 +553,7 @@ func TestTable(t *testing.T) {
 			s.Group = "Y"
 		}})
 		plot.SetStylersTo(lbls, plot.Stylers{genst, func(s *plot.Style) {
-			s.On = plot.On
+			s.On = true
 			s.Role = plot.Label
 			s.Group = "Y"
 		}})
