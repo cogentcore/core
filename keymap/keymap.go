@@ -157,8 +157,8 @@ func Of(chord key.Chord) Functions {
 	if ok {
 		return f
 	}
-	if strings.Contains(string(chord), "+String") {
-		nsc := key.Chord(strings.ReplaceAll(string(chord), "+String", ""))
+	if strings.Contains(string(chord), "Shift+") {
+		nsc := key.Chord(strings.ReplaceAll(string(chord), "Shift+", ""))
 		f, ok = (*ActiveMap)[nsc]
 		if ok {
 			if f <= WordLeft { // automatically allow +Shift for nav
