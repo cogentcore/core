@@ -42,6 +42,7 @@ const (
 	DocEnd  // end-of-doc Control / Alt / Shift +End
 	WordRight
 	WordLeft
+	// WordLeft is the final navigation function -- all above also allow Shift+ for selection.
 	FocusNext // Tab
 	FocusPrev // Shift-Tab
 	Enter     // Enter / return key -- has various special functions
@@ -152,7 +153,20 @@ func SetActiveMapName(mapnm MapName) {
 
 // Of converts the given [key.Chord] into a keyboard function.
 func Of(chord key.Chord) Functions {
-	return (*ActiveMap)[chord]
+	f, ok := (*ActiveMap)[chord]
+	if ok {
+		return f
+	}
+	if strings.Contains(string(chord), "+String") {
+		nsc := key.Chord(strings.ReplaceAll(string(chord), "+String", ""))
+		f, ok = (*ActiveMap)[nsc]
+		if ok {
+			if f <= WordLeft { // automatically allow +Shift for nav
+				return f
+			}
+		}
+	}
+	return None
 }
 
 // MapItem records one element of the key map, which is used for organizing the map.
