@@ -36,6 +36,7 @@ type Labels struct {
 	// plot size and number of TextStyle when styles last generated -- don't regen
 	styleSize image.Point
 	stylers   plot.Stylers
+	ystylers  plot.Stylers
 }
 
 // NewLabels returns a new Labels using defaults
@@ -60,6 +61,7 @@ func NewLabels(data plot.Data) *Labels {
 	}
 
 	lb.stylers = plot.GetStylersFromData(data, plot.Label)
+	lb.ystylers = plot.GetStylersFromData(data, plot.Y)
 	lb.Defaults()
 	return lb
 }
@@ -76,7 +78,10 @@ func (lb *Labels) Styler(f func(s *plot.Style)) *Labels {
 
 func (lb *Labels) ApplyStyle(ps *plot.PlotStyle) {
 	ps.SetElementStyle(&lb.Style)
-	lb.stylers.Run(&lb.Style)
+	yst := &plot.Style{}
+	lb.ystylers.Run(yst)
+	lb.Style.Range = yst.Range // get range from y
+	lb.stylers.Run(&lb.Style)  // can still override here
 }
 
 func (lb *Labels) Stylers() *plot.Stylers { return &lb.stylers }

@@ -52,7 +52,7 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 	for ci, cl := range dt.Columns.Values {
 		cnm := dt.Columns.Keys[ci]
 		st := csty[cl]
-		if st.On != On || st.Role == X {
+		if st == nil || st.On != On || st.Role == X {
 			continue
 		}
 		gp := st.Group
@@ -94,6 +94,7 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 					err = fmt.Errorf("plot.NewTablePlot: Required Role %q not found in Group %q, Plotter %q not added for Column: %q", rl.String(), gp, ptyp, cnm)
 					errs = append(errs, err)
 					gotReq = false
+					fmt.Println(err)
 				}
 			}
 		}

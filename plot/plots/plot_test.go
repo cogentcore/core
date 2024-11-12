@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"testing"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/paint"
@@ -80,6 +81,60 @@ func ExampleStylerMetadata() {
 	plt.Add(NewLine(plot.Data{plot.X: tx, plot.Y: ty}))
 	plt.Draw()
 	imagex.Save(plt.Pixels, "testdata/ex_styler_metadata.png")
+	// Output:
+}
+
+func ExampleTable() {
+	rand.Seed(1)
+	n := 21
+	tx, ty, th := tensor.NewFloat64(n), tensor.NewFloat64(n), tensor.NewFloat64(n)
+	lbls := tensor.NewString(n)
+	for i := range n {
+		tx.SetFloat1D(float64(i*5), i)
+		ty.SetFloat1D(50.0+40*math.Sin((float64(i)/8)*math.Pi), i)
+		th.SetFloat1D(5*rand.Float64(), i)
+		lbls.SetString1D(strconv.Itoa(i), i)
+	}
+	genst := func(s *plot.Style) {
+		s.Plot.Title = "Test Table"
+		s.Plot.XAxis.Label = "X Axis"
+		s.Plot.YAxisLabel = "Y Axis"
+		s.Plot.Scale = 2
+		s.Plot.SetLinesOn(plot.On).SetPointsOn(plot.Off)
+		s.Line.Color = colors.Uniform(colors.Red)
+		s.Range.SetMin(0).SetMax(100)
+	}
+	plot.SetStylersTo(ty, plot.Stylers{genst, func(s *plot.Style) {
+		s.On = plot.On
+		s.Plotter = "XY"
+		s.Role = plot.Y
+	}})
+	// others get basic styling
+	plot.SetStylersTo(tx, plot.Stylers{func(s *plot.Style) {
+		s.Role = plot.X
+	}})
+	plot.SetStylersTo(th, plot.Stylers{func(s *plot.Style) {
+		s.On = plot.On
+		s.Plotter = "YErrorBars"
+		s.Role = plot.High
+	}})
+	plot.SetStylersTo(lbls, plot.Stylers{func(s *plot.Style) {
+		s.On = plot.On
+		s.Plotter = "Labels"
+		s.Role = plot.Label
+		s.Text.Offset.X.Dp(6)
+		s.Text.Offset.Y.Dp(-6)
+	}})
+	dt := table.New("Test Table") // todo: use Name by default for plot.
+	dt.AddColumn("X", tx)
+	dt.AddColumn("Y", ty)
+	dt.AddColumn("High", th)
+	dt.AddColumn("Labels", lbls)
+
+	plt := errors.Log1(plot.NewTablePlot(dt))
+	plt.Resize(image.Point{640, 480})
+	plt.Draw()
+	imagex.Save(plt.Pixels, "testdata/ex_table.png")
 	// Output:
 }
 

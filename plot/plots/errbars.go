@@ -20,16 +20,17 @@ const (
 )
 
 func init() {
-	plot.RegisterPlotter(YErrorBarsType, "draws draws vertical error bars, denoting error in Y values, using Low, High data roles for error deviations around X, Y coordinates.", []plot.Roles{plot.X, plot.Y, plot.Low, plot.High}, []plot.Roles{}, func(data plot.Data) plot.Plotter {
+	plot.RegisterPlotter(YErrorBarsType, "draws draws vertical error bars, denoting error in Y values, using either High or Low & High data roles for error deviations around X, Y coordinates.", []plot.Roles{plot.X, plot.Y, plot.High}, []plot.Roles{plot.Low}, func(data plot.Data) plot.Plotter {
 		return NewYErrorBars(data)
 	})
-	plot.RegisterPlotter(XErrorBarsType, "draws draws horizontal error bars, denoting error in X values, using Low, High data roles for error deviations around X, Y coordinates.", []plot.Roles{plot.X, plot.Y, plot.Low, plot.High}, []plot.Roles{}, func(data plot.Data) plot.Plotter {
+	plot.RegisterPlotter(XErrorBarsType, "draws draws horizontal error bars, denoting error in X values, using either High or Low & High data roles for error deviations around X, Y coordinates.", []plot.Roles{plot.X, plot.Y, plot.High}, []plot.Roles{plot.Low}, func(data plot.Data) plot.Plotter {
 		return NewXErrorBars(data)
 	})
 }
 
-// XErrorBars draws vertical error bars, denoting error in Y values,
-// using Low, High data roles for error deviations around X, Y coordinates.
+// YErrorBars draws vertical error bars, denoting error in Y values,
+// using ether High or Low, High data roles for error deviations
+// around X, Y coordinates.
 type YErrorBars struct {
 	// copies of data for this line
 	X, Y, Low, High plot.Values
@@ -40,7 +41,8 @@ type YErrorBars struct {
 	// Style is the style for plotting.
 	Style plot.Style
 
-	stylers plot.Stylers
+	stylers  plot.Stylers
+	ystylers plot.Stylers
 }
 
 func (eb *YErrorBars) Defaults() {
@@ -57,12 +59,16 @@ func NewYErrorBars(data plot.Data) *YErrorBars {
 	eb := &YErrorBars{}
 	eb.X = plot.MustCopyRole(data, plot.X)
 	eb.Y = plot.MustCopyRole(data, plot.Y)
-	eb.Low = plot.MustCopyRole(data, plot.Low)
-	eb.High = plot.MustCopyRole(data, plot.High)
+	eb.Low = plot.CopyRole(data, plot.Low)
+	eb.High = plot.CopyRole(data, plot.High)
+	if eb.Low == nil && eb.High != nil {
+		eb.Low = eb.High
+	}
 	if eb.X == nil || eb.Y == nil || eb.Low == nil || eb.High == nil {
 		return nil
 	}
 	eb.stylers = plot.GetStylersFromData(data, plot.High)
+	eb.ystylers = plot.GetStylersFromData(data, plot.Y)
 	eb.Defaults()
 	return eb
 }
@@ -75,6 +81,9 @@ func (eb *YErrorBars) Styler(f func(s *plot.Style)) *YErrorBars {
 
 func (eb *YErrorBars) ApplyStyle(ps *plot.PlotStyle) {
 	ps.SetElementStyle(&eb.Style)
+	yst := &plot.Style{}
+	eb.ystylers.Run(yst)
+	eb.Style.Range = yst.Range // get range from y
 	eb.stylers.Run(&eb.Style)
 }
 
@@ -124,6 +133,7 @@ func (eb *YErrorBars) Plot(plt *plot.Plot) {
 // UpdateRange updates the given ranges.
 func (eb *YErrorBars) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
 	plot.Range(eb.X, xr)
+	plot.RangeClamp(eb.Y, yr, &eb.Style.Range)
 	for i, y := range eb.Y {
 		ylow := y - math.Abs(eb.Low[i])
 		yhigh := y + math.Abs(eb.High[i])
@@ -135,7 +145,8 @@ func (eb *YErrorBars) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
 //////// XErrorBars
 
 // XErrorBars draws horizontal error bars, denoting error in X values,
-// using Low, High data roles for error deviations around X, Y coordinates.
+// using ether High or Low, High data roles for error deviations
+// around X, Y coordinates.
 type XErrorBars struct {
 	// copies of data for this line
 	X, Y, Low, High plot.Values
@@ -146,7 +157,9 @@ type XErrorBars struct {
 	// Style is the style for plotting.
 	Style plot.Style
 
-	stylers plot.Stylers
+	stylers  plot.Stylers
+	ystylers plot.Stylers
+	yrange   minmax.Range64
 }
 
 func (eb *XErrorBars) Defaults() {
@@ -164,10 +177,16 @@ func NewXErrorBars(data plot.Data) *XErrorBars {
 	eb.Y = plot.MustCopyRole(data, plot.Y)
 	eb.Low = plot.MustCopyRole(data, plot.Low)
 	eb.High = plot.MustCopyRole(data, plot.High)
+	eb.Low = plot.CopyRole(data, plot.Low)
+	eb.High = plot.CopyRole(data, plot.High)
+	if eb.Low == nil && eb.High != nil {
+		eb.Low = eb.High
+	}
 	if eb.X == nil || eb.Y == nil || eb.Low == nil || eb.High == nil {
 		return nil
 	}
 	eb.stylers = plot.GetStylersFromData(data, plot.High)
+	eb.ystylers = plot.GetStylersFromData(data, plot.Y)
 	eb.Defaults()
 	return eb
 }
@@ -180,6 +199,9 @@ func (eb *XErrorBars) Styler(f func(s *plot.Style)) *XErrorBars {
 
 func (eb *XErrorBars) ApplyStyle(ps *plot.PlotStyle) {
 	ps.SetElementStyle(&eb.Style)
+	yst := &plot.Style{}
+	eb.ystylers.Run(yst)
+	eb.yrange = yst.Range // get range from y
 	eb.stylers.Run(&eb.Style)
 }
 
@@ -227,12 +249,13 @@ func (eb *XErrorBars) Plot(plt *plot.Plot) {
 }
 
 // UpdateRange updates the given ranges.
-func (eb *XErrorBars) UpdateRange(plt *plot.Plot, x, y, z *minmax.F64) {
-	plot.Range(eb.Y, y)
+func (eb *XErrorBars) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
+	plot.RangeClamp(eb.X, xr, &eb.Style.Range)
+	plot.RangeClamp(eb.Y, yr, &eb.yrange)
 	for i, xv := range eb.X {
 		xlow := xv - math.Abs(eb.Low[i])
 		xhigh := xv + math.Abs(eb.High[i])
-		x.FitInRange(minmax.F64{xlow, xhigh})
+		xr.FitInRange(minmax.F64{xlow, xhigh})
 	}
 	return
 }
