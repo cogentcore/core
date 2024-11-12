@@ -53,13 +53,10 @@ type PlotterType struct {
 }
 
 // Plotters is the registry of [Plotter] types.
-var Plotters map[string]PlotterType
+var Plotters = map[string]PlotterType{}
 
 // RegisterPlotter registers a plotter type.
 func RegisterPlotter(name, doc string, required, optional []Roles, newFun func(data Data) Plotter) {
-	if Plotters == nil {
-		Plotters = make(map[string]PlotterType)
-	}
 	Plotters[name] = PlotterType{Name: name, Doc: doc, Required: required, Optional: optional, New: newFun}
 }
 

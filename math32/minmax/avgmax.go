@@ -4,7 +4,10 @@
 
 package minmax
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 //gosl:start
 
@@ -114,7 +117,7 @@ func (am *AvgMax64) Init() {
 	am.Avg = 0
 	am.Sum = 0
 	am.N = 0
-	am.Max = -MaxFloat64
+	am.Max = math.Inf(-1)
 	am.MaxIndex = -1
 }
 

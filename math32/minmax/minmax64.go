@@ -9,11 +9,6 @@ import "math"
 
 //go:generate core generate
 
-const (
-	MaxFloat64 float64 = 1.7976931348623158e+308
-	MinFloat64 float64 = 2.2250738585072014e-308
-)
-
 // F64 represents a min / max range for float64 values.
 // Supports clipping, renormalizing, etc
 type F64 struct {
@@ -27,11 +22,11 @@ func (mr *F64) Set(mn, mx float64) {
 	mr.Max = mx
 }
 
-// SetInfinity sets the Min to +MaxFloat, Max to -MaxFloat -- suitable for
-// iteratively calling Fit*InRange.
+// SetInfinity sets the Min to +Inf, Max to -Inf, suitable for
+// iteratively calling Fit*InRange. See also Sanitize when done.
 func (mr *F64) SetInfinity() {
-	mr.Min = MaxFloat64
-	mr.Max = -MaxFloat64
+	mr.Min = math.Inf(1)
+	mr.Max = math.Inf(-1)
 }
 
 // IsValid returns true if Min <= Max.

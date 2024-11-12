@@ -8,7 +8,10 @@ import (
 	"fmt"
 	"image"
 	"math"
+	"math/rand"
 	"os"
+	"slices"
+	"strconv"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -18,6 +21,7 @@ import (
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/exp/maps"
 )
 
 func ExampleLine() {
@@ -207,7 +211,6 @@ func TestLabels(t *testing.T) {
 	plt.X.Label.Text = "X Axis"
 	plt.Y.Label.Text = "Y Axis"
 
-	// note: making two overlapping series
 	xd, yd := make(plot.Values, 12), make(plot.Values, 12)
 	labels := make(plot.Labels, 12)
 	for i := range xd {
@@ -233,8 +236,8 @@ func TestLabels(t *testing.T) {
 	if l2 == nil {
 		t.Error("bad data")
 	}
-	l2.Style.Offset.X.Dp(6)
-	l2.Style.Offset.Y.Dp(-6)
+	l2.Style.Text.Offset.X.Dp(6)
+	l2.Style.Text.Offset.Y.Dp(-6)
 	plt.Add(l2)
 
 	plt.Resize(image.Point{640, 480})
@@ -437,38 +440,82 @@ func TestStyle(t *testing.T) {
 // todo: move into statplot and test everything
 
 func TestTable(t *testing.T) {
-	tx, ty := tensor.NewFloat64(21), tensor.NewFloat64(21)
-	for i := range tx.DimSize(0) {
+	rand.Seed(1)
+	n := 21
+	tx, ty := tensor.NewFloat64(n), tensor.NewFloat64(n)
+	tl, th := tensor.NewFloat64(n), tensor.NewFloat64(n)
+	ts, tc := tensor.NewFloat64(n), tensor.NewFloat64(n)
+	lbls := tensor.NewString(n)
+	for i := range n {
 		tx.SetFloat1D(float64(i*5), i)
 		ty.SetFloat1D(50.0+40*math.Sin((float64(i)/8)*math.Pi), i)
+		tl.SetFloat1D(5*rand.Float64(), i)
+		th.SetFloat1D(5*rand.Float64(), i)
+		ts.SetFloat1D(1+5*rand.Float64(), i)
+		tc.SetFloat1D(float64(i), i)
+		lbls.SetString1D(strconv.Itoa(i), i)
 	}
-	// attach stylers to the Y axis data: that is where plotter looks for it
-	plot.SetStylersTo(ty, plot.Stylers{func(s *plot.Style) {
-		s.Plot.Title = "Test Line"
-		s.Plot.XAxis.Label = "X Axis"
-		s.Plot.YAxisLabel = "Y Axis"
-		s.Plot.Scale = 2
-		s.Plot.XAxis.Range.SetMax(105)
-		s.Plot.SetLinesOn(plot.On).SetPointsOn(plot.On)
-		s.On = plot.On
-		s.Role = plot.Y
-		s.Line.Color = colors.Uniform(colors.Red)
-		s.Point.Color = colors.Uniform(colors.Blue)
-		s.Range.SetMin(0).SetMax(100)
-	}})
+	ptyps := maps.Keys(plot.Plotters)
+	slices.Sort(ptyps)
+	for _, ttyp := range ptyps {
+		// attach stylers to the Y axis data: that is where plotter looks for it
+		genst := func(s *plot.Style) {
+			s.Plot.Title = "Test " + ttyp
+			s.Plot.XAxis.Label = "X Axis"
+			s.Plot.YAxisLabel = "Y Axis"
+			s.Plotter = ttyp
+			s.Plot.Scale = 2
+			s.Plot.SetLinesOn(plot.On).SetPointsOn(plot.On)
+			s.Line.Color = colors.Uniform(colors.Red)
+			s.Point.Color = colors.Uniform(colors.Blue)
+			s.Range.SetMin(0).SetMax(100)
+		}
+		plot.SetStylersTo(ty, plot.Stylers{genst, func(s *plot.Style) {
+			s.On = plot.On
+			s.Role = plot.Y
+			s.Group = "Y"
+		}})
+		// others get basic styling
+		plot.SetStylersTo(tx, plot.Stylers{func(s *plot.Style) {
+			s.Role = plot.X
+			s.Group = "Y"
+		}})
+		plot.SetStylersTo(tl, plot.Stylers{func(s *plot.Style) {
+			s.Role = plot.Low
+			s.Group = "Y"
+		}})
+		plot.SetStylersTo(th, plot.Stylers{genst, func(s *plot.Style) {
+			s.On = plot.On
+			s.Role = plot.High
+			s.Group = "Y"
+		}})
+		plot.SetStylersTo(ts, plot.Stylers{func(s *plot.Style) {
+			s.Role = plot.Size
+			s.Group = "Y"
+		}})
+		plot.SetStylersTo(tc, plot.Stylers{func(s *plot.Style) {
+			s.Role = plot.Color
+			s.Group = "Y"
+		}})
+		plot.SetStylersTo(lbls, plot.Stylers{genst, func(s *plot.Style) {
+			s.On = plot.On
+			s.Role = plot.Label
+			s.Group = "Y"
+		}})
+		dt := table.New("Test Table") // todo: use Name by default for plot.
+		dt.AddColumn("X", tx)
+		dt.AddColumn("Y", ty)
+		dt.AddColumn("Low", tl)
+		dt.AddColumn("High", th)
+		dt.AddColumn("Size", ts)
+		dt.AddColumn("Color", tc)
+		dt.AddColumn("Labels", lbls)
 
-	plot.SetStylersTo(tx, plot.Stylers{func(s *plot.Style) {
-		s.Role = plot.X
-	}})
-
-	dt := table.New("Test Table") // todo: use Name by default for plot.
-	dt.AddColumn("X", tx)
-	dt.AddColumn("Y", ty)
-
-	plt, err := plot.NewTablePlot(dt)
-	assert.NoError(t, err)
-	plt.Resize(image.Point{640, 480})
-	plt.Draw()
-	imagex.Save(plt.Pixels, "testdata/table_xy.png")
-	// Output:
+		plt, err := plot.NewTablePlot(dt)
+		assert.NoError(t, err)
+		plt.Resize(image.Point{640, 480})
+		plt.Draw()
+		fnm := "table_" + ttyp + ".png"
+		imagex.Assert(t, plt.Pixels, fnm)
+	}
 }

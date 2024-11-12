@@ -31,7 +31,7 @@ type Labels struct {
 	PX, PY []float32
 
 	// Style is the style of the label text.
-	Style plot.TextStyle
+	Style plot.Style
 
 	// plot size and number of TextStyle when styles last generated -- don't regen
 	styleSize image.Point
@@ -54,12 +54,12 @@ func NewLabels(data plot.Data) *Labels {
 	if ld == nil {
 		return nil
 	}
-	lb.stylers = plot.GetStylersFromData(data, plot.Label)
 	lb.Labels = make(plot.Labels, lb.X.Len())
 	for i := range ld.Len() {
 		lb.Labels[i] = ld.String1D(i)
 	}
 
+	lb.stylers = plot.GetStylersFromData(data, plot.Label)
 	lb.Defaults()
 	return lb
 }
@@ -75,8 +75,8 @@ func (lb *Labels) Styler(f func(s *plot.Style)) *Labels {
 }
 
 func (lb *Labels) ApplyStyle(ps *plot.PlotStyle) {
-	st := lb.stylers.NewStyle(ps)
-	lb.Style = st.Text
+	ps.SetElementStyle(&lb.Style)
+	lb.stylers.Run(&lb.Style)
 }
 
 func (lb *Labels) Stylers() *plot.Stylers { return &lb.stylers }
@@ -96,11 +96,12 @@ func (lb *Labels) Plot(plt *plot.Plot) {
 	pc := plt.Paint
 	uc := &pc.UnitContext
 	lb.PX = plot.PlotX(plt, lb.X)
-	lb.PY = plot.PlotX(plt, lb.Y)
-	lb.Style.Offset.ToDots(uc)
-	lb.Style.ToDots(uc)
+	lb.PY = plot.PlotY(plt, lb.Y)
+	st := &lb.Style.Text
+	st.Offset.ToDots(uc)
+	st.ToDots(uc)
 	var ltxt plot.Text
-	ltxt.Style = lb.Style
+	ltxt.Style = *st
 	for i, label := range lb.Labels {
 		if label == "" {
 			continue
@@ -108,7 +109,7 @@ func (lb *Labels) Plot(plt *plot.Plot) {
 		ltxt.Text = label
 		ltxt.Config(plt)
 		tht := ltxt.PaintText.BBox.Size().Y
-		ltxt.Draw(plt, math32.Vec2(lb.PX[i]+lb.Style.Offset.X.Dots, lb.PY[i]+lb.Style.Offset.Y.Dots-tht))
+		ltxt.Draw(plt, math32.Vec2(lb.PX[i]+st.Offset.X.Dots, lb.PY[i]+st.Offset.Y.Dots-tht))
 	}
 }
 
@@ -116,12 +117,13 @@ func (lb *Labels) Plot(plt *plot.Plot) {
 func (lb *Labels) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
 	// todo: include point sizes!
 	plot.Range(lb.X, xr)
-	plot.Range(lb.Y, yr)
+	plot.RangeClamp(lb.Y, yr, &lb.Style.Range)
 	pxToData := math32.FromPoint(plt.Size)
 	pxToData.X = float32(xr.Range()) / pxToData.X
 	pxToData.Y = float32(yr.Range()) / pxToData.Y
+	st := &lb.Style.Text
 	var ltxt plot.Text
-	ltxt.Style = lb.Style
+	ltxt.Style = *st
 	for i, label := range lb.Labels {
 		if label == "" {
 			continue
@@ -132,8 +134,8 @@ func (lb *Labels) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
 		twd := 1.1 * pxToData.X * ltxt.PaintText.BBox.Size().X
 		x := lb.X[i]
 		y := lb.Y[i]
-		maxx := x + float64(pxToData.X*lb.Style.Offset.X.Dots+twd)
-		maxy := y + float64(pxToData.Y*lb.Style.Offset.Y.Dots+tht) // y is up here
+		maxx := x + float64(pxToData.X*st.Offset.X.Dots+twd)
+		maxy := y + float64(pxToData.Y*st.Offset.Y.Dots+tht) // y is up here
 		xr.FitInRange(minmax.F64{x, maxx})
 		yr.FitInRange(minmax.F64{y, maxy})
 	}

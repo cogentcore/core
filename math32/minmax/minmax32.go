@@ -28,10 +28,10 @@ func (mr *F32) Set(mn, mx float32) {
 }
 
 // SetInfinity sets the Min to +MaxFloat, Max to -MaxFloat -- suitable for
-// iteratively calling Fit*InRange
+// iteratively calling Fit*InRange. See also Sanitize when done.
 func (mr *F32) SetInfinity() {
-	mr.Min = MaxFloat32
-	mr.Max = -MaxFloat32
+	mr.Min = math32.Inf(1)
+	mr.Max = math32.Inf(-1)
 }
 
 // IsValid returns true if Min <= Max

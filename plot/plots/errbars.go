@@ -167,6 +167,7 @@ func NewXErrorBars(data plot.Data) *XErrorBars {
 	if eb.X == nil || eb.Y == nil || eb.Low == nil || eb.High == nil {
 		return nil
 	}
+	eb.stylers = plot.GetStylersFromData(data, plot.High)
 	eb.Defaults()
 	return eb
 }

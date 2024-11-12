@@ -40,8 +40,12 @@ func (cl *Columns) SetNumRows(rows int) *Columns { //types:add
 // AddColumn adds the given tensor (as a [tensor.Values]) as a column,
 // returning an error and not adding if the name is not unique.
 // Automatically adjusts the shape to fit the current number of rows,
+// (setting Rows if this is the first column added)
 // and calls the metadata SetName with column name.
 func (cl *Columns) AddColumn(name string, tsr tensor.Values) error {
+	if cl.Len() == 0 {
+		cl.Rows = tsr.DimSize(0)
+	}
 	err := cl.Add(name, tsr)
 	if err != nil {
 		return err

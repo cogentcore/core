@@ -186,7 +186,7 @@ func (bc *Bar) Plot(plt *plot.Plot) {
 		pc.FillStrokeClear()
 
 		if i < len(bc.Err) {
-			errval := bc.Err[i]
+			errval := math.Abs(bc.Err[i])
 			if bc.Horizontal {
 				eVal := plt.PX(bottom + ht + math.Abs(errval))
 				pc.MoveTo(valMax, catVal)
