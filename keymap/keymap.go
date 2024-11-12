@@ -43,6 +43,7 @@ const (
 	WordRight
 	WordLeft
 	// WordLeft is the final navigation function -- all above also allow Shift+ for selection.
+
 	FocusNext // Tab
 	FocusPrev // Shift-Tab
 	Enter     // Enter / return key -- has various special functions
@@ -159,11 +160,8 @@ func Of(chord key.Chord) Functions {
 	}
 	if strings.Contains(string(chord), "Shift+") {
 		nsc := key.Chord(strings.ReplaceAll(string(chord), "Shift+", ""))
-		f, ok = (*ActiveMap)[nsc]
-		if ok {
-			if f <= WordLeft { // automatically allow +Shift for nav
-				return f
-			}
+		if f, ok = (*ActiveMap)[nsc]; ok && f <= WordLeft { // automatically allow +Shift for nav
+			return f
 		}
 	}
 	return None
