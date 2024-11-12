@@ -13,7 +13,7 @@ import (
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.AxisScales", IDName: "axis-scales", Doc: "AxisScales are the scaling options for how values are distributed\nalong an axis: Linear, Log, etc."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.AxisStyle", IDName: "axis-style", Doc: "AxisStyle has style properties for the axis.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Text", Doc: "Text has the text style parameters for the text label."}, {Name: "Line", Doc: "Line has styling properties for the axis line."}, {Name: "Padding", Doc: "Padding between the axis line and the data.  Having\nnon-zero padding ensures that the data is never drawn\non the axis, thus making it easier to see."}, {Name: "NTicks", Doc: "NTicks is the desired number of ticks"}, {Name: "Scale", Doc: "Scale specifies how values are scaled along the axis:\nLinear, Log, Inverted"}, {Name: "TickText", Doc: "TickText has the text style for rendering tick labels,\nand is shared for actual rendering."}, {Name: "TickLine", Doc: "TickLine has line style for drawing tick lines."}, {Name: "TickLength", Doc: "TickLength is the length of tick lines."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.AxisStyle", IDName: "axis-style", Doc: "AxisStyle has style properties for the axis.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Text", Doc: "Text has the text style parameters for the text label."}, {Name: "Line", Doc: "Line has styling properties for the axis line."}, {Name: "Padding", Doc: "Padding between the axis line and the data.  Having\nnon-zero padding ensures that the data is never drawn\non the axis, thus making it easier to see."}, {Name: "NTicks", Doc: "NTicks is the desired number of ticks."}, {Name: "Scale", Doc: "Scale specifies how values are scaled along the axis:\nLinear, Log, Inverted"}, {Name: "TickText", Doc: "TickText has the text style for rendering tick labels,\nand is shared for actual rendering."}, {Name: "TickLine", Doc: "TickLine has line style for drawing tick lines."}, {Name: "TickLength", Doc: "TickLength is the length of tick lines."}}})
 
 // SetText sets the [AxisStyle.Text]:
 // Text has the text style parameters for the text label.
@@ -30,7 +30,7 @@ func (t *AxisStyle) SetLine(v LineStyle) *AxisStyle { t.Line = v; return t }
 func (t *AxisStyle) SetPadding(v units.Value) *AxisStyle { t.Padding = v; return t }
 
 // SetNTicks sets the [AxisStyle.NTicks]:
-// NTicks is the desired number of ticks
+// NTicks is the desired number of ticks.
 func (t *AxisStyle) SetNTicks(v int) *AxisStyle { t.NTicks = v; return t }
 
 // SetScale sets the [AxisStyle.Scale]:
@@ -146,7 +146,7 @@ func (t *LineStyle) SetStep(v StepKind) *LineStyle { t.Step = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.StepKind", IDName: "step-kind", Doc: "StepKind specifies a form of a connection of two consecutive points."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.XAxisStyle", IDName: "x-axis-style", Doc: "XAxisStyle has overall plot level styling properties for the XAxis.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Column", Doc: "Column specifies the column to use for the common X axis in a table based plot.\nif empty or not found, the row number is used.\nThis optional for Bar plots, if present and Legend is also present,\nthen an extra space will be put between X values."}, {Name: "Rotation", Doc: "Rotation is the rotation of the X Axis labels, in degrees."}, {Name: "Label", Doc: "Label is the optional label to use for the XAxis instead of the default."}, {Name: "Range", Doc: "Range is the effective range of XAxis data to plot, where either end can be fixed."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.XAxisStyle", IDName: "x-axis-style", Doc: "XAxisStyle has overall plot level styling properties for the XAxis.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Column", Doc: "Column specifies the column to use for the common X axis in a table based plot.\nif empty or not found, the row number is used.\nThis optional for Bar plots, if present and Legend is also present,\nthen an extra space will be put between X values."}, {Name: "Rotation", Doc: "Rotation is the rotation of the X Axis labels, in degrees."}, {Name: "Label", Doc: "Label is the optional label to use for the XAxis instead of the default."}, {Name: "Range", Doc: "Range is the effective range of XAxis data to plot, where either end can be fixed."}, {Name: "Scale", Doc: "Scale specifies how values are scaled along the X axis:\nLinear, Log, Inverted"}}})
 
 // SetColumn sets the [XAxisStyle.Column]:
 // Column specifies the column to use for the common X axis in a table based plot.
@@ -166,6 +166,11 @@ func (t *XAxisStyle) SetLabel(v string) *XAxisStyle { t.Label = v; return t }
 // SetRange sets the [XAxisStyle.Range]:
 // Range is the effective range of XAxis data to plot, where either end can be fixed.
 func (t *XAxisStyle) SetRange(v minmax.Range64) *XAxisStyle { t.Range = v; return t }
+
+// SetScale sets the [XAxisStyle.Scale]:
+// Scale specifies how values are scaled along the X axis:
+// Linear, Log, Inverted
+func (t *XAxisStyle) SetScale(v AxisScales) *XAxisStyle { t.Scale = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.PlotStyle", IDName: "plot-style", Doc: "PlotStyle has overall plot level styling properties.\nSome properties provide defaults for individual elements, which can\nthen be overwritten by element-level properties.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Title", Doc: "Title is the overall title of the plot."}, {Name: "TitleStyle", Doc: "TitleStyle is the text styling parameters for the title."}, {Name: "Background", Doc: "Background is the background of the plot.\nThe default is [colors.Scheme.Surface]."}, {Name: "Scale", Doc: "Scale multiplies the plot DPI value, to change the overall scale\nof the rendered plot.  Larger numbers produce larger scaling.\nTypically use larger numbers when generating plots for inclusion in\ndocuments or other cases where the overall plot size will be small."}, {Name: "Legend", Doc: "Legend has the styling properties for the Legend."}, {Name: "Axis", Doc: "Axis has the styling properties for the Axes."}, {Name: "XAxis", Doc: "XAxis has plot-level XAxis style properties."}, {Name: "YAxisLabel", Doc: "YAxisLabel is the optional label to use for the YAxis instead of the default."}, {Name: "LinesOn", Doc: "LinesOn determines whether lines are plotted by default,\nfor elements that plot lines (e.g., plots.XY)."}, {Name: "LineWidth", Doc: "LineWidth sets the default line width for data plotting lines."}, {Name: "PointsOn", Doc: "PointsOn determines whether points are plotted by default,\nfor elements that plot points (e.g., plots.XY)."}, {Name: "PointSize", Doc: "PointSize sets the default point size."}, {Name: "LabelSize", Doc: "LabelSize sets the default label text size."}, {Name: "BarWidth", Doc: "BarWidth for Bar plot sets the default width of the bars,\nwhich should be less than the Stride (1 typically) to prevent\nbar overlap. Defaults to .8."}}})
 
@@ -272,7 +277,7 @@ func (t *PointStyle) SetSize(v units.Value) *PointStyle { t.Size = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Shapes", IDName: "shapes", Doc: "Shapes has the options for how to draw points in the plot."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Style", IDName: "style", Doc: "Style contains the plot styling properties relevant across\nmost plot types. These properties apply to individual plot elements\nwhile the Plot properties applies to the overall plot itself.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Plot", Doc: "\tPlot has overall plot-level properties, which can be set by any\nplot element, and are updated first, before applying element-wise styles."}, {Name: "On", Doc: "On specifies whether to plot this item, for cases where it can be turned off."}, {Name: "Role", Doc: "Role specifies a role for this item, used for table-based plots to indicate\nhow a particular column of data should be used."}, {Name: "Group", Doc: "Group specifies a group of related data items, used for table-based plots\nwhere different columns of data within the same Group play different Roles"}, {Name: "Range", Doc: "Range is the effective range of data to plot, where either end can be fixed."}, {Name: "Label", Doc: "Label provides an alternative label to use for axis, if set."}, {Name: "NTicks", Doc: "NTicks sets the desired number of ticks for the axis, if > 0."}, {Name: "Line", Doc: "Line has style properties for drawing lines."}, {Name: "Point", Doc: "Point has style properties for drawing points."}, {Name: "Text", Doc: "Text has style properties for rendering text."}, {Name: "Width", Doc: "Width has various plot width properties."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Style", IDName: "style", Doc: "Style contains the plot styling properties relevant across\nmost plot types. These properties apply to individual plot elements\nwhile the Plot properties applies to the overall plot itself.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Plot", Doc: "\tPlot has overall plot-level properties, which can be set by any\nplot element, and are updated first, before applying element-wise styles."}, {Name: "On", Doc: "On specifies whether to plot this item, for table-based plots."}, {Name: "Plotter", Doc: "Plotter is the type of plotter to use in plotting this data,\nfor table-based plots. Blank means use default ([plots.XY] is overall default)."}, {Name: "Role", Doc: "Role specifies a role for this item, used for table-based plots to indicate\nhow a particular column of data should be used."}, {Name: "Group", Doc: "Group specifies a group of related data items, used for table-based plots\nwhere different columns of data within the same Group play different Roles"}, {Name: "Range", Doc: "Range is the effective range of data to plot, where either end can be fixed."}, {Name: "Label", Doc: "Label provides an alternative label to use for axis, if set."}, {Name: "NTicks", Doc: "NTicks sets the desired number of ticks for the axis, if > 0."}, {Name: "Line", Doc: "Line has style properties for drawing lines."}, {Name: "Point", Doc: "Point has style properties for drawing points."}, {Name: "Text", Doc: "Text has style properties for rendering text."}, {Name: "Width", Doc: "Width has various plot width properties."}}})
 
 // SetPlot sets the [Style.Plot]:
 //
@@ -282,8 +287,13 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Style", IDName
 func (t *Style) SetPlot(v PlotStyle) *Style { t.Plot = v; return t }
 
 // SetOn sets the [Style.On]:
-// On specifies whether to plot this item, for cases where it can be turned off.
+// On specifies whether to plot this item, for table-based plots.
 func (t *Style) SetOn(v DefaultOffOn) *Style { t.On = v; return t }
+
+// SetPlotter sets the [Style.Plotter]:
+// Plotter is the type of plotter to use in plotting this data,
+// for table-based plots. Blank means use default ([plots.XY] is overall default).
+func (t *Style) SetPlotter(v string) *Style { t.Plotter = v; return t }
 
 // SetRole sets the [Style.Role]:
 // Role specifies a role for this item, used for table-based plots to indicate
@@ -379,7 +389,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Text", IDName:
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Tick", IDName: "tick", Doc: "A Tick is a single tick mark on an axis.", Fields: []types.Field{{Name: "Value", Doc: "Value is the data value marked by this Tick."}, {Name: "Label", Doc: "Label is the text to display at the tick mark.\nIf Label is an empty string then this is a minor tick mark."}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Ticker", IDName: "ticker", Doc: "Ticker creates Ticks in a specified range", Methods: []types.Method{{Name: "Ticks", Doc: "Ticks returns Ticks in a specified range", Args: []string{"min", "max"}, Returns: []string{"Tick"}}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.Ticker", IDName: "ticker", Doc: "Ticker creates Ticks in a specified range", Methods: []types.Method{{Name: "Ticks", Doc: "Ticks returns Ticks in a specified range, with desired number of ticks,\nwhich can be ignored depending on the ticker type.", Args: []string{"min", "max", "nticks"}, Returns: []string{"Tick"}}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.DefaultTicks", IDName: "default-ticks", Doc: "DefaultTicks is suitable for the Ticker field of an Axis,\nit returns a reasonable default set of tick marks."})
 
@@ -388,5 +398,3 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.LogTicks", IDN
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.ConstantTicks", IDName: "constant-ticks", Doc: "ConstantTicks is suitable for the Ticker field of an Axis.\nThis function returns the given set of ticks."})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.TimeTicks", IDName: "time-ticks", Doc: "TimeTicks is suitable for axes representing time values.", Fields: []types.Field{{Name: "Ticker", Doc: "Ticker is used to generate a set of ticks.\nIf nil, DefaultTicks will be used."}, {Name: "Format", Doc: "Format is the textual representation of the time value.\nIf empty, time.RFC3339 will be used"}, {Name: "Time", Doc: "Time takes a float32 value and converts it into a time.Time.\nIf nil, UTCUnixTime is used."}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot.TickerFunc", IDName: "ticker-func", Doc: "TickerFunc is suitable for the Ticker field of an Axis.\nIt is an adapter which allows to quickly setup a Ticker using a function with an appropriate signature."})

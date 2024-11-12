@@ -101,13 +101,13 @@ func ExampleTable() {
 		s.Plot.YAxisLabel = "Y Axis"
 		s.Plot.Scale = 2
 		s.Plot.SetLinesOn(plot.On).SetPointsOn(plot.Off)
-		s.Line.Color = colors.Uniform(colors.Red)
-		s.Range.SetMin(0).SetMax(100)
 	}
 	plot.SetStylersTo(ty, plot.Stylers{genst, func(s *plot.Style) {
 		s.On = plot.On
 		s.Plotter = "XY"
 		s.Role = plot.Y
+		s.Line.Color = colors.Uniform(colors.Red)
+		s.Range.SetMin(0).SetMax(100)
 	}})
 	// others get basic styling
 	plot.SetStylersTo(tx, plot.Stylers{func(s *plot.Style) {

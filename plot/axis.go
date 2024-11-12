@@ -29,8 +29,11 @@ const (
 	// Log is a Logarithmic axis scale.
 	Log
 
-	// Inverted is an inverted axis scale.
-	Inverted
+	// InverseLinear is an inverted linear axis scale.
+	InverseLinear
+
+	// InverseLog is an inverted log axis scale.
+	InverseLog
 )
 
 // AxisStyle has style properties for the axis.
@@ -134,8 +137,10 @@ func (ax *Axis) drawConfig() {
 		ax.Scale = LinearScale{}
 	case Log:
 		ax.Scale = LogScale{}
-	case Inverted:
-		ax.Scale = InvertedScale{}
+	case InverseLinear:
+		ax.Scale = InvertedScale{LinearScale{}}
+	case InverseLog:
+		ax.Scale = InvertedScale{LogScale{}}
 	}
 }
 
