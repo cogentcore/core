@@ -28,14 +28,14 @@ func InitPointerTest() {
 	pt.Mbr2 = 2
 }
 
-func FieldValue(obj any, fld reflect.StructField) reflect.Value {
+func fieldValue(obj any, fld reflect.StructField) reflect.Value {
 	ov := reflect.ValueOf(obj)
 	f := unsafe.Pointer(ov.Pointer() + fld.Offset)
 	nw := reflect.NewAt(fld.Type, f)
 	return nw
 }
 
-func SubFieldValue(obj any, fld reflect.StructField, sub reflect.StructField) reflect.Value {
+func subFieldValue(obj any, fld reflect.StructField, sub reflect.StructField) reflect.Value {
 	ov := reflect.ValueOf(obj)
 	f := unsafe.Pointer(ov.Pointer() + fld.Offset + sub.Offset)
 	nw := reflect.NewAt(sub.Type, f)
@@ -47,7 +47,7 @@ func TestNewAt(t *testing.T) {
 	InitPointerTest()
 	typ := reflect.TypeOf(pt)
 	fld, _ := typ.FieldByName("Mbr2")
-	vf := FieldValue(&pt, fld)
+	vf := fieldValue(&pt, fld)
 
 	// fmt.Printf("Fld: %v Typ: %v vf: %v vfi: %v vfT: %v vfp: %v canaddr: %v canset: %v caninterface: %v\n", fld.Name, vf.Type().String(), vf.String(), vf.Interface(), vf.Interface(), vf.Interface(), vf.CanAddr(), vf.CanSet(), vf.CanInterface())
 
@@ -58,7 +58,7 @@ func TestNewAt(t *testing.T) {
 	}
 
 	fld, _ = typ.FieldByName("Mbr1")
-	vf = FieldValue(&pt, fld)
+	vf = fieldValue(&pt, fld)
 
 	// fmt.Printf("Fld: %v Typ: %v vf: %v vfi: %v vfT: %v vfp: %v canaddr: %v canset: %v caninterface: %v\n", fld.Name, vf.Type().String(), vf.String(), vf.Interface(), vf.Interface(), vf.Interface(), vf.CanAddr(), vf.CanSet(), vf.CanInterface())
 

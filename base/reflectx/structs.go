@@ -232,3 +232,54 @@ func StructTags(tags reflect.StructTag) map[string]string {
 func StringJSON(v any) string {
 	return string(errors.Log1(jsonx.WriteBytesIndent(v)))
 }
+
+// FieldValue returns the [reflect.Value] of given field within given struct value,
+// where the field can be a path with . separators, for fields within struct fields.
+func FieldValue(s reflect.Value, fieldPath string) (reflect.Value, error) {
+	sv := UnderlyingPointer(s)
+	var zv reflect.Value
+	if sv.Elem().Kind() != reflect.Struct {
+		return zv, errors.New("reflectx.FieldValue: kind is not struct")
+	}
+	fps := strings.Split(fieldPath, ".")
+	fv := sv.Elem().FieldByName(fps[0])
+	if fv == zv {
+		return zv, errors.New("reflectx.FieldValue: field name not found: " + fps[0])
+	}
+	if len(fps) == 1 {
+		return fv, nil
+	}
+	return FieldValue(fv, strings.Join(fps[1:], "."))
+}
+
+// CopyFields copies the named fields from src struct into dest struct.
+// Fields can be paths with . separators for sub-fields of fields.
+func CopyFields(dest, src any, fields ...string) error {
+	dsv := UnderlyingPointer(reflect.ValueOf(dest))
+	if dsv.Elem().Kind() != reflect.Struct {
+		return errors.New("reflectx.CopyFields: destination kind is not struct")
+	}
+	ssv := UnderlyingPointer(reflect.ValueOf(src))
+	if ssv.Elem().Kind() != reflect.Struct {
+		return errors.New("reflectx.CopyFields: source kind is not struct")
+	}
+	var errs []error
+	for _, f := range fields {
+		dfv, err := FieldValue(dsv, f)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		sfv, err := FieldValue(ssv, f)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		err = SetRobust(UnderlyingPointer(dfv).Interface(), sfv.Interface())
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+	}
+	return errors.Join(errs...)
+}

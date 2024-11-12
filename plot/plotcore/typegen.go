@@ -41,7 +41,7 @@ func NewPlotEditor(parent ...tree.Node) *PlotEditor { return tree.New[PlotEditor
 // PlotStyle has the overall plot style parameters.
 func (t *PlotEditor) SetPlotStyle(v plot.PlotStyle) *PlotEditor { t.PlotStyle = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot/plotcore.PlotterChooser", IDName: "plotter-chooser", Doc: "PlotterChooser represents a [Plottername] value with a [core.Chooser]\nfor selecting a plotter.", Embeds: []types.Field{{Name: "Chooser"}}, Fields: []types.Field{{Name: "PlotterName"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot/plotcore.PlotterChooser", IDName: "plotter-chooser", Doc: "PlotterChooser represents a [Plottername] value with a [core.Chooser]\nfor selecting a plotter.", Embeds: []types.Field{{Name: "Chooser"}}})
 
 // NewPlotterChooser returns a new [PlotterChooser] with the given optional parent:
 // PlotterChooser represents a [Plottername] value with a [core.Chooser]
@@ -49,6 +49,3 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot/plotcore.Plott
 func NewPlotterChooser(parent ...tree.Node) *PlotterChooser {
 	return tree.New[PlotterChooser](parent...)
 }
-
-// SetPlotterName sets the [PlotterChooser.PlotterName]
-func (t *PlotterChooser) SetPlotterName(v string) *PlotterChooser { t.PlotterName = v; return t }

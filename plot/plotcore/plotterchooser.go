@@ -5,7 +5,6 @@
 package plotcore
 
 import (
-	"reflect"
 	"slices"
 
 	"cogentcore.org/core/core"
@@ -22,17 +21,11 @@ func init() {
 // for selecting a plotter.
 type PlotterChooser struct {
 	core.Chooser
-	PlotterName string
-}
-
-func (fc *PlotterChooser) WidgetValue() any { return &fc.PlotterName }
-
-func (fc *PlotterChooser) OnBind(value any, tags reflect.StructTag) {
 }
 
 func (fc *PlotterChooser) Init() {
 	fc.Chooser.Init()
 	pnms := maps.Keys(plot.Plotters)
 	slices.Sort(pnms)
-	fc.Chooser.SetStrings(pnms...)
+	fc.SetStrings(pnms...)
 }

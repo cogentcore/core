@@ -7,6 +7,8 @@ package reflectx
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type person struct {
@@ -52,4 +54,23 @@ func TestNonDefaultFields(t *testing.T) {
 	if !reflect.DeepEqual(have, want) {
 		t.Errorf("expected\n%v\n\tbut got\n%v", want, have)
 	}
+}
+
+func TestCopyFields(t *testing.T) {
+	sp := &person{
+		Name:                "Go Gopher",
+		Age:                 23,
+		ProgrammingLanguage: "Go",
+		FavoriteFruit:       "Peach",
+		Data:                "abcdef",
+		Pet: pet{
+			Name: "Pet Gopher",
+			Type: "Dog",
+			Age:  7,
+		},
+	}
+	dp := &person{}
+	CopyFields(dp, sp, "Name", "Pet.Age")
+	assert.Equal(t, sp.Name, dp.Name)
+	assert.Equal(t, sp.Pet.Age, dp.Pet.Age)
 }

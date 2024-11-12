@@ -12,12 +12,14 @@ import (
 	"io/fs"
 	"log/slog"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -30,6 +32,7 @@ import (
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tensor/tensorcore"
 	"cogentcore.org/core/tree"
+	"golang.org/x/exp/maps"
 )
 
 // PlotEditor is a widget that provides an interactive 2D plot
@@ -264,50 +267,6 @@ func (pl *PlotEditor) genPlot() {
 
 const plotColumnsHeaderN = 2
 
-// columnsListUpdate updates the list of columns
-// func (pl *PlotEditor) columnsListUpdate() {
-// 	if pl.table == nil {
-// 		return
-// 	}
-// 	dt := pl.table
-// 	nc := dt.NumColumns()
-// 	if nc == len(pl.Columns) {
-// 		return
-// 	}
-// 	pl.Columns = make([]*ColumnOptions, nc)
-// 	clri := 0
-// 	hasOn := false
-// 	for ci := range dt.NumColumns() {
-// 		cn := dt.ColumnName(ci)
-// 		if pl.Options.XAxis == "" && ci == 0 {
-// 			pl.Options.XAxis = cn // x-axis defaults to the first column
-// 		}
-// 		cp := &ColumnOptions{Column: cn}
-// 		cp.Defaults()
-// 		pl.Stylers.ApplyToColumn(cp)
-// 		tcol := dt.ColumnByIndex(ci)
-// 		tc := tcol.Tensor
-// 		if tc.IsString() {
-// 			cp.IsString = true
-// 		} else {
-// 			cp.IsString = false
-// 			// we enable the first non-string, non-x-axis, non-first column by default
-// 			if !hasOn && cn != pl.Options.XAxis && ci != 0 {
-// 				cp.On = true
-// 				hasOn = true
-// 			}
-// 		}
-// 		cp.fromMetaMap(pl.table.Meta)
-// 		inc := 1
-// 		if cn == pl.Options.XAxis || tc.IsString() || tc.DataType() == reflect.Int || tc.DataType() == reflect.Int64 || tc.DataType() == reflect.Int32 || tc.DataType() == reflect.Uint8 {
-// 			inc = 0
-// 		}
-// 		cp.Color = colors.Uniform(colors.Spaced(clri))
-// 		pl.Columns[ci] = cp
-// 		clri += inc
-// 	}
-// }
-
 // setAllColumns turns all Columns on or off (except X axis)
 func (pl *PlotEditor) setAllColumns(on bool) {
 	// fr := pl.columnsFrame
@@ -378,26 +337,19 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 	}
 	for ci, cl := range pl.table.Columns.Values {
 		cnm := pl.table.Columns.Keys[ci]
-		cst := &plot.Style{}
-		cst.Defaults()
 		psty := plot.GetStylersFrom(cl)
-		// nsty := 0
-		if psty != nil {
-			// nsty = len(psty)
-			psty.Run(cst)
-		}
-		mods := map[string]bool{}
-		// metadata.SetTo(cl, "PlotEditorNStylers", nsty)
-		// metadata.SetTo(cl, "PlotEditorModsMap", mods)
+		cst, mods := pl.defaultColumnStyle(ci, cl, psty)
 		updateStyle := func() {
 			if len(mods) == 0 {
 				return
 			}
+			mf := modFields(mods)
 			sty := psty
 			sty = append(sty, func(s *plot.Style) {
+				errors.Log(reflectx.CopyFields(s, cst, mf...))
 			})
+			plot.SetStylersTo(cl, sty)
 		}
-		_ = updateStyle
 		tree.AddAt(p, cnm, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.CenterAll()
@@ -408,6 +360,7 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 				w.OnChange(func(e events.Event) {
 					mods["On"] = true
 					cst.On = w.IsChecked()
+					updateStyle()
 					pl.UpdatePlot()
 				})
 				w.Updater(func() {
@@ -424,6 +377,7 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 				w.SetText(cnm).SetType(core.ButtonAction).SetTooltip("Edit all styling options for this column")
 				w.OnClick(func(e events.Event) {
 					update := func() {
+						updateStyle()
 						if core.TheApp.Platform().IsMobile() {
 							pl.Update()
 							return
@@ -438,8 +392,6 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 					fm := core.NewForm(d).SetStruct(cst)
 					fm.Modified = mods
 					fm.OnChange(func(e events.Event) {
-						// todo: compile style based on changed items
-						fmt.Println(mods)
 						update()
 					})
 					// d.AddTopBar(func(bar *core.Frame) {
@@ -463,6 +415,91 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 			})
 		})
 	}
+}
+
+// defaultColumnStyle initializes the column style with any existing stylers
+// plus additional general defaults, returning the initially modified field names.
+func (pl *PlotEditor) defaultColumnStyle(ci int, cl tensor.Values, psty plot.Stylers) (*plot.Style, map[string]bool) {
+	cst := &plot.Style{}
+	cst.Defaults()
+	if psty != nil {
+		psty.Run(cst)
+	}
+	mods := map[string]bool{}
+	// todo: qualify based on type?
+	if cst.Plotter == "" {
+		cst.Plotter = plot.PlotterName("XY")
+		mods["Plotter"] = true
+	}
+	if cst.Role == plot.NoRole {
+		cst.Role = plot.Y
+		mods["Role"] = true
+	}
+	// if cst.Line.Color == nil {  // todo: detect default
+	// todo: skip over non-float types here
+	cst.Line.Color = colors.Uniform(colors.Spaced(ci))
+	mods["Line.Color"] = true
+	// }
+	return cst, mods
+}
+
+// columnsListUpdate updates the list of columns
+// func (pl *PlotEditor) columnsListUpdate() {
+// 	if pl.table == nil {
+// 		return
+// 	}
+// 	dt := pl.table
+// 	nc := dt.NumColumns()
+// 	if nc == len(pl.Columns) {
+// 		return
+// 	}
+// 	pl.Columns = make([]*ColumnOptions, nc)
+// 	clri := 0
+// 	hasOn := false
+// 	for ci := range dt.NumColumns() {
+// 		cn := dt.ColumnName(ci)
+// 		if pl.Options.XAxis == "" && ci == 0 {
+// 			pl.Options.XAxis = cn // x-axis defaults to the first column
+// 		}
+// 		cp := &ColumnOptions{Column: cn}
+// 		cp.Defaults()
+// 		pl.Stylers.ApplyToColumn(cp)
+// 		tcol := dt.ColumnByIndex(ci)
+// 		tc := tcol.Tensor
+// 		if tc.IsString() {
+// 			cp.IsString = true
+// 		} else {
+// 			cp.IsString = false
+// 			// we enable the first non-string, non-x-axis, non-first column by default
+// 			if !hasOn && cn != pl.Options.XAxis && ci != 0 {
+// 				cp.On = true
+// 				hasOn = true
+// 			}
+// 		}
+// 		cp.fromMetaMap(pl.table.Meta)
+// 		inc := 1
+// 		if cn == pl.Options.XAxis || tc.IsString() || tc.DataType() == reflect.Int || tc.DataType() == reflect.Int64 || tc.DataType() == reflect.Int32 || tc.DataType() == reflect.Uint8 {
+// 			inc = 0
+// 		}
+// 		cp.Color = colors.Uniform(colors.Spaced(clri))
+// 		pl.Columns[ci] = cp
+// 		clri += inc
+// 	}
+// }
+
+// modFields returns the modified fields as field paths using . separators
+func modFields(mods map[string]bool) []string {
+	fns := maps.Keys(mods)
+	rf := make([]string, 0, len(fns))
+	for _, f := range fns {
+		if mods[f] == false {
+			continue
+		}
+		fc := strings.ReplaceAll(f, " • ", ".")
+		rf = append(rf, fc)
+	}
+	slices.Sort(rf)
+	return rf
 }
 
 func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
