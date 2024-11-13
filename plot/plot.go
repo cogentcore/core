@@ -129,6 +129,27 @@ func (ps *PlotStyle) SetElementStyle(es *Style) {
 	es.Text.Size = ps.LabelSize
 }
 
+// PanZoom provides post-styling pan and zoom range manipulation.
+type PanZoom struct {
+
+	// XOffset adds offset to X range (pan).
+	XOffset float64
+
+	// XScale multiplies X range (zoom).
+	XScale float64
+
+	// YOffset adds offset to Y range (pan).
+	YOffset float64
+
+	// YScale multiplies Y range (zoom).
+	YScale float64
+}
+
+func (pz *PanZoom) Defaults() {
+	pz.XScale = 1
+	pz.YScale = 1
+}
+
 // Plot is the basic type representing a plot.
 // It renders into its own image.RGBA Pixels image,
 // and can also save a corresponding SVG version.
@@ -161,6 +182,9 @@ type Plot struct {
 	// which is strongly recommended for print (e.g., use 300 for print)
 	DPI float32 `default:"96,160,300"`
 
+	// PanZoom provides post-styling pan and zoom range factors.
+	PanZoom PanZoom
+
 	// painter for rendering
 	Paint *paint.Context
 
@@ -187,6 +211,7 @@ func (pt *Plot) Defaults() {
 	pt.Y.Defaults(math32.Y)
 	pt.Legend.Defaults()
 	pt.DPI = 96
+	pt.PanZoom.Defaults()
 	pt.Size = image.Point{1280, 1024}
 	pt.StandardTextStyle.Defaults()
 	pt.StandardTextStyle.WhiteSpace = styles.WhiteSpaceNowrap
@@ -334,6 +359,19 @@ func (pt *Plot) UpdateRange() {
 	for _, pl := range pt.Plotters {
 		pl.UpdateRange(pt, &pt.X.Range, &pt.Y.Range, &pt.Z.Range)
 	}
+	pt.X.Range.Sanitize()
+	pt.Y.Range.Sanitize()
+	pt.Z.Range.Sanitize()
+
+	pt.X.Range.Min *= pt.PanZoom.XScale
+	pt.X.Range.Max *= pt.PanZoom.XScale
+	pt.X.Range.Min += pt.PanZoom.XOffset
+	pt.X.Range.Max += pt.PanZoom.XOffset
+
+	pt.Y.Range.Min *= pt.PanZoom.YScale
+	pt.Y.Range.Max *= pt.PanZoom.YScale
+	pt.Y.Range.Min += pt.PanZoom.YOffset
+	pt.Y.Range.Max += pt.PanZoom.YOffset
 }
 
 // PX returns the X-axis plotting coordinate for given raw data value
