@@ -5,9 +5,11 @@
 package reflectx
 
 import (
+	"image"
 	"reflect"
 	"testing"
 
+	"cogentcore.org/core/colors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -56,6 +58,10 @@ func TestNonDefaultFields(t *testing.T) {
 	}
 }
 
+type imgfield struct {
+	Mycolor image.Image
+}
+
 func TestCopyFields(t *testing.T) {
 	sp := &person{
 		Name:                "Go Gopher",
@@ -73,4 +79,11 @@ func TestCopyFields(t *testing.T) {
 	CopyFields(dp, sp, "Name", "Pet.Age")
 	assert.Equal(t, sp.Name, dp.Name)
 	assert.Equal(t, sp.Pet.Age, dp.Pet.Age)
+
+	sif := &imgfield{
+		Mycolor: colors.Uniform(colors.Black),
+	}
+	dif := &imgfield{}
+	CopyFields(dif, sif, "Mycolor")
+	assert.Equal(t, sif.Mycolor, dif.Mycolor)
 }

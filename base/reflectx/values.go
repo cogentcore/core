@@ -961,6 +961,15 @@ func SetRobust(to, from any) error {
 		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pointer, pointer)
 	}
 
+	// images should not be copied per content: just set the pointer!
+	// otherwise the original images (esp colors!) are altered.
+	if img, ok := to.(*image.Image); ok {
+		if fimg, ok := from.(image.Image); ok {
+			*img = fimg
+			return nil
+		}
+	}
+
 	// first we do the generic AssignableTo case
 	if v.Kind() == reflect.Pointer {
 		fv := reflect.ValueOf(from)

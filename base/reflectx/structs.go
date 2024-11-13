@@ -275,7 +275,7 @@ func CopyFields(dest, src any, fields ...string) error {
 			errs = append(errs, err)
 			continue
 		}
-		err = SetRobust(UnderlyingPointer(dfv).Interface(), sfv.Interface())
+		err = SetRobust(PointerValue(dfv).Interface(), sfv.Interface())
 		if err != nil {
 			errs = append(errs, err)
 			continue
