@@ -10,7 +10,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/plot/plotcore"
-	_ "cogentcore.org/core/plot/plots"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 )

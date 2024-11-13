@@ -61,8 +61,9 @@ type PlotEditor struct { //types:add
 	// currently doing a plot
 	inPlot bool
 
-	columnsFrame *core.Frame
-	plotWidget   *Plot
+	columnsFrame      *core.Frame
+	plotWidget        *Plot
+	plotStyleModified map[string]bool
 }
 
 func (pl *PlotEditor) CopyFieldsFrom(frm tree.Node) {
@@ -90,6 +91,7 @@ func (pl *PlotEditor) Init() {
 	pl.Frame.Init()
 
 	pl.PlotStyle.Defaults()
+
 	pl.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		if pl.SizeClass() == core.SizeCompact {
@@ -101,11 +103,11 @@ func (pl *PlotEditor) Init() {
 		pl.UpdatePlot()
 	})
 
-	// pl.Updater(func() {
-	// 	if pl.table != nil {
-	// 		pl.Options.fromMeta(pl.table)
-	// 	}
-	// })
+	pl.Updater(func() {
+		if pl.table != nil {
+			pl.plotStyleFromTable(pl.table)
+		}
+	})
 	tree.AddChildAt(pl, "columns", func(w *core.Frame) {
 		pl.columnsFrame = w
 		w.Styler(func(s *styles.Style) {
@@ -349,6 +351,7 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 			sty := psty
 			sty = append(sty, func(s *plot.Style) {
 				errors.Log(reflectx.CopyFields(s, cst, mf...))
+				errors.Log(reflectx.CopyFields(&s.Plot, &pl.PlotStyle, modFields(pl.plotStyleModified)...))
 			})
 			plot.SetStylersTo(cl, sty)
 		}
@@ -432,7 +435,7 @@ func (pl *PlotEditor) defaultColumnStyle(cl tensor.Values, ci int, colorIdx *int
 	isfloat := reflectx.KindIsFloat(cl.DataType())
 	if cst.Plotter == "" {
 		if isfloat {
-			cst.Plotter = plots.XYType
+			cst.Plotter = plot.PlotterName(plots.XYType)
 			mods["Plotter"] = true
 		} else if cl.IsString() {
 			cst.Plotter = plot.PlotterName(plots.LabelsType)
@@ -456,55 +459,40 @@ func (pl *PlotEditor) defaultColumnStyle(cl tensor.Values, ci int, colorIdx *int
 			mods["Line.Color"] = true
 			cst.Point.Color = spclr
 			mods["Point.Color"] = true
+			if cst.Plotter == plots.BarType {
+				cst.Line.Fill = spclr
+				mods["Line.Fill"] = true
+			}
 			(*colorIdx)++
 		}
 	}
 	return cst, mods
 }
 
-// columnsListUpdate updates the list of columns
-// func (pl *PlotEditor) columnsListUpdate() {
-// 	if pl.table == nil {
-// 		return
-// 	}
-// 	dt := pl.table
-// 	nc := dt.NumColumns()
-// 	if nc == len(pl.Columns) {
-// 		return
-// 	}
-// 	pl.Columns = make([]*ColumnOptions, nc)
-// 	clri := 0
-// 	hasOn := false
-// 	for ci := range dt.NumColumns() {
-// 		cn := dt.ColumnName(ci)
-// 		if pl.Options.XAxis == "" && ci == 0 {
-// 			pl.Options.XAxis = cn // x-axis defaults to the first column
-// 		}
-// 		cp := &ColumnOptions{Column: cn}
-// 		cp.Defaults()
-// 		pl.Stylers.ApplyToColumn(cp)
-// 		tcol := dt.ColumnByIndex(ci)
-// 		tc := tcol.Tensor
-// 		if tc.IsString() {
-// 			cp.IsString = true
-// 		} else {
-// 			cp.IsString = false
-// 			// we enable the first non-string, non-x-axis, non-first column by default
-// 			if !hasOn && cn != pl.Options.XAxis && ci != 0 {
-// 				cp.On = true
-// 				hasOn = true
-// 			}
-// 		}
-// 		cp.fromMetaMap(pl.table.Meta)
-// 		inc := 1
-// 		if cn == pl.Options.XAxis || tc.IsString() || tc.DataType() == reflect.Int || tc.DataType() == reflect.Int64 || tc.DataType() == reflect.Int32 || tc.DataType() == reflect.Uint8 {
-// 			inc = 0
-// 		}
-// 		cp.Color = colors.Uniform(colors.Spaced(clri))
-// 		pl.Columns[ci] = cp
-// 		clri += inc
-// 	}
-// }
+func (pl *PlotEditor) plotStyleFromTable(dt *table.Table) {
+	if pl.plotStyleModified != nil { // already set
+		return
+	}
+	pst := &pl.PlotStyle
+	mods := map[string]bool{}
+	pl.plotStyleModified = mods
+	tst := &plot.Style{}
+	tst.Defaults()
+	tst.Plot.Defaults()
+	for _, cl := range pl.table.Columns.Values {
+		stl := plot.GetStylersFrom(cl)
+		if stl == nil {
+			continue
+		}
+		stl.Run(tst)
+	}
+	*pst = tst.Plot
+	if pst.PointsOn == plot.Default {
+		pst.PointsOn = plot.Off
+		mods["PointsOn"] = true
+	}
+	fmt.Println(pl.PlotStyle.Scale)
+}
 
 // modFields returns the modified fields as field paths using . separators
 func modFields(mods map[string]bool) []string {
@@ -551,15 +539,13 @@ func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 			})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Options").SetIcon(icons.Settings).
-			SetTooltip("Options for how the plot is rendered").
+		w.SetText("Style").SetIcon(icons.Settings).
+			SetTooltip("Style for how the plot is rendered").
 			OnClick(func(e events.Event) {
 				d := core.NewBody("Plot style")
 				fm := core.NewForm(d).SetStruct(&pl.PlotStyle)
-				fm.Modified = map[string]bool{}
+				fm.Modified = pl.plotStyleModified
 				fm.OnChange(func(e events.Event) {
-					// todo: get modified and make style
-					fmt.Println(fm.Modified)
 					pl.GoUpdatePlot()
 				})
 				d.RunWindowDialog(pl)
