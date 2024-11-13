@@ -13,6 +13,7 @@ func init() {
 		"DirAndFile":       reflect.ValueOf(fsx.DirAndFile),
 		"DirFS":            reflect.ValueOf(fsx.DirFS),
 		"Dirs":             reflect.ValueOf(fsx.Dirs),
+		"ExtSplit":         reflect.ValueOf(fsx.ExtSplit),
 		"FileExists":       reflect.ValueOf(fsx.FileExists),
 		"FileExistsFS":     reflect.ValueOf(fsx.FileExistsFS),
 		"Filenames":        reflect.ValueOf(fsx.Filenames),
@@ -22,6 +23,7 @@ func init() {
 		"HasFile":          reflect.ValueOf(fsx.HasFile),
 		"LatestMod":        reflect.ValueOf(fsx.LatestMod),
 		"RelativeFilePath": reflect.ValueOf(fsx.RelativeFilePath),
+		"SplitRootPathFS":  reflect.ValueOf(fsx.SplitRootPathFS),
 		"Sub":              reflect.ValueOf(fsx.Sub),
 	}
 }

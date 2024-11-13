@@ -112,6 +112,7 @@ func init() {
 		"NewMenuFromStrings":            reflect.ValueOf(core.NewMenuFromStrings),
 		"NewMenuStage":                  reflect.ValueOf(core.NewMenuStage),
 		"NewMeter":                      reflect.ValueOf(core.NewMeter),
+		"NewPages":                      reflect.ValueOf(core.NewPages),
 		"NewPopupStage":                 reflect.ValueOf(core.NewPopupStage),
 		"NewSVG":                        reflect.ValueOf(core.NewSVG),
 		"NewScene":                      reflect.ValueOf(core.NewScene),
@@ -271,9 +272,11 @@ func init() {
 		"ListGrid":               reflect.ValueOf((*core.ListGrid)(nil)),
 		"ListStyler":             reflect.ValueOf((*core.ListStyler)(nil)),
 		"Lister":                 reflect.ValueOf((*core.Lister)(nil)),
+		"MenuSearcher":           reflect.ValueOf((*core.MenuSearcher)(nil)),
 		"Meter":                  reflect.ValueOf((*core.Meter)(nil)),
 		"MeterTypes":             reflect.ValueOf((*core.MeterTypes)(nil)),
 		"OnBinder":               reflect.ValueOf((*core.OnBinder)(nil)),
+		"Pages":                  reflect.ValueOf((*core.Pages)(nil)),
 		"SVG":                    reflect.ValueOf((*core.SVG)(nil)),
 		"Scene":                  reflect.ValueOf((*core.Scene)(nil)),
 		"ScreenSettings":         reflect.ValueOf((*core.ScreenSettings)(nil)),
@@ -331,6 +334,7 @@ func init() {
 		"_ButtonEmbedder":    reflect.ValueOf((*_cogentcore_org_core_core_ButtonEmbedder)(nil)),
 		"_Layouter":          reflect.ValueOf((*_cogentcore_org_core_core_Layouter)(nil)),
 		"_Lister":            reflect.ValueOf((*_cogentcore_org_core_core_Lister)(nil)),
+		"_MenuSearcher":      reflect.ValueOf((*_cogentcore_org_core_core_MenuSearcher)(nil)),
 		"_OnBinder":          reflect.ValueOf((*_cogentcore_org_core_core_OnBinder)(nil)),
 		"_Settings":          reflect.ValueOf((*_cogentcore_org_core_core_Settings)(nil)),
 		"_SettingsOpener":    reflect.ValueOf((*_cogentcore_org_core_core_SettingsOpener)(nil)),
@@ -512,6 +516,16 @@ func (W _cogentcore_org_core_core_Lister) StyleValue(w core.Widget, s *styles.St
 }
 func (W _cogentcore_org_core_core_Lister) UpdateMaxWidths()     { W.WUpdateMaxWidths() }
 func (W _cogentcore_org_core_core_Lister) UpdateSliceSize() int { return W.WUpdateSliceSize() }
+
+// _cogentcore_org_core_core_MenuSearcher is an interface wrapper for MenuSearcher type
+type _cogentcore_org_core_core_MenuSearcher struct {
+	IValue      interface{}
+	WMenuSearch func(items *[]core.ChooserItem)
+}
+
+func (W _cogentcore_org_core_core_MenuSearcher) MenuSearch(items *[]core.ChooserItem) {
+	W.WMenuSearch(items)
+}
 
 // _cogentcore_org_core_core_OnBinder is an interface wrapper for OnBinder type
 type _cogentcore_org_core_core_OnBinder struct {
