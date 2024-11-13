@@ -99,7 +99,6 @@ func (pt *Plot) Init() {
 		pt.Plot.PanZoom.XOffset += dx
 		pt.Plot.PanZoom.YOffset += dy
 		pt.updatePlot()
-		pt.NeedsRender()
 	})
 
 	pt.On(events.Scroll, func(e events.Event) {
@@ -118,7 +117,6 @@ func (pt *Plot) Init() {
 		pt.Plot.PanZoom.XScale *= xsc
 		pt.Plot.PanZoom.YScale *= ysc
 		pt.updatePlot()
-		pt.NeedsRender()
 	})
 }
 
@@ -130,9 +128,17 @@ func (pt *Plot) WidgetTooltip(pos image.Point) (string, image.Point) {
 		return pt.Tooltip, pt.DefaultTooltipPos()
 	}
 	wpos := pos.Sub(pt.Geom.ContentBBox.Min)
-	_, idx, dist, data, _, legend := pt.Plot.ClosestDataToPixel(wpos.X, wpos.Y)
+	plt, _, idx, dist, data, _, legend := pt.Plot.ClosestDataToPixel(wpos.X, wpos.Y)
 	if dist <= 10 {
+		pt.Plot.HighlightPlotter = plt
+		pt.Plot.HighlightIndex = idx
+		pt.updatePlot()
 		return fmt.Sprintf("%s[%d]: (%g, %g)", legend, idx, data.X, data.Y), pos
+	} else {
+		if pt.Plot.HighlightPlotter != nil {
+			pt.Plot.HighlightPlotter = nil
+			pt.updatePlot()
+		}
 	}
 	return pt.Tooltip, pt.DefaultTooltipPos()
 }

@@ -170,11 +170,10 @@ type Plot struct {
 	// Legend is the plot's legend.
 	Legend Legend
 
-	// plotters are drawn by calling their Plot method
-	// after the axes are drawn.
+	// Plotters are drawn by calling their Plot method after the axes are drawn.
 	Plotters []Plotter
 
-	// size is the target size of the image to render to
+	// Size is the target size of the image to render to.
 	Size image.Point
 
 	// DPI is the dots per inch for rendering the image.
@@ -185,11 +184,18 @@ type Plot struct {
 	// PanZoom provides post-styling pan and zoom range factors.
 	PanZoom PanZoom
 
-	// painter for rendering
-	Paint *paint.Context
+	//	HighlightPlotter is the Plotter to highlight. Used for mouse hovering for example.
+	// It is the responsibility of the Plotter Plot function to implement highlighting.
+	HighlightPlotter Plotter
+
+	// HighlightIndex is the index of the data point to highlight, for HighlightPlotter.
+	HighlightIndex int
 
 	// pixels that we render into
 	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" edit:"-"`
+
+	// Paint is the painter for rendering
+	Paint *paint.Context
 
 	// Current plot bounding box in image coordinates, for plotting coordinates
 	PlotBox math32.Box2
@@ -387,11 +393,11 @@ func (pt *Plot) PY(v float64) float32 {
 
 // ClosestDataToPixel returns the Plotter data point closest to given pixel point,
 // in the Pixels image.
-func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float32, pixel math32.Vector2, data Data, legend string) {
+func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, plotterIndex, pointIndex int, dist float32, pixel math32.Vector2, data Data, legend string) {
 	tp := math32.Vec2(float32(px), float32(py))
 	dist = float32(math32.MaxFloat32)
-	for _, p := range pt.Plotters {
-		dts, pxX, pxY := p.Data()
+	for pi, pl := range pt.Plotters {
+		dts, pxX, pxY := pl.Data()
 		for i, ptx := range pxX {
 			pty := pxY[i]
 			pxy := math32.Vec2(ptx, pty)
@@ -399,10 +405,11 @@ func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float
 			if d < dist {
 				dist = d
 				pixel = pxy
-				plt = p
-				idx = i
+				plt = pl
+				plotterIndex = pi
+				pointIndex = i
 				data = dts
-				legend = pt.Legend.LegendForPlotter(p)
+				legend = pt.Legend.LegendForPlotter(pl)
 			}
 		}
 	}
