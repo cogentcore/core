@@ -153,6 +153,10 @@ The `statplot` package provides functions taking `tensor` data that produce stat
 
 TODO: add a Data scatter that plots points to overlay on top of Violin or Box.
 
+## LegendGroups
+
+* implements current legend grouping logic -- ends up being a multi-table output -- not sure how to interface.
+
 ## Histogram
 
 ## Quartiles
