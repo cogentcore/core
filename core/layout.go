@@ -1152,7 +1152,11 @@ func (fr *Frame) SizeDown(iter int) bool {
 // iteration is required.  It allocates sizes to fit given parent-allocated
 // total size.
 func (fr *Frame) sizeDownFrame(iter int) bool {
-	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "SizeDown") || fr.Styles.Display == styles.NoLayout {
+	if fr.Styles.Display == styles.NoLayout {
+		fr.WidgetBase.SizeDown(iter) // behave like a widget
+		return fr.sizeDownChildren(iter)
+	}
+	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "SizeDown") {
 		return fr.WidgetBase.SizeDown(iter) // behave like a widget
 	}
 	prel := fr.updateParentRelSizes()
