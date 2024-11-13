@@ -31,7 +31,7 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 	}
 	csty := make(map[tensor.Values]*Style, nc)
 	gps := make(map[string][]tensor.Values, nc)
-	var xt tensor.Values
+	var xt tensor.Values // get the _last_ role = X column -- most specific counter
 	var errs []error
 	for _, cl := range dt.Columns.Values {
 		st := &Style{}
@@ -43,7 +43,7 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 		csty[cl] = st
 		stl.Run(st)
 		gps[st.Group] = append(gps[st.Group], cl)
-		if xt == nil && st.Role == X {
+		if st.Role == X {
 			xt = cl
 		}
 	}
@@ -82,9 +82,16 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 			for _, gc := range gcols {
 				gst := csty[gc]
 				if gst.Role == rl {
+					if rl == Y {
+						if !gst.On {
+							continue
+						}
+					}
 					data[rl] = gc
 					got = true
-					break
+					if rl != X { // get the last one for X
+						break
+					}
 				}
 			}
 			if !got {

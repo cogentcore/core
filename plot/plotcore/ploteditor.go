@@ -25,6 +25,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/plot"
+	"cogentcore.org/core/plot/plots"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
@@ -335,10 +336,11 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 	if pl.table == nil {
 		return
 	}
+	colorIdx := 0 // index for color sequence -- skips various types
 	for ci, cl := range pl.table.Columns.Values {
 		cnm := pl.table.Columns.Keys[ci]
 		psty := plot.GetStylersFrom(cl)
-		cst, mods := pl.defaultColumnStyle(ci, cl, psty)
+		cst, mods := pl.defaultColumnStyle(cl, ci, &colorIdx, psty)
 		updateStyle := func() {
 			if len(mods) == 0 {
 				return
@@ -350,6 +352,7 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 			})
 			plot.SetStylersTo(cl, sty)
 		}
+		updateStyle()
 		tree.AddAt(p, cnm, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.CenterAll()
@@ -419,27 +422,43 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 
 // defaultColumnStyle initializes the column style with any existing stylers
 // plus additional general defaults, returning the initially modified field names.
-func (pl *PlotEditor) defaultColumnStyle(ci int, cl tensor.Values, psty plot.Stylers) (*plot.Style, map[string]bool) {
+func (pl *PlotEditor) defaultColumnStyle(cl tensor.Values, ci int, colorIdx *int, psty plot.Stylers) (*plot.Style, map[string]bool) {
 	cst := &plot.Style{}
 	cst.Defaults()
 	if psty != nil {
 		psty.Run(cst)
 	}
 	mods := map[string]bool{}
-	// todo: qualify based on type?
+	isfloat := reflectx.KindIsFloat(cl.DataType())
 	if cst.Plotter == "" {
-		cst.Plotter = plot.PlotterName("XY")
-		mods["Plotter"] = true
+		if isfloat {
+			cst.Plotter = plots.XYType
+			mods["Plotter"] = true
+		} else if cl.IsString() {
+			cst.Plotter = plot.PlotterName(plots.LabelsType)
+			mods["Plotter"] = true
+		}
 	}
 	if cst.Role == plot.NoRole {
-		cst.Role = plot.Y
 		mods["Role"] = true
+		if isfloat {
+			cst.Role = plot.Y
+		} else if cl.IsString() {
+			cst.Role = plot.Label
+		} else {
+			cst.Role = plot.X
+		}
 	}
-	// if cst.Line.Color == nil {  // todo: detect default
-	// todo: skip over non-float types here
-	cst.Line.Color = colors.Uniform(colors.Spaced(ci))
-	mods["Line.Color"] = true
-	// }
+	if cst.Line.Color == colors.Scheme.OnSurface {
+		if cst.Role == plot.Y && isfloat {
+			spclr := colors.Uniform(colors.Spaced(*colorIdx))
+			cst.Line.Color = spclr
+			mods["Line.Color"] = true
+			cst.Point.Color = spclr
+			mods["Point.Color"] = true
+			(*colorIdx)++
+		}
+	}
 	return cst, mods
 }
 
