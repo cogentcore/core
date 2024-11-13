@@ -46,6 +46,7 @@ type LineStyle struct { //types:add -setters
 
 func (ls *LineStyle) Defaults() {
 	ls.Color = colors.Scheme.OnSurface
+	ls.Fill = colors.Uniform(colors.Transparent)
 	ls.Width.Pt(1)
 }
 
@@ -64,6 +65,17 @@ func (ls *LineStyle) SetStroke(pt *Plot) bool {
 	pc.StrokeStyle.Width = ls.Width
 	pc.StrokeStyle.Color = ls.Color
 	pc.StrokeStyle.ToDots(uc)
+	return true
+}
+
+func (ls *LineStyle) HasFill() bool {
+	if ls.Fill == nil {
+		return false
+	}
+	clr := colors.ToUniform(ls.Fill)
+	if clr == colors.Transparent {
+		return false
+	}
 	return true
 }
 

@@ -151,10 +151,20 @@ func (pl *PlotEditor) SetTable(tab *table.Table) *PlotEditor {
 	return pl
 }
 
-// SetSlice sets the table to a [table.NewSliceTable]
-// from the given slice.
-func (pl *PlotEditor) SetSlice(sl any) *PlotEditor {
-	return pl.SetTable(errors.Log1(table.NewSliceTable(sl)))
+// SetSlice sets the table to a [table.NewSliceTable] from the given slice.
+// Optional styler functions are used for each struct field in sequence,
+// and any can contain global plot style.
+func (pl *PlotEditor) SetSlice(sl any, stylers ...func(s *plot.Style)) *PlotEditor {
+	dt, err := table.NewSliceTable(sl)
+	errors.Log(err)
+	if dt == nil {
+		return nil
+	}
+	mx := min(dt.NumColumns(), len(stylers))
+	for i := range mx {
+		plot.SetStylersTo(dt.Columns.Values[i], plot.Stylers{stylers[i]})
+	}
+	return pl.SetTable(dt)
 }
 
 // SaveSVG saves the plot to an svg -- first updates to ensure that plot is current

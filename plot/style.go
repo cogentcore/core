@@ -71,6 +71,7 @@ func NewStyle() *Style {
 }
 
 func (st *Style) Defaults() {
+	st.Plot.Defaults()
 	st.Line.Defaults()
 	st.Point.Defaults()
 	st.Text.Defaults()
@@ -86,14 +87,14 @@ type WidthStyle struct { //types:add -setters
 
 	// Offset for Bar plot is the offset added to each X axis value
 	// relative to the Stride computed value (X = offset + index * Stride)
-	// Defaults to 1.
+	// Defaults to 0.
 	Offset float64
 
 	// Stride for Bar plot is distance between bars. Defaults to 1.
 	Stride float64
 
-	// Width for Bar plot is the width of the bars, which should be less than
-	// the Stride (1 typically) to prevent bar overlap. Defaults to .8.
+	// Width for Bar plot is the width of the bars, as a fraction of the Stride,
+	// to prevent bar overlap. Defaults to .8.
 	Width float64 `min:"0.01" max:"1" default:"0.8"`
 
 	// Pad for Bar plot is additional space at start / end of data range,

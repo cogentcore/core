@@ -8,11 +8,13 @@ import (
 	"testing"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/plot"
+	"cogentcore.org/core/plot/plots"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 )
 
-type Data struct {
+type data struct {
 	City       string
 	Population float32
 	Area       float32
@@ -25,12 +27,16 @@ func TestTablePlotEditor(t *testing.T) {
 	epc.OpenCSV("testdata/ra25epoch.tsv", tensor.Tab)
 
 	pl := NewPlotEditor(b)
-	pl.Options.Title = "RA25 Epoch Train"
-	pl.Options.XAxis = "Epoch"
-	// pl.Options.Scale = 2
-	pl.Options.Points = true
+	pst := func(s *plot.Style) {
+		s.Plot.Title = "RA25 Epoch Train"
+		s.Plot.PointsOn = plot.On
+	}
+	perr := epc.Column("PctErr")
+	plot.SetStylersTo(perr, plot.Stylers{pst, func(s *plot.Style) {
+		s.On = true
+		s.Role = plot.Y
+	}})
 	pl.SetTable(epc)
-	pl.ColumnOptions("UnitErr").On = true
 	b.AddTopBar(func(bar *core.Frame) {
 		core.NewToolbar(bar).Maker(pl.MakeToolbar)
 	})
@@ -38,18 +44,24 @@ func TestTablePlotEditor(t *testing.T) {
 }
 
 func TestSlicePlotEditor(t *testing.T) {
-	t.Skip("TODO: this test randomly hangs on CI")
-	data := []Data{
+	dt := []data{
 		{"Davis", 62000, 500},
 		{"Boulder", 85000, 800},
 	}
 
 	b := core.NewBody()
-
 	pl := NewPlotEditor(b)
-	pl.Options.Title = "Slice Data"
-	pl.Options.Points = true
-	pl.SetSlice(data)
+	pst := func(s *plot.Style) {
+		s.Plot.Title = "Test Data"
+		s.Plot.PointsOn = plot.On
+	}
+	onst := func(s *plot.Style) {
+		pst(s)
+		s.Plotter = plots.BarType
+		s.On = true
+		s.Role = plot.Y
+	}
+	pl.SetSlice(dt, pst, onst)
 	b.AddTopBar(func(bar *core.Frame) {
 		core.NewToolbar(bar).Maker(pl.MakeToolbar)
 	})

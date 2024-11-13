@@ -180,5 +180,7 @@ Here is the copyright notice for that package:
 
 # TODO
 
+* points size incorporated into UpdateRange in XY
+* tensor index
 * Grid? in styling.
 

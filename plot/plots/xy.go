@@ -120,8 +120,7 @@ func (ln *XY) Plot(plt *plot.Plot) {
 	ln.PX = plot.PlotX(plt, ln.X)
 	ln.PY = plot.PlotY(plt, ln.Y)
 	np := len(ln.PX)
-
-	if ln.Style.Line.Fill != nil {
+	if ln.Style.Line.HasFill() {
 		pc.FillStyle.Color = ln.Style.Line.Fill
 		minY := plt.PY(plt.Y.Range.Min)
 		prevX := ln.PX[0]

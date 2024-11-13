@@ -50,7 +50,7 @@ type AxisStyle struct { //types:add -setters
 	// on the axis, thus making it easier to see.
 	Padding units.Value
 
-	// NTicks is the desired number of ticks.
+	// NTicks is the desired number of ticks (actual likely will be different).
 	NTicks int
 
 	// Scale specifies how values are scaled along the axis:
@@ -73,7 +73,7 @@ func (ax *AxisStyle) Defaults() {
 	ax.Text.Defaults()
 	ax.Text.Size.Dp(20)
 	ax.Padding.Pt(5)
-	ax.NTicks = 3
+	ax.NTicks = 5
 	ax.TickText.Defaults()
 	ax.TickText.Size.Dp(16)
 	ax.TickText.Padding.Dp(2)

@@ -66,6 +66,8 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 	plt := New()
 	var legends []Thumbnailer // candidates for legend adding -- only add if > 1
 	var legLabels []string
+	var barCols []int  // column indexes of bar plots
+	var barPlots []int // plotter indexes of bar plots
 	for ci, cl := range dt.Columns.Values {
 		cnm := dt.Columns.Keys[ci]
 		st := csty[ci]
@@ -152,17 +154,21 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 			}
 		}
 		pl := pt.New(data)
-		if pl != nil {
-			plt.Add(pl)
-			if !st.NoLegend {
-				if tn, ok := pl.(Thumbnailer); ok {
-					legends = append(legends, tn)
-					legLabels = append(legLabels, lbl)
-				}
-			}
-		} else {
+		if pl == nil {
 			err = fmt.Errorf("plot.NewTablePlot: error in creating plotter type: %q", ptyp)
 			errs = append(errs, err)
+			continue
+		}
+		plt.Add(pl)
+		if !st.NoLegend {
+			if tn, ok := pl.(Thumbnailer); ok {
+				legends = append(legends, tn)
+				legLabels = append(legLabels, lbl)
+			}
+		}
+		if ptyp == "Bar" {
+			barCols = append(barCols, ci)
+			barPlots = append(barPlots, len(plt.Plotters)-1)
 		}
 	}
 	if len(legends) > 1 {
@@ -181,5 +187,42 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 			s.Plot.XAxis.Label = lbl
 		})
 	}
+	nbar := len(barCols)
+	if nbar > 1 {
+		sz := 1.0 / (float64(nbar) + 0.5)
+		for bi, bp := range barPlots {
+			pl := plt.Plotters[bp]
+			pl.Stylers().Add(func(s *Style) {
+				s.Width.Stride = 1
+				s.Width.Offset = float64(bi) * sz
+				s.Width.Width = psty.BarWidth * sz
+			})
+		}
+	}
 	return plt, errors.Join(errs...)
 }
+
+// todo: bar chart rows, if needed
+//
+// netn := pl.table.NumRows() * stride
+// xc := pl.table.ColumnByIndex(xi)
+// vals := make([]string, netn)
+// for i, dx := range pl.table.Indexes {
+// 	pi := mid + i*stride
+// 	if pi < netn && dx < xc.Len() {
+// 		vals[pi] = xc.String1D(dx)
+// 	}
+// }
+// plt.NominalX(vals...)
+
+// todo:
+// Use string labels for X axis if X is a string
+// xc := pl.table.ColumnByIndex(xi)
+// if xc.Tensor.IsString() {
+// 	xcs := xc.Tensor.(*tensor.String)
+// 	vals := make([]string, pl.table.NumRows())
+// 	for i, dx := range pl.table.Indexes {
+// 		vals[i] = xcs.Values[dx]
+// 	}
+// 	plt.NominalX(vals...)
+// }
