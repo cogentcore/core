@@ -754,6 +754,11 @@ func (wb *WidgetBase) sizeUpParts() {
 }
 
 func (fr *Frame) SizeUp() {
+	if fr.Styles.Display == styles.NoLayout {
+		fr.SizeUpWidget()
+		fr.sizeUpChildren()
+		return
+	}
 	if !fr.HasChildren() {
 		fr.SizeUpWidget() // behave like a widget
 		return
@@ -1147,6 +1152,10 @@ func (fr *Frame) SizeDown(iter int) bool {
 // iteration is required.  It allocates sizes to fit given parent-allocated
 // total size.
 func (fr *Frame) sizeDownFrame(iter int) bool {
+	if fr.Styles.Display == styles.NoLayout {
+		fr.WidgetBase.SizeDown(iter) // behave like a widget
+		return fr.sizeDownChildren(iter)
+	}
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "SizeDown") {
 		return fr.WidgetBase.SizeDown(iter) // behave like a widget
 	}
@@ -1536,6 +1545,11 @@ func (wb *WidgetBase) sizeFinalParts() {
 }
 
 func (fr *Frame) SizeFinal() {
+	if fr.Styles.Display == styles.NoLayout {
+		fr.WidgetBase.SizeFinal() // behave like a widget
+		fr.sizeFinalChildren()
+		return
+	}
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "SizeFinal") {
 		fr.WidgetBase.SizeFinal() // behave like a widget
 		return
@@ -1639,6 +1653,10 @@ func (wb *WidgetBase) positionChildren() {
 // Position: uses the final sizes to position everything within layouts
 // according to alignment settings.
 func (fr *Frame) Position() {
+	if fr.Styles.Display == styles.NoLayout {
+		fr.positionFromPos()
+		return
+	}
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "Position") {
 		fr.WidgetBase.Position() // behave like a widget
 		return
@@ -1829,6 +1847,13 @@ func (fr *Frame) applyScenePosChildren() {
 // This step can be performed when scrolling after updating Scroll.
 func (fr *Frame) ApplyScenePos() {
 	fr.scrollResetIfNone()
+	if fr.Styles.Display == styles.NoLayout {
+		fr.WidgetBase.ApplyScenePos()
+		fr.applyScenePosChildren()
+		fr.PositionScrolls()
+		fr.applyScenePosParts() // in case they fit inside parent
+		return
+	}
 	// note: ly.Geom.Scroll has the X, Y scrolling offsets, set by Layouter.ScrollChanged function
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "ScenePos") {
 		fr.WidgetBase.ApplyScenePos() // behave like a widget
@@ -1848,6 +1873,16 @@ func (fr *Frame) scrollResetIfNone() {
 			fr.Geom.Scroll.SetDim(d, 0)
 		}
 	}
+}
+
+// positionFromPos does NoLayout positioning from style positions.
+func (fr *Frame) positionFromPos() {
+	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		cwb.Geom.RelPos.X = cwb.Styles.Pos.X.Dots
+		cwb.Geom.RelPos.Y = cwb.Styles.Pos.Y.Dots
+		fmt.Println("set pos:", cwb.Geom.RelPos)
+		return tree.Continue
+	})
 }
 
 // DirectRenderDrawBBoxes returns the destination and source bounding boxes

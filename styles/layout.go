@@ -92,7 +92,7 @@ func (d Directions) Other() Directions {
 	return Row
 }
 
-// Displays determines how items are displayed
+// Displays determines how items are displayed.
 type Displays int32 //enums:enum -trim-prefix Display -transform kebab
 
 const (
@@ -110,7 +110,7 @@ const (
 	Grid
 
 	// NoLayout means that no automatic layout will be applied to elements,
-	// which can then be managed via custom code.
+	// which can then be managed via custom code by setting the [Style.Pos] position.
 	NoLayout
 
 	// None means the item is not displayed: sets the Invisible state

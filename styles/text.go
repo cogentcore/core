@@ -187,14 +187,14 @@ type WhiteSpaces int32 //enums:enum -trim-prefix WhiteSpace
 const (
 	// WhiteSpaceNormal means that all white space is collapsed to a single
 	// space, and text wraps when necessary.  To get full word wrapping to
-	// expand to all available space, you also need to set GrowWrap = 1.
+	// expand to all available space, you also need to set GrowWrap = true.
 	// Use the SetTextWrap convenience method to set both.
 	WhiteSpaceNormal WhiteSpaces = iota
 
 	// WhiteSpaceNowrap means that sequences of whitespace will collapse into
 	// a single whitespace. Text will never wrap to the next line except
 	// if there is an explicit line break via a <br> tag.  In general you
-	// also don't want simple non-wrapping text labels to Grow (GrowWrap = 0).
+	// also don't want simple non-wrapping text labels to Grow (GrowWrap = false).
 	// Use the SetTextWrap method to set both.
 	WhiteSpaceNowrap
 
