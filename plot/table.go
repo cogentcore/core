@@ -33,6 +33,8 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 	gps := make(map[string][]tensor.Values, nc)
 	var xt tensor.Values // get the _last_ role = X column -- most specific counter
 	var errs []error
+	var pstySt Style // overall PlotStyle accumulator
+	pstySt.Defaults()
 	for _, cl := range dt.Columns.Values {
 		st := &Style{}
 		st.Defaults()
@@ -42,18 +44,36 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 		}
 		csty[cl] = st
 		stl.Run(st)
+		stl.Run(&pstySt)
 		gps[st.Group] = append(gps[st.Group], cl)
 		if st.Role == X {
 			xt = cl
 		}
 	}
+	psty := pstySt.Plot
+	globalX := false
+	if psty.XAxis.Column != "" {
+		xc := dt.Columns.At(psty.XAxis.Column)
+		if xc != nil {
+			xt = xc
+			globalX = true
+		} else {
+			errs = append(errs, errors.New("XAxis.Column name not found: "+psty.XAxis.Column))
+		}
+	}
 	doneGps := map[string]bool{}
 	plt := New()
+	var legends []Thumbnailer // candidates for legend adding -- only add if > 1
+	var legLabels []string
 	for ci, cl := range dt.Columns.Values {
 		cnm := dt.Columns.Keys[ci]
 		st := csty[cl]
 		if st == nil || !st.On || st.Role == X {
 			continue
+		}
+		lbl := cnm
+		if st.Label != "" {
+			lbl = st.Label
 		}
 		gp := st.Group
 		if doneGps[gp] {
@@ -74,8 +94,11 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 		data := Data{st.Role: cl}
 		gcols := gps[gp]
 		gotReq := true
+		if globalX {
+			data[X] = xt
+		}
 		for _, rl := range pt.Required {
-			if rl == st.Role {
+			if rl == st.Role || (rl == X && globalX) {
 				continue
 			}
 			got := false
@@ -123,9 +146,20 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 		pl := pt.New(data)
 		if pl != nil {
 			plt.Add(pl)
+			if !st.NoLegend {
+				if tn, ok := pl.(Thumbnailer); ok {
+					legends = append(legends, tn)
+					legLabels = append(legLabels, lbl)
+				}
+			}
 		} else {
 			err = fmt.Errorf("plot.NewTablePlot: error in creating plotter type: %q", ptyp)
 			errs = append(errs, err)
+		}
+	}
+	if len(legends) > 1 {
+		for i, l := range legends {
+			plt.Legend.Add(legLabels[i], l)
 		}
 	}
 	return plt, errors.Join(errs...)

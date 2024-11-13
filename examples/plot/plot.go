@@ -24,7 +24,6 @@ func main() {
 	epc.OpenFS(tsv, "ra25epoch.tsv", tensor.Tab)
 	pst := func(s *plot.Style) {
 		s.Plot.Title = "RA25 Epoch Train"
-		s.Plot.XAxis.Label = "Epoch"
 	}
 	perr := epc.Column("PctErr")
 	plot.SetStylersTo(perr, plot.Stylers{pst, func(s *plot.Style) {

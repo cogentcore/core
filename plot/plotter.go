@@ -14,6 +14,7 @@ import (
 // Plotter is an interface that wraps the Plot method.
 // Standard implementations of Plotter are in the [plots] package.
 type Plotter interface {
+
 	// Plot draws the data to the Plot Paint.
 	Plot(pt *Plot)
 

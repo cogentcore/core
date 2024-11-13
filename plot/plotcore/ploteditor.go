@@ -264,7 +264,11 @@ func (pl *PlotEditor) genPlot() {
 			pl.table.Sequential()
 		}
 	}
-	pl.plot = errors.Log1(plot.NewTablePlot(pl.table))
+	var err error
+	pl.plot, err = plot.NewTablePlot(pl.table)
+	if err != nil {
+		core.ErrorSnackbar(pl, err)
+	}
 	pl.plotWidget.SetPlot(pl.plot) // redraws etc
 	pl.inPlot = false
 }
@@ -397,7 +401,7 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 						pl.Update()
 						pl.AsyncUnlock()
 					}
-					d := core.NewBody("Column " + cnm + " style properties")
+					d := core.NewBody(cnm + " style properties")
 					fm := core.NewForm(d).SetStruct(cst)
 					fm.Modified = mods
 					fm.OnChange(func(e events.Event) {

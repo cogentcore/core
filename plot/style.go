@@ -23,15 +23,17 @@ type Style struct { //types:add -setters
 	On bool
 
 	// Plotter is the type of plotter to use in plotting this data,
-	// for table-based plots. Blank means use default ([plots.XY] is overall default).
+	// for [plot.NewTablePlot] [table.Table] driven plots.
+	// Blank means use default ([plots.XY] is overall default).
 	Plotter PlotterName
 
-	// Role specifies a role for this item, used for table-based plots to indicate
-	// how a particular column of data should be used.
+	// Role specifies how a particular column of data should be used,
+	// for [plot.NewTablePlot] [table.Table] driven plots.
 	Role Roles
 
-	// Group specifies a group of related data items, used for table-based plots
-	// where different columns of data within the same Group play different Roles
+	// Group specifies a group of related data items,
+	// for [plot.NewTablePlot] [table.Table] driven plots,
+	// where different columns of data within the same Group play different Roles.
 	Group string
 
 	// Range is the effective range of data to plot, where either end can be fixed.
@@ -39,6 +41,11 @@ type Style struct { //types:add -setters
 
 	// Label provides an alternative label to use for axis, if set.
 	Label string
+
+	// NoLegend excludes this item from the legend when it otherwise would be included,
+	// for [plot.NewTablePlot] [table.Table] driven plots.
+	// Role = Y values are included in the Legend by default.
+	NoLegend bool
 
 	// NTicks sets the desired number of ticks for the axis, if > 0.
 	NTicks int

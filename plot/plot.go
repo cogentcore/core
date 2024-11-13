@@ -25,10 +25,10 @@ import (
 
 // XAxisStyle has overall plot level styling properties for the XAxis.
 type XAxisStyle struct { //types:add -setters
-	// Column specifies the column to use for the common X axis in a table based plot.
-	// if empty or not found, the row number is used.
-	// This optional for Bar plots, if present and Legend is also present,
-	// then an extra space will be put between X values.
+	// Column specifies the column to use for the common X axis,
+	// for [plot.NewTablePlot] [table.Table] driven plots.
+	// If empty, standard Group-based role binding is used: the last column
+	// within the same group with Role=X is used.
 	Column string
 
 	// Rotation is the rotation of the X Axis labels, in degrees.

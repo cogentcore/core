@@ -518,7 +518,7 @@ func TestTable(t *testing.T) {
 			s.Plot.Title = "Test " + ttyp
 			s.Plot.XAxis.Label = "X Axis"
 			s.Plot.YAxisLabel = "Y Axis"
-			s.Plotter = ttyp
+			s.Plotter = plot.PlotterName(ttyp)
 			s.Plot.Scale = 2
 			s.Plot.SetLinesOn(plot.On).SetPointsOn(plot.On)
 			s.Line.Color = colors.Uniform(colors.Red)

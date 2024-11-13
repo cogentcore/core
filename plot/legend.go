@@ -93,14 +93,12 @@ func (lg *Legend) LegendForPlotter(plt Plotter) string {
 	return ""
 }
 
-// Thumbnailer wraps the Thumbnail method, which
-// draws the small image in a legend representing the
-// style of data.
+// Thumbnailer wraps the Thumbnail method, which draws the small
+// image in a legend representing the style of data.
 type Thumbnailer interface {
-	// Thumbnail draws an thumbnail representing
-	// a legend entry.  The thumbnail will usually show
-	// a smaller representation of the style used
-	// to plot the corresponding data.
+	// Thumbnail draws an thumbnail representing a legend entry.
+	// The thumbnail will usually show a smaller representation
+	// of the style used to plot the corresponding data.
 	Thumbnail(pt *Plot)
 }
 
