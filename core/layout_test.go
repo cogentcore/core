@@ -237,13 +237,11 @@ func TestParentRelativeSize(t *testing.T) {
 }
 
 func TestNoLayoutPos(t *testing.T) {
-	DebugSettings.LayoutTrace = true
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(100))
 	})
 	fr := NewFrame(b)
-	fr.SetName("target")
 	fr.Styler(func(s *styles.Style) {
 		s.Display = styles.NoLayout
 		s.Grow.Set(1, 1)
@@ -258,5 +256,5 @@ func TestNoLayoutPos(t *testing.T) {
 		s.Min.Set(units.Dp(40))
 		s.Pos.Set(units.Dp(50))
 	})
-	b.AssertRender(t, "layout/nolayout")
+	b.AssertRender(t, "layout/no-layout")
 }
