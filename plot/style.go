@@ -160,6 +160,13 @@ func GetStylersFrom(obj any) Stylers {
 	return st
 }
 
+// AddStylerTo adds the given [Styler] function into given object's [metadata].
+func AddStylerTo(obj any, f func(s *Style)) {
+	st := GetStylersFrom(obj)
+	st.Add(f)
+	SetStylersTo(obj, st)
+}
+
 // GetStylersFromData returns [Stylers] from given role
 // in given [Data]. nil if not present.
 func GetStylersFromData(data Data, role Roles) Stylers {

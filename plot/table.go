@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
+	"golang.org/x/exp/maps"
 )
 
 // NewTablePlot returns a new Plot with all configuration based on given
@@ -29,34 +29,35 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 	if nc == 0 {
 		return nil, errors.New("plot.NewTablePlot: no columns in data table")
 	}
-	csty := make(map[tensor.Values]*Style, nc)
-	gps := make(map[string][]tensor.Values, nc)
-	var xt tensor.Values // get the _last_ role = X column -- most specific counter
+	csty := make([]*Style, nc)
+	gps := make(map[string][]int, nc)
+	xi := -1 // get the _last_ role = X column -- most specific counter
 	var errs []error
 	var pstySt Style // overall PlotStyle accumulator
 	pstySt.Defaults()
-	for _, cl := range dt.Columns.Values {
+	for ci, cl := range dt.Columns.Values {
 		st := &Style{}
 		st.Defaults()
 		stl := GetStylersFrom(cl)
-		if stl == nil {
-			continue
+		if stl != nil {
+			stl.Run(st)
 		}
-		csty[cl] = st
-		stl.Run(st)
+		csty[ci] = st
 		stl.Run(&pstySt)
-		gps[st.Group] = append(gps[st.Group], cl)
+		gps[st.Group] = append(gps[st.Group], ci)
 		if st.Role == X {
-			xt = cl
+			xi = ci
 		}
 	}
 	psty := pstySt.Plot
 	globalX := false
+	xidxs := map[int]bool{} // map of all the _unique_ x indexes used
 	if psty.XAxis.Column != "" {
-		xc := dt.Columns.At(psty.XAxis.Column)
-		if xc != nil {
-			xt = xc
+		xc := dt.Columns.IndexByKey(psty.XAxis.Column)
+		if xc >= 0 {
+			xi = xc
 			globalX = true
+			xidxs[xi] = true
 		} else {
 			errs = append(errs, errors.New("XAxis.Column name not found: "+psty.XAxis.Column))
 		}
@@ -67,8 +68,8 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 	var legLabels []string
 	for ci, cl := range dt.Columns.Values {
 		cnm := dt.Columns.Keys[ci]
-		st := csty[cl]
-		if st == nil || !st.On || st.Role == X {
+		st := csty[ci]
+		if !st.On || st.Role == X {
 			continue
 		}
 		lbl := cnm
@@ -95,31 +96,35 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 		gcols := gps[gp]
 		gotReq := true
 		if globalX {
-			data[X] = xt
+			data[X] = dt.Columns.Values[xi]
 		}
+		gotX := -1
 		for _, rl := range pt.Required {
 			if rl == st.Role || (rl == X && globalX) {
 				continue
 			}
 			got := false
-			for _, gc := range gcols {
-				gst := csty[gc]
+			for _, gi := range gcols {
+				gst := csty[gi]
 				if gst.Role == rl {
 					if rl == Y {
 						if !gst.On {
 							continue
 						}
 					}
-					data[rl] = gc
+					data[rl] = dt.Columns.Values[gi]
 					got = true
-					if rl != X { // get the last one for X
+					if rl == X {
+						gotX = gi
+					} else {
 						break
 					}
 				}
 			}
 			if !got {
-				if rl == X && xt != nil {
-					data[rl] = xt
+				if rl == X && xi >= 0 {
+					gotX = xi
+					data[rl] = dt.Columns.Values[xi]
 				} else {
 					err = fmt.Errorf("plot.NewTablePlot: Required Role %q not found in Group %q, Plotter %q not added for Column: %q", rl.String(), gp, ptyp, cnm)
 					errs = append(errs, err)
@@ -131,14 +136,17 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 		if !gotReq {
 			continue
 		}
+		if gotX >= 0 {
+			xidxs[gotX] = true
+		}
 		for _, rl := range pt.Optional {
 			if rl == st.Role { // should not happen
 				continue
 			}
-			for _, gc := range gcols {
-				gst := csty[gc]
+			for _, gi := range gcols {
+				gst := csty[gi]
 				if gst.Role == rl {
-					data[rl] = gc
+					data[rl] = dt.Columns.Values[gi]
 					break
 				}
 			}
@@ -161,6 +169,17 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 		for i, l := range legends {
 			plt.Legend.Add(legLabels[i], l)
 		}
+	}
+	if psty.XAxis.Label == "" && len(xidxs) == 1 {
+		xi := maps.Keys(xidxs)[0]
+		lbl := dt.Columns.Keys[xi]
+		if csty[xi].Label != "" {
+			lbl = csty[xi].Label
+		}
+		pl0 := plt.Plotters[0]
+		pl0.Stylers().Add(func(s *Style) {
+			s.Plot.XAxis.Label = lbl
+		})
 	}
 	return plt, errors.Join(errs...)
 }

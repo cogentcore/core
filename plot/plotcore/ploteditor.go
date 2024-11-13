@@ -8,7 +8,6 @@ package plotcore
 //go:generate core generate
 
 import (
-	"fmt"
 	"io/fs"
 	"log/slog"
 	"path/filepath"
@@ -504,7 +503,6 @@ func (pl *PlotEditor) plotStyleFromTable(dt *table.Table) {
 			mods["Title"] = true
 		}
 	}
-	fmt.Println(pl.PlotStyle.Scale)
 }
 
 // modFields returns the modified fields as field paths using . separators
