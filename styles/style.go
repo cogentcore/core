@@ -95,7 +95,7 @@ type Style struct { //types:add
 	// in the horizontal axis to allow for longer, word wrapped text to fill
 	// the available space, but then it does not grow thereafter, so that alignment
 	// operations still work (Grow elements do not align because they absorb all
-	// available space).
+	// available space). Do NOT set this for non-Text elements.
 	GrowWrap bool
 
 	// RenderBox determines whether to render the standard box model for the element.
