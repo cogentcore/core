@@ -22,21 +22,17 @@ func main() {
 
 	epc := table.New("epc")
 	epc.OpenFS(tsv, "ra25epoch.tsv", tensor.Tab)
-	epcc := epc.Column("Epoch")
-	plot.SetStylersTo(epcc, plot.Stylers{func(s *plot.Style) {
-		s.Role = plot.X
-	}})
+	pst := func(s *plot.Style) {
+		s.Plot.Title = "RA25 Epoch Train"
+		s.Plot.XAxis.Label = "Epoch"
+	}
 	perr := epc.Column("PctErr")
-	plot.SetStylersTo(perr, plot.Stylers{func(s *plot.Style) {
+	plot.SetStylersTo(perr, plot.Stylers{pst, func(s *plot.Style) {
 		s.On = true
 		s.Role = plot.Y
 	}})
 
 	pl := plotcore.NewPlotEditor(b)
-	// pl.Options.Title = "RA25 Epoch Train"
-	// pl.Options.XAxis = "Epoch"
-	// pl.Options.Points = true
-	// pl.ColumnOptions("UnitErr").On = true
 	pl.SetTable(epc)
 	b.AddTopBar(func(bar *core.Frame) {
 		core.NewToolbar(bar).Maker(pl.MakeToolbar)

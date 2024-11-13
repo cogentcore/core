@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -268,52 +269,40 @@ func (pl *PlotEditor) genPlot() {
 	pl.inPlot = false
 }
 
-const plotColumnsHeaderN = 2
+const plotColumnsHeaderN = 3
 
-// setAllColumns turns all Columns on or off (except X axis)
-func (pl *PlotEditor) setAllColumns(on bool) {
-	// fr := pl.columnsFrame
-	// for i, cli := range fr.Children {
-	// 	if i < plotColumnsHeaderN {
-	// 		continue
-	// 	}
-	// 	ci := i - plotColumnsHeaderN
-	// 	cp := pl.Columns[ci]
-	// 	if cp.Column == pl.Options.XAxis {
-	// 		continue
-	// 	}
-	// 	cp.On = on
-	// 	cl := cli.(*core.Frame)
-	// 	sw := cl.Child(0).(*core.Switch)
-	// 	sw.SetChecked(cp.On)
-	// }
-	// pl.UpdatePlot()
-	// pl.NeedsRender()
+// allColumnsOff turns all columns off.
+func (pl *PlotEditor) allColumnsOff() {
+	fr := pl.columnsFrame
+	for i, cli := range fr.Children {
+		if i < plotColumnsHeaderN {
+			continue
+		}
+		cl := cli.(*core.Frame)
+		sw := cl.Child(0).(*core.Switch)
+		sw.SetChecked(false)
+		sw.SendChange()
+	}
+	pl.Update()
 }
 
 // setColumnsByName turns columns on or off if their name contains
 // the given string.
 func (pl *PlotEditor) setColumnsByName(nameContains string, on bool) { //types:add
-	// fr := pl.columnsFrame
-	// for i, cli := range fr.Children {
-	// 	if i < plotColumnsHeaderN {
-	// 		continue
-	// 	}
-	// 	ci := i - plotColumnsHeaderN
-	// 	cp := pl.Columns[ci]
-	// 	if cp.Column == pl.Options.XAxis {
-	// 		continue
-	// 	}
-	// 	if !strings.Contains(cp.Column, nameContains) {
-	// 		continue
-	// 	}
-	// 	cp.On = on
-	// 	cl := cli.(*core.Frame)
-	// 	sw := cl.Child(0).(*core.Switch)
-	// 	sw.SetChecked(cp.On)
-	// }
-	// pl.UpdatePlot()
-	// pl.NeedsRender()
+	fr := pl.columnsFrame
+	for i, cli := range fr.Children {
+		if i < plotColumnsHeaderN {
+			continue
+		}
+		cl := cli.(*core.Frame)
+		if !strings.Contains(cl.Name, nameContains) {
+			continue
+		}
+		sw := cl.Child(0).(*core.Switch)
+		sw.SetChecked(on)
+		sw.SendChange()
+	}
+	pl.Update()
 }
 
 // makeColumns makes the Plans for columns
@@ -323,7 +312,7 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 			w.SetText("Clear").SetIcon(icons.ClearAll).SetType(core.ButtonAction)
 			w.SetTooltip("Turn all columns off")
 			w.OnClick(func(e events.Event) {
-				pl.setAllColumns(false)
+				pl.allColumnsOff()
 			})
 		})
 		tree.AddChild(w, func(w *core.Button) {
@@ -362,7 +351,21 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 			})
 			tree.AddChild(w, func(w *core.Switch) {
 				w.SetType(core.SwitchCheckbox).SetTooltip("Turn this column on or off")
-				// todo: set color according to style
+				w.Styler(func(s *styles.Style) {
+					s.Color = cst.Line.Color
+				})
+				tree.AddChildInit(w, "stack", func(w *core.Frame) {
+					f := func(name string) {
+						tree.AddChildInit(w, name, func(w *core.Icon) {
+							w.Styler(func(s *styles.Style) {
+								s.Color = cst.Line.Color
+							})
+						})
+					}
+					f("icon-on")
+					f("icon-off")
+					f("icon-indeterminate")
+				})
 				w.OnChange(func(e events.Event) {
 					mods["On"] = true
 					cst.On = w.IsChecked()
@@ -490,6 +493,12 @@ func (pl *PlotEditor) plotStyleFromTable(dt *table.Table) {
 	if pst.PointsOn == plot.Default {
 		pst.PointsOn = plot.Off
 		mods["PointsOn"] = true
+	}
+	if pst.Title == "" {
+		pst.Title = metadata.Name(pl.table)
+		if pst.Title != "" {
+			mods["Title"] = true
+		}
 	}
 	fmt.Println(pl.PlotStyle.Scale)
 }

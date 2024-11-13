@@ -124,3 +124,25 @@ func SetTo(obj any, key string, value any) error {
 	md.Set(key, value)
 	return nil
 }
+
+// SetName sets the "Name" standard key.
+func SetName(obj any, name string) {
+	SetTo(obj, "Name", name)
+}
+
+// Name returns the "Name" standard key value (empty if not set).
+func Name(obj any) string {
+	nm, _ := GetFrom[string](obj, "Name")
+	return nm
+}
+
+// SetDoc sets the "Doc" standard key.
+func SetDoc(obj any, doc string) {
+	SetTo(obj, "Doc", doc)
+}
+
+// Doc returns the "Doc" standard key value (empty if not set).
+func Doc(obj any) string {
+	doc, _ := GetFrom[string](obj, "Doc")
+	return doc
+}
