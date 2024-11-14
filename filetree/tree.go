@@ -173,7 +173,7 @@ func (ft *Tree) OpenPathFS(fsys fs.FS, path string) *Tree {
 }
 
 // UpdatePath updates the tree at the directory level for given path
-// and everything below it.  It flags that it needs render update,
+// and everything below it. It flags that it needs render update,
 // but if a deletion or insertion happened, then NeedsLayout should also
 // be called.
 func (ft *Tree) UpdatePath(path string) {
@@ -355,8 +355,13 @@ func (ft *Tree) AddExternalFile(fpath string) (*Node, error) {
 	if has, _ := ft.hasExternalFile(pth); has {
 		return ft.externalNodeByPath(pth)
 	}
+	newExt := len(ft.externalFiles) == 0
 	ft.externalFiles = append(ft.externalFiles, pth)
-	ft.Child(0).(Filer).AsFileNode().Update()
+	if newExt {
+		ft.Update()
+	} else {
+		ft.Child(0).(Filer).AsFileNode().Update()
+	}
 	return ft.externalNodeByPath(pth)
 }
 
