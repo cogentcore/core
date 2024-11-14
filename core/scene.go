@@ -5,7 +5,6 @@
 package core
 
 import (
-	"fmt"
 	"image"
 	"slices"
 
@@ -296,7 +295,10 @@ func (sc *Scene) resize(geom math32.Geom2DInt) {
 
 // ResizeToContents resizes the scene so it fits the current contents.
 // Only applicable to Desktop systems where windows can be resized.
-func (sc *Scene) ResizeToContents() {
+// Extra size is added to the amount computed to hold the contents,
+// which is needed in cases with wrapped text elements, which don't
+// always size accurately.
+func (sc *Scene) ResizeToContents(extra image.Point) {
 	if TheApp.Platform().IsMobile() { // not resizable
 		return
 	}
@@ -307,8 +309,7 @@ func (sc *Scene) ResizeToContents() {
 	go func() {
 		scsz := system.TheApp.Screen(0).PixSize
 		sz := sc.contentsSize(scsz)
-		fmt.Println(scsz, sz, sc.SceneSize())
-		win.SystemWindow.SetSize(sz)
+		win.SystemWindow.SetSize(sz.Add(extra))
 	}()
 }
 

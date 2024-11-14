@@ -9,6 +9,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"image"
 	"strconv"
 	"strings"
 	"time"
@@ -598,8 +599,9 @@ func dialogs(ts *core.Tabs) {
 	})
 
 	rw := core.NewButton(drow).SetText("Resize To Contents")
+	rw.SetTooltip("resizes this window to fit the current contents")
 	rw.OnClick(func(e events.Event) {
-		drow.Scene.ResizeToContents()
+		drow.Scene.ResizeToContents(image.Point{0, 40}) // note: size is not correct due to wrapping? #1307
 	})
 
 	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Snackbars")
