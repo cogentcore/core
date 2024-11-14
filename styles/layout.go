@@ -109,9 +109,9 @@ const (
 	// of elements in the X axis.
 	Grid
 
-	// NoLayout means that no automatic layout will be applied to elements,
+	// Custom means that no automatic layout will be applied to elements,
 	// which can then be managed via custom code by setting the [Style.Pos] position.
-	NoLayout
+	Custom
 
 	// None means the item is not displayed: sets the Invisible state
 	DisplayNone

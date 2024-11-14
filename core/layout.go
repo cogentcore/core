@@ -754,7 +754,7 @@ func (wb *WidgetBase) sizeUpParts() {
 }
 
 func (fr *Frame) SizeUp() {
-	if fr.Styles.Display == styles.NoLayout {
+	if fr.Styles.Display == styles.Custom {
 		fr.SizeUpWidget()
 		fr.sizeUpChildren()
 		return
@@ -1152,7 +1152,7 @@ func (fr *Frame) SizeDown(iter int) bool {
 // iteration is required.  It allocates sizes to fit given parent-allocated
 // total size.
 func (fr *Frame) sizeDownFrame(iter int) bool {
-	if fr.Styles.Display == styles.NoLayout {
+	if fr.Styles.Display == styles.Custom {
 		fr.WidgetBase.SizeDown(iter) // behave like a widget
 		return fr.sizeDownChildren(iter)
 	}
@@ -1545,7 +1545,7 @@ func (wb *WidgetBase) sizeFinalParts() {
 }
 
 func (fr *Frame) SizeFinal() {
-	if fr.Styles.Display == styles.NoLayout {
+	if fr.Styles.Display == styles.Custom {
 		fr.WidgetBase.SizeFinal() // behave like a widget
 		fr.sizeFinalChildren()
 		return
@@ -1653,7 +1653,7 @@ func (wb *WidgetBase) positionChildren() {
 // Position: uses the final sizes to position everything within layouts
 // according to alignment settings.
 func (fr *Frame) Position() {
-	if fr.Styles.Display == styles.NoLayout {
+	if fr.Styles.Display == styles.Custom {
 		fr.positionFromPos()
 		return
 	}
@@ -1847,7 +1847,7 @@ func (fr *Frame) applyScenePosChildren() {
 // This step can be performed when scrolling after updating Scroll.
 func (fr *Frame) ApplyScenePos() {
 	fr.scrollResetIfNone()
-	if fr.Styles.Display == styles.NoLayout {
+	if fr.Styles.Display == styles.Custom {
 		fr.WidgetBase.ApplyScenePos()
 		fr.applyScenePosChildren()
 		fr.PositionScrolls()
@@ -1875,12 +1875,11 @@ func (fr *Frame) scrollResetIfNone() {
 	}
 }
 
-// positionFromPos does NoLayout positioning from style positions.
+// positionFromPos does Custom positioning from style positions.
 func (fr *Frame) positionFromPos() {
 	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cwb.Geom.RelPos.X = cwb.Styles.Pos.X.Dots
 		cwb.Geom.RelPos.Y = cwb.Styles.Pos.Y.Dots
-		fmt.Println("set pos:", cwb.Geom.RelPos)
 		return tree.Continue
 	})
 }

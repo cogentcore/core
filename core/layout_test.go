@@ -236,14 +236,14 @@ func TestParentRelativeSize(t *testing.T) {
 	b.AssertRender(t, "layout/parent-relative")
 }
 
-func TestNoLayoutPos(t *testing.T) {
+func TestCustomLayout(t *testing.T) {
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(100))
 	})
 	fr := NewFrame(b)
 	fr.Styler(func(s *styles.Style) {
-		s.Display = styles.NoLayout
+		s.Display = styles.Custom
 		s.Grow.Set(1, 1)
 	})
 	NewFrame(fr).Styler(func(s *styles.Style) {
@@ -256,5 +256,5 @@ func TestNoLayoutPos(t *testing.T) {
 		s.Min.Set(units.Dp(40))
 		s.Pos.Set(units.Dp(50))
 	})
-	b.AssertRender(t, "layout/no-layout")
+	b.AssertRender(t, "layout/custom")
 }
