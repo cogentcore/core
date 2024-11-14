@@ -31,16 +31,11 @@ const (
 type LoopPhase int32 //enums:enum
 
 const (
-	// Start is the start of the loop.
+	// Start is the start of the loop. Start does initialization, and should be called at Init.
 	Start LoopPhase = iota
 
 	// Step is at each iteration of the loop.
 	Step
-
-	// End is at the end of the loop, after all iterations.
-	// This is only called for the outer-most loop, because all others
-	// are synonymous with Step at the next higher level.
-	End
 )
 
 type Sim struct {
@@ -57,7 +52,7 @@ type Sim struct {
 	Current *datafs.Data
 
 	// StatFuncs are statistics functions, per stat, handles everything.
-	StatFuncs []func(tm Times, lp LoopPhase)
+	StatFuncs []func(ltime Times, lphase LoopPhase)
 
 	// Counters are current values of counters: normally in looper.
 	Counters [TimesN]int
@@ -78,13 +73,13 @@ func (ss *Sim) ConfigAll() {
 	ss.ConfigStats()
 }
 
-func (ss *Sim) AddStat(f func(tm Times, lp LoopPhase)) {
+func (ss *Sim) AddStat(f func(ltime Times, lphase LoopPhase)) {
 	ss.StatFuncs = append(ss.StatFuncs, f)
 }
 
-func (ss *Sim) RunStats(tm Times, lp LoopPhase) {
+func (ss *Sim) RunStats(ltime Times, lphase LoopPhase) {
 	for _, sf := range ss.StatFuncs {
-		sf(tm, lp)
+		sf(ltime, lphase)
 	}
 }
 
@@ -93,98 +88,92 @@ func (ss *Sim) ConfigStats() {
 	ss.Current, _ = ss.Stats.Mkdir("Current")
 	ctrs := []Times{Run, Epoch, Trial}
 	for _, ctr := range ctrs {
-		ss.AddStat(func(tm Times, lp LoopPhase) {
-			if lp == End || tm > ctr { // don't record counter for time above it
+		ss.AddStat(func(ltime Times, lphase LoopPhase) {
+			if ltime > ctr { // don't record counter for time above it
 				return
 			}
-			name := ctr.String()                   // name of stat = counter
-			td := ss.Stats.RecycleDir(tm.String()) // log for tm time
-			tv := datafs.Value[int](td, name)
-			if lp == Start {
-				tv.SetNumRows(0)
-				if ps := plot.GetStylersFrom(tv); ps == nil {
+			name := ctr.String() // name of stat = counter
+			timeDir := ss.Stats.RecycleDir(ltime.String())
+			tsr := datafs.Value[int](timeDir, name)
+			if lphase == Start {
+				tsr.SetNumRows(0)
+				if ps := plot.GetStylersFrom(tsr); ps == nil {
 					ps.Add(func(s *plot.Style) {
 						s.Range.SetMin(0)
 					})
-					plot.SetStylersTo(tv, ps)
+					plot.SetStylersTo(tsr, ps)
 				}
 				return
 			}
 			ctv := ss.Counters[ctr]
 			datafs.Scalar[int](ss.Current, name).SetInt1D(ctv, 0)
-			tv.AppendRowInt(ctv)
+			tsr.AppendRowInt(ctv)
 		})
 	}
 	// note: it is essential to only have 1 per func
 	// so generic names can be used for everything.
-	ss.AddStat(func(tm Times, lp LoopPhase) {
-		if lp == End { // only called for Run; we ignore
-			return
-		}
+	ss.AddStat(func(ltime Times, lphase LoopPhase) {
 		name := "SSE"
-		td := ss.Stats.RecycleDir(tm.String())
-		tv := datafs.Value[float64](td, name)
-		if lp == Start {
-			tv.SetNumRows(0)
-			if ps := plot.GetStylersFrom(tv); ps == nil {
+		timeDir := ss.Stats.RecycleDir(ltime.String())
+		tsr := datafs.Value[float64](timeDir, name)
+		if lphase == Start {
+			tsr.SetNumRows(0)
+			if ps := plot.GetStylersFrom(tsr); ps == nil {
 				ps.Add(func(s *plot.Style) {
 					s.Range.SetMin(0).SetMax(1)
 					s.On = true
 				})
-				plot.SetStylersTo(tv, ps)
+				plot.SetStylersTo(tsr, ps)
 			}
 			return
 		}
-		switch tm {
+		switch ltime {
 		case Trial:
-			sv := rand.Float64()
-			datafs.Scalar[float64](ss.Current, name).SetFloat(sv, 0)
-			tv.AppendRowFloat(sv)
+			stat := rand.Float64()
+			datafs.Scalar[float64](ss.Current, name).SetFloat(stat, 0)
+			tsr.AppendRowFloat(stat)
 		case Epoch:
-			subd := ss.Stats.RecycleDir((tm - 1).String())
-			sv := stats.StatMean.Call(subd.Value(name))
-			tv.AppendRow(sv)
+			subd := ss.Stats.RecycleDir((ltime - 1).String())
+			stat := stats.StatMean.Call(subd.Value(name))
+			tsr.AppendRow(stat)
 		case Run:
-			subd := ss.Stats.RecycleDir((tm - 1).String())
-			sv := stats.StatMean.Call(subd.Value(name))
-			tv.AppendRow(sv)
+			subd := ss.Stats.RecycleDir((ltime - 1).String())
+			stat := stats.StatMean.Call(subd.Value(name))
+			tsr.AppendRow(stat)
 		}
 	})
-	ss.AddStat(func(tm Times, lp LoopPhase) {
-		if lp == End { // only called for Run; we ignore
-			return
-		}
+	ss.AddStat(func(ltime Times, lphase LoopPhase) {
 		name := "Err"
-		td := ss.Stats.RecycleDir(tm.String())
-		tv := datafs.Value[float64](td, name)
-		if lp == Start {
-			tv.SetNumRows(0)
-			if ps := plot.GetStylersFrom(tv); ps == nil {
+		timeDir := ss.Stats.RecycleDir(ltime.String())
+		tsr := datafs.Value[float64](timeDir, name)
+		if lphase == Start {
+			tsr.SetNumRows(0)
+			if ps := plot.GetStylersFrom(tsr); ps == nil {
 				ps.Add(func(s *plot.Style) {
 					s.Range.SetMin(0).SetMax(1)
 					s.On = true
 				})
-				plot.SetStylersTo(tv, ps)
+				plot.SetStylersTo(tsr, ps)
 			}
 			return
 		}
-		switch tm {
+		switch ltime {
 		case Trial:
 			sse := ss.Current.Item("SSE").AsFloat64()
-			sv := 1.0
+			stat := 1.0
 			if sse < 0.5 {
-				sv = 0
+				stat = 0
 			}
-			datafs.Scalar[float64](ss.Current, name).SetFloat(sv, 0)
-			tv.AppendRowFloat(sv)
+			datafs.Scalar[float64](ss.Current, name).SetFloat(stat, 0)
+			tsr.AppendRowFloat(stat)
 		case Epoch:
-			subd := ss.Stats.RecycleDir((tm - 1).String())
-			sv := stats.StatMean.Call(subd.Value(name))
-			tv.AppendRow(sv)
+			subd := ss.Stats.RecycleDir((ltime - 1).String())
+			stat := stats.StatMean.Call(subd.Value(name))
+			tsr.AppendRow(stat)
 		case Run:
-			subd := ss.Stats.RecycleDir((tm - 1).String())
-			sv := stats.StatMean.Call(subd.Value(name))
-			tv.AppendRow(sv)
+			subd := ss.Stats.RecycleDir((ltime - 1).String())
+			stat := stats.StatMean.Call(subd.Value(name))
+			tsr.AppendRow(stat)
 		}
 	})
 }
@@ -209,7 +198,7 @@ func (ss *Sim) Run() {
 		}
 		ss.RunStats(Run, Step)
 	}
-	ss.RunStats(Run, End)
+	// todo: could do final analysis here
 	// alldt := ss.Logs.Item("AllTrials").GetDirTable(nil)
 	// dir, _ := ss.Logs.Mkdir("Stats")
 	// stats.TableGroups(dir, alldt, "Run", "Epoch", "Trial")
