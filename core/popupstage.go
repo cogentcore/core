@@ -88,6 +88,10 @@ func (st *Stage) runPopup() *Stage {
 	sc.SceneGeom.Size = maxGeom.Size
 	sc.SceneGeom.Pos = st.Pos
 	sz := sc.prefSize(maxGeom.Size)
+	bigPopup := false
+	if usingWinGeom && 4*sz.X*sz.Y > 3*msc.SceneGeom.Size.X*msc.SceneGeom.Size.Y { // reasonable fraction
+		bigPopup = true
+	}
 	scrollWd := int(sc.Styles.ScrollbarWidth.Dots)
 	fontHt := 16
 	if sc.Styles.Font.Face != nil {
@@ -124,8 +128,9 @@ func (st *Stage) runPopup() *Stage {
 	}
 
 	sc.SceneGeom.Size = sz
-	sc.fitInWindow(maxGeom) // does resize
-	if usingWinGeom {       // reposition to be as close to top-right of main scene as possible
+	if bigPopup { // we have a big popup -- make it not cover the original window;
+		sc.fitInWindow(maxGeom) // does resize
+		// reposition to be as close to top-right of main scene as possible
 		tpos := msc.SceneGeom.Pos
 		tpos.X += msc.SceneGeom.Size.X
 		if tpos.X+sc.SceneGeom.Size.X > maxGeom.Size.X { // favor left side instead
@@ -145,6 +150,8 @@ func (st *Stage) runPopup() *Stage {
 			tpos.Y = 0
 		}
 		sc.SceneGeom.Pos = tpos
+	} else {
+		sc.fitInWindow(msc.SceneGeom)
 	}
 	sc.showIter = 0
 
