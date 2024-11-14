@@ -371,11 +371,11 @@ var _DisplaysValues = []Displays{0, 1, 2, 3, 4}
 // DisplaysN is the highest valid value for type Displays, plus one.
 const DisplaysN Displays = 5
 
-var _DisplaysValueMap = map[string]Displays{`flex`: 0, `stacked`: 1, `grid`: 2, `no-layout`: 3, `none`: 4}
+var _DisplaysValueMap = map[string]Displays{`flex`: 0, `stacked`: 1, `grid`: 2, `custom`: 3, `none`: 4}
 
-var _DisplaysDescMap = map[Displays]string{0: `Flex is the default layout model, based on a simplified version of the CSS flex layout: uses MainAxis to specify the direction, Wrap for wrapping of elements, and Min, Max, and Grow values on elements to determine sizing.`, 1: `Stacked is a stack of elements, with one on top that is visible`, 2: `Grid is the X, Y grid layout, with Columns specifying the number of elements in the X axis.`, 3: `NoLayout means that no automatic layout will be applied to elements, which can then be managed via custom code.`, 4: `None means the item is not displayed: sets the Invisible state`}
+var _DisplaysDescMap = map[Displays]string{0: `Flex is the default layout model, based on a simplified version of the CSS flex layout: uses MainAxis to specify the direction, Wrap for wrapping of elements, and Min, Max, and Grow values on elements to determine sizing.`, 1: `Stacked is a stack of elements, with one on top that is visible`, 2: `Grid is the X, Y grid layout, with Columns specifying the number of elements in the X axis.`, 3: `Custom means that no automatic layout will be applied to elements, which can then be managed via custom code by setting the [Style.Pos] position.`, 4: `None means the item is not displayed: sets the Invisible state`}
 
-var _DisplaysMap = map[Displays]string{0: `flex`, 1: `stacked`, 2: `grid`, 3: `no-layout`, 4: `none`}
+var _DisplaysMap = map[Displays]string{0: `flex`, 1: `stacked`, 2: `grid`, 3: `custom`, 4: `none`}
 
 // String returns the string representation of this Displays value.
 func (i Displays) String() string { return enums.String(i, _DisplaysMap) }
@@ -924,7 +924,7 @@ const WhiteSpacesN WhiteSpaces = 5
 
 var _WhiteSpacesValueMap = map[string]WhiteSpaces{`Normal`: 0, `Nowrap`: 1, `Pre`: 2, `PreLine`: 3, `PreWrap`: 4}
 
-var _WhiteSpacesDescMap = map[WhiteSpaces]string{0: `WhiteSpaceNormal means that all white space is collapsed to a single space, and text wraps when necessary. To get full word wrapping to expand to all available space, you also need to set GrowWrap = 1. Use the SetTextWrap convenience method to set both.`, 1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line except if there is an explicit line break via a &lt;br&gt; tag. In general you also don&#39;t want simple non-wrapping text labels to Grow (GrowWrap = 0). Use the SetTextWrap method to set both.`, 2: `WhiteSpacePre means that whitespace is preserved. Text will only wrap on line breaks. Acts like the &lt;pre&gt; tag in HTML. This invokes a different hand-written parser because the default Go parser automatically throws away whitespace.`, 3: `WhiteSpacePreLine means that sequences of whitespace will collapse into a single whitespace. Text will wrap when necessary, and on line breaks`, 4: `WhiteSpacePreWrap means that whitespace is preserved. Text will wrap when necessary, and on line breaks`}
+var _WhiteSpacesDescMap = map[WhiteSpaces]string{0: `WhiteSpaceNormal means that all white space is collapsed to a single space, and text wraps when necessary. To get full word wrapping to expand to all available space, you also need to set GrowWrap = true. Use the SetTextWrap convenience method to set both.`, 1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line except if there is an explicit line break via a &lt;br&gt; tag. In general you also don&#39;t want simple non-wrapping text labels to Grow (GrowWrap = false). Use the SetTextWrap method to set both.`, 2: `WhiteSpacePre means that whitespace is preserved. Text will only wrap on line breaks. Acts like the &lt;pre&gt; tag in HTML. This invokes a different hand-written parser because the default Go parser automatically throws away whitespace.`, 3: `WhiteSpacePreLine means that sequences of whitespace will collapse into a single whitespace. Text will wrap when necessary, and on line breaks`, 4: `WhiteSpacePreWrap means that whitespace is preserved. Text will wrap when necessary, and on line breaks`}
 
 var _WhiteSpacesMap = map[WhiteSpaces]string{0: `Normal`, 1: `Nowrap`, 2: `Pre`, 3: `PreLine`, 4: `PreWrap`}
 
