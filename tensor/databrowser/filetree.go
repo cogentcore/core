@@ -21,7 +21,40 @@ import (
 	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/texteditor/diffbrowser"
+	"cogentcore.org/core/tree"
 )
+
+// Treer is an interface for getting the Root node as a DataTree struct.
+type Treer interface {
+	AsDataTree() *DataTree
+}
+
+// AsDataTree returns the given value as a [DataTree] if it has
+// an AsDataTree() method, or nil otherwise.
+func AsDataTree(n tree.Node) *DataTree {
+	if t, ok := n.(Treer); ok {
+		return t.AsDataTree()
+	}
+	return nil
+}
+
+// DataTree is the databrowser version of [filetree.Tree],
+// which provides the Tabber to show data editors.
+type DataTree struct {
+	filetree.Tree
+
+	// Tabber is the [Tabber] for this tree.
+	Tabber Tabber
+}
+
+func (ft *DataTree) AsDataTree() *DataTree {
+	return ft
+}
+
+func (ft *DataTree) Init() {
+	ft.Tree.Init()
+	ft.Root = ft
+}
 
 // FileNode is databrowser version of FileNode for FileTree
 type FileNode struct {
@@ -31,6 +64,15 @@ type FileNode struct {
 func (fn *FileNode) Init() {
 	fn.Node.Init()
 	fn.AddContextMenu(fn.ContextMenu)
+}
+
+// Tabber returns the [Tabber] for this filenode, from root tree.
+func (fn *FileNode) Tabber() Tabber {
+	fr := AsDataTree(fn.Root)
+	if fr != nil {
+		return fr.Tabber
+	}
+	return nil
 }
 
 func (fn *FileNode) WidgetTooltip(pos image.Point) (string, image.Point) {
@@ -53,7 +95,7 @@ func (fn *FileNode) WidgetTooltip(pos image.Point) (string, image.Point) {
 // DataFS returns the datafs representation of this item.
 // returns nil if not a dataFS item.
 func DataFS(fn *filetree.Node) *datafs.Data {
-	dfs, ok := fn.FileRoot.FS.(*datafs.Data)
+	dfs, ok := fn.FileRoot().FS.(*datafs.Data)
 	if !ok {
 		return nil
 	}
@@ -66,7 +108,7 @@ func DataFS(fn *filetree.Node) *datafs.Data {
 
 func (fn *FileNode) GetFileInfo() error {
 	err := fn.InitFileInfo()
-	if fn.FileRoot.FS == nil {
+	if fn.FileRoot().FS == nil {
 		return err
 	}
 	d := DataFS(fn.AsNode())
@@ -91,8 +133,8 @@ func (fn *FileNode) GetFileInfo() error {
 
 func (fn *FileNode) OpenFile() error {
 	ofn := fn.AsNode()
-	br := ParentBrowser(fn.This)
-	if br == nil {
+	ts := fn.Tabber()
+	if ts == nil {
 		return nil
 	}
 	df := fsx.DirAndFile(string(fn.Filepath))
@@ -100,18 +142,12 @@ func (fn *FileNode) OpenFile() error {
 	case fn.IsDir():
 		d := DataFS(ofn)
 		dt := d.GetDirTable(nil)
-		br.NewTabTensorTable(df, dt)
-		br.Update()
+		ts.TensorTable(df, dt)
 	case fn.Info.Cat == fileinfo.Data:
 		switch fn.Info.Known {
 		case fileinfo.Tensor:
 			d := DataFS(ofn)
-			br.NewTabTensorEditor(df, d.Data)
-		// case fileinfo.Table:
-		// 	d := DataFS(ofn)
-		// 	dt := d.AsTable()
-		// 	br.NewTabTensorTable(df, dt)
-		// 	br.Update()
+			ts.TensorEditor(df, d.Data)
 		case fileinfo.Number:
 			dv := DataFS(ofn)
 			v := dv.AsFloat32()
@@ -124,7 +160,7 @@ func (fn *FileNode) OpenFile() error {
 					dv.SetFloat32(sp.Value)
 				})
 			})
-			d.RunDialog(br)
+			d.RunDialog(fn)
 		case fileinfo.String:
 			dv := DataFS(ofn)
 			v := dv.AsString()
@@ -137,15 +173,15 @@ func (fn *FileNode) OpenFile() error {
 					dv.SetString(tf.Text())
 				})
 			})
-			d.RunDialog(br)
+			d.RunDialog(fn)
 
 		default:
 			dt := table.New()
 			err := dt.OpenCSV(fsx.Filename(fn.Filepath), tensor.Tab) // todo: need more flexible data handling mode
 			if err != nil {
-				core.ErrorSnackbar(br, err)
+				core.ErrorSnackbar(fn, err)
 			} else {
-				br.NewTabTensorTable(df, dt)
+				ts.TensorTable(df, dt)
 			}
 		}
 	case fn.IsExec(): // todo: use exec?
@@ -165,7 +201,7 @@ func (fn *FileNode) OpenFile() error {
 	case fn.Info.Cat == fileinfo.Archive || fn.Info.Cat == fileinfo.Backup: // don't edit
 		fn.OpenFilesDefault()
 	default:
-		br.NewTabEditor(df, string(fn.Filepath))
+		ts.EditorString(df, string(fn.Filepath))
 	}
 	return nil
 }
@@ -183,8 +219,8 @@ func (fn *FileNode) EditFile() {
 		fn.OpenFile()
 		return
 	}
-	br := ParentBrowser(fn.This)
-	if br == nil {
+	ts := fn.Tabber()
+	if ts == nil {
 		return
 	}
 	if fn.Info.Cat == fileinfo.Data {
@@ -192,7 +228,7 @@ func (fn *FileNode) EditFile() {
 		return
 	}
 	df := fsx.DirAndFile(string(fn.Filepath))
-	br.NewTabEditor(df, string(fn.Filepath))
+	ts.EditorString(df, string(fn.Filepath))
 }
 
 // PlotFiles calls PlotFile on selected files
@@ -206,8 +242,8 @@ func (fn *FileNode) PlotFiles() { //types:add
 
 // PlotFile pulls up this file in a texteditor.
 func (fn *FileNode) PlotFile() {
-	br := ParentBrowser(fn.This)
-	if br == nil {
+	ts := fn.Tabber()
+	if ts == nil {
 		return
 	}
 	d := DataFS(fn.AsNode())
@@ -237,7 +273,7 @@ func (fn *FileNode) PlotFile() {
 			dt = table.New(df)
 			err := dt.OpenCSV(fsx.Filename(fn.Filepath), tensor.Tab) // todo: need more flexible data handling mode
 			if err != nil {
-				core.ErrorSnackbar(br, err)
+				core.ErrorSnackbar(fn, err)
 				dt = nil
 			}
 		}
@@ -245,11 +281,10 @@ func (fn *FileNode) PlotFile() {
 	if dt == nil {
 		return
 	}
-	pl := br.NewTabPlot(ptab, dt)
+	pl := ts.PlotTable(ptab, dt)
 	_ = pl
 	// pl.Options.Title = df
 	// TODO: apply column and plot level options.
-	br.Update()
 }
 
 // DiffDirs displays a browser with differences between two selected directories

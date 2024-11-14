@@ -9,7 +9,7 @@ import (
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.Browser", IDName: "browser", Doc: "Browser is a data browser, for browsing data either on an OS filesystem\nor as a datafs virtual data filesystem.\nIt supports the automatic loading of [goal] scripts as toolbar actions to\nperform pre-programmed tasks on the data, to create app-like functionality.\nScripts are ordered alphabetically and any leading #- prefix is automatically\nremoved from the label, so you can use numbers to specify a custom order.", Methods: []types.Method{{Name: "UpdateFiles", Doc: "UpdateFiles Updates the files list.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "UpdateScripts", Doc: "UpdateScripts updates the Scripts and updates the toolbar.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "FS", Doc: "FS is the filesystem, if browsing an FS"}, {Name: "DataRoot", Doc: "DataRoot is the path to the root of the data to browse."}, {Name: "StartDir", Doc: "StartDir is the starting directory, where the app was originally started."}, {Name: "ScriptsDir", Doc: "ScriptsDir is the directory containing scripts for toolbar actions.\nIt defaults to DataRoot/dbscripts"}, {Name: "Scripts", Doc: "Scripts"}, {Name: "Interpreter", Doc: "Interpreter is the interpreter to use for running Browser scripts"}, {Name: "toolbar"}, {Name: "splits"}, {Name: "files"}, {Name: "tabs"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.Browser", IDName: "browser", Doc: "Browser is a data browser, for browsing data either on an OS filesystem\nor as a datafs virtual data filesystem.\nIt supports the automatic loading of [goal] scripts as toolbar actions to\nperform pre-programmed tasks on the data, to create app-like functionality.\nScripts are ordered alphabetically and any leading #- prefix is automatically\nremoved from the label, so you can use numbers to specify a custom order.", Methods: []types.Method{{Name: "UpdateFiles", Doc: "UpdateFiles Updates the files list.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "UpdateScripts", Doc: "UpdateScripts updates the Scripts and updates the toolbar.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "FS", Doc: "FS is the filesystem, if browsing an FS."}, {Name: "DataRoot", Doc: "DataRoot is the path to the root of the data to browse."}, {Name: "StartDir", Doc: "StartDir is the starting directory, where the app was originally started."}, {Name: "ScriptsDir", Doc: "ScriptsDir is the directory containing scripts for toolbar actions.\nIt defaults to DataRoot/dbscripts"}, {Name: "Scripts", Doc: "Scripts"}, {Name: "Interpreter", Doc: "Interpreter is the interpreter to use for running Browser scripts"}, {Name: "toolbar"}, {Name: "splits"}, {Name: "files"}, {Name: "tabs"}}})
 
 // NewBrowser returns a new [Browser] with the given optional parent:
 // Browser is a data browser, for browsing data either on an OS filesystem
@@ -21,7 +21,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.
 func NewBrowser(parent ...tree.Node) *Browser { return tree.New[Browser](parent...) }
 
 // SetFS sets the [Browser.FS]:
-// FS is the filesystem, if browsing an FS
+// FS is the filesystem, if browsing an FS.
 func (t *Browser) SetFS(v fs.FS) *Browser { t.FS = v; return t }
 
 // SetDataRoot sets the [Browser.DataRoot]:
@@ -37,8 +37,25 @@ func (t *Browser) SetStartDir(v string) *Browser { t.StartDir = v; return t }
 // It defaults to DataRoot/dbscripts
 func (t *Browser) SetScriptsDir(v string) *Browser { t.ScriptsDir = v; return t }
 
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.DataTree", IDName: "data-tree", Doc: "DataTree is the databrowser version of [filetree.Tree],\nwhich provides the Tabber to show data editors.", Embeds: []types.Field{{Name: "Tree"}}, Fields: []types.Field{{Name: "Tabber", Doc: "Tabber is the [Tabber] for this tree."}}})
+
+// NewDataTree returns a new [DataTree] with the given optional parent:
+// DataTree is the databrowser version of [filetree.Tree],
+// which provides the Tabber to show data editors.
+func NewDataTree(parent ...tree.Node) *DataTree { return tree.New[DataTree](parent...) }
+
+// SetTabber sets the [DataTree.Tabber]:
+// Tabber is the [Tabber] for this tree.
+func (t *DataTree) SetTabber(v Tabber) *DataTree { t.Tabber = v; return t }
+
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.FileNode", IDName: "file-node", Doc: "FileNode is databrowser version of FileNode for FileTree", Methods: []types.Method{{Name: "EditFiles", Doc: "EditFiles calls EditFile on selected files", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "PlotFiles", Doc: "PlotFiles calls PlotFile on selected files", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DiffDirs", Doc: "DiffDirs displays a browser with differences between two selected directories", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Node"}}})
 
 // NewFileNode returns a new [FileNode] with the given optional parent:
 // FileNode is databrowser version of FileNode for FileTree
 func NewFileNode(parent ...tree.Node) *FileNode { return tree.New[FileNode](parent...) }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.Tabs", IDName: "tabs", Doc: "Tabs implements the [Tabber] interface.", Embeds: []types.Field{{Name: "Tabs"}}})
+
+// NewTabs returns a new [Tabs] with the given optional parent:
+// Tabs implements the [Tabber] interface.
+func NewTabs(parent ...tree.Node) *Tabs { return tree.New[Tabs](parent...) }

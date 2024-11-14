@@ -26,6 +26,20 @@ const (
 	externalFilesName = "[external files]"
 )
 
+// Treer is an interface for getting the Root node as a Tree struct.
+type Treer interface {
+	AsFileTree() *Tree
+}
+
+// AsTree returns the given value as a [Tree] if it has
+// an AsFileTree() method, or nil otherwise.
+func AsTree(n tree.Node) *Tree {
+	if t, ok := n.(Treer); ok {
+		return t.AsFileTree()
+	}
+	return nil
+}
+
 // Tree is the root widget of a file tree representing files in a given directory
 // (and subdirectories thereof), and has some overall management state for how to
 // view things.
@@ -80,16 +94,19 @@ type Tree struct {
 
 func (ft *Tree) Init() {
 	ft.Node.Init()
-	ft.FileRoot = ft
+	ft.Root = ft
 	ft.FileNodeType = types.For[Node]()
 	ft.OpenDepth = 4
 	ft.DirsOnTop = true
 	ft.FirstMaker(func(p *tree.Plan) {
+		if len(ft.externalFiles) == 0 {
+			return
+		}
 		tree.AddNew(p, externalFilesName, func() Filer {
 			return tree.NewOfType(ft.FileNodeType).(Filer)
 		}, func(wf Filer) {
 			w := wf.AsFileNode()
-			w.FileRoot = ft
+			w.Root = ft.Root
 			w.Filepath = externalFilesName
 			w.Info.Mode = os.ModeDir
 			w.Info.VCS = vcs.Stored
@@ -108,6 +125,10 @@ func (fv *Tree) Destroy() {
 		fv.doneWatcher = nil
 	}
 	fv.Tree.Destroy()
+}
+
+func (ft *Tree) AsFileTree() *Tree {
+	return ft
 }
 
 // OpenPath opens the filetree at the given os file system directory path.

@@ -16,7 +16,6 @@ import (
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/filetree"
 	"cogentcore.org/core/goal/interpreter"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -39,7 +38,7 @@ var TheBrowser *Browser
 type Browser struct {
 	core.Frame
 
-	// FS is the filesystem, if browsing an FS
+	// FS is the filesystem, if browsing an FS.
 	FS fs.FS
 
 	// DataRoot is the path to the root of the data to browse.
@@ -60,8 +59,8 @@ type Browser struct {
 
 	toolbar *core.Toolbar
 	splits  *core.Splits
-	files   *filetree.Tree
-	tabs    *core.Tabs
+	files   *DataTree
+	tabs    *Tabs
 }
 
 // Init initializes with the data and script directories
@@ -85,23 +84,22 @@ func (br *Browser) Init() {
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
 			})
-			tree.AddChildAt(w, "filetree", func(w *filetree.Tree) {
+			tree.AddChildAt(w, "filetree", func(w *DataTree) {
 				br.files = w
 				w.FileNodeType = types.For[FileNode]()
-				// w.OnSelect(func(e events.Event) {
-				// 	e.SetHandled()
-				// 	sels := w.SelectedViews()
-				// 	if sels != nil {
-				// 		br.FileNodeSelected(sn)
-				// 	}
-				// })
 			})
 		})
-		tree.AddChildAt(w, "tabs", func(w *core.Tabs) {
+		tree.AddChildAt(w, "tabs", func(w *Tabs) {
 			br.tabs = w
 			w.Type = core.FunctionalTabs
 		})
 	})
+	br.Updater(func() {
+		if br.files != nil {
+			br.files.Tabber = br.tabs
+		}
+	})
+
 }
 
 // NewBrowserWindow opens a new data Browser for given

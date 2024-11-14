@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/tensor/stats/stats"
 )
 
+// Times are the looping time levels for running and statistics.
 type Times int32 //enums:enum
 
 const (
@@ -31,10 +32,10 @@ const (
 type LoopPhase int32 //enums:enum
 
 const (
-	// Start is the start of the loop. Start does initialization, and should be called at Init.
+	// Start is the start of the loop: resets accumulated stats, initializes.
 	Start LoopPhase = iota
 
-	// Step is at each iteration of the loop.
+	// Step is each iteration of the loop.
 	Step
 )
 
