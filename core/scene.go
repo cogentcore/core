@@ -5,6 +5,7 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"slices"
 
@@ -124,11 +125,11 @@ const (
 	// copy the image up to the GPU or not.
 	sceneImageUpdated
 
-	// scenePrefSizing means that this scene is currently doing a
+	// sceneContentsSizing means that this scene is currently doing a
 	// PrefSize computation to compute the size of the scene
 	// (for sizing window for example); affects layout size computation
 	// only for Over
-	scenePrefSizing
+	sceneContentsSizing
 )
 
 // hasFlag returns whether the given flag is set.
@@ -291,6 +292,24 @@ func (sc *Scene) resize(geom math32.Geom2DInt) {
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.showIter = 0
 	sc.NeedsLayout()
+}
+
+// ResizeToContents resizes the scene so it fits the current contents.
+// Only applicable to Desktop systems where windows can be resized.
+func (sc *Scene) ResizeToContents() {
+	if TheApp.Platform().IsMobile() { // not resizable
+		return
+	}
+	win := sc.RenderWindow()
+	if win == nil {
+		return
+	}
+	go func() {
+		scsz := system.TheApp.Screen(0).PixSize
+		sz := sc.contentsSize(scsz)
+		fmt.Println(scsz, sz, sc.SceneSize())
+		win.SystemWindow.SetSize(sz)
+	}()
 }
 
 // Close closes the [Stage] associated with this [Scene].

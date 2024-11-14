@@ -597,6 +597,11 @@ func dialogs(ts *core.Tabs) {
 		d.RunWindowDialog(nd)
 	})
 
+	rw := core.NewButton(drow).SetText("Resize To Contents")
+	rw.OnClick(func(e events.Event) {
+		drow.Scene.ResizeToContents()
+	})
+
 	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Snackbars")
 	srow := makeRow(tab)
 

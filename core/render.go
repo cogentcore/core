@@ -214,7 +214,7 @@ func (sc *Scene) doUpdate() bool {
 
 	if sc.showIter == sceneShowIters { // end of first pass
 		sc.showIter++
-		if !sc.hasFlag(scenePrefSizing) {
+		if !sc.hasFlag(sceneContentsSizing) {
 			sc.Events.activateStartFocus()
 		}
 	}
@@ -255,20 +255,20 @@ func (sc *Scene) doRebuild() {
 	sc.layoutRenderScene()
 }
 
-// prefSize computes the preferred size of the scene based on current contents.
+// contentsSize computes the size of the scene based on current contents.
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
-func (sc *Scene) prefSize(initSz image.Point) image.Point {
+func (sc *Scene) contentsSize(initSz image.Point) image.Point {
 	sc.setFlag(true, sceneUpdating) // prevent rendering
 	defer func() { sc.setFlag(false, sceneUpdating) }()
 
-	sc.setFlag(true, scenePrefSizing)
+	sc.setFlag(true, sceneContentsSizing)
 	sc.updateScene()
 	sc.applyStyleScene()
 	sc.layoutScene()
 	sz := &sc.Geom.Size
 	psz := sz.Actual.Total
-	sc.setFlag(false, scenePrefSizing)
+	sc.setFlag(false, sceneContentsSizing)
 	sc.showIter = 0
 	return psz.ToPointFloor()
 }

@@ -27,7 +27,7 @@ const (
 // in terms of dp (density-independent pixels).
 func (wb *WidgetBase) SceneSize() math32.Vector2 {
 	dots := math32.FromPoint(wb.Scene.SceneGeom.Size)
-	if wb.Scene.hasFlag(scenePrefSizing) {
+	if wb.Scene.hasFlag(sceneContentsSizing) {
 		if currentRenderWindow != nil {
 			rg := currentRenderWindow.SystemWindow.RenderGeom()
 			dots = math32.FromPoint(rg.Size)
