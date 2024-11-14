@@ -27,12 +27,40 @@ const (
 	Run
 )
 
+// LoopPhase is the phase of loop processing for given time.
+type LoopPhase int32 //enums:enum
+
+const (
+	// Start is the start of the loop.
+	Start LoopPhase = iota
+
+	// Step is at each iteration of the loop.
+	Step
+
+	// End is at the end of the loop, after all iterations.
+	// This is only called for the outer-most loop, because all others
+	// are synonymous with Step at the next higher level.
+	End
+)
+
 type Sim struct {
-	Root      *datafs.Data
-	Config    *datafs.Data
-	Stats     *datafs.Data
-	StatFuncs []func(tm Times)
-	Counters  [TimesN]int
+	// Root is the root data dir.
+	Root *datafs.Data
+
+	// Config has config data.
+	Config *datafs.Data
+
+	// Stats has all stats data.
+	Stats *datafs.Data
+
+	// Current has current value of all stats
+	Current *datafs.Data
+
+	// StatFuncs are statistics functions, per stat, handles everything.
+	StatFuncs []func(tm Times, lp LoopPhase)
+
+	// Counters are current values of counters: normally in looper.
+	Counters [TimesN]int
 }
 
 // ConfigAll configures the sim
@@ -50,188 +78,138 @@ func (ss *Sim) ConfigAll() {
 	ss.ConfigStats()
 }
 
-func (ss *Sim) AddStat(f func(tm Times)) {
+func (ss *Sim) AddStat(f func(tm Times, lp LoopPhase)) {
 	ss.StatFuncs = append(ss.StatFuncs, f)
 }
 
-func (ss *Sim) RunStats(tm Times) {
+func (ss *Sim) RunStats(tm Times, lp LoopPhase) {
 	for _, sf := range ss.StatFuncs {
-		sf(tm)
+		sf(tm, lp)
 	}
 }
 
 func (ss *Sim) ConfigStats() {
 	ss.Stats, _ = ss.Root.Mkdir("Stats")
+	ss.Current, _ = ss.Stats.Mkdir("Current")
 	ctrs := []Times{Run, Epoch, Trial}
 	for _, ctr := range ctrs {
-		ss.AddStat(func(tm Times) {
-			if tm > ctr {
+		ss.AddStat(func(tm Times, lp LoopPhase) {
+			if lp == End || tm > ctr { // don't record counter for time above it
 				return
 			}
-			name := ctr.String()
-			ctv := ss.Counters[ctr]
-			td := ss.Stats.RecycleDir(tm.String())
-			cd := ss.Stats.RecycleDir("Current")
-			datafs.Scalar[int](cd, name).SetInt1D(ctv, 0)
+			name := ctr.String()                   // name of stat = counter
+			td := ss.Stats.RecycleDir(tm.String()) // log for tm time
 			tv := datafs.Value[int](td, name)
+			if lp == Start {
+				tv.SetNumRows(0)
+				if ps := plot.GetStylersFrom(tv); ps == nil {
+					ps.Add(func(s *plot.Style) {
+						s.Range.SetMin(0)
+					})
+					plot.SetStylersTo(tv, ps)
+				}
+				return
+			}
+			ctv := ss.Counters[ctr]
+			datafs.Scalar[int](ss.Current, name).SetInt1D(ctv, 0)
 			tv.AppendRow(tensor.NewIntScalar(ctv))
+		})
+	}
+	// note: it is essential to only have 1 per func
+	// so generic names can be used for everything.
+	ss.AddStat(func(tm Times, lp LoopPhase) {
+		if lp == End { // only called for Run; we ignore
+			return
+		}
+		name := "SSE"
+		td := ss.Stats.RecycleDir(tm.String())
+		tv := datafs.Value[float64](td, name)
+		if lp == Start {
+			tv.SetNumRows(0)
 			if ps := plot.GetStylersFrom(tv); ps == nil {
 				ps.Add(func(s *plot.Style) {
-					s.Range.SetMin(0)
+					s.Range.SetMin(0).SetMax(1)
+					s.On = true
 				})
 				plot.SetStylersTo(tv, ps)
 			}
-			if tm > Trial {
-				subd := ss.Stats.RecycleDir((tm - 1).String())
-				subd.Value(name).(tensor.Values).SetNumRows(0)
-			}
-		})
-	}
-	ss.AddStat(func(tm Times) {
-		sseName := "SSE"
-		errName := "Err"
-		td := ss.Stats.RecycleDir(tm.String())
+			return
+		}
 		switch tm {
 		case Trial:
-			cd := ss.Stats.RecycleDir("Current")
-			sse := rand.Float32()
-			terr := float32(1)
-			if sse < 0.5 {
-				terr = 0
-			}
-			datafs.Scalar[float32](cd, sseName).SetFloat(float64(sse), 0)
-			datafs.Scalar[float32](cd, errName).SetFloat(float64(terr), 0)
-			datafs.Value[float32](td, sseName).AppendRow(tensor.NewFloat32Scalar(sse))
-			datafs.Value[float32](td, errName).AppendRow(tensor.NewFloat32Scalar(terr))
+			sv := rand.Float64()
+			datafs.Scalar[float64](ss.Current, name).SetFloat(sv, 0)
+			tv.AppendRow(tensor.NewFloat64Scalar(sv))
 		case Epoch:
-			trld, _ := ss.Stats.Mkdir(Trial.String())
-			sse := stats.StatMean.Call(trld.Value(sseName)).Float1D(0)
-			terr := stats.StatMean.Call(trld.Value(errName)).Float1D(0)
-			datafs.Value[float32](td, sseName).AppendRow(tensor.NewFloat64Scalar(sse))
-			datafs.Value[float32](td, errName).AppendRow(tensor.NewFloat64Scalar(terr))
-			trld.Value(sseName).(tensor.Values).SetNumRows(0)
-			trld.Value(errName).(tensor.Values).SetNumRows(0)
+			subd := ss.Stats.RecycleDir((tm - 1).String())
+			sv := stats.StatMean.Call(subd.Value(name))
+			tv.AppendRow(sv)
+		case Run:
+			subd := ss.Stats.RecycleDir((tm - 1).String())
+			sv := stats.StatMean.Call(subd.Value(name))
+			tv.AppendRow(sv)
+		}
+	})
+	ss.AddStat(func(tm Times, lp LoopPhase) {
+		if lp == End { // only called for Run; we ignore
+			return
+		}
+		name := "Err"
+		td := ss.Stats.RecycleDir(tm.String())
+		tv := datafs.Value[float64](td, name)
+		if lp == Start {
+			tv.SetNumRows(0)
+			if ps := plot.GetStylersFrom(tv); ps == nil {
+				ps.Add(func(s *plot.Style) {
+					s.Range.SetMin(0).SetMax(1)
+					s.On = true
+				})
+				plot.SetStylersTo(tv, ps)
+			}
+			return
+		}
+		switch tm {
+		case Trial:
+			sse := ss.Current.Item("SSE").AsFloat64()
+			sv := 1.0
+			if sse < 0.5 {
+				sv = 0
+			}
+			datafs.Scalar[float64](ss.Current, name).SetFloat(sv, 0)
+			tv.AppendRow(tensor.NewFloat64Scalar(sv))
+		case Epoch:
+			subd := ss.Stats.RecycleDir((tm - 1).String())
+			sv := stats.StatMean.Call(subd.Value(name)).Float1D(0)
+			tv.AppendRow(tensor.NewFloat64Scalar(sv))
+		case Run:
+			subd := ss.Stats.RecycleDir((tm - 1).String())
+			sv := stats.StatMean.Call(subd.Value(name)).Float1D(0)
+			tv.AppendRow(tensor.NewFloat64Scalar(sv))
 		}
 	})
 }
-
-// // ConfigStats adds basic stats that we record for our simulation.
-// func (ss *Sim) ConfigStats(dir *datafs.Data) *datafs.Data {
-// 	stats, _ := dir.Mkdir("Stats")
-// 	datafs.NewScalar[int](stats, "Run", "Epoch", "Trial") // counters
-// 	datafs.NewScalar[string](stats, "TrialName")
-// 	datafs.NewScalar[float32](stats, "SSE", "AvgSSE", "TrlErr")
-// 	z1, key := plotcore.PlotColumnZeroOne()
-// 	stats.SetMetaItems(key, z1, "AvgErr", "TrlErr")
-// 	zmax, _ := plotcore.PlotColumnZeroOne()
-// 	zmax.Range.FixMax = false
-// 	stats.SetMetaItems(key, z1, "SSE")
-// 	return stats
-// }
-//
-// // ConfigLogs adds first-level logging of stats into tensors
-// func (ss *Sim) ConfigLogs(dir *datafs.Data) *datafs.Data {
-// 	logd, _ := dir.Mkdir("Log")
-// 	trial := ss.ConfigTrialLog(logd)
-// 	ss.ConfigAggLog(logd, "Epoch", trial, stats.StatMean, stats.StatSem, stats.StatMin)
-// 	return logd
-// }
-//
-// // ConfigTrialLog adds first-level logging of stats into tensors
-// func (ss *Sim) ConfigTrialLog(dir *datafs.Data) *datafs.Data {
-// 	logd, _ := dir.Mkdir("Trial")
-// 	ntrial := ss.Config.Item("NTrial").AsInt()
-// 	sitems := ss.Stats.ValuesFunc(nil)
-// 	for _, st := range sitems {
-// 		nm := st.Metadata().Name()
-// 		lt := logd.NewOfType(nm, st.DataType(), ntrial)
-// 		lt.Metadata().Copy(*st.Metadata()) // key affordance: we get meta data from source
-// 		tensor.SetCalcFunc(lt, func() error {
-// 			trl := ss.Stats.Item("Trial").AsInt()
-// 			if st.IsString() {
-// 				lt.SetStringRow(st.String1D(0), trl)
-// 			} else {
-// 				lt.SetFloatRow(st.Float1D(0), trl)
-// 			}
-// 			return nil
-// 		})
-// 	}
-// 	alllogd, _ := dir.Mkdir("AllTrials")
-// 	for _, st := range sitems {
-// 		nm := st.Metadata().Name()
-// 		// allocate full size
-// 		lt := alllogd.NewOfType(nm, st.DataType(), ntrial*ss.Config.Item("NEpoch").AsInt()*ss.Config.Item("NRun").AsInt())
-// 		lt.SetShapeSizes(0)                // then truncate to 0
-// 		lt.Metadata().Copy(*st.Metadata()) // key affordance: we get meta data from source
-// 		tensor.SetCalcFunc(lt, func() error {
-// 			row := lt.DimSize(0)
-// 			lt.SetShapeSizes(row + 1)
-// 			if st.IsString() {
-// 				lt.SetStringRow(st.String1D(0), row)
-// 			} else {
-// 				lt.SetFloatRow(st.Float1D(0), row)
-// 			}
-// 			return nil
-// 		})
-// 	}
-// 	return logd
-// }
-//
-// // ConfigAggLog adds a higher-level logging of lower-level into higher-level tensors
-// func (ss *Sim) ConfigAggLog(dir *datafs.Data, level string, from *datafs.Data, aggs ...stats.Stats) *datafs.Data {
-// 	logd, _ := dir.Mkdir(level)
-// 	sitems := ss.Stats.ValuesFunc(nil)
-// 	nctr := ss.Config.Item("N" + level).AsInt()
-// 	for _, st := range sitems {
-// 		if st.IsString() {
-// 			continue
-// 		}
-// 		nm := st.Metadata().Name()
-// 		src := from.Value(nm)
-// 		if st.DataType() >= reflect.Float32 {
-// 			// todo: pct correct etc
-// 			dd, _ := logd.Mkdir(nm)
-// 			for _, ag := range aggs { // key advantage of dir structure: multiple stats per item
-// 				lt := dd.NewOfType(ag.String(), st.DataType(), nctr)
-// 				lt.Metadata().Copy(*st.Metadata())
-// 				tensor.SetCalcFunc(lt, func() error {
-// 					stout := ag.Call(src)
-// 					ctr := ss.Stats.Item(level).AsInt()
-// 					lt.SetFloatRow(stout.FloatRow(0), ctr)
-// 					return nil
-// 				})
-// 			}
-// 		} else {
-// 			lt := logd.NewOfType(nm, st.DataType(), nctr)
-// 			lt.Metadata().Copy(*st.Metadata())
-// 			tensor.SetCalcFunc(lt, func() error {
-// 				v := st.Float1D(0)
-// 				ctr := ss.Stats.Item(level).AsInt()
-// 				lt.SetFloatRow(v, ctr)
-// 				return nil
-// 			})
-// 		}
-// 	}
-// 	return logd
-// }
 
 func (ss *Sim) Run() {
 	mx := ss.Config.Value("Max").(*tensor.Int)
 	nrun := mx.Value1D(int(Run))
 	nepc := mx.Value1D(int(Epoch))
 	ntrl := mx.Value1D(int(Trial))
+	ss.RunStats(Run, Start)
 	for run := range nrun {
 		ss.Counters[Run] = run
+		ss.RunStats(Epoch, Start)
 		for epc := range nepc {
 			ss.Counters[Epoch] = epc
+			ss.RunStats(Trial, Start)
 			for trl := range ntrl {
 				ss.Counters[Trial] = trl
-				ss.RunStats(Trial)
+				ss.RunStats(Trial, Step)
 			}
-			ss.RunStats(Epoch)
+			ss.RunStats(Epoch, Step)
 		}
-		ss.RunStats(Run)
+		ss.RunStats(Run, Step)
 	}
+	ss.RunStats(Run, End)
 	// alldt := ss.Logs.Item("AllTrials").GetDirTable(nil)
 	// dir, _ := ss.Logs.Mkdir("Stats")
 	// stats.TableGroups(dir, alldt, "Run", "Epoch", "Trial")
@@ -239,25 +217,6 @@ func (ss *Sim) Run() {
 	// stats.TableGroupStats(dir, stats.StatMean, alldt, sts...)
 	// stats.TableGroupStats(dir, stats.StatSem, alldt, sts...)
 }
-
-// func (ss *Sim) RunTrial(trl int) {
-// 	ss.Stats.Item("TrialName").SetString("Trial_" + strconv.Itoa(trl))
-// 	sse := rand.Float32()
-// 	avgSSE := rand.Float32()
-// 	ss.Stats.Item("SSE").SetFloat32(sse)
-// 	ss.Stats.Item("AvgSSE").SetFloat32(avgSSE)
-// 	trlErr := float32(1)
-// 	if sse < 0.5 {
-// 		trlErr = 0
-// 	}
-// 	ss.Stats.Item("TrlErr").SetFloat32(trlErr)
-// 	ss.Logs.Item("Trial").CalcAll()
-// 	ss.Logs.Item("AllTrials").CalcAll()
-// }
-
-// func (ss *Sim) EpochDone() {
-// 	ss.Logs.Item("Epoch").CalcAll()
-// }
 
 func main() {
 	ss := &Sim{}

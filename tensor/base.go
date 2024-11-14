@@ -85,6 +85,9 @@ func (tsr *Base[T]) Set1D(val T, i int) { tsr.Values[tsr.shape.Header+i] = val }
 // it is best to first set the anticipated full size, which allocates the
 // full amount of memory, and then set to 0 and grow incrementally.
 func (tsr *Base[T]) SetNumRows(rows int) {
+	if tsr.NumDims() == 0 {
+		tsr.SetShapeSizes(0)
+	}
 	_, cells := tsr.shape.RowCellSize()
 	nln := tsr.shape.Header + rows*cells
 	tsr.shape.Sizes[0] = rows

@@ -111,6 +111,9 @@ func (sh *Shape) IsEqual(oth *Shape) bool {
 // and the size of all the remaining inner dimensions (the "cell" size).
 // Used for Tensors that are columns in a data table.
 func (sh *Shape) RowCellSize() (rows, cells int) {
+	if len(sh.Sizes) == 0 {
+		return 0, 1
+	}
 	rows = sh.Sizes[0]
 	if len(sh.Sizes) == 1 {
 		cells = 1
