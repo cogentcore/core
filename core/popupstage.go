@@ -87,7 +87,7 @@ func (st *Stage) runPopup() *Stage {
 
 	sc.SceneGeom.Size = maxGeom.Size
 	sc.SceneGeom.Pos = st.Pos
-	sz := sc.contentsSize(maxGeom.Size)
+	sz := sc.contentSize(maxGeom.Size)
 	bigPopup := false
 	if usingWinGeom && 4*sz.X*sz.Y > 3*msc.SceneGeom.Size.X*msc.SceneGeom.Size.Y { // reasonable fraction
 		bigPopup = true

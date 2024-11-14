@@ -124,11 +124,10 @@ const (
 	// copy the image up to the GPU or not.
 	sceneImageUpdated
 
-	// sceneContentsSizing means that this scene is currently doing a
-	// PrefSize computation to compute the size of the scene
-	// (for sizing window for example); affects layout size computation
-	// only for Over
-	sceneContentsSizing
+	// sceneContentSizing means that this scene is currently doing a
+	// contentSize computation to compute the size of the scene
+	// (for sizing window for example). Affects layout size computation.
+	sceneContentSizing
 )
 
 // hasFlag returns whether the given flag is set.
@@ -293,12 +292,12 @@ func (sc *Scene) resize(geom math32.Geom2DInt) {
 	sc.NeedsLayout()
 }
 
-// ResizeToContents resizes the scene so it fits the current contents.
+// ResizeToContent resizes the scene so it fits the current content.
 // Only applicable to Desktop systems where windows can be resized.
-// Extra size is added to the amount computed to hold the contents,
+// Optional extra size is added to the amount computed to hold the contents,
 // which is needed in cases with wrapped text elements, which don't
 // always size accurately.
-func (sc *Scene) ResizeToContents(extra image.Point) {
+func (sc *Scene) ResizeToContent(extra ...image.Point) {
 	if TheApp.Platform().IsMobile() { // not resizable
 		return
 	}
@@ -308,8 +307,11 @@ func (sc *Scene) ResizeToContents(extra image.Point) {
 	}
 	go func() {
 		scsz := system.TheApp.Screen(0).PixSize
-		sz := sc.contentsSize(scsz)
-		win.SystemWindow.SetSize(sz.Add(extra))
+		sz := sc.contentSize(scsz)
+		if len(extra) == 1 {
+			sz = sz.Add(extra[0])
+		}
+		win.SystemWindow.SetSize(sz)
 	}()
 }
 

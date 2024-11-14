@@ -120,9 +120,9 @@ type Stage struct { //types:add -setters
 	// [WindowStage]s take up the entire window they are created in.
 	FullWindow bool
 
-	// For NewWindow stages, use the actual contents size, instead of
+	// For NewWindow stages, use the actual content size, instead of
 	// enforcing a minimum size as a function of the total screen size.
-	ContentsSize bool
+	ContentSize bool
 
 	// Timeout, if greater than 0, results in a popup stages disappearing
 	// after this timeout duration.
