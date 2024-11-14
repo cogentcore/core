@@ -124,7 +124,10 @@ func (a *AppMulti[W]) QuitClean() bool {
 	nwin := len(a.Windows)
 	for i := nwin - 1; i >= 0; i-- {
 		win := a.Windows[i]
+		// CloseReq calls RemoveWindow, which also Locks, so we must Unlock
+		a.Mu.Unlock()
 		win.CloseReq()
+		a.Mu.Lock()
 	}
 	return len(a.Windows) == 0
 }
