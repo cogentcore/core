@@ -44,6 +44,9 @@ type RowMajor interface {
 	// dimension, and cell is a 1D index into remaining inner dimensions.
 	SetFloatRow(val float64, row, cell int)
 
+	// AppendRowFloat adds a row and sets float value(s), up to number of cells.
+	AppendRowFloat(val ...float64)
+
 	////////  Ints
 
 	// IntRow returns the value at given row and cell, where row is the outermost
@@ -53,6 +56,9 @@ type RowMajor interface {
 	// SetIntRow sets the value at given row and cell, where row is the outermost
 	// dimension, and cell is a 1D index into remaining inner dimensions.
 	SetIntRow(val int, row, cell int)
+
+	// AppendRowInt adds a row and sets int value(s), up to number of cells.
+	AppendRowInt(val ...int)
 
 	////////  Strings
 
@@ -67,4 +73,7 @@ type RowMajor interface {
 	// [Rows] tensors index along the row, and use this interface extensively.
 	// This is useful for lists of patterns, and the [table.Table] container.
 	SetStringRow(val string, row, cell int)
+
+	// AppendRowString adds a row and sets string value(s), up to number of cells.
+	AppendRowString(val ...string)
 }

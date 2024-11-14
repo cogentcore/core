@@ -123,7 +123,7 @@ func (tsr *Number[T]) SetDiv(val T, i ...int) {
 	tsr.Values[tsr.shape.IndexTo1D(i...)] /= val
 }
 
-/////////////////////  Strings
+///////  Strings
 
 func (tsr *Number[T]) SetString(val string, i ...int) {
 	if fv, err := strconv.ParseFloat(val, 64); err == nil {
@@ -144,7 +144,20 @@ func (tsr *Number[T]) SetStringRow(val string, row, cell int) {
 	}
 }
 
-/////////////////////  Floats
+// AppendRowString adds a row and sets string value(s), up to number of cells.
+func (tsr *Number[T]) AppendRowString(val ...string) {
+	if tsr.NumDims() == 0 {
+		tsr.SetShapeSizes(0)
+	}
+	nrow, sz := tsr.shape.RowCellSize()
+	tsr.SetNumRows(nrow + 1)
+	mx := min(sz, len(val))
+	for i := range mx {
+		tsr.SetStringRow(val[i], nrow, i)
+	}
+}
+
+///////  Floats
 
 func (tsr *Number[T]) Float(i ...int) float64 {
 	return float64(tsr.Values[tsr.shape.IndexTo1D(i...)])
@@ -173,7 +186,20 @@ func (tsr *Number[T]) SetFloatRow(val float64, row, cell int) {
 	tsr.Values[tsr.shape.Header+row*sz+cell] = T(val)
 }
 
-/////////////////////  Ints
+// AppendRowFloat adds a row and sets float value(s), up to number of cells.
+func (tsr *Number[T]) AppendRowFloat(val ...float64) {
+	if tsr.NumDims() == 0 {
+		tsr.SetShapeSizes(0)
+	}
+	nrow, sz := tsr.shape.RowCellSize()
+	tsr.SetNumRows(nrow + 1)
+	mx := min(sz, len(val))
+	for i := range mx {
+		tsr.SetFloatRow(val[i], nrow, i)
+	}
+}
+
+///////  Ints
 
 func (tsr *Number[T]) Int(i ...int) int {
 	return int(tsr.Values[tsr.shape.IndexTo1D(i...)])
@@ -200,6 +226,19 @@ func (tsr *Number[T]) IntRow(row, cell int) int {
 func (tsr *Number[T]) SetIntRow(val int, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[tsr.shape.Header+row*sz+cell] = T(val)
+}
+
+// AppendRowInt adds a row and sets int value(s), up to number of cells.
+func (tsr *Number[T]) AppendRowInt(val ...int) {
+	if tsr.NumDims() == 0 {
+		tsr.SetShapeSizes(0)
+	}
+	nrow, sz := tsr.shape.RowCellSize()
+	tsr.SetNumRows(nrow + 1)
+	mx := min(sz, len(val))
+	for i := range mx {
+		tsr.SetIntRow(val[i], nrow, i)
+	}
 }
 
 // SetZeros is simple convenience function initialize all values to 0

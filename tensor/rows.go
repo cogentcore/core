@@ -395,15 +395,22 @@ func (rw *Rows) CopyIndexes(oix *Rows) {
 	}
 }
 
+// addRowsIndexes adds n rows to indexes starting at end of current tensor size
+func (rw *Rows) addRowsIndexes(n int) { //types:add
+	if rw.Indexes == nil {
+		return
+	}
+	stidx := rw.Tensor.DimSize(0)
+	for i := stidx; i < stidx+n; i++ {
+		rw.Indexes = append(rw.Indexes, i)
+	}
+}
+
 // AddRows adds n rows to end of underlying Tensor, and to the indexes in this view
 func (rw *Rows) AddRows(n int) { //types:add
 	stidx := rw.Tensor.DimSize(0)
+	rw.addRowsIndexes(n)
 	rw.Tensor.SetNumRows(stidx + n)
-	if rw.Indexes != nil {
-		for i := stidx; i < stidx+n; i++ {
-			rw.Indexes = append(rw.Indexes, i)
-		}
-	}
 }
 
 // InsertRows adds n rows to end of underlying Tensor, and to the indexes starting at
@@ -433,10 +440,7 @@ func (rw *Rows) Swap(i, j int) {
 	rw.Indexes[i], rw.Indexes[j] = rw.Indexes[j], rw.Indexes[i]
 }
 
-///////////////////////////////////////////////
-// Rows access
-
-/////////////////////  Floats
+///////  Floats
 
 // Float returns the value of given index as a float64.
 // The first index value is indirected through the indexes.
@@ -495,7 +499,7 @@ func (rw *Rows) SetFloat1D(val float64, i int) {
 	rw.SetFloat(val, rw.Tensor.Shape().IndexFrom1D(i)...)
 }
 
-/////////////////////  Strings
+///////  Strings
 
 // StringValue returns the value of given index as a string.
 // The first index value is indirected through the indexes.
@@ -535,6 +539,12 @@ func (rw *Rows) SetStringRow(val string, row, cell int) {
 	rw.Tensor.SetStringRow(val, rw.RowIndex(row), cell)
 }
 
+// AppendRowFloat adds a row and sets float value(s), up to number of cells.
+func (rw *Rows) AppendRowFloat(val ...float64) {
+	rw.addRowsIndexes(1)
+	rw.Tensor.AppendRowFloat(val...)
+}
+
 // String1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (rw *Rows) String1D(i int) string {
@@ -553,7 +563,13 @@ func (rw *Rows) SetString1D(val string, i int) {
 	rw.SetString(val, rw.Tensor.Shape().IndexFrom1D(i)...)
 }
 
-/////////////////////  Ints
+// AppendRowString adds a row and sets string value(s), up to number of cells.
+func (rw *Rows) AppendRowString(val ...string) {
+	rw.addRowsIndexes(1)
+	rw.Tensor.AppendRowString(val...)
+}
+
+///////  Ints
 
 // Int returns the value of given index as an int.
 // The first index value is indirected through the indexes.
@@ -594,6 +610,12 @@ func (rw *Rows) SetIntRow(val int, row, cell int) {
 	rw.Tensor.SetIntRow(val, rw.RowIndex(row), cell)
 }
 
+// AppendRowInt adds a row and sets int value(s), up to number of cells.
+func (rw *Rows) AppendRowInt(val ...int) {
+	rw.addRowsIndexes(1)
+	rw.Tensor.AppendRowInt(val...)
+}
+
 // Int1D is somewhat expensive if indexes are set, because it needs to convert
 // the flat index back into a full n-dimensional index and then use that api.
 func (rw *Rows) Int1D(i int) int {
@@ -612,7 +634,7 @@ func (rw *Rows) SetInt1D(val int, i int) {
 	rw.SetInt(val, rw.Tensor.Shape().IndexFrom1D(i)...)
 }
 
-/////////////////////  SubSpaces
+///////  SubSpaces
 
 // SubSpace returns a new tensor with innermost subspace at given
 // offset(s) in outermost dimension(s) (len(offs) < NumDims).

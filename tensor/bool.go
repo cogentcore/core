@@ -130,7 +130,7 @@ func (tsr *Bool) SetRowTensor(val Values, row int) {}
 // AppendRow not possible with Bool.
 func (tsr *Bool) AppendRow(val Values) {}
 
-/////////////////////  Bool
+///////  Bool
 
 func (tsr *Bool) Value(i ...int) bool {
 	return tsr.Values.Index(tsr.shape.IndexTo1D(i...))
@@ -144,7 +144,7 @@ func (tsr *Bool) Value1D(i int) bool { return tsr.Values.Index(i) }
 
 func (tsr *Bool) Set1D(val bool, i int) { tsr.Values.Set(val, i) }
 
-/////////////////////  Strings
+///////  Strings
 
 func (tsr *Bool) String1D(off int) string {
 	return reflectx.ToString(tsr.Values.Index(off))
@@ -178,7 +178,10 @@ func (tsr *Bool) SetStringRow(val string, row, cell int) {
 	}
 }
 
-/////////////////////  Floats
+// AppendRowString not possible with Bool.
+func (tsr *Bool) AppendRowString(val ...string) {}
+
+///////  Floats
 
 func (tsr *Bool) Float(i ...int) float64 {
 	return BoolToFloat64(tsr.Values.Index(tsr.shape.IndexTo1D(i...)))
@@ -206,7 +209,10 @@ func (tsr *Bool) SetFloatRow(val float64, row, cell int) {
 	tsr.Values.Set(Float64ToBool(val), row*sz+cell)
 }
 
-/////////////////////  Ints
+// AppendRowFloat not possible with Bool.
+func (tsr *Bool) AppendRowFloat(val ...float64) {}
+
+///////  Ints
 
 func (tsr *Bool) Int(i ...int) int {
 	return BoolToInt(tsr.Values.Index(tsr.shape.IndexTo1D(i...)))
@@ -234,7 +240,10 @@ func (tsr *Bool) SetIntRow(val int, row, cell int) {
 	tsr.Values.Set(IntToBool(val), row*sz+cell)
 }
 
-/////////////////////  Bools
+// AppendRowInt not possible with Bool.
+func (tsr *Bool) AppendRowInt(val ...int) {}
+
+///////  Bools
 
 func (tsr *Bool) Bool(i ...int) bool {
 	return tsr.Values.Index(tsr.shape.IndexTo1D(i...))

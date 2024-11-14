@@ -112,7 +112,7 @@ func (ss *Sim) ConfigStats() {
 			}
 			ctv := ss.Counters[ctr]
 			datafs.Scalar[int](ss.Current, name).SetInt1D(ctv, 0)
-			tv.AppendRow(tensor.NewIntScalar(ctv))
+			tv.AppendRowInt(ctv)
 		})
 	}
 	// note: it is essential to only have 1 per func
@@ -139,7 +139,7 @@ func (ss *Sim) ConfigStats() {
 		case Trial:
 			sv := rand.Float64()
 			datafs.Scalar[float64](ss.Current, name).SetFloat(sv, 0)
-			tv.AppendRow(tensor.NewFloat64Scalar(sv))
+			tv.AppendRowFloat(sv)
 		case Epoch:
 			subd := ss.Stats.RecycleDir((tm - 1).String())
 			sv := stats.StatMean.Call(subd.Value(name))
@@ -176,15 +176,15 @@ func (ss *Sim) ConfigStats() {
 				sv = 0
 			}
 			datafs.Scalar[float64](ss.Current, name).SetFloat(sv, 0)
-			tv.AppendRow(tensor.NewFloat64Scalar(sv))
+			tv.AppendRowFloat(sv)
 		case Epoch:
 			subd := ss.Stats.RecycleDir((tm - 1).String())
-			sv := stats.StatMean.Call(subd.Value(name)).Float1D(0)
-			tv.AppendRow(tensor.NewFloat64Scalar(sv))
+			sv := stats.StatMean.Call(subd.Value(name))
+			tv.AppendRow(sv)
 		case Run:
 			subd := ss.Stats.RecycleDir((tm - 1).String())
-			sv := stats.StatMean.Call(subd.Value(name)).Float1D(0)
-			tv.AppendRow(tensor.NewFloat64Scalar(sv))
+			sv := stats.StatMean.Call(subd.Value(name))
+			tv.AppendRow(sv)
 		}
 	})
 }

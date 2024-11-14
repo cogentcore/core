@@ -59,7 +59,7 @@ func (tsr *String) IsString() bool {
 
 func (tsr *String) AsValues() Values { return tsr }
 
-/////////////////////  Strings
+///////  Strings
 
 func (tsr *String) SetString(val string, i ...int) {
 	tsr.Values[tsr.shape.IndexTo1D(i...)] = val
@@ -79,7 +79,20 @@ func (tsr *String) SetStringRow(val string, row, cell int) {
 	tsr.Values[tsr.shape.Header+row*sz+cell] = val
 }
 
-/////////////////////  Floats
+// AppendRowString adds a row and sets string value(s), up to number of cells.
+func (tsr *String) AppendRowString(val ...string) {
+	if tsr.NumDims() == 0 {
+		tsr.SetShapeSizes(0)
+	}
+	nrow, sz := tsr.shape.RowCellSize()
+	tsr.SetNumRows(nrow + 1)
+	mx := min(sz, len(val))
+	for i := range mx {
+		tsr.SetStringRow(val[i], nrow, i)
+	}
+}
+
+///////  Floats
 
 func (tsr *String) Float(i ...int) float64 {
 	return StringToFloat64(tsr.Values[tsr.shape.IndexTo1D(i...)])
@@ -107,7 +120,20 @@ func (tsr *String) SetFloatRow(val float64, row, cell int) {
 	tsr.Values[tsr.shape.Header+row*sz+cell] = Float64ToString(val)
 }
 
-/////////////////////  Ints
+// AppendRowFloat adds a row and sets float value(s), up to number of cells.
+func (tsr *String) AppendRowFloat(val ...float64) {
+	if tsr.NumDims() == 0 {
+		tsr.SetShapeSizes(0)
+	}
+	nrow, sz := tsr.shape.RowCellSize()
+	tsr.SetNumRows(nrow + 1)
+	mx := min(sz, len(val))
+	for i := range mx {
+		tsr.SetFloatRow(val[i], nrow, i)
+	}
+}
+
+///////  Ints
 
 func (tsr *String) Int(i ...int) int {
 	return errors.Ignore1(strconv.Atoi(tsr.Values[tsr.shape.IndexTo1D(i...)]))
@@ -133,6 +159,19 @@ func (tsr *String) IntRow(row, cell int) int {
 func (tsr *String) SetIntRow(val int, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[tsr.shape.Header+row*sz+cell] = strconv.Itoa(val)
+}
+
+// AppendRowInt adds a row and sets int value(s), up to number of cells.
+func (tsr *String) AppendRowInt(val ...int) {
+	if tsr.NumDims() == 0 {
+		tsr.SetShapeSizes(0)
+	}
+	nrow, sz := tsr.shape.RowCellSize()
+	tsr.SetNumRows(nrow + 1)
+	mx := min(sz, len(val))
+	for i := range mx {
+		tsr.SetIntRow(val[i], nrow, i)
+	}
 }
 
 // SetZeros is a simple convenience function initialize all values to the
