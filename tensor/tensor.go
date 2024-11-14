@@ -104,12 +104,12 @@ type Tensor interface {
 	// Float1D returns the value of given 1-dimensional index (0-Len()-1) as a float64.
 	// This can be somewhat expensive in wrapper views ([Rows], [Sliced]), which
 	// convert the flat index back into a full n-dimensional index and use that api.
-	// [Tensor.FloatRowCell] is preferred.
+	// [Tensor.FloatRow] is preferred.
 	Float1D(i int) float64
 
 	// SetFloat1D sets the value of given 1-dimensional index (0-Len()-1) as a float64.
 	// This can be somewhat expensive in the commonly-used [Rows] view;
-	// [Tensor.SetFloatRowCell] is preferred.
+	// [Tensor.SetFloatRow] is preferred.
 	SetFloat1D(val float64, i int)
 
 	/////////////////////  Strings

@@ -3,6 +3,7 @@
 package symbols
 
 import (
+	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
 	"reflect"
 )
@@ -10,112 +11,164 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/plot/plot"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"CheckFloats":       reflect.ValueOf(plot.CheckFloats),
-		"CheckNaNs":         reflect.ValueOf(plot.CheckNaNs),
-		"CopyValues":        reflect.ValueOf(plot.CopyValues),
-		"CopyXYZs":          reflect.ValueOf(plot.CopyXYZs),
-		"CopyXYs":           reflect.ValueOf(plot.CopyXYs),
-		"DefaultFontFamily": reflect.ValueOf(&plot.DefaultFontFamily).Elem(),
-		"ErrInfinity":       reflect.ValueOf(&plot.ErrInfinity).Elem(),
-		"ErrNoData":         reflect.ValueOf(&plot.ErrNoData).Elem(),
-		"New":               reflect.ValueOf(plot.New),
-		"PlotXYs":           reflect.ValueOf(plot.PlotXYs),
-		"Range":             reflect.ValueOf(plot.Range),
-		"UTCUnixTime":       reflect.ValueOf(&plot.UTCUnixTime).Elem(),
-		"UnixTimeIn":        reflect.ValueOf(plot.UnixTimeIn),
-		"XYRange":           reflect.ValueOf(plot.XYRange),
+		"AddStylerTo":        reflect.ValueOf(plot.AddStylerTo),
+		"AxisScalesN":        reflect.ValueOf(plot.AxisScalesN),
+		"AxisScalesValues":   reflect.ValueOf(plot.AxisScalesValues),
+		"Box":                reflect.ValueOf(plot.Box),
+		"CheckFloats":        reflect.ValueOf(plot.CheckFloats),
+		"CheckNaNs":          reflect.ValueOf(plot.CheckNaNs),
+		"Circle":             reflect.ValueOf(plot.Circle),
+		"Color":              reflect.ValueOf(plot.Color),
+		"CopyRole":           reflect.ValueOf(plot.CopyRole),
+		"CopyValues":         reflect.ValueOf(plot.CopyValues),
+		"Cross":              reflect.ValueOf(plot.Cross),
+		"Default":            reflect.ValueOf(plot.Default),
+		"DefaultFontFamily":  reflect.ValueOf(&plot.DefaultFontFamily).Elem(),
+		"DefaultOffOnN":      reflect.ValueOf(plot.DefaultOffOnN),
+		"DefaultOffOnValues": reflect.ValueOf(plot.DefaultOffOnValues),
+		"DrawBox":            reflect.ValueOf(plot.DrawBox),
+		"DrawCircle":         reflect.ValueOf(plot.DrawCircle),
+		"DrawCross":          reflect.ValueOf(plot.DrawCross),
+		"DrawPlus":           reflect.ValueOf(plot.DrawPlus),
+		"DrawPyramid":        reflect.ValueOf(plot.DrawPyramid),
+		"DrawRing":           reflect.ValueOf(plot.DrawRing),
+		"DrawSquare":         reflect.ValueOf(plot.DrawSquare),
+		"DrawTriangle":       reflect.ValueOf(plot.DrawTriangle),
+		"ErrInfinity":        reflect.ValueOf(&plot.ErrInfinity).Elem(),
+		"ErrNoData":          reflect.ValueOf(&plot.ErrNoData).Elem(),
+		"GetStylers":         reflect.ValueOf(plot.GetStylers),
+		"GetStylersFrom":     reflect.ValueOf(plot.GetStylersFrom),
+		"GetStylersFromData": reflect.ValueOf(plot.GetStylersFromData),
+		"High":               reflect.ValueOf(plot.High),
+		"InverseLinear":      reflect.ValueOf(plot.InverseLinear),
+		"InverseLog":         reflect.ValueOf(plot.InverseLog),
+		"Label":              reflect.ValueOf(plot.Label),
+		"Linear":             reflect.ValueOf(plot.Linear),
+		"Log":                reflect.ValueOf(plot.Log),
+		"Low":                reflect.ValueOf(plot.Low),
+		"MidStep":            reflect.ValueOf(plot.MidStep),
+		"MustCopyRole":       reflect.ValueOf(plot.MustCopyRole),
+		"New":                reflect.ValueOf(plot.New),
+		"NewPlotter":         reflect.ValueOf(plot.NewPlotter),
+		"NewStyle":           reflect.ValueOf(plot.NewStyle),
+		"NewTablePlot":       reflect.ValueOf(plot.NewTablePlot),
+		"NoRole":             reflect.ValueOf(plot.NoRole),
+		"NoStep":             reflect.ValueOf(plot.NoStep),
+		"Off":                reflect.ValueOf(plot.Off),
+		"On":                 reflect.ValueOf(plot.On),
+		"PlotX":              reflect.ValueOf(plot.PlotX),
+		"PlotY":              reflect.ValueOf(plot.PlotY),
+		"PlotterByType":      reflect.ValueOf(plot.PlotterByType),
+		"Plotters":           reflect.ValueOf(&plot.Plotters).Elem(),
+		"Plus":               reflect.ValueOf(plot.Plus),
+		"PostStep":           reflect.ValueOf(plot.PostStep),
+		"PreStep":            reflect.ValueOf(plot.PreStep),
+		"Pyramid":            reflect.ValueOf(plot.Pyramid),
+		"Range":              reflect.ValueOf(plot.Range),
+		"RangeClamp":         reflect.ValueOf(plot.RangeClamp),
+		"RegisterPlotter":    reflect.ValueOf(plot.RegisterPlotter),
+		"Ring":               reflect.ValueOf(plot.Ring),
+		"RolesN":             reflect.ValueOf(plot.RolesN),
+		"RolesValues":        reflect.ValueOf(plot.RolesValues),
+		"SetStylers":         reflect.ValueOf(plot.SetStylers),
+		"SetStylersTo":       reflect.ValueOf(plot.SetStylersTo),
+		"ShapesN":            reflect.ValueOf(plot.ShapesN),
+		"ShapesValues":       reflect.ValueOf(plot.ShapesValues),
+		"Size":               reflect.ValueOf(plot.Size),
+		"Square":             reflect.ValueOf(plot.Square),
+		"StepKindN":          reflect.ValueOf(plot.StepKindN),
+		"StepKindValues":     reflect.ValueOf(plot.StepKindValues),
+		"Triangle":           reflect.ValueOf(plot.Triangle),
+		"U":                  reflect.ValueOf(plot.U),
+		"UTCUnixTime":        reflect.ValueOf(&plot.UTCUnixTime).Elem(),
+		"UnixTimeIn":         reflect.ValueOf(plot.UnixTimeIn),
+		"V":                  reflect.ValueOf(plot.V),
+		"W":                  reflect.ValueOf(plot.W),
+		"X":                  reflect.ValueOf(plot.X),
+		"Y":                  reflect.ValueOf(plot.Y),
+		"Z":                  reflect.ValueOf(plot.Z),
 
 		// type definitions
 		"Axis":           reflect.ValueOf((*plot.Axis)(nil)),
+		"AxisScales":     reflect.ValueOf((*plot.AxisScales)(nil)),
+		"AxisStyle":      reflect.ValueOf((*plot.AxisStyle)(nil)),
 		"ConstantTicks":  reflect.ValueOf((*plot.ConstantTicks)(nil)),
-		"DataRanger":     reflect.ValueOf((*plot.DataRanger)(nil)),
+		"Data":           reflect.ValueOf((*plot.Data)(nil)),
+		"DefaultOffOn":   reflect.ValueOf((*plot.DefaultOffOn)(nil)),
 		"DefaultTicks":   reflect.ValueOf((*plot.DefaultTicks)(nil)),
 		"InvertedScale":  reflect.ValueOf((*plot.InvertedScale)(nil)),
-		"Labeler":        reflect.ValueOf((*plot.Labeler)(nil)),
+		"Labels":         reflect.ValueOf((*plot.Labels)(nil)),
 		"Legend":         reflect.ValueOf((*plot.Legend)(nil)),
 		"LegendEntry":    reflect.ValueOf((*plot.LegendEntry)(nil)),
 		"LegendPosition": reflect.ValueOf((*plot.LegendPosition)(nil)),
+		"LegendStyle":    reflect.ValueOf((*plot.LegendStyle)(nil)),
 		"LineStyle":      reflect.ValueOf((*plot.LineStyle)(nil)),
 		"LinearScale":    reflect.ValueOf((*plot.LinearScale)(nil)),
 		"LogScale":       reflect.ValueOf((*plot.LogScale)(nil)),
 		"LogTicks":       reflect.ValueOf((*plot.LogTicks)(nil)),
 		"Normalizer":     reflect.ValueOf((*plot.Normalizer)(nil)),
+		"PanZoom":        reflect.ValueOf((*plot.PanZoom)(nil)),
 		"Plot":           reflect.ValueOf((*plot.Plot)(nil)),
+		"PlotStyle":      reflect.ValueOf((*plot.PlotStyle)(nil)),
 		"Plotter":        reflect.ValueOf((*plot.Plotter)(nil)),
+		"PlotterName":    reflect.ValueOf((*plot.PlotterName)(nil)),
+		"PlotterType":    reflect.ValueOf((*plot.PlotterType)(nil)),
+		"PointStyle":     reflect.ValueOf((*plot.PointStyle)(nil)),
+		"Roles":          reflect.ValueOf((*plot.Roles)(nil)),
+		"Shapes":         reflect.ValueOf((*plot.Shapes)(nil)),
+		"StepKind":       reflect.ValueOf((*plot.StepKind)(nil)),
+		"Style":          reflect.ValueOf((*plot.Style)(nil)),
 		"Stylers":        reflect.ValueOf((*plot.Stylers)(nil)),
-		"TensorValues":   reflect.ValueOf((*plot.TensorValues)(nil)),
-		"TensorXYs":      reflect.ValueOf((*plot.TensorXYs)(nil)),
 		"Text":           reflect.ValueOf((*plot.Text)(nil)),
 		"TextStyle":      reflect.ValueOf((*plot.TextStyle)(nil)),
 		"Thumbnailer":    reflect.ValueOf((*plot.Thumbnailer)(nil)),
 		"Tick":           reflect.ValueOf((*plot.Tick)(nil)),
 		"Ticker":         reflect.ValueOf((*plot.Ticker)(nil)),
-		"TickerFunc":     reflect.ValueOf((*plot.TickerFunc)(nil)),
 		"TimeTicks":      reflect.ValueOf((*plot.TimeTicks)(nil)),
 		"Valuer":         reflect.ValueOf((*plot.Valuer)(nil)),
 		"Values":         reflect.ValueOf((*plot.Values)(nil)),
-		"XValues":        reflect.ValueOf((*plot.XValues)(nil)),
-		"XYValues":       reflect.ValueOf((*plot.XYValues)(nil)),
-		"XYZ":            reflect.ValueOf((*plot.XYZ)(nil)),
-		"XYZer":          reflect.ValueOf((*plot.XYZer)(nil)),
-		"XYZs":           reflect.ValueOf((*plot.XYZs)(nil)),
-		"XYer":           reflect.ValueOf((*plot.XYer)(nil)),
-		"XYs":            reflect.ValueOf((*plot.XYs)(nil)),
-		"YValues":        reflect.ValueOf((*plot.YValues)(nil)),
+		"WidthStyle":     reflect.ValueOf((*plot.WidthStyle)(nil)),
+		"XAxisStyle":     reflect.ValueOf((*plot.XAxisStyle)(nil)),
 
 		// interface wrapper definitions
-		"_DataRanger":  reflect.ValueOf((*_cogentcore_org_core_plot_DataRanger)(nil)),
-		"_Labeler":     reflect.ValueOf((*_cogentcore_org_core_plot_Labeler)(nil)),
 		"_Normalizer":  reflect.ValueOf((*_cogentcore_org_core_plot_Normalizer)(nil)),
 		"_Plotter":     reflect.ValueOf((*_cogentcore_org_core_plot_Plotter)(nil)),
 		"_Thumbnailer": reflect.ValueOf((*_cogentcore_org_core_plot_Thumbnailer)(nil)),
 		"_Ticker":      reflect.ValueOf((*_cogentcore_org_core_plot_Ticker)(nil)),
 		"_Valuer":      reflect.ValueOf((*_cogentcore_org_core_plot_Valuer)(nil)),
-		"_XYZer":       reflect.ValueOf((*_cogentcore_org_core_plot_XYZer)(nil)),
-		"_XYer":        reflect.ValueOf((*_cogentcore_org_core_plot_XYer)(nil)),
 	}
 }
-
-// _cogentcore_org_core_plot_DataRanger is an interface wrapper for DataRanger type
-type _cogentcore_org_core_plot_DataRanger struct {
-	IValue     interface{}
-	WDataRange func(pt *plot.Plot) (xmin float32, xmax float32, ymin float32, ymax float32)
-}
-
-func (W _cogentcore_org_core_plot_DataRanger) DataRange(pt *plot.Plot) (xmin float32, xmax float32, ymin float32, ymax float32) {
-	return W.WDataRange(pt)
-}
-
-// _cogentcore_org_core_plot_Labeler is an interface wrapper for Labeler type
-type _cogentcore_org_core_plot_Labeler struct {
-	IValue interface{}
-	WLabel func(i int) string
-}
-
-func (W _cogentcore_org_core_plot_Labeler) Label(i int) string { return W.WLabel(i) }
 
 // _cogentcore_org_core_plot_Normalizer is an interface wrapper for Normalizer type
 type _cogentcore_org_core_plot_Normalizer struct {
 	IValue     interface{}
-	WNormalize func(min float32, max float32, x float32) float32
+	WNormalize func(min float64, max float64, x float64) float64
 }
 
-func (W _cogentcore_org_core_plot_Normalizer) Normalize(min float32, max float32, x float32) float32 {
+func (W _cogentcore_org_core_plot_Normalizer) Normalize(min float64, max float64, x float64) float64 {
 	return W.WNormalize(min, max, x)
 }
 
 // _cogentcore_org_core_plot_Plotter is an interface wrapper for Plotter type
 type _cogentcore_org_core_plot_Plotter struct {
-	IValue      interface{}
-	WApplyStyle func()
-	WPlot       func(pt *plot.Plot)
-	WXYData     func() (data plot.XYer, pixels plot.XYer)
+	IValue       interface{}
+	WApplyStyle  func(plotStyle *plot.PlotStyle)
+	WData        func() (data plot.Data, pixX []float32, pixY []float32)
+	WPlot        func(pt *plot.Plot)
+	WStylers     func() *plot.Stylers
+	WUpdateRange func(plt *plot.Plot, xr *minmax.F64, yr *minmax.F64, zr *minmax.F64)
 }
 
-func (W _cogentcore_org_core_plot_Plotter) ApplyStyle()        { W.WApplyStyle() }
-func (W _cogentcore_org_core_plot_Plotter) Plot(pt *plot.Plot) { W.WPlot(pt) }
-func (W _cogentcore_org_core_plot_Plotter) XYData() (data plot.XYer, pixels plot.XYer) {
-	return W.WXYData()
+func (W _cogentcore_org_core_plot_Plotter) ApplyStyle(plotStyle *plot.PlotStyle) {
+	W.WApplyStyle(plotStyle)
+}
+func (W _cogentcore_org_core_plot_Plotter) Data() (data plot.Data, pixX []float32, pixY []float32) {
+	return W.WData()
+}
+func (W _cogentcore_org_core_plot_Plotter) Plot(pt *plot.Plot)     { W.WPlot(pt) }
+func (W _cogentcore_org_core_plot_Plotter) Stylers() *plot.Stylers { return W.WStylers() }
+func (W _cogentcore_org_core_plot_Plotter) UpdateRange(plt *plot.Plot, xr *minmax.F64, yr *minmax.F64, zr *minmax.F64) {
+	W.WUpdateRange(plt, xr, yr, zr)
 }
 
 // _cogentcore_org_core_plot_Thumbnailer is an interface wrapper for Thumbnailer type
@@ -129,41 +182,21 @@ func (W _cogentcore_org_core_plot_Thumbnailer) Thumbnail(pt *plot.Plot) { W.WThu
 // _cogentcore_org_core_plot_Ticker is an interface wrapper for Ticker type
 type _cogentcore_org_core_plot_Ticker struct {
 	IValue interface{}
-	WTicks func(min float32, max float32) []plot.Tick
+	WTicks func(min float64, max float64, nticks int) []plot.Tick
 }
 
-func (W _cogentcore_org_core_plot_Ticker) Ticks(min float32, max float32) []plot.Tick {
-	return W.WTicks(min, max)
+func (W _cogentcore_org_core_plot_Ticker) Ticks(min float64, max float64, nticks int) []plot.Tick {
+	return W.WTicks(min, max, nticks)
 }
 
 // _cogentcore_org_core_plot_Valuer is an interface wrapper for Valuer type
 type _cogentcore_org_core_plot_Valuer struct {
-	IValue interface{}
-	WLen   func() int
-	WValue func(i int) float32
+	IValue    interface{}
+	WFloat1D  func(i int) float64
+	WLen      func() int
+	WString1D func(i int) string
 }
 
-func (W _cogentcore_org_core_plot_Valuer) Len() int            { return W.WLen() }
-func (W _cogentcore_org_core_plot_Valuer) Value(i int) float32 { return W.WValue(i) }
-
-// _cogentcore_org_core_plot_XYZer is an interface wrapper for XYZer type
-type _cogentcore_org_core_plot_XYZer struct {
-	IValue interface{}
-	WLen   func() int
-	WXY    func(i int) (float32, float32)
-	WXYZ   func(i int) (float32, float32, float32)
-}
-
-func (W _cogentcore_org_core_plot_XYZer) Len() int                              { return W.WLen() }
-func (W _cogentcore_org_core_plot_XYZer) XY(i int) (float32, float32)           { return W.WXY(i) }
-func (W _cogentcore_org_core_plot_XYZer) XYZ(i int) (float32, float32, float32) { return W.WXYZ(i) }
-
-// _cogentcore_org_core_plot_XYer is an interface wrapper for XYer type
-type _cogentcore_org_core_plot_XYer struct {
-	IValue interface{}
-	WLen   func() int
-	WXY    func(i int) (x float32, y float32)
-}
-
-func (W _cogentcore_org_core_plot_XYer) Len() int                        { return W.WLen() }
-func (W _cogentcore_org_core_plot_XYer) XY(i int) (x float32, y float32) { return W.WXY(i) }
+func (W _cogentcore_org_core_plot_Valuer) Float1D(i int) float64 { return W.WFloat1D(i) }
+func (W _cogentcore_org_core_plot_Valuer) Len() int              { return W.WLen() }
+func (W _cogentcore_org_core_plot_Valuer) String1D(i int) string { return W.WString1D(i) }

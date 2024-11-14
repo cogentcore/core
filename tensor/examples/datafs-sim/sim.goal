@@ -10,7 +10,7 @@ import (
 	"math/rand/v2"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/plot/plotcore"
+	"cogentcore.org/core/plot"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/databrowser"
 	"cogentcore.org/core/tensor/datafs"
@@ -60,7 +60,6 @@ func (ss *Sim) RunStats(tm Times) {
 
 func (ss *Sim) ConfigStats() {
 	ss.Stats, _ = ss.Root.Mkdir("Stats")
-	mx := ss.Config.Value("Max").(*tensor.Int)
 	ctrs := []Times{Run, Epoch, Trial}
 	for _, ctr := range ctrs {
 		ss.AddStat(func(tm Times) {
@@ -69,24 +68,20 @@ func (ss *Sim) ConfigStats() {
 			}
 			name := ctr.String()
 			ctv := ss.Counters[ctr]
-			mxi := mx.Value1D(int(tm))
 			td := ss.Stats.RecycleDir(tm.String())
 			cd := ss.Stats.RecycleDir("Current")
 			datafs.Scalar[int](cd, name).SetInt1D(ctv, 0)
-			tv := datafs.Value[int](td, name, mxi)
-			tv.SetInt1D(ctv, ss.Counters[tm])
-			if ps := plotcore.GetPlotStylers(tv.Metadata()); ps == nil {
-				ps = plotcore.NewPlotStylers()
-				ps.ColumnStyler(name, func(co *plotcore.ColumnOptions) {
-					co.Range.FixMin = true
-					co.On = false
+			tv := datafs.Value[int](td, name)
+			tv.AppendRow(tensor.NewIntScalar(ctv))
+			if ps := plot.GetStylersFrom(tv); ps == nil {
+				ps.Add(func(s *plot.Style) {
+					s.Range.SetMin(0)
 				})
-				if tm == ctr {
-					ps.PlotStyler(func(po *plotcore.PlotOptions) {
-						po.XAxis = name
-					})
-				}
-				plotcore.SetPlotStylers(tv.Metadata(), ps)
+				plot.SetStylersTo(tv, ps)
+			}
+			if tm > Trial {
+				subd := ss.Stats.RecycleDir((tm - 1).String())
+				subd.Value(name).(tensor.Values).SetNumRows(0)
 			}
 		})
 	}
@@ -96,8 +91,6 @@ func (ss *Sim) ConfigStats() {
 		td := ss.Stats.RecycleDir(tm.String())
 		switch tm {
 		case Trial:
-			ctv := ss.Counters[tm]
-			mxi := mx.Value1D(int(tm))
 			cd := ss.Stats.RecycleDir("Current")
 			sse := rand.Float32()
 			terr := float32(1)
@@ -106,16 +99,16 @@ func (ss *Sim) ConfigStats() {
 			}
 			datafs.Scalar[float32](cd, sseName).SetFloat(float64(sse), 0)
 			datafs.Scalar[float32](cd, errName).SetFloat(float64(terr), 0)
-			datafs.Value[float32](td, sseName, mxi).SetFloat1D(float64(sse), ctv)
-			datafs.Value[float32](td, errName, mxi).SetFloat1D(float64(terr), ctv)
+			datafs.Value[float32](td, sseName).AppendRow(tensor.NewFloat32Scalar(sse))
+			datafs.Value[float32](td, errName).AppendRow(tensor.NewFloat32Scalar(terr))
 		case Epoch:
-			ctv := ss.Counters[tm]
-			mxi := mx.Value1D(int(tm))
 			trld, _ := ss.Stats.Mkdir(Trial.String())
 			sse := stats.StatMean.Call(trld.Value(sseName)).Float1D(0)
 			terr := stats.StatMean.Call(trld.Value(errName)).Float1D(0)
-			datafs.Value[float32](td, sseName, mxi).SetFloat1D(float64(sse), ctv)
-			datafs.Value[float32](td, errName, mxi).SetFloat1D(float64(terr), ctv)
+			datafs.Value[float32](td, sseName).AppendRow(tensor.NewFloat64Scalar(sse))
+			datafs.Value[float32](td, errName).AppendRow(tensor.NewFloat64Scalar(terr))
+			trld.Value(sseName).(tensor.Values).SetNumRows(0)
+			trld.Value(errName).(tensor.Values).SetNumRows(0)
 		}
 	})
 }

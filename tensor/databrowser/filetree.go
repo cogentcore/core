@@ -246,7 +246,8 @@ func (fn *FileNode) PlotFile() {
 		return
 	}
 	pl := br.NewTabPlot(ptab, dt)
-	pl.Options.Title = df
+	_ = pl
+	// pl.Options.Title = df
 	// TODO: apply column and plot level options.
 	br.Update()
 }

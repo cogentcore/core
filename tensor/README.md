@@ -99,10 +99,10 @@ str := ix.String1D(2)
 ```Go
 // value at row 3, cell 2 (flat index into entire `SubSpace` tensor for this row)
 // The row index will be indirected through any `Indexes` present on the Rows view.
-val := ix.FloatRowCell(3, 2)
+val := ix.FloatRow(3, 2)
 // string value at row 2, cell 0. this is safe for 1D and 2D+ shapes
 // and is a robust way to get 1D data from tensors of unknown shapes.
-str := ix.FloatRowCell(2, 0)
+str := ix.FloatRow(2, 0)
 ```
 
 ```Go

@@ -15,6 +15,12 @@ func NewFloat64Scalar(val float64) *Float64 {
 	return NewNumberFromValues(val)
 }
 
+// NewFloat32Scalar is a convenience method for a Tensor
+// representation of a single float32 scalar value.
+func NewFloat32Scalar(val float32) *Float32 {
+	return NewNumberFromValues(val)
+}
+
 // NewIntScalar is a convenience method for a Tensor
 // representation of a single int scalar value.
 func NewIntScalar(val int) *Int {
@@ -31,6 +37,13 @@ func NewStringScalar(val string) *String {
 // initialized directly from the given slice values, which are not copied.
 // The resulting Tensor thus "wraps" the given values.
 func NewFloat64FromValues(vals ...float64) *Float64 {
+	return NewNumberFromValues(vals...)
+}
+
+// NewFloat32FromValues returns a new 1-dimensional tensor of given value type
+// initialized directly from the given slice values, which are not copied.
+// The resulting Tensor thus "wraps" the given values.
+func NewFloat32FromValues(vals ...float32) *Float32 {
 	return NewNumberFromValues(vals...)
 }
 
@@ -171,7 +184,7 @@ func NewFloat64SpacedLinear(start, stop Tensor, num int, endpoint bool) *Float64
 	}
 	for r := range num {
 		for i := range n {
-			tsr.SetFloatRowCell(start.Float1D(i)+float64(r)*step.Float1D(i), r, i)
+			tsr.SetFloatRow(start.Float1D(i)+float64(r)*step.Float1D(i), r, i)
 		}
 	}
 	return tsr

@@ -152,12 +152,12 @@ func (dt *Table) SortColumnIndexes(ascending, stable bool, colIndexes ...int) {
 		for _, ci := range colIndexes {
 			cl := dt.ColumnByIndex(ci).Tensor
 			if cl.IsString() {
-				v := tensor.CompareAscending(cl.StringRowCell(i, 0), cl.StringRowCell(j, 0), ascending)
+				v := tensor.CompareAscending(cl.StringRow(i, 0), cl.StringRow(j, 0), ascending)
 				if v != 0 {
 					return v
 				}
 			} else {
-				v := tensor.CompareAscending(cl.FloatRowCell(i, 0), cl.FloatRowCell(j, 0), ascending)
+				v := tensor.CompareAscending(cl.FloatRow(i, 0), cl.FloatRow(j, 0), ascending)
 				if v != 0 {
 					return v
 				}

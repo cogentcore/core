@@ -10,28 +10,14 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/plot/plotcore/plotcore"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"Bar":                  reflect.ValueOf(plotcore.Bar),
-		"FixMax":               reflect.ValueOf(plotcore.FixMax),
-		"FixMin":               reflect.ValueOf(plotcore.FixMin),
-		"FloatMax":             reflect.ValueOf(plotcore.FloatMax),
-		"FloatMin":             reflect.ValueOf(plotcore.FloatMin),
-		"NewPlot":              reflect.ValueOf(plotcore.NewPlot),
-		"NewPlotEditor":        reflect.ValueOf(plotcore.NewPlotEditor),
-		"NewSubPlot":           reflect.ValueOf(plotcore.NewSubPlot),
-		"Off":                  reflect.ValueOf(plotcore.Off),
-		"On":                   reflect.ValueOf(plotcore.On),
-		"PlotColumnOptions":    reflect.ValueOf(plotcore.PlotColumnOptions),
-		"PlotColumnZeroOne":    reflect.ValueOf(plotcore.PlotColumnZeroOne),
-		"PlotTypesN":           reflect.ValueOf(plotcore.PlotTypesN),
-		"PlotTypesValues":      reflect.ValueOf(plotcore.PlotTypesValues),
-		"SetPlotColumnOptions": reflect.ValueOf(plotcore.SetPlotColumnOptions),
-		"XY":                   reflect.ValueOf(plotcore.XY),
+		"NewPlot":           reflect.ValueOf(plotcore.NewPlot),
+		"NewPlotEditor":     reflect.ValueOf(plotcore.NewPlotEditor),
+		"NewPlotterChooser": reflect.ValueOf(plotcore.NewPlotterChooser),
+		"NewSubPlot":        reflect.ValueOf(plotcore.NewSubPlot),
 
 		// type definitions
-		"ColumnOptions": reflect.ValueOf((*plotcore.ColumnOptions)(nil)),
-		"Plot":          reflect.ValueOf((*plotcore.Plot)(nil)),
-		"PlotEditor":    reflect.ValueOf((*plotcore.PlotEditor)(nil)),
-		"PlotOptions":   reflect.ValueOf((*plotcore.PlotOptions)(nil)),
-		"PlotTypes":     reflect.ValueOf((*plotcore.PlotTypes)(nil)),
+		"Plot":           reflect.ValueOf((*plotcore.Plot)(nil)),
+		"PlotEditor":     reflect.ValueOf((*plotcore.PlotEditor)(nil)),
+		"PlotterChooser": reflect.ValueOf((*plotcore.PlotterChooser)(nil)),
 	}
 }

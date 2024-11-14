@@ -56,13 +56,13 @@ func QuantilesOut(in, qs tensor.Tensor, out tensor.Values) error {
 		lwi := math.Floor(qi)
 		lwii := int(lwi)
 		if lwii >= sz {
-			val = sin.FloatRow(sz)
+			val = sin.FloatRow(sz, 0)
 		} else if lwii < 0 {
-			val = sin.FloatRow(0)
+			val = sin.FloatRow(0, 0)
 		} else {
 			phi := qi - lwi
-			lwv := sin.FloatRow(lwii)
-			hiv := sin.FloatRow(lwii + 1)
+			lwv := sin.FloatRow(lwii, 0)
+			hiv := sin.FloatRow(lwii+1, 0)
 			val = (1-phi)*lwv + phi*hiv
 		}
 		out.SetFloat1D(val, i)

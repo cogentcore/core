@@ -45,9 +45,9 @@ func NewTestTable() *Table {
 	dt.AddIntColumn("Int")
 	dt.SetNumRows(3)
 	for i := range dt.NumRows() {
-		dt.Column("Str").SetStringRow(strconv.Itoa(i), i)
-		dt.Column("Flt64").SetFloatRow(float64(i), i)
-		dt.Column("Int").SetFloatRow(float64(i), i)
+		dt.Column("Str").SetStringRow(strconv.Itoa(i), i, 0)
+		dt.Column("Flt64").SetFloatRow(float64(i), i, 0)
+		dt.Column("Int").SetFloatRow(float64(i), i, 0)
 	}
 	return dt
 }
@@ -61,16 +61,16 @@ func TestAppendRowsEtc(t *testing.T) {
 	for j := range 3 {
 		for i := range st.NumRows() {
 			sr := j*3 + i
-			ss := st.Column("Str").StringRow(i)
-			ds := dt.Column("Str").StringRow(sr)
+			ss := st.Column("Str").StringRow(i, 0)
+			ds := dt.Column("Str").StringRow(sr, 0)
 			assert.Equal(t, ss, ds)
 
-			sf := st.Column("Flt64").FloatRow(i)
-			df := dt.Column("Flt64").FloatRow(sr)
+			sf := st.Column("Flt64").FloatRow(i, 0)
+			df := dt.Column("Flt64").FloatRow(sr, 0)
 			assert.Equal(t, sf, df)
 
-			sf = st.Column("Int").FloatRow(i)
-			df = dt.Column("Int").FloatRow(sr)
+			sf = st.Column("Int").FloatRow(i, 0)
+			df = dt.Column("Int").FloatRow(sr, 0)
 			assert.Equal(t, sf, df)
 		}
 	}
@@ -88,7 +88,7 @@ func TestAppendRowsEtc(t *testing.T) {
 
 	dt.Sequential()
 	dt.Filter(func(dt *Table, row int) bool {
-		return dt.Column("Flt64").FloatRow(row) > 1
+		return dt.Column("Flt64").FloatRow(row, 0) > 1
 	})
 	assert.Equal(t, []int{2, 5, 8, 11}, dt.Indexes)
 }
@@ -121,7 +121,7 @@ func TestCells(t *testing.T) {
 	for i := range 10 {
 		vals := make([]float32, 16)
 		for j := range 16 {
-			vals[j] = float32(in.FloatRowCell(i, j))
+			vals[j] = float32(in.FloatRow(i, j))
 		}
 		// fmt.Println(s)
 		ss := in.Tensor.SubSpace(i).(*tensor.Float32)

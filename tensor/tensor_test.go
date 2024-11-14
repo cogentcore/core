@@ -30,9 +30,9 @@ func TestTensorString(t *testing.T) {
 	assert.Equal(t, "testing", tsr.StringValue(2, 1))
 	assert.Equal(t, "test", tsr.String1D(4))
 
-	assert.Equal(t, "test", tsr.StringRowCell(2, 0))
-	assert.Equal(t, "testing", tsr.StringRowCell(2, 1))
-	assert.Equal(t, "", tsr.StringRowCell(3, 0))
+	assert.Equal(t, "test", tsr.StringRow(2, 0))
+	assert.Equal(t, "testing", tsr.StringRow(2, 1))
+	assert.Equal(t, "", tsr.StringRow(3, 0))
 
 	cln := tsr.Clone()
 	assert.Equal(t, "testing", cln.StringValue(2, 1))
@@ -89,9 +89,9 @@ func TestTensorFloat64(t *testing.T) {
 	assert.Equal(t, 2.17, tsr.Float(2, 1))
 	assert.Equal(t, 3.14, tsr.Float1D(4))
 
-	assert.Equal(t, 3.14, tsr.FloatRowCell(2, 0))
-	assert.Equal(t, 2.17, tsr.FloatRowCell(2, 1))
-	assert.Equal(t, 0.0, tsr.FloatRowCell(3, 0))
+	assert.Equal(t, 3.14, tsr.FloatRow(2, 0))
+	assert.Equal(t, 2.17, tsr.FloatRow(2, 1))
+	assert.Equal(t, 0.0, tsr.FloatRow(3, 0))
 
 	cln := tsr.Clone()
 	assert.Equal(t, 2.17, cln.Float(2, 1))
@@ -293,7 +293,7 @@ func TestReshaped(t *testing.T) {
 func TestSortFilter(t *testing.T) {
 	tsr := NewRows(NewFloat64(5))
 	for i := range 5 {
-		tsr.SetFloatRowCell(float64(i), i, 0)
+		tsr.SetFloatRow(float64(i), i, 0)
 	}
 	tsr.Sort(Ascending)
 	assert.Equal(t, []int{0, 1, 2, 3, 4}, tsr.Indexes)

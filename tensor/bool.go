@@ -16,7 +16,7 @@ import (
 )
 
 // Bool is a tensor of bits backed by a [bitslice.Slice] for efficient storage
-// of binary, boolean data. Bool does not support [Tensor.SubSpace] access
+// of binary, boolean data. Bool does not support [RowMajor.SubSpace] access
 // and related methods due to the nature of the underlying data representation.
 type Bool struct {
 	shape  Shape
@@ -127,6 +127,9 @@ func (tsr *Bool) RowTensor(row int) Values { return nil }
 // SetRowTensor not possible with Bool.
 func (tsr *Bool) SetRowTensor(val Values, row int) {}
 
+// AppendRow not possible with Bool.
+func (tsr *Bool) AppendRow(val Values) {}
+
 /////////////////////  Bool
 
 func (tsr *Bool) Value(i ...int) bool {
@@ -163,24 +166,16 @@ func (tsr *Bool) SetString(val string, i ...int) {
 	}
 }
 
-func (tsr *Bool) StringRowCell(row, cell int) string {
+func (tsr *Bool) StringRow(row, cell int) string {
 	_, sz := tsr.shape.RowCellSize()
 	return reflectx.ToString(tsr.Values.Index(row*sz + cell))
 }
 
-func (tsr *Bool) SetStringRowCell(val string, row, cell int) {
+func (tsr *Bool) SetStringRow(val string, row, cell int) {
 	if bv, err := reflectx.ToBool(val); err == nil {
 		_, sz := tsr.shape.RowCellSize()
 		tsr.Values.Set(bv, row*sz+cell)
 	}
-}
-
-func (tsr *Bool) StringRow(row int) string {
-	return tsr.StringRowCell(row, 0)
-}
-
-func (tsr *Bool) SetStringRow(val string, row int) {
-	tsr.SetStringRowCell(val, row, 0)
 }
 
 /////////////////////  Floats
@@ -201,22 +196,14 @@ func (tsr *Bool) SetFloat1D(val float64, off int) {
 	tsr.Values.Set(Float64ToBool(val), off)
 }
 
-func (tsr *Bool) FloatRowCell(row, cell int) float64 {
+func (tsr *Bool) FloatRow(row, cell int) float64 {
 	_, sz := tsr.shape.RowCellSize()
 	return BoolToFloat64(tsr.Values.Index(row*sz + cell))
 }
 
-func (tsr *Bool) SetFloatRowCell(val float64, row, cell int) {
+func (tsr *Bool) SetFloatRow(val float64, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values.Set(Float64ToBool(val), row*sz+cell)
-}
-
-func (tsr *Bool) FloatRow(row int) float64 {
-	return tsr.FloatRowCell(row, 0)
-}
-
-func (tsr *Bool) SetFloatRow(val float64, row int) {
-	tsr.SetFloatRowCell(val, row, 0)
 }
 
 /////////////////////  Ints
@@ -237,22 +224,14 @@ func (tsr *Bool) SetInt1D(val int, off int) {
 	tsr.Values.Set(IntToBool(val), off)
 }
 
-func (tsr *Bool) IntRowCell(row, cell int) int {
+func (tsr *Bool) IntRow(row, cell int) int {
 	_, sz := tsr.shape.RowCellSize()
 	return BoolToInt(tsr.Values.Index(row*sz + cell))
 }
 
-func (tsr *Bool) SetIntRowCell(val int, row, cell int) {
+func (tsr *Bool) SetIntRow(val int, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values.Set(IntToBool(val), row*sz+cell)
-}
-
-func (tsr *Bool) IntRow(row int) int {
-	return tsr.IntRowCell(row, 0)
-}
-
-func (tsr *Bool) SetIntRow(val int, row int) {
-	tsr.SetIntRowCell(val, row, 0)
 }
 
 /////////////////////  Bools

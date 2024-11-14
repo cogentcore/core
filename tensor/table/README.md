@@ -43,15 +43,15 @@ dt.Column("Name").SetStringRow(4)
 To access higher-dimensional "cell" level data using a simple 1D index into the cell patterns:
 
 ```Go
-// FloatRowCell is a method on the `tensor.Rows` returned from the `Column` method.
+// FloatRow is a method on the `tensor.Rows` returned from the `Column` method.
 // This is the best method to use in general for generic 1D data access,
 // as it works on any data from 1D on up (although it only samples the first value
 // from higher dimensional data) .
-val := dt.Column("Values").FloatRowCell(3, 2)
+val := dt.Column("Values").FloatRow(3, 2)
 ```
 
 ```Go
-dt.Column("Name").SetStringRowCell("Alia", 4, 1)
+dt.Column("Name").SetStringRow("Alia", 4, 1)
 ```
 
 todo: more

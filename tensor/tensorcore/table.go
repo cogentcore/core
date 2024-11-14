@@ -602,7 +602,7 @@ func (tb *Table) SelectedColumnStrings(colName string) []string {
 	var s []string
 	col := dt.Column(colName)
 	for _, i := range jis {
-		v := col.StringRow(i)
+		v := col.StringRow(i, 0)
 		s = append(s, v)
 	}
 	return s

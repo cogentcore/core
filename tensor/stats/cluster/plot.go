@@ -33,29 +33,29 @@ func (nn *Node) Plot(pt *table.Table, dmat, labels tensor.Tensor) {
 	lbl := pt.ColumnByIndex(2)
 	if nn.IsLeaf() {
 		pt.SetNumRows(row + 1)
-		xc.SetFloatRow(nn.ParDist, row)
-		yc.SetFloatRow(nn.Y, row)
+		xc.SetFloatRow(nn.ParDist, row, 0)
+		yc.SetFloatRow(nn.Y, row, 0)
 		if labels.Len() > nn.Index {
-			lbl.SetStringRow(labels.StringValue(nn.Index), row)
+			lbl.SetStringRow(labels.StringValue(nn.Index), row, 0)
 		}
 	} else {
 		for _, kn := range nn.Kids {
 			pt.SetNumRows(row + 2)
-			xc.SetFloatRow(nn.ParDist, row)
-			yc.SetFloatRow(kn.Y, row)
+			xc.SetFloatRow(nn.ParDist, row, 0)
+			yc.SetFloatRow(kn.Y, row, 0)
 			row++
-			xc.SetFloatRow(nn.ParDist+nn.Dist, row)
-			yc.SetFloatRow(kn.Y, row)
+			xc.SetFloatRow(nn.ParDist+nn.Dist, row, 0)
+			yc.SetFloatRow(kn.Y, row, 0)
 			kn.Plot(pt, dmat, labels)
 			row = pt.NumRows()
 			pt.SetNumRows(row + 1)
-			xc.SetFloatRow(nn.ParDist, row)
-			yc.SetFloatRow(kn.Y, row)
+			xc.SetFloatRow(nn.ParDist, row, 0)
+			yc.SetFloatRow(kn.Y, row, 0)
 			row++
 		}
 		pt.SetNumRows(row + 1)
-		xc.SetFloatRow(nn.ParDist, row)
-		yc.SetFloatRow(nn.Y, row)
+		xc.SetFloatRow(nn.ParDist, row, 0)
+		yc.SetFloatRow(nn.Y, row, 0)
 	}
 }
 

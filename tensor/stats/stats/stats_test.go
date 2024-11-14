@@ -158,7 +158,7 @@ func TestFuncsCell(t *testing.T) {
 
 	for i := range 20 {
 		for j := range 10 {
-			tsr.SetFloatRowCell(vals[j], i, j)
+			tsr.SetFloatRow(vals[j], i, j)
 		}
 	}
 
@@ -168,15 +168,15 @@ func TestFuncsCell(t *testing.T) {
 	CountOut(ix, out)
 	nsub := out.Len()
 	for i := range nsub {
-		assert.Equal(t, 20.0, out.FloatRowCell(0, i))
+		assert.Equal(t, 20.0, out.FloatRow(0, i))
 	}
 	MeanOut(ix, out)
 	for i := range nsub {
-		assert.InDelta(t, vals[i], out.FloatRowCell(0, i), 1.0e-7) // lower tol, using float32
+		assert.InDelta(t, vals[i], out.FloatRow(0, i), 1.0e-7) // lower tol, using float32
 	}
 	VarOut(ix, out)
 	for i := range nsub {
-		assert.InDelta(t, 0.0, out.FloatRowCell(0, i), 1.0e-7)
+		assert.InDelta(t, 0.0, out.FloatRow(0, i), 1.0e-7)
 	}
 }
 

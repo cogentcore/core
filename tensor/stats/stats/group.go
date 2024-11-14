@@ -35,7 +35,7 @@ func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 		n := r - start
 		it := datafs.Value[int](dir, val, n)
 		for j := range n {
-			it.SetIntRow(srt.Indexes[start+j], j) // key to indirect through sort indexes
+			it.SetIntRow(srt.Indexes[start+j], j, 0) // key to indirect through sort indexes
 		}
 	}
 
@@ -53,9 +53,9 @@ func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 		srt.SortStable(tensor.Ascending)
 		start := 0
 		if tsr.IsString() {
-			lastVal := srt.StringRow(0)
+			lastVal := srt.StringRow(0, 0)
 			for r := range nr {
-				v := srt.StringRow(r)
+				v := srt.StringRow(r, 0)
 				if v != lastVal {
 					makeIdxs(td, srt, lastVal, start, r)
 					start = r
@@ -66,9 +66,9 @@ func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 				makeIdxs(td, srt, lastVal, start, nr)
 			}
 		} else {
-			lastVal := srt.FloatRow(0)
+			lastVal := srt.FloatRow(0, 0)
 			for r := range nr {
-				v := srt.FloatRow(r)
+				v := srt.FloatRow(r, 0)
 				if v != lastVal {
 					makeIdxs(td, srt, tensor.Float64ToString(lastVal), start, r)
 					start = r
@@ -105,7 +105,7 @@ func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 	td, _ := gd.Mkdir("All")
 	it := datafs.Value[int](td, "All", nr)
 	for j := range nr {
-		it.SetIntRow(tsr.RowIndex(j), j) // key to indirect through any existing indexes
+		it.SetIntRow(tsr.RowIndex(j), j, 0) // key to indirect through any existing indexes
 	}
 	return nil
 }
@@ -140,7 +140,7 @@ func GroupStats(dir *datafs.Data, stat Stats, tsrs ...tensor.Tensor) error {
 		if gv == nil {
 			gtsr := datafs.Value[string](sgd, gpnm, nv)
 			for i, v := range vals {
-				gtsr.SetStringRow(v.Metadata().Name(), i)
+				gtsr.SetStringRow(v.Metadata().Name(), i, 0)
 			}
 		}
 		for _, tsr := range tsrs {
@@ -150,7 +150,7 @@ func GroupStats(dir *datafs.Data, stat Stats, tsrs ...tensor.Tensor) error {
 				idx := tensor.AsIntSlice(v)
 				sg := tensor.NewRows(tsr.AsValues(), idx...)
 				stout := stat.Call(sg)
-				sv.SetFloatRow(stout.Float1D(0), i)
+				sv.SetFloatRow(stout.Float1D(0), i, 0)
 			}
 		}
 	}

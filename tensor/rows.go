@@ -187,7 +187,7 @@ func (rw *Rows) ExcludeMissing() { //types:add
 	rw.IndexesNeeded()
 	ni := rw.NumRows()
 	for i := ni - 1; i >= 0; i-- {
-		if math.IsNaN(rw.Tensor.FloatRowCell(rw.Indexes[i], 0)) {
+		if math.IsNaN(rw.Tensor.FloatRow(rw.Indexes[i], 0)) {
 			rw.Indexes = append(rw.Indexes[:i], rw.Indexes[i+1:]...)
 		}
 	}
@@ -260,11 +260,11 @@ func CompareAscending[T cmp.Ordered](a, b T, ascending bool) int {
 func (rw *Rows) Sort(ascending bool) {
 	if rw.Tensor.IsString() {
 		rw.SortFunc(func(tsr Values, i, j int) int {
-			return CompareAscending(tsr.StringRowCell(i, 0), tsr.StringRowCell(j, 0), ascending)
+			return CompareAscending(tsr.StringRow(i, 0), tsr.StringRow(j, 0), ascending)
 		})
 	} else {
 		rw.SortFunc(func(tsr Values, i, j int) int {
-			return CompareAscending(tsr.FloatRowCell(i, 0), tsr.FloatRowCell(j, 0), ascending)
+			return CompareAscending(tsr.FloatRow(i, 0), tsr.FloatRow(j, 0), ascending)
 		})
 	}
 }
@@ -288,11 +288,11 @@ func (rw *Rows) SortStableFunc(cmp func(tsr Values, i, j int) int) {
 func (rw *Rows) SortStable(ascending bool) {
 	if rw.Tensor.IsString() {
 		rw.SortStableFunc(func(tsr Values, i, j int) int {
-			return CompareAscending(tsr.StringRowCell(i, 0), tsr.StringRowCell(j, 0), ascending)
+			return CompareAscending(tsr.StringRow(i, 0), tsr.StringRow(j, 0), ascending)
 		})
 	} else {
 		rw.SortStableFunc(func(tsr Values, i, j int) int {
-			return CompareAscending(tsr.FloatRowCell(i, 0), tsr.FloatRowCell(j, 0), ascending)
+			return CompareAscending(tsr.FloatRow(i, 0), tsr.FloatRow(j, 0), ascending)
 		})
 	}
 }
@@ -340,7 +340,7 @@ type FilterOptions struct { //types:add
 func (rw *Rows) FilterString(str string, opts FilterOptions) { //types:add
 	lowstr := strings.ToLower(str)
 	rw.Filter(func(tsr Values, row int) bool {
-		val := tsr.StringRowCell(row, 0)
+		val := tsr.StringRow(row, 0)
 		has := false
 		switch {
 		case opts.Contains && opts.IgnoreCase:
@@ -461,20 +461,20 @@ func (rw *Rows) SetFloat(val float64, i ...int) {
 	rw.Tensor.SetFloat(val, ic...)
 }
 
-// FloatRowCell returns the value at given row and cell,
+// FloatRow returns the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Rows.Indexes].
 // This is the preferred interface for all Rows operations.
-func (rw *Rows) FloatRowCell(row, cell int) float64 {
-	return rw.Tensor.FloatRowCell(rw.RowIndex(row), cell)
+func (rw *Rows) FloatRow(row, cell int) float64 {
+	return rw.Tensor.FloatRow(rw.RowIndex(row), cell)
 }
 
-// SetFloatRowCell sets the value at given row and cell,
+// SetFloatRow sets the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Rows.Indexes].
 // This is the preferred interface for all Rows operations.
-func (rw *Rows) SetFloatRowCell(val float64, row, cell int) {
-	rw.Tensor.SetFloatRowCell(val, rw.RowIndex(row), cell)
+func (rw *Rows) SetFloatRow(val float64, row, cell int) {
+	rw.Tensor.SetFloatRow(val, rw.RowIndex(row), cell)
 }
 
 // Float1D is somewhat expensive if indexes are set, because it needs to convert
@@ -493,14 +493,6 @@ func (rw *Rows) SetFloat1D(val float64, i int) {
 		rw.Tensor.SetFloat1D(val, i)
 	}
 	rw.SetFloat(val, rw.Tensor.Shape().IndexFrom1D(i)...)
-}
-
-func (rw *Rows) FloatRow(row int) float64 {
-	return rw.FloatRowCell(row, 0)
-}
-
-func (rw *Rows) SetFloatRow(val float64, row int) {
-	rw.SetFloatRowCell(val, row, 0)
 }
 
 /////////////////////  Strings
@@ -527,20 +519,20 @@ func (rw *Rows) SetString(val string, i ...int) {
 	rw.Tensor.SetString(val, ic...)
 }
 
-// StringRowCell returns the value at given row and cell,
+// StringRow returns the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Rows.Indexes].
 // This is the preferred interface for all Rows operations.
-func (rw *Rows) StringRowCell(row, cell int) string {
-	return rw.Tensor.StringRowCell(rw.RowIndex(row), cell)
+func (rw *Rows) StringRow(row, cell int) string {
+	return rw.Tensor.StringRow(rw.RowIndex(row), cell)
 }
 
-// SetStringRowCell sets the value at given row and cell,
+// SetStringRow sets the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Rows.Indexes].
 // This is the preferred interface for all Rows operations.
-func (rw *Rows) SetStringRowCell(val string, row, cell int) {
-	rw.Tensor.SetStringRowCell(val, rw.RowIndex(row), cell)
+func (rw *Rows) SetStringRow(val string, row, cell int) {
+	rw.Tensor.SetStringRow(val, rw.RowIndex(row), cell)
 }
 
 // String1D is somewhat expensive if indexes are set, because it needs to convert
@@ -559,14 +551,6 @@ func (rw *Rows) SetString1D(val string, i int) {
 		rw.Tensor.SetString1D(val, i)
 	}
 	rw.SetString(val, rw.Tensor.Shape().IndexFrom1D(i)...)
-}
-
-func (rw *Rows) StringRow(row int) string {
-	return rw.StringRowCell(row, 0)
-}
-
-func (rw *Rows) SetStringRow(val string, row int) {
-	rw.SetStringRowCell(val, row, 0)
 }
 
 /////////////////////  Ints
@@ -594,20 +578,20 @@ func (rw *Rows) SetInt(val int, i ...int) {
 	rw.Tensor.SetInt(val, ic...)
 }
 
-// IntRowCell returns the value at given row and cell,
+// IntRow returns the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Rows.Indexes].
 // This is the preferred interface for all Rows operations.
-func (rw *Rows) IntRowCell(row, cell int) int {
-	return rw.Tensor.IntRowCell(rw.RowIndex(row), cell)
+func (rw *Rows) IntRow(row, cell int) int {
+	return rw.Tensor.IntRow(rw.RowIndex(row), cell)
 }
 
-// SetIntRowCell sets the value at given row and cell,
+// SetIntRow sets the value at given row and cell,
 // where row is outermost dim, and cell is 1D index into remaining inner dims.
 // Row is indirected through the [Rows.Indexes].
 // This is the preferred interface for all Rows operations.
-func (rw *Rows) SetIntRowCell(val int, row, cell int) {
-	rw.Tensor.SetIntRowCell(val, rw.RowIndex(row), cell)
+func (rw *Rows) SetIntRow(val int, row, cell int) {
+	rw.Tensor.SetIntRow(val, rw.RowIndex(row), cell)
 }
 
 // Int1D is somewhat expensive if indexes are set, because it needs to convert
@@ -626,14 +610,6 @@ func (rw *Rows) SetInt1D(val int, i int) {
 		rw.Tensor.SetInt1D(val, i)
 	}
 	rw.SetInt(val, rw.Tensor.Shape().IndexFrom1D(i)...)
-}
-
-func (rw *Rows) IntRow(row int) int {
-	return rw.IntRowCell(row, 0)
-}
-
-func (rw *Rows) SetIntRow(val int, row int) {
-	rw.SetIntRowCell(val, row, 0)
 }
 
 /////////////////////  SubSpaces
@@ -664,6 +640,13 @@ func (rw *Rows) RowTensor(row int) Values {
 // with row indirected through the indexes.
 func (rw *Rows) SetRowTensor(val Values, row int) {
 	rw.Tensor.SetRowTensor(val, rw.RowIndex(row))
+}
+
+// AppendRow adds a row and sets values to given values.
+func (rw *Rows) AppendRow(val Values) {
+	nrow := rw.Tensor.DimSize(0)
+	rw.AddRows(1)
+	rw.Tensor.SetRowTensor(val, nrow)
 }
 
 // check for interface impl

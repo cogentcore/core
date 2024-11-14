@@ -148,7 +148,7 @@ func (d *Data) KnownFileInfo() fileinfo.Known {
 // This is the actual underlying data, so make a copy if it can be
 // unintentionally modified or retained more than for immediate use.
 func (d *Data) Bytes() []byte {
-	if d.Data == nil {
+	if d.Data == nil || d.Data.NumDims() == 0 || d.Data.Len() == 0 {
 		return nil
 	}
 	return d.Data.AsValues().Bytes()
@@ -156,7 +156,7 @@ func (d *Data) Bytes() []byte {
 
 // AsString returns data as scalar string.
 func (d *Data) AsString() string {
-	if d.Data == nil {
+	if d.Data == nil || d.Data.NumDims() == 0 || d.Data.Len() == 0 {
 		return ""
 	}
 	return d.Data.String1D(0)
@@ -164,7 +164,7 @@ func (d *Data) AsString() string {
 
 // SetString sets scalar data value from given string.
 func (d *Data) SetString(v string) {
-	if d.Data == nil {
+	if d.Data == nil || d.Data.NumDims() == 0 || d.Data.Len() == 0 {
 		return
 	}
 	d.Data.SetString1D(v, 0)
@@ -172,7 +172,7 @@ func (d *Data) SetString(v string) {
 
 // AsFloat64 returns data as a scalar float64 (first element of tensor).
 func (d *Data) AsFloat64() float64 {
-	if d.Data == nil {
+	if d.Data == nil || d.Data.NumDims() == 0 || d.Data.Len() == 0 {
 		return 0
 	}
 	return d.Data.Float1D(0)
@@ -180,7 +180,7 @@ func (d *Data) AsFloat64() float64 {
 
 // SetFloat64 sets scalar data value from given float64.
 func (d *Data) SetFloat64(v float64) {
-	if d.Data == nil {
+	if d.Data == nil || d.Data.NumDims() == 0 || d.Data.Len() == 0 {
 		return
 	}
 	d.Data.SetFloat1D(v, 0)
@@ -198,7 +198,7 @@ func (d *Data) SetFloat32(v float32) {
 
 // AsInt returns data as a scalar int (first element of tensor).
 func (d *Data) AsInt() int {
-	if d.Data == nil {
+	if d.Data == nil || d.Data.NumDims() == 0 || d.Data.Len() == 0 {
 		return 0
 	}
 	return d.Data.Int1D(0)
@@ -206,7 +206,7 @@ func (d *Data) AsInt() int {
 
 // SetInt sets scalar data value from given int.
 func (d *Data) SetInt(v int) {
-	if d.Data == nil {
+	if d.Data == nil || d.Data.NumDims() == 0 || d.Data.Len() == 0 {
 		return
 	}
 	d.Data.SetInt1D(v, 0)

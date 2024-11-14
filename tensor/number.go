@@ -137,27 +137,11 @@ func (tsr Number[T]) SetString1D(val string, i int) {
 	}
 }
 
-func (tsr *Number[T]) SetStringRowCell(val string, row, cell int) {
+func (tsr *Number[T]) SetStringRow(val string, row, cell int) {
 	if fv, err := strconv.ParseFloat(val, 64); err == nil {
 		_, sz := tsr.shape.RowCellSize()
 		tsr.Values[tsr.shape.Header+row*sz+cell] = T(fv)
 	}
-}
-
-// StringRow returns the value at given row (outermost dimension).
-// It is a convenience wrapper for StringRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (tsr *Number[T]) StringRow(row int) string {
-	return tsr.StringRowCell(row, 0)
-}
-
-// SetStringRow sets the value at given row (outermost dimension).
-// It is a convenience wrapper for SetStringRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (tsr *Number[T]) SetStringRow(val string, row int) {
-	tsr.SetStringRowCell(val, row, 0)
 }
 
 /////////////////////  Floats
@@ -178,32 +162,15 @@ func (tsr *Number[T]) SetFloat1D(val float64, i int) {
 	tsr.Values[tsr.shape.Header+i] = T(val)
 }
 
-func (tsr *Number[T]) FloatRowCell(row, cell int) float64 {
+func (tsr *Number[T]) FloatRow(row, cell int) float64 {
 	_, sz := tsr.shape.RowCellSize()
 	i := row*sz + cell
 	return float64(tsr.Values[tsr.shape.Header+i])
 }
 
-func (tsr *Number[T]) SetFloatRowCell(val float64, row, cell int) {
+func (tsr *Number[T]) SetFloatRow(val float64, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[tsr.shape.Header+row*sz+cell] = T(val)
-}
-
-// FloatRow returns the value at given row (outermost dimension).
-// It is a convenience wrapper for FloatRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (tsr *Number[T]) FloatRow(row int) float64 {
-	return tsr.FloatRowCell(row, 0)
-}
-
-// SetFloatRow sets the value at given row (outermost dimension).
-// Row is indirected through the [Indexed.Indexes].
-// It is a convenience wrapper for SetFloatRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (tsr *Number[T]) SetFloatRow(val float64, row int) {
-	tsr.SetFloatRowCell(val, row, 0)
 }
 
 /////////////////////  Ints
@@ -224,31 +191,15 @@ func (tsr *Number[T]) SetInt1D(val int, i int) {
 	tsr.Values[tsr.shape.Header+i] = T(val)
 }
 
-func (tsr *Number[T]) IntRowCell(row, cell int) int {
+func (tsr *Number[T]) IntRow(row, cell int) int {
 	_, sz := tsr.shape.RowCellSize()
 	i := row*sz + cell
 	return int(tsr.Values[tsr.shape.Header+i])
 }
 
-func (tsr *Number[T]) SetIntRowCell(val int, row, cell int) {
+func (tsr *Number[T]) SetIntRow(val int, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[tsr.shape.Header+row*sz+cell] = T(val)
-}
-
-// IntRow returns the value at given row (outermost dimension).
-// It is a convenience wrapper for IntRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (tsr *Number[T]) IntRow(row int) int {
-	return tsr.IntRowCell(row, 0)
-}
-
-// SetIntRow sets the value at given row (outermost dimension).
-// It is a convenience wrapper for SetIntRowCell(row, 0), providing robust
-// operations on 1D and higher-dimensional data (which nevertheless should
-// generally be processed separately in ways that treat it properly).
-func (tsr *Number[T]) SetIntRow(val int, row int) {
-	tsr.SetIntRowCell(val, row, 0)
 }
 
 // SetZeros is simple convenience function initialize all values to 0
@@ -340,7 +291,7 @@ func (tsr *Number[T]) SubSpace(offs ...int) Values {
 	return rt
 }
 
-// RowTensor is a convenience version of [Tensor.SubSpace] to return the
+// RowTensor is a convenience version of [RowMajor.SubSpace] to return the
 // SubSpace for the outermost row dimension. [Rows] defines a version
 // of this that indirects through the row indexes.
 func (tsr *Number[T]) RowTensor(row int) Values {
@@ -353,4 +304,14 @@ func (tsr *Number[T]) SetRowTensor(val Values, row int) {
 	st := row * cells
 	mx := min(val.Len(), cells)
 	tsr.CopyCellsFrom(val, st, 0, mx)
+}
+
+// AppendRow adds a row and sets values to given values.
+func (tsr *Number[T]) AppendRow(val Values) {
+	if tsr.NumDims() == 0 {
+		tsr.SetShapeSizes(0)
+	}
+	nrow := tsr.DimSize(0)
+	tsr.SetNumRows(nrow + 1)
+	tsr.SetRowTensor(val, nrow)
 }

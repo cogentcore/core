@@ -22,8 +22,8 @@ func TestGroup(t *testing.T) {
 		if i >= 2 {
 			gp = "B"
 		}
-		dt.Column("Name").SetStringRow(gp, i)
-		dt.Column("Value").SetFloatRow(float64(i), i)
+		dt.Column("Name").SetStringRow(gp, i, 0)
+		dt.Column("Value").SetFloatRow(float64(i), i, 0)
 	}
 	dir, _ := datafs.NewDir("Group")
 	err := TableGroups(dir, dt, "Name")

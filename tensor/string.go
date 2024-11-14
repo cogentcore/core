@@ -69,17 +69,14 @@ func (tsr String) SetString1D(val string, i int) {
 	tsr.Values[tsr.shape.Header+i] = val
 }
 
-func (tsr *String) SetStringRowCell(val string, row, cell int) {
+func (tsr *String) StringRow(row, cell int) string {
+	_, sz := tsr.shape.RowCellSize()
+	return tsr.Values[tsr.shape.Header+row*sz+cell]
+}
+
+func (tsr *String) SetStringRow(val string, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[tsr.shape.Header+row*sz+cell] = val
-}
-
-func (tsr *String) StringRow(row int) string {
-	return tsr.StringRowCell(row, 0)
-}
-
-func (tsr *String) SetStringRow(val string, row int) {
-	tsr.SetStringRowCell(val, row, 0)
 }
 
 /////////////////////  Floats
@@ -100,22 +97,14 @@ func (tsr *String) SetFloat1D(val float64, i int) {
 	tsr.Values[tsr.shape.Header+i] = Float64ToString(val)
 }
 
-func (tsr *String) FloatRowCell(row, cell int) float64 {
+func (tsr *String) FloatRow(row, cell int) float64 {
 	_, sz := tsr.shape.RowCellSize()
 	return StringToFloat64(tsr.Values[tsr.shape.Header+row*sz+cell])
 }
 
-func (tsr *String) SetFloatRowCell(val float64, row, cell int) {
+func (tsr *String) SetFloatRow(val float64, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[tsr.shape.Header+row*sz+cell] = Float64ToString(val)
-}
-
-func (tsr *String) FloatRow(row int) float64 {
-	return tsr.FloatRowCell(row, 0)
-}
-
-func (tsr *String) SetFloatRow(val float64, row int) {
-	tsr.SetFloatRowCell(val, row, 0)
 }
 
 /////////////////////  Ints
@@ -136,22 +125,14 @@ func (tsr *String) SetInt1D(val int, i int) {
 	tsr.Values[tsr.shape.Header+i] = strconv.Itoa(val)
 }
 
-func (tsr *String) IntRowCell(row, cell int) int {
+func (tsr *String) IntRow(row, cell int) int {
 	_, sz := tsr.shape.RowCellSize()
 	return errors.Ignore1(strconv.Atoi(tsr.Values[tsr.shape.Header+row*sz+cell]))
 }
 
-func (tsr *String) SetIntRowCell(val int, row, cell int) {
+func (tsr *String) SetIntRow(val int, row, cell int) {
 	_, sz := tsr.shape.RowCellSize()
 	tsr.Values[tsr.shape.Header+row*sz+cell] = strconv.Itoa(val)
-}
-
-func (tsr *String) IntRow(row int) int {
-	return tsr.IntRowCell(row, 0)
-}
-
-func (tsr *String) SetIntRow(val int, row int) {
-	tsr.SetIntRowCell(val, row, 0)
 }
 
 // SetZeros is a simple convenience function initialize all values to the
@@ -241,7 +222,7 @@ func (tsr *String) SubSpace(offs ...int) Values {
 	return rt
 }
 
-// RowTensor is a convenience version of [Tensor.SubSpace] to return the
+// RowTensor is a convenience version of [RowMajor.SubSpace] to return the
 // SubSpace for the outermost row dimension. [Rows] defines a version
 // of this that indirects through the row indexes.
 func (tsr *String) RowTensor(row int) Values {
@@ -254,4 +235,14 @@ func (tsr *String) SetRowTensor(val Values, row int) {
 	st := row * cells
 	mx := min(val.Len(), cells)
 	tsr.CopyCellsFrom(val, st, 0, mx)
+}
+
+// AppendRow adds a row and sets values to given values.
+func (tsr String) AppendRow(val Values) {
+	if tsr.NumDims() == 0 {
+		tsr.SetShapeSizes(0)
+	}
+	nrow := tsr.DimSize(0)
+	tsr.SetNumRows(nrow + 1)
+	tsr.SetRowTensor(val, nrow)
 }

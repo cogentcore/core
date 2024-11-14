@@ -129,7 +129,7 @@ func (tsr *Base[T]) String1D(i int) string {
 	return reflectx.ToString(tsr.Values[tsr.shape.Header+i])
 }
 
-func (tsr *Base[T]) StringRowCell(row, cell int) string {
+func (tsr *Base[T]) StringRow(row, cell int) string {
 	_, sz := tsr.shape.RowCellSize()
 	return reflectx.ToString(tsr.Values[tsr.shape.Header+row*sz+cell])
 }

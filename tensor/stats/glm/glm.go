@@ -194,24 +194,24 @@ func (glm *GLM) Run() {
 			for di := 0; di < nDv; di++ {
 				pred := 0.0
 				for ii := 0; ii < nIv; ii++ {
-					pred += glm.Coeff.Float(di, ii) * iv.FloatRowCell(row, ii)
+					pred += glm.Coeff.Float(di, ii) * iv.FloatRow(row, ii)
 				}
 				if !glm.ZeroOffset {
 					pred += glm.Coeff.Float(di, nIv)
 				}
-				targ := dv.FloatRowCell(row, di)
+				targ := dv.FloatRow(row, di)
 				err := targ - pred
 				sse += err * err
 				for ii := 0; ii < nIv; ii++ {
-					dc.Values[di*nCi+ii] += err * iv.FloatRowCell(row, ii)
+					dc.Values[di*nCi+ii] += err * iv.FloatRow(row, ii)
 				}
 				if !glm.ZeroOffset {
 					dc.Values[di*nCi+nIv] += err
 				}
 				if lastItr {
-					pv.SetFloatRowCell(pred, row, di)
+					pv.SetFloatRow(pred, row, di)
 					if ev != nil {
-						ev.SetFloatRowCell(err, row, di)
+						ev.SetFloatRow(err, row, di)
 					}
 				}
 			}
@@ -252,8 +252,8 @@ func (glm *GLM) Run() {
 	for i := 0; i < n; i++ {
 		row := dt.Indexes[i]
 		for di := 0; di < nDv; di++ {
-			obsMeans[di] += dv.FloatRowCell(row, di)
-			errMeans[di] += ev.FloatRowCell(row, di)
+			obsMeans[di] += dv.FloatRow(row, di)
+			errMeans[di] += ev.FloatRow(row, di)
 		}
 	}
 	for di := 0; di < nDv; di++ {
@@ -265,9 +265,9 @@ func (glm *GLM) Run() {
 	for i := 0; i < n; i++ {
 		row := dt.Indexes[i]
 		for di := 0; di < nDv; di++ {
-			o := dv.FloatRowCell(row, di) - obsMeans[di]
+			o := dv.FloatRow(row, di) - obsMeans[di]
 			glm.ObsVariance[di] += o * o
-			e := ev.FloatRowCell(row, di) - errMeans[di]
+			e := ev.FloatRow(row, di) - errMeans[di]
 			glm.ErrVariance[di] += e * e
 		}
 	}

@@ -49,7 +49,7 @@ func TestOps(t *testing.T) {
 	AddOut(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
-			assert.InDelta(t, v+v, cellout.FloatRowCell(ri, i), 1.0e-6)
+			assert.InDelta(t, v+v, cellout.FloatRow(ri, i), 1.0e-6)
 		}
 	}
 
@@ -77,7 +77,7 @@ func TestOps(t *testing.T) {
 	SubOut(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
-			assert.InDelta(t, v-v, cellout.FloatRowCell(ri, i), 1.0e-6)
+			assert.InDelta(t, v-v, cellout.FloatRow(ri, i), 1.0e-6)
 		}
 	}
 
@@ -97,7 +97,7 @@ func TestOps(t *testing.T) {
 	MulOut(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
-			assert.InDelta(t, v*v, cellout.FloatRowCell(ri, i), 1.0e-6)
+			assert.InDelta(t, v*v, cellout.FloatRow(ri, i), 1.0e-6)
 		}
 	}
 
@@ -125,7 +125,7 @@ func TestOps(t *testing.T) {
 	DivOut(cell2d, oned, cellout)
 	for ri := range 5 {
 		for i, v := range vals {
-			assert.InDelta(t, v/v, cellout.FloatRowCell(ri, i), 1.0e-6)
+			assert.InDelta(t, v/v, cellout.FloatRow(ri, i), 1.0e-6)
 		}
 	}
 
