@@ -3,20 +3,29 @@
 package symbols
 
 import (
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/plot/plotcore"
+	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/databrowser"
+	"cogentcore.org/core/tensor/table"
+	"cogentcore.org/core/tensor/tensorcore"
+	"cogentcore.org/core/texteditor"
 	"reflect"
 )
 
 func init() {
 	Symbols["cogentcore.org/core/tensor/databrowser/databrowser"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"AsDataTree":         reflect.ValueOf(databrowser.AsDataTree),
 		"DataFS":             reflect.ValueOf(databrowser.DataFS),
 		"FirstComment":       reflect.ValueOf(databrowser.FirstComment),
 		"IsTableFile":        reflect.ValueOf(databrowser.IsTableFile),
 		"NewBrowser":         reflect.ValueOf(databrowser.NewBrowser),
 		"NewBrowserWindow":   reflect.ValueOf(databrowser.NewBrowserWindow),
+		"NewDataTree":        reflect.ValueOf(databrowser.NewDataTree),
 		"NewDiffBrowserDirs": reflect.ValueOf(databrowser.NewDiffBrowserDirs),
 		"NewFileNode":        reflect.ValueOf(databrowser.NewFileNode),
+		"NewTabs":            reflect.ValueOf(databrowser.NewTabs),
 		"ParentBrowser":      reflect.ValueOf(databrowser.ParentBrowser),
 		"PromptOKCancel":     reflect.ValueOf(databrowser.PromptOKCancel),
 		"PromptString":       reflect.ValueOf(databrowser.PromptString),
@@ -26,6 +35,66 @@ func init() {
 
 		// type definitions
 		"Browser":  reflect.ValueOf((*databrowser.Browser)(nil)),
+		"DataTree": reflect.ValueOf((*databrowser.DataTree)(nil)),
 		"FileNode": reflect.ValueOf((*databrowser.FileNode)(nil)),
+		"Tabber":   reflect.ValueOf((*databrowser.Tabber)(nil)),
+		"Tabs":     reflect.ValueOf((*databrowser.Tabs)(nil)),
+		"Treer":    reflect.ValueOf((*databrowser.Treer)(nil)),
+
+		// interface wrapper definitions
+		"_Tabber": reflect.ValueOf((*_cogentcore_org_core_tensor_databrowser_Tabber)(nil)),
+		"_Treer":  reflect.ValueOf((*_cogentcore_org_core_tensor_databrowser_Treer)(nil)),
 	}
+}
+
+// _cogentcore_org_core_tensor_databrowser_Tabber is an interface wrapper for Tabber type
+type _cogentcore_org_core_tensor_databrowser_Tabber struct {
+	IValue        interface{}
+	WAsTabs       func() *databrowser.Tabs
+	WEditorFile   func(label string, filename string) *texteditor.Editor
+	WEditorString func(label string, content string) *texteditor.Editor
+	WPlotTable    func(label string, dt *table.Table) *plotcore.PlotEditor
+	WRecycleTab   func(name string) *core.Frame
+	WSliceTable   func(label string, slc any) *core.Table
+	WTensorEditor func(label string, tsr tensor.Tensor) *tensorcore.TensorEditor
+	WTensorGrid   func(label string, tsr tensor.Tensor) *tensorcore.TensorGrid
+	WTensorTable  func(label string, dt *table.Table) *tensorcore.Table
+}
+
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) AsTabs() *databrowser.Tabs {
+	return W.WAsTabs()
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) EditorFile(label string, filename string) *texteditor.Editor {
+	return W.WEditorFile(label, filename)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) EditorString(label string, content string) *texteditor.Editor {
+	return W.WEditorString(label, content)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) PlotTable(label string, dt *table.Table) *plotcore.PlotEditor {
+	return W.WPlotTable(label, dt)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) RecycleTab(name string) *core.Frame {
+	return W.WRecycleTab(name)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) SliceTable(label string, slc any) *core.Table {
+	return W.WSliceTable(label, slc)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) TensorEditor(label string, tsr tensor.Tensor) *tensorcore.TensorEditor {
+	return W.WTensorEditor(label, tsr)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) TensorGrid(label string, tsr tensor.Tensor) *tensorcore.TensorGrid {
+	return W.WTensorGrid(label, tsr)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) TensorTable(label string, dt *table.Table) *tensorcore.Table {
+	return W.WTensorTable(label, dt)
+}
+
+// _cogentcore_org_core_tensor_databrowser_Treer is an interface wrapper for Treer type
+type _cogentcore_org_core_tensor_databrowser_Treer struct {
+	IValue      interface{}
+	WAsDataTree func() *databrowser.DataTree
+}
+
+func (W _cogentcore_org_core_tensor_databrowser_Treer) AsDataTree() *databrowser.DataTree {
+	return W.WAsDataTree()
 }

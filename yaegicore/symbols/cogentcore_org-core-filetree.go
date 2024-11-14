@@ -18,6 +18,7 @@ func init() {
 	Symbols["cogentcore.org/core/filetree/filetree"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AsNode":             reflect.ValueOf(filetree.AsNode),
+		"AsTree":             reflect.ValueOf(filetree.AsTree),
 		"FindLocationAll":    reflect.ValueOf(filetree.FindLocationAll),
 		"FindLocationDir":    reflect.ValueOf(filetree.FindLocationDir),
 		"FindLocationFile":   reflect.ValueOf(filetree.FindLocationFile),
@@ -41,11 +42,13 @@ func init() {
 		"NodeNameCount": reflect.ValueOf((*filetree.NodeNameCount)(nil)),
 		"SearchResults": reflect.ValueOf((*filetree.SearchResults)(nil)),
 		"Tree":          reflect.ValueOf((*filetree.Tree)(nil)),
+		"Treer":         reflect.ValueOf((*filetree.Treer)(nil)),
 		"VCSLog":        reflect.ValueOf((*filetree.VCSLog)(nil)),
 
 		// interface wrapper definitions
 		"_Filer":        reflect.ValueOf((*_cogentcore_org_core_filetree_Filer)(nil)),
 		"_NodeEmbedder": reflect.ValueOf((*_cogentcore_org_core_filetree_NodeEmbedder)(nil)),
+		"_Treer":        reflect.ValueOf((*_cogentcore_org_core_filetree_Treer)(nil)),
 	}
 }
 
@@ -142,3 +145,11 @@ type _cogentcore_org_core_filetree_NodeEmbedder struct {
 }
 
 func (W _cogentcore_org_core_filetree_NodeEmbedder) AsNode() *filetree.Node { return W.WAsNode() }
+
+// _cogentcore_org_core_filetree_Treer is an interface wrapper for Treer type
+type _cogentcore_org_core_filetree_Treer struct {
+	IValue      interface{}
+	WAsFileTree func() *filetree.Tree
+}
+
+func (W _cogentcore_org_core_filetree_Treer) AsFileTree() *filetree.Tree { return W.WAsFileTree() }
