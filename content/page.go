@@ -75,7 +75,7 @@ func (pg *Page) ReadMetadata() error {
 		if string(b) == `+++` {
 			break
 		}
-		data = append(data, b...)
+		data = append(data, append(b, '\n')...)
 	}
 	return tomlx.ReadBytes(pg, data)
 }
