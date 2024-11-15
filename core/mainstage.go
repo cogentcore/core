@@ -235,10 +235,10 @@ func (st *Stage) runWindow() *Stage {
 			}
 		} else {
 			// on other platforms, we want extra space and a minimum window size
-			if !st.ContentSize {
+			if !st.SizeToContent {
 				sz = sz.Add(image.Pt(20, 20))
 			}
-			if st.NewWindow && !st.ContentSize {
+			if st.NewWindow && !st.SizeToContent {
 				// we require windows to be at least 60% and no more than 80% of the
 				// screen size by default
 				scsz := system.TheApp.Screen(0).PixSize // TODO(kai): is there a better screen to get here?
