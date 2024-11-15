@@ -10,7 +10,6 @@ package content
 
 import (
 	"io/fs"
-	"os"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
@@ -43,13 +42,17 @@ type Content struct {
 
 func (ct *Content) Init() {
 	ct.Frame.Init()
+	ct.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Grow.Set(1, 1)
+	})
 	ct.Maker(func(p *tree.Plan) {
 		if ct.currentPage == nil {
 			return
 		}
 		if ct.currentPage.Name != "" {
 			tree.Add(p, func(w *core.Text) {
-				w.SetType(core.TextHeadlineSmall)
+				w.SetType(core.TextDisplaySmall)
 				w.Updater(func() {
 					w.SetText(ct.currentPage.Name)
 				})
@@ -57,16 +60,23 @@ func (ct *Content) Init() {
 		}
 		tree.Add(p, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
+				s.Direction = styles.Column
 				s.Grow.Set(1, 1)
 			})
 			w.Updater(func() {
 				if ct.renderedPage == ct.currentPage {
 					return
 				}
-				ct.renderedPage = ct.currentPage
 				w.DeleteChildren()
-				b, err := os.ReadFile(ct.currentPage.Filename)
-				htmlcore.ReadMD(htmlcore.NewContext(), w)
+				b, err := fs.ReadFile(ct.Source, ct.currentPage.Filename)
+				if errors.Log(err) != nil {
+					return
+				}
+				err = htmlcore.ReadMD(htmlcore.NewContext(), w, b)
+				if errors.Log(err) != nil {
+					return
+				}
+				ct.renderedPage = ct.currentPage
 			})
 		})
 	})
