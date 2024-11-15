@@ -5,22 +5,16 @@
 package content
 
 import (
-	"embed"
 	"testing"
 
-	"cogentcore.org/core/base/fsx"
 	"github.com/stretchr/testify/assert"
 )
 
-//go:embed examples/basic/content
-var content embed.FS
-
 func TestNewPage(t *testing.T) {
-	fsys := fsx.Sub(content, "examples/basic/content")
-	pg, err := NewPage(fsys, "index.md")
+	pg, err := NewPage(exampleContent, "index.md")
 	assert.NoError(t, err)
 	assert.Equal(t, *pg, Page{
-		FS:         fsys,
+		FS:         exampleContent,
 		Filename:   "index.md",
 		Name:       "Home",
 		Authors:    []string{"Cogent Core", "Go Gopher"},

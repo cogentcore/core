@@ -6,8 +6,9 @@
 // apps and websites consisting of Markdown, HTML, and Cogent Core.
 package content
 
+//go:generate core generate
+
 import (
-	"fmt"
 	"io/fs"
 
 	"cogentcore.org/core/base/errors"
@@ -49,7 +50,6 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		ct.pages = append(ct.pages, pg)
 		return nil
 	}))
-	fmt.Printf("%#v\n", ct.pages)
 	return ct
 }
 
