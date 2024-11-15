@@ -10,10 +10,13 @@ package content
 
 import (
 	"io/fs"
+	"os"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
 
@@ -33,6 +36,9 @@ type Content struct {
 
 	// currentPage is the currently open page.
 	currentPage *Page
+
+	// renderedPage is the most recently rendered page.
+	renderedPage *Page
 }
 
 func (ct *Content) Init() {
@@ -49,6 +55,20 @@ func (ct *Content) Init() {
 				})
 			})
 		}
+		tree.Add(p, func(w *core.Frame) {
+			w.Styler(func(s *styles.Style) {
+				s.Grow.Set(1, 1)
+			})
+			w.Updater(func() {
+				if ct.renderedPage == ct.currentPage {
+					return
+				}
+				ct.renderedPage = ct.currentPage
+				w.DeleteChildren()
+				b, err := os.ReadFile(ct.currentPage.Filename)
+				htmlcore.ReadMD(htmlcore.NewContext(), w)
+			})
+		})
 	})
 }
 
