@@ -5,20 +5,19 @@ package databrowser
 import (
 	"io/fs"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.Browser", IDName: "browser", Doc: "Browser is a data browser, for browsing data either on an OS filesystem\nor as a datafs virtual data filesystem.\nIt supports the automatic loading of [goal] scripts as toolbar actions to\nperform pre-programmed tasks on the data, to create app-like functionality.\nScripts are ordered alphabetically and any leading #- prefix is automatically\nremoved from the label, so you can use numbers to specify a custom order.", Methods: []types.Method{{Name: "UpdateFiles", Doc: "UpdateFiles Updates the files list.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "UpdateScripts", Doc: "UpdateScripts updates the Scripts and updates the toolbar.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "FS", Doc: "FS is the filesystem, if browsing an FS."}, {Name: "DataRoot", Doc: "DataRoot is the path to the root of the data to browse."}, {Name: "StartDir", Doc: "StartDir is the starting directory, where the app was originally started."}, {Name: "ScriptsDir", Doc: "ScriptsDir is the directory containing scripts for toolbar actions.\nIt defaults to DataRoot/dbscripts"}, {Name: "Scripts", Doc: "Scripts"}, {Name: "Interpreter", Doc: "Interpreter is the interpreter to use for running Browser scripts"}, {Name: "toolbar"}, {Name: "splits"}, {Name: "files"}, {Name: "tabs"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.Basic", IDName: "basic", Doc: "Basic is a basic data browser with the files as the left panel,\nand the Tabber as the right panel.", Embeds: []types.Field{{Name: "Frame"}, {Name: "Browser"}}})
 
-// NewBrowser returns a new [Browser] with the given optional parent:
-// Browser is a data browser, for browsing data either on an OS filesystem
-// or as a datafs virtual data filesystem.
-// It supports the automatic loading of [goal] scripts as toolbar actions to
-// perform pre-programmed tasks on the data, to create app-like functionality.
-// Scripts are ordered alphabetically and any leading #- prefix is automatically
-// removed from the label, so you can use numbers to specify a custom order.
-func NewBrowser(parent ...tree.Node) *Browser { return tree.New[Browser](parent...) }
+// NewBasic returns a new [Basic] with the given optional parent:
+// Basic is a basic data browser with the files as the left panel,
+// and the Tabber as the right panel.
+func NewBasic(parent ...tree.Node) *Basic { return tree.New[Basic](parent...) }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.Browser", IDName: "browser", Doc: "Browser holds all the elements of a data browser, for browsing data\neither on an OS filesystem or as a datafs virtual data filesystem.\nIt supports the automatic loading of [goal] scripts as toolbar actions to\nperform pre-programmed tasks on the data, to create app-like functionality.\nScripts are ordered alphabetically and any leading #- prefix is automatically\nremoved from the label, so you can use numbers to specify a custom order.\nIt is not a [core.Widget] itself, and is intended to be incorporated into\na [core.Frame] widget, potentially along with other custom elements.\nSee [Basic] for a basic implementation.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Methods: []types.Method{{Name: "UpdateFiles", Doc: "UpdateFiles Updates the files list.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "UpdateScripts", Doc: "UpdateScripts updates the Scripts and updates the toolbar.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Fields: []types.Field{{Name: "FS", Doc: "FS is the filesystem, if browsing an FS."}, {Name: "DataRoot", Doc: "DataRoot is the path to the root of the data to browse."}, {Name: "StartDir", Doc: "StartDir is the starting directory, where the app was originally started."}, {Name: "ScriptsDir", Doc: "ScriptsDir is the directory containing scripts for toolbar actions.\nIt defaults to DataRoot/dbscripts"}, {Name: "Scripts", Doc: "Scripts"}, {Name: "Interpreter", Doc: "Interpreter is the interpreter to use for running Browser scripts"}, {Name: "Files", Doc: "Files is the [DataTree] tree browser of the datafs or files."}, {Name: "Tabs", Doc: "Tabs is the [Tabber] element managing tabs of data views."}, {Name: "Toolbar", Doc: "Toolbar is the top-level toolbar for the browser, if used."}, {Name: "Splits", Doc: "Splits is the overall [core.Splits] for the browser."}}})
 
 // SetFS sets the [Browser.FS]:
 // FS is the filesystem, if browsing an FS.
@@ -36,6 +35,22 @@ func (t *Browser) SetStartDir(v string) *Browser { t.StartDir = v; return t }
 // ScriptsDir is the directory containing scripts for toolbar actions.
 // It defaults to DataRoot/dbscripts
 func (t *Browser) SetScriptsDir(v string) *Browser { t.ScriptsDir = v; return t }
+
+// SetFiles sets the [Browser.Files]:
+// Files is the [DataTree] tree browser of the datafs or files.
+func (t *Browser) SetFiles(v *DataTree) *Browser { t.Files = v; return t }
+
+// SetTabs sets the [Browser.Tabs]:
+// Tabs is the [Tabber] element managing tabs of data views.
+func (t *Browser) SetTabs(v Tabber) *Browser { t.Tabs = v; return t }
+
+// SetToolbar sets the [Browser.Toolbar]:
+// Toolbar is the top-level toolbar for the browser, if used.
+func (t *Browser) SetToolbar(v *core.Toolbar) *Browser { t.Toolbar = v; return t }
+
+// SetSplits sets the [Browser.Splits]:
+// Splits is the overall [core.Splits] for the browser.
+func (t *Browser) SetSplits(v *core.Splits) *Browser { t.Splits = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/databrowser.DataTree", IDName: "data-tree", Doc: "DataTree is the databrowser version of [filetree.Tree],\nwhich provides the Tabber to show data editors.", Embeds: []types.Field{{Name: "Tree"}}, Fields: []types.Field{{Name: "Tabber", Doc: "Tabber is the [Tabber] for this tree."}}})
 

@@ -5,6 +5,8 @@
 package databrowser
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/styles"
@@ -64,7 +66,8 @@ func NewTab[T any](tb Tabber, label string, mkfun func(tab *core.Frame) T) T {
 		if tt, ok := tab.Child(1).(T); ok {
 			return tt
 		}
-		core.MessageSnackbar(tb.AsTabs(), "Name / Type conflict: tab "+label+" does not have the expected type of content")
+		err := fmt.Errorf("Name / Type conflict: tab %q does not have the expected type of content", label)
+		core.ErrorSnackbar(tb.AsTabs(), err)
 		return zv
 	}
 	w := mkfun(tab)

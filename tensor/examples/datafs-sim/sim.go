@@ -213,6 +213,6 @@ func main() {
 	ss.ConfigAll()
 	ss.Run()
 
-	databrowser.NewBrowserWindow(ss.Root, "Root")
+	databrowser.NewBasicWindow(ss.Root, "Root")
 	core.Wait()
 }

@@ -65,8 +65,8 @@ func (br *Browser) UpdateScripts() { //types:add
 			slog.Error(err.Error())
 		}
 	}
-	if br.toolbar != nil {
-		br.toolbar.Update()
+	if br.Toolbar != nil {
+		br.Toolbar.Update()
 	}
 }
 

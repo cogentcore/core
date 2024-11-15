@@ -8,19 +8,13 @@ package databrowser
 
 import (
 	"io/fs"
-	"os"
-	"path/filepath"
 	"slices"
 
-	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goal/interpreter"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/types"
 	"golang.org/x/exp/maps"
 )
 
@@ -29,15 +23,16 @@ import (
 // where it is used to get a local variable for subsequent use.
 var TheBrowser *Browser
 
-// Browser is a data browser, for browsing data either on an OS filesystem
-// or as a datafs virtual data filesystem.
+// Browser holds all the elements of a data browser, for browsing data
+// either on an OS filesystem or as a datafs virtual data filesystem.
 // It supports the automatic loading of [goal] scripts as toolbar actions to
 // perform pre-programmed tasks on the data, to create app-like functionality.
 // Scripts are ordered alphabetically and any leading #- prefix is automatically
 // removed from the label, so you can use numbers to specify a custom order.
-type Browser struct {
-	core.Frame
-
+// It is not a [core.Widget] itself, and is intended to be incorporated into
+// a [core.Frame] widget, potentially along with other custom elements.
+// See [Basic] for a basic implementation.
+type Browser struct { //types:add -setters
 	// FS is the filesystem, if browsing an FS.
 	FS fs.FS
 
@@ -57,104 +52,31 @@ type Browser struct {
 	// Interpreter is the interpreter to use for running Browser scripts
 	Interpreter *interpreter.Interpreter `set:"-"`
 
-	toolbar *core.Toolbar
-	splits  *core.Splits
-	files   *DataTree
-	tabs    *Tabs
-}
+	// Files is the [DataTree] tree browser of the datafs or files.
+	Files *DataTree
 
-// Init initializes with the data and script directories
-func (br *Browser) Init() {
-	br.Frame.Init()
-	br.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-	})
-	br.InitInterp()
+	// Tabs is the [Tabber] element managing tabs of data views.
+	Tabs Tabber
 
-	br.OnShow(func(e events.Event) {
-		br.UpdateFiles()
-	})
+	// Toolbar is the top-level toolbar for the browser, if used.
+	Toolbar *core.Toolbar
 
-	tree.AddChildAt(br, "splits", func(w *core.Splits) {
-		br.splits = w
-		w.SetSplits(.15, .85)
-		tree.AddChildAt(w, "fileframe", func(w *core.Frame) {
-			w.Styler(func(s *styles.Style) {
-				s.Direction = styles.Column
-				s.Overflow.Set(styles.OverflowAuto)
-				s.Grow.Set(1, 1)
-			})
-			tree.AddChildAt(w, "filetree", func(w *DataTree) {
-				br.files = w
-				w.FileNodeType = types.For[FileNode]()
-			})
-		})
-		tree.AddChildAt(w, "tabs", func(w *Tabs) {
-			br.tabs = w
-			w.Type = core.FunctionalTabs
-		})
-	})
-	br.Updater(func() {
-		if br.files != nil {
-			br.files.Tabber = br.tabs
-		}
-	})
-
-}
-
-// NewBrowserWindow opens a new data Browser for given
-// file system (nil for os files) and data directory.
-func NewBrowserWindow(fsys fs.FS, dataDir string) *Browser {
-	startDir, _ := os.Getwd()
-	startDir = errors.Log1(filepath.Abs(startDir))
-	b := core.NewBody("Cogent Data Browser: " + fsx.DirAndFile(startDir))
-	br := NewBrowser(b)
-	br.FS = fsys
-	ddr := dataDir
-	if fsys == nil {
-		ddr = errors.Log1(filepath.Abs(dataDir))
-	}
-	b.AddTopBar(func(bar *core.Frame) {
-		tb := core.NewToolbar(bar)
-		br.toolbar = tb
-		tb.Maker(br.MakeToolbar)
-	})
-	br.SetDataRoot(ddr)
-	br.SetScriptsDir(filepath.Join(ddr, "dbscripts"))
-	TheBrowser = br
-	br.Interpreter.Eval("br := databrowser.TheBrowser") // grab it
-	br.UpdateScripts()
-	b.RunWindow()
-	return br
-}
-
-// ParentBrowser returns the Browser parent of given node
-func ParentBrowser(tn tree.Node) *Browser {
-	var res *Browser
-	tn.AsTree().WalkUp(func(n tree.Node) bool {
-		if c, ok := n.(*Browser); ok {
-			res = c
-			return false
-		}
-		return true
-	})
-	return res
+	// Splits is the overall [core.Splits] for the browser.
+	Splits *core.Splits
 }
 
 // UpdateFiles Updates the files list.
 func (br *Browser) UpdateFiles() { //types:add
-	files := br.files
+	if br.Files == nil {
+		return
+	}
+	files := br.Files
 	if br.FS != nil {
 		files.SortByModTime = true
 		files.OpenPathFS(br.FS, br.DataRoot)
 	} else {
 		files.OpenPath(br.DataRoot)
 	}
-	br.Update()
-}
-
-func (br *Browser) GetDataRoot() string {
-	return br.DataRoot
 }
 
 func (br *Browser) MakeToolbar(p *tree.Plan) {
