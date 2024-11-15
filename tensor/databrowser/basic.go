@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/types"
 )
 
 // Basic is a basic data browser with the files as the left panel,
@@ -48,12 +47,10 @@ func (br *Basic) Init() {
 			})
 			tree.AddChildAt(w, "filetree", func(w *DataTree) {
 				br.Files = w
-				w.FileNodeType = types.For[FileNode]()
 			})
 		})
 		tree.AddChildAt(w, "tabs", func(w *Tabs) {
 			br.Tabs = w
-			w.Type = core.FunctionalTabs
 		})
 	})
 	br.Updater(func() {

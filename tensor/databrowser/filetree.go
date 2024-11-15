@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/texteditor/diffbrowser"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // Treer is an interface for getting the Root node as a DataTree struct.
@@ -54,6 +55,7 @@ func (ft *DataTree) AsDataTree() *DataTree {
 func (ft *DataTree) Init() {
 	ft.Tree.Init()
 	ft.Root = ft
+	ft.FileNodeType = types.For[FileNode]()
 }
 
 // FileNode is databrowser version of FileNode for FileTree

@@ -79,6 +79,11 @@ type Tabs struct {
 	core.Tabs
 }
 
+func (ts *Tabs) Init() {
+	ts.Tabs.Init()
+	ts.Type = core.FunctionalTabs
+}
+
 func (ts *Tabs) AsTabs() *Tabs {
 	return ts
 }
@@ -89,7 +94,7 @@ func (ts *Tabs) AsTabs() *Tabs {
 // Use tv.Table.Sequential to update the Indexed to view
 // all of the rows when done updating the Table, and then call br.Update()
 func (ts *Tabs) TensorTable(label string, dt *table.Table) *tensorcore.Table {
-	tv := NewTab[*tensorcore.Table](ts, label, func(tab *core.Frame) *tensorcore.Table {
+	tv := NewTab(ts, label, func(tab *core.Frame) *tensorcore.Table {
 		tb := core.NewToolbar(tab)
 		tv := tensorcore.NewTable(tab)
 		tb.Maker(tv.MakeToolbar)
@@ -103,7 +108,7 @@ func (ts *Tabs) TensorTable(label string, dt *table.Table) *tensorcore.Table {
 // TensorEditor recycles a tab with a tensorcore.TensorEditor widget
 // to view given Tensor.
 func (ts *Tabs) TensorEditor(label string, tsr tensor.Tensor) *tensorcore.TensorEditor {
-	tv := NewTab[*tensorcore.TensorEditor](ts, label, func(tab *core.Frame) *tensorcore.TensorEditor {
+	tv := NewTab(ts, label, func(tab *core.Frame) *tensorcore.TensorEditor {
 		tb := core.NewToolbar(tab)
 		tv := tensorcore.NewTensorEditor(tab)
 		tb.Maker(tv.MakeToolbar)
@@ -117,7 +122,7 @@ func (ts *Tabs) TensorEditor(label string, tsr tensor.Tensor) *tensorcore.Tensor
 // TensorGrid recycles a tab with a tensorcore.TensorGrid widget
 // to view given Tensor.
 func (ts *Tabs) TensorGrid(label string, tsr tensor.Tensor) *tensorcore.TensorGrid {
-	tv := NewTab[*tensorcore.TensorGrid](ts, label, func(tab *core.Frame) *tensorcore.TensorGrid {
+	tv := NewTab(ts, label, func(tab *core.Frame) *tensorcore.TensorGrid {
 		// tb := core.NewToolbar(tab)
 		tv := tensorcore.NewTensorGrid(tab)
 		// tb.Maker(tv.MakeToolbar)
@@ -130,7 +135,7 @@ func (ts *Tabs) TensorGrid(label string, tsr tensor.Tensor) *tensorcore.TensorGr
 
 // PlotTable recycles a tab with a Plot of given table.Table.
 func (ts *Tabs) PlotTable(label string, dt *table.Table) *plotcore.PlotEditor {
-	pl := NewTab[*plotcore.PlotEditor](ts, label, func(tab *core.Frame) *plotcore.PlotEditor {
+	pl := NewTab(ts, label, func(tab *core.Frame) *plotcore.PlotEditor {
 		return plotcore.NewSubPlot(tab)
 	})
 	pl.SetTable(dt)
@@ -141,7 +146,7 @@ func (ts *Tabs) PlotTable(label string, dt *table.Table) *plotcore.PlotEditor {
 // SliceTable recycles a tab with a core.Table widget
 // to view the given slice of structs.
 func (ts *Tabs) SliceTable(label string, slc any) *core.Table {
-	tv := NewTab[*core.Table](ts, label, func(tab *core.Frame) *core.Table {
+	tv := NewTab(ts, label, func(tab *core.Frame) *core.Table {
 		return core.NewTable(tab)
 	})
 	tv.SetSlice(slc)
@@ -151,7 +156,7 @@ func (ts *Tabs) SliceTable(label string, slc any) *core.Table {
 
 // EditorString recycles a [texteditor.Editor] tab, displaying given string.
 func (ts *Tabs) EditorString(label, content string) *texteditor.Editor {
-	ed := NewTab[*texteditor.Editor](ts, label, func(tab *core.Frame) *texteditor.Editor {
+	ed := NewTab(ts, label, func(tab *core.Frame) *texteditor.Editor {
 		ed := texteditor.NewEditor(tab)
 		ed.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
@@ -167,7 +172,7 @@ func (ts *Tabs) EditorString(label, content string) *texteditor.Editor {
 
 // EditorFile opens an editor tab for given file.
 func (ts *Tabs) EditorFile(label, filename string) *texteditor.Editor {
-	ed := NewTab[*texteditor.Editor](ts, label, func(tab *core.Frame) *texteditor.Editor {
+	ed := NewTab(ts, label, func(tab *core.Frame) *texteditor.Editor {
 		ed := texteditor.NewEditor(tab)
 		ed.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 1)

@@ -57,6 +57,11 @@ func (tk Tokens) Path(idx0 bool) (string, int) {
 		ci += tin + 1
 		str = tid + tk[tin].String()
 		lastEnd += len(str)
+		if ci >= n || int(tk[ci].Pos) > lastEnd { // just 2 or 2 and a space
+			if tk[tin].Tok == token.COLON { // go Ident: static initializer
+				return "", 0
+			}
+		}
 	}
 	prevWasDelim := true
 	for {

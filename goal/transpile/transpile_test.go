@@ -200,15 +200,24 @@ func TestCommand(t *testing.T) {
 	tests := []exIn{
 		{
 			`command list {
-ls -la args... 
-}`,
+				ls -la args...
+				}`,
 			`goal.AddCommand("list", func(args ...string) {
 goal.Run("ls", "-la", "args...")
 })`},
+		{
+			`	ss.GUI.AddToolbarItem(p, egui.ToolbarItem{
+		Label: "Reset RunLog",
+	})
+`,
+			`ss.GUI.AddToolbarItem(p, egui.ToolbarItem {
+Label: "Reset RunLog",
+} )
+`},
 	}
 
-	st := NewState()
 	for _, test := range tests {
+		st := NewState()
 		st.TranspileCode(test.i)
 		o := st.Code()
 		assert.Equal(t, test.e, o)
@@ -219,7 +228,7 @@ goal.Run("ls", "-la", "args...")
 func TestCur(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"&Data[idx, Integ] = integ", `Data.ValuePtr(int(idx), int(Integ)) = integ`},
+		{`Label: "Reset RunLog",`, `Label: "Reset RunLog",`},
 	}
 	st := NewState()
 	st.MathRecord = false

@@ -28,13 +28,14 @@ func (st *State) TranspileLine(code string) string {
 	st.ParenDepth += paren
 	st.BraceDepth += brace
 	st.BrackDepth += brack
+	// logx.PrintlnDebug("depths: ", st.ParenDepth, st.BraceDepth, st.BrackDepth, st.TypeDepth, st.DeclDepth)
 	if st.TypeDepth > 0 && st.BraceDepth == 0 {
 		st.TypeDepth = 0
 	}
 	if st.DeclDepth > 0 && (st.ParenDepth == 0 && st.BraceDepth == 0) {
 		st.DeclDepth = 0
 	}
-	// logx.PrintlnDebug("depths: ", sh.ParenDepth, sh.BraceDepth, sh.BrackDepth)
+	// logx.PrintlnDebug("depths: ", st.ParenDepth, st.BraceDepth, st.BrackDepth, st.TypeDepth, st.DeclDepth)
 	return toks.Code()
 }
 
@@ -70,7 +71,7 @@ func (st *State) TranspileLineTokens(code string) Tokens {
 	if toks[0].Tok == token.IMPORT || toks[0].Tok == token.VAR || toks[0].Tok == token.CONST {
 		st.DeclDepth++
 	}
-
+	// logx.PrintlnDebug("depths: ", st.ParenDepth, st.BraceDepth, st.BrackDepth, st.TypeDepth, st.DeclDepth)
 	if st.TypeDepth > 0 || st.DeclDepth > 0 {
 		logx.PrintlnDebug("go:   type / decl defn")
 		return st.TranspileGo(toks, code)
@@ -81,6 +82,9 @@ func (st *State) TranspileLineTokens(code string) Tokens {
 	en := len(ewords)
 
 	f0exec := (t0.Tok == token.IDENT && ExecWordIsCommand(ewords[0]))
+	if f0exec && n > 1 && toks[1].Tok == token.COLON { // go Ident: static initializer
+		f0exec = false
+	}
 
 	switch {
 	case t0.Tok == token.ILLEGAL:
