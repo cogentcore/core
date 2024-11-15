@@ -183,11 +183,11 @@ var _sceneFlagsValues = []sceneFlags{0, 1, 2, 3, 4, 5}
 // sceneFlagsN is the highest valid value for type sceneFlags, plus one.
 const sceneFlagsN sceneFlags = 6
 
-var _sceneFlagsValueMap = map[string]sceneFlags{`HasShown`: 0, `Updating`: 1, `NeedsRender`: 2, `NeedsLayout`: 3, `ImageUpdated`: 4, `PrefSizing`: 5}
+var _sceneFlagsValueMap = map[string]sceneFlags{`HasShown`: 0, `Updating`: 1, `NeedsRender`: 2, `NeedsLayout`: 3, `ImageUpdated`: 4, `ContentSizing`: 5}
 
-var _sceneFlagsDescMap = map[sceneFlags]string{0: `sceneHasShown is whether this scene has been shown. This is used to ensure that [events.Show] is only sent once.`, 1: `sceneUpdating means the Scene is in the process of sceneUpdating. It is set for any kind of tree-level update. Skip any further update passes until it goes off.`, 2: `sceneNeedsRender is whether anything in the Scene needs to be re-rendered (but not necessarily the whole scene itself).`, 3: `sceneNeedsLayout is whether the Scene needs a new layout pass.`, 4: `sceneImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global [RenderWindow] rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 5: `scenePrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example); affects layout size computation only for Over`}
+var _sceneFlagsDescMap = map[sceneFlags]string{0: `sceneHasShown is whether this scene has been shown. This is used to ensure that [events.Show] is only sent once.`, 1: `sceneUpdating means the Scene is in the process of sceneUpdating. It is set for any kind of tree-level update. Skip any further update passes until it goes off.`, 2: `sceneNeedsRender is whether anything in the Scene needs to be re-rendered (but not necessarily the whole scene itself).`, 3: `sceneNeedsLayout is whether the Scene needs a new layout pass.`, 4: `sceneImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global [RenderWindow] rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 5: `sceneContentSizing means that this scene is currently doing a contentSize computation to compute the size of the scene (for sizing window for example). Affects layout size computation.`}
 
-var _sceneFlagsMap = map[sceneFlags]string{0: `HasShown`, 1: `Updating`, 2: `NeedsRender`, 3: `NeedsLayout`, 4: `ImageUpdated`, 5: `PrefSizing`}
+var _sceneFlagsMap = map[sceneFlags]string{0: `HasShown`, 1: `Updating`, 2: `NeedsRender`, 3: `NeedsLayout`, 4: `ImageUpdated`, 5: `ContentSizing`}
 
 // String returns the string representation of this sceneFlags value.
 func (i sceneFlags) String() string { return enums.BitFlagString(i, _sceneFlagsValues) }

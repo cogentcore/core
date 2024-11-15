@@ -213,7 +213,7 @@ func (st *Stage) runWindow() *Stage {
 	if TheApp.Platform() == system.Offscreen ||
 		(!TheApp.Platform().IsMobile() &&
 			(st.NewWindow || !st.FullWindow || currentRenderWindow == nil)) {
-		sz = sc.prefSize(sz)
+		sz = sc.contentSize(sz)
 		// on offscreen, we don't want any extra space, as we want the smallest
 		// possible representation of the content
 		// also, on offscreen, if the new size is bigger than the current size,
@@ -236,7 +236,7 @@ func (st *Stage) runWindow() *Stage {
 		} else {
 			// on other platforms, we want extra space and a minimum window size
 			sz = sz.Add(image.Pt(20, 20))
-			if st.NewWindow {
+			if st.NewWindow && st.UseMinSize {
 				// we require windows to be at least 60% and no more than 80% of the
 				// screen size by default
 				scsz := system.TheApp.Screen(0).PixSize // TODO(kai): is there a better screen to get here?
@@ -317,11 +317,13 @@ func (st *Stage) runDialog() *Stage {
 
 	sz := ms.renderContext.geom.Size
 	if !st.FullWindow || st.NewWindow {
-		sz = sc.prefSize(sz)
+		sz = sc.contentSize(sz)
 		sz = sz.Add(image.Pt(50, 50))
-		// dialogs must be at least 400dp wide by default
-		minx := int(ctx.Scene.Styles.UnitContext.Dp(400))
-		sz.X = max(sz.X, minx)
+		if st.UseMinSize {
+			// dialogs must be at least 400dp wide by default
+			minx := int(ctx.Scene.Styles.UnitContext.Dp(400))
+			sz.X = max(sz.X, minx)
+		}
 		sc.Events.startFocusFirst = true // popup dialogs always need focus
 	}
 	if DebugSettings.WinRenderTrace {
