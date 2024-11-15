@@ -120,9 +120,10 @@ type Stage struct { //types:add -setters
 	// [WindowStage]s take up the entire window they are created in.
 	FullWindow bool
 
-	// SizeToContent is for NewWindow stages, to use the actual content size,
-	// instead of enforcing a minimum size as a function of the total screen size.
-	SizeToContent bool
+	// UseMinSize uses a minimum size as a function of the total available size
+	// for sizing new windows and dialogs. Otherwise, only the content size is used.
+	// The saved window position and size takes precedence on multi-window platforms.
+	UseMinSize bool
 
 	// Timeout, if greater than 0, results in a popup stages disappearing
 	// after this timeout duration.
@@ -229,6 +230,7 @@ func (st *Stage) setPopups(mainSt *Stage) *Stage {
 // setType sets the type and also sets default parameters based on that type
 func (st *Stage) setType(typ StageTypes) *Stage {
 	st.Type = typ
+	st.UseMinSize = true
 	switch st.Type {
 	case WindowStage:
 		if !TheApp.Platform().IsMobile() {

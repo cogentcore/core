@@ -640,7 +640,7 @@ func dialogs(ts *core.Tabs) {
 	rw := core.NewButton(wrow).SetText("Resize to content")
 	rw.SetTooltip("Resizes this window to fit the current content")
 	rw.OnClick(func(e events.Event) {
-		wrow.Scene.ResizeToContent(image.Point{0, 40}) // note: size is not correct due to wrapping? #1307
+		wrow.Scene.ResizeToContent(image.Pt(0, 40)) // note: size is not correct due to wrapping? #1307
 	})
 }
 
