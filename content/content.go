@@ -28,6 +28,9 @@ type Content struct {
 	// pages are the pages that constitute the content.
 	pages []*Page
 
+	// pagesByURL has the [Page] for each URL.
+	pagesByURL map[string]*Page
+
 	// currentPage is the currently open page.
 	currentPage *Page
 }
@@ -53,6 +56,7 @@ func (ct *Content) Init() {
 func (ct *Content) SetSource(source fs.FS) *Content {
 	ct.Source = source
 	ct.pages = []*Page{}
+	ct.pagesByURL = map[string]*Page{}
 	errors.Log(fs.WalkDir(ct.Source, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -64,10 +68,15 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		if err != nil {
 			return err
 		}
-		ct.currentPage = pg
 		ct.pages = append(ct.pages, pg)
+		ct.pagesByURL[pg.URL] = pg
 		return nil
 	}))
+	if root, ok := ct.pagesByURL[""]; ok {
+		ct.currentPage = root
+	} else {
+		ct.currentPage = ct.pages[0]
+	}
 	return ct
 }
 
@@ -75,4 +84,11 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 // with the "content" subdirectory of the given filesystem.
 func (ct *Content) SetContent(content fs.FS) *Content {
 	return ct.SetSource(fsx.Sub(content, "content"))
+}
+
+// Open opens the page with the given URL and updates the display.
+func (ct *Content) Open(url string) *Content {
+	ct.currentPage = ct.pagesByURL[url]
+	ct.Update()
+	return ct
 }

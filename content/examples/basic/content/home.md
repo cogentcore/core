@@ -1,5 +1,5 @@
 +++
-Name = "Home"
+URL = ""
 Authors = ["Cogent Core", "Go Gopher"]
 Categories = ["General"]
 +++

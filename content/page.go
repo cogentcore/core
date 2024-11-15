@@ -7,6 +7,8 @@ package content
 import (
 	"bufio"
 	"io/fs"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"cogentcore.org/core/base/iox/tomlx"
@@ -23,8 +25,14 @@ type Page struct {
 	Filename string `toml:"-"`
 
 	// Name is the user-friendly name of the page, defaulting to the
-	// [strcase.ToSentence] of the [Page.Filename].
+	// [strcase.ToSentence] of the [Page.Filename] without its extension.
 	Name string
+
+	// URL is the URL of the page relative to the root of the app, without
+	// any leading slash. It defaults to [Page.Name] with underscores instead
+	// of spaces (ex: "Home" or "Text_fields"). A blank URL ("") manually
+	// specified in the front matter indicates that this the root page.
+	URL string
 
 	// Date is the optional date that the page was published.
 	Date time.Time
@@ -50,7 +58,8 @@ func NewPage(fsys fs.FS, filename string) (*Page, error) {
 
 // Defaults sets default values for the page based on its filename.
 func (pg *Page) Defaults() {
-	pg.Name = strcase.ToSentence(pg.Filename)
+	pg.Name = strcase.ToSentence(strings.TrimSuffix(pg.Filename, filepath.Ext(pg.Filename)))
+	pg.URL = strings.ReplaceAll(pg.Name, " ", "_")
 }
 
 // ReadMetadata reads the page metadata from the front matter of the page file,
