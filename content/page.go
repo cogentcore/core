@@ -6,6 +6,8 @@ package content
 
 import (
 	"bufio"
+	"bytes"
+	"fmt"
 	"io/fs"
 	"path/filepath"
 	"strings"
@@ -18,8 +20,8 @@ import (
 // Page represents the metadata for a single page of content.
 type Page struct {
 
-	// FS is the filesystem that the page is stored in.
-	FS fs.FS `toml:"-"`
+	// Source is the filesystem that the page is stored in.
+	Source fs.FS `toml:"-"`
 
 	// Filename is the name of the file in [Page.FS] that the content is stored in.
 	Filename string `toml:"-"`
@@ -49,8 +51,8 @@ type Page struct {
 
 // NewPage makes a new page in the given filesystem with the given filename,
 // sets default values, and reads metadata from the front matter of the page file.
-func NewPage(fsys fs.FS, filename string) (*Page, error) {
-	pg := &Page{FS: fsys, Filename: filename}
+func NewPage(source fs.FS, filename string) (*Page, error) {
+	pg := &Page{Source: source, Filename: filename}
 	pg.Defaults()
 	err := pg.ReadMetadata()
 	return pg, err
@@ -65,7 +67,7 @@ func (pg *Page) Defaults() {
 // ReadMetadata reads the page metadata from the front matter of the page file,
 // if there is any.
 func (pg *Page) ReadMetadata() error {
-	f, err := pg.FS.Open(pg.Filename)
+	f, err := pg.Source.Open(pg.Filename)
 	if err != nil {
 		return err
 	}
@@ -87,4 +89,21 @@ func (pg *Page) ReadMetadata() error {
 		data = append(data, append(b, '\n')...)
 	}
 	return tomlx.ReadBytes(pg, data)
+}
+
+// ReadContent returns the page content with any front matter removed.
+func (pg *Page) ReadContent() ([]byte, error) {
+	b, err := fs.ReadFile(pg.Source, pg.Filename)
+	if err != nil {
+		return nil, err
+	}
+	if !bytes.HasPrefix(b, []byte(`+++`)) {
+		return b, nil
+	}
+	b = bytes.TrimPrefix(b, []byte(`+++`))
+	_, after, has := bytes.Cut(b, []byte(`+++`))
+	if !has {
+		return nil, fmt.Errorf("unclosed front matter")
+	}
+	return after, nil
 }

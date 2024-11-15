@@ -14,7 +14,7 @@ func TestNewPage(t *testing.T) {
 	pg, err := NewPage(exampleContent, "home.md")
 	assert.NoError(t, err)
 	assert.Equal(t, Page{
-		FS:         exampleContent,
+		Source:     exampleContent,
 		Filename:   "home.md",
 		Name:       "Home",
 		Authors:    []string{"Cogent Core", "Go Gopher"},

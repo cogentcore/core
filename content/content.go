@@ -68,7 +68,7 @@ func (ct *Content) Init() {
 					return
 				}
 				w.DeleteChildren()
-				b, err := fs.ReadFile(ct.Source, ct.currentPage.Filename)
+				b, err := ct.currentPage.ReadContent()
 				if errors.Log(err) != nil {
 					return
 				}
