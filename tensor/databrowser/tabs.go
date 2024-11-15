@@ -138,8 +138,10 @@ func (ts *Tabs) PlotTable(label string, dt *table.Table) *plotcore.PlotEditor {
 	pl := NewTab(ts, label, func(tab *core.Frame) *plotcore.PlotEditor {
 		return plotcore.NewSubPlot(tab)
 	})
-	pl.SetTable(dt)
-	ts.Update()
+	if pl != nil {
+		pl.SetTable(dt)
+		ts.Update()
+	}
 	return pl
 }
 

@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/tensor/table"
 	"golang.org/x/exp/maps"
 )
@@ -154,7 +155,7 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 			}
 		}
 		pl := pt.New(data)
-		if pl == nil {
+		if reflectx.AnyIsNil(pl) {
 			err = fmt.Errorf("plot.NewTablePlot: error in creating plotter type: %q", ptyp)
 			errs = append(errs, err)
 			continue
@@ -182,10 +183,14 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 		if csty[xi].Label != "" {
 			lbl = csty[xi].Label
 		}
-		pl0 := plt.Plotters[0]
-		pl0.Stylers().Add(func(s *Style) {
-			s.Plot.XAxis.Label = lbl
-		})
+		if len(plt.Plotters) > 0 {
+			pl0 := plt.Plotters[0]
+			if pl0 != nil {
+				pl0.Stylers().Add(func(s *Style) {
+					s.Plot.XAxis.Label = lbl
+				})
+			}
+		}
 	}
 	nbar := len(barCols)
 	if nbar > 1 {
