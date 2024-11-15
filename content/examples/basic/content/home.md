@@ -1,7 +1,9 @@
 +++
 URL = ""
-Authors = ["Cogent Core", "Go Gopher"]
-Categories = ["General"]
 +++
 
-Hello, world!
+Welcome to Cogent Content!
+
+## Featured widgets
+
+* [[Button]]

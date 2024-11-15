@@ -11,13 +11,13 @@ import (
 )
 
 func TestNewPage(t *testing.T) {
-	pg, err := NewPage(exampleContent, "home.md")
+	pg, err := NewPage(exampleContent, "button.md")
 	assert.NoError(t, err)
 	assert.Equal(t, Page{
 		Source:     exampleContent,
-		Filename:   "home.md",
-		Name:       "Home",
-		Authors:    []string{"Cogent Core", "Go Gopher"},
-		Categories: []string{"General"},
+		Filename:   "button.md",
+		Name:       "Button",
+		URL:        "Button",
+		Categories: []string{"Widgets"},
 	}, *pg)
 }
