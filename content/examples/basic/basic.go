@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/content"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore"
 )
 
 //go:embed content
@@ -16,6 +17,7 @@ var fsys embed.FS
 
 func main() {
 	b := core.NewBody("Cogent Content Example")
-	content.NewContent(b).SetContent(fsys)
+	ct := content.NewContent(b).SetContent(fsys)
+	ct.Context.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))
 	b.RunMainWindow()
 }
