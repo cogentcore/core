@@ -191,10 +191,7 @@ func Run%[1]sGPU(n int) {
 
 // Run%[1]sCPU runs the %[1]s kernel on the CPU.
 func Run%[1]sCPU(n int) {
-	// todo: need threaded api -- not tensor
-	for i := range n {
-		%[1]s(uint32(i))
-	}
+	gpu.VectorizeFunc(0, n, %[1]s)
 }
 
 // RunOne%[1]s runs the %[1]s kernel with given number of elements,

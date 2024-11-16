@@ -32,7 +32,11 @@ const (
 
 // GPUInit initializes the GPU compute system,
 // configuring system(s), variables and kernels.
+// It is safe to call multiple times: detects if already run.
 func GPUInit() {
+	if ComputeGPU != nil {
+		return
+	}
 	gp := gpu.NewComputeGPU()
 	ComputeGPU = gp
 	{
@@ -86,10 +90,7 @@ func RunAtomicGPU(n int) {
 
 // RunAtomicCPU runs the Atomic kernel on the CPU.
 func RunAtomicCPU(n int) {
-	// todo: need threaded api -- not tensor
-	for i := range n {
-		Atomic(uint32(i))
-	}
+	gpu.VectorizeFunc(0, n, Atomic)
 }
 
 // RunOneAtomic runs the Atomic kernel with given number of elements,
@@ -131,10 +132,7 @@ func RunComputeGPU(n int) {
 
 // RunComputeCPU runs the Compute kernel on the CPU.
 func RunComputeCPU(n int) {
-	// todo: need threaded api -- not tensor
-	for i := range n {
-		Compute(uint32(i))
-	}
+	gpu.VectorizeFunc(0, n, Compute)
 }
 
 // RunOneCompute runs the Compute kernel with given number of elements,

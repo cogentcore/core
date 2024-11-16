@@ -7,6 +7,8 @@ package gpu
 import (
 	"fmt"
 	"math"
+	"runtime"
+	"sync"
 
 	"cogentcore.org/core/base/errors"
 	"github.com/cogentcore/webgpu/wgpu"
@@ -165,4 +167,29 @@ func (sy *ComputeSystem) EndComputePass() error {
 // Ceil(n / threads)
 func Warps(n, threads int) int {
 	return int(math.Ceil(float64(n) / float64(threads)))
+}
+
+// VectorizeFunc runs given GPU kernel function taking a uint32 index
+// on the CPU, using given number of threads with goroutines, for n iterations.
+// If threads is 0, then GOMAXPROCS is used.
+func VectorizeFunc(threads, n int, fun func(idx uint32)) {
+	if threads == 0 {
+		threads = runtime.GOMAXPROCS(0)
+	}
+	nper := int(math.Ceil(float64(n) / float64(threads)))
+	wait := sync.WaitGroup{}
+	for start := 0; start < n; start += nper {
+		end := start + nper
+		if end > n {
+			end = n
+		}
+		wait.Add(1)
+		go func() {
+			for idx := start; idx < end; idx++ {
+				fun(uint32(idx))
+			}
+			wait.Done()
+		}()
+	}
+	wait.Wait()
 }
