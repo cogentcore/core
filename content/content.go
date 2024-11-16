@@ -88,22 +88,28 @@ func (ct *Content) Init() {
 				s.Grow.Set(1, 1)
 			})
 			w.Updater(func() {
-				if ct.renderedPage == ct.currentPage {
-					return
-				}
-				w.DeleteChildren()
-				b, err := ct.currentPage.ReadContent()
-				if errors.Log(err) != nil {
-					return
-				}
-				err = htmlcore.ReadMD(ct.Context, w, b)
-				if errors.Log(err) != nil {
-					return
-				}
-				ct.renderedPage = ct.currentPage
+				errors.Log(ct.loadPage(w))
 			})
 		})
 	})
+}
+
+// loadPage loads the current page content into the given frame if it is not already loaded.
+func (ct *Content) loadPage(w *core.Frame) error {
+	if ct.renderedPage == ct.currentPage {
+		return nil
+	}
+	w.DeleteChildren()
+	b, err := ct.currentPage.ReadContent()
+	if err != nil {
+		return err
+	}
+	err = htmlcore.ReadMD(ct.Context, w, b)
+	if err != nil {
+		return err
+	}
+	ct.renderedPage = ct.currentPage
+	return nil
 }
 
 // SetSource sets the source filesystem for the content.
