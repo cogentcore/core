@@ -46,6 +46,9 @@ type Content struct {
 
 	// renderedPage is the most recently rendered page.
 	renderedPage *Page
+
+	// headings are all of the heading elements on the currently rendered page.
+	headings []*core.Text
 }
 
 func (ct *Content) Init() {
@@ -92,24 +95,6 @@ func (ct *Content) Init() {
 			})
 		})
 	})
-}
-
-// loadPage loads the current page content into the given frame if it is not already loaded.
-func (ct *Content) loadPage(w *core.Frame) error {
-	if ct.renderedPage == ct.currentPage {
-		return nil
-	}
-	w.DeleteChildren()
-	b, err := ct.currentPage.ReadContent()
-	if err != nil {
-		return err
-	}
-	err = htmlcore.ReadMD(ct.Context, w, b)
-	if err != nil {
-		return err
-	}
-	ct.renderedPage = ct.currentPage
-	return nil
 }
 
 // SetSource sets the source filesystem for the content.
@@ -159,4 +144,39 @@ func (ct *Content) Open(url string) *Content {
 	ct.currentPage = pg
 	ct.Update()
 	return ct
+}
+
+// loadPage loads the current page content into the given frame if it is not already loaded.
+func (ct *Content) loadPage(w *core.Frame) error {
+	if ct.renderedPage == ct.currentPage {
+		return nil
+	}
+	w.DeleteChildren()
+	b, err := ct.currentPage.ReadContent()
+	if err != nil {
+		return err
+	}
+	err = htmlcore.ReadMD(ct.Context, w, b)
+	if err != nil {
+		return err
+	}
+	ct.getHeadings(w)
+	ct.renderedPage = ct.currentPage
+	return nil
+}
+
+// getHeadings sets [Content.headings] to be all of the headings in the given frame.
+func (ct *Content) getHeadings(w *core.Frame) {
+	ct.headings = []*core.Text{}
+	w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		tx, ok := cw.(*core.Text)
+		if !ok {
+			return tree.Continue
+		}
+		switch tx.Property("tag") {
+		case "h1", "h2", "h3", "h4", "h5", "h6":
+			ct.headings = append(ct.headings, tx)
+		}
+		return tree.Continue
+	})
 }
