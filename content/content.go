@@ -10,6 +10,7 @@ package content
 
 import (
 	"io/fs"
+	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -180,14 +181,27 @@ func (ct *Content) loadPage(w *core.Frame) error {
 func (ct *Content) makeTableOfContents(w *core.Frame) {
 	ct.leftFrame.DeleteChildren()
 	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
+	// last is the most recent tree node for each heading level, used for nesting.
+	last := map[int]*core.Tree{}
 	w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 		tx, ok := cw.(*core.Text)
 		if !ok {
 			return tree.Continue
 		}
-		switch tx.Property("tag") {
+		tag := tx.Property("tag")
+		switch tag {
 		case "h1", "h2", "h3", "h4", "h5", "h6":
-			tr := core.NewTree(contents).SetText(tx.Text)
+			num := errors.Log1(strconv.Atoi(tag.(string)[1:]))
+			parent := contents
+			// Our parent is the last heading with a lower level (closer to h1).
+			for i := num - 1; i >= 1; i-- {
+				if last[i] != nil {
+					parent = last[i]
+					break
+				}
+			}
+			tr := core.NewTree(parent).SetText(tx.Text)
+			last[num] = tr
 			tr.OnSelect(func(e events.Event) {
 				tx.ScrollToThis()
 			})
