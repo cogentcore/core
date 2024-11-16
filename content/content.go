@@ -23,7 +23,7 @@ import (
 
 // Content manages and displays the content of a set of pages.
 type Content struct {
-	core.Frame
+	core.Splits
 
 	// Source is the source filesystem for the content.
 	// It should be set using [Content.SetSource] or [Content.SetContent].
@@ -54,7 +54,9 @@ type Content struct {
 }
 
 func (ct *Content) Init() {
-	ct.Frame.Init()
+	ct.Splits.Init()
+	ct.SetSplits(0.2, 0.8)
+
 	ct.Context = htmlcore.NewContext()
 	ct.Context.OpenURL = func(url string) {
 		ct.Open(url)
@@ -68,10 +70,6 @@ func (ct *Content) Init() {
 			return pg.URL, label
 		}
 		return "", ""
-	})
-
-	ct.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
 	})
 
 	ct.Maker(func(p *tree.Plan) {
