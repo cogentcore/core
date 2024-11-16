@@ -18,20 +18,14 @@ import (
 // of the brackets is passed to the handler.
 type WikilinkHandler func(text string) (url string, label string)
 
-// WikilinkHandlers is a list of handlers to use for wikilinks.
-// If one returns "", "", the next ones will be tried instead.
-// The functions are tried in sequential ascending order.
-// See [AddWikilinkHandler] to add a new handler.
-var WikilinkHandlers []WikilinkHandler
-
-// AddWikilinkHandler adds a new [WikilinkHandler] to [WikilinkHandlers].
+// AddWikilinkHandler adds a new [WikilinkHandler] to [Context.WikilinkHandlers].
 // If it returns "", "", the next handlers will be tried instead.
 // The functions are tried in sequential ascending order.
-func AddWikilinkHandler(f WikilinkHandler) {
-	WikilinkHandlers = append(WikilinkHandlers, f)
+func (c *Context) AddWikilinkHandler(f WikilinkHandler) {
+	c.WikilinkHandlers = append(c.WikilinkHandlers, f)
 }
 
-// GoDocWikilink returns a WikilinkHandler that converts wikilinks of the form
+// GoDocWikilink returns a [WikilinkHandler] that converts wikilinks of the form
 // [[prefix:identifier]] to a pkg.go.dev URL starting at base. For example, with
 // base="cogentcore.org/core" and prefix="doc", the wikilink [[doc:core.Button]] will
 // result in the URL "https://pkg.go.dev/cogentcore.org/core/core#Button".
@@ -53,7 +47,7 @@ func GoDocWikilink(base string, prefix string) WikilinkHandler {
 // wikilink returns an inline parser function. This indirection is
 // required because we want to call the previous definition in case
 // this is not a wikilink.
-func wikilink(fn func(p *parser.Parser, data []byte, offset int) (int, ast.Node)) func(p *parser.Parser, data []byte, offset int) (int, ast.Node) {
+func wikilink(ctx *Context, fn func(p *parser.Parser, data []byte, offset int) (int, ast.Node)) func(p *parser.Parser, data []byte, offset int) (int, ast.Node) {
 	return func(p *parser.Parser, original []byte, offset int) (int, ast.Node) {
 		data := original[offset:]
 		n := len(data)
@@ -67,7 +61,7 @@ func wikilink(fn func(p *parser.Parser, data []byte, offset int) (int, ast.Node)
 		}
 		text := data[2 : i+1]
 		url, label := "", ""
-		for _, h := range WikilinkHandlers {
+		for _, h := range ctx.WikilinkHandlers {
 			u, l := h(string(text))
 			if u == "" && l == "" {
 				continue

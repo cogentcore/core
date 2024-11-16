@@ -55,6 +55,12 @@ type Context struct {
 	// GetURL is the function used to get resources from URLs,
 	// which defaults to [http.Get].
 	GetURL func(url string) (*http.Response, error)
+
+	// WikilinkHandlers is a list of handlers to use for wikilinks.
+	// If one returns "", "", the next ones will be tried instead.
+	// The functions are tried in sequential ascending order.
+	// See [Context.AddWikilinkHandler] to add a new handler.
+	WikilinkHandlers []WikilinkHandler
 }
 
 // NewContext returns a new [Context] with basic defaults.

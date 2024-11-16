@@ -13,12 +13,12 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
-func mdToHTML(md []byte) []byte {
+func mdToHTML(ctx *Context, md []byte) []byte {
 	// create markdown parser with extensions
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
 	p := parser.NewWithExtensions(extensions)
 	prev := p.RegisterInline('[', nil)
-	p.RegisterInline('[', wikilink(prev))
+	p.RegisterInline('[', wikilink(ctx, prev))
 	doc := p.Parse(md)
 
 	// create HTML renderer with extensions
@@ -32,7 +32,7 @@ func mdToHTML(md []byte) []byte {
 // ReadMD reads MD (markdown) from the given bytes and adds corresponding
 // Cogent Core widgets to the given [core.Widget], using the given context.
 func ReadMD(ctx *Context, parent core.Widget, b []byte) error {
-	htm := mdToHTML(b)
+	htm := mdToHTML(ctx, b)
 	buf := bytes.NewBuffer(htm)
 	return ReadHTML(ctx, parent, buf)
 }
