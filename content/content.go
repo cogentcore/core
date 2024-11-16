@@ -92,7 +92,7 @@ func (ct *Content) Init() {
 				if errors.Log(err) != nil {
 					return
 				}
-				err = htmlcore.ReadMD(htmlcore.NewContext(), w, b)
+				err = htmlcore.ReadMD(ct.Context, w, b)
 				if errors.Log(err) != nil {
 					return
 				}
