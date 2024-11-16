@@ -168,17 +168,17 @@ func (tsr *Number[T]) SetFloat(val float64, i ...int) {
 }
 
 func (tsr *Number[T]) Float1D(i int) float64 {
-	return float64(tsr.Values[tsr.shape.Header+i])
+	return float64(tsr.Values[tsr.shape.Header+NegIndex(i, len(tsr.Values))])
 }
 
 func (tsr *Number[T]) SetFloat1D(val float64, i int) {
-	tsr.Values[tsr.shape.Header+i] = T(val)
+	tsr.Values[tsr.shape.Header+NegIndex(i, len(tsr.Values))] = T(val)
 }
 
 func (tsr *Number[T]) FloatRow(row, cell int) float64 {
 	_, sz := tsr.shape.RowCellSize()
 	i := row*sz + cell
-	return float64(tsr.Values[tsr.shape.Header+i])
+	return float64(tsr.Values[tsr.shape.Header+NegIndex(i, len(tsr.Values))])
 }
 
 func (tsr *Number[T]) SetFloatRow(val float64, row, cell int) {
@@ -210,11 +210,11 @@ func (tsr *Number[T]) SetInt(val int, i ...int) {
 }
 
 func (tsr *Number[T]) Int1D(i int) int {
-	return int(tsr.Values[tsr.shape.Header+i])
+	return int(tsr.Values[tsr.shape.Header+NegIndex(i, len(tsr.Values))])
 }
 
 func (tsr *Number[T]) SetInt1D(val int, i int) {
-	tsr.Values[tsr.shape.Header+i] = T(val)
+	tsr.Values[tsr.shape.Header+NegIndex(i, len(tsr.Values))] = T(val)
 }
 
 func (tsr *Number[T]) IntRow(row, cell int) int {

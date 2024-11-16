@@ -65,8 +65,12 @@ func (tsr *String) SetString(val string, i ...int) {
 	tsr.Values[tsr.shape.IndexTo1D(i...)] = val
 }
 
-func (tsr String) SetString1D(val string, i int) {
-	tsr.Values[tsr.shape.Header+i] = val
+func (tsr *String) String1D(i int) string {
+	return tsr.Values[tsr.shape.Header+i]
+}
+
+func (tsr *String) SetString1D(val string, i int) {
+	tsr.Values[tsr.shape.Header+NegIndex(i, len(tsr.Values))] = val
 }
 
 func (tsr *String) StringRow(row, cell int) string {
@@ -103,11 +107,11 @@ func (tsr *String) SetFloat(val float64, i ...int) {
 }
 
 func (tsr *String) Float1D(i int) float64 {
-	return StringToFloat64(tsr.Values[tsr.shape.Header+i])
+	return StringToFloat64(tsr.Values[tsr.shape.Header+NegIndex(i, len(tsr.Values))])
 }
 
 func (tsr *String) SetFloat1D(val float64, i int) {
-	tsr.Values[tsr.shape.Header+i] = Float64ToString(val)
+	tsr.Values[tsr.shape.Header+NegIndex(i, len(tsr.Values))] = Float64ToString(val)
 }
 
 func (tsr *String) FloatRow(row, cell int) float64 {
@@ -144,11 +148,11 @@ func (tsr *String) SetInt(val int, i ...int) {
 }
 
 func (tsr *String) Int1D(i int) int {
-	return errors.Ignore1(strconv.Atoi(tsr.Values[tsr.shape.Header+i]))
+	return errors.Ignore1(strconv.Atoi(tsr.Values[tsr.shape.Header+NegIndex(i, len(tsr.Values))]))
 }
 
 func (tsr *String) SetInt1D(val int, i int) {
-	tsr.Values[tsr.shape.Header+i] = strconv.Itoa(val)
+	tsr.Values[tsr.shape.Header+NegIndex(i, len(tsr.Values))] = strconv.Itoa(val)
 }
 
 func (tsr *String) IntRow(row, cell int) int {
@@ -277,7 +281,7 @@ func (tsr *String) SetRowTensor(val Values, row int) {
 }
 
 // AppendRow adds a row and sets values to given values.
-func (tsr String) AppendRow(val Values) {
+func (tsr *String) AppendRow(val Values) {
 	if tsr.NumDims() == 0 {
 		tsr.SetShapeSizes(0)
 	}

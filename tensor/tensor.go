@@ -102,12 +102,14 @@ type Tensor interface {
 	SetFloat(val float64, i ...int)
 
 	// Float1D returns the value of given 1-dimensional index (0-Len()-1) as a float64.
+	// If index is negative, it indexes from the end of the list (-1 = last).
 	// This can be somewhat expensive in wrapper views ([Rows], [Sliced]), which
 	// convert the flat index back into a full n-dimensional index and use that api.
 	// [Tensor.FloatRow] is preferred.
 	Float1D(i int) float64
 
 	// SetFloat1D sets the value of given 1-dimensional index (0-Len()-1) as a float64.
+	// If index is negative, it indexes from the end of the list (-1 = last).
 	// This can be somewhat expensive in the commonly-used [Rows] view;
 	// [Tensor.SetFloatRow] is preferred.
 	SetFloat1D(val float64, i int)
@@ -122,9 +124,11 @@ type Tensor interface {
 	SetString(val string, i ...int)
 
 	// String1D returns the value of given 1-dimensional index (0-Len()-1) as a string.
+	// If index is negative, it indexes from the end of the list (-1 = last).
 	String1D(i int) string
 
 	// SetString1D sets the value of given 1-dimensional index (0-Len()-1) as a string.
+	// If index is negative, it indexes from the end of the list (-1 = last).
 	SetString1D(val string, i int)
 
 	/////////////////////  Ints
@@ -136,8 +140,18 @@ type Tensor interface {
 	SetInt(val int, i ...int)
 
 	// Int1D returns the value of given 1-dimensional index (0-Len()-1) as a int.
+	// If index is negative, it indexes from the end of the list (-1 = last).
 	Int1D(i int) int
 
 	// SetInt1D sets the value of given 1-dimensional index (0-Len()-1) as a int.
+	// If index is negative, it indexes from the end of the list (-1 = last).
 	SetInt1D(val int, i int)
+}
+
+// NegIndex handles negative index values as counting backward from n.
+func NegIndex(i, n int) int {
+	if i < 0 {
+		return n + i
+	}
+	return i
 }

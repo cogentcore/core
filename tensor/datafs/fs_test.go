@@ -17,7 +17,7 @@ func makeTestData(t *testing.T) *Data {
 	assert.NoError(t, err)
 	net, err := dfs.Mkdir("network")
 	assert.NoError(t, err)
-	NewValue[float32](net, "units", 50, 50)
+	Value[float32](net, "units", 50, 50)
 	_, err = dfs.Mkdir("log")
 	assert.NoError(t, err)
 	return dfs
