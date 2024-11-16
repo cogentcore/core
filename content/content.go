@@ -10,6 +10,7 @@ package content
 
 import (
 	"io/fs"
+	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
@@ -27,8 +28,15 @@ type Content struct {
 	// It should be set using [Content.SetSource] or [Content.SetContent].
 	Source fs.FS `set:"-"`
 
+	// Context is the [htmlcore.Context] used to render the content,
+	// which can be modified for things such as adding wikilink handlers.
+	Context *htmlcore.Context `set:"-"`
+
 	// pages are the pages that constitute the content.
 	pages []*Page
+
+	// pagesByName has the [Page] for each name transformed into lowercase.
+	pagesByName map[string]*Page
 
 	// pagesByURL has the [Page] for each URL.
 	pagesByURL map[string]*Page
@@ -42,10 +50,22 @@ type Content struct {
 
 func (ct *Content) Init() {
 	ct.Frame.Init()
+	ct.Context = htmlcore.NewContext()
+	ct.Context.OpenURL = func(url string) {
+		ct.Open(url)
+	}
+	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
+		if pg, ok := ct.pagesByName[strings.ToLower(text)]; ok {
+			return pg.URL, text
+		}
+		return "", ""
+	})
+
 	ct.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
+
 	ct.Maker(func(p *tree.Plan) {
 		if ct.currentPage == nil {
 			return
@@ -86,6 +106,7 @@ func (ct *Content) Init() {
 func (ct *Content) SetSource(source fs.FS) *Content {
 	ct.Source = source
 	ct.pages = []*Page{}
+	ct.pagesByName = map[string]*Page{}
 	ct.pagesByURL = map[string]*Page{}
 	errors.Log(fs.WalkDir(ct.Source, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -99,6 +120,7 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 			return err
 		}
 		ct.pages = append(ct.pages, pg)
+		ct.pagesByName[strings.ToLower(pg.Name)] = pg
 		ct.pagesByURL[pg.URL] = pg
 		return nil
 	}))
@@ -117,8 +139,14 @@ func (ct *Content) SetContent(content fs.FS) *Content {
 }
 
 // Open opens the page with the given URL and updates the display.
+// If no pages correspond to the URL, it is opened in the default browser.
 func (ct *Content) Open(url string) *Content {
-	ct.currentPage = ct.pagesByURL[url]
+	pg, ok := ct.pagesByURL[url]
+	if !ok {
+		core.TheApp.OpenURL(url)
+		return ct
+	}
+	ct.currentPage = pg
 	ct.Update()
 	return ct
 }
