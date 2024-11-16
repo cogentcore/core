@@ -29,6 +29,10 @@ type Tabber interface {
 	// TabByName returns a tab with the given name, nil if not found.
 	TabByName(name string) *core.Frame
 
+	// SelectTabByName selects the tab by widget name, returning it.
+	// The widget name is the original full tab label, prior to any eliding.
+	SelectTabByName(name string) *core.Frame
+
 	// RecycleTab returns a tab with the given name, first by looking for an existing one,
 	// and if not found, making a new one. It returns the frame for the tab.
 	RecycleTab(name string) *core.Frame
