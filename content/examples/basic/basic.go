@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/content"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/htmlcore"
+	_ "cogentcore.org/core/yaegicore"
 )
 
 //go:embed content

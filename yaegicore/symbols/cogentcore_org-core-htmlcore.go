@@ -19,7 +19,6 @@ func init() {
 		"ReadHTMLString":  reflect.ValueOf(htmlcore.ReadHTMLString),
 		"ReadMD":          reflect.ValueOf(htmlcore.ReadMD),
 		"ReadMDString":    reflect.ValueOf(htmlcore.ReadMDString),
-		"WikilinkBaseURL": reflect.ValueOf(&htmlcore.WikilinkBaseURL).Elem(),
 
 		// type definitions
 		"Context": reflect.ValueOf((*htmlcore.Context)(nil)),
