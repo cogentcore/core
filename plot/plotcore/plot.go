@@ -128,12 +128,20 @@ func (pt *Plot) WidgetTooltip(pos image.Point) (string, image.Point) {
 		return pt.Tooltip, pt.DefaultTooltipPos()
 	}
 	wpos := pos.Sub(pt.Geom.ContentBBox.Min)
-	plt, _, idx, dist, data, _, legend := pt.Plot.ClosestDataToPixel(wpos.X, wpos.Y)
+	plt, _, idx, dist, _, data, legend := pt.Plot.ClosestDataToPixel(wpos.X, wpos.Y)
 	if dist <= 10 {
 		pt.Plot.HighlightPlotter = plt
 		pt.Plot.HighlightIndex = idx
 		pt.updatePlot()
-		return fmt.Sprintf("%s[%d]: (%g, %g)", legend, idx, data.X, data.Y), pos
+		dx := 0.0
+		if data[plot.X] != nil {
+			dx = data[plot.X].Float1D(idx)
+		}
+		dy := 0.0
+		if data[plot.Y] != nil {
+			dy = data[plot.Y].Float1D(idx)
+		}
+		return fmt.Sprintf("%s[%d]: (%g, %g)", legend, idx, dx, dy), pos
 	} else {
 		if pt.Plot.HighlightPlotter != nil {
 			pt.Plot.HighlightPlotter = nil
