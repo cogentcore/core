@@ -21,15 +21,15 @@ type WikilinkHandler func(text string) (url string, label string)
 // AddWikilinkHandler adds a new [WikilinkHandler] to [Context.WikilinkHandlers].
 // If it returns "", "", the next handlers will be tried instead.
 // The functions are tried in sequential ascending order.
-func (c *Context) AddWikilinkHandler(f WikilinkHandler) {
-	c.WikilinkHandlers = append(c.WikilinkHandlers, f)
+func (c *Context) AddWikilinkHandler(h WikilinkHandler) {
+	c.WikilinkHandlers = append(c.WikilinkHandlers, h)
 }
 
 // GoDocWikilink returns a [WikilinkHandler] that converts wikilinks of the form
-// [[prefix:identifier]] to a pkg.go.dev URL starting at base. For example, with
-// base="cogentcore.org/core" and prefix="doc", the wikilink [[doc:core.Button]] will
+// [[prefix:identifier]] to a pkg.go.dev URL starting at pkg. For example, with
+// prefix="doc" and pkg="cogentcore.org/core", the wikilink [[doc:core.Button]] will
 // result in the URL "https://pkg.go.dev/cogentcore.org/core/core#Button".
-func GoDocWikilink(base string, prefix string) WikilinkHandler {
+func GoDocWikilink(prefix string, pkg string) WikilinkHandler {
 	return func(text string) (url string, label string) {
 		if !strings.HasPrefix(text, prefix+":") {
 			return "", ""
@@ -37,7 +37,7 @@ func GoDocWikilink(base string, prefix string) WikilinkHandler {
 		text = strings.TrimPrefix(text, prefix+":")
 		// pkg.go.dev uses fragments for first dot within package
 		t := strings.Replace(text, ".", "#", 1)
-		url = "https://pkg.go.dev/" + base + "/" + t
+		url = "https://pkg.go.dev/" + pkg + "/" + t
 		return url, text
 	}
 }
