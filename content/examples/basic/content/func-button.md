@@ -1,0 +1,1 @@
+A **func button** is a [[button]] that is [[binding|bound]] to a function.

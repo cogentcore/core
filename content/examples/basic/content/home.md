@@ -2,8 +2,4 @@
 URL = ""
 +++
 
-Welcome to Cogent Content!
-
-## Featured widgets
-
-* [[Button]]
+Welcome to **Cogent Content**, built out of [[widget]]s.
