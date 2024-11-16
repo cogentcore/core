@@ -386,11 +386,13 @@ func (d *Data) Recycle(it *Data) *Data {
 // Row count is updated to current max row.
 // Set DirTable = nil to regenerate.
 func (d *Data) GetDirTable(fun func(item *Data) bool) *table.Table {
-	if d.DirTable != nil {
-		d.DirTable.SetNumRowsToMax()
-		return d.DirTable
-	}
 	its := d.FlatItemsFunc(fun)
+	if d.DirTable != nil {
+		if d.DirTable.NumColumns() == len(its) {
+			d.DirTable.SetNumRowsToMax()
+			return d.DirTable
+		}
+	}
 	dt := table.New(fsx.DirAndFile(string(d.Path())))
 	for _, it := range its {
 		tsr := it.Data

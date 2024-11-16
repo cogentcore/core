@@ -20,6 +20,11 @@ import (
 	"cogentcore.org/core/tree"
 )
 
+// Tabber is an interface for getting the parent Tabs of tab buttons.
+type Tabber interface {
+	AsCoreTabs() *Tabs
+}
+
 // Tabs divide widgets into logical groups and give users the ability
 // to freely navigate between them using tab buttons.
 type Tabs struct {
@@ -100,6 +105,8 @@ func (tt TabTypes) effective(w Widget) TabTypes {
 func (tt TabTypes) isColumn() bool {
 	return tt == NavigationDrawer
 }
+
+func (ts *Tabs) AsCoreTabs() *Tabs { return ts }
 
 func (ts *Tabs) Init() {
 	ts.Frame.Init()
@@ -543,5 +550,8 @@ func (tb *Tab) Init() {
 
 // tabs returns the parent [Tabs] of this [Tab].
 func (tb *Tab) tabs() *Tabs {
-	return tb.Parent.AsTree().Parent.(*Tabs)
+	if tbr, ok := tb.Parent.AsTree().Parent.(Tabber); ok {
+		return tbr.AsCoreTabs()
+	}
+	return nil
 }

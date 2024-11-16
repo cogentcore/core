@@ -23,8 +23,8 @@ import (
 // among others.
 type Tabber interface {
 
-	// AsTabs returns the underlying [Tabs] widget.
-	AsTabs() *Tabs
+	// AsDataTabs returns the underlying [databrowser.Tabs] widget.
+	AsDataTabs() *Tabs
 
 	// TabByName returns a tab with the given name, nil if not found.
 	TabByName(name string) *core.Frame
@@ -84,7 +84,7 @@ func NewTab[T any](tb Tabber, label string, mkfun func(tab *core.Frame) T) T {
 			return tt
 		}
 		err := fmt.Errorf("Name / Type conflict: tab %q does not have the expected type of content: is %T", label, lc)
-		core.ErrorSnackbar(tb.AsTabs(), err)
+		core.ErrorSnackbar(tb.AsDataTabs(), err)
 		return zv
 	}
 	w := mkfun(tab)
@@ -108,7 +108,7 @@ func TabAt[T any](tb Tabber, label string) T {
 	}
 
 	err := fmt.Errorf("Name / Type conflict: tab %q does not have the expected type of content: %T", label, lc)
-	core.ErrorSnackbar(tb.AsTabs(), err)
+	core.ErrorSnackbar(tb.AsDataTabs(), err)
 	return zv
 }
 
@@ -122,7 +122,7 @@ func (ts *Tabs) Init() {
 	ts.Type = core.FunctionalTabs
 }
 
-func (ts *Tabs) AsTabs() *Tabs {
+func (ts *Tabs) AsDataTabs() *Tabs {
 	return ts
 }
 
