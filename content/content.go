@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -47,8 +48,9 @@ type Content struct {
 	// renderedPage is the most recently rendered page.
 	renderedPage *Page
 
-	// headings are all of the heading elements on the currently rendered page.
-	headings []*core.Text
+	// leftFrame is the frame on the left side of the widget,
+	// used for displaying the table of contents.
+	leftFrame *core.Frame
 }
 
 func (ct *Content) Init() {
@@ -76,13 +78,9 @@ func (ct *Content) Init() {
 		if ct.currentPage == nil {
 			return
 		}
-		if len(ct.headings) > 0 {
-			tree.Add(p, func(w *core.Frame) {
-				tree.AddChild(w, func(w *core.Tree) {
-					w.SetText("Contents")
-				})
-			})
-		}
+		tree.Add(p, func(w *core.Frame) {
+			ct.leftFrame = w
+		})
 		tree.Add(p, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
@@ -174,14 +172,16 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	if err != nil {
 		return err
 	}
-	ct.getHeadings(w)
+	ct.makeTableOfContents(w)
 	ct.renderedPage = ct.currentPage
 	return nil
 }
 
-// getHeadings sets [Content.headings] to be all of the headings in the given frame.
-func (ct *Content) getHeadings(w *core.Frame) {
-	ct.headings = []*core.Text{}
+// makeTableOfContents makes the table of contents and adds it to [Content.leftFrame]
+// based on the headings in the given frame.
+func (ct *Content) makeTableOfContents(w *core.Frame) {
+	ct.leftFrame.DeleteChildren()
+	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
 	w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 		tx, ok := cw.(*core.Text)
 		if !ok {
@@ -189,8 +189,12 @@ func (ct *Content) getHeadings(w *core.Frame) {
 		}
 		switch tx.Property("tag") {
 		case "h1", "h2", "h3", "h4", "h5", "h6":
-			ct.headings = append(ct.headings, tx)
+			tr := core.NewTree(contents).SetText(tx.Text)
+			tr.OnSelect(func(e events.Event) {
+				tx.ScrollToThis()
+			})
 		}
 		return tree.Continue
 	})
+	ct.leftFrame.Update()
 }
