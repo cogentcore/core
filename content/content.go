@@ -79,11 +79,13 @@ func (ct *Content) Init() {
 		}
 		tree.Add(p, func(w *core.Frame) {
 			ct.leftFrame = w
+			w.Styler(func(s *styles.Style) {
+				s.Direction = styles.Column
+			})
 		})
 		tree.Add(p, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
-				s.Grow.Set(1, 1)
 			})
 			w.Maker(func(p *tree.Plan) {
 				if ct.currentPage.Name != "" {
@@ -171,7 +173,10 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	if err != nil {
 		return err
 	}
+	ct.leftFrame.DeleteChildren()
 	ct.makeTableOfContents(w)
+	ct.makeCategories()
+	ct.leftFrame.Update()
 	ct.renderedPage = ct.currentPage
 	return nil
 }
@@ -179,7 +184,6 @@ func (ct *Content) loadPage(w *core.Frame) error {
 // makeTableOfContents makes the table of contents and adds it to [Content.leftFrame]
 // based on the headings in the given frame.
 func (ct *Content) makeTableOfContents(w *core.Frame) {
-	ct.leftFrame.DeleteChildren()
 	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
 	// last is the most recent tree node for each heading level, used for nesting.
 	last := map[int]*core.Tree{}
@@ -208,5 +212,12 @@ func (ct *Content) makeTableOfContents(w *core.Frame) {
 		}
 		return tree.Continue
 	})
-	ct.leftFrame.Update()
+}
+
+// makeCategories makes the categories tree for the current page and adds it to [Content.leftFrame].
+func (ct *Content) makeCategories() {
+	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
+	for _, cat := range ct.currentPage.Categories {
+		core.NewTree(cats).SetText(cat)
+	}
 }
