@@ -69,7 +69,6 @@ func (ct *Content) Init() {
 	})
 
 	ct.Styler(func(s *styles.Style) {
-		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
 
@@ -77,11 +76,10 @@ func (ct *Content) Init() {
 		if ct.currentPage == nil {
 			return
 		}
-		if ct.currentPage.Name != "" {
-			tree.Add(p, func(w *core.Text) {
-				w.SetType(core.TextDisplaySmall)
-				w.Updater(func() {
-					w.SetText(ct.currentPage.Name)
+		if len(ct.headings) > 0 {
+			tree.Add(p, func(w *core.Frame) {
+				tree.AddChild(w, func(w *core.Tree) {
+					w.SetText("Contents")
 				})
 			})
 		}
@@ -90,8 +88,24 @@ func (ct *Content) Init() {
 				s.Direction = styles.Column
 				s.Grow.Set(1, 1)
 			})
-			w.Updater(func() {
-				errors.Log(ct.loadPage(w))
+			w.Maker(func(p *tree.Plan) {
+				if ct.currentPage.Name != "" {
+					tree.Add(p, func(w *core.Text) {
+						w.SetType(core.TextDisplaySmall)
+						w.Updater(func() {
+							w.SetText(ct.currentPage.Name)
+						})
+					})
+				}
+				tree.Add(p, func(w *core.Frame) {
+					w.Styler(func(s *styles.Style) {
+						s.Direction = styles.Column
+						s.Grow.Set(1, 1)
+					})
+					w.Updater(func() {
+						errors.Log(ct.loadPage(w))
+					})
+				})
 			})
 		})
 	})
