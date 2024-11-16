@@ -55,8 +55,12 @@ func (ct *Content) Init() {
 		ct.Open(url)
 	}
 	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
-		if pg, ok := ct.pagesByName[strings.ToLower(text)]; ok {
-			return pg.URL, text
+		name, label, has := strings.Cut(text, "|")
+		if !has {
+			label = text
+		}
+		if pg, ok := ct.pagesByName[strings.ToLower(name)]; ok {
+			return pg.URL, label
 		}
 		return "", ""
 	})
