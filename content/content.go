@@ -37,11 +37,14 @@ type Content struct {
 	// pages are the pages that constitute the content.
 	pages []*Page
 
-	// pagesByName has the [Page] for each name transformed into lowercase.
+	// pagesByName has the [Page] for each [Page.Name] transformed into lowercase.
 	pagesByName map[string]*Page
 
-	// pagesByURL has the [Page] for each URL.
+	// pagesByURL has the [Page] for each [Page.URL].
 	pagesByURL map[string]*Page
+
+	// pagesByCategory has the [Page]s for each of all [Page.Categories].
+	pagesByCategory map[string][]*Page
 
 	// currentPage is the currently open page.
 	currentPage *Page
@@ -116,6 +119,7 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 	ct.pages = []*Page{}
 	ct.pagesByName = map[string]*Page{}
 	ct.pagesByURL = map[string]*Page{}
+	ct.pagesByCategory = map[string][]*Page{}
 	errors.Log(fs.WalkDir(ct.Source, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -130,6 +134,9 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		ct.pages = append(ct.pages, pg)
 		ct.pagesByName[strings.ToLower(pg.Name)] = pg
 		ct.pagesByURL[pg.URL] = pg
+		for _, cat := range pg.Categories {
+			ct.pagesByCategory[cat] = append(ct.pagesByCategory[cat], pg)
+		}
 		return nil
 	}))
 	if root, ok := ct.pagesByURL[""]; ok {
@@ -218,6 +225,12 @@ func (ct *Content) makeTableOfContents(w *core.Frame) {
 func (ct *Content) makeCategories() {
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
 	for _, cat := range ct.currentPage.Categories {
-		core.NewTree(cats).SetText(cat)
+		catTree := core.NewTree(cats).SetText(cat)
+		for _, pg := range ct.pagesByCategory[cat] {
+			pgTree := core.NewTree(catTree).SetText(pg.Name)
+			pgTree.OnSelect(func(e events.Event) {
+				ct.Open(pg.URL)
+			})
+		}
 	}
 }
