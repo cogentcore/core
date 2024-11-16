@@ -18,7 +18,7 @@ func mdToHTML(md []byte) []byte {
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
 	p := parser.NewWithExtensions(extensions)
 	prev := p.RegisterInline('[', nil)
-	p.RegisterInline('[', wikiLink(prev))
+	p.RegisterInline('[', wikilink(prev))
 	doc := p.Parse(md)
 
 	// create HTML renderer with extensions
