@@ -249,44 +249,22 @@ func (fn *FileNode) PlotFile() {
 		return
 	}
 	d := DataFS(fn.AsNode())
-	df := fsx.DirAndFile(string(fn.Filepath))
-	ptab := df + " Plot"
-	var dt *table.Table
-	switch {
-	case fn.IsDir():
-		dt = d.GetDirTable(nil)
-	case fn.Info.Cat == fileinfo.Data:
-		switch fn.Info.Known {
-		case fileinfo.Tensor:
-			tsr := d.Data
-			dt = table.New(df)
-			dt.Columns.Rows = tsr.DimSize(0)
-			if ix, ok := tsr.(*tensor.Rows); ok {
-				dt.Indexes = ix.Indexes
-			}
-			rc := dt.AddIntColumn("Row")
-			for r := range dt.Columns.Rows {
-				rc.Values[r] = r
-			}
-			dt.AddColumn(fn.Name, tsr.AsValues())
-		// case fileinfo.Table:
-		// 	dt = d.AsTable()
-		default:
-			dt = table.New(df)
-			err := dt.OpenCSV(fsx.Filename(fn.Filepath), tensor.Tab) // todo: need more flexible data handling mode
-			if err != nil {
-				core.ErrorSnackbar(fn, err)
-				dt = nil
-			}
-		}
-	}
-	if dt == nil {
+	if d != nil {
+		ts.PlotDataFS(d)
 		return
 	}
-	pl := ts.PlotTable(ptab, dt)
-	_ = pl
-	// pl.Options.Title = df
-	// TODO: apply column and plot level options.
+	if fn.Info.Cat != fileinfo.Data {
+		return
+	}
+	df := fsx.DirAndFile(string(fn.Filepath))
+	ptab := df + " Plot"
+	dt := table.New(df)
+	err := dt.OpenCSV(fsx.Filename(fn.Filepath), tensor.Tab) // todo: need more flexible data handling mode
+	if err != nil {
+		core.ErrorSnackbar(fn, err)
+		return
+	}
+	ts.PlotTable(ptab, dt)
 }
 
 // DiffDirs displays a browser with differences between two selected directories
