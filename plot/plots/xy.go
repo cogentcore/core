@@ -116,10 +116,13 @@ func (ln *XY) Data() (data plot.Data, pixX, pixY []float32) {
 
 // Plot does the drawing, implementing the plot.Plotter interface.
 func (ln *XY) Plot(plt *plot.Plot) {
-	pc := plt.Paint
 	ln.PX = plot.PlotX(plt, ln.X)
 	ln.PY = plot.PlotY(plt, ln.Y)
 	np := len(ln.PX)
+	if np == 0 {
+		return
+	}
+	pc := plt.Paint
 	if ln.Style.Line.HasFill() {
 		pc.FillStyle.Color = ln.Style.Line.Fill
 		minY := plt.PY(plt.Y.Range.Min)

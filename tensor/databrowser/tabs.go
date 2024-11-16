@@ -24,6 +24,9 @@ type Tabber interface {
 	// AsTabs returns the underlying [Tabs] widget.
 	AsTabs() *Tabs
 
+	// TabByName returns a tab with the given name, nil if not found.
+	TabByName(name string) *core.Frame
+
 	// RecycleTab returns a tab with the given name, first by looking for an existing one,
 	// and if not found, making a new one. It returns the frame for the tab.
 	RecycleTab(name string) *core.Frame
@@ -42,6 +45,10 @@ type Tabber interface {
 
 	// PlotTable recycles a tab with a Plot of given [table.Table].
 	PlotTable(label string, dt *table.Table) *plotcore.PlotEditor
+
+	// GoUpdatePlot calls GoUpdatePlot on plot at tab with given name.
+	// Does nothing if tab name doesn't exist (returns nil).
+	GoUpdatePlot(label string) *plotcore.PlotEditor
 
 	// todo: PlotData of plot.Data
 
@@ -72,6 +79,24 @@ func NewTab[T any](tb Tabber, label string, mkfun func(tab *core.Frame) T) T {
 	}
 	w := mkfun(tab)
 	return w
+}
+
+// TabAt returns widget of given type at tab of given name, nil if tab not found.
+func TabAt[T any](tb Tabber, label string) T {
+	var zv T
+	tab := tb.TabByName(label)
+	if tab == nil {
+		return zv
+	}
+	if !tab.HasChildren() { // shouldn't happen
+		return zv
+	}
+	if tt, ok := tab.Child(1).(T); ok {
+		return tt
+	}
+	err := fmt.Errorf("Name / Type conflict: tab %q does not have the expected type of content", label)
+	core.ErrorSnackbar(tb.AsTabs(), err)
+	return zv
 }
 
 // Tabs implements the [Tabber] interface.
@@ -141,6 +166,16 @@ func (ts *Tabs) PlotTable(label string, dt *table.Table) *plotcore.PlotEditor {
 	if pl != nil {
 		pl.SetTable(dt)
 		ts.Update()
+	}
+	return pl
+}
+
+// GoUpdatePlot calls GoUpdatePlot on plot at tab with given name.
+// Does nothing if tab name doesn't exist (returns nil).
+func (ts *Tabs) GoUpdatePlot(label string) *plotcore.PlotEditor {
+	pl := TabAt[*plotcore.PlotEditor](ts, label)
+	if pl != nil {
+		pl.GoUpdatePlot()
 	}
 	return pl
 }

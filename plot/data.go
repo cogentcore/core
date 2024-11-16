@@ -175,9 +175,6 @@ func CopyValues(data Valuer) (Values, error) {
 	if data == nil {
 		return nil, ErrNoData
 	}
-	if data.Len() == 0 {
-		return nil, ErrNoData
-	}
 	cpy := make(Values, 0, data.Len())
 	for i := 0; i < data.Len(); i++ {
 		v := data.Float1D(i)
