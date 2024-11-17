@@ -192,7 +192,7 @@ var defaultMat = &Material{
 // Local constants
 const (
 	blanks   = "\r\n\t "
-	invINDEX = math.MaxUint32
+	invINDEX = math.MaxInt32
 	objType  = "obj"
 	mtlType  = "mtl"
 )
@@ -461,7 +461,7 @@ func makeObject(name string) Object {
 // v <x> <y> <z> [w]
 func (dec *Decoder) parseVertex(fields []string) error {
 	if len(fields) < 3 {
-		return errors.New("Less than 3 vertices in 'v' line")
+		return errors.New("fewer than 3 vertices in 'v' line")
 	}
 	for _, f := range fields[:3] {
 		val, err := strconv.ParseFloat(f, 32)
@@ -477,7 +477,7 @@ func (dec *Decoder) parseVertex(fields []string) error {
 // vn <x> <y> <z>
 func (dec *Decoder) parseNormal(fields []string) error {
 	if len(fields) < 3 {
-		return errors.New("Less than 3 normals in 'vn' line")
+		return errors.New("fewer than 3 normals in 'vn' line")
 	}
 	for _, f := range fields[:3] {
 		val, err := strconv.ParseFloat(f, 32)
@@ -493,7 +493,7 @@ func (dec *Decoder) parseNormal(fields []string) error {
 // vt <u> <v> <w>
 func (dec *Decoder) parseTex(fields []string) error {
 	if len(fields) < 2 {
-		return errors.New("Less than 2 texture coords. in 'vt' line")
+		return errors.New("fewer than 2 texture coords. in 'vt' line")
 	}
 	for _, f := range fields[:2] {
 		val, err := strconv.ParseFloat(f, 32)

@@ -641,7 +641,7 @@ func (fr *Frame) laySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 		if nosz {
 			continue
 		}
-		if !(fr.Scene != nil && fr.Scene.hasFlag(scenePrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto && fr.Parent != nil {
+		if !(fr.Scene != nil && fr.Scene.hasFlag(sceneContentSizing)) && oflow.Dim(d) >= styles.OverflowAuto && fr.Parent != nil {
 			if mx.Dim(d) > 0 {
 				asz.SetDim(d, styles.ClampMax(styles.ClampMin(asz.Dim(d), nsz.Dim(d)), mx.Dim(d)))
 			}
@@ -753,6 +753,11 @@ func (wb *WidgetBase) sizeUpParts() {
 }
 
 func (fr *Frame) SizeUp() {
+	if fr.Styles.Display == styles.Custom {
+		fr.SizeUpWidget()
+		fr.sizeUpChildren()
+		return
+	}
 	if !fr.HasChildren() {
 		fr.SizeUpWidget() // behave like a widget
 		return
@@ -1146,6 +1151,10 @@ func (fr *Frame) SizeDown(iter int) bool {
 // iteration is required.  It allocates sizes to fit given parent-allocated
 // total size.
 func (fr *Frame) sizeDownFrame(iter int) bool {
+	if fr.Styles.Display == styles.Custom {
+		fr.WidgetBase.SizeDown(iter) // behave like a widget
+		return fr.sizeDownChildren(iter)
+	}
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "SizeDown") {
 		return fr.WidgetBase.SizeDown(iter) // behave like a widget
 	}
@@ -1509,7 +1518,7 @@ func (wb *WidgetBase) SizeFinal() {
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change in our Total size.
 func (wb *WidgetBase) growToAlloc() bool {
-	if (wb.Scene != nil && wb.Scene.hasFlag(scenePrefSizing)) || wb.Styles.GrowWrap {
+	if (wb.Scene != nil && wb.Scene.hasFlag(sceneContentSizing)) || wb.Styles.GrowWrap {
 		return false
 	}
 	sz := &wb.Geom.Size
@@ -1535,6 +1544,11 @@ func (wb *WidgetBase) sizeFinalParts() {
 }
 
 func (fr *Frame) SizeFinal() {
+	if fr.Styles.Display == styles.Custom {
+		fr.WidgetBase.SizeFinal() // behave like a widget
+		fr.sizeFinalChildren()
+		return
+	}
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "SizeFinal") {
 		fr.WidgetBase.SizeFinal() // behave like a widget
 		return
@@ -1638,6 +1652,10 @@ func (wb *WidgetBase) positionChildren() {
 // Position: uses the final sizes to position everything within layouts
 // according to alignment settings.
 func (fr *Frame) Position() {
+	if fr.Styles.Display == styles.Custom {
+		fr.positionFromPos()
+		return
+	}
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "Position") {
 		fr.WidgetBase.Position() // behave like a widget
 		return
@@ -1828,6 +1846,13 @@ func (fr *Frame) applyScenePosChildren() {
 // This step can be performed when scrolling after updating Scroll.
 func (fr *Frame) ApplyScenePos() {
 	fr.scrollResetIfNone()
+	if fr.Styles.Display == styles.Custom {
+		fr.WidgetBase.ApplyScenePos()
+		fr.applyScenePosChildren()
+		fr.PositionScrolls()
+		fr.applyScenePosParts() // in case they fit inside parent
+		return
+	}
 	// note: ly.Geom.Scroll has the X, Y scrolling offsets, set by Layouter.ScrollChanged function
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "ScenePos") {
 		fr.WidgetBase.ApplyScenePos() // behave like a widget
@@ -1847,6 +1872,15 @@ func (fr *Frame) scrollResetIfNone() {
 			fr.Geom.Scroll.SetDim(d, 0)
 		}
 	}
+}
+
+// positionFromPos does Custom positioning from style positions.
+func (fr *Frame) positionFromPos() {
+	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		cwb.Geom.RelPos.X = cwb.Styles.Pos.X.Dots
+		cwb.Geom.RelPos.Y = cwb.Styles.Pos.Y.Dots
+		return tree.Continue
+	})
 }
 
 // DirectRenderDrawBBoxes returns the destination and source bounding boxes

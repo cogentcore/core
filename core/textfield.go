@@ -149,6 +149,9 @@ type TextField struct { //core:embedder
 	// selectMode is whether to select text as the cursor moves.
 	selectMode bool
 
+	// selectModeShift is whether selectmode was turned on because of the shift key.
+	selectModeShift bool
+
 	// renderAll is the render version of entire text, for sizing.
 	renderAll paint.Text
 
@@ -894,9 +897,11 @@ func (tf *TextField) shiftSelect(e events.Event) {
 	hasShift := e.HasAnyModifier(key.Shift)
 	if hasShift && !tf.selectMode {
 		tf.selectModeToggle()
+		tf.selectModeShift = true
 	}
-	if !hasShift && tf.selectMode {
+	if !hasShift && tf.selectMode && tf.selectModeShift {
 		tf.selectReset()
+		tf.selectModeShift = false
 	}
 }
 

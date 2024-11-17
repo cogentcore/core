@@ -223,6 +223,12 @@ func (w *Window) SetWinSize(sz image.Point) {
 	})
 }
 
+func (w *Window) SetSize(sz image.Point) {
+	sc := w.Screen()
+	sz = sc.WinSizeFromPix(sz)
+	w.SetWinSize(sz)
+}
+
 func (w *Window) SetPos(pos image.Point) {
 	if w.IsClosed() || w.Is(system.Fullscreen) {
 		return

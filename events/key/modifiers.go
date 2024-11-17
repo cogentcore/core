@@ -31,7 +31,8 @@ const (
 )
 
 // ModifiersString returns the string representation of the modifiers using
-// plus symbols as seperators.
+// plus symbols as seperators. The order is given by Modifiers order:
+// Control, Meta, Alt, Shift.
 func (mo Modifiers) ModifiersString() string {
 	modstr := ""
 	for _, m := range ModifiersValues() {

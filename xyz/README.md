@@ -1,8 +1,8 @@
 # XYZ
 
-`xyz` is a 3D graphics framework written in Go. It is a separate standalone package that renders to an offscreen Vulkan framebuffer, which can easily be converted into a Go `image.RGBA`.  The [xyzcore](xyzcore) package provides an integration of xyz in Cogent Core, for dynamic and efficient 3D rendering within 2D GUI windows.
+`xyz` is a 3D graphics framework written in Go. It is a separate standalone package that renders to an offscreen WebGPU framebuffer, which can easily be converted into a Go `image.RGBA`.  The [xyzcore](xyzcore) package provides an integration of xyz in Cogent Core, for dynamic and efficient 3D rendering within 2D GUI windows.
 
-`xyz` is built on the [gpu](../gpu) WebGPU framework (specifically the [phong](../gpu/phong]) rendering system, and uses the [tree](../tree) tree structure for the scenegraph.  It currently supports standard Phong-based rendering with different types of lights and materials.  It is designed for scientific and other non-game 3D applications, and lacks almost all of the advanced features one would expect in a modern 3D graphics framework.  Thus, its primary advantage is its simplicity and support for directly programming 3D visualizations in Go, its broad cross-platform support across all major desktop and mobile platforms, and the use of WebGPU which is highly efficient.
+`xyz` is built on the [gpu](../gpu) WebGPU framework (specifically the [phong](../gpu/phong) rendering system, and uses the [tree](../tree) tree structure for the scenegraph.  It currently supports standard Phong-based rendering with different types of lights and materials.  It is designed for scientific and other non-game 3D applications, and lacks some of the advanced features one would expect in a modern 3D graphics framework. Thus, its primary advantage is its simplicity and support for directly programming 3D visualizations in Go, its broad cross-platform support across all major desktop, mobile, and web platforms, and the use of WebGPU which is highly efficient.
 
 * The [physics](physics) sub-package provides a physics engine for simulating 3D virtual worlds, using xyz.
 
