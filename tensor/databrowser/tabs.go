@@ -26,8 +26,15 @@ type Tabber interface {
 	// AsDataTabs returns the underlying [databrowser.Tabs] widget.
 	AsDataTabs() *Tabs
 
+	// CurrentTab returns currently selected tab and its index; returns nil if none.
+	CurrentTab() (core.Widget, int)
+
 	// TabByName returns a tab with the given name, nil if not found.
 	TabByName(name string) *core.Frame
+
+	// SelectTabIndex selects the tab at the given index, returning it or nil.
+	// This is the final tab selection path.
+	SelectTabIndex(idx int) *core.Frame
 
 	// SelectTabByName selects the tab by widget name, returning it.
 	// The widget name is the original full tab label, prior to any eliding.
