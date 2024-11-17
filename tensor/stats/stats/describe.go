@@ -7,6 +7,7 @@ package stats
 import (
 	"strconv"
 
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
@@ -29,7 +30,7 @@ func Describe(dir *datafs.Data, tsrs ...tensor.Tensor) {
 		if nr == 0 {
 			continue
 		}
-		nm := tsr.Metadata().Name()
+		nm := metadata.Name(tsr)
 		if nm == "" {
 			nm = strconv.Itoa(i)
 		}

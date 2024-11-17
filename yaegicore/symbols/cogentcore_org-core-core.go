@@ -303,6 +303,7 @@ func init() {
 		"SystemSettingsData":     reflect.ValueOf((*core.SystemSettingsData)(nil)),
 		"Tab":                    reflect.ValueOf((*core.Tab)(nil)),
 		"TabTypes":               reflect.ValueOf((*core.TabTypes)(nil)),
+		"Tabber":                 reflect.ValueOf((*core.Tabber)(nil)),
 		"Table":                  reflect.ValueOf((*core.Table)(nil)),
 		"TableStyler":            reflect.ValueOf((*core.TableStyler)(nil)),
 		"Tabs":                   reflect.ValueOf((*core.Tabs)(nil)),
@@ -338,6 +339,7 @@ func init() {
 		"_SettingsOpener":    reflect.ValueOf((*_cogentcore_org_core_core_SettingsOpener)(nil)),
 		"_SettingsSaver":     reflect.ValueOf((*_cogentcore_org_core_core_SettingsSaver)(nil)),
 		"_ShouldDisplayer":   reflect.ValueOf((*_cogentcore_org_core_core_ShouldDisplayer)(nil)),
+		"_Tabber":            reflect.ValueOf((*_cogentcore_org_core_core_Tabber)(nil)),
 		"_TextFieldEmbedder": reflect.ValueOf((*_cogentcore_org_core_core_TextFieldEmbedder)(nil)),
 		"_ToolbarMaker":      reflect.ValueOf((*_cogentcore_org_core_core_ToolbarMaker)(nil)),
 		"_Treer":             reflect.ValueOf((*_cogentcore_org_core_core_Treer)(nil)),
@@ -596,6 +598,14 @@ type _cogentcore_org_core_core_ShouldDisplayer struct {
 func (W _cogentcore_org_core_core_ShouldDisplayer) ShouldDisplay(field string) bool {
 	return W.WShouldDisplay(field)
 }
+
+// _cogentcore_org_core_core_Tabber is an interface wrapper for Tabber type
+type _cogentcore_org_core_core_Tabber struct {
+	IValue      interface{}
+	WAsCoreTabs func() *core.Tabs
+}
+
+func (W _cogentcore_org_core_core_Tabber) AsCoreTabs() *core.Tabs { return W.WAsCoreTabs() }
 
 // _cogentcore_org_core_core_TextFieldEmbedder is an interface wrapper for TextFieldEmbedder type
 type _cogentcore_org_core_core_TextFieldEmbedder struct {

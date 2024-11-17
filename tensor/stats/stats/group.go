@@ -7,6 +7,7 @@ package stats
 import (
 	"strconv"
 
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
@@ -44,7 +45,7 @@ func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 		if nr == 0 {
 			continue
 		}
-		nm := tsr.Metadata().Name()
+		nm := metadata.Name(tsr)
 		if nm == "" {
 			nm = strconv.Itoa(i)
 		}
@@ -140,11 +141,11 @@ func GroupStats(dir *datafs.Data, stat Stats, tsrs ...tensor.Tensor) error {
 		if gv == nil {
 			gtsr := datafs.Value[string](sgd, gpnm, nv)
 			for i, v := range vals {
-				gtsr.SetStringRow(v.Metadata().Name(), i, 0)
+				gtsr.SetStringRow(metadata.Name(v), i, 0)
 			}
 		}
 		for _, tsr := range tsrs {
-			vd := sgd.RecycleDir(tsr.Metadata().Name())
+			vd := sgd.RecycleDir(metadata.Name(tsr))
 			sv := datafs.Value[float64](vd, stnm, nv)
 			for i, v := range vals {
 				idx := tensor.AsIntSlice(v)

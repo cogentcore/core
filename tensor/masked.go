@@ -88,7 +88,7 @@ func (ms *Masked) SyncShape() {
 	}
 }
 
-func (ms *Masked) Label() string            { return label(ms.Metadata().Name(), ms.Shape()) }
+func (ms *Masked) Label() string            { return label(metadata.Name(ms), ms.Shape()) }
 func (ms *Masked) String() string           { return Sprintf("", ms, 0) }
 func (ms *Masked) Metadata() *metadata.Data { return ms.Tensor.Metadata() }
 func (ms *Masked) IsString() bool           { return ms.Tensor.IsString() }

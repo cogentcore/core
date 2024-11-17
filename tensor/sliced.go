@@ -222,7 +222,7 @@ func (sl *Sliced) IndexesNeeded(d int) {
 	sl.Indexes[d] = ix
 }
 
-func (sl *Sliced) Label() string            { return label(sl.Metadata().Name(), sl.Shape()) }
+func (sl *Sliced) Label() string            { return label(metadata.Name(sl), sl.Shape()) }
 func (sl *Sliced) String() string           { return Sprintf("", sl, 0) }
 func (sl *Sliced) Metadata() *metadata.Data { return sl.Tensor.Metadata() }
 func (sl *Sliced) IsString() bool           { return sl.Tensor.IsString() }

@@ -57,8 +57,8 @@ func TestTensorString(t *testing.T) {
 	tsr.SetNumRows(5)
 	assert.Equal(t, 20, tsr.Len())
 
-	tsr.Metadata().SetName("test")
-	nm := tsr.Metadata().Name()
+	metadata.SetName(tsr, "test")
+	nm := metadata.Name(tsr)
 	assert.Equal(t, "test", nm)
 	_, err := metadata.Get[string](*tsr.Metadata(), "type")
 	assert.Error(t, err)

@@ -6,6 +6,7 @@ package table
 
 import (
 	"cogentcore.org/core/base/keylist"
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/tensor"
 )
 
@@ -51,7 +52,7 @@ func (cl *Columns) AddColumn(name string, tsr tensor.Values) error {
 		return err
 	}
 	tsr.SetNumRows(cl.Rows)
-	tsr.Metadata().SetName(name)
+	metadata.SetName(tsr, name)
 	return nil
 }
 

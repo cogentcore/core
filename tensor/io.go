@@ -50,15 +50,15 @@ func (dl Delims) Rune() rune {
 
 // SetPrecision sets the "precision" metadata value that determines
 // the precision to use in writing floating point numbers to files.
-func SetPrecision(md metadata.Data, prec int) {
-	md.Set("precision", prec)
+func SetPrecision(obj any, prec int) {
+	metadata.SetTo(obj, "Precision", prec)
 }
 
 // Precision gets the "precision" metadata value that determines
 // the precision to use in writing floating point numbers to files.
 // returns an error if not set.
-func Precision(md metadata.Data) (int, error) {
-	return metadata.Get[int](md, "precision")
+func Precision(obj any) (int, error) {
+	return metadata.GetFrom[int](obj, "Precision")
 }
 
 // SaveCSV writes a tensor to a comma-separated-values (CSV) file

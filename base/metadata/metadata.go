@@ -6,7 +6,7 @@
 // with generic support for type-safe Get and nil-safe Set.
 // Metadata keys often function as optional fields in a struct,
 // and therefore a CamelCase naming convention is typical.
-// Provides default support for "Name" and "Doc" standard keys.
+// Provides default support for "Name", "Doc", "File" standard keys.
 package metadata
 
 import (
@@ -63,26 +63,6 @@ func (md *Data) Copy(src Data) {
 	}
 	md.init()
 	maps.Copy(*md, src)
-}
-
-// SetName sets the "Name" standard key.
-func (md *Data) SetName(name string) {
-	md.Set("Name", name)
-}
-
-// Name returns the "Name" standard key value (empty if not set).
-func (md *Data) Name() string {
-	return errors.Ignore1(Get[string](*md, "Name"))
-}
-
-// SetDoc sets the "Doc" standard key.
-func (md *Data) SetDoc(doc string) {
-	md.Set("Doc", doc)
-}
-
-// Doc returns the "Doc" standard key value (empty if not set).
-func (md *Data) Doc() string {
-	return errors.Ignore1(Get[string](*md, "Doc"))
 }
 
 //////// Metadataer

@@ -152,7 +152,7 @@ func (rs *Reshaped) SetShapeSizes(sizes ...int) error {
 	return nil
 }
 
-func (rs *Reshaped) Label() string            { return label(rs.Metadata().Name(), rs.Shape()) }
+func (rs *Reshaped) Label() string            { return label(metadata.Name(rs), rs.Shape()) }
 func (rs *Reshaped) String() string           { return Sprintf("", rs, 0) }
 func (rs *Reshaped) Metadata() *metadata.Data { return rs.Tensor.Metadata() }
 func (rs *Reshaped) IsString() bool           { return rs.Tensor.IsString() }

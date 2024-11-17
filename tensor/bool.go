@@ -67,7 +67,7 @@ func (tsr *Bool) String() string { return Sprintf("", tsr, 0) }
 
 // Label satisfies the core.Labeler interface for a summary description of the tensor
 func (tsr *Bool) Label() string {
-	return label(tsr.Metadata().Name(), tsr.Shape())
+	return label(metadata.Name(tsr), tsr.Shape())
 }
 
 func (tsr *Bool) IsString() bool { return false }

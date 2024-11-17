@@ -8,6 +8,7 @@ import (
 	"embed"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
@@ -19,7 +20,7 @@ var tsv embed.FS
 
 func main() {
 	pats := table.New("TrainPats")
-	pats.Meta.SetDoc("Training patterns")
+	metadata.SetDoc(pats, "Training patterns")
 	// todo: meta data for grid size
 	errors.Log(pats.OpenFS(tsv, "random_5x5_25.tsv", tensor.Tab))
 

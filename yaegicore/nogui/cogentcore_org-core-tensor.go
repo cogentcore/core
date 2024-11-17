@@ -79,11 +79,14 @@ func init() {
 		"NFirstLen":               reflect.ValueOf(tensor.NFirstLen),
 		"NFirstRows":              reflect.ValueOf(tensor.NFirstRows),
 		"NMinLen":                 reflect.ValueOf(tensor.NMinLen),
+		"NegIndex":                reflect.ValueOf(tensor.NegIndex),
 		"NewAxis":                 reflect.ValueOf(tensor.NewAxis),
 		"NewBool":                 reflect.ValueOf(tensor.NewBool),
 		"NewBoolShape":            reflect.ValueOf(tensor.NewBoolShape),
 		"NewByte":                 reflect.ValueOf(tensor.NewByte),
 		"NewFloat32":              reflect.ValueOf(tensor.NewFloat32),
+		"NewFloat32FromValues":    reflect.ValueOf(tensor.NewFloat32FromValues),
+		"NewFloat32Scalar":        reflect.ValueOf(tensor.NewFloat32Scalar),
 		"NewFloat64":              reflect.ValueOf(tensor.NewFloat64),
 		"NewFloat64FromValues":    reflect.ValueOf(tensor.NewFloat64FromValues),
 		"NewFloat64Full":          reflect.ValueOf(tensor.NewFloat64Full),
@@ -191,48 +194,58 @@ func init() {
 
 // _cogentcore_org_core_tensor_RowMajor is an interface wrapper for RowMajor type
 type _cogentcore_org_core_tensor_RowMajor struct {
-	IValue        interface{}
-	WAppendRow    func(val tensor.Values)
-	WAsValues     func() tensor.Values
-	WDataType     func() reflect.Kind
-	WDimSize      func(dim int) int
-	WFloat        func(i ...int) float64
-	WFloat1D      func(i int) float64
-	WFloatRow     func(row int, cell int) float64
-	WInt          func(i ...int) int
-	WInt1D        func(i int) int
-	WIntRow       func(row int, cell int) int
-	WIsString     func() bool
-	WLabel        func() string
-	WLen          func() int
-	WMetadata     func() *metadata.Data
-	WNumDims      func() int
-	WRowTensor    func(row int) tensor.Values
-	WSetFloat     func(val float64, i ...int)
-	WSetFloat1D   func(val float64, i int)
-	WSetFloatRow  func(val float64, row int, cell int)
-	WSetInt       func(val int, i ...int)
-	WSetInt1D     func(val int, i int)
-	WSetIntRow    func(val int, row int, cell int)
-	WSetRowTensor func(val tensor.Values, row int)
-	WSetString    func(val string, i ...int)
-	WSetString1D  func(val string, i int)
-	WSetStringRow func(val string, row int, cell int)
-	WShape        func() *tensor.Shape
-	WShapeSizes   func() []int
-	WString       func() string
-	WString1D     func(i int) string
-	WStringRow    func(row int, cell int) string
-	WStringValue  func(i ...int) string
-	WSubSpace     func(offs ...int) tensor.Values
+	IValue           interface{}
+	WAppendRow       func(val tensor.Values)
+	WAppendRowFloat  func(val ...float64)
+	WAppendRowInt    func(val ...int)
+	WAppendRowString func(val ...string)
+	WAsValues        func() tensor.Values
+	WDataType        func() reflect.Kind
+	WDimSize         func(dim int) int
+	WFloat           func(i ...int) float64
+	WFloat1D         func(i int) float64
+	WFloatRow        func(row int, cell int) float64
+	WInt             func(i ...int) int
+	WInt1D           func(i int) int
+	WIntRow          func(row int, cell int) int
+	WIsString        func() bool
+	WLabel           func() string
+	WLen             func() int
+	WMetadata        func() *metadata.Data
+	WNumDims         func() int
+	WRowTensor       func(row int) tensor.Values
+	WSetFloat        func(val float64, i ...int)
+	WSetFloat1D      func(val float64, i int)
+	WSetFloatRow     func(val float64, row int, cell int)
+	WSetInt          func(val int, i ...int)
+	WSetInt1D        func(val int, i int)
+	WSetIntRow       func(val int, row int, cell int)
+	WSetRowTensor    func(val tensor.Values, row int)
+	WSetString       func(val string, i ...int)
+	WSetString1D     func(val string, i int)
+	WSetStringRow    func(val string, row int, cell int)
+	WShape           func() *tensor.Shape
+	WShapeSizes      func() []int
+	WString          func() string
+	WString1D        func(i int) string
+	WStringRow       func(row int, cell int) string
+	WStringValue     func(i ...int) string
+	WSubSpace        func(offs ...int) tensor.Values
 }
 
 func (W _cogentcore_org_core_tensor_RowMajor) AppendRow(val tensor.Values) { W.WAppendRow(val) }
-func (W _cogentcore_org_core_tensor_RowMajor) AsValues() tensor.Values     { return W.WAsValues() }
-func (W _cogentcore_org_core_tensor_RowMajor) DataType() reflect.Kind      { return W.WDataType() }
-func (W _cogentcore_org_core_tensor_RowMajor) DimSize(dim int) int         { return W.WDimSize(dim) }
-func (W _cogentcore_org_core_tensor_RowMajor) Float(i ...int) float64      { return W.WFloat(i...) }
-func (W _cogentcore_org_core_tensor_RowMajor) Float1D(i int) float64       { return W.WFloat1D(i) }
+func (W _cogentcore_org_core_tensor_RowMajor) AppendRowFloat(val ...float64) {
+	W.WAppendRowFloat(val...)
+}
+func (W _cogentcore_org_core_tensor_RowMajor) AppendRowInt(val ...int) { W.WAppendRowInt(val...) }
+func (W _cogentcore_org_core_tensor_RowMajor) AppendRowString(val ...string) {
+	W.WAppendRowString(val...)
+}
+func (W _cogentcore_org_core_tensor_RowMajor) AsValues() tensor.Values { return W.WAsValues() }
+func (W _cogentcore_org_core_tensor_RowMajor) DataType() reflect.Kind  { return W.WDataType() }
+func (W _cogentcore_org_core_tensor_RowMajor) DimSize(dim int) int     { return W.WDimSize(dim) }
+func (W _cogentcore_org_core_tensor_RowMajor) Float(i ...int) float64  { return W.WFloat(i...) }
+func (W _cogentcore_org_core_tensor_RowMajor) Float1D(i int) float64   { return W.WFloat1D(i) }
 func (W _cogentcore_org_core_tensor_RowMajor) FloatRow(row int, cell int) float64 {
 	return W.WFloatRow(row, cell)
 }
@@ -347,58 +360,66 @@ func (W _cogentcore_org_core_tensor_Tensor) StringValue(i ...int) string { retur
 
 // _cogentcore_org_core_tensor_Values is an interface wrapper for Values type
 type _cogentcore_org_core_tensor_Values struct {
-	IValue         interface{}
-	WAppendFrom    func(from tensor.Values) error
-	WAppendRow     func(val tensor.Values)
-	WAsValues      func() tensor.Values
-	WBytes         func() []byte
-	WClone         func() tensor.Values
-	WCopyCellsFrom func(from tensor.Values, to int, start int, n int)
-	WCopyFrom      func(from tensor.Values)
-	WDataType      func() reflect.Kind
-	WDimSize       func(dim int) int
-	WFloat         func(i ...int) float64
-	WFloat1D       func(i int) float64
-	WFloatRow      func(row int, cell int) float64
-	WInt           func(i ...int) int
-	WInt1D         func(i int) int
-	WIntRow        func(row int, cell int) int
-	WIsString      func() bool
-	WLabel         func() string
-	WLen           func() int
-	WMetadata      func() *metadata.Data
-	WNumDims       func() int
-	WRowTensor     func(row int) tensor.Values
-	WSetFloat      func(val float64, i ...int)
-	WSetFloat1D    func(val float64, i int)
-	WSetFloatRow   func(val float64, row int, cell int)
-	WSetInt        func(val int, i ...int)
-	WSetInt1D      func(val int, i int)
-	WSetIntRow     func(val int, row int, cell int)
-	WSetNumRows    func(rows int)
-	WSetRowTensor  func(val tensor.Values, row int)
-	WSetShapeSizes func(sizes ...int)
-	WSetString     func(val string, i ...int)
-	WSetString1D   func(val string, i int)
-	WSetStringRow  func(val string, row int, cell int)
-	WSetZeros      func()
-	WShape         func() *tensor.Shape
-	WShapeSizes    func() []int
-	WSizeof        func() int64
-	WString        func() string
-	WString1D      func(i int) string
-	WStringRow     func(row int, cell int) string
-	WStringValue   func(i ...int) string
-	WSubSpace      func(offs ...int) tensor.Values
+	IValue           interface{}
+	WAppendFrom      func(from tensor.Values) error
+	WAppendRow       func(val tensor.Values)
+	WAppendRowFloat  func(val ...float64)
+	WAppendRowInt    func(val ...int)
+	WAppendRowString func(val ...string)
+	WAsValues        func() tensor.Values
+	WBytes           func() []byte
+	WClone           func() tensor.Values
+	WCopyCellsFrom   func(from tensor.Values, to int, start int, n int)
+	WCopyFrom        func(from tensor.Values)
+	WDataType        func() reflect.Kind
+	WDimSize         func(dim int) int
+	WFloat           func(i ...int) float64
+	WFloat1D         func(i int) float64
+	WFloatRow        func(row int, cell int) float64
+	WInt             func(i ...int) int
+	WInt1D           func(i int) int
+	WIntRow          func(row int, cell int) int
+	WIsString        func() bool
+	WLabel           func() string
+	WLen             func() int
+	WMetadata        func() *metadata.Data
+	WNumDims         func() int
+	WRowTensor       func(row int) tensor.Values
+	WSetFloat        func(val float64, i ...int)
+	WSetFloat1D      func(val float64, i int)
+	WSetFloatRow     func(val float64, row int, cell int)
+	WSetInt          func(val int, i ...int)
+	WSetInt1D        func(val int, i int)
+	WSetIntRow       func(val int, row int, cell int)
+	WSetNumRows      func(rows int)
+	WSetRowTensor    func(val tensor.Values, row int)
+	WSetShapeSizes   func(sizes ...int)
+	WSetString       func(val string, i ...int)
+	WSetString1D     func(val string, i int)
+	WSetStringRow    func(val string, row int, cell int)
+	WSetZeros        func()
+	WShape           func() *tensor.Shape
+	WShapeSizes      func() []int
+	WSizeof          func() int64
+	WString          func() string
+	WString1D        func(i int) string
+	WStringRow       func(row int, cell int) string
+	WStringValue     func(i ...int) string
+	WSubSpace        func(offs ...int) tensor.Values
 }
 
 func (W _cogentcore_org_core_tensor_Values) AppendFrom(from tensor.Values) error {
 	return W.WAppendFrom(from)
 }
-func (W _cogentcore_org_core_tensor_Values) AppendRow(val tensor.Values) { W.WAppendRow(val) }
-func (W _cogentcore_org_core_tensor_Values) AsValues() tensor.Values     { return W.WAsValues() }
-func (W _cogentcore_org_core_tensor_Values) Bytes() []byte               { return W.WBytes() }
-func (W _cogentcore_org_core_tensor_Values) Clone() tensor.Values        { return W.WClone() }
+func (W _cogentcore_org_core_tensor_Values) AppendRow(val tensor.Values)   { W.WAppendRow(val) }
+func (W _cogentcore_org_core_tensor_Values) AppendRowFloat(val ...float64) { W.WAppendRowFloat(val...) }
+func (W _cogentcore_org_core_tensor_Values) AppendRowInt(val ...int)       { W.WAppendRowInt(val...) }
+func (W _cogentcore_org_core_tensor_Values) AppendRowString(val ...string) {
+	W.WAppendRowString(val...)
+}
+func (W _cogentcore_org_core_tensor_Values) AsValues() tensor.Values { return W.WAsValues() }
+func (W _cogentcore_org_core_tensor_Values) Bytes() []byte           { return W.WBytes() }
+func (W _cogentcore_org_core_tensor_Values) Clone() tensor.Values    { return W.WClone() }
 func (W _cogentcore_org_core_tensor_Values) CopyCellsFrom(from tensor.Values, to int, start int, n int) {
 	W.WCopyCellsFrom(from, to, start, n)
 }

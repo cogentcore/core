@@ -48,7 +48,7 @@ func New(name ...string) *Table {
 	dt := &Table{}
 	dt.Columns = NewColumns()
 	if len(name) > 0 {
-		dt.Meta.SetName(name[0])
+		metadata.SetName(dt, name[0])
 	}
 	return dt
 }

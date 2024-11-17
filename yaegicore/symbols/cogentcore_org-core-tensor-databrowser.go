@@ -7,6 +7,7 @@ import (
 	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/databrowser"
+	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tensor/tensorcore"
 	"cogentcore.org/core/texteditor"
@@ -20,13 +21,12 @@ func init() {
 		"DataFS":             reflect.ValueOf(databrowser.DataFS),
 		"FirstComment":       reflect.ValueOf(databrowser.FirstComment),
 		"IsTableFile":        reflect.ValueOf(databrowser.IsTableFile),
-		"NewBrowser":         reflect.ValueOf(databrowser.NewBrowser),
-		"NewBrowserWindow":   reflect.ValueOf(databrowser.NewBrowserWindow),
+		"NewBasic":           reflect.ValueOf(databrowser.NewBasic),
+		"NewBasicWindow":     reflect.ValueOf(databrowser.NewBasicWindow),
 		"NewDataTree":        reflect.ValueOf(databrowser.NewDataTree),
 		"NewDiffBrowserDirs": reflect.ValueOf(databrowser.NewDiffBrowserDirs),
 		"NewFileNode":        reflect.ValueOf(databrowser.NewFileNode),
 		"NewTabs":            reflect.ValueOf(databrowser.NewTabs),
-		"ParentBrowser":      reflect.ValueOf(databrowser.ParentBrowser),
 		"PromptOKCancel":     reflect.ValueOf(databrowser.PromptOKCancel),
 		"PromptString":       reflect.ValueOf(databrowser.PromptString),
 		"PromptStruct":       reflect.ValueOf(databrowser.PromptStruct),
@@ -34,6 +34,7 @@ func init() {
 		"TrimOrderPrefix":    reflect.ValueOf(databrowser.TrimOrderPrefix),
 
 		// type definitions
+		"Basic":    reflect.ValueOf((*databrowser.Basic)(nil)),
 		"Browser":  reflect.ValueOf((*databrowser.Browser)(nil)),
 		"DataTree": reflect.ValueOf((*databrowser.DataTree)(nil)),
 		"FileNode": reflect.ValueOf((*databrowser.FileNode)(nil)),
@@ -49,20 +50,29 @@ func init() {
 
 // _cogentcore_org_core_tensor_databrowser_Tabber is an interface wrapper for Tabber type
 type _cogentcore_org_core_tensor_databrowser_Tabber struct {
-	IValue        interface{}
-	WAsTabs       func() *databrowser.Tabs
-	WEditorFile   func(label string, filename string) *texteditor.Editor
-	WEditorString func(label string, content string) *texteditor.Editor
-	WPlotTable    func(label string, dt *table.Table) *plotcore.PlotEditor
-	WRecycleTab   func(name string) *core.Frame
-	WSliceTable   func(label string, slc any) *core.Table
-	WTensorEditor func(label string, tsr tensor.Tensor) *tensorcore.TensorEditor
-	WTensorGrid   func(label string, tsr tensor.Tensor) *tensorcore.TensorGrid
-	WTensorTable  func(label string, dt *table.Table) *tensorcore.Table
+	IValue           interface{}
+	WAsDataTabs      func() *databrowser.Tabs
+	WCurrentTab      func() (core.Widget, int)
+	WEditorFile      func(label string, filename string) *texteditor.Editor
+	WEditorString    func(label string, content string) *texteditor.Editor
+	WGoUpdatePlot    func(label string) *plotcore.PlotEditor
+	WPlotDataFS      func(dfs *datafs.Data) *plotcore.PlotEditor
+	WPlotTable       func(label string, dt *table.Table) *plotcore.PlotEditor
+	WRecycleTab      func(name string) *core.Frame
+	WSelectTabByName func(name string) *core.Frame
+	WSelectTabIndex  func(idx int) *core.Frame
+	WSliceTable      func(label string, slc any) *core.Table
+	WTabByName       func(name string) *core.Frame
+	WTensorEditor    func(label string, tsr tensor.Tensor) *tensorcore.TensorEditor
+	WTensorGrid      func(label string, tsr tensor.Tensor) *tensorcore.TensorGrid
+	WTensorTable     func(label string, dt *table.Table) *tensorcore.Table
 }
 
-func (W _cogentcore_org_core_tensor_databrowser_Tabber) AsTabs() *databrowser.Tabs {
-	return W.WAsTabs()
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) AsDataTabs() *databrowser.Tabs {
+	return W.WAsDataTabs()
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) CurrentTab() (core.Widget, int) {
+	return W.WCurrentTab()
 }
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) EditorFile(label string, filename string) *texteditor.Editor {
 	return W.WEditorFile(label, filename)
@@ -70,14 +80,29 @@ func (W _cogentcore_org_core_tensor_databrowser_Tabber) EditorFile(label string,
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) EditorString(label string, content string) *texteditor.Editor {
 	return W.WEditorString(label, content)
 }
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) GoUpdatePlot(label string) *plotcore.PlotEditor {
+	return W.WGoUpdatePlot(label)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) PlotDataFS(dfs *datafs.Data) *plotcore.PlotEditor {
+	return W.WPlotDataFS(dfs)
+}
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) PlotTable(label string, dt *table.Table) *plotcore.PlotEditor {
 	return W.WPlotTable(label, dt)
 }
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) RecycleTab(name string) *core.Frame {
 	return W.WRecycleTab(name)
 }
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) SelectTabByName(name string) *core.Frame {
+	return W.WSelectTabByName(name)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) SelectTabIndex(idx int) *core.Frame {
+	return W.WSelectTabIndex(idx)
+}
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) SliceTable(label string, slc any) *core.Table {
 	return W.WSliceTable(label, slc)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) TabByName(name string) *core.Frame {
+	return W.WTabByName(name)
 }
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) TensorEditor(label string, tsr tensor.Tensor) *tensorcore.TensorEditor {
 	return W.WTensorEditor(label, tsr)

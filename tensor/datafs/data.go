@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 )
@@ -74,7 +75,7 @@ func Value[T tensor.DataTypes](dir *Data, name string, sizes ...int) tensor.Valu
 		return it.Data.(tensor.Values)
 	}
 	tsr := tensor.New[T](sizes...)
-	tsr.Metadata().SetName(name)
+	metadata.SetName(tsr, name)
 	d, err := newData(dir, name)
 	if errors.Log(err) != nil {
 		return nil
@@ -109,7 +110,7 @@ func (d *Data) NewOfType(name string, typ reflect.Kind, sizes ...int) tensor.Val
 		return it.Data.(tensor.Values)
 	}
 	tsr := tensor.NewOfType(typ, sizes...)
-	tsr.Metadata().SetName(name)
+	metadata.SetName(tsr, name)
 	nd, err := newData(d, name)
 	if errors.Log(err) != nil {
 		return nil

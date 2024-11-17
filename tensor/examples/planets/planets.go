@@ -95,7 +95,7 @@ func main() {
 func Interactive(c *interpreter.Config, in *interpreter.Interpreter) error {
 	in.Interp.Use(symbols.Symbols) // gui imports
 	in.Config()
-	br := databrowser.NewBrowserWindow(datafs.CurRoot, "Planets")
+	br := databrowser.NewBasicWindow(datafs.CurRoot, "Planets")
 	b := br.Parent.(*core.Body)
 	b.AddTopBar(func(bar *core.Frame) {
 		tb := core.NewToolbar(bar)

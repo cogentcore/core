@@ -92,12 +92,12 @@ Here is the mapping of special header prefix characters to standard types:
 '#': etensor.FLOAT64,
 '|': etensor.INT64,
 '@': etensor.UINT8,
-'^': etensor.BOOl,
+'^': etensor.BOOL,
 ```
 
 Columns that have tensor cell shapes (not just scalars) are marked as such with the *first* such column having a `<ndim:dim,dim..>` suffix indicating the shape of the *cells* in this column, e.g., `<2:5,4>` indicates a 2D cell Y=5,X=4.  Each individual column is then indexed as `[ndims:x,y..]` e.g., the first would be `[2:0,0]`, then `[2:0,1]` etc.
 
-### Example
+## Example
 
 Here's a TSV file for a scalar String column (`Name`), a 2D 1x4 tensor float32 column (`Input`), and a 2D 1x2 float32 `Output` column.
 
@@ -108,6 +108,8 @@ _D:	Event_1	0	1	0	0	1	0
 _D:	Event_2	0	0	1	0	0	1
 _D:	Event_3	0	0	0	1	0	1
 ```
+
+## Logging one row at a time
 
 
 

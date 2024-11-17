@@ -79,7 +79,7 @@ func (ix *Indexed) SourceIndexesFrom1D(oned int) []int {
 	return ix.Indexes.Values[oned : oned+nd]
 }
 
-func (ix *Indexed) Label() string            { return label(ix.Metadata().Name(), ix.Shape()) }
+func (ix *Indexed) Label() string            { return label(metadata.Name(ix), ix.Shape()) }
 func (ix *Indexed) String() string           { return Sprintf("", ix, 0) }
 func (ix *Indexed) Metadata() *metadata.Data { return ix.Tensor.Metadata() }
 func (ix *Indexed) IsString() bool           { return ix.Tensor.IsString() }
