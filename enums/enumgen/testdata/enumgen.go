@@ -13,7 +13,11 @@ import (
 var _FruitsValues = []Fruits{0, 1, 2, 3, 4, 5, 6}
 
 // FruitsN is the highest valid value for type Fruits, plus one.
+//
+//gosl:start
 const FruitsN Fruits = 7
+
+//gosl:end
 
 var _FruitsValueMap = map[string]Fruits{`Apple`: 0, `apple`: 0, `Orange`: 1, `orange`: 1, `Peach`: 2, `peach`: 2, `Strawberry`: 3, `strawberry`: 3, `Blackberry`: 4, `blackberry`: 4, `Blueberry`: 5, `blueberry`: 5, `Apricot`: 6, `apricot`: 6}
 
@@ -57,7 +61,11 @@ func (i *Fruits) UnmarshalText(text []byte) error { return enums.UnmarshalText(i
 var _FoodsValues = []Foods{7, 8, 9, 10}
 
 // FoodsN is the highest valid value for type Foods, plus one.
+//
+//gosl:start
 const FoodsN Foods = 11
+
+//gosl:end
 
 var _FoodsValueMap = map[string]Foods{`Bread`: 7, `Lettuce`: 8, `Cheese`: 9, `Meat`: 10}
 
@@ -101,7 +109,11 @@ func (i *Foods) UnmarshalText(text []byte) error { return enums.UnmarshalText(i,
 var _DaysValues = []Days{-11, -9, -7, -5, -3, -1, 1}
 
 // DaysN is the highest valid value for type Days, plus one.
+//
+//gosl:start
 const DaysN Days = 2
+
+//gosl:end
 
 var _DaysValueMap = map[string]Days{`DAY_SATURDAY`: -11, `DAY_FRIDAY`: -9, `DAY_THURSDAY`: -7, `DAY_WEDNESDAY`: -5, `DAY_TUESDAY`: -3, `DAY_MONDAY`: -1, `DAY_SUNDAY`: 1}
 
@@ -146,7 +158,11 @@ func (i *Days) UnmarshalGQL(value any) error { return enums.Scan(i, value, "Days
 var _StatesValues = []States{1, 3, 5, 7, 9, 11, 13}
 
 // StatesN is the highest valid value for type States, plus one.
+//
+//gosl:start
 const StatesN States = 14
+
+//gosl:end
 
 var _StatesValueMap = map[string]States{`enabled`: 1, `not-enabled`: 3, `focused`: 5, `vered`: 7, `currently-being-pressed-by-user`: 9, `actively-focused`: 11, `selected`: 13}
 
@@ -203,7 +219,11 @@ func (i *States) Scan(value any) error { return enums.Scan(i, value, "States") }
 var _LanguagesValues = []Languages{6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54}
 
 // LanguagesN is the highest valid value for type Languages, plus one.
+//
+//gosl:start
 const LanguagesN Languages = 55
+
+//gosl:end
 
 var _LanguagesValueMap = map[string]Languages{`Go`: 6, `Python`: 10, `JavaScript`: 14, `Dart`: 18, `Rust`: 22, `Ruby`: 26, `C`: 30, `CPP`: 34, `ObjectiveC`: 38, `Java`: 42, `TypeScript`: 46, `Kotlin`: 50, `Swift`: 54}
 
@@ -262,7 +282,11 @@ func (i *Languages) UnmarshalText(text []byte) error {
 var _MoreLanguagesValues = []MoreLanguages{55}
 
 // MoreLanguagesN is the highest valid value for type MoreLanguages, plus one.
+//
+//gosl:start
 const MoreLanguagesN MoreLanguages = 56
+
+//gosl:end
 
 var _MoreLanguagesValueMap = map[string]MoreLanguages{`Perl`: 55}
 

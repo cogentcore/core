@@ -68,13 +68,15 @@ func (md *Data) Copy(src Data) {
 //////// Metadataer
 
 // Metadataer is an interface for a type that returns associated
-// metadata.Data using a Metadata() method.
+// metadata.Data using a Metadata() method. To be able to set metadata,
+// the method should be defined with a pointer receiver.
 type Metadataer interface {
 	Metadata() *Data
 }
 
 // GetData gets the Data from given object, if it implements the
 // Metadata() method. Returns nil if it does not.
+// Must pass a pointer to the object.
 func GetData(obj any) *Data {
 	if md, ok := obj.(Metadataer); ok {
 		return md.Metadata()
@@ -84,6 +86,7 @@ func GetData(obj any) *Data {
 
 // GetFrom gets metadata value of given type from given object,
 // if it implements the Metadata() method.
+// Must pass a pointer to the object.
 // Returns error if not present or item is a different type.
 func GetFrom[T any](obj any, key string) (T, error) {
 	md := GetData(obj)
@@ -96,33 +99,12 @@ func GetFrom[T any](obj any, key string) (T, error) {
 
 // SetTo sets metadata value on given object, if it implements
 // the Metadata() method. Returns error if no Metadata on object.
+// Must pass a pointer to the object.
 func SetTo(obj any, key string, value any) error {
 	md := GetData(obj)
 	if md == nil {
-		return errors.New("metadata not available for given object type")
+		return errors.Log(errors.New("metadata not available for given object type"))
 	}
 	md.Set(key, value)
 	return nil
-}
-
-// SetName sets the "Name" standard key.
-func SetName(obj any, name string) {
-	SetTo(obj, "Name", name)
-}
-
-// Name returns the "Name" standard key value (empty if not set).
-func Name(obj any) string {
-	nm, _ := GetFrom[string](obj, "Name")
-	return nm
-}
-
-// SetDoc sets the "Doc" standard key.
-func SetDoc(obj any, doc string) {
-	SetTo(obj, "Doc", doc)
-}
-
-// Doc returns the "Doc" standard key value (empty if not set).
-func Doc(obj any) string {
-	doc, _ := GetFrom[string](obj, "Doc")
-	return doc
 }

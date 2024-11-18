@@ -25,15 +25,15 @@ func TestGaussianGen(t *testing.T) {
 
 	for i := 0; i < nsamp; i++ {
 		vl := GaussianGen(mean, sig)
-		dt.Column("Val").SetFloatRow(vl, i)
+		dt.Column("Val").SetFloatRow(vl, i, 0)
 	}
 	dir, _ := datafs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
 	desc := dir.GetDirTable(nil)
 	// fmt.Println(desc.Columns.Keys)
 
-	actMean := desc.Column("Val/Mean").FloatRow(0)
-	actStd := desc.Column("Val/Std").FloatRow(0)
+	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
+	actStd := desc.Column("Val/Std").FloatRow(0, 0)
 
 	if math.Abs(actMean-mean) > tol {
 		t.Errorf("Gaussian: mean %g\t out of tolerance vs target: %g\n", actMean, mean)
@@ -60,10 +60,10 @@ func TestBinomialGen(t *testing.T) {
 	dir, _ := datafs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
 	desc := dir.GetDirTable(nil)
-	actMean := desc.Column("Val/Mean").FloatRow(0)
-	actStd := desc.Column("Val/Std").FloatRow(0)
-	actMin := desc.Column("Val/Min").FloatRow(0)
-	actMax := desc.Column("Val/Max").FloatRow(0)
+	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
+	actStd := desc.Column("Val/Std").FloatRow(0, 0)
+	actMin := desc.Column("Val/Min").FloatRow(0, 0)
+	actMax := desc.Column("Val/Max").FloatRow(0, 0)
 	mean := n * p
 	if math.Abs(actMean-mean) > tol {
 		t.Errorf("Binomial: mean %g\t out of tolerance vs target: %g\n", actMean, mean)
@@ -91,15 +91,15 @@ func TestPoissonGen(t *testing.T) {
 
 	for i := 0; i < nsamp; i++ {
 		vl := PoissonGen(lambda)
-		dt.Column("Val").SetFloatRow(vl, i)
+		dt.Column("Val").SetFloatRow(vl, i, 0)
 	}
 	dir, _ := datafs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
 	desc := dir.GetDirTable(nil)
-	actMean := desc.Column("Val/Mean").FloatRow(0)
-	actStd := desc.Column("Val/Std").FloatRow(0)
-	actMin := desc.Column("Val/Min").FloatRow(0)
-	// actMax := desc.Column("Val/Max").FloatRow(0)
+	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
+	actStd := desc.Column("Val/Std").FloatRow(0, 0)
+	actMin := desc.Column("Val/Min").FloatRow(0, 0)
+	// actMax := desc.Column("Val/Max").FloatRow(0, 0)
 
 	mean := lambda
 	if math.Abs(actMean-mean) > tol {
@@ -129,15 +129,15 @@ func TestGammaGen(t *testing.T) {
 
 	for i := 0; i < nsamp; i++ {
 		vl := GammaGen(alpha, beta)
-		dt.Column("Val").SetFloatRow(vl, i)
+		dt.Column("Val").SetFloatRow(vl, i, 0)
 	}
 	dir, _ := datafs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
 	desc := dir.GetDirTable(nil)
-	actMean := desc.Column("Val/Mean").FloatRow(0)
-	actStd := desc.Column("Val/Std").FloatRow(0)
-	// actMin := desc.Column("Val/Min").FloatRow(0)
-	// actMax := desc.Column("Val/Max").FloatRow(0)
+	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
+	actStd := desc.Column("Val/Std").FloatRow(0, 0)
+	// actMin := desc.Column("Val/Min").FloatRow(0, 0)
+	// actMax := desc.Column("Val/Max").FloatRow(0, 0)
 	mean := alpha / beta
 	if math.Abs(actMean-mean) > tol {
 		t.Errorf("Gamma: mean %g\t out of tolerance vs target: %g\n", actMean, mean)
@@ -160,15 +160,15 @@ func TestBetaGen(t *testing.T) {
 
 	for i := 0; i < nsamp; i++ {
 		vl := BetaGen(alpha, beta)
-		dt.Column("Val").SetFloatRow(vl, i)
+		dt.Column("Val").SetFloatRow(vl, i, 0)
 	}
 	dir, _ := datafs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
 	desc := dir.GetDirTable(nil)
-	actMean := desc.Column("Val/Mean").FloatRow(0)
-	actStd := desc.Column("Val/Std").FloatRow(0)
-	// actMin := desc.Column("Val/Min").FloatRow(0)
-	// actMax := desc.Column("Val/Max").FloatRow(0)
+	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
+	actStd := desc.Column("Val/Std").FloatRow(0, 0)
+	// actMin := desc.Column("Val/Min").FloatRow(0, 0)
+	// actMax := desc.Column("Val/Max").FloatRow(0, 0)
 	mean := alpha / (alpha + beta)
 	if math.Abs(actMean-mean) > tol {
 		t.Errorf("Beta: mean %g\t out of tolerance vs target: %g\n", actMean, mean)
