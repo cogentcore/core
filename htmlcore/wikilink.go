@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"strings"
+	"unicode"
 
 	"github.com/gomarkdown/markdown/ast"
 	"github.com/gomarkdown/markdown/parser"
@@ -15,7 +16,10 @@ import (
 // a corresponding URL and label text. If it returns "", "", the
 // handler will be skipped in favor of the next possible handlers.
 // Wikilinks are of the form [[wikilink text]]. Only the text inside
-// of the brackets is passed to the handler.
+// of the brackets is passed to the handler. If there is additional
+// text directly after the closing brackets without spaces or punctuation,
+// it will be appended to the label text after the handler is run
+// (ex: [[widget]]s).
 type WikilinkHandler func(text string) (url string, label string)
 
 // AddWikilinkHandler adds a new [WikilinkHandler] to [Context.WikilinkHandlers].
@@ -50,32 +54,53 @@ func GoDocWikilink(prefix string, pkg string) WikilinkHandler {
 func wikilink(ctx *Context, fn func(p *parser.Parser, data []byte, offset int) (int, ast.Node)) func(p *parser.Parser, data []byte, offset int) (int, ast.Node) {
 	return func(p *parser.Parser, original []byte, offset int) (int, ast.Node) {
 		data := original[offset:]
-		n := len(data)
 		// minimum: [[X]]
-		if n < 5 || data[1] != '[' {
+		if len(data) < 5 || data[1] != '[' {
 			return fn(p, original, offset)
 		}
-		i := 2
-		for i+1 < n && data[i] != ']' && data[i+1] != ']' {
-			i++
-		}
-		text := data[2 : i+1]
-		url, label := "", ""
-		for _, h := range ctx.WikilinkHandlers {
-			u, l := h(string(text))
-			if u == "" && l == "" {
-				continue
-			}
-			url, label = u, l
-			break
-		}
-		if url == "" && label == "" {
+		inside, after := getWikilinkText(data)
+		url, label := runWikilinkHandlers(ctx, inside)
+		if len(url) == 0 && len(label) == 0 {
 			return fn(p, original, offset)
 		}
 		link := &ast.Link{
-			Destination: []byte(url),
+			Destination: url,
 		}
-		ast.AppendChild(link, &ast.Text{Leaf: ast.Leaf{Literal: []byte(label)}})
-		return i + 3, link
+		ast.AppendChild(link, &ast.Text{Leaf: ast.Leaf{Literal: append(label, after...)}})
+		return len(inside) + len(after) + 4, link
 	}
+}
+
+// getWikilinkText gets the wikilink text from the given raw text data starting with [[.
+// Inside contains the text inside the [[]], and after contains all of the text
+// after the ]] until there is a space or punctuation.
+func getWikilinkText(data []byte) (inside, after []byte) {
+	i := 2
+	for ; i < len(data); i++ {
+		if data[i] == ']' && data[i-1] == ']' {
+			inside = data[2 : i-1]
+			continue
+		}
+		r := rune(data[i])
+		// Space or punctuation after ]] means we are done.
+		if inside != nil && (unicode.IsSpace(r) || unicode.IsPunct(r)) {
+			break
+		}
+	}
+	after = data[len(inside)+4 : i]
+	return
+}
+
+// runWikilinkHandlers returns the first non-blank URL and label returned
+// by [Context.WikilinkHandlers].
+func runWikilinkHandlers(ctx *Context, text []byte) (url, label []byte) {
+	for _, h := range ctx.WikilinkHandlers {
+		u, l := h(string(text))
+		if u == "" && l == "" {
+			continue
+		}
+		url, label = []byte(u), []byte(l)
+		break
+	}
+	return
 }
