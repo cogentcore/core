@@ -100,7 +100,7 @@ func OpenCSV(tsr Tensor, filename fsx.Filename, delim Delims) error {
 // Reading just grabs all values and doesn't care about shape.
 func WriteCSV(tsr Tensor, w io.Writer, delim Delims) error {
 	prec := -1
-	if ps, err := Precision(*tsr.Metadata()); err == nil {
+	if ps, err := Precision(tsr); err == nil {
 		prec = ps
 	}
 	cw := csv.NewWriter(w)

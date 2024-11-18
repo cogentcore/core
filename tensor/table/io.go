@@ -376,7 +376,7 @@ func (dt *Table) WriteCSVRow(w io.Writer, row int, delim tensor.Delims) error {
 // WriteCSVRowWriter uses csv.Writer to write one row
 func (dt *Table) WriteCSVRowWriter(cw *csv.Writer, row int, ncol int) error {
 	prec := -1
-	if ps, err := tensor.Precision(dt.Meta); err == nil {
+	if ps, err := tensor.Precision(dt); err == nil {
 		prec = ps
 	}
 	var rec []string
