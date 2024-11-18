@@ -29,22 +29,22 @@ type Tabber interface {
 	AsCoreTabs() *Tabs
 
 	// CurrentTab returns currently selected tab and its index; returns nil if none.
-	CurrentTab() (core.Widget, int)
+	CurrentTab() (Widget, int)
 
 	// TabByName returns a tab with the given name, nil if not found.
-	TabByName(name string) *core.Frame
+	TabByName(name string) *Frame
 
 	// SelectTabIndex selects the tab at the given index, returning it or nil.
 	// This is the final tab selection path.
-	SelectTabIndex(idx int) *core.Frame
+	SelectTabIndex(idx int) *Frame
 
 	// SelectTabByName selects the tab by widget name, returning it.
 	// The widget name is the original full tab label, prior to any eliding.
-	SelectTabByName(name string) *core.Frame
+	SelectTabByName(name string) *Frame
 
 	// RecycleTab returns a tab with the given name, first by looking for an existing one,
 	// and if not found, making a new one. It returns the frame for the tab.
-	RecycleTab(name string) *core.Frame
+	RecycleTab(name string) *Frame
 }
 
 // Tabs divide widgets into logical groups and give users the ability
