@@ -495,6 +495,7 @@ func (rw *Rows) Float1D(i int) float64 {
 func (rw *Rows) SetFloat1D(val float64, i int) {
 	if rw.Indexes == nil {
 		rw.Tensor.SetFloat1D(val, i)
+		return
 	}
 	rw.SetFloat(val, rw.Tensor.Shape().IndexFrom1D(i)...)
 }
@@ -517,6 +518,7 @@ func (rw *Rows) StringValue(i ...int) string {
 func (rw *Rows) SetString(val string, i ...int) {
 	if rw.Indexes == nil {
 		rw.Tensor.SetString(val, i...)
+		return
 	}
 	ic := slices.Clone(i)
 	ic[0] = rw.Indexes[ic[0]]
@@ -559,6 +561,7 @@ func (rw *Rows) String1D(i int) string {
 func (rw *Rows) SetString1D(val string, i int) {
 	if rw.Indexes == nil {
 		rw.Tensor.SetString1D(val, i)
+		return
 	}
 	rw.SetString(val, rw.Tensor.Shape().IndexFrom1D(i)...)
 }
@@ -630,6 +633,7 @@ func (rw *Rows) Int1D(i int) int {
 func (rw *Rows) SetInt1D(val int, i int) {
 	if rw.Indexes == nil {
 		rw.Tensor.SetInt1D(val, i)
+		return
 	}
 	rw.SetInt(val, rw.Tensor.Shape().IndexFrom1D(i)...)
 }

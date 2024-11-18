@@ -9,6 +9,9 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"cogentcore.org/core/tensor"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTableHeaders(t *testing.T) {
@@ -106,4 +109,42 @@ func TestReadTableDat(t *testing.T) {
 		}
 		dt.WriteCSV(fo, '\t', Headers)
 	}
+}
+
+func TestLog(t *testing.T) {
+	dt := New()
+	dt.AddStringColumn("Name")
+	dt.AddFloat64Column("Value")
+	err := dt.OpenLog("testdata/log.tsv", tensor.Tab)
+	assert.NoError(t, err)
+	err = dt.WriteToLog()
+	assert.Equal(t, ErrLogNoNewRows, err)
+
+	dt.SetNumRows(1)
+	dt.Column("Name").SetString1D("test1", 0)
+	dt.Column("Value").SetFloat1D(42, 0)
+	err = dt.WriteToLog()
+	assert.NoError(t, err)
+
+	dt.AddRows(2)
+	dt.Column("Name").SetString1D("test2", 1)
+	dt.Column("Value").SetFloat1D(44, 1)
+	dt.Column("Name").SetString1D("test3", 2)
+	dt.Column("Value").SetFloat1D(46, 2)
+	err = dt.WriteToLog()
+	assert.NoError(t, err)
+
+	err = dt.WriteToLog()
+	assert.Equal(t, ErrLogNoNewRows, err)
+
+	dt.SetNumRows(0)
+	err = dt.WriteToLog()
+	assert.Equal(t, ErrLogNoNewRows, err)
+
+	dt.AddRows(1)
+	dt.Column("Name").SetString1D("test4", 0)
+	dt.Column("Value").SetFloat1D(50, 0)
+	err = dt.WriteToLog()
+	assert.NoError(t, err)
+	dt.CloseLog()
 }

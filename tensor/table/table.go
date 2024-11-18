@@ -66,6 +66,8 @@ func NewView(src *Table) *Table {
 	return dt
 }
 
+func (dt *Table) Metadata() *metadata.Data { return &dt.Meta }
+
 // IsValidRow returns error if the row is invalid, if error checking is needed.
 func (dt *Table) IsValidRow(row int) error {
 	if row < 0 || row >= dt.NumRows() {

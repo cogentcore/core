@@ -21,8 +21,30 @@ import (
 )
 
 // Tabber is an interface for getting the parent Tabs of tab buttons.
+// It exposes the main Tabs interface so other packages can build on that
+// to provide an augmented Tabs API.
 type Tabber interface {
+
+	// AsCoreTabs returns the underlying Tabs implementation.
 	AsCoreTabs() *Tabs
+
+	// CurrentTab returns currently selected tab and its index; returns nil if none.
+	CurrentTab() (core.Widget, int)
+
+	// TabByName returns a tab with the given name, nil if not found.
+	TabByName(name string) *core.Frame
+
+	// SelectTabIndex selects the tab at the given index, returning it or nil.
+	// This is the final tab selection path.
+	SelectTabIndex(idx int) *core.Frame
+
+	// SelectTabByName selects the tab by widget name, returning it.
+	// The widget name is the original full tab label, prior to any eliding.
+	SelectTabByName(name string) *core.Frame
+
+	// RecycleTab returns a tab with the given name, first by looking for an existing one,
+	// and if not found, making a new one. It returns the frame for the tab.
+	RecycleTab(name string) *core.Frame
 }
 
 // Tabs divide widgets into logical groups and give users the ability
