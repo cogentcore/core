@@ -227,6 +227,9 @@ func (ct *Content) makeCategories() {
 	for _, cat := range ct.currentPage.Categories {
 		catTree := core.NewTree(cats).SetText(cat)
 		for _, pg := range ct.pagesByCategory[cat] {
+			if pg == ct.currentPage {
+				continue
+			}
 			pgTree := core.NewTree(catTree).SetText(pg.Name)
 			pgTree.OnSelect(func(e events.Event) {
 				ct.Open(pg.URL)
