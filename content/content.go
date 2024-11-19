@@ -286,7 +286,7 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		w.SetIcon(icons.Search).SetKey(keymap.Menu)
 		w.SetTooltip("Search")
 		w.OnClick(func(e events.Event) {
-			ct.Scene.MenuSearchDialog("Search " + core.TheApp.Name())
+			ct.Scene.MenuSearchDialog("Search", "Search "+core.TheApp.Name())
 		})
 	})
 }

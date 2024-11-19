@@ -217,7 +217,7 @@ type MenuSearcher interface {
 func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 	msdesc := "Search for menu buttons and other app actions"
 	NewButton(m).SetText("Menu search").SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip(msdesc).OnClick(func(e events.Event) {
-		sc.MenuSearchDialog(msdesc)
+		sc.MenuSearchDialog("Menu search", msdesc)
 	})
 	NewButton(m).SetText("About").SetIcon(icons.Info).OnClick(func(e events.Event) {
 		d := NewBody(TheApp.Name())
@@ -281,10 +281,10 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 }
 
 // MenuSearchDialog runs the menu search dialog for the scene with
-// the given description text. It includes scenes, toolbar buttons,
+// the given title and description text. It includes scenes, toolbar buttons,
 // and [MenuSearcher]s.
-func (sc *Scene) MenuSearchDialog(text string) {
-	d := NewBody("Menu search")
+func (sc *Scene) MenuSearchDialog(title, text string) {
+	d := NewBody(title)
 	NewText(d).SetType(TextSupporting).SetText(text)
 	w := NewChooser(d).SetEditable(true).SetIcon(icons.Search)
 	w.Styler(func(s *styles.Style) {
