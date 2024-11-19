@@ -48,6 +48,13 @@ type Content struct {
 	// pagesByCategory has the [Page]s for each of all [Page.Categories].
 	pagesByCategory map[string][]*Page
 
+	// history is the history of pages that have been visited.
+	// The oldest page is first.
+	history []*Page
+
+	// historyIndex is the current position in [Content.history].
+	historyIndex int
+
 	// currentPage is the currently open page.
 	currentPage *Page
 
@@ -142,9 +149,9 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		return nil
 	}))
 	if root, ok := ct.pagesByURL[""]; ok {
-		ct.currentPage = root
+		ct.Open(root.URL)
 	} else {
-		ct.currentPage = ct.pages[0]
+		ct.Open(ct.pages[0].URL)
 	}
 	return ct
 }
@@ -164,6 +171,8 @@ func (ct *Content) Open(url string) *Content {
 		return ct
 	}
 	ct.currentPage = pg
+	ct.historyIndex = len(ct.history)
+	ct.history = append(ct.history, pg)
 	ct.Update()
 	return ct
 }
@@ -242,7 +251,24 @@ func (ct *Content) makeCategories() {
 
 func (ct *Content) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip("Search").OnClick(func(e events.Event) {
+		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
+		w.SetTooltip("Back")
+		w.Updater(func() {
+			w.SetEnabled(ct.historyIndex > 0)
+		})
+		w.OnClick(func(e events.Event) {
+			ct.historyIndex--
+			ct.Open(ct.history[ct.historyIndex].URL)
+		})
+	})
+	tree.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.ArrowForward).SetKey(keymap.HistNext)
+		w.SetTooltip("Forward")
+	})
+	tree.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.Search).SetKey(keymap.Menu)
+		w.SetTooltip("Search")
+		w.OnClick(func(e events.Event) {
 
 		})
 	})
