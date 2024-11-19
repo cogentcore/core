@@ -18,6 +18,8 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -236,4 +238,12 @@ func (ct *Content) makeCategories() {
 			})
 		}
 	}
+}
+
+func (ct *Content) MakeToolbar(p *tree.Plan) {
+	tree.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip("Search").OnClick(func(e events.Event) {
+
+		})
+	})
 }

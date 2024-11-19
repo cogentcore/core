@@ -20,5 +20,8 @@ func main() {
 	b := core.NewBody("Cogent Content Example")
 	ct := content.NewContent(b).SetContent(fsys)
 	ct.Context.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))
+	b.AddTopBar(func(bar *core.Frame) {
+		core.NewToolbar(bar).Maker(ct.MakeToolbar)
+	})
 	b.RunMainWindow()
 }
