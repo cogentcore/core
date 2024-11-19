@@ -13,9 +13,9 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
+	"cogentcore.org/core/tensor/tensorfs"
 )
 
 var (
@@ -146,7 +146,7 @@ func AvgByColumn(files []string, column string) {
 			fmt.Printf("File %v empty\n", fn)
 			continue
 		}
-		dir, _ := datafs.NewDir("Groups")
+		dir, _ := tensorfs.NewDir("Groups")
 		if column == "" {
 			stats.GroupAll(dir, dt.ColumnByIndex(0))
 		} else {

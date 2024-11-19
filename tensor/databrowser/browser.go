@@ -24,7 +24,7 @@ import (
 var TheBrowser *Browser
 
 // Browser holds all the elements of a data browser, for browsing data
-// either on an OS filesystem or as a datafs virtual data filesystem.
+// either on an OS filesystem or as a tensorfs virtual data filesystem.
 // It supports the automatic loading of [goal] scripts as toolbar actions to
 // perform pre-programmed tasks on the data, to create app-like functionality.
 // Scripts are ordered alphabetically and any leading #- prefix is automatically
@@ -52,7 +52,7 @@ type Browser struct { //types:add -setters
 	// Interpreter is the interpreter to use for running Browser scripts
 	Interpreter *interpreter.Interpreter `set:"-"`
 
-	// Files is the [DataTree] tree browser of the datafs or files.
+	// Files is the [DataTree] tree browser of the tensorfs or files.
 	Files *DataTree
 
 	// Tabs is the [Tabber] element managing tabs of data views.

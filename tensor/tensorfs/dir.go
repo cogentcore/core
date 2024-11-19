@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package datafs
+package tensorfs
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ import (
 // the natural order items are processed in.
 type Dir = keylist.List[string, *Data]
 
-// NewDir returns a new datafs directory with the given name.
+// NewDir returns a new tensorfs directory with the given name.
 // If parent != nil and a directory, this dir is added to it.
 // If the parent already has an item of that name, it is returned,
 // with an [fs.ErrExist] error.
@@ -72,7 +72,7 @@ func (d *Data) Items(names ...string) ([]*Data, error) {
 		if dt != nil {
 			its = append(its, dt)
 		} else {
-			err := fmt.Errorf("datafs Dir %q item not found: %q", d.Path(), nm)
+			err := fmt.Errorf("tensorfs Dir %q item not found: %q", d.Path(), nm)
 			errs = append(errs, err)
 		}
 	}
@@ -92,7 +92,7 @@ func (d *Data) Values(names ...string) ([]tensor.Tensor, error) {
 		if it != nil && it.Data != nil {
 			its = append(its, it.Data)
 		} else {
-			err := fmt.Errorf("datafs Dir %q item not found: %q", d.Path(), nm)
+			err := fmt.Errorf("tensorfs Dir %q item not found: %q", d.Path(), nm)
 			errs = append(errs, err)
 		}
 	}
@@ -313,7 +313,7 @@ func (d *Data) DirNamesByTime() []string {
 // if this data item is not a directory.
 func (d *Data) mustDir(op, path string) error {
 	if !d.IsDir() {
-		return &fs.PathError{Op: op, Path: path, Err: errors.New("datafs item is not a directory")}
+		return &fs.PathError{Op: op, Path: path, Err: errors.New("tensorfs item is not a directory")}
 	}
 	return nil
 }

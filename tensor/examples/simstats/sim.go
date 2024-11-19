@@ -15,8 +15,8 @@ import (
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/databrowser"
-	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/stats/stats"
+	"cogentcore.org/core/tensor/tensorfs"
 )
 
 // Times are the looping time levels for running and statistics.
@@ -41,16 +41,16 @@ const (
 
 type Sim struct {
 	// Root is the root data dir.
-	Root *datafs.Data
+	Root *tensorfs.Data
 
 	// Config has config data.
-	Config *datafs.Data
+	Config *tensorfs.Data
 
 	// Stats has all stats data.
-	Stats *datafs.Data
+	Stats *tensorfs.Data
 
 	// Current has current value of all stats
-	Current *datafs.Data
+	Current *tensorfs.Data
 
 	// StatFuncs are statistics functions, per stat, handles everything.
 	StatFuncs []func(ltime Times, lphase LoopPhase)
@@ -61,9 +61,9 @@ type Sim struct {
 
 // ConfigAll configures the sim
 func (ss *Sim) ConfigAll() {
-	ss.Root, _ = datafs.NewDir("Root")
+	ss.Root, _ = tensorfs.NewDir("Root")
 	ss.Config, _ = ss.Root.Mkdir("Config")
-	mx := datafs.Value[int](ss.Config, "Max", int(TimesN)).(*tensor.Int)
+	mx := tensorfs.Value[int](ss.Config, "Max", int(TimesN)).(*tensor.Int)
 	mx.Set1D(5, int(Trial))
 	mx.Set1D(4, int(Epoch))
 	mx.Set1D(3, int(Run))
@@ -95,7 +95,7 @@ func (ss *Sim) ConfigStats() {
 			}
 			name := ctr.String() // name of stat = counter
 			timeDir := ss.Stats.RecycleDir(ltime.String())
-			tsr := datafs.Value[int](timeDir, name)
+			tsr := tensorfs.Value[int](timeDir, name)
 			if lphase == Start {
 				tsr.SetNumRows(0)
 				if ps := plot.GetStylersFrom(tsr); ps == nil {
@@ -107,7 +107,7 @@ func (ss *Sim) ConfigStats() {
 				return
 			}
 			ctv := ss.Counters[ctr]
-			datafs.Scalar[int](ss.Current, name).SetInt1D(ctv, 0)
+			tensorfs.Scalar[int](ss.Current, name).SetInt1D(ctv, 0)
 			tsr.AppendRowInt(ctv)
 		})
 	}
@@ -116,7 +116,7 @@ func (ss *Sim) ConfigStats() {
 	ss.AddStat(func(ltime Times, lphase LoopPhase) {
 		name := "SSE"
 		timeDir := ss.Stats.RecycleDir(ltime.String())
-		tsr := datafs.Value[float64](timeDir, name)
+		tsr := tensorfs.Value[float64](timeDir, name)
 		if lphase == Start {
 			tsr.SetNumRows(0)
 			if ps := plot.GetStylersFrom(tsr); ps == nil {
@@ -131,7 +131,7 @@ func (ss *Sim) ConfigStats() {
 		switch ltime {
 		case Trial:
 			stat := rand.Float64()
-			datafs.Scalar[float64](ss.Current, name).SetFloat(stat, 0)
+			tensorfs.Scalar[float64](ss.Current, name).SetFloat(stat, 0)
 			tsr.AppendRowFloat(stat)
 		case Epoch:
 			subd := ss.Stats.RecycleDir((ltime - 1).String())
@@ -146,7 +146,7 @@ func (ss *Sim) ConfigStats() {
 	ss.AddStat(func(ltime Times, lphase LoopPhase) {
 		name := "Err"
 		timeDir := ss.Stats.RecycleDir(ltime.String())
-		tsr := datafs.Value[float64](timeDir, name)
+		tsr := tensorfs.Value[float64](timeDir, name)
 		if lphase == Start {
 			tsr.SetNumRows(0)
 			if ps := plot.GetStylersFrom(tsr); ps == nil {
@@ -165,7 +165,7 @@ func (ss *Sim) ConfigStats() {
 			if sse < 0.5 {
 				stat = 0
 			}
-			datafs.Scalar[float64](ss.Current, name).SetFloat(stat, 0)
+			tensorfs.Scalar[float64](ss.Current, name).SetFloat(stat, 0)
 			tsr.AppendRowFloat(stat)
 		case Epoch:
 			subd := ss.Stats.RecycleDir((ltime - 1).String())

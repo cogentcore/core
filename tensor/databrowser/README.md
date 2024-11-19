@@ -2,11 +2,11 @@
 
 The databrowser package provides GUI elements for data exploration and visualization, and a simple `Browser` implementation that combines these elements.
 
-* `FileTree` (with `FileNode` elements), implementing a [filetree](https://github.com/cogentcore/tree/main/filetree) that has support for a [datafs](../datafs) filesystem, and data files in an actual filesystem. It has a `Tabber` pointer that handles the viewing actions on `datafs` elements (showing a Plot, etc).
+* `FileTree` (with `FileNode` elements), implementing a [filetree](https://github.com/cogentcore/tree/main/filetree) that has support for a [tensorfs](../tensorfs) filesystem, and data files in an actual filesystem. It has a `Tabber` pointer that handles the viewing actions on `tensorfs` elements (showing a Plot, etc).
 
 * `Tabber` interface and `Tabs` base implementation provides methods for showing data plots and editors in tabs.
 
-* `Terminal` running a `goal` shell that supports interactive commands operating on the `datafs` data etc. TODO!
+* `Terminal` running a `goal` shell that supports interactive commands operating on the `tensorfs` data etc. TODO!
 
 * `Browser` provides a hub structure connecting the above elements, which can be included in an actual GUI widget, that also provides additional functionality / GUI elements.
 

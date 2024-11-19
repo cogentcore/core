@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package datafs
+package tensorfs
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ import (
 
 // fs.go contains all the io/fs interface implementations
 
-// Open opens the given data Value within this datafs filesystem.
+// Open opens the given data Value within this tensorfs filesystem.
 func (d *Data) Open(name string) (fs.File, error) {
 	itm, err := d.ItemAtPath(name)
 	if err != nil {

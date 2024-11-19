@@ -72,16 +72,16 @@ Within the [gpu](../gpu) framework, each `ComputeSystem` defines a specific orga
 
 > Kernels and variables both must be defined within a specific system context.
 
-### datafs mapping
+### tensorfs mapping
 
 TODO:
 
-The grouped global variables can be mapped directly to a corresponding [datafs](../tensor/datafs) directory, which provides direct accessibility to this data within interactive Goal usage. Further, different sets of variable values can be easily managed by saving and loading different such directories.
+The grouped global variables can be mapped directly to a corresponding [tensorfs](../tensor/tensorfs) directory, which provides direct accessibility to this data within interactive Goal usage. Further, different sets of variable values can be easily managed by saving and loading different such directories.
 
 ```Go
-    gosl.ToDataFS("path/to/dir" [, system]) // set datafs items in given path to current global vars
+    gosl.ToDataFS("path/to/dir" [, system]) // set tensorfs items in given path to current global vars
     
-    gosl.FromDataFS("path/to/dir" [,system]) // set global vars from given datafs path
+    gosl.FromDataFS("path/to/dir" [,system]) // set global vars from given tensorfs path
 ```
 
 These and all such `gosl` functions use the current system if none is explicitly specified, which is settable using the `gosl.SetSystem` call. Any given variable can use the `get` or `set` Goal math mode functions directly.

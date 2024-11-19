@@ -15,9 +15,9 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/databrowser"
-	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
+	"cogentcore.org/core/tensor/tensorfs"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/yaegicore/symbols"
 )
@@ -28,7 +28,7 @@ var csv embed.FS
 // AnalyzePlanets analyzes planets.csv data following some of the examples
 // in pandas from:
 // https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html
-func AnalyzePlanets(dir *datafs.Data) {
+func AnalyzePlanets(dir *tensorfs.Data) {
 	Planets := table.New("planets")
 	Planets.OpenFS(csv, "planets.csv", tensor.Comma)
 
@@ -83,7 +83,7 @@ func AnalyzePlanets(dir *datafs.Data) {
 }
 
 func main() {
-	dir := datafs.Mkdir("Planets")
+	dir := tensorfs.Mkdir("Planets")
 	AnalyzePlanets(dir)
 
 	opts := cli.DefaultOptions("planets", "interactive data analysis.")
@@ -95,7 +95,7 @@ func main() {
 func Interactive(c *interpreter.Config, in *interpreter.Interpreter) error {
 	in.Interp.Use(symbols.Symbols) // gui imports
 	in.Config()
-	br := databrowser.NewBasicWindow(datafs.CurRoot, "Planets")
+	br := databrowser.NewBasicWindow(tensorfs.CurRoot, "Planets")
 	b := br.Parent.(*core.Body)
 	b.AddTopBar(func(bar *core.Frame) {
 		tb := core.NewToolbar(bar)

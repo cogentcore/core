@@ -36,7 +36,7 @@ func (st *State) TranspileMath(toks Tokens, code string, fullLine bool) Tokens {
 	if fullLine {
 		ewords, err := ExecWords(str)
 		if len(ewords) > 0 {
-			if cmd, ok := datafsCommands[ewords[0]]; ok {
+			if cmd, ok := tensorfsCommands[ewords[0]]; ok {
 				mp.ewords = ewords
 				err := cmd(&mp)
 				if err != nil {
@@ -578,7 +578,7 @@ func (mp *mathParse) defineStmt(as *ast.AssignStmt) {
 		nvar, ok := as.Lhs[0].(*ast.Ident)
 		if ok {
 			mp.out.Add(token.SEMICOLON)
-			mp.out.Add(token.IDENT, "datafs.Record("+nvar.Name+",`"+nvar.Name+"`)")
+			mp.out.Add(token.IDENT, "tensorfs.Record("+nvar.Name+",`"+nvar.Name+"`)")
 		}
 	}
 }
@@ -854,8 +854,8 @@ var numpyFuncs = map[string]funWrap{
 	"linspace": {"tensor.NewFloat64SpacedLinear", ""},
 	"reshape":  {"tensor.Reshape", ""},
 	"copy":     {"tensor.Clone", ""},
-	"get":      {"datafs.Get", ""},
-	"set":      {"datafs.Set", ""},
+	"get":      {"tensorfs.Get", ""},
+	"set":      {"tensorfs.Set", ""},
 	"flatten":  {"tensor.Flatten", "nofun"},
 	"squeeze":  {"tensor.Squeeze", "nofun"},
 }

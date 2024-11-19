@@ -3,15 +3,16 @@
 package symbols
 
 import (
+	"reflect"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/databrowser"
-	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tensor/tensorcore"
+	"cogentcore.org/core/tensor/tensorfs"
 	"cogentcore.org/core/texteditor"
-	"reflect"
 )
 
 func init() {
@@ -56,7 +57,7 @@ type _cogentcore_org_core_tensor_databrowser_Tabber struct {
 	WEditorFile      func(label string, filename string) *texteditor.Editor
 	WEditorString    func(label string, content string) *texteditor.Editor
 	WGoUpdatePlot    func(label string) *plotcore.PlotEditor
-	WPlotDataFS      func(dfs *datafs.Data) *plotcore.PlotEditor
+	WPlotDataFS      func(dfs *tensorfs.Data) *plotcore.PlotEditor
 	WPlotTable       func(label string, dt *table.Table) *plotcore.PlotEditor
 	WRecycleTab      func(name string) *core.Frame
 	WSelectTabByName func(name string) *core.Frame
@@ -83,7 +84,7 @@ func (W _cogentcore_org_core_tensor_databrowser_Tabber) EditorString(label strin
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) GoUpdatePlot(label string) *plotcore.PlotEditor {
 	return W.WGoUpdatePlot(label)
 }
-func (W _cogentcore_org_core_tensor_databrowser_Tabber) PlotDataFS(dfs *datafs.Data) *plotcore.PlotEditor {
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) PlotDataFS(dfs *tensorfs.Data) *plotcore.PlotEditor {
 	return W.WPlotDataFS(dfs)
 }
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) PlotTable(label string, dt *table.Table) *plotcore.PlotEditor {

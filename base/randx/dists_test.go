@@ -8,9 +8,9 @@ import (
 	"math"
 	"testing"
 
-	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
+	"cogentcore.org/core/tensor/tensorfs"
 )
 
 func TestGaussianGen(t *testing.T) {
@@ -27,7 +27,7 @@ func TestGaussianGen(t *testing.T) {
 		vl := GaussianGen(mean, sig)
 		dt.Column("Val").SetFloatRow(vl, i, 0)
 	}
-	dir, _ := datafs.NewDir("Desc")
+	dir, _ := tensorfs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
 	desc := dir.GetDirTable(nil)
 	// fmt.Println(desc.Columns.Keys)
@@ -57,7 +57,7 @@ func TestBinomialGen(t *testing.T) {
 		vl := BinomialGen(n, p)
 		dt.Column("Val").SetFloat(vl, i)
 	}
-	dir, _ := datafs.NewDir("Desc")
+	dir, _ := tensorfs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
 	desc := dir.GetDirTable(nil)
 	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
@@ -93,7 +93,7 @@ func TestPoissonGen(t *testing.T) {
 		vl := PoissonGen(lambda)
 		dt.Column("Val").SetFloatRow(vl, i, 0)
 	}
-	dir, _ := datafs.NewDir("Desc")
+	dir, _ := tensorfs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
 	desc := dir.GetDirTable(nil)
 	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
@@ -131,7 +131,7 @@ func TestGammaGen(t *testing.T) {
 		vl := GammaGen(alpha, beta)
 		dt.Column("Val").SetFloatRow(vl, i, 0)
 	}
-	dir, _ := datafs.NewDir("Desc")
+	dir, _ := tensorfs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
 	desc := dir.GetDirTable(nil)
 	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
@@ -162,7 +162,7 @@ func TestBetaGen(t *testing.T) {
 		vl := BetaGen(alpha, beta)
 		dt.Column("Val").SetFloatRow(vl, i, 0)
 	}
-	dir, _ := datafs.NewDir("Desc")
+	dir, _ := tensorfs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
 	desc := dir.GetDirTable(nil)
 	actMean := desc.Column("Val/Mean").FloatRow(0, 0)

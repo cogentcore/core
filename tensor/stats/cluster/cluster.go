@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/tensor/stats/stats"
 )
 
-// todo: all of this data goes into the datafs
+// todo: all of this data goes into the tensorfs
 // Cluster makes a new dir, stuffs results in there!
 // need a global "cwd" that it uses, so basically you cd
 // to a dir, then call it.

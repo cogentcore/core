@@ -9,8 +9,8 @@ import (
 
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
+	"cogentcore.org/core/tensor/tensorfs"
 )
 
 // Groups generates indexes for each unique value in each of the given tensors.
@@ -19,7 +19,7 @@ import (
 // [GroupStats] function. See [GroupCombined] for function that makes a
 // "Combined" Group that has a unique group for each _combination_ of
 // the separate, independent groups created by this function.
-// It creates subdirectories in a "Groups" directory within given [datafs],
+// It creates subdirectories in a "Groups" directory within given [tensorfs],
 // for each tensor passed in here, using the metadata Name property for
 // names (index if empty).
 // Within each subdirectory there are int tensors for each unique 1D
@@ -30,11 +30,11 @@ import (
 // rows, indirected through any existing indexes on the inputs, so that
 // the results can be used directly as Indexes into the corresponding tensor data.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
-func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) error {
+func Groups(dir *tensorfs.Data, tsrs ...tensor.Tensor) error {
 	gd := dir.RecycleDir("Groups")
-	makeIdxs := func(dir *datafs.Data, srt *tensor.Rows, val string, start, r int) {
+	makeIdxs := func(dir *tensorfs.Data, srt *tensor.Rows, val string, start, r int) {
 		n := r - start
-		it := datafs.Value[int](dir, val, n)
+		it := tensorfs.Value[int](dir, val, n)
 		for j := range n {
 			it.SetIntRow(srt.Indexes[start+j], j, 0) // key to indirect through sort indexes
 		}
@@ -85,7 +85,7 @@ func Groups(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 }
 
 // TableGroups runs [Groups] on the given columns from given [table.Table].
-func TableGroups(dir *datafs.Data, dt *table.Table, columns ...string) error {
+func TableGroups(dir *tensorfs.Data, dt *table.Table, columns ...string) error {
 	dv := table.NewView(dt)
 	// important for consistency across columns, to do full outer product sort first.
 	dv.SortColumns(tensor.Ascending, tensor.StableSort, columns...)
@@ -93,10 +93,10 @@ func TableGroups(dir *datafs.Data, dt *table.Table, columns ...string) error {
 }
 
 // GroupAll copies all indexes from the first given tensor,
-// into an "All/All" tensor in the given [datafs], which can then
+// into an "All/All" tensor in the given [tensorfs], which can then
 // be used with [GroupStats] to generate summary statistics across
 // all the data. See [Groups] for more general documentation.
-func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) error {
+func GroupAll(dir *tensorfs.Data, tsrs ...tensor.Tensor) error {
 	gd := dir.RecycleDir("Groups")
 	tsr := tensor.AsRows(tsrs[0])
 	nr := tsr.NumRows()
@@ -104,7 +104,7 @@ func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 		return nil
 	}
 	td, _ := gd.Mkdir("All")
-	it := datafs.Value[int](td, "All", nr)
+	it := tensorfs.Value[int](td, "All", nr)
 	for j := range nr {
 		it.SetIntRow(tsr.RowIndex(j), j, 0) // key to indirect through any existing indexes
 	}
@@ -114,7 +114,7 @@ func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 // todo: GroupCombined
 
 // GroupStats computes the given stats function on the unique grouped indexes
-// produced by the [Groups] function, in the given [datafs] directory,
+// produced by the [Groups] function, in the given [tensorfs] directory,
 // applied to each of the tensors passed here.
 // It creates a "Stats" subdirectory in given directory, with
 // subdirectories with the name of each value tensor (if it does not
@@ -123,7 +123,7 @@ func GroupAll(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 // a String tensor with the unique values of each source [Groups] tensor,
 // and a aligned Float64 tensor with the statistics results for each such
 // unique group value. See the README.md file for a diagram of the results.
-func GroupStats(dir *datafs.Data, stat Stats, tsrs ...tensor.Tensor) error {
+func GroupStats(dir *tensorfs.Data, stat Stats, tsrs ...tensor.Tensor) error {
 	gd := dir.RecycleDir("Groups")
 	sd := dir.RecycleDir("Stats")
 	stnm := StripPackage(stat.String())
@@ -139,14 +139,14 @@ func GroupStats(dir *datafs.Data, stat Stats, tsrs ...tensor.Tensor) error {
 		sgd := sd.RecycleDir(gpnm)
 		gv := sgd.Item(gpnm)
 		if gv == nil {
-			gtsr := datafs.Value[string](sgd, gpnm, nv)
+			gtsr := tensorfs.Value[string](sgd, gpnm, nv)
 			for i, v := range vals {
 				gtsr.SetStringRow(metadata.Name(v), i, 0)
 			}
 		}
 		for _, tsr := range tsrs {
 			vd := sgd.RecycleDir(metadata.Name(tsr))
-			sv := datafs.Value[float64](vd, stnm, nv)
+			sv := tensorfs.Value[float64](vd, stnm, nv)
 			for i, v := range vals {
 				idx := tensor.AsIntSlice(v)
 				sg := tensor.NewRows(tsr.AsValues(), idx...)
@@ -160,13 +160,13 @@ func GroupStats(dir *datafs.Data, stat Stats, tsrs ...tensor.Tensor) error {
 
 // TableGroupStats runs [GroupStats] using standard [Stats]
 // on the given columns from given [table.Table].
-func TableGroupStats(dir *datafs.Data, stat Stats, dt *table.Table, columns ...string) error {
+func TableGroupStats(dir *tensorfs.Data, stat Stats, dt *table.Table, columns ...string) error {
 	return GroupStats(dir, stat, dt.ColumnList(columns...)...)
 }
 
 // GroupDescribe runs standard descriptive statistics on given tensor data
 // using [GroupStats] function, with [DescriptiveStats] list of stats.
-func GroupDescribe(dir *datafs.Data, tsrs ...tensor.Tensor) error {
+func GroupDescribe(dir *tensorfs.Data, tsrs ...tensor.Tensor) error {
 	for _, st := range DescriptiveStats {
 		err := GroupStats(dir, st, tsrs...)
 		if err != nil {
@@ -177,6 +177,6 @@ func GroupDescribe(dir *datafs.Data, tsrs ...tensor.Tensor) error {
 }
 
 // TableGroupDescribe runs [GroupDescribe] on the given columns from given [table.Table].
-func TableGroupDescribe(dir *datafs.Data, dt *table.Table, columns ...string) error {
+func TableGroupDescribe(dir *tensorfs.Data, dt *table.Table, columns ...string) error {
 	return GroupDescribe(dir, dt.ColumnList(columns...)...)
 }

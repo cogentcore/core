@@ -15,6 +15,7 @@ func init() {
 		"ConfigFromHeaders":      reflect.ValueOf(table.ConfigFromHeaders),
 		"ConfigFromTableHeaders": reflect.ValueOf(table.ConfigFromTableHeaders),
 		"DetectTableHeaders":     reflect.ValueOf(table.DetectTableHeaders),
+		"ErrLogNoNewRows":        reflect.ValueOf(&table.ErrLogNoNewRows).Elem(),
 		"Headers":                reflect.ValueOf(table.Headers),
 		"InferDataType":          reflect.ValueOf(table.InferDataType),
 		"New":                    reflect.ValueOf(table.New),

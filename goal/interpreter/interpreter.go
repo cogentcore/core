@@ -18,9 +18,9 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/goal"
-	"cogentcore.org/core/tensor/datafs"
 	_ "cogentcore.org/core/tensor/stats/metric"
 	_ "cogentcore.org/core/tensor/stats/stats"
+	"cogentcore.org/core/tensor/tensorfs"
 	_ "cogentcore.org/core/tensor/tmath"
 	"cogentcore.org/core/yaegicore/nogui"
 	"github.com/cogentcore/yaegi/interp"
@@ -80,7 +80,7 @@ func (in *Interpreter) Prompt() string {
 	dir := in.Goal.HostAndDir()
 	if in.Goal.TrState.MathMode {
 		pc = "#"
-		dir = datafs.CurDir.Path()
+		dir = tensorfs.CurDir.Path()
 	}
 	if dp == 0 {
 		return dir + " " + pc + " "

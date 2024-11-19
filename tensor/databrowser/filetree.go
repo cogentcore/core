@@ -18,8 +18,8 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
+	"cogentcore.org/core/tensor/tensorfs"
 	"cogentcore.org/core/texteditor/diffbrowser"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
@@ -94,10 +94,10 @@ func (fn *FileNode) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return res, fn.DefaultTooltipPos()
 }
 
-// DataFS returns the datafs representation of this item.
+// DataFS returns the tensorfs representation of this item.
 // returns nil if not a dataFS item.
-func DataFS(fn *filetree.Node) *datafs.Data {
-	dfs, ok := fn.FileRoot().FS.(*datafs.Data)
+func DataFS(fn *filetree.Node) *tensorfs.Data {
+	dfs, ok := fn.FileRoot().FS.(*tensorfs.Data)
 	if !ok {
 		return nil
 	}
@@ -105,7 +105,7 @@ func DataFS(fn *filetree.Node) *datafs.Data {
 	if errors.Log(err) != nil {
 		return nil
 	}
-	return dfi.(*datafs.Data)
+	return dfi.(*tensorfs.Data)
 }
 
 func (fn *FileNode) GetFileInfo() error {

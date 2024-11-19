@@ -64,7 +64,7 @@ The stats package also has the following standard normalization functions for tr
 
 ## Groups
 
-The `Groups` function (and `TableGroups` convenience function for `table.Table` columns) creates lists of indexes for each unique value in a 1D tensor, and `GroupStats` calls a stats function on those groups, thereby creating a "pivot table" that summarizes data in terms of the groups present within it. The data is stored in a [datafs](../datafs) data filesystem, which can be visualized and further manipulated.
+The `Groups` function (and `TableGroups` convenience function for `table.Table` columns) creates lists of indexes for each unique value in a 1D tensor, and `GroupStats` calls a stats function on those groups, thereby creating a "pivot table" that summarizes data in terms of the groups present within it. The data is stored in a [tensorfs](../tensorfs) data filesystem, which can be visualized and further manipulated.
 
 For example, with this data:
 ```
@@ -74,7 +74,7 @@ Alia    30     12
 Ben     20     10
 Ben     10     12
 ```
-The `Groups` function called on the `Person` column would create the following `datafs` structure:
+The `Groups` function called on the `Person` column would create the following `tensorfs` structure:
 ```
 Groups
     Person
@@ -82,7 +82,7 @@ Groups
         Ben:   [2,3]
     // other groups here if passed
 ```
-Then the `GroupStats` function operating on this `datafs` directory, using the `Score` and `Time` data and the `Mean` stat, followed by a second call with the `Sem` stat, would produce:
+Then the `GroupStats` function operating on this `tensorfs` directory, using the `Score` and `Time` data and the `Mean` stat, followed by a second call with the `Sem` stat, would produce:
 ```
 Stats
     Person
@@ -96,7 +96,7 @@ Stats
     // other groups here..
 ```
 
-The `Person` directory can be turned directly into a `table.Table` and plotted or otherwise used, in the `datafs` system and associated `databrowser`.
+The `Person` directory can be turned directly into a `table.Table` and plotted or otherwise used, in the `tensorfs` system and associated `databrowser`.
 
 See the [examples/planets](../examples/planets) example for an interactive exploration of data on exoplanets using the `Groups` functions.
 

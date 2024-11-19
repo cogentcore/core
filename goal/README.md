@@ -413,11 +413,11 @@ todo: huge amount of work needed to support complex numbers throughout!
 |  |  |`np.fft.ifft(a)` | `ifft(a)` | inverse Fourier transform of `a` |
 |  |  |`signal.resample(x, np.ceil(len(x)/q))` |  `decimate(x, q)` | downsample with low-pass filtering |
 
-## datafs
+## tensorfs
 
-The [datafs](../tensor/datafs) data filesystem provides a global filesystem-like workspace for storing tensor data, and Goal has special commands and functions to facilitate interacting with it. In an interactive `goal` shell, when you do `##` to switch into math mode, the prompt changes to show your current directory in the datafs, not the regular OS filesystem, and the final prompt character turns into a `#`.
+The [tensorfs](../tensor/tensorfs) data filesystem provides a global filesystem-like workspace for storing tensor data, and Goal has special commands and functions to facilitate interacting with it. In an interactive `goal` shell, when you do `##` to switch into math mode, the prompt changes to show your current directory in the tensorfs, not the regular OS filesystem, and the final prompt character turns into a `#`.
 
-Use `get` and `set` (aliases for `datafs.Get` and `datafs.Set`) to retrieve and store data in the datafs:
+Use `get` and `set` (aliases for `tensorfs.Get` and `tensorfs.Set`) to retrieve and store data in the tensorfs:
 
 * `x := get("path/to/item")` retrieves the tensor data value at given path, which can then be used directly in an expression or saved to a new variable as in this example.
 

@@ -295,9 +295,9 @@ func TestMath(t *testing.T) {
 		{"# if a[1,2] == 2 {", `if tmath.Equal(tensor.Reslice(a, 1, 2), tensor.NewIntScalar(2)).Bool1D(0) {`},
 		{"# for i := 0; i < 3; i++ {", `for i := tensor.Tensor(tensor.NewIntScalar(0)); tmath.Less(i, tensor.NewIntScalar(3)).Bool1D(0); tmath.Inc(i) {`},
 		{"# for i, v := range a {", `for i := 0; i < a.Len(); i++ { v := a .Float1D(i)`},
-		{`# x := get("item")`, `x := tensor.Tensor(datafs.Get("item"))`},
-		{`# set("item", x)`, `datafs.Set("item", x)`},
-		{`# set("item", 5)`, `datafs.Set("item", tensor.NewIntScalar(5))`},
+		{`# x := get("item")`, `x := tensor.Tensor(tensorfs.Get("item"))`},
+		{`# set("item", x)`, `tensorfs.Set("item", x)`},
+		{`# set("item", 5)`, `tensorfs.Set("item", tensor.NewIntScalar(5))`},
 		{`fmt.Println(#zeros(3,4)#)`, `fmt.Println(tensor.NewFloat64(3, 4))`},
 	}
 

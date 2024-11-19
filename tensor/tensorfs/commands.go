@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package datafs
+package tensorfs
 
 import (
 	"fmt"
@@ -18,8 +18,8 @@ var (
 	// CurDir is the current working directory.
 	CurDir *Data
 
-	// CurRoot is the current root datafs system.
-	// A default root datafs is created at startup.
+	// CurRoot is the current root tensorfs system.
+	// A default root tensorfs is created at startup.
 	CurRoot *Data
 )
 
@@ -34,7 +34,7 @@ func Record(tsr tensor.Tensor, name string) error {
 	return err // todo: could prompt about conficts, or always overwrite existing?
 }
 
-// Chdir changes the current working datafs directory to the named directory.
+// Chdir changes the current working tensorfs directory to the named directory.
 func Chdir(dir string) error {
 	if CurDir == nil {
 		CurDir = CurRoot

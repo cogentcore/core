@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
+	"cogentcore.org/core/tensor/tensorfs"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +25,7 @@ func TestGroup(t *testing.T) {
 		dt.Column("Name").SetStringRow(gp, i, 0)
 		dt.Column("Value").SetFloatRow(float64(i), i, 0)
 	}
-	dir, _ := datafs.NewDir("Group")
+	dir, _ := tensorfs.NewDir("Group")
 	err := TableGroups(dir, dt, "Name")
 	assert.NoError(t, err)
 

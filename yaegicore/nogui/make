@@ -8,5 +8,5 @@ command extract {
 
 yaegi extract fmt strconv strings math time log/slog reflect
 
-extract math32 tensor tensor/tmath tensor/table tensor/vector tensor/matrix tensor/stats/stats tensor/stats/metric tensor/datafs base/errors base/fsx base/reflectx base/labels base/fileinfo base/num goal/goalib 
+extract math32 tensor tensor/tmath tensor/table tensor/vector tensor/matrix tensor/stats/stats tensor/stats/metric tensor/tensorfs base/errors base/fsx base/reflectx base/labels base/fileinfo base/num goal/goalib 
 

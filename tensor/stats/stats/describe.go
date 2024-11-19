@@ -9,8 +9,8 @@ import (
 
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/datafs"
 	"cogentcore.org/core/tensor/table"
+	"cogentcore.org/core/tensor/tensorfs"
 )
 
 // DescriptiveStats are the standard descriptive stats used in Describe function.
@@ -18,12 +18,12 @@ import (
 var DescriptiveStats = []Stats{StatCount, StatMean, StatStd, StatSem, StatMin, StatMax, StatQ1, StatMedian, StatQ3}
 
 // Describe adds standard descriptive statistics for given tensor
-// to the given [datafs] directory, adding a directory for each tensor
+// to the given [tensorfs] directory, adding a directory for each tensor
 // and result tensor stats for each result.
 // This is an easy way to provide a comprehensive description of data.
 // The [DescriptiveStats] list is: [Count], [Mean], [Std], [Sem],
 // [Min], [Max], [Q1], [Median], [Q3]
-func Describe(dir *datafs.Data, tsrs ...tensor.Tensor) {
+func Describe(dir *tensorfs.Data, tsrs ...tensor.Tensor) {
 	dd := dir.RecycleDir("Describe")
 	for i, tsr := range tsrs {
 		nr := tsr.DimSize(0)
@@ -37,7 +37,7 @@ func Describe(dir *datafs.Data, tsrs ...tensor.Tensor) {
 		td, _ := dd.Mkdir(nm)
 		for _, st := range DescriptiveStats {
 			stnm := st.String()
-			sv := datafs.Scalar[float64](td, stnm)
+			sv := tensorfs.Scalar[float64](td, stnm)
 			stout := st.Call(tsr)
 			sv.CopyFrom(stout)
 		}
@@ -45,12 +45,12 @@ func Describe(dir *datafs.Data, tsrs ...tensor.Tensor) {
 }
 
 // DescribeTable runs [Describe] on given columns in table.
-func DescribeTable(dir *datafs.Data, dt *table.Table, columns ...string) {
+func DescribeTable(dir *tensorfs.Data, dt *table.Table, columns ...string) {
 	Describe(dir, dt.ColumnList(columns...)...)
 }
 
 // DescribeTableAll runs [Describe] on all numeric columns in given table.
-func DescribeTableAll(dir *datafs.Data, dt *table.Table) {
+func DescribeTableAll(dir *tensorfs.Data, dt *table.Table) {
 	var cols []string
 	for i, cl := range dt.Columns.Values {
 		if !cl.IsString() {
