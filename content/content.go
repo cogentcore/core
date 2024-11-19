@@ -292,14 +292,16 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 }
 
 func (ct *Content) MenuSearch(items *[]core.ChooserItem) {
-	for _, pg := range ct.pages {
-		*items = append(*items, core.ChooserItem{
+	newItems := make([]core.ChooserItem, len(ct.pages))
+	for i, pg := range ct.pages {
+		newItems[i] = core.ChooserItem{
 			Value: pg,
 			Text:  pg.Name,
 			Icon:  icons.Article,
 			Func: func() {
 				ct.Open(pg.URL)
 			},
-		})
+		}
 	}
+	*items = append(newItems, *items...)
 }
