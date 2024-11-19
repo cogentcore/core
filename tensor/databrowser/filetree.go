@@ -83,7 +83,7 @@ func (fn *FileNode) WidgetTooltip(pos image.Point) (string, image.Point) {
 		ofn := fn.AsNode()
 		switch fn.Info.Known {
 		case fileinfo.Number, fileinfo.String:
-			dv := DataFS(ofn)
+			dv := TensorFS(ofn)
 			v := dv.AsString()
 			if res != "" {
 				res += " "
@@ -94,9 +94,9 @@ func (fn *FileNode) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return res, fn.DefaultTooltipPos()
 }
 
-// DataFS returns the tensorfs representation of this item.
+// TensorFS returns the tensorfs representation of this item.
 // returns nil if not a dataFS item.
-func DataFS(fn *filetree.Node) *tensorfs.Data {
+func TensorFS(fn *filetree.Node) *tensorfs.Data {
 	dfs, ok := fn.FileRoot().FS.(*tensorfs.Data)
 	if !ok {
 		return nil
@@ -113,7 +113,7 @@ func (fn *FileNode) GetFileInfo() error {
 	if fn.FileRoot().FS == nil {
 		return err
 	}
-	d := DataFS(fn.AsNode())
+	d := TensorFS(fn.AsNode())
 	if d != nil {
 		fn.Info.Known = d.KnownFileInfo()
 		fn.Info.Cat = fileinfo.Data
@@ -142,16 +142,16 @@ func (fn *FileNode) OpenFile() error {
 	df := fsx.DirAndFile(string(fn.Filepath))
 	switch {
 	case fn.IsDir():
-		d := DataFS(ofn)
+		d := TensorFS(ofn)
 		dt := d.GetDirTable(nil)
 		ts.TensorTable(df, dt)
 	case fn.Info.Cat == fileinfo.Data:
 		switch fn.Info.Known {
 		case fileinfo.Tensor:
-			d := DataFS(ofn)
+			d := TensorFS(ofn)
 			ts.TensorEditor(df, d.Data)
 		case fileinfo.Number:
-			dv := DataFS(ofn)
+			dv := TensorFS(ofn)
 			v := dv.AsFloat32()
 			d := core.NewBody(df)
 			core.NewText(d).SetType(core.TextSupporting).SetText(df)
@@ -164,7 +164,7 @@ func (fn *FileNode) OpenFile() error {
 			})
 			d.RunDialog(fn)
 		case fileinfo.String:
-			dv := DataFS(ofn)
+			dv := TensorFS(ofn)
 			v := dv.AsString()
 			d := core.NewBody(df)
 			core.NewText(d).SetType(core.TextSupporting).SetText(df)
@@ -248,9 +248,9 @@ func (fn *FileNode) PlotFile() {
 	if ts == nil {
 		return
 	}
-	d := DataFS(fn.AsNode())
+	d := TensorFS(fn.AsNode())
 	if d != nil {
-		ts.PlotDataFS(d)
+		ts.PlotTensorFS(d)
 		return
 	}
 	if fn.Info.Cat != fileinfo.Data {

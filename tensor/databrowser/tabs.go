@@ -42,9 +42,9 @@ type Tabber interface {
 	// PlotTable recycles a tab with a Plot of given [table.Table].
 	PlotTable(label string, dt *table.Table) *plotcore.PlotEditor
 
-	// PlotDataFS recycles a tab with a Plot of given [tensorfs.Data],
+	// PlotTensorFS recycles a tab with a Plot of given [tensorfs.Data],
 	// automatically using the Dir/File name of the data node for the label.
-	PlotDataFS(dfs *tensorfs.Data) *plotcore.PlotEditor
+	PlotTensorFS(dfs *tensorfs.Data) *plotcore.PlotEditor
 
 	// GoUpdatePlot calls GoUpdatePlot on plot at tab with given name.
 	// Does nothing if tab name doesn't exist (returns nil).
@@ -184,8 +184,8 @@ func (ts *Tabs) PlotTable(label string, dt *table.Table) *plotcore.PlotEditor {
 	return pl
 }
 
-// PlotDataFS recycles a tab with a Plot of given [tensorfs.Data].
-func (ts *Tabs) PlotDataFS(dfs *tensorfs.Data) *plotcore.PlotEditor {
+// PlotTensorFS recycles a tab with a Plot of given [tensorfs.Data].
+func (ts *Tabs) PlotTensorFS(dfs *tensorfs.Data) *plotcore.PlotEditor {
 	label := fsx.DirAndFile(dfs.Path()) + " Plot"
 	if dfs.IsDir() {
 		return ts.PlotTable(label, dfs.GetDirTable(nil))
