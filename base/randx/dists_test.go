@@ -29,7 +29,7 @@ func TestGaussianGen(t *testing.T) {
 	}
 	dir, _ := tensorfs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
-	desc := dir.GetDirTable(nil)
+	desc := tensorfs.DirTable(dir, nil)
 	// fmt.Println(desc.Columns.Keys)
 
 	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
@@ -59,7 +59,7 @@ func TestBinomialGen(t *testing.T) {
 	}
 	dir, _ := tensorfs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
-	desc := dir.GetDirTable(nil)
+	desc := tensorfs.DirTable(dir, nil)
 	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
 	actStd := desc.Column("Val/Std").FloatRow(0, 0)
 	actMin := desc.Column("Val/Min").FloatRow(0, 0)
@@ -95,7 +95,7 @@ func TestPoissonGen(t *testing.T) {
 	}
 	dir, _ := tensorfs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
-	desc := dir.GetDirTable(nil)
+	desc := tensorfs.DirTable(dir, nil)
 	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
 	actStd := desc.Column("Val/Std").FloatRow(0, 0)
 	actMin := desc.Column("Val/Min").FloatRow(0, 0)
@@ -133,7 +133,7 @@ func TestGammaGen(t *testing.T) {
 	}
 	dir, _ := tensorfs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
-	desc := dir.GetDirTable(nil)
+	desc := tensorfs.DirTable(dir, nil)
 	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
 	actStd := desc.Column("Val/Std").FloatRow(0, 0)
 	// actMin := desc.Column("Val/Min").FloatRow(0, 0)
@@ -164,7 +164,7 @@ func TestBetaGen(t *testing.T) {
 	}
 	dir, _ := tensorfs.NewDir("Desc")
 	stats.DescribeTableAll(dir, dt)
-	desc := dir.GetDirTable(nil)
+	desc := tensorfs.DirTable(dir, nil)
 	actMean := desc.Column("Val/Mean").FloatRow(0, 0)
 	actStd := desc.Column("Val/Std").FloatRow(0, 0)
 	// actMin := desc.Column("Val/Min").FloatRow(0, 0)
