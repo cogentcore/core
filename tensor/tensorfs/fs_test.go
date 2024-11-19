@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func makeTestData(t *testing.T) *Data {
+func makeTestNode(t *testing.T) *Node {
 	dfs, err := NewDir("root")
 	assert.NoError(t, err)
 	net, err := dfs.Mkdir("network")
@@ -24,7 +24,7 @@ func makeTestData(t *testing.T) *Data {
 }
 
 func TestFS(t *testing.T) {
-	dfs := makeTestData(t)
+	dfs := makeTestNode(t)
 	dirs, err := dfs.ReadDir(".")
 	assert.NoError(t, err)
 	for _, d := range dirs {

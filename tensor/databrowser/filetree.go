@@ -84,7 +84,7 @@ func (fn *FileNode) WidgetTooltip(pos image.Point) (string, image.Point) {
 		switch fn.Info.Known {
 		case fileinfo.Number, fileinfo.String:
 			dv := TensorFS(ofn)
-			v := dv.AsString()
+			v := dv.String()
 			if res != "" {
 				res += " "
 			}
@@ -96,8 +96,8 @@ func (fn *FileNode) WidgetTooltip(pos image.Point) (string, image.Point) {
 
 // TensorFS returns the tensorfs representation of this item.
 // returns nil if not a dataFS item.
-func TensorFS(fn *filetree.Node) *tensorfs.Data {
-	dfs, ok := fn.FileRoot().FS.(*tensorfs.Data)
+func TensorFS(fn *filetree.Node) *tensorfs.Node {
+	dfs, ok := fn.FileRoot().FS.(*tensorfs.Node)
 	if !ok {
 		return nil
 	}
@@ -105,7 +105,7 @@ func TensorFS(fn *filetree.Node) *tensorfs.Data {
 	if errors.Log(err) != nil {
 		return nil
 	}
-	return dfi.(*tensorfs.Data)
+	return dfi.(*tensorfs.Node)
 }
 
 func (fn *FileNode) GetFileInfo() error {
@@ -143,36 +143,36 @@ func (fn *FileNode) OpenFile() error {
 	switch {
 	case fn.IsDir():
 		d := TensorFS(ofn)
-		dt := d.GetDirTable(nil)
+		dt := tensorfs.DirTable(d, nil)
 		ts.TensorTable(df, dt)
 	case fn.Info.Cat == fileinfo.Data:
 		switch fn.Info.Known {
 		case fileinfo.Tensor:
 			d := TensorFS(ofn)
-			ts.TensorEditor(df, d.Data)
+			ts.TensorEditor(df, d.Tensor)
 		case fileinfo.Number:
 			dv := TensorFS(ofn)
-			v := dv.AsFloat32()
+			v := dv.Tensor.Float1D(0)
 			d := core.NewBody(df)
 			core.NewText(d).SetType(core.TextSupporting).SetText(df)
-			sp := core.NewSpinner(d).SetValue(v)
+			sp := core.NewSpinner(d).SetValue(float32(v))
 			d.AddBottomBar(func(bar *core.Frame) {
 				d.AddCancel(bar)
 				d.AddOK(bar).OnClick(func(e events.Event) {
-					dv.SetFloat32(sp.Value)
+					dv.Tensor.SetFloat1D(float64(sp.Value), 0)
 				})
 			})
 			d.RunDialog(fn)
 		case fileinfo.String:
 			dv := TensorFS(ofn)
-			v := dv.AsString()
+			v := dv.Tensor.String1D(0)
 			d := core.NewBody(df)
 			core.NewText(d).SetType(core.TextSupporting).SetText(df)
 			tf := core.NewTextField(d).SetText(v)
 			d.AddBottomBar(func(bar *core.Frame) {
 				d.AddCancel(bar)
 				d.AddOK(bar).OnClick(func(e events.Event) {
-					dv.SetString(tf.Text())
+					dv.Tensor.SetString1D(tf.Text(), 0)
 				})
 			})
 			d.RunDialog(fn)

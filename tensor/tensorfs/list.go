@@ -20,24 +20,28 @@ const (
 
 // todo: list options string
 
-func (d *Data) String() string {
-	if !d.IsDir() {
-		return d.Data.Label()
+func (nd *Node) String() string {
+	if !nd.IsDir() {
+		return nd.Tensor.Label()
 	}
-	return d.List(Short, DirOnly)
+	return nd.List(Short, DirOnly)
 }
 
-func (d *Data) List(long, recursive bool) string {
+// List returns a listing of nodes in the given directory.
+//   - long = include detailed information about each node, vs just the name.
+//   - recursive = descend into subdirectories.
+func (dir *Node) List(long, recursive bool) string {
 	if long {
-		return d.ListLong(recursive, 0)
+		return dir.ListLong(recursive, 0)
 	}
-	return d.ListShort(recursive, 0)
+	return dir.ListShort(recursive, 0)
 }
 
-func (d *Data) ListShort(recursive bool, ident int) string {
+// ListShort returns a name-only listing of given directory.
+func (dir *Node) ListShort(recursive bool, ident int) string {
 	var b strings.Builder
-	items := d.ItemsFunc(nil)
-	for _, it := range items {
+	nodes, _ := dir.Nodes()
+	for _, it := range nodes {
 		b.WriteString(indent.Tabs(ident))
 		if it.IsDir() {
 			if recursive {
@@ -52,10 +56,11 @@ func (d *Data) ListShort(recursive bool, ident int) string {
 	return b.String()
 }
 
-func (d *Data) ListLong(recursive bool, ident int) string {
+// ListLong returns a detailed listing of given directory.
+func (dir *Node) ListLong(recursive bool, ident int) string {
 	var b strings.Builder
-	items := d.ItemsFunc(nil)
-	for _, it := range items {
+	nodes, _ := dir.Nodes()
+	for _, it := range nodes {
 		b.WriteString(indent.Tabs(ident))
 		if it.IsDir() {
 			b.WriteString(it.name + "/\n")

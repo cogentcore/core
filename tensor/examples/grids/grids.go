@@ -27,7 +27,10 @@ func main() {
 	b := core.NewBody("grids")
 	tv := core.NewTabs(b)
 	nt, _ := tv.NewTab("Patterns")
-	etv := tensorcore.NewTable(nt).SetTable(pats)
+	etv := tensorcore.NewTable(nt)
+	etv.TensorDisplay.GridMinSize = 24
+	etv.TensorDisplay.GridMaxSize = 48
+	etv.SetTable(pats)
 	b.AddTopBar(func(bar *core.Frame) {
 		core.NewToolbar(bar).Maker(etv.MakeToolbar)
 	})

@@ -41,16 +41,16 @@ const (
 
 type Sim struct {
 	// Root is the root data dir.
-	Root *tensorfs.Data
+	Root *tensorfs.Node
 
 	// Config has config data.
-	Config *tensorfs.Data
+	Config *tensorfs.Node
 
 	// Stats has all stats data.
-	Stats *tensorfs.Data
+	Stats *tensorfs.Node
 
 	// Current has current value of all stats
-	Current *tensorfs.Data
+	Current *tensorfs.Node
 
 	// StatFuncs are statistics functions, per stat, handles everything.
 	StatFuncs []func(ltime Times, lphase LoopPhase)
@@ -160,7 +160,7 @@ func (ss *Sim) ConfigStats() {
 		}
 		switch ltime {
 		case Trial:
-			sse := ss.Current.Item("SSE").AsFloat64()
+			sse := tensorfs.Scalar[float64](ss.Current, "SSE").Float1D(0)
 			stat := 1.0
 			if sse < 0.5 {
 				stat = 0
@@ -213,6 +213,7 @@ func main() {
 	ss.ConfigAll()
 	ss.Run()
 
-	databrowser.NewBasicWindow(ss.Root, "Root")
+	b, _ := databrowser.NewBasicWindow(ss.Root, "Root")
+	b.RunWindow()
 	core.Wait()
 }

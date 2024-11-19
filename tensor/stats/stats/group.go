@@ -6,6 +6,7 @@ package stats
 
 import (
 	"strconv"
+	"strings"
 
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/tensor"
@@ -30,9 +31,9 @@ import (
 // rows, indirected through any existing indexes on the inputs, so that
 // the results can be used directly as Indexes into the corresponding tensor data.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
-func Groups(dir *tensorfs.Data, tsrs ...tensor.Tensor) error {
+func Groups(dir *tensorfs.Node, tsrs ...tensor.Tensor) error {
 	gd := dir.RecycleDir("Groups")
-	makeIdxs := func(dir *tensorfs.Data, srt *tensor.Rows, val string, start, r int) {
+	makeIdxs := func(dir *tensorfs.Node, srt *tensor.Rows, val string, start, r int) {
 		n := r - start
 		it := tensorfs.Value[int](dir, val, n)
 		for j := range n {
@@ -85,7 +86,7 @@ func Groups(dir *tensorfs.Data, tsrs ...tensor.Tensor) error {
 }
 
 // TableGroups runs [Groups] on the given columns from given [table.Table].
-func TableGroups(dir *tensorfs.Data, dt *table.Table, columns ...string) error {
+func TableGroups(dir *tensorfs.Node, dt *table.Table, columns ...string) error {
 	dv := table.NewView(dt)
 	// important for consistency across columns, to do full outer product sort first.
 	dv.SortColumns(tensor.Ascending, tensor.StableSort, columns...)
@@ -96,7 +97,7 @@ func TableGroups(dir *tensorfs.Data, dt *table.Table, columns ...string) error {
 // into an "All/All" tensor in the given [tensorfs], which can then
 // be used with [GroupStats] to generate summary statistics across
 // all the data. See [Groups] for more general documentation.
-func GroupAll(dir *tensorfs.Data, tsrs ...tensor.Tensor) error {
+func GroupAll(dir *tensorfs.Node, tsrs ...tensor.Tensor) error {
 	gd := dir.RecycleDir("Groups")
 	tsr := tensor.AsRows(tsrs[0])
 	nr := tsr.NumRows()
@@ -119,15 +120,15 @@ func GroupAll(dir *tensorfs.Data, tsrs ...tensor.Tensor) error {
 // It creates a "Stats" subdirectory in given directory, with
 // subdirectories with the name of each value tensor (if it does not
 // yet exist), and then creates a subdirectory within that
-// for the statistic name.  Within that statistic directory, it creates
+// for the statistic name. Within that statistic directory, it creates
 // a String tensor with the unique values of each source [Groups] tensor,
 // and a aligned Float64 tensor with the statistics results for each such
 // unique group value. See the README.md file for a diagram of the results.
-func GroupStats(dir *tensorfs.Data, stat Stats, tsrs ...tensor.Tensor) error {
+func GroupStats(dir *tensorfs.Node, stat Stats, tsrs ...tensor.Tensor) error {
 	gd := dir.RecycleDir("Groups")
 	sd := dir.RecycleDir("Stats")
 	stnm := StripPackage(stat.String())
-	groups := gd.ItemsFunc(nil)
+	groups, _ := gd.Nodes()
 	for _, gp := range groups {
 		gpnm := gp.Name()
 		ggd := gd.RecycleDir(gpnm)
@@ -137,7 +138,7 @@ func GroupStats(dir *tensorfs.Data, stat Stats, tsrs ...tensor.Tensor) error {
 			continue
 		}
 		sgd := sd.RecycleDir(gpnm)
-		gv := sgd.Item(gpnm)
+		gv := sgd.Node(gpnm)
 		if gv == nil {
 			gtsr := tensorfs.Value[string](sgd, gpnm, nv)
 			for i, v := range vals {
@@ -160,13 +161,13 @@ func GroupStats(dir *tensorfs.Data, stat Stats, tsrs ...tensor.Tensor) error {
 
 // TableGroupStats runs [GroupStats] using standard [Stats]
 // on the given columns from given [table.Table].
-func TableGroupStats(dir *tensorfs.Data, stat Stats, dt *table.Table, columns ...string) error {
+func TableGroupStats(dir *tensorfs.Node, stat Stats, dt *table.Table, columns ...string) error {
 	return GroupStats(dir, stat, dt.ColumnList(columns...)...)
 }
 
 // GroupDescribe runs standard descriptive statistics on given tensor data
 // using [GroupStats] function, with [DescriptiveStats] list of stats.
-func GroupDescribe(dir *tensorfs.Data, tsrs ...tensor.Tensor) error {
+func GroupDescribe(dir *tensorfs.Node, tsrs ...tensor.Tensor) error {
 	for _, st := range DescriptiveStats {
 		err := GroupStats(dir, st, tsrs...)
 		if err != nil {
@@ -177,6 +178,38 @@ func GroupDescribe(dir *tensorfs.Data, tsrs ...tensor.Tensor) error {
 }
 
 // TableGroupDescribe runs [GroupDescribe] on the given columns from given [table.Table].
-func TableGroupDescribe(dir *tensorfs.Data, dt *table.Table, columns ...string) error {
+func TableGroupDescribe(dir *tensorfs.Node, dt *table.Table, columns ...string) error {
 	return GroupDescribe(dir, dt.ColumnList(columns...)...)
+}
+
+// GroupStatsAsTable returns the results from [GroupStats] in given directory
+// as a [table.Table], using [tensorfs.DirTable] function.
+func GroupStatsAsTable(dir *tensorfs.Node) *table.Table {
+	return tensorfs.DirTable(dir.Node("Stats"), nil)
+}
+
+// GroupStatsAsTableNoStatName returns the results from [GroupStats]
+// in given directory as a [table.Table], using [tensorfs.DirTable] function.
+// Column names are updated to not include the stat name, if there is only
+// one statistic such that the resulting name will still be unique.
+// Otherwise, column names are Value/Stat.
+func GroupStatsAsTableNoStatName(dir *tensorfs.Node) *table.Table {
+	dt := tensorfs.DirTable(dir.Node("Stats"), nil)
+	cols := make(map[string]string)
+	for _, nm := range dt.Columns.Keys {
+		vn := nm
+		si := strings.Index(nm, "/")
+		if si > 0 {
+			vn = nm[:si]
+		}
+		if _, exists := cols[vn]; exists {
+			continue
+		}
+		cols[vn] = nm
+	}
+	for k, v := range cols {
+		ci := dt.Columns.IndexByKey(v)
+		dt.Columns.RenameIndex(ci, k)
+	}
+	return dt
 }

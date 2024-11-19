@@ -16,11 +16,11 @@ import (
 
 var (
 	// CurDir is the current working directory.
-	CurDir *Data
+	CurDir *Node
 
 	// CurRoot is the current root tensorfs system.
 	// A default root tensorfs is created at startup.
-	CurRoot *Data
+	CurRoot *Node
 )
 
 func init() {
@@ -30,7 +30,7 @@ func init() {
 
 // Record saves given tensor to current directory with given name.
 func Record(tsr tensor.Tensor, name string) error {
-	_, err := CurDir.NewData(tsr, name)
+	_, err := NewForTensor(CurDir, tsr, name)
 	return err // todo: could prompt about conficts, or always overwrite existing?
 }
 
@@ -53,7 +53,7 @@ func Chdir(dir string) error {
 
 // Mkdir creates a new directory with the specified name
 // in the current directory.
-func Mkdir(dir string) *Data {
+func Mkdir(dir string) *Node {
 	if CurDir == nil {
 		CurDir = CurRoot
 	}
@@ -95,10 +95,10 @@ func List(opts ...string) error {
 	return nil
 }
 
-// Get returns the data item as a tensor at given path
-// relative to the current working directory.
-// This is the direct pointer to the data item, so changes
-// to it will change the data item. Clone the data to make
+// Get returns the tensor value at given path relative to the
+// current working directory.
+// This is the direct pointer to the node, so changes
+// to it will change the node. Clone the tensor to make
 // a new copy disconnected from the original.
 func Get(name string) tensor.Tensor {
 	if CurDir == nil {
@@ -109,23 +109,22 @@ func Get(name string) tensor.Tensor {
 		errors.Log(err)
 		return nil
 	}
-	d, err := CurDir.ItemAtPath(name)
+	nd, err := CurDir.NodeAtPath(name)
 	if errors.Log(err) != nil {
 		return nil
 	}
-	if d.IsDir() {
-		err := &fs.PathError{Op: "Get", Path: name, Err: errors.New("item is a directory, not a data item")}
+	if nd.IsDir() {
+		err := &fs.PathError{Op: "Get", Path: name, Err: errors.New("node is a directory, not a data node")}
 		errors.Log(err)
 		return nil
 	}
-	return d.Data
+	return nd.Tensor
 }
 
-// Set sets tensor data item to given data item name or path
-// relative to the current working directory.
-// If the item already exists, its previous data tensor is
-// updated to the given one; if it doesn't, then a new data
-// item is created.
+// Set sets tensor to given name or path relative to the
+// current working directory.
+// If the node already exists, its previous tensor is updated to the
+// given one; if it doesn't, then a new node is created.
 func Set(name string, tsr tensor.Tensor) error {
 	if CurDir == nil {
 		CurDir = CurRoot
@@ -134,13 +133,13 @@ func Set(name string, tsr tensor.Tensor) error {
 		err := &fs.PathError{Op: "Set", Path: name, Err: errors.New("name must not be empty")}
 		return errors.Log(err)
 	}
-	itm, err := CurDir.ItemAtPath(name)
+	itm, err := CurDir.NodeAtPath(name)
 	if err == nil {
 		if itm.IsDir() {
-			err := &fs.PathError{Op: "Set", Path: name, Err: errors.New("existing item is a directory, not a data item")}
+			err := &fs.PathError{Op: "Set", Path: name, Err: errors.New("existing node is a directory, not a data node")}
 			return errors.Log(err)
 		}
-		itm.Data = tsr
+		itm.Tensor = tsr
 		return nil
 	}
 	cd := CurDir
@@ -152,6 +151,6 @@ func Set(name string, tsr tensor.Tensor) error {
 		}
 		cd = d
 	}
-	_, err = cd.NewData(tsr, name)
+	_, err = NewForTensor(cd, tsr, name)
 	return errors.Log(err)
 }

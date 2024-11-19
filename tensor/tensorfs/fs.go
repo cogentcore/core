@@ -11,44 +11,45 @@ import (
 	"slices"
 	"time"
 
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fsx"
 )
 
-// fs.go contains all the io/fs interface implementations
+// fs.go contains all the io/fs interface implementations, and other fs functionality.
 
-// Open opens the given data Value within this tensorfs filesystem.
-func (d *Data) Open(name string) (fs.File, error) {
-	itm, err := d.ItemAtPath(name)
+// Open opens the given node at given path within this tensorfs filesystem.
+func (nd *Node) Open(name string) (fs.File, error) {
+	itm, err := nd.NodeAtPath(name)
 	if err != nil {
 		return nil, err
 	}
 	if itm.IsDir() {
-		return &DirFile{File: File{Reader: *bytes.NewReader(itm.Bytes()), Data: itm}}, nil
+		return &DirFile{File: File{Reader: *bytes.NewReader(itm.Bytes()), Node: itm}}, nil
 	}
-	return &File{Reader: *bytes.NewReader(itm.Bytes()), Data: itm}, nil
+	return &File{Reader: *bytes.NewReader(itm.Bytes()), Node: itm}, nil
 }
 
 // Stat returns a FileInfo describing the file.
 // If there is an error, it should be of type *PathError.
-func (d *Data) Stat(name string) (fs.FileInfo, error) {
-	return d.ItemAtPath(name)
+func (nd *Node) Stat(name string) (fs.FileInfo, error) {
+	return nd.NodeAtPath(name)
 }
 
 // Sub returns a data FS corresponding to the subtree rooted at dir.
-func (d *Data) Sub(dir string) (fs.FS, error) {
-	if err := d.mustDir("Sub", dir); err != nil {
+func (nd *Node) Sub(dir string) (fs.FS, error) {
+	if err := nd.mustDir("Sub", dir); err != nil {
 		return nil, err
 	}
 	if !fs.ValidPath(dir) {
 		return nil, &fs.PathError{Op: "Sub", Path: dir, Err: errors.New("invalid name")}
 	}
-	if dir == "." || dir == "" || dir == d.name {
-		return d, nil
+	if dir == "." || dir == "" || dir == nd.name {
+		return nd, nil
 	}
 	cd := dir
-	cur := d
+	cur := nd
 	root, rest := fsx.SplitRootPathFS(dir)
-	if root == "." || root == d.name {
+	if root == "." || root == nd.name {
 		cd = rest
 	}
 	for {
@@ -73,12 +74,12 @@ func (d *Data) Sub(dir string) (fs.FS, error) {
 
 // ReadDir returns the contents of the given directory within this filesystem.
 // Use "." (or "") to refer to the current directory.
-func (d *Data) ReadDir(dir string) ([]fs.DirEntry, error) {
-	sd, err := d.DirAtPath(dir)
+func (nd *Node) ReadDir(dir string) ([]fs.DirEntry, error) {
+	sd, err := nd.DirAtPath(dir)
 	if err != nil {
 		return nil, err
 	}
-	names := sd.DirNamesAlpha()
+	names := sd.dirNamesAlpha()
 	ents := make([]fs.DirEntry, len(names))
 	for i, nm := range names {
 		ents[i] = sd.Dir.At(nm)
@@ -93,61 +94,86 @@ func (d *Data) ReadDir(dir string) ([]fs.DirEntry, error) {
 //
 // The caller is permitted to modify the returned byte slice.
 // This method should return a copy of the underlying data.
-func (d *Data) ReadFile(name string) ([]byte, error) {
-	itm, err := d.ItemAtPath(name)
+func (nd *Node) ReadFile(name string) ([]byte, error) {
+	itm, err := nd.NodeAtPath(name)
 	if err != nil {
 		return nil, err
 	}
 	if itm.IsDir() {
-		return nil, &fs.PathError{Op: "ReadFile", Path: name, Err: errors.New("Item is a directory")}
+		return nil, &fs.PathError{Op: "ReadFile", Path: name, Err: errors.New("Node is a directory")}
 	}
 	return slices.Clone(itm.Bytes()), nil
 }
 
-///////////////////////////////
-// FileInfo interface:
+//////// FileInfo interface:
 
-func (d *Data) Name() string { return d.name }
+func (nd *Node) Name() string { return nd.name }
 
 // Size returns the size of known data Values, or it uses
 // the Sizer interface, otherwise returns 0.
-func (d *Data) Size() int64 {
-	if d.Data == nil {
+func (nd *Node) Size() int64 {
+	if nd.Tensor == nil {
 		return 0
 	}
-	return d.Data.AsValues().Sizeof()
+	return nd.Tensor.AsValues().Sizeof()
 }
 
-func (d *Data) IsDir() bool {
-	return d.Dir != nil
+func (nd *Node) IsDir() bool {
+	return nd.Dir != nil
 }
 
-func (d *Data) ModTime() time.Time {
-	return d.modTime
+func (nd *Node) ModTime() time.Time {
+	return nd.modTime
 }
 
-func (d *Data) Mode() fs.FileMode {
-	if d.IsDir() {
+func (nd *Node) Mode() fs.FileMode {
+	if nd.IsDir() {
 		return 0755 | fs.ModeDir
 	}
 	return 0444
 }
 
 // Sys returns the Dir or Value
-func (d *Data) Sys() any {
-	if d.Data != nil {
-		return d.Data
+func (nd *Node) Sys() any {
+	if nd.Tensor != nil {
+		return nd.Tensor
 	}
-	return d.Dir
+	return nd.Dir
 }
 
-///////////////////////////////
-// DirEntry interface
+//////// DirEntry interface
 
-func (d *Data) Type() fs.FileMode {
-	return d.Mode().Type()
+func (nd *Node) Type() fs.FileMode {
+	return nd.Mode().Type()
 }
 
-func (d *Data) Info() (fs.FileInfo, error) {
-	return d, nil
+func (nd *Node) Info() (fs.FileInfo, error) {
+	return nd, nil
+}
+
+//////// Misc
+
+func (nd *Node) KnownFileInfo() fileinfo.Known {
+	if nd.Tensor == nil {
+		return fileinfo.Unknown
+	}
+	tsr := nd.Tensor
+	if tsr.Len() > 1 {
+		return fileinfo.Tensor
+	}
+	// scalars by type
+	if tsr.IsString() {
+		return fileinfo.String
+	}
+	return fileinfo.Number
+}
+
+// Bytes returns the byte-wise representation of the data Value.
+// This is the actual underlying data, so make a copy if it can be
+// unintentionally modified or retained more than for immediate use.
+func (nd *Node) Bytes() []byte {
+	if nd.Tensor == nil || nd.Tensor.NumDims() == 0 || nd.Tensor.Len() == 0 {
+		return nil
+	}
+	return nd.Tensor.AsValues().Bytes()
 }

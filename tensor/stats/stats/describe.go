@@ -23,7 +23,7 @@ var DescriptiveStats = []Stats{StatCount, StatMean, StatStd, StatSem, StatMin, S
 // This is an easy way to provide a comprehensive description of data.
 // The [DescriptiveStats] list is: [Count], [Mean], [Std], [Sem],
 // [Min], [Max], [Q1], [Median], [Q3]
-func Describe(dir *tensorfs.Data, tsrs ...tensor.Tensor) {
+func Describe(dir *tensorfs.Node, tsrs ...tensor.Tensor) {
 	dd := dir.RecycleDir("Describe")
 	for i, tsr := range tsrs {
 		nr := tsr.DimSize(0)
@@ -45,12 +45,12 @@ func Describe(dir *tensorfs.Data, tsrs ...tensor.Tensor) {
 }
 
 // DescribeTable runs [Describe] on given columns in table.
-func DescribeTable(dir *tensorfs.Data, dt *table.Table, columns ...string) {
+func DescribeTable(dir *tensorfs.Node, dt *table.Table, columns ...string) {
 	Describe(dir, dt.ColumnList(columns...)...)
 }
 
 // DescribeTableAll runs [Describe] on all numeric columns in given table.
-func DescribeTableAll(dir *tensorfs.Data, dt *table.Table) {
+func DescribeTableAll(dir *tensorfs.Node, dt *table.Table) {
 	var cols []string
 	for i, cl := range dt.Columns.Values {
 		if !cl.IsString() {

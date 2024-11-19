@@ -28,12 +28,11 @@ var csv embed.FS
 // AnalyzePlanets analyzes planets.csv data following some of the examples
 // in pandas from:
 // https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html
-func AnalyzePlanets(dir *tensorfs.Data) {
+func AnalyzePlanets(dir *tensorfs.Node) {
 	Planets := table.New("planets")
 	Planets.OpenFS(csv, "planets.csv", tensor.Comma)
 
 	vals := []string{"number", "orbital_period", "mass", "distance", "year"}
-
 	stats.DescribeTable(dir, Planets, vals...)
 
 	decade := Planets.AddFloat64Column("decade")
@@ -82,6 +81,8 @@ func AnalyzePlanets(dir *tensorfs.Data) {
 	// and another that has the data to put in the cells.
 }
 
+// important: must be run from an interactive terminal.
+// Will quit immediately if not!
 func main() {
 	dir := tensorfs.Mkdir("Planets")
 	AnalyzePlanets(dir)
@@ -95,8 +96,7 @@ func main() {
 func Interactive(c *interpreter.Config, in *interpreter.Interpreter) error {
 	in.Interp.Use(symbols.Symbols) // gui imports
 	in.Config()
-	br := databrowser.NewBasicWindow(tensorfs.CurRoot, "Planets")
-	b := br.Parent.(*core.Body)
+	b, _ := databrowser.NewBasicWindow(tensorfs.CurRoot, "Planets")
 	b.AddTopBar(func(bar *core.Frame) {
 		tb := core.NewToolbar(bar)
 		// tb.Maker(tbv.MakeToolbar)
@@ -117,6 +117,7 @@ func Interactive(c *interpreter.Config, in *interpreter.Interpreter) error {
 			in.Interactive()
 		}()
 	})
+	b.RunWindow()
 	core.Wait()
 	return nil
 }

@@ -186,6 +186,14 @@ func (kl *List[K, V]) DeleteByKey(key K) bool {
 	return true
 }
 
+// RenameIndex renames the item at given index to new key.
+func (kl *List[K, V]) RenameIndex(i int, key K) {
+	old := kl.Keys[i]
+	delete(kl.indexes, old)
+	kl.Keys[i] = key
+	kl.indexes[key] = i
+}
+
 // Copy copies all of the entries from the given key list
 // into this list. It keeps existing entries in this
 // list unless they also exist in the given list, in which case

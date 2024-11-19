@@ -14,17 +14,17 @@ import (
 // All io functionality is handled by [bytes.Reader].
 type File struct {
 	bytes.Reader
-	Data       *Data
+	Node       *Node
 	dirEntries []fs.DirEntry
 	dirsRead   int
 }
 
 func (f *File) Stat() (fs.FileInfo, error) {
-	return f.Data, nil
+	return f.Node, nil
 }
 
 func (f *File) Close() error {
-	f.Reader.Reset(f.Data.Bytes())
+	f.Reader.Reset(f.Node.Bytes())
 	return nil
 }
 
@@ -36,11 +36,11 @@ type DirFile struct {
 }
 
 func (f *DirFile) ReadDir(n int) ([]fs.DirEntry, error) {
-	if err := f.Data.mustDir("DirFile:ReadDir", ""); err != nil {
+	if err := f.Node.mustDir("DirFile:ReadDir", ""); err != nil {
 		return nil, err
 	}
 	if f.dirEntries == nil {
-		f.dirEntries, _ = f.Data.ReadDir(".")
+		f.dirEntries, _ = f.Node.ReadDir(".")
 		f.dirsRead = 0
 	}
 	ne := len(f.dirEntries)

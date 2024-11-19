@@ -20,33 +20,33 @@ const (
 	Overwrite = true
 )
 
-// CopyFromValue copies value from given source data node, cloning it.
-func (d *Data) CopyFromValue(frd *Data) {
+// CopyFromValue copies value from given source node, cloning it.
+func (d *Node) CopyFromValue(frd *Node) {
 	d.modTime = time.Now()
-	d.Data = tensor.Clone(frd.Data)
+	d.Tensor = tensor.Clone(frd.Tensor)
 }
 
-// Clone returns a copy of this data item, recursively cloning directory items
+// Clone returns a copy of this node, recursively cloning directory nodes
 // if it is a directory.
-func (d *Data) Clone() *Data {
-	if !d.IsDir() {
-		cp, _ := newData(nil, d.name)
-		cp.Data = tensor.Clone(d.Data)
+func (nd *Node) Clone() *Node {
+	if !nd.IsDir() {
+		cp, _ := newNode(nil, nd.name)
+		cp.Tensor = tensor.Clone(nd.Tensor)
 		return cp
 	}
-	items := d.ItemsFunc(nil)
-	cp, _ := NewDir(d.name)
-	for _, it := range items {
+	nodes, _ := nd.Nodes()
+	cp, _ := NewDir(nd.name)
+	for _, it := range nodes {
 		cp.Add(it.Clone())
 	}
 	return cp
 }
 
-// Copy copies item(s) from given paths to given path or directory.
-// if there are multiple from items, then to must be a directory.
+// Copy copies node(s) from given paths to given path or directory.
+// if there are multiple from nodes, then to must be a directory.
 // must be called on a directory node.
-func (d *Data) Copy(overwrite bool, to string, from ...string) error {
-	if err := d.mustDir("Copy", to); err != nil {
+func (dir *Node) Copy(overwrite bool, to string, from ...string) error {
+	if err := dir.mustDir("Copy", to); err != nil {
 		return err
 	}
 	switch {
@@ -56,12 +56,12 @@ func (d *Data) Copy(overwrite bool, to string, from ...string) error {
 		return &fs.PathError{Op: "Copy", Path: to, Err: errors.New("no from sources specified")}
 	}
 	// todo: check for to conflict first here..
-	tod, _ := d.ItemAtPath(to)
+	tod, _ := dir.NodeAtPath(to)
 	var errs []error
 	if len(from) > 1 && tod != nil && !tod.IsDir() {
-		return &fs.PathError{Op: "Copy", Path: to, Err: errors.New("multiple source items requires destination to be a directory")}
+		return &fs.PathError{Op: "Copy", Path: to, Err: errors.New("multiple source nodes requires destination to be a directory")}
 	}
-	targd := d
+	targd := dir
 	targf := to
 	if tod != nil && tod.IsDir() {
 		targd = tod
@@ -69,7 +69,7 @@ func (d *Data) Copy(overwrite bool, to string, from ...string) error {
 	}
 	for _, fr := range from {
 		opstr := fr + " -> " + to
-		frd, err := d.ItemAtPath(fr)
+		frd, err := dir.NodeAtPath(fr)
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -78,7 +78,7 @@ func (d *Data) Copy(overwrite bool, to string, from ...string) error {
 			if trg, ok := targd.Dir.AtTry(frd.name); ok { // target exists
 				switch {
 				case trg.IsDir() && frd.IsDir():
-					// todo: copy all items from frd into trg
+					// todo: copy all nodes from frd into trg
 				case trg.IsDir(): // frd is not
 					errs = append(errs, &fs.PathError{Op: "Copy", Path: opstr, Err: errors.New("cannot copy from Value onto directory of same name")})
 				case frd.IsDir(): // trg is not

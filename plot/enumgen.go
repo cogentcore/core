@@ -9,11 +9,7 @@ import (
 var _AxisScalesValues = []AxisScales{0, 1, 2, 3}
 
 // AxisScalesN is the highest valid value for type AxisScales, plus one.
-//
-//gosl:start
 const AxisScalesN AxisScales = 4
-
-//gosl:end
 
 var _AxisScalesValueMap = map[string]AxisScales{`Linear`: 0, `Log`: 1, `InverseLinear`: 2, `InverseLog`: 3}
 
@@ -56,11 +52,7 @@ func (i *AxisScales) UnmarshalText(text []byte) error {
 var _RolesValues = []Roles{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 
 // RolesN is the highest valid value for type Roles, plus one.
-//
-//gosl:start
 const RolesN Roles = 12
-
-//gosl:end
 
 var _RolesValueMap = map[string]Roles{`NoRole`: 0, `X`: 1, `Y`: 2, `Z`: 3, `U`: 4, `V`: 5, `W`: 6, `Low`: 7, `High`: 8, `Size`: 9, `Color`: 10, `Label`: 11}
 
@@ -99,11 +91,7 @@ func (i *Roles) UnmarshalText(text []byte) error { return enums.UnmarshalText(i,
 var _StepKindValues = []StepKind{0, 1, 2, 3}
 
 // StepKindN is the highest valid value for type StepKind, plus one.
-//
-//gosl:start
 const StepKindN StepKind = 4
-
-//gosl:end
 
 var _StepKindValueMap = map[string]StepKind{`NoStep`: 0, `PreStep`: 1, `MidStep`: 2, `PostStep`: 3}
 
@@ -144,11 +132,7 @@ func (i *StepKind) UnmarshalText(text []byte) error { return enums.UnmarshalText
 var _ShapesValues = []Shapes{0, 1, 2, 3, 4, 5, 6, 7}
 
 // ShapesN is the highest valid value for type Shapes, plus one.
-//
-//gosl:start
 const ShapesN Shapes = 8
-
-//gosl:end
 
 var _ShapesValueMap = map[string]Shapes{`Ring`: 0, `Circle`: 1, `Square`: 2, `Box`: 3, `Triangle`: 4, `Pyramid`: 5, `Plus`: 6, `Cross`: 7}
 
@@ -187,11 +171,7 @@ func (i *Shapes) UnmarshalText(text []byte) error { return enums.UnmarshalText(i
 var _DefaultOffOnValues = []DefaultOffOn{0, 1, 2}
 
 // DefaultOffOnN is the highest valid value for type DefaultOffOn, plus one.
-//
-//gosl:start
 const DefaultOffOnN DefaultOffOn = 3
-
-//gosl:end
 
 var _DefaultOffOnValueMap = map[string]DefaultOffOn{`Default`: 0, `Off`: 1, `On`: 2}
 

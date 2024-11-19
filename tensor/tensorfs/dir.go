@@ -12,272 +12,283 @@ import (
 	"sort"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/table"
 )
 
-// Dir is a map of directory entry names to Data nodes.
-// It retains the order that items were added in, which is
-// the natural order items are processed in.
-type Dir = keylist.List[string, *Data]
+// Dir is a map of directory entry names to Nodes.
+// It retains the order that nodes were added in, which is
+// the natural order nodes are processed in.
+type Dir = keylist.List[string, *Node]
 
 // NewDir returns a new tensorfs directory with the given name.
 // If parent != nil and a directory, this dir is added to it.
-// If the parent already has an item of that name, it is returned,
+// If the parent already has an node of that name, it is returned,
 // with an [fs.ErrExist] error.
 // If the name is empty, then it is set to "root", the root directory.
 // Note that "/" is not allowed for the root directory in Go [fs].
-func NewDir(name string, parent ...*Data) (*Data, error) {
+func NewDir(name string, parent ...*Node) (*Node, error) {
 	if name == "" {
 		name = "root"
 	}
-	var par *Data
+	var par *Node
 	if len(parent) == 1 {
 		par = parent[0]
 	}
-	d, err := newData(par, name)
-	if d != nil && d.Dir == nil {
-		d.Dir = &Dir{}
+	dir, err := newNode(par, name)
+	if dir != nil && dir.Dir == nil {
+		dir.Dir = &Dir{}
 	}
-	return d, err
+	return dir, err
 }
 
-// Item returns data item in given directory by name.
+// Mkdir creates a new directory under given dir with the specified name.
+// Returns an error if this dir node is not a directory.
+// Returns existing directory and [fs.ErrExist] if a node
+// with the same name already exists.
+// See [Node.RecycleDir] for a version with no error return
+// that is preferable when expecting an existing directory.
+func (dir *Node) Mkdir(name string) (*Node, error) {
+	if err := dir.mustDir("Mkdir", name); err != nil {
+		return nil, err
+	}
+	return NewDir(name, dir)
+}
+
+// RecycleDir creates a new directory under given dir with the specified name
+// if it doesn't already exist, otherwise returns the existing one.
+// It logs an error and returns nil if this dir node is not a directory.
+func (dir *Node) RecycleDir(name string) *Node {
+	if err := dir.mustDir("RecycleDir", name); errors.Log(err) != nil {
+		return nil
+	}
+	if cd := dir.Dir.At(name); cd != nil {
+		return cd
+	}
+	nd, _ := NewDir(name, dir)
+	return nd
+}
+
+// Node returns a Node in given directory by name.
 // This is for fast access and direct usage of known
-// items, and it will panic if this data is not a directory.
-func (d *Data) Item(name string) *Data {
-	return d.Dir.At(name)
+// nodes, and it will panic if this node is not a directory.
+// Returns nil if no node of given name exists.
+func (dir *Node) Node(name string) *Node {
+	return dir.Dir.At(name)
 }
 
-// Value returns the [tensor.Tensor] Value for given item
-// within this directory. This will panic if item is not
+// Value returns the [tensor.Tensor] value for given node
+// within this directory. This will panic if node is not
 // found, and will return nil if it is not a Value
 // (i.e., it is a directory).
-func (d *Data) Value(name string) tensor.Tensor {
-	return d.Dir.At(name).Data
+func (dir *Node) Value(name string) tensor.Tensor {
+	return dir.Dir.At(name).Tensor
 }
 
-// Items returns data items in given directory by name.
-// error reports any items not found, or if not a directory.
-func (d *Data) Items(names ...string) ([]*Data, error) {
-	if err := d.mustDir("Items", ""); err != nil {
+// Nodes returns a slice of Nodes in given directory by names variadic list.
+// If list is empty, then all nodes in the directory are returned.
+// returned error reports any nodes not found, or if not a directory.
+func (dir *Node) Nodes(names ...string) ([]*Node, error) {
+	if err := dir.mustDir("Nodes", ""); err != nil {
 		return nil, err
 	}
+	var nds []*Node
+	if len(names) == 0 {
+		for _, it := range dir.Dir.Values {
+			nds = append(nds, it)
+		}
+		return nds, nil
+	}
 	var errs []error
-	var its []*Data
 	for _, nm := range names {
-		dt := d.Dir.At(nm)
+		dt := dir.Dir.At(nm)
 		if dt != nil {
-			its = append(its, dt)
+			nds = append(nds, dt)
 		} else {
-			err := fmt.Errorf("tensorfs Dir %q item not found: %q", d.Path(), nm)
+			err := fmt.Errorf("tensorfs Dir %q node not found: %q", dir.Path(), nm)
 			errs = append(errs, err)
 		}
 	}
-	return its, errors.Join(errs...)
+	return nds, errors.Join(errs...)
 }
 
-// Values returns Value items (tensors) in given directory by name.
-// error reports any items not found, or if not a directory.
-func (d *Data) Values(names ...string) ([]tensor.Tensor, error) {
-	if err := d.mustDir("Values", ""); err != nil {
+// Values returns a slice of tensor values in the given directory,
+// by names variadic list. If list is empty, then all value nodes
+// in the directory are returned.
+// returned error reports any nodes not found, or if not a directory.
+func (dir *Node) Values(names ...string) ([]tensor.Tensor, error) {
+	if err := dir.mustDir("Values", ""); err != nil {
 		return nil, err
 	}
+	var nds []tensor.Tensor
+	if len(names) == 0 {
+		for _, it := range dir.Dir.Values {
+			if it.Tensor != nil {
+				nds = append(nds, it.Tensor)
+			}
+		}
+		return nds, nil
+	}
 	var errs []error
-	var its []tensor.Tensor
 	for _, nm := range names {
-		it := d.Dir.At(nm)
-		if it != nil && it.Data != nil {
-			its = append(its, it.Data)
+		it := dir.Dir.At(nm)
+		if it != nil && it.Tensor != nil {
+			nds = append(nds, it.Tensor)
 		} else {
-			err := fmt.Errorf("tensorfs Dir %q item not found: %q", d.Path(), nm)
+			err := fmt.Errorf("tensorfs Dir %q node not found: %q", dir.Path(), nm)
 			errs = append(errs, err)
 		}
 	}
-	return its, errors.Join(errs...)
+	return nds, errors.Join(errs...)
 }
 
-// ItemsFunc returns data items in given directory
-// filtered by given function, in directory order (e.g., order added).
-// If func is nil, all items are returned.
-// Any directories within this directory are returned,
-// unless specifically filtered.
-func (d *Data) ItemsFunc(fun func(item *Data) bool) []*Data {
-	if err := d.mustDir("ItemsFunc", ""); err != nil {
-		return nil
-	}
-	var its []*Data
-	for _, it := range d.Dir.Values {
-		if fun != nil && !fun(it) {
-			continue
-		}
-		its = append(its, it)
-	}
-	return its
-}
-
-// ValuesFunc returns Value items (tensors) in given directory
-// filtered by given function, in directory order (e.g., order added).
-// If func is nil, all values are returned.
-func (d *Data) ValuesFunc(fun func(item *Data) bool) []tensor.Tensor {
-	if err := d.mustDir("ItemsFunc", ""); err != nil {
-		return nil
-	}
-	var its []tensor.Tensor
-	for _, it := range d.Dir.Values {
-		if it.Data == nil {
-			continue
-		}
-		if fun != nil && !fun(it) {
-			continue
-		}
-		its = append(its, it.Data)
-	}
-	return its
-}
-
-// ItemsAlphaFunc returns data items in given directory
-// filtered by given function, in alphabetical order.
-// If func is nil, all items are returned.
-// Any directories within this directory are returned,
-// unless specifically filtered.
-func (d *Data) ItemsAlphaFunc(fun func(item *Data) bool) []*Data {
-	if err := d.mustDir("ItemsAlphaFunc", ""); err != nil {
-		return nil
-	}
-	names := d.DirNamesAlpha()
-	var its []*Data
-	for _, nm := range names {
-		it := d.Dir.At(nm)
-		if fun != nil && !fun(it) {
-			continue
-		}
-		its = append(its, it)
-	}
-	return its
-}
-
-// FlatValuesFunc returns all Value items (tensor) in given directory,
+// ValuesFunc returns all tensor Values under given directory,
+// filtered by given function, in directory order (e.g., order added),
 // recursively descending into directories to return a flat list of
-// the entire subtree, filtered by given function, in directory order
+// the entire subtree. The function can filter out directories to prune
+// the tree, e.g., using `IsDir` method.
+// If func is nil, all Value nodes are returned.
+func (dir *Node) ValuesFunc(fun func(nd *Node) bool) []tensor.Tensor {
+	if err := dir.mustDir("ValuesFunc", ""); err != nil {
+		return nil
+	}
+	var nds []tensor.Tensor
+	for _, it := range dir.Dir.Values {
+		if fun != nil && !fun(it) {
+			continue
+		}
+		if it.IsDir() {
+			subs := it.ValuesFunc(fun)
+			nds = append(nds, subs...)
+		} else {
+			nds = append(nds, it.Tensor)
+		}
+	}
+	return nds
+}
+
+// NodesFunc returns leaf Nodes under given directory, filtered by
+// given function, recursively descending into directories
+// to return a flat list of the entire subtree, in directory order
 // (e.g., order added).
 // The function can filter out directories to prune the tree.
-// If func is nil, all Value items are returned.
-func (d *Data) FlatValuesFunc(fun func(item *Data) bool) []tensor.Tensor {
-	if err := d.mustDir("FlatValuesFunc", ""); err != nil {
+// If func is nil, all leaf Nodes are returned.
+func (dir *Node) NodesFunc(fun func(nd *Node) bool) []*Node {
+	if err := dir.mustDir("NodesFunc", ""); err != nil {
 		return nil
 	}
-	var its []tensor.Tensor
-	for _, it := range d.Dir.Values {
+	var nds []*Node
+	for _, it := range dir.Dir.Values {
 		if fun != nil && !fun(it) {
 			continue
 		}
 		if it.IsDir() {
-			subs := it.FlatValuesFunc(fun)
-			its = append(its, subs...)
+			subs := it.NodesFunc(fun)
+			nds = append(nds, subs...)
 		} else {
-			its = append(its, it.Data)
+			nds = append(nds, it)
 		}
 	}
-	return its
+	return nds
 }
 
-// FlatItemsFunc returns all Value items (tensor) as Data items
-// in given directory, recursively descending into directories
-// to return a flat list of the entire subtree, filtered by
-// given function, in directory order (e.g., order added).
-// The function can filter out directories to prune the tree.
-// If func is nil, all Value items are returned.
-func (d *Data) FlatItemsFunc(fun func(item *Data) bool) []*Data {
-	if err := d.mustDir("FlatItemsFunc", ""); err != nil {
-		return nil
-	}
-	var its []*Data
-	for _, it := range d.Dir.Values {
-		if fun != nil && !fun(it) {
-			continue
-		}
-		if it.IsDir() {
-			subs := it.FlatItemsFunc(fun)
-			its = append(its, subs...)
-		} else {
-			its = append(its, it)
-		}
-	}
-	return its
-}
-
-// FlatValuesAlphaFunc returns all Value items (tensors) in given directory,
+// ValuesAlphaFunc returns all Value nodes (tensors) in given directory,
 // recursively descending into directories to return a flat list of
-// the entire subtree, filtered by given function, in alphabetical order.
+// the entire subtree, filtered by given function, with nodes at each
+// directory level traversed in alphabetical order.
 // The function can filter out directories to prune the tree.
-// If func is nil, all items are returned.
-func (d *Data) FlatValuesAlphaFunc(fun func(item *Data) bool) []tensor.Tensor {
-	if err := d.mustDir("FlatValuesFunc", ""); err != nil {
+// If func is nil, all Values are returned.
+func (dir *Node) ValuesAlphaFunc(fun func(nd *Node) bool) []tensor.Tensor {
+	if err := dir.mustDir("ValuesAlphaFunc", ""); err != nil {
 		return nil
 	}
-	names := d.DirNamesAlpha()
-	var its []tensor.Tensor
+	names := dir.dirNamesAlpha()
+	var nds []tensor.Tensor
 	for _, nm := range names {
-		it := d.Dir.At(nm)
+		it := dir.Dir.At(nm)
 		if fun != nil && !fun(it) {
 			continue
 		}
 		if it.IsDir() {
-			subs := it.FlatValuesAlphaFunc(fun)
-			its = append(its, subs...)
+			subs := it.ValuesAlphaFunc(fun)
+			nds = append(nds, subs...)
 		} else {
-			its = append(its, it.Data)
+			nds = append(nds, it.Tensor)
 		}
 	}
-	return its
+	return nds
+}
+
+// NodesAlphaFunc returns leaf nodes under given directory, filtered
+// by given function, with nodes at each directory level
+// traversed in alphabetical order, recursively descending into directories
+// to return a flat list of the entire subtree, in directory order
+// (e.g., order added).
+// The function can filter out directories to prune the tree.
+// If func is nil, all leaf Nodes are returned.
+func (dir *Node) NodesAlphaFunc(fun func(nd *Node) bool) []*Node {
+	if err := dir.mustDir("NodesAlphaFunc", ""); err != nil {
+		return nil
+	}
+	names := dir.dirNamesAlpha()
+	var nds []*Node
+	for _, nm := range names {
+		it := dir.Dir.At(nm)
+		if fun != nil && !fun(it) {
+			continue
+		}
+		if it.IsDir() {
+			subs := it.NodesAlphaFunc(fun)
+			nds = append(nds, subs...)
+		} else {
+			nds = append(nds, it)
+		}
+	}
+	return nds
 }
 
 // todo: these must handle going up the tree using ..
 
 // DirAtPath returns directory at given relative path
 // from this starting dir.
-func (d *Data) DirAtPath(dir string) (*Data, error) {
+func (dir *Node) DirAtPath(dirPath string) (*Node, error) {
 	var err error
-	dir = path.Clean(dir)
-	sdf, err := d.Sub(dir) // this ensures that d is a dir
+	dirPath = path.Clean(dirPath)
+	sdf, err := dir.Sub(dirPath) // this ensures that dir is a dir
 	if err != nil {
 		return nil, err
 	}
-	return sdf.(*Data), nil
+	return sdf.(*Node), nil
 }
 
-// ItemAtPath returns item at given relative path
-// from this starting dir.
-func (d *Data) ItemAtPath(name string) (*Data, error) {
-	if err := d.mustDir("ItemAtPath", name); err != nil {
+// NodeAtPath returns node at given relative path from this starting dir.
+func (dir *Node) NodeAtPath(name string) (*Node, error) {
+	if err := dir.mustDir("NodeAtPath", name); err != nil {
 		return nil, err
 	}
 	if !fs.ValidPath(name) {
-		return nil, &fs.PathError{Op: "ItemAtPath", Path: name, Err: errors.New("invalid path")}
+		return nil, &fs.PathError{Op: "NodeAtPath", Path: name, Err: errors.New("invalid path")}
 	}
-	dir, file := path.Split(name)
-	sd, err := d.DirAtPath(dir)
+	dirPath, file := path.Split(name)
+	sd, err := dir.DirAtPath(dirPath)
 	if err != nil {
 		return nil, err
 	}
-	itm, ok := sd.Dir.AtTry(file)
+	nd, ok := sd.Dir.AtTry(file)
 	if !ok {
-		if dir == "" && (file == d.name || file == ".") {
-			return d, nil
+		if dirPath == "" && (file == dir.name || file == ".") {
+			return dir, nil
 		}
-		return nil, &fs.PathError{Op: "ItemAtPath", Path: name, Err: errors.New("file not found")}
+		return nil, &fs.PathError{Op: "NodeAtPath", Path: name, Err: errors.New("file not found")}
 	}
-	return itm, nil
+	return nd, nil
 }
 
-// Path returns the full path to this data item
-func (d *Data) Path() string {
-	pt := d.name
-	cur := d.Parent
-	loops := make(map[*Data]struct{})
+// Path returns the full path to this data node
+func (dir *Node) Path() string {
+	pt := dir.name
+	cur := dir.Parent
+	loops := make(map[*Node]struct{})
 	for {
 		if cur == nil {
 			return pt
@@ -291,122 +302,44 @@ func (d *Data) Path() string {
 	}
 }
 
-// DirNamesAlpha returns the names of items in the directory
-// sorted alphabetically.  Data must be dir by this point.
-func (d *Data) DirNamesAlpha() []string {
-	names := slices.Clone(d.Dir.Keys)
+// dirNamesAlpha returns the names of nodes in the directory
+// sorted alphabetically. Node must be dir by this point.
+func (dir *Node) dirNamesAlpha() []string {
+	names := slices.Clone(dir.Dir.Keys)
 	sort.Strings(names)
 	return names
 }
 
-// DirNamesByTime returns the names of items in the directory
-// sorted by modTime. Data must be dir by this point.
-func (d *Data) DirNamesByTime() []string {
-	names := slices.Clone(d.Dir.Keys)
+// dirNamesByTime returns the names of nodes in the directory
+// sorted by modTime. Node must be dir by this point.
+func (dir *Node) dirNamesByTime() []string {
+	names := slices.Clone(dir.Dir.Keys)
 	slices.SortFunc(names, func(a, b string) int {
-		return d.Dir.At(a).ModTime().Compare(d.Dir.At(b).ModTime())
+		return dir.Dir.At(a).ModTime().Compare(dir.Dir.At(b).ModTime())
 	})
 	return names
 }
 
 // mustDir returns an error for given operation and path
-// if this data item is not a directory.
-func (d *Data) mustDir(op, path string) error {
-	if !d.IsDir() {
-		return &fs.PathError{Op: op, Path: path, Err: errors.New("tensorfs item is not a directory")}
+// if this data node is not a directory.
+func (dir *Node) mustDir(op, path string) error {
+	if !dir.IsDir() {
+		return &fs.PathError{Op: op, Path: path, Err: errors.New("tensorfs node is not a directory")}
 	}
 	return nil
 }
 
-// Add adds an item to this directory data item.
-// The only errors are if this item is not a directory,
+// Add adds an node to this directory data node.
+// The only errors are if this node is not a directory,
 // or the name already exists, in which case an [fs.ErrExist] is returned.
 // Names must be unique within a directory.
-func (d *Data) Add(it *Data) error {
-	if err := d.mustDir("Add", it.name); err != nil {
+func (dir *Node) Add(it *Node) error {
+	if err := dir.mustDir("Add", it.name); err != nil {
 		return err
 	}
-	err := d.Dir.Add(it.name, it)
+	err := dir.Dir.Add(it.name, it)
 	if err != nil {
 		return fs.ErrExist
 	}
 	return nil
-}
-
-// Mkdir creates a new directory with the specified name.
-// Returns an error if this parent item is not a directory.
-// Returns existing directory and [fs.ErrExist] if an item
-// with the same name already exists.
-// See [Data.RecycleDir] for a version with no error return
-// that is preferable when expecting an existing directory.
-func (d *Data) Mkdir(name string) (*Data, error) {
-	if err := d.mustDir("Mkdir", name); err != nil {
-		return nil, err
-	}
-	return NewDir(name, d)
-}
-
-// RecycleDir creates a new directory with the specified name
-// if it doesn't already exist, otherwise returns the existing one.
-// It logs an error and returns nil if this parent item is not a directory.
-func (d *Data) RecycleDir(name string) *Data {
-	if err := d.mustDir("RecycleDir", name); errors.Log(err) != nil {
-		return nil
-	}
-	if cd := d.Dir.At(name); cd != nil {
-		return cd
-	}
-	nd, _ := NewDir(name, d)
-	return nd
-}
-
-// Recycle ensures that an item with the given Data item's name
-// exists within this directory, returning the actual item.
-// If there is no such item already, the given Data item is added,
-// otherwise the existing one is returned.
-// It will log an error and return nil if the parent Data is not a directory.
-func (d *Data) Recycle(it *Data) *Data {
-	if err := d.mustDir("Recycle", it.name); errors.Log(err) != nil {
-		return nil
-	}
-	if ex, ok := d.Dir.AtTry(it.name); ok {
-		return ex
-	}
-	d.Dir.Add(it.name, it)
-	return it
-}
-
-// GetDirTable gets the DirTable as a [table.Table] for this directory item,
-// with columns as the Tensor values elements in the directory
-// and any subdirectories, from FlatItemsFunc using given filter function.
-// This is a convenient mechanism for creating a plot of all the data
-// in a given directory.
-// If such was previously constructed, it is returned from "DirTable"
-// where it is stored for later use.
-// Row count is updated to current max row.
-// Set DirTable = nil to regenerate.
-func (d *Data) GetDirTable(fun func(item *Data) bool) *table.Table {
-	its := d.FlatItemsFunc(fun)
-	if d.DirTable != nil {
-		if d.DirTable.NumColumns() == len(its) {
-			d.DirTable.SetNumRowsToMax()
-			return d.DirTable
-		}
-	}
-	dt := table.New(fsx.DirAndFile(string(d.Path())))
-	for _, it := range its {
-		tsr := it.Data
-		rows := tsr.DimSize(0)
-		if dt.Columns.Rows < rows {
-			dt.Columns.Rows = rows
-			dt.SetNumRows(dt.Columns.Rows)
-		}
-		nm := it.name
-		if it.Parent != d {
-			nm = fsx.DirAndFile(string(it.Path()))
-		}
-		dt.AddColumn(nm, tsr.AsValues())
-	}
-	d.DirTable = dt
-	return dt
 }

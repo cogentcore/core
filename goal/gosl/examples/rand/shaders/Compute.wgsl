@@ -6,6 +6,8 @@ var<storage, read_write> Seed: array<Seeds>;
 @group(0) @binding(1)
 var<storage, read_write> Data: array<Rnds>;
 
+alias GPUVars = i32;
+
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
 	Compute(idx.x);

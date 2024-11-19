@@ -9,11 +9,7 @@ import (
 var _BorderStylesValues = []BorderStyles{0, 1, 2, 3, 4, 5, 6, 7, 8}
 
 // BorderStylesN is the highest valid value for type BorderStyles, plus one.
-//
-//gosl:start
 const BorderStylesN BorderStyles = 9
-
-//gosl:end
 
 var _BorderStylesValueMap = map[string]BorderStyles{`solid`: 0, `dotted`: 1, `dashed`: 2, `double`: 3, `groove`: 4, `ridge`: 5, `inset`: 6, `outset`: 7, `none`: 8}
 
@@ -56,11 +52,7 @@ func (i *BorderStyles) UnmarshalText(text []byte) error {
 var _FontStylesValues = []FontStyles{0, 1, 2}
 
 // FontStylesN is the highest valid value for type FontStyles, plus one.
-//
-//gosl:start
 const FontStylesN FontStyles = 3
-
-//gosl:end
 
 var _FontStylesValueMap = map[string]FontStyles{`normal`: 0, `italic`: 1, `oblique`: 2}
 
@@ -103,11 +95,7 @@ func (i *FontStyles) UnmarshalText(text []byte) error {
 var _FontWeightsValues = []FontWeights{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}
 
 // FontWeightsN is the highest valid value for type FontWeights, plus one.
-//
-//gosl:start
 const FontWeightsN FontWeights = 20
-
-//gosl:end
 
 var _FontWeightsValueMap = map[string]FontWeights{`normal`: 0, `100`: 1, `thin`: 2, `200`: 3, `extra-light`: 4, `300`: 5, `light`: 6, `400`: 7, `500`: 8, `medium`: 9, `600`: 10, `semi-bold`: 11, `700`: 12, `bold`: 13, `800`: 14, `extra-bold`: 15, `900`: 16, `black`: 17, `bolder`: 18, `lighter`: 19}
 
@@ -150,11 +138,7 @@ func (i *FontWeights) UnmarshalText(text []byte) error {
 var _FontStretchValues = []FontStretch{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
 // FontStretchN is the highest valid value for type FontStretch, plus one.
-//
-//gosl:start
 const FontStretchN FontStretch = 11
-
-//gosl:end
 
 var _FontStretchValueMap = map[string]FontStretch{`Normal`: 0, `UltraCondensed`: 1, `ExtraCondensed`: 2, `SemiCondensed`: 3, `SemiExpanded`: 4, `ExtraExpanded`: 5, `UltraExpanded`: 6, `Condensed`: 7, `Expanded`: 8, `Narrower`: 9, `Wider`: 10}
 
@@ -197,11 +181,7 @@ func (i *FontStretch) UnmarshalText(text []byte) error {
 var _TextDecorationsValues = []TextDecorations{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 
 // TextDecorationsN is the highest valid value for type TextDecorations, plus one.
-//
-//gosl:start
 const TextDecorationsN TextDecorations = 10
-
-//gosl:end
 
 var _TextDecorationsValueMap = map[string]TextDecorations{`none`: 0, `underline`: 1, `overline`: 2, `line-through`: 3, `blink`: 4, `dotted-underline`: 5, `para-start`: 6, `super`: 7, `sub`: 8, `background-color`: 9}
 
@@ -260,11 +240,7 @@ func (i *TextDecorations) UnmarshalText(text []byte) error {
 var _BaselineShiftsValues = []BaselineShifts{0, 1, 2}
 
 // BaselineShiftsN is the highest valid value for type BaselineShifts, plus one.
-//
-//gosl:start
 const BaselineShiftsN BaselineShifts = 3
-
-//gosl:end
 
 var _BaselineShiftsValueMap = map[string]BaselineShifts{`baseline`: 0, `super`: 1, `sub`: 2}
 
@@ -307,11 +283,7 @@ func (i *BaselineShifts) UnmarshalText(text []byte) error {
 var _FontVariantsValues = []FontVariants{0, 1}
 
 // FontVariantsN is the highest valid value for type FontVariants, plus one.
-//
-//gosl:start
 const FontVariantsN FontVariants = 2
-
-//gosl:end
 
 var _FontVariantsValueMap = map[string]FontVariants{`normal`: 0, `small-caps`: 1}
 
@@ -354,11 +326,7 @@ func (i *FontVariants) UnmarshalText(text []byte) error {
 var _DirectionsValues = []Directions{0, 1}
 
 // DirectionsN is the highest valid value for type Directions, plus one.
-//
-//gosl:start
 const DirectionsN Directions = 2
-
-//gosl:end
 
 var _DirectionsValueMap = map[string]Directions{`row`: 0, `column`: 1}
 
@@ -401,11 +369,7 @@ func (i *Directions) UnmarshalText(text []byte) error {
 var _DisplaysValues = []Displays{0, 1, 2, 3, 4}
 
 // DisplaysN is the highest valid value for type Displays, plus one.
-//
-//gosl:start
 const DisplaysN Displays = 5
-
-//gosl:end
 
 var _DisplaysValueMap = map[string]Displays{`flex`: 0, `stacked`: 1, `grid`: 2, `custom`: 3, `none`: 4}
 
@@ -446,11 +410,7 @@ func (i *Displays) UnmarshalText(text []byte) error { return enums.UnmarshalText
 var _AlignsValues = []Aligns{0, 1, 2, 3, 4, 5, 6, 7}
 
 // AlignsN is the highest valid value for type Aligns, plus one.
-//
-//gosl:start
 const AlignsN Aligns = 8
-
-//gosl:end
 
 var _AlignsValueMap = map[string]Aligns{`auto`: 0, `start`: 1, `end`: 2, `center`: 3, `baseline`: 4, `space-between`: 5, `space-around`: 6, `space-evenly`: 7}
 
@@ -489,11 +449,7 @@ func (i *Aligns) UnmarshalText(text []byte) error { return enums.UnmarshalText(i
 var _OverflowsValues = []Overflows{0, 1, 2, 3}
 
 // OverflowsN is the highest valid value for type Overflows, plus one.
-//
-//gosl:start
 const OverflowsN Overflows = 4
-
-//gosl:end
 
 var _OverflowsValueMap = map[string]Overflows{`visible`: 0, `hidden`: 1, `auto`: 2, `scroll`: 3}
 
@@ -536,11 +492,7 @@ func (i *Overflows) UnmarshalText(text []byte) error {
 var _ObjectFitsValues = []ObjectFits{0, 1, 2, 3, 4}
 
 // ObjectFitsN is the highest valid value for type ObjectFits, plus one.
-//
-//gosl:start
 const ObjectFitsN ObjectFits = 5
-
-//gosl:end
 
 var _ObjectFitsValueMap = map[string]ObjectFits{`fill`: 0, `contain`: 1, `cover`: 2, `none`: 3, `scale-down`: 4}
 
@@ -583,11 +535,7 @@ func (i *ObjectFits) UnmarshalText(text []byte) error {
 var _FillRulesValues = []FillRules{0, 1}
 
 // FillRulesN is the highest valid value for type FillRules, plus one.
-//
-//gosl:start
 const FillRulesN FillRules = 2
-
-//gosl:end
 
 var _FillRulesValueMap = map[string]FillRules{`non-zero`: 0, `even-odd`: 1}
 
@@ -630,11 +578,7 @@ func (i *FillRules) UnmarshalText(text []byte) error {
 var _VectorEffectsValues = []VectorEffects{0, 1}
 
 // VectorEffectsN is the highest valid value for type VectorEffects, plus one.
-//
-//gosl:start
 const VectorEffectsN VectorEffects = 2
-
-//gosl:end
 
 var _VectorEffectsValueMap = map[string]VectorEffects{`none`: 0, `non-scaling-stroke`: 1}
 
@@ -677,11 +621,7 @@ func (i *VectorEffects) UnmarshalText(text []byte) error {
 var _LineCapsValues = []LineCaps{0, 1, 2, 3, 4}
 
 // LineCapsN is the highest valid value for type LineCaps, plus one.
-//
-//gosl:start
 const LineCapsN LineCaps = 5
-
-//gosl:end
 
 var _LineCapsValueMap = map[string]LineCaps{`butt`: 0, `round`: 1, `square`: 2, `cubic`: 3, `quadratic`: 4}
 
@@ -722,11 +662,7 @@ func (i *LineCaps) UnmarshalText(text []byte) error { return enums.UnmarshalText
 var _LineJoinsValues = []LineJoins{0, 1, 2, 3, 4, 5}
 
 // LineJoinsN is the highest valid value for type LineJoins, plus one.
-//
-//gosl:start
 const LineJoinsN LineJoins = 6
-
-//gosl:end
 
 var _LineJoinsValueMap = map[string]LineJoins{`miter`: 0, `miter-clip`: 1, `round`: 2, `bevel`: 3, `arcs`: 4, `arcs-clip`: 5}
 
@@ -769,11 +705,7 @@ func (i *LineJoins) UnmarshalText(text []byte) error {
 var _SideIndexesValues = []SideIndexes{0, 1, 2, 3}
 
 // SideIndexesN is the highest valid value for type SideIndexes, plus one.
-//
-//gosl:start
 const SideIndexesN SideIndexes = 4
-
-//gosl:end
 
 var _SideIndexesValueMap = map[string]SideIndexes{`Top`: 0, `Right`: 1, `Bottom`: 2, `Left`: 3}
 
@@ -816,11 +748,7 @@ func (i *SideIndexes) UnmarshalText(text []byte) error {
 var _VirtualKeyboardsValues = []VirtualKeyboards{0, 1, 2, 3, 4, 5, 6, 7}
 
 // VirtualKeyboardsN is the highest valid value for type VirtualKeyboards, plus one.
-//
-//gosl:start
 const VirtualKeyboardsN VirtualKeyboards = 8
-
-//gosl:end
 
 var _VirtualKeyboardsValueMap = map[string]VirtualKeyboards{`none`: 0, `single-line`: 1, `multi-line`: 2, `number`: 3, `password`: 4, `email`: 5, `phone`: 6, `url`: 7}
 
@@ -863,11 +791,7 @@ func (i *VirtualKeyboards) UnmarshalText(text []byte) error {
 var _UnicodeBidiValues = []UnicodeBidi{0, 1, 2}
 
 // UnicodeBidiN is the highest valid value for type UnicodeBidi, plus one.
-//
-//gosl:start
 const UnicodeBidiN UnicodeBidi = 3
-
-//gosl:end
 
 var _UnicodeBidiValueMap = map[string]UnicodeBidi{`normal`: 0, `embed`: 1, `bidi-override`: 2}
 
@@ -910,11 +834,7 @@ func (i *UnicodeBidi) UnmarshalText(text []byte) error {
 var _TextDirectionsValues = []TextDirections{0, 1, 2, 3, 4, 5, 6, 7}
 
 // TextDirectionsN is the highest valid value for type TextDirections, plus one.
-//
-//gosl:start
 const TextDirectionsN TextDirections = 8
-
-//gosl:end
 
 var _TextDirectionsValueMap = map[string]TextDirections{`lrtb`: 0, `rltb`: 1, `tbrl`: 2, `lr`: 3, `rl`: 4, `tb`: 5, `ltr`: 6, `rtl`: 7}
 
@@ -957,11 +877,7 @@ func (i *TextDirections) UnmarshalText(text []byte) error {
 var _TextAnchorsValues = []TextAnchors{0, 1, 2}
 
 // TextAnchorsN is the highest valid value for type TextAnchors, plus one.
-//
-//gosl:start
 const TextAnchorsN TextAnchors = 3
-
-//gosl:end
 
 var _TextAnchorsValueMap = map[string]TextAnchors{`start`: 0, `middle`: 1, `end`: 2}
 
@@ -1004,11 +920,7 @@ func (i *TextAnchors) UnmarshalText(text []byte) error {
 var _WhiteSpacesValues = []WhiteSpaces{0, 1, 2, 3, 4}
 
 // WhiteSpacesN is the highest valid value for type WhiteSpaces, plus one.
-//
-//gosl:start
 const WhiteSpacesN WhiteSpaces = 5
-
-//gosl:end
 
 var _WhiteSpacesValueMap = map[string]WhiteSpaces{`Normal`: 0, `Nowrap`: 1, `Pre`: 2, `PreLine`: 3, `PreWrap`: 4}
 

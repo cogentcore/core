@@ -42,8 +42,8 @@ func GPUInit() {
 	{
 		sy := gpu.NewComputeSystem(gp, "Default")
 		GPUSystem = sy
-		gpu.NewComputePipelineShaderFS(shaders, "shaders/Atomic.wgsl", sy)
 		gpu.NewComputePipelineShaderFS(shaders, "shaders/Compute.wgsl", sy)
+		gpu.NewComputePipelineShaderFS(shaders, "shaders/Atomic.wgsl", sy)
 		vars := sy.Vars()
 		{
 			sgp := vars.AddGroup(gpu.Storage)

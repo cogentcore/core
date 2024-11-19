@@ -29,19 +29,18 @@ func TestGroup(t *testing.T) {
 	err := TableGroups(dir, dt, "Name")
 	assert.NoError(t, err)
 
-	ixs := dir.FlatValuesFunc(nil)
+	ixs := dir.ValuesFunc(nil)
 	assert.Equal(t, []int{0, 1}, tensor.AsInt(ixs[0]).Values)
 	assert.Equal(t, []int{2, 3}, tensor.AsInt(ixs[1]).Values)
 
 	err = TableGroupStats(dir, StatMean, dt, "Value")
 	assert.NoError(t, err)
 
-	// AggColumn(spl, "Value", stats.Mean)
-	// st := spl.AggsToTable(table.ColumnNameOnly)
-	// assert.Equal(t, 0.5, st.Float("Value", 0))
-	// assert.Equal(t, 2.5, st.Float("Value", 1))
-	// assert.Equal(t, "A", st.StringValue("Group", 0))
-	// assert.Equal(t, "B", st.StringValue("Group", 1))
+	gdt := GroupStatsAsTableNoStatName(dir)
+	assert.Equal(t, 0.5, gdt.Column("Value").Float1D(0))
+	assert.Equal(t, 2.5, gdt.Column("Value").Float1D(1))
+	assert.Equal(t, "A", gdt.Column("Name").String1D(0))
+	assert.Equal(t, "B", gdt.Column("Name").String1D(1))
 }
 
 /*

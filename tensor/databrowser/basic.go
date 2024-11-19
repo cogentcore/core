@@ -61,9 +61,10 @@ func (br *Basic) Init() {
 
 }
 
-// NewBasicWindow opens a new data Browser for given
+// NewBasicWindow returns a new data Browser window for given
 // file system (nil for os files) and data directory.
-func NewBasicWindow(fsys fs.FS, dataDir string) *Basic {
+// do RunWindow on resulting [core.Body] to open the window.
+func NewBasicWindow(fsys fs.FS, dataDir string) (*core.Body, *Basic) {
 	startDir, _ := os.Getwd()
 	startDir = errors.Log1(filepath.Abs(startDir))
 	b := core.NewBody("Cogent Data Browser: " + fsx.DirAndFile(startDir))
@@ -83,6 +84,5 @@ func NewBasicWindow(fsys fs.FS, dataDir string) *Basic {
 	TheBrowser = &br.Browser
 	br.Interpreter.Eval("br := databrowser.TheBrowser") // grab it
 	br.UpdateScripts()
-	b.RunWindow()
-	return br
+	return b, br
 }

@@ -3,8 +3,6 @@
 package symbols
 
 import (
-	"reflect"
-
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/tensor"
@@ -13,13 +11,13 @@ import (
 	"cogentcore.org/core/tensor/tensorcore"
 	"cogentcore.org/core/tensor/tensorfs"
 	"cogentcore.org/core/texteditor"
+	"reflect"
 )
 
 func init() {
 	Symbols["cogentcore.org/core/tensor/databrowser/databrowser"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AsDataTree":         reflect.ValueOf(databrowser.AsDataTree),
-		"DataFS":             reflect.ValueOf(databrowser.DataFS),
 		"FirstComment":       reflect.ValueOf(databrowser.FirstComment),
 		"IsTableFile":        reflect.ValueOf(databrowser.IsTableFile),
 		"NewBasic":           reflect.ValueOf(databrowser.NewBasic),
@@ -31,6 +29,7 @@ func init() {
 		"PromptOKCancel":     reflect.ValueOf(databrowser.PromptOKCancel),
 		"PromptString":       reflect.ValueOf(databrowser.PromptString),
 		"PromptStruct":       reflect.ValueOf(databrowser.PromptStruct),
+		"TensorFS":           reflect.ValueOf(databrowser.TensorFS),
 		"TheBrowser":         reflect.ValueOf(&databrowser.TheBrowser).Elem(),
 		"TrimOrderPrefix":    reflect.ValueOf(databrowser.TrimOrderPrefix),
 
@@ -52,13 +51,14 @@ func init() {
 // _cogentcore_org_core_tensor_databrowser_Tabber is an interface wrapper for Tabber type
 type _cogentcore_org_core_tensor_databrowser_Tabber struct {
 	IValue           interface{}
+	WAsCoreTabs      func() *core.Tabs
 	WAsDataTabs      func() *databrowser.Tabs
 	WCurrentTab      func() (core.Widget, int)
 	WEditorFile      func(label string, filename string) *texteditor.Editor
 	WEditorString    func(label string, content string) *texteditor.Editor
 	WGoUpdatePlot    func(label string) *plotcore.PlotEditor
-	WPlotDataFS      func(dfs *tensorfs.Data) *plotcore.PlotEditor
 	WPlotTable       func(label string, dt *table.Table) *plotcore.PlotEditor
+	WPlotTensorFS    func(dfs *tensorfs.Node) *plotcore.PlotEditor
 	WRecycleTab      func(name string) *core.Frame
 	WSelectTabByName func(name string) *core.Frame
 	WSelectTabIndex  func(idx int) *core.Frame
@@ -69,6 +69,9 @@ type _cogentcore_org_core_tensor_databrowser_Tabber struct {
 	WTensorTable     func(label string, dt *table.Table) *tensorcore.Table
 }
 
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) AsCoreTabs() *core.Tabs {
+	return W.WAsCoreTabs()
+}
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) AsDataTabs() *databrowser.Tabs {
 	return W.WAsDataTabs()
 }
@@ -84,11 +87,11 @@ func (W _cogentcore_org_core_tensor_databrowser_Tabber) EditorString(label strin
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) GoUpdatePlot(label string) *plotcore.PlotEditor {
 	return W.WGoUpdatePlot(label)
 }
-func (W _cogentcore_org_core_tensor_databrowser_Tabber) PlotDataFS(dfs *tensorfs.Data) *plotcore.PlotEditor {
-	return W.WPlotDataFS(dfs)
-}
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) PlotTable(label string, dt *table.Table) *plotcore.PlotEditor {
 	return W.WPlotTable(label, dt)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) PlotTensorFS(dfs *tensorfs.Node) *plotcore.PlotEditor {
+	return W.WPlotTensorFS(dfs)
 }
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) RecycleTab(name string) *core.Frame {
 	return W.WRecycleTab(name)

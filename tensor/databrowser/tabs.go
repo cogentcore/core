@@ -42,15 +42,15 @@ type Tabber interface {
 	// PlotTable recycles a tab with a Plot of given [table.Table].
 	PlotTable(label string, dt *table.Table) *plotcore.PlotEditor
 
-	// PlotTensorFS recycles a tab with a Plot of given [tensorfs.Data],
+	// PlotTensorFS recycles a tab with a Plot of given [tensorfs.Node],
 	// automatically using the Dir/File name of the data node for the label.
-	PlotTensorFS(dfs *tensorfs.Data) *plotcore.PlotEditor
+	PlotTensorFS(dfs *tensorfs.Node) *plotcore.PlotEditor
 
 	// GoUpdatePlot calls GoUpdatePlot on plot at tab with given name.
 	// Does nothing if tab name doesn't exist (returns nil).
 	GoUpdatePlot(label string) *plotcore.PlotEditor
 
-	// todo: PlotData of plot.Data
+	// todo: PlotData of plot.Node
 
 	// SliceTable recycles a tab with a [core.Table] widget
 	// to view the given slice of structs.
@@ -184,13 +184,13 @@ func (ts *Tabs) PlotTable(label string, dt *table.Table) *plotcore.PlotEditor {
 	return pl
 }
 
-// PlotTensorFS recycles a tab with a Plot of given [tensorfs.Data].
-func (ts *Tabs) PlotTensorFS(dfs *tensorfs.Data) *plotcore.PlotEditor {
+// PlotTensorFS recycles a tab with a Plot of given [tensorfs.Node].
+func (ts *Tabs) PlotTensorFS(dfs *tensorfs.Node) *plotcore.PlotEditor {
 	label := fsx.DirAndFile(dfs.Path()) + " Plot"
 	if dfs.IsDir() {
-		return ts.PlotTable(label, dfs.GetDirTable(nil))
+		return ts.PlotTable(label, tensorfs.DirTable(dfs, nil))
 	}
-	tsr := dfs.Data
+	tsr := dfs.Tensor
 	dt := table.New(label)
 	dt.Columns.Rows = tsr.DimSize(0)
 	if ix, ok := tsr.(*tensor.Rows); ok {
