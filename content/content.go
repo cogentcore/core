@@ -149,9 +149,9 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		return nil
 	}))
 	if root, ok := ct.pagesByURL[""]; ok {
-		ct.Open(root.URL)
+		ct.openPage(root, true, false)
 	} else {
-		ct.Open(ct.pages[0].URL)
+		ct.openPage(ct.pages[0], true, false)
 	}
 	return ct
 }
@@ -170,11 +170,21 @@ func (ct *Content) Open(url string) *Content {
 		core.TheApp.OpenURL(url)
 		return ct
 	}
-	ct.currentPage = pg
-	ct.historyIndex = len(ct.history)
-	ct.history = append(ct.history, pg)
-	ct.Scene.Update() // need to also update toolbar
+	ct.openPage(pg, true, true)
 	return ct
+}
+
+// openpage opens the given page. It optionally adds the page to the history.
+// It also optionally updates the display.
+func (ct *Content) openPage(pg *Page, history, update bool) {
+	ct.currentPage = pg
+	if history {
+		ct.historyIndex = len(ct.history)
+		ct.history = append(ct.history, pg)
+	}
+	if update {
+		ct.Scene.Update() // need to also update toolbar
+	}
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
@@ -258,7 +268,7 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			ct.historyIndex--
-			ct.Open(ct.history[ct.historyIndex].URL)
+			ct.openPage(ct.history[ct.historyIndex], false, true)
 		})
 	})
 	tree.Add(p, func(w *core.Button) {
