@@ -177,6 +177,9 @@ func (ct *Content) Open(url string) *Content {
 // openpage opens the given page. It optionally adds the page to the history.
 // It also optionally updates the display.
 func (ct *Content) openPage(pg *Page, history, update bool) {
+	if ct.currentPage == pg {
+		return
+	}
 	ct.currentPage = pg
 	if history {
 		ct.historyIndex = len(ct.history)
