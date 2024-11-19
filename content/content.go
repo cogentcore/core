@@ -173,7 +173,7 @@ func (ct *Content) Open(url string) *Content {
 	ct.currentPage = pg
 	ct.historyIndex = len(ct.history)
 	ct.history = append(ct.history, pg)
-	ct.Update()
+	ct.Scene.Update() // need to also update toolbar
 	return ct
 }
 
