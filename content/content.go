@@ -274,6 +274,13 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.ArrowForward).SetKey(keymap.HistNext)
 		w.SetTooltip("Forward")
+		w.Updater(func() {
+			w.SetEnabled(ct.historyIndex < len(ct.history)-1)
+		})
+		w.OnClick(func(e events.Event) {
+			ct.historyIndex++
+			ct.openPage(ct.history[ct.historyIndex], false, true)
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.Search).SetKey(keymap.Menu)
