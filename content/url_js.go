@@ -12,10 +12,20 @@ import (
 	"syscall/js"
 )
 
+// firstContent is the first [Content] used for [Content.getWebURL] or [Content.saveWebURL],
+// which is used to prevent nested [Content] widgets from incorrectly affecting the URL.
+var firstContent *Content
+
 var documentData = js.Global().Get("document").Get("documentElement").Get("dataset")
 
 // saveWebURL saves the current page URL to the user's address bar and history.
 func (ct *Content) saveWebURL() {
+	if firstContent == nil {
+		firstContent = ct
+	}
+	if firstContent != ct {
+		return
+	}
 	url := ct.currentPage.URL
 	if url == "" {
 		url = ".."
