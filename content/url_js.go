@@ -7,7 +7,6 @@
 package content
 
 import (
-	"fmt"
 	"net/url"
 	"strings"
 	"syscall/js"
@@ -45,7 +44,7 @@ func (ct *Content) saveWebURL() {
 	if firstContent != ct {
 		return
 	}
-	_, base, err := getURL()
+	current, base, err := getURL()
 	if errors.Log(err) != nil {
 		return
 	}
@@ -54,7 +53,9 @@ func (ct *Content) saveWebURL() {
 		return
 	}
 	fullNew := base.ResolveReference(new)
-	fmt.Println("push", fullNew.String())
+	if fullNew.String() == current.String() {
+		return // We are already at this URL, so don't push it again
+	}
 	js.Global().Get("history").Call("pushState", "", "", fullNew.String())
 }
 
