@@ -7,6 +7,7 @@
 package content
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 	"syscall/js"
@@ -44,11 +45,17 @@ func (ct *Content) saveWebURL() {
 	if firstContent != ct {
 		return
 	}
-	url := ct.currentPage.URL
-	if url == "" {
-		url = ".."
+	_, base, err := getURL()
+	if errors.Log(err) != nil {
+		return
 	}
-	js.Global().Get("history").Call("pushState", "", "", url)
+	new, err := url.Parse(ct.currentPage.URL)
+	if errors.Log(err) != nil {
+		return
+	}
+	fullNew := base.ResolveReference(new)
+	fmt.Println("push", fullNew.String())
+	js.Global().Get("history").Call("pushState", "", "", fullNew.String())
 }
 
 // handleWebPopState adds a JS event listener to handle user navigation in the browser.
