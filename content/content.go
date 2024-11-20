@@ -184,6 +184,9 @@ func (ct *Content) openPage(pg *Page, history bool) {
 		ct.historyIndex = len(ct.history)
 		ct.history = append(ct.history, pg)
 	}
+	if saveWebURL != nil {
+		saveWebURL(ct)
+	}
 	ct.Scene.Update() // need to also update toolbar
 }
 

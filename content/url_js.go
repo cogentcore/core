@@ -6,8 +6,10 @@
 
 package content
 
+import "syscall/js"
+
 func init() {
 	saveWebURL = func(ct *Content) {
-
+		js.Global().Get("history").Call("pushState", "", "", ct.currentPage.URL)
 	}
 }
