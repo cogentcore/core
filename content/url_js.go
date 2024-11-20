@@ -33,7 +33,7 @@ func (ct *Content) getWebURL() string {
 	if errors.Log(err) != nil {
 		return ""
 	}
-	return strings.TrimPrefix(full.String(), base.String())
+	return strings.TrimSuffix(strings.TrimPrefix(full.String(), base.String()), "/")
 }
 
 // saveWebURL saves the current page URL to the user's address bar and history.
