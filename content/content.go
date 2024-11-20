@@ -67,6 +67,14 @@ type Content struct {
 	leftFrame *core.Frame
 }
 
+func init() {
+	// We want Command+[ and Command+] to work for browser back/forward navigation
+	// in content, since we rely on that. They should still be intercepted by
+	// Cogent Core for non-content apps for things such as full window dialogs,
+	// so we only add these in content.
+	system.ReservedWebShortcuts = append(system.ReservedWebShortcuts, "Command+[", "Command+]")
+}
+
 func (ct *Content) Init() {
 	ct.Splits.Init()
 	ct.SetSplits(0.2, 0.8)
