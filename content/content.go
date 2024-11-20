@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
 
@@ -267,28 +268,31 @@ func (ct *Content) makeCategories() {
 }
 
 func (ct *Content) MakeToolbar(p *tree.Plan) {
-	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
-		w.SetTooltip("Back")
-		w.Updater(func() {
-			w.SetEnabled(ct.historyIndex > 0)
+	// Superseded by browser navigation on web.
+	if core.TheApp.Platform() != system.Web {
+		tree.Add(p, func(w *core.Button) {
+			w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
+			w.SetTooltip("Back")
+			w.Updater(func() {
+				w.SetEnabled(ct.historyIndex > 0)
+			})
+			w.OnClick(func(e events.Event) {
+				ct.historyIndex--
+				ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
+			})
 		})
-		w.OnClick(func(e events.Event) {
-			ct.historyIndex--
-			ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
+		tree.Add(p, func(w *core.Button) {
+			w.SetIcon(icons.ArrowForward).SetKey(keymap.HistNext)
+			w.SetTooltip("Forward")
+			w.Updater(func() {
+				w.SetEnabled(ct.historyIndex < len(ct.history)-1)
+			})
+			w.OnClick(func(e events.Event) {
+				ct.historyIndex++
+				ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
+			})
 		})
-	})
-	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.ArrowForward).SetKey(keymap.HistNext)
-		w.SetTooltip("Forward")
-		w.Updater(func() {
-			w.SetEnabled(ct.historyIndex < len(ct.history)-1)
-		})
-		w.OnClick(func(e events.Event) {
-			ct.historyIndex++
-			ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
-		})
-	})
+	}
 	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.Search).SetKey(keymap.Menu)
 		w.SetTooltip("Search")
