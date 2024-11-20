@@ -170,17 +170,18 @@ func (ct *Content) SetContent(content fs.FS) *Content {
 // Open opens the page with the given URL and updates the display.
 // If no pages correspond to the URL, it is opened in the default browser.
 func (ct *Content) Open(url string) *Content {
-	pg, ok := ct.pagesByURL[url]
-	if !ok {
-		core.TheApp.OpenURL(url)
-		return ct
-	}
-	ct.openPage(pg, true)
+	ct.openPage(url, true)
 	return ct
 }
 
-// openPage opens the given page. It optionally adds the page to the history.
-func (ct *Content) openPage(pg *Page, history bool) {
+// openPage opens the page with the given URL and updates the display.
+// It optionally adds the page to the history.
+func (ct *Content) openPage(url string, history bool) {
+	pg, ok := ct.pagesByURL[url]
+	if !ok {
+		core.TheApp.OpenURL(url)
+		return
+	}
 	if ct.currentPage == pg {
 		return
 	}
@@ -188,8 +189,8 @@ func (ct *Content) openPage(pg *Page, history bool) {
 	if history {
 		ct.historyIndex = len(ct.history)
 		ct.history = append(ct.history, pg)
+		ct.saveWebURL()
 	}
-	ct.saveWebURL()
 	ct.Scene.Update() // need to also update toolbar
 }
 
@@ -274,7 +275,7 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			ct.historyIndex--
-			ct.openPage(ct.history[ct.historyIndex], false)
+			ct.openPage(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
 		})
 	})
 	tree.Add(p, func(w *core.Button) {
@@ -285,7 +286,7 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			ct.historyIndex++
-			ct.openPage(ct.history[ct.historyIndex], false)
+			ct.openPage(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
 		})
 	})
 	tree.Add(p, func(w *core.Button) {

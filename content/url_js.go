@@ -54,7 +54,7 @@ func (ct *Content) saveWebURL() {
 // handleWebPopState adds a JS event listener to handle user navigation in the browser.
 func (ct *Content) handleWebPopState() {
 	js.Global().Get("window").Call("addEventListener", "popstate", js.FuncOf(func(this js.Value, args []js.Value) any {
-		ct.Open(ct.getWebURL())
+		ct.openPage(ct.getWebURL(), false) // do not add to history while navigating history
 		return nil
 	}))
 }
