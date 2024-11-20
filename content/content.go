@@ -186,7 +186,7 @@ func (ct *Content) open(url string, history bool) {
 		ct.history = append(ct.history, pg)
 		ct.saveWebURL()
 	}
-	ct.Scene.Update() // need to also update toolbar
+	ct.Scene.Update() // need to update the whole scene to also update the toolbar
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
