@@ -6,4 +6,5 @@
 
 package content
 
-func (ct *Content) saveWebURL() {}
+func (ct *Content) saveWebURL()        {}
+func (ct *Content) handleWebPopState() {}

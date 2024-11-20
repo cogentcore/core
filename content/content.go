@@ -120,6 +120,7 @@ func (ct *Content) Init() {
 			})
 		})
 	})
+	ct.handleWebPopState()
 }
 
 // SetSource sets the source filesystem for the content.
