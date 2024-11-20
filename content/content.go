@@ -92,14 +92,8 @@ func (ct *Content) Init() {
 		}
 		tree.Add(p, func(w *core.Frame) {
 			ct.leftFrame = w
-			w.Styler(func(s *styles.Style) {
-				s.Direction = styles.Column
-			})
 		})
 		tree.Add(p, func(w *core.Frame) {
-			w.Styler(func(s *styles.Style) {
-				s.Direction = styles.Column
-			})
 			w.Maker(func(p *tree.Plan) {
 				if ct.currentPage.Name != "" {
 					tree.Add(p, func(w *core.Text) {
