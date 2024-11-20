@@ -174,7 +174,7 @@ func (ct *Content) Open(url string) *Content {
 	return ct
 }
 
-// openpage opens the given page. It optionally adds the page to the history.
+// openPage opens the given page. It optionally adds the page to the history.
 func (ct *Content) openPage(pg *Page, history bool) {
 	if ct.currentPage == pg {
 		return

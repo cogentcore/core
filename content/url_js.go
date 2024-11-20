@@ -10,5 +10,9 @@ import "syscall/js"
 
 // saveWebURL saves the current page URL to the user's address bar and history.
 func (ct *Content) saveWebURL() {
-	js.Global().Get("history").Call("pushState", "", "", ct.currentPage.URL)
+	url := ct.currentPage.URL
+	if url == "" {
+		url = ".."
+	}
+	js.Global().Get("history").Call("pushState", "", "", url)
 }
