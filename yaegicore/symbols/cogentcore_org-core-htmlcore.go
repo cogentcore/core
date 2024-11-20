@@ -14,6 +14,7 @@ func init() {
 		"ElementHandlers": reflect.ValueOf(&htmlcore.ElementHandlers).Elem(),
 		"ExtractText":     reflect.ValueOf(htmlcore.ExtractText),
 		"Get":             reflect.ValueOf(htmlcore.Get),
+		"GoDocWikilink":   reflect.ValueOf(htmlcore.GoDocWikilink),
 		"NewContext":      reflect.ValueOf(htmlcore.NewContext),
 		"ReadHTML":        reflect.ValueOf(htmlcore.ReadHTML),
 		"ReadHTMLString":  reflect.ValueOf(htmlcore.ReadHTMLString),
@@ -21,6 +22,7 @@ func init() {
 		"ReadMDString":    reflect.ValueOf(htmlcore.ReadMDString),
 
 		// type definitions
-		"Context": reflect.ValueOf((*htmlcore.Context)(nil)),
+		"Context":         reflect.ValueOf((*htmlcore.Context)(nil)),
+		"WikilinkHandler": reflect.ValueOf((*htmlcore.WikilinkHandler)(nil)),
 	}
 }
