@@ -149,11 +149,15 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		}
 		return nil
 	}))
+	if url := ct.getWebURL(); url != "" {
+		ct.Open(url)
+		return ct
+	}
 	if root, ok := ct.pagesByURL[""]; ok {
 		ct.Open(root.URL)
-	} else {
-		ct.Open(ct.pages[0].URL)
+		return ct
 	}
+	ct.Open(ct.pages[0].URL)
 	return ct
 }
 

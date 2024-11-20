@@ -7,9 +7,11 @@
 package content
 
 import (
-	"fmt"
 	"net/url"
+	"strings"
 	"syscall/js"
+
+	"cogentcore.org/core/base/errors"
 )
 
 // firstContent is the first [Content] used for [Content.getWebURL] or [Content.saveWebURL],
@@ -17,6 +19,22 @@ import (
 var firstContent *Content
 
 var documentData = js.Global().Get("document").Get("documentElement").Get("dataset")
+
+// getWebURL returns the current relative web URL that should be passed to [Content.Open]
+// on startup and in [Content.handleWebPopState].
+func (ct *Content) getWebURL() string {
+	if firstContent == nil {
+		firstContent = ct
+	}
+	if firstContent != ct {
+		return ""
+	}
+	full, base, err := getURL()
+	if errors.Log(err) != nil {
+		return ""
+	}
+	return strings.TrimPrefix(full.String(), base.String())
+}
 
 // saveWebURL saves the current page URL to the user's address bar and history.
 func (ct *Content) saveWebURL() {
@@ -36,8 +54,7 @@ func (ct *Content) saveWebURL() {
 // handleWebPopState adds a JS event listener to handle user navigation in the browser.
 func (ct *Content) handleWebPopState() {
 	js.Global().Get("window").Call("addEventListener", "popstate", js.FuncOf(func(this js.Value, args []js.Value) any {
-		full, base, err := getURL()
-		fmt.Println(full, base, err)
+		ct.Open(ct.getWebURL())
 		return nil
 	}))
 }

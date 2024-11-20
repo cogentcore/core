@@ -6,5 +6,6 @@
 
 package content
 
+func (ct *Content) getWebURL() string  { return "" }
 func (ct *Content) saveWebURL()        {}
 func (ct *Content) handleWebPopState() {}
