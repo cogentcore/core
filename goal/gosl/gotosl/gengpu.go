@@ -7,7 +7,10 @@ package gotosl
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
+
+	"golang.org/x/exp/maps"
 )
 
 // genSysName is the name to use for system in generating code.
@@ -52,7 +55,11 @@ var UseGPU bool
 
 	b.WriteString(fmt.Sprintf(header, st.Package, st.Config.Output))
 
-	for _, sy := range st.Systems {
+	sys := maps.Keys(st.Systems)
+	slices.Sort(sys)
+
+	for _, synm := range sys {
+		sy := st.Systems[synm]
 		b.WriteString(fmt.Sprintf("// %s is a GPU compute System with kernels operating on the\n// same set of data variables.\n", st.genSysVar(sy)))
 		b.WriteString(fmt.Sprintf("var %s *gpu.ComputeSystem\n", st.genSysVar(sy)))
 	}
@@ -67,7 +74,8 @@ const (
 	b.WriteString(venum)
 
 	vidx := 0
-	for _, sy := range st.Systems {
+	for _, synm := range sys {
+		sy := st.Systems[synm]
 		for _, gp := range sy.Groups {
 			for _, vr := range gp.Vars {
 				b.WriteString(fmt.Sprintf("\t%sVar GPUVars = %d\n", vr.Name, vidx))
@@ -91,7 +99,8 @@ func GPUInit() {
 
 	b.WriteString(initf)
 
-	for _, sy := range st.Systems {
+	for _, synm := range sys {
+		sy := st.Systems[synm]
 		b.WriteString(st.GenGPUSystemInit(sy))
 	}
 	b.WriteString("}\n\n")
@@ -103,13 +112,15 @@ func GPURelease() {
 
 	b.WriteString(release)
 
-	for _, sy := range st.Systems {
+	for _, synm := range sys {
+		sy := st.Systems[synm]
 		b.WriteString(fmt.Sprintf("\t%s.Release()\n", st.genSysVar(sy)))
 	}
 	b.WriteString("\tComputeGPU.Release()\n")
 	b.WriteString("}\n\n")
 
-	for _, sy := range st.Systems {
+	for _, synm := range sys {
+		sy := st.Systems[synm]
 		b.WriteString(st.GenGPUSystemOps(sy))
 	}
 
@@ -127,7 +138,11 @@ func (st *State) GenGPUSystemInit(sy *System) string {
 	b.WriteString("\t{\n")
 	b.WriteString(fmt.Sprintf("\t\tsy := gpu.NewComputeSystem(gp, %q)\n", sy.Name))
 	b.WriteString(fmt.Sprintf("\t\t%s = sy\n", syvar))
-	for _, kn := range sy.Kernels {
+
+	kns := maps.Keys(sy.Kernels)
+	slices.Sort(kns)
+	for _, knm := range kns {
+		kn := sy.Kernels[knm]
 		b.WriteString(fmt.Sprintf("\t\tgpu.NewComputePipelineShaderFS(shaders, %q, sy)\n", kn.Filename))
 	}
 	b.WriteString("\t\tvars := sy.Vars()\n")
@@ -237,7 +252,10 @@ func %[1]sToGPU(vars ...GPUVars) {
 		switch vr {
 `
 
-	for _, kn := range sy.Kernels {
+	kns := maps.Keys(sy.Kernels)
+	slices.Sort(kns)
+	for _, knm := range kns {
+		kn := sy.Kernels[knm]
 		b.WriteString(fmt.Sprintf(run, kn.Name, syvar, synm))
 	}
 	b.WriteString(fmt.Sprintf(runDone, synm, syvar))

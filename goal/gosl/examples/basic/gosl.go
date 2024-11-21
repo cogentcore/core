@@ -42,8 +42,8 @@ func GPUInit() {
 	{
 		sy := gpu.NewComputeSystem(gp, "Default")
 		GPUSystem = sy
-		gpu.NewComputePipelineShaderFS(shaders, "shaders/Compute.wgsl", sy)
 		gpu.NewComputePipelineShaderFS(shaders, "shaders/Atomic.wgsl", sy)
+		gpu.NewComputePipelineShaderFS(shaders, "shaders/Compute.wgsl", sy)
 		vars := sy.Vars()
 		{
 			sgp := vars.AddGroup(gpu.Storage)
@@ -167,6 +167,9 @@ func RunDone(syncVars ...GPUVars) {
 
 // ToGPU copies given variables to the GPU for the system.
 func ToGPU(vars ...GPUVars) {
+	if !UseGPU {
+		return
+	}
 	sy := GPUSystem
 	syVars := sy.Vars()
 	for _, vr := range vars {

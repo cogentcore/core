@@ -123,6 +123,9 @@ func RunDone(syncVars ...GPUVars) {
 
 // ToGPU copies given variables to the GPU for the system.
 func ToGPU(vars ...GPUVars) {
+	if !UseGPU {
+		return
+	}
 	sy := GPUSystem
 	syVars := sy.Vars()
 	for _, vr := range vars {
