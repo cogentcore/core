@@ -163,6 +163,9 @@ func findAll(start *Node, find string, ignoreCase, regExp bool, langs []fileinfo
 		if strings.HasSuffix(info.Name(), ".code") { // exclude self
 			return nil
 		}
+		if fileinfo.IsGeneratedFile(path) {
+			return nil
+		}
 		if len(langs) > 0 {
 			mtyp, _, err := fileinfo.MimeFromFile(path)
 			if err != nil {

@@ -149,13 +149,13 @@ func (sy *ComputeSystem) EndComputePass() error {
 	cmd := sy.CommandEncoder
 	sy.ComputeEncoder = nil
 	sy.CommandEncoder = nil
+	ce.Release() // must happen before Finish
 	cmdBuffer, err := cmd.Finish(nil)
 	if errors.Log(err) != nil {
 		return err
 	}
 	sy.device.Queue.Submit(cmdBuffer)
 	cmdBuffer.Release()
-	ce.Release()
 	cmd.Release()
 	return nil
 }
