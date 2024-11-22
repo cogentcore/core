@@ -112,12 +112,26 @@ func GPURelease() {
 
 	b.WriteString(release)
 
+	sysRelease := `	if %[1]s != nil {
+		%[1]s.Release()
+		%[1]s = nil
+	}
+`
+
 	for _, synm := range sys {
 		sy := st.Systems[synm]
-		b.WriteString(fmt.Sprintf("\t%s.Release()\n", st.genSysVar(sy)))
+		b.WriteString(fmt.Sprintf(sysRelease, st.genSysVar(sy)))
 	}
-	b.WriteString("\tComputeGPU.Release()\n")
-	b.WriteString("}\n\n")
+
+	gpuRelease := `
+	if ComputeGPU != nil {
+		ComputeGPU.Release()
+		ComputeGPU = nil
+	}
+}
+
+`
+	b.WriteString(gpuRelease)
 
 	for _, synm := range sys {
 		sy := st.Systems[synm]
