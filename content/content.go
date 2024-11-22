@@ -124,6 +124,11 @@ func (ct *Content) Init() {
 			})
 		})
 	})
+
+	// Must be done after the default title is set elsewhere in normal OnShow
+	ct.OnFinal(events.Show, func(e events.Event) {
+		ct.setStageTitle()
+	})
 	ct.handleWebPopState()
 }
 
