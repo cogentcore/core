@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package content
+// Package bcontent ("base content") provides base types and functions
+// shared by both content and the core build tool for content. This is
+// necessary to ensure that the core build tool does not import GUI packages.
+package bcontent
 
 import (
 	"bufio"

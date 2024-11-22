@@ -15,6 +15,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
+	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
@@ -38,29 +39,29 @@ type Content struct {
 	Context *htmlcore.Context `set:"-"`
 
 	// pages are the pages that constitute the content.
-	pages []*Page
+	pages []*bcontent.Page
 
 	// pagesByName has the [Page] for each [Page.Name] transformed into lowercase.
-	pagesByName map[string]*Page
+	pagesByName map[string]*bcontent.Page
 
 	// pagesByURL has the [Page] for each [Page.URL].
-	pagesByURL map[string]*Page
+	pagesByURL map[string]*bcontent.Page
 
 	// pagesByCategory has the [Page]s for each of all [Page.Categories].
-	pagesByCategory map[string][]*Page
+	pagesByCategory map[string][]*bcontent.Page
 
 	// history is the history of pages that have been visited.
 	// The oldest page is first.
-	history []*Page
+	history []*bcontent.Page
 
 	// historyIndex is the current position in [Content.history].
 	historyIndex int
 
 	// currentPage is the currently open page.
-	currentPage *Page
+	currentPage *bcontent.Page
 
 	// renderedPage is the most recently rendered page.
-	renderedPage *Page
+	renderedPage *bcontent.Page
 
 	// leftFrame is the frame on the left side of the widget,
 	// used for displaying the table of contents.
@@ -129,10 +130,10 @@ func (ct *Content) Init() {
 // SetSource sets the source filesystem for the content.
 func (ct *Content) SetSource(source fs.FS) *Content {
 	ct.Source = source
-	ct.pages = []*Page{}
-	ct.pagesByName = map[string]*Page{}
-	ct.pagesByURL = map[string]*Page{}
-	ct.pagesByCategory = map[string][]*Page{}
+	ct.pages = []*bcontent.Page{}
+	ct.pagesByName = map[string]*bcontent.Page{}
+	ct.pagesByURL = map[string]*bcontent.Page{}
+	ct.pagesByCategory = map[string][]*bcontent.Page{}
 	errors.Log(fs.WalkDir(ct.Source, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -140,7 +141,7 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		if path == "" || path == "." {
 			return nil
 		}
-		pg, err := NewPage(ct.Source, path)
+		pg, err := bcontent.NewPage(ct.Source, path)
 		if err != nil {
 			return err
 		}
