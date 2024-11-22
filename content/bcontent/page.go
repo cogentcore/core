@@ -52,7 +52,7 @@ type Page struct {
 	Categories []string
 }
 
-// PreRenderPage contains the data printed in JSON by a content app
+// PreRenderPage contains the data for each page printed in JSON by a content app
 // run with the generatehtml tag, which is then handled by the core
 // build tool.
 type PreRenderPage struct {

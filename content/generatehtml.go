@@ -13,8 +13,8 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/jsonx"
+	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/pages/ppath"
 	"cogentcore.org/core/tree"
 )
 
@@ -39,31 +39,29 @@ func init() {
 			fmt.Println(core.GenerateHTML(n.(core.Widget))) // basic fallback
 			os.Exit(0)
 		}
-		data := &ppath.PreRenderData{
-			Description: map[string]string{},
-			HTML:        map[string]string{},
-		}
+		prps := []*bcontent.PreRenderPage{}
 		ct.UpdateTree() // need initial update first
 		for _, pg := range ct.pages {
 			ct.Open(pg.URL)
-			data.HTML[pg.URL] = core.GenerateHTML(ct)
-			desc := ""
+			prp := &bcontent.PreRenderPage{
+				Page: *pg,
+				HTML: core.GenerateHTML(ct),
+			}
 			// The first non-emphasized paragraph is used as the description
 			// (<em> typically indicates a note or caption, not an introduction).
 			ct.WalkDown(func(n tree.Node) bool {
-				if desc != "" {
+				if prp.Description != "" {
 					return tree.Break
 				}
 				if tx, ok := n.(*core.Text); ok {
 					if tx.Property("tag") == "p" && !strings.HasPrefix(tx.Text, "<em>") {
-						desc = tx.Text
+						prp.Description = tx.Text
 						return tree.Break
 					}
 				}
 				return tree.Continue
 			})
-			data.Description[pg.URL] = desc
 		}
-		fmt.Println(string(errors.Log1(jsonx.WriteBytes(data))))
+		fmt.Println(string(errors.Log1(jsonx.WriteBytes(prps))))
 	})
 }
