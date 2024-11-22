@@ -9,6 +9,7 @@ package content
 //go:generate core generate
 
 import (
+	"fmt"
 	"io/fs"
 	"strconv"
 	"strings"
@@ -186,12 +187,14 @@ func (ct *Content) Open(url string) *Content {
 // open opens the page with the given URL and updates the display.
 // It optionally adds the page to the history.
 func (ct *Content) open(url string, history bool) {
+	url, heading, _ := strings.Cut(url, "#")
 	pg, ok := ct.pagesByURL[url]
 	if !ok {
 		core.TheApp.OpenURL(url)
 		return
 	}
 	if ct.currentPage == pg {
+		ct.openHeading(heading)
 		return
 	}
 	ct.currentPage = pg
@@ -202,6 +205,14 @@ func (ct *Content) open(url string, history bool) {
 	}
 	ct.Scene.Update() // need to update the whole scene to also update the toolbar
 	ct.setStageTitle()
+	ct.openHeading(heading)
+}
+
+func (ct *Content) openHeading(heading string) {
+	if heading == "" {
+		return
+	}
+	fmt.Println("open", heading)
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
