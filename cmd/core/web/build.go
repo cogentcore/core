@@ -8,7 +8,6 @@ package web
 import (
 	"crypto/sha1"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -20,7 +19,7 @@ import (
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/pages/ppath"
+	"cogentcore.org/core/content/bcontent"
 	strip "github.com/grokify/html-strip-tags-go"
 )
 
@@ -111,23 +110,30 @@ func makeFiles(c *config.Config) error {
 			return err
 		}
 	}
-	preRenderHTMLIndex := preRenderHTML
-	preRenderDescriptionIndex := ""
-	pagesPreRenderData := &ppath.PreRenderData{}
+	prindex := &bcontent.PreRenderPage{
+		HTML: preRenderHTML,
+	}
+	prps := []*bcontent.PreRenderPage{}
 	if strings.HasPrefix(preRenderHTML, "{") {
-		err := jsonx.Read(pagesPreRenderData, strings.NewReader(preRenderHTML))
+		err := jsonx.Read(prps, strings.NewReader(preRenderHTML))
 		if err != nil {
 			return err
-		}
-		preRenderHTMLIndex = pagesPreRenderData.HTML[""]
-		if c.About == "" {
-			preRenderDescriptionIndex = pagesPreRenderData.Description[""]
 		}
 		if c.Pages == "" {
 			c.Pages = "content"
 		}
 	}
-	iht, err := makeIndexHTML(c, "", "", preRenderDescriptionIndex, preRenderHTMLIndex)
+	for _, prp := range prps {
+		if prp.URL == "" {
+			prindex = prp
+			break
+		}
+	}
+	prindex.Name = c.Name
+	if c.About != "" {
+		prindex.Description = c.About
+	}
+	iht, err := makeIndexHTML(c, "", prindex)
 	if err != nil {
 		return err
 	}
@@ -137,7 +143,7 @@ func makeFiles(c *config.Config) error {
 	}
 
 	if c.Pages != "" {
-		err := makePages(c, pagesPreRenderData)
+		err := makePages(c, prps)
 		if err != nil {
 			return err
 		}
@@ -168,43 +174,21 @@ func makeFiles(c *config.Config) error {
 
 // makePages makes a directory structure of pages for
 // the core pages located at [config.Config.Pages].
-func makePages(c *config.Config, preRenderData *ppath.PreRenderData) error {
-	return filepath.WalkDir(c.Pages, func(path string, d fs.DirEntry, err error) error {
+func makePages(c *config.Config, prps []*bcontent.PreRenderPage) error {
+	for _, prp := range prps {
+		if prp.URL == "" { // exclude root index (already handled)
+			continue
+		}
+		opath := filepath.Join(c.Build.Output, prp.URL)
+		err := os.MkdirAll(opath, 0777)
 		if err != nil {
 			return err
 		}
-		if d.IsDir() {
-			return nil
-		}
-		if filepath.Ext(path) != ".md" {
-			return nil
-		}
-		path = strings.ReplaceAll(path, `\`, "/")
-		path = strings.TrimSuffix(path, "index.md")
-		path = strings.TrimSuffix(path, ".md")
-		path = strings.TrimPrefix(path, c.Pages)
-		path = strings.TrimPrefix(path, "/")
-		path = strings.TrimSuffix(path, "/")
-		if ppath.Draft(path) {
-			return nil
-		}
-		path = ppath.Format(path)
-		if path == "" { // exclude root index
-			return nil
-		}
-		opath := filepath.Join(c.Build.Output, path)
-		err = os.MkdirAll(opath, 0777)
-		if err != nil {
-			return err
-		}
-		title := ppath.Label(path, c.Name)
-		if title != c.Name {
-			title += " • " + c.Name
-		}
-		b, err := makeIndexHTML(c, ppath.BasePath(path), title, preRenderData.Description[path], preRenderData.HTML[path])
+		b, err := makeIndexHTML(c, "../", prp)
 		if err != nil {
 			return err
 		}
 		return os.WriteFile(filepath.Join(opath, "index.html"), b, 0666)
-	})
+	}
+	return nil
 }
