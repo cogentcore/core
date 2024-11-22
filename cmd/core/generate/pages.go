@@ -22,7 +22,7 @@ import (
 
 // Pages does any necessary generation for pages.
 func Pages(c *config.Config) error {
-	if c.Pages == "" {
+	if c.Content == "" {
 		return nil
 	}
 	examples, err := getPagesExamples(c)
@@ -35,7 +35,7 @@ func Pages(c *config.Config) error {
 // getPagesExamples collects and returns all of the pages examples.
 func getPagesExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 	var examples ordmap.Map[string, []byte]
-	err := filepath.WalkDir(c.Pages, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(c.Content, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -83,7 +83,7 @@ func getPagesExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				if curExample == nil {
 					continue
 				}
-				rel, err := filepath.Rel(c.Pages, path)
+				rel, err := filepath.Rel(c.Content, path)
 				if err != nil {
 					return err
 				}

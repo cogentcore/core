@@ -50,14 +50,11 @@ type Config struct { //types:add
 	// the version of the project to release
 	Version string `cmd:"release" posarg:"0" save:"-"`
 
-	// Pages, if specified, indicates that the app has core
-	// pages located at this directory. If so, markdown code blocks with
-	// language Go (must be uppercase, as that indicates that is an
-	// "exported" example) will be collected and stored at pagegen.go, and
-	// a directory tree will be made for all of the pages when building
-	// for platform web. This defaults to "content" when building an app
-	// for platform web that imports pages.
-	Pages string
+	// Content, if specified, indicates that the app has core content pages
+	// located at this directory. If so, a directory tree will be made for all
+	// of the pages when building for platform web. This defaults to "content"
+	// when building an app for platform web that imports content.
+	Content string
 
 	// the configuration options for the build, install, run, and pack commands
 	Build Build `cmd:"build,install,run,pack"`

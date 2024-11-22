@@ -119,8 +119,8 @@ func makeFiles(c *config.Config) error {
 		if err != nil {
 			return err
 		}
-		if c.Pages == "" {
-			c.Pages = "content"
+		if c.Content == "" {
+			c.Content = "content"
 		}
 	}
 	for _, prp := range prps {
@@ -142,7 +142,7 @@ func makeFiles(c *config.Config) error {
 		return err
 	}
 
-	if c.Pages != "" {
+	if c.Content != "" {
 		err := makePages(c, prps)
 		if err != nil {
 			return err
