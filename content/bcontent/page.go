@@ -24,10 +24,10 @@ import (
 type Page struct {
 
 	// Source is the filesystem that the page is stored in.
-	Source fs.FS `toml:"-"`
+	Source fs.FS `toml:"-" json:"-"`
 
 	// Filename is the name of the file in [Page.FS] that the content is stored in.
-	Filename string `toml:"-"`
+	Filename string `toml:"-" json:"-"`
 
 	// Name is the user-friendly name of the page, defaulting to the
 	// [strcase.ToSentence] of the [Page.Filename] without its extension.
@@ -50,6 +50,19 @@ type Page struct {
 
 	// Categories are the categories that the page belongs to.
 	Categories []string
+}
+
+// PreRenderPage contains the data printed in JSON by a content app
+// run with the generatehtml tag, which is then handled by the core
+// build tool.
+type PreRenderPage struct {
+	Page
+
+	// Description is the automatic page description.
+	Description string
+
+	// HTML is the pre-rendered HTML for the page.
+	HTML string
 }
 
 // NewPage makes a new page in the given filesystem with the given filename,
