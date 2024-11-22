@@ -196,6 +196,7 @@ func (ct *Content) open(url string, history bool) {
 		ct.saveWebURL()
 	}
 	ct.Scene.Update() // need to update the whole scene to also update the toolbar
+	ct.setStageTitle()
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
@@ -267,6 +268,17 @@ func (ct *Content) makeCategories() {
 				ct.Open(pg.URL)
 			})
 		}
+	}
+}
+
+// setStageTitle sets the title of the stage based on the current page URL.
+func (ct *Content) setStageTitle() {
+	if rw := ct.Scene.RenderWindow(); rw != nil {
+		name := ct.currentPage.Name
+		if ct.currentPage.URL == "" { // Root page just gets app name
+			name = core.TheApp.Name()
+		}
+		rw.SetStageTitle(name)
 	}
 }
 
