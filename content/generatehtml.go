@@ -61,6 +61,7 @@ func init() {
 				}
 				return tree.Continue
 			})
+			prps = append(prps, prp)
 		}
 		fmt.Println(string(errors.Log1(jsonx.WriteBytes(prps))))
 	})

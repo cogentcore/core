@@ -114,8 +114,8 @@ func makeFiles(c *config.Config) error {
 		HTML: preRenderHTML,
 	}
 	prps := []*bcontent.PreRenderPage{}
-	if strings.HasPrefix(preRenderHTML, "{") {
-		err := jsonx.Read(prps, strings.NewReader(preRenderHTML))
+	if strings.HasPrefix(preRenderHTML, "[{") {
+		err := jsonx.Read(&prps, strings.NewReader(preRenderHTML))
 		if err != nil {
 			return err
 		}
@@ -188,7 +188,10 @@ func makePages(c *config.Config, prps []*bcontent.PreRenderPage) error {
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(filepath.Join(opath, "index.html"), b, 0666)
+		err = os.WriteFile(filepath.Join(opath, "index.html"), b, 0666)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
