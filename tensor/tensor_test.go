@@ -5,7 +5,6 @@
 package tensor
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -396,28 +395,28 @@ func TestSliced(t *testing.T) {
 		}
 	}
 
-	res := `[3, 4]
-	[0]:	[1]:	[2]:	[3]:	
-[0]:	0	1	2	3	
-[1]:	10	11	12	13	
-[2]:	20	21	22	23	
+	res := `[3 4]
+    [0] [1] [2] [3] 
+[0]   0   1   2   3 
+[1]  10  11  12  13 
+[2]  20  21  22  23 
 `
 	assert.Equal(t, res, ft.String())
 
-	res = `[2, 2]
-	[0]:	[1]:	
-[0]:	23	22	
-[1]:	13	12	
+	res = `[2 2]
+    [0] [1] 
+[0]  23  22 
+[1]  13  12 
 `
 	sl := NewSliced(ft, []int{2, 1}, []int{3, 2})
 	assert.Equal(t, res, sl.String())
 
 	vl := sl.AsValues()
 	assert.Equal(t, res, vl.String())
-	res = `[3, 1]
-[0]:	2	
-[1]:	12	
-[2]:	22	
+	res = `[3 1]
+[0]  2 
+[1] 12 
+[2] 22 
 `
 	sl2 := Reslice(ft, FullAxis, Slice{2, 3, 0})
 	assert.Equal(t, res, sl2.String())
@@ -436,11 +435,11 @@ func TestMasked(t *testing.T) {
 	}
 	ms := NewMasked(ft)
 
-	res := `[3, 4]
-	[0]:	[1]:	[2]:	[3]:	
-[0]:	0	1	2	3	
-[1]:	10	11	12	13	
-[2]:	20	21	22	23	
+	res := `[3 4]
+    [0] [1] [2] [3] 
+[0]   0   1   2   3 
+[1]  10  11  12  13 
+[2]  20  21  22  23 
 `
 	assert.Equal(t, res, ms.String())
 
@@ -448,15 +447,15 @@ func TestMasked(t *testing.T) {
 		val := tsr.Float1D(idx)
 		return int(val)%10 == 2
 	})
-	res = `[3, 4]
-	[0]:	[1]:	[2]:	[3]:	
-[0]:	NaN	NaN	2	NaN	
-[1]:	NaN	NaN	12	NaN	
-[2]:	NaN	NaN	22	NaN	
+	res = `[3 4]
+    [0] [1] [2] [3] 
+[0] NaN NaN   2 NaN 
+[1] NaN NaN  12 NaN 
+[2] NaN NaN  22 NaN 
 `
 	assert.Equal(t, res, ms.String())
 
-	res = `[3] 2	12	22	
+	res = `[3]  2 12 22 
 `
 	vl := ms.AsValues()
 	assert.Equal(t, res, vl.String())
@@ -484,12 +483,13 @@ func TestIndexed(t *testing.T) {
 	ixs.SetShapeSizes(2, 2, 2, 2)
 	ix := NewIndexed(ft, ixs)
 
-	res := `[2, 2, 2]
-	[0 0]:	[0 1]:	[0 0]:	[0 1]:	
-[0]:	1	1	11	11	
-[0]:	2	2	22	22	
+	res := `[2 2 2]
+[r r c] [0] [1] 
+[0 0]     1   1 
+[0 1]     2   2 
+[1 0]    11  11 
+[1 1]    22  22 
 `
-	fmt.Println(ix.String())
 	assert.Equal(t, res, ix.String())
 
 	vl := ix.AsValues()
@@ -505,37 +505,36 @@ func TestReshaped(t *testing.T) {
 		}
 	}
 
-	res := `[4, 3]
-	[0]:	[1]:	[2]:	
-[0]:	0	1	2	
-[1]:	3	10	11	
-[2]:	12	13	20	
-[3]:	21	22	23	
+	res := `[4 3]
+    [0] [1] [2] 
+[0]   0   1   2 
+[1]   3  10  11 
+[2]  12  13  20 
+[3]  21  22  23 
 `
 	rs := NewReshaped(ft, 4, 3)
 	assert.Equal(t, res, rs.String())
 
-	res = `[1, 3, 4]
-	[0 0]:	[0 1]:	[0 2]:	[0 3]:	
-[0]:	0	1	2	3	
-[0]:	10	11	12	13	
-[0]:	20	21	22	23	
+	res = `[1 3 4]
+[r r c] [0] [1] [2] [3] 
+[0 0]     0   1   2   3 
+[0 1]    10  11  12  13 
+[0 2]    20  21  22  23 
 `
 	rs = NewReshaped(ft, int(NewAxis), 3, 4)
 	assert.Equal(t, res, rs.String())
 
-	res = `[12]
-[0]:	0	1	2	3	10	11	12	13	20	21	22	23	
+	res = `[12]  0  1  2  3 10 11 12 13 20 21 22 23 
 `
 	rs = NewReshaped(ft, -1)
 	assert.Equal(t, res, rs.String())
 
-	res = `[4, 3]
-	[0]:	[1]:	[2]:	
-[0]:	0	1	2	
-[1]:	3	10	11	
-[2]:	12	13	20	
-[3]:	21	22	23	
+	res = `[4 3]
+    [0] [1] [2] 
+[0]   0   1   2 
+[1]   3  10  11 
+[2]  12  13  20 
+[3]  21  22  23 
 `
 	rs = NewReshaped(ft, 4, -1)
 	assert.Equal(t, res, rs.String())
@@ -543,14 +542,13 @@ func TestReshaped(t *testing.T) {
 	err := rs.SetShapeSizes(5, -1)
 	assert.Error(t, err)
 
-	res = `[3, 4]
-	[0]:	[3]:	[2]:	[1]:	
-[0]:	0	3	12	21	
-[0]:	1	10	13	22	
-[0]:	2	11	20	23	
+	res = `[3 4]
+    [0] [3] [2] [1] 
+[0]   0   3  12  21 
+[0]   1  10  13  22 
+[0]   2  11  20  23 
 `
 	tr := Transpose(ft)
-	// fmt.Println(tr)
 	assert.Equal(t, res, tr.String())
 
 }
