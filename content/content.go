@@ -9,6 +9,7 @@ package content
 //go:generate core generate
 
 import (
+	"fmt"
 	"io/fs"
 	"strconv"
 	"strings"
@@ -227,7 +228,12 @@ func (ct *Content) openHeading(heading string) {
 	if heading == "" {
 		return
 	}
-	ct.tocNodes[strings.ToLower(heading)].SelectEvent(events.SelectOne)
+	tr := ct.tocNodes[strings.ToLower(heading)]
+	if tr == nil {
+		errors.Log(fmt.Errorf("heading %q not found", heading))
+		return
+	}
+	tr.SelectEvent(events.SelectOne)
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
