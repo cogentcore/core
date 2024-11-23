@@ -22,7 +22,7 @@ Even though Cogent Core is written in Go, a compiled language, it uses the inter
 
 ## Apps
 
-*Main article: [[Apps]]*
+*Main article: [[App]]*
 
 The first call in every **app** is [[doc:core.NewBody]]. This creates and returns a new [[doc:core.Body]], which is a container in which app content is placed. This takes an optional name, which is used for the title of the app/window/tab.
 
@@ -48,7 +48,7 @@ For most of the code examples on this website, we will omit the outer structure 
 
 ## Widgets
 
-*Main article: [[Widgets]]*
+*Main article: [[Widget]]*
 
 All app content is organized into **widgets**, which are reusable app components that render, store information, and handle [[#events|events]]. All widgets satisfy the [[doc:core.Widget]] interface.
 
@@ -72,7 +72,7 @@ bt.SetText("New text")
 
 ## Events
 
-*Main article: [[Events]]*
+*Main article: [[Event]]*
 
 **Events** are user actions that you can process. To handle an event, simply call the `On{EventType}` method on any [[#widgets|widget]]. For example:
 
@@ -87,5 +87,37 @@ The [[doc:events.Event]] object passed to the function can be used for things su
 ```Go
 core.NewButton(b).SetText("Click me!").OnClick(func(e events.Event) {
     core.MessageSnackbar(b, fmt.Sprint("Button clicked at ", e.Pos()))
+})
+```
+
+## Styling
+
+*Main article: [[Styling]]*
+
+**Styling** allows you to easily customize the appearance of [[#widgets|widgets]] at any level.
+
+You can change any style properties of a widget:
+
+```Go
+core.NewText(b).SetText("Bold text").Styler(func(s *styles.Style) {
+    s.Font.Weight = styles.WeightBold
+})
+```
+
+You can change the [[color]]s of a widget using Cogent Core's dynamic [[color#scheme|color scheme]] system:
+
+```Go
+core.NewButton(b).SetText("Success button").Styler(func(s *styles.Style) {
+    s.Background = colors.Scheme.Success.Base
+    s.Color = colors.Scheme.Success.On
+})
+```
+
+You can change the size of a widget using Cogent Core's flexible [[unit]] system:
+
+```Go
+core.NewFrame(b).Styler(func(s *styles.Style) {
+    s.Min.Set(units.Dp(50))
+    s.Background = colors.Scheme.Primary.Base
 })
 ```
