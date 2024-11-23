@@ -93,6 +93,7 @@ func (ct *Content) Init() {
 		if !has {
 			label = text
 		}
+		label = strings.ReplaceAll(label, "#", " § ")
 		name, heading, _ := strings.Cut(name, "#")
 		if pg, ok := ct.pagesByName[strings.ToLower(name)]; ok {
 			if heading != "" {
