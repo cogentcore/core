@@ -90,7 +90,11 @@ func (ct *Content) Init() {
 		if !has {
 			label = text
 		}
+		name, heading, _ := strings.Cut(name, "#")
 		if pg, ok := ct.pagesByName[strings.ToLower(name)]; ok {
+			if heading != "" {
+				return pg.URL + "#" + heading, label
+			}
 			return pg.URL, label
 		}
 		return "", ""
