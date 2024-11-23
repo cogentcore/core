@@ -31,7 +31,7 @@ import (
 )
 
 //go:embed content
-var contentFS embed.FS
+var econtent embed.FS
 
 //go:embed *.svg name.png weld-icon.png
 var resources embed.FS
@@ -55,7 +55,7 @@ func main() {
 
 func main() {
 	b := core.NewBody("Cogent Core Docs")
-	ct := content.NewContent(b).SetContent(contentFS)
+	ct := content.NewContent(b).SetContent(econtent)
 	ct.Context.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))
 	b.AddTopBar(func(bar *core.Frame) {
 		tb := core.NewToolbar(bar)
@@ -100,7 +100,7 @@ func main() {
 		})
 	})
 
-	symbols.Symbols["."]["content"] = reflect.ValueOf(contentFS)
+	symbols.Symbols["."]["econtent"] = reflect.ValueOf(econtent)
 	symbols.Symbols["."]["myImage"] = reflect.ValueOf(myImage)
 	symbols.Symbols["."]["mySVG"] = reflect.ValueOf(mySVG)
 	symbols.Symbols["."]["myFile"] = reflect.ValueOf(myFile)

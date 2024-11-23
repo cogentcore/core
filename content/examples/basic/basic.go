@@ -14,11 +14,11 @@ import (
 )
 
 //go:embed content
-var fsys embed.FS
+var econtent embed.FS
 
 func main() {
 	b := core.NewBody("Cogent Content Example")
-	ct := content.NewContent(b).SetContent(fsys)
+	ct := content.NewContent(b).SetContent(econtent)
 	ct.Context.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))
 	b.AddTopBar(func(bar *core.Frame) {
 		core.NewToolbar(bar).Maker(ct.MakeToolbar)
