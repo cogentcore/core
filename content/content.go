@@ -198,6 +198,10 @@ func (ct *Content) Open(url string) *Content {
 // open opens the page with the given URL and updates the display.
 // It optionally adds the page to the history.
 func (ct *Content) open(url string, history bool) {
+	if strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://") {
+		core.TheApp.OpenURL(url)
+		return
+	}
 	url, heading, _ := strings.Cut(url, "#")
 	pg, ok := ct.pagesByURL[url]
 	if !ok {
