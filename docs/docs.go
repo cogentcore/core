@@ -16,12 +16,12 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/content"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
@@ -31,7 +31,7 @@ import (
 )
 
 //go:embed content
-var content embed.FS
+var contentFS embed.FS
 
 //go:embed *.svg name.png weld-icon.png
 var resources embed.FS
@@ -55,52 +55,52 @@ func main() {
 
 func main() {
 	b := core.NewBody("Cogent Core Docs")
-	pg := pages.NewPage(b).SetContent(content)
-	// htmlcore.WikilinkBaseURL = "cogentcore.org/core"
+	ct := content.NewContent(b).SetContent(contentFS)
+	ct.Context.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))
 	b.AddTopBar(func(bar *core.Frame) {
 		tb := core.NewToolbar(bar)
-		tb.Maker(pg.MakeToolbar)
+		tb.Maker(ct.MakeToolbar)
 		tb.Maker(func(p *tree.Plan) {
 			tree.Add(p, func(w *core.Button) {
 				w.SetText("Playground").SetIcon(icons.PlayCircle)
 				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("/playground")
+					ct.Open("/playground")
 				})
 			})
 			tree.Add(p, func(w *core.Button) {
 				w.SetText("Videos").SetIcon(icons.VideoLibrary)
 				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("https://youtube.com/@CogentCore")
+					ct.Open("https://youtube.com/@CogentCore")
 				})
 			})
 			tree.Add(p, func(w *core.Button) {
 				w.SetText("Blog").SetIcon(icons.RssFeed)
 				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("https://cogentcore.org/blog")
+					ct.Open("https://cogentcore.org/blog")
 				})
 			})
 			tree.Add(p, func(w *core.Button) {
 				w.SetText("GitHub").SetIcon(icons.GitHub)
 				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("https://github.com/cogentcore/core")
+					ct.Open("https://github.com/cogentcore/core")
 				})
 			})
 			tree.Add(p, func(w *core.Button) {
 				w.SetText("Community").SetIcon(icons.Forum)
 				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("https://cogentcore.org/community")
+					ct.Open("https://cogentcore.org/community")
 				})
 			})
 			tree.Add(p, func(w *core.Button) {
 				w.SetText("Sponsor").SetIcon(icons.Favorite)
 				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("https://github.com/sponsors/cogentcore")
+					ct.Open("https://github.com/sponsors/cogentcore")
 				})
 			})
 		})
 	})
 
-	symbols.Symbols["."]["content"] = reflect.ValueOf(content)
+	symbols.Symbols["."]["content"] = reflect.ValueOf(contentFS)
 	symbols.Symbols["."]["myImage"] = reflect.ValueOf(myImage)
 	symbols.Symbols["."]["mySVG"] = reflect.ValueOf(mySVG)
 	symbols.Symbols["."]["myFile"] = reflect.ValueOf(myFile)
