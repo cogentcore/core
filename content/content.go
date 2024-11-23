@@ -9,7 +9,6 @@ package content
 //go:generate core generate
 
 import (
-	"fmt"
 	"io/fs"
 	"strconv"
 	"strings"
@@ -67,6 +66,10 @@ type Content struct {
 	// leftFrame is the frame on the left side of the widget,
 	// used for displaying the table of contents.
 	leftFrame *core.Frame
+
+	// tocNodes are all of the tree nodes in the table of contents
+	// by heading name.
+	tocNodes map[string]*core.Tree
 }
 
 func init() {
@@ -216,7 +219,7 @@ func (ct *Content) openHeading(heading string) {
 	if heading == "" {
 		return
 	}
-	fmt.Println("open", heading)
+	ct.tocNodes[heading].SelectEvent(events.SelectOne)
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
@@ -244,6 +247,7 @@ func (ct *Content) loadPage(w *core.Frame) error {
 // makeTableOfContents makes the table of contents and adds it to [Content.leftFrame]
 // based on the headings in the given frame.
 func (ct *Content) makeTableOfContents(w *core.Frame) {
+	ct.tocNodes = map[string]*core.Tree{}
 	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
 	// last is the most recent tree node for each heading level, used for nesting.
 	last := map[int]*core.Tree{}
@@ -266,6 +270,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame) {
 			}
 			tr := core.NewTree(parent).SetText(tx.Text)
 			last[num] = tr
+			ct.tocNodes[tx.Text] = tr
 			tr.OnSelect(func(e events.Event) {
 				tx.ScrollToThis()
 			})

@@ -7,4 +7,4 @@ A **widget** is a reusable app component that renders, stores information, and h
 ## Featured widgets
 
 * [[Button]]
-    * [[Button#Events]]
+    * [[Button#Types]]
