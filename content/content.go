@@ -68,7 +68,7 @@ type Content struct {
 	leftFrame *core.Frame
 
 	// tocNodes are all of the tree nodes in the table of contents
-	// by heading name.
+	// by lowercase heading name.
 	tocNodes map[string]*core.Tree
 }
 
@@ -219,7 +219,7 @@ func (ct *Content) openHeading(heading string) {
 	if heading == "" {
 		return
 	}
-	ct.tocNodes[heading].SelectEvent(events.SelectOne)
+	ct.tocNodes[strings.ToLower(heading)].SelectEvent(events.SelectOne)
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
@@ -270,7 +270,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame) {
 			}
 			tr := core.NewTree(parent).SetText(tx.Text)
 			last[num] = tr
-			ct.tocNodes[tx.Text] = tr
+			ct.tocNodes[strings.ToLower(tx.Text)] = tr
 			tr.OnSelect(func(e events.Event) {
 				tx.ScrollToThis()
 			})
