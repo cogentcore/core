@@ -91,9 +91,9 @@ func (ct *Content) Init() {
 	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
 		name, label, has := strings.Cut(text, "|")
 		if !has {
-			label = text
+			label = strings.ReplaceAll(name, "#", " § ")
+			label = strings.TrimPrefix(label, " ")
 		}
-		label = strings.ReplaceAll(label, "#", " § ")
 		name, heading, _ := strings.Cut(name, "#")
 		if name == "" { // A link with a blank page links to the current page
 			name = ct.currentPage.Name
