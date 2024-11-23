@@ -95,6 +95,9 @@ func (ct *Content) Init() {
 		}
 		label = strings.ReplaceAll(label, "#", " § ")
 		name, heading, _ := strings.Cut(name, "#")
+		if name == "" { // A link with a blank page links to the current page
+			name = ct.currentPage.Name
+		}
 		if pg, ok := ct.pagesByName[strings.ToLower(name)]; ok {
 			if heading != "" {
 				return pg.URL + "#" + heading, label
