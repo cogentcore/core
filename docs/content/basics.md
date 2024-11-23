@@ -2,7 +2,7 @@ The **basics** are a simple overview of the key [[concepts]] of Cogent Core. We 
 
 ## Hello world
 
-This code makes a simple hello world example app using Cogent Core:
+This code makes a simple **hello world** example app:
 
 ```Go
 package main
@@ -30,7 +30,7 @@ After calling NewBody, you add content to the body that was returned, which is t
 
 Then, after adding content to your body, you can create and start a window from it using [[doc:core.Body.RunMainWindow]].
 
-Therefore, the standard structure of a Cogent Core app looks like this:
+Therefore, the standard structure of an app looks like this:
 
 ```Go
 package main
@@ -119,5 +119,36 @@ You can change the size of a widget using Cogent Core's flexible [[unit]] system
 core.NewFrame(b).Styler(func(s *styles.Style) {
     s.Min.Set(units.Dp(50))
     s.Background = colors.Scheme.Primary.Base
+})
+```
+
+## Updating
+
+*Main article: [[Updating]]*
+
+There are several ways to dynamically **update** the content of an app.
+
+The simplest way to update a [[#widgets|widget]] is to call [[doc:core.WidgetBase.Update]] after changing any of its properties:
+
+```Go
+count := 0
+text := core.NewText(b).SetText("0")
+core.NewButton(b).SetText("Increment").OnClick(func(e events.Event) {
+    count++
+    text.SetText(strconv.Itoa(count)).Update()
+})
+```
+
+You can also register a [[doc:tree.NodeBase.Updater]] that will get called when the widget is updated. This can allow you to more closely couple widgets with their updating logic:
+
+```Go
+count := 0
+text := core.NewText(b)
+text.Updater(func() {
+    text.SetText(strconv.Itoa(count))
+})
+core.NewButton(b).SetText("Increment").OnClick(func(e events.Event) {
+    count++
+    text.Update()
 })
 ```
