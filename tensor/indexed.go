@@ -120,7 +120,7 @@ func (ix *Indexed) AsValues() Values {
 	return vt
 }
 
-/////////////////////  Floats
+////////  Floats
 
 // Float returns the value of given index as a float64.
 // The indexes are indirected through the [Indexed.Indexes].
@@ -146,7 +146,7 @@ func (ix *Indexed) SetFloat1D(val float64, i int) {
 	ix.Tensor.SetFloat(val, ix.SourceIndexesFrom1D(i)...)
 }
 
-/////////////////////  Strings
+////////  Strings
 
 // StringValue returns the value of given index as a string.
 // The indexes are indirected through the [Indexed.Indexes].
@@ -172,7 +172,7 @@ func (ix *Indexed) SetString1D(val string, i int) {
 	ix.Tensor.SetString(val, ix.SourceIndexesFrom1D(i)...)
 }
 
-/////////////////////  Ints
+////////  Ints
 
 // Int returns the value of given index as an int.
 // The indexes are indirected through the [Indexed.Indexes].

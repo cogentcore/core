@@ -281,7 +281,7 @@ func (sl *Sliced) AsValues() Values {
 	return vt
 }
 
-/////////////////////  Floats
+////////  Floats
 
 // Float returns the value of given index as a float64.
 // The indexes are indirected through the [Sliced.Indexes].
@@ -307,7 +307,7 @@ func (sl *Sliced) SetFloat1D(val float64, i int) {
 	sl.Tensor.SetFloat(val, sl.SourceIndexesFrom1D(i)...)
 }
 
-/////////////////////  Strings
+////////  Strings
 
 // StringValue returns the value of given index as a string.
 // The indexes are indirected through the [Sliced.Indexes].
@@ -333,7 +333,7 @@ func (sl *Sliced) SetString1D(val string, i int) {
 	sl.Tensor.SetString(val, sl.SourceIndexesFrom1D(i)...)
 }
 
-/////////////////////  Ints
+////////  Ints
 
 // Int returns the value of given index as an int.
 // The indexes are indirected through the [Sliced.Indexes].

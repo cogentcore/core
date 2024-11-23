@@ -149,8 +149,7 @@ func (td *TensorDisplay) FromMeta(tsr tensor.Tensor) {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////
-//  	TensorGrid
+////////	TensorGrid
 
 // TensorGrid is a widget that displays tensor values as a grid of colored squares.
 type TensorGrid struct {

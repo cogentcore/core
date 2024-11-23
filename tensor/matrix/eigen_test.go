@@ -56,8 +56,7 @@ func TestPCAIris(t *testing.T) {
 		assert.InDelta(t, trgprjns[i], v, errtol)
 	}
 
-	////////////////////////////////////////////////////////////
-	//  	SVD
+	////////  SVD
 
 	err = SVDOut(covar, vecs, vals)
 	assert.NoError(t, err)

@@ -93,7 +93,7 @@ type Tensor interface {
 	// and enables all the additional functionality provided by the [Values] interface.
 	AsValues() Values
 
-	/////////////////////  Floats
+	////////  Floats
 
 	// Float returns the value of given n-dimensional index (matching Shape) as a float64.
 	Float(i ...int) float64
@@ -114,7 +114,7 @@ type Tensor interface {
 	// [Tensor.SetFloatRow] is preferred.
 	SetFloat1D(val float64, i int)
 
-	/////////////////////  Strings
+	////////  Strings
 
 	// StringValue returns the value of given n-dimensional index (matching Shape) as a string.
 	// 'String' conflicts with [fmt.Stringer], so we have to use StringValue here.
@@ -131,7 +131,7 @@ type Tensor interface {
 	// If index is negative, it indexes from the end of the list (-1 = last).
 	SetString1D(val string, i int)
 
-	/////////////////////  Ints
+	////////  Ints
 
 	// Int returns the value of given n-dimensional index (matching Shape) as a int.
 	Int(i ...int) int

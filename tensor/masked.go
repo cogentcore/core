@@ -159,7 +159,7 @@ func (ms *Masked) SourceIndexes(getTrue bool) *Int {
 	return it
 }
 
-/////////////////////  Floats
+////////  Floats
 
 func (ms *Masked) Float(i ...int) float64 {
 	if !ms.Mask.Bool(i...) {
@@ -189,7 +189,7 @@ func (ms *Masked) SetFloat1D(val float64, i int) {
 	ms.Tensor.SetFloat1D(val, i)
 }
 
-/////////////////////  Strings
+////////  Strings
 
 func (ms *Masked) StringValue(i ...int) string {
 	if !ms.Mask.Bool(i...) {
@@ -219,7 +219,7 @@ func (ms *Masked) SetString1D(val string, i int) {
 	ms.Tensor.SetString1D(val, i)
 }
 
-/////////////////////  Ints
+////////  Ints
 
 func (ms *Masked) Int(i ...int) int {
 	if !ms.Mask.Bool(i...) {

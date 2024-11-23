@@ -247,7 +247,7 @@ func FloatSetFunc(flops int, fun func(idx int) float64, a Tensor) error {
 	return nil
 }
 
-//////////////////////////	Bool
+//////// Bool
 
 // BoolStringsFunc sets boolean output value based on a function involving
 // string values from the two tensors.

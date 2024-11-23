@@ -5,6 +5,7 @@
 package tensor
 
 import (
+	"bytes"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -16,7 +17,6 @@ import (
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/math32"
 )
 
 // Delim are standard CSV delimiter options (Tab, Comma, Space)
@@ -91,8 +91,7 @@ func OpenCSV(tsr Tensor, filename fsx.Filename, delim Delims) error {
 	return ReadCSV(tsr, fp, delim)
 }
 
-//////////////////////////////////////////////////////////////////////////
-// WriteCSV
+//////// WriteCSV
 
 // WriteCSV writes a tensor to a comma-separated-values (CSV) file
 // (where comma = any delimiter, specified in the delim arg).
@@ -167,29 +166,53 @@ func label(nm string, sh *Shape) string {
 	return nm
 }
 
+// padToLength returns the given string with added spaces
+// to pad out to target length. at least 1 space will be added
+func padToLength(str string, tlen int) string {
+	slen := len(str)
+	if slen < tlen-1 {
+		return str + strings.Repeat(" ", tlen-slen)
+	}
+	return str + " "
+}
+
+// prepadToLength returns the given string with added spaces
+// to pad out to target length at start (for numbers).
+// at least 1 space will be added
+func prepadToLength(str string, tlen int) string {
+	slen := len(str)
+	if slen < tlen-1 {
+		return strings.Repeat(" ", tlen-slen-1) + str + " "
+	}
+	return str + " "
+}
+
+// MaxPrintLineWidth is the maximum line width in characters
+// to generate for tensor Sprintf function.
+var MaxPrintLineWidth = 80
+
 // Sprintf returns a string representation of the given tensor,
 // with a maximum length of as given: output is terminated
 // when it exceeds that length. If maxLen = 0, [MaxSprintLength] is used.
-// The format is the per-element format string, which should include
-// any delimiter or spacing between elements (which will apply to last
-// element too).  If empty it uses general %g or %s defaults with a tab separator.
+// The format is the per-element format string.
+// If empty it uses general %g for number or %s for string.
 func Sprintf(format string, tsr Tensor, maxLen int) string {
 	if maxLen == 0 {
 		maxLen = MaxSprintLength
 	}
-	colWd := 1 // column width in tabs
 	defFmt := format == ""
 	if defFmt {
 		switch {
 		case tsr.IsString():
-			format = "%s\t"
+			format = "%s"
 		case reflectx.KindIsInt(tsr.DataType()):
-			format = "%.10g\t"
+			format = "%.10g"
 		default:
-			format = "%.10g\t"
+			format = "%.10g"
 		}
 	}
-	if tsr.NumDims() == 1 && tsr.DimSize(0) == 1 { // scalar special case
+	nd := tsr.NumDims()
+	if nd == 1 && tsr.DimSize(0) == 1 { // scalar special case
 		if tsr.IsString() {
 			return fmt.Sprintf(format, tsr.String1D(0))
 		} else {
@@ -209,50 +232,71 @@ func Sprintf(format string, tsr Tensor, maxLen int) string {
 			mxwd = len(s)
 		}
 	}
-	colWd = int(math32.IntMultipleGE(float32(mxwd), 8)) / 8
-	sh := tsr.Shape()
-	oddRow := false
-	rows, cols, _, _ := Projection2DShape(sh, oddRow)
+	onedRow := false
+	shp := tsr.Shape()
+	rowShape, colShape, _, colIdxs := Projection2DDimShapes(shp, onedRow)
+	rows, cols, _, _ := Projection2DShape(shp, onedRow)
+
+	rowWd := len(rowShape.String()) + 1
+	legend := ""
+	if nd > 2 {
+		leg := bytes.Repeat([]byte("r "), nd)
+		for _, i := range colIdxs {
+			leg[2*i] = 'c'
+		}
+		legend = "[" + string(leg[:len(leg)-1]) + "]"
+	}
+	rowWd = max(rowWd, len(legend)+1)
+	hdrWd := len(colShape.String()) + 1
+	colWd := mxwd + 1
+
 	var b strings.Builder
 	b.WriteString(tsr.Label())
 	noidx := false
-	if tsr.NumDims() == 1 && tsr.Len() < 8 {
+	if tsr.NumDims() == 1 {
 		b.WriteString(" ")
+		rowWd = len(tsr.Label()) + 1
 		noidx = true
 	} else {
 		b.WriteString("\n")
 	}
-	if !noidx && tsr.NumDims() > 1 && cols > 1 {
-		b.WriteString("\t")
+	if !noidx && nd > 1 && cols > 1 {
+		colWd = max(colWd, hdrWd)
+		b.WriteString(padToLength(legend, rowWd))
+		totWd := rowWd
 		for c := 0; c < cols; c++ {
-			_, cc := Projection2DCoords(sh, oddRow, 0, c)
-			b.WriteString(fmt.Sprintf("%v:\t", cc))
-			if colWd > 1 {
-				b.WriteString(strings.Repeat("\t", colWd-1))
+			_, cc := Projection2DCoords(shp, onedRow, 0, c)
+			s := prepadToLength(fmt.Sprintf("%v", cc), colWd)
+			if totWd+len(s) > MaxPrintLineWidth {
+				b.WriteString("\n" + strings.Repeat(" ", rowWd))
+				totWd = rowWd
 			}
+			b.WriteString(s)
+			totWd += len(s)
 		}
 		b.WriteString("\n")
 	}
-	// todo: could do something better for large numbers of columns..
 	ctr := 0
 	for r := range rows {
-		rc, _ := Projection2DCoords(sh, oddRow, r, 0)
+		rc, _ := Projection2DCoords(shp, onedRow, r, 0)
 		if !noidx {
-			b.WriteString(fmt.Sprintf("%v:\t", rc))
+			b.WriteString(padToLength(fmt.Sprintf("%v", rc), rowWd))
 		}
 		ri := r
+		totWd := rowWd
 		for c := 0; c < cols; c++ {
 			s := ""
 			if tsr.IsString() {
-				s = fmt.Sprintf(format, Projection2DString(tsr, oddRow, ri, c))
+				s = padToLength(fmt.Sprintf(format, Projection2DString(tsr, onedRow, ri, c)), colWd)
 			} else {
-				s = fmt.Sprintf(format, Projection2DValue(tsr, oddRow, ri, c))
+				s = prepadToLength(fmt.Sprintf(format, Projection2DValue(tsr, onedRow, ri, c)), colWd)
+			}
+			if totWd+len(s) > MaxPrintLineWidth {
+				b.WriteString("\n" + strings.Repeat(" ", rowWd))
+				totWd = rowWd
 			}
 			b.WriteString(s)
-			nt := int(math32.IntMultipleGE(float32(len(s)), 8)) / 8
-			if nt < colWd {
-				b.WriteString(strings.Repeat("\t", colWd-nt))
-			}
+			totWd += len(s)
 		}
 		b.WriteString("\n")
 		ctr += cols

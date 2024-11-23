@@ -185,6 +185,104 @@ B      (3d array):  8 x 4 x 3 # second from last dimensions mismatched
 
 The `AlignShapes` function performs this shape alignment logic, and the `WrapIndex1D` function is used to compute a 1D index into a given shape, based on the total output shape sizes, wrapping any singleton dimensions around as needed. These are used in the [tmath](tmath) package for example to implement the basic binary math operators.
 
+# Printing format
+
+The following are examples of tensor printing via the `Sprintf` function, which is used with default values for the `String()` stringer method on tensors. It does a 2D projection of higher-dimensional tensors, using the `Projection2D` set of functions, which assume a row-wise outermost dimension in general, and pack even sets of inner dimensions into 2D row x col shapes (see examples below).
+
+1D (vector): goes column-wise, and wraps around as needed, e.g., length = 4:
+```
+[4] 0 1 2 3 
+```
+and 40:
+```
+[40]  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 
+     25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 
+```
+
+2D matrix:
+```
+[4 3]
+    [0] [1] [2] 
+[0]   0   1   2 
+[1]  10  11  12 
+[2]  20  21  22 
+[3]  30  31  32 
+```
+and a column vector (2nd dimension is 1):
+```
+[4 1]
+[0] 0 
+[1] 1 
+[2] 2 
+[3] 3 
+```
+
+3D tensor, shape = `[4 3 2]` -- note the `[r r c]` legend below the shape which indicates which dimensions are shown on the row (`r`) vs column (`c`) axis, so you know how to interpret the indexes:
+```
+[4 3 2]
+[r r c] [0] [1] 
+[0 0]     0   1 
+[0 1]    10  11 
+[0 2]    20  21 
+[1 0]   100 101 
+[1 1]   110 111 
+[1 2]   120 121 
+[2 0]   200 201 
+[2 1]   210 211 
+[2 2]   220 221 
+[3 0]   300 301 
+[3 1]   310 311 
+[3 2]   320 321 
+```
+
+4D tensor: note how the row, column dimensions alternate, resulting in a 2D layout of the outer 2 dimensions, with another 2D layout of the inner 2D dimensions inlaid within that:
+```
+[5 4 3 2]
+[r c r c] [0 0] [0 1] [1 0] [1 1] [2 0] [2 1] [3 0] [3 1] 
+[0 0]         0     1   100   101   200   201   300   301 
+[0 1]        10    11   110   111   210   211   310   311 
+[0 2]        20    21   120   121   220   221   320   321 
+[1 0]      1000  1001  1100  1101  1200  1201  1300  1301 
+[1 1]      1010  1011  1110  1111  1210  1211  1310  1311 
+[1 2]      1020  1021  1120  1121  1220  1221  1320  1321 
+[2 0]      2000  2001  2100  2101  2200  2201  2300  2301 
+[2 1]      2010  2011  2110  2111  2210  2211  2310  2311 
+[2 2]      2020  2021  2120  2121  2220  2221  2320  2321 
+[3 0]      3000  3001  3100  3101  3200  3201  3300  3301 
+[3 1]      3010  3011  3110  3111  3210  3211  3310  3311 
+[3 2]      3020  3021  3120  3121  3220  3221  3320  3321 
+[4 0]      4000  4001  4100  4101  4200  4201  4300  4301 
+[4 1]      4010  4011  4110  4111  4210  4211  4310  4311 
+[4 2]      4020  4021  4120  4121  4220  4221  4320  4321 
+```
+
+5D tensor: is treated like a 4D with the outermost dimension being an additional row dimension:
+```
+[6 5 4 3 2]
+[r r c r c] [0 0] [0 1] [1 0] [1 1] [2 0] [2 1] [3 0] [3 1] 
+[0 0 0]         0     1   100   101   200   201   300   301 
+[0 0 1]        10    11   110   111   210   211   310   311 
+[0 0 2]        20    21   120   121   220   221   320   321 
+[0 1 0]      1000  1001  1100  1101  1200  1201  1300  1301 
+[0 1 1]      1010  1011  1110  1111  1210  1211  1310  1311 
+[0 1 2]      1020  1021  1120  1121  1220  1221  1320  1321 
+[0 2 0]      2000  2001  2100  2101  2200  2201  2300  2301 
+[0 2 1]      2010  2011  2110  2111  2210  2211  2310  2311 
+[0 2 2]      2020  2021  2120  2121  2220  2221  2320  2321 
+[0 3 0]      3000  3001  3100  3101  3200  3201  3300  3301 
+[0 3 1]      3010  3011  3110  3111  3210  3211  3310  3311 
+[0 3 2]      3020  3021  3120  3121  3220  3221  3320  3321 
+[0 4 0]      4000  4001  4100  4101  4200  4201  4300  4301 
+[0 4 1]      4010  4011  4110  4111  4210  4211  4310  4311 
+[0 4 2]      4020  4021  4120  4121  4220  4221  4320  4321 
+[1 0 0]     10000 10001 10100 10101 10200 10201 10300 10301 
+[1 0 1]     10010 10011 10110 10111 10210 10211 10310 10311 
+[1 0 2]     10020 10021 10120 10121 10220 10221 10320 10321 
+[1 1 0]     11000 11001 11100 11101 11200 11201 11300 11301 
+[1 1 1]     11010 11011 11110 11111 11210 11211 11310 11311 
+...
+```
+
 # History
 
 This package was originally developed as [etable](https://github.com/emer/etable) as part of the _emergent_ software framework. It always depended on the GUI framework that became Cogent Core, and having it integrated within the Core monorepo makes it easier to integrate updates, and also makes it easier to build advanced data management and visualization applications. For example, the [plot/plotcore](../plot/plotcore) package uses the `Table` to support flexible and powerful plotting functionality.

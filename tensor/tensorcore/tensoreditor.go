@@ -339,8 +339,7 @@ func (tb *TensorEditor) RowGrabFocus(row int) *core.WidgetBase {
 	return nil
 }
 
-//////////////////////////////////////////////////////
-// 	Header layout
+/////// 	Header layout
 
 func (tb *TensorEditor) SizeFinal() {
 	tb.ListBase.SizeFinal()
@@ -369,8 +368,7 @@ func (tb *TensorEditor) SizeFinal() {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//    Copy / Cut / Paste
+////////    Copy / Cut / Paste
 
 // SaveTSV writes a tensor to a tab-separated-values (TSV) file.
 // Outer-most dims are rows in the file, and inner-most is column --

@@ -56,7 +56,7 @@ func (mx *Matrix) T() mat.Matrix {
 	return mat.Transpose{mx}
 }
 
-/////////////////////////  Symmetric
+////////  Symmetric
 
 // Symmetric provides a view of the given [tensor.Tensor] as a [gonum]
 // [mat.Symmetric] matrix interface type.

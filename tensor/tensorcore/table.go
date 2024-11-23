@@ -562,8 +562,7 @@ func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
 	return nil
 }
 
-//////////////////////////////////////////////////////
-// 	Header layout
+//////// Header layout
 
 func (tb *Table) SizeFinal() {
 	tb.ListBase.SizeFinal()
@@ -608,8 +607,7 @@ func (tb *Table) SelectedColumnStrings(colName string) []string {
 	return s
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//    Copy / Cut / Paste
+////////  Copy / Cut / Paste
 
 func (tb *Table) MakeToolbar(p *tree.Plan) {
 	if tb.Table == nil {

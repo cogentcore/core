@@ -313,8 +313,7 @@ func InferDataType(str string) reflect.Kind {
 	return reflect.String
 }
 
-//////////////////////////////////////////////////////////////////////////
-// WriteCSV
+//////// WriteCSV
 
 // WriteCSV writes only rows in table idx view to a comma-separated-values (CSV) file
 // (where comma = any delimiter, specified in the delim arg).

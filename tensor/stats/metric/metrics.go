@@ -71,8 +71,7 @@ const (
 	// a * log(a/b) + (1-a) * log(1-a/1-b).
 	MetricCrossEntropy
 
-	/////////////////////////////////////////////////////////////////////////
-	// Everything below here is !Increasing -- larger = closer, not farther
+	//////// Everything below here is !Increasing -- larger = closer, not farther
 
 	// DotProduct is the sum of the co-products of the tensor values.
 	MetricDotProduct

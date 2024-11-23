@@ -47,8 +47,7 @@ type GLM struct {
 	//	optional names of the dependent variables, for reporting results
 	DepNames []string
 
-	///////////////////////////////////////////
-	// Parameters for the GLM model fitting:
+	//////// Parameters for the GLM model fitting:
 
 	// ZeroOffset restricts the offset of the linear function to 0,
 	// forcing it to pass through the origin.  Otherwise, a constant offset "b"
@@ -81,8 +80,7 @@ type GLM struct {
 	// maximum number of iterations to perform
 	MaxIters int `default:"50"`
 
-	///////////////////////////////////////////
-	// Cached values from the table
+	//////// Cached values from the table
 
 	// Table of data
 	Table *table.Table

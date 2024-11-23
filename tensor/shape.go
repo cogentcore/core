@@ -159,15 +159,7 @@ func (sh *Shape) IndexFrom1D(oned int) []int {
 
 // String satisfies the fmt.Stringer interface
 func (sh *Shape) String() string {
-	str := "["
-	for i := range sh.Sizes {
-		str += fmt.Sprintf("%d", sh.Sizes[i])
-		if i < len(sh.Sizes)-1 {
-			str += ", "
-		}
-	}
-	str += "]"
-	return str
+	return fmt.Sprintf("%v", sh.Sizes)
 }
 
 // RowMajorStrides returns strides for sizes where the first dimension is outermost

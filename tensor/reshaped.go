@@ -172,7 +172,7 @@ func (rs *Reshaped) AsValues() Values {
 	return vals
 }
 
-/////////////////////  Floats
+////////  Floats
 
 func (rs *Reshaped) Float(i ...int) float64 {
 	return rs.Tensor.Float1D(rs.Reshape.IndexTo1D(i...))
@@ -185,7 +185,7 @@ func (rs *Reshaped) SetFloat(val float64, i ...int) {
 func (rs *Reshaped) Float1D(i int) float64         { return rs.Tensor.Float1D(i) }
 func (rs *Reshaped) SetFloat1D(val float64, i int) { rs.Tensor.SetFloat1D(val, i) }
 
-/////////////////////  Strings
+////////  Strings
 
 func (rs *Reshaped) StringValue(i ...int) string {
 	return rs.Tensor.String1D(rs.Reshape.IndexTo1D(i...))
@@ -198,7 +198,7 @@ func (rs *Reshaped) SetString(val string, i ...int) {
 func (rs *Reshaped) String1D(i int) string         { return rs.Tensor.String1D(i) }
 func (rs *Reshaped) SetString1D(val string, i int) { rs.Tensor.SetString1D(val, i) }
 
-/////////////////////  Ints
+////////  Ints
 
 func (rs *Reshaped) Int(i ...int) int {
 	return rs.Tensor.Int1D(rs.Reshape.IndexTo1D(i...))
