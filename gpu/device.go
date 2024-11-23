@@ -5,6 +5,8 @@
 package gpu
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/base/errors"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -35,6 +37,9 @@ func NewDevice(gpu *GPU) (*Device, error) {
 	limits.MaxBufferSize = min(gpu.Limits.Limits.MaxBufferSize, maxv)
 	// limits.MaxBindGroups = gpu.Limits.Limits.MaxBindGroups // note: no point in changing -- web constraint
 
+	if Debug {
+		fmt.Printf("Requesting sizes: MaxStorageBufferBindingSize: %d  MaxBufferSize: %d\n", limits.MaxStorageBufferBindingSize, limits.MaxBufferSize)
+	}
 	desc := wgpu.DeviceDescriptor{
 		RequiredLimits: &wgpu.RequiredLimits{
 			Limits: limits,

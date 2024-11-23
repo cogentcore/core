@@ -173,3 +173,16 @@ func DirTable(dir *Node, fun func(node *Node) bool) *table.Table {
 	dir.DirTable = dt
 	return dt
 }
+
+// DirFromTable sets tensor values under given directory node to the
+// columns of the given [table.Table]. Also sets the DirTable to this table.
+func DirFromTable(dir *Node, dt *table.Table) {
+	for i, cl := range dt.Columns.Values {
+		nm := dt.Columns.Keys[i]
+		nd, err := newNode(dir, nm)
+		if err == nil || err == fs.ErrExist {
+			nd.Tensor = cl
+		}
+	}
+	dir.DirTable = dt
+}
