@@ -42,11 +42,14 @@ func InitC() {
 	c.Mbr6 = 6
 }
 
-func AFun(aa any) bool {
-	return IsNil(reflect.ValueOf(aa))
+func isNil(v any) bool {
+	return IsNil(reflect.ValueOf(v))
 }
 
-func TestAnyIsNil(t *testing.T) {
+func TestIsNil(t *testing.T) {
+	assert.False(t, IsNil(reflect.ValueOf(0)))
+	assert.True(t, IsNil(reflect.ValueOf((*int)(nil))))
+
 	ai := any(a)
 
 	assert.False(t, IsNil(reflect.ValueOf(ai)))
@@ -55,8 +58,9 @@ func TestAnyIsNil(t *testing.T) {
 	api := any(ap)
 
 	assert.True(t, IsNil(reflect.ValueOf(api)))
-	assert.True(t, AFun(ap))
-	assert.False(t, AFun(&a))
+	assert.True(t, isNil(ap))
+	assert.False(t, isNil(&a))
+	assert.False(t, isNil(&ap))
 }
 
 func TestConverts(t *testing.T) {
