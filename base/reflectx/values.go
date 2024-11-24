@@ -688,6 +688,12 @@ func ToFloat32(v any) (float32, error) {
 // pointers, and byte is converted as string(byte), not the decimal representation.
 func ToString(v any) string {
 	nilstr := "nil"
+	// TODO: this reflection is unideal for performance, but we need it to prevent panics,
+	// so this whole "greatest efficiency" type switch is kind of pointless.
+	rv := reflect.ValueOf(v)
+	if IsNil(rv) {
+		return nilstr
+	}
 	switch vt := v.(type) {
 	case string:
 		return vt
@@ -832,7 +838,7 @@ func ToString(v any) string {
 	}
 
 	// then fall back on reflection
-	uv := Underlying(reflect.ValueOf(v))
+	uv := Underlying(rv)
 	if IsNil(uv) {
 		return nilstr
 	}
