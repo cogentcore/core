@@ -932,35 +932,35 @@ func ToStringPrec(v any, prec int) string {
 // Note that maps are not reset prior to setting, whereas slices are
 // set to be fully equivalent to the source slice.
 func SetRobust(to, from any) error {
-	v := reflect.ValueOf(to)
-	if IsNil(v) {
+	rto := reflect.ValueOf(to)
+	pto := UnderlyingPointer(rto)
+	if IsNil(pto) {
 		return fmt.Errorf("got nil destination value")
 	}
-	pointer := UnderlyingPointer(v)
-	ti := pointer.Interface()
+	pito := pto.Interface()
 
-	typ := pointer.Elem().Type()
-	kind := typ.Kind()
-	if !pointer.Elem().CanSet() {
-		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pointer, pointer)
+	totyp := pto.Elem().Type()
+	tokind := totyp.Kind()
+	if !pto.Elem().CanSet() {
+		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pto, pto)
 	}
 
 	// first we do the generic AssignableTo case
-	if v.Kind() == reflect.Pointer {
+	if rto.Kind() == reflect.Pointer {
 		fv := reflect.ValueOf(from)
 		if fv.IsValid() {
-			if fv.Type().AssignableTo(typ) {
-				pointer.Elem().Set(fv)
+			if fv.Type().AssignableTo(totyp) {
+				pto.Elem().Set(fv)
 				return nil
 			}
 			ufvp := UnderlyingPointer(fv)
-			if ufvp.IsValid() && ufvp.Type().AssignableTo(typ) {
-				pointer.Elem().Set(ufvp)
+			if ufvp.IsValid() && ufvp.Type().AssignableTo(totyp) {
+				pto.Elem().Set(ufvp)
 				return nil
 			}
 			ufv := ufvp.Elem()
-			if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
-				pointer.Elem().Set(ufv)
+			if ufv.IsValid() && ufv.Type().AssignableTo(totyp) {
+				pto.Elem().Set(ufv)
 				return nil
 			}
 		} else {
@@ -968,14 +968,14 @@ func SetRobust(to, from any) error {
 		}
 	}
 
-	if sa, ok := ti.(SetAnyer); ok {
+	if sa, ok := pito.(SetAnyer); ok {
 		err := sa.SetAny(from)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
-	if ss, ok := ti.(SetStringer); ok {
+	if ss, ok := pito.(SetStringer); ok {
 		if s, ok := from.(string); ok {
 			err := ss.SetString(s)
 			if err != nil {
@@ -984,7 +984,7 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 	}
-	if es, ok := ti.(enums.EnumSetter); ok {
+	if es, ok := pito.(enums.EnumSetter); ok {
 		if en, ok := from.(enums.Enum); ok {
 			es.SetInt64(en.Int64())
 			return nil
@@ -1000,7 +1000,7 @@ func SetRobust(to, from any) error {
 		return nil
 	}
 
-	if bv, ok := ti.(bools.BoolSetter); ok {
+	if bv, ok := pito.(bools.BoolSetter); ok {
 		fb, err := ToBool(from)
 		if err != nil {
 			return err
@@ -1008,7 +1008,7 @@ func SetRobust(to, from any) error {
 		bv.SetBool(fb)
 		return nil
 	}
-	if td, ok := ti.(*time.Duration); ok {
+	if td, ok := pito.(*time.Duration); ok {
 		if fs, ok := from.(string); ok {
 			fd, err := time.ParseDuration(fs)
 			if err != nil {
@@ -1020,7 +1020,7 @@ func SetRobust(to, from any) error {
 	}
 
 	if fc, err := colors.FromAny(from); err == nil {
-		switch c := ti.(type) {
+		switch c := pito.(type) {
 		case *color.RGBA:
 			*c = fc
 			return nil
@@ -1039,39 +1039,39 @@ func SetRobust(to, from any) error {
 	ftyp := NonPointerType(reflect.TypeOf(from))
 
 	switch {
-	case kind >= reflect.Int && kind <= reflect.Int64:
+	case tokind >= reflect.Int && tokind <= reflect.Int64:
 		fm, err := ToInt(from)
 		if err != nil {
 			return err
 		}
-		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pto.Elem().Set(reflect.ValueOf(fm).Convert(totyp))
 		return nil
-	case kind >= reflect.Uint && kind <= reflect.Uint64:
+	case tokind >= reflect.Uint && tokind <= reflect.Uint64:
 		fm, err := ToInt(from)
 		if err != nil {
 			return err
 		}
-		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pto.Elem().Set(reflect.ValueOf(fm).Convert(totyp))
 		return nil
-	case kind == reflect.Bool:
+	case tokind == reflect.Bool:
 		fm, err := ToBool(from)
 		if err != nil {
 			return err
 		}
-		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pto.Elem().Set(reflect.ValueOf(fm).Convert(totyp))
 		return nil
-	case kind >= reflect.Float32 && kind <= reflect.Float64:
+	case tokind >= reflect.Float32 && tokind <= reflect.Float64:
 		fm, err := ToFloat(from)
 		if err != nil {
 			return err
 		}
-		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pto.Elem().Set(reflect.ValueOf(fm).Convert(totyp))
 		return nil
-	case kind == reflect.String:
+	case tokind == reflect.String:
 		fm := ToString(from)
-		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pto.Elem().Set(reflect.ValueOf(fm).Convert(totyp))
 		return nil
-	case kind == reflect.Struct:
+	case tokind == reflect.Struct:
 		if ftyp.Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to) // todo: this is not working -- see what marshal says, etc
 			if err != nil {
@@ -1080,7 +1080,7 @@ func SetRobust(to, from any) error {
 			}
 			return nil
 		}
-	case kind == reflect.Slice:
+	case tokind == reflect.Slice:
 		if ftyp.Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
@@ -1090,7 +1090,7 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 		return CopySliceRobust(to, from)
-	case kind == reflect.Map:
+	case tokind == reflect.Map:
 		if ftyp.Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
@@ -1104,5 +1104,5 @@ func SetRobust(to, from any) error {
 
 	tos := elide.End(fmt.Sprintf("%v", to), 40)
 	fms := elide.End(fmt.Sprintf("%v", from), 40)
-	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, typ.String(), fms, from, LongTypeName(Underlying(reflect.ValueOf(from)).Type()))
+	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, totyp.String(), fms, from, LongTypeName(Underlying(reflect.ValueOf(from)).Type()))
 }
