@@ -80,6 +80,37 @@ func TestPointerValue(t *testing.T) {
 	assert.False(t, PointerValue(ran).IsValid())
 }
 
+func TestOnePointerValue(t *testing.T) {
+	v := 1
+	rv := reflect.ValueOf(v)
+	assert.False(t, rv.CanAddr())
+	assert.False(t, OnePointerValue(reflect.ValueOf(v)).Equal(rv))
+	assert.Equal(t, reflect.TypeFor[*int](), OnePointerValue(reflect.ValueOf(v)).Type())
+
+	p := &v
+	rp := reflect.ValueOf(p)
+	assert.True(t, OnePointerValue(rp).Equal(rp))
+	assert.Equal(t, reflect.TypeFor[*int](), OnePointerValue(rp).Type())
+
+	assert.True(t, rp.Elem().CanAddr())
+	assert.True(t, OnePointerValue(rp.Elem()).Equal(rp))
+	assert.True(t, OnePointerValue(rp.Elem()).Equal(rp.Elem().Addr()))
+
+	pp := &p
+	rpp := reflect.ValueOf(pp)
+	assert.False(t, OnePointerValue(rpp).Equal(rpp))
+	assert.True(t, OnePointerValue(rpp).Equal(rp))
+	assert.Equal(t, reflect.TypeFor[*int](), OnePointerValue(rpp).Type())
+
+	n := (*int)(nil)
+	rn := reflect.ValueOf(n)
+	assert.True(t, OnePointerValue(rn).Equal(rn))
+
+	an := any(nil)
+	ran := reflect.ValueOf(an)
+	assert.False(t, OnePointerValue(ran).IsValid())
+}
+
 type PointerTestSub struct {
 	Mbr1 string
 	Mbr2 int

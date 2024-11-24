@@ -47,6 +47,9 @@ func PointerValue(v reflect.Value) reflect.Value {
 // OnePointerValue returns a value that is exactly one pointer away
 // from a non-pointer value.
 func OnePointerValue(v reflect.Value) reflect.Value {
+	if !v.IsValid() {
+		return v
+	}
 	if v.Kind() != reflect.Pointer {
 		if v.CanAddr() {
 			return v.Addr()
