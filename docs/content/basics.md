@@ -209,7 +209,6 @@ spinner.OnChange(func(e events.Event) {
 
 Plans are a powerful tool that are critical for some widgets such as those that need to dynamically manage hundreds of children in a convenient and performant way. They aren't always necessary, but you will find them being used a lot in complicated apps, and you will see more examples of them in the rest of this documentation.
 
-
 ## Async
 
 *Main article: [[Async]]*
