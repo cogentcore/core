@@ -173,6 +173,26 @@ func TestUnderlyingPointer(t *testing.T) {
 	assert.False(t, UnderlyingPointer(ran).IsValid())
 }
 
+func TestNonNilNew(t *testing.T) {
+	n0 := NonNilNew(reflect.TypeFor[int]())
+	assert.Equal(t, reflect.TypeFor[*int](), n0.Type())
+	assert.False(t, n0.IsNil())
+	assert.Equal(t, 0, n0.Elem().Interface())
+
+	n1 := NonNilNew(reflect.TypeFor[*int]())
+	assert.Equal(t, reflect.TypeFor[**int](), n1.Type())
+	assert.False(t, n1.IsNil())
+	assert.False(t, n1.Elem().IsNil())
+	assert.Equal(t, 0, n1.Elem().Elem().Interface())
+
+	n2 := NonNilNew(reflect.TypeFor[**int]())
+	assert.Equal(t, reflect.TypeFor[***int](), n2.Type())
+	assert.False(t, n2.IsNil())
+	assert.False(t, n2.Elem().IsNil())
+	assert.False(t, n2.Elem().Elem().IsNil())
+	assert.Equal(t, 0, n2.Elem().Elem().Elem().Interface())
+}
+
 type PointerTestSub struct {
 	Mbr1 string
 	Mbr2 int
