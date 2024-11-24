@@ -427,7 +427,7 @@ func (lb *ListBase) SetSlice(sl any) *ListBase {
 	lb.Slice = sl
 	lb.sliceUnderlying = reflectx.Underlying(reflect.ValueOf(lb.Slice))
 	lb.isArray = reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
-	lb.elementValue = reflectx.SliceElementValue(sl)
+	lb.elementValue = reflectx.Underlying(reflectx.SliceElementValue(sl))
 	lb.SetSliceBase()
 	return lb
 }
@@ -485,8 +485,8 @@ func (lb *ListBase) BindSelect(val *int) *ListBase {
 
 func (lb *ListBase) UpdateMaxWidths() {
 	lb.maxWidth = 0
-	npv := reflectx.NonPointerValue(lb.elementValue)
-	isString := npv.Type().Kind() == reflect.String && npv.Type() != reflect.TypeFor[icons.Icon]()
+	ev := lb.elementValue
+	isString := ev.Type().Kind() == reflect.String && ev.Type() != reflect.TypeFor[icons.Icon]()
 	if !isString || lb.SliceSize == 0 {
 		return
 	}
@@ -505,10 +505,10 @@ func (lb *ListBase) sliceElementValue(si int) reflect.Value {
 	if si < lb.SliceSize {
 		val = reflectx.Underlying(lb.sliceUnderlying.Index(si)) // deal with pointer lists
 	} else {
-		val = reflectx.Underlying(lb.elementValue)
+		val = lb.elementValue
 	}
 	if !val.IsValid() {
-		val = reflectx.Underlying(lb.elementValue)
+		val = lb.elementValue
 	}
 	return val
 }
