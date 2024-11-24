@@ -262,8 +262,8 @@ func TestCustomLayout(t *testing.T) {
 func TestCustomLayoutButton(t *testing.T) {
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
-		s.Min.Set(units.Dp(200), units.Dp(100))
 		s.Display = styles.Custom
+		s.Min.Set(units.Dp(200), units.Dp(100))
 	})
 	bt := NewButton(b).SetText("Hello")
 	bt.Styler(func(s *styles.Style) {
