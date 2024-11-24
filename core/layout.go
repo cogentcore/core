@@ -1153,8 +1153,7 @@ func (fr *Frame) SizeDown(iter int) bool {
 // total size.
 func (fr *Frame) sizeDownFrame(iter int) bool {
 	if fr.Styles.Display == styles.Custom {
-		fr.WidgetBase.SizeDown(iter) // behave like a widget
-		return fr.sizeDownChildren(iter)
+		return fr.sizeDownCustom(iter)
 	}
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "SizeDown") {
 		return fr.WidgetBase.SizeDown(iter) // behave like a widget
@@ -1486,6 +1485,27 @@ func (fr *Frame) sizeDownAllocActualStacked(iter int) {
 	})
 }
 
+func (fr *Frame) sizeDownCustom(iter int) bool {
+	prel := fr.updateParentRelSizes()
+	fr.growToAlloc()
+	sz := &fr.Geom.Size
+	if DebugSettings.LayoutTrace {
+		fmt.Println(fr, "Custom Managing Alloc:", sz.Alloc.Content)
+	}
+	styles.SetClampMaxVector(&sz.Alloc.Content, sz.Max) // can't be more than max..
+	// this allocates our full size to each child, same as ActualStacked all case
+	asz := sz.Actual.Content
+	fr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		ksz := &cwb.Geom.Size
+		ksz.Alloc.Total = asz
+		ksz.setContentFromTotal(&ksz.Alloc)
+		return tree.Continue
+	})
+	redo := fr.sizeDownChildren(iter)
+	fr.sizeDownParts(iter) // no std role, just get sizes
+	return prel || redo
+}
+
 // sizeFinalUpdateChildrenSizes can optionally be called for layouts
 // that dynamically create child elements based on final layout size.
 // It ensures that the children are properly sized.
@@ -1547,7 +1567,7 @@ func (wb *WidgetBase) sizeFinalParts() {
 func (fr *Frame) SizeFinal() {
 	if fr.Styles.Display == styles.Custom {
 		fr.WidgetBase.SizeFinal() // behave like a widget
-		fr.sizeFinalChildren()
+		fr.WidgetBase.sizeFinalChildren()
 		return
 	}
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "SizeFinal") {
@@ -1655,6 +1675,7 @@ func (wb *WidgetBase) positionChildren() {
 func (fr *Frame) Position() {
 	if fr.Styles.Display == styles.Custom {
 		fr.positionFromPos()
+		fr.positionChildren()
 		return
 	}
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "Position") {
