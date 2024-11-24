@@ -20,9 +20,15 @@ func NonPointerType(typ reflect.Type) reflect.Type {
 }
 
 // NonPointerValue returns a non-pointer version of the given value.
+// If it encounters a nil pointer, it returns the nil pointer instead
+// of an invalid value.
 func NonPointerValue(v reflect.Value) reflect.Value {
 	for v.Kind() == reflect.Pointer {
-		v = v.Elem()
+		new := v.Elem()
+		if !new.IsValid() {
+			return v
+		}
+		v = new
 	}
 	return v
 }
@@ -67,22 +73,28 @@ func OnePointerValue(v reflect.Value) reflect.Value {
 }
 
 // Underlying returns the actual underlying version of the given value,
-// going through any pointers and interfaces.
+// going through any pointers and interfaces. If it encounters a nil
+// pointer or interface, it returns the nil pointer or interface instead of
+// an invalid value.
 func Underlying(v reflect.Value) reflect.Value {
 	if !v.IsValid() {
 		return v
 	}
 	for v.Type().Kind() == reflect.Interface || v.Type().Kind() == reflect.Pointer {
-		v = v.Elem()
-		if !v.IsValid() {
+		new := v.Elem()
+		if !new.IsValid() {
 			return v
 		}
+		v = new
 	}
 	return v
 }
 
 // UnderlyingPointer returns a pointer to the actual underlying version of the
-// given value, going through any pointers and interfaces.
+// given value, going through any pointers and interfaces. It is equivalent to
+// [OnePointerValue] of [Underlying], so if it encounters a nil pointer or
+// interface, it stops at the nil pointer or interface instead of returning
+// an invalid value.
 func UnderlyingPointer(v reflect.Value) reflect.Value {
 	if !v.IsValid() {
 		return v

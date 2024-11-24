@@ -50,7 +50,8 @@ func TestNonPointerValue(t *testing.T) {
 	n := (*int)(nil)
 	rn := reflect.ValueOf(n)
 	assert.True(t, rn.IsValid())
-	assert.False(t, NonPointerValue(rn).IsValid()) // <- made invalid
+	assert.True(t, NonPointerValue(rn).IsValid())
+	assert.True(t, NonPointerValue(rn).Equal(rn))
 
 	in := myInterface(nil)
 	rinp := reflect.ValueOf(&in)
@@ -148,12 +149,14 @@ func TestUnderlying(t *testing.T) {
 	n := (*int)(nil)
 	rn := reflect.ValueOf(n)
 	assert.True(t, rn.IsValid())
-	assert.False(t, Underlying(rn).IsValid()) // <- made invalid
+	assert.True(t, Underlying(rn).IsValid())
+	assert.True(t, Underlying(rn).Equal(rn))
 
 	in := myInterface(nil)
 	rinp := reflect.ValueOf(&in)
 	assert.True(t, rinp.IsValid())
-	assert.False(t, Underlying(rinp).IsValid()) // <- made invalid
+	assert.True(t, Underlying(rinp).IsValid())
+	assert.True(t, Underlying(rinp).Equal(rinp.Elem()))
 
 	an := any(nil)
 	ran := reflect.ValueOf(an)
