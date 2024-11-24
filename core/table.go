@@ -121,7 +121,7 @@ func (tb *Table) StyleValue(w Widget, s *styles.Style, row, col int) {
 
 // SetSlice sets the source slice that we are viewing.
 func (tb *Table) SetSlice(sl any) *Table {
-	if reflectx.AnyIsNil(sl) {
+	if reflectx.IsNil(sl) {
 		tb.Slice = nil
 		return tb
 	}

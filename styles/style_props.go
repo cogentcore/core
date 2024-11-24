@@ -22,7 +22,7 @@ func styleInhInit(val, parent any) (inh, init bool) {
 	if str, ok := val.(string); ok {
 		switch str {
 		case "inherit":
-			return !reflectx.AnyIsNil(parent), false
+			return !reflectx.IsNil(parent), false
 		case "initial":
 			return false, true
 		default:

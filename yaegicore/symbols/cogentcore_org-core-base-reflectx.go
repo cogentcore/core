@@ -11,7 +11,7 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/base/reflectx/reflectx"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"AnyIsNil":           reflect.ValueOf(reflectx.AnyIsNil),
+		"AnyIsNil":           reflect.ValueOf(reflectx.IsNil),
 		"CloneToType":        reflect.ValueOf(reflectx.CloneToType),
 		"CopyMapRobust":      reflect.ValueOf(reflectx.CopyMapRobust),
 		"CopySliceRobust":    reflect.ValueOf(reflectx.CopySliceRobust),

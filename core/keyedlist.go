@@ -50,7 +50,7 @@ func (kl *KeyedList) Init() {
 	})
 
 	kl.Maker(func(p *tree.Plan) {
-		if reflectx.AnyIsNil(kl.Map) {
+		if reflectx.IsNil(kl.Map) {
 			return
 		}
 		mapv := reflectx.Underlying(reflect.ValueOf(kl.Map))
@@ -187,7 +187,7 @@ func (kl *KeyedList) toggleSort() {
 
 // AddItem adds a new key-value item to the map.
 func (kl *KeyedList) AddItem() {
-	if reflectx.AnyIsNil(kl.Map) {
+	if reflectx.IsNil(kl.Map) {
 		return
 	}
 	reflectx.MapAdd(kl.Map)
@@ -196,7 +196,7 @@ func (kl *KeyedList) AddItem() {
 
 // DeleteItem deletes a key-value item from the map.
 func (kl *KeyedList) DeleteItem(key reflect.Value) {
-	if reflectx.AnyIsNil(kl.Map) {
+	if reflectx.IsNil(kl.Map) {
 		return
 	}
 	reflectx.MapDelete(kl.Map, reflectx.NonPointerValue(key))
@@ -204,7 +204,7 @@ func (kl *KeyedList) DeleteItem(key reflect.Value) {
 }
 
 func (kl *KeyedList) MakeToolbar(p *tree.Plan) {
-	if reflectx.AnyIsNil(kl.Map) {
+	if reflectx.IsNil(kl.Map) {
 		return
 	}
 	tree.Add(p, func(w *Button) {

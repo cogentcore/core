@@ -42,20 +42,20 @@ func InitC() {
 }
 
 func AFun(aa any) bool {
-	return AnyIsNil(aa)
+	return IsNil(aa)
 }
 
 func TestAnyIsNil(t *testing.T) {
 	ai := any(a)
 
-	if AnyIsNil(ai) != false {
+	if IsNil(ai) != false {
 		t.Errorf("should be non-nil: %v\n", ai)
 	}
 
 	var ap *A
 	api := any(ap)
 
-	if AnyIsNil(api) != true {
+	if IsNil(api) != true {
 		t.Errorf("should be nil: %v\n", api)
 	}
 

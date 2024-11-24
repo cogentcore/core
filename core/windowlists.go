@@ -49,7 +49,7 @@ func (wl *renderWindowList) FindName(name string) *renderWindow {
 // window and true if found, nil, false otherwise.
 // data of type string works fine -- does equality comparison on string contents.
 func (wl *renderWindowList) findData(data any) (*renderWindow, bool) {
-	if reflectx.AnyIsNil(data) {
+	if reflectx.IsNil(data) {
 		return nil, false
 	}
 	typ := reflect.TypeOf(data)

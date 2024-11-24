@@ -67,7 +67,7 @@ func (e Error) Report(basepath string, showSrc, showRule bool) string {
 		}
 	}
 	str := fnm + ":" + e.Pos.String() + ": " + e.Msg
-	if showRule && !reflectx.AnyIsNil(e.Rule) {
+	if showRule && !reflectx.IsNil(e.Rule) {
 		str += fmt.Sprintf(" (rule: %v)", e.Rule.AsTree().Name)
 	}
 	ssz := len(e.Src)

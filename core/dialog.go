@@ -198,7 +198,7 @@ func (bd *Body) dialogStyles() {
 // nonNilContext returns a non-nil context widget, falling back on the top
 // scene of the current window.
 func nonNilContext(ctx Widget) Widget {
-	if !reflectx.AnyIsNil(ctx) {
+	if !reflectx.IsNil(ctx) {
 		return ctx
 	}
 	return currentRenderWindow.mains.top().Scene

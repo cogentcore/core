@@ -103,7 +103,7 @@ func ValueIsDefault(fv reflect.Value, def string) bool {
 // SetFromDefaultTags sets the values of fields in the given struct based on
 // `default:` default value struct field tags.
 func SetFromDefaultTags(v any) error {
-	if AnyIsNil(v) {
+	if IsNil(v) {
 		return nil
 	}
 	ov := reflect.ValueOf(v)

@@ -21,10 +21,10 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-// AnyIsNil checks if an interface value is nil. The interface itself
+// IsNil checks if an interface value is nil. The interface itself
 // could be nil, or the value pointed to by the interface could be nil.
 // This safely checks both.
-func AnyIsNil(v any) bool {
+func IsNil(v any) bool {
 	if v == nil {
 		return true
 	}
@@ -178,7 +178,7 @@ func ToBool(v any) (bool, error) {
 	}
 
 	// then fall back on reflection
-	if AnyIsNil(v) {
+	if IsNil(v) {
 		return false, fmt.Errorf("got nil value of type %T", v)
 	}
 	npv := Underlying(reflect.ValueOf(v))
@@ -335,7 +335,7 @@ func ToInt(v any) (int64, error) {
 	}
 
 	// then fall back on reflection
-	if AnyIsNil(v) {
+	if IsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
 	npv := Underlying(reflect.ValueOf(v))
@@ -492,7 +492,7 @@ func ToFloat(v any) (float64, error) {
 	}
 
 	// then fall back on reflection
-	if AnyIsNil(v) {
+	if IsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
 	npv := Underlying(reflect.ValueOf(v))
@@ -649,7 +649,7 @@ func ToFloat32(v any) (float32, error) {
 	}
 
 	// then fall back on reflection
-	if AnyIsNil(v) {
+	if IsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
 	npv := Underlying(reflect.ValueOf(v))
@@ -689,7 +689,7 @@ func ToFloat32(v any) (float32, error) {
 // pointers, and byte is converted as string(byte), not the decimal representation.
 func ToString(v any) string {
 	nilstr := "nil"
-	if AnyIsNil(v) {
+	if IsNil(v) {
 		return nilstr
 	}
 	switch vt := v.(type) {
@@ -836,7 +836,7 @@ func ToString(v any) string {
 	}
 
 	// then fall back on reflection
-	if AnyIsNil(v) {
+	if IsNil(v) {
 		return nilstr
 	}
 	npv := Underlying(reflect.ValueOf(v))
@@ -936,7 +936,7 @@ func ToStringPrec(v any, prec int) string {
 // Note that maps are not reset prior to setting, whereas slices are
 // set to be fully equivalent to the source slice.
 func SetRobust(to, from any) error {
-	if AnyIsNil(to) {
+	if IsNil(to) {
 		return fmt.Errorf("got nil destination value")
 	}
 	v := reflect.ValueOf(to)
