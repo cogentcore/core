@@ -407,7 +407,7 @@ func (lb *ListBase) SetSliceBase() {
 // Note: it is important to at least set an empty slice of
 // the desired type at the start to enable initial configuration.
 func (lb *ListBase) SetSlice(sl any) *ListBase {
-	if reflectx.IsNil(sl) {
+	if reflectx.IsNil(reflect.ValueOf(sl)) {
 		lb.Slice = nil
 		return lb
 	}
@@ -803,7 +803,7 @@ func (lb *ListBase) DeleteAt(i int) {
 }
 
 func (lb *ListBase) MakeToolbar(p *tree.Plan) {
-	if reflectx.IsNil(lb.Slice) {
+	if reflectx.IsNil(reflect.ValueOf(lb.Slice)) {
 		return
 	}
 	if lb.isArray || lb.IsReadOnly() {

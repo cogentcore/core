@@ -76,7 +76,7 @@ func (il *InlineList) Init() {
 // SetSlice sets the source slice that we are viewing.
 // It rebuilds the children to represent this slice.
 func (il *InlineList) SetSlice(sl any) *InlineList {
-	if reflectx.IsNil(sl) {
+	if reflectx.IsNil(reflect.ValueOf(sl)) {
 		il.Slice = nil
 		return il
 	}

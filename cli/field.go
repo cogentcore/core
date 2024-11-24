@@ -60,11 +60,8 @@ func addFields(obj any, allFields *fields, cmd string) {
 // the "cmd" struct tag, as the user already knows what command they are
 // running, so they do not need that duplicated specificity for every flag.
 func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, usedNames map[string]*field, cmd string) {
-	if reflectx.IsNil(obj) {
-		return
-	}
 	ov := reflect.ValueOf(obj)
-	if ov.Kind() == reflect.Pointer && ov.IsNil() {
+	if reflectx.IsNil(ov) {
 		return
 	}
 	val := reflectx.NonPointerValue(ov)

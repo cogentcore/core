@@ -6,6 +6,7 @@ package core
 
 import (
 	"log/slog"
+	"reflect"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
@@ -198,7 +199,7 @@ func (bd *Body) dialogStyles() {
 // nonNilContext returns a non-nil context widget, falling back on the top
 // scene of the current window.
 func nonNilContext(ctx Widget) Widget {
-	if !reflectx.IsNil(ctx) {
+	if !reflectx.IsNil(reflect.ValueOf(ctx)) {
 		return ctx
 	}
 	return currentRenderWindow.mains.top().Scene

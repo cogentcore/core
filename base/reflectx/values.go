@@ -21,17 +21,16 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-// IsNil checks if an interface value is nil. The interface itself
-// could be nil, or the value pointed to by the interface could be nil.
-// This safely checks both.
-func IsNil(v any) bool {
-	if v == nil {
+// IsNil returns whether the given value is nil or invalid.
+// If it is a non-nillable type, it does not check whether
+// it is nil to avoid panics.
+func IsNil(v reflect.Value) bool {
+	if !v.IsValid() {
 		return true
 	}
-	rv := reflect.ValueOf(v)
-	vk := rv.Kind()
-	if vk == reflect.Pointer || vk == reflect.Interface || vk == reflect.Map || vk == reflect.Slice || vk == reflect.Func || vk == reflect.Chan {
-		return rv.IsNil()
+	switch v.Kind() {
+	case reflect.Pointer, reflect.Interface, reflect.Map, reflect.Slice, reflect.Func, reflect.Chan:
+		return v.IsNil()
 	}
 	return false
 }
@@ -178,24 +177,24 @@ func ToBool(v any) (bool, error) {
 	}
 
 	// then fall back on reflection
-	if IsNil(v) {
+	uv := Underlying(reflect.ValueOf(v))
+	if IsNil(uv) {
 		return false, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := Underlying(reflect.ValueOf(v))
-	vk := npv.Kind()
+	vk := uv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		return (npv.Int() != 0), nil
+		return (uv.Int() != 0), nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return (npv.Uint() != 0), nil
+		return (uv.Uint() != 0), nil
 	case vk == reflect.Bool:
-		return npv.Bool(), nil
+		return uv.Bool(), nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return (npv.Float() != 0.0), nil
+		return (uv.Float() != 0.0), nil
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return (real(npv.Complex()) != 0.0), nil
+		return (real(uv.Complex()) != 0.0), nil
 	case vk == reflect.String:
-		r, err := strconv.ParseBool(npv.String())
+		r, err := strconv.ParseBool(uv.String())
 		if err != nil {
 			return false, err
 		}
@@ -335,27 +334,27 @@ func ToInt(v any) (int64, error) {
 	}
 
 	// then fall back on reflection
-	if IsNil(v) {
+	uv := Underlying(reflect.ValueOf(v))
+	if IsNil(uv) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := Underlying(reflect.ValueOf(v))
-	vk := npv.Kind()
+	vk := uv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		return npv.Int(), nil
+		return uv.Int(), nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return int64(npv.Uint()), nil
+		return int64(uv.Uint()), nil
 	case vk == reflect.Bool:
-		if npv.Bool() {
+		if uv.Bool() {
 			return 1, nil
 		}
 		return 0, nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return int64(npv.Float()), nil
+		return int64(uv.Float()), nil
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return int64(real(npv.Complex())), nil
+		return int64(real(uv.Complex())), nil
 	case vk == reflect.String:
-		r, err := strconv.ParseInt(npv.String(), 0, 64)
+		r, err := strconv.ParseInt(uv.String(), 0, 64)
 		if err != nil {
 			return 0, err
 		}
@@ -492,27 +491,27 @@ func ToFloat(v any) (float64, error) {
 	}
 
 	// then fall back on reflection
-	if IsNil(v) {
+	uv := Underlying(reflect.ValueOf(v))
+	if IsNil(uv) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := Underlying(reflect.ValueOf(v))
-	vk := npv.Kind()
+	vk := uv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		return float64(npv.Int()), nil
+		return float64(uv.Int()), nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return float64(npv.Uint()), nil
+		return float64(uv.Uint()), nil
 	case vk == reflect.Bool:
-		if npv.Bool() {
+		if uv.Bool() {
 			return 1, nil
 		}
 		return 0, nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return npv.Float(), nil
+		return uv.Float(), nil
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return real(npv.Complex()), nil
+		return real(uv.Complex()), nil
 	case vk == reflect.String:
-		r, err := strconv.ParseFloat(npv.String(), 64)
+		r, err := strconv.ParseFloat(uv.String(), 64)
 		if err != nil {
 			return 0, err
 		}
@@ -649,27 +648,27 @@ func ToFloat32(v any) (float32, error) {
 	}
 
 	// then fall back on reflection
-	if IsNil(v) {
+	uv := Underlying(reflect.ValueOf(v))
+	if IsNil(uv) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := Underlying(reflect.ValueOf(v))
-	vk := npv.Kind()
+	vk := uv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		return float32(npv.Int()), nil
+		return float32(uv.Int()), nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return float32(npv.Uint()), nil
+		return float32(uv.Uint()), nil
 	case vk == reflect.Bool:
-		if npv.Bool() {
+		if uv.Bool() {
 			return 1, nil
 		}
 		return 0, nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return float32(npv.Float()), nil
+		return float32(uv.Float()), nil
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return float32(real(npv.Complex())), nil
+		return float32(real(uv.Complex())), nil
 	case vk == reflect.String:
-		r, err := strconv.ParseFloat(npv.String(), 32)
+		r, err := strconv.ParseFloat(uv.String(), 32)
 		if err != nil {
 			return 0, err
 		}
@@ -689,9 +688,6 @@ func ToFloat32(v any) (float32, error) {
 // pointers, and byte is converted as string(byte), not the decimal representation.
 func ToString(v any) string {
 	nilstr := "nil"
-	if IsNil(v) {
-		return nilstr
-	}
 	switch vt := v.(type) {
 	case string:
 		return vt
@@ -836,26 +832,26 @@ func ToString(v any) string {
 	}
 
 	// then fall back on reflection
-	if IsNil(v) {
+	uv := Underlying(reflect.ValueOf(v))
+	if IsNil(uv) {
 		return nilstr
 	}
-	npv := Underlying(reflect.ValueOf(v))
-	vk := npv.Kind()
+	vk := uv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		return strconv.FormatInt(npv.Int(), 10)
+		return strconv.FormatInt(uv.Int(), 10)
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return strconv.FormatUint(npv.Uint(), 10)
+		return strconv.FormatUint(uv.Uint(), 10)
 	case vk == reflect.Bool:
-		return strconv.FormatBool(npv.Bool())
+		return strconv.FormatBool(uv.Bool())
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return strconv.FormatFloat(npv.Float(), 'G', -1, 64)
+		return strconv.FormatFloat(uv.Float(), 'G', -1, 64)
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		cv := npv.Complex()
+		cv := uv.Complex()
 		rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
 		return rv
 	case vk == reflect.String:
-		return npv.String()
+		return uv.String()
 	case vk == reflect.Slice:
 		eltyp := SliceElementType(v)
 		if eltyp.Kind() == reflect.Uint8 { // []byte
@@ -936,10 +932,10 @@ func ToStringPrec(v any, prec int) string {
 // Note that maps are not reset prior to setting, whereas slices are
 // set to be fully equivalent to the source slice.
 func SetRobust(to, from any) error {
-	if IsNil(to) {
+	v := reflect.ValueOf(to)
+	if IsNil(v) {
 		return fmt.Errorf("got nil destination value")
 	}
-	v := reflect.ValueOf(to)
 	pointer := UnderlyingPointer(v)
 	ti := pointer.Interface()
 
