@@ -158,8 +158,8 @@ type ShouldSaver interface {
 func NonDefaultFields(v any) map[string]any {
 	res := map[string]any{}
 
-	rv := NonPointerValue(reflect.ValueOf(v))
-	if !rv.IsValid() {
+	rv := Underlying(reflect.ValueOf(v))
+	if IsNil(rv) {
 		return nil
 	}
 	rt := rv.Type()
