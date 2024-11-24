@@ -8,7 +8,22 @@ import (
 	"reflect"
 	"testing"
 	"unsafe"
+
+	"github.com/stretchr/testify/assert"
 )
+
+func TestNonPointerType(t *testing.T) {
+	v := 0
+	assert.Equal(t, reflect.TypeFor[int](), NonPointerType(reflect.TypeOf(v)))
+	assert.Equal(t, reflect.TypeFor[int](), NonPointerType(reflect.TypeOf(&v)))
+	p := &v
+	assert.Equal(t, reflect.TypeFor[int](), NonPointerType(reflect.TypeOf(p)))
+	assert.Equal(t, reflect.TypeFor[int](), NonPointerType(reflect.TypeOf(&p)))
+	a := any(v)
+	assert.Equal(t, reflect.TypeFor[int](), NonPointerType(reflect.TypeOf(a)))
+	// NonPointerType cannot go through *any
+	assert.Equal(t, reflect.TypeFor[any](), NonPointerType(reflect.TypeOf(&a)))
+}
 
 type PointerTestSub struct {
 	Mbr1 string
