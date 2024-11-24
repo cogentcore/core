@@ -119,6 +119,8 @@ func TestOnePointerValue(t *testing.T) {
 
 	n := (*int)(nil)
 	rn := reflect.ValueOf(n)
+	assert.True(t, rn.IsValid())
+	assert.True(t, OnePointerValue(rn).IsValid())
 	assert.True(t, OnePointerValue(rn).Equal(rn))
 
 	an := any(nil)
@@ -191,10 +193,13 @@ func TestUnderlyingPointer(t *testing.T) {
 
 	n := (*int)(nil)
 	rn := reflect.ValueOf(n)
+	assert.True(t, rn.IsValid())
+	assert.True(t, UnderlyingPointer(rn).IsValid())
 	assert.True(t, UnderlyingPointer(rn).Equal(rn))
 
 	an := any(nil)
 	ran := reflect.ValueOf(an)
+	assert.False(t, ran.IsValid())
 	assert.False(t, UnderlyingPointer(ran).IsValid())
 }
 
