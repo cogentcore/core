@@ -24,6 +24,22 @@ func TestNonPointerType(t *testing.T) {
 	assert.Equal(t, reflect.TypeFor[any](), NonPointerType(reflect.TypeFor[***any]()))
 }
 
+func TestNonPointerValue(t *testing.T) {
+	v := 0
+	rv := reflect.ValueOf(v)
+	assert.True(t, NonPointerValue(reflect.ValueOf(v)).Equal(rv))
+	assert.True(t, NonPointerValue(reflect.ValueOf(&v)).Equal(rv))
+	p := &v
+	assert.True(t, NonPointerValue(reflect.ValueOf(p)).Equal(rv))
+	assert.True(t, NonPointerValue(reflect.ValueOf(&p)).Equal(rv))
+	a := any(v)
+	assert.True(t, NonPointerValue(reflect.ValueOf(a)).Equal(rv))
+	assert.True(t, NonPointerValue(reflect.ValueOf(a)).Type() == rv.Type())
+	assert.True(t, NonPointerValue(reflect.ValueOf(&a)).Equal(rv))
+	// NonPointerValue cannot go through *any to get the true type
+	assert.False(t, NonPointerValue(reflect.ValueOf(&a)).Type() == rv.Type())
+}
+
 type PointerTestSub struct {
 	Mbr1 string
 	Mbr2 int
