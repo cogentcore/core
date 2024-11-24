@@ -111,6 +111,29 @@ func TestOnePointerValue(t *testing.T) {
 	assert.False(t, OnePointerValue(ran).IsValid())
 }
 
+func TestUnderlying(t *testing.T) {
+	v := 1
+	rv := reflect.ValueOf(v)
+	assert.True(t, Underlying(reflect.ValueOf(v)).Equal(rv))
+	assert.True(t, Underlying(reflect.ValueOf(&v)).Equal(rv))
+
+	p := &v
+	assert.True(t, Underlying(reflect.ValueOf(p)).Equal(rv))
+	assert.True(t, Underlying(reflect.ValueOf(&p)).Equal(rv))
+
+	a := any(v)
+	assert.True(t, Underlying(reflect.ValueOf(a)).Equal(rv))
+	assert.Equal(t, rv.Type(), Underlying(reflect.ValueOf(a)).Type())
+	assert.True(t, Underlying(reflect.ValueOf(&a)).Equal(rv))
+	assert.Equal(t, rv.Type(), Underlying(reflect.ValueOf(&a)).Type())
+
+	n := (*int)(nil)
+	assert.False(t, Underlying(reflect.ValueOf(n)).IsValid())
+
+	an := any(nil)
+	assert.False(t, Underlying(reflect.ValueOf(an)).IsValid())
+}
+
 type PointerTestSub struct {
 	Mbr1 string
 	Mbr2 int
