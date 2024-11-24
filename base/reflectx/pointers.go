@@ -30,6 +30,9 @@ func NonPointerValue(v reflect.Value) reflect.Value {
 // PointerValue returns a pointer to the given value if it is not already
 // a pointer.
 func PointerValue(v reflect.Value) reflect.Value {
+	if !v.IsValid() {
+		return v
+	}
 	if v.Kind() == reflect.Pointer {
 		return v
 	}
