@@ -12,6 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type myInterface interface {
+	myMethod()
+}
+
 func TestNonPointerType(t *testing.T) {
 	assert.Equal(t, reflect.TypeFor[int](), NonPointerType(reflect.TypeFor[int]()))
 	assert.Equal(t, reflect.TypeFor[int](), NonPointerType(reflect.TypeFor[*int]()))
@@ -44,9 +48,16 @@ func TestNonPointerValue(t *testing.T) {
 	assert.NotEqual(t, rv.Type(), NonPointerValue(reflect.ValueOf(&a)).Type())
 
 	n := (*int)(nil)
-	assert.False(t, NonPointerValue(reflect.ValueOf(n)).IsValid())
+	assert.True(t, reflect.ValueOf(n).IsValid())
+	assert.False(t, NonPointerValue(reflect.ValueOf(n)).IsValid()) // <- made invalid
+
+	in := myInterface(nil)
+	assert.True(t, reflect.ValueOf(&in).IsValid())
+	assert.True(t, NonPointerValue(reflect.ValueOf(&in)).IsValid())
+	assert.True(t, NonPointerValue(reflect.ValueOf(&in)).Equal(reflect.ValueOf(in)))
 
 	an := any(nil)
+	assert.False(t, reflect.ValueOf(an).IsValid())
 	assert.False(t, NonPointerValue(reflect.ValueOf(an)).IsValid())
 }
 
