@@ -48,17 +48,20 @@ func TestNonPointerValue(t *testing.T) {
 	assert.NotEqual(t, rv.Type(), NonPointerValue(reflect.ValueOf(&a)).Type())
 
 	n := (*int)(nil)
-	assert.True(t, reflect.ValueOf(n).IsValid())
-	assert.False(t, NonPointerValue(reflect.ValueOf(n)).IsValid()) // <- made invalid
+	rn := reflect.ValueOf(n)
+	assert.True(t, rn.IsValid())
+	assert.False(t, NonPointerValue(rn).IsValid()) // <- made invalid
 
 	in := myInterface(nil)
-	assert.True(t, reflect.ValueOf(&in).IsValid())
-	assert.True(t, NonPointerValue(reflect.ValueOf(&in)).IsValid())
-	assert.True(t, NonPointerValue(reflect.ValueOf(&in)).Equal(reflect.ValueOf(in)))
+	rinp := reflect.ValueOf(&in)
+	assert.True(t, rinp.IsValid())
+	assert.True(t, NonPointerValue(rinp).IsValid())
+	assert.True(t, NonPointerValue(rinp).Equal(reflect.ValueOf(in)))
 
 	an := any(nil)
-	assert.False(t, reflect.ValueOf(an).IsValid())
-	assert.False(t, NonPointerValue(reflect.ValueOf(an)).IsValid())
+	ran := reflect.ValueOf(an)
+	assert.False(t, ran.IsValid())
+	assert.False(t, NonPointerValue(ran).IsValid())
 }
 
 func TestPointerValue(t *testing.T) {
@@ -88,6 +91,7 @@ func TestPointerValue(t *testing.T) {
 
 	an := any(nil)
 	ran := reflect.ValueOf(an)
+	assert.False(t, ran.IsValid())
 	assert.False(t, PointerValue(ran).IsValid())
 }
 
@@ -119,6 +123,7 @@ func TestOnePointerValue(t *testing.T) {
 
 	an := any(nil)
 	ran := reflect.ValueOf(an)
+	assert.False(t, ran.IsValid())
 	assert.False(t, OnePointerValue(ran).IsValid())
 }
 
