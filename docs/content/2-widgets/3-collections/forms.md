@@ -149,7 +149,7 @@ type person struct {
 core.NewFormButton(b).SetStruct(&person{Name: "Go", Age: 35})
 ```
 
-You can make it so that the documentation comments for struct fields are used as tooltips for the label and value widgets of a form by adding the type to [[types]] and running `core generate`:
+You can make it so that the documentation comments for struct fields are used as tooltips for the label and value widgets of a form by adding the type to [[doc:types]] and running `core generate`:
 
 ```go
 // Add this once per package:

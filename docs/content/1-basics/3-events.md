@@ -6,7 +6,7 @@ core.NewButton(b).SetText("Click me!").OnClick(func(e events.Event) {
 })
 ```
 
-The [[events.Event]] object passed to the function can be used for various things like obtaining detailed event information. For example, you can determine the exact position of a click event:
+The [[doc:events.Event]] object passed to the function can be used for various things like obtaining detailed event information. For example, you can determine the exact position of a click event:
 
 ```Go
 core.NewButton(b).SetText("Click me!").OnClick(func(e events.Event) {

@@ -1,6 +1,6 @@
 Cogent Core provides several ways to dynamically update the content of an app.
 
-The simplest way to update a widget is to call [[core.WidgetBase.Update]] after changing any of its properties:
+The simplest way to update a widget is to call [[doc:core.WidgetBase.Update]] after changing any of its properties:
 
 ```Go
 count := 0
@@ -11,7 +11,7 @@ core.NewButton(b).SetText("Increment").OnClick(func(e events.Event) {
 })
 ```
 
-You can also register a [[core.WidgetBase.Updater]] that will get called when the widget is updated. This can allow you to more closely couple widgets with their updating logic:
+You can also register a [[doc:core.WidgetBase.Updater]] that will get called when the widget is updated. This can allow you to more closely couple widgets with their updating logic:
 
 ```Go
 count := 0

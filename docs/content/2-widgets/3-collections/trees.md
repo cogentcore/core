@@ -9,7 +9,7 @@ c2 := core.NewTree(tr)
 core.NewTree(c2)
 ```
 
-You can make a tree represent another [[tree.Node]] tree:
+You can make a tree represent another [[doc:tree.Node]] tree:
 
 ```Go
 n := tree.NewNodeBase()

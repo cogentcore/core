@@ -47,23 +47,23 @@ However, using a `struct` with appropriately named fields has the following adva
 * Compile time type-safety: the type of the property is not `any` but the actual type needed.
 * Tab completion and full lookup in IDEs -- much easier when _using_ config values in an app, and also when setting styling in GUI.
 * GUI editor of config opts as a Form has full access to field tag GUI hints, etc.
-* [[types]] can provide access to field comments for full docs for each option, whereas the map implementation requires separate maps of docs and values.
+* [[doc:types]] can provide access to field comments for full docs for each option, whereas the map implementation requires separate maps of docs and values.
 
-This is why the [[cli]] configuration and app command management system is based on structs, and why Cogent Core uses direct styling functions that directly set values on the [[styles.Style]] structs.
+This is why the [[doc:cli]] configuration and app command management system is based on structs, and why Cogent Core uses direct styling functions that directly set values on the [[doc:styles.Style]] structs.
 
 ### Generate vs. `reflect` tradeoffs
 
 Generated code is, in general, faster and cleaner and can be targeted to just what is needed. On the other hand, `reflect` is more robust than generated code (doesn't require proper such code to have been generated), and generated code takes more space.  Therefore, these tradeoffs need to be considered in a case-by-case basis, also in conjunction with generics.
 
-* [[types]] went back-and-forth from using generated vs reflect code, and settled on an "optimal" hybrid of the two.  The documentation-level data extracted from comments can only be obtained using generate, but we saved a lot of code by using reflect + generics instead of generating a `Type` variable for each type.
+* [[doc:types]] went back-and-forth from using generated vs reflect code, and settled on an "optimal" hybrid of the two.  The documentation-level data extracted from comments can only be obtained using generate, but we saved a lot of code by using reflect + generics instead of generating a `Type` variable for each type.
 
-* Many "Collection" elements in [[core]] use `reflect` to operate on any Go type, e.g., [[core.Form]] on `struct` and [[core.List]] on `slices` etc.
+* Many "Collection" elements in [[doc:core]] use `reflect` to operate on any Go type, e.g., [[doc:core.Form]] on `struct` and [[doc:core.List]] on `slices` etc.
 
 ### Interfaces instead of `reflect`
 
 Interfaces go hand-in-hand with generated code: the boilerplate code that satisfies the interfaces is auto-generated as needed.
 
-The prototype here is [[enums]].
+The prototype here is [[doc:enums]].
 
 ### Keep interfaces small
 
@@ -71,7 +71,7 @@ This is a Go mantra that can be difficult for people coming from other languages
 
 The general principle is simple: _an interface should only specify the methods that actually need to be implemented differently_.
 
-For example, the [[tree.Node]] interface used to be rather large, but now we follow the above principle and just require people to do `AsTree()` to access all the "base" level functionality defined on [[tree.NodeBase]].  This also helps to avoid naming conflicts between the interface methods and the implementation fields.
+For example, the [[doc:tree.Node]] interface used to be rather large, but now we follow the above principle and just require people to do `AsTree()` to access all the "base" level functionality defined on [[doc:tree.NodeBase]].  This also helps to avoid naming conflicts between the interface methods and the implementation fields.
 
 ### Exporting vs. hiding
 
@@ -79,7 +79,7 @@ One extreme strategy is to hide (lowercase) everything and only export (uppercas
 
 A more relaxed strategy, used frequently in the Go stdlib, is to export `struct` fields directly wherever possible, and only provide `Set` methods where side-effects exist. Furthermore, such side-effects should be minimized, including handling the "zero value" case to the extent possible, such that no initializer methods are needed.  Making fields exported also allows direct inspection of such fields in the GUI inspector, providing important easy-to-use debugging and understanding.
 
-This is the approach taken in Cogent Core (along with auto-generated `Set` methods for chaining as discussed below).  In general, setting fields should have no side-effects, and instead all the side-effects should be handled in the [[core.WidgetBase.Update]] method (via [[tree.NodeBase.Updaters]] or [[core.WidgetBase.Stylers]] as appropriate).
+This is the approach taken in Cogent Core (along with auto-generated `Set` methods for chaining as discussed below).  In general, setting fields should have no side-effects, and instead all the side-effects should be handled in the [[doc:core.WidgetBase.Update]] method (via [[doc:tree.NodeBase.Updaters]] or [[doc:core.WidgetBase.Stylers]] as appropriate).
 
 In C++ and other languages, it is of utmost importance to hide all implementational details, to ensure that minor changes do not affect the binary linking compatibility of dynamic libraries. However, in Go, everything is always built from source and no such consideration really applies.  Therefore, it is possible to be more relaxed about hiding things.  Furthermore, it is all-too-often the case that someone has hidden some key bit of implementation that is critical for some other package to use, resulting in significant painful code duplication.
 
@@ -89,7 +89,7 @@ Therefore, _if anyone ever needs access to something that has been hidden, we ar
 
 ### Chaining function calls
 
-The [[types]] package performs automatic generation of `New` and `Set` convenience methods that have one key advantage over direct field access: they return a pointer to the receiver object, so that you can chain multiple calls together, as in:
+The [[doc:types]] package performs automatic generation of `New` and `Set` convenience methods that have one key advantage over direct field access: they return a pointer to the receiver object, so that you can chain multiple calls together, as in:
 
 ```Go
 core.NewButton(b).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
@@ -110,9 +110,9 @@ Try to make these packages as independent as possible; don't have them depend on
 This is what we look for in considering whether to import a given package, so it is what we should provide.
 
 Examples:
-* [[colors]] pulled out of core
-* [[reflectx]] pulled reflection stuff out of tree
-* [[clicore]] separated from [[cli]] to keep cli free of core dependency
+* [[doc:colors]] pulled out of core
+* [[doc:reflectx]] pulled reflection stuff out of tree
+* [[doc:clicore]] separated from [[doc:cli]] to keep cli free of core dependency
 
 ### Use function libraries instead of putting lots of methods on a type
 
@@ -122,7 +122,7 @@ Go uses the `strings` package instead of adding a lot of builtin methods on the 
 * Multiple different such packages can be used for different subsets of functionality (e.g., regex, unicode etc are all separate).
 * Type itself remains small and only handles most basic functionality; presumably this works better for checking interface implementation etc.
 
-Consistent with this approach, [[colors]] implements functions operating on the standard `color.RGBA` data type, instead of the many methods we defined on `gist.Color` in the old version.
+Consistent with this approach, [[doc:colors]] implements functions operating on the standard `color.RGBA` data type, instead of the many methods we defined on `gist.Color` in the old version.
 
 ## Naming
 
@@ -142,4 +142,4 @@ Here is a list of choices for cases where there are two widely-used but equivale
 
 ### Collections are plural
 
-Packages and types whose primary purpose is to describe/hold a collection of something should be named in the plural. For example, [[events]] holds a collection of different event types, so it has a plural name. Also, per this rule, enum types are almost always named in the plural, as they describe a collection of possible values.
+Packages and types whose primary purpose is to describe/hold a collection of something should be named in the plural. For example, [[doc:events]] holds a collection of different event types, so it has a plural name. Also, per this rule, enum types are almost always named in the plural, as they describe a collection of possible values.

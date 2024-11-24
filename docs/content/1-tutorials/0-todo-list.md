@@ -9,7 +9,7 @@ type item struct {
 }
 ```
 
-We can create a slice of these items and then represent them with a [[core.Table]] widget:
+We can create a slice of these items and then represent them with a [[doc:core.Table]] widget:
 
 ```Go
 type item struct {

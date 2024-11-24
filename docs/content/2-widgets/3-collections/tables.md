@@ -83,7 +83,7 @@ type language struct {
 core.NewListButton(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
-You can make it so that the documentation comments for struct fields are used as tooltips for the column headers and value widgets of a table by adding the type to [[types]] and running `core generate`:
+You can make it so that the documentation comments for struct fields are used as tooltips for the column headers and value widgets of a table by adding the type to [[doc:types]] and running `core generate`:
 
 ```go
 // Add this once per package:

@@ -10,7 +10,7 @@ core.NewFuncButton(b).SetFunc(func() {
 
 Notice how the text of the func button above is set to `Anonymous function`. That is because the bound function in that case is an anonymous function. You can also see that the tooltip of the function has been set to give more information about the function.
 
-You can always override the text and tooltip of a func button as long as you do so after you call [[core.FuncButton.SetFunc]]:
+You can always override the text and tooltip of a func button as long as you do so after you call [[doc:core.FuncButton.SetFunc]]:
 
 ```Go
 core.NewFuncButton(b).SetFunc(func() {
@@ -26,7 +26,7 @@ core.NewFuncButton(b).SetFunc(func(name string, age int) {
 })
 ```
 
-When the bound function returns values, you can set [[core.FuncButton.ShowReturn]] to true for the user to be shown those values:
+When the bound function returns values, you can set [[doc:core.FuncButton.ShowReturn]] to true for the user to be shown those values:
 
 ```Go
 core.NewFuncButton(b).SetShowReturn(true).SetFunc(func() (string, int) {
@@ -42,13 +42,13 @@ core.NewFuncButton(b).SetConfirm(true).SetFunc(func() {
 })
 ```
 
-You may have noticed in all of the examples so far that the names and tooltips for the func buttons are not particularly useful, and the names of the arguments are missing. To solve this, you can use named functions added to [[types]], which gives information about all of those things. For example, here is a func button for [[core.SettingsWindow]]:
+You may have noticed in all of the examples so far that the names and tooltips for the func buttons are not particularly useful, and the names of the arguments are missing. To solve this, you can use named functions added to [[doc:types]], which gives information about all of those things. For example, here is a func button for [[doc:core.SettingsWindow]]:
 
 ```Go
 core.NewFuncButton(b).SetFunc(core.SettingsWindow).SetConfirm(true)
 ```
 
-The process for adding a function to [[types]] is similar to the process for adding a struct described in [forms](../collections/forms):
+The process for adding a function to [[doc:types]] is similar to the process for adding a struct described in [forms](../collections/forms):
 
 ```go
 // Add this once per package:
