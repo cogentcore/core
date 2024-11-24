@@ -134,6 +134,45 @@ func TestUnderlying(t *testing.T) {
 	assert.False(t, Underlying(reflect.ValueOf(an)).IsValid())
 }
 
+func TestUnderlyingPointer(t *testing.T) {
+	v := 1
+	rv := reflect.ValueOf(v)
+	assert.False(t, rv.CanAddr())
+	assert.False(t, UnderlyingPointer(reflect.ValueOf(v)).Equal(rv))
+	assert.Equal(t, reflect.TypeFor[*int](), UnderlyingPointer(reflect.ValueOf(v)).Type())
+
+	p := &v
+	rp := reflect.ValueOf(p)
+	assert.True(t, UnderlyingPointer(rp).Equal(rp))
+	assert.Equal(t, reflect.TypeFor[*int](), UnderlyingPointer(rp).Type())
+
+	assert.True(t, rp.Elem().CanAddr())
+	assert.True(t, UnderlyingPointer(rp.Elem()).Equal(rp))
+	assert.True(t, UnderlyingPointer(rp.Elem()).Equal(rp.Elem().Addr()))
+
+	pp := &p
+	rpp := reflect.ValueOf(pp)
+	assert.False(t, UnderlyingPointer(rpp).Equal(rpp))
+	assert.True(t, UnderlyingPointer(rpp).Equal(rp))
+	assert.Equal(t, reflect.TypeFor[*int](), UnderlyingPointer(rpp).Type())
+
+	a := any(v)
+	ap := &a
+	rap := reflect.ValueOf(ap)
+	// Different pointer, same type
+	assert.False(t, UnderlyingPointer(rap).Equal(rp))
+	assert.Equal(t, rp.Type(), UnderlyingPointer(rap).Type())
+	assert.Equal(t, reflect.TypeFor[*int](), UnderlyingPointer(rap).Type())
+
+	n := (*int)(nil)
+	rn := reflect.ValueOf(n)
+	assert.True(t, UnderlyingPointer(rn).Equal(rn))
+
+	an := any(nil)
+	ran := reflect.ValueOf(an)
+	assert.False(t, UnderlyingPointer(ran).IsValid())
+}
+
 type PointerTestSub struct {
 	Mbr1 string
 	Mbr2 int
