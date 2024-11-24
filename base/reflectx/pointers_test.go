@@ -144,10 +144,19 @@ func TestUnderlying(t *testing.T) {
 	assert.Equal(t, rv.Type(), Underlying(reflect.ValueOf(&a)).Type())
 
 	n := (*int)(nil)
-	assert.False(t, Underlying(reflect.ValueOf(n)).IsValid())
+	rn := reflect.ValueOf(n)
+	assert.True(t, rn.IsValid())
+	assert.False(t, Underlying(rn).IsValid()) // <- made invalid
+
+	in := myInterface(nil)
+	rinp := reflect.ValueOf(&in)
+	assert.True(t, rinp.IsValid())
+	assert.False(t, Underlying(rinp).IsValid()) // <- made invalid
 
 	an := any(nil)
-	assert.False(t, Underlying(reflect.ValueOf(an)).IsValid())
+	ran := reflect.ValueOf(an)
+	assert.False(t, ran.IsValid())
+	assert.False(t, Underlying(ran).IsValid())
 }
 
 func TestUnderlyingPointer(t *testing.T) {
