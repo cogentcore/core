@@ -187,9 +187,9 @@ Note that value binding goes both ways: not only is the value of the widget upda
 
 *Main article: [[Plan]]*
 
-The previous two sections cover how to update the properties of a [[#widgets|widget]], but what if you want to update the structure of a widget? To answer that question, Cogent Core provides [[doc:tree.Plan]], a mechanism for specifying what the children of a widget should be, which is then used to automatically update the actual children to reflect that.
+The previous two sections cover how to update the properties of a [[#widgets|widget]], but what if you want to update the structure of a widget? To answer that question, Cogent Core provides **plans**, a mechanism for specifying what the children of a widget should be, which is then used to automatically update the actual children to reflect that.
 
-For example, this code uses [[doc:tree.Plan]] through [[doc:tree.NodeBase.Maker]] to dynamically update the number of [[button]]s in a frame:
+For example, this code uses [[doc:tree.Plan]] through [[doc:tree.NodeBase.Maker]] to dynamically update the number of [[button]]s in a [[frame]]:
 
 ```Go
 number := 3
@@ -208,3 +208,27 @@ spinner.OnChange(func(e events.Event) {
 ```
 
 Plans are a powerful tool that are critical for some widgets such as those that need to dynamically manage hundreds of children in a convenient and performant way. They aren't always necessary, but you will find them being used a lot in complicated apps, and you will see more examples of them in the rest of this documentation.
+
+
+## Async
+
+*Main article: [[Async]]*
+
+Most of the time, updating happens synchronously through [[#events|event]] handlers, [[#styling|stylers]], [[#updating|updaters]], and [[#plans|makers]]. However, sometimes you need to update content **asynchronously** from another goroutine. When you do so, you just need to protect any updates you make to [[#widgets|widgets]] with [[doc:core.WidgetBase.AsyncLock]] and [[doc:core.WidgetBase.AsyncUnlock]].
+
+For example, this code utilizes a goroutine to update [[text]] to the current time every second:
+
+```Go
+text := core.NewText(b)
+text.Updater(func() {
+    text.SetText(time.Now().Format("15:04:05"))
+})
+go func() {
+    ticker := time.NewTicker(time.Second)
+    for range ticker.C {
+        text.AsyncLock()
+        text.Update()
+        text.AsyncUnlock()
+    }
+}()
+```
