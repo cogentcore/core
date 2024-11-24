@@ -1,4 +1,4 @@
-Note: we recommend you read the [basics](../basics) and [tutorials](../tutorials) before you start developing with Cogent Core on your system. Complete all of the following steps to install Cogent Core:
+Note: we recommend you read the [[basics]] and [[tutorials]] before you start developing with Cogent Core on your system. Complete all of the following steps to install Cogent Core:
 
 1. Download and install Go from [the Go website](https://go.dev/doc/install) if you do not already have Go 1.22+ installed.
 2. Run `go install cogentcore.org/core/cmd/core@main` to install the Cogent Core command line tool. You should run this command again each time you update to a new version of Cogent Core.

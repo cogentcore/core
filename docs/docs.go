@@ -245,7 +245,7 @@ func homePage(ctx *htmlcore.Context) bool {
 		tree.AddChild(w, func(w *core.Button) {
 			w.SetText("Install").SetType(core.ButtonTonal)
 			w.OnClick(func(e events.Event) {
-				ctx.OpenURL("/setup/install")
+				ctx.OpenURL("Install")
 			})
 		})
 	})
