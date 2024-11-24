@@ -1,4 +1,4 @@
-The **basics** are a simple overview of the key [[concepts]] of Cogent Core. We recommend you read the basics before the [[tutorials]] and [[install|install instructions]].
+The **basics** are a simple overview of the key [[concepts]] of Cogent Core. You can interactively run and edit the examples on this website directly, or you can [[install]] Cogent Core on your system and experiment locally. You can also use the [[playground]] to develop interactively. After you finish the basics, we recommend you read the [[tutorials]] and explore the [[widgets]].
 
 ## Hello world
 
@@ -18,11 +18,9 @@ func main() {
 
 Notice how you can see the result of the code above, a [[button]] with the [[text]] "Hello, World!". Not only can you see the result of the code, you can edit the code live. Try changing "Hello, World!" to "Click me!" and you will see the button update accordingly.
 
-Even though Cogent Core is written in Go, a compiled language, it uses the interpreter [yaegi](https://github.com/cogentcore/yaegi) to provide interactive editing. You can edit almost all of the examples on this website and see the result immediately. You can also use the [[playground]] to experiment interactively with Cogent Core.
-
 ## Apps
 
-*Main article: [[App]]*
+*Main page: [[App]]*
 
 The first call in every **app** is [[doc:core.NewBody]]. This creates and returns a new [[doc:core.Body]], which is a container in which app content is placed. This takes an optional name, which is used for the title of the app/window/tab.
 
@@ -48,7 +46,7 @@ For most of the code examples on this website, we will omit the outer structure 
 
 ## Widgets
 
-*Main article: [[Widget]]*
+*Main page: [[Widget]]*
 
 All app content is organized into **widgets**, which are reusable app components that render, store information, and handle [[#events|events]]. All widgets satisfy the [[doc:core.Widget]] interface.
 
@@ -72,7 +70,7 @@ bt.SetText("New text")
 
 ## Events
 
-*Main article: [[Event]]*
+*Main page: [[Event]]*
 
 **Events** are user actions that you can process. To handle an event, simply call the `On{EventType}` method on any [[#widgets|widget]]. For example:
 
@@ -92,7 +90,7 @@ core.NewButton(b).SetText("Click me!").OnClick(func(e events.Event) {
 
 ## Styling
 
-*Main article: [[Styling]]*
+*Main page: [[Styling]]*
 
 **Styling** allows you to easily customize the appearance of [[#widgets|widgets]] at any level.
 
@@ -124,7 +122,7 @@ core.NewFrame(b).Styler(func(s *styles.Style) {
 
 ## Updating
 
-*Main article: [[Updating]]*
+*Main page: [[Updating]]*
 
 There are several ways to dynamically **update** the content of an app.
 
@@ -155,7 +153,7 @@ core.NewButton(b).SetText("Increment").OnClick(func(e events.Event) {
 
 ## Value binding
 
-*Main article: [[Value binding]]*
+*Main page: [[Value binding]]*
 
 **Value binding** allows you to link the value of a variable and the value of a [[#widgets|widget]], ensuring that they automatically stay up-to-date.
 
@@ -185,7 +183,7 @@ Note that value binding goes both ways: not only is the value of the widget upda
 
 ## Plans
 
-*Main article: [[Plan]]*
+*Main page: [[Plan]]*
 
 The previous two sections cover how to update the properties of a [[#widgets|widget]], but what if you want to update the structure of a widget? To answer that question, Cogent Core provides **plans**, a mechanism for specifying what the children of a widget should be, which is then used to automatically update the actual children to reflect that.
 
@@ -211,7 +209,7 @@ Plans are a powerful tool that are critical for some widgets such as those that 
 
 ## Async
 
-*Main article: [[Async]]*
+*Main page: [[Async]]*
 
 Most of the time, updating happens synchronously through [[#events|event]] handlers, [[#styling|stylers]], [[#updating|updaters]], and [[#plans|makers]]. However, sometimes you need to update content **asynchronously** from another goroutine. When you do so, you just need to protect any updates you make to [[#widgets|widgets]] with [[doc:core.WidgetBase.AsyncLock]] and [[doc:core.WidgetBase.AsyncUnlock]].
 
@@ -231,3 +229,7 @@ go func() {
     }
 }()
 ```
+
+## Next steps
+
+Now that you understand the basics, you can apply them in [[tutorials]], explore the [[widgets]], or [[install]] Cogent Core on your system.
