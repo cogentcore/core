@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
@@ -250,6 +251,7 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	if err != nil {
 		return err
 	}
+	w.ScrollDimToContentStart(math32.Y)
 	ct.leftFrame.DeleteChildren()
 	ct.makeTableOfContents(w)
 	ct.makeCategories()

@@ -24,7 +24,7 @@ This installs [w64devkit](https://github.com/skeeto/w64devkit) and [Git](https:/
 
 ## Linux
 
-This installs various graphics libraries. You may need to enter your password so that it can run `sudo` commands. On some devices and distros, you may need to also install a custom Lavapipe Vulkan driver. For example, on Arch Linux without a dedicated GPU, you need to install [vulkan-swrast](https://archlinux.org/packages/extra/x86_64/vulkan-swrast/).
+This installs various graphics libraries. You may need to enter your password so that it can run `sudo` commands. On some devices and distros, you may also need to install a custom Lavapipe Vulkan driver. For example, on Arch Linux without a dedicated GPU, you need to install [vulkan-swrast](https://archlinux.org/packages/extra/x86_64/vulkan-swrast/).
 
 If you want to install manually instead, the commands run for each distro are listed below.
 
