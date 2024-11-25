@@ -227,7 +227,7 @@ func (bt *Button) Init() {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 					s.FillMargin = false
-					s.Font.Size = bt.Styles.Font.Size // Directly inherit to override [Text.Type] based default
+					s.Font.Size = bt.Styles.Font.Size // Directly inherit to override the [Text.Type]-based default
 				})
 				w.Updater(func() {
 					if bt.Type == ButtonMenu {
