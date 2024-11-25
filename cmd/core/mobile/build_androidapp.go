@@ -80,13 +80,19 @@ func goAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		if err := exec.MkdirAll(filepath.Dir(libAbsPath), 0755); err != nil {
 			return nil, err
 		}
+		args := []string{
+			"-buildmode=c-shared",
+			"-ldflags", config.LinkerFlags(c),
+			"-o", libAbsPath,
+		}
+		if c.Build.Trimpath {
+			args = append(args, "-trimpath")
+		}
 		err = goBuild(
 			c,
 			pkg.PkgPath,
 			androidEnv[t.Arch],
-			"-buildmode=c-shared",
-			"-ldflags", config.LinkerFlags(c),
-			"-o", libAbsPath,
+			args...,
 		)
 		if err != nil {
 			return nil, err

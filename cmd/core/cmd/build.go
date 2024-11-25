@@ -61,12 +61,12 @@ func buildDesktop(c *config.Config, platform config.Platform) error {
 	xc.Env["GOOS"] = platform.OS
 	xc.Env["GOARCH"] = platform.Arch
 
-	tags := []string{"build"}
+	args := []string{"build"}
 	if c.Build.Debug {
-		tags = append(tags, "-tags", "debug")
+		args = append(args, "-tags", "debug")
 	}
 	if c.Build.Trimpath {
-		tags = append(tags, "-trimpath")
+		args = append(args, "-trimpath")
 	}
 	ldflags := ""
 	output := filepath.Base(c.Build.Output)
@@ -78,9 +78,9 @@ func buildDesktop(c *config.Config, platform config.Platform) error {
 		}
 	}
 	ldflags += " " + config.LinkerFlags(c)
-	tags = append(tags, "-ldflags", ldflags, "-o", filepath.Join(c.Build.Output, output))
+	args = append(args, "-ldflags", ldflags, "-o", filepath.Join(c.Build.Output, output))
 
-	err := xc.Run("go", tags...)
+	err := xc.Run("go", args...)
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}
