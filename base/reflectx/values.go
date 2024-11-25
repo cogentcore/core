@@ -21,17 +21,16 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-// AnyIsNil checks if an interface value is nil. The interface itself
-// could be nil, or the value pointed to by the interface could be nil.
-// This safely checks both.
-func AnyIsNil(v any) bool {
-	if v == nil {
+// IsNil returns whether the given value is nil or invalid.
+// If it is a non-nillable type, it does not check whether
+// it is nil to avoid panics.
+func IsNil(v reflect.Value) bool {
+	if !v.IsValid() {
 		return true
 	}
-	rv := reflect.ValueOf(v)
-	vk := rv.Kind()
-	if vk == reflect.Pointer || vk == reflect.Interface || vk == reflect.Map || vk == reflect.Slice || vk == reflect.Func || vk == reflect.Chan {
-		return rv.IsNil()
+	switch v.Kind() {
+	case reflect.Pointer, reflect.Interface, reflect.Map, reflect.Slice, reflect.Func, reflect.Chan:
+		return v.IsNil()
 	}
 	return false
 }
@@ -190,24 +189,24 @@ func ToBool(v any) (bool, error) {
 	}
 
 	// then fall back on reflection
-	if AnyIsNil(v) {
+	uv := Underlying(reflect.ValueOf(v))
+	if IsNil(uv) {
 		return false, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := Underlying(reflect.ValueOf(v))
-	vk := npv.Kind()
+	vk := uv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		return (npv.Int() != 0), nil
+		return (uv.Int() != 0), nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return (npv.Uint() != 0), nil
+		return (uv.Uint() != 0), nil
 	case vk == reflect.Bool:
-		return npv.Bool(), nil
+		return uv.Bool(), nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return (npv.Float() != 0.0), nil
+		return (uv.Float() != 0.0), nil
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return (real(npv.Complex()) != 0.0), nil
+		return (real(uv.Complex()) != 0.0), nil
 	case vk == reflect.String:
-		r, err := strconv.ParseBool(npv.String())
+		r, err := strconv.ParseBool(uv.String())
 		if err != nil {
 			return false, err
 		}
@@ -347,27 +346,27 @@ func ToInt(v any) (int64, error) {
 	}
 
 	// then fall back on reflection
-	if AnyIsNil(v) {
+	uv := Underlying(reflect.ValueOf(v))
+	if IsNil(uv) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := Underlying(reflect.ValueOf(v))
-	vk := npv.Kind()
+	vk := uv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		return npv.Int(), nil
+		return uv.Int(), nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return int64(npv.Uint()), nil
+		return int64(uv.Uint()), nil
 	case vk == reflect.Bool:
-		if npv.Bool() {
+		if uv.Bool() {
 			return 1, nil
 		}
 		return 0, nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return int64(npv.Float()), nil
+		return int64(uv.Float()), nil
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return int64(real(npv.Complex())), nil
+		return int64(real(uv.Complex())), nil
 	case vk == reflect.String:
-		r, err := strconv.ParseInt(npv.String(), 0, 64)
+		r, err := strconv.ParseInt(uv.String(), 0, 64)
 		if err != nil {
 			return 0, err
 		}
@@ -504,27 +503,27 @@ func ToFloat(v any) (float64, error) {
 	}
 
 	// then fall back on reflection
-	if AnyIsNil(v) {
+	uv := Underlying(reflect.ValueOf(v))
+	if IsNil(uv) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := Underlying(reflect.ValueOf(v))
-	vk := npv.Kind()
+	vk := uv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		return float64(npv.Int()), nil
+		return float64(uv.Int()), nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return float64(npv.Uint()), nil
+		return float64(uv.Uint()), nil
 	case vk == reflect.Bool:
-		if npv.Bool() {
+		if uv.Bool() {
 			return 1, nil
 		}
 		return 0, nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return npv.Float(), nil
+		return uv.Float(), nil
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return real(npv.Complex()), nil
+		return real(uv.Complex()), nil
 	case vk == reflect.String:
-		r, err := strconv.ParseFloat(npv.String(), 64)
+		r, err := strconv.ParseFloat(uv.String(), 64)
 		if err != nil {
 			return 0, err
 		}
@@ -661,27 +660,27 @@ func ToFloat32(v any) (float32, error) {
 	}
 
 	// then fall back on reflection
-	if AnyIsNil(v) {
+	uv := Underlying(reflect.ValueOf(v))
+	if IsNil(uv) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := Underlying(reflect.ValueOf(v))
-	vk := npv.Kind()
+	vk := uv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		return float32(npv.Int()), nil
+		return float32(uv.Int()), nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return float32(npv.Uint()), nil
+		return float32(uv.Uint()), nil
 	case vk == reflect.Bool:
-		if npv.Bool() {
+		if uv.Bool() {
 			return 1, nil
 		}
 		return 0, nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return float32(npv.Float()), nil
+		return float32(uv.Float()), nil
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return float32(real(npv.Complex())), nil
+		return float32(real(uv.Complex())), nil
 	case vk == reflect.String:
-		r, err := strconv.ParseFloat(npv.String(), 32)
+		r, err := strconv.ParseFloat(uv.String(), 32)
 		if err != nil {
 			return 0, err
 		}
@@ -701,7 +700,10 @@ func ToFloat32(v any) (float32, error) {
 // pointers, and byte is converted as string(byte), not the decimal representation.
 func ToString(v any) string {
 	nilstr := "nil"
-	if AnyIsNil(v) {
+	// TODO: this reflection is unideal for performance, but we need it to prevent panics,
+	// so this whole "greatest efficiency" type switch is kind of pointless.
+	rv := reflect.ValueOf(v)
+	if IsNil(rv) {
 		return nilstr
 	}
 	switch vt := v.(type) {
@@ -848,26 +850,26 @@ func ToString(v any) string {
 	}
 
 	// then fall back on reflection
-	if AnyIsNil(v) {
+	uv := Underlying(rv)
+	if IsNil(uv) {
 		return nilstr
 	}
-	npv := Underlying(reflect.ValueOf(v))
-	vk := npv.Kind()
+	vk := uv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		return strconv.FormatInt(npv.Int(), 10)
+		return strconv.FormatInt(uv.Int(), 10)
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return strconv.FormatUint(npv.Uint(), 10)
+		return strconv.FormatUint(uv.Uint(), 10)
 	case vk == reflect.Bool:
-		return strconv.FormatBool(npv.Bool())
+		return strconv.FormatBool(uv.Bool())
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return strconv.FormatFloat(npv.Float(), 'G', -1, 64)
+		return strconv.FormatFloat(uv.Float(), 'G', -1, 64)
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		cv := npv.Complex()
+		cv := uv.Complex()
 		rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
 		return rv
 	case vk == reflect.String:
-		return npv.String()
+		return uv.String()
 	case vk == reflect.Slice:
 		eltyp := SliceElementType(v)
 		if eltyp.Kind() == reflect.Uint8 { // []byte
@@ -948,17 +950,17 @@ func ToStringPrec(v any, prec int) string {
 // Note that maps are not reset prior to setting, whereas slices are
 // set to be fully equivalent to the source slice.
 func SetRobust(to, from any) error {
-	if AnyIsNil(to) {
+	rto := reflect.ValueOf(to)
+	pto := UnderlyingPointer(rto)
+	if IsNil(pto) {
 		return fmt.Errorf("got nil destination value")
 	}
-	v := reflect.ValueOf(to)
-	pointer := UnderlyingPointer(v)
-	ti := pointer.Interface()
+	pito := pto.Interface()
 
-	typ := pointer.Elem().Type()
-	kind := typ.Kind()
-	if !pointer.Elem().CanSet() {
-		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pointer, pointer)
+	totyp := pto.Elem().Type()
+	tokind := totyp.Kind()
+	if !pto.Elem().CanSet() {
+		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pto, pto)
 	}
 
 	// images should not be copied per content: just set the pointer!
@@ -971,21 +973,21 @@ func SetRobust(to, from any) error {
 	}
 
 	// first we do the generic AssignableTo case
-	if v.Kind() == reflect.Pointer {
+	if rto.Kind() == reflect.Pointer {
 		fv := reflect.ValueOf(from)
 		if fv.IsValid() {
-			if fv.Type().AssignableTo(typ) {
-				pointer.Elem().Set(fv)
+			if fv.Type().AssignableTo(totyp) {
+				pto.Elem().Set(fv)
 				return nil
 			}
 			ufvp := UnderlyingPointer(fv)
-			if ufvp.IsValid() && ufvp.Type().AssignableTo(typ) {
-				pointer.Elem().Set(ufvp)
+			if ufvp.IsValid() && ufvp.Type().AssignableTo(totyp) {
+				pto.Elem().Set(ufvp)
 				return nil
 			}
 			ufv := ufvp.Elem()
-			if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
-				pointer.Elem().Set(ufv)
+			if ufv.IsValid() && ufv.Type().AssignableTo(totyp) {
+				pto.Elem().Set(ufv)
 				return nil
 			}
 		} else {
@@ -993,14 +995,14 @@ func SetRobust(to, from any) error {
 		}
 	}
 
-	if sa, ok := ti.(SetAnyer); ok {
+	if sa, ok := pito.(SetAnyer); ok {
 		err := sa.SetAny(from)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
-	if ss, ok := ti.(SetStringer); ok {
+	if ss, ok := pito.(SetStringer); ok {
 		if s, ok := from.(string); ok {
 			err := ss.SetString(s)
 			if err != nil {
@@ -1009,7 +1011,7 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 	}
-	if es, ok := ti.(enums.EnumSetter); ok {
+	if es, ok := pito.(enums.EnumSetter); ok {
 		if en, ok := from.(enums.Enum); ok {
 			es.SetInt64(en.Int64())
 			return nil
@@ -1025,7 +1027,7 @@ func SetRobust(to, from any) error {
 		return nil
 	}
 
-	if bv, ok := ti.(bools.BoolSetter); ok {
+	if bv, ok := pito.(bools.BoolSetter); ok {
 		fb, err := ToBool(from)
 		if err != nil {
 			return err
@@ -1033,7 +1035,7 @@ func SetRobust(to, from any) error {
 		bv.SetBool(fb)
 		return nil
 	}
-	if td, ok := ti.(*time.Duration); ok {
+	if td, ok := pito.(*time.Duration); ok {
 		if fs, ok := from.(string); ok {
 			fd, err := time.ParseDuration(fs)
 			if err != nil {
@@ -1045,7 +1047,7 @@ func SetRobust(to, from any) error {
 	}
 
 	if fc, err := colors.FromAny(from); err == nil {
-		switch c := ti.(type) {
+		switch c := pito.(type) {
 		case *color.RGBA:
 			*c = fc
 			return nil
@@ -1064,39 +1066,39 @@ func SetRobust(to, from any) error {
 	ftyp := NonPointerType(reflect.TypeOf(from))
 
 	switch {
-	case kind >= reflect.Int && kind <= reflect.Int64:
+	case tokind >= reflect.Int && tokind <= reflect.Int64:
 		fm, err := ToInt(from)
 		if err != nil {
 			return err
 		}
-		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pto.Elem().Set(reflect.ValueOf(fm).Convert(totyp))
 		return nil
-	case kind >= reflect.Uint && kind <= reflect.Uint64:
+	case tokind >= reflect.Uint && tokind <= reflect.Uint64:
 		fm, err := ToInt(from)
 		if err != nil {
 			return err
 		}
-		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pto.Elem().Set(reflect.ValueOf(fm).Convert(totyp))
 		return nil
-	case kind == reflect.Bool:
+	case tokind == reflect.Bool:
 		fm, err := ToBool(from)
 		if err != nil {
 			return err
 		}
-		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pto.Elem().Set(reflect.ValueOf(fm).Convert(totyp))
 		return nil
-	case kind >= reflect.Float32 && kind <= reflect.Float64:
+	case tokind >= reflect.Float32 && tokind <= reflect.Float64:
 		fm, err := ToFloat(from)
 		if err != nil {
 			return err
 		}
-		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pto.Elem().Set(reflect.ValueOf(fm).Convert(totyp))
 		return nil
-	case kind == reflect.String:
+	case tokind == reflect.String:
 		fm := ToString(from)
-		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pto.Elem().Set(reflect.ValueOf(fm).Convert(totyp))
 		return nil
-	case kind == reflect.Struct:
+	case tokind == reflect.Struct:
 		if ftyp.Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to) // todo: this is not working -- see what marshal says, etc
 			if err != nil {
@@ -1105,7 +1107,7 @@ func SetRobust(to, from any) error {
 			}
 			return nil
 		}
-	case kind == reflect.Slice:
+	case tokind == reflect.Slice:
 		if ftyp.Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
@@ -1115,7 +1117,7 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 		return CopySliceRobust(to, from)
-	case kind == reflect.Map:
+	case tokind == reflect.Map:
 		if ftyp.Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
@@ -1129,5 +1131,5 @@ func SetRobust(to, from any) error {
 
 	tos := elide.End(fmt.Sprintf("%v", to), 40)
 	fms := elide.End(fmt.Sprintf("%v", from), 40)
-	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, typ.String(), fms, from, LongTypeName(Underlying(reflect.ValueOf(from)).Type()))
+	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, totyp.String(), fms, from, LongTypeName(Underlying(reflect.ValueOf(from)).Type()))
 }

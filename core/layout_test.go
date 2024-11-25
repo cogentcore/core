@@ -258,3 +258,17 @@ func TestCustomLayout(t *testing.T) {
 	})
 	b.AssertRender(t, "layout/custom")
 }
+
+func TestCustomLayoutButton(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Display = styles.Custom
+		s.Min.Set(units.Dp(200), units.Dp(100))
+	})
+	bt := NewButton(b).SetText("Hello")
+	bt.Styler(func(s *styles.Style) {
+		s.Min.X.Dp(100)
+		s.Pos.Set(units.Dp(25))
+	})
+	b.AssertRender(t, "layout/custom-button")
+}

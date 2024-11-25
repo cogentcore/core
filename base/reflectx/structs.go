@@ -103,11 +103,8 @@ func ValueIsDefault(fv reflect.Value, def string) bool {
 // SetFromDefaultTags sets the values of fields in the given struct based on
 // `default:` default value struct field tags.
 func SetFromDefaultTags(v any) error {
-	if AnyIsNil(v) {
-		return nil
-	}
 	ov := reflect.ValueOf(v)
-	if ov.Kind() == reflect.Pointer && ov.IsNil() {
+	if IsNil(ov) {
 		return nil
 	}
 	val := NonPointerValue(ov)
@@ -161,8 +158,8 @@ type ShouldSaver interface {
 func NonDefaultFields(v any) map[string]any {
 	res := map[string]any{}
 
-	rv := NonPointerValue(reflect.ValueOf(v))
-	if !rv.IsValid() {
+	rv := Underlying(reflect.ValueOf(v))
+	if IsNil(rv) {
 		return nil
 	}
 	rt := rv.Type()

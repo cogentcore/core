@@ -497,14 +497,18 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			w.gotFocus = false
 			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
+			if DebugSettings.WinEventTrace {
+				fmt.Printf("Win: %v ScreenUpdate\n", w.name)
+			}
 			w.resized()
-			// TODO: figure out how to restore this stuff without breaking window size on mobile
-
-			// TheWindowGeometryaver.AbortSave() // anything just prior to this is sus
-			// if !system.TheApp.NoScreens() {
-			// 	Settings.UpdateAll()
-			// 	WindowGeometrySave.RestoreAll()
-			// }
+			if !TheApp.Platform().IsMobile() { // native desktop
+				// TheWindowGeometryaver.AbortSave() // anything just prior to this is sus
+				if TheApp.NScreens() > 0 {
+					AppearanceSettings.Apply()
+					UpdateAll()
+					// WindowGeometrySave.RestoreAll()
+				}
+			}
 		}
 	}
 }

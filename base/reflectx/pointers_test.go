@@ -8,7 +8,223 @@ import (
 	"reflect"
 	"testing"
 	"unsafe"
+
+	"github.com/stretchr/testify/assert"
 )
+
+type myInterface interface {
+	myMethod()
+}
+
+func TestNonPointerType(t *testing.T) {
+	assert.Equal(t, reflect.TypeFor[int](), NonPointerType(reflect.TypeFor[int]()))
+	assert.Equal(t, reflect.TypeFor[int](), NonPointerType(reflect.TypeFor[*int]()))
+	assert.Equal(t, reflect.TypeFor[int](), NonPointerType(reflect.TypeFor[**int]()))
+	assert.Equal(t, reflect.TypeFor[int](), NonPointerType(reflect.TypeFor[***int]()))
+
+	assert.Equal(t, reflect.TypeFor[any](), NonPointerType(reflect.TypeFor[any]()))
+	assert.Equal(t, reflect.TypeFor[any](), NonPointerType(reflect.TypeFor[*any]()))
+	assert.Equal(t, reflect.TypeFor[any](), NonPointerType(reflect.TypeFor[**any]()))
+	assert.Equal(t, reflect.TypeFor[any](), NonPointerType(reflect.TypeFor[***any]()))
+
+	assert.Equal(t, nil, NonPointerType(reflect.TypeOf(nil)))
+}
+
+func TestNonPointerValue(t *testing.T) {
+	v := 1
+	rv := reflect.ValueOf(v)
+	assert.True(t, NonPointerValue(reflect.ValueOf(v)).Equal(rv))
+	assert.True(t, NonPointerValue(reflect.ValueOf(&v)).Equal(rv))
+
+	p := &v
+	assert.True(t, NonPointerValue(reflect.ValueOf(p)).Equal(rv))
+	assert.True(t, NonPointerValue(reflect.ValueOf(&p)).Equal(rv))
+
+	a := any(v)
+	assert.True(t, NonPointerValue(reflect.ValueOf(a)).Equal(rv))
+	assert.Equal(t, rv.Type(), NonPointerValue(reflect.ValueOf(a)).Type())
+	assert.True(t, NonPointerValue(reflect.ValueOf(&a)).Equal(rv))
+	// NonPointerValue cannot go through *any to get the true type
+	assert.NotEqual(t, rv.Type(), NonPointerValue(reflect.ValueOf(&a)).Type())
+
+	n := (*int)(nil)
+	rn := reflect.ValueOf(n)
+	assert.True(t, rn.IsValid())
+	assert.True(t, NonPointerValue(rn).IsValid())
+	assert.True(t, NonPointerValue(rn).Equal(rn))
+
+	in := myInterface(nil)
+	rinp := reflect.ValueOf(&in)
+	assert.True(t, rinp.IsValid())
+	assert.True(t, NonPointerValue(rinp).IsValid())
+	assert.True(t, NonPointerValue(rinp).Equal(reflect.ValueOf(in)))
+
+	an := any(nil)
+	ran := reflect.ValueOf(an)
+	assert.False(t, ran.IsValid())
+	assert.False(t, NonPointerValue(ran).IsValid())
+}
+
+func TestPointerValue(t *testing.T) {
+	v := 1
+	rv := reflect.ValueOf(v)
+	assert.False(t, rv.CanAddr())
+	assert.False(t, PointerValue(reflect.ValueOf(v)).Equal(rv))
+	assert.Equal(t, reflect.TypeFor[*int](), PointerValue(reflect.ValueOf(v)).Type())
+
+	p := &v
+	rp := reflect.ValueOf(p)
+	assert.True(t, PointerValue(rp).Equal(rp))
+	assert.Equal(t, reflect.TypeFor[*int](), PointerValue(rp).Type())
+
+	assert.True(t, rp.Elem().CanAddr())
+	assert.True(t, PointerValue(rp.Elem()).Equal(rp))
+	assert.True(t, PointerValue(rp.Elem()).Equal(rp.Elem().Addr()))
+
+	pp := &p
+	rpp := reflect.ValueOf(pp)
+	assert.True(t, PointerValue(rpp).Equal(rpp))
+	assert.Equal(t, reflect.TypeFor[**int](), PointerValue(rpp).Type())
+
+	n := (*int)(nil)
+	rn := reflect.ValueOf(n)
+	assert.True(t, PointerValue(rn).Equal(rn))
+
+	an := any(nil)
+	ran := reflect.ValueOf(an)
+	assert.False(t, ran.IsValid())
+	assert.False(t, PointerValue(ran).IsValid())
+}
+
+func TestOnePointerValue(t *testing.T) {
+	v := 1
+	rv := reflect.ValueOf(v)
+	assert.False(t, rv.CanAddr())
+	assert.False(t, OnePointerValue(reflect.ValueOf(v)).Equal(rv))
+	assert.Equal(t, reflect.TypeFor[*int](), OnePointerValue(reflect.ValueOf(v)).Type())
+
+	p := &v
+	rp := reflect.ValueOf(p)
+	assert.True(t, OnePointerValue(rp).Equal(rp))
+	assert.Equal(t, reflect.TypeFor[*int](), OnePointerValue(rp).Type())
+
+	assert.True(t, rp.Elem().CanAddr())
+	assert.True(t, OnePointerValue(rp.Elem()).Equal(rp))
+	assert.True(t, OnePointerValue(rp.Elem()).Equal(rp.Elem().Addr()))
+
+	pp := &p
+	rpp := reflect.ValueOf(pp)
+	assert.False(t, OnePointerValue(rpp).Equal(rpp))
+	assert.True(t, OnePointerValue(rpp).Equal(rp))
+	assert.Equal(t, reflect.TypeFor[*int](), OnePointerValue(rpp).Type())
+
+	n := (*int)(nil)
+	rn := reflect.ValueOf(n)
+	assert.True(t, rn.IsValid())
+	assert.True(t, OnePointerValue(rn).IsValid())
+	assert.True(t, OnePointerValue(rn).Equal(rn))
+
+	an := any(nil)
+	ran := reflect.ValueOf(an)
+	assert.False(t, ran.IsValid())
+	assert.False(t, OnePointerValue(ran).IsValid())
+}
+
+func TestUnderlying(t *testing.T) {
+	v := 1
+	rv := reflect.ValueOf(v)
+	assert.True(t, Underlying(reflect.ValueOf(v)).Equal(rv))
+	assert.True(t, Underlying(reflect.ValueOf(&v)).Equal(rv))
+
+	p := &v
+	assert.True(t, Underlying(reflect.ValueOf(p)).Equal(rv))
+	assert.True(t, Underlying(reflect.ValueOf(&p)).Equal(rv))
+
+	a := any(v)
+	assert.True(t, Underlying(reflect.ValueOf(a)).Equal(rv))
+	assert.Equal(t, rv.Type(), Underlying(reflect.ValueOf(a)).Type())
+	assert.True(t, Underlying(reflect.ValueOf(&a)).Equal(rv))
+	assert.Equal(t, rv.Type(), Underlying(reflect.ValueOf(&a)).Type())
+
+	n := (*int)(nil)
+	rn := reflect.ValueOf(n)
+	assert.True(t, rn.IsValid())
+	assert.True(t, Underlying(rn).IsValid())
+	assert.True(t, Underlying(rn).Equal(rn))
+
+	in := myInterface(nil)
+	rinp := reflect.ValueOf(&in)
+	assert.True(t, rinp.IsValid())
+	assert.True(t, Underlying(rinp).IsValid())
+	assert.True(t, Underlying(rinp).Equal(rinp.Elem()))
+
+	an := any(nil)
+	ran := reflect.ValueOf(an)
+	assert.False(t, ran.IsValid())
+	assert.False(t, Underlying(ran).IsValid())
+}
+
+func TestUnderlyingPointer(t *testing.T) {
+	v := 1
+	rv := reflect.ValueOf(v)
+	assert.False(t, rv.CanAddr())
+	assert.False(t, UnderlyingPointer(reflect.ValueOf(v)).Equal(rv))
+	assert.Equal(t, reflect.TypeFor[*int](), UnderlyingPointer(reflect.ValueOf(v)).Type())
+
+	p := &v
+	rp := reflect.ValueOf(p)
+	assert.True(t, UnderlyingPointer(rp).Equal(rp))
+	assert.Equal(t, reflect.TypeFor[*int](), UnderlyingPointer(rp).Type())
+
+	assert.True(t, rp.Elem().CanAddr())
+	assert.True(t, UnderlyingPointer(rp.Elem()).Equal(rp))
+	assert.True(t, UnderlyingPointer(rp.Elem()).Equal(rp.Elem().Addr()))
+
+	pp := &p
+	rpp := reflect.ValueOf(pp)
+	assert.False(t, UnderlyingPointer(rpp).Equal(rpp))
+	assert.True(t, UnderlyingPointer(rpp).Equal(rp))
+	assert.Equal(t, reflect.TypeFor[*int](), UnderlyingPointer(rpp).Type())
+
+	a := any(v)
+	ap := &a
+	rap := reflect.ValueOf(ap)
+	// Different pointer, same type
+	assert.False(t, UnderlyingPointer(rap).Equal(rp))
+	assert.Equal(t, rp.Type(), UnderlyingPointer(rap).Type())
+	assert.Equal(t, reflect.TypeFor[*int](), UnderlyingPointer(rap).Type())
+
+	n := (*int)(nil)
+	rn := reflect.ValueOf(n)
+	assert.True(t, rn.IsValid())
+	assert.True(t, UnderlyingPointer(rn).IsValid())
+	assert.True(t, UnderlyingPointer(rn).Equal(rn))
+
+	an := any(nil)
+	ran := reflect.ValueOf(an)
+	assert.False(t, ran.IsValid())
+	assert.False(t, UnderlyingPointer(ran).IsValid())
+}
+
+func TestNonNilNew(t *testing.T) {
+	n0 := NonNilNew(reflect.TypeFor[int]())
+	assert.Equal(t, reflect.TypeFor[*int](), n0.Type())
+	assert.False(t, n0.IsNil())
+	assert.Equal(t, 0, n0.Elem().Interface())
+
+	n1 := NonNilNew(reflect.TypeFor[*int]())
+	assert.Equal(t, reflect.TypeFor[**int](), n1.Type())
+	assert.False(t, n1.IsNil())
+	assert.False(t, n1.Elem().IsNil())
+	assert.Equal(t, 0, n1.Elem().Elem().Interface())
+
+	n2 := NonNilNew(reflect.TypeFor[**int]())
+	assert.Equal(t, reflect.TypeFor[***int](), n2.Type())
+	assert.False(t, n2.IsNil())
+	assert.False(t, n2.Elem().IsNil())
+	assert.False(t, n2.Elem().Elem().IsNil())
+	assert.Equal(t, 0, n2.Elem().Elem().Elem().Interface())
+}
 
 type PointerTestSub struct {
 	Mbr1 string
