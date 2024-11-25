@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -213,12 +214,8 @@ func (sc *Scene) doUpdate() bool {
 	}
 
 	if sc.showIter == sceneShowIters { // end of first pass
-		sc.showIter++
-		if !sc.hasFlag(sceneContentSizing) {
-			sc.Events.activateStartFocus()
-		}
+		sc.showIter++ // just go 1 past the iters cutoff
 	}
-
 	return true
 }
 
@@ -250,6 +247,7 @@ func (sc *Scene) applyStyleScene() {
 // should be used by Widgets to rebuild things that are otherwise
 // cached (e.g., Icon, TextCursor).
 func (sc *Scene) doRebuild() {
+	sc.Stage.Sprites.Reset()
 	sc.updateScene()
 	sc.applyStyleScene()
 	sc.layoutRenderScene()
@@ -398,8 +396,51 @@ func (wb *WidgetBase) renderChildren() {
 	})
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//  Standard Box Model rendering
+////////  Defer
+
+// Defer adds a function to [WidgetBase.Deferred] that will be called after the next
+// [Scene] update/render, including on the initial Scene render. After the function
+// is called, it is removed and not called again. In the function, sending events
+// etc will work as expected.
+func (wb *WidgetBase) Defer(fun func()) {
+	wb.Deferred = append(wb.Deferred, fun)
+	if wb.Scene != nil {
+		wb.Scene.setFlag(true, sceneHasDeferred)
+	}
+}
+
+// runDeferred runs deferred functions on all widgets in the scene.
+func (sc *Scene) runDeferred() {
+	sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		for _, f := range cwb.Deferred {
+			f()
+		}
+		cwb.Deferred = nil
+		return tree.Continue
+	})
+}
+
+// DeferShown adds a [WidgetBase.Defer] function to call [WidgetBase.Shown]
+// and activate [WidgetBase.StartFocus]. For example, this is called in [Tabs]
+// and [Pages] when a tab/page is newly shown, so that elements can perform
+// [WidgetBase.OnShow] updating as needed.
+func (wb *WidgetBase) DeferShown() {
+	wb.Defer(func() {
+		wb.Shown()
+		wb.Scene.Events.activateStartFocus()
+	})
+}
+
+// Shown sends [events.Show] to all widgets from this one down. Also see
+// [WidgetBase.DeferShown].
+func (wb *WidgetBase) Shown() {
+	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		cwb.Send(events.Show)
+		return tree.Continue
+	})
+}
+
+////////  Standard Box Model rendering
 
 // RenderBoxGeom renders a box with the given geometry.
 func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs styles.Border) {
@@ -413,8 +454,7 @@ func (wb *WidgetBase) RenderStandardBox() {
 	wb.Scene.PaintContext.DrawStandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
 }
 
-//////////////////////////////////////////////////////////////////
-//		Widget position functions
+////////	Widget position functions
 
 // PointToRelPos translates a point in Scene pixel coords
 // into relative position within node, based on the Content BBox
@@ -445,7 +485,7 @@ func (wb *WidgetBase) winPos(x, y float32) image.Point {
 	return pt
 }
 
-// Profiling and Benchmarking, controlled by settings app bar:
+//////// Profiling and Benchmarking, controlled by settings app bar
 
 // ProfileToggle turns profiling on or off, which does both
 // targeted profiling and global CPU and memory profiling.

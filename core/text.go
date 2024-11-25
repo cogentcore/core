@@ -119,24 +119,25 @@ func (tx *Text) Init() {
 		s.GrowWrap = true
 
 		// Text styles based on https://m3.material.io/styles/typography/type-scale-tokens
+		// We use Em for line height so that it scales properly with font size changes.
 		switch tx.Type {
 		case TextLabelLarge:
-			s.Text.LineHeight.Dp(20)
+			s.Text.LineHeight.Em(20.0 / 14)
 			s.Font.Size.Dp(14)
 			s.Text.LetterSpacing.Dp(0.1)
-			s.Font.Weight = styles.WeightMedium // note: excludes all fonts except Go!
+			s.Font.Weight = styles.WeightMedium
 		case TextLabelMedium:
-			s.Text.LineHeight.Dp(16)
+			s.Text.LineHeight.Em(16.0 / 12)
 			s.Font.Size.Dp(12)
 			s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = styles.WeightMedium
 		case TextLabelSmall:
-			s.Text.LineHeight.Dp(16)
+			s.Text.LineHeight.Em(16.0 / 11)
 			s.Font.Size.Dp(11)
 			s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = styles.WeightMedium
 		case TextBodyLarge:
-			s.Text.LineHeight.Dp(24)
+			s.Text.LineHeight.Em(24.0 / 16)
 			s.Font.Size.Dp(16)
 			s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = styles.WeightNormal
@@ -144,57 +145,57 @@ func (tx *Text) Init() {
 			s.Color = colors.Scheme.OnSurfaceVariant
 			fallthrough
 		case TextBodyMedium:
-			s.Text.LineHeight.Dp(20)
+			s.Text.LineHeight.Em(20.0 / 14)
 			s.Font.Size.Dp(14)
 			s.Text.LetterSpacing.Dp(0.25)
 			s.Font.Weight = styles.WeightNormal
 		case TextBodySmall:
-			s.Text.LineHeight.Dp(16)
+			s.Text.LineHeight.Em(16.0 / 12)
 			s.Font.Size.Dp(12)
 			s.Text.LetterSpacing.Dp(0.4)
 			s.Font.Weight = styles.WeightNormal
 		case TextTitleLarge:
-			s.Text.LineHeight.Dp(28)
+			s.Text.LineHeight.Em(28.0 / 22)
 			s.Font.Size.Dp(22)
 			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
 		case TextTitleMedium:
-			s.Text.LineHeight.Dp(24)
+			s.Text.LineHeight.Em(24.0 / 16)
 			s.Font.Size.Dp(16)
 			s.Text.LetterSpacing.Dp(0.15)
 			s.Font.Weight = styles.WeightMedium
 		case TextTitleSmall:
-			s.Text.LineHeight.Dp(20)
+			s.Text.LineHeight.Em(20.0 / 14)
 			s.Font.Size.Dp(14)
 			s.Text.LetterSpacing.Dp(0.1)
 			s.Font.Weight = styles.WeightMedium
 		case TextHeadlineLarge:
-			s.Text.LineHeight.Dp(40)
+			s.Text.LineHeight.Em(40.0 / 32)
 			s.Font.Size.Dp(32)
 			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
 		case TextHeadlineMedium:
-			s.Text.LineHeight.Dp(36)
+			s.Text.LineHeight.Em(36.0 / 28)
 			s.Font.Size.Dp(28)
 			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
 		case TextHeadlineSmall:
-			s.Text.LineHeight.Dp(32)
+			s.Text.LineHeight.Em(32.0 / 24)
 			s.Font.Size.Dp(24)
 			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
 		case TextDisplayLarge:
-			s.Text.LineHeight.Dp(64)
+			s.Text.LineHeight.Em(64.0 / 57)
 			s.Font.Size.Dp(57)
 			s.Text.LetterSpacing.Dp(-0.25)
 			s.Font.Weight = styles.WeightNormal
 		case TextDisplayMedium:
-			s.Text.LineHeight.Dp(52)
+			s.Text.LineHeight.Em(52.0 / 45)
 			s.Font.Size.Dp(45)
 			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
 		case TextDisplaySmall:
-			s.Text.LineHeight.Dp(44)
+			s.Text.LineHeight.Em(44.0 / 36)
 			s.Font.Size.Dp(36)
 			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
@@ -210,7 +211,7 @@ func (tx *Text) Init() {
 	})
 	tx.OnDoubleClick(func(e events.Event) {
 		tx.SetSelected(true)
-		tx.SetFocus()
+		tx.SetFocusQuiet()
 	})
 	tx.OnFocusLost(func(e events.Event) {
 		tx.SetSelected(false)

@@ -130,6 +130,7 @@ func (bt *Button) Init() {
 				s.Padding.Right.Dp(16)
 			}
 		}
+		s.Font.Size.Dp(14) // Button font size is used for text font size
 		s.Gap.Zero()
 		s.CenterAll()
 
@@ -226,6 +227,7 @@ func (bt *Button) Init() {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 					s.FillMargin = false
+					s.Font.Size = bt.Styles.Font.Size // Directly inherit to override the [Text.Type]-based default
 				})
 				w.Updater(func() {
 					if bt.Type == ButtonMenu {

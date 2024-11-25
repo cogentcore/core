@@ -108,7 +108,7 @@ func (fp *FilePicker) Init() {
 		case keymap.Search:
 			e.SetHandled()
 			sf := fp.selectField
-			sf.SetFocusEvent()
+			sf.SetFocus()
 		}
 	})
 
