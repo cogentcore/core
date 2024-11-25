@@ -191,10 +191,9 @@ type WidgetBase struct {
 	// [Scene.ContextMenus] apply to all widgets in the scene.
 	ContextMenus []func(m *Scene) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
-	// Deferred is a slice of functions to call after a full [Scene] update.
-	// At this point event sending will work as expected, for example.
-	// It is used to send an OnShow event when a [Tabs] or [Pages] item is newly shown,
-	// and to apply [Widget.StartFocus].
+	// Deferred is a slice of functions to call after the next [Scene] update/render.
+	// In each function event sending etc will work as expected. Use
+	// [WidgetBase.Defer] to add a function.
 	Deferred []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// Scene is the overall Scene to which we belong. It is automatically

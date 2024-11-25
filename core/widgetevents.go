@@ -547,8 +547,9 @@ func (wb *WidgetBase) focusClear() {
 }
 
 // StartFocus specifies that this widget should get focus when the [Scene] is shown,
-// or when a major content managing widget (e.g., [Tabs], [Pages]) shows an element
-// that contains this widget.
+// or when a major content managing widget (e.g., [Tabs], [Pages]) shows a
+// tab/page/element that contains this widget. This is handled via an
+// [events.Show] event.
 func (wb *WidgetBase) StartFocus() {
 	em := wb.Events()
 	if em != nil {
