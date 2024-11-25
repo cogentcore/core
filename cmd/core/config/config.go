@@ -94,6 +94,19 @@ type Build struct { //types:add
 	// also prints the program output.
 	Debug bool `flag:"d,debug"`
 
+	// Ldflags are optional additional linker flags to pass to go build commands.
+	Ldflags string
+
+	// Trimpath is whether to replace file system paths with module paths
+	// in the resulting executable. It is on by default for commands other
+	// than core run.
+	Trimpath bool
+
+	// Windowsgui is whether to make this a "Windows GUI" application that
+	// opens without a terminal window on Windows. It is on by default for
+	// commands other than core run.
+	Windowsgui bool
+
 	// the minimum version of the iOS SDK to compile against
 	IOSVersion string `default:"13.0"`
 
