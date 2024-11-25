@@ -32,6 +32,7 @@ jobs:
       with:
         name: testdata
         workflow_search: true
+        search_artifacts: true
         if_no_artifact_found: warn
 
     # we can't test gpu, xyz, and system on the CI since there is no Vulkan support
