@@ -83,7 +83,13 @@ func goAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 
 		path := filepath.Join(tmpDir, t.OS, t.Arch)
 
-		if err := goBuild(c, src, appleEnv[t.String()], "-ldflags", config.LinkerFlags(c), "-o="+path); err != nil {
+		buildArgs := []string{
+			"-ldflags", config.LinkerFlags(c), "-o=" + path,
+		}
+		if c.Build.Trimpath {
+			buildArgs = append(buildArgs, "-trimpath")
+		}
+		if err := goBuild(c, src, appleEnv[t.String()], buildArgs...); err != nil {
 			return nil, err
 		}
 		if nmpkgs == nil {
