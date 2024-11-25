@@ -53,7 +53,7 @@ func Run(c *config.Config) error { //types:add
 	}
 	switch t.OS {
 	case "darwin", "windows", "linux":
-		return exec.Verbose().SetBuffer(false).Run(filepath.Join(c.Build.Output, c.Name))
+		return exec.Verbose().SetBuffer(false).Run(filepath.Join(c.Build.Output, filepath.Base(c.Build.Output)))
 	case "android":
 		err := exec.Run("adb", "install", "-r", filepath.Join(c.Build.Output, c.Name+".apk"))
 		if err != nil {

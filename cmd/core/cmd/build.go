@@ -67,7 +67,7 @@ func buildDesktop(c *config.Config, platform config.Platform) error {
 	}
 	// see https://stackoverflow.com/questions/30005878/avoid-debugging-information-on-golang
 	ldflags := "-s -w"
-	output := c.Name
+	output := filepath.Base(c.Build.Output)
 	if platform.OS == "windows" {
 		output += ".exe"
 		// TODO(kai): windows gui
