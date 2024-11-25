@@ -210,7 +210,7 @@ func (tx *Text) Init() {
 	})
 	tx.OnDoubleClick(func(e events.Event) {
 		tx.SetSelected(true)
-		tx.SetFocus()
+		tx.SetFocusQuiet()
 	})
 	tx.OnFocusLost(func(e events.Event) {
 		tx.SetSelected(false)

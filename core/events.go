@@ -180,12 +180,12 @@ func (em *Events) handleFocusEvent(e events.Event) {
 			if DebugSettings.FocusTrace {
 				fmt.Println(em.scene, "StartFocus:", em.startFocus)
 			}
-			em.setFocusEvent(em.startFocus)
+			em.setFocus(em.startFocus)
 		case em.prevFocus != nil:
 			if DebugSettings.FocusTrace {
 				fmt.Println(em.scene, "PrevFocus:", em.prevFocus)
 			}
-			em.setFocusEvent(em.prevFocus)
+			em.setFocus(em.prevFocus)
 			em.prevFocus = nil
 		}
 	}
@@ -881,14 +881,14 @@ func (em *Events) focusClear() bool {
 		}
 		em.prevFocus = em.focus
 	}
-	return em.setFocusEvent(nil)
+	return em.setFocus(nil)
 }
 
-// setFocus sets focus to given item, and returns true if focus changed.
+// setFocusQuiet sets focus to given item, and returns true if focus changed.
 // If item is nil, then nothing has focus.
-// This does NOT send the events.Focus event to the widget.
-// See [SetFocusEvent] for version that does send event.
-func (em *Events) setFocus(w Widget) bool {
+// This does NOT send the [events.Focus] event to the widget.
+// See [Events.setFocus] for version that does send an event.
+func (em *Events) setFocusQuiet(w Widget) bool {
 	if DebugSettings.FocusTrace {
 		fmt.Println(em.scene, "SetFocus:", w)
 	}
@@ -905,11 +905,11 @@ func (em *Events) setFocus(w Widget) bool {
 	return got
 }
 
-// setFocusEvent sets focus to given item, and returns true if focus changed.
+// setFocus sets focus to given item, and returns true if focus changed.
 // If item is nil, then nothing has focus.
 // This sends the [events.Focus] event to the widget.
-// See [SetFocus] for a version that does not.
-func (em *Events) setFocusEvent(w Widget) bool {
+// See [Events.setFocusQuiet] for a version that does not.
+func (em *Events) setFocus(w Widget) bool {
 	if DebugSettings.FocusTrace {
 		fmt.Println(em.scene, "SetFocusEvent:", w)
 	}
@@ -975,7 +975,7 @@ func (em *Events) FocusNextFrom(from Widget) bool {
 		wb := w.AsWidget()
 		return wb.IsVisible() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
 	})
-	em.setFocusEvent(next)
+	em.setFocus(next)
 	return next != nil
 }
 
@@ -991,7 +991,7 @@ func (em *Events) focusOnOrNext(foc Widget) bool {
 		return false
 	}
 	if wb.AbilityIs(abilities.Focusable) {
-		em.setFocusEvent(foc)
+		em.setFocus(foc)
 		return true
 	}
 	return em.FocusNextFrom(foc)
@@ -1009,7 +1009,7 @@ func (em *Events) focusOnOrPrev(foc Widget) bool {
 		return false
 	}
 	if wb.AbilityIs(abilities.Focusable) {
-		em.setFocusEvent(foc)
+		em.setFocus(foc)
 		return true
 	}
 	return em.focusPrevFrom(foc)
@@ -1031,7 +1031,7 @@ func (em *Events) focusPrevFrom(from Widget) bool {
 		wb := w.AsWidget()
 		return wb.IsVisible() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
 	})
-	em.setFocusEvent(prev)
+	em.setFocus(prev)
 	return prev != nil
 }
 
@@ -1072,7 +1072,7 @@ func (em *Events) activateStartFocus() bool {
 		em.focusFirst()
 	} else {
 		// fmt.Println("start focus on:", sf)
-		em.setFocusEvent(sf)
+		em.setFocus(sf)
 	}
 	return true
 }

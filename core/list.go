@@ -530,7 +530,7 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 			s.Min.Y.Em(6)
 		})
 		oc := func(e events.Event) {
-			lb.SetFocusEvent()
+			lb.SetFocus()
 			row, _, isValid := w.indexFromPixel(e.Pos())
 			if isValid {
 				lb.updateSelectRow(row, e.SelectMode())
@@ -868,7 +868,7 @@ func (lb *ListBase) RowGrabFocus(row int) *WidgetBase {
 		return w
 	}
 	lb.InFocusGrab = true
-	w.SetFocusEvent()
+	w.SetFocus()
 	lb.InFocusGrab = false
 	return w
 }

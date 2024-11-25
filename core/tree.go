@@ -766,20 +766,20 @@ func (tr *Tree) selectUpdate(mode events.SelectModes) bool {
 			if len(sl) > 1 {
 				tr.UnselectAll()
 				tr.Select()
-				tr.SetFocus()
+				tr.SetFocusQuiet()
 				sel = true
 			}
 		} else {
 			tr.UnselectAll()
 			tr.Select()
-			tr.SetFocus()
+			tr.SetFocusQuiet()
 			sel = true
 		}
 	case events.ExtendContinuous:
 		sl := tr.GetSelectedNodes()
 		if len(sl) == 0 {
 			tr.Select()
-			tr.SetFocus()
+			tr.SetFocusQuiet()
 			sel = true
 		} else {
 			minIndex := -1
@@ -814,7 +814,7 @@ func (tr *Tree) selectUpdate(mode events.SelectModes) bool {
 			tr.UnselectEvent()
 		} else {
 			tr.Select()
-			tr.SetFocus()
+			tr.SetFocusQuiet()
 			sel = true
 		}
 	case events.SelectQuiet:
@@ -903,7 +903,7 @@ func (tr *Tree) moveDown(selMode events.SelectModes) *Tree {
 func (tr *Tree) moveDownEvent(selMode events.SelectModes) *Tree {
 	nn := tr.moveDown(selMode)
 	if nn != nil && nn != tr {
-		nn.SetFocus()
+		nn.SetFocusQuiet()
 		nn.ScrollToThis()
 		tr.sendSelectEvent()
 	}
@@ -963,7 +963,7 @@ func (tr *Tree) moveUp(selMode events.SelectModes) *Tree {
 func (tr *Tree) moveUpEvent(selMode events.SelectModes) *Tree {
 	nn := tr.moveUp(selMode)
 	if nn != nil && nn != tr {
-		nn.SetFocus()
+		nn.SetFocusQuiet()
 		nn.ScrollToThis()
 		tr.sendSelectEvent()
 	}
@@ -996,7 +996,7 @@ func (tr *Tree) movePageUpEvent(selMode events.SelectModes) *Tree {
 		if selMode == events.SelectOne {
 			fnn.selectUpdate(selMode)
 		}
-		fnn.SetFocus()
+		fnn.SetFocusQuiet()
 		fnn.ScrollToThis()
 		tr.sendSelectEvent()
 	}
@@ -1027,7 +1027,7 @@ func (tr *Tree) movePageDownEvent(selMode events.SelectModes) *Tree {
 		if selMode == events.SelectOne {
 			fnn.selectUpdate(selMode)
 		}
-		fnn.SetFocus()
+		fnn.SetFocusQuiet()
 		fnn.ScrollToThis()
 		tr.sendSelectEvent()
 	}
@@ -1055,7 +1055,7 @@ func (tr *Tree) moveToLastChild(selMode events.SelectModes) *Tree {
 // and emits select event for newly selected item
 func (tr *Tree) moveHomeEvent(selMode events.SelectModes) *Tree {
 	tr.root.selectUpdate(selMode)
-	tr.root.SetFocus()
+	tr.root.SetFocusQuiet()
 	tr.root.ScrollToThis()
 	tr.root.sendSelectEvent()
 	return tr.root
@@ -1083,7 +1083,7 @@ func (tr *Tree) moveEndEvent(selMode events.SelectModes) *Tree {
 		if selMode == events.SelectOne {
 			fnn.selectUpdate(selMode)
 		}
-		fnn.SetFocus()
+		fnn.SetFocusQuiet()
 		fnn.ScrollToThis()
 		tr.sendSelectEvent()
 	}
