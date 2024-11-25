@@ -436,7 +436,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		rc.unlock() // one case where we need to break lock
 		w.renderWindow()
 		rc.lock()
-		w.mains.sendShowEvents()
+		w.mains.runDeferred() // note: must be outside of locks in renderWindow
 
 	case events.WindowResize:
 		e.SetHandled()

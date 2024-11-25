@@ -51,7 +51,7 @@ func (st *Stage) runPopup() *Stage {
 	// if our context stage is nil, we wait until
 	// our context is shown and then try again
 	if ctx.Scene.Stage == nil {
-		ctx.OnShow(func(e events.Event) {
+		ctx.Defer(func() {
 			st.runPopup()
 		})
 		return st

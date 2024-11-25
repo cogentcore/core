@@ -47,6 +47,7 @@ func (pg *Pages) Init() {
 		}
 		pg.page = pg.Page
 		fun(pg)
+		pg.DeferShown()
 	})
 }
 
