@@ -9,9 +9,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/ordmap"
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/tree"
 )
 
 // stages manages a stack of [Stage]s.
@@ -256,14 +254,7 @@ func (sm *stages) sendShowEvents() {
 			sc.showIter++
 			if !sc.hasFlag(sceneHasShown) {
 				sc.setFlag(true, sceneHasShown)
-				// profile.Profiling = true
-				// pr := profile.Start("send show")
-				sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
-					cwb.Send(events.Show)
-					return tree.Continue
-				})
-				// pr.End()
-				// profile.Report(time.Millisecond)
+				sc.Shown()
 			}
 		}
 	}

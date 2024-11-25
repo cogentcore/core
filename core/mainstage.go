@@ -300,7 +300,7 @@ func (st *Stage) runDialog() *Stage {
 
 	// if our main stages are nil, we wait until our context is shown and then try again
 	if ctx.Scene.Stage == nil || ctx.Scene.Stage.Mains == nil {
-		ctx.OnShow(func(e events.Event) {
+		ctx.Defer(func() {
 			st.runDialog()
 		})
 		return st

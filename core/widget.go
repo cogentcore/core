@@ -191,6 +191,12 @@ type WidgetBase struct {
 	// [Scene.ContextMenus] apply to all widgets in the scene.
 	ContextMenus []func(m *Scene) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
+	// Deferred is a slice of functions to call after a full [Scene] update.
+	// At this point event sending will work as expected, for example.
+	// It is used to send an OnShow event when a [Tabs] or [Pages] item is newly shown,
+	// and to apply [Widget.StartFocus].
+	Deferred []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+
 	// Scene is the overall Scene to which we belong. It is automatically
 	// by widgets whenever they are added to another widget parent.
 	Scene *Scene `copier:"-" json:"-" xml:"-" set:"-"`
@@ -459,7 +465,8 @@ func (wb *WidgetBase) forVisibleChildren(fun func(i int, cw Widget, cwb *WidgetB
 	}
 }
 
-// WidgetWalkDown is a version of [tree.NodeBase.WalkDown] that operates on [Widget] types.
+// WidgetWalkDown is a version of [tree.NodeBase.WalkDown] that operates on [Widget] types,
+// calling the given function on the Widget and all of its children in a depth-first manner.
 // Return [tree.Continue] to continue and [tree.Break] to terminate.
 func (wb *WidgetBase) WidgetWalkDown(fun func(cw Widget, cwb *WidgetBase) bool) {
 	wb.WalkDown(func(n tree.Node) bool {

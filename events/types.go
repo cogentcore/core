@@ -214,10 +214,11 @@ const (
 	Input
 
 	// Show is sent to widgets when their Scene is first shown to the user
-	// in its final form. Listening to this event enables widgets to perform
-	// initial one-time activities on startup, in the context of a fully
-	// rendered display. This is guaranteed to only happen once per widget
-	// per Scene.
+	// in its final form, and whenever a major content managing widget
+	// (e.g., [core.Tabs], [core.Pages]) shows a new element.
+	// This can be used for updates that depend on other elements, or
+	// relatively expensive updates that should be only done when actually
+	// needed "at show time".
 	Show
 
 	// Close is sent to widgets when their Scene is being closed. This is an

@@ -467,14 +467,14 @@ func (wb *WidgetBase) HandleClickOnEnterSpace() {
 	})
 }
 
-///////////////////////////////////////////////////////////////////
-//		Focus
+////////	Focus
 
 // SetFocus sets the keyboard input focus on this item or the first item within it
 // that can be focused (if none, then just sets focus to this object).
 // This does not send an [events.Focus] event, which typically results in
 // the widget being styled as focused. See [WidgetBase.SetFocusEvent] for
-// a version that does.
+// a version that does. Also see [WidgetBase.StartFocus] which must be
+// called instead during initial construction prior to the initial scene render.
 func (wb *WidgetBase) SetFocus() {
 	foc := wb.This.(Widget)
 	if !wb.AbilityIs(abilities.Focusable) {
@@ -485,7 +485,6 @@ func (wb *WidgetBase) SetFocus() {
 	}
 	em := wb.Events()
 	if em != nil {
-		// fmt.Println("grab focus:", foc)
 		em.setFocus(foc) // doesn't send event
 	}
 }
@@ -494,7 +493,8 @@ func (wb *WidgetBase) SetFocus() {
 // that can be focused (if none, then just sets focus to this object).
 // This sends an [events.Focus] event, which typically results in
 // the widget being styled as focused. See [WidgetBase.SetFocus] for
-// a version that does not.
+// a version that does not. See also [WidgetBase.StartFocus] which must be
+// called instead during initial construction prior to the initial scene render.
 func (wb *WidgetBase) SetFocusEvent() {
 	foc := wb.This.(Widget)
 	if !wb.AbilityIs(abilities.Focusable) {
@@ -505,8 +505,7 @@ func (wb *WidgetBase) SetFocusEvent() {
 	}
 	em := wb.Events()
 	if em != nil {
-		// fmt.Println("grab focus:", foc)
-		em.setFocusEvent(foc) // doesn't send event
+		em.setFocusEvent(foc)
 	}
 }
 
@@ -547,7 +546,9 @@ func (wb *WidgetBase) focusClear() {
 	}
 }
 
-// StartFocus specifies that this widget should get focus when the [Scene] is shown.
+// StartFocus specifies that this widget should get focus when the [Scene] is shown,
+// or when a major content managing widget (e.g., [Tabs], [Pages]) shows an element
+// that contains this widget.
 func (wb *WidgetBase) StartFocus() {
 	em := wb.Events()
 	if em != nil {
