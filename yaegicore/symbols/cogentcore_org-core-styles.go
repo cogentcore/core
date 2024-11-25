@@ -137,7 +137,6 @@ func init() {
 		"LineCapSquare":                reflect.ValueOf(styles.LineCapSquare),
 		"LineCapsN":                    reflect.ValueOf(styles.LineCapsN),
 		"LineCapsValues":               reflect.ValueOf(styles.LineCapsValues),
-		"LineHeightNormal":             reflect.ValueOf(&styles.LineHeightNormal).Elem(),
 		"LineJoinArcs":                 reflect.ValueOf(styles.LineJoinArcs),
 		"LineJoinArcsClip":             reflect.ValueOf(styles.LineJoinArcsClip),
 		"LineJoinBevel":                reflect.ValueOf(styles.LineJoinBevel),

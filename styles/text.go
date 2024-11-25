@@ -78,12 +78,8 @@ type Text struct { //types:add
 	TabSize int
 }
 
-// LineHeightNormal represents a normal line height,
-// equal to the default height of the font being used.
-var LineHeightNormal = units.Dp(-1)
-
 func (ts *Text) Defaults() {
-	ts.LineHeight = LineHeightNormal
+	ts.LineHeight.Em(4.0 / 3)
 	ts.Align = Start
 	ts.AlignV = Baseline
 	ts.Direction = LTR
