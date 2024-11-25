@@ -356,6 +356,10 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		Icon:      appIconImages(),
 		Size:      st.Scene.SceneGeom.Size,
 		StdPixels: false,
+		Screen:    st.Screen,
+	}
+	if !st.Resizable {
+		opts.Flags.SetFlag(true, system.FixedSize)
 	}
 	wgp := theWindowGeometrySaver.pref(title, nil)
 	if TheApp.Platform() != system.Offscreen && wgp != nil {

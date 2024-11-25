@@ -7,6 +7,7 @@ package desktop
 import (
 	"image"
 	"log"
+	"slices"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
@@ -55,6 +56,7 @@ func (a *App) GetScreens() {
 	defer a.Mu.Unlock()
 
 	mons := glfw.GetMonitors()
+	a.Monitors = mons
 	sz := len(mons)
 	if sz == 0 {
 		a.Screens = []*system.Screen{}
@@ -112,7 +114,8 @@ func (a *App) GetScreens() {
 					continue
 				}
 			}
-			a.Screens = a.Screens[0 : len(a.Screens)-1] // not all there
+			a.Screens = slices.Delete(a.Screens, scNo, scNo+1)
+			a.Monitors = slices.Delete(a.Monitors, scNo, scNo+1)
 			continue
 		}
 		pw, ph := mon.GetPhysicalSize()
@@ -120,7 +123,9 @@ func (a *App) GetScreens() {
 			if MonitorDebug {
 				log.Printf("MonitorDebug: physical size %s returned 0 -- bailing\n", mon.GetName())
 			}
-			a.Screens = a.Screens[0 : len(a.Screens)-1] // not all there
+			a.Screens = slices.Delete(a.Screens, scNo, scNo+1)
+			a.Monitors = slices.Delete(a.Monitors, scNo, scNo+1)
+			continue
 		}
 		x, y := mon.GetPos()
 		cscx, _ := mon.GetContentScale() // note: requires glfw 3.3
