@@ -100,12 +100,12 @@ type Build struct { //types:add
 	// Trimpath is whether to replace file system paths with module paths
 	// in the resulting executable. It is on by default for commands other
 	// than core run.
-	Trimpath bool
+	Trimpath bool `default:"true"`
 
 	// Windowsgui is whether to make this a "Windows GUI" application that
 	// opens without a terminal window on Windows. It is on by default for
 	// commands other than core run.
-	Windowsgui bool
+	Windowsgui bool `default:"true"`
 
 	// the minimum version of the iOS SDK to compile against
 	IOSVersion string `default:"13.0"`
@@ -212,6 +212,10 @@ func (c *Config) OnConfig(cmd string) error {
 			// to be close to "com.org.app", the intended format
 			c.ID = "com." + dir + "." + base
 		}
+	}
+	if cmd == "run" {
+		c.Build.Trimpath = false
+		c.Build.Windowsgui = false
 	}
 	return nil
 }
