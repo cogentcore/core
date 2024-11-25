@@ -89,9 +89,9 @@ type Build struct { //types:add
 	// and "bin/{platform}" for all other platforms and command "pack".
 	Output string `flag:"o,output"`
 
-	// whether to build/run the app in debug mode, which sets
-	// the "debug" tag when building. On iOS and Android, this
-	// also prints the program output.
+	// Debug is whether to build/run the app in debug mode, which sets
+	// the "debug" tag when building and prevents the default stripping
+	// of debug symbols. On iOS and Android, this also prints the program output.
 	Debug bool `flag:"d,debug"`
 
 	// Ldflags are optional additional linker flags to pass to go build commands.
@@ -227,6 +227,11 @@ func LinkerFlags(c *Config) string {
 
 	if c.Build.Ldflags != "" {
 		res += c.Build.Ldflags + " "
+	}
+
+	if !c.Build.Debug {
+		// See https://stackoverflow.com/questions/30005878/avoid-debugging-information-on-golang and go.dev/issues/25148.
+		res += "-s -w "
 	}
 
 	if c.About != "" {
