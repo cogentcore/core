@@ -216,8 +216,8 @@ func (sc *Scene) doUpdate() bool {
 	if sc.showIter == sceneShowIters { // end of first pass
 		sc.showIter++
 		if !sc.hasFlag(sceneContentSizing) {
-			sc.runDeferred() // any defer adds might have had a nil scene
 			sc.setFlag(false, sceneHasDeferred)
+			sc.runDeferred() // any defer adds might have had a nil scene
 			sc.Events.activateStartFocus()
 		}
 	}
