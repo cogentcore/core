@@ -69,6 +69,12 @@ func (ws *windowGeometrySaver) init() {
 	}
 }
 
+// shouldSave returns whether the window geometry should be saved based on
+// the platform: only for non-mobile (non-web) and not offscreen.
+func (ws *windowGeometrySaver) shouldSave() bool {
+	return !TheApp.Platform().IsMobile() && TheApp.Platform() != system.Offscreen
+}
+
 // resetCache resets the cache; call under mutex
 func (ws *windowGeometrySaver) resetCache() {
 	ws.cache = make(windowGeometries)
@@ -231,7 +237,7 @@ func (ws *windowGeometrySaver) settingEnd() {
 
 // recordPref records current state of window as preference
 func (ws *windowGeometrySaver) recordPref(win *renderWindow) {
-	if !win.isVisible() {
+	if !ws.shouldSave() || !win.isVisible() {
 		return
 	}
 	win.SystemWindow.Lock()
@@ -243,6 +249,7 @@ func (ws *windowGeometrySaver) recordPref(win *renderWindow) {
 		}
 		return
 	}
+	sc := win.SystemWindow.Screen()
 	pos := win.SystemWindow.Position()
 	if pos.X == -32000 || pos.Y == -32000 { // windows badness
 		if DebugSettings.WinGeomTrace {
@@ -261,8 +268,7 @@ func (ws *windowGeometrySaver) recordPref(win *renderWindow) {
 	ws.init()
 
 	winName := ws.windowName(win.title)
-	sc := win.SystemWindow.Screen()
-	wgr := windowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.SystemWindow.Is(system.Fullscreen)}
+	wgr := windowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, FS: win.SystemWindow.Is(system.Fullscreen)}
 	wgr.setPos(pos)
 	wgr.setSize(wsz)
 
@@ -312,6 +318,9 @@ func (ws *windowGeometrySaver) saveCached() {
 // if the window name has a colon, only the part prior to the colon is used.
 // if no saved pref is available for that screen, nil is returned.
 func (ws *windowGeometrySaver) pref(winName string, scrn *system.Screen) *windowGeometry {
+	if !ws.shouldSave() {
+		return nil
+	}
 	ws.mu.RLock()
 	defer ws.mu.RUnlock()
 
@@ -360,6 +369,9 @@ func (ws *windowGeometrySaver) deleteAll() {
 // restoreAll restores size and position of all windows, for current screen.
 // Called when screen changes.
 func (ws *windowGeometrySaver) restoreAll() {
+	if !ws.shouldSave() {
+		return
+	}
 	renderWindowGlobalMu.Lock()
 	defer renderWindowGlobalMu.Unlock()
 	if DebugSettings.WinGeomTrace {
@@ -383,14 +395,13 @@ func (ws *windowGeometrySaver) restoreAll() {
 
 // windowGeometry records the geometry settings used for a given window
 type windowGeometry struct {
-	DPI        float32
-	DPR        float32
-	SX         int
-	SY         int
-	PX         int
-	PY         int
-	Fullscreen bool
-	Screeen    string
+	DPI float32
+	DPR float32
+	SX  int
+	SY  int
+	PX  int
+	PY  int
+	FS  bool
 }
 
 func (wg *windowGeometry) size() image.Point {

@@ -183,6 +183,7 @@ func (w *Window) GetScreenOverlap() *system.Screen {
 }
 
 func (w *Window) Position() image.Point {
+	sc := w.Screen()
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	if w.Glw == nil {
@@ -190,6 +191,7 @@ func (w *Window) Position() image.Point {
 	}
 	var ps image.Point
 	ps.X, ps.Y = w.Glw.GetPos()
+	ps = ps.Sub(sc.Geometry.Min) // position is always screen relative
 	w.Pos = ps
 	return ps
 }
