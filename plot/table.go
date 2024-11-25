@@ -6,6 +6,7 @@ package plot
 
 import (
 	"fmt"
+	"reflect"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
@@ -155,7 +156,7 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 			}
 		}
 		pl := pt.New(data)
-		if reflectx.AnyIsNil(pl) {
+		if reflectx.IsNil(reflect.ValueOf(pl)) {
 			err = fmt.Errorf("plot.NewTablePlot: error in creating plotter type: %q", ptyp)
 			errs = append(errs, err)
 			continue
