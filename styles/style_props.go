@@ -440,7 +440,7 @@ var styleTextFuncs = map[string]styleFunc{
 		func(obj *Text) *units.Value { return &obj.LetterSpacing }),
 	"word-spacing": styleFuncUnits(units.Value{},
 		func(obj *Text) *units.Value { return &obj.WordSpacing }),
-	"line-height": styleFuncUnits(units.Em(4.0/3),
+	"line-height": styleFuncUnits(LineHeightNormal,
 		func(obj *Text) *units.Value { return &obj.LineHeight }),
 	"white-space": styleFuncEnum(WhiteSpaceNormal,
 		func(obj *Text) enums.EnumSetter { return &obj.WhiteSpace }),
