@@ -42,7 +42,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: testdata
-        path: "**/testdata/*.png"
+        path: "**/testdata/**/*.png"
 
     - name: Update coverage report
       uses: ncruces/go-coverage-report@v0
