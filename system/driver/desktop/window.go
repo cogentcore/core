@@ -107,7 +107,8 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 	}
 
 	if !opts.Flags.HasFlag(system.Fullscreen) {
-		win.SetPos(opts.Pos.X, opts.Pos.Y)
+		scpos := sc.Geometry.Min.Add(opts.Pos)
+		win.SetPos(scpos.X, scpos.Y)
 	}
 	if opts.Icon != nil {
 		win.SetIcon(opts.Icon)

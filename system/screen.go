@@ -188,14 +188,19 @@ func (sc *Screen) ConstrainWinGeom(sz, pos image.Point) (csz, cpos image.Point) 
 		csz.Y = scsz.Y - 10
 		// fmt.Println("constrain y:", csz.Y)
 	}
-
-	// these are windows-specific special numbers for minimized windows
-	// can be sent here for WinGeom saved geom.
-	if cpos.X == -32000 {
-		cpos.X = 0
-	}
-	if cpos.Y == -32000 {
-		cpos.Y = 50
+	if TheApp.Platform() == Windows {
+		if csz.Y > (scsz.Y - 20) { // leave room for title
+			csz.Y = scsz.Y - 20
+			// fmt.Println("constrain y:", csz.Y)
+		}
+		// these are windows-specific special numbers for minimized windows
+		// can be sent here for WinGeom saved geom.
+		if cpos.X == -32000 {
+			cpos.X = 0
+		}
+		if cpos.Y == -32000 {
+			cpos.Y = 50
+		}
 	}
 
 	// don't go off the edge
@@ -210,6 +215,11 @@ func (sc *Screen) ConstrainWinGeom(sz, pos image.Point) (csz, cpos image.Point) 
 	}
 	if cpos.Y < 0 {
 		cpos.Y = 0
+	}
+	if TheApp.Platform() == Windows {
+		if cpos.Y < 20 {
+			cpos.Y = 20
+		}
 	}
 
 	csz = sc.WinSizeToPix(csz)

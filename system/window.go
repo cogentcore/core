@@ -251,7 +251,7 @@ type NewWindowOptions struct {
 	StdPixels bool
 
 	// Pos specifies the position of the window, if non-zero -- always in
-	// device-specific raw pixels
+	// device-specific raw pixels, and relative to the specified screen.
 	Pos image.Point
 
 	// Title specifies the window title.
@@ -310,9 +310,9 @@ func sanitizeUTF8(s string, n int) string {
 }
 
 // Fixup fills in defaults and updates everything based on current screen and
-// window context Specific hardware can fine-tune this as well, in driver code
+// window context. Specific hardware can fine-tune this as well, in driver code.
 func (o *NewWindowOptions) Fixup() {
-	sc := TheApp.Screen(0)
+	sc := TheApp.Screen(o.Screen)
 	scsz := sc.Geometry.Size() // window coords size
 
 	if o.Size.X <= 0 {
