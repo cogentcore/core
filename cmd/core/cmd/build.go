@@ -65,6 +65,9 @@ func buildDesktop(c *config.Config, platform config.Platform) error {
 	if c.Build.Debug {
 		tags = append(tags, "-tags", "debug")
 	}
+	if c.Build.Trimpath {
+		tags = append(tags, "-trimpath")
+	}
 	ldflags := ""
 	output := filepath.Base(c.Build.Output)
 	if platform.OS == "windows" {
