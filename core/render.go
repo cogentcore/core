@@ -214,19 +214,8 @@ func (sc *Scene) doUpdate() bool {
 	}
 
 	if sc.showIter == sceneShowIters { // end of first pass
-		sc.showIter++
-		if !sc.hasFlag(sceneContentSizing) {
-			sc.setFlag(false, sceneHasDeferred)
-			sc.runDeferred() // any defer adds might have had a nil scene
-			sc.Events.activateStartFocus()
-		}
+		sc.showIter++ // just go 1 past the iters cutoff
 	}
-
-	if sc.hasFlag(sceneHasDeferred) {
-		sc.setFlag(false, sceneHasDeferred)
-		sc.runDeferred()
-	}
-
 	return true
 }
 
