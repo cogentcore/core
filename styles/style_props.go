@@ -6,6 +6,7 @@ package styles
 
 import (
 	"log/slog"
+	"reflect"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/num"
@@ -22,7 +23,7 @@ func styleInhInit(val, parent any) (inh, init bool) {
 	if str, ok := val.(string); ok {
 		switch str {
 		case "inherit":
-			return !reflectx.AnyIsNil(parent), false
+			return !reflectx.IsNil(reflect.ValueOf(parent)), false
 		case "initial":
 			return false, true
 		default:

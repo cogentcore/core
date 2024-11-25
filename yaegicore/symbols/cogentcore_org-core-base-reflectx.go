@@ -11,11 +11,11 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/base/reflectx/reflectx"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"AnyIsNil":           reflect.ValueOf(reflectx.AnyIsNil),
 		"CloneToType":        reflect.ValueOf(reflectx.CloneToType),
 		"CopyMapRobust":      reflect.ValueOf(reflectx.CopyMapRobust),
 		"CopySliceRobust":    reflect.ValueOf(reflectx.CopySliceRobust),
 		"FormatDefault":      reflect.ValueOf(reflectx.FormatDefault),
+		"IsNil":              reflect.ValueOf(reflectx.IsNil),
 		"KindIsBasic":        reflect.ValueOf(reflectx.KindIsBasic),
 		"KindIsNumber":       reflect.ValueOf(reflectx.KindIsNumber),
 		"LongTypeName":       reflect.ValueOf(reflectx.LongTypeName),
