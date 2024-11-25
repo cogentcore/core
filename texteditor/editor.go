@@ -487,7 +487,7 @@ func (ed *Editor) styleEditor() {
 			ed.Buffer.SetHighlighting(highlighting.StyleDefault)
 		}
 	}
-	ed.WidgetBase.Style()
+	ed.Frame.Style()
 	ed.CursorWidth.ToDots(&ed.Styles.UnitContext)
 }
 

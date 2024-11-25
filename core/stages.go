@@ -199,6 +199,7 @@ func (sm *stages) resize(rg math32.Geom2DInt) {
 	for _, kv := range sm.stack.Order {
 		st := kv.Value
 		if st.Type == WindowStage || (st.Type == DialogStage && st.FullWindow) {
+			st.Sprites.reset()
 			st.Scene.resize(rg)
 		} else {
 			st.Scene.fitInWindow(rg)
