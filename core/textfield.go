@@ -290,7 +290,7 @@ func (tf *TextField) Init() {
 	})
 	tf.On(events.MouseDown, func(e events.Event) {
 		if !tf.StateIs(states.Focused) {
-			tf.SetFocusEvent() // always grab, even if read only..
+			tf.SetFocus() // always grab, even if read only..
 		}
 		if tf.IsReadOnly() {
 			return
@@ -309,14 +309,14 @@ func (tf *TextField) Init() {
 		if tf.IsReadOnly() {
 			return
 		}
-		tf.SetFocusEvent()
+		tf.SetFocus()
 	})
 	tf.On(events.DoubleClick, func(e events.Event) {
 		if tf.IsReadOnly() {
 			return
 		}
 		if !tf.IsReadOnly() && !tf.StateIs(states.Focused) {
-			tf.SetFocusEvent()
+			tf.SetFocus()
 		}
 		e.SetHandled()
 		tf.selectWord()
@@ -326,7 +326,7 @@ func (tf *TextField) Init() {
 			return
 		}
 		if !tf.IsReadOnly() && !tf.StateIs(states.Focused) {
-			tf.SetFocusEvent()
+			tf.SetFocus()
 		}
 		e.SetHandled()
 		tf.selectAll()
@@ -547,7 +547,7 @@ func (tf *TextField) clear() {
 	tf.startPos = 0
 	tf.endPos = 0
 	tf.selectReset()
-	tf.SetFocusEvent() // this is essential for ensuring that the clear applies after focus is lost..
+	tf.SetFocus() // this is essential for ensuring that the clear applies after focus is lost..
 	tf.NeedsRender()
 }
 

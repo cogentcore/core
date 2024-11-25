@@ -485,7 +485,7 @@ func (tb *Table) RowGrabFocus(row int) *WidgetBase {
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		w := lg.Child(ridx + idxOff + fli).(Widget).AsWidget()
 		if w.CanFocus() {
-			w.SetFocusEvent()
+			w.SetFocus()
 			return w
 		}
 	}

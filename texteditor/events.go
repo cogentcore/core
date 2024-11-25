@@ -541,7 +541,7 @@ func (ed *Editor) OpenLinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 func (ed *Editor) handleMouse() {
 	ed.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
 		if !ed.StateIs(states.Focused) {
-			ed.SetFocusEvent()
+			ed.SetFocus()
 		}
 		pt := ed.PointToRelPos(e.Pos())
 		newPos := ed.PixelToCursor(pt)
@@ -571,7 +571,7 @@ func (ed *Editor) handleMouse() {
 	})
 	ed.OnDoubleClick(func(e events.Event) {
 		if !ed.StateIs(states.Focused) {
-			ed.SetFocusEvent()
+			ed.SetFocus()
 			ed.Send(events.Focus, e) // sets focused flag
 		}
 		e.SetHandled()
@@ -582,7 +582,7 @@ func (ed *Editor) handleMouse() {
 	})
 	ed.On(events.TripleClick, func(e events.Event) {
 		if !ed.StateIs(states.Focused) {
-			ed.SetFocusEvent()
+			ed.SetFocus()
 			ed.Send(events.Focus, e) // sets focused flag
 		}
 		e.SetHandled()

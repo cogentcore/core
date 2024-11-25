@@ -118,6 +118,9 @@ const (
 	// sceneNeedsLayout is whether the Scene needs a new layout pass.
 	sceneNeedsLayout
 
+	// sceneHasDeferred is whether the Scene has elements with Deferred functions.
+	sceneHasDeferred
+
 	// sceneImageUpdated indicates that the Scene's image has been updated
 	// e.g., due to a render or a resize. This is reset by the
 	// global [RenderWindow] rendering pass, so it knows whether it needs to
