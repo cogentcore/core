@@ -27,6 +27,12 @@ jobs:
     - name: Build
       run: go build -v ./...
 
+    - name: Download testdata
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        name: testdata
+        workflow_search: true
+
     # we can't test gpu, xyz, and system on the CI since there is no Vulkan support
     - name: Test
       run: go test -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system) -coverprofile cover.out -timeout 30s
