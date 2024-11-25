@@ -267,6 +267,7 @@ func (bt *Button) Init() {
 						s.SetNonSelectable()
 						s.SetTextWrap(false)
 						s.Color = colors.Scheme.OnSurfaceVariant
+						s.Font.Size = bt.Styles.Font.Size
 					})
 					w.Updater(func() {
 						if bt.Type == ButtonMenu {
