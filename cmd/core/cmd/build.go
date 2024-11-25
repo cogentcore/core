@@ -61,23 +61,26 @@ func buildDesktop(c *config.Config, platform config.Platform) error {
 	xc.Env["GOOS"] = platform.OS
 	xc.Env["GOARCH"] = platform.Arch
 
-	tags := []string{"build"}
+	args := []string{"build"}
 	if c.Build.Debug {
-		tags = append(tags, "-tags", "debug")
+		args = append(args, "-tags", "debug")
 	}
-	// see https://stackoverflow.com/questions/30005878/avoid-debugging-information-on-golang
-	ldflags := "-s -w"
-	output := c.Name
+	if c.Build.Trimpath {
+		args = append(args, "-trimpath")
+	}
+	ldflags := ""
+	output := filepath.Base(c.Build.Output)
 	if platform.OS == "windows" {
 		output += ".exe"
-		// TODO(kai): windows gui
 		// see https://stackoverflow.com/questions/23250505/how-do-i-create-an-executable-from-golang-that-doesnt-open-a-console-window-whe
-		// tags = append(tags, "-ldflags", "-H=windowsgui")
+		if c.Build.Windowsgui {
+			ldflags += " -H=windowsgui"
+		}
 	}
 	ldflags += " " + config.LinkerFlags(c)
-	tags = append(tags, "-ldflags", ldflags, "-o", filepath.Join(c.Build.Output, output))
+	args = append(args, "-ldflags", ldflags, "-o", filepath.Join(c.Build.Output, output))
 
-	err := xc.Run("go", tags...)
+	err := xc.Run("go", args...)
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}

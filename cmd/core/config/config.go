@@ -89,10 +89,23 @@ type Build struct { //types:add
 	// and "bin/{platform}" for all other platforms and command "pack".
 	Output string `flag:"o,output"`
 
-	// whether to build/run the app in debug mode, which sets
-	// the "debug" tag when building. On iOS and Android, this
-	// also prints the program output.
+	// Debug is whether to build/run the app in debug mode, which sets
+	// the "debug" tag when building and prevents the default stripping
+	// of debug symbols. On iOS and Android, this also prints the program output.
 	Debug bool `flag:"d,debug"`
+
+	// Ldflags are optional additional linker flags to pass to go build commands.
+	Ldflags string
+
+	// Trimpath is whether to replace file system paths with module paths
+	// in the resulting executable. It is on by default for commands other
+	// than core run.
+	Trimpath bool `default:"true"`
+
+	// Windowsgui is whether to make this a "Windows GUI" application that
+	// opens without a terminal window on Windows. It is on by default for
+	// commands other than core run.
+	Windowsgui bool `default:"true"`
 
 	// the minimum version of the iOS SDK to compile against
 	IOSVersion string `default:"13.0"`
@@ -200,13 +213,26 @@ func (c *Config) OnConfig(cmd string) error {
 			c.ID = "com." + dir + "." + base
 		}
 	}
+	if cmd == "run" {
+		c.Build.Trimpath = false
+		c.Build.Windowsgui = false
+	}
 	return nil
 }
 
 // LinkerFlags returns the ld linker flags that specify the app and core version,
-// the app about information, and the app icon.
+// the app about information, the app icon, and the optional [Build.Ldflags].
 func LinkerFlags(c *Config) string {
 	res := ""
+
+	if c.Build.Ldflags != "" {
+		res += c.Build.Ldflags + " "
+	}
+
+	if !c.Build.Debug {
+		// See https://stackoverflow.com/questions/30005878/avoid-debugging-information-on-golang and go.dev/issues/25148.
+		res += "-s -w "
+	}
 
 	if c.About != "" {
 		res += "-X 'cogentcore.org/core/core.AppAbout=" + strings.ReplaceAll(c.About, "'", `\'`) + "' "

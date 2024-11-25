@@ -69,7 +69,7 @@ func packLinux(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = exec.Run("cp", "-p", c.Name, filepath.Join(ulbpath, anm))
+	err = exec.Run("cp", "-p", filepath.Base(c.Build.Output), filepath.Join(ulbpath, anm))
 	if err != nil {
 		return err
 	}
@@ -206,7 +206,7 @@ func packDarwin(c *config.Config) error {
 		return err
 	}
 
-	err = exec.Run("cp", "-p", c.Name, filepath.Join(mpath, anm))
+	err = exec.Run("cp", "-p", filepath.Base(c.Build.Output), filepath.Join(mpath, anm))
 	if err != nil {
 		return err
 	}
@@ -365,7 +365,7 @@ func packWindows(c *config.Config) error {
 		return err
 	}
 
-	err = exec.Run("cp", c.Name+".exe", filepath.Join(ipath, "app.exe"))
+	err = exec.Run("cp", filepath.Base(c.Build.Output)+".exe", filepath.Join(ipath, "app.exe"))
 	if err != nil {
 		return err
 	}
