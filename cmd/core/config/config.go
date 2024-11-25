@@ -217,9 +217,13 @@ func (c *Config) OnConfig(cmd string) error {
 }
 
 // LinkerFlags returns the ld linker flags that specify the app and core version,
-// the app about information, and the app icon.
+// the app about information, the app icon, and the optional [Build.Ldflags].
 func LinkerFlags(c *Config) string {
 	res := ""
+
+	if c.Build.Ldflags != "" {
+		res += c.Build.Ldflags + " "
+	}
 
 	if c.About != "" {
 		res += "-X 'cogentcore.org/core/core.AppAbout=" + strings.ReplaceAll(c.About, "'", `\'`) + "' "
