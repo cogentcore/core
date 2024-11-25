@@ -390,6 +390,7 @@ type windowGeometry struct {
 	PX         int
 	PY         int
 	Fullscreen bool
+	Screeen    string
 }
 
 func (wg *windowGeometry) size() image.Point {
