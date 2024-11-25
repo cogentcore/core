@@ -42,7 +42,7 @@ type Text struct { //types:add
 	// LineHeight is the height of a line of text (inherited).
 	// Text is centered within the overall line height.
 	// The standard way to specify line height is in terms of
-	// [units.Em].
+	// [units.Em] so that it scales with the font size.
 	LineHeight units.Value
 
 	// WhiteSpace (not inherited) specifies how white space is processed,
