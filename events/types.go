@@ -215,10 +215,10 @@ const (
 
 	// Show is sent to widgets when their Scene is first shown to the user
 	// in its final form, and whenever a major content managing widget
-	// (e.g., [core.Tabs], [core.Pages]) shows a new element.
-	// This can be used for updates that depend on other elements, or
-	// relatively expensive updates that should be only done when actually
-	// needed "at show time".
+	// (e.g., [core.Tabs], [core.Pages]) shows a new tab/page/element (via
+	// [core.WidgetBase.Shown] or DeferShown). This can be used for updates
+	// that depend on other elements, or relatively expensive updates that
+	// should be only done when actually needed "at show time".
 	Show
 
 	// Close is sent to widgets when their Scene is being closed. This is an
