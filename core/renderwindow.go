@@ -275,7 +275,6 @@ func (w *renderWindow) resized() {
 		return
 	}
 	// w.FocusInactivate()
-	// w.InactivateAllSprites()
 	if !w.isVisible() {
 		rc.visible = false
 		if DebugSettings.WinEventTrace {
