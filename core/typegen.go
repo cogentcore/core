@@ -1282,7 +1282,7 @@ func (t *WidgetBase) SetTooltip(v string) *WidgetBase { t.Tooltip = v; return t 
 // ValueTitle is the title to display for a dialog for this [Value].
 func (t *WidgetBase) SetValueTitle(v string) *WidgetBase { t.ValueTitle = v; return t }
 
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.ProfileToggle", Doc: "ProfileToggle turns profiling on or off, which does both\ntargeted profiling and global CPU and memory profiling.", Directives: []types.Directive{{Tool: "////// Profiling and Benchmarking, controlled by settings app bar"}, {Tool: "types", Directive: "add"}}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.ProfileToggle", Doc: "ProfileToggle turns profiling on or off, which does both\ntargeted profiling and global CPU and memory profiling.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.resetAllSettings", Doc: "resetAllSettings resets all of the settings to their default values.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}})
 

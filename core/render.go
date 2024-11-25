@@ -408,9 +408,10 @@ func (wb *WidgetBase) renderChildren() {
 
 ////////  Defer
 
-// Defer adds a functions that will be called after a full [Scene] update,
-// including on the initial Scene render.
-// At this point event sending functions will work as expected, etc.
+// Defer adds a function to [WidgetBase.Deferred] that will be called after the next
+// [Scene] update/render, including on the initial Scene render. After the function
+// is called, it is removed and not called again. In the function, sending events
+// etc will work as expected.
 func (wb *WidgetBase) Defer(fun func()) {
 	wb.Deferred = append(wb.Deferred, fun)
 	if wb.Scene != nil {
@@ -421,19 +422,18 @@ func (wb *WidgetBase) Defer(fun func()) {
 // runDeferred runs deferred functions on all widgets in the scene.
 func (sc *Scene) runDeferred() {
 	sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
-		if cwb.Deferred != nil {
-			for _, f := range cwb.Deferred {
-				f()
-			}
-			cwb.Deferred = nil
+		for _, f := range cwb.Deferred {
+			f()
 		}
+		cwb.Deferred = nil
 		return tree.Continue
 	})
 }
 
-// DeferShown adds a [Widget.Deferred] function to activate [WidgetBase.StartFocus]
-// and call [WidgetBase.Shown]. This is called in [Tabs] and [Pages] for example, when
-// an element is newly shown, so that these elements can perform OnShow updating as needed.
+// DeferShown adds a [WidgetBase.Defer] function to call [WidgetBase.Shown]
+// and activate [WidgetBase.StartFocus]. For example, this is called in [Tabs]
+// and [Pages] when a tab/page is newly shown, so that elements can perform
+// [WidgetBase.OnShow] updating as needed.
 func (wb *WidgetBase) DeferShown() {
 	wb.Defer(func() {
 		wb.Shown()
@@ -441,7 +441,8 @@ func (wb *WidgetBase) DeferShown() {
 	})
 }
 
-// Shown sends [events.Show] to all widgets from this one down.
+// Shown sends [events.Show] to all widgets from this one down. Also see
+// [WidgetBase.DeferShown].
 func (wb *WidgetBase) Shown() {
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		cwb.Send(events.Show)
@@ -494,7 +495,7 @@ func (wb *WidgetBase) winPos(x, y float32) image.Point {
 	return pt
 }
 
-//////// Profiling and Benchmarking, controlled by settings app bar:
+//////// Profiling and Benchmarking, controlled by settings app bar
 
 // ProfileToggle turns profiling on or off, which does both
 // targeted profiling and global CPU and memory profiling.
