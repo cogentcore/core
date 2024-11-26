@@ -5,6 +5,13 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      updateTestdata:
+        description: 'Update testdata images'
+        required: true
+        default: true
+        type: boolean
 
 jobs:
 
@@ -34,6 +41,10 @@ jobs:
         workflow_search: true
         search_artifacts: true
         if_no_artifact_found: warn
+
+    - name: Set CORE_UPDATE_TESTDATA env var
+      if: inputs.updateTestdata
+      run: echo "CORE_UPDATE_TESTDATA=true" >> $GITHUB_ENV
 
     # we can't test gpu, xyz, and system on the CI since there is no Vulkan support
     - name: Test

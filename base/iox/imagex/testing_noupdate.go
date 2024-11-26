@@ -8,4 +8,4 @@ package imagex
 
 import "os"
 
-var updateTestImages = os.Getenv("CORE_UPDATE_TESTS") == "true"
+var updateTestImages = os.Getenv("CORE_UPDATE_TESTDATA") == "true"
