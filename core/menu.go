@@ -85,7 +85,7 @@ func newMenuScene(menu func(m *Scene), name ...string) *Scene {
 			}
 		}
 		if !hasSelected && cwb.StateIs(states.Selected) {
-			// fmt.Println("start focus sel:", wb)
+			// fmt.Println("start focus sel:", cwb)
 			msc.Events.SetStartFocus(cwb)
 			hasSelected = true
 		}
