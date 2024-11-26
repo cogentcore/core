@@ -31,7 +31,7 @@ type windowGeometrySaver struct {
 	// the full set of window geometries
 	geometries allWindowGeometries
 
-	// temporary cached geometries -- saved to Geometries after SaveDelay
+	// temporary cached geometries: saved to geometries after SaveDelay
 	cache allWindowGeometries
 
 	// base name of the settings file in Cogent Core settings directory
@@ -249,9 +249,15 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	wgr.setPos(pos)
 	wgr.setSize(wsz)
 
-	wgs := ws.cache[winName]
+	wgs := ws.geometries[winName] // get full official record
+	wgsc, hasCache := ws.cache[winName]
 	if wgs.SC == nil {
 		wgs.SC = make(map[string]windowGeometry)
+	}
+	if hasCache {
+		for k, v := range wgsc.SC {
+			wgs.SC[k] = v
+		}
 	}
 	wgs.SC[sc.Name] = wgr
 	wgs.LS = sc.Name
@@ -278,7 +284,7 @@ func (ws *windowGeometrySaver) saveCached() {
 	for winName, wgs := range ws.cache {
 		ws.geometries[winName] = wgs
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: RecordPref: Saving for window: %v\n", winName)
+			log.Printf("WindowGeometry: Saving for window: %v\n", winName)
 		}
 	}
 	ws.resetCache()
