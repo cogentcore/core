@@ -371,8 +371,7 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	if !st.Resizable {
 		opts.Flags.SetFlag(true, system.FixedSize)
 	}
-	sc := TheApp.Screen(st.Screen)
-	wgp := theWindowGeometrySaver.pref(title, sc)
+	wgp, scName := theWindowGeometrySaver.get(title)
 	if wgp != nil {
 		theWindowGeometrySaver.settingStart()
 		opts.Size = wgp.size()
@@ -385,7 +384,12 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		if wgp.FS {
 			opts.SetFullscreen()
 		}
-		fmt.Println("restored opts:", sc.Name, opts)
+		if scName != "" {
+			nsc := TheApp.ScreenByName(scName)
+			if nsc != nil {
+				opts.Screen = nsc.ScreenNumber
+			}
+		}
 	}
 	win := newRenderWindow(name, title, opts)
 	theWindowGeometrySaver.settingEnd()
