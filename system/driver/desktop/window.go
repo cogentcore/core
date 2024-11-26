@@ -81,8 +81,7 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 	// glfw.WindowHint(glfw.ScaleToMonitor, glfw.True)
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
 	// glfw.WindowHint(glfw.Samples, 0) // don't do multisampling for main window -- only in sub-render
-	fullscreen := opts.Flags.HasFlag(system.Fullscreen)
-	if fullscreen {
+	if opts.Flags.HasFlag(system.Maximized) {
 		glfw.WindowHint(glfw.Maximized, glfw.True)
 	}
 	if opts.Flags.HasFlag(system.Tool) {
@@ -97,6 +96,7 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 		// on macOS, the size we pass to glfw must be in dots
 		sz = sc.WinSizeFromPix(opts.Size)
 	}
+	fullscreen := opts.Flags.HasFlag(system.Fullscreen)
 	var mon *glfw.Monitor
 	if fullscreen && sc.ScreenNumber < len(TheApp.Monitors) {
 		mon = TheApp.Monitors[sc.ScreenNumber]
@@ -106,7 +106,7 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 		return win, err
 	}
 
-	if !opts.Flags.HasFlag(system.Fullscreen) {
+	if !fullscreen {
 		pos := opts.Pos.Add(sc.Geometry.Min) // screen relative
 		win.SetPos(pos.X, pos.Y)
 	}
