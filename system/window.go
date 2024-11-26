@@ -230,7 +230,12 @@ const (
 	// window decoration.
 	Tool
 
-	// Fullscreen indicates a window that occupies the entire screen.
+	// Maximized indicates a window that occupies the entire screen, but
+	// still has window decorations.
+	Maximized
+
+	// Fullscreen indicates a fullscreen window attached to a monitor.
+	// This results in no window decorations.
 	Fullscreen
 
 	// FixedSize indicates a window that cannot be resized.
@@ -272,22 +277,6 @@ type NewWindowOptions struct {
 
 	// Flags can be set using WindowFlags to request different types of windows
 	Flags WindowFlags
-}
-
-func (o *NewWindowOptions) SetDialog() {
-	o.Flags.SetFlag(true, Dialog)
-}
-
-func (o *NewWindowOptions) SetModal() {
-	o.Flags.SetFlag(true, Modal)
-}
-
-func (o *NewWindowOptions) SetTool() {
-	o.Flags.SetFlag(true, Tool)
-}
-
-func (o *NewWindowOptions) SetFullscreen() {
-	o.Flags.SetFlag(true, Fullscreen)
 }
 
 // GetTitle returns a sanitized form of o.Title. In particular, its length will

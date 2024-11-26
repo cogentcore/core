@@ -373,9 +373,9 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		StdPixels: false,
 		Screen:    st.Screen,
 	}
-	if !st.Resizable {
-		opts.Flags.SetFlag(true, system.FixedSize)
-	}
+	opts.Flags.SetFlag(!st.Resizable, system.FixedSize)
+	opts.Flags.SetFlag(st.Maximized, system.Maximized)
+	opts.Flags.SetFlag(st.Fullscreen, system.Fullscreen)
 	screenName := ""
 	if st.Screen > 0 {
 		screenName = TheApp.Screen(st.Screen).Name
@@ -391,9 +391,8 @@ func (st *Stage) newRenderWindow() *renderWindow {
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}
-		if wgp.Full {
-			opts.SetFullscreen()
-		}
+		opts.Flags.SetFlag(wgp.Max, system.Maximized)
+		opts.Flags.SetFlag(wgp.Full, system.Fullscreen)
 	}
 	win := newRenderWindow(name, title, opts)
 	theWindowGeometrySaver.settingEnd()

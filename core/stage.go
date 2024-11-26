@@ -125,17 +125,19 @@ type Stage struct { //types:add -setters
 	// [WindowStage]s take up the entire window they are created in.
 	FullWindow bool
 
-	// Maximize is whether to make a window take up the entire screen on desktop
+	// Maximized is whether to make a window take up the entire screen on desktop
 	// platforms by default. It is different from [Stage.Fullscreen] in that
 	// fullscreen makes the window truly fullscreen without decorations
-	// (such as for a video player), whereas maximize keeps decorations and just
+	// (such as for a video player), whereas maximized keeps decorations and just
 	// makes it fill the available space.
-	Maximize bool
+	Maximized bool
 
 	// Fullscreen is whether to make a window fullscreen on desktop platforms
-	// by default. It is different from [Stage.Maximize] in that fullscreen makes
+	// by default. It is different from [Stage.Maximized] in that fullscreen makes
 	// the window truly fullscreen without decorations (such as for a video player),
-	// whereas maximize keeps decorations and just makes it fill the available space.
+	// whereas maximized keeps decorations and just makes it fill the available space.
+	// Not to be confused with [Stage.FullWindow], which is for stages contained within
+	// another system window.
 	Fullscreen bool
 
 	// UseMinSize uses a minimum size as a function of the total available size
