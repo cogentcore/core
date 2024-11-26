@@ -72,8 +72,8 @@ type App interface {
 	// screens managed under this overall screen hardware.
 	NScreens() int
 
-	// Screen returns screen for given screen number, or nil if not a
-	// valid screen number.
+	// Screen returns the screen for the given screen number, or the first
+	// screen if the number is out of range.
 	Screen(n int) *Screen
 
 	// ScreenByName returns screen for given screen name, or nil if not a
