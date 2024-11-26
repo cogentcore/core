@@ -381,7 +381,7 @@ func (w *Window) Moved(gw *glfw.Window, x, y int) {
 	w.Mu.Unlock()
 	// w.app.GetScreens() // this can crash here on win disconnect..
 	w.Screen() // gets parameters
-	w.UpdateFullscreen()
+	w.updateMaximized()
 	w.Event.Window(events.WinMove)
 }
 
@@ -390,12 +390,12 @@ func (w *Window) WinResized(gw *glfw.Window, width, height int) {
 	if MonitorDebug {
 		log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.PixSize)
 	}
-	w.UpdateFullscreen()
+	w.updateMaximized()
 	w.UpdateGeom()
 }
 
-func (w *Window) UpdateFullscreen() {
-	w.Flgs.SetFlag(w.Glw.GetAttrib(glfw.Maximized) == glfw.True, system.Fullscreen)
+func (w *Window) updateMaximized() {
+	w.Flgs.SetFlag(w.Glw.GetAttrib(glfw.Maximized) == glfw.True, system.Maximized)
 }
 
 func (w *Window) UpdateGeom() {
