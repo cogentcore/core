@@ -37,6 +37,8 @@ func newMainStage(typ StageTypes, sc *Scene) *Stage {
 // to close. It should typically be called once by every app at
 // the end of their main function. It can not be called more than
 // once for one app. For secondary windows, see [Body.RunWindow].
+// If you need to configure the [Stage] further, use [Body.NewWindow]
+// and then [Stage.RunMain] on the resulting [Stage].
 func (bd *Body) RunMainWindow() {
 	if ExternalParent != nil {
 		bd.handleExternalParent()
@@ -46,11 +48,11 @@ func (bd *Body) RunMainWindow() {
 	Wait()
 }
 
-// RunMain runs a MainWindow, starts the app's main loop,
-// and waits for all windows to close. It should typically be
-// called once by every app at the end of their main function.
-// It can not be called more than once for one app. For secondary
-// windows, see [Body.RunWindow].
+// RunMain runs the stage, starts the app's main loop,
+// and waits for all windows to close. It can be called instead
+// of [Body.RunMainWindow] if extra configuration steps are necessary
+// on the [Stage]. It can not be called more than once for one app.
+// For secondary stages, see [Stage.Run].
 func (st *Stage) RunMain() {
 	st.Run()
 	Wait()
@@ -98,8 +100,9 @@ func (bd *Body) handleExternalParent() {
 
 // NewWindow returns a new [WindowStage] that is placed in
 // a new system window on multi-window platforms.
-// You must call [Stage.Run] to run the window; see [Body.RunWindow]
-// for a version that automatically runs it.
+// You must call [Stage.Run] or [Stage.RunMain] to run the window;
+// see [Body.RunWindow] and [Body.RunMainWindow] for versions that
+// automatically do so.
 func (bd *Body) NewWindow() *Stage {
 	ms := newMainStage(WindowStage, bd.Scene)
 	ms.SetNewWindow(true)
