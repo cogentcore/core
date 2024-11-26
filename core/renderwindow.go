@@ -497,12 +497,10 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			w.gotFocus = false
 			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
-			// if DebugSettings.WinEventTrace {
-			fmt.Println("Win: ScreenUpdate", w.name, screenConfig())
-			// }
-			// w.resized()
+			if DebugSettings.WinEventTrace {
+				fmt.Println("Win: ScreenUpdate", w.name, screenConfig())
+			}
 			if !TheApp.Platform().IsMobile() { // native desktop
-				// TheWindowGeometryaver.AbortSave() // anything just prior to this is sus
 				if TheApp.NScreens() > 0 {
 					AppearanceSettings.Apply()
 					UpdateAll()
