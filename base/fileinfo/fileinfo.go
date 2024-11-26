@@ -163,7 +163,8 @@ func (fi *FileInfo) SetMimeInfo() error {
 	return nil
 }
 
-// SetFileInfo updates from given [fs.FileInfo]
+// SetFileInfo updates from given [fs.FileInfo]. It uses a canonical
+// [FileInfo.ModTime] when testing to ensure consistent results.
 func (fi *FileInfo) SetFileInfo(info fs.FileInfo) {
 	fi.Size = datasize.Size(info.Size())
 	fi.Mode = info.Mode()
