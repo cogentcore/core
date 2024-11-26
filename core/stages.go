@@ -262,9 +262,6 @@ func (sm *stages) runDeferred() {
 		if sc.showIter == sceneShowIters+1 {
 			sc.showIter++
 			if !sc.hasFlag(sceneHasShown) {
-				if !sc.hasFlag(sceneContentSizing) {
-					sc.Events.activateStartFocus()
-				}
 				sc.setFlag(true, sceneHasShown)
 				sc.Shown()
 			}

@@ -215,6 +215,9 @@ func (sc *Scene) doUpdate() bool {
 
 	if sc.showIter == sceneShowIters { // end of first pass
 		sc.showIter++ // just go 1 past the iters cutoff
+		if !sc.hasFlag(sceneContentSizing) {
+			sc.Events.activateStartFocus()
+		}
 	}
 	return true
 }
