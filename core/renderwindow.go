@@ -439,7 +439,6 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		w.mains.runDeferred() // note: must be outside of locks in renderWindow
 
 	case events.WindowResize:
-		// fmt.Println("resized")
 		e.SetHandled()
 		w.resized()
 

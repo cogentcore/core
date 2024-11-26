@@ -97,9 +97,9 @@ type Stage struct { //types:add -setters
 	// [Stage.DisplayTitle] is true.
 	Title string
 
-	// Screen specifies the screen number to open a NewWindow on non-mobile
-	// platforms. 0 is the default window.
-	// Use TheApp.ScreenByName("name").ScreenNumber to get the number by name.
+	// Screen specifies the screen number on which a new window is opened
+	// by default on desktop platforms. 0 is the default primary screen.
+	// Use [TheApp].ScreenByName("name").ScreenNumber to get the number by name.
 	Screen int
 
 	// Modal, if true, blocks input to all other stages.

@@ -386,7 +386,6 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		opts.Screen = screen.ScreenNumber
 		opts.Size = wgp.size()
 		opts.Pos = wgp.pos()
-		// fmt.Println("using saved:", screen.Name, wgp.size(), wgp.pos())
 		opts.StdPixels = false
 		if w := AllRenderWindows.FindName(name); w != nil { // offset from existing
 			opts.Pos.X += 20

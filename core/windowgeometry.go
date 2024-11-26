@@ -84,7 +84,7 @@ type windowGeometrySaver struct {
 // init does initialization if not yet initialized
 func (ws *windowGeometrySaver) init() {
 	if ws.geometries == nil {
-		ws.geometries = make(screenConfigGeometries, 1000)
+		ws.geometries = make(screenConfigGeometries)
 		ws.resetCache()
 		ws.filename = "window-geometry"
 		ws.lockSleep = 100 * time.Millisecond
@@ -93,7 +93,7 @@ func (ws *windowGeometrySaver) init() {
 }
 
 // shouldSave returns whether the window geometry should be saved based on
-// the platform: only for non-mobile (non-web) and not offscreen.
+// the platform: only for desktop native platforms.
 func (ws *windowGeometrySaver) shouldSave() bool {
 	return !TheApp.Platform().IsMobile() && TheApp.Platform() != system.Offscreen
 }
@@ -394,7 +394,7 @@ func (ws *windowGeometrySaver) deleteAll() {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, ws.filename+".json")
 	errors.Log(os.Remove(pnm))
-	ws.geometries = make(screenConfigGeometries, 1000)
+	ws.geometries = make(screenConfigGeometries)
 }
 
 // restoreAll restores size and position of all windows, for current screen.
