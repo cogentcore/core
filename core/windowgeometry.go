@@ -287,40 +287,40 @@ func (ws *windowGeometrySaver) saveCached() {
 }
 
 // get returns saved geometry for given window name, returning
-// nil if there is no saved info. The last saved screen name is also returned.
+// nil if there is no saved info. The last saved screen is used
+// if it is currently available (connected); otherwise the given screen
+// name is used if non-empty; otherwise the default screen 0 is used.
+// If no saved info is found for any active screen, nil is returned.
+// The screen used for the preferences is returned, and should be used
+// to set the screen for a new window.
 // If the window name has a colon, only the part prior to the colon is used.
-// if no saved pref is available (for given screen), nil is returned.
-func (ws *windowGeometrySaver) get(winName string) (*windowGeometry, string) {
+func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry, *system.Screen) {
 	if !ws.shouldSave() {
-		return nil, ""
+		return nil, nil
 	}
 	ws.mu.RLock()
 	defer ws.mu.RUnlock()
 
 	if ws.geometries == nil {
-		return nil, ""
+		return nil, nil
 	}
 	winName = ws.windowName(winName)
 	wgs, ok := ws.cache[winName]
 	if !ok {
 		wgs, ok = ws.geometries[winName]
 		if !ok {
-			return nil, ""
+			return nil, nil
 		}
 	}
-	screenName := wgs.LS
-	wgr, ok := wgs.SC[screenName]
-	if ok { // should never be false
-		sc := TheApp.ScreenByName(screenName)
-		if sc != nil {
-			wgr.constrainGeom(sc)
-		}
+	wgr, sc := wgs.getForScreen(screenName)
+	if wgr != nil {
+		wgr.constrainGeom(sc)
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: Got geom for window: %v pos: %v size: %v screen: %v\n", winName, wgr.pos(), wgr.size(), screenName)
+			log.Printf("WindowGeometry: Got geom for window: %v pos: %v size: %v screen: %v\n", winName, wgr.pos(), wgr.size(), sc.Name)
 		}
-		return &wgr, screenName
+		return wgr, sc
 	}
-	return nil, ""
+	return nil, nil
 }
 
 // deleteAll deletes the file that saves the position and size of each window,
@@ -349,7 +349,7 @@ func (ws *windowGeometrySaver) restoreAll() {
 	}
 	ws.settingStart()
 	for _, w := range AllRenderWindows {
-		wgp, scNm := ws.get(w.title)
+		wgp, scNm := ws.get(w.title, "")
 		if wgp != nil {
 			if DebugSettings.WinGeomTrace {
 				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v screen: %s\n", w.name, wgp.pos(), wgp.size(), scNm)
@@ -369,6 +369,32 @@ type windowGeometries struct {
 	// LS last screen
 	LS string
 	SC map[string]windowGeometry
+}
+
+// getForScreen returns saved geometry for an active (connected) Screen,
+// searching in order of: last screen saved, given screen name, and then
+// going through the list of available screens in order.
+// returns nil if no saved geometry info is available for any active screen.
+func (wgs *windowGeometries) getForScreen(screenName string) (*windowGeometry, *system.Screen) {
+	sc := TheApp.ScreenByName(wgs.LS)
+	if sc != nil {
+		wgr := wgs.SC[wgs.LS]
+		return &wgr, sc
+	}
+	sc = TheApp.ScreenByName(screenName)
+	if sc != nil {
+		if wgr, ok := wgs.SC[screenName]; ok {
+			return &wgr, sc
+		}
+	}
+	ns := TheApp.NScreens()
+	for i := range ns {
+		sc = TheApp.Screen(i)
+		if wgr, ok := wgs.SC[sc.Name]; ok {
+			return &wgr, sc
+		}
+	}
+	return nil, nil
 }
 
 // windowGeometry records the geometry settings used for a given screen, window

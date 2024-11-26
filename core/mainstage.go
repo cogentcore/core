@@ -371,11 +371,17 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	if !st.Resizable {
 		opts.Flags.SetFlag(true, system.FixedSize)
 	}
-	wgp, scName := theWindowGeometrySaver.get(title)
+	screenName := ""
+	if st.Screen > 0 {
+		screenName = TheApp.Screen(st.Screen).Name
+	}
+	wgp, screen := theWindowGeometrySaver.get(title, screenName)
 	if wgp != nil {
 		theWindowGeometrySaver.settingStart()
+		opts.Screen = screen.ScreenNumber
 		opts.Size = wgp.size()
 		opts.Pos = wgp.pos()
+		// fmt.Println("using saved:", screen.Name, wgp.size(), wgp.pos())
 		opts.StdPixels = false
 		if w := AllRenderWindows.FindName(name); w != nil { // offset from existing
 			opts.Pos.X += 20
@@ -383,12 +389,6 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		}
 		if wgp.FS {
 			opts.SetFullscreen()
-		}
-		if scName != "" {
-			nsc := TheApp.ScreenByName(scName)
-			if nsc != nil {
-				opts.Screen = nsc.ScreenNumber
-			}
 		}
 	}
 	win := newRenderWindow(name, title, opts)

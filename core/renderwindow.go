@@ -173,7 +173,7 @@ func (w *renderWindow) setName(name string) {
 		w.SystemWindow.SetName(name)
 	}
 	if isdif && w.SystemWindow != nil {
-		wgp, _ := theWindowGeometrySaver.get(w.title)
+		wgp, _ := theWindowGeometrySaver.get(w.title, "")
 		if wgp != nil {
 			theWindowGeometrySaver.settingStart()
 			if w.SystemWindow.Size() != wgp.size() || w.SystemWindow.Position() != wgp.pos() {
@@ -439,6 +439,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		w.mains.runDeferred() // note: must be outside of locks in renderWindow
 
 	case events.WindowResize:
+		// fmt.Println("resized")
 		e.SetHandled()
 		w.resized()
 
