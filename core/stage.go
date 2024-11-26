@@ -130,8 +130,9 @@ type Stage struct { //types:add -setters
 	// The saved window position and size takes precedence on multi-window platforms.
 	UseMinSize bool
 
-	// Resizable specifies whether a NewWindow on non-mobile platforms can
-	// be resized by the end user. This defaults to true.
+	// Resizable specifies whether a window on desktop platforms can
+	// be resized by the user, and whether a non-full same-window dialog can
+	// be resized by the user on any platform. It defaults to true.
 	Resizable bool
 
 	// Timeout, if greater than 0, results in a popup stages disappearing

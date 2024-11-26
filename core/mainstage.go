@@ -144,27 +144,29 @@ func (st *Stage) addSceneParts() {
 		sc.SceneGeom.Pos = np
 		sc.NeedsRender()
 	})
-	rsz := NewHandle(parts)
-	rsz.Styler(func(s *styles.Style) {
-		s.Direction = styles.Column
-		s.FillMargin = false
-	})
-	rsz.FinalStyler(func(s *styles.Style) {
-		s.Cursor = cursors.ResizeNWSE
-		s.Min.Set(units.Em(1))
-	})
-	rsz.SetName("resize")
-	rsz.OnChange(func(e events.Event) {
-		e.SetHandled()
-		pd := e.PrevDelta()
-		np := sc.SceneGeom.Size.Add(pd)
-		minsz := 100
-		np.X = max(np.X, minsz)
-		np.Y = max(np.Y, minsz)
-		ng := sc.SceneGeom
-		ng.Size = np
-		sc.resize(ng)
-	})
+	if st.Resizable {
+		rsz := NewHandle(parts)
+		rsz.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.FillMargin = false
+		})
+		rsz.FinalStyler(func(s *styles.Style) {
+			s.Cursor = cursors.ResizeNWSE
+			s.Min.Set(units.Em(1))
+		})
+		rsz.SetName("resize")
+		rsz.OnChange(func(e events.Event) {
+			e.SetHandled()
+			pd := e.PrevDelta()
+			np := sc.SceneGeom.Size.Add(pd)
+			minsz := 100
+			np.X = max(np.X, minsz)
+			np.Y = max(np.Y, minsz)
+			ng := sc.SceneGeom
+			ng.Size = np
+			sc.resize(ng)
+		})
+	}
 }
 
 // firstWindowStages creates a temporary [stages] for the first window
