@@ -271,17 +271,17 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 
 	cfg := screenConfig()
 	winName := ws.windowName(win.title)
-	wgr := windowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, FS: win.SystemWindow.Is(system.Fullscreen)}
-	wgr.setPos(pos)
-	wgr.setSize(wsz)
+	wgr := windowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, Full: win.SystemWindow.Is(system.Fullscreen)}
+	wgr.Pos = pos
+	wgr.Size = wsz
 
 	sgs := ws.geometries[cfg]
 	if sgs == nil {
 		sgs = make(map[string]windowGeometries)
 	}
 	wgs := sgs[winName]
-	if wgs.SC == nil {
-		wgs.SC = make(map[string]windowGeometry)
+	if wgs.Screens == nil {
+		wgs.Screens = make(map[string]windowGeometry)
 	}
 
 	sgsc := ws.cache[cfg]
@@ -290,12 +290,12 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	}
 	wgsc, hasCache := sgsc[winName]
 	if hasCache {
-		for k, v := range wgsc.SC {
-			wgs.SC[k] = v
+		for k, v := range wgsc.Screens {
+			wgs.Screens[k] = v
 		}
 	}
-	wgs.SC[sc.Name] = wgr
-	wgs.LS = sc.Name
+	wgs.Screens[sc.Name] = wgr
+	wgs.Last = sc.Name
 	sgsc[winName] = wgs
 	ws.cache[cfg] = sgsc
 
@@ -377,7 +377,7 @@ func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry,
 	if wgr != nil {
 		wgr.constrainGeom(sc)
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: Got geom for window: %q pos: %v size: %v screen: %q lastScreen: %q cfg: %q\n", winName, wgr.pos(), wgr.size(), sc.Name, wgs.LS, cfg)
+			log.Printf("WindowGeometry: Got geom for window: %q pos: %v size: %v screen: %q lastScreen: %q cfg: %q\n", winName, wgr.Pos, wgr.Size, sc.Name, wgs.Last, cfg)
 		}
 		return wgr, sc
 	}
@@ -413,9 +413,9 @@ func (ws *windowGeometrySaver) restoreAll() {
 		wgp, sc := ws.get(w.title, "")
 		if wgp != nil {
 			if DebugSettings.WinGeomTrace {
-				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v screen: %s\n", w.name, wgp.pos(), wgp.size(), sc.Name)
+				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v screen: %s\n", w.name, wgp.Pos, wgp.Size, sc.Name)
 			}
-			w.SystemWindow.SetGeom(wgp.pos(), wgp.size(), sc)
+			w.SystemWindow.SetGeom(wgp.Pos, wgp.Size, sc)
 		} else {
 			if DebugSettings.WinGeomTrace {
 				log.Printf("WindowGeometry: RestoreAll: not found for win: %q  cfg: %q\n", w.title, screenConfig())
@@ -431,8 +431,8 @@ func (ws *windowGeometrySaver) restoreAll() {
 // windowGeometries holds the window geometries for a given window
 // across different screens, and the last screen used.
 type windowGeometries struct {
-	LS string                    // last screen
-	SC map[string]windowGeometry // screen map
+	Last    string                    // Last screen
+	Screens map[string]windowGeometry // Screen map
 }
 
 // getForScreen returns saved geometry for an active (connected) Screen,
@@ -440,61 +440,39 @@ type windowGeometries struct {
 // going through the list of available screens in order.
 // returns nil if no saved geometry info is available for any active screen.
 func (wgs *windowGeometries) getForScreen(screenName string) (*windowGeometry, *system.Screen) {
-	sc := TheApp.ScreenByName(wgs.LS)
+	sc := TheApp.ScreenByName(wgs.Last)
 	if sc != nil {
-		wgr := wgs.SC[wgs.LS]
+		wgr := wgs.Screens[wgs.Last]
 		return &wgr, sc
 	}
 	sc = TheApp.ScreenByName(screenName)
 	if sc != nil {
-		if wgr, ok := wgs.SC[screenName]; ok {
+		if wgr, ok := wgs.Screens[screenName]; ok {
 			return &wgr, sc
 		}
 	}
 	ns := TheApp.NScreens()
 	for i := range ns {
 		sc = TheApp.Screen(i)
-		if wgr, ok := wgs.SC[sc.Name]; ok {
+		if wgr, ok := wgs.Screens[sc.Name]; ok {
 			return &wgr, sc
 		}
 	}
 	return nil, nil
 }
 
-// windowGeometry records the geometry settings used for a given screen, window
+// windowGeometry records the geometry settings used for
+// a certain screen and window pair.
 type windowGeometry struct {
-	DPI float32
-	DPR float32
-	SX  int
-	SY  int
-	PX  int
-	PY  int
-	FS  bool
-}
-
-func (wg *windowGeometry) size() image.Point {
-	return image.Point{wg.SX, wg.SY}
-}
-
-func (wg *windowGeometry) setSize(sz image.Point) {
-	wg.SX = sz.X
-	wg.SY = sz.Y
-}
-
-func (wg *windowGeometry) pos() image.Point {
-	return image.Point{wg.PX, wg.PY}
-}
-
-func (wg *windowGeometry) setPos(ps image.Point) {
-	wg.PX = ps.X
-	wg.PY = ps.Y
+	DPI  float32
+	DPR  float32 // Device Pixel Ratio
+	Size image.Point
+	Pos  image.Point
+	Max  bool // Maximized
+	Full bool // Fullscreen
 }
 
 // constrainGeom constrains geometry based on screen params
 func (wg *windowGeometry) constrainGeom(sc *system.Screen) {
-	sz, pos := sc.ConstrainWinGeom(image.Point{wg.SX, wg.SY}, image.Point{wg.PX, wg.PY})
-	wg.SX = sz.X
-	wg.SY = sz.Y
-	wg.PX = pos.X
-	wg.PY = pos.Y
+	wg.Size, wg.Pos = sc.ConstrainWinGeom(wg.Size, wg.Pos)
 }

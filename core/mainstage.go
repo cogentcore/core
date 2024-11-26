@@ -384,14 +384,14 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	if wgp != nil {
 		theWindowGeometrySaver.settingStart()
 		opts.Screen = screen.ScreenNumber
-		opts.Size = wgp.size()
-		opts.Pos = wgp.pos()
+		opts.Size = wgp.Size
+		opts.Pos = wgp.Pos
 		opts.StdPixels = false
 		if w := AllRenderWindows.FindName(name); w != nil { // offset from existing
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}
-		if wgp.FS {
+		if wgp.Full {
 			opts.SetFullscreen()
 		}
 	}
