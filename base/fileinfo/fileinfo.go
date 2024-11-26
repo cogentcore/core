@@ -32,6 +32,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"testing"
 	"time"
 
 	"cogentcore.org/core/base/datasize"
@@ -166,7 +167,12 @@ func (fi *FileInfo) SetMimeInfo() error {
 func (fi *FileInfo) SetFileInfo(info fs.FileInfo) {
 	fi.Size = datasize.Size(info.Size())
 	fi.Mode = info.Mode()
-	fi.ModTime = info.ModTime()
+	if testing.Testing() {
+		// We use a canonical time when testing to ensure consistent results.
+		fi.ModTime = time.Unix(1500000000, 0)
+	} else {
+		fi.ModTime = info.ModTime()
+	}
 	if info.IsDir() {
 		fi.Kind = "Folder"
 		fi.Cat = Folder
