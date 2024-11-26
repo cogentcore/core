@@ -173,14 +173,14 @@ func (w *renderWindow) setName(name string) {
 		w.SystemWindow.SetName(name)
 	}
 	if isdif && w.SystemWindow != nil {
-		wgp, _ := theWindowGeometrySaver.get(w.title, "")
+		wgp, sc := theWindowGeometrySaver.get(w.title, "")
 		if wgp != nil {
 			theWindowGeometrySaver.settingStart()
-			if w.SystemWindow.Size() != wgp.size() || w.SystemWindow.Position() != wgp.pos() {
+			if w.SystemWindow.Size() != wgp.size() || w.SystemWindow.Position(sc) != wgp.pos() {
 				if DebugSettings.WinGeomTrace {
 					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.pos(), wgp.size())
 				}
-				w.SystemWindow.SetGeom(wgp.pos(), wgp.size())
+				w.SystemWindow.SetGeom(wgp.pos(), wgp.size(), sc)
 				system.TheApp.SendEmptyEvent()
 			}
 			theWindowGeometrySaver.settingEnd()
@@ -497,24 +497,25 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			w.gotFocus = false
 			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
-			if DebugSettings.WinEventTrace {
-				fmt.Printf("Win: %v ScreenUpdate\n", w.name)
-			}
-			w.resized()
+			// if DebugSettings.WinEventTrace {
+			fmt.Println("Win: ScreenUpdate", w.name, screenConfig())
+			// }
+			// w.resized()
 			if !TheApp.Platform().IsMobile() { // native desktop
 				// TheWindowGeometryaver.AbortSave() // anything just prior to this is sus
 				if TheApp.NScreens() > 0 {
 					AppearanceSettings.Apply()
 					UpdateAll()
-					// WindowGeometrySave.RestoreAll()
+					theWindowGeometrySaver.restoreAll()
 				}
+			} else {
+				w.resized()
 			}
 		}
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//                   Rendering
+////////  Rendering
 
 // renderParams are the key [renderWindow] params that determine if
 // a scene needs to be restyled since last render, if these params change.

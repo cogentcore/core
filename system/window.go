@@ -58,9 +58,11 @@ type Window interface {
 	// units that may not include any high DPI factors.
 	WinSize() image.Point
 
-	// Position returns the current left-top position of the window relative to
-	// underlying screen, in OS-specific window manager coordinates.
-	Position() image.Point
+	// Position returns the current left-top position of the window,
+	// in OS-specific window manager coordinates.
+	// If the optional screen is non-nil, then coordinates are relative
+	// to that screen (e.g., pass window.Screen() for window's own screen).
+	Position(screen *Screen) image.Point
 
 	// RenderGeom returns the actual effective geometry of the window used
 	// for rendering content, which may be different from {0, [Window.Size]}
@@ -79,14 +81,19 @@ type Window interface {
 
 	// SetPos sets the position of the window, in OS window manager
 	// coordinates, which may be different from Size() coordinates
-	// that reflect high DPI
-	SetPos(pos image.Point)
+	// that reflect high DPI. If the optional screen argument is non-nil,
+	// then the position is relative to the given screen, so the window
+	// should move to be on the given screen assuming the coordinates are within
+	// its bounds. Otherwise, positions are in global coordinates interpreted
+	// relative to overall screen layouts in multi-monitor configurations.
+	SetPos(pos image.Point, screen *Screen)
 
-	// SetGeom sets the position and size in one call -- use this if doing
+	// SetGeom sets the position and size in one call. Use this if doing
 	// both because sequential calls to SetPos and SetSize might fail on some
-	// platforms.  Size is in actual pixel units (i.e., same units as returned by Size()),
-	// and Pos is in OS-specific window manager units (i.e., as returned in Pos())
-	SetGeom(pos image.Point, sz image.Point)
+	// platforms. Size is in actual pixel units (i.e., same units as returned by Size()),
+	// and Pos is in OS-specific window manager units (i.e., as returned in Position()).
+	// See [Window.SetPos] for information on the optional screen argument.
+	SetGeom(pos image.Point, sz image.Point, screen *Screen)
 
 	// Raise requests that the window be at the top of the stack of windows,
 	// and receive focus.  If it is iconified, it will be de-iconified.  This
@@ -333,7 +340,7 @@ func (o *NewWindowOptions) Fixup() {
 		if nw > 0 {
 			lastw := TheApp.Window(nw - 1)
 			lsz := lastw.WinSize()
-			lp := lastw.Position()
+			lp := lastw.Position(nil)
 
 			nwbig := wsz.X > lsz.X || wsz.Y > lsz.Y
 

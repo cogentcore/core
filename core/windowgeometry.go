@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -21,18 +22,40 @@ import (
 // theWindowGeometrySaver is the manager of window geometry settings
 var theWindowGeometrySaver = windowGeometrySaver{}
 
-// allWindowGeometries has the window geometry data for all windows.
-type allWindowGeometries map[string]windowGeometries
+// screenConfigGeometries has the window geometry data for different
+// screen configurations, where a screen configuration is a specific
+// set of available screens, naturally corresponding to the
+// home vs. office vs. travel usage of a laptop, for example,
+// with different sets of screens available in each location.
+// Each such configuration has a different set of saved window geometries,
+// which is restored when the set of screens changes, so your windows will
+// be restored to their last positions and sizes for each such configuration.
+type screenConfigGeometries map[string]map[string]windowGeometries
+
+// screenConfig returns the current screen configuration string,
+// which is the alpha-sorted list of current screen names.
+func screenConfig() string {
+	ns := TheApp.NScreens()
+	if ns == 0 {
+		return "none"
+	}
+	scs := make([]string, ns)
+	for i := range ns {
+		scs[i] = TheApp.Screen(i).Name
+	}
+	slices.Sort(scs)
+	return strings.Join(scs, "|")
+}
 
 // windowGeometrySaver records window geometries in a persistent file,
 // which is then used when opening new windows to restore.
 type windowGeometrySaver struct {
 
 	// the full set of window geometries
-	geometries allWindowGeometries
+	geometries screenConfigGeometries
 
 	// temporary cached geometries: saved to geometries after SaveDelay
-	cache allWindowGeometries
+	cache screenConfigGeometries
 
 	// base name of the settings file in Cogent Core settings directory
 	filename string
@@ -41,7 +64,8 @@ type windowGeometrySaver struct {
 	// then we need to re-open before modifying.
 	lastSave time.Time
 
-	// if true, we are setting geometry so don't save -- caller must call SettingStart() SettingEnd() to block
+	// if true, we are setting geometry so don't save;
+	// Caller must call SettingStart() SettingEnd() to block.
 	settingNoSave bool
 
 	// read-write mutex that protects updating of WindowGeometry
@@ -60,7 +84,7 @@ type windowGeometrySaver struct {
 // init does initialization if not yet initialized
 func (ws *windowGeometrySaver) init() {
 	if ws.geometries == nil {
-		ws.geometries = make(allWindowGeometries, 1000)
+		ws.geometries = make(screenConfigGeometries, 1000)
 		ws.resetCache()
 		ws.filename = "window-geometry"
 		ws.lockSleep = 100 * time.Millisecond
@@ -76,7 +100,7 @@ func (ws *windowGeometrySaver) shouldSave() bool {
 
 // resetCache resets the cache; call under mutex
 func (ws *windowGeometrySaver) resetCache() {
-	ws.cache = make(allWindowGeometries)
+	ws.cache = make(screenConfigGeometries)
 }
 
 // lockFile attempts to create the window geometry lock file
@@ -165,7 +189,7 @@ func (ws *windowGeometrySaver) open() error {
 	if err != nil {
 		return err
 	}
-	return errors.Log(json.Unmarshal(b, &ws.geometries))
+	return json.Unmarshal(b, &ws.geometries)
 }
 
 // save RenderWindow Geom Settings to Cogent Core standard prefs directory
@@ -201,6 +225,7 @@ func (ws *windowGeometrySaver) windowName(winName string) string {
 // Must call SettingEnd to turn off (safe to call even if Start not called).
 func (ws *windowGeometrySaver) settingStart() {
 	ws.mu.Lock()
+	ws.resetCache() // get rid of anything just saved prior to this -- sus.
 	ws.settingNoSave = true
 	ws.mu.Unlock()
 }
@@ -227,7 +252,7 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 		return
 	}
 	sc := win.SystemWindow.Screen()
-	pos := win.SystemWindow.Position()
+	pos := win.SystemWindow.Position(sc)
 	if pos.X == -32000 || pos.Y == -32000 { // windows badness
 		if DebugSettings.WinGeomTrace {
 			log.Printf("WindowGeometry: Record: NOT storing very negative pos: %v for win: %v\n", pos, win.name)
@@ -244,16 +269,26 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	}
 	ws.init()
 
+	cfg := screenConfig()
 	winName := ws.windowName(win.title)
 	wgr := windowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, FS: win.SystemWindow.Is(system.Fullscreen)}
 	wgr.setPos(pos)
 	wgr.setSize(wsz)
 
-	wgs := ws.geometries[winName] // get full official record
-	wgsc, hasCache := ws.cache[winName]
+	sgs := ws.geometries[cfg]
+	if sgs == nil {
+		sgs = make(map[string]windowGeometries)
+	}
+	wgs := sgs[winName]
 	if wgs.SC == nil {
 		wgs.SC = make(map[string]windowGeometry)
 	}
+
+	sgsc := ws.cache[cfg]
+	if sgsc == nil {
+		sgsc = make(map[string]windowGeometries)
+	}
+	wgsc, hasCache := sgsc[winName]
 	if hasCache {
 		for k, v := range wgsc.SC {
 			wgs.SC[k] = v
@@ -261,7 +296,12 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	}
 	wgs.SC[sc.Name] = wgr
 	wgs.LS = sc.Name
-	ws.cache[winName] = wgs
+	sgsc[winName] = wgs
+	ws.cache[cfg] = sgsc
+
+	if DebugSettings.WinGeomTrace {
+		log.Printf("WindowGeometry: Record win: %q screen: %q cfg: %q", winName, sc.Name, cfg)
+	}
 
 	if ws.saveTimer == nil {
 		ws.saveTimer = time.AfterFunc(time.Duration(ws.saveDelay), func() {
@@ -281,10 +321,17 @@ func (ws *windowGeometrySaver) saveCached() {
 	if ws.needToReload() {
 		ws.open()
 	}
-	for winName, wgs := range ws.cache {
-		ws.geometries[winName] = wgs
-		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: Saving for window: %v\n", winName)
+	if DebugSettings.WinGeomTrace {
+		log.Println("WindowGeometry: saveCached")
+	}
+	for cfg, sgsc := range ws.cache {
+		for winName, wgs := range sgsc {
+			sg := ws.geometries[cfg]
+			if sg == nil {
+				sg = make(map[string]windowGeometries)
+			}
+			sg[winName] = wgs
+			ws.geometries[cfg] = sg
 		}
 	}
 	ws.resetCache()
@@ -307,22 +354,30 @@ func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry,
 	ws.mu.RLock()
 	defer ws.mu.RUnlock()
 
-	if ws.geometries == nil {
-		return nil, nil
-	}
+	cfg := screenConfig()
 	winName = ws.windowName(winName)
-	wgs, ok := ws.cache[winName]
+	var wgs windowGeometries
+
+	sgs := ws.cache[cfg]
+	ok := false
+	if sgs != nil {
+		wgs, ok = sgs[winName]
+	}
 	if !ok {
-		wgs, ok = ws.geometries[winName]
+		sgs, ok = ws.geometries[cfg]
 		if !ok {
 			return nil, nil
 		}
+		wgs, ok = sgs[winName]
+	}
+	if !ok {
+		return nil, nil
 	}
 	wgr, sc := wgs.getForScreen(screenName)
 	if wgr != nil {
 		wgr.constrainGeom(sc)
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: Got geom for window: %v pos: %v size: %v screen: %v\n", winName, wgr.pos(), wgr.size(), sc.Name)
+			log.Printf("WindowGeometry: Got geom for window: %q pos: %v size: %v screen: %q lastScreen: %q cfg: %q\n", winName, wgr.pos(), wgr.size(), sc.Name, wgs.LS, cfg)
 		}
 		return wgr, sc
 	}
@@ -339,7 +394,7 @@ func (ws *windowGeometrySaver) deleteAll() {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, ws.filename+".json")
 	errors.Log(os.Remove(pnm))
-	ws.geometries = make(allWindowGeometries, 1000)
+	ws.geometries = make(screenConfigGeometries, 1000)
 }
 
 // restoreAll restores size and position of all windows, for current screen.
@@ -355,12 +410,16 @@ func (ws *windowGeometrySaver) restoreAll() {
 	}
 	ws.settingStart()
 	for _, w := range AllRenderWindows {
-		wgp, scNm := ws.get(w.title, "")
+		wgp, sc := ws.get(w.title, "")
 		if wgp != nil {
 			if DebugSettings.WinGeomTrace {
-				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v screen: %s\n", w.name, wgp.pos(), wgp.size(), scNm)
+				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v screen: %s\n", w.name, wgp.pos(), wgp.size(), sc.Name)
 			}
-			w.SystemWindow.SetGeom(wgp.pos(), wgp.size())
+			w.SystemWindow.SetGeom(wgp.pos(), wgp.size(), sc)
+		} else {
+			if DebugSettings.WinGeomTrace {
+				log.Printf("WindowGeometry: RestoreAll: not found for win: %q  cfg: %q\n", w.title, screenConfig())
+			}
 		}
 	}
 	ws.settingEnd()
@@ -372,9 +431,8 @@ func (ws *windowGeometrySaver) restoreAll() {
 // windowGeometries holds the window geometries for a given window
 // across different screens, and the last screen used.
 type windowGeometries struct {
-	// LS last screen
-	LS string
-	SC map[string]windowGeometry
+	LS string                    // last screen
+	SC map[string]windowGeometry // screen map
 }
 
 // getForScreen returns saved geometry for an active (connected) Screen,

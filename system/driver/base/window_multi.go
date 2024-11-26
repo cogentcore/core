@@ -83,7 +83,7 @@ func (w *WindowMulti[A, D]) WinSize() image.Point {
 	return w.WnSize
 }
 
-func (w *WindowMulti[A, D]) Position() image.Point {
+func (w *WindowMulti[A, D]) Position(screen *system.Screen) image.Point {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	return w.Pos
@@ -123,14 +123,14 @@ func (w *WindowMulti[A, D]) SetSize(sz image.Point) {
 	w.SetWinSize(sz)
 }
 
-func (w *WindowMulti[A, D]) SetPos(pos image.Point) {
+func (w *WindowMulti[A, D]) SetPos(pos image.Point, screen *system.Screen) {
 	if w.This.IsClosed() {
 		return
 	}
 	w.Pos = pos
 }
 
-func (w *WindowMulti[A, D]) SetGeom(pos image.Point, sz image.Point) {
+func (w *WindowMulti[A, D]) SetGeom(pos image.Point, sz image.Point, screen *system.Screen) {
 	if w.This.IsClosed() {
 		return
 	}
