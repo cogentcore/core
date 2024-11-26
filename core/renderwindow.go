@@ -173,7 +173,7 @@ func (w *renderWindow) setName(name string) {
 		w.SystemWindow.SetName(name)
 	}
 	if isdif && w.SystemWindow != nil {
-		wgp := theWindowGeometrySaver.pref(w.title, w.SystemWindow.Screen())
+		wgp, _ := theWindowGeometrySaver.get(w.title, "")
 		if wgp != nil {
 			theWindowGeometrySaver.settingStart()
 			if w.SystemWindow.Size() != wgp.size() || w.SystemWindow.Position() != wgp.pos() {
@@ -293,7 +293,7 @@ func (w *renderWindow) resized() {
 	if DebugSettings.WinGeomTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
 	}
-	theWindowGeometrySaver.recordPref(w)
+	theWindowGeometrySaver.record(w)
 }
 
 // Raise requests that the window be at the top of the stack of windows,
@@ -439,6 +439,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		w.mains.runDeferred() // note: must be outside of locks in renderWindow
 
 	case events.WindowResize:
+		// fmt.Println("resized")
 		e.SetHandled()
 		w.resized()
 
@@ -469,7 +470,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if DebugSettings.WinGeomTrace {
 				log.Printf("WindowGeometry: recording from Move\n")
 			}
-			theWindowGeometrySaver.recordPref(w)
+			theWindowGeometrySaver.record(w)
 		case events.WinFocus:
 			// if we are not already the last in AllRenderWins, we go there,
 			// as this allows focus to be restored to us in the future

@@ -70,18 +70,22 @@ func (w *Window) DeActivate() {
 // NewGlfwWindow makes a new glfw window.
 // It must be run on main.
 func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Window, error) {
-	_, _, tool, fullscreen := system.WindowFlagsToBool(opts.Flags)
 	// glfw.DefaultWindowHints()
-	glfw.WindowHint(glfw.Resizable, glfw.True)
+	if opts.Flags.HasFlag(system.FixedSize) {
+		glfw.WindowHint(glfw.Resizable, glfw.False)
+	} else {
+		glfw.WindowHint(glfw.Resizable, glfw.True)
+	}
 	glfw.WindowHint(glfw.Visible, glfw.False) // needed to position
 	glfw.WindowHint(glfw.Focused, glfw.True)
 	// glfw.WindowHint(glfw.ScaleToMonitor, glfw.True)
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
 	// glfw.WindowHint(glfw.Samples, 0) // don't do multisampling for main window -- only in sub-render
+	fullscreen := opts.Flags.HasFlag(system.Fullscreen)
 	if fullscreen {
 		glfw.WindowHint(glfw.Maximized, glfw.True)
 	}
-	if tool {
+	if opts.Flags.HasFlag(system.Tool) {
 		glfw.WindowHint(glfw.Decorated, glfw.False)
 	} else {
 		glfw.WindowHint(glfw.Decorated, glfw.True)
@@ -93,13 +97,18 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 		// on macOS, the size we pass to glfw must be in dots
 		sz = sc.WinSizeFromPix(opts.Size)
 	}
-	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), nil, nil)
+	var mon *glfw.Monitor
+	if fullscreen && sc.ScreenNumber < len(TheApp.Monitors) {
+		mon = TheApp.Monitors[sc.ScreenNumber]
+	}
+	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), mon, nil)
 	if err != nil {
 		return win, err
 	}
 
-	if !fullscreen {
-		win.SetPos(opts.Pos.X, opts.Pos.Y)
+	if !opts.Flags.HasFlag(system.Fullscreen) {
+		scpos := sc.Geometry.Min.Add(opts.Pos)
+		win.SetPos(scpos.X, scpos.Y)
 	}
 	if opts.Icon != nil {
 		win.SetIcon(opts.Icon)
@@ -174,6 +183,7 @@ func (w *Window) GetScreenOverlap() *system.Screen {
 }
 
 func (w *Window) Position() image.Point {
+	sc := w.Screen()
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	if w.Glw == nil {
@@ -181,6 +191,7 @@ func (w *Window) Position() image.Point {
 	}
 	var ps image.Point
 	ps.X, ps.Y = w.Glw.GetPos()
+	ps = ps.Sub(sc.Geometry.Min) // position is always screen relative
 	w.Pos = ps
 	return ps
 }

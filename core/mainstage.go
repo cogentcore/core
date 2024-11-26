@@ -46,6 +46,16 @@ func (bd *Body) RunMainWindow() {
 	Wait()
 }
 
+// RunMain runs a MainWindow, starts the app's main loop,
+// and waits for all windows to close. It should typically be
+// called once by every app at the end of their main function.
+// It can not be called more than once for one app. For secondary
+// windows, see [Body.RunWindow].
+func (st *Stage) RunMain() {
+	st.Run()
+	Wait()
+}
+
 // ExternalParent is a parent widget external to this program.
 // If it is set, calls to [Body.RunWindow] before [Wait] and
 // calls to [Body.RunMainWindow] will add the [Body] to this
@@ -356,18 +366,28 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		Icon:      appIconImages(),
 		Size:      st.Scene.SceneGeom.Size,
 		StdPixels: false,
+		Screen:    st.Screen,
 	}
-	wgp := theWindowGeometrySaver.pref(title, nil)
-	if TheApp.Platform() != system.Offscreen && wgp != nil {
+	if !st.Resizable {
+		opts.Flags.SetFlag(true, system.FixedSize)
+	}
+	screenName := ""
+	if st.Screen > 0 {
+		screenName = TheApp.Screen(st.Screen).Name
+	}
+	wgp, screen := theWindowGeometrySaver.get(title, screenName)
+	if wgp != nil {
 		theWindowGeometrySaver.settingStart()
+		opts.Screen = screen.ScreenNumber
 		opts.Size = wgp.size()
 		opts.Pos = wgp.pos()
+		// fmt.Println("using saved:", screen.Name, wgp.size(), wgp.pos())
 		opts.StdPixels = false
 		if w := AllRenderWindows.FindName(name); w != nil { // offset from existing
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}
-		if wgp.Fullscreen {
+		if wgp.FS {
 			opts.SetFullscreen()
 		}
 	}

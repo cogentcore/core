@@ -45,7 +45,7 @@ var (
 type App interface {
 
 	// Platform returns the platform type, which can be used
-	// for conditionalizing behavior
+	// for conditionalizing behavior.
 	Platform() Platforms
 
 	// SystemPlatform returns the platform type of the underlying
@@ -58,18 +58,18 @@ type App interface {
 	// that is not otherwise given. It is used in crash logs.
 	SystemInfo() string
 
-	// Name is the overall name of the application -- used for specifying an
-	// application-specific preferences directory, etc
+	// Name is the overall name of the application. Used for specifying an
+	// application-specific preferences directory, etc.
 	Name() string
 
-	// SetName sets the application name -- defaults to Cogent Core if not otherwise set
+	// SetName sets the application name. Defaults to Cogent Core if not otherwise set.
 	SetName(name string)
 
-	// GetScreens gets the current list of screens
+	// GetScreens gets the current list of screens.
 	GetScreens()
 
 	// NScreens returns the number of different logical and/or physical
-	// screens managed under this overall screen hardware
+	// screens managed under this overall screen hardware.
 	NScreens() int
 
 	// Screen returns screen for given screen number, or nil if not a

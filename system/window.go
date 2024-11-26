@@ -226,6 +226,9 @@ const (
 	// Fullscreen indicates a window that occupies the entire screen.
 	Fullscreen
 
+	// FixedSize indicates a window that cannot be resized.
+	FixedSize
+
 	// Minimized indicates a window reduced to an icon, or otherwise no longer
 	// visible or active.  Otherwise, the window should be assumed to be
 	// visible.
@@ -248,11 +251,14 @@ type NewWindowOptions struct {
 	StdPixels bool
 
 	// Pos specifies the position of the window, if non-zero -- always in
-	// device-specific raw pixels
+	// device-specific raw pixels, and relative to the specified screen.
 	Pos image.Point
 
 	// Title specifies the window title.
 	Title string
+
+	// Screen is the screen number to open on. 0 default = primary monitor.
+	Screen int
 
 	// Icon specifies the window icon (see [Window.SetIcon] for more info).
 	Icon []image.Image
@@ -277,18 +283,9 @@ func (o *NewWindowOptions) SetFullscreen() {
 	o.Flags.SetFlag(true, Fullscreen)
 }
 
-func WindowFlagsToBool(flags WindowFlags) (dialog, modal, tool, fullscreen bool) {
-	dialog = flags.HasFlag(Dialog)
-	modal = flags.HasFlag(Modal)
-	tool = flags.HasFlag(Tool)
-	fullscreen = flags.HasFlag(Fullscreen)
-	return
-}
-
 // GetTitle returns a sanitized form of o.Title. In particular, its length will
 // not exceed 4096, and it may be further truncated so that it is valid UTF-8
 // and will not contain the NUL byte.
-//
 // o may be nil, in which case "" is returned.
 func (o *NewWindowOptions) GetTitle() string {
 	if o == nil {
@@ -313,9 +310,9 @@ func sanitizeUTF8(s string, n int) string {
 }
 
 // Fixup fills in defaults and updates everything based on current screen and
-// window context Specific hardware can fine-tune this as well, in driver code
+// window context. Specific hardware can fine-tune this as well, in driver code.
 func (o *NewWindowOptions) Fixup() {
-	sc := TheApp.Screen(0)
+	sc := TheApp.Screen(o.Screen)
 	scsz := sc.Geometry.Size() // window coords size
 
 	if o.Size.X <= 0 {
@@ -330,7 +327,8 @@ func (o *NewWindowOptions) Fixup() {
 	o.Size, o.Pos = sc.ConstrainWinGeom(o.Size, o.Pos)
 	if o.Pos.X == 0 && o.Pos.Y == 0 {
 		wsz := sc.WinSizeFromPix(o.Size)
-		dialog, modal, _, _ := WindowFlagsToBool(o.Flags)
+		dialog := o.Flags.HasFlag(Dialog)
+		modal := o.Flags.HasFlag(Modal)
 		nw := TheApp.NWindows()
 		if nw > 0 {
 			lastw := TheApp.Window(nw - 1)

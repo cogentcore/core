@@ -97,6 +97,11 @@ type Stage struct { //types:add -setters
 	// [Stage.DisplayTitle] is true.
 	Title string
 
+	// Screen specifies the screen number to open a NewWindow on non-mobile
+	// platforms. 0 is the default window.
+	// Use TheApp.ScreenByName("name").ScreenNumber to get the number by name.
+	Screen int
+
 	// Modal, if true, blocks input to all other stages.
 	Modal bool `set:"-"`
 
@@ -124,6 +129,10 @@ type Stage struct { //types:add -setters
 	// for sizing new windows and dialogs. Otherwise, only the content size is used.
 	// The saved window position and size takes precedence on multi-window platforms.
 	UseMinSize bool
+
+	// Resizable specifies whether a NewWindow on non-mobile platforms can
+	// be resized by the end user. This defaults to true.
+	Resizable bool
 
 	// Timeout, if greater than 0, results in a popup stages disappearing
 	// after this timeout duration.
@@ -231,6 +240,7 @@ func (st *Stage) setPopups(mainSt *Stage) *Stage {
 func (st *Stage) setType(typ StageTypes) *Stage {
 	st.Type = typ
 	st.UseMinSize = true
+	st.Resizable = true
 	switch st.Type {
 	case WindowStage:
 		if !TheApp.Platform().IsMobile() {
