@@ -56,7 +56,7 @@ func (w *WindowSingle[A]) WinSize() image.Point {
 	return w.Screen().PixSize
 }
 
-func (w *WindowSingle[A]) Position() image.Point {
+func (w *WindowSingle[A]) Position(screen *system.Screen) image.Point {
 	// w.Mu.Lock()
 	// defer w.Mu.Unlock()
 	return image.Point{}
@@ -94,11 +94,11 @@ func (w *WindowSingle[A]) SetSize(sz image.Point) {
 	w.Screen().PixSize = sz
 }
 
-func (w *WindowSingle[A]) SetPos(pos image.Point) {
+func (w *WindowSingle[A]) SetPos(pos image.Point, screen *system.Screen) {
 	// no-op
 }
 
-func (w *WindowSingle[A]) SetGeom(pos image.Point, sz image.Point) {
+func (w *WindowSingle[A]) SetGeom(pos image.Point, sz image.Point, screen *system.Screen) {
 	if w.This.IsClosed() {
 		return
 	}

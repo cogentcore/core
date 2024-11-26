@@ -107,8 +107,8 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 	}
 
 	if !opts.Flags.HasFlag(system.Fullscreen) {
-		scpos := sc.Geometry.Min.Add(opts.Pos)
-		win.SetPos(scpos.X, scpos.Y)
+		pos := opts.Pos.Add(sc.Geometry.Min) // screen relative
+		win.SetPos(pos.X, pos.Y)
 	}
 	if opts.Icon != nil {
 		win.SetIcon(opts.Icon)
@@ -182,8 +182,7 @@ func (w *Window) GetScreenOverlap() *system.Screen {
 	return csc
 }
 
-func (w *Window) Position() image.Point {
-	sc := w.Screen()
+func (w *Window) Position(screen *system.Screen) image.Point {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	if w.Glw == nil {
@@ -191,8 +190,10 @@ func (w *Window) Position() image.Point {
 	}
 	var ps image.Point
 	ps.X, ps.Y = w.Glw.GetPos()
-	ps = ps.Sub(sc.Geometry.Min) // position is always screen relative
 	w.Pos = ps
+	if screen != nil {
+		ps = ps.Sub(screen.Geometry.Min)
+	}
 	return ps
 }
 
@@ -240,9 +241,12 @@ func (w *Window) SetSize(sz image.Point) {
 	w.SetWinSize(sz)
 }
 
-func (w *Window) SetPos(pos image.Point) {
+func (w *Window) SetPos(pos image.Point, screen *system.Screen) {
 	if w.IsClosed() || w.Is(system.Fullscreen) {
 		return
+	}
+	if screen != nil {
+		pos = pos.Add(screen.Geometry.Min)
 	}
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
@@ -253,9 +257,12 @@ func (w *Window) SetPos(pos image.Point) {
 	})
 }
 
-func (w *Window) SetGeom(pos image.Point, sz image.Point) {
+func (w *Window) SetGeom(pos image.Point, sz image.Point, screen *system.Screen) {
 	if w.IsClosed() || w.Is(system.Fullscreen) {
 		return
+	}
+	if screen != nil {
+		pos = pos.Add(screen.Geometry.Min)
 	}
 	sc := w.Screen()
 	sz = sc.WinSizeFromPix(sz)
@@ -380,6 +387,9 @@ func (w *Window) Moved(gw *glfw.Window, x, y int) {
 
 func (w *Window) WinResized(gw *glfw.Window, width, height int) {
 	// w.app.GetScreens()  // this can crash here on win disconnect..
+	if MonitorDebug {
+		log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.PixSize)
+	}
 	w.UpdateFullscreen()
 	w.UpdateGeom()
 }
@@ -419,6 +429,9 @@ func (w *Window) UpdateGeom() {
 func (w *Window) FbResized(gw *glfw.Window, width, height int) {
 	fbsz := image.Point{width, height}
 	if w.PixSize != fbsz {
+		if MonitorDebug {
+			log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, w.PixSize)
+		}
 		w.UpdateGeom()
 	}
 }
