@@ -22,7 +22,8 @@ type TestingT interface {
 // UpdateTestImages indicates whether to update currently saved test
 // images in [AssertImage] instead of comparing against them.
 // It is automatically set if the build tag "update" is specified,
-// and it should typically only be set through that. It should only be
+// or if the environment variable "CORE_UPDATE_TESTS" is set to "true".
+// It should typically only be set through those methods. It should only be
 // set when behavior has been updated that causes test images to change,
 // and it should only be set once and then turned back off.
 var UpdateTestImages = updateTestImages
