@@ -271,7 +271,7 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 
 	cfg := screenConfig()
 	winName := ws.windowName(win.title)
-	wgr := windowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, Full: win.SystemWindow.Is(system.Fullscreen)}
+	wgr := windowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, Max: win.SystemWindow.Is(system.Maximized), Full: win.SystemWindow.Is(system.Fullscreen)}
 	wgr.Pos = pos
 	wgr.Size = wsz
 
