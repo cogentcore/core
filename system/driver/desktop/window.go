@@ -107,6 +107,10 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 	if err != nil {
 		return win, err
 	}
+	if !fullscreen {
+		pos := opts.Pos.Add(sc.Geometry.Min) // screen relative
+		win.SetPos(pos.X, pos.Y)
+	}
 	if opts.Icon != nil {
 		win.SetIcon(opts.Icon)
 	}
@@ -304,7 +308,7 @@ func (w *Window) ConstrainFrame() image.Rectangle {
 		sz.Y = csz.Y
 	}
 	if change {
-		fmt.Println("scSize:", scSize, "pos:", pos, "cpos:", cpos, "sz:", sz, "csz:", csz, "frame:", w.FrameSize)
+		fmt.Println("scSize:", scSize, "pos:", w.Pos, "cpos:", cpos, "sz:", w.WnSize, "csz:", csz, "frame:", w.FrameSize)
 		w.SetGeom(pos, sz, sc)
 	}
 	return w.FrameSize
