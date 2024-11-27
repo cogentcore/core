@@ -358,13 +358,18 @@ func (w *Window) Minimize() {
 }
 
 func (w *Window) UpdateFullscreen(fullscreen bool) {
-	if !fullscreen {
-		w.Glw.SetMonitor(nil, w.Pos.X, w.Pos.Y, w.WnSize.X, w.WnSize.Y, glfw.DontCare)
+	if w.IsClosed() {
 		return
 	}
-	sc := w.Screen()
-	mon := w.App.Monitors[sc.ScreenNumber]
-	w.Glw.SetMonitor(mon, 0, 0, sc.Geometry.Dx(), sc.Geometry.Dy(), glfw.DontCare)
+	w.App.RunOnMain(func() {
+		if !fullscreen {
+			w.Glw.SetMonitor(nil, w.Pos.X, w.Pos.Y, w.WnSize.X, w.WnSize.Y, glfw.DontCare)
+			return
+		}
+		sc := w.Screen()
+		mon := w.App.Monitors[sc.ScreenNumber]
+		w.Glw.SetMonitor(mon, 0, 0, sc.Geometry.Dx(), sc.Geometry.Dy(), glfw.DontCare)
+	})
 }
 
 func (w *Window) Close() {
