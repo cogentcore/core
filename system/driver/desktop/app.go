@@ -154,6 +154,9 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	w.Show()
 	a.RunOnMain(func() {
 		w.UpdateGeom()
+		if !opts.Flags.HasFlag(system.Fullscreen) {
+			w.ConstrainFrame()
+		}
 	})
 
 	go w.WinLoop() // start window's own dedicated publish update loop

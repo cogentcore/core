@@ -10,6 +10,7 @@
 package desktop
 
 import (
+	"fmt"
 	"image"
 	"log"
 
@@ -105,11 +106,6 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), mon, nil)
 	if err != nil {
 		return win, err
-	}
-
-	if !fullscreen {
-		pos := opts.Pos.Add(sc.Geometry.Min) // screen relative
-		win.SetPos(pos.X, pos.Y)
 	}
 	if opts.Icon != nil {
 		win.SetIcon(opts.Icon)
@@ -275,6 +271,43 @@ func (w *Window) SetGeom(pos image.Point, sz image.Point, screen *system.Screen)
 		w.Glw.SetSize(sz.X, sz.Y)
 		w.Glw.SetPos(pos.X, pos.Y)
 	})
+}
+
+func (w *Window) ConstrainFrame() image.Rectangle {
+	l, t, r, b := w.Glw.GetFrameSize()
+	w.FrameSize.Min.X, w.FrameSize.Min.Y = l, t
+	w.FrameSize.Max.X, w.FrameSize.Max.Y = r, b
+	sc := w.Screen()
+	scSize := sc.Geometry.Size()
+	sz := w.WnSize.Add(w.FrameSize.Min).Add(w.FrameSize.Max)
+	pos := w.Pos.Sub(w.FrameSize.Min)
+	csz, cpos := system.ConstrainWinGeom(sz, pos, scSize)
+	cpos = cpos.Add(w.FrameSize.Min)
+	csz = csz.Sub(w.FrameSize.Min).Sub(w.FrameSize.Max)
+	change := false
+	pos = w.Pos
+	if cpos.X > pos.X {
+		change = true
+		pos.X = cpos.X
+	}
+	if cpos.Y > pos.Y {
+		change = true
+		pos.Y = cpos.Y
+	}
+	sz = w.WnSize
+	if csz.X < sz.X {
+		change = true
+		sz.X = csz.X
+	}
+	if csz.Y < sz.Y {
+		change = true
+		sz.Y = csz.Y
+	}
+	if change {
+		fmt.Println("scSize:", scSize, "pos:", pos, "cpos:", cpos, "sz:", sz, "csz:", csz, "frame:", w.FrameSize)
+		w.SetGeom(pos, sz, sc)
+	}
+	return w.FrameSize
 }
 
 func (w *Window) Show() {

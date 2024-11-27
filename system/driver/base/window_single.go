@@ -105,6 +105,11 @@ func (w *WindowSingle[A]) SetGeom(pos image.Point, sz image.Point, screen *syste
 	w.Screen().PixSize = sz
 }
 
+func (w *WindowSingle[A]) ConstrainFrame() image.Rectangle {
+	// no-op
+	return image.Rectangle{}
+}
+
 func (w *WindowSingle[A]) Raise() {
 	// no-op
 }
