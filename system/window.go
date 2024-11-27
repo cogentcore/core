@@ -111,8 +111,8 @@ type Window interface {
 	Minimize()
 
 	// UpdateFullscreen requests that the window be updated to either
-	// fullscreen mode (true) or windowed mode (false). This is implemented
-	// on desktop and web.
+	// fullscreen mode (true) or window mode (false). This is implemented
+	// on desktop and web platforms.
 	UpdateFullscreen(fullscreen bool)
 
 	// PhysicalDPI is the physical dots per inch of the window, for generating
