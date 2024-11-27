@@ -104,6 +104,11 @@ type Window interface {
 	// visible or active -- rendering should not occur for minimized windows.
 	Minimize()
 
+	// UpdateFullscreen requests that the window be updated to either
+	// fullscreen mode (true) or windowed mode (false). This is implemented
+	// on desktop and web.
+	UpdateFullscreen(fullscreen bool)
+
 	// PhysicalDPI is the physical dots per inch of the window, for generating
 	// true-to-physical-size output, for example -- see the gi/units package for
 	// translating into various other units.
