@@ -154,10 +154,11 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	w.Show()
 	a.RunOnMain(func() {
 		w.UpdateGeom()
-		if w.Pos.X == 0 && w.Pos.Y == 0 {
+		zp := image.Point{}
+		if w.Pos == zp && opts.Pos != zp {
 			w.Pos = opts.Pos
 		}
-		if w.WnSize.X == 0 && w.WnSize.Y == 0 {
+		if w.WnSize == zp && opts.Size != zp {
 			w.WnSize = opts.Size
 		}
 		w.ConstrainFrame()
