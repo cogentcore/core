@@ -100,6 +100,7 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 	var mon *glfw.Monitor
 	if fullscreen && sc.ScreenNumber < len(TheApp.Monitors) {
 		mon = TheApp.Monitors[sc.ScreenNumber]
+		sz = sc.Geometry.Size() // use screen size for fullscreen video mode resolution
 	}
 	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), mon, nil)
 	if err != nil {
@@ -317,6 +318,16 @@ func (w *Window) Minimize() {
 		}
 		w.Glw.Iconify()
 	})
+}
+
+func (w *Window) UpdateFullscreen(fullscreen bool) {
+	if !fullscreen {
+		w.Glw.SetMonitor(nil, w.Pos.X, w.Pos.Y, w.WnSize.X, w.WnSize.Y, glfw.DontCare)
+		return
+	}
+	sc := w.Screen()
+	mon := w.App.Monitors[sc.ScreenNumber]
+	w.Glw.SetMonitor(mon, 0, 0, sc.Geometry.Dx(), sc.Geometry.Dy(), glfw.DontCare)
 }
 
 func (w *Window) Close() {
