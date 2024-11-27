@@ -42,7 +42,7 @@ func main() {
 	valueBinding(ts)
 	makeStyles(ts)
 
-	b.NewWindow().SetScreen(1).RunMain()
+	b.RunMainWindow()
 }
 
 func home(ts *core.Tabs) {

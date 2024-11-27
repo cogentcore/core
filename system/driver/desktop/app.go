@@ -154,6 +154,14 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	w.Show()
 	a.RunOnMain(func() {
 		w.UpdateGeom()
+		zp := image.Point{}
+		if w.Pos == zp && opts.Pos != zp {
+			w.Pos = opts.Pos
+		}
+		if w.WnSize == zp && opts.Size != zp {
+			w.WnSize = opts.Size
+		}
+		w.ConstrainFrame()
 	})
 
 	go w.WinLoop() // start window's own dedicated publish update loop

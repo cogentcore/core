@@ -37,6 +37,8 @@ func newMainStage(typ StageTypes, sc *Scene) *Stage {
 // to close. It should typically be called once by every app at
 // the end of their main function. It can not be called more than
 // once for one app. For secondary windows, see [Body.RunWindow].
+// If you need to configure the [Stage] further, use [Body.NewWindow]
+// and then [Stage.RunMain] on the resulting [Stage].
 func (bd *Body) RunMainWindow() {
 	if ExternalParent != nil {
 		bd.handleExternalParent()
@@ -46,11 +48,11 @@ func (bd *Body) RunMainWindow() {
 	Wait()
 }
 
-// RunMain runs a MainWindow, starts the app's main loop,
-// and waits for all windows to close. It should typically be
-// called once by every app at the end of their main function.
-// It can not be called more than once for one app. For secondary
-// windows, see [Body.RunWindow].
+// RunMain runs the stage, starts the app's main loop,
+// and waits for all windows to close. It can be called instead
+// of [Body.RunMainWindow] if extra configuration steps are necessary
+// on the [Stage]. It can not be called more than once for one app.
+// For secondary stages, see [Stage.Run].
 func (st *Stage) RunMain() {
 	st.Run()
 	Wait()
@@ -98,8 +100,9 @@ func (bd *Body) handleExternalParent() {
 
 // NewWindow returns a new [WindowStage] that is placed in
 // a new system window on multi-window platforms.
-// You must call [Stage.Run] to run the window; see [Body.RunWindow]
-// for a version that automatically runs it.
+// You must call [Stage.Run] or [Stage.RunMain] to run the window;
+// see [Body.RunWindow] and [Body.RunMainWindow] for versions that
+// automatically do so.
 func (bd *Body) NewWindow() *Stage {
 	ms := newMainStage(WindowStage, bd.Scene)
 	ms.SetNewWindow(true)
@@ -141,27 +144,29 @@ func (st *Stage) addSceneParts() {
 		sc.SceneGeom.Pos = np
 		sc.NeedsRender()
 	})
-	rsz := NewHandle(parts)
-	rsz.Styler(func(s *styles.Style) {
-		s.Direction = styles.Column
-		s.FillMargin = false
-	})
-	rsz.FinalStyler(func(s *styles.Style) {
-		s.Cursor = cursors.ResizeNWSE
-		s.Min.Set(units.Em(1))
-	})
-	rsz.SetName("resize")
-	rsz.OnChange(func(e events.Event) {
-		e.SetHandled()
-		pd := e.PrevDelta()
-		np := sc.SceneGeom.Size.Add(pd)
-		minsz := 100
-		np.X = max(np.X, minsz)
-		np.Y = max(np.Y, minsz)
-		ng := sc.SceneGeom
-		ng.Size = np
-		sc.resize(ng)
-	})
+	if st.Resizable {
+		rsz := NewHandle(parts)
+		rsz.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.FillMargin = false
+		})
+		rsz.FinalStyler(func(s *styles.Style) {
+			s.Cursor = cursors.ResizeNWSE
+			s.Min.Set(units.Em(1))
+		})
+		rsz.SetName("resize")
+		rsz.OnChange(func(e events.Event) {
+			e.SetHandled()
+			pd := e.PrevDelta()
+			np := sc.SceneGeom.Size.Add(pd)
+			minsz := 100
+			np.X = max(np.X, minsz)
+			np.Y = max(np.Y, minsz)
+			ng := sc.SceneGeom
+			ng.Size = np
+			sc.resize(ng)
+		})
+	}
 }
 
 // firstWindowStages creates a temporary [stages] for the first window
@@ -368,9 +373,9 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		StdPixels: false,
 		Screen:    st.Screen,
 	}
-	if !st.Resizable {
-		opts.Flags.SetFlag(true, system.FixedSize)
-	}
+	opts.Flags.SetFlag(!st.Resizable, system.FixedSize)
+	opts.Flags.SetFlag(st.Maximized, system.Maximized)
+	opts.Flags.SetFlag(st.Fullscreen, system.Fullscreen)
 	screenName := ""
 	if st.Screen > 0 {
 		screenName = TheApp.Screen(st.Screen).Name
@@ -379,17 +384,15 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	if wgp != nil {
 		theWindowGeometrySaver.settingStart()
 		opts.Screen = screen.ScreenNumber
-		opts.Size = wgp.size()
-		opts.Pos = wgp.pos()
-		// fmt.Println("using saved:", screen.Name, wgp.size(), wgp.pos())
+		opts.Size = wgp.Size
+		opts.Pos = wgp.Pos
 		opts.StdPixels = false
 		if w := AllRenderWindows.FindName(name); w != nil { // offset from existing
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}
-		if wgp.FS {
-			opts.SetFullscreen()
-		}
+		opts.Flags.SetFlag(wgp.Max, system.Maximized)
+		opts.Flags.SetFlag(wgp.Full, system.Fullscreen)
 	}
 	win := newRenderWindow(name, title, opts)
 	theWindowGeometrySaver.settingEnd()

@@ -10,6 +10,7 @@
 package desktop
 
 import (
+	"fmt"
 	"image"
 	"log"
 
@@ -81,8 +82,7 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 	// glfw.WindowHint(glfw.ScaleToMonitor, glfw.True)
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
 	// glfw.WindowHint(glfw.Samples, 0) // don't do multisampling for main window -- only in sub-render
-	fullscreen := opts.Flags.HasFlag(system.Fullscreen)
-	if fullscreen {
+	if opts.Flags.HasFlag(system.Maximized) {
 		glfw.WindowHint(glfw.Maximized, glfw.True)
 	}
 	if opts.Flags.HasFlag(system.Tool) {
@@ -97,16 +97,17 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 		// on macOS, the size we pass to glfw must be in dots
 		sz = sc.WinSizeFromPix(opts.Size)
 	}
+	fullscreen := opts.Flags.HasFlag(system.Fullscreen)
 	var mon *glfw.Monitor
 	if fullscreen && sc.ScreenNumber < len(TheApp.Monitors) {
 		mon = TheApp.Monitors[sc.ScreenNumber]
+		sz = sc.Geometry.Size() // use screen size for fullscreen video mode resolution
 	}
 	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), mon, nil)
 	if err != nil {
 		return win, err
 	}
-
-	if !opts.Flags.HasFlag(system.Fullscreen) {
+	if !fullscreen {
 		pos := opts.Pos.Add(sc.Geometry.Min) // screen relative
 		win.SetPos(pos.X, pos.Y)
 	}
@@ -276,6 +277,43 @@ func (w *Window) SetGeom(pos image.Point, sz image.Point, screen *system.Screen)
 	})
 }
 
+func (w *Window) ConstrainFrame() image.Rectangle {
+	l, t, r, b := w.Glw.GetFrameSize()
+	w.FrameSize.Min.X, w.FrameSize.Min.Y = l, t
+	w.FrameSize.Max.X, w.FrameSize.Max.Y = r, b
+	sc := w.Screen()
+	scSize := sc.Geometry.Size()
+	sz := w.WnSize.Add(w.FrameSize.Min).Add(w.FrameSize.Max)
+	pos := w.Pos.Sub(w.FrameSize.Min)
+	csz, cpos := system.ConstrainWinGeom(sz, pos, scSize)
+	cpos = cpos.Add(w.FrameSize.Min)
+	csz = csz.Sub(w.FrameSize.Min).Sub(w.FrameSize.Max)
+	change := false
+	pos = w.Pos
+	if cpos.X > pos.X {
+		change = true
+		pos.X = cpos.X
+	}
+	if cpos.Y > pos.Y {
+		change = true
+		pos.Y = cpos.Y
+	}
+	sz = w.WnSize
+	if csz.X < sz.X {
+		change = true
+		sz.X = csz.X
+	}
+	if csz.Y < sz.Y {
+		change = true
+		sz.Y = csz.Y
+	}
+	if change {
+		fmt.Println("scSize:", scSize, "pos:", w.Pos, "cpos:", cpos, "sz:", w.WnSize, "csz:", csz, "frame:", w.FrameSize)
+		w.SetGeom(pos, sz, sc)
+	}
+	return w.FrameSize
+}
+
 func (w *Window) Show() {
 	if w.IsClosed() {
 		return
@@ -317,6 +355,16 @@ func (w *Window) Minimize() {
 		}
 		w.Glw.Iconify()
 	})
+}
+
+func (w *Window) UpdateFullscreen(fullscreen bool) {
+	if !fullscreen {
+		w.Glw.SetMonitor(nil, w.Pos.X, w.Pos.Y, w.WnSize.X, w.WnSize.Y, glfw.DontCare)
+		return
+	}
+	sc := w.Screen()
+	mon := w.App.Monitors[sc.ScreenNumber]
+	w.Glw.SetMonitor(mon, 0, 0, sc.Geometry.Dx(), sc.Geometry.Dy(), glfw.DontCare)
 }
 
 func (w *Window) Close() {
@@ -381,7 +429,7 @@ func (w *Window) Moved(gw *glfw.Window, x, y int) {
 	w.Mu.Unlock()
 	// w.app.GetScreens() // this can crash here on win disconnect..
 	w.Screen() // gets parameters
-	w.UpdateFullscreen()
+	w.updateMaximized()
 	w.Event.Window(events.WinMove)
 }
 
@@ -390,12 +438,12 @@ func (w *Window) WinResized(gw *glfw.Window, width, height int) {
 	if MonitorDebug {
 		log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.PixSize)
 	}
-	w.UpdateFullscreen()
+	w.updateMaximized()
 	w.UpdateGeom()
 }
 
-func (w *Window) UpdateFullscreen() {
-	w.Flgs.SetFlag(w.Glw.GetAttrib(glfw.Maximized) == glfw.True, system.Fullscreen)
+func (w *Window) updateMaximized() {
+	w.Flgs.SetFlag(w.Glw.GetAttrib(glfw.Maximized) == glfw.True, system.Maximized)
 }
 
 func (w *Window) UpdateGeom() {

@@ -97,9 +97,9 @@ type Stage struct { //types:add -setters
 	// [Stage.DisplayTitle] is true.
 	Title string
 
-	// Screen specifies the screen number to open a NewWindow on non-mobile
-	// platforms. 0 is the default window.
-	// Use TheApp.ScreenByName("name").ScreenNumber to get the number by name.
+	// Screen specifies the screen number on which a new window is opened
+	// by default on desktop platforms. 0 is the default primary screen.
+	// Use [TheApp].ScreenByName("name").ScreenNumber to get the number by name.
 	Screen int
 
 	// Modal, if true, blocks input to all other stages.
@@ -125,13 +125,29 @@ type Stage struct { //types:add -setters
 	// [WindowStage]s take up the entire window they are created in.
 	FullWindow bool
 
+	// Maximized is whether to make a window take up the entire screen on desktop
+	// platforms by default. It is different from [Stage.Fullscreen] in that
+	// fullscreen makes the window truly fullscreen without decorations
+	// (such as for a video player), whereas maximized keeps decorations and just
+	// makes it fill the available space.
+	Maximized bool
+
+	// Fullscreen is whether to make a window fullscreen on desktop platforms
+	// by default. It is different from [Stage.Maximized] in that fullscreen makes
+	// the window truly fullscreen without decorations (such as for a video player),
+	// whereas maximized keeps decorations and just makes it fill the available space.
+	// Not to be confused with [Stage.FullWindow], which is for stages contained within
+	// another system window.
+	Fullscreen bool
+
 	// UseMinSize uses a minimum size as a function of the total available size
 	// for sizing new windows and dialogs. Otherwise, only the content size is used.
 	// The saved window position and size takes precedence on multi-window platforms.
 	UseMinSize bool
 
-	// Resizable specifies whether a NewWindow on non-mobile platforms can
-	// be resized by the end user. This defaults to true.
+	// Resizable specifies whether a window on desktop platforms can
+	// be resized by the user, and whether a non-full same-window dialog can
+	// be resized by the user on any platform. It defaults to true.
 	Resizable bool
 
 	// Timeout, if greater than 0, results in a popup stages disappearing

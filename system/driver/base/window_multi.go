@@ -39,6 +39,9 @@ type WindowMulti[A system.App, D system.Drawer] struct {
 	// PixSize is the pixel size of the window in raw display dots
 	PixSize image.Point `label:"Pixel size"`
 
+	// FrameSize of the window frame: Min = left, top; Max = right, bottom.
+	FrameSize image.Rectangle
+
 	// DevicePixelRatio is a factor that scales the screen's
 	// "natural" pixel coordinates into actual device pixels.
 	// On OS-X, it is backingScaleFactor = 2.0 on "retina"
@@ -138,6 +141,11 @@ func (w *WindowMulti[A, D]) SetGeom(pos image.Point, sz image.Point, screen *sys
 	sz = sc.WinSizeFromPix(sz)
 	w.SetWinSize(sz)
 	w.Pos = pos
+}
+
+func (w *WindowMulti[A, D]) ConstrainFrame() image.Rectangle {
+	// no-op
+	return image.Rectangle{}
 }
 
 func (w *WindowMulti[A, D]) IsVisible() bool {

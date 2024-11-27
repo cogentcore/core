@@ -176,11 +176,11 @@ func (w *renderWindow) setName(name string) {
 		wgp, sc := theWindowGeometrySaver.get(w.title, "")
 		if wgp != nil {
 			theWindowGeometrySaver.settingStart()
-			if w.SystemWindow.Size() != wgp.size() || w.SystemWindow.Position(sc) != wgp.pos() {
+			if w.SystemWindow.Size() != wgp.Size || w.SystemWindow.Position(sc) != wgp.Pos {
 				if DebugSettings.WinGeomTrace {
-					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.pos(), wgp.size())
+					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.Pos, wgp.Size)
 				}
-				w.SystemWindow.SetGeom(wgp.pos(), wgp.size(), sc)
+				w.SystemWindow.SetGeom(wgp.Pos, wgp.Size, sc)
 				system.TheApp.SendEmptyEvent()
 			}
 			theWindowGeometrySaver.settingEnd()
@@ -439,7 +439,6 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		w.mains.runDeferred() // note: must be outside of locks in renderWindow
 
 	case events.WindowResize:
-		// fmt.Println("resized")
 		e.SetHandled()
 		w.resized()
 
@@ -497,12 +496,10 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			w.gotFocus = false
 			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
-			// if DebugSettings.WinEventTrace {
-			fmt.Println("Win: ScreenUpdate", w.name, screenConfig())
-			// }
-			// w.resized()
+			if DebugSettings.WinEventTrace {
+				fmt.Println("Win: ScreenUpdate", w.name, screenConfig())
+			}
 			if !TheApp.Platform().IsMobile() { // native desktop
-				// TheWindowGeometryaver.AbortSave() // anything just prior to this is sus
 				if TheApp.NScreens() > 0 {
 					AppearanceSettings.Apply()
 					UpdateAll()

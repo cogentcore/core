@@ -95,6 +95,12 @@ type Window interface {
 	// See [Window.SetPos] for information on the optional screen argument.
 	SetGeom(pos image.Point, sz image.Point, screen *Screen)
 
+	// ConstrainFrame ensures that the window frame is entirely within the
+	// window's screen, returning the size of the frame, where the Rectangle
+	// Min has the left and top size of the frame, and Max has right and bottom.
+	// This will result in move and / or size events as needed.
+	ConstrainFrame() image.Rectangle
+
 	// Raise requests that the window be at the top of the stack of windows,
 	// and receive focus.  If it is iconified, it will be de-iconified.  This
 	// is the only supported mechanism for de-iconifying.
@@ -103,6 +109,11 @@ type Window interface {
 	// Minimize requests that the window be iconified, making it no longer
 	// visible or active -- rendering should not occur for minimized windows.
 	Minimize()
+
+	// UpdateFullscreen requests that the window be updated to either
+	// fullscreen mode (true) or windowed mode (false). This is implemented
+	// on desktop and web.
+	UpdateFullscreen(fullscreen bool)
 
 	// PhysicalDPI is the physical dots per inch of the window, for generating
 	// true-to-physical-size output, for example -- see the gi/units package for
@@ -230,7 +241,12 @@ const (
 	// window decoration.
 	Tool
 
-	// Fullscreen indicates a window that occupies the entire screen.
+	// Maximized indicates a window that occupies the entire screen, but
+	// still has window decorations.
+	Maximized
+
+	// Fullscreen indicates a fullscreen window attached to a monitor.
+	// This results in no window decorations.
 	Fullscreen
 
 	// FixedSize indicates a window that cannot be resized.
@@ -272,22 +288,6 @@ type NewWindowOptions struct {
 
 	// Flags can be set using WindowFlags to request different types of windows
 	Flags WindowFlags
-}
-
-func (o *NewWindowOptions) SetDialog() {
-	o.Flags.SetFlag(true, Dialog)
-}
-
-func (o *NewWindowOptions) SetModal() {
-	o.Flags.SetFlag(true, Modal)
-}
-
-func (o *NewWindowOptions) SetTool() {
-	o.Flags.SetFlag(true, Tool)
-}
-
-func (o *NewWindowOptions) SetFullscreen() {
-	o.Flags.SetFlag(true, Fullscreen)
 }
 
 // GetTitle returns a sanitized form of o.Title. In particular, its length will

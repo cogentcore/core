@@ -92,16 +92,16 @@ func (i *ScreenOrientation) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "ScreenOrientation")
 }
 
-var _WindowFlagsValues = []WindowFlags{0, 1, 2, 3, 4, 5}
+var _WindowFlagsValues = []WindowFlags{0, 1, 2, 3, 4, 5, 6, 7}
 
 // WindowFlagsN is the highest valid value for type WindowFlags, plus one.
-const WindowFlagsN WindowFlags = 6
+const WindowFlagsN WindowFlags = 8
 
-var _WindowFlagsValueMap = map[string]WindowFlags{`Dialog`: 0, `Modal`: 1, `Tool`: 2, `Fullscreen`: 3, `Minimized`: 4, `Focused`: 5}
+var _WindowFlagsValueMap = map[string]WindowFlags{`Dialog`: 0, `Modal`: 1, `Tool`: 2, `Maximized`: 3, `Fullscreen`: 4, `FixedSize`: 5, `Minimized`: 6, `Focused`: 7}
 
-var _WindowFlagsDescMap = map[WindowFlags]string{0: `Dialog indicates that this is a temporary, pop-up window.`, 1: `Modal indicates that this dialog window blocks events going to other windows until it is closed.`, 2: `Tool indicates that this is a floating tool window that has minimized window decoration.`, 3: `Fullscreen indicates a window that occupies the entire screen.`, 4: `Minimized indicates a window reduced to an icon, or otherwise no longer visible or active. Otherwise, the window should be assumed to be visible.`, 5: `Focused indicates that the window has the focus.`}
+var _WindowFlagsDescMap = map[WindowFlags]string{0: `Dialog indicates that this is a temporary, pop-up window.`, 1: `Modal indicates that this dialog window blocks events going to other windows until it is closed.`, 2: `Tool indicates that this is a floating tool window that has minimized window decoration.`, 3: `Maximized indicates a window that occupies the entire screen, but still has window decorations.`, 4: `Fullscreen indicates a fullscreen window attached to a monitor. This results in no window decorations.`, 5: `FixedSize indicates a window that cannot be resized.`, 6: `Minimized indicates a window reduced to an icon, or otherwise no longer visible or active. Otherwise, the window should be assumed to be visible.`, 7: `Focused indicates that the window has the focus.`}
 
-var _WindowFlagsMap = map[WindowFlags]string{0: `Dialog`, 1: `Modal`, 2: `Tool`, 3: `Fullscreen`, 4: `Minimized`, 5: `Focused`}
+var _WindowFlagsMap = map[WindowFlags]string{0: `Dialog`, 1: `Modal`, 2: `Tool`, 3: `Maximized`, 4: `Fullscreen`, 5: `FixedSize`, 6: `Minimized`, 7: `Focused`}
 
 // String returns the string representation of this WindowFlags value.
 func (i WindowFlags) String() string { return enums.BitFlagString(i, _WindowFlagsValues) }
