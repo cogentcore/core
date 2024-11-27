@@ -86,7 +86,7 @@ func (ws *windowGeometrySaver) init() {
 	if ws.geometries == nil {
 		ws.geometries = make(screenConfigGeometries)
 		ws.resetCache()
-		ws.filename = "window-geometry"
+		ws.filename = "window-geometry-0.3.6"
 		ws.lockSleep = 100 * time.Millisecond
 		ws.saveDelay = 1 * time.Second
 	}

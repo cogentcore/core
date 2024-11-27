@@ -99,7 +99,9 @@ type Window interface {
 	// window's screen, returning the size of the frame, where the Rectangle
 	// Min has the left and top size of the frame, and Max has right and bottom.
 	// This will result in move and / or size events as needed.
-	ConstrainFrame() image.Rectangle
+	// If topOnly is true, then only the top vertical axis is constrained, so that
+	// the window title bar does not go offscreen.
+	ConstrainFrame(topOnly bool) image.Rectangle
 
 	// Raise requests that the window be at the top of the stack of windows,
 	// and receive focus.  If it is iconified, it will be de-iconified.  This

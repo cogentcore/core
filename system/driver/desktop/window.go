@@ -10,7 +10,6 @@
 package desktop
 
 import (
-	"fmt"
 	"image"
 	"log"
 
@@ -277,7 +276,7 @@ func (w *Window) SetGeom(pos image.Point, sz image.Point, screen *system.Screen)
 	})
 }
 
-func (w *Window) ConstrainFrame() image.Rectangle {
+func (w *Window) ConstrainFrame(topOnly bool) image.Rectangle {
 	l, t, r, b := w.Glw.GetFrameSize()
 	w.FrameSize.Min.X, w.FrameSize.Min.Y = l, t
 	w.FrameSize.Max.X, w.FrameSize.Max.Y = r, b
@@ -290,7 +289,7 @@ func (w *Window) ConstrainFrame() image.Rectangle {
 	csz = csz.Sub(w.FrameSize.Min).Sub(w.FrameSize.Max)
 	change := false
 	pos = w.Pos
-	if cpos.X > pos.X {
+	if !topOnly && cpos.X > pos.X {
 		change = true
 		pos.X = cpos.X
 	}
@@ -299,16 +298,15 @@ func (w *Window) ConstrainFrame() image.Rectangle {
 		pos.Y = cpos.Y
 	}
 	sz = w.WnSize
-	if csz.X < sz.X {
+	if !topOnly && csz.X < sz.X {
 		change = true
 		sz.X = csz.X
 	}
-	if csz.Y < sz.Y {
+	if !topOnly && csz.Y < sz.Y {
 		change = true
 		sz.Y = csz.Y
 	}
 	if change {
-		fmt.Println("scSize:", scSize, "pos:", w.Pos, "cpos:", cpos, "sz:", w.WnSize, "csz:", csz, "frame:", w.FrameSize)
 		w.SetGeom(pos, sz, sc)
 	}
 	return w.FrameSize

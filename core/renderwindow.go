@@ -469,6 +469,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if DebugSettings.WinGeomTrace {
 				log.Printf("WindowGeometry: recording from Move\n")
 			}
+			w.SystemWindow.ConstrainFrame(true) // top only
 			theWindowGeometrySaver.record(w)
 		case events.WinFocus:
 			// if we are not already the last in AllRenderWins, we go there,

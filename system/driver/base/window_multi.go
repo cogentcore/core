@@ -143,7 +143,7 @@ func (w *WindowMulti[A, D]) SetGeom(pos image.Point, sz image.Point, screen *sys
 	w.Pos = pos
 }
 
-func (w *WindowMulti[A, D]) ConstrainFrame() image.Rectangle {
+func (w *WindowMulti[A, D]) ConstrainFrame(topOnly bool) image.Rectangle {
 	// no-op
 	return image.Rectangle{}
 }
