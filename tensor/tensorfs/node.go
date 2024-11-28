@@ -186,3 +186,31 @@ func DirFromTable(dir *Node, dt *table.Table) {
 	}
 	dir.DirTable = dt
 }
+
+// Float64 creates / returns a Node with given name as a [tensor.Float64]
+// for given shape sizes, in given directory [Node].
+// See [Values] function for more info.
+func (dir *Node) Float64(name string, sizes ...int) *tensor.Float64 {
+	return Value[float64](dir, name, sizes...).(*tensor.Float64)
+}
+
+// Float32 creates / returns a Node with given name as a [tensor.Float32]
+// for given shape sizes, in given directory [Node].
+// See [Values] function for more info.
+func (dir *Node) Float32(name string, sizes ...int) *tensor.Float32 {
+	return Value[float32](dir, name, sizes...).(*tensor.Float32)
+}
+
+// Int creates / returns a Node with given name as a [tensor.Int]
+// for given shape sizes, in given directory [Node].
+// See [Values] function for more info.
+func (dir *Node) Int(name string, sizes ...int) *tensor.Int {
+	return Value[int](dir, name, sizes...).(*tensor.Int)
+}
+
+// StringValue creates / returns a Node with given name as a [tensor.String]
+// for given shape sizes, in given directory [Node].
+// See [Values] function for more info.
+func (dir *Node) StringValue(name string, sizes ...int) *tensor.String {
+	return Value[string](dir, name, sizes...).(*tensor.String)
+}

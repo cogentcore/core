@@ -30,7 +30,11 @@ If the tensor was previously created, then it is returned, and otherwise it is c
 
 For efficiency, _there are no checks_ on the existing value relative to the arguments passed, so if you end up using the same name for two different things, that will cause problems that will hopefully become evident. If you want to ensure that the size is correct, you should use an explicit `tensor.SetShapeSizes` call, which is still quite efficient if the size is the same. You can also have an initial call to `Value` that has no size args, and then set the size later -- that works fine.
 
-All tensor value access is via standalone functions, not methods, with methods reserved for directory node functionality.
+There are also functions for high-frequency types, defined on the `Node`: `Float64`, `Float32`, `Int`, and `StringValue` (`String` is taken by `fmt.Stringer`, `StringValue` is used in `tensor`).
+
+```Go
+tsr := dir.Float64("filename", 5, 5)
+```
 
 There are also a few other variants of the `Value` functionality:
 * `Scalar` calls `Value` with a size of 1.
