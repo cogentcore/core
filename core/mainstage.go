@@ -392,7 +392,6 @@ func (st *Stage) newRenderWindow() *renderWindow {
 			opts.Pos.Y += 20
 		}
 		opts.Flags.SetFlag(wgp.Max, system.Maximized)
-		opts.Flags.SetFlag(wgp.Full, system.Fullscreen)
 	}
 	win := newRenderWindow(name, title, opts)
 	theWindowGeometrySaver.settingEnd()

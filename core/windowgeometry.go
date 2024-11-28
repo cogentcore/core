@@ -239,7 +239,7 @@ func (ws *windowGeometrySaver) settingEnd() {
 
 // record records current state of window as preference
 func (ws *windowGeometrySaver) record(win *renderWindow) {
-	if !ws.shouldSave() || !win.isVisible() {
+	if !ws.shouldSave() || !win.isVisible() || win.SystemWindow.Is(system.Fullscreen) {
 		return
 	}
 	win.SystemWindow.Lock()
@@ -271,7 +271,7 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 
 	cfg := screenConfig()
 	winName := ws.windowName(win.title)
-	wgr := windowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, Max: win.SystemWindow.Is(system.Maximized), Full: win.SystemWindow.Is(system.Fullscreen)}
+	wgr := windowGeometry{DPI: win.logicalDPI(), DPR: sc.DevicePixelRatio, Max: win.SystemWindow.Is(system.Maximized)}
 	wgr.Pos = pos
 	wgr.Size = wsz
 
@@ -469,7 +469,6 @@ type windowGeometry struct {
 	Size image.Point
 	Pos  image.Point
 	Max  bool // Maximized
-	Full bool // Fullscreen
 }
 
 // constrainGeom constrains geometry based on screen params

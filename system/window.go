@@ -15,6 +15,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 )
 
 // Window is a double-buffered OS-specific hardware window.
@@ -96,12 +97,11 @@ type Window interface {
 	SetGeom(pos image.Point, sz image.Point, screen *Screen)
 
 	// ConstrainFrame ensures that the window frame is entirely within the
-	// window's screen, returning the size of the frame, where the Rectangle
-	// Min has the left and top size of the frame, and Max has right and bottom.
+	// window's screen, returning the size of each side of the frame.
 	// This will result in move and / or size events as needed.
 	// If topOnly is true, then only the top vertical axis is constrained, so that
 	// the window title bar does not go offscreen.
-	ConstrainFrame(topOnly bool) image.Rectangle
+	ConstrainFrame(topOnly bool) styles.Sides[int]
 
 	// Raise requests that the window be at the top of the stack of windows,
 	// and receive focus.  If it is iconified, it will be de-iconified.  This

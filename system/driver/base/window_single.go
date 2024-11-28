@@ -14,6 +14,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 )
 
@@ -105,9 +106,9 @@ func (w *WindowSingle[A]) SetGeom(pos image.Point, sz image.Point, screen *syste
 	w.Screen().PixSize = sz
 }
 
-func (w *WindowSingle[A]) ConstrainFrame(topOnly bool) image.Rectangle {
+func (w *WindowSingle[A]) ConstrainFrame(topOnly bool) styles.Sides[int] {
 	// no-op
-	return image.Rectangle{}
+	return styles.Sides[int]{}
 }
 
 func (w *WindowSingle[A]) Raise() {

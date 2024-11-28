@@ -10,12 +10,14 @@
 package desktop
 
 import (
+	"fmt"
 	"image"
 	"log"
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -276,17 +278,18 @@ func (w *Window) SetGeom(pos image.Point, sz image.Point, screen *system.Screen)
 	})
 }
 
-func (w *Window) ConstrainFrame(topOnly bool) image.Rectangle {
+func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
 	l, t, r, b := w.Glw.GetFrameSize()
-	w.FrameSize.Min.X, w.FrameSize.Min.Y = l, t
-	w.FrameSize.Max.X, w.FrameSize.Max.Y = r, b
+	w.FrameSize.Set(t, r, b, l)
 	sc := w.Screen()
 	scSize := sc.Geometry.Size()
-	sz := w.WnSize.Add(w.FrameSize.Min).Add(w.FrameSize.Max)
-	pos := w.Pos.Sub(w.FrameSize.Min)
+	frSize := image.Pt(w.FrameSize.Left+w.FrameSize.Right, w.FrameSize.Top+w.FrameSize.Bottom)
+	frOff := image.Pt(w.FrameSize.Left, w.FrameSize.Top)
+	sz := w.WnSize.Add(frSize)
+	pos := w.Pos.Sub(frOff)
 	csz, cpos := system.ConstrainWinGeom(sz, pos, scSize)
-	cpos = cpos.Add(w.FrameSize.Min)
-	csz = csz.Sub(w.FrameSize.Min).Sub(w.FrameSize.Max)
+	cpos = cpos.Add(frOff)
+	csz = csz.Sub(frSize)
 	change := false
 	pos = w.Pos
 	if !topOnly && cpos.X > pos.X {
@@ -478,6 +481,12 @@ func (w *Window) UpdateGeom() {
 }
 
 func (w *Window) FbResized(gw *glfw.Window, width, height int) {
+	if w.Is(system.Fullscreen) {
+		sc := w.Screen()
+		width = sc.PixSize.X
+		height = sc.PixSize.Y
+		fmt.Println("fullscreen size:", sc.PixSize)
+	}
 	fbsz := image.Point{width, height}
 	if w.PixSize != fbsz {
 		if MonitorDebug {
