@@ -362,6 +362,7 @@ func (w *Window) UpdateFullscreen(fullscreen bool) {
 	if w.IsClosed() {
 		return
 	}
+	w.Flgs.SetFlag(fullscreen, system.Fullscreen)
 	w.App.RunOnMain(func() {
 		if !fullscreen {
 			w.Glw.SetMonitor(nil, w.Pos.X, w.Pos.Y, w.WnSize.X, w.WnSize.Y, glfw.DontCare)
