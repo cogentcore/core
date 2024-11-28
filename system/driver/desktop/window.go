@@ -10,7 +10,6 @@
 package desktop
 
 import (
-	"fmt"
 	"image"
 	"log"
 
@@ -466,6 +465,7 @@ func (w *Window) UpdateGeom() {
 	var fbsz image.Point
 	fbsz.X, fbsz.Y = w.Glw.GetFramebufferSize()
 	w.PixSize = fbsz
+	// fmt.Println("UpdateGeom:", fbsz, wsz)
 	w.PhysDPI = sc.PhysicalDPI
 	w.LogDPI = sc.LogicalDPI
 	w.Mu.Unlock()
@@ -486,7 +486,7 @@ func (w *Window) FbResized(gw *glfw.Window, width, height int) {
 		sc := w.Screen()
 		width = sc.PixSize.X
 		height = sc.PixSize.Y
-		fmt.Println("fullscreen size:", sc.PixSize)
+		// fmt.Println("fullscreen size:", sc.PixSize)
 	}
 	fbsz := image.Point{width, height}
 	if w.PixSize != fbsz {

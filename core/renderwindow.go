@@ -267,6 +267,8 @@ func (w *renderWindow) resized() {
 		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.name, curRg)
 		}
+		rc.logicalDPI = w.logicalDPI()
+		w.mains.resize(rg) // no-op if everyone below is good
 		// still need to apply style even if size is same
 		for _, kv := range w.mains.stack.Order {
 			sc := kv.Value.Scene
