@@ -137,7 +137,8 @@ type Stage struct { //types:add -setters
 	// the window truly fullscreen without decorations (such as for a video player),
 	// whereas maximized keeps decorations and just makes it fill the available space.
 	// Not to be confused with [Stage.FullWindow], which is for stages contained within
-	// another system window.
+	// another system window. See [Scene.UpdateFullscreen] to update fullscreen state
+	// dynamically.
 	Fullscreen bool
 
 	// UseMinSize uses a minimum size as a function of the total available size

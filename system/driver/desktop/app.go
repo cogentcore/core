@@ -161,7 +161,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 		if w.WnSize == zp && opts.Size != zp {
 			w.WnSize = opts.Size
 		}
-		w.ConstrainFrame()
+		w.ConstrainFrame(false) // constrain full frame on open
 	})
 
 	go w.WinLoop() // start window's own dedicated publish update loop

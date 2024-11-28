@@ -293,6 +293,9 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 			SetKey(keymap.WinFocusNext).OnClick(func(e events.Event) {
 			AllRenderWindows.focusNext()
 		})
+		NewButton(m).SetText("Fullscreen").SetIcon(icons.Fullscreen).OnClick(func(e events.Event) {
+			sc.UpdateFullscreen(true)
+		})
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
 			OnClick(func(e events.Event) {
 				win := sc.RenderWindow()

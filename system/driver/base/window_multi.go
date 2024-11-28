@@ -13,6 +13,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 )
 
@@ -40,7 +41,7 @@ type WindowMulti[A system.App, D system.Drawer] struct {
 	PixSize image.Point `label:"Pixel size"`
 
 	// FrameSize of the window frame: Min = left, top; Max = right, bottom.
-	FrameSize image.Rectangle
+	FrameSize styles.Sides[int]
 
 	// DevicePixelRatio is a factor that scales the screen's
 	// "natural" pixel coordinates into actual device pixels.
@@ -143,9 +144,9 @@ func (w *WindowMulti[A, D]) SetGeom(pos image.Point, sz image.Point, screen *sys
 	w.Pos = pos
 }
 
-func (w *WindowMulti[A, D]) ConstrainFrame() image.Rectangle {
+func (w *WindowMulti[A, D]) ConstrainFrame(topOnly bool) styles.Sides[int] {
 	// no-op
-	return image.Rectangle{}
+	return styles.Sides[int]{}
 }
 
 func (w *WindowMulti[A, D]) IsVisible() bool {
