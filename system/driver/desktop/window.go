@@ -292,7 +292,7 @@ func (w *Window) SetGeom(fullscreen bool, pos, sz image.Point, screen *system.Sc
 }
 
 func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
-	if w.IsClosed() || w.Is(system.Fullscreen) {
+	if w.IsClosed() || w.Is(system.Fullscreen) || w.Is(system.Maximized) {
 		return w.FrameSize
 	}
 	l, t, r, b := w.Glw.GetFrameSize()
@@ -459,6 +459,7 @@ func (w *Window) UpdateGeom() {
 	w.Mu.Unlock()
 	sc := w.Screen() // gets parameters
 	w.Mu.Lock()
+	w.updateMaximized()
 	var wsz image.Point
 	wsz.X, wsz.Y = w.Glw.GetSize()
 	// fmt.Printf("win size: %v\n", wsz)
