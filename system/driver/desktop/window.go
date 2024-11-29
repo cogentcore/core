@@ -259,8 +259,8 @@ func (w *Window) SetPos(pos image.Point, screen *system.Screen) {
 	})
 }
 
-func (w *Window) SetGeom(pos image.Point, sz image.Point, screen *system.Screen) {
-	if w.IsClosed() || w.Is(system.Fullscreen) {
+func (w *Window) SetGeom(fullscreen bool, pos, sz image.Point, screen *system.Screen) {
+	if w.IsClosed() {
 		return
 	}
 	if screen != nil {
@@ -273,12 +273,28 @@ func (w *Window) SetGeom(pos image.Point, sz image.Point, screen *system.Screen)
 		if w.Glw == nil { // by time we got to main, could be diff
 			return
 		}
-		w.Glw.SetSize(sz.X, sz.Y)
-		w.Glw.SetPos(pos.X, pos.Y)
+		switch {
+		case w.Is(system.Fullscreen) && !fullscreen:
+			w.Flgs.SetFlag(false, system.Fullscreen)
+			w.Glw.SetMonitor(nil, pos.X, pos.Y, sz.X, sz.Y, glfw.DontCare)
+		case fullscreen:
+			w.Flgs.SetFlag(true, system.Fullscreen)
+			if screen != nil {
+				sc = screen
+			}
+			mon := w.App.Monitors[sc.ScreenNumber]
+			w.Glw.SetMonitor(mon, 0, 0, sc.Geometry.Dx(), sc.Geometry.Dy(), glfw.DontCare)
+		default:
+			w.Glw.SetSize(sz.X, sz.Y)
+			w.Glw.SetPos(pos.X, pos.Y)
+		}
 	})
 }
 
 func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
+	if w.IsClosed() || w.Is(system.Fullscreen) {
+		return w.FrameSize
+	}
 	l, t, r, b := w.Glw.GetFrameSize()
 	w.FrameSize.Set(t, r, b, l)
 	sc := w.Screen()
@@ -287,7 +303,7 @@ func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
 	frOff := image.Pt(w.FrameSize.Left, w.FrameSize.Top)
 	sz := w.WnSize.Add(frSize)
 	pos := w.Pos.Sub(frOff)
-	csz, cpos := system.ConstrainWinGeom(sz, pos, scSize)
+	cpos, csz := system.ConstrainWinGeom(pos, sz, scSize)
 	cpos = cpos.Add(frOff)
 	csz = csz.Sub(frSize)
 	change := false
@@ -310,7 +326,7 @@ func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
 		sz.Y = csz.Y
 	}
 	if change {
-		w.SetGeom(pos, sz, sc)
+		w.SetGeom(false, pos, sz, sc)
 	}
 	return w.FrameSize
 }
@@ -355,21 +371,6 @@ func (w *Window) Minimize() {
 			return
 		}
 		w.Glw.Iconify()
-	})
-}
-
-func (w *Window) UpdateFullscreen(fullscreen bool) {
-	if w.IsClosed() {
-		return
-	}
-	w.App.RunOnMain(func() {
-		if !fullscreen {
-			w.Glw.SetMonitor(nil, w.Pos.X, w.Pos.Y, w.WnSize.X, w.WnSize.Y, glfw.DontCare)
-			return
-		}
-		sc := w.Screen()
-		mon := w.App.Monitors[sc.ScreenNumber]
-		w.Glw.SetMonitor(mon, 0, 0, sc.Geometry.Dx(), sc.Geometry.Dy(), glfw.DontCare)
 	})
 }
 

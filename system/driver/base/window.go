@@ -168,10 +168,6 @@ func (w *Window[A]) RenderGeom() math32.Geom2DInt {
 	return math32.Geom2DInt{Size: w.This.Size()}
 }
 
-func (w *Window[A]) UpdateFullscreen(fullscreen bool) {
-	// no-op by default
-}
-
 func (w *Window[A]) SetCloseReqFunc(fun func(win system.Window)) {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()

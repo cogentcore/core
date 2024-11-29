@@ -172,7 +172,7 @@ func (w *renderWindow) setName(name string) {
 	if w.SystemWindow != nil {
 		w.SystemWindow.SetName(name)
 	}
-	if isdif && w.SystemWindow != nil {
+	if isdif && w.SystemWindow != nil && !w.SystemWindow.Is(system.Fullscreen) {
 		wgp, sc := theWindowGeometrySaver.get(w.title, "")
 		if wgp != nil {
 			theWindowGeometrySaver.settingStart()
@@ -180,7 +180,7 @@ func (w *renderWindow) setName(name string) {
 				if DebugSettings.WinGeomTrace {
 					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.Pos, wgp.Size)
 				}
-				w.SystemWindow.SetGeom(wgp.Pos, wgp.Size, sc)
+				w.SystemWindow.SetGeom(false, wgp.Pos, wgp.Size, sc)
 				system.TheApp.SendEmptyEvent()
 			}
 			theWindowGeometrySaver.settingEnd()

@@ -411,15 +411,11 @@ func (ws *windowGeometrySaver) restoreAll() {
 	ws.settingStart()
 	for _, w := range AllRenderWindows {
 		wgp, sc := ws.get(w.title, "")
-		if wgp != nil {
+		if wgp != nil && !w.SystemWindow.Is(system.Fullscreen) {
 			if DebugSettings.WinGeomTrace {
 				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v screen: %s\n", w.name, wgp.Pos, wgp.Size, sc.Name)
 			}
-			w.SystemWindow.SetGeom(wgp.Pos, wgp.Size, sc)
-		} else {
-			if DebugSettings.WinGeomTrace {
-				log.Printf("WindowGeometry: RestoreAll: not found for win: %q  cfg: %q\n", w.title, screenConfig())
-			}
+			w.SystemWindow.SetGeom(false, wgp.Pos, wgp.Size, sc)
 		}
 	}
 	ws.settingEnd()
@@ -473,5 +469,5 @@ type windowGeometry struct {
 
 // constrainGeom constrains geometry based on screen params
 func (wg *windowGeometry) constrainGeom(sc *system.Screen) {
-	wg.Size, wg.Pos = sc.ConstrainWinGeom(wg.Size, wg.Pos)
+	wg.Pos, wg.Size = sc.ConstrainWinGeom(wg.Pos, wg.Size)
 }

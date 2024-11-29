@@ -171,7 +171,7 @@ func (sc *Screen) WinSizeFromPix(sz image.Point) image.Point {
 
 // ConstrainWinGeom constrains window geometry to fit in the screen.
 // Size is in pixel units.
-func (sc *Screen) ConstrainWinGeom(sz, pos image.Point) (csz, cpos image.Point) {
+func (sc *Screen) ConstrainWinGeom(pos, sz image.Point) (cpos, csz image.Point) {
 	scSize := sc.Geometry.Size() // in window coords size
 	if TheApp.Platform() == Windows {
 		// these are windows-specific special numbers for minimized windows
@@ -183,14 +183,14 @@ func (sc *Screen) ConstrainWinGeom(sz, pos image.Point) (csz, cpos image.Point) 
 			pos.Y = 50
 		}
 	}
-	csz, cpos = ConstrainWinGeom(sc.WinSizeFromPix(sz), pos, scSize)
+	cpos, csz = ConstrainWinGeom(pos, sc.WinSizeFromPix(sz), scSize)
 	csz = sc.WinSizeToPix(csz)
 	return
 }
 
 // ConstrainWinGeom constrains the size and position of a window within
 // given screen size, preserving the size to the extent possible.
-func ConstrainWinGeom(sz, pos, scSize image.Point) (csz, cpos image.Point) {
+func ConstrainWinGeom(pos, sz, scSize image.Point) (cpos, csz image.Point) {
 	csz = sz
 	cpos = pos
 	if csz.X > scSize.X {

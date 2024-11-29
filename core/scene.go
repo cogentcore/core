@@ -327,7 +327,13 @@ func (sc *Scene) UpdateFullscreen(fullscreen bool) {
 	if rw == nil {
 		return
 	}
-	rw.SystemWindow.UpdateFullscreen(fullscreen)
+	wgp, screen := theWindowGeometrySaver.get(rw.title, "")
+	if wgp != nil {
+		rw.SystemWindow.SetGeom(fullscreen, wgp.Pos, wgp.Size, screen)
+	} else {
+		zp := image.Point{}
+		rw.SystemWindow.SetGeom(fullscreen, zp, zp, nil)
+	}
 }
 
 // Close closes the [Stage] associated with this [Scene].
