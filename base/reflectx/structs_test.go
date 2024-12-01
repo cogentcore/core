@@ -87,3 +87,34 @@ func TestCopyFields(t *testing.T) {
 	CopyFields(dif, sif, "Mycolor")
 	assert.Equal(t, sif.Mycolor, dif.Mycolor)
 }
+
+func TestFieldAtPath(t *testing.T) {
+	sp := &person{
+		Name:                "Go Gopher",
+		Age:                 23,
+		ProgrammingLanguage: "Go",
+		FavoriteFruit:       "Peach",
+		Data:                "abcdef",
+		Pet: pet{
+			Name: "Pet Gopher",
+			Type: "Dog",
+			Age:  7,
+		},
+	}
+	spv := reflect.ValueOf(sp)
+	fv, err := FieldAtPath(spv, "Pet.Age")
+	assert.NoError(t, err)
+	assert.Equal(t, 7, fv.Elem().Interface())
+	fv, err = FieldAtPath(spv, "Pet.Name")
+	assert.NoError(t, err)
+	assert.Equal(t, "Pet Gopher", fv.Elem().Interface())
+	fv, err = FieldAtPath(spv, "Pet.Ages")
+	assert.Error(t, err)
+	fv, err = FieldAtPath(spv, "Pets.Age")
+	assert.Error(t, err)
+
+	err = SetFieldsFromMap(sp, map[string]any{"Pet.Age": 8, "Data": "ddd"})
+	assert.NoError(t, err)
+	assert.Equal(t, 8, sp.Pet.Age)
+	assert.Equal(t, "ddd", sp.Data)
+}

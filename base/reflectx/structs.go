@@ -280,3 +280,29 @@ func CopyFields(dest, src any, fields ...string) error {
 	}
 	return errors.Join(errs...)
 }
+
+// FieldAtPath parses a path to a field within the given struct,
+// using . delimted field names, and returns the [reflect.Value] for
+// the field. Returns an error if not found.
+func FieldAtPath(val reflect.Value, path string) (reflect.Value, error) {
+	npv := NonPointerValue(val)
+	if npv.Kind() != reflect.Struct {
+		if !npv.IsValid() {
+			err := fmt.Errorf("FieldAtPath: struct is nil, for path: %q", path)
+			return npv, err
+		}
+		err := fmt.Errorf("FieldAtPath: object is not a struct: %q kind: %q, for path: %q", npv.String(), npv.Kind(), path)
+		return npv, err
+	}
+	paths := strings.Split(path, ".")
+	fnm := paths[0]
+	fld := npv.FieldByName(fnm)
+	if !fld.IsValid() {
+		err := fmt.Errorf("FieldAtPath: could not find Field named: %q in struct: %q kind: %q, path: %v", fnm, npv.String(), npv.Kind(), path)
+		return fld, err
+	}
+	if len(paths) == 1 {
+		return fld.Addr(), nil
+	}
+	return FieldAtPath(fld.Addr(), strings.Join(paths[1:], "."))
+}
