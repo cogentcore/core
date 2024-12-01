@@ -27,6 +27,8 @@ type Dir = keylist.List[string, *Node]
 // with an [fs.ErrExist] error.
 // If the name is empty, then it is set to "root", the root directory.
 // Note that "/" is not allowed for the root directory in Go [fs].
+// If no parent (i.e., a new root) and CurRoot is nil, then it is set
+// to this.
 func NewDir(name string, parent ...*Node) (*Node, error) {
 	if name == "" {
 		name = "root"

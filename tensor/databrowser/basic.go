@@ -82,6 +82,7 @@ func NewBasicWindow(fsys fs.FS, dataDir string) (*core.Body, *Basic) {
 	br.SetDataRoot(ddr)
 	br.SetScriptsDir(filepath.Join(ddr, "dbscripts"))
 	TheBrowser = &br.Browser
+	CurTabber = br.Browser.Tabs
 	br.Interpreter.Eval("br := databrowser.TheBrowser") // grab it
 	br.UpdateScripts()
 	return b, br

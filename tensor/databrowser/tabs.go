@@ -18,6 +18,9 @@ import (
 	"cogentcore.org/core/texteditor"
 )
 
+// CurTabber is the current Tabber. Set when one is created.
+var CurTabber Tabber
+
 // Tabber is a [core.Tabs] based widget that has support for opening
 // tabs for [plotcore.PlotEditor] and [tensorcore.Table] editors,
 // among others.
