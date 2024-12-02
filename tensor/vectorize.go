@@ -14,8 +14,8 @@ var (
 	// ThreadingThreshod is the threshold in number of flops (floating point ops),
 	// computed as tensor N * flops per element, to engage actual parallel processing.
 	// Heuristically, numbers below this threshold do not result in
-	// an overall speedup, due to overhead costs.
-	ThreadingThreshold = 10_000
+	// an overall speedup, due to overhead costs. See tmath/ops_test.go for benchmark.
+	ThreadingThreshold = 300
 
 	// NumThreads is the number of threads to use for parallel threading.
 	// The default of 0 causes the [runtime.GOMAXPROCS] to be used.

@@ -5,6 +5,7 @@
 package tmath
 
 import (
+	"fmt"
 	"testing"
 
 	"cogentcore.org/core/tensor"
@@ -158,5 +159,47 @@ func TestOps(t *testing.T) {
 	Dec(onedc)
 	for i, v := range vals {
 		assert.InDelta(t, v, onedc.Float1D(i), 1.0e-7)
+	}
+}
+
+func runBenchMult(b *testing.B, n int, thread bool) {
+	if thread {
+		tensor.ThreadingThreshold = 1
+	} else {
+		tensor.ThreadingThreshold = 100_000_000
+	}
+	av := tensor.NewFloat64(n)
+	bv := tensor.NewFloat64(n)
+	ov := tensor.NewFloat64(n)
+	for i := range n {
+		av.SetFloat1D(1.0/float64(n), i)
+		bv.SetFloat1D(1.0/float64(n), i)
+	}
+	b.ResetTimer()
+	for range b.N {
+		MulOut(av, bv, ov)
+	}
+}
+
+// to run this benchmark, do:
+// go test -bench BenchmarkMult -count 10 >bench.txt
+// go install golang.org/x/perf/cmd/benchstat@latest
+// benchstat -row /n -col .name bench.txt
+
+var ns = []int{10, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10_000}
+
+func BenchmarkMultThreaded(b *testing.B) {
+	for _, n := range ns {
+		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+			runBenchMult(b, n, true)
+		})
+	}
+}
+
+func BenchmarkMultSingle(b *testing.B) {
+	for _, n := range ns {
+		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+			runBenchMult(b, n, false)
+		})
 	}
 }

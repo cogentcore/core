@@ -20,10 +20,7 @@ func ZScore(a tensor.Tensor) tensor.Values {
 // subtracting the Mean and dividing by the standard deviation.
 func ZScoreOut(a tensor.Tensor, out tensor.Values) error {
 	mout := tensor.NewFloat64()
-	std, mean, _, err := StdOut64(a, mout)
-	if err != nil {
-		return err
-	}
+	std, mean, _ := StdOut64(a, mout)
 	tmath.SubOut(a, mean, out)
 	tmath.DivOut(out, std, out)
 	return nil

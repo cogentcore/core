@@ -5,6 +5,7 @@
 package stats
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -188,8 +189,7 @@ func TestNorm(t *testing.T) {
 
 	ZScoreOut(oned, oneout)
 	mout := tensor.NewFloat64()
-	std, mean, _, err := StdOut64(oneout, mout)
-	assert.NoError(t, err)
+	std, mean, _ := StdOut64(oneout, mout)
 	assert.InDelta(t, 1.0, std.Float1D(0), 1.0e-6)
 	assert.InDelta(t, 0.0, mean.Float1D(0), 1.0e-6)
 
@@ -216,4 +216,113 @@ func TestNorm(t *testing.T) {
 	MaxOut(oneout, mout)
 	assert.InDelta(t, 1.0, mout.Float1D(0), 1.0e-6)
 	// fmt.Println(oneout)
+}
+
+// baseline values pre-optimization:
+// go test -bench BenchmarkFuncs -count=1
+// goos: darwin
+// goarch: arm64
+// pkg: cogentcore.org/core/tensor/stats/stats
+// stat=Count-16         	  677764	      1789 ns/op
+// stat=Sum-16           	  668791	      1809 ns/op
+// stat=L1Norm-16        	  821071	      1484 ns/op
+// stat=Prod-16          	  703598	      1706 ns/op
+// stat=Min-16           	  182587	      6564 ns/op
+// stat=Max-16           	  181981	      6577 ns/op
+// stat=MinAbs-16        	  176342	      6787 ns/op
+// stat=MaxAbs-16        	  175491	      6784 ns/op
+// stat=Mean-16          	  592713	      2014 ns/op
+// stat=Var-16           	  330260	      3620 ns/op
+// stat=Std-16           	  329876	      3625 ns/op
+// stat=Sem-16           	  330141	      3629 ns/op
+// stat=SumSq-16         	  366603	      3267 ns/op
+// stat=L2Norm-16        	  366862	      3264 ns/op
+// stat=VarPop-16        	  330362	      3617 ns/op
+// stat=StdPop-16        	  329172	      3626 ns/op
+// stat=SemPop-16        	  331568	      3631 ns/op
+// stat=Median-16        	  116071	     10316 ns/op
+// stat=Q1-16            	  116175	     10334 ns/op
+// stat=Q3-16            	  115149	     10331 ns/op
+
+// old: prior to optimizing 12/1/2024:
+// stat=Count-16         	  166908	      7189 ns/op
+// stat=Sum-16           	  166287	      7198 ns/op
+// stat=L1Norm-16        	  166587	      7195 ns/op
+// stat=Prod-16          	  166029	      7185 ns/op
+// stat=Min-16           	  125803	      9523 ns/op
+// stat=Max-16           	  125067	      9561 ns/op
+// stat=MinAbs-16        	  126109	      9524 ns/op
+// stat=MaxAbs-16        	  126346	      9500 ns/op
+// stat=Mean-16          	   83302	     14365 ns/op
+// stat=Var-16           	   53138	     22707 ns/op
+// stat=Std-16           	   53073	     22611 ns/op
+// stat=Sem-16           	   52928	     22611 ns/op
+// stat=SumSq-16         	  125698	      9486 ns/op
+// stat=L2Norm-16        	  126196	      9483 ns/op
+// stat=VarPop-16        	   53010	     22659 ns/op
+// stat=StdPop-16        	   52994	     22573 ns/op
+// stat=SemPop-16        	   52897	     22726 ns/op
+// stat=Median-16        	  116223	     10334 ns/op
+// stat=Q1-16            	  115728	     10431 ns/op
+// stat=Q3-16            	  111325	     10307 ns/op
+
+func runBenchFuncs(b *testing.B, n int, fun Stats) {
+	av := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	b.ResetTimer()
+	for range b.N {
+		fun.Call(av)
+	}
+}
+
+func BenchmarkFuncs(b *testing.B) {
+	for stf := StatCount; stf < StatsN; stf++ {
+		b.Run(fmt.Sprintf("stat=%s", stf.String()), func(b *testing.B) {
+			runBenchFuncs(b, 1000, stf)
+		})
+	}
+}
+
+// 258.6 ns/op, vs 1809 actual
+func BenchmarkSumBaseline(b *testing.B) {
+	n := 1000
+	av := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	b.ResetTimer()
+	for range b.N {
+		sum := float64(0)
+		for i := range n {
+			val := av.Float1D(i)
+			if math.IsNaN(val) {
+				continue
+			}
+			sum += val
+		}
+		_ = sum
+	}
+}
+
+func runClosure(av *tensor.Float64, fun func(a, agg float64) float64) float64 {
+	// fun := func(a, agg float64) float64 { // note: it can inline closure if in same fun
+	// 	return agg + a
+	// }
+	n := 1000
+	s := float64(0)
+	for i := range n {
+		s = fun(av.Float1D(i), s) // note: Float1D here no extra cost
+	}
+	return s
+}
+
+// 1242 ns/op, vs 1809 actual -- mostly it is the closure
+func BenchmarkSumClosure(b *testing.B) {
+	n := 1000
+	av := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	b.ResetTimer()
+	for range b.N {
+		runClosure(av, func(val, agg float64) float64 {
+			if math.IsNaN(val) {
+				return agg
+			}
+			return agg + val
+		})
+	}
 }

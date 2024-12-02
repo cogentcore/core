@@ -7,7 +7,6 @@ package metric
 import (
 	"math"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/stats"
@@ -34,25 +33,39 @@ type MetricOutFunc = func(a, b tensor.Tensor, out tensor.Values) error
 
 // SumSquaresScaleOut64 computes the sum of squares differences between tensor values,
 // returning scale and ss factors aggregated separately for better numerical stability, per BLAS.
-func SumSquaresScaleOut64(a, b tensor.Tensor, out tensor.Values) (scale64, ss64 tensor.Tensor, err error) {
+func SumSquaresScaleOut64(a, b tensor.Tensor) (scale64, ss64 *tensor.Float64, err error) {
 	if err = tensor.MustBeSameShape(a, b); err != nil {
 		return
 	}
-	scale64, ss64, err = stats.Vectorize2Out64(NFunc, func(idx int, tsr ...tensor.Tensor) {
-		VecSSFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], 0, 1, func(a, b float64) float64 {
-			return a - b
-		})
-	}, a, b, out)
+	scale64, ss64 = Vectorize2Out64(a, b, 0, 1, func(a, b, scale, ss float64) (float64, float64) {
+		if math.IsNaN(a) || math.IsNaN(b) {
+			return scale, ss
+		}
+		d := a - b
+		if d == 0 {
+			return scale, ss
+		}
+		absxi := math.Abs(d)
+		if scale < absxi {
+			ss = 1 + ss*(scale/absxi)*(scale/absxi)
+			scale = absxi
+		} else {
+			ss = ss + (absxi/scale)*(absxi/scale)
+		}
+		return scale, ss
+	})
 	return
 }
 
 // SumSquaresOut64 computes the sum of squares differences between tensor values,
 // and returns the Float64 output values for use in subsequent computations.
-func SumSquaresOut64(a, b tensor.Tensor, out tensor.Values) (tensor.Tensor, error) {
-	scale64, ss64, err := SumSquaresScaleOut64(a, b, out)
+func SumSquaresOut64(a, b tensor.Tensor, out tensor.Values) (*tensor.Float64, error) {
+	scale64, ss64, err := SumSquaresScaleOut64(a, b)
 	if err != nil {
 		return nil, err
 	}
+	osz := tensor.CellsSize(a.ShapeSizes())
+	out.SetShapeSizes(osz...)
 	nsub := out.Len()
 	for i := range nsub {
 		scale := scale64.Float1D(i)
@@ -79,18 +92,18 @@ func SumSquaresOut(a, b tensor.Tensor, out tensor.Values) error {
 // SumSquares computes the sum of squares differences between tensor values,
 // See [MetricFunc] for general information.
 func SumSquares(a, b tensor.Tensor) tensor.Values {
-	out := tensor.NewOfType(a.DataType())
-	errors.Log(SumSquaresOut(a, b, out))
-	return out
+	return tensor.CallOut2(SumSquaresOut, a, b)
 }
 
 // L2NormOut computes the L2 Norm: square root of the sum of squares
 // differences between tensor values, aka the Euclidean distance.
 func L2NormOut(a, b tensor.Tensor, out tensor.Values) error {
-	scale64, ss64, err := SumSquaresScaleOut64(a, b, out)
+	scale64, ss64, err := SumSquaresScaleOut64(a, b)
 	if err != nil {
 		return err
 	}
+	osz := tensor.CellsSize(a.ShapeSizes())
+	out.SetShapeSizes(osz...)
 	nsub := out.Len()
 	for i := range nsub {
 		scale := scale64.Float1D(i)
@@ -121,12 +134,13 @@ func L1NormOut(a, b tensor.Tensor, out tensor.Values) error {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return err
 	}
-	_, err := stats.VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
-		VecFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(a, b, agg float64) float64 {
-			return agg + math.Abs(a-b)
-		})
-	}, a, b, out)
-	return err
+	VectorizeOut64(a, b, out, 0, func(a, b, agg float64) float64 {
+		if math.IsNaN(a) || math.IsNaN(b) {
+			return agg
+		}
+		return agg + math.Abs(a-b)
+	})
+	return nil
 }
 
 // L1Norm computes the sum of the absolute value of differences between the
@@ -143,15 +157,16 @@ func HammingOut(a, b tensor.Tensor, out tensor.Values) error {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return err
 	}
-	_, err := stats.VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
-		VecFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(a, b, agg float64) float64 {
-			if a != b {
-				agg += 1
-			}
+	VectorizeOut64(a, b, out, 0, func(a, b, agg float64) float64 {
+		if math.IsNaN(a) || math.IsNaN(b) {
 			return agg
-		})
-	}, a, b, out)
-	return err
+		}
+		if a != b {
+			agg += 1
+		}
+		return agg
+	})
+	return nil
 }
 
 // Hamming computes the sum of 1s for every element that is different,
@@ -164,19 +179,27 @@ func Hamming(a, b tensor.Tensor) tensor.Values {
 // SumSquaresBinTolScaleOut64 computes the sum of squares differences between tensor values,
 // with binary tolerance: differences < 0.5 are thresholded to 0.
 // returning scale and ss factors aggregated separately for better numerical stability, per BLAS.
-func SumSquaresBinTolScaleOut64(a, b tensor.Tensor, out tensor.Values) (scale64, ss64 tensor.Tensor, err error) {
+func SumSquaresBinTolScaleOut64(a, b tensor.Tensor) (scale64, ss64 *tensor.Float64, err error) {
 	if err = tensor.MustBeSameShape(a, b); err != nil {
 		return
 	}
-	scale64, ss64, err = stats.Vectorize2Out64(NFunc, func(idx int, tsr ...tensor.Tensor) {
-		VecSSFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], 0, 1, func(a, b float64) float64 {
-			d := a - b
-			if math.Abs(d) < 0.5 {
-				d = 0
-			}
-			return d
-		})
-	}, a, b, out)
+	scale64, ss64 = Vectorize2Out64(a, b, 0, 1, func(a, b, scale, ss float64) (float64, float64) {
+		if math.IsNaN(a) || math.IsNaN(b) {
+			return scale, ss
+		}
+		d := a - b
+		if math.Abs(d) < 0.5 {
+			return scale, ss
+		}
+		absxi := math.Abs(d)
+		if scale < absxi {
+			ss = 1 + ss*(scale/absxi)*(scale/absxi)
+			scale = absxi
+		} else {
+			ss = ss + (absxi/scale)*(absxi/scale)
+		}
+		return scale, ss
+	})
 	return
 }
 
@@ -184,10 +207,12 @@ func SumSquaresBinTolScaleOut64(a, b tensor.Tensor, out tensor.Values) (scale64,
 // differences between tensor values (aka Euclidean distance), with binary tolerance:
 // differences < 0.5 are thresholded to 0.
 func L2NormBinTolOut(a, b tensor.Tensor, out tensor.Values) error {
-	scale64, ss64, err := SumSquaresBinTolScaleOut64(a, b, out)
+	scale64, ss64, err := SumSquaresBinTolScaleOut64(a, b)
 	if err != nil {
 		return err
 	}
+	osz := tensor.CellsSize(a.ShapeSizes())
+	out.SetShapeSizes(osz...)
 	nsub := out.Len()
 	for i := range nsub {
 		scale := scale64.Float1D(i)
@@ -215,10 +240,12 @@ func L2NormBinTol(a, b tensor.Tensor) tensor.Values {
 // SumSquaresBinTolOut computes the sum of squares differences between tensor values,
 // with binary tolerance: differences < 0.5 are thresholded to 0.
 func SumSquaresBinTolOut(a, b tensor.Tensor, out tensor.Values) error {
-	scale64, ss64, err := SumSquaresBinTolScaleOut64(a, b, out)
+	scale64, ss64, err := SumSquaresBinTolScaleOut64(a, b)
 	if err != nil {
 		return err
 	}
+	osz := tensor.CellsSize(a.ShapeSizes())
+	out.SetShapeSizes(osz...)
 	nsub := out.Len()
 	for i := range nsub {
 		scale := scale64.Float1D(i)
@@ -253,20 +280,21 @@ func CrossEntropyOut(a, b tensor.Tensor, out tensor.Values) error {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return err
 	}
-	_, err := stats.VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
-		VecFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(a, b, agg float64) float64 {
-			b = math32.Clamp(b, 0.000001, 0.999999)
-			if a >= 1.0 {
-				agg += -math.Log(b)
-			} else if a <= 0.0 {
-				agg += -math.Log(1.0 - b)
-			} else {
-				agg += a*math.Log(a/b) + (1-a)*math.Log((1-a)/(1-b))
-			}
+	VectorizeOut64(a, b, out, 0, func(a, b, agg float64) float64 {
+		if math.IsNaN(a) || math.IsNaN(b) {
 			return agg
-		})
-	}, a, b, out)
-	return err
+		}
+		b = math32.Clamp(b, 0.000001, 0.999999)
+		if a >= 1.0 {
+			agg += -math.Log(b)
+		} else if a <= 0.0 {
+			agg += -math.Log(1.0 - b)
+		} else {
+			agg += a*math.Log(a/b) + (1-a)*math.Log((1-a)/(1-b))
+		}
+		return agg
+	})
+	return nil
 }
 
 // CrossEntropy is a standard measure of the difference between two
@@ -287,12 +315,13 @@ func DotProductOut(a, b tensor.Tensor, out tensor.Values) error {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return err
 	}
-	_, err := stats.VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
-		VecFunc(idx, tsr[0], tsr[1], tsr[2], 0, func(a, b, agg float64) float64 {
-			return agg + a*b
-		})
-	}, a, b, out)
-	return err
+	VectorizeOut64(a, b, out, 0, func(a, b, agg float64) float64 {
+		if math.IsNaN(a) || math.IsNaN(b) {
+			return agg
+		}
+		return agg + a*b
+	})
+	return nil
 }
 
 // DotProductOut computes the sum of the element-wise products of the
@@ -309,24 +338,24 @@ func CovarianceOut(a, b tensor.Tensor, out tensor.Values) error {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return err
 	}
-	amean, acount, err := stats.MeanOut64(a, out)
-	if err != nil {
-		return err
-	}
-	bmean, _, _ := stats.MeanOut64(b, out)
-	cov64, _ := stats.VectorizeOut64(NFunc, func(idx int, tsr ...tensor.Tensor) {
-		Vec2inFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4], 0, func(a, b, am, bm, agg float64) float64 {
-			return agg + (a-am)*(b-bm)
-		})
-	}, a, b, amean, bmean, out)
+	amean, acount := stats.MeanOut64(a, out)
+	bmean, _ := stats.MeanOut64(b, out)
+	cov64 := VectorizePreOut64(a, b, out, 0, amean, bmean, func(a, b, am, bm, agg float64) float64 {
+		if math.IsNaN(a) || math.IsNaN(b) {
+			return agg
+		}
+		return agg + (a-am)*(b-bm)
+	})
+	osz := tensor.CellsSize(a.ShapeSizes())
+	out.SetShapeSizes(osz...)
 	nsub := out.Len()
 	for i := range nsub {
 		c := acount.Float1D(i)
 		if c == 0 {
 			continue
 		}
-		cov64.SetFloat1D(cov64.Float1D(i)/c, i)
-		out.SetFloat1D(cov64.Float1D(i), i)
+		cov := cov64.Float1D(i) / c
+		out.SetFloat1D(cov, i)
 	}
 	return nil
 }
@@ -346,29 +375,25 @@ func Covariance(a, b tensor.Tensor) tensor.Values {
 // (i.e., the standardized covariance).
 // Equivalent to the cosine of mean-normalized vectors.
 // Returns the Float64 output values for subsequent use.
-func CorrelationOut64(a, b tensor.Tensor, out tensor.Values) (tensor.Tensor, error) {
+func CorrelationOut64(a, b tensor.Tensor, out tensor.Values) (*tensor.Float64, error) {
 	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return nil, err
 	}
-	amean, _, err := stats.MeanOut64(a, out)
-	if err != nil {
-		return nil, err
-	}
-	bmean, _, _ := stats.MeanOut64(b, out)
-	ss64, avar64, bvar64, err := Vectorize3Out64(NFunc, func(idx int, tsr ...tensor.Tensor) {
-		Vec2in3outFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4], tsr[5], tsr[6], 0, func(a, b, am, bm, ss, avar, bvar float64) (float64, float64, float64) {
-			ad := a - am
-			bd := b - bm
-			ss += ad * bd   // between
-			avar += ad * ad // within
-			bvar += bd * bd
+	amean, _ := stats.MeanOut64(a, out)
+	bmean, _ := stats.MeanOut64(b, out)
+	ss64, avar64, bvar64 := VectorizePre3Out64(a, b, 0, 0, 0, amean, bmean, func(a, b, am, bm, ss, avar, bvar float64) (float64, float64, float64) {
+		if math.IsNaN(a) || math.IsNaN(b) {
 			return ss, avar, bvar
-		})
-	}, a, b, amean, bmean, out)
-	if err != nil {
-		return nil, err
-	}
-
+		}
+		ad := a - am
+		bd := b - bm
+		ss += ad * bd   // between
+		avar += ad * ad // within
+		bvar += bd * bd
+		return ss, avar, bvar
+	})
+	osz := tensor.CellsSize(a.ShapeSizes())
+	out.SetShapeSizes(osz...)
 	nsub := out.Len()
 	for i := range nsub {
 		ss := ss64.Float1D(i)
@@ -441,18 +466,21 @@ func InvCorrelation(a, b tensor.Tensor) tensor.Values {
 // CosineOut64 computes the high-dimensional angle between two vectors,
 // in range (-1..1) as the normalized [Dot]:
 // dot product / sqrt(ssA * ssB).  See also [Correlation].
-func CosineOut64(a, b tensor.Tensor, out tensor.Values) (tensor.Tensor, error) {
-	ss64, avar64, bvar64, err := Vectorize3Out64(NFunc, func(idx int, tsr ...tensor.Tensor) {
-		Vec3outFunc(idx, tsr[0], tsr[1], tsr[2], tsr[3], tsr[4], 0, func(a, b, ss, avar, bvar float64) (float64, float64, float64) {
-			ss += a * b
-			avar += a * a
-			bvar += b * b
-			return ss, avar, bvar
-		})
-	}, a, b, out)
-	if err != nil {
+func CosineOut64(a, b tensor.Tensor, out tensor.Values) (*tensor.Float64, error) {
+	if err := tensor.MustBeSameShape(a, b); err != nil {
 		return nil, err
 	}
+	ss64, avar64, bvar64 := Vectorize3Out64(a, b, 0, 0, 0, func(a, b, ss, avar, bvar float64) (float64, float64, float64) {
+		if math.IsNaN(a) || math.IsNaN(b) {
+			return ss, avar, bvar
+		}
+		ss += a * b
+		avar += a * a
+		bvar += b * b
+		return ss, avar, bvar
+	})
+	osz := tensor.CellsSize(a.ShapeSizes())
+	out.SetShapeSizes(osz...)
 	nsub := out.Len()
 	for i := range nsub {
 		ss := ss64.Float1D(i)

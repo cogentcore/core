@@ -5,6 +5,7 @@
 package metric
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -85,4 +86,167 @@ func TestMatrix(t *testing.T) {
 	for i, v := range simres {
 		assert.InDelta(t, v, out.Float1D(i), 1.0e-8)
 	}
+}
+
+func runBenchFuncs(b *testing.B, n int, fun Metrics) {
+	av := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	bv := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	b.ResetTimer()
+	for range b.N {
+		fun.Call(av, bv)
+	}
+}
+
+// 375 ns/op = fastest that DotProduct could be.
+func BenchmarkFuncMulBaseline(b *testing.B) {
+	n := 1000
+	av := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	bv := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	b.ResetTimer()
+	s := float64(0)
+	for range b.N {
+		for i := range n {
+			s += av.Values[i] * bv.Values[i]
+		}
+	}
+}
+
+func runClosure(av, bv *tensor.Float64, fun func(a, b, agg float64) float64) float64 {
+	// fun := func(a, b, agg float64) float64 { // note: it can inline closure if in same fun
+	// 	return agg + a*b
+	// }
+	n := 1000
+	s := float64(0)
+	for i := range n {
+		s = fun(av.Values[i], bv.Values[i], s) // note: Float1D here no extra cost
+	}
+	return s
+}
+
+// 1465 ns/op = ~4x penalty for cosure
+func BenchmarkFuncMulClosure(b *testing.B) {
+	n := 1000
+	av := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	bv := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	b.ResetTimer()
+	for range b.N {
+		runClosure(av, bv, func(a, b, agg float64) float64 {
+			return agg + a*b
+		})
+	}
+}
+
+func runClosureInterface(av, bv tensor.Tensor, fun func(a, b, agg float64) float64) float64 {
+	n := 1000
+	s := float64(0)
+	for i := range n {
+		s = fun(av.Float1D(i), bv.Float1D(i), s)
+	}
+	return s
+}
+
+// 3665 ns/op = going through the Tensor interface = another ~2x
+func BenchmarkFuncMulClosureInterface(b *testing.B) {
+	n := 1000
+	av := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	bv := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	b.ResetTimer()
+	for range b.N {
+		runClosureInterface(av, bv, func(a, b, agg float64) float64 {
+			return agg + a*b
+		})
+	}
+}
+
+// original pre-optimization was: 8027 ns/op = 21x slower than the MulBaseline!
+func BenchmarkDotProductOut(b *testing.B) {
+	n := 1000
+	av := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	bv := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, n+1), n))
+	ov := tensor.NewFloat64(1)
+	b.ResetTimer()
+	for range b.N {
+		DotProductOut(av, bv, ov)
+	}
+}
+
+// to run this benchmark, do:
+// go test -bench BenchmarkFuncs -count 10 >bench.txt
+// go install golang.org/x/perf/cmd/benchstat@latest
+// benchstat -row /met -col .name bench.txt
+
+var fns = []int{10, 20, 50, 100, 500, 1000, 10000}
+
+// after 12/2/2024 optimizations
+// goos: darwin
+// goarch: arm64
+// pkg: cogentcore.org/core/tensor/stats/metric
+//                  │    Funcs    │
+//                  │   sec/op    │
+// L2Norm             1.853µ ± 1%
+// SumSquares         1.878µ ± 1%
+// L1Norm             1.686µ ± 1%
+// Hamming            1.798µ ± 1%
+// L2NormBinTol       1.906µ ± 0%
+// SumSquaresBinTol   1.912µ ± 0%
+// InvCosine          2.421µ ± 0%
+// InvCorrelation     6.379µ ± 1%
+// CrossEntropy       5.876µ ± 0%
+// DotProduct         1.792µ ± 0%
+// Covariance         5.914µ ± 0%
+// Correlation        6.437µ ± 0%
+// Cosine             2.451µ ± 0%
+// geomean            2.777µ
+
+// prior to optimization:
+//                  │    Funcs    │
+//                  │   sec/op    │
+// L1Norm             8.283µ ± 0%
+// DotProduct         8.299µ ± 0%
+// L2Norm             8.457µ ± 1%
+// SumSquares         8.483µ ± 1%
+// L2NormBinTol       8.466µ ± 0%
+// SumSquaresBinTol   8.470µ ± 0%
+// Hamming            8.556µ ± 0%
+// CrossEntropy       12.84µ ± 0%
+// Cosine             13.91µ ± 0%
+// InvCosine          14.43µ ± 0%
+// Covariance         39.47µ ± 0%
+// Correlation        47.15µ ± 0%
+// InvCorrelation     45.48µ ± 0%
+// geomean            13.80µ
+
+// BenchmarkFuncMulBaseline: 				 376.7 ns/op
+// BenchmarkFuncMulBaselineClosureArg: 	1464 ns/op
+
+func BenchmarkFuncs(b *testing.B) {
+	for met := MetricL2Norm; met < MetricsN; met++ {
+		b.Run(fmt.Sprintf("met=%s", met.String()), func(b *testing.B) {
+			runBenchFuncs(b, 1000, met)
+		})
+	}
+}
+
+func runBenchNs(b *testing.B, fun Metrics) {
+	for _, n := range fns {
+		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+			runBenchFuncs(b, n, fun)
+		})
+	}
+}
+
+func BenchmarkNsL1Norm(b *testing.B) {
+	runBenchNs(b, MetricL1Norm)
+}
+
+func BenchmarkNsCosine(b *testing.B) {
+	runBenchNs(b, MetricCosine)
+}
+
+func BenchmarkNsCovariance(b *testing.B) {
+	runBenchNs(b, MetricCovariance)
+}
+
+func BenchmarkNsCorrelation(b *testing.B) {
+	runBenchNs(b, MetricCorrelation)
 }

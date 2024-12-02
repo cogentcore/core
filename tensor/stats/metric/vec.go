@@ -5,194 +5,820 @@
 package metric
 
 import (
-	"math"
-	"slices"
-
 	"cogentcore.org/core/tensor"
 )
 
-// Vectorize3Out64 is a version of the [tensor.Vectorize] function
-// for metrics, which makes three Float64 output tensors for aggregating
-// and computing values, returning them for final computation.
-func Vectorize3Out64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr ...tensor.Tensor), tsr ...tensor.Tensor) (out1, out2, out3 tensor.Tensor, err error) {
-	n := nfunc(tsr...)
-	if n <= 0 {
-		return nil, nil, nil, nil
+// VectorizeOut64 is the general compute function for metric.
+// This version makes a Float64 output tensor for aggregating
+// and computing values, and then copies the results back to the
+// original output. This allows metric functions to operate directly
+// on integer valued inputs and produce sensible results.
+// It returns the Float64 output tensor for further processing as needed.
+// a and b are already enforced to be the same shape.
+func VectorizeOut64(a, b tensor.Tensor, out tensor.Values, ini float64, fun func(a, b, agg float64) float64) *tensor.Float64 {
+	rows, cells := a.Shape().RowCellSize()
+	o64 := tensor.NewFloat64(cells)
+	if rows <= 0 {
+		return o64
 	}
-	if err = tensor.MustBeSameShape(tsr[0], tsr[1]); err != nil {
+	if cells == 1 {
+		out.SetShapeSizes(1)
+		agg := ini
+		switch x := a.(type) {
+		case *tensor.Float64:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					agg = fun(x.Float1D(i), y.Float1D(i), agg)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					agg = fun(x.Float1D(i), y.Float1D(i), agg)
+				}
+			default:
+				for i := range rows {
+					agg = fun(x.Float1D(i), b.Float1D(i), agg)
+				}
+			}
+		case *tensor.Float32:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					agg = fun(x.Float1D(i), y.Float1D(i), agg)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					agg = fun(x.Float1D(i), y.Float1D(i), agg)
+				}
+			default:
+				for i := range rows {
+					agg = fun(x.Float1D(i), b.Float1D(i), agg)
+				}
+			}
+		default:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					agg = fun(a.Float1D(i), y.Float1D(i), agg)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					agg = fun(a.Float1D(i), y.Float1D(i), agg)
+				}
+			default:
+				for i := range rows {
+					agg = fun(a.Float1D(i), b.Float1D(i), agg)
+				}
+			}
+		}
+		o64.SetFloat1D(agg, 0)
+		out.SetFloat1D(agg, 0)
+		return o64
+	}
+	osz := tensor.CellsSize(a.ShapeSizes())
+	out.SetShapeSizes(osz...)
+	for i := range cells {
+		o64.SetFloat1D(ini, i)
+	}
+	switch x := a.(type) {
+	case *tensor.Float64:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), y.Float1D(si+j), o64.Float1D(j)), j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), y.Float1D(si+j), o64.Float1D(j)), j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), b.Float1D(si+j), o64.Float1D(j)), j)
+				}
+			}
+		}
+	case *tensor.Float32:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), y.Float1D(si+j), o64.Float1D(j)), j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), y.Float1D(si+j), o64.Float1D(j)), j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), b.Float1D(si+j), o64.Float1D(j)), j)
+				}
+			}
+		}
+	default:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(a.Float1D(si+j), y.Float1D(si+j), o64.Float1D(j)), j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(a.Float1D(si+j), y.Float1D(si+j), o64.Float1D(j)), j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(a.Float1D(si+j), b.Float1D(si+j), o64.Float1D(j)), j)
+				}
+			}
+		}
+	}
+	for j := range cells {
+		out.SetFloat1D(o64.Float1D(j), j)
+	}
+	return o64
+}
+
+// VectorizePreOut64 is a version of [VectorizeOut64] that takes additional
+// tensor.Float64 inputs of pre-computed values, e.g., the means of each output cell.
+func VectorizePreOut64(a, b tensor.Tensor, out tensor.Values, ini float64, preA, preB *tensor.Float64, fun func(a, b, preA, preB, agg float64) float64) *tensor.Float64 {
+	rows, cells := a.Shape().RowCellSize()
+	o64 := tensor.NewFloat64(cells)
+	if rows <= 0 {
+		return o64
+	}
+	if cells == 1 {
+		out.SetShapeSizes(1)
+		agg := ini
+		prevA := preA.Float1D(0)
+		prevB := preB.Float1D(0)
+		switch x := a.(type) {
+		case *tensor.Float64:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					agg = fun(x.Float1D(i), y.Float1D(i), prevA, prevB, agg)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					agg = fun(x.Float1D(i), y.Float1D(i), prevA, prevB, agg)
+				}
+			default:
+				for i := range rows {
+					agg = fun(x.Float1D(i), b.Float1D(i), prevA, prevB, agg)
+				}
+			}
+		case *tensor.Float32:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					agg = fun(x.Float1D(i), y.Float1D(i), prevA, prevB, agg)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					agg = fun(x.Float1D(i), y.Float1D(i), prevA, prevB, agg)
+				}
+			default:
+				for i := range rows {
+					agg = fun(x.Float1D(i), b.Float1D(i), prevA, prevB, agg)
+				}
+			}
+		default:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					agg = fun(a.Float1D(i), y.Float1D(i), prevA, prevB, agg)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					agg = fun(a.Float1D(i), y.Float1D(i), prevA, prevB, agg)
+				}
+			default:
+				for i := range rows {
+					agg = fun(a.Float1D(i), b.Float1D(i), prevA, prevB, agg)
+				}
+			}
+		}
+		o64.SetFloat1D(agg, 0)
+		out.SetFloat1D(agg, 0)
+		return o64
+	}
+	osz := tensor.CellsSize(a.ShapeSizes())
+	out.SetShapeSizes(osz...)
+	for j := range cells {
+		o64.SetFloat1D(ini, j)
+	}
+	switch x := a.(type) {
+	case *tensor.Float64:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), o64.Float1D(j)), j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), o64.Float1D(j)), j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), b.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), o64.Float1D(j)), j)
+				}
+			}
+		}
+	case *tensor.Float32:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), o64.Float1D(j)), j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), o64.Float1D(j)), j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(x.Float1D(si+j), b.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), o64.Float1D(j)), j)
+				}
+			}
+		}
+	default:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(a.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), o64.Float1D(j)), j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(a.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), o64.Float1D(j)), j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					o64.SetFloat1D(fun(a.Float1D(si+j), b.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), o64.Float1D(j)), j)
+				}
+			}
+		}
+	}
+	for i := range cells {
+		out.SetFloat1D(o64.Float1D(i), i)
+	}
+	return o64
+}
+
+// Vectorize2Out64 is a version of [VectorizeOut64] that separately aggregates
+// two output values, x and y as tensor.Float64.
+func Vectorize2Out64(a, b tensor.Tensor, iniX, iniY float64, fun func(a, b, ox, oy float64) (float64, float64)) (ox64, oy64 *tensor.Float64) {
+	rows, cells := a.Shape().RowCellSize()
+	ox64 = tensor.NewFloat64(cells)
+	oy64 = tensor.NewFloat64(cells)
+	if rows <= 0 {
 		return
 	}
-	nt := len(tsr)
-	osz := tensor.CellsSize(tsr[0].ShapeSizes())
-	out := tsr[nt-1].(tensor.Values)
-	out.SetShapeSizes(osz...)
-	out1 = tensor.NewFloat64(osz...)
-	out2 = tensor.NewFloat64(osz...)
-	out3 = tensor.NewFloat64(osz...)
-	tsrs := slices.Clone(tsr[:nt-1])
-	tsrs = append(tsrs, out1, out2, out3)
-	for idx := range n {
-		fun(idx, tsrs...)
+	if cells == 1 {
+		ox := iniX
+		oy := iniY
+		switch x := a.(type) {
+		case *tensor.Float64:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					ox, oy = fun(x.Float1D(i), y.Float1D(i), ox, oy)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					ox, oy = fun(x.Float1D(i), y.Float1D(i), ox, oy)
+				}
+			default:
+				for i := range rows {
+					ox, oy = fun(x.Float1D(i), b.Float1D(i), ox, oy)
+				}
+			}
+		case *tensor.Float32:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					ox, oy = fun(x.Float1D(i), y.Float1D(i), ox, oy)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					ox, oy = fun(x.Float1D(i), y.Float1D(i), ox, oy)
+				}
+			default:
+				for i := range rows {
+					ox, oy = fun(x.Float1D(i), b.Float1D(i), ox, oy)
+				}
+			}
+		default:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					ox, oy = fun(a.Float1D(i), y.Float1D(i), ox, oy)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					ox, oy = fun(a.Float1D(i), y.Float1D(i), ox, oy)
+				}
+			default:
+				for i := range rows {
+					ox, oy = fun(a.Float1D(i), b.Float1D(i), ox, oy)
+				}
+			}
+		}
+		ox64.SetFloat1D(ox, 0)
+		oy64.SetFloat1D(oy, 0)
+		return
 	}
-	return out1, out2, out3, nil
+	for j := range cells {
+		ox64.SetFloat1D(iniX, j)
+		oy64.SetFloat1D(iniY, j)
+	}
+	switch x := a.(type) {
+	case *tensor.Float64:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy := fun(x.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy := fun(x.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy := fun(x.Float1D(si+j), b.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+				}
+			}
+		}
+	case *tensor.Float32:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy := fun(x.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy := fun(x.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy := fun(x.Float1D(si+j), b.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+				}
+			}
+		}
+	default:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy := fun(a.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy := fun(a.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy := fun(a.Float1D(si+j), b.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+				}
+			}
+		}
+	}
+	return
 }
 
-// NFunc is the nfun for metrics functions, returning the min number of rows across the
-// two input tensors, and initializing the _last_ one to hold the output
-// with the first, row dimension set to 1.
-func NFunc(tsr ...tensor.Tensor) int {
-	nt := len(tsr)
-	if nt < 3 {
-		return 0
+// Vectorize3Out64 is a version of [VectorizeOut64] that has 3 outputs instead of 1.
+func Vectorize3Out64(a, b tensor.Tensor, iniX, iniY, iniZ float64, fun func(a, b, ox, oy, oz float64) (float64, float64, float64)) (ox64, oy64, oz64 *tensor.Float64) {
+	rows, cells := a.Shape().RowCellSize()
+	ox64 = tensor.NewFloat64(cells)
+	oy64 = tensor.NewFloat64(cells)
+	oz64 = tensor.NewFloat64(cells)
+	if rows <= 0 {
+		return
 	}
-	a, b := tsr[0], tsr[1]
-	na, nb := a.DimSize(0), b.DimSize(0)
-	return min(na, nb)
+	if cells == 1 {
+		ox := iniX
+		oy := iniY
+		oz := iniZ
+		switch x := a.(type) {
+		case *tensor.Float64:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), y.Float1D(i), ox, oy, oz)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), y.Float1D(i), ox, oy, oz)
+				}
+			default:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), b.Float1D(i), ox, oy, oz)
+				}
+			}
+		case *tensor.Float32:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), y.Float1D(i), ox, oy, oz)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), y.Float1D(i), ox, oy, oz)
+				}
+			default:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), b.Float1D(i), ox, oy, oz)
+				}
+			}
+		default:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					ox, oy, oz = fun(a.Float1D(i), y.Float1D(i), ox, oy, oz)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					ox, oy, oz = fun(a.Float1D(i), y.Float1D(i), ox, oy, oz)
+				}
+			default:
+				for i := range rows {
+					ox, oy, oz = fun(a.Float1D(i), b.Float1D(i), ox, oy, oz)
+				}
+			}
+		}
+		ox64.SetFloat1D(ox, 0)
+		oy64.SetFloat1D(oy, 0)
+		oz64.SetFloat1D(oz, 0)
+		return
+	}
+	for j := range cells {
+		ox64.SetFloat1D(iniX, j)
+		oy64.SetFloat1D(iniY, j)
+		oz64.SetFloat1D(iniZ, j)
+	}
+	switch x := a.(type) {
+	case *tensor.Float64:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), b.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		}
+	case *tensor.Float32:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), b.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		}
+	default:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(a.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(a.Float1D(si+j), y.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(a.Float1D(si+j), b.Float1D(si+j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		}
+	}
+	return
 }
 
-// VecFunc is a helper function for metrics functions, dealing with iterating over
-// the Cell subspace per row and initializing the aggregation values for first index.
-// It also skips over NaN missing values.
-func VecFunc(idx int, a, b, out tensor.Tensor, ini float64, fun func(a, b, agg float64) float64) {
-	nsub := out.Len()
-	si := idx * nsub // 1D start of sub
-	for i := range nsub {
-		if idx == 0 {
-			out.SetFloat1D(ini, i)
-		}
-		av := a.Float1D(si + i)
-		if math.IsNaN(av) {
-			continue
-		}
-		bv := b.Float1D(si + i)
-		if math.IsNaN(bv) {
-			continue
-		}
-		out.SetFloat1D(fun(av, bv, out.Float1D(i)), i)
+// VectorizePre3Out64 is a version of [VectorizePreOut64] that takes additional
+// tensor.Float64 inputs of pre-computed values, e.g., the means of each output cell,
+// and has 3 outputs instead of 1.
+func VectorizePre3Out64(a, b tensor.Tensor, iniX, iniY, iniZ float64, preA, preB *tensor.Float64, fun func(a, b, preA, preB, ox, oy, oz float64) (float64, float64, float64)) (ox64, oy64, oz64 *tensor.Float64) {
+	rows, cells := a.Shape().RowCellSize()
+	ox64 = tensor.NewFloat64(cells)
+	oy64 = tensor.NewFloat64(cells)
+	oz64 = tensor.NewFloat64(cells)
+	if rows <= 0 {
+		return
 	}
-}
-
-// VecSSFunc is a helper function for metric functions, dealing with iterating over
-// the Cell subspace per row and initializing the aggregation values for first index.
-// This version does sum-of-squares integration over 2 output vectors,
-// It also skips over NaN missing values.
-func VecSSFunc(idx int, a, b, out1, out2 tensor.Tensor, ini1, ini2 float64, fun func(a, b float64) float64) {
-	nsub := out2.Len()
-	si := idx * nsub // 1D start of sub
-	for i := range nsub {
-		if idx == 0 {
-			out1.SetFloat1D(ini1, i)
-			out2.SetFloat1D(ini2, i)
+	if cells == 1 {
+		ox := iniX
+		oy := iniY
+		oz := iniZ
+		prevA := preA.Float1D(0)
+		prevB := preB.Float1D(0)
+		switch x := a.(type) {
+		case *tensor.Float64:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), y.Float1D(i), prevA, prevB, ox, oy, oz)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), y.Float1D(i), prevA, prevB, ox, oy, oz)
+				}
+			default:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), b.Float1D(i), prevA, prevB, ox, oy, oz)
+				}
+			}
+		case *tensor.Float32:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), y.Float1D(i), prevA, prevB, ox, oy, oz)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), y.Float1D(i), prevA, prevB, ox, oy, oz)
+				}
+			default:
+				for i := range rows {
+					ox, oy, oz = fun(x.Float1D(i), b.Float1D(i), prevA, prevB, ox, oy, oz)
+				}
+			}
+		default:
+			switch y := b.(type) {
+			case *tensor.Float64:
+				for i := range rows {
+					ox, oy, oz = fun(a.Float1D(i), y.Float1D(i), prevA, prevB, ox, oy, oz)
+				}
+			case *tensor.Float32:
+				for i := range rows {
+					ox, oy, oz = fun(a.Float1D(i), y.Float1D(i), prevA, prevB, ox, oy, oz)
+				}
+			default:
+				for i := range rows {
+					ox, oy, oz = fun(a.Float1D(i), b.Float1D(i), prevA, prevB, ox, oy, oz)
+				}
+			}
 		}
-		av := a.Float1D(si + i)
-		if math.IsNaN(av) {
-			continue
-		}
-		bv := b.Float1D(si + i)
-		if math.IsNaN(bv) {
-			continue
-		}
-		scale, ss := out1.Float1D(i), out2.Float1D(i)
-		d := fun(av, bv)
-		if d == 0 {
-			continue
-		}
-		absxi := math.Abs(d)
-		if scale < absxi {
-			ss = 1 + ss*(scale/absxi)*(scale/absxi)
-			scale = absxi
-		} else {
-			ss = ss + (absxi/scale)*(absxi/scale)
-		}
-		out1.SetFloat1D(scale, i)
-		out2.SetFloat1D(ss, i)
+		ox64.SetFloat1D(ox, 0)
+		oy64.SetFloat1D(oy, 0)
+		oz64.SetFloat1D(oz, 0)
+		return
 	}
-}
-
-// Vec2inFunc is a helper function for stats functions, dealing with iterating over
-// the Cell subspace per row and initializing the aggregation values for first index.
-// This version has 2 input vectors, the second input being the output of another stat
-// e.g., the mean. It also skips over NaN missing values.
-func Vec2inFunc(idx int, a, b, a2, b2, out tensor.Tensor, ini float64, fun func(a, b, a2, b2, agg float64) float64) {
-	nsub := out.Len()
-	si := idx * nsub // 1D start of sub
-	for i := range nsub {
-		if idx == 0 {
-			out.SetFloat1D(ini, i)
-		}
-		av := a.Float1D(si + i)
-		if math.IsNaN(av) {
-			continue
-		}
-		bv := b.Float1D(si + i)
-		if math.IsNaN(bv) {
-			continue
-		}
-		av2 := a2.Float1D(i)
-		bv2 := b2.Float1D(i)
-		out.SetFloat1D(fun(av, bv, av2, bv2, out.Float1D(i)), i)
+	for j := range cells {
+		ox64.SetFloat1D(iniX, j)
+		oy64.SetFloat1D(iniY, j)
+		oz64.SetFloat1D(iniZ, j)
 	}
-}
-
-// Vec2in3outFunc is a helper function for stats functions, dealing with iterating over
-// the Cell subspace per row and initializing the aggregation values for first index.
-// This version has 2 input, 3 output vectors. The second input being the output of another stat
-// e.g., the mean. It also skips over NaN missing values.
-func Vec2in3outFunc(idx int, a, b, a2, b2, out1, out2, out3 tensor.Tensor, ini float64, fun func(a, b, a2, b2, out1, out2, out3 float64) (float64, float64, float64)) {
-	nsub := out1.Len()
-	si := idx * nsub // 1D start of sub
-	for i := range nsub {
-		if idx == 0 {
-			out1.SetFloat1D(ini, i)
-			out2.SetFloat1D(ini, i)
-			out3.SetFloat1D(ini, i)
+	switch x := a.(type) {
+	case *tensor.Float64:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), b.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
 		}
-		av := a.Float1D(si + i)
-		if math.IsNaN(av) {
-			continue
+	case *tensor.Float32:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(x.Float1D(si+j), b.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
 		}
-		bv := b.Float1D(si + i)
-		if math.IsNaN(bv) {
-			continue
+	default:
+		switch y := b.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(a.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(a.Float1D(si+j), y.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
+		default:
+			for i := range rows {
+				si := i * cells
+				for j := range cells {
+					ox, oy, oz := fun(a.Float1D(si+j), b.Float1D(si+j), preA.Float1D(j), preB.Float1D(j), ox64.Float1D(j), oy64.Float1D(j), oz64.Float1D(j))
+					ox64.SetFloat1D(ox, j)
+					oy64.SetFloat1D(oy, j)
+					oz64.SetFloat1D(oz, j)
+				}
+			}
 		}
-		av2 := a2.Float1D(i)
-		bv2 := b2.Float1D(i)
-		o1 := out1.Float1D(i)
-		o2 := out2.Float1D(i)
-		o3 := out3.Float1D(i)
-		o1, o2, o3 = fun(av, bv, av2, bv2, o1, o2, o3)
-		out1.SetFloat1D(o1, i)
-		out2.SetFloat1D(o2, i)
-		out3.SetFloat1D(o3, i)
 	}
-}
-
-// Vec3outFunc is a helper function for stats functions, dealing with iterating over
-// the Cell subspace per row and initializing the aggregation values for first index.
-// This version has 3 output vectors. It also skips over NaN missing values.
-func Vec3outFunc(idx int, a, b, out1, out2, out3 tensor.Tensor, ini float64, fun func(a, b, out1, out2, out3 float64) (float64, float64, float64)) {
-	nsub := out1.Len()
-	si := idx * nsub // 1D start of sub
-	for i := range nsub {
-		if idx == 0 {
-			out1.SetFloat1D(ini, i)
-			out2.SetFloat1D(ini, i)
-			out3.SetFloat1D(ini, i)
-		}
-		av := a.Float1D(si + i)
-		if math.IsNaN(av) {
-			continue
-		}
-		bv := b.Float1D(si + i)
-		if math.IsNaN(bv) {
-			continue
-		}
-		o1 := out1.Float1D(i)
-		o2 := out2.Float1D(i)
-		o3 := out3.Float1D(i)
-		o1, o2, o3 = fun(av, bv, o1, o2, o3)
-		out1.SetFloat1D(o1, i)
-		out2.SetFloat1D(o2, i)
-		out3.SetFloat1D(o3, i)
-	}
+	return
 }

@@ -5,132 +5,193 @@
 package stats
 
 import (
-	"math"
-	"slices"
-
 	"cogentcore.org/core/tensor"
 )
 
-// VectorizeOut64 is a version of the [tensor.Vectorize] function
-// for stats, which makes a Float64 output tensor for aggregating
+// VectorizeOut64 is the general compute function for stats.
+// This version makes a Float64 output tensor for aggregating
 // and computing values, and then copies the results back to the
-// original output.  This allows stats functions to operate directly
+// original output. This allows stats functions to operate directly
 // on integer valued inputs and produce sensible results.
-// and returns the Float64 output tensor for further processing as needed.
-// It uses the _last_ tensor as the output, allowing for multiple inputs,
-// as in the case of VarVecFun.
-func VectorizeOut64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr ...tensor.Tensor), tsr ...tensor.Tensor) (tensor.Tensor, error) {
-	n := nfunc(tsr...)
-	if n <= 0 {
-		return nil, nil
+// It returns the Float64 output tensor for further processing as needed.
+func VectorizeOut64(a tensor.Tensor, out tensor.Values, ini float64, fun func(val, agg float64) float64) *tensor.Float64 {
+	rows, cells := a.Shape().RowCellSize()
+	o64 := tensor.NewFloat64(cells)
+	if rows <= 0 {
+		return o64
 	}
-	nt := len(tsr)
-	osz := tensor.CellsSize(tsr[0].ShapeSizes())
-	out := tsr[nt-1].(tensor.Values)
+	if cells == 1 {
+		out.SetShapeSizes(1)
+		agg := ini
+		switch x := a.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				agg = fun(x.Float1D(i), agg)
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				agg = fun(x.Float1D(i), agg)
+			}
+		default:
+			for i := range rows {
+				agg = fun(a.Float1D(i), agg)
+			}
+		}
+		o64.SetFloat1D(agg, 0)
+		out.SetFloat1D(agg, 0)
+		return o64
+	}
+	osz := tensor.CellsSize(a.ShapeSizes())
 	out.SetShapeSizes(osz...)
-	o64 := tensor.NewFloat64(osz...)
-	etsr := slices.Clone(tsr)
-	etsr[nt-1] = o64
-	for idx := range n {
-		fun(idx, etsr...)
+	for i := range cells {
+		o64.SetFloat1D(ini, i)
 	}
-	nsub := out.Len()
-	for i := range nsub {
+	switch x := a.(type) {
+	case *tensor.Float64:
+		for i := range rows {
+			for j := range cells {
+				o64.SetFloat1D(fun(x.Float1D(i*cells+j), o64.Float1D(j)), j)
+			}
+		}
+	case *tensor.Float32:
+		for i := range rows {
+			for j := range cells {
+				o64.SetFloat1D(fun(x.Float1D(i*cells+j), o64.Float1D(j)), j)
+			}
+		}
+	default:
+		for i := range rows {
+			for j := range cells {
+				o64.SetFloat1D(fun(a.Float1D(i*cells+j), o64.Float1D(j)), j)
+			}
+		}
+	}
+	for j := range cells {
+		out.SetFloat1D(o64.Float1D(j), j)
+	}
+	return o64
+}
+
+// VectorizePreOut64 is a version of [VectorizeOut64] that takes an additional
+// tensor.Float64 input of pre-computed values, e.g., the means of each output cell.
+func VectorizePreOut64(a tensor.Tensor, out tensor.Values, ini float64, pre *tensor.Float64, fun func(val, pre, agg float64) float64) *tensor.Float64 {
+	rows, cells := a.Shape().RowCellSize()
+	o64 := tensor.NewFloat64(cells)
+	if rows <= 0 {
+		return o64
+	}
+	if cells == 1 {
+		out.SetShapeSizes(1)
+		agg := ini
+		prev := pre.Float1D(0)
+		switch x := a.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				agg = fun(x.Float1D(i), prev, agg)
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				agg = fun(x.Float1D(i), prev, agg)
+			}
+		default:
+			for i := range rows {
+				agg = fun(a.Float1D(i), prev, agg)
+			}
+		}
+		o64.SetFloat1D(agg, 0)
+		out.SetFloat1D(agg, 0)
+		return o64
+	}
+	osz := tensor.CellsSize(a.ShapeSizes())
+	out.SetShapeSizes(osz...)
+	for j := range cells {
+		o64.SetFloat1D(ini, j)
+	}
+	switch x := a.(type) {
+	case *tensor.Float64:
+		for i := range rows {
+			for j := range cells {
+				o64.SetFloat1D(fun(x.Float1D(i*cells+j), pre.Float1D(j), o64.Float1D(j)), j)
+			}
+		}
+	case *tensor.Float32:
+		for i := range rows {
+			for j := range cells {
+				o64.SetFloat1D(fun(x.Float1D(i*cells+j), pre.Float1D(j), o64.Float1D(j)), j)
+			}
+		}
+	default:
+		for i := range rows {
+			for j := range cells {
+				o64.SetFloat1D(fun(a.Float1D(i*cells+j), pre.Float1D(j), o64.Float1D(j)), j)
+			}
+		}
+	}
+	for i := range cells {
 		out.SetFloat1D(o64.Float1D(i), i)
 	}
-	return o64, nil
+	return o64
 }
 
-// Vectorize2Out64 is a version of the [tensor.Vectorize] function
-// for stats, which makes two Float64 output tensors for aggregating
-// and computing values, returning them for final computation.
-func Vectorize2Out64(nfunc func(tsr ...tensor.Tensor) int, fun func(idx int, tsr ...tensor.Tensor), tsr ...tensor.Tensor) (out1, out2 tensor.Tensor, err error) {
-	n := nfunc(tsr...)
-	if n <= 0 {
-		return nil, nil, nil
+// Vectorize2Out64 is a version of [VectorizeOut64] that separately aggregates
+// two output values, x and y as tensor.Float64.
+func Vectorize2Out64(a tensor.Tensor, iniX, iniY float64, fun func(val, ox, oy float64) (float64, float64)) (ox64, oy64 *tensor.Float64) {
+	rows, cells := a.Shape().RowCellSize()
+	ox64 = tensor.NewFloat64(cells)
+	oy64 = tensor.NewFloat64(cells)
+	if rows <= 0 {
+		return ox64, oy64
 	}
-	nt := len(tsr)
-	osz := tensor.CellsSize(tsr[0].ShapeSizes())
-	out := tsr[nt-1].(tensor.Values)
-	out.SetShapeSizes(osz...)
-	out1 = tensor.NewFloat64(osz...)
-	out2 = tensor.NewFloat64(osz...)
-	tsrs := slices.Clone(tsr[:nt-1])
-	tsrs = append(tsrs, out1, out2)
-	for idx := range n {
-		fun(idx, tsrs...)
+	if cells == 1 {
+		ox := iniX
+		oy := iniY
+		switch x := a.(type) {
+		case *tensor.Float64:
+			for i := range rows {
+				ox, oy = fun(x.Float1D(i), ox, oy)
+			}
+		case *tensor.Float32:
+			for i := range rows {
+				ox, oy = fun(x.Float1D(i), ox, oy)
+			}
+		default:
+			for i := range rows {
+				ox, oy = fun(a.Float1D(i), ox, oy)
+			}
+		}
+		ox64.SetFloat1D(ox, 0)
+		oy64.SetFloat1D(oy, 0)
+		return
 	}
-	return out1, out2, err
-}
-
-// NFunc is the nfun for stats functions, returning number of rows of the
-// first tensor
-func NFunc(tsr ...tensor.Tensor) int {
-	nt := len(tsr)
-	if nt < 2 {
-		return 0
+	for j := range cells {
+		ox64.SetFloat1D(iniX, j)
+		oy64.SetFloat1D(iniY, j)
 	}
-	return tsr[0].DimSize(0)
-}
-
-// VecFunc is a helper function for stats functions, dealing with iterating over
-// the Cell subspace per row and initializing the aggregation values for first index.
-// It also skips over NaN missing values.
-func VecFunc(idx int, in, out tensor.Tensor, ini float64, fun func(val, agg float64) float64) {
-	nsub := out.Len()
-	si := idx * nsub // 1D start of sub
-	for i := range nsub {
-		if idx == 0 {
-			out.SetFloat1D(ini, i)
+	switch x := a.(type) {
+	case *tensor.Float64:
+		for i := range rows {
+			for j := range cells {
+				ox, oy := fun(x.Float1D(i*cells+j), ox64.Float1D(j), oy64.Float1D(j))
+				ox64.SetFloat1D(ox, j)
+				oy64.SetFloat1D(oy, j)
+			}
 		}
-		val := in.Float1D(si + i)
-		if math.IsNaN(val) {
-			continue
+	case *tensor.Float32:
+		for i := range rows {
+			for j := range cells {
+				ox, oy := fun(x.Float1D(i*cells+j), ox64.Float1D(j), oy64.Float1D(j))
+				ox64.SetFloat1D(ox, j)
+				oy64.SetFloat1D(oy, j)
+			}
 		}
-		out.SetFloat1D(fun(val, out.Float1D(i)), i)
+	default:
+		for i := range rows {
+			for j := range cells {
+				ox, oy := fun(a.Float1D(i*cells+j), ox64.Float1D(j), oy64.Float1D(j))
+				ox64.SetFloat1D(ox, j)
+				oy64.SetFloat1D(oy, j)
+			}
+		}
 	}
-}
-
-// Vec2inFunc is a helper function for stats functions, dealing with iterating over
-// the Cell subspace per row and initializing the aggregation values for first index.
-// This version has 2 input vectors, the second input being the output of another stat
-// e.g., the mean for Var.
-// It also skips over NaN missing values.
-func Vec2inFunc(idx int, in1, in2, out tensor.Tensor, ini float64, fun func(val1, val2, agg float64) float64) {
-	nsub := out.Len()
-	si := idx * nsub // 1D start of sub
-	for i := range nsub {
-		if idx == 0 {
-			out.SetFloat1D(ini, i)
-		}
-		val1 := in1.Float1D(si + i)
-		if math.IsNaN(val1) {
-			continue
-		}
-		val2 := in2.Float1D(i) // output = not nan
-		out.SetFloat1D(fun(val1, val2, out.Float1D(i)), i)
-	}
-}
-
-// Vec2outFunc is a helper function for stats functions, dealing with iterating over
-// the Cell subspace per row and initializing the aggregation values for first index.
-// This version has 2 output vectors, for separate integration of scale sum squared
-// It also skips over NaN missing values.
-func Vec2outFunc(idx int, in, out1, out2 tensor.Tensor, ini1, ini2 float64, fun func(val, agg1, agg2 float64) (float64, float64)) {
-	nsub := out2.Len()
-	si := idx * nsub // 1D start of sub
-	for i := range nsub {
-		if idx == 0 {
-			out1.SetFloat1D(ini1, i)
-			out2.SetFloat1D(ini2, i)
-		}
-		val := in.Float1D(si + i)
-		if math.IsNaN(val) {
-			continue
-		}
-		ag1, ag2 := out1.Float1D(i), out2.Float1D(i)
-		ag1, ag2 = fun(val, ag1, ag2)
-		out1.SetFloat1D(ag1, i)
-		out2.SetFloat1D(ag2, i)
-	}
+	return
 }

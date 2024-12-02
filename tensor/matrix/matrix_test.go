@@ -5,6 +5,7 @@
 package matrix
 
 import (
+	"fmt"
 	"testing"
 
 	"cogentcore.org/core/base/tolassert"
@@ -68,4 +69,43 @@ func TestMatrix(t *testing.T) {
 
 	inv = Inverse(b)
 	tolassert.EqualTolSlice(t, []float64{-2, 1, 1.5, -0.5, -2, 1, 1.5, -0.5, -2, 1, 1.5, -0.5}, inv.Values, 1.0e-8)
+}
+
+func runBenchMult(b *testing.B, n int, thread bool) {
+	if thread {
+		tensor.ThreadingThreshold = 1
+	} else {
+		tensor.ThreadingThreshold = 100_000_000
+	}
+	nrows := 10 // benefits even at 10 x 2 x 2 = 40
+	av := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, nrows*n*n+1), nrows, n, n))
+	bv := tensor.AsFloat64(tensor.Reshape(tensor.NewIntRange(1, nrows*n*n+1), nrows, n, n))
+	ov := tensor.NewFloat64(nrows, n, n)
+	b.ResetTimer()
+	for range b.N {
+		MulOut(av, bv, ov)
+	}
+}
+
+// to run this benchmark, do:
+// go test -bench BenchmarkMult -count 10 >bench.txt
+// go install golang.org/x/perf/cmd/benchstat@latest
+// benchstat -row /n -col .name bench.txt
+
+var ns = []int{2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 40}
+
+func BenchmarkMultThreaded(b *testing.B) {
+	for _, n := range ns {
+		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+			runBenchMult(b, n, true)
+		})
+	}
+}
+
+func BenchmarkMultSingle(b *testing.B) {
+	for _, n := range ns {
+		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+			runBenchMult(b, n, false)
+		})
+	}
 }

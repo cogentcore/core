@@ -116,7 +116,7 @@ func MulOut(a, b tensor.Tensor, out *tensor.Float64) error {
 		mb, _ := NewMatrix(eb)
 		nr := ea.DimSize(0)
 		out.SetShapeSizes(nr, ea.DimSize(1), eb.DimSize(1))
-		tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2)*eb.Len(),
+		tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2)*eb.Len()*100, // always beneficial
 			func(tsr ...tensor.Tensor) int { return nr },
 			func(r int, tsr ...tensor.Tensor) {
 				sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
@@ -131,7 +131,7 @@ func MulOut(a, b tensor.Tensor, out *tensor.Float64) error {
 		ma, _ := NewMatrix(ea)
 		nr := eb.DimSize(0)
 		out.SetShapeSizes(nr, ea.DimSize(0), eb.DimSize(2))
-		tensor.VectorizeThreaded(ea.Len()*eb.DimSize(1)*eb.DimSize(2),
+		tensor.VectorizeThreaded(ea.Len()*eb.DimSize(1)*eb.DimSize(2)*100,
 			func(tsr ...tensor.Tensor) int { return nr },
 			func(r int, tsr ...tensor.Tensor) {
 				sb := tensor.Reslice(eb, r, tensor.FullAxis, tensor.FullAxis)
@@ -245,7 +245,7 @@ func InverseOut(a tensor.Tensor, out *tensor.Float64) error {
 	nr := ea.DimSize(0)
 	out.SetShapeSizes(nr, ea.DimSize(1), ea.DimSize(2))
 	var errs []error
-	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2), // todo: better compute estimate
+	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2)*100,
 		func(tsr ...tensor.Tensor) int { return nr },
 		func(r int, tsr ...tensor.Tensor) {
 			sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)

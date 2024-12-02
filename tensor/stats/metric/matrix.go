@@ -5,7 +5,6 @@
 package metric
 
 import (
-	"cogentcore.org/core/math32/vecint"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/matrix"
 )
@@ -143,9 +142,6 @@ func CovarianceMatrixOut(fun any, in tensor.Tensor, out tensor.Values) error {
 	out.SetShapeSizes(cells, cells)
 	flatvw := tensor.NewReshaped(in, rows, cells)
 
-	var av, bv tensor.Tensor
-	curCoords := vecint.Vector2i{-1, -1}
-
 	coords := matrix.TriLIndicies(cells)
 	nc := coords.DimSize(0)
 	// note: flops estimating 3 per item on average -- different for different metrics.
@@ -153,14 +149,8 @@ func CovarianceMatrixOut(fun any, in tensor.Tensor, out tensor.Values) error {
 		func(idx int, tsr ...tensor.Tensor) {
 			cx := coords.Int(idx, 0)
 			cy := coords.Int(idx, 1)
-			if cx != curCoords.X {
-				av = tensor.Reslice(tsr[0], tensor.FullAxis, cx)
-				curCoords.X = cx
-			}
-			if cy != curCoords.Y {
-				bv = tensor.Reslice(tsr[0], tensor.FullAxis, cy)
-				curCoords.Y = cy
-			}
+			av := tensor.Reslice(tsr[0], tensor.FullAxis, cx)
+			bv := tensor.Reslice(tsr[0], tensor.FullAxis, cy)
 			mout := mfun(av, bv)
 			tsr[1].SetFloat(mout.Float1D(0), cx, cy)
 		}, flatvw, out)

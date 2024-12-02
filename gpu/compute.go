@@ -169,12 +169,26 @@ func Warps(n, threads int) int {
 	return int(math.Ceil(float64(n) / float64(threads)))
 }
 
+// NumThreads is the number of threads to use for parallel threading,
+// in the [VectorizeFunc] that is used for CPU versions of GPU functions.
+// The default of 0 causes the [runtime.GOMAXPROCS] to be used.
+var NumThreads = 0
+
+// DefaultNumThreads returns the default number of threads to use:
+// NumThreads if non-zero, otherwise [runtime.GOMAXPROCS].
+func DefaultNumThreads() int {
+	if NumThreads > 0 {
+		return NumThreads
+	}
+	return runtime.GOMAXPROCS(0)
+}
+
 // VectorizeFunc runs given GPU kernel function taking a uint32 index
 // on the CPU, using given number of threads with goroutines, for n iterations.
 // If threads is 0, then GOMAXPROCS is used.
 func VectorizeFunc(threads, n int, fun func(idx uint32)) {
 	if threads == 0 {
-		threads = runtime.GOMAXPROCS(0)
+		threads = DefaultNumThreads()
 	}
 	nper := int(math.Ceil(float64(n) / float64(threads)))
 	wait := sync.WaitGroup{}

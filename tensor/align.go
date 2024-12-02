@@ -181,7 +181,7 @@ func FloatBinaryFuncOut(flops int, fun func(a, b float64) float64, a, b Tensor, 
 	}
 	out.SetShapeSizes(os.Sizes...)
 	olen := os.Len()
-	VectorizeThreaded(1, func(tsr ...Tensor) int { return olen },
+	VectorizeThreaded(flops, func(tsr ...Tensor) int { return olen },
 		func(idx int, tsr ...Tensor) {
 			oi := os.IndexFrom1D(idx)
 			ai := WrapIndex1D(as, oi...)

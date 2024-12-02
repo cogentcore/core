@@ -83,7 +83,7 @@ func EigOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 	vecs.SetShapeSizes(nr, sz, sz)
 	vals.SetShapeSizes(nr, sz)
 	var errs []error
-	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2), // todo: better compute estimate
+	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2)*1000,
 		func(tsr ...tensor.Tensor) int { return nr },
 		func(r int, tsr ...tensor.Tensor) {
 			sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
@@ -171,7 +171,7 @@ func EigSymOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 	vecs.SetShapeSizes(nr, sz, sz)
 	vals.SetShapeSizes(nr, sz)
 	var errs []error
-	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2), // todo: better compute estimate
+	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2)*1000,
 		func(tsr ...tensor.Tensor) int { return nr },
 		func(r int, tsr ...tensor.Tensor) {
 			sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
@@ -258,7 +258,7 @@ func SVDOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 	vecs.SetShapeSizes(nr, sz, sz)
 	vals.SetShapeSizes(nr, sz)
 	var errs []error
-	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2), // todo: better compute estimate
+	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2)*1000,
 		func(tsr ...tensor.Tensor) int { return nr },
 		func(r int, tsr ...tensor.Tensor) {
 			sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
@@ -270,6 +270,82 @@ func SVDOut(a tensor.Tensor, vecs, vals *tensor.Float64) error {
 				errs = append(errs, errors.New("gonum mat.SVD Factorize failed"))
 			}
 			eig.UTo(do)
+			eig.Values(vals.Values[r*sz : (r+1)*sz])
+		})
+	return errors.Join(errs...)
+}
+
+// SVDValues performs the singular value decomposition of the given
+// symmetric square matrix, which produces real-valued results,
+// and is generally much faster than [EigSym], while producing the same results.
+// This version only generates eigenvalues, not vectors: see [SVD].
+// The values are the size of one row ordered highest to lowest,
+// which is the opposite of [EigSym].
+// If the input tensor is > 2D, it is treated as a list of 2D matricies,
+// and parallel threading is used where beneficial.
+func SVDValues(a tensor.Tensor) *tensor.Float64 {
+	vals := tensor.NewFloat64()
+	errors.Log(SVDValuesOut(a, vals))
+	return vals
+}
+
+// SVDValuesOut performs the singular value decomposition of the given
+// symmetric square matrix, which produces real-valued results,
+// and is generally much faster than [EigSym], while producing the same results.
+// This version only generates eigenvalues, not vectors: see [SVDOut].
+// The values are the size of one row ordered highest to lowest,
+// which is the opposite of [EigSym].
+// If the input tensor is > 2D, it is treated as a list of 2D matricies,
+// and parallel threading is used where beneficial.
+func SVDValuesOut(a tensor.Tensor, vals *tensor.Float64) error {
+	if err := StringCheck(a); err != nil {
+		return err
+	}
+	na := a.NumDims()
+	if na == 1 {
+		return mat.ErrShape
+	}
+	var asz []int
+	ea := a
+	if na > 2 {
+		asz = tensor.SplitAtInnerDims(a, 2)
+		if asz[0] == 1 {
+			ea = tensor.Reshape(a, asz[1:]...)
+			na = 2
+		}
+	}
+	if na == 2 {
+		if a.DimSize(0) != a.DimSize(1) {
+			return mat.ErrShape
+		}
+		ma, _ := NewSymmetric(a)
+		vals.SetShapeSizes(a.DimSize(0))
+		var eig mat.SVD
+		ok := eig.Factorize(ma, mat.SVDNone)
+		if !ok {
+			return errors.New("gonum mat.SVD Factorize failed")
+		}
+		eig.Values(vals.Values)
+		return nil
+	}
+	ea = tensor.Reshape(a, asz...)
+	if ea.DimSize(1) != ea.DimSize(2) {
+		return mat.ErrShape
+	}
+	nr := ea.DimSize(0)
+	sz := ea.DimSize(1)
+	vals.SetShapeSizes(nr, sz)
+	var errs []error
+	tensor.VectorizeThreaded(ea.DimSize(1)*ea.DimSize(2)*1000,
+		func(tsr ...tensor.Tensor) int { return nr },
+		func(r int, tsr ...tensor.Tensor) {
+			sa := tensor.Reslice(ea, r, tensor.FullAxis, tensor.FullAxis)
+			ma, _ := NewSymmetric(sa)
+			var eig mat.SVD
+			ok := eig.Factorize(ma, mat.SVDNone)
+			if !ok {
+				errs = append(errs, errors.New("gonum mat.SVD Factorize failed"))
+			}
 			eig.Values(vals.Values[r*sz : (r+1)*sz])
 		})
 	return errors.Join(errs...)
