@@ -34,6 +34,8 @@ func init() {
 		"ProjectOnMatrixColumnOut": reflect.ValueOf(matrix.ProjectOnMatrixColumnOut),
 		"SVD":                      reflect.ValueOf(matrix.SVD),
 		"SVDOut":                   reflect.ValueOf(matrix.SVDOut),
+		"SVDValues":                reflect.ValueOf(matrix.SVDValues),
+		"SVDValuesOut":             reflect.ValueOf(matrix.SVDValuesOut),
 		"StringCheck":              reflect.ValueOf(matrix.StringCheck),
 		"Trace":                    reflect.ValueOf(matrix.Trace),
 		"Tri":                      reflect.ValueOf(matrix.Tri),

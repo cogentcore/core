@@ -218,7 +218,7 @@ func TestNorm(t *testing.T) {
 	// fmt.Println(oneout)
 }
 
-// baseline values pre-optimization:
+// after optimizing: 12/1/2024:  also, GOEXPERIMENT=newinliner didn't make any diff
 // go test -bench BenchmarkFuncs -count=1
 // goos: darwin
 // goarch: arm64

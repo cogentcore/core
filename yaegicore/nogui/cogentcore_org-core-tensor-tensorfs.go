@@ -13,6 +13,7 @@ func init() {
 		"Chdir":        reflect.ValueOf(tensorfs.Chdir),
 		"CurDir":       reflect.ValueOf(&tensorfs.CurDir).Elem(),
 		"CurRoot":      reflect.ValueOf(&tensorfs.CurRoot).Elem(),
+		"DirFromTable": reflect.ValueOf(tensorfs.DirFromTable),
 		"DirOnly":      reflect.ValueOf(tensorfs.DirOnly),
 		"DirTable":     reflect.ValueOf(tensorfs.DirTable),
 		"Get":          reflect.ValueOf(tensorfs.Get),

@@ -18,6 +18,7 @@ func init() {
 	Symbols["cogentcore.org/core/tensor/databrowser/databrowser"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AsDataTree":         reflect.ValueOf(databrowser.AsDataTree),
+		"CurTabber":          reflect.ValueOf(&databrowser.CurTabber).Elem(),
 		"FirstComment":       reflect.ValueOf(databrowser.FirstComment),
 		"IsTableFile":        reflect.ValueOf(databrowser.IsTableFile),
 		"NewBasic":           reflect.ValueOf(databrowser.NewBasic),
