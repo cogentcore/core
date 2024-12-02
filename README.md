@@ -15,6 +15,6 @@
 
 Cogent Core is a free and open source framework for building powerful, fast, elegant 2D and 3D apps that run on macOS, Windows, Linux, iOS, Android, and the web with a single Go codebase, allowing you to Code Once, Run Everywhere (Core). See the [Cogent Core Website](https://cogentcore.org/core) for more information, including extensive documentation and editable interactive running examples. The website itself is a Cogent Core app running on the web using wasm.
 
-### Sponsors
+## Sponsors
 
-We thank @octoberswimmer and our other [sponsors](https://github.com/sponsors/cogentcore) for their support, which allows us to spend more time improving Cogent Core.
+We thank October Swimmer and our other [sponsors](https://github.com/sponsors/cogentcore) for their support, which allows us to spend more time improving Cogent Core.
