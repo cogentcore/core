@@ -265,7 +265,7 @@ func (vg *VarGroup) bindLayout(vs *Vars) (*wgpu.BindGroupLayout, error) {
 			}
 		default:
 			bd.Buffer = wgpu.BufferBindingLayout{
-				Type:             vr.Role.BindingType(),
+				Type:             vr.bindingType(),
 				HasDynamicOffset: false,
 				MinBindingSize:   0, // 0 is fine
 			}

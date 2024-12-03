@@ -3,7 +3,7 @@
 
 // // Params are the parameters for the computation. 
 @group(0) @binding(0)
-var<storage, read_write> Params: array<ParamStruct>;
+var<storage, read> Params: array<ParamStruct>;
 @group(0) @binding(1)
 var<storage, read_write> Data: array<DataStruct>;
 
@@ -15,7 +15,7 @@ fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
 }
 
 
-///////////// import: "basic.go"
+//////// import: "basic.go"
 alias NeuronFlags = i32;
 const  NeuronOff: NeuronFlags = 0x01;
 const  NeuronHasExt: NeuronFlags = 0x02; // note: 1<<2 does NOT work
@@ -100,7 +100,7 @@ fn Compute(i: u32) { //gosl:kernel
 	Data[i] = data;
 }
 
-///////////// import: "slrand.wgsl"
+//////// import: "slrand.wgsl"
 fn Philox2x32round(counter: su64, key: u32) -> su64 {
 	let mul = Uint32Mul64(u32(0xD256D193), counter.x);
 	var ctr: su64;
@@ -190,7 +190,7 @@ fn RandCounter_Add(ct: ptr<function,RandCounter>, inc: u32) {
 	(*ct).Counter = Uint64Add32((*ct).Counter, inc);
 }
 
-///////////// import: "sltype.wgsl"
+//////// import: "sltype.wgsl"
 alias su64 = vec2<u32>;
 fn Uint32Mul64(a: u32, b: u32) -> su64 {
 	let LOMASK = (((u32(1))<<16)-1);

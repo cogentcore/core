@@ -96,10 +96,11 @@ const (
 		for _, synm := range sys {
 			sy := st.Systems[synm]
 			genSynm := st.genSysName(sy)
-			if sy.NTensors > 0 {
-				b.WriteString(fmt.Sprintf("var %sTensorStrides tensor.Uint32\n", genSynm))
-			}
+			b.WriteString(fmt.Sprintf("var %sTensorStrides tensor.Uint32\n", genSynm))
 		}
+	} else {
+		b.WriteString("\n// Dummy tensor stride variable to avoid import error\n")
+		b.WriteString("var __TensorStrides tensor.Uint32\n")
 	}
 
 	initf := `
@@ -187,6 +188,7 @@ func (st *State) GenGPUSystemInit(sy *System) string {
 		b.WriteString("\t\t\tvar vr *gpu.Var\n\t\t\t_ = vr\n")
 		if sy.NTensors > 0 && gi == 0 {
 			b.WriteString(fmt.Sprintf("\t\t\tvr = sgp.Add(%q, gpu.%s, 1, gpu.ComputeShader)\n", "TensorStrides", "Uint32"))
+			b.WriteString("\t\t\tvr.ReadOnly = true\n")
 		}
 		for _, vr := range gp.Vars {
 			if vr.Tensor {
@@ -311,6 +313,9 @@ func %[1]sToGPU(vars ...GPUVars) {
 		tensorStrides := `
 // %[1]sToGPUTensorStrides gets tensor strides and starts copying to the GPU.
 func %[1]sToGPUTensorStrides() {
+	if !UseGPU {
+		return
+	}
 	sy := %[2]s
 	syVars := sy.Vars()
 `
@@ -326,7 +331,7 @@ func %[1]sToGPUTensorStrides() {
 					continue
 				}
 				for d := range vr.TensorDims {
-					b.WriteString(fmt.Sprintf("\t%sTensorStrides.SetInt1D(%s.DimSize(%d), %d)\n", synm, vr.Name, d, vr.TensorIndex*10+d))
+					b.WriteString(fmt.Sprintf("\t%sTensorStrides.SetInt1D(%s.Shape().Strides[%d], %d)\n", synm, vr.Name, d, vr.TensorIndex*10+d))
 				}
 			}
 		}

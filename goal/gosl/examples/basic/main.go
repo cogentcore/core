@@ -27,24 +27,26 @@ func main() {
 	gpu.Debug = true
 	GPUInit()
 
+	rand.Seed(0)
+	gpu.NumThreads = 1
 	n := 2_000_000 // note: not necc to spec up-front, but easier if so
 
 	Params = make([]ParamStruct, 1)
 	Params[0].Defaults()
 
 	Data = tensor.NewFloat32()
-	Data.SetShapeSizes(n, 3) // critically, makes GPU compatible Header with strides
+	Data.SetShapeSizes(n, 3)
 	nt := Data.Len()
 
 	IntData = tensor.NewInt32()
-	IntData.SetShapeSizes(n, 3) // critically, makes GPU compatible Header with strides
+	IntData.SetShapeSizes(n, 3)
 
 	for i := range nt {
 		Data.Set1D(rand.Float32(), i)
 	}
 
 	sid := tensor.NewInt32()
-	sid.SetShapeSizes(n, 3) // critically, makes GPU compatible Header with strides
+	sid.SetShapeSizes(n, 3)
 
 	sd := tensor.NewFloat32()
 	sd.SetShapeSizes(n, 3)
@@ -55,7 +57,6 @@ func main() {
 	cpuTmr := timer.Time{}
 	cpuTmr.Start()
 
-	UseGPU = false
 	RunOneAtomic(n)
 	RunOneCompute(n)
 
@@ -69,13 +70,13 @@ func main() {
 	gpuFullTmr := timer.Time{}
 	gpuFullTmr.Start()
 
+	UseGPU = true
 	ToGPUTensorStrides()
 	ToGPU(ParamsVar, DataVar, IntDataVar)
 
 	gpuTmr := timer.Time{}
 	gpuTmr.Start()
 
-	UseGPU = true
 	RunAtomic(n)
 	RunCompute(n)
 	gpuTmr.Stop()
@@ -90,7 +91,8 @@ func main() {
 	fmt.Println()
 	for i := 0; i < mx; i++ {
 		d := cd.Value(i, Exp) - sd.Value(i, Exp)
-		fmt.Printf("%d\t Raw: %6.4g\t Integ: %6.4g\t Exp: %6.4g\tTrg: %6.4g\tDiff: %g\n", i, sd.Value(i, Raw), sd.Value(i, Integ), sd.Value(i, Exp), cd.Value(i, Exp), d)
+		fmt.Printf("CPU:\t%d\t Raw: %6.4g\t Integ: %6.4g\t Exp: %6.4g\tGPU: %6.4g\tDiff: %g\n", i, cd.Value(i, Raw), cd.Value(i, Integ), cd.Value(i, Exp), sd.Value(i, Exp), d)
+		fmt.Printf("GPU:\t%d\t Raw: %6.4g\t Integ: %6.4g\t Exp: %6.4g\tCPU: %6.4g\tDiff: %g\n\n", i, sd.Value(i, Raw), sd.Value(i, Integ), sd.Value(i, Exp), cd.Value(i, Exp), d)
 	}
 	fmt.Printf("\n")
 

@@ -54,8 +54,15 @@ func GPUInit() {
 			var vr *gpu.Var
 			_ = vr
 			vr = sgp.Add("TensorStrides", gpu.Uint32, 1, gpu.ComputeShader)
+			vr.ReadOnly = true
 			vr = sgp.AddStruct("Params", int(unsafe.Sizeof(ParamStruct{})), 1, gpu.ComputeShader)
 			vr.ReadOnly = true
+			sgp.SetNValues(1)
+		}
+		{
+			sgp := vars.AddGroup(gpu.Storage)
+			var vr *gpu.Var
+			_ = vr
 			vr = sgp.Add("Data", gpu.Float32, 1, gpu.ComputeShader)
 			vr = sgp.Add("IntData", gpu.Int32, 1, gpu.ComputeShader)
 			sgp.SetNValues(1)
@@ -191,10 +198,10 @@ func ToGPU(vars ...GPUVars) {
 			v, _ := syVars.ValueByIndex(0, "Params", 0)
 			gpu.SetValueFrom(v, Params)
 		case DataVar:
-			v, _ := syVars.ValueByIndex(0, "Data", 0)
+			v, _ := syVars.ValueByIndex(1, "Data", 0)
 			gpu.SetValueFrom(v, Data.Values)
 		case IntDataVar:
-			v, _ := syVars.ValueByIndex(0, "IntData", 0)
+			v, _ := syVars.ValueByIndex(1, "IntData", 0)
 			gpu.SetValueFrom(v, IntData.Values)
 		}
 	}
@@ -202,13 +209,16 @@ func ToGPU(vars ...GPUVars) {
 
 // ToGPUTensorStrides gets tensor strides and starts copying to the GPU.
 func ToGPUTensorStrides() {
+	if !UseGPU {
+		return
+	}
 	sy := GPUSystem
 	syVars := sy.Vars()
 	TensorStrides.SetShapeSizes(20)
-	TensorStrides.SetInt1D(Data.DimSize(0), 0)
-	TensorStrides.SetInt1D(Data.DimSize(1), 1)
-	TensorStrides.SetInt1D(IntData.DimSize(0), 10)
-	TensorStrides.SetInt1D(IntData.DimSize(1), 11)
+	TensorStrides.SetInt1D(Data.Shape().Strides[0], 0)
+	TensorStrides.SetInt1D(Data.Shape().Strides[1], 1)
+	TensorStrides.SetInt1D(IntData.Shape().Strides[0], 10)
+	TensorStrides.SetInt1D(IntData.Shape().Strides[1], 11)
 	v, _ := syVars.ValueByIndex(0, "TensorStrides", 0)
 	gpu.SetValueFrom(v, TensorStrides.Values)
 }
@@ -223,10 +233,10 @@ func ReadFromGPU(vars ...GPUVars) {
 			v, _ := syVars.ValueByIndex(0, "Params", 0)
 			v.GPUToRead(sy.CommandEncoder)
 		case DataVar:
-			v, _ := syVars.ValueByIndex(0, "Data", 0)
+			v, _ := syVars.ValueByIndex(1, "Data", 0)
 			v.GPUToRead(sy.CommandEncoder)
 		case IntDataVar:
-			v, _ := syVars.ValueByIndex(0, "IntData", 0)
+			v, _ := syVars.ValueByIndex(1, "IntData", 0)
 			v.GPUToRead(sy.CommandEncoder)
 		}
 	}
@@ -243,11 +253,11 @@ func SyncFromGPU(vars ...GPUVars) {
 			v.ReadSync()
 			gpu.ReadToBytes(v, Params)
 		case DataVar:
-			v, _ := syVars.ValueByIndex(0, "Data", 0)
+			v, _ := syVars.ValueByIndex(1, "Data", 0)
 			v.ReadSync()
 			gpu.ReadToBytes(v, Data.Values)
 		case IntDataVar:
-			v, _ := syVars.ValueByIndex(0, "IntData", 0)
+			v, _ := syVars.ValueByIndex(1, "IntData", 0)
 			v.ReadSync()
 			gpu.ReadToBytes(v, IntData.Values)
 		}

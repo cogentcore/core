@@ -6,6 +6,7 @@ import (
 	"embed"
 	"unsafe"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/tensor"
 )
 
 //go:embed shaders/*.wgsl
@@ -28,6 +29,9 @@ const (
 	SeedVar GPUVars = 0
 	DataVar GPUVars = 1
 )
+
+// Dummy tensor stride variable to avoid import error
+var __TensorStrides tensor.Uint32
 
 // GPUInit initializes the GPU compute system,
 // configuring system(s), variables and kernels.

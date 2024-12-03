@@ -2,7 +2,7 @@
 // kernel: Compute
 
 @group(0) @binding(0)
-var<storage, read_write> Seed: array<Seeds>;
+var<storage, read> Seed: array<Seeds>;
 @group(0) @binding(1)
 var<storage, read_write> Data: array<Rnds>;
 
@@ -14,7 +14,7 @@ fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
 }
 
 
-///////////// import: "rand.go"
+//////// import: "rand.go"
 struct Seeds {
 	Seed: su64,
 	pad:  i32,
@@ -46,7 +46,7 @@ fn Compute(i: u32) { //gosl:kernel
 	Data[i]=data;
 }
 
-///////////// import: "slrand.wgsl"
+//////// import: "slrand.wgsl"
 fn Philox2x32round(counter: su64, key: u32) -> su64 {
 	let mul = Uint32Mul64(u32(0xD256D193), counter.x);
 	var ctr: su64;
@@ -136,7 +136,7 @@ fn RandCounter_Add(ct: ptr<function,RandCounter>, inc: u32) {
 	(*ct).Counter = Uint64Add32((*ct).Counter, inc);
 }
 
-///////////// import: "sltype.wgsl"
+//////// import: "sltype.wgsl"
 alias su64 = vec2<u32>;
 fn Uint32Mul64(a: u32, b: u32) -> su64 {
 	let LOMASK = (((u32(1))<<16)-1);

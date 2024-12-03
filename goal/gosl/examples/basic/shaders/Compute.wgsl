@@ -6,9 +6,10 @@
 var<storage, read> TensorStrides: array<u32>;
 @group(0) @binding(1)
 var<storage, read> Params: array<ParamStruct>;
-@group(0) @binding(2)
+// // Data is the data on which the computation operates. // 2D: outer index is data, inner index is: Raw, Integ, Exp vars. // 
+@group(1) @binding(0)
 var<storage, read_write> Data: array<f32>;
-@group(0) @binding(3)
+@group(1) @binding(1)
 var<storage, read_write> IntData: array<i32>;
 
 alias GPUVars = i32;

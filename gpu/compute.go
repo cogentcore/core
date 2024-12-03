@@ -190,6 +190,12 @@ func VectorizeFunc(threads, n int, fun func(idx uint32)) {
 	if threads == 0 {
 		threads = DefaultNumThreads()
 	}
+	if threads <= 1 {
+		for idx := range n {
+			fun(uint32(idx))
+		}
+		return
+	}
 	nper := int(math.Ceil(float64(n) / float64(threads)))
 	wait := sync.WaitGroup{}
 	for start := 0; start < n; start += nper {

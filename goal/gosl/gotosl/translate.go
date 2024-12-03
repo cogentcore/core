@@ -160,16 +160,44 @@ func (st *State) TranslateDir(pf string) error {
 	return nil
 }
 
+var (
+	nagaWarned = false
+	tintWarned = false
+)
+
 func (st *State) CompileFile(fn string) error {
 	dir, _ := filepath.Abs(st.Config.Output)
-	// cmd := exec.Command("naga", "--compact", fn, fn) // produces some pretty weird code actually
-	cmd := exec.Command("naga", fn)
-	cmd.Dir = dir
-	out, err := cmd.CombinedOutput()
-	fmt.Printf("\n-----------------------------------------------------\nnaga output for: %s\n%s", fn, out)
-	if err != nil {
-		log.Println(err)
-		return err
+	if _, err := exec.LookPath("naga"); err == nil {
+		// cmd := exec.Command("naga", "--compact", fn, fn) // produces some pretty weird code actually
+		cmd := exec.Command("naga", fn)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		fmt.Printf("\n-----------------------------------------------------\nnaga output for: %s\n%s", fn, out)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+	} else {
+		if !nagaWarned {
+			fmt.Println("\nImportant: you should install the 'naga' WGSL compiler from https://github.com/gfx-rs/wgpu to get immediate validation")
+			nagaWarned = true
+		}
 	}
+	if _, err := exec.LookPath("tint"); err == nil {
+		cmd := exec.Command("tint", "--validate", "--format", "wgsl", "-o", "/dev/null", fn)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		fmt.Printf("\n-----------------------------------------------------\ntint output for: %s\n%s", fn, out)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+	} else {
+		if !tintWarned {
+			fmt.Println("\nImportant: you should install the 'tint' WGSL compiler from https://dawn.googlesource.com/dawn/ to get immediate validation")
+			tintWarned = true
+		}
+	}
+
 	return nil
 }

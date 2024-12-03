@@ -15,11 +15,13 @@ import (
 //gosl:vars
 var (
 	// Params are the parameters for the computation.
+	//gosl:group Params
 	//gosl:read-only
 	Params []ParamStruct
 
 	// Data is the data on which the computation operates.
 	// 2D: outer index is data, inner index is: Raw, Integ, Exp vars.
+	//gosl:group Data
 	//gosl:dims 2
 	Data *tensor.Float32
 

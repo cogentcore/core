@@ -179,3 +179,17 @@ func (vr *Var) SetCurrentValue(i int) {
 func (vr *Var) bindGroupEntry() []wgpu.BindGroupEntry {
 	return vr.Values.bindGroupEntry(vr)
 }
+
+func (vr *Var) bindingType() wgpu.BufferBindingType {
+	if vr.Role == Storage && vr.ReadOnly {
+		return wgpu.BufferBindingTypeReadOnlyStorage
+	}
+	return vr.Role.BindingType()
+}
+
+func (vr *Var) bufferUsages() wgpu.BufferUsage {
+	if vr.Role == Storage && vr.ReadOnly {
+		return wgpu.BufferUsageStorage | wgpu.BufferUsageCopyDst
+	}
+	return vr.Role.BufferUsages()
+}

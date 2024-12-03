@@ -160,7 +160,7 @@ func (vl *Value) CreateBuffer() error {
 	buf, err := vl.device.Device.CreateBuffer(&wgpu.BufferDescriptor{
 		Size:             uint64(sz),
 		Label:            vl.Name,
-		Usage:            vl.role.BufferUsages(),
+		Usage:            vl.vvar.bufferUsages(),
 		MappedAtCreation: false,
 	})
 	if errors.Log(err) != nil {
@@ -270,7 +270,7 @@ func (vl *Value) SetFromBytes(from []byte) error {
 		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,
 			Contents: from,
-			Usage:    vl.role.BufferUsages(),
+			Usage:    vl.vvar.bufferUsages(),
 		})
 		if errors.Log(err) != nil {
 			return err
@@ -346,7 +346,7 @@ func (vl *Value) WriteDynamicBuffer() error {
 		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,
 			Contents: vl.dynamicBuffer,
-			Usage:    vl.role.BufferUsages(),
+			Usage:    vl.vvar.bufferUsages(),
 		})
 		if errors.Log(err) != nil {
 			return err
@@ -435,7 +435,7 @@ func (vl *Value) SetFromTexture(tx *Texture) *Texture {
 // for [Storage] values only. Automatically called for !ReadOnly.
 // Read buffer is needed for reading values back from the GPU.
 func (vl *Value) CreateReadBuffer() error {
-	if !(vl.role == Storage || vl.role == StorageTexture) {
+	if !(vl.role == Storage || vl.role == StorageTexture) || vl.vvar.ReadOnly {
 		return nil
 	}
 	sz := vl.MemSize()
