@@ -10,6 +10,7 @@ import (
 	"path"
 	"slices"
 	"sort"
+	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/keylist"
@@ -59,15 +60,26 @@ func (dir *Node) Mkdir(name string) (*Node, error) {
 
 // RecycleDir creates a new directory under given dir with the specified name
 // if it doesn't already exist, otherwise returns the existing one.
+// Path / slash separators can be used to make a path of multiple directories.
 // It logs an error and returns nil if this dir node is not a directory.
 func (dir *Node) RecycleDir(name string) *Node {
 	if err := dir.mustDir("RecycleDir", name); errors.Log(err) != nil {
 		return nil
 	}
-	if cd := dir.Dir.At(name); cd != nil {
+	if len(name) == 0 {
+		return dir
+	}
+	path := strings.Split(name, "/")
+	if cd := dir.Dir.At(path[0]); cd != nil {
+		if len(path) > 1 {
+			return cd.RecycleDir(strings.Join(path[1:], "/"))
+		}
 		return cd
 	}
 	nd, _ := NewDir(name, dir)
+	if len(path) > 1 {
+		return nd.RecycleDir(strings.Join(path[1:], "/"))
+	}
 	return nd
 }
 

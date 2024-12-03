@@ -69,6 +69,8 @@ You can also just declare a slice of elemental GPU-compatible data values such a
 
 ### Tensor data
 
+TODO: redo with special TensorIndexes variable, with MaxDims = 10 per tensor, so TensorIndexes[VarIndex*10 + strideIndex] does the trick. Also, for cases where multiple banks of vars are required, this could be encoded in the TensorIndexes functionality. It will always be the outer-most index that determines when it gets over threshold, which all can be pre-computed.
+
 On the GPU, the tensor data is represented using a simple flat array of the basic data type, with the _strides_ for each dimension encoded in the first `n` elements. `gosl` automatically generates the appropriate indexing code using these strides (which is why the number of dimensions is needed).
 
 The tensor must be initialized using this special [sltensor](sltensor) function to encode the stride values in the "header" section of the tensor data:
@@ -203,6 +205,18 @@ In general shader code should be simple mathematical expressions and data types,
 * `private` scope = within the shader code "module", i.e., one thread.  
 * `function` = within the function, not outside it.
 * `workgroup` = shared across workgroup -- coudl be powerful (but slow!) -- need to learn more.
+
+## Atomic access
+
+WGSL adopts the Metal (lowest common denominator) strong constraint of imposing a _type_ level restriction on atomic operations: you can only do atomic operations on variables that have been declared atomic, as in:
+
+```
+var<storage, read_write> PathGBuf: array<atomic<i32>>;
+...
+atomicAdd(&PathGBuf[idx], val);
+```
+
+This also unfortunately has the side-effect that you cannot do _non-atomic_ operations on atomic variables, as discussed extensively here: https://github.com/gpuweb/gpuweb/issues/2377  Gosl automatically detects the use of atomic functions on GPU variables, and tags them as atomic. However, while the rust `wgpu` package does not impose the non-atomic restriction, Google's `dawn / tint` do impose it, and that breaks the initial idea of storing strides  in the first few values of a tensor.
 
 ## Random numbers: slrand
 
