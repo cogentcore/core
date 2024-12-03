@@ -40,6 +40,7 @@ import (
 	"embed"
 	"unsafe"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/tensor"
 )
 
 //go:embed %s/*.wgsl
@@ -74,8 +75,13 @@ const (
 	b.WriteString(venum)
 
 	vidx := 0
+	hasTensors := false
 	for _, synm := range sys {
 		sy := st.Systems[synm]
+
+		if sy.NTensors > 0 {
+			hasTensors = true
+		}
 		for _, gp := range sy.Groups {
 			for _, vr := range gp.Vars {
 				b.WriteString(fmt.Sprintf("\t%sVar GPUVars = %d\n", vr.Name, vidx))
@@ -84,6 +90,17 @@ const (
 		}
 	}
 	b.WriteString(")\n")
+
+	if hasTensors {
+		b.WriteString("\n// Tensor stride variables\n")
+		for _, synm := range sys {
+			sy := st.Systems[synm]
+			genSynm := st.genSysName(sy)
+			if sy.NTensors > 0 {
+				b.WriteString(fmt.Sprintf("var %sTensorStrides tensor.Uint32\n", genSynm))
+			}
+		}
+	}
 
 	initf := `
 // GPUInit initializes the GPU compute system,
@@ -160,7 +177,7 @@ func (st *State) GenGPUSystemInit(sy *System) string {
 		b.WriteString(fmt.Sprintf("\t\tgpu.NewComputePipelineShaderFS(shaders, %q, sy)\n", kn.Filename))
 	}
 	b.WriteString("\t\tvars := sy.Vars()\n")
-	for _, gp := range sy.Groups {
+	for gi, gp := range sy.Groups {
 		b.WriteString("\t\t{\n")
 		gtyp := "gpu.Storage"
 		if gp.Uniform {
@@ -168,6 +185,9 @@ func (st *State) GenGPUSystemInit(sy *System) string {
 		}
 		b.WriteString(fmt.Sprintf("\t\t\tsgp := vars.AddGroup(%s)\n", gtyp))
 		b.WriteString("\t\t\tvar vr *gpu.Var\n\t\t\t_ = vr\n")
+		if sy.NTensors > 0 && gi == 0 {
+			b.WriteString(fmt.Sprintf("\t\t\tvr = sgp.Add(%q, gpu.%s, 1, gpu.ComputeShader)\n", "TensorStrides", "Uint32"))
+		}
 		for _, vr := range gp.Vars {
 			if vr.Tensor {
 				typ := strings.TrimPrefix(vr.Type, "tensor.")
@@ -286,6 +306,34 @@ func %[1]sToGPU(vars ...GPUVars) {
 		}
 	}
 	b.WriteString("\t\t}\n\t}\n}\n")
+
+	if sy.NTensors > 0 {
+		tensorStrides := `
+// %[1]sToGPUTensorStrides gets tensor strides and starts copying to the GPU.
+func %[1]sToGPUTensorStrides() {
+	sy := %[2]s
+	syVars := sy.Vars()
+`
+		b.WriteString(fmt.Sprintf(tensorStrides, synm, syvar))
+
+		strvar := synm + "TensorStrides"
+
+		b.WriteString(fmt.Sprintf("\t%s.SetShapeSizes(%d)\n", strvar, sy.NTensors*10))
+
+		for _, gp := range sy.Groups {
+			for _, vr := range gp.Vars {
+				if !vr.Tensor {
+					continue
+				}
+				for d := range vr.TensorDims {
+					b.WriteString(fmt.Sprintf("\t%sTensorStrides.SetInt1D(%s.DimSize(%d), %d)\n", synm, vr.Name, d, vr.TensorIndex*10+d))
+				}
+			}
+		}
+		b.WriteString(fmt.Sprintf("\tv, _ := syVars.ValueByIndex(0, %q, 0)\n", strvar))
+		b.WriteString(fmt.Sprintf("\tgpu.SetValueFrom(v, %s.Values)\n", strvar))
+		b.WriteString("}\n")
+	}
 
 	fmGPU := `
 // %[1]sReadFromGPU starts the process of copying vars to the GPU.

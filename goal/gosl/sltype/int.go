@@ -20,8 +20,7 @@ type Int32Vec4 struct {
 	W int32
 }
 
-////////////////////////////////////////
-// Unsigned
+////////  Unsigned
 
 // Uint32Vec2 is a length 2 vector of uint32
 type Uint32Vec2 struct {

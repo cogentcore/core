@@ -633,8 +633,7 @@ type EditorSettings struct { //types:add
 	DepthColor bool `default:"true"`
 }
 
-//////////////////////////////////////////////////////////////////
-//  FavoritePaths
+////////  FavoritePaths
 
 // favoritePathItem represents one item in a favorite path list, for display of
 // favorites. Is an ordered list instead of a map because user can organize
@@ -684,8 +683,7 @@ var defaultPaths = favoritePaths{
 	{icons.Computer, "root", "/"},
 }
 
-//////////////////////////////////////////////////////////////////
-//  FilePaths
+////////  FilePaths
 
 // FilePaths represents a set of file paths.
 type FilePaths []string
@@ -734,8 +732,7 @@ func openRecentPaths() {
 	}
 }
 
-//////////////////////////////////////////////////////////////////
-//  DebugSettings
+////////  DebugSettings
 
 // DebugSettings are the currently active debugging settings
 var DebugSettings = &DebugSettingsData{

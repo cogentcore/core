@@ -12,7 +12,6 @@ import (
 	"runtime"
 
 	"cogentcore.org/core/base/timer"
-	"cogentcore.org/core/goal/gosl/sltensor"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/tensor"
 )
@@ -34,21 +33,21 @@ func main() {
 	Params[0].Defaults()
 
 	Data = tensor.NewFloat32()
-	sltensor.SetShapeSizes(Data, n, 3) // critically, makes GPU compatible Header with strides
+	Data.SetShapeSizes(n, 3) // critically, makes GPU compatible Header with strides
 	nt := Data.Len()
 
 	IntData = tensor.NewInt32()
-	sltensor.SetShapeSizes(IntData, n, 3) // critically, makes GPU compatible Header with strides
+	IntData.SetShapeSizes(n, 3) // critically, makes GPU compatible Header with strides
 
 	for i := range nt {
 		Data.Set1D(rand.Float32(), i)
 	}
 
 	sid := tensor.NewInt32()
-	sltensor.SetShapeSizes(sid, n, 3) // critically, makes GPU compatible Header with strides
+	sid.SetShapeSizes(n, 3) // critically, makes GPU compatible Header with strides
 
 	sd := tensor.NewFloat32()
-	sltensor.SetShapeSizes(sd, n, 3)
+	sd.SetShapeSizes(n, 3)
 	for i := range nt {
 		sd.Set1D(Data.Value1D(i), i)
 	}
@@ -70,6 +69,7 @@ func main() {
 	gpuFullTmr := timer.Time{}
 	gpuFullTmr.Start()
 
+	ToGPUTensorStrides()
 	ToGPU(ParamsVar, DataVar, IntDataVar)
 
 	gpuTmr := timer.Time{}

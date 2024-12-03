@@ -108,7 +108,7 @@ func (st *State) TranslateDir(pf string) error {
 		slfix = SlRemoveComments(slfix)
 		exsl := st.ExtractWGSL(slfix)
 		lines = append(lines, []byte(""))
-		lines = append(lines, []byte(fmt.Sprintf("///////////// import: %q", gofn)))
+		lines = append(lines, []byte(fmt.Sprintf("//////// import: %q", gofn)))
 		lines = append(lines, exsl...)
 		return lines
 	}
@@ -145,7 +145,7 @@ func (st *State) TranslateDir(pf string) error {
 			}
 			for _, im := range st.SLImportFiles {
 				lines = append(lines, []byte(""))
-				lines = append(lines, []byte(fmt.Sprintf("///////////// import: %q", im.Name)))
+				lines = append(lines, []byte(fmt.Sprintf("//////// import: %q", im.Name)))
 				lines = append(lines, im.Lines...)
 			}
 			kn.Lines = lines

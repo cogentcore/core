@@ -6,7 +6,6 @@ package gotosl
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 )
 
@@ -21,16 +20,33 @@ func (st *State) GenKernelHeader(sy *System, kn *Kernel, avars map[string]*Var) 
 		if gp.Doc != "" {
 			b.WriteString("// " + gp.Doc + "\n")
 		}
-		str := "storage, read_write"
+		str := "storage"
 		if gp.Uniform {
 			str = "uniform"
 		}
+		viOff := 0
+		if gi == 0 && sy.NTensors > 0 {
+			access := ", read"
+			if gp.Uniform {
+				access = ""
+			}
+			viOff = 1
+			b.WriteString("@group(0) @binding(0)\n")
+			b.WriteString(fmt.Sprintf("var<%s%s> TensorStrides: array<u32>;\n", str, access))
+		}
 		for vi, vr := range gp.Vars {
+			access := ", read_write"
+			if vr.ReadOnly {
+				access = ", read"
+			}
+			if gp.Uniform {
+				access = ""
+			}
 			if vr.Doc != "" {
 				b.WriteString("// " + vr.Doc + "\n")
 			}
-			b.WriteString(fmt.Sprintf("@group(%d) @binding(%d)\n", gi, vi))
-			b.WriteString(fmt.Sprintf("var<%s> %s: ", str, vr.Name))
+			b.WriteString(fmt.Sprintf("@group(%d) @binding(%d)\n", gi, vi+viOff))
+			b.WriteString(fmt.Sprintf("var<%s%s> %s: ", str, access, vr.Name))
 			if _, ok := avars[vr.Name]; ok {
 				b.WriteString(fmt.Sprintf("array<atomic<%s>>;\n", vr.SLType()))
 			} else {
@@ -62,23 +78,12 @@ func (st *State) GenTensorFuncs(sy *System) string {
 			if !vr.Tensor {
 				continue
 			}
-			typ := vr.SLType()
 			fn := vr.IndexFunc()
 			if _, ok := done[fn]; ok {
 				continue
 			}
 			done[fn] = true
-			tconv := ""
-			switch vr.TensorKind {
-			case reflect.Float32:
-				tconv = "bitcast<u32>("
-			case reflect.Int32:
-				tconv = "u32("
-			}
-			tend := ""
-			if tconv != "" {
-				tend = ")"
-			}
+			typ := "u32"
 			b.WriteString("\nfn " + fn + "(")
 			nd := vr.TensorDims
 			for d := range nd {
@@ -91,9 +96,11 @@ func (st *State) GenTensorFuncs(sy *System) string {
 				}
 			}
 			b.WriteString(") -> u32 {\n\treturn ")
-			b.WriteString(fmt.Sprintf("u32(%d)", vr.TensorDims))
 			for d := range nd {
-				b.WriteString(fmt.Sprintf(" + %ss%d%s * i%d", tconv, d, tend, d))
+				b.WriteString(fmt.Sprintf("s%d * i%d", d, d))
+				if d < nd-1 {
+					b.WriteString(" + ")
+				}
 			}
 			b.WriteString(";\n}\n")
 		}

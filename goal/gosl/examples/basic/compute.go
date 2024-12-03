@@ -18,7 +18,7 @@ import (
 var (
 	// Params are the parameters for the computation.
 	//
-	//	gosl:read-only
+	//gosl:read-only
 	Params []ParamStruct
 
 	// Data is the data on which the computation operates.

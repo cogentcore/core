@@ -6,6 +6,7 @@ import (
 	"embed"
 	"unsafe"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/tensor"
 )
 
 //go:embed shaders/*.wgsl
@@ -30,6 +31,9 @@ const (
 	IntDataVar GPUVars = 2
 )
 
+// Tensor stride variables
+var TensorStrides tensor.Uint32
+
 // GPUInit initializes the GPU compute system,
 // configuring system(s), variables and kernels.
 // It is safe to call multiple times: detects if already run.
@@ -49,7 +53,9 @@ func GPUInit() {
 			sgp := vars.AddGroup(gpu.Storage)
 			var vr *gpu.Var
 			_ = vr
+			vr = sgp.Add("TensorStrides", gpu.Uint32, 1, gpu.ComputeShader)
 			vr = sgp.AddStruct("Params", int(unsafe.Sizeof(ParamStruct{})), 1, gpu.ComputeShader)
+			vr.ReadOnly = true
 			vr = sgp.Add("Data", gpu.Float32, 1, gpu.ComputeShader)
 			vr = sgp.Add("IntData", gpu.Int32, 1, gpu.ComputeShader)
 			sgp.SetNValues(1)
@@ -192,6 +198,19 @@ func ToGPU(vars ...GPUVars) {
 			gpu.SetValueFrom(v, IntData.Values)
 		}
 	}
+}
+
+// ToGPUTensorStrides gets tensor strides and starts copying to the GPU.
+func ToGPUTensorStrides() {
+	sy := GPUSystem
+	syVars := sy.Vars()
+	TensorStrides.SetShapeSizes(20)
+	TensorStrides.SetInt1D(Data.DimSize(0), 0)
+	TensorStrides.SetInt1D(Data.DimSize(1), 1)
+	TensorStrides.SetInt1D(IntData.DimSize(0), 10)
+	TensorStrides.SetInt1D(IntData.DimSize(1), 11)
+	v, _ := syVars.ValueByIndex(0, "TensorStrides", 0)
+	gpu.SetValueFrom(v, TensorStrides.Values)
 }
 
 // ReadFromGPU starts the process of copying vars to the GPU.

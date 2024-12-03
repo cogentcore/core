@@ -25,6 +25,9 @@ type System struct {
 
 	// Groups are the variables for this compute system.
 	Groups []*Group
+
+	// NTensors is the number of tensor vars.
+	NTensors int
 }
 
 func NewSystem(name string) *System {
@@ -73,6 +76,9 @@ type Var struct {
 
 	// data kind of the tensor
 	TensorKind reflect.Kind
+
+	// index of tensor in list of tensor variables, for indexing.
+	TensorIndex int
 }
 
 func (vr *Var) SetTensorKind() {
@@ -108,10 +114,14 @@ func (vr *Var) SLType() string {
 	return ""
 }
 
-// IndexFunc returns the index function name
+// IndexFunc returns the tensor index function name
 func (vr *Var) IndexFunc() string {
-	typ := strings.ToUpper(vr.SLType())
-	return fmt.Sprintf("Index%s%dD", typ, vr.TensorDims)
+	return fmt.Sprintf("Index%dD", vr.TensorDims)
+}
+
+// IndexStride returns the tensor stride variable reference
+func (vr *Var) IndexStride(dim int) string {
+	return fmt.Sprintf("TensorStrides[%d]", vr.TensorIndex*10+dim)
 }
 
 // Group represents one variable group.
@@ -121,7 +131,7 @@ type Group struct {
 	// comment docs about this group
 	Doc string
 
-	// Uniform indicates a uniform group; else default is Storage
+	// Uniform indicates a uniform group; else default is Storage.
 	Uniform bool
 
 	Vars []*Var
@@ -294,13 +304,17 @@ func (st *State) GetTempVar(vrnm string) *GetGlobalVar {
 func (st *State) VarsAdded() {
 	st.GetFuncs = make(map[string]*Var)
 	for _, sy := range st.Systems {
+		tensorIdx := 0
 		for _, gp := range sy.Groups {
 			for _, vr := range gp.Vars {
 				if vr.Tensor {
+					vr.TensorIndex = tensorIdx
+					tensorIdx++
 					continue
 				}
 				st.GetFuncs["Get"+vr.Name] = vr
 			}
 		}
+		sy.NTensors = tensorIdx
 	}
 }

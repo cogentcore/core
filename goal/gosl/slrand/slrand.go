@@ -54,7 +54,7 @@ func Philox2x32(counter uint64, key uint32) sltype.Uint32Vec2 {
 	return sltype.Uint64ToLoHi(Philox2x32round(counter, key)) // 10
 }
 
-////////////////////////////////////////////////////////////
+/////////
 // Methods below provide a standard interface  with more
 // readable names, mapping onto the Go rand methods.
 //

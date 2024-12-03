@@ -232,7 +232,7 @@ func CallOut2Gen2[T any, S any](fun func(g T, h S, a, b Tensor, out Values) erro
 	return out
 }
 
-//////////////////// Metadata
+//////// Metadata
 
 // SetCalcFunc sets a function to calculate updated value for given tensor,
 // storing the function pointer in the Metadata "CalcFunc" key for the tensor.

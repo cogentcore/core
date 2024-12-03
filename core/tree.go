@@ -663,8 +663,7 @@ func (tr *Tree) RenderWidget() {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//    Selection
+////////  Selection
 
 // GetSelectedNodes returns a slice of the currently selected
 // Trees within the entire tree, using a list maintained
@@ -880,8 +879,7 @@ func (tr *Tree) UnselectEvent() {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//    Moving
+////////  Moving
 
 // moveDown moves the selection down to next element in the tree,
 // using given select mode (from keyboard modifiers).
@@ -1203,8 +1201,7 @@ func (tr *Tree) OpenParents() {
 	tr.NeedsLayout()
 }
 
-/////////////////////////////////////////////////////////////
-//    Modifying Source Tree
+////////  Modifying Source Tree
 
 func (tr *Tree) ContextMenuPos(e events.Event) (pos image.Point) {
 	if e != nil {
@@ -1267,8 +1264,7 @@ func (tr *Tree) IsRoot(action ...string) bool {
 	return false
 }
 
-////////////////////////////////////////////////////////////
-//    Copy / Cut / Paste
+////////  Copy / Cut / Paste
 
 // MimeData adds mimedata for this node: a text/plain of the Path.
 func (tr *Tree) MimeData(md *mimedata.Mimes) {
@@ -1506,8 +1502,7 @@ func (tr *Tree) pasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	tr.sendChangeEvent()
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//    Drag-n-Drop
+////////  Drag-n-Drop
 
 // dragStart starts a drag-n-drop on this node -- it includes any other
 // selected nodes as well, each as additional records in mimedata.

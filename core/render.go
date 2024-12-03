@@ -160,8 +160,7 @@ func (wb *WidgetBase) doNeedsRender() {
 	})
 }
 
-//////////////////////////////////////////////////////////////////
-//		Scene
+////////  Scene
 
 var sceneShowIters = 2
 
@@ -274,8 +273,7 @@ func (sc *Scene) contentSize(initSz image.Point) image.Point {
 	return psz.ToPointFloor()
 }
 
-//////////////////////////////////////////////////////////////////
-//		Widget local rendering
+//////// Widget local rendering
 
 // PushBounds pushes our bounding box bounds onto the bounds stack
 // if they are non-empty. This automatically limits our drawing to

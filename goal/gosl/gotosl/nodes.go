@@ -1763,7 +1763,7 @@ func (p *printer) tensorMethod(x *ast.CallExpr, vr *Var, methName string) {
 	p.print(vr.IndexFunc(), token.LPAREN)
 	nd := vr.TensorDims
 	for d := range nd {
-		p.print(vr.Name, token.LBRACK, strconv.Itoa(d), token.RBRACK, token.COMMA, blank)
+		p.print(vr.IndexStride(d), token.COMMA, blank)
 	}
 	n := len(args)
 	for i := stArg; i < n; i++ {
@@ -1779,7 +1779,7 @@ func (p *printer) tensorMethod(x *ast.CallExpr, vr *Var, methName string) {
 		p.expr(ag)
 		p.print(token.RPAREN)
 		if i < n-1 {
-			p.print(token.COMMA)
+			p.print(token.COMMA, blank)
 		}
 	}
 	p.print(token.RPAREN, token.RBRACK)

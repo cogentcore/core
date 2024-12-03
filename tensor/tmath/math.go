@@ -306,7 +306,7 @@ func Y1Out(in tensor.Tensor, out tensor.Values) error {
 	return tensor.FloatFuncOut(1, func(a float64) float64 { return math.Y1(a) }, in, out)
 }
 
-//////////////////////// Binary
+//////// Binary
 
 func Atan2(y, x tensor.Tensor) tensor.Values {
 	return tensor.CallOut2(Atan2Out, y, x)
