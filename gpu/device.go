@@ -28,6 +28,9 @@ func NewDevice(gpu *GPU) (*Device, error) {
 	// we only request max buffer sizes so compute can go as big as it needs to
 	limits := wgpu.DefaultLimits()
 	const maxv = 0xFFFFFFFF
+	// note: on web / chromium / dawn, limited to 10: https://issues.chromium.org/issues/366151398?pli=1
+	limits.MaxStorageBuffersPerShaderStage = gpu.Limits.Limits.MaxStorageBuffersPerShaderStage
+	// fmt.Println("MaxStorageBuffersPerShaderStage:", gpu.Limits.Limits.MaxStorageBuffersPerShaderStage)
 	// note: these limits are being processed and allow the MaxBufferSize to be the
 	// controlling factor -- if we don't set these, then the slrand example doesn't
 	// work above a smaller limit.
