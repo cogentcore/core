@@ -6,12 +6,14 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/core/config"
+	"github.com/mitchellh/go-homedir"
 )
 
 // Setup installs platform-specific dependencies for the current platform.
@@ -62,6 +64,15 @@ func Setup(c *config.Config) error { //types:add
 		}
 		return fmt.Errorf("unknown Linux distro; please file a bug report at https://github.com/cogentcore/core/issues")
 	case "windows":
+		// We must be in the home directory to avoid permission issues with file downloading.
+		hd, err := homedir.Dir()
+		if err != nil {
+			return err
+		}
+		err = os.Chdir(hd)
+		if err != nil {
+			return err
+		}
 		if _, err := exec.LookPath("gcc"); err != nil {
 			err := vc.Run("curl", "-OL", "https://github.com/skeeto/w64devkit/releases/download/v2.0.0/w64devkit-x64-2.0.0.exe")
 			if err != nil {

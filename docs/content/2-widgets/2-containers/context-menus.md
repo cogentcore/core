@@ -17,7 +17,7 @@ tf := core.NewTextField(b)
 tf.ContextMenus = nil
 ```
 
-Note that there is still a context menu in the example above since all widgets inherit the [[core.Scene]] context menu items, which consist of various important actions by default. You can remove these items if you want:
+Note that there is still a context menu in the example above since all widgets inherit the [[doc:core.Scene]] context menu items, which consist of various important actions by default. You can remove these items if you want:
 
 ```go
 myWidget.Scene.ContextMenus = nil
