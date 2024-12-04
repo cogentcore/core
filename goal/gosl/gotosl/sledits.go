@@ -126,13 +126,13 @@ func SlEditsReplace(lines [][]byte) (bool, bool) {
 		if bytes.Contains(ln, include) {
 			continue
 		}
+		if !hasSlrand && bytes.Contains(ln, slr) {
+			hasSlrand = true
+		}
+		if !hasSltype && bytes.Contains(ln, styp) {
+			hasSltype = true
+		}
 		for _, r := range Replaces {
-			if !hasSlrand && bytes.Contains(ln, slr) {
-				hasSlrand = true
-			}
-			if !hasSltype && bytes.Contains(ln, styp) {
-				hasSltype = true
-			}
 			ln = bytes.ReplaceAll(ln, r.From, r.To)
 		}
 		ln = MathReplaceAll(mt32, ln)

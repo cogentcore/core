@@ -99,13 +99,13 @@ func (st *State) TranslateDir(pf string) error {
 		_, gofn := filepath.Split(fname)
 		var buf bytes.Buffer
 		doFile(fname, &buf)
-		slfix, hasSltype, hasSlrand := SlEdits(buf.Bytes())
+		slfix, hasSlrand, hasSltype := SlEdits(buf.Bytes())
 		slfix = SlRemoveComments(slfix)
 		exsl := st.ExtractWGSL(slfix)
 		lines = append(lines, []byte(""))
 		lines = append(lines, []byte(fmt.Sprintf("//////// import: %q", gofn)))
 		lines = append(lines, exsl...)
-		return lines, hasSltype, hasSlrand
+		return lines, hasSlrand, hasSltype
 	}
 
 	// next pass is per kernel
@@ -122,9 +122,7 @@ func (st *State) TranslateDir(pf string) error {
 			if st.KernelFuncs == nil {
 				continue
 			}
-			st.CopyPackageFile("slrand.wgsl", "cogentcore.org/core/goal/gosl/slrand")
-			st.CopyPackageFile("sltype.wgsl", "cogentcore.org/core/goal/gosl/sltype")
-			var hasSltype, hasSlrand, hasT, hasR bool
+			var hasSlrand, hasSltype, hasR, hasT bool
 			avars := st.AtomicVars(st.KernelFuncs)
 			// if st.Config.Debug {
 			fmt.Printf("###################################\nTranslating Kernel file: %s\n", kn.Name)
@@ -132,12 +130,12 @@ func (st *State) TranslateDir(pf string) error {
 			hdr := st.GenKernelHeader(sy, kn, avars)
 			lines := bytes.Split([]byte(hdr), []byte("\n"))
 			for fn := range st.GoVarsFiles { // do varsFiles first!!
-				lines, hasT, hasR = doKernelFile(fn, lines)
-				if hasT {
-					hasSltype = true
-				}
+				lines, hasR, hasT = doKernelFile(fn, lines)
 				if hasR {
 					hasSlrand = true
+				}
+				if hasT {
+					hasSltype = true
 				}
 			}
 			for _, gofp := range files {
@@ -145,24 +143,21 @@ func (st *State) TranslateDir(pf string) error {
 				if _, ok := st.GoVarsFiles[gofn]; ok {
 					continue
 				}
-				lines, hasT, hasR = doKernelFile(gofp, lines)
-				if hasT {
-					hasSltype = true
-				}
+				lines, hasR, hasT = doKernelFile(gofp, lines)
 				if hasR {
 					hasSlrand = true
 				}
+				if hasT {
+					hasSltype = true
+				}
 			}
-			// this is not working
-			// if hasSlrand {
-			// 	st.CopyPackageFile("slrand.wgsl", "cogentcore.org/core/goal/gosl/slrand")
-			// 	hasSltype = true
-			// }
-			// if hasSltype {
-			// 	st.CopyPackageFile("sltype.wgsl", "cogentcore.org/core/goal/gosl/sltype")
-			// }
-			_ = hasSltype
-			_ = hasSlrand
+			if hasSlrand {
+				st.CopyPackageFile("slrand.wgsl", "cogentcore.org/core/goal/gosl/slrand")
+				hasSltype = true
+			}
+			if hasSltype {
+				st.CopyPackageFile("sltype.wgsl", "cogentcore.org/core/goal/gosl/sltype")
+			}
 			for _, im := range st.SLImportFiles {
 				lines = append(lines, []byte(""))
 				lines = append(lines, []byte(fmt.Sprintf("//////// import: %q", im.Name)))
