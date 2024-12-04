@@ -8,24 +8,30 @@ The relevant regions of Go code to be run on the GPU are tagged using the `//gos
 
 See [examples/basic](examples/basic) and [rand](examples/rand) for complete working examples.
 
-Although `gosl` is typically run via the `goal build` command, you can also run `gosl` directly.  Here's how to install the standalone `gosl` command:
+Typically, `gosl` is called from a go generate command, e.g., by including this comment directive:
+
+```
+//go:generate gosl 
+```
+
+To install the `gosl` command:
 ```bash
 $ go install cogentcore.org/core/goal/gosl@latest
 ```
 
 # Usage
 
-There are two critical elements for GPU-enabled code:
+There are two key elements for GPU-enabled code:
 
 1. One or more [Kernel](#kernels) compute functions that take an _index_ argument and perform computations for that specific index of data, _in parallel_. **GPU computation is effectively just a parallel `for` loop**. On the GPU, each such kernel is implemented by its own separate compute shader code, and one of the main functions of `gosl` is to generate this code from the Go sources, in the automatically created `shaders/` directory.
 
-2. [Global variables](#global-variables) on which the kernel functions _exclusively_ operate: all relevant data must be specifically copied from the CPU to the GPU and back. As explained in the [GPU](../GPU.md) docs, each GPU compute shader is effectively a _standalone_ program operating on these global variables. To replicate this environment on the CPU, so the code is transferrable, we need to make these variables global in the CPU (Go) environment as well.
+2. [Global variables](#global-variables) on which the kernel functions _exclusively_ operate: all relevant data must be specifically copied from the CPU to the GPU and back. As explained in the [GPU](../GPU.md) docs, each GPU compute shader is effectively a _standalone_ program operating on these global variables. To replicate this environment on the CPU, so the code works in both contexts, we need to make these variables global in the CPU (Go) environment as well.
 
 `gosl` generates a file named `gosl.go` in your package directory that initializes the GPU with all of the global variables, and functions for running the kernels and syncing the gobal variable data back and forth between the CPu and GPU.
 
 ## Kernels
 
-Each distinct compute kernel must be tagged with a `//gosl:kernel` comment directive, as in this example:
+Each distinct compute kernel must be tagged with a `//gosl:kernel` comment directive, as in this example (from `examples/basic`):
 ```Go
 // Compute does the main computation.
 func Compute(i uint32) { //gosl:kernel
@@ -69,14 +75,18 @@ You can also just declare a slice of elemental GPU-compatible data values such a
 
 ### Tensor data
 
-TODO: redo with special TensorIndexes variable, with MaxDims = 10 per tensor, so TensorIndexes[VarIndex*10 + strideIndex] does the trick. Also, for cases where multiple banks of vars are required, this could be encoded in the TensorIndexes functionality. It will always be the outer-most index that determines when it gets over threshold, which all can be pre-computed.
+On the GPU, the tensor data is represented using a simple flat array of the basic data type. To index into this array, the _strides_ for each dimension are encoded in a special `TensorStrides` tensor that is managed by `gosl`, in the generated `gosl.go` file. `gosl` automatically generates the appropriate indexing code using these strides (which is why the number of dimensions is needed).
 
-On the GPU, the tensor data is represented using a simple flat array of the basic data type, with the _strides_ for each dimension encoded in the first `n` elements. `gosl` automatically generates the appropriate indexing code using these strides (which is why the number of dimensions is needed).
-
-The tensor must be initialized using this special [sltensor](sltensor) function to encode the stride values in the "header" section of the tensor data:
+Whenever the strides of any tensor variable change, and at least once at initialization, your code must call the function that copies the current strides up to the GPU:
 ```Go
-	sltensor.SetShapeSizes(&Data, n, 3) // critically, makes GPU compatible Header with strides
+	ToGPUTensorStrides()
 ```
+
+### Multiple tensor variables for large data
+
+The size of each memory buffer is limited by the GPU, to a maximum of at most 4GB on modern GPU hardware. Therefore, if you need to have any single tensor that holds more than this amount of data, then a bank of multiple vars are required. `gosl` provides helper functions to make this relatively straightforward.
+
+TODO: this could be encoded in the TensorStrides. It will always be the outer-most index that determines when it gets over threshold, which all can be pre-computed.
 
 ### Systems and Groups
 
@@ -143,7 +153,7 @@ to make this code available to all of the shaders that are generated.
 
 Use the `//gosl:import "package/path"` directive to import GPU-relevant code from other packages, similar to the standard Go import directive. It is assumed that many other Go imports are not GPU relevant, so this separate directive is required.
 
-`gosl` automatically includes _all_ tagged code with each shader, and lets the compiler sort out the subset of code that is actually relevant to each specific kernel. Ideally, we could do this with a pre-processing step that performs dead code elimination, but that does not appear to be functional yet.
+If any `enums` variables are defined, pass the `-gosl` flag to the `core generate` command to ensure that the `N` value is tagged with `//gosl:start` and `//gosl:end` tags.
 
 **IMPORTANT:** all `.go` and `.wgsl` files are removed from the `shaders` directory prior to processing to ensure everything there is current -- always specify a different source location for any custom `.wgsl` files that are included.
 
@@ -197,6 +207,8 @@ In general shader code should be simple mathematical expressions and data types,
 
 * A local variable to a global `struct` array variable (e.g., `par := &Params[i]`) can only be created as a function argument. There are special access restrictions that make it impossible to do otherwise.
 
+* tensor variables can only be used in `storage` (not `uniform`) memory, due to restrictions on dynamic sizing and alignment. Aside from this constraint, it is possible to designate a group of variables to use uniform memory, with the `-uniform` argument as the first item in the `//gosl:group` comment directive.
+
 ## Other language features
 
 * [tour-of-wgsl](https://google.github.io/tour-of-wgsl/types/pointers/passing_pointers/) is a good reference to explain things more directly than the spec.
@@ -216,7 +228,7 @@ var<storage, read_write> PathGBuf: array<atomic<i32>>;
 atomicAdd(&PathGBuf[idx], val);
 ```
 
-This also unfortunately has the side-effect that you cannot do _non-atomic_ operations on atomic variables, as discussed extensively here: https://github.com/gpuweb/gpuweb/issues/2377  Gosl automatically detects the use of atomic functions on GPU variables, and tags them as atomic. However, while the rust `wgpu` package does not impose the non-atomic restriction, Google's `dawn / tint` do impose it, and that breaks the initial idea of storing strides  in the first few values of a tensor.
+This also unfortunately has the side-effect that you cannot do _non-atomic_ operations on atomic variables, as discussed extensively here: https://github.com/gpuweb/gpuweb/issues/2377  Gosl automatically detects the use of atomic functions on GPU variables, and tags them as atomic. 
 
 ## Random numbers: slrand
 

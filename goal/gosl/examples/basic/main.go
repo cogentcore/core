@@ -28,7 +28,7 @@ func main() {
 	GPUInit()
 
 	rand.Seed(0)
-	gpu.NumThreads = 1
+	// gpu.NumThreads = 1 // to restrict to sequential for loop
 	n := 2_000_000 // note: not necc to spec up-front, but easier if so
 
 	Params = make([]ParamStruct, 1)
