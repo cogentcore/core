@@ -9,7 +9,6 @@ package web
 import (
 	"image"
 	"image/draw"
-	"strings"
 	"syscall/js"
 
 	"cogentcore.org/core/gpu"
@@ -44,7 +43,8 @@ func (a *App) InitDrawer() {
 	// TODO(wgpu): various mobile and Linux browsers do not fully support WebGPU yet.
 	isMobile := a.SystemPlatform().IsMobile() || a.SystemPlatform() == system.Linux
 	// TODO(wgpu): Firefox currently does not support WebGPU in release builds.
-	isFirefox := strings.Contains(js.Global().Get("navigator").Get("userAgent").String(), "Firefox")
+	// isFirefox := strings.Contains(js.Global().Get("navigator").Get("userAgent").String(), "Firefox")
+	isFirefox := false
 	if isMobile || isFirefox || !js.Global().Get("navigator").Get("gpu").Truthy() {
 		a.Draw.context2D = js.Global().Get("document").Call("querySelector", "canvas").Call("getContext", "2d")
 		return

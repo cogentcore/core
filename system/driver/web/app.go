@@ -158,6 +158,10 @@ func (a *App) Resize() {
 	a.Event.WindowResize()
 }
 
+func (a *App) GPUDevice() any {
+	return a.Draw.wgpu
+}
+
 func (a *App) DataDir() string {
 	return "/home/me/.data"
 }

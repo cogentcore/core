@@ -192,6 +192,9 @@ type App interface {
 
 	// IsDark returns whether the system color theme is dark (as oppposed to light).
 	IsDark() bool
+
+	// GPUDevice returns the gpu.GPU device if it is present (else nil).
+	GPUDevice() any
 }
 
 // OnSystemWindowCreated is a channel used to communicate that the underlying
