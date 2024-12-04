@@ -50,7 +50,7 @@ func GPUInit() {
 		gpu.NewComputePipelineShaderFS(shaders, "shaders/Compute.wgsl", sy)
 		vars := sy.Vars()
 		{
-			sgp := vars.AddGroup(gpu.Storage)
+			sgp := vars.AddGroup(gpu.Storage, "Params")
 			var vr *gpu.Var
 			_ = vr
 			vr = sgp.Add("TensorStrides", gpu.Uint32, 1, gpu.ComputeShader)
@@ -60,7 +60,7 @@ func GPUInit() {
 			sgp.SetNValues(1)
 		}
 		{
-			sgp := vars.AddGroup(gpu.Storage)
+			sgp := vars.AddGroup(gpu.Storage, "Data")
 			var vr *gpu.Var
 			_ = vr
 			vr = sgp.Add("Data", gpu.Float32, 1, gpu.ComputeShader)

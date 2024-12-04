@@ -141,6 +141,9 @@ func (vr *Var) String() string {
 		}
 	}
 	s := fmt.Sprintf("%d:\t%s\t%s\t(size: %d)\tValues: %d", vr.Binding, vr.Name, typ, vr.SizeOf, len(vr.Values.Values))
+	if len(vr.Values.Values) == 1 {
+		s += "\t" + vr.Values.Values[0].String()
+	}
 	return s
 }
 

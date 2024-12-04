@@ -48,7 +48,7 @@ func GPUInit() {
 		gpu.NewComputePipelineShaderFS(shaders, "shaders/Compute.wgsl", sy)
 		vars := sy.Vars()
 		{
-			sgp := vars.AddGroup(gpu.Storage)
+			sgp := vars.AddGroup(gpu.Storage, "Group_0")
 			var vr *gpu.Var
 			_ = vr
 			vr = sgp.AddStruct("Seed", int(unsafe.Sizeof(Seeds{})), 1, gpu.ComputeShader)

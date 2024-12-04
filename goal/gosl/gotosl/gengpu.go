@@ -184,7 +184,7 @@ func (st *State) GenGPUSystemInit(sy *System) string {
 		if gp.Uniform {
 			gtyp = "gpu.Uniform"
 		}
-		b.WriteString(fmt.Sprintf("\t\t\tsgp := vars.AddGroup(%s)\n", gtyp))
+		b.WriteString(fmt.Sprintf("\t\t\tsgp := vars.AddGroup(%s, %q)\n", gtyp, gp.Name))
 		b.WriteString("\t\t\tvar vr *gpu.Var\n\t\t\t_ = vr\n")
 		if sy.NTensors > 0 && gi == 0 {
 			b.WriteString(fmt.Sprintf("\t\t\tvr = sgp.Add(%q, gpu.%s, 1, gpu.ComputeShader)\n", "TensorStrides", "Uint32"))

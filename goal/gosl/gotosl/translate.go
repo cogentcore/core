@@ -95,22 +95,17 @@ func (st *State) TranslateDir(pf string) error {
 
 	// st.PrintFuncGraph()
 
-	st.CopyPackageFile("slrand.wgsl", "cogentcore.org/core/goal/gosl/slrand")
-	st.CopyPackageFile("sltype.wgsl", "cogentcore.org/core/goal/gosl/sltype")
-
-	doKernelFile := func(fname string, lines [][]byte) [][]byte {
+	doKernelFile := func(fname string, lines [][]byte) ([][]byte, bool, bool) {
 		_, gofn := filepath.Split(fname)
 		var buf bytes.Buffer
 		doFile(fname, &buf)
 		slfix, hasSltype, hasSlrand := SlEdits(buf.Bytes())
-		_ = hasSlrand
-		_ = hasSltype
 		slfix = SlRemoveComments(slfix)
 		exsl := st.ExtractWGSL(slfix)
 		lines = append(lines, []byte(""))
 		lines = append(lines, []byte(fmt.Sprintf("//////// import: %q", gofn)))
 		lines = append(lines, exsl...)
-		return lines
+		return lines, hasSltype, hasSlrand
 	}
 
 	// next pass is per kernel
@@ -127,6 +122,7 @@ func (st *State) TranslateDir(pf string) error {
 			if st.KernelFuncs == nil {
 				continue
 			}
+			var hasSltype, hasSlrand bool
 			avars := st.AtomicVars(st.KernelFuncs)
 			// if st.Config.Debug {
 			fmt.Printf("###################################\nTranslating Kernel file: %s\n", kn.Name)
@@ -134,15 +130,23 @@ func (st *State) TranslateDir(pf string) error {
 			hdr := st.GenKernelHeader(sy, kn, avars)
 			lines := bytes.Split([]byte(hdr), []byte("\n"))
 			for fn := range st.GoVarsFiles { // do varsFiles first!!
-				lines = doKernelFile(fn, lines)
+				lines, hasSltype, hasSlrand = doKernelFile(fn, lines)
 			}
 			for _, gofp := range files {
 				_, gofn := filepath.Split(gofp)
 				if _, ok := st.GoVarsFiles[gofn]; ok {
 					continue
 				}
-				lines = doKernelFile(gofp, lines)
+				lines, hasSltype, hasSlrand = doKernelFile(gofp, lines)
 			}
+			if hasSlrand {
+				st.CopyPackageFile("slrand.wgsl", "cogentcore.org/core/goal/gosl/slrand")
+				hasSltype = true
+			}
+			if hasSltype {
+				st.CopyPackageFile("sltype.wgsl", "cogentcore.org/core/goal/gosl/sltype")
+			}
+
 			for _, im := range st.SLImportFiles {
 				lines = append(lines, []byte(""))
 				lines = append(lines, []byte(fmt.Sprintf("//////// import: %q", im.Name)))
