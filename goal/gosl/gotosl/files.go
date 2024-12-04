@@ -164,6 +164,11 @@ func RemoveGenFiles(dir string) {
 // into the current imports directory.
 // e.g., "slrand.wgsl", "cogentcore.org/core/goal/gosl/slrand"
 func (st *State) CopyPackageFile(fnm, packagePath string) error {
+	// for _, f := range st.SLImportFiles {
+	// 	if f.Name == fnm {
+	// 		return nil // already
+	// 	}
+	// }
 	tofn := filepath.Join(st.ImportsDir, fnm)
 	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, packagePath)
 	if err != nil {
