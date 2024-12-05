@@ -99,9 +99,13 @@ outer:
 				fmt.Println("win IsClosed in paint:", w.Name())
 				break outer
 			}
-			w.This.Events().WindowPaint()
+			w.This.SendPaintEvent()
 		}
 	}
+}
+
+func (w *Window[A]) SendPaintEvent() {
+	w.This.Events().WindowPaint()
 }
 
 func (w *Window[A]) Lock() bool {
@@ -166,10 +170,6 @@ func (w *Window[A]) SetDestroyGPUResourcesFunc(f func()) {
 func (w *Window[A]) RenderGeom() math32.Geom2DInt {
 	// {0, Size} by default
 	return math32.Geom2DInt{Size: w.This.Size()}
-}
-
-func (w *Window[A]) UpdateFullscreen(fullscreen bool) {
-	// no-op by default
 }
 
 func (w *Window[A]) SetCloseReqFunc(fun func(win system.Window)) {

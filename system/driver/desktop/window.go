@@ -37,6 +37,11 @@ func (w *Window) IsVisible() bool {
 	return w.WindowMulti.IsVisible() && w.Glw != nil
 }
 
+func (w *Window) SendPaintEvent() {
+	TheApp.PollScreenChanges()
+	w.This.Events().WindowPaint()
+}
+
 // Activate() sets this window as the current render target for gpu rendering
 // functions, and the current context for gpu state (equivalent to
 // MakeCurrentContext on OpenGL).
@@ -129,19 +134,19 @@ func (w *Window) Screen() *system.Screen {
 	mon := w.Glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
 	// that is super useless it seems. only works for fullscreen
 	if mon != nil {
-		if MonitorDebug {
-			log.Printf("MonitorDebug: desktop.Window.Screen: %v: got screen: %v\n", w.Nm, mon.GetName())
+		if ScreenDebug {
+			log.Printf("ScreenDebug: desktop.Window.Screen: %v: got screen: %v\n", w.Nm, mon.GetName())
 		}
 		sc = TheApp.ScreenByName(mon.GetName())
 		if sc == nil {
-			log.Printf("MonitorDebug: desktop.Window.Screen: could not find screen of name: %v\n", mon.GetName())
+			log.Printf("ScreenDebug: desktop.Window.Screen: could not find screen of name: %v\n", mon.GetName())
 			sc = TheApp.Screens[0]
 		}
 		goto setScreen
 	}
 	sc = w.GetScreenOverlap()
 	// if monitorDebug {
-	// 	log.Printf("MonitorDebug: desktop.Window.GetScreenOverlap: %v: got screen: %v\n", w.Nm, sc.Name)
+	// 	log.Printf("ScreenDebug: desktop.Window.GetScreenOverlap: %v: got screen: %v\n", w.Nm, sc.Name)
 	// }
 setScreen:
 	w.ScreenWindow = sc.Name
@@ -258,26 +263,45 @@ func (w *Window) SetPos(pos image.Point, screen *system.Screen) {
 	})
 }
 
-func (w *Window) SetGeom(pos image.Point, sz image.Point, screen *system.Screen) {
-	if w.IsClosed() || w.Is(system.Fullscreen) {
+func (w *Window) SetGeom(fullscreen bool, pos, sz image.Point, screen *system.Screen) {
+	if w.IsClosed() {
 		return
 	}
 	if screen != nil {
 		pos = pos.Add(screen.Geometry.Min)
 	}
 	sc := w.Screen()
+	if screen != nil {
+		sc = screen // critical to use this b/c w.Screen() can be wrong on new screen sequence
+	}
 	sz = sc.WinSizeFromPix(sz)
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
 		if w.Glw == nil { // by time we got to main, could be diff
 			return
 		}
-		w.Glw.SetSize(sz.X, sz.Y)
-		w.Glw.SetPos(pos.X, pos.Y)
+		switch {
+		case w.Is(system.Fullscreen) && !fullscreen:
+			w.Flgs.SetFlag(false, system.Fullscreen)
+			w.Glw.SetMonitor(nil, pos.X, pos.Y, sz.X, sz.Y, glfw.DontCare)
+		case fullscreen:
+			w.Flgs.SetFlag(true, system.Fullscreen)
+			if screen != nil {
+				sc = screen
+			}
+			mon := w.App.Monitors[sc.ScreenNumber]
+			w.Glw.SetMonitor(mon, 0, 0, sc.Geometry.Dx(), sc.Geometry.Dy(), glfw.DontCare)
+		default:
+			w.Glw.SetSize(sz.X, sz.Y)
+			w.Glw.SetPos(pos.X, pos.Y)
+		}
 	})
 }
 
 func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
+	if w.IsClosed() || w.Is(system.Fullscreen) || w.Is(system.Maximized) {
+		return w.FrameSize
+	}
 	l, t, r, b := w.Glw.GetFrameSize()
 	w.FrameSize.Set(t, r, b, l)
 	sc := w.Screen()
@@ -286,7 +310,7 @@ func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
 	frOff := image.Pt(w.FrameSize.Left, w.FrameSize.Top)
 	sz := w.WnSize.Add(frSize)
 	pos := w.Pos.Sub(frOff)
-	csz, cpos := system.ConstrainWinGeom(sz, pos, scSize)
+	cpos, csz := system.ConstrainWinGeom(pos, sz, scSize)
 	cpos = cpos.Add(frOff)
 	csz = csz.Sub(frSize)
 	change := false
@@ -309,7 +333,7 @@ func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
 		sz.Y = csz.Y
 	}
 	if change {
-		w.SetGeom(pos, sz, sc)
+		w.SetGeom(false, pos, sz, sc)
 	}
 	return w.FrameSize
 }
@@ -354,22 +378,6 @@ func (w *Window) Minimize() {
 			return
 		}
 		w.Glw.Iconify()
-	})
-}
-
-func (w *Window) UpdateFullscreen(fullscreen bool) {
-	if w.IsClosed() {
-		return
-	}
-	w.Flgs.SetFlag(fullscreen, system.Fullscreen)
-	w.App.RunOnMain(func() {
-		if !fullscreen {
-			w.Glw.SetMonitor(nil, w.Pos.X, w.Pos.Y, w.WnSize.X, w.WnSize.Y, glfw.DontCare)
-			return
-		}
-		sc := w.Screen()
-		mon := w.App.Monitors[sc.ScreenNumber]
-		w.Glw.SetMonitor(mon, 0, 0, sc.Geometry.Dx(), sc.Geometry.Dy(), glfw.DontCare)
 	})
 }
 
@@ -441,7 +449,7 @@ func (w *Window) Moved(gw *glfw.Window, x, y int) {
 
 func (w *Window) WinResized(gw *glfw.Window, width, height int) {
 	// w.app.GetScreens()  // this can crash here on win disconnect..
-	if MonitorDebug {
+	if ScreenDebug {
 		log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.PixSize)
 	}
 	w.updateMaximized()
@@ -458,6 +466,7 @@ func (w *Window) UpdateGeom() {
 	w.Mu.Unlock()
 	sc := w.Screen() // gets parameters
 	w.Mu.Lock()
+	w.updateMaximized()
 	var wsz image.Point
 	wsz.X, wsz.Y = w.Glw.GetSize()
 	// fmt.Printf("win size: %v\n", wsz)
@@ -474,7 +483,7 @@ func (w *Window) UpdateGeom() {
 	w.Draw.System.Renderer.SetSize(w.PixSize)
 	// })
 	if cursc != w.ScreenWindow {
-		if MonitorDebug {
+		if ScreenDebug {
 			log.Printf("desktop.Window.UpdateGeom: %v: got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)
 		}
 	}
@@ -490,7 +499,7 @@ func (w *Window) FbResized(gw *glfw.Window, width, height int) {
 	}
 	fbsz := image.Point{width, height}
 	if w.PixSize != fbsz {
-		if MonitorDebug {
+		if ScreenDebug {
 			log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, w.PixSize)
 		}
 		w.UpdateGeom()

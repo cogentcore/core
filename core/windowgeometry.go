@@ -6,8 +6,10 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 	"image"
 	"log"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -275,12 +277,16 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	wgr.Pos = pos
 	wgr.Size = wsz
 
+	// first get copy of stored data
 	sgs := ws.geometries[cfg]
 	if sgs == nil {
 		sgs = make(map[string]windowGeometries)
 	}
-	wgs := sgs[winName]
-	if wgs.Screens == nil {
+	var wgs windowGeometries
+	if swgs, ok := sgs[winName]; ok {
+		wgs.Last = swgs.Last
+		wgs.Screens = maps.Clone(swgs.Screens)
+	} else {
 		wgs.Screens = make(map[string]windowGeometry)
 	}
 
@@ -300,7 +306,7 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	ws.cache[cfg] = sgsc
 
 	if DebugSettings.WinGeomTrace {
-		log.Printf("WindowGeometry: Record win: %q screen: %q cfg: %q", winName, sc.Name, cfg)
+		log.Printf("WindowGeometry: Record win: %q screen: %q cfg: %q geom: %s", winName, sc.Name, cfg, wgr.String())
 	}
 
 	if ws.saveTimer == nil {
@@ -358,6 +364,7 @@ func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry,
 	winName = ws.windowName(winName)
 	var wgs windowGeometries
 
+	fromMain := false
 	sgs := ws.cache[cfg]
 	ok := false
 	if sgs != nil {
@@ -369,6 +376,7 @@ func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry,
 			return nil, nil
 		}
 		wgs, ok = sgs[winName]
+		fromMain = true
 	}
 	if !ok {
 		return nil, nil
@@ -377,7 +385,7 @@ func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry,
 	if wgr != nil {
 		wgr.constrainGeom(sc)
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: Got geom for window: %q pos: %v size: %v screen: %q lastScreen: %q cfg: %q\n", winName, wgr.Pos, wgr.Size, sc.Name, wgs.Last, cfg)
+			log.Printf("WindowGeometry: Got geom for window: %q screen: %q lastScreen: %q cfg: %q geom: %s fromMain: %v\n", winName, sc.Name, wgs.Last, cfg, wgr.String(), fromMain)
 		}
 		return wgr, sc
 	}
@@ -411,15 +419,11 @@ func (ws *windowGeometrySaver) restoreAll() {
 	ws.settingStart()
 	for _, w := range AllRenderWindows {
 		wgp, sc := ws.get(w.title, "")
-		if wgp != nil {
+		if wgp != nil && !w.SystemWindow.Is(system.Fullscreen) {
 			if DebugSettings.WinGeomTrace {
-				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v screen: %s\n", w.name, wgp.Pos, wgp.Size, sc.Name)
+				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v screen: %s geom: %s\n", w.name, sc.Name, wgp.String())
 			}
-			w.SystemWindow.SetGeom(wgp.Pos, wgp.Size, sc)
-		} else {
-			if DebugSettings.WinGeomTrace {
-				log.Printf("WindowGeometry: RestoreAll: not found for win: %q  cfg: %q\n", w.title, screenConfig())
-			}
+			w.SystemWindow.SetGeom(false, wgp.Pos, wgp.Size, sc)
 		}
 	}
 	ws.settingEnd()
@@ -471,7 +475,11 @@ type windowGeometry struct {
 	Max  bool // Maximized
 }
 
+func (wg *windowGeometry) String() string {
+	return fmt.Sprintf("DPI: %g  DPR: %g  Size: %v  Pos: %v  Max: %v", wg.DPI, wg.DPR, wg.Size, wg.Pos, wg.Max)
+}
+
 // constrainGeom constrains geometry based on screen params
 func (wg *windowGeometry) constrainGeom(sc *system.Screen) {
-	wg.Size, wg.Pos = sc.ConstrainWinGeom(wg.Size, wg.Pos)
+	wg.Pos, wg.Size = sc.ConstrainWinGeom(wg.Pos, wg.Size)
 }

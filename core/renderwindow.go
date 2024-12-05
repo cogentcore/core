@@ -172,7 +172,7 @@ func (w *renderWindow) setName(name string) {
 	if w.SystemWindow != nil {
 		w.SystemWindow.SetName(name)
 	}
-	if isdif && w.SystemWindow != nil {
+	if isdif && w.SystemWindow != nil && !w.SystemWindow.Is(system.Fullscreen) {
 		wgp, sc := theWindowGeometrySaver.get(w.title, "")
 		if wgp != nil {
 			theWindowGeometrySaver.settingStart()
@@ -180,7 +180,7 @@ func (w *renderWindow) setName(name string) {
 				if DebugSettings.WinGeomTrace {
 					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.Pos, wgp.Size)
 				}
-				w.SystemWindow.SetGeom(wgp.Pos, wgp.Size, sc)
+				w.SystemWindow.SetGeom(false, wgp.Pos, wgp.Size, sc)
 				system.TheApp.SendEmptyEvent()
 			}
 			theWindowGeometrySaver.settingEnd()
@@ -221,19 +221,35 @@ func (w *renderWindow) logicalDPI() float32 {
 
 // stepZoom calls [SetZoom] with the current zoom plus 10 times the given number of steps.
 func (w *renderWindow) stepZoom(steps float32) {
-	w.setZoom(AppearanceSettings.Zoom + 10*steps)
+	sc := w.SystemWindow.Screen()
+	curZoom := AppearanceSettings.Zoom
+	screenName := ""
+	sset, ok := AppearanceSettings.Screens[sc.Name]
+	if ok {
+		screenName = sc.Name
+		curZoom = sset.Zoom
+	}
+	w.setZoom(curZoom+10*steps, screenName)
 }
 
 // setZoom sets [AppearanceSettingsData.Zoom] to the given value and then triggers
-// necessary updating and makes a snackbar.
-func (w *renderWindow) setZoom(zoom float32) {
-	AppearanceSettings.Zoom = math32.Clamp(zoom, 10, 500)
+// necessary updating and makes a snackbar. If screenName is non-empty, then the
+// zoom is set on the screen-specific settings, instead of the global.
+func (w *renderWindow) setZoom(zoom float32, screenName string) {
+	zoom = math32.Clamp(zoom, 10, 500)
+	if screenName != "" {
+		sset := AppearanceSettings.Screens[screenName]
+		sset.Zoom = zoom
+		AppearanceSettings.Screens[screenName] = sset
+	} else {
+		AppearanceSettings.Zoom = zoom
+	}
 	AppearanceSettings.Apply()
 	UpdateAll()
 	errors.Log(SaveSettings(AppearanceSettings))
 
 	if ms := w.MainScene(); ms != nil {
-		b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", AppearanceSettings.Zoom))
+		b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", zoom))
 		NewStretch(b)
 		b.AddSnackbarIcon(icons.Remove, func(e events.Event) {
 			w.stepZoom(-1)
@@ -242,7 +258,7 @@ func (w *renderWindow) setZoom(zoom float32) {
 			w.stepZoom(1)
 		})
 		b.AddSnackbarButton("Reset", func(e events.Event) {
-			w.setZoom(100)
+			w.setZoom(100, screenName)
 		})
 		b.DeleteChildByName("stretch")
 		b.RunSnackbar(ms)
@@ -500,7 +516,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
 			if DebugSettings.WinEventTrace {
-				fmt.Println("Win: ScreenUpdate", w.name, screenConfig())
+				log.Println("Win: ScreenUpdate", w.name, screenConfig())
 			}
 			if !TheApp.Platform().IsMobile() { // native desktop
 				if TheApp.NScreens() > 0 {

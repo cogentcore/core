@@ -90,12 +90,14 @@ type Window interface {
 	// relative to overall screen layouts in multi-monitor configurations.
 	SetPos(pos image.Point, screen *Screen)
 
-	// SetGeom sets the position and size in one call. Use this if doing
-	// both because sequential calls to SetPos and SetSize might fail on some
-	// platforms. Size is in actual pixel units (i.e., same units as returned by Size()),
+	// SetGeom sets the full window geometry in one call, including full screen,
+	// position, and size. If fullscreen is true, then the position and size are
+	// ignored, but screen can be used to move to a different screen if already
+	// fullscreen. For non-fullscreeen, this method is preferred over separate SetPos
+	// and SetSize. Size is in actual pixel units (i.e., same units as returned by Size()),
 	// and Pos is in OS-specific window manager units (i.e., as returned in Position()).
 	// See [Window.SetPos] for information on the optional screen argument.
-	SetGeom(pos image.Point, sz image.Point, screen *Screen)
+	SetGeom(fullscreen bool, pos image.Point, sz image.Point, screen *Screen)
 
 	// ConstrainFrame ensures that the window frame is entirely within the
 	// window's screen, returning the size of each side of the frame.
@@ -112,11 +114,6 @@ type Window interface {
 	// Minimize requests that the window be iconified, making it no longer
 	// visible or active -- rendering should not occur for minimized windows.
 	Minimize()
-
-	// UpdateFullscreen requests that the window be updated to either
-	// fullscreen mode (true) or window mode (false). This is implemented
-	// on desktop and web platforms.
-	UpdateFullscreen(fullscreen bool)
 
 	// PhysicalDPI is the physical dots per inch of the window, for generating
 	// true-to-physical-size output, for example -- see the gi/units package for
@@ -221,6 +218,10 @@ type Window interface {
 	// Events returns the [events.Source] for this window,
 	// which manages all of the event sending.
 	Events() *events.Source
+
+	// SendPaintEvent sends the WindowPaint event.
+	// Other updates / polling may be done at this point too.
+	SendPaintEvent()
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -342,7 +343,7 @@ func (o *NewWindowOptions) Fixup() {
 		o.Size.Y = int(0.8 * float32(scsz.Y) * sc.DevicePixelRatio)
 	}
 
-	o.Size, o.Pos = sc.ConstrainWinGeom(o.Size, o.Pos)
+	o.Pos, o.Size = sc.ConstrainWinGeom(o.Pos, o.Size)
 	if o.Pos.X == 0 && o.Pos.Y == 0 {
 		wsz := sc.WinSizeFromPix(o.Size)
 		dialog := o.Flags.HasFlag(Dialog)
@@ -368,6 +369,6 @@ func (o *NewWindowOptions) Fixup() {
 			o.Pos.X = scsz.X/2 - wsz.X/2
 			o.Pos.Y = scsz.Y/2 - wsz.Y/2
 		}
-		o.Size, o.Pos = sc.ConstrainWinGeom(o.Size, o.Pos) // make sure ok
+		o.Pos, o.Size = sc.ConstrainWinGeom(o.Pos, o.Size) // make sure ok
 	}
 }
