@@ -11,7 +11,11 @@ import (
 	"runtime"
 	"unsafe"
 
+	"cogentcore.org/core/base/timer"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/gpu"
+	// "cogentcore.org/core/system/driver/web/jsfs"
 )
 
 //go:embed squares.wgsl
@@ -30,6 +34,18 @@ type Data struct {
 }
 
 func main() {
+	// errors.Log1(jsfs.Config(js.Global().Get("fs"))) // needed for printing etc to work
+	// time.Sleep(1 * time.Second)
+	b := core.NewBody()
+	bt := core.NewButton(b).SetText("Run Compute")
+	bt.OnClick(func(e events.Event) {
+		compute()
+	})
+	b.RunMainWindow()
+	// select {}
+}
+
+func compute() {
 	gpu.Debug = true
 	gp := gpu.NewComputeGPU()
 	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
@@ -42,7 +58,7 @@ func main() {
 	vars := sy.Vars()
 	sgp := vars.AddGroup(gpu.Storage)
 
-	n := 20 // note: not necc to spec up-front, but easier if so
+	n := 2_000_000 // note: not necc to spec up-front, but easier if so
 	threads := 64
 
 	dv := sgp.AddStruct("Data", int(unsafe.Sizeof(Data{})), n, gpu.ComputeShader)
@@ -59,16 +75,27 @@ func main() {
 	}
 	gpu.SetValueFrom(dvl, sd)
 
-	ce, _ := sy.BeginComputePass()
-	pl.Dispatch1D(ce, n, threads)
-	ce.End()
-	dvl.GPUToRead(sy.CommandEncoder)
-	sy.EndComputePass()
+	gpuTmr := timer.Time{}
+	cpyTmr := timer.Time{}
+	gpuTmr.Start()
 
-	dvl.ReadSync()
-	gpu.ReadToBytes(dvl, sd)
+	for range 100 {
+		ce, _ := sy.BeginComputePass()
+		pl.Dispatch1D(ce, n, threads)
+		ce.End()
+		dvl.GPUToRead(sy.CommandEncoder)
+		sy.EndComputePass()
 
-	for i := 0; i < n; i++ {
+		cpyTmr.Start()
+		dvl.ReadSync()
+		cpyTmr.Stop()
+		gpu.ReadToBytes(dvl, sd)
+	}
+
+	gpuTmr.Stop()
+
+	mx := min(n, 10)
+	for i := 0; i < mx; i++ {
 		tc := sd[i].A + sd[i].B
 		td := tc * tc
 		dc := sd[i].C - tc
@@ -76,6 +103,7 @@ func main() {
 		fmt.Printf("%d\t A: %g\t B: %g\t C: %g\t trg: %g\t D: %g \t trg: %g \t difC: %g \t difD: %g\n", i, sd[i].A, sd[i].B, sd[i].C, tc, sd[i].D, td, dc, dd)
 	}
 	fmt.Printf("\n")
+	fmt.Println("total:", gpuTmr.Total, "copy:", cpyTmr.Total)
 
 	sy.Release()
 	gp.Release()
