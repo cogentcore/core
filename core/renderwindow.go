@@ -498,7 +498,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
 			if DebugSettings.WinEventTrace {
-				fmt.Println("Win: ScreenUpdate", w.name, screenConfig())
+				log.Println("Win: ScreenUpdate", w.name, screenConfig())
 			}
 			if !TheApp.Platform().IsMobile() { // native desktop
 				if TheApp.NScreens() > 0 {

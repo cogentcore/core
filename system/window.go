@@ -217,6 +217,10 @@ type Window interface {
 	// Events returns the [events.Source] for this window,
 	// which manages all of the event sending.
 	Events() *events.Source
+
+	// SendPaintEvent sends the WindowPaint event.
+	// Other updates / polling may be done at this point too.
+	SendPaintEvent()
 }
 
 ////////////////////////////////////////////////////////////////////////////

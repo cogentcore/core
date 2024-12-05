@@ -38,6 +38,11 @@ func (w *Window) IsVisible() bool {
 	return w.WindowMulti.IsVisible() && w.Glw != nil
 }
 
+func (w *Window) SendPaintEvent() {
+	TheApp.PollScreenChanges()
+	w.This.Events().WindowPaint()
+}
+
 // Activate() sets this window as the current render target for gpu rendering
 // functions, and the current context for gpu state (equivalent to
 // MakeCurrentContext on OpenGL).
@@ -130,19 +135,19 @@ func (w *Window) Screen() *system.Screen {
 	mon := w.Glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
 	// that is super useless it seems. only works for fullscreen
 	if mon != nil {
-		if MonitorDebug {
-			log.Printf("MonitorDebug: desktop.Window.Screen: %v: got screen: %v\n", w.Nm, mon.GetName())
+		if ScreenDebug {
+			log.Printf("ScreenDebug: desktop.Window.Screen: %v: got screen: %v\n", w.Nm, mon.GetName())
 		}
 		sc = TheApp.ScreenByName(mon.GetName())
 		if sc == nil {
-			log.Printf("MonitorDebug: desktop.Window.Screen: could not find screen of name: %v\n", mon.GetName())
+			log.Printf("ScreenDebug: desktop.Window.Screen: could not find screen of name: %v\n", mon.GetName())
 			sc = TheApp.Screens[0]
 		}
 		goto setScreen
 	}
 	sc = w.GetScreenOverlap()
 	// if monitorDebug {
-	// 	log.Printf("MonitorDebug: desktop.Window.GetScreenOverlap: %v: got screen: %v\n", w.Nm, sc.Name)
+	// 	log.Printf("ScreenDebug: desktop.Window.GetScreenOverlap: %v: got screen: %v\n", w.Nm, sc.Name)
 	// }
 setScreen:
 	w.ScreenWindow = sc.Name
@@ -442,7 +447,7 @@ func (w *Window) Moved(gw *glfw.Window, x, y int) {
 
 func (w *Window) WinResized(gw *glfw.Window, width, height int) {
 	// w.app.GetScreens()  // this can crash here on win disconnect..
-	if MonitorDebug {
+	if ScreenDebug {
 		log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.PixSize)
 	}
 	w.updateMaximized()
@@ -475,7 +480,7 @@ func (w *Window) UpdateGeom() {
 	w.Draw.System.Renderer.SetSize(w.PixSize)
 	// })
 	if cursc != w.ScreenWindow {
-		if MonitorDebug {
+		if ScreenDebug {
 			log.Printf("desktop.Window.UpdateGeom: %v: got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)
 		}
 	}
@@ -491,7 +496,7 @@ func (w *Window) FbResized(gw *glfw.Window, width, height int) {
 	}
 	fbsz := image.Point{width, height}
 	if w.PixSize != fbsz {
-		if MonitorDebug {
+		if ScreenDebug {
 			log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, w.PixSize)
 		}
 		w.UpdateGeom()
