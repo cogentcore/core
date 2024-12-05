@@ -109,7 +109,7 @@ func (gp *GPU) init() error {
 	gp.Properties = gp.GPU.GetInfo()
 	gp.DeviceName = adapterName(&gp.Properties)
 	if Debug || DebugAdapter {
-		fmt.Println("gpu: Selected Device:", gp.DeviceName, " (set DebugAdapter to get more adapter info)")
+		fmt.Println("gpu: Selected Device:", gpIndex, gp.DeviceName, " (set DebugAdapter to get more adapter info)")
 	}
 
 	gp.Limits = gp.GPU.GetLimits()
@@ -132,10 +132,10 @@ func (gp *GPU) init() error {
 }
 
 func adapterName(ai *wgpu.AdapterInfo) string {
-	if ai.Name != "" && ai.Name != "0x0" {
+	if ai.Name != "" && !strings.HasPrefix(ai.Name, "0x") {
 		return ai.Name
 	}
-	if ai.DriverDescription != "" && ai.DriverDescription != "0x0" {
+	if ai.DriverDescription != "" && !strings.HasPrefix(ai.DriverDescription, "0x") {
 		return ai.DriverDescription
 	}
 	return ai.VendorName
