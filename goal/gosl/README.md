@@ -19,6 +19,8 @@ To install the `gosl` command:
 $ go install cogentcore.org/core/goal/gosl@latest
 ```
 
+It is also strongly recommended to install the `naga` WGSL compiler from https://github.com/gfx-rs/wgpu and the `tint` compiler from https://dawn.googlesource.com/dawn/ Both of these are used if available to validate the generated GPU shader code. It is much faster to fix the issues at generation time rather than when trying to run the app later. Once code passes validation in both of these compilers, it should load fine in your app, and if the Go version runs correctly, there is a good chance of at least some reasonable behavior on the GPU.
+
 # Usage
 
 There are two key elements for GPU-enabled code:
