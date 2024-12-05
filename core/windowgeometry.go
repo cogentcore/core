@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -276,12 +277,16 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	wgr.Pos = pos
 	wgr.Size = wsz
 
+	// first get copy of stored data
 	sgs := ws.geometries[cfg]
 	if sgs == nil {
 		sgs = make(map[string]windowGeometries)
 	}
-	wgs := sgs[winName]
-	if wgs.Screens == nil {
+	var wgs windowGeometries
+	if swgs, ok := sgs[winName]; ok {
+		wgs.Last = swgs.Last
+		wgs.Screens = maps.Clone(swgs.Screens)
+	} else {
 		wgs.Screens = make(map[string]windowGeometry)
 	}
 
@@ -359,6 +364,7 @@ func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry,
 	winName = ws.windowName(winName)
 	var wgs windowGeometries
 
+	fromMain := false
 	sgs := ws.cache[cfg]
 	ok := false
 	if sgs != nil {
@@ -370,6 +376,7 @@ func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry,
 			return nil, nil
 		}
 		wgs, ok = sgs[winName]
+		fromMain = true
 	}
 	if !ok {
 		return nil, nil
@@ -378,7 +385,7 @@ func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry,
 	if wgr != nil {
 		wgr.constrainGeom(sc)
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: Got geom for window: %q screen: %q lastScreen: %q cfg: %q geom: %s\n", winName, sc.Name, wgs.Last, cfg, wgr.String())
+			log.Printf("WindowGeometry: Got geom for window: %q screen: %q lastScreen: %q cfg: %q geom: %s fromMain: %v\n", winName, sc.Name, wgs.Last, cfg, wgr.String(), fromMain)
 		}
 		return wgr, sc
 	}

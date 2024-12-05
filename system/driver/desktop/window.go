@@ -273,9 +273,8 @@ func (w *Window) SetGeom(fullscreen bool, pos, sz image.Point, screen *system.Sc
 	}
 	sc := w.Screen()
 	if screen != nil {
-		sc = screen
+		sc = screen // critical to use this b/c w.Screen() can be wrong on new screen sequence
 	}
-	fmt.Println("SetGeom sz in:", sz, "winsz:", sc.WinSizeFromPix(sz))
 	sz = sc.WinSizeFromPix(sz)
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
