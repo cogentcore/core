@@ -190,6 +190,7 @@ func (sc *Screen) ConstrainWinGeom(pos, sz image.Point) (cpos, csz image.Point) 
 
 // ConstrainWinGeom constrains the size and position of a window within
 // given screen size, preserving the size to the extent possible.
+// size is in window manager coordinates.
 func ConstrainWinGeom(pos, sz, scSize image.Point) (cpos, csz image.Point) {
 	csz = sz
 	cpos = pos

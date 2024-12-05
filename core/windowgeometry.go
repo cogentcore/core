@@ -6,6 +6,7 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 	"image"
 	"log"
 	"os"
@@ -300,7 +301,7 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	ws.cache[cfg] = sgsc
 
 	if DebugSettings.WinGeomTrace {
-		log.Printf("WindowGeometry: Record win: %q screen: %q cfg: %q", winName, sc.Name, cfg)
+		log.Printf("WindowGeometry: Record win: %q screen: %q cfg: %q geom: %s", winName, sc.Name, cfg, wgr.String())
 	}
 
 	if ws.saveTimer == nil {
@@ -377,7 +378,7 @@ func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry,
 	if wgr != nil {
 		wgr.constrainGeom(sc)
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WindowGeometry: Got geom for window: %q pos: %v size: %v screen: %q lastScreen: %q cfg: %q\n", winName, wgr.Pos, wgr.Size, sc.Name, wgs.Last, cfg)
+			log.Printf("WindowGeometry: Got geom for window: %q screen: %q lastScreen: %q cfg: %q geom: %s\n", winName, sc.Name, wgs.Last, cfg, wgr.String())
 		}
 		return wgr, sc
 	}
@@ -413,7 +414,7 @@ func (ws *windowGeometrySaver) restoreAll() {
 		wgp, sc := ws.get(w.title, "")
 		if wgp != nil && !w.SystemWindow.Is(system.Fullscreen) {
 			if DebugSettings.WinGeomTrace {
-				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v pos: %v size: %v screen: %s\n", w.name, wgp.Pos, wgp.Size, sc.Name)
+				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v screen: %s geom: %s\n", w.name, sc.Name, wgp.String())
 			}
 			w.SystemWindow.SetGeom(false, wgp.Pos, wgp.Size, sc)
 		}
@@ -465,6 +466,10 @@ type windowGeometry struct {
 	Size image.Point
 	Pos  image.Point
 	Max  bool // Maximized
+}
+
+func (wg *windowGeometry) String() string {
+	return fmt.Sprintf("DPI: %g  DPR: %g  Size: %v  Pos: %v  Max: %v", wg.DPI, wg.DPR, wg.Size, wg.Pos, wg.Max)
 }
 
 // constrainGeom constrains geometry based on screen params
