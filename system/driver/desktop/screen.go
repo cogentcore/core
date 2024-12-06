@@ -124,7 +124,7 @@ func (a *App) GetScreens() {
 		if ScreenDebug {
 			log.Printf("ScreenDebug: getScreens: mon number: %v name: %v\n", i, mon.GetName())
 		}
-		if len(a.Screens) <= scNo {
+		for len(a.Screens) <= scNo {
 			a.Screens = append(a.Screens, &system.Screen{})
 		}
 		sc := a.Screens[scNo]

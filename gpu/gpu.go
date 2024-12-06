@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -64,7 +65,7 @@ type GPU struct {
 	Limits wgpu.SupportedLimits
 
 	// ComputeOnly indicates if this GPU is only used for compute,
-	// which determines if it listens to WEBGPU_COMPUTE_DEVICE_SELECT
+	// which determines if it listens to GPU_COMPUTE_DEVICE_SELECT
 	// environment variable, allowing different compute devices to be
 	// selected vs. graphics devices.
 	ComputeOnly bool
@@ -91,7 +92,7 @@ func NewGPU() *GPU {
 
 // NewComputeGPU returns a new GPU, configured and ready to use,
 // for purely compute use, which causes it to listen to
-// use the WEBGPU_COMPUTE_DEVICE_SELECT variable for which GPU device to use.
+// use the GPU_COMPUTE_DEVICE_SELECT variable for which GPU device to use.
 func NewComputeGPU() *GPU {
 	gp := &GPU{}
 	gp.ComputeOnly = true
@@ -119,16 +120,46 @@ func (gp *GPU) init() error {
 	}
 
 	gp.MaxComputeWorkGroupCount1D = int(gp.Limits.Limits.MaxComputeWorkgroupsPerDimension)
-	ldv := strings.ToLower(gp.DeviceName)
-	if strings.Contains(ldv, "nvidia") {
+	dv := actualVendorName(&gp.Properties)
+	if Debug || DebugAdapter {
+		fmt.Println("GPU device vendor:", dv)
+	}
+	if dv == "nvidia" {
 		// all NVIDIA are either 1 << 31 or -1 of that.
 		gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1
-	} else if strings.Contains(ldv, "apple") {
+	} else if dv == "apple" {
 		gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1
 	}
 	// note: if known to be higher for any specific case, please file an issue or PR
 	// todo: where are the errors!?
 	return nil
+}
+
+// actualVendorName returns the actual vendor name from the coded
+// string that the adapter VendorName contains,
+// or, failing that, from the description.
+func actualVendorName(ai *wgpu.AdapterInfo) string {
+	nm := strings.ToLower(ai.VendorName)
+	// source: https://www.reddit.com/r/vulkan/comments/4ta9nj/is_there_a_comprehensive_list_of_the_names_and/
+	switch nm {
+	case "0x10de":
+		return "nvidia"
+	case "0x1002":
+		return "amd"
+	case "0x1010":
+		return "imgtec"
+	case "0x13b5":
+		return "arm"
+	case "0x5143":
+		return "qualcomm"
+	case "0x8086":
+		return "intel"
+	}
+	vd := strings.ToLower(ai.DriverDescription)
+	if strings.Contains(vd, "apple") {
+		return "apple"
+	}
+	return nm
 }
 
 func adapterName(ai *wgpu.AdapterInfo) string {
@@ -190,7 +221,15 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			continue
 		}
 		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
-			score++
+			vnm := actualVendorName(&props)
+			if runtime.GOOS == "linux" && vnm == "nvidia" {
+				if Debug || DebugAdapter {
+					fmt.Println("not selecting discrete nvidia GPU: tends to crash when resizing windows")
+				}
+				score--
+			} else {
+				score++
+			}
 		}
 		if !gpuIsGLdBackend(props.BackendType) {
 			score++
