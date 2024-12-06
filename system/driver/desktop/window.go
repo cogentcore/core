@@ -310,15 +310,18 @@ func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
 	w.FrameSize.Set(t, r, b, l)
 	sc := w.Screen()
 	scSize := sc.Geometry.Size()
+	// fmt.Println("\tconstrainframe screen:", sc.Name, scSize, w.FrameSize, "geom:", w.Pos, w.WnSize)
 	frSize := image.Pt(w.FrameSize.Left+w.FrameSize.Right, w.FrameSize.Top+w.FrameSize.Bottom)
 	frOff := image.Pt(w.FrameSize.Left, w.FrameSize.Top)
 	sz := w.WnSize.Add(frSize)
-	pos := w.Pos.Sub(frOff)
+	scpos := w.Pos.Sub(sc.Geometry.Min)
+	pos := scpos.Sub(frOff)
 	cpos, csz := system.ConstrainWinGeom(pos, sz, scSize)
 	cpos = cpos.Add(frOff)
 	csz = csz.Sub(frSize)
+	// fmt.Println("\tconstrainframe pos:", scpos, "cpos:", cpos, "size:", w.WnSize, "csz:", csz)
 	change := false
-	pos = w.Pos
+	pos = scpos
 	if !topOnly && cpos.X > pos.X {
 		change = true
 		pos.X = cpos.X
@@ -337,6 +340,7 @@ func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
 		sz.Y = csz.Y
 	}
 	if change {
+		// fmt.Println("\tconstrainframe changed:", pos, sz)
 		w.SetGeom(false, pos, sz, sc)
 	}
 	return w.FrameSize
