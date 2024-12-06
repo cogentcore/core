@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -104,9 +105,21 @@ func NewComputeGPU() *GPU {
 func (gp *GPU) init() error {
 	gp.Instance = wgpu.CreateInstance(nil)
 
-	gpus := gp.Instance.EnumerateAdapters(nil)
-	gpIndex := gp.SelectGPU(gpus)
-	gp.GPU = gpus[gpIndex]
+	gpIndex := 0
+	if gp.ComputeOnly {
+		gpus := gp.Instance.EnumerateAdapters(nil)
+		gpIndex = gp.SelectGPU(gpus)
+		gp.GPU = gpus[gpIndex]
+	} else {
+		opts := &wgpu.RequestAdapterOptions{
+			PowerPreference: wgpu.PowerPreferenceHighPerformance,
+		}
+		ad, err := gp.Instance.RequestAdapter(opts)
+		if errors.Log(err) != nil {
+			return err
+		}
+		gp.GPU = ad
+	}
 	gp.Properties = gp.GPU.GetInfo()
 	gp.DeviceName = adapterName(&gp.Properties)
 	if Debug || DebugAdapter {
