@@ -26,7 +26,7 @@ var (
 
 	// DebugAdapter provides detailed information about the selected
 	// GPU adpater device (i.e., the type and limits of the hardware).
-	DebugAdapter = true
+	DebugAdapter = false
 )
 
 // SetDebug sets [Debug] (debug mode). If it is set to true,
