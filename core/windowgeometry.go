@@ -290,12 +290,14 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 		wgs.Screens = make(map[string]windowGeometry)
 	}
 
+	// then look for current cache data
 	sgsc := ws.cache[cfg]
 	if sgsc == nil {
 		sgsc = make(map[string]windowGeometries)
 	}
 	wgsc, hasCache := sgsc[winName]
 	if hasCache {
+		wgs.Last = wgsc.Last
 		for k, v := range wgsc.Screens {
 			wgs.Screens[k] = v
 		}

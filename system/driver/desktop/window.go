@@ -450,8 +450,7 @@ func (w *Window) Moved(gw *glfw.Window, x, y int) {
 	w.Pos = image.Pt(x, y)
 	w.Mu.Unlock()
 	// w.app.GetScreens() // this can crash here on win disconnect..
-	w.Screen() // gets parameters
-	w.updateMaximized()
+	w.UpdateGeom() // critical to update size etc here.
 	w.Event.Window(events.WinMove)
 }
 
