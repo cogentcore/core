@@ -26,7 +26,7 @@ var (
 
 	// DebugAdapter provides detailed information about the selected
 	// GPU adpater device (i.e., the type and limits of the hardware).
-	DebugAdapter = false
+	DebugAdapter = true
 )
 
 // SetDebug sets [Debug] (debug mode). If it is set to true,
@@ -120,7 +120,7 @@ func (gp *GPU) init() error {
 	}
 
 	gp.MaxComputeWorkGroupCount1D = int(gp.Limits.Limits.MaxComputeWorkgroupsPerDimension)
-	dv := actualVendorName(gp.Properties.VendorName)
+	dv := actualVendorName(&gp.Properties)
 	if Debug || DebugAdapter {
 		fmt.Println("GPU device vendor:", dv)
 	}
@@ -136,10 +136,11 @@ func (gp *GPU) init() error {
 }
 
 // actualVendorName returns the actual vendor name from the coded
-// string that the adapter VendorName contains.
-func actualVendorName(nm string) string {
-	nm = strings.ToLower(nm)
-	// source:
+// string that the adapter VendorName contains,
+// or, failing that, from the description.
+func actualVendorName(ai *wgpu.AdapterInfo) string {
+	nm := strings.ToLower(ai.VendorName)
+	// source: https://www.reddit.com/r/vulkan/comments/4ta9nj/is_there_a_comprehensive_list_of_the_names_and/
 	switch nm {
 	case "0x10de":
 		return "nvidia"
@@ -153,6 +154,10 @@ func actualVendorName(nm string) string {
 		return "qualcomm"
 	case "0x8086":
 		return "intel"
+	}
+	vd := strings.ToLower(ai.DriverDescription)
+	if strings.Contains(vd, "apple") {
+		return "apple"
 	}
 	return nm
 }
@@ -216,7 +221,7 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			continue
 		}
 		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
-			vnm := actualVendorName(props.VendorName)
+			vnm := actualVendorName(&props)
 			if runtime.GOOS == "linux" && vnm == "nvidia" {
 				if Debug || DebugAdapter {
 					fmt.Println("not selecting discrete nvidia GPU: tends to crash when resizing windows")
