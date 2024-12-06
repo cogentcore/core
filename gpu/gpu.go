@@ -120,16 +120,41 @@ func (gp *GPU) init() error {
 	}
 
 	gp.MaxComputeWorkGroupCount1D = int(gp.Limits.Limits.MaxComputeWorkgroupsPerDimension)
-	ldv := strings.ToLower(gp.DeviceName)
-	if strings.Contains(ldv, "nvidia") {
+	dv := actualVendorName(gp.Properties.VendorName)
+	if Debug || DebugAdapter {
+		fmt.Println("GPU device vendor:", dv)
+	}
+	if dv == "nvidia" {
 		// all NVIDIA are either 1 << 31 or -1 of that.
 		gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1
-	} else if strings.Contains(ldv, "apple") {
+	} else if dv == "apple" {
 		gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1
 	}
 	// note: if known to be higher for any specific case, please file an issue or PR
 	// todo: where are the errors!?
 	return nil
+}
+
+// actualVendorName returns the actual vendor name from the coded
+// string that the adapter VendorName contains.
+func actualVendorName(nm string) string {
+	nm = strings.ToLower(nm)
+	// source:
+	switch nm {
+	case "0x10de":
+		return "nvidia"
+	case "0x1002":
+		return "amd"
+	case "0x1010":
+		return "imgtec"
+	case "0x13b5":
+		return "arm"
+	case "0x5143":
+		return "qualcomm"
+	case "0x8086":
+		return "intel"
+	}
+	return nm
 }
 
 func adapterName(ai *wgpu.AdapterInfo) string {
@@ -191,9 +216,11 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			continue
 		}
 		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
-			anm := strings.ToLower(adapterName(&props))
-			if runtime.GOOS == "linux" && strings.Contains(anm, "nvidia") {
-				fmt.Println("nvidia GPU tends to crash when resizing windows")
+			vnm := actualVendorName(props.VendorName)
+			if runtime.GOOS == "linux" && vnm == "nvidia" {
+				if Debug || DebugAdapter {
+					fmt.Println("not selecting discrete nvidia GPU: tends to crash when resizing windows")
+				}
 				score--
 			} else {
 				score++
