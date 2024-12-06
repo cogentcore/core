@@ -133,13 +133,13 @@ func (sy *ComputeSystem) BeginComputePass() (*wgpu.ComputePassEncoder, error) {
 func (sy *ComputeSystem) EndComputePass(ce *wgpu.ComputePassEncoder) error {
 	cmd := sy.CommandEncoder
 	sy.CommandEncoder = nil
+	ce.Release() // must happen before Finish
 	cmdBuffer, err := cmd.Finish(nil)
 	if errors.Log(err) != nil {
 		return err
 	}
 	sy.device.Queue.Submit(cmdBuffer)
 	cmdBuffer.Release()
-	ce.Release()
 	cmd.Release()
 	return nil
 }
