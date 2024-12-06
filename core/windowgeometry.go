@@ -255,7 +255,7 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	}
 	sc := win.SystemWindow.Screen()
 	pos := win.SystemWindow.Position(sc)
-	if pos.X == -32000 || pos.Y == -32000 { // windows badness
+	if TheApp.Platform() == system.Windows && pos.X == -32000 || pos.Y == -32000 { // windows badness
 		if DebugSettings.WinGeomTrace {
 			log.Printf("WindowGeometry: Record: NOT storing very negative pos: %v for win: %v\n", pos, win.name)
 		}
