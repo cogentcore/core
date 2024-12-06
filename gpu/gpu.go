@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -64,7 +65,7 @@ type GPU struct {
 	Limits wgpu.SupportedLimits
 
 	// ComputeOnly indicates if this GPU is only used for compute,
-	// which determines if it listens to WEBGPU_COMPUTE_DEVICE_SELECT
+	// which determines if it listens to GPU_COMPUTE_DEVICE_SELECT
 	// environment variable, allowing different compute devices to be
 	// selected vs. graphics devices.
 	ComputeOnly bool
@@ -91,7 +92,7 @@ func NewGPU() *GPU {
 
 // NewComputeGPU returns a new GPU, configured and ready to use,
 // for purely compute use, which causes it to listen to
-// use the WEBGPU_COMPUTE_DEVICE_SELECT variable for which GPU device to use.
+// use the GPU_COMPUTE_DEVICE_SELECT variable for which GPU device to use.
 func NewComputeGPU() *GPU {
 	gp := &GPU{}
 	gp.ComputeOnly = true
@@ -190,7 +191,13 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			continue
 		}
 		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
-			score++
+			anm := strings.ToLower(adapterName(&props))
+			if runtime.GOOS == "linux" && strings.Contains(anm, "nvidia") {
+				fmt.Println("nvidia GPU tends to crash when resizing windows")
+				score--
+			} else {
+				score++
+			}
 		}
 		if !gpuIsGLdBackend(props.BackendType) {
 			score++
