@@ -279,6 +279,7 @@ func (w *renderWindow) resized() {
 	w.SystemWindow.Unlock()
 
 	curRg := rc.geom
+	rc.logicalDPI = w.logicalDPI() // always update
 	if curRg == rg {
 		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.name, curRg)
@@ -305,7 +306,6 @@ func (w *renderWindow) resized() {
 	}
 	rc.geom = rg
 	rc.visible = true
-	rc.logicalDPI = w.logicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.mains.resize(rg)
 	if DebugSettings.WinGeomTrace {

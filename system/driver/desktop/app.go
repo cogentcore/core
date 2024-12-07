@@ -82,7 +82,6 @@ func (a *App) InitGPU() {
 		log.Fatalln("system/driver/desktop failed to initialize glfw:", err)
 	}
 	glfw.SetMonitorCallback(a.MonitorChange)
-	a.GPU = gpu.NewGPU()
 	a.GetScreens()
 }
 
@@ -122,11 +121,14 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	w.This = w
 
 	a.RunOnMain(func() {
-		surf := a.GPU.Instance.CreateSurface(wgpuglfw.GetSurfaceDescriptor(glw))
+		surf := gpu.Instance().CreateSurface(wgpuglfw.GetSurfaceDescriptor(glw))
 		var fbsz image.Point
 		fbsz.X, fbsz.Y = glw.GetFramebufferSize()
 		if fbsz == (image.Point{}) {
 			fbsz = opts.Size
+		}
+		if a.GPU == nil {
+			a.GPU = gpu.NewGPU(surf)
 		}
 		// no multisample and no depth
 		sf := gpu.NewSurface(a.GPU, surf, fbsz, 1, gpu.UndefinedType)
