@@ -41,6 +41,9 @@ func NewComputeDevice(gpu *GPU) (*Device, error) {
 	// we only request max buffer sizes so compute can go as big as it needs to
 	limits := wgpu.DefaultLimits()
 	const maxv = 0xFFFFFFFF
+	// Per https://github.com/cogentcore/core/issues/1362 -- this may cause issues on "downlevel"
+	// hardware, so we may need to detect that. OTOH it probably won't be useful for compute anyway,
+	// but we can just sort that out later
 	// note: on web / chromium / dawn, limited to 10: https://issues.chromium.org/issues/366151398?pli=1
 	limits.MaxStorageBuffersPerShaderStage = gpu.Limits.Limits.MaxStorageBuffersPerShaderStage
 	// fmt.Println("MaxStorageBuffersPerShaderStage:", gpu.Limits.Limits.MaxStorageBuffersPerShaderStage)
