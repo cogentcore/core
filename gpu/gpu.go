@@ -20,13 +20,6 @@ import (
 )
 
 var (
-	// AutoSelectAdapter uses a simpler GPU adapter selection function,
-	// RequestAdapter, that uses the surface properties to select an
-	// adapter. Otherwise a more detailed selection algorithm is used
-	// that also listens to the GPU_DEVICE_SELECT environment variable.
-	// This detailed algorithm is always used in the compute case.
-	AutoSelectAdapter = false
-
 	// Debug is whether to enable debug mode, getting
 	// more diagnostic output about GPU configuration and rendering.
 	// It should be set using [SetDebug].
@@ -129,7 +122,11 @@ func NewComputeGPU() *GPU {
 func (gp *GPU) init(sf *wgpu.Surface) error {
 	inst := Instance()
 	gpIndex := 0
-	if sf != nil && AutoSelectAdapter {
+	if gp.ComputeOnly {
+		gpus := inst.EnumerateAdapters(nil)
+		gpIndex = gp.SelectGPU(gpus)
+		gp.GPU = gpus[gpIndex]
+	} else {
 		opts := &wgpu.RequestAdapterOptions{
 			CompatibleSurface: sf,
 			PowerPreference:   wgpu.PowerPreferenceHighPerformance,
@@ -139,10 +136,6 @@ func (gp *GPU) init(sf *wgpu.Surface) error {
 			return err
 		}
 		gp.GPU = ad
-	} else {
-		gpus := inst.EnumerateAdapters(nil)
-		gpIndex = gp.SelectGPU(gpus)
-		gp.GPU = gpus[gpIndex]
 	}
 	gp.Properties = gp.GPU.GetInfo()
 	gp.DeviceName = adapterName(&gp.Properties)
@@ -259,7 +252,7 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 		}
 		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
 			vnm := actualVendorName(&props)
-			if (runtime.GOOS == "linux" || runtime.GOOS == "windows") && vnm == "nvidia" {
+			if !gp.ComputeOnly && (runtime.GOOS == "linux" || runtime.GOOS == "windows") && vnm == "nvidia" {
 				if Debug || DebugAdapter {
 					fmt.Println("not selecting discrete nvidia GPU: tends to crash when resizing windows")
 				}
