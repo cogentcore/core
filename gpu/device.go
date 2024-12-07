@@ -40,7 +40,9 @@ func NewDevice(gpu *GPU) (*Device, error) {
 func NewComputeDevice(gpu *GPU) (*Device, error) {
 	// we only request max buffer sizes so compute can go as big as it needs to
 	limits := wgpu.DefaultLimits()
-	const maxv = 0xFFFFFFFF
+	// const maxv = 0xFFFFFFFF
+	// todo: need to apply alignment rounding to these limits! wgpu should do this for you!
+	const maxv = 0xFFFFFFF0
 	// Per https://github.com/cogentcore/core/issues/1362 -- this may cause issues on "downlevel"
 	// hardware, so we may need to detect that. OTOH it probably won't be useful for compute anyway,
 	// but we can just sort that out later
@@ -55,6 +57,7 @@ func NewComputeDevice(gpu *GPU) (*Device, error) {
 	// note: this limit is not working properly:
 	limits.MaxBufferSize = min(gpu.Limits.Limits.MaxBufferSize, maxv)
 	// limits.MaxBindGroups = gpu.Limits.Limits.MaxBindGroups // note: no point in changing -- web constraint
+	// limits.MaxComputeWorkgroupsPerDimension = 21474836 // gpu.Limits.Limits.MaxComputeWorkgroupsPerDimension
 
 	if Debug {
 		fmt.Printf("Requesting sizes: MaxStorageBufferBindingSize: %d  MaxBufferSize: %d\n", limits.MaxStorageBufferBindingSize, limits.MaxBufferSize)

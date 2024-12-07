@@ -46,7 +46,7 @@ func main() {
 }
 
 func compute() {
-	gpu.Debug = true
+	gpu.SetDebug(true)
 	gp := gpu.NewComputeGPU()
 	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
 
