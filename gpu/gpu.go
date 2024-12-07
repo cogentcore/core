@@ -252,7 +252,7 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 		}
 		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
 			vnm := actualVendorName(&props)
-			if (runtime.GOOS == "linux" || runtime.GOOS == "windows") && vnm == "nvidia" {
+			if !gp.ComputeOnly && (runtime.GOOS == "linux" || runtime.GOOS == "windows") && vnm == "nvidia" {
 				if Debug || DebugAdapter {
 					fmt.Println("not selecting discrete nvidia GPU: tends to crash when resizing windows")
 				}
