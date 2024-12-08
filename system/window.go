@@ -96,7 +96,8 @@ type Window interface {
 	// non-fullscreen, this method is preferred over separate [Window.SetPos]
 	// and [Window.SetSize]. Size is in actual pixel units (i.e., same units as
 	// returned by [Window.Size]), and pos is in OS-specific window manager units
-	// (i.e., as returned in [Window.Position]). See [Window.SetPos] for information
+	// (i.e., as returned in [Window.Position]). If pos and/or size is not specified,
+	// it defaults to the current value. See [Window.SetPos] for information
 	// on the optional screen argument. This method only fully works on desktop
 	// platforms, with only fullscreen supported on web.
 	SetGeometry(fullscreen bool, pos image.Point, sz image.Point, screen *Screen)

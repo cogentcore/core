@@ -267,6 +267,12 @@ func (w *Window) SetGeometry(fullscreen bool, pos, sz image.Point, screen *syste
 	if w.IsClosed() {
 		return
 	}
+	if pos == (image.Point{}) {
+		pos = w.Pos
+	}
+	if sz == (image.Point{}) {
+		sz = w.PixSize
+	}
 	if screen != nil {
 		pos = pos.Add(screen.Geometry.Min)
 	}
