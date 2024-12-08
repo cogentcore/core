@@ -363,8 +363,7 @@ func (sc *Scene) SetFullscreen(fullscreen bool) {
 	if wgp != nil {
 		rw.SystemWindow.SetGeometry(fullscreen, wgp.Pos, wgp.Size, screen)
 	} else {
-		zp := image.Point{}
-		rw.SystemWindow.SetGeometry(fullscreen, zp, zp, nil)
+		rw.SystemWindow.SetGeometry(fullscreen, image.Point{}, image.Point{}, rw.SystemWindow.Screen())
 	}
 }
 
