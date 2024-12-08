@@ -97,7 +97,8 @@ func CheckStruct(cx *Context, st *types.Struct, stName string) bool {
 	last := cx.Sizes.Sizeof(flds[nf-1].Type())
 	totsz := int(offs[nf-1] + last)
 	mod := totsz % 16
-	if mod != 0 {
+	vectyp := strings.Contains(strings.ToLower(stName), "vec") // vector types are ok
+	if !vectyp && mod != 0 {
 		needs := 4 - (mod / 4)
 		hasErr = cx.AddError(fmt.Sprintf("    total size: %d not even multiple of 16 -- needs %d extra 32bit padding fields", totsz, needs), hasErr, stName)
 	}

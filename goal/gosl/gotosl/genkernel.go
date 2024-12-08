@@ -58,9 +58,9 @@ func (st *State) GenKernelHeader(sy *System, kn *Kernel, avars map[string]*Var) 
 	b.WriteString("\nalias GPUVars = i32;\n\n") // gets included when iteratively processing enumgen.go
 
 	b.WriteString("@compute @workgroup_size(64, 1, 1)\n")
-	// todo: conditional on different index dimensionality
-	b.WriteString("fn main(@builtin(global_invocation_id) idx: vec3<u32>) {\n")
-	b.WriteString(fmt.Sprintf("\t%s(idx.x);\n", kn.Name))
+	b.WriteString("fn main(@builtin(workgroup_id) wgid: vec3<u32>, @builtin(num_workgroups) nwg: vec3<u32>, @builtin(local_invocation_index) loci: u32) {\n")
+	b.WriteString("\tlet idx = loci + (wgid.x + wgid.y * nwg.x + wgid.z * nwg.x * nwg.y) * 64;\n")
+	b.WriteString(fmt.Sprintf("\t%s(idx);\n", kn.Name))
 	b.WriteString("}\n")
 	b.WriteString(st.GenTensorFuncs(sy))
 	return b.String()

@@ -140,7 +140,7 @@ func (vl *Value) init(vr *Var, dev *Device, idx int) {
 }
 
 func (vl *Value) String() string {
-	return fmt.Sprintf("Bytes: %d", vl.MemSize())
+	return fmt.Sprintf("Bytes: 0x%X", vl.MemSize())
 }
 
 // MemSize returns the memory allocation size for this value, in bytes.

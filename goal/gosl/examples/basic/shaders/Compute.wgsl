@@ -15,8 +15,9 @@ var<storage, read_write> IntData: array<i32>;
 alias GPUVars = i32;
 
 @compute @workgroup_size(64, 1, 1)
-fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
-	Compute(idx.x);
+fn main(@builtin(workgroup_id) wgid: vec3<u32>, @builtin(num_workgroups) nwg: vec3<u32>, @builtin(local_invocation_index) loci: u32) {
+	let idx = loci + (wgid.x + wgid.y * nwg.x + wgid.z * nwg.x * nwg.y) * 64;
+	Compute(idx);
 }
 
 fn Index2D(s0: u32, s1: u32, i0: u32, i1: u32) -> u32 {

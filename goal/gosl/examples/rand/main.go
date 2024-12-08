@@ -24,7 +24,8 @@ func main() {
 	GPUInit()
 
 	// n := 10
-	n := 4_000_000 // 5_000_000 is too much -- 256_000_000 -- up against buf size limit
+	// n := 16_000_000 // max for macbook M*
+	n := 200_000
 
 	UseGPU = false
 
