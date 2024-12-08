@@ -286,7 +286,12 @@ func (w *renderWindow) resized() {
 		}
 		// still need to apply style even if size is same
 		for _, kv := range w.mains.stack.Order {
-			sc := kv.Value.Scene
+			st := kv.Value
+			sc := st.Scene
+			if st.FullWindow || sc.SceneGeom.Size != rg.Size { // double-check: can be off in fullscreen init
+				st.Sprites.reset()
+				sc.resize(rg)
+			}
 			sc.applyStyleScene()
 		}
 		return

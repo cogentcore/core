@@ -432,7 +432,7 @@ func (sm *stages) mainHandleEvent(e events.Event) {
 	for i := n - 1; i >= 0; i-- {
 		st := sm.stack.ValueByIndex(i)
 		st.mainHandleEvent(e)
-		if e.IsHandled() || st.Modal || st.Type == WindowStage || st.FullWindow {
+		if e.IsHandled() || st.Modal || st.FullWindow {
 			break
 		}
 		if st.Type == DialogStage { // modeless dialog, by definition
