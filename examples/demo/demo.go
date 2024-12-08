@@ -645,10 +645,8 @@ func dialogs(ts *core.Tabs) {
 
 	fs := core.NewButton(wrow).SetText("Fullscreen")
 	fs.SetTooltip("Toggle fullscreen mode")
-	cfs := false
 	fs.OnClick(func(e events.Event) {
-		cfs = !cfs
-		wrow.Scene.UpdateFullscreen(cfs)
+		wrow.Scene.UpdateFullscreen(!wrow.Scene.IsFullscreen())
 	})
 }
 
