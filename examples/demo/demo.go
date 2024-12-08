@@ -638,15 +638,21 @@ func dialogs(ts *core.Tabs) {
 	})
 
 	rw := core.NewButton(wrow).SetText("Resize to content")
-	rw.SetTooltip("Resizes this window to fit the current content")
+	rw.SetTooltip("Resizes this window to fit the current content on multi-window platforms")
 	rw.OnClick(func(e events.Event) {
 		wrow.Scene.ResizeToContent(image.Pt(0, 40)) // note: size is not correct due to wrapping? #1307
 	})
 
 	fs := core.NewButton(wrow).SetText("Fullscreen")
-	fs.SetTooltip("Toggle fullscreen mode")
+	fs.SetTooltip("Toggle fullscreen mode on desktop and web platforms")
 	fs.OnClick(func(e events.Event) {
 		wrow.Scene.SetFullscreen(!wrow.Scene.IsFullscreen())
+	})
+
+	sg := core.NewButton(wrow).SetText("Set geometry")
+	sg.SetTooltip("Move the window to the top-left corner of the second screen and resize it on desktop platforms")
+	sg.OnClick(func(e events.Event) {
+		wrow.Scene.SetGeometry(false, image.Pt(30, 100), image.Pt(1000, 1000), 1)
 	})
 }
 
