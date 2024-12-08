@@ -19,6 +19,11 @@ import (
 	"github.com/cogentcore/webgpu/wgpu"
 )
 
+func init() {
+	SetDebug(false) // Note: don't remove -- this is needed to silence wgpu warning about not being on main thread
+	// see Surface.GetCurrentTexture()
+}
+
 var (
 	// Debug is whether to enable debug mode, getting
 	// more diagnostic output about GPU configuration and rendering.
