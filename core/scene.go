@@ -324,8 +324,9 @@ func (sc *Scene) ResizeToContent(extra ...image.Point) {
 // of the screen on which to fullscreen the window. If fullscreen is false, the
 // window is moved to the given pos and size on the given screen. If screen is -1,
 // the current screen the window is on is used, and fullscreen/pos/size are all
-// relative to that screen. See [Scene.SetFullscreen] for a simpler way to set
-// only the fullscreen state. See [Scene.ResizeToContent] to resize the window
+// relative to that screen. It is only applicable on desktop and web platforms,
+// with only fullscreen supported on web. See [Scene.SetFullscreen] for a simpler way
+// to set only the fullscreen state. See [Scene.ResizeToContent] to resize the window
 // to fit the current content.
 func (sc *Scene) SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen int) {
 	rw := sc.RenderWindow()

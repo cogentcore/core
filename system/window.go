@@ -71,13 +71,14 @@ type Window interface {
 	RenderGeom() math32.Geom2DInt
 
 	// SetWinSize sets the size of the window, in OS-specific window manager
-	// units that may not include any high DPI factors (DevPixRatio)
+	// units that may not include any high DPI factors (DevicePixelRatio)
 	// (i.e., the same units as returned in WinSize())
 	SetWinSize(sz image.Point)
 
 	// SetSize sets the size of the window, in actual pixel units
 	// (i.e., the same units as returned by Size())
-	// Divides by DevPixRatio before calling SetWinSize.
+	// Divides by DevicePixelRatio before calling SetWinSize.
+	// This method works on desktop and offscreen platforms.
 	SetSize(sz image.Point)
 
 	// SetPos sets the position of the window, in OS window manager
@@ -96,7 +97,8 @@ type Window interface {
 	// and [Window.SetSize]. Size is in actual pixel units (i.e., same units as
 	// returned by [Window.Size]), and pos is in OS-specific window manager units
 	// (i.e., as returned in [Window.Position]). See [Window.SetPos] for information
-	// on the optional screen argument.
+	// on the optional screen argument. This method only fully works on desktop
+	// platforms, with only fullscreen supported on web.
 	SetGeometry(fullscreen bool, pos image.Point, sz image.Point, screen *Screen)
 
 	// ConstrainFrame ensures that the window frame is entirely within the
