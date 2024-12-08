@@ -100,6 +100,7 @@ type Stage struct { //types:add -setters
 	// Screen specifies the screen number on which a new window is opened
 	// by default on desktop platforms. 0 is the default primary screen.
 	// Use [TheApp].ScreenByName("name").ScreenNumber to get the number by name.
+	// The automatically saved previous screen takes precedence.
 	Screen int
 
 	// Modal, if true, blocks input to all other stages.
@@ -129,11 +130,12 @@ type Stage struct { //types:add -setters
 	// platforms by default. It is different from [Stage.Fullscreen] in that
 	// fullscreen makes the window truly fullscreen without decorations
 	// (such as for a video player), whereas maximized keeps decorations and just
-	// makes it fill the available space.
+	// makes it fill the available space. The automatically saved previous maximized
+	// state takes precedence.
 	Maximized bool
 
-	// Fullscreen is whether to make a window fullscreen on desktop platforms
-	// by default. It is different from [Stage.Maximized] in that fullscreen makes
+	// Fullscreen is whether to make a window fullscreen on desktop platforms.
+	// It is different from [Stage.Maximized] in that fullscreen makes
 	// the window truly fullscreen without decorations (such as for a video player),
 	// whereas maximized keeps decorations and just makes it fill the available space.
 	// Not to be confused with [Stage.FullWindow], which is for stages contained within
