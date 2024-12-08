@@ -318,6 +318,18 @@ func (sc *Scene) ResizeToContent(extra ...image.Point) {
 	}()
 }
 
+// SetGeometry uses [system.Window.SetGeom] to update all window geometry properties.
+// If fullscreen is true, pos and size are ignored, and screen indicates the screen
+// to fullscreen on. If fullscreen is false, the window is moved to the given pos and size
+// on the given screen.
+func (sc *Scene) SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen int) {
+	rw := sc.RenderWindow()
+	if rw == nil {
+		return
+	}
+	rw.SystemWindow.SetGeom(fullscreen, pos, size, TheApp.Screen(screen))
+}
+
 // IsFullscreen returns whether the window associated with this [Scene]
 // is in fullscreen mode (true) or window mode (false). This is implemented
 // on desktop and web platforms. See [Scene.UpdateFullscreen] to update the
