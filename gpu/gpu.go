@@ -19,10 +19,6 @@ import (
 	"github.com/cogentcore/webgpu/wgpu"
 )
 
-func init() {
-	SetDebug(false) // Note: don't remove; this is needed to silence irrelevant wgpu warning about not being on main thread; see [Surface.GetCurrentTexture]
-}
-
 var (
 	// Debug is whether to enable debug mode, getting
 	// more diagnostic output about GPU configuration and rendering.
@@ -65,7 +61,7 @@ func SetDebug(debug bool) {
 	if Debug {
 		wgpu.SetLogLevel(wgpu.LogLevelDebug)
 	} else {
-		wgpu.SetLogLevel(wgpu.LogLevelError)
+		wgpu.SetLogLevel(wgpu.LogLevelWarn)
 	}
 }
 

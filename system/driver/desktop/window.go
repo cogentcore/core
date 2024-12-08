@@ -505,6 +505,9 @@ func (w *Window) FbResized(gw *glfw.Window, width, height int) {
 		if ScreenDebug {
 			log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, w.PixSize)
 		}
+		if sf, ok := w.Draw.Renderer().(*gpu.Surface); ok {
+			sf.SetSize(fbsz)
+		}
 		w.updateGeometry()
 	}
 }
