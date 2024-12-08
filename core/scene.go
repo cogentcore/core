@@ -318,10 +318,23 @@ func (sc *Scene) ResizeToContent(extra ...image.Point) {
 	}()
 }
 
-// UpdateFullscreen requests that the window associated with this Scene
+// IsFullscreen returns whether the window associated with this [Scene]
+// is in fullscreen mode (true) or window mode (false). This is implemented
+// on desktop and web platforms. See [Scene.UpdateFullscreen] to update the
+// current fullscreen state and [Stage.Fullscreen] to set the initial state.
+func (sc *Scene) IsFullscreen() bool {
+	rw := sc.RenderWindow()
+	if rw == nil {
+		return false
+	}
+	return rw.SystemWindow.Is(system.Fullscreen)
+}
+
+// UpdateFullscreen requests that the window associated with this [Scene]
 // be updated to either fullscreen mode (true) or window mode (false).
-// This is implemented on desktop and web platforms. See [Stage.Fullscreen]
-// to set the initial fullscreen state.
+// This is implemented on desktop and web platforms. See [Scene.IsFullscreen]
+// to get the current fullscreen state and [Stage.Fullscreen] to set the
+// initial state.
 func (sc *Scene) UpdateFullscreen(fullscreen bool) {
 	rw := sc.RenderWindow()
 	if rw == nil {
