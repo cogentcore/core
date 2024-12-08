@@ -151,7 +151,7 @@ func (a *App) GetScreens() {
 					sc.DevicePixelRatio = 2
 					sc.PixSize = sc.Geometry.Max.Mul(2)
 					sc.PhysicalSize = image.Point{344, 222}
-					sc.PhysicalDPI = 25.4 * float32(sc.PixSize.X) / float32(sc.PhysicalSize.X)
+					sc.UpdatePhysicalDPI()
 					sc.Depth = 24
 					sc.RefreshRate = 60
 					sc.UpdateLogicalDPI()
@@ -205,8 +205,7 @@ func (a *App) GetScreens() {
 		depth := vm.RedBits + vm.GreenBits + vm.BlueBits
 		sc.Depth = depth
 		sc.PhysicalSize = image.Point{pw, ph}
-		dpi := 25.4 * float32(sc.PixSize.X) / float32(pw)
-		sc.PhysicalDPI = dpi
+		sc.UpdatePhysicalDPI()
 		sc.UpdateLogicalDPI()
 		sc.RefreshRate = float32(vm.RefreshRate)
 		if ScreenDebug {

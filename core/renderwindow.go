@@ -589,7 +589,7 @@ func newRenderContext() *renderContext {
 	rc := &renderContext{}
 	scr := system.TheApp.Screen(0)
 	if scr != nil {
-		rc.geom.SetRect(scr.Geometry)
+		rc.geom.SetRect(image.Rectangle{Max: scr.PixSize})
 		rc.logicalDPI = scr.LogicalDPI
 	} else {
 		rc.geom = math32.Geom2DInt{Size: image.Pt(1080, 720)}

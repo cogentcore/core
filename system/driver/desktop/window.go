@@ -107,7 +107,7 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 	var mon *glfw.Monitor
 	if fullscreen && sc.ScreenNumber < len(TheApp.Monitors) {
 		mon = TheApp.Monitors[sc.ScreenNumber]
-		sz = sc.Geometry.Size() // use screen size for fullscreen video mode resolution
+		sz = sc.PixSize // use screen size for fullscreen video mode resolution
 	}
 	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), mon, nil)
 	if err != nil {
@@ -291,7 +291,7 @@ func (w *Window) SetGeom(fullscreen bool, pos, sz image.Point, screen *system.Sc
 				sc = screen
 			}
 			mon := w.App.Monitors[sc.ScreenNumber]
-			w.Glw.SetMonitor(mon, 0, 0, sc.Geometry.Dx(), sc.Geometry.Dy(), glfw.DontCare)
+			w.Glw.SetMonitor(mon, 0, 0, sc.PixSize.X, sc.PixSize.Y, glfw.DontCare)
 		default:
 			w.Glw.SetSize(sz.X, sz.Y)
 			w.Glw.SetPos(pos.X, pos.Y)
@@ -476,7 +476,6 @@ func (w *Window) UpdateGeom() {
 	w.updateMaximized()
 	var wsz image.Point
 	wsz.X, wsz.Y = w.Glw.GetSize()
-	// fmt.Printf("win size: %v\n", wsz)
 	w.WnSize = wsz
 	var fbsz image.Point
 	fbsz.X, fbsz.Y = w.Glw.GetFramebufferSize()
