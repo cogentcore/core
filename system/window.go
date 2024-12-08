@@ -89,14 +89,15 @@ type Window interface {
 	// relative to overall screen layouts in multi-monitor configurations.
 	SetPos(pos image.Point, screen *Screen)
 
-	// SetGeom sets the full window geometry in one call, including full screen,
+	// SetGeometry sets the full window geometry in one call, including full screen,
 	// position, and size. If fullscreen is true, then the position and size are
-	// ignored, but screen can be used to move to a different screen if already
-	// fullscreen. For non-fullscreeen, this method is preferred over separate SetPos
-	// and SetSize. Size is in actual pixel units (i.e., same units as returned by Size()),
-	// and Pos is in OS-specific window manager units (i.e., as returned in Position()).
-	// See [Window.SetPos] for information on the optional screen argument.
-	SetGeom(fullscreen bool, pos image.Point, sz image.Point, screen *Screen)
+	// ignored, but screen can be used to move to a different screen. For
+	// non-fullscreen, this method is preferred over separate [Window.SetPos]
+	// and [Window.SetSize]. Size is in actual pixel units (i.e., same units as
+	// returned by [Window.Size]), and pos is in OS-specific window manager units
+	// (i.e., as returned in [Window.Position]). See [Window.SetPos] for information
+	// on the optional screen argument.
+	SetGeometry(fullscreen bool, pos image.Point, sz image.Point, screen *Screen)
 
 	// ConstrainFrame ensures that the window frame is entirely within the
 	// window's screen, returning the size of each side of the frame.

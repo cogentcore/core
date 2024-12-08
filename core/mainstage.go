@@ -261,7 +261,7 @@ func (st *Stage) runWindow() *Stage {
 		}
 	}
 	st.Mains = nil // reset
-	if DebugSettings.WinRenderTrace {
+	if DebugSettings.WindowRenderTrace {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
 
@@ -341,7 +341,7 @@ func (st *Stage) runDialog() *Stage {
 		}
 		sc.Events.startFocusFirst = true // popup dialogs always need focus
 	}
-	if DebugSettings.WinRenderTrace {
+	if DebugSettings.WindowRenderTrace {
 		slog.Info("MainStage.RunDialog", "size", sz)
 	}
 

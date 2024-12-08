@@ -263,7 +263,7 @@ func (w *Window) SetPos(pos image.Point, screen *system.Screen) {
 	})
 }
 
-func (w *Window) SetGeom(fullscreen bool, pos, sz image.Point, screen *system.Screen) {
+func (w *Window) SetGeometry(fullscreen bool, pos, sz image.Point, screen *system.Screen) {
 	if w.IsClosed() {
 		return
 	}
@@ -340,7 +340,7 @@ func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
 	}
 	if change {
 		// fmt.Println("\tconstrainframe changed:", pos, sz)
-		w.SetGeom(false, pos, sz, sc)
+		w.SetGeometry(false, pos, sz, sc)
 	}
 	return w.FrameSize
 }
@@ -449,7 +449,7 @@ func (w *Window) Moved(gw *glfw.Window, x, y int) {
 	w.Pos = image.Pt(x, y)
 	w.Mu.Unlock()
 	// w.app.GetScreens() // this can crash here on win disconnect..
-	w.UpdateGeom() // critical to update size etc here.
+	w.updateGeometry() // critical to update size etc here.
 	w.Event.Window(events.WinMove)
 }
 
@@ -459,14 +459,14 @@ func (w *Window) WinResized(gw *glfw.Window, width, height int) {
 		log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.PixSize)
 	}
 	w.updateMaximized()
-	w.UpdateGeom()
+	w.updateGeometry()
 }
 
 func (w *Window) updateMaximized() {
 	w.Flgs.SetFlag(w.Glw.GetAttrib(glfw.Maximized) == glfw.True, system.Maximized)
 }
 
-func (w *Window) UpdateGeom() {
+func (w *Window) updateGeometry() {
 	w.Mu.Lock()
 	cursc := w.ScreenWindow
 	w.Mu.Unlock()
@@ -488,7 +488,7 @@ func (w *Window) UpdateGeom() {
 	// })
 	if cursc != w.ScreenWindow {
 		if ScreenDebug {
-			log.Printf("desktop.Window.UpdateGeom: %v: got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)
+			log.Printf("desktop.Window.updateGeometry: %v: got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)
 		}
 	}
 	w.Event.WindowResize()
@@ -505,7 +505,7 @@ func (w *Window) FbResized(gw *glfw.Window, width, height int) {
 		if ScreenDebug {
 			log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, w.PixSize)
 		}
-		w.UpdateGeom()
+		w.updateGeometry()
 	}
 }
 

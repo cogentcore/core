@@ -156,7 +156,7 @@ func RecycleMainWindow(data any) bool {
 	if !got {
 		return false
 	}
-	if DebugSettings.WinEventTrace {
+	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v getting recycled based on data match\n", ew.name)
 	}
 	ew.Raise()
@@ -177,10 +177,10 @@ func (w *renderWindow) setName(name string) {
 		if wgp != nil {
 			theWindowGeometrySaver.settingStart()
 			if w.SystemWindow.Size() != wgp.Size || w.SystemWindow.Position(sc) != wgp.Pos {
-				if DebugSettings.WinGeomTrace {
+				if DebugSettings.WindowGeometryTrace {
 					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.Pos, wgp.Size)
 				}
-				w.SystemWindow.SetGeom(false, wgp.Pos, wgp.Size, sc)
+				w.SystemWindow.SetGeometry(false, wgp.Pos, wgp.Size, sc)
 				system.TheApp.SendEmptyEvent()
 			}
 			theWindowGeometrySaver.settingEnd()
@@ -281,7 +281,7 @@ func (w *renderWindow) resized() {
 	curRg := rc.geom
 	rc.logicalDPI = w.logicalDPI() // always update
 	if curRg == rg {
-		if DebugSettings.WinEventTrace {
+		if DebugSettings.WindowEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.name, curRg)
 		}
 		// still need to apply style even if size is same
@@ -294,19 +294,19 @@ func (w *renderWindow) resized() {
 	// w.FocusInactivate()
 	if !w.isVisible() {
 		rc.visible = false
-		if DebugSettings.WinEventTrace {
+		if DebugSettings.WindowEventTrace {
 			fmt.Printf("Win: %v Resized already closed\n", w.name)
 		}
 		return
 	}
-	if DebugSettings.WinEventTrace {
+	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.name, curRg, rg)
 	}
 	rc.geom = rg
 	rc.visible = true
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.mains.resize(rg)
-	if DebugSettings.WinGeomTrace {
+	if DebugSettings.WindowGeometryTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
 	}
 	theWindowGeometrySaver.record(w)
@@ -343,12 +343,12 @@ func (w *renderWindow) closed() {
 	AllRenderWindows.delete(w)
 	mainRenderWindows.delete(w)
 	dialogRenderWindows.delete(w)
-	if DebugSettings.WinEventTrace {
+	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v Closed\n", w.name)
 	}
 	if len(AllRenderWindows) > 0 {
 		pfw := AllRenderWindows[len(AllRenderWindows)-1]
-		if DebugSettings.WinEventTrace {
+		if DebugSettings.WindowEventTrace {
 			fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.name, w.name)
 		}
 		pfw.Raise()
@@ -407,7 +407,7 @@ func (w *renderWindow) eventLoop() {
 			w.noEventsChan <- struct{}{}
 		}
 	}
-	if DebugSettings.WinEventTrace {
+	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v out of event loop\n", w.name)
 	}
 	windowWait.Done()
@@ -476,13 +476,13 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		case events.WinShow:
 			e.SetHandled()
 			// note that this is sent delayed by driver
-			if DebugSettings.WinEventTrace {
+			if DebugSettings.WindowEventTrace {
 				fmt.Printf("Win: %v got show event\n", w.name)
 			}
 		case events.WinMove:
 			e.SetHandled()
 			// fmt.Printf("win move: %v\n", w.SystemWin.Position())
-			if DebugSettings.WinGeomTrace {
+			if DebugSettings.WindowGeometryTrace {
 				log.Printf("WindowGeometry: recording from Move\n")
 			}
 			w.SystemWindow.ConstrainFrame(true) // top only
@@ -497,23 +497,23 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if !w.gotFocus {
 				w.gotFocus = true
 				w.sendWinFocusEvent(events.WinFocus)
-				if DebugSettings.WinEventTrace {
+				if DebugSettings.WindowEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.name)
 				}
 			} else {
-				if DebugSettings.WinEventTrace {
+				if DebugSettings.WindowEventTrace {
 					fmt.Printf("Win: %v got extra focus\n", w.name)
 				}
 			}
 			setCurrentRenderWindow(w)
 		case events.WinFocusLost:
-			if DebugSettings.WinEventTrace {
+			if DebugSettings.WindowEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.name)
 			}
 			w.gotFocus = false
 			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
-			if DebugSettings.WinEventTrace {
+			if DebugSettings.WindowEventTrace {
 				log.Println("Win: ScreenUpdate", w.name, screenConfig())
 			}
 			if !TheApp.Platform().IsMobile() { // native desktop
@@ -651,19 +651,19 @@ func (w *renderWindow) renderWindow() {
 		return
 	}
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
-		if DebugSettings.WinRenderTrace {
+		if DebugSettings.WindowRenderTrace {
 			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
 		}
 		return
 	}
 
-	if DebugSettings.WinRenderTrace {
+	if DebugSettings.WindowRenderTrace {
 		fmt.Println("RenderWindow: doing render:", w.name)
 		fmt.Println("rebuild:", rebuild, "stageMods:", stageMods, "sceneMods:", sceneMods)
 	}
 
 	if !w.SystemWindow.Lock() {
-		if DebugSettings.WinRenderTrace {
+		if DebugSettings.WindowRenderTrace {
 			fmt.Printf("RenderWindow: window was closed: %v\n", w.name)
 		}
 		return
@@ -686,7 +686,7 @@ func (w *renderWindow) renderWindow() {
 	for i := n - 1; i >= 0; i-- {
 		st := sm.stack.ValueByIndex(i)
 		if st.Type == WindowStage {
-			if DebugSettings.WinRenderTrace {
+			if DebugSettings.WindowRenderTrace {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}
 			winScene = st.Scene
@@ -707,7 +707,7 @@ func (w *renderWindow) renderWindow() {
 			drw.Copy(image.Point{}, clr, winScene.Geom.TotalBBox, draw.Over, system.Unchanged)
 		}
 		st.Scene.RenderDraw(drw, draw.Over)
-		if DebugSettings.WinRenderTrace {
+		if DebugSettings.WindowRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
 	}
@@ -716,7 +716,7 @@ func (w *renderWindow) renderWindow() {
 	for _, kv := range top.popups.stack.Order {
 		st := kv.Value
 		st.Scene.RenderDraw(drw, draw.Over)
-		if DebugSettings.WinRenderTrace {
+		if DebugSettings.WindowRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}

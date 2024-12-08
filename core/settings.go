@@ -356,11 +356,11 @@ func (as *AppearanceSettingsData) applyDPI() {
 	}
 }
 
-// deleteSavedWindowGeoms deletes the file that saves the position and size of
+// deleteSavedWindowGeometries deletes the file that saves the position and size of
 // each window, by screen, and clear current in-memory cache. You shouldn't generally
 // need to do this, but sometimes it is useful for testing or windows that are
 // showing up in bad places that you can't recover from.
-func (as *AppearanceSettingsData) deleteSavedWindowGeoms() { //types:add
+func (as *AppearanceSettingsData) deleteSavedWindowGeometries() { //types:add
 	theWindowGeometrySaver.deleteAll()
 }
 
@@ -770,14 +770,14 @@ type DebugSettingsData struct { //types:add
 	LayoutTraceDetail bool
 
 	// Print a trace of window events
-	WinEventTrace bool
+	WindowEventTrace bool
 
 	// Print the stack trace leading up to win publish events
 	// which are expensive
-	WinRenderTrace bool
+	WindowRenderTrace bool
 
 	// Print a trace of window geometry saving / loading functions
-	WinGeomTrace bool
+	WindowGeometryTrace bool
 
 	// Print a trace of keyboard events
 	KeyEventTrace bool

@@ -134,7 +134,7 @@ func (w *WindowMulti[A, D]) SetPos(pos image.Point, screen *system.Screen) {
 	w.Pos = pos
 }
 
-func (w *WindowMulti[A, D]) SetGeom(pos image.Point, sz image.Point, screen *system.Screen) {
+func (w *WindowMulti[A, D]) SetGeometry(pos image.Point, sz image.Point, screen *system.Screen) {
 	if w.This.IsClosed() {
 		return
 	}

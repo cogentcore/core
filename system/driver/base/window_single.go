@@ -99,7 +99,7 @@ func (w *WindowSingle[A]) SetPos(pos image.Point, screen *system.Screen) {
 	// no-op
 }
 
-func (w *WindowSingle[A]) SetGeom(fullscreen bool, pos image.Point, sz image.Point, screen *system.Screen) {
+func (w *WindowSingle[A]) SetGeometry(fullscreen bool, pos image.Point, sz image.Point, screen *system.Screen) {
 	if w.This.IsClosed() {
 		return
 	}
