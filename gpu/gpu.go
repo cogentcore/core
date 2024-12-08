@@ -20,8 +20,7 @@ import (
 )
 
 func init() {
-	SetDebug(false) // Note: don't remove -- this is needed to silence wgpu warning about not being on main thread
-	// see Surface.GetCurrentTexture()
+	SetDebug(false) // Note: don't remove; this is needed to silence irrelevant wgpu warning about not being on main thread; see [Surface.GetCurrentTexture]
 }
 
 var (
