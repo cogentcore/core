@@ -6,6 +6,7 @@ package gpu
 
 import (
 	"io/fs"
+	"math"
 	"path"
 
 	"cogentcore.org/core/base/errors"
@@ -74,9 +75,45 @@ func (pl *ComputePipeline) Dispatch(ce *wgpu.ComputePassEncoder, nx, ny, nz int)
 // (X) dimension, for given number *elements* (threads) per warp (typically 64).
 // See [Dispatch] for full info.
 // This is just a convenience method for common 1D case that calls
-// the Warps method for you.
+// the NumWorkgroups1D function with threads for you.
 func (pl *ComputePipeline) Dispatch1D(ce *wgpu.ComputePassEncoder, n, threads int) error {
-	return pl.Dispatch(ce, Warps(n, threads), 1, 1)
+	nx, ny := NumWorkgroups1D(n, threads)
+	return pl.Dispatch(ce, nx, ny, 1)
+}
+
+// NumWorkgroups1D() returns the number of work groups of compute threads
+// that is sufficient to compute n total elements, given specified number
+// of threads in the x dimension, subject to constraint that no more than
+// 65536 work groups can be deployed per dimension.
+func NumWorkgroups1D(n, threads int) (nx, ny int) {
+	mxn := 65536
+	ny = 1
+	nx = int(math.Ceil(float64(n) / float64(threads)))
+	if nx <= 65536 {
+		return
+	}
+	xsz := mxn * threads
+	ny = int(math.Ceil(float64(n) / float64(xsz)))
+	nx = int(math.Ceil(float64(n) / float64(ny*threads)))
+	return
+}
+
+// NumWorkgroups2D() returns the number of work groups of compute threads
+// that is sufficient to compute n total elements, given specified number
+// of threads per x, y dimension, subject to constraint that no more than
+// 65536 work groups can be deployed per dimension.
+func NumWorkgroups2D(n, x, y int) (nx, ny int) {
+	mxn := 65536
+	sz := x * y
+	ny = 1
+	nx = int(math.Ceil(float64(n) / float64(sz)))
+	if nx <= 65536 {
+		return
+	}
+	xsz := mxn * x // size of full x chunk
+	ny = int(math.Ceil(float64(n) / float64(xsz*y)))
+	nx = int(math.Ceil(float64(n) / float64(x*ny*y)))
+	return
 }
 
 // BindAllGroups binds the Current Value for all variables across all

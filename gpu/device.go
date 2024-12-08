@@ -40,9 +40,6 @@ func NewDevice(gpu *GPU) (*Device, error) {
 func NewComputeDevice(gpu *GPU) (*Device, error) {
 	// we only request max buffer sizes so compute can go as big as it needs to
 	limits := wgpu.DefaultLimits()
-	// const maxv = 0xFFFFFFFF
-	// todo: need to apply alignment rounding to these limits! wgpu should do this for you!
-	const maxv = 0xFFFFFFF0
 	// Per https://github.com/cogentcore/core/issues/1362 -- this may cause issues on "downlevel"
 	// hardware, so we may need to detect that. OTOH it probably won't be useful for compute anyway,
 	// but we can just sort that out later
@@ -52,12 +49,12 @@ func NewComputeDevice(gpu *GPU) (*Device, error) {
 	// note: these limits are being processed and allow the MaxBufferSize to be the
 	// controlling factor -- if we don't set these, then the slrand example doesn't
 	// work above a smaller limit.
-	limits.MaxUniformBufferBindingSize = min(gpu.Limits.Limits.MaxUniformBufferBindingSize, maxv)
-	limits.MaxStorageBufferBindingSize = min(gpu.Limits.Limits.MaxStorageBufferBindingSize, maxv)
+	limits.MaxUniformBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxUniformBufferBindingSize), int(gpu.Limits.Limits.MinUniformBufferOffsetAlignment)))
+
+	limits.MaxStorageBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxStorageBufferBindingSize), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
 	// note: this limit is not working properly:
-	limits.MaxBufferSize = min(gpu.Limits.Limits.MaxBufferSize, maxv)
+	limits.MaxBufferSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxBufferSize), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
 	// limits.MaxBindGroups = gpu.Limits.Limits.MaxBindGroups // note: no point in changing -- web constraint
-	// limits.MaxComputeWorkgroupsPerDimension = 21474836 // gpu.Limits.Limits.MaxComputeWorkgroupsPerDimension
 
 	if Debug {
 		fmt.Printf("Requesting sizes: MaxStorageBufferBindingSize: %d  MaxBufferSize: %d\n", limits.MaxStorageBufferBindingSize, limits.MaxBufferSize)

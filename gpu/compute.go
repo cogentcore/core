@@ -160,15 +160,6 @@ func (sy *ComputeSystem) EndComputePass() error {
 	return nil
 }
 
-// Warps returns the number of warps (work goups of compute threads)
-// that is sufficient to compute n elements, given specified number
-// of threads per this dimension.
-// It just rounds up to nearest even multiple of n divided by threads:
-// Ceil(n / threads)
-func Warps(n, threads int) int {
-	return int(math.Ceil(float64(n) / float64(threads)))
-}
-
 // NumThreads is the number of threads to use for parallel threading,
 // in the [VectorizeFunc] that is used for CPU versions of GPU functions.
 // The default of 0 causes the [runtime.GOMAXPROCS] to be used.

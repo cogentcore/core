@@ -110,6 +110,16 @@ func MemSizeAlign(size, align int) int {
 	return (nb + 1) * align
 }
 
+// MemSizeAlignDown returns the size aligned according to align byte increments,
+// rounding down, not up.
+func MemSizeAlignDown(size, align int) int {
+	if size%align == 0 {
+		return size
+	}
+	nb := size / align
+	return nb * align
+}
+
 // init initializes value based on variable and index
 // within list of vals for this var.
 func (vl *Value) init(vr *Var, dev *Device, idx int) {

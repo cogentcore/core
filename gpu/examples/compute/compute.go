@@ -12,8 +12,6 @@ import (
 	"unsafe"
 
 	"cogentcore.org/core/base/timer"
-	"cogentcore.org/core/core"
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/gpu"
 	// "cogentcore.org/core/system/driver/web/jsfs"
 )
@@ -36,17 +34,17 @@ type Data struct {
 func main() {
 	// errors.Log1(jsfs.Config(js.Global().Get("fs"))) // needed for printing etc to work
 	// time.Sleep(1 * time.Second)
-	b := core.NewBody()
-	bt := core.NewButton(b).SetText("Run Compute")
-	bt.OnClick(func(e events.Event) {
-		compute()
-	})
-	b.RunMainWindow()
+	// b := core.NewBody()
+	// bt := core.NewButton(b).SetText("Run Compute")
+	// bt.OnClick(func(e events.Event) {
+	compute()
+	// })
+	// b.RunMainWindow()
 	// select {}
 }
 
 func compute() {
-	gpu.SetDebug(true)
+	// gpu.SetDebug(true)
 	gp := gpu.NewComputeGPU()
 	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
 
@@ -58,8 +56,11 @@ func compute() {
 	vars := sy.Vars()
 	sgp := vars.AddGroup(gpu.Storage)
 
-	n := 2_000_000 // note: not necc to spec up-front, but easier if so
+	// n := 16_000_000 // near max capacity on Mac M*
+	n := 200_000 // should fit in any webgpu
 	threads := 64
+	nx, ny := gpu.NumWorkgroups1D(n, threads)
+	fmt.Printf("workgroup sizes: %d, %d  storage mem bytes: %X\n", nx, ny, n*int(unsafe.Sizeof(Data{})))
 
 	dv := sgp.AddStruct("Data", int(unsafe.Sizeof(Data{})), n, gpu.ComputeShader)
 
@@ -78,8 +79,9 @@ func compute() {
 	gpuTmr := timer.Time{}
 	cpyTmr := timer.Time{}
 	gpuTmr.Start()
+	nItr := 1
 
-	for range 100 {
+	for range nItr {
 		ce, _ := sy.BeginComputePass()
 		pl.Dispatch1D(ce, n, threads)
 		ce.End()
