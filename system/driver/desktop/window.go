@@ -10,7 +10,6 @@
 package desktop
 
 import (
-	"fmt"
 	"image"
 	"log"
 
@@ -500,7 +499,6 @@ func (w *Window) FbResized(gw *glfw.Window, width, height int) {
 		sc := w.Screen()
 		width = sc.PixSize.X
 		height = sc.PixSize.Y
-		fmt.Println("fullscreen size:", sc.PixSize)
 	}
 	fbsz := image.Point{width, height}
 	if w.PixSize != fbsz {
