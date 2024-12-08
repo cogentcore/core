@@ -482,10 +482,7 @@ func (w *Window) updateGeometry() {
 	w.PhysDPI = sc.PhysicalDPI
 	w.LogDPI = sc.LogicalDPI
 	w.Mu.Unlock()
-	// w.App.RunOnMain(func() {
-	// note: getting non-main thread warning.
-	// w.Draw.System.Renderer.SetSize(w.PixSize)
-	// })
+	w.Draw.System.Renderer.SetSize(w.PixSize)
 	if cursc != w.ScreenWindow {
 		if ScreenDebug {
 			log.Printf("desktop.Window.updateGeometry: %v: got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)
@@ -504,9 +501,6 @@ func (w *Window) FbResized(gw *glfw.Window, width, height int) {
 	if w.PixSize != fbsz {
 		if ScreenDebug {
 			log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, w.PixSize)
-		}
-		if sf, ok := w.Draw.Renderer().(*gpu.Surface); ok {
-			sf.SetSize(fbsz)
 		}
 		w.updateGeometry()
 	}
