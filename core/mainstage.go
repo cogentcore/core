@@ -370,6 +370,7 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		Title:     title,
 		Icon:      appIconImages(),
 		Size:      st.Scene.SceneGeom.Size,
+		Pos:       st.Pos,
 		StdPixels: false,
 		Screen:    st.Screen,
 	}

@@ -293,7 +293,6 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 			SetKey(keymap.WinFocusNext).OnClick(func(e events.Event) {
 			AllRenderWindows.focusNext()
 		})
-
 		if sc.IsFullscreen() {
 			NewButton(m).SetText("Exit fullscreen").SetIcon(icons.Fullscreen).OnClick(func(e events.Event) {
 				sc.UpdateFullscreen(false)
