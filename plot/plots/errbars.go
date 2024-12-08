@@ -5,124 +5,118 @@
 package plots
 
 import (
-	"cogentcore.org/core/math32"
+	"math"
+
+	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
-	"cogentcore.org/core/styles/units"
 )
 
-//////////////////////////////////////////////////
-// 	XErrorer
+const (
+	// YErrorBarsType is be used for specifying the type name.
+	YErrorBarsType = "YErrorBars"
 
-// XErrorer provides an interface for a list of Low, High error bar values.
-// This is used in addition to an XYer interface, if implemented.
-type XErrorer interface {
-	// XError returns Low, High error values for X data.
-	XError(i int) (low, high float32)
+	// XErrorBarsType is be used for specifying the type name.
+	XErrorBarsType = "XErrorBars"
+)
+
+func init() {
+	plot.RegisterPlotter(YErrorBarsType, "draws draws vertical error bars, denoting error in Y values, using either High or Low & High data roles for error deviations around X, Y coordinates.", []plot.Roles{plot.X, plot.Y, plot.High}, []plot.Roles{plot.Low}, func(data plot.Data) plot.Plotter {
+		return NewYErrorBars(data)
+	})
+	plot.RegisterPlotter(XErrorBarsType, "draws draws horizontal error bars, denoting error in X values, using either High or Low & High data roles for error deviations around X, Y coordinates.", []plot.Roles{plot.X, plot.Y, plot.High}, []plot.Roles{plot.Low}, func(data plot.Data) plot.Plotter {
+		return NewXErrorBars(data)
+	})
 }
 
-// Errors is a slice of low and high error values.
-type Errors []struct{ Low, High float32 }
-
-// XErrors implements the XErrorer interface.
-type XErrors Errors
-
-func (xe XErrors) XError(i int) (low, high float32) {
-	return xe[i].Low, xe[i].High
-}
-
-// YErrorer provides an interface for YError method.
-// This is used in addition to an XYer interface, if implemented.
-type YErrorer interface {
-	// YError returns two error values for Y data.
-	YError(i int) (float32, float32)
-}
-
-// YErrors implements the YErrorer interface.
-type YErrors Errors
-
-func (ye YErrors) YError(i int) (float32, float32) {
-	return ye[i].Low, ye[i].High
-}
-
-// YErrorBars implements the plot.Plotter, plot.DataRanger,
-// and plot.GlyphBoxer interfaces, drawing vertical error
-// bars, denoting error in Y values.
+// YErrorBars draws vertical error bars, denoting error in Y values,
+// using ether High or Low, High data roles for error deviations
+// around X, Y coordinates.
 type YErrorBars struct {
-	// XYs is a copy of the points for this line.
-	plot.XYs
+	// copies of data for this line
+	X, Y, Low, High plot.Values
 
-	// YErrors is a copy of the Y errors for each point.
-	YErrors
+	// PX, PY are the actual pixel plotting coordinates for each XY value.
+	PX, PY []float32
 
-	// PXYs is the actual pixel plotting coordinates for each XY value,
-	// representing the high, center value of the error bar.
-	PXYs plot.XYs
+	// Style is the style for plotting.
+	Style plot.Style
 
-	// LineStyle is the style used to draw the error bars.
-	LineStyle plot.LineStyle
-
-	// CapWidth is the width of the caps drawn at the top of each error bar.
-	CapWidth units.Value
+	stylers  plot.Stylers
+	ystylers plot.Stylers
 }
 
 func (eb *YErrorBars) Defaults() {
-	eb.LineStyle.Defaults()
-	eb.CapWidth.Dp(10)
+	eb.Style.Defaults()
 }
 
-// NewYErrorBars returns a new YErrorBars plotter, or an error on failure.
-// The error values from the YErrorer interface are interpreted as relative
-// to the corresponding Y value. The errors for a given Y value are computed
-// by taking the absolute value of the error returned by the YErrorer
-// and subtracting the first and adding the second to the Y value.
-func NewYErrorBars(yerrs interface {
-	plot.XYer
-	YErrorer
-}) (*YErrorBars, error) {
-
-	errors := make(YErrors, yerrs.Len())
-	for i := range errors {
-		errors[i].Low, errors[i].High = yerrs.YError(i)
-		if err := plot.CheckFloats(errors[i].Low, errors[i].High); err != nil {
-			return nil, err
-		}
+// NewYErrorBars returns a new YErrorBars plotter,
+// using Low, High data roles for error deviations around X, Y coordinates.
+// Styler functions are obtained from the High data if present.
+func NewYErrorBars(data plot.Data) *YErrorBars {
+	if data.CheckLengths() != nil {
+		return nil
 	}
-	xys, err := plot.CopyXYs(yerrs)
-	if err != nil {
-		return nil, err
+	eb := &YErrorBars{}
+	eb.X = plot.MustCopyRole(data, plot.X)
+	eb.Y = plot.MustCopyRole(data, plot.Y)
+	eb.Low = plot.CopyRole(data, plot.Low)
+	eb.High = plot.CopyRole(data, plot.High)
+	if eb.Low == nil && eb.High != nil {
+		eb.Low = eb.High
 	}
-
-	eb := &YErrorBars{
-		XYs:     xys,
-		YErrors: errors,
+	if eb.X == nil || eb.Y == nil || eb.Low == nil || eb.High == nil {
+		return nil
 	}
+	eb.stylers = plot.GetStylersFromData(data, plot.High)
+	eb.ystylers = plot.GetStylersFromData(data, plot.Y)
 	eb.Defaults()
-	return eb, nil
+	return eb
 }
 
-func (e *YErrorBars) XYData() (data plot.XYer, pixels plot.XYer) {
-	data = e.XYs
-	pixels = e.PXYs
+// Styler adds a style function to set style parameters.
+func (eb *YErrorBars) Styler(f func(s *plot.Style)) *YErrorBars {
+	eb.stylers.Add(f)
+	return eb
+}
+
+func (eb *YErrorBars) ApplyStyle(ps *plot.PlotStyle) {
+	ps.SetElementStyle(&eb.Style)
+	yst := &plot.Style{}
+	eb.ystylers.Run(yst)
+	eb.Style.Range = yst.Range // get range from y
+	eb.stylers.Run(&eb.Style)
+}
+
+func (eb *YErrorBars) Stylers() *plot.Stylers { return &eb.stylers }
+
+func (eb *YErrorBars) Data() (data plot.Data, pixX, pixY []float32) {
+	pixX = eb.PX
+	pixY = eb.PY
+	data = plot.Data{}
+	data[plot.X] = eb.X
+	data[plot.Y] = eb.Y
+	data[plot.Low] = eb.Low
+	data[plot.High] = eb.High
 	return
 }
 
-// Plot implements the Plotter interface, drawing labels.
-func (e *YErrorBars) Plot(plt *plot.Plot) {
+func (eb *YErrorBars) Plot(plt *plot.Plot) {
 	pc := plt.Paint
 	uc := &pc.UnitContext
 
-	e.CapWidth.ToDots(uc)
-	cw := 0.5 * e.CapWidth.Dots
-	nv := len(e.YErrors)
-	e.PXYs = make(plot.XYs, nv)
-	e.LineStyle.SetStroke(plt)
-	for i, err := range e.YErrors {
-		x := plt.PX(e.XYs[i].X)
-		ylow := plt.PY(e.XYs[i].Y - math32.Abs(err.Low))
-		yhigh := plt.PY(e.XYs[i].Y + math32.Abs(err.High))
+	eb.Style.Width.Cap.ToDots(uc)
+	cw := 0.5 * eb.Style.Width.Cap.Dots
+	nv := len(eb.X)
+	eb.PX = make([]float32, nv)
+	eb.PY = make([]float32, nv)
+	eb.Style.Line.SetStroke(plt)
+	for i, y := range eb.Y {
+		x := plt.PX(eb.X.Float1D(i))
+		ylow := plt.PY(y - math.Abs(eb.Low[i]))
+		yhigh := plt.PY(y + math.Abs(eb.High[i]))
 
-		e.PXYs[i].X = x
-		e.PXYs[i].Y = yhigh
+		eb.PX[i] = x
+		eb.PY[i] = yhigh
 
 		pc.MoveTo(x, ylow)
 		pc.LineTo(x, yhigh)
@@ -136,102 +130,111 @@ func (e *YErrorBars) Plot(plt *plot.Plot) {
 	}
 }
 
-// DataRange implements the plot.DataRanger interface.
-func (e *YErrorBars) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
-	xmin, xmax = plot.Range(plot.XValues{e})
-	ymin = math32.Inf(1)
-	ymax = math32.Inf(-1)
-	for i, err := range e.YErrors {
-		y := e.XYs[i].Y
-		ylow := y - math32.Abs(err.Low)
-		yhigh := y + math32.Abs(err.High)
-		ymin = math32.Min(math32.Min(math32.Min(ymin, y), ylow), yhigh)
-		ymax = math32.Max(math32.Max(math32.Max(ymax, y), ylow), yhigh)
+// UpdateRange updates the given ranges.
+func (eb *YErrorBars) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
+	plot.Range(eb.X, xr)
+	plot.RangeClamp(eb.Y, yr, &eb.Style.Range)
+	for i, y := range eb.Y {
+		ylow := y - math.Abs(eb.Low[i])
+		yhigh := y + math.Abs(eb.High[i])
+		yr.FitInRange(minmax.F64{ylow, yhigh})
 	}
 	return
 }
 
-// XErrorBars implements the plot.Plotter, plot.DataRanger,
-// and plot.GlyphBoxer interfaces, drawing horizontal error
-// bars, denoting error in Y values.
+//////// XErrorBars
+
+// XErrorBars draws horizontal error bars, denoting error in X values,
+// using ether High or Low, High data roles for error deviations
+// around X, Y coordinates.
 type XErrorBars struct {
-	// XYs is a copy of the points for this line.
-	plot.XYs
+	// copies of data for this line
+	X, Y, Low, High plot.Values
 
-	// XErrors is a copy of the X errors for each point.
-	XErrors
+	// PX, PY are the actual pixel plotting coordinates for each XY value.
+	PX, PY []float32
 
-	// PXYs is the actual pixel plotting coordinates for each XY value,
-	// representing the high, center value of the error bar.
-	PXYs plot.XYs
+	// Style is the style for plotting.
+	Style plot.Style
 
-	// LineStyle is the style used to draw the error bars.
-	LineStyle plot.LineStyle
-
-	// CapWidth is the width of the caps drawn at the top
-	// of each error bar.
-	CapWidth units.Value
-}
-
-// Returns a new XErrorBars plotter, or an error on failure. The error values
-// from the XErrorer interface are interpreted as relative to the corresponding
-// X value. The errors for a given X value are computed by taking the absolute
-// value of the error returned by the XErrorer and subtracting the first and
-// adding the second to the X value.
-func NewXErrorBars(xerrs interface {
-	plot.XYer
-	XErrorer
-}) (*XErrorBars, error) {
-
-	errors := make(XErrors, xerrs.Len())
-	for i := range errors {
-		errors[i].Low, errors[i].High = xerrs.XError(i)
-		if err := plot.CheckFloats(errors[i].Low, errors[i].High); err != nil {
-			return nil, err
-		}
-	}
-	xys, err := plot.CopyXYs(xerrs)
-	if err != nil {
-		return nil, err
-	}
-
-	eb := &XErrorBars{
-		XYs:     xys,
-		XErrors: errors,
-	}
-	eb.Defaults()
-	return eb, nil
+	stylers  plot.Stylers
+	ystylers plot.Stylers
+	yrange   minmax.Range64
 }
 
 func (eb *XErrorBars) Defaults() {
-	eb.LineStyle.Defaults()
-	eb.CapWidth.Dp(10)
+	eb.Style.Defaults()
 }
 
-func (e *XErrorBars) XYData() (data plot.XYer, pixels plot.XYer) {
-	data = e.XYs
-	pixels = e.PXYs
+// NewXErrorBars returns a new XErrorBars plotter,
+// using Low, High data roles for error deviations around X, Y coordinates.
+func NewXErrorBars(data plot.Data) *XErrorBars {
+	if data.CheckLengths() != nil {
+		return nil
+	}
+	eb := &XErrorBars{}
+	eb.X = plot.MustCopyRole(data, plot.X)
+	eb.Y = plot.MustCopyRole(data, plot.Y)
+	eb.Low = plot.MustCopyRole(data, plot.Low)
+	eb.High = plot.MustCopyRole(data, plot.High)
+	eb.Low = plot.CopyRole(data, plot.Low)
+	eb.High = plot.CopyRole(data, plot.High)
+	if eb.Low == nil && eb.High != nil {
+		eb.Low = eb.High
+	}
+	if eb.X == nil || eb.Y == nil || eb.Low == nil || eb.High == nil {
+		return nil
+	}
+	eb.stylers = plot.GetStylersFromData(data, plot.High)
+	eb.ystylers = plot.GetStylersFromData(data, plot.Y)
+	eb.Defaults()
+	return eb
+}
+
+// Styler adds a style function to set style parameters.
+func (eb *XErrorBars) Styler(f func(s *plot.Style)) *XErrorBars {
+	eb.stylers.Add(f)
+	return eb
+}
+
+func (eb *XErrorBars) ApplyStyle(ps *plot.PlotStyle) {
+	ps.SetElementStyle(&eb.Style)
+	yst := &plot.Style{}
+	eb.ystylers.Run(yst)
+	eb.yrange = yst.Range // get range from y
+	eb.stylers.Run(&eb.Style)
+}
+
+func (eb *XErrorBars) Stylers() *plot.Stylers { return &eb.stylers }
+
+func (eb *XErrorBars) Data() (data plot.Data, pixX, pixY []float32) {
+	pixX = eb.PX
+	pixY = eb.PY
+	data = plot.Data{}
+	data[plot.X] = eb.X
+	data[plot.Y] = eb.Y
+	data[plot.Low] = eb.Low
+	data[plot.High] = eb.High
 	return
 }
 
-// Plot implements the Plotter interface, drawing labels.
-func (e *XErrorBars) Plot(plt *plot.Plot) {
+func (eb *XErrorBars) Plot(plt *plot.Plot) {
 	pc := plt.Paint
 	uc := &pc.UnitContext
 
-	e.CapWidth.ToDots(uc)
-	cw := 0.5 * e.CapWidth.Dots
+	eb.Style.Width.Cap.ToDots(uc)
+	cw := 0.5 * eb.Style.Width.Cap.Dots
+	nv := len(eb.X)
+	eb.PX = make([]float32, nv)
+	eb.PY = make([]float32, nv)
+	eb.Style.Line.SetStroke(plt)
+	for i, x := range eb.X {
+		y := plt.PY(eb.Y.Float1D(i))
+		xlow := plt.PX(x - math.Abs(eb.Low[i]))
+		xhigh := plt.PX(x + math.Abs(eb.High[i]))
 
-	nv := len(e.XErrors)
-	e.PXYs = make(plot.XYs, nv)
-	e.LineStyle.SetStroke(plt)
-	for i, err := range e.XErrors {
-		y := plt.PY(e.XYs[i].Y)
-		xlow := plt.PX(e.XYs[i].X - math32.Abs(err.Low))
-		xhigh := plt.PX(e.XYs[i].X + math32.Abs(err.High))
-
-		e.PXYs[i].X = xhigh
-		e.PXYs[i].Y = y
+		eb.PX[i] = xhigh
+		eb.PY[i] = y
 
 		pc.MoveTo(xlow, y)
 		pc.LineTo(xhigh, y)
@@ -245,17 +248,14 @@ func (e *XErrorBars) Plot(plt *plot.Plot) {
 	}
 }
 
-// DataRange implements the plot.DataRanger interface.
-func (e *XErrorBars) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
-	ymin, ymax = plot.Range(plot.YValues{e})
-	xmin = math32.Inf(1)
-	xmax = math32.Inf(-1)
-	for i, err := range e.XErrors {
-		x := e.XYs[i].X
-		xlow := x - math32.Abs(err.Low)
-		xhigh := x + math32.Abs(err.High)
-		xmin = math32.Min(math32.Min(math32.Min(xmin, x), xlow), xhigh)
-		xmax = math32.Max(math32.Max(math32.Max(xmax, x), xlow), xhigh)
+// UpdateRange updates the given ranges.
+func (eb *XErrorBars) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
+	plot.RangeClamp(eb.X, xr, &eb.Style.Range)
+	plot.RangeClamp(eb.Y, yr, &eb.yrange)
+	for i, xv := range eb.X {
+		xlow := xv - math.Abs(eb.Low[i])
+		xhigh := xv + math.Abs(eb.High[i])
+		xr.FitInRange(minmax.F64{xlow, xhigh})
 	}
 	return
 }

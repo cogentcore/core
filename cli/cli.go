@@ -40,6 +40,9 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 		}
 		return err
 	}
+	if len(cmds) == 1 { // one command is always the root
+		cs[0].Root = true
+	}
 	cmd, err := config(opts, cfg, cs...)
 	if err != nil {
 		if opts.Fatal {

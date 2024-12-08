@@ -172,15 +172,15 @@ func (w *renderWindow) setName(name string) {
 	if w.SystemWindow != nil {
 		w.SystemWindow.SetName(name)
 	}
-	if isdif && w.SystemWindow != nil {
-		wgp := theWindowGeometrySaver.pref(w.title, w.SystemWindow.Screen())
+	if isdif && w.SystemWindow != nil && !w.SystemWindow.Is(system.Fullscreen) {
+		wgp, sc := theWindowGeometrySaver.get(w.title, "")
 		if wgp != nil {
 			theWindowGeometrySaver.settingStart()
-			if w.SystemWindow.Size() != wgp.size() || w.SystemWindow.Position() != wgp.pos() {
+			if w.SystemWindow.Size() != wgp.Size || w.SystemWindow.Position(sc) != wgp.Pos {
 				if DebugSettings.WinGeomTrace {
-					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.pos(), wgp.size())
+					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.Pos, wgp.Size)
 				}
-				w.SystemWindow.SetGeom(wgp.pos(), wgp.size())
+				w.SystemWindow.SetGeom(false, wgp.Pos, wgp.Size, sc)
 				system.TheApp.SendEmptyEvent()
 			}
 			theWindowGeometrySaver.settingEnd()
@@ -221,19 +221,35 @@ func (w *renderWindow) logicalDPI() float32 {
 
 // stepZoom calls [SetZoom] with the current zoom plus 10 times the given number of steps.
 func (w *renderWindow) stepZoom(steps float32) {
-	w.setZoom(AppearanceSettings.Zoom + 10*steps)
+	sc := w.SystemWindow.Screen()
+	curZoom := AppearanceSettings.Zoom
+	screenName := ""
+	sset, ok := AppearanceSettings.Screens[sc.Name]
+	if ok {
+		screenName = sc.Name
+		curZoom = sset.Zoom
+	}
+	w.setZoom(curZoom+10*steps, screenName)
 }
 
 // setZoom sets [AppearanceSettingsData.Zoom] to the given value and then triggers
-// necessary updating and makes a snackbar.
-func (w *renderWindow) setZoom(zoom float32) {
-	AppearanceSettings.Zoom = math32.Clamp(zoom, 10, 500)
+// necessary updating and makes a snackbar. If screenName is non-empty, then the
+// zoom is set on the screen-specific settings, instead of the global.
+func (w *renderWindow) setZoom(zoom float32, screenName string) {
+	zoom = math32.Clamp(zoom, 10, 500)
+	if screenName != "" {
+		sset := AppearanceSettings.Screens[screenName]
+		sset.Zoom = zoom
+		AppearanceSettings.Screens[screenName] = sset
+	} else {
+		AppearanceSettings.Zoom = zoom
+	}
 	AppearanceSettings.Apply()
 	UpdateAll()
 	errors.Log(SaveSettings(AppearanceSettings))
 
 	if ms := w.MainScene(); ms != nil {
-		b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", AppearanceSettings.Zoom))
+		b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", zoom))
 		NewStretch(b)
 		b.AddSnackbarIcon(icons.Remove, func(e events.Event) {
 			w.stepZoom(-1)
@@ -242,7 +258,7 @@ func (w *renderWindow) setZoom(zoom float32) {
 			w.stepZoom(1)
 		})
 		b.AddSnackbarButton("Reset", func(e events.Event) {
-			w.setZoom(100)
+			w.setZoom(100, screenName)
 		})
 		b.DeleteChildByName("stretch")
 		b.RunSnackbar(ms)
@@ -263,10 +279,13 @@ func (w *renderWindow) resized() {
 	w.SystemWindow.Unlock()
 
 	curRg := rc.geom
+	rc.logicalDPI = w.logicalDPI() // always update
 	if curRg == rg {
 		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.name, curRg)
 		}
+		rc.logicalDPI = w.logicalDPI()
+		w.mains.resize(rg) // no-op if everyone below is good
 		// still need to apply style even if size is same
 		for _, kv := range w.mains.stack.Order {
 			sc := kv.Value.Scene
@@ -287,13 +306,12 @@ func (w *renderWindow) resized() {
 	}
 	rc.geom = rg
 	rc.visible = true
-	rc.logicalDPI = w.logicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.mains.resize(rg)
 	if DebugSettings.WinGeomTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
 	}
-	theWindowGeometrySaver.recordPref(w)
+	theWindowGeometrySaver.record(w)
 }
 
 // Raise requests that the window be at the top of the stack of windows,
@@ -469,7 +487,8 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if DebugSettings.WinGeomTrace {
 				log.Printf("WindowGeometry: recording from Move\n")
 			}
-			theWindowGeometrySaver.recordPref(w)
+			w.SystemWindow.ConstrainFrame(true) // top only
+			theWindowGeometrySaver.record(w)
 		case events.WinFocus:
 			// if we are not already the last in AllRenderWins, we go there,
 			// as this allows focus to be restored to us in the future
@@ -497,23 +516,22 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
 			if DebugSettings.WinEventTrace {
-				fmt.Printf("Win: %v ScreenUpdate\n", w.name)
+				log.Println("Win: ScreenUpdate", w.name, screenConfig())
 			}
-			w.resized()
 			if !TheApp.Platform().IsMobile() { // native desktop
-				// TheWindowGeometryaver.AbortSave() // anything just prior to this is sus
 				if TheApp.NScreens() > 0 {
 					AppearanceSettings.Apply()
 					UpdateAll()
-					// WindowGeometrySave.RestoreAll()
+					theWindowGeometrySaver.restoreAll()
 				}
+			} else {
+				w.resized()
 			}
 		}
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//                   Rendering
+////////  Rendering
 
 // renderParams are the key [renderWindow] params that determine if
 // a scene needs to be restyled since last render, if these params change.

@@ -210,6 +210,9 @@ func (sc *Scene) Init() {
 		currentRenderWindow.SetStageTitle(st.Title)
 	})
 	sc.Updater(func() {
+		if TheApp.Platform() == system.Offscreen {
+			return
+		}
 		// At the scene level, we reset the shortcuts and add our context menu
 		// shortcuts every time. This clears the way for buttons to add their
 		// shortcuts in their own Updaters. We must get the shortcuts every time
@@ -316,6 +319,24 @@ func (sc *Scene) ResizeToContent(extra ...image.Point) {
 		}
 		win.SystemWindow.SetSize(sz)
 	}()
+}
+
+// UpdateFullscreen requests that the window associated with this Scene
+// be updated to either fullscreen mode (true) or window mode (false).
+// This is implemented on desktop and web platforms. See [Stage.Fullscreen]
+// to set the initial fullscreen state.
+func (sc *Scene) UpdateFullscreen(fullscreen bool) {
+	rw := sc.RenderWindow()
+	if rw == nil {
+		return
+	}
+	wgp, screen := theWindowGeometrySaver.get(rw.title, "")
+	if wgp != nil {
+		rw.SystemWindow.SetGeom(fullscreen, wgp.Pos, wgp.Size, screen)
+	} else {
+		zp := image.Point{}
+		rw.SystemWindow.SetGeom(fullscreen, zp, zp, nil)
+	}
 }
 
 // Close closes the [Stage] associated with this [Scene].

@@ -46,26 +46,34 @@ func (t Trilean) Prefix(s string) string {
 // StyleEntry is one value in the map of highlight style values
 type StyleEntry struct {
 
-	// text color
+	// Color is the text color.
 	Color color.RGBA
 
-	// background color
+	// Background color.
+	// In general it is not good to use this because it obscures highlighting.
 	Background color.RGBA
 
-	// border color? not sure what this is -- not really used
+	// Border color? not sure what this is -- not really used.
 	Border color.RGBA `display:"-"`
 
-	// bold font
+	// Bold font.
 	Bold Trilean
 
-	// italic font
+	// Italic font.
 	Italic Trilean
 
-	// underline
+	// Underline.
 	Underline Trilean
 
-	// don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited
+	// NoInherit indicates to not inherit these settings from sub-category or category levels.
+	// Otherwise everything with a Pass is inherited.
 	NoInherit bool
+
+	// themeColor is the theme-adjusted text color.
+	themeColor color.RGBA
+
+	// themeBackground is the theme-adjusted background color.
+	themeBackground color.RGBA
 }
 
 // // FromChroma copies styles from chroma
@@ -108,7 +116,7 @@ func (se *StyleEntry) UpdateFromTheme() {
 	if matcolor.SchemeIsDark {
 		ctone = 80
 	}
-	se.Color = hc.WithChroma(max(hc.Chroma, 48)).WithTone(ctone).AsRGBA()
+	se.themeColor = hc.WithChroma(max(hc.Chroma, 48)).WithTone(ctone).AsRGBA()
 
 	if !colors.IsNil(se.Background) {
 		hb := hct.FromColor(se.Background)
@@ -116,7 +124,7 @@ func (se *StyleEntry) UpdateFromTheme() {
 		if matcolor.SchemeIsDark {
 			btone = min(hb.Tone, 17)
 		}
-		se.Background = hb.WithChroma(max(hb.Chroma, 6)).WithTone(btone).AsRGBA()
+		se.themeBackground = hb.WithChroma(max(hb.Chroma, 6)).WithTone(btone).AsRGBA()
 	}
 }
 
@@ -134,11 +142,11 @@ func (se StyleEntry) String() string {
 	if se.NoInherit {
 		out = append(out, "noinherit")
 	}
-	if !colors.IsNil(se.Color) {
-		out = append(out, colors.AsString(se.Color))
+	if !colors.IsNil(se.themeColor) {
+		out = append(out, colors.AsString(se.themeColor))
 	}
-	if !colors.IsNil(se.Background) {
-		out = append(out, "bg:"+colors.AsString(se.Background))
+	if !colors.IsNil(se.themeBackground) {
+		out = append(out, "bg:"+colors.AsString(se.themeBackground))
 	}
 	if !colors.IsNil(se.Border) {
 		out = append(out, "border:"+colors.AsString(se.Border))
@@ -149,11 +157,11 @@ func (se StyleEntry) String() string {
 // ToCSS converts StyleEntry to CSS attributes.
 func (se StyleEntry) ToCSS() string {
 	styles := []string{}
-	if !colors.IsNil(se.Color) {
-		styles = append(styles, "color: "+colors.AsString(se.Color))
+	if !colors.IsNil(se.themeColor) {
+		styles = append(styles, "color: "+colors.AsString(se.themeColor))
 	}
-	if !colors.IsNil(se.Background) {
-		styles = append(styles, "background-color: "+colors.AsString(se.Background))
+	if !colors.IsNil(se.themeBackground) {
+		styles = append(styles, "background-color: "+colors.AsString(se.themeBackground))
 	}
 	if se.Bold == Yes {
 		styles = append(styles, "font-weight: bold")
@@ -170,11 +178,11 @@ func (se StyleEntry) ToCSS() string {
 // ToProperties converts the StyleEntry to key-value properties.
 func (se StyleEntry) ToProperties() map[string]any {
 	pr := map[string]any{}
-	if !colors.IsNil(se.Color) {
-		pr["color"] = se.Color
+	if !colors.IsNil(se.themeColor) {
+		pr["color"] = se.themeColor
 	}
-	if !colors.IsNil(se.Background) {
-		pr["background-color"] = se.Background
+	if !colors.IsNil(se.themeBackground) {
+		pr["background-color"] = se.themeBackground
 	}
 	if se.Bold == Yes {
 		pr["font-weight"] = styles.WeightBold
@@ -189,25 +197,27 @@ func (se StyleEntry) ToProperties() map[string]any {
 }
 
 // Sub subtracts two style entries, returning an entry with only the differences set
-func (s StyleEntry) Sub(e StyleEntry) StyleEntry {
+func (se StyleEntry) Sub(e StyleEntry) StyleEntry {
 	out := StyleEntry{}
-	if e.Color != s.Color {
-		out.Color = s.Color
+	if e.Color != se.Color {
+		out.Color = se.Color
+		out.themeColor = se.themeColor
 	}
-	if e.Background != s.Background {
-		out.Background = s.Background
+	if e.Background != se.Background {
+		out.Background = se.Background
+		out.themeBackground = se.themeBackground
 	}
-	if e.Border != s.Border {
-		out.Border = s.Border
+	if e.Border != se.Border {
+		out.Border = se.Border
 	}
-	if e.Bold != s.Bold {
-		out.Bold = s.Bold
+	if e.Bold != se.Bold {
+		out.Bold = se.Bold
 	}
-	if e.Italic != s.Italic {
-		out.Italic = s.Italic
+	if e.Italic != se.Italic {
+		out.Italic = se.Italic
 	}
-	if e.Underline != s.Underline {
-		out.Underline = s.Underline
+	if e.Underline != se.Underline {
+		out.Underline = se.Underline
 	}
 	return out
 }
@@ -215,18 +225,20 @@ func (s StyleEntry) Sub(e StyleEntry) StyleEntry {
 // Inherit styles from ancestors.
 //
 // Ancestors should be provided from oldest, furthest away to newest, closest.
-func (s StyleEntry) Inherit(ancestors ...StyleEntry) StyleEntry {
-	out := s
+func (se StyleEntry) Inherit(ancestors ...StyleEntry) StyleEntry {
+	out := se
 	for i := len(ancestors) - 1; i >= 0; i-- {
 		if out.NoInherit {
 			return out
 		}
 		ancestor := ancestors[i]
-		if colors.IsNil(out.Color) {
+		if colors.IsNil(out.themeColor) {
 			out.Color = ancestor.Color
+			out.themeColor = ancestor.themeColor
 		}
-		if colors.IsNil(out.Background) {
+		if colors.IsNil(out.themeBackground) {
 			out.Background = ancestor.Background
+			out.themeBackground = ancestor.themeBackground
 		}
 		if colors.IsNil(out.Border) {
 			out.Border = ancestor.Border
@@ -244,9 +256,9 @@ func (s StyleEntry) Inherit(ancestors ...StyleEntry) StyleEntry {
 	return out
 }
 
-func (s StyleEntry) IsZero() bool {
-	return colors.IsNil(s.Color) && colors.IsNil(s.Background) && colors.IsNil(s.Border) && s.Bold == Pass && s.Italic == Pass &&
-		s.Underline == Pass && !s.NoInherit
+func (se StyleEntry) IsZero() bool {
+	return colors.IsNil(se.Color) && colors.IsNil(se.Background) && colors.IsNil(se.Border) && se.Bold == Pass && se.Italic == Pass &&
+		se.Underline == Pass && !se.NoInherit
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

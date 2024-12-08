@@ -41,7 +41,7 @@ func Terminate() {
 
 // GLFWCreateWindow is a helper function intended only for use in simple examples that makes a
 // new window with glfw on platforms that support it and is largely a no-op on other platforms.
-func GLFWCreateWindow(gp *GPU, size image.Point, title string, resize *func(size image.Point)) (surface *wgpu.Surface, terminate func(), pollEvents func() bool, actualSize image.Point, err error) {
+func GLFWCreateWindow(size image.Point, title string, resize *func(size image.Point)) (surface *wgpu.Surface, terminate func(), pollEvents func() bool, actualSize image.Point, err error) {
 	if err = Init(); err != nil {
 		return
 	}
@@ -50,7 +50,8 @@ func GLFWCreateWindow(gp *GPU, size image.Point, title string, resize *func(size
 	if err != nil {
 		return
 	}
-	surface = gp.Instance.CreateSurface(wgpuglfw.GetSurfaceDescriptor(window))
+	inst := Instance()
+	surface = inst.CreateSurface(wgpuglfw.GetSurfaceDescriptor(window))
 	terminate = func() {
 		window.Destroy()
 		Terminate()

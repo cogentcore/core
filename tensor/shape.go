@@ -9,91 +9,76 @@ import (
 	"slices"
 )
 
-// Shape manages a tensor's shape information, including strides and dimension names
+// Shape manages a tensor's shape information, including sizes and strides,
 // and can compute the flat index into an underlying 1D data storage array based on an
 // n-dimensional index (and vice-versa).
-// Per C / Go / Python conventions, indexes are Row-Major, ordered from
+// Per Go / C / Python conventions, indexes are Row-Major, ordered from
 // outer to inner left-to-right, so the inner-most is right-most.
 type Shape struct {
 
-	// size per dimension
+	// size per dimension.
 	Sizes []int
 
-	// offsets for each dimension
+	// offsets for each dimension.
 	Strides []int `display:"-"`
-
-	// names of each dimension
-	Names []string `display:"-"`
 }
 
-// NewShape returns a new shape with given sizes and optional dimension names.
+// NewShape returns a new shape with given sizes.
 // RowMajor ordering is used by default.
-func NewShape(sizes []int, names ...string) *Shape {
+func NewShape(sizes ...int) *Shape {
 	sh := &Shape{}
-	sh.SetShape(sizes, names...)
+	sh.SetShapeSizes(sizes...)
 	return sh
 }
 
-// SetShape sets the shape size and optional names
+// SetShapeSizes sets the shape sizes from list of ints.
 // RowMajor ordering is used by default.
-func (sh *Shape) SetShape(sizes []int, names ...string) {
+func (sh *Shape) SetShapeSizes(sizes ...int) {
 	sh.Sizes = slices.Clone(sizes)
-	sh.Strides = RowMajorStrides(sizes)
-	sh.Names = make([]string, len(sh.Sizes))
-	if len(names) == len(sizes) {
-		copy(sh.Names, names)
-	}
+	sh.Strides = RowMajorStrides(sizes...)
 }
 
-// CopyShape copies the shape parameters from another Shape struct.
+// SetShapeSizesFromTensor sets the shape sizes from given tensor.
+// RowMajor ordering is used by default.
+func (sh *Shape) SetShapeSizesFromTensor(sizes Tensor) {
+	sh.SetShapeSizes(AsIntSlice(sizes)...)
+}
+
+// SizesAsTensor returns shape sizes as an Int Tensor.
+func (sh *Shape) SizesAsTensor() *Int {
+	return NewIntFromValues(sh.Sizes...)
+}
+
+// CopyFrom copies the shape parameters from another Shape struct.
 // copies the data so it is not accidentally subject to updates.
-func (sh *Shape) CopyShape(cp *Shape) {
+func (sh *Shape) CopyFrom(cp *Shape) {
 	sh.Sizes = slices.Clone(cp.Sizes)
 	sh.Strides = slices.Clone(cp.Strides)
-	sh.Names = slices.Clone(cp.Names)
 }
 
 // Len returns the total length of elements in the tensor
-// (i.e., the product of the shape sizes)
+// (i.e., the product of the shape sizes).
 func (sh *Shape) Len() int {
 	if len(sh.Sizes) == 0 {
 		return 0
 	}
-	o := int(1)
+	ln := 1
 	for _, v := range sh.Sizes {
-		o *= v
+		ln *= v
 	}
-	return int(o)
+	return ln
 }
 
 // NumDims returns the total number of dimensions.
 func (sh *Shape) NumDims() int { return len(sh.Sizes) }
 
 // DimSize returns the size of given dimension.
-func (sh *Shape) DimSize(i int) int { return sh.Sizes[i] }
-
-// DimName returns the name of given dimension.
-func (sh *Shape) DimName(i int) string { return sh.Names[i] }
-
-// DimByName returns the index of the given dimension name.
-// returns -1 if not found.
-func (sh *Shape) DimByName(name string) int {
-	for i, nm := range sh.Names {
-		if nm == name {
-			return i
-		}
-	}
-	return -1
-}
-
-// DimSizeByName returns the size of given dimension, specified by name.
-// will crash if name not found.
-func (sh *Shape) DimSizeByName(name string) int {
-	return sh.DimSize(sh.DimByName(name))
+func (sh *Shape) DimSize(i int) int {
+	return sh.Sizes[i]
 }
 
 // IndexIsValid() returns true if given index is valid (within ranges for all dimensions)
-func (sh *Shape) IndexIsValid(idx []int) bool {
+func (sh *Shape) IndexIsValid(idx ...int) bool {
 	if len(idx) != sh.NumDims() {
 		return false
 	}
@@ -107,45 +92,58 @@ func (sh *Shape) IndexIsValid(idx []int) bool {
 
 // IsEqual returns true if this shape is same as other (does not compare names)
 func (sh *Shape) IsEqual(oth *Shape) bool {
-	if !EqualInts(sh.Sizes, oth.Sizes) {
+	if slices.Compare(sh.Sizes, oth.Sizes) != 0 {
 		return false
 	}
-	if !EqualInts(sh.Strides, oth.Strides) {
+	if slices.Compare(sh.Strides, oth.Strides) != 0 {
 		return false
 	}
 	return true
 }
 
-// RowCellSize returns the size of the outer-most Row shape dimension,
+// RowCellSize returns the size of the outermost Row shape dimension,
 // and the size of all the remaining inner dimensions (the "cell" size).
 // Used for Tensors that are columns in a data table.
 func (sh *Shape) RowCellSize() (rows, cells int) {
+	if len(sh.Sizes) == 0 {
+		return 0, 1
+	}
 	rows = sh.Sizes[0]
 	if len(sh.Sizes) == 1 {
 		cells = 1
-	} else {
+	} else if rows > 0 {
 		cells = sh.Len() / rows
+	} else {
+		ln := 1
+		for _, v := range sh.Sizes[1:] {
+			ln *= v
+		}
+		cells = ln
 	}
 	return
 }
 
-// Offset returns the "flat" 1D array index into an element at the given n-dimensional index.
-// No checking is done on the length or size of the index values relative to the shape of the tensor.
-func (sh *Shape) Offset(index []int) int {
-	var offset int
+// IndexTo1D returns the flat 1D index from given n-dimensional indicies.
+// No checking is done on the length or size of the index values relative
+// to the shape of the tensor.
+func (sh *Shape) IndexTo1D(index ...int) int {
+	oned := 0
 	for i, v := range index {
-		offset += v * sh.Strides[i]
+		oned += v * sh.Strides[i]
 	}
-	return offset
+	return oned
 }
 
-// Index returns the n-dimensional index from a "flat" 1D array index.
-func (sh *Shape) Index(offset int) []int {
+// IndexFrom1D returns the n-dimensional index from a "flat" 1D array index.
+func (sh *Shape) IndexFrom1D(oned int) []int {
 	nd := len(sh.Sizes)
 	index := make([]int, nd)
-	rem := offset
+	rem := oned
 	for i := nd - 1; i >= 0; i-- {
 		s := sh.Sizes[i]
+		if s == 0 {
+			return index
+		}
 		iv := rem % s
 		rem /= s
 		index[i] = iv
@@ -155,24 +153,16 @@ func (sh *Shape) Index(offset int) []int {
 
 // String satisfies the fmt.Stringer interface
 func (sh *Shape) String() string {
-	str := "["
-	for i := range sh.Sizes {
-		nm := sh.Names[i]
-		if nm != "" {
-			str += nm + ": "
-		}
-		str += fmt.Sprintf("%d", sh.Sizes[i])
-		if i < len(sh.Sizes)-1 {
-			str += ", "
-		}
-	}
-	str += "]"
-	return str
+	return fmt.Sprintf("%v", sh.Sizes)
 }
 
-// RowMajorStrides returns strides for sizes where the first dimension is outer-most
+// RowMajorStrides returns strides for sizes where the first dimension is outermost
 // and subsequent dimensions are progressively inner.
-func RowMajorStrides(sizes []int) []int {
+func RowMajorStrides(sizes ...int) []int {
+	if len(sizes) == 0 {
+		return nil
+	}
+	sizes[0] = max(1, sizes[0]) // critical for strides to not be nil due to rows = 0
 	rem := int(1)
 	for _, v := range sizes {
 		rem *= v
@@ -180,7 +170,6 @@ func RowMajorStrides(sizes []int) []int {
 
 	if rem == 0 {
 		strides := make([]int, len(sizes))
-		rem := int(1)
 		for i := range strides {
 			strides[i] = rem
 		}
@@ -195,9 +184,9 @@ func RowMajorStrides(sizes []int) []int {
 	return strides
 }
 
-// ColMajorStrides returns strides for sizes where the first dimension is inner-most
+// ColumnMajorStrides returns strides for sizes where the first dimension is inner-most
 // and subsequent dimensions are progressively outer
-func ColMajorStrides(sizes []int) []int {
+func ColumnMajorStrides(sizes ...int) []int {
 	total := int(1)
 	for _, v := range sizes {
 		if v == 0 {
@@ -217,19 +206,6 @@ func ColMajorStrides(sizes []int) []int {
 	return strides
 }
 
-// EqualInts compares two int slices and returns true if they are equal
-func EqualInts(a, b []int) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
 // AddShapes returns a new shape by adding two shapes one after the other.
 func AddShapes(shape1, shape2 *Shape) *Shape {
 	sh1 := shape1.Sizes
@@ -237,8 +213,19 @@ func AddShapes(shape1, shape2 *Shape) *Shape {
 	nsh := make([]int, len(sh1)+len(sh2))
 	copy(nsh, sh1)
 	copy(nsh[len(sh1):], sh2)
-	nms := make([]string, len(sh1)+len(sh2))
-	copy(nms, shape1.Names)
-	copy(nms[len(sh1):], shape2.Names)
-	return NewShape(nsh, nms...)
+	sh := NewShape(nsh...)
+	return sh
+}
+
+// CellsSizes returns the sizes of inner cells dimensions given
+// overall tensor sizes.  It returns []int{1} for the 1D case.
+// Used for ensuring cell-wise outputs are the right size.
+func CellsSize(sizes []int) []int {
+	csz := slices.Clone(sizes)
+	if len(csz) == 1 {
+		csz[0] = 1
+	} else {
+		csz = csz[1:]
+	}
+	return csz
 }

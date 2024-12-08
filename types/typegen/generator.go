@@ -80,7 +80,7 @@ func (g *Generator) Find() error {
 		return err
 	}
 	g.Types = []*Type{}
-	err = generate.Inspect(g.Pkg, g.Inspect)
+	err = generate.Inspect(g.Pkg, g.Inspect, "enumgen.go", "typegen.go")
 	if err != nil {
 		return fmt.Errorf("error while inspecting: %w", err)
 	}

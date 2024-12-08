@@ -26,15 +26,13 @@ func init() {
 }
 
 func main() {
-	gp := gpu.NewGPU()
-
 	var resize func(size image.Point)
 	size := image.Point{1024, 768}
-	sp, terminate, pollEvents, size, err := gpu.GLFWCreateWindow(gp, size, "GPU Draw", &resize)
+	sp, terminate, pollEvents, size, err := gpu.GLFWCreateWindow(size, "GPU Draw", &resize)
 	if err != nil {
 		return
 	}
-
+	gp := gpu.NewGPU(sp)
 	sf := gpu.NewSurface(gp, sp, size, 1, gpu.UndefinedType) // note: 1, no depth for draw
 	drw := gpudraw.NewDrawer(gp, sf)
 	fmt.Printf("format: %s\n", sf.Format.String())

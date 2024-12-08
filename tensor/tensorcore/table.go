@@ -34,34 +34,34 @@ import (
 type Table struct {
 	core.ListBase
 
-	// the idx view of the table that we're a view of
-	Table *table.IndexView `set:"-"`
+	// Table is the table that we're a view of.
+	Table *table.Table `set:"-"`
 
-	// overall display options for tensor display
+	// overall display options for tensor display.
 	TensorDisplay TensorDisplay `set:"-"`
 
-	// per column tensor display params
+	// per column tensor display params.
 	ColumnTensorDisplay map[int]*TensorDisplay `set:"-"`
 
-	// per column blank tensor values
+	// per column blank tensor values.
 	ColumnTensorBlank map[int]*tensor.Float64 `set:"-"`
 
-	// number of columns in table (as of last update)
+	// number of columns in table (as of last update).
 	NCols int `edit:"-"`
 
-	// current sort index
+	// current sort index.
 	SortIndex int
 
-	// whether current sort order is descending
+	// whether current sort order is descending.
 	SortDescending bool
 
-	// headerWidths has number of characters in each header, per visfields
+	// headerWidths has number of characters in each header, per visfields.
 	headerWidths []int `copier:"-" display:"-" json:"-" xml:"-"`
 
-	// colMaxWidths records maximum width in chars of string type fields
+	// colMaxWidths records maximum width in chars of string type fields.
 	colMaxWidths []int `set:"-" copier:"-" json:"-" xml:"-"`
 
-	//	blank values for out-of-range rows
+	//	blank values for out-of-range rows.
 	BlankString string
 	BlankFloat  float64
 }
@@ -109,8 +109,8 @@ func (tb *Table) Init() {
 func (tb *Table) SliceIndex(i int) (si, vi int, invis bool) {
 	si = tb.StartIndex + i
 	vi = -1
-	if si < len(tb.Table.Indexes) {
-		vi = tb.Table.Indexes[si]
+	if si < tb.Table.NumRows() {
+		vi = tb.Table.RowIndex(si)
 	}
 	invis = vi < 0
 	return
@@ -130,14 +130,13 @@ func (tb *Table) StyleValue(w core.Widget, s *styles.Style, row, col int) {
 	s.SetTextWrap(false)
 }
 
-// SetTable sets the source table that we are viewing, using a sequential IndexView
+// SetTable sets the source table that we are viewing, using a sequential view,
 // and then configures the display
-func (tb *Table) SetTable(et *table.Table) *Table {
-	if et == nil {
+func (tb *Table) SetTable(dt *table.Table) *Table {
+	if dt == nil {
 		return nil
 	}
-
-	tb.Table = table.NewIndexView(et)
+	tb.Table = table.NewView(dt)
 	tb.This.(core.Lister).UpdateSliceSize()
 	tb.SetSliceBase()
 	tb.Update()
@@ -160,35 +159,13 @@ func (tb *Table) AsyncUpdateTable() {
 	tb.AsyncUnlock()
 }
 
-// SetIndexView sets the source IndexView of a table (using a copy so original is not modified)
-// and then configures the display
-func (tb *Table) SetIndexView(ix *table.IndexView) *Table {
-	if ix == nil {
-		return tb
-	}
-
-	tb.Table = ix.Clone() // always copy
-
-	tb.This.(core.Lister).UpdateSliceSize()
-	tb.StartIndex = 0
-	tb.VisibleRows = tb.MinRows
-	if !tb.IsReadOnly() {
-		tb.SelectedIndex = -1
-	}
-	tb.ResetSelectedIndexes()
-	tb.SelectMode = false
-	tb.MakeIter = 0
-	tb.Update()
-	return tb
-}
-
 func (tb *Table) UpdateSliceSize() int {
-	tb.Table.DeleteInvalid() // table could have changed
-	if tb.Table.Len() == 0 {
+	tb.Table.ValidIndexes() // table could have changed
+	if tb.Table.NumRows() == 0 {
 		tb.Table.Sequential()
 	}
-	tb.SliceSize = tb.Table.Len()
-	tb.NCols = tb.Table.Table.NumColumns()
+	tb.SliceSize = tb.Table.NumRows()
+	tb.NCols = tb.Table.NumColumns()
 	return tb.SliceSize
 }
 
@@ -203,7 +180,7 @@ func (tb *Table) UpdateMaxWidths() {
 	}
 	for fli := 0; fli < tb.NCols; fli++ {
 		tb.colMaxWidths[fli] = 0
-		col := tb.Table.Table.Columns[fli]
+		col := tb.Table.Columns.Values[fli]
 		stsr, isstr := col.(*tensor.String)
 
 		if !isstr {
@@ -239,7 +216,7 @@ func (tb *Table) MakeHeader(p *tree.Plan) {
 				})
 			}
 			for fli := 0; fli < tb.NCols; fli++ {
-				field := tb.Table.Table.ColumnNames[fli]
+				field := tb.Table.Columns.Keys[fli]
 				tree.AddAt(p, "head-"+field, func(w *core.Button) {
 					w.SetType(core.ButtonAction)
 					w.Styler(func(s *styles.Style) {
@@ -249,7 +226,7 @@ func (tb *Table) MakeHeader(p *tree.Plan) {
 						tb.SortSliceAction(fli)
 					})
 					w.Updater(func() {
-						field := tb.Table.Table.ColumnNames[fli]
+						field := tb.Table.Columns.Keys[fli]
 						w.SetText(field).SetTooltip(field + " (tap to sort by)")
 						tb.headerWidths[fli] = len(field)
 						if fli == tb.SortIndex {
@@ -294,7 +271,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	}
 
 	for fli := 0; fli < tb.NCols; fli++ {
-		col := tb.Table.Table.Columns[fli]
+		col := tb.Table.Columns.Values[fli]
 		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
 
 		_, isstr := col.(*tensor.String)
@@ -313,11 +290,12 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 				w.AsTree().SetProperty(core.ListColProperty, fli)
 				if !tb.IsReadOnly() {
 					wb.OnChange(func(e events.Event) {
-						if si < len(tb.Table.Indexes) {
+						_, vi, invis := svi.SliceIndex(i)
+						if !invis {
 							if isstr {
-								tb.Table.Table.SetStringIndex(fli, tb.Table.Indexes[si], str)
+								col.SetString1D(str, vi)
 							} else {
-								tb.Table.Table.SetFloatIndex(fli, tb.Table.Indexes[si], fval)
+								col.SetFloat1D(fval, vi)
 							}
 						}
 						tb.This.(core.Lister).UpdateMaxWidths()
@@ -328,10 +306,10 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 					_, vi, invis := svi.SliceIndex(i)
 					if !invis {
 						if isstr {
-							str = tb.Table.Table.StringIndex(fli, vi)
+							str = col.String1D(vi)
 							core.Bind(&str, w)
 						} else {
-							fval = tb.Table.Table.FloatIndex(fli, vi)
+							fval = col.Float1D(vi)
 							core.Bind(&fval, w)
 						}
 					} else {
@@ -366,7 +344,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 					if invis {
 						cell = tb.ColTensorBlank(fli, col)
 					} else {
-						cell = tb.Table.Table.TensorIndex(fli, vi)
+						cell = col.RowTensor(vi)
 					}
 					wb.ValueTitle = tb.ValueTitle + "[" + strconv.Itoa(si) + "]"
 					w.SetState(invis, states.Invisible)
@@ -383,7 +361,7 @@ func (tb *Table) ColTensorBlank(cidx int, col tensor.Tensor) *tensor.Float64 {
 	if ctb, has := tb.ColumnTensorBlank[cidx]; has {
 		return ctb
 	}
-	ctb := tensor.New[float64](col.Shape().Sizes, col.Shape().Names...).(*tensor.Float64)
+	ctb := tensor.New[float64](col.ShapeSizes()...).(*tensor.Float64)
 	tb.ColumnTensorBlank[cidx] = ctb
 	return ctb
 }
@@ -395,8 +373,8 @@ func (tb *Table) GetColumnTensorDisplay(col int) *TensorDisplay {
 		return ctd
 	}
 	if tb.Table != nil {
-		cl := tb.Table.Table.Columns[col]
-		if len(cl.MetaDataMap()) > 0 {
+		cl := tb.Table.Columns.Values[col]
+		if len(*cl.Metadata()) > 0 {
 			return tb.SetColumnTensorDisplay(col)
 		}
 	}
@@ -412,7 +390,7 @@ func (tb *Table) SetColumnTensorDisplay(col int) *TensorDisplay {
 	ctd := &TensorDisplay{}
 	*ctd = tb.TensorDisplay
 	if tb.Table != nil {
-		cl := tb.Table.Table.Columns[col]
+		cl := tb.Table.Columns.Values[col]
 		ctd.FromMeta(cl)
 	}
 	tb.ColumnTensorDisplay[col] = ctd
@@ -463,7 +441,10 @@ func (tb *Table) SortSliceAction(fldIndex int) {
 	if fldIndex == -1 {
 		tb.Table.SortIndexes()
 	} else {
-		tb.Table.SortColumn(tb.SortIndex, !tb.SortDescending)
+		tb.Table.IndexesNeeded()
+		col := tb.Table.ColumnByIndex(tb.SortIndex)
+		col.Sort(!tb.SortDescending)
+		tb.Table.IndexesFromTensor(col)
 	}
 	tb.Update() // requires full update due to sort button icon
 }
@@ -490,7 +471,7 @@ func (tb *Table) StyleRow(w core.Widget, idx, fidx int) {}
 // :down depending on descending
 func (tb *Table) SortFieldName() string {
 	if tb.SortIndex >= 0 && tb.SortIndex < tb.NCols {
-		nm := tb.Table.Table.ColumnNames[tb.SortIndex]
+		nm := tb.Table.Columns.Keys[tb.SortIndex]
 		if tb.SortDescending {
 			nm += ":down"
 		} else {
@@ -510,7 +491,7 @@ func (tb *Table) SetSortFieldName(nm string) {
 	spnm := strings.Split(nm, ":")
 	got := false
 	for fli := 0; fli < tb.NCols; fli++ {
-		fld := tb.Table.Table.ColumnNames[fli]
+		fld := tb.Table.Columns.Keys[fli]
 		if fld == spnm[0] {
 			got = true
 			// fmt.Println("sorting on:", fld.Name, fli, "from:", nm)
@@ -581,8 +562,7 @@ func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
 	return nil
 }
 
-//////////////////////////////////////////////////////
-// 	Header layout
+//////// Header layout
 
 func (tb *Table) SizeFinal() {
 	tb.ListBase.SizeFinal()
@@ -613,24 +593,24 @@ func (tb *Table) SizeFinal() {
 
 // SelectedColumnStrings returns the string values of given column name.
 func (tb *Table) SelectedColumnStrings(colName string) []string {
-	dt := tb.Table.Table
+	dt := tb.Table
 	jis := tb.SelectedIndexesList(false)
 	if len(jis) == 0 || dt == nil {
 		return nil
 	}
 	var s []string
+	col := dt.Column(colName)
 	for _, i := range jis {
-		v := dt.StringValue(colName, i)
+		v := col.StringRow(i, 0)
 		s = append(s, v)
 	}
 	return s
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//    Copy / Cut / Paste
+////////  Copy / Cut / Paste
 
 func (tb *Table) MakeToolbar(p *tree.Plan) {
-	if tb.Table == nil || tb.Table.Table == nil {
+	if tb.Table == nil {
 		return
 	}
 	tree.Add(p, func(w *core.FuncButton) {
@@ -638,11 +618,11 @@ func (tb *Table) MakeToolbar(p *tree.Plan) {
 		w.SetAfterFunc(func() { tb.Update() })
 	})
 	tree.Add(p, func(w *core.FuncButton) {
-		w.SetFunc(tb.Table.SortColumnName).SetText("Sort").SetIcon(icons.Sort)
+		w.SetFunc(tb.Table.SortColumns).SetText("Sort").SetIcon(icons.Sort)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
 	tree.Add(p, func(w *core.FuncButton) {
-		w.SetFunc(tb.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
+		w.SetFunc(tb.Table.FilterString).SetText("Filter").SetIcon(icons.FilterAlt)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
 	tree.Add(p, func(w *core.FuncButton) {
@@ -669,16 +649,15 @@ func (tb *Table) CopySelectToMime() mimedata.Mimes {
 	if nitms == 0 {
 		return nil
 	}
-	ix := &table.IndexView{}
-	ix.Table = tb.Table.Table
+	ix := table.NewView(tb.Table)
 	idx := tb.SelectedIndexesList(false) // ascending
 	iidx := make([]int, len(idx))
 	for i, di := range idx {
-		iidx[i] = tb.Table.Indexes[di]
+		iidx[i] = tb.Table.RowIndex(di)
 	}
 	ix.Indexes = iidx
 	var b bytes.Buffer
-	ix.WriteCSV(&b, table.Tab, table.Headers)
+	ix.WriteCSV(&b, tensor.Tab, table.Headers)
 	md := mimedata.NewTextBytes(b.Bytes())
 	md[0].Type = fileinfo.DataCsv
 	return md
@@ -691,7 +670,7 @@ func (tb *Table) FromMimeData(md mimedata.Mimes) [][]string {
 		if d.Type == fileinfo.DataCsv {
 			b := bytes.NewBuffer(d.Data)
 			cr := csv.NewReader(b)
-			cr.Comma = table.Tab.Rune()
+			cr.Comma = tensor.Tab.Rune()
 			rec, err := cr.ReadAll()
 			if err != nil || len(rec) == 0 {
 				log.Printf("Error reading CSV from clipboard: %s\n", err)
@@ -709,7 +688,7 @@ func (tb *Table) PasteAssign(md mimedata.Mimes, idx int) {
 	if len(recs) == 0 {
 		return
 	}
-	tb.Table.Table.ReadCSVRow(recs[1], tb.Table.Indexes[idx])
+	tb.Table.ReadCSVRow(recs[1], tb.Table.RowIndex(idx))
 	tb.UpdateChange()
 }
 
@@ -724,8 +703,8 @@ func (tb *Table) PasteAtIndex(md mimedata.Mimes, idx int) {
 	tb.Table.InsertRows(idx, nr)
 	for ri := 0; ri < nr; ri++ {
 		rec := recs[1+ri]
-		rw := tb.Table.Indexes[idx+ri]
-		tb.Table.Table.ReadCSVRow(rec, rw)
+		rw := tb.Table.RowIndex(idx + ri)
+		tb.Table.ReadCSVRow(rec, rw)
 	}
 	tb.SendChange()
 	tb.SelectIndexEvent(idx, events.SelectOne)

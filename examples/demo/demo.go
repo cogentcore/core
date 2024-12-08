@@ -43,6 +43,7 @@ func main() {
 	makeStyles(ts)
 
 	b.RunMainWindow()
+	// b.NewWindow().SetFullscreen(true).RunMain()
 }
 
 func home(ts *core.Tabs) {
@@ -641,6 +642,14 @@ func dialogs(ts *core.Tabs) {
 	rw.SetTooltip("Resizes this window to fit the current content")
 	rw.OnClick(func(e events.Event) {
 		wrow.Scene.ResizeToContent(image.Pt(0, 40)) // note: size is not correct due to wrapping? #1307
+	})
+
+	fs := core.NewButton(wrow).SetText("Fullscreen")
+	fs.SetTooltip("Toggle fullscreen mode")
+	cfs := false
+	fs.OnClick(func(e events.Event) {
+		cfs = !cfs
+		wrow.Scene.UpdateFullscreen(cfs)
 	})
 }
 
