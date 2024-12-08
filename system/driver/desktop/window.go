@@ -484,7 +484,7 @@ func (w *Window) updateGeometry() {
 	w.Mu.Unlock()
 	// w.App.RunOnMain(func() {
 	// note: getting non-main thread warning.
-	w.Draw.System.Renderer.SetSize(w.PixSize)
+	// w.Draw.System.Renderer.SetSize(w.PixSize)
 	// })
 	if cursc != w.ScreenWindow {
 		if ScreenDebug {
