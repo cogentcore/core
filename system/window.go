@@ -100,7 +100,7 @@ type Window interface {
 	// it defaults to the current value. See [Window.SetPos] for information
 	// on the optional screen argument. This method only fully works on desktop
 	// platforms, with only fullscreen supported on web.
-	SetGeometry(fullscreen bool, pos image.Point, sz image.Point, screen *Screen)
+	SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen *Screen)
 
 	// ConstrainFrame ensures that the window frame is entirely within the
 	// window's screen, returning the size of each side of the frame.

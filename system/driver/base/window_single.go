@@ -99,8 +99,9 @@ func (w *WindowSingle[A]) SetPos(pos image.Point, screen *system.Screen) {
 	// no-op
 }
 
-func (w *WindowSingle[A]) SetGeometry(fullscreen bool, pos image.Point, sz image.Point, screen *system.Screen) {
-	// no-op
+func (w *WindowSingle[A]) SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen *system.Screen) {
+	// mostly no-op
+	w.Flgs.SetFlag(fullscreen, system.Fullscreen)
 }
 
 func (w *WindowSingle[A]) ConstrainFrame(topOnly bool) styles.Sides[int] {

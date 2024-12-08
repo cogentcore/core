@@ -263,15 +263,15 @@ func (w *Window) SetPos(pos image.Point, screen *system.Screen) {
 	})
 }
 
-func (w *Window) SetGeometry(fullscreen bool, pos, sz image.Point, screen *system.Screen) {
+func (w *Window) SetGeometry(fullscreen bool, pos, size image.Point, screen *system.Screen) {
 	if w.IsClosed() {
 		return
 	}
 	if pos == (image.Point{}) {
 		pos = w.Pos
 	}
-	if sz == (image.Point{}) {
-		sz = w.PixSize
+	if size == (image.Point{}) {
+		size = w.PixSize
 	}
 	if screen != nil {
 		pos = pos.Add(screen.Geometry.Min)
@@ -280,7 +280,7 @@ func (w *Window) SetGeometry(fullscreen bool, pos, sz image.Point, screen *syste
 	if screen != nil {
 		sc = screen // critical to use this b/c w.Screen() can be wrong on new screen sequence
 	}
-	sz = sc.WinSizeFromPix(sz)
+	size = sc.WinSizeFromPix(size)
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
 		if w.Glw == nil { // by time we got to main, could be diff
@@ -289,7 +289,7 @@ func (w *Window) SetGeometry(fullscreen bool, pos, sz image.Point, screen *syste
 		switch {
 		case w.Is(system.Fullscreen) && !fullscreen:
 			w.Flgs.SetFlag(false, system.Fullscreen)
-			w.Glw.SetMonitor(nil, pos.X, pos.Y, sz.X, sz.Y, glfw.DontCare)
+			w.Glw.SetMonitor(nil, pos.X, pos.Y, size.X, size.Y, glfw.DontCare)
 		case fullscreen:
 			w.Flgs.SetFlag(true, system.Fullscreen)
 			if screen != nil {
@@ -298,7 +298,7 @@ func (w *Window) SetGeometry(fullscreen bool, pos, sz image.Point, screen *syste
 			mon := w.App.Monitors[sc.ScreenNumber]
 			w.Glw.SetMonitor(mon, 0, 0, sc.PixSize.X, sc.PixSize.Y, glfw.DontCare)
 		default:
-			w.Glw.SetSize(sz.X, sz.Y)
+			w.Glw.SetSize(size.X, size.Y)
 			w.Glw.SetPos(pos.X, pos.Y)
 		}
 	})
