@@ -296,10 +296,11 @@ func (sc *Scene) resize(geom math32.Geom2DInt) {
 }
 
 // ResizeToContent resizes the scene so it fits the current content.
-// Only applicable to Desktop systems where windows can be resized.
+// Only applicable to desktop systems where windows can be resized.
 // Optional extra size is added to the amount computed to hold the contents,
 // which is needed in cases with wrapped text elements, which don't
-// always size accurately.
+// always size accurately. See [Scene.SetGeometry] for a more general way
+// to set all window geometry properties.
 func (sc *Scene) ResizeToContent(extra ...image.Point) {
 	if TheApp.Platform().IsMobile() { // not resizable
 		return
@@ -318,12 +319,14 @@ func (sc *Scene) ResizeToContent(extra ...image.Point) {
 	}()
 }
 
-// SetGeometry uses [system.Window.SetGeometry] to update all window geometry properties.
+// SetGeometry uses [system.Window.SetGeometry] to set all window geometry properties.
 // If fullscreen is true, pos and size are ignored, and screen indicates the number
 // of the screen on which to fullscreen the window. If fullscreen is false, the
 // window is moved to the given pos and size on the given screen. If screen is -1,
 // the current screen the window is on is used, and fullscreen/pos/size are all
-// relative to that screen.
+// relative to that screen. See [Scene.SetFullscreen] for a simpler way to set
+// only the fullscreen state. See [Scene.ResizeToContent] to resize the window
+// to fit the current content.
 func (sc *Scene) SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen int) {
 	rw := sc.RenderWindow()
 	if rw == nil {
@@ -354,6 +357,8 @@ func (sc *Scene) IsFullscreen() bool {
 // to get the current fullscreen state and [Stage.SetFullscreen] to set the
 // initial state. ([Stage.SetFullscreen] sets the initial state, whereas
 // this function sets the current state after the [Stage] is already running).
+// See [Scene.SetGeometry] for a more general way to set all window
+// geometry properties.
 func (sc *Scene) SetFullscreen(fullscreen bool) {
 	rw := sc.RenderWindow()
 	if rw == nil {
