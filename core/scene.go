@@ -319,7 +319,8 @@ func (sc *Scene) ResizeToContent(extra ...image.Point) {
 	}()
 }
 
-// SetGeometry uses [system.Window.SetGeometry] to set all window geometry properties.
+// SetGeometry uses [system.Window.SetGeometry] to set all window geometry properties,
+// with pos in operating system window manager units and size in raw pixels.
 // If fullscreen is true, pos and size are ignored, and screen indicates the number
 // of the screen on which to fullscreen the window. If fullscreen is false, the
 // window is moved to the given pos and size on the given screen. If screen is -1,
