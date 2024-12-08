@@ -295,11 +295,11 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 		})
 		if sc.IsFullscreen() {
 			NewButton(m).SetText("Exit fullscreen").SetIcon(icons.Fullscreen).OnClick(func(e events.Event) {
-				sc.UpdateFullscreen(false)
+				sc.SetFullscreen(false)
 			})
 		} else {
 			NewButton(m).SetText("Fullscreen").SetIcon(icons.Fullscreen).OnClick(func(e events.Event) {
-				sc.UpdateFullscreen(true)
+				sc.SetFullscreen(true)
 			})
 		}
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
