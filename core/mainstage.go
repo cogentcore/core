@@ -178,6 +178,13 @@ func (st *Stage) firstWindowStages() *stages {
 	return ms
 }
 
+func (st *Stage) currentScreen() *system.Screen {
+	if currentRenderWindow != nil {
+		return currentRenderWindow.SystemWindow.Screen()
+	}
+	return system.TheApp.Screen(0)
+}
+
 // configMainStage does main-stage configuration steps
 func (st *Stage) configMainStage() {
 	sc := st.Scene
@@ -251,12 +258,16 @@ func (st *Stage) runWindow() *Stage {
 		} else {
 			// on other platforms, we want extra space and a minimum window size
 			sz = sz.Add(image.Pt(20, 20))
-			if st.NewWindow && st.UseMinSize {
-				// we require windows to be at least 60% and no more than 80% of the
-				// screen size by default
-				scsz := system.TheApp.Screen(0).PixSize // TODO(kai): is there a better screen to get here?
-				sz = image.Pt(max(sz.X, scsz.X*6/10), max(sz.Y, scsz.Y*6/10))
-				sz = image.Pt(min(sz.X, scsz.X*8/10), min(sz.Y, scsz.Y*8/10))
+			screen := st.currentScreen()
+			if screen != nil {
+				st.SetScreen(screen.ScreenNumber)
+				if st.NewWindow && st.UseMinSize {
+					// we require windows to be at least 60% and no more than 80% of the
+					// screen size by default
+					scsz := screen.PixSize
+					sz = image.Pt(max(sz.X, scsz.X*6/10), max(sz.Y, scsz.Y*6/10))
+					sz = image.Pt(min(sz.X, scsz.X*8/10), min(sz.Y, scsz.Y*8/10))
+				}
 			}
 		}
 	}
@@ -340,6 +351,10 @@ func (st *Stage) runDialog() *Stage {
 			sz.X = max(sz.X, minx)
 		}
 		sc.Events.startFocusFirst = true // popup dialogs always need focus
+		screen := st.currentScreen()
+		if screen != nil {
+			st.SetScreen(screen.ScreenNumber)
+		}
 	}
 	if DebugSettings.WindowRenderTrace {
 		slog.Info("MainStage.RunDialog", "size", sz)
