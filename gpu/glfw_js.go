@@ -19,7 +19,7 @@ import (
 // new window with glfw on platforms that support it and is largely a no-op on other platforms.
 func GLFWCreateWindow(gp *GPU, size image.Point, title string, resize *func(size image.Point)) (surface *wgpu.Surface, terminate func(), pollEvents func() bool, actualSize image.Point, err error) {
 	errors.Log1(jsfs.Config(js.Global().Get("fs"))) // needed for printing etc to work
-	surface = gp.Instance.CreateSurface(&wgpu.SurfaceDescriptor{})
+	surface = Instance().CreateSurface(&wgpu.SurfaceDescriptor{})
 	terminate = func() {}
 	pollEvents = func() bool { return true }
 	vv := js.Global().Get("visualViewport")

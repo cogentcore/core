@@ -47,10 +47,10 @@ func (a *AppMulti[W]) NScreens() int {
 }
 
 func (a *AppMulti[W]) Screen(n int) *system.Screen {
-	if n < len(a.Screens) {
+	if n >= 0 && n < len(a.Screens) {
 		return a.Screens[n]
 	}
-	return nil
+	return a.Screens[0]
 }
 
 func (a *AppMulti[W]) ScreenByName(name string) *system.Screen {

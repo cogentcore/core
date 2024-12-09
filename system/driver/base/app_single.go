@@ -90,10 +90,7 @@ func (a *AppSingle[D, W]) NScreens() int {
 }
 
 func (a *AppSingle[D, W]) Screen(n int) *system.Screen {
-	if n == 0 {
-		return a.Scrn
-	}
-	return nil
+	return a.Scrn
 }
 
 func (a *AppSingle[D, W]) ScreenByName(name string) *system.Screen {

@@ -33,15 +33,13 @@ type CamView struct {
 }
 
 func main() {
-	gp := gpu.NewGPU()
-
 	var resize func(size image.Point)
 	size := image.Point{1024, 768}
-	sp, terminate, pollEvents, size, err := gpu.GLFWCreateWindow(gp, size, "Draw Triangle Indexed", &resize)
+	sp, terminate, pollEvents, size, err := gpu.GLFWCreateWindow(size, "Draw Triangle Indexed", &resize)
 	if err != nil {
 		return
 	}
-
+	gp := gpu.NewGPU(sp)
 	sf := gpu.NewSurface(gp, sp, size, 1, gpu.UndefinedType)
 	sy := gpu.NewGraphicsSystem(gp, "drawidx", sf)
 	fmt.Printf("format: %s\n", sf.Format.String())

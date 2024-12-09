@@ -37,12 +37,24 @@ func newMainStage(typ StageTypes, sc *Scene) *Stage {
 // to close. It should typically be called once by every app at
 // the end of their main function. It can not be called more than
 // once for one app. For secondary windows, see [Body.RunWindow].
+// If you need to configure the [Stage] further, use [Body.NewWindow]
+// and then [Stage.RunMain] on the resulting [Stage].
 func (bd *Body) RunMainWindow() {
 	if ExternalParent != nil {
 		bd.handleExternalParent()
 		return
 	}
 	bd.RunWindow()
+	Wait()
+}
+
+// RunMain runs the stage, starts the app's main loop,
+// and waits for all windows to close. It can be called instead
+// of [Body.RunMainWindow] if extra configuration steps are necessary
+// on the [Stage]. It can not be called more than once for one app.
+// For secondary stages, see [Stage.Run].
+func (st *Stage) RunMain() {
+	st.Run()
 	Wait()
 }
 
@@ -88,8 +100,9 @@ func (bd *Body) handleExternalParent() {
 
 // NewWindow returns a new [WindowStage] that is placed in
 // a new system window on multi-window platforms.
-// You must call [Stage.Run] to run the window; see [Body.RunWindow]
-// for a version that automatically runs it.
+// You must call [Stage.Run] or [Stage.RunMain] to run the window;
+// see [Body.RunWindow] and [Body.RunMainWindow] for versions that
+// automatically do so.
 func (bd *Body) NewWindow() *Stage {
 	ms := newMainStage(WindowStage, bd.Scene)
 	ms.SetNewWindow(true)
@@ -131,27 +144,29 @@ func (st *Stage) addSceneParts() {
 		sc.SceneGeom.Pos = np
 		sc.NeedsRender()
 	})
-	rsz := NewHandle(parts)
-	rsz.Styler(func(s *styles.Style) {
-		s.Direction = styles.Column
-		s.FillMargin = false
-	})
-	rsz.FinalStyler(func(s *styles.Style) {
-		s.Cursor = cursors.ResizeNWSE
-		s.Min.Set(units.Em(1))
-	})
-	rsz.SetName("resize")
-	rsz.OnChange(func(e events.Event) {
-		e.SetHandled()
-		pd := e.PrevDelta()
-		np := sc.SceneGeom.Size.Add(pd)
-		minsz := 100
-		np.X = max(np.X, minsz)
-		np.Y = max(np.Y, minsz)
-		ng := sc.SceneGeom
-		ng.Size = np
-		sc.resize(ng)
-	})
+	if st.Resizable {
+		rsz := NewHandle(parts)
+		rsz.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.FillMargin = false
+		})
+		rsz.FinalStyler(func(s *styles.Style) {
+			s.Cursor = cursors.ResizeNWSE
+			s.Min.Set(units.Em(1))
+		})
+		rsz.SetName("resize")
+		rsz.OnChange(func(e events.Event) {
+			e.SetHandled()
+			pd := e.PrevDelta()
+			np := sc.SceneGeom.Size.Add(pd)
+			minsz := 100
+			np.X = max(np.X, minsz)
+			np.Y = max(np.Y, minsz)
+			ng := sc.SceneGeom
+			ng.Size = np
+			sc.resize(ng)
+		})
+	}
 }
 
 // firstWindowStages creates a temporary [stages] for the first window
@@ -161,6 +176,13 @@ func (st *Stage) firstWindowStages() *stages {
 	ms := &stages{}
 	ms.renderContext = newRenderContext()
 	return ms
+}
+
+func (st *Stage) currentScreen() *system.Screen {
+	if currentRenderWindow != nil {
+		return currentRenderWindow.SystemWindow.Screen()
+	}
+	return system.TheApp.Screen(0)
 }
 
 // configMainStage does main-stage configuration steps
@@ -236,17 +258,21 @@ func (st *Stage) runWindow() *Stage {
 		} else {
 			// on other platforms, we want extra space and a minimum window size
 			sz = sz.Add(image.Pt(20, 20))
-			if st.NewWindow && st.UseMinSize {
-				// we require windows to be at least 60% and no more than 80% of the
-				// screen size by default
-				scsz := system.TheApp.Screen(0).PixSize // TODO(kai): is there a better screen to get here?
-				sz = image.Pt(max(sz.X, scsz.X*6/10), max(sz.Y, scsz.Y*6/10))
-				sz = image.Pt(min(sz.X, scsz.X*8/10), min(sz.Y, scsz.Y*8/10))
+			screen := st.currentScreen()
+			if screen != nil {
+				st.SetScreen(screen.ScreenNumber)
+				if st.NewWindow && st.UseMinSize {
+					// we require windows to be at least 60% and no more than 80% of the
+					// screen size by default
+					scsz := screen.PixSize
+					sz = image.Pt(max(sz.X, scsz.X*6/10), max(sz.Y, scsz.Y*6/10))
+					sz = image.Pt(min(sz.X, scsz.X*8/10), min(sz.Y, scsz.Y*8/10))
+				}
 			}
 		}
 	}
 	st.Mains = nil // reset
-	if DebugSettings.WinRenderTrace {
+	if DebugSettings.WindowRenderTrace {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
 
@@ -325,8 +351,12 @@ func (st *Stage) runDialog() *Stage {
 			sz.X = max(sz.X, minx)
 		}
 		sc.Events.startFocusFirst = true // popup dialogs always need focus
+		screen := st.currentScreen()
+		if screen != nil {
+			st.SetScreen(screen.ScreenNumber)
+		}
 	}
-	if DebugSettings.WinRenderTrace {
+	if DebugSettings.WindowRenderTrace {
 		slog.Info("MainStage.RunDialog", "size", sz)
 	}
 
@@ -355,21 +385,29 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		Title:     title,
 		Icon:      appIconImages(),
 		Size:      st.Scene.SceneGeom.Size,
+		Pos:       st.Pos,
 		StdPixels: false,
+		Screen:    st.Screen,
 	}
-	wgp := theWindowGeometrySaver.pref(title, nil)
-	if TheApp.Platform() != system.Offscreen && wgp != nil {
+	opts.Flags.SetFlag(!st.Resizable, system.FixedSize)
+	opts.Flags.SetFlag(st.Maximized, system.Maximized)
+	opts.Flags.SetFlag(st.Fullscreen, system.Fullscreen)
+	screenName := ""
+	if st.Screen > 0 {
+		screenName = TheApp.Screen(st.Screen).Name
+	}
+	wgp, screen := theWindowGeometrySaver.get(title, screenName)
+	if wgp != nil {
 		theWindowGeometrySaver.settingStart()
-		opts.Size = wgp.size()
-		opts.Pos = wgp.pos()
+		opts.Screen = screen.ScreenNumber
+		opts.Size = wgp.Size
+		opts.Pos = wgp.Pos
 		opts.StdPixels = false
 		if w := AllRenderWindows.FindName(name); w != nil { // offset from existing
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}
-		if wgp.Fullscreen {
-			opts.SetFullscreen()
-		}
+		opts.Flags.SetFlag(wgp.Max, system.Maximized)
 	}
 	win := newRenderWindow(name, title, opts)
 	theWindowGeometrySaver.settingEnd()
@@ -409,7 +447,7 @@ func (sm *stages) mainHandleEvent(e events.Event) {
 	for i := n - 1; i >= 0; i-- {
 		st := sm.stack.ValueByIndex(i)
 		st.mainHandleEvent(e)
-		if e.IsHandled() || st.Modal || st.Type == WindowStage || st.FullWindow {
+		if e.IsHandled() || st.Modal || st.FullWindow {
 			break
 		}
 		if st.Type == DialogStage { // modeless dialog, by definition

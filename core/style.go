@@ -166,7 +166,7 @@ func (wb *WidgetBase) Restyle() {
 func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	rebuild := false
 	var rc *renderContext
-	sz := image.Point{1920, 1280}
+	sz := image.Point{1920, 1080}
 	if sc != nil {
 		rebuild = sc.NeedsRebuild()
 		rc = sc.renderContext()

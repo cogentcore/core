@@ -7,8 +7,10 @@
 package web
 
 import (
+	"image"
 	"syscall/js"
 
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 )
 
@@ -20,4 +22,15 @@ type Window struct {
 func (w *Window) SetTitle(title string) {
 	w.WindowSingle.SetTitle(title)
 	js.Global().Get("document").Set("title", title)
+}
+
+func (w *Window) SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen *system.Screen) {
+	w.WindowSingle.SetGeometry(fullscreen, pos, size, screen)
+	// We only support fullscreen, not pos, size, or screen.
+	doc := js.Global().Get("document")
+	if fullscreen {
+		doc.Call("getElementById", "app").Call("requestFullscreen")
+		return
+	}
+	doc.Call("exitFullscreen")
 }

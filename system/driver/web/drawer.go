@@ -49,8 +49,8 @@ func (a *App) InitDrawer() {
 		a.Draw.context2D = js.Global().Get("document").Call("querySelector", "canvas").Call("getContext", "2d")
 		return
 	}
-	gp := gpu.NewGPU()
-	surf := gp.Instance.CreateSurface(nil)
+	gp := gpu.NewGPU(nil)
+	surf := gpu.Instance().CreateSurface(nil)
 	sf := gpu.NewSurface(gp, surf, a.Scrn.PixSize, 1, gpu.UndefinedType)
 	a.Draw.wgpu = gpudraw.NewDrawer(gp, sf)
 }
