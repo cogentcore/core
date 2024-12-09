@@ -66,6 +66,11 @@ func NewView(src *Table) *Table {
 	return dt
 }
 
+// Init initializes a new empty table with [NewColumns].
+func (dt *Table) Init() {
+	dt.Columns = NewColumns()
+}
+
 func (dt *Table) Metadata() *metadata.Data { return &dt.Meta }
 
 // IsValidRow returns error if the row is invalid, if error checking is needed.
