@@ -61,7 +61,10 @@ func (pg *Pages) AddPage(name string, f func(pg *Pages)) {
 }
 
 // Open sets the current page to the given name and updates the display.
-func (pg *Pages) Open(name string) {
+// In comparison, [Pages.SetPage] does not update the display and should typically
+// only be called at the start.
+func (pg *Pages) Open(name string) *Pages {
 	pg.SetPage(name)
 	pg.Update()
+	return pg
 }

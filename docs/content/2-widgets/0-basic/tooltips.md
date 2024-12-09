@@ -6,7 +6,7 @@ You can set the tooltip of any widget:
 core.NewButton(b).SetIcon(icons.Add).SetTooltip("Add a new item to the list")
 ```
 
-Some widgets automatically add certain information to their tooltip by implementing the [[core.Widget.WidgetTooltip]] method, like sliders:
+Some widgets automatically add certain information to their tooltip by implementing the [[doc:core.Widget.WidgetTooltip]] method, like sliders:
 
 ```Go
 core.NewSlider(b)
