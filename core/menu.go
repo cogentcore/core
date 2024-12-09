@@ -284,15 +284,11 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 			InspectorWindow(sc)
 		})
 
-	// no window menu on single-window platforms
-	if TheApp.Platform().IsMobile() {
+	// No window menu on mobile platforms
+	if TheApp.Platform().IsMobile() && TheApp.Platform() != system.Web {
 		return
 	}
 	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
-		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong).
-			SetKey(keymap.WinFocusNext).OnClick(func(e events.Event) {
-			AllRenderWindows.focusNext()
-		})
 		if sc.IsFullscreen() {
 			NewButton(m).SetText("Exit fullscreen").SetIcon(icons.Fullscreen).OnClick(func(e events.Event) {
 				sc.SetFullscreen(false)
@@ -302,6 +298,14 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 				sc.SetFullscreen(true)
 			})
 		}
+		// Only do fullscreen on web
+		if TheApp.Platform() == system.Web {
+			return
+		}
+		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong).
+			SetKey(keymap.WinFocusNext).OnClick(func(e events.Event) {
+			AllRenderWindows.focusNext()
+		})
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
 			OnClick(func(e events.Event) {
 				win := sc.RenderWindow()
