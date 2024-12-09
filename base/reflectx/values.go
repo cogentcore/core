@@ -955,8 +955,11 @@ func SetRobust(to, from any) error {
 		return fmt.Errorf("got nil destination value")
 	}
 	pto := rto
-	if pto.Elem().Kind() != reflect.Pointer {
+	if !(pto.Kind() == reflect.Pointer && pto.Elem().Kind() == reflect.Pointer) {
 		pto = UnderlyingPointer(rto)
+	}
+	if IsNil(pto) {
+		return fmt.Errorf("got nil destination value")
 	}
 	pito := pto.Interface()
 
