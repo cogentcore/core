@@ -178,7 +178,13 @@ func (st *Stage) firstWindowStages() *stages {
 	return ms
 }
 
-func (st *Stage) currentScreen() *system.Screen {
+// targetScreen returns the screen to use for opening a new window
+// based on Screen field, currentRenderWindow's screen, and a fallback
+// default of Screen 0.
+func (st *Stage) targetScreen() *system.Screen {
+	if st.Screen >= 0 && st.Screen < system.TheApp.NScreens() {
+		return system.TheApp.Screen(st.Screen)
+	}
 	if currentRenderWindow != nil {
 		return currentRenderWindow.SystemWindow.Screen()
 	}
@@ -258,7 +264,7 @@ func (st *Stage) runWindow() *Stage {
 		} else {
 			// on other platforms, we want extra space and a minimum window size
 			sz = sz.Add(image.Pt(20, 20))
-			screen := st.currentScreen()
+			screen := st.targetScreen()
 			if screen != nil {
 				st.SetScreen(screen.ScreenNumber)
 				if st.NewWindow && st.UseMinSize {
@@ -351,7 +357,7 @@ func (st *Stage) runDialog() *Stage {
 			sz.X = max(sz.X, minx)
 		}
 		sc.Events.startFocusFirst = true // popup dialogs always need focus
-		screen := st.currentScreen()
+		screen := st.targetScreen()
 		if screen != nil {
 			st.SetScreen(screen.ScreenNumber)
 		}
@@ -392,11 +398,13 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	opts.Flags.SetFlag(!st.Resizable, system.FixedSize)
 	opts.Flags.SetFlag(st.Maximized, system.Maximized)
 	opts.Flags.SetFlag(st.Fullscreen, system.Fullscreen)
+	screen := st.targetScreen()
 	screenName := ""
-	if st.Screen > 0 {
-		screenName = TheApp.Screen(st.Screen).Name
+	if screen != nil {
+		screenName = screen.Name
 	}
-	wgp, screen := theWindowGeometrySaver.get(title, screenName)
+	var wgp *windowGeometry
+	wgp, screen = theWindowGeometrySaver.get(title, screenName)
 	if wgp != nil {
 		theWindowGeometrySaver.settingStart()
 		opts.Screen = screen.ScreenNumber
