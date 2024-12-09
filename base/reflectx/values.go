@@ -951,9 +951,12 @@ func ToStringPrec(v any, prec int) string {
 // set to be fully equivalent to the source slice.
 func SetRobust(to, from any) error {
 	rto := reflect.ValueOf(to)
-	pto := UnderlyingPointer(rto)
-	if IsNil(pto) {
+	if IsNil(rto) {
 		return fmt.Errorf("got nil destination value")
+	}
+	pto := rto
+	if pto.Elem().Kind() != reflect.Pointer {
+		pto = UnderlyingPointer(rto)
 	}
 	pito := pto.Interface()
 
