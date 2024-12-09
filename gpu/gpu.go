@@ -61,7 +61,7 @@ func SetDebug(debug bool) {
 	if Debug {
 		wgpu.SetLogLevel(wgpu.LogLevelDebug)
 	} else {
-		wgpu.SetLogLevel(wgpu.LogLevelError)
+		wgpu.SetLogLevel(wgpu.LogLevelWarn)
 	}
 }
 

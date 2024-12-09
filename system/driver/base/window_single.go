@@ -89,7 +89,7 @@ func (w *WindowSingle[A]) SetWinSize(sz image.Point) {
 }
 
 func (w *WindowSingle[A]) SetSize(sz image.Point) {
-	if w.This.IsClosed() {
+	if w.This.IsClosed() || (w.App.Platform().IsMobile() && w.App.Platform() != system.Offscreen) {
 		return
 	}
 	w.Screen().PixSize = sz
@@ -99,11 +99,9 @@ func (w *WindowSingle[A]) SetPos(pos image.Point, screen *system.Screen) {
 	// no-op
 }
 
-func (w *WindowSingle[A]) SetGeom(fullscreen bool, pos image.Point, sz image.Point, screen *system.Screen) {
-	if w.This.IsClosed() {
-		return
-	}
-	w.Screen().PixSize = sz
+func (w *WindowSingle[A]) SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen *system.Screen) {
+	// mostly no-op
+	w.Flgs.SetFlag(fullscreen, system.Fullscreen)
 }
 
 func (w *WindowSingle[A]) ConstrainFrame(topOnly bool) styles.Sides[int] {

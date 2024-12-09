@@ -248,7 +248,7 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	wsz := win.SystemWindow.Size()
 	win.SystemWindow.Unlock()
 	if wsz == (image.Point{}) {
-		if DebugSettings.WinGeomTrace {
+		if DebugSettings.WindowGeometryTrace {
 			log.Printf("WindowGeometry: Record: NOT storing null size for win: %v\n", win.name)
 		}
 		return
@@ -256,14 +256,14 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	sc := win.SystemWindow.Screen()
 	pos := win.SystemWindow.Position(sc)
 	if TheApp.Platform() == system.Windows && pos.X == -32000 || pos.Y == -32000 { // windows badness
-		if DebugSettings.WinGeomTrace {
+		if DebugSettings.WindowGeometryTrace {
 			log.Printf("WindowGeometry: Record: NOT storing very negative pos: %v for win: %v\n", pos, win.name)
 		}
 		return
 	}
 	ws.mu.Lock()
 	if ws.settingNoSave {
-		if DebugSettings.WinGeomTrace {
+		if DebugSettings.WindowGeometryTrace {
 			log.Printf("WindowGeometry: Record: SettingNoSave so NOT storing for win: %v\n", win.name)
 		}
 		ws.mu.Unlock()
@@ -307,7 +307,7 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	sgsc[winName] = wgs
 	ws.cache[cfg] = sgsc
 
-	if DebugSettings.WinGeomTrace {
+	if DebugSettings.WindowGeometryTrace {
 		log.Printf("WindowGeometry: Record win: %q screen: %q cfg: %q geom: %s", winName, sc.Name, cfg, wgr.String())
 	}
 
@@ -329,7 +329,7 @@ func (ws *windowGeometrySaver) saveCached() {
 	if ws.needToReload() {
 		ws.open()
 	}
-	if DebugSettings.WinGeomTrace {
+	if DebugSettings.WindowGeometryTrace {
 		log.Println("WindowGeometry: saveCached")
 	}
 	for cfg, sgsc := range ws.cache {
@@ -386,7 +386,7 @@ func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry,
 	wgr, sc := wgs.getForScreen(screenName)
 	if wgr != nil {
 		wgr.constrainGeom(sc)
-		if DebugSettings.WinGeomTrace {
+		if DebugSettings.WindowGeometryTrace {
 			log.Printf("WindowGeometry: Got geom for window: %q screen: %q lastScreen: %q cfg: %q geom: %s fromMain: %v\n", winName, sc.Name, wgs.Last, cfg, wgr.String(), fromMain)
 		}
 		return wgr, sc
@@ -415,21 +415,21 @@ func (ws *windowGeometrySaver) restoreAll() {
 	}
 	renderWindowGlobalMu.Lock()
 	defer renderWindowGlobalMu.Unlock()
-	if DebugSettings.WinGeomTrace {
+	if DebugSettings.WindowGeometryTrace {
 		log.Printf("WindowGeometry: RestoreAll: starting\n")
 	}
 	ws.settingStart()
 	for _, w := range AllRenderWindows {
 		wgp, sc := ws.get(w.title, "")
 		if wgp != nil && !w.SystemWindow.Is(system.Fullscreen) {
-			if DebugSettings.WinGeomTrace {
+			if DebugSettings.WindowGeometryTrace {
 				log.Printf("WindowGeometry: RestoreAll: restoring geom for window: %v screen: %s geom: %s\n", w.name, sc.Name, wgp.String())
 			}
-			w.SystemWindow.SetGeom(false, wgp.Pos, wgp.Size, sc)
+			w.SystemWindow.SetGeometry(false, wgp.Pos, wgp.Size, sc)
 		}
 	}
 	ws.settingEnd()
-	if DebugSettings.WinGeomTrace {
+	if DebugSettings.WindowGeometryTrace {
 		log.Printf("WindowGeometry: RestoreAll: done\n")
 	}
 }

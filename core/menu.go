@@ -284,25 +284,28 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 			InspectorWindow(sc)
 		})
 
-	// no window menu on single-window platforms
-	if TheApp.Platform().IsMobile() {
+	// No window menu on mobile platforms
+	if TheApp.Platform().IsMobile() && TheApp.Platform() != system.Web {
 		return
 	}
 	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
+		if sc.IsFullscreen() {
+			NewButton(m).SetText("Exit fullscreen").SetIcon(icons.Fullscreen).OnClick(func(e events.Event) {
+				sc.SetFullscreen(false)
+			})
+		} else {
+			NewButton(m).SetText("Fullscreen").SetIcon(icons.Fullscreen).OnClick(func(e events.Event) {
+				sc.SetFullscreen(true)
+			})
+		}
+		// Only do fullscreen on web
+		if TheApp.Platform() == system.Web {
+			return
+		}
 		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong).
 			SetKey(keymap.WinFocusNext).OnClick(func(e events.Event) {
 			AllRenderWindows.focusNext()
 		})
-		rw := sc.RenderWindow()
-		if rw != nil && rw.SystemWindow != nil && rw.SystemWindow.Is(system.Fullscreen) {
-			NewButton(m).SetText("Exit fullscreen").SetIcon(icons.Fullscreen).OnClick(func(e events.Event) {
-				sc.UpdateFullscreen(false)
-			})
-		} else {
-			NewButton(m).SetText("Fullscreen").SetIcon(icons.Fullscreen).OnClick(func(e events.Event) {
-				sc.UpdateFullscreen(true)
-			})
-		}
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
 			OnClick(func(e events.Event) {
 				win := sc.RenderWindow()

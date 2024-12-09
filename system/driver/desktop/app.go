@@ -159,7 +159,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 
 	w.Show()
 	a.RunOnMain(func() {
-		w.UpdateGeom()
+		w.updateGeometry()
 		zp := image.Point{}
 		if w.Pos == zp && opts.Pos != zp {
 			w.Pos = opts.Pos

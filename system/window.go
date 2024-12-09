@@ -72,13 +72,14 @@ type Window interface {
 	RenderGeom() math32.Geom2DInt
 
 	// SetWinSize sets the size of the window, in OS-specific window manager
-	// units that may not include any high DPI factors (DevPixRatio)
+	// units that may not include any high DPI factors (DevicePixelRatio)
 	// (i.e., the same units as returned in WinSize())
 	SetWinSize(sz image.Point)
 
 	// SetSize sets the size of the window, in actual pixel units
 	// (i.e., the same units as returned by Size())
-	// Divides by DevPixRatio before calling SetWinSize.
+	// Divides by DevicePixelRatio before calling SetWinSize.
+	// This method works on desktop and offscreen platforms.
 	SetSize(sz image.Point)
 
 	// SetPos sets the position of the window, in OS window manager
@@ -90,14 +91,17 @@ type Window interface {
 	// relative to overall screen layouts in multi-monitor configurations.
 	SetPos(pos image.Point, screen *Screen)
 
-	// SetGeom sets the full window geometry in one call, including full screen,
+	// SetGeometry sets the full window geometry in one call, including full screen,
 	// position, and size. If fullscreen is true, then the position and size are
-	// ignored, but screen can be used to move to a different screen if already
-	// fullscreen. For non-fullscreeen, this method is preferred over separate SetPos
-	// and SetSize. Size is in actual pixel units (i.e., same units as returned by Size()),
-	// and Pos is in OS-specific window manager units (i.e., as returned in Position()).
-	// See [Window.SetPos] for information on the optional screen argument.
-	SetGeom(fullscreen bool, pos image.Point, sz image.Point, screen *Screen)
+	// ignored, but screen can be used to move to a different screen. For
+	// non-fullscreen, this method is preferred over separate [Window.SetPos]
+	// and [Window.SetSize]. Size is in actual pixel units (i.e., same units as
+	// returned by [Window.Size]), and pos is in OS-specific window manager units
+	// (i.e., as returned in [Window.Position]). If pos and/or size is not specified,
+	// it defaults to the current value. See [Window.SetPos] for information
+	// on the optional screen argument. This method only fully works on desktop
+	// platforms, with only fullscreen supported on web.
+	SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen *Screen)
 
 	// ConstrainFrame ensures that the window frame is entirely within the
 	// window's screen, returning the size of each side of the frame.
