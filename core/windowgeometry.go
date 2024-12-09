@@ -24,10 +24,6 @@ import (
 var (
 	// theWindowGeometrySaver is the manager of window geometry settings
 	theWindowGeometrySaver = windowGeometrySaver{}
-
-	// WindowGeometryDisabled disables the saving and loading of window geometry
-	// data, for testing purposes.
-	WindowGeometryDisabled = false
 )
 
 // screenConfigGeometries has the window geometry data for different
@@ -247,7 +243,7 @@ func (ws *windowGeometrySaver) settingEnd() {
 
 // record records current state of window as preference
 func (ws *windowGeometrySaver) record(win *renderWindow) {
-	if WindowGeometryDisabled || !ws.shouldSave() || !win.isVisible() || win.SystemWindow.Is(system.Fullscreen) {
+	if DebugSettings.DisableWindowGeometry || !ws.shouldSave() || !win.isVisible() || win.SystemWindow.Is(system.Fullscreen) {
 		return
 	}
 	win.SystemWindow.Lock()
@@ -362,7 +358,7 @@ func (ws *windowGeometrySaver) saveCached() {
 // to set the screen for a new window.
 // If the window name has a colon, only the part prior to the colon is used.
 func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry, *system.Screen) {
-	if WindowGeometryDisabled || !ws.shouldSave() {
+	if DebugSettings.DisableWindowGeometry || !ws.shouldSave() {
 		return nil, nil
 	}
 	ws.mu.RLock()

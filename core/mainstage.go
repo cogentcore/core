@@ -182,13 +182,13 @@ func (st *Stage) firstWindowStages() *stages {
 // based on Screen field, currentRenderWindow's screen, and a fallback
 // default of Screen 0.
 func (st *Stage) targetScreen() *system.Screen {
-	if st.Screen >= 0 && st.Screen < system.TheApp.NScreens() {
-		return system.TheApp.Screen(st.Screen)
+	if st.Screen >= 0 && st.Screen < TheApp.NScreens() {
+		return TheApp.Screen(st.Screen)
 	}
 	if currentRenderWindow != nil {
 		return currentRenderWindow.SystemWindow.Screen()
 	}
-	return system.TheApp.Screen(0)
+	return TheApp.Screen(0)
 }
 
 // configMainStage does main-stage configuration steps
@@ -258,7 +258,7 @@ func (st *Stage) runWindow() *Stage {
 				}
 				if nsz != csz {
 					currentRenderWindow.SystemWindow.SetSize(nsz)
-					system.TheApp.GetScreens()
+					TheApp.GetScreens()
 				}
 			}
 		} else {
