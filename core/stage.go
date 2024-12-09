@@ -98,12 +98,13 @@ type Stage struct { //types:add -setters
 	Title string
 
 	// Screen specifies the screen number on which a new window is opened
-	// by default on desktop platforms. The default behavior (Screen = -1)
-	// will open the first window on screen 0 (default primary screen) and
-	// any subsequent windows will open on the same screen as the currently
-	// active window. In any case, the automatically saved last position for
-	// a window (by window title) always has the final say if it exists.
-	// Use [TheApp].ScreenByName("name").ScreenNumber to get the number by name.
+	// by default on desktop platforms. It defaults to -1, which indicates
+	// that the first window should open on screen 0 (the default primary
+	// screen) and any subsequent windows should open on the same screen as
+	// the currently active window. Regardless, the automatically saved last
+	// screen of a window with the same [Stage.Title] takes precedence if it exists;
+	// see the website documentation on window geometry saving for more information.
+	// Use [TheApp].ScreenByName("name").ScreenNumber to get the screen by name.
 	Screen int
 
 	// Modal, if true, blocks input to all other stages.
