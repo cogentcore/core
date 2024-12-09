@@ -296,10 +296,11 @@ func (sc *Scene) resize(geom math32.Geom2DInt) {
 }
 
 // ResizeToContent resizes the scene so it fits the current content.
-// Only applicable to Desktop systems where windows can be resized.
+// Only applicable to desktop systems where windows can be resized.
 // Optional extra size is added to the amount computed to hold the contents,
 // which is needed in cases with wrapped text elements, which don't
-// always size accurately.
+// always size accurately. See [Scene.SetGeometry] for a more general way
+// to set all window geometry properties.
 func (sc *Scene) ResizeToContent(extra ...image.Point) {
 	if TheApp.Platform().IsMobile() { // not resizable
 		return
@@ -316,6 +317,62 @@ func (sc *Scene) ResizeToContent(extra ...image.Point) {
 		}
 		win.SystemWindow.SetSize(sz)
 	}()
+}
+
+// SetGeometry uses [system.Window.SetGeometry] to set all window geometry properties,
+// with pos in operating system window manager units and size in raw pixels.
+// If pos and/or size is not specified, it defaults to the current value.
+// If fullscreen is true, pos and size are ignored, and screen indicates the number
+// of the screen on which to fullscreen the window. If fullscreen is false, the
+// window is moved to the given pos and size on the given screen. If screen is -1,
+// the current screen the window is on is used, and fullscreen/pos/size are all
+// relative to that screen. It is only applicable on desktop and web platforms,
+// with only fullscreen supported on web. See [Scene.SetFullscreen] for a simpler way
+// to set only the fullscreen state. See [Scene.ResizeToContent] to resize the window
+// to fit the current content.
+func (sc *Scene) SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen int) {
+	rw := sc.RenderWindow()
+	if rw == nil {
+		return
+	}
+	scr := TheApp.Screen(screen)
+	if screen < 0 {
+		scr = rw.SystemWindow.Screen()
+	}
+	rw.SystemWindow.SetGeometry(fullscreen, pos, size, scr)
+}
+
+// IsFullscreen returns whether the window associated with this [Scene]
+// is in fullscreen mode (true) or window mode (false). This is implemented
+// on desktop and web platforms. See [Scene.SetFullscreen] to update the
+// current fullscreen state and [Stage.SetFullscreen] to set the initial state.
+func (sc *Scene) IsFullscreen() bool {
+	rw := sc.RenderWindow()
+	if rw == nil {
+		return false
+	}
+	return rw.SystemWindow.Is(system.Fullscreen)
+}
+
+// SetFullscreen requests that the window associated with this [Scene]
+// be updated to either fullscreen mode (true) or window mode (false).
+// This is implemented on desktop and web platforms. See [Scene.IsFullscreen]
+// to get the current fullscreen state and [Stage.SetFullscreen] to set the
+// initial state. ([Stage.SetFullscreen] sets the initial state, whereas
+// this function sets the current state after the [Stage] is already running).
+// See [Scene.SetGeometry] for a more general way to set all window
+// geometry properties.
+func (sc *Scene) SetFullscreen(fullscreen bool) {
+	rw := sc.RenderWindow()
+	if rw == nil {
+		return
+	}
+	wgp, screen := theWindowGeometrySaver.get(rw.title, "")
+	if wgp != nil {
+		rw.SystemWindow.SetGeometry(fullscreen, wgp.Pos, wgp.Size, screen)
+	} else {
+		rw.SystemWindow.SetGeometry(fullscreen, image.Point{}, image.Point{}, rw.SystemWindow.Screen())
+	}
 }
 
 // Close closes the [Stage] associated with this [Scene].

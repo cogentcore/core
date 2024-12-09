@@ -225,30 +225,36 @@ var AppearanceSettings = &AppearanceSettingsData{
 type AppearanceSettingsData struct { //types:add
 	SettingsBase
 
-	// the color theme
+	// the color theme.
 	Theme Themes `default:"Auto"`
 
-	// the primary color used to generate the color scheme
+	// the primary color used to generate the color scheme.
 	Color color.RGBA `default:"#4285f4"`
 
-	// overall zoom factor as a percentage of the default zoom
+	// overall zoom factor as a percentage of the default zoom.
+	// Use Control +/- keyboard shortcut to change zoom level anytime.
+	// Screen-specific zoom factor will be used if present, see 'Screens' field.
 	Zoom float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
 	// the overall spacing factor as a percentage of the default amount of spacing
-	// (higher numbers lead to more space and lower numbers lead to higher density)
+	// (higher numbers lead to more space and lower numbers lead to higher density).
 	Spacing float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
 	// the overall font size factor applied to all text as a percentage
-	// of the default font size (higher numbers lead to larger text)
+	// of the default font size (higher numbers lead to larger text).
 	FontSize float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
-	// the amount that alternating rows are highlighted when showing tabular data (set to 0 to disable zebra striping)
+	// the amount that alternating rows are highlighted when showing
+	// tabular data (set to 0 to disable zebra striping).
 	ZebraStripes float32 `default:"0" min:"0" max:"100" step:"10" format:"%g%%"`
 
-	// screen-specific settings, which will override overall defaults if set
-	Screens map[string]ScreenSettings
+	// screen-specific settings, which will override overall defaults if set,
+	// so different screens can use different zoom levels.
+	// Use 'Save screen zoom' in the toolbar to save the current zoom for the current
+	// screen, and Control +/- keyboard shortcut to change this zoom level anytime.
+	Screens map[string]ScreenSettings `edit:"-"`
 
-	// text highlighting style / theme
+	// text highlighting style / theme.
 	Highlighting HighlightingName `default:"emacs"`
 
 	// Font is the default font family to use.
@@ -350,11 +356,11 @@ func (as *AppearanceSettingsData) applyDPI() {
 	}
 }
 
-// deleteSavedWindowGeoms deletes the file that saves the position and size of
+// deleteSavedWindowGeometries deletes the file that saves the position and size of
 // each window, by screen, and clear current in-memory cache. You shouldn't generally
 // need to do this, but sometimes it is useful for testing or windows that are
 // showing up in bad places that you can't recover from.
-func (as *AppearanceSettingsData) deleteSavedWindowGeoms() { //types:add
+func (as *AppearanceSettingsData) deleteSavedWindowGeometries() { //types:add
 	theWindowGeometrySaver.deleteAll()
 }
 
@@ -372,7 +378,9 @@ var DeviceSettings = &DeviceSettingsData{
 	},
 }
 
-// SaveScreenZoom saves the current zoom factor for the current screen.
+// SaveScreenZoom saves the current zoom factor for the current screen,
+// which will then be used for this screen instead of overall default.
+// Use the Control +/- keyboard shortcut to modify the screen zoom level.
 func (as *AppearanceSettingsData) SaveScreenZoom() { //types:add
 	sc := system.TheApp.Screen(0)
 	sp, ok := as.Screens[sc.Name]
@@ -762,14 +770,14 @@ type DebugSettingsData struct { //types:add
 	LayoutTraceDetail bool
 
 	// Print a trace of window events
-	WinEventTrace bool
+	WindowEventTrace bool
 
 	// Print the stack trace leading up to win publish events
 	// which are expensive
-	WinRenderTrace bool
+	WindowRenderTrace bool
 
 	// Print a trace of window geometry saving / loading functions
-	WinGeomTrace bool
+	WindowGeometryTrace bool
 
 	// Print a trace of keyboard events
 	KeyEventTrace bool

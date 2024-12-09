@@ -10,9 +10,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -26,7 +28,27 @@ var (
 	// DebugAdapter provides detailed information about the selected
 	// GPU adpater device (i.e., the type and limits of the hardware).
 	DebugAdapter = false
+
+	// theInstance is the initialized WebGPU instance, initialized
+	// for the first call to NewGPU.
+	theInstance *wgpu.Instance
 )
+
+// Instance returns the highest-level GPU handle: the Instance.
+func Instance() *wgpu.Instance {
+	if theInstance == nil {
+		theInstance = wgpu.CreateInstance(nil)
+	}
+	return theInstance
+}
+
+// ReleaseInstance should only be called at final termination.
+func ReleaseInstance() {
+	if theInstance != nil {
+		theInstance.Release()
+		theInstance = nil
+	}
+}
 
 // SetDebug sets [Debug] (debug mode). If it is set to true,
 // it calls [wgpu.SetLogLevel]([wgpu.LogLevelDebug]). Otherwise,
@@ -39,17 +61,12 @@ func SetDebug(debug bool) {
 	if Debug {
 		wgpu.SetLogLevel(wgpu.LogLevelDebug)
 	} else {
-		wgpu.SetLogLevel(wgpu.LogLevelError)
+		wgpu.SetLogLevel(wgpu.LogLevelWarn)
 	}
 }
 
-func init() { SetDebug(false) }
-
 // GPU represents the GPU hardware
 type GPU struct {
-	// Instance represents the WebGPU system overall
-	Instance *wgpu.Instance
-
 	// GPU represents the specific GPU hardware device used.
 	// You can call GetInfo() to get info.
 	GPU *wgpu.Adapter
@@ -64,7 +81,7 @@ type GPU struct {
 	Limits wgpu.SupportedLimits
 
 	// ComputeOnly indicates if this GPU is only used for compute,
-	// which determines if it listens to WEBGPU_COMPUTE_DEVICE_SELECT
+	// which determines if it listens to GPU_COMPUTE_DEVICE_SELECT
 	// environment variable, allowing different compute devices to be
 	// selected vs. graphics devices.
 	ComputeOnly bool
@@ -83,33 +100,47 @@ type GPU struct {
 
 // NewGPU returns a new GPU, configured and ready to use.
 // If only doing compute, use [NewComputeGPU].
-func NewGPU() *GPU {
+// The surface is used to select an appropriate adapter, and
+// is recommended but not essential.
+func NewGPU(sf *wgpu.Surface) *GPU {
 	gp := &GPU{}
-	gp.init()
+	gp.init(sf)
 	return gp
 }
 
 // NewComputeGPU returns a new GPU, configured and ready to use,
 // for purely compute use, which causes it to listen to
-// use the WEBGPU_COMPUTE_DEVICE_SELECT variable for which GPU device to use.
+// use the GPU_COMPUTE_DEVICE_SELECT variable for which GPU device to use.
 func NewComputeGPU() *GPU {
 	gp := &GPU{}
 	gp.ComputeOnly = true
-	gp.init()
+	gp.init(nil)
 	return gp
 }
 
 // init configures the GPU
-func (gp *GPU) init() error {
-	gp.Instance = wgpu.CreateInstance(nil)
-
-	gpus := gp.Instance.EnumerateAdapters(nil)
-	gpIndex := gp.SelectGPU(gpus)
-	gp.GPU = gpus[gpIndex]
+func (gp *GPU) init(sf *wgpu.Surface) error {
+	inst := Instance()
+	gpIndex := 0
+	if gp.ComputeOnly {
+		gpus := inst.EnumerateAdapters(nil)
+		gpIndex = gp.SelectGPU(gpus)
+		gp.GPU = gpus[gpIndex]
+	} else {
+		opts := &wgpu.RequestAdapterOptions{
+			CompatibleSurface: sf,
+			PowerPreference:   wgpu.PowerPreferenceHighPerformance,
+		}
+		ad, err := inst.RequestAdapter(opts)
+		if errors.Log(err) != nil {
+			return err
+		}
+		gp.GPU = ad
+	}
 	gp.Properties = gp.GPU.GetInfo()
 	gp.DeviceName = adapterName(&gp.Properties)
 	if Debug || DebugAdapter {
-		fmt.Println("gpu: Selected Device:", gp.DeviceName, " (set DebugAdapter to get more adapter info)")
+		fmt.Println("gpu: Selected Device:", gpIndex, gp.DeviceName, " (set DebugAdapter to get more adapter info)")
 	}
 
 	gp.Limits = gp.GPU.GetLimits()
@@ -119,11 +150,14 @@ func (gp *GPU) init() error {
 	}
 
 	gp.MaxComputeWorkGroupCount1D = int(gp.Limits.Limits.MaxComputeWorkgroupsPerDimension)
-	ldv := strings.ToLower(gp.DeviceName)
-	if strings.Contains(ldv, "nvidia") {
+	dv := actualVendorName(&gp.Properties)
+	if Debug || DebugAdapter {
+		fmt.Println("GPU device vendor:", dv)
+	}
+	if dv == "nvidia" {
 		// all NVIDIA are either 1 << 31 or -1 of that.
 		gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1
-	} else if strings.Contains(ldv, "apple") {
+	} else if dv == "apple" {
 		gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1
 	}
 	// note: if known to be higher for any specific case, please file an issue or PR
@@ -131,11 +165,38 @@ func (gp *GPU) init() error {
 	return nil
 }
 
+// actualVendorName returns the actual vendor name from the coded
+// string that the adapter VendorName contains,
+// or, failing that, from the description.
+func actualVendorName(ai *wgpu.AdapterInfo) string {
+	nm := strings.ToLower(ai.VendorName)
+	// source: https://www.reddit.com/r/vulkan/comments/4ta9nj/is_there_a_comprehensive_list_of_the_names_and/
+	switch nm {
+	case "0x10de":
+		return "nvidia"
+	case "0x1002":
+		return "amd"
+	case "0x1010":
+		return "imgtec"
+	case "0x13b5":
+		return "arm"
+	case "0x5143":
+		return "qualcomm"
+	case "0x8086":
+		return "intel"
+	}
+	vd := strings.ToLower(ai.DriverDescription)
+	if strings.Contains(vd, "apple") {
+		return "apple"
+	}
+	return nm
+}
+
 func adapterName(ai *wgpu.AdapterInfo) string {
-	if ai.Name != "" && ai.Name != "0x0" {
+	if ai.Name != "" && !strings.HasPrefix(ai.Name, "0x") {
 		return ai.Name
 	}
-	if ai.DriverDescription != "" && ai.DriverDescription != "0x0" {
+	if ai.DriverDescription != "" && !strings.HasPrefix(ai.DriverDescription, "0x") {
 		return ai.DriverDescription
 	}
 	return ai.VendorName
@@ -190,7 +251,15 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			continue
 		}
 		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
-			score++
+			vnm := actualVendorName(&props)
+			if !gp.ComputeOnly && (runtime.GOOS == "linux" || runtime.GOOS == "windows") && vnm == "nvidia" {
+				if Debug || DebugAdapter {
+					fmt.Println("not selecting discrete nvidia GPU: tends to crash when resizing windows")
+				}
+				score--
+			} else {
+				score++
+			}
 		}
 		if !gpuIsGLdBackend(props.BackendType) {
 			score++
@@ -217,10 +286,6 @@ func (gp *GPU) Release() {
 		gp.GPU.Release()
 		gp.GPU = nil
 	}
-	if gp.Instance != nil {
-		gp.Instance.Release()
-		gp.Instance = nil
-	}
 }
 
 // NewDevice returns a new device for given GPU.
@@ -237,7 +302,7 @@ func (gp *GPU) PropertiesString() string {
 // NoDisplayGPU Initializes WebGPU and returns that and a new
 // GPU device, without using an existing surface window.
 func NoDisplayGPU() (*GPU, *Device, error) {
-	gp := NewGPU()
+	gp := NewGPU(nil)
 	dev, err := NewDevice(gp)
 	return gp, dev, err
 }

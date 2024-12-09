@@ -61,6 +61,9 @@ var TheClipboard = &Clipboard{}
 type Clipboard struct{}
 
 func (cl *Clipboard) IsEmpty() bool {
+	return false // todo: GetClipboardString hangs with some
+	// non-zero probability and this call spams the thing
+	// so we just bail here with a permissive not-empty.
 	return len(glfw.GetClipboardString()) == 0
 }
 

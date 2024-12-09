@@ -15,6 +15,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 )
 
 // Window is a double-buffered OS-specific hardware window.
@@ -58,9 +59,11 @@ type Window interface {
 	// units that may not include any high DPI factors.
 	WinSize() image.Point
 
-	// Position returns the current left-top position of the window relative to
-	// underlying screen, in OS-specific window manager coordinates.
-	Position() image.Point
+	// Position returns the current left-top position of the window,
+	// in OS-specific window manager coordinates.
+	// If the optional screen is non-nil, then coordinates are relative
+	// to that screen (e.g., pass window.Screen() for window's own screen).
+	Position(screen *Screen) image.Point
 
 	// RenderGeom returns the actual effective geometry of the window used
 	// for rendering content, which may be different from {0, [Window.Size]}
@@ -68,25 +71,43 @@ type Window interface {
 	RenderGeom() math32.Geom2DInt
 
 	// SetWinSize sets the size of the window, in OS-specific window manager
-	// units that may not include any high DPI factors (DevPixRatio)
+	// units that may not include any high DPI factors (DevicePixelRatio)
 	// (i.e., the same units as returned in WinSize())
 	SetWinSize(sz image.Point)
 
 	// SetSize sets the size of the window, in actual pixel units
 	// (i.e., the same units as returned by Size())
-	// Divides by DevPixRatio before calling SetWinSize.
+	// Divides by DevicePixelRatio before calling SetWinSize.
+	// This method works on desktop and offscreen platforms.
 	SetSize(sz image.Point)
 
 	// SetPos sets the position of the window, in OS window manager
 	// coordinates, which may be different from Size() coordinates
-	// that reflect high DPI
-	SetPos(pos image.Point)
+	// that reflect high DPI. If the optional screen argument is non-nil,
+	// then the position is relative to the given screen, so the window
+	// should move to be on the given screen assuming the coordinates are within
+	// its bounds. Otherwise, positions are in global coordinates interpreted
+	// relative to overall screen layouts in multi-monitor configurations.
+	SetPos(pos image.Point, screen *Screen)
 
-	// SetGeom sets the position and size in one call -- use this if doing
-	// both because sequential calls to SetPos and SetSize might fail on some
-	// platforms.  Size is in actual pixel units (i.e., same units as returned by Size()),
-	// and Pos is in OS-specific window manager units (i.e., as returned in Pos())
-	SetGeom(pos image.Point, sz image.Point)
+	// SetGeometry sets the full window geometry in one call, including full screen,
+	// position, and size. If fullscreen is true, then the position and size are
+	// ignored, but screen can be used to move to a different screen. For
+	// non-fullscreen, this method is preferred over separate [Window.SetPos]
+	// and [Window.SetSize]. Size is in actual pixel units (i.e., same units as
+	// returned by [Window.Size]), and pos is in OS-specific window manager units
+	// (i.e., as returned in [Window.Position]). If pos and/or size is not specified,
+	// it defaults to the current value. See [Window.SetPos] for information
+	// on the optional screen argument. This method only fully works on desktop
+	// platforms, with only fullscreen supported on web.
+	SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen *Screen)
+
+	// ConstrainFrame ensures that the window frame is entirely within the
+	// window's screen, returning the size of each side of the frame.
+	// This will result in move and / or size events as needed.
+	// If topOnly is true, then only the top vertical axis is constrained, so that
+	// the window title bar does not go offscreen.
+	ConstrainFrame(topOnly bool) styles.Sides[int]
 
 	// Raise requests that the window be at the top of the stack of windows,
 	// and receive focus.  If it is iconified, it will be de-iconified.  This
@@ -200,6 +221,10 @@ type Window interface {
 	// Events returns the [events.Source] for this window,
 	// which manages all of the event sending.
 	Events() *events.Source
+
+	// SendPaintEvent sends the WindowPaint event.
+	// Other updates / polling may be done at this point too.
+	SendPaintEvent()
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -223,8 +248,16 @@ const (
 	// window decoration.
 	Tool
 
-	// Fullscreen indicates a window that occupies the entire screen.
+	// Maximized indicates a window that occupies the entire screen, but
+	// still has window decorations.
+	Maximized
+
+	// Fullscreen indicates a fullscreen window attached to a monitor.
+	// This results in no window decorations.
 	Fullscreen
+
+	// FixedSize indicates a window that cannot be resized.
+	FixedSize
 
 	// Minimized indicates a window reduced to an icon, or otherwise no longer
 	// visible or active.  Otherwise, the window should be assumed to be
@@ -248,11 +281,14 @@ type NewWindowOptions struct {
 	StdPixels bool
 
 	// Pos specifies the position of the window, if non-zero -- always in
-	// device-specific raw pixels
+	// device-specific raw pixels, and relative to the specified screen.
 	Pos image.Point
 
 	// Title specifies the window title.
 	Title string
+
+	// Screen is the screen number to open on. 0 default = primary monitor.
+	Screen int
 
 	// Icon specifies the window icon (see [Window.SetIcon] for more info).
 	Icon []image.Image
@@ -261,34 +297,9 @@ type NewWindowOptions struct {
 	Flags WindowFlags
 }
 
-func (o *NewWindowOptions) SetDialog() {
-	o.Flags.SetFlag(true, Dialog)
-}
-
-func (o *NewWindowOptions) SetModal() {
-	o.Flags.SetFlag(true, Modal)
-}
-
-func (o *NewWindowOptions) SetTool() {
-	o.Flags.SetFlag(true, Tool)
-}
-
-func (o *NewWindowOptions) SetFullscreen() {
-	o.Flags.SetFlag(true, Fullscreen)
-}
-
-func WindowFlagsToBool(flags WindowFlags) (dialog, modal, tool, fullscreen bool) {
-	dialog = flags.HasFlag(Dialog)
-	modal = flags.HasFlag(Modal)
-	tool = flags.HasFlag(Tool)
-	fullscreen = flags.HasFlag(Fullscreen)
-	return
-}
-
 // GetTitle returns a sanitized form of o.Title. In particular, its length will
 // not exceed 4096, and it may be further truncated so that it is valid UTF-8
 // and will not contain the NUL byte.
-//
 // o may be nil, in which case "" is returned.
 func (o *NewWindowOptions) GetTitle() string {
 	if o == nil {
@@ -313,9 +324,9 @@ func sanitizeUTF8(s string, n int) string {
 }
 
 // Fixup fills in defaults and updates everything based on current screen and
-// window context Specific hardware can fine-tune this as well, in driver code
+// window context. Specific hardware can fine-tune this as well, in driver code.
 func (o *NewWindowOptions) Fixup() {
-	sc := TheApp.Screen(0)
+	sc := TheApp.Screen(o.Screen)
 	scsz := sc.Geometry.Size() // window coords size
 
 	if o.Size.X <= 0 {
@@ -327,15 +338,16 @@ func (o *NewWindowOptions) Fixup() {
 		o.Size.Y = int(0.8 * float32(scsz.Y) * sc.DevicePixelRatio)
 	}
 
-	o.Size, o.Pos = sc.ConstrainWinGeom(o.Size, o.Pos)
+	o.Pos, o.Size = sc.ConstrainWinGeom(o.Pos, o.Size)
 	if o.Pos.X == 0 && o.Pos.Y == 0 {
 		wsz := sc.WinSizeFromPix(o.Size)
-		dialog, modal, _, _ := WindowFlagsToBool(o.Flags)
+		dialog := o.Flags.HasFlag(Dialog)
+		modal := o.Flags.HasFlag(Modal)
 		nw := TheApp.NWindows()
 		if nw > 0 {
 			lastw := TheApp.Window(nw - 1)
 			lsz := lastw.WinSize()
-			lp := lastw.Position()
+			lp := lastw.Position(nil)
 
 			nwbig := wsz.X > lsz.X || wsz.Y > lsz.Y
 
@@ -352,6 +364,6 @@ func (o *NewWindowOptions) Fixup() {
 			o.Pos.X = scsz.X/2 - wsz.X/2
 			o.Pos.Y = scsz.Y/2 - wsz.Y/2
 		}
-		o.Size, o.Pos = sc.ConstrainWinGeom(o.Size, o.Pos) // make sure ok
+		o.Pos, o.Size = sc.ConstrainWinGeom(o.Pos, o.Size) // make sure ok
 	}
 }

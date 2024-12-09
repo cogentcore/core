@@ -171,39 +171,41 @@ func (sc *Screen) WinSizeFromPix(sz image.Point) image.Point {
 
 // ConstrainWinGeom constrains window geometry to fit in the screen.
 // Size is in pixel units.
-func (sc *Screen) ConstrainWinGeom(sz, pos image.Point) (csz, cpos image.Point) {
-	scsz := sc.Geometry.Size() // in window coords size
+func (sc *Screen) ConstrainWinGeom(pos, sz image.Point) (cpos, csz image.Point) {
+	scSize := sc.Geometry.Size() // in window coords size
+	if TheApp.Platform() == Windows {
+		// these are windows-specific special numbers for minimized windows
+		// can be sent here for WinGeom saved geom.
+		if pos.X == -32000 {
+			pos.X = 0
+		}
+		if pos.Y == -32000 {
+			pos.Y = 50
+		}
+	}
+	cpos, csz = ConstrainWinGeom(pos, sc.WinSizeFromPix(sz), scSize)
+	csz = sc.WinSizeToPix(csz)
+	return
+}
 
-	// options size are in pixel sizes, logic below works in window sizes
-	csz = sc.WinSizeFromPix(sz)
+// ConstrainWinGeom constrains the size and position of a window within
+// given screen size, preserving the size to the extent possible.
+// size is in window manager coordinates.
+func ConstrainWinGeom(pos, sz, scSize image.Point) (cpos, csz image.Point) {
+	csz = sz
 	cpos = pos
-
-	// fmt.Printf("sz: %v  csz: %v  scsz: %v\n", sz, csz, scsz)
-	// fmt.Println(string(debug.Stack()))
-	if csz.X > scsz.X {
-		csz.X = scsz.X - 10
-		// fmt.Println("constrain x:", csz.X)
+	if csz.X > scSize.X {
+		csz.X = scSize.X
 	}
-	if csz.Y > scsz.Y {
-		csz.Y = scsz.Y - 10
-		// fmt.Println("constrain y:", csz.Y)
+	if csz.Y > scSize.Y {
+		csz.Y = scSize.Y
 	}
-
-	// these are windows-specific special numbers for minimized windows
-	// can be sent here for WinGeom saved geom.
-	if cpos.X == -32000 {
-		cpos.X = 0
-	}
-	if cpos.Y == -32000 {
-		cpos.Y = 50
-	}
-
 	// don't go off the edge
-	if cpos.X+csz.X > scsz.X {
-		cpos.X = scsz.X - csz.X
+	if cpos.X+csz.X > scSize.X {
+		cpos.X = scSize.X - csz.X
 	}
-	if cpos.Y+csz.Y > scsz.Y {
-		cpos.Y = scsz.Y - csz.Y
+	if cpos.Y+csz.Y > scSize.Y {
+		cpos.Y = scSize.Y - csz.Y
 	}
 	if cpos.X < 0 {
 		cpos.X = 0
@@ -211,8 +213,6 @@ func (sc *Screen) ConstrainWinGeom(sz, pos image.Point) (csz, cpos image.Point) 
 	if cpos.Y < 0 {
 		cpos.Y = 0
 	}
-
-	csz = sc.WinSizeToPix(csz)
 	return
 }
 

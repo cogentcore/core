@@ -97,6 +97,12 @@ type Stage struct { //types:add -setters
 	// [Stage.DisplayTitle] is true.
 	Title string
 
+	// Screen specifies the screen number on which a new window is opened
+	// by default on desktop platforms. 0 is the default primary screen.
+	// Use [TheApp].ScreenByName("name").ScreenNumber to get the number by name.
+	// The automatically saved user previous screen takes precedence.
+	Screen int
+
 	// Modal, if true, blocks input to all other stages.
 	Modal bool `set:"-"`
 
@@ -120,10 +126,34 @@ type Stage struct { //types:add -setters
 	// [WindowStage]s take up the entire window they are created in.
 	FullWindow bool
 
+	// Maximized is whether to make a window take up the entire screen on desktop
+	// platforms by default. It is different from [Stage.Fullscreen] in that
+	// fullscreen makes the window truly fullscreen without decorations
+	// (such as for a video player), whereas maximized keeps decorations and just
+	// makes it fill the available space. The automatically saved user previous
+	// maximized state takes precedence.
+	Maximized bool
+
+	// Fullscreen is whether to make a window fullscreen on desktop platforms.
+	// It is different from [Stage.Maximized] in that fullscreen makes
+	// the window truly fullscreen without decorations (such as for a video player),
+	// whereas maximized keeps decorations and just makes it fill the available space.
+	// Not to be confused with [Stage.FullWindow], which is for stages contained within
+	// another system window. See [Scene.IsFullscreen] and [Scene.SetFullscreen] to
+	// check and update fullscreen state dynamically on desktop and web platforms
+	// ([Stage.SetFullscreen] sets the initial state, whereas [Scene.SetFullscreen]
+	// sets the current state after the [Stage] is already running).
+	Fullscreen bool
+
 	// UseMinSize uses a minimum size as a function of the total available size
 	// for sizing new windows and dialogs. Otherwise, only the content size is used.
 	// The saved window position and size takes precedence on multi-window platforms.
 	UseMinSize bool
+
+	// Resizable specifies whether a window on desktop platforms can
+	// be resized by the user, and whether a non-full same-window dialog can
+	// be resized by the user on any platform. It defaults to true.
+	Resizable bool
 
 	// Timeout, if greater than 0, results in a popup stages disappearing
 	// after this timeout duration.
@@ -140,8 +170,9 @@ type Stage struct { //types:add -setters
 	// and off for all other stages.
 	DisplayTitle bool
 
-	// Pos is the target position for the [Stage] to be placed within
-	// the surrounding window.
+	// Pos is the default target position for the [Stage] to be placed within
+	// the surrounding window or screen in raw pixels. For a new window on desktop
+	// platforms, the automatically saved user previous window position takes precedence.
 	Pos image.Point
 
 	// If a popup stage, this is the main stage that owns it (via its [Stage.popups]).
@@ -231,6 +262,7 @@ func (st *Stage) setPopups(mainSt *Stage) *Stage {
 func (st *Stage) setType(typ StageTypes) *Stage {
 	st.Type = typ
 	st.UseMinSize = true
+	st.Resizable = true
 	switch st.Type {
 	case WindowStage:
 		if !TheApp.Platform().IsMobile() {

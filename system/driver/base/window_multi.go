@@ -13,6 +13,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 )
 
@@ -38,6 +39,9 @@ type WindowMulti[A system.App, D system.Drawer] struct {
 
 	// PixSize is the pixel size of the window in raw display dots
 	PixSize image.Point `label:"Pixel size"`
+
+	// FrameSize of the window frame: Min = left, top; Max = right, bottom.
+	FrameSize styles.Sides[int]
 
 	// DevicePixelRatio is a factor that scales the screen's
 	// "natural" pixel coordinates into actual device pixels.
@@ -83,7 +87,7 @@ func (w *WindowMulti[A, D]) WinSize() image.Point {
 	return w.WnSize
 }
 
-func (w *WindowMulti[A, D]) Position() image.Point {
+func (w *WindowMulti[A, D]) Position(screen *system.Screen) image.Point {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	return w.Pos
@@ -123,14 +127,14 @@ func (w *WindowMulti[A, D]) SetSize(sz image.Point) {
 	w.SetWinSize(sz)
 }
 
-func (w *WindowMulti[A, D]) SetPos(pos image.Point) {
+func (w *WindowMulti[A, D]) SetPos(pos image.Point, screen *system.Screen) {
 	if w.This.IsClosed() {
 		return
 	}
 	w.Pos = pos
 }
 
-func (w *WindowMulti[A, D]) SetGeom(pos image.Point, sz image.Point) {
+func (w *WindowMulti[A, D]) SetGeometry(pos image.Point, sz image.Point, screen *system.Screen) {
 	if w.This.IsClosed() {
 		return
 	}
@@ -138,6 +142,11 @@ func (w *WindowMulti[A, D]) SetGeom(pos image.Point, sz image.Point) {
 	sz = sc.WinSizeFromPix(sz)
 	w.SetWinSize(sz)
 	w.Pos = pos
+}
+
+func (w *WindowMulti[A, D]) ConstrainFrame(topOnly bool) styles.Sides[int] {
+	// no-op
+	return styles.Sides[int]{}
 }
 
 func (w *WindowMulti[A, D]) IsVisible() bool {
