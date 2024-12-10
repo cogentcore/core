@@ -108,7 +108,7 @@ func (tg *TensorGrid) MinSize() math32.Vector2 {
 	fcl := float32(cols) + float32(colEx)*tg.GridStyle.DimExtra // extra spacing
 	mx := float32(max(frw, fcl))
 	gsz := tg.GridStyle.TotalSize / mx
-	gsz = tg.GridStyle.Size.Clamp(gsz)
+	gsz = tg.GridStyle.Size.ClampValue(gsz)
 	gsz = max(gsz, 2)
 	return math32.Vec2(gsz*float32(fcl), gsz*float32(frw))
 }
