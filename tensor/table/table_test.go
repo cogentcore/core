@@ -8,72 +8,128 @@ import (
 	"strconv"
 	"testing"
 
+	"cogentcore.org/core/tensor"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAdd3DCol(t *testing.T) {
-	dt := NewTable()
-	dt.AddFloat32TensorColumn("Values", []int{11, 1, 16})
+	dt := New()
+	dt.AddFloat32Column("Values", 11, 1, 16)
 
-	col, err := dt.ColumnByName("Values")
-	if err != nil {
-		t.Error(err)
-	}
+	col := dt.Column("Values").Tensor
 	if col.NumDims() != 4 {
 		t.Errorf("Add4DCol: # of dims != 4\n")
 	}
 
-	if col.Shape().DimSize(0) != 1 {
-		t.Errorf("Add4DCol: dim 0 len != 1, was: %v\n", col.Shape().DimSize(0))
+	if col.DimSize(0) != 0 {
+		t.Errorf("Add4DCol: dim 0 len != 0, was: %v\n", col.DimSize(0))
 	}
 
-	if col.Shape().DimSize(1) != 11 {
-		t.Errorf("Add4DCol: dim 0 len != 11, was: %v\n", col.Shape().DimSize(1))
+	if col.DimSize(1) != 11 {
+		t.Errorf("Add4DCol: dim 0 len != 11, was: %v\n", col.DimSize(1))
 	}
 
-	if col.Shape().DimSize(2) != 1 {
-		t.Errorf("Add4DCol: dim 0 len != 1, was: %v\n", col.Shape().DimSize(2))
+	if col.DimSize(2) != 1 {
+		t.Errorf("Add4DCol: dim 0 len != 1, was: %v\n", col.DimSize(2))
 	}
 
-	if col.Shape().DimSize(3) != 16 {
+	if col.DimSize(3) != 16 {
 		t.Errorf("Add4DCol: dim 0 len != 16, was: %v\n", col.Shape().DimSize(3))
 	}
 }
 
 func NewTestTable() *Table {
-	dt := NewTable()
+	dt := New()
 	dt.AddStringColumn("Str")
 	dt.AddFloat64Column("Flt64")
 	dt.AddIntColumn("Int")
 	dt.SetNumRows(3)
-	for i := 0; i < dt.Rows; i++ {
-		dt.SetString("Str", i, strconv.Itoa(i))
-		dt.SetFloat("Flt64", i, float64(i))
-		dt.SetFloat("Int", i, float64(i))
+	for i := range dt.NumRows() {
+		dt.Column("Str").SetStringRow(strconv.Itoa(i), i, 0)
+		dt.Column("Flt64").SetFloatRow(float64(i), i, 0)
+		dt.Column("Int").SetFloatRow(float64(i), i, 0)
 	}
 	return dt
 }
 
-func TestAppendRows(t *testing.T) {
+func TestAppendRowsEtc(t *testing.T) {
 	st := NewTestTable()
 	dt := NewTestTable()
 	dt.AppendRows(st)
 	dt.AppendRows(st)
 	dt.AppendRows(st)
-	for j := 0; j < 3; j++ {
-		for i := 0; i < st.Rows; i++ {
+	for j := range 3 {
+		for i := range st.NumRows() {
 			sr := j*3 + i
-			ss := st.StringValue("Str", i)
-			ds := dt.StringValue("Str", sr)
+			ss := st.Column("Str").StringRow(i, 0)
+			ds := dt.Column("Str").StringRow(sr, 0)
 			assert.Equal(t, ss, ds)
 
-			sf := st.Float("Flt64", i)
-			df := dt.Float("Flt64", sr)
+			sf := st.Column("Flt64").FloatRow(i, 0)
+			df := dt.Column("Flt64").FloatRow(sr, 0)
 			assert.Equal(t, sf, df)
 
-			sf = st.Float("Int", i)
-			df = dt.Float("Int", sr)
+			sf = st.Column("Int").FloatRow(i, 0)
+			df = dt.Column("Int").FloatRow(sr, 0)
 			assert.Equal(t, sf, df)
 		}
+	}
+	dt.Sequential()
+	dt.SortColumn("Int", tensor.Descending)
+	assert.Equal(t, []int{2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9}, dt.Indexes)
+
+	dt.Sequential()
+	dt.SortColumns(tensor.Descending, true, "Int", "Flt64")
+	assert.Equal(t, []int{2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9}, dt.Indexes)
+
+	dt.Sequential()
+	dt.FilterString("Int", "1", tensor.FilterOptions{Contains: true, IgnoreCase: true})
+	assert.Equal(t, []int{1, 4, 7, 10}, dt.Indexes)
+
+	dt.Sequential()
+	dt.Filter(func(dt *Table, row int) bool {
+		return dt.Column("Flt64").FloatRow(row, 0) > 1
+	})
+	assert.Equal(t, []int{2, 5, 8, 11}, dt.Indexes)
+}
+
+func TestSetNumRows(t *testing.T) {
+	st := NewTestTable()
+	dt := NewTestTable()
+	dt.AppendRows(st)
+	dt.AppendRows(st)
+	dt.AppendRows(st)
+	dt.IndexesNeeded()
+	dt.SetNumRows(3)
+	assert.Equal(t, []int{0, 1, 2}, dt.Indexes)
+}
+
+func TestInsertDeleteRows(t *testing.T) {
+	dt := NewTestTable()
+	dt.IndexesNeeded()
+	dt.InsertRows(1, 2)
+	assert.Equal(t, []int{0, 3, 4, 1, 2}, dt.Indexes)
+	dt.DeleteRows(1, 2)
+	assert.Equal(t, []int{0, 1, 2}, dt.Indexes)
+}
+
+func TestCells(t *testing.T) {
+	dt := New()
+	err := dt.OpenCSV("../stats/cluster/testdata/faces.dat", tensor.Tab)
+	assert.NoError(t, err)
+	in := dt.Column("Input")
+	for i := range 10 {
+		vals := make([]float32, 16)
+		for j := range 16 {
+			vals[j] = float32(in.FloatRow(i, j))
+		}
+		// fmt.Println(s)
+		ss := in.Tensor.SubSpace(i).(*tensor.Float32)
+		// fmt.Println(ss.Values[:16])
+
+		cl := tensor.AsFloat32(tensor.Cells1D(in, i))
+		// fmt.Println(cl.Values[:16])
+		assert.Equal(t, vals, ss.Values[:16])
+		assert.Equal(t, vals, cl.Values[:16])
 	}
 }

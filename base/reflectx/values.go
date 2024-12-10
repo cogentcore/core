@@ -47,6 +47,18 @@ func KindIsNumber(vk reflect.Kind) bool {
 	return vk >= reflect.Int && vk <= reflect.Complex128
 }
 
+// KindIsInt returns whether the given [reflect.Kind] is an int
+// type such as int, int32 etc.
+func KindIsInt(vk reflect.Kind) bool {
+	return vk >= reflect.Int && vk <= reflect.Uintptr
+}
+
+// KindIsFloat returns whether the given [reflect.Kind] is a
+// float32 or float64.
+func KindIsFloat(vk reflect.Kind) bool {
+	return vk >= reflect.Float32 && vk <= reflect.Float64
+}
+
 // ToBool robustly converts to a bool any basic elemental type
 // (including pointers to such) using a big type switch organized
 // for greatest efficiency. It tries the [bools.Booler]
@@ -939,7 +951,13 @@ func ToStringPrec(v any, prec int) string {
 // set to be fully equivalent to the source slice.
 func SetRobust(to, from any) error {
 	rto := reflect.ValueOf(to)
-	pto := UnderlyingPointer(rto)
+	if IsNil(rto) {
+		return fmt.Errorf("got nil destination value")
+	}
+	pto := rto
+	if !(pto.Kind() == reflect.Pointer && pto.Elem().Kind() == reflect.Pointer) {
+		pto = UnderlyingPointer(rto)
+	}
 	if IsNil(pto) {
 		return fmt.Errorf("got nil destination value")
 	}
@@ -949,6 +967,15 @@ func SetRobust(to, from any) error {
 	tokind := totyp.Kind()
 	if !pto.Elem().CanSet() {
 		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pto, pto)
+	}
+
+	// images should not be copied per content: just set the pointer!
+	// otherwise the original images (esp colors!) are altered.
+	if img, ok := to.(*image.Image); ok {
+		if fimg, ok := from.(image.Image); ok {
+			*img = fimg
+			return nil
+		}
 	}
 
 	// first we do the generic AssignableTo case

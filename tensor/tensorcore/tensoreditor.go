@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fileinfo/mimedata"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -19,7 +20,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tree"
 )
 
@@ -31,7 +31,7 @@ type TensorEditor struct {
 	Tensor tensor.Tensor `set:"-"`
 
 	// overall layout options for tensor display
-	Layout TensorLayout `set:"-"`
+	Layout Layout `set:"-"`
 
 	// number of columns in table (as of last update)
 	NCols int `edit:"-"`
@@ -52,6 +52,7 @@ var _ core.Lister = (*TensorEditor)(nil)
 
 func (tb *TensorEditor) Init() {
 	tb.ListBase.Init()
+	tb.Layout.OddRow = true
 	tb.Makers.Normal[0] = func(p *tree.Plan) { // TODO: reduce redundancy with ListBase Maker
 		svi := tb.This.(core.Lister)
 		svi.UpdateSliceSize()
@@ -70,6 +71,9 @@ func (tb *TensorEditor) Init() {
 		tb.UpdateMaxWidths()
 
 		tb.Updater(func() {
+			if tb.Tensor.NumDims() == 1 {
+				tb.Layout.TopZero = true
+			}
 			tb.UpdateStartIndex()
 		})
 
@@ -335,8 +339,7 @@ func (tb *TensorEditor) RowGrabFocus(row int) *core.WidgetBase {
 	return nil
 }
 
-//////////////////////////////////////////////////////
-// 	Header layout
+/////// 	Header layout
 
 func (tb *TensorEditor) SizeFinal() {
 	tb.ListBase.SizeFinal()
@@ -365,14 +368,13 @@ func (tb *TensorEditor) SizeFinal() {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//    Copy / Cut / Paste
+////////    Copy / Cut / Paste
 
 // SaveTSV writes a tensor to a tab-separated-values (TSV) file.
 // Outer-most dims are rows in the file, and inner-most is column --
 // Reading just grabs all values and doesn't care about shape.
 func (tb *TensorEditor) SaveCSV(filename core.Filename) error { //types:add
-	return tensor.SaveCSV(tb.Tensor, filename, table.Tab.Rune())
+	return tensor.SaveCSV(tb.Tensor, fsx.Filename(filename), tensor.Tab)
 }
 
 // OpenTSV reads a tensor from a tab-separated-values (TSV) file.
@@ -380,7 +382,7 @@ func (tb *TensorEditor) SaveCSV(filename core.Filename) error { //types:add
 // to the official CSV standard.
 // Reads all values and assigns as many as fit.
 func (tb *TensorEditor) OpenCSV(filename core.Filename) error { //types:add
-	return tensor.OpenCSV(tb.Tensor, filename, table.Tab.Rune())
+	return tensor.OpenCSV(tb.Tensor, fsx.Filename(filename), tensor.Tab)
 }
 
 func (tb *TensorEditor) MakeToolbar(p *tree.Plan) {
@@ -409,7 +411,7 @@ func (tb *TensorEditor) CopySelectToMime() mimedata.Mimes {
 	}
 	// idx := tb.SelectedIndexesList(false) // ascending
 	// var b bytes.Buffer
-	// ix.WriteCSV(&b, table.Tab, table.Headers)
+	// ix.WriteCSV(&b, tensor.Tab, table.Headers)
 	// md := mimedata.NewTextBytes(b.Bytes())
 	// md[0].Type = fileinfo.DataCsv
 	// return md
@@ -423,7 +425,7 @@ func (tb *TensorEditor) FromMimeData(md mimedata.Mimes) [][]string {
 		if d.Type == fileinfo.DataCsv {
 			// b := bytes.NewBuffer(d.Data)
 			// cr := csv.NewReader(b)
-			// cr.Comma = table.Tab.Rune()
+			// cr.Comma = tensor.Tab.Rune()
 			// rec, err := cr.ReadAll()
 			// if err != nil || len(rec) == 0 {
 			// 	log.Printf("Error reading CSV from clipboard: %s\n", err)

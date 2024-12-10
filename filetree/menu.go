@@ -26,7 +26,7 @@ func vcsLabelFunc(fn *Node, label string) string {
 }
 
 func (fn *Node) VCSContextMenu(m *core.Scene) {
-	if fn.FileRoot.FS != nil {
+	if fn.FileRoot().FS != nil {
 		return
 	}
 	core.NewFuncButton(m).SetFunc(fn.addToVCSSelected).SetText(vcsLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).

@@ -5,162 +5,144 @@
 package plots
 
 import (
-	"errors"
 	"image"
 
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
-	"cogentcore.org/core/styles/units"
 )
 
-// Labels implements the Plotter interface,
-// drawing a set of labels at specified points.
+// LabelsType is be used for specifying the type name.
+const LabelsType = "Labels"
+
+func init() {
+	plot.RegisterPlotter(LabelsType, "draws text labels at specified X, Y points.", []plot.Roles{plot.X, plot.Y, plot.Label}, []plot.Roles{}, func(data plot.Data) plot.Plotter {
+		return NewLabels(data)
+	})
+}
+
+// Labels draws text labels at specified X, Y points.
 type Labels struct {
-	// XYs is a copy of the points for labels
-	plot.XYs
+	// copies of data for this line
+	X, Y   plot.Values
+	Labels plot.Labels
 
-	// PXYs is the actual pixel plotting coordinates for each XY value.
-	PXYs plot.XYs
+	// PX, PY are the actual pixel plotting coordinates for each XY value.
+	PX, PY []float32
 
-	// Labels is the set of labels corresponding to each point.
-	Labels []string
-
-	// TextStyle is the style of the label text.
-	// Each label can have a different text style, but
-	// by default they share a common one (len = 1)
-	TextStyle []plot.TextStyle
-
-	// Offset is added directly to the final label location.
-	Offset units.XY
+	// Style is the style of the label text.
+	Style plot.Style
 
 	// plot size and number of TextStyle when styles last generated -- don't regen
 	styleSize image.Point
-	styleN    int
+	stylers   plot.Stylers
+	ystylers  plot.Stylers
 }
 
 // NewLabels returns a new Labels using defaults
-func NewLabels(d XYLabeler) (*Labels, error) {
-	xys, err := plot.CopyXYs(d)
-	if err != nil {
-		return nil, err
+// Styler functions are obtained from the Label metadata if present.
+func NewLabels(data plot.Data) *Labels {
+	if data.CheckLengths() != nil {
+		return nil
+	}
+	lb := &Labels{}
+	lb.X = plot.MustCopyRole(data, plot.X)
+	lb.Y = plot.MustCopyRole(data, plot.Y)
+	if lb.X == nil || lb.Y == nil {
+		return nil
+	}
+	ld := data[plot.Label]
+	if ld == nil {
+		return nil
+	}
+	lb.Labels = make(plot.Labels, lb.X.Len())
+	for i := range ld.Len() {
+		lb.Labels[i] = ld.String1D(i)
 	}
 
-	if d.Len() != len(xys) {
-		return nil, errors.New("plotter: number of points does not match the number of labels")
-	}
-
-	strs := make([]string, d.Len())
-	for i := range strs {
-		strs[i] = d.Label(i)
-	}
-
-	styles := make([]plot.TextStyle, 1)
-	for i := range styles {
-		styles[i].Defaults()
-	}
-
-	return &Labels{
-		XYs:       xys,
-		Labels:    strs,
-		TextStyle: styles,
-	}, nil
+	lb.stylers = plot.GetStylersFromData(data, plot.Label)
+	lb.ystylers = plot.GetStylersFromData(data, plot.Y)
+	lb.Defaults()
+	return lb
 }
 
-func (l *Labels) XYData() (data plot.XYer, pixels plot.XYer) {
-	data = l.XYs
-	pixels = l.PXYs
+func (lb *Labels) Defaults() {
+	lb.Style.Defaults()
+}
+
+// Styler adds a style function to set style parameters.
+func (lb *Labels) Styler(f func(s *plot.Style)) *Labels {
+	lb.stylers.Add(f)
+	return lb
+}
+
+func (lb *Labels) ApplyStyle(ps *plot.PlotStyle) {
+	ps.SetElementStyle(&lb.Style)
+	yst := &plot.Style{}
+	lb.ystylers.Run(yst)
+	lb.Style.Range = yst.Range // get range from y
+	lb.stylers.Run(&lb.Style)  // can still override here
+}
+
+func (lb *Labels) Stylers() *plot.Stylers { return &lb.stylers }
+
+func (lb *Labels) Data() (data plot.Data, pixX, pixY []float32) {
+	pixX = lb.PX
+	pixY = lb.PY
+	data = plot.Data{}
+	data[plot.X] = lb.X
+	data[plot.Y] = lb.Y
+	data[plot.Label] = lb.Labels
 	return
 }
 
-// updateStyles updates the text styles and dots.
-// returns true if custom styles are used per point
-func (l *Labels) updateStyles(plt *plot.Plot) bool {
-	customStyles := len(l.TextStyle) == len(l.XYs)
-	if plt.Size == l.styleSize && len(l.TextStyle) == l.styleN {
-		return customStyles
-	}
-	l.styleSize = plt.Size
-	l.styleN = len(l.TextStyle)
+// Plot implements the Plotter interface, drawing labels.
+func (lb *Labels) Plot(plt *plot.Plot) {
 	pc := plt.Paint
 	uc := &pc.UnitContext
-	l.Offset.ToDots(uc)
-	for i := range l.TextStyle {
-		l.TextStyle[i].ToDots(uc)
-	}
-	return customStyles
-}
-
-// Plot implements the Plotter interface, drawing labels.
-func (l *Labels) Plot(plt *plot.Plot) {
-	ps := plot.PlotXYs(plt, l.XYs)
-	customStyles := l.updateStyles(plt)
+	lb.PX = plot.PlotX(plt, lb.X)
+	lb.PY = plot.PlotY(plt, lb.Y)
+	st := &lb.Style.Text
+	st.Offset.ToDots(uc)
 	var ltxt plot.Text
-	for i, label := range l.Labels {
+	ltxt.Defaults()
+	ltxt.Style = *st
+	ltxt.ToDots(uc)
+	for i, label := range lb.Labels {
 		if label == "" {
 			continue
-		}
-		if customStyles {
-			ltxt.Style = l.TextStyle[i]
-		} else {
-			ltxt.Style = l.TextStyle[0]
 		}
 		ltxt.Text = label
 		ltxt.Config(plt)
 		tht := ltxt.PaintText.BBox.Size().Y
-		ltxt.Draw(plt, math32.Vec2(ps[i].X+l.Offset.X.Dots, ps[i].Y+l.Offset.Y.Dots-tht))
+		ltxt.Draw(plt, math32.Vec2(lb.PX[i]+st.Offset.X.Dots, lb.PY[i]+st.Offset.Y.Dots-tht))
 	}
 }
 
-// DataRange returns the minimum and maximum X and Y values
-func (l *Labels) DataRange(plt *plot.Plot) (xmin, xmax, ymin, ymax float32) {
-	xmin, xmax, ymin, ymax = plot.XYRange(l) // first get basic numerical range
+// UpdateRange updates the given ranges.
+func (lb *Labels) UpdateRange(plt *plot.Plot, xr, yr, zr *minmax.F64) {
+	// todo: include point sizes!
+	plot.Range(lb.X, xr)
+	plot.RangeClamp(lb.Y, yr, &lb.Style.Range)
 	pxToData := math32.FromPoint(plt.Size)
-	pxToData.X = (xmax - xmin) / pxToData.X
-	pxToData.Y = (ymax - ymin) / pxToData.Y
-	customStyles := l.updateStyles(plt)
+	pxToData.X = float32(xr.Range()) / pxToData.X
+	pxToData.Y = float32(yr.Range()) / pxToData.Y
+	st := &lb.Style.Text
 	var ltxt plot.Text
-	for i, label := range l.Labels {
+	ltxt.Style = *st
+	for i, label := range lb.Labels {
 		if label == "" {
 			continue
-		}
-		if customStyles {
-			ltxt.Style = l.TextStyle[i]
-		} else {
-			ltxt.Style = l.TextStyle[0]
 		}
 		ltxt.Text = label
 		ltxt.Config(plt)
 		tht := pxToData.Y * ltxt.PaintText.BBox.Size().Y
 		twd := 1.1 * pxToData.X * ltxt.PaintText.BBox.Size().X
-		x, y := l.XY(i)
-		minx := x
-		maxx := x + pxToData.X*l.Offset.X.Dots + twd
-		miny := y
-		maxy := y + pxToData.Y*l.Offset.Y.Dots + tht // y is up here
-		xmin = min(xmin, minx)
-		xmax = max(xmax, maxx)
-		ymin = min(ymin, miny)
-		ymax = max(ymax, maxy)
+		x := lb.X[i]
+		y := lb.Y[i]
+		maxx := x + float64(pxToData.X*st.Offset.X.Dots+twd)
+		maxy := y + float64(pxToData.Y*st.Offset.Y.Dots+tht) // y is up here
+		xr.FitInRange(minmax.F64{x, maxx})
+		yr.FitInRange(minmax.F64{y, maxy})
 	}
-	return
 }
-
-// XYLabeler combines the [plot.XYer] and [plot.Labeler] types.
-type XYLabeler interface {
-	plot.XYer
-	plot.Labeler
-}
-
-// XYLabels holds XY data with labels.
-// The ith label corresponds to the ith XY.
-type XYLabels struct {
-	plot.XYs
-	Labels []string
-}
-
-// Label returns the label for point index i.
-func (l XYLabels) Label(i int) string {
-	return l.Labels[i]
-}
-
-var _ XYLabeler = (*XYLabels)(nil)

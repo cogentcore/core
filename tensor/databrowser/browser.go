@@ -8,122 +8,99 @@ package databrowser
 
 import (
 	"io/fs"
-	"path/filepath"
+	"slices"
 
-	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/filetree"
+	"cogentcore.org/core/goal/interpreter"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/types"
+	"golang.org/x/exp/maps"
 )
 
-// Browser is a data browser, for browsing data either on an os filesystem
-// or as a datafs virtual data filesystem.
-type Browser struct {
-	core.Frame
+// TheBrowser is the current browser,
+// which is valid immediately after NewBrowserWindow
+// where it is used to get a local variable for subsequent use.
+var TheBrowser *Browser
 
-	// FS is the filesystem, if browsing an FS
+// Browser holds all the elements of a data browser, for browsing data
+// either on an OS filesystem or as a tensorfs virtual data filesystem.
+// It supports the automatic loading of [goal] scripts as toolbar actions to
+// perform pre-programmed tasks on the data, to create app-like functionality.
+// Scripts are ordered alphabetically and any leading #- prefix is automatically
+// removed from the label, so you can use numbers to specify a custom order.
+// It is not a [core.Widget] itself, and is intended to be incorporated into
+// a [core.Frame] widget, potentially along with other custom elements.
+// See [Basic] for a basic implementation.
+type Browser struct { //types:add -setters
+	// FS is the filesystem, if browsing an FS.
 	FS fs.FS
 
-	// DataRoot is the path to the root of the data to browse
+	// DataRoot is the path to the root of the data to browse.
 	DataRoot string
 
-	toolbar *core.Toolbar
-	splits  *core.Splits
-	files   *filetree.Tree
-	tabs    *core.Tabs
-}
+	// StartDir is the starting directory, where the app was originally started.
+	StartDir string
 
-// Init initializes with the data and script directories
-func (br *Browser) Init() {
-	br.Frame.Init()
-	br.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-	})
+	// ScriptsDir is the directory containing scripts for toolbar actions.
+	// It defaults to DataRoot/dbscripts
+	ScriptsDir string
 
-	br.OnShow(func(e events.Event) {
-		br.UpdateFiles()
-	})
+	// Scripts
+	Scripts map[string]string `set:"-"`
 
-	tree.AddChildAt(br, "splits", func(w *core.Splits) {
-		br.splits = w
-		w.SetSplits(.15, .85)
-		tree.AddChildAt(w, "fileframe", func(w *core.Frame) {
-			w.Styler(func(s *styles.Style) {
-				s.Direction = styles.Column
-				s.Overflow.Set(styles.OverflowAuto)
-				s.Grow.Set(1, 1)
-			})
-			tree.AddChildAt(w, "filetree", func(w *filetree.Tree) {
-				br.files = w
-				w.FileNodeType = types.For[FileNode]()
-				// w.OnSelect(func(e events.Event) {
-				// 	e.SetHandled()
-				// 	sels := w.SelectedViews()
-				// 	if sels != nil {
-				// 		br.FileNodeSelected(sn)
-				// 	}
-				// })
-			})
-		})
-		tree.AddChildAt(w, "tabs", func(w *core.Tabs) {
-			br.tabs = w
-			w.Type = core.FunctionalTabs
-		})
-	})
-}
+	// Interpreter is the interpreter to use for running Browser scripts
+	Interpreter *interpreter.Interpreter `set:"-"`
 
-// NewBrowserWindow opens a new data Browser for given
-// file system (nil for os files) and data directory.
-func NewBrowserWindow(fsys fs.FS, dataDir string) *Browser {
-	b := core.NewBody("Cogent Data Browser: " + fsx.DirAndFile(dataDir))
-	br := NewBrowser(b)
-	br.FS = fsys
-	ddr := dataDir
-	if fsys == nil {
-		ddr = errors.Log1(filepath.Abs(dataDir))
-	}
-	b.AddTopBar(func(bar *core.Frame) {
-		tb := core.NewToolbar(bar)
-		br.toolbar = tb
-		tb.Maker(br.MakeToolbar)
-	})
-	br.SetDataRoot(ddr)
-	b.RunWindow()
-	return br
-}
+	// Files is the [DataTree] tree browser of the tensorfs or files.
+	Files *DataTree
 
-// ParentBrowser returns the Browser parent of given node
-func ParentBrowser(tn tree.Node) *Browser {
-	var res *Browser
-	tn.AsTree().WalkUp(func(n tree.Node) bool {
-		if c, ok := n.(*Browser); ok {
-			res = c
-			return false
-		}
-		return true
-	})
-	return res
+	// Tabs is the [Tabber] element managing tabs of data views.
+	Tabs Tabber
+
+	// Toolbar is the top-level toolbar for the browser, if used.
+	Toolbar *core.Toolbar
+
+	// Splits is the overall [core.Splits] for the browser.
+	Splits *core.Splits
 }
 
 // UpdateFiles Updates the files list.
 func (br *Browser) UpdateFiles() { //types:add
-	files := br.files
+	if br.Files == nil {
+		return
+	}
+	files := br.Files
 	if br.FS != nil {
 		files.SortByModTime = true
 		files.OpenPathFS(br.FS, br.DataRoot)
 	} else {
 		files.OpenPath(br.DataRoot)
 	}
-	br.Update()
 }
 
 func (br *Browser) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(br.UpdateFiles).SetText("").SetIcon(icons.Refresh).SetShortcut("Command+U")
 	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(br.UpdateScripts).SetText("").SetIcon(icons.Code)
+	})
+	scr := maps.Keys(br.Scripts)
+	slices.Sort(scr)
+	for _, s := range scr {
+		lbl := TrimOrderPrefix(s)
+		tree.AddAt(p, lbl, func(w *core.Button) {
+			w.SetText(lbl).SetIcon(icons.RunCircle).
+				OnClick(func(e events.Event) {
+					br.RunScript(s)
+				})
+			sc := br.Scripts[s]
+			tt := FirstComment(sc)
+			if tt == "" {
+				tt = "Run Script (add a comment to top of script to provide more useful info here)"
+			}
+			w.SetTooltip(tt)
+		})
+	}
 }

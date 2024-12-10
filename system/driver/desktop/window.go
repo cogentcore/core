@@ -485,6 +485,7 @@ func (w *Window) updateGeometry() {
 	var fbsz image.Point
 	fbsz.X, fbsz.Y = w.Glw.GetFramebufferSize()
 	w.PixSize = fbsz
+	// fmt.Println("UpdateGeom:", fbsz, wsz)
 	w.PhysDPI = sc.PhysicalDPI
 	w.LogDPI = sc.LogicalDPI
 	w.Mu.Unlock()

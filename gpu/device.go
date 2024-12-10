@@ -5,6 +5,8 @@
 package gpu
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/base/errors"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -38,14 +40,25 @@ func NewDevice(gpu *GPU) (*Device, error) {
 func NewComputeDevice(gpu *GPU) (*Device, error) {
 	// we only request max buffer sizes so compute can go as big as it needs to
 	limits := wgpu.DefaultLimits()
-	const maxv = 0xFFFFFFFF
+	// Per https://github.com/cogentcore/core/issues/1362 -- this may cause issues on "downlevel"
+	// hardware, so we may need to detect that. OTOH it probably won't be useful for compute anyway,
+	// but we can just sort that out later
+	// note: on web / chromium / dawn, limited to 10: https://issues.chromium.org/issues/366151398?pli=1
+	limits.MaxStorageBuffersPerShaderStage = gpu.Limits.Limits.MaxStorageBuffersPerShaderStage
+	// fmt.Println("MaxStorageBuffersPerShaderStage:", gpu.Limits.Limits.MaxStorageBuffersPerShaderStage)
 	// note: these limits are being processed and allow the MaxBufferSize to be the
 	// controlling factor -- if we don't set these, then the slrand example doesn't
 	// work above a smaller limit.
-	limits.MaxUniformBufferBindingSize = min(gpu.Limits.Limits.MaxUniformBufferBindingSize, maxv)
-	limits.MaxStorageBufferBindingSize = min(gpu.Limits.Limits.MaxStorageBufferBindingSize, maxv)
+	limits.MaxUniformBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxUniformBufferBindingSize), int(gpu.Limits.Limits.MinUniformBufferOffsetAlignment)))
+
+	limits.MaxStorageBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxStorageBufferBindingSize), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
 	// note: this limit is not working properly:
-	limits.MaxBufferSize = min(gpu.Limits.Limits.MaxBufferSize, maxv)
+	limits.MaxBufferSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxBufferSize), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
+	// limits.MaxBindGroups = gpu.Limits.Limits.MaxBindGroups // note: no point in changing -- web constraint
+
+	if Debug {
+		fmt.Printf("Requesting sizes: MaxStorageBufferBindingSize: %X  MaxBufferSize: %X\n", limits.MaxStorageBufferBindingSize, limits.MaxBufferSize)
+	}
 	desc := wgpu.DeviceDescriptor{
 		RequiredLimits: &wgpu.RequiredLimits{
 			Limits: limits,

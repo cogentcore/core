@@ -8,7 +8,9 @@ import (
 	"embed"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/plot"
 	"cogentcore.org/core/plot/plotcore"
+	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 )
 
@@ -18,15 +20,19 @@ var tsv embed.FS
 func main() {
 	b := core.NewBody("Plot Example")
 
-	epc := table.NewTable("epc")
-	epc.OpenFS(tsv, "ra25epoch.tsv", table.Tab)
+	epc := table.New("epc")
+	epc.OpenFS(tsv, "ra25epoch.tsv", tensor.Tab)
+	pst := func(s *plot.Style) {
+		s.Plot.Title = "RA25 Epoch Train"
+	}
+	perr := epc.Column("PctErr")
+	plot.SetStylersTo(perr, plot.Stylers{pst, func(s *plot.Style) {
+		s.On = true
+		s.Role = plot.Y
+	}})
 
 	pl := plotcore.NewPlotEditor(b)
-	pl.Options.Title = "RA25 Epoch Train"
-	pl.Options.XAxis = "Epoch"
-	pl.Options.Points = true
 	pl.SetTable(epc)
-	pl.ColumnOptions("UnitErr").On = true
 	b.AddTopBar(func(bar *core.Frame) {
 		core.NewToolbar(bar).Maker(pl.MakeToolbar)
 	})

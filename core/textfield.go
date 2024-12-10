@@ -585,8 +585,7 @@ func (tf *TextField) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return tf.error.Error(), tf.DefaultTooltipPos()
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-//  Cursor Navigation
+////////  Cursor Navigation
 
 // cursorForward moves the cursor forward
 func (tf *TextField) cursorForward(steps int) {
@@ -856,8 +855,7 @@ func (tf *TextField) cursorKill() {
 	tf.cursorDelete(steps)
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//    Selection
+////////  Selection
 
 // clearSelected resets both the global selected flag and any current selection
 func (tf *TextField) clearSelected() {
@@ -1098,8 +1096,7 @@ func (tf *TextField) contextMenu(m *Scene) {
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//    Undo
+////////  Undo
 
 // textFieldUndoRecord holds one undo record
 type textFieldUndoRecord struct {
@@ -1190,8 +1187,7 @@ func (tf *TextField) redo() {
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//    Complete
+////////  Complete
 
 // SetCompleter sets completion functions so that completions will
 // automatically be offered as the user types.
@@ -1241,8 +1237,7 @@ func (tf *TextField) completeText(s string) {
 	tf.editDone()
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//    Rendering
+////////  Rendering
 
 // hasWordWrap returns true if the layout is multi-line word wrapping
 func (tf *TextField) hasWordWrap() bool {
@@ -1461,7 +1456,7 @@ func (tf *TextField) autoScroll() {
 	availSz := sz.Actual.Content.Sub(icsz)
 	tf.configTextSize(availSz)
 	n := len(tf.editText)
-	tf.cursorPos = math32.ClampInt(tf.cursorPos, 0, n)
+	tf.cursorPos = math32.Clamp(tf.cursorPos, 0, n)
 
 	if tf.hasWordWrap() { // does not scroll
 		tf.startPos = 0

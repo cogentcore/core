@@ -210,6 +210,9 @@ func (sc *Scene) Init() {
 		currentRenderWindow.SetStageTitle(st.Title)
 	})
 	sc.Updater(func() {
+		if TheApp.Platform() == system.Offscreen {
+			return
+		}
 		// At the scene level, we reset the shortcuts and add our context menu
 		// shortcuts every time. This clears the way for buttons to add their
 		// shortcuts in their own Updaters. We must get the shortcuts every time
