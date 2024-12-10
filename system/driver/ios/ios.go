@@ -138,8 +138,8 @@ func updateConfig(width, height, orientation int32) {
 	)
 
 	TheApp.Scrn.DevicePixelRatio = float32(s) // TODO(kai): is this actually DevicePixelRatio?
-	TheApp.Scrn.PixSize = image.Pt(int(width), int(height))
-	TheApp.Scrn.Geometry.Max = TheApp.Scrn.PixSize
+	TheApp.Scrn.PixelSize = image.Pt(int(width), int(height))
+	TheApp.Scrn.Geometry.Max = TheApp.Scrn.PixelSize
 
 	TheApp.Scrn.PhysicalDPI = DisplayMetrics.DPI
 	TheApp.Scrn.LogicalDPI = DisplayMetrics.DPI
@@ -159,7 +159,7 @@ func updateConfig(width, height, orientation int32) {
 		system.OnSystemWindowCreated <- struct{}{}
 	}
 	if TheApp.Draw != nil {
-		TheApp.Draw.System.Renderer.SetSize(TheApp.Scrn.PixSize)
+		TheApp.Draw.System.Renderer.SetSize(TheApp.Scrn.PixelSize)
 	}
 	TheApp.Event.WindowResize()
 }

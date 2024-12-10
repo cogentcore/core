@@ -98,9 +98,13 @@ type Stage struct { //types:add -setters
 	Title string
 
 	// Screen specifies the screen number on which a new window is opened
-	// by default on desktop platforms. 0 is the default primary screen.
-	// Use [TheApp].ScreenByName("name").ScreenNumber to get the number by name.
-	// The automatically saved user previous screen takes precedence.
+	// by default on desktop platforms. It defaults to -1, which indicates
+	// that the first window should open on screen 0 (the default primary
+	// screen) and any subsequent windows should open on the same screen as
+	// the currently active window. Regardless, the automatically saved last
+	// screen of a window with the same [Stage.Title] takes precedence if it exists;
+	// see the website documentation on window geometry saving for more information.
+	// Use [TheApp].ScreenByName("name").ScreenNumber to get the screen by name.
 	Screen int
 
 	// Modal, if true, blocks input to all other stages.
@@ -263,6 +267,7 @@ func (st *Stage) setType(typ StageTypes) *Stage {
 	st.Type = typ
 	st.UseMinSize = true
 	st.Resizable = true
+	st.Screen = -1
 	switch st.Type {
 	case WindowStage:
 		if !TheApp.Platform().IsMobile() {

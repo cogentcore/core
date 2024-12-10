@@ -21,8 +21,10 @@ import (
 	"cogentcore.org/core/system"
 )
 
-// theWindowGeometrySaver is the manager of window geometry settings
-var theWindowGeometrySaver = windowGeometrySaver{}
+var (
+	// theWindowGeometrySaver is the manager of window geometry settings
+	theWindowGeometrySaver = windowGeometrySaver{}
+)
 
 // screenConfigGeometries has the window geometry data for different
 // screen configurations, where a screen configuration is a specific
@@ -97,7 +99,7 @@ func (ws *windowGeometrySaver) init() {
 // shouldSave returns whether the window geometry should be saved based on
 // the platform: only for desktop native platforms.
 func (ws *windowGeometrySaver) shouldSave() bool {
-	return !TheApp.Platform().IsMobile() && TheApp.Platform() != system.Offscreen
+	return !TheApp.Platform().IsMobile() && TheApp.Platform() != system.Offscreen && !DebugSettings.DisableWindowGeometrySaver
 }
 
 // resetCache resets the cache; call under mutex
@@ -483,5 +485,5 @@ func (wg *windowGeometry) String() string {
 
 // constrainGeom constrains geometry based on screen params
 func (wg *windowGeometry) constrainGeom(sc *system.Screen) {
-	wg.Pos, wg.Size = sc.ConstrainWinGeom(wg.Pos, wg.Size)
+	wg.Pos, wg.Size = sc.ConstrainWindowGeometry(wg.Pos, wg.Size)
 }
