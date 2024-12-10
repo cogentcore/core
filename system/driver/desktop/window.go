@@ -73,9 +73,9 @@ func (w *Window) DeActivate() {
 	glfw.DetachCurrentContext()
 }
 
-// NewGlfwWindow makes a new glfw window.
+// newGlfwWindow makes a new glfw window for this window.
 // It must be run on main.
-func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Window, error) {
+func (w *Window) newGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) error {
 	// glfw.DefaultWindowHints()
 	if opts.Flags.HasFlag(system.FixedSize) {
 		glfw.WindowHint(glfw.Resizable, glfw.False)
@@ -99,7 +99,7 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 	// todo: glfw.Floating for always-on-top -- could set for modal
 	sz := opts.Size
 	if TheApp.Platform() == system.MacOS {
-		// on macOS, the size we pass to glfw must be in dots
+		// on macOS, the size we pass to glfw must be in window manager units
 		sz = sc.WindowSizeFromPixels(opts.Size)
 	}
 	fullscreen := opts.Flags.HasFlag(system.Fullscreen)
@@ -108,18 +108,20 @@ func NewGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) (*glfw.Wind
 		mon = TheApp.Monitors[sc.ScreenNumber]
 		sz = sc.PixelSize // use screen size for fullscreen video mode resolution
 	}
-	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), mon, nil)
+	glw, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), mon, nil)
 	if err != nil {
-		return win, err
+		return err
 	}
 	if !fullscreen {
 		pos := opts.Pos.Add(sc.Geometry.Min) // screen relative
-		win.SetPos(pos.X, pos.Y)
+		glw.SetPos(pos.X, pos.Y)
+		w.Pos = pos
 	}
 	if opts.Icon != nil {
-		win.SetIcon(opts.Icon)
+		glw.SetIcon(opts.Icon)
 	}
-	return win, err
+	w.Glw = glw
+	return nil
 }
 
 // Screen gets the screen of the window, computing various window parameters.
