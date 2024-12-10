@@ -792,7 +792,7 @@ type DebugSettingsData struct { //types:add
 	DNDTrace bool
 
 	// DisableWindowGeometry disables the saving and loading of window geometry
-	// data, for testing purposes.
+	// data for testing purposes.
 	DisableWindowGeometry bool
 
 	// Print a trace of Go language completion and lookup process

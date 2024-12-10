@@ -99,7 +99,7 @@ func (ws *windowGeometrySaver) init() {
 // shouldSave returns whether the window geometry should be saved based on
 // the platform: only for desktop native platforms.
 func (ws *windowGeometrySaver) shouldSave() bool {
-	return !TheApp.Platform().IsMobile() && TheApp.Platform() != system.Offscreen
+	return !TheApp.Platform().IsMobile() && TheApp.Platform() != system.Offscreen && !DebugSettings.DisableWindowGeometry
 }
 
 // resetCache resets the cache; call under mutex
@@ -243,7 +243,7 @@ func (ws *windowGeometrySaver) settingEnd() {
 
 // record records current state of window as preference
 func (ws *windowGeometrySaver) record(win *renderWindow) {
-	if DebugSettings.DisableWindowGeometry || !ws.shouldSave() || !win.isVisible() || win.SystemWindow.Is(system.Fullscreen) {
+	if !ws.shouldSave() || !win.isVisible() || win.SystemWindow.Is(system.Fullscreen) {
 		return
 	}
 	win.SystemWindow.Lock()
@@ -358,7 +358,7 @@ func (ws *windowGeometrySaver) saveCached() {
 // to set the screen for a new window.
 // If the window name has a colon, only the part prior to the colon is used.
 func (ws *windowGeometrySaver) get(winName, screenName string) (*windowGeometry, *system.Screen) {
-	if DebugSettings.DisableWindowGeometry || !ws.shouldSave() {
+	if !ws.shouldSave() {
 		return nil, nil
 	}
 	ws.mu.RLock()
