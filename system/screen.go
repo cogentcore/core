@@ -28,11 +28,15 @@ var (
 
 // note: fields obtained from QScreen in Qt
 
-// Screen contains data about each physical and / or logical screen
+// Screen contains data about each physical and/or logical screen.
 type Screen struct {
+
 	// ScreenNumber is the index of this screen in the list of screens
 	// maintained under Screen.
 	ScreenNumber int
+
+	// Name is the name of the screen.
+	Name string
 
 	// Geometry contains the geometry of the screen in window manager
 	// size units, which may not be same as raw pixels (dots)
@@ -76,7 +80,6 @@ type Screen struct {
 	NativeOrientation  ScreenOrientation `table:"-"`
 	PrimaryOrientation ScreenOrientation `table:"-"`
 
-	Name         string
 	Manufacturer string `table:"-"`
 	Model        string `table:"-"`
 	SerialNumber string `table:"-"`
