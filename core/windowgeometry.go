@@ -485,5 +485,5 @@ func (wg *windowGeometry) String() string {
 
 // constrainGeom constrains geometry based on screen params
 func (wg *windowGeometry) constrainGeom(sc *system.Screen) {
-	wg.Pos, wg.Size = sc.ConstrainWinGeom(wg.Pos, wg.Size)
+	wg.Pos, wg.Size = sc.ConstrainWindowGeometry(wg.Pos, wg.Size)
 }

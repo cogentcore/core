@@ -338,9 +338,9 @@ func (o *NewWindowOptions) Fixup() {
 		o.Size.Y = int(0.8 * float32(scsz.Y) * sc.DevicePixelRatio)
 	}
 
-	o.Pos, o.Size = sc.ConstrainWinGeom(o.Pos, o.Size)
+	o.Pos, o.Size = sc.ConstrainWindowGeometry(o.Pos, o.Size)
 	if o.Pos.X == 0 && o.Pos.Y == 0 {
-		wsz := sc.WinSizeFromPix(o.Size)
+		wsz := sc.WindowSizeFromPixels(o.Size)
 		dialog := o.Flags.HasFlag(Dialog)
 		modal := o.Flags.HasFlag(Modal)
 		nw := TheApp.NWindows()
@@ -364,6 +364,6 @@ func (o *NewWindowOptions) Fixup() {
 			o.Pos.X = scsz.X/2 - wsz.X/2
 			o.Pos.Y = scsz.Y/2 - wsz.Y/2
 		}
-		o.Pos, o.Size = sc.ConstrainWinGeom(o.Pos, o.Size) // make sure ok
+		o.Pos, o.Size = sc.ConstrainWindowGeometry(o.Pos, o.Size) // make sure ok
 	}
 }

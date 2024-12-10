@@ -48,13 +48,13 @@ func (w *WindowSingle[A]) Screen() *system.Screen {
 func (w *WindowSingle[A]) Size() image.Point {
 	// w.Mu.Lock() // this prevents race conditions but also locks up
 	// defer w.Mu.Unlock()
-	return w.Screen().PixSize
+	return w.Screen().PixelSize
 }
 
 func (w *WindowSingle[A]) WinSize() image.Point {
 	// w.Mu.Lock() // this prevents race conditions but also locks up
 	// defer w.Mu.Unlock()
-	return w.Screen().PixSize
+	return w.Screen().PixelSize
 }
 
 func (w *WindowSingle[A]) Position(screen *system.Screen) image.Point {
@@ -85,14 +85,14 @@ func (w *WindowSingle[A]) SetWinSize(sz image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
-	w.Screen().PixSize = sz
+	w.Screen().PixelSize = sz
 }
 
 func (w *WindowSingle[A]) SetSize(sz image.Point) {
 	if w.This.IsClosed() || (w.App.Platform().IsMobile() && w.App.Platform() != system.Offscreen) {
 		return
 	}
-	w.Screen().PixSize = sz
+	w.Screen().PixelSize = sz
 }
 
 func (w *WindowSingle[A]) SetPos(pos image.Point, screen *system.Screen) {

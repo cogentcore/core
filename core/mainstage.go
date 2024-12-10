@@ -270,7 +270,7 @@ func (st *Stage) runWindow() *Stage {
 				if st.NewWindow && st.UseMinSize {
 					// we require windows to be at least 60% and no more than 80% of the
 					// screen size by default
-					scsz := screen.PixSize
+					scsz := screen.PixelSize
 					sz = image.Pt(max(sz.X, scsz.X*6/10), max(sz.Y, scsz.Y*6/10))
 					sz = image.Pt(min(sz.X, scsz.X*8/10), min(sz.Y, scsz.Y*8/10))
 				}
