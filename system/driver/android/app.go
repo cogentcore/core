@@ -40,7 +40,7 @@ type App struct {
 
 // InitGPU initializes WebGPU for the app.
 func (a *App) InitGPU() {
-	a.GPU = gpu.NewGPU()
+	a.GPU = gpu.NewGPU(nil)
 }
 
 // DestroyGPU releases GPU things (the drawer of the window) for when the app becomes invisible
@@ -87,7 +87,7 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 			Window: unsafe.Pointer(winptr),
 		},
 	}
-	wsf := a.GPU.Instance.CreateSurface(wsd)
+	wsf := gpu.Instance().CreateSurface(wsd)
 	sf := gpu.NewSurface(a.GPU, wsf, image.Pt(512, 512), 1, gpu.UndefinedType) // placeholder size
 	a.Draw = gpudraw.NewDrawer(a.GPU, sf)
 
