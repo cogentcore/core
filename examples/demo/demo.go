@@ -42,9 +42,7 @@ func main() {
 	valueBinding(ts)
 	makeStyles(ts)
 
-	// b.RunMainWindow()
-	core.DebugSettings.DisableWindowGeometrySaver = true
-	b.NewWindow().SetScreen(1).RunMain()
+	b.RunMainWindow()
 }
 
 func home(ts *core.Tabs) {
