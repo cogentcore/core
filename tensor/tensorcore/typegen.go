@@ -4,21 +4,78 @@ package tensorcore
 
 import (
 	"cogentcore.org/core/colors/colormap"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.Table", IDName: "table", Doc: "Table provides a GUI widget for representing [table.Table] values.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "Table", Doc: "Table is the table that we're a view of."}, {Name: "TensorDisplay", Doc: "overall display options for tensor display."}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params."}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values."}, {Name: "NCols", Doc: "number of columns in table (as of last update)."}, {Name: "SortIndex", Doc: "current sort index."}, {Name: "SortDescending", Doc: "whether current sort order is descending."}, {Name: "headerWidths", Doc: "headerWidths has number of characters in each header, per visfields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows."}, {Name: "BlankFloat"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.Layout", IDName: "layout", Doc: "Layout are layout options for displaying tensors.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"--setters"}}}, Fields: []types.Field{{Name: "OddRow", Doc: "OddRow means that even-numbered dimensions are displayed as Y*X rectangles.\nThis determines along which dimension to display any remaining\nodd dimension: OddRow = true = organize vertically along row\ndimension, false = organize horizontally across column dimension."}, {Name: "TopZero", Doc: "TopZero means that the Y=0 coordinate is displayed from the top-down;\notherwise the Y=0 coordinate is displayed from the bottom up,\nwhich is typical for emergent network patterns."}, {Name: "Image", Doc: "Image will display the data as a bitmap image. If a 2D tensor, then it will\nbe a greyscale image. If a 3D tensor with size of either the first\nor last dim = either 3 or 4, then it is a RGB(A) color image."}}})
+
+// SetOddRow sets the [Layout.OddRow]:
+// OddRow means that even-numbered dimensions are displayed as Y*X rectangles.
+// This determines along which dimension to display any remaining
+// odd dimension: OddRow = true = organize vertically along row
+// dimension, false = organize horizontally across column dimension.
+func (t *Layout) SetOddRow(v bool) *Layout { t.OddRow = v; return t }
+
+// SetTopZero sets the [Layout.TopZero]:
+// TopZero means that the Y=0 coordinate is displayed from the top-down;
+// otherwise the Y=0 coordinate is displayed from the bottom up,
+// which is typical for emergent network patterns.
+func (t *Layout) SetTopZero(v bool) *Layout { t.TopZero = v; return t }
+
+// SetImage sets the [Layout.Image]:
+// Image will display the data as a bitmap image. If a 2D tensor, then it will
+// be a greyscale image. If a 3D tensor with size of either the first
+// or last dim = either 3 or 4, then it is a RGB(A) color image.
+func (t *Layout) SetImage(v bool) *Layout { t.Image = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.GridStyle", IDName: "grid-style", Doc: "GridStyle are options for displaying tensors", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"--setters"}}}, Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Range", Doc: "Range to plot"}, {Name: "MinMax", Doc: "MinMax has the actual range of data, if not using fixed Range."}, {Name: "ColorMap", Doc: "ColorMap is the name of the color map to use in translating values to colors."}, {Name: "GridFill", Doc: "GridFill sets proportion of grid square filled by the color block:\n1 = all, .5 = half, etc."}, {Name: "DimExtra", Doc: "DimExtra is the amount of extra space to add at dimension boundaries,\nas a proportion of total grid size."}, {Name: "Size", Doc: "Size sets the minimum and maximum size for grid squares."}, {Name: "TotalSize", Doc: "TotalSize sets the total preferred display size along largest dimension.\nGrid squares will be sized to fit within this size,\nsubject to the Size.Min / Max constraints, which have precedence."}, {Name: "FontSize", Doc: "FontSize is the font size in standard point units for labels."}}})
+
+// SetRange sets the [GridStyle.Range]:
+// Range to plot
+func (t *GridStyle) SetRange(v minmax.Range64) *GridStyle { t.Range = v; return t }
+
+// SetMinMax sets the [GridStyle.MinMax]:
+// MinMax has the actual range of data, if not using fixed Range.
+func (t *GridStyle) SetMinMax(v minmax.F64) *GridStyle { t.MinMax = v; return t }
+
+// SetColorMap sets the [GridStyle.ColorMap]:
+// ColorMap is the name of the color map to use in translating values to colors.
+func (t *GridStyle) SetColorMap(v core.ColorMapName) *GridStyle { t.ColorMap = v; return t }
+
+// SetGridFill sets the [GridStyle.GridFill]:
+// GridFill sets proportion of grid square filled by the color block:
+// 1 = all, .5 = half, etc.
+func (t *GridStyle) SetGridFill(v float32) *GridStyle { t.GridFill = v; return t }
+
+// SetDimExtra sets the [GridStyle.DimExtra]:
+// DimExtra is the amount of extra space to add at dimension boundaries,
+// as a proportion of total grid size.
+func (t *GridStyle) SetDimExtra(v float32) *GridStyle { t.DimExtra = v; return t }
+
+// SetSize sets the [GridStyle.Size]:
+// Size sets the minimum and maximum size for grid squares.
+func (t *GridStyle) SetSize(v minmax.F32) *GridStyle { t.Size = v; return t }
+
+// SetTotalSize sets the [GridStyle.TotalSize]:
+// TotalSize sets the total preferred display size along largest dimension.
+// Grid squares will be sized to fit within this size,
+// subject to the Size.Min / Max constraints, which have precedence.
+func (t *GridStyle) SetTotalSize(v float32) *GridStyle { t.TotalSize = v; return t }
+
+// SetFontSize sets the [GridStyle.FontSize]:
+// FontSize is the font size in standard point units for labels.
+func (t *GridStyle) SetFontSize(v float32) *GridStyle { t.FontSize = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.Table", IDName: "table", Doc: "Table provides a GUI widget for representing [table.Table] values.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "Table", Doc: "Table is the table that we're a view of."}, {Name: "GridStyle", Doc: "GridStyle has global grid display styles. GridStylers on the Table\nare applied to this on top of defaults."}, {Name: "ColumnGridStyle", Doc: "ColumnGridStyle has per column grid display styles."}, {Name: "SortIndex", Doc: "current sort index."}, {Name: "SortDescending", Doc: "whether current sort order is descending."}, {Name: "nCols", Doc: "number of columns in table (as of last update)."}, {Name: "headerWidths", Doc: "headerWidths has number of characters in each header, per visfields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}, {Name: "blankString", Doc: "\tblank values for out-of-range rows."}, {Name: "blankFloat"}, {Name: "blankCells", Doc: "blankCells has per column blank tensor cells."}}})
 
 // NewTable returns a new [Table] with the given optional parent:
 // Table provides a GUI widget for representing [table.Table] values.
 func NewTable(parent ...tree.Node) *Table { return tree.New[Table](parent...) }
-
-// SetNCols sets the [Table.NCols]:
-// number of columns in table (as of last update).
-func (t *Table) SetNCols(v int) *Table { t.NCols = v; return t }
 
 // SetSortIndex sets the [Table.SortIndex]:
 // current sort index.
@@ -27,14 +84,6 @@ func (t *Table) SetSortIndex(v int) *Table { t.SortIndex = v; return t }
 // SetSortDescending sets the [Table.SortDescending]:
 // whether current sort order is descending.
 func (t *Table) SetSortDescending(v bool) *Table { t.SortDescending = v; return t }
-
-// SetBlankString sets the [Table.BlankString]:
-//
-//	blank values for out-of-range rows.
-func (t *Table) SetBlankString(v string) *Table { t.BlankString = v; return t }
-
-// SetBlankFloat sets the [Table.BlankFloat]
-func (t *Table) SetBlankFloat(v float64) *Table { t.BlankFloat = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.TensorEditor", IDName: "tensor-editor", Doc: "TensorEditor provides a GUI widget for representing [tensor.Tensor] values.", Methods: []types.Method{{Name: "SaveCSV", Doc: "SaveTSV writes a tensor to a tab-separated-values (TSV) file.\nOuter-most dims are rows in the file, and inner-most is column --\nReading just grabs all values and doesn't care about shape.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "OpenCSV", Doc: "OpenTSV reads a tensor from a tab-separated-values (TSV) file.\nusing the Go standard encoding/csv reader conforming\nto the official CSV standard.\nReads all values and assigns as many as fit.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "Tensor", Doc: "the tensor that we're a view of"}, {Name: "Layout", Doc: "overall layout options for tensor display"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "headerWidths", Doc: "headerWidths has number of characters in each header, per visfields"}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}})
 
@@ -54,22 +103,18 @@ func (t *TensorEditor) SetBlankString(v string) *TensorEditor { t.BlankString = 
 // SetBlankFloat sets the [TensorEditor.BlankFloat]
 func (t *TensorEditor) SetBlankFloat(v float64) *TensorEditor { t.BlankFloat = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.TensorLayout", IDName: "tensor-layout", Doc: "TensorLayout are layout options for displaying tensors", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "OddRow", Doc: "even-numbered dimensions are displayed as Y*X rectangles.\nThis determines along which dimension to display any remaining\nodd dimension: OddRow = true = organize vertically along row\ndimension, false = organize horizontally across column dimension."}, {Name: "TopZero", Doc: "if true, then the Y=0 coordinate is displayed from the top-down;\notherwise the Y=0 coordinate is displayed from the bottom up,\nwhich is typical for emergent network patterns."}, {Name: "Image", Doc: "display the data as a bitmap image.  if a 2D tensor, then it will\nbe a greyscale image.  if a 3D tensor with size of either the first\nor last dim = either 3 or 4, then it is a RGB(A) color image."}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.TensorDisplay", IDName: "tensor-display", Doc: "TensorDisplay are options for displaying tensors", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "TensorLayout"}}, Fields: []types.Field{{Name: "Range", Doc: "range to plot"}, {Name: "MinMax", Doc: "if not using fixed range, this is the actual range of data"}, {Name: "ColorMap", Doc: "the name of the color map to use in translating values to colors"}, {Name: "GridFill", Doc: "what proportion of grid square should be filled by color block -- 1 = all, .5 = half, etc"}, {Name: "DimExtra", Doc: "amount of extra space to add at dimension boundaries, as a proportion of total grid size"}, {Name: "GridMinSize", Doc: "minimum size for grid squares -- they will never be smaller than this"}, {Name: "GridMaxSize", Doc: "maximum size for grid squares -- they will never be larger than this"}, {Name: "TotPrefSize", Doc: "total preferred display size along largest dimension.\ngrid squares will be sized to fit within this size,\nsubject to harder GridMin / Max size constraints"}, {Name: "FontSize", Doc: "font size in standard point units for labels (e.g., SimMat)"}, {Name: "GridView", Doc: "our gridview, for update method"}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.TensorGrid", IDName: "tensor-grid", Doc: "TensorGrid is a widget that displays tensor values as a grid of colored squares.", Methods: []types.Method{{Name: "OpenTensorEditor", Doc: "OpenTensorEditor pulls up a TensorEditor of our tensor", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "EditSettings", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Tensor", Doc: "the tensor that we view"}, {Name: "Display", Doc: "display options"}, {Name: "ColorMap", Doc: "the actual colormap"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.TensorGrid", IDName: "tensor-grid", Doc: "TensorGrid is a widget that displays tensor values as a grid of colored squares.", Methods: []types.Method{{Name: "OpenTensorEditor", Doc: "OpenTensorEditor pulls up a TensorEditor of our tensor", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "EditStyle", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Tensor", Doc: "Tensor is the tensor that we view."}, {Name: "GridStyle", Doc: "GridStyle has grid display style properties."}, {Name: "ColorMap", Doc: "ColorMap is the colormap displayed (based on)"}}})
 
 // NewTensorGrid returns a new [TensorGrid] with the given optional parent:
 // TensorGrid is a widget that displays tensor values as a grid of colored squares.
 func NewTensorGrid(parent ...tree.Node) *TensorGrid { return tree.New[TensorGrid](parent...) }
 
-// SetDisplay sets the [TensorGrid.Display]:
-// display options
-func (t *TensorGrid) SetDisplay(v TensorDisplay) *TensorGrid { t.Display = v; return t }
+// SetGridStyle sets the [TensorGrid.GridStyle]:
+// GridStyle has grid display style properties.
+func (t *TensorGrid) SetGridStyle(v GridStyle) *TensorGrid { t.GridStyle = v; return t }
 
 // SetColorMap sets the [TensorGrid.ColorMap]:
-// the actual colormap
+// ColorMap is the colormap displayed (based on)
 func (t *TensorGrid) SetColorMap(v *colormap.Map) *TensorGrid { t.ColorMap = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.TensorButton", IDName: "tensor-button", Doc: "TensorButton represents a Tensor with a button for making a [TensorGrid]\nviewer for an [tensor.Tensor].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Tensor"}}})

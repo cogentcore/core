@@ -31,7 +31,7 @@ type TensorEditor struct {
 	Tensor tensor.Tensor `set:"-"`
 
 	// overall layout options for tensor display
-	Layout TensorLayout `set:"-"`
+	Layout Layout `set:"-"`
 
 	// number of columns in table (as of last update)
 	NCols int `edit:"-"`

@@ -91,7 +91,7 @@ func (mr *F32) FitValInRange(val float32) bool {
 // NormVal normalizes value to 0-1 unit range relative to current Min / Max range
 // Clips the value within Min-Max range first.
 func (mr *F32) NormValue(val float32) float32 {
-	return (mr.ClipValue(val) - mr.Min) * mr.Scale()
+	return (mr.Clamp(val) - mr.Min) * mr.Scale()
 }
 
 // ProjVal projects a 0-1 normalized unit value into current Min / Max range (inverse of NormVal)
@@ -101,7 +101,7 @@ func (mr *F32) ProjValue(val float32) float32 {
 
 // ClipVal clips given value within Min / Max range
 // Note: a NaN will remain as a NaN
-func (mr *F32) ClipValue(val float32) float32 {
+func (mr *F32) Clamp(val float32) float32 {
 	if val < mr.Min {
 		return mr.Min
 	}

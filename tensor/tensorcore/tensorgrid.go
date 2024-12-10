@@ -8,7 +8,6 @@ import (
 	"image/color"
 	"log"
 
-	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/colormap"
 	"cogentcore.org/core/core"
@@ -22,146 +21,17 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-// TensorLayout are layout options for displaying tensors
-type TensorLayout struct { //types:add
-
-	// even-numbered dimensions are displayed as Y*X rectangles.
-	// This determines along which dimension to display any remaining
-	// odd dimension: OddRow = true = organize vertically along row
-	// dimension, false = organize horizontally across column dimension.
-	OddRow bool
-
-	// if true, then the Y=0 coordinate is displayed from the top-down;
-	// otherwise the Y=0 coordinate is displayed from the bottom up,
-	// which is typical for emergent network patterns.
-	TopZero bool
-
-	// display the data as a bitmap image.  if a 2D tensor, then it will
-	// be a greyscale image.  if a 3D tensor with size of either the first
-	// or last dim = either 3 or 4, then it is a RGB(A) color image.
-	Image bool
-}
-
-// TensorDisplay are options for displaying tensors
-type TensorDisplay struct { //types:add
-	TensorLayout
-
-	// range to plot
-	Range minmax.Range64 `display:"inline"`
-
-	// if not using fixed range, this is the actual range of data
-	MinMax minmax.F64 `display:"inline"`
-
-	// the name of the color map to use in translating values to colors
-	ColorMap core.ColorMapName
-
-	// what proportion of grid square should be filled by color block -- 1 = all, .5 = half, etc
-	GridFill float32 `min:"0.1" max:"1" step:"0.1" default:"0.9,1"`
-
-	// amount of extra space to add at dimension boundaries, as a proportion of total grid size
-	DimExtra float32 `min:"0" max:"1" step:"0.02" default:"0.1,0.3"`
-
-	// minimum size for grid squares -- they will never be smaller than this
-	GridMinSize float32
-
-	// maximum size for grid squares -- they will never be larger than this
-	GridMaxSize float32
-
-	// total preferred display size along largest dimension.
-	// grid squares will be sized to fit within this size,
-	// subject to harder GridMin / Max size constraints
-	TotPrefSize float32
-
-	// font size in standard point units for labels (e.g., SimMat)
-	FontSize float32
-
-	// our gridview, for update method
-	GridView *TensorGrid `copier:"-" json:"-" xml:"-" display:"-"`
-}
-
-// Defaults sets defaults for values that are at nonsensical initial values
-func (td *TensorDisplay) Defaults() {
-	if td.ColorMap == "" {
-		td.ColorMap = "ColdHot"
-	}
-	if td.Range.Max == 0 && td.Range.Min == 0 {
-		td.Range.SetMin(-1)
-		td.Range.SetMax(1)
-	}
-	if td.GridMinSize == 0 {
-		td.GridMinSize = 2
-	}
-	if td.GridMaxSize == 0 {
-		td.GridMaxSize = 16
-	}
-	if td.TotPrefSize == 0 {
-		td.TotPrefSize = 100
-	}
-	if td.GridFill == 0 {
-		td.GridFill = 0.9
-		td.DimExtra = 0.3
-	}
-	if td.FontSize == 0 {
-		td.FontSize = 24
-	}
-}
-
-// FromMeta sets display options from Tensor meta-data
-func (td *TensorDisplay) FromMeta(tsr tensor.Tensor) {
-	if op, err := metadata.Get[bool](*tsr.Metadata(), "top-zero"); err == nil {
-		td.TopZero = op
-	}
-	if op, err := metadata.Get[bool](*tsr.Metadata(), "odd-row"); err == nil {
-		td.OddRow = op
-	}
-	if op, err := metadata.Get[bool](*tsr.Metadata(), "image"); err == nil {
-		td.Image = op
-	}
-	if op, err := metadata.Get[float64](*tsr.Metadata(), "min"); err == nil {
-		td.Range.Min = op
-	}
-	if op, err := metadata.Get[float64](*tsr.Metadata(), "max"); err == nil {
-		td.Range.Max = op
-	}
-	if op, err := metadata.Get[bool](*tsr.Metadata(), "fix-min"); err == nil {
-		td.Range.FixMin = op
-	}
-	if op, err := metadata.Get[bool](*tsr.Metadata(), "fix-max"); err == nil {
-		td.Range.FixMax = op
-	}
-	if op, err := metadata.Get[string](*tsr.Metadata(), "colormap"); err == nil {
-		td.ColorMap = core.ColorMapName(op)
-	}
-	if op, err := metadata.Get[float64](*tsr.Metadata(), "grid-fill"); err == nil {
-		td.GridFill = float32(op)
-	}
-	if op, err := metadata.Get[float64](*tsr.Metadata(), "grid-min"); err == nil {
-		td.GridMinSize = float32(op)
-	}
-	if op, err := metadata.Get[float64](*tsr.Metadata(), "grid-max"); err == nil {
-		td.GridMaxSize = float32(op)
-	}
-	if op, err := metadata.Get[float64](*tsr.Metadata(), "dim-extra"); err == nil {
-		td.DimExtra = float32(op)
-	}
-	if op, err := metadata.Get[float64](*tsr.Metadata(), "font-size"); err == nil {
-		td.FontSize = float32(op)
-	}
-}
-
-////////	TensorGrid
-
 // TensorGrid is a widget that displays tensor values as a grid of colored squares.
 type TensorGrid struct {
 	core.WidgetBase
 
-	// the tensor that we view
+	// Tensor is the tensor that we view.
 	Tensor tensor.Tensor `set:"-"`
 
-	// display options
-	Display TensorDisplay
+	// GridStyle has grid display style properties.
+	GridStyle GridStyle
 
-	// the actual colormap
+	// ColorMap is the colormap displayed (based on)
 	ColorMap *colormap.Map
 }
 
@@ -174,8 +44,7 @@ func (tg *TensorGrid) SetWidgetValue(value any) error {
 
 func (tg *TensorGrid) Init() {
 	tg.WidgetBase.Init()
-	tg.Display.GridView = tg
-	tg.Display.Defaults()
+	tg.GridStyle.Defaults()
 	tg.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.DoubleClickable)
 		ms := tg.MinSize()
@@ -184,11 +53,11 @@ func (tg *TensorGrid) Init() {
 	})
 
 	tg.OnDoubleClick(func(e events.Event) {
-		tg.OpenTensorEditor()
+		tg.TensorEditor()
 	})
 	tg.AddContextMenu(func(m *core.Scene) {
-		core.NewFuncButton(m).SetFunc(tg.OpenTensorEditor).SetIcon(icons.Edit)
-		core.NewFuncButton(m).SetFunc(tg.EditSettings).SetIcon(icons.Edit)
+		core.NewFuncButton(m).SetFunc(tg.TensorEditor).SetIcon(icons.Edit)
+		core.NewFuncButton(m).SetFunc(tg.EditStyle).SetIcon(icons.Edit)
 	})
 }
 
@@ -200,14 +69,14 @@ func (tg *TensorGrid) SetTensor(tsr tensor.Tensor) *TensorGrid {
 	}
 	tg.Tensor = tsr
 	if tg.Tensor != nil {
-		tg.Display.FromMeta(tg.Tensor)
+		tg.GridStyle.ApplyStylersFrom(tg.Tensor)
 	}
 	return tg
 }
 
-// OpenTensorEditor pulls up a TensorEditor of our tensor
-func (tg *TensorGrid) OpenTensorEditor() { //types:add
-	d := core.NewBody("Tensor Editor")
+// TensorEditor pulls up a TensorEditor of our tensor
+func (tg *TensorGrid) TensorEditor() { //types:add
+	d := core.NewBody("Tensor editor")
 	tb := core.NewToolbar(d)
 	te := NewTensorEditor(d).SetTensor(tg.Tensor)
 	te.OnChange(func(e events.Event) {
@@ -217,9 +86,9 @@ func (tg *TensorGrid) OpenTensorEditor() { //types:add
 	d.RunWindowDialog(tg)
 }
 
-func (tg *TensorGrid) EditSettings() { //types:add
-	d := core.NewBody("Tensor Grid Display Options")
-	core.NewForm(d).SetStruct(&tg.Display).
+func (tg *TensorGrid) EditStyle() { //types:add
+	d := core.NewBody("Tensor grid style")
+	core.NewForm(d).SetStruct(&tg.GridStyle).
 		OnChange(func(e events.Event) {
 			tg.NeedsRender()
 		})
@@ -231,33 +100,32 @@ func (tg *TensorGrid) MinSize() math32.Vector2 {
 	if tg.Tensor == nil || tg.Tensor.Len() == 0 {
 		return math32.Vector2{}
 	}
-	if tg.Display.Image {
+	if tg.GridStyle.Image {
 		return math32.Vec2(float32(tg.Tensor.DimSize(1)), float32(tg.Tensor.DimSize(0)))
 	}
-	rows, cols, rowEx, colEx := tensor.Projection2DShape(tg.Tensor.Shape(), tg.Display.OddRow)
-	frw := float32(rows) + float32(rowEx)*tg.Display.DimExtra // extra spacing
-	fcl := float32(cols) + float32(colEx)*tg.Display.DimExtra // extra spacing
+	rows, cols, rowEx, colEx := tensor.Projection2DShape(tg.Tensor.Shape(), tg.GridStyle.OddRow)
+	frw := float32(rows) + float32(rowEx)*tg.GridStyle.DimExtra // extra spacing
+	fcl := float32(cols) + float32(colEx)*tg.GridStyle.DimExtra // extra spacing
 	mx := float32(max(frw, fcl))
-	gsz := tg.Display.TotPrefSize / mx
-	gsz = max(gsz, tg.Display.GridMinSize)
-	gsz = min(gsz, tg.Display.GridMaxSize)
+	gsz := tg.GridStyle.TotalSize / mx
+	gsz = tg.GridStyle.Size.Clamp(gsz)
 	gsz = max(gsz, 2)
 	return math32.Vec2(gsz*float32(fcl), gsz*float32(frw))
 }
 
 // EnsureColorMap makes sure there is a valid color map that matches specified name
 func (tg *TensorGrid) EnsureColorMap() {
-	if tg.ColorMap != nil && tg.ColorMap.Name != string(tg.Display.ColorMap) {
+	if tg.ColorMap != nil && tg.ColorMap.Name != string(tg.GridStyle.ColorMap) {
 		tg.ColorMap = nil
 	}
 	if tg.ColorMap == nil {
 		ok := false
-		tg.ColorMap, ok = colormap.AvailableMaps[string(tg.Display.ColorMap)]
+		tg.ColorMap, ok = colormap.AvailableMaps[string(tg.GridStyle.ColorMap)]
 		if !ok {
-			tg.Display.ColorMap = ""
-			tg.Display.Defaults()
+			tg.GridStyle.ColorMap = ""
+			tg.GridStyle.Defaults()
 		}
-		tg.ColorMap = colormap.AvailableMaps[string(tg.Display.ColorMap)]
+		tg.ColorMap = colormap.AvailableMaps[string(tg.GridStyle.ColorMap)]
 	}
 }
 
@@ -265,22 +133,22 @@ func (tg *TensorGrid) Color(val float64) (norm float64, clr color.Color) {
 	if tg.ColorMap.Indexed {
 		clr = tg.ColorMap.MapIndex(int(val))
 	} else {
-		norm = tg.Display.Range.ClipNormValue(val)
+		norm = tg.GridStyle.Range.ClipNormValue(val)
 		clr = tg.ColorMap.Map(float32(norm))
 	}
 	return
 }
 
 func (tg *TensorGrid) UpdateRange() {
-	if !tg.Display.Range.FixMin || !tg.Display.Range.FixMax {
+	if !tg.GridStyle.Range.FixMin || !tg.GridStyle.Range.FixMax {
 		min, max, _, _ := tensor.Range(tg.Tensor.AsValues())
-		if !tg.Display.Range.FixMin {
+		if !tg.GridStyle.Range.FixMin {
 			nmin := minmax.NiceRoundNumber(min, true) // true = below #
-			tg.Display.Range.Min = nmin
+			tg.GridStyle.Range.Min = nmin
 		}
-		if !tg.Display.Range.FixMax {
+		if !tg.GridStyle.Range.FixMax {
 			nmax := minmax.NiceRoundNumber(max, false) // false = above #
-			tg.Display.Range.Max = nmax
+			tg.GridStyle.Range.Max = nmax
 		}
 	}
 }
@@ -302,7 +170,7 @@ func (tg *TensorGrid) Render() {
 
 	tsr := tg.Tensor
 
-	if tg.Display.Image {
+	if tg.GridStyle.Image {
 		ysz := tsr.DimSize(0)
 		xsz := tsr.DimSize(1)
 		nclr := 1
@@ -322,18 +190,18 @@ func (tg *TensorGrid) Render() {
 		for y := 0; y < ysz; y++ {
 			for x := 0; x < xsz; x++ {
 				ey := y
-				if !tg.Display.TopZero {
+				if !tg.GridStyle.TopZero {
 					ey = (ysz - 1) - y
 				}
 				switch {
 				case outclr:
 					var r, g, b, a float64
 					a = 1
-					r = tg.Display.Range.ClipNormValue(tsr.Float(0, y, x))
-					g = tg.Display.Range.ClipNormValue(tsr.Float(1, y, x))
-					b = tg.Display.Range.ClipNormValue(tsr.Float(2, y, x))
+					r = tg.GridStyle.Range.ClipNormValue(tsr.Float(0, y, x))
+					g = tg.GridStyle.Range.ClipNormValue(tsr.Float(1, y, x))
+					b = tg.GridStyle.Range.ClipNormValue(tsr.Float(2, y, x))
 					if nclr > 3 {
-						a = tg.Display.Range.ClipNormValue(tsr.Float(3, y, x))
+						a = tg.GridStyle.Range.ClipNormValue(tsr.Float(3, y, x))
 					}
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
@@ -342,18 +210,18 @@ func (tg *TensorGrid) Render() {
 				case nclr > 1:
 					var r, g, b, a float64
 					a = 1
-					r = tg.Display.Range.ClipNormValue(tsr.Float(y, x, 0))
-					g = tg.Display.Range.ClipNormValue(tsr.Float(y, x, 1))
-					b = tg.Display.Range.ClipNormValue(tsr.Float(y, x, 2))
+					r = tg.GridStyle.Range.ClipNormValue(tsr.Float(y, x, 0))
+					g = tg.GridStyle.Range.ClipNormValue(tsr.Float(y, x, 1))
+					b = tg.GridStyle.Range.ClipNormValue(tsr.Float(y, x, 2))
 					if nclr > 3 {
-						a = tg.Display.Range.ClipNormValue(tsr.Float(y, x, 3))
+						a = tg.GridStyle.Range.ClipNormValue(tsr.Float(y, x, 3))
 					}
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
 					pc.StrokeStyle.Color = colors.Uniform(colors.FromFloat64(r, g, b, a))
 					pc.FillBox(pr, gsz, pc.StrokeStyle.Color)
 				default:
-					val := tg.Display.Range.ClipNormValue(tsr.Float(y, x))
+					val := tg.GridStyle.Range.ClipNormValue(tsr.Float(y, x))
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
 					pc.StrokeStyle.Color = colors.Uniform(colors.FromFloat64(val, val, val, 1))
@@ -363,9 +231,9 @@ func (tg *TensorGrid) Render() {
 		}
 		return
 	}
-	rows, cols, rowEx, colEx := tensor.Projection2DShape(tsr.Shape(), tg.Display.OddRow)
-	frw := float32(rows) + float32(rowEx)*tg.Display.DimExtra // extra spacing
-	fcl := float32(cols) + float32(colEx)*tg.Display.DimExtra // extra spacing
+	rows, cols, rowEx, colEx := tensor.Projection2DShape(tsr.Shape(), tg.GridStyle.OddRow)
+	frw := float32(rows) + float32(rowEx)*tg.GridStyle.DimExtra // extra spacing
+	fcl := float32(cols) + float32(colEx)*tg.GridStyle.DimExtra // extra spacing
 	rowsInner := rows
 	colsInner := cols
 	if rowEx > 0 {
@@ -377,16 +245,16 @@ func (tg *TensorGrid) Render() {
 	tsz := math32.Vec2(fcl, frw)
 	gsz := sz.Div(tsz)
 
-	ssz := gsz.MulScalar(tg.Display.GridFill) // smaller size with margin
+	ssz := gsz.MulScalar(tg.GridStyle.GridFill) // smaller size with margin
 	for y := 0; y < rows; y++ {
-		yex := float32(int(y/rowsInner)) * tg.Display.DimExtra
+		yex := float32(int(y/rowsInner)) * tg.GridStyle.DimExtra
 		for x := 0; x < cols; x++ {
-			xex := float32(int(x/colsInner)) * tg.Display.DimExtra
+			xex := float32(int(x/colsInner)) * tg.GridStyle.DimExtra
 			ey := y
-			if !tg.Display.TopZero {
+			if !tg.GridStyle.TopZero {
 				ey = (rows - 1) - y
 			}
-			val := tensor.Projection2DValue(tsr, tg.Display.OddRow, ey, x)
+			val := tensor.Projection2DValue(tsr, tg.GridStyle.OddRow, ey, x)
 			cr := math32.Vec2(float32(x)+xex, float32(y)+yex)
 			pr := pos.Add(cr.Mul(gsz))
 			_, clr := tg.Color(val)

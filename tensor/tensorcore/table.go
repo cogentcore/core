@@ -37,23 +37,21 @@ type Table struct {
 	// Table is the table that we're a view of.
 	Table *table.Table `set:"-"`
 
-	// overall display options for tensor display.
-	TensorDisplay TensorDisplay `set:"-"`
+	// GridStyle has global grid display styles. GridStylers on the Table
+	// are applied to this on top of defaults.
+	GridStyle GridStyle `set:"-"`
 
-	// per column tensor display params.
-	ColumnTensorDisplay map[int]*TensorDisplay `set:"-"`
-
-	// per column blank tensor values.
-	ColumnTensorBlank map[int]*tensor.Float64 `set:"-"`
-
-	// number of columns in table (as of last update).
-	NCols int `edit:"-"`
+	// ColumnGridStyle has per column grid display styles.
+	ColumnGridStyle map[int]*GridStyle `set:"-"`
 
 	// current sort index.
 	SortIndex int
 
 	// whether current sort order is descending.
 	SortDescending bool
+
+	// number of columns in table (as of last update).
+	nCols int `edit:"-"`
 
 	// headerWidths has number of characters in each header, per visfields.
 	headerWidths []int `copier:"-" display:"-" json:"-" xml:"-"`
@@ -62,8 +60,11 @@ type Table struct {
 	colMaxWidths []int `set:"-" copier:"-" json:"-" xml:"-"`
 
 	//	blank values for out-of-range rows.
-	BlankString string
-	BlankFloat  float64
+	blankString string
+	blankFloat  float64
+
+	// blankCells has per column blank tensor cells.
+	blankCells map[int]*tensor.Float64 `set:"-"`
 }
 
 // check for interface impl
@@ -72,9 +73,9 @@ var _ core.Lister = (*Table)(nil)
 func (tb *Table) Init() {
 	tb.ListBase.Init()
 	tb.SortIndex = -1
-	tb.TensorDisplay.Defaults()
-	tb.ColumnTensorDisplay = map[int]*TensorDisplay{}
-	tb.ColumnTensorBlank = map[int]*tensor.Float64{}
+	tb.GridStyle.Defaults()
+	tb.ColumnGridStyle = map[int]*GridStyle{}
+	tb.blankCells = map[int]*tensor.Float64{}
 
 	tb.Makers.Normal[0] = func(p *tree.Plan) { // TODO: reduce redundancy with ListBase Maker
 		svi := tb.This.(core.Lister)
@@ -134,9 +135,11 @@ func (tb *Table) StyleValue(w core.Widget, s *styles.Style, row, col int) {
 // and then configures the display
 func (tb *Table) SetTable(dt *table.Table) *Table {
 	if dt == nil {
-		return nil
+		tb.Table = nil
+	} else {
+		tb.Table = table.NewView(dt)
+		tb.GridStyle.ApplyStylersFrom(tb.Table)
 	}
-	tb.Table = table.NewView(dt)
 	tb.This.(core.Lister).UpdateSliceSize()
 	tb.SetSliceBase()
 	tb.Update()
@@ -165,20 +168,20 @@ func (tb *Table) UpdateSliceSize() int {
 		tb.Table.Sequential()
 	}
 	tb.SliceSize = tb.Table.NumRows()
-	tb.NCols = tb.Table.NumColumns()
+	tb.nCols = tb.Table.NumColumns()
 	return tb.SliceSize
 }
 
 func (tb *Table) UpdateMaxWidths() {
-	if len(tb.headerWidths) != tb.NCols {
-		tb.headerWidths = make([]int, tb.NCols)
-		tb.colMaxWidths = make([]int, tb.NCols)
+	if len(tb.headerWidths) != tb.nCols {
+		tb.headerWidths = make([]int, tb.nCols)
+		tb.colMaxWidths = make([]int, tb.nCols)
 	}
 
 	if tb.SliceSize == 0 {
 		return
 	}
-	for fli := 0; fli < tb.NCols; fli++ {
+	for fli := 0; fli < tb.nCols; fli++ {
 		tb.colMaxWidths[fli] = 0
 		col := tb.Table.Columns.Values[fli]
 		stsr, isstr := col.(*tensor.String)
@@ -215,7 +218,7 @@ func (tb *Table) MakeHeader(p *tree.Plan) {
 					w.SetText("Index")
 				})
 			}
-			for fli := 0; fli < tb.NCols; fli++ {
+			for fli := 0; fli < tb.nCols; fli++ {
 				field := tb.Table.Columns.Keys[fli]
 				tree.AddAt(p, "head-"+field, func(w *core.Button) {
 					w.SetType(core.ButtonAction)
@@ -223,8 +226,16 @@ func (tb *Table) MakeHeader(p *tree.Plan) {
 						s.Justify.Content = styles.Start
 					})
 					w.OnClick(func(e events.Event) {
-						tb.SortSliceAction(fli)
+						tb.SortColumn(fli)
 					})
+					if tb.Table.Columns.Values[fli].NumDims() > 1 {
+						w.AddContextMenu(func(m *core.Scene) {
+							core.NewButton(m).SetText("Edit grid style").SetIcon(icons.Edit).
+								OnClick(func(e events.Event) {
+									tb.EditGridStyle(fli)
+								})
+						})
+					}
 					w.Updater(func() {
 						field := tb.Table.Columns.Keys[fli]
 						w.SetText(field).SetTooltip(field + " (tap to sort by)")
@@ -252,7 +263,7 @@ func (tb *Table) SliceHeader() *core.Frame {
 
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (tb *Table) RowWidgetNs() (nWidgPerRow, idxOff int) {
-	nWidgPerRow = 1 + tb.NCols
+	nWidgPerRow = 1 + tb.nCols
 	idxOff = 1
 	if !tb.ShowIndexes {
 		nWidgPerRow -= 1
@@ -270,7 +281,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 		tb.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
-	for fli := 0; fli < tb.NCols; fli++ {
+	for fli := 0; fli < tb.nCols; fli++ {
 		col := tb.Table.Columns.Values[fli]
 		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
 
@@ -314,9 +325,9 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 						}
 					} else {
 						if isstr {
-							core.Bind(tb.BlankString, w)
+							core.Bind(tb.blankString, w)
 						} else {
-							core.Bind(tb.BlankFloat, w)
+							core.Bind(tb.blankFloat, w)
 						}
 					}
 					wb.SetReadOnly(tb.IsReadOnly())
@@ -342,58 +353,41 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 					si, vi, invis := svi.SliceIndex(i)
 					var cell tensor.Tensor
 					if invis {
-						cell = tb.ColTensorBlank(fli, col)
+						cell = tb.blankCell(fli, col)
 					} else {
 						cell = col.RowTensor(vi)
 					}
 					wb.ValueTitle = tb.ValueTitle + "[" + strconv.Itoa(si) + "]"
 					w.SetState(invis, states.Invisible)
 					w.SetTensor(cell)
-					w.Display = *tb.GetColumnTensorDisplay(fli)
+					w.GridStyle = *tb.GetColumnGridStyle(fli)
 				})
 			})
 		}
 	}
 }
 
-// ColTensorBlank returns tensor blanks for given tensor col
-func (tb *Table) ColTensorBlank(cidx int, col tensor.Tensor) *tensor.Float64 {
-	if ctb, has := tb.ColumnTensorBlank[cidx]; has {
+// blankCell returns tensor blanks for given tensor col
+func (tb *Table) blankCell(cidx int, col tensor.Tensor) *tensor.Float64 {
+	if ctb, has := tb.blankCells[cidx]; has {
 		return ctb
 	}
 	ctb := tensor.New[float64](col.ShapeSizes()...).(*tensor.Float64)
-	tb.ColumnTensorBlank[cidx] = ctb
+	tb.blankCells[cidx] = ctb
 	return ctb
 }
 
-// GetColumnTensorDisplay returns tensor display parameters for this column
-// either the overall defaults or the per-column if set
-func (tb *Table) GetColumnTensorDisplay(col int) *TensorDisplay {
-	if ctd, has := tb.ColumnTensorDisplay[col]; has {
+// GetColumnGridStyle gets grid style for given column.
+func (tb *Table) GetColumnGridStyle(col int) *GridStyle {
+	if ctd, has := tb.ColumnGridStyle[col]; has {
 		return ctd
 	}
+	ctd := &GridStyle{}
+	*ctd = tb.GridStyle
 	if tb.Table != nil {
 		cl := tb.Table.Columns.Values[col]
-		if len(*cl.Metadata()) > 0 {
-			return tb.SetColumnTensorDisplay(col)
-		}
+		ctd.ApplyStylersFrom(cl)
 	}
-	return &tb.TensorDisplay
-}
-
-// SetColumnTensorDisplay sets per-column tensor display params and returns them
-// if already set, just returns them
-func (tb *Table) SetColumnTensorDisplay(col int) *TensorDisplay {
-	if ctd, has := tb.ColumnTensorDisplay[col]; has {
-		return ctd
-	}
-	ctd := &TensorDisplay{}
-	*ctd = tb.TensorDisplay
-	if tb.Table != nil {
-		cl := tb.Table.Columns.Values[col]
-		ctd.FromMeta(cl)
-	}
-	tb.ColumnTensorDisplay[col] = ctd
 	return ctd
 }
 
@@ -419,13 +413,13 @@ func (tb *Table) DeleteAt(idx int) {
 	tb.Update()
 }
 
-// SortSliceAction sorts the slice for given field index -- toggles ascending
-// vs. descending if already sorting on this dimension
-func (tb *Table) SortSliceAction(fldIndex int) {
+// SortColumn sorts the slice for given column index.
+// Toggles ascending vs. descending if already sorting on this dimension.
+func (tb *Table) SortColumn(fldIndex int) {
 	sgh := tb.SliceHeader()
 	_, idxOff := tb.RowWidgetNs()
 
-	for fli := 0; fli < tb.NCols; fli++ {
+	for fli := 0; fli < tb.nCols; fli++ {
 		hdr := sgh.Child(idxOff + fli).(*core.Button)
 		hdr.SetType(core.ButtonAction)
 		if fli == fldIndex {
@@ -449,18 +443,30 @@ func (tb *Table) SortSliceAction(fldIndex int) {
 	tb.Update() // requires full update due to sort button icon
 }
 
-// TensorDisplayAction allows user to select tensor display options for column
-// pass -1 for global params for the entire table
-func (tb *Table) TensorDisplayAction(fldIndex int) {
-	ctd := &tb.TensorDisplay
-	if fldIndex >= 0 {
-		ctd = tb.SetColumnTensorDisplay(fldIndex)
-	}
-	d := core.NewBody("Tensor grid display options")
-	core.NewForm(d).SetStruct(ctd)
-	d.RunFullDialog(tb)
-	// tv.UpdateSliceGrid()
-	tb.NeedsRender()
+// EditGridStyle shows an editor dialog for grid style for given column index.
+func (tb *Table) EditGridStyle(col int) {
+	ctd := tb.GetColumnGridStyle(col)
+	d := core.NewBody("Tensor grid style")
+	core.NewForm(d).SetStruct(ctd).
+		OnChange(func(e events.Event) {
+			tb.ColumnGridStyle[col] = ctd
+			tb.Update()
+		})
+	core.NewButton(d).SetText("Edit global style").SetIcon(icons.Edit).
+		OnClick(func(e events.Event) {
+			tb.EditGlobalGridStyle()
+		})
+	d.RunWindowDialog(tb)
+}
+
+// EditGlobalGridStyle shows an editor dialog for global grid styles.
+func (tb *Table) EditGlobalGridStyle() {
+	d := core.NewBody("Tensor grid style")
+	core.NewForm(d).SetStruct(&tb.GridStyle).
+		OnChange(func(e events.Event) {
+			tb.Update()
+		})
+	d.RunWindowDialog(tb)
 }
 
 func (tb *Table) HasStyler() bool { return false }
@@ -470,7 +476,7 @@ func (tb *Table) StyleRow(w core.Widget, idx, fidx int) {}
 // SortFieldName returns the name of the field being sorted, along with :up or
 // :down depending on descending
 func (tb *Table) SortFieldName() string {
-	if tb.SortIndex >= 0 && tb.SortIndex < tb.NCols {
+	if tb.SortIndex >= 0 && tb.SortIndex < tb.nCols {
 		nm := tb.Table.Columns.Keys[tb.SortIndex]
 		if tb.SortDescending {
 			nm += ":down"
@@ -490,7 +496,7 @@ func (tb *Table) SetSortFieldName(nm string) {
 	}
 	spnm := strings.Split(nm, ":")
 	got := false
-	for fli := 0; fli < tb.NCols; fli++ {
+	for fli := 0; fli < tb.nCols; fli++ {
 		fld := tb.Table.Columns.Keys[fli]
 		if fld == spnm[0] {
 			got = true
@@ -524,7 +530,7 @@ func (tb *Table) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
 		return w, true
 	}
 	ridx := nWidgPerRow * row
-	for fli := 0; fli < tb.NCols; fli++ {
+	for fli := 0; fli < tb.nCols; fli++ {
 		w := lg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.Geom.TotalBBox != (image.Rectangle{}) {
 			return w, true
@@ -544,7 +550,7 @@ func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
 	ridx := nWidgPerRow * row
 	lg := tb.ListGrid
 	// first check if we already have focus
-	for fli := 0; fli < tb.NCols; fli++ {
+	for fli := 0; fli < tb.nCols; fli++ {
 		w := lg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.StateIs(states.Focused) || w.ContainsFocus() {
 			return w
@@ -552,7 +558,7 @@ func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
 	}
 	tb.InFocusGrab = true
 	defer func() { tb.InFocusGrab = false }()
-	for fli := 0; fli < tb.NCols; fli++ {
+	for fli := 0; fli < tb.nCols; fli++ {
 		w := lg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.CanFocus() {
 			w.SetFocus()
