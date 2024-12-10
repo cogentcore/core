@@ -155,13 +155,6 @@ func (ts *Tabs) Init() {
 				s.Min.Set(units.Dp(160), units.Dp(96))
 				s.Grow.Set(1, 1)
 			})
-			w.SetOnChildAdded(func(n tree.Node) {
-				AsWidget(n).Styler(func(s *styles.Style) {
-					// tab frames must scroll independently and grow
-					s.Overflow.Set(styles.OverflowAuto)
-					s.Grow.Set(1, 1)
-				})
-			})
 		})
 		// frame comes before tabs in bottom navigation bar
 		if ts.Type.effective(ts) == NavigationBar {
@@ -212,6 +205,9 @@ func (ts *Tabs) insertNewTab(label string, idx int) (*Frame, *Tab) {
 	tfr.InsertChild(frame, idx)
 	frame.SetName(label)
 	frame.Styler(func(s *styles.Style) {
+		// tab frames must scroll independently and grow
+		s.Overflow.Set(styles.OverflowAuto)
+		s.Grow.Set(1, 1)
 		s.Direction = styles.Column
 	})
 	button := ts.insertTabButtonAt(label, idx)

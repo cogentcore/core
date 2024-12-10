@@ -18,7 +18,7 @@ for range 9 {
 }
 ```
 
-Then, we will make a `squares` array that keeps track of the value of each square, and we will make it so that clicking on a button sets its value in the array to either X or O based on an alternating variable `current`. We also add a [[core.WidgetBase.Updater]] to update the text of each button based on its value in the array. Also, we add a reset button that clears all of the squares.
+Then, we will make a `squares` array that keeps track of the value of each square, and we will make it so that clicking on a button sets its value in the array to either X or O based on an alternating variable `current`. We also add a [[doc:core.WidgetBase.Updater]] to update the text of each button based on its value in the array. Also, we add a reset button that clears all of the squares.
 
 ```Go
 current := "X"
