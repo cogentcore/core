@@ -791,9 +791,9 @@ type DebugSettingsData struct { //types:add
 	// Print a trace of DND event handling
 	DNDTrace bool
 
-	// DisableWindowGeometry disables the saving and loading of window geometry
-	// data for testing purposes.
-	DisableWindowGeometry bool
+	// DisableWindowGeometrySaver disables the saving and loading of window geometry
+	// data to allow for easier testing of window manipulation code.
+	DisableWindowGeometrySaver bool
 
 	// Print a trace of Go language completion and lookup process
 	GoCompleteTrace bool

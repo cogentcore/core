@@ -43,7 +43,7 @@ func main() {
 	makeStyles(ts)
 
 	// b.RunMainWindow()
-	core.DebugSettings.DisableWindowGeometry = true
+	core.DebugSettings.DisableWindowGeometrySaver = true
 	b.NewWindow().SetScreen(1).RunMain()
 }
 

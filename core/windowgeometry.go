@@ -99,7 +99,7 @@ func (ws *windowGeometrySaver) init() {
 // shouldSave returns whether the window geometry should be saved based on
 // the platform: only for desktop native platforms.
 func (ws *windowGeometrySaver) shouldSave() bool {
-	return !TheApp.Platform().IsMobile() && TheApp.Platform() != system.Offscreen && !DebugSettings.DisableWindowGeometry
+	return !TheApp.Platform().IsMobile() && TheApp.Platform() != system.Offscreen && !DebugSettings.DisableWindowGeometrySaver
 }
 
 // resetCache resets the cache; call under mutex
