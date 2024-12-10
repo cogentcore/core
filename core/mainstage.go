@@ -54,13 +54,17 @@ func (bd *Body) RunMainWindow() {
 // on the [Stage]. It can not be called more than once for one app.
 // For secondary stages, see [Stage.Run].
 func (st *Stage) RunMain() {
+	if ExternalParent != nil {
+		st.Scene.Body.handleExternalParent()
+		return
+	}
 	st.Run()
 	Wait()
 }
 
 // ExternalParent is a parent widget external to this program.
 // If it is set, calls to [Body.RunWindow] before [Wait] and
-// calls to [Body.RunMainWindow] will add the [Body] to this
+// calls to [Body.RunMainWindow] and [Stage.RunMain] will add the [Body] to this
 // parent instead of creating a new window. It should typically not be
 // used by end users; it is used in yaegicore and for pre-rendering apps
 // as HTML that can be used as a preview and for SEO purposes.
