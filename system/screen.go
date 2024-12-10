@@ -72,14 +72,14 @@ type Screen struct {
 	// VirtualGeometry          image.Rectangle
 	// AvailableVirtualGeometry image.Rectangle
 
-	Orientation        ScreenOrientation
-	NativeOrientation  ScreenOrientation
-	PrimaryOrientation ScreenOrientation
+	Orientation        ScreenOrientation `table:"-"`
+	NativeOrientation  ScreenOrientation `table:"-"`
+	PrimaryOrientation ScreenOrientation `table:"-"`
 
 	Name         string
-	Manufacturer string
-	Model        string
-	SerialNumber string
+	Manufacturer string `table:"-"`
+	Model        string `table:"-"`
+	SerialNumber string `table:"-"`
 }
 
 // ScreenOrientation is the orientation of the device screen.
