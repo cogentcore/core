@@ -19,6 +19,11 @@ import (
 	"github.com/cogentcore/webgpu/wgpu"
 )
 
+func init() {
+	// Don't remove this; it is needed to silence various irrelevant wgpu warnings
+	SetDebug(false)
+}
+
 var (
 	// Debug is whether to enable debug mode, getting
 	// more diagnostic output about GPU configuration and rendering.
@@ -61,7 +66,7 @@ func SetDebug(debug bool) {
 	if Debug {
 		wgpu.SetLogLevel(wgpu.LogLevelDebug)
 	} else {
-		wgpu.SetLogLevel(wgpu.LogLevelWarn)
+		wgpu.SetLogLevel(wgpu.LogLevelError)
 	}
 }
 
