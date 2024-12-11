@@ -8,6 +8,7 @@ package plotcore
 //go:generate core generate
 
 import (
+	"fmt"
 	"io/fs"
 	"log/slog"
 	"path/filepath"
@@ -276,7 +277,7 @@ func (pl *PlotEditor) genPlot() {
 	var err error
 	pl.plot, err = plot.NewTablePlot(pl.table)
 	if err != nil {
-		core.ErrorSnackbar(pl, err)
+		core.ErrorSnackbar(pl, fmt.Errorf("%s: %w", pl.PlotStyle.Title, err))
 	}
 	pl.plotWidget.SetPlot(pl.plot) // redraws etc
 	pl.inPlot = false
@@ -343,21 +344,40 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 	colorIdx := 0 // index for color sequence -- skips various types
 	for ci, cl := range pl.table.Columns.Values {
 		cnm := pl.table.Columns.Keys[ci]
+		// note: the stylers can persist beyond plot updating
+		// so we need to avoid continuously adding more styler functions.
+		key := "PlotEditorNStyles"
+		initNSty, err := metadata.GetFrom[int](cl, key)
 		psty := plot.GetStylersFrom(cl)
-		cst, mods := pl.defaultColumnStyle(cl, ci, &colorIdx, psty)
-		updateStyle := func() {
-			if len(mods) == 0 {
-				return
-			}
-			mf := modFields(mods)
-			sty := psty
-			sty = append(sty, func(s *plot.Style) {
-				errors.Log(reflectx.CopyFields(s, cst, mf...))
-				errors.Log(reflectx.CopyFields(&s.Plot, &pl.PlotStyle, modFields(pl.plotStyleModified)...))
-			})
-			plot.SetStylersTo(cl, sty)
+		if err == nil {
+			// if cnm == "PctCor" {
+			// 	fmt.Println("remove existing")
+			// }
+			psty = slices.Delete(psty, initNSty, initNSty+1)
 		}
-		updateStyle()
+		cst, mods := pl.defaultColumnStyle(cl, ci, &colorIdx, psty)
+		// if cnm == "PctCor" {
+		// 	fmt.Println(cnm, "redo")
+		// }
+		if err != nil {
+			metadata.SetTo(cl, key, len(psty))
+		}
+		metadata.SetTo(cl, "PlotEditorMods", mods)
+		metadata.SetTo(cl, "PlotEditorEditStyle", cst)
+		stys := psty
+		stys.Add(func(s *plot.Style) {
+			mods, _ := metadata.GetFrom[map[string]bool](cl, "PlotEditorMods")
+			cst, _ := metadata.GetFrom[*plot.Style](cl, "PlotEditorEditStyle")
+
+			mf := modFields(mods)
+			errors.Log(reflectx.CopyFields(s, cst, mf...))
+			errors.Log(reflectx.CopyFields(&s.Plot, &pl.PlotStyle, modFields(pl.plotStyleModified)...))
+			// if cnm == "PctCor" {
+			// 	fmt.Println(cnm, cst.On, s.On, mods, mf)
+			// }
+		})
+		plot.SetStylersTo(cl, stys)
+
 		tree.AddAt(p, cnm, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.CenterAll()
@@ -382,7 +402,9 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 				w.OnChange(func(e events.Event) {
 					mods["On"] = true
 					cst.On = w.IsChecked()
-					updateStyle()
+					// fmt.Println(cnm, cst.On, mods)
+					metadata.SetTo(cl, "PlotEditorMods", mods)
+					metadata.SetTo(cl, "PlotEditorEditStyle", cst)
 					pl.UpdatePlot()
 				})
 				w.Updater(func() {
@@ -399,7 +421,6 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 				w.SetText(cnm).SetType(core.ButtonAction).SetTooltip("Edit all styling options for this column")
 				w.OnClick(func(e events.Event) {
 					update := func() {
-						updateStyle()
 						if core.TheApp.Platform().IsMobile() {
 							pl.Update()
 							return
@@ -414,6 +435,8 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 					fm := core.NewForm(d).SetStruct(cst)
 					fm.Modified = mods
 					fm.OnChange(func(e events.Event) {
+						metadata.SetTo(cl, "PlotEditorMods", mods)
+						metadata.SetTo(cl, "PlotEditorEditStyle", cst)
 						update()
 					})
 					// d.AddTopBar(func(bar *core.Frame) {

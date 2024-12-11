@@ -99,10 +99,11 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 		data := Data{st.Role: cl}
 		gcols := gps[gp]
 		gotReq := true
+		gotX := -1
 		if globalX {
 			data[X] = dt.Columns.Values[xi]
+			gotX = xi
 		}
-		gotX := -1
 		for _, rl := range pt.Required {
 			if rl == st.Role || (rl == X && globalX) {
 				continue
@@ -119,7 +120,7 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 					data[rl] = dt.Columns.Values[gi]
 					got = true
 					if rl == X {
-						gotX = gi
+						gotX = gi // fallthrough so we get the last X
 					} else {
 						break
 					}
@@ -133,7 +134,6 @@ func NewTablePlot(dt *table.Table) (*Plot, error) {
 					err = fmt.Errorf("plot.NewTablePlot: Required Role %q not found in Group %q, Plotter %q not added for Column: %q", rl.String(), gp, ptyp, cnm)
 					errs = append(errs, err)
 					gotReq = false
-					fmt.Println(err)
 				}
 			}
 		}
