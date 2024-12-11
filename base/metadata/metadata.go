@@ -53,11 +53,11 @@ func Get[T any](md Data, key string) (T, error) {
 	return v, nil
 }
 
-// Copy does a shallow copy of metadata from source.
+// CopyFrom does a shallow copy of metadata from source.
 // Any pointer-based values will still point to the same
 // underlying data as the source, but the two maps remain
 // distinct.  It uses [maps.Copy].
-func (md *Data) Copy(src Data) {
+func (md *Data) CopyFrom(src Data) {
 	if src == nil {
 		return
 	}
@@ -107,4 +107,19 @@ func SetTo(obj any, key string, value any) error {
 	}
 	md.Set(key, value)
 	return nil
+}
+
+// CopyFrom copies metadata from source
+// Must pass a pointer to the object.
+func CopyFrom(to, src any) *Data {
+	tod := GetData(to)
+	if tod == nil {
+		return nil
+	}
+	srcd := GetData(src)
+	if srcd == nil {
+		return tod
+	}
+	tod.CopyFrom(*srcd)
+	return tod
 }

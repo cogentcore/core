@@ -68,6 +68,7 @@ type _cogentcore_org_core_tensor_databrowser_Tabber struct {
 	WTensorEditor    func(label string, tsr tensor.Tensor) *tensorcore.TensorEditor
 	WTensorGrid      func(label string, tsr tensor.Tensor) *tensorcore.TensorGrid
 	WTensorTable     func(label string, dt *table.Table) *tensorcore.Table
+	WUpdatePlot      func(label string) *plotcore.PlotEditor
 }
 
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) AsCoreTabs() *core.Tabs {
@@ -117,6 +118,9 @@ func (W _cogentcore_org_core_tensor_databrowser_Tabber) TensorGrid(label string,
 }
 func (W _cogentcore_org_core_tensor_databrowser_Tabber) TensorTable(label string, dt *table.Table) *tensorcore.Table {
 	return W.WTensorTable(label, dt)
+}
+func (W _cogentcore_org_core_tensor_databrowser_Tabber) UpdatePlot(label string) *plotcore.PlotEditor {
+	return W.WUpdatePlot(label)
 }
 
 // _cogentcore_org_core_tensor_databrowser_Treer is an interface wrapper for Treer type

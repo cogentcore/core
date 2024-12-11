@@ -69,6 +69,7 @@ func init() {
 		"Ring":               reflect.ValueOf(plot.Ring),
 		"RolesN":             reflect.ValueOf(plot.RolesN),
 		"RolesValues":        reflect.ValueOf(plot.RolesValues),
+		"SetStylerTo":        reflect.ValueOf(plot.SetStylerTo),
 		"SetStylersTo":       reflect.ValueOf(plot.SetStylersTo),
 		"ShapesN":            reflect.ValueOf(plot.ShapesN),
 		"ShapesValues":       reflect.ValueOf(plot.ShapesValues),

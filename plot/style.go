@@ -150,6 +150,12 @@ func GetStylersFrom(obj any) Stylers {
 	return st
 }
 
+// SetStylerTo sets the [Styler] function into given object's [metadata],
+// replacing anything that might have already been added.
+func SetStylerTo(obj any, f func(s *Style)) {
+	metadata.SetTo(obj, "PlotStylers", Stylers{f})
+}
+
 // AddStylerTo adds the given [Styler] function into given object's [metadata].
 func AddStylerTo(obj any, f func(s *Style)) {
 	st := GetStylersFrom(obj)

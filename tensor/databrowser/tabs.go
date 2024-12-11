@@ -53,6 +53,10 @@ type Tabber interface {
 	// Does nothing if tab name doesn't exist (returns nil).
 	GoUpdatePlot(label string) *plotcore.PlotEditor
 
+	// UpdatePlot calls UpdatePlot on plot at tab with given name.
+	// Does nothing if tab name doesn't exist (returns nil).
+	UpdatePlot(label string) *plotcore.PlotEditor
+
 	// todo: PlotData of plot.Node
 
 	// SliceTable recycles a tab with a [core.Table] widget
@@ -213,6 +217,16 @@ func (ts *Tabs) GoUpdatePlot(label string) *plotcore.PlotEditor {
 	pl := TabAt[*plotcore.PlotEditor](ts, label)
 	if pl != nil {
 		pl.GoUpdatePlot()
+	}
+	return pl
+}
+
+// UpdatePlot calls UpdatePlot on plot at tab with given name.
+// Does nothing if tab name doesn't exist (returns nil).
+func (ts *Tabs) UpdatePlot(label string) *plotcore.PlotEditor {
+	pl := TabAt[*plotcore.PlotEditor](ts, label)
+	if pl != nil {
+		pl.UpdatePlot()
 	}
 	return pl
 }

@@ -119,7 +119,7 @@ func (ln *XY) Plot(plt *plot.Plot) {
 	ln.PX = plot.PlotX(plt, ln.X)
 	ln.PY = plot.PlotY(plt, ln.Y)
 	np := len(ln.PX)
-	if np == 0 {
+	if np == 0 || len(ln.PY) == 0 {
 		return
 	}
 	pc := plt.Paint
