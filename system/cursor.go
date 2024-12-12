@@ -6,6 +6,7 @@ package system
 
 import (
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/styles/units"
 )
 
 // Cursor manages the mouse cursor / pointer appearance.
@@ -35,7 +36,8 @@ type Cursor interface {
 	Show()
 
 	// SetSize sets the size that cursors are rendered at.
-	SetSize(size int)
+	// The standard size is [units.Dp](32).
+	SetSize(size units.Value)
 }
 
 // CursorBase provides the common infrastructure for the [Cursor] interface,
@@ -49,8 +51,9 @@ type CursorBase struct {
 	// Vis is whether the cursor is visible; be sure to initialize to true!
 	Vis bool
 
-	// Size is the size that cursors are rendered at
-	Size int
+	// Size is the size that cursors are rendered at.
+	// The standard size is [units.Dp](32).
+	Size units.Value
 }
 
 // CursorBase should be a valid cursor so that it can be used directly in mobile
@@ -77,6 +80,6 @@ func (c *CursorBase) Show() {
 	c.Vis = true
 }
 
-func (c *CursorBase) SetSize(size int) {
+func (c *CursorBase) SetSize(size units.Value) {
 	c.Size = size
 }
