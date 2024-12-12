@@ -41,7 +41,7 @@ func (cu *Cursor) Set(cursor enums.Enum) error {
 		cu.unitContext = &units.Context{}
 		cu.unitContext.Defaults()
 	}
-	cu.unitContext.DPI = TheApp.CtxWindow.LogDPI
+	// cu.unitContext.DPI = TheApp.CtxWindow.LogDPI
 	size := int(cu.Size.ToDots(cu.unitContext))
 	if cursor == cu.Cur && size == cu.prevSize { // we already have, so we don't need to set again
 		return nil
