@@ -42,6 +42,14 @@ func (cu *Cursor) Set(cursor enums.Enum) error {
 		cu.unitContext.Defaults()
 	}
 	// cu.unitContext.DPI = TheApp.CtxWindow.LogDPI
+
+	// If the cursorimg cache got cleared (probably due to a theme change),
+	// we have to clear our cache as well.
+	if len(cursorimg.Cursors) == 0 {
+		clear(cu.cursors)
+		cu.prevSize = 0
+	}
+
 	size := int(cu.Size.ToDots(cu.unitContext))
 	if cursor == cu.Cur && size == cu.prevSize { // we already have, so we don't need to set again
 		return nil
