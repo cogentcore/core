@@ -6,11 +6,13 @@
 package cursorimg
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	_ "image/png"
+	"io/fs"
 
-	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/svg"
@@ -50,10 +52,14 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	}
 
 	sv := svg.NewSVG(size, size)
-	err := sv.OpenFS(cursors.Cursors, "svg/"+name+".svg")
+	b, err := fs.ReadFile(cursors.Cursors, "svg/"+name+".svg")
 	if err != nil {
-		err := fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
-		return nil, errors.Log(err)
+		return nil, err
+	}
+	b = replaceColors(b)
+	err = sv.ReadXML(bytes.NewReader(b))
+	if err != nil {
+		return nil, fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
 	}
 	sv.Render()
 	return &Cursor{
@@ -61,4 +67,17 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 		Size:    size,
 		Hotspot: hot.Mul(size).Div(256),
 	}, nil
+}
+
+// replaceColors replaces literal cursor colors in the given SVG with scheme colors.
+func replaceColors(b []byte) []byte {
+	m := map[string]image.Image{
+		"#fff": colors.Scheme.Surface,
+		"#000": colors.Scheme.OnSurface,
+	}
+	for old, clr := range m {
+		b = bytes.ReplaceAll(b, []byte(fmt.Sprintf("%q", old)), []byte(fmt.Sprintf("%q", colors.AsHex(colors.ToUniform(clr)))))
+	}
+	fmt.Println(string(b))
+	return b
 }
