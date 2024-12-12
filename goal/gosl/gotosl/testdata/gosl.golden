@@ -150,6 +150,16 @@ func ToGPU(vars ...GPUVars) {
 		}
 	}
 }
+// RunGPUSync can be called to synchronize data between CPU and GPU.
+// Any prior ToGPU* calls will execute to send data to the GPU,
+// and any subsequent RunDone* calls will copy data back from the GPU.
+func RunGPUSync() {
+	if !UseGPU {
+		return
+	}
+	sy := GPUSystem
+	sy.BeginComputePass()
+}
 
 // ReadFromGPU starts the process of copying vars to the GPU.
 func ReadFromGPU(vars ...GPUVars) {

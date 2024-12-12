@@ -10,11 +10,7 @@
 
 /*
 gosl translates Go source code into WGSL compatible shader code.
-use //gosl:start <filename> and //gosl:end <filename> to
-bracket code that should be copied into shaders/<filename>.wgsl
-Use //gosl:main <filename> instead of start for shader code that is
-commented out in the .go file, which will be copied into the filename
-and uncommented.
+Use //gosl:start and //gosl:end to bracket code to generate.
 
 pass filenames or directory names for files to process.
 
@@ -27,7 +23,7 @@ The flags are:
 	-debug
 	  	enable debugging messages while running
 	-exclude string
-	  	comma-separated list of names of functions to exclude from exporting to HLSL (default "Update,Defaults")
+	  	comma-separated list of names of functions to exclude from exporting to WGSL (default "Update,Defaults")
 	-keep
 	  	keep temporary converted versions of the source files, for debugging
 	-out string

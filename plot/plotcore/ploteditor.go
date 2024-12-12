@@ -344,33 +344,17 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 	colorIdx := 0 // index for color sequence -- skips various types
 	for ci, cl := range pl.table.Columns.Values {
 		cnm := pl.table.Columns.Keys[ci]
-		// note: the stylers can persist beyond plot updating
-		// so we need to avoid continuously adding more styler functions.
-		initNSty, err := metadata.GetFrom[int](cl, "PlotEditorNStyles")
-		psty := plot.GetStylersFrom(cl)
-		if err == nil {
-			psty = slices.Delete(psty, initNSty, initNSty+1)
-		}
-		cst, mods := pl.defaultColumnStyle(cl, ci, &colorIdx, psty)
-		if err != nil { // first time
-			metadata.SetTo(cl, "PlotEditorNStyles", len(psty))
-			metadata.SetTo(cl, "PlotEditorMods", mods)
-			metadata.SetTo(cl, "PlotEditorStyle", cst)
-		} else { // recover prior settings
-			mods, _ = metadata.GetFrom[map[string]bool](cl, "PlotEditorMods")
-			cst, _ = metadata.GetFrom[*plot.Style](cl, "PlotEditorStyle")
-		}
-		stys := psty
-		stys.Add(func(s *plot.Style) {
-			mods, _ := metadata.GetFrom[map[string]bool](cl, "PlotEditorMods")
-			cst, _ := metadata.GetFrom[*plot.Style](cl, "PlotEditorStyle")
-			mf := modFields(mods)
-			errors.Log(reflectx.CopyFields(s, cst, mf...))
-			errors.Log(reflectx.CopyFields(&s.Plot, &pl.PlotStyle, modFields(pl.plotStyleModified)...))
-		})
-		plot.SetStylersTo(cl, stys)
-
 		tree.AddAt(p, cnm, func(w *core.Frame) {
+			psty := plot.GetStylersFrom(cl)
+			cst, mods := pl.defaultColumnStyle(cl, ci, &colorIdx, psty)
+			stys := psty
+			stys.Add(func(s *plot.Style) {
+				mf := modFields(mods)
+				errors.Log(reflectx.CopyFields(s, cst, mf...))
+				errors.Log(reflectx.CopyFields(&s.Plot, &pl.PlotStyle, modFields(pl.plotStyleModified)...))
+			})
+			plot.SetStylersTo(cl, stys)
+
 			w.Styler(func(s *styles.Style) {
 				s.CenterAll()
 			})
@@ -394,8 +378,6 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 				w.OnChange(func(e events.Event) {
 					mods["On"] = true
 					cst.On = w.IsChecked()
-					metadata.SetTo(cl, "PlotEditorMods", mods)
-					metadata.SetTo(cl, "PlotEditorStyle", cst)
 					pl.UpdatePlot()
 				})
 				w.Updater(func() {
@@ -426,8 +408,6 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 					fm := core.NewForm(d).SetStruct(cst)
 					fm.Modified = mods
 					fm.OnChange(func(e events.Event) {
-						metadata.SetTo(cl, "PlotEditorMods", mods)
-						metadata.SetTo(cl, "PlotEditorStyle", cst)
 						update()
 					})
 					// d.AddTopBar(func(bar *core.Frame) {

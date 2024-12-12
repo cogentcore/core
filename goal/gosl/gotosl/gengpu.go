@@ -309,6 +309,19 @@ func %[1]sToGPU(vars ...GPUVars) {
 	}
 	b.WriteString("\t\t}\n\t}\n}\n")
 
+	runSync := `// Run%[1]sGPUSync can be called to synchronize data between CPU and GPU.
+// Any prior ToGPU* calls will execute to send data to the GPU,
+// and any subsequent RunDone* calls will copy data back from the GPU.
+func Run%[1]sGPUSync() {
+	if !UseGPU {
+		return
+	}
+	sy := %[2]s
+	sy.BeginComputePass()
+}
+`
+	b.WriteString(fmt.Sprintf(runSync, synm, syvar))
+
 	if sy.NTensors > 0 {
 		tensorStrides := `
 // %[1]sToGPUTensorStrides gets tensor strides and starts copying to the GPU.
