@@ -74,6 +74,7 @@ func replaceColors(b []byte) []byte {
 	m := map[string]image.Image{
 		"#fff": colors.Scheme.Surface,
 		"#000": colors.Scheme.OnSurface,
+		"#f00": colors.Scheme.Error.Base,
 	}
 	for old, clr := range m {
 		b = bytes.ReplaceAll(b, []byte(fmt.Sprintf("%q", old)), []byte(fmt.Sprintf("%q", colors.AsHex(colors.ToUniform(clr)))))
