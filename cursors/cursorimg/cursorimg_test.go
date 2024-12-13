@@ -32,13 +32,13 @@ func TestCursors(t *testing.T) {
 			y := ((i - 1) / 10) * 100
 			draw.Draw(img, cur.Image.Bounds().Add(image.Pt(x, y+yOffset)), cur.Image, image.Point{}, draw.Over)
 		}
-		imagex.Assert(t, img, "cursors")
 	}
 
 	do(0)
 	colors.SetScheme(true)
 	do(400)
 	colors.SetScheme(false)
+	imagex.Assert(t, img, "cursors")
 }
 
 func TestHotspot(t *testing.T) {
