@@ -34,15 +34,20 @@ const (
 	PcPerInch = 6
 )
 
-// Units is an enum that represents a unit (px, em, etc)
+// Units is an enum that represents a unit (dp, px, em, etc).
+// See the website documentation on units for more information.
 type Units int32 //enums:enum -trim-prefix Unit -transform lower
 
 const (
 	// UnitDp represents density-independent pixels. 1dp is 1/160 in.
+	// Inches are not necessarily the same as actual physical inches, as they
+	// depend on the DPI, so dp values may correspond to different physical sizes
+	// on different displays, but they will look correct.
 	UnitDp Units = iota
 
 	// UnitPx represents logical pixels. 1px is 1/96 in.
 	// These are not raw display pixels, for which you should use dots.
+	// Dp is a more common unit for general use.
 	UnitPx
 
 	// UnitEw represents percentage of element width, which is equivalent to CSS % in some contexts.
@@ -85,19 +90,21 @@ const (
 	// UnitVmax represents percentage of the larger dimension of the viewport (Scene).
 	UnitVmax
 
-	// UnitCm represents centimeters. 1cm is 1/2.54 in.
+	// UnitCm represents logical centimeters. 1cm is 1/2.54 in.
 	UnitCm
 
-	// UnitMm represents millimeters. 1mm is 1/10 cm.
+	// UnitMm represents logical millimeters. 1mm is 1/10 cm.
 	UnitMm
 
-	// UnitQ represents quarter-millimeters. 1q is 1/40 cm.
+	// UnitQ represents logical quarter-millimeters. 1q is 1/40 cm.
 	UnitQ
 
-	// UnitIn represents inches. 1in is 2.54cm or 96px.
+	// UnitIn represents logical inches. 1in is 2.54cm or 96px.
+	// This is similar to CSS inches in that it is not necessarily the same
+	// as an actual physical inch; it is dependent on the DPI of the display.
 	UnitIn
 
-	// UnitPc represents picas. 1pc is 1/6 in.
+	// UnitPc represents logical picas. 1pc is 1/6 in.
 	UnitPc
 
 	// UnitPt represents points. 1pt is 1/72 in.

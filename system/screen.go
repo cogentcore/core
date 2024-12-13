@@ -11,7 +11,8 @@ package system
 
 import (
 	"image"
-	"math"
+
+	"cogentcore.org/core/math32"
 )
 
 var (
@@ -56,7 +57,8 @@ type Screen struct {
 
 	// LogicalDPI is the logical dots per inch of the screen,
 	// which is used for all rendering.
-	// It is: transient zoom factor * screen-specific multiplier * PhysicalDPI
+	// It is 160 * DevicePixelRatio * zoom factor, rounded to the nearest 6
+	// for optimal font rendering.
 	LogicalDPI float32
 
 	// PhysicalDPI is the physical dots per inch of the screen,
@@ -115,14 +117,12 @@ const (
 	Landscape
 )
 
-// LogicalFromPhysicalDPI computes the logical DPI used in actual screen scaling
-// based on the given logical DPI scale factor (logScale), and also makes it a
-// multiple of 6 to make normal font sizes look best.
-func LogicalFromPhysicalDPI(logScale, pdpi float32) float32 {
-	idpi := int(math.Round(float64(pdpi * logScale)))
-	mdpi := idpi / 6
-	mdpi *= 6
-	return float32(mdpi)
+// computeLogicalDPI computes the logical DPI used in actual screen scaling
+// based on the given device pixel ratio and scaling factor. It also makes it a
+// multiple of 6 to make normal font sizes look best. DPI is 160 * dpr * scale.
+func computeLogicalDPI(dpr, scale float32) float32 {
+	dpi := 160 * dpr * scale
+	return 6 * math32.Round(dpi/6)
 }
 
 // SetLogicalDPIScale sets the LogicalDPIScale factor for given screen name
@@ -136,14 +136,13 @@ func SetLogicalDPIScale(scrnName string, dpiScale float32) {
 // UpdateLogicalDPI updates the logical DPI of the screen
 // based on ZoomFactor and LogicalDPIScale (per screen if exists)
 func (sc *Screen) UpdateLogicalDPI() {
-	dpisc := LogicalDPIScale
+	scale := LogicalDPIScale
 	if LogicalDPIScales != nil {
 		if dsc, has := LogicalDPIScales[sc.Name]; has {
-			dpisc = dsc
+			scale = dsc
 		}
 	}
-	sc.LogicalDPI = LogicalFromPhysicalDPI(dpisc, sc.PhysicalDPI)
-	// fmt.Println("log dpi:", sc.LogicalDPI, "zoom:", ZoomFactor, "dpisc:", dpisc)
+	sc.LogicalDPI = computeLogicalDPI(sc.DevicePixelRatio, scale)
 }
 
 // UpdatePhysicalDPI updates the value of [Screen.PhysicalDPI] based on
