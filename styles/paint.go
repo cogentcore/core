@@ -131,7 +131,7 @@ func (pc *Paint) ToDots() {
 	}
 }
 
-type FillRules int32 //enums:enum -trim-prefix FillRule -transform kebab
+type FillRules int32 //enums:enum -trim-prefix FillRule -transform lower
 
 const (
 	FillRuleNonZero FillRules = iota

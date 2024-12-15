@@ -95,6 +95,7 @@ func (w *Window) newGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen)
 	} else {
 		glfw.WindowHint(glfw.Decorated, glfw.True)
 	}
+	glfw.WindowHint(glfw.CocoaRetinaFramebuffer, glfw.True)
 	// glfw.WindowHint(glfw.TransparentFramebuffer, glfw.True)
 	// todo: glfw.Floating for always-on-top -- could set for modal
 	sz := opts.Size
