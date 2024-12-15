@@ -4,7 +4,10 @@
 
 package matcolor
 
-import "image"
+import (
+	"image"
+	"image/color"
+)
 
 //go:generate core generate
 
@@ -185,7 +188,8 @@ func NewDarkScheme(p *Palette) Scheme {
 		Outline:        p.NeutralVariant.AbsToneUniform(60),
 		OutlineVariant: p.NeutralVariant.AbsToneUniform(30),
 
-		Shadow:      p.Neutral.AbsToneUniform(0),
+		// We want some visible "glow" shadow, but not too much
+		Shadow:      image.NewUniform(color.RGBA{127, 127, 127, 127}),
 		SurfaceTint: p.Primary.AbsToneUniform(80),
 		Scrim:       p.Neutral.AbsToneUniform(0),
 	}
