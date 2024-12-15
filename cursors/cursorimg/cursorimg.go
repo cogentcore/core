@@ -73,9 +73,13 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	}
 	sv.Render()
 
-	shadow := image.NewRGBA(sv.Pixels.Bounds())
+	blurRadius := size / 16
+	bounds := sv.Pixels.Bounds()
+	// We need to add extra space so that the shadow doesn't get clipped.
+	bounds.Max = bounds.Max.Add(image.Pt(blurRadius, blurRadius))
+	shadow := image.NewRGBA(bounds)
 	draw.DrawMask(shadow, shadow.Bounds(), gradient.ApplyOpacity(colors.Scheme.Shadow, 0.3), image.Point{}, sv.Pixels, image.Point{}, draw.Src)
-	shadow = paint.GaussianBlur(shadow, float64(size)/16)
+	shadow = paint.GaussianBlur(shadow, float64(blurRadius))
 	draw.Draw(shadow, shadow.Bounds(), sv.Pixels, image.Point{}, draw.Over)
 
 	return &Cursor{
