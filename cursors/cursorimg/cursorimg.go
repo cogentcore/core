@@ -9,12 +9,15 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"image/draw"
 	_ "image/png"
 	"io/fs"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/svg"
 )
 
@@ -62,8 +65,14 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 		return nil, fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
 	}
 	sv.Render()
+
+	shadow := image.NewRGBA(sv.Pixels.Bounds())
+	draw.DrawMask(shadow, shadow.Bounds(), gradient.ApplyOpacity(colors.Scheme.Shadow, 0.3), image.Point{}, sv.Pixels, image.Point{}, draw.Src)
+	shadow = paint.GaussianBlur(shadow, 3)
+	draw.Draw(shadow, shadow.Bounds(), sv.Pixels, image.Pt(size/16, size/16), draw.Over)
+
 	return &Cursor{
-		Image:   sv.Pixels,
+		Image:   shadow,
 		Size:    size,
 		Hotspot: hot.Mul(size).Div(256),
 	}, nil
