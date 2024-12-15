@@ -69,7 +69,7 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	shadow := image.NewRGBA(sv.Pixels.Bounds())
 	draw.DrawMask(shadow, shadow.Bounds(), gradient.ApplyOpacity(colors.Scheme.Shadow, 0.3), image.Point{}, sv.Pixels, image.Point{}, draw.Src)
 	shadow = paint.GaussianBlur(shadow, 3)
-	draw.Draw(shadow, shadow.Bounds(), sv.Pixels, image.Pt(size/16, size/16), draw.Over)
+	draw.Draw(shadow, shadow.Bounds(), sv.Pixels, image.Point{}, draw.Over)
 
 	return &Cursor{
 		Image:   shadow,
