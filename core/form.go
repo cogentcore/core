@@ -121,8 +121,8 @@ func (fm *Form) getStructFields() {
 func (fm *Form) Init() {
 	fm.Frame.Init()
 	fm.Styler(func(s *styles.Style) {
-		s.Align.Items = styles.Center
 		if fm.Inline {
+			s.Align.Items = styles.Center
 			return
 		}
 		s.Display = styles.Grid
