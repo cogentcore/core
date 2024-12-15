@@ -41,7 +41,11 @@ func (cu *Cursor) Set(cursor enums.Enum) error {
 		cu.unitContext = &units.Context{}
 		cu.unitContext.Defaults()
 	}
-	// cu.unitContext.DPI = TheApp.CtxWindow.LogDPI
+	cu.unitContext.DPI = TheApp.CtxWindow.LogDPI
+	if TheApp.Platform() == system.MacOS {
+		// The DPR is automatically applied to cursors on macOS already, so we cannot apply it here.
+		cu.unitContext.DPI /= TheApp.CtxWindow.DevicePixelRatio
+	}
 
 	// If the cursorimg cache got cleared (probably due to a theme change),
 	// we have to clear our cache as well.
