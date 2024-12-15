@@ -475,8 +475,9 @@ func (em *Events) handlePosEvent(e events.Event) {
 					em.lastDoubleClickWidget = nil
 					em.lastClickWidget = up
 					if em.focus != up {
-						em.focusClear() // always any other focus before the click is processed
+						// always clear any other focus before the click is processed.
 						// this causes textfields etc to apply their changes.
+						em.focusClear()
 					}
 					up.AsWidget().Send(events.Click, e)
 				}
