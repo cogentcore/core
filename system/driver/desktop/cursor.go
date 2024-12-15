@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/cursors/cursorimg"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -54,7 +55,11 @@ func (cu *Cursor) Set(cursor enums.Enum) error {
 		cu.prevSize = 0
 	}
 
-	size := int(cu.Size.ToDots(cu.unitContext))
+	sizef := cu.Size.ToDots(cu.unitContext)
+	// Multiples of 2 are less blurry on macOS Retina displays
+	// (TODO: make cursors less blurry on macOS Retina displays:
+	// https://github.com/cogentcore/core/issues/1373).
+	size := int(math32.Round(sizef/2) * 2)
 	if cursor == cu.Cur && size == cu.prevSize { // we already have, so we don't need to set again
 		return nil
 	}

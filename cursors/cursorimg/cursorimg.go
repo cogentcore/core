@@ -40,11 +40,11 @@ var Cursors = map[enums.Enum]map[int]*Cursor{}
 // with the given size. If it is not already cached in [Cursors], it renders and caches it.
 //
 // It automatically replaces literal colors in svg with appropriate scheme colors as follows:
-//   - #fff: Surface
-//   - #000: OnSurface
-//   - #f00: Error.Base
-//   - #0f0: Success.Base
-//   - #ff0: Warn.Base
+//   - #fff: [colors.Palette].Neutral.ToneUniform(100)
+//   - #000: [colors.Palette].Neutral.ToneUniform(0)
+//   - #f00: [colors.Scheme].Error.Base
+//   - #0f0: [colors.Scheme].Success.Base
+//   - #ff0: [colors.Scheme].Warn.Base
 func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	sm := Cursors[cursor]
 	if sm == nil {
@@ -92,8 +92,8 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 // replaceColors replaces literal cursor colors in the given SVG with scheme colors.
 func replaceColors(b []byte) []byte {
 	m := map[string]image.Image{
-		"#fff": colors.Scheme.Surface,
-		"#000": colors.Scheme.OnSurface,
+		"#fff": colors.Palette.Neutral.ToneUniform(100),
+		"#000": colors.Palette.Neutral.ToneUniform(0),
 		"#f00": colors.Scheme.Error.Base,
 		"#0f0": colors.Scheme.Success.Base,
 		"#ff0": colors.Scheme.Warn.Base,
