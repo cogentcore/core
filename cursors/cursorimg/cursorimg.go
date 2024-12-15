@@ -38,6 +38,13 @@ var Cursors = map[enums.Enum]map[int]*Cursor{}
 
 // Get returns the cursor object corresponding to the given cursor enum,
 // with the given size. If it is not already cached in [Cursors], it renders and caches it.
+//
+// It automatically replaces literal colors in svg with appropriate scheme colors as follows:
+//   - #fff: Surface
+//   - #000: OnSurface
+//   - #f00: Error.Base
+//   - #0f0: Success.Base
+//   - #ff0: Warn.Base
 func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	sm := Cursors[cursor]
 	if sm == nil {
