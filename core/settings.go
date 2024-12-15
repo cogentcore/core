@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
+	"cogentcore.org/core/cursors/cursorimg"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
@@ -205,7 +206,10 @@ func UpdateSettings(ctx Widget, se Settings) {
 // UpdateAll updates all windows and triggers a full render rebuild.
 // It is typically called when user settings are changed.
 func UpdateAll() { //types:add
-	gradient.Cache = nil // the cache is invalid now
+	// Some caches are invalid now:
+	clear(gradient.Cache)
+	clear(cursorimg.Cursors)
+
 	for _, w := range AllRenderWindows {
 		rc := w.mains.renderContext
 		rc.logicalDPI = w.logicalDPI()
@@ -787,6 +791,10 @@ type DebugSettingsData struct { //types:add
 
 	// Print a trace of DND event handling
 	DNDTrace bool
+
+	// DisableWindowGeometrySaver disables the saving and loading of window geometry
+	// data to allow for easier testing of window manipulation code.
+	DisableWindowGeometrySaver bool
 
 	// Print a trace of Go language completion and lookup process
 	GoCompleteTrace bool

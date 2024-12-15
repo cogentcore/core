@@ -346,8 +346,8 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			a.Scrn.Orientation = orientation
 
 			a.Scrn.DevicePixelRatio = 1
-			a.Scrn.PixSize = image.Pt(widthPx, heightPx)
-			a.Scrn.Geometry.Max = a.Scrn.PixSize
+			a.Scrn.PixelSize = image.Pt(widthPx, heightPx)
+			a.Scrn.Geometry.Max = a.Scrn.PixelSize
 
 			a.Scrn.PhysicalDPI = dpi
 			a.Scrn.LogicalDPI = dpi
@@ -365,7 +365,7 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 				system.OnSystemWindowCreated <- struct{}{}
 			}
 
-			a.Draw.System.Renderer.SetSize(a.Scrn.PixSize)
+			a.Draw.System.Renderer.SetSize(a.Scrn.PixelSize)
 			a.Event.WindowResize()
 		case <-windowDestroyed:
 			// we need to set the size of the window to 0 so that it detects a size difference

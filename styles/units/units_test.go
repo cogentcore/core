@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"testing"
 
-	"cogentcore.org/core/math32"
+	"cogentcore.org/core/base/tolassert"
 )
 
 func TestToDots(t *testing.T) {
 	tests := map[Units]float32{
-		UnitPx:   50,
-		UnitDp:   30,
+		UnitPx:   83.33333,
+		UnitDp:   50,
 		UnitEw:   200,
 		UnitEh:   250,
 		UnitPw:   450,
@@ -27,12 +27,12 @@ func TestToDots(t *testing.T) {
 		UnitVh:   540,
 		UnitVmin: 540,
 		UnitVmax: 960,
-		UnitCm:   1889.7638,
-		UnitMm:   188.97638,
-		UnitQ:    47.244095,
-		UnitIn:   4800,
-		UnitPc:   800,
-		UnitPt:   66.66667,
+		UnitCm:   3149.6064,
+		UnitMm:   314.96063,
+		UnitQ:    78.74016,
+		UnitIn:   8000,
+		UnitPc:   1333.3333,
+		UnitPt:   111.111115,
 		UnitDot:  50,
 	}
 	var uc Context
@@ -46,9 +46,7 @@ func TestToDots(t *testing.T) {
 	for unit, want := range tests {
 		v := New(50, unit)
 		have := v.ToDots(&uc)
-		if math32.Abs(have-want) > 0.001 {
-			t.Errorf("expected %g for %v, but got %g", want, unit, have)
-		}
+		tolassert.Equal(t, want, have, unit)
 	}
 }
 

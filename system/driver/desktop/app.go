@@ -104,26 +104,24 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 		sc = a.Screens[opts.Screen]
 	}
 
-	var glw *glfw.Window
+	w := &Window{
+		WindowMulti:  base.NewWindowMulti[*App, *gpudraw.Drawer](a, opts),
+		ScreenWindow: sc.Name,
+	}
+	w.This = w
+
 	var err error
 	a.RunOnMain(func() {
-		glw, err = NewGlfwWindow(opts, sc)
+		err = w.newGlfwWindow(opts, sc)
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	w := &Window{
-		WindowMulti:  base.NewWindowMulti[*App, *gpudraw.Drawer](a, opts),
-		Glw:          glw,
-		ScreenWindow: sc.Name,
-	}
-	w.This = w
-
 	a.RunOnMain(func() {
-		surf := gpu.Instance().CreateSurface(wgpuglfw.GetSurfaceDescriptor(glw))
+		surf := gpu.Instance().CreateSurface(wgpuglfw.GetSurfaceDescriptor(w.Glw))
 		var fbsz image.Point
-		fbsz.X, fbsz.Y = glw.GetFramebufferSize()
+		fbsz.X, fbsz.Y = w.Glw.GetFramebufferSize()
 		if fbsz == (image.Point{}) {
 			fbsz = opts.Size
 		}
@@ -141,32 +139,25 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	a.Windows = append(a.Windows, w)
 	a.Mu.Unlock()
 
-	glw.SetPosCallback(w.Moved)
-	glw.SetSizeCallback(w.WinResized)
-	glw.SetFramebufferSizeCallback(w.FbResized)
-	glw.SetCloseCallback(w.OnCloseReq)
-	// glw.SetRefreshCallback(w.refresh)
-	glw.SetFocusCallback(w.Focused)
-	glw.SetIconifyCallback(w.Iconify)
+	w.Glw.SetPosCallback(w.Moved)
+	w.Glw.SetSizeCallback(w.WinResized)
+	w.Glw.SetFramebufferSizeCallback(w.FbResized)
+	w.Glw.SetCloseCallback(w.OnCloseReq)
+	// w.Glw.SetRefreshCallback(w.refresh)
+	w.Glw.SetFocusCallback(w.Focused)
+	w.Glw.SetIconifyCallback(w.Iconify)
 
-	glw.SetKeyCallback(w.KeyEvent)
-	glw.SetCharModsCallback(w.CharEvent)
-	glw.SetMouseButtonCallback(w.MouseButtonEvent)
-	glw.SetScrollCallback(w.ScrollEvent)
-	glw.SetCursorPosCallback(w.CursorPosEvent)
-	glw.SetCursorEnterCallback(w.CursorEnterEvent)
-	glw.SetDropCallback(w.DropEvent)
+	w.Glw.SetKeyCallback(w.KeyEvent)
+	w.Glw.SetCharModsCallback(w.CharEvent)
+	w.Glw.SetMouseButtonCallback(w.MouseButtonEvent)
+	w.Glw.SetScrollCallback(w.ScrollEvent)
+	w.Glw.SetCursorPosCallback(w.CursorPosEvent)
+	w.Glw.SetCursorEnterCallback(w.CursorEnterEvent)
+	w.Glw.SetDropCallback(w.DropEvent)
 
 	w.Show()
 	a.RunOnMain(func() {
 		w.updateGeometry()
-		zp := image.Point{}
-		if w.Pos == zp && opts.Pos != zp {
-			w.Pos = opts.Pos
-		}
-		if w.WnSize == zp && opts.Size != zp {
-			w.WnSize = opts.Size
-		}
 		w.ConstrainFrame(false) // constrain full frame on open
 	})
 

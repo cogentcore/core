@@ -149,7 +149,7 @@ func (a *App) GetScreens() {
 					sc.Name = MacOsBuiltinMonitor
 					sc.Geometry.Max = image.Point{2056, 1329}
 					sc.DevicePixelRatio = 2
-					sc.PixSize = sc.Geometry.Max.Mul(2)
+					sc.PixelSize = sc.Geometry.Max.Mul(2)
 					sc.PhysicalSize = image.Point{344, 222}
 					sc.UpdatePhysicalDPI()
 					sc.Depth = 24
@@ -201,7 +201,7 @@ func (a *App) GetScreens() {
 		sc.ScreenNumber = scNo
 		sc.Geometry = image.Rectangle{Min: image.Point{x, y}, Max: image.Point{x + vm.Width, y + vm.Height}}
 		sc.DevicePixelRatio = cscx
-		sc.PixSize = sc.WinSizeToPix(image.Point{vm.Width, vm.Height})
+		sc.PixelSize = sc.WindowSizeToPixels(image.Point{vm.Width, vm.Height})
 		depth := vm.RedBits + vm.GreenBits + vm.BlueBits
 		sc.Depth = depth
 		sc.PhysicalSize = image.Point{pw, ph}

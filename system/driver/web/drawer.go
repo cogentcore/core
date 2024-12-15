@@ -51,7 +51,7 @@ func (a *App) InitDrawer() {
 	}
 	gp := gpu.NewGPU(nil)
 	surf := gpu.Instance().CreateSurface(nil)
-	sf := gpu.NewSurface(gp, surf, a.Scrn.PixSize, 1, gpu.UndefinedType)
+	sf := gpu.NewSurface(gp, surf, a.Scrn.PixelSize, 1, gpu.UndefinedType)
 	a.Draw.wgpu = gpudraw.NewDrawer(gp, sf)
 }
 

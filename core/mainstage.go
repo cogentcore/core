@@ -54,13 +54,17 @@ func (bd *Body) RunMainWindow() {
 // on the [Stage]. It can not be called more than once for one app.
 // For secondary stages, see [Stage.Run].
 func (st *Stage) RunMain() {
+	if ExternalParent != nil {
+		st.Scene.Body.handleExternalParent()
+		return
+	}
 	st.Run()
 	Wait()
 }
 
 // ExternalParent is a parent widget external to this program.
 // If it is set, calls to [Body.RunWindow] before [Wait] and
-// calls to [Body.RunMainWindow] will add the [Body] to this
+// calls to [Body.RunMainWindow] and [Stage.RunMain] will add the [Body] to this
 // parent instead of creating a new window. It should typically not be
 // used by end users; it is used in yaegicore and for pre-rendering apps
 // as HTML that can be used as a preview and for SEO purposes.
@@ -178,11 +182,17 @@ func (st *Stage) firstWindowStages() *stages {
 	return ms
 }
 
-func (st *Stage) currentScreen() *system.Screen {
+// targetScreen returns the screen to use for opening a new window
+// based on Screen field, currentRenderWindow's screen, and a fallback
+// default of Screen 0.
+func (st *Stage) targetScreen() *system.Screen {
+	if st.Screen >= 0 && st.Screen < TheApp.NScreens() {
+		return TheApp.Screen(st.Screen)
+	}
 	if currentRenderWindow != nil {
 		return currentRenderWindow.SystemWindow.Screen()
 	}
-	return system.TheApp.Screen(0)
+	return TheApp.Screen(0)
 }
 
 // configMainStage does main-stage configuration steps
@@ -252,19 +262,19 @@ func (st *Stage) runWindow() *Stage {
 				}
 				if nsz != csz {
 					currentRenderWindow.SystemWindow.SetSize(nsz)
-					system.TheApp.GetScreens()
+					TheApp.GetScreens()
 				}
 			}
 		} else {
 			// on other platforms, we want extra space and a minimum window size
 			sz = sz.Add(image.Pt(20, 20))
-			screen := st.currentScreen()
+			screen := st.targetScreen()
 			if screen != nil {
 				st.SetScreen(screen.ScreenNumber)
 				if st.NewWindow && st.UseMinSize {
 					// we require windows to be at least 60% and no more than 80% of the
 					// screen size by default
-					scsz := screen.PixSize
+					scsz := screen.PixelSize
 					sz = image.Pt(max(sz.X, scsz.X*6/10), max(sz.Y, scsz.Y*6/10))
 					sz = image.Pt(min(sz.X, scsz.X*8/10), min(sz.Y, scsz.Y*8/10))
 				}
@@ -351,7 +361,7 @@ func (st *Stage) runDialog() *Stage {
 			sz.X = max(sz.X, minx)
 		}
 		sc.Events.startFocusFirst = true // popup dialogs always need focus
-		screen := st.currentScreen()
+		screen := st.targetScreen()
 		if screen != nil {
 			st.SetScreen(screen.ScreenNumber)
 		}
@@ -392,11 +402,13 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	opts.Flags.SetFlag(!st.Resizable, system.FixedSize)
 	opts.Flags.SetFlag(st.Maximized, system.Maximized)
 	opts.Flags.SetFlag(st.Fullscreen, system.Fullscreen)
+	screen := st.targetScreen()
 	screenName := ""
-	if st.Screen > 0 {
-		screenName = TheApp.Screen(st.Screen).Name
+	if screen != nil {
+		screenName = screen.Name
 	}
-	wgp, screen := theWindowGeometrySaver.get(title, screenName)
+	var wgp *windowGeometry
+	wgp, screen = theWindowGeometrySaver.get(title, screenName)
 	if wgp != nil {
 		theWindowGeometrySaver.settingStart()
 		opts.Screen = screen.ScreenNumber

@@ -11,7 +11,8 @@ package system
 
 import (
 	"image"
-	"math"
+
+	"cogentcore.org/core/math32"
 )
 
 var (
@@ -28,11 +29,15 @@ var (
 
 // note: fields obtained from QScreen in Qt
 
-// Screen contains data about each physical and / or logical screen
+// Screen contains data about each physical and/or logical screen.
 type Screen struct {
+
 	// ScreenNumber is the index of this screen in the list of screens
 	// maintained under Screen.
 	ScreenNumber int
+
+	// Name is the name of the screen.
+	Name string
 
 	// Geometry contains the geometry of the screen in window manager
 	// size units, which may not be same as raw pixels (dots)
@@ -43,21 +48,22 @@ type Screen struct {
 	// On OS-X, it is backingScaleFactor = 2.0 on "retina"
 	DevicePixelRatio float32
 
-	// PixSize is the number of actual pixels in the screen
+	// PixelSize is the number of actual pixels in the screen
 	// (raw display dots), computed as Size * DevicePixelRatio
-	PixSize image.Point
+	PixelSize image.Point
 
 	// PhysicalSize is the actual physical size of the screen, in mm.
 	PhysicalSize image.Point
 
 	// LogicalDPI is the logical dots per inch of the screen,
 	// which is used for all rendering.
-	// It is: transient zoom factor * screen-specific multiplier * PhysicalDPI
+	// It is 160 * DevicePixelRatio * zoom factor, rounded to the nearest 6
+	// for optimal font rendering.
 	LogicalDPI float32
 
 	// PhysicalDPI is the physical dots per inch of the screen,
 	// for generating true-to-physical-size output.
-	// It is computed as 25.4 * (PixSize.X / PhysicalSize.X)
+	// It is computed as 25.4 * (PixelSize.X / PhysicalSize.X)
 	// where 25.4 is the number of mm per inch.
 	PhysicalDPI float32
 
@@ -72,14 +78,13 @@ type Screen struct {
 	// VirtualGeometry          image.Rectangle
 	// AvailableVirtualGeometry image.Rectangle
 
-	Orientation        ScreenOrientation
-	NativeOrientation  ScreenOrientation
-	PrimaryOrientation ScreenOrientation
+	Orientation        ScreenOrientation `table:"-"`
+	NativeOrientation  ScreenOrientation `table:"-"`
+	PrimaryOrientation ScreenOrientation `table:"-"`
 
-	Name         string
-	Manufacturer string
-	Model        string
-	SerialNumber string
+	Manufacturer string `table:"-"`
+	Model        string `table:"-"`
+	SerialNumber string `table:"-"`
 }
 
 // ScreenOrientation is the orientation of the device screen.
@@ -112,14 +117,12 @@ const (
 	Landscape
 )
 
-// LogicalFromPhysicalDPI computes the logical DPI used in actual screen scaling
-// based on the given logical DPI scale factor (logScale), and also makes it a
-// multiple of 6 to make normal font sizes look best.
-func LogicalFromPhysicalDPI(logScale, pdpi float32) float32 {
-	idpi := int(math.Round(float64(pdpi * logScale)))
-	mdpi := idpi / 6
-	mdpi *= 6
-	return float32(mdpi)
+// computeLogicalDPI computes the logical DPI used in actual screen scaling
+// based on the given device pixel ratio and scaling factor. It also makes it a
+// multiple of 6 to make normal font sizes look best. DPI is 160 * dpr * scale.
+func computeLogicalDPI(dpr, scale float32) float32 {
+	dpi := 160 * dpr * scale
+	return 6 * math32.Round(dpi/6)
 }
 
 // SetLogicalDPIScale sets the LogicalDPIScale factor for given screen name
@@ -133,45 +136,44 @@ func SetLogicalDPIScale(scrnName string, dpiScale float32) {
 // UpdateLogicalDPI updates the logical DPI of the screen
 // based on ZoomFactor and LogicalDPIScale (per screen if exists)
 func (sc *Screen) UpdateLogicalDPI() {
-	dpisc := LogicalDPIScale
+	scale := LogicalDPIScale
 	if LogicalDPIScales != nil {
 		if dsc, has := LogicalDPIScales[sc.Name]; has {
-			dpisc = dsc
+			scale = dsc
 		}
 	}
-	sc.LogicalDPI = LogicalFromPhysicalDPI(dpisc, sc.PhysicalDPI)
-	// fmt.Println("log dpi:", sc.LogicalDPI, "zoom:", ZoomFactor, "dpisc:", dpisc)
+	sc.LogicalDPI = computeLogicalDPI(sc.DevicePixelRatio, scale)
 }
 
 // UpdatePhysicalDPI updates the value of [Screen.PhysicalDPI] based on
-// [Screen.PixSize] and [Screen.PhysicalSize]
+// [Screen.PixelSize] and [Screen.PhysicalSize]
 func (sc *Screen) UpdatePhysicalDPI() {
-	sc.PhysicalDPI = 25.4 * (float32(sc.PixSize.X) / float32(sc.PhysicalSize.X))
+	sc.PhysicalDPI = 25.4 * (float32(sc.PixelSize.X) / float32(sc.PhysicalSize.X))
 }
 
-// WinSizeToPix returns window manager size units
+// WindowSizeToPixels returns window manager size units
 // (where DevicePixelRatio is ignored) converted to pixel units --
 // i.e., multiply by DevicePixelRatio
-func (sc *Screen) WinSizeToPix(sz image.Point) image.Point {
+func (sc *Screen) WindowSizeToPixels(sz image.Point) image.Point {
 	var psz image.Point
 	psz.X = int(float32(sz.X) * sc.DevicePixelRatio)
 	psz.Y = int(float32(sz.Y) * sc.DevicePixelRatio)
 	return psz
 }
 
-// WinSizeFromPix returns window manager size units
+// WindowSizeFromPixels returns window manager size units
 // (where DevicePixelRatio is ignored) converted from pixel units --
 // i.e., divide by DevicePixelRatio
-func (sc *Screen) WinSizeFromPix(sz image.Point) image.Point {
+func (sc *Screen) WindowSizeFromPixels(sz image.Point) image.Point {
 	var wsz image.Point
 	wsz.X = int(float32(sz.X) / sc.DevicePixelRatio)
 	wsz.Y = int(float32(sz.Y) / sc.DevicePixelRatio)
 	return wsz
 }
 
-// ConstrainWinGeom constrains window geometry to fit in the screen.
+// ConstrainWindowGeometry constrains window geometry to fit in the screen.
 // Size is in pixel units.
-func (sc *Screen) ConstrainWinGeom(pos, sz image.Point) (cpos, csz image.Point) {
+func (sc *Screen) ConstrainWindowGeometry(pos, sz image.Point) (cpos, csz image.Point) {
 	scSize := sc.Geometry.Size() // in window coords size
 	if TheApp.Platform() == Windows {
 		// these are windows-specific special numbers for minimized windows
@@ -183,15 +185,15 @@ func (sc *Screen) ConstrainWinGeom(pos, sz image.Point) (cpos, csz image.Point) 
 			pos.Y = 50
 		}
 	}
-	cpos, csz = ConstrainWinGeom(pos, sc.WinSizeFromPix(sz), scSize)
-	csz = sc.WinSizeToPix(csz)
+	cpos, csz = ConstrainWindowGeometry(pos, sc.WindowSizeFromPixels(sz), scSize)
+	csz = sc.WindowSizeToPixels(csz)
 	return
 }
 
-// ConstrainWinGeom constrains the size and position of a window within
+// ConstrainWindowGeometry constrains the size and position of a window within
 // given screen size, preserving the size to the extent possible.
 // size is in window manager coordinates.
-func ConstrainWinGeom(pos, sz, scSize image.Point) (cpos, csz image.Point) {
+func ConstrainWindowGeometry(pos, sz, scSize image.Point) (cpos, csz image.Point) {
 	csz = sz
 	cpos = pos
 	if csz.X > scSize.X {

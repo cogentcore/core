@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	_ "cogentcore.org/core/system/driver"
 	"github.com/cogentcore/webgpu/wgpu"
@@ -32,7 +33,7 @@ func main() {
 		panic(err)
 	}
 
-	system.TheApp.Cursor(w).SetSize(32)
+	system.TheApp.Cursor(w).SetSize(units.Dp(32))
 
 	var sf *gpu.Surface
 	var sy *gpu.GraphicsSystem

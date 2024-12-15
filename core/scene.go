@@ -313,7 +313,7 @@ func (sc *Scene) ResizeToContent(extra ...image.Point) {
 		return
 	}
 	go func() {
-		scsz := system.TheApp.Screen(0).PixSize
+		scsz := system.TheApp.Screen(0).PixelSize
 		sz := sc.contentSize(scsz)
 		if len(extra) == 1 {
 			sz = sz.Add(extra[0])

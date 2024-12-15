@@ -47,7 +47,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
 	a.Win.This = a.Win
-	a.Scrn.PixSize = opts.Size
+	a.Scrn.PixelSize = opts.Size
 	a.GetScreens()
 
 	a.Event.WindowResize()
@@ -61,15 +61,15 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 }
 
 func (a *App) GetScreens() {
-	if a.Scrn.PixSize.X == 0 {
-		a.Scrn.PixSize.X = 800
+	if a.Scrn.PixelSize.X == 0 {
+		a.Scrn.PixelSize.X = 800
 	}
-	if a.Scrn.PixSize.Y == 0 {
-		a.Scrn.PixSize.Y = 600
+	if a.Scrn.PixelSize.Y == 0 {
+		a.Scrn.PixelSize.Y = 600
 	}
 
 	a.Scrn.DevicePixelRatio = 1
-	a.Scrn.Geometry.Max = a.Scrn.PixSize
+	a.Scrn.Geometry.Max = a.Scrn.PixelSize
 	dpi := float32(160)
 	a.Scrn.PhysicalDPI = dpi
 	a.Scrn.LogicalDPI = dpi
@@ -78,11 +78,11 @@ func (a *App) GetScreens() {
 		system.InitScreenLogicalDPIFunc()
 	}
 
-	physX := 25.4 * float32(a.Scrn.PixSize.X) / dpi
-	physY := 25.4 * float32(a.Scrn.PixSize.Y) / dpi
+	physX := 25.4 * float32(a.Scrn.PixelSize.X) / dpi
+	physY := 25.4 * float32(a.Scrn.PixelSize.Y) / dpi
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-	a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
+	a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixelSize})
 }
 
 func (a *App) QuitClean() bool {
