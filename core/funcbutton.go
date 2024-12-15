@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/types"
 )
 
@@ -147,7 +148,8 @@ func (fb *FuncButton) Init() {
 	fb.Button.Init()
 	fb.WarnUnadded = true
 	fb.Styler(func(s *styles.Style) {
-		if fb.IsReadOnly() {
+		// If Disabled, these steps are unnecessary and we want the default NotAllowed cursor, so only check for ReadOnly.
+		if s.Is(states.ReadOnly) {
 			s.SetAbilities(false, abilities.Hoverable, abilities.Clickable, abilities.Activatable)
 			s.Cursor = cursors.None
 		}

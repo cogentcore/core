@@ -49,7 +49,7 @@ func (wb *WidgetBase) SetEnabled(enabled bool) *WidgetBase {
 	return wb.SetState(!enabled, states.Disabled)
 }
 
-// IsDisabled returns whether this node is flagged as [Disabled].
+// IsDisabled returns whether this node is flagged as [states.Disabled].
 // If so, behave and style appropriately.
 func (wb *WidgetBase) IsDisabled() bool {
 	return wb.StateIs(states.Disabled)
