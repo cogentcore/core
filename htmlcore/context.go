@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
@@ -178,4 +179,18 @@ func (c *Context) addStyle(style string) {
 			c.styles[match] = append(c.styles[match], rule)
 		}
 	}
+}
+
+// LinkButton is a helper function that makes the given button
+// open the given link when clicked on, using [Context.OpenURL].
+// The advantage of using this is that it does [tree.NodeBase.SetProperty]
+// of "href" to the given url, allowing generatehtml to create an <a> element
+// for HTML preview and SEO purposes.
+func (c *Context) LinkButton(bt *core.Button, url string) *core.Button {
+	bt.SetProperty("tag", "a")
+	bt.SetProperty("href", url)
+	bt.OnClick(func(e events.Event) {
+		c.OpenURL(url)
+	})
+	return bt
 }

@@ -62,10 +62,8 @@ func main() {
 		tb.Maker(ct.MakeToolbar)
 		tb.Maker(func(p *tree.Plan) {
 			tree.Add(p, func(w *core.Button) {
+				ct.Context.LinkButton(w, "playground")
 				w.SetText("Playground").SetIcon(icons.PlayCircle)
-				w.OnClick(func(e events.Event) {
-					ct.Open("playground")
-				})
 			})
 			tree.Add(p, func(w *core.Button) {
 				w.SetText("Videos").SetIcon(icons.VideoLibrary)
@@ -237,16 +235,12 @@ func homePage(ctx *htmlcore.Context) bool {
 	})
 	tree.AddChild(home, func(w *core.Frame) {
 		tree.AddChild(w, func(w *core.Button) {
+			ctx.LinkButton(w, "basics")
 			w.SetText("Get started")
-			w.OnClick(func(e events.Event) {
-				ctx.OpenURL("basics")
-			})
 		})
 		tree.AddChild(w, func(w *core.Button) {
+			ctx.LinkButton(w, "install")
 			w.SetText("Install").SetType(core.ButtonTonal)
-			w.OnClick(func(e events.Event) {
-				ctx.OpenURL("install")
-			})
 		})
 	})
 
