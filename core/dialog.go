@@ -126,9 +126,6 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 // beyond that. Also see [Body.AddOKOnly].
 func (bd *Body) AddOK(parent Widget) *Button {
 	bt := NewButton(parent).SetText("OK")
-	bt.OnFirst(events.Click, func(e events.Event) { // first de-focus any active editors
-		bt.focusClear()
-	})
 	bt.OnFinal(events.Click, func(e events.Event) { // then close
 		e.SetHandled() // otherwise propagates to dead elements
 		bd.Close()
