@@ -58,7 +58,7 @@ func (g *Rect) Render(sv *SVG) {
 	bs.Style.Set(styles.BorderSolid)
 	bs.Width.Set(pc.StrokeStyle.Width)
 	bs.Color.Set(pc.StrokeStyle.Color)
-	bs.Radius.Set(units.Px(g.Radius.X))
+	bs.Radius.Set(units.Dp(g.Radius.X))
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
 		pc.DrawRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
