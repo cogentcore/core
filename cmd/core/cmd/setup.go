@@ -113,3 +113,39 @@ func Setup(c *config.Config) error { //types:add
 	}
 	return fmt.Errorf("platform %q not supported for core setup", runtime.GOOS)
 }
+
+// linuxDistro represents the data needed to install dependencies for a specific Linux
+// distribution family with the same installation steps.
+type linuxDistro struct {
+
+	// Name contains the user-friendly name(s) of the Linux distribution(s).
+	Name string
+
+	// Sudo is whether the package manager requires sudo.
+	Sudo bool
+
+	// Tool is the name of the package manager used for installation.
+	Tool string
+
+	// Command is the subcommand in the package manager used to install packages.
+	Command []string
+
+	// Packages are the packages that need to be installed.
+	Packages []string
+}
+
+// linuxDistros contains the supporte4d Linux distributions.
+var linuxDistros = []*linuxDistro{
+	{Name: "Debian/Ubuntu", Sudo: true, Tool: "apt", Command: []string{"install"}, Packages: []string{
+		"golang", "gcc", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev",
+	}},
+	{Name: "Fedora", Sudo: true, Tool: "dnf", Command: []string{"install"}, Packages: []string{
+		"golang", "golang-misc", "gcc", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel",
+	}},
+	{Name: "Arch", Sudo: true, Tool: "pacman", Command: []string{"-S"}, Packages: []string{
+		"go", "xorg-server-devel", "libxcursor", "libxrandr", "libxinerama", "libxi", "vulkan-swrast",
+	}},
+	{Name: "Solus", Sudo: true, Tool: "eopkg", Command: []string{"it", "-c"}, Packages: []string{
+		"system.devel", "golang", "mesalib-devel", "libxrandr-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel",
+	}},
+}
