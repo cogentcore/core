@@ -118,47 +118,60 @@ func Setup(c *config.Config) error { //types:add
 // distribution family with the same installation steps.
 type linuxDistro struct {
 
-	// Name contains the user-friendly name(s) of the Linux distribution(s).
-	Name string
+	// name contains the user-friendly name(s) of the Linux distribution(s).
+	name string
 
-	// Sudo is whether the package manager requires sudo.
-	Sudo bool
+	// sudo is whether the package manager requires sudo.
+	sudo bool
 
-	// Tool is the name of the package manager used for installation.
-	Tool string
+	// tool is the name of the package manager used for installation.
+	tool string
 
-	// Command is the subcommand in the package manager used to install packages.
-	Command []string
+	// command contains the subcommand(s) in the package manager used to install packages.
+	command []string
 
-	// Packages are the packages that need to be installed.
-	Packages []string
+	// packages are the packages that need to be installed.
+	packages []string
+}
+
+// cmd returns the command and arguments to install the packages for the Linux distribution.
+func (ld *linuxDistro) cmd() (cmd string, args []string) {
+	if ld.sudo {
+		cmd = "sudo"
+		args = append(args, ld.tool)
+	} else {
+		cmd = ld.tool
+	}
+	args = append(args, ld.command...)
+	args = append(args, ld.packages...)
+	return
 }
 
 // linuxDistros contains the supported Linux distributions,
 // based on https://docs.fyne.io/started.
 var linuxDistros = []*linuxDistro{
-	{Name: "Debian/Ubuntu", Sudo: true, Tool: "apt", Command: []string{"install"}, Packages: []string{
+	{name: "Debian/Ubuntu", sudo: true, tool: "apt", command: []string{"install"}, packages: []string{
 		"golang", "gcc", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev",
 	}},
-	{Name: "Fedora", Sudo: true, Tool: "dnf", Command: []string{"install"}, Packages: []string{
+	{name: "Fedora", sudo: true, tool: "dnf", command: []string{"install"}, packages: []string{
 		"golang", "golang-misc", "gcc", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel",
 	}},
-	{Name: "Arch", Sudo: true, Tool: "pacman", Command: []string{"-S"}, Packages: []string{
+	{name: "Arch", sudo: true, tool: "pacman", command: []string{"-S"}, packages: []string{
 		"go", "xorg-server-devel", "libxcursor", "libxrandr", "libxinerama", "libxi", "vulkan-swrast",
 	}},
-	{Name: "Solus", Sudo: true, Tool: "eopkg", Command: []string{"it", "-c"}, Packages: []string{
+	{name: "Solus", sudo: true, tool: "eopkg", command: []string{"it", "-c"}, packages: []string{
 		"system.devel", "golang", "mesalib-devel", "libxrandr-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel",
 	}},
-	{Name: "openSUSE", Sudo: true, Tool: "zypper", Command: []string{"install"}, Packages: []string{
+	{name: "openSUSE", sudo: true, tool: "zypper", command: []string{"install"}, packages: []string{
 		"go", "gcc", "libXcursor-devel", "libXrandr-devel", "Mesa-libGL-devel", "libXi-devel", "libXinerama-devel", "libXxf86vm-devel",
 	}},
-	{Name: "Void", Sudo: true, Tool: "xbps-install", Command: []string{"-S"}, Packages: []string{
+	{name: "Void", sudo: true, tool: "xbps-install", command: []string{"-S"}, packages: []string{
 		"go", "base-devel", "xorg-server-devel", "libXrandr-devel", "libXcursor-devel", "libXinerama-devel",
 	}},
-	{Name: "Alpine", Sudo: true, Tool: "apk", Command: []string{"add"}, Packages: []string{
+	{name: "Alpine", sudo: true, tool: "apk", command: []string{"add"}, packages: []string{
 		"go", "gcc", "libxcursor-dev", "libxrandr-dev", "libxinerama-dev", "libxi-dev", "linux-headers", "mesa-dev",
 	}},
-	{Name: "NixOS", Sudo: false, Tool: "nix-shell", Command: []string{"-p"}, Packages: []string{
+	{name: "NixOS", sudo: false, tool: "nix-shell", command: []string{"-p"}, packages: []string{
 		"libGL", "pkg-config", "xorg.libX11.dev", "xorg.libXcursor", "xorg.libXi", "xorg.libXinerama", "xorg.libXrandr", "xorg.libXxf86vm",
 	}},
 }
