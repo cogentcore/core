@@ -64,7 +64,7 @@ func (txt *Text2D) Defaults() {
 	txt.Pose.Scale.SetScalar(.005)
 	txt.Styles.Defaults()
 	txt.Styles.Font.Size.Pt(36)
-	txt.Styles.Margin.Set(units.Px(2))
+	txt.Styles.Margin.Set(units.Dp(2))
 	txt.Material.Bright = 4 // this is key for making e.g., a white background show up as white..
 }
 

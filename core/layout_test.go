@@ -62,9 +62,9 @@ func TestLayoutFramesAlignContent(t *testing.T) {
 				b := NewBody()
 				b.Styler(func(s *styles.Style) {
 					if dir == styles.Row {
-						s.Min.Y.Px(300)
+						s.Min.Y.Dp(300)
 					} else {
-						s.Min.X.Px(300)
+						s.Min.X.Dp(300)
 					}
 					s.Overflow.Set(styles.OverflowVisible)
 					s.Direction = dir
@@ -94,9 +94,9 @@ func TestLayoutFramesJustifyContent(t *testing.T) {
 				b := NewBody()
 				b.Styler(func(s *styles.Style) {
 					if dir == styles.Row {
-						s.Min.X.Px(dsz)
+						s.Min.X.Dp(dsz)
 					} else {
-						s.Min.Y.Px(dsz)
+						s.Min.Y.Dp(dsz)
 					}
 					s.Overflow.Set(styles.OverflowVisible)
 					s.Direction = dir
@@ -182,8 +182,8 @@ func plainFrames(parent Widget, grow math32.Vector2) {
 	for _, sz := range frameSizes {
 		fr := boxFrame(parent)
 		fr.Styler(func(s *styles.Style) {
-			s.Min.X.Px(sz.X)
-			s.Min.Y.Px(sz.Y)
+			s.Min.X.Dp(sz.X)
+			s.Min.Y.Dp(sz.Y)
 			s.Grow = grow
 		})
 	}
