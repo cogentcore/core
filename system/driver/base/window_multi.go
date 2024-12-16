@@ -13,6 +13,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 )
 
@@ -36,8 +37,11 @@ type WindowMulti[A system.App, D system.Drawer] struct {
 	// WnSize is the size of the window in window manager coordinates
 	WnSize image.Point `label:"Window manager size"`
 
-	// PixSize is the pixel size of the window in raw display dots
-	PixSize image.Point `label:"Pixel size"`
+	// PixelSize is the pixel size of the window in raw display dots
+	PixelSize image.Point `label:"Pixel size"`
+
+	// FrameSize of the window frame: Min = left, top; Max = right, bottom.
+	FrameSize styles.Sides[int]
 
 	// DevicePixelRatio is a factor that scales the screen's
 	// "natural" pixel coordinates into actual device pixels.
@@ -46,7 +50,7 @@ type WindowMulti[A system.App, D system.Drawer] struct {
 
 	// PhysicalDPI is the physical dots per inch of the screen,
 	// for generating true-to-physical-size output.
-	// It is computed as 25.4 * (PixSize.X / PhysicalSize.X)
+	// It is computed as 25.4 * (PixelSize.X / PhysicalSize.X)
 	// where 25.4 is the number of mm per inch.
 	PhysDPI float32 `label:"Physical DPI"`
 
@@ -74,7 +78,7 @@ func (w *WindowMulti[A, D]) Drawer() system.Drawer {
 func (w *WindowMulti[A, D]) Size() image.Point {
 	// w.Mu.Lock() // this prevents race conditions but also locks up
 	// defer w.Mu.Unlock()
-	return w.PixSize
+	return w.PixelSize
 }
 
 func (w *WindowMulti[A, D]) WinSize() image.Point {
@@ -83,7 +87,7 @@ func (w *WindowMulti[A, D]) WinSize() image.Point {
 	return w.WnSize
 }
 
-func (w *WindowMulti[A, D]) Position() image.Point {
+func (w *WindowMulti[A, D]) Position(screen *system.Screen) image.Point {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	return w.Pos
@@ -119,25 +123,30 @@ func (w *WindowMulti[A, D]) SetSize(sz image.Point) {
 		return
 	}
 	sc := w.This.Screen()
-	sz = sc.WinSizeFromPix(sz)
+	sz = sc.WindowSizeFromPixels(sz)
 	w.SetWinSize(sz)
 }
 
-func (w *WindowMulti[A, D]) SetPos(pos image.Point) {
+func (w *WindowMulti[A, D]) SetPos(pos image.Point, screen *system.Screen) {
 	if w.This.IsClosed() {
 		return
 	}
 	w.Pos = pos
 }
 
-func (w *WindowMulti[A, D]) SetGeom(pos image.Point, sz image.Point) {
+func (w *WindowMulti[A, D]) SetGeometry(pos image.Point, sz image.Point, screen *system.Screen) {
 	if w.This.IsClosed() {
 		return
 	}
 	sc := w.This.Screen()
-	sz = sc.WinSizeFromPix(sz)
+	sz = sc.WindowSizeFromPixels(sz)
 	w.SetWinSize(sz)
 	w.Pos = pos
+}
+
+func (w *WindowMulti[A, D]) ConstrainFrame(topOnly bool) styles.Sides[int] {
+	// no-op
+	return styles.Sides[int]{}
 }
 
 func (w *WindowMulti[A, D]) IsVisible() bool {

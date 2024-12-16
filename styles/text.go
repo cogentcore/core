@@ -39,8 +39,10 @@ type Text struct { //types:add
 	// extra space to add between words (inherited)
 	WordSpacing units.Value
 
-	// specified height of a line of text (inherited); text is centered within the overall lineheight;
-	// the standard way to specify line height is in terms of em
+	// LineHeight is the height of a line of text (inherited).
+	// Text is centered within the overall line height.
+	// The standard way to specify line height is in terms of
+	// [units.Em] so that it scales with the font size.
 	LineHeight units.Value
 
 	// WhiteSpace (not inherited) specifies how white space is processed,

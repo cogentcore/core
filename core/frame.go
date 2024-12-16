@@ -353,7 +353,7 @@ func (fr *Frame) focusOnName(e events.Event) bool {
 	if focel != nil {
 		em := fr.Events()
 		if em != nil {
-			em.setFocusEvent(focel.(Widget)) // this will also scroll by default!
+			em.setFocus(focel.(Widget)) // this will also scroll by default!
 		}
 		fr.focusNameLast = focel
 		return true

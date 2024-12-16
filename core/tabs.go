@@ -276,6 +276,7 @@ func (ts *Tabs) SelectTabIndex(idx int) *Frame {
 	tab.SetSelected(true)
 	fr.StackTop = idx
 	fr.Update()
+	frame.DeferShown()
 	ts.mu.Unlock()
 	return frame
 }

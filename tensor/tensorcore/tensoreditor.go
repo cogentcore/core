@@ -328,7 +328,7 @@ func (tb *TensorEditor) RowGrabFocus(row int) *core.WidgetBase {
 	for fli := 0; fli < tb.NCols; fli++ {
 		w := lg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.CanFocus() {
-			w.SetFocusEvent()
+			w.SetFocus()
 			return w
 		}
 	}

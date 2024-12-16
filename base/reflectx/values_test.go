@@ -6,6 +6,7 @@ package reflectx
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"cogentcore.org/core/base/reflectx/testdata"
@@ -41,32 +42,25 @@ func InitC() {
 	c.Mbr6 = 6
 }
 
-func AFun(aa any) bool {
-	return AnyIsNil(aa)
+func isNil(v any) bool {
+	return IsNil(reflect.ValueOf(v))
 }
 
-func TestAnyIsNil(t *testing.T) {
+func TestIsNil(t *testing.T) {
+	assert.False(t, IsNil(reflect.ValueOf(0)))
+	assert.True(t, IsNil(reflect.ValueOf((*int)(nil))))
+
 	ai := any(a)
 
-	if AnyIsNil(ai) != false {
-		t.Errorf("should be non-nil: %v\n", ai)
-	}
+	assert.False(t, IsNil(reflect.ValueOf(ai)))
 
 	var ap *A
 	api := any(ap)
 
-	if AnyIsNil(api) != true {
-		t.Errorf("should be nil: %v\n", api)
-	}
-
-	if AFun(ap) != true {
-		t.Errorf("should be nil: %v\n", ap)
-	}
-
-	if AFun(&a) != false {
-		t.Errorf("should be non-nil: %v\n", &a)
-	}
-
+	assert.True(t, IsNil(reflect.ValueOf(api)))
+	assert.True(t, isNil(ap))
+	assert.False(t, isNil(&a))
+	assert.False(t, isNil(&ap))
 }
 
 func TestConverts(t *testing.T) {

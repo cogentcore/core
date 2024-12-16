@@ -6,6 +6,7 @@ package core
 
 import (
 	"log/slog"
+	"reflect"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
@@ -125,9 +126,6 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 // beyond that. Also see [Body.AddOKOnly].
 func (bd *Body) AddOK(parent Widget) *Button {
 	bt := NewButton(parent).SetText("OK")
-	bt.OnFirst(events.Click, func(e events.Event) { // first de-focus any active editors
-		bt.focusClear()
-	})
 	bt.OnFinal(events.Click, func(e events.Event) { // then close
 		e.SetHandled() // otherwise propagates to dead elements
 		bd.Close()
@@ -198,7 +196,7 @@ func (bd *Body) dialogStyles() {
 // nonNilContext returns a non-nil context widget, falling back on the top
 // scene of the current window.
 func nonNilContext(ctx Widget) Widget {
-	if !reflectx.AnyIsNil(ctx) {
+	if !reflectx.IsNil(reflect.ValueOf(ctx)) {
 		return ctx
 	}
 	return currentRenderWindow.mains.top().Scene

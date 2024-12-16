@@ -9,6 +9,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"image"
 	"strconv"
 	"strings"
 	"time"
@@ -635,6 +636,27 @@ func dialogs(ts *core.Tabs) {
 		core.NewText(d).SetType(core.TextSupporting).SetText("A standalone window that opens in the same system window")
 		d.NewWindow().SetNewWindow(false).SetDisplayTitle(true).Run()
 	})
+
+	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Window manipulations")
+	mrow := makeRow(tab)
+
+	rw := core.NewButton(mrow).SetText("Resize to content")
+	rw.SetTooltip("Resizes this window to fit the current content on multi-window platforms")
+	rw.OnClick(func(e events.Event) {
+		mrow.Scene.ResizeToContent(image.Pt(0, 40)) // note: size is not correct due to wrapping? #1307
+	})
+
+	fs := core.NewButton(mrow).SetText("Fullscreen")
+	fs.SetTooltip("Toggle fullscreen mode on desktop and web platforms")
+	fs.OnClick(func(e events.Event) {
+		mrow.Scene.SetFullscreen(!mrow.Scene.IsFullscreen())
+	})
+
+	sg := core.NewButton(mrow).SetText("Set geometry")
+	sg.SetTooltip("Move the window to the top-left corner of the second screen and resize it on desktop platforms")
+	sg.OnClick(func(e events.Event) {
+		mrow.Scene.SetGeometry(false, image.Pt(30, 100), image.Pt(1000, 1000), 1)
+	})
 }
 
 func makeStyles(ts *core.Tabs) {
@@ -666,7 +688,7 @@ func makeStyles(ts *core.Tabs) {
 	}
 	for _, sz := range frameSizes {
 		core.NewFrame(fr).Styler(func(s *styles.Style) {
-			s.Min.Set(units.Px(sz.X), units.Px(sz.Y))
+			s.Min.Set(units.Dp(sz.X), units.Dp(sz.Y))
 			s.Background = colors.Scheme.Primary.Base
 		})
 	}

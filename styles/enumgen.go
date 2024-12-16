@@ -537,11 +537,11 @@ var _FillRulesValues = []FillRules{0, 1}
 // FillRulesN is the highest valid value for type FillRules, plus one.
 const FillRulesN FillRules = 2
 
-var _FillRulesValueMap = map[string]FillRules{`non-zero`: 0, `even-odd`: 1}
+var _FillRulesValueMap = map[string]FillRules{`nonzero`: 0, `evenodd`: 1}
 
 var _FillRulesDescMap = map[FillRules]string{0: ``, 1: ``}
 
-var _FillRulesMap = map[FillRules]string{0: `non-zero`, 1: `even-odd`}
+var _FillRulesMap = map[FillRules]string{0: `nonzero`, 1: `evenodd`}
 
 // String returns the string representation of this FillRules value.
 func (i FillRules) String() string { return enums.String(i, _FillRulesMap) }

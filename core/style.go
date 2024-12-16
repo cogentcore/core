@@ -106,7 +106,7 @@ func (wb *WidgetBase) runStylers() {
 	})
 }
 
-// resetStyleSettings reverses the effects of [ApplyStyleSettings]
+// resetStyleSettings reverses the effects of [WidgetBase.styleSettings]
 // for the widget's font size so that it does not create cascading
 // inhereted font size values. It only does this for non-root elements,
 // as the root element must receive the larger font size so that
@@ -118,11 +118,10 @@ func (wb *WidgetBase) resetStyleSettings() {
 	}
 	fsz := AppearanceSettings.FontSize / 100
 	wb.Styles.Font.Size.Value /= fsz
-	wb.Styles.Text.LineHeight.Value /= fsz
 }
 
 // styleSettings applies [AppearanceSettingsData.Spacing]
-// and [AppearanceSettings.FontSize] to the style values for the widget.
+// and [AppearanceSettingsData.FontSize] to the style values for the widget.
 func (wb *WidgetBase) styleSettings() {
 	s := &wb.Styles
 
@@ -140,7 +139,6 @@ func (wb *WidgetBase) styleSettings() {
 
 	fsz := AppearanceSettings.FontSize / 100
 	s.Font.Size.Value *= fsz
-	s.Text.LineHeight.Value *= fsz
 }
 
 // StyleTree calls [WidgetBase.Style] on every widget in tree
@@ -168,7 +166,7 @@ func (wb *WidgetBase) Restyle() {
 func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	rebuild := false
 	var rc *renderContext
-	sz := image.Point{1920, 1280}
+	sz := image.Point{1920, 1080}
 	if sc != nil {
 		rebuild = sc.NeedsRebuild()
 		rc = sc.renderContext()

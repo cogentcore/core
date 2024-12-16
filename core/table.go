@@ -121,7 +121,7 @@ func (tb *Table) StyleValue(w Widget, s *styles.Style, row, col int) {
 
 // SetSlice sets the source slice that we are viewing.
 func (tb *Table) SetSlice(sl any) *Table {
-	if reflectx.AnyIsNil(sl) {
+	if reflectx.IsNil(reflect.ValueOf(sl)) {
 		tb.Slice = nil
 		return tb
 	}
@@ -485,7 +485,7 @@ func (tb *Table) RowGrabFocus(row int) *WidgetBase {
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		w := lg.Child(ridx + idxOff + fli).(Widget).AsWidget()
 		if w.CanFocus() {
-			w.SetFocusEvent()
+			w.SetFocus()
 			return w
 		}
 	}

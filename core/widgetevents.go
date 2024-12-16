@@ -170,6 +170,14 @@ func (wb *WidgetBase) Send(typ events.Types, original ...events.Event) {
 	if wb.This == nil {
 		return
 	}
+	if typ == events.Click {
+		em := wb.Events()
+		if em != nil && em.focus != wb.This.(Widget) {
+			// always clear any other focus before the click is processed.
+			// this causes textfields etc to apply their changes.
+			em.focusClear()
+		}
+	}
 	var e events.Event
 	if len(original) > 0 && original[0] != nil {
 		e = original[0].NewFromClone(typ)
@@ -293,7 +301,7 @@ func (wb *WidgetBase) handleWidgetClick() {
 			wb.SetState(!wb.StateIs(states.Checked), states.Checked)
 		}
 		if wb.AbilityIs(abilities.Focusable) {
-			wb.SetFocus()
+			wb.SetFocusQuiet()
 		} else {
 			wb.focusClear()
 		}
@@ -467,14 +475,33 @@ func (wb *WidgetBase) HandleClickOnEnterSpace() {
 	})
 }
 
-///////////////////////////////////////////////////////////////////
-//		Focus
+////////	Focus
+
+// SetFocusQuiet sets the keyboard input focus on this item or the first item
+// within it that can be focused (if none, then just sets focus to this widget).
+// This does NOT send an [events.Focus] event, so the widget will NOT appear focused;
+// it will however receive keyboard input, at which point it will get visible focus.
+// See [WidgetBase.SetFocus] for a version that sends an event. Also see
+// [WidgetBase.StartFocus].
+func (wb *WidgetBase) SetFocusQuiet() {
+	foc := wb.This.(Widget)
+	if !wb.AbilityIs(abilities.Focusable) {
+		foc = wb.focusableInThis()
+		if foc == nil {
+			foc = wb.This.(Widget)
+		}
+	}
+	em := wb.Events()
+	if em != nil {
+		em.setFocusQuiet(foc) // doesn't send event
+	}
+}
 
 // SetFocus sets the keyboard input focus on this item or the first item within it
-// that can be focused (if none, then just sets focus to this object).
-// This does not send an [events.Focus] event, which typically results in
-// the widget being styled as focused. See [WidgetBase.SetFocusEvent] for
-// a version that does.
+// that can be focused (if none, then just sets focus to this widget).
+// This sends an [events.Focus] event, which typically results in
+// the widget being styled as focused. See [WidgetBase.SetFocusQuiet] for
+// a version that does not. Also see [WidgetBase.StartFocus].
 func (wb *WidgetBase) SetFocus() {
 	foc := wb.This.(Widget)
 	if !wb.AbilityIs(abilities.Focusable) {
@@ -485,28 +512,7 @@ func (wb *WidgetBase) SetFocus() {
 	}
 	em := wb.Events()
 	if em != nil {
-		// fmt.Println("grab focus:", foc)
-		em.setFocus(foc) // doesn't send event
-	}
-}
-
-// SetFocusEvent sets the keyboard input focus on this item or the first item within it
-// that can be focused (if none, then just sets focus to this object).
-// This sends an [events.Focus] event, which typically results in
-// the widget being styled as focused. See [WidgetBase.SetFocus] for
-// a version that does not.
-func (wb *WidgetBase) SetFocusEvent() {
-	foc := wb.This.(Widget)
-	if !wb.AbilityIs(abilities.Focusable) {
-		foc = wb.focusableInThis()
-		if foc == nil {
-			foc = wb.This.(Widget)
-		}
-	}
-	em := wb.Events()
-	if em != nil {
-		// fmt.Println("grab focus:", foc)
-		em.setFocusEvent(foc) // doesn't send event
+		em.setFocus(foc)
 	}
 }
 
@@ -547,7 +553,10 @@ func (wb *WidgetBase) focusClear() {
 	}
 }
 
-// StartFocus specifies that this widget should get focus when the [Scene] is shown.
+// StartFocus specifies that this widget should get focus when the [Scene] is shown,
+// or when a major content managing widget (e.g., [Tabs], [Pages]) shows a
+// tab/page/element that contains this widget. This is implemented via an
+// [events.Show] event.
 func (wb *WidgetBase) StartFocus() {
 	em := wb.Events()
 	if em != nil {

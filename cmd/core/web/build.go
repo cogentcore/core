@@ -30,7 +30,11 @@ func Build(c *config.Config) error {
 	if c.Web.Gzip {
 		opath += ".orig"
 	}
-	err := exec.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", opath, "-ldflags", config.LinkerFlags(c))
+	args := []string{"build", "-o", opath, "-ldflags", config.LinkerFlags(c)}
+	if c.Build.Trimpath {
+		args = append(args, "-trimpath")
+	}
+	err := exec.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", args...)
 	if err != nil {
 		return err
 	}

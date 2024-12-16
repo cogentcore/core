@@ -131,7 +131,7 @@ func (pc *Paint) ToDots() {
 	}
 }
 
-type FillRules int32 //enums:enum -trim-prefix FillRule -transform kebab
+type FillRules int32 //enums:enum -trim-prefix FillRule -transform lower
 
 const (
 	FillRuleNonZero FillRules = iota
@@ -249,7 +249,7 @@ type Stroke struct {
 func (ss *Stroke) Defaults() {
 	// stroking is off by default in svg
 	ss.Color = nil
-	ss.Width.Px(1)
+	ss.Width.Dp(1)
 	ss.MinWidth.Dot(.5)
 	ss.Cap = LineCapButt
 	ss.Join = LineJoinMiter // Miter not yet supported, but that is the default -- falls back on bevel

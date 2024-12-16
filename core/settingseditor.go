@@ -42,7 +42,7 @@ func SettingsEditor(b *Body) {
 		}
 		tb.AddOverflowMenu(func(m *Scene) {
 			NewFuncButton(m).SetFunc(resetAllSettings).SetConfirm(true).SetText("Reset settings").SetIcon(icons.Delete)
-			NewFuncButton(m).SetFunc(AppearanceSettings.deleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+			NewFuncButton(m).SetFunc(AppearanceSettings.deleteSavedWindowGeometries).SetConfirm(true).SetIcon(icons.Delete)
 			NewFuncButton(m).SetFunc(ProfileToggle).SetShortcut("Control+Alt+R").SetText("Profile performance").SetIcon(icons.Analytics)
 		})
 	})

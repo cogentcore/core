@@ -9,9 +9,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/ordmap"
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/tree"
 )
 
 // stages manages a stack of [Stage]s.
@@ -198,7 +196,8 @@ func (sm *stages) deleteAll() {
 func (sm *stages) resize(rg math32.Geom2DInt) {
 	for _, kv := range sm.stack.Order {
 		st := kv.Value
-		if st.Type == WindowStage || (st.Type == DialogStage && st.FullWindow) {
+		if st.FullWindow {
+			st.Sprites.reset()
 			st.Scene.resize(rg)
 		} else {
 			st.Scene.fitInWindow(rg)
@@ -245,25 +244,26 @@ func (sm *stages) windowStage() *Stage {
 	return nil
 }
 
-func (sm *stages) sendShowEvents() {
+func (sm *stages) runDeferred() {
 	for _, kv := range sm.stack.Order {
 		st := kv.Value
 		if st.Scene == nil {
 			continue
 		}
 		sc := st.Scene
+		if sc.hasFlag(sceneContentSizing) {
+			continue
+		}
+		if sc.hasFlag(sceneHasDeferred) {
+			sc.setFlag(false, sceneHasDeferred)
+			sc.runDeferred()
+		}
+
 		if sc.showIter == sceneShowIters+1 {
 			sc.showIter++
 			if !sc.hasFlag(sceneHasShown) {
 				sc.setFlag(true, sceneHasShown)
-				// profile.Profiling = true
-				// pr := profile.Start("send show")
-				sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
-					cwb.Send(events.Show)
-					return tree.Continue
-				})
-				// pr.End()
-				// profile.Report(time.Millisecond)
+				sc.Shown()
 			}
 		}
 	}

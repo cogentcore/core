@@ -129,7 +129,7 @@ func (fm *Form) Init() {
 	})
 
 	fm.Maker(func(p *tree.Plan) {
-		if reflectx.AnyIsNil(fm.Struct) {
+		if reflectx.IsNil(reflect.ValueOf(fm.Struct)) {
 			return
 		}
 

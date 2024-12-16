@@ -59,7 +59,7 @@ func (sy *ComputeSystem) Render() *Render { return nil }
 func (sy *ComputeSystem) init(gp *GPU, name string) {
 	sy.gpu = gp
 	sy.Name = name
-	sy.device = errors.Log1(NewDevice(gp))
+	sy.device = errors.Log1(NewComputeDevice(gp))
 	sy.vars.device = *sy.device
 	sy.vars.sys = sy
 	sy.ComputePipelines = make(map[string]*ComputePipeline)
@@ -133,13 +133,13 @@ func (sy *ComputeSystem) BeginComputePass() (*wgpu.ComputePassEncoder, error) {
 func (sy *ComputeSystem) EndComputePass(ce *wgpu.ComputePassEncoder) error {
 	cmd := sy.CommandEncoder
 	sy.CommandEncoder = nil
+	ce.Release() // must happen before Finish
 	cmdBuffer, err := cmd.Finish(nil)
 	if errors.Log(err) != nil {
 		return err
 	}
 	sy.device.Queue.Submit(cmdBuffer)
 	cmdBuffer.Release()
-	ce.Release()
 	cmd.Release()
 	return nil
 }

@@ -407,7 +407,7 @@ func (lb *ListBase) SetSliceBase() {
 // Note: it is important to at least set an empty slice of
 // the desired type at the start to enable initial configuration.
 func (lb *ListBase) SetSlice(sl any) *ListBase {
-	if reflectx.AnyIsNil(sl) {
+	if reflectx.IsNil(reflect.ValueOf(sl)) {
 		lb.Slice = nil
 		return lb
 	}
@@ -427,7 +427,7 @@ func (lb *ListBase) SetSlice(sl any) *ListBase {
 	lb.Slice = sl
 	lb.sliceUnderlying = reflectx.Underlying(reflect.ValueOf(lb.Slice))
 	lb.isArray = reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
-	lb.elementValue = reflectx.SliceElementValue(sl)
+	lb.elementValue = reflectx.Underlying(reflectx.SliceElementValue(sl))
 	lb.SetSliceBase()
 	return lb
 }
@@ -485,8 +485,8 @@ func (lb *ListBase) BindSelect(val *int) *ListBase {
 
 func (lb *ListBase) UpdateMaxWidths() {
 	lb.maxWidth = 0
-	npv := reflectx.NonPointerValue(lb.elementValue)
-	isString := npv.Type().Kind() == reflect.String && npv.Type() != reflect.TypeFor[icons.Icon]()
+	ev := lb.elementValue
+	isString := ev.Type().Kind() == reflect.String && ev.Type() != reflect.TypeFor[icons.Icon]()
 	if !isString || lb.SliceSize == 0 {
 		return
 	}
@@ -505,10 +505,10 @@ func (lb *ListBase) sliceElementValue(si int) reflect.Value {
 	if si < lb.SliceSize {
 		val = reflectx.Underlying(lb.sliceUnderlying.Index(si)) // deal with pointer lists
 	} else {
-		val = reflectx.Underlying(lb.elementValue)
+		val = lb.elementValue
 	}
 	if !val.IsValid() {
-		val = reflectx.Underlying(lb.elementValue)
+		val = lb.elementValue
 	}
 	return val
 }
@@ -530,7 +530,7 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 			s.Min.Y.Em(6)
 		})
 		oc := func(e events.Event) {
-			lb.SetFocusEvent()
+			lb.SetFocus()
 			row, _, isValid := w.indexFromPixel(e.Pos())
 			if isValid {
 				lb.updateSelectRow(row, e.SelectMode())
@@ -803,7 +803,7 @@ func (lb *ListBase) DeleteAt(i int) {
 }
 
 func (lb *ListBase) MakeToolbar(p *tree.Plan) {
-	if reflectx.AnyIsNil(lb.Slice) {
+	if reflectx.IsNil(reflect.ValueOf(lb.Slice)) {
 		return
 	}
 	if lb.isArray || lb.IsReadOnly() {
@@ -868,7 +868,7 @@ func (lb *ListBase) RowGrabFocus(row int) *WidgetBase {
 		return w
 	}
 	lb.InFocusGrab = true
-	w.SetFocusEvent()
+	w.SetFocus()
 	lb.InFocusGrab = false
 	return w
 }

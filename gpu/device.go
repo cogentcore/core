@@ -23,6 +23,19 @@ type Device struct {
 // NewDevice returns a new device for given GPU.
 // It gets the Queue for this device.
 func NewDevice(gpu *GPU) (*Device, error) {
+	wdev, err := gpu.GPU.RequestDevice(nil)
+	if errors.Log(err) != nil {
+		return nil, err
+	}
+	dev := &Device{Device: wdev}
+	dev.Queue = wdev.GetQueue()
+	return dev, nil
+}
+
+// NewComputeDevice returns a new device for given GPU,
+// for compute functionality, which requests maximum buffer sizes.
+// It gets the Queue for this device.
+func NewComputeDevice(gpu *GPU) (*Device, error) {
 	// we only request max buffer sizes so compute can go as big as it needs to
 	limits := wgpu.DefaultLimits()
 	const maxv = 0xFFFFFFFF

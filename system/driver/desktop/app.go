@@ -40,8 +40,8 @@ type App struct {
 	// GPU is the system GPU used for the app
 	GPU *gpu.GPU
 
-	// ShareWin is a non-visible, always-present window that all windows share gl context with
-	ShareWin *glfw.Window
+	// Monitors are pointers to the glfw monitors corresponding to Screens.
+	Monitors []*glfw.Monitor
 }
 
 // SendEmptyEvent sends an empty, blank event to global event processing
@@ -78,24 +78,12 @@ func (a *App) InitGPU() {
 		log.Fatalln("system/driver/desktop failed to initialize glfw:", err)
 	}
 	glfw.SetMonitorCallback(a.MonitorChange)
-	// glfw.DefaultWindowHints()
-	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
-	glfw.WindowHint(glfw.Resizable, glfw.False)
-	glfw.WindowHint(glfw.Visible, glfw.False)
-	var err error
-	a.ShareWin, err = glfw.CreateWindow(16, 16, "Share Window", nil, nil)
-	if err != nil {
-		log.Fatalln("desktop.App failed to create hidden share window", err)
-	}
-
-	a.GPU = gpu.NewGPU()
-
 	a.GetScreens()
 }
 
 func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	if len(a.Windows) == 0 && system.InitScreenLogicalDPIFunc != nil {
-		if MonitorDebug {
+		if ScreenDebug {
 			log.Println("app first new window calling InitScreenLogicalDPIFunc")
 		}
 		system.InitScreenLogicalDPIFunc()
@@ -108,29 +96,33 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	}
 	opts.Fixup()
 	// can also apply further tuning here..
+	if opts.Screen > 0 && opts.Screen < len(a.Screens) {
+		sc = a.Screens[opts.Screen]
+	}
 
-	var glw *glfw.Window
+	w := &Window{
+		WindowMulti:  base.NewWindowMulti[*App, *gpudraw.Drawer](a, opts),
+		ScreenWindow: sc.Name,
+	}
+	w.This = w
+
 	var err error
 	a.RunOnMain(func() {
-		glw, err = NewGlfwWindow(opts, sc)
+		err = w.newGlfwWindow(opts, sc)
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	w := &Window{
-		WindowMulti:  base.NewWindowMulti[*App, *gpudraw.Drawer](a, opts),
-		Glw:          glw,
-		ScreenWindow: sc.Name,
-	}
-	w.This = w
-
 	a.RunOnMain(func() {
-		surf := a.GPU.Instance.CreateSurface(wgpuglfw.GetSurfaceDescriptor(glw))
+		surf := gpu.Instance().CreateSurface(wgpuglfw.GetSurfaceDescriptor(w.Glw))
 		var fbsz image.Point
-		fbsz.X, fbsz.Y = glw.GetFramebufferSize()
+		fbsz.X, fbsz.Y = w.Glw.GetFramebufferSize()
 		if fbsz == (image.Point{}) {
 			fbsz = opts.Size
+		}
+		if a.GPU == nil {
+			a.GPU = gpu.NewGPU(surf)
 		}
 		// no multisample and no depth
 		sf := gpu.NewSurface(a.GPU, surf, fbsz, 1, gpu.UndefinedType)
@@ -143,25 +135,26 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	a.Windows = append(a.Windows, w)
 	a.Mu.Unlock()
 
-	glw.SetPosCallback(w.Moved)
-	glw.SetSizeCallback(w.WinResized)
-	glw.SetFramebufferSizeCallback(w.FbResized)
-	glw.SetCloseCallback(w.OnCloseReq)
-	// glw.SetRefreshCallback(w.refresh)
-	glw.SetFocusCallback(w.Focused)
-	glw.SetIconifyCallback(w.Iconify)
+	w.Glw.SetPosCallback(w.Moved)
+	w.Glw.SetSizeCallback(w.WinResized)
+	w.Glw.SetFramebufferSizeCallback(w.FbResized)
+	w.Glw.SetCloseCallback(w.OnCloseReq)
+	// w.Glw.SetRefreshCallback(w.refresh)
+	w.Glw.SetFocusCallback(w.Focused)
+	w.Glw.SetIconifyCallback(w.Iconify)
 
-	glw.SetKeyCallback(w.KeyEvent)
-	glw.SetCharModsCallback(w.CharEvent)
-	glw.SetMouseButtonCallback(w.MouseButtonEvent)
-	glw.SetScrollCallback(w.ScrollEvent)
-	glw.SetCursorPosCallback(w.CursorPosEvent)
-	glw.SetCursorEnterCallback(w.CursorEnterEvent)
-	glw.SetDropCallback(w.DropEvent)
+	w.Glw.SetKeyCallback(w.KeyEvent)
+	w.Glw.SetCharModsCallback(w.CharEvent)
+	w.Glw.SetMouseButtonCallback(w.MouseButtonEvent)
+	w.Glw.SetScrollCallback(w.ScrollEvent)
+	w.Glw.SetCursorPosCallback(w.CursorPosEvent)
+	w.Glw.SetCursorEnterCallback(w.CursorEnterEvent)
+	w.Glw.SetDropCallback(w.DropEvent)
 
 	w.Show()
 	a.RunOnMain(func() {
-		w.UpdateGeom()
+		w.updateGeometry()
+		w.ConstrainFrame(false) // constrain full frame on open
 	})
 
 	go w.WinLoop() // start window's own dedicated publish update loop

@@ -99,9 +99,13 @@ outer:
 				fmt.Println("win IsClosed in paint:", w.Name())
 				break outer
 			}
-			w.This.Events().WindowPaint()
+			w.This.SendPaintEvent()
 		}
 	}
+}
+
+func (w *Window[A]) SendPaintEvent() {
+	w.This.Events().WindowPaint()
 }
 
 func (w *Window[A]) Lock() bool {

@@ -156,7 +156,7 @@ func RecycleMainWindow(data any) bool {
 	if !got {
 		return false
 	}
-	if DebugSettings.WinEventTrace {
+	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v getting recycled based on data match\n", ew.name)
 	}
 	ew.Raise()
@@ -172,15 +172,15 @@ func (w *renderWindow) setName(name string) {
 	if w.SystemWindow != nil {
 		w.SystemWindow.SetName(name)
 	}
-	if isdif && w.SystemWindow != nil {
-		wgp := theWindowGeometrySaver.pref(w.title, w.SystemWindow.Screen())
+	if isdif && w.SystemWindow != nil && !w.SystemWindow.Is(system.Fullscreen) {
+		wgp, sc := theWindowGeometrySaver.get(w.title, "")
 		if wgp != nil {
 			theWindowGeometrySaver.settingStart()
-			if w.SystemWindow.Size() != wgp.size() || w.SystemWindow.Position() != wgp.pos() {
-				if DebugSettings.WinGeomTrace {
-					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.pos(), wgp.size())
+			if w.SystemWindow.Size() != wgp.Size || w.SystemWindow.Position(sc) != wgp.Pos {
+				if DebugSettings.WindowGeometryTrace {
+					log.Printf("WindowGeometry: SetName setting geom for window: %v pos: %v size: %v\n", w.name, wgp.Pos, wgp.Size)
 				}
-				w.SystemWindow.SetGeom(wgp.pos(), wgp.size())
+				w.SystemWindow.SetGeometry(false, wgp.Pos, wgp.Size, sc)
 				system.TheApp.SendEmptyEvent()
 			}
 			theWindowGeometrySaver.settingEnd()
@@ -221,19 +221,35 @@ func (w *renderWindow) logicalDPI() float32 {
 
 // stepZoom calls [SetZoom] with the current zoom plus 10 times the given number of steps.
 func (w *renderWindow) stepZoom(steps float32) {
-	w.setZoom(AppearanceSettings.Zoom + 10*steps)
+	sc := w.SystemWindow.Screen()
+	curZoom := AppearanceSettings.Zoom
+	screenName := ""
+	sset, ok := AppearanceSettings.Screens[sc.Name]
+	if ok {
+		screenName = sc.Name
+		curZoom = sset.Zoom
+	}
+	w.setZoom(curZoom+10*steps, screenName)
 }
 
 // setZoom sets [AppearanceSettingsData.Zoom] to the given value and then triggers
-// necessary updating and makes a snackbar.
-func (w *renderWindow) setZoom(zoom float32) {
-	AppearanceSettings.Zoom = math32.Clamp(zoom, 10, 500)
+// necessary updating and makes a snackbar. If screenName is non-empty, then the
+// zoom is set on the screen-specific settings, instead of the global.
+func (w *renderWindow) setZoom(zoom float32, screenName string) {
+	zoom = math32.Clamp(zoom, 10, 500)
+	if screenName != "" {
+		sset := AppearanceSettings.Screens[screenName]
+		sset.Zoom = zoom
+		AppearanceSettings.Screens[screenName] = sset
+	} else {
+		AppearanceSettings.Zoom = zoom
+	}
 	AppearanceSettings.Apply()
 	UpdateAll()
 	errors.Log(SaveSettings(AppearanceSettings))
 
 	if ms := w.MainScene(); ms != nil {
-		b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", AppearanceSettings.Zoom))
+		b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", zoom))
 		NewStretch(b)
 		b.AddSnackbarIcon(icons.Remove, func(e events.Event) {
 			w.stepZoom(-1)
@@ -242,7 +258,7 @@ func (w *renderWindow) setZoom(zoom float32) {
 			w.stepZoom(1)
 		})
 		b.AddSnackbarButton("Reset", func(e events.Event) {
-			w.setZoom(100)
+			w.setZoom(100, screenName)
 		})
 		b.DeleteChildByName("stretch")
 		b.RunSnackbar(ms)
@@ -263,38 +279,42 @@ func (w *renderWindow) resized() {
 	w.SystemWindow.Unlock()
 
 	curRg := rc.geom
+	rc.logicalDPI = w.logicalDPI() // always update
 	if curRg == rg {
-		if DebugSettings.WinEventTrace {
+		if DebugSettings.WindowEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.name, curRg)
 		}
 		// still need to apply style even if size is same
 		for _, kv := range w.mains.stack.Order {
-			sc := kv.Value.Scene
+			st := kv.Value
+			sc := st.Scene
+			if st.FullWindow && sc.SceneGeom.Size != rg.Size { // double-check: can be off in fullscreen init
+				st.Sprites.reset()
+				sc.resize(rg)
+			}
 			sc.applyStyleScene()
 		}
 		return
 	}
 	// w.FocusInactivate()
-	// w.InactivateAllSprites()
 	if !w.isVisible() {
 		rc.visible = false
-		if DebugSettings.WinEventTrace {
+		if DebugSettings.WindowEventTrace {
 			fmt.Printf("Win: %v Resized already closed\n", w.name)
 		}
 		return
 	}
-	if DebugSettings.WinEventTrace {
+	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.name, curRg, rg)
 	}
 	rc.geom = rg
 	rc.visible = true
-	rc.logicalDPI = w.logicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.mains.resize(rg)
-	if DebugSettings.WinGeomTrace {
+	if DebugSettings.WindowGeometryTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
 	}
-	theWindowGeometrySaver.recordPref(w)
+	theWindowGeometrySaver.record(w)
 }
 
 // Raise requests that the window be at the top of the stack of windows,
@@ -328,12 +348,12 @@ func (w *renderWindow) closed() {
 	AllRenderWindows.delete(w)
 	mainRenderWindows.delete(w)
 	dialogRenderWindows.delete(w)
-	if DebugSettings.WinEventTrace {
+	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v Closed\n", w.name)
 	}
 	if len(AllRenderWindows) > 0 {
 		pfw := AllRenderWindows[len(AllRenderWindows)-1]
-		if DebugSettings.WinEventTrace {
+		if DebugSettings.WindowEventTrace {
 			fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.name, w.name)
 		}
 		pfw.Raise()
@@ -392,7 +412,7 @@ func (w *renderWindow) eventLoop() {
 			w.noEventsChan <- struct{}{}
 		}
 	}
-	if DebugSettings.WinEventTrace {
+	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v out of event loop\n", w.name)
 	}
 	windowWait.Done()
@@ -437,7 +457,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		rc.unlock() // one case where we need to break lock
 		w.renderWindow()
 		rc.lock()
-		w.mains.sendShowEvents()
+		w.mains.runDeferred() // note: must be outside of locks in renderWindow
 
 	case events.WindowResize:
 		e.SetHandled()
@@ -461,16 +481,17 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		case events.WinShow:
 			e.SetHandled()
 			// note that this is sent delayed by driver
-			if DebugSettings.WinEventTrace {
+			if DebugSettings.WindowEventTrace {
 				fmt.Printf("Win: %v got show event\n", w.name)
 			}
 		case events.WinMove:
 			e.SetHandled()
 			// fmt.Printf("win move: %v\n", w.SystemWin.Position())
-			if DebugSettings.WinGeomTrace {
+			if DebugSettings.WindowGeometryTrace {
 				log.Printf("WindowGeometry: recording from Move\n")
 			}
-			theWindowGeometrySaver.recordPref(w)
+			w.SystemWindow.ConstrainFrame(true) // top only
+			theWindowGeometrySaver.record(w)
 		case events.WinFocus:
 			// if we are not already the last in AllRenderWins, we go there,
 			// as this allows focus to be restored to us in the future
@@ -481,36 +502,39 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if !w.gotFocus {
 				w.gotFocus = true
 				w.sendWinFocusEvent(events.WinFocus)
-				if DebugSettings.WinEventTrace {
+				if DebugSettings.WindowEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.name)
 				}
 			} else {
-				if DebugSettings.WinEventTrace {
+				if DebugSettings.WindowEventTrace {
 					fmt.Printf("Win: %v got extra focus\n", w.name)
 				}
 			}
 			setCurrentRenderWindow(w)
 		case events.WinFocusLost:
-			if DebugSettings.WinEventTrace {
+			if DebugSettings.WindowEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.name)
 			}
 			w.gotFocus = false
 			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
-			w.resized()
-			// TODO: figure out how to restore this stuff without breaking window size on mobile
-
-			// TheWindowGeometryaver.AbortSave() // anything just prior to this is sus
-			// if !system.TheApp.NoScreens() {
-			// 	Settings.UpdateAll()
-			// 	WindowGeometrySave.RestoreAll()
-			// }
+			if DebugSettings.WindowEventTrace {
+				log.Println("Win: ScreenUpdate", w.name, screenConfig())
+			}
+			if !TheApp.Platform().IsMobile() { // native desktop
+				if TheApp.NScreens() > 0 {
+					AppearanceSettings.Apply()
+					UpdateAll()
+					theWindowGeometrySaver.restoreAll()
+				}
+			} else {
+				w.resized()
+			}
 		}
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//                   Rendering
+////////  Rendering
 
 // renderParams are the key [renderWindow] params that determine if
 // a scene needs to be restyled since last render, if these params change.
@@ -570,7 +594,7 @@ func newRenderContext() *renderContext {
 	rc := &renderContext{}
 	scr := system.TheApp.Screen(0)
 	if scr != nil {
-		rc.geom.SetRect(scr.Geometry)
+		rc.geom.SetRect(image.Rectangle{Max: scr.PixelSize})
 		rc.logicalDPI = scr.LogicalDPI
 	} else {
 		rc.geom = math32.Geom2DInt{Size: image.Pt(1080, 720)}
@@ -632,19 +656,19 @@ func (w *renderWindow) renderWindow() {
 		return
 	}
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
-		if DebugSettings.WinRenderTrace {
+		if DebugSettings.WindowRenderTrace {
 			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
 		}
 		return
 	}
 
-	if DebugSettings.WinRenderTrace {
+	if DebugSettings.WindowRenderTrace {
 		fmt.Println("RenderWindow: doing render:", w.name)
 		fmt.Println("rebuild:", rebuild, "stageMods:", stageMods, "sceneMods:", sceneMods)
 	}
 
 	if !w.SystemWindow.Lock() {
-		if DebugSettings.WinRenderTrace {
+		if DebugSettings.WindowRenderTrace {
 			fmt.Printf("RenderWindow: window was closed: %v\n", w.name)
 		}
 		return
@@ -667,7 +691,7 @@ func (w *renderWindow) renderWindow() {
 	for i := n - 1; i >= 0; i-- {
 		st := sm.stack.ValueByIndex(i)
 		if st.Type == WindowStage {
-			if DebugSettings.WinRenderTrace {
+			if DebugSettings.WindowRenderTrace {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}
 			winScene = st.Scene
@@ -688,7 +712,7 @@ func (w *renderWindow) renderWindow() {
 			drw.Copy(image.Point{}, clr, winScene.Geom.TotalBBox, draw.Over, system.Unchanged)
 		}
 		st.Scene.RenderDraw(drw, draw.Over)
-		if DebugSettings.WinRenderTrace {
+		if DebugSettings.WindowRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
 	}
@@ -697,7 +721,7 @@ func (w *renderWindow) renderWindow() {
 	for _, kv := range top.popups.stack.Order {
 		st := kv.Value
 		st.Scene.RenderDraw(drw, draw.Over)
-		if DebugSettings.WinRenderTrace {
+		if DebugSettings.WindowRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}
