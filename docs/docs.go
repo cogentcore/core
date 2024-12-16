@@ -66,34 +66,24 @@ func main() {
 				w.SetText("Playground").SetIcon(icons.PlayCircle)
 			})
 			tree.Add(p, func(w *core.Button) {
+				ct.Context.LinkButton(w, "https://youtube.com/@CogentCore")
 				w.SetText("Videos").SetIcon(icons.VideoLibrary)
-				w.OnClick(func(e events.Event) {
-					ct.Open("https://youtube.com/@CogentCore")
-				})
 			})
 			tree.Add(p, func(w *core.Button) {
+				ct.Context.LinkButton(w, "https://cogentcore.org/blog")
 				w.SetText("Blog").SetIcon(icons.RssFeed)
-				w.OnClick(func(e events.Event) {
-					ct.Open("https://cogentcore.org/blog")
-				})
 			})
 			tree.Add(p, func(w *core.Button) {
+				ct.Context.LinkButton(w, "https://github.com/cogentcore/core")
 				w.SetText("GitHub").SetIcon(icons.GitHub)
-				w.OnClick(func(e events.Event) {
-					ct.Open("https://github.com/cogentcore/core")
-				})
 			})
 			tree.Add(p, func(w *core.Button) {
+				ct.Context.LinkButton(w, "https://cogentcore.org/community")
 				w.SetText("Community").SetIcon(icons.Forum)
-				w.OnClick(func(e events.Event) {
-					ct.Open("https://cogentcore.org/community")
-				})
 			})
 			tree.Add(p, func(w *core.Button) {
+				ct.Context.LinkButton(w, "https://github.com/sponsors/cogentcore")
 				w.SetText("Sponsor").SetIcon(icons.Favorite)
-				w.OnClick(func(e events.Event) {
-					ct.Open("https://github.com/sponsors/cogentcore")
-				})
 			})
 		})
 	})
@@ -349,10 +339,8 @@ b.RunMainWindow()`)
 	})
 
 	tree.AddChild(home, func(w *core.Button) {
+		ctx.LinkButton(w, "basics")
 		w.SetText("Get started")
-		w.OnClick(func(e events.Event) {
-			ctx.OpenURL("basics")
-		})
 	})
 
 	return true
