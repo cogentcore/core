@@ -170,6 +170,14 @@ func (wb *WidgetBase) Send(typ events.Types, original ...events.Event) {
 	if wb.This == nil {
 		return
 	}
+	if typ == events.Click {
+		em := wb.Events()
+		if em != nil && em.focus != wb.This.(Widget) {
+			// always clear any other focus before the click is processed.
+			// this causes textfields etc to apply their changes.
+			em.focusClear()
+		}
+	}
 	var e events.Event
 	if len(original) > 0 && original[0] != nil {
 		e = original[0].NewFromClone(typ)
