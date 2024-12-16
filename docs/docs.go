@@ -64,7 +64,7 @@ func main() {
 			tree.Add(p, func(w *core.Button) {
 				w.SetText("Playground").SetIcon(icons.PlayCircle)
 				w.OnClick(func(e events.Event) {
-					ct.Open("Playground")
+					ct.Open("playground")
 				})
 			})
 			tree.Add(p, func(w *core.Button) {
@@ -239,13 +239,13 @@ func homePage(ctx *htmlcore.Context) bool {
 		tree.AddChild(w, func(w *core.Button) {
 			w.SetText("Get started")
 			w.OnClick(func(e events.Event) {
-				ctx.OpenURL("Basics")
+				ctx.OpenURL("basics")
 			})
 		})
 		tree.AddChild(w, func(w *core.Button) {
 			w.SetText("Install").SetType(core.ButtonTonal)
 			w.OnClick(func(e events.Event) {
-				ctx.OpenURL("Install")
+				ctx.OpenURL("install")
 			})
 		})
 	})

@@ -34,8 +34,8 @@ type Page struct {
 	Name string
 
 	// URL is the URL of the page relative to the root of the app, without
-	// any leading slash. It defaults to [Page.Name] with underscores instead
-	// of spaces (ex: "Home" or "Text_fields"). A blank URL ("") manually
+	// any leading slash. It defaults to [Page.Name] in kebab-case
+	// (ex: "home" or "text-fields"). A blank URL ("") manually
 	// specified in the front matter indicates that this the root page.
 	URL string
 
@@ -77,7 +77,7 @@ func NewPage(source fs.FS, filename string) (*Page, error) {
 // Defaults sets default values for the page based on its filename.
 func (pg *Page) Defaults() {
 	pg.Name = strcase.ToSentence(strings.TrimSuffix(pg.Filename, filepath.Ext(pg.Filename)))
-	pg.URL = strings.ReplaceAll(pg.Name, " ", "_")
+	pg.URL = strcase.ToKebab(pg.Name)
 }
 
 // ReadMetadata reads the page metadata from the front matter of the page file,
