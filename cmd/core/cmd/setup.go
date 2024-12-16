@@ -134,7 +134,8 @@ type linuxDistro struct {
 	Packages []string
 }
 
-// linuxDistros contains the supporte4d Linux distributions.
+// linuxDistros contains the supported Linux distributions,
+// based on https://docs.fyne.io/started.
 var linuxDistros = []*linuxDistro{
 	{Name: "Debian/Ubuntu", Sudo: true, Tool: "apt", Command: []string{"install"}, Packages: []string{
 		"golang", "gcc", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev",
@@ -147,5 +148,17 @@ var linuxDistros = []*linuxDistro{
 	}},
 	{Name: "Solus", Sudo: true, Tool: "eopkg", Command: []string{"it", "-c"}, Packages: []string{
 		"system.devel", "golang", "mesalib-devel", "libxrandr-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel",
+	}},
+	{Name: "openSUSE", Sudo: true, Tool: "zypper", Command: []string{"install"}, Packages: []string{
+		"go", "gcc", "libXcursor-devel", "libXrandr-devel", "Mesa-libGL-devel", "libXi-devel", "libXinerama-devel", "libXxf86vm-devel",
+	}},
+	{Name: "Void", Sudo: true, Tool: "xbps-install", Command: []string{"-S"}, Packages: []string{
+		"go", "base-devel", "xorg-server-devel", "libXrandr-devel", "libXcursor-devel", "libXinerama-devel",
+	}},
+	{Name: "Alpine", Sudo: true, Tool: "apk", Command: []string{"add"}, Packages: []string{
+		"go", "gcc", "libxcursor-dev", "libxrandr-dev", "libxinerama-dev", "libxi-dev", "linux-headers", "mesa-dev",
+	}},
+	{Name: "NixOS", Sudo: false, Tool: "nix-shell", Command: []string{"-p"}, Packages: []string{
+		"libGL", "pkg-config", "xorg.libX11.dev", "xorg.libXcursor", "xorg.libXi", "xorg.libXinerama", "xorg.libXrandr", "xorg.libXxf86vm",
 	}},
 }
