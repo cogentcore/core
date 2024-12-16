@@ -76,7 +76,7 @@ func (dir *Node) RecycleDir(name string) *Node {
 		}
 		return cd
 	}
-	nd, _ := NewDir(name, dir)
+	nd, _ := NewDir(path[0], dir)
 	if len(path) > 1 {
 		return nd.RecycleDir(strings.Join(path[1:], "/"))
 	}
