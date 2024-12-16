@@ -18,7 +18,7 @@ func TestNewPage(t *testing.T) {
 		Source:     exampleContent,
 		Filename:   "button.md",
 		Name:       "Button",
-		URL:        "Button",
+		URL:        "button",
 		Categories: []string{"Widgets"},
 	}, *pg)
 }
