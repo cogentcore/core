@@ -53,7 +53,7 @@ You can also see the [web version of the demo](https://cogentcore.org/core/demo)
 
 ## Troubleshooting
 
-If you run into any issues while installing Cogent Core or running the demo, please re-read all of the install instructions above and make sure that you have followed them.
+If you run into any issues while installing Cogent Core or trying to run the demo, please re-read all of the install instructions above and make sure that you have followed them.
 
 If the problem still happens, it is probably related to WebGPU and Vulkan. Please follow these [instructions](https://linuxconfig.org/install-and-test-vulkan-on-linux) (or other ones for your distro) to make sure you have your device-specific Vulkan drivers installed.
 
