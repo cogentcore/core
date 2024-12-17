@@ -301,6 +301,11 @@ func (ct *Content) makeCategories() {
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
 	for _, cat := range ct.currentPage.Categories {
 		catTree := core.NewTree(cats).SetText(cat)
+		catTree.OnSelect(func(e events.Event) {
+			if catPage := ct.pagesByName[strings.ToLower(cat)]; catPage != nil {
+				ct.Open(catPage.URL)
+			}
+		})
 		for _, pg := range ct.pagesByCategory[cat] {
 			if pg == ct.currentPage {
 				continue
