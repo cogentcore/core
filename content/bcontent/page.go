@@ -108,11 +108,13 @@ func (pg *Page) ReadMetadata() error {
 }
 
 // ReadContent returns the page content with any front matter removed.
-func (pg *Page) ReadContent() ([]byte, error) {
+// It also applies [Page.categoryLinks].
+func (pg *Page) ReadContent(pagesByCategory map[string][]*Page) ([]byte, error) {
 	b, err := fs.ReadFile(pg.Source, pg.Filename)
 	if err != nil {
 		return nil, err
 	}
+	b = append(b, pg.categoryLinks(pagesByCategory)...)
 	if !bytes.HasPrefix(b, []byte(`+++`)) {
 		return b, nil
 	}
@@ -124,17 +126,17 @@ func (pg *Page) ReadContent() ([]byte, error) {
 	return after, nil
 }
 
-// CategoryLinks, if the page has the same names as one of the given categories,
+// categoryLinks, if the page has the same names as one of the given categories,
 // returns markdown containing a list of links to all pages in that category.
-// Otherwise, it returns nil
-func (pg *Page) CategoryLinks(pagesByCategory map[string][]*Page) []byte {
-	pages := pagesByCategory[pg.Name]
-	if pages == nil {
+// Otherwise, it returns nil.
+func (pg *Page) categoryLinks(pagesByCategory map[string][]*Page) []byte {
+	cpages := pagesByCategory[pg.Name]
+	if cpages == nil {
 		return nil
 	}
 	res := []byte{'\n'}
-	for _, cpg := range pages {
-		res = append(res, fmt.Sprintf("* [[%s]]\n", cpg.Name)...)
+	for _, cpage := range cpages {
+		res = append(res, fmt.Sprintf("* [[%s]]\n", cpage.Name)...)
 	}
 	return res
 }

@@ -243,11 +243,10 @@ func (ct *Content) loadPage(w *core.Frame) error {
 		return nil
 	}
 	w.DeleteChildren()
-	b, err := ct.currentPage.ReadContent()
+	b, err := ct.currentPage.ReadContent(ct.pagesByCategory)
 	if err != nil {
 		return err
 	}
-	b = append(b, ct.currentPage.CategoryLinks(ct.pagesByCategory)...)
 	err = htmlcore.ReadMD(ct.Context, w, b)
 	if err != nil {
 		return err
