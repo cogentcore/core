@@ -3,7 +3,7 @@ Name = "Tic-tac-toe tutorial"
 Categories = ["Tutorials"]
 +++
 
-This [[tutorials|tutorial]] shows how to make a simple tic-tac-toe game.
+This [[tutorials|tutorial]] shows how to make a simple **tic-tac-toe** game.
 
 First, we will make a 3x3 grid of action [[button]]s with borders:
 
