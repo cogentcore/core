@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 const expectedlinuxDistroString = `Debian/Ubuntu: sudo apt install golang gcc libgl1-mesa-dev libegl1-mesa-dev mesa-vulkan-drivers xorg-dev
@@ -26,6 +26,6 @@ func TestLinuxDistroString(t *testing.T) {
 	for _, ld := range linuxDistros {
 		str += ld.String() + "\n"
 	}
-	require.Equal(t, expectedlinuxDistroString, str)
-	fmt.Println(str)
+	assert.Equal(t, expectedlinuxDistroString, str)
+	fmt.Println("Current linux distro string:\n\n" + str)
 }
