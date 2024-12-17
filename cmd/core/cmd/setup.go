@@ -150,7 +150,7 @@ func (ld *linuxDistro) cmd() (cmd string, args []string) {
 
 func (ld *linuxDistro) String() string {
 	cmd, args := ld.cmd()
-	return fmt.Sprintf("%s: %s %s", ld.name, cmd, strings.Join(args, " "))
+	return fmt.Sprintf("%-15s %s %s", ld.name+":", cmd, strings.Join(args, " "))
 }
 
 // linuxDistros contains the supported Linux distributions,
