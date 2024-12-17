@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
@@ -145,6 +146,11 @@ func (ld *linuxDistro) cmd() (cmd string, args []string) {
 	args = append(args, ld.command...)
 	args = append(args, ld.packages...)
 	return
+}
+
+func (ld *linuxDistro) String() string {
+	cmd, args := ld.cmd()
+	return fmt.Sprintf("%s: %s %s", ld.name, cmd, strings.Join(args, " "))
 }
 
 // linuxDistros contains the supported Linux distributions,
