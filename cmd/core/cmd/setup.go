@@ -34,34 +34,17 @@ func Setup(c *config.Config) error { //types:add
 		}
 		return nil
 	case "linux":
-		// Based on https://docs.fyne.io/started
-		if _, err := exec.LookPath("apt-get"); err == nil {
-			err := vc.Run("sudo", "apt-get", "update")
+		for _, ld := range linuxDistros {
+			_, err := exec.LookPath(ld.tool)
 			if err != nil {
-				return err
+				continue // package manager not found
 			}
-			return vc.Run("sudo", "apt-get", "install", "-f", "-y", "gcc", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev")
-		}
-		if _, err := exec.LookPath("dnf"); err == nil {
-			return vc.Run("sudo", "dnf", "install", "gcc", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel")
-		}
-		if _, err := exec.LookPath("pacman"); err == nil {
-			return vc.Run("sudo", "pacman", "-S", "xorg-server-devel", "libxcursor", "libxrandr", "libxinerama", "libxi")
-		}
-		if _, err := exec.LookPath("eopkg"); err == nil {
-			return vc.Run("sudo", "eopkg", "it", "-c", "system.devel", "mesalib-devel", "libxrandr-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel")
-		}
-		if _, err := exec.LookPath("zypper"); err == nil {
-			return vc.Run("sudo", "zypper", "install", "gcc", "libXcursor-devel", "libXrandr-devel", "Mesa-libGL-devel", "libXi-devel", "libXinerama-devel", "libXxf86vm-devel")
-		}
-		if _, err := exec.LookPath("xbps-install"); err == nil {
-			return vc.Run("sudo", "xbps-install", "-S", "base-devel", "xorg-server-devel", "libXrandr-devel", "libXcursor-devel", "libXinerama-devel")
-		}
-		if _, err := exec.LookPath("apk"); err == nil {
-			return vc.Run("sudo", "apk", "add", "gcc", "libxcursor-dev", "libxrandr-dev", "libxinerama-dev", "libxi-dev", "linux-headers", "mesa-dev")
-		}
-		if _, err := exec.LookPath("nix-shell"); err == nil {
-			return vc.Run("nix-shell", "-p", "libGL", "pkg-config", "xorg.libX11.dev", "xorg.libXcursor", "xorg.libXi", "xorg.libXinerama", "xorg.libXrandr", "xorg.libXxf86vm")
+			cmd, args := ld.cmd()
+			err = vc.Run(cmd, args...)
+			if err != nil {
+				return err // package installation failed
+			}
+			return nil // success
 		}
 		return fmt.Errorf("unknown Linux distro; please file a bug report at https://github.com/cogentcore/core/issues")
 	case "windows":
