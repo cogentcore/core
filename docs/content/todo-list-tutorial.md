@@ -2,7 +2,7 @@
 Categories = ["Tutorials"]
 +++
 
-This [[tutorials|tutorial]] shows how to make a **todo list** app using Cogent Core.
+This [[tutorials|tutorial]] shows how to make a **todo list** app.
 
 We will represent todo list items using an `item` struct type:
 

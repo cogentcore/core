@@ -1,6 +1,11 @@
-This tutorial shows how to make a simple tic-tac-toe game using Cogent Core.
++++
+Name = "Tic-tac-toe tutorial"
+Categories = ["Tutorials"]
++++
 
-First, we will make a 3x3 grid of action buttons with borders:
+This [[tutorials|tutorial]] shows how to make a simple tic-tac-toe game.
+
+First, we will make a 3x3 grid of action [[button]]s with borders:
 
 ```Go
 grid := core.NewFrame(b)
@@ -18,7 +23,7 @@ for range 9 {
 }
 ```
 
-Then, we will make a `squares` array that keeps track of the value of each square, and we will make it so that clicking on a button sets its value in the array to either X or O based on an alternating variable `current`. We also add a [[doc:core.WidgetBase.Updater]] to update the text of each button based on its value in the array. Also, we add a reset button that clears all of the squares.
+Then, we will make a `squares` array that keeps track of the value of each square, and we will make it so that [[event#click|clicking]] on a button sets its value in the array to either X or O based on an alternating variable `current`. We also add an [[updating|updater]] to update the text of each button based on its value in the array. Also, we add a reset button that clears all of the squares.
 
 ```Go
 current := "X"
@@ -59,7 +64,7 @@ core.NewButton(b).SetText("Reset").OnClick(func(e events.Event) {
 })
 ```
 
-Finally, we will add status text that updates according to the current state of the game. This includes checking if there is a winner and displaying it if there is one.
+Finally, we will add status [[text]] that updates according to the current state of the game. This includes checking if there is a winner and displaying it if there is one.
 
 ```Go
 current := "X"
