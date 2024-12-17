@@ -1,4 +1,8 @@
-This tutorial shows how to make a todo list app using Cogent Core. You should read the [basics](../basics) section if you haven't yet before starting this.
++++
+Categories = ["Tutorials"]
++++
+
+This [[tutorials|tutorial]] shows how to make a **todo list** app using Cogent Core.
 
 We will represent todo list items using an `item` struct type:
 
@@ -9,7 +13,7 @@ type item struct {
 }
 ```
 
-We can create a slice of these items and then represent them with a [[doc:core.Table]] widget:
+We can create a slice of these items and then represent them with a [[table]] widget:
 
 ```Go
 type item struct {
@@ -20,7 +24,7 @@ items := []item{{Task: "Code"}, {Task: "Eat"}}
 core.NewTable(b).SetSlice(&items)
 ```
 
-We can add a button for adding a new todo list item:
+We can add a [[button]] for adding a new todo list item:
 
 ```Go
 type item struct {
