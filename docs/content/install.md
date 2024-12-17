@@ -49,8 +49,14 @@ You can run the Cogent Core Demo to verify Cogent Core is properly installed on 
 go run cogentcore.org/core/examples/demo@main
 ```
 
-If you run into any issues while trying to run the demo, please re-read all of the install instructions above and make sure that you have followed them. If the problem still happens, please [file a bug report](https://github.com/cogentcore/core/issues/new?assignees=&labels=bug&projects=&template=bug_report.yml).
+You can also see the [web version of the demo](https://cogentcore.org/core/demo).
 
-You can also run the [web version of the demo](https://cogentcore.org/core/demo).
+## Troubleshooting
 
-After you run the demo, you can explore the [[basics]], [[tutorials]], and [[widgets]].
+If you run into any issues while installing Cogent Core or running the demo, please re-read all of the install instructions above and make sure that you have followed them.
+
+If the problem still happens, it is probably related to WebGPU and Vulkan. Please follow these [instructions](https://linuxconfig.org/install-and-test-vulkan-on-linux) (or other ones for your distro) to make sure you have your device-specific Vulkan drivers installed.
+
+If you still have WebGPU or Vulkan issues, please file an [issue](https://github.com/cogentcore/core/issues). Please include the output of [webgpuinfo](https://github.com/cogentcore/core/tree/main/gpu/cmd/webgpuinfo) in your bug report.
+
+After the demo is working, you can explore the [[basics]], [[tutorials]], and [[widgets]].
