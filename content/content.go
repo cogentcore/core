@@ -247,10 +247,12 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	if err != nil {
 		return err
 	}
+	b = append(b, ct.currentPage.CategoryLinks(ct.pagesByCategory)...)
 	err = htmlcore.ReadMD(ct.Context, w, b)
 	if err != nil {
 		return err
 	}
+
 	w.ScrollDimToContentStart(math32.Y)
 	ct.leftFrame.DeleteChildren()
 	ct.makeTableOfContents(w)

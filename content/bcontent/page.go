@@ -123,3 +123,18 @@ func (pg *Page) ReadContent() ([]byte, error) {
 	}
 	return after, nil
 }
+
+// CategoryLinks, if the page has the same names as one of the given categories,
+// returns markdown containing a list of links to all pages in that category.
+// Otherwise, it returns nil
+func (pg *Page) CategoryLinks(pagesByCategory map[string][]*Page) []byte {
+	pages := pagesByCategory[pg.Name]
+	if pages == nil {
+		return nil
+	}
+	res := []byte{'\n'}
+	for _, cpg := range pages {
+		res = append(res, fmt.Sprintf("* [[%s]]\n", cpg.Name)...)
+	}
+	return res
+}
