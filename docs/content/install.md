@@ -1,4 +1,4 @@
-You can complete the three steps below to **install** Cogent Core on your system. You can also explore the [[#demo|demo]], [[basics]], [[tutorials]], and [[widgets]]. You can also see more on how to [[build]] apps.
+You can complete the three steps below to **install** Cogent Core on your system. You can also explore the [[#demo|demo]], [[basics]], [[tutorials]], and [[widgets]]. You can also see how to [[build]] apps.
 
 1. Download and install Go from [the Go website](https://go.dev/doc/install) if you do not already have Go 1.22.6+ installed.
 
@@ -59,4 +59,4 @@ If the problem still happens, it is probably related to WebGPU and/or Vulkan. If
 
 If you still have problems, please file an [issue](https://github.com/cogentcore/core/issues). Please include the output of [webgpuinfo](https://github.com/cogentcore/core/tree/main/gpu/cmd/webgpuinfo) in your bug report. If you are on Linux, please also include the output of `vulkaninfo`.
 
-After the demo is working, you can explore the [[basics]], [[tutorials]], and [[widgets]]. You can also see more on how to [[build]] apps.
+After the demo is working, you can explore the [[basics]], [[tutorials]], and [[widgets]]. You can also see how to [[build]] apps.
