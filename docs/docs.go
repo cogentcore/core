@@ -93,8 +93,8 @@ func main() {
 	symbols.Symbols["."]["mySVG"] = reflect.ValueOf(mySVG)
 	symbols.Symbols["."]["myFile"] = reflect.ValueOf(myFile)
 
-	htmlcore.ElementHandlers["home-page"] = homePage
-	htmlcore.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
+	ct.Context.ElementHandlers["home-page"] = homePage
+	ct.Context.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
 		splits := core.NewSplits(ctx.BlockParent)
 		ed := texteditor.NewEditor(splits)
 		playgroundFile := filepath.Join(core.TheApp.AppDataDir(), "playground.go")
@@ -118,7 +118,7 @@ func main() {
 		yaegicore.BindTextEditor(ed, parent)
 		return true
 	}
-	htmlcore.ElementHandlers["style-demo"] = func(ctx *htmlcore.Context) bool {
+	ct.Context.ElementHandlers["style-demo"] = func(ctx *htmlcore.Context) bool {
 		// same as demo styles tab
 		sp := core.NewSplits(ctx.BlockParent)
 		sp.Styler(func(s *styles.Style) {

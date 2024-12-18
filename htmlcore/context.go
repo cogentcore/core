@@ -57,6 +57,14 @@ type Context struct {
 	// which defaults to [http.Get].
 	GetURL func(url string) (*http.Response, error)
 
+	// ElementHandlers is a map of handler functions for each HTML element
+	// type (eg: "button", "input", "p"). It is empty by default, but can be
+	// used by anyone in need of behavior different than the default behavior
+	// defined in [handleElement] (for example, for custom elements).
+	// If the handler for an element returns false, then the default behavior
+	// for an element is used.
+	ElementHandlers map[string]func(ctx *Context) bool
+
 	// WikilinkHandlers is a list of handlers to use for wikilinks.
 	// If one returns "", "", the next ones will be tried instead.
 	// The functions are tried in sequential ascending order.
@@ -67,9 +75,10 @@ type Context struct {
 // NewContext returns a new [Context] with basic defaults.
 func NewContext() *Context {
 	return &Context{
-		styles:  map[*html.Node][]*css.Rule{},
-		OpenURL: system.TheApp.OpenURL,
-		GetURL:  http.Get,
+		styles:          map[*html.Node][]*css.Rule{},
+		OpenURL:         system.TheApp.OpenURL,
+		GetURL:          http.Get,
+		ElementHandlers: map[string]func(ctx *Context) bool{},
 	}
 }
 

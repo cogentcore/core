@@ -26,19 +26,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-// ElementHandlers is a map of handler functions for each HTML element
-// type (eg: "button", "input", "p"). It is empty by default, but can be
-// used by anyone in need of behavior different than the default behavior
-// defined in [handleElement] (for example, for custom elements).
-// If the handler for an element returns false, then the default behavior
-// for an element is used.
-var ElementHandlers = map[string]func(ctx *Context) bool{}
-
-// BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
-// when importing yaegicore, which provides interactive editing functionality for Go
-// code blocks in text editors.
-var BindTextEditor func(ed *texteditor.Editor, parent core.Widget)
-
 // New adds a new widget of the given type to the context parent.
 // It automatically calls [Context.config] on the resulting widget.
 func New[T tree.NodeValue](ctx *Context) *T {
@@ -48,12 +35,12 @@ func New[T tree.NodeValue](ctx *Context) *T {
 	return w
 }
 
-// handleElement calls the handler in [ElementHandlers] associated with the current node
+// handleElement calls the handler in [Context.ElementHandlers] associated with the current node
 // using the given context. If there is no handler associated with it, it uses default
 // hardcoded configuration code.
 func handleElement(ctx *Context) {
 	tag := ctx.Node.Data
-	h, ok := ElementHandlers[tag]
+	h, ok := ctx.ElementHandlers[tag]
 	if ok {
 		if h(ctx) {
 			return
@@ -345,3 +332,8 @@ func Get(ctx *Context, url string) (*http.Response, error) {
 	}
 	return resp, nil
 }
+
+// BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
+// when importing yaegicore, which provides interactive editing functionality for Go
+// code blocks in text editors.
+var BindTextEditor func(ed *texteditor.Editor, parent core.Widget)

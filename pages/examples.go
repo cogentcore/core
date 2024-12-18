@@ -22,7 +22,7 @@ import (
 var Examples = map[string]func(b core.Widget){}
 
 func init() {
-	htmlcore.ElementHandlers["pages-example"] = ExampleHandler
+	// htmlcore.ElementHandlers["pages-example"] = ExampleHandler
 }
 
 // NumExamples has the number of examples per page URL.
