@@ -332,7 +332,7 @@ func (ct *Content) makeCategories() {
 
 // embedPage handles an <embed-page> element by embedding the lead section
 // (content before the first heading) into the current page, with a
-// *Main article: [[name]]* link added at the start as well. The name of the
+// *Main page: [[Name]]* link added at the start as well. The name of the
 // embedded page is the src attribute of the current html element.
 func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 	src := htmlcore.GetAttr(ctx.Node, "src")
@@ -348,7 +348,8 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 		return err
 	}
 	lead, _, _ := bytes.Cut(b, []byte("\n#"))
-	return htmlcore.ReadMD(ctx, ctx.BlockParent, lead)
+	res := append([]byte(fmt.Sprintf("*Main page: [[%s]]*", pg.Name)), lead...)
+	return htmlcore.ReadMD(ctx, ctx.BlockParent, res)
 }
 
 // setStageTitle sets the title of the stage based on the current page URL.

@@ -20,9 +20,11 @@ Notice how you can see the result of the code above, a [[button]] with the [[tex
 
 ## Apps
 
+<embed-page src="app">
 
 ## Widgets
 
+<embed-page src="widget">
 
 ## Events
 
