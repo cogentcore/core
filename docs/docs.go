@@ -56,33 +56,34 @@ func main() {
 func main() {
 	b := core.NewBody("Cogent Core Docs")
 	ct := content.NewContent(b).SetContent(econtent)
-	ct.Context.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))
+	ctx := ct.Context
+	ctx.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))
 	b.AddTopBar(func(bar *core.Frame) {
 		tb := core.NewToolbar(bar)
 		tb.Maker(ct.MakeToolbar)
 		tb.Maker(func(p *tree.Plan) {
 			tree.Add(p, func(w *core.Button) {
-				ct.Context.LinkButton(w, "playground")
+				ctx.LinkButton(w, "playground")
 				w.SetText("Playground").SetIcon(icons.PlayCircle)
 			})
 			tree.Add(p, func(w *core.Button) {
-				ct.Context.LinkButton(w, "https://youtube.com/@CogentCore")
+				ctx.LinkButton(w, "https://youtube.com/@CogentCore")
 				w.SetText("Videos").SetIcon(icons.VideoLibrary)
 			})
 			tree.Add(p, func(w *core.Button) {
-				ct.Context.LinkButton(w, "https://cogentcore.org/blog")
+				ctx.LinkButton(w, "https://cogentcore.org/blog")
 				w.SetText("Blog").SetIcon(icons.RssFeed)
 			})
 			tree.Add(p, func(w *core.Button) {
-				ct.Context.LinkButton(w, "https://github.com/cogentcore/core")
+				ctx.LinkButton(w, "https://github.com/cogentcore/core")
 				w.SetText("GitHub").SetIcon(icons.GitHub)
 			})
 			tree.Add(p, func(w *core.Button) {
-				ct.Context.LinkButton(w, "https://cogentcore.org/community")
+				ctx.LinkButton(w, "https://cogentcore.org/community")
 				w.SetText("Community").SetIcon(icons.Forum)
 			})
 			tree.Add(p, func(w *core.Button) {
-				ct.Context.LinkButton(w, "https://github.com/sponsors/cogentcore")
+				ctx.LinkButton(w, "https://github.com/sponsors/cogentcore")
 				w.SetText("Sponsor").SetIcon(icons.Favorite)
 			})
 		})
@@ -93,8 +94,8 @@ func main() {
 	symbols.Symbols["."]["mySVG"] = reflect.ValueOf(mySVG)
 	symbols.Symbols["."]["myFile"] = reflect.ValueOf(myFile)
 
-	ct.Context.ElementHandlers["home-page"] = homePage
-	ct.Context.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
+	ctx.ElementHandlers["home-page"] = homePage
+	ctx.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
 		splits := core.NewSplits(ctx.BlockParent)
 		ed := texteditor.NewEditor(splits)
 		playgroundFile := filepath.Join(core.TheApp.AppDataDir(), "playground.go")
@@ -118,7 +119,7 @@ func main() {
 		yaegicore.BindTextEditor(ed, parent)
 		return true
 	}
-	ct.Context.ElementHandlers["style-demo"] = func(ctx *htmlcore.Context) bool {
+	ctx.ElementHandlers["style-demo"] = func(ctx *htmlcore.Context) bool {
 		// same as demo styles tab
 		sp := core.NewSplits(ctx.BlockParent)
 		sp.Styler(func(s *styles.Style) {
