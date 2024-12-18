@@ -2,7 +2,7 @@
 Categories = ["Concepts"]
 +++
 
-All app content is organized into **widgets**, which are reusable app components that render, store information, and handle [[events]]. All widgets satisfy the [[doc:core.Widget]] interface. See [[widgets]] for a list of widget types.
+All app content is organized into **widgets**, which are reusable app components that render, store information, and handle [[event]]s. All widgets satisfy the [[doc:core.Widget]] interface. See [[widgets]] for a list of widget types.
 
 Widgets are typically created by calling the `core.New{WidgetName}` function (for example: [[doc:core.NewButton]]). All of these `New` functions take a parent in which the widget is added. This allows you to create nested widget structures and [[layout]]s that position and size widgets in different ways. For elements at the root level of your app, the parent is `b`, the [[app]] body. However, if your widget is located in a some other container, you would pass that as the parent.
 

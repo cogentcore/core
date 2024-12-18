@@ -18,31 +18,37 @@ func main() {
 
 Notice how you can see the result of the code above, a [[button]] with the [[text]] "Hello, World!". Not only can you see the result of the code, you can edit the code live. Try changing "Hello, World!" to "Click me!" and you will see the button update accordingly.
 
-## Apps
+## App
 
 <embed-page src="app">
 
-## Widgets
+## Widget
 
 <embed-page src="widget">
 
-## Events
+## Event
 
+<embed-page src="event">
 
 ## Styling
 
+<embed-page src="styling">
 
 ## Updating
 
+<embed-page src="updating">
 
 ## Value binding
 
+<embed-page src="value binding">
 
-## Plans
+## Plan
 
+<embed-page src="plan">
 
 ## Async
 
+<embed-page src="async">
 
 ## Next steps
 
