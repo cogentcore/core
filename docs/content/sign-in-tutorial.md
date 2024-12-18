@@ -14,7 +14,7 @@ type user struct {
 u := &user{}
 ```
 
-We can create a sign in page to enter user information:
+We can create a sign in page to enter user information in a [[form]]:
 
 ```Go
 type user struct {
@@ -29,7 +29,7 @@ pg.AddPage("sign-in", func(pg *core.Pages) {
 })
 ```
 
-We can create a home page that opens after a user signs in:
+We can create a home page that opens after a user [[event#click|clicks]] the sign in [[button]]:
 
 ```Go
 type user struct {

@@ -5,7 +5,7 @@ Categories = ["Tutorials"]
 
 This [[tutorials|tutorial]] shows how to make a simple **tic-tac-toe** game.
 
-First, we will make a 3x3 grid of action [[button]]s with borders:
+First, we will make a 3x3 grid of action [[button]]s with [[styling#border|borders]]:
 
 ```Go
 grid := core.NewFrame(b)

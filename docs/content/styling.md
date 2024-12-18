@@ -2,7 +2,7 @@
 Categories = ["Concepts"]
 +++
 
-**Styling** allows you to easily customize the appearance of [[#widgets|widgets]] at any level.
+**Styling** allows you to easily customize the appearance of [[widget]]s at any level.
 
 You can change any style properties of a widget:
 

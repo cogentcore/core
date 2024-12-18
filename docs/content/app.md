@@ -4,7 +4,7 @@ Categories = ["Concepts"]
 
 The first call in every **app** is [[doc:core.NewBody]]. This creates and returns a new [[doc:core.Body]], which is a container in which app content is placed. This takes an optional name, which is used for the title of the app/window/tab.
 
-After calling NewBody, you add content to the body that was returned, which is typically given the local variable name `b` for body.
+After calling NewBody, you add [[widget]]s to the body that was returned, which is typically given the local variable name `b` for body.
 
 Then, after adding content to your body, you can create and start a window from it using [[doc:core.Body.RunMainWindow]].
 

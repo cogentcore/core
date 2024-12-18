@@ -4,7 +4,7 @@ Categories = ["Concepts"]
 
 There are several ways to dynamically **update** the content of an [[app]].
 
-The simplest way to update a [[#widgets|widget]] is to call [[doc:core.WidgetBase.Update]] after changing any of its properties:
+The simplest way to update a [[widget]] is to call [[doc:core.WidgetBase.Update]] after changing any of its properties:
 
 ```Go
 count := 0

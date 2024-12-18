@@ -44,4 +44,4 @@ Notice how you can see the result of the code above, a [[button]] with the [[tex
 
 ## Next steps
 
-Now that you understand the basics, you can apply them in [[tutorials]], explore the [[widgets]], or [[install]] Cogent Core on your system.
+Now that you understand the basics, you can apply them in [[tutorials]], explore the [[widgets]], or [[install]] Cogent Core on your system. You can also explore all of the [[concepts]] in greater depth.

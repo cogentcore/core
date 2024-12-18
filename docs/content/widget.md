@@ -2,9 +2,9 @@
 Categories = ["Concepts"]
 +++
 
-All app content is organized into **widgets**, which are reusable app components that render, store information, and handle [[#events|events]]. All widgets satisfy the [[doc:core.Widget]] interface.
+All app content is organized into **widgets**, which are reusable app components that render, store information, and handle [[events]]. All widgets satisfy the [[doc:core.Widget]] interface. See [[widgets]] for a list of widget types.
 
-Widgets are typically created by calling the `core.New{WidgetName}` function (for example: [[doc:core.NewButton]]). All of these `New` functions take a parent in which the widget is added. This allows you to create nested widget structures and [[layout]]s that position and size widgets in different ways. For elements at the root level of your app, the parent is `b`, the app body. However, if your widget is located in a some other container, you would pass that as the parent.
+Widgets are typically created by calling the `core.New{WidgetName}` function (for example: [[doc:core.NewButton]]). All of these `New` functions take a parent in which the widget is added. This allows you to create nested widget structures and [[layout]]s that position and size widgets in different ways. For elements at the root level of your app, the parent is `b`, the [[app]] body. However, if your widget is located in a some other container, you would pass that as the parent.
 
 Many widgets define attributes that you can set, like the text of a [[button]]. These attributes can be set using the `Set{AttributeName}` method (for example: [[doc:core.Button.SetText]]). These `Set` methods always return the original object so that you can chain multiple `Set` calls together on one line. You can also always access the attributes of a widget by directly accessing its fields.
 

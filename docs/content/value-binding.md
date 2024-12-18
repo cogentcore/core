@@ -2,9 +2,9 @@
 Categories = ["Concepts"]
 +++
 
-**Value binding** allows you to link the value of a variable and the value of a [[#widgets|widget]], ensuring that they automatically stay up-to-date.
+**Value binding** allows you to link the value of a variable and the value of a [[widget]], ensuring that they automatically stay up-to-date.
 
-For example, the example in [[#updating]] above can also be written as:
+For example, the example in [[updating]] can also be written as:
 
 ```Go
 count := 0
