@@ -1,4 +1,4 @@
-You can complete the three steps below to **install** Cogent Core on your system. You can also explore the [[#demo|demo]], [[basics]], [[tutorials]], and [[widgets]].
+You can complete the three steps below to **install** Cogent Core on your system. You can also explore the [[#demo|demo]], [[basics]], [[tutorials]], and [[widgets]]. You can also see more on how to [[build]] apps.
 
 1. Download and install Go from [the Go website](https://go.dev/doc/install) if you do not already have Go 1.22.6+ installed.
 
@@ -55,8 +55,8 @@ You can also see the [web version of the demo](https://cogentcore.org/core/demo)
 
 If you run into any issues while installing Cogent Core or trying to run the demo, please re-read all of the install instructions above and make sure that you have followed them.
 
-If the problem still happens, it is probably related to WebGPU and Vulkan. Please follow these [instructions](https://linuxconfig.org/install-and-test-vulkan-on-linux) (or other ones for your distro) to make sure you have your device-specific Vulkan drivers installed.
+If the problem still happens, it is probably related to WebGPU and/or Vulkan. If you are on Linux, please follow these [instructions](https://linuxconfig.org/install-and-test-vulkan-on-linux) (or other ones for your distro) to make sure you have your device-specific Vulkan drivers installed.
 
-If you still have WebGPU or Vulkan issues, please file an [issue](https://github.com/cogentcore/core/issues). Please include the output of [webgpuinfo](https://github.com/cogentcore/core/tree/main/gpu/cmd/webgpuinfo) in your bug report.
+If you still have problems, please file an [issue](https://github.com/cogentcore/core/issues). Please include the output of [webgpuinfo](https://github.com/cogentcore/core/tree/main/gpu/cmd/webgpuinfo) in your bug report. If you are on Linux, please also include the output of `vulkaninfo`.
 
-After the demo is working, you can explore the [[basics]], [[tutorials]], and [[widgets]].
+After the demo is working, you can explore the [[basics]], [[tutorials]], and [[widgets]]. You can also see more on how to [[build]] apps.

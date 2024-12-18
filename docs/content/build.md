@@ -1,6 +1,10 @@
++++
+Categories = ["Concepts"]
++++
+
 All Cogent Core apps can be built using normal `go` commands (`go build`, `go run`, `go install`, etc). This means that things such as tests, debuggers, and race detectors work as usual.
 
-However, the Cogent Core command line tool `core` provides a build process optimized for cross-platform Cogent Core development. This tool automatically sets appropriate linker flags to reduce binary sizes, optimizes binaries for running as standalone GUI apps, and provides support for building for mobile and web platforms.
+However, the Cogent Core command line tool `core` provides a build process optimized for cross-platform Cogent Core development. This tool automatically sets appropriate linker flags to reduce binary sizes, optimizes binaries for running as standalone GUI apps, and provides support for building for [[mobile]] and [[web]] platforms.
 
 The `core` command line tool provides four main build commands, as documented below. In general, you should use `core run` during development.
 
@@ -20,4 +24,14 @@ If there is an `icon.svg` file in the current directory, it will be used as the 
 
 For development on Android, you need to install [Android Studio](https://developer.android.com/studio), and for development on iOS, you need to install [XCode](https://apps.apple.com/us/app/xcode/id497799835?mt=12). For Android development, if you run into any errors with the Android NDK, you should ensure that it is [installed](https://developer.android.com/studio/projects/install-ndk#default-version). You may also need to add the Android tools [to your PATH](https://stackoverflow.com/a/29083170).
 
-You can see the [advanced building page](../advanced/building) for more information if you need it.
+## Details
+
+You can build for Android on all desktop platforms, and for iOS on macOS only. Cross-compiling between desktop platforms is planned but not yet supported.
+
+The file(s) produced by `core build` are `.exe` on Windows, `.app` on iOS, `.apk` on Android, `.wasm` and associated `.html` and `.js` files on Web, and no extension on macOS and Linux. The file(s) are placed in the current directory for desktop platforms, and `bin/{platform}` for other platforms (eg: `bin/android`).
+
+For desktop platforms, `core run` just runs the executable directly. For mobile platforms, it installs the executable package on the target device (which can be a simulator or a real connected device) using `core install` and then starts it. For web, it serves the files in `bin/web` at http://localhost:8080.
+
+On mobile and web platforms, `core pack` is the same as `core build`, as that already makes a package on those platforms. On macOS, it makes a `.app` bundle file and a `.dmg` disk image installer file. On Windows, it makes a `.exe` installer file. On Linux, it makes a `.deb` package file.
+
+For macOS, `core install` means running `core pack` and then copying the resulting `.app` file to `Applications`. It is not yet implemented on Linux and Windows. For mobile platforms, it installs the executable package on the target device, which can be a simulator or a real connected device. For web, it is not applicable.
