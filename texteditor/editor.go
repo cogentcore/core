@@ -248,6 +248,9 @@ func (ed *Editor) Init() {
 
 		s.MaxBorder.Width.Set(units.Dp(2))
 		s.Background = colors.Scheme.SurfaceContainerLow
+		if s.IsReadOnly() {
+			s.Background = colors.Scheme.SurfaceContainer
+		}
 		// note: a blank background does NOT work for depth color rendering
 		if s.Is(states.Focused) {
 			s.StateLayer = 0
@@ -316,9 +319,6 @@ func (ed *Editor) resetState() {
 	ed.QReplace.On = false
 	if ed.Buffer == nil || ed.lastFilename != ed.Buffer.Filename { // don't reset if reopening..
 		ed.CursorPos = lexer.Pos{}
-	}
-	if ed.Buffer != nil {
-		ed.Buffer.SetReadOnly(ed.IsReadOnly())
 	}
 }
 

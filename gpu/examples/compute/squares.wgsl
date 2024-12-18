@@ -16,11 +16,19 @@ fn compute(d: ptr<function,Data>) {
 }
 
 @compute
-@workgroup_size(64)
-fn main(@builtin(global_invocation_id) idx: vec3<u32>) {
-	// compute(&In[idx.x]);
-	var d = In[idx.x];
+@workgroup_size(64,1,1)
+fn main(@builtin(workgroup_id) wgid: vec3<u32>, @builtin(num_workgroups) nwg: vec3<u32>, @builtin(local_invocation_index) loci: u32) {
+	// note: wgid.x is the inner loop, then y, then z
+	let idx = loci + (wgid.x + wgid.y * nwg.x + wgid.z * nwg.x * nwg.y) * 64;
+	// note: array access is clamped so it doesn't exceed bounds, but best to check here
+	// and skip anything beyond the max size of buffer.
+	var d = In[idx];
 	compute(&d);
-	In[idx.x] = d;
+	In[idx] = d;
+	// the following is for testing indexing: uncomment to see.
+	// In[idx].A = f32(loci); 
+	// In[idx].B = f32(wgid.x); 
+	// In[idx].C = f32(wgid.y); 
+	// In[idx].D = f32(idx); 
 }
 

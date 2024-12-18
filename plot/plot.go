@@ -17,39 +17,163 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 )
 
-// Plot is the basic type representing a plot.
-// It renders into its own image.RGBA Pixels image,
-// and can also save a corresponding SVG version.
-// The Axis ranges are updated automatically when plots
-// are added, so setting a fixed range should happen
-// after that point.  See [UpdateRange] method as well.
-type Plot struct {
-	// Title of the plot
-	Title Text
+// XAxisStyle has overall plot level styling properties for the XAxis.
+type XAxisStyle struct { //types:add -setters
+	// Column specifies the column to use for the common X axis,
+	// for [plot.NewTablePlot] [table.Table] driven plots.
+	// If empty, standard Group-based role binding is used: the last column
+	// within the same group with Role=X is used.
+	Column string
+
+	// Rotation is the rotation of the X Axis labels, in degrees.
+	Rotation float32
+
+	// Label is the optional label to use for the XAxis instead of the default.
+	Label string
+
+	// Range is the effective range of XAxis data to plot, where either end can be fixed.
+	Range minmax.Range64 `display:"inline"`
+
+	// Scale specifies how values are scaled along the X axis:
+	// Linear, Log, Inverted
+	Scale AxisScales
+}
+
+// PlotStyle has overall plot level styling properties.
+// Some properties provide defaults for individual elements, which can
+// then be overwritten by element-level properties.
+type PlotStyle struct { //types:add -setters
+
+	// Title is the overall title of the plot.
+	Title string
+
+	// TitleStyle is the text styling parameters for the title.
+	TitleStyle TextStyle
 
 	// Background is the background of the plot.
 	// The default is [colors.Scheme.Surface].
 	Background image.Image
 
+	// Scale multiplies the plot DPI value, to change the overall scale
+	// of the rendered plot.  Larger numbers produce larger scaling.
+	// Typically use larger numbers when generating plots for inclusion in
+	// documents or other cases where the overall plot size will be small.
+	Scale float32 `default:"1,2"`
+
+	// Legend has the styling properties for the Legend.
+	Legend LegendStyle `display:"add-fields"`
+
+	// Axis has the styling properties for the Axes.
+	Axis AxisStyle `display:"add-fields"`
+
+	// XAxis has plot-level XAxis style properties.
+	XAxis XAxisStyle `display:"add-fields"`
+
+	// YAxisLabel is the optional label to use for the YAxis instead of the default.
+	YAxisLabel string
+
+	// LinesOn determines whether lines are plotted by default,
+	// for elements that plot lines (e.g., plots.XY).
+	LinesOn DefaultOffOn
+
+	// LineWidth sets the default line width for data plotting lines.
+	LineWidth units.Value
+
+	// PointsOn determines whether points are plotted by default,
+	// for elements that plot points (e.g., plots.XY).
+	PointsOn DefaultOffOn
+
+	// PointSize sets the default point size.
+	PointSize units.Value
+
+	// LabelSize sets the default label text size.
+	LabelSize units.Value
+
+	// BarWidth for Bar plot sets the default width of the bars,
+	// which should be less than the Stride (1 typically) to prevent
+	// bar overlap. Defaults to .8.
+	BarWidth float64
+}
+
+func (ps *PlotStyle) Defaults() {
+	ps.TitleStyle.Defaults()
+	ps.TitleStyle.Size.Dp(24)
+	ps.Background = colors.Scheme.Surface
+	ps.Scale = 1
+	ps.Legend.Defaults()
+	ps.Axis.Defaults()
+	ps.LineWidth.Pt(1)
+	ps.PointSize.Pt(4)
+	ps.LabelSize.Dp(16)
+	ps.BarWidth = .8
+}
+
+// SetElementStyle sets the properties for given element's style
+// based on the global default settings in this PlotStyle.
+func (ps *PlotStyle) SetElementStyle(es *Style) {
+	if ps.LinesOn != Default {
+		es.Line.On = ps.LinesOn
+	}
+	if ps.PointsOn != Default {
+		es.Point.On = ps.PointsOn
+	}
+	es.Line.Width = ps.LineWidth
+	es.Point.Size = ps.PointSize
+	es.Width.Width = ps.BarWidth
+	es.Text.Size = ps.LabelSize
+}
+
+// PanZoom provides post-styling pan and zoom range manipulation.
+type PanZoom struct {
+
+	// XOffset adds offset to X range (pan).
+	XOffset float64
+
+	// XScale multiplies X range (zoom).
+	XScale float64
+
+	// YOffset adds offset to Y range (pan).
+	YOffset float64
+
+	// YScale multiplies Y range (zoom).
+	YScale float64
+}
+
+func (pz *PanZoom) Defaults() {
+	pz.XScale = 1
+	pz.YScale = 1
+}
+
+// Plot is the basic type representing a plot.
+// It renders into its own image.RGBA Pixels image,
+// and can also save a corresponding SVG version.
+type Plot struct {
+	// Title of the plot
+	Title Text
+
+	// Style has the styling properties for the plot.
+	Style PlotStyle
+
 	// standard text style with default options
 	StandardTextStyle styles.Text
 
-	// X and Y are the horizontal and vertical axes
+	// X, Y, and Z are the horizontal, vertical, and depth axes
 	// of the plot respectively.
-	X, Y Axis
+	X, Y, Z Axis
 
 	// Legend is the plot's legend.
 	Legend Legend
 
-	// plotters are drawn by calling their Plot method
-	// after the axes are drawn.
+	// Plotters are drawn by calling their Plot method after the axes are drawn.
 	Plotters []Plotter
 
-	// size is the target size of the image to render to
+	// Size is the target size of the image to render to.
 	Size image.Point
 
 	// DPI is the dots per inch for rendering the image.
@@ -57,28 +181,24 @@ type Plot struct {
 	// which is strongly recommended for print (e.g., use 300 for print)
 	DPI float32 `default:"96,160,300"`
 
-	// painter for rendering
-	Paint *paint.Context
+	// PanZoom provides post-styling pan and zoom range factors.
+	PanZoom PanZoom
+
+	//	HighlightPlotter is the Plotter to highlight. Used for mouse hovering for example.
+	// It is the responsibility of the Plotter Plot function to implement highlighting.
+	HighlightPlotter Plotter
+
+	// HighlightIndex is the index of the data point to highlight, for HighlightPlotter.
+	HighlightIndex int
 
 	// pixels that we render into
 	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" edit:"-"`
 
+	// Paint is the painter for rendering
+	Paint *paint.Context
+
 	// Current plot bounding box in image coordinates, for plotting coordinates
 	PlotBox math32.Box2
-}
-
-// Defaults sets defaults
-func (pt *Plot) Defaults() {
-	pt.Title.Defaults()
-	pt.Title.Style.Size.Dp(24)
-	pt.Background = colors.Scheme.Surface
-	pt.X.Defaults(math32.X)
-	pt.Y.Defaults(math32.Y)
-	pt.Legend.Defaults()
-	pt.DPI = 96
-	pt.Size = image.Point{1280, 1024}
-	pt.StandardTextStyle.Defaults()
-	pt.StandardTextStyle.WhiteSpace = styles.WhiteSpaceNowrap
 }
 
 // New returns a new plot with some reasonable default settings.
@@ -88,26 +208,75 @@ func New() *Plot {
 	return pt
 }
 
-// Add adds a Plotters to the plot.
-//
-// If the plotters implements DataRanger then the
-// minimum and maximum values of the X and Y
-// axes are changed if necessary to fit the range of
-// the data.
-//
+// Defaults sets defaults
+func (pt *Plot) Defaults() {
+	pt.Style.Defaults()
+	pt.Title.Defaults()
+	pt.Title.Style.Size.Dp(24)
+	pt.X.Defaults(math32.X)
+	pt.Y.Defaults(math32.Y)
+	pt.Legend.Defaults()
+	pt.DPI = 96
+	pt.PanZoom.Defaults()
+	pt.Size = image.Point{1280, 1024}
+	pt.StandardTextStyle.Defaults()
+	pt.StandardTextStyle.WhiteSpace = styles.WhiteSpaceNowrap
+}
+
+// applyStyle applies all the style parameters
+func (pt *Plot) applyStyle() {
+	// first update the global plot style settings
+	var st Style
+	st.Defaults()
+	st.Plot = pt.Style
+	for _, plt := range pt.Plotters {
+		stlr := plt.Stylers()
+		stlr.Run(&st)
+	}
+	pt.Style = st.Plot
+	// then apply to elements
+	for _, plt := range pt.Plotters {
+		plt.ApplyStyle(&pt.Style)
+	}
+	// now style plot:
+	pt.DPI *= pt.Style.Scale
+	pt.Title.Style = pt.Style.TitleStyle
+	if pt.Style.Title != "" {
+		pt.Title.Text = pt.Style.Title
+	}
+	pt.Legend.Style = pt.Style.Legend
+	pt.X.Style = pt.Style.Axis
+	pt.X.Style.Scale = pt.Style.XAxis.Scale
+	pt.Y.Style = pt.Style.Axis
+	if pt.Style.XAxis.Label != "" {
+		pt.X.Label.Text = pt.Style.XAxis.Label
+	}
+	if pt.Style.YAxisLabel != "" {
+		pt.Y.Label.Text = pt.Style.YAxisLabel
+	}
+	pt.X.Label.Style = pt.Style.Axis.Text
+	pt.Y.Label.Style = pt.Style.Axis.Text
+	pt.X.TickText.Style = pt.Style.Axis.TickText
+	pt.X.TickText.Style.Rotation = pt.Style.XAxis.Rotation
+	pt.Y.TickText.Style = pt.Style.Axis.TickText
+	pt.Y.Label.Style.Rotation = -90
+	pt.Y.Style.TickText.Align = styles.End
+	pt.UpdateRange()
+}
+
+// Add adds Plotter element(s) to the plot.
 // When drawing the plot, Plotters are drawn in the
 // order in which they were added to the plot.
 func (pt *Plot) Add(ps ...Plotter) {
 	pt.Plotters = append(pt.Plotters, ps...)
 }
 
-// SetPixels sets the backing pixels image to given image.RGBA
+// SetPixels sets the backing pixels image to given image.RGBA.
 func (pt *Plot) SetPixels(img *image.RGBA) {
 	pt.Pixels = img
 	pt.Paint = paint.NewContextFromImage(pt.Pixels)
 	pt.Paint.UnitContext.DPI = pt.DPI
 	pt.Size = pt.Pixels.Bounds().Size()
-	pt.UpdateRange() // needs context, to automatically update for labels
 }
 
 // Resize sets the size of the output image to given size.
@@ -136,28 +305,28 @@ func (pt *Plot) SaveImage(filename string) error {
 // that do not end up in range of the X axis will not have
 // tick marks.
 func (pt *Plot) NominalX(names ...string) {
-	pt.X.TickLine.Width.Pt(0)
-	pt.X.TickLength.Pt(0)
-	pt.X.Line.Width.Pt(0)
-	// pt.Y.Padding.Pt(pt.X.Tick.Label.Width(names[0]) / 2)
+	pt.X.Style.TickLine.Width.Pt(0)
+	pt.X.Style.TickLength.Pt(0)
+	pt.X.Style.Line.Width.Pt(0)
+	// pt.Y.Padding.Pt(pt.X.Style.Tick.Label.Width(names[0]) / 2)
 	ticks := make([]Tick, len(names))
 	for i, name := range names {
-		ticks[i] = Tick{float32(i), name}
+		ticks[i] = Tick{float64(i), name}
 	}
 	pt.X.Ticker = ConstantTicks(ticks)
 }
 
 // HideX configures the X axis so that it will not be drawn.
 func (pt *Plot) HideX() {
-	pt.X.TickLength.Pt(0)
-	pt.X.Line.Width.Pt(0)
+	pt.X.Style.TickLength.Pt(0)
+	pt.X.Style.Line.Width.Pt(0)
 	pt.X.Ticker = ConstantTicks([]Tick{})
 }
 
 // HideY configures the Y axis so that it will not be drawn.
 func (pt *Plot) HideY() {
-	pt.Y.TickLength.Pt(0)
-	pt.Y.Line.Width.Pt(0)
+	pt.Y.Style.TickLength.Pt(0)
+	pt.Y.Style.Line.Width.Pt(0)
 	pt.Y.Ticker = ConstantTicks([]Tick{})
 }
 
@@ -169,13 +338,13 @@ func (pt *Plot) HideAxes() {
 
 // NominalY is like NominalX, but for the Y axis.
 func (pt *Plot) NominalY(names ...string) {
-	pt.Y.TickLine.Width.Pt(0)
-	pt.Y.TickLength.Pt(0)
-	pt.Y.Line.Width.Pt(0)
+	pt.Y.Style.TickLine.Width.Pt(0)
+	pt.Y.Style.TickLength.Pt(0)
+	pt.Y.Style.Line.Width.Pt(0)
 	// pt.X.Padding = pt.Y.Tick.Label.Height(names[0]) / 2
 	ticks := make([]Tick, len(names))
 	for i, name := range names {
-		ticks[i] = Tick{float32(i), name}
+		ticks[i] = Tick{float64(i), name}
 	}
 	pt.Y.Ticker = ConstantTicks(ticks)
 }
@@ -184,55 +353,63 @@ func (pt *Plot) NominalY(names ...string) {
 // This first resets the range so any fixed additional range values should
 // be set after this point.
 func (pt *Plot) UpdateRange() {
-	pt.X.Min = math32.Inf(+1)
-	pt.X.Max = math32.Inf(-1)
-	pt.Y.Min = math32.Inf(+1)
-	pt.Y.Max = math32.Inf(-1)
-	for _, d := range pt.Plotters {
-		pt.UpdateRangeFromPlotter(d)
+	pt.X.Range.SetInfinity()
+	pt.Y.Range.SetInfinity()
+	pt.Z.Range.SetInfinity()
+	if pt.Style.XAxis.Range.FixMin {
+		pt.X.Range.Min = pt.Style.XAxis.Range.Min
 	}
-}
+	if pt.Style.XAxis.Range.FixMax {
+		pt.X.Range.Max = pt.Style.XAxis.Range.Max
+	}
+	for _, pl := range pt.Plotters {
+		pl.UpdateRange(pt, &pt.X.Range, &pt.Y.Range, &pt.Z.Range)
+	}
+	pt.X.Range.Sanitize()
+	pt.Y.Range.Sanitize()
+	pt.Z.Range.Sanitize()
 
-func (pt *Plot) UpdateRangeFromPlotter(d Plotter) {
-	if x, ok := d.(DataRanger); ok {
-		xmin, xmax, ymin, ymax := x.DataRange(pt)
-		pt.X.Min = math32.Min(pt.X.Min, xmin)
-		pt.X.Max = math32.Max(pt.X.Max, xmax)
-		pt.Y.Min = math32.Min(pt.Y.Min, ymin)
-		pt.Y.Max = math32.Max(pt.Y.Max, ymax)
-	}
+	pt.X.Range.Min *= pt.PanZoom.XScale
+	pt.X.Range.Max *= pt.PanZoom.XScale
+	pt.X.Range.Min += pt.PanZoom.XOffset
+	pt.X.Range.Max += pt.PanZoom.XOffset
+
+	pt.Y.Range.Min *= pt.PanZoom.YScale
+	pt.Y.Range.Max *= pt.PanZoom.YScale
+	pt.Y.Range.Min += pt.PanZoom.YOffset
+	pt.Y.Range.Max += pt.PanZoom.YOffset
 }
 
 // PX returns the X-axis plotting coordinate for given raw data value
 // using the current plot bounding region
-func (pt *Plot) PX(v float32) float32 {
-	return pt.PlotBox.ProjectX(pt.X.Norm(v))
+func (pt *Plot) PX(v float64) float32 {
+	return pt.PlotBox.ProjectX(float32(pt.X.Norm(v)))
 }
 
 // PY returns the Y-axis plotting coordinate for given raw data value
-func (pt *Plot) PY(v float32) float32 {
-	return pt.PlotBox.ProjectY(1 - pt.Y.Norm(v))
+func (pt *Plot) PY(v float64) float32 {
+	return pt.PlotBox.ProjectY(float32(1 - pt.Y.Norm(v)))
 }
 
 // ClosestDataToPixel returns the Plotter data point closest to given pixel point,
 // in the Pixels image.
-func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float32, data, pixel math32.Vector2, legend string) {
+func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, plotterIndex, pointIndex int, dist float32, pixel math32.Vector2, data Data, legend string) {
 	tp := math32.Vec2(float32(px), float32(py))
 	dist = float32(math32.MaxFloat32)
-	for _, p := range pt.Plotters {
-		dts, pxls := p.XYData()
-		for i := range pxls.Len() {
-			ptx, pty := pxls.XY(i)
+	for pi, pl := range pt.Plotters {
+		dts, pxX, pxY := pl.Data()
+		for i, ptx := range pxX {
+			pty := pxY[i]
 			pxy := math32.Vec2(ptx, pty)
 			d := pxy.DistanceTo(tp)
 			if d < dist {
 				dist = d
 				pixel = pxy
-				plt = p
-				idx = i
-				dx, dy := dts.XY(i)
-				data = math32.Vec2(dx, dy)
-				legend = pt.Legend.LegendForPlotter(p)
+				plt = pl
+				plotterIndex = pi
+				pointIndex = i
+				data = dts
+				legend = pt.Legend.LegendForPlotter(pl)
 			}
 		}
 	}

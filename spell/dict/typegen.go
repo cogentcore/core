@@ -6,7 +6,7 @@ import (
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "main.Config", IDName: "config", Doc: "Config is the configuration information for the cosh cli.", Directives: []types.Directive{{Tool: "go", Directive: "generate", Args: []string{"core", "generate", "-add-types", "-add-funcs"}}}, Fields: []types.Field{{Name: "InputA", Doc: "InputA is the first input dictionary file"}, {Name: "InputB", Doc: "InputB is the second input dictionary file"}, {Name: "Output", Doc: "Output is the output file for merge command"}}})
+var _ = types.AddType(&types.Type{Name: "main.Config", IDName: "config", Doc: "Config is the configuration information for the dict cli.", Directives: []types.Directive{{Tool: "go", Directive: "generate", Args: []string{"core", "generate", "-add-types", "-add-funcs"}}}, Fields: []types.Field{{Name: "InputA", Doc: "InputA is the first input dictionary file"}, {Name: "InputB", Doc: "InputB is the second input dictionary file"}, {Name: "Output", Doc: "Output is the output file for merge command"}}})
 
 var _ = types.AddFunc(&types.Func{Name: "main.Compare", Doc: "Compare compares two dictionaries", Directives: []types.Directive{{Tool: "cli", Directive: "cmd", Args: []string{"-root"}}}, Args: []string{"c"}, Returns: []string{"error"}})
 

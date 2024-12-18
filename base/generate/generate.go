@@ -54,16 +54,28 @@ func PrintHeader(w io.Writer, pkg string, imports ...string) {
 	}
 }
 
-// Inspect goes through all of the files in the given package
-// and calls the given function on each node in files that
-// are not generated. The bool return value from the given function
+// ExcludeFile returns true if the given file is on the exclude list.
+func ExcludeFile(pkg *packages.Package, file *ast.File, exclude ...string) bool {
+	fpos := pkg.Fset.Position(file.FileStart)
+	_, fname := filepath.Split(fpos.Filename)
+	for _, ex := range exclude {
+		if fname == ex {
+			return true
+		}
+	}
+	return false
+}
+
+// Inspect goes through all of the files in the given package,
+// except those listed in the exclude list, and calls the given
+// function on each node. The bool return value from the given function
 // indicates whether to continue traversing down the AST tree
 // of that node and look at its children. If a non-nil error value
 // is returned by the given function, the traversal of the tree is
 // stopped and the error value is returned.
-func Inspect(pkg *packages.Package, f func(n ast.Node) (bool, error)) error {
+func Inspect(pkg *packages.Package, f func(n ast.Node) (bool, error), exclude ...string) error {
 	for _, file := range pkg.Syntax {
-		if ast.IsGenerated(file) {
+		if ExcludeFile(pkg, file, exclude...) {
 			continue
 		}
 		var terr error

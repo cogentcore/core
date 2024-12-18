@@ -18,6 +18,5 @@
 // data points, and are just skipped over.
 //
 // New* functions return an error if the data contains Inf or is
-// empty. Some of the New* functions return other plotter-specific errors
-// too.
+// empty. Some of the New* functions return other plotter-specific errors too.
 package plots

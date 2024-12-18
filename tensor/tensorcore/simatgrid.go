@@ -4,6 +4,8 @@
 
 package tensorcore
 
+/*
+
 import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -237,3 +239,5 @@ func (tg *SimMatGrid) Render() {
 		}
 	}
 }
+
+*/

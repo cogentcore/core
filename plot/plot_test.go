@@ -21,11 +21,9 @@ func TestMain(m *testing.M) {
 func TestPlot(t *testing.T) {
 	pt := New()
 	pt.Title.Text = "Test Plot"
-	pt.X.Min = 0
-	pt.X.Max = 100
+	pt.X.Range.Max = 100
 	pt.X.Label.Text = "X Axis"
-	pt.Y.Min = 0
-	pt.Y.Max = 100
+	pt.Y.Range.Max = 100
 	pt.Y.Label.Text = "Y Axis"
 
 	pt.Resize(image.Point{640, 480})
