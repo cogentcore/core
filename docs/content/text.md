@@ -1,4 +1,8 @@
-Cogent Core provides customizable and selectable text widgets that can display many kinds of text.
++++
+Categories = ["Widgets"]
++++
+
+**Text** is a [[widget]] that can display many kinds of text.
 
 You can render plain text:
 
@@ -18,13 +22,15 @@ You can use HTML formatting in text:
 core.NewText(b).SetText(`<b>You</b> can use <i>HTML</i> <u>formatting</u> inside of <b><i><u>Cogent Core</u></i></b> text, including <span style="color:red;background-color:yellow">custom styling</span> and <a href="https://example.com">links</a>`)
 ```
 
+## Styling
+
 You can use one of the 15 preset text types to customize the appearance of text:
 
 ```Go
 core.NewText(b).SetType(core.TextHeadlineMedium).SetText("Hello, world!")
 ```
 
-You can also use a styler to further customize the appearance of text:
+You can also use a [[styling|styler]] to further customize the appearance of text:
 
 ```Go
 core.NewText(b).SetText("Hello,\n\tworld!").Styler(func(s *styles.Style) {
