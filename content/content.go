@@ -9,6 +9,7 @@ package content
 //go:generate core generate
 
 import (
+	"bytes"
 	"fmt"
 	"io/fs"
 	"strconv"
@@ -43,13 +44,15 @@ type Content struct {
 	// pages are the pages that constitute the content.
 	pages []*bcontent.Page
 
-	// pagesByName has the [Page] for each [Page.Name] transformed into lowercase.
+	// pagesByName has the [bcontent.Page] for each [bcontent.Page.Name]
+	// transformed into lowercase. See [Content.pageByName] for a helper
+	// function that automatically transforms into lowercase.
 	pagesByName map[string]*bcontent.Page
 
-	// pagesByURL has the [Page] for each [Page.URL].
+	// pagesByURL has the [bcontent.Page] for each [bcontent.Page.URL].
 	pagesByURL map[string]*bcontent.Page
 
-	// pagesByCategory has the [Page]s for each of all [Page.Categories].
+	// pagesByCategory has the [bcontent.Page]s for each of all [bcontent.Page.Categories].
 	pagesByCategory map[string][]*bcontent.Page
 
 	// history is the history of pages that have been visited.
@@ -100,7 +103,7 @@ func (ct *Content) Init() {
 		if name == "" { // A link with a blank page links to the current page
 			name = ct.currentPage.Name
 		}
-		if pg, ok := ct.pagesByName[strings.ToLower(name)]; ok {
+		if pg := ct.pageByName(name); pg != nil {
 			if heading != "" {
 				return pg.URL + "#" + heading, label
 			}
@@ -108,6 +111,10 @@ func (ct *Content) Init() {
 		}
 		return "", ""
 	})
+	ct.Context.ElementHandlers["embed-page"] = func(ctx *htmlcore.Context) bool {
+		errors.Log(ct.embedPage(ctx))
+		return true
+	}
 
 	ct.Maker(func(p *tree.Plan) {
 		if ct.currentPage == nil {
@@ -144,6 +151,11 @@ func (ct *Content) Init() {
 		ct.setStageTitle()
 	})
 	ct.handleWebPopState()
+}
+
+// pageByName returns [Content.pagesByName] of the lowercase version of the given name.
+func (ct *Content) pageByName(name string) *bcontent.Page {
+	return ct.pagesByName[strings.ToLower(name)]
 }
 
 // SetSource sets the source filesystem for the content.
@@ -302,7 +314,7 @@ func (ct *Content) makeCategories() {
 	for _, cat := range ct.currentPage.Categories {
 		catTree := core.NewTree(cats).SetText(cat)
 		catTree.OnSelect(func(e events.Event) {
-			if catPage := ct.pagesByName[strings.ToLower(cat)]; catPage != nil {
+			if catPage := ct.pageByName(cat); catPage != nil {
 				ct.Open(catPage.URL)
 			}
 		})
@@ -316,6 +328,27 @@ func (ct *Content) makeCategories() {
 			})
 		}
 	}
+}
+
+// embedPage handles an <embed-page> element by embedding the lead section
+// (content before the first heading) into the current page, with a
+// *Main article: [[name]]* link added at the start as well. The name of the
+// embedded page is the src attribute of the current html element.
+func (ct *Content) embedPage(ctx *htmlcore.Context) error {
+	src := htmlcore.GetAttr(ctx.Node, "src")
+	if src == "" {
+		return fmt.Errorf("missing src attribute in <embed-page>")
+	}
+	pg := ct.pageByName(src)
+	if pg == nil {
+		return fmt.Errorf("page %q not found", src)
+	}
+	b, err := pg.ReadContent(ct.pagesByCategory)
+	if err != nil {
+		return err
+	}
+	lead, _, _ := bytes.Cut(b, []byte("\n#"))
+	return htmlcore.ReadMD(ctx, ctx.BlockParent, lead)
 }
 
 // setStageTitle sets the title of the stage based on the current page URL.

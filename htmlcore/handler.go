@@ -56,7 +56,7 @@ func handleElement(ctx *Context) {
 	case "script", "title", "meta":
 		// we don't render anything
 	case "link":
-		rel := getAttr(ctx.Node, "rel")
+		rel := GetAttr(ctx.Node, "rel")
 		// TODO(kai/htmlcore): maybe handle preload
 		if rel == "preload" {
 			return
@@ -65,7 +65,7 @@ func handleElement(ctx *Context) {
 		if rel != "stylesheet" {
 			return
 		}
-		resp, err := Get(ctx, getAttr(ctx.Node, "href"))
+		resp, err := Get(ctx, GetAttr(ctx.Node, "href"))
 		if errors.Log(err) != nil {
 			return
 		}
@@ -111,7 +111,7 @@ func handleElement(ctx *Context) {
 		if hasCode {
 			ed := New[texteditor.Editor](ctx)
 			ctx.Node = ctx.Node.FirstChild // go to the code element
-			lang := getLanguage(getAttr(ctx.Node, "class"))
+			lang := getLanguage(GetAttr(ctx.Node, "class"))
 			if lang != "" {
 				ed.Buffer.SetFileExt(lang)
 			}
@@ -186,9 +186,9 @@ func handleElement(ctx *Context) {
 	case "img":
 		img := New[core.Image](ctx)
 		n := ctx.Node
-		img.SetTooltip(getAttr(n, "alt"))
+		img.SetTooltip(GetAttr(n, "alt"))
 		go func() {
-			src := getAttr(n, "src")
+			src := GetAttr(n, "src")
 			resp, err := Get(ctx, src)
 			if errors.Log(err) != nil {
 				return
@@ -209,18 +209,18 @@ func handleElement(ctx *Context) {
 			}
 		}()
 	case "input":
-		ityp := getAttr(ctx.Node, "type")
-		val := getAttr(ctx.Node, "value")
+		ityp := GetAttr(ctx.Node, "type")
+		val := GetAttr(ctx.Node, "value")
 		switch ityp {
 		case "number":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
 			New[core.Spinner](ctx).SetValue(fval)
 		case "checkbox":
 			New[core.Switch](ctx).SetType(core.SwitchCheckbox).
-				SetState(hasAttr(ctx.Node, "checked"), states.Checked)
+				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "radio":
 			New[core.Switch](ctx).SetType(core.SwitchRadioButton).
-				SetState(hasAttr(ctx.Node, "checked"), states.Checked)
+				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "range":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
 			New[core.Slider](ctx).SetValue(fval)
@@ -281,9 +281,9 @@ func handleTextTag(ctx *Context) *core.Text {
 	return tx
 }
 
-// getAttr gets the given attribute from the given node, returning ""
+// GetAttr gets the given attribute from the given node, returning ""
 // if the attribute is not found.
-func getAttr(n *html.Node, attr string) string {
+func GetAttr(n *html.Node, attr string) string {
 	res := ""
 	for _, a := range n.Attr {
 		if a.Key == attr {
@@ -293,8 +293,8 @@ func getAttr(n *html.Node, attr string) string {
 	return res
 }
 
-// hasAttr returns whether the given node has the given attribute defined.
-func hasAttr(n *html.Node, attr string) bool {
+// HasAttr returns whether the given node has the given attribute defined.
+func HasAttr(n *html.Node, attr string) bool {
 	return slices.ContainsFunc(n.Attr, func(a html.Attribute) bool {
 		return a.Key == attr
 	})
