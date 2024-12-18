@@ -1,4 +1,8 @@
-Cogent Core provides customizable frames that can position content in many different ways and render a container. Frames are the base container type, and almost all Cogent Core widgets are contained within some kind of frame.
++++
+Categories = ["Widgets"]
++++
+
+A **frame** is a [[widget]] that can position content in many different ways and [[render]] a container. Frames are the base container type, and almost all [[widgets]] are contained within some kind of frame.
 
 You can make a frame and place elements inside of it:
 
@@ -8,6 +12,8 @@ core.NewButton(fr).SetText("First")
 core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
+
+## Styling
 
 You can position elements in a column instead of in a row:
 
@@ -45,7 +51,7 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
-You can make a frame add scroll bars when it overflows:
+You can make a frame add scrollbars when it overflows:
 
 ```Go
 fr := core.NewFrame(b)
@@ -150,6 +156,8 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
+## Separator
+
 You can add a separator to separate elements inside of a frame:
 
 ```Go
@@ -175,6 +183,8 @@ sp.Styler(func(s *styles.Style) {
 core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
+
+## Stretch
 
 You can add a stretch to create a growing gap between elements inside of a frame:
 
