@@ -14,7 +14,7 @@ type user struct {
 u := &user{}
 ```
 
-We can create a sign in page to enter user information in a [[form]]:
+We can create a sign in page for users to enter information in a [[form]]:
 
 ```Go
 type user struct {
