@@ -37,8 +37,8 @@ type Node struct {
 	// to n-dimensional data, in a range of data types.
 	Tensor tensor.Tensor
 
-	// Dir is for directory nodes, with all the nodes in the directory.
-	Dir *Dir
+	// nodes is for directory nodes, with all the nodes in the directory.
+	nodes *Nodes
 
 	// DirTable is a summary [table.Table] with columns comprised of Value
 	// nodes in the directory, which can be used for plotting or other operations.
@@ -57,11 +57,11 @@ func newNode(dir *Node, name string) (*Node, error) {
 	if err := dir.mustDir("newNode", name); err != nil {
 		return nil, err
 	}
-	if ex, ok := dir.Dir.AtTry(name); ok {
+	if ex, ok := dir.nodes.AtTry(name); ok {
 		return ex, fs.ErrExist
 	}
 	d := &Node{Parent: dir, name: name, modTime: time.Now()}
-	dir.Dir.Add(name, d)
+	dir.nodes.Add(name, d)
 	return d, nil
 }
 

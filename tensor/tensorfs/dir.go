@@ -17,10 +17,10 @@ import (
 	"cogentcore.org/core/tensor"
 )
 
-// Dir is a map of directory entry names to Nodes.
+// Nodes is a map of directory entry names to Nodes.
 // It retains the order that nodes were added in, which is
 // the natural order nodes are processed in.
-type Dir = keylist.List[string, *Node]
+type Nodes = keylist.List[string, *Node]
 
 // NewDir returns a new tensorfs directory with the given name.
 // If parent != nil and a directory, this dir is added to it.
@@ -39,46 +39,33 @@ func NewDir(name string, parent ...*Node) (*Node, error) {
 		par = parent[0]
 	}
 	dir, err := newNode(par, name)
-	if dir != nil && dir.Dir == nil {
-		dir.Dir = &Dir{}
+	if dir != nil && dir.nodes == nil {
+		dir.nodes = &Nodes{}
 	}
 	return dir, err
 }
 
-// Mkdir creates a new directory under given dir with the specified name.
-// Returns an error if this dir node is not a directory.
-// Returns existing directory and [fs.ErrExist] if a node
-// with the same name already exists.
-// See [Node.RecycleDir] for a version with no error return
-// that is preferable when expecting an existing directory.
-func (dir *Node) Mkdir(name string) (*Node, error) {
-	if err := dir.mustDir("Mkdir", name); err != nil {
-		return nil, err
-	}
-	return NewDir(name, dir)
-}
-
-// RecycleDir creates a new directory under given dir with the specified name
+// Dir creates a new directory under given dir with the specified name
 // if it doesn't already exist, otherwise returns the existing one.
 // Path / slash separators can be used to make a path of multiple directories.
 // It logs an error and returns nil if this dir node is not a directory.
-func (dir *Node) RecycleDir(name string) *Node {
-	if err := dir.mustDir("RecycleDir", name); errors.Log(err) != nil {
+func (dir *Node) Dir(name string) *Node {
+	if err := dir.mustDir("Dir", name); errors.Log(err) != nil {
 		return nil
 	}
 	if len(name) == 0 {
 		return dir
 	}
 	path := strings.Split(name, "/")
-	if cd := dir.Dir.At(path[0]); cd != nil {
+	if cd := dir.nodes.At(path[0]); cd != nil {
 		if len(path) > 1 {
-			return cd.RecycleDir(strings.Join(path[1:], "/"))
+			return cd.Dir(strings.Join(path[1:], "/"))
 		}
 		return cd
 	}
 	nd, _ := NewDir(path[0], dir)
 	if len(path) > 1 {
-		return nd.RecycleDir(strings.Join(path[1:], "/"))
+		return nd.Dir(strings.Join(path[1:], "/"))
 	}
 	return nd
 }
@@ -88,7 +75,7 @@ func (dir *Node) RecycleDir(name string) *Node {
 // nodes, and it will panic if this node is not a directory.
 // Returns nil if no node of given name exists.
 func (dir *Node) Node(name string) *Node {
-	return dir.Dir.At(name)
+	return dir.nodes.At(name)
 }
 
 // Value returns the [tensor.Tensor] value for given node
@@ -96,7 +83,7 @@ func (dir *Node) Node(name string) *Node {
 // found, and will return nil if it is not a Value
 // (i.e., it is a directory).
 func (dir *Node) Value(name string) tensor.Tensor {
-	return dir.Dir.At(name).Tensor
+	return dir.nodes.At(name).Tensor
 }
 
 // Nodes returns a slice of Nodes in given directory by names variadic list.
@@ -108,14 +95,14 @@ func (dir *Node) Nodes(names ...string) ([]*Node, error) {
 	}
 	var nds []*Node
 	if len(names) == 0 {
-		for _, it := range dir.Dir.Values {
+		for _, it := range dir.nodes.Values {
 			nds = append(nds, it)
 		}
 		return nds, nil
 	}
 	var errs []error
 	for _, nm := range names {
-		dt := dir.Dir.At(nm)
+		dt := dir.nodes.At(nm)
 		if dt != nil {
 			nds = append(nds, dt)
 		} else {
@@ -136,7 +123,7 @@ func (dir *Node) Values(names ...string) ([]tensor.Tensor, error) {
 	}
 	var nds []tensor.Tensor
 	if len(names) == 0 {
-		for _, it := range dir.Dir.Values {
+		for _, it := range dir.nodes.Values {
 			if it.Tensor != nil {
 				nds = append(nds, it.Tensor)
 			}
@@ -145,7 +132,7 @@ func (dir *Node) Values(names ...string) ([]tensor.Tensor, error) {
 	}
 	var errs []error
 	for _, nm := range names {
-		it := dir.Dir.At(nm)
+		it := dir.nodes.At(nm)
 		if it != nil && it.Tensor != nil {
 			nds = append(nds, it.Tensor)
 		} else {
@@ -167,7 +154,7 @@ func (dir *Node) ValuesFunc(fun func(nd *Node) bool) []tensor.Tensor {
 		return nil
 	}
 	var nds []tensor.Tensor
-	for _, it := range dir.Dir.Values {
+	for _, it := range dir.nodes.Values {
 		if fun != nil && !fun(it) {
 			continue
 		}
@@ -192,7 +179,7 @@ func (dir *Node) NodesFunc(fun func(nd *Node) bool) []*Node {
 		return nil
 	}
 	var nds []*Node
-	for _, it := range dir.Dir.Values {
+	for _, it := range dir.nodes.Values {
 		if fun != nil && !fun(it) {
 			continue
 		}
@@ -219,7 +206,7 @@ func (dir *Node) ValuesAlphaFunc(fun func(nd *Node) bool) []tensor.Tensor {
 	names := dir.dirNamesAlpha()
 	var nds []tensor.Tensor
 	for _, nm := range names {
-		it := dir.Dir.At(nm)
+		it := dir.nodes.At(nm)
 		if fun != nil && !fun(it) {
 			continue
 		}
@@ -247,7 +234,7 @@ func (dir *Node) NodesAlphaFunc(fun func(nd *Node) bool) []*Node {
 	names := dir.dirNamesAlpha()
 	var nds []*Node
 	for _, nm := range names {
-		it := dir.Dir.At(nm)
+		it := dir.nodes.At(nm)
 		if fun != nil && !fun(it) {
 			continue
 		}
@@ -288,7 +275,7 @@ func (dir *Node) NodeAtPath(name string) (*Node, error) {
 	if err != nil {
 		return nil, err
 	}
-	nd, ok := sd.Dir.AtTry(file)
+	nd, ok := sd.nodes.AtTry(file)
 	if !ok {
 		if dirPath == "" && (file == dir.name || file == ".") {
 			return dir, nil
@@ -319,7 +306,7 @@ func (dir *Node) Path() string {
 // dirNamesAlpha returns the names of nodes in the directory
 // sorted alphabetically. Node must be dir by this point.
 func (dir *Node) dirNamesAlpha() []string {
-	names := slices.Clone(dir.Dir.Keys)
+	names := slices.Clone(dir.nodes.Keys)
 	sort.Strings(names)
 	return names
 }
@@ -327,9 +314,9 @@ func (dir *Node) dirNamesAlpha() []string {
 // dirNamesByTime returns the names of nodes in the directory
 // sorted by modTime. Node must be dir by this point.
 func (dir *Node) dirNamesByTime() []string {
-	names := slices.Clone(dir.Dir.Keys)
+	names := slices.Clone(dir.nodes.Keys)
 	slices.SortFunc(names, func(a, b string) int {
-		return dir.Dir.At(a).ModTime().Compare(dir.Dir.At(b).ModTime())
+		return dir.nodes.At(a).ModTime().Compare(dir.nodes.At(b).ModTime())
 	})
 	return names
 }
@@ -351,7 +338,7 @@ func (dir *Node) Add(it *Node) error {
 	if err := dir.mustDir("Add", it.name); err != nil {
 		return err
 	}
-	err := dir.Dir.Add(it.name, it)
+	err := dir.nodes.Add(it.name, it)
 	if err != nil {
 		return fs.ErrExist
 	}

@@ -61,7 +61,7 @@ func (nd *Node) Sub(dir string) (fs.FS, error) {
 			return cur, nil
 		}
 		cd = rest
-		sd, ok := cur.Dir.AtTry(root)
+		sd, ok := cur.nodes.AtTry(root)
 		if !ok {
 			return nil, &fs.PathError{Op: "Sub", Path: dir, Err: errors.New("directory not found")}
 		}
@@ -82,7 +82,7 @@ func (nd *Node) ReadDir(dir string) ([]fs.DirEntry, error) {
 	names := sd.dirNamesAlpha()
 	ents := make([]fs.DirEntry, len(names))
 	for i, nm := range names {
-		ents[i] = sd.Dir.At(nm)
+		ents[i] = sd.nodes.At(nm)
 	}
 	return ents, nil
 }
@@ -119,7 +119,7 @@ func (nd *Node) Size() int64 {
 }
 
 func (nd *Node) IsDir() bool {
-	return nd.Dir != nil
+	return nd.nodes != nil
 }
 
 func (nd *Node) ModTime() time.Time {
@@ -138,7 +138,7 @@ func (nd *Node) Sys() any {
 	if nd.Tensor != nil {
 		return nd.Tensor
 	}
-	return nd.Dir
+	return nd.nodes
 }
 
 //////// DirEntry interface

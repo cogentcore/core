@@ -15,11 +15,9 @@ import (
 func makeTestNode(t *testing.T) *Node {
 	dfs, err := NewDir("root")
 	assert.NoError(t, err)
-	net, err := dfs.Mkdir("network")
-	assert.NoError(t, err)
+	net := dfs.Dir("network")
 	Value[float32](net, "units", 50, 50)
-	_, err = dfs.Mkdir("log")
-	assert.NoError(t, err)
+	dfs.Dir("log")
 	return dfs
 }
 

@@ -24,7 +24,7 @@ var DescriptiveStats = []Stats{StatCount, StatMean, StatStd, StatSem, StatMin, S
 // The [DescriptiveStats] list is: [Count], [Mean], [Std], [Sem],
 // [Min], [Max], [Q1], [Median], [Q3]
 func Describe(dir *tensorfs.Node, tsrs ...tensor.Tensor) {
-	dd := dir.RecycleDir("Describe")
+	dd := dir.Dir("Describe")
 	for i, tsr := range tsrs {
 		nr := tsr.DimSize(0)
 		if nr == 0 {
@@ -34,7 +34,7 @@ func Describe(dir *tensorfs.Node, tsrs ...tensor.Tensor) {
 		if nm == "" {
 			nm = strconv.Itoa(i)
 		}
-		td, _ := dd.Mkdir(nm)
+		td := dd.Dir(nm)
 		for _, st := range DescriptiveStats {
 			stnm := st.String()
 			sv := tensorfs.Scalar[float64](td, stnm)

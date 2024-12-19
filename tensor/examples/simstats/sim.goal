@@ -60,7 +60,7 @@ type Sim struct {
 // ConfigAll configures the sim
 func (ss *Sim) ConfigAll() {
 	ss.Root, _ = tensorfs.NewDir("Root")
-	ss.Config, _ = ss.Root.Mkdir("Config")
+	ss.Config = ss.Root.Dir("Config")
 	mx := tensorfs.Value[int](ss.Config, "Max", int(TimesN)).(*tensor.Int)
 	mx.Set1D(5, int(Trial))
 	mx.Set1D(4, int(Epoch))
@@ -83,8 +83,8 @@ func (ss *Sim) RunStats(ltime Times, lphase LoopPhase) {
 }
 
 func (ss *Sim) ConfigStats() {
-	ss.Stats, _ = ss.Root.Mkdir("Stats")
-	ss.Current, _ = ss.Stats.Mkdir("Current")
+	ss.Stats = ss.Root.Dir("Stats")
+	ss.Current = ss.Stats.Dir("Current")
 	ctrs := []Times{Run, Epoch, Trial}
 	for _, ctr := range ctrs {
 		ss.AddStat(func(ltime Times, lphase LoopPhase) {
@@ -92,7 +92,7 @@ func (ss *Sim) ConfigStats() {
 				return
 			}
 			name := ctr.String() // name of stat = counter
-			timeDir := ss.Stats.RecycleDir(ltime.String())
+			timeDir := ss.Stats.Dir(ltime.String())
 			tsr := tensorfs.Value[int](timeDir, name)
 			if lphase == Start {
 				tsr.SetNumRows(0)
@@ -113,7 +113,7 @@ func (ss *Sim) ConfigStats() {
 	// so generic names can be used for everything.
 	ss.AddStat(func(ltime Times, lphase LoopPhase) {
 		name := "SSE"
-		timeDir := ss.Stats.RecycleDir(ltime.String())
+		timeDir := ss.Stats.Dir(ltime.String())
 		tsr := tensorfs.Value[float64](timeDir, name)
 		if lphase == Start {
 			tsr.SetNumRows(0)
@@ -132,18 +132,18 @@ func (ss *Sim) ConfigStats() {
 			tensorfs.Scalar[float64](ss.Current, name).SetFloat(stat, 0)
 			tsr.AppendRowFloat(stat)
 		case Epoch:
-			subd := ss.Stats.RecycleDir((ltime - 1).String())
+			subd := ss.Stats.Dir((ltime - 1).String())
 			stat := stats.StatMean.Call(subd.Value(name))
 			tsr.AppendRow(stat)
 		case Run:
-			subd := ss.Stats.RecycleDir((ltime - 1).String())
+			subd := ss.Stats.Dir((ltime - 1).String())
 			stat := stats.StatMean.Call(subd.Value(name))
 			tsr.AppendRow(stat)
 		}
 	})
 	ss.AddStat(func(ltime Times, lphase LoopPhase) {
 		name := "Err"
-		timeDir := ss.Stats.RecycleDir(ltime.String())
+		timeDir := ss.Stats.Dir(ltime.String())
 		tsr := tensorfs.Value[float64](timeDir, name)
 		if lphase == Start {
 			tsr.SetNumRows(0)
@@ -166,11 +166,11 @@ func (ss *Sim) ConfigStats() {
 			tensorfs.Scalar[float64](ss.Current, name).SetFloat(stat, 0)
 			tsr.AppendRowFloat(stat)
 		case Epoch:
-			subd := ss.Stats.RecycleDir((ltime - 1).String())
+			subd := ss.Stats.Dir((ltime - 1).String())
 			stat := stats.StatMean.Call(subd.Value(name))
 			tsr.AppendRow(stat)
 		case Run:
-			subd := ss.Stats.RecycleDir((ltime - 1).String())
+			subd := ss.Stats.Dir((ltime - 1).String())
 			stat := stats.StatMean.Call(subd.Value(name))
 			tsr.AppendRow(stat)
 		}
@@ -199,7 +199,7 @@ func (ss *Sim) Run() {
 	}
 	// todo: could do final analysis here
 	// alldt := ss.Logs.Item("AllTrials").GetDirTable(nil)
-	// dir, _ := ss.Logs.Mkdir("Stats")
+	// dir := ss.Logs.Dir("Stats")
 	// stats.TableGroups(dir, alldt, "Run", "Epoch", "Trial")
 	// sts := []string{"SSE", "AvgSSE", "TrlErr"}
 	// stats.TableGroupStats(dir, stats.StatMean, alldt, sts...)

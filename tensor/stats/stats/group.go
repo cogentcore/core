@@ -32,7 +32,7 @@ import (
 // the results can be used directly as Indexes into the corresponding tensor data.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
 func Groups(dir *tensorfs.Node, tsrs ...tensor.Tensor) error {
-	gd := dir.RecycleDir("Groups")
+	gd := dir.Dir("Groups")
 	makeIdxs := func(dir *tensorfs.Node, srt *tensor.Rows, val string, start, r int) {
 		n := r - start
 		it := tensorfs.Value[int](dir, val, n)
@@ -50,7 +50,7 @@ func Groups(dir *tensorfs.Node, tsrs ...tensor.Tensor) error {
 		if nm == "" {
 			nm = strconv.Itoa(i)
 		}
-		td, _ := gd.Mkdir(nm)
+		td := gd.Dir(nm)
 		srt := tensor.AsRows(tsr).CloneIndexes()
 		srt.SortStable(tensor.Ascending)
 		start := 0
@@ -98,13 +98,13 @@ func TableGroups(dir *tensorfs.Node, dt *table.Table, columns ...string) error {
 // be used with [GroupStats] to generate summary statistics across
 // all the data. See [Groups] for more general documentation.
 func GroupAll(dir *tensorfs.Node, tsrs ...tensor.Tensor) error {
-	gd := dir.RecycleDir("Groups")
+	gd := dir.Dir("Groups")
 	tsr := tensor.AsRows(tsrs[0])
 	nr := tsr.NumRows()
 	if nr == 0 {
 		return nil
 	}
-	td, _ := gd.Mkdir("All")
+	td := gd.Dir("All")
 	it := tensorfs.Value[int](td, "All", nr)
 	for j := range nr {
 		it.SetIntRow(tsr.RowIndex(j), j, 0) // key to indirect through any existing indexes
@@ -125,19 +125,19 @@ func GroupAll(dir *tensorfs.Node, tsrs ...tensor.Tensor) error {
 // and a aligned Float64 tensor with the statistics results for each such
 // unique group value. See the README.md file for a diagram of the results.
 func GroupStats(dir *tensorfs.Node, stat Stats, tsrs ...tensor.Tensor) error {
-	gd := dir.RecycleDir("Groups")
-	sd := dir.RecycleDir("Stats")
+	gd := dir.Dir("Groups")
+	sd := dir.Dir("Stats")
 	stnm := StripPackage(stat.String())
 	groups, _ := gd.Nodes()
 	for _, gp := range groups {
 		gpnm := gp.Name()
-		ggd := gd.RecycleDir(gpnm)
+		ggd := gd.Dir(gpnm)
 		vals := ggd.ValuesFunc(nil)
 		nv := len(vals)
 		if nv == 0 {
 			continue
 		}
-		sgd := sd.RecycleDir(gpnm)
+		sgd := sd.Dir(gpnm)
 		gv := sgd.Node(gpnm)
 		if gv == nil {
 			gtsr := tensorfs.Value[string](sgd, gpnm, nv)
@@ -146,7 +146,7 @@ func GroupStats(dir *tensorfs.Node, stat Stats, tsrs ...tensor.Tensor) error {
 			}
 		}
 		for _, tsr := range tsrs {
-			vd := sgd.RecycleDir(metadata.Name(tsr))
+			vd := sgd.Dir(metadata.Name(tsr))
 			sv := tensorfs.Value[float64](vd, stnm, nv)
 			for i, v := range vals {
 				idx := tensor.AsIntSlice(v)

@@ -30,7 +30,7 @@ If the tensor was previously created, then it is returned, and otherwise it is c
 
 For efficiency, _there are no checks_ on the existing value relative to the arguments passed, so if you end up using the same name for two different things, that will cause problems that will hopefully become evident. If you want to ensure that the size is correct, you should use an explicit `tensor.SetShapeSizes` call, which is still quite efficient if the size is the same. You can also have an initial call to `Value` that has no size args, and then set the size later -- that works fine.
 
-There are also functions for high-frequency types, defined on the `Node`: `Float64`, `Float32`, `Int`, and `StringValue` (`String` is taken by `fmt.Stringer`, `StringValue` is used in `tensor`).
+There are also functions for high-frequency types, defined on the `Node`: `Float64`, `Float32`, `Int`, and `StringValue` (`String` is taken by `fmt.Stringer`, `StringValue` is used in `tensor`), e.g.,:
 
 ```Go
 tsr := dir.Float64("filename", 5, 5)
@@ -46,11 +46,13 @@ There are also a few other variants of the `Value` functionality:
 
 ### Directories
 
-Directories are `Node` elements that have a `Dir` value (ordered map of named nodes) instead of a tensor value.
+Directories are `Node` elements that have a `nodes` value (ordered map of named nodes) instead of a tensor value.
 
+The primary way to make / access a subdirectory is the `Dir` method:
 ```Go
-dir := tensorfs.NewDir("subdir", dir) // make a new directory
+subdir := dir.Dir("subdir")
 ```
+If the subdirectory doesn't exist yet, it will be made, and otherwise it is returned. Any errors will be logged and a nil returned, likely causing a panic unless you expect it to fail and check for that.
 
 There are parallel `Node` and `Value` access methods for directory nodes, with the Value ones being:
 
@@ -61,11 +63,11 @@ There are parallel `Node` and `Value` access methods for directory nodes, with t
 
 ### Existing items and unique names
 
-As in a real filesystem, names must be unique within each directory, which creates issues for how to manage conflicts between existing and new items. We adopt the same behavior as the Go `os` package in general:
+As in a real filesystem, names must be unique within each directory, which creates issues for how to manage conflicts between existing and new items. To make the overall framework maximally robust and eliminate the need for a controlled initialization-then-access ordering, we generally adopt the "Recycle" logic:
 
-* If an existing item with the same name is present, return that existing item and an `fs.ErrExist` error, so that the caller can decide how to proceed, using `errors.Is(fs.ErrExist)`.
+* _Return an existing item of the same name, or make a new one._
 
-* There are also `Recycle` versions of functions that do not return an error and are preferred when specifically expecting an existing item.
+In addition, if you really need to know if there is an existing item, you can use the `Node` method to check for yourself -- it will return `nil` if no node of that name exists. Furthermore, the global `NewDir` function returns an `fs.ErrExist` error for existing items (e.g., use `errors.Is(fs.ErrExist)`), as used in various `os` package functions.
 
 ## `goal` Command API
 

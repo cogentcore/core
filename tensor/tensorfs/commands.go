@@ -51,8 +51,8 @@ func Chdir(dir string) error {
 	return nil
 }
 
-// Mkdir creates a new directory with the specified name
-// in the current directory.
+// Mkdir creates a new directory with the specified name in the current directory.
+// It returns an existing directory of the same name without error.
 func Mkdir(dir string) *Node {
 	if CurDir == nil {
 		CurDir = CurRoot
@@ -62,7 +62,7 @@ func Mkdir(dir string) *Node {
 		errors.Log(err)
 		return nil
 	}
-	return errors.Log1(CurDir.Mkdir(dir))
+	return CurDir.Dir(dir)
 }
 
 // List lists files using arguments (options and path) from the current directory.
