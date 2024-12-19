@@ -158,6 +158,9 @@ func DirTable(dir *Node, fun func(node *Node) bool) *table.Table {
 	}
 	dt := table.New(fsx.DirAndFile(string(dir.Path())))
 	for _, it := range nds {
+		if it.Tensor == nil || it.Tensor.NumDims() == 0 {
+			continue
+		}
 		tsr := it.Tensor
 		rows := tsr.DimSize(0)
 		if dt.Columns.Rows < rows {

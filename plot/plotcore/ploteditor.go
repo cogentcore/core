@@ -391,7 +391,8 @@ func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 				})
 			})
 			tree.AddChild(w, func(w *core.Button) {
-				w.SetText(cnm).SetType(core.ButtonAction).SetTooltip("Edit all styling options for this column")
+				tt := "[Edit all styling options for this column] " + metadata.Doc(cl)
+				w.SetText(cnm).SetType(core.ButtonAction).SetTooltip(tt)
 				w.OnClick(func(e events.Event) {
 					update := func() {
 						if core.TheApp.Platform().IsMobile() {
