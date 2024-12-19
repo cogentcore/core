@@ -1,4 +1,10 @@
-Cogent Core provides customizable sliders for bounded numeric input.
++++
+Categories = ["Widgets"]
++++
+
+A **slider** is a [[widget]] for bounded numeric input.
+
+## Properties
 
 You can make a slider without any custom options:
 
@@ -30,13 +36,15 @@ You can ensure that the value is always a multiple of the step:
 core.NewSlider(b).SetStep(0.2).SetEnforceStep(true)
 ```
 
-You can use an icon for the thumb of the slider:
+You can use an [[icon]] for the thumb of the slider:
 
 ```Go
 core.NewSlider(b).SetIcon(icons.DeployedCodeFill)
 ```
 
-You can detect when the user changes the value of the slider and then stops:
+## Events
+
+You can detect when a user [[event#change|changes]] the value of a slider and then stops:
 
 ```Go
 sr := core.NewSlider(b)
@@ -45,7 +53,7 @@ sr.OnChange(func(e events.Event) {
 })
 ```
 
-You can detect when the user changes the value of the slider as they slide it:
+You can detect when a user changes the value of a slider as they slide ([[event#input|input]]):
 
 ```Go
 sr := core.NewSlider(b)
