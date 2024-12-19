@@ -1,6 +1,12 @@
-Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.
++++
+Categories = ["Widgets"]
++++
 
-Text editors should mainly be used for editing code and other multiline syntactic data like markdown and JSON. For simpler use cases, consider using [text fields](text-fields) instead.
+A **text editor** is a [[widget]] for editing complex text. It supports advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.
+
+Text editors should mainly be used for editing code and other multiline syntactic data like markdown and JSON. For simpler use cases, consider using a [[text field]] instead.
+
+## Properties
 
 You can make a text editor without any custom options:
 
@@ -50,7 +56,9 @@ texteditor.NewEditor(b).SetBuffer(tb)
 texteditor.NewEditor(b).SetBuffer(tb)
 ```
 
-You can detect when the user changes the content of a text editor and then exits it:
+## Events
+
+You can detect when the user [[event#change|changes]] the content of a text editor and then exits it:
 
 ```Go
 ed := texteditor.NewEditor(b)
@@ -59,7 +67,7 @@ ed.OnChange(func(e events.Event) {
 })
 ```
 
-You can detect when the user makes any changes to the content of a text editor as they type:
+You can detect when the user makes any changes to the content of a text editor as they type ([[event#input|input]]):
 
 ```Go
 ed := texteditor.NewEditor(b)
