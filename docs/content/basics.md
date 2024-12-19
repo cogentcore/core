@@ -24,9 +24,9 @@ The **basics** are a simple overview of the key [[concepts]] of Cogent Core. You
 
 <embed-page src="update">
 
-## Value binding
+## Bind
 
-<embed-page src="value binding">
+<embed-page src="bind">
 
 ## Plan
 

@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **button** is a [[widget]] that a user can click on to trigger an action. See [[func button]] for a button [[value binding|bound]] to a function.
+A **button** is a [[widget]] that a user can click on to trigger an action. See [[func button]] for a button [[bind|bound]] to a function.
 
 ## Properties
 
