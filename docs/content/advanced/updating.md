@@ -1,6 +1,6 @@
 ## Updating order
 
-The `Update()` method on [[core.WidgetBase]] is the general-purpose update method, which should be called whenever you have finished setting field values on a widget (or any other such configuration changes), and want to have the GUI display reflect those changes.  In general, setting field values or other methods that configure a widget _should have no side-effects directly_, and all the implications thereof should be handled in the context of the `Update()` method.
+The `Update()` method on [[doc:core.WidgetBase]] is the general-purpose update method, which should be called whenever you have finished setting field values on a widget (or any other such configuration changes), and want to have the GUI display reflect those changes.  In general, setting field values or other methods that configure a widget _should have no side-effects directly_, and all the implications thereof should be handled in the context of the `Update()` method.
 
 It performs these steps in order:
 
@@ -8,11 +8,11 @@ It performs these steps in order:
 
 * calls `NeedsLayout()` to trigger a new layout of the widgets.
 
-The `UpdateWidget()` method first updates the value represented by the widget if any `Bind` value has been set, and then runs the `Updaters` functions, including any `Maker` functions as described in [basics/plans](../basics/plans), which makes a [[tree.Plan]] to update the child elements within the Widget.
+The `UpdateWidget()` method first updates the value represented by the widget if any `Bind` value has been set, and then runs the `Updaters` functions, including any `Maker` functions as described in [basics/plans](../basics/plans), which makes a [[doc:tree.Plan]] to update the child elements within the Widget.
 
 Some other important things to keep in mind:
 
-* `Update()` is automatically called on all widgets when the [[core.Scene]] is first shown in the GUI, so it doesn't need to be called manually prior to that.
+* `Update()` is automatically called on all widgets when the [[doc:core.Scene]] is first shown in the GUI, so it doesn't need to be called manually prior to that.
 
 * `Update()` can be called prior to GUI rendering, and in general _must_ be called prior to accessing any children of a given Widget, as they will not in general exist prior to the Update call.
 
@@ -20,7 +20,7 @@ Some other important things to keep in mind:
 
 ## How to make a new Widget type
 
-To better understand the Update logic, it is useful to see how the code is organized to configure a given Widget.  We will look at elements of the [[core.Button]] widget as a familiar example.
+To better understand the Update logic, it is useful to see how the code is organized to configure a given Widget.  We will look at elements of the [[doc:core.Button]] widget as a familiar example.
 
 ### The `Init()` method has everything
 
@@ -78,7 +78,7 @@ Next, children are added with appropriate logic determining whether they are nee
         ...
 ```
 
-The [[tree.AddAt]] adds a child with the given name to the overall [[tree.Plan]] for the widget's children, and the first closure function indicates what to do when that icon is actually made for the first time.  This code is run _after_ the standard `Init()` method for the [[core.Icon]] type itself, so it is providing any _additional_ styling and functionality over and above the defaults for that type.  You can connect event handlers here, etc.  Critically, this code is only ever run _once_, and like the `Init()` method itself, it should largely be setting closures that will actually be run _later_ when the widget is actually made.
+The [[doc:tree.AddAt]] adds a child with the given name to the overall [[doc:tree.Plan]] for the widget's children, and the first closure function indicates what to do when that icon is actually made for the first time.  This code is run _after_ the standard `Init()` method for the [[doc:core.Icon]] type itself, so it is providing any _additional_ styling and functionality over and above the defaults for that type.  You can connect event handlers here, etc.  Critically, this code is only ever run _once_, and like the `Init()` method itself, it should largely be setting closures that will actually be run _later_ when the widget is actually made.
 
 The `Updater` closure added here will be called _every time Update() is called_ on the Icon, and it ensures that this icon is always updated to reflect the `Icon` field _on the parent Button_ object.  This is how you establish connections between properties on different widgets to ensure everything is consistent: the button's Icon field is the definitive source setting for what the icon should be.
 
@@ -86,11 +86,11 @@ In general, it is ideal to be able to specify _all_ of the dynamic updating logi
 
 Note that you should _never_ call functions like `Styler`, `Maker`, `OnClick` etc in a situation where they might be called multiple times, because that would end up adding _multiple copies_ of the given closure functions to the list of such functions to be run at the appropriate time, which, aside from being inefficient, could lead to bad effects.
 
-The [[tree.Add]] function works just like `AddAt` except it automatically generates a unique name, based on the point in the source code where it is called.  This is convenient for [[core.Toolbar]] Makers, where you are often adding multiple buttons and don't really care about the names because you will not be referring back to these children elsewhere.
+The [[doc:tree.Add]] function works just like `AddAt` except it automatically generates a unique name, based on the point in the source code where it is called.  This is convenient for [[doc:core.Toolbar]] Makers, where you are often adding multiple buttons and don't really care about the names because you will not be referring back to these children elsewhere.
 
 ### Adding more Init functions to children
 
-In a Widget that embeds another widget type and extends its functionality, you can add additional `Init` closures that override or extend the basic initialization function that was specified in the `AddAt` call that creates the child widget in the first place.  This is done using the [[tree.AddInit]] function, e.g., in the case of a [[core.Spinner]] that embeds [[core.TextField]] and modifies the properties of the leading and trailing icons thereof:
+In a Widget that embeds another widget type and extends its functionality, you can add additional `Init` closures that override or extend the basic initialization function that was specified in the `AddAt` call that creates the child widget in the first place.  This is done using the [[doc:tree.AddInit]] function, e.g., in the case of a [[doc:core.Spinner]] that embeds [[doc:core.TextField]] and modifies the properties of the leading and trailing icons thereof:
 
 ```go
 	sp.Maker(func(p *tree.Plan) {
@@ -104,7 +104,7 @@ In a Widget that embeds another widget type and extends its functionality, you c
 
 ### Adding individual children and Makers for sub-children
 
-If a widget does not require dynamic configuration of its children (i.e., it always has the same children), you can save a step of indentation by using the [[tree.AddChildAt]] version of [[tree.AddAt]], without enclosing everything in an outer `Maker` function.  These `Child` versions of all the basic `tree.Add*` functions simply create a separate `Maker` function wrapper for you.  There is a list of Maker functions that are called to create the overall [[tree.Plan]] for the widget, so multiple such functions can be defined, and they are called in the order added.
+If a widget does not require dynamic configuration of its children (i.e., it always has the same children), you can save a step of indentation by using the [[doc:tree.AddChildAt]] version of [[doc:tree.AddAt]], without enclosing everything in an outer `Maker` function.  These `Child` versions of all the basic `tree.Add*` functions simply create a separate `Maker` function wrapper for you.  There is a list of Maker functions that are called to create the overall [[doc:tree.Plan]] for the widget, so multiple such functions can be defined, and they are called in the order added.
 
 These `Child` versions are essential when you need to specify the children of children (and beyond), to configure an entire complex structure.  Here's an example from the [Cogent Mail](https://github.com/cogentcore/cogent/mail) app:
 

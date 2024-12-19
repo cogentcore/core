@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
@@ -55,14 +56,29 @@ type Context struct {
 	// GetURL is the function used to get resources from URLs,
 	// which defaults to [http.Get].
 	GetURL func(url string) (*http.Response, error)
+
+	// ElementHandlers is a map of handler functions for each HTML element
+	// type (eg: "button", "input", "p"). It is empty by default, but can be
+	// used by anyone in need of behavior different than the default behavior
+	// defined in [handleElement] (for example, for custom elements).
+	// If the handler for an element returns false, then the default behavior
+	// for an element is used.
+	ElementHandlers map[string]func(ctx *Context) bool
+
+	// WikilinkHandlers is a list of handlers to use for wikilinks.
+	// If one returns "", "", the next ones will be tried instead.
+	// The functions are tried in sequential ascending order.
+	// See [Context.AddWikilinkHandler] to add a new handler.
+	WikilinkHandlers []WikilinkHandler
 }
 
 // NewContext returns a new [Context] with basic defaults.
 func NewContext() *Context {
 	return &Context{
-		styles:  map[*html.Node][]*css.Rule{},
-		OpenURL: system.TheApp.OpenURL,
-		GetURL:  http.Get,
+		styles:          map[*html.Node][]*css.Rule{},
+		OpenURL:         system.TheApp.OpenURL,
+		GetURL:          http.Get,
+		ElementHandlers: map[string]func(ctx *Context) bool{},
 	}
 }
 
@@ -172,4 +188,18 @@ func (c *Context) addStyle(style string) {
 			c.styles[match] = append(c.styles[match], rule)
 		}
 	}
+}
+
+// LinkButton is a helper function that makes the given button
+// open the given link when clicked on, using [Context.OpenURL].
+// The advantage of using this is that it does [tree.NodeBase.SetProperty]
+// of "href" to the given url, allowing generatehtml to create an <a> element
+// for HTML preview and SEO purposes.
+func (c *Context) LinkButton(bt *core.Button, url string) *core.Button {
+	bt.SetProperty("tag", "a")
+	bt.SetProperty("href", url)
+	bt.OnClick(func(e events.Event) {
+		c.OpenURL(url)
+	})
+	return bt
 }

@@ -94,6 +94,9 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	if se.Name.Local != "img" { // images don't render yet
 		addAttr(se, "style", styles.ToCSS(&wb.Styles, idName, se.Name.Local))
 	}
+	if href, ok := wb.Property("href").(string); ok {
+		addAttr(se, "href", href)
+	}
 
 	handleChildren := true
 

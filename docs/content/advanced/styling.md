@@ -6,11 +6,11 @@ Here is a [list](https://pkg.go.dev/cogentcore.org/core/styles#Style) of all sty
 
 Stylers are called in the order that they are added (first added, first called), which means that the stylers added last get the final say on the styles. This means that the base stylers set during initial widget configuration will be overridden by special end-user stylers.
 
-As with event handlers, there are three levels of stylers: `First`, regular, and `Final`, which are called in that order. For example, this allows you to set properties that affect stylers before they are called using [[core.WidgetBase.FirstStyler]], like [[styles.Style.State]], and set style properties based on other style properties using [[core.WidgetBase.FinalStyler]], like [[styles.Style.Min]] based on [[styles.Style.Direction]].
+As with event handlers, there are three levels of stylers: `First`, regular, and `Final`, which are called in that order. For example, this allows you to set properties that affect stylers before they are called using [[doc:core.WidgetBase.FirstStyler]], like [[doc:styles.Style.State]], and set style properties based on other style properties using [[doc:core.WidgetBase.FinalStyler]], like [[doc:styles.Style.Min]] based on [[doc:styles.Style.Direction]].
 
 ## Styling multiple widgets
 
-You can style all direct children of a container at once using [[tree.NodeBase.OnChildAdded]]:
+You can style all direct children of a container at once using [[doc:tree.NodeBase.OnChildAdded]]:
 
 ```Go
 fr := core.NewFrame(b)
@@ -41,7 +41,7 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
-You can style all widgets in the entire app using [[core.App.SceneInit]] in conjunction with [[core.Scene.WidgetInit]]. For example, to make all buttons in your app have a small border radius, you can do the following:
+You can style all widgets in the entire app using [[doc:core.App.SceneInit]] in conjunction with [[doc:core.Scene.WidgetInit]]. For example, to make all buttons in your app have a small border radius, you can do the following:
 
 ```go
 core.TheApp.SetSceneInit(func(sc *core.Scene) {
@@ -58,9 +58,9 @@ core.TheApp.SetSceneInit(func(sc *core.Scene) {
 
 ## States and abilities
 
-The [[styles/states]] and [[styles/abilities]] flags provide a major source of input for the styling of a widget.  For example, if a widget has the `abilities.Hoverable` flag set, then when a user hovers the mouse over that widget, it will get the `states.Hovered` flag set, which can then be used to style the widget appropriately.
+The [[doc:styles/states]] and [[doc:styles/abilities]] flags provide a major source of input for the styling of a widget.  For example, if a widget has the `abilities.Hoverable` flag set, then when a user hovers the mouse over that widget, it will get the `states.Hovered` flag set, which can then be used to style the widget appropriately.
 
-For example, here's the relevant code for the [[core.Button]]:
+For example, here's the relevant code for the [[doc:core.Button]]:
 
 ```go
 bt.Styler(func(s *styles.Style) {

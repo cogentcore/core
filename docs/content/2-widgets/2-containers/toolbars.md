@@ -1,6 +1,6 @@
 Cogent Core provides an extensible system of powerful toolbars that allows you to create responsive toolbars that work on all platforms.
 
-All toolbars use the [[tree.Plan]] system through [[core.WidgetBase.Maker]]. This ensures that toolbars can always be dynamic and responsive.
+All toolbars use the [[doc:tree.Plan]] system through [[doc:core.WidgetBase.Maker]]. This ensures that toolbars can always be dynamic and responsive.
 
 You can make a standalone toolbar and add elements to it:
 
@@ -57,7 +57,7 @@ tb.AddOverflowMenu(func(m *core.Scene) {
 })
 ```
 
-Toolbars are frequently added in [[core.Body.AddTopBar]]:
+Toolbars are frequently added in [[doc:core.Body.AddTopBar]]:
 
 ```go
 b.AddTopBar(func(bar *core.Frame) {

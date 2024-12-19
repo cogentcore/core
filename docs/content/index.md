@@ -1,1 +1,0 @@
-<home-page></home-page>
