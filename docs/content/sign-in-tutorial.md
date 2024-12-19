@@ -29,7 +29,7 @@ pg.AddPage("sign-in", func(pg *core.Pages) {
 })
 ```
 
-We can create a home page that opens after a user [[event#click|clicks]] the sign in [[button]]:
+We can create a home page that opens after a user [[events#click|clicks]] the sign in [[button]]:
 
 ```Go
 type user struct {

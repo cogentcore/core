@@ -2,7 +2,9 @@
 Categories = ["Concepts"]
 +++
 
-**Events** are user actions that you can process. To handle an event, simply call the `On{EventType}` method on any [[widget]]. For example:
+An **event** is a user action that you can process. See [[events]] for a list of event types.
+
+To handle an event, simply call the `On{EventType}` method on any [[widget]]. For example:
 
 ```Go
 core.NewButton(b).SetText("Click me!").OnClick(func(e events.Event) {
@@ -10,7 +12,7 @@ core.NewButton(b).SetText("Click me!").OnClick(func(e events.Event) {
 })
 ```
 
-The [[doc:events.Event]] object passed to the function can be used for things such as obtaining detailed event information. For example, you can determine the exact position of a [[#click|click]] event:
+The [[doc:events.Event]] object passed to the function can be used for things such as obtaining detailed event information. For example, you can determine the exact position of a [[events#click|click]] event:
 
 ```Go
 core.NewButton(b).SetText("Click me!").OnClick(func(e events.Event) {

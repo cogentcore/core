@@ -35,7 +35,7 @@ core.NewButton(b).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *core.Sce
 
 ## Events
 
-You can detect when a button is [[event#click|clicked]]:
+You can detect when a button is [[events#click|clicked]]:
 
 ```Go
 core.NewButton(b).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
