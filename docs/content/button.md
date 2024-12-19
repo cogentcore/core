@@ -76,13 +76,13 @@ Tonal buttons are similar to filled buttons but have less emphasis, making them 
 core.NewButton(b).SetType(core.ButtonTonal).SetText("Tonal")
 ```
 
-Elevated buttons have a [[styling#shadow|shadow]] and a light [[styling#background|background]], and they are typically used when a button needs to stand out from its surroundings, like when it is above an [[image]]:
+Elevated buttons have a [[style#shadow|shadow]] and a light [[style#background|background]], and they are typically used when a button needs to stand out from its surroundings, like when it is above an [[image]]:
 
 ```Go
 core.NewButton(b).SetType(core.ButtonElevated).SetText("Elevated")
 ```
 
-Outlined buttons have a [[styling#border|border]] and no background, and they are typically used for secondary actions like canceling or going back:
+Outlined buttons have a [[style#border|border]] and no background, and they are typically used for secondary actions like canceling or going back:
 
 ```Go
 core.NewButton(b).SetType(core.ButtonOutlined).SetText("Outlined")

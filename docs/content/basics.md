@@ -16,13 +16,13 @@ The **basics** are a simple overview of the key [[concepts]] of Cogent Core. You
 
 <embed-page src="event">
 
-## Styling
+## Style
 
-<embed-page src="styling">
+<embed-page src="style">
 
-## Updating
+## Update
 
-<embed-page src="updating">
+<embed-page src="update">
 
 ## Value binding
 
