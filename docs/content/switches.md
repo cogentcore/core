@@ -1,39 +1,12 @@
-Cogent Core provides switches for selecting one or more options out of a list of items, in addition to standalone switches for controlling a single bool value.
++++
+Categories = ["Widgets"]
++++
 
-You can make a standalone switch with no label:
+**Switches** allow users to select one or more options out of a list of items represented with [[switch]] widgets.
 
-```Go
-core.NewSwitch(b)
-```
+## Properties
 
-You can add a label to a standalone switch:
-
-```Go
-core.NewSwitch(b).SetText("Remember me")
-```
-
-You can make a standalone switch render as a checkbox:
-
-```Go
-core.NewSwitch(b).SetType(core.SwitchCheckbox).SetText("Remember me")
-```
-
-You can make a standalone switch render as a radio button:
-
-```Go
-core.NewSwitch(b).SetType(core.SwitchRadioButton).SetText("Remember me")
-```
-
-You can detect when the user changes whether the switch is checked:
-
-```Go
-sw := core.NewSwitch(b).SetText("Remember me")
-sw.OnChange(func(e events.Event) {
-    core.MessageSnackbar(sw, fmt.Sprintf("Switch is %v", sw.IsChecked()))
-})
-```
-
-You can make a group of switches from a list of strings:
+You can make switches from a list of strings:
 
 ```Go
 core.NewSwitches(b).SetStrings("Go", "Python", "C++")
@@ -54,6 +27,8 @@ You can make switches mutually exclusive so that only one can be selected at a t
 ```Go
 core.NewSwitches(b).SetMutex(true).SetStrings("Go", "Python", "C++")
 ```
+
+## Types
 
 You can make switches render as chips:
 
@@ -79,6 +54,8 @@ You can make switches render as segmented buttons:
 core.NewSwitches(b).SetType(core.SwitchSegmentedButton).SetStrings("Go", "Python", "C++")
 ```
 
+## Styles
+
 You can make switches render vertically:
 
 ```Go
@@ -87,7 +64,9 @@ core.NewSwitches(b).SetStrings("Go", "Python", "C++").Styler(func(s *styles.Styl
 })
 ```
 
-You can detect when the user changes which switches are selected:
+## Events
+
+You can detect when the user [[event#change|changes]] which switches are selected:
 
 ```Go
 sw := core.NewSwitches(b).SetStrings("Go", "Python", "C++")
