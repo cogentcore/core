@@ -248,7 +248,10 @@ func (glm *GLM) Run() {
 	obsMeans := make([]float64, nDv)
 	errMeans := make([]float64, nDv)
 	for i := 0; i < n; i++ {
-		row := dt.Indexes[i]
+		row := i
+		if dt.Indexes != nil {
+			row = dt.Indexes[i]
+		}
 		for di := 0; di < nDv; di++ {
 			obsMeans[di] += dv.FloatRow(row, di)
 			errMeans[di] += ev.FloatRow(row, di)
@@ -261,7 +264,10 @@ func (glm *GLM) Run() {
 		glm.ErrVariance[di] = 0
 	}
 	for i := 0; i < n; i++ {
-		row := dt.Indexes[i]
+		row := i
+		if dt.Indexes != nil {
+			row = dt.Indexes[i]
+		}
 		for di := 0; di < nDv; di++ {
 			o := dv.FloatRow(row, di) - obsMeans[di]
 			glm.ObsVariance[di] += o * o
