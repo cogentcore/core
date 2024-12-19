@@ -78,4 +78,4 @@ bt.Styler(func(s *styles.Style) {
 
 You can edit the style properties below and see them immediately take effect on the outer frame:
 
-<style-demo></style-demo>
+<style-demo>
