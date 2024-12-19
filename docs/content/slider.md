@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **slider** is a [[widget]] for bounded numeric input.
+A **slider** is a [[widget]] for bounded numeric input. It provides more visual and less precise input than a [[spinner]].
 
 ## Properties
 

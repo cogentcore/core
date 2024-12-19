@@ -4,7 +4,7 @@ Categories = ["Widgets"]
 
 A **text field** is a [[widget]] that a user can enter text in. Text fields come with powerful selection, navigation, and editing functionality built in, including undo and redo, copy and paste, and word-based navigation, selection, and deletion.
 
-Text fields should mainly be used for relatively short and simple text. For more advanced use cases such as code editing, see [[text editors]].
+Text fields should mainly be used for relatively short and simple text. For more advanced use cases such as code editing, use a [[text editor]]. For numeric input, use a [[spinner]].
 
 ## Properties
 

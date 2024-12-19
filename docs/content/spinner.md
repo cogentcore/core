@@ -1,4 +1,10 @@
-Cogent Core provides customizable spinners, which are text fields designed for numeric input. They automatically support the parsing and validation of input, in addition to convenient incrementing and decrementing.
++++
+Categories = ["Widgets"]
++++
+
+A **spinner** is a [[text field]] designed for numeric input. It automatically supports the parsing and validation of input, in addition to convenient incrementing and decrementing. It provides more precise and less visual input than a [[slider]].
+
+## Properties
 
 You can make a spinner without any custom options:
 
@@ -42,7 +48,9 @@ You can change the way that the value is formatted:
 core.NewSpinner(b).SetFormat("%X").SetStep(1).SetValue(44)
 ```
 
-You can detect when the user changes the value of the spinner:
+## Events
+
+You can detect when a user [[event#change|changes]] the value of a spinner:
 
 ```Go
 sp := core.NewSpinner(b)
