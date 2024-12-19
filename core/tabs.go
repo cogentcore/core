@@ -20,6 +20,33 @@ import (
 	"cogentcore.org/core/tree"
 )
 
+// Tabber is an interface for getting the parent Tabs of tab buttons.
+// It exposes the main Tabs interface so other packages can build on that
+// to provide an augmented Tabs API.
+type Tabber interface {
+
+	// AsCoreTabs returns the underlying Tabs implementation.
+	AsCoreTabs() *Tabs
+
+	// CurrentTab returns currently selected tab and its index; returns nil if none.
+	CurrentTab() (Widget, int)
+
+	// TabByName returns a tab with the given name, nil if not found.
+	TabByName(name string) *Frame
+
+	// SelectTabIndex selects the tab at the given index, returning it or nil.
+	// This is the final tab selection path.
+	SelectTabIndex(idx int) *Frame
+
+	// SelectTabByName selects the tab by widget name, returning it.
+	// The widget name is the original full tab label, prior to any eliding.
+	SelectTabByName(name string) *Frame
+
+	// RecycleTab returns a tab with the given name, first by looking for an existing one,
+	// and if not found, making a new one. It returns the frame for the tab.
+	RecycleTab(name string) *Frame
+}
+
 // Tabs divide widgets into logical groups and give users the ability
 // to freely navigate between them using tab buttons.
 type Tabs struct {
@@ -100,6 +127,8 @@ func (tt TabTypes) effective(w Widget) TabTypes {
 func (tt TabTypes) isColumn() bool {
 	return tt == NavigationDrawer
 }
+
+func (ts *Tabs) AsCoreTabs() *Tabs { return ts }
 
 func (ts *Tabs) Init() {
 	ts.Frame.Init()
@@ -544,5 +573,8 @@ func (tb *Tab) Init() {
 
 // tabs returns the parent [Tabs] of this [Tab].
 func (tb *Tab) tabs() *Tabs {
-	return tb.Parent.AsTree().Parent.(*Tabs)
+	if tbr, ok := tb.Parent.AsTree().Parent.(Tabber); ok {
+		return tbr.AsCoreTabs()
+	}
+	return nil
 }

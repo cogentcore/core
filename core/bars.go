@@ -114,8 +114,7 @@ func (sc *Scene) addDefaultBars() {
 	}
 }
 
-//////////////////////////////////////////////////////////////
-// 	Scene wrappers
+////////  Scene wrappers
 
 // AddTopBar adds the given function for configuring a control bar
 // at the top of the window

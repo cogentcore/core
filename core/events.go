@@ -474,6 +474,10 @@ func (em *Events) handlePosEvent(e events.Event) {
 				if !sentMulti {
 					em.lastDoubleClickWidget = nil
 					em.lastClickWidget = up
+					if em.focus != up {
+						em.focusClear() // always any other focus before the click is processed
+						// this causes textfields etc to apply their changes.
+					}
 					up.AsWidget().Send(events.Click, e)
 				}
 			case events.Right: // note: automatically gets Control+Left

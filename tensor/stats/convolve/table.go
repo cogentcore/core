@@ -4,13 +4,7 @@
 
 package convolve
 
-import (
-	"reflect"
-
-	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/table"
-)
-
+/*
 // SmoothTable returns a cloned table with each of the floating-point
 // columns in the source table smoothed over rows.
 // khalf is the half-width of the Gaussian smoothing kernel,
@@ -34,3 +28,4 @@ func SmoothTable(src *table.Table, khalf int) *table.Table {
 	}
 	return dest
 }
+*/
