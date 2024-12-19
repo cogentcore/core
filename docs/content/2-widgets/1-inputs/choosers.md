@@ -6,7 +6,7 @@ You can set the items of a chooser from a list of strings:
 core.NewChooser(b).SetStrings("macOS", "Windows", "Linux")
 ```
 
-If you need to customize the items more, you can use a list of [[core.ChooserItem]] objects:
+If you need to customize the items more, you can use a list of [[doc:core.ChooserItem]] objects:
 
 ```Go
 core.NewChooser(b).SetItems(

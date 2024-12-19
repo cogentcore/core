@@ -39,7 +39,7 @@ You can make a group of switches from a list of strings:
 core.NewSwitches(b).SetStrings("Go", "Python", "C++")
 ```
 
-If you need to customize the items more, you can use a list of [[core.SwitchItem]] objects:
+If you need to customize the items more, you can use a list of [[doc:core.SwitchItem]] objects:
 
 ```Go
 core.NewSwitches(b).SetItems(
