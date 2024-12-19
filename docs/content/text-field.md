@@ -1,6 +1,12 @@
-Cogent Core provides highly customizable text fields with powerful selection, navigation, and editing functionality built in, including undo and redo, copy and paste, and word-based navigation, selection, and deletion.
++++
+Categories = ["Widgets"]
++++
 
-Text fields should mainly be used for relatively short and simple text. For more advanced use cases such as code editing, see [text editors](text-editors).
+A **text field** is a [[widget]] that a user can enter text in. Text fields come with powerful selection, navigation, and editing functionality built in, including undo and redo, copy and paste, and word-based navigation, selection, and deletion.
+
+Text fields should mainly be used for relatively short and simple text. For more advanced use cases such as code editing, see [[text editors]].
+
+## Properties
 
 You can make a text field without any custom options:
 
@@ -8,7 +14,7 @@ You can make a text field without any custom options:
 core.NewTextField(b)
 ```
 
-You can set the placeholder of a text field and add label text before it:
+You can set the placeholder of a text field and add label [[text]] before it:
 
 ```Go
 core.NewText(b).SetText("Name:")
@@ -39,13 +45,13 @@ You can make a text field designed for password input:
 core.NewTextField(b).SetTypePassword()
 ```
 
-You can add a clear button to a text field:
+You can add a clear [[button]] to a text field:
 
 ```Go
 core.NewTextField(b).AddClearButton()
 ```
 
-You can set any custom leading and trailing icons you want:
+You can set any custom leading and trailing [[icon]]s you want:
 
 ```Go
 core.NewTextField(b).SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew, func(e events.Event) {
@@ -53,7 +59,9 @@ core.NewTextField(b).SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew,
 })
 ```
 
-You can add a validation function that ensures the value of a text field is valid:
+## Events
+
+You can add a validation function that ensures the value of a text field is valid when a user [[event#change|changes]] it:
 
 ```Go
 tf := core.NewTextField(b)
@@ -65,7 +73,7 @@ tf.SetValidator(func() error {
 })
 ```
 
-You can detect when the user changes the content of a text field and then exits it:
+You can detect when the user [[event#change|changes]] the content of a text field and then exits it:
 
 ```Go
 tf := core.NewTextField(b)
@@ -74,7 +82,7 @@ tf.OnChange(func(e events.Event) {
 })
 ```
 
-You can detect when the user makes any changes to the content of a text field as they type:
+You can detect when the user makes any changes to the content of a text field as they type ([[event#input|input]]):
 
 ```Go
 tf := core.NewTextField(b)
