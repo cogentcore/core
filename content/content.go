@@ -364,6 +364,13 @@ func (ct *Content) setStageTitle() {
 }
 
 func (ct *Content) MakeToolbar(p *tree.Plan) {
+	tree.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.Icon(core.AppIcon))
+		w.SetTooltip("Home")
+		w.OnClick(func(e events.Event) {
+			ct.Open("")
+		})
+	})
 	// Superseded by browser navigation on web.
 	if core.TheApp.Platform() != system.Web {
 		tree.Add(p, func(w *core.Button) {
