@@ -1,4 +1,4 @@
-You can complete the three steps below to **install** Cogent Core on your system. You can also explore the [[#demo|demo]], [[basics]], [[tutorials]], and [[widgets]]. You can also see how to [[build]] apps.
+You can complete the three steps below to **install** Cogent Core on your system. You can also explore the [[#demo]], [[basics]], [[tutorials]], and [[widgets]]. You can also see how to [[build]] apps.
 
 1. Download and install Go from [the Go website](https://go.dev/doc/install) if you do not already have Go 1.22.6+ installed.
 
