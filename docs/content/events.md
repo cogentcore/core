@@ -46,6 +46,10 @@ tf.OnKeyChord(func(e events.Event) {
 })
 ```
 
+### Shortcuts
+
+[[Button]]s support keyboard shortcuts, which allow you to make a button trigger when a user presses a certain key chord or semantic key function, even if the button doesn't already have [[#focus]]. See [[button#events]] for more information.
+
 ## Generated
 
 Generated events are created as a result of other events.

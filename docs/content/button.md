@@ -43,8 +43,7 @@ core.NewButton(b).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Even
 })
 ```
 
-
-You can make a button trigger on a certain [[event#shortcut|keyboard shortcut]] (`Command` is automatically converted to `Control` on non-macOS platforms):
+You can make a button trigger on a certain [[events#key|keyboard shortcut]] (`Command` is automatically converted to `Control` on non-macOS platforms):
 
 ```Go
 core.NewButton(b).SetText("Save").SetShortcut("Command+S").OnClick(func(e events.Event) {
@@ -52,7 +51,7 @@ core.NewButton(b).SetText("Save").SetShortcut("Command+S").OnClick(func(e events
 })
 ```
 
-You can make a button trigger on a certain semantic [[event#key function|key function]], which have default bindings that the user can customize in their [[settings]]:
+You can make a button trigger on a certain semantic [[events#key function|key function]], which have default bindings that the user can customize in their [[settings]]:
 
 ```Go
 core.NewButton(b).SetText("Open").SetKey(keymap.Open).OnClick(func(e events.Event) {
