@@ -1,4 +1,4 @@
-**Events** contains explanations of important [[event]] types. You can also see the API documentation for an [exhaustive list](https://pkg.go.dev/cogentcore.org/core/events#Types) of event types.
+**Events** contains explanations of common [[event]] types. You can also see the API documentation for an [exhaustive list](https://pkg.go.dev/cogentcore.org/core/events#Types) of event types.
 
 ## Mouse
 
@@ -11,6 +11,16 @@ A click event is triggered when a user presses down and then up in a short perio
 ```Go
 core.NewButton(b).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
     core.MessageSnackbar(b, "Message sent")
+})
+```
+
+### Double click
+
+A double click event is triggered when a user [[#click]]s twice in a row in rapid succession on a [[doc:styles/abilities.DoubleClickable]] widget.
+
+```Go
+core.NewButton(b).SetText("Hello").OnDoubleClick(func(e events.Event) {
+    core.MessageSnackbar(b, "Double clicked")
 })
 ```
 
