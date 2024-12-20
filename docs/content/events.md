@@ -88,3 +88,21 @@ sr.OnInput(func(e events.Event) {
 ```
 
 Unlike [[#change]] events, input events rarely cascade to higher-level elements, so they must be handled directly on the relevant widget. Also, some widgets like [[chooser]]s support change events but not input events since they aren't applicable.
+
+### Focus
+
+A focus event is triggered when a [[doc:styles/abilities.Focusable]] widget gains keyboard focus:
+
+```Go
+core.NewTextField(b).OnFocus(func(e events.Event) {
+    core.MessageSnackbar(b, "Focus gained")
+})
+```
+
+Conversely, a focus lost event is triggered when such a widget loses keyboard focus:
+
+```Go
+core.NewTextField(b).OnFocusLost(func(e events.Event) {
+    core.MessageSnackbar(b, "Focus lost")
+})
+```
