@@ -24,6 +24,16 @@ core.NewButton(b).SetText("Hello").OnDoubleClick(func(e events.Event) {
 })
 ```
 
+### Context menu
+
+A context menu event is triggered when a user right clicks or [[#long press]]es on a widget. It results in any [[context menu]] for the widget being shown.
+
+```Go
+core.NewTextField(b).On(events.ContextMenu, func(e events.Event) {
+    core.MessageSnackbar(b, "Context menu")
+})
+```
+
 ### Hover
 
 A mouse enter event is triggered when a user moves their mouse over a widget. It sets the [[states#hovered|hovered]] state. Conversely, a mouse leave event is triggered when a user moves their mouse off of a widget. It clears the hovered state.
