@@ -7,10 +7,6 @@ First of all, the set of events that a Widget can receive is determined by setti
         s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
 ```
 
-## Low-level events
-
-For low-level system events like [[doc:events.MouseDown]] and [[doc:events.KeyUp]], there is no `On{EventType}` helper method for listening to the event, so you must use [[doc:core.Widget.On]] with the event type as an argument.
-
 ## Event handling order
 
 Event handlers are called in the reverse order that they are added (last added, first called), so that default event handling (added during initial widget configuration) can be overridden by special end-user handlers.

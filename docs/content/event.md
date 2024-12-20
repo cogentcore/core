@@ -19,3 +19,13 @@ core.NewButton(b).SetText("Click me!").OnClick(func(e events.Event) {
     core.MessageSnackbar(b, fmt.Sprint("Button clicked at ", e.Pos()))
 })
 ```
+
+## Low-level events
+
+For some lower-level events like [[doc:events.MouseDown]] and [[doc:events.KeyUp]], there is no `On{EventType}` helper method for listening to the event, so you must use [[doc:core.WidgetBase.On]] with the event type as an argument. For example:
+
+```Go
+core.NewButton(b).SetText("Press").On(events.MouseDown, func(e events.Event) {
+    core.MessageSnackbar(b, "Mouse down")
+})
+```
