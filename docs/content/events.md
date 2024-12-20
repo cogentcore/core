@@ -105,18 +105,14 @@ Unlike [[#change]] events, input events rarely cascade to higher-level elements,
 
 ### Focus
 
-A focus event is triggered when a [[doc:styles/abilities.Focusable]] widget gains keyboard focus:
+A focus event is triggered when a [[doc:styles/abilities.Focusable]] widget gains keyboard focus. Conversely, a focus lost event is triggered when such a widget loses keyboard focus.
 
 ```Go
-core.NewTextField(b).OnFocus(func(e events.Event) {
+tf := core.NewTextField(b)
+tf.OnFocus(func(e events.Event) {
     core.MessageSnackbar(b, "Focus gained")
 })
-```
-
-Conversely, a focus lost event is triggered when such a widget loses keyboard focus:
-
-```Go
-core.NewTextField(b).OnFocusLost(func(e events.Event) {
+tf.OnFocusLost(func(e events.Event) {
     core.MessageSnackbar(b, "Focus lost")
 })
 ```
