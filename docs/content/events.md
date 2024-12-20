@@ -44,12 +44,27 @@ A long hover start event is triggered when a user leaves their mouse over a [[ab
 
 ```Go
 bt := core.NewButton(b).SetText("Hello")
-bt.SetTooltip("You are long hovering")
+bt.SetTooltip("You are long hovering/pressing")
 bt.On(events.LongHoverStart, func(e events.Event) {
     core.MessageSnackbar(b, "Long hover start")
 })
 bt.On(events.LongHoverEnd, func(e events.Event) {
     core.MessageSnackbar(b, "Long hover end")
+})
+```
+
+### Long press
+
+Similar to a [[#long hover]] event, a long press start event is triggered when a user presses down on a [[abilities#long pressable|long pressable]] widget for 500 milliseconds. A long press event results in any specified [[tooltip]] being shown, and it also creates a [[#context menu]] event. A long press end event is triggered when a user moves their mouse/finger a certain distance, moves it off of a widget, or stops pressing down. That event causes any visible tooltip to disappear, but it does *not* hide any context menu created by the start event. Long press events are mainly relevant as a replacement for long hover events on mobile.
+
+```Go
+bt := core.NewButton(b).SetText("Hello")
+bt.SetTooltip("You are long hovering/pressing")
+bt.On(events.LongPressStart, func(e events.Event) {
+    core.MessageSnackbar(b, "Long press start")
+})
+bt.On(events.LongPressEnd, func(e events.Event) {
+    core.MessageSnackbar(b, "Long press end")
 })
 ```
 
