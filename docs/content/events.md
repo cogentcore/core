@@ -24,6 +24,28 @@ core.NewButton(b).SetText("Hello").OnDoubleClick(func(e events.Event) {
 })
 ```
 
+## Key
+
+Key events are triggered by keyboard input through a physical or virtual keyboard. The main way to directly handle key events is the key chord event:
+
+```Go
+tf := core.NewTextField(b)
+tf.OnKeyChord(func(e events.Event) {
+    core.MessageSnackbar(b, string(e.KeyChord()))
+})
+```
+
+### Key function
+
+You can convert a key chord into a semantic key function. The key mappings are defined in the user's keyboard shortcut [[settings]]. Try pressing keyboard shortcuts in the text field below to see their semantic names (ex: `Ctrl+C`, `Ctrl+V`, `Ctrl+F`, `Ctrl+Enter`, `Ctrl+Left`, and `Right`, using `Cmd` instead of `Ctrl` on macOS).
+
+```Go
+tf := core.NewTextField(b)
+tf.OnKeyChord(func(e events.Event) {
+    core.MessageSnackbar(b, keymap.Of(e.KeyChord()).String())
+})
+```
+
 ## Generated
 
 Generated events are created as a result of other events.
