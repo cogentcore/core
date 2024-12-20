@@ -24,6 +24,20 @@ core.NewButton(b).SetText("Hello").OnDoubleClick(func(e events.Event) {
 })
 ```
 
+### Hover
+
+A mouse enter event is triggered when a user moves their mouse over a widget. It sets the [[states#hovered|hovered]] state. Conversely, a mouse leave event is triggered when a user moves their mouse off of a widget. It clears the hovered state.
+
+```Go
+sr := core.NewSlider(b)
+sr.On(events.MouseEnter, func(e events.Event) {
+    core.MessageSnackbar(b, "Hovered")
+})
+sr.On(events.MouseLeave, func(e events.Event) {
+    core.MessageSnackbar(b, "No longer hovered")
+})
+```
+
 ## Key
 
 Key events are triggered by keyboard input through a physical or virtual keyboard. The main way to directly handle key events is the key chord event:
