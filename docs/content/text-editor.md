@@ -58,7 +58,7 @@ texteditor.NewEditor(b).SetBuffer(tb)
 
 ## Events
 
-You can detect when the user [[event#change|changes]] the content of a text editor and then exits it:
+You can detect when the user [[events#change|changes]] the content of a text editor and then exits it:
 
 ```Go
 ed := texteditor.NewEditor(b)
@@ -67,7 +67,7 @@ ed.OnChange(func(e events.Event) {
 })
 ```
 
-You can detect when the user makes any changes to the content of a text editor as they type ([[event#input|input]]):
+You can detect when the user makes any changes to the content of a text editor as they type ([[events#input|input]]):
 
 ```Go
 ed := texteditor.NewEditor(b)

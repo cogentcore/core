@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-**Tooltips** give the user additional information about a [[widget]]. Users can view tooltips by [[event#hover|hovering]] over a widget for 500 milliseconds or pressing down on a widget for 500 milliseconds, so tooltips work on all platforms.
+**Tooltips** give the user additional information about a [[widget]]. Users can view tooltips by [[events#hover|hovering]] over a widget for 500 milliseconds or pressing down on a widget for 500 milliseconds, so tooltips work on all platforms.
 
 You can set the tooltip of any widget:
 

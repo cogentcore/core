@@ -50,7 +50,7 @@ core.NewSpinner(b).SetFormat("%X").SetStep(1).SetValue(44)
 
 ## Events
 
-You can detect when a user [[event#change|changes]] the value of a spinner:
+You can detect when a user [[events#change|changes]] the value of a spinner:
 
 ```Go
 sp := core.NewSpinner(b)
