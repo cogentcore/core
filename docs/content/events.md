@@ -38,6 +38,21 @@ sr.On(events.MouseLeave, func(e events.Event) {
 })
 ```
 
+### Long hover
+
+A long hover start event is triggered when a user leaves their mouse over a [[abilities#long hoverable|long hoverable]] widget for 500 milliseconds (that duration can be customized in the [[settings]]). That event results in any specified [[tooltip]] being shown. A long hover end event is sent whenever a user moves their mouse a certain distance, moves it off of a widget, or presses it down. That event causes any visible tooltip to disappear.
+
+```Go
+bt := core.NewButton(b).SetText("Hello")
+bt.SetTooltip("You are long hovering")
+bt.On(events.LongHoverStart, func(e events.Event) {
+    core.MessageSnackbar(b, "Long hover start")
+})
+bt.On(events.LongHoverEnd, func(e events.Event) {
+    core.MessageSnackbar(b, "Long hover end")
+})
+```
+
 ## Key
 
 Key events are triggered by keyboard input through a physical or virtual keyboard. The main way to directly handle key events is the key chord event:
