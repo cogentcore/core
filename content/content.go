@@ -96,8 +96,10 @@ func (ct *Content) Init() {
 	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
 		name, label, has := strings.Cut(text, "|")
 		if !has {
-			label = strings.ReplaceAll(name, "#", " § ")
-			label = strings.TrimPrefix(label, " ")
+			// we just use the heading name if it is a link to a heading on the current page
+			label = strings.TrimPrefix(name, "#")
+			// otherwise, we use the section symbol
+			label = strings.ReplaceAll(label, "#", " § ")
 		}
 		name, heading, _ := strings.Cut(name, "#")
 		if name == "" { // A link with a blank page links to the current page
