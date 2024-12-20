@@ -92,12 +92,12 @@ core.NewList(b).SetSlice(&sl).OnChange(func(e events.Event) {
 
 An input event is triggered when a user changes the value of a widget, as soon as they make the change and before they apply it by exiting the element. Input events are different from [[#change]] events, which only happen once the changes are applied by exiting the element.
 
-For example, a slider sends input events as the user slides it, even before they let go to apply the changes:
+For example, a text field sends input events each time the user presses a key, even before they exit to apply the changes:
 
 ```Go
-sr := core.NewSlider(b)
-sr.OnInput(func(e events.Event) {
-    core.MessageSnackbar(b, fmt.Sprintf("OnInput: %v", sr.Value))
+tf := core.NewTextField(b)
+tf.OnInput(func(e events.Event) {
+    core.MessageSnackbar(b, "OnInput: "+tf.Text())
 })
 ```
 
