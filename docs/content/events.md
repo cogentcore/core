@@ -169,6 +169,21 @@ bt.OnFinal(events.Click, func(e events.Event) {
 })
 ```
 
+You can make a widget have starting focus (so that it gets focus when there is a [[#show]] event):
+
+```Go
+pg := core.NewPages(b)
+pg.AddPage("home", func(pg *core.Pages) {
+    core.NewButton(pg).SetText("Next").OnClick(func(e events.Event) {
+        pg.Open("next")
+    })
+})
+pg.AddPage("next", func(pg *core.Pages) {
+    tf := core.NewTextField(pg)
+    tf.StartFocus()
+})
+```
+
 ### Show
 
 A show event is triggered when the [[scene]] containing a widget is first shown to a user. It is also sent whenever a major content managing widget such as [[tabs]] or [[pages]] shows a new tab/page/element (it is sent using [[doc:core.WidgetBase.Shown]]). It is often used to do things that only work once everything is configured and visible, or for expensive actions that should only happen when truly necessary.
