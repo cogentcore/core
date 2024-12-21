@@ -28,21 +28,6 @@ type morePerson struct {
 	LikesPython bool
 }
 
-type subStruct struct {
-	Name string
-	Age  int
-	Type ChooserTypes
-}
-
-type addFields struct {
-	Type    ButtonTypes
-	Person1 subStruct `display:"add-fields"`
-	Person2 subStruct `display:"add-fields"`
-	Person5 subStruct `display:"add-fields"`
-	Person6 subStruct `display:"add-fields"`
-	Person9 subStruct `display:"inline"`
-}
-
 func TestForm(t *testing.T) {
 	b := NewBody()
 	NewForm(b).SetStruct(&person{Name: "Go", Age: 35})
@@ -88,6 +73,21 @@ func TestFormStyle(t *testing.T) {
 	s.SetAbilities(true, abilities.Checkable)
 	NewForm(b).SetStruct(s)
 	b.AssertRender(t, "form/style")
+}
+
+type giveUpParams struct {
+	ProbThr         float32
+	MinGiveUpSum    float32
+	Utility         float32
+	Timing          float32
+	Progress        float32
+	MinUtility      float32
+	ProgressRateTau float32
+	ProgressRateDt  float32
+}
+
+type addFields struct {
+	GiveUp giveUpParams `display:"add-fields"`
 }
 
 func TestFormAddFields(t *testing.T) {
