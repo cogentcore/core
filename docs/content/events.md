@@ -159,7 +159,7 @@ tf.OnFocusLost(func(e events.Event) {
 
 ### Show
 
-A show event is triggered when the [[scene]] containing a widget is first shown to a user. It is also sent whenever a major content managing widget such as [[tabs]] or [[pages]] shows a new tab/page/element (through [[doc:core.WidgetBase.Shown]]). It is often used to do things that only work once everything is configured and visible, or for expensive actions that should only happen when truly necessary.
+A show event is triggered when the [[scene]] containing a widget is first shown to a user. It is also sent whenever a major content managing widget such as [[tabs]] or [[pages]] shows a new tab/page/element (it is sent using [[doc:core.WidgetBase.Shown]]). It is often used to do things that only work once everything is configured and visible, or for expensive actions that should only happen when truly necessary.
 
 ```Go
 ts := core.NewTabs(b)
@@ -184,5 +184,22 @@ bt.OnClick(func(e events.Event) {
         core.MessageSnackbar(bt, "Dialog closed")
     })
     d.AddOKOnly().RunDialog(bt)
+})
+```
+
+### Defer
+
+Although not technically an event, deferring is related to event handling. Deferring allows you to add a function that will be called after the next [[scene]] update/render and then removed. This is often necessary when you make structural changes to widgets and then want to do a follow-up action after the layout and rendering is done.
+
+For example, in the code below, using [[doc:core.WidgetBase.Defer]] for [[#set focus]] is necessary, as the text field cannot be properly focused until it has been styled and the layout has been updated by the [[update]] call.
+
+```Go
+bt := core.NewButton(b).SetText("Create text field")
+bt.OnClick(func(e events.Event) {
+    tf := core.NewTextField(b)
+    tf.Defer(func() {
+        tf.SetFocus()
+    })
+    b.Update()
 })
 ```
