@@ -7,6 +7,7 @@ package core
 import (
 	"testing"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
@@ -72,4 +73,32 @@ func TestFormStyle(t *testing.T) {
 	s.SetAbilities(true, abilities.Checkable)
 	NewForm(b).SetStruct(s)
 	b.AssertRender(t, "form/style")
+}
+
+type giveUpParams struct {
+	ProbThr         float32
+	MinGiveUpSum    float32
+	Utility         float32
+	Timing          float32
+	Progress        float32
+	MinUtility      float32
+	ProgressRateTau float32
+	ProgressRateDt  float32
+}
+
+type rubicon struct {
+	GiveUp giveUpParams `display:"add-fields"`
+}
+
+func TestFormRubicon(t *testing.T) {
+	AppearanceSettings.Spacing = 30
+	DebugSettings.LayoutTrace = true
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.X.Ch(100)
+	})
+	NewForm(b).SetStruct(&rubicon{}).Styler(func(s *styles.Style) {
+		s.Background = colors.Scheme.SurfaceContainerLow
+	})
+	b.AssertRender(t, "form/rubicon")
 }

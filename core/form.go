@@ -190,7 +190,6 @@ func (fm *Form) Init() {
 					}
 					var isDef bool
 					w.Styler(func(s *styles.Style) {
-						f := fm.structFields[i]
 						dcr := "(Double click to reset to default) "
 						if fm.Modified != nil {
 							isDef = !fm.Modified[f.path]
@@ -209,7 +208,6 @@ func (fm *Form) Init() {
 						}
 					})
 					w.OnDoubleClick(func(e events.Event) {
-						f := fm.structFields[i]
 						if isDef {
 							return
 						}
@@ -254,7 +252,6 @@ func (fm *Form) Init() {
 					wb.SetTooltip("(Default: " + def + ") " + wb.Tooltip)
 				}
 				wb.OnInput(func(e events.Event) {
-					f := fm.structFields[i]
 					fm.Send(events.Input, e)
 					if f.field.Tag.Get("immediate") == "+" {
 						wb.SendChange(e)
@@ -276,13 +273,10 @@ func (fm *Form) Init() {
 				}
 				wb.Updater(func() {
 					wb.SetReadOnly(fm.IsReadOnly() || readOnlyTag)
-					if i < len(fm.structFields) {
-						f := fm.structFields[i]
-						Bind(reflectx.UnderlyingPointer(f.value).Interface(), w)
-						vc := joinValueTitle(fm.ValueTitle, label)
-						if vc != wb.ValueTitle {
-							wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
-						}
+					Bind(reflectx.UnderlyingPointer(f.value).Interface(), w)
+					vc := joinValueTitle(fm.ValueTitle, label)
+					if vc != wb.ValueTitle {
+						wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
 					}
 				})
 			})
