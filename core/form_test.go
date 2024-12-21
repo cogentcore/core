@@ -7,6 +7,7 @@ package core
 import (
 	"testing"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
@@ -25,6 +26,19 @@ type morePerson struct {
 	Job         string
 	LikesGo     bool
 	LikesPython bool
+}
+
+type subStruct struct {
+	Sub morePerson `display:"inline"`
+}
+
+type addFields struct {
+	Type    ButtonTypes
+	Person1 subStruct `display:"add-fields"`
+	Person2 subStruct `display:"add-fields"`
+	Person5 subStruct `display:"add-fields"`
+	Person6 subStruct `display:"add-fields"`
+	Person9 subStruct `display:"inline"`
 }
 
 func TestForm(t *testing.T) {
@@ -72,4 +86,16 @@ func TestFormStyle(t *testing.T) {
 	s.SetAbilities(true, abilities.Checkable)
 	NewForm(b).SetStruct(s)
 	b.AssertRender(t, "form/style")
+}
+
+func TestFormAddFields(t *testing.T) {
+	AppearanceSettings.Spacing = 30
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.X.Ch(100)
+	})
+	NewForm(b).SetStruct(&addFields{}).Styler(func(s *styles.Style) {
+		s.Background = colors.Scheme.SurfaceContainerLow
+	})
+	b.AssertRender(t, "form/addfields")
 }
