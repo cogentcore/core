@@ -18,7 +18,7 @@ func TestFuncs64(t *testing.T) {
 	ix := tensor.NewNumberFromValues(vals...)
 	out := tensor.NewFloat64(1)
 
-	results := []float64{11, 5.5, 5.5, 0, 0, 1, 0, 1, 0.5, 0.11, math.Sqrt(0.11), math.Sqrt(0.11) / math.Sqrt(11), 3.85, math.Sqrt(3.85), 0.1, math.Sqrt(0.1), math.Sqrt(0.1) / math.Sqrt(11), 0.5, 0.25, 0.75}
+	results := []float64{11, 5.5, 5.5, 0, 0, 1, 0, 1, 0.5, 0.11, math.Sqrt(0.11), math.Sqrt(0.11) / math.Sqrt(11), 3.85, math.Sqrt(3.85), 0.1, math.Sqrt(0.1), math.Sqrt(0.1) / math.Sqrt(11), 0.5, 0.25, 0.75, 0, 1}
 
 	tol := 1.0e-8
 
@@ -81,6 +81,12 @@ func TestFuncs64(t *testing.T) {
 
 	Q3Out(ix, out)
 	assert.InDelta(t, results[StatQ3], out.Values[0], tol)
+
+	FirstOut(ix, out)
+	assert.InDelta(t, results[StatFirst], out.Values[0], tol)
+
+	FinalOut(ix, out)
+	assert.InDelta(t, results[StatFinal], out.Values[0], tol)
 
 	for stat := StatCount; stat < StatsN; stat++ {
 		out := stat.Call(ix)

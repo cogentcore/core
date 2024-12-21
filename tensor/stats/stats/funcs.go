@@ -493,3 +493,64 @@ func L2NormOut(in tensor.Tensor, out tensor.Values) error {
 	L2NormOut64(in, out)
 	return nil
 }
+
+// First returns the first tensor value(s), as a stats function,
+// for the starting point in a naturally-ordered set of data.
+// See [StatsFunc] for general information.
+func First(in tensor.Tensor) tensor.Values {
+	return tensor.CallOut1(FirstOut, in)
+}
+
+// FirstOut returns the first tensor value(s), as a stats function,
+// for the starting point in a naturally-ordered set of data.
+// See [StatsOutFunc] for general information.
+func FirstOut(in tensor.Tensor, out tensor.Values) error {
+	rows, cells := in.Shape().RowCellSize()
+	if cells == 1 {
+		out.SetShapeSizes(1)
+		if rows > 0 {
+			out.SetFloat1D(in.Float1D(0), 0)
+		}
+		return nil
+	}
+	osz := tensor.CellsSize(in.ShapeSizes())
+	out.SetShapeSizes(osz...)
+	if rows == 0 {
+		return nil
+	}
+	for i := range cells {
+		out.SetFloat1D(in.Float1D(i), i)
+	}
+	return nil
+}
+
+// Final returns the final tensor value(s), as a stats function,
+// for the ending point in a naturally-ordered set of data.
+// See [StatsFunc] for general information.
+func Final(in tensor.Tensor) tensor.Values {
+	return tensor.CallOut1(FinalOut, in)
+}
+
+// FinalOut returns the first tensor value(s), as a stats function,
+// for the ending point in a naturally-ordered set of data.
+// See [StatsOutFunc] for general information.
+func FinalOut(in tensor.Tensor, out tensor.Values) error {
+	rows, cells := in.Shape().RowCellSize()
+	if cells == 1 {
+		out.SetShapeSizes(1)
+		if rows > 0 {
+			out.SetFloat1D(in.Float1D(rows-1), 0)
+		}
+		return nil
+	}
+	osz := tensor.CellsSize(in.ShapeSizes())
+	out.SetShapeSizes(osz...)
+	if rows == 0 {
+		return nil
+	}
+	st := (rows - 1) * cells
+	for i := range cells {
+		out.SetFloat1D(in.Float1D(st+i), i)
+	}
+	return nil
+}

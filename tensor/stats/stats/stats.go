@@ -34,6 +34,8 @@ func init() {
 	tensor.AddFunc(StatMedian.FuncName(), Median)
 	tensor.AddFunc(StatQ1.FuncName(), Q1)
 	tensor.AddFunc(StatQ3.FuncName(), Q3)
+	tensor.AddFunc(StatFirst.FuncName(), First)
+	tensor.AddFunc(StatFinal.FuncName(), Final)
 }
 
 // Stats is a list of different standard aggregation functions, which can be used
@@ -100,6 +102,12 @@ const (
 
 	// Q3 third quartile = 75%ile value = .75 quantile value.
 	StatQ3
+
+	// first item in the set of data: for data with a natural ordering.
+	StatFirst
+
+	// final item in the set of data: for data with a natural ordering.
+	StatFinal
 )
 
 // FuncName returns the package-qualified function name to use
