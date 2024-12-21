@@ -50,7 +50,7 @@ sr.On(events.MouseLeave, func(e events.Event) {
 
 ### Long hover
 
-A long hover start event is triggered when a user leaves their mouse over a [[abilities#long hoverable]] widget for 500 milliseconds (that duration can be customized in the [[settings]]). That event results in any specified [[tooltip]] being shown. A long hover end event is sent whenever a user moves their mouse a certain distance, moves it off of a widget, or presses it down. That event causes any visible tooltip to disappear.
+A long hover start event is triggered when a user leaves their mouse over a [[abilities#long hoverable]] widget for 250 milliseconds (that duration can be customized in the [[settings]]). That event results in any specified [[tooltip]] being shown. A long hover end event is sent whenever a user moves their mouse a certain distance, moves it off of a widget, or presses it down. That event causes any visible tooltip to disappear.
 
 ```Go
 bt := core.NewButton(b).SetText("Hello")
