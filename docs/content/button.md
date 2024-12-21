@@ -35,7 +35,7 @@ core.NewButton(b).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *core.Sce
 
 ## Events
 
-You can detect when a button is [[events#click|clicked]]:
+You can detect when a button is [[events#click]]ed:
 
 ```Go
 core.NewButton(b).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
@@ -51,7 +51,7 @@ core.NewButton(b).SetText("Save").SetShortcut("Command+S").OnClick(func(e events
 })
 ```
 
-You can make a button trigger on a certain semantic [[events#key function|key function]], which have default bindings that the user can customize in their [[settings]]:
+You can make a button trigger on a certain semantic [[events#key function]], which have default bindings that the user can customize in their [[settings]]:
 
 ```Go
 core.NewButton(b).SetText("Open").SetKey(keymap.Open).OnClick(func(e events.Event) {
@@ -75,13 +75,13 @@ Tonal buttons are similar to filled buttons but have less emphasis, making them 
 core.NewButton(b).SetType(core.ButtonTonal).SetText("Tonal")
 ```
 
-Elevated buttons have a [[style#shadow|shadow]] and a light [[style#background|background]], and they are typically used when a button needs to stand out from its surroundings, like when it is above an [[image]]:
+Elevated buttons have a [[style#shadow]] and a light [[style#background]], and they are typically used when a button needs to stand out from its surroundings, like when it is above an [[image]]:
 
 ```Go
 core.NewButton(b).SetType(core.ButtonElevated).SetText("Elevated")
 ```
 
-Outlined buttons have a [[style#border|border]] and no background, and they are typically used for secondary actions like canceling or going back:
+Outlined buttons have a [[style#border]] and no background, and they are typically used for secondary actions like canceling or going back:
 
 ```Go
 core.NewButton(b).SetType(core.ButtonOutlined).SetText("Outlined")

@@ -44,7 +44,7 @@ core.NewSlider(b).SetIcon(icons.DeployedCodeFill)
 
 ## Events
 
-You can detect when a user [[events#change|changes]] the value of a slider and then stops:
+You can detect when a user [[events#change]]s the value of a slider and then stops:
 
 ```Go
 sr := core.NewSlider(b)
@@ -53,7 +53,7 @@ sr.OnChange(func(e events.Event) {
 })
 ```
 
-You can detect when a user changes the value of a slider as they slide ([[events#input|input]]):
+You can detect when a user changes the value of a slider as they slide ([[events#input]]):
 
 ```Go
 sr := core.NewSlider(b)

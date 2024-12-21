@@ -34,7 +34,7 @@ core.NewSwitch(b).SetType(core.SwitchRadioButton).SetText("Remember me")
 
 ## Events
 
-You can detect when the user [[events#change|changes]] whether the switch is checked:
+You can detect when the user [[events#change]]s whether the switch is checked:
 
 ```Go
 sw := core.NewSwitch(b).SetText("Remember me")

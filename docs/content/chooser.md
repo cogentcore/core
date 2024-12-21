@@ -65,7 +65,7 @@ core.NewChooser(b).SetEditable(true).SetAllowNew(true).SetStrings("Newest", "Old
 
 ## Events
 
-You can detect when the user [[events#change|changes]] the value of a chooser:
+You can detect when the user [[events#change]]s the value of a chooser:
 
 ```Go
 ch := core.NewChooser(b).SetStrings("Newest", "Oldest", "Popular")

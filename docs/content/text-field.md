@@ -61,7 +61,7 @@ core.NewTextField(b).SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew,
 
 ## Events
 
-You can add a validation function that ensures the value of a text field is valid when a user [[events#change|changes]] it:
+You can add a validation function that ensures the value of a text field is valid when a user [[events#change]]s it:
 
 ```Go
 tf := core.NewTextField(b)
@@ -73,7 +73,7 @@ tf.SetValidator(func() error {
 })
 ```
 
-You can detect when the user [[events#change|changes]] the content of a text field and then exits it:
+You can detect when the user [[events#change]]s the content of a text field and then exits it:
 
 ```Go
 tf := core.NewTextField(b)
@@ -82,7 +82,7 @@ tf.OnChange(func(e events.Event) {
 })
 ```
 
-You can detect when the user makes any changes to the content of a text field as they type ([[events#input|input]]):
+You can detect when the user makes any changes to the content of a text field as they type ([[events#input]]):
 
 ```Go
 tf := core.NewTextField(b)

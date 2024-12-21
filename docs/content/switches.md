@@ -66,7 +66,7 @@ core.NewSwitches(b).SetStrings("Go", "Python", "C++").Styler(func(s *styles.Styl
 
 ## Events
 
-You can detect when the user [[events#change|changes]] which switches are selected:
+You can detect when the user [[events#change]]s which switches are selected:
 
 ```Go
 sw := core.NewSwitches(b).SetStrings("Go", "Python", "C++")

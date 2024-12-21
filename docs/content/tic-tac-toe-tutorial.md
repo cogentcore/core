@@ -5,7 +5,7 @@ Categories = ["Tutorials"]
 
 This [[tutorials|tutorial]] shows how to make a simple **tic-tac-toe** game.
 
-First, we will make a 3x3 grid of action [[button]]s with [[style#border|borders]]:
+First, we will make a 3x3 grid of action [[button]]s with [[styles#border]]s:
 
 ```Go
 grid := core.NewFrame(b)
@@ -23,7 +23,7 @@ for range 9 {
 }
 ```
 
-Then, we will make a `squares` array that keeps track of the value of each square, and we will make it so that [[events#click|clicking]] on a button sets its value in the array to either X or O based on an alternating variable `current`. We also add an [[update]]r to update the text of each button based on its value in the array. Also, we add a reset button that clears all of the squares.
+Then, we will make a `squares` array that keeps track of the value of each square, and we will make it so that [[events#click]]ing on a button sets its value in the array to either X or O based on an alternating variable `current`. We also add an [[update]]r to update the text of each button based on its value in the array. Also, we add a reset button that clears all of the squares.
 
 ```Go
 current := "X"
