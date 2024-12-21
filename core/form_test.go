@@ -29,7 +29,9 @@ type morePerson struct {
 }
 
 type subStruct struct {
-	Sub morePerson `display:"inline"`
+	Name string
+	Age  int
+	Type ChooserTypes
 }
 
 type addFields struct {
