@@ -157,6 +157,18 @@ tf.OnFocusLost(func(e events.Event) {
 })
 ```
 
+#### Set focus
+
+You can programmatically give a widget focus with [[doc:core.WidgetBase.SetFocus]]:
+
+```Go
+bt := core.NewButton(b).SetText("Focus")
+tf := core.NewTextField(b)
+bt.OnFinal(events.Click, func(e events.Event) {
+    tf.SetFocus()
+})
+```
+
 ### Show
 
 A show event is triggered when the [[scene]] containing a widget is first shown to a user. It is also sent whenever a major content managing widget such as [[tabs]] or [[pages]] shows a new tab/page/element (it is sent using [[doc:core.WidgetBase.Shown]]). It is often used to do things that only work once everything is configured and visible, or for expensive actions that should only happen when truly necessary.
