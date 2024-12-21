@@ -236,8 +236,11 @@ func (ct *Content) open(url string, history bool) {
 		ct.saveWebURL()
 	}
 	ct.Scene.Update() // need to update the whole scene to also update the toolbar
-	ct.setStageTitle()
-	ct.openHeading(heading)
+	// We can only scroll to the heading after the page layout has been updated, so we defer.
+	ct.Defer(func() {
+		ct.setStageTitle()
+		ct.openHeading(heading)
+	})
 }
 
 func (ct *Content) openHeading(heading string) {
