@@ -169,7 +169,7 @@ bt.OnFinal(events.Click, func(e events.Event) {
 })
 ```
 
-Please note that SetFocus is only for widgets that have already been shown. For newly created widgets, consider using [[doc:core.WidgetBase.StartFocus]] (documented right below) or [[#defer]].
+SetFocus only fully works for widgets that have already been shown. For newly created widgets, consider using [[doc:core.WidgetBase.StartFocus]] (documented right below), or [[#defer]] your SetFocus call.
 
 You can make a widget have starting focus (so that it gets focus when there is a [[#show]] event):
 
