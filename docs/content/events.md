@@ -171,3 +171,18 @@ tx.OnShow(func(e events.Event) {
     tx.SetText("Result of expensive computation: "+time.Now().Format(time.DateTime)).Update()
 })
 ```
+
+### Close
+
+A close event is triggered when the [[scene]] containing a widget is about to close. It is often used to save unsaved edits or apply changes. You can also consider a [[dialog#close dialog]], which builds on close events.
+
+```Go
+bt := core.NewButton(b).SetText("Open dialog")
+bt.OnClick(func(e events.Event) {
+    d := core.NewBody("Dialog")
+    d.OnClose(func(e events.Event) {
+        core.MessageSnackbar(bt, "Dialog closed")
+    })
+    d.AddOKOnly().RunDialog(bt)
+})
+```
