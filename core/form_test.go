@@ -86,19 +86,18 @@ type giveUpParams struct {
 	ProgressRateDt  float32
 }
 
-type rubicon struct {
+type addFields struct {
 	GiveUp giveUpParams `display:"add-fields"`
 }
 
-func TestFormRubicon(t *testing.T) {
+func TestFormAddFields(t *testing.T) {
 	AppearanceSettings.Spacing = 30
-	DebugSettings.LayoutTrace = true
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Min.X.Ch(100)
 	})
-	NewForm(b).SetStruct(&rubicon{}).Styler(func(s *styles.Style) {
+	NewForm(b).SetStruct(&addFields{}).Styler(func(s *styles.Style) {
 		s.Background = colors.Scheme.SurfaceContainerLow
 	})
-	b.AssertRender(t, "form/rubicon")
+	b.AssertRender(t, "form/addfields")
 }
