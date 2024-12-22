@@ -26,3 +26,10 @@ bt.OnClick(func(e events.Event) {
     core.MessageSnackbar(b, "This will never happen")
 })
 ```
+
+A [[states#disabled]] widget effectively has no abilities:
+
+```Go
+bt := core.NewButton(b).SetText("Disabled")
+bt.SetEnabled(false)
+```
