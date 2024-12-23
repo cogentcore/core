@@ -194,7 +194,7 @@ func (fm *Form) Init() {
 						dcr := "(Double click to reset to default) "
 						if fm.Modified != nil {
 							isDef = !fm.Modified[f.path]
-							dcr = "(Double click to mark as non-modified) "
+							dcr = "(Double click to mark as not modified) "
 						} else {
 							isDef = reflectx.ValueIsDefault(f.value, def)
 						}
