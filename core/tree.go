@@ -617,12 +617,10 @@ func (tr *Tree) ApplyScenePos() {
 	sz := &tr.Geom.Size
 	if sz.Actual.Total == tr.widgetSize {
 		sz.setTotalFromContent(&sz.Actual) // restore after scrolling
-		sz.Alloc = sz.Actual
 	}
 	tr.WidgetBase.ApplyScenePos()
 	tr.applyScenePosChildren()
 	sz.Actual.Total = tr.widgetSize // key: we revert to just ourselves
-	sz.Alloc = sz.Actual
 }
 
 func (tr *Tree) Render() {

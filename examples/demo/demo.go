@@ -43,7 +43,6 @@ func main() {
 	makeStyles(ts)
 
 	b.RunMainWindow()
-	// b.NewWindow().SetFullscreen(true).RunMain()
 }
 
 func home(ts *core.Tabs) {
@@ -689,7 +688,7 @@ func makeStyles(ts *core.Tabs) {
 	}
 	for _, sz := range frameSizes {
 		core.NewFrame(fr).Styler(func(s *styles.Style) {
-			s.Min.Set(units.Px(sz.X), units.Px(sz.Y))
+			s.Min.Set(units.Dp(sz.X), units.Dp(sz.Y))
 			s.Background = colors.Scheme.Primary.Base
 		})
 	}
