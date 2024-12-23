@@ -254,12 +254,12 @@ func FieldValue(s reflect.Value, fieldPath string) (reflect.Value, error) {
 // CopyFields copies the named fields from src struct into dest struct.
 // Fields can be paths with . separators for sub-fields of fields.
 func CopyFields(dest, src any, fields ...string) error {
-	dsv := UnderlyingPointer(reflect.ValueOf(dest))
-	if dsv.Elem().Kind() != reflect.Struct {
+	dsv := Underlying(reflect.ValueOf(dest))
+	if dsv.Kind() != reflect.Struct {
 		return errors.New("reflectx.CopyFields: destination kind is not struct")
 	}
-	ssv := UnderlyingPointer(reflect.ValueOf(src))
-	if ssv.Elem().Kind() != reflect.Struct {
+	ssv := Underlying(reflect.ValueOf(src))
+	if ssv.Kind() != reflect.Struct {
 		return errors.New("reflectx.CopyFields: source kind is not struct")
 	}
 	var errs []error
