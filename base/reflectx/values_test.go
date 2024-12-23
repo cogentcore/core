@@ -149,9 +149,7 @@ func TestPointerSetRobust(t *testing.T) {
 
 	aptr = nil // also must work if dest pointer is nil
 	err = SetRobust(&aptr, bptr)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	assert.NoError(t, err)
 	assert.Equal(t, aptr, bptr)
 }
 
