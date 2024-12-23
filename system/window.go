@@ -330,8 +330,7 @@ func (o *NewWindowOptions) Fixup() {
 	scsz := sc.Geometry.Size() // window coords size
 
 	if o.Flags.HasFlag(Fullscreen) {
-		o.Size.X = int(float32(scsz.X) * sc.DevicePixelRatio)
-		o.Size.Y = int(float32(scsz.Y) * sc.DevicePixelRatio)
+		o.Size = sc.PixelSize
 		o.Pos = image.Point{}
 		return
 	}
