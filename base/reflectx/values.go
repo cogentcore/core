@@ -971,6 +971,7 @@ func SetRobust(to, from any) error {
 
 	// images should not be copied per content: just set the pointer!
 	// otherwise the original images (esp colors!) are altered.
+	// TODO: #1394 notes the more general ambiguity about deep vs. shallow pointer copy.
 	if img, ok := to.(*image.Image); ok {
 		if fimg, ok := from.(image.Image); ok {
 			*img = fimg
