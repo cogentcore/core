@@ -43,6 +43,7 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 		coresymbols.Symbols["cogentcore.org/core/tree/tree"]["AutoPlanName"] = reflect.ValueOf(func(int) string {
 			return fmt.Sprintf("yaegi-%v", atomic.AddUint64(&autoPlanNameCounter, 1))
 		})
+		errors.Log(in.Use(basesymbols.Symbols))
 		errors.Log(in.Use(coresymbols.Symbols))
 		in.ImportUsed()
 

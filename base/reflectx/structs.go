@@ -230,20 +230,20 @@ func StringJSON(v any) string {
 	return string(errors.Log1(jsonx.WriteBytesIndent(v)))
 }
 
-// FieldValue returns the [reflect.Value] of given field within given struct value,
+// FieldByPath returns the [reflect.Value] of given field within given struct value,
 // where the field can be a path with . separators, for fields within struct fields.
-func FieldValue(s reflect.Value, fieldPath string) (reflect.Value, error) {
+func FieldByPath(s reflect.Value, fieldPath string) (reflect.Value, error) {
 	sv := Underlying(s)
 	var zv reflect.Value
 	if sv.Kind() != reflect.Struct {
-		return zv, errors.New("reflectx.FieldValue: kind is not struct")
+		return zv, errors.New("reflectx.FieldByPath: kind is not struct")
 	}
 	fps := strings.Split(fieldPath, ".")
 	var fv reflect.Value
 	for _, fp := range fps {
 		fv = sv.FieldByName(fp)
 		if fv == zv {
-			return zv, errors.New("reflectx.FieldValue: field name not found: " + fp)
+			return zv, errors.New("reflectx.FieldByPath: field name not found: " + fp)
 		}
 		sv = fv
 	}
@@ -263,12 +263,12 @@ func CopyFields(dest, src any, fields ...string) error {
 	}
 	var errs []error
 	for _, f := range fields {
-		dfv, err := FieldValue(dsv, f)
+		dfv, err := FieldByPath(dsv, f)
 		if err != nil {
 			errs = append(errs, err)
 			continue
 		}
-		sfv, err := FieldValue(ssv, f)
+		sfv, err := FieldByPath(ssv, f)
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -297,7 +297,7 @@ func SetFieldsFromMap(obj any, vals map[string]any) error {
 	}
 	var errs []error
 	for k, v := range vals {
-		fld, err := FieldValue(objv, k)
+		fld, err := FieldByPath(objv, k)
 		if err != nil {
 			errs = append(errs, err)
 		}
