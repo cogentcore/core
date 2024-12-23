@@ -20,7 +20,9 @@ import (
 func init() {
 	wb := NewWidgetBase()
 	ExternalParent = wb
+	fmt.Println("core init")
 	wb.SetOnChildAdded(func(n tree.Node) {
+		fmt.Println("core oca")
 		fmt.Println(GenerateHTML(n.(Widget)))
 		os.Exit(0)
 	})

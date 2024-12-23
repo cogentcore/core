@@ -24,7 +24,7 @@ import (
 func init() {
 	// We override the OnChildAdded set in core/generatehtml.go
 	core.ExternalParent.AsWidget().SetOnChildAdded(func(n tree.Node) {
-		fmt.Println("oka")
+		fmt.Println("pages oca")
 		var pg *Page
 		n.AsTree().WalkDown(func(n tree.Node) bool {
 			if pg != nil {

@@ -110,7 +110,7 @@ func makeFiles(c *config.Config) error {
 
 	preRenderHTML := ""
 	if c.Web.GenerateHTML {
-		preRenderHTML, err = exec.Output("go", "run", "-tags", "offscreen,generatehtml", ".")
+		preRenderHTML, err = exec.Verbose().SetBuffer(false).Output("go", "run", "-tags", "offscreen,generatehtml", ".")
 		if err != nil {
 			return err
 		}
