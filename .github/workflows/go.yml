@@ -27,8 +27,8 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Build Docs
-      run: core build web -dir docs -o static -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core
+    - name: Build Docs (to confirm that web works)
+      run: core build web -dir docs -o static -v
 
     # we can't test gpu, xyz, and system on the CI since there is no Vulkan support
     - name: Test
