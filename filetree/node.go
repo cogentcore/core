@@ -21,7 +21,6 @@ import (
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
@@ -80,24 +79,28 @@ func (fn *Node) Init() {
 	fn.AddContextMenu(fn.contextMenu)
 	fn.Styler(func(s *styles.Style) {
 		status := fn.Info.VCS
+		hex := ""
 		switch {
 		case status == vcs.Untracked:
-			s.Color = errors.Must1(gradient.FromString("#808080"))
+			hex = "#808080"
 		case status == vcs.Modified:
-			s.Color = errors.Must1(gradient.FromString("#4b7fd1"))
+			hex = "#4b7fd1"
 		case status == vcs.Added:
-			s.Color = errors.Must1(gradient.FromString("#008800"))
+			hex = "#008800"
 		case status == vcs.Deleted:
-			s.Color = errors.Must1(gradient.FromString("#ff4252"))
+			hex = "#ff4252"
 		case status == vcs.Conflicted:
-			s.Color = errors.Must1(gradient.FromString("#ce8020"))
+			hex = "#ce8020"
 		case status == vcs.Updated:
-			s.Color = errors.Must1(gradient.FromString("#008060"))
+			hex = "#008060"
 		case status == vcs.Stored:
 			s.Color = colors.Scheme.OnSurface
 		}
 		if fn.Info.Generated {
-			s.Color = errors.Must1(gradient.FromString("#8080C0"))
+			hex = "#8080C0"
+		}
+		if hex != "" {
+			s.Color = colors.Uniform(colors.ToBase(errors.Must1(colors.FromHex(hex))))
 		}
 	})
 	fn.On(events.KeyChord, func(e events.Event) {
