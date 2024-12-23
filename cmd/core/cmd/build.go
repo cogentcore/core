@@ -79,20 +79,9 @@ func buildDesktop(c *config.Config, platform config.Platform) error {
 	}
 	ldflags += " " + config.LinkerFlags(c)
 
-	inCmd := false
-	fi, err := os.Stat("cmd")
-	if err == nil && fi.IsDir() {
-		os.Chdir("cmd")
-		inCmd = true
-	}
-
 	args = append(args, "-ldflags", ldflags, "-o", filepath.Join(c.Build.Output, output))
 
 	err = xc.Run("go", args...)
-	if inCmd {
-		os.Rename(output, filepath.Join("..", output))
-		os.Chdir("../")
-	}
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}
