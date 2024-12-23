@@ -603,29 +603,11 @@ func (W _cogentcore_org_core_core_ShouldDisplayer) ShouldDisplay(field string) b
 
 // _cogentcore_org_core_core_Tabber is an interface wrapper for Tabber type
 type _cogentcore_org_core_core_Tabber struct {
-	IValue           interface{}
-	WAsCoreTabs      func() *core.Tabs
-	WCurrentTab      func() (core.Widget, int)
-	WRecycleTab      func(name string) *core.Frame
-	WSelectTabByName func(name string) *core.Frame
-	WSelectTabIndex  func(idx int) *core.Frame
-	WTabByName       func(name string) *core.Frame
+	IValue      interface{}
+	WAsCoreTabs func() *core.Tabs
 }
 
-func (W _cogentcore_org_core_core_Tabber) AsCoreTabs() *core.Tabs         { return W.WAsCoreTabs() }
-func (W _cogentcore_org_core_core_Tabber) CurrentTab() (core.Widget, int) { return W.WCurrentTab() }
-func (W _cogentcore_org_core_core_Tabber) RecycleTab(name string) *core.Frame {
-	return W.WRecycleTab(name)
-}
-func (W _cogentcore_org_core_core_Tabber) SelectTabByName(name string) *core.Frame {
-	return W.WSelectTabByName(name)
-}
-func (W _cogentcore_org_core_core_Tabber) SelectTabIndex(idx int) *core.Frame {
-	return W.WSelectTabIndex(idx)
-}
-func (W _cogentcore_org_core_core_Tabber) TabByName(name string) *core.Frame {
-	return W.WTabByName(name)
-}
+func (W _cogentcore_org_core_core_Tabber) AsCoreTabs() *core.Tabs { return W.WAsCoreTabs() }
 
 // _cogentcore_org_core_core_TextFieldEmbedder is an interface wrapper for TextFieldEmbedder type
 type _cogentcore_org_core_core_TextFieldEmbedder struct {
