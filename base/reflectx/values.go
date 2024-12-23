@@ -951,15 +951,17 @@ func ToStringPrec(v any, prec int) string {
 // set to be fully equivalent to the source slice.
 func SetRobust(to, from any) error {
 	rto := reflect.ValueOf(to)
-	if IsNil(rto) {
-		return fmt.Errorf("got nil destination value")
-	}
-	pto := rto
-	if !(pto.Kind() == reflect.Pointer && pto.Elem().Kind() == reflect.Pointer) {
-		pto = UnderlyingPointer(rto)
-	}
+	pto := UnderlyingPointer(rto)
 	if IsNil(pto) {
-		return fmt.Errorf("got nil destination value")
+		// If the original value is a non-nil pointer, we can just use it
+		// even though the underlying pointer is nil (this happens when there
+		// is a pointer to a nil pointer; see #1365).
+		if !IsNil(rto) && rto.Kind() == reflect.Pointer {
+			pto = rto
+		} else {
+			// Otherwise, we cannot recover any meaningful value.
+			return fmt.Errorf("got nil destination value")
+		}
 	}
 	pito := pto.Interface()
 
