@@ -6,7 +6,6 @@ package reflectx
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -292,8 +291,7 @@ func SetFieldsFromMap(obj any, vals map[string]any) error {
 	npv := NonPointerValue(objv)
 	if npv.Kind() == reflect.Map {
 		err := CopyMapRobust(obj, vals)
-		if err != nil {
-			log.Println(err)
+		if errors.Log(err) != nil {
 			return err
 		}
 	}
