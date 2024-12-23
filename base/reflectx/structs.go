@@ -305,8 +305,7 @@ func SetFieldsFromMap(obj any, vals map[string]any) error {
 		}
 		err = SetRobust(fld.Interface(), v)
 		if err != nil {
-			err = fmt.Errorf("SetFieldsFromMap: was not able to apply value: %v to field: %s", v, k)
-			log.Println(err)
+			err = errors.Log(fmt.Errorf("SetFieldsFromMap: was not able to apply value: %v to field: %s", v, k))
 			errs = append(errs, err)
 		}
 	}
