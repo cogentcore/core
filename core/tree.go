@@ -1256,7 +1256,7 @@ func (tr *Tree) contextMenu(m *Scene) {
 // creating an error snackbar if it is and action is non-empty.
 func (tr *Tree) IsRoot(action ...string) bool {
 	if tr.This == tr.Root.AsCoreTree().This {
-		if len(action) == 1 {
+		if len(action) > 0 {
 			MessageSnackbar(tr, fmt.Sprintf("Cannot %v the root of the tree", action[0]))
 		}
 		return true
