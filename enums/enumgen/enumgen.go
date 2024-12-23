@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/generate"
 	"cogentcore.org/core/base/logx"
 	"golang.org/x/tools/go/packages"
@@ -47,13 +46,13 @@ func Generate(cfg *Config) error { //types:add
 	pkgs, err := ParsePackages(cfg)
 	if err != nil {
 		if logx.UserLevel <= slog.LevelInfo {
-			errors.Log(err)
+			logx.PrintlnInfo(err)
 		}
 		return err
 	}
 	err = GeneratePkgs(cfg, pkgs)
 	if logx.UserLevel <= slog.LevelInfo {
-		errors.Log(err)
+		logx.PrintlnInfo(err)
 	}
 	return err
 }
