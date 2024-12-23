@@ -26,7 +26,7 @@ const (
 	externalFilesName = "[external files]"
 )
 
-// Treer is an interface for getting the Root node as a Tree struct.
+// Treer is an interface for getting the Root node if it implements [Treer].
 type Treer interface {
 	AsFileTree() *Tree
 }
