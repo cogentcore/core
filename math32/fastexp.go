@@ -65,7 +65,7 @@ func FastExp3(x float32) float32 {
 }
 */
 
-//gosl:start fastexp
+//gosl:start
 
 // FastExp is a quartic spline approximation to the Exp function, by N.N. Schraudolph
 // It does not have any of the sanity checking of a standard method -- returns
@@ -76,9 +76,9 @@ func FastExp(x float32) float32 {
 		return 0.0
 	}
 	i := int32(12102203*x) + int32(127)*(int32(1)<<23)
-	m := i >> 7 & 0xFFFF // copy mantissa
+	m := (i >> 7) & 0xFFFF // copy mantissa
 	i += (((((((((((3537 * m) >> 16) + 13668) * m) >> 18) + 15817) * m) >> 14) - 80470) * m) >> 11)
 	return math.Float32frombits(uint32(i))
 }
 
-//gosl:end fastexp
+//gosl:end

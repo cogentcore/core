@@ -4,9 +4,13 @@
 
 package minmax
 
-import "fmt"
+import (
+	"fmt"
 
-//gosl:start minmax
+	"cogentcore.org/core/math32"
+)
+
+//gosl:start
 
 // F32 represents a min / max range for float32 values.
 // Supports clipping, renormalizing, etc
@@ -23,11 +27,11 @@ func (mr *F32) Set(mn, mx float32) {
 	mr.Max = mx
 }
 
-// SetInfinity sets the Min to +MaxFloat, Max to -MaxFloat -- suitable for
-// iteratively calling Fit*InRange
+// SetInfinity sets the Min to +Inf, Max to -Inf -- suitable for
+// iteratively calling Fit*InRange. See also Sanitize when done.
 func (mr *F32) SetInfinity() {
-	mr.Min = MaxFloat32
-	mr.Max = -MaxFloat32
+	mr.Min = math32.Inf(1)
+	mr.Max = math32.Inf(-1)
 }
 
 // IsValid returns true if Min <= Max
@@ -87,7 +91,7 @@ func (mr *F32) FitValInRange(val float32) bool {
 // NormVal normalizes value to 0-1 unit range relative to current Min / Max range
 // Clips the value within Min-Max range first.
 func (mr *F32) NormValue(val float32) float32 {
-	return (mr.ClipValue(val) - mr.Min) * mr.Scale()
+	return (mr.ClampValue(val) - mr.Min) * mr.Scale()
 }
 
 // ProjVal projects a 0-1 normalized unit value into current Min / Max range (inverse of NormVal)
@@ -95,9 +99,9 @@ func (mr *F32) ProjValue(val float32) float32 {
 	return mr.Min + (val * mr.Range())
 }
 
-// ClipVal clips given value within Min / Max range
-// Note: a NaN will remain as a NaN
-func (mr *F32) ClipValue(val float32) float32 {
+// ClampValue clamps given value within Min / Max range
+// Note: a NaN will remain as a NaN.
+func (mr *F32) ClampValue(val float32) float32 {
 	if val < mr.Min {
 		return mr.Min
 	}
@@ -119,7 +123,7 @@ func (mr *F32) ClipNormValue(val float32) float32 {
 	return mr.NormValue(val)
 }
 
-//gosl:end minmax
+//gosl:end
 
 func (mr *F32) String() string {
 	return fmt.Sprintf("{%g %g}", mr.Min, mr.Max)
@@ -138,4 +142,21 @@ func (mr *F32) FitInRange(oth F32) bool {
 		adj = true
 	}
 	return adj
+}
+
+// Sanitize ensures that the Min / Max range is not infinite or contradictory.
+func (mr *F32) Sanitize() {
+	if math32.IsInf(mr.Min, 0) {
+		mr.Min = 0
+	}
+	if math32.IsInf(mr.Max, 0) {
+		mr.Max = 0
+	}
+	if mr.Min > mr.Max {
+		mr.Min, mr.Max = mr.Max, mr.Min
+	}
+	if mr.Min == mr.Max {
+		mr.Min--
+		mr.Max++
+	}
 }

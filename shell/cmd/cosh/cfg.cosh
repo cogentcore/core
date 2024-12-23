@@ -1,8 +1,0 @@
-set ANDROID_HOME ~/Library/Android/sdk
-
-add-path ~/go/bin ~/bin /usr/local/bin /opt/homebrew/bin /opt/homebrew/sbin /opt/homebrew/opt/openjdk/bin $ANDROID_HOME/tools $ANDROID_HOME/platform-tools /Library/TeX/texbin
-
-command list {
- 	ls -la 
-}
-

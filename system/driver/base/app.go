@@ -182,6 +182,10 @@ func (a *App) IsDark() bool {
 	return a.Dark
 }
 
+func (a *App) GPUDevice() any {
+	return nil
+}
+
 func (a *App) GetScreens() {
 	// no-op by default
 }

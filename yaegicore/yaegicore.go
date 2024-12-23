@@ -17,7 +17,8 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/yaegicore/symbols"
+	"cogentcore.org/core/yaegicore/basesymbols"
+	"cogentcore.org/core/yaegicore/coresymbols"
 	"github.com/cogentcore/yaegi/interp"
 )
 
@@ -25,7 +26,8 @@ var autoPlanNameCounter uint64
 
 func init() {
 	htmlcore.BindTextEditor = BindTextEditor
-	symbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
+	coresymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
+	basesymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
 }
 
 // BindTextEditor binds the given text editor to a yaegi interpreter
@@ -36,12 +38,13 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 	oc := func() {
 		in := interp.New(interp.Options{})
 		core.ExternalParent = parent
-		symbols.Symbols["."]["b"] = reflect.ValueOf(parent)
+		coresymbols.Symbols["."]["b"] = reflect.ValueOf(parent)
 		// the normal AutoPlanName cannot be used because the stack trace in yaegi is not helpful
-		symbols.Symbols["cogentcore.org/core/tree/tree"]["AutoPlanName"] = reflect.ValueOf(func(int) string {
+		coresymbols.Symbols["cogentcore.org/core/tree/tree"]["AutoPlanName"] = reflect.ValueOf(func(int) string {
 			return fmt.Sprintf("yaegi-%v", atomic.AddUint64(&autoPlanNameCounter, 1))
 		})
-		errors.Log(in.Use(symbols.Symbols))
+		errors.Log(in.Use(basesymbols.Symbols))
+		errors.Log(in.Use(coresymbols.Symbols))
 		in.ImportUsed()
 
 		parent.AsTree().DeleteChildren()

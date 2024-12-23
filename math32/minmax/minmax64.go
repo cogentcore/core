@@ -5,12 +5,9 @@
 // Package minmax provides a struct that holds Min and Max values.
 package minmax
 
-//go:generate core generate
+import "math"
 
-const (
-	MaxFloat64 float64 = 1.7976931348623158e+308
-	MinFloat64 float64 = 2.2250738585072014e-308
-)
+//go:generate core generate
 
 // F64 represents a min / max range for float64 values.
 // Supports clipping, renormalizing, etc
@@ -25,39 +22,39 @@ func (mr *F64) Set(mn, mx float64) {
 	mr.Max = mx
 }
 
-// SetInfinity sets the Min to +MaxFloat, Max to -MaxFloat -- suitable for
-// iteratively calling Fit*InRange
+// SetInfinity sets the Min to +Inf, Max to -Inf, suitable for
+// iteratively calling Fit*InRange. See also Sanitize when done.
 func (mr *F64) SetInfinity() {
-	mr.Min = MaxFloat64
-	mr.Max = -MaxFloat64
+	mr.Min = math.Inf(1)
+	mr.Max = math.Inf(-1)
 }
 
-// IsValid returns true if Min <= Max
+// IsValid returns true if Min <= Max.
 func (mr *F64) IsValid() bool {
 	return mr.Min <= mr.Max
 }
 
-// InRange tests whether value is within the range (>= Min and <= Max)
+// InRange tests whether value is within the range (>= Min and <= Max).
 func (mr *F64) InRange(val float64) bool {
 	return ((val >= mr.Min) && (val <= mr.Max))
 }
 
-// IsLow tests whether value is lower than the minimum
+// IsLow tests whether value is lower than the minimum.
 func (mr *F64) IsLow(val float64) bool {
 	return (val < mr.Min)
 }
 
-// IsHigh tests whether value is higher than the maximum
+// IsHigh tests whether value is higher than the maximum.
 func (mr *F64) IsHigh(val float64) bool {
 	return (val > mr.Min)
 }
 
-// Range returns Max - Min
+// Range returns Max - Min.
 func (mr *F64) Range() float64 {
 	return mr.Max - mr.Min
 }
 
-// Scale returns 1 / Range -- if Range = 0 then returns 0
+// Scale returns 1 / Range -- if Range = 0 then returns 0.
 func (mr *F64) Scale() float64 {
 	r := mr.Range()
 	if r != 0 {
@@ -89,7 +86,7 @@ func (mr *F64) FitValInRange(val float64) bool {
 // NormVal normalizes value to 0-1 unit range relative to current Min / Max range
 // Clips the value within Min-Max range first.
 func (mr *F64) NormValue(val float64) float64 {
-	return (mr.ClipValue(val) - mr.Min) * mr.Scale()
+	return (mr.ClampValue(val) - mr.Min) * mr.Scale()
 }
 
 // ProjVal projects a 0-1 normalized unit value into current Min / Max range (inverse of NormVal)
@@ -97,9 +94,9 @@ func (mr *F64) ProjValue(val float64) float64 {
 	return mr.Min + (val * mr.Range())
 }
 
-// ClipVal clips given value within Min / Max range
+// ClampValue clips given value within Min / Max range
 // Note: a NaN will remain as a NaN
-func (mr *F64) ClipValue(val float64) float64 {
+func (mr *F64) ClampValue(val float64) float64 {
 	if val < mr.Min {
 		return mr.Min
 	}
@@ -134,4 +131,21 @@ func (mr *F64) FitInRange(oth F64) bool {
 		adj = true
 	}
 	return adj
+}
+
+// Sanitize ensures that the Min / Max range is not infinite or contradictory.
+func (mr *F64) Sanitize() {
+	if math.IsInf(mr.Min, 0) {
+		mr.Min = 0
+	}
+	if math.IsInf(mr.Max, 0) {
+		mr.Max = 0
+	}
+	if mr.Min > mr.Max {
+		mr.Min, mr.Max = mr.Max, mr.Min
+	}
+	if mr.Min == mr.Max {
+		mr.Min--
+		mr.Max++
+	}
 }

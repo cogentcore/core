@@ -75,6 +75,10 @@ type FileInfo struct { //types:add
 	// version control system status, when enabled
 	VCS vcs.FileStatus `table:"-"`
 
+	// Generated indicates that the file is generated and should not be edited.
+	// For Go files, this regex: `^// Code generated .* DO NOT EDIT\.$` is used.
+	Generated bool `table:"-"`
+
 	// full path to file, including name; for file functions
 	Path string `table:"-"`
 }
@@ -143,6 +147,7 @@ func (fi *FileInfo) SetMimeInfo() error {
 	}
 	fi.Cat = UnknownCategory
 	fi.Known = Unknown
+	fi.Generated = IsGeneratedFile(fi.Path)
 	fi.Kind = ""
 	mtyp, _, err := MimeFromFile(fi.Path)
 	if err != nil {

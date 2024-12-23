@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -705,7 +706,7 @@ func (fp *FilePicker) editRecentPaths() {
 
 // Filename is used to specify an file path.
 // It results in a [FileButton] [Value].
-type Filename string
+type Filename = fsx.Filename
 
 // FileButton represents a [Filename] value with a button
 // that opens a [FilePicker].

@@ -140,8 +140,8 @@ type Layouter interface {
 	SetScrollParams(d math32.Dims, sb *Slider)
 }
 
-// AsFrame returns the given value as a value of type [Frame] if the type
-// of the given value embeds [Frame], or nil otherwise.
+// AsFrame returns the given value as a [Frame] if it implements [Layouter]
+// or nil otherwise.
 func AsFrame(n tree.Node) *Frame {
 	if t, ok := n.(Layouter); ok {
 		return t.AsFrame()
@@ -149,7 +149,6 @@ func AsFrame(n tree.Node) *Frame {
 	return nil
 }
 
-// AsFrame satisfies the [Layouter] interface.
 func (t *Frame) AsFrame() *Frame {
 	return t
 }

@@ -8,6 +8,7 @@ package stringsx
 
 import (
 	"bytes"
+	"slices"
 	"strings"
 )
 
@@ -87,4 +88,19 @@ func InsertFirstUnique(strs *[]string, str string, max int) {
 		}
 		(*strs)[0] = str
 	}
+}
+
+// UniqueList removes duplicates from given string list,
+// preserving the order.
+func UniqueList(strs []string) []string {
+	n := len(strs)
+	for i := n - 1; i >= 0; i-- {
+		p := strs[i]
+		for j, s := range strs {
+			if p == s && i != j {
+				strs = slices.Delete(strs, i, i+1)
+			}
+		}
+	}
+	return strs
 }

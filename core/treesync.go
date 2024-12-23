@@ -62,13 +62,13 @@ func (tr *Tree) Resync() {
 func (tr *Tree) syncToSrc(tvIndex *int, init bool, depth int) {
 	sn := tr.SyncNode
 	// root must keep the same name for continuity with surrounding context
-	if tr != tr.root {
+	if tr != tr.Root {
 		nm := "tv_" + sn.AsTree().Name
 		tr.SetName(nm)
 	}
 	tr.viewIndex = *tvIndex
 	*tvIndex++
-	if init && depth >= tr.root.OpenDepth {
+	if init && depth >= tr.Root.AsCoreTree().OpenDepth {
 		tr.SetClosed(true)
 	}
 	skids := sn.AsTree().Children
@@ -377,7 +377,7 @@ func (tr *Tree) inspectNode() { //types:add
 // mimeDataSync adds mimedata for this node: a text/plain of the Path,
 // and an application/json of the sync node.
 func (tr *Tree) mimeDataSync(md *mimedata.Mimes) {
-	sroot := tr.root.SyncNode
+	sroot := tr.Root.AsCoreTree().SyncNode
 	src := tr.SyncNode
 	*md = append(*md, mimedata.NewTextData(src.AsTree().PathFrom(sroot)))
 	var buf bytes.Buffer
@@ -435,7 +435,7 @@ func (tr *Tree) pasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, act
 		return
 	}
 	myidx += rel
-	sroot := tr.root.SyncNode
+	sroot := tr.Root.AsCoreTree().SyncNode
 	sz := len(sl)
 	var seln tree.Node
 	for i, ns := range sl {
@@ -488,7 +488,7 @@ func (tr *Tree) cutSync() {
 // dropDeleteSourceSync handles delete source event for DropMove case, for Sync
 func (tr *Tree) dropDeleteSourceSync(de *events.DragDrop) {
 	md := de.Data.(mimedata.Mimes)
-	sroot := tr.root.SyncNode
+	sroot := tr.Root.AsCoreTree().SyncNode
 	for _, d := range md {
 		if d.Type != fileinfo.TextPlain { // link
 			continue
