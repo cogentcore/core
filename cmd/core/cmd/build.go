@@ -81,7 +81,7 @@ func buildDesktop(c *config.Config, platform config.Platform) error {
 
 	args = append(args, "-ldflags", ldflags, "-o", filepath.Join(c.Build.Output, output))
 
-	err = xc.Run("go", args...)
+	err := xc.Run("go", args...)
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}
