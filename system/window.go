@@ -10,7 +10,6 @@
 package system
 
 import (
-	"fmt"
 	"image"
 	"unicode/utf8"
 
@@ -334,7 +333,6 @@ func (o *NewWindowOptions) Fixup() {
 		o.Size.X = int(float32(scsz.X) * sc.DevicePixelRatio)
 		o.Size.Y = int(float32(scsz.Y) * sc.DevicePixelRatio)
 		o.Pos = image.Point{}
-		fmt.Println("fullscreen start:", o.Size, o.Pos)
 		return
 	}
 
