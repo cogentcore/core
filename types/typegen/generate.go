@@ -6,7 +6,7 @@
 // Go types, methods, and functions.
 package typegen
 
-//go:generate go run ../cmd/typegen -output typegen_gen.go
+//go:generate core generate
 
 import (
 	"fmt"
