@@ -78,7 +78,6 @@ func buildDesktop(c *config.Config, platform config.Platform) error {
 		}
 	}
 	ldflags += " " + config.LinkerFlags(c)
-
 	args = append(args, "-ldflags", ldflags, "-o", filepath.Join(c.Build.Output, output))
 
 	err := xc.Run("go", args...)
