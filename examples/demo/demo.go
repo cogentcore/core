@@ -43,7 +43,6 @@ func main() {
 	makeStyles(ts)
 
 	b.RunMainWindow()
-	// b.NewWindow().SetFullscreen(true).RunMain()
 }
 
 func home(ts *core.Tabs) {
