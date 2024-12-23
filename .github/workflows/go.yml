@@ -27,6 +27,9 @@ jobs:
     - name: Build
       run: go build -v ./...
 
+    - name: Build Docs
+      run: core build web -dir docs -o static -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core
+
     # we can't test gpu, xyz, and system on the CI since there is no Vulkan support
     - name: Test
       run: go test -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system) -coverprofile cover.out -timeout 30s
