@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package basesymbols contains yaegi symbols for core base packages.
+// Package basesymbols contains yaegi symbols for base (non-GUI) packages.
 package basesymbols
 
 //go:generate ./make
