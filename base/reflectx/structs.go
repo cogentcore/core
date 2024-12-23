@@ -248,7 +248,7 @@ func FieldValue(s reflect.Value, fieldPath string) (reflect.Value, error) {
 		}
 		sv = fv
 	}
-	return fv, nil
+	return fv.Addr(), nil
 }
 
 // CopyFields copies the named fields from src struct into dest struct.
@@ -283,32 +283,6 @@ func CopyFields(dest, src any, fields ...string) error {
 	return errors.Join(errs...)
 }
 
-// FieldAtPath parses a path to a field within the given struct,
-// using . delimted field names, and returns the [reflect.Value] for
-// the field. Returns an error if not found.
-func FieldAtPath(val reflect.Value, path string) (reflect.Value, error) {
-	npv := NonPointerValue(val)
-	if npv.Kind() != reflect.Struct {
-		if !npv.IsValid() {
-			err := fmt.Errorf("FieldAtPath: struct is nil, for path: %q", path)
-			return npv, err
-		}
-		err := fmt.Errorf("FieldAtPath: object is not a struct: %q kind: %q, for path: %q", npv.String(), npv.Kind(), path)
-		return npv, err
-	}
-	paths := strings.Split(path, ".")
-	fnm := paths[0]
-	fld := npv.FieldByName(fnm)
-	if !fld.IsValid() {
-		err := fmt.Errorf("FieldAtPath: could not find Field named: %q in struct: %q kind: %q, path: %v", fnm, npv.String(), npv.Kind(), path)
-		return fld, err
-	}
-	if len(paths) == 1 {
-		return fld.Addr(), nil
-	}
-	return FieldAtPath(fld.Addr(), strings.Join(paths[1:], "."))
-}
-
 // SetFieldsFromMap sets given map[string]any values to fields of given object,
 // where the map keys are field paths (with . delimiters for sub-field paths).
 // The value can be any appropriate type that applies to the given field.
@@ -325,7 +299,7 @@ func SetFieldsFromMap(obj any, vals map[string]any) error {
 	}
 	var errs []error
 	for k, v := range vals {
-		fld, err := FieldAtPath(objv, k)
+		fld, err := FieldValue(objv, k)
 		if err != nil {
 			errs = append(errs, err)
 		}
