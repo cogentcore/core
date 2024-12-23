@@ -90,9 +90,9 @@ func InsertFirstUnique(strs *[]string, str string, max int) {
 	}
 }
 
-// DedupeList removes duplicates from given string list,
+// UniqueList removes duplicates from given string list,
 // preserving the order.
-func DedupeList(strs []string) []string {
+func UniqueList(strs []string) []string {
 	n := len(strs)
 	for i := n - 1; i >= 0; i-- {
 		p := strs[i]
