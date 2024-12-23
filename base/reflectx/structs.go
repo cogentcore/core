@@ -245,7 +245,7 @@ func FieldByPath(s reflect.Value, fieldPath string) (reflect.Value, error) {
 		}
 		sv = fv
 	}
-	return sv.Addr(), nil
+	return sv, nil
 }
 
 // CopyFields copies the named fields from src struct into dest struct.
@@ -299,7 +299,7 @@ func SetFieldsFromMap(obj any, vals map[string]any) error {
 		if err != nil {
 			errs = append(errs, err)
 		}
-		err = SetRobust(fld.Interface(), v)
+		err = SetRobust(PointerValue(fld).Interface(), v)
 		if err != nil {
 			err = errors.Log(fmt.Errorf("SetFieldsFromMap: was not able to apply value: %v to field: %s", v, k))
 			errs = append(errs, err)
