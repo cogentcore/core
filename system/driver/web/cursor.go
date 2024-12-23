@@ -12,11 +12,12 @@ import (
 
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 )
 
 // TheCursor is the single [system.Cursor] for the web platform
-var TheCursor = &Cursor{CursorBase: system.CursorBase{Vis: true, Size: 32}}
+var TheCursor = &Cursor{CursorBase: system.CursorBase{Vis: true, Size: units.Dp(32)}}
 
 // Cursor is the [system.Cursor] implementation for the web platform
 type Cursor struct {

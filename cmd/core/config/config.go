@@ -247,6 +247,12 @@ func LinkerFlags(c *Config) string {
 		res += "-X 'cogentcore.org/core/core.AppIcon=" + strings.ReplaceAll(string(b), "'", `\'`) + "' "
 	}
 
+	// TODO: maybe replace this linker flag version injection logic with
+	// [debug.ReadBuildInfo] at some point; we currently support it as a
+	// backup in system/app.go, but it is less reliable and formats worse,
+	// so we won't use it as a full replacement yet (see
+	// https://github.com/cogentcore/core/issues/1370).
+
 	av, err := exec.Silent().Output("git", "describe", "--tags")
 	if err == nil {
 		res += "-X cogentcore.org/core/system.AppVersion=" + av + " "

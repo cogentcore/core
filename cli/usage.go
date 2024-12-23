@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime/debug"
 	"slices"
 	"strconv"
 	"strings"
@@ -47,6 +48,19 @@ func usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			fmt.Println(logx.CmdColor(cmdName()+" help") + logx.ErrorColor(fmt.Sprintf(" failed: command %q not found", cmd)))
 			os.Exit(1)
 		}
+	}
+
+	if bi, ok := debug.ReadBuildInfo(); ok {
+		revision, time := "dev", "unknown"
+		for _, set := range bi.Settings {
+			if set.Key == "vcs.revision" {
+				revision = set.Value
+			}
+			if set.Key == "vcs.time" {
+				time = set.Value
+			}
+		}
+		b.WriteString(logx.TitleColor("Version: ") + fmt.Sprintf("%s (%s)\n\n", revision, time))
 	}
 
 	fs := &fields{}

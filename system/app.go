@@ -12,7 +12,12 @@
 // functionality needed for full GUI support.
 package system
 
-import "cogentcore.org/core/styles"
+import (
+	"fmt"
+	"runtime/debug"
+
+	"cogentcore.org/core/styles"
+)
 
 //go:generate core generate
 
@@ -21,11 +26,13 @@ var (
 	TheApp App
 
 	// AppVersion is the version of the current app.
-	// It is set by a linker flag in the core command line tool.
+	// It is set by a linker flag in the core command line tool,
+	// with a backup based on [debug.ReadBuildInfo].
 	AppVersion = "dev"
 
 	// CoreVersion is the version of Cogent Core that the current app is using.
-	// It is set by a linker flag in the core command line tool.
+	// It is set by a linker flag in the core command line tool,
+	// with a backup based on [debug.ReadBuildInfo].
 	CoreVersion = "dev"
 
 	// ReservedWebShortcuts is a list of shortcuts that are reserved on the web
@@ -237,4 +244,38 @@ const (
 // considered mobile platforms because they only support one window.
 func (p Platforms) IsMobile() bool {
 	return p == IOS || p == Android || p == Web || p == Offscreen
+}
+
+func init() {
+	// We only need this backup [debug.ReadBuildInfo] logic if the versions
+	// weren't already set by the linker flags in the core tool.
+	if AppVersion != "dev" || CoreVersion != "dev" {
+		return
+	}
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		return
+	}
+
+	revision, time := "dev", "unknown"
+	for _, set := range bi.Settings {
+		if set.Key == "vcs.revision" {
+			revision = set.Value
+		}
+		if set.Key == "vcs.time" {
+			time = set.Value
+		}
+	}
+	AppVersion = fmt.Sprintf("%s (%s)", revision, time)
+
+	if bi.Main.Path == "cogentcore.org/core" {
+		CoreVersion = AppVersion
+	} else {
+		for _, dep := range bi.Deps {
+			if dep.Path == "cogentcore.org/core" {
+				CoreVersion = dep.Version
+				break
+			}
+		}
+	}
 }

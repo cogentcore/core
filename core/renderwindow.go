@@ -290,7 +290,7 @@ func (w *renderWindow) resized() {
 		for _, kv := range w.mains.stack.Order {
 			st := kv.Value
 			sc := st.Scene
-			if st.FullWindow || sc.SceneGeom.Size != rg.Size { // double-check: can be off in fullscreen init
+			if st.FullWindow && sc.SceneGeom.Size != rg.Size { // double-check: can be off in fullscreen init
 				st.Sprites.reset()
 				sc.resize(rg)
 			}
