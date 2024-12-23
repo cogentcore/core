@@ -10,7 +10,6 @@ package enumgen
 
 import (
 	"fmt"
-	"log/slog"
 
 	"cogentcore.org/core/base/generate"
 	"cogentcore.org/core/base/logx"
@@ -45,15 +44,11 @@ func ParsePackages(cfg *Config) ([]*packages.Package, error) {
 func Generate(cfg *Config) error { //types:add
 	pkgs, err := ParsePackages(cfg)
 	if err != nil {
-		if logx.UserLevel <= slog.LevelInfo {
-			logx.PrintlnInfo(err)
-		}
+		logx.PrintlnInfo(err)
 		return err
 	}
 	err = GeneratePkgs(cfg, pkgs)
-	if logx.UserLevel <= slog.LevelInfo {
-		logx.PrintlnInfo(err)
-	}
+	logx.PrintlnInfo(err)
 	return err
 }
 
