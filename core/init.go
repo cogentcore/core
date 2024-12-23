@@ -5,6 +5,7 @@
 package core
 
 import (
+	"fmt"
 	"testing"
 
 	"cogentcore.org/core/styles"
@@ -12,6 +13,7 @@ import (
 )
 
 func init() {
+	fmt.Println("core base init")
 	system.HandleRecover = handleRecover
 	system.InitScreenLogicalDPIFunc = AppearanceSettings.applyDPI // called when screens are initialized
 	TheApp.CogentCoreDataDir()                                    // ensure it exists
