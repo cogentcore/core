@@ -597,7 +597,6 @@ func (tr *Tree) Position() {
 	sz := &tr.Geom.Size
 	sz.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tr.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
 	sz.Actual.Content.X = sz.Actual.Total.X - sz.Space.X
-	sz.Alloc = sz.Actual
 	tr.widgetSize.X = sz.Actual.Total.X
 	tr.WidgetBase.Position() // just does our parts
 
