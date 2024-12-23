@@ -91,7 +91,6 @@ type addFields struct {
 }
 
 func TestFormAddFields(t *testing.T) {
-	AppearanceSettings.Spacing = 30
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Min.X.Ch(100)
