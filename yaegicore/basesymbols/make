@@ -1,0 +1,12 @@
+#!/usr/bin/env goal
+
+command extract {
+    for _, pkg := range args {
+        yaegi extract {"cogentcore.org/core/"+pkg}
+    }
+}
+
+yaegi extract fmt strconv strings math time log/slog reflect
+
+extract math32 base/errors base/fsx base/reflectx base/labels base/fileinfo base/num
+

@@ -21,22 +21,24 @@ import (
 // for rendering -- see [FontRender] for that.
 type Font struct { //types:add
 
-	// size of font to render (inherited); converted to points when getting font to use
+	// Size of font to render (inherited).
+	// Converted to points when getting font to use.
 	Size units.Value
 
-	// font family (inherited): ordered list of comma-separated names from more general to more specific to use; use split on , to parse
+	// Family name for font (inherited): ordered list of comma-separated names
+	// from more general to more specific to use. Use split on, to parse.
 	Family string
 
-	// style (inherited): normal, italic, etc
+	// Style (inherited): normal, italic, etc.
 	Style FontStyles
 
-	// weight (inherited): normal, bold, etc
+	// Weight (inherited): normal, bold, etc.
 	Weight FontWeights
 
-	// font stretch / condense options (inherited)
+	// Stretch / condense options (inherited).
 	Stretch FontStretch
 
-	// normal or small caps (inherited)
+	// Variant specifies normal or small caps (inherited).
 	Variant FontVariants
 
 	// Decoration contains the bit flag [TextDecorations]
@@ -45,15 +47,16 @@ type Font struct { //types:add
 	// It is not inherited.
 	Decoration TextDecorations
 
-	// super / sub script (not inherited)
+	// Shift is the super / sub script (not inherited).
 	Shift BaselineShifts
 
-	// full font information including enhanced metrics and actual font codes for drawing text; this is a pointer into FontLibrary of loaded fonts
+	// Face has full font information including enhanced metrics and actual
+	// font codes for drawing text; this is a pointer into FontLibrary of loaded fonts.
 	Face *FontFace `display:"-"`
 }
 
 func (fs *Font) Defaults() {
-	fs.Size = units.Dp(16)
+	fs.Size.Dp(16)
 }
 
 // InheritFields from parent

@@ -1,0 +1,12 @@
+#!/usr/bin/env goal
+
+command extract {
+    for _, pkg := range args {
+        yaegi extract {"cogentcore.org/core/"+pkg}
+    }
+}
+
+yaegi extract image image/color image/draw
+
+extract core icons events styles styles/states styles/abilities styles/units tree keymap colors colors/gradient filetree texteditor htmlcore pages paint
+

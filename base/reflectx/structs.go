@@ -229,3 +229,81 @@ func StructTags(tags reflect.StructTag) map[string]string {
 func StringJSON(v any) string {
 	return string(errors.Log1(jsonx.WriteBytesIndent(v)))
 }
+
+// FieldByPath returns the [reflect.Value] of given field within given struct value,
+// where the field can be a path with . separators, for fields within struct fields.
+func FieldByPath(s reflect.Value, fieldPath string) (reflect.Value, error) {
+	sv := Underlying(s)
+	if sv.Kind() != reflect.Struct {
+		return reflect.Value{}, errors.New("reflectx.FieldByPath: kind is not struct")
+	}
+	fps := strings.Split(fieldPath, ".")
+	for _, fp := range fps {
+		fv := sv.FieldByName(fp)
+		if !fv.IsValid() {
+			return reflect.Value{}, errors.New("reflectx.FieldByPath: field name not found: " + fp)
+		}
+		sv = fv
+	}
+	return sv.Addr(), nil
+}
+
+// CopyFields copies the named fields from src struct into dest struct.
+// Fields can be paths with . separators for sub-fields of fields.
+func CopyFields(dest, src any, fields ...string) error {
+	dsv := Underlying(reflect.ValueOf(dest))
+	if dsv.Kind() != reflect.Struct {
+		return errors.New("reflectx.CopyFields: destination kind is not struct")
+	}
+	ssv := Underlying(reflect.ValueOf(src))
+	if ssv.Kind() != reflect.Struct {
+		return errors.New("reflectx.CopyFields: source kind is not struct")
+	}
+	var errs []error
+	for _, f := range fields {
+		dfv, err := FieldByPath(dsv, f)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		sfv, err := FieldByPath(ssv, f)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		err = SetRobust(PointerValue(dfv).Interface(), sfv.Interface())
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+	}
+	return errors.Join(errs...)
+}
+
+// SetFieldsFromMap sets given map[string]any values to fields of given object,
+// where the map keys are field paths (with . delimiters for sub-field paths).
+// The value can be any appropriate type that applies to the given field.
+// It prints a message if a parameter fails to be set, and returns an error.
+func SetFieldsFromMap(obj any, vals map[string]any) error {
+	objv := reflect.ValueOf(obj)
+	npv := NonPointerValue(objv)
+	if npv.Kind() == reflect.Map {
+		err := CopyMapRobust(obj, vals)
+		if errors.Log(err) != nil {
+			return err
+		}
+	}
+	var errs []error
+	for k, v := range vals {
+		fld, err := FieldByPath(objv, k)
+		if err != nil {
+			errs = append(errs, err)
+		}
+		err = SetRobust(fld.Interface(), v)
+		if err != nil {
+			err = errors.Log(fmt.Errorf("SetFieldsFromMap: was not able to apply value: %v to field: %s", v, k))
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
+}

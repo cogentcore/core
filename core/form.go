@@ -30,6 +30,11 @@ type Form struct {
 	// Inline is whether to display the form in one line.
 	Inline bool
 
+	// Modified optionally highlights and tracks fields that have been modified
+	// through an OnChange event. If present, it replaces the default value highlighting
+	// and resetting logic. Ignored if nil.
+	Modified map[string]bool
+
 	// structFields are the fields of the current struct.
 	structFields []*structField
 
@@ -179,13 +184,20 @@ func (fm *Form) Init() {
 				// (see https://github.com/cogentcore/core/issues/1098).
 				doc, _ := types.GetDoc(f.value, f.parent, f.field, label)
 				w.SetTooltip(doc)
-				if hasDef {
-					w.SetTooltip("(Default: " + def + ") " + w.Tooltip)
+				if hasDef || fm.Modified != nil {
+					if hasDef {
+						w.SetTooltip("(Default: " + def + ") " + w.Tooltip)
+					}
 					var isDef bool
 					w.Styler(func(s *styles.Style) {
 						f := fm.structFields[i]
-						isDef = reflectx.ValueIsDefault(f.value, def)
 						dcr := "(Double click to reset to default) "
+						if fm.Modified != nil {
+							isDef = !fm.Modified[f.path]
+							dcr = "(Double click to mark as not modified) "
+						} else {
+							isDef = reflectx.ValueIsDefault(f.value, def)
+						}
 						if !isDef {
 							s.Color = colors.Scheme.Primary.Base
 							s.Cursor = cursors.Poof
@@ -202,13 +214,20 @@ func (fm *Form) Init() {
 							return
 						}
 						e.SetHandled()
-						err := reflectx.SetFromDefaultTag(f.value, def)
+						var err error
+						if fm.Modified != nil {
+							fm.Modified[f.path] = false
+						} else {
+							err = reflectx.SetFromDefaultTag(f.value, def)
+						}
 						if err != nil {
 							ErrorSnackbar(w, err, "Error setting default value")
 						} else {
 							w.Update()
 							valueWidget.AsWidget().Update()
-							valueWidget.AsWidget().SendChange(e)
+							if fm.Modified == nil {
+								valueWidget.AsWidget().SendChange(e)
+							}
 						}
 					})
 				}
@@ -243,8 +262,11 @@ func (fm *Form) Init() {
 				})
 				if !fm.IsReadOnly() && !readOnlyTag {
 					wb.OnChange(func(e events.Event) {
+						if fm.Modified != nil {
+							fm.Modified[f.path] = true
+						}
 						fm.SendChange(e)
-						if hasDef {
+						if hasDef || fm.Modified != nil {
 							labelWidget.Update()
 						}
 						if fm.isShouldDisplayer {
