@@ -234,20 +234,18 @@ func StringJSON(v any) string {
 // where the field can be a path with . separators, for fields within struct fields.
 func FieldByPath(s reflect.Value, fieldPath string) (reflect.Value, error) {
 	sv := Underlying(s)
-	var zv reflect.Value
 	if sv.Kind() != reflect.Struct {
-		return zv, errors.New("reflectx.FieldByPath: kind is not struct")
+		return reflect.Value{}, errors.New("reflectx.FieldByPath: kind is not struct")
 	}
 	fps := strings.Split(fieldPath, ".")
-	var fv reflect.Value
 	for _, fp := range fps {
-		fv = sv.FieldByName(fp)
-		if fv == zv {
-			return zv, errors.New("reflectx.FieldByPath: field name not found: " + fp)
+		fv := sv.FieldByName(fp)
+		if !fv.IsValid() {
+			return reflect.Value{}, errors.New("reflectx.FieldByPath: field name not found: " + fp)
 		}
 		sv = fv
 	}
-	return fv.Addr(), nil
+	return sv.Addr(), nil
 }
 
 // CopyFields copies the named fields from src struct into dest struct.
