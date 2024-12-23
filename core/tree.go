@@ -617,6 +617,9 @@ func (tr *Tree) ApplyScenePos() {
 	if sz.Actual.Total == tr.widgetSize {
 		sz.setTotalFromContent(&sz.Actual) // restore after scrolling
 	}
+	psz := &tr.Parts.Geom.Size
+	psz.Alloc.Total = tr.widgetSize
+	psz.setContentFromTotal(&psz.Alloc)
 	tr.WidgetBase.ApplyScenePos()
 	tr.applyScenePosChildren()
 	sz.Actual.Total = tr.widgetSize // key: we revert to just ourselves
