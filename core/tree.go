@@ -598,6 +598,11 @@ func (tr *Tree) Position() {
 	sz.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tr.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
 	sz.Actual.Content.X = sz.Actual.Total.X - sz.Space.X
 	tr.widgetSize.X = sz.Actual.Total.X
+	sz.Alloc = sz.Actual
+	psz := &tr.Parts.Geom.Size
+	psz.Alloc.Total = tr.widgetSize
+	psz.setContentFromTotal(&psz.Alloc)
+
 	tr.WidgetBase.Position() // just does our parts
 
 	if !tr.Closed {
@@ -619,7 +624,7 @@ func (tr *Tree) ApplyScenePos() {
 	}
 	tr.WidgetBase.ApplyScenePos()
 	tr.applyScenePosChildren()
-	tr.Geom.Size.Actual.Total = tr.widgetSize // key: we revert to just ourselves
+	sz.Actual.Total = tr.widgetSize // key: we revert to just ourselves
 }
 
 func (tr *Tree) Render() {
