@@ -10,6 +10,7 @@ package pages
 
 import (
 	"bytes"
+	"fmt"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -298,6 +299,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		core.ErrorSnackbar(pg, err, "Error opening page "+rawURL)
 		return
 	}
+	fmt.Println("read file")
 
 	pg.Context.PageURL = rawURL
 	if addToHistory {
@@ -328,6 +330,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	// need to reset
 	NumExamples[pg.Context.PageURL] = 0
 
+	fmt.Println("will do nav")
 	pg.nav.UnselectAll()
 	curNav := pg.nav.FindPath(rawURL).(*core.Tree)
 	// we must select the first tree that does not have "no-index"
@@ -350,6 +353,8 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	curNav.ScrollToThis()
 	pg.Context.PageURL = curNav.PathFrom(pg.nav)
 	pg.setStageTitle()
+
+	fmt.Println("did nav")
 
 	pg.body.DeleteChildren()
 	if ppath.Draft(pg.pagePath) {
@@ -377,12 +382,14 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 			core.NewText(pg.body).SetType(core.TextTitleMedium).SetText(t.Format("1/2/2006"))
 		}
 	}
+	fmt.Println("will read md")
 	err = htmlcore.ReadMD(pg.Context, pg.body, b)
 	if err != nil {
 		core.ErrorSnackbar(pg, err, "Error loading page")
 		return
 	}
 
+	fmt.Println("will add nav buttons")
 	if curNav != pg.nav {
 		buttons := core.NewFrame(pg.body)
 		buttons.Styler(func(s *styles.Style) {
@@ -412,8 +419,11 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		}
 	}
 
+	fmt.Println("will update")
 	pg.body.Update()
+	fmt.Println("will scroll")
 	pg.body.ScrollDimToContentStart(math32.Y)
+	fmt.Println("did scroll")
 }
 
 func (pg *Page) MakeToolbar(p *tree.Plan) {
