@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"bytes"
+	"fmt"
 
 	"cogentcore.org/core/core"
 	"github.com/gomarkdown/markdown"
@@ -34,6 +35,7 @@ func mdToHTML(md []byte) []byte {
 func ReadMD(ctx *Context, parent core.Widget, b []byte) error {
 	htm := mdToHTML(b)
 	buf := bytes.NewBuffer(htm)
+	fmt.Println("got html", htm)
 	return ReadHTML(ctx, parent, buf)
 }
 

@@ -22,6 +22,7 @@ func ReadHTML(ctx *Context, parent core.Widget, r io.Reader) error {
 	if err != nil {
 		return fmt.Errorf("error parsing HTML: %w", err)
 	}
+	fmt.Println("parsed html")
 	return readHTMLNode(ctx, parent, n)
 }
 
@@ -35,6 +36,7 @@ func ReadHTMLString(ctx *Context, parent core.Widget, s string) error {
 // readHTMLNode reads HTML from the given [*html.Node] and adds corresponding
 // Cogent Core widgets to the given [core.Widget], using the given context.
 func readHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
+	fmt.Println("read node", n)
 	// nil parent means we are root, so we add user agent styles here
 	if n.Parent == nil {
 		ctx.Node = n
