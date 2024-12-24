@@ -56,13 +56,9 @@ func (st *StdIO) Set(o *StdIO) *StdIO {
 func (st *StdIO) SetToOS() *StdIO {
 	cur := &StdIO{}
 	cur.SetFromOS()
-	if sif, ok := st.In.(*os.File); ok {
-		os.Stdin = sif
-	} else {
-		fmt.Printf("In is not an *os.File: %#v\n", st.In)
-	}
 	os.Stdout = st.Out.(*os.File)
 	os.Stderr = st.Err.(*os.File)
+	os.Stdin = st.In.(*os.File)
 	return cur
 }
 
@@ -102,8 +98,11 @@ func IsPipe(rw any) bool {
 	if rw == nil {
 		return false
 	}
-	_, ok := rw.(io.Writer)
+	w, ok := rw.(io.Writer)
 	if !ok {
+		return false
+	}
+	if w == os.Stdout {
 		return false
 	}
 	of, ok := rw.(*os.File)
@@ -247,9 +246,6 @@ func (st *StdIOState) PopToStart() {
 	}
 	for len(st.InStack) > st.InStart {
 		st.PopIn()
-	}
-	for len(st.PipeIn) > 0 {
-		CloseReader(st.PipeIn.Pop())
 	}
 }
 
