@@ -47,9 +47,11 @@ func init() {
 		}
 		pg.UpdateTree() // need initial update first
 		for u := range pg.urlToPagePath {
-			fmt.Println("open", u)
+			fmt.Println("will open", u)
 			pg.OpenURL("/"+u, false)
+			fmt.Println("did open", u)
 			data.HTML[u] = core.GenerateHTML(pg)
+			fmt.Println("did generate html", u)
 			desc := ""
 			// The first non-emphasized paragraph is used as the description
 			// (<em> typically indicates a note or caption, not an introduction).
@@ -65,6 +67,7 @@ func init() {
 				}
 				return tree.Continue
 			})
+			fmt.Println("did get desc", u)
 			data.Description[u] = desc
 		}
 		fmt.Println("done")
