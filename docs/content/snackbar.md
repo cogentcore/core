@@ -1,6 +1,12 @@
-Cogent Core provides customizable snackbars for displaying temporary information to the user.
++++
+Categories = ["Widgets"]
++++
 
-You can make a snackbar with a text message:
+A **snackbar** displays temporary information to users.
+
+## Simple
+
+You can make a snackbar with a [[text]] message:
 
 ```Go
 bt := core.NewButton(b).SetText("Message")
@@ -18,7 +24,9 @@ bt.OnClick(func(e events.Event) {
 })
 ```
 
-You can make a custom snackbar with a button and an icon:
+## Custom
+
+You can make a custom snackbar with a [[button]] and/or [[icon]]:
 
 ```Go
 bt := core.NewButton(b).SetText("Custom")
