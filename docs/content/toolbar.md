@@ -1,8 +1,14 @@
-Cogent Core provides an extensible system of powerful toolbars that allows you to create responsive toolbars that work on all platforms.
++++
+Categories = ["Widgets"]
++++
 
-All toolbars use the [[doc:tree.Plan]] system through [[doc:core.WidgetBase.Maker]]. This ensures that toolbars can always be dynamic and responsive.
+A **toolbar** is a [[frame]] that contains [[widgets]] for related actions and controls.
 
-You can make a standalone toolbar and add elements to it:
+All toolbars use the [[plan]] system through [[doc:core.WidgetBase.Maker]]. This ensures that toolbars can always be dynamic and responsive.
+
+## Properties
+
+You can make a standalone toolbar and add widgets to it:
 
 ```Go
 tb := core.NewToolbar(b)
@@ -16,7 +22,7 @@ tb.Maker(func(p *tree.Plan) {
 })
 ```
 
-You can add any types of widgets to toolbars, although [buttons](../basic/buttons) and [func buttons](../other/func-buttons) are the most common:
+You can add any types of widgets to toolbars, although [[buttons]] and [[func buttons]] are the most common:
 
 ```Go
 tb := core.NewToolbar(b)
@@ -29,6 +35,8 @@ tb.Maker(func(p *tree.Plan) {
     })
 })
 ```
+
+## Overflow
 
 When you add more items to a toolbar than can fit on the screen, it places them in an overflow menu:
 
@@ -56,6 +64,8 @@ tb.AddOverflowMenu(func(m *core.Scene) {
     core.NewButton(m).SetText("Run")
 })
 ```
+
+## Top bar
 
 Toolbars are frequently added in [[doc:core.Body.AddTopBar]]:
 
