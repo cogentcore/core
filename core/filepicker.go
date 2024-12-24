@@ -112,6 +112,7 @@ func (fp *FilePicker) Init() {
 	})
 
 	fp.Maker(func(p *tree.Plan) {
+		fmt.Println("start", fp.directory, fp.selectedFilename)
 		if fp.directory == "" {
 			fp.SetFilename("") // default to current directory
 		}
@@ -120,6 +121,7 @@ func (fp *FilePicker) Init() {
 		}
 		recentPaths.AddPath(fp.directory, SystemSettings.SavedPathsMax)
 		saveRecentPaths()
+		fmt.Println("will read files")
 		fp.readFiles()
 
 		if fp.prevPath != fp.directory {
@@ -139,6 +141,7 @@ func (fp *FilePicker) Init() {
 			fp.prevPath = fp.directory
 		}
 
+		fmt.Println("will add stuff")
 		tree.AddAt(p, "path", func(w *Chooser) {
 			Bind(&fp.directory, w)
 			w.SetEditable(true).SetDefaultNew(true)
