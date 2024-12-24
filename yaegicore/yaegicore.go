@@ -43,9 +43,13 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 		coresymbols.Symbols["cogentcore.org/core/tree/tree"]["AutoPlanName"] = reflect.ValueOf(func(int) string {
 			return fmt.Sprintf("yaegi-%v", atomic.AddUint64(&autoPlanNameCounter, 1))
 		})
+		fmt.Println("will use")
 		errors.Log(in.Use(basesymbols.Symbols))
+		fmt.Println("did base")
 		errors.Log(in.Use(coresymbols.Symbols))
+		fmt.Println("did core")
 		in.ImportUsed()
+		fmt.Println("imported")
 
 		parent.AsTree().DeleteChildren()
 		str := ed.Buffer.String()
@@ -53,12 +57,16 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 		if !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"
 		}
+		fmt.Println("will eval")
 		_, err := in.Eval(str)
+		fmt.Println("did eval")
 		if err != nil {
 			core.ErrorSnackbar(ed, err, "Error interpreting Go code")
 			return
 		}
+		fmt.Println("will update")
 		parent.AsWidget().Update()
+		fmt.Println("did update")
 	}
 	ed.OnChange(func(e events.Event) { oc() })
 	oc()

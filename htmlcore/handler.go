@@ -129,6 +129,7 @@ func handleElement(ctx *Context) {
 				ed.Buffer.SetFileExt(lang)
 			}
 			ed.Buffer.SetString(ExtractText(ctx))
+			fmt.Println("code", ed.Buffer.String())
 			if BindTextEditor != nil && lang == "Go" {
 				ed.Buffer.SpacesToTabs(0, ed.Buffer.NumLines()) // Go uses tabs
 				parent := core.NewFrame(ed.Parent)
@@ -150,7 +151,9 @@ func handleElement(ctx *Context) {
 						parent.Styles.Grow.Y = s.Grow.Y
 					})
 				})
+				fmt.Println("will bind editor")
 				BindTextEditor(ed, parent)
+				fmt.Println("did bind editor")
 			} else {
 				ed.SetReadOnly(true)
 				ed.Buffer.Options.LineNumbers = false
