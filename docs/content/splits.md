@@ -1,4 +1,10 @@
-Cogent Core provides customizable splits, which allow you to divide space among widgets and have the user customize how much space each widget gets using draggable handles.
++++
+Categories = ["Widgets"]
++++
+
+**Splits** allow you to divide space among [[widget]]s and have the user customize how much space each widget gets using draggable handles.
+
+## Properties
 
 You can make splits without any custom options:
 
@@ -38,7 +44,7 @@ core.NewText(sp).SetText("First")
 core.NewText(sp).SetText("Second")
 ```
 
-You can use [[doc:core.Splits.Tiles]] to create 2D arrangements of widgets, without having to nest multiple splits.  This is simpler because it operates on the same list of child widgets, whereas the nesting approach requires moving child widgets around to switch between different arrangements.
+You can use [[doc:core.Splits.Tiles]] to create 2D arrangements of widgets without having to nest multiple splits:
 
 ```Go
 sp := core.NewSplits(b)
@@ -48,6 +54,8 @@ core.NewText(sp).SetText("Third")
 core.NewText(sp).SetText("Fourth")
 sp.SetTiles(core.TileSpan, core.TileSecondLong)
 ```
+
+## Styles
 
 You can arrange widgets in a column (by default, split widgets are arranged in a row on wide screens and a column on compact screens):
 
