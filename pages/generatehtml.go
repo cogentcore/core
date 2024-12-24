@@ -24,6 +24,7 @@ import (
 func init() {
 	// We override the OnChildAdded set in core/generatehtml.go
 	core.ExternalParent.AsWidget().SetOnChildAdded(func(n tree.Node) {
+		fmt.Println("pages oca")
 		var pg *Page
 		n.AsTree().WalkDown(func(n tree.Node) bool {
 			if pg != nil {
@@ -39,14 +40,18 @@ func init() {
 			fmt.Println(core.GenerateHTML(n.(core.Widget))) // basic fallback
 			os.Exit(0)
 		}
+		fmt.Println("pg", pg)
 		data := &ppath.PreRenderData{
 			Description: map[string]string{},
 			HTML:        map[string]string{},
 		}
 		pg.UpdateTree() // need initial update first
 		for u := range pg.urlToPagePath {
+			fmt.Println("will open", u)
 			pg.OpenURL("/"+u, false)
+			fmt.Println("did open", u)
 			data.HTML[u] = core.GenerateHTML(pg)
+			fmt.Println("did generate html", u)
 			desc := ""
 			// The first non-emphasized paragraph is used as the description
 			// (<em> typically indicates a note or caption, not an introduction).
@@ -62,8 +67,10 @@ func init() {
 				}
 				return tree.Continue
 			})
+			fmt.Println("did get desc", u)
 			data.Description[u] = desc
 		}
+		fmt.Println("done")
 		fmt.Println(string(errors.Log1(jsonx.WriteBytes(data))))
 	})
 }

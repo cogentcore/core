@@ -15,7 +15,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 
 	"cogentcore.org/core/base/elide"
@@ -71,11 +70,11 @@ type FilePicker struct {
 	// index of currently selected file in Files list (-1 if none)
 	selectedIndex int
 
-	// change notify for current dir
-	watcher *fsnotify.Watcher
+	// // change notify for current dir
+	// watcher *fsnotify.Watcher
 
-	// channel to close watcher watcher
-	doneWatcher chan bool
+	// // channel to close watcher watcher
+	// doneWatcher chan bool
 
 	// Previous path that was processed via UpdateFiles
 	prevPath string
@@ -113,6 +112,7 @@ func (fp *FilePicker) Init() {
 	})
 
 	fp.Maker(func(p *tree.Plan) {
+		fmt.Println("start", fp.directory, fp.selectedFilename)
 		if fp.directory == "" {
 			fp.SetFilename("") // default to current directory
 		}
@@ -121,25 +121,27 @@ func (fp *FilePicker) Init() {
 		}
 		recentPaths.AddPath(fp.directory, SystemSettings.SavedPathsMax)
 		saveRecentPaths()
+		fmt.Println("will read files")
 		fp.readFiles()
 
 		if fp.prevPath != fp.directory {
-			// TODO(#424): disable for all platforms for now; causing issues
-			if false && TheApp.Platform() != system.MacOS {
-				// mac is not supported in a high-capacity fashion at this point
-				if fp.prevPath == "" {
-					fp.configWatcher()
-				} else {
-					fp.watcher.Remove(fp.prevPath)
-				}
-				fp.watcher.Add(fp.directory)
-				if fp.prevPath == "" {
-					fp.watchWatcher()
-				}
-			}
+			// // TODO(#424): disable for all platforms for now; causing issues
+			// if false && TheApp.Platform() != system.MacOS {
+			// 	// mac is not supported in a high-capacity fashion at this point
+			// 	if fp.prevPath == "" {
+			// 		fp.configWatcher()
+			// 	} else {
+			// 		fp.watcher.Remove(fp.prevPath)
+			// 	}
+			// 	fp.watcher.Add(fp.directory)
+			// 	if fp.prevPath == "" {
+			// 		fp.watchWatcher()
+			// 	}
+			// }
 			fp.prevPath = fp.directory
 		}
 
+		fmt.Println("will add stuff")
 		tree.AddAt(p, "path", func(w *Chooser) {
 			Bind(&fp.directory, w)
 			w.SetEditable(true).SetDefaultNew(true)
@@ -171,15 +173,15 @@ func (fp *FilePicker) Init() {
 
 func (fp *FilePicker) Destroy() {
 	fp.Frame.Destroy()
-	if fp.watcher != nil {
-		fp.watcher.Close()
-		fp.watcher = nil
-	}
-	if fp.doneWatcher != nil {
-		fp.doneWatcher <- true
-		close(fp.doneWatcher)
-		fp.doneWatcher = nil
-	}
+	// if fp.watcher != nil {
+	// 	fp.watcher.Close()
+	// 	fp.watcher = nil
+	// }
+	// if fp.doneWatcher != nil {
+	// 	fp.doneWatcher <- true
+	// 	close(fp.doneWatcher)
+	// 	fp.doneWatcher = nil
+	// }
 }
 
 // FilePickerFilterer is a filtering function for files; returns true if the
@@ -438,41 +440,42 @@ func (fp *FilePicker) makeSelectedRow(selected *tree.Plan) {
 }
 
 func (fp *FilePicker) configWatcher() error {
-	if fp.watcher != nil {
-		return nil
-	}
-	var err error
-	fp.watcher, err = fsnotify.NewWatcher()
-	return err
+	// if fp.watcher != nil {
+	// 	return nil
+	// }
+	// var err error
+	// fp.watcher, err = fsnotify.NewWatcher()
+	// return err
+	return nil
 }
 
 func (fp *FilePicker) watchWatcher() {
-	if fp.watcher == nil || fp.watcher.Events == nil {
-		return
-	}
-	if fp.doneWatcher != nil {
-		return
-	}
-	fp.doneWatcher = make(chan bool)
-	go func() {
-		watch := fp.watcher
-		done := fp.doneWatcher
-		for {
-			select {
-			case <-done:
-				return
-			case event := <-watch.Events:
-				switch {
-				case event.Op&fsnotify.Create == fsnotify.Create ||
-					event.Op&fsnotify.Remove == fsnotify.Remove ||
-					event.Op&fsnotify.Rename == fsnotify.Rename:
-					fp.Update()
-				}
-			case err := <-watch.Errors:
-				_ = err
-			}
-		}
-	}()
+	// if fp.watcher == nil || fp.watcher.Events == nil {
+	// 	return
+	// }
+	// if fp.doneWatcher != nil {
+	// 	return
+	// }
+	// fp.doneWatcher = make(chan bool)
+	// go func() {
+	// 	watch := fp.watcher
+	// 	done := fp.doneWatcher
+	// 	for {
+	// 		select {
+	// 		case <-done:
+	// 			return
+	// 		case event := <-watch.Events:
+	// 			switch {
+	// 			case event.Op&fsnotify.Create == fsnotify.Create ||
+	// 				event.Op&fsnotify.Remove == fsnotify.Remove ||
+	// 				event.Op&fsnotify.Rename == fsnotify.Rename:
+	// 				fp.Update()
+	// 			}
+	// 		case err := <-watch.Errors:
+	// 			_ = err
+	// 		}
+	// 	}
+	// }()
 }
 
 // updateFilesEvent updates the list of files and other views for the current path.
@@ -484,17 +487,20 @@ func (fp *FilePicker) updateFilesEvent() { //types:add
 }
 
 func (fp *FilePicker) readFiles() {
+	fmt.Println("will es", fp.directory)
 	effpath, err := filepath.EvalSymlinks(fp.directory)
 	if err != nil {
 		log.Printf("FilePicker Path: %v could not be opened -- error: %v\n", effpath, err)
 		return
 	}
+	fmt.Println("will lstat", effpath)
 	_, err = os.Lstat(effpath)
 	if err != nil {
 		log.Printf("FilePicker Path: %v could not be opened -- error: %v\n", effpath, err)
 		return
 	}
 
+	fmt.Println("will walk")
 	fp.files = make([]*fileinfo.FileInfo, 0, 1000)
 	filepath.Walk(effpath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -509,7 +515,9 @@ func (fp *FilePicker) readFiles() {
 		if path == effpath { // proceed..
 			return nil
 		}
+		fmt.Println("will new fileinfo", path)
 		fi, ferr := fileinfo.NewFileInfo(path)
+		fmt.Println("did new fi", path)
 		keep := ferr == nil
 		if fp.Filterer != nil {
 			keep = fp.Filterer(fp, fi)
@@ -522,6 +530,7 @@ func (fp *FilePicker) readFiles() {
 		}
 		return nil
 	})
+	fmt.Println("did walk")
 }
 
 // updateFavorites updates list of files and other views for current path
