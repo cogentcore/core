@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strings"
 
+	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
@@ -30,8 +31,13 @@ type Form struct {
 	// Inline is whether to display the form in one line.
 	Inline bool
 
-	// structFields are the fields of the current struct.
-	structFields []*structField
+	// Modified optionally highlights and tracks fields that have been modified
+	// through an OnChange event. If present, it replaces the default value highlighting
+	// and resetting logic. Ignored if nil.
+	Modified map[string]bool
+
+	// structFields are the fields of the current struct, keys are field paths.
+	structFields keylist.List[string, *structField]
 
 	// isShouldDisplayer is whether the struct implements [ShouldDisplayer], which results
 	// in additional updating being done at certain points.
@@ -74,7 +80,7 @@ type ShouldDisplayer interface {
 func (fm *Form) WidgetValue() any { return &fm.Struct }
 
 func (fm *Form) getStructFields() {
-	var fields []*structField
+	var fields keylist.List[string, *structField]
 
 	shouldShow := func(parent reflect.Value, field reflect.StructField) bool {
 		if field.Tag.Get("display") == "-" {
@@ -104,10 +110,11 @@ func (fm *Form) getStructFields() {
 						if field.Tag.Get("edit") == "-" && sfield.Tag.Get("edit") == "" {
 							sfield.Tag += ` edit:"-"`
 						}
-						fields = append(fields, &structField{path: field.Name + " • " + sfield.Name, field: sfield, value: value, parent: parent})
+						path := field.Name + " • " + sfield.Name
+						fields.Add(path, &structField{path: path, field: sfield, value: value, parent: parent})
 					})
 			} else {
-				fields = append(fields, &structField{path: field.Name, field: field, value: value, parent: parent})
+				fields.Add(field.Name, &structField{path: field.Name, field: field, value: value, parent: parent})
 			}
 		})
 	fm.structFields = fields
@@ -140,7 +147,9 @@ func (fm *Form) Init() {
 			sc = !noSentenceCaseForType(types.TypeNameValue(fm.Struct))
 		}
 
-		for i, f := range fm.structFields {
+		for i := range fm.structFields.Len() {
+			f := fm.structFields.Values[i]
+			fieldPath := fm.structFields.Keys[i]
 			label := f.path
 			if sc {
 				label = strcase.ToSentence(label)
@@ -148,7 +157,7 @@ func (fm *Form) Init() {
 			if lt, ok := f.field.Tag.Lookup("label"); ok {
 				label = lt
 			}
-			labnm := fmt.Sprintf("label-%s", f.path)
+			labnm := fmt.Sprintf("label-%s", fieldPath)
 			// we must have a different name for different types
 			// so that the widget can be re-made for a new type
 			typnm := reflectx.ShortTypeName(f.field.Type)
@@ -157,12 +166,11 @@ func (fm *Form) Init() {
 			if !reflectx.Underlying(f.value).IsValid() {
 				typnm = "invalid"
 			}
-			// We must have a different name for different indexes so that the index
-			// is always guaranteed to be accurate, which is required since we use it
-			// as the ground truth everywhere. The index could otherwise become invalid,
-			// such as when a ShouldDisplayer condition is newly satisfied
-			// (see https://github.com/cogentcore/core/issues/1096).
-			valnm := fmt.Sprintf("value-%s-%s-%d", f.path, typnm, i)
+			// Using the type name ensures that widgets are specific to the type,
+			// even if they happen to have the same name. Using the path to index
+			// the structFields ensures safety against any [ShouldDisplayer]
+			// updates (see #1390).
+			valnm := fmt.Sprintf("value-%s-%s", fieldPath, typnm)
 			readOnlyTag := f.field.Tag.Get("edit") == "-"
 			def, hasDef := f.field.Tag.Lookup("default")
 
@@ -179,13 +187,20 @@ func (fm *Form) Init() {
 				// (see https://github.com/cogentcore/core/issues/1098).
 				doc, _ := types.GetDoc(f.value, f.parent, f.field, label)
 				w.SetTooltip(doc)
-				if hasDef {
-					w.SetTooltip("(Default: " + def + ") " + w.Tooltip)
+				if hasDef || fm.Modified != nil {
+					if hasDef {
+						w.SetTooltip("(Default: " + def + ") " + w.Tooltip)
+					}
 					var isDef bool
 					w.Styler(func(s *styles.Style) {
-						f := fm.structFields[i]
-						isDef = reflectx.ValueIsDefault(f.value, def)
+						f := fm.structFields.At(fieldPath)
 						dcr := "(Double click to reset to default) "
+						if fm.Modified != nil {
+							isDef = !fm.Modified[f.path]
+							dcr = "(Double click to mark as not modified) "
+						} else {
+							isDef = reflectx.ValueIsDefault(f.value, def)
+						}
 						if !isDef {
 							s.Color = colors.Scheme.Primary.Base
 							s.Cursor = cursors.Poof
@@ -197,18 +212,25 @@ func (fm *Form) Init() {
 						}
 					})
 					w.OnDoubleClick(func(e events.Event) {
-						f := fm.structFields[i]
+						f := fm.structFields.At(fieldPath)
 						if isDef {
 							return
 						}
 						e.SetHandled()
-						err := reflectx.SetFromDefaultTag(f.value, def)
+						var err error
+						if fm.Modified != nil {
+							fm.Modified[f.path] = false
+						} else {
+							err = reflectx.SetFromDefaultTag(f.value, def)
+						}
 						if err != nil {
 							ErrorSnackbar(w, err, "Error setting default value")
 						} else {
 							w.Update()
 							valueWidget.AsWidget().Update()
-							valueWidget.AsWidget().SendChange(e)
+							if fm.Modified == nil {
+								valueWidget.AsWidget().SendChange(e)
+							}
 						}
 					})
 				}
@@ -235,7 +257,7 @@ func (fm *Form) Init() {
 					wb.SetTooltip("(Default: " + def + ") " + wb.Tooltip)
 				}
 				wb.OnInput(func(e events.Event) {
-					f := fm.structFields[i]
+					f := fm.structFields.At(fieldPath)
 					fm.Send(events.Input, e)
 					if f.field.Tag.Get("immediate") == "+" {
 						wb.SendChange(e)
@@ -243,8 +265,11 @@ func (fm *Form) Init() {
 				})
 				if !fm.IsReadOnly() && !readOnlyTag {
 					wb.OnChange(func(e events.Event) {
+						if fm.Modified != nil {
+							fm.Modified[f.path] = true
+						}
 						fm.SendChange(e)
-						if hasDef {
+						if hasDef || fm.Modified != nil {
 							labelWidget.Update()
 						}
 						if fm.isShouldDisplayer {
@@ -254,13 +279,11 @@ func (fm *Form) Init() {
 				}
 				wb.Updater(func() {
 					wb.SetReadOnly(fm.IsReadOnly() || readOnlyTag)
-					if i < len(fm.structFields) {
-						f := fm.structFields[i]
-						Bind(reflectx.UnderlyingPointer(f.value).Interface(), w)
-						vc := joinValueTitle(fm.ValueTitle, label)
-						if vc != wb.ValueTitle {
-							wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
-						}
+					f := fm.structFields.At(fieldPath)
+					Bind(reflectx.UnderlyingPointer(f.value).Interface(), w)
+					vc := joinValueTitle(fm.ValueTitle, label)
+					if vc != wb.ValueTitle {
+						wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
 					}
 				})
 			})

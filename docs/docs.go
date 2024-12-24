@@ -27,7 +27,7 @@ import (
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/yaegicore"
-	"cogentcore.org/core/yaegicore/symbols"
+	"cogentcore.org/core/yaegicore/coresymbols"
 )
 
 //go:embed content
@@ -89,10 +89,10 @@ func main() {
 		})
 	})
 
-	symbols.Symbols["."]["econtent"] = reflect.ValueOf(econtent)
-	symbols.Symbols["."]["myImage"] = reflect.ValueOf(myImage)
-	symbols.Symbols["."]["mySVG"] = reflect.ValueOf(mySVG)
-	symbols.Symbols["."]["myFile"] = reflect.ValueOf(myFile)
+	coresymbols.Symbols["."]["econtent"] = reflect.ValueOf(econtent)
+	coresymbols.Symbols["."]["myImage"] = reflect.ValueOf(myImage)
+	coresymbols.Symbols["."]["mySVG"] = reflect.ValueOf(mySVG)
+	coresymbols.Symbols["."]["myFile"] = reflect.ValueOf(myFile)
 
 	ctx.ElementHandlers["home-page"] = homePage
 	ctx.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {

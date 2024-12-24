@@ -329,6 +329,12 @@ func (o *NewWindowOptions) Fixup() {
 	sc := TheApp.Screen(o.Screen)
 	scsz := sc.Geometry.Size() // window coords size
 
+	if o.Flags.HasFlag(Fullscreen) {
+		o.Size = sc.PixelSize
+		o.Pos = image.Point{}
+		return
+	}
+
 	if o.Size.X <= 0 {
 		o.StdPixels = false
 		o.Size.X = int(0.8 * float32(scsz.X) * sc.DevicePixelRatio)

@@ -442,14 +442,14 @@ type tableStruct struct { //types:add
 
 type inlineStruct struct { //types:add
 
-	// click to show next
-	On bool
-
 	// this is now showing
 	ShowMe string
 
+	// click to show next
+	On bool
+
 	// a condition
-	Condition int
+	Condition int `default:"0"`
 
 	// if On && Condition == 0
 	Condition1 string
@@ -458,7 +458,7 @@ type inlineStruct struct { //types:add
 	Condition2 tableStruct
 
 	// a value
-	Value float32
+	Value float32 `default:"1"`
 }
 
 func (il *inlineStruct) ShouldDisplay(field string) bool {

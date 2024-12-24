@@ -7,7 +7,9 @@ package fileinfo
 import (
 	"fmt"
 	"mime"
+	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/h2non/filetype"
@@ -97,6 +99,18 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 		return MimeString(Makefile), ext, nil
 	}
 	return "", ext, fmt.Errorf("fileinfo.MimeFromFile could not find mime type for ext: %v file: %v", ext, fn)
+}
+
+var generatedRe = regexp.MustCompile(`^// Code generated .* DO NOT EDIT`)
+
+func IsGeneratedFile(fname string) bool {
+	file, err := os.Open(fname)
+	if err != nil {
+		return false
+	}
+	head := make([]byte, 2048)
+	file.Read(head)
+	return generatedRe.Match(head)
 }
 
 // todo: use this to check against mime types!
@@ -316,7 +330,7 @@ var StandardMimes = []MimeType{
 	{"text/x-forth", []string{".frt"}, Code, Forth},                       // note: ".fs" conflicts with fsharp
 	{"text/x-fortran", []string{".f", ".F"}, Code, Fortran},
 	{"text/x-fsharp", []string{".fs", ".fsi"}, Code, FSharp},
-	{"text/x-gosrc", []string{".go", ".mod", ".work", ".cosh"}, Code, Go},
+	{"text/x-gosrc", []string{".go", ".mod", ".work", ".goal"}, Code, Go},
 	{"text/x-haskell", []string{".hs", ".lhs"}, Code, Haskell},
 	{"text/x-literate-haskell", nil, Code, Haskell}, // todo: not sure if same or not
 

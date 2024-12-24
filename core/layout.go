@@ -140,8 +140,8 @@ type Layouter interface {
 	SetScrollParams(d math32.Dims, sb *Slider)
 }
 
-// AsFrame returns the given value as a value of type [Frame] if the type
-// of the given value embeds [Frame], or nil otherwise.
+// AsFrame returns the given value as a [Frame] if it implements [Layouter]
+// or nil otherwise.
 func AsFrame(n tree.Node) *Frame {
 	if t, ok := n.(Layouter); ok {
 		return t.AsFrame()
@@ -149,7 +149,6 @@ func AsFrame(n tree.Node) *Frame {
 	return nil
 }
 
-// AsFrame satisfies the [Layouter] interface.
 func (t *Frame) AsFrame() *Frame {
 	return t
 }
@@ -295,13 +294,13 @@ func (ls *geomState) contentRangeDim(d math32.Dims) (cmin, cmax float32) {
 // totalRect returns Pos.Total -- Size.Actual.Total
 // as an image.Rectangle, e.g., for bounding box
 func (ls *geomState) totalRect() image.Rectangle {
-	return math32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Actual.Total)
+	return math32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Alloc.Total)
 }
 
 // contentRect returns Pos.Content, Size.Actual.Content
 // as an image.Rectangle, e.g., for bounding box.
 func (ls *geomState) contentRect() image.Rectangle {
-	return math32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Actual.Content)
+	return math32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Alloc.Content)
 }
 
 // ScrollOffset computes the net scrolling offset as a function of
