@@ -1,4 +1,10 @@
-Cogent Core provides customizable tabs, which allow you to divide widgets into logical groups and give users the ability to freely navigate between them.
++++
+Categories = ["Widgets"]
++++
+
+**Tabs** allow you to divide [[widget]]s into logical groups and give users the ability to freely navigate between them.
+
+## Properties
 
 You can make tabs without any custom options:
 
@@ -28,7 +34,7 @@ ts.NewTab("Third")
 ts.NewTab("Fourth")
 ```
 
-You can add icons to tabs:
+You can add [[icon]]s to tabs:
 
 ```Go
 ts := core.NewTabs(b)
@@ -38,7 +44,17 @@ _, tb = ts.NewTab("Second")
 tb.SetIcon(icons.Explore)
 ```
 
-You can make functional tabs, which can be closed and moved:
+You can allow users to add new tabs:
+
+```Go
+ts := core.NewTabs(b).SetNewTabButton(true)
+ts.NewTab("First")
+ts.NewTab("Second")
+```
+
+## Types
+
+You can make functional tabs, which can be closed:
 
 ```Go
 ts := core.NewTabs(b).SetType(core.FunctionalTabs)
@@ -57,12 +73,4 @@ _, tb = ts.NewTab("Second")
 tb.SetIcon(icons.Explore)
 _, tb = ts.NewTab("Third")
 tb.SetIcon(icons.History)
-```
-
-You can allow the user to add new tabs:
-
-```Go
-ts := core.NewTabs(b).SetNewTabButton(true)
-ts.NewTab("First")
-ts.NewTab("Second")
 ```

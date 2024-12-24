@@ -63,7 +63,7 @@ bt.OnClick(func(e events.Event) {
 })
 ```
 
-## Options
+## Types
 
 You can make a dialog that takes up the entire window:
 
