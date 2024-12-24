@@ -1,6 +1,12 @@
-Cogent Core provides various different types of customizable dialogs with support for any kind of content.
++++
+Categories = ["Widgets"]
++++
 
-You can make a dialog with a text message:
+A **dialog** is a type of [[stage]] that displays content on top of the surrounding window.
+
+## Simple
+
+You can make a dialog with a [[text]] message:
 
 ```Go
 bt := core.NewButton(b).SetText("Message")
@@ -17,6 +23,8 @@ bt.OnClick(func(e events.Event) {
     core.ErrorDialog(bt, errors.New("invalid encoding format"), "Error loading file")
 })
 ```
+
+## Custom
 
 You can also construct a dialog with any content you want. For example, you can make a confirmation dialog:
 
@@ -55,6 +63,8 @@ bt.OnClick(func(e events.Event) {
 })
 ```
 
+## Options
+
 You can make a dialog that takes up the entire window:
 
 ```Go
@@ -74,6 +84,8 @@ bt.OnClick(func(e events.Event) {
     d.RunWindowDialog(bt)
 })
 ```
+
+## Close dialog
 
 You can confirm that the user wants to close a scene when they try to close it:
 
