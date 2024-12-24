@@ -441,7 +441,7 @@ type DeviceSettingsData struct { //types:add
 	DragStartDistance int `default:"4" min:"0" max:"100" step:"1"`
 
 	// The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)
-	LongHoverTime time.Duration `default:"500ms" min:"10ms" max:"10s" step:"10ms"`
+	LongHoverTime time.Duration `default:"250ms" min:"10ms" max:"10s" step:"10ms"`
 
 	// The maximum number of pixels that mouse can move and still register a long hover event
 	LongHoverStopDistance int `default:"5" min:"0" max:"1000" step:"1"`

@@ -112,10 +112,6 @@ func Generate(c *config.Config) error { //types:add
 	if err != nil {
 		return fmt.Errorf("error running typegen: %w", err)
 	}
-	err = Pages(c)
-	if err != nil {
-		return fmt.Errorf("error running pagegen: %w", err)
-	}
 	err = Icons(c)
 	if err != nil {
 		return fmt.Errorf("error running icongen: %w", err)

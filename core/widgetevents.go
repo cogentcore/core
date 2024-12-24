@@ -502,6 +502,10 @@ func (wb *WidgetBase) SetFocusQuiet() {
 // This sends an [events.Focus] event, which typically results in
 // the widget being styled as focused. See [WidgetBase.SetFocusQuiet] for
 // a version that does not. Also see [WidgetBase.StartFocus].
+//
+// SetFocus only fully works for widgets that have already been shown, so for newly
+// created widgets, you should use [WidgetBase.StartFocus], or [WidgetBase.Defer] your
+// SetFocus call.
 func (wb *WidgetBase) SetFocus() {
 	foc := wb.This.(Widget)
 	if !wb.AbilityIs(abilities.Focusable) {
