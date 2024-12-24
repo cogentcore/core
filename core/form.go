@@ -168,8 +168,8 @@ func (fm *Form) Init() {
 			}
 			// Using the type name ensures that widgets are specific to the type,
 			// even if they happen to have the same name. Using the path to index
-			// the structFields ensures safety against any ShouldDisplayer
-			// updates (see https://github.com/cogentcore/core/issues/1096).
+			// the structFields ensures safety against any [ShouldDisplayer]
+			// updates (see #1390).
 			valnm := fmt.Sprintf("value-%s-%s", fieldPath, typnm)
 			readOnlyTag := f.field.Tag.Get("edit") == "-"
 			def, hasDef := f.field.Tag.Lookup("default")
