@@ -487,17 +487,20 @@ func (fp *FilePicker) updateFilesEvent() { //types:add
 }
 
 func (fp *FilePicker) readFiles() {
+	fmt.Println("will es")
 	effpath, err := filepath.EvalSymlinks(fp.directory)
 	if err != nil {
 		log.Printf("FilePicker Path: %v could not be opened -- error: %v\n", effpath, err)
 		return
 	}
+	fmt.Println("will lstat")
 	_, err = os.Lstat(effpath)
 	if err != nil {
 		log.Printf("FilePicker Path: %v could not be opened -- error: %v\n", effpath, err)
 		return
 	}
 
+	fmt.Println("will walk")
 	fp.files = make([]*fileinfo.FileInfo, 0, 1000)
 	filepath.Walk(effpath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -512,7 +515,9 @@ func (fp *FilePicker) readFiles() {
 		if path == effpath { // proceed..
 			return nil
 		}
+		fmt.Println("will new fileinfo", path)
 		fi, ferr := fileinfo.NewFileInfo(path)
+		fmt.Println("did new fi", path)
 		keep := ferr == nil
 		if fp.Filterer != nil {
 			keep = fp.Filterer(fp, fi)
@@ -525,6 +530,7 @@ func (fp *FilePicker) readFiles() {
 		}
 		return nil
 	})
+	fmt.Println("did walk")
 }
 
 // updateFavorites updates list of files and other views for current path
