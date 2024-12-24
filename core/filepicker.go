@@ -487,13 +487,13 @@ func (fp *FilePicker) updateFilesEvent() { //types:add
 }
 
 func (fp *FilePicker) readFiles() {
-	fmt.Println("will es")
+	fmt.Println("will es", fp.directory)
 	effpath, err := filepath.EvalSymlinks(fp.directory)
 	if err != nil {
 		log.Printf("FilePicker Path: %v could not be opened -- error: %v\n", effpath, err)
 		return
 	}
-	fmt.Println("will lstat")
+	fmt.Println("will lstat", effpath)
 	_, err = os.Lstat(effpath)
 	if err != nil {
 		log.Printf("FilePicker Path: %v could not be opened -- error: %v\n", effpath, err)
