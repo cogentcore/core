@@ -166,11 +166,10 @@ func (fm *Form) Init() {
 			if !reflectx.Underlying(f.value).IsValid() {
 				typnm = "invalid"
 			}
-			// We must have a different name for different indexes so that the index
-			// is always guaranteed to be accurate, which is required since we use it
-			// as the ground truth everywhere. The index could otherwise become invalid,
-			// such as when a ShouldDisplayer condition is newly satisfied
-			// (see https://github.com/cogentcore/core/issues/1096).
+			// Using the type name ensures that widgets are specific to the type,
+			// even if they happen to have the same name. Using the path to index
+			// the structFields ensures safety against any ShouldDisplayer
+			// updates (see https://github.com/cogentcore/core/issues/1096).
 			valnm := fmt.Sprintf("value-%s-%s", fieldPath, typnm)
 			readOnlyTag := f.field.Tag.Get("edit") == "-"
 			def, hasDef := f.field.Tag.Lookup("default")
