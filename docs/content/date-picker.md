@@ -16,7 +16,7 @@ core.NewDatePicker(b).SetTime(time.Now())
 
 ## Events
 
-You can detect when a user changes the date:
+You can detect when a user [[events#change]]s the date:
 
 ```Go
 dp := core.NewDatePicker(b).SetTime(time.Now())

@@ -1,4 +1,12 @@
-Cogent Core provides interactive time pickers that allow users to select an hour and minute. See [date pickers](date-pickers) for date pickers that allow users to select a year, month, and day.
++++
+Categories = ["Widgets"]
++++
+
+A **time picker** is a [[widget]] that allows users to select an hour and minute.
+
+Also see a [[date picker]] for selecting a year, month, and day.
+
+## Properties
 
 You can make a time picker and set its starting value:
 
@@ -6,7 +14,9 @@ You can make a time picker and set its starting value:
 core.NewTimePicker(b).SetTime(time.Now())
 ```
 
-You can detect when the user changes the time:
+## Events
+
+You can detect when a user [[events#change]]s the time:
 
 ```Go
 tp := core.NewTimePicker(b).SetTime(time.Now())
@@ -15,7 +25,9 @@ tp.OnChange(func(e events.Event) {
 })
 ```
 
-You can create a unified time input that allows users to select both a date and time using text fields and dialogs:
+## Time input
+
+You can create a unified time input that allows users to select both a date and time using [[text field]]s and [[dialog]]s:
 
 ```Go
 core.NewTimeInput(b).SetTime(time.Now())
@@ -27,7 +39,7 @@ You can hide the date or time part of a unified time input:
 core.NewTimeInput(b).SetTime(time.Now()).SetDisplayDate(false)
 ```
 
-You can detect when the user changes the value of a unified time input:
+You can detect when a user [[events#change]]s the value of a unified time input:
 
 ```Go
 ti := core.NewTimeInput(b).SetTime(time.Now())
@@ -36,13 +48,15 @@ ti.OnChange(func(e events.Event) {
 })
 ```
 
+## Duration input
+
 You can also create a duration input that allows users to select a duration of time:
 
 ```Go
 core.NewDurationInput(b).SetDuration(3 * time.Second)
 ```
 
-You can detect when the user changes the value of a duration input:
+You can detect when a user changes the value of a duration input:
 
 ```Go
 di := core.NewDurationInput(b).SetDuration(3 * time.Second)
