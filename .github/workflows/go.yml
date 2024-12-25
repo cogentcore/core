@@ -36,7 +36,7 @@ jobs:
 
     - name: Build Docs
       run: core build web -dir docs -o static -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core
-	
+
     - name: Update coverage report
       uses: ncruces/go-coverage-report@v0
       with:
