@@ -47,18 +47,6 @@ func KindIsNumber(vk reflect.Kind) bool {
 	return vk >= reflect.Int && vk <= reflect.Complex128
 }
 
-// KindIsInt returns whether the given [reflect.Kind] is an int
-// type such as int, int32 etc.
-func KindIsInt(vk reflect.Kind) bool {
-	return vk >= reflect.Int && vk <= reflect.Uintptr
-}
-
-// KindIsFloat returns whether the given [reflect.Kind] is a
-// float32 or float64.
-func KindIsFloat(vk reflect.Kind) bool {
-	return vk >= reflect.Float32 && vk <= reflect.Float64
-}
-
 // ToBool robustly converts to a bool any basic elemental type
 // (including pointers to such) using a big type switch organized
 // for greatest efficiency. It tries the [bools.Booler]
@@ -953,15 +941,7 @@ func SetRobust(to, from any) error {
 	rto := reflect.ValueOf(to)
 	pto := UnderlyingPointer(rto)
 	if IsNil(pto) {
-		// If the original value is a non-nil pointer, we can just use it
-		// even though the underlying pointer is nil (this happens when there
-		// is a pointer to a nil pointer; see #1365).
-		if !IsNil(rto) && rto.Kind() == reflect.Pointer {
-			pto = rto
-		} else {
-			// Otherwise, we cannot recover any meaningful value.
-			return fmt.Errorf("got nil destination value")
-		}
+		return fmt.Errorf("got nil destination value")
 	}
 	pito := pto.Interface()
 
@@ -969,16 +949,6 @@ func SetRobust(to, from any) error {
 	tokind := totyp.Kind()
 	if !pto.Elem().CanSet() {
 		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pto, pto)
-	}
-
-	// images should not be copied per content: just set the pointer!
-	// otherwise the original images (esp colors!) are altered.
-	// TODO: #1394 notes the more general ambiguity about deep vs. shallow pointer copy.
-	if img, ok := to.(*image.Image); ok {
-		if fimg, ok := from.(image.Image); ok {
-			*img = fimg
-			return nil
-		}
 	}
 
 	// first we do the generic AssignableTo case
