@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/gpu"
 	"github.com/cogentcore/webgpu/wgpu"
 )
 
@@ -16,6 +17,12 @@ func main() {
 	instance := wgpu.CreateInstance(nil)
 
 	gpus := instance.EnumerateAdapters(nil)
+	gp := gpu.NewGPU(nil)
+	gpIndex := gp.SelectGPU(gpus)
+	props := gpus[gpIndex].GetInfo()
+	fmt.Println("Default WebGPU Adapter number:", gpIndex, "  Type:", props.AdapterType.String(), "  Backend:", props.BackendType.String())
+	fmt.Println("Set the GPU_DEVICE environment variable to an adapter number to select a different GPU")
+
 	for i, a := range gpus {
 		props := a.GetInfo()
 		fmt.Println("\n#####################################################################")
