@@ -1,4 +1,12 @@
-Cogent Core provides powerful file pickers for selecting files that support sorting, navigation, searching, favorites, and history.
++++
+Categories = ["Widgets"]
++++
+
+A **file picker** is a [[widget]] for selecting files. It supports sorting, navigation, searching, favorites, and history.
+
+For a nested filesystem tree, use a [[file tree]] instead.
+
+## Properties
 
 You can make a file picker:
 
@@ -12,6 +20,8 @@ You can set the starting file of a file picker:
 core.NewFilePicker(b).SetFilename(core.TheApp.DataDir())
 ```
 
+## Events
+
 You can detect when a user selects a file:
 
 ```Go
@@ -21,13 +31,15 @@ fp.OnSelect(func(e events.Event) {
 })
 ```
 
-You can make a button that opens a file picker dialog:
+## File button
+
+You can make a [[button]] that opens a file picker [[dialog]]:
 
 ```Go
 core.NewFileButton(b)
 ```
 
-You can detect when the user selects a file using the dialog:
+You can detect when a user selects a file using the dialog:
 
 ```Go
 fb := core.NewFileButton(b)
