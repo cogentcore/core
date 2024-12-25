@@ -103,6 +103,10 @@ func NewFileInfoType(ftyp Known) *FileInfo {
 // but file info will be updated based on the filename even if
 // the file does not exist.
 func (fi *FileInfo) InitFile(fname string) error {
+	fi.Cat = UnknownCategory
+	fi.Known = Unknown
+	fi.Generated = false
+	fi.Kind = ""
 	var errs []error
 	path, err := filepath.Abs(fname)
 	if err == nil {
@@ -111,7 +115,6 @@ func (fi *FileInfo) InitFile(fname string) error {
 		fi.Path = fname
 	}
 	_, fi.Name = filepath.Split(path)
-	fi.SetMimeInfo()
 	info, err := os.Stat(fi.Path)
 	if err != nil {
 		errs = append(errs, err)
@@ -126,10 +129,13 @@ func (fi *FileInfo) InitFile(fname string) error {
 // but file info will be updated based on the filename even if
 // the file does not exist.
 func (fi *FileInfo) InitFileFS(fsys fs.FS, fname string) error {
+	fi.Cat = UnknownCategory
+	fi.Known = Unknown
+	fi.Generated = false
+	fi.Kind = ""
 	var errs []error
 	fi.Path = fname
 	_, fi.Name = path.Split(fname)
-	fi.SetMimeInfo()
 	info, err := fs.Stat(fsys, fi.Path)
 	if err != nil {
 		errs = append(errs, err)
@@ -145,10 +151,7 @@ func (fi *FileInfo) SetMimeInfo() error {
 	if fi.Path == "" || fi.Path == "." || fi.IsDir() {
 		return nil
 	}
-	fi.Cat = UnknownCategory
-	fi.Known = Unknown
 	fi.Generated = IsGeneratedFile(fi.Path)
-	fi.Kind = ""
 	mtyp, _, err := MimeFromFile(fi.Path)
 	if err != nil {
 		return err
@@ -177,6 +180,9 @@ func (fi *FileInfo) SetFileInfo(info fs.FileInfo) {
 		fi.Cat = Folder
 		fi.Known = AnyFolder
 	} else {
+		if fi.Mode.IsRegular() {
+			fi.SetMimeInfo()
+		}
 		if fi.Cat == UnknownCategory {
 			if fi.IsExec() {
 				fi.Cat = Exe

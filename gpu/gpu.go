@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -86,7 +85,7 @@ type GPU struct {
 	Limits wgpu.SupportedLimits
 
 	// ComputeOnly indicates if this GPU is only used for compute,
-	// which determines if it listens to GPU_COMPUTE_DEVICE_SELECT
+	// which determines if it listens to GPU_COMPUTE_DEVICE
 	// environment variable, allowing different compute devices to be
 	// selected vs. graphics devices.
 	ComputeOnly bool
@@ -115,7 +114,7 @@ func NewGPU(sf *wgpu.Surface) *GPU {
 
 // NewComputeGPU returns a new GPU, configured and ready to use,
 // for purely compute use, which causes it to listen to
-// use the GPU_COMPUTE_DEVICE_SELECT variable for which GPU device to use.
+// use the GPU_COMPUTE_DEVICE variable for which GPU device to use.
 func NewComputeGPU() *GPU {
 	gp := &GPU{}
 	gp.ComputeOnly = true
@@ -132,15 +131,21 @@ func (gp *GPU) init(sf *wgpu.Surface) error {
 		gpIndex = gp.SelectGPU(gpus)
 		gp.GPU = gpus[gpIndex]
 	} else {
-		opts := &wgpu.RequestAdapterOptions{
-			CompatibleSurface: sf,
-			PowerPreference:   wgpu.PowerPreferenceHighPerformance,
-		}
-		ad, err := inst.RequestAdapter(opts)
-		if errors.Log(err) != nil {
-			return err
-		}
-		gp.GPU = ad
+		gpus := inst.EnumerateAdapters(nil)
+		gpIndex = gp.SelectGPU(gpus)
+		gp.GPU = gpus[gpIndex]
+		// note: below is a more standard way of doing it, but until we fix the issues
+		// with NVIDIA adapters on linux (#1247), we are using our custom logic.
+		//
+		// opts := &wgpu.RequestAdapterOptions{
+		// 	CompatibleSurface: sf,
+		// 	PowerPreference:   wgpu.PowerPreferenceHighPerformance,
+		// }
+		// ad, err := inst.RequestAdapter(opts)
+		// if errors.Log(err) != nil {
+		// 	return err
+		// }
+		// gp.GPU = ad
 	}
 	gp.Properties = gp.GPU.GetInfo()
 	gp.DeviceName = adapterName(&gp.Properties)
@@ -213,11 +218,11 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 		return 0
 	}
 	trgDevNm := ""
-	if ev := os.Getenv("GPU_DEVICE_SELECT"); ev != "" {
+	if ev := os.Getenv("GPU_DEVICE"); ev != "" {
 		trgDevNm = ev
 	}
 	if gp.ComputeOnly {
-		if ev := os.Getenv("GPU_COMPUTE_DEVICE_SELECT"); ev != "" {
+		if ev := os.Getenv("GPU_COMPUTE_DEVICE"); ev != "" {
 			trgDevNm = ev
 		}
 	}
@@ -236,13 +241,13 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			if strings.Contains(pnm, trgDevNm) {
 				devNm := props.Name
 				if Debug {
-					log.Printf("wgpu: selected device named: %s, specified in *_DEVICE_SELECT environment variable, index: %d\n", devNm, gi)
+					log.Printf("gpu: selected device named: %s, specified in GPU_DEVICE or GPU_COMPUTE_DEVICE environment variable, index: %d\n", devNm, gi)
 				}
 				return gi
 			}
 		}
 		if Debug {
-			log.Printf("vgpu: unable to find device named: %s, specified in *_DEVICE_SELECT environment variable\n", trgDevNm)
+			log.Printf("gpu: unable to find device named: %s, specified in GPU_DEVICE or GPU_COMPUTE_DEVICE environment variable\n", trgDevNm)
 		}
 	}
 
