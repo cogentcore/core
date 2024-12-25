@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -132,15 +131,20 @@ func (gp *GPU) init(sf *wgpu.Surface) error {
 		gpIndex = gp.SelectGPU(gpus)
 		gp.GPU = gpus[gpIndex]
 	} else {
-		opts := &wgpu.RequestAdapterOptions{
-			CompatibleSurface: sf,
-			PowerPreference:   wgpu.PowerPreferenceHighPerformance,
-		}
-		ad, err := inst.RequestAdapter(opts)
-		if errors.Log(err) != nil {
-			return err
-		}
-		gp.GPU = ad
+		gpus := inst.EnumerateAdapters(nil)
+		gpIndex = gp.SelectGPU(gpus)
+		gp.GPU = gpus[gpIndex]
+		// note: this is a more standard way of doing it, but until we fix the issues
+		// with NVIDIA adapters on linux, we are using our custom logic.
+		// opts := &wgpu.RequestAdapterOptions{
+		// 	CompatibleSurface: sf,
+		// 	PowerPreference:   wgpu.PowerPreferenceHighPerformance,
+		// }
+		// ad, err := inst.RequestAdapter(opts)
+		// if errors.Log(err) != nil {
+		// 	return err
+		// }
+		// gp.GPU = ad
 	}
 	gp.Properties = gp.GPU.GetInfo()
 	gp.DeviceName = adapterName(&gp.Properties)
@@ -236,13 +240,13 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			if strings.Contains(pnm, trgDevNm) {
 				devNm := props.Name
 				if Debug {
-					log.Printf("wgpu: selected device named: %s, specified in *_DEVICE environment variable, index: %d\n", devNm, gi)
+					log.Printf("gpu: selected device named: %s, specified in GPU_DEVICE or GPU_COMPUTE_DEVICE environment variable, index: %d\n", devNm, gi)
 				}
 				return gi
 			}
 		}
 		if Debug {
-			log.Printf("vgpu: unable to find device named: %s, specified in *_DEVICE environment variable\n", trgDevNm)
+			log.Printf("gpu: unable to find device named: %s, specified in GPU_DEVICE or GPU_COMPUTE_DEVICE environment variable\n", trgDevNm)
 		}
 	}
 
