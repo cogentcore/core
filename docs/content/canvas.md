@@ -1,6 +1,12 @@
-Cogent Core provides customizable canvases that allow you to arbitrarily draw anything that you want. All canvas coordinates are on a normalized 0-1 scale.
++++
+Categories = ["Widgets"]
++++
 
-You can set the function used to draw the canvas:
+A **canvas** allows you to arbitrarily render. All canvas coordinates are on a normalized 0-1 scale.
+
+## Draw
+
+You can set the function used to draw a canvas:
 
 ```Go
 core.NewCanvas(b).SetDraw(func(pc *paint.Context) {
@@ -94,6 +100,8 @@ core.NewCanvas(b).SetDraw(func(pc *paint.Context) {
 })
 ```
 
+## Styles
+
 You can change the size of a canvas:
 
 ```Go
@@ -105,7 +113,7 @@ c.Styler(func(s *styles.Style) {
 })
 ```
 
-You can make a canvas grow to fill the available space:
+You can make a canvas [[styles#grow]] to fill the available space:
 
 ```Go
 c := core.NewCanvas(b).SetDraw(func(pc *paint.Context) {
