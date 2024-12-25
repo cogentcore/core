@@ -27,7 +27,7 @@ var autoPlanNameCounter uint64
 func init() {
 	htmlcore.BindTextEditor = BindTextEditor
 	coresymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
-	basesymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
+	// basesymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
 }
 
 // BindTextEditor binds the given text editor to a yaegi interpreter
