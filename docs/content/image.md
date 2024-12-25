@@ -1,4 +1,12 @@
-Cogent Core provides customizable images that allow you to render any image.
++++
+Categories = ["Widgets"]
++++
+
+An **image** is a [[widget]] that displays an image.
+
+If you have SVG files instead of image files, use an [[SVG]] widget. For more programmatic control of rendering, you can use a [[canvas]].
+
+## Properties
 
 You should load images by embedding them so that they work across all platforms:
 

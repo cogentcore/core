@@ -2,7 +2,9 @@
 Categories = ["Widgets"]
 +++
 
-A **canvas** allows you to arbitrarily render. All canvas coordinates are on a normalized 0-1 scale.
+A **canvas** is a [[widget]] that allows you to manually render anything. All canvas coordinates are on a normalized 0-1 scale.
+
+If you want to render SVG files, use an [[SVG]] widget instead. If you want to render an image, use an [[image]] widget.
 
 ## Draw
 
