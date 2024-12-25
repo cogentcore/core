@@ -21,7 +21,7 @@ func main() {
 	gpIndex := gp.SelectGPU(gpus)
 	props := gpus[gpIndex].GetInfo()
 	fmt.Println("Default WebGPU Adapter number:", gpIndex, "  Type:", props.AdapterType.String(), "  Backend:", props.BackendType.String())
-	fmt.Println("Set GPU_DEVICE environment variable to select a different device")
+	fmt.Println("Set the GPU_DEVICE environment variable to an adapter number to select a different GPU")
 
 	for i, a := range gpus {
 		props := a.GetInfo()
