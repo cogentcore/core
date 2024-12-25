@@ -1,4 +1,10 @@
-Cogent Core provides interactive forms that allow you to display a struct value to users and have them edit it.
++++
+Categories = ["Widgets"]
++++
+
+A **form** allows you to display a struct value to users and have them edit it.
+
+## Properties
 
 You can make a form from any struct pointer:
 
@@ -20,7 +26,19 @@ type person struct {
 core.NewForm(b).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
 ```
 
-You can detect when the user changes the value of the form:
+You can prevent the user from editing the form:
+
+```Go
+type person struct {
+    Name string
+    Age  int
+}
+core.NewForm(b).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
+```
+
+## Events
+
+You can detect when the user [[events#change]]s the value of the form:
 
 ```Go
 type person struct {
@@ -33,7 +51,7 @@ core.NewForm(b).SetStruct(&p).OnChange(func(e events.Event) {
 })
 ```
 
-You can make it so that change events are sent immediately as the user types:
+You can make it so that change events are sent immediately as the user types (like [[events#input]]):
 
 ```Go
 type person struct {
@@ -45,6 +63,8 @@ core.NewForm(b).SetStruct(&p).OnChange(func(e events.Event) {
     core.MessageSnackbar(b, fmt.Sprintf("You are %v", p))
 })
 ```
+
+## Struct tags
 
 You can hide certain fields from the user:
 
@@ -64,16 +84,6 @@ type person struct {
     Age  int
 }
 core.NewForm(b).SetStruct(&person{Name: "Go", Age: 35})
-```
-
-You can prevent the user from editing the entire form:
-
-```Go
-type person struct {
-    Name string
-    Age  int
-}
-core.NewForm(b).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 ```
 
 You can change the label of a field:
@@ -128,7 +138,7 @@ type employee struct {
 core.NewForm(b).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 ```
 
-You can specify a default value (or list or range of values) for a field, which will be displayed in the tooltip for the field label, make the label highlighted when the value is non-default, and allow the user to reset the value to the default value by double clicking on the label:
+You can specify a default value (or list or range of values) for a field, which will be displayed in the [[tooltip]] for the field label [[text]], make the label highlighted when the value is non-default, and allow the user to reset the value to the default value by double clicking on the label:
 
 ```Go
 type person struct {
@@ -139,7 +149,9 @@ type person struct {
 core.NewForm(b).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 ```
 
-You can make a button that opens up a dialog with a form:
+## Form button
+
+You can make a [[button]] that opens up a [[dialog]] with a form:
 
 ```Go
 type person struct {
@@ -149,7 +161,9 @@ type person struct {
 core.NewFormButton(b).SetStruct(&person{Name: "Go", Age: 35})
 ```
 
-You can make it so that the documentation comments for struct fields are used as tooltips for the label and value widgets of a form by adding the type to [[doc:types]] and running `core generate`:
+## Generate
+
+You can make it so that the documentation comments for struct fields are used as [[tooltip]]s for the label and value widgets of a form by adding the type to [[doc:types]] and running [[generate]]:
 
 ```go
 // Add this once per package:
