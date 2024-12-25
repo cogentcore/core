@@ -4,7 +4,7 @@ Categories = ["Widgets"]
 
 A **canvas** is a [[widget]] that allows you to manually render anything. All canvas coordinates are on a normalized 0-1 scale.
 
-If you want to render SVG files, use an [[SVG]] widget instead. If you want to render an image, use an [[image]] widget. If you want to render HTML, see [[HTML]].
+If you want to render SVG files, use an [[SVG]] widget instead. For images, use an [[image]] widget. For videos, use a [[video]] widget. For HTML, see [[HTML]].
 
 ## Draw
 
