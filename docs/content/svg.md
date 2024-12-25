@@ -1,4 +1,13 @@
-Cogent Core provides customizable widgets that allow you to render any SVG object.
++++
+Name = "SVG"
+Categories = ["Widgets"]
++++
+
+An **SVG** [[widget]] renders SVG data.
+
+If you have image files instead of SVG files, use an [[image]] widget. For more programmatic control of rendering, you can use a [[canvas]]. For rendering HTML, see [[HTML]].
+
+## Properties
 
 You should load SVG files by embedding them so that they work across all platforms:
 
