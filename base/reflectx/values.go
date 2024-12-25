@@ -47,6 +47,18 @@ func KindIsNumber(vk reflect.Kind) bool {
 	return vk >= reflect.Int && vk <= reflect.Complex128
 }
 
+// KindIsInt returns whether the given [reflect.Kind] is an int
+// type such as int, int32 etc.
+func KindIsInt(vk reflect.Kind) bool {
+	return vk >= reflect.Int && vk <= reflect.Uintptr
+}
+
+// KindIsFloat returns whether the given [reflect.Kind] is a
+// float32 or float64.
+func KindIsFloat(vk reflect.Kind) bool {
+	return vk >= reflect.Float32 && vk <= reflect.Float64
+}
+
 // ToBool robustly converts to a bool any basic elemental type
 // (including pointers to such) using a big type switch organized
 // for greatest efficiency. It tries the [bools.Booler]
