@@ -136,6 +136,7 @@ func (gp *GPU) init(sf *wgpu.Surface) error {
 		gp.GPU = gpus[gpIndex]
 		// note: this is a more standard way of doing it, but until we fix the issues
 		// with NVIDIA adapters on linux, we are using our custom logic.
+		// https://github.com/cogentcore/core/issues/1247
 		// opts := &wgpu.RequestAdapterOptions{
 		// 	CompatibleSurface: sf,
 		// 	PowerPreference:   wgpu.PowerPreferenceHighPerformance,
