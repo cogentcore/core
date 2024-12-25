@@ -2,9 +2,9 @@
 Categories = ["Widgets"]
 +++
 
-A **list** allows you to display a slice value to users and have them edit it. Users can use [[context menu]]s and [[events#drag-and-drop]] to add, remove, and move rows.
+A **list** is a [[widget]] that allows you to display a slice value to users and have them edit it. Users can use [[context menu]]s and [[events#drag-and-drop]] to add, remove, and move rows.
 
-For a slice of structs, use a [[table]]. For a single struct, use a [[form]]. For a map, use a [[keyed list]].
+For a slice of structs, use a [[table]] instead. For a single struct, use a [[form]]. For a map, use a [[keyed list]]. For a nested tree, use a [[tree]].
 
 ## Properties
 

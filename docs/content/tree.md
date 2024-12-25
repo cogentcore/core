@@ -1,4 +1,12 @@
-Cogent Core provides interactive trees that allow you to display a nested tree structure. Users can use context menus and drag-and-drop to add, remove, and move tree nodes. See [file trees](../other/file-trees) for trees designed to display file structures.
++++
+Categories = ["Widgets"]
++++
+
+A **tree** is a [[widget]] that allows you to display a nested tree structure. Users can use [[context menu]]s and [[events#drag-and-drop]] to add, remove, and move tree nodes.
+
+For filesystem trees, use a [[file tree]] instead. For a struct, use a [[form]]. For a non-nested slice, use a [[list]]. For a map, use a [[keyed list]].
+
+## Properties
 
 You can make a tree and add tree child nodes directly to it:
 
@@ -19,7 +27,19 @@ tree.NewNodeBase(c2)
 core.NewTree(b).SyncTree(n)
 ```
 
-You can detect when the user changes the value of a tree:
+You can prevent users from changing a tree:
+
+```Go
+n := tree.NewNodeBase()
+tree.NewNodeBase(n)
+c2 := tree.NewNodeBase(n)
+tree.NewNodeBase(c2)
+core.NewTree(b).SyncTree(n).SetReadOnly(true)
+```
+
+## Events
+
+You can detect when a user [[events#change]]s the value of a tree:
 
 ```Go
 n := tree.NewNodeBase()
@@ -31,17 +51,7 @@ core.NewTree(b).SyncTree(n).OnChange(func(e events.Event) {
 })
 ```
 
-You can prevent the user from changing a tree:
-
-```Go
-n := tree.NewNodeBase()
-tree.NewNodeBase(n)
-c2 := tree.NewNodeBase(n)
-tree.NewNodeBase(c2)
-core.NewTree(b).SyncTree(n).SetReadOnly(true)
-```
-
-You can add an initialization function that is called automatically with each tree node:
+You can add an initialization function that is called automatically with each tree node (this example adds a [[context menu]]):
 
 ```Go
 n := tree.NewNodeBase()
@@ -57,7 +67,9 @@ tr.SetTreeInit(func(tr *core.Tree) {
 tr.SyncTree(n)
 ```
 
-You can make a button that opens an interactive inspector of a tree:
+## Tree button
+
+You can make a [[button]] that opens an interactive [[inspector]] of a tree:
 
 ```Go
 n := tree.NewNodeBase()
