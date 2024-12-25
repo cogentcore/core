@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **table** allows you to display a slice of structs to users as a table and have them edit it. Users can use [[context menu]]s and drag-and-drop to add, remove, and move rows. Also, users can sort the table by clicking on columns.
+A **table** allows you to display a slice of structs to users as a table and have them edit it. Users can use [[context menu]]s and [[events#drag-and-drop]] to add, remove, and move rows. Also, users can sort the table by clicking on columns.
 
 For a slice of non-structs, use a [[list]]. For a single struct, use a [[form]]. For a map, use a [[keyed list]].
 
@@ -89,7 +89,7 @@ core.NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 
 ## List button
 
-You can make a button that opens a dialog with a table:
+You can make a [[button]] that opens a [[dialog]] with a table:
 
 ```Go
 type language struct {

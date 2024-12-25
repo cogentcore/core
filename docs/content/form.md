@@ -155,7 +155,7 @@ core.NewForm(b).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 
 ## Form button
 
-You can make a [[button]] that opens up a [[dialog]] with a form:
+You can make a [[button]] that opens a [[dialog]] with a form:
 
 ```Go
 type person struct {
