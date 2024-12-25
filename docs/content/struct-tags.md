@@ -1,4 +1,4 @@
-A cheat sheet of all possible **struct tags** and their meanings.
+A cheat sheet of all possible **struct tags** and their meanings. See the linked pages for further explanations with examples.
 
 * `edit:"-"` — prevent users from editing a field in a [[form]] or [[table]]
 * `label:"{Label}"` — change the label text for a field in a [[form]] or [[table]]
