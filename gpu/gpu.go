@@ -86,7 +86,7 @@ type GPU struct {
 	Limits wgpu.SupportedLimits
 
 	// ComputeOnly indicates if this GPU is only used for compute,
-	// which determines if it listens to GPU_COMPUTE_DEVICE_SELECT
+	// which determines if it listens to GPU_COMPUTE_DEVICE
 	// environment variable, allowing different compute devices to be
 	// selected vs. graphics devices.
 	ComputeOnly bool
@@ -115,7 +115,7 @@ func NewGPU(sf *wgpu.Surface) *GPU {
 
 // NewComputeGPU returns a new GPU, configured and ready to use,
 // for purely compute use, which causes it to listen to
-// use the GPU_COMPUTE_DEVICE_SELECT variable for which GPU device to use.
+// use the GPU_COMPUTE_DEVICE variable for which GPU device to use.
 func NewComputeGPU() *GPU {
 	gp := &GPU{}
 	gp.ComputeOnly = true
@@ -213,11 +213,11 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 		return 0
 	}
 	trgDevNm := ""
-	if ev := os.Getenv("GPU_DEVICE_SELECT"); ev != "" {
+	if ev := os.Getenv("GPU_DEVICE"); ev != "" {
 		trgDevNm = ev
 	}
 	if gp.ComputeOnly {
-		if ev := os.Getenv("GPU_COMPUTE_DEVICE_SELECT"); ev != "" {
+		if ev := os.Getenv("GPU_COMPUTE_DEVICE"); ev != "" {
 			trgDevNm = ev
 		}
 	}
@@ -236,13 +236,13 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			if strings.Contains(pnm, trgDevNm) {
 				devNm := props.Name
 				if Debug {
-					log.Printf("wgpu: selected device named: %s, specified in *_DEVICE_SELECT environment variable, index: %d\n", devNm, gi)
+					log.Printf("wgpu: selected device named: %s, specified in *_DEVICE environment variable, index: %d\n", devNm, gi)
 				}
 				return gi
 			}
 		}
 		if Debug {
-			log.Printf("vgpu: unable to find device named: %s, specified in *_DEVICE_SELECT environment variable\n", trgDevNm)
+			log.Printf("vgpu: unable to find device named: %s, specified in *_DEVICE environment variable\n", trgDevNm)
 		}
 	}
 

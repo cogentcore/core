@@ -30,8 +30,8 @@ $ go run cogentcore.org/core/gpu/cmd/webgpuinfo@latest
 
 The following environment variables can be set to specifically select a particular device by device number or name (`deviceName`): 
 
-* `GPU_DEVICE_SELECT`, for GUI and compute usage.
-* `GPU_COMPUTE_DEVICE_SELECT`, only used for compute, if present, will override above, so you can use different GPUs for graphics vs compute.
+* `GPU_DEVICE`, for GUI and compute usage.
+* `GPU_COMPUTE_DEVICE`, only used for compute, if present, will override above, so you can use different GPUs for graphics vs compute.
 
 * `GPU` represents the hardware `Adapter` and maintains global settings, info about the hardware.
 
