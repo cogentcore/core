@@ -147,7 +147,7 @@ func (fi *FileInfo) SetMimeInfo() error {
 	}
 	fi.Cat = UnknownCategory
 	fi.Known = Unknown
-	fi.Generated = IsGeneratedFile(fi.Path)
+	// fi.Generated = IsGeneratedFile(fi.Path)
 	fi.Kind = ""
 	mtyp, _, err := MimeFromFile(fi.Path)
 	if err != nil {
