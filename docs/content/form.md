@@ -66,6 +66,8 @@ core.NewForm(b).SetStruct(&p).OnChange(func(e events.Event) {
 
 ## Struct tags
 
+*See [[struct tags]] for a concise overview of all struct tags.*
+
 You can hide certain fields from the user:
 
 ```Go
