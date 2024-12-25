@@ -1,4 +1,10 @@
-Cogent Core provides interactive tables that allow you to display a slice of structs to users as a table and have them edit it. Users can use context menus and drag-and-drop to add, remove, and move rows. Also, users can sort the table by clicking on columns.
++++
+Categories = ["Widgets"]
++++
+
+A **table** allows you to display a slice of structs to users as a table and have them edit it. Users can use [[context menu]]s and drag-and-drop to add, remove, and move rows. Also, users can sort the table by clicking on columns.
+
+## Properties
 
 You can make a table from any pointer to a slice of structs:
 
@@ -10,7 +16,19 @@ type language struct {
 core.NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
-You can detect when the user changes the value of the table:
+You can prevent users from editing a table:
+
+```Go
+type language struct {
+    Name   string
+    Rating int
+}
+core.NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
+```
+
+## Events
+
+You can detect when a user [[events#change]]s the value of a table:
 
 ```Go
 type language struct {
@@ -23,6 +41,10 @@ core.NewTable(b).SetSlice(&sl).OnChange(func(e events.Event) {
 })
 ```
 
+## Struct tags
+
+*See [[struct tags]] for a concise overview of all struct tags.*
+
 You can hide certain columns from the user:
 
 ```Go
@@ -33,7 +55,7 @@ type language struct {
 core.NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
-You can also use the `table` struct tag, which overrides the `view` struct tag. This allows you to have a struct field displayed in a form but not a table, or vise versa:
+You can also use the `table` struct tag, which overrides the `display` struct tag. This allows you to have a struct field displayed in a form but not a table, or vice versa:
 
 ```Go
 type language struct {
@@ -53,16 +75,6 @@ type language struct {
 core.NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
-You can prevent the user from editing the entire table:
-
-```Go
-type language struct {
-    Name   string
-    Rating int
-}
-core.NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
-```
-
 You can change the label of a column:
 
 ```Go
@@ -72,6 +84,8 @@ type language struct {
 }
 core.NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
+
+## List button
 
 You can make a button that opens a dialog with a table:
 
@@ -83,7 +97,9 @@ type language struct {
 core.NewListButton(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
-You can make it so that the documentation comments for struct fields are used as tooltips for the column headers and value widgets of a table by adding the type to [[doc:types]] and running `core generate`:
+## Generate
+
+You can make it so that the documentation comments for struct fields are used as [[tooltip]]s for the column headers and value widgets of a table by adding the type to [[generate#types]] and running [[generate]]:
 
 ```go
 // Add this once per package:

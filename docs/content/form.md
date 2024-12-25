@@ -26,7 +26,7 @@ type person struct {
 core.NewForm(b).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
 ```
 
-You can prevent the user from editing the form:
+You can prevent users from editing a form:
 
 ```Go
 type person struct {
@@ -38,7 +38,7 @@ core.NewForm(b).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 
 ## Events
 
-You can detect when the user [[events#change]]s the value of the form:
+You can detect when a user [[events#change]]s the value of a form:
 
 ```Go
 type person struct {
@@ -165,7 +165,7 @@ core.NewFormButton(b).SetStruct(&person{Name: "Go", Age: 35})
 
 ## Generate
 
-You can make it so that the documentation comments for struct fields are used as [[tooltip]]s for the label and value widgets of a form by adding the type to [[doc:types]] and running [[generate]]:
+You can make it so that the documentation comments for struct fields are used as [[tooltip]]s for the label and value widgets of a form by adding the type to [[generate#types]] and running [[generate]]:
 
 ```go
 // Add this once per package:
