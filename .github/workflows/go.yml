@@ -31,7 +31,7 @@ jobs:
     - name: Test
       run: go test -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system) -coverprofile cover.out -timeout 30s
 
-    - name: Build Docs test
+    - name: Build Docs (to verify it works on PRs)
       run: core build web -dir docs -o static
 
     - name: Update coverage report
