@@ -12,8 +12,7 @@ text.Updater(func() {
     text.SetText(time.Now().Format("15:04:05"))
 })
 go func() {
-    ticker := time.NewTicker(time.Second)
-    for range ticker.C {
+    for range time.Tick(time.Second) {
         text.AsyncLock()
         text.Update()
         text.AsyncUnlock()

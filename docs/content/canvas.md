@@ -65,6 +65,23 @@ core.NewCanvas(b).SetDraw(func(pc *paint.Context) {
 })
 ```
 
+You can animate a canvas:
+
+```Go
+t := 0
+c := core.NewCanvas(b).SetDraw(func(pc *paint.Context) {
+    pc.DrawCircle(0.5, 0.5, float32(t%60)/120)
+    pc.FillStyle.Color = colors.Scheme.Success.Base
+    pc.Fill()
+})
+go func() {
+    for range time.Tick(time.Second/60) {
+        c.NeedsRender()
+        t++
+    }
+}()
+```
+
 You can draw ellipses:
 
 ```Go
