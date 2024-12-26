@@ -54,13 +54,15 @@ You can combine any number of canvas rendering operations:
 
 ```Go
 core.NewCanvas(b).SetDraw(func(pc *paint.Context) {
-    pc.DrawCircle(0.5, 0.5, 0.5)
-    pc.FillStyle.Color = colors.Scheme.Success.Container
+    pc.DrawCircle(0.6, 0.6, 0.15)
+    pc.FillStyle.Color = colors.Scheme.Warn.Base
     pc.Fill()
 
-    pc.MoveTo(0, 0)
-    pc.LineTo(1, 1)
-    pc.StrokeStyle.Color = colors.Scheme.Error.Base
+    pc.MoveTo(0.7, 0.2)
+    pc.LineTo(0.2, 0.7)
+    pc.StrokeStyle.Color = colors.Scheme.Primary.Base
+    pc.StrokeStyle.Width.Dp(16)
+    pc.ToDots()
     pc.Stroke()
 })
 ```
