@@ -1,3 +1,11 @@
++++
+Categories = ["Architecture"]
++++
+
+**Rendering** is the process of converting [[widget]]s into images uploaded to a window. This page documents low-level [[architecture]] details of rendering.
+
+Almost all of rendering is pure Go and does **not** depend on a WebView or any other system APIs; instead, [[scene]]s are rendered to images using custom logic written in Go (see [[doc:paint]]). The rendered images are then combined as necessary before being uploaded to a window. Only at the final stage of uploading to the system window does Cogent Core using system APIs. Given that almost all of the rendering process is platform-independent, widgets look the same on all platforms.
+
 ## Rendering logic
 
 At the highest level, rendering is made robust by having a completely separate, mutex lock-protected pass where all render-level updating takes place.  This render pass is triggered by [[doc:events.WindowPaint]] events that are sent regularly at 60 FPS (frames per second).  If nothing needs to be updated, nothing happens (which is the typical case for most frames), so it is not a significant additional cost.
