@@ -1,12 +1,3 @@
-## Abilities enable events
-
-First of all, the set of events that a Widget can receive is determined by setting the [[doc:styles/abilities]] flags for that widget.  For example, the [[doc:core.Button]] enables these abilities in its `Styler` function:
-
-```go
-    bt.Styler(func(s *styles.Style) {
-        s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
-```
-
 ## Event handling order
 
 Event handlers are called in the reverse order that they are added (last added, first called), so that default event handling (added during initial widget configuration) can be overridden by special end-user handlers.

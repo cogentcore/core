@@ -2,7 +2,7 @@
 Categories = ["Concepts"]
 +++
 
-An **event** is a user action that you can process. See [[events]] for a list of event types.
+An **event** is a user action that you can process. See [[events]] for explanations of common event types.
 
 To handle an event, simply call the `On{EventType}` method on any [[widget]]. For example:
 
@@ -19,6 +19,14 @@ core.NewButton(b).SetText("Click me!").OnClick(func(e events.Event) {
     core.MessageSnackbar(b, fmt.Sprint("Button clicked at ", e.Pos()))
 })
 ```
+
+## Abilities and states
+
+[[Abilities]] determine the events that a widget can receive, and [[states]] are set as a result of events. Therefore, events act as a bridge between abilities and corresponding states.
+
+For example, a [[abilities#hoverable]] ability allows for [[events#hover]] events, which set the [[states#hovered]] state.
+
+If events aren't working as expected, the reason might be that the right abilities aren't set.
 
 ## Low-level events
 
