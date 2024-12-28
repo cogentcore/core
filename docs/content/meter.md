@@ -1,4 +1,10 @@
-Cogent Core provides customizable meters for displaying bounded numeric values to users.
++++
+Categories = ["Widgets"]
++++
+
+A **meter** displays bounded numeric values. It is read-only, whereas a [[slider]] supports changing the value.
+
+## Properties
 
 You can make a meter without any custom options:
 
@@ -17,6 +23,8 @@ You can set the minimum and maximum values of a meter:
 ```Go
 core.NewMeter(b).SetMin(5.7).SetMax(18).SetValue(10.2)
 ```
+
+## Types
 
 You can make a meter render vertically:
 
