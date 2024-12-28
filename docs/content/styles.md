@@ -28,10 +28,23 @@ Common scheme colors are explained below, with an interactive [[#color scheme de
         * `Success` for success indicators
         * `Warn` for warnings
 
-### Color scheme demo
+#### Color scheme demo
 
-Here is an interactive demo of all scheme colors. Try editing the first color below (primary base) and see the links on this page change to that color.
+Here is an interactive demo of all scheme colors. For example, try editing the first color below (primary base) and see the links on this page change to that color.
 
 ```Go
 core.NewForm(b).SetStruct(colors.Scheme)
 ```
+
+### Named colors
+
+You can also use named colors:
+
+```Go
+bt := core.NewButton(b).SetText("Hello")
+bt.Styler(func(s *styles.Style) {
+    s.Background = colors.Uniform(colors.Orange)
+})
+```
+
+Note that the color is wrapped in [[doc:colors.Uniform]]. That is because all colors in Cogent Core are specified as images, which allows for easy use of [[#gradient]]s and [[#background image]]s. For the [[#color scheme]] above, scheme colors are automatically converted to images, so you don't need to use colors.Uniform.
