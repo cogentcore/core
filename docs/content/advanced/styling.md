@@ -1,7 +1,3 @@
-## All styling properties
-
-Here is a [list](https://pkg.go.dev/cogentcore.org/core/styles#Style) of all styling properties supported by Cogent Core, which you can experiment with in the interactive styling demo at the bottom of this page.
-
 ## Styling order
 
 Stylers are called in the order that they are added (first added, first called), which means that the stylers added last get the final say on the styles. This means that the base stylers set during initial widget configuration will be overridden by special end-user stylers.
