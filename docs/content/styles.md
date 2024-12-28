@@ -8,7 +8,7 @@ Many style properties involve colors, which can be specified in several ways.
 
 Colors should typically be specified using the color scheme, which automatically adapts to light/dark mode and is based on the theme color specified in the user [[settings]] or through [[doc:core.AppColor]]. The color scheme is based on Material Design 3 and uses their [HCT](https://material.io/blog/science-of-color-design) color format to ensure accessible color contrast.
 
-Common scheme colors are explained below. You can see the API documentation for an exhaustive list of all [[doc:colors/matcolor.Scheme]] colors.
+Common scheme colors are explained below, with an interactive [[#color scheme demo]] below that. You can also see the API documentation for an exhaustive list of all [[doc:colors/matcolor.Scheme]] colors.
 
 * Surface colors are relatively neutral colors often used for backgrounds and [[text]]
     * `Surface` is the basic background color
@@ -27,6 +27,10 @@ Common scheme colors are explained below. You can see the API documentation for 
         * `Error` for error indicators or delete buttons
         * `Success` for success indicators
         * `Warn` for warnings
+
+### Color scheme demo
+
+Here is an interactive demo of all scheme colors. Try editing the first color below (primary base) and see the links on this page change to that color.
 
 ```Go
 core.NewForm(b).SetStruct(colors.Scheme)
