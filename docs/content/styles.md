@@ -48,3 +48,19 @@ bt.Styler(func(s *styles.Style) {
 ```
 
 Note that the color is wrapped in [[doc:colors.Uniform]]. That is because all colors in Cogent Core are specified as images, which allows for easy use of [[#gradient]]s and [[#background image]]s. For the [[#color scheme]] above, scheme colors are automatically converted to images, so you don't need to use colors.Uniform.
+
+Named colors do not adjust to light/dark mode and user [[settings]], so you should use the [[#color scheme]] instead when possible. However, if you do need colors outside of the color scheme, you can use color normalization functions as explained below.
+
+### Color normalization
+
+You can use color normalization functions to make your colors adapt to the [[#color scheme]], ensuring sufficient contrast. Each color normalization function corresponds to a color scheme accent color version as documented above: `Base`, `On`, `Container`, and `OnContainer`.
+
+For example, to make a color suitable for a high emphasis filled button, you can use [[doc:colors.ToBase]]:
+
+```Go
+bt := core.NewButton(b).SetText("Hello")
+bt.Styler(func(s *styles.Style) {
+    s.Background = colors.Uniform(colors.ToBase(colors.Orange))
+    s.Color = colors.Uniform(colors.ToOn(colors.Orange))
+})
+```
