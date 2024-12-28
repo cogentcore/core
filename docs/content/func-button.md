@@ -1,4 +1,10 @@
-Cogent Core provides interactive func buttons, which are [buttons](../basic/buttons) bound to functions. The text and tooltip of a func button are automatically set based on the bound function, and when you click on a func button, it calls the function bound to it.
++++
+Categories = ["Widgets"]
++++
+
+A **func button** is a [[button]] that can be [[bind|bound]] to a function. The [[text]] and [[tooltip]] of a func button are automatically set based on the bound function, and when you [[events#click]] on a func button, it calls the function bound to it.
+
+## Properties
 
 You can make a func button with any function:
 
@@ -8,17 +14,18 @@ core.NewFuncButton(b).SetFunc(func() {
 })
 ```
 
-Notice how the text of the func button above is set to `Anonymous function`. That is because the bound function in that case is an anonymous function. You can also see that the tooltip of the function has been set to give more information about the function.
+Notice how the text of the func button above is set to `Anonymous function`. That is because the bound function in that case is an anonymous function. You will see [[#generate|later on this page]] how to get more meaningful information using named functions.
 
 You can always override the text and tooltip of a func button as long as you do so after you call [[doc:core.FuncButton.SetFunc]]:
 
 ```Go
-core.NewFuncButton(b).SetFunc(func() {
+fb := core.NewFuncButton(b).SetFunc(func() {
     core.MessageSnackbar(b, "Function called")
-}).SetText("Run").SetTooltip("Click me!")
+})
+fb.SetText("Run").SetTooltip("Click me!")
 ```
 
-When the bound function takes arguments, the user will be prompted for those arguments in a dialog:
+When the bound function takes arguments, the user will be prompted for those arguments in a [[dialog]]:
 
 ```Go
 core.NewFuncButton(b).SetFunc(func(name string, age int) {
@@ -42,13 +49,15 @@ core.NewFuncButton(b).SetConfirm(true).SetFunc(func() {
 })
 ```
 
-You may have noticed in all of the examples so far that the names and tooltips for the func buttons are not particularly useful, and the names of the arguments are missing. To solve this, you can use named functions added to [[doc:types]], which gives information about all of those things. For example, here is a func button for [[doc:core.SettingsWindow]]:
+## Generate
+
+You may have noticed in all of the examples so far that the names and tooltips for the func buttons are not particularly useful, and the names of the arguments are missing. To solve this, you can use named functions added to [[generate#types]], which gives information about all of those things. For example, here is a func button for [[doc:core.SettingsWindow]]:
 
 ```Go
 core.NewFuncButton(b).SetFunc(core.SettingsWindow).SetConfirm(true)
 ```
 
-The process for adding a function to [[doc:types]] is similar to the process for adding a struct described in [forms](../collections/forms):
+The process for adding a function to [[generate#types]] uses [[generate]] as shown below:
 
 ```go
 // Add this once per package:
