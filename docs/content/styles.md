@@ -10,8 +10,24 @@ Colors should typically be specified using the color scheme, which automatically
 
 Common scheme colors are explained below. You can see the API documentation for an exhaustive list of all [[doc:colors/matcolor.Scheme]] colors.
 
-* Surface colors are relatively neutral colors often used for backgrounds and text.
+* Surface colors are relatively neutral colors often used for backgrounds and [[text]]
     * `Surface` is the basic background color
     * `OnSurface` is the color for text and other such things on top of backgrounds with `Surface` color
-    * `SurfaceContainer` and other similar colors like `SurfaceContainerHigh` are for widgets that contrast some with the background, like text fields and dialogs
+    * `SurfaceContainer` and other similar colors like `SurfaceContainerHigh` are for widgets that contrast some with the background, like [[text field]]s and [[dialog]]s
     * As for almost all scheme colors, there are `On` versions of `SurfaceContainer` colors, such as `OnSurfaceContainer`, which serves a similar purpose as `OnSurface`
+* Accent colors are colorful colors used to convey something
+    * All accent colors come with four versions:
+        * `Base` for high-emphasis content
+        * `On` for text/content on top of `Base`
+        * `Container` for lower emphasis content
+        * `OnContainer` for text/content on top of `Container`
+    * The commonly used accents are:
+        * `Primary` for important elements like filled [[button]]s
+        * `Select` for selected elements
+        * `Error` for error indicators or delete buttons
+        * `Success` for success indicators
+        * `Warn` for warnings
+
+```Go
+core.NewForm(b).SetStruct(colors.Scheme)
+```
