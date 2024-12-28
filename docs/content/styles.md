@@ -47,7 +47,7 @@ bt.Styler(func(s *styles.Style) {
 })
 ```
 
-Note that the color is wrapped in [[doc:colors.Uniform]]. That is because all colors in Cogent Core are specified as images, which allows for easy use of [[#gradient]]s and [[#background image]]s. For the [[#color scheme]] above, scheme colors are automatically converted to images, so you don't need to use colors.Uniform.
+Note that the color is wrapped in [[doc:colors.Uniform]]. That is because all colors in Cogent Core are specified as images, which allows for easy use of [[#gradient]]s and [[#background image]]s. For the [[#color scheme]] above, scheme colors are automatically converted to images, so you don't need to use colors.Uniform. You can use [[doc:colors.ToUniform]] to convert a scheme color back from an image to a color.
 
 Named colors do not adjust to light/dark mode and user [[settings]], so you should use the [[#color scheme]] instead when possible. However, if you do need colors outside of the color scheme, you can use color normalization functions as explained below.
 
@@ -62,5 +62,39 @@ bt := core.NewButton(b).SetText("Hello")
 bt.Styler(func(s *styles.Style) {
     s.Background = colors.Uniform(colors.ToBase(colors.Orange))
     s.Color = colors.Uniform(colors.ToOn(colors.Orange))
+})
+```
+
+### Gradient
+
+You can specify a color as a gradient:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
+    s.Min.Set(units.Em(5))
+})
+```
+
+You can make a radial gradient:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Background = gradient.NewRadial().AddStop(colors.Purple, 0).AddStop(colors.Blue, 0.5).AddStop(colors.Skyblue, 1)
+    s.Min.Set(units.Em(5))
+})
+```
+
+You can rotate a gradient:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    gr := gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
+    gr.SetTransform(math32.Rotate2D(math32.Pi/2))
+    s.Background = gr
+    s.Min.Set(units.Em(5))
 })
 ```
