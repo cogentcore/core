@@ -47,7 +47,7 @@ bt.Styler(func(s *styles.Style) {
 })
 ```
 
-Note that the color is wrapped in [[doc:colors.Uniform]]. That is because all colors in Cogent Core are specified as images, which allows for easy use of [[#gradient]]s and [[#background image]]s. For the [[#color scheme]] above, scheme colors are automatically converted to images, so you don't need to use colors.Uniform. You can use [[doc:colors.ToUniform]] to convert a scheme color back from an image to a color.
+Note that the color is wrapped in [[doc:colors.Uniform]]. That is because all colors in Cogent Core are specified as images, which allows for easy use of [[#gradient]]s and background [[#image]]s. For the [[#color scheme]] above, scheme colors are automatically converted to images, so you don't need to use colors.Uniform. You can use [[doc:colors.ToUniform]] to convert a scheme color back from an image to a color.
 
 Named colors do not adjust to light/dark mode and user [[settings]], so you should use the [[#color scheme]] instead when possible. However, if you do need colors outside of the color scheme, you can use color normalization functions as explained below.
 
@@ -98,3 +98,7 @@ fr.Styler(func(s *styles.Style) {
     s.Min.Set(units.Em(5))
 })
 ```
+
+### Images
+
+You can use any image as a color, including all those supported by the [[image]] widget.
