@@ -123,7 +123,7 @@ type Widget interface {
 	// ContextMenuPos.
 	ShowContextMenu(e events.Event)
 
-	// ChildBackground returns the background color (Image) for given child Widget.
+	// ChildBackground returns the background color (Image) for the given child Widget.
 	// By default, this is just our [styles.Style.ActualBackground] but it can be computed
 	// specifically for the child (e.g., for zebra stripes in [ListGrid]).
 	ChildBackground(child Widget) image.Image
