@@ -10,15 +10,17 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/htmlcore/htmlcore"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"BindTextEditor":  reflect.ValueOf(&htmlcore.BindTextEditor).Elem(),
-		"ExtractText":     reflect.ValueOf(htmlcore.ExtractText),
-		"Get":             reflect.ValueOf(htmlcore.Get),
-		"GoDocWikilink":   reflect.ValueOf(htmlcore.GoDocWikilink),
-		"NewContext":      reflect.ValueOf(htmlcore.NewContext),
-		"ReadHTML":        reflect.ValueOf(htmlcore.ReadHTML),
-		"ReadHTMLString":  reflect.ValueOf(htmlcore.ReadHTMLString),
-		"ReadMD":          reflect.ValueOf(htmlcore.ReadMD),
-		"ReadMDString":    reflect.ValueOf(htmlcore.ReadMDString),
+		"BindTextEditor": reflect.ValueOf(&htmlcore.BindTextEditor).Elem(),
+		"ExtractText":    reflect.ValueOf(htmlcore.ExtractText),
+		"Get":            reflect.ValueOf(htmlcore.Get),
+		"GetAttr":        reflect.ValueOf(htmlcore.GetAttr),
+		"GoDocWikilink":  reflect.ValueOf(htmlcore.GoDocWikilink),
+		"HasAttr":        reflect.ValueOf(htmlcore.HasAttr),
+		"NewContext":     reflect.ValueOf(htmlcore.NewContext),
+		"ReadHTML":       reflect.ValueOf(htmlcore.ReadHTML),
+		"ReadHTMLString": reflect.ValueOf(htmlcore.ReadHTMLString),
+		"ReadMD":         reflect.ValueOf(htmlcore.ReadMD),
+		"ReadMDString":   reflect.ValueOf(htmlcore.ReadMDString),
 
 		// type definitions
 		"Context":         reflect.ValueOf((*htmlcore.Context)(nil)),

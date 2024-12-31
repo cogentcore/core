@@ -101,4 +101,19 @@ fr.Styler(func(s *styles.Style) {
 
 ## Image
 
-You can use any image as a color, including all those supported by the [[image]] widget.
+You can use any image as a color, including all those supported by the [[image]] widget:
+
+```go
+//go:embed image.png
+var myImage embed.FS
+```
+
+```Go
+fr := core.NewFrame(b)
+img, _, err := imagex.OpenFS(myImage, "image.png")
+errors.Log(err)
+fr.Styler(func(s *styles.Style) {
+    s.Background = img
+    s.Min.Set(units.Em(5))
+})
+```
