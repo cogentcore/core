@@ -78,8 +78,8 @@ c := core.NewCanvas(b).SetDraw(func(pc *paint.Context) {
 })
 go func() {
     for range time.Tick(time.Second/60) {
-        c.NeedsRender()
         t++
+        c.NeedsRender()
     }
 }()
 ```

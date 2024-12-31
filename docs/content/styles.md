@@ -2,7 +2,7 @@
 
 ## Color
 
-Many style properties involve [[color]]s, which can be specified in several ways as documented on that page.
+Many style properties involve [[color]]s, which can be specified in several ways as documented on that linked page.
 
 You can set the content color of [[text]] or an [[icon]]:
 
@@ -10,5 +10,43 @@ You can set the content color of [[text]] or an [[icon]]:
 tx := core.NewText(b).SetText("Success")
 tx.Styler(func(s *styles.Style) {
     s.Color = colors.Scheme.Success.Base
+})
+```
+
+### Background
+
+You can set the background color of a [[widget]]:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
+    s.Min.Set(units.Em(5))
+})
+```
+
+## Border
+
+You can add a border to a widget:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Border.Width.Set(units.Dp(4))
+    s.Border.Color.Set(colors.Scheme.Outline)
+    s.Min.Set(units.Em(5))
+})
+```
+
+### Border radius
+
+You can make a widget have a curved rendering boundary, whether or not it has a [[#border]]:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Border.Radius = styles.BorderRadiusLarge
+    s.Background = colors.Scheme.Error.Base
+    s.Min.Set(units.Em(5))
 })
 ```
