@@ -38,6 +38,29 @@ fr.Styler(func(s *styles.Style) {
 })
 ```
 
+You can make a dotted or dashed border:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Border.Style.Set(styles.BorderDotted)
+    s.Border.Width.Set(units.Dp(4))
+    s.Border.Color.Set(colors.Scheme.Warn.Base)
+    s.Min.Set(units.Em(5))
+})
+```
+
+You can specify different border properties for different sides of a widget (see the documentation for [[doc:styles.Sides.Set]]):
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Border.Width.Set(units.Dp(4))
+    s.Border.Color.Set(colors.Scheme.Warn.Base, colors.Scheme.Error.Base)
+    s.Min.Set(units.Em(5))
+})
+```
+
 ### Border radius
 
 You can make a widget have a curved rendering boundary, whether or not it has a [[#border]]:
