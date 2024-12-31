@@ -73,3 +73,58 @@ fr.Styler(func(s *styles.Style) {
     s.Min.Set(units.Em(5))
 })
 ```
+
+## Layout
+
+There are many layout properties that customize the positioning and sizing of widgets. See the [[layout]] page for a low-level explanation of the layout process.
+
+### Size
+
+You can control the size of a widget through three properties: `Min`, `Max`, and `Grow`.
+
+Min specifies the minimum size that a widget must receive:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Min.Set(units.Em(5))
+    s.Background = colors.Scheme.InverseSurface
+})
+```
+
+Min (and Max and Grow) can be specified for each dimension:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Min.Set(units.Em(10), units.Em(3))
+    s.Background = colors.Scheme.InverseSurface
+})
+```
+
+#### Grow
+
+Grow makes a widget fill the available space up to Max:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Grow.Set(1, 1)
+    s.Min.Set(units.Em(5))
+    s.Background = colors.Scheme.InverseSurface
+})
+```
+
+Max puts a constraint on the amount a widget can Grow:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Grow.Set(1, 1)
+    s.Min.Set(units.Em(5))
+    s.Max.Set(units.Em(10))
+    s.Background = colors.Scheme.InverseSurface
+})
+```
+
+In the example above, notice that the [[frame]] has a size of 10em in the X direction, but only 5em in the Y direction. That is because the widget has room to grow in the X direction and thus reaches the Max, but there are plenty of other widgets competing for space in the Y direction, so it stays at its Min.
