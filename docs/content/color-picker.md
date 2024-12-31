@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **color picker** is a [[widget]] that allows users to input [[styles#color]]s using three [[slider]]s for the components of the HCT color system: hue, chroma, and tone. The [[tooltip]] for each slider contains more information about each component.
+A **color picker** is a [[widget]] that allows users to input [[color]]s using three [[slider]]s for the components of the HCT color system: hue, chroma, and tone. The [[tooltip]] for each slider contains more information about each component.
 
 ## Properties
 
