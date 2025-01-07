@@ -462,7 +462,7 @@ func (tb *Buffer) saveFile(filename core.Filename) error {
 // Save saves the current text into the current filename associated with this buffer.
 func (tb *Buffer) Save() error { //types:add
 	if tb.Filename == "" {
-		return fmt.Errorf("core.Buf: filename is empty for Save")
+		return errors.New("core.Buf: filename is empty for Save")
 	}
 	tb.editDone()
 	info, err := os.Stat(string(tb.Filename))

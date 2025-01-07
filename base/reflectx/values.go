@@ -17,6 +17,7 @@ import (
 
 	"cogentcore.org/core/base/bools"
 	"cogentcore.org/core/base/elide"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/enums"
 )
@@ -70,7 +71,7 @@ func ToBool(v any) (bool, error) {
 		return vt, nil
 	case *bool:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *bool")
+			return false, errors.New("got nil *bool")
 		}
 		return *vt, nil
 	}
@@ -84,42 +85,42 @@ func ToBool(v any) (bool, error) {
 		return vt != 0, nil
 	case *int:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *int")
+			return false, errors.New("got nil *int")
 		}
 		return *vt != 0, nil
 	case int32:
 		return vt != 0, nil
 	case *int32:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *int32")
+			return false, errors.New("got nil *int32")
 		}
 		return *vt != 0, nil
 	case int64:
 		return vt != 0, nil
 	case *int64:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *int64")
+			return false, errors.New("got nil *int64")
 		}
 		return *vt != 0, nil
 	case uint8:
 		return vt != 0, nil
 	case *uint8:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *uint8")
+			return false, errors.New("got nil *uint8")
 		}
 		return *vt != 0, nil
 	case float64:
 		return vt != 0, nil
 	case *float64:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *float64")
+			return false, errors.New("got nil *float64")
 		}
 		return *vt != 0, nil
 	case float32:
 		return vt != 0, nil
 	case *float32:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *float32")
+			return false, errors.New("got nil *float32")
 		}
 		return *vt != 0, nil
 	case string:
@@ -130,7 +131,7 @@ func ToBool(v any) (bool, error) {
 		return r, nil
 	case *string:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *string")
+			return false, errors.New("got nil *string")
 		}
 		r, err := strconv.ParseBool(*vt)
 		if err != nil {
@@ -141,49 +142,49 @@ func ToBool(v any) (bool, error) {
 		return vt != 0, nil
 	case *int8:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *int8")
+			return false, errors.New("got nil *int8")
 		}
 		return *vt != 0, nil
 	case int16:
 		return vt != 0, nil
 	case *int16:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *int16")
+			return false, errors.New("got nil *int16")
 		}
 		return *vt != 0, nil
 	case uint:
 		return vt != 0, nil
 	case *uint:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *uint")
+			return false, errors.New("got nil *uint")
 		}
 		return *vt != 0, nil
 	case uint16:
 		return vt != 0, nil
 	case *uint16:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *uint16")
+			return false, errors.New("got nil *uint16")
 		}
 		return *vt != 0, nil
 	case uint32:
 		return vt != 0, nil
 	case *uint32:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *uint32")
+			return false, errors.New("got nil *uint32")
 		}
 		return *vt != 0, nil
 	case uint64:
 		return vt != 0, nil
 	case *uint64:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *uint64")
+			return false, errors.New("got nil *uint64")
 		}
 		return *vt != 0, nil
 	case uintptr:
 		return vt != 0, nil
 	case *uintptr:
 		if vt == nil {
-			return false, fmt.Errorf("got nil *uintptr")
+			return false, errors.New("got nil *uintptr")
 		}
 		return *vt != 0, nil
 	}
@@ -226,42 +227,42 @@ func ToInt(v any) (int64, error) {
 		return int64(vt), nil
 	case *int:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, errors.New("got nil *int")
 		}
 		return int64(*vt), nil
 	case int32:
 		return int64(vt), nil
 	case *int32:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int32")
+			return 0, errors.New("got nil *int32")
 		}
 		return int64(*vt), nil
 	case int64:
 		return vt, nil
 	case *int64:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int64")
+			return 0, errors.New("got nil *int64")
 		}
 		return *vt, nil
 	case uint8:
 		return int64(vt), nil
 	case *uint8:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint8")
+			return 0, errors.New("got nil *uint8")
 		}
 		return int64(*vt), nil
 	case float64:
 		return int64(vt), nil
 	case *float64:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *float64")
+			return 0, errors.New("got nil *float64")
 		}
 		return int64(*vt), nil
 	case float32:
 		return int64(vt), nil
 	case *float32:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *float32")
+			return 0, errors.New("got nil *float32")
 		}
 		return int64(*vt), nil
 	case bool:
@@ -271,7 +272,7 @@ func ToInt(v any) (int64, error) {
 		return 0, nil
 	case *bool:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *bool")
+			return 0, errors.New("got nil *bool")
 		}
 		if *vt {
 			return 1, nil
@@ -285,7 +286,7 @@ func ToInt(v any) (int64, error) {
 		return r, nil
 	case *string:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *string")
+			return 0, errors.New("got nil *string")
 		}
 		r, err := strconv.ParseInt(*vt, 0, 64)
 		if err != nil {
@@ -298,49 +299,49 @@ func ToInt(v any) (int64, error) {
 		return int64(vt), nil
 	case *int8:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int8")
+			return 0, errors.New("got nil *int8")
 		}
 		return int64(*vt), nil
 	case int16:
 		return int64(vt), nil
 	case *int16:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int16")
+			return 0, errors.New("got nil *int16")
 		}
 		return int64(*vt), nil
 	case uint:
 		return int64(vt), nil
 	case *uint:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint")
+			return 0, errors.New("got nil *uint")
 		}
 		return int64(*vt), nil
 	case uint16:
 		return int64(vt), nil
 	case *uint16:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint16")
+			return 0, errors.New("got nil *uint16")
 		}
 		return int64(*vt), nil
 	case uint32:
 		return int64(vt), nil
 	case *uint32:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint32")
+			return 0, errors.New("got nil *uint32")
 		}
 		return int64(*vt), nil
 	case uint64:
 		return int64(vt), nil
 	case *uint64:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint64")
+			return 0, errors.New("got nil *uint64")
 		}
 		return int64(*vt), nil
 	case uintptr:
 		return int64(vt), nil
 	case *uintptr:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uintptr")
+			return 0, errors.New("got nil *uintptr")
 		}
 		return int64(*vt), nil
 	}
@@ -385,42 +386,42 @@ func ToFloat(v any) (float64, error) {
 		return vt, nil
 	case *float64:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *float64")
+			return 0, errors.New("got nil *float64")
 		}
 		return *vt, nil
 	case float32:
 		return float64(vt), nil
 	case *float32:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *float32")
+			return 0, errors.New("got nil *float32")
 		}
 		return float64(*vt), nil
 	case int:
 		return float64(vt), nil
 	case *int:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, errors.New("got nil *int")
 		}
 		return float64(*vt), nil
 	case int32:
 		return float64(vt), nil
 	case *int32:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int32")
+			return 0, errors.New("got nil *int32")
 		}
 		return float64(*vt), nil
 	case int64:
 		return float64(vt), nil
 	case *int64:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int64")
+			return 0, errors.New("got nil *int64")
 		}
 		return float64(*vt), nil
 	case uint8:
 		return float64(vt), nil
 	case *uint8:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint8")
+			return 0, errors.New("got nil *uint8")
 		}
 		return float64(*vt), nil
 	case bool:
@@ -430,7 +431,7 @@ func ToFloat(v any) (float64, error) {
 		return 0, nil
 	case *bool:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *bool")
+			return 0, errors.New("got nil *bool")
 		}
 		if *vt {
 			return 1, nil
@@ -444,7 +445,7 @@ func ToFloat(v any) (float64, error) {
 		return r, nil
 	case *string:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *string")
+			return 0, errors.New("got nil *string")
 		}
 		r, err := strconv.ParseFloat(*vt, 64)
 		if err != nil {
@@ -455,49 +456,49 @@ func ToFloat(v any) (float64, error) {
 		return float64(vt), nil
 	case *int8:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int8")
+			return 0, errors.New("got nil *int8")
 		}
 		return float64(*vt), nil
 	case int16:
 		return float64(vt), nil
 	case *int16:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int16")
+			return 0, errors.New("got nil *int16")
 		}
 		return float64(*vt), nil
 	case uint:
 		return float64(vt), nil
 	case *uint:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint")
+			return 0, errors.New("got nil *uint")
 		}
 		return float64(*vt), nil
 	case uint16:
 		return float64(vt), nil
 	case *uint16:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint16")
+			return 0, errors.New("got nil *uint16")
 		}
 		return float64(*vt), nil
 	case uint32:
 		return float64(vt), nil
 	case *uint32:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint32")
+			return 0, errors.New("got nil *uint32")
 		}
 		return float64(*vt), nil
 	case uint64:
 		return float64(vt), nil
 	case *uint64:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint64")
+			return 0, errors.New("got nil *uint64")
 		}
 		return float64(*vt), nil
 	case uintptr:
 		return float64(vt), nil
 	case *uintptr:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uintptr")
+			return 0, errors.New("got nil *uintptr")
 		}
 		return float64(*vt), nil
 	}
@@ -542,42 +543,42 @@ func ToFloat32(v any) (float32, error) {
 		return vt, nil
 	case *float32:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *float32")
+			return 0, errors.New("got nil *float32")
 		}
 		return *vt, nil
 	case float64:
 		return float32(vt), nil
 	case *float64:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *float64")
+			return 0, errors.New("got nil *float64")
 		}
 		return float32(*vt), nil
 	case int:
 		return float32(vt), nil
 	case *int:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, errors.New("got nil *int")
 		}
 		return float32(*vt), nil
 	case int32:
 		return float32(vt), nil
 	case *int32:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int32")
+			return 0, errors.New("got nil *int32")
 		}
 		return float32(*vt), nil
 	case int64:
 		return float32(vt), nil
 	case *int64:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int64")
+			return 0, errors.New("got nil *int64")
 		}
 		return float32(*vt), nil
 	case uint8:
 		return float32(vt), nil
 	case *uint8:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint8")
+			return 0, errors.New("got nil *uint8")
 		}
 		return float32(*vt), nil
 	case bool:
@@ -587,7 +588,7 @@ func ToFloat32(v any) (float32, error) {
 		return 0, nil
 	case *bool:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *bool")
+			return 0, errors.New("got nil *bool")
 		}
 		if *vt {
 			return 1, nil
@@ -601,7 +602,7 @@ func ToFloat32(v any) (float32, error) {
 		return float32(r), nil
 	case *string:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *string")
+			return 0, errors.New("got nil *string")
 		}
 		r, err := strconv.ParseFloat(*vt, 32)
 		if err != nil {
@@ -612,49 +613,49 @@ func ToFloat32(v any) (float32, error) {
 		return float32(vt), nil
 	case *int8:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int8")
+			return 0, errors.New("got nil *int8")
 		}
 		return float32(*vt), nil
 	case int16:
 		return float32(vt), nil
 	case *int16:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int8")
+			return 0, errors.New("got nil *int8")
 		}
 		return float32(*vt), nil
 	case uint:
 		return float32(vt), nil
 	case *uint:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint")
+			return 0, errors.New("got nil *uint")
 		}
 		return float32(*vt), nil
 	case uint16:
 		return float32(vt), nil
 	case *uint16:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint16")
+			return 0, errors.New("got nil *uint16")
 		}
 		return float32(*vt), nil
 	case uint32:
 		return float32(vt), nil
 	case *uint32:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint32")
+			return 0, errors.New("got nil *uint32")
 		}
 		return float32(*vt), nil
 	case uint64:
 		return float32(vt), nil
 	case *uint64:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uint64")
+			return 0, errors.New("got nil *uint64")
 		}
 		return float32(*vt), nil
 	case uintptr:
 		return float32(vt), nil
 	case *uintptr:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *uintptr")
+			return 0, errors.New("got nil *uintptr")
 		}
 		return float32(*vt), nil
 	}
@@ -960,7 +961,7 @@ func SetRobust(to, from any) error {
 			pto = rto
 		} else {
 			// Otherwise, we cannot recover any meaningful value.
-			return fmt.Errorf("got nil destination value")
+			return errors.New("got nil destination value")
 		}
 	}
 	pito := pto.Interface()

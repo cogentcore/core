@@ -525,7 +525,7 @@ func (typ *Type) UnmarshalBinary(bin []byte) error {
 	typ.entriesStart = btou32(bin[16:])
 
 	if typ.res0 != 0 || typ.res1 != 0 {
-		return fmt.Errorf("res0 res1 not zero")
+		return errors.New("res0 res1 not zero")
 	}
 
 	typ.config.size = btou32(bin[20:])

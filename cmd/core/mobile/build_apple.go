@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -182,7 +183,7 @@ func detectTeamID() (string, error) {
 	}
 
 	if len(cert.Subject.OrganizationalUnit) == 0 {
-		err = fmt.Errorf("the signing certificate has no organizational unit (team ID)")
+		err = errors.New("the signing certificate has no organizational unit (team ID)")
 		return "", err
 	}
 

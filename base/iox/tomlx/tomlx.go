@@ -5,7 +5,7 @@
 package tomlx
 
 import (
-	"fmt"
+	"errors"
 	"io"
 	"io/fs"
 
@@ -77,7 +77,7 @@ func WriteBytes(v any) ([]byte, error) {
 func OpenFromPaths(v any, file string, paths ...string) error {
 	filenames := fsx.FindFilesOnPaths(paths, file)
 	if len(filenames) == 0 {
-		return fmt.Errorf("OpenFromPaths: no files found")
+		return errors.New("OpenFromPaths: no files found")
 	}
 	return Open(v, filenames[0])
 }

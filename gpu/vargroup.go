@@ -192,7 +192,7 @@ func (vg *VarGroup) Config(dev *Device) error {
 			continue
 		}
 		if vg.Group >= 0 && vr.Role <= Index {
-			err := fmt.Errorf("gpu.VarGroup:Config Vertex or Index Vars must be located in a VertexGroup!  Use AddVertexGroup() method instead of AddGroup()")
+			err := errors.New("gpu.VarGroup:Config Vertex or Index Vars must be located in a VertexGroup!  Use AddVertexGroup() method instead of AddGroup()")
 			errs = append(errs, err)
 			errors.Log(err)
 		}

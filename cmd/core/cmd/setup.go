@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"runtime"
@@ -60,7 +61,7 @@ func Setup(c *config.Config) error { //types:add
 		if _, err := exec.LookPath("nix-shell"); err == nil {
 			return vc.Run("nix-shell", "-p", "libGL", "pkg-config", "xorg.libX11.dev", "xorg.libXcursor", "xorg.libXi", "xorg.libXinerama", "xorg.libXrandr", "xorg.libXxf86vm")
 		}
-		return fmt.Errorf("unknown Linux distro; please file a bug report at https://github.com/cogentcore/core/issues")
+		return errors.New("unknown Linux distro; please file a bug report at https://github.com/cogentcore/core/issues")
 	case "windows":
 		if _, err := exec.LookPath("gcc"); err != nil {
 			err := vc.Run("curl", "-OL", "https://github.com/skeeto/w64devkit/releases/download/v2.0.0/w64devkit-x64-2.0.0.exe")
