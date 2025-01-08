@@ -1988,7 +1988,11 @@ func (lg *ListGrid) indexFromPixel(pt image.Point) (row, col int, isValid bool) 
 		miny := st.Y
 		if r > 0 {
 			for c := 0; c < cols; c++ {
-				kw := lg.Child(r*cols + c).(Widget).AsWidget()
+				kwt := lg.Child(r*cols + c)
+				if kwt == nil {
+					continue
+				}
+				kw := kwt.(Widget).AsWidget()
 				pyi := math32.Floor(kw.Geom.Pos.Total.Y)
 				if pyi < miny {
 					miny = pyi

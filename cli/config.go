@@ -191,6 +191,9 @@ func config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	for _, fn := range cfgFiles {
 		err = openWithIncludes(opts, cfg, fn)
 		if err == nil {
+			if mc.Verbose {
+				fmt.Println("loaded config file:", fn)
+			}
 			gotAny = true
 		}
 	}
