@@ -13,7 +13,7 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
-## Styling
+## Styles
 
 You can position elements in a column instead of in a row:
 

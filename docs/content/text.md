@@ -22,7 +22,7 @@ You can use HTML formatting in text:
 core.NewText(b).SetText(`<b>You</b> can use <i>HTML</i> <u>formatting</u> inside of <b><i><u>Cogent Core</u></i></b> text, including <span style="color:red;background-color:yellow">custom styling</span> and <a href="https://example.com">links</a>`)
 ```
 
-## Styling
+## Styles
 
 You can use one of the 15 preset text types to customize the appearance of text:
 

@@ -127,4 +127,8 @@ fr.Styler(func(s *styles.Style) {
 })
 ```
 
-In the example above, notice that the [[frame]] has a size of 10em in the X direction, but only 5em in the Y direction. That is because the widget has room to grow in the X direction and thus reaches the Max, but there are plenty of other widgets competing for space in the Y direction, so it stays at its Min.
+In the example above, notice that the [[frame]] has a size of 10em in the X direction, but only 5em in the Y direction. That is because the widget has room to grow in the X direction and thus reaches the Max, but there are many other widgets competing for space in the Y direction, so it stays at its Min.
+
+### Position
+
+TODO
