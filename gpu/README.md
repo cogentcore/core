@@ -189,6 +189,7 @@ See https://web3dsurvey.com/webgpu for a browser of limits across different plat
 
 # WebGPU Links
 
+* https://google.github.io/tour-of-wgsl/ -- much more concise and clear vs. reading the spec!
 * https://webgpu.rocks/
 * https://gpuweb.github.io/gpuweb/wgsl/
 * https://www.w3.org/TR/webgpu

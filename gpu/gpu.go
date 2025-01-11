@@ -33,6 +33,9 @@ var (
 	// GPU adpater device (i.e., the type and limits of the hardware).
 	DebugAdapter = false
 
+	// SelectAdapter selects the given adapter number if >= 0.
+	SelectAdapter = -1
+
 	// theInstance is the initialized WebGPU instance, initialized
 	// for the first call to NewGPU.
 	theInstance *wgpu.Instance
@@ -216,6 +219,9 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 	n := len(gpus)
 	if n == 1 {
 		return 0
+	}
+	if SelectAdapter >= 0 && SelectAdapter < n {
+		return SelectAdapter
 	}
 	trgDevNm := ""
 	if ev := os.Getenv("GPU_DEVICE"); ev != "" {
