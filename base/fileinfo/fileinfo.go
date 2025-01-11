@@ -318,7 +318,7 @@ func (fi *FileInfo) Filenames(names *[]string) (err error) {
 // Does not actually do the renaming -- see Rename method.
 func (fi *FileInfo) RenamePath(path string) (newpath string, err error) {
 	if path == "" {
-		err = fmt.Errorf("core.Rename: new name is empty")
+		err = errors.New("core.Rename: new name is empty")
 		log.Println(err)
 		return path, err
 	}

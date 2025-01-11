@@ -6,6 +6,7 @@ package sshclient
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -77,7 +78,7 @@ func (cl *Client) CloseSessions() {
 func (cl *Client) Connect(host string) error {
 	if host == "" {
 		if cl.Host == "" {
-			return fmt.Errorf("ssh: Connect host is empty and no default host set in Config")
+			return errors.New("ssh: Connect host is empty and no default host set in Config")
 		}
 		host = cl.Host
 	}
@@ -137,7 +138,7 @@ func (cl *Client) Connect(host string) error {
 // config.  Only works if Client already connected.
 func (cl *Client) NewSession(interact bool) (*ssh.Session, error) {
 	if cl.Client == nil {
-		return nil, fmt.Errorf("ssh: no client, must Connect first")
+		return nil, errors.New("ssh: no client, must Connect first")
 	}
 	ses, err := cl.Client.NewSession()
 	if err != nil {

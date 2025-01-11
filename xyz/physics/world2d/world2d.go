@@ -7,7 +7,7 @@ package world2d
 //go:generate core generate -add-types
 
 import (
-	"fmt"
+	"errors"
 	"image"
 
 	"cogentcore.org/core/math32"
@@ -77,7 +77,7 @@ func (vw *View) UpdateBodyView(bodyNames ...string) {
 func (vw *View) Image() (*image.RGBA, error) {
 	img := vw.Scene.Pixels
 	if img == nil {
-		return nil, fmt.Errorf("eve2d.View Image: is nil")
+		return nil, errors.New("eve2d.View Image: is nil")
 	}
 	return img, nil
 }

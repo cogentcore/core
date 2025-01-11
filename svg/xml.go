@@ -8,7 +8,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/xml"
-	"fmt"
+	"errors"
 	"io"
 	"unicode/utf8"
 )
@@ -187,7 +187,7 @@ func (xe *XMLEncoder) EscapeString(s string, escapeNewline bool) {
 
 func (xe *XMLEncoder) WriteStart(start *xml.StartElement) error {
 	if start.Name.Local == "" {
-		return fmt.Errorf("xml: start tag with no name")
+		return errors.New("xml: start tag with no name")
 	}
 	if xe.CurStart != "" {
 		xe.WriteString(">")
@@ -219,7 +219,7 @@ func (xe *XMLEncoder) WriteStart(start *xml.StartElement) error {
 func (xe *XMLEncoder) WriteEnd(name string) error {
 	xe.CurIndent--
 	if name == "" {
-		return fmt.Errorf("xml: end tag with no name")
+		return errors.New("xml: end tag with no name")
 	}
 	if xe.CurStart == name {
 		xe.WriteString(" />")
