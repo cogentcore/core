@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"go/build"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -207,4 +208,38 @@ func ExtSplit(file string) (base, ext string) {
 	ext = filepath.Ext(file)
 	base = strings.TrimSuffix(file, ext)
 	return
+}
+
+// here's all the discussion about why CopyFile is not in std lib:
+// https://old.reddit.com/r/golang/comments/3lfqoh/why_golang_does_not_provide_a_copy_file_func/
+// https://github.com/golang/go/issues/8868
+
+// CopyFile copies the contents from src to dst atomically.
+// If dst does not exist, CopyFile creates it with permissions perm.
+// If the copy fails, CopyFile aborts and dst is preserved.
+func CopyFile(dst, src string, perm os.FileMode) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	tmp, err := os.CreateTemp(filepath.Dir(dst), "")
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(tmp, in)
+	if err != nil {
+		tmp.Close()
+		os.Remove(tmp.Name())
+		return err
+	}
+	if err = tmp.Close(); err != nil {
+		os.Remove(tmp.Name())
+		return err
+	}
+	if err = os.Chmod(tmp.Name(), perm); err != nil {
+		os.Remove(tmp.Name())
+		return err
+	}
+	return os.Rename(tmp.Name(), dst)
 }

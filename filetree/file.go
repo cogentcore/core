@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
@@ -279,7 +278,7 @@ func (fn *Node) copyFileToDir(filename string, perm os.FileMode) {
 	ppath := string(fn.Filepath)
 	sfn := filepath.Base(filename)
 	tpath := filepath.Join(ppath, sfn)
-	fileinfo.CopyFile(tpath, filename, perm)
+	fsx.CopyFile(tpath, filename, perm)
 	fn.FileRoot().UpdatePath(ppath)
 	ofn, ok := fn.FileRoot().FindFile(filename)
 	if ok && ofn.Info.VCS >= vcs.Stored {
