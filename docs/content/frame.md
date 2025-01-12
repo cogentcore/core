@@ -15,18 +15,6 @@ core.NewButton(fr).SetText("Third")
 
 ## Styles
 
-You can position elements in a column instead of in a row:
-
-```Go
-fr := core.NewFrame(b)
-fr.Styler(func(s *styles.Style) {
-    s.Direction = styles.Column
-})
-core.NewButton(fr).SetText("First")
-core.NewButton(fr).SetText("Second")
-core.NewButton(fr).SetText("Third")
-```
-
 You can change the space between elements in a frame:
 
 ```Go
@@ -51,18 +39,6 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
-You can make a frame add scrollbars when it overflows:
-
-```Go
-fr := core.NewFrame(b)
-fr.Styler(func(s *styles.Style) {
-    s.Overflow.X = styles.OverflowAuto
-    s.Max.X.Em(10)
-})
-core.NewButton(fr).SetText("First")
-core.NewButton(fr).SetText("Second")
-core.NewButton(fr).SetText("Third")
-```
 
 ## Separator
 
