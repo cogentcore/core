@@ -312,10 +312,18 @@ func (ct *Content) makeTableOfContents(w *core.Frame) {
 		}
 		return tree.Continue
 	})
+
+	if contents.NumChildren() == 0 {
+		contents.Delete()
+	}
 }
 
 // makeCategories makes the categories tree for the current page and adds it to [Content.leftFrame].
 func (ct *Content) makeCategories() {
+	if len(ct.currentPage.Categories) == 0 {
+		return
+	}
+
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
 	for _, cat := range ct.currentPage.Categories {
 		catTree := core.NewTree(cats).SetText(cat)
