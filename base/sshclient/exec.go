@@ -47,10 +47,9 @@ func (cl *Client) Exec(sio *exec.StdIOState, start, output bool, cmd string, arg
 }
 
 func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, start, output bool, cmd string, args ...string) (string, error) {
-	// todo: env is established on connection!
-	// for k, v := range cl.Env {
-	// 	ses.Env = append(ses.Env, k+"="+v)
-	// }
+	for k, v := range cl.Env {
+		ses.Setenv(k, v)
+	}
 	var err error
 	out := ""
 	ses.Stderr = sio.Err // note: no need to save previous b/c not retained
