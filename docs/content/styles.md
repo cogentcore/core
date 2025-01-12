@@ -197,7 +197,7 @@ You can change the space between widgets:
 ```Go
 fr := core.NewFrame(b)
 fr.Styler(func(s *styles.Style) {
-    s.Gap.Set(units.Em(2))
+    s.Gap.Set(units.Em(3))
 })
 core.NewButton(fr).SetText("First")
 core.NewButton(fr).SetText("Second")
