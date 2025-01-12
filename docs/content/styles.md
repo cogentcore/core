@@ -74,7 +74,7 @@ fr.Styler(func(s *styles.Style) {
 
 ### Border radius
 
-You can make a widget have curved corners, whether or not it has a [[#border]]:
+You can make a widget have curved corners, regardless of whether it has a [[#border]]:
 
 ```Go
 fr := core.NewFrame(b)
@@ -207,6 +207,21 @@ core.NewButton(fr).SetText("Third")
 ### Alignment
 
 *Note: we recommend experimenting with alignment properties in the [[style playground]] to get a better sense of how they work.*
+
+You can use the CenterAll helper function to center widgets in all possible ways:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.CenterAll()
+    s.Grow.Set(1, 1)
+    s.Min.Set(units.Em(10))
+    s.Background = colors.Scheme.SurfaceContainerHigh
+})
+core.NewButton(fr).SetText("First")
+core.NewButton(fr).SetText("Second")
+core.NewButton(fr).SetText("Third")
+```
 
 #### Justify
 
