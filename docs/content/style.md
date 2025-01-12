@@ -21,7 +21,7 @@ core.NewButton(b).SetText("Success button").Styler(func(s *styles.Style) {
 })
 ```
 
-You can change the size of a widget using Cogent Core's flexible [[styles#unit]] system:
+You can change the [[styles#size]] of a widget using Cogent Core's flexible [[unit]] system:
 
 ```Go
 core.NewFrame(b).Styler(func(s *styles.Style) {

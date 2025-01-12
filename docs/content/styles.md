@@ -87,7 +87,7 @@ fr.Styler(func(s *styles.Style) {
 
 ## Layout
 
-There are many layout properties that customize the positioning and sizing of widgets. See the [[layout]] page for a low-level explanation of the layout process.
+There are many layout properties that customize the positioning and sizing of widgets, typically using [[unit]]s. See the [[layout]] page for a low-level explanation of the layout process.
 
 ### Size
 
