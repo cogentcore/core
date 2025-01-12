@@ -131,4 +131,33 @@ In the example above, notice that the [[frame]] has a size of 10em in the X dire
 
 ### Position
 
-TODO
+You can control the positioning of the elements of a [[frame]] or other container widget in several ways.
+
+You can make widgets wrap when they overflow:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Wrap = true
+    s.Min.X.Em(20)
+})
+core.NewButton(fr).SetText("First")
+core.NewButton(fr).SetText("Second")
+core.NewButton(fr).SetText("Third")
+core.NewButton(fr).SetText("Fourth")
+core.NewButton(fr).SetText("Fifth")
+```
+
+You can position widgets in a grid:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Display = styles.Grid
+    s.Columns = 2
+})
+core.NewButton(fr).SetText("First")
+core.NewButton(fr).SetText("Second")
+core.NewButton(fr).SetText("Third")
+core.NewButton(fr).SetText("Fourth")
+```

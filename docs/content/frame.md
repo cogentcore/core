@@ -64,33 +64,6 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
-You can make a frame wrap when it overflows:
-
-```Go
-fr := core.NewFrame(b)
-fr.Styler(func(s *styles.Style) {
-    s.Wrap = true
-    s.Max.X.Em(10)
-})
-core.NewButton(fr).SetText("First")
-core.NewButton(fr).SetText("Second")
-core.NewButton(fr).SetText("Third")
-```
-
-You can position elements in a grid:
-
-```Go
-fr := core.NewFrame(b)
-fr.Styler(func(s *styles.Style) {
-    s.Display = styles.Grid
-    s.Columns = 2
-})
-core.NewButton(fr).SetText("First")
-core.NewButton(fr).SetText("Second")
-core.NewButton(fr).SetText("Third")
-core.NewButton(fr).SetText("Fourth")
-```
-
 You can add a background to a frame:
 
 ```Go
