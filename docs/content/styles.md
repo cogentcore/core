@@ -204,6 +204,41 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
+### Alignment
+
+*Note: we recommend experimenting with alignment properties in the [[style playground]] to get a better sense of how they work.*
+
+#### Justify
+
+You can change the distribution of widgets on the main axis:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Justify.Content = styles.Center
+    s.Grow.Set(1, 0)
+})
+core.NewButton(fr).SetText("First")
+core.NewButton(fr).SetText("Second")
+core.NewButton(fr).SetText("Third")
+```
+
+#### Align
+
+You can change the alignment of widgets on the cross (non-main) axis:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Align.Content = styles.End
+    s.Min.Y.Em(10)
+    s.Background = colors.Scheme.SurfaceContainerHigh
+})
+core.NewButton(fr).SetText("First")
+core.NewButton(fr).SetText("Second")
+core.NewButton(fr).SetText("Third")
+```
+
 ### Overflow
 
 You can make a container add scrollbars when it overflows:
