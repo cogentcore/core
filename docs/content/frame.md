@@ -15,30 +15,7 @@ core.NewButton(fr).SetText("Third")
 
 ## Styles
 
-You can change the space between elements in a frame:
-
-```Go
-fr := core.NewFrame(b)
-fr.Styler(func(s *styles.Style) {
-    s.Gap.Set(units.Em(2))
-})
-core.NewButton(fr).SetText("First")
-core.NewButton(fr).SetText("Second")
-core.NewButton(fr).SetText("Third")
-```
-
-You can limit the size of a frame:
-
-```Go
-fr := core.NewFrame(b)
-fr.Styler(func(s *styles.Style) {
-    s.Max.X.Em(10)
-})
-core.NewButton(fr).SetText("First")
-core.NewButton(fr).SetText("Second")
-core.NewButton(fr).SetText("Third")
-```
-
+See the [[styles]] page for documentation on important [[style]] properties for frames, especially the [[styles#layout]] styles.
 
 ## Separator
 

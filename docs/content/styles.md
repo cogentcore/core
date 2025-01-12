@@ -93,6 +93,8 @@ There are many layout properties that customize the positioning and sizing of wi
 
 You can control the size of a widget through three properties: `Min`, `Max`, and `Grow`.
 
+#### Min
+
 Min specifies the minimum size that a widget must receive:
 
 ```Go
@@ -126,6 +128,8 @@ fr.Styler(func(s *styles.Style) {
 })
 ```
 
+#### Max
+
 Max puts a constraint on the amount a widget can Grow:
 
 ```Go
@@ -139,6 +143,18 @@ fr.Styler(func(s *styles.Style) {
 ```
 
 In the example above, notice that the [[frame]] has a size of 10em in the X direction, but only 5em in the Y direction. That is because the widget has room to grow in the X direction and thus reaches the Max, but there are many other widgets competing for space in the Y direction, so it stays at its Min.
+
+Max can also be used to limit the size of a widget without Grow:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Max.X.Em(10)
+})
+core.NewButton(fr).SetText("First")
+core.NewButton(fr).SetText("Second")
+core.NewButton(fr).SetText("Third")
+```
 
 ### Position
 
@@ -172,6 +188,20 @@ core.NewButton(fr).SetText("First")
 core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 core.NewButton(fr).SetText("Fourth")
+```
+
+#### Gap
+
+You can change the space between widgets:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Gap.Set(units.Em(2))
+})
+core.NewButton(fr).SetText("First")
+core.NewButton(fr).SetText("Second")
+core.NewButton(fr).SetText("Third")
 ```
 
 ### Overflow
