@@ -20,10 +20,21 @@ You can set the background color of a [[widget]]:
 ```Go
 fr := core.NewFrame(b)
 fr.Styler(func(s *styles.Style) {
+    s.Background = colors.Scheme.Warn.Container
+})
+```
+
+You can use a [[color#gradient]] background:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
     s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
     s.Min.Set(units.Em(5))
 })
 ```
+
+See the [[color]] page for more possible background color options such as an [[color#image]].
 
 ## Border
 
@@ -63,7 +74,7 @@ fr.Styler(func(s *styles.Style) {
 
 ### Border radius
 
-You can make a widget have a curved rendering boundary, whether or not it has a [[#border]]:
+You can make a widget have curved corners, whether or not it has a [[#border]]:
 
 ```Go
 fr := core.NewFrame(b)
