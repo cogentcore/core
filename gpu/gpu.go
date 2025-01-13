@@ -34,6 +34,8 @@ var (
 	DebugAdapter = false
 
 	// SelectAdapter selects the given adapter number if >= 0.
+	// If there are multiple discrete gpu adapters, then all of them
+	// are listed in order 0..n-1.
 	SelectAdapter = -1
 
 	// theInstance is the initialized WebGPU instance, initialized
@@ -131,11 +133,11 @@ func (gp *GPU) init(sf *wgpu.Surface) error {
 	gpIndex := 0
 	if gp.ComputeOnly {
 		gpus := inst.EnumerateAdapters(nil)
-		gpIndex = gp.SelectGPU(gpus)
+		gpIndex = gp.SelectComputeGPU(gpus)
 		gp.GPU = gpus[gpIndex]
 	} else {
 		gpus := inst.EnumerateAdapters(nil)
-		gpIndex = gp.SelectGPU(gpus)
+		gpIndex = gp.SelectGraphicsGPU(gpus)
 		gp.GPU = gpus[gpIndex]
 		// note: below is a more standard way of doing it, but until we fix the issues
 		// with NVIDIA adapters on linux (#1247), we are using our custom logic.
@@ -215,11 +217,12 @@ func adapterName(ai *wgpu.AdapterInfo) string {
 	return ai.VendorName
 }
 
-func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
+func (gp *GPU) SelectGraphicsGPU(gpus []*wgpu.Adapter) int {
 	n := len(gpus)
 	if n == 1 {
 		return 0
 	}
+
 	if SelectAdapter >= 0 && SelectAdapter < n {
 		return SelectAdapter
 	}
@@ -227,12 +230,6 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 	if ev := os.Getenv("GPU_DEVICE"); ev != "" {
 		trgDevNm = ev
 	}
-	if gp.ComputeOnly {
-		if ev := os.Getenv("GPU_COMPUTE_DEVICE"); ev != "" {
-			trgDevNm = ev
-		}
-	}
-
 	if trgDevNm != "" {
 		idx, err := strconv.Atoi(trgDevNm)
 		if err == nil && idx >= 0 && idx < n {
@@ -268,7 +265,7 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 		}
 		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
 			vnm := actualVendorName(&props)
-			if !gp.ComputeOnly && (runtime.GOOS == "linux" || runtime.GOOS == "windows") && vnm == "nvidia" {
+			if (runtime.GOOS == "linux" || runtime.GOOS == "windows") && vnm == "nvidia" {
 				if Debug || DebugAdapter {
 					fmt.Println("not selecting discrete nvidia GPU: tends to crash when resizing windows")
 				}
@@ -276,6 +273,88 @@ func (gp *GPU) SelectGPU(gpus []*wgpu.Adapter) int {
 			} else {
 				score++
 			}
+		}
+		if !gpuIsGLdBackend(props.BackendType) {
+			score++
+		}
+		if score > hiscore {
+			hiscore = score
+			best = gi
+		}
+	}
+	return best
+}
+
+func (gp *GPU) SelectComputeGPU(gpus []*wgpu.Adapter) int {
+	n := len(gpus)
+	if n == 1 {
+		return 0
+	}
+
+	var discrete []int
+	for gi := range n {
+		props := gpus[gi].GetInfo()
+		if gpuIsBadBackend(props.BackendType) {
+			continue
+		}
+		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
+			discrete = append(discrete, gi)
+		}
+	}
+
+	ndisc := len(discrete)
+
+	if ndisc > 0 && SelectAdapter >= 0 && SelectAdapter < ndisc {
+		return discrete[SelectAdapter]
+	}
+	trgDevNm := ""
+	if ev := os.Getenv("GPU_DEVICE"); ev != "" {
+		trgDevNm = ev
+	}
+	if gp.ComputeOnly {
+		if ev := os.Getenv("GPU_COMPUTE_DEVICE"); ev != "" {
+			trgDevNm = ev
+		}
+	}
+
+	if trgDevNm != "" {
+		idx, err := strconv.Atoi(trgDevNm)
+		if err == nil && idx >= 0 && idx < ndisc {
+			return discrete[idx]
+		}
+		if err == nil && idx >= 0 && idx < n {
+			return idx
+		}
+		for gi := range n {
+			props := gpus[gi].GetInfo()
+			if gpuIsBadBackend(props.BackendType) {
+				continue
+			}
+			pnm := adapterName(&props)
+			if strings.Contains(pnm, trgDevNm) {
+				devNm := props.Name
+				if Debug {
+					log.Printf("gpu: selected device named: %s, specified in GPU_DEVICE or GPU_COMPUTE_DEVICE environment variable, index: %d\n", devNm, gi)
+				}
+				return gi
+			}
+		}
+		if Debug {
+			log.Printf("gpu: unable to find device named: %s, specified in GPU_DEVICE or GPU_COMPUTE_DEVICE environment variable\n", trgDevNm)
+		}
+	}
+
+	// scoring system has 1 point for discrete and 1 for non-gl backend
+	hiscore := 0
+	best := 0
+	for gi := range n {
+		score := 0
+		props := gpus[gi].GetInfo()
+		if gpuIsBadBackend(props.BackendType) {
+			continue
+		}
+		if props.AdapterType == wgpu.AdapterTypeDiscreteGPU {
+			score++
 		}
 		if !gpuIsGLdBackend(props.BackendType) {
 			score++

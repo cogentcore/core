@@ -36,9 +36,12 @@ func (cl *Client) Exec(sio *exec.StdIOState, start, output bool, cmd string, arg
 		if ok {
 			return s2
 		}
+		switch s {
+		case "!", "?":
+			return "$" + s
+		}
 		return os.Getenv(s)
 	}
-	// todo: what does this do?
 	cmd = os.Expand(cmd, expand)
 	for i := range args {
 		args[i] = os.Expand(args[i], expand)
@@ -73,6 +76,8 @@ func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, start, output bool
 		}
 		cmds = `cd '` + cl.Dir + `'; ` + cmds
 	}
+
+	// fmt.Println(start, output, "cmds:", cmds)
 
 	if !cl.PrintOnly {
 		switch {

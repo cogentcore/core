@@ -20,7 +20,7 @@ The main gpu code is in the top-level `gpu` package, with the following sub-pack
 
 # Selecting a GPU Device
 
-For systems with multiple GPU devices, by default the discrete device is selected, and if multiple of those are present, the one with the most RAM is used.  To see what is available and their properties, use:
+For systems with multiple GPU devices, by default the discrete device is selected, and if multiple of those are present, the one with the most RAM is used. To see what is available and their properties, use:
 
 ```
 $ go run cogentcore.org/core/gpu/cmd/webgpuinfo@latest
@@ -28,10 +28,17 @@ $ go run cogentcore.org/core/gpu/cmd/webgpuinfo@latest
 
 (you can `install` that tool for later use as well)
 
-The following environment variables can be set to specifically select a particular device by device number or name (`deviceName`): 
+There are different rules and ordering of adapters for graphics vs. compute usage.
 
-* `GPU_DEVICE`, for GUI and compute usage.
-* `GPU_COMPUTE_DEVICE`, only used for compute, if present, will override above, so you can use different GPUs for graphics vs compute.
+## Graphics usage
+
+The `GPU_DEVICE` environment variable selects a particular device by number or name (`deviceName`). The order of the devices are as presented by the WebGPU system, and shown in the `webgpuinfo` listing.
+
+## Compute usage
+
+For compute usage, if there are multiple discrete devices, then they are ordered from 0 to n-1 for device numbering, so that the logical process of selecting among different devices is straightforward.  The `gpu.SelectAdapter` variable can be set to directly set an adapter by logical index, or the `GPU_COMPUTE_DEVICE` environment variable.
+
+## Types
 
 * `GPU` represents the hardware `Adapter` and maintains global settings, info about the hardware.
 

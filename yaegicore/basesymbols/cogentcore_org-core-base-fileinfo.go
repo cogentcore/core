@@ -48,7 +48,6 @@ func init() {
 		"CategoryFromMime":    reflect.ValueOf(fileinfo.CategoryFromMime),
 		"Code":                reflect.ValueOf(fileinfo.Code),
 		"Color":               reflect.ValueOf(fileinfo.Color),
-		"CopyFile":            reflect.ValueOf(fileinfo.CopyFile),
 		"Cosh":                reflect.ValueOf(fileinfo.Cosh),
 		"Csh":                 reflect.ValueOf(fileinfo.Csh),
 		"Css":                 reflect.ValueOf(fileinfo.Css),
