@@ -128,11 +128,11 @@ func (ct *Content) Init() {
 		})
 		tree.Add(p, func(w *core.Frame) {
 			w.Maker(func(p *tree.Plan) {
-				if ct.currentPage.Name != "" {
+				if ct.currentPage.Title != "" {
 					tree.Add(p, func(w *core.Text) {
 						w.SetType(core.TextDisplaySmall)
 						w.Updater(func() {
-							w.SetText(ct.currentPage.Name)
+							w.SetText(ct.currentPage.Title)
 						})
 					})
 				}

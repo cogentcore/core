@@ -39,6 +39,11 @@ type Page struct {
 	// specified in the front matter indicates that this the root page.
 	URL string
 
+	// Title is the title displayed at the top of the page. It defaults to [Page.Name].
+	// Note that [Page.Name] is still used for the stage title and other such things; this
+	// is only for the actual title widget.
+	Title string
+
 	// Date is the optional date that the page was published.
 	Date time.Time
 
@@ -78,6 +83,7 @@ func NewPage(source fs.FS, filename string) (*Page, error) {
 func (pg *Page) Defaults() {
 	pg.Name = strcase.ToSentence(strings.TrimSuffix(pg.Filename, filepath.Ext(pg.Filename)))
 	pg.URL = strcase.ToKebab(pg.Name)
+	pg.Title = pg.Name
 }
 
 // ReadMetadata reads the page metadata from the front matter of the page file,
