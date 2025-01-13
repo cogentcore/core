@@ -5,10 +5,10 @@
 package htmlcore
 
 import (
+	"log/slog"
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/base/logx"
 	"github.com/gomarkdown/markdown/ast"
 	"github.com/gomarkdown/markdown/parser"
 )
@@ -62,7 +62,7 @@ func wikilink(ctx *Context, fn func(p *parser.Parser, data []byte, offset int) (
 		inside, after := getWikilinkText(data)
 		url, label := runWikilinkHandlers(ctx, inside)
 		if len(url) == 0 && len(label) == 0 {
-			logx.PrintfError("invalid wikilink: %s", inside)
+			slog.Error("invalid wikilink", "link", string(inside))
 			return fn(p, original, offset)
 		}
 		link := &ast.Link{
