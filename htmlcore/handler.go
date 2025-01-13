@@ -116,7 +116,7 @@ func handleElement(ctx *Context) {
 				ed.Buffer.SetFileExt(lang)
 			}
 			ed.Buffer.SetString(ExtractText(ctx))
-			if BindTextEditor != nil && lang == "Go" {
+			if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
 				ed.Buffer.SpacesToTabs(0, ed.Buffer.NumLines()) // Go uses tabs
 				parent := core.NewFrame(ed.Parent)
 				parent.Styler(func(s *styles.Style) {
