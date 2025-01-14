@@ -80,13 +80,13 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget, language string) 
 
 		parent.AsTree().DeleteChildren()
 		str := ed.Buffer.String()
-		// all code must be in a function for declarations to be handled correctly
-		if !strings.Contains(str, "func main()") {
+		// all Go code must be in a function for declarations to be handled correctly
+		if language == "Go" && !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"
 		}
 		_, err := in.Eval(str)
 		if err != nil {
-			core.ErrorSnackbar(ed, err, "Error interpreting Go code")
+			core.ErrorSnackbar(ed, err, fmt.Sprintf("Error interpreting %s code", language))
 			return
 		}
 		parent.AsWidget().Update()
