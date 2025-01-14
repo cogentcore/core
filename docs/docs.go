@@ -116,7 +116,7 @@ func main() {
 			core.ErrorSnackbar(ed, ed.Buffer.Save(), "Error saving code")
 		})
 		parent := core.NewFrame(splits)
-		yaegicore.BindTextEditor(ed, parent)
+		yaegicore.BindTextEditor(ed, parent, "Go")
 		return true
 	}
 	ctx.ElementHandlers["style-demo"] = func(ctx *htmlcore.Context) bool {

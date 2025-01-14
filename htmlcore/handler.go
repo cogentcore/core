@@ -137,7 +137,7 @@ func handleElement(ctx *Context) {
 						parent.Styles.Grow.Y = s.Grow.Y
 					})
 				})
-				BindTextEditor(ed, parent)
+				BindTextEditor(ed, parent, lang)
 			} else {
 				ed.SetReadOnly(true)
 				ed.Buffer.Options.LineNumbers = false
@@ -336,4 +336,4 @@ func Get(ctx *Context, url string) (*http.Response, error) {
 // BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
 // when importing yaegicore, which provides interactive editing functionality for Go
 // code blocks in text editors.
-var BindTextEditor func(ed *texteditor.Editor, parent core.Widget)
+var BindTextEditor func(ed *texteditor.Editor, parent core.Widget, language string)
