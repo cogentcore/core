@@ -1339,10 +1339,9 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope lexer.Reg
 				ps.Error(creg.St, fmt.Sprintf("required element: %v did not match input", rr.Rule.Name), pr)
 				valid = false
 				break
-			} else {
-				if ps.Trace.On {
-					ps.Trace.Out(ps, pr, Run, creg.St, creg, trcAST, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name))
-				}
+			}
+			if ps.Trace.On {
+				ps.Trace.Out(ps, pr, Run, creg.St, creg, trcAST, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name))
 			}
 		}
 		if !rr.Opt && ourAST != nil {

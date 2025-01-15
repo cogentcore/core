@@ -64,11 +64,11 @@ func OnePointerValue(v reflect.Value) reflect.Value {
 		pv := reflect.New(v.Type())
 		pv.Elem().Set(v)
 		return pv
-	} else {
-		for v.Elem().Kind() == reflect.Pointer {
-			v = v.Elem()
-		}
 	}
+	for v.Elem().Kind() == reflect.Pointer {
+		v = v.Elem()
+	}
+
 	return v
 }
 

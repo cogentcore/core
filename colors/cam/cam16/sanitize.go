@@ -27,9 +27,9 @@ func SanitizeDegrees(deg float32) float32 {
 		return math32.Mod(deg, 360) + 360
 	} else if deg >= 360 {
 		return math32.Mod(deg, 360)
-	} else {
-		return deg
 	}
+
+	return deg
 }
 
 // SanitizeRadians sanitizes a small enough angle in radians.

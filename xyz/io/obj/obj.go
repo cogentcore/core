@@ -100,9 +100,8 @@ func (dec *Decoder) SetFileFS(fsys fs.FS, fname string) ([]string, error) {
 	exists, _ = fsx.FileExistsFS(dec.FS, fname)
 	if exists {
 		return []string{fname, mtlf}, nil
-	} else {
-		return []string{fname}, nil
 	}
+	return []string{fname}, nil
 }
 
 // Decode reads the given data and decodes into Decoder tmp vars.

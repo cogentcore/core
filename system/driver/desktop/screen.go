@@ -144,23 +144,23 @@ func (a *App) GetScreens() {
 					}
 					scNo++
 					continue
-				} else { // use plausible defaults.. sheesh
-					sc.ScreenNumber = scNo
-					sc.Name = MacOsBuiltinMonitor
-					sc.Geometry.Max = image.Point{2056, 1329}
-					sc.DevicePixelRatio = 2
-					sc.PixelSize = sc.Geometry.Max.Mul(2)
-					sc.PhysicalSize = image.Point{344, 222}
-					sc.UpdatePhysicalDPI()
-					sc.Depth = 24
-					sc.RefreshRate = 60
-					sc.UpdateLogicalDPI()
-					if ScreenDebug {
-						log.Printf("ScreenDebug: getScreens: MacOS unknown display set to Built-in Retina Display %d:\n%s\n", i, reflectx.StringJSON(sc))
-					}
-					scNo++
-					continue
 				}
+				// use plausible defaults.. sheesh
+				sc.ScreenNumber = scNo
+				sc.Name = MacOsBuiltinMonitor
+				sc.Geometry.Max = image.Point{2056, 1329}
+				sc.DevicePixelRatio = 2
+				sc.PixelSize = sc.Geometry.Max.Mul(2)
+				sc.PhysicalSize = image.Point{344, 222}
+				sc.UpdatePhysicalDPI()
+				sc.Depth = 24
+				sc.RefreshRate = 60
+				sc.UpdateLogicalDPI()
+				if ScreenDebug {
+					log.Printf("ScreenDebug: getScreens: MacOS unknown display set to Built-in Retina Display %d:\n%s\n", i, reflectx.StringJSON(sc))
+				}
+				scNo++
+				continue
 			}
 			a.Screens = slices.Delete(a.Screens, scNo, scNo+1)
 			a.Monitors = slices.Delete(a.Monitors, scNo, scNo+1)

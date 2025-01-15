@@ -221,9 +221,8 @@ func (kt KeyToken) StringKey() string {
 	tstr := string([]byte{byte(kt.Token)})
 	if kt.Token.IsKeyword() {
 		return tstr + kt.Key
-	} else {
-		return tstr
 	}
+	return tstr
 }
 
 // KeyTokenList is a list (slice) of KeyTokens
