@@ -56,27 +56,49 @@ func init() {
 	basesymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
 }
 
+var currentGoalInterpreter Interpreter
+
+// getInterpreter returns a new interpreter for the given language,
+// or [currentGoalInterpreter] if the language is "Goal" and it is non-nil.
+func getInterpreter(language string) (in Interpreter, new bool, err error) {
+	if language == "Goal" && currentGoalInterpreter != nil {
+		return currentGoalInterpreter, false, nil
+	}
+
+	f := Interpreters[language]
+	if f == nil {
+		return nil, false, fmt.Errorf("no entry in yaegicore.Interpreters for language %q", language)
+	}
+	in = f(interp.Options{})
+
+	if language == "Goal" {
+		currentGoalInterpreter = in
+	}
+	return in, true, nil
+}
+
 // BindTextEditor binds the given text editor to a yaegi interpreter
 // such that the contents of the text editor are interpreted as code
 // of the given language, which is run in the context of the given parent widget.
 // It is used as the default value of [htmlcore.BindTextEditor].
 func BindTextEditor(ed *texteditor.Editor, parent core.Widget, language string) {
 	oc := func() {
-		inNew := Interpreters[language]
-		if inNew == nil {
-			core.ErrorSnackbar(ed, fmt.Errorf("no entry in yaegicore.Interpreters for language %q", language))
+		in, new, err := getInterpreter(language)
+		if err != nil {
+			core.ErrorSnackbar(ed, err)
 			return
 		}
-		in := inNew(interp.Options{})
 		core.ExternalParent = parent
 		coresymbols.Symbols["."]["b"] = reflect.ValueOf(parent)
 		// the normal AutoPlanName cannot be used because the stack trace in yaegi is not helpful
 		coresymbols.Symbols["cogentcore.org/core/tree/tree"]["AutoPlanName"] = reflect.ValueOf(func(int) string {
 			return fmt.Sprintf("yaegi-%v", atomic.AddUint64(&autoPlanNameCounter, 1))
 		})
-		errors.Log(in.Use(basesymbols.Symbols))
-		errors.Log(in.Use(coresymbols.Symbols))
-		in.ImportUsed()
+		if new {
+			errors.Log(in.Use(basesymbols.Symbols))
+			errors.Log(in.Use(coresymbols.Symbols))
+			in.ImportUsed()
+		}
 
 		parent.AsTree().DeleteChildren()
 		str := ed.Buffer.String()
@@ -84,7 +106,7 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget, language string) 
 		if language == "Go" && !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"
 		}
-		_, err := in.Eval(str)
+		_, err = in.Eval(str)
 		if err != nil {
 			core.ErrorSnackbar(ed, err, fmt.Sprintf("Error interpreting %s code", language))
 			return
