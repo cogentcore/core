@@ -58,6 +58,12 @@ func init() {
 
 var currentGoalInterpreter Interpreter
 
+// interpreterParent is used to store the parent widget ("b") for the interpreter.
+// It exists such that it can be updated after-the-fact, such in Cogent Lab/Goal where interpreters
+// are re-used across multiple text editors, wherein the parent widget must be remotely controllable
+// with a pointer to keep the parent widget up-to-date.
+var interpreterParent = new(core.Widget)
+
 // getInterpreter returns a new interpreter for the given language,
 // or [currentGoalInterpreter] if the language is "Goal" and it is non-nil.
 func getInterpreter(language string) (in Interpreter, new bool, err error) {
@@ -89,7 +95,8 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget, language string) 
 			return
 		}
 		core.ExternalParent = parent
-		coresymbols.Symbols["."]["b"] = reflect.ValueOf(parent)
+		*interpreterParent = parent
+		coresymbols.Symbols["."]["b"] = reflect.ValueOf(interpreterParent).Elem()
 		// the normal AutoPlanName cannot be used because the stack trace in yaegi is not helpful
 		coresymbols.Symbols["cogentcore.org/core/tree/tree"]["AutoPlanName"] = reflect.ValueOf(func(int) string {
 			return fmt.Sprintf("yaegi-%v", atomic.AddUint64(&autoPlanNameCounter, 1))
