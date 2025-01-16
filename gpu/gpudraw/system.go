@@ -154,7 +154,7 @@ func (dw *Drawer) drawAll() error {
 		return err
 	}
 
-	// finalizers is a collection of postponed finalizer for objects allocated in CGO world.
+	// finalizers is a collection of postponed finalizers for objects allocated in CGO world.
 	var finalizers memoryFinalizer
 
 	imgIdx := 0
