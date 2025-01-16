@@ -53,7 +53,11 @@ func NewComputeDevice(gpu *GPU) (*Device, error) {
 
 	limits.MaxStorageBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxStorageBufferBindingSize), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
 	// note: this limit is not working properly:
-	limits.MaxBufferSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxBufferSize), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
+	g4 := 0xFFFFFF00
+	limits.MaxBufferSize = uint64(MemSizeAlignDown(min(int(gpu.Limits.Limits.MaxBufferSize), g4), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
+	if limits.MaxBufferSize == 0 {
+	   limits.MaxBufferSize = uint64(g4)
+   	}
 	// limits.MaxBindGroups = gpu.Limits.Limits.MaxBindGroups // note: no point in changing -- web constraint
 
 	if Debug {
