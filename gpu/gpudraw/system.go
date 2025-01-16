@@ -197,7 +197,7 @@ func (dw *Drawer) drawAll() error {
 
 	// we should actually run finalizers when everything new is up and running on GPU.
 	if err := finalizers.Finalize(); err != nil {
-		return fmt.Errorf("Drawer.drawAll: finalizator failed: %w", err)
+		return fmt.Errorf("Drawer.drawAll: finalizer failed: %w", err)
 	}
 
 	return nil
