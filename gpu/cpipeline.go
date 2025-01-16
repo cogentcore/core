@@ -134,8 +134,9 @@ func (pl *ComputePipeline) BindAllGroups(ce *wgpu.ComputePassEncoder) {
 func (pl *ComputePipeline) BindGroup(ce *wgpu.ComputePassEncoder, group int) {
 	vs := pl.Vars()
 	vg := vs.Groups[group]
-	bg, dynOffs, err := vg.bindGroup(vs)
+	bg, release, dynOffs, err := vg.bindGroup(vs)
 	if err == nil {
+		defer release()
 		ce.SetBindGroup(uint32(vg.Group), bg, dynOffs)
 	}
 }

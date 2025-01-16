@@ -6,6 +6,7 @@ package gpudraw
 
 import (
 	"embed"
+	"fmt"
 	"image"
 	"image/draw"
 	"unsafe"
@@ -108,6 +109,34 @@ func (dw *Drawer) configSystem(gp *gpu.GPU, rd gpu.Renderer) {
 	img.SetFromGoImage(dimg, 0)
 }
 
+// memoryFinalizer is a companion of the RenderPassEncoder.
+type memoryFinalizer []func() error
+
+func (o memoryFinalizer) AddFinalizer(finalizers ...func() error) memoryFinalizer {
+	if len(finalizers) == 0 {
+		return o
+	}
+
+	return append(o, finalizers...)
+}
+
+func (o memoryFinalizer) Finalize() error {
+	var errs []error
+
+	for _, finalize := range o {
+		err := finalize()
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if err := errors.Join(errs...); err != nil {
+		return fmt.Errorf("render pass encoder finalization failed: %w", err)
+	}
+
+	return nil
+}
+
 func (dw *Drawer) drawAll() error {
 	sy := dw.System
 
@@ -125,6 +154,9 @@ func (dw *Drawer) drawAll() error {
 		return err
 	}
 
+	// finalizers is a collection of postponed finalizer for objects allocated in CGO world.
+	var finalizers memoryFinalizer
+
 	imgIdx := 0
 	lastOp := draw.Op(-1)
 	_ = lastOp
@@ -140,20 +172,33 @@ func (dw *Drawer) drawAll() error {
 		case fillSrc:
 			pl = sy.GraphicsPipelines["fillsrc"]
 		}
+
 		mvl.DynamicIndex = i
 		if op < fillOver {
 			tvr.SetCurrentValue(dw.images.used[imgIdx].index)
 			imgIdx++
 		}
+
 		if op != lastOp {
 			pl.BindPipeline(rp)
 			lastOp = op
 		} else {
 			pl.BindAllGroups(rp)
 		}
+
 		pl.BindDrawIndexed(rp)
+
+		// we should regularly clean up pipelines.
+		finalizers = finalizers.AddFinalizer(pl.DrainFinalizers()...)
 	}
+
 	rp.End()
 	sy.EndRenderPass(rp)
+
+	// we should actually run finalizers when everything new is up and running on GPU.
+	if err := finalizers.Finalize(); err != nil {
+		return fmt.Errorf("Drawer.drawAll: finalizator failed: %w", err)
+	}
+
 	return nil
 }

@@ -234,7 +234,7 @@ func (vg *VarGroup) Release() {
 // Only for non-VertexGroup sets.
 // Must have set NValuesPer for any SampledTexture vars,
 // which require separate descriptors per.
-func (vg *VarGroup) bindLayout(vs *Vars) (*wgpu.BindGroupLayout, error) {
+func (vg *VarGroup) bindLayout(_ *Vars) (*wgpu.BindGroupLayout, error) {
 	var binds []wgpu.BindGroupLayoutEntry
 
 	vg.nDynamicOffsets = 0
@@ -312,16 +312,26 @@ func (vg *VarGroup) dynamicOffsets() []uint32 {
 // current Render actions will use.  Only for non-VertexGroup groups.
 // The second return value is the dynamicOffsets for any dynamic
 // offset variables.
-func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, []uint32, error) {
+func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, func() error, []uint32, error) {
+	release := func() error { return nil }
 	dynamicOffsets := vg.dynamicOffsets()
 	if vg.currentBindGroup != nil && !vg.bindGroupDirty {
-		return vg.currentBindGroup, dynamicOffsets, nil
+		return vg.currentBindGroup, release, dynamicOffsets, nil
 	}
 	vg.bindGroupDirty = false
+
+	if bg := vg.currentBindGroup; bg != nil {
+		release = func() error {
+			bg.Release()
+			return nil
+		}
+	}
+
 	vg.currentBindGroup = nil // critically, we do NOT release this!
+
 	bgl, err := vg.bindLayout(vs)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	defer bgl.Release()
 
@@ -335,10 +345,10 @@ func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, []uint32, error) {
 		Label:   vg.Name,
 	})
 	if errors.Log(err) != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	vg.currentBindGroup = bg
-	return bg, dynamicOffsets, nil
+	return bg, release, dynamicOffsets, nil
 }
 
 // IndexVar returns the Index variable within this VertexGroup.

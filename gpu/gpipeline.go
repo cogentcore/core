@@ -27,6 +27,8 @@ type GraphicsPipeline struct {
 
 	// renderPipeline is the configured, instantiated wgpu pipeline
 	renderPipeline *wgpu.RenderPipeline
+
+	finalizers []func() error
 }
 
 // NewGraphicsPipeline returns a new GraphicsPipeline.
@@ -56,10 +58,17 @@ func (pl *GraphicsPipeline) BindAllGroups(rp *wgpu.RenderPassEncoder) {
 func (pl *GraphicsPipeline) BindGroup(rp *wgpu.RenderPassEncoder, group int) {
 	vs := pl.Vars()
 	vg := vs.Groups[group]
-	bg, dynOffs, err := vg.bindGroup(vs)
+	bg, release, dynOffs, err := vg.bindGroup(vs)
 	if err == nil {
+		pl.finalizers = append(pl.finalizers, release)
 		rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
 	}
+}
+
+func (pl *GraphicsPipeline) DrainFinalizers() []func() error {
+	finalizers := pl.finalizers
+	pl.finalizers = nil
+	return finalizers
 }
 
 // BindPipeline binds this pipeline as the one to use for next commands in
