@@ -396,10 +396,10 @@ func (ft *Tree) externalNodeByPath(fpath string) (*Node, error) {
 	}
 	ekid := ft.ChildByName(externalFilesName, 0)
 	if ekid == nil {
-		return nil, fmt.Errorf("ExtFile not updated -- no ExtFiles node")
+		return nil, errors.New("ExtFile not updated -- no ExtFiles node")
 	}
 	if n := ekid.AsTree().Child(i); n != nil {
 		return AsNode(n), nil
 	}
-	return nil, fmt.Errorf("ExtFile not updated; index invalid")
+	return nil, errors.New("ExtFile not updated; index invalid")
 }

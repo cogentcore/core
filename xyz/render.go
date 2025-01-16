@@ -5,7 +5,7 @@
 package xyz
 
 import (
-	"fmt"
+	"errors"
 	"image"
 	"sort"
 
@@ -108,7 +108,7 @@ func (sc *Scene) configNewPhong() {
 func (sc *Scene) Image() (*image.RGBA, error) {
 	fr := sc.Frame
 	if fr == nil {
-		return nil, fmt.Errorf("xyz.Scene Image: Scene does not have a Frame")
+		return nil, errors.New("xyz.Scene Image: Scene does not have a Frame")
 	}
 	// sy := &sc.Phong.System
 	// tcmd := sy.MemCmdStart()
@@ -138,7 +138,7 @@ func (sc *Scene) ImageDone() {
 func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 	fr := sc.Frame
 	if fr == nil {
-		return nil, fmt.Errorf("xyz.Scene ImageCopy: Scene does not have a Frame")
+		return nil, errors.New("xyz.Scene ImageCopy: Scene does not have a Frame")
 	}
 	// sy := &sc.Phong.System
 	// tcmd := sy.MemCmdStart()
@@ -175,7 +175,7 @@ func (sc *Scene) AssertImage(t imagex.TestingT, filename string) {
 func (sc *Scene) DepthImage() ([]float32, error) {
 	fr := sc.Frame
 	if fr == nil {
-		return nil, fmt.Errorf("xyz.Scene DepthImage: Scene does not have a Frame")
+		return nil, errors.New("xyz.Scene DepthImage: Scene does not have a Frame")
 	}
 	// sy := &sc.Phong.System
 	// tcmd := sy.MemCmdStart()

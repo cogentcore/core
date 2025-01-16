@@ -5,7 +5,6 @@
 package gpu
 
 import (
-	"fmt"
 	"image"
 
 	"cogentcore.org/core/base/errors"
@@ -253,7 +252,7 @@ func (tx *Texture) ConfigReadBuffer() error {
 // [ConfigReadBuffer] prior to start of render pass for this to work.
 func (tx *Texture) CopyToReadBuffer(cmd *wgpu.CommandEncoder) error {
 	if tx.readBuffer == nil {
-		err := fmt.Errorf("gpu.Texture.CopyToReadBuffer: must configure readBuffer prior to render pass")
+		err := errors.New("gpu.Texture.CopyToReadBuffer: must configure readBuffer prior to render pass")
 		return errors.Log(err)
 	}
 	size := tx.Format.Extent3D()
@@ -351,7 +350,7 @@ func (tx *Texture) ReadDataMapped() ([]byte, error) {
 // UnmapReadData unmaps the data from a prior ReadDataMapped call.
 func (tx *Texture) UnmapReadData() error {
 	if tx.readBuffer == nil {
-		return errors.Log(fmt.Errorf("gpu.Texture.UnmapReadData: buffer is nil"))
+		return errors.Log(errors.New("gpu.Texture.UnmapReadData: buffer is nil"))
 	}
 	tx.readBuffer.Unmap()
 	return nil
