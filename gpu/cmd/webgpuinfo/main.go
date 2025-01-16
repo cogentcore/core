@@ -18,7 +18,7 @@ func main() {
 
 	gpus := instance.EnumerateAdapters(nil)
 	gp := gpu.NewGPU(nil)
-	gpIndex := gp.SelectGPU(gpus)
+	gpIndex := gp.SelectGraphicsGPU(gpus)
 	props := gpus[gpIndex].GetInfo()
 	fmt.Println("Default WebGPU Adapter number:", gpIndex, "  Type:", props.AdapterType.String(), "  Backend:", props.BackendType.String())
 	fmt.Println("Set the GPU_DEVICE environment variable to an adapter number to select a different GPU")

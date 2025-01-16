@@ -302,7 +302,13 @@ func (st *StdIO) NewWrappers(o *StdIO) {
 // which can be used in restoring state later.
 // The wrappers must have been created using NewWrappers initially.
 func (st *StdIO) SetWrappers(o *StdIO) *StdIO {
+	if o == nil {
+		return nil
+	}
 	cur := st.GetWrapped()
+	if cur == nil {
+		return nil
+	}
 	st.Out.(*WriteWrapper).Writer = o.Out
 	st.Err.(*WriteWrapper).Writer = o.Err
 	st.In.(*ReadWrapper).Reader = o.In
@@ -330,6 +336,10 @@ func (st *StdIO) SetWrappedIn(r io.Reader) {
 // GetWrapped returns the current wrapped values as a StdIO.
 // The wrappers must have been created using NewWrappers initially.
 func (st *StdIO) GetWrapped() *StdIO {
+	_, ok := st.Out.(*WriteWrapper)
+	if !ok {
+		return nil
+	}
 	o := &StdIO{}
 	o.Out = st.Out.(*WriteWrapper).Writer
 	o.Err = st.Err.(*WriteWrapper).Writer

@@ -69,6 +69,9 @@ func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, used
 
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
+		if !f.IsExported() {
+			continue
+		}
 		fv := val.Field(i)
 		pval := reflectx.PointerValue(fv)
 		cmdTag, hct := f.Tag.Lookup("cmd")

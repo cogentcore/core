@@ -10,6 +10,7 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/base/fsx/fsx"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"CopyFile":         reflect.ValueOf(fsx.CopyFile),
 		"DirAndFile":       reflect.ValueOf(fsx.DirAndFile),
 		"DirFS":            reflect.ValueOf(fsx.DirFS),
 		"Dirs":             reflect.ValueOf(fsx.Dirs),

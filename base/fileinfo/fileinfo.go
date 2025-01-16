@@ -25,7 +25,6 @@ package fileinfo
 import (
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -35,6 +34,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/datasize"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/icons"
 	"github.com/Bios-Marcel/wastebasket"
@@ -257,7 +257,7 @@ func (fi *FileInfo) Duplicate() (string, error) { //types:add
 			break
 		}
 	}
-	return dst, CopyFile(dst, fi.Path, fi.Mode)
+	return dst, fsx.CopyFile(dst, fi.Path, fi.Mode)
 }
 
 // Delete moves the file to the trash / recycling bin.
@@ -365,40 +365,3 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 
 // Note: can get all the detailed birth, access, change times from this package
 // 	"github.com/djherbis/times"
-
-//////////////////////////////////////////////////////////////////////////////
-//    CopyFile
-
-// here's all the discussion about why CopyFile is not in std lib:
-// https://old.reddit.com/r/golang/comments/3lfqoh/why_golang_does_not_provide_a_copy_file_func/
-// https://github.com/golang/go/issues/8868
-
-// CopyFile copies the contents from src to dst atomically.
-// If dst does not exist, CopyFile creates it with permissions perm.
-// If the copy fails, CopyFile aborts and dst is preserved.
-func CopyFile(dst, src string, perm os.FileMode) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-	tmp, err := os.CreateTemp(filepath.Dir(dst), "")
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(tmp, in)
-	if err != nil {
-		tmp.Close()
-		os.Remove(tmp.Name())
-		return err
-	}
-	if err = tmp.Close(); err != nil {
-		os.Remove(tmp.Name())
-		return err
-	}
-	if err = os.Chmod(tmp.Name(), perm); err != nil {
-		os.Remove(tmp.Name())
-		return err
-	}
-	return os.Rename(tmp.Name(), dst)
-}

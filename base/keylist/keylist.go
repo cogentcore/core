@@ -214,6 +214,17 @@ func (kl *List[K, V]) String() string {
 	return sv
 }
 
+// UpdateIndexes updates the Indexes from Keys and Values.
+// This must be called after loading Values from a file, for example,
+// where Keys can be populated from Values or are also otherwise available.
+func (kl *List[K, V]) UpdateIndexes() {
+	kl.makeIndexes()
+	for i := range kl.Values {
+		k := kl.Keys[i]
+		kl.indexes[k] = i
+	}
+}
+
 /*
 // GoString returns the list as Go code.
 func (kl *List[K, V]) GoString() string {

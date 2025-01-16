@@ -6,7 +6,7 @@ command extract {
     }
 }
 
-yaegi extract fmt strconv strings math time log/slog reflect
+yaegi extract fmt strconv strings math time log/slog reflect path/filepath
 
 extract math32 base/errors base/fsx base/reflectx base/labels base/fileinfo base/num
 

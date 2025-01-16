@@ -219,7 +219,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				texteditor.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(bar).SetText("Overwrite").OnClick(func(e events.Event) {
-				fileinfo.CopyFile(tpath, srcpath, mode)
+				fsx.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
@@ -239,14 +239,14 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				texteditor.DiffFiles(fn, npath, srcpath)
 			})
 			d.AddOK(bar).SetText("Overwrite target").OnClick(func(e events.Event) {
-				fileinfo.CopyFile(tpath, srcpath, mode)
+				fsx.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
 			})
 			d.AddOK(bar).SetText("Overwrite existing").OnClick(func(e events.Event) {
 				npath := filepath.Join(string(tdir.Filepath), fname)
-				fileinfo.CopyFile(npath, srcpath, mode)
+				fsx.CopyFile(npath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
@@ -262,7 +262,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				texteditor.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(bar).SetText("Overwrite target").OnClick(func(e events.Event) {
-				fileinfo.CopyFile(tpath, srcpath, mode)
+				fsx.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
