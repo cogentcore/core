@@ -157,6 +157,7 @@ func (sy *ComputeSystem) EndComputePass() error {
 	sy.device.Queue.Submit(cmdBuffer)
 	cmdBuffer.Release()
 	cmd.Release()
+	sy.vars.releaseOldBindGroups()
 	return nil
 }
 
