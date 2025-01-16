@@ -77,8 +77,6 @@ func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, start, output bool
 		cmds = `cd '` + cl.Dir + `'; ` + cmds
 	}
 
-	// fmt.Println(start, output, "cmds:", cmds)
-
 	if !cl.PrintOnly {
 		switch {
 		case start:
