@@ -49,6 +49,7 @@ import (
 	"encoding"
 	"encoding/binary"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -240,7 +241,7 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 			default:
 				q = append(q, ltoken{tkn, line})
 			case "uses-sdk":
-				return nil, fmt.Errorf("manual declaration of uses-sdk in AndroidManifest.xml not supported")
+				return nil, errors.New("manual declaration of uses-sdk in AndroidManifest.xml not supported")
 			case "manifest":
 				// synthesize additional attributes and nodes for use during encode.
 				tkn.Attr = append(tkn.Attr, xml.Attr{
@@ -292,7 +293,7 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 				if !skipSynthesize {
 					for _, attr := range tkn.Attr {
 						if attr.Name.Space == androidSchema && attr.Name.Local == "icon" {
-							return nil, fmt.Errorf("manual declaration of android:icon in AndroidManifest.xml not supported")
+							return nil, errors.New("manual declaration of android:icon in AndroidManifest.xml not supported")
 						}
 					}
 					if withIcon {
@@ -357,7 +358,7 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 
 				if attr.Name.Space == "xmlns" && attr.Name.Local == "android" {
 					if bx.Namespace != nil {
-						return nil, fmt.Errorf("multiple declarations of xmlns:android encountered")
+						return nil, errors.New("multiple declarations of xmlns:android encountered")
 					}
 					bx.Namespace = &Namespace{
 						NodeHeader: NodeHeader{
@@ -515,7 +516,7 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 				} else if el.tail == nil {
 					el.tail = cdt
 				} else {
-					return nil, fmt.Errorf("element head and tail already contain chardata")
+					return nil, errors.New("element head and tail already contain chardata")
 				}
 			}
 		case xml.EndElement:
@@ -533,7 +534,7 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 			var el *Element
 			el, bx.stack = bx.stack[n-1], bx.stack[:n-1]
 			if el.end != nil {
-				return nil, fmt.Errorf("element end already exists")
+				return nil, errors.New("element end already exists")
 			}
 			el.end = &ElementEnd{
 				NodeHeader: NodeHeader{
@@ -728,25 +729,25 @@ func (bx *XML) kind(t ResType) (unmarshaler, error) {
 	switch t {
 	case ResStringPool:
 		if bx.Pool != nil {
-			return nil, fmt.Errorf("pool already exists")
+			return nil, errors.New("pool already exists")
 		}
 		bx.Pool = new(Pool)
 		return bx.Pool, nil
 	case ResXMLResourceMap:
 		if bx.Map != nil {
-			return nil, fmt.Errorf("resource map already exists")
+			return nil, errors.New("resource map already exists")
 		}
 		bx.Map = new(Map)
 		return bx.Map, nil
 	case ResXMLStartNamespace:
 		if bx.Namespace != nil {
-			return nil, fmt.Errorf("namespace start already exists")
+			return nil, errors.New("namespace start already exists")
 		}
 		bx.Namespace = new(Namespace)
 		return bx.Namespace, nil
 	case ResXMLEndNamespace:
 		if bx.Namespace.end != nil {
-			return nil, fmt.Errorf("namespace end already exists")
+			return nil, errors.New("namespace end already exists")
 		}
 		bx.Namespace.end = new(Namespace)
 		return bx.Namespace.end, nil
@@ -768,7 +769,7 @@ func (bx *XML) kind(t ResType) (unmarshaler, error) {
 		var el *Element
 		el, bx.stack = bx.stack[n-1], bx.stack[:n-1]
 		if el.end != nil {
-			return nil, fmt.Errorf("element end already exists")
+			return nil, errors.New("element end already exists")
 		}
 		el.end = new(ElementEnd)
 		return el.end, nil
@@ -780,7 +781,7 @@ func (bx *XML) kind(t ResType) (unmarshaler, error) {
 		} else if el.tail == nil {
 			el.tail = cdt
 		} else {
-			return nil, fmt.Errorf("element head and tail already contain chardata")
+			return nil, errors.New("element head and tail already contain chardata")
 		}
 		return cdt, nil
 	default:

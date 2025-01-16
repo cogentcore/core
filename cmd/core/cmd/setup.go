@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -46,7 +47,7 @@ func Setup(c *config.Config) error { //types:add
 			}
 			return nil // success
 		}
-		return fmt.Errorf("unknown Linux distro; please file a bug report at https://github.com/cogentcore/core/issues")
+		return errors.New("unknown Linux distro; please file a bug report at https://github.com/cogentcore/core/issues")
 	case "windows":
 		// We must be in the home directory to avoid permission issues with file downloading.
 		hd, err := homedir.Dir()

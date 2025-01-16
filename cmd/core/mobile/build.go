@@ -105,11 +105,11 @@ func buildImpl(c *config.Config) (*packages.Package, error) {
 	pkg := pkgs[0]
 
 	if pkg.Name != "main" {
-		return nil, fmt.Errorf("cannot build non-main package")
+		return nil, errors.New("cannot build non-main package")
 	}
 
 	if c.ID == "" {
-		return nil, fmt.Errorf("id must be set when building for mobile")
+		return nil, errors.New("id must be set when building for mobile")
 	}
 
 	switch {

@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"runtime"
@@ -46,7 +47,7 @@ func Install(c *config.Config) error { //types:add
 				return fmt.Errorf("install: %w", err)
 			}
 		case "web":
-			return fmt.Errorf("can not install on platform web; use build or run instead")
+			return errors.New("can not install on platform web; use build or run instead")
 		case "darwin":
 			c.Pack.DMG = false
 			err := Pack(c)

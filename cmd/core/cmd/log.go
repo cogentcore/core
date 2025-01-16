@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"cogentcore.org/core/base/exec"
@@ -16,7 +17,7 @@ import (
 // run for other platforms.
 func Log(c *config.Config) error { //types:add
 	if c.Log.Target != "android" {
-		return fmt.Errorf("only android is supported for log; use the -debug flag on run for other platforms")
+		return errors.New("only android is supported for log; use the -debug flag on run for other platforms")
 	}
 	if !c.Log.Keep {
 		err := exec.Run("adb", "logcat", "-c")

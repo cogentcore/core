@@ -9,7 +9,7 @@ package vcs
 //go:generate core generate
 
 import (
-	"fmt"
+	"errors"
 	"path/filepath"
 
 	"cogentcore.org/core/base/fsx"
@@ -108,9 +108,9 @@ func NewRepo(remote, local string) (Repo, error) {
 			r.SvnRepo = *(repo.(*vcs.SvnRepo))
 			return r, err
 		case vcs.Hg:
-			err = fmt.Errorf("hg version control not yet supported")
+			err = errors.New("hg version control not yet supported")
 		case vcs.Bzr:
-			err = fmt.Errorf("bzr version control not yet supported")
+			err = errors.New("bzr version control not yet supported")
 		}
 	}
 	return nil, err
