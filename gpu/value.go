@@ -279,7 +279,7 @@ func (vl *Value) SetFromBytes(from []byte) error {
 		return errors.Log(err)
 	}
 	if vl.buffer == nil || vl.AllocSize != tb {
-		vl.varGroupDirty()
+		vl.varGroupDirty() // only if tb is different; buffer created in bindGroupEntry so not nil here
 		vl.Release()
 		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,
@@ -355,7 +355,7 @@ func (vl *Value) WriteDynamicBuffer() error {
 		return errors.Log(err)
 	}
 	if vl.buffer == nil || nb != vl.AllocSize {
-		vl.varGroupDirty()
+		vl.varGroupDirty() // only if nb is different; buffer created in bindGroupEntry so not nil here
 		vl.Release()
 		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,

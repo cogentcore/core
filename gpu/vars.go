@@ -48,6 +48,12 @@ func (vs *Vars) Release() {
 	}
 }
 
+func (vs *Vars) releaseOldBindGroups() {
+	for _, vg := range vs.Groups {
+		vg.releaseOldBindGroups()
+	}
+}
+
 // AddVertexGroup adds a new Vertex Group.
 // This is a special Group holding Vertex, Index vars
 func (vs *Vars) AddVertexGroup() *VarGroup {

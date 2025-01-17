@@ -269,6 +269,7 @@ func (sy *GraphicsSystem) SubmitRender(rp *wgpu.RenderPassEncoder) error {
 	sy.device.Queue.Submit(cmdBuffer)
 	cmdBuffer.Release()
 	cmd.Release()
+	sy.vars.releaseOldBindGroups()
 	return nil
 }
 

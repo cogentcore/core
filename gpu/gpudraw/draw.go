@@ -39,7 +39,7 @@ func (dw *Drawer) Copy(dp image.Point, src image.Image, sr image.Rectangle, op d
 		dr := sr
 		del := dp.Sub(sr.Min)
 		dr.Min = dp
-		dr.Max.Add(del)
+		dr.Max = dr.Max.Add(del)
 		dw.Fill(u.At(0, 0), dr, op)
 		return
 	}
