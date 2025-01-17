@@ -92,7 +92,7 @@ func (sf *Surface) Render() *Render { return &sf.render }
 // WebGPU does not have any internal mechanism for tracking this, so we
 // need to drive it from external events.
 func (sf *Surface) SetSize(sz image.Point) {
-	if sf.Format.Size == sz {
+	if sf.Format.Size == sz || sz.X == 0 || sz.Y == 0 {
 		return
 	}
 	sf.render.SetSize(sz)
