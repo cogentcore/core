@@ -66,6 +66,10 @@ type VarGroup struct {
 
 	// current bind group
 	currentBindGroup *wgpu.BindGroup
+
+	// oldBindGroups are prior bind groups that need to be released
+	// after current render or compute pass.
+	oldBindGroups []*wgpu.BindGroup
 }
 
 // addVar adds given variable
@@ -223,8 +227,25 @@ func (vg *VarGroup) Config(dev *Device) error {
 	return errors.Join(errs...)
 }
 
+// releaseOldBindGroups releases old bind groups.
+func (vg *VarGroup) releaseOldBindGroups() {
+	if vg.oldBindGroups == nil {
+		return
+	}
+	og := vg.oldBindGroups
+	vg.oldBindGroups = nil
+	for _, bg := range og {
+		bg.Release()
+	}
+}
+
 // Release destroys infrastructure for Group, Vars and Values.
 func (vg *VarGroup) Release() {
+	vg.releaseOldBindGroups()
+	if vg.currentBindGroup != nil {
+		vg.currentBindGroup.Release()
+		vg.currentBindGroup = nil
+	}
 	for _, vr := range vg.Vars {
 		vr.Release()
 	}
@@ -318,7 +339,10 @@ func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, []uint32, error) {
 		return vg.currentBindGroup, dynamicOffsets, nil
 	}
 	vg.bindGroupDirty = false
-	vg.currentBindGroup = nil // critically, we do NOT release this!
+	if vg.currentBindGroup != nil {
+		vg.oldBindGroups = append(vg.oldBindGroups, vg.currentBindGroup) // to be released
+	}
+	vg.currentBindGroup = nil
 	bgl, err := vg.bindLayout(vs)
 	if err != nil {
 		return nil, nil, err

@@ -131,3 +131,12 @@ func (pl *Pipeline) bindLayout() (*wgpu.PipelineLayout, error) {
 	}
 	return rpl, nil
 }
+
+func (pl *Pipeline) releaseOldBindGroups() {
+	vs := pl.Vars()
+	ngp := vs.NGroups()
+	for gi := range ngp {
+		vg := vs.Groups[gi]
+		vg.releaseOldBindGroups()
+	}
+}
