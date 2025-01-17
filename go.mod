@@ -12,10 +12,9 @@ require (
 	github.com/bramvdbogaerde/go-scp v1.4.0
 	github.com/chewxy/math32 v1.10.1
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
-	github.com/cogentcore/webgpu v0.0.0-20241212004832-ad7475f3b4dd
+	github.com/cogentcore/webgpu v0.0.0-20250117020559-3809548f4891
 	github.com/cogentcore/yaegi v0.0.0-20240724064145-e32a03faad56
 	github.com/coreos/go-oidc/v3 v3.10.0
-	github.com/ergochat/readline v0.1.2
 	github.com/ericchiang/css v1.3.0
 	github.com/faiface/beep v1.1.0
 	github.com/fsnotify/fsnotify v1.7.0
@@ -30,7 +29,6 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.15.2
-	github.com/nsf/termbox-go v1.1.1
 	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.31.0
@@ -40,7 +38,6 @@ require (
 	golang.org/x/oauth2 v0.20.0
 	golang.org/x/sys v0.28.0
 	golang.org/x/tools v0.23.0
-	gonum.org/v1/gonum v0.15.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

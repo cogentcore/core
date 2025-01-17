@@ -242,6 +242,10 @@ func (vg *VarGroup) releaseOldBindGroups() {
 // Release destroys infrastructure for Group, Vars and Values.
 func (vg *VarGroup) Release() {
 	vg.releaseOldBindGroups()
+	if vg.currentBindGroup != nil {
+		vg.currentBindGroup.Release()
+		vg.currentBindGroup = nil
+	}
 	for _, vr := range vg.Vars {
 		vr.Release()
 	}
