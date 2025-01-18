@@ -420,6 +420,7 @@ func (sc *Scene) ApplyScenePos() {
 
 	sc.Parts.Geom.Pos.Total.Y = math32.Ceil(0.5 * mv.Geom.Size.Actual.Total.Y)
 	sc.Parts.Geom.Size.Actual = sc.Geom.Size.Actual
+	sc.Parts.Geom.Size.Alloc = sc.Geom.Size.Alloc
 	sc.Parts.setContentPosFromPos()
 	sc.Parts.setBBoxesFromAllocs()
 	sc.Parts.applyScenePosChildren()
