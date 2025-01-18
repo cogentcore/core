@@ -39,10 +39,6 @@ var (
 	// are listed in order 0..n-1.
 	SelectAdapter = -1
 
-	// Unsupported is set to true if the first attempt to get a valid GPU
-	// device fails.
-	Unsupported = false
-
 	// theInstance is the initialized WebGPU instance, initialized
 	// for the first call to NewGPU.
 	theInstance *wgpu.Instance
@@ -115,21 +111,20 @@ type GPU struct {
 // NewGPU returns a new GPU, configured and ready to use.
 // If only doing compute, use [NewComputeGPU].
 // The surface can be used to select an appropriate adapter, and
-// is recommended but not essential. Returns nil and sets
-// Unsupported = true if the current platform is not supported by WebGPU.
+// is recommended but not essential. Returns nil and logs an error
+// if the current platform is not supported by WebGPU.
 func NewGPU(sf *wgpu.Surface) *GPU {
 	gp := &GPU{}
 	if errors.Log(gp.init(sf)) == nil {
 		return gp
 	}
-	Unsupported = true
 	return nil
 }
 
 // NewComputeGPU returns a new GPU, configured and ready to use,
 // for purely compute use, which causes it to listen to
 // use the GPU_COMPUTE_DEVICE variable for which GPU device to use.
-// Returns nil and sets Unsupported = true if the current platform
+// Returns nil and logs an error if the current platform
 // is not supported by WebGPU.
 func NewComputeGPU() *GPU {
 	gp := &GPU{}
@@ -137,7 +132,6 @@ func NewComputeGPU() *GPU {
 	if errors.Log(gp.init(nil)) == nil {
 		return gp
 	}
-	Unsupported = true
 	return nil
 }
 
