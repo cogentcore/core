@@ -140,6 +140,7 @@ func (sl *Splits) Init() {
 				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
+				s.Direction = styles.Column
 			})
 		}
 	})

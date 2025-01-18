@@ -10,10 +10,10 @@
     <a href="https://pkg.go.dev/cogentcore.org/core"><img src="https://img.shields.io/badge/dev-reference-007d9c?logo=go&logoColor=white&style=flat" alt="pkg.go.dev docs"></a>
     <a href="https://github.com/cogentcore/core/actions"><img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/cogentcore/core/go.yml"></a>
     <a href="https://raw.githack.com/wiki/cogentcore/core/coverage.html"><img alt="Test Coverage" src="https://github.com/cogentcore/core/wiki/coverage.svg"></a>
-    <a href="https://github.com/cogentcore/core/tags"><img alt="Version" src="https://img.shields.io/github/v/tag/cogentcore/core?label=version"></a>
+    <a href="https://github.com/cogentcore/core/tags"><img alt="Version" src="https://img.shields.io/github/v/tag/cogentcore/core?label=version&color=blue"></a>
 </p>
 
-Cogent Core is a free and open source framework for building powerful, fast, elegant 2D and 3D apps that run on macOS, Windows, Linux, iOS, Android, and the web with a single Go codebase, allowing you to Code Once, Run Everywhere (Core). See the [Cogent Core Website](https://cogentcore.org/core) for more information, including extensive documentation and editable interactive running examples. The website itself is a Cogent Core app running on the web using wasm.
+Cogent Core is a free and open source framework for building powerful, fast, elegant 2D and 3D apps that run on macOS, Windows, Linux, iOS, Android, and web with a single Go codebase, allowing you to Code Once, Run Everywhere (Core). See the [Cogent Core Website](https://cogentcore.org/core) for more information, including extensive documentation and interactive examples you can directly edit and run. The website itself is a Cogent Core app running on the web using wasm. You must complete the install instructions on the website before developing with Cogent Core on your system.
 
 ## Sponsors
 

@@ -163,7 +163,7 @@ func (tx *Text) Init() {
 			s.Text.LineHeight.Em(24.0 / 16)
 			s.Font.Size.Dp(16)
 			s.Text.LetterSpacing.Dp(0.15)
-			s.Font.Weight = styles.WeightMedium
+			s.Font.Weight = styles.WeightBold
 		case TextTitleSmall:
 			s.Text.LineHeight.Em(20.0 / 14)
 			s.Font.Size.Dp(14)

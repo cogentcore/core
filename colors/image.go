@@ -10,11 +10,13 @@ import (
 )
 
 // Uniform returns a new [image.Uniform] filled completely with the given color.
+// See [ToUniform] for the converse.
 func Uniform(c color.Color) image.Image {
 	return image.NewUniform(c)
 }
 
 // ToUniform converts the given image to a uniform [color.RGBA] color.
+// See [Uniform] for the converse.
 func ToUniform(img image.Image) color.RGBA {
 	if img == nil {
 		return color.RGBA{}

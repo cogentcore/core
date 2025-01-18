@@ -16,12 +16,12 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/content"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
@@ -31,7 +31,7 @@ import (
 )
 
 //go:embed content
-var content embed.FS
+var econtent embed.FS
 
 //go:embed *.svg name.png weld-icon.png
 var resources embed.FS
@@ -55,58 +55,47 @@ func main() {
 
 func main() {
 	b := core.NewBody("Cogent Core Docs")
-	pg := pages.NewPage(b).SetContent(content)
-	htmlcore.WikilinkBaseURL = "cogentcore.org/core"
+	ct := content.NewContent(b).SetContent(econtent)
+	ctx := ct.Context
+	ctx.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))
 	b.AddTopBar(func(bar *core.Frame) {
 		tb := core.NewToolbar(bar)
-		tb.Maker(pg.MakeToolbar)
+		tb.Maker(ct.MakeToolbar)
 		tb.Maker(func(p *tree.Plan) {
 			tree.Add(p, func(w *core.Button) {
+				ctx.LinkButton(w, "playground")
 				w.SetText("Playground").SetIcon(icons.PlayCircle)
-				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("/playground")
-				})
 			})
 			tree.Add(p, func(w *core.Button) {
+				ctx.LinkButton(w, "https://youtube.com/@CogentCore")
 				w.SetText("Videos").SetIcon(icons.VideoLibrary)
-				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("https://youtube.com/@CogentCore")
-				})
 			})
 			tree.Add(p, func(w *core.Button) {
+				ctx.LinkButton(w, "https://cogentcore.org/blog")
 				w.SetText("Blog").SetIcon(icons.RssFeed)
-				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("https://cogentcore.org/blog")
-				})
 			})
 			tree.Add(p, func(w *core.Button) {
+				ctx.LinkButton(w, "https://github.com/cogentcore/core")
 				w.SetText("GitHub").SetIcon(icons.GitHub)
-				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("https://github.com/cogentcore/core")
-				})
 			})
 			tree.Add(p, func(w *core.Button) {
+				ctx.LinkButton(w, "https://cogentcore.org/community")
 				w.SetText("Community").SetIcon(icons.Forum)
-				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("https://cogentcore.org/community")
-				})
 			})
 			tree.Add(p, func(w *core.Button) {
+				ctx.LinkButton(w, "https://github.com/sponsors/cogentcore")
 				w.SetText("Sponsor").SetIcon(icons.Favorite)
-				w.OnClick(func(e events.Event) {
-					pg.Context.OpenURL("https://github.com/sponsors/cogentcore")
-				})
 			})
 		})
 	})
 
-	coresymbols.Symbols["."]["content"] = reflect.ValueOf(content)
+	coresymbols.Symbols["."]["econtent"] = reflect.ValueOf(econtent)
 	coresymbols.Symbols["."]["myImage"] = reflect.ValueOf(myImage)
 	coresymbols.Symbols["."]["mySVG"] = reflect.ValueOf(mySVG)
 	coresymbols.Symbols["."]["myFile"] = reflect.ValueOf(myFile)
 
-	htmlcore.ElementHandlers["home-page"] = homePage
-	htmlcore.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
+	ctx.ElementHandlers["home-page"] = homePage
+	ctx.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
 		splits := core.NewSplits(ctx.BlockParent)
 		ed := texteditor.NewEditor(splits)
 		playgroundFile := filepath.Join(core.TheApp.AppDataDir(), "playground.go")
@@ -127,10 +116,10 @@ func main() {
 			core.ErrorSnackbar(ed, ed.Buffer.Save(), "Error saving code")
 		})
 		parent := core.NewFrame(splits)
-		yaegicore.BindTextEditor(ed, parent)
+		yaegicore.BindTextEditor(ed, parent, "Go")
 		return true
 	}
-	htmlcore.ElementHandlers["style-demo"] = func(ctx *htmlcore.Context) bool {
+	ctx.ElementHandlers["style-demo"] = func(ctx *htmlcore.Context) bool {
 		// same as demo styles tab
 		sp := core.NewSplits(ctx.BlockParent)
 		sp.Styler(func(s *styles.Style) {
@@ -237,16 +226,12 @@ func homePage(ctx *htmlcore.Context) bool {
 	})
 	tree.AddChild(home, func(w *core.Frame) {
 		tree.AddChild(w, func(w *core.Button) {
+			ctx.LinkButton(w, "basics")
 			w.SetText("Get started")
-			w.OnClick(func(e events.Event) {
-				ctx.OpenURL("/basics")
-			})
 		})
 		tree.AddChild(w, func(w *core.Button) {
+			ctx.LinkButton(w, "install")
 			w.SetText("Install").SetType(core.ButtonTonal)
-			w.OnClick(func(e events.Event) {
-				ctx.OpenURL("/setup/install")
-			})
 		})
 	})
 
@@ -355,10 +340,8 @@ b.RunMainWindow()`)
 	})
 
 	tree.AddChild(home, func(w *core.Button) {
+		ctx.LinkButton(w, "basics")
 		w.SetText("Get started")
-		w.OnClick(func(e events.Event) {
-			ctx.OpenURL("basics")
-		})
 	})
 
 	return true

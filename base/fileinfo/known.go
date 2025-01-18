@@ -173,6 +173,7 @@ const (
 	Fortran
 	FSharp
 	Go
+	Goal
 	Haskell
 	Java
 	JavaScript
@@ -192,6 +193,7 @@ const (
 	Ruby
 	Rust
 	Scala
+	SQL
 	Tcl
 
 	// Doc is an editable word processing file including latex, markdown, html, css, etc

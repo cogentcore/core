@@ -38,9 +38,9 @@ func (md *Data) Set(key string, value any) {
 	(*md)[key] = value
 }
 
-// Get gets metadata value of given type from given Data.
+// GetFromData gets metadata value of given type from given Data.
 // Returns error if not present or item is a different type.
-func Get[T any](md Data, key string) (T, error) {
+func GetFromData[T any](md Data, key string) (T, error) {
 	var z T
 	x, ok := md[key]
 	if !ok {
@@ -53,11 +53,11 @@ func Get[T any](md Data, key string) (T, error) {
 	return v, nil
 }
 
-// CopyFrom does a shallow copy of metadata from source.
+// Copy does a shallow copy of metadata from source.
 // Any pointer-based values will still point to the same
 // underlying data as the source, but the two maps remain
 // distinct.  It uses [maps.Copy].
-func (md *Data) CopyFrom(src Data) {
+func (md *Data) Copy(src Data) {
 	if src == nil {
 		return
 	}
@@ -84,23 +84,23 @@ func GetData(obj any) *Data {
 	return nil
 }
 
-// GetFrom gets metadata value of given type from given object,
+// Get gets metadata value of given type from given object,
 // if it implements the Metadata() method.
 // Must pass a pointer to the object.
 // Returns error if not present or item is a different type.
-func GetFrom[T any](obj any, key string) (T, error) {
+func Get[T any](obj any, key string) (T, error) {
 	md := GetData(obj)
 	if md == nil {
 		var zv T
 		return zv, errors.New("metadata not available for given object type")
 	}
-	return Get[T](*md, key)
+	return GetFromData[T](*md, key)
 }
 
-// SetTo sets metadata value on given object, if it implements
+// Set sets metadata value on given object, if it implements
 // the Metadata() method. Returns error if no Metadata on object.
 // Must pass a pointer to the object.
-func SetTo(obj any, key string, value any) error {
+func Set(obj any, key string, value any) error {
 	md := GetData(obj)
 	if md == nil {
 		return errors.Log(errors.New("metadata not available for given object type"))
@@ -109,9 +109,9 @@ func SetTo(obj any, key string, value any) error {
 	return nil
 }
 
-// CopyFrom copies metadata from source
+// Copy copies metadata from source
 // Must pass a pointer to the object.
-func CopyFrom(to, src any) *Data {
+func Copy(to, src any) *Data {
 	tod := GetData(to)
 	if tod == nil {
 		return nil
@@ -120,6 +120,6 @@ func CopyFrom(to, src any) *Data {
 	if srcd == nil {
 		return tod
 	}
-	tod.CopyFrom(*srcd)
+	tod.Copy(*srcd)
 	return tod
 }

@@ -1,0 +1,1 @@
+**Architecture** documentation is low-level documentation of the structure of Cogent Core, appropriate for those curious or interested in [[contribute|contributing]]. See the [[basics]] or [[concepts]] for user-friendly documentation of important concepts.
