@@ -284,17 +284,22 @@ func (w *renderWindow) resized() {
 		if DebugSettings.WindowEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.name, curRg)
 		}
-		rc.logicalDPI = w.logicalDPI()
-		w.mains.resize(rg) // no-op if everyone below is good
-		// still need to apply style even if size is same
-		for _, kv := range w.mains.stack.Order {
-			st := kv.Value
-			sc := st.Scene
-			if st.FullWindow && sc.SceneGeom.Size != rg.Size { // double-check: can be off in fullscreen init
-				st.Sprites.reset()
-				sc.resize(rg)
+		newDPI := false
+		if rc.logicalDPI != w.logicalDPI() {
+			rc.logicalDPI = w.logicalDPI()
+			newDPI = true
+		}
+		if w.mains.resize(rg) || newDPI {
+			// still need to apply style even if size is same
+			for _, kv := range w.mains.stack.Order {
+				st := kv.Value
+				sc := st.Scene
+				// if st.FullWindow && sc.SceneGeom.Size != rg.Size { // double-check: can be off in fullscreen init
+				// 	st.Sprites.reset()
+				// 	sc.resize(rg)
+				// }
+				sc.applyStyleScene()
 			}
-			sc.applyStyleScene()
 		}
 		return
 	}
