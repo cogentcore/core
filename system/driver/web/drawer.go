@@ -7,7 +7,6 @@
 package web
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
 	"syscall/js"
@@ -41,16 +40,7 @@ func (dw *Drawer) AsGPUDrawer() *gpudraw.Drawer {
 // InitDrawer sets the [Drawer] to a WebGPU-based drawer if the browser
 // supports WebGPU and a backup 2D image drawer otherwise.
 func (a *App) InitDrawer() {
-	// TODO(wgpu): various mobile and Linux browsers do not fully support WebGPU yet.
-	// isMobile := a.SystemPlatform().IsMobile() || a.SystemPlatform() == system.Linux
-	// // TODO(wgpu): Firefox currently does not support WebGPU in release builds.
-	// isFirefox := strings.Contains(js.Global().Get("navigator").Get("userAgent").String(), "Firefox")
-	// if isMobile || isFirefox || !js.Global().Get("navigator").Get("gpu").Truthy() {
-	// 	a.Draw.context2D = js.Global().Get("document").Call("querySelector", "canvas").Call("getContext", "2d")
-	// 	return
-	// }
 	gp := gpu.NewGPU(nil)
-	fmt.Println("gpu is nil:", (gp == nil))
 	if gp == nil {
 		a.Draw.context2D = js.Global().Get("document").Call("querySelector", "canvas").Call("getContext", "2d")
 		return
