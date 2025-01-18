@@ -265,7 +265,9 @@ func (w *renderWindow) setZoom(zoom float32, screenName string) {
 	}
 }
 
-// resized updates internal buffers after a window has been resized.
+// resized updates Scene sizes after a window has been resized.
+// It is called on any geometry update, including move and
+// DPI changes, so it detects what actually needs to be updated.
 func (w *renderWindow) resized() {
 	rc := w.renderContext()
 	if !w.isVisible() {
@@ -273,7 +275,6 @@ func (w *renderWindow) resized() {
 		return
 	}
 
-	// drw := w.SystemWindow.Drawer()
 	w.SystemWindow.Lock()
 	rg := w.SystemWindow.RenderGeom()
 	w.SystemWindow.Unlock()
@@ -290,20 +291,14 @@ func (w *renderWindow) resized() {
 			newDPI = true
 		}
 		if w.mains.resize(rg) || newDPI {
-			// still need to apply style even if size is same
 			for _, kv := range w.mains.stack.Order {
 				st := kv.Value
 				sc := st.Scene
-				// if st.FullWindow && sc.SceneGeom.Size != rg.Size { // double-check: can be off in fullscreen init
-				// 	st.Sprites.reset()
-				// 	sc.resize(rg)
-				// }
 				sc.applyStyleScene()
 			}
 		}
 		return
 	}
-	// w.FocusInactivate()
 	if !w.isVisible() {
 		rc.visible = false
 		if DebugSettings.WindowEventTrace {
@@ -316,7 +311,6 @@ func (w *renderWindow) resized() {
 	}
 	rc.geom = rg
 	rc.visible = true
-	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.mains.resize(rg)
 	if DebugSettings.WindowGeometryTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
