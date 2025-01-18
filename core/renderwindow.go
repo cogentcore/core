@@ -280,15 +280,15 @@ func (w *renderWindow) resized() {
 	w.SystemWindow.Unlock()
 
 	curRg := rc.geom
-	rc.logicalDPI = w.logicalDPI() // always update
+	curDPI := w.logicalDPI()
 	if curRg == rg {
-		if DebugSettings.WindowEventTrace {
-			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.name, curRg)
-		}
 		newDPI := false
-		if rc.logicalDPI != w.logicalDPI() {
-			rc.logicalDPI = w.logicalDPI()
+		if rc.logicalDPI != curDPI {
+			rc.logicalDPI = curDPI
 			newDPI = true
+		}
+		if DebugSettings.WindowEventTrace {
+			fmt.Printf("Win: %v same-size resized: %v newDPI: %v\n", w.name, curRg, newDPI)
 		}
 		if w.mains.resize(rg) || newDPI {
 			for _, kv := range w.mains.stack.Order {
@@ -299,6 +299,7 @@ func (w *renderWindow) resized() {
 		}
 		return
 	}
+	rc.logicalDPI = curDPI
 	if !w.isVisible() {
 		rc.visible = false
 		if DebugSettings.WindowEventTrace {
