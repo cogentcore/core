@@ -143,7 +143,6 @@ func NewComputeGPU() *GPU {
 
 // init configures the GPU
 func (gp *GPU) init(sf *wgpu.Surface) error {
-	fmt.Println("trying to get gpu")
 	inst := Instance()
 	if inst == nil {
 		return errors.New("WebGPU is not supported on this machine: could not create an instance")
@@ -157,9 +156,7 @@ func (gp *GPU) init(sf *wgpu.Surface) error {
 		gpIndex = gp.SelectComputeGPU(gpus)
 		gp.GPU = gpus[gpIndex]
 	} else {
-		fmt.Println("trying to get adapters")
 		gpus := inst.EnumerateAdapters(nil)
-		fmt.Println("got gpus:", gpus)
 		if len(gpus) == 0 {
 			return errors.New("WebGPU is not supported on this machine: no adapters available")
 		}
