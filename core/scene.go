@@ -255,23 +255,23 @@ func (sc *Scene) RenderWindow() *renderWindow {
 }
 
 // fitInWindow fits Scene geometry (pos, size) into given window geom.
-// Calls resize for the new size.
-func (sc *Scene) fitInWindow(winGeom math32.Geom2DInt) {
+// Calls resize for the new size and returns whether it actually needed to
+// be resized.
+func (sc *Scene) fitInWindow(winGeom math32.Geom2DInt) bool {
 	geom := sc.SceneGeom
 	// full offscreen windows ignore any window geometry constraints
 	// because they must be unbounded by any previous window sizes
 	if TheApp.Platform() != system.Offscreen || !sc.Stage.FullWindow {
 		geom = geom.FitInWindow(winGeom)
 	}
-	sc.resize(geom)
-	sc.SceneGeom.Pos = geom.Pos
-	// fmt.Println("win", winGeom, "geom", geom)
+	return sc.resize(geom)
 }
 
-// resize resizes the scene, creating a new image; updates Geom
-func (sc *Scene) resize(geom math32.Geom2DInt) {
+// resize resizes the scene if needed, creating a new image; updates Geom.
+// returns false if the scene is already the correct size.
+func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 	if geom.Size.X <= 0 || geom.Size.Y <= 0 {
-		return
+		return false
 	}
 	if sc.PaintContext.State == nil {
 		sc.PaintContext.State = &paint.State{}
@@ -282,6 +282,8 @@ func (sc *Scene) resize(geom math32.Geom2DInt) {
 	sc.SceneGeom.Pos = geom.Pos
 	if sc.Pixels == nil || sc.Pixels.Bounds().Size() != geom.Size {
 		sc.Pixels = image.NewRGBA(image.Rectangle{Max: geom.Size})
+	} else {
+		return false
 	}
 	sc.PaintContext.Init(geom.Size.X, geom.Size.Y, sc.Pixels)
 	sc.SceneGeom.Size = geom.Size // make sure
@@ -296,6 +298,7 @@ func (sc *Scene) resize(geom math32.Geom2DInt) {
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.showIter = 0
 	sc.NeedsLayout()
+	return true
 }
 
 // ResizeToContent resizes the scene so it fits the current content.
