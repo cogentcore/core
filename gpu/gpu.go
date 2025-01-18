@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -37,6 +38,10 @@ var (
 	// If there are multiple discrete gpu adapters, then all of them
 	// are listed in order 0..n-1.
 	SelectAdapter = -1
+
+	// Unsupported is set to true if the first attempt to get a valid GPU
+	// device fails.
+	Unsupported = false
 
 	// theInstance is the initialized WebGPU instance, initialized
 	// for the first call to NewGPU.
@@ -109,34 +114,55 @@ type GPU struct {
 
 // NewGPU returns a new GPU, configured and ready to use.
 // If only doing compute, use [NewComputeGPU].
-// The surface is used to select an appropriate adapter, and
-// is recommended but not essential.
+// The surface can be used to select an appropriate adapter, and
+// is recommended but not essential. Returns nil and sets
+// Unsupported = true if the current platform is not supported by WebGPU.
 func NewGPU(sf *wgpu.Surface) *GPU {
 	gp := &GPU{}
-	gp.init(sf)
-	return gp
+	if errors.Log(gp.init(sf)) == nil {
+		return gp
+	}
+	Unsupported = true
+	return nil
 }
 
 // NewComputeGPU returns a new GPU, configured and ready to use,
 // for purely compute use, which causes it to listen to
 // use the GPU_COMPUTE_DEVICE variable for which GPU device to use.
+// Returns nil and sets Unsupported = true if the current platform
+// is not supported by WebGPU.
 func NewComputeGPU() *GPU {
 	gp := &GPU{}
 	gp.ComputeOnly = true
-	gp.init(nil)
-	return gp
+	if errors.Log(gp.init(nil)) == nil {
+		return gp
+	}
+	Unsupported = true
+	return nil
 }
 
 // init configures the GPU
 func (gp *GPU) init(sf *wgpu.Surface) error {
+	fmt.Println("trying to get gpu")
 	inst := Instance()
+	if inst == nil {
+		return errors.New("WebGPU is not supported on this machine: could not create an instance")
+	}
 	gpIndex := 0
 	if gp.ComputeOnly {
 		gpus := inst.EnumerateAdapters(nil)
+		if len(gpus) == 0 {
+			return errors.New("WebGPU is not supported on this machine: no adapters available")
+		}
 		gpIndex = gp.SelectComputeGPU(gpus)
 		gp.GPU = gpus[gpIndex]
 	} else {
+		fmt.Println("trying to get adapters")
 		gpus := inst.EnumerateAdapters(nil)
+		fmt.Println("got gpus:", gpus)
+		if len(gpus) == 0 {
+			return errors.New("WebGPU is not supported on this machine: no adapters available")
+		}
 		gpIndex = gp.SelectGraphicsGPU(gpus)
 		gp.GPU = gpus[gpIndex]
 		// note: below is a more standard way of doing it, but until we fix the issues

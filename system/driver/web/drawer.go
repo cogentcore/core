@@ -7,9 +7,9 @@
 package web
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
-	"strings"
 	"syscall/js"
 
 	"cogentcore.org/core/gpu"
@@ -42,14 +42,19 @@ func (dw *Drawer) AsGPUDrawer() *gpudraw.Drawer {
 // supports WebGPU and a backup 2D image drawer otherwise.
 func (a *App) InitDrawer() {
 	// TODO(wgpu): various mobile and Linux browsers do not fully support WebGPU yet.
-	isMobile := a.SystemPlatform().IsMobile() || a.SystemPlatform() == system.Linux
-	// TODO(wgpu): Firefox currently does not support WebGPU in release builds.
-	isFirefox := strings.Contains(js.Global().Get("navigator").Get("userAgent").String(), "Firefox")
-	if isMobile || isFirefox || !js.Global().Get("navigator").Get("gpu").Truthy() {
+	// isMobile := a.SystemPlatform().IsMobile() || a.SystemPlatform() == system.Linux
+	// // TODO(wgpu): Firefox currently does not support WebGPU in release builds.
+	// isFirefox := strings.Contains(js.Global().Get("navigator").Get("userAgent").String(), "Firefox")
+	// if isMobile || isFirefox || !js.Global().Get("navigator").Get("gpu").Truthy() {
+	// 	a.Draw.context2D = js.Global().Get("document").Call("querySelector", "canvas").Call("getContext", "2d")
+	// 	return
+	// }
+	gp := gpu.NewGPU(nil)
+	fmt.Println("gpu is nil:", (gp == nil))
+	if gp == nil {
 		a.Draw.context2D = js.Global().Get("document").Call("querySelector", "canvas").Call("getContext", "2d")
 		return
 	}
-	gp := gpu.NewGPU(nil)
 	surf := gpu.Instance().CreateSurface(nil)
 	sf := gpu.NewSurface(gp, surf, a.Scrn.PixelSize, 1, gpu.UndefinedType)
 	a.Draw.wgpu = gpudraw.NewDrawer(gp, sf)
