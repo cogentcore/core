@@ -895,13 +895,12 @@ func (tr *Tree) moveDown(selMode events.SelectModes) *Tree {
 	}
 	if tr.Closed || !tr.HasChildren() { // next sibling
 		return tr.moveDownSibling(selMode)
-	} else {
-		if tr.HasChildren() {
-			nn := AsTree(tr.Child(0))
-			if nn != nil {
-				nn.selectUpdate(selMode)
-				return nn
-			}
+	}
+	if tr.HasChildren() {
+		nn := AsTree(tr.Child(0))
+		if nn != nil {
+			nn.selectUpdate(selMode)
+			return nn
 		}
 	}
 	return nil
@@ -1054,10 +1053,9 @@ func (tr *Tree) moveToLastChild(selMode events.SelectModes) *Tree {
 	if !tr.Closed && tr.HasChildren() {
 		nn := AsTree(tr.Child(tr.NumChildren() - 1))
 		return nn.moveToLastChild(selMode)
-	} else {
-		tr.selectUpdate(selMode)
-		return tr
 	}
+	tr.selectUpdate(selMode)
+	return tr
 }
 
 // moveHomeEvent moves the selection up to top of the tree,

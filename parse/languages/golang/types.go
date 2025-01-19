@@ -256,9 +256,8 @@ func (gl *GoLang) TypeFromASTPrim(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 			ty.Kind = etyp.Kind
 			ty.Els.Add("par", etyp.Name) // parent type
 			return ty, true
-		} else {
-			return nil, false
 		}
+		return nil, false
 	case "TypeNm", "QualType":
 		if etyp != nil && etyp != ty {
 			ty.Kind = etyp.Kind
@@ -269,9 +268,8 @@ func (gl *GoLang) TypeFromASTPrim(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 				}
 			}
 			return ty, true
-		} else {
-			return nil, false
 		}
+		return nil, false
 	case "PointerType":
 		if ty == nil {
 			ty = &syms.Type{}
@@ -287,9 +285,8 @@ func (gl *GoLang) TypeFromASTPrim(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 				}
 			}
 			return ty, true
-		} else {
-			return nil, false
 		}
+		return nil, false
 	}
 	return nil, false
 }

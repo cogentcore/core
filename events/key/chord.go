@@ -33,9 +33,8 @@ func NewChord(rn rune, code Codes, mods Modifiers) Chord {
 	if unicode.IsPrint(rn) {
 		if len(modstr) > 0 {
 			return Chord(modstr + string(unicode.ToUpper(rn))) // all modded keys are uppercase!
-		} else {
-			return Chord(string(rn))
 		}
+		return Chord(string(rn))
 	}
 	// now convert code
 	codestr := strings.TrimPrefix(code.String(), "Code")

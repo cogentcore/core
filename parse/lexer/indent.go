@@ -41,13 +41,12 @@ func LineIndent(src []rune, tabSz int) (ind int, ichr indent.Character) {
 		}
 		ind /= tabSz
 		return
-	} else {
-		for i := 1; i < sz; i++ {
-			if src[i] == '\t' {
-				ind++
-			} else {
-				return
-			}
+	}
+	for i := 1; i < sz; i++ {
+		if src[i] == '\t' {
+			ind++
+		} else {
+			return
 		}
 	}
 	return

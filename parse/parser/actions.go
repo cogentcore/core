@@ -82,9 +82,8 @@ type Act struct {
 func (ac Act) String() string {
 	if ac.FromToken != token.None {
 		return fmt.Sprintf(`%v:%v:"%v":%v<-%v`, ac.RunIndex, ac.Act, ac.Path, ac.Token, ac.FromToken)
-	} else {
-		return fmt.Sprintf(`%v:%v:"%v":%v`, ac.RunIndex, ac.Act, ac.Path, ac.Token)
 	}
+	return fmt.Sprintf(`%v:%v:"%v":%v`, ac.RunIndex, ac.Act, ac.Path, ac.Token)
 }
 
 // ChangeToken changes the token type, using FromToken logic

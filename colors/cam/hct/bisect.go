@@ -120,28 +120,25 @@ func NthVertex(y float32, n int) math32.Vector3 {
 		r := (y - g*k_g - b*k_b) / k_r
 		if IsBounded(r) {
 			return math32.Vec3(r, g, b)
-		} else {
-			return math32.Vec3(-1.0, -1.0, -1.0)
 		}
+		return math32.Vec3(-1.0, -1.0, -1.0)
+
 	} else if n < 8 {
 		b := coord_a
 		r := coord_b
 		g := (y - r*k_r - b*k_b) / k_g
 		if IsBounded(g) {
 			return math32.Vec3(r, g, b)
-		} else {
-			return math32.Vec3(-1.0, -1.0, -1.0)
 		}
-	} else {
-		r := coord_a
-		g := coord_b
-		b := (y - r*k_r - g*k_g) / k_b
-		if IsBounded(b) {
-			return math32.Vec3(r, g, b)
-		} else {
-			return math32.Vec3(-1.0, -1.0, -1.0)
-		}
+		return math32.Vec3(-1.0, -1.0, -1.0)
 	}
+	r := coord_a
+	g := coord_b
+	b := (y - r*k_r - g*k_g) / k_b
+	if IsBounded(b) {
+		return math32.Vec3(r, g, b)
+	}
+	return math32.Vec3(-1.0, -1.0, -1.0)
 }
 
 // Finds the segment containing the desired color.
@@ -233,19 +230,18 @@ func BisectToLimit(y, target_hue float32) math32.Vector3 {
 			for i := 0; i < 8; i++ {
 				if num.Abs(r_plane-l_plane) <= 1 {
 					break
+				}
+				m_plane := int(math32.Floor(float32(l_plane+r_plane) / 2.0))
+				mid_plane_coordinate := kCriticalPlanes[m_plane]
+				mid := SetCoordinate(left, right, mid_plane_coordinate, axis)
+				mid_hue := HueOf(mid)
+				if cam16.InCyclicOrder(left_hue, target_hue, mid_hue) {
+					right = mid
+					r_plane = m_plane
 				} else {
-					m_plane := int(math32.Floor(float32(l_plane+r_plane) / 2.0))
-					mid_plane_coordinate := kCriticalPlanes[m_plane]
-					mid := SetCoordinate(left, right, mid_plane_coordinate, axis)
-					mid_hue := HueOf(mid)
-					if cam16.InCyclicOrder(left_hue, target_hue, mid_hue) {
-						right = mid
-						r_plane = m_plane
-					} else {
-						left = mid
-						left_hue = mid_hue
-						l_plane = m_plane
-					}
+					left = mid
+					left_hue = mid_hue
+					l_plane = m_plane
 				}
 			}
 		}

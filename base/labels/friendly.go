@@ -42,9 +42,8 @@ func FriendlyTypeName(typ reflect.Type) string {
 			return "List of " + bnm
 		} else if strings.Contains(bnm, "Function of") {
 			return strings.ReplaceAll(bnm, "Function of", "Functions of") + "s"
-		} else {
-			return bnm + "s"
 		}
+		return bnm + "s"
 	case reflect.Func:
 		str := "Function"
 		ni := nptyp.NumIn()

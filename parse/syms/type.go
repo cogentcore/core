@@ -143,9 +143,8 @@ func (ty *Type) ArgString() string {
 	npars := ty.Size[0]
 	if ty.Kind.SubCat() == Method {
 		return ty.Els.StringRange(1, npars-1)
-	} else {
-		return ty.Els.StringRange(0, npars)
 	}
+	return ty.Els.StringRange(0, npars)
 }
 
 // ReturnString() returns string of return vals of function if it is a function type

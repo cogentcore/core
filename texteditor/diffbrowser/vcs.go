@@ -63,9 +63,8 @@ func (br *Browser) DiffVCS(repo vcs.Repo, revA, revB string) {
 			for i := 0; i < mn; i++ {
 				if cdirs[i] != dirs[i] {
 					break
-				} else {
-					di = i
 				}
+				di = i
 			}
 			cnodes = cnodes[:di]
 			for i := di; i < nd; i++ {

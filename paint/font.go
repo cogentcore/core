@@ -67,20 +67,20 @@ func OpenFontFace(bytes []byte, name, path string, size int, strokeWidth int) (*
 		})
 		ff := styles.NewFontFace(name, size, face)
 		return ff, err
-	} else {
-		f, err := truetype.Parse(bytes)
-		if err != nil {
-			return nil, err
-		}
-		face := truetype.NewFace(f, &truetype.Options{
-			Size:   float64(size),
-			Stroke: strokeWidth,
-			// Hinting: font.HintingFull,
-			// GlyphCacheEntries: 1024, // default is 512 -- todo benchmark
-		})
-		ff := styles.NewFontFace(name, size, face)
-		return ff, nil
 	}
+
+	f, err := truetype.Parse(bytes)
+	if err != nil {
+		return nil, err
+	}
+	face := truetype.NewFace(f, &truetype.Options{
+		Size:   float64(size),
+		Stroke: strokeWidth,
+		// Hinting: font.HintingFull,
+		// GlyphCacheEntries: 1024, // default is 512 -- todo benchmark
+	})
+	ff := styles.NewFontFace(name, size, face)
+	return ff, nil
 }
 
 // FontStyleCSS looks for "tag" name properties in cssAgg properties, and applies those to

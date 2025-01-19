@@ -464,10 +464,10 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 				}
 				if g == nil {
 					return fmt.Errorf("got stop outside of gradient: %v", stop)
-				} else {
-					gb := (*g).AsBase()
-					gb.Stops = append(gb.Stops, stop)
 				}
+				gb := (*g).AsBase()
+				gb.Stops = append(gb.Stops, stop)
+
 			default:
 				return fmt.Errorf("cannot process svg element %q", se.Name.Local)
 			}

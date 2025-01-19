@@ -92,9 +92,8 @@ func (g *Text) SetNodeSize(sz math32.Vector2) {
 func (g *Text) NodeBBox(sv *SVG) image.Rectangle {
 	if g.IsParText() {
 		return BBoxFromChildren(g)
-	} else {
-		return image.Rectangle{Min: g.LastBBox.Min.ToPointFloor(), Max: g.LastBBox.Max.ToPointCeil()}
 	}
+	return image.Rectangle{Min: g.LastBBox.Min.ToPointFloor(), Max: g.LastBBox.Max.ToPointCeil()}
 }
 
 // TextBBox returns the bounding box in local coordinates
