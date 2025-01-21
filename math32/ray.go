@@ -233,7 +233,7 @@ func (ray *Ray) DistanceToPlane(plane Plane) float32 {
 // If no intersection is found false is returned.
 func (ray *Ray) IntersectPlane(plane Plane) (Vector3, bool) {
 	t := ray.DistanceToPlane(plane)
-	if t == NaN() {
+	if IsNaN(t) {
 		return ray.Origin, false
 	}
 	return ray.At(t), true
@@ -272,14 +272,11 @@ func (ray *Ray) IntersectBox(box Box3) (Vector3, bool) {
 		return ray.Origin, false
 	}
 
-	// These lines also handle the case where tmin or tmax is NaN
-	// (result of 0 * Infinity). x !== x returns true if x is NaN
-
-	if tymin > tmin || tmin != tmin {
+	if tymin > tmin || IsNaN(tmin) {
 		tmin = tymin
 	}
 
-	if tymax < tmax || tmax != tmax {
+	if tymax < tmax || IsNaN(tmax) {
 		tmax = tymax
 	}
 
@@ -295,11 +292,11 @@ func (ray *Ray) IntersectBox(box Box3) (Vector3, bool) {
 		return ray.Origin, false
 	}
 
-	if tzmin > tmin || tmin != tmin {
+	if tzmin > tmin || IsNaN(tmin) {
 		tmin = tzmin
 	}
 
-	if tzmax < tmax || tmax != tmax {
+	if tzmax < tmax || IsNaN(tmax) {
 		tmax = tzmax
 	}
 
