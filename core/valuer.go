@@ -85,9 +85,9 @@ func toValue(value any, tags reflect.StructTag) Value {
 		return NewText()
 	}
 	uv := reflectx.Underlying(rv)
-	if reflectx.IsNil(uv) {
-		return NewText()
-	}
+	// if reflectx.IsNil(uv) { // no! perfectly valid to have a nil pointer and still want to create for type
+	// 	return NewText()
+	// }
 	typ := uv.Type()
 	if vwt, ok := ValueTypes[types.TypeName(typ)]; ok {
 		if vw := vwt(value); vw != nil {
