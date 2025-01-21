@@ -85,9 +85,9 @@ func toValue(value any, tags reflect.StructTag) Value {
 		return NewText()
 	}
 	uv := reflectx.Underlying(rv)
-	if reflectx.IsNil(uv) {
-		return NewText()
-	}
+	// if reflectx.IsNil(uv) { // no: handle null properly in relevant widgets; essential for list / table
+	// 	return NewText()
+	// }
 	typ := uv.Type()
 	if vwt, ok := ValueTypes[types.TypeName(typ)]; ok {
 		if vw := vwt(value); vw != nil {
