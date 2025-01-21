@@ -118,7 +118,9 @@ func (tb *TreeButton) Init() {
 		tb.SetText(path)
 	})
 	InitValueButton(tb, true, func(d *Body) {
-		makeInspector(d, tb.Tree)
+		if !reflectx.UnderlyingPointer(reflect.ValueOf(tb.Tree)).IsNil() {
+			makeInspector(d, tb.Tree)
+		}
 	})
 }
 
