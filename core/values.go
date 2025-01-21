@@ -112,7 +112,7 @@ func (tb *TreeButton) Init() {
 	tb.SetType(ButtonTonal).SetIcon(icons.Edit)
 	tb.Updater(func() {
 		path := "None"
-		if tb.Tree != nil {
+		if !reflectx.UnderlyingPointer(reflect.ValueOf(tb.Tree)).IsNil() {
 			path = tb.Tree.AsTree().String()
 		}
 		tb.SetText(path)
@@ -123,7 +123,7 @@ func (tb *TreeButton) Init() {
 }
 
 func (tb *TreeButton) WidgetTooltip(pos image.Point) (string, image.Point) {
-	if tb.Tree == nil {
+	if reflectx.UnderlyingPointer(reflect.ValueOf(tb.Tree)).IsNil() {
 		return tb.Tooltip, tb.DefaultTooltipPos()
 	}
 	tpa := "(" + tb.Tree.AsTree().Path() + ")"
