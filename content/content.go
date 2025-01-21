@@ -307,7 +307,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame) {
 			last[num] = tr
 			ct.tocNodes[strings.ToLower(tx.Text)] = tr
 			tr.OnSelect(func(e events.Event) {
-				tx.ScrollToThisTop()
+				tx.ScrollThisToTop()
 			})
 		}
 		return tree.Continue

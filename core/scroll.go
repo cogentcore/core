@@ -280,10 +280,10 @@ func (wb *WidgetBase) ScrollToThis() bool {
 	return fr.scrollToWidget(wb.This.(Widget))
 }
 
-// ScrollToThisTop tells this widget's parent frame to scroll so the top
+// ScrollThisToTop tells this widget's parent frame to scroll so the top
 // of this widget is at the top of the visible range.
 // It returns whether any scrolling was done.
-func (wb *WidgetBase) ScrollToThisTop() bool {
+func (wb *WidgetBase) ScrollThisToTop() bool {
 	if wb.This == nil {
 		return false
 	}
