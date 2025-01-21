@@ -52,6 +52,7 @@ func (ct *Content) saveWebURL() {
 	if errors.Log(err) != nil {
 		return
 	}
+	new.Fragment = ct.currentHeading
 	fullNew := base.ResolveReference(new)
 	if fullNew.String() == current.String() {
 		return // We are already at this URL, so don't push it again

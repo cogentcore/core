@@ -17,6 +17,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -73,8 +74,12 @@ type Content struct {
 	leftFrame *core.Frame
 
 	// tocNodes are all of the tree nodes in the table of contents
-	// by lowercase heading name.
+	// by kebab-case heading name.
 	tocNodes map[string]*core.Tree
+
+	// currentHeading is the currently selected heading in the table of contents,
+	// if any (in kebab-case).
+	currentHeading string
 }
 
 func init() {
@@ -225,6 +230,7 @@ func (ct *Content) open(url string, history bool) {
 		core.TheApp.OpenURL(url)
 		return
 	}
+	ct.currentHeading = heading
 	if ct.currentPage == pg {
 		ct.openHeading(heading)
 		return
@@ -247,7 +253,7 @@ func (ct *Content) openHeading(heading string) {
 	if heading == "" {
 		return
 	}
-	tr := ct.tocNodes[strings.ToLower(heading)]
+	tr := ct.tocNodes[strcase.ToKebab(heading)]
 	if tr == nil {
 		errors.Log(fmt.Errorf("heading %q not found", heading))
 		return
@@ -305,8 +311,10 @@ func (ct *Content) makeTableOfContents(w *core.Frame) {
 			}
 			tr := core.NewTree(parent).SetText(tx.Text)
 			last[num] = tr
-			ct.tocNodes[strings.ToLower(tx.Text)] = tr
+			kebab := strcase.ToKebab(tr.Text)
+			ct.tocNodes[kebab] = tr
 			tr.OnSelect(func(e events.Event) {
+				ct.currentHeading = kebab
 				tx.ScrollThisToTop()
 			})
 		}
