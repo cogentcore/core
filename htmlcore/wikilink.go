@@ -61,15 +61,18 @@ func wikilink(ctx *Context, fn func(p *parser.Parser, data []byte, offset int) (
 		}
 		inside, after := getWikilinkText(data)
 		url, label := runWikilinkHandlers(ctx, inside)
+
+		var node ast.Node
 		if len(url) == 0 && len(label) == 0 {
 			slog.Error("invalid wikilink", "link", string(inside))
-			return fn(p, original, offset)
+			// TODO: we just treat broken wikilinks like plaintext for now, but we should
+			// make red links instead at some point
+			node = &ast.Text{Leaf: ast.Leaf{Literal: append(inside, after...)}}
+		} else {
+			node = &ast.Link{Destination: url}
+			ast.AppendChild(node, &ast.Text{Leaf: ast.Leaf{Literal: append(label, after...)}})
 		}
-		link := &ast.Link{
-			Destination: url,
-		}
-		ast.AppendChild(link, &ast.Text{Leaf: ast.Leaf{Literal: append(label, after...)}})
-		return len(inside) + len(after) + 4, link
+		return len(inside) + len(after) + 4, node
 	}
 }
 
