@@ -163,11 +163,11 @@ func getFlag(s string, args []string, boolFlags map[string]bool) (name, value st
 		if strings.HasPrefix(value, "-") {
 			value = ""
 			return
-		} else {
-			// if it doesn't start with a dash, it is our value, so we remove it from the remaining args (we have already set value to it above)
-			a = a[1:]
-			return
 		}
+		// if it doesn't start with a dash, it is our value, so we remove it from the remaining args (we have already set value to it above)
+		a = a[1:]
+		return
+
 	}
 	return
 }
@@ -469,9 +469,8 @@ func addFlags(allFields *fields, allFlags *fields, args []string, flags map[stri
 					}
 					if got {
 						continue // if we got the pos arg through the flag, we skip the rest of the pos arg stuff and go onto the next field
-					} else {
-						return nil, fmt.Errorf("missing positional argument %d (%s)", ui, strcase.ToKebab(v.Names[0]))
 					}
+					return nil, fmt.Errorf("missing positional argument %d (%s)", ui, strcase.ToKebab(v.Names[0]))
 				}
 				err = setFieldValue(v, args[ui]) // must be pointer to be settable
 				if err != nil {

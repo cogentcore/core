@@ -350,9 +350,8 @@ func sortByModTime(files []fs.FileInfo, ascending bool) {
 	slices.SortFunc(files, func(a, b fs.FileInfo) int {
 		if ascending {
 			return a.ModTime().Compare(b.ModTime())
-		} else {
-			return b.ModTime().Compare(a.ModTime())
 		}
+		return b.ModTime().Compare(a.ModTime())
 	})
 }
 
@@ -557,11 +556,10 @@ func (fn *Node) dirsTo(path string) (*Node, error) {
 		if sfni == nil {
 			if i == sz-1 { // ok for terminal -- might not exist yet
 				return cfn, nil
-			} else {
-				err = fmt.Errorf("filetree.Node could not find node %v in: %v, orig: %v, rel: %v", dr, cfn.Filepath, pth, rpath)
-				// slog.Error(err.Error()) // note: this is expected sometimes
-				return nil, err
 			}
+			err = fmt.Errorf("filetree.Node could not find node %v in: %v, orig: %v, rel: %v", dr, cfn.Filepath, pth, rpath)
+			// slog.Error(err.Error()) // note: this is expected sometimes
+			return nil, err
 		}
 		sfn := AsNode(sfni)
 		if sfn.IsDir() || i == sz-1 {

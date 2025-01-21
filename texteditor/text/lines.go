@@ -565,9 +565,8 @@ func (ls *Lines) Search(find []byte, ignoreCase, lexItems bool) (int, []Match) {
 	defer ls.Unlock()
 	if lexItems {
 		return SearchLexItems(ls.lines, ls.hiTags, find, ignoreCase)
-	} else {
-		return SearchRuneLines(ls.lines, find, ignoreCase)
 	}
+	return SearchRuneLines(ls.lines, find, ignoreCase)
 }
 
 // SearchRegexp looks for a string (regexp) within buffer,

@@ -206,9 +206,8 @@ func (v Vector3) Div(other Vector3) Vector3 {
 func (v Vector3) DivScalar(scalar float32) Vector3 {
 	if scalar != 0 {
 		return v.MulScalar(1 / scalar)
-	} else {
-		return Vector3{}
 	}
+	return Vector3{}
 }
 
 // SetDiv sets this to division by other vector (i.e., /= or divide-equals).

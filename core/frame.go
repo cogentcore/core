@@ -357,12 +357,11 @@ func (fr *Frame) focusOnName(e events.Event) bool {
 		}
 		fr.focusNameLast = focel
 		return true
-	} else {
-		if fr.focusNameLast == nil {
-			fr.focusName = "" // nothing being found
-		}
-		fr.focusNameLast = nil // start over
 	}
+	if fr.focusNameLast == nil {
+		fr.focusName = "" // nothing being found
+	}
+	fr.focusNameLast = nil // start over
 	return false
 }
 

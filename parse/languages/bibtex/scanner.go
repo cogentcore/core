@@ -117,14 +117,15 @@ func (s *Scanner) scanIdent() (tok Token, lit string) {
 func (s *Scanner) scanBare() (Token, string) {
 	var buf bytes.Buffer
 	for {
-		if ch := s.read(); ch == eof {
+		ch := s.read()
+		if ch == eof {
 			break
-		} else if !isAlphanum(ch) && !isBareSymbol(ch) || isWhitespace(ch) {
+		}
+		if !isAlphanum(ch) && !isBareSymbol(ch) || isWhitespace(ch) {
 			s.unread()
 			break
-		} else {
-			_, _ = buf.WriteRune(ch)
 		}
+		_, _ = buf.WriteRune(ch)
 	}
 	str := buf.String()
 	if strings.ToLower(str) == "comment" {

@@ -423,9 +423,8 @@ func (fl *File) RegSrc(reg Reg) string {
 	if reg.Ed.Ln == reg.St.Ln {
 		if reg.Ed.Ch > reg.St.Ch {
 			return string(fl.Lines[reg.Ed.Ln][reg.St.Ch:reg.Ed.Ch])
-		} else {
-			return ""
 		}
+		return ""
 	}
 	src := string(fl.Lines[reg.St.Ln][reg.St.Ch:])
 	nln := reg.Ed.Ln - reg.St.Ln
