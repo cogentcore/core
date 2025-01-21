@@ -314,8 +314,9 @@ func (ct *Content) makeTableOfContents(w *core.Frame) {
 			kebab := strcase.ToKebab(tr.Text)
 			ct.tocNodes[kebab] = tr
 			tr.OnSelect(func(e events.Event) {
-				ct.currentHeading = kebab
 				tx.ScrollThisToTop()
+				ct.currentHeading = kebab
+				ct.saveWebURL()
 			})
 		}
 		return tree.Continue
