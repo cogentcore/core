@@ -280,6 +280,21 @@ func (wb *WidgetBase) ScrollToThis() bool {
 	return fr.scrollToWidget(wb.This.(Widget))
 }
 
+// ScrollToThisTop tells this widget's parent frame to scroll so the top
+// of this widget is at the top of the visible range.
+// It returns whether any scrolling was done.
+func (wb *WidgetBase) ScrollToThisTop() bool {
+	if wb.This == nil {
+		return false
+	}
+	fr := wb.parentScrollFrame()
+	if fr == nil {
+		return false
+	}
+	box := wb.AsWidget().Geom.totalRect()
+	return fr.ScrollDimToStart(math32.Y, box.Min.Y)
+}
+
 // scrollToWidget scrolls the layout to ensure that the given widget is in view.
 // It returns whether scrolling was needed.
 func (fr *Frame) scrollToWidget(w Widget) bool {
