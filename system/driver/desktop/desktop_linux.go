@@ -78,14 +78,12 @@ func (cl *Clipboard) Read(types []string) mimedata.Mimes {
 		isMulti, mediaType, boundary, body := mimedata.IsMultipart(bstr)
 		if isMulti {
 			return mimedata.FromMultipart(body, boundary)
-		} else {
-			if mediaType != "" { // found a mime type encoding
-				return mimedata.NewMime(mediaType, bstr)
-			} else {
-				// we can't really figure out type, so just assume..
-				return mimedata.NewMime(types[0], bstr)
-			}
 		}
+		if mediaType != "" { // found a mime type encoding
+			return mimedata.NewMime(mediaType, bstr)
+		}
+		// we can't really figure out type, so just assume..
+		return mimedata.NewMime(types[0], bstr)
 	} else {
 		// todo: deal with image formats etc
 	}

@@ -113,7 +113,7 @@ func (p ErrorList) Less(i, j int) bool {
 	if e.Pos.Ch != f.Pos.Ch {
 		return e.Pos.Ch < f.Pos.Ch
 	}
-	return e.Msg < e.Msg
+	return e.Msg < f.Msg
 }
 
 // Sort sorts an ErrorList. *Error entries are sorted by position,

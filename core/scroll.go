@@ -386,12 +386,11 @@ func (fr *Frame) scrollToBoxDim(d math32.Dims, tmini, tmaxi int) bool {
 		}
 		sb.setValueEvent(trg)
 		return true
-	} else {
-		if (tmax - tmin) < sb.scrollThumbValue() { // only if whole thing fits
-			trg := sb.Value + float32(tmax-cmax) + h
-			sb.setValueEvent(trg)
-			return true
-		}
+	}
+	if (tmax - tmin) < sb.scrollThumbValue() { // only if whole thing fits
+		trg := sb.Value + float32(tmax-cmax) + h
+		sb.setValueEvent(trg)
+		return true
 	}
 	return false
 }

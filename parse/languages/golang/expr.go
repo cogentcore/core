@@ -70,23 +70,22 @@ func (gl *GoLang) TypeFromASTExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 				fmt.Printf("TExpr: FuncCall: could not find function: %v\n", funm)
 			}
 			return nil, fun, false
-		} else {
-			if funm == "len" || funm == "cap" {
-				return BuiltinTypes["int"], nil, true
-			}
-			if funm == "append" {
-				farg := fun.NextAST().NextAST()
-				return gl.TypeFromASTExpr(fs, origPkg, pkg, farg, last)
-			}
-			ctyp, _ := gl.FindTypeName(funm, fs, pkg) // conversion
-			if ctyp != nil {
-				return ctyp, nil, true
-			}
-			if TraceTypes {
-				fmt.Printf("TExpr: FuncCall: could not find function: %v\n", funm)
-			}
-			return nil, fun, false
 		}
+		if funm == "len" || funm == "cap" {
+			return BuiltinTypes["int"], nil, true
+		}
+		if funm == "append" {
+			farg := fun.NextAST().NextAST()
+			return gl.TypeFromASTExpr(fs, origPkg, pkg, farg, last)
+		}
+		ctyp, _ := gl.FindTypeName(funm, fs, pkg) // conversion
+		if ctyp != nil {
+			return ctyp, nil, true
+		}
+		if TraceTypes {
+			fmt.Printf("TExpr: FuncCall: could not find function: %v\n", funm)
+		}
+		return nil, fun, false
 	case tnm == "Selector":
 		if tyast.NumChildren() == 0 { // incomplete
 			return nil, nil, false
@@ -309,13 +308,13 @@ func (gl *GoLang) TypeFromASTType(fs *parse.FileState, origPkg, pkg *syms.Symbol
 			ftyp, got := ttp.Meths[funm]
 			if got && len(ftyp.Size) == 2 {
 				return gl.TypeFromFuncCall(fs, origPkg, pkg, nxt, last, ftyp)
-			} else {
-				if TraceTypes {
-					fmt.Printf("TExpr: FuncCall: could not find method: %v in type: %v\n", funm, ttp.Name)
-					tyast.WriteTree(os.Stdout, 0)
-				}
-				return nil, fun, false
 			}
+			if TraceTypes {
+				fmt.Printf("TExpr: FuncCall: could not find method: %v in type: %v\n", funm, ttp.Name)
+				tyast.WriteTree(os.Stdout, 0)
+			}
+			return nil, fun, false
+
 		}
 		if brk || nxt == nil || nxt == last {
 			break

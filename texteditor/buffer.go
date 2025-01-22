@@ -924,7 +924,7 @@ func (tb *Buffer) CommentRegion(start, end int) {
 func (tb *Buffer) JoinParaLines(startLine, endLine int) {
 	autoSave := tb.batchUpdateStart()
 	defer tb.batchUpdateEnd(autoSave)
-	tb.JoinParaLines(startLine, endLine)
+	tb.Lines.JoinParaLines(startLine, endLine)
 	tb.signalMods()
 }
 

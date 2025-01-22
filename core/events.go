@@ -269,9 +269,9 @@ func (em *Events) handlePosEvent(e events.Event) {
 					em.lastScrollTime = time.Now()
 				}
 				return
-			} else {
-				em.scroll = nil
 			}
+			em.scroll = nil
+
 		}
 	}
 
