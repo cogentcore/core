@@ -197,5 +197,27 @@ func makePages(c *config.Config, prps []*bcontent.PreRenderPage) error {
 			return err
 		}
 	}
+
+	err := make404(c)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// make404 makes the 404.html page.
+func make404(c *config.Config) error {
+	pr404 := &bcontent.PreRenderPage{}
+	pr404.Name = "404"
+	pr404.URL = "404"
+	pr404.HTML = "<p>404 page not found</p>"
+	b, err := makeIndexHTML(c, "", pr404)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(c.Build.Output, "404.html"), b, 0666)
+	if err != nil {
+		return err
+	}
 	return nil
 }
