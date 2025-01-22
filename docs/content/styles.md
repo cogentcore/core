@@ -67,7 +67,7 @@ You can specify different border properties for different sides of a widget (see
 fr := core.NewFrame(b)
 fr.Styler(func(s *styles.Style) {
     s.Border.Width.Set(units.Dp(4))
-    s.Border.Color.Set(colors.Scheme.Warn.Base, colors.Scheme.Error.Base)
+    s.Border.Color.Set(colors.Scheme.OutlineVariant, colors.Scheme.Primary.Base)
     s.Min.Set(units.Em(5))
 })
 ```
