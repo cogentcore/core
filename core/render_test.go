@@ -79,6 +79,27 @@ func TestRenderParentBorderRadiusHorizontalToolbar(t *testing.T) {
 	b.AssertRender(t, "render/parent-border-radius-horizontal-toolbar")
 }
 
+func TestRenderBorderLeak(t *testing.T) {
+	b := NewBody()
+	NewFrame(b).Styler(func(s *styles.Style) {
+		s.Min.Set(units.Em(5))
+		s.Border.Width.Set(units.Dp(4))
+		s.Border.Color.Set(colors.Scheme.Outline)
+	})
+	NewFrame(b).Styler(func(s *styles.Style) {
+		s.Min.Set(units.Em(5))
+		s.Border.Style.Set(styles.BorderDotted)
+		s.Border.Width.Set(units.Dp(4))
+		s.Border.Color.Set(colors.Scheme.Error.Base)
+	})
+	NewFrame(b).Styler(func(s *styles.Style) {
+		s.Min.Set(units.Em(5))
+		s.Border.Width.Set(units.Dp(4))
+		s.Border.Color.Set(colors.Scheme.Outline)
+	})
+	b.AssertRender(t, "render/border-leak")
+}
+
 // For https://github.com/cogentcore/core/issues/810
 func TestRenderButtonAlignment(t *testing.T) {
 	b := NewBody()
