@@ -377,7 +377,7 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 
 // setStageTitle sets the title of the stage based on the current page URL.
 func (ct *Content) setStageTitle() {
-	if rw := ct.Scene.RenderWindow(); rw != nil {
+	if rw := ct.Scene.RenderWindow(); rw != nil && ct.currentPage != nil {
 		name := ct.currentPage.Name
 		if ct.currentPage.URL == "" { // Root page just gets app name
 			name = core.TheApp.Name()
