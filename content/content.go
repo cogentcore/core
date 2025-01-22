@@ -231,6 +231,7 @@ func (ct *Content) open(url string, history bool) {
 		core.TheApp.OpenURL(url)
 		return
 	}
+	heading = strcase.ToKebab(heading)
 	ct.currentHeading = heading
 	if ct.currentPage == pg {
 		ct.openHeading(heading)
