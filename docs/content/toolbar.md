@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **toolbar** is a [[frame]] that contains [[widgets]] for related actions and controls.
+A **toolbar** is a [[frame]] that contains [[widget]]s for related actions and controls.
 
 All toolbars use the [[plan]] system through [[doc:core.WidgetBase.Maker]]. This ensures that toolbars can always be dynamic and responsive.
 
@@ -22,7 +22,7 @@ tb.Maker(func(p *tree.Plan) {
 })
 ```
 
-You can add any types of widgets to toolbars, although [[buttons]] and [[func buttons]] are the most common:
+You can add any types of widgets to toolbars, although [[button]]s and [[func button]]s are the most common:
 
 ```Go
 tb := core.NewToolbar(b)
@@ -38,7 +38,7 @@ tb.Maker(func(p *tree.Plan) {
 
 ## Overflow
 
-When you add more items to a toolbar than can fit on the screen, it places them in an overflow menu:
+When you add more items to a toolbar than can fit on the screen, it places them in an overflow [[menu]]:
 
 ```Go
 tb := core.NewToolbar(b)
