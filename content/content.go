@@ -224,6 +224,7 @@ func (ct *Content) open(url string, history bool) {
 		core.TheApp.OpenURL(url)
 		return
 	}
+	url = strings.ReplaceAll(url, "/#", "#")
 	url, heading, _ := strings.Cut(url, "#")
 	pg, ok := ct.pagesByURL[url]
 	if !ok {
