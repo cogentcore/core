@@ -6,11 +6,10 @@ package web
 
 import (
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/core/config"
 )
@@ -20,8 +19,8 @@ func Serve(c *config.Config) error {
 	hfs := http.FileServer(http.Dir(c.Build.Output))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		trim := strings.Trim(r.URL.Path, "/")
-		exists := errors.Log1(fsx.FileExists(filepath.Join(c.Build.Output, trim)))
-		if !exists {
+		_, err := os.Stat(filepath.Join(c.Build.Output, trim))
+		if err != nil {
 			r.URL.Path = "/404.html"
 			trim = "404.html"
 			w.WriteHeader(http.StatusNotFound)
