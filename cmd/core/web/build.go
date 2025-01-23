@@ -146,9 +146,13 @@ func makeFiles(c *config.Config) error {
 		return err
 	}
 
-	// We just load the home page for 404 errors; the logic in the home page
-	// can then handle them appropriately.
-	err = os.WriteFile(filepath.Join(odir, "404.html"), iht, 0666)
+	// The 404 page is just the same as the index page, with an updated base path.
+	// The logic in the home page can then handle the error appropriately.
+	notFound, err := makeIndexHTML(c, "../", prindex)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(odir, "404.html"), notFound, 0666)
 	if err != nil {
 		return nil
 	}
