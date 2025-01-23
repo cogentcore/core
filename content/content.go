@@ -228,9 +228,17 @@ func (ct *Content) open(url string, history bool) {
 	url, heading, _ := strings.Cut(url, "#")
 	pg := ct.pagesByURL[url]
 	if pg == nil {
-		pg = ct.similarPage(url)
+		// We want only the URL after the last slash for automatic redirects
+		// (old URLs could have nesting).
+		last := url
+		if li := strings.LastIndex(url, "/"); li >= 0 {
+			last = url[li+1:]
+		}
+		pg = ct.similarPage(last)
 		if pg == nil {
 			core.ErrorSnackbar(ct, errors.New("no pages available"))
+		} else {
+			core.MessageSnackbar(ct, fmt.Sprintf("Redirected from %s", url))
 		}
 	}
 	heading = strcase.ToKebab(heading)
