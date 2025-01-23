@@ -5,27 +5,34 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
+	"path/filepath"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/core/config"
 )
 
 // Serve serves the build output directory on the default network address at the config port.
 func Serve(c *config.Config) error {
-	fs := http.FileServer(http.Dir(c.Build.Output))
+	hfs := http.FileServer(http.Dir(c.Build.Output))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		trim := strings.Trim(r.URL.Path, "/")
-		fmt.Println(trim)
+		exists := errors.Log1(fsx.FileExists(filepath.Join(c.Build.Output, trim)))
+		if !exists {
+			r.URL.Path = "/404.html"
+			trim = "404.html"
+			w.WriteHeader(http.StatusNotFound)
+		}
 		if trim == "app.wasm" {
 			w.Header().Set("Content-Type", "application/wasm")
 			if c.Web.Gzip {
 				w.Header().Set("Content-Encoding", "gzip")
 			}
 		}
-		fs.ServeHTTP(w, r)
+		hfs.ServeHTTP(w, r)
 	})
 
 	logx.PrintlnWarn("Serving at http://localhost:" + c.Web.Port)
