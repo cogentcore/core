@@ -226,10 +226,12 @@ func (ct *Content) open(url string, history bool) {
 	}
 	url = strings.ReplaceAll(url, "/#", "#")
 	url, heading, _ := strings.Cut(url, "#")
-	pg, ok := ct.pagesByURL[url]
-	if !ok {
-		core.TheApp.OpenURL(url)
-		return
+	pg := ct.pagesByURL[url]
+	if pg == nil {
+		pg = ct.similarPage(url)
+		if pg == nil {
+			core.ErrorSnackbar(ct, errors.New("no pages available"))
+		}
 	}
 	heading = strcase.ToKebab(heading)
 	ct.currentHeading = heading
