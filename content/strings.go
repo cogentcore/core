@@ -4,11 +4,18 @@
 
 package content
 
-import "cogentcore.org/core/content/bcontent"
+import (
+	"strings"
+
+	"cogentcore.org/core/content/bcontent"
+)
 
 // hamming computes the Hamming distance between the two given strings.
 // It is based on https://github.com/adrg/strutil/blob/master/metrics/hamming.go.
 func hamming(a, b string) int {
+	a = strings.ToLower(a)
+	b = strings.ToLower(b)
+
 	runesA, runesB := []rune(a), []rune(b)
 
 	// Check if both terms are empty.
