@@ -300,7 +300,7 @@ func (ct *Content) loadPage(w *core.Frame) error {
 		return err
 	}
 
-	w.ScrollDimToContentStart(math32.Y)
+	w.Parent.(*core.Frame).ScrollDimToContentStart(math32.Y) // parent has scrollbars
 	ct.leftFrame.DeleteChildren()
 	ct.makeTableOfContents(w)
 	ct.makeCategories()
