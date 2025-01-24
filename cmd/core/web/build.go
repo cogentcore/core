@@ -152,7 +152,7 @@ func makeFiles(c *config.Config) error {
 	// TODO: this is a temporary hack to fix the 404 page for multi-nested old URLs in the Cogent Core Docs.
 	if c.Name == "Cogent Core Docs" {
 		if c.Build.Trimpath {
-			bpath404 = "https://cogentcore.org/core/" // production
+			bpath404 = "https://www.cogentcore.org/core/" // production
 		} else {
 			bpath404 = "http://localhost:8080/" // dev
 		}
