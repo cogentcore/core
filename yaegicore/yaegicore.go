@@ -59,10 +59,11 @@ func init() {
 var currentGoalInterpreter Interpreter
 
 // interpreterParent is used to store the parent widget ("b") for the interpreter.
-// It exists such that it can be updated after-the-fact, such in Cogent Lab/Goal where interpreters
-// are re-used across multiple text editors, wherein the parent widget must be remotely controllable
-// with a pointer to keep the parent widget up-to-date.
-var interpreterParent = new(core.Widget)
+// It exists (as a double pointer) such that it can be updated after-the-fact, such
+// as in Cogent Lab/Goal where interpreters are re-used across multiple text editors,
+// wherein the parent widget must be remotely controllable with a double pointer to
+// keep the parent widget up-to-date.
+var interpreterParent = new(*core.Frame)
 
 // getInterpreter returns a new interpreter for the given language,
 // or [currentGoalInterpreter] if the language is "Goal" and it is non-nil.
@@ -87,7 +88,7 @@ func getInterpreter(language string) (in Interpreter, new bool, err error) {
 // such that the contents of the text editor are interpreted as code
 // of the given language, which is run in the context of the given parent widget.
 // It is used as the default value of [htmlcore.BindTextEditor].
-func BindTextEditor(ed *texteditor.Editor, parent core.Widget, language string) {
+func BindTextEditor(ed *texteditor.Editor, parent *core.Frame, language string) {
 	oc := func() {
 		in, new, err := getInterpreter(language)
 		if err != nil {
@@ -107,7 +108,7 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget, language string) 
 			in.ImportUsed()
 		}
 
-		parent.AsTree().DeleteChildren()
+		parent.DeleteChildren()
 		str := ed.Buffer.String()
 		// all Go code must be in a function for declarations to be handled correctly
 		if language == "Go" && !strings.Contains(str, "func main()") {
@@ -118,7 +119,7 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget, language string) 
 			core.ErrorSnackbar(ed, err, fmt.Sprintf("Error interpreting %s code", language))
 			return
 		}
-		parent.AsWidget().Update()
+		parent.Update()
 	}
 	ed.OnChange(func(e events.Event) { oc() })
 	oc()

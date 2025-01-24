@@ -336,4 +336,4 @@ func Get(ctx *Context, url string) (*http.Response, error) {
 // BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
 // when importing yaegicore, which provides interactive editing functionality for Go
 // code blocks in text editors.
-var BindTextEditor func(ed *texteditor.Editor, parent core.Widget, language string)
+var BindTextEditor func(ed *texteditor.Editor, parent *core.Frame, language string)
