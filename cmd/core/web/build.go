@@ -148,7 +148,16 @@ func makeFiles(c *config.Config) error {
 
 	// The 404 page is just the same as the index page, with an updated base path.
 	// The logic in the home page can then handle the error appropriately.
-	notFound, err := makeIndexHTML(c, "../", prindex)
+	bpath404 := "../"
+	// TODO: this is a temporary hack to fix the 404 page for multi-nested old URLs in the Cogent Core Docs.
+	if c.Name == "Cogent Core Docs" {
+		if c.Build.Trimpath {
+			bpath404 = "https://cogentcore.org/core/" // production
+		} else {
+			bpath404 = "http://localhost:8080/" // dev
+		}
+	}
+	notFound, err := makeIndexHTML(c, bpath404, prindex)
 	if err != nil {
 		return err
 	}
