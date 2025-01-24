@@ -12,6 +12,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/fs"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -177,7 +178,14 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		if err != nil {
 			return err
 		}
+		if d.IsDir() {
+			return nil
+		}
 		if path == "" || path == "." {
+			return nil
+		}
+		ext := filepath.Ext(path)
+		if !(ext == ".md" || ext == ".html") {
 			return nil
 		}
 		pg, err := bcontent.NewPage(ct.Source, path)
