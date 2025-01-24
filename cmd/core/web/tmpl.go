@@ -13,6 +13,7 @@ import (
 
 	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/cmd/core/config"
+	"cogentcore.org/core/content/bcontent"
 	strip "github.com/grokify/html-strip-tags-go"
 )
 
@@ -147,28 +148,25 @@ type indexHTMLData struct {
 // defaults to [config.Config.Name] otherwise), optional page-specific description (used
 // in [makePages], defaults to [config.Config.About]), and pre-render HTML representation
 // of app content.
-func makeIndexHTML(c *config.Config, basePath, title, description, preRenderHTML string) ([]byte, error) {
-	if title == "" {
-		title = c.Name
-	}
-	if description == "" {
-		description = c.About
+func makeIndexHTML(c *config.Config, basePath string, prp *bcontent.PreRenderPage) ([]byte, error) {
+	if prp.Description == "" {
+		prp.Description = c.About
 	} else {
 		// c.About is already stripped earlier, so only necessary
 		// for page-specific description here.
-		description = strip.StripTags(description)
+		prp.Description = strip.StripTags(prp.Description)
 	}
 	d := indexHTMLData{
 		BasePath:               basePath,
 		Author:                 c.Web.Author,
-		Description:            description,
+		Description:            prp.Description,
 		Keywords:               c.Web.Keywords,
-		Title:                  title,
+		Title:                  prp.Name,
 		SiteName:               c.Name,
 		Image:                  c.Web.Image,
 		VanityURL:              c.Web.VanityURL,
 		GithubVanityRepository: c.Web.GithubVanityRepository,
-		PreRenderHTML:          preRenderHTML,
+		PreRenderHTML:          prp.HTML,
 	}
 
 	b := &bytes.Buffer{}

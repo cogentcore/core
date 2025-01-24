@@ -118,6 +118,7 @@ func (fi *FileInfo) InitFile(fname string) error {
 	info, err := os.Stat(fi.Path)
 	if err != nil {
 		errs = append(errs, err)
+		fi.MimeFromFilename()
 	} else {
 		fi.SetFileInfo(info)
 	}
@@ -139,26 +140,44 @@ func (fi *FileInfo) InitFileFS(fsys fs.FS, fname string) error {
 	info, err := fs.Stat(fsys, fi.Path)
 	if err != nil {
 		errs = append(errs, err)
+		fi.MimeFromFilename()
 	} else {
 		fi.SetFileInfo(info)
 	}
 	return errors.Join(errs...)
 }
 
-// SetMimeInfo parses the file name to set mime type,
-// which then drives Kind and Icon.
-func (fi *FileInfo) SetMimeInfo() error {
+// MimeFromFilename sets the mime data based only on the filename
+// without attempting to open the file.
+func (fi *FileInfo) MimeFromFilename() error {
+	ext := strings.ToLower(filepath.Ext(fi.Path))
+	if mtype, has := ExtMimeMap[ext]; has { // only use our filename ext map
+		fi.SetMimeFromType(mtype)
+		return nil
+	}
+	return errors.New("FileInfo MimeFromFilename: Filename extension not known: " + ext)
+}
+
+// MimeFromFile sets the mime data for a valid file (i.e., os.Stat works).
+// Use MimeFromFilename to only examine the filename.
+func (fi *FileInfo) MimeFromFile() error {
 	if fi.Path == "" || fi.Path == "." || fi.IsDir() {
 		return nil
 	}
 	fi.Generated = IsGeneratedFile(fi.Path)
-	mtyp, _, err := MimeFromFile(fi.Path)
+	mtype, _, err := MimeFromFile(fi.Path)
 	if err != nil {
 		return err
 	}
-	fi.Mime = mtyp
-	fi.Cat = CategoryFromMime(fi.Mime)
-	fi.Known = MimeKnown(fi.Mime)
+	fi.SetMimeFromType(mtype)
+	return nil
+}
+
+// SetMimeType sets file info fields from given mime type string.
+func (fi *FileInfo) SetMimeFromType(mtype string) {
+	fi.Mime = mtype
+	fi.Cat = CategoryFromMime(mtype)
+	fi.Known = MimeKnown(mtype)
 	if fi.Cat != UnknownCategory {
 		fi.Kind = fi.Cat.String() + ": "
 	}
@@ -167,7 +186,6 @@ func (fi *FileInfo) SetMimeInfo() error {
 	} else {
 		fi.Kind += MimeSub(fi.Mime)
 	}
-	return nil
 }
 
 // SetFileInfo updates from given [fs.FileInfo]
@@ -181,7 +199,7 @@ func (fi *FileInfo) SetFileInfo(info fs.FileInfo) {
 		fi.Known = AnyFolder
 	} else {
 		if fi.Mode.IsRegular() {
-			fi.SetMimeInfo()
+			fi.MimeFromFile()
 		}
 		if fi.Cat == UnknownCategory {
 			if fi.IsExec() {
