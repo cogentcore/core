@@ -73,6 +73,9 @@ const (
 
 	// LongHoverable means it can be LongHovered
 	LongHoverable
+
+	// RemoteScrollable means it can be Scrolled without focus.
+	RemoteScrollable
 )
 
 // Is is a shortcut for HasFlag for Abilities

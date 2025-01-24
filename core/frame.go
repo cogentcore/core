@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"
 )
 
@@ -65,6 +66,11 @@ type Frame struct {
 
 func (fr *Frame) Init() {
 	fr.WidgetBase.Init()
+	fr.Styler(func(s *styles.Style) { // can be overridden
+		// if s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto {
+		s.SetAbilities(true, abilities.RemoteScrollable)
+		// }
+	})
 	fr.FinalStyler(func(s *styles.Style) {
 		// we only enable, not disable, since some other widget like Slider may want to enable
 		if s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto {
@@ -142,15 +148,22 @@ func (fr *Frame) Init() {
 		fr.focusOnName(e)
 	})
 	fr.On(events.Scroll, func(e events.Event) {
-		fr.scrollDelta(e)
+		if fr.AbilityIs(abilities.RemoteScrollable) || fr.Styles.Is(states.Focused) {
+			fr.scrollDelta(e)
+		}
 	})
 	// We treat slide events on frames as scroll events.
 	fr.On(events.SlideMove, func(e events.Event) {
 		// We must negate the delta for "natural" scrolling behavior.
-		del := math32.FromPoint(e.PrevDelta()).MulScalar(-0.034)
-		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
+		if fr.AbilityIs(abilities.RemoteScrollable) || fr.Styles.Is(states.Focused) {
+			del := math32.FromPoint(e.PrevDelta()).MulScalar(-0.034)
+			fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
+		}
 	})
 	fr.On(events.SlideStop, func(e events.Event) {
+		if !(fr.AbilityIs(abilities.RemoteScrollable) || fr.Styles.Is(states.Focused)) {
+			return
+		}
 		// If we have enough velocity, we continue scrolling over the
 		// next second in a goroutine while slowly decelerating for a
 		// smoother experience.
