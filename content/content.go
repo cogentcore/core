@@ -12,6 +12,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/fs"
+	"net/http"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -98,6 +99,9 @@ func (ct *Content) Init() {
 	ct.Context = htmlcore.NewContext()
 	ct.Context.OpenURL = func(url string) {
 		ct.Open(url)
+	}
+	ct.Context.GetURL = func(url string) (*http.Response, error) {
+		return htmlcore.GetURLFromFS(ct.Source, url)
 	}
 	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
 		name, label, _ := strings.Cut(text, "|")

@@ -24,27 +24,25 @@ func parseRelativeURL(rawURL, base string) (*url.URL, error) {
 	return b.ResolveReference(u), nil
 }
 
-// GetURLWithFS returns a function suitable for [Context.GetURL] that gets
+// GetURLFromFS can be used for [Context.GetURL] to get
 // resources from the given file system.
-func GetURLWithFS(fsys fs.FS) func(rawURL string) (*http.Response, error) {
-	return func(rawURL string) (*http.Response, error) {
-		u, err := url.Parse(rawURL)
-		if err != nil {
-			return nil, err
-		}
-		if u.Scheme != "" {
-			return http.Get(rawURL)
-		}
-		rawURL = strings.TrimPrefix(rawURL, "/")
-		f, err := fsys.Open(rawURL)
-		if err != nil {
-			return nil, err
-		}
-		return &http.Response{
-			Status:        http.StatusText(http.StatusOK),
-			StatusCode:    http.StatusOK,
-			Body:          f,
-			ContentLength: -1,
-		}, nil
+func GetURLFromFS(fsys fs.FS, rawURL string) (*http.Response, error) {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, err
 	}
+	if u.Scheme != "" {
+		return http.Get(rawURL)
+	}
+	rawURL = strings.TrimPrefix(rawURL, "/")
+	f, err := fsys.Open(rawURL)
+	if err != nil {
+		return nil, err
+	}
+	return &http.Response{
+		Status:        http.StatusText(http.StatusOK),
+		StatusCode:    http.StatusOK,
+		Body:          f,
+		ContentLength: -1,
+	}, nil
 }
