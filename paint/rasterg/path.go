@@ -7,9 +7,9 @@
 package rasterg
 
 import (
-	"math"
 	"unsafe"
 
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 )
 
@@ -86,7 +86,7 @@ func NewStyleFromStroke(stroke Stroke) Style {
 
 func f32ToF16(f float32) uint32 {
 	// This is a placeholder implementation. You need to implement the actual conversion.
-	return uint32(math.Float32bits(f) >> 16)
+	return uint32(math32.Float32bits(f) >> 16)
 }
 
 type Stroke struct {
@@ -454,10 +454,10 @@ func (pe *PathEncoder) isZeroLengthSegment(p1 [2]float32, p2, p3 *[2]float32) bo
 	if p3 == nil {
 		p3 = &p1
 	}
-	xMin := math.Min(math.Min(math.Min(float64(p0[0]), float64(p1[0])), float64((*p2)[0])), float64((*p3)[0]))
-	xMax := math.Max(math.Max(math.Max(float64(p0[0]), float64(p1[0])), float64((*p2)[0])), float64((*p3)[0]))
-	yMin := math.Min(math.Min(math.Min(float64(p0[1]), float64(p1[1])), float64((*p2)[1])), float64((*p3)[1]))
-	yMax := math.Max(math.Max(math.Max(float64(p0[1]), float64(p1[1])), float64((*p2)[1])), float64((*p3)[1]))
+	xMin := math32.Min(math32.Min(math32.Min(p0[0], p1[0]), p2[0]), p3[0])
+	xMax := math32.Max(math32.Max(math32.Max(p0[0], p1[0]), p2[0]), p3[0])
+	yMin := math32.Min(math32.Min(math32.Min(p0[1], p1[1]), p2[1]), p3[1])
+	yMax := math32.Max(math32.Max(math32.Max(p0[1], p1[1]), p2[1]), p3[1])
 	return !(xMax-xMin > EPSILON || yMax-yMin > EPSILON)
 }
 
@@ -466,11 +466,11 @@ const EPSILON = 1e-12
 func (pe *PathEncoder) startTangentForCurve(p1, p2, p3 [2]float32) *[2]float32 {
 	p0 := pe.firstPoint
 	var pt *[2]float32
-	if math.Abs(float64(p1[0]-p0[0])) > EPSILON || math.Abs(float64(p1[1]-p0[1])) > EPSILON {
+	if math32.Abs(p1[0]-p0[0]) > EPSILON || math32.Abs(p1[1]-p0[1]) > EPSILON {
 		pt = &p1
-	} else if math.Abs(float64(p2[0]-p0[0])) > EPSILON || math.Abs(float64(p2[1]-p0[1])) > EPSILON {
+	} else if math32.Abs(p2[0]-p0[0]) > EPSILON || math32.Abs(p2[1]-p0[1]) > EPSILON {
 		pt = &p2
-	} else if math.Abs(float64(p3[0]-p0[0])) > EPSILON || math.Abs(float64(p3[1]-p0[1])) > EPSILON {
+	} else if math32.Abs(p3[0]-p0[0]) > EPSILON || math32.Abs(p3[1]-p0[1]) > EPSILON {
 		pt = &p3
 	} else {
 		return nil
@@ -481,7 +481,7 @@ func (pe *PathEncoder) startTangentForCurve(p1, p2, p3 [2]float32) *[2]float32 {
 func (pe *PathEncoder) startTangentForLine(p1 [2]float32) *[2]float32 {
 	p0 := pe.firstPoint
 	var pt *[2]float32
-	if math.Abs(float64(p1[0]-p0[0])) > EPSILON || math.Abs(float64(p1[1]-p0[1])) > EPSILON {
+	if math32.Abs(p1[0]-p0[0]) > EPSILON || math32.Abs(p1[1]-p0[1]) > EPSILON {
 		pt = &[2]float32{
 			p0[0] + 1.0/3.0*(p1[0]-p0[0]),
 			p0[1] + 1.0/3.0*(p1[1]-p0[1]),
@@ -495,12 +495,12 @@ func (pe *PathEncoder) startTangentForLine(p1 [2]float32) *[2]float32 {
 func (pe *PathEncoder) startTangentForQuad(p1, p2 [2]float32) *[2]float32 {
 	p0 := pe.firstPoint
 	var pt *[2]float32
-	if math.Abs(float64(p1[0]-p0[0])) > EPSILON || math.Abs(float64(p1[1]-p0[1])) > EPSILON {
+	if math32.Abs(p1[0]-p0[0]) > EPSILON || math32.Abs(p1[1]-p0[1]) > EPSILON {
 		pt = &[2]float32{
 			p1[0] + 1.0/3.0*(p0[0]-p1[0]),
 			p1[1] + 1.0/3.0*(p0[1]-p1[1]),
 		}
-	} else if math.Abs(float64(p2[0]-p0[0])) > EPSILON || math.Abs(float64(p2[1]-p0[1])) > EPSILON {
+	} else if math32.Abs(p2[0]-p0[0]) > EPSILON || math32.Abs(p2[1]-p0[1]) > EPSILON {
 		pt = &[2]float32{
 			p1[0] + 1.0/3.0*(p2[0]-p1[0]),
 			p1[1] + 1.0/3.0*(p2[1]-p1[1]),
