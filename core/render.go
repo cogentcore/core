@@ -31,7 +31,7 @@ import (
 // context is not available, then this will block forever. Enable
 // [DebugSettingsData.UpdateTrace] in [DebugSettings] to see when that happens.
 // If the scene has not been shown yet and the render context is nil, it will wait
-// until the scene is shown.
+// until the scene is shown before trying again.
 func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {
@@ -43,7 +43,8 @@ func (wb *WidgetBase) AsyncLock() {
 			}
 			select {}
 		}
-		// Otherwise, if we haven't been shown yet, we just wait until we are.
+		// Otherwise, if we haven't been shown yet, we just wait until we are
+		// and then try again.
 		if DebugSettings.UpdateTrace {
 			fmt.Println("AsyncLock: waiting for scene to be shown:", wb)
 		}
@@ -52,6 +53,8 @@ func (wb *WidgetBase) AsyncLock() {
 			onShow <- struct{}{}
 		})
 		<-onShow
+		wb.AsyncLock() // try again
+		return
 	}
 	rc.lock()
 	if wb.This == nil {
