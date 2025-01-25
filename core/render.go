@@ -26,11 +26,14 @@ import (
 // AsyncLock must be called before making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
 // It must have a matching [WidgetBase.AsyncUnlock] after it.
+//
+// If the widget has been deleted, or if the [Scene] has been shown and the render
+// context is not available, then this will block forever.
 func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.renderContext()
-	if rc == nil {
-		// if there is no render context, we are probably
-		// being deleted, so we just block forever
+	if rc == nil && wb.Scene.hasFlag(sceneHasShown) {
+		// If there is no render context and the scene is shown,
+		// we are probably being deleted, so we just block forever.
 		select {}
 	}
 	rc.lock()
