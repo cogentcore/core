@@ -29,7 +29,7 @@ import (
 //
 // If the widget has been deleted, or if the [Scene] has been shown but the render
 // context is not available, then this will block forever. Enable
-// [DebugSettingsData.UpdateTrace] to see when that happens.
+// [DebugSettingsData.UpdateTrace] in [DebugSettings] to see when that happens.
 func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil && wb.Scene.hasFlag(sceneHasShown) {
