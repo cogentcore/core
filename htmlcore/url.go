@@ -35,6 +35,7 @@ func GetURLFromFS(fsys fs.FS, rawURL string) (*http.Response, error) {
 		return http.Get(rawURL)
 	}
 	rawURL = strings.TrimPrefix(rawURL, "/")
+	rawURL, _, _ = strings.Cut(rawURL, "?")
 	f, err := fsys.Open(rawURL)
 	if err != nil {
 		return nil, err
