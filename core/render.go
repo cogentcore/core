@@ -26,16 +26,42 @@ import (
 // AsyncLock must be called before making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
 // It must have a matching [WidgetBase.AsyncUnlock] after it.
+//
+// If the widget has been deleted, or if the [Scene] has been shown but the render
+// context is not available, then this will block forever. Enable
+// [DebugSettingsData.UpdateTrace] in [DebugSettings] to see when that happens.
+// If the scene has not been shown yet and the render context is nil, it will wait
+// until the scene is shown before trying again.
 func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {
-		// if there is no render context, we are probably
-		// being deleted, so we just block forever
-		select {}
+		if wb.Scene.hasFlag(sceneHasShown) {
+			// If the scene has been shown but there is no render context,
+			// we are probably being deleted, so we just block forever.
+			if DebugSettings.UpdateTrace {
+				fmt.Println("AsyncLock: scene shown but no render context; blocking forever:", wb)
+			}
+			select {}
+		}
+		// Otherwise, if we haven't been shown yet, we just wait until we are
+		// and then try again.
+		if DebugSettings.UpdateTrace {
+			fmt.Println("AsyncLock: waiting for scene to be shown:", wb)
+		}
+		onShow := make(chan struct{})
+		wb.OnShow(func(e events.Event) {
+			onShow <- struct{}{}
+		})
+		<-onShow
+		wb.AsyncLock() // try again
+		return
 	}
 	rc.lock()
 	if wb.This == nil {
 		rc.unlock()
+		if DebugSettings.UpdateTrace {
+			fmt.Println("AsyncLock: widget deleted; blocking forever:", wb)
+		}
 		select {}
 	}
 	wb.Scene.setFlag(true, sceneUpdating)
