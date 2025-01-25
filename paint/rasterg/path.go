@@ -54,27 +54,27 @@ func NewStyleFromStroke(stroke Stroke) Style {
 	style := FLAGS_STYLE_BIT
 	var join, startCap, endCap uint32
 	switch stroke.join {
-	case Bevel:
+	case styles.LineJoinBevel:
 		join = FLAGS_JOIN_BITS_BEVEL
-	case Miter:
+	case styles.LineJoinMiter:
 		join = FLAGS_JOIN_BITS_MITER
-	case RoundJoin:
+	case styles.LineJoinRound:
 		join = FLAGS_JOIN_BITS_ROUND
 	}
 	switch stroke.startCap {
-	case Butt:
+	case styles.LineCapButt:
 		startCap = FLAGS_START_CAP_BITS_BUTT
-	case Square:
+	case styles.LineCapSquare:
 		startCap = FLAGS_START_CAP_BITS_SQUARE
-	case Round:
+	case styles.LineCapRound:
 		startCap = FLAGS_START_CAP_BITS_ROUND
 	}
 	switch stroke.endCap {
-	case Butt:
+	case styles.LineCapButt:
 		endCap = FLAGS_END_CAP_BITS_BUTT
-	case Square:
+	case styles.LineCapSquare:
 		endCap = FLAGS_END_CAP_BITS_SQUARE
-	case Round:
+	case styles.LineCapRound:
 		endCap = FLAGS_END_CAP_BITS_ROUND
 	}
 	miterLimit := f32ToF16(float32(stroke.miterLimit))
@@ -91,9 +91,9 @@ func f32ToF16(f float32) uint32 {
 
 type Stroke struct {
 	width      float64
-	join       Join
-	startCap   Cap
-	endCap     Cap
+	join       styles.LineJoins
+	startCap   styles.LineCaps
+	endCap     styles.LineCaps
 	miterLimit float64
 }
 
@@ -101,17 +101,17 @@ func NewStroke(width float64) Stroke {
 	return Stroke{width: width}
 }
 
-func (s Stroke) WithJoin(join Join) Stroke {
+func (s Stroke) WithJoin(join styles.LineJoins) Stroke {
 	s.join = join
 	return s
 }
 
-func (s Stroke) WithStartCap(cap Cap) Stroke {
+func (s Stroke) WithStartCap(cap styles.LineCaps) Stroke {
 	s.startCap = cap
 	return s
 }
 
-func (s Stroke) WithEndCap(cap Cap) Stroke {
+func (s Stroke) WithEndCap(cap styles.LineCaps) Stroke {
 	s.endCap = cap
 	return s
 }
