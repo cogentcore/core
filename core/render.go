@@ -32,13 +32,24 @@ import (
 // [DebugSettingsData.UpdateTrace] in [DebugSettings] to see when that happens.
 func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.renderContext()
-	if rc == nil && wb.Scene.hasFlag(sceneHasShown) {
-		// If the scene has been shown but there is no render context,
-		// we are probably being deleted, so we just block forever.
-		if DebugSettings.UpdateTrace {
-			fmt.Println("AsyncLock: scene shown but no render context; blocking forever:", wb)
+	if rc == nil {
+		if wb.Scene.hasFlag(sceneHasShown) {
+			// If the scene has been shown but there is no render context,
+			// we are probably being deleted, so we just block forever.
+			if DebugSettings.UpdateTrace {
+				fmt.Println("AsyncLock: scene shown but no render context; blocking forever:", wb)
+			}
+			select {}
 		}
-		select {}
+		// Otherwise, if we haven't been shown yet, we just wait until we are.
+		if DebugSettings.UpdateTrace {
+			fmt.Println("AsyncLock: waiting for scene to be shown:", wb)
+		}
+		onShow := make(chan struct{})
+		wb.OnShow(func(e events.Event) {
+			onShow <- struct{}{}
+		})
+		<-onShow
 	}
 	rc.lock()
 	if wb.This == nil {
