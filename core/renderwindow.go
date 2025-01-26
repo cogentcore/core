@@ -28,6 +28,10 @@ var windowWait sync.WaitGroup
 // Wait waits for all windows to close and runs the main app loop.
 // This should be put at the end of the main function if
 // [Body.RunMainWindow] is not used.
+//
+// For offscreen testing, Wait is typically never called, as it is
+// not necessary (the app will already terminate once all tests are done,
+// and nothing needs to run on the main thread).
 func Wait() {
 	waitCalled = true
 	defer func() { system.HandleRecover(recover()) }()
