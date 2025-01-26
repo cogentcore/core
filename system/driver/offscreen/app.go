@@ -47,8 +47,13 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 
 	w := &Window{base.NewWindowMulti[*App, *Drawer](a, opts)}
 	w.This = w
+	w.Draw = &Drawer{}
 	w.PixelSize = opts.Size
+
+	a.Mu.Lock()
+	a.Windows = append(a.Windows, w)
 	a.GetScreens()
+	a.Mu.Unlock()
 
 	w.Event.WindowResize()
 	w.Event.Window(events.WinShow)
