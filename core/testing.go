@@ -5,9 +5,10 @@
 package core
 
 import (
+	"image"
+
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/system"
 )
 
 // AssertRender makes a new window from the body, waits until it is shown
@@ -33,9 +34,15 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	}
 
 	b.Scene.assertPixels(t, filename)
+
 	b.AsyncLock()
 	b.Close()
 	b.AsyncUnlock()
+}
+
+// getImager is implemented by offscreen.Drawer for [Body.AssertRenderScreen].
+type getImager interface {
+	GetImage() *image.RGBA
 }
 
 // AssertRenderScreen is the same as [Body.AssertRender] except that it asserts the
@@ -52,7 +59,10 @@ func (b *Body) AssertRenderScreen(t imagex.TestingT, filename string, fun ...fun
 		b.waitNoEvents()
 	}
 
-	system.AssertCapture(t, filename)
+	dw := b.Scene.RenderWindow().SystemWindow.Drawer()
+	img := dw.(getImager).GetImage()
+	imagex.Assert(t, img, filename)
+
 	b.AsyncLock()
 	b.Close()
 	b.AsyncUnlock()
