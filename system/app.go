@@ -216,34 +216,37 @@ var OnSystemWindowCreated chan struct{}
 type Platforms int32 //enums:enum
 
 const (
-	// MacOS is a Mac OS machine (aka Darwin)
+	// MacOS is a macOS computer (aka Darwin). It is a multi-window desktop platform.
 	MacOS Platforms = iota
 
-	// Linux is a Linux OS machine
+	// Linux is a Linux computer. It is a multi-window desktop platform.
 	Linux
 
-	// Windows is a Microsoft Windows machine
+	// Windows is a Microsoft Windows computer. It is a multi-window desktop platform.
 	Windows
 
-	// IOS is an Apple iOS or iPadOS mobile phone or iPad
+	// IOS is an Apple iOS or iPadOS mobile phone or iPad. It is a single-window mobile platform.
 	IOS
 
-	// Android is an Android mobile phone or tablet
+	// Android is an Android mobile phone or tablet. It is a single-window mobile platform.
 	Android
 
-	// Web is a web browser running the app through WASM
+	// Web is a web browser running the app through WASM. It is a single-window "mobile" platform.
 	Web
 
 	// Offscreen is an offscreen driver typically used for testing,
-	// specified using the "offscreen" build tag
+	// specified using the "offscreen" build tag. It is automatically
+	// enabled when testing. It is a multi-window but single-screen platform.
 	Offscreen
 )
 
-// IsMobile returns whether the platform is a mobile platform
-// (iOS, Android, Web, or Offscreen). Web and Offscreen are
-// considered mobile platforms because they only support one window.
+// IsMobile returns whether the platform is a "mobile" platform
+// ([IOS], [Android], or [Web]). [Web] is considered a mobile platform
+// because it only supports one window. You can use [App.SystemPlatform]
+// to determine the underlying system platform on [Web] (IsMobile on SystemPlatform
+// will only return true if the underlying system is actually iOS or Android).
 func (p Platforms) IsMobile() bool {
-	return p == IOS || p == Android || p == Web || p == Offscreen
+	return p == IOS || p == Android || p == Web
 }
 
 func init() {
