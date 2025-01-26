@@ -17,13 +17,12 @@ type Drawer struct {
 	Window *Window
 }
 
-// DestBounds returns the bounds of the render destination
-func (dw *Drawer) DestBounds() image.Rectangle {
+func (dw *Drawer) Start() {
 	rect := image.Rectangle{Max: dw.Window.PixelSize}
-	if dw.Image.Bounds().Size() != dw.Window.PixelSize {
+	if dw.Image == nil || dw.Image.Rect != rect {
 		dw.Image = image.NewRGBA(rect)
 	}
-	return rect
+	dw.DrawerBase.Start()
 }
 
 func (dw *Drawer) End() {} // no-op
