@@ -33,7 +33,9 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	}
 
 	b.Scene.assertPixels(t, filename)
+	b.AsyncLock()
 	b.Close()
+	b.AsyncUnlock()
 }
 
 // AssertRenderScreen is the same as [Body.AssertRender] except that it asserts the
@@ -51,7 +53,9 @@ func (b *Body) AssertRenderScreen(t imagex.TestingT, filename string, fun ...fun
 	}
 
 	system.AssertCapture(t, filename)
+	b.AsyncLock()
 	b.Close()
+	b.AsyncUnlock()
 }
 
 // runAndShowNewWindow runs a new window and waits for it to be shown.
