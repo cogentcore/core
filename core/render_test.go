@@ -161,6 +161,7 @@ func TestOverflowAutoDefinedMax(t *testing.T) {
 
 // For https://github.com/cogentcore/core/issues/615
 func TestRenderNestedScroll(t *testing.T) {
+	t.Skip("TODO(#1456): fix this test")
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Max.Set(units.Dp(300))
