@@ -40,7 +40,11 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	}
 
 	b.AsyncLock()
-	b.doNeedsRender()
+	rw.mains.mu.Lock()
+	for _, kv := range rw.mains.stack.Order {
+		kv.Value.Scene.NeedsRender()
+	}
+	rw.mains.mu.Unlock()
 	b.AsyncUnlock()
 	rw.renderWindow()
 
