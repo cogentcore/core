@@ -47,7 +47,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 
 	w := &Window{base.NewWindowMulti[*App, *Drawer](a, opts)}
 	w.This = w
-	w.Draw = &Drawer{}
+	w.Draw = &Drawer{Window: w}
 	w.PixelSize = opts.Size
 
 	a.Mu.Lock()
@@ -90,10 +90,6 @@ func (a *App) GetScreens() {
 	physX := 25.4 * float32(sc.PixelSize.X) / dpi
 	physY := 25.4 * float32(sc.PixelSize.Y) / dpi
 	sc.PhysicalSize = image.Pt(int(physX), int(physY))
-
-	for _, win := range a.Windows {
-		win.Draw.Image = image.NewRGBA(image.Rectangle{Max: sc.PixelSize})
-	}
 }
 
 func (a *App) QuitClean() bool {

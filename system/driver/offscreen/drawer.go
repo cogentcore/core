@@ -13,11 +13,17 @@ import (
 // Drawer is the implementation of [system.Drawer] for the offscreen platform
 type Drawer struct {
 	system.DrawerBase
+
+	Window *Window
 }
 
 // DestBounds returns the bounds of the render destination
 func (dw *Drawer) DestBounds() image.Rectangle {
-	return TheApp.Screen(0).Geometry
+	rect := image.Rectangle{Max: dw.Window.PixelSize}
+	if dw.Image.Bounds().Size() != dw.Window.PixelSize {
+		dw.Image = image.NewRGBA(rect)
+	}
+	return rect
 }
 
 func (dw *Drawer) End() {} // no-op
