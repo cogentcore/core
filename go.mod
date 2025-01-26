@@ -12,10 +12,9 @@ require (
 	github.com/bramvdbogaerde/go-scp v1.4.0
 	github.com/chewxy/math32 v1.10.1
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
-	github.com/cogentcore/webgpu v0.0.0-20240906154609-e35089e9a725
+	github.com/cogentcore/webgpu v0.0.0-20250118183535-3dd1436165cf
 	github.com/cogentcore/yaegi v0.0.0-20240724064145-e32a03faad56
 	github.com/coreos/go-oidc/v3 v3.10.0
-	github.com/ergochat/readline v0.1.2
 	github.com/ericchiang/css v1.3.0
 	github.com/faiface/beep v1.1.0
 	github.com/fsnotify/fsnotify v1.7.0
@@ -30,17 +29,15 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.15.2
-	github.com/nsf/termbox-go v1.1.1
 	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/crypto v0.25.0
+	golang.org/x/crypto v0.31.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	golang.org/x/image v0.18.0
-	golang.org/x/net v0.27.0
+	golang.org/x/net v0.33.0
 	golang.org/x/oauth2 v0.20.0
-	golang.org/x/sys v0.22.0
+	golang.org/x/sys v0.28.0
 	golang.org/x/tools v0.23.0
-	gonum.org/v1/gonum v0.15.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -64,7 +61,7 @@ require (
 	golang.org/x/exp/shiny v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
 	golang.org/x/mod v0.19.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )

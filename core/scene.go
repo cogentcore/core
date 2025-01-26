@@ -210,6 +210,9 @@ func (sc *Scene) Init() {
 		currentRenderWindow.SetStageTitle(st.Title)
 	})
 	sc.Updater(func() {
+		if TheApp.Platform() == system.Offscreen {
+			return
+		}
 		// At the scene level, we reset the shortcuts and add our context menu
 		// shortcuts every time. This clears the way for buttons to add their
 		// shortcuts in their own Updaters. We must get the shortcuts every time
@@ -252,23 +255,23 @@ func (sc *Scene) RenderWindow() *renderWindow {
 }
 
 // fitInWindow fits Scene geometry (pos, size) into given window geom.
-// Calls resize for the new size.
-func (sc *Scene) fitInWindow(winGeom math32.Geom2DInt) {
+// Calls resize for the new size and returns whether it actually needed to
+// be resized.
+func (sc *Scene) fitInWindow(winGeom math32.Geom2DInt) bool {
 	geom := sc.SceneGeom
 	// full offscreen windows ignore any window geometry constraints
 	// because they must be unbounded by any previous window sizes
 	if TheApp.Platform() != system.Offscreen || !sc.Stage.FullWindow {
 		geom = geom.FitInWindow(winGeom)
 	}
-	sc.resize(geom)
-	sc.SceneGeom.Pos = geom.Pos
-	// fmt.Println("win", winGeom, "geom", geom)
+	return sc.resize(geom)
 }
 
-// resize resizes the scene, creating a new image; updates Geom
-func (sc *Scene) resize(geom math32.Geom2DInt) {
+// resize resizes the scene if needed, creating a new image; updates Geom.
+// returns false if the scene is already the correct size.
+func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 	if geom.Size.X <= 0 || geom.Size.Y <= 0 {
-		return
+		return false
 	}
 	if sc.PaintContext.State == nil {
 		sc.PaintContext.State = &paint.State{}
@@ -279,6 +282,8 @@ func (sc *Scene) resize(geom math32.Geom2DInt) {
 	sc.SceneGeom.Pos = geom.Pos
 	if sc.Pixels == nil || sc.Pixels.Bounds().Size() != geom.Size {
 		sc.Pixels = image.NewRGBA(image.Rectangle{Max: geom.Size})
+	} else {
+		return false
 	}
 	sc.PaintContext.Init(geom.Size.X, geom.Size.Y, sc.Pixels)
 	sc.SceneGeom.Size = geom.Size // make sure
@@ -293,13 +298,15 @@ func (sc *Scene) resize(geom math32.Geom2DInt) {
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.showIter = 0
 	sc.NeedsLayout()
+	return true
 }
 
 // ResizeToContent resizes the scene so it fits the current content.
-// Only applicable to Desktop systems where windows can be resized.
+// Only applicable to desktop systems where windows can be resized.
 // Optional extra size is added to the amount computed to hold the contents,
 // which is needed in cases with wrapped text elements, which don't
-// always size accurately.
+// always size accurately. See [Scene.SetGeometry] for a more general way
+// to set all window geometry properties.
 func (sc *Scene) ResizeToContent(extra ...image.Point) {
 	if TheApp.Platform().IsMobile() { // not resizable
 		return
@@ -309,13 +316,69 @@ func (sc *Scene) ResizeToContent(extra ...image.Point) {
 		return
 	}
 	go func() {
-		scsz := system.TheApp.Screen(0).PixSize
+		scsz := system.TheApp.Screen(0).PixelSize
 		sz := sc.contentSize(scsz)
 		if len(extra) == 1 {
 			sz = sz.Add(extra[0])
 		}
 		win.SystemWindow.SetSize(sz)
 	}()
+}
+
+// SetGeometry uses [system.Window.SetGeometry] to set all window geometry properties,
+// with pos in operating system window manager units and size in raw pixels.
+// If pos and/or size is not specified, it defaults to the current value.
+// If fullscreen is true, pos and size are ignored, and screen indicates the number
+// of the screen on which to fullscreen the window. If fullscreen is false, the
+// window is moved to the given pos and size on the given screen. If screen is -1,
+// the current screen the window is on is used, and fullscreen/pos/size are all
+// relative to that screen. It is only applicable on desktop and web platforms,
+// with only fullscreen supported on web. See [Scene.SetFullscreen] for a simpler way
+// to set only the fullscreen state. See [Scene.ResizeToContent] to resize the window
+// to fit the current content.
+func (sc *Scene) SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen int) {
+	rw := sc.RenderWindow()
+	if rw == nil {
+		return
+	}
+	scr := TheApp.Screen(screen)
+	if screen < 0 {
+		scr = rw.SystemWindow.Screen()
+	}
+	rw.SystemWindow.SetGeometry(fullscreen, pos, size, scr)
+}
+
+// IsFullscreen returns whether the window associated with this [Scene]
+// is in fullscreen mode (true) or window mode (false). This is implemented
+// on desktop and web platforms. See [Scene.SetFullscreen] to update the
+// current fullscreen state and [Stage.SetFullscreen] to set the initial state.
+func (sc *Scene) IsFullscreen() bool {
+	rw := sc.RenderWindow()
+	if rw == nil {
+		return false
+	}
+	return rw.SystemWindow.Is(system.Fullscreen)
+}
+
+// SetFullscreen requests that the window associated with this [Scene]
+// be updated to either fullscreen mode (true) or window mode (false).
+// This is implemented on desktop and web platforms. See [Scene.IsFullscreen]
+// to get the current fullscreen state and [Stage.SetFullscreen] to set the
+// initial state. ([Stage.SetFullscreen] sets the initial state, whereas
+// this function sets the current state after the [Stage] is already running).
+// See [Scene.SetGeometry] for a more general way to set all window
+// geometry properties.
+func (sc *Scene) SetFullscreen(fullscreen bool) {
+	rw := sc.RenderWindow()
+	if rw == nil {
+		return
+	}
+	wgp, screen := theWindowGeometrySaver.get(rw.title, "")
+	if wgp != nil {
+		rw.SystemWindow.SetGeometry(fullscreen, wgp.Pos, wgp.Size, screen)
+	} else {
+		rw.SystemWindow.SetGeometry(fullscreen, image.Point{}, image.Point{}, rw.SystemWindow.Screen())
+	}
 }
 
 // Close closes the [Stage] associated with this [Scene].
@@ -360,6 +423,7 @@ func (sc *Scene) ApplyScenePos() {
 
 	sc.Parts.Geom.Pos.Total.Y = math32.Ceil(0.5 * mv.Geom.Size.Actual.Total.Y)
 	sc.Parts.Geom.Size.Actual = sc.Geom.Size.Actual
+	sc.Parts.Geom.Size.Alloc = sc.Geom.Size.Alloc
 	sc.Parts.setContentPosFromPos()
 	sc.Parts.setBBoxesFromAllocs()
 	sc.Parts.applyScenePosChildren()

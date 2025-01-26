@@ -56,9 +56,13 @@ func (st *StdIO) Set(o *StdIO) *StdIO {
 func (st *StdIO) SetToOS() *StdIO {
 	cur := &StdIO{}
 	cur.SetFromOS()
+	if sif, ok := st.In.(*os.File); ok {
+		os.Stdin = sif
+	} else {
+		fmt.Printf("In is not an *os.File: %#v\n", st.In)
+	}
 	os.Stdout = st.Out.(*os.File)
 	os.Stderr = st.Err.(*os.File)
-	os.Stdin = st.In.(*os.File)
 	return cur
 }
 
@@ -98,11 +102,8 @@ func IsPipe(rw any) bool {
 	if rw == nil {
 		return false
 	}
-	w, ok := rw.(io.Writer)
+	_, ok := rw.(io.Writer)
 	if !ok {
-		return false
-	}
-	if w == os.Stdout {
 		return false
 	}
 	of, ok := rw.(*os.File)
@@ -247,6 +248,9 @@ func (st *StdIOState) PopToStart() {
 	for len(st.InStack) > st.InStart {
 		st.PopIn()
 	}
+	for len(st.PipeIn) > 0 {
+		CloseReader(st.PipeIn.Pop())
+	}
 }
 
 // ErrIsInOut returns true if the given Err writer is also present
@@ -298,7 +302,13 @@ func (st *StdIO) NewWrappers(o *StdIO) {
 // which can be used in restoring state later.
 // The wrappers must have been created using NewWrappers initially.
 func (st *StdIO) SetWrappers(o *StdIO) *StdIO {
+	if o == nil {
+		return nil
+	}
 	cur := st.GetWrapped()
+	if cur == nil {
+		return nil
+	}
 	st.Out.(*WriteWrapper).Writer = o.Out
 	st.Err.(*WriteWrapper).Writer = o.Err
 	st.In.(*ReadWrapper).Reader = o.In
@@ -326,6 +336,10 @@ func (st *StdIO) SetWrappedIn(r io.Reader) {
 // GetWrapped returns the current wrapped values as a StdIO.
 // The wrappers must have been created using NewWrappers initially.
 func (st *StdIO) GetWrapped() *StdIO {
+	_, ok := st.Out.(*WriteWrapper)
+	if !ok {
+		return nil
+	}
 	o := &StdIO{}
 	o.Out = st.Out.(*WriteWrapper).Writer
 	o.Err = st.Err.(*WriteWrapper).Writer

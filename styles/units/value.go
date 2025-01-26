@@ -8,8 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"log/slog"
-
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"golang.org/x/image/math/fixed"
 )
@@ -193,14 +192,13 @@ func (v *Value) SetAny(iface any, key string) error {
 		*v = val
 	case *Value:
 		*v = *val
-	default: // assume Px as an implicit default
+	default: // assume Dp as an implicit default
 		valflt, err := reflectx.ToFloat(iface)
 		if err == nil {
-			v.Set(float32(valflt), UnitPx)
+			v.Dp(float32(valflt))
 		} else {
 			err := fmt.Errorf("units.Value: could not set property %q from value: %v of type: %T: %w", key, val, val, err)
-			slog.Error(err.Error())
-			return err
+			return errors.Log(err)
 		}
 	}
 	return nil

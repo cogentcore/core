@@ -21,7 +21,6 @@ import (
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
@@ -53,9 +52,6 @@ type Node struct { //core:embedder
 	// Buffer is the file buffer for editing this file.
 	Buffer *texteditor.Buffer `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// FileRoot is the root [Tree] of the tree, which has global state.
-	FileRoot *Tree `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
-
 	// DirRepo is the version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control.
 	DirRepo vcs.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
@@ -70,6 +66,11 @@ func (fn *Node) AsFileNode() *Node {
 	return fn
 }
 
+// FileRoot returns the Root node as a [Tree].
+func (fn *Node) FileRoot() *Tree {
+	return AsTree(fn.Root)
+}
+
 func (fn *Node) Init() {
 	fn.Tree.Init()
 	fn.IconOpen = icons.FolderOpen
@@ -78,21 +79,28 @@ func (fn *Node) Init() {
 	fn.AddContextMenu(fn.contextMenu)
 	fn.Styler(func(s *styles.Style) {
 		status := fn.Info.VCS
+		hex := ""
 		switch {
 		case status == vcs.Untracked:
-			s.Color = errors.Must1(gradient.FromString("#808080"))
+			hex = "#808080"
 		case status == vcs.Modified:
-			s.Color = errors.Must1(gradient.FromString("#4b7fd1"))
+			hex = "#4b7fd1"
 		case status == vcs.Added:
-			s.Color = errors.Must1(gradient.FromString("#008800"))
+			hex = "#008800"
 		case status == vcs.Deleted:
-			s.Color = errors.Must1(gradient.FromString("#ff4252"))
+			hex = "#ff4252"
 		case status == vcs.Conflicted:
-			s.Color = errors.Must1(gradient.FromString("#ce8020"))
+			hex = "#ce8020"
 		case status == vcs.Updated:
-			s.Color = errors.Must1(gradient.FromString("#008060"))
+			hex = "#008060"
 		case status == vcs.Stored:
 			s.Color = colors.Scheme.OnSurface
+		}
+		if fn.Info.Generated {
+			hex = "#8080C0"
+		}
+		if hex != "" {
+			s.Color = colors.Uniform(colors.ToBase(errors.Must1(colors.FromHex(hex))))
 		}
 	})
 	fn.On(events.KeyChord, func(e events.Event) {
@@ -189,14 +197,14 @@ func (fn *Node) Init() {
 			return
 		}
 		if fn.Name == externalFilesName {
-			files := fn.FileRoot.externalFiles
+			files := fn.FileRoot().externalFiles
 			for _, fi := range files {
 				tree.AddNew(p, fi, func() Filer {
-					return tree.NewOfType(fn.FileRoot.FileNodeType).(Filer)
+					return tree.NewOfType(fn.FileRoot().FileNodeType).(Filer)
 				}, func(wf Filer) {
 					w := wf.AsFileNode()
+					w.Root = fn.Root
 					w.NeedsLayout()
-					w.FileRoot = fn.FileRoot
 					w.Filepath = core.Filename(fi)
 					w.Info.Mode = os.ModeIrregular
 					w.Info.VCS = vcs.Stored
@@ -207,25 +215,25 @@ func (fn *Node) Init() {
 		if !fn.IsDir() || fn.IsIrregular() {
 			return
 		}
-		if !((fn.FileRoot.inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot.isDirOpen(fn.Filepath)) {
+		if !((fn.FileRoot().inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot().isDirOpen(fn.Filepath)) {
 			return
 		}
 		repo, _ := fn.Repo()
 		files := fn.dirFileList()
 		for _, fi := range files {
 			fpath := filepath.Join(string(fn.Filepath), fi.Name())
-			if fn.FileRoot.FilterFunc != nil && !fn.FileRoot.FilterFunc(fpath, fi) {
+			if fn.FileRoot().FilterFunc != nil && !fn.FileRoot().FilterFunc(fpath, fi) {
 				continue
 			}
 			tree.AddNew(p, fi.Name(), func() Filer {
-				return tree.NewOfType(fn.FileRoot.FileNodeType).(Filer)
+				return tree.NewOfType(fn.FileRoot().FileNodeType).(Filer)
 			}, func(wf Filer) {
 				w := wf.AsFileNode()
+				w.Root = fn.Root
 				w.NeedsLayout()
-				w.FileRoot = fn.FileRoot
 				w.Filepath = core.Filename(fpath)
 				w.This.(Filer).GetFileInfo()
-				if w.FileRoot.FS == nil {
+				if w.FileRoot().FS == nil {
 					if w.IsDir() && repo == nil {
 						w.detectVCSRepo(true) // update files
 					}
@@ -284,10 +292,10 @@ func (fn *Node) isAutoSave() bool {
 
 // RelativePath returns the relative path from root for this node
 func (fn *Node) RelativePath() string {
-	if fn.IsIrregular() || fn.FileRoot == nil {
+	if fn.IsIrregular() || fn.FileRoot() == nil {
 		return fn.Name
 	}
-	return fsx.RelativeFilePath(string(fn.Filepath), string(fn.FileRoot.Filepath))
+	return fsx.RelativeFilePath(string(fn.Filepath), string(fn.FileRoot().Filepath))
 }
 
 // dirFileList returns the list of files in this directory,
@@ -297,14 +305,16 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 	var files []fs.FileInfo
 	var dirs []fs.FileInfo // for DirsOnTop mode
 	var di []fs.DirEntry
-	if fn.FileRoot.FS == nil {
+	isFS := false
+	if fn.FileRoot().FS == nil {
 		di = errors.Log1(os.ReadDir(path))
 	} else {
-		di = errors.Log1(fs.ReadDir(fn.FileRoot.FS, path))
+		isFS = true
+		di = errors.Log1(fs.ReadDir(fn.FileRoot().FS, path))
 	}
 	for _, d := range di {
 		info := errors.Log1(d.Info())
-		if fn.FileRoot.DirsOnTop {
+		if fn.FileRoot().DirsOnTop {
 			if d.IsDir() {
 				dirs = append(dirs, info)
 			} else {
@@ -314,30 +324,34 @@ func (fn *Node) dirFileList() []fs.FileInfo {
 			files = append(files, info)
 		}
 	}
-	doModSort := fn.FileRoot.SortByModTime
+	doModSort := fn.FileRoot().SortByModTime
 	if doModSort {
-		doModSort = !fn.FileRoot.dirSortByName(core.Filename(path))
+		doModSort = !fn.FileRoot().dirSortByName(core.Filename(path))
 	} else {
-		doModSort = fn.FileRoot.dirSortByModTime(core.Filename(path))
+		doModSort = fn.FileRoot().dirSortByModTime(core.Filename(path))
 	}
 
-	if fn.FileRoot.DirsOnTop {
+	if fn.FileRoot().DirsOnTop {
 		if doModSort {
-			sortByModTime(dirs)
-			sortByModTime(files)
+			sortByModTime(dirs, isFS) // note: FS = ascending, otherwise descending
+			sortByModTime(files, isFS)
 		}
 		files = append(dirs, files...)
 	} else {
 		if doModSort {
-			sortByModTime(files)
+			sortByModTime(files, isFS)
 		}
 	}
 	return files
 }
 
-func sortByModTime(files []fs.FileInfo) {
+// sortByModTime sorts by _reverse_ mod time (newest first)
+func sortByModTime(files []fs.FileInfo, ascending bool) {
 	slices.SortFunc(files, func(a, b fs.FileInfo) int {
-		return a.ModTime().Compare(b.ModTime())
+		if ascending {
+			return a.ModTime().Compare(b.ModTime())
+		}
+		return b.ModTime().Compare(a.ModTime())
 	})
 }
 
@@ -371,7 +385,7 @@ func (fn *Node) InitFileInfo() error {
 		return nil
 	}
 	var err error
-	if fn.FileRoot.FS == nil { // deal with symlinks
+	if fn.FileRoot().FS == nil { // deal with symlinks
 		ls, err := os.Lstat(string(fn.Filepath))
 		if errors.Log(err) != nil {
 			return err
@@ -387,7 +401,7 @@ func (fn *Node) InitFileInfo() error {
 		}
 		err = fn.Info.InitFile(string(fn.Filepath))
 	} else {
-		err = fn.Info.InitFileFS(fn.FileRoot.FS, string(fn.Filepath))
+		err = fn.Info.InitFileFS(fn.FileRoot().FS, string(fn.Filepath))
 	}
 	if err != nil {
 		emsg := fmt.Errorf("filetree.Node InitFileInfo Path %q: Error: %v", fn.Filepath, err)
@@ -431,7 +445,7 @@ func (fn *Node) OnClose() {
 	if !fn.IsDir() {
 		return
 	}
-	fn.FileRoot.setDirClosed(fn.Filepath)
+	fn.FileRoot().setDirClosed(fn.Filepath)
 }
 
 func (fn *Node) CanOpen() bool {
@@ -443,7 +457,7 @@ func (fn *Node) openDir() {
 	if !fn.IsDir() {
 		return
 	}
-	fn.FileRoot.setDirOpen(fn.Filepath)
+	fn.FileRoot().setDirOpen(fn.Filepath)
 	fn.Update()
 }
 
@@ -458,15 +472,15 @@ func (fn *Node) sortBys(modTime bool) { //types:add
 // sortBy determines how to sort the files in the directory -- default is alpha by name,
 // optionally can be sorted by modification time.
 func (fn *Node) sortBy(modTime bool) {
-	fn.FileRoot.setDirSortBy(fn.Filepath, modTime)
+	fn.FileRoot().setDirSortBy(fn.Filepath, modTime)
 	fn.Update()
 }
 
 // openAll opens all directories under this one
 func (fn *Node) openAll() { //types:add
-	fn.FileRoot.inOpenAll = true // causes chaining of opening
+	fn.FileRoot().inOpenAll = true // causes chaining of opening
 	fn.Tree.OpenAll()
-	fn.FileRoot.inOpenAll = false
+	fn.FileRoot().inOpenAll = false
 }
 
 // OpenBuf opens the file in its buffer if it is not already open.
@@ -499,7 +513,7 @@ func (fn *Node) removeFromExterns() { //types:add
 		if !sn.isExternal() {
 			return
 		}
-		sn.FileRoot.removeExternalFile(string(sn.Filepath))
+		sn.FileRoot().removeExternalFile(string(sn.Filepath))
 		sn.closeBuf()
 		sn.Delete()
 	})
@@ -542,11 +556,10 @@ func (fn *Node) dirsTo(path string) (*Node, error) {
 		if sfni == nil {
 			if i == sz-1 { // ok for terminal -- might not exist yet
 				return cfn, nil
-			} else {
-				err = fmt.Errorf("filetree.Node could not find node %v in: %v, orig: %v, rel: %v", dr, cfn.Filepath, pth, rpath)
-				// slog.Error(err.Error()) // note: this is expected sometimes
-				return nil, err
 			}
+			err = fmt.Errorf("filetree.Node could not find node %v in: %v, orig: %v, rel: %v", dr, cfn.Filepath, pth, rpath)
+			// slog.Error(err.Error()) // note: this is expected sometimes
+			return nil, err
 		}
 		sfn := AsNode(sfni)
 		if sfn.IsDir() || i == sz-1 {

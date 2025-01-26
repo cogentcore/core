@@ -66,6 +66,10 @@ type VarGroup struct {
 
 	// current bind group
 	currentBindGroup *wgpu.BindGroup
+
+	// oldBindGroups are prior bind groups that need to be released
+	// after current render or compute pass.
+	oldBindGroups []*wgpu.BindGroup
 }
 
 // addVar adds given variable
@@ -166,18 +170,6 @@ func (vg *VarGroup) SetAllCurrentValue(i int) {
 	}
 }
 
-// CreateReadBuffers creates read buffers for all values.
-func (vg *VarGroup) CreateReadBuffers() error {
-	var errs []error
-	for _, vr := range vg.Vars {
-		err := vr.Values.CreateReadBuffers()
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-	return errors.Join(errs...)
-}
-
 // Config must be called after all variables have been added.
 // Configures binding / location for all vars based on sequential order.
 // also does validation and returns error message.
@@ -204,7 +196,7 @@ func (vg *VarGroup) Config(dev *Device) error {
 			continue
 		}
 		if vg.Group >= 0 && vr.Role <= Index {
-			err := fmt.Errorf("gpu.VarGroup:Config Vertex or Index Vars must be located in a VertexGroup!  Use AddVertexGroup() method instead of AddGroup()")
+			err := errors.New("gpu.VarGroup:Config Vertex or Index Vars must be located in a VertexGroup!  Use AddVertexGroup() method instead of AddGroup()")
 			errs = append(errs, err)
 			errors.Log(err)
 		}
@@ -235,8 +227,25 @@ func (vg *VarGroup) Config(dev *Device) error {
 	return errors.Join(errs...)
 }
 
+// releaseOldBindGroups releases old bind groups.
+func (vg *VarGroup) releaseOldBindGroups() {
+	if vg.oldBindGroups == nil {
+		return
+	}
+	og := vg.oldBindGroups
+	vg.oldBindGroups = nil
+	for _, bg := range og {
+		bg.Release()
+	}
+}
+
 // Release destroys infrastructure for Group, Vars and Values.
 func (vg *VarGroup) Release() {
+	vg.releaseOldBindGroups()
+	if vg.currentBindGroup != nil {
+		vg.currentBindGroup.Release()
+		vg.currentBindGroup = nil
+	}
 	for _, vr := range vg.Vars {
 		vr.Release()
 	}
@@ -277,7 +286,7 @@ func (vg *VarGroup) bindLayout(vs *Vars) (*wgpu.BindGroupLayout, error) {
 			}
 		default:
 			bd.Buffer = wgpu.BufferBindingLayout{
-				Type:             vr.Role.BindingType(),
+				Type:             vr.bindingType(),
 				HasDynamicOffset: false,
 				MinBindingSize:   0, // 0 is fine
 			}
@@ -330,7 +339,10 @@ func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, []uint32, error) {
 		return vg.currentBindGroup, dynamicOffsets, nil
 	}
 	vg.bindGroupDirty = false
-	vg.currentBindGroup = nil // critically, we do NOT release this!
+	if vg.currentBindGroup != nil {
+		vg.oldBindGroups = append(vg.oldBindGroups, vg.currentBindGroup) // to be released
+	}
+	vg.currentBindGroup = nil
 	bgl, err := vg.bindLayout(vs)
 	if err != nil {
 		return nil, nil, err

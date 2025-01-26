@@ -135,9 +135,8 @@ func (gl *GoLang) HighlightLine(fss *parse.FileStates, line int, txt []rune) lex
 		lfs.Syms.WriteDoc(os.Stdout, 0)
 		lfs.Destroy()
 		return mc
-	} else {
-		return ll
 	}
+	return ll
 }
 
 // IndentLine returns the indentation level for given line based on

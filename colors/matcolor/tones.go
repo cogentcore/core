@@ -60,3 +60,8 @@ func (t *Tones) Tone(tone int) color.RGBA {
 	}
 	return t.AbsTone(tone)
 }
+
+// ToneUniform returns [image.Uniform] of [Tones.Tone].
+func (t *Tones) ToneUniform(tone int) *image.Uniform {
+	return image.NewUniform(t.Tone(tone))
+}

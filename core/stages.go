@@ -191,18 +191,26 @@ func (sm *stages) deleteAll() {
 	}
 }
 
-// resize calls resize on all stages within based on the given
-// window render geom.
-func (sm *stages) resize(rg math32.Geom2DInt) {
+// resize calls resize on all stages within based on the given window render geom.
+// if nothing actually needed to be resized, it returns false.
+func (sm *stages) resize(rg math32.Geom2DInt) bool {
+	resized := false
 	for _, kv := range sm.stack.Order {
 		st := kv.Value
-		if st.Type == WindowStage || (st.Type == DialogStage && st.FullWindow) {
-			st.Sprites.reset()
-			st.Scene.resize(rg)
+		if st.FullWindow {
+			did := st.Scene.resize(rg)
+			if did {
+				st.Sprites.reset()
+				resized = true
+			}
 		} else {
-			st.Scene.fitInWindow(rg)
+			did := st.Scene.fitInWindow(rg)
+			if did {
+				resized = true
+			}
 		}
 	}
+	return resized
 }
 
 // updateAll iterates through all Stages and calls DoUpdate on them.
@@ -262,9 +270,6 @@ func (sm *stages) runDeferred() {
 		if sc.showIter == sceneShowIters+1 {
 			sc.showIter++
 			if !sc.hasFlag(sceneHasShown) {
-				if !sc.hasFlag(sceneContentSizing) {
-					sc.Events.activateStartFocus()
-				}
 				sc.setFlag(true, sceneHasShown)
 				sc.Shown()
 			}

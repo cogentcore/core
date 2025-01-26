@@ -187,9 +187,8 @@ func (v Vector2i) Div(other Vector2i) Vector2i {
 func (v Vector2i) DivScalar(scalar int) Vector2i {
 	if scalar != 0 {
 		return Vector2i{v.X / scalar, v.Y / scalar}
-	} else {
-		return Vector2i{}
 	}
+	return Vector2i{}
 }
 
 // SetDiv sets this to division by other vector (i.e., /= or divide-equals).

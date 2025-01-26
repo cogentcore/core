@@ -753,10 +753,9 @@ func PathDecodeCmd(r rune) PathCmds {
 	cmd, ok := PathRuneToCmd[r]
 	if ok {
 		return cmd
-	} else {
-		// log.Printf("core.PathDecodeCmd unrecognized path command: %v %v\n", string(r), r)
-		return PcErr
 	}
+	// log.Printf("core.PathDecodeCmd unrecognized path command: %v %v\n", string(r), r)
+	return PcErr
 }
 
 // PathDataParse parses a string representation of the path data into compiled path data

@@ -85,9 +85,6 @@ func toValue(value any, tags reflect.StructTag) Value {
 		return NewText()
 	}
 	uv := reflectx.Underlying(rv)
-	if reflectx.IsNil(uv) {
-		return NewText()
-	}
 	typ := uv.Type()
 	if vwt, ok := ValueTypes[types.TypeName(typ)]; ok {
 		if vw := vwt(value); vw != nil {
@@ -129,16 +126,14 @@ func toValue(value any, tags reflect.StructTag) Value {
 		num := reflectx.NumAllFields(uv)
 		if !noInline && (inline || num <= SystemSettings.StructInlineLength) {
 			return NewForm().SetInline(true)
-		} else {
-			return NewFormButton()
 		}
+		return NewFormButton()
 	case kind == reflect.Map:
 		len := uv.Len()
 		if !noInline && (inline || len <= SystemSettings.MapInlineLength) {
 			return NewKeyedList().SetInline(true)
-		} else {
-			return NewKeyedListButton()
 		}
+		return NewKeyedListButton()
 	case kind == reflect.Array, kind == reflect.Slice:
 		sz := uv.Len()
 		elemType := reflectx.SliceElementType(value)
@@ -151,9 +146,8 @@ func toValue(value any, tags reflect.StructTag) Value {
 		isStruct := (reflectx.NonPointerType(elemType).Kind() == reflect.Struct)
 		if !noInline && (inline || (!isStruct && sz <= SystemSettings.SliceInlineLength && !tree.IsNode(elemType))) {
 			return NewInlineList()
-		} else {
-			return NewListButton()
 		}
+		return NewListButton()
 	case kind == reflect.Func:
 		return NewFuncButton()
 	}

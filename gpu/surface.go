@@ -43,8 +43,6 @@ type Surface struct {
 	// current texture: must release at end
 	curTexture *wgpu.TextureView
 
-	needsReconfig bool
-
 	sync.Mutex
 }
 
@@ -94,29 +92,19 @@ func (sf *Surface) Render() *Render { return &sf.render }
 // WebGPU does not have any internal mechanism for tracking this, so we
 // need to drive it from external events.
 func (sf *Surface) SetSize(sz image.Point) {
-	if sf.Format.Size == sz {
+	if sf.Format.Size == sz || sz.X == 0 || sz.Y == 0 {
 		return
 	}
 	sf.render.SetSize(sz)
 	sf.Format.Size = sz
 	sf.config.Width = uint32(sf.Format.Size.X)
 	sf.config.Height = uint32(sf.Format.Size.Y)
-	sf.needsReconfig = true
+	sf.Reconfig()
 }
 
 // GetCurrentTexture returns a TextureView that is the current
 // target for rendering.
 func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
-	if sf.needsReconfig {
-		// system.TheApp.RunOnMain(func() {
-		// todo: in theory this should be called on main thread
-		// but it deadlocks when we do so, because main thread
-		// is handling another resize event apparently.
-		// everything works fine here -- easiest to just mute the
-		// rust warning about this.
-		sf.Reconfig()
-		// })
-	}
 	sf.Lock() // we remain locked until submit!
 	texture, err := sf.surface.GetCurrentTexture()
 	if errors.Log(err) != nil {
@@ -193,7 +181,6 @@ func (sf *Surface) Config() {
 func (sf *Surface) Reconfig() bool {
 	sf.Lock()
 	defer sf.Unlock()
-	sf.needsReconfig = false
 	sf.Config()
 	sf.render.SetSize(sf.Format.Size)
 	return true

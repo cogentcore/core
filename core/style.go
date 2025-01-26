@@ -166,7 +166,7 @@ func (wb *WidgetBase) Restyle() {
 func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	rebuild := false
 	var rc *renderContext
-	sz := image.Point{1920, 1280}
+	sz := image.Point{1920, 1080}
 	if sc != nil {
 		rebuild = sc.NeedsRebuild()
 		rc = sc.renderContext()
@@ -184,8 +184,8 @@ func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	st.ToDots()
 }
 
-// ChildBackground returns the background color (Image) for given child Widget.
-// By default, this is just our [Styles.Actualbackground] but it can be computed
+// ChildBackground returns the background color (Image) for the given child Widget.
+// By default, this is just our [styles.Style.ActualBackground] but it can be computed
 // specifically for the child (e.g., for zebra stripes in [ListGrid])
 func (wb *WidgetBase) ChildBackground(child Widget) image.Image {
 	return wb.Styles.ActualBackground

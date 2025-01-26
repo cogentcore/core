@@ -729,5 +729,13 @@ func (ed *Editor) contextMenu(m *core.Scene) {
 			OnClick(func(e events.Event) {
 				ed.Clear()
 			})
+		if ed.Buffer != nil && ed.Buffer.Info.Generated {
+			core.NewButton(m).SetText("Set editable").SetIcon(icons.Edit).
+				OnClick(func(e events.Event) {
+					ed.SetReadOnly(false)
+					ed.Buffer.Info.Generated = false
+					ed.Update()
+				})
+		}
 	}
 }

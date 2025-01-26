@@ -442,14 +442,14 @@ type tableStruct struct { //types:add
 
 type inlineStruct struct { //types:add
 
-	// click to show next
-	On bool
-
 	// this is now showing
 	ShowMe string
 
+	// click to show next
+	On bool
+
 	// a condition
-	Condition int
+	Condition int `default:"0"`
 
 	// if On && Condition == 0
 	Condition1 string
@@ -458,7 +458,7 @@ type inlineStruct struct { //types:add
 	Condition2 tableStruct
 
 	// a value
-	Value float32
+	Value float32 `default:"1"`
 }
 
 func (il *inlineStruct) ShouldDisplay(field string) bool {
@@ -637,10 +637,25 @@ func dialogs(ts *core.Tabs) {
 		d.NewWindow().SetNewWindow(false).SetDisplayTitle(true).Run()
 	})
 
-	rw := core.NewButton(wrow).SetText("Resize to content")
-	rw.SetTooltip("Resizes this window to fit the current content")
+	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Window manipulations")
+	mrow := makeRow(tab)
+
+	rw := core.NewButton(mrow).SetText("Resize to content")
+	rw.SetTooltip("Resizes this window to fit the current content on multi-window platforms")
 	rw.OnClick(func(e events.Event) {
-		wrow.Scene.ResizeToContent(image.Pt(0, 40)) // note: size is not correct due to wrapping? #1307
+		mrow.Scene.ResizeToContent(image.Pt(0, 40)) // note: size is not correct due to wrapping? #1307
+	})
+
+	fs := core.NewButton(mrow).SetText("Fullscreen")
+	fs.SetTooltip("Toggle fullscreen mode on desktop and web platforms")
+	fs.OnClick(func(e events.Event) {
+		mrow.Scene.SetFullscreen(!mrow.Scene.IsFullscreen())
+	})
+
+	sg := core.NewButton(mrow).SetText("Set geometry")
+	sg.SetTooltip("Move the window to the top-left corner of the second screen and resize it on desktop platforms")
+	sg.OnClick(func(e events.Event) {
+		mrow.Scene.SetGeometry(false, image.Pt(30, 100), image.Pt(1000, 1000), 1)
 	})
 }
 
@@ -673,7 +688,7 @@ func makeStyles(ts *core.Tabs) {
 	}
 	for _, sz := range frameSizes {
 		core.NewFrame(fr).Styler(func(s *styles.Style) {
-			s.Min.Set(units.Px(sz.X), units.Px(sz.Y))
+			s.Min.Set(units.Dp(sz.X), units.Dp(sz.Y))
 			s.Background = colors.Scheme.Primary.Base
 		})
 	}

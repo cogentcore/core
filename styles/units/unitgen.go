@@ -7,39 +7,39 @@
 package units
 	
 // Dp returns a new dp value.
-// Dp is density-independent pixels. 1dp is 1/160 in.
+// Dp is density-independent pixels. 1dp is 1/160 in. Inches are not necessarily the same as actual physical inches, as they depend on the DPI, so dp values may correspond to different physical sizes on different displays, but they will look correct.
 func Dp(value float32) Value {
 	return Value{Value: value, Unit: UnitDp}
 }
 
 // Dp sets the value in terms of dp.
-// Dp is density-independent pixels. 1dp is 1/160 in.
+// Dp is density-independent pixels. 1dp is 1/160 in. Inches are not necessarily the same as actual physical inches, as they depend on the DPI, so dp values may correspond to different physical sizes on different displays, but they will look correct.
 func (v *Value) Dp(value float32) {
 	v.Value = value
 	v.Unit = UnitDp
 }
 
 // Dp converts the given dp value to dots.
-// Dp is density-independent pixels. 1dp is 1/160 in.
+// Dp is density-independent pixels. 1dp is 1/160 in. Inches are not necessarily the same as actual physical inches, as they depend on the DPI, so dp values may correspond to different physical sizes on different displays, but they will look correct.
 func (uc *Context) Dp(value float32) float32 {
 	return uc.ToDots(value, UnitDp)
 }
 
 // Px returns a new px value.
-// Px is logical pixels. 1px is 1/96 in. These are not raw display pixels, for which you should use dots.
+// Px is logical pixels. 1px is 1/96 in. These are not raw display pixels, for which you should use dots. Dp is a more common unit for general use.
 func Px(value float32) Value {
 	return Value{Value: value, Unit: UnitPx}
 }
 
 // Px sets the value in terms of px.
-// Px is logical pixels. 1px is 1/96 in. These are not raw display pixels, for which you should use dots.
+// Px is logical pixels. 1px is 1/96 in. These are not raw display pixels, for which you should use dots. Dp is a more common unit for general use.
 func (v *Value) Px(value float32) {
 	v.Value = value
 	v.Unit = UnitPx
 }
 
 // Px converts the given px value to dots.
-// Px is logical pixels. 1px is 1/96 in. These are not raw display pixels, for which you should use dots.
+// Px is logical pixels. 1px is 1/96 in. These are not raw display pixels, for which you should use dots. Dp is a more common unit for general use.
 func (uc *Context) Px(value float32) float32 {
 	return uc.ToDots(value, UnitPx)
 }
@@ -273,96 +273,96 @@ func (uc *Context) Vmax(value float32) float32 {
 }
 
 // Cm returns a new cm value.
-// Cm is centimeters. 1cm is 1/2.54 in.
+// Cm is logical centimeters. 1cm is 1/2.54 in.
 func Cm(value float32) Value {
 	return Value{Value: value, Unit: UnitCm}
 }
 
 // Cm sets the value in terms of cm.
-// Cm is centimeters. 1cm is 1/2.54 in.
+// Cm is logical centimeters. 1cm is 1/2.54 in.
 func (v *Value) Cm(value float32) {
 	v.Value = value
 	v.Unit = UnitCm
 }
 
 // Cm converts the given cm value to dots.
-// Cm is centimeters. 1cm is 1/2.54 in.
+// Cm is logical centimeters. 1cm is 1/2.54 in.
 func (uc *Context) Cm(value float32) float32 {
 	return uc.ToDots(value, UnitCm)
 }
 
 // Mm returns a new mm value.
-// Mm is millimeters. 1mm is 1/10 cm.
+// Mm is logical millimeters. 1mm is 1/10 cm.
 func Mm(value float32) Value {
 	return Value{Value: value, Unit: UnitMm}
 }
 
 // Mm sets the value in terms of mm.
-// Mm is millimeters. 1mm is 1/10 cm.
+// Mm is logical millimeters. 1mm is 1/10 cm.
 func (v *Value) Mm(value float32) {
 	v.Value = value
 	v.Unit = UnitMm
 }
 
 // Mm converts the given mm value to dots.
-// Mm is millimeters. 1mm is 1/10 cm.
+// Mm is logical millimeters. 1mm is 1/10 cm.
 func (uc *Context) Mm(value float32) float32 {
 	return uc.ToDots(value, UnitMm)
 }
 
 // Q returns a new q value.
-// Q is quarter-millimeters. 1q is 1/40 cm.
+// Q is logical quarter-millimeters. 1q is 1/40 cm.
 func Q(value float32) Value {
 	return Value{Value: value, Unit: UnitQ}
 }
 
 // Q sets the value in terms of q.
-// Q is quarter-millimeters. 1q is 1/40 cm.
+// Q is logical quarter-millimeters. 1q is 1/40 cm.
 func (v *Value) Q(value float32) {
 	v.Value = value
 	v.Unit = UnitQ
 }
 
 // Q converts the given q value to dots.
-// Q is quarter-millimeters. 1q is 1/40 cm.
+// Q is logical quarter-millimeters. 1q is 1/40 cm.
 func (uc *Context) Q(value float32) float32 {
 	return uc.ToDots(value, UnitQ)
 }
 
 // In returns a new in value.
-// In is inches. 1in is 2.54cm or 96px.
+// In is logical inches. 1in is 2.54cm or 96px. This is similar to CSS inches in that it is not necessarily the same as an actual physical inch; it is dependent on the DPI of the display.
 func In(value float32) Value {
 	return Value{Value: value, Unit: UnitIn}
 }
 
 // In sets the value in terms of in.
-// In is inches. 1in is 2.54cm or 96px.
+// In is logical inches. 1in is 2.54cm or 96px. This is similar to CSS inches in that it is not necessarily the same as an actual physical inch; it is dependent on the DPI of the display.
 func (v *Value) In(value float32) {
 	v.Value = value
 	v.Unit = UnitIn
 }
 
 // In converts the given in value to dots.
-// In is inches. 1in is 2.54cm or 96px.
+// In is logical inches. 1in is 2.54cm or 96px. This is similar to CSS inches in that it is not necessarily the same as an actual physical inch; it is dependent on the DPI of the display.
 func (uc *Context) In(value float32) float32 {
 	return uc.ToDots(value, UnitIn)
 }
 
 // Pc returns a new pc value.
-// Pc is picas. 1pc is 1/6 in.
+// Pc is logical picas. 1pc is 1/6 in.
 func Pc(value float32) Value {
 	return Value{Value: value, Unit: UnitPc}
 }
 
 // Pc sets the value in terms of pc.
-// Pc is picas. 1pc is 1/6 in.
+// Pc is logical picas. 1pc is 1/6 in.
 func (v *Value) Pc(value float32) {
 	v.Value = value
 	v.Unit = UnitPc
 }
 
 // Pc converts the given pc value to dots.
-// Pc is picas. 1pc is 1/6 in.
+// Pc is logical picas. 1pc is 1/6 in.
 func (uc *Context) Pc(value float32) float32 {
 	return uc.ToDots(value, UnitPc)
 }

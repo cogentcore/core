@@ -79,8 +79,8 @@ func TestRender(t *testing.T) {
 		txt := &Text{}
 		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnitContext, nil)
 
-		tsz := txt.Layout(tsty, fsty, &pc.UnitContext, math32.Vec2(100, 40))
-		if tsz.X != 100 || tsz.Y != 40 {
+		tsz := txt.Layout(tsty, fsty, &pc.UnitContext, math32.Vec2(100, 60))
+		if tsz.X != 100 || tsz.Y != 60 {
 			t.Errorf("unexpected text size: %v", tsz)
 		}
 

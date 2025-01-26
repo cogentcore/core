@@ -61,6 +61,9 @@ var TheClipboard = &Clipboard{}
 type Clipboard struct{}
 
 func (cl *Clipboard) IsEmpty() bool {
+	return false // todo: GetClipboardString hangs with some
+	// non-zero probability and this call spams the thing
+	// so we just bail here with a permissive not-empty.
 	return len(glfw.GetClipboardString()) == 0
 }
 
@@ -75,14 +78,12 @@ func (cl *Clipboard) Read(types []string) mimedata.Mimes {
 		isMulti, mediaType, boundary, body := mimedata.IsMultipart(bstr)
 		if isMulti {
 			return mimedata.FromMultipart(body, boundary)
-		} else {
-			if mediaType != "" { // found a mime type encoding
-				return mimedata.NewMime(mediaType, bstr)
-			} else {
-				// we can't really figure out type, so just assume..
-				return mimedata.NewMime(types[0], bstr)
-			}
 		}
+		if mediaType != "" { // found a mime type encoding
+			return mimedata.NewMime(mediaType, bstr)
+		}
+		// we can't really figure out type, so just assume..
+		return mimedata.NewMime(types[0], bstr)
 	} else {
 		// todo: deal with image formats etc
 	}

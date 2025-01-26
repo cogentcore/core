@@ -46,7 +46,7 @@ type Context struct {
 
 // Defaults are generic defaults
 func (uc *Context) Defaults() {
-	uc.DPI = PxPerInch
+	uc.DPI = DpPerInch
 	uc.FontEm = 16
 	uc.FontEx = 8
 	uc.FontCh = 8

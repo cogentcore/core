@@ -30,9 +30,16 @@ type Value struct {
 	// index of this value within the Var list of values
 	Index int
 
-	// VarSize is the size of each Var element, which includes any fixed ArrayN
+	// VarSize is the size of each Var element, which includes any fixed Var.ArrayN
 	// array size specified on the Var.
+	// The actual buffer size is VarSize * Value.ArrayN (or DynamicN for dynamic).
 	VarSize int
+
+	// ArrayN is the actual number of array elements, for Uniform or Storage
+	// variables without a fixed array size (i.e., the Var ArrayN = 1).
+	// This is set when the buffer is actually created, based on the data,
+	// or can be set directly prior to buffer creation.
+	ArrayN int
 
 	// DynamicIndex is the current index into a DynamicOffset variable
 	// to use for the SetBindGroup call.  Note that this is an index,
@@ -103,6 +110,16 @@ func MemSizeAlign(size, align int) int {
 	return (nb + 1) * align
 }
 
+// MemSizeAlignDown returns the size aligned according to align byte increments,
+// rounding down, not up.
+func MemSizeAlignDown(size, align int) int {
+	if size%align == 0 {
+		return size
+	}
+	nb := size / align
+	return nb * align
+}
+
 // init initializes value based on variable and index
 // within list of vals for this var.
 func (vl *Value) init(vr *Var, dev *Device, idx int) {
@@ -112,6 +129,7 @@ func (vl *Value) init(vr *Var, dev *Device, idx int) {
 	vl.Index = idx
 	vl.Name = fmt.Sprintf("%s_%d", vr.Name, vl.Index)
 	vl.VarSize = vr.MemSize()
+	vl.ArrayN = 1
 	vl.alignBytes = vr.alignBytes
 	vl.AlignVarSize = MemSizeAlign(vl.VarSize, vl.alignBytes)
 	vl.isDynamic = vl.role == Vertex || vl.role == Index || vr.DynamicOffset
@@ -119,6 +137,10 @@ func (vl *Value) init(vr *Var, dev *Device, idx int) {
 	if vr.Role >= SampledTexture {
 		vl.Texture = NewTexture(dev)
 	}
+}
+
+func (vl *Value) String() string {
+	return fmt.Sprintf("Bytes: 0x%X", vl.MemSize())
 }
 
 // MemSize returns the memory allocation size for this value, in bytes.
@@ -129,11 +151,12 @@ func (vl *Value) MemSize() int {
 	if vl.isDynamic {
 		return vl.AlignVarSize * vl.dynamicN
 	}
-	return vl.VarSize
+	return vl.ArrayN * vl.VarSize
 }
 
 // CreateBuffer creates the GPU buffer for this value if it does not
 // yet exist or is not the right size.
+// For !ReadOnly [Storage] buffers, calls [Value.CreateReadBuffer].
 func (vl *Value) CreateBuffer() error {
 	if vl.role == SampledTexture {
 		return nil
@@ -151,7 +174,7 @@ func (vl *Value) CreateBuffer() error {
 	buf, err := vl.device.Device.CreateBuffer(&wgpu.BufferDescriptor{
 		Size:             uint64(sz),
 		Label:            vl.Name,
-		Usage:            vl.role.BufferUsages(),
+		Usage:            vl.vvar.bufferUsages(),
 		MappedAtCreation: false,
 	})
 	if errors.Log(err) != nil {
@@ -159,6 +182,9 @@ func (vl *Value) CreateBuffer() error {
 	}
 	vl.AllocSize = sz
 	vl.buffer = buf
+	if vl.role == Storage && !vl.vvar.ReadOnly {
+		vl.CreateReadBuffer()
+	}
 	return nil
 }
 
@@ -214,6 +240,9 @@ func (vl *Value) SetDynamicN(n int) {
 
 // SetValueFrom copies given values into value buffer memory,
 // making the buffer if it has not yet been constructed.
+// The actual ArrayN size of Storage or Uniform variables will
+// be computed based on the size of the from bytes, relative to
+// the variable size.
 // IMPORTANT: do not use this for dynamic offset Uniform or
 // Storage variables, as the alignment will not be correct;
 // See [SetDynamicFromBytes].
@@ -223,6 +252,7 @@ func SetValueFrom[E any](vl *Value, from []E) error {
 
 // SetFromBytes copies given bytes into value buffer memory,
 // making the buffer if it has not yet been constructed.
+// For !ReadOnly [Storage] buffers, calls [Value.CreateReadBuffer].
 // IMPORTANT: do not use this for dynamic offset Uniform or
 // Storage variables, as the alignment will not be correct;
 // See [SetDynamicFromBytes].
@@ -232,28 +262,38 @@ func (vl *Value) SetFromBytes(from []byte) error {
 		return errors.Log(err)
 	}
 	nb := len(from)
+	an := nb / vl.VarSize
+	aover := nb % vl.VarSize
+	if aover != 0 {
+		err := fmt.Errorf("gpu.Value SetFromBytes %s, Size passed: %d is not an even multiple of the variable size: %d", vl.Name, nb, vl.VarSize)
+		return errors.Log(err)
+	}
 	if vl.isDynamic { // Vertex, Index at this point
-		dn := nb / vl.VarSize
-		vl.SetDynamicN(dn)
+		vl.SetDynamicN(an)
+	} else {
+		vl.ArrayN = an
 	}
 	tb := vl.MemSize()
-	if nb != tb {
+	if nb != tb { // this should never happen, but justin case
 		err := fmt.Errorf("gpu.Value SetFromBytes %s, Size passed: %d != Size expected %d", vl.Name, nb, tb)
 		return errors.Log(err)
 	}
 	if vl.buffer == nil || vl.AllocSize != tb {
-		vl.varGroupDirty()
+		vl.varGroupDirty() // only if tb is different; buffer created in bindGroupEntry so not nil here
 		vl.Release()
 		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,
 			Contents: from,
-			Usage:    vl.role.BufferUsages(),
+			Usage:    vl.vvar.bufferUsages(),
 		})
 		if errors.Log(err) != nil {
 			return err
 		}
 		vl.buffer = buf
 		vl.AllocSize = nb
+		if vl.role == Storage && !vl.vvar.ReadOnly {
+			vl.CreateReadBuffer()
+		}
 	} else {
 		err := vl.device.Queue.WriteBuffer(vl.buffer, 0, from)
 		if errors.Log(err) != nil {
@@ -315,12 +355,12 @@ func (vl *Value) WriteDynamicBuffer() error {
 		return errors.Log(err)
 	}
 	if vl.buffer == nil || nb != vl.AllocSize {
-		vl.varGroupDirty()
+		vl.varGroupDirty() // only if nb is different; buffer created in bindGroupEntry so not nil here
 		vl.Release()
 		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,
 			Contents: vl.dynamicBuffer,
-			Usage:    vl.role.BufferUsages(),
+			Usage:    vl.vvar.bufferUsages(),
 		})
 		if errors.Log(err) != nil {
 			return err
@@ -406,11 +446,10 @@ func (vl *Value) SetFromTexture(tx *Texture) *Texture {
 }
 
 // CreateReadBuffer creates a read buffer for this value,
-// if it does not yet exist or is not the right size.
+// for [Storage] values only. Automatically called for !ReadOnly.
 // Read buffer is needed for reading values back from the GPU.
-// Only for Storage role variables.
 func (vl *Value) CreateReadBuffer() error {
-	if !(vl.role == Storage || vl.role == StorageTexture) {
+	if !(vl.role == Storage || vl.role == StorageTexture) || vl.vvar.ReadOnly {
 		return nil
 	}
 	sz := vl.MemSize()

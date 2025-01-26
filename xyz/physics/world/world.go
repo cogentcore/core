@@ -7,7 +7,6 @@ package world
 //go:generate core generate -add-types
 
 import (
-	"fmt"
 	"image"
 
 	"cogentcore.org/core/base/errors"
@@ -87,7 +86,7 @@ func (vw *View) RenderOffNode(node physics.Node, cam *Camera) error {
 	ok := sc.Render()
 	sc.Geom.Size = sz
 	if !ok {
-		return fmt.Errorf("could not render scene")
+		return errors.New("could not render scene")
 	}
 	return nil
 }

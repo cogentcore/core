@@ -238,7 +238,7 @@ func (km *Map) Update(kmName MapName) {
 			del := fun - lfun
 			if del > 1 {
 				for mi := lfun + 1; mi < fun; mi++ {
-					slog.Error("keymap.KeyMap: key map is missing a key for a key function", "keyMap", kmName, "function", mi)
+					// slog.Error("keymap.KeyMap: key map is missing a key for a key function", "keyMap", kmName, "function", mi)
 					s := mi.String()
 					s = "- Not Set - " + s
 					nski := MapItem{Key: key.Chord(s), Fun: mi}

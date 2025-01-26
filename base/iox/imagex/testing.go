@@ -12,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"cogentcore.org/core/base/num"
 )
 
 // TestingT is an interface wrapper around *testing.T
@@ -57,6 +59,25 @@ func CompareColors(cc, ic color.RGBA, tol int) bool {
 	return true
 }
 
+// DiffImage returns the difference between two images,
+// with pixels having the abs of the difference between pixels.
+func DiffImage(a, b image.Image) image.Image {
+	ab := a.Bounds()
+	di := image.NewRGBA(ab)
+	for y := ab.Min.Y; y < ab.Max.Y; y++ {
+		for x := ab.Min.X; x < ab.Max.X; x++ {
+			cc := color.RGBAModel.Convert(a.At(x, y)).(color.RGBA)
+			ic := color.RGBAModel.Convert(b.At(x, y)).(color.RGBA)
+			r := uint8(num.Abs(int(cc.R) - int(ic.R)))
+			g := uint8(num.Abs(int(cc.G) - int(ic.G)))
+			b := uint8(num.Abs(int(cc.B) - int(ic.B)))
+			c := color.RGBA{r, g, b, 255}
+			di.Set(x, y, c)
+		}
+	}
+	return di
+}
+
 // Assert asserts that the given image is equivalent
 // to the image stored at the given filename in the testdata directory,
 // with ".png" added to the filename if there is no extension
@@ -78,6 +99,7 @@ func Assert(t TestingT, img image.Image, filename string) {
 
 	ext := filepath.Ext(filename)
 	failFilename := strings.TrimSuffix(filename, ext) + ".fail" + ext
+	diffFilename := strings.TrimSuffix(filename, ext) + ".diff" + ext
 
 	if UpdateTestImages {
 		err := Save(img, filename)
@@ -88,6 +110,7 @@ func Assert(t TestingT, img image.Image, filename string) {
 		if err != nil {
 			t.Errorf("AssertImage: error removing old fail image: %v", err)
 		}
+		os.RemoveAll(diffFilename)
 		return
 	}
 
@@ -134,10 +157,15 @@ func Assert(t TestingT, img image.Image, filename string) {
 		if err != nil {
 			t.Errorf("AssertImage: error saving fail image: %v", err)
 		}
+		err = Save(DiffImage(img, fimg), diffFilename)
+		if err != nil {
+			t.Errorf("AssertImage: error saving diff image: %v", err)
+		}
 	} else {
 		err := os.RemoveAll(failFilename)
 		if err != nil {
 			t.Errorf("AssertImage: error removing old fail image: %v", err)
 		}
+		os.RemoveAll(diffFilename)
 	}
 }

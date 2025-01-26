@@ -14,6 +14,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 )
 
@@ -47,16 +48,16 @@ func (w *WindowSingle[A]) Screen() *system.Screen {
 func (w *WindowSingle[A]) Size() image.Point {
 	// w.Mu.Lock() // this prevents race conditions but also locks up
 	// defer w.Mu.Unlock()
-	return w.Screen().PixSize
+	return w.Screen().PixelSize
 }
 
 func (w *WindowSingle[A]) WinSize() image.Point {
 	// w.Mu.Lock() // this prevents race conditions but also locks up
 	// defer w.Mu.Unlock()
-	return w.Screen().PixSize
+	return w.Screen().PixelSize
 }
 
-func (w *WindowSingle[A]) Position() image.Point {
+func (w *WindowSingle[A]) Position(screen *system.Screen) image.Point {
 	// w.Mu.Lock()
 	// defer w.Mu.Unlock()
 	return image.Point{}
@@ -84,25 +85,28 @@ func (w *WindowSingle[A]) SetWinSize(sz image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
-	w.Screen().PixSize = sz
+	w.Screen().PixelSize = sz
 }
 
 func (w *WindowSingle[A]) SetSize(sz image.Point) {
-	if w.This.IsClosed() {
+	if w.This.IsClosed() || (w.App.Platform().IsMobile() && w.App.Platform() != system.Offscreen) {
 		return
 	}
-	w.Screen().PixSize = sz
+	w.Screen().PixelSize = sz
 }
 
-func (w *WindowSingle[A]) SetPos(pos image.Point) {
+func (w *WindowSingle[A]) SetPos(pos image.Point, screen *system.Screen) {
 	// no-op
 }
 
-func (w *WindowSingle[A]) SetGeom(pos image.Point, sz image.Point) {
-	if w.This.IsClosed() {
-		return
-	}
-	w.Screen().PixSize = sz
+func (w *WindowSingle[A]) SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen *system.Screen) {
+	// mostly no-op
+	w.Flgs.SetFlag(fullscreen, system.Fullscreen)
+}
+
+func (w *WindowSingle[A]) ConstrainFrame(topOnly bool) styles.Sides[int] {
+	// no-op
+	return styles.Sides[int]{}
 }
 
 func (w *WindowSingle[A]) Raise() {

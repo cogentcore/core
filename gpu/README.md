@@ -20,7 +20,7 @@ The main gpu code is in the top-level `gpu` package, with the following sub-pack
 
 # Selecting a GPU Device
 
-For systems with multiple GPU devices, by default the discrete device is selected, and if multiple of those are present, the one with the most RAM is used.  To see what is available and their properties, use:
+For systems with multiple GPU devices, by default the discrete device is selected, and if multiple of those are present, the one with the most RAM is used. To see what is available and their properties, use:
 
 ```
 $ go run cogentcore.org/core/gpu/cmd/webgpuinfo@latest
@@ -28,10 +28,17 @@ $ go run cogentcore.org/core/gpu/cmd/webgpuinfo@latest
 
 (you can `install` that tool for later use as well)
 
-The following environment variables can be set to specifically select a particular device by device number or name (`deviceName`): 
+There are different rules and ordering of adapters for graphics vs. compute usage.
 
-* `GPU_DEVICE_SELECT`, for GUI and compute usage.
-* `GPU_COMPUTE_DEVICE_SELECT`, only used for compute, if present, will override above, so you can use different GPUs for graphics vs compute.
+## Graphics usage
+
+The `GPU_DEVICE` environment variable selects a particular device by number or name (`deviceName`). The order of the devices are as presented by the WebGPU system, and shown in the `webgpuinfo` listing.
+
+## Compute usage
+
+For compute usage, if there are multiple discrete devices, then they are ordered from 0 to n-1 for device numbering, so that the logical process of selecting among different devices is straightforward.  The `gpu.SelectAdapter` variable can be set to directly set an adapter by logical index, or the `GPU_COMPUTE_DEVICE` environment variable.
+
+## Types
 
 * `GPU` represents the hardware `Adapter` and maintains global settings, info about the hardware.
 
@@ -152,13 +159,15 @@ Here's how it works:
 
 * Each WebGPU `Pipeline` holds **1** compute `shader` program, which is equivalent to a `kernel` in CUDA. This is the basic unit of computation, accomplishing one parallel sweep of processing across some number of identical data structures.
 
-* You must organize at the outset your `Vars` and `Values` in the `System` to hold the data structures your shaders operate on.  In general, you want to have a single static set of Vars that cover everything you'll need, and different shaders can operate on different subsets of these.  You want to minimize the amount of memory transfer.
+* The `Vars` and `Values` in the `System` hold all the data structures your shaders operate on, and must be configured and data uploaded before running.  In general, it is best to have a single static set of Vars that cover everything you'll need, and different shaders can operate on different subsets of these, minimizing the amount of memory transfer.
 
-* Because the `Queue.Submit` call is by far the most expensive call in WebGPU, you want to minimize those.  This means you want to combine as much of your computation into one big Command sequence, with calls to various different `Pipeline` shaders (which can all be put in one command buffer) that gets submitted *once*, rather than submitting separate commands for each shader.  Ideally this also involves combining memory transfers to / from the GPU in the same command buffer as well.
+* Because the `Queue.Submit` call is by far the most expensive call in WebGPU, it should be minimized. This means combining as much of your computation into one big Command sequence, with calls to various different `Pipeline` shaders (which can all be put in one command buffer) that gets submitted *once*, rather than submitting separate commands for each shader.  Ideally this also involves combining memory transfers to / from the GPU in the same command buffer as well.
 
-* There are no explicit sync mechanisms in WebGPU, but it is designed so that shader compute is automatically properly synced with prior and subsequent memory transfer commands, so it automatically does the right thing for most use cases.
+* There are no explicit sync mechanisms on the command, CPU side WebGPU (they only exist in the WGSL shaders), but it is designed so that shader compute is automatically properly synced with prior and subsequent memory transfer commands, so it automatically does the right thing for most use cases.
 
-* Compute is particularly taxing on memory transfer in general, and as far as I can tell, the best strategy is to rely on the optimized `WriteBuffer` command to transfer from CPU to GPU, and then use a staging buffer to read data back from the GPU. E.g., see [this reddit post](https://www.reddit.com/r/wgpu/comments/13zqe1u/can_someone_please_explain_to_me_the_whole_buffer/).  Critically, the write commands are queued and any staging buffers are managed internally, so it shouldn't be much slower than manually doing all the staging.  For reading, we have to implement everything ourselves, and here it is critical to batch the `ReadSync` calls for all relevant values, so they all happen at once.  Use ad-hoc `ValueGroup`s to organize these batched read operations efficiently for the different groups of values that need to be read back in the different compute stages.
+* Compute is particularly taxing on memory transfer in general, and overall the best strategy is to rely on the optimized `WriteBuffer` command to transfer from CPU to GPU, and then use a staging buffer to read data back from the GPU. E.g., see [this reddit post](https://www.reddit.com/r/wgpu/comments/13zqe1u/can_someone_please_explain_to_me_the_whole_buffer/).  Critically, the write commands are queued and any staging buffers are managed internally, so it shouldn't be much slower than manually doing all the staging.  For reading, we have to implement everything ourselves, and here it is critical to batch the `ReadSync` calls for all relevant values, so they all happen at once.  Use ad-hoc `ValueGroup`s to organize these batched read operations efficiently for the different groups of values that need to be read back in the different compute stages.
+
+* For large numbers of items to compute, there is a strong constraint that only 65_536 (2^16) workgroups can be submitted, _per dimension_ at a time. For unstructured 1D indexing, we typically use `[64,1,1]` for the workgroup size (which must be hard-coded into the shader and coordinated with the Go side code), which gives 64 * 65_536 = 4_194_304 max items. For more than that number, more than 1 needs to be used for the second dimension. The NumWorkgroups* functions return appropriate sizes with a minimum remainder. See [examples/compute](examples/compute) for the logic needed to get the overall global index from the workgroup sizes.
 
 # Gamma Correction (sRGB vs Linear) and Headless / Offscreen Rendering
 
@@ -187,6 +196,7 @@ See https://web3dsurvey.com/webgpu for a browser of limits across different plat
 
 # WebGPU Links
 
+* https://google.github.io/tour-of-wgsl/ -- much more concise and clear vs. reading the spec!
 * https://webgpu.rocks/
 * https://gpuweb.github.io/gpuweb/wgsl/
 * https://www.w3.org/TR/webgpu

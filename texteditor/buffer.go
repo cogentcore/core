@@ -462,7 +462,7 @@ func (tb *Buffer) saveFile(filename core.Filename) error {
 // Save saves the current text into the current filename associated with this buffer.
 func (tb *Buffer) Save() error { //types:add
 	if tb.Filename == "" {
-		return fmt.Errorf("core.Buf: filename is empty for Save")
+		return errors.New("core.Buf: filename is empty for Save")
 	}
 	tb.editDone()
 	info, err := os.Stat(string(tb.Filename))
@@ -924,7 +924,7 @@ func (tb *Buffer) CommentRegion(start, end int) {
 func (tb *Buffer) JoinParaLines(startLine, endLine int) {
 	autoSave := tb.batchUpdateStart()
 	defer tb.batchUpdateEnd(autoSave)
-	tb.JoinParaLines(startLine, endLine)
+	tb.Lines.JoinParaLines(startLine, endLine)
 	tb.signalMods()
 }
 

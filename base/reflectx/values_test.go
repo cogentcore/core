@@ -146,6 +146,11 @@ func TestPointerSetRobust(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 	assert.Equal(t, aptr, bptr)
+
+	aptr = nil // also must work if dest pointer is nil
+	err = SetRobust(&aptr, bptr)
+	assert.NoError(t, err)
+	assert.Equal(t, aptr, bptr)
 }
 
 func BenchmarkFloatToFloat(b *testing.B) {

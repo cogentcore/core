@@ -519,6 +519,12 @@ func (pc *Context) DrawPolygonPxToDots(points []math32.Vector2) {
 // DrawBorder is a higher-level function that draws, strokes, and fills
 // an potentially rounded border box with the given position, size, and border styles.
 func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
+	origStroke := pc.StrokeStyle
+	origFill := pc.FillStyle
+	defer func() {
+		pc.StrokeStyle = origStroke
+		pc.FillStyle = origFill
+	}()
 	r := bs.Radius.Dots()
 	if styles.SidesAreSame(bs.Style) && styles.SidesAreSame(bs.Color) && styles.SidesAreSame(bs.Width.Dots().Sides) {
 		// set the color if it is not nil and the stroke style

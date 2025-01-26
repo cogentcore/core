@@ -140,6 +140,7 @@ func (sl *Splits) Init() {
 				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
+				s.Direction = styles.Column
 			})
 		}
 	})
@@ -318,15 +319,13 @@ func (sl *Splits) Split(idx int) float32 {
 		case TileFirstLong:
 			if ri == 0 {
 				return sl.SubSplits[i][0]
-			} else {
-				return sl.SubSplits[i][1+ri]
 			}
+			return sl.SubSplits[i][1+ri]
 		case TileSecondLong:
 			if ri == 2 {
 				return sl.SubSplits[i][1]
-			} else {
-				return sl.SubSplits[i][2+ri]
 			}
+			return sl.SubSplits[i][2+ri]
 		case TilePlus:
 			si := 2 + ri
 			return sl.SubSplits[i][si]
@@ -367,9 +366,8 @@ func (sl *Splits) ChildIsCollapsed(idx int) bool {
 		case TilePlus:
 			if ri < 2 {
 				return sl.SubSplits[i][0] < 0.01
-			} else {
-				return sl.SubSplits[i][1] < 0.01
 			}
+			return sl.SubSplits[i][1] < 0.01
 		}
 		return false
 	}

@@ -8,6 +8,7 @@ package imagex
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"image"
 	"image/draw"
@@ -43,7 +44,7 @@ const (
 // which can start with a . or not
 func ExtToFormat(ext string) (Formats, error) {
 	if len(ext) == 0 {
-		return None, fmt.Errorf("ExtToFormat: ext is empty")
+		return None, errors.New("ExtToFormat: ext is empty")
 	}
 	if ext[0] == '.' {
 		ext = ext[1:]

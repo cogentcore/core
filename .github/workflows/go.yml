@@ -26,13 +26,16 @@ jobs:
         go-version: '1.22'
 
     - name: Set up Core
-      run: go install ./cmd/core && core setup
+      run: go install ./cmd/core && sudo apt update && core setup
 
     - name: "Install video dependencies (TODO: move to a command)"
       run: sudo add-apt-repository ppa:savoury1/ffmpeg4 && sudo apt install libswscale-dev libavcodec-dev libavformat-dev libswresample-dev libavutil-dev libasound2-dev
 
     - name: Build
       run: go build -v ./...
+      
+    - name: Build Docs (to verify it works on PRs)
+      run: core build web -dir docs -o static
 
     - name: Download testdata
       uses: dawidd6/action-download-artifact@v6

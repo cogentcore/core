@@ -54,7 +54,7 @@ type AppSingler interface {
 	Drawer() system.Drawer
 
 	// RenderGeom returns the actual effective geometry of the window used
-	// for rendering content, which may be different from {0, [system.Screen.PixSize]}
+	// for rendering content, which may be different from {0, [system.Screen.PixelSize]}
 	// due to insets caused by things like status bars and button overlays.
 	RenderGeom() math32.Geom2DInt
 }
@@ -78,7 +78,7 @@ func (a *AppSingle[D, W]) RenderGeom() math32.Geom2DInt {
 	pos := image.Pt(a.Insets.Left, a.Insets.Top)
 	return math32.Geom2DInt{
 		Pos:  pos,
-		Size: a.Scrn.PixSize.Sub(pos).Sub(image.Pt(a.Insets.Right, a.Insets.Bottom)),
+		Size: a.Scrn.PixelSize.Sub(pos).Sub(image.Pt(a.Insets.Right, a.Insets.Bottom)),
 	}
 }
 
@@ -90,10 +90,7 @@ func (a *AppSingle[D, W]) NScreens() int {
 }
 
 func (a *AppSingle[D, W]) Screen(n int) *system.Screen {
-	if n == 0 {
-		return a.Scrn
-	}
-	return nil
+	return a.Scrn
 }
 
 func (a *AppSingle[D, W]) ScreenByName(name string) *system.Screen {

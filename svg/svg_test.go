@@ -25,7 +25,7 @@ func TestSVG(t *testing.T) {
 	files := fsx.Filenames(dir, ".svg")
 
 	for _, fn := range files {
-		// if fn != "test2.svg" {
+		// if fn != "zoom-in.svg" {
 		// 	continue
 		// }
 		sv := NewSVG(640, 480)
@@ -80,8 +80,8 @@ func TestViewBoxParse(t *testing.T) {
 
 func TestCoreLogo(t *testing.T) {
 	sv := NewSVG(720, 720)
-	sv.PhysicalWidth.Px(256)
-	sv.PhysicalHeight.Px(256)
+	sv.PhysicalWidth.Dp(256)
+	sv.PhysicalHeight.Dp(256)
 	sv.Root.ViewBox.Size.Set(1, 1)
 
 	outer := colors.Scheme.Primary.Base // #005BC0

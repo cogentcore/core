@@ -126,14 +126,14 @@ func (a *App) Resize() {
 	w, h := vv.Get("width").Int(), vv.Get("height").Int()
 	sz := image.Pt(w, h)
 	a.Scrn.Geometry.Max = sz
-	a.Scrn.PixSize = image.Pt(int(math32.Ceil(float32(sz.X)*a.Scrn.DevicePixelRatio)), int(math32.Ceil(float32(sz.Y)*a.Scrn.DevicePixelRatio)))
+	a.Scrn.PixelSize = image.Pt(int(math32.Ceil(float32(sz.X)*a.Scrn.DevicePixelRatio)), int(math32.Ceil(float32(sz.Y)*a.Scrn.DevicePixelRatio)))
 	physX := 25.4 * float32(w) / dpi
 	physY := 25.4 * float32(h) / dpi
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
 	canvas := js.Global().Get("document").Call("getElementById", "app")
-	canvas.Set("width", a.Scrn.PixSize.X)
-	canvas.Set("height", a.Scrn.PixSize.Y)
+	canvas.Set("width", a.Scrn.PixelSize.X)
+	canvas.Set("height", a.Scrn.PixelSize.Y)
 
 	// We need to manually set the style width and height of the canvas
 	// instead of using 100vw and 100vh because vw and vh are incorrect on mobile browsers
@@ -146,16 +146,20 @@ func (a *App) Resize() {
 	// (see https://github.com/cogentcore/core/issues/779 and
 	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313)
 	cstyle := canvas.Get("style")
-	cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.X)/a.Scrn.DevicePixelRatio))
-	cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.Y)/a.Scrn.DevicePixelRatio))
+	cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.X)/a.Scrn.DevicePixelRatio))
+	cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.Y)/a.Scrn.DevicePixelRatio))
 
 	if a.Draw.wgpu != nil {
-		a.Draw.wgpu.System.Renderer.SetSize(a.Scrn.PixSize)
+		a.Draw.wgpu.System.Renderer.SetSize(a.Scrn.PixelSize)
 	} else {
-		a.Draw.base.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
+		a.Draw.base.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixelSize})
 	}
 
 	a.Event.WindowResize()
+}
+
+func (a *App) GPUDevice() any {
+	return a.Draw.wgpu
 }
 
 func (a *App) DataDir() string {

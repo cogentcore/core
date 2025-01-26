@@ -7,6 +7,8 @@ package gpu
 import (
 	"fmt"
 	"math"
+	"runtime"
+	"sync"
 
 	"cogentcore.org/core/base/errors"
 	"github.com/cogentcore/webgpu/wgpu"
@@ -25,8 +27,12 @@ type ComputeSystem struct {
 	// Access through the System.Vars() method.
 	vars Vars
 
-	// ComputePipelines by name
+	// ComputePipelines by name.
 	ComputePipelines map[string]*ComputePipeline
+
+	// ComputeEncoder is the compute specific command encoder for the
+	// current [BeginComputePass], and released in [EndComputePass].
+	ComputeEncoder *wgpu.ComputePassEncoder
 
 	// CommandEncoder is the command encoder created in
 	// [BeginComputePass], and released in [EndComputePass].
@@ -59,7 +65,7 @@ func (sy *ComputeSystem) Render() *Render { return nil }
 func (sy *ComputeSystem) init(gp *GPU, name string) {
 	sy.gpu = gp
 	sy.Name = name
-	sy.device = errors.Log1(NewDevice(gp))
+	sy.device = errors.Log1(NewComputeDevice(gp))
 	sy.vars.device = *sy.device
 	sy.vars.sys = sy
 	sy.ComputePipelines = make(map[string]*ComputePipeline)
@@ -116,39 +122,86 @@ func (sy *ComputeSystem) NewCommandEncoder() (*wgpu.CommandEncoder, error) {
 // to start the compute pass, returning the encoder object
 // to which further compute commands should be added.
 // Call [EndComputePass] when done.
+// If an existing [ComputeSystem.ComputeEncoder] is already set from
+// a prior BeginComputePass call, then that is returned, so this
+// is safe and efficient to call for every compute shader dispatch,
+// where the first call will create and the rest add to the ongoing job.
 func (sy *ComputeSystem) BeginComputePass() (*wgpu.ComputePassEncoder, error) {
+	if sy.ComputeEncoder != nil {
+		return sy.ComputeEncoder, nil
+	}
 	cmd, err := sy.NewCommandEncoder()
 	if errors.Log(err) != nil {
 		return nil, err
 	}
 	sy.CommandEncoder = cmd
-	return cmd.BeginComputePass(nil), nil // note: optional name in the descriptor
+	sy.ComputeEncoder = cmd.BeginComputePass(nil) // optional name in the encoder
+	return sy.ComputeEncoder, nil
 }
 
 // EndComputePass submits the current compute commands to the device
-// Queue and releases the [CommandEncoder] and the given
-// ComputePassEncoder.  You must call ce.End prior to calling this.
+// Queue and releases the [ComputeSystem.CommandEncoder] and
+// [ComputeSystem.ComputeEncoder].  You must call ce.End prior to calling this.
 // Can insert other commands after ce.End, e.g., to copy data back
 // from the GPU, prior to calling EndComputePass.
-func (sy *ComputeSystem) EndComputePass(ce *wgpu.ComputePassEncoder) error {
+func (sy *ComputeSystem) EndComputePass() error {
+	ce := sy.ComputeEncoder
 	cmd := sy.CommandEncoder
+	sy.ComputeEncoder = nil
 	sy.CommandEncoder = nil
+	ce.Release() // must happen before Finish
 	cmdBuffer, err := cmd.Finish(nil)
 	if errors.Log(err) != nil {
 		return err
 	}
 	sy.device.Queue.Submit(cmdBuffer)
 	cmdBuffer.Release()
-	ce.Release()
 	cmd.Release()
+	sy.vars.releaseOldBindGroups()
 	return nil
 }
 
-// Warps returns the number of warps (work goups of compute threads)
-// that is sufficient to compute n elements, given specified number
-// of threads per this dimension.
-// It just rounds up to nearest even multiple of n divided by threads:
-// Ceil(n / threads)
-func Warps(n, threads int) int {
-	return int(math.Ceil(float64(n) / float64(threads)))
+// NumThreads is the number of threads to use for parallel threading,
+// in the [VectorizeFunc] that is used for CPU versions of GPU functions.
+// The default of 0 causes the [runtime.GOMAXPROCS] to be used.
+var NumThreads = 0
+
+// DefaultNumThreads returns the default number of threads to use:
+// NumThreads if non-zero, otherwise [runtime.GOMAXPROCS].
+func DefaultNumThreads() int {
+	if NumThreads > 0 {
+		return NumThreads
+	}
+	return runtime.GOMAXPROCS(0)
+}
+
+// VectorizeFunc runs given GPU kernel function taking a uint32 index
+// on the CPU, using given number of threads with goroutines, for n iterations.
+// If threads is 0, then GOMAXPROCS is used.
+func VectorizeFunc(threads, n int, fun func(idx uint32)) {
+	if threads == 0 {
+		threads = DefaultNumThreads()
+	}
+	if threads <= 1 {
+		for idx := range n {
+			fun(uint32(idx))
+		}
+		return
+	}
+	nper := int(math.Ceil(float64(n) / float64(threads)))
+	wait := sync.WaitGroup{}
+	for start := 0; start < n; start += nper {
+		end := start + nper
+		if end > n {
+			end = n
+		}
+		wait.Add(1)
+		go func() {
+			for idx := start; idx < end; idx++ {
+				fun(uint32(idx))
+			}
+			wait.Done()
+		}()
+	}
+	wait.Wait()
 }

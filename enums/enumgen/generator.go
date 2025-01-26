@@ -70,7 +70,7 @@ func (g *Generator) PrintHeader() {
 // or enums:bitflag. It stores the resulting types in [Generator.Types].
 func (g *Generator) FindEnumTypes() error {
 	g.Types = []*Type{}
-	return generate.Inspect(g.Pkg, g.InspectForType)
+	return generate.Inspect(g.Pkg, g.InspectForType, "enumgen.go", "typegen.go")
 }
 
 // AllowedEnumTypes are the types that can be used for enums
@@ -159,7 +159,7 @@ func (g *Generator) Generate() (bool, error) {
 	for _, typ := range g.Types {
 		values := make([]Value, 0, 100)
 		for _, file := range g.Pkg.Syntax {
-			if ast.IsGenerated(file) {
+			if generate.ExcludeFile(g.Pkg, file, "enumgen.go", "typegen.go") {
 				continue
 			}
 			var terr error

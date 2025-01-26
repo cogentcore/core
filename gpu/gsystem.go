@@ -261,14 +261,15 @@ func (sy *GraphicsSystem) BeginRenderPassNoClear() (*wgpu.RenderPassEncoder, err
 func (sy *GraphicsSystem) SubmitRender(rp *wgpu.RenderPassEncoder) error {
 	cmd := sy.CommandEncoder
 	sy.CommandEncoder = nil
+	rp.Release() // must happen before Finish
 	cmdBuffer, err := cmd.Finish(nil)
 	if errors.Log(err) != nil {
 		return err
 	}
 	sy.device.Queue.Submit(cmdBuffer)
 	cmdBuffer.Release()
-	rp.Release()
 	cmd.Release()
+	sy.vars.releaseOldBindGroups()
 	return nil
 }
 

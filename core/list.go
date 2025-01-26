@@ -90,7 +90,7 @@ type Lister interface {
 	// SliceIndex returns the logical slice index: si = i + StartIndex,
 	// the actual value index vi into the slice value (typically = si),
 	// which can be different if there is an index indirection as in
-	// tensorcore table.IndexView), and a bool that is true if the
+	// tensorcore.Table), and a bool that is true if the
 	// index is beyond the available data and is thus invisible,
 	// given the row index provided.
 	SliceIndex(i int) (si, vi int, invis bool)
@@ -817,7 +817,7 @@ func (lb *ListBase) MakeToolbar(p *tree.Plan) {
 	})
 }
 
-////////////////////////////////////////////////////////////
+////////
 //  Row access methods
 //  NOTE: row = physical GUI display row, idx = slice index
 //  not the same!
@@ -1062,8 +1062,7 @@ func (lb *ListBase) movePageUpEvent(selMode events.SelectModes) int {
 	return nidx
 }
 
-//////////////////////////////////////////////////////////
-//    Selection: user operates on the index labels
+////////  Selection: user operates on the index labels
 
 // updateSelectRow updates the selection for the given row
 func (lb *ListBase) updateSelectRow(row int, selMode events.SelectModes) {
@@ -1251,8 +1250,7 @@ func (lb *ListBase) unselectIndexEvent(idx int) {
 	}
 }
 
-///////////////////////////////////////////////////
-//    Copy / Cut / Paste
+////////  Copy / Cut / Paste
 
 // mimeDataIndex adds mimedata for given idx: an application/json of the struct
 func (lb *ListBase) mimeDataIndex(md *mimedata.Mimes, idx int) {
@@ -1438,8 +1436,7 @@ func (lb *ListBase) duplicate() int { //types:add
 	return pasteAt
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//    Drag-n-Drop
+//////// Drag-n-Drop
 
 // selectRowIfNone selects the row the mouse is on if there
 // are no currently selected items.  Returns false if no valid mouse row.
@@ -1991,7 +1988,11 @@ func (lg *ListGrid) indexFromPixel(pt image.Point) (row, col int, isValid bool) 
 		miny := st.Y
 		if r > 0 {
 			for c := 0; c < cols; c++ {
-				kw := lg.Child(r*cols + c).(Widget).AsWidget()
+				kwt := lg.Child(r*cols + c)
+				if kwt == nil {
+					continue
+				}
+				kw := kwt.(Widget).AsWidget()
 				pyi := math32.Floor(kw.Geom.Pos.Total.Y)
 				if pyi < miny {
 					miny = pyi
