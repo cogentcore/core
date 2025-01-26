@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
 
@@ -262,7 +261,7 @@ func (bt *Button) Init() {
 				})
 			})
 		}
-		if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
+		if bt.Type == ButtonMenu && !TheApp.SystemPlatform().IsMobile() {
 			if !bt.Indicator.IsSet() && bt.Shortcut != "" {
 				tree.AddAt(p, "shortcut-stretch", func(w *Stretch) {})
 				tree.AddAt(p, "shortcut", func(w *Text) {
@@ -334,7 +333,7 @@ func (bt *Button) handleClickDismissMenu() {
 
 func (bt *Button) WidgetTooltip(pos image.Point) (string, image.Point) {
 	res := bt.Tooltip
-	if bt.Shortcut != "" && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
+	if bt.Shortcut != "" && !TheApp.SystemPlatform().IsMobile() {
 		res = "[" + bt.Shortcut.Label() + "]"
 		if bt.Tooltip != "" {
 			res += " " + bt.Tooltip

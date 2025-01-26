@@ -89,7 +89,7 @@ func (w *WindowSingle[A]) SetWinSize(sz image.Point) {
 }
 
 func (w *WindowSingle[A]) SetSize(sz image.Point) {
-	if w.This.IsClosed() || (w.App.Platform().IsMobile() && w.App.Platform() != system.Offscreen) {
+	if w.This.IsClosed() || w.App.Platform().IsMobile() {
 		return
 	}
 	w.Screen().PixelSize = sz

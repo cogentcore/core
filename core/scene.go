@@ -259,11 +259,7 @@ func (sc *Scene) RenderWindow() *renderWindow {
 // be resized.
 func (sc *Scene) fitInWindow(winGeom math32.Geom2DInt) bool {
 	geom := sc.SceneGeom
-	// full offscreen windows ignore any window geometry constraints
-	// because they must be unbounded by any previous window sizes
-	if TheApp.Platform() != system.Offscreen || !sc.Stage.FullWindow {
-		geom = geom.FitInWindow(winGeom)
-	}
+	geom = geom.FitInWindow(winGeom)
 	return sc.resize(geom)
 }
 
