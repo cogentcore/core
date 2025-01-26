@@ -17,7 +17,7 @@ type Drawer struct {
 
 // DestBounds returns the bounds of the render destination
 func (dw *Drawer) DestBounds() image.Rectangle {
-	return TheApp.Scrn.Geometry
+	return TheApp.Screen(0).Geometry
 }
 
 // End ends image drawing rendering process on render target.

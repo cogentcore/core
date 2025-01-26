@@ -10,5 +10,5 @@ import (
 
 // Window is the implementation of [system.Window] for the offscreen platform.
 type Window struct {
-	base.WindowSingle[*App]
+	base.WindowMulti[*App, *Drawer]
 }
