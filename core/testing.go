@@ -28,14 +28,21 @@ type getImager interface {
 // backslashes on Windows.
 func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	b.runAndShowNewWindow()
+
+	rw := b.Scene.RenderWindow()
 	for i := 0; i < len(fun); i++ {
 		fun[i]()
-		b.waitNoEvents()
+		b.waitNoEvents(rw)
 	}
 	if len(fun) == 0 {
 		// we didn't get it above
-		b.waitNoEvents()
+		b.waitNoEvents(rw)
 	}
+
+	b.AsyncLock()
+	b.doNeedsRender()
+	b.AsyncUnlock()
+	rw.renderWindow()
 
 	dw := b.Scene.RenderWindow().SystemWindow.Drawer()
 	img := dw.(getImager).GetImage()
@@ -58,13 +65,8 @@ func (b *Body) runAndShowNewWindow() {
 
 // waitNoEvents waits for all events to be handled and does any rendering
 // of the body necessary.
-func (b *Body) waitNoEvents() {
-	rw := b.Scene.RenderWindow()
+func (b *Body) waitNoEvents(rw *renderWindow) {
 	rw.noEventsChan = make(chan struct{})
 	<-rw.noEventsChan
 	rw.noEventsChan = nil
-
-	b.AsyncLock()
-	b.doNeedsRender()
-	b.AsyncUnlock()
 }
