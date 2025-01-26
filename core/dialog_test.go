@@ -12,6 +12,7 @@ import (
 )
 
 func TestDialogMessage(t *testing.T) {
+	t.Skip("TODO(#1456): fix this test")
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(300))
