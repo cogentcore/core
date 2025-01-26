@@ -27,7 +27,7 @@ func TestChooserClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetStrings("macOS", "Windows", "Linux")
-	b.AssertRenderWindow(t, "chooser/click", func() {
+	b.AssertRender(t, "chooser/click", func() {
 		ch.Send(events.Click)
 	})
 }
@@ -83,7 +83,7 @@ func TestChooserEditableClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRenderWindow(t, "chooser/editable-click", func() {
+	b.AssertRender(t, "chooser/editable-click", func() {
 		ch.Send(events.Click)
 	})
 }
@@ -94,7 +94,7 @@ func TestChooserEditableTextFieldClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRenderWindow(t, "chooser/editable-text-field-click", func() {
+	b.AssertRender(t, "chooser/editable-text-field-click", func() {
 		ch.textField.Send(events.Click)
 	})
 }
@@ -105,7 +105,7 @@ func TestChooserAllowNewClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRenderWindow(t, "chooser/allow-new-click", func() {
+	b.AssertRender(t, "chooser/allow-new-click", func() {
 		ch.Send(events.Click)
 	})
 }
@@ -116,7 +116,7 @@ func TestChooserEditableAllowNewClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRenderWindow(t, "chooser/editable-allow-new-click", func() {
+	b.AssertRender(t, "chooser/editable-allow-new-click", func() {
 		ch.Send(events.Click)
 	})
 }
@@ -127,7 +127,7 @@ func TestChooserEditableAllowNewTextFieldClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRenderWindow(t, "chooser/editable-allow-new-text-field-click", func() {
+	b.AssertRender(t, "chooser/editable-allow-new-text-field-click", func() {
 		ch.textField.HandleEvent(events.NewKey(events.KeyChord, 'O', 0, 0))
 	}, func() {
 		ch.textField.Send(events.Click)

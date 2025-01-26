@@ -16,7 +16,7 @@ func TestDialogMessage(t *testing.T) {
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(300))
 	})
-	b.AssertRenderWindow(t, "dialog/message", func() {
+	b.AssertRender(t, "dialog/message", func() {
 		MessageDialog(b, "Something happened", "Message")
 	})
 }

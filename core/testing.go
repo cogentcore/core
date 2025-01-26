@@ -11,6 +11,11 @@ import (
 	"cogentcore.org/core/events"
 )
 
+// getImager is implemented by offscreen.Drawer for [Body.AssertRender].
+type getImager interface {
+	GetImage() *image.RGBA
+}
+
 // AssertRender makes a new window from the body, waits until it is shown
 // and all events have been handled, does any necessary re-rendering,
 // asserts that its rendered image is the same as that stored at the given
@@ -20,35 +25,8 @@ import (
 // window is shown, and all system events are handled before proessing continues.
 // A testdata directory and png file extension are automatically added to
 // the the filename, and forward slashes are automatically replaced with
-// backslashes on Windows. See [Body.AssertRenderWindow] for a version
-// that asserts the rendered image of the entire window, not just this body.
+// backslashes on Windows.
 func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
-	b.runAndShowNewWindow()
-	for i := 0; i < len(fun); i++ {
-		fun[i]()
-		b.waitNoEvents()
-	}
-	if len(fun) == 0 {
-		// we didn't get it above
-		b.waitNoEvents()
-	}
-
-	b.Scene.assertPixels(t, filename)
-
-	b.AsyncLock()
-	b.Close()
-	b.AsyncUnlock()
-}
-
-// getImager is implemented by offscreen.Drawer for [Body.AssertRenderWindow].
-type getImager interface {
-	GetImage() *image.RGBA
-}
-
-// AssertRenderWindow is the same as [Body.AssertRender] except that it asserts the
-// rendered image of the entire window, not just this body. It should be used for
-// multi-scene tests like those of snackbars and dialogs.
-func (b *Body) AssertRenderWindow(t imagex.TestingT, filename string, fun ...func()) {
 	b.runAndShowNewWindow()
 	for i := 0; i < len(fun); i++ {
 		fun[i]()
@@ -89,16 +67,4 @@ func (b *Body) waitNoEvents() {
 	b.AsyncLock()
 	b.doNeedsRender()
 	b.AsyncUnlock()
-}
-
-// assertPixels asserts that [Scene.Pixels] is equivalent
-// to the image stored at the given filename in the testdata directory,
-// with ".png" added to the filename if there is no extension
-// (eg: "button" becomes "testdata/button.png"). Forward slashes are
-// automatically replaced with backslashes on Windows.
-// If it is not, it fails the test with an error, but continues its
-// execution. If there is no image at the given filename in the testdata
-// directory, it creates the image.
-func (sc *Scene) assertPixels(t imagex.TestingT, filename string) {
-	imagex.Assert(t, sc.Pixels, filename)
 }

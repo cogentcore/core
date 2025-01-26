@@ -113,7 +113,7 @@ func TestTextFieldValidatorInvalid(t *testing.T) {
 		}
 		return nil
 	})
-	b.AssertRenderWindow(t, "text-field/validator-invalid", func() {
+	b.AssertRender(t, "text-field/validator-invalid", func() {
 		tf.SendChange() // trigger validation
 	})
 }

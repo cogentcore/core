@@ -28,7 +28,7 @@ func (dw *Drawer) Start() {
 func (dw *Drawer) End() {} // no-op
 
 // GetImage returns the rendered image. It is called through an interface
-// in core.Body.AssertRenderWindow.
+// in core.Body.AssertRender.
 func (dw *Drawer) GetImage() *image.RGBA {
 	return dw.Image
 }

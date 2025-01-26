@@ -25,46 +25,46 @@ func newBodyForSnackbar() *Body {
 
 func TestSnackbarCustom(t *testing.T) {
 	b := newBodyForSnackbar()
-	b.AssertRenderWindow(t, filepath.Join("snackbar", "text"), func() {
+	b.AssertRender(t, filepath.Join("snackbar", "text"), func() {
 		NewBody().AddSnackbarText("Files updated").RunSnackbar(b)
 	})
 
 	b = newBodyForSnackbar()
-	b.AssertRenderWindow(t, filepath.Join("snackbar", "button"), func() {
+	b.AssertRender(t, filepath.Join("snackbar", "button"), func() {
 		NewBody().AddSnackbarText("Files updated").AddSnackbarButton("Refresh").RunSnackbar(b)
 	})
 
 	b = newBodyForSnackbar()
-	b.AssertRenderWindow(t, filepath.Join("snackbar", "icon"), func() {
+	b.AssertRender(t, filepath.Join("snackbar", "icon"), func() {
 		NewBody().AddSnackbarText("Files updated").AddSnackbarIcon(icons.Close).RunSnackbar(b)
 	})
 
 	b = newBodyForSnackbar()
-	b.AssertRenderWindow(t, filepath.Join("snackbar", "button-icon"), func() {
+	b.AssertRender(t, filepath.Join("snackbar", "button-icon"), func() {
 		NewBody().AddSnackbarText("Files updated").AddSnackbarButton("Refresh").AddSnackbarIcon(icons.Close).RunSnackbar(b)
 	})
 }
 
 func TestSnackbarMessage(t *testing.T) {
 	b := newBodyForSnackbar()
-	b.AssertRenderWindow(t, filepath.Join("snackbar", "message"), func() {
+	b.AssertRender(t, filepath.Join("snackbar", "message"), func() {
 		MessageSnackbar(b, "New messages loaded")
 	})
 }
 
 func TestSnackbarError(t *testing.T) {
 	b := newBodyForSnackbar()
-	b.AssertRenderWindow(t, filepath.Join("snackbar", "no-error"), func() {
+	b.AssertRender(t, filepath.Join("snackbar", "no-error"), func() {
 		ErrorSnackbar(b, nil)
 	})
 
 	b = newBodyForSnackbar()
-	b.AssertRenderWindow(t, filepath.Join("snackbar", "error"), func() {
+	b.AssertRender(t, filepath.Join("snackbar", "error"), func() {
 		ErrorSnackbar(b, errors.New("file not found"))
 	})
 
 	b = newBodyForSnackbar()
-	b.AssertRenderWindow(t, filepath.Join("snackbar", "error-label"), func() {
+	b.AssertRender(t, filepath.Join("snackbar", "error-label"), func() {
 		ErrorSnackbar(b, errors.New("file not found"), "Error loading page")
 	})
 }
@@ -84,7 +84,7 @@ func TestSnackbarTime(t *testing.T) {
 		})
 		NewText(b).SetText(tm.String())
 
-		b.AssertRenderWindow(t, filepath.Join("snackbar", tm.String()), func() {
+		b.AssertRender(t, filepath.Join("snackbar", tm.String()), func() {
 			MessageSnackbar(b, "Test")
 			time.Sleep(tm)
 		})
@@ -95,7 +95,7 @@ func TestSnackbarTime(t *testing.T) {
 		b := newBodyForSnackbar()
 		NewText(b).SetText(tm.String() + "-two")
 
-		b.AssertRenderWindow(t, filepath.Join("snackbar", tm.String()+"-two"), func() {
+		b.AssertRender(t, filepath.Join("snackbar", tm.String()+"-two"), func() {
 			MessageSnackbar(b, "Test One")
 			time.Sleep(tm / 2)
 			MessageSnackbar(b, "Test Two")
