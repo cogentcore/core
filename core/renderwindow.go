@@ -639,9 +639,8 @@ func (w *renderWindow) renderContext() *renderContext {
 }
 
 // renderWindow performs all rendering based on current Stages config.
-// It sets the Write lock on RenderContext Mutex, so nothing else can update
-// during this time.  All other updates are done with a Read lock so they
-// won't interfere with each other.
+// It sets the lock on RenderContext Mutex, so nothing else can update
+// during this time.
 func (w *renderWindow) renderWindow() {
 	rc := w.renderContext()
 	rc.lock()
