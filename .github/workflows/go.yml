@@ -33,7 +33,7 @@ jobs:
 
     - name: Build
       run: go build -v ./...
-      
+
     - name: Build Docs (to verify it works on PRs)
       run: core build web -dir docs -o static
 
