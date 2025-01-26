@@ -214,6 +214,7 @@ func (tf *TextField) Init() {
 
 	tf.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
+		// s.SetAbilities(false, abilities.ScrollableUnfocused)
 		tf.CursorWidth.Dp(1)
 		tf.SelectColor = colors.Scheme.Select.Container
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
@@ -288,28 +289,18 @@ func (tf *TextField) Init() {
 			e.SetHandled()
 		}
 	})
-	tf.On(events.MouseDown, func(e events.Event) {
-		if !tf.StateIs(states.Focused) {
-			tf.SetFocus() // always grab, even if read only..
+	tf.OnClick(func(e events.Event) {
+		if !tf.IsReadOnly() {
+			tf.SetFocus()
 		}
-		if tf.IsReadOnly() {
-			return
-		}
-		e.SetHandled()
 		switch e.MouseButton() {
 		case events.Left:
 			tf.setCursorFromPixel(e.Pos(), e.SelectMode())
 		case events.Middle:
-			e.SetHandled()
-			tf.setCursorFromPixel(e.Pos(), e.SelectMode())
-			tf.paste()
+			if !tf.IsReadOnly() {
+				tf.paste()
+			}
 		}
-	})
-	tf.OnClick(func(e events.Event) {
-		if tf.IsReadOnly() {
-			return
-		}
-		tf.SetFocus()
 	})
 	tf.On(events.DoubleClick, func(e events.Event) {
 		if tf.IsReadOnly() {
@@ -331,14 +322,21 @@ func (tf *TextField) Init() {
 		e.SetHandled()
 		tf.selectAll()
 	})
-	tf.On(events.SlideMove, func(e events.Event) {
-		if tf.IsReadOnly() {
-			return
-		}
+	tf.On(events.SlideStart, func(e events.Event) {
 		e.SetHandled()
-		if !tf.selectMode {
-			tf.selectModeToggle()
+		tf.SetState(true, states.Sliding)
+		if tf.selectMode || e.SelectMode() != events.SelectOne { // extend existing select
+			tf.setCursorFromPixel(e.Pos(), e.SelectMode())
+		} else {
+			tf.cursorPos = tf.pixelToCursor(e.Pos())
+			if !tf.selectMode {
+				tf.selectModeToggle()
+			}
 		}
+	})
+	tf.On(events.SlideMove, func(e events.Event) {
+		e.SetHandled()
+		tf.selectMode = true // always
 		tf.setCursorFromPixel(e.Pos(), events.SelectOne)
 	})
 	tf.OnClose(func(e events.Event) {
@@ -1615,7 +1613,7 @@ func (tf *TextField) setCursorFromPixel(pt image.Point, selMode events.SelectMod
 			tf.selectStart = oldPos
 			tf.selectMode = true
 		}
-		if !tf.StateIs(states.Sliding) && selMode == events.SelectOne { // && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
+		if !tf.StateIs(states.Sliding) && selMode == events.SelectOne {
 			tf.selectReset()
 		} else {
 			tf.selectRegionUpdate(tf.cursorPos)

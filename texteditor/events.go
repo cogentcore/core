@@ -539,41 +539,17 @@ func (ed *Editor) OpenLinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 
 // handleMouse handles mouse events
 func (ed *Editor) handleMouse() {
-	ed.On(events.Click, func(e events.Event) { // note: usual is Click..
-		if !ed.StateIs(states.Focused) {
-			ed.SetFocus()
-		}
-	})
-	ed.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
-		if !ed.AbilityIs(abilities.RemoteScrollable) && !ed.StateIs(states.Focused) {
-			return
-		}
-		if !ed.StateIs(states.Focused) {
-			ed.SetFocus()
-		}
+	ed.OnClick(func(e events.Event) {
+		ed.SetFocus()
 		pt := ed.PointToRelPos(e.Pos())
 		newPos := ed.PixelToCursor(pt)
 		switch e.MouseButton() {
 		case events.Left:
-			ed.SetState(true, states.Focused)
-			ed.setCursorFromMouse(pt, newPos, e.SelectMode())
-			ed.savePosHistory(ed.CursorPos)
-		case events.Middle:
-			if !ed.IsReadOnly() {
+			_, got := ed.OpenLinkAt(newPos)
+			if !got {
 				ed.setCursorFromMouse(pt, newPos, e.SelectMode())
 				ed.savePosHistory(ed.CursorPos)
 			}
-		}
-	})
-	ed.On(events.MouseUp, func(e events.Event) { // note: usual is Click..
-		if !ed.AbilityIs(abilities.RemoteScrollable) && !ed.StateIs(states.Focused) {
-			return
-		}
-		pt := ed.PointToRelPos(e.Pos())
-		newPos := ed.PixelToCursor(pt)
-		switch e.MouseButton() {
-		case events.Left:
-			ed.OpenLinkAt(newPos)
 		case events.Middle:
 			if !ed.IsReadOnly() {
 				ed.Paste()
@@ -581,9 +557,6 @@ func (ed *Editor) handleMouse() {
 		}
 	})
 	ed.OnDoubleClick(func(e events.Event) {
-		if !ed.AbilityIs(abilities.RemoteScrollable) && !ed.StateIs(states.Focused) {
-			return
-		}
 		if !ed.StateIs(states.Focused) {
 			ed.SetFocus()
 			ed.Send(events.Focus, e) // sets focused flag
@@ -595,9 +568,6 @@ func (ed *Editor) handleMouse() {
 		ed.NeedsRender()
 	})
 	ed.On(events.TripleClick, func(e events.Event) {
-		if !ed.AbilityIs(abilities.RemoteScrollable) && !ed.StateIs(states.Focused) {
-			return
-		}
 		if !ed.StateIs(states.Focused) {
 			ed.SetFocus()
 			ed.Send(events.Focus, e) // sets focused flag
@@ -612,14 +582,24 @@ func (ed *Editor) handleMouse() {
 		}
 		ed.NeedsRender()
 	})
-	ed.On(events.SlideMove, func(e events.Event) {
-		if !ed.AbilityIs(abilities.RemoteScrollable) && !ed.StateIs(states.Focused) {
-			return
-		}
+	ed.On(events.SlideStart, func(e events.Event) { // note: usual is Click..
 		e.SetHandled()
-		if !ed.selectMode {
-			ed.selectModeToggle()
+		ed.SetState(true, states.Sliding)
+		pt := ed.PointToRelPos(e.Pos())
+		newPos := ed.PixelToCursor(pt)
+		if ed.selectMode || e.SelectMode() != events.SelectOne { // extend existing select
+			ed.setCursorFromMouse(pt, newPos, e.SelectMode())
+		} else {
+			ed.CursorPos = newPos
+			if !ed.selectMode {
+				ed.selectModeToggle()
+			}
 		}
+		ed.savePosHistory(ed.CursorPos)
+	})
+	ed.On(events.SlideMove, func(e events.Event) {
+		e.SetHandled()
+		ed.selectMode = true
 		pt := ed.PointToRelPos(e.Pos())
 		newPos := ed.PixelToCursor(pt)
 		ed.setCursorFromMouse(pt, newPos, events.SelectOne)

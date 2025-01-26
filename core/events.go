@@ -326,7 +326,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 				dragPress = w
 			}
 			if slidePress == nil && wb.AbilityIs(abilities.Slideable) {
-				if !wb.AbilityIs(abilities.RemoteScrollable) && !wb.Styles.Is(states.Focused) {
+				if !wb.AbilityIs(abilities.ScrollableUnfocused) && !wb.Styles.Is(states.Focused) {
 					continue
 				}
 				slidePress = w
