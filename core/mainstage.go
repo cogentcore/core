@@ -237,7 +237,7 @@ func (st *Stage) runWindow() *Stage {
 	st.addSceneParts()
 
 	sz := st.renderContext.geom.Size
-	// Non-offscreen mobile windows must take up the whole window
+	// Mobile windows must take up the whole window
 	// and thus don't consider pref size.
 	// Desktop new windows and non-full windows can pref size.
 	if !TheApp.Platform().IsMobile() &&
