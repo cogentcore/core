@@ -109,14 +109,6 @@ func (w *WindowSingle[A]) ConstrainFrame(topOnly bool) styles.Sides[int] {
 	return styles.Sides[int]{}
 }
 
-func (w *WindowSingle[A]) Raise() {
-	// no-op
-}
-
-func (w *WindowSingle[A]) Minimize() {
-	// no-op
-}
-
 func (w *WindowSingle[A]) RenderGeom() math32.Geom2DInt {
 	return w.App.RenderGeom()
 }

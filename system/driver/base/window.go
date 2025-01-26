@@ -143,6 +143,14 @@ func (w *Window[A]) SetIcon(images []image.Image) {
 	// no-op by default
 }
 
+func (w *Window[A]) Raise() {
+	// no-op by default
+}
+
+func (w *Window[A]) Minimize() {
+	// no-op by default
+}
+
 func (w *Window[A]) Flags() system.WindowFlags {
 	return w.Flgs
 }

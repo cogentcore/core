@@ -27,7 +27,8 @@ func Init() {
 // TheApp is the single [system.App] for the offscreen platform
 var TheApp = &App{AppMulti: base.NewAppMulti[*Window]()}
 
-// App is the [system.App] implementation for the offscreen platform
+// App is the [system.App] implementation for the offscreen platform.
+// It is multi-window but only has one screen.
 type App struct {
 	base.AppMulti[*Window]
 
