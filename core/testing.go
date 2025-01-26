@@ -20,8 +20,8 @@ import (
 // window is shown, and all system events are handled before proessing continues.
 // A testdata directory and png file extension are automatically added to
 // the the filename, and forward slashes are automatically replaced with
-// backslashes on Windows. See [Body.AssertRenderScreen] for a version
-// that asserts the rendered image of the entire screen, not just this body.
+// backslashes on Windows. See [Body.AssertRenderWindow] for a version
+// that asserts the rendered image of the entire window, not just this body.
 func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	b.runAndShowNewWindow()
 	for i := 0; i < len(fun); i++ {
@@ -40,15 +40,15 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	b.AsyncUnlock()
 }
 
-// getImager is implemented by offscreen.Drawer for [Body.AssertRenderScreen].
+// getImager is implemented by offscreen.Drawer for [Body.AssertRenderWindow].
 type getImager interface {
 	GetImage() *image.RGBA
 }
 
-// AssertRenderScreen is the same as [Body.AssertRender] except that it asserts the
-// rendered image of the entire screen, not just this body. It should be used for
+// AssertRenderWindow is the same as [Body.AssertRender] except that it asserts the
+// rendered image of the entire window, not just this body. It should be used for
 // multi-scene tests like those of snackbars and dialogs.
-func (b *Body) AssertRenderScreen(t imagex.TestingT, filename string, fun ...func()) {
+func (b *Body) AssertRenderWindow(t imagex.TestingT, filename string, fun ...func()) {
 	b.runAndShowNewWindow()
 	for i := 0; i < len(fun); i++ {
 		fun[i]()
