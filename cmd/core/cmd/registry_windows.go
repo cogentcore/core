@@ -32,7 +32,7 @@ func windowsRegistryAddPath(path string) error {
 		fmt.Printf("Path %s already in existing Path: %s\n", path, s)
 		return nil
 	}
-	s += path + ";"
+	s += scpath
 	err = k.SetStringValue("Path", s)
 	if err != nil {
 		return err
