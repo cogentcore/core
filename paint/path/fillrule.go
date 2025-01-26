@@ -12,11 +12,11 @@ import "fmt"
 // Tolerance is the maximum deviation from the original path in millimeters
 // when e.g. flatting. Used for flattening in the renderers, font decorations,
 // and path intersections.
-var Tolerance = 0.01
+var Tolerance = float32(0.01)
 
 // PixelTolerance is the maximum deviation of the rasterized path from
 // the original for flattening purposed in pixels.
-var PixelTolerance = 0.1
+var PixelTolerance = float32(0.1)
 
 // FillRule is the algorithm to specify which area is to be filled
 // and which not, in particular when multiple subpaths overlap.

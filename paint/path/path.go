@@ -11,15 +11,11 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"math"
 	"slices"
-	"sort"
-	"strconv"
 	"strings"
-	"unsafe"
 
 	"cogentcore.org/core/math32"
-	"golang.org/x/image/vector"
+	"github.com/tdewolff/parse/v2/strconv"
 )
 
 // Path is a collection of MoveTo, LineTo, QuadTo, CubeTo, ArcTo, and Close
@@ -35,29 +31,45 @@ import (
 // Only valid commands are appended, so that LineTo has a non-zero length,
 // QuadTo's and CubeTo's control point(s) don't (both) overlap with the start
 // and end point.
-type Path []Cmd
+type Path []float32
 
 // Path is a render item.
 func (pt Path) isRenderItem() {
 }
 
-// Cmd is one path command, or the float32 oordinate data for that command.
-type Cmd float32
-
 // Commands
 const (
-	MoveTo Cmd = 0
-	LineTo     = 1
-	QuadTo     = 2
-	CubeTo     = 3
-	ArcTo      = 4
-	Close      = 5
+	MoveTo float32 = 0
+	LineTo float32 = 1
+	QuadTo float32 = 2
+	CubeTo float32 = 3
+	ArcTo  float32 = 4
+	Close  float32 = 5
 )
 
 var cmdLens = [6]int{4, 4, 6, 8, 8, 4}
 
-func (cmd Cmd) cmdLen() int {
+func CmdLen(cmd float32) int {
 	return cmdLens[int(cmd)]
+}
+
+// toArcFlags converts to the largeArc and sweep boolean flags given its value in the path.
+func toArcFlags(cmd float32) (bool, bool) {
+	large := (cmd == 1.0 || cmd == 3.0)
+	sweep := (cmd == 2.0 || cmd == 3.0)
+	return large, sweep
+}
+
+// fromArcFlags converts the largeArc and sweep boolean flags to a value stored in the path.
+func fromArcFlags(large, sweep bool) float32 {
+	f := float32(0.0)
+	if large {
+		f += 1.0
+	}
+	if sweep {
+		f += 2.0
+	}
+	return f
 }
 
 type Paths []Path
@@ -69,33 +81,6 @@ func (ps Paths) Empty() bool {
 		}
 	}
 	return true
-}
-
-func (p Path) AsFloat32() []float32 {
-	return unsafe.Slice((*float32)(unsafe.SliceData(p)), len(p))
-}
-
-func NewPathFromFloat32(d []float32) Path {
-	return unsafe.Slice((*Cmd)(unsafe.SliceData(d)), len(d))
-}
-
-// toArcFlags converts to the largeArc and sweep boolean flags given its value in the path.
-func toArcFlags(f float32) (bool, bool) {
-	large := (f == 1.0 || f == 3.0)
-	sweep := (f == 2.0 || f == 3.0)
-	return large, sweep
-}
-
-// fromArcFlags converts the largeArc and sweep boolean flags to a value stored in the path.
-func fromArcFlags(large, sweep bool) float32 {
-	f := 0.0
-	if large {
-		f += 1.0
-	}
-	if sweep {
-		f += 2.0
-	}
-	return f
 }
 
 // Reset clears the path but retains the same memory.
@@ -123,7 +108,7 @@ func (p *Path) GobDecode(b []byte) error {
 
 // Empty returns true if p is an empty path or consists of only MoveTos and Closes.
 func (p Path) Empty() bool {
-	return len(p) <= cmdLen(MoveTo)
+	return len(p) <= CmdLen(MoveTo)
 }
 
 // Equals returns true if p and q are equal within tolerance Epsilon.
@@ -142,11 +127,11 @@ func (p Path) Equals(q Path) bool {
 // Sane returns true if the path is sane, ie. it does not have NaN or infinity values.
 func (p Path) Sane() bool {
 	sane := func(x float32) bool {
-		return !math.IsNaN(x) && !math.IsInf(x, 0.0)
+		return !math32.IsNaN(x) && !math32.IsInf(x, 0.0)
 	}
 	for i := 0; i < len(p); {
 		cmd := p[i]
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 
 		if !sane(p[i-3]) || !sane(p[i-2]) {
 			return false
@@ -196,7 +181,7 @@ func (p Path) Same(q Path) bool {
 		if equal {
 			return true
 		}
-		j += cmdLen(q[j])
+		j += CmdLen(q[j])
 	}
 	return false
 }
@@ -220,7 +205,7 @@ func (p Path) HasSubpaths() bool {
 		if p[i] == MoveTo && i != 0 {
 			return true
 		}
-		i += cmdLen(p[i])
+		i += CmdLen(p[i])
 	}
 	return false
 }
@@ -231,9 +216,9 @@ func (p Path) Clone() Path {
 }
 
 // CopyTo returns a copy of p, using the memory of path q.
-func (p *Path) CopyTo(q *Path) *Path {
+func (p Path) CopyTo(q Path) Path {
 	if q == nil || len(q) < len(p) {
-		q = make([]float32, len(p))
+		q = make(Path, len(p))
 	} else {
 		q = q[:len(p)]
 	}
@@ -241,27 +226,27 @@ func (p *Path) CopyTo(q *Path) *Path {
 	return q
 }
 
-// Len returns the number of segments.
+// Len returns the number of commands in the path.
 func (p Path) Len() int {
 	n := 0
 	for i := 0; i < len(p); {
-		i += cmdLen(p[i])
+		i += CmdLen(p[i])
 		n++
 	}
 	return n
 }
 
 // Append appends path q to p and returns the extended path p.
-func (p *Path) Append(qs ...Path) Path {
+func (p Path) Append(qs ...Path) Path {
 	if p.Empty() {
-		p = &Path{}
+		p = Path{}
 	}
 	for _, q := range qs {
 		if !q.Empty() {
 			p = append(p, q...)
 		}
 	}
-	return *p
+	return p
 }
 
 // Join joins path q to p and returns the extended path p
@@ -279,10 +264,10 @@ func (p Path) Join(q Path) Path {
 	}
 
 	if p[len(p)-1] == Close || !Equal(p[len(p)-3], q[1]) || !Equal(p[len(p)-2], q[2]) {
-		return &Path{append(p, q...)}
+		return append(p, q...)
 	}
 
-	d := q[cmdLen(MoveTo):]
+	d := q[CmdLen(MoveTo):]
 
 	// add the first command through the command functions to use the optimization features
 	// q is not empty, so starts with a MoveTo followed by other commands
@@ -298,14 +283,14 @@ func (p Path) Join(q Path) Path {
 		p.CubeTo(d[1], d[2], d[3], d[4], d[5], d[6])
 	case ArcTo:
 		large, sweep := toArcFlags(d[4])
-		p.ArcTo(d[1], d[2], d[3]*180.0/math.Pi, large, sweep, d[5], d[6])
+		p.ArcTo(d[1], d[2], d[3]*180.0/math32.Pi, large, sweep, d[5], d[6])
 	case Close:
 		p.Close()
 	}
 
 	i := len(p)
 	end := p.StartPos()
-	p = &Path{append(p, d[cmdLen(cmd):]...)}
+	p = append(p, d[CmdLen(cmd):]...)
 
 	// repair close commands
 	for i < len(p) {
@@ -317,7 +302,7 @@ func (p Path) Join(q Path) Path {
 			p[i+2] = end.Y
 			break
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 	}
 	return p
 
@@ -327,7 +312,7 @@ func (p Path) Join(q Path) Path {
 // which is the end point of the last command.
 func (p Path) Pos() math32.Vector2 {
 	if 0 < len(p) {
-		return math32.Vector2{p[len(p)-3], p[len(p)-2]}
+		return math32.Vec2(p[len(p)-3], p[len(p)-2])
 	}
 	return math32.Vector2{}
 }
@@ -338,9 +323,9 @@ func (p Path) StartPos() math32.Vector2 {
 	for i := len(p); 0 < i; {
 		cmd := p[i-1]
 		if cmd == MoveTo {
-			return math32.Vector2{p[i-3], p[i-2]}
+			return math32.Vec2(p[i-3], p[i-2])
 		}
-		i -= cmdLen(cmd)
+		i -= CmdLen(cmd)
 	}
 	return math32.Vector2{}
 }
@@ -351,9 +336,9 @@ func (p Path) Coords() []math32.Vector2 {
 	coords := []math32.Vector2{}
 	for i := 0; i < len(p); {
 		cmd := p[i]
-		i += cmdLen(cmd)
-		if len(coords) == 0 || cmd != Close || !coords[len(coords)-1].Equals(math32.Vector2{p[i-3], p[i-2]}) {
-			coords = append(coords, math32.Vector2{p[i-3], p[i-2]})
+		i += CmdLen(cmd)
+		if len(coords) == 0 || cmd != Close || !EqualPoint(coords[len(coords)-1], math32.Vec2(p[i-3], p[i-2])) {
+			coords = append(coords, math32.Vec2(p[i-3], p[i-2]))
 		}
 	}
 	return coords
@@ -364,39 +349,43 @@ func (p Path) Coords() []math32.Vector2 {
 // EndPoint returns the end point for MoveTo, LineTo, and Close commands,
 // where the command is at index i.
 func (p Path) EndPoint(i int) math32.Vector2 {
-	return math32.Vector2{float32(p[i+1]), float32(p[i+2])}
+	return math32.Vec2(p[i+1], p[i+2])
 }
 
 // QuadToPoints returns the control point and end for QuadTo command,
 // where the command is at index i.
 func (p Path) QuadToPoints(i int) (cp, end math32.Vector2) {
-	return math32.Vector2{float32(p[i+1]), float32(p[i+2])}, math32.Vector2{float32(p[i+3]), float32(p[i+4])}
+	return math32.Vec2(p[i+1], p[i+2]), math32.Vec2(p[i+3], p[i+4])
 }
 
 // CubeToPoints returns the cp1, cp2, and end for CubeTo command,
 // where the command is at index i.
 func (p Path) CubeToPoints(i int) (cp1, cp2, end math32.Vector2) {
-	return math32.Vector2{float32(p[i+1]), float32(p[i+2])}, math32.Vector2{float32(p[i+3]), float32(p[i+4])}, math32.Vector2{float32(p[i+5]), float32(p[i+6])}
+	return math32.Vec2(p[i+1], p[i+2]), math32.Vec2(p[i+3], p[i+4]), math32.Vec2(p[i+5], p[i+6])
 }
 
 // ArcToPoints returns the rx, ry, phi, large, sweep values for ArcTo command,
 // where the command is at index i.
 func (p Path) ArcToPoints(i int) (rx, ry, phi float32, large, sweep bool, end math32.Vector2) {
-	rx = float32(p[i+1])
-	ry = float32(p[i+2])
-	phi = float32(p[i+3])
+	rx = p[i+1]
+	ry = p[i+2]
+	phi = p[i+3]
 	large, sweep = toArcFlags(p[i+4])
-	end = math32.Vector2{float32(p[i+5]), float32(p[i+6])}
+	end = math32.Vec2(p[i+5], p[i+6])
 	return
 }
 
 /////// Constructors
 
-// MoveTo moves the path to (x,y) without connecting the path. It starts a new independent subpath. Multiple subpaths can be useful when negating parts of a previous path by overlapping it with a path in the opposite direction. The behaviour for overlapping paths depends on the FillRule.
+// MoveTo moves the path to (x,y) without connecting the path.
+// It starts a new independent subpath. Multiple subpaths can be useful
+// when negating parts of a previous path by overlapping it with a path
+// in the opposite direction. The behaviour for overlapping paths depends
+// on the FillRule.
 func (p *Path) MoveTo(x, y float32) {
-	if 0 < len(p) && p[len(p)-1] == MoveTo {
-		p[len(p)-3] = x
-		p[len(p)-2] = y
+	if 0 < len(*p) && (*p)[len(*p)-1] == MoveTo {
+		(*p)[len(*p)-3] = x
+		(*p)[len(*p)-2] = y
 		return
 	}
 	*p = append(*p, MoveTo, x, y, MoveTo)
@@ -406,42 +395,42 @@ func (p *Path) MoveTo(x, y float32) {
 func (p *Path) LineTo(x, y float32) {
 	start := p.Pos()
 	end := math32.Vector2{x, y}
-	if start.Equals(end) {
+	if EqualPoint(start, end) {
 		return
-	} else if cmdLen(LineTo) <= len(p) && p[len(p)-1] == LineTo {
+	} else if CmdLen(LineTo) <= len(*p) && (*p)[len(*p)-1] == LineTo {
 		prevStart := math32.Vector2{}
-		if cmdLen(LineTo) < len(p) {
-			prevStart = math32.Vector2{p[len(p)-cmdLen(LineTo)-3], p[len(p)-cmdLen(LineTo)-2]}
+		if CmdLen(LineTo) < len(*p) {
+			prevStart = math32.Vec2((*p)[len(*p)-CmdLen(LineTo)-3], (*p)[len(*p)-CmdLen(LineTo)-2])
 		}
 
 		// divide by length^2 since otherwise the perpdot between very small segments may be
 		// below Epsilon
 		da := start.Sub(prevStart)
 		db := end.Sub(start)
-		div := da.PerpDot(db)
+		div := da.Cross(db)
 		if length := da.Length() * db.Length(); Equal(div/length, 0.0) {
 			// lines are parallel
 			extends := false
 			if da.Y < da.X {
-				extends = math.Signbit(da.X) == math.Signbit(db.X)
+				extends = math32.Signbit(da.X) == math32.Signbit(db.X)
 			} else {
-				extends = math.Signbit(da.Y) == math.Signbit(db.Y)
+				extends = math32.Signbit(da.Y) == math32.Signbit(db.Y)
 			}
 			if extends {
 				//if Equal(end.Sub(start).AngleBetween(start.Sub(prevStart)), 0.0) {
-				p[len(p)-3] = x
-				p[len(p)-2] = y
+				(*p)[len(*p)-3] = x
+				(*p)[len(*p)-2] = y
 				return
 			}
 		}
 	}
 
-	if len(p) == 0 {
+	if len(*p) == 0 {
 		p.MoveTo(0.0, 0.0)
-	} else if p[len(p)-1] == Close {
-		p.MoveTo(p[len(p)-3], p[len(p)-2])
+	} else if (*p)[len(*p)-1] == Close {
+		p.MoveTo((*p)[len(*p)-3], (*p)[len(*p)-2])
 	}
-	*p = *append(p, LineTo, end.X, end.Y, LineTo)
+	*p = append(*p, LineTo, end.X, end.Y, LineTo)
 }
 
 // QuadTo adds a quadratic Bézier path with control point (cpx,cpy) and end point (x,y).
@@ -449,19 +438,19 @@ func (p *Path) QuadTo(cpx, cpy, x, y float32) {
 	start := p.Pos()
 	cp := math32.Vector2{cpx, cpy}
 	end := math32.Vector2{x, y}
-	if start.Equals(end) && start.Equals(cp) {
+	if EqualPoint(start, end) && EqualPoint(start, cp) {
 		return
-	} else if !start.Equals(end) && (start.Equals(cp) || angleEqual(end.Sub(start).AngleBetween(cp.Sub(start)), 0.0)) && (end.Equals(cp) || angleEqual(end.Sub(start).AngleBetween(end.Sub(cp)), 0.0)) {
+	} else if !EqualPoint(start, end) && (EqualPoint(start, cp) || angleEqual(AngleBetween(end.Sub(start), cp.Sub(start)), 0.0)) && (EqualPoint(end, cp) || angleEqual(AngleBetween(end.Sub(start), end.Sub(cp)), 0.0)) {
 		p.LineTo(end.X, end.Y)
 		return
 	}
 
-	if len(p) == 0 {
+	if len(*p) == 0 {
 		p.MoveTo(0.0, 0.0)
-	} else if p[len(p)-1] == Close {
-		p.MoveTo(p[len(p)-3], p[len(p)-2])
+	} else if (*p)[len(*p)-1] == Close {
+		p.MoveTo((*p)[len(*p)-3], (*p)[len(*p)-2])
 	}
-	p = append(p, QuadTo, cp.X, cp.Y, end.X, end.Y, QuadTo)
+	*p = append(*p, QuadTo, cp.X, cp.Y, end.X, end.Y, QuadTo)
 }
 
 // CubeTo adds a cubic Bézier path with control points (cpx1,cpy1) and (cpx2,cpy2) and end point (x,y).
@@ -470,35 +459,35 @@ func (p *Path) CubeTo(cpx1, cpy1, cpx2, cpy2, x, y float32) {
 	cp1 := math32.Vector2{cpx1, cpy1}
 	cp2 := math32.Vector2{cpx2, cpy2}
 	end := math32.Vector2{x, y}
-	if start.Equals(end) && start.Equals(cp1) && start.Equals(cp2) {
+	if EqualPoint(start, end) && EqualPoint(start, cp1) && EqualPoint(start, cp2) {
 		return
-	} else if !start.Equals(end) && (start.Equals(cp1) || end.Equals(cp1) || angleEqual(end.Sub(start).AngleBetween(cp1.Sub(start)), 0.0) && angleEqual(end.Sub(start).AngleBetween(end.Sub(cp1)), 0.0)) && (start.Equals(cp2) || end.Equals(cp2) || angleEqual(end.Sub(start).AngleBetween(cp2.Sub(start)), 0.0) && angleEqual(end.Sub(start).AngleBetween(end.Sub(cp2)), 0.0)) {
+	} else if !EqualPoint(start, end) && (EqualPoint(start, cp1) || EqualPoint(end, cp1) || angleEqual(AngleBetween(end.Sub(start), cp1.Sub(start)), 0.0) && angleEqual(AngleBetween(end.Sub(start), end.Sub(cp1)), 0.0)) && (EqualPoint(start, cp2) || EqualPoint(end, cp2) || angleEqual(AngleBetween(end.Sub(start), cp2.Sub(start)), 0.0) && angleEqual(AngleBetween(end.Sub(start), end.Sub(cp2)), 0.0)) {
 		p.LineTo(end.X, end.Y)
 		return
 	}
 
-	if len(p) == 0 {
+	if len(*p) == 0 {
 		p.MoveTo(0.0, 0.0)
-	} else if p[len(p)-1] == Close {
-		p.MoveTo(p[len(p)-3], p[len(p)-2])
+	} else if (*p)[len(*p)-1] == Close {
+		p.MoveTo((*p)[len(*p)-3], (*p)[len(*p)-2])
 	}
-	p = append(p, CubeTo, cp1.X, cp1.Y, cp2.X, cp2.Y, end.X, end.Y, CubeTo)
+	*p = append(*p, CubeTo, cp1.X, cp1.Y, cp2.X, cp2.Y, end.X, end.Y, CubeTo)
 }
 
 // ArcTo adds an arc with radii rx and ry, with rot the counter clockwise rotation with respect to the coordinate system in degrees, large and sweep booleans (see https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#Arcs), and (x,y) the end position of the pen. The start position of the pen was given by a previous command's end point.
 func (p *Path) ArcTo(rx, ry, rot float32, large, sweep bool, x, y float32) {
 	start := p.Pos()
 	end := math32.Vector2{x, y}
-	if start.Equals(end) {
+	if EqualPoint(start, end) {
 		return
 	}
-	if Equal(rx, 0.0) || math.IsInf(rx, 0) || Equal(ry, 0.0) || math.IsInf(ry, 0) {
+	if Equal(rx, 0.0) || math32.IsInf(rx, 0) || Equal(ry, 0.0) || math32.IsInf(ry, 0) {
 		p.LineTo(end.X, end.Y)
 		return
 	}
 
-	rx = math.Abs(rx)
-	ry = math.Abs(ry)
+	rx = math32.Abs(rx)
+	ry = math32.Abs(ry)
 	if Equal(rx, ry) {
 		rot = 0.0 // circle
 	} else if rx < ry {
@@ -506,9 +495,9 @@ func (p *Path) ArcTo(rx, ry, rot float32, large, sweep bool, x, y float32) {
 		rot += 90.0
 	}
 
-	phi := angleNorm(rot * math.Pi / 180.0)
-	if math.Pi <= phi { // phi is canonical within 0 <= phi < 180
-		phi -= math.Pi
+	phi := angleNorm(rot * math32.Pi / 180.0)
+	if math32.Pi <= phi { // phi is canonical within 0 <= phi < 180
+		phi -= math32.Pi
 	}
 
 	// scale ellipse if rx and ry are too small
@@ -518,33 +507,33 @@ func (p *Path) ArcTo(rx, ry, rot float32, large, sweep bool, x, y float32) {
 		ry *= lambda
 	}
 
-	if len(p) == 0 {
+	if len(*p) == 0 {
 		p.MoveTo(0.0, 0.0)
-	} else if p[len(p)-1] == Close {
-		p.MoveTo(p[len(p)-3], p[len(p)-2])
+	} else if (*p)[len(*p)-1] == Close {
+		p.MoveTo((*p)[len(*p)-3], (*p)[len(*p)-2])
 	}
-	p = append(p, ArcTo, rx, ry, phi, fromArcFlags(large, sweep), end.X, end.Y, ArcTo)
+	*p = append(*p, ArcTo, rx, ry, phi, fromArcFlags(large, sweep), end.X, end.Y, ArcTo)
 }
 
 // Arc adds an elliptical arc with radii rx and ry, with rot the counter clockwise rotation in degrees, and theta0 and theta1 the angles in degrees of the ellipse (before rot is applies) between which the arc will run. If theta0 < theta1, the arc will run in a CCW direction. If the difference between theta0 and theta1 is bigger than 360 degrees, one full circle will be drawn and the remaining part of diff % 360, e.g. a difference of 810 degrees will draw one full circle and an arc over 90 degrees.
 func (p *Path) Arc(rx, ry, rot, theta0, theta1 float32) {
-	phi := rot * math.Pi / 180.0
-	theta0 *= math.Pi / 180.0
-	theta1 *= math.Pi / 180.0
-	dtheta := math.Abs(theta1 - theta0)
+	phi := rot * math32.Pi / 180.0
+	theta0 *= math32.Pi / 180.0
+	theta1 *= math32.Pi / 180.0
+	dtheta := math32.Abs(theta1 - theta0)
 
 	sweep := theta0 < theta1
-	large := math.Mod(dtheta, 2.0*math.Pi) > math.Pi
+	large := math32.Mod(dtheta, 2.0*math32.Pi) > math32.Pi
 	p0 := EllipsePos(rx, ry, phi, 0.0, 0.0, theta0)
 	p1 := EllipsePos(rx, ry, phi, 0.0, 0.0, theta1)
 
 	start := p.Pos()
 	center := start.Sub(p0)
-	if dtheta >= 2.0*math.Pi {
+	if dtheta >= 2.0*math32.Pi {
 		startOpposite := center.Sub(p0)
 		p.ArcTo(rx, ry, rot, large, sweep, startOpposite.X, startOpposite.Y)
 		p.ArcTo(rx, ry, rot, large, sweep, start.X, start.Y)
-		if Equal(math.Mod(dtheta, 2.0*math.Pi), 0.0) {
+		if Equal(math32.Mod(dtheta, 2.0*math32.Pi), 0.0) {
 			return
 		}
 	}
@@ -554,80 +543,80 @@ func (p *Path) Arc(rx, ry, rot, theta0, theta1 float32) {
 
 // Close closes a (sub)path with a LineTo to the start of the path (the most recent MoveTo command). It also signals the path closes as opposed to being just a LineTo command, which can be significant for stroking purposes for example.
 func (p *Path) Close() {
-	if len(p) == 0 || p[len(p)-1] == Close {
+	if len(*p) == 0 || (*p)[len(*p)-1] == Close {
 		// already closed or empty
 		return
-	} else if p[len(p)-1] == MoveTo {
+	} else if (*p)[len(*p)-1] == MoveTo {
 		// remove MoveTo + Close
-		p = p[:len(p)-cmdLen(MoveTo)]
+		*p = (*p)[:len(*p)-CmdLen(MoveTo)]
 		return
 	}
 
 	end := p.StartPos()
-	if p[len(p)-1] == LineTo && Equal(p[len(p)-3], end.X) && Equal(p[len(p)-2], end.Y) {
+	if (*p)[len(*p)-1] == LineTo && Equal((*p)[len(*p)-3], end.X) && Equal((*p)[len(*p)-2], end.Y) {
 		// replace LineTo by Close if equal
-		p[len(p)-1] = Close
-		p[len(p)-cmdLen(LineTo)] = Close
+		(*p)[len(*p)-1] = Close
+		(*p)[len(*p)-CmdLen(LineTo)] = Close
 		return
-	} else if p[len(p)-1] == LineTo {
+	} else if (*p)[len(*p)-1] == LineTo {
 		// replace LineTo by Close if equidirectional extension
-		start := math32.Vector2{p[len(p)-3], p[len(p)-2]}
+		start := math32.Vec2((*p)[len(*p)-3], (*p)[len(*p)-2])
 		prevStart := math32.Vector2{}
-		if cmdLen(LineTo) < len(p) {
-			prevStart = math32.Vector2{p[len(p)-cmdLen(LineTo)-3], p[len(p)-cmdLen(LineTo)-2]}
+		if CmdLen(LineTo) < len(*p) {
+			prevStart = math32.Vec2((*p)[len(*p)-CmdLen(LineTo)-3], (*p)[len(*p)-CmdLen(LineTo)-2])
 		}
-		if Equal(end.Sub(start).AngleBetween(start.Sub(prevStart)), 0.0) {
-			p[len(p)-cmdLen(LineTo)] = Close
-			p[len(p)-3] = end.X
-			p[len(p)-2] = end.Y
-			p[len(p)-1] = Close
+		if Equal(AngleBetween(end.Sub(start), start.Sub(prevStart)), 0.0) {
+			(*p)[len(*p)-CmdLen(LineTo)] = Close
+			(*p)[len(*p)-3] = end.X
+			(*p)[len(*p)-2] = end.Y
+			(*p)[len(*p)-1] = Close
 			return
 		}
 	}
-	p = append(p, Close, end.X, end.Y, Close)
+	*p = append(*p, Close, end.X, end.Y, Close)
 }
 
 // optimizeClose removes a superfluous first line segment in-place of a subpath. If both the first and last segment are line segments and are colinear, move the start of the path forward one segment
 func (p *Path) optimizeClose() {
-	if len(p) == 0 || p[len(p)-1] != Close {
+	if len(*p) == 0 || (*p)[len(*p)-1] != Close {
 		return
 	}
 
 	// find last MoveTo
 	end := math32.Vector2{}
-	iMoveTo := len(p)
+	iMoveTo := len(*p)
 	for 0 < iMoveTo {
-		cmd := p[iMoveTo-1]
-		iMoveTo -= cmdLen(cmd)
+		cmd := (*p)[iMoveTo-1]
+		iMoveTo -= CmdLen(cmd)
 		if cmd == MoveTo {
-			end = math32.Vector2{p[iMoveTo+1], p[iMoveTo+2]}
+			end = math32.Vec2((*p)[iMoveTo+1], (*p)[iMoveTo+2])
 			break
 		}
 	}
 
-	if p[iMoveTo] == MoveTo && p[iMoveTo+cmdLen(MoveTo)] == LineTo && iMoveTo+cmdLen(MoveTo)+cmdLen(LineTo) < len(p)-cmdLen(Close) {
+	if (*p)[iMoveTo] == MoveTo && (*p)[iMoveTo+CmdLen(MoveTo)] == LineTo && iMoveTo+CmdLen(MoveTo)+CmdLen(LineTo) < len(*p)-CmdLen(Close) {
 		// replace Close + MoveTo + LineTo by Close + MoveTo if equidirectional
 		// move Close and MoveTo forward along the path
-		start := math32.Vector2{p[len(p)-cmdLen(Close)-3], p[len(p)-cmdLen(Close)-2]}
-		nextEnd := math32.Vector2{p[iMoveTo+cmdLen(MoveTo)+cmdLen(LineTo)-3], p[iMoveTo+cmdLen(MoveTo)+cmdLen(LineTo)-2]}
-		if Equal(end.Sub(start).AngleBetween(nextEnd.Sub(end)), 0.0) {
+		start := math32.Vec2((*p)[len(*p)-CmdLen(Close)-3], (*p)[len(*p)-CmdLen(Close)-2])
+		nextEnd := math32.Vec2((*p)[iMoveTo+CmdLen(MoveTo)+CmdLen(LineTo)-3], (*p)[iMoveTo+CmdLen(MoveTo)+CmdLen(LineTo)-2])
+		if Equal(AngleBetween(end.Sub(start), nextEnd.Sub(end)), 0.0) {
 			// update Close
-			p[len(p)-3] = nextEnd.X
-			p[len(p)-2] = nextEnd.Y
+			(*p)[len(*p)-3] = nextEnd.X
+			(*p)[len(*p)-2] = nextEnd.Y
 
 			// update MoveTo
-			p[iMoveTo+1] = nextEnd.X
-			p[iMoveTo+2] = nextEnd.Y
+			(*p)[iMoveTo+1] = nextEnd.X
+			(*p)[iMoveTo+2] = nextEnd.Y
 
 			// remove LineTo
-			p = append(p[:iMoveTo+cmdLen(MoveTo)], p[iMoveTo+cmdLen(MoveTo)+cmdLen(LineTo):]...)
+			*p = append((*p)[:iMoveTo+CmdLen(MoveTo)], (*p)[iMoveTo+CmdLen(MoveTo)+CmdLen(LineTo):]...)
 		}
 	}
 }
 
-////////////////////////////////////////////////////////////////
+////////
 
-func (p *Path) simplifyToCoords() []math32.Vector2 {
+func (p Path) simplifyToCoords() []math32.Vector2 {
 	coords := p.Coords()
 	if len(coords) <= 3 {
 		// if there are just two commands, linearizing them gives us an area of no surface. To avoid this we add extra coordinates halfway for QuadTo, CubeTo and ArcTo.
@@ -635,16 +624,16 @@ func (p *Path) simplifyToCoords() []math32.Vector2 {
 		for i := 0; i < len(p); {
 			cmd := p[i]
 			if cmd == QuadTo {
-				p0 := math32.Vector2{p[i-3], p[i-2]}
-				p1 := math32.Vector2{p[i+1], p[i+2]}
-				p2 := math32.Vector2{p[i+3], p[i+4]}
+				p0 := math32.Vec2(p[i-3], p[i-2])
+				p1 := math32.Vec2(p[i+1], p[i+2])
+				p2 := math32.Vec2(p[i+3], p[i+4])
 				_, _, _, coord, _, _ := quadraticBezierSplit(p0, p1, p2, 0.5)
 				coords = append(coords, coord)
 			} else if cmd == CubeTo {
-				p0 := math32.Vector2{p[i-3], p[i-2]}
-				p1 := math32.Vector2{p[i+1], p[i+2]}
-				p2 := math32.Vector2{p[i+3], p[i+4]}
-				p3 := math32.Vector2{p[i+5], p[i+6]}
+				p0 := math32.Vec2(p[i-3], p[i-2])
+				p1 := math32.Vec2(p[i+1], p[i+2])
+				p2 := math32.Vec2(p[i+3], p[i+4])
+				p3 := math32.Vec2(p[i+5], p[i+6])
 				_, _, _, _, coord, _, _, _ := cubicBezierSplit(p0, p1, p2, p3, 0.5)
 				coords = append(coords, coord)
 			} else if cmd == ArcTo {
@@ -654,9 +643,9 @@ func (p *Path) simplifyToCoords() []math32.Vector2 {
 				coord, _, _, _ := ellipseSplit(rx, ry, phi, cx, cy, theta0, theta1, (theta0+theta1)/2.0)
 				coords = append(coords, coord)
 			}
-			i += cmdLen(cmd)
+			i += CmdLen(cmd)
 			if cmd != Close || !Equal(coords[len(coords)-1].X, p[i-3]) || !Equal(coords[len(coords)-1].Y, p[i-2]) {
-				coords = append(coords, math32.Vector2{p[i-3], p[i-2]})
+				coords = append(coords, math32.Vec2(p[i-3], p[i-2]))
 			}
 		}
 	}
@@ -666,9 +655,9 @@ func (p *Path) simplifyToCoords() []math32.Vector2 {
 // direction returns the direction of the path at the given index into Path and t in [0.0,1.0]. Path must not contain subpaths, and will return the path's starting direction when i points to a MoveTo, or the path's final direction when i points to a Close of zero-length.
 func (p Path) direction(i int, t float32) math32.Vector2 {
 	last := len(p)
-	if p[last-1] == Close && (math32.Vector2{p[last-cmdLen(Close)-3], p[last-cmdLen(Close)-2]}).Equals(math32.Vector2{p[last-3], p[last-2]}) {
+	if p[last-1] == Close && EqualPoint(math32.Vec2(p[last-CmdLen(Close)-3], p[last-CmdLen(Close)-2]), math32.Vec2(p[last-3], p[last-2])) {
 		// point-closed
-		last -= cmdLen(Close)
+		last -= CmdLen(Close)
 	}
 
 	if i == 0 {
@@ -677,39 +666,39 @@ func (p Path) direction(i int, t float32) math32.Vector2 {
 		t = 0.0
 	} else if i < len(p) && i == last {
 		// get path's final direction when i points to zero-length Close
-		i -= cmdLen(p[i-1])
+		i -= CmdLen(p[i-1])
 		t = 1.0
 	}
-	if i < 0 || len(p) <= i || last < i+cmdLen(p[i]) {
+	if i < 0 || len(p) <= i || last < i+CmdLen(p[i]) {
 		return math32.Vector2{}
 	}
 
 	cmd := p[i]
 	var start math32.Vector2
 	if i == 0 {
-		start = math32.Vector2{p[last-3], p[last-2]}
+		start = math32.Vec2(p[last-3], p[last-2])
 	} else {
-		start = math32.Vector2{p[i-3], p[i-2]}
+		start = math32.Vec2(p[i-3], p[i-2])
 	}
 
-	i += cmdLen(cmd)
-	end := math32.Vector2{p[i-3], p[i-2]}
+	i += CmdLen(cmd)
+	end := math32.Vec2(p[i-3], p[i-2])
 	switch cmd {
 	case LineTo, Close:
-		return end.Sub(start).Norm(1.0)
+		return end.Sub(start).Normal()
 	case QuadTo:
-		cp := math32.Vector2{p[i-5], p[i-4]}
-		return quadraticBezierDeriv(start, cp, end, t).Norm(1.0)
+		cp := math32.Vec2(p[i-5], p[i-4])
+		return quadraticBezierDeriv(start, cp, end, t).Normal()
 	case CubeTo:
-		cp1 := math32.Vector2{p[i-7], p[i-6]}
-		cp2 := math32.Vector2{p[i-5], p[i-4]}
-		return cubicBezierDeriv(start, cp1, cp2, end, t).Norm(1.0)
+		cp1 := math32.Vec2(p[i-7], p[i-6])
+		cp2 := math32.Vec2(p[i-5], p[i-4])
+		return cubicBezierDeriv(start, cp1, cp2, end, t).Normal()
 	case ArcTo:
 		rx, ry, phi := p[i-7], p[i-6], p[i-5]
 		large, sweep := toArcFlags(p[i-4])
 		_, _, theta0, theta1 := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 		theta := theta0 + t*(theta1-theta0)
-		return ellipseDeriv(rx, ry, phi, sweep, theta).Norm(1.0)
+		return ellipseDeriv(rx, ry, phi, sweep, theta).Normal()
 	}
 	return math32.Vector2{}
 }
@@ -726,15 +715,15 @@ func (p Path) Direction(seg int, t float32) math32.Vector2 {
 		cmd := p[i]
 		if cmd == MoveTo {
 			if seg < curSeg {
-				pi := &Path{p[iStart:iEnd]}
-				return piirection(iSeg-iStart, t)
+				pi := p[iStart:iEnd]
+				return pi.direction(iSeg-iStart, t)
 			}
 			iStart = i
 		}
 		if seg == curSeg {
 			iSeg = i
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 	}
 	return math32.Vector2{} // if segment doesn't exist
 }
@@ -745,9 +734,9 @@ func (p Path) CoordDirections() []math32.Vector2 {
 		return []math32.Vector2{{}}
 	}
 	last := len(p)
-	if p[last-1] == Close && (math32.Vector2{p[last-cmdLen(Close)-3], p[last-cmdLen(Close)-2]}).Equals(math32.Vector2{p[last-3], p[last-2]}) {
+	if p[last-1] == Close && EqualPoint(math32.Vec2(p[last-CmdLen(Close)-3], p[last-CmdLen(Close)-2]), math32.Vec2(p[last-3], p[last-2])) {
 		// point-closed
-		last -= cmdLen(Close)
+		last -= CmdLen(Close)
 	}
 
 	dirs := []math32.Vector2{}
@@ -755,18 +744,18 @@ func (p Path) CoordDirections() []math32.Vector2 {
 	var dirPrev math32.Vector2
 	for i := 4; i < last; {
 		cmd := p[i]
-		dir := pirection(i, 0.0)
+		dir := p.direction(i, 0.0)
 		if i == 0 {
 			dirs = append(dirs, dir)
 		} else {
-			dirs = append(dirs, dirPrev.Add(dir).Norm(1.0))
+			dirs = append(dirs, dirPrev.Add(dir).Normal())
 		}
-		dirPrev = pirection(i, 1.0)
+		dirPrev = p.direction(i, 1.0)
 		closed = cmd == Close
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 	}
 	if closed {
-		dirs[0] = dirs[0].Add(dirPrev).Norm(1.0)
+		dirs[0] = dirs[0].Add(dirPrev).Normal()
 		dirs = append(dirs, dirs[0])
 	} else {
 		dirs = append(dirs, dirPrev)
@@ -777,9 +766,9 @@ func (p Path) CoordDirections() []math32.Vector2 {
 // curvature returns the curvature of the path at the given index into Path and t in [0.0,1.0]. Path must not contain subpaths, and will return the path's starting curvature when i points to a MoveTo, or the path's final curvature when i points to a Close of zero-length.
 func (p Path) curvature(i int, t float32) float32 {
 	last := len(p)
-	if p[last-1] == Close && (math32.Vector2{p[last-cmdLen(Close)-3], p[last-cmdLen(Close)-2]}).Equals(math32.Vector2{p[last-3], p[last-2]}) {
+	if p[last-1] == Close && EqualPoint(math32.Vec2(p[last-CmdLen(Close)-3], p[last-CmdLen(Close)-2]), math32.Vec2(p[last-3], p[last-2])) {
 		// point-closed
-		last -= cmdLen(Close)
+		last -= CmdLen(Close)
 	}
 
 	if i == 0 {
@@ -788,32 +777,32 @@ func (p Path) curvature(i int, t float32) float32 {
 		t = 0.0
 	} else if i < len(p) && i == last {
 		// get path's final direction when i points to zero-length Close
-		i -= cmdLen(p[i-1])
+		i -= CmdLen(p[i-1])
 		t = 1.0
 	}
-	if i < 0 || len(p) <= i || last < i+cmdLen(p[i]) {
+	if i < 0 || len(p) <= i || last < i+CmdLen(p[i]) {
 		return 0.0
 	}
 
 	cmd := p[i]
 	var start math32.Vector2
 	if i == 0 {
-		start = math32.Vector2{p[last-3], p[last-2]}
+		start = math32.Vec2(p[last-3], p[last-2])
 	} else {
-		start = math32.Vector2{p[i-3], p[i-2]}
+		start = math32.Vec2(p[i-3], p[i-2])
 	}
 
-	i += cmdLen(cmd)
-	end := math32.Vector2{p[i-3], p[i-2]}
+	i += CmdLen(cmd)
+	end := math32.Vec2(p[i-3], p[i-2])
 	switch cmd {
 	case LineTo, Close:
 		return 0.0
 	case QuadTo:
-		cp := math32.Vector2{p[i-5], p[i-4]}
+		cp := math32.Vec2(p[i-5], p[i-4])
 		return 1.0 / quadraticBezierCurvatureRadius(start, cp, end, t)
 	case CubeTo:
-		cp1 := math32.Vector2{p[i-7], p[i-6]}
-		cp2 := math32.Vector2{p[i-5], p[i-4]}
+		cp1 := math32.Vec2(p[i-7], p[i-6])
+		cp2 := math32.Vec2(p[i-5], p[i-4])
 		return 1.0 / cubicBezierCurvatureRadius(start, cp1, cp2, end, t)
 	case ArcTo:
 		rx, ry, phi := p[i-7], p[i-6], p[i-5]
@@ -837,7 +826,7 @@ func (p Path) Curvature(seg int, t float32) float32 {
 		cmd := p[i]
 		if cmd == MoveTo {
 			if seg < curSeg {
-				pi := &Path{p[iStart:iEnd]}
+				pi := p[iStart:iEnd]
 				return pi.curvature(iSeg-iStart, t)
 			}
 			iStart = i
@@ -845,7 +834,7 @@ func (p Path) Curvature(seg int, t float32) float32 {
 		if seg == curSeg {
 			iSeg = i
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 	}
 	return 0.0 // if segment doesn't exist
 }
@@ -953,7 +942,7 @@ func (p Path) Contains(x, y float32, fillRule FillRule) bool {
 // It will return true for an empty path or a straight line. It may not return a valid value when
 // the right-most point happens to be a (self-)overlapping segment.
 func (p Path) CCW() bool {
-	if len(p) <= 4 || (p[4] == LineTo || p[4] == Close) && len(p) <= 4+cmdLen(p[4]) {
+	if len(p) <= 4 || (p[4] == LineTo || p[4] == Close) && len(p) <= 4+CmdLen(p[4]) {
 		// empty path or single straight segment
 		return true
 	}
@@ -963,7 +952,7 @@ func (p Path) CCW() bool {
 	// pick bottom-right-most coordinate of subpath, as we know its left-hand side is filling
 	k, kMax := 4, len(p)
 	if p[kMax-1] == Close {
-		kMax -= cmdLen(Close)
+		kMax -= CmdLen(Close)
 	}
 	for i := 4; i < len(p); {
 		cmd := p[i]
@@ -972,7 +961,7 @@ func (p Path) CCW() bool {
 			kMax = i
 			break
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 		if x, y := p[i-3], p[i-2]; p[k-3] < x || Equal(p[k-3], x) && y < p[k-2] {
 			k = i
 		}
@@ -983,16 +972,16 @@ func (p Path) CCW() bool {
 	if k == 4 {
 		kPrev = kMax
 	} else {
-		kPrev = k - cmdLen(p[k-1])
+		kPrev = k - CmdLen(p[k-1])
 	}
 
 	var angleNext float32
-	anglePrev := angleNorm(pirection(kPrev, 1.0).Angle() + math.Pi)
+	anglePrev := angleNorm(Angle(p.direction(kPrev, 1.0)) + math32.Pi)
 	if k == kMax {
 		// use implicit close command
-		angleNext = math32.Vector2{p[1], p[2]}.Sub(math32.Vector2{p[k-3], p[k-2]}).Angle()
+		angleNext = Angle(math32.Vec2(p[1], p[2]).Sub(math32.Vec2(p[k-3], p[k-2])))
 	} else {
-		angleNext = pirection(k, 0.0).Angle()
+		angleNext = Angle(p.direction(k, 0.0))
 	}
 	if Equal(anglePrev, angleNext) {
 		// segments have the same direction at their right-most point
@@ -1029,7 +1018,7 @@ func (p Path) Filling(fillRule FillRule) []bool {
 		}
 
 		// sum windings from other subpaths
-		pos := math32.Vector2{pi[1], pi[2]}
+		pos := math32.Vec2(pi[1], pi[2])
 		for j, pj := range ps {
 			if i == j {
 				continue
@@ -1053,37 +1042,35 @@ func (p Path) FastBounds() math32.Box2 {
 	}
 
 	// first command is MoveTo
-	start, end := math32.Vector2{p[1], p[2]}, math32.Vector2{}
+	start, end := math32.Vec2(p[1], p[2]), math32.Vector2{}
 	xmin, xmax := start.X, start.X
 	ymin, ymax := start.Y, start.Y
 	for i := 4; i < len(p); {
 		cmd := p[i]
 		switch cmd {
 		case MoveTo, LineTo, Close:
-			end = math32.Vector2{p[i+1], p[i+2]}
+			end = math32.Vec2(p[i+1], p[i+2])
 			xmin = math32.Min(xmin, end.X)
 			xmax = math32.Max(xmax, end.X)
 			ymin = math32.Min(ymin, end.Y)
 			ymax = math32.Max(ymax, end.Y)
 		case QuadTo:
-			cp := math32.Vector2{p[i+1], p[i+2]}
-			end = math32.Vector2{p[i+3], p[i+4]}
+			cp := math32.Vec2(p[i+1], p[i+2])
+			end = math32.Vec2(p[i+3], p[i+4])
 			xmin = math32.Min(xmin, math32.Min(cp.X, end.X))
 			xmax = math32.Max(xmax, math32.Max(cp.X, end.X))
 			ymin = math32.Min(ymin, math32.Min(cp.Y, end.Y))
 			ymax = math32.Max(ymax, math32.Max(cp.Y, end.Y))
 		case CubeTo:
-			cp1 := math32.Vector2{p[i+1], p[i+2]}
-			cp2 := math32.Vector2{p[i+3], p[i+4]}
-			end = math32.Vector2{p[i+5], p[i+6]}
+			cp1 := math32.Vec2(p[i+1], p[i+2])
+			cp2 := math32.Vec2(p[i+3], p[i+4])
+			end = math32.Vec2(p[i+5], p[i+6])
 			xmin = math32.Min(xmin, math32.Min(cp1.X, math32.Min(cp2.X, end.X)))
 			xmax = math32.Max(xmax, math32.Max(cp1.X, math32.Min(cp2.X, end.X)))
 			ymin = math32.Min(ymin, math32.Min(cp1.Y, math32.Min(cp2.Y, end.Y)))
 			ymax = math32.Max(ymax, math32.Max(cp1.Y, math32.Min(cp2.Y, end.Y)))
 		case ArcTo:
-			rx, ry, phi := p[i+1], p[i+2], p[i+3]
-			large, sweep := toArcFlags(p[i+4])
-			end = math32.Vector2{p[i+5], p[i+6]}
+			rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
 			cx, cy, _, _ := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 			r := math32.Max(rx, ry)
 			xmin = math32.Min(xmin, cx-r)
@@ -1092,10 +1079,10 @@ func (p Path) FastBounds() math32.Box2 {
 			ymax = math32.Max(ymax, cy+r)
 
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 		start = end
 	}
-	return math32.Box2{xmin, ymin, xmax, ymax}
+	return math32.B2(xmin, ymin, xmax, ymax)
 }
 
 // Bounds returns the exact bounding box rectangle of the path.
@@ -1105,26 +1092,26 @@ func (p Path) Bounds() math32.Box2 {
 	}
 
 	// first command is MoveTo
-	start, end := math32.Vector2{p[1], p[2]}, math32.Vector2{}
+	start, end := math32.Vec2(p[1], p[2]), math32.Vector2{}
 	xmin, xmax := start.X, start.X
 	ymin, ymax := start.Y, start.Y
 	for i := 4; i < len(p); {
 		cmd := p[i]
 		switch cmd {
 		case MoveTo, LineTo, Close:
-			end = math32.Vector2{p[i+1], p[i+2]}
+			end = math32.Vec2(p[i+1], p[i+2])
 			xmin = math32.Min(xmin, end.X)
 			xmax = math32.Max(xmax, end.X)
 			ymin = math32.Min(ymin, end.Y)
 			ymax = math32.Max(ymax, end.Y)
 		case QuadTo:
-			cp := math32.Vector2{p[i+1], p[i+2]}
-			end = math32.Vector2{p[i+3], p[i+4]}
+			cp := math32.Vec2(p[i+1], p[i+2])
+			end = math32.Vec2(p[i+3], p[i+4])
 
 			xmin = math32.Min(xmin, end.X)
 			xmax = math32.Max(xmax, end.X)
 			if tdenom := (start.X - 2*cp.X + end.X); !Equal(tdenom, 0.0) {
-				if t := (start.X - cp.X) / tdenom; IntervalExclusive(t, 0.0, 1.0) {
+				if t := (start.X - cp.X) / tdenom; InIntervalExclusive(t, 0.0, 1.0) {
 					x := quadraticBezierPos(start, cp, end, t)
 					xmin = math32.Min(xmin, x.X)
 					xmax = math32.Max(xmax, x.X)
@@ -1134,16 +1121,16 @@ func (p Path) Bounds() math32.Box2 {
 			ymin = math32.Min(ymin, end.Y)
 			ymax = math32.Max(ymax, end.Y)
 			if tdenom := (start.Y - 2*cp.Y + end.Y); !Equal(tdenom, 0.0) {
-				if t := (start.Y - cp.Y) / tdenom; IntervalExclusive(t, 0.0, 1.0) {
+				if t := (start.Y - cp.Y) / tdenom; InIntervalExclusive(t, 0.0, 1.0) {
 					y := quadraticBezierPos(start, cp, end, t)
 					ymin = math32.Min(ymin, y.Y)
 					ymax = math32.Max(ymax, y.Y)
 				}
 			}
 		case CubeTo:
-			cp1 := math32.Vector2{p[i+1], p[i+2]}
-			cp2 := math32.Vector2{p[i+3], p[i+4]}
-			end = math32.Vector2{p[i+5], p[i+6]}
+			cp1 := math32.Vec2(p[i+1], p[i+2])
+			cp2 := math32.Vec2(p[i+3], p[i+4])
+			end = math32.Vec2(p[i+5], p[i+6])
 
 			a := -start.X + 3*cp1.X - 3*cp2.X + end.X
 			b := 2*start.X - 4*cp1.X + 2*cp2.X
@@ -1152,12 +1139,12 @@ func (p Path) Bounds() math32.Box2 {
 
 			xmin = math32.Min(xmin, end.X)
 			xmax = math32.Max(xmax, end.X)
-			if !math.IsNaN(t1) && IntervalExclusive(t1, 0.0, 1.0) {
+			if !math32.IsNaN(t1) && InIntervalExclusive(t1, 0.0, 1.0) {
 				x1 := cubicBezierPos(start, cp1, cp2, end, t1)
 				xmin = math32.Min(xmin, x1.X)
 				xmax = math32.Max(xmax, x1.X)
 			}
-			if !math.IsNaN(t2) && IntervalExclusive(t2, 0.0, 1.0) {
+			if !math32.IsNaN(t2) && InIntervalExclusive(t2, 0.0, 1.0) {
 				x2 := cubicBezierPos(start, cp1, cp2, end, t2)
 				xmin = math32.Min(xmin, x2.X)
 				xmax = math32.Max(xmax, x2.X)
@@ -1170,20 +1157,18 @@ func (p Path) Bounds() math32.Box2 {
 
 			ymin = math32.Min(ymin, end.Y)
 			ymax = math32.Max(ymax, end.Y)
-			if !math.IsNaN(t1) && IntervalExclusive(t1, 0.0, 1.0) {
+			if !math32.IsNaN(t1) && InIntervalExclusive(t1, 0.0, 1.0) {
 				y1 := cubicBezierPos(start, cp1, cp2, end, t1)
 				ymin = math32.Min(ymin, y1.Y)
 				ymax = math32.Max(ymax, y1.Y)
 			}
-			if !math.IsNaN(t2) && IntervalExclusive(t2, 0.0, 1.0) {
+			if !math32.IsNaN(t2) && InIntervalExclusive(t2, 0.0, 1.0) {
 				y2 := cubicBezierPos(start, cp1, cp2, end, t2)
 				ymin = math32.Min(ymin, y2.Y)
 				ymax = math32.Max(ymax, y2.Y)
 			}
 		case ArcTo:
-			rx, ry, phi := p[i+1], p[i+2], p[i+3]
-			large, sweep := toArcFlags(p[i+4])
-			end = math32.Vector2{p[i+5], p[i+6]}
+			rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
 			cx, cy, theta0, theta1 := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 
 			// find the four extremes (top, bottom, left, right) and apply those who are between theta1 and theta2
@@ -1192,14 +1177,14 @@ func (p Path) Bounds() math32.Box2 {
 			// be aware that positive rotation appears clockwise in SVGs (non-Cartesian coordinate system)
 			// we can now find the angles of the extremes
 
-			sinphi, cosphi := math.Sincos(phi)
-			thetaRight := math.Atan2(-ry*sinphi, rx*cosphi)
-			thetaTop := math.Atan2(rx*cosphi, ry*sinphi)
-			thetaLeft := thetaRight + math.Pi
-			thetaBottom := thetaTop + math.Pi
+			sinphi, cosphi := math32.Sincos(phi)
+			thetaRight := math32.Atan2(-ry*sinphi, rx*cosphi)
+			thetaTop := math32.Atan2(rx*cosphi, ry*sinphi)
+			thetaLeft := thetaRight + math32.Pi
+			thetaBottom := thetaTop + math32.Pi
 
-			dx := math.Sqrt(rx*rx*cosphi*cosphi + ry*ry*sinphi*sinphi)
-			dy := math.Sqrt(rx*rx*sinphi*sinphi + ry*ry*cosphi*cosphi)
+			dx := math32.Sqrt(rx*rx*cosphi*cosphi + ry*ry*sinphi*sinphi)
+			dy := math32.Sqrt(rx*rx*sinphi*sinphi + ry*ry*cosphi*cosphi)
 			if angleBetween(thetaLeft, theta0, theta1) {
 				xmin = math32.Min(xmin, cx-dx)
 			}
@@ -1217,67 +1202,66 @@ func (p Path) Bounds() math32.Box2 {
 			ymin = math32.Min(ymin, end.Y)
 			ymax = math32.Max(ymax, end.Y)
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 		start = end
 	}
-	return math32.Box2{xmin, ymin, xmax, ymax}
+	return math32.B2(xmin, ymin, xmax, ymax)
 }
 
 // Length returns the length of the path in millimeters. The length is approximated for cubic Béziers.
 func (p Path) Length() float32 {
-	d := 0.0
+	d := float32(0.0)
 	var start, end math32.Vector2
 	for i := 0; i < len(p); {
 		cmd := p[i]
 		switch cmd {
 		case MoveTo:
-			end = math32.Vector2{p[i+1], p[i+2]}
+			end = math32.Vec2(p[i+1], p[i+2])
 		case LineTo, Close:
-			end = math32.Vector2{p[i+1], p[i+2]}
+			end = math32.Vec2(p[i+1], p[i+2])
 			d += end.Sub(start).Length()
 		case QuadTo:
-			cp := math32.Vector2{p[i+1], p[i+2]}
-			end = math32.Vector2{p[i+3], p[i+4]}
+			cp := math32.Vec2(p[i+1], p[i+2])
+			end = math32.Vec2(p[i+3], p[i+4])
 			d += quadraticBezierLength(start, cp, end)
 		case CubeTo:
-			cp1 := math32.Vector2{p[i+1], p[i+2]}
-			cp2 := math32.Vector2{p[i+3], p[i+4]}
-			end = math32.Vector2{p[i+5], p[i+6]}
+			cp1 := math32.Vec2(p[i+1], p[i+2])
+			cp2 := math32.Vec2(p[i+3], p[i+4])
+			end = math32.Vec2(p[i+5], p[i+6])
 			d += cubicBezierLength(start, cp1, cp2, end)
 		case ArcTo:
-			rx, ry, phi := p[i+1], p[i+2], p[i+3]
-			large, sweep := toArcFlags(p[i+4])
-			end = math32.Vector2{p[i+5], p[i+6]}
+			rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
 			_, _, theta1, theta2 := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 			d += ellipseLength(rx, ry, theta1, theta2)
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 		start = end
 	}
 	return d
 }
 
-// Transform transforms the path by the given transformation matrix and returns a new path. It modifies the path in-place.
+// Transform transforms the path by the given transformation matrix
+// and returns a new path. It modifies the path in-place.
 func (p Path) Transform(m math32.Matrix2) Path {
-	_, _, _, xscale, yscale, _ := mecompose()
+	xscale, yscale := m.ExtractScale()
 	for i := 0; i < len(p); {
 		cmd := p[i]
 		switch cmd {
 		case MoveTo, LineTo, Close:
-			end := mot(math32.Vector2{p[i+1], p[i+2]})
+			end := m.MulVector2AsPoint(math32.Vec2(p[i+1], p[i+2]))
 			p[i+1] = end.X
 			p[i+2] = end.Y
 		case QuadTo:
-			cp := mot(math32.Vector2{p[i+1], p[i+2]})
-			end := mot(math32.Vector2{p[i+3], p[i+4]})
+			cp := m.MulVector2AsPoint(math32.Vec2(p[i+1], p[i+2]))
+			end := m.MulVector2AsPoint(math32.Vec2(p[i+3], p[i+4]))
 			p[i+1] = cp.X
 			p[i+2] = cp.Y
 			p[i+3] = end.X
 			p[i+4] = end.Y
 		case CubeTo:
-			cp1 := mot(math32.Vector2{p[i+1], p[i+2]})
-			cp2 := mot(math32.Vector2{p[i+3], p[i+4]})
-			end := mot(math32.Vector2{p[i+5], p[i+6]})
+			cp1 := m.MulVector2AsPoint(math32.Vec2(p[i+1], p[i+2]))
+			cp2 := m.MulVector2AsPoint(math32.Vec2(p[i+3], p[i+4]))
+			end := m.MulVector2AsPoint(math32.Vec2(p[i+5], p[i+6]))
 			p[i+1] = cp1.X
 			p[i+2] = cp1.Y
 			p[i+3] = cp2.X
@@ -1285,11 +1269,7 @@ func (p Path) Transform(m math32.Matrix2) Path {
 			p[i+5] = end.X
 			p[i+6] = end.Y
 		case ArcTo:
-			rx := p[i+1]
-			ry := p[i+2]
-			phi := p[i+3]
-			large, sweep := toArcFlags(p[i+4])
-			end := math32.Vector2{p[i+5], p[i+6]}
+			rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
 
 			// For ellipses written as the conic section equation in matrix form, we have:
 			// [x, y] E [x; y] = 0, with E = [1/rx^2, 0; 0, 1/ry^2]
@@ -1299,28 +1279,28 @@ func (p Path) Transform(m math32.Matrix2) Path {
 			// We define Q = T^(-1,T) E T^(-1) the new ellipse equation which is typically rotated
 			// from the x-axis. That's why we find the eigenvalues and eigenvectors (the new
 			// direction and length of the major and minor axes).
-			T := m.Rotate(phi * 180.0 / math.Pi)
-			invT := T.Inv()
-			Q := Identity.Scale(1.0/rx/rx, 1.0/ry/ry)
-			Q = invT.T().Mul(Q).Mul(invT)
+			T := m.Rotate(phi)
+			invT := T.Inverse()
+			Q := math32.Identity2().Scale(1.0/rx/rx, 1.0/ry/ry)
+			Q = invT.Transpose().Mul(Q).Mul(invT)
 
 			lambda1, lambda2, v1, v2 := Q.Eigen()
-			rx = 1 / math.Sqrt(lambda1)
-			ry = 1 / math.Sqrt(lambda2)
-			phi = v1.Angle()
+			rx = 1 / math32.Sqrt(lambda1)
+			ry = 1 / math32.Sqrt(lambda2)
+			phi = Angle(v1)
 			if rx < ry {
 				rx, ry = ry, rx
-				phi = v2.Angle()
+				phi = Angle(v2)
 			}
 			phi = angleNorm(phi)
-			if math.Pi <= phi { // phi is canonical within 0 <= phi < 180
-				phi -= math.Pi
+			if math32.Pi <= phi { // phi is canonical within 0 <= phi < 180
+				phi -= math32.Pi
 			}
 
 			if xscale*yscale < 0.0 { // flip x or y axis needs flipping of the sweep
 				sweep = !sweep
 			}
-			end = mot(end)
+			end = m.MulVector2AsPoint(end)
 
 			p[i+1] = rx
 			p[i+2] = ry
@@ -1329,82 +1309,100 @@ func (p Path) Transform(m math32.Matrix2) Path {
 			p[i+5] = end.X
 			p[i+6] = end.Y
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 	}
 	return p
 }
 
 // Translate translates the path by (x,y) and returns a new path.
 func (p Path) Translate(x, y float32) Path {
-	return p.Transform(Identity.Translate(x, y))
+	return p.Transform(math32.Identity2().Translate(x, y))
 }
 
 // Scale scales the path by (x,y) and returns a new path.
 func (p Path) Scale(x, y float32) Path {
-	return p.Transform(Identity.Scale(x, y))
+	return p.Transform(math32.Identity2().Scale(x, y))
 }
 
-// Flat returns true if the path consists of solely line segments, that is only MoveTo, LineTo and Close commands.
+// Flat returns true if the path consists of solely line segments,
+// that is only MoveTo, LineTo and Close commands.
 func (p Path) Flat() bool {
 	for i := 0; i < len(p); {
 		cmd := p[i]
 		if cmd != MoveTo && cmd != LineTo && cmd != Close {
 			return false
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 	}
 	return true
 }
 
-// Flatten flattens all Bézier and arc curves into linear segments and returns a new path. It uses tolerance as the maximum deviation.
-func (p *Path) Flatten(tolerance float32) *Path {
-	quad := func(p0, p1, p2 math32.Vector2) *Path {
-		return flattenQuadraticBezier(p0, p1, p2, tolerance)
+// Flatten flattens all Bézier and arc curves into linear segments
+// and returns a new path. It uses tolerance as the maximum deviation.
+func (p Path) Flatten(tolerance float32) Path {
+	quad := func(p0, p1, p2 math32.Vector2) Path {
+		return FlattenQuadraticBezier(p0, p1, p2, tolerance)
 	}
-	cube := func(p0, p1, p2, p3 math32.Vector2) *Path {
-		return flattenCubicBezier(p0, p1, p2, p3, tolerance)
+	cube := func(p0, p1, p2, p3 math32.Vector2) Path {
+		return FlattenCubicBezier(p0, p1, p2, p3, tolerance)
 	}
-	arc := func(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) *Path {
-		return flattenEllipticArc(start, rx, ry, phi, large, sweep, end, tolerance)
+	arc := func(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) Path {
+		return FlattenEllipticArc(start, rx, ry, phi, large, sweep, end, tolerance)
 	}
 	return p.replace(nil, quad, cube, arc)
 }
 
 // ReplaceArcs replaces ArcTo commands by CubeTo commands and returns a new path.
-func (p *Path) ReplaceArcs() *Path {
+func (p *Path) ReplaceArcs() Path {
 	return p.replace(nil, nil, nil, arcToCube)
 }
 
-// XMonotone replaces all Bézier and arc segments to be x-monotone and returns a new path, that is each path segment is either increasing or decreasing with X while moving across the segment. This is always true for line segments.
-func (p *Path) XMonotone() *Path {
-	quad := func(p0, p1, p2 math32.Vector2) *Path {
+// XMonotone replaces all Bézier and arc segments to be x-monotone
+// and returns a new path, that is each path segment is either increasing
+// or decreasing with X while moving across the segment.
+// This is always true for line segments.
+func (p Path) XMonotone() Path {
+	quad := func(p0, p1, p2 math32.Vector2) Path {
 		return xmonotoneQuadraticBezier(p0, p1, p2)
 	}
-	cube := func(p0, p1, p2, p3 math32.Vector2) *Path {
+	cube := func(p0, p1, p2, p3 math32.Vector2) Path {
 		return xmonotoneCubicBezier(p0, p1, p2, p3)
 	}
-	arc := func(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) *Path {
+	arc := func(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) Path {
 		return xmonotoneEllipticArc(start, rx, ry, phi, large, sweep, end)
 	}
 	return p.replace(nil, quad, cube, arc)
 }
 
-// replace replaces path segments by their respective functions, each returning the path that will replace the segment or nil if no replacement is to be performed. The line function will take the start and end points. The bezier function will take the start point, control point 1 and 2, and the end point (i.e. a cubic Bézier, quadratic Béziers will be implicitly converted to cubic ones). The arc function will take a start point, the major and minor radii, the radial rotaton counter clockwise, the large and sweep booleans, and the end point. The replacing path will replace the path segment without any checks, you need to make sure the be moved so that its start point connects with the last end point of the base path before the replacement. If the end point of the replacing path is different that the end point of what is replaced, the path that follows will be displaced.
-func (p *Path) replace(
-	line func(math32.Vector2, math32.Vector2) *Path,
-	quad func(math32.Vector2, math32.Vector2, math32.Vector2) *Path,
-	cube func(math32.Vector2, math32.Vector2, math32.Vector2, math32.Vector2) *Path,
-	arc func(math32.Vector2, float32, float32, float32, bool, bool, math32.Vector2) *Path,
-) *Path {
+// replace replaces path segments by their respective functions,
+// each returning the path that will replace the segment or nil
+// if no replacement is to be performed. The line function will
+// take the start and end points. The bezier function will take
+// the start point, control point 1 and 2, and the end point
+// (i.e. a cubic Bézier, quadratic Béziers will be implicitly
+// converted to cubic ones). The arc function will take a start point,
+// the major and minor radii, the radial rotaton counter clockwise,
+// the large and sweep booleans, and the end point.
+// The replacing path will replace the path segment without any checks,
+// you need to make sure the be moved so that its start point connects
+// with the last end point of the base path before the replacement.
+// If the end point of the replacing path is different that the end point
+// of what is replaced, the path that follows will be displaced.
+func (p Path) replace(
+	line func(math32.Vector2, math32.Vector2) Path,
+	quad func(math32.Vector2, math32.Vector2, math32.Vector2) Path,
+	cube func(math32.Vector2, math32.Vector2, math32.Vector2, math32.Vector2) Path,
+	arc func(math32.Vector2, float32, float32, float32, bool, bool, math32.Vector2) Path,
+) Path {
 	copied := false
-	var start, end math32.Vector2
+	var start, end, cp1, cp2 math32.Vector2
 	for i := 0; i < len(p); {
-		var q *Path
+		var q Path
 		cmd := p[i]
 		switch cmd {
 		case LineTo, Close:
 			if line != nil {
-				end = math32.Vector2{p[i+1], p[i+2]}
+				end = p.EndPoint(i)
 				q = line(start, end)
 				if cmd == Close {
 					q.Close()
@@ -1412,35 +1410,30 @@ func (p *Path) replace(
 			}
 		case QuadTo:
 			if quad != nil {
-				cp := math32.Vector2{p[i+1], p[i+2]}
-				end = math32.Vector2{p[i+3], p[i+4]}
-				q = quad(start, cp, end)
+				cp1, end = p.QuadToPoints(i)
+				q = quad(start, cp1, end)
 			}
 		case CubeTo:
 			if cube != nil {
-				cp1 := math32.Vector2{p[i+1], p[i+2]}
-				cp2 := math32.Vector2{p[i+3], p[i+4]}
-				end = math32.Vector2{p[i+5], p[i+6]}
+				cp1, cp2, end = p.CubeToPoints(i)
 				q = cube(start, cp1, cp2, end)
 			}
 		case ArcTo:
 			if arc != nil {
-				rx, ry, phi := p[i+1], p[i+2], p[i+3]
-				large, sweep := toArcFlags(p[i+4])
-				end = math32.Vector2{p[i+5], p[i+6]}
+				rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
 				q = arc(start, rx, ry, phi, large, sweep, end)
 			}
 		}
 
 		if q != nil {
 			if !copied {
-				p = p.Copy()
+				p = p.Clone()
 				copied = true
 			}
 
-			r := &Path{append([]float32{MoveTo, end.X, end.Y, MoveTo}, p[i+cmdLen(cmd):]...)}
+			r := append(Path{MoveTo, end.X, end.Y, MoveTo}, p[i+CmdLen(cmd):]...)
 
-			p = p[: i : i+cmdLen(cmd)] // make sure not to overwrite the rest of the path
+			p = p[: i : i+CmdLen(cmd)] // make sure not to overwrite the rest of the path
 			p = p.Join(q)
 			if cmd != Close {
 				p.LineTo(end.X, end.Y)
@@ -1449,16 +1442,19 @@ func (p *Path) replace(
 			i = len(p)
 			p = p.Join(r) // join the rest of the base path
 		} else {
-			i += cmdLen(cmd)
+			i += CmdLen(cmd)
 		}
-		start = math32.Vector2{p[i-3], p[i-2]}
+		start = math32.Vec2(p[i-3], p[i-2])
 	}
 	return p
 }
 
-// Markers returns an array of start, mid and end marker paths along the path at the coordinates between commands. Align will align the markers with the path direction so that the markers orient towards the path's left.
-func (p *Path) Markers(first, mid, last *Path, align bool) []*Path {
-	markers := []*Path{}
+// Markers returns an array of start, mid and end marker paths along
+// the path at the coordinates between commands.
+// Align will align the markers with the path direction so that
+// the markers orient towards the path's left.
+func (p Path) Markers(first, mid, last *Path, align bool) []Path {
+	markers := []Path{}
 	coordPos := p.Coords()
 	coordDir := p.CoordDirections()
 	for i := range coordPos {
@@ -1471,17 +1467,18 @@ func (p *Path) Markers(first, mid, last *Path, align bool) []*Path {
 
 		if q != nil {
 			pos, dir := coordPos[i], coordDir[i]
-			m := Identity.Translate(pos.X, pos.Y)
+			m := math32.Identity2().Translate(pos.X, pos.Y)
 			if align {
-				m = m.Rotate(dir.Angle() * 180.0 / math.Pi)
+				m = m.Rotate(math32.RadToDeg(Angle(dir)))
 			}
-			markers = append(markers, q.Copy().Transform(m))
+			markers = append(markers, q.Clone().Transform(m))
 		}
 	}
 	return markers
 }
 
-// Split splits the path into its independent subpaths. The path is split before each MoveTo command.
+// Split splits the path into its independent subpaths.
+// The path is split before each MoveTo command.
 func (p Path) Split() []Path {
 	if p == nil {
 		return nil
@@ -1491,13 +1488,13 @@ func (p Path) Split() []Path {
 	for j < len(p) {
 		cmd := p[j]
 		if i < j && cmd == MoveTo {
-			ps = append(ps, &Path{p[i:j:j]})
+			ps = append(ps, p[i:j:j])
 			i = j
 		}
-		j += cmdLen(cmd)
+		j += CmdLen(cmd)
 	}
-	if i+cmdLen(MoveTo) < j {
-		ps = append(ps, &Path{p[i:j:j]})
+	if i+CmdLen(MoveTo) < j {
+		ps = append(ps, p[i:j:j])
 	}
 	return ps
 }
@@ -1508,19 +1505,19 @@ func (p Path) SplitAt(ts ...float32) []Path {
 		return []Path{p}
 	}
 
-	sort.Float32s(ts)
+	slices.Sort(ts)
 	if ts[0] == 0.0 {
 		ts = ts[1:]
 	}
 
-	j := 0   // index into ts
-	T := 0.0 // current position along curve
+	j := 0            // index into ts
+	T := float32(0.0) // current position along curve
 
 	qs := []Path{}
-	q := &Path{}
+	q := Path{}
 	push := func() {
 		qs = append(qs, q)
-		q = &Path{}
+		q = Path{}
 	}
 
 	if 0 < len(p) && p[0] == MoveTo {
@@ -1532,9 +1529,9 @@ func (p Path) SplitAt(ts ...float32) []Path {
 			cmd := ps[i]
 			switch cmd {
 			case MoveTo:
-				end = math32.Vector2{p[i+1], p[i+2]}
+				end = math32.Vec2(p[i+1], p[i+2])
 			case LineTo, Close:
-				end = math32.Vector2{p[i+1], p[i+2]}
+				end = math32.Vec2(p[i+1], p[i+2])
 
 				if j == len(ts) {
 					q.LineTo(end.X, end.Y)
@@ -1543,7 +1540,7 @@ func (p Path) SplitAt(ts ...float32) []Path {
 					Tcurve := T
 					for j < len(ts) && T < ts[j] && ts[j] <= T+dT {
 						tpos := (ts[j] - T) / dT
-						pos := start.Interpolate(end, tpos)
+						pos := start.Lerp(end, tpos)
 						Tcurve = ts[j]
 
 						q.LineTo(pos.X, pos.Y)
@@ -1557,8 +1554,8 @@ func (p Path) SplitAt(ts ...float32) []Path {
 					T += dT
 				}
 			case QuadTo:
-				cp := math32.Vector2{p[i+1], p[i+2]}
-				end = math32.Vector2{p[i+3], p[i+4]}
+				cp := math32.Vec2(p[i+1], p[i+2])
+				end = math32.Vec2(p[i+3], p[i+4])
 
 				if j == len(ts) {
 					q.QuadTo(cp.X, cp.Y, end.X, end.Y)
@@ -1568,7 +1565,7 @@ func (p Path) SplitAt(ts ...float32) []Path {
 					}
 					invL, dT := invSpeedPolynomialChebyshevApprox(20, gaussLegendre7, speed, 0.0, 1.0)
 
-					t0 := 0.0
+					t0 := float32(0.0)
 					r0, r1, r2 := start, cp, end
 					for j < len(ts) && T < ts[j] && ts[j] <= T+dT {
 						t := invL(ts[j] - T)
@@ -1589,9 +1586,9 @@ func (p Path) SplitAt(ts ...float32) []Path {
 					T += dT
 				}
 			case CubeTo:
-				cp1 := math32.Vector2{p[i+1], p[i+2]}
-				cp2 := math32.Vector2{p[i+3], p[i+4]}
-				end = math32.Vector2{p[i+5], p[i+6]}
+				cp1 := math32.Vec2(p[i+1], p[i+2])
+				cp2 := math32.Vec2(p[i+3], p[i+4])
+				end = math32.Vec2(p[i+5], p[i+6])
 
 				if j == len(ts) {
 					q.CubeTo(cp1.X, cp1.Y, cp2.X, cp2.Y, end.X, end.Y)
@@ -1603,7 +1600,7 @@ func (p Path) SplitAt(ts ...float32) []Path {
 					N := 20 + 20*cubicBezierNumInflections(start, cp1, cp2, end) // TODO: needs better N
 					invL, dT := invSpeedPolynomialChebyshevApprox(N, gaussLegendre7, speed, 0.0, 1.0)
 
-					t0 := 0.0
+					t0 := float32(0.0)
 					r0, r1, r2, r3 := start, cp1, cp2, end
 					for j < len(ts) && T < ts[j] && ts[j] <= T+dT {
 						t := invL(ts[j] - T)
@@ -1624,13 +1621,11 @@ func (p Path) SplitAt(ts ...float32) []Path {
 					T += dT
 				}
 			case ArcTo:
-				rx, ry, phi := p[i+1], p[i+2], p[i+3]
-				large, sweep := toArcFlags(p[i+4])
-				end = math32.Vector2{p[i+5], p[i+6]}
+				rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
 				cx, cy, theta1, theta2 := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 
 				if j == len(ts) {
-					q.ArcTo(rx, ry, phi*180.0/math.Pi, large, sweep, end.X, end.Y)
+					q.ArcTo(rx, ry, phi*180.0/math32.Pi, large, sweep, end.X, end.Y)
 				} else {
 					speed := func(theta float32) float32 {
 						return ellipseDeriv(rx, ry, 0.0, true, theta).Length()
@@ -1646,7 +1641,7 @@ func (p Path) SplitAt(ts ...float32) []Path {
 							panic("theta not in elliptic arc range for splitting")
 						}
 
-						q.ArcTo(rx, ry, phi*180.0/math.Pi, large1, sweep, mid.X, mid.Y)
+						q.ArcTo(rx, ry, phi*180.0/math32.Pi, large1, sweep, mid.X, mid.Y)
 						push()
 						q.MoveTo(mid.X, mid.Y)
 						startTheta = theta
@@ -1654,16 +1649,16 @@ func (p Path) SplitAt(ts ...float32) []Path {
 						j++
 					}
 					if !Equal(startTheta, theta2) {
-						q.ArcTo(rx, ry, phi*180.0/math.Pi, nextLarge, sweep, end.X, end.Y)
+						q.ArcTo(rx, ry, phi*180.0/math32.Pi, nextLarge, sweep, end.X, end.Y)
 					}
 					T += dT
 				}
 			}
-			i += cmdLen(cmd)
+			i += CmdLen(cmd)
 			start = end
 		}
 	}
-	if cmdLen(MoveTo) < len(q) {
+	if CmdLen(MoveTo) < len(q) {
 		push()
 	}
 	return qs
@@ -1680,7 +1675,7 @@ func dashStart(offset float32, d []float32) (int, float32) {
 	}
 	pos0 := -offset // negative if offset is halfway into dash
 	if offset < 0.0 {
-		dTotal := 0.0
+		dTotal := float32(0.0)
 		for _, dd := range d {
 			dTotal += dd
 		}
@@ -1770,7 +1765,7 @@ func (p Path) Dash(offset float32, d ...float32) Path {
 	if len(d) == 0 {
 		return p
 	} else if len(d) == 1 && d[0] == 0.0 {
-		return &Path{}
+		return Path{}
 	}
 
 	if len(d)%2 == 1 {
@@ -1780,7 +1775,7 @@ func (p Path) Dash(offset float32, d ...float32) Path {
 
 	i0, pos0 := dashStart(offset, d)
 
-	q := &Path{}
+	q := Path{}
 	for _, ps := range p.Split() {
 		i := i0
 		pos := pos0
@@ -1804,7 +1799,7 @@ func (p Path) Dash(offset float32, d ...float32) Path {
 			j0 = 1
 		}
 
-		qd := &Path{}
+		qd := Path{}
 		pd := ps.SplitAt(t...)
 		for j := j0; j < len(pd)-1; j += 2 {
 			qd = qd.Append(pd[j])
@@ -1828,14 +1823,14 @@ func (p Path) Reverse() Path {
 	}
 
 	end := math32.Vector2{p[len(p)-3], p[len(p)-2]}
-	q := &Path{d: make([]float32, 0, len(p))}
+	q := make(Path, 0, len(p))
 	q = append(q, MoveTo, end.X, end.Y, MoveTo)
 
 	closed := false
 	first, start := end, end
 	for i := len(p); 0 < i; {
 		cmd := p[i-1]
-		i -= cmdLen(cmd)
+		i -= CmdLen(cmd)
 
 		end = math32.Vector2{}
 		if 0 < i {
@@ -1853,7 +1848,7 @@ func (p Path) Reverse() Path {
 				first = end
 			}
 		case Close:
-			if !start.Equals(end) {
+			if !EqualPoint(start, end) {
 				q = append(q, LineTo, end.X, end.Y, LineTo)
 			}
 			closed = true
@@ -1872,8 +1867,7 @@ func (p Path) Reverse() Path {
 			cx2, cy2 := p[i+3], p[i+4]
 			q = append(q, CubeTo, cx2, cy2, cx1, cy1, end.X, end.Y, CubeTo)
 		case ArcTo:
-			rx, ry, phi := p[i+1], p[i+2], p[i+3]
-			large, sweep := toArcFlags(p[i+4])
+			rx, ry, phi, large, sweep, _ := p.ArcToPoints(i)
 			q = append(q, ArcTo, rx, ry, phi, fromArcFlags(large, !sweep), end.X, end.Y, ArcTo)
 		}
 		start = end
@@ -1906,7 +1900,7 @@ func MustParseSVGPath(s string) Path {
 // ParseSVGPath parses an SVG path data string.
 func ParseSVGPath(s string) (Path, error) {
 	if len(s) == 0 {
-		return &Path{}, nil
+		return Path{}, nil
 	}
 
 	i := 0
@@ -1930,7 +1924,7 @@ func ParseSVGPath(s string) (Path, error) {
 	}
 	f := [7]float32{}
 
-	p := &Path{}
+	p := Path{}
 	var q, c math32.Vector2
 	var p0, p1 math32.Vector2
 	prevCmd := byte('z')
@@ -1975,7 +1969,7 @@ func ParseSVGPath(s string) (Path, error) {
 						return nil, fmt.Errorf("bad path: number should follow command '%c' at position %d", cmd, i+1)
 					}
 				}
-				f[j] = num
+				f[j] = float32(num)
 				i += n
 			}
 			i += skipCommaWhitespace(path[i:])
@@ -2032,7 +2026,7 @@ func ParseSVGPath(s string) (Path, error) {
 				p1 = p1.Add(p0)
 			}
 			if prevCmd == 'C' || prevCmd == 'c' || prevCmd == 'S' || prevCmd == 's' {
-				cp1 = p0.Mul(2.0).Sub(c)
+				cp1 = p0.MulScalar(2.0).Sub(c)
 			}
 			p.CubeTo(cp1.X, cp1.Y, cp2.X, cp2.Y, p1.X, p1.Y)
 			c = cp2
@@ -2052,7 +2046,7 @@ func ParseSVGPath(s string) (Path, error) {
 				p1 = p1.Add(p0)
 			}
 			if prevCmd == 'Q' || prevCmd == 'q' || prevCmd == 'T' || prevCmd == 't' {
-				cp = p0.Mul(2.0).Sub(q)
+				cp = p0.MulScalar(2.0).Sub(q)
 			}
 			p.QuadTo(cp.X, cp.Y, p1.X, p1.Y)
 			q = cp
@@ -2091,7 +2085,7 @@ func (p Path) String() string {
 		case CubeTo:
 			fmt.Fprintf(&sb, "C%g %g %g %g %g %g", p[i+1], p[i+2], p[i+3], p[i+4], p[i+5], p[i+6])
 		case ArcTo:
-			rot := p[i+3] * 180.0 / math.Pi
+			rot := p[i+3] * 180.0 / math32.Pi
 			large, sweep := toArcFlags(p[i+4])
 			sLarge := "0"
 			if large {
@@ -2105,7 +2099,7 @@ func (p Path) String() string {
 		case Close:
 			fmt.Fprintf(&sb, "z")
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 	}
 	return sb.String()
 }
@@ -2144,7 +2138,7 @@ func (p Path) ToSVG() string {
 			fmt.Fprintf(&sb, "C%v %v %v %v %v %v", num(p[i+1]), num(p[i+2]), num(p[i+3]), num(p[i+4]), num(x), num(y))
 		case ArcTo:
 			rx, ry := p[i+1], p[i+2]
-			rot := p[i+3] * 180.0 / math.Pi
+			rot := p[i+3] * 180.0 / math32.Pi
 			large, sweep := toArcFlags(p[i+4])
 			x, y = p[i+5], p[i+6]
 			sLarge := "0"
@@ -2164,7 +2158,7 @@ func (p Path) ToSVG() string {
 			x, y = p[i+1], p[i+2]
 			fmt.Fprintf(&sb, "z")
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 	}
 	return sb.String()
 }
@@ -2191,10 +2185,10 @@ func (p Path) ToPS() string {
 			start = math32.Vector2{x, y}
 			if cmd == QuadTo {
 				x, y = p[i+3], p[i+4]
-				cp1, cp2 = quadraticToCubicBezier(start, math32.Vector2{p[i+1], p[i+2]}, math32.Vector2{x, y})
+				cp1, cp2 = quadraticToCubicBezier(start, math32.Vec2(p[i+1], p[i+2]), math32.Vector2{x, y})
 			} else {
-				cp1 = math32.Vector2{p[i+1], p[i+2]}
-				cp2 = math32.Vector2{p[i+3], p[i+4]}
+				cp1 = math32.Vec2(p[i+1], p[i+2])
+				cp2 = math32.Vec2(p[i+3], p[i+4])
 				x, y = p[i+5], p[i+6]
 			}
 			fmt.Fprintf(&sb, " %v %v %v %v %v %v curveto", dec(cp1.X), dec(cp1.Y), dec(cp2.X), dec(cp2.Y), dec(x), dec(y))
@@ -2205,9 +2199,9 @@ func (p Path) ToPS() string {
 			x, y = p[i+5], p[i+6]
 
 			cx, cy, theta0, theta1 := ellipseToCenter(x0, y0, rx, ry, phi, large, sweep, x, y)
-			theta0 = theta0 * 180.0 / math.Pi
-			theta1 = theta1 * 180.0 / math.Pi
-			rot := phi * 180.0 / math.Pi
+			theta0 = theta0 * 180.0 / math32.Pi
+			theta1 = theta1 * 180.0 / math32.Pi
+			rot := phi * 180.0 / math32.Pi
 
 			fmt.Fprintf(&sb, " %v %v %v %v %v %v %v ellipse", dec(cx), dec(cy), dec(rx), dec(ry), dec(theta0), dec(theta1), dec(rot))
 			if !sweep {
@@ -2217,7 +2211,7 @@ func (p Path) ToPS() string {
 			x, y = p[i+1], p[i+2]
 			fmt.Fprintf(&sb, " closepath")
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 	}
 	return sb.String()[1:] // remove the first space
 }
@@ -2245,10 +2239,10 @@ func (p Path) ToPDF() string {
 			start = math32.Vector2{x, y}
 			if cmd == QuadTo {
 				x, y = p[i+3], p[i+4]
-				cp1, cp2 = quadraticToCubicBezier(start, math32.Vector2{p[i+1], p[i+2]}, math32.Vector2{x, y})
+				cp1, cp2 = quadraticToCubicBezier(start, math32.Vec2(p[i+1], p[i+2]), math32.Vector2{x, y})
 			} else {
-				cp1 = math32.Vector2{p[i+1], p[i+2]}
-				cp2 = math32.Vector2{p[i+3], p[i+4]}
+				cp1 = math32.Vec2(p[i+1], p[i+2])
+				cp2 = math32.Vec2(p[i+3], p[i+4])
 				x, y = p[i+5], p[i+6]
 			}
 			fmt.Fprintf(&sb, " %v %v %v %v %v %v c", dec(cp1.X), dec(cp1.Y), dec(cp2.X), dec(cp2.Y), dec(x), dec(y))
@@ -2258,59 +2252,7 @@ func (p Path) ToPDF() string {
 			x, y = p[i+1], p[i+2]
 			fmt.Fprintf(&sb, " h")
 		}
-		i += cmdLen(cmd)
+		i += CmdLen(cmd)
 	}
 	return sb.String()[1:] // remove the first space
-}
-
-// ToRasterizer rasterizes the path using the given rasterizer and resolution.
-func (p Path) ToRasterizer(ras *vector.Rasterizer, resolution Resolution) {
-	// TODO: smoothen path using Ramer-...
-
-	dpmm := resolutionPMM()
-	tolerance := PixelTolerance / dpmm // tolerance of 1/10 of a pixel
-	dy := float32(ras.Bounds().Size().Y)
-	for i := 0; i < len(p); {
-		cmd := p[i]
-		switch cmd {
-		case MoveTo:
-			ras.MoveTo(float32(p[i+1]*dpmm), float32(dy-p[i+2]*dpmm))
-		case LineTo:
-			ras.LineTo(float32(p[i+1]*dpmm), float32(dy-p[i+2]*dpmm))
-		case QuadTo, CubeTo, ArcTo:
-			// flatten
-			var q Path
-			var start math32.Vector2
-			if 0 < i {
-				start = math32.Vector2{p[i-3], p[i-2]}
-			}
-			if cmd == QuadTo {
-				cp := math32.Vector2{p[i+1], p[i+2]}
-				end := math32.Vector2{p[i+3], p[i+4]}
-				q = flattenQuadraticBezier(start, cp, end, tolerance)
-			} else if cmd == CubeTo {
-				cp1 := math32.Vector2{p[i+1], p[i+2]}
-				cp2 := math32.Vector2{p[i+3], p[i+4]}
-				end := math32.Vector2{p[i+5], p[i+6]}
-				q = flattenCubicBezier(start, cp1, cp2, end, tolerance)
-			} else {
-				rx, ry, phi := p[i+1], p[i+2], p[i+3]
-				large, sweep := toArcFlags(p[i+4])
-				end := math32.Vector2{p[i+5], p[i+6]}
-				q = flattenEllipticArc(start, rx, ry, phi, large, sweep, end, tolerance)
-			}
-			for j := 4; j < len(q); j += 4 {
-				ras.LineTo(float32(q[j+1]*dpmm), float32(dy-q[j+2]*dpmm))
-			}
-		case Close:
-			ras.ClosePath()
-		default:
-			panic("quadratic and cubic Béziers and arcs should have been replaced")
-		}
-		i += cmdLen(cmd)
-	}
-	if !p.Closed() {
-		// implicitly close path
-		ras.ClosePath()
-	}
 }

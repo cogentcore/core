@@ -21,7 +21,7 @@ import (
 // BentleyOttmannEpsilon is the snap rounding grid used by the Bentley-Ottmann algorithm.
 // This prevents numerical issues. It must be larger than Epsilon since we use that to calculate
 // intersections between segments. It is the number of binary digits to keep.
-var BentleyOttmannEpsilon = 1e-8
+var BentleyOttmannEpsilon = float32(1e-8)
 
 // RayIntersections returns the intersections of a path with a ray starting at (x,y) to (∞,y).
 // An intersection is tangent only when it is at (x,y), i.e. the start of the ray. Intersections
@@ -39,7 +39,7 @@ func (p Path) RayIntersections(x, y float32) []Intersection {
 			ymin := math32.Min(start.Y, end.Y)
 			ymax := math32.Max(start.Y, end.Y)
 			xmax := math32.Max(start.X, end.X)
-			if Interval(y, ymin, ymax) && x <= xmax+Epsilon {
+			if InInterval(y, ymin, ymax) && x <= xmax+Epsilon {
 				zs = intersectionLineLine(zs, math32.Vector2{x, y}, math32.Vector2{xmax + 1.0, y}, start, end)
 			}
 		case QuadTo:
@@ -47,7 +47,7 @@ func (p Path) RayIntersections(x, y float32) []Intersection {
 			ymin := math32.Min(math32.Min(start.Y, end.Y), cp1.Y)
 			ymax := math32.Max(math32.Max(start.Y, end.Y), cp1.Y)
 			xmax := math32.Max(math32.Max(start.X, end.X), cp1.X)
-			if Interval(y, ymin, ymax) && x <= xmax+Epsilon {
+			if InInterval(y, ymin, ymax) && x <= xmax+Epsilon {
 				zs = intersectionLineQuad(zs, math32.Vector2{x, y}, math32.Vector2{xmax + 1.0, y}, start, cp1, end)
 			}
 		case CubeTo:
@@ -55,17 +55,17 @@ func (p Path) RayIntersections(x, y float32) []Intersection {
 			ymin := math32.Min(math32.Min(start.Y, end.Y), math32.Min(cp1.Y, cp2.Y))
 			ymax := math32.Max(math32.Max(start.Y, end.Y), math32.Max(cp1.Y, cp2.Y))
 			xmax := math32.Max(math32.Max(start.X, end.X), math32.Max(cp1.X, cp2.X))
-			if Interval(y, ymin, ymax) && x <= xmax+Epsilon {
+			if InInterval(y, ymin, ymax) && x <= xmax+Epsilon {
 				zs = intersectionLineCube(zs, math32.Vector2{x, y}, math32.Vector2{xmax + 1.0, y}, start, cp1, cp2, end)
 			}
 		case ArcTo:
 			rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
 			cx, cy, theta0, theta1 := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
-			if Interval(y, cy-math32.Max(rx, ry), cy+math32.Max(rx, ry)) && x <= cx+math32.Max(rx, ry)+Epsilon {
+			if InInterval(y, cy-math32.Max(rx, ry), cy+math32.Max(rx, ry)) && x <= cx+math32.Max(rx, ry)+Epsilon {
 				zs = intersectionLineEllipse(zs, math32.Vector2{x, y}, math32.Vector2{cx + rx + 1.0, y}, math32.Vector2{cx, cy}, math32.Vector2{rx, ry}, phi, theta0, theta1)
 			}
 		}
-		i += cmd.cmdLen()
+		i += CmdLen(cmd)
 		start = end
 	}
 	for i := range zs {
@@ -235,7 +235,7 @@ type SweepPoint struct {
 
 func (s *SweepPoint) InterpolateY(x float32) float32 {
 	t := (x - s.X) / (s.other.X - s.X)
-	return s.Interpolate(s.other, t).Y
+	return s.Lerp(s.other.Vector2, t).Y
 }
 
 // ToleranceEdgeY returns the y-value of the SweepPoint at the tolerance edges given by xLeft and
@@ -313,7 +313,7 @@ func (q *SweepEvents) AddPathEndpoints(p Path, seg int, clipping bool) int {
 	}
 
 	open := !p.Closed()
-	start := math32.Vector2{float32(p[1]), float32(p[2])}
+	start := math32.Vector2{p[1], p[2]}
 	if math32.IsNaN(start.X) || math32.IsInf(start.X, 0.0) || math32.IsNaN(start.Y) || math32.IsInf(start.Y, 0.0) {
 		panic("path has NaN or Inf")
 	}
@@ -322,8 +322,8 @@ func (q *SweepEvents) AddPathEndpoints(p Path, seg int, clipping bool) int {
 			panic("non-flat paths not supported")
 		}
 
-		n := p[i].cmdLen()
-		end := math32.Vector2{float32(p[i+n-3]), float32(p[i+n-2])}
+		n := CmdLen(p[i])
+		end := math32.Vector2{p[i+n-3], p[i+n-2]}
 		if math32.IsNaN(end.X) || math32.IsInf(end.X, 0.0) || math32.IsNaN(end.Y) || math32.IsInf(end.Y, 0.0) {
 			panic("path has NaN or Inf")
 		}
@@ -372,7 +372,7 @@ func (q *SweepEvents) AddPathEndpoints(p Path, seg int, clipping bool) int {
 func (q SweepEvents) Init() {
 	n := len(q)
 	for i := n/2 - 1; 0 <= i; i-- {
-		qown(i, n)
+		q.down(i, n)
 	}
 }
 
@@ -388,7 +388,7 @@ func (q *SweepEvents) Top() *SweepPoint {
 func (q *SweepEvents) Pop() *SweepPoint {
 	n := len(*q) - 1
 	q.Swap(0, n)
-	qown(0, n)
+	q.down(0, n)
 
 	items := (*q)[n]
 	*q = (*q)[:n]
@@ -396,7 +396,7 @@ func (q *SweepEvents) Pop() *SweepPoint {
 }
 
 func (q *SweepEvents) Fix(i int) {
-	if !qown(i, len(*q)) {
+	if !q.down(i, len(*q)) {
 		q.up(i)
 	}
 }
@@ -441,7 +441,7 @@ func (q SweepEvents) Print(w io.Writer) {
 	n := len(q) - 1
 	for 0 < n {
 		q.Swap(0, n)
-		qown(0, n)
+		q.down(0, n)
 		n--
 	}
 	width := int(math32.Max(0.0, math32.Log10(float32(len(q)-1)))) + 1
@@ -1091,7 +1091,7 @@ func addIntersections(zs []math32.Vector2, queue *SweepEvents, event *SweepPoint
 	// find all intersections between segment pair
 	// this returns either no intersections, or one or more secant/tangent intersections,
 	// or exactly two "same" intersections which occurs when the segments overlap.
-	zs = intersectionLineLineBentleyOttmann(zs[:0], a.math32.Vector2, a.other.math32.Vector2, b.math32.Vector2, b.other.math32.Vector2)
+	zs = intersectionLineLineBentleyOttmann(zs[:0], a.Vector2, a.other.Vector2, b.Vector2, b.other.Vector2)
 
 	// no (valid) intersections
 	if len(zs) == 0 {
@@ -1182,7 +1182,7 @@ func splitAtIntersections(zs []math32.Vector2, queue *SweepEvents, s *SweepPoint
 	changed := false
 	for i := len(zs) - 1; 0 <= i; i-- {
 		z := zs[i]
-		if z == s.math32.Vector2 || z == s.other.math32.Vector2 {
+		if z == s.Vector2 || z == s.other.Vector2 {
 			// ignore tangent intersections at the endpoints
 			continue
 		}
@@ -1672,7 +1672,7 @@ func (s *SweepPoint) mergeOverlapping(op pathOp, fillRule FillRule) {
 	}
 	prev := s.prev
 	for ; prev != nil; prev = prev.prev {
-		if prev.overlapped || s.math32.Vector2 != prev.math32.Vector2 || s.other.math32.Vector2 != prev.other.math32.Vector2 {
+		if prev.overlapped || s.Vector2 != prev.Vector2 || s.other.Vector2 != prev.other.Vector2 {
 			break
 		}
 
@@ -1828,7 +1828,7 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRule) Path {
 		qs = nil
 	} else if qs.Empty() {
 		if op == opAND {
-			return &Path{}
+			return Path{}
 		}
 		return ps.Settle(fillRule)
 	}
@@ -1836,7 +1836,7 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRule) Path {
 		if qs != nil && (op == opOR || op == opXOR) {
 			return qs.Settle(fillRule)
 		}
-		return &Path{}
+		return Path{}
 	}
 
 	// ensure that X-monotone property holds for Béziers and arcs by breaking them up at their
@@ -1870,11 +1870,11 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRule) Path {
 	// check for path bounding boxes to overlap
 	// TODO: cluster paths that overlap and treat non-overlapping clusters separately, this
 	// makes the algorithm "more linear"
-	R := &Path{}
+	R := Path{}
 	var pOverlaps, qOverlaps []bool
 	if qs != nil {
-		pBounds := make([]Rect, len(ps))
-		qBounds := make([]Rect, len(qs))
+		pBounds := make([]math32.Box2, len(ps))
+		qBounds := make([]math32.Box2, len(qs))
 		for i := range ps {
 			pBounds[i] = ps[i].FastBounds()
 		}
@@ -1885,7 +1885,7 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRule) Path {
 		qOverlaps = make([]bool, len(qs))
 		for i := range ps {
 			for j := range qs {
-				if pBounds[i].Touches(qBounds[j]) {
+				if Touches(pBounds[i], qBounds[j]) {
 					pOverlaps[i] = true
 					qOverlaps[j] = true
 				}
@@ -2030,8 +2030,8 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRule) Path {
 				event.index = j
 				event.X, event.Y = x, square.Y
 
-				other := event.other.math32.Vector2.Gridsnap(BentleyOttmannEpsilon)
-				if event.math32.Vector2 == other {
+				other := Gridsnap(event.other.Vector2, BentleyOttmannEpsilon)
+				if event.Vector2 == other {
 					// remove collapsed segments, we aggregate them with `del` to improve performance when we have many
 					// TODO: prevent creating these segments in the first place
 					del++
@@ -2086,11 +2086,11 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRule) Path {
 					next := n.Next()
 					if 0 < n.CompareV(next.SweepPoint) {
 						if next.other.X < n.other.X {
-							r, l := n.SplitAt(next.other.math32.Vector2)
+							r, l := n.SplitAt(next.other.Vector2)
 							queue.Push(r)
 							queue.Push(l)
 						} else if n.other.X < next.other.X {
-							r, l := next.SplitAt(n.other.math32.Vector2)
+							r, l := next.SplitAt(n.other.Vector2)
 							queue.Push(r)
 							queue.Push(l)
 						}
@@ -2109,7 +2109,7 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRule) Path {
 				// find intersections between neighbouring segments due to snapping
 				// TODO: ugly!
 				has := false
-				centre.math32.Vector2 = math32.Vector2{square.X, square.Y}
+				centre.Vector2 = math32.Vector2{square.X, square.Y}
 				if prev := square.Lower.Prev(); prev != nil {
 					has = addIntersections(zs, queue, centre, prev, square.Lower)
 				}
@@ -2263,7 +2263,7 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRule) Path {
 
 			if first.open {
 				if Ropen != nil {
-					start := (&Path{R[indexR:]}).Reverse()
+					start := (R[indexR:]).Reverse()
 					R = append(R[:indexR], start...)
 					R = append(R, Ropen...)
 					Ropen = nil
@@ -2271,7 +2271,7 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRule) Path {
 					for _, cur2 := range square.Events {
 						if 0 < cur2.inResult && cur2.open {
 							cur = cur2
-							Ropen = &Path{d: make([]float32, len(R)-indexR-4)}
+							Ropen = make(Path, len(R)-indexR-4)
 							copy(Ropen, R[indexR+4:])
 							R = R[:indexR]
 							goto BuildPath
@@ -2282,7 +2282,7 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRule) Path {
 				R.Close()
 				if windings%2 != 0 {
 					// orient holes clockwise
-					hole := (&Path{R[indexR:]}).Reverse()
+					hole := R[indexR:].Reverse()
 					R = append(R[:indexR], hole...)
 				}
 			}

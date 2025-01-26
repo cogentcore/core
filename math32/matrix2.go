@@ -40,6 +40,9 @@ SOFTWARE.
 */
 
 // Matrix2 is a 3x2 matrix.
+// [XX YX]
+// [XY YY]
+// [X0 Y0]
 type Matrix2 struct {
 	XX, YX, XY, YY, X0, Y0 float32
 }
@@ -203,6 +206,12 @@ func (a Matrix2) ExtractScale() (scx, scy float32) {
 	return scxv.X, scyv.Y
 }
 
+// Transpose returns the transpose of the matrix
+func (a Matrix2) Transpose() Matrix2 {
+	a.XY, a.YX = a.YX, a.XY
+	return a
+}
+
 // Inverse returns inverse of matrix, for inverting transforms
 func (a Matrix2) Inverse() Matrix2 {
 	// homogenous rep, rc indexes, mapping into Matrix3 code
@@ -224,6 +233,36 @@ func (a Matrix2) Inverse() Matrix2 {
 	b.X0 = (a.Y0*a.XY - a.YY*a.X0) * detInv
 	b.Y0 = (a.X0*a.YX - a.XX*a.Y0) * detInv
 	return b
+}
+
+// Eigen returns the matrix eigenvalues and eigenvectors.
+// The first eigenvalue is related to the first eigenvector,
+// and so for the second pair. Eigenvectors are normalized.
+func (m Matrix2) Eigen() (float32, float32, Vector2, Vector2) {
+	return 0, 0, Vector2{}, Vector2{}
+	// todo:
+	// if m[1][0], 0.0) && Equal(m[0][1], 0.0) {
+	// 	return m[0][0], m[1][1], Point{1.0, 0.0}, Point{0.0, 1.0}
+	// }
+	//
+	// lambda1, lambda2 := solveQuadraticFormula(1.0, -m[0][0]-m[1][1], m.Det())
+	// if math.IsNaN(lambda1) && math.IsNaN(lambda2) {
+	// 	// either m[0][0] or m[1][1] is NaN or the the affine matrix has no real eigenvalues
+	// 	return lambda1, lambda2, Point{}, Point{}
+	// } else if math.IsNaN(lambda2) {
+	// 	lambda2 = lambda1
+	// }
+	//
+	// // see http://www.math.harvard.edu/archive/21b_fall_04/exhibits/2dmatrices/index.html
+	// var v1, v2 Point
+	// if !Equal(m[1][0], 0.0) {
+	// 	v1 = Point{lambda1 - m.YY, m[1][0]}.Norm(1.0)
+	// 	v2 = Point{lambda2 - m.YY, m[1][0]}.Norm(1.0)
+	// } else if !Equal(m[0][1], 0.0) {
+	// 	v1 = Point{m[0][1], lambda1 - m[0][0]}.Norm(1.0)
+	// 	v2 = Point{m[0][1], lambda2 - m[0][0]}.Norm(1.0)
+	// }
+	// return lambda1, lambda2, v1, v2
 }
 
 // ParseFloat32 logs any strconv.ParseFloat errors
