@@ -6,6 +6,7 @@ require (
 	github.com/Bios-Marcel/wastebasket v0.0.4-0.20240213135800-f26f1ae0a7c4
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/Masterminds/vcs v1.13.3
+	github.com/adrg/strutil v0.3.1
 	github.com/alecthomas/chroma/v2 v2.13.0
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/aymerick/douceur v0.2.0
