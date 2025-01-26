@@ -5,8 +5,6 @@
 package core
 
 import (
-	"testing"
-
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 )
@@ -19,9 +17,4 @@ func init() {
 	theWindowGeometrySaver.open()
 	styles.SettingsFont = (*string)(&AppearanceSettings.Font)
 	styles.SettingsMonoFont = (*string)(&AppearanceSettings.MonoFont)
-
-	if testing.Testing() {
-		// needed to prevent app from quitting prematurely
-		NewBody().RunWindow()
-	}
 }
