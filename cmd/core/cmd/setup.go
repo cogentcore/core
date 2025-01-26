@@ -7,12 +7,15 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/core/config"
+	"github.com/mitchellh/go-homedir"
 )
 
 // Setup installs platform-specific dependencies for the current platform.
@@ -32,37 +35,29 @@ func Setup(c *config.Config) error { //types:add
 		}
 		return nil
 	case "linux":
-		// Based on https://docs.fyne.io/started
-		if _, err := exec.LookPath("apt-get"); err == nil {
-			err := vc.Run("sudo", "apt-get", "update")
+		for _, ld := range linuxDistros {
+			_, err := exec.LookPath(ld.tool)
 			if err != nil {
-				return err
+				continue // package manager not found
 			}
-			return vc.Run("sudo", "apt-get", "install", "-f", "-y", "gcc", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev")
-		}
-		if _, err := exec.LookPath("dnf"); err == nil {
-			return vc.Run("sudo", "dnf", "install", "gcc", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel")
-		}
-		if _, err := exec.LookPath("pacman"); err == nil {
-			return vc.Run("sudo", "pacman", "-S", "xorg-server-devel", "libxcursor", "libxrandr", "libxinerama", "libxi")
-		}
-		if _, err := exec.LookPath("eopkg"); err == nil {
-			return vc.Run("sudo", "eopkg", "it", "-c", "system.devel", "mesalib-devel", "libxrandr-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel")
-		}
-		if _, err := exec.LookPath("zypper"); err == nil {
-			return vc.Run("sudo", "zypper", "install", "gcc", "libXcursor-devel", "libXrandr-devel", "Mesa-libGL-devel", "libXi-devel", "libXinerama-devel", "libXxf86vm-devel")
-		}
-		if _, err := exec.LookPath("xbps-install"); err == nil {
-			return vc.Run("sudo", "xbps-install", "-S", "base-devel", "xorg-server-devel", "libXrandr-devel", "libXcursor-devel", "libXinerama-devel")
-		}
-		if _, err := exec.LookPath("apk"); err == nil {
-			return vc.Run("sudo", "apk", "add", "gcc", "libxcursor-dev", "libxrandr-dev", "libxinerama-dev", "libxi-dev", "linux-headers", "mesa-dev")
-		}
-		if _, err := exec.LookPath("nix-shell"); err == nil {
-			return vc.Run("nix-shell", "-p", "libGL", "pkg-config", "xorg.libX11.dev", "xorg.libXcursor", "xorg.libXi", "xorg.libXinerama", "xorg.libXrandr", "xorg.libXxf86vm")
+			cmd, args := ld.cmd()
+			err = vc.Run(cmd, args...)
+			if err != nil {
+				return err // package installation failed
+			}
+			return nil // success
 		}
 		return errors.New("unknown Linux distro; please file a bug report at https://github.com/cogentcore/core/issues")
 	case "windows":
+		// We must be in the home directory to avoid permission issues with file downloading.
+		hd, err := homedir.Dir()
+		if err != nil {
+			return err
+		}
+		err = os.Chdir(hd)
+		if err != nil {
+			return err
+		}
 		if _, err := exec.LookPath("gcc"); err != nil {
 			err := vc.Run("curl", "-OL", "https://github.com/skeeto/w64devkit/releases/download/v2.0.0/w64devkit-x64-2.0.0.exe")
 			if err != nil {
@@ -102,4 +97,71 @@ func Setup(c *config.Config) error { //types:add
 		return nil
 	}
 	return fmt.Errorf("platform %q not supported for core setup", runtime.GOOS)
+}
+
+// linuxDistro represents the data needed to install dependencies for a specific Linux
+// distribution family with the same installation steps.
+type linuxDistro struct {
+
+	// name contains the user-friendly name(s) of the Linux distribution(s).
+	name string
+
+	// sudo is whether the package manager requires sudo.
+	sudo bool
+
+	// tool is the name of the package manager used for installation.
+	tool string
+
+	// command contains the subcommand(s) in the package manager used to install packages.
+	command []string
+
+	// packages are the packages that need to be installed.
+	packages []string
+}
+
+// cmd returns the command and arguments to install the packages for the Linux distribution.
+func (ld *linuxDistro) cmd() (cmd string, args []string) {
+	if ld.sudo {
+		cmd = "sudo"
+		args = append(args, ld.tool)
+	} else {
+		cmd = ld.tool
+	}
+	args = append(args, ld.command...)
+	args = append(args, ld.packages...)
+	return
+}
+
+func (ld *linuxDistro) String() string {
+	cmd, args := ld.cmd()
+	return fmt.Sprintf("%-15s %s %s", ld.name+":", cmd, strings.Join(args, " "))
+}
+
+// linuxDistros contains the supported Linux distributions,
+// based on https://docs.fyne.io/started.
+var linuxDistros = []*linuxDistro{
+	{name: "Debian/Ubuntu", sudo: true, tool: "apt", command: []string{"install"}, packages: []string{
+		"gcc", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev",
+	}},
+	{name: "Fedora", sudo: true, tool: "dnf", command: []string{"install"}, packages: []string{
+		"gcc", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel", "mesa-vulkan-drivers",
+	}},
+	{name: "Arch", sudo: true, tool: "pacman", command: []string{"-S"}, packages: []string{
+		"xorg-server-devel", "libxcursor", "libxrandr", "libxinerama", "libxi", "vulkan-swrast",
+	}},
+	{name: "Solus", sudo: true, tool: "eopkg", command: []string{"it", "-c"}, packages: []string{
+		"system.devel", "mesalib-devel", "libxrandr-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel", "vulkan",
+	}},
+	{name: "openSUSE", sudo: true, tool: "zypper", command: []string{"install"}, packages: []string{
+		"gcc", "libXcursor-devel", "libXrandr-devel", "Mesa-libGL-devel", "libXi-devel", "libXinerama-devel", "libXxf86vm-devel", "libvulkan1",
+	}},
+	{name: "Void", sudo: true, tool: "xbps-install", command: []string{"-S"}, packages: []string{
+		"base-devel", "xorg-server-devel", "libXrandr-devel", "libXcursor-devel", "libXinerama-devel", "vulkan-loader",
+	}},
+	{name: "Alpine", sudo: true, tool: "apk", command: []string{"add"}, packages: []string{
+		"gcc", "libxcursor-dev", "libxrandr-dev", "libxinerama-dev", "libxi-dev", "linux-headers", "mesa-dev", "vulkan-loader",
+	}},
+	{name: "NixOS", sudo: false, tool: "nix-shell", command: []string{"-p"}, packages: []string{
+		"libGL", "pkg-config", "xorg.libX11.dev", "xorg.libXcursor", "xorg.libXi", "xorg.libXinerama", "xorg.libXrandr", "xorg.libXxf86vm", "mesa.drivers", "vulkan-loader",
+	}},
 }

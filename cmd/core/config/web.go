@@ -43,7 +43,8 @@ type Web struct { //types:add
 	Image string
 
 	// The interval between each app auto-update while running in a web browser.
-	// Zero or negative values deactivates the auto-update mechanism.
+	// Zero or negative values deactivate the auto-update mechanism. The auto-update
+	// mechanism updates the WASM file for the app from the server if it has changed.
 	//
 	// Default is 10 seconds.
 	AutoUpdateInterval time.Duration `default:"10s"`
