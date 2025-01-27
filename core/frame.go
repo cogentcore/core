@@ -143,7 +143,7 @@ func (fr *Frame) Init() {
 		fr.focusOnName(e)
 	})
 	fr.On(events.Scroll, func(e events.Event) {
-		if fr.AbilityIs(abilities.ScrollableUnfocused) || fr.Styles.Is(states.Focused) {
+		if fr.AbilityIs(abilities.ScrollableUnfocused) || fr.StateIs(states.Focused) {
 			fr.scrollDelta(e)
 		}
 	})
