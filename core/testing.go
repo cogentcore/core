@@ -43,13 +43,11 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	rw.mains.updateAll()
 	rw.mains.runDeferred()
 	rw.renderWindow()
-	b.AsyncUnlock()
 
 	dw := b.Scene.RenderWindow().SystemWindow.Drawer()
 	img := dw.(getImager).GetImage()
 	imagex.Assert(t, img, filename)
 
-	b.AsyncLock()
 	b.Close()
 	b.AsyncUnlock()
 }
