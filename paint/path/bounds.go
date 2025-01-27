@@ -45,7 +45,9 @@ func (p Path) FastBounds() math32.Box2 {
 			ymin = math32.Min(ymin, math32.Min(cp1.Y, math32.Min(cp2.Y, end.Y)))
 			ymax = math32.Max(ymax, math32.Max(cp1.Y, math32.Min(cp2.Y, end.Y)))
 		case ArcTo:
-			rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
+			var rx, ry, phi float32
+			var large, sweep bool
+			rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
 			cx, cy, _, _ := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 			r := math32.Max(rx, ry)
 			xmin = math32.Min(xmin, cx-r)
@@ -143,7 +145,9 @@ func (p Path) Bounds() math32.Box2 {
 				ymax = math32.Max(ymax, y2.Y)
 			}
 		case ArcTo:
-			rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
+			var rx, ry, phi float32
+			var large, sweep bool
+			rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
 			cx, cy, theta0, theta1 := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 
 			// find the four extremes (top, bottom, left, right) and apply those who are between theta1 and theta2

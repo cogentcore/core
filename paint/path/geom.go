@@ -249,8 +249,8 @@ func windings(zs []Intersection) (int, bool) {
 				n += d
 			}
 		} else {
-			same := z.Same || zs[i+1].Same
-			if !same {
+			same := z.Same || (len(zs) > i+1 && zs[i+1].Same)
+			if !same && len(zs) > i+1 {
 				if z.Into() == zs[i+1].Into() {
 					n += d
 				}
@@ -447,7 +447,9 @@ func (p Path) Length() float32 {
 			end = math32.Vec2(p[i+5], p[i+6])
 			d += cubicBezierLength(start, cp1, cp2, end)
 		case ArcTo:
-			rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
+			var rx, ry, phi float32
+			var large, sweep bool
+			rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
 			_, _, theta1, theta2 := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 			d += ellipseLength(rx, ry, theta1, theta2)
 		}

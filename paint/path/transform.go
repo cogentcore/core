@@ -180,7 +180,9 @@ func (p Path) replace(
 			}
 		case ArcTo:
 			if arc != nil {
-				rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
+				var rx, ry, phi float32
+				var large, sweep bool
+				rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
 				q = arc(start, rx, ry, phi, large, sweep, end)
 			}
 		}
@@ -382,7 +384,9 @@ func (p Path) SplitAt(ts ...float32) []Path {
 					T += dT
 				}
 			case ArcTo:
-				rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
+				var rx, ry, phi float32
+				var large, sweep bool
+				rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
 				cx, cy, theta1, theta2 := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 
 				if j == len(ts) {

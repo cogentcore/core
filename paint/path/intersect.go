@@ -59,7 +59,9 @@ func (p Path) RayIntersections(x, y float32) []Intersection {
 				zs = intersectionLineCube(zs, math32.Vector2{x, y}, math32.Vector2{xmax + 1.0, y}, start, cp1, cp2, end)
 			}
 		case ArcTo:
-			rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
+			var rx, ry, phi float32
+			var large, sweep bool
+			rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
 			cx, cy, theta0, theta1 := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 			if InInterval(y, cy-math32.Max(rx, ry), cy+math32.Max(rx, ry)) && x <= cx+math32.Max(rx, ry)+Epsilon {
 				zs = intersectionLineEllipse(zs, math32.Vector2{x, y}, math32.Vector2{cx + rx + 1.0, y}, math32.Vector2{cx, cy}, math32.Vector2{rx, ry}, phi, theta0, theta1)
