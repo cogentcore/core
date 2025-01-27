@@ -22,7 +22,7 @@ var Epsilon = float32(1e-10)
 
 // Precision is the number of significant digits at which floating point
 // value will be printed to output formats.
-var Precision = 8
+var Precision = 7
 
 // Origin is the coordinate system's origin.
 var Origin = math32.Vector2{0.0, 0.0}

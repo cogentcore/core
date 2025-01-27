@@ -195,7 +195,7 @@ func ParseSVGPath(s string) (Path, error) {
 			if cmd == 'a' {
 				p1 = p1.Add(p0)
 			}
-			p.ArcTo(rx, ry, rot, large, sweep, p1.X, p1.Y)
+			p.ArcToDeg(rx, ry, rot, large, sweep, p1.X, p1.Y)
 		default:
 			return nil, fmt.Errorf("bad path: unknown command '%c' at position %d", cmd, i+1)
 		}
