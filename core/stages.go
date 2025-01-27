@@ -274,5 +274,10 @@ func (sm *stages) runDeferred() {
 				sc.Shown()
 			}
 		}
+
+		// If we own popups, we also need to runDeferred on them.
+		if st.Main == st && st.popups != nil {
+			st.popups.runDeferred()
+		}
 	}
 }
