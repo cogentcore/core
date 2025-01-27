@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"
 )
 
@@ -142,7 +143,9 @@ func (fr *Frame) Init() {
 		fr.focusOnName(e)
 	})
 	fr.On(events.Scroll, func(e events.Event) {
-		fr.scrollDelta(e)
+		if fr.AbilityIs(abilities.ScrollableUnfocused) || fr.StateIs(states.Focused) {
+			fr.scrollDelta(e)
+		}
 	})
 	// We treat slide events on frames as scroll events.
 	fr.On(events.SlideMove, func(e events.Event) {

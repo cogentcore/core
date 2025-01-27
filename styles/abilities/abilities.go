@@ -73,6 +73,10 @@ const (
 
 	// LongHoverable means it can be LongHovered
 	LongHoverable
+
+	// ScrollableUnfocused means it can be Scrolled and Slided without focus.
+	// This is true by default except for text editors and text fields.
+	ScrollableUnfocused
 )
 
 // Is is a shortcut for HasFlag for Abilities

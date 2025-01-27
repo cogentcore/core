@@ -219,6 +219,7 @@ func (ed *Editor) Init() {
 	ed.SetBuffer(NewBuffer())
 	ed.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
+		s.SetAbilities(false, abilities.ScrollableUnfocused)
 		ed.CursorWidth.Dp(1)
 		ed.LineNumberColor = colors.Uniform(colors.Transparent)
 		ed.SelectColor = colors.Scheme.Select.Container
