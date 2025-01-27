@@ -7,7 +7,10 @@
 
 package path
 
-import "cogentcore.org/core/math32"
+import (
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
+)
 
 // NOTE: implementation inspired from github.com/golang/freetype/raster/stroke.go
 
@@ -46,6 +49,36 @@ func (p Path) Stroke(w float32, cr Capper, jr Joiner, tolerance float32) Path {
 		}
 	}
 	return q
+}
+
+func capFromStyle(st styles.LineCaps) Capper {
+	switch st {
+	case styles.LineCapButt:
+		return ButtCap
+	case styles.LineCapRound:
+		return RoundCap
+	case styles.LineCapSquare:
+		return SquareCap
+	}
+	return ButtCap
+}
+
+func joinFromStyle(st styles.LineJoins) Joiner {
+	switch st {
+	case styles.LineJoinMiter:
+		return MiterJoin
+	case styles.LineJoinMiterClip:
+		return MiterClipJoin
+	case styles.LineJoinRound:
+		return RoundJoin
+	case styles.LineJoinBevel:
+		return BevelJoin
+	case styles.LineJoinArcs:
+		return ArcsJoin
+	case styles.LineJoinArcsClip:
+		return ArcsClipJoin
+	}
+	return MiterJoin
 }
 
 // Capper implements Cap, with rhs the path to append to,

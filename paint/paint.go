@@ -8,14 +8,11 @@ import (
 	"errors"
 	"image"
 	"image/color"
-	"io"
 	"math"
-	"slices"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/raster"
 	"cogentcore.org/core/styles"
 	"github.com/anthonynsimon/bild/clone"
 	"golang.org/x/image/draw"
@@ -103,13 +100,13 @@ func NewContextFromRGBA(img image.Image) *Context {
 }
 
 // FillStrokeClear is a convenience final stroke and clear draw for shapes when done
-func (pc *Context) FillStrokeClear() {
-	if pc.SVGOut != nil {
-		io.WriteString(pc.SVGOut, pc.SVGPath())
-	}
-	pc.FillPreserve()
-	pc.StrokePreserve()
-	pc.ClearPath()
+func (pc *Context) FillStrokeDone() {
+	// if pc.SVGOut != nil {
+	// 	io.WriteString(pc.SVGOut, pc.SVGPath())
+	// }
+	// pc.FillPreserve()
+	// pc.StrokePreserve()
+	// pc.DonePath()
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -125,7 +122,7 @@ func (pc *Context) TransformPoint(x, y float32) math32.Vector2 {
 // coordinates, applying current transform
 func (pc *Context) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	sw := float32(0.0)
-	if pc.StrokeStyle.Color != nil {
+	if pc.Stroke.Color != nil {
 		sw = 0.5 * pc.StrokeWidth()
 	}
 	tmin := pc.CurrentTransform.MulVector2AsPoint(math32.Vec2(minX, minY))
@@ -153,122 +150,91 @@ func (pc *Context) BoundingBoxFromPoints(points []math32.Vector2) image.Rectangl
 // MoveTo starts a new subpath within the current path starting at the
 // specified point.
 func (pc *Context) MoveTo(x, y float32) {
-	if pc.HasCurrent {
-		pc.Path.Stop(false) // note: used to add a point to separate FillPath..
-	}
+	// if pc.HasCurrent {
+	// 	pc.Path.Stop(false) // note: used to add a point to separate FillPath..
+	// }
 	p := pc.TransformPoint(x, y)
-	pc.Path.Start(p.ToFixed())
+	pc.State.Path.MoveTo(p.X, p.Y)
 	pc.Start = p
-	pc.Current = p
-	pc.HasCurrent = true
+	// pc.Current = p
+	// pc.HasCurrent = true
 }
 
 // LineTo adds a line segment to the current path starting at the current
 // point. If there is no current point, it is equivalent to MoveTo(x, y)
 func (pc *Context) LineTo(x, y float32) {
-	if !pc.HasCurrent {
-		pc.MoveTo(x, y)
-	} else {
-		p := pc.TransformPoint(x, y)
-		pc.Path.Line(p.ToFixed())
-		pc.Current = p
-	}
+	// if !pc.HasCurrent {
+	// 	pc.MoveTo(x, y)
+	// } else {
+	p := pc.TransformPoint(x, y)
+	pc.State.Path.LineTo(p.X, p.Y)
+	// pc.Current = p
+	// }
 }
 
+// todo: no
+//  If there is no current point, it first performs MoveTo(x1, y1)
+
 // QuadraticTo adds a quadratic bezier curve to the current path starting at
-// the current point. If there is no current point, it first performs
-// MoveTo(x1, y1)
+// the current point. The first point is the control point for curvature
+// and the second is the end point.
 func (pc *Context) QuadraticTo(x1, y1, x2, y2 float32) {
-	if !pc.HasCurrent {
-		pc.MoveTo(x1, y1)
-	}
-	p1 := pc.TransformPoint(x1, y1)
-	p2 := pc.TransformPoint(x2, y2)
-	pc.Path.QuadBezier(p1.ToFixed(), p2.ToFixed())
-	pc.Current = p2
+	// if !pc.HasCurrent {
+	// 	pc.MoveTo(x1, y1)
+	// }
+	cp := pc.TransformPoint(x1, y1)
+	e := pc.TransformPoint(x2, y2)
+	pc.State.Path.QuadTo(cp.X, cp.Y, e.X, e.Y)
+	// pc.Current = p2
 }
 
 // CubicTo adds a cubic bezier curve to the current path starting at the
-// current point. If there is no current point, it first performs
-// MoveTo(x1, y1).
+// current point, with the first two points being the two control points,
+// and the final being the end point.
 func (pc *Context) CubicTo(x1, y1, x2, y2, x3, y3 float32) {
-	if !pc.HasCurrent {
-		pc.MoveTo(x1, y1)
-	}
+	// if !pc.HasCurrent {
+	// 	pc.MoveTo(x1, y1)
+	// }
 	// x0, y0 := pc.Current.X, pc.Current.Y
-	b := pc.TransformPoint(x1, y1)
-	c := pc.TransformPoint(x2, y2)
-	d := pc.TransformPoint(x3, y3)
-
-	pc.Path.CubeBezier(b.ToFixed(), c.ToFixed(), d.ToFixed())
-	pc.Current = d
+	cp1 := pc.TransformPoint(x1, y1)
+	cp2 := pc.TransformPoint(x2, y2)
+	e := pc.TransformPoint(x3, y3)
+	pc.State.Path.CubeTo(cp1.X, cp1.Y, cp2.X, cp2.Y, e.X, e.Y)
+	// pc.Current = d
 }
 
 // ClosePath adds a line segment from the current point to the beginning
 // of the current subpath. If there is no current point, this is a no-op.
 func (pc *Context) ClosePath() {
-	if pc.HasCurrent {
-		pc.Path.Stop(true)
-		pc.Current = pc.Start
-	}
-}
-
-// ClearPath clears the current path. There is no current point after this
-// operation.
-func (pc *Context) ClearPath() {
-	pc.Path.Clear()
-	pc.HasCurrent = false
-}
-
-// NewSubPath starts a new subpath within the current path. There is no current
-// point after this operation.
-func (pc *Context) NewSubPath() {
 	// if pc.HasCurrent {
-	// 	pc.FillPath.Add1(pc.Start.Fixed())
+	// 	pc.Path.Stop(true)
+	// 	pc.Current = pc.Start
 	// }
-	pc.HasCurrent = false
+	pc.State.Path.Close()
 }
 
-// Path Drawing
-
-func (pc *Context) capfunc() raster.CapFunc {
-	switch pc.StrokeStyle.Cap {
-	case styles.LineCapButt:
-		return raster.ButtCap
-	case styles.LineCapRound:
-		return raster.RoundCap
-	case styles.LineCapSquare:
-		return raster.SquareCap
-	case styles.LineCapCubic:
-		return raster.CubicCap
-	case styles.LineCapQuadratic:
-		return raster.QuadraticCap
-	}
-	return nil
+// PathDone puts the current path on the render stack, capturing the style
+// settings present at this point, and creates a new current path.
+func (pc *Context) PathDone() {
+	pt := &Path{Path: pc.State.Path.Clone(), Style: pc.Paint.Path}
+	pc.Render.Add(pt)
+	pc.State.Path.Reset()
+	// pc.HasCurrent = false
 }
 
-func (pc *Context) joinmode() raster.JoinMode {
-	switch pc.StrokeStyle.Join {
-	case styles.LineJoinMiter:
-		return raster.Miter
-	case styles.LineJoinMiterClip:
-		return raster.MiterClip
-	case styles.LineJoinRound:
-		return raster.Round
-	case styles.LineJoinBevel:
-		return raster.Bevel
-	case styles.LineJoinArcs:
-		return raster.Arc
-	case styles.LineJoinArcsClip:
-		return raster.ArcClip
-	}
-	return raster.Arc
+// RenderDone sends the entire current Render to the renderer.
+// This is when the drawing actually happens: don't forget to call!
+func (pc *Context) RenderDone() {
+	pc.Renderer.Render(pc.Render)
+	pc.Render.Reset()
 }
+
+//////// Path Drawing
 
 // StrokeWidth obtains the current stoke width subject to transform (or not
 // depending on VecEffNonScalingStroke)
 func (pc *Context) StrokeWidth() float32 {
-	dw := pc.StrokeStyle.Width.Dots
+	dw := pc.Stroke.Width.Dots
 	if dw == 0 {
 		return dw
 	}
@@ -277,19 +243,22 @@ func (pc *Context) StrokeWidth() float32 {
 	}
 	scx, scy := pc.CurrentTransform.ExtractScale()
 	sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
-	lw := math32.Max(sc*dw, pc.StrokeStyle.MinWidth.Dots)
+	lw := math32.Max(sc*dw, pc.Stroke.MinWidth.Dots)
 	return lw
 }
+
+// todo: the following are all redundant with PathDone at this point!
 
 // StrokePreserve strokes the current path with the current color, line width,
 // line cap, line join and dash settings. The path is preserved after this
 // operation.
 func (pc *Context) StrokePreserve() {
-	if pc.Raster == nil || pc.StrokeStyle.Color == nil {
+	/* TODO: all of this just happens in renderer
+	if pc.Stroke.Color == nil {
 		return
 	}
 
-	dash := slices.Clone(pc.StrokeStyle.Dashes)
+	dash := slices.Clone(pc.Stroke.Dashes)
 	if dash != nil {
 		scx, scy := pc.CurrentTransform.ExtractScale()
 		sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
@@ -300,7 +269,7 @@ func (pc *Context) StrokePreserve() {
 
 	pc.Raster.SetStroke(
 		math32.ToFixed(pc.StrokeWidth()),
-		math32.ToFixed(pc.StrokeStyle.MiterLimit),
+		math32.ToFixed(pc.Stroke.MiterLimit),
 		pc.capfunc(), nil, nil, pc.joinmode(), // todo: supports leading / trailing caps, and "gaps"
 		dash, 0)
 	pc.Scanner.SetClip(pc.Bounds)
@@ -308,69 +277,72 @@ func (pc *Context) StrokePreserve() {
 	fbox := pc.Raster.Scanner.GetPathExtent()
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	if g, ok := pc.StrokeStyle.Color.(gradient.Gradient); ok {
-		g.Update(pc.StrokeStyle.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
-		pc.Raster.SetColor(pc.StrokeStyle.Color)
+	if g, ok := pc.Stroke.Color.(gradient.Gradient); ok {
+		g.Update(pc.Stroke.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
+		pc.Raster.SetColor(pc.Stroke.Color)
 	} else {
-		if pc.StrokeStyle.Opacity < 1 {
-			pc.Raster.SetColor(gradient.ApplyOpacity(pc.StrokeStyle.Color, pc.StrokeStyle.Opacity))
+		if pc.Stroke.Opacity < 1 {
+			pc.Raster.SetColor(gradient.ApplyOpacity(pc.Stroke.Color, pc.Stroke.Opacity))
 		} else {
-			pc.Raster.SetColor(pc.StrokeStyle.Color)
+			pc.Raster.SetColor(pc.Stroke.Color)
 		}
 	}
 
 	pc.Raster.Draw()
 	pc.Raster.Clear()
+	*/
 }
 
-// Stroke strokes the current path with the current color, line width,
+// DrawStroke strokes the current path with the current color, line width,
 // line cap, line join and dash settings. The path is cleared after this
 // operation.
-func (pc *Context) Stroke() {
-	if pc.SVGOut != nil && pc.StrokeStyle.Color != nil {
-		io.WriteString(pc.SVGOut, pc.SVGPath())
-	}
-	pc.StrokePreserve()
-	pc.ClearPath()
+func (pc *Context) DrawStroke() {
+	// if pc.SVGOut != nil && pc.Stroke.Color != nil {
+	// 	io.WriteString(pc.SVGOut, pc.SVGPath())
+	// }
+	// pc.StrokePreserve()
+	// pc.ClearPath()
 }
 
 // FillPreserve fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is preserved after this operation.
 func (pc *Context) FillPreserve() {
-	if pc.Raster == nil || pc.FillStyle.Color == nil {
-		return
-	}
-
-	rf := &pc.Raster.Filler
-	rf.SetWinding(pc.FillStyle.Rule == styles.FillRuleNonZero)
-	pc.Scanner.SetClip(pc.Bounds)
-	pc.Path.AddTo(rf)
-	fbox := pc.Scanner.GetPathExtent()
-	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
-		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	if g, ok := pc.FillStyle.Color.(gradient.Gradient); ok {
-		g.Update(pc.FillStyle.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
-		rf.SetColor(pc.FillStyle.Color)
-	} else {
-		if pc.FillStyle.Opacity < 1 {
-			rf.SetColor(gradient.ApplyOpacity(pc.FillStyle.Color, pc.FillStyle.Opacity))
-		} else {
-			rf.SetColor(pc.FillStyle.Color)
+	/*
+		if pc.Raster == nil || pc.Fill.Color == nil {
+			return
 		}
-	}
-	rf.Draw()
-	rf.Clear()
+
+		rf := &pc.Raster.Filler
+		rf.SetWinding(pc.Fill.Rule == styles.FillRuleNonZero)
+		pc.Scanner.SetClip(pc.Bounds)
+		pc.Path.AddTo(rf)
+		fbox := pc.Scanner.GetPathExtent()
+		pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+			Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
+		if g, ok := pc.Fill.Color.(gradient.Gradient); ok {
+			g.Update(pc.Fill.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
+			rf.SetColor(pc.Fill.Color)
+		} else {
+			if pc.Fill.Opacity < 1 {
+				rf.SetColor(gradient.ApplyOpacity(pc.Fill.Color, pc.Fill.Opacity))
+			} else {
+				rf.SetColor(pc.Fill.Color)
+			}
+		}
+		rf.Draw()
+		rf.Clear()
+	*/
 }
 
-// Fill fills the current path with the current color. Open subpaths
+// DrawFill fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is cleared after this operation.
-func (pc *Context) Fill() {
-	if pc.SVGOut != nil {
-		io.WriteString(pc.SVGOut, pc.SVGPath())
-	}
-
-	pc.FillPreserve()
-	pc.ClearPath()
+func (pc *Context) DrawFill() {
+	// if pc.SVGOut != nil {
+	// 	io.WriteString(pc.SVGOut, pc.SVGPath())
+	// }
+	//
+	// pc.FillPreserve()
+	// pc.ClearPath()
 }
 
 // FillBox performs an optimized fill of the given
@@ -395,9 +367,9 @@ func (pc *Context) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op
 	size = pc.CurrentTransform.MulVector2AsVector(size)
 	b := pc.Bounds.Intersect(math32.RectFromPosSizeMax(pos, size))
 	if g, ok := img.(gradient.Gradient); ok {
-		g.Update(pc.FillStyle.Opacity, math32.B2FromRect(b), pc.CurrentTransform)
+		g.Update(pc.Fill.Opacity, math32.B2FromRect(b), pc.CurrentTransform)
 	} else {
-		img = gradient.ApplyOpacity(img, pc.FillStyle.Opacity)
+		img = gradient.ApplyOpacity(img, pc.Fill.Opacity)
 	}
 	draw.Draw(pc.Image, b, img, b.Min, op)
 }
@@ -415,7 +387,7 @@ func (pc *Context) BlurBox(pos, size math32.Vector2, blurRadius float32) {
 }
 
 // ClipPreserve updates the clipping region by intersecting the current
-// clipping region with the current path as it would be filled by pc.Fill().
+// clipping region with the current path as it would be filled by pc.DrawFill().
 // The path is preserved after this operation.
 func (pc *Context) ClipPreserve() {
 	clip := image.NewAlpha(pc.Image.Bounds())
@@ -452,11 +424,11 @@ func (pc *Context) AsMask() *image.Alpha {
 }
 
 // Clip updates the clipping region by intersecting the current
-// clipping region with the current path as it would be filled by pc.Fill().
+// clipping region with the current path as it would be filled by pc.DrawFill().
 // The path is cleared after this operation.
 func (pc *Context) Clip() {
 	pc.ClipPreserve()
-	pc.ClearPath()
+	pc.PathDone()
 }
 
 // ResetClip clears the clipping region.
@@ -469,13 +441,13 @@ func (pc *Context) ResetClip() {
 
 // Clear fills the entire image with the current fill color.
 func (pc *Context) Clear() {
-	src := pc.FillStyle.Color
+	src := pc.Fill.Color
 	draw.Draw(pc.Image, pc.Image.Bounds(), src, image.Point{}, draw.Src)
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
 func (pc *Context) SetPixel(x, y int) {
-	pc.Image.Set(x, y, pc.StrokeStyle.Color.At(x, y))
+	pc.Image.Set(x, y, pc.Stroke.Color.At(x, y))
 }
 
 func (pc *Context) DrawLine(x1, y1, x2, y2 float32) {
@@ -519,33 +491,33 @@ func (pc *Context) DrawPolygonPxToDots(points []math32.Vector2) {
 // DrawBorder is a higher-level function that draws, strokes, and fills
 // an potentially rounded border box with the given position, size, and border styles.
 func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
-	origStroke := pc.StrokeStyle
-	origFill := pc.FillStyle
+	origStroke := pc.Stroke
+	origFill := pc.Fill
 	defer func() {
-		pc.StrokeStyle = origStroke
-		pc.FillStyle = origFill
+		pc.Stroke = origStroke
+		pc.Fill = origFill
 	}()
 	r := bs.Radius.Dots()
 	if styles.SidesAreSame(bs.Style) && styles.SidesAreSame(bs.Color) && styles.SidesAreSame(bs.Width.Dots().Sides) {
 		// set the color if it is not nil and the stroke style
 		// is not set to the correct color
-		if bs.Color.Top != nil && bs.Color.Top != pc.StrokeStyle.Color {
-			pc.StrokeStyle.Color = bs.Color.Top
+		if bs.Color.Top != nil && bs.Color.Top != pc.Stroke.Color {
+			pc.Stroke.Color = bs.Color.Top
 		}
-		pc.StrokeStyle.Width = bs.Width.Top
-		pc.StrokeStyle.ApplyBorderStyle(bs.Style.Top)
+		pc.Stroke.Width = bs.Width.Top
+		pc.Stroke.ApplyBorderStyle(bs.Style.Top)
 		if styles.SidesAreZero(r.Sides) {
 			pc.DrawRectangle(x, y, w, h)
 		} else {
 			pc.DrawRoundedRectangle(x, y, w, h, r)
 		}
-		pc.FillStrokeClear()
+		pc.PathDone()
 		return
 	}
 
 	// use consistent rounded rectangle for fill, and then draw borders side by side
 	pc.DrawRoundedRectangle(x, y, w, h, r)
-	pc.Fill()
+	pc.DrawFill()
 
 	r = ClampBorderRadius(r, w, h)
 
@@ -567,63 +539,59 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	// SidesTODO: need to figure out how to style rounded corners correctly
 	// (in CSS they are split in the middle between different border side styles)
 
-	pc.NewSubPath()
 	pc.MoveTo(xtli, ytl)
 
 	// set the color if it is not the same as the already set color
-	if bs.Color.Top != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = bs.Color.Top
+	if bs.Color.Top != pc.Stroke.Color {
+		pc.Stroke.Color = bs.Color.Top
 	}
-	pc.StrokeStyle.Width = bs.Width.Top
+	pc.Stroke.Width = bs.Width.Top
 	pc.LineTo(xtri, ytr)
 	if r.Right != 0 {
 		pc.DrawArc(xtri, ytri, r.Right, math32.DegToRad(270), math32.DegToRad(360))
 	}
 	// if the color or width is changing for the next one, we have to stroke now
 	if bs.Color.Top != bs.Color.Right || bs.Width.Top.Dots != bs.Width.Right.Dots {
-		pc.Stroke()
-		pc.NewSubPath()
+		pc.DrawStroke()
 		pc.MoveTo(xtr, ytri)
 	}
 
-	if bs.Color.Right != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = bs.Color.Right
+	if bs.Color.Right != pc.Stroke.Color {
+		pc.Stroke.Color = bs.Color.Right
 	}
-	pc.StrokeStyle.Width = bs.Width.Right
+	pc.Stroke.Width = bs.Width.Right
 	pc.LineTo(xbr, ybri)
 	if r.Bottom != 0 {
 		pc.DrawArc(xbri, ybri, r.Bottom, math32.DegToRad(0), math32.DegToRad(90))
 	}
 	if bs.Color.Right != bs.Color.Bottom || bs.Width.Right.Dots != bs.Width.Bottom.Dots {
-		pc.Stroke()
-		pc.NewSubPath()
+		pc.DrawStroke()
 		pc.MoveTo(xbri, ybr)
 	}
 
-	if bs.Color.Bottom != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = bs.Color.Bottom
+	if bs.Color.Bottom != pc.Stroke.Color {
+		pc.Stroke.Color = bs.Color.Bottom
 	}
-	pc.StrokeStyle.Width = bs.Width.Bottom
+	pc.Stroke.Width = bs.Width.Bottom
 	pc.LineTo(xbli, ybl)
 	if r.Left != 0 {
 		pc.DrawArc(xbli, ybli, r.Left, math32.DegToRad(90), math32.DegToRad(180))
 	}
 	if bs.Color.Bottom != bs.Color.Left || bs.Width.Bottom.Dots != bs.Width.Left.Dots {
-		pc.Stroke()
-		pc.NewSubPath()
+		pc.DrawStroke()
 		pc.MoveTo(xbl, ybli)
 	}
 
-	if bs.Color.Left != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = bs.Color.Left
+	if bs.Color.Left != pc.Stroke.Color {
+		pc.Stroke.Color = bs.Color.Left
 	}
-	pc.StrokeStyle.Width = bs.Width.Left
+	pc.Stroke.Width = bs.Width.Left
 	pc.LineTo(xtl, ytli)
 	if r.Top != 0 {
 		pc.DrawArc(xtli, ytli, r.Top, math32.DegToRad(180), math32.DegToRad(270))
 	}
 	pc.LineTo(xtli, ytl)
-	pc.Stroke()
+	pc.DrawStroke()
 }
 
 // ClampBorderRadius returns the given border radius clamped to fit based
@@ -639,7 +607,6 @@ func ClampBorderRadius(r styles.SideFloats, w, h float32) styles.SideFloats {
 
 // DrawRectangle draws (but does not stroke or fill) a standard rectangle with a consistent border
 func (pc *Context) DrawRectangle(x, y, w, h float32) {
-	pc.NewSubPath()
 	pc.MoveTo(x, y)
 	pc.LineTo(x+w, y)
 	pc.LineTo(x+w, y+h)
@@ -676,7 +643,6 @@ func (pc *Context) DrawRoundedRectangle(x, y, w, h float32, r styles.SideFloats)
 	// SidesTODO: need to figure out how to style rounded corners correctly
 	// (in CSS they are split in the middle between different border side styles)
 
-	pc.NewSubPath()
 	pc.MoveTo(xtli, ytl)
 
 	pc.LineTo(xtri, ytr)
@@ -729,25 +695,26 @@ func (pc *Context) DrawRoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h flo
 	radiusFactor = br / blurSigma
 	blurs := EdgeBlurFactors(blurSigma, radiusFactor)
 
-	origStroke := pc.StrokeStyle
-	origFill := pc.FillStyle
-	origOpacity := pc.FillStyle.Opacity
+	origStroke := pc.Stroke
+	origFill := pc.Fill
+	origOpacity := pc.Fill.Opacity
 
-	pc.StrokeStyle.Color = nil
+	pc.Stroke.Color = nil
 	pc.DrawRoundedRectangle(x+br, y+br, w-2*br, h-2*br, r)
-	pc.FillStrokeClear()
-	pc.StrokeStyle.Color = pc.FillStyle.Color
-	pc.FillStyle.Color = nil
-	pc.StrokeStyle.Width.Dots = 1.5 // 1.5 is the key number: 1 makes lines very transparent overall
+	pc.PathDone()
+	// pc.FillStrokeClear()
+	pc.Stroke.Color = pc.Fill.Color
+	pc.Fill.Color = nil
+	pc.Stroke.Width.Dots = 1.5 // 1.5 is the key number: 1 makes lines very transparent overall
 	for i, b := range blurs {
 		bo := br - float32(i)
-		pc.StrokeStyle.Opacity = b * origOpacity
+		pc.Stroke.Opacity = b * origOpacity
 		pc.DrawRoundedRectangle(x+bo, y+bo, w-2*bo, h-2*bo, r)
-		pc.Stroke()
+		pc.DrawStroke()
 
 	}
-	pc.StrokeStyle = origStroke
-	pc.FillStyle = origFill
+	pc.Stroke = origStroke
+	pc.Fill = origFill
 }
 
 // DrawEllipticalArc draws arc between angle1 and angle2 (radians)
@@ -915,7 +882,6 @@ func (pc *Context) DrawEllipticalArcPath(cx, cy, ocx, ocy, pcx, pcy, rx, ry, ang
 
 // DrawEllipse draws an ellipse at the given position with the given radii.
 func (pc *Context) DrawEllipse(x, y, rx, ry float32) {
-	pc.NewSubPath()
 	pc.DrawEllipticalArc(x, y, rx, ry, 0, 2*math32.Pi)
 	pc.ClosePath()
 }
@@ -929,7 +895,6 @@ func (pc *Context) DrawArc(x, y, r, angle1, angle2 float32) {
 
 // DrawCircle draws a circle at the given position with the given radius.
 func (pc *Context) DrawCircle(x, y, r float32) {
-	pc.NewSubPath()
 	pc.DrawEllipticalArc(x, y, r, r, 0, 2*math32.Pi)
 	pc.ClosePath()
 }
@@ -942,7 +907,6 @@ func (pc *Context) DrawRegularPolygon(n int, x, y, r, rotation float32) {
 	if n%2 == 0 {
 		rotation += angle / 2
 	}
-	pc.NewSubPath()
 	for i := 0; i < n; i++ {
 		a := rotation + angle*float32(i)
 		pc.LineTo(x+r*math32.Cos(a), y+r*math32.Sin(a))

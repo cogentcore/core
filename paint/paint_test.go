@@ -162,13 +162,13 @@ func TestPaintFill(t *testing.T) {
 		pc.FillStyle.Color = colors.Uniform(colors.Purple)
 		pc.StrokeStyle.Color = colors.Uniform(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
-		pc.Fill()
+		pc.DrawFill()
 	})
 	test("stroke", func(pc *Context) {
 		pc.FillStyle.Color = colors.Uniform(colors.Purple)
 		pc.StrokeStyle.Color = colors.Uniform(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
-		pc.Stroke()
+		pc.DrawStroke()
 	})
 
 	// testing whether nil values turn off stroking/filling with FillStrokeClear

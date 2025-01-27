@@ -10,29 +10,37 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/raster"
-	"cogentcore.org/core/paint/scan"
+	"cogentcore.org/core/paint/path"
 	"cogentcore.org/core/styles"
 )
 
 // The State holds all the current rendering state information used
-// while painting -- a viewport just has one of these
+// while painting -- a viewport just has one of these.
 type State struct {
 
 	// current transform
 	CurrentTransform math32.Matrix2
 
+	// Render is the current render state that we are building.
+	Render Render
+
+	// Path is the current path state we are adding to.
+	Path path.Path
+
+	// Renderer is the currrent renderer.
+	Renderer Renderer
+
 	// current path
-	Path raster.Path
-
-	// rasterizer -- stroke / fill rendering engine from raster
-	Raster *raster.Dasher
-
-	// scan scanner
-	Scanner *scan.Scanner
-
-	// scan spanner
-	ImgSpanner *scan.ImgSpanner
+	// Path raster.Path
+	//
+	// // rasterizer -- stroke / fill rendering engine from raster
+	// Raster *raster.Dasher
+	//
+	// // scan scanner
+	// Scanner *scan.Scanner
+	//
+	// // scan spanner
+	// ImgSpanner *scan.ImgSpanner
 
 	// starting point, for close path
 	Start math32.Vector2
@@ -84,9 +92,9 @@ type State struct {
 func (rs *State) Init(width, height int, img *image.RGBA) {
 	rs.CurrentTransform = math32.Identity2()
 	rs.Image = img
-	rs.ImgSpanner = scan.NewImgSpanner(img)
-	rs.Scanner = scan.NewScanner(rs.ImgSpanner, width, height)
-	rs.Raster = raster.NewDasher(width, height, rs.Scanner)
+	// rs.ImgSpanner = scan.NewImgSpanner(img)
+	// rs.Scanner = scan.NewScanner(rs.ImgSpanner, width, height)
+	// rs.Raster = raster.NewDasher(width, height, rs.Scanner)
 }
 
 // PushTransform pushes current transform onto stack and apply new transform on top of it

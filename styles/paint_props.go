@@ -18,12 +18,10 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-////////////////////////////////////////////////////////////////////////////
-//   Styling functions for setting from properties
-//     see style_properties.go for master version
+/////// see style_properties.go for master version
 
 // styleFromProperties sets style field values based on map[string]any properties
-func (pc *Paint) styleFromProperties(parent *Paint, properties map[string]any, cc colors.Context) {
+func (pc *Path) styleFromProperties(parent *Path, properties map[string]any, cc colors.Context) {
 	for key, val := range properties {
 		if len(key) == 0 {
 			continue
@@ -53,18 +51,39 @@ func (pc *Paint) styleFromProperties(parent *Paint, properties map[string]any, c
 		}
 		if sfunc, ok := styleStrokeFuncs[key]; ok {
 			if parent != nil {
-				sfunc(&pc.StrokeStyle, key, val, &parent.StrokeStyle, cc)
+				sfunc(&pc.Stroke, key, val, &parent.Stroke, cc)
 			} else {
-				sfunc(&pc.StrokeStyle, key, val, nil, cc)
+				sfunc(&pc.Stroke, key, val, nil, cc)
 			}
 			continue
 		}
 		if sfunc, ok := styleFillFuncs[key]; ok {
 			if parent != nil {
-				sfunc(&pc.FillStyle, key, val, &parent.FillStyle, cc)
+				sfunc(&pc.Fill, key, val, &parent.Fill, cc)
 			} else {
-				sfunc(&pc.FillStyle, key, val, nil, cc)
+				sfunc(&pc.Fill, key, val, nil, cc)
 			}
+			continue
+		}
+		if sfunc, ok := stylePathFuncs[key]; ok {
+			sfunc(pc, key, val, parent, cc)
+			continue
+		}
+	}
+}
+
+// styleFromProperties sets style field values based on map[string]any properties
+func (pc *Paint) styleFromProperties(parent *Paint, properties map[string]any, cc colors.Context) {
+	var ppath *Path
+	if parent != nil {
+		ppath = &parent.Path
+	}
+	pc.Path.styleFromProperties(ppath, properties, cc)
+	for key, val := range properties {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
 		if sfunc, ok := styleFontFuncs[key]; ok {
@@ -91,15 +110,10 @@ func (pc *Paint) styleFromProperties(parent *Paint, properties map[string]any, c
 			}
 			continue
 		}
-		if sfunc, ok := stylePaintFuncs[key]; ok {
-			sfunc(pc, key, val, parent, cc)
-			continue
-		}
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//  Stroke
+////////  Stroke
 
 // styleStrokeFuncs are functions for styling the Stroke object
 var styleStrokeFuncs = map[string]styleFunc{
@@ -148,8 +162,7 @@ var styleStrokeFuncs = map[string]styleFunc{
 		func(obj *Stroke) *float32 { return &(obj.MiterLimit) }),
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//  Fill
+////////  Fill
 
 // styleFillFuncs are functions for styling the Fill object
 var styleFillFuncs = map[string]styleFunc{
@@ -171,18 +184,17 @@ var styleFillFuncs = map[string]styleFunc{
 		func(obj *Fill) enums.EnumSetter { return &(obj.Rule) }),
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//  Paint
+////////  Paint
 
-// stylePaintFuncs are functions for styling the Stroke object
-var stylePaintFuncs = map[string]styleFunc{
+// stylePathFuncs are functions for styling the Stroke object
+var stylePathFuncs = map[string]styleFunc{
 	"vector-effect": styleFuncEnum(VectorEffectNone,
-		func(obj *Paint) enums.EnumSetter { return &(obj.VectorEffect) }),
+		func(obj *Path) enums.EnumSetter { return &(obj.VectorEffect) }),
 	"transform": func(obj any, key string, val any, parent any, cc colors.Context) {
-		pc := obj.(*Paint)
+		pc := obj.(*Path)
 		if inh, init := styleInhInit(val, parent); inh || init {
 			if inh {
-				pc.Transform = parent.(*Paint).Transform
+				pc.Transform = parent.(*Path).Transform
 			} else if init {
 				pc.Transform = math32.Identity2()
 			}

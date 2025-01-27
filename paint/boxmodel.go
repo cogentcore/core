@@ -38,7 +38,7 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 
 	// note that we always set the fill opacity to 1 because we are already applying
 	// the opacity of the background color in ComputeActualBackground above
-	pc.FillStyle.Opacity = 1
+	pc.Fill.Opacity = 1
 
 	if st.FillMargin {
 		// We need to fill the whole box where the
@@ -52,15 +52,15 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 		// We need to use raw geom data because we need to clear
 		// any box shadow that may have gone in margin.
 		if encroach { // if we encroach, we must limit ourselves to the parent radius
-			pc.FillStyle.Color = pabg
+			pc.Fill.Color = pabg
 			pc.DrawRoundedRectangle(pos.X, pos.Y, size.X, size.Y, radius)
-			pc.Fill()
+			pc.DrawFill()
 		} else {
 			pc.BlitBox(pos, size, pabg)
 		}
 	}
 
-	pc.StrokeStyle.Opacity = st.Opacity
+	pc.Stroke.Opacity = st.Opacity
 	pc.FontStyle.Opacity = st.Opacity
 
 	// first do any shadow
@@ -68,10 +68,10 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 		// CSS effectively goes in reverse order
 		for i := len(st.BoxShadow) - 1; i >= 0; i-- {
 			shadow := st.BoxShadow[i]
-			pc.StrokeStyle.Color = nil
+			pc.Stroke.Color = nil
 			// note: applying 0.5 here does a reasonable job of matching
 			// material design shadows, at their specified alpha levels.
-			pc.FillStyle.Color = gradient.ApplyOpacity(shadow.Color, 0.5)
+			pc.Fill.Color = gradient.ApplyOpacity(shadow.Color, 0.5)
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msize)
 
@@ -96,10 +96,10 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 	if styles.SidesAreZero(radius.Sides) {
 		pc.FillBox(mpos, msize, st.ActualBackground)
 	} else {
-		pc.FillStyle.Color = st.ActualBackground
+		pc.Fill.Color = st.ActualBackground
 		// no border; fill on
 		pc.DrawRoundedRectangle(mpos.X, mpos.Y, msize.X, msize.Y, radius)
-		pc.Fill()
+		pc.DrawFill()
 	}
 
 	// now that we have drawn background color
@@ -108,7 +108,7 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 	msize.SetAdd(st.Border.Width.Dots().Size().MulScalar(0.5))
 	mpos.SetSub(st.Border.Offset.Dots().Pos())
 	msize.SetAdd(st.Border.Offset.Dots().Size())
-	pc.FillStyle.Color = nil
+	pc.Fill.Color = nil
 	pc.DrawBorder(mpos.X, mpos.Y, msize.X, msize.Y, st.Border)
 }
 

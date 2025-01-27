@@ -17,7 +17,12 @@ import (
 // Stroke and Fill.
 type Path struct { //types:add
 	// Off indicates that node and everything below it are off, non-rendering.
+	// This is auto-updated based on other settings.
 	Off bool
+
+	// Display is the user-settable flag that determines if this item
+	// should be displayed.
+	Display bool
 
 	// Stroke (line drawing) parameters.
 	Stroke Stroke
@@ -27,13 +32,50 @@ type Path struct { //types:add
 
 	// Transform has our additions to the transform stack.
 	Transform math32.Matrix2
+
+	// VectorEffect has various rendering special effects settings.
+	VectorEffect VectorEffects
+
+	// UnitContext has parameters necessary for determining unit sizes.
+	UnitContext units.Context `display:"-"`
+
+	// StyleSet indicates if the styles already been set.
+	StyleSet bool `display:"-"`
+
+	PropertiesNil bool `display:"-"`
+	dotsSet       bool
+	lastUnCtxt    units.Context
 }
 
 func (pc *Path) Defaults() {
 	pc.Off = false
+	pc.Display = true
 	pc.Stroke.Defaults()
 	pc.Fill.Defaults()
 	pc.Transform = math32.Identity2()
+	pc.StyleSet = false
+}
+
+// CopyStyleFrom copies styles from another paint
+func (pc *Path) CopyStyleFrom(cp *Path) {
+	pc.Off = cp.Off
+	pc.UnitContext = cp.UnitContext
+	pc.Stroke = cp.Stroke
+	pc.Fill = cp.Fill
+	pc.VectorEffect = cp.VectorEffect
+}
+
+// SetStyleProperties sets path values based on given property map (name: value
+// pairs), inheriting elements as appropriate from parent, and also having a
+// default style for the "initial" setting
+func (pc *Path) SetStyleProperties(parent *Path, properties map[string]any, ctxt colors.Context) {
+	pc.styleFromProperties(parent, properties, ctxt)
+	pc.PropertiesNil = (len(properties) == 0)
+	pc.StyleSet = true
+}
+
+func (pc *Path) FromStyle(st *Style) {
+	pc.UnitContext = st.UnitContext
 }
 
 // ToDotsImpl runs ToDots on unit values, to compile down to raw pixels
@@ -41,6 +83,8 @@ func (pc *Path) ToDotsImpl(uc *units.Context) {
 	pc.Stroke.ToDots(uc)
 	pc.Fill.ToDots(uc)
 }
+
+//////// Stroke and Fill Styles
 
 type FillRules int32 //enums:enum -trim-prefix FillRule -transform lower
 

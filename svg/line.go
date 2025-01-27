@@ -51,7 +51,7 @@ func (g *Line) Render(sv *SVG) {
 		return
 	}
 	pc.DrawLine(g.Start.X, g.Start.Y, g.End.X, g.End.Y)
-	pc.Stroke()
+	pc.DrawStroke()
 	g.BBoxes(sv)
 
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {

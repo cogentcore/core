@@ -11,7 +11,9 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// Paint provides the styling parameters for SVG-style rendering
+// Paint provides the styling parameters for SVG-style rendering,
+// including the Path stroke and fill properties, and font and text
+// properties.
 type Paint struct { //types:add
 	Path
 
@@ -22,37 +24,19 @@ type Paint struct { //types:add
 
 	// TextStyle has the text styling settings.
 	TextStyle Text
-
-	// VectorEffect has various rendering special effects settings.
-	VectorEffect VectorEffects
-
-	// UnitContext has parameters necessary for determining unit sizes.
-	UnitContext units.Context
-
-	// StyleSet indicates if the styles already been set.
-	StyleSet bool
-
-	PropertiesNil bool
-	dotsSet       bool
-	lastUnCtxt    units.Context
 }
 
 func (pc *Paint) Defaults() {
 	pc.Path.Defaults()
-	pc.StyleSet = false
 	pc.FontStyle.Defaults()
 	pc.TextStyle.Defaults()
 }
 
 // CopyStyleFrom copies styles from another paint
 func (pc *Paint) CopyStyleFrom(cp *Paint) {
-	pc.Off = cp.Off
-	pc.UnitContext = cp.UnitContext
-	pc.StrokeStyle = cp.StrokeStyle
-	pc.FillStyle = cp.FillStyle
+	pc.Path.CopyStyleFrom(&cp.Path)
 	pc.FontStyle = cp.FontStyle
 	pc.TextStyle = cp.TextStyle
-	pc.VectorEffect = cp.VectorEffect
 }
 
 // InheritFields from parent

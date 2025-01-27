@@ -11,6 +11,8 @@ import (
 	"cogentcore.org/core/colors"
 )
 
+// todo: replace with proper backend renderer
+
 // SVGStart returns the start of an SVG based on the current context state
 func (pc *Context) SVGStart() string {
 	sz := pc.Image.Bounds().Size()
@@ -24,17 +26,18 @@ func (pc *Context) SVGEnd() string {
 
 // SVGPath generates an SVG path representation of the current Path
 func (pc *Context) SVGPath() string {
-	style := pc.SVGStrokeStyle() + pc.SVGFillStyle()
-	return `<path style="` + style + `" d="` + pc.Path.ToSVGPath() + `"/>\n`
+	// style := pc.SVGStrokeStyle() + pc.SVGFillStyle()
+	// return `<path style="` + style + `" d="` + pc.Path.ToSVGPath() + `"/>\n`
+	return ""
 }
 
 // SVGStrokeStyle returns the style string for current Stroke
 func (pc *Context) SVGStrokeStyle() string {
-	if pc.StrokeStyle.Color == nil {
+	if pc.Stroke.Color == nil {
 		return "stroke:none;"
 	}
 	s := "stroke-width:" + fmt.Sprintf("%g", pc.StrokeWidth()) + ";"
-	switch im := pc.StrokeStyle.Color.(type) {
+	switch im := pc.Stroke.Color.(type) {
 	case *image.Uniform:
 		s += "stroke:" + colors.AsHex(colors.AsRGBA(im)) + ";"
 	}
@@ -44,11 +47,11 @@ func (pc *Context) SVGStrokeStyle() string {
 
 // SVGFillStyle returns the style string for current Fill
 func (pc *Context) SVGFillStyle() string {
-	if pc.FillStyle.Color == nil {
+	if pc.Fill.Color == nil {
 		return "fill:none;"
 	}
 	s := ""
-	switch im := pc.FillStyle.Color.(type) {
+	switch im := pc.Fill.Color.(type) {
 	case *image.Uniform:
 		s += "fill:" + colors.AsHex(colors.AsRGBA(im)) + ";"
 	}

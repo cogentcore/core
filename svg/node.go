@@ -341,7 +341,7 @@ func (g *NodeBase) Style(sv *SVG) {
 	pc.StrokeStyle.Opacity *= pc.FontStyle.Opacity // applies to all
 	pc.FillStyle.Opacity *= pc.FontStyle.Opacity
 
-	pc.Off = !pc.Display || (pc.StrokeStyle.Color == nil && pc.FillStyle.Color == nil)
+	pc.Off = (pc.StrokeStyle.Color == nil && pc.FillStyle.Color == nil)
 }
 
 // AggCSS aggregates css properties
