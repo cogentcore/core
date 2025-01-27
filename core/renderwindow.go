@@ -459,7 +459,10 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 	switch et {
 	case events.WindowPaint:
 		e.SetHandled()
+		rc := w.renderContext()
+		rc.unlock() // one case where we need to break lock
 		w.renderWindow()
+		rc.lock()
 		w.mains.runDeferred() // note: must be outside of locks in renderWindow
 
 	case events.WindowResize:
@@ -636,9 +639,14 @@ func (w *renderWindow) renderContext() *renderContext {
 }
 
 // renderWindow performs all rendering based on current Stages config.
+// It locks and unlocks the renderContext itself, which is necessary so that
+// there is a moment for other goroutines to acquire the lock and get necessary
+// updates through (such as in offscreen testing).
 func (w *renderWindow) renderWindow() {
 	rc := w.renderContext()
+	rc.lock()
 	defer func() {
+		rc.unlock()
 		rc.rebuild = false
 	}()
 	rebuild := rc.rebuild

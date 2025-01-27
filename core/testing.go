@@ -45,12 +45,14 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	for _, kv := range rw.mains.stack.Order {
 		kv.Value.Scene.NeedsRender()
 	}
+	b.AsyncUnlock()
 	rw.renderWindow()
 
 	dw := b.Scene.RenderWindow().SystemWindow.Drawer()
 	img := dw.(getImager).GetImage()
 	imagex.Assert(t, img, filename)
 
+	b.AsyncLock()
 	b.Close()
 	b.AsyncUnlock()
 }
