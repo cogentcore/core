@@ -62,7 +62,7 @@ func intersectionSegment(zs Intersections, a0 math32.Vector2, a Path, b0 math32.
 	} else if a[0] == ArcTo {
 		rx := a[1]
 		ry := a[2]
-		phi := math32.DegToRad(a[3])
+		phi := a[3]
 		large, sweep := toArcFlags(a[4])
 		cx, cy, theta0, theta1 := ellipseToCenter(a0.X, a0.Y, rx, ry, phi, large, sweep, a[5], a[6])
 		if b[0] == LineTo || b[0] == Close {
@@ -75,7 +75,7 @@ func intersectionSegment(zs Intersections, a0 math32.Vector2, a Path, b0 math32.
 		} else if b[0] == ArcTo {
 			rx2 := b[1]
 			ry2 := b[2]
-			phi2 := math32.DegToRad(b[3])
+			phi2 := b[3]
 			large2, sweep2 := toArcFlags(b[4])
 			cx2, cy2, theta20, theta21 := ellipseToCenter(b0.X, b0.Y, rx2, ry2, phi2, large2, sweep2, b[5], b[6])
 			zs = intersectionEllipseEllipse(zs, math32.Vector2{cx, cy}, math32.Vector2{rx, ry}, phi, theta0, theta1, math32.Vector2{cx2, cy2}, math32.Vector2{rx2, ry2}, phi2, theta20, theta21)

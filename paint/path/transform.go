@@ -229,7 +229,7 @@ func (p Path) Markers(first, mid, last Path, align bool) []Path {
 			pos, dir := coordPos[i], coordDir[i]
 			m := math32.Identity2().Translate(pos.X, pos.Y)
 			if align {
-				m = m.Rotate(math32.RadToDeg(Angle(dir)))
+				m = m.Rotate(Angle(dir))
 			}
 			markers = append(markers, q.Clone().Transform(m))
 		}
