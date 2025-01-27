@@ -276,7 +276,7 @@ func (sm *stages) runDeferred() {
 		}
 
 		// If we own popups, we also need to runDeferred on them.
-		if st.Main == st && st.popups != nil {
+		if st.Main == st && st.popups.stack.Len() > 0 {
 			st.popups.runDeferred()
 		}
 	}
