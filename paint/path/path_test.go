@@ -169,7 +169,7 @@ func TestPathCommands(t *testing.T) {
 }
 
 func TestPathCrossingsWindings(t *testing.T) {
-	t.Skip("tmp")
+	t.Skip("TODO: fix this test!!")
 	var tts = []struct {
 		p         string
 		pos       math32.Vector2
@@ -424,7 +424,7 @@ func TestPathLength(t *testing.T) {
 
 /*
 func TestPathTransform(t *testing.T) {
-	t.Skip("tmp")
+	t.Skip("TODO: fix this test!!")
 	var tts = []struct {
 		p string
 		m Matrix
@@ -445,7 +445,7 @@ func TestPathTransform(t *testing.T) {
 */
 
 func TestPathReplace(t *testing.T) {
-	t.Skip("tmp")
+	t.Skip("TODO: fix this test!!")
 	line := func(p0, p1 math32.Vector2) Path {
 		p := Path{}
 		p.MoveTo(p0.X, p0.Y)
@@ -493,7 +493,7 @@ func TestPathReplace(t *testing.T) {
 }
 
 func TestPathMarkers(t *testing.T) {
-	t.Skip("tmp")
+	t.Skip("TODO: fix this test!!")
 	start := MustParseSVGPath("L1 0L0 1z")
 	mid := MustParseSVGPath("M-1 0A1 1 0 0 0 1 0z")
 	end := MustParseSVGPath("L-1 0L0 1z")
@@ -528,7 +528,7 @@ func TestPathMarkers(t *testing.T) {
 }
 
 func TestPathMarkersAligned(t *testing.T) {
-	t.Skip("tmp")
+	t.Skip("TODO: fix this test!!")
 	start := MustParseSVGPath("L1 0L0 1z")
 	mid := MustParseSVGPath("M-1 0A1 1 0 0 0 1 0z")
 	end := MustParseSVGPath("L-1 0L0 1z")
