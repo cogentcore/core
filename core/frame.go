@@ -150,15 +150,10 @@ func (fr *Frame) Init() {
 	// We treat slide events on frames as scroll events.
 	fr.On(events.SlideMove, func(e events.Event) {
 		// We must negate the delta for "natural" scrolling behavior.
-		if fr.AbilityIs(abilities.ScrollableUnfocused) || fr.Styles.Is(states.Focused) {
-			del := math32.FromPoint(e.PrevDelta()).MulScalar(-0.034)
-			fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
-		}
+		del := math32.FromPoint(e.PrevDelta()).MulScalar(-0.034)
+		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 	fr.On(events.SlideStop, func(e events.Event) {
-		if !(fr.AbilityIs(abilities.ScrollableUnfocused) || fr.Styles.Is(states.Focused)) {
-			return
-		}
 		// If we have enough velocity, we continue scrolling over the
 		// next second in a goroutine while slowly decelerating for a
 		// smoother experience.

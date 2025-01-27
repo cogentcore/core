@@ -582,7 +582,7 @@ func (ed *Editor) handleMouse() {
 		}
 		ed.NeedsRender()
 	})
-	ed.On(events.SlideStart, func(e events.Event) { // note: usual is Click..
+	ed.On(events.SlideStart, func(e events.Event) {
 		e.SetHandled()
 		ed.SetState(true, states.Sliding)
 		pt := ed.PointToRelPos(e.Pos())
