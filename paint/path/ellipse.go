@@ -59,7 +59,12 @@ func ellipseLength(rx, ry, theta1, theta2 float32) float32 {
 	return gaussLegendre5(speed, theta1, theta2)
 }
 
-// ellipseToCenter converts to the center arc format and returns (centerX, centerY, angleFrom, angleTo) with angles in radians. When angleFrom with range [0, 2*PI) is bigger than angleTo with range (-2*PI, 4*PI), the ellipse runs clockwise. The angles are from before the ellipse has been stretched and rotated. See https://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
+// ellipseToCenter converts to the center arc format and returns
+// (centerX, centerY, angleFrom, angleTo) with angles in radians.
+// When angleFrom with range [0, 2*PI) is bigger than angleTo with range
+// (-2*PI, 4*PI), the ellipse runs clockwise.
+// The angles are from before the ellipse has been stretched and rotated.
+// See https://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
 func ellipseToCenter(x1, y1, rx, ry, phi float32, large, sweep bool, x2, y2 float32) (float32, float32, float32, float32) {
 	if Equal(x1, x2) && Equal(y1, y2) {
 		return x1, y1, 0.0, 0.0
@@ -240,7 +245,7 @@ func xmonotoneEllipticArc(start math32.Vector2, rx, ry, phi float32, large, swee
 		t += sign * dt
 
 		pos := EllipsePos(rx, ry, phi, cx, cy, t)
-		p.ArcTo(rx, ry, phi*180.0/math32.Pi, false, sweep, pos.X, pos.Y)
+		p.ArcTo(rx, ry, phi, false, sweep, pos.X, pos.Y)
 		left = !left
 	}
 	return p

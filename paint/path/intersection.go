@@ -17,8 +17,8 @@ import (
 // see https://github.com/w8r/bezier-intersect
 // see https://cs.nyu.edu/exact/doc/subdiv1.pdf
 
-// intersect for path segments a and b, starting at a0 and b0. Note that all intersection functions
-// return upto two intersections.
+// intersect for path segments a and b, starting at a0 and b0.
+// Note that all intersection functions return up to two intersections.
 func intersectionSegment(zs Intersections, a0 math32.Vector2, a Path, b0 math32.Vector2, b Path) Intersections {
 	n := len(zs)
 	swapCurves := false
@@ -32,7 +32,7 @@ func intersectionSegment(zs Intersections, a0 math32.Vector2, a Path, b0 math32.
 		} else if b[0] == ArcTo {
 			rx := b[1]
 			ry := b[2]
-			phi := b[3] * math32.Pi / 180.0
+			phi := b[3]
 			large, sweep := toArcFlags(b[4])
 			cx, cy, theta0, theta1 := ellipseToCenter(b0.X, b0.Y, rx, ry, phi, large, sweep, b[5], b[6])
 			zs = intersectionLineEllipse(zs, a0, math32.Vec2(a[1], a[2]), math32.Vector2{cx, cy}, math32.Vector2{rx, ry}, phi, theta0, theta1)
@@ -122,7 +122,7 @@ func (z Intersection) String() string {
 	if z.Same {
 		extra = " Same"
 	}
-	return fmt.Sprintf("({%v,%v} t={%v,%v} dir={%v°,%v°}%v)", numEps(z.Vector2.X), numEps(z.Vector2.Y), numEps(z.T[0]), numEps(z.T[1]), numEps(angleNorm(z.Dir[0])*180.0/math32.Pi), numEps(angleNorm(z.Dir[1])*180.0/math32.Pi), extra)
+	return fmt.Sprintf("({%v,%v} t={%v,%v} dir={%v°,%v°}%v)", numEps(z.Vector2.X), numEps(z.Vector2.Y), numEps(z.T[0]), numEps(z.T[1]), numEps(math32.RadToDeg(angleNorm(z.Dir[0]))), numEps(math32.RadToDeg(angleNorm(z.Dir[1]))), extra)
 }
 
 type Intersections []Intersection

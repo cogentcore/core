@@ -438,11 +438,12 @@ type pathStrokeState struct {
 	r0, r1 float32        // radius of start and end
 
 	cp1, cp2                    math32.Vector2 // Béziers
-	rx, ry, rot, theta0, theta1 float32        // arcs
+	rx, ry, phi, theta0, theta1 float32        // arcs
 	large, sweep                bool           // arcs
 }
 
-// offset returns the rhs and lhs paths from offsetting a path (must not have subpaths). It closes rhs and lhs when p is closed as well.
+// offset returns the rhs and lhs paths from offsetting a path (must not have subpaths).
+// It closes rhs and lhs when p is closed as well.
 func (p Path) offset(halfWidth float32, cr Capper, jr Joiner, strokeOpen bool, tolerance float32) (Path, Path) {
 	// only non-empty paths are evaluated
 	closed := false
@@ -510,7 +511,7 @@ func (p Path) offset(halfWidth float32, cr Capper, jr Joiner, strokeOpen bool, t
 				r1:     r1,
 				rx:     rx,
 				ry:     ry,
-				rot:    phi * 180.0 / math32.Pi,
+				phi:    phi,
 				theta0: theta0,
 				theta1: theta1,
 				large:  large,
@@ -565,13 +566,13 @@ func (p Path) offset(halfWidth float32, cr Capper, jr Joiner, strokeOpen bool, t
 				dr = -dr
 			}
 
-			rLambda := ellipseRadiiCorrection(rStart, cur.rx+dr, cur.ry+dr, cur.rot*math32.Pi/180.0, rEnd)
-			lLambda := ellipseRadiiCorrection(lStart, cur.rx-dr, cur.ry-dr, cur.rot*math32.Pi/180.0, lEnd)
+			rLambda := ellipseRadiiCorrection(rStart, cur.rx+dr, cur.ry+dr, cur.phi, rEnd)
+			lLambda := ellipseRadiiCorrection(lStart, cur.rx-dr, cur.ry-dr, cur.phi, lEnd)
 			if rLambda <= 1.0 && lLambda <= 1.0 {
 				rLambda, lLambda = 1.0, 1.0
 			}
-			rhs.ArcTo(rLambda*(cur.rx+dr), rLambda*(cur.ry+dr), cur.rot, cur.large, cur.sweep, rEnd.X, rEnd.Y)
-			lhs.ArcTo(lLambda*(cur.rx-dr), lLambda*(cur.ry-dr), cur.rot, cur.large, cur.sweep, lEnd.X, lEnd.Y)
+			rhs.ArcTo(rLambda*(cur.rx+dr), rLambda*(cur.ry+dr), cur.phi, cur.large, cur.sweep, rEnd.X, rEnd.Y)
+			lhs.ArcTo(lLambda*(cur.rx-dr), lLambda*(cur.ry-dr), cur.phi, cur.large, cur.sweep, lEnd.X, lEnd.Y)
 		}
 
 		// optimize inner bend
