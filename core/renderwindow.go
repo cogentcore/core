@@ -459,10 +459,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 	switch et {
 	case events.WindowPaint:
 		e.SetHandled()
-		rc := w.renderContext()
-		rc.unlock() // one case where we need to break lock
 		w.renderWindow()
-		rc.lock()
 		w.mains.runDeferred() // note: must be outside of locks in renderWindow
 
 	case events.WindowResize:
@@ -639,14 +636,10 @@ func (w *renderWindow) renderContext() *renderContext {
 }
 
 // renderWindow performs all rendering based on current Stages config.
-// It sets the lock on RenderContext Mutex, so nothing else can update
-// during this time.
 func (w *renderWindow) renderWindow() {
 	rc := w.renderContext()
-	rc.lock()
 	defer func() {
 		rc.rebuild = false
-		rc.unlock()
 	}()
 	rebuild := rc.rebuild
 
