@@ -271,7 +271,6 @@ func (em *Events) handlePosEvent(e events.Event) {
 				return
 			}
 			em.scroll = nil
-
 		}
 	}
 
@@ -322,10 +321,13 @@ func (em *Events) handlePosEvent(e events.Event) {
 			if press == nil && (wb.Styles.Abilities.IsPressable() || sc.renderBBoxes) {
 				press = w
 			}
-			if dragPress == nil && wb.Styles.Abilities.Is(abilities.Draggable) {
+			if dragPress == nil && wb.AbilityIs(abilities.Draggable) {
 				dragPress = w
 			}
-			if slidePress == nil && wb.Styles.Abilities.Is(abilities.Slideable) {
+			if slidePress == nil && wb.AbilityIs(abilities.Slideable) {
+				if !wb.AbilityIs(abilities.ScrollableUnfocused) && !wb.StateIs(states.Focused) {
+					continue
+				}
 				slidePress = w
 			}
 			if repeatClick == nil && wb.Styles.Abilities.Is(abilities.RepeatClickable) {
