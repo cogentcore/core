@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
-	"github.com/tdewolff/test"
 )
 
 func TestPathEmpty(t *testing.T) {
@@ -385,7 +384,7 @@ func TestPathBounds(t *testing.T) {
 			Epsilon = origEpsilon
 			bounds := MustParseSVGPath(tt.p).Bounds()
 			Epsilon = 1e-6
-			test.T(t, bounds.Min.X, tt.bounds.Min.X)
+			tolEqualVec2(t, bounds.Min, tt.bounds.Min)
 		})
 	}
 	Epsilon = origEpsilon
@@ -415,8 +414,11 @@ func TestPathLength(t *testing.T) {
 	for _, tt := range tts {
 		t.Run(tt.p, func(t *testing.T) {
 			length := MustParseSVGPath(tt.p).Length()
-			if math32.Abs(tt.length-length)/length > 0.01 {
-				test.Fail(t, length, "!=", tt.length, "±1%")
+			if tt.length == 0.0 {
+				assert.True(t, length == 0)
+			} else {
+				lerr := math32.Abs(tt.length-length) / length
+				assert.True(t, lerr < 0.01)
 			}
 		})
 	}
@@ -680,7 +682,7 @@ func TestDashCanonical(t *testing.T) {
 				}
 			}
 			if diff {
-				test.Fail(t, fmt.Sprintf("%v +%v != %v +%v", dashes, offset, tt.dashes, tt.offset))
+				t.Errorf("%v +%v != %v +%v", dashes, offset, tt.dashes, tt.offset)
 			}
 		})
 	}
@@ -776,7 +778,7 @@ func TestPathParseSVGPath(t *testing.T) {
 	for _, tt := range tts {
 		t.Run(tt.p, func(t *testing.T) {
 			p, err := ParseSVGPath(tt.p)
-			test.Error(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, MustParseSVGPath(tt.r), p)
 		})
 	}

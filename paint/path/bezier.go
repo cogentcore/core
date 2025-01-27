@@ -236,7 +236,7 @@ func cubicBezierSplit(p0, p1, p2, p3 math32.Vector2, t float32) (math32.Vector2,
 	return q0, q1, q2, q3, r0, r1, r2, r3
 }
 
-func addCubicBezierLine(p Path, p0, p1, p2, p3 math32.Vector2, t, d float32) {
+func addCubicBezierLine(p *Path, p0, p1, p2, p3 math32.Vector2, t, d float32) {
 	if EqualPoint(p0, p3) && (EqualPoint(p0, p1) || EqualPoint(p0, p2)) {
 		// Bézier has p0=p1=p3 or p0=p2=p3 and thus has no surface or length
 		return
@@ -337,7 +337,7 @@ func FlattenCubicBezier(p0, p1, p2, p3 math32.Vector2, tolerance float32) Path {
 }
 
 // split the curve and replace it by lines as long as (maximum deviation <= tolerance) is maintained
-func FlattenSmoothCubicBezier(p Path, p0, p1, p2, p3 math32.Vector2, d, tolerance float32) {
+func FlattenSmoothCubicBezier(p *Path, p0, p1, p2, p3 math32.Vector2, d, tolerance float32) {
 	t := float32(0.0)
 	for t < 1.0 {
 		D := p1.Sub(p0)
@@ -456,7 +456,7 @@ func strokeCubicBezier(p0, p1, p2, p3 math32.Vector2, d, tolerance float32) Path
 	t1, t2 := findInflectionPointCubicBezier(p0, p1, p2, p3)
 	if math32.IsNaN(t1) && math32.IsNaN(t2) {
 		// There are no inflection points or cusps, approximate linearly by subdivision.
-		FlattenSmoothCubicBezier(p, p0, p1, p2, p3, d, tolerance)
+		FlattenSmoothCubicBezier(&p, p0, p1, p2, p3, d, tolerance)
 		return p
 	}
 
@@ -467,28 +467,28 @@ func strokeCubicBezier(p0, p1, p2, p3 math32.Vector2, d, tolerance float32) Path
 
 	if math32.IsNaN(t2) && t1min <= 0.0 && 1.0 <= t1max {
 		// There is no second inflection point, and the first inflection point can be entirely approximated linearly.
-		addCubicBezierLine(p, p0, p1, p2, p3, 1.0, d)
+		addCubicBezierLine(&p, p0, p1, p2, p3, 1.0, d)
 		return p
 	}
 
 	if 0.0 < t1min {
 		// Flatten up to t1min
 		q0, q1, q2, q3, _, _, _, _ := cubicBezierSplit(p0, p1, p2, p3, t1min)
-		FlattenSmoothCubicBezier(p, q0, q1, q2, q3, d, tolerance)
+		FlattenSmoothCubicBezier(&p, q0, q1, q2, q3, d, tolerance)
 	}
 
 	if 0.0 < t1max && t1max < 1.0 && t1max < t2min {
 		// t1 and t2 ranges do not overlap, approximate t1 linearly
 		_, _, _, _, q0, q1, q2, q3 := cubicBezierSplit(p0, p1, p2, p3, t1max)
-		addCubicBezierLine(p, q0, q1, q2, q3, 0.0, d)
+		addCubicBezierLine(&p, q0, q1, q2, q3, 0.0, d)
 		if 1.0 <= t2min {
 			// No t2 present, approximate the rest linearly by subdivision
-			FlattenSmoothCubicBezier(p, q0, q1, q2, q3, d, tolerance)
+			FlattenSmoothCubicBezier(&p, q0, q1, q2, q3, d, tolerance)
 			return p
 		}
 	} else if 1.0 <= t2min {
 		// No t2 present and t1max is past the end of the curve, approximate linearly
-		addCubicBezierLine(p, p0, p1, p2, p3, 1.0, d)
+		addCubicBezierLine(&p, p0, p1, p2, p3, 1.0, d)
 		return p
 	}
 
@@ -497,24 +497,24 @@ func strokeCubicBezier(p0, p1, p2, p3 math32.Vector2, d, tolerance float32) Path
 		if t2min < t1max {
 			// t2 range starts inside t1 range, approximate t1 range linearly
 			_, _, _, _, q0, q1, q2, q3 := cubicBezierSplit(p0, p1, p2, p3, t1max)
-			addCubicBezierLine(p, q0, q1, q2, q3, 0.0, d)
+			addCubicBezierLine(&p, q0, q1, q2, q3, 0.0, d)
 		} else {
 			// no overlap
 			_, _, _, _, q0, q1, q2, q3 := cubicBezierSplit(p0, p1, p2, p3, t1max)
 			t2minq := (t2min - t1max) / (1 - t1max)
 			q0, q1, q2, q3, _, _, _, _ = cubicBezierSplit(q0, q1, q2, q3, t2minq)
-			FlattenSmoothCubicBezier(p, q0, q1, q2, q3, d, tolerance)
+			FlattenSmoothCubicBezier(&p, q0, q1, q2, q3, d, tolerance)
 		}
 	}
 
 	// handle (the rest of) t2
 	if t2max < 1.0 {
 		_, _, _, _, q0, q1, q2, q3 := cubicBezierSplit(p0, p1, p2, p3, t2max)
-		addCubicBezierLine(p, q0, q1, q2, q3, 0.0, d)
-		FlattenSmoothCubicBezier(p, q0, q1, q2, q3, d, tolerance)
+		addCubicBezierLine(&p, q0, q1, q2, q3, 0.0, d)
+		FlattenSmoothCubicBezier(&p, q0, q1, q2, q3, d, tolerance)
 	} else {
 		// t2max extends beyond 1
-		addCubicBezierLine(p, p0, p1, p2, p3, 1.0, d)
+		addCubicBezierLine(&p, p0, p1, p2, p3, 1.0, d)
 	}
 	return p
 }

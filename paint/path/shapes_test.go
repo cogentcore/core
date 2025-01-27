@@ -11,29 +11,45 @@ import (
 	"fmt"
 	"testing"
 
+	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
-	"github.com/tdewolff/test"
 )
 
-func TestEllipse(t *testing.T) {
-	test.T(t, EllipsePos(2.0, 1.0, math32.Pi/2.0, 1.0, 0.5, 0.0), math32.Vector2{1.0, 2.5})
-	test.T(t, ellipseDeriv(2.0, 1.0, math32.Pi/2.0, true, 0.0), math32.Vector2{-1.0, 0.0})
-	test.T(t, ellipseDeriv(2.0, 1.0, math32.Pi/2.0, false, 0.0), math32.Vector2{1.0, 0.0})
-	test.T(t, ellipseDeriv2(2.0, 1.0, math32.Pi/2.0, 0.0), math32.Vector2{0.0, -2.0})
-	test.T(t, ellipseCurvatureRadius(2.0, 1.0, true, 0.0), 0.5)
-	test.T(t, ellipseCurvatureRadius(2.0, 1.0, false, 0.0), -0.5)
-	test.T(t, ellipseCurvatureRadius(2.0, 1.0, true, math32.Pi/2.0), 4.0)
-	if !math32.IsNaN(ellipseCurvatureRadius(2.0, 0.0, true, 0.0)) {
-		test.Fail(t)
+func tolEqualVec2(t *testing.T, a, b math32.Vector2, tols ...float64) {
+	tol := 1.0e-4
+	if len(tols) == 1 {
+		tol = tols[0]
 	}
-	test.T(t, ellipseNormal(2.0, 1.0, math32.Pi/2.0, true, 0.0, 1.0), math32.Vector2{0.0, 1.0})
-	test.T(t, ellipseNormal(2.0, 1.0, math32.Pi/2.0, false, 0.0, 1.0), math32.Vector2{0.0, -1.0})
+	assert.InDelta(t, b.X, a.X, tol)
+	assert.InDelta(t, b.Y, a.Y, tol)
+}
+
+func tolEqualBox2(t *testing.T, a, b math32.Box2, tols ...float64) {
+	tol := 1.0e-4
+	if len(tols) == 1 {
+		tol = tols[0]
+	}
+	tolEqualVec2(t, b.Min, a.Min, tol)
+	tolEqualVec2(t, b.Max, a.Max, tol)
+}
+
+func TestEllipse(t *testing.T) {
+	tolEqualVec2(t, EllipsePos(2.0, 1.0, math32.Pi/2.0, 1.0, 0.5, 0.0), math32.Vector2{1.0, 2.5})
+	tolEqualVec2(t, ellipseDeriv(2.0, 1.0, math32.Pi/2.0, true, 0.0), math32.Vector2{-1.0, 0.0})
+	tolEqualVec2(t, ellipseDeriv(2.0, 1.0, math32.Pi/2.0, false, 0.0), math32.Vector2{1.0, 0.0})
+	tolEqualVec2(t, ellipseDeriv2(2.0, 1.0, math32.Pi/2.0, 0.0), math32.Vector2{0.0, -2.0})
+	assert.InDelta(t, ellipseCurvatureRadius(2.0, 1.0, true, 0.0), 0.5, 1.0e-5)
+	assert.InDelta(t, ellipseCurvatureRadius(2.0, 1.0, false, 0.0), -0.5, 1.0e-5)
+	assert.InDelta(t, ellipseCurvatureRadius(2.0, 1.0, true, math32.Pi/2.0), 4.0, 1.0e-5)
+	assert.True(t, math32.IsNaN(ellipseCurvatureRadius(2.0, 0.0, true, 0.0)))
+	tolEqualVec2(t, ellipseNormal(2.0, 1.0, math32.Pi/2.0, true, 0.0, 1.0), math32.Vector2{0.0, 1.0})
+	tolEqualVec2(t, ellipseNormal(2.0, 1.0, math32.Pi/2.0, false, 0.0, 1.0), math32.Vector2{0.0, -1.0})
 
 	// https://www.wolframalpha.com/input/?i=arclength+x%28t%29%3D2*cos+t%2C+y%28t%29%3Dsin+t+for+t%3D0+to+0.5pi
-	assert.Equal(t, ellipseLength(2.0, 1.0, 0.0, math32.Pi/2.0), 2.4221102220)
+	assert.InDelta(t, ellipseLength(2.0, 1.0, 0.0, math32.Pi/2.0), 2.4221102220, 1.0e-5)
 
-	assert.Equal(t, ellipseRadiiCorrection(math32.Vector2{0.0, 0.0}, 0.1, 0.1, 0.0, math32.Vector2{1.0, 0.0}), 5.0)
+	assert.InDelta(t, ellipseRadiiCorrection(math32.Vector2{0.0, 0.0}, 0.1, 0.1, 0.0, math32.Vector2{1.0, 0.0}), 5.0, 1.0e-5)
 }
 
 func TestEllipseToCenter(t *testing.T) {
@@ -66,7 +82,7 @@ func TestEllipseToCenter(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("(%g,%g) %g %g %g %v %v (%g,%g)", tt.x1, tt.y1, tt.rx, tt.ry, tt.phi, tt.large, tt.sweep, tt.x2, tt.y2), func(t *testing.T) {
 			cx, cy, theta0, theta1 := ellipseToCenter(tt.x1, tt.y1, tt.rx, tt.ry, tt.phi, tt.large, tt.sweep, tt.x2, tt.y2)
-			assert.Equal(t, []float32{cx, cy, theta0, theta1}, []float32{tt.cx, tt.cy, tt.theta0, tt.theta1})
+			tolassert.EqualTolSlice(t, []float32{cx, cy, theta0, theta1}, []float32{tt.cx, tt.cy, tt.theta0, tt.theta1}, 1.0e-2)
 		})
 	}
 
@@ -109,41 +125,41 @@ func TestEllipseToCenter(t *testing.T) {
 
 func TestEllipseSplit(t *testing.T) {
 	mid, large0, large1, ok := ellipseSplit(2.0, 1.0, 0.0, 0.0, 0.0, math32.Pi, 0.0, math32.Pi/2.0)
-	test.That(t, ok)
-	test.T(t, mid, math32.Vector2{0.0, 1.0})
-	test.That(t, !large0)
-	test.That(t, !large1)
+	assert.True(t, ok)
+	tolEqualVec2(t, math32.Vec2(0, 1), mid, 1.0e-7)
+	assert.True(t, !large0)
+	assert.True(t, !large1)
 
 	_, _, _, ok = ellipseSplit(2.0, 1.0, 0.0, 0.0, 0.0, math32.Pi, 0.0, -math32.Pi/2.0)
-	test.That(t, !ok)
+	assert.True(t, !ok)
 
 	mid, large0, large1, ok = ellipseSplit(2.0, 1.0, 0.0, 0.0, 0.0, 0.0, math32.Pi*7.0/4.0, math32.Pi/2.0)
-	test.That(t, ok)
-	test.T(t, mid, math32.Vector2{0.0, 1.0})
-	test.That(t, !large0)
-	test.That(t, large1)
+	assert.True(t, ok)
+	tolEqualVec2(t, math32.Vec2(0, 1), mid, 1.0e-7)
+	assert.True(t, !large0)
+	assert.True(t, large1)
 
 	mid, large0, large1, ok = ellipseSplit(2.0, 1.0, 0.0, 0.0, 0.0, 0.0, math32.Pi*7.0/4.0, math32.Pi*3.0/2.0)
-	test.That(t, ok)
-	test.T(t, mid, math32.Vector2{0.0, -1.0})
-	test.That(t, large0)
-	test.That(t, !large1)
+	assert.True(t, ok)
+	tolEqualVec2(t, math32.Vec2(0, -1), mid, 1.0e-7)
+	assert.True(t, large0)
+	assert.True(t, !large1)
 }
 
 func TestArcToQuad(t *testing.T) {
-	test.T(t, arcToQuad(math32.Vector2{0.0, 0.0}, 100.0, 100.0, 0.0, false, false, math32.Vector2{200.0, 0.0}), MustParseSVGPath("Q0 100 100 100Q200 100 200 0"))
+	assert.InDeltaSlice(t, arcToQuad(math32.Vector2{0.0, 0.0}, 100.0, 100.0, 0.0, false, false, math32.Vector2{200.0, 0.0}), MustParseSVGPath("Q0 100 100 100Q200 100 200 0"), 1.0e-5)
 }
 
 func TestArcToCube(t *testing.T) {
 	// defer setEpsilon(1e-3)()
-	test.T(t, arcToCube(math32.Vector2{0.0, 0.0}, 100.0, 100.0, 0.0, false, false, math32.Vector2{200.0, 0.0}), MustParseSVGPath("C0 54.858 45.142 100 100 100C154.858 100 200 54.858 200 0"))
+	assert.InDeltaSlice(t, arcToCube(math32.Vector2{0.0, 0.0}, 100.0, 100.0, 0.0, false, false, math32.Vector2{200.0, 0.0}), MustParseSVGPath("C0 54.858 45.142 100 100 100C154.858 100 200 54.858 200 0"), 1.0e-3)
 }
 
 func TestXMonotoneEllipse(t *testing.T) {
-	test.T(t, xmonotoneEllipticArc(math32.Vector2{0.0, 0.0}, 100.0, 50.0, 0.0, false, false, math32.Vector2{0.0, 100.0}), MustParseSVGPath("M0 0A100 50 0 0 0 -100 50A100 50 0 0 0 0 100"))
+	assert.InDeltaSlice(t, xmonotoneEllipticArc(math32.Vector2{0.0, 0.0}, 100.0, 50.0, 0.0, false, false, math32.Vector2{0.0, 100.0}), MustParseSVGPath("M0 0A100 50 0 0 0 -100 50A100 50 0 0 0 0 100"), 1.0e-5)
 
 	// defer setEpsilon(1e-3)()
-	test.T(t, xmonotoneEllipticArc(math32.Vector2{0.0, 0.0}, 50.0, 25.0, math32.Pi/4.0, false, false, math32.Vector2{100.0 / math32.Sqrt(2.0), 100.0 / math32.Sqrt(2.0)}), MustParseSVGPath("M0 0A50 25 45 0 0 -4.1731 11.6383A50 25 45 0 0 70.71067811865474 70.71067811865474"))
+	assert.InDeltaSlice(t, xmonotoneEllipticArc(math32.Vector2{0.0, 0.0}, 50.0, 25.0, math32.Pi/4.0, false, false, math32.Vector2{100.0 / math32.Sqrt(2.0), 100.0 / math32.Sqrt(2.0)}), MustParseSVGPath("M0 0A50 25 45 0 0 -4.1731 11.6383A50 25 45 0 0 70.71067811865474 70.71067811865474"), 1.0e-4)
 }
 
 func TestFlattenEllipse(t *testing.T) {
@@ -151,25 +167,25 @@ func TestFlattenEllipse(t *testing.T) {
 	tolerance := float32(1.0)
 
 	// circular
-	test.T(t, FlattenEllipticArc(math32.Vector2{0.0, 0.0}, 100.0, 100.0, 0.0, false, false, math32.Vector2{200.0, 0.0}, tolerance), MustParseSVGPath("M0 0L3.855789619238635 30.62763190857508L20.85117757566036 62.58773789575414L48.032233398236286 86.49342322102808L81.90102498412543 99.26826345535623L118.09897501587452 99.26826345535625L151.96776660176369 86.4934232210281L179.1488224243396 62.58773789575416L196.14421038076136 30.62763190857507L200 0"))
+	assert.InDeltaSlice(t, FlattenEllipticArc(math32.Vector2{0.0, 0.0}, 100.0, 100.0, 0.0, false, false, math32.Vector2{200.0, 0.0}, tolerance), MustParseSVGPath("M0 0L3.855789619238635 30.62763190857508L20.85117757566036 62.58773789575414L48.032233398236286 86.49342322102808L81.90102498412543 99.26826345535623L118.09897501587452 99.26826345535625L151.96776660176369 86.4934232210281L179.1488224243396 62.58773789575416L196.14421038076136 30.62763190857507L200 0"), 1.0e-4)
 }
 
 func TestQuadraticBezier(t *testing.T) {
 	p1, p2 := quadraticToCubicBezier(math32.Vector2{0.0, 0.0}, math32.Vector2{1.5, 0.0}, math32.Vector2{3.0, 0.0})
-	test.T(t, p1, math32.Vector2{1.0, 0.0})
-	test.T(t, p2, math32.Vector2{2.0, 0.0})
+	tolEqualVec2(t, p1, math32.Vector2{1.0, 0.0})
+	tolEqualVec2(t, p2, math32.Vector2{2.0, 0.0})
 
 	p1, p2 = quadraticToCubicBezier(math32.Vector2{0.0, 0.0}, math32.Vector2{1.0, 0.0}, math32.Vector2{1.0, 1.0})
-	test.T(t, p1, math32.Vector2{2.0 / 3.0, 0.0})
-	test.T(t, p2, math32.Vector2{1.0, 1.0 / 3.0})
+	tolEqualVec2(t, p1, math32.Vector2{2.0 / 3.0, 0.0})
+	tolEqualVec2(t, p2, math32.Vector2{1.0, 1.0 / 3.0})
 
 	p0, p1, p2, q0, q1, q2 := quadraticBezierSplit(math32.Vector2{0.0, 0.0}, math32.Vector2{1.0, 0.0}, math32.Vector2{1.0, 1.0}, 0.5)
-	test.T(t, p0, math32.Vector2{0.0, 0.0})
-	test.T(t, p1, math32.Vector2{0.5, 0.0})
-	test.T(t, p2, math32.Vector2{0.75, 0.25})
-	test.T(t, q0, math32.Vector2{0.75, 0.25})
-	test.T(t, q1, math32.Vector2{1.0, 0.5})
-	test.T(t, q2, math32.Vector2{1.0, 1.0})
+	tolEqualVec2(t, p0, math32.Vector2{0.0, 0.0})
+	tolEqualVec2(t, p1, math32.Vector2{0.5, 0.0})
+	tolEqualVec2(t, p2, math32.Vector2{0.75, 0.25})
+	tolEqualVec2(t, q0, math32.Vector2{0.75, 0.25})
+	tolEqualVec2(t, q1, math32.Vector2{1.0, 0.5})
+	tolEqualVec2(t, q2, math32.Vector2{1.0, 1.0})
 }
 
 func TestQuadraticBezierPos(t *testing.T) {
@@ -186,7 +202,7 @@ func TestQuadraticBezierPos(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v%v%v--%v", tt.p0, tt.p1, tt.p2, tt.t), func(t *testing.T) {
 			q := quadraticBezierPos(tt.p0, tt.p1, tt.p2, tt.t)
-			test.T(t, q, tt.q)
+			tolEqualVec2(t, q, tt.q, 1.0e-5)
 		})
 	}
 }
@@ -205,7 +221,7 @@ func TestQuadraticBezierDeriv(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v%v%v--%v", tt.p0, tt.p1, tt.p2, tt.t), func(t *testing.T) {
 			q := quadraticBezierDeriv(tt.p0, tt.p1, tt.p2, tt.t)
-			test.T(t, q, tt.q)
+			tolEqualVec2(t, q, tt.q, 1.0e-5)
 		})
 	}
 }
@@ -253,7 +269,7 @@ func TestQuadraticBezierDistance(t *testing.T) {
 }
 
 func TestXMonotoneQuadraticBezier(t *testing.T) {
-	test.T(t, xmonotoneQuadraticBezier(math32.Vector2{2.0, 0.0}, math32.Vector2{0.0, 1.0}, math32.Vector2{2.0, 2.0}), MustParseSVGPath("M2 0Q1 0.5 1 1Q1 1.5 2 2"))
+	assert.InDeltaSlice(t, xmonotoneQuadraticBezier(math32.Vector2{2.0, 0.0}, math32.Vector2{0.0, 1.0}, math32.Vector2{2.0, 2.0}), MustParseSVGPath("M2 0Q1 0.5 1 1Q1 1.5 2 2"), 1.0e-5)
 }
 
 func TestQuadraticBezierFlatten(t *testing.T) {
@@ -272,7 +288,7 @@ func TestQuadraticBezierFlatten(t *testing.T) {
 			p2 := math32.Vector2{path[7], path[8]}
 
 			p := FlattenQuadraticBezier(p0, p1, p2, tolerance)
-			test.T(t, p, MustParseSVGPath(tt.expected))
+			assert.InDeltaSlice(t, p, MustParseSVGPath(tt.expected), 1.0e-5)
 		})
 	}
 }
@@ -292,7 +308,7 @@ func TestCubicBezierPos(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v%v%v%v--%v", tt.p0, tt.p1, tt.p2, tt.p3, tt.t), func(t *testing.T) {
 			q := cubicBezierPos(tt.p0, tt.p1, tt.p2, tt.p3, tt.t)
-			test.T(t, q, tt.q)
+			tolEqualVec2(t, q, tt.q, 1.0e-5)
 		})
 	}
 }
@@ -312,7 +328,7 @@ func TestCubicBezierDeriv(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v%v%v%v--%v", tt.p0, tt.p1, tt.p2, tt.p3, tt.t), func(t *testing.T) {
 			q := cubicBezierDeriv(tt.p0, tt.p1, tt.p2, tt.p3, tt.t)
-			test.T(t, q, tt.q)
+			tolEqualVec2(t, q, tt.q, 1.0e-5)
 		})
 	}
 }
@@ -332,7 +348,7 @@ func TestCubicBezierDeriv2(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v%v%v%v--%v", tt.p0, tt.p1, tt.p2, tt.p3, tt.t), func(t *testing.T) {
 			q := cubicBezierDeriv2(tt.p0, tt.p1, tt.p2, tt.p3, tt.t)
-			test.T(t, q, tt.q)
+			tolEqualVec2(t, q, tt.q, 1.0e-5)
 		})
 	}
 }
@@ -353,7 +369,11 @@ func TestCubicBezierCurvatureRadius(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v%v%v%v--%v", tt.p0, tt.p1, tt.p2, tt.p3, tt.t), func(t *testing.T) {
 			r := cubicBezierCurvatureRadius(tt.p0, tt.p1, tt.p2, tt.p3, tt.t)
-			assert.Equal(t, r, tt.r)
+			if math32.IsNaN(tt.r) {
+				assert.True(t, math32.IsNaN(r))
+			} else {
+				assert.Equal(t, r, tt.r)
+			}
 		})
 	}
 }
@@ -378,7 +398,7 @@ func TestCubicBezierNormal(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v%v%v%v--%v", tt.p0, tt.p1, tt.p2, tt.p3, tt.t), func(t *testing.T) {
 			q := cubicBezierNormal(tt.p0, tt.p1, tt.p2, tt.p3, tt.t, 1.0)
-			test.T(t, q, tt.q)
+			tolEqualVec2(t, q, tt.q, 1.0e-5)
 		})
 	}
 }
@@ -403,35 +423,35 @@ func TestCubicBezierLength(t *testing.T) {
 
 func TestCubicBezierSplit(t *testing.T) {
 	p0, p1, p2, p3, q0, q1, q2, q3 := cubicBezierSplit(math32.Vector2{0.0, 0.0}, math32.Vector2{2.0 / 3.0, 0.0}, math32.Vector2{1.0, 1.0 / 3.0}, math32.Vector2{1.0, 1.0}, 0.5)
-	test.T(t, p0, math32.Vector2{0.0, 0.0})
-	test.T(t, p1, math32.Vector2{1.0 / 3.0, 0.0})
-	test.T(t, p2, math32.Vector2{7.0 / 12.0, 1.0 / 12.0})
-	test.T(t, p3, math32.Vector2{0.75, 0.25})
-	test.T(t, q0, math32.Vector2{0.75, 0.25})
-	test.T(t, q1, math32.Vector2{11.0 / 12.0, 5.0 / 12.0})
-	test.T(t, q2, math32.Vector2{1.0, 2.0 / 3.0})
-	test.T(t, q3, math32.Vector2{1.0, 1.0})
+	tolEqualVec2(t, p0, math32.Vector2{0.0, 0.0})
+	tolEqualVec2(t, p1, math32.Vector2{1.0 / 3.0, 0.0})
+	tolEqualVec2(t, p2, math32.Vector2{7.0 / 12.0, 1.0 / 12.0})
+	tolEqualVec2(t, p3, math32.Vector2{0.75, 0.25})
+	tolEqualVec2(t, q0, math32.Vector2{0.75, 0.25})
+	tolEqualVec2(t, q1, math32.Vector2{11.0 / 12.0, 5.0 / 12.0})
+	tolEqualVec2(t, q2, math32.Vector2{1.0, 2.0 / 3.0})
+	tolEqualVec2(t, q3, math32.Vector2{1.0, 1.0})
 }
 
 func TestCubicBezierStrokeHelpers(t *testing.T) {
 	p0, p1, p2, p3 := math32.Vector2{0.0, 0.0}, math32.Vector2{2.0 / 3.0, 0.0}, math32.Vector2{1.0, 1.0 / 3.0}, math32.Vector2{1.0, 1.0}
 
 	p := Path{}
-	addCubicBezierLine(p, p0, p1, p0, p0, 0.0, 0.5)
-	test.That(t, p.Empty())
+	addCubicBezierLine(&p, p0, p1, p0, p0, 0.0, 0.5)
+	assert.True(t, p.Empty())
 
 	p = Path{}
-	addCubicBezierLine(p, p0, p1, p2, p3, 0.0, 0.5)
-	test.T(t, p, MustParseSVGPath("L0 -0.5"))
+	addCubicBezierLine(&p, p0, p1, p2, p3, 0.0, 0.5)
+	assert.InDeltaSlice(t, p, MustParseSVGPath("L0 -0.5"), 1.0e-5)
 
 	p = Path{}
-	addCubicBezierLine(p, p0, p1, p2, p3, 1.0, 0.5)
-	test.T(t, p, MustParseSVGPath("L1.5 1"))
+	addCubicBezierLine(&p, p0, p1, p2, p3, 1.0, 0.5)
+	assert.InDeltaSlice(t, p, MustParseSVGPath("L1.5 1"), 1.0e-5)
 }
 
 func TestXMonotoneCubicBezier(t *testing.T) {
-	test.T(t, xmonotoneCubicBezier(math32.Vector2{1.0, 0.0}, math32.Vector2{0.0, 0.0}, math32.Vector2{0.0, 1.0}, math32.Vector2{1.0, 1.0}), MustParseSVGPath("M1 0C0.5 0 0.25 0.25 0.25 0.5C0.25 0.75 0.5 1 1 1"))
-	test.T(t, xmonotoneCubicBezier(math32.Vector2{0.0, 0.0}, math32.Vector2{3.0, 0.0}, math32.Vector2{-2.0, 1.0}, math32.Vector2{1.0, 1.0}), MustParseSVGPath("M0 0C0.75 0 1 0.0625 1 0.15625C1 0.34375 0.0 0.65625 0.0 0.84375C0.0 0.9375 0.25 1 1 1"))
+	assert.InDeltaSlice(t, xmonotoneCubicBezier(math32.Vector2{1.0, 0.0}, math32.Vector2{0.0, 0.0}, math32.Vector2{0.0, 1.0}, math32.Vector2{1.0, 1.0}), MustParseSVGPath("M1 0C0.5 0 0.25 0.25 0.25 0.5C0.25 0.75 0.5 1 1 1"), 1.0e-5)
+	assert.InDeltaSlice(t, xmonotoneCubicBezier(math32.Vector2{0.0, 0.0}, math32.Vector2{3.0, 0.0}, math32.Vector2{-2.0, 1.0}, math32.Vector2{1.0, 1.0}), MustParseSVGPath("M0 0C0.75 0 1 0.0625 1 0.15625C1 0.34375 0.0 0.65625 0.0 0.84375C0.0 0.9375 0.25 1 1 1"), 1.0e-5)
 }
 
 func TestCubicBezierStrokeFlatten(t *testing.T) {
@@ -458,9 +478,9 @@ func TestCubicBezierStrokeFlatten(t *testing.T) {
 			p3 := math32.Vector2{path[9], path[10]}
 
 			p := Path{}
-			FlattenSmoothCubicBezier(p, p0, p1, p2, p3, tt.d, tt.tolerance)
+			FlattenSmoothCubicBezier(&p, p0, p1, p2, p3, tt.d, tt.tolerance)
 			Epsilon = 1e-6
-			test.T(t, p, MustParseSVGPath(tt.expected))
+			assert.InDeltaSlice(t, p, MustParseSVGPath(tt.expected), 1.0e-5)
 		})
 	}
 	Epsilon = origEpsilon
@@ -485,7 +505,7 @@ func TestCubicBezierInflectionPoints(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v %v %v %v", tt.p0, tt.p1, tt.p2, tt.p3), func(t *testing.T) {
 			x1, x2 := findInflectionPointCubicBezier(tt.p0, tt.p1, tt.p2, tt.p3)
-			assert.Equal(t, []float32{x1, x2}, []float32{tt.x1, tt.x2})
+			assert.InDeltaSlice(t, []float32{x1, x2}, []float32{tt.x1, tt.x2}, 1.0e-5)
 		})
 	}
 }
@@ -511,7 +531,7 @@ func TestCubicBezierInflectionPointRange(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v %v %v %v", tt.p0, tt.p1, tt.p2, tt.p3), func(t *testing.T) {
 			x1, x2 := findInflectionPointRangeCubicBezier(tt.p0, tt.p1, tt.p2, tt.p3, tt.t, tt.tolerance)
-			assert.Equal(t, []float32{x1, x2}, []float32{tt.x1, tt.x2})
+			assert.InDeltaSlice(t, []float32{x1, x2}, []float32{tt.x1, tt.x2}, 1.0e-5)
 		})
 	}
 }
@@ -547,5 +567,5 @@ func TestCubicBezierStroke(t *testing.T) {
 		})
 	}
 
-	test.T(t, strokeCubicBezier(math32.Vector2{0, 0}, math32.Vector2{30, 0}, math32.Vector2{30, 10}, math32.Vector2{25, 10}, 5.0, 0.01).Bounds(), math32.B2(0.0, -5.0, 32.4787516156, 15.0))
+	tolEqualBox2(t, strokeCubicBezier(math32.Vector2{0, 0}, math32.Vector2{30, 0}, math32.Vector2{30, 10}, math32.Vector2{25, 10}, 5.0, 0.01).Bounds(), math32.B2(0.0, -5.0, 32.4787516156, 15.0), 1.0e-5)
 }
