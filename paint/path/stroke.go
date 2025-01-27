@@ -11,11 +11,49 @@ import "cogentcore.org/core/math32"
 
 // NOTE: implementation inspired from github.com/golang/freetype/raster/stroke.go
 
-// Capper implements Cap, with rhs the path to append to, halfWidth the half width
-// of the stroke, pivot the pivot point around which to construct a cap, and n0
-// the normal at the start of the path. The length of n0 is equal to the halfWidth.
+// Stroke converts a path into a stroke of width w and returns a new path.
+// It uses cr to cap the start and end of the path, and jr to join all path elements.
+// If the path closes itself, it will use a join between the start and end instead
+// of capping them. The tolerance is the maximum deviation from the original path
+// when flattening Béziers and optimizing the stroke.
+func (p Path) Stroke(w float32, cr Capper, jr Joiner, tolerance float32) Path {
+	if cr == nil {
+		cr = ButtCap
+	}
+	if jr == nil {
+		jr = MiterJoin
+	}
+	q := Path{}
+	halfWidth := math32.Abs(w) / 2.0
+	for _, pi := range p.Split() {
+		rhs, lhs := pi.offset(halfWidth, cr, jr, true, tolerance)
+		if rhs == nil {
+			continue
+		} else if lhs == nil {
+			// open path
+			q = q.Append(rhs.Settle(Positive))
+		} else {
+			// closed path
+			// inner path should go opposite direction to cancel the outer path
+			if pi.CCW() {
+				q = q.Append(rhs.Settle(Positive))
+				q = q.Append(lhs.Settle(Positive).Reverse())
+			} else {
+				// outer first, then inner
+				q = q.Append(lhs.Settle(Negative))
+				q = q.Append(rhs.Settle(Negative).Reverse())
+			}
+		}
+	}
+	return q
+}
+
+// Capper implements Cap, with rhs the path to append to,
+// halfWidth the half width of the stroke, pivot the pivot point around
+// which to construct a cap, and n0 the normal at the start of the path.
+// The length of n0 is equal to the halfWidth.
 type Capper interface {
-	Cap(Path, float32, math32.Vector2, math32.Vector2)
+	Cap(*Path, float32, math32.Vector2, math32.Vector2)
 }
 
 // RoundCap caps the start or end of a path by a round cap.
@@ -24,8 +62,9 @@ var RoundCap Capper = RoundCapper{}
 // RoundCapper is a round capper.
 type RoundCapper struct{}
 
-// Cap adds a cap to path p of width 2*halfWidth, at a pivot point and initial normal direction of n0.
-func (RoundCapper) Cap(p Path, halfWidth float32, pivot, n0 math32.Vector2) {
+// Cap adds a cap to path p of width 2*halfWidth,
+// at a pivot point and initial normal direction of n0.
+func (RoundCapper) Cap(p *Path, halfWidth float32, pivot, n0 math32.Vector2) {
 	end := pivot.Sub(n0)
 	p.ArcTo(halfWidth, halfWidth, 0, false, true, end.X, end.Y)
 }
@@ -40,8 +79,9 @@ var ButtCap Capper = ButtCapper{}
 // ButtCapper is a butt capper.
 type ButtCapper struct{}
 
-// Cap adds a cap to path p of width 2*halfWidth, at a pivot point and initial normal direction of n0.
-func (ButtCapper) Cap(p Path, halfWidth float32, pivot, n0 math32.Vector2) {
+// Cap adds a cap to path p of width 2*halfWidth,
+// at a pivot point and initial normal direction of n0.
+func (ButtCapper) Cap(p *Path, halfWidth float32, pivot, n0 math32.Vector2) {
 	end := pivot.Sub(n0)
 	p.LineTo(end.X, end.Y)
 }
@@ -56,8 +96,9 @@ var SquareCap Capper = SquareCapper{}
 // SquareCapper is a square capper.
 type SquareCapper struct{}
 
-// Cap adds a cap to path p of width 2*halfWidth, at a pivot point and initial normal direction of n0.
-func (SquareCapper) Cap(p Path, halfWidth float32, pivot, n0 math32.Vector2) {
+// Cap adds a cap to path p of width 2*halfWidth,
+// at a pivot point and initial normal direction of n0.
+func (SquareCapper) Cap(p *Path, halfWidth float32, pivot, n0 math32.Vector2) {
 	e := n0.Rot90CCW()
 	corner1 := pivot.Add(e).Add(n0)
 	corner2 := pivot.Add(e).Sub(n0)
@@ -71,11 +112,14 @@ func (SquareCapper) String() string {
 	return "Square"
 }
 
-////////////////
+////////
 
-// Joiner implements Join, with rhs the right path and lhs the left path to append to, pivot the intersection of both path elements, n0 and n1 the normals at the start and end of the path respectively. The length of n0 and n1 are equal to the halfWidth.
+// Joiner implements Join, with rhs the right path and lhs the left path
+// to append to, pivot the intersection of both path elements, n0 and n1
+// the normals at the start and end of the path respectively.
+// The length of n0 and n1 are equal to the halfWidth.
 type Joiner interface {
-	Join(Path, Path, float32, math32.Vector2, math32.Vector2, math32.Vector2, float32, float32)
+	Join(*Path, *Path, float32, math32.Vector2, math32.Vector2, math32.Vector2, float32, float32)
 }
 
 // BevelJoin connects two path elements by a linear join.
@@ -84,8 +128,11 @@ var BevelJoin Joiner = BevelJoiner{}
 // BevelJoiner is a bevel joiner.
 type BevelJoiner struct{}
 
-// Join adds a join to a right-hand-side and left-hand-side path, of width 2*halfWidth, around a pivot point with starting and ending normals of n0 and n1, and radius of curvatures of the previous and next segments.
-func (BevelJoiner) Join(rhs, lhs Path, halfWidth float32, pivot, n0, n1 math32.Vector2, r0, r1 float32) {
+// Join adds a join to a right-hand-side and left-hand-side path,
+// of width 2*halfWidth, around a pivot point with starting and
+// ending normals of n0 and n1, and radius of curvatures of the
+// previous and next segments.
+func (BevelJoiner) Join(rhs, lhs *Path, halfWidth float32, pivot, n0, n1 math32.Vector2, r0, r1 float32) {
 	rEnd := pivot.Add(n1)
 	lEnd := pivot.Sub(n1)
 	rhs.LineTo(rEnd.X, rEnd.Y)
@@ -102,8 +149,7 @@ var RoundJoin Joiner = RoundJoiner{}
 // RoundJoiner is a round joiner.
 type RoundJoiner struct{}
 
-// Join adds a join to a right-hand-side and left-hand-side path, of width 2*halfWidth, around a pivot point with starting and ending normals of n0 and n1, and radius of curvatures of the previous and next segments.
-func (RoundJoiner) Join(rhs, lhs Path, halfWidth float32, pivot, n0, n1 math32.Vector2, r0, r1 float32) {
+func (RoundJoiner) Join(rhs, lhs *Path, halfWidth float32, pivot, n0, n1 math32.Vector2, r0, r1 float32) {
 	rEnd := pivot.Add(n1)
 	lEnd := pivot.Sub(n1)
 	cw := 0.0 <= n0.Rot90CW().Dot(n1)
@@ -120,7 +166,10 @@ func (RoundJoiner) String() string {
 	return "Round"
 }
 
-// MiterJoin connects two path elements by extending the ends of the paths as lines until they meet. If this point is further than the limit, this will result in a bevel join (MiterJoin) or they will meet at the limit (MiterClipJoin).
+// MiterJoin connects two path elements by extending the ends
+// of the paths as lines until they meet.
+// If this point is further than the limit, this will result in a bevel
+// join (MiterJoin) or they will meet at the limit (MiterClipJoin).
 var MiterJoin Joiner = MiterJoiner{BevelJoin, 4.0}
 var MiterClipJoin Joiner = MiterJoiner{nil, 4.0} // TODO: should extend limit*halfwidth before bevel
 
@@ -130,8 +179,7 @@ type MiterJoiner struct {
 	Limit     float32
 }
 
-// Join adds a join to a right-hand-side and left-hand-side path, of width 2*halfWidth, around a pivot point with starting and ending normals of n0 and n1, and radius of curvatures of the previous and next segments.
-func (j MiterJoiner) Join(rhs, lhs Path, halfWidth float32, pivot, n0, n1 math32.Vector2, r0, r1 float32) {
+func (j MiterJoiner) Join(rhs, lhs *Path, halfWidth float32, pivot, n0, n1 math32.Vector2, r0, r1 float32) {
 	if EqualPoint(n0, n1.Negate()) {
 		BevelJoin.Join(rhs, lhs, halfWidth, pivot, n0, n1, r0, r1)
 		return
@@ -189,7 +237,10 @@ func (j MiterJoiner) String() string {
 	return "Miter"
 }
 
-// ArcsJoin connects two path elements by extending the ends of the paths as circle arcs until they meet. If this point is further than the limit, this will result in a bevel join (ArcsJoin) or they will meet at the limit (ArcsClipJoin).
+// ArcsJoin connects two path elements by extending the ends
+// of the paths as circle arcs until they meet.
+// If this point is further than the limit, this will result
+// in a bevel join (ArcsJoin) or they will meet at the limit (ArcsClipJoin).
 var ArcsJoin Joiner = ArcsJoiner{BevelJoin, 4.0}
 var ArcsClipJoin Joiner = ArcsJoiner{nil, 4.0}
 
@@ -213,8 +264,7 @@ func closestArcIntersection(c math32.Vector2, cw bool, pivot, i0, i1 math32.Vect
 	return i0
 }
 
-// Join adds a join to a right-hand-side and left-hand-side path, of width 2*halfWidth, around a pivot point with starting and ending normals of n0 and n1, and radius of curvatures of the previous and next segments, which are positive for CCW arcs.
-func (j ArcsJoiner) Join(rhs, lhs Path, halfWidth float32, pivot, n0, n1 math32.Vector2, r0, r1 float32) {
+func (j ArcsJoiner) Join(rhs, lhs *Path, halfWidth float32, pivot, n0, n1 math32.Vector2, r0, r1 float32) {
 	if EqualPoint(n0, n1.Negate()) {
 		BevelJoin.Join(rhs, lhs, halfWidth, pivot, n0, n1, r0, r1)
 		return
@@ -438,12 +488,12 @@ type pathStrokeState struct {
 	r0, r1 float32        // radius of start and end
 
 	cp1, cp2                    math32.Vector2 // Béziers
-	rx, ry, phi, theta0, theta1 float32        // arcs
+	rx, ry, rot, theta0, theta1 float32        // arcs
 	large, sweep                bool           // arcs
 }
 
-// offset returns the rhs and lhs paths from offsetting a path (must not have subpaths).
-// It closes rhs and lhs when p is closed as well.
+// offset returns the rhs and lhs paths from offsetting a path
+// (must not have subpaths). It closes rhs and lhs when p is closed as well.
 func (p Path) offset(halfWidth float32, cr Capper, jr Joiner, strokeOpen bool, tolerance float32) (Path, Path) {
 	// only non-empty paths are evaluated
 	closed := false
@@ -511,7 +561,7 @@ func (p Path) offset(halfWidth float32, cr Capper, jr Joiner, strokeOpen bool, t
 				r1:     r1,
 				rx:     rx,
 				ry:     ry,
-				phi:    phi,
+				rot:    phi * 180.0 / math32.Pi,
 				theta0: theta0,
 				theta1: theta1,
 				large:  large,
@@ -566,13 +616,13 @@ func (p Path) offset(halfWidth float32, cr Capper, jr Joiner, strokeOpen bool, t
 				dr = -dr
 			}
 
-			rLambda := ellipseRadiiCorrection(rStart, cur.rx+dr, cur.ry+dr, cur.phi, rEnd)
-			lLambda := ellipseRadiiCorrection(lStart, cur.rx-dr, cur.ry-dr, cur.phi, lEnd)
+			rLambda := ellipseRadiiCorrection(rStart, cur.rx+dr, cur.ry+dr, cur.rot*math32.Pi/180.0, rEnd)
+			lLambda := ellipseRadiiCorrection(lStart, cur.rx-dr, cur.ry-dr, cur.rot*math32.Pi/180.0, lEnd)
 			if rLambda <= 1.0 && lLambda <= 1.0 {
 				rLambda, lLambda = 1.0, 1.0
 			}
-			rhs.ArcTo(rLambda*(cur.rx+dr), rLambda*(cur.ry+dr), cur.phi, cur.large, cur.sweep, rEnd.X, rEnd.Y)
-			lhs.ArcTo(lLambda*(cur.rx-dr), lLambda*(cur.ry-dr), cur.phi, cur.large, cur.sweep, lEnd.X, lEnd.Y)
+			rhs.ArcTo(rLambda*(cur.rx+dr), rLambda*(cur.ry+dr), cur.rot, cur.large, cur.sweep, rEnd.X, rEnd.Y)
+			lhs.ArcTo(lLambda*(cur.rx-dr), lLambda*(cur.ry-dr), cur.rot, cur.large, cur.sweep, lEnd.X, lEnd.Y)
 		}
 
 		// optimize inner bend
@@ -597,7 +647,7 @@ func (p Path) offset(halfWidth float32, cr Capper, jr Joiner, strokeOpen bool, t
 			if !EqualPoint(cur.n1, next.n0) {
 				rhsJoinIndex = len(rhs)
 				lhsJoinIndex = len(lhs)
-				jr.Join(rhs, lhs, halfWidth, cur.p1, cur.n1, next.n0, cur.r1, next.r0)
+				jr.Join(&rhs, &lhs, halfWidth, cur.p1, cur.n1, next.n0, cur.r1, next.r0)
 			}
 		}
 	}
@@ -620,9 +670,9 @@ func (p Path) offset(halfWidth float32, cr Capper, jr Joiner, strokeOpen bool, t
 		lhs.optimizeClose()
 	} else if strokeOpen {
 		lhs = lhs.Reverse()
-		cr.Cap(rhs, halfWidth, states[len(states)-1].p1, states[len(states)-1].n1)
+		cr.Cap(&rhs, halfWidth, states[len(states)-1].p1, states[len(states)-1].n1)
 		rhs = rhs.Join(lhs)
-		cr.Cap(rhs, halfWidth, states[0].p0, states[0].n0.Negate())
+		cr.Cap(&rhs, halfWidth, states[0].p0, states[0].n0.Negate())
 		lhs = nil
 
 		rhs.Close()
@@ -631,7 +681,14 @@ func (p Path) offset(halfWidth float32, cr Capper, jr Joiner, strokeOpen bool, t
 	return rhs, lhs
 }
 
-// Offset offsets the path by w and returns a new path. A positive w will offset the path to the right-hand side, that is, it expands CCW oriented contours and contracts CW oriented contours. If you don't know the orientation you can use `Path.CCW` to find out, but if there may be self-intersection you should use `Path.Settle` to remove them and orient all filling contours CCW. The tolerance is the maximum deviation from the actual offset when flattening Béziers and optimizing the path.
+// Offset offsets the path by w and returns a new path.
+// A positive w will offset the path to the right-hand side, that is,
+// it expands CCW oriented contours and contracts CW oriented contours.
+// If you don't know the orientation you can use `Path.CCW` to find out,
+// but if there may be self-intersection you should use `Path.Settle`
+// to remove them and orient all filling contours CCW.
+// The tolerance is the maximum deviation from the actual offset when
+// flattening Béziers and optimizing the path.
 func (p Path) Offset(w float32, tolerance float32) Path {
 	if Equal(w, 0.0) {
 		return p
@@ -659,39 +716,6 @@ func (p Path) Offset(w float32, tolerance float32) Path {
 			}
 		}
 		q = q.Append(r)
-	}
-	return q
-}
-
-// Stroke converts a path into a stroke of width w and returns a new path. It uses cr to cap the start and end of the path, and jr to join all path elements. If the path closes itself, it will use a join between the start and end instead of capping them. The tolerance is the maximum deviation from the original path when flattening Béziers and optimizing the stroke.
-func (p Path) Stroke(w float32, cr Capper, jr Joiner, tolerance float32) Path {
-	if cr == nil {
-		cr = ButtCap
-	}
-	if jr == nil {
-		jr = MiterJoin
-	}
-	q := Path{}
-	halfWidth := math32.Abs(w) / 2.0
-	for _, pi := range p.Split() {
-		rhs, lhs := pi.offset(halfWidth, cr, jr, true, tolerance)
-		if rhs == nil {
-			continue
-		} else if lhs == nil {
-			// open path
-			q = q.Append(rhs.Settle(Positive))
-		} else {
-			// closed path
-			// inner path should go opposite direction to cancel the outer path
-			if pi.CCW() {
-				q = q.Append(rhs.Settle(Positive))
-				q = q.Append(lhs.Settle(Positive).Reverse())
-			} else {
-				// outer first, then inner
-				q = q.Append(lhs.Settle(Negative))
-				q = q.Append(rhs.Settle(Negative).Reverse())
-			}
-		}
 	}
 	return q
 }
