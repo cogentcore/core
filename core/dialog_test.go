@@ -12,12 +12,12 @@ import (
 )
 
 func TestDialogMessage(t *testing.T) {
-	t.Skip("TODO: this test randomly hangs on CI")
+	t.Skip("TODO(#1456): fix this test")
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
-		s.Min.Set(units.Em(10))
+		s.Min.Set(units.Dp(300))
 	})
-	b.AssertRenderScreen(t, "dialog/message", func() {
+	b.AssertRender(t, "dialog/message", func() {
 		MessageDialog(b, "Something happened", "Message")
 	})
 }

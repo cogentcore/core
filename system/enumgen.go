@@ -13,7 +13,7 @@ const PlatformsN Platforms = 7
 
 var _PlatformsValueMap = map[string]Platforms{`MacOS`: 0, `Linux`: 1, `Windows`: 2, `IOS`: 3, `Android`: 4, `Web`: 5, `Offscreen`: 6}
 
-var _PlatformsDescMap = map[Platforms]string{0: `MacOS is a Mac OS machine (aka Darwin)`, 1: `Linux is a Linux OS machine`, 2: `Windows is a Microsoft Windows machine`, 3: `IOS is an Apple iOS or iPadOS mobile phone or iPad`, 4: `Android is an Android mobile phone or tablet`, 5: `Web is a web browser running the app through WASM`, 6: `Offscreen is an offscreen driver typically used for testing, specified using the &#34;offscreen&#34; build tag`}
+var _PlatformsDescMap = map[Platforms]string{0: `MacOS is a macOS computer (aka Darwin). It is a multi-window desktop platform.`, 1: `Linux is a Linux computer. It is a multi-window desktop platform.`, 2: `Windows is a Microsoft Windows computer. It is a multi-window desktop platform.`, 3: `IOS is an Apple iOS or iPadOS mobile phone or iPad. It is a single-window mobile platform.`, 4: `Android is an Android mobile phone or tablet. It is a single-window mobile platform.`, 5: `Web is a web browser running the app through WASM. It is a single-window &#34;mobile&#34; platform.`, 6: `Offscreen is an offscreen driver typically used for testing, specified using the &#34;offscreen&#34; build tag. It is automatically enabled when testing. It is a multi-window but single-screen platform.`}
 
 var _PlatformsMap = map[Platforms]string{0: `MacOS`, 1: `Linux`, 2: `Windows`, 3: `IOS`, 4: `Android`, 5: `Web`, 6: `Offscreen`}
 

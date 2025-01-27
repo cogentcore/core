@@ -240,9 +240,6 @@ func (sc *Scene) doUpdate() bool {
 
 	if sc.showIter == sceneShowIters { // end of first pass
 		sc.showIter++ // just go 1 past the iters cutoff
-		if !sc.hasFlag(sceneContentSizing) {
-			sc.Events.activateStartFocus()
-		}
 	}
 	return true
 }
@@ -454,7 +451,6 @@ func (sc *Scene) runDeferred() {
 func (wb *WidgetBase) DeferShown() {
 	wb.Defer(func() {
 		wb.Shown()
-		wb.Scene.Events.activateStartFocus()
 	})
 }
 
@@ -465,6 +461,7 @@ func (wb *WidgetBase) Shown() {
 		cwb.Send(events.Show)
 		return tree.Continue
 	})
+	wb.Events().activateStartFocus()
 }
 
 ////////  Standard Box Model rendering

@@ -6,4 +6,6 @@
 
 package imagex
 
-var updateTestImages = false
+import "os"
+
+var updateTestImages = os.Getenv("CORE_UPDATE_TESTDATA") == "true"

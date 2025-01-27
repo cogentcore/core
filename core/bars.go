@@ -11,7 +11,6 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/system"
 )
 
 // BarFuncs are functions for creating control bars,
@@ -94,7 +93,7 @@ func (sc *Scene) makeSceneBars() {
 
 func (sc *Scene) addDefaultBars() {
 	st := sc.Stage
-	addBack := st.BackButton.Or(st.FullWindow && !st.NewWindow && !(st.Mains != nil && st.Mains.stack.Len() == 0) && TheApp.Platform() != system.Offscreen)
+	addBack := st.BackButton.Or(st.FullWindow && !st.NewWindow && !(st.Mains != nil && st.Mains.stack.Len() == 0))
 	if addBack || st.DisplayTitle {
 		sc.Bars.Top = slices.Insert(sc.Bars.Top, 0, func(bar *Frame) {
 			if addBack {

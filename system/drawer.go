@@ -27,8 +27,6 @@ const (
 // This is used for compositing the stack of images that together comprise
 // the content of a window.
 type Drawer interface {
-	// DestBounds returns the bounds of the render destination
-	DestBounds() image.Rectangle
 
 	// Start starts recording a sequence of draw / fill actions,
 	// which will be performed on the GPU at End().

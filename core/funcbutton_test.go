@@ -23,5 +23,5 @@ func TestCallFuncArgs(t *testing.T) {
 	b := NewBody()
 	myFunc := func(a int, b string) {}
 	CallFunc(b, myFunc)
-	b.AssertRenderScreen(t, "func-button/args")
+	b.AssertRender(t, "func-button/args")
 }

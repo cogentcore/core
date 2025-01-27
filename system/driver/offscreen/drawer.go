@@ -13,19 +13,22 @@ import (
 // Drawer is the implementation of [system.Drawer] for the offscreen platform
 type Drawer struct {
 	system.DrawerBase
+
+	Window *Window
 }
 
-// DestBounds returns the bounds of the render destination
-func (dw *Drawer) DestBounds() image.Rectangle {
-	return TheApp.Scrn.Geometry
-}
-
-// End ends image drawing rendering process on render target.
-// This is the function that actually sends the image to the capture channel.
-func (dw *Drawer) End() {
-	if !system.NeedsCapture {
-		return
+func (dw *Drawer) Start() {
+	rect := image.Rectangle{Max: dw.Window.PixelSize}
+	if dw.Image == nil || dw.Image.Rect != rect {
+		dw.Image = image.NewRGBA(rect)
 	}
-	system.NeedsCapture = false
-	system.CaptureImage = dw.Image
+	dw.DrawerBase.Start()
+}
+
+func (dw *Drawer) End() {} // no-op
+
+// GetImage returns the rendered image. It is called through an interface
+// in core.Body.AssertRender.
+func (dw *Drawer) GetImage() *image.RGBA {
+	return dw.Image
 }
