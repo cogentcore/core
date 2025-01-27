@@ -646,8 +646,8 @@ func (w *renderWindow) renderWindow() {
 	rc := w.renderContext()
 	rc.lock()
 	defer func() {
-		rc.unlock()
 		rc.rebuild = false
+		rc.unlock()
 	}()
 	rebuild := rc.rebuild
 
