@@ -8,7 +8,6 @@
 package rasterizer
 
 import (
-	"fmt"
 	"image"
 
 	"cogentcore.org/core/math32"
@@ -24,6 +23,12 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 	var bounds math32.Box2
 	if sty.HasFill() {
 		fill = pt.Path.Clone() // .Transform(pc.Transform)
+		if len(pc.Bounds.Path) > 0 {
+			fill = fill.And(pc.Bounds.Path)
+		}
+		if len(pc.ClipPath) > 0 {
+			fill = fill.And(pc.ClipPath)
+		}
 		bounds = fill.FastBounds()
 	}
 	if sty.HasStroke() {
@@ -35,6 +40,12 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 		}
 		stroke = stroke.Stroke(sty.Stroke.Width.Dots, path.CapFromStyle(sty.Stroke.Cap), path.JoinFromStyle(sty.Stroke.Join), tolerance)
 		// stroke = stroke.Transform(pc.Transform)
+		if len(pc.Bounds.Path) > 0 {
+			stroke = stroke.And(pc.Bounds.Path)
+		}
+		if len(pc.ClipPath) > 0 {
+			stroke = stroke.And(pc.ClipPath)
+		}
 		if sty.HasFill() {
 			bounds = bounds.Union(stroke.FastBounds())
 		} else {
@@ -60,7 +71,6 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 		// }
 
 		r.ras.Reset(w, h)
-		// todo: clip here:
 		ToRasterizer(fill, r.ras)
 		r.ras.Draw(r.Image, image.Rect(x, y, x+w, y+h), sty.Fill.Color, image.Point{dx, dy})
 	}
@@ -73,8 +83,6 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 		// }
 
 		r.ras.Reset(w, h)
-		// todo: clip here
-		fmt.Println(stroke)
 		ToRasterizer(stroke, r.ras)
 		r.ras.Draw(r.Image, image.Rect(x, y, x+w, y+h), sty.Stroke.Color, image.Point{dx, dy})
 	}

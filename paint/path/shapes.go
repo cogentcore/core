@@ -82,14 +82,14 @@ func RoundedRectangle(x, y, w, h, r float32) Path {
 	r = math32.Min(r, h/2.0)
 
 	p := Path{}
-	p.MoveTo(0.0, r)
-	p.ArcTo(r, r, 0.0, false, sweep, r, 0.0)
-	p.LineTo(w-r, 0.0)
-	p.ArcTo(r, r, 0.0, false, sweep, w, r)
-	p.LineTo(w, h-r)
-	p.ArcTo(r, r, 0.0, false, sweep, w-r, h)
-	p.LineTo(r, h)
-	p.ArcTo(r, r, 0.0, false, sweep, 0.0, h-r)
+	p.MoveTo(x, y+r)
+	p.ArcTo(r, r, 0.0, false, sweep, x+r, y)
+	p.LineTo(x+w-r, y)
+	p.ArcTo(r, r, 0.0, false, sweep, x+w, y+r)
+	p.LineTo(x+w, y+h-r)
+	p.ArcTo(r, r, 0.0, false, sweep, x+w-r, y+h)
+	p.LineTo(x+r, y+h)
+	p.ArcTo(r, r, 0.0, false, sweep, x, y+h-r)
 	p.Close()
 	return p
 }

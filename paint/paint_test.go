@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/math32"
 	. "cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/renderers/rasterizer"
+	"cogentcore.org/core/styles/sides"
 )
 
 func TestMain(m *testing.M) {
@@ -104,25 +105,33 @@ func TestPaintPath(t *testing.T) {
 		pc.MoveTo(100, 200)
 		pc.LineTo(200, 100)
 	})
-	// test("quadratic-to", func(pc *Painter) {
-	// 	pc.MoveTo(100, 200)
-	// 	pc.QuadTo(120, 140, 200, 100)
-	// })
-	// test("cubic-to", func(pc *Painter) {
-	// 	pc.MoveTo(100, 200)
-	// 	pc.CubeTo(130, 110, 160, 180, 200, 100)
-	// })
-	// test("close-path", func(pc *Painter) {
-	// 	pc.MoveTo(100, 200)
-	// 	pc.LineTo(200, 100)
-	// 	pc.LineTo(250, 150)
-	// 	pc.Close()
-	// })
-	// test("clear-path", func(pc *Painter) {
-	// 	pc.MoveTo(100, 200)
-	// 	pc.MoveTo(200, 100)
-	// 	pc.Clear()
-	// })
+	test("quadratic-to", func(pc *Painter) {
+		pc.MoveTo(100, 200)
+		pc.QuadTo(120, 140, 200, 100)
+	})
+	test("cubic-to", func(pc *Painter) {
+		pc.MoveTo(100, 200)
+		pc.CubeTo(130, 110, 160, 180, 200, 100)
+		pc.LineTo(200, 150)
+		pc.Close()
+	})
+	test("close-path", func(pc *Painter) {
+		pc.MoveTo(100, 200)
+		pc.LineTo(200, 100)
+		pc.LineTo(250, 150)
+		pc.Close()
+	})
+	test("clear-path", func(pc *Painter) {
+		pc.MoveTo(100, 200)
+		pc.MoveTo(200, 100)
+		pc.Clear()
+	})
+	test("rounded-rect", func(pc *Painter) {
+		pc.RoundedRectangle(50, 50, 100, 80, 10)
+	})
+	test("rounded-rect-sides", func(pc *Painter) {
+		pc.RoundedRectangleSides(50, 50, 100, 80, sides.NewFloats(10.0, 20.0, 15.0, 5.0))
+	})
 }
 
 /*

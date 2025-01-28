@@ -571,10 +571,13 @@ func (j ArcsJoiner) String() string {
 func (p Path) optimizeInnerBend(i int) {
 	// i is the index of the line segment in the inner bend connecting both edges
 	ai := i - CmdLen(p[i-1])
-	bi := i + CmdLen(p[i])
 	if ai == 0 {
 		return
 	}
+	if i >= len(p) {
+		return
+	}
+	bi := i + CmdLen(p[i])
 
 	a0 := math32.Vector2{p[ai-3], p[ai-2]}
 	b0 := math32.Vector2{p[bi-3], p[bi-2]}

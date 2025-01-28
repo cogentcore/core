@@ -206,27 +206,27 @@ func (pc *Painter) EllipticalArc(rx, ry, rot, theta0, theta1 float32) {
 
 // Rectangle adds a rectangle of width w and height h at position x,y.
 func (pc *Painter) Rectangle(x, y, w, h float32) {
-	pc.State.Path.Append(path.Rectangle(x, y, w, h))
+	pc.State.Path = pc.State.Path.Append(path.Rectangle(x, y, w, h))
 }
 
 // RoundedRectangle adds a rectangle of width w and height h
 // with rounded corners of radius r at postion x,y.
 // A negative radius will cast the corners inwards (i.e. concave).
 func (pc *Painter) RoundedRectangle(x, y, w, h, r float32) {
-	pc.State.Path.Append(path.RoundedRectangle(x, y, w, h, r))
+	pc.State.Path = pc.State.Path.Append(path.RoundedRectangle(x, y, w, h, r))
 }
 
 // RoundedRectangleSides draws a standard rounded rectangle
 // with a consistent border and with the given x and y position,
 // width and height, and border radius for each corner.
 func (pc *Painter) RoundedRectangleSides(x, y, w, h float32, r sides.Floats) {
-	pc.State.Path.Append(path.RoundedRectangleSides(x, y, w, h, r))
+	pc.State.Path = pc.State.Path.Append(path.RoundedRectangleSides(x, y, w, h, r))
 }
 
 // BeveledRectangle adds a rectangle of width w and height h
 // with beveled corners at distance r from the corner.
 func (pc *Painter) BeveledRectangle(x, y, w, h, r float32) {
-	pc.State.Path.Append(path.BeveledRectangle(x, y, w, h, r))
+	pc.State.Path = pc.State.Path.Append(path.BeveledRectangle(x, y, w, h, r))
 }
 
 // Circle adds a circle of radius r.
@@ -236,12 +236,12 @@ func (pc *Painter) Circle(x, y, r float32) {
 
 // Ellipse adds an ellipse of radii rx and ry.
 func (pc *Painter) Ellipse(x, y, rx, ry float32) {
-	pc.State.Path.Append(path.Ellipse(x, y, rx, ry))
+	pc.State.Path = pc.State.Path.Append(path.Ellipse(x, y, rx, ry))
 }
 
 // Triangle adds a triangle of radius r pointing upwards.
 func (pc *Painter) Triangle(x, y, r float32) {
-	pc.State.Path.Append(path.RegularPolygon(3, r, true).Translate(x, y))
+	pc.State.Path = pc.State.Path.Append(path.RegularPolygon(3, r, true).Translate(x, y))
 }
 
 // RegularPolygon adds a regular polygon with radius r.
@@ -250,7 +250,7 @@ func (pc *Painter) Triangle(x, y, r float32) {
 // n must be 3 or more. The up boolean defines whether
 // the first point will point upwards or downwards.
 func (pc *Painter) RegularPolygon(x, y float32, n int, r float32, up bool) {
-	pc.State.Path.Append(path.RegularPolygon(n, r, up).Translate(x, y))
+	pc.State.Path = pc.State.Path.Append(path.RegularPolygon(n, r, up).Translate(x, y))
 }
 
 // RegularStarPolygon adds a regular star polygon with radius r.
@@ -261,14 +261,14 @@ func (pc *Painter) RegularPolygon(x, y float32, n int, r float32, up bool) {
 // n must be 3 or more and d 2 or more. The up boolean defines whether
 // the first point will point upwards or downwards.
 func (pc *Painter) RegularStarPolygon(x, y float32, n, d int, r float32, up bool) {
-	pc.State.Path.Append(path.RegularStarPolygon(n, d, r, up).Translate(x, y))
+	pc.State.Path = pc.State.Path.Append(path.RegularStarPolygon(n, d, r, up).Translate(x, y))
 }
 
 // StarPolygon returns a star polygon of n points with alternating
 // radius R and r. The up boolean defines whether the first point
 // will be point upwards or downwards.
 func (pc *Painter) StarPolygon(x, y float32, n int, R, r float32, up bool) {
-	pc.State.Path.Append(path.StarPolygon(n, R, r, up).Translate(x, y))
+	pc.State.Path = pc.State.Path.Append(path.StarPolygon(n, R, r, up).Translate(x, y))
 }
 
 // Grid returns a stroked grid of width w and height h,
