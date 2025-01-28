@@ -85,6 +85,14 @@ func (pc *Path) ToDotsImpl(uc *units.Context) {
 	pc.Fill.ToDots(uc)
 }
 
+func (pc *Path) HasFill() bool {
+	return !pc.Off && pc.Fill.Color != nil
+}
+
+func (pc *Path) HasStroke() bool {
+	return !pc.Off && pc.Stroke.Color != nil
+}
+
 //////// Stroke and Fill Styles
 
 // IMPORTANT: any changes here must be updated in StyleFillFuncs
@@ -130,12 +138,19 @@ type Stroke struct {
 	// line width
 	Width units.Value
 
-	// minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard
+	// MinWidth is the minimum line width used for rendering.
+	// If width is > 0, then this is the smallest line width.
+	// This value is NOT subject to transforms so is in absolute
+	// dot values, and is ignored if vector-effects, non-scaling-stroke
+	// is used. This is an extension of the SVG / CSS standard
 	MinWidth units.Value
 
 	// Dashes are the dashes of the stroke. Each pair of values specifies
 	// the amount to paint and then the amount to skip.
 	Dashes []float32
+
+	// DashOffset is the starting offset for the dashes.
+	DashOffset float32
 
 	// Cap specifies how to draw the end cap of stroked lines.
 	Cap path.Caps

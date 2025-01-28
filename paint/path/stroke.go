@@ -88,6 +88,28 @@ const (
 	JoinArcsClip
 )
 
+// Dash patterns
+var (
+	Solid              = []float32{}
+	Dotted             = []float32{1.0, 2.0}
+	DenselyDotted      = []float32{1.0, 1.0}
+	SparselyDotted     = []float32{1.0, 4.0}
+	Dashed             = []float32{3.0, 3.0}
+	DenselyDashed      = []float32{3.0, 1.0}
+	SparselyDashed     = []float32{3.0, 6.0}
+	Dashdotted         = []float32{3.0, 2.0, 1.0, 2.0}
+	DenselyDashdotted  = []float32{3.0, 1.0, 1.0, 1.0}
+	SparselyDashdotted = []float32{3.0, 4.0, 1.0, 4.0}
+)
+
+func ScaleDash(scale float32, offset float32, d []float32) (float32, []float32) {
+	d2 := make([]float32, len(d))
+	for i := range d {
+		d2[i] = d[i] * scale
+	}
+	return offset * scale, d2
+}
+
 // NOTE: implementation inspired from github.com/golang/freetype/raster/stroke.go
 
 // Stroke converts a path into a stroke of width w and returns a new path.
@@ -127,7 +149,7 @@ func (p Path) Stroke(w float32, cr Capper, jr Joiner, tolerance float32) Path {
 	return q
 }
 
-func capFromStyle(st Caps) Capper {
+func CapFromStyle(st Caps) Capper {
 	switch st {
 	case CapButt:
 		return ButtCap
@@ -139,7 +161,7 @@ func capFromStyle(st Caps) Capper {
 	return ButtCap
 }
 
-func joinFromStyle(st Joins) Joiner {
+func JoinFromStyle(st Joins) Joiner {
 	switch st {
 	case JoinMiter:
 		return MiterJoin

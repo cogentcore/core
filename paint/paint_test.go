@@ -12,12 +12,13 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	. "cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/renderers/rasterx"
+	"cogentcore.org/core/paint/renderers/rasterizer"
 )
 
 func TestMain(m *testing.M) {
 	FontLibrary.InitFontPaths(FontPaths...)
-	NewDefaultImageRenderer = rasterx.New
+	// NewDefaultImageRenderer = rasterx.New
+	NewDefaultImageRenderer = rasterizer.New
 	os.Exit(m.Run())
 }
 
