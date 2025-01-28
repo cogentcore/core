@@ -28,11 +28,15 @@ func windowsRegistryAddPath(path string) error {
 		return err
 	}
 	scpath := ";" + path + ";"
-	if strings.Contains(s, scpath) {
+	if strings.Contains(s, scpath) || strings.HasPrefix(s, path+";") || strings.HasSuffix(s, ";"+path) {
 		fmt.Printf("Path %s already in existing Path: %s\n", path, s)
 		return nil
 	}
-	s += path + ";"
+	if strings.HasSuffix(s, ";") {
+		s += path + ";"
+	} else {
+		s += scpath
+	}
 	err = k.SetStringValue("Path", s)
 	if err != nil {
 		return err

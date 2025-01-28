@@ -28,6 +28,10 @@ var windowWait sync.WaitGroup
 // Wait waits for all windows to close and runs the main app loop.
 // This should be put at the end of the main function if
 // [Body.RunMainWindow] is not used.
+//
+// For offscreen testing, Wait is typically never called, as it is
+// not necessary (the app will already terminate once all tests are done,
+// and nothing needs to run on the main thread).
 func Wait() {
 	waitCalled = true
 	defer func() { system.HandleRecover(recover()) }()
@@ -635,9 +639,9 @@ func (w *renderWindow) renderContext() *renderContext {
 }
 
 // renderWindow performs all rendering based on current Stages config.
-// It sets the Write lock on RenderContext Mutex, so nothing else can update
-// during this time.  All other updates are done with a Read lock so they
-// won't interfere with each other.
+// It locks and unlocks the renderContext itself, which is necessary so that
+// there is a moment for other goroutines to acquire the lock and get necessary
+// updates through (such as in offscreen testing).
 func (w *renderWindow) renderWindow() {
 	rc := w.renderContext()
 	rc.lock()

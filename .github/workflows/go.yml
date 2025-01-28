@@ -5,6 +5,13 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      updateTestdata:
+        description: 'Update testdata images'
+        required: true
+        default: true
+        type: boolean
 
 jobs:
 
@@ -30,9 +37,34 @@ jobs:
     - name: Build Docs (to verify it works on PRs)
       run: core build web -dir docs -o static
 
+    - name: Download testdata
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        name: testdata
+        workflow_search: true
+        search_artifacts: true
+        if_no_artifact_found: warn
+
+    - name: Set CORE_UPDATE_TESTDATA env var
+      if: inputs.updateTestdata
+      run: echo "CORE_UPDATE_TESTDATA=true" >> $GITHUB_ENV
+
     # we can't test gpu, xyz, and system on the CI since there is no Vulkan support
     - name: Test
       run: go test -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system) -coverprofile cover.out -timeout 30s
+
+    - name: Upload testdata
+      uses: actions/upload-artifact@v4
+      with:
+        name: testdata
+        path: "**/testdata/**/*.png"
+
+    - name: Upload failure testdata
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: testdata-fail
+        path: "**/testdata/**/*.png"
 
     - name: Update coverage report
       uses: ncruces/go-coverage-report@v0

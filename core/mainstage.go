@@ -237,36 +237,15 @@ func (st *Stage) runWindow() *Stage {
 	st.addSceneParts()
 
 	sz := st.renderContext.geom.Size
-	// offscreen windows always consider pref size because
-	// they must be unbounded by any previous window sizes
-	// non-offscreen mobile windows must take up the whole window
-	// and thus don't consider pref size
-	// desktop new windows and non-full windows can pref size
-	if TheApp.Platform() == system.Offscreen ||
-		(!TheApp.Platform().IsMobile() &&
-			(st.NewWindow || !st.FullWindow || currentRenderWindow == nil)) {
+	// Mobile windows must take up the whole window
+	// and thus don't consider pref size.
+	// Desktop new windows and non-full windows can pref size.
+	if !TheApp.Platform().IsMobile() &&
+		(st.NewWindow || !st.FullWindow || currentRenderWindow == nil) {
 		sz = sc.contentSize(sz)
-		// on offscreen, we don't want any extra space, as we want the smallest
-		// possible representation of the content
-		// also, on offscreen, if the new size is bigger than the current size,
-		// we need to resize the window
-		if TheApp.Platform() == system.Offscreen {
-			if currentRenderWindow != nil {
-				csz := currentRenderWindow.SystemWindow.Size()
-				nsz := csz
-				if sz.X > csz.X {
-					nsz.X = sz.X
-				}
-				if sz.Y > csz.Y {
-					nsz.Y = sz.Y
-				}
-				if nsz != csz {
-					currentRenderWindow.SystemWindow.SetSize(nsz)
-					TheApp.GetScreens()
-				}
-			}
-		} else {
-			// on other platforms, we want extra space and a minimum window size
+		// On offscreen, we don't want any extra space, as we want the smallest
+		// possible representation of the content.
+		if TheApp.Platform() != system.Offscreen {
 			sz = sz.Add(image.Pt(20, 20))
 			screen := st.targetScreen()
 			if screen != nil {

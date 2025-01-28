@@ -71,13 +71,6 @@ func (dw *Drawer) End() {
 	}
 }
 
-func (dw *Drawer) DestBounds() image.Rectangle {
-	if dw.wgpu != nil {
-		return dw.wgpu.DestBounds()
-	}
-	return TheApp.Scrn.Geometry
-}
-
 func (dw *Drawer) Start() {
 	if dw.wgpu != nil {
 		dw.wgpu.Start()

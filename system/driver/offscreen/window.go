@@ -5,10 +5,15 @@
 package offscreen
 
 import (
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 )
 
 // Window is the implementation of [system.Window] for the offscreen platform.
 type Window struct {
-	base.WindowSingle[*App]
+	base.WindowMulti[*App, *Drawer]
+}
+
+func (w *Window) Screen() *system.Screen {
+	return TheApp.Screen(0)
 }

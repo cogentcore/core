@@ -134,13 +134,13 @@ func (w *WindowMulti[A, D]) SetPos(pos image.Point, screen *system.Screen) {
 	w.Pos = pos
 }
 
-func (w *WindowMulti[A, D]) SetGeometry(pos image.Point, sz image.Point, screen *system.Screen) {
+func (w *WindowMulti[A, D]) SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen *system.Screen) {
 	if w.This.IsClosed() {
 		return
 	}
 	sc := w.This.Screen()
-	sz = sc.WindowSizeFromPixels(sz)
-	w.SetWinSize(sz)
+	size = sc.WindowSizeFromPixels(size)
+	w.SetWinSize(size)
 	w.Pos = pos
 }
 
