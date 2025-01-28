@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package styles
+// Package sides provides flexible representation of box sides
+// or corners, with either a single value for all, or different values
+// for subsets.
+package sides
+
+//go:generate core generate
 
 import (
 	"fmt"
@@ -17,11 +22,11 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// SideIndexes provides names for the Sides in order defined
-type SideIndexes int32 //enums:enum
+// Indexes provides names for the Sides in order defined
+type Indexes int32 //enums:enum
 
 const (
-	Top SideIndexes = iota
+	Top Indexes = iota
 	Right
 	Bottom
 	Left
@@ -202,35 +207,35 @@ func (s *Sides[T]) SetString(str string) error {
 	return nil
 }
 
-// SidesAreSame returns whether all of the sides/corners are the same
-func SidesAreSame[T comparable](s Sides[T]) bool {
+// AreSame returns whether all of the sides/corners are the same
+func AreSame[T comparable](s Sides[T]) bool {
 	return s.Right == s.Top && s.Bottom == s.Top && s.Left == s.Top
 }
 
-// SidesAreZero returns whether all of the sides/corners are equal to zero
-func SidesAreZero[T comparable](s Sides[T]) bool {
+// AreZero returns whether all of the sides/corners are equal to zero
+func AreZero[T comparable](s Sides[T]) bool {
 	var zv T
 	return s.Top == zv && s.Right == zv && s.Bottom == zv && s.Left == zv
 }
 
-// SideValues contains units.Value values for each side/corner of a box
-type SideValues struct { //types:add
+// Values contains units.Value values for each side/corner of a box
+type Values struct { //types:add
 	Sides[units.Value]
 }
 
-// NewSideValues is a helper that creates new side/corner values
+// NewValues is a helper that creates new side/corner values
 // and calls Set on them with the given values.
-func NewSideValues(vals ...units.Value) SideValues {
+func NewValues(vals ...units.Value) Values {
 	sides := Sides[units.Value]{}
 	sides.Set(vals...)
-	return SideValues{sides}
+	return Values{sides}
 }
 
 // ToDots converts the values for each of the sides/corners
 // to raw display pixels (dots) and sets the Dots field for each
-// of the values. It returns the dot values as a SideFloats.
-func (sv *SideValues) ToDots(uc *units.Context) SideFloats {
-	return NewSideFloats(
+// of the values. It returns the dot values as a Floats.
+func (sv *Values) ToDots(uc *units.Context) Floats {
+	return NewFloats(
 		sv.Top.ToDots(uc),
 		sv.Right.ToDots(uc),
 		sv.Bottom.ToDots(uc),
@@ -238,10 +243,10 @@ func (sv *SideValues) ToDots(uc *units.Context) SideFloats {
 	)
 }
 
-// Dots returns the dot values of the sides/corners as a SideFloats.
+// Dots returns the dot values of the sides/corners as a Floats.
 // It does not compute them; see ToDots for that.
-func (sv SideValues) Dots() SideFloats {
-	return NewSideFloats(
+func (sv Values) Dots() Floats {
+	return NewFloats(
 		sv.Top.Dots,
 		sv.Right.Dots,
 		sv.Bottom.Dots,
@@ -249,23 +254,23 @@ func (sv SideValues) Dots() SideFloats {
 	)
 }
 
-// SideFloats contains float32 values for each side/corner of a box
-type SideFloats struct { //types:add
+// Floats contains float32 values for each side/corner of a box
+type Floats struct { //types:add
 	Sides[float32]
 }
 
-// NewSideFloats is a helper that creates new side/corner floats
+// NewFloats is a helper that creates new side/corner floats
 // and calls Set on them with the given values.
-func NewSideFloats(vals ...float32) SideFloats {
+func NewFloats(vals ...float32) Floats {
 	sides := Sides[float32]{}
 	sides.Set(vals...)
-	return SideFloats{sides}
+	return Floats{sides}
 }
 
 // Add adds the side floats to the
 // other side floats and returns the result
-func (sf SideFloats) Add(other SideFloats) SideFloats {
-	return NewSideFloats(
+func (sf Floats) Add(other Floats) Floats {
+	return NewFloats(
 		sf.Top+other.Top,
 		sf.Right+other.Right,
 		sf.Bottom+other.Bottom,
@@ -275,8 +280,8 @@ func (sf SideFloats) Add(other SideFloats) SideFloats {
 
 // Sub subtracts the other side floats from
 // the side floats and returns the result
-func (sf SideFloats) Sub(other SideFloats) SideFloats {
-	return NewSideFloats(
+func (sf Floats) Sub(other Floats) Floats {
+	return NewFloats(
 		sf.Top-other.Top,
 		sf.Right-other.Right,
 		sf.Bottom-other.Bottom,
@@ -286,8 +291,8 @@ func (sf SideFloats) Sub(other SideFloats) SideFloats {
 
 // MulScalar multiplies each side by the given scalar value
 // and returns the result.
-func (sf SideFloats) MulScalar(s float32) SideFloats {
-	return NewSideFloats(
+func (sf Floats) MulScalar(s float32) Floats {
+	return NewFloats(
 		sf.Top*s,
 		sf.Right*s,
 		sf.Bottom*s,
@@ -297,8 +302,8 @@ func (sf SideFloats) MulScalar(s float32) SideFloats {
 
 // Min returns a new side floats containing the
 // minimum values of the two side floats
-func (sf SideFloats) Min(other SideFloats) SideFloats {
-	return NewSideFloats(
+func (sf Floats) Min(other Floats) Floats {
+	return NewFloats(
 		math32.Min(sf.Top, other.Top),
 		math32.Min(sf.Right, other.Right),
 		math32.Min(sf.Bottom, other.Bottom),
@@ -308,8 +313,8 @@ func (sf SideFloats) Min(other SideFloats) SideFloats {
 
 // Max returns a new side floats containing the
 // maximum values of the two side floats
-func (sf SideFloats) Max(other SideFloats) SideFloats {
-	return NewSideFloats(
+func (sf Floats) Max(other Floats) Floats {
+	return NewFloats(
 		math32.Max(sf.Top, other.Top),
 		math32.Max(sf.Right, other.Right),
 		math32.Max(sf.Bottom, other.Bottom),
@@ -319,8 +324,8 @@ func (sf SideFloats) Max(other SideFloats) SideFloats {
 
 // Round returns a new side floats with each side value
 // rounded to the nearest whole number.
-func (sf SideFloats) Round() SideFloats {
-	return NewSideFloats(
+func (sf Floats) Round() Floats {
+	return NewFloats(
 		math32.Round(sf.Top),
 		math32.Round(sf.Right),
 		math32.Round(sf.Bottom),
@@ -329,19 +334,19 @@ func (sf SideFloats) Round() SideFloats {
 }
 
 // Pos returns the position offset casued by the side/corner values (Left, Top)
-func (sf SideFloats) Pos() math32.Vector2 {
+func (sf Floats) Pos() math32.Vector2 {
 	return math32.Vec2(sf.Left, sf.Top)
 }
 
 // Size returns the toal size the side/corner values take up (Left + Right, Top + Bottom)
-func (sf SideFloats) Size() math32.Vector2 {
+func (sf Floats) Size() math32.Vector2 {
 	return math32.Vec2(sf.Left+sf.Right, sf.Top+sf.Bottom)
 }
 
 // ToValues returns the side floats a
-// SideValues composed of [units.UnitDot] values
-func (sf SideFloats) ToValues() SideValues {
-	return NewSideValues(
+// Values composed of [units.UnitDot] values
+func (sf Floats) ToValues() Values {
+	return NewValues(
 		units.Dot(sf.Top),
 		units.Dot(sf.Right),
 		units.Dot(sf.Bottom),
@@ -349,22 +354,22 @@ func (sf SideFloats) ToValues() SideValues {
 	)
 }
 
-// SideColors contains color values for each side/corner of a box
-type SideColors struct { //types:add
+// Colors contains color values for each side/corner of a box
+type Colors struct { //types:add
 	Sides[color.RGBA]
 }
 
-// NewSideColors is a helper that creates new side/corner colors
+// NewColors is a helper that creates new side/corner colors
 // and calls Set on them with the given values.
 // It does not return any error values and just logs them.
-func NewSideColors(vals ...color.RGBA) SideColors {
+func NewColors(vals ...color.RGBA) Colors {
 	sides := Sides[color.RGBA]{}
 	sides.Set(vals...)
-	return SideColors{sides}
+	return Colors{sides}
 }
 
 // SetAny sets the sides/corners from the given value of any type
-func (s *SideColors) SetAny(a any, base color.Color) error {
+func (s *Colors) SetAny(a any, base color.Color) error {
 	switch val := a.(type) {
 	case Sides[color.RGBA]:
 		s.Sides = val
@@ -387,13 +392,13 @@ func (s *SideColors) SetAny(a any, base color.Color) error {
 }
 
 // SetString sets the sides/corners from the given string value
-func (s *SideColors) SetString(str string, base color.Color) error {
+func (s *Colors) SetString(str string, base color.Color) error {
 	fields := strings.Fields(str)
 	vals := make([]color.RGBA, len(fields))
 	for i, field := range fields {
 		clr, err := colors.FromString(field, base)
 		if err != nil {
-			nerr := fmt.Errorf("(SideColors).SetString('%s'): error setting sides of type %T from string: %w", str, s, err)
+			nerr := fmt.Errorf("(Colors).SetString('%s'): error setting sides of type %T from string: %w", str, s, err)
 			slog.Error(nerr.Error())
 			return nerr
 		}

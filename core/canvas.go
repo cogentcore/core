@@ -21,10 +21,10 @@ type Canvas struct {
 	// canvas every time that it is rendered. The paint context
 	// is automatically normalized to the size of the canvas,
 	// so you should specify points on a 0-1 scale.
-	Draw func(pc *paint.Context)
+	Draw func(pc *paint.Painter)
 
 	// context is the paint context used for drawing.
-	context *paint.Context
+	context *paint.Painter
 }
 
 func (c *Canvas) Init() {

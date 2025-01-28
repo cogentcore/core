@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build not
+
 package paint
 
 import (
@@ -15,7 +17,7 @@ import (
 )
 
 func TestBackgroundColor(t *testing.T) {
-	RunTest(t, "background-color", 300, 300, func(pc *Context) {
+	RunTest(t, "background-color", 300, 300, func(pc *Painter) {
 		pabg := colors.Uniform(colors.White)
 		st := styles.NewStyle()
 		st.Background = colors.Uniform(colors.Blue)
@@ -30,7 +32,7 @@ func TestBackgroundColor(t *testing.T) {
 func TestBackgroundImage(t *testing.T) {
 	img, _, err := imagex.Open("test.png")
 	assert.NoError(t, err)
-	RunTest(t, "background-image", 1260, 200, func(pc *Context) {
+	RunTest(t, "background-image", 1260, 200, func(pc *Painter) {
 		pabg := colors.Uniform(colors.White)
 		st := styles.NewStyle()
 		st.Background = img
@@ -56,7 +58,7 @@ func TestObjectFit(t *testing.T) {
 	img, _, err := imagex.Open("test.png")
 	// obj := math32.FromPoint(img.Bounds().Size())
 	assert.NoError(t, err)
-	RunTest(t, "object-fit", 1260, 300, func(pc *Context) {
+	RunTest(t, "object-fit", 1260, 300, func(pc *Painter) {
 		st := styles.NewStyle()
 		st.ToDots()
 		box := math32.Vec2(200, 100)

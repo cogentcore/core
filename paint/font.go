@@ -25,7 +25,7 @@ import (
 // style object with Face set to the resulting font.
 // The font size is always rounded to nearest integer, to produce
 // better-looking results (presumably).  The current metrics and given
-// unit.Context are updated based on the properties of the font.
+// unit.Paint are updated based on the properties of the font.
 func OpenFont(fs *styles.FontRender, uc *units.Context) styles.Font {
 	fs.Size.ToDots(uc)
 	facenm := FontFaceName(fs.Family, fs.Stretch, fs.Weight, fs.Style)

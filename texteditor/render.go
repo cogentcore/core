@@ -426,9 +426,9 @@ func (ed *Editor) renderLineNumbersBoxAll() {
 	epos.X = spos.X + ed.LineNumberOffset
 
 	sz := epos.Sub(spos)
-	pc.FillStyle.Color = ed.LineNumberColor
+	pc.Fill.Color = ed.LineNumberColor
 	pc.DrawRoundedRectangle(spos.X, spos.Y, sz.X, sz.Y, ed.Styles.Border.Radius.Dots())
-	pc.Fill()
+	pc.PathDone()
 }
 
 // renderLineNumber renders given line number; called within context of other render.
@@ -493,9 +493,9 @@ func (ed *Editor) renderLineNumber(ln int, defFill bool) {
 		// cut radius in half so that it doesn't look too big
 		r /= 2
 
-		pc.FillStyle.Color = lineColor
+		pc.Fill.Color = lineColor
 		pc.DrawCircle(center.X, center.Y, r)
-		pc.Fill()
+		pc.PathDone()
 	}
 }
 

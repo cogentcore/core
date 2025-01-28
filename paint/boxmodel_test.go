@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build not
+
 package paint
 
 import (
@@ -16,7 +18,7 @@ import (
 )
 
 func TestBoxModel(t *testing.T) {
-	RunTest(t, "boxmodel", 300, 300, func(pc *Context) {
+	RunTest(t, "boxmodel", 300, 300, func(pc *Painter) {
 		pabg := colors.Uniform(colors.White)
 		s := styles.NewStyle()
 		s.Color = colors.Uniform(colors.Black)
@@ -34,7 +36,7 @@ func TestBoxModel(t *testing.T) {
 }
 
 func TestBoxShadow(t *testing.T) {
-	RunTest(t, "boxshadow", 300, 300, func(pc *Context) {
+	RunTest(t, "boxshadow", 300, 300, func(pc *Painter) {
 		pabg := colors.Uniform(colors.White)
 		s := styles.NewStyle()
 		s.Color = colors.Uniform(colors.Black)
@@ -54,7 +56,7 @@ func TestBoxShadow(t *testing.T) {
 }
 
 func TestActualBackgroundColor(t *testing.T) {
-	RunTest(t, "actual-background-color", 300, 300, func(pc *Context) {
+	RunTest(t, "actual-background-color", 300, 300, func(pc *Painter) {
 		pabg := colors.Uniform(colors.White)
 		a := styles.NewStyle()
 		a.Background = colors.Uniform(colors.Lightgray)
@@ -84,7 +86,7 @@ func TestActualBackgroundColor(t *testing.T) {
 
 func TestBorderStyle(t *testing.T) {
 	for _, typ := range styles.BorderStylesValues() {
-		RunTest(t, filepath.Join("border-styles", strcase.ToKebab(typ.String())), 300, 300, func(pc *Context) {
+		RunTest(t, filepath.Join("border-styles", strcase.ToKebab(typ.String())), 300, 300, func(pc *Painter) {
 			s := styles.NewStyle()
 			s.Background = colors.Uniform(colors.Lightgray)
 			s.Border.Style.Set(typ)

@@ -99,14 +99,14 @@ func (g *Image) DrawImage(sv *SVG) {
 		return
 	}
 
-	pc := &paint.Context{&sv.RenderState, &g.Paint}
+	pc := &paint.Painter{&sv.RenderState, &g.Paint}
 	pc.DrawImageScaled(g.Pixels, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 }
 
 func (g *Image) NodeBBox(sv *SVG) image.Rectangle {
-	rs := &sv.RenderState
-	pos := rs.CurrentTransform.MulVector2AsPoint(g.Pos)
-	max := rs.CurrentTransform.MulVector2AsPoint(g.Pos.Add(g.Size))
+	rs := sv.RenderState.Context()
+	pos := rs.Transform.MulVector2AsPoint(g.Pos)
+	max := rs.Transform.MulVector2AsPoint(g.Pos.Add(g.Size))
 	posi := pos.ToPointCeil()
 	maxi := max.ToPointCeil()
 	return image.Rectangle{posi, maxi}.Canon()
@@ -120,14 +120,13 @@ func (g *Image) LocalBBox() math32.Box2 {
 }
 
 func (g *Image) Render(sv *SVG) {
-	vis, rs := g.PushTransform(sv)
+	vis, _ := g.IsVisible(sv)
 	if !vis {
 		return
 	}
 	g.DrawImage(sv)
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
-	rs.PopTransform()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

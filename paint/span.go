@@ -681,16 +681,17 @@ func (sr *Span) LastFont() (face font.Face, color image.Image) {
 }
 
 // RenderBg renders the background behind chars
-func (sr *Span) RenderBg(pc *Context, tpos math32.Vector2) {
+func (sr *Span) RenderBg(pc *Painter, tpos math32.Vector2) {
 	curFace := sr.Render[0].Face
 	didLast := false
 	// first := true
+	cb := pc.Context().Bounds.Rect.ToRect()
 
 	for i := range sr.Text {
 		rr := &(sr.Render[i])
 		if rr.Background == nil {
 			if didLast {
-				pc.Fill()
+				pc.PathDone()
 			}
 			didLast = false
 			continue
@@ -705,32 +706,33 @@ func (sr *Span) RenderBg(pc *Context, tpos math32.Vector2) {
 		tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
 		ll := rp.Add(tx.MulVector2AsVector(math32.Vec2(0, dsc32)))
 		ur := ll.Add(tx.MulVector2AsVector(math32.Vec2(rr.Size.X, -rr.Size.Y)))
-		if int(math32.Floor(ll.X)) > pc.Bounds.Max.X || int(math32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
-			int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
+		if int(math32.Floor(ll.X)) > cb.Max.X || int(math32.Floor(ur.Y)) > cb.Max.Y ||
+			int(math32.Ceil(ur.X)) < cb.Min.X || int(math32.Ceil(ll.Y)) < cb.Min.Y {
 			if didLast {
-				pc.Fill()
+				pc.PathDone()
 			}
 			didLast = false
 			continue
 		}
-		pc.FillStyle.Color = rr.Background
+		pc.Fill.Color = rr.Background
 		szt := math32.Vec2(rr.Size.X, -rr.Size.Y)
 		sp := rp.Add(tx.MulVector2AsVector(math32.Vec2(0, dsc32)))
 		ul := sp.Add(tx.MulVector2AsVector(math32.Vec2(0, szt.Y)))
 		lr := sp.Add(tx.MulVector2AsVector(math32.Vec2(szt.X, 0)))
-		pc.DrawPolygon([]math32.Vector2{sp, ul, ur, lr})
+		pc.Polygon([]math32.Vector2{sp, ul, ur, lr})
 		didLast = true
 	}
 	if didLast {
-		pc.Fill()
+		pc.PathDone()
 	}
 }
 
 // RenderUnderline renders the underline for span -- ensures continuity to do it all at once
-func (sr *Span) RenderUnderline(pc *Context, tpos math32.Vector2) {
+func (sr *Span) RenderUnderline(pc *Painter, tpos math32.Vector2) {
 	curFace := sr.Render[0].Face
 	curColor := sr.Render[0].Color
 	didLast := false
+	cb := pc.Context().Bounds.Rect.ToRect()
 
 	for i, r := range sr.Text {
 		if !unicode.IsPrint(r) {
@@ -739,7 +741,7 @@ func (sr *Span) RenderUnderline(pc *Context, tpos math32.Vector2) {
 		rr := &(sr.Render[i])
 		if !(rr.Deco.HasFlag(styles.Underline) || rr.Deco.HasFlag(styles.DecoDottedUnderline)) {
 			if didLast {
-				pc.Stroke()
+				pc.PathDone()
 			}
 			didLast = false
 			continue
@@ -757,20 +759,20 @@ func (sr *Span) RenderUnderline(pc *Context, tpos math32.Vector2) {
 		tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
 		ll := rp.Add(tx.MulVector2AsVector(math32.Vec2(0, dsc32)))
 		ur := ll.Add(tx.MulVector2AsVector(math32.Vec2(rr.Size.X, -rr.Size.Y)))
-		if int(math32.Floor(ll.X)) > pc.Bounds.Max.X || int(math32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
-			int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
+		if int(math32.Floor(ll.X)) > cb.Max.X || int(math32.Floor(ur.Y)) > cb.Max.Y ||
+			int(math32.Ceil(ur.X)) < cb.Min.X || int(math32.Ceil(ll.Y)) < cb.Min.Y {
 			if didLast {
-				pc.Stroke()
+				pc.PathDone()
 			}
 			continue
 		}
 		dw := .05 * rr.Size.Y
 		if !didLast {
-			pc.StrokeStyle.Width.Dots = dw
-			pc.StrokeStyle.Color = curColor
+			pc.Stroke.Width.Dots = dw
+			pc.Stroke.Color = curColor
 		}
 		if rr.Deco.HasFlag(styles.DecoDottedUnderline) {
-			pc.StrokeStyle.Dashes = []float32{2, 2}
+			pc.Stroke.Dashes = []float32{2, 2}
 		}
 		sp := rp.Add(tx.MulVector2AsVector(math32.Vec2(0, 2*dw)))
 		ep := rp.Add(tx.MulVector2AsVector(math32.Vec2(rr.Size.X, 2*dw)))
@@ -778,23 +780,23 @@ func (sr *Span) RenderUnderline(pc *Context, tpos math32.Vector2) {
 		if didLast {
 			pc.LineTo(sp.X, sp.Y)
 		} else {
-			pc.NewSubPath()
 			pc.MoveTo(sp.X, sp.Y)
 		}
 		pc.LineTo(ep.X, ep.Y)
 		didLast = true
 	}
 	if didLast {
-		pc.Stroke()
+		pc.PathDone()
 	}
-	pc.StrokeStyle.Dashes = nil
+	pc.Stroke.Dashes = nil
 }
 
 // RenderLine renders overline or line-through -- anything that is a function of ascent
-func (sr *Span) RenderLine(pc *Context, tpos math32.Vector2, deco styles.TextDecorations, ascPct float32) {
+func (sr *Span) RenderLine(pc *Painter, tpos math32.Vector2, deco styles.TextDecorations, ascPct float32) {
 	curFace := sr.Render[0].Face
 	curColor := sr.Render[0].Color
 	didLast := false
+	cb := pc.Context().Bounds.Rect.ToRect()
 
 	for i, r := range sr.Text {
 		if !unicode.IsPrint(r) {
@@ -803,7 +805,7 @@ func (sr *Span) RenderLine(pc *Context, tpos math32.Vector2, deco styles.TextDec
 		rr := &(sr.Render[i])
 		if !rr.Deco.HasFlag(deco) {
 			if didLast {
-				pc.Stroke()
+				pc.PathDone()
 			}
 			didLast = false
 			continue
@@ -819,10 +821,10 @@ func (sr *Span) RenderLine(pc *Context, tpos math32.Vector2, deco styles.TextDec
 		tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
 		ll := rp.Add(tx.MulVector2AsVector(math32.Vec2(0, dsc32)))
 		ur := ll.Add(tx.MulVector2AsVector(math32.Vec2(rr.Size.X, -rr.Size.Y)))
-		if int(math32.Floor(ll.X)) > pc.Bounds.Max.X || int(math32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
-			int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
+		if int(math32.Floor(ll.X)) > cb.Max.X || int(math32.Floor(ur.Y)) > cb.Max.Y ||
+			int(math32.Ceil(ur.X)) < cb.Min.X || int(math32.Ceil(ll.Y)) < cb.Min.Y {
 			if didLast {
-				pc.Stroke()
+				pc.PathDone()
 			}
 			continue
 		}
@@ -831,8 +833,8 @@ func (sr *Span) RenderLine(pc *Context, tpos math32.Vector2, deco styles.TextDec
 		}
 		dw := 0.05 * rr.Size.Y
 		if !didLast {
-			pc.StrokeStyle.Width.Dots = dw
-			pc.StrokeStyle.Color = curColor
+			pc.Stroke.Width.Dots = dw
+			pc.Stroke.Color = curColor
 		}
 		yo := ascPct * asc32
 		sp := rp.Add(tx.MulVector2AsVector(math32.Vec2(0, -yo)))
@@ -841,13 +843,12 @@ func (sr *Span) RenderLine(pc *Context, tpos math32.Vector2, deco styles.TextDec
 		if didLast {
 			pc.LineTo(sp.X, sp.Y)
 		} else {
-			pc.NewSubPath()
 			pc.MoveTo(sp.X, sp.Y)
 		}
 		pc.LineTo(ep.X, ep.Y)
 		didLast = true
 	}
 	if didLast {
-		pc.Stroke()
+		pc.PathDone()
 	}
 }
