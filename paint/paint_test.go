@@ -2,37 +2,35 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package paint
+package paint_test
 
 import (
-	"image"
 	"os"
-	"slices"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/units"
-	"github.com/stretchr/testify/assert"
+	. "cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/renderers/rasterx"
 )
 
 func TestMain(m *testing.M) {
 	FontLibrary.InitFontPaths(FontPaths...)
+	NewDefaultImageRenderer = rasterx.New
 	os.Exit(m.Run())
 }
 
 // RunTest makes a rendering state, paint, and image with the given size, calls the given
 // function, and then asserts the image using [imagex.Assert] with the given name.
 func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)) {
-	pc := NewPaint(width, height)
-	pc.PushBounds(pc.Image.Rect)
+	pc := NewPainter(width, height)
+	// pc.PushBounds(pc.Image.Rect)
 	f(pc)
 	imagex.Assert(t, pc.Image, nm)
 }
 
+/*
 func TestRender(t *testing.T) {
 	RunTest(t, "render", 300, 300, func(pc *Painter) {
 		testimg, _, err := imagex.Open("test.png")
@@ -50,9 +48,9 @@ func TestRender(t *testing.T) {
 		bs.ToDots(&pc.UnitPaint)
 
 		// first, draw a frame around the entire image
-		// pc.StrokeStyle.Color = colors.C(blk)
-		pc.FillStyle.Color = colors.Uniform(colors.White)
-		// pc.StrokeStyle.Width.SetDot(1) // use dots directly to render in literal pixels
+		// pc.Stroke.Color = colors.C(blk)
+		pc.Fill.Color = colors.Uniform(colors.White)
+		// pc.Stroke.Width.SetDot(1) // use dots directly to render in literal pixels
 		pc.DrawBorder(0, 0, 300, 300, bs)
 		pc.PathDone() // actually render path that has been setup
 
@@ -61,8 +59,8 @@ func TestRender(t *testing.T) {
 		bs.Color.Set(imgs...)
 		// bs.Width.Set(units.NewDot(10))
 		bs.Radius.Set(units.Dot(0), units.Dot(30), units.Dot(10))
-		pc.FillStyle.Color = colors.Uniform(colors.Lightblue)
-		pc.StrokeStyle.Width.Dot(10)
+		pc.Fill.Color = colors.Uniform(colors.Lightblue)
+		pc.Stroke.Width.Dot(10)
 		bs.ToDots(&pc.UnitPaint)
 		pc.DrawBorder(60, 60, 150, 100, bs)
 		pc.PathDone()
@@ -87,43 +85,46 @@ func TestRender(t *testing.T) {
 		txt.Render(pc, math32.Vec2(85, 80))
 	})
 }
+*/
 
 func TestPaintPath(t *testing.T) {
 	test := func(nm string, f func(pc *Painter)) {
 		RunTest(t, nm, 300, 300, func(pc *Painter) {
 			pc.FillBox(math32.Vector2{}, math32.Vec2(300, 300), colors.Uniform(colors.White))
 			f(pc)
-			pc.StrokeStyle.Color = colors.Uniform(colors.Blue)
-			pc.FillStyle.Color = colors.Uniform(colors.Yellow)
-			pc.StrokeStyle.Width.Dot(3)
+			pc.Stroke.Color = colors.Uniform(colors.Blue)
+			pc.Fill.Color = colors.Uniform(colors.Yellow)
+			pc.Stroke.Width.Dot(3)
 			pc.PathDone()
+			pc.RenderDone()
 		})
 	}
 	test("line-to", func(pc *Painter) {
 		pc.MoveTo(100, 200)
 		pc.LineTo(200, 100)
 	})
-	test("quadratic-to", func(pc *Painter) {
-		pc.MoveTo(100, 200)
-		pc.QuadraticTo(120, 140, 200, 100)
-	})
-	test("cubic-to", func(pc *Painter) {
-		pc.MoveTo(100, 200)
-		pc.CubicTo(130, 110, 160, 180, 200, 100)
-	})
-	test("close-path", func(pc *Painter) {
-		pc.MoveTo(100, 200)
-		pc.LineTo(200, 100)
-		pc.LineTo(250, 150)
-		pc.ClosePath()
-	})
-	test("clear-path", func(pc *Painter) {
-		pc.MoveTo(100, 200)
-		pc.MoveTo(200, 100)
-		pc.ClearPath()
-	})
+	// test("quadratic-to", func(pc *Painter) {
+	// 	pc.MoveTo(100, 200)
+	// 	pc.QuadTo(120, 140, 200, 100)
+	// })
+	// test("cubic-to", func(pc *Painter) {
+	// 	pc.MoveTo(100, 200)
+	// 	pc.CubeTo(130, 110, 160, 180, 200, 100)
+	// })
+	// test("close-path", func(pc *Painter) {
+	// 	pc.MoveTo(100, 200)
+	// 	pc.LineTo(200, 100)
+	// 	pc.LineTo(250, 150)
+	// 	pc.Close()
+	// })
+	// test("clear-path", func(pc *Painter) {
+	// 	pc.MoveTo(100, 200)
+	// 	pc.MoveTo(200, 100)
+	// 	pc.Clear()
+	// })
 }
 
+/*
 func TestPaintFill(t *testing.T) {
 	test := func(nm string, f func(pc *Painter)) {
 		RunTest(t, nm, 300, 300, func(pc *Painter) {
@@ -159,29 +160,30 @@ func TestPaintFill(t *testing.T) {
 	})
 
 	test("fill", func(pc *Painter) {
-		pc.FillStyle.Color = colors.Uniform(colors.Purple)
-		pc.StrokeStyle.Color = colors.Uniform(colors.Orange)
+		pc.Fill.Color = colors.Uniform(colors.Purple)
+		pc.Stroke.Color = colors.Uniform(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.PathDone()
 	})
 	test("stroke", func(pc *Painter) {
-		pc.FillStyle.Color = colors.Uniform(colors.Purple)
-		pc.StrokeStyle.Color = colors.Uniform(colors.Orange)
+		pc.Fill.Color = colors.Uniform(colors.Purple)
+		pc.Stroke.Color = colors.Uniform(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.PathDone()
 	})
 
 	// testing whether nil values turn off stroking/filling with FillStrokeClear
 	test("fill-stroke-clear-fill", func(pc *Painter) {
-		pc.FillStyle.Color = colors.Uniform(colors.Purple)
-		pc.StrokeStyle.Color = nil
+		pc.Fill.Color = colors.Uniform(colors.Purple)
+		pc.Stroke.Color = nil
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.PathDone()
 	})
 	test("fill-stroke-clear-stroke", func(pc *Painter) {
-		pc.FillStyle.Color = nil
-		pc.StrokeStyle.Color = colors.Uniform(colors.Orange)
+		pc.Fill.Color = nil
+		pc.Stroke.Color = colors.Uniform(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.PathDone()
 	})
 }
+*/

@@ -8,10 +8,14 @@ import (
 	"image"
 	"log/slog"
 
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/path"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 )
+
+// NewDefaultImageRenderer is a function that returns the default image renderer
+var NewDefaultImageRenderer func(size math32.Vector2, img *image.RGBA) Renderer
 
 // The State holds all the current rendering state information used
 // while painting. The [Paint] embeds a pointer to this.
@@ -39,7 +43,9 @@ type State struct {
 // rasterizing renderer, using the given overall styles, size, and image.
 // It must be called whenever the image size changes.
 func (rs *State) InitImageRaster(sty *styles.Paint, width, height int, img *image.RGBA) {
-	// todo: make a default renderer
+	sz := math32.Vec2(float32(width), float32(height))
+	rast := NewDefaultImageRenderer(sz, img)
+	rs.Renderers = append(rs.Renderers, rast)
 	rs.Stack = []*Context{NewContext(sty, NewBounds(float32(width), float32(height), sides.Floats{}), nil)}
 	rs.Image = img
 }

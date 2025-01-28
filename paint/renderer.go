@@ -81,3 +81,6 @@ type ContextPop struct {
 // interface assertion.
 func (p *ContextPop) isRenderItem() {
 }
+
+// Registry of renderers
+var Renderers map[string]Renderer

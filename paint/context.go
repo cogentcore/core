@@ -79,6 +79,7 @@ func NewContext(sty *styles.Paint, bounds *Bounds, parent *Context) *Context {
 // All the values from the style are used to update the Context,
 // accumulating anything from the parent.
 func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
+	ctx.Style = *sty
 	if parent == nil {
 		ctx.Transform = sty.Transform
 		bsz := bounds.Rect.Size()

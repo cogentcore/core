@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/path"
 	"cogentcore.org/core/paint/renderers/rasterx/scan"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -39,7 +38,7 @@ type Renderer struct {
 }
 
 // New returns a new rasterx Renderer, rendering to given image.
-func New(size math32.Vector2, img *image.RGBA) *Renderer {
+func New(size math32.Vector2, img *image.RGBA) paint.Renderer {
 	rs := &Renderer{Size: size, Image: img}
 	psz := size.ToPointCeil()
 	rs.ImgSpanner = scan.NewImgSpanner(img)
@@ -65,8 +64,9 @@ func (rs *Renderer) Render(r paint.Render) {
 
 func (rs *Renderer) RenderPath(pt *paint.Path) {
 	rs.Raster.Clear()
+	// todo: transform!
 	p := pt.Path.ReplaceArcs()
-	for s := p; s.Scan(); {
+	for s := p.Scanner(); s.Scan(); {
 		cmd := s.Cmd()
 		end := s.End()
 		switch cmd {
@@ -85,17 +85,19 @@ func (rs *Renderer) RenderPath(pt *paint.Path) {
 			rs.Path.Stop(true)
 		}
 	}
-	rs.Fill(&pt.Style)
-	rs.Stroke(&pt.Style)
+	rs.Fill(pt)
+	rs.Stroke(pt)
 	rs.Path.Clear()
 }
 
-func (rs *Renderer) Stroke(sty *styles.Path) {
+func (rs *Renderer) Stroke(pt *paint.Path) {
+	pc := &pt.Context
+	sty := &pc.Style
 	if sty.Off || sty.Stroke.Color == nil {
 		return
 	}
 
-	dash := slices.Clone(sty.Dashes)
+	dash := slices.Clone(sty.Stroke.Dashes)
 	if dash != nil {
 		scx, scy := pc.Transform.ExtractScale()
 		sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
@@ -104,53 +106,56 @@ func (rs *Renderer) Stroke(sty *styles.Path) {
 		}
 	}
 
-	pc.Raster.SetStroke(
-		math32.ToFixed(pc.StrokeWidth()),
-		math32.ToFixed(sty.MiterLimit),
-		pc.capfunc(), nil, nil, pc.joinmode(), // todo: supports leading / trailing caps, and "gaps"
+	sw := rs.StrokeWidth(pt)
+
+	rs.Raster.SetStroke(
+		math32.ToFixed(sw),
+		math32.ToFixed(sty.Stroke.MiterLimit),
+		capfunc(sty.Stroke.Cap), nil, nil, joinmode(sty.Stroke.Join),
 		dash, 0)
-	pc.Scanner.SetClip(pc.Bounds)
-	pc.Path.AddTo(pc.Raster)
-	fbox := pc.Raster.Scanner.GetPathExtent()
-	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
+	rs.Path.AddTo(rs.Raster)
+	fbox := rs.Raster.Scanner.GetPathExtent()
+	lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	if g, ok := sty.Color.(gradient.Gradient); ok {
-		g.Update(sty.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.Transform)
-		pc.Raster.SetColor(sty.Color)
+	if g, ok := sty.Stroke.Color.(gradient.Gradient); ok {
+		g.Update(sty.Stroke.Opacity, math32.B2FromRect(lastRenderBBox), pc.Transform)
+		rs.Raster.SetColor(sty.Stroke.Color)
 	} else {
-		if sty.Opacity < 1 {
-			pc.Raster.SetColor(gradient.ApplyOpacity(sty.Color, sty.Opacity))
+		if sty.Stroke.Opacity < 1 {
+			rs.Raster.SetColor(gradient.ApplyOpacity(sty.Stroke.Color, sty.Stroke.Opacity))
 		} else {
-			pc.Raster.SetColor(sty.Color)
+			rs.Raster.SetColor(sty.Stroke.Color)
 		}
 	}
 
-	pc.Raster.Draw()
-	pc.Raster.Clear()
-
+	rs.Raster.Draw()
+	rs.Raster.Clear()
 }
 
 // Fill fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is preserved after this operation.
-func (rs *Renderer) Fill() {
-	if pc.Fill.Color == nil {
+func (rs *Renderer) Fill(pt *paint.Path) {
+	pc := &pt.Context
+	sty := &pc.Style
+	if sty.Fill.Color == nil {
 		return
 	}
-	rf := &pc.Raster.Filler
-	rf.SetWinding(pc.Fill.Rule == styles.FillRuleNonZero)
-	pc.Scanner.SetClip(pc.Bounds)
-	pc.Path.AddTo(rf)
-	fbox := pc.Scanner.GetPathExtent()
-	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+	rf := &rs.Raster.Filler
+	rf.SetWinding(sty.Fill.Rule == path.NonZero)
+	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
+	rs.Path.AddTo(rf)
+	fbox := rs.Scanner.GetPathExtent()
+	lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	if g, ok := pc.Fill.Color.(gradient.Gradient); ok {
-		g.Update(pc.Fill.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.Transform)
-		rf.SetColor(pc.Fill.Color)
+	if g, ok := sty.Fill.Color.(gradient.Gradient); ok {
+		g.Update(sty.Fill.Opacity, math32.B2FromRect(lastRenderBBox), pc.Transform)
+		rf.SetColor(sty.Fill.Color)
 	} else {
-		if pc.Fill.Opacity < 1 {
-			rf.SetColor(gradient.ApplyOpacity(pc.Fill.Color, pc.Fill.Opacity))
+		if sty.Fill.Opacity < 1 {
+			rf.SetColor(gradient.ApplyOpacity(sty.Fill.Color, sty.Fill.Opacity))
 		} else {
-			rf.SetColor(pc.Fill.Color)
+			rf.SetColor(sty.Fill.Color)
 		}
 	}
 	rf.Draw()
@@ -159,16 +164,48 @@ func (rs *Renderer) Fill() {
 
 // StrokeWidth obtains the current stoke width subject to transform (or not
 // depending on VecEffNonScalingStroke)
-func (rs *Renderer) StrokeWidth() float32 {
-	dw := sty.Width.Dots
+func (rs *Renderer) StrokeWidth(pt *paint.Path) float32 {
+	pc := &pt.Context
+	sty := &pc.Style
+	dw := sty.Stroke.Width.Dots
 	if dw == 0 {
 		return dw
 	}
-	if pc.VectorEffect == styles.VectorEffectNonScalingStroke {
+	if sty.VectorEffect == path.VectorEffectNonScalingStroke {
 		return dw
 	}
 	scx, scy := pc.Transform.ExtractScale()
 	sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
-	lw := math32.Max(sc*dw, sty.MinWidth.Dots)
+	lw := math32.Max(sc*dw, sty.Stroke.MinWidth.Dots)
 	return lw
+}
+
+func capfunc(st path.Caps) CapFunc {
+	switch st {
+	case path.CapButt:
+		return ButtCap
+	case path.CapRound:
+		return RoundCap
+	case path.CapSquare:
+		return SquareCap
+	}
+	return nil
+}
+
+func joinmode(st path.Joins) JoinMode {
+	switch st {
+	case path.JoinMiter:
+		return Miter
+	case path.JoinMiterClip:
+		return MiterClip
+	case path.JoinRound:
+		return Round
+	case path.JoinBevel:
+		return Bevel
+	case path.JoinArcs:
+		return Arc
+	case path.JoinArcsClip:
+		return ArcClip
+	}
+	return Arc
 }
