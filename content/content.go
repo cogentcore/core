@@ -395,7 +395,7 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 		return err
 	}
 	lead, _, _ := bytes.Cut(b, []byte("\n#"))
-	res := append([]byte(fmt.Sprintf("*Main page: [[%s]]*", pg.Name)), lead...)
+	res := append([]byte(fmt.Sprintf("*Main page: [[%s]]*\n\n", pg.Name)), lead...)
 	return htmlcore.ReadMD(ctx, ctx.BlockParent, res)
 }
 
