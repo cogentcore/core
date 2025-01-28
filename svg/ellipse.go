@@ -44,17 +44,15 @@ func (g *Ellipse) LocalBBox() math32.Box2 {
 }
 
 func (g *Ellipse) Render(sv *SVG) {
-	vis, pc := g.PushTransform(sv)
+	vis, pc := g.IsVisible(sv)
 	if !vis {
 		return
 	}
-	pc.DrawEllipse(g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
+	pc.Ellipse(g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
 	pc.PathDone()
 
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
-
-	pc.PopTransform()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

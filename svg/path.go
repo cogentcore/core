@@ -66,7 +66,7 @@ func (g *Path) Render(sv *SVG) {
 	if sz < 2 {
 		return
 	}
-	vis, pc := g.PushTransform(sv)
+	vis, pc := g.IsVisible(sv)
 	if !vis {
 		return
 	}
@@ -78,11 +78,11 @@ func (g *Path) Render(sv *SVG) {
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		// todo: could look for close-path at end and find angle from there..
 		stv, ang := PathDataStart(g.Data)
-		mrk.RenderMarker(sv, stv, ang, g.Paint.StrokeStyle.Width.Dots)
+		mrk.RenderMarker(sv, stv, ang, g.Paint.Stroke.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-end"); mrk != nil {
 		env, ang := PathDataEnd(g.Data)
-		mrk.RenderMarker(sv, env, ang, g.Paint.StrokeStyle.Width.Dots)
+		mrk.RenderMarker(sv, env, ang, g.Paint.Stroke.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-mid"); mrk != nil {
 		var ptm2, ptm1, pt math32.Vector2
@@ -99,14 +99,13 @@ func (g *Path) Render(sv *SVG) {
 				return false
 			}
 			ang := 0.5 * (math32.Atan2(pt.Y-ptm1.Y, pt.X-ptm1.X) + math32.Atan2(ptm1.Y-ptm2.Y, ptm1.X-ptm2.X))
-			mrk.RenderMarker(sv, ptm1, ang, g.Paint.StrokeStyle.Width.Dots)
+			mrk.RenderMarker(sv, ptm1, ang, g.Paint.Stroke.Width.Dots)
 			gotidx++
 			return true
 		})
 	}
 
 	g.RenderChildren(sv)
-	pc.PopTransform()
 }
 
 // AddPath adds given path command to the PathData
@@ -259,7 +258,7 @@ func reflectPt(pt, rp math32.Vector2) math32.Vector2 {
 
 // PathDataRender traverses the path data and renders it using paint.
 // We assume all the data has been validated and that n's are sufficient, etc
-func PathDataRender(data []PathData, pc *paint.Context) {
+func PathDataRender(data []PathData, pc *paint.Painter) {
 	sz := len(data)
 	if sz == 0 {
 		return
@@ -321,14 +320,14 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 				xp = PathDataNextVector(data, &i)
 				ctrl = PathDataNextVector(data, &i)
 				cp = PathDataNextVector(data, &i)
-				pc.CubicTo(xp.X, xp.Y, ctrl.X, ctrl.Y, cp.X, cp.Y)
+				pc.CubeTo(xp.X, xp.Y, ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pcc:
 			for np := 0; np < n/6; np++ {
 				xp = PathDataNextRel(data, &i, cp)
 				ctrl = PathDataNextRel(data, &i, cp)
 				cp = PathDataNextRel(data, &i, cp)
-				pc.CubicTo(xp.X, xp.Y, ctrl.X, ctrl.Y, cp.X, cp.Y)
+				pc.CubeTo(xp.X, xp.Y, ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pcs:
 			rel = true
@@ -348,7 +347,7 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 					xp = PathDataNextVector(data, &i)
 					cp = PathDataNextVector(data, &i)
 				}
-				pc.CubicTo(ctrl.X, ctrl.Y, xp.X, xp.Y, cp.X, cp.Y)
+				pc.CubeTo(ctrl.X, ctrl.Y, xp.X, xp.Y, cp.X, cp.Y)
 				lastCmd = cmd
 				ctrl = xp
 			}
@@ -356,13 +355,13 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 			for np := 0; np < n/4; np++ {
 				ctrl = PathDataNextVector(data, &i)
 				cp = PathDataNextVector(data, &i)
-				pc.QuadraticTo(ctrl.X, ctrl.Y, cp.X, cp.Y)
+				pc.QuadTo(ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
 				ctrl = PathDataNextRel(data, &i, cp)
 				cp = PathDataNextRel(data, &i, cp)
-				pc.QuadraticTo(ctrl.X, ctrl.Y, cp.X, cp.Y)
+				pc.QuadTo(ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pct:
 			rel = true
@@ -380,7 +379,7 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 				} else {
 					cp = PathDataNextVector(data, &i)
 				}
-				pc.QuadraticTo(ctrl.X, ctrl.Y, cp.X, cp.Y)
+				pc.QuadTo(ctrl.X, ctrl.Y, cp.X, cp.Y)
 				lastCmd = cmd
 			}
 		case Pca:
@@ -392,19 +391,17 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 				ang := PathDataNext(data, &i)
 				largeArc := (PathDataNext(data, &i) != 0)
 				sweep := (PathDataNext(data, &i) != 0)
-				prv := cp
 				if rel {
 					cp = PathDataNextRel(data, &i, cp)
 				} else {
 					cp = PathDataNextVector(data, &i)
 				}
-				ncx, ncy := paint.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
-				cp.X, cp.Y = pc.DrawEllipticalArcPath(ncx, ncy, cp.X, cp.Y, prv.X, prv.Y, rad.X, rad.Y, ang, largeArc, sweep)
+				pc.ArcTo(rad.X, rad.Y, ang, largeArc, sweep, cp.X, cp.Y)
 			}
 		case PcZ:
 			fallthrough
 		case Pcz:
-			pc.ClosePath()
+			pc.Close()
 			cp = st
 		}
 		lastCmd = cmd
@@ -427,7 +424,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 		return
 	}
 	lastCmd := PcErr
-	var st, cp, xp, ctrl, nc math32.Vector2
+	var st, cp, xp, ctrl math32.Vector2
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
 		rel := false
@@ -588,17 +585,20 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 				largeArc := (laf != 0)
 				sf := PathDataNext(data, &i)
 				sweep := (sf != 0)
+				_, _, _, _ = rad, ang, largeArc, sweep
 
-				prv := cp
+				// prv := cp
 				if rel {
 					cp = PathDataNextRel(data, &i, cp)
 				} else {
 					cp = PathDataNextVector(data, &i)
 				}
-				nc.X, nc.Y = paint.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
-				if !fun(i-2, cmd, np, cp, []math32.Vector2{nc, prv, rad, {X: ang}, {laf, sf}}) {
-					return
-				}
+				// todo:
+				// pc.ArcToDeg(rad.X, rad.Y, ang, largeArc, sweep, cp.X, cp.Y)
+				// nc.X, nc.Y = paint.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
+				// if !fun(i-2, cmd, np, cp, []math32.Vector2{nc, prv, rad, {X: ang}, {laf, sf}}) {
+				// 	return
+				// }
 			}
 		case PcZ:
 			fallthrough

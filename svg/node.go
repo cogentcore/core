@@ -338,10 +338,10 @@ func (g *NodeBase) Style(sv *SVG) {
 	AggCSS(&g.CSSAgg, g.CSS)
 	g.StyleCSS(sv, g.CSSAgg)
 
-	pc.StrokeStyle.Opacity *= pc.FontStyle.Opacity // applies to all
-	pc.FillStyle.Opacity *= pc.FontStyle.Opacity
+	pc.Stroke.Opacity *= pc.FontStyle.Opacity // applies to all
+	pc.Fill.Opacity *= pc.FontStyle.Opacity
 
-	pc.Off = (pc.StrokeStyle.Color == nil && pc.FillStyle.Color == nil)
+	pc.Off = (pc.Stroke.Color == nil && pc.Fill.Color == nil)
 }
 
 // AggCSS aggregates css properties
@@ -407,10 +407,10 @@ func (g *NodeBase) SetNodeSize(sz math32.Vector2) {
 // LocalLineWidth returns the line width in local coordinates
 func (g *NodeBase) LocalLineWidth() float32 {
 	pc := &g.Paint
-	if pc.StrokeStyle.Color == nil {
+	if pc.Stroke.Color == nil {
 		return 0
 	}
-	return pc.StrokeStyle.Width.Dots
+	return pc.Stroke.Width.Dots
 }
 
 // ComputeBBox is called by default in render to compute bounding boxes for
@@ -426,10 +426,10 @@ func (g *NodeBase) BBoxes(sv *SVG) {
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 }
 
-// PushTransform checks our bounding box and visibility, returning false if
-// out of bounds.  If visible, pushes our transform.
+// IsVisible checks our bounding box and visibility, returning false if
+// out of bounds. If visible, returns the Painter for painting.
 // Must be called as first step in Render.
-func (g *NodeBase) PushTransform(sv *SVG) (bool, *paint.Context) {
+func (g *NodeBase) IsVisible(sv *SVG) (bool, *paint.Painter) {
 	g.BBox = image.Rectangle{}
 	if g.Paint.Off || g == nil || g.This == nil {
 		return false, nil
@@ -447,11 +447,19 @@ func (g *NodeBase) PushTransform(sv *SVG) (bool, *paint.Context) {
 	if nvis && !g.isDef {
 		return false, nil
 	}
+	pc := &paint.Painter{&sv.RenderState, &g.Paint}
+	return true, pc
+}
 
-	rs := &sv.RenderState
-	rs.PushTransform(g.Paint.Transform)
-
-	pc := &paint.Context{rs, &g.Paint}
+// PushContext checks our bounding box and visibility, returning false if
+// out of bounds.  If visible, pushes us as Context.
+// Must be called as first step in Render.
+func (g *NodeBase) PushContext(sv *SVG) (bool, *paint.Painter) {
+	vis, pc := g.IsVisible(sv)
+	if !vis {
+		return vis, pc
+	}
+	pc.PushContext(&g.Paint, nil)
 	return true, pc
 }
 
@@ -463,13 +471,10 @@ func (g *NodeBase) RenderChildren(sv *SVG) {
 }
 
 func (g *NodeBase) Render(sv *SVG) {
-	vis, rs := g.PushTransform(sv)
+	vis, _ := g.IsVisible(sv)
 	if !vis {
 		return
 	}
-	// pc := &g.Paint
-	// render path elements, then compute bbox, then fill / stroke
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
-	rs.PopTransform()
 }

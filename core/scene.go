@@ -55,7 +55,7 @@ type Scene struct { //core:no-new
 	SceneGeom math32.Geom2DInt `edit:"-" set:"-"`
 
 	// paint context for rendering
-	PaintContext paint.Context `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
+	PaintContext paint.Painter `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// live pixels that we render into
 	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" display:"-" set:"-"`

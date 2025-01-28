@@ -43,17 +43,15 @@ func (g *Circle) LocalBBox() math32.Box2 {
 }
 
 func (g *Circle) Render(sv *SVG) {
-	vis, pc := g.PushTransform(sv)
+	vis, pc := g.IsVisible(sv)
 	if !vis {
 		return
 	}
-	pc.DrawCircle(g.Pos.X, g.Pos.Y, g.Radius)
+	pc.Circle(g.Pos.X, g.Pos.Y, g.Radius)
 	pc.PathDone()
 
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
-
-	pc.PopTransform()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

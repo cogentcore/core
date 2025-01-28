@@ -117,8 +117,8 @@ func (g *Text) LayoutText() {
 	}
 	pc := &g.Paint
 	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnitContext) // use original size font
-	if pc.FillStyle.Color != nil {
-		pc.FontStyle.Color = pc.FillStyle.Color
+	if pc.Fill.Color != nil {
+		pc.FontStyle.Color = pc.Fill.Color
 	}
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnitContext, &pc.TextStyle, true, 0, 1)
 	sr := &(g.TextRender.Spans[0])
@@ -164,7 +164,7 @@ func (g *Text) LayoutText() {
 }
 
 func (g *Text) RenderText(sv *SVG) {
-	pc := &paint.Context{&sv.RenderState, &g.Paint}
+	pc := &paint.Painter{&sv.RenderState, &g.Paint}
 	mat := &pc.Transform
 	// note: layout of text has already been done in LocalBBox above
 	g.TextRender.Transform(*mat, &pc.FontStyle, &pc.UnitContext)
@@ -190,14 +190,14 @@ func (g *Text) Render(sv *SVG) {
 	if g.IsParText() {
 		pc := &g.Paint
 		rs := &sv.RenderState
-		rs.PushTransform(pc.Transform)
+		rs.PushContext(pc, nil)
 
 		g.RenderChildren(sv)
 		g.BBoxes(sv) // must come after render
 
-		rs.PopTransform()
+		rs.PopContext()
 	} else {
-		vis, rs := g.PushTransform(sv)
+		vis, rs := g.IsVisible(sv)
 		if !vis {
 			return
 		}
@@ -208,7 +208,6 @@ func (g *Text) Render(sv *SVG) {
 		if g.IsParText() {
 			g.BBoxes(sv) // after kids have rendered
 		}
-		rs.PopTransform()
 	}
 }
 

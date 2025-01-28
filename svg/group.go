@@ -43,17 +43,15 @@ func (g *Group) NodeBBox(sv *SVG) image.Rectangle {
 }
 
 func (g *Group) Render(sv *SVG) {
-	pc := &g.Paint
-	rs := &sv.RenderState
-	if pc.Off || rs == nil {
+	vis, rs := g.PushContext(sv)
+	if !vis {
 		return
 	}
-	rs.PushTransform(pc.Transform)
 
 	g.RenderChildren(sv)
 	g.BBoxes(sv) // must come after render
 
-	rs.PopTransform()
+	rs.PopContext()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

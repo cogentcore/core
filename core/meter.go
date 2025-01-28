@@ -127,13 +127,13 @@ func (m *Meter) Render() {
 		if m.ValueColor != nil {
 			dim := m.Styles.Direction.Dim()
 			size := m.Geom.Size.Actual.Content.MulDim(dim, prop)
-			pc.FillStyle.Color = m.ValueColor
+			pc.Fill.Color = m.ValueColor
 			m.RenderBoxGeom(m.Geom.Pos.Content, size, st.Border)
 		}
 		return
 	}
 
-	pc.StrokeStyle.Width = m.Width
+	pc.Stroke.Width = m.Width
 	sw := pc.StrokeWidth()
 	pos := m.Geom.Pos.Content.AddScalar(sw / 2)
 	size := m.Geom.Size.Actual.Content.SubScalar(sw)
@@ -152,12 +152,12 @@ func (m *Meter) Render() {
 		c := pos.Add(r)
 
 		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, 0, 2*math32.Pi)
-		pc.StrokeStyle.Color = st.Background
+		pc.Stroke.Color = st.Background
 		pc.PathDone()
 
 		if m.ValueColor != nil {
 			pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, -math32.Pi/2, prop*2*math32.Pi-math32.Pi/2)
-			pc.StrokeStyle.Color = m.ValueColor
+			pc.Stroke.Color = m.ValueColor
 			pc.PathDone()
 		}
 		if txt != nil {
@@ -170,12 +170,12 @@ func (m *Meter) Render() {
 	c := pos.Add(r)
 
 	pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, math32.Pi, 2*math32.Pi)
-	pc.StrokeStyle.Color = st.Background
+	pc.Stroke.Color = st.Background
 	pc.PathDone()
 
 	if m.ValueColor != nil {
 		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, math32.Pi, (1+prop)*math32.Pi)
-		pc.StrokeStyle.Color = m.ValueColor
+		pc.Stroke.Color = m.ValueColor
 		pc.PathDone()
 	}
 	if txt != nil {

@@ -84,7 +84,7 @@ type Border struct { //types:add
 
 	// Offset specifies how much, if any, the border is offset
 	// from its element. It is only applicable in the standard
-	// box model, which is used by [paint.Context.DrawStdBox] and
+	// box model, which is used by [paint.Painter.DrawStdBox] and
 	// all standard GUI elements.
 	Offset sides.Values `display:"inline"`
 

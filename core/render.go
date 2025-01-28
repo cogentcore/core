@@ -354,25 +354,25 @@ func (wb *WidgetBase) PopBounds() {
 		pos := math32.FromPoint(wb.Geom.TotalBBox.Min)
 		sz := math32.FromPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.
-		pcsw := pc.StrokeStyle.Width
-		pcsc := pc.StrokeStyle.Color
-		pcfc := pc.FillStyle.Color
-		pcop := pc.FillStyle.Opacity
-		pc.StrokeStyle.Width.Dot(1)
-		pc.StrokeStyle.Color = colors.Uniform(hct.New(wb.Scene.renderBBoxHue, 100, 50))
-		pc.FillStyle.Color = nil
+		pcsw := pc.Stroke.Width
+		pcsc := pc.Stroke.Color
+		pcfc := pc.Fill.Color
+		pcop := pc.Fill.Opacity
+		pc.Stroke.Width.Dot(1)
+		pc.Stroke.Color = colors.Uniform(hct.New(wb.Scene.renderBBoxHue, 100, 50))
+		pc.Fill.Color = nil
 		if isSelw {
-			fc := pc.StrokeStyle.Color
-			pc.FillStyle.Color = fc
-			pc.FillStyle.Opacity = 0.2
+			fc := pc.Stroke.Color
+			pc.Fill.Color = fc
+			pc.Fill.Opacity = 0.2
 		}
 		pc.DrawRectangle(pos.X, pos.Y, sz.X, sz.Y)
 		pc.PathDone()
 		// restore
-		pc.FillStyle.Opacity = pcop
-		pc.FillStyle.Color = pcfc
-		pc.StrokeStyle.Width = pcsw
-		pc.StrokeStyle.Color = pcsc
+		pc.Fill.Opacity = pcop
+		pc.Fill.Color = pcfc
+		pc.Stroke.Width = pcsw
+		pc.Stroke.Color = pcsc
 
 		wb.Scene.renderBBoxHue += 10
 		if wb.Scene.renderBBoxHue > 360 {

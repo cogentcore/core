@@ -163,7 +163,7 @@ func (txt *Text2D) RenderText() {
 	pt := styles.Paint{}
 	pt.Defaults()
 	pt.FromStyle(st)
-	ctx := &paint.Context{State: rs, Paint: &pt}
+	ctx := &paint.Painter{State: rs, Paint: &pt}
 	if st.Background != nil {
 		draw.Draw(img, bounds, st.Background, image.Point{}, draw.Src)
 	}
