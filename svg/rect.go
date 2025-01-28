@@ -66,7 +66,7 @@ func (g *Rect) Render(sv *SVG) {
 		// SidesTODO: also support different radii for each corner
 		pc.DrawRoundedRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, styles.NewSideFloats(g.Radius.X))
 	}
-	pc.FillStrokeClear()
+	pc.PathDone()
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
 	pc.PopTransform()

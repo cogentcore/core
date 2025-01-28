@@ -16,16 +16,27 @@ import (
 	"github.com/tdewolff/minify/v2"
 )
 
-// Epsilon is the smallest number below which we assume the value to be zero.
-// This is to avoid numerical floating point issues.
-var Epsilon = float32(1e-10)
+var (
+	// Tolerance is the maximum deviation from the original path in millimeters
+	// when e.g. flatting. Used for flattening in the renderers, font decorations,
+	// and path intersections.
+	Tolerance = float32(0.01)
 
-// Precision is the number of significant digits at which floating point
-// value will be printed to output formats.
-var Precision = 7
+	// PixelTolerance is the maximum deviation of the rasterized path from
+	// the original for flattening purposed in pixels.
+	PixelTolerance = float32(0.1)
 
-// Origin is the coordinate system's origin.
-var Origin = math32.Vector2{0.0, 0.0}
+	// Epsilon is the smallest number below which we assume the value to be zero.
+	// This is to avoid numerical floating point issues.
+	Epsilon = float32(1e-10)
+
+	// Precision is the number of significant digits at which floating point
+	// value will be printed to output formats.
+	Precision = 7
+
+	// Origin is the coordinate system's origin.
+	Origin = math32.Vector2{0.0, 0.0}
+)
 
 // Equal returns true if a and b are equal within an absolute
 // tolerance of Epsilon.

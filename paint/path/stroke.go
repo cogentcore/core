@@ -7,9 +7,85 @@
 
 package path
 
+//go:generate core generate
+
 import (
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles"
+)
+
+// FillRules specifies the algorithm for which area is to be filled and which not,
+// in particular when multiple subpaths overlap. The NonZero rule is the default
+// and will fill any point that is being enclosed by an unequal number of paths
+// winding clock-wise and counter clock-wise, otherwise it will not be filled.
+// The EvenOdd rule will fill any point that is being enclosed by an uneven number
+// of paths, whichever their direction. Positive fills only counter clock-wise
+// oriented paths, while Negative fills only clock-wise oriented paths.
+type FillRules int32 //enums:enum -transform kebab
+
+const (
+	NonZero FillRules = iota
+	EvenOdd
+	Positive
+	Negative
+)
+
+func (fr FillRules) Fills(windings int) bool {
+	switch fr {
+	case NonZero:
+		return windings != 0
+	case EvenOdd:
+		return windings%2 != 0
+	case Positive:
+		return 0 < windings
+	case Negative:
+		return windings < 0
+	}
+	return false
+}
+
+// todo: these need serious work:
+
+// VectorEffects contains special effects for rendering
+type VectorEffects int32 //enums:enum -trim-prefix VectorEffect -transform kebab
+
+const (
+	VectorEffectNone VectorEffects = iota
+
+	// VectorEffectNonScalingStroke means that the stroke width is not affected by
+	// transform properties
+	VectorEffectNonScalingStroke
+)
+
+// Caps specifies the end-cap of a stroked line: stroke-linecap property in SVG
+type Caps int32 //enums:enum -trim-prefix Cap -transform kebab
+
+const (
+	// CapButt indicates to draw no line caps; it draws a
+	// line with the length of the specified length.
+	CapButt Caps = iota
+
+	// CapRound indicates to draw a semicircle on each line
+	// end with a diameter of the stroke width.
+	CapRound
+
+	// CapSquare indicates to draw a rectangle on each line end
+	// with a height of the stroke width and a width of half of the
+	// stroke width.
+	CapSquare
+)
+
+// Joins specifies the way stroked lines are joined together:
+// stroke-linejoin property in SVG
+type Joins int32 //enums:enum -trim-prefix Join -transform kebab
+
+const (
+	JoinMiter Joins = iota
+	JoinMiterClip
+	JoinRound
+	JoinBevel
+	JoinArcs
+	// rasterx extension
+	JoinArcsClip
 )
 
 // NOTE: implementation inspired from github.com/golang/freetype/raster/stroke.go
@@ -51,31 +127,31 @@ func (p Path) Stroke(w float32, cr Capper, jr Joiner, tolerance float32) Path {
 	return q
 }
 
-func capFromStyle(st styles.LineCaps) Capper {
+func capFromStyle(st Caps) Capper {
 	switch st {
-	case styles.LineCapButt:
+	case CapButt:
 		return ButtCap
-	case styles.LineCapRound:
+	case CapRound:
 		return RoundCap
-	case styles.LineCapSquare:
+	case CapSquare:
 		return SquareCap
 	}
 	return ButtCap
 }
 
-func joinFromStyle(st styles.LineJoins) Joiner {
+func joinFromStyle(st Joins) Joiner {
 	switch st {
-	case styles.LineJoinMiter:
+	case JoinMiter:
 		return MiterJoin
-	case styles.LineJoinMiterClip:
+	case JoinMiterClip:
 		return MiterClipJoin
-	case styles.LineJoinRound:
+	case JoinRound:
 		return RoundJoin
-	case styles.LineJoinBevel:
+	case JoinBevel:
 		return BevelJoin
-	case styles.LineJoinArcs:
+	case JoinArcs:
 		return ArcsJoin
-	case styles.LineJoinArcsClip:
+	case JoinArcsClip:
 		return ArcsClipJoin
 	}
 	return MiterJoin

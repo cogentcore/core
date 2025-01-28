@@ -81,16 +81,18 @@ func (tr *Text) InsertSpan(at int, ns *Span) {
 // runes, and the overall font size, etc.  todo: does not currently support
 // stroking, only filling of text -- probably need to grab path from font and
 // use paint rendering for stroking.
-func (tr *Text) Render(pc *Context, pos math32.Vector2) {
+func (tr *Text) Render(pc *Painter, pos math32.Vector2) {
 	// pr := profile.Start("RenderText")
 	// defer pr.End()
 
 	var ppaint styles.Paint
 	ppaint.CopyStyleFrom(pc.Paint)
+	cb := pc.Context().Bounds.Rect.ToRect()
 
-	pc.PushTransform(math32.Identity2()) // needed for SVG
-	defer pc.PopTransform()
-	pc.CurrentTransform = math32.Identity2()
+	// todo:
+	// pc.PushTransform(math32.Identity2()) // needed for SVG
+	// defer pc.PopTransform()
+	pc.Transform = math32.Identity2()
 
 	TextFontRenderMu.Lock()
 	defer TextFontRenderMu.Unlock()
@@ -112,7 +114,9 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 		curFace := sr.Render[0].Face
 		curColor := sr.Render[0].Color
 		if g, ok := curColor.(gradient.Gradient); ok {
-			g.Update(pc.FontStyle.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
+			_ = g
+			// todo: no last render bbox:
+			// g.Update(pc.FontStyle.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.Transform)
 		} else {
 			curColor = gradient.ApplyOpacity(curColor, pc.FontStyle.Opacity)
 		}
@@ -121,7 +125,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 		if !overBoxSet {
 			overWd, _ := curFace.GlyphAdvance(elipses)
 			overWd32 := math32.FromFixed(overWd)
-			overEnd := math32.FromPoint(pc.Bounds.Max)
+			overEnd := math32.FromPoint(cb.Max)
 			overStart = overEnd.Sub(math32.Vec2(overWd32, 0.1*tr.FontHeight))
 			overBox = math32.Box2{Min: math32.Vec2(overStart.X, overEnd.Y-tr.FontHeight), Max: overEnd}
 			overFace = curFace
@@ -168,7 +172,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 			ll := rp.Add(tx.MulVector2AsVector(math32.Vec2(0, dsc32)))
 			ur := ll.Add(tx.MulVector2AsVector(math32.Vec2(rr.Size.X, -rr.Size.Y)))
 
-			if int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
+			if int(math32.Ceil(ur.X)) < cb.Min.X || int(math32.Ceil(ll.Y)) < cb.Min.Y {
 				continue
 			}
 
@@ -181,7 +185,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 				}
 			}
 
-			if int(math32.Floor(ll.X)) > pc.Bounds.Max.X+1 || int(math32.Floor(ur.Y)) > pc.Bounds.Max.Y+1 {
+			if int(math32.Floor(ll.X)) > cb.Max.X+1 || int(math32.Floor(ur.Y)) > cb.Max.Y+1 {
 				hadOverflow = true
 				if !doingOverflow {
 					continue
@@ -200,15 +204,15 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 				continue
 			}
 			if rr.RotRad == 0 && (rr.ScaleX == 0 || rr.ScaleX == 1) {
-				idr := dr.Intersect(pc.Bounds)
+				idr := dr.Intersect(cb)
 				soff := image.Point{}
-				if dr.Min.X < pc.Bounds.Min.X {
-					soff.X = pc.Bounds.Min.X - dr.Min.X
-					maskp.X += pc.Bounds.Min.X - dr.Min.X
+				if dr.Min.X < cb.Min.X {
+					soff.X = cb.Min.X - dr.Min.X
+					maskp.X += cb.Min.X - dr.Min.X
 				}
-				if dr.Min.Y < pc.Bounds.Min.Y {
-					soff.Y = pc.Bounds.Min.Y - dr.Min.Y
-					maskp.Y += pc.Bounds.Min.Y - dr.Min.Y
+				if dr.Min.Y < cb.Min.Y {
+					soff.Y = cb.Min.Y - dr.Min.Y
+					maskp.Y += cb.Min.Y - dr.Min.Y
 				}
 				draw.DrawMask(d.Dst, idr, d.Src, soff, mask, maskp, draw.Over)
 			} else {
@@ -242,7 +246,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 			Dot:  overStart.ToFixed(),
 		}
 		dr, mask, maskp, _, _ := d.Face.Glyph(d.Dot, elipses)
-		idr := dr.Intersect(pc.Bounds)
+		idr := dr.Intersect(cb)
 		soff := image.Point{}
 		draw.DrawMask(d.Dst, idr, d.Src, soff, mask, maskp, draw.Over)
 	}
@@ -253,7 +257,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 // RenderTopPos renders at given top position -- uses first font info to
 // compute baseline offset and calls overall Render -- convenience for simple
 // widget rendering without layouts
-func (tr *Text) RenderTopPos(pc *Context, tpos math32.Vector2) {
+func (tr *Text) RenderTopPos(pc *Painter, tpos math32.Vector2) {
 	if len(tr.Spans) == 0 {
 		return
 	}

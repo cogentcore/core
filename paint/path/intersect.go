@@ -126,12 +126,12 @@ var boInitPoolsOnce = sync.OnceFunc(func() {
 // CCW and all holes CW, and tries to split into subpaths if possible. Note that path p is
 // flattened unless q is already flat. Path q is implicitly closed. It runs in O((n + k) log n),
 // with n the sum of the number of segments, and k the number of intersections.
-func (p Path) Settle(fillRule FillRule) Path {
+func (p Path) Settle(fillRule FillRules) Path {
 	return bentleyOttmann(p.Split(), nil, opSettle, fillRule)
 }
 
 // Settle is the same as Path.Settle, but faster if paths are already split.
-func (ps Paths) Settle(fillRule FillRule) Path {
+func (ps Paths) Settle(fillRule FillRules) Path {
 	return bentleyOttmann(ps, nil, opSettle, fillRule)
 }
 
@@ -1566,7 +1566,7 @@ func (a eventSliceH) Swap(i, j int) {
 	a[i], a[j] = a[j], a[i]
 }
 
-func (cur *SweepPoint) computeSweepFields(prev *SweepPoint, op pathOp, fillRule FillRule) {
+func (cur *SweepPoint) computeSweepFields(prev *SweepPoint, op pathOp, fillRule FillRules) {
 	// cur is left-endpoint
 	if !cur.open {
 		cur.selfWindings = 1
@@ -1599,7 +1599,7 @@ func (cur *SweepPoint) computeSweepFields(prev *SweepPoint, op pathOp, fillRule 
 	cur.other.inResult = cur.inResult
 }
 
-func (s *SweepPoint) InResult(op pathOp, fillRule FillRule) uint8 {
+func (s *SweepPoint) InResult(op pathOp, fillRule FillRules) uint8 {
 	lowerWindings, lowerOtherWindings := s.windings, s.otherWindings
 	upperWindings, upperOtherWindings := s.windings+s.selfWindings, s.otherWindings+s.otherSelfWindings
 	if s.clipping {
@@ -1660,7 +1660,7 @@ func (s *SweepPoint) InResult(op pathOp, fillRule FillRule) uint8 {
 	return 0
 }
 
-func (s *SweepPoint) mergeOverlapping(op pathOp, fillRule FillRule) {
+func (s *SweepPoint) mergeOverlapping(op pathOp, fillRule FillRules) {
 	// When merging overlapping segments, the order of the right-endpoints may have changed and
 	// thus be different from the order used to compute the sweep fields, here we reset the values
 	// for windings and otherWindings to be taken from the segment below (prev) which was updated
@@ -1709,7 +1709,7 @@ func (s *SweepPoint) mergeOverlapping(op pathOp, fillRule FillRule) {
 	s.prev = prev
 }
 
-func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRule) Path {
+func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRules) Path {
 	// TODO: make public and add grid spacing argument
 	// TODO: support OpDIV, keeping only subject, or both subject and clipping subpaths
 	// TODO: add Intersects/Touches functions (return bool)

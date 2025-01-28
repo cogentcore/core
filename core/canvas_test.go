@@ -18,7 +18,7 @@ func TestCanvas(t *testing.T) {
 		pc.MoveTo(0.15, 0.3)
 		pc.LineTo(0.3, 0.15)
 		pc.StrokeStyle.Color = colors.Uniform(colors.Blue)
-		pc.DrawStroke()
+		pc.PathDone()
 
 		pc.FillBox(math32.Vec2(0.7, 0.3), math32.Vec2(0.2, 0.5), colors.Scheme.Success.Container)
 

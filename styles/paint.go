@@ -8,6 +8,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/paint/path"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -24,6 +25,18 @@ type Paint struct { //types:add
 
 	// TextStyle has the text styling settings.
 	TextStyle Text
+
+	//	ClipPath is a clipping path for this item.
+	ClipPath path.Path
+
+	//	Mask is a rendered image of the mask for this item.
+	Mask image.Image
+}
+
+func NewPaint() *Paint {
+	pc := &Paint{}
+	pc.Defaults()
+	return pc
 }
 
 func (pc *Paint) Defaults() {

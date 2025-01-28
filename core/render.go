@@ -367,7 +367,7 @@ func (wb *WidgetBase) PopBounds() {
 			pc.FillStyle.Opacity = 0.2
 		}
 		pc.DrawRectangle(pos.X, pos.Y, sz.X, sz.Y)
-		pc.FillStrokeClear()
+		pc.PathDone()
 		// restore
 		pc.FillStyle.Opacity = pcop
 		pc.FillStyle.Color = pcfc

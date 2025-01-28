@@ -301,7 +301,7 @@ func TestPathFilling(t *testing.T) {
 	var tts = []struct {
 		p       string
 		filling []bool
-		rule    FillRule
+		rule    FillRules
 	}{
 		{"M0 0", []bool{}, NonZero},
 		{"L10 10z", []bool{true}, NonZero},

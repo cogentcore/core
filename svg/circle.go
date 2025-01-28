@@ -48,7 +48,7 @@ func (g *Circle) Render(sv *SVG) {
 		return
 	}
 	pc.DrawCircle(g.Pos.X, g.Pos.Y, g.Radius)
-	pc.FillStrokeClear()
+	pc.PathDone()
 
 	g.BBoxes(sv)
 	g.RenderChildren(sv)

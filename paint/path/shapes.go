@@ -9,21 +9,23 @@ package path
 
 import (
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles/sides"
 )
 
-// Line returns a line segment of from (0,0) to (x,y).
-func Line(x, y float32) Path {
-	if Equal(x, 0.0) && Equal(y, 0.0) {
+// Line returns a line segment of from (x1,y1) to (x2,y2).
+func Line(x1, y1, x2, y2 float32) Path {
+	if Equal(x1, x2) && Equal(y1, y2) {
 		return Path{}
 	}
 
 	p := Path{}
-	p.LineTo(x, y)
+	p.MoveTo(x1, y1)
+	p.LineTo(x2, y2)
 	return p
 }
 
 // Arc returns a circular arc with radius r and theta0 and theta1 as the angles
-// in degrees of the ellipse (before rot is applies) between which the arc
+// in degrees of the ellipse (before rot is applied) between which the arc
 // will run. If theta0 < theta1, the arc will run in a CCW direction.
 // If the difference between theta0 and theta1 is bigger than 360 degrees,
 // one full circle will be drawn and the remaining part of diff % 360,
@@ -43,19 +45,20 @@ func Arc(r, theta0, theta1 float32) Path {
 // over 90 degrees.
 func EllipticalArc(rx, ry, rot, theta0, theta1 float32) Path {
 	p := Path{}
-	p.Arc(rx, ry, rot, theta0, theta1)
+	p.ArcDeg(rx, ry, rot, theta0, theta1)
 	return p
 }
 
 // Rectangle returns a rectangle of width w and height h.
-func Rectangle(w, h float32) Path {
+func Rectangle(x, y, w, h float32) Path {
 	if Equal(w, 0.0) || Equal(h, 0.0) {
 		return Path{}
 	}
 	p := Path{}
-	p.LineTo(w, 0.0)
-	p.LineTo(w, h)
-	p.LineTo(0.0, h)
+	p.MoveTo(x, y)
+	p.LineTo(x+w, y)
+	p.LineTo(x+w, y+h)
+	p.LineTo(x, y+h)
 	p.Close()
 	return p
 }
@@ -63,11 +66,11 @@ func Rectangle(w, h float32) Path {
 // RoundedRectangle returns a rectangle of width w and height h
 // with rounded corners of radius r. A negative radius will cast
 // the corners inwards (i.e. concave).
-func RoundedRectangle(w, h, r float32) Path {
+func RoundedRectangle(x, y, w, h, r float32) Path {
 	if Equal(w, 0.0) || Equal(h, 0.0) {
 		return Path{}
 	} else if Equal(r, 0.0) {
-		return Rectangle(w, h)
+		return Rectangle(x, y, w, h)
 	}
 
 	sweep := true
@@ -91,13 +94,52 @@ func RoundedRectangle(w, h, r float32) Path {
 	return p
 }
 
+// RoundedRectangleSides draws a standard rounded rectangle
+// with a consistent border and with the given x and y position,
+// width and height, and border radius for each corner.
+func RoundedRectangleSides(x, y, w, h float32, r sides.Floats) Path {
+	// clamp border radius values
+	min := math32.Min(w/2, h/2)
+	r.Top = math32.Clamp(r.Top, 0, min)
+	r.Right = math32.Clamp(r.Right, 0, min)
+	r.Bottom = math32.Clamp(r.Bottom, 0, min)
+	r.Left = math32.Clamp(r.Left, 0, min)
+
+	// position values; some variables are missing because they are unused
+	var (
+		xtl, ytl   = x, y                 // top left
+		xtli, ytli = x + r.Top, y + r.Top // top left inset
+
+		ytr        = y                            // top right
+		xtri, ytri = x + w - r.Right, y + r.Right // top right inset
+
+		xbr        = x + w                              // bottom right
+		xbri, ybri = x + w - r.Bottom, y + h - r.Bottom // bottom right inset
+
+		ybl        = y + h                      // bottom left
+		xbli, ybli = x + r.Left, y + h - r.Left // bottom left inset
+	)
+
+	p := Path{}
+	p.MoveTo(xtl, ytli)
+	p.ArcTo(r.Top, r.Top, 0, false, true, xtli, ytl)
+	p.LineTo(xtri, ytr)
+	p.ArcTo(r.Right, r.Right, 0, false, true, xbr, ytri)
+	p.LineTo(xbr, ybri)
+	p.ArcTo(r.Bottom, r.Bottom, 0, false, true, xbri, ybl)
+	p.LineTo(xbli, ybl)
+	p.ArcTo(r.Left, r.Left, 0, false, true, xtl, ybli)
+	p.Close()
+	return p
+}
+
 // BeveledRectangle returns a rectangle of width w and height h
 // with beveled corners at distance r from the corner.
-func BeveledRectangle(w, h, r float32) Path {
+func BeveledRectangle(x, y, w, h, r float32) Path {
 	if Equal(w, 0.0) || Equal(h, 0.0) {
 		return Path{}
 	} else if Equal(r, 0.0) {
-		return Rectangle(w, h)
+		return Rectangle(x, y, w, h)
 	}
 
 	r = math32.Abs(r)
@@ -105,33 +147,33 @@ func BeveledRectangle(w, h, r float32) Path {
 	r = math32.Min(r, h/2.0)
 
 	p := Path{}
-	p.MoveTo(0.0, r)
-	p.LineTo(r, 0.0)
-	p.LineTo(w-r, 0.0)
-	p.LineTo(w, r)
-	p.LineTo(w, h-r)
-	p.LineTo(w-r, h)
-	p.LineTo(r, h)
-	p.LineTo(0.0, h-r)
+	p.MoveTo(x, y+r)
+	p.LineTo(x+r, y)
+	p.LineTo(x+w-r, y)
+	p.LineTo(x+w, y+r)
+	p.LineTo(x+w, y+h-r)
+	p.LineTo(x+w-r, y+h)
+	p.LineTo(x+r, y+h)
+	p.LineTo(x, y+h-r)
 	p.Close()
 	return p
 }
 
 // Circle returns a circle of radius r.
-func Circle(r float32) Path {
-	return Ellipse(r, r)
+func Circle(x, y, r float32) Path {
+	return Ellipse(x, y, r, r)
 }
 
 // Ellipse returns an ellipse of radii rx and ry.
-func Ellipse(rx, ry float32) Path {
+func Ellipse(x, y, rx, ry float32) Path {
 	if Equal(rx, 0.0) || Equal(ry, 0.0) {
 		return Path{}
 	}
 
 	p := Path{}
-	p.MoveTo(rx, 0.0)
-	p.ArcTo(rx, ry, 0.0, false, true, -rx, 0.0)
-	p.ArcTo(rx, ry, 0.0, false, true, rx, 0.0)
+	p.MoveTo(x+rx, y)
+	p.ArcTo(rx, ry, 0.0, false, true, x-rx, y)
+	p.ArcTo(rx, ry, 0.0, false, true, x+rx, y)
 	p.Close()
 	return p
 }
@@ -221,9 +263,9 @@ func Grid(w, h float32, nx, ny int, r float32) Path {
 		return Path{}
 	}
 
-	p := Rectangle(w, h)
+	p := Rectangle(0, 0, w, h)
 	dx, dy := (w-float32(nx+1)*r)/float32(nx), (h-float32(ny+1)*r)/float32(ny)
-	cell := Rectangle(dx, dy).Reverse()
+	cell := Rectangle(0, 0, dx, dy).Reverse()
 	for j := 0; j < ny; j++ {
 		for i := 0; i < nx; i++ {
 			x := r + float32(i)*(r+dx)

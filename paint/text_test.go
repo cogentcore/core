@@ -16,7 +16,7 @@ import (
 func TestText(t *testing.T) {
 	size := image.Point{100, 40}
 	sizef := math32.FromPoint(size)
-	RunTest(t, "text", size.X, size.Y, func(pc *Context) {
+	RunTest(t, "text", size.X, size.Y, func(pc *Painter) {
 		pc.BlitBox(math32.Vector2{}, sizef, colors.Uniform(colors.White))
 		tsty := &styles.Text{}
 		tsty.Defaults()
@@ -25,9 +25,9 @@ func TestText(t *testing.T) {
 		fsty.Size.Dp(60)
 
 		txt := &Text{}
-		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnitContext, nil)
+		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnitPaint, nil)
 
-		tsz := txt.Layout(tsty, fsty, &pc.UnitContext, sizef)
+		tsz := txt.Layout(tsty, fsty, &pc.UnitPaint, sizef)
 		_ = tsz
 		// if tsz.X != 100 || tsz.Y != 40 {
 		// 	t.Errorf("unexpected text size: %v", tsz)

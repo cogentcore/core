@@ -49,7 +49,7 @@ func (g *Ellipse) Render(sv *SVG) {
 		return
 	}
 	pc.DrawEllipse(g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
-	pc.FillStrokeClear()
+	pc.PathDone()
 
 	g.BBoxes(sv)
 	g.RenderChildren(sv)

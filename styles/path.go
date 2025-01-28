@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/path"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -34,7 +35,7 @@ type Path struct { //types:add
 	Transform math32.Matrix2
 
 	// VectorEffect has various rendering special effects settings.
-	VectorEffect VectorEffects
+	VectorEffect path.VectorEffects
 
 	// UnitContext has parameters necessary for determining unit sizes.
 	UnitContext units.Context `display:"-"`
@@ -86,43 +87,26 @@ func (pc *Path) ToDotsImpl(uc *units.Context) {
 
 //////// Stroke and Fill Styles
 
-type FillRules int32 //enums:enum -trim-prefix FillRule -transform lower
-
-const (
-	FillRuleNonZero FillRules = iota
-	FillRuleEvenOdd
-)
-
-// VectorEffects contains special effects for rendering
-type VectorEffects int32 //enums:enum -trim-prefix VectorEffect -transform kebab
-
-const (
-	VectorEffectNone VectorEffects = iota
-
-	// VectorEffectNonScalingStroke means that the stroke width is not affected by
-	// transform properties
-	VectorEffectNonScalingStroke
-)
-
 // IMPORTANT: any changes here must be updated in StyleFillFuncs
 
 // Fill contains all the properties for filling a region.
 type Fill struct {
 
-	// fill color image specification; filling is off if nil
+	// Color to use in filling; filling is off if nil.
 	Color image.Image
 
-	// global alpha opacity / transparency factor between 0 and 1
+	// Fill alpha opacity / transparency factor between 0 and 1.
+	// This applies in addition to any alpha specified in the Color.
 	Opacity float32
 
-	// rule for how to fill more complex shapes with crossing lines
-	Rule FillRules
+	// Rule for how to fill more complex shapes with crossing lines.
+	Rule path.FillRules
 }
 
 // Defaults initializes default values for paint fill
 func (pf *Fill) Defaults() {
 	pf.Color = colors.Uniform(color.Black)
-	pf.Rule = FillRuleNonZero
+	pf.Rule = path.NonZero
 	pf.Opacity = 1.0
 }
 
@@ -131,37 +115,6 @@ func (fs *Fill) ToDots(uc *units.Context) {
 }
 
 //////// Stroke
-
-// LineCaps specifies end-cap of a line: stroke-linecap property in SVG
-type LineCaps int32 //enums:enum -trim-prefix LineCap -transform kebab
-
-const (
-	// LineCapButt indicates to draw no line caps; it draws a
-	// line with the length of the specified length.
-	LineCapButt LineCaps = iota
-
-	// LineCapRound indicates to draw a semicircle on each line
-	// end with a diameter of the stroke width.
-	LineCapRound
-
-	// LineCapSquare indicates to draw a rectangle on each line end
-	// with a height of the stroke width and a width of half of the
-	// stroke width.
-	LineCapSquare
-)
-
-// the way in which lines are joined together: stroke-linejoin property in SVG
-type LineJoins int32 //enums:enum -trim-prefix LineJoin -transform kebab
-
-const (
-	LineJoinMiter LineJoins = iota
-	LineJoinMiterClip
-	LineJoinRound
-	LineJoinBevel
-	LineJoinArcs
-	// rasterx extension
-	LineJoinArcsClip
-)
 
 // IMPORTANT: any changes here must be updated below in StyleStrokeFuncs
 
@@ -184,13 +137,13 @@ type Stroke struct {
 	// the amount to paint and then the amount to skip.
 	Dashes []float32
 
-	// how to draw the end cap of lines
-	Cap LineCaps
+	// Cap specifies how to draw the end cap of stroked lines.
+	Cap path.Caps
 
-	// how to join line segments
-	Join LineJoins
+	// Join specifies how to join line segments.
+	Join path.Joins
 
-	// limit of how far to miter -- must be 1 or larger
+	// MiterLimit is the limit of how far to miter: must be 1 or larger.
 	MiterLimit float32 `min:"1"`
 }
 
@@ -200,8 +153,8 @@ func (ss *Stroke) Defaults() {
 	ss.Color = nil
 	ss.Width.Dp(1)
 	ss.MinWidth.Dot(.5)
-	ss.Cap = LineCapButt
-	ss.Join = LineJoinMiter // Miter not yet supported, but that is the default -- falls back on bevel
+	ss.Cap = path.CapButt
+	ss.Join = path.JoinMiter
 	ss.MiterLimit = 10.0
 	ss.Opacity = 1.0
 }
@@ -219,7 +172,7 @@ func (ss *Stroke) ApplyBorderStyle(bs BorderStyles) {
 		ss.Color = nil
 	case BorderDotted:
 		ss.Dashes = []float32{0, 12}
-		ss.Cap = LineCapRound
+		ss.Cap = path.CapRound
 	case BorderDashed:
 		ss.Dashes = []float32{8, 6}
 	}

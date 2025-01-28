@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 )
@@ -47,11 +48,11 @@ type Style struct { //types:add
 
 	// Padding is the transparent space around central content of box,
 	// which is _included_ in the size of the standard box rendering.
-	Padding SideValues `display:"inline"`
+	Padding sides.Values `display:"inline"`
 
 	// Margin is the outer-most transparent space around box element,
 	// which is _excluded_ from standard box rendering.
-	Margin SideValues `display:"inline"`
+	Margin sides.Values `display:"inline"`
 
 	// Display controls how items are displayed, in terms of layout
 	Display Displays
@@ -396,7 +397,7 @@ func (s *Style) ToDots() {
 
 // BoxSpace returns the extra space around the central content in the box model in dots.
 // It rounds all of the sides first.
-func (s *Style) BoxSpace() SideFloats {
+func (s *Style) BoxSpace() sides.Floats {
 	return s.TotalMargin().Add(s.Padding.Dots()).Round()
 }
 
@@ -406,13 +407,13 @@ func (s *Style) BoxSpace() SideFloats {
 // values for the max border width / box shadow are unset, the
 // current values are used instead, which allows for the omission
 // of the max properties when the values do not change.
-func (s *Style) TotalMargin() SideFloats {
+func (s *Style) TotalMargin() sides.Floats {
 	mbw := s.MaxBorder.Width.Dots()
-	if SidesAreZero(mbw.Sides) {
+	if sides.AreZero(mbw.Sides) {
 		mbw = s.Border.Width.Dots()
 	}
 	mbo := s.MaxBorder.Offset.Dots()
-	if SidesAreZero(mbo.Sides) {
+	if sides.AreZero(mbo.Sides) {
 		mbo = s.Border.Offset.Dots()
 	}
 	mbw = mbw.Add(mbo)
@@ -431,7 +432,7 @@ func (s *Style) TotalMargin() SideFloats {
 	}
 
 	mbsm := s.MaxBoxShadowMargin()
-	if SidesAreZero(mbsm.Sides) {
+	if sides.AreZero(mbsm.Sides) {
 		mbsm = s.BoxShadowMargin()
 	}
 	return s.Margin.Dots().Add(mbw).Add(mbsm)

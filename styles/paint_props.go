@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/path"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -154,9 +155,9 @@ var styleStrokeFuncs = map[string]styleFunc{
 			math32.CopyFloat32s(&fs.Dashes, *vt)
 		}
 	},
-	"stroke-linecap": styleFuncEnum(LineCapButt,
+	"stroke-linecap": styleFuncEnum(path.CapButt,
 		func(obj *Stroke) enums.EnumSetter { return &(obj.Cap) }),
-	"stroke-linejoin": styleFuncEnum(LineJoinMiter,
+	"stroke-linejoin": styleFuncEnum(path.JoinMiter,
 		func(obj *Stroke) enums.EnumSetter { return &(obj.Join) }),
 	"stroke-miterlimit": styleFuncFloat(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.MiterLimit) }),
@@ -180,7 +181,7 @@ var styleFillFuncs = map[string]styleFunc{
 	},
 	"fill-opacity": styleFuncFloat(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),
-	"fill-rule": styleFuncEnum(FillRuleNonZero,
+	"fill-rule": styleFuncEnum(path.NonZero,
 		func(obj *Fill) enums.EnumSetter { return &(obj.Rule) }),
 }
 
@@ -188,7 +189,7 @@ var styleFillFuncs = map[string]styleFunc{
 
 // stylePathFuncs are functions for styling the Stroke object
 var stylePathFuncs = map[string]styleFunc{
-	"vector-effect": styleFuncEnum(VectorEffectNone,
+	"vector-effect": styleFuncEnum(path.VectorEffectNone,
 		func(obj *Path) enums.EnumSetter { return &(obj.VectorEffect) }),
 	"transform": func(obj any, key string, val any, parent any, cc colors.Context) {
 		pc := obj.(*Path)

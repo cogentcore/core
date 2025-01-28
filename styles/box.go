@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -73,22 +74,22 @@ const (
 type Border struct { //types:add
 
 	// Style specifies how to draw the border
-	Style Sides[BorderStyles]
+	Style sides.Sides[BorderStyles]
 
 	// Width specifies the width of the border
-	Width SideValues `display:"inline"`
+	Width sides.Values `display:"inline"`
 
 	// Radius specifies the radius (rounding) of the corners
-	Radius SideValues `display:"inline"`
+	Radius sides.Values `display:"inline"`
 
 	// Offset specifies how much, if any, the border is offset
 	// from its element. It is only applicable in the standard
 	// box model, which is used by [paint.Context.DrawStdBox] and
 	// all standard GUI elements.
-	Offset SideValues `display:"inline"`
+	Offset sides.Values `display:"inline"`
 
 	// Color specifies the color of the border
-	Color Sides[image.Image] `display:"inline"`
+	Color sides.Sides[image.Image] `display:"inline"`
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
@@ -103,49 +104,49 @@ func (bs *Border) ToDots(uc *units.Context) {
 var (
 	// BorderRadiusExtraSmall indicates to use extra small
 	// 4dp rounded corners
-	BorderRadiusExtraSmall = NewSideValues(units.Dp(4))
+	BorderRadiusExtraSmall = sides.NewValues(units.Dp(4))
 
 	// BorderRadiusExtraSmallTop indicates to use extra small
 	// 4dp rounded corners on the top of the element and no
 	// border radius on the bottom of the element
-	BorderRadiusExtraSmallTop = NewSideValues(units.Dp(4), units.Dp(4), units.Zero(), units.Zero())
+	BorderRadiusExtraSmallTop = sides.NewValues(units.Dp(4), units.Dp(4), units.Zero(), units.Zero())
 
 	// BorderRadiusSmall indicates to use small
 	// 8dp rounded corners
-	BorderRadiusSmall = NewSideValues(units.Dp(8))
+	BorderRadiusSmall = sides.NewValues(units.Dp(8))
 
 	// BorderRadiusMedium indicates to use medium
 	// 12dp rounded corners
-	BorderRadiusMedium = NewSideValues(units.Dp(12))
+	BorderRadiusMedium = sides.NewValues(units.Dp(12))
 
 	// BorderRadiusLarge indicates to use large
 	// 16dp rounded corners
-	BorderRadiusLarge = NewSideValues(units.Dp(16))
+	BorderRadiusLarge = sides.NewValues(units.Dp(16))
 
 	// BorderRadiusLargeEnd indicates to use large
 	// 16dp rounded corners on the end (right side)
 	// of the element and no border radius elsewhere
-	BorderRadiusLargeEnd = NewSideValues(units.Zero(), units.Dp(16), units.Dp(16), units.Zero())
+	BorderRadiusLargeEnd = sides.NewValues(units.Zero(), units.Dp(16), units.Dp(16), units.Zero())
 
 	// BorderRadiusLargeTop indicates to use large
 	// 16dp rounded corners on the top of the element
 	// and no border radius on the bottom of the element
-	BorderRadiusLargeTop = NewSideValues(units.Dp(16), units.Dp(16), units.Zero(), units.Zero())
+	BorderRadiusLargeTop = sides.NewValues(units.Dp(16), units.Dp(16), units.Zero(), units.Zero())
 
 	// BorderRadiusExtraLarge indicates to use extra large
 	// 28dp rounded corners
-	BorderRadiusExtraLarge = NewSideValues(units.Dp(28))
+	BorderRadiusExtraLarge = sides.NewValues(units.Dp(28))
 
 	// BorderRadiusExtraLargeTop indicates to use extra large
 	// 28dp rounded corners on the top of the element
 	// and no border radius on the bottom of the element
-	BorderRadiusExtraLargeTop = NewSideValues(units.Dp(28), units.Dp(28), units.Zero(), units.Zero())
+	BorderRadiusExtraLargeTop = sides.NewValues(units.Dp(28), units.Dp(28), units.Zero(), units.Zero())
 
 	// BorderRadiusFull indicates to use a full border radius,
 	// which creates a circular/pill-shaped object.
 	// It is defined to be a value that the width/height of an object
 	// will never exceed.
-	BorderRadiusFull = NewSideValues(units.Dp(1_000_000_000))
+	BorderRadiusFull = sides.NewValues(units.Dp(1_000_000_000))
 )
 
 // IMPORTANT: any changes here must be updated in style_properties.go StyleShadowFuncs
@@ -229,7 +230,7 @@ func (s *Shadow) Size(startSize math32.Vector2) math32.Vector2 {
 // Margin returns the effective margin created by the
 // shadow on each side in terms of raw display dots.
 // It should be added to margin for sizing considerations.
-func (s *Shadow) Margin() SideFloats {
+func (s *Shadow) Margin() sides.Floats {
 	// Spread benefits every side.
 	// Offset goes either way, depending on side.
 	// Every side must be positive.
@@ -252,7 +253,7 @@ func (s *Shadow) Margin() SideFloats {
 		}
 	}
 
-	return NewSideFloats(
+	return sides.NewFloats(
 		math32.Max(s.Spread.Dots-s.OffsetY.Dots+sdots, 0),
 		math32.Max(s.Spread.Dots+s.OffsetX.Dots+sdots, 0),
 		math32.Max(s.Spread.Dots+s.OffsetY.Dots+sdots, 0),
@@ -270,20 +271,20 @@ func (s *Style) AddBoxShadow(shadow ...Shadow) {
 
 // BoxShadowMargin returns the effective box
 // shadow margin of the style, calculated through [Shadow.Margin]
-func (s *Style) BoxShadowMargin() SideFloats {
+func (s *Style) BoxShadowMargin() sides.Floats {
 	return BoxShadowMargin(s.BoxShadow)
 }
 
 // MaxBoxShadowMargin returns the maximum effective box
 // shadow margin of the style, calculated through [Shadow.Margin]
-func (s *Style) MaxBoxShadowMargin() SideFloats {
+func (s *Style) MaxBoxShadowMargin() sides.Floats {
 	return BoxShadowMargin(s.MaxBoxShadow)
 }
 
 // BoxShadowMargin returns the maximum effective box shadow margin
 // of the given box shadows, calculated through [Shadow.Margin].
-func BoxShadowMargin(shadows []Shadow) SideFloats {
-	max := SideFloats{}
+func BoxShadowMargin(shadows []Shadow) sides.Floats {
+	max := sides.Floats{}
 	for _, sh := range shadows {
 		max = max.Max(sh.Margin())
 	}

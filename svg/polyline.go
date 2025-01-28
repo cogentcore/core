@@ -48,7 +48,7 @@ func (g *Polyline) Render(sv *SVG) {
 		return
 	}
 	pc.DrawPolyline(g.Points)
-	pc.FillStrokeClear()
+	pc.PathDone()
 	g.BBoxes(sv)
 
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {

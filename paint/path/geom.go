@@ -311,10 +311,10 @@ func (p Path) Crossings(x, y float32) (int, bool) {
 }
 
 // Contains returns whether the point (x,y) is contained/filled by the path.
-// This depends on the FillRule. It uses a ray from (x,y) toward (∞,y) and
+// This depends on the FillRules. It uses a ray from (x,y) toward (∞,y) and
 // counts the number of intersections with the path.
 // When the point is on the boundary it is considered to be on the path's exterior.
-func (p Path) Contains(x, y float32, fillRule FillRule) bool {
+func (p Path) Contains(x, y float32, fillRule FillRules) bool {
 	n, boundary := p.Windings(x, y)
 	if boundary {
 		return true
@@ -391,10 +391,10 @@ func (p Path) CCW() bool {
 }
 
 // Filling returns whether each subpath gets filled or not.
-// Whether a path is filled depends on the FillRule and whether it
+// Whether a path is filled depends on the FillRules and whether it
 // negates another path. If a subpath is not closed, it is implicitly
 // assumed to be closed.
-func (p Path) Filling(fillRule FillRule) []bool {
+func (p Path) Filling(fillRule FillRules) []bool {
 	ps := p.Split()
 	filling := make([]bool, len(ps))
 	for i, pi := range ps {

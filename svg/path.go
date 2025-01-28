@@ -71,7 +71,7 @@ func (g *Path) Render(sv *SVG) {
 		return
 	}
 	PathDataRender(g.Data, pc)
-	pc.FillStrokeClear()
+	pc.PathDone()
 
 	g.BBoxes(sv)
 

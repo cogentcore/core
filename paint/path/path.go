@@ -378,7 +378,7 @@ func (p Path) ArcToPoints(i int) (rx, ry, phi float32, large, sweep bool, end ma
 // It starts a new independent subpath. Multiple subpaths can be useful
 // when negating parts of a previous path by overlapping it with a path
 // in the opposite direction. The behaviour for overlapping paths depends
-// on the FillRule.
+// on the FillRules.
 func (p *Path) MoveTo(x, y float32) {
 	if 0 < len(*p) && (*p)[len(*p)-1] == MoveTo {
 		(*p)[len(*p)-3] = x

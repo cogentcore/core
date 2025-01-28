@@ -165,7 +165,7 @@ func (g *Text) LayoutText() {
 
 func (g *Text) RenderText(sv *SVG) {
 	pc := &paint.Context{&sv.RenderState, &g.Paint}
-	mat := &pc.CurrentTransform
+	mat := &pc.Transform
 	// note: layout of text has already been done in LocalBBox above
 	g.TextRender.Transform(*mat, &pc.FontStyle, &pc.UnitContext)
 	pos := mat.MulVector2AsPoint(math32.Vec2(g.Pos.X, g.Pos.Y))

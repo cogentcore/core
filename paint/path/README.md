@@ -22,4 +22,7 @@ Once a Path has been defined, the actual rendering process involves optionally f
 
 The rasterizer is what actually turns the path lines into discrete pixels in an image. It uses the Flatten* methods to turn curves into discrete straight line segments, so everything is just a simple set of lines in the end, which can actually be drawn. The rasterizer also does antialiasing so the results look smooth.
 
+# Import logic
+
+`path` is a foundational package that should not import any other packages such as paint, styles, etc. These other higher-level packages import path.
 

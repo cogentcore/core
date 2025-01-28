@@ -7,7 +7,6 @@ package paint
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/path"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -49,14 +48,36 @@ type Path struct {
 	// Path specifies the shape(s) to be drawn, using commands:
 	// MoveTo, LineTo, QuadTo, CubeTo, ArcTo, and Close.
 	// Each command has the applicable coordinates appended after it,
-	// like the SVG path element.
+	// like the SVG path element. The coordinates are in the original
+	// units as specified in the Paint drawing commands, without any
+	// transforms applied. See [Path.Transform].
 	Path path.Path
 
-	// Style has the styling parameters for rendering the path,
-	// including colors, stroke width, and transform.
-	Style styles.Path
+	// Context has the full accumulated style, transform, etc parameters
+	// for rendering the path, combining the current state context (e.g.,
+	// from any higher-level groups) with the current element's style parameters.
+	Context Context
 }
 
 // interface assertion.
 func (p *Path) isRenderItem() {
+}
+
+// ContextPush is a [Context] push render item, which can be used by renderers
+// that track group structure (e.g., SVG).
+type ContextPush struct {
+	Context Context
+}
+
+// interface assertion.
+func (p *ContextPush) isRenderItem() {
+}
+
+// ContextPop is a [Context] pop render item, which can be used by renderers
+// that track group structure (e.g., SVG).
+type ContextPop struct {
+}
+
+// interface assertion.
+func (p *ContextPop) isRenderItem() {
 }
