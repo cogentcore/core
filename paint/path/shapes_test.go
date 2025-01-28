@@ -16,24 +16,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func tolEqualVec2(t *testing.T, a, b math32.Vector2, tols ...float64) {
-	tol := 1.0e-4
-	if len(tols) == 1 {
-		tol = tols[0]
-	}
-	assert.InDelta(t, b.X, a.X, tol)
-	assert.InDelta(t, b.Y, a.Y, tol)
-}
-
-func tolEqualBox2(t *testing.T, a, b math32.Box2, tols ...float64) {
-	tol := 1.0e-4
-	if len(tols) == 1 {
-		tol = tols[0]
-	}
-	tolEqualVec2(t, b.Min, a.Min, tol)
-	tolEqualVec2(t, b.Max, a.Max, tol)
-}
-
 func TestEllipse(t *testing.T) {
 	tolEqualVec2(t, EllipsePos(2.0, 1.0, math32.Pi/2.0, 1.0, 0.5, 0.0), math32.Vector2{1.0, 2.5})
 	tolEqualVec2(t, ellipseDeriv(2.0, 1.0, math32.Pi/2.0, true, 0.0), math32.Vector2{-1.0, 0.0})

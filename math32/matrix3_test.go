@@ -24,17 +24,17 @@ func TestMatrix3(t *testing.T) {
 
 	assert.Equal(t, vxy.MulScalar(2), Matrix3FromMatrix2(Scale2D(2, 2)).MulVector2AsPoint(vxy))
 
-	tolAssertEqualVector(t, standardTol, vy, Matrix3FromMatrix2(Rotate2D(DegToRad(90))).MulVector2AsPoint(vx))  // left
-	tolAssertEqualVector(t, standardTol, vx, Matrix3FromMatrix2(Rotate2D(DegToRad(-90))).MulVector2AsPoint(vy)) // right
-	tolAssertEqualVector(t, standardTol, vxy.Normal(), Matrix3FromMatrix2(Rotate2D(DegToRad(45))).MulVector2AsPoint(vx))
-	tolAssertEqualVector(t, standardTol, vxy.Normal(), Matrix3FromMatrix2(Rotate2D(DegToRad(-45))).MulVector2AsPoint(vy))
+	tolAssertEqualVector(t, vy, Matrix3FromMatrix2(Rotate2D(DegToRad(90))).MulVector2AsPoint(vx))  // left
+	tolAssertEqualVector(t, vx, Matrix3FromMatrix2(Rotate2D(DegToRad(-90))).MulVector2AsPoint(vy)) // right
+	tolAssertEqualVector(t, vxy.Normal(), Matrix3FromMatrix2(Rotate2D(DegToRad(45))).MulVector2AsPoint(vx))
+	tolAssertEqualVector(t, vxy.Normal(), Matrix3FromMatrix2(Rotate2D(DegToRad(-45))).MulVector2AsPoint(vy))
 
-	tolAssertEqualVector(t, standardTol, vy, Matrix3FromMatrix2(Rotate2D(DegToRad(-90))).Inverse().MulVector2AsPoint(vx)) // left
-	tolAssertEqualVector(t, standardTol, vx, Matrix3FromMatrix2(Rotate2D(DegToRad(90))).Inverse().MulVector2AsPoint(vy))  // right
+	tolAssertEqualVector(t, vy, Matrix3FromMatrix2(Rotate2D(DegToRad(-90))).Inverse().MulVector2AsPoint(vx)) // left
+	tolAssertEqualVector(t, vx, Matrix3FromMatrix2(Rotate2D(DegToRad(90))).Inverse().MulVector2AsPoint(vy))  // right
 
 	// 1,0 -> scale(2) = 2,0 -> rotate 90 = 0,2 -> trans 1,1 -> 1,3
 	// multiplication order is *reverse* of "logical" order:
-	tolAssertEqualVector(t, standardTol, Vec2(1, 3), Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulVector2AsPoint(vx))
+	tolAssertEqualVector(t, Vec2(1, 3), Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulVector2AsPoint(vx))
 
 	// xmat := Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulVector2AsPoint(vx))
 }

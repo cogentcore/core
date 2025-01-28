@@ -26,9 +26,11 @@ var (
 	// the original for flattening purposed in pixels.
 	PixelTolerance = float32(0.1)
 
+	//	In C, FLT_EPSILON = 1.19209e-07
+
 	// Epsilon is the smallest number below which we assume the value to be zero.
 	// This is to avoid numerical floating point issues.
-	Epsilon = float32(1e-10)
+	Epsilon = float32(1e-7)
 
 	// Precision is the number of significant digits at which floating point
 	// value will be printed to output formats.

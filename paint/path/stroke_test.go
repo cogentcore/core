@@ -118,7 +118,7 @@ func TestPathOffset(t *testing.T) {
 	for _, tt := range tts {
 		t.Run(fmt.Sprintf("%v/%v", tt.orig, tt.w), func(t *testing.T) {
 			offset := MustParseSVGPath(tt.orig).Offset(tt.w, tolerance)
-			assert.Equal(t, MustParseSVGPath(tt.offset), offset)
+			assert.InDeltaSlice(t, MustParseSVGPath(tt.offset), offset, 1.0e-5)
 		})
 	}
 }

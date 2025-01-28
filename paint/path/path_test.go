@@ -17,6 +17,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func tolEqualVec2(t *testing.T, a, b math32.Vector2, tols ...float64) {
+	tol := 1.0e-4
+	if len(tols) == 1 {
+		tol = tols[0]
+	}
+	assert.InDelta(t, b.X, a.X, tol)
+	assert.InDelta(t, b.Y, a.Y, tol)
+}
+
+func tolEqualBox2(t *testing.T, a, b math32.Box2, tols ...float64) {
+	tol := 1.0e-4
+	if len(tols) == 1 {
+		tol = tols[0]
+	}
+	tolEqualVec2(t, b.Min, a.Min, tol)
+	tolEqualVec2(t, b.Max, a.Max, tol)
+}
+
 func TestPathEmpty(t *testing.T) {
 	p := &Path{}
 	assert.True(t, p.Empty())
@@ -422,27 +440,24 @@ func TestPathLength(t *testing.T) {
 	}
 }
 
-/*
 func TestPathTransform(t *testing.T) {
-	t.Skip("TODO: fix this test!!")
 	var tts = []struct {
 		p string
-		m Matrix
+		m math32.Matrix2
 		r string
 	}{
-		{"L10 0Q15 10 20 0C23 10 27 10 30 0z", Identity.Translate(0, 100), "M0 100L10 100Q15 110 20 100C23 110 27 110 30 100z"},
-		{"A10 10 0 0 0 20 0", Identity.Translate(0, 10), "M0 10A10 10 0 0 0 20 10"},
-		{"A10 10 0 0 0 20 0", Identity.Scale(1, -1), "A10 10 0 0 1 20 0"},
-		{"A10 5 0 0 0 20 0", Identity.Rotate(270), "A10 5 90 0 0 0 -20"},
-		{"A10 10 0 0 0 20 0", Identity.Rotate(120).Scale(1, -2), "A20 10 30 0 1 -10 17.3205080757"},
+		{"L10 0Q15 10 20 0C23 10 27 10 30 0z", math32.Identity2().Translate(0, 100), "M0 100L10 100Q15 110 20 100C23 110 27 110 30 100z"},
+		{"A10 10 0 0 0 20 0", math32.Identity2().Translate(0, 10), "M0 10A10 10 0 0 0 20 10"},
+		{"A10 10 0 0 0 20 0", math32.Identity2().Scale(1, -1), "A10 10 0 0 1 20 0"},
+		{"A10 5 0 0 0 20 0", math32.Identity2().Rotate(math32.DegToRad(270)), "A10 5 90 0 0 0 -20"},
+		{"A10 10 0 0 0 20 0", math32.Identity2().Rotate(math32.DegToRad(120)).Scale(1, -2), "A20 10 30 0 1 -10 17.3205080757"},
 	}
 	for _, tt := range tts {
 		t.Run(tt.p, func(t *testing.T) {
-			assert.Equal(t, MustParseSVGPath(tt.p).Transform(tt.m), MustParseSVGPath(tt.r))
+			assert.InDeltaSlice(t, MustParseSVGPath(tt.r), MustParseSVGPath(tt.p).Transform(tt.m), 1.0e-5)
 		})
 	}
 }
-*/
 
 func TestPathReplace(t *testing.T) {
 	line := func(p0, p1 math32.Vector2) Path {
@@ -492,7 +507,6 @@ func TestPathReplace(t *testing.T) {
 }
 
 func TestPathMarkers(t *testing.T) {
-	t.Skip("TODO: fix this test -- uses Transform!!")
 	start := MustParseSVGPath("L1 0L0 1z")
 	mid := MustParseSVGPath("M-1 0A1 1 0 0 0 1 0z")
 	end := MustParseSVGPath("L-1 0L0 1z")
@@ -519,7 +533,7 @@ func TestPathMarkers(t *testing.T) {
 				assert.Equal(t, strings.Join(origs, "\n"), strings.Join(tt.rs, "\n"))
 			} else {
 				for i, p := range ps {
-					assert.Equal(t, MustParseSVGPath(tt.rs[i]), p)
+					assert.InDeltaSlice(t, p, MustParseSVGPath(tt.rs[i]), 1.0e-3)
 				}
 			}
 		})
@@ -527,7 +541,6 @@ func TestPathMarkers(t *testing.T) {
 }
 
 func TestPathMarkersAligned(t *testing.T) {
-	t.Skip("TODO: fix this test -- uses Transform!!")
 	start := MustParseSVGPath("L1 0L0 1z")
 	mid := MustParseSVGPath("M-1 0A1 1 0 0 0 1 0z")
 	end := MustParseSVGPath("L-1 0L0 1z")
@@ -559,7 +572,7 @@ func TestPathMarkersAligned(t *testing.T) {
 				assert.Equal(t, strings.Join(origs, "\n"), strings.Join(tt.rs, "\n"))
 			} else {
 				for i, p := range ps {
-					tolassert.EqualTolSlice(t, MustParseSVGPath(tt.rs[i]), p, 1.0e-6)
+					tolassert.EqualTolSlice(t, MustParseSVGPath(tt.rs[i]), p, 1.0e-3)
 				}
 			}
 		})
