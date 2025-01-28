@@ -17,6 +17,9 @@ import (
 )
 
 func (r *Renderer) RenderPath(pt *paint.Path) {
+	if pt.Path.Empty() {
+		return
+	}
 	pc := &pt.Context
 	sty := &pc.Style
 	var fill, stroke path.Path
@@ -54,13 +57,18 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 	}
 
 	dx, dy := 0, 0
-	origin := pc.Bounds.Rect.Min
-	size := pc.Bounds.Rect.Size()
-	isz := size.ToPoint()
-	w := isz.X
-	h := isz.Y
-	x := int(origin.X)
-	y := int(origin.Y)
+	ib := r.Image.Bounds()
+	w := ib.Size().X
+	h := ib.Size().Y
+	// todo: could optimize by setting rasterizer only to the size to be rendered,
+	// but would require adjusting the coordinates accordingly.  Just translate so easy.
+	// origin := pc.Bounds.Rect.Min
+	// size := pc.Bounds.Rect.Size()
+	// isz := size.ToPoint()
+	// w := isz.X
+	// h := isz.Y
+	// x := int(origin.X)
+	// y := int(origin.Y)
 
 	if sty.HasFill() {
 		// if sty.Fill.IsPattern() {
@@ -72,7 +80,7 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 
 		r.ras.Reset(w, h)
 		ToRasterizer(fill, r.ras)
-		r.ras.Draw(r.Image, image.Rect(x, y, x+w, y+h), sty.Fill.Color, image.Point{dx, dy})
+		r.ras.Draw(r.Image, r.Image.Bounds(), sty.Fill.Color, image.Point{dx, dy})
 	}
 	if sty.HasStroke() {
 		// if sty.Stroke.IsPattern() {
@@ -84,7 +92,7 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 
 		r.ras.Reset(w, h)
 		ToRasterizer(stroke, r.ras)
-		r.ras.Draw(r.Image, image.Rect(x, y, x+w, y+h), sty.Stroke.Color, image.Point{dx, dy})
+		r.ras.Draw(r.Image, r.Image.Bounds(), sty.Stroke.Color, image.Point{dx, dy})
 	}
 }
 

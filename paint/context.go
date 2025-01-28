@@ -29,8 +29,8 @@ type Bounds struct {
 	// todo: probably need an image here for text
 }
 
-func NewBounds(w, h float32, radius sides.Floats) *Bounds {
-	return &Bounds{Rect: math32.B2(0, 0, w, h), Radius: radius}
+func NewBounds(x, y, w, h float32, radius sides.Floats) *Bounds {
+	return &Bounds{Rect: math32.B2(x, y, x+w, y+h), Radius: radius}
 }
 
 // Context contains all of the rendering constraints / filters / masks

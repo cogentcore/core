@@ -93,10 +93,10 @@ func TestPaintPath(t *testing.T) {
 	test := func(nm string, f func(pc *Painter)) {
 		RunTest(t, nm, 300, 300, func(pc *Painter) {
 			pc.FillBox(math32.Vector2{}, math32.Vec2(300, 300), colors.Uniform(colors.White))
-			f(pc)
 			pc.Stroke.Color = colors.Uniform(colors.Blue)
 			pc.Fill.Color = colors.Uniform(colors.Yellow)
 			pc.Stroke.Width.Dot(3)
+			f(pc)
 			pc.PathDone()
 			pc.RenderDone()
 		})
@@ -131,6 +131,12 @@ func TestPaintPath(t *testing.T) {
 	})
 	test("rounded-rect-sides", func(pc *Painter) {
 		pc.RoundedRectangleSides(50, 50, 100, 80, sides.NewFloats(10.0, 20.0, 15.0, 5.0))
+	})
+	test("clip-bounds", func(pc *Painter) {
+		pc.PushContext(pc.Paint, NewBounds(50, 50, 100, 80, sides.NewFloats(5.0, 10.0, 15.0, 20.0)))
+		pc.RoundedRectangleSides(50, 50, 100, 80, sides.NewFloats(10.0, 20.0, 15.0, 5.0))
+		pc.PathDone()
+		pc.PopContext()
 	})
 }
 

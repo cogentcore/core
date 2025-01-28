@@ -46,7 +46,7 @@ func (rs *State) InitImageRaster(sty *styles.Paint, width, height int, img *imag
 	sz := math32.Vec2(float32(width), float32(height))
 	rast := NewDefaultImageRenderer(sz, img)
 	rs.Renderers = append(rs.Renderers, rast)
-	rs.Stack = []*Context{NewContext(sty, NewBounds(float32(width), float32(height), sides.Floats{}), nil)}
+	rs.Stack = []*Context{NewContext(sty, NewBounds(0, 0, float32(width), float32(height), sides.Floats{}), nil)}
 	rs.Image = img
 }
 
