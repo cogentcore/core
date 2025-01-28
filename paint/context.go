@@ -83,6 +83,7 @@ func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
 	if parent == nil {
 		ctx.Transform = sty.Transform
 		bsz := bounds.Rect.Size()
+		ctx.Bounds = *bounds
 		ctx.Bounds.Path = path.RoundedRectangleSides(bounds.Rect.Min.X, bounds.Rect.Min.Y, bsz.X, bsz.Y, bounds.Radius)
 		ctx.ClipPath = sty.ClipPath
 		ctx.Mask = sty.Mask

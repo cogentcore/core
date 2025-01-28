@@ -8,8 +8,6 @@
 package path
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/math32"
 )
 
@@ -33,7 +31,6 @@ type Scanner struct {
 func (s *Scanner) Scan() bool {
 	if s.i+1 < len(s.p) {
 		s.i += CmdLen(s.p[s.i+1])
-		fmt.Println("scan:", s.i)
 		return true
 	}
 	return false
