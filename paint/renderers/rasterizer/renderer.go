@@ -10,6 +10,8 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/pimage"
+	"cogentcore.org/core/paint/ptext"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles/units"
 	"golang.org/x/image/vector"
 )
@@ -51,12 +53,14 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2, img *image.RGBA
 	rs.image = image.NewRGBA(image.Rectangle{Max: psz})
 }
 
-func (rs *Renderer) Render(r paint.Render) {
+func (rs *Renderer) Render(r render.Render) {
 	for _, ri := range r {
 		switch x := ri.(type) {
-		case *paint.Path:
+		case *render.Path:
 			rs.RenderPath(x)
 		case *pimage.Params:
+			x.Render(rs.image)
+		case *ptext.Text:
 			x.Render(rs.image)
 		}
 	}

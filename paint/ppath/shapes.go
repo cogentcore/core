@@ -24,6 +24,27 @@ func Line(x1, y1, x2, y2 float32) Path {
 	return p
 }
 
+// Polyline returns multiple connected lines, with no final Close.
+func Polyline(points ...math32.Vector2) Path {
+	sz := len(points)
+	p := Path{}
+	if sz < 2 {
+		return p
+	}
+	p.MoveTo(points[0].X, points[0].Y)
+	for i := 1; i < sz; i++ {
+		p.LineTo(points[i].X, points[i].Y)
+	}
+	return p
+}
+
+// Polygon returns multiple connected lines with a final Close.
+func Polygon(points ...math32.Vector2) Path {
+	p := Polyline(points...)
+	p.Close()
+	return p
+}
+
 // Rectangle returns a rectangle of width w and height h.
 func Rectangle(x, y, w, h float32) Path {
 	if Equal(w, 0.0) || Equal(h, 0.0) {

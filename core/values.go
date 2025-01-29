@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
@@ -200,7 +200,7 @@ func (fb *FontButton) Init() {
 	InitValueButton(fb, false, func(d *Body) {
 		d.SetTitle("Select a font family")
 		si := 0
-		fi := paint.FontLibrary.FontInfo
+		fi := ptext.FontLibrary.FontInfo
 		tb := NewTable(d)
 		tb.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
 		tb.SetTableStyler(func(w Widget, s *styles.Style, row, col int) {

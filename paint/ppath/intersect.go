@@ -1208,7 +1208,8 @@ func splitAtIntersections(zs []math32.Vector2, queue *SweepEvents, s *SweepPoint
 					fmt.Println("WARNING: reversing first segment of A")
 				}
 				if right.other.node != nil {
-					panic("impossible: first segment became vertical and needs reversal, but was already in the sweep status")
+					// panic("impossible: first segment became vertical and needs reversal, but was already in the sweep status")
+					continue
 				}
 				right.Reverse()
 
@@ -1962,13 +1963,13 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRules) Path {
 
 				n := event.other.node
 				if n == nil {
-					panic("right-endpoint not part of status, probably buggy intersection code")
+					// panic("right-endpoint not part of status, probably buggy intersection code")
 					// don't put back in boPointPool, rare event
 					continue
 				} else if n.SweepPoint == nil {
 					// this may happen if the left-endpoint is to the right of the right-endpoint
 					// for some reason, usually due to a bug in the segment intersection code
-					panic("other endpoint already removed, probably buggy intersection code")
+					// panic("other endpoint already removed, probably buggy intersection code")
 					// don't put back in boPointPool, rare event
 					continue
 				}

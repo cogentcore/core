@@ -7,7 +7,7 @@ import (
 
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"github.com/aymerick/douceur/css"
@@ -208,7 +208,7 @@ func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[NodeBase](pare
 // use spaces to separate per css standard.
 func (t *NodeBase) SetClass(v string) *NodeBase { t.Class = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Path", IDName: "path", Doc: "Path renders SVG data sequences that can render just about anything", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Data", Doc: "the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"}, {Name: "DataStr", Doc: "string version of the path data"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Path", IDName: "path", Doc: "Path renders SVG data sequences that can render just about anything", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Data", Doc: "Path data using paint/ppath representation."}, {Name: "DataStr", Doc: "string version of the path data"}}})
 
 // NewPath returns a new [Path] with the given optional parent:
 // Path renders SVG data sequences that can render just about anything
@@ -234,7 +234,7 @@ func NewPolyline(parent ...tree.Node) *Polyline { return tree.New[Polyline](pare
 // the coordinates to draw -- does a moveto on the first, then lineto for all the rest
 func (t *Polyline) SetPoints(v ...math32.Vector2) *Polyline { t.Points = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Rect", IDName: "rect", Doc: "Rect is a SVG rectangle, optionally with rounded corners", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the top-left of the rectangle"}, {Name: "Size", Doc: "size of the rectangle"}, {Name: "Radius", Doc: "radii for curved corners, as a proportion of width, height"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Rect", IDName: "rect", Doc: "Rect is a SVG rectangle, optionally with rounded corners", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the top-left of the rectangle"}, {Name: "Size", Doc: "size of the rectangle"}, {Name: "Radius", Doc: "radii for curved corners. only rx is used for now."}}})
 
 // NewRect returns a new [Rect] with the given optional parent:
 // Rect is a SVG rectangle, optionally with rounded corners
@@ -249,7 +249,7 @@ func (t *Rect) SetPos(v math32.Vector2) *Rect { t.Pos = v; return t }
 func (t *Rect) SetSize(v math32.Vector2) *Rect { t.Size = v; return t }
 
 // SetRadius sets the [Rect.Radius]:
-// radii for curved corners, as a proportion of width, height
+// radii for curved corners. only rx is used for now.
 func (t *Rect) SetRadius(v math32.Vector2) *Rect { t.Radius = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Root", IDName: "root", Doc: "Root represents the root of an SVG tree.", Embeds: []types.Field{{Name: "Group"}}, Fields: []types.Field{{Name: "ViewBox", Doc: "ViewBox defines the coordinate system for the drawing.\nThese units are mapped into the screen space allocated\nfor the SVG during rendering."}}})
@@ -285,7 +285,7 @@ func (t *Text) SetText(v string) *Text { t.Text = v; return t }
 
 // SetTextRender sets the [Text.TextRender]:
 // render version of text
-func (t *Text) SetTextRender(v paint.Text) *Text { t.TextRender = v; return t }
+func (t *Text) SetTextRender(v ptext.Text) *Text { t.TextRender = v; return t }
 
 // SetCharPosX sets the [Text.CharPosX]:
 // character positions along X axis, if specified

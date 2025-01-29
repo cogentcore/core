@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 )
@@ -138,10 +138,10 @@ func (m *Meter) Render() {
 	pos := m.Geom.Pos.Content.AddScalar(sw / 2)
 	size := m.Geom.Size.Actual.Content.SubScalar(sw)
 
-	var txt *paint.Text
+	var txt *ptext.Text
 	var toff math32.Vector2
 	if m.Text != "" {
-		txt = &paint.Text{}
+		txt = &ptext.Text{}
 		txt.SetHTML(m.Text, st.FontRender(), &st.Text, &st.UnitContext, nil)
 		tsz := txt.Layout(&st.Text, st.FontRender(), &st.UnitContext, size)
 		toff = tsz.DivScalar(2)
@@ -161,7 +161,7 @@ func (m *Meter) Render() {
 			pc.PathDone()
 		}
 		if txt != nil {
-			txt.Render(pc, c.Sub(toff))
+			pc.RenderText(txt, c.Sub(toff))
 		}
 		return
 	}
@@ -179,6 +179,6 @@ func (m *Meter) Render() {
 		pc.PathDone()
 	}
 	if txt != nil {
-		txt.Render(pc, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))
+		pc.RenderText(txt, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))
 	}
 }

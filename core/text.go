@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
@@ -34,8 +34,8 @@ type Text struct {
 	// It defaults to [TextBodyLarge].
 	Type TextTypes
 
-	// paintText is the [paint.Text] for the text.
-	paintText paint.Text
+	// paintText is the [ptext.Text] for the text.
+	paintText ptext.Text
 
 	// normalCursor is the cached cursor to display when there
 	// is no link being hovered.
@@ -206,7 +206,7 @@ func (tx *Text) Init() {
 		tx.paintText.UpdateColors(s.FontRender())
 	})
 
-	tx.HandleTextClick(func(tl *paint.TextLink) {
+	tx.HandleTextClick(func(tl *ptext.TextLink) {
 		system.TheApp.OpenURL(tl.URL)
 	})
 	tx.OnDoubleClick(func(e events.Event) {
@@ -246,7 +246,7 @@ func (tx *Text) Init() {
 
 // findLink finds the text link at the given scene-local position. If it
 // finds it, it returns it and its bounds; otherwise, it returns nil.
-func (tx *Text) findLink(pos image.Point) (*paint.TextLink, image.Rectangle) {
+func (tx *Text) findLink(pos image.Point) (*ptext.TextLink, image.Rectangle) {
 	for _, tl := range tx.paintText.Links {
 		// TODO(kai/link): is there a better way to be safe here?
 		if tl.Label == "" {
@@ -262,7 +262,7 @@ func (tx *Text) findLink(pos image.Point) (*paint.TextLink, image.Rectangle) {
 
 // HandleTextClick handles click events such that the given function will be called
 // on any links that are clicked on.
-func (tx *Text) HandleTextClick(openLink func(tl *paint.TextLink)) {
+func (tx *Text) HandleTextClick(openLink func(tl *ptext.TextLink)) {
 	tx.OnClick(func(e events.Event) {
 		tl, _ := tx.findLink(e.Pos())
 		if tl == nil {
@@ -333,7 +333,7 @@ func (tx *Text) SizeUp() {
 	sz := &tx.Geom.Size
 	if tx.Styles.Text.HasWordWrap() {
 		// note: using a narrow ratio of .5 to allow text to squeeze into narrow space
-		tx.configTextSize(paint.TextWrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), 0.5, &tx.Styles.Font))
+		tx.configTextSize(ptext.TextWrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), 0.5, &tx.Styles.Font))
 	} else {
 		tx.configTextSize(sz.Actual.Content)
 	}
@@ -367,5 +367,5 @@ func (tx *Text) SizeDown(iter int) bool {
 
 func (tx *Text) Render() {
 	tx.WidgetBase.Render()
-	tx.paintText.Render(&tx.Scene.Painter, tx.Geom.Pos.Content)
+	tx.Scene.Painter.RenderText(&tx.paintText, tx.Geom.Pos.Content)
 }

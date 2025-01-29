@@ -24,7 +24,7 @@ func (g *Polygon) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	pc.Polygon(g.Points)
+	pc.Polygon(g.Points...)
 	pc.PathDone()
 	g.BBoxes(sv)
 

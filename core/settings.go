@@ -26,7 +26,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
@@ -565,10 +565,10 @@ func (ss *SystemSettingsData) Defaults() {
 // Apply detailed settings to all the relevant settings.
 func (ss *SystemSettingsData) Apply() { //types:add
 	if ss.FontPaths != nil {
-		paths := append(ss.FontPaths, paint.FontPaths...)
-		paint.FontLibrary.InitFontPaths(paths...)
+		paths := append(ss.FontPaths, ptext.FontPaths...)
+		ptext.FontLibrary.InitFontPaths(paths...)
 	} else {
-		paint.FontLibrary.InitFontPaths(paint.FontPaths...)
+		ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
 	}
 
 	np := len(ss.FavPaths)

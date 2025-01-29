@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
@@ -83,9 +83,9 @@ type Editor struct { //core:embedder
 	// but always reflects the storage size of renders etc.
 	NumLines int `set:"-" display:"-" json:"-" xml:"-"`
 
-	// renders is a slice of paint.Text representing the renders of the text lines,
+	// renders is a slice of ptext.Text representing the renders of the text lines,
 	// with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines).
-	renders []paint.Text
+	renders []ptext.Text
 
 	// offsets is a slice of float32 representing the starting render offsets for the top of each line.
 	offsets []float32
@@ -97,7 +97,7 @@ type Editor struct { //core:embedder
 	LineNumberOffset float32 `set:"-" display:"-" json:"-" xml:"-"`
 
 	// lineNumberRender is the render for line numbers.
-	lineNumberRender paint.Text
+	lineNumberRender ptext.Text
 
 	// CursorPos is the current cursor position.
 	CursorPos lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
@@ -132,7 +132,7 @@ type Editor struct { //core:embedder
 
 	// LinkHandler handles link clicks.
 	// If it is nil, they are sent to the standard web URL handler.
-	LinkHandler func(tl *paint.TextLink)
+	LinkHandler func(tl *ptext.TextLink)
 
 	// ISearch is the interactive search data.
 	ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
@@ -364,7 +364,7 @@ func (ed *Editor) linesInserted(tbe *text.Edit) {
 	if stln > len(ed.renders) { // invalid
 		return
 	}
-	ed.renders = slices.Insert(ed.renders, stln, make([]paint.Text, nsz)...)
+	ed.renders = slices.Insert(ed.renders, stln, make([]ptext.Text, nsz)...)
 
 	// Offs
 	tmpof := make([]float32, nsz)

@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
@@ -28,10 +29,10 @@ type State struct {
 	// Stack provides the SVG "stacking context" as a stack of [Context]s.
 	// There is always an initial base-level Context element for the overall
 	// rendering context.
-	Stack []*Context
+	Stack []*render.Context
 
 	// Render is the current render state that we are building.
-	Render Render
+	Render render.Render
 
 	// Path is the current path state we are adding to.
 	Path ppath.Path
@@ -51,7 +52,7 @@ func (rs *State) InitImageRaster(sty *styles.Paint, width, height int, img *imag
 	if len(rs.Renderers) == 0 {
 		rd := NewDefaultImageRenderer(sz, img)
 		rs.Renderers = append(rs.Renderers, rd)
-		rs.Stack = []*Context{NewContext(sty, NewBounds(0, 0, float32(width), float32(height), sides.Floats{}), nil)}
+		rs.Stack = []*render.Context{render.NewContext(sty, render.NewBounds(0, 0, float32(width), float32(height), sides.Floats{}), nil)}
 		rs.Image = rd.Image()
 		return
 	}
@@ -68,22 +69,22 @@ func (rs *State) InitImageRaster(sty *styles.Paint, width, height int, img *imag
 	}
 }
 
-// Context() returns the currently active [Context] state (top of Stack).
-func (rs *State) Context() *Context {
+// Context() returns the currently active [render.Context] state (top of Stack).
+func (rs *State) Context() *render.Context {
 	return rs.Stack[len(rs.Stack)-1]
 }
 
-// PushContext pushes a new [Context] onto the stack using given styles and bounds.
+// PushContext pushes a new [render.Context] onto the stack using given styles and bounds.
 // The transform from the style will be applied to all elements rendered
 // within this group, along with the other group properties.
 // This adds the Context to the current Render state as well, so renderers
 // that track grouping will track this.
 // Must protect within render mutex lock (see Lock version).
-func (rs *State) PushContext(sty *styles.Paint, bounds *Bounds) *Context {
+func (rs *State) PushContext(sty *styles.Paint, bounds *render.Bounds) *render.Context {
 	parent := rs.Context()
-	g := NewContext(sty, bounds, parent)
+	g := render.NewContext(sty, bounds, parent)
 	rs.Stack = append(rs.Stack, g)
-	rs.Render.Add(&ContextPush{Context: *g})
+	rs.Render.Add(&render.ContextPush{Context: *g})
 	return g
 }
 
@@ -95,5 +96,5 @@ func (rs *State) PopContext() {
 		return
 	}
 	rs.Stack = rs.Stack[:n-1]
-	rs.Render.Add(&ContextPop{})
+	rs.Render.Add(&render.ContextPop{})
 }

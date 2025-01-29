@@ -22,7 +22,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
@@ -153,10 +153,10 @@ type TextField struct { //core:embedder
 	selectModeShift bool
 
 	// renderAll is the render version of entire text, for sizing.
-	renderAll paint.Text
+	renderAll ptext.Text
 
 	// renderVisible is the render version of just the visible text.
-	renderVisible paint.Text
+	renderVisible ptext.Text
 
 	// number of lines from last render update, for word-wrap version
 	numLines int
@@ -1810,7 +1810,7 @@ func (tf *TextField) configTextSize(sz math32.Vector2) math32.Vector2 {
 	st := &tf.Styles
 	txs := &st.Text
 	fs := st.FontRender()
-	st.Font = paint.OpenFont(fs, &st.UnitContext)
+	st.Font = ptext.OpenFont(fs, &st.UnitContext)
 	txt := tf.editText
 	if tf.NoEcho {
 		txt = concealDots(len(tf.editText))
@@ -1935,7 +1935,7 @@ func (tf *TextField) Render() {
 	tf.autoScroll() // inits paint with our style
 	fs := st.FontRender()
 	txs := &st.Text
-	st.Font = paint.OpenFont(fs, &st.UnitContext)
+	st.Font = ptext.OpenFont(fs, &st.UnitContext)
 	tf.RenderStandardBox()
 	if tf.startPos < 0 || tf.endPos > len(tf.editText) {
 		return
@@ -1956,7 +1956,7 @@ func (tf *TextField) Render() {
 	availSz := sz.Actual.Content.Sub(icsz)
 	tf.renderVisible.SetRunes(cur, fs, &st.UnitContext, &st.Text, true, 0, 0)
 	tf.renderVisible.Layout(txs, fs, &st.UnitContext, availSz)
-	tf.renderVisible.Render(pc, pos)
+	pc.RenderText(&tf.renderVisible, pos)
 	st.Color = prevColor
 }
 

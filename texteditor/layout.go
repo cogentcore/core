@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 )
 
@@ -22,7 +22,7 @@ const maxGrowLines = 25
 func (ed *Editor) styleSizes() {
 	sty := &ed.Styles
 	spc := sty.BoxSpace()
-	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnitContext)
+	sty.Font = ptext.OpenFont(sty.FontRender(), &sty.UnitContext)
 	ed.fontHeight = sty.Font.Face.Metrics.Height
 	ed.lineHeight = sty.Text.EffLineHeight(ed.fontHeight)
 	ed.fontDescent = math32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
@@ -74,7 +74,7 @@ func (ed *Editor) internalSizeFromLines() {
 	ed.Geom.Size.Internal.Y += ed.lineHeight
 }
 
-// layoutAllLines generates paint.Text Renders of lines
+// layoutAllLines generates ptext.Text Renders of lines
 // from the Markup version of the source in Buf.
 // It computes the total LinesSize and TotalSize.
 func (ed *Editor) layoutAllLines() {

@@ -47,7 +47,7 @@ func (g *Polyline) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	pc.Polyline(g.Points)
+	pc.Polyline(g.Points...)
 	pc.PathDone()
 	g.BBoxes(sv)
 

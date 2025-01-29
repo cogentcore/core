@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"
@@ -179,7 +179,7 @@ func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	}
 	st.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
 	if st.Font.Face == nil || rebuild {
-		st.Font = paint.OpenFont(st.FontRender(), &st.UnitContext) // calls SetUnContext after updating metrics
+		st.Font = ptext.OpenFont(st.FontRender(), &st.UnitContext) // calls SetUnContext after updating metrics
 	}
 	st.ToDots()
 }

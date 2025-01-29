@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles/abilities"
@@ -490,7 +490,7 @@ func (ed *Editor) keyInputInsertRune(kt events.Event) {
 // receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
 // non-nil (which by default opens user's default browser via
 // system/App.OpenURL())
-func (ed *Editor) openLink(tl *paint.TextLink) {
+func (ed *Editor) openLink(tl *ptext.TextLink) {
 	if ed.LinkHandler != nil {
 		ed.LinkHandler(tl)
 	} else {
@@ -500,7 +500,7 @@ func (ed *Editor) openLink(tl *paint.TextLink) {
 
 // linkAt returns link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise
-func (ed *Editor) linkAt(pos lexer.Pos) (*paint.TextLink, bool) {
+func (ed *Editor) linkAt(pos lexer.Pos) (*ptext.TextLink, bool) {
 	if !(pos.Ln < len(ed.renders) && len(ed.renders[pos.Ln].Links) > 0) {
 		return nil, false
 	}
@@ -521,7 +521,7 @@ func (ed *Editor) linkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 
 // OpenLinkAt opens a link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise -- highlights selected link
-func (ed *Editor) OpenLinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
+func (ed *Editor) OpenLinkAt(pos lexer.Pos) (*ptext.TextLink, bool) {
 	tl, ok := ed.linkAt(pos)
 	if ok {
 		rend := &ed.renders[pos.Ln]

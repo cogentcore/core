@@ -13,6 +13,8 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/paint/ptext"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/paint/renderers/rasterx/scan"
 	"cogentcore.org/core/styles/units"
 )
@@ -69,18 +71,20 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2, img *image.RGBA
 }
 
 // Render is the main rendering function.
-func (rs *Renderer) Render(r paint.Render) {
+func (rs *Renderer) Render(r render.Render) {
 	for _, ri := range r {
 		switch x := ri.(type) {
-		case *paint.Path:
+		case *render.Path:
 			rs.RenderPath(x)
 		case *pimage.Params:
+			x.Render(rs.image)
+		case *ptext.Text:
 			x.Render(rs.image)
 		}
 	}
 }
 
-func (rs *Renderer) RenderPath(pt *paint.Path) {
+func (rs *Renderer) RenderPath(pt *render.Path) {
 	rs.Raster.Clear()
 	// todo: transform!
 	p := pt.Path.ReplaceArcs()
@@ -109,7 +113,7 @@ func (rs *Renderer) RenderPath(pt *paint.Path) {
 	rs.Path.Clear()
 }
 
-func (rs *Renderer) Stroke(pt *paint.Path) {
+func (rs *Renderer) Stroke(pt *render.Path) {
 	pc := &pt.Context
 	sty := &pc.Style
 	if sty.Off || sty.Stroke.Color == nil {
@@ -154,7 +158,7 @@ func (rs *Renderer) Stroke(pt *paint.Path) {
 
 // Fill fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is preserved after this operation.
-func (rs *Renderer) Fill(pt *paint.Path) {
+func (rs *Renderer) Fill(pt *render.Path) {
 	pc := &pt.Context
 	sty := &pc.Style
 	if sty.Fill.Color == nil {
@@ -183,7 +187,7 @@ func (rs *Renderer) Fill(pt *paint.Path) {
 
 // StrokeWidth obtains the current stoke width subject to transform (or not
 // depending on VecEffNonScalingStroke)
-func (rs *Renderer) StrokeWidth(pt *paint.Path) float32 {
+func (rs *Renderer) StrokeWidth(pt *render.Path) float32 {
 	pc := &pt.Context
 	sty := &pc.Style
 	dw := sty.Stroke.Width.Dots

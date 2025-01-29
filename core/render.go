@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -326,11 +326,11 @@ func (wb *WidgetBase) StartRender() bool {
 		wb.setFlag(true, widgetFirstRender)
 		// push our parent's bounds if we are the first to render
 		pw := wb.parentWidget()
-		pc.PushContext(nil, paint.NewBoundsRect(pw.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+		pc.PushContext(nil, render.NewBoundsRect(pw.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
 	} else {
 		wb.setFlag(false, widgetFirstRender)
 	}
-	pc.PushContext(nil, paint.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+	pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
 	pc.Paint.Defaults() // start with default style values
 	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)

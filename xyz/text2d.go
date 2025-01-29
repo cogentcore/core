@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
@@ -45,7 +46,7 @@ type Text2D struct {
 	TextPos math32.Vector2 `set:"-" xml:"-" json:"-"`
 
 	// render data for text label
-	TextRender paint.Text `set:"-" xml:"-" json:"-"`
+	TextRender ptext.Text `set:"-" xml:"-" json:"-"`
 
 	// render state for rendering text
 	RenderState paint.State `set:"-" copier:"-" json:"-" xml:"-" display:"-"`

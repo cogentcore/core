@@ -13,7 +13,8 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
@@ -381,7 +382,7 @@ func (ed *Editor) renderAllLines() {
 	if stln < 0 || edln < 0 { // shouldn't happen.
 		return
 	}
-	pc.PushContext(nil, paint.NewBoundsRect(bb, sides.NewFloats()))
+	pc.PushContext(nil, render.NewBoundsRect(bb, sides.NewFloats()))
 
 	if ed.hasLineNumbers {
 		ed.renderLineNumbersBoxAll()
@@ -397,7 +398,7 @@ func (ed *Editor) renderAllLines() {
 	if ed.hasLineNumbers {
 		tbb := bb
 		tbb.Min.X += int(ed.LineNumberOffset)
-		pc.PushContext(nil, paint.NewBoundsRect(tbb, sides.NewFloats()))
+		pc.PushContext(nil, render.NewBoundsRect(tbb, sides.NewFloats()))
 	}
 	for ln := stln; ln <= edln; ln++ {
 		lst := pos.Y + ed.offsets[ln]
@@ -407,7 +408,7 @@ func (ed *Editor) renderAllLines() {
 		if lp.Y+ed.fontAscent > float32(bb.Max.Y) {
 			break
 		}
-		ed.renders[ln].Render(pc, lp) // not top pos; already has baseline offset
+		pc.RenderText(&ed.renders[ln], lp) // not top pos; already has baseline offset
 	}
 	if ed.hasLineNumbers {
 		pc.PopContext()
@@ -462,13 +463,13 @@ func (ed *Editor) renderLineNumber(ln int, defFill bool) {
 		fst.Color = colors.Scheme.Primary.Base
 		fst.Weight = styles.WeightBold
 		// need to open with new weight
-		fst.Font = paint.OpenFont(fst, &ed.Styles.UnitContext)
+		fst.Font = ptext.OpenFont(fst, &ed.Styles.UnitContext)
 	} else {
 		fst.Color = colors.Scheme.OnSurfaceVariant
 	}
 	ed.lineNumberRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
 
-	ed.lineNumberRender.Render(pc, tpos)
+	pc.RenderText(&ed.lineNumberRender, tpos)
 
 	// render circle
 	lineColor := ed.Buffer.LineColors[ln]

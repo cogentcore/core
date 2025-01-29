@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
@@ -259,7 +259,7 @@ func textStyler(s *styles.Style) {
 func handleText(ctx *Context) *core.Text {
 	tx := New[core.Text](ctx).SetText(ExtractText(ctx))
 	tx.Styler(textStyler)
-	tx.HandleTextClick(func(tl *paint.TextLink) {
+	tx.HandleTextClick(func(tl *ptext.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})
 	return tx
@@ -275,7 +275,7 @@ func handleTextTag(ctx *Context) *core.Text {
 	str := start + ExtractText(ctx) + end
 	tx := New[core.Text](ctx).SetText(str)
 	tx.Styler(textStyler)
-	tx.HandleTextClick(func(tl *paint.TextLink) {
+	tx.HandleTextClick(func(tl *ptext.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})
 	return tx

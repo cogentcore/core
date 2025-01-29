@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 )
 
@@ -28,7 +29,7 @@ type Text struct {
 	Text string `xml:"text"`
 
 	// render version of text
-	TextRender paint.Text `xml:"-" json:"-" copier:"-"`
+	TextRender ptext.Text `xml:"-" json:"-" copier:"-"`
 
 	// character positions along X axis, if specified
 	CharPosX []float32
@@ -116,7 +117,7 @@ func (g *Text) LayoutText() {
 		return
 	}
 	pc := &g.Paint
-	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnitContext) // use original size font
+	pc.FontStyle.Font = ptext.OpenFont(&pc.FontStyle, &pc.UnitContext) // use original size font
 	if pc.Fill.Color != nil {
 		pc.FontStyle.Color = pc.Fill.Color
 	}
@@ -174,7 +175,7 @@ func (g *Text) RenderText(sv *SVG) {
 	} else if pc.TextStyle.Align == styles.End || pc.TextStyle.Anchor == styles.AnchorEnd {
 		pos.X -= g.TextRender.BBox.Size().X
 	}
-	g.TextRender.Render(pc, pos)
+	pc.RenderText(&g.TextRender, pos)
 	g.LastPos = pos
 	bb := g.TextRender.BBox
 	bb.Translate(math32.Vec2(pos.X, pos.Y-0.8*pc.FontStyle.Font.Face.Metrics.Height)) // adjust for baseline

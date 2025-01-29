@@ -14,6 +14,8 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/paint/ptext"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"github.com/anthonynsimon/bild/clone"
@@ -121,7 +123,7 @@ func (pc *Painter) Close() {
 // settings present at this point, which will be used to render the path,
 // and creates a new current path.
 func (pc *Painter) PathDone() {
-	pt := &Path{Path: pc.State.Path.Clone()}
+	pt := &render.Path{Path: pc.State.Path.Clone()}
 	pt.Context.Init(pc.Paint, nil, pc.Context())
 	pc.Render.Add(pt)
 	pc.State.Path.Reset()
@@ -149,15 +151,8 @@ func (pc *Painter) Line(x1, y1, x2, y2 float32) {
 }
 
 // Polyline adds multiple connected lines, with no final Close.
-func (pc *Painter) Polyline(points []math32.Vector2) {
-	sz := len(points)
-	if sz < 2 {
-		return
-	}
-	pc.MoveTo(points[0].X, points[0].Y)
-	for i := 1; i < sz; i++ {
-		pc.LineTo(points[i].X, points[i].Y)
-	}
+func (pc *Painter) Polyline(points ...math32.Vector2) {
+	pc.State.Path = pc.State.Path.Append(ppath.Polyline(points...))
 }
 
 // Polyline adds multiple connected lines, with no final Close,
@@ -175,8 +170,8 @@ func (pc *Painter) PolylinePx(points []math32.Vector2) {
 }
 
 // Polygon adds multiple connected lines with a final Close.
-func (pc *Painter) Polygon(points []math32.Vector2) {
-	pc.Polyline(points)
+func (pc *Painter) Polygon(points ...math32.Vector2) {
+	pc.Polyline(points...)
 	pc.Close()
 }
 
@@ -579,4 +574,19 @@ func (pc *Painter) BoundingBoxFromPoints(points []math32.Vector2) image.Rectangl
 		max.SetMax(points[i])
 	}
 	return pc.BoundingBox(min.X, min.Y, max.X, max.Y)
+}
+
+/////// Text
+
+// RenderText adds given text to the rendering list, at given baseline position.
+func (pc *Painter) RenderText(tx *ptext.Text, pos math32.Vector2) {
+	tx.RenderPaths(pc.Context(), pos)
+	pc.Render.Add(tx)
+}
+
+// RenderTextTopPos adds given text to the rendering list, at given top
+// position.
+func (pc *Painter) RenderTextTopPos(tx *ptext.Text, pos math32.Vector2) {
+	tx.RenderTopPos(pc.Context(), pos)
+	pc.Render.Add(tx)
 }

@@ -11,12 +11,12 @@ import (
 	"image"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/paint/render"
 	"golang.org/x/image/vector"
 )
 
-func (r *Renderer) RenderPath(pt *paint.Path) {
+func (r *Renderer) RenderPath(pt *render.Path) {
 	if pt.Path.Empty() {
 		return
 	}
