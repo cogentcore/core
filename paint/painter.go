@@ -129,7 +129,7 @@ func (pc *Painter) PathDone() {
 	pc.State.Path.Reset()
 }
 
-// RenderDone sends the entire current Render to the renderer.
+// RenderDone sends the entire current Render to the renderers.
 // This is when the drawing actually happens: don't forget to call!
 func (pc *Painter) RenderDone() {
 	for _, rnd := range pc.Renderers {
@@ -578,15 +578,8 @@ func (pc *Painter) BoundingBoxFromPoints(points []math32.Vector2) image.Rectangl
 
 /////// Text
 
-// RenderText adds given text to the rendering list, at given baseline position.
-func (pc *Painter) RenderText(tx *ptext.Text, pos math32.Vector2) {
-	tx.RenderPaths(pc.Context(), pos)
-	pc.Render.Add(tx)
-}
-
-// RenderTextTopPos adds given text to the rendering list, at given top
-// position.
-func (pc *Painter) RenderTextTopPos(tx *ptext.Text, pos math32.Vector2) {
-	tx.RenderTopPos(pc.Context(), pos)
+// Text adds given text to the rendering list, at given baseline position.
+func (pc *Painter) Text(tx *ptext.Text, pos math32.Vector2) {
+	tx.PreRender(pc.Context(), pos)
 	pc.Render.Add(tx)
 }

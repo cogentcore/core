@@ -10,17 +10,17 @@ import (
 
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/f64"
 )
 
-// todo: need to pass the path renderer in here to get it to actually render the paths
-
 // Render actually does text rendering into given image, using all data
-// stored previously during RenderPaths.
-func (tr *Text) Render(img *image.RGBA) {
+// stored previously during PreRender, and using given renderer to draw
+// the text path decorations etc.
+func (tr *Text) Render(img *image.RGBA, rd render.Renderer) {
 	// pr := profile.Start("RenderText")
 	// defer pr.End()
 
@@ -47,7 +47,8 @@ func (tr *Text) Render(img *image.RGBA) {
 	var overFace font.Face
 	var overColor image.Image
 
-	for _, sr := range tr.Spans {
+	for si := range tr.Spans {
+		sr := &tr.Spans[si]
 		if sr.IsValid() != nil {
 			continue
 		}
@@ -80,7 +81,8 @@ func (tr *Text) Render(img *image.RGBA) {
 			Face: curFace,
 		}
 
-		// todo: call BgPaths, DecoPaths rendering here!
+		rd.Render(sr.BgPaths)
+		rd.Render(sr.DecoPaths)
 
 		for i, r := range sr.Text {
 			rr := &(sr.Render[i])
@@ -163,7 +165,7 @@ func (tr *Text) Render(img *image.RGBA) {
 				rendOverflow = true
 			}
 		}
-		// todo: do StrikePaths render here!
+		rd.Render(sr.StrikePaths)
 	}
 	tr.HasOverflow = hadOverflow
 

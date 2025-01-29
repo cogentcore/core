@@ -11,6 +11,7 @@ import (
 	"image"
 	"io"
 	"math"
+	"slices"
 	"strings"
 	"unicode/utf8"
 
@@ -69,14 +70,7 @@ func (tr *Text) IsRenderItem() {}
 
 // InsertSpan inserts a new span at given index
 func (tr *Text) InsertSpan(at int, ns *Span) {
-	sz := len(tr.Spans)
-	tr.Spans = append(tr.Spans, Span{})
-	if at > sz-1 {
-		tr.Spans[sz] = *ns
-		return
-	}
-	copy(tr.Spans[at+1:], tr.Spans[at:])
-	tr.Spans[at] = *ns
+	tr.Spans = slices.Insert(tr.Spans, at, *ns)
 }
 
 // SetString is for basic text rendering with a single style of text (see

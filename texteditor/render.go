@@ -408,7 +408,7 @@ func (ed *Editor) renderAllLines() {
 		if lp.Y+ed.fontAscent > float32(bb.Max.Y) {
 			break
 		}
-		pc.RenderText(&ed.renders[ln], lp) // not top pos; already has baseline offset
+		pc.Text(&ed.renders[ln], lp) // not top pos; already has baseline offset
 	}
 	if ed.hasLineNumbers {
 		pc.PopContext()
@@ -469,7 +469,7 @@ func (ed *Editor) renderLineNumber(ln int, defFill bool) {
 	}
 	ed.lineNumberRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
 
-	pc.RenderText(&ed.lineNumberRender, tpos)
+	pc.Text(&ed.lineNumberRender, tpos)
 
 	// render circle
 	lineColor := ed.Buffer.LineColors[ln]

@@ -175,7 +175,7 @@ func (g *Text) RenderText(sv *SVG) {
 	} else if pc.TextStyle.Align == styles.End || pc.TextStyle.Anchor == styles.AnchorEnd {
 		pos.X -= g.TextRender.BBox.Size().X
 	}
-	pc.RenderText(&g.TextRender, pos)
+	pc.Text(&g.TextRender, pos)
 	g.LastPos = pos
 	bb := g.TextRender.BBox
 	bb.Translate(math32.Vec2(pos.X, pos.Y-0.8*pc.FontStyle.Font.Face.Metrics.Height)) // adjust for baseline

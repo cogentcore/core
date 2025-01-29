@@ -1956,7 +1956,7 @@ func (tf *TextField) Render() {
 	availSz := sz.Actual.Content.Sub(icsz)
 	tf.renderVisible.SetRunes(cur, fs, &st.UnitContext, &st.Text, true, 0, 0)
 	tf.renderVisible.Layout(txs, fs, &st.UnitContext, availSz)
-	pc.RenderText(&tf.renderVisible, pos)
+	pc.Text(&tf.renderVisible, pos)
 	st.Color = prevColor
 }
 

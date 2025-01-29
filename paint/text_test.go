@@ -11,11 +11,12 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	. "cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 )
 
 func TestText(t *testing.T) {
-	size := image.Point{400, 200}
+	size := image.Point{480, 400}
 	sizef := math32.FromPoint(size)
 	RunTest(t, "text", size.X, size.Y, func(pc *Painter) {
 		pc.BlitBox(math32.Vector2{}, sizef, colors.Uniform(colors.White))
@@ -25,8 +26,8 @@ func TestText(t *testing.T) {
 		fsty.Defaults()
 		fsty.Size.Dp(60)
 
-		txt := &Text{}
-		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnitContext, nil)
+		txt := &ptext.Text{}
+		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i> with <u>underline</u> and <s>strikethrough</s>", fsty, tsty, &pc.UnitContext, nil)
 
 		tsz := txt.Layout(tsty, fsty, &pc.UnitContext, sizef)
 		_ = tsz
@@ -34,6 +35,6 @@ func TestText(t *testing.T) {
 		// 	t.Errorf("unexpected text size: %v", tsz)
 		// }
 		txt.HasOverflow = true
-		txt.Render(pc, math32.Vector2{})
+		pc.Text(txt, math32.Vector2{})
 	})
 }

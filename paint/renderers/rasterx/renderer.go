@@ -10,7 +10,6 @@ import (
 
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/ptext"
@@ -36,7 +35,7 @@ type Renderer struct {
 	ImgSpanner *scan.ImgSpanner
 }
 
-func New(size math32.Vector2, img *image.RGBA) paint.Renderer {
+func New(size math32.Vector2, img *image.RGBA) render.Renderer {
 	psz := size.ToPointCeil()
 	if img == nil {
 		img = image.NewRGBA(image.Rectangle{Max: psz})
@@ -79,7 +78,7 @@ func (rs *Renderer) Render(r render.Render) {
 		case *pimage.Params:
 			x.Render(rs.image)
 		case *ptext.Text:
-			x.Render(rs.image)
+			x.Render(rs.image, rs)
 		}
 	}
 }

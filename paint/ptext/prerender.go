@@ -13,34 +13,19 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-// RenderTopPos does RenderPaths at given top position.
-// Uses first font info to compute baseline offset and calls overall Render.
-// Convenience for simple widget rendering without layouts.
-func (tr *Text) RenderTopPos(ctx *render.Context, tpos math32.Vector2) {
-	if len(tr.Spans) == 0 {
-		return
-	}
-	sr := &(tr.Spans[0])
-	if sr.IsValid() != nil {
-		return
-	}
-	curFace := sr.Render[0].Face
-	pos := tpos
-	pos.Y += math32.FromFixed(curFace.Metrics().Ascent)
-	tr.RenderPaths(ctx, pos)
-}
-
-// RenderPaths generates the Path elements for rendering, recording given
+// PreRender performs pre-rendering steps based on a fully-configured
+// Text layout. It generates the Path elements for rendering, recording given
 // absolute position offset (specifying position of text baseline).
 // Any applicable transforms (aside from the char-specific rotation in Render)
 // must be applied in advance in computing the relative positions of the
 // runes, and the overall font size, etc.
-func (tr *Text) RenderPaths(ctx *render.Context, pos math32.Vector2) {
+func (tr *Text) PreRender(ctx *render.Context, pos math32.Vector2) {
 	// ctx.Transform = math32.Identity2()
 	tr.Context = *ctx
 	tr.RenderPos = pos
 
-	for _, sr := range tr.Spans {
+	for si := range tr.Spans {
+		sr := &tr.Spans[si]
 		if sr.IsValid() != nil {
 			continue
 		}

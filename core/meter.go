@@ -161,7 +161,7 @@ func (m *Meter) Render() {
 			pc.PathDone()
 		}
 		if txt != nil {
-			pc.RenderText(txt, c.Sub(toff))
+			pc.Text(txt, c.Sub(toff))
 		}
 		return
 	}
@@ -179,6 +179,6 @@ func (m *Meter) Render() {
 		pc.PathDone()
 	}
 	if txt != nil {
-		pc.RenderText(txt, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))
+		pc.Text(txt, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))
 	}
 }

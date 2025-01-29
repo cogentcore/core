@@ -17,14 +17,14 @@ import (
 )
 
 // NewDefaultImageRenderer is a function that returns the default image renderer
-var NewDefaultImageRenderer func(size math32.Vector2, img *image.RGBA) Renderer
+var NewDefaultImageRenderer func(size math32.Vector2, img *image.RGBA) render.Renderer
 
 // The State holds all the current rendering state information used
 // while painting. The [Paint] embeds a pointer to this.
 type State struct {
 
 	// Renderers are the current renderers.
-	Renderers []Renderer
+	Renderers []render.Renderer
 
 	// Stack provides the SVG "stacking context" as a stack of [Context]s.
 	// There is always an initial base-level Context element for the overall

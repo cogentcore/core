@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package paint
+package render
 
 import (
 	"image"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -40,7 +39,7 @@ type Renderer interface {
 	SetSize(un units.Units, size math32.Vector2, img *image.RGBA)
 
 	// Render renders the list of render items.
-	Render(r render.Render)
+	Render(r Render)
 }
 
 // Registry of renderers

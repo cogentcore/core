@@ -15,7 +15,9 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	. "cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/renderers/rasterx"
+	"cogentcore.org/core/paint/ptext"
+	"cogentcore.org/core/paint/render"
+	"cogentcore.org/core/paint/renderers/rasterizer"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
@@ -23,9 +25,9 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	FontLibrary.InitFontPaths(FontPaths...)
-	NewDefaultImageRenderer = rasterx.New
-	// NewDefaultImageRenderer = rasterizer.New
+	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
+	// NewDefaultImageRenderer = rasterx.New
+	NewDefaultImageRenderer = rasterizer.New
 	os.Exit(m.Run())
 }
 
@@ -82,7 +84,7 @@ func TestRender(t *testing.T) {
 
 		tsty.Align = styles.Center
 
-		txt := &Text{}
+		txt := &ptext.Text{}
 		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnitContext, nil)
 
 		tsz := txt.Layout(tsty, fsty, &pc.UnitContext, math32.Vec2(100, 60))
@@ -90,7 +92,7 @@ func TestRender(t *testing.T) {
 			t.Errorf("unexpected text size: %v", tsz)
 		}
 
-		txt.Render(pc, math32.Vec2(85, 80))
+		pc.Text(txt, math32.Vec2(85, 80))
 	})
 }
 
@@ -137,7 +139,7 @@ func TestPaintPath(t *testing.T) {
 		pc.RoundedRectangleSides(50, 50, 100, 80, sides.NewFloats(10.0, 20.0, 15.0, 5.0))
 	})
 	test("clip-bounds", func(pc *Painter) {
-		pc.PushContext(pc.Paint, NewBounds(50, 50, 100, 80, sides.NewFloats(5.0, 10.0, 15.0, 20.0)))
+		pc.PushContext(pc.Paint, render.NewBounds(50, 50, 100, 80, sides.NewFloats(5.0, 10.0, 15.0, 20.0)))
 		pc.RoundedRectangleSides(50, 50, 100, 80, sides.NewFloats(10.0, 20.0, 15.0, 5.0))
 		pc.PathDone()
 		pc.PopContext()
