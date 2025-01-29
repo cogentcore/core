@@ -220,12 +220,12 @@ func (fr *Frame) RenderChildren() {
 }
 
 func (fr *Frame) RenderWidget() {
-	if fr.PushBounds() {
+	if fr.StartRender() {
 		fr.This.(Widget).Render()
 		fr.RenderChildren()
 		fr.renderParts()
 		fr.RenderScrolls()
-		fr.PopBounds()
+		fr.EndRender()
 	}
 }
 

@@ -404,7 +404,7 @@ func (wb *WidgetBase) parentWidget() *WidgetBase {
 // to the [states.Invisible] flag on it or any of its parents.
 // This flag is also set by [styles.DisplayNone] during [WidgetBase.Style].
 // This does *not* check for an empty TotalBBox, indicating that the widget
-// is out of render range; that is done by [WidgetBase.PushBounds] prior to rendering.
+// is out of render range; that is done by [WidgetBase.StartRender] prior to rendering.
 // Non-visible nodes are automatically not rendered and do not get
 // window events.
 // This call recursively calls the parent, which is typically a short path.

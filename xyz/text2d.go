@@ -159,7 +159,7 @@ func (txt *Text2D) RenderText() {
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {
 		rs.Init(szpt.X, szpt.Y, img)
 	}
-	rs.PushBounds(bounds)
+	rs.StartRender(bounds)
 	pt := styles.Paint{}
 	pt.Defaults()
 	pt.FromStyle(st)

@@ -299,12 +299,11 @@ func (sc *Scene) contentSize(initSz image.Point) image.Point {
 
 //////// Widget local rendering
 
-// PushBounds pushes our bounding box bounds onto the bounds stack
-// if they are non-empty. This automatically limits our drawing to
-// our own bounding box. This must be called as the first step in
-// Render implementations. It returns whether the new bounds are
-// empty or not; if they are empty, then don't render.
-func (wb *WidgetBase) PushBounds() bool {
+// StartRender starts the rendering process in the Painter, if the
+// widget is visible, otherwise it returns false.
+// It pushes our context and bounds onto the render stack.
+// This must be called as the first step in Render implementations.
+func (wb *WidgetBase) StartRender() bool {
 	if wb == nil || wb.This == nil {
 		return false
 	}
@@ -320,28 +319,28 @@ func (wb *WidgetBase) PushBounds() bool {
 	}
 	wb.Styles.ComputeActualBackground(wb.parentActualBackground())
 	pc := &wb.Scene.Painter
-	if pc.State == nil || pc.Image == nil {
+	if pc.State == nil {
 		return false
 	}
 	if len(pc.Stack) == 0 && wb.Parent != nil {
 		wb.setFlag(true, widgetFirstRender)
 		// push our parent's bounds if we are the first to render
 		pw := wb.parentWidget()
-		pc.PushContext(nil, paint.NewBounds(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+		pc.PushContext(nil, paint.NewBoundsRect(pw.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
 	} else {
 		wb.setFlag(false, widgetFirstRender)
 	}
-	pc.PushContext(nil, paint.NewBounds(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
-	pc.Defaults() // start with default values
+	pc.PushContext(nil, paint.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+	pc.Paint.Defaults() // start with default style values
 	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
 	}
 	return true
 }
 
-// PopBounds pops our bounding box bounds. This is the last step
-// in Render implementations after rendering children.
-func (wb *WidgetBase) PopBounds() {
+// EndRender is the last step in Render implementations after
+// rendering children. It pops our state off of the render stack.
+func (wb *WidgetBase) EndRender() {
 	if wb == nil || wb.This == nil {
 		return
 	}
@@ -399,11 +398,11 @@ func (wb *WidgetBase) Render() {
 // It does not render if the widget is invisible. It calls Widget.Render]
 // for widget-specific rendering.
 func (wb *WidgetBase) RenderWidget() {
-	if wb.PushBounds() {
+	if wb.StartRender() {
 		wb.This.(Widget).Render()
 		wb.renderChildren()
 		wb.renderParts()
-		wb.PopBounds()
+		wb.EndRender()
 	}
 }
 

@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 // function, and then asserts the image using [imagex.Assert] with the given name.
 func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)) {
 	pc := NewPainter(width, height)
-	// pc.PushBounds(pc.Image.Rect)
+	// pc.StartRender(pc.Image.Rect)
 	f(pc)
 	imagex.Assert(t, pc.Image, nm)
 }

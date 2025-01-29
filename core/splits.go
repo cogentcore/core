@@ -874,13 +874,13 @@ func (sl *Splits) Position() {
 }
 
 func (sl *Splits) RenderWidget() {
-	if sl.PushBounds() {
+	if sl.StartRender() {
 		sl.ForWidgetChildren(func(i int, kwi Widget, cwb *WidgetBase) bool {
 			cwb.SetState(sl.ChildIsCollapsed(i), states.Invisible)
 			kwi.RenderWidget()
 			return tree.Continue
 		})
 		sl.renderParts()
-		sl.PopBounds()
+		sl.EndRender()
 	}
 }

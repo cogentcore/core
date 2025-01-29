@@ -649,7 +649,7 @@ func (tr *Tree) Render() {
 }
 
 func (tr *Tree) RenderWidget() {
-	if tr.PushBounds() {
+	if tr.StartRender() {
 		tr.Render()
 		if tr.Parts != nil {
 			// we must copy from actual values in parent
@@ -659,9 +659,9 @@ func (tr *Tree) RenderWidget() {
 			}
 			tr.renderParts()
 		}
-		tr.PopBounds()
+		tr.EndRender()
 	}
-	// We have to render our children outside of `if PushBounds`
+	// We have to render our children outside of `if StartRender`
 	// since we could be out of scope but they could still be in!
 	if !tr.Closed {
 		tr.renderChildren()

@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/texteditor/text"
 )
@@ -39,7 +40,7 @@ func (ed *Editor) renderLayout() {
 }
 
 func (ed *Editor) RenderWidget() {
-	if ed.PushBounds() {
+	if ed.StartRender() {
 		if ed.needsLayout {
 			ed.renderLayout()
 			ed.needsLayout = false
@@ -56,7 +57,7 @@ func (ed *Editor) RenderWidget() {
 		}
 		ed.RenderChildren()
 		ed.RenderScrolls()
-		ed.PopBounds()
+		ed.EndRender()
 	} else {
 		ed.stopCursor()
 	}
@@ -351,7 +352,7 @@ func (ed *Editor) renderRegionToEnd(st lexer.Pos, sty *styles.Style, bg image.Im
 }
 
 // renderAllLines displays all the visible lines on the screen,
-// after PushBounds has already been called.
+// after StartRender has already been called.
 func (ed *Editor) renderAllLines() {
 	ed.RenderStandardBox()
 	pc := &ed.Scene.Painter
@@ -380,7 +381,7 @@ func (ed *Editor) renderAllLines() {
 	if stln < 0 || edln < 0 { // shouldn't happen.
 		return
 	}
-	pc.PushBounds(bb)
+	pc.PushContext(nil, paint.NewBoundsRect(bb, sides.NewFloats()))
 
 	if ed.hasLineNumbers {
 		ed.renderLineNumbersBoxAll()
@@ -396,7 +397,7 @@ func (ed *Editor) renderAllLines() {
 	if ed.hasLineNumbers {
 		tbb := bb
 		tbb.Min.X += int(ed.LineNumberOffset)
-		pc.PushBounds(tbb)
+		pc.PushContext(nil, paint.NewBoundsRect(tbb, sides.NewFloats()))
 	}
 	for ln := stln; ln <= edln; ln++ {
 		lst := pos.Y + ed.offsets[ln]
@@ -409,9 +410,9 @@ func (ed *Editor) renderAllLines() {
 		ed.renders[ln].Render(pc, lp) // not top pos; already has baseline offset
 	}
 	if ed.hasLineNumbers {
-		pc.PopBounds()
+		pc.PopContext()
 	}
-	pc.PopBounds()
+	pc.PopContext()
 }
 
 // renderLineNumbersBoxAll renders the background for the line numbers in the LineNumberColor
@@ -427,7 +428,7 @@ func (ed *Editor) renderLineNumbersBoxAll() {
 
 	sz := epos.Sub(spos)
 	pc.Fill.Color = ed.LineNumberColor
-	pc.DrawRoundedRectangle(spos.X, spos.Y, sz.X, sz.Y, ed.Styles.Border.Radius.Dots())
+	pc.RoundedRectangleSides(spos.X, spos.Y, sz.X, sz.Y, ed.Styles.Border.Radius.Dots())
 	pc.PathDone()
 }
 
@@ -494,7 +495,7 @@ func (ed *Editor) renderLineNumber(ln int, defFill bool) {
 		r /= 2
 
 		pc.Fill.Color = lineColor
-		pc.DrawCircle(center.X, center.Y, r)
+		pc.Circle(center.X, center.Y, r)
 		pc.PathDone()
 	}
 }

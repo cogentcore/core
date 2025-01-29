@@ -148,6 +148,7 @@ func (pc *Painter) Line(x1, y1, x2, y2 float32) {
 	pc.LineTo(x2, y2)
 }
 
+// Polyline adds multiple connected lines, with no final Close.
 func (pc *Painter) Polyline(points []math32.Vector2) {
 	sz := len(points)
 	if sz < 2 {
@@ -159,7 +160,9 @@ func (pc *Painter) Polyline(points []math32.Vector2) {
 	}
 }
 
-func (pc *Painter) PolylinePxToDots(points []math32.Vector2) {
+// Polyline adds multiple connected lines, with no final Close,
+// with coordinates in Px units.
+func (pc *Painter) PolylinePx(points []math32.Vector2) {
 	pu := &pc.UnitContext
 	sz := len(points)
 	if sz < 2 {
@@ -171,37 +174,17 @@ func (pc *Painter) PolylinePxToDots(points []math32.Vector2) {
 	}
 }
 
+// Polygon adds multiple connected lines with a final Close.
 func (pc *Painter) Polygon(points []math32.Vector2) {
 	pc.Polyline(points)
 	pc.Close()
 }
 
-func (pc *Painter) PolygonPxToDots(points []math32.Vector2) {
-	pc.PolylinePxToDots(points)
+// Polygon adds multiple connected lines with a final Close,
+// with coordinates in Px units.
+func (pc *Painter) PolygonPx(points []math32.Vector2) {
+	pc.PolylinePx(points)
 	pc.Close()
-}
-
-// Arc adds a circular arc with radius r and theta0 and theta1 as the angles
-// in degrees of the ellipse (before rot is applied) between which the arc
-// will run. If theta0 < theta1, the arc will run in a CCW direction.
-// If the difference between theta0 and theta1 is bigger than 360 degrees,
-// one full circle will be drawn and the remaining part of diff % 360,
-// e.g. a difference of 810 degrees will draw one full circle and an arc
-// over 90 degrees.
-func (pc *Painter) Arc(r, theta0, theta1 float32) {
-	pc.EllipticalArc(r, r, 0.0, theta0, theta1)
-}
-
-// EllipticalArc returns an elliptical arc with radii rx and ry, with rot
-// the counter clockwise rotation in degrees, and theta0 and theta1 the
-// angles in degrees of the ellipse (before rot is applied) between which
-// the arc will run. If theta0 < theta1, the arc will run in a CCW direction.
-// If the difference between theta0 and theta1 is bigger than 360 degrees,
-// one full circle will be drawn and the remaining part of diff % 360,
-// e.g. a difference of 810 degrees will draw one full circle and an arc
-// over 90 degrees.
-func (pc *Painter) EllipticalArc(rx, ry, rot, theta0, theta1 float32) {
-	pc.State.Path.ArcDeg(rx, ry, rot, theta0, theta1)
 }
 
 // Rectangle adds a rectangle of width w and height h at position x,y.
@@ -216,7 +199,7 @@ func (pc *Painter) RoundedRectangle(x, y, w, h, r float32) {
 	pc.State.Path = pc.State.Path.Append(path.RoundedRectangle(x, y, w, h, r))
 }
 
-// RoundedRectangleSides draws a standard rounded rectangle
+// RoundedRectangleSides adds a standard rounded rectangle
 // with a consistent border and with the given x and y position,
 // width and height, and border radius for each corner.
 func (pc *Painter) RoundedRectangleSides(x, y, w, h float32, r sides.Floats) {
@@ -229,14 +212,39 @@ func (pc *Painter) BeveledRectangle(x, y, w, h, r float32) {
 	pc.State.Path = pc.State.Path.Append(path.BeveledRectangle(x, y, w, h, r))
 }
 
-// Circle adds a circle of radius r.
-func (pc *Painter) Circle(x, y, r float32) {
-	pc.Ellipse(x, y, r, r)
+// Circle adds a circle at given center coordinates of radius r.
+func (pc *Painter) Circle(cx, cy, r float32) {
+	pc.Ellipse(cx, cy, r, r)
 }
 
-// Ellipse adds an ellipse of radii rx and ry.
-func (pc *Painter) Ellipse(x, y, rx, ry float32) {
-	pc.State.Path = pc.State.Path.Append(path.Ellipse(x, y, rx, ry))
+// Ellipse adds an ellipse at given center coordinates of radii rx and ry.
+func (pc *Painter) Ellipse(cx, cy, rx, ry float32) {
+	pc.State.Path = pc.State.Path.Append(path.Ellipse(cx, cy, rx, ry))
+}
+
+// Arc adds a circular arc at given center coordinates with radius r
+// and theta0 and theta1 as the angles in degrees of the ellipse
+// (before rot is applied) between which the arc will run.
+// If theta0 < theta1, the arc will run in a CCW direction.
+// If the difference between theta0 and theta1 is bigger than 360 degrees,
+// one full circle will be drawn and the remaining part of diff % 360,
+// e.g. a difference of 810 degrees will draw one full circle and an arc
+// over 90 degrees.
+func (pc *Painter) Arc(cx, cy, r, theta0, theta1 float32) {
+	pc.EllipticalArc(cx, cy, r, r, 0.0, theta0, theta1)
+}
+
+// EllipticalArc adds an elliptical arc at given center coordinates with
+// radii rx and ry, with rot the counter clockwise rotation in degrees,
+// and theta0 and theta1 the angles in degrees of the ellipse
+// (before rot is applied) between which the arc will run.
+// If theta0 < theta1, the arc will run in a CCW direction.
+// If the difference between theta0 and theta1 is bigger than 360 degrees,
+// one full circle will be drawn and the remaining part of diff % 360,
+// e.g. a difference of 810 degrees will draw one full circle and an arc
+// over 90 degrees.
+func (pc *Painter) EllipticalArc(cx, cy, rx, ry, rot, theta0, theta1 float32) {
+	pc.EllipticalArc(cx, cy, rx, ry, rot, theta0, theta1)
 }
 
 // Triangle adds a triangle of radius r pointing upwards.

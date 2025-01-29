@@ -33,6 +33,11 @@ func NewBounds(x, y, w, h float32, radius sides.Floats) *Bounds {
 	return &Bounds{Rect: math32.B2(x, y, x+w, y+h), Radius: radius}
 }
 
+func NewBoundsRect(rect image.Rectangle, radius sides.Floats) *Bounds {
+	sz := rect.Size()
+	return NewBounds(float32(rect.Min.X), float32(rect.Min.Y), float32(sz.X), float32(sz.Y), radius)
+}
+
 // Context contains all of the rendering constraints / filters / masks
 // that are applied to elements being rendered.
 // For SVG compliant rendering, we need a stack of these Context elements
@@ -68,6 +73,9 @@ type Context struct {
 // NewContext returns a new Context using given paint style, bounds, and
 // parent Context. See [Context.Init] for details.
 func NewContext(sty *styles.Paint, bounds *Bounds, parent *Context) *Context {
+	if sty == nil {
+		sty = styles.NewPaint()
+	}
 	ctx := &Context{Style: *sty}
 	ctx.Init(sty, bounds, parent)
 	return ctx

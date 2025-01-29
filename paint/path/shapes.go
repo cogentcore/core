@@ -24,31 +24,6 @@ func Line(x1, y1, x2, y2 float32) Path {
 	return p
 }
 
-// Arc returns a circular arc with radius r and theta0 and theta1 as the angles
-// in degrees of the ellipse (before rot is applied) between which the arc
-// will run. If theta0 < theta1, the arc will run in a CCW direction.
-// If the difference between theta0 and theta1 is bigger than 360 degrees,
-// one full circle will be drawn and the remaining part of diff % 360,
-// e.g. a difference of 810 degrees will draw one full circle and an arc
-// over 90 degrees.
-func Arc(r, theta0, theta1 float32) Path {
-	return EllipticalArc(r, r, 0.0, theta0, theta1)
-}
-
-// EllipticalArc returns an elliptical arc with radii rx and ry, with rot
-// the counter clockwise rotation in degrees, and theta0 and theta1 the
-// angles in degrees of the ellipse (before rot is applies) between which
-// the arc will run. If theta0 < theta1, the arc will run in a CCW direction.
-// If the difference between theta0 and theta1 is bigger than 360 degrees,
-// one full circle will be drawn and the remaining part of diff % 360,
-// e.g. a difference of 810 degrees will draw one full circle and an arc
-// over 90 degrees.
-func EllipticalArc(rx, ry, rot, theta0, theta1 float32) Path {
-	p := Path{}
-	p.ArcDeg(rx, ry, rot, theta0, theta1)
-	return p
-}
-
 // Rectangle returns a rectangle of width w and height h.
 func Rectangle(x, y, w, h float32) Path {
 	if Equal(w, 0.0) || Equal(h, 0.0) {
@@ -159,22 +134,50 @@ func BeveledRectangle(x, y, w, h, r float32) Path {
 	return p
 }
 
-// Circle returns a circle of radius r.
-func Circle(x, y, r float32) Path {
-	return Ellipse(x, y, r, r)
+// Circle returns a circle at given center coordinates of radius r.
+func Circle(cx, cy, r float32) Path {
+	return Ellipse(cx, cy, r, r)
 }
 
-// Ellipse returns an ellipse of radii rx and ry.
-func Ellipse(x, y, rx, ry float32) Path {
+// Ellipse returns an ellipse at given center coordinates of radii rx and ry.
+func Ellipse(cx, cy, rx, ry float32) Path {
 	if Equal(rx, 0.0) || Equal(ry, 0.0) {
 		return Path{}
 	}
 
 	p := Path{}
-	p.MoveTo(x+rx, y)
-	p.ArcTo(rx, ry, 0.0, false, true, x-rx, y)
-	p.ArcTo(rx, ry, 0.0, false, true, x+rx, y)
+	p.MoveTo(cx+rx, cy)
+	p.ArcTo(rx, ry, 0.0, false, true, cx-rx, cy)
+	p.ArcTo(rx, ry, 0.0, false, true, cx+rx, cy)
 	p.Close()
+	return p
+}
+
+// Arc returns a circular arc at given center coordinates with radius r
+// and theta0 and theta1 as the angles in degrees of the ellipse
+// (before rot is applied) between which the arc will run.
+// If theta0 < theta1, the arc will run in a CCW direction.
+// If the difference between theta0 and theta1 is bigger than 360 degrees,
+// one full circle will be drawn and the remaining part of diff % 360,
+// e.g. a difference of 810 degrees will draw one full circle and an arc
+// over 90 degrees.
+func Arc(cx, cy, r, theta0, theta1 float32) Path {
+	return EllipticalArc(cx, cy, r, r, 0.0, theta0, theta1)
+}
+
+// EllipticalArc returns an elliptical arc at given center coordinates with
+// radii rx and ry, with rot the counter clockwise rotation in degrees,
+// and theta0 and theta1 the angles in degrees of the ellipse
+// (before rot is applied) between which the arc will run.
+// If theta0 < theta1, the arc will run in a CCW direction.
+// If the difference between theta0 and theta1 is bigger than 360 degrees,
+// one full circle will be drawn and the remaining part of diff % 360,
+// e.g. a difference of 810 degrees will draw one full circle and an arc
+// over 90 degrees.
+func EllipticalArc(cx, cy, rx, ry, rot, theta0, theta1 float32) Path {
+	p := Path{}
+	p.MoveTo(cx+rx, cy)
+	p.ArcDeg(rx, ry, rot, theta0, theta1)
 	return p
 }
 
