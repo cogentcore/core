@@ -128,7 +128,7 @@ func (w *Window) newGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen)
 // Screen gets the screen of the window, computing various window parameters.
 func (w *Window) Screen() *system.Screen {
 	if w == nil || w.Glw == nil {
-		return TheApp.Screens[0] // cool guys do not look aat panics
+		return TheApp.Screens[0] // cool guys do not look at panics
 	}
 
 	w.Mu.Lock()
