@@ -288,6 +288,7 @@ func (a Matrix2) Inverse() Matrix2 {
 	return b
 }
 
+// mapping onto canvas, [col][row] matrix:
 // m[0][0] = XX
 // m[1][0] = YX
 // m[0][1] = XY

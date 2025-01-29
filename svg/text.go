@@ -197,7 +197,7 @@ func (g *Text) Render(sv *SVG) {
 
 		rs.PopContext()
 	} else {
-		vis, rs := g.IsVisible(sv)
+		vis, _ := g.IsVisible(sv)
 		if !vis {
 			return
 		}

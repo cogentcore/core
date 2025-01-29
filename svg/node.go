@@ -392,8 +392,9 @@ func (g *NodeBase) LocalBBoxToWin(bb math32.Box2) image.Rectangle {
 }
 
 func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {
-	rs := &sv.RenderState
-	return rs.LastRenderBBox
+	// rs := &sv.RenderState
+	// return rs.LastRenderBBox // todo!
+	return image.Rectangle{Max: image.Point{100, 100}}
 }
 
 func (g *NodeBase) SetNodePos(pos math32.Vector2) {
@@ -435,18 +436,15 @@ func (g *NodeBase) IsVisible(sv *SVG) (bool, *paint.Painter) {
 		return false, nil
 	}
 	ni := g.This.(Node)
-	// if g.IsInvisible() { // just the Invisible flag
-	// 	return false, nil
-	// }
 	lbb := ni.LocalBBox()
 	g.BBox = g.LocalBBoxToWin(lbb)
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 	nvis := g.VisBBox == image.Rectangle{}
-	// g.SetInvisibleState(nvis) // don't set
 
-	if nvis && !g.isDef {
-		return false, nil
-	}
+	_ = nvis
+	// if nvis && !g.isDef {
+	// 	return false, nil
+	// }
 	pc := &paint.Painter{&sv.RenderState, &g.Paint}
 	return true, pc
 }

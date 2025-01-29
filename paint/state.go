@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/paint/path"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
+	"cogentcore.org/core/styles/units"
 )
 
 // NewDefaultImageRenderer is a function that returns the default image renderer
@@ -39,15 +40,32 @@ type State struct {
 	Image *image.RGBA
 }
 
-// InitImageRaster initializes the [State] with the default image-based
-// rasterizing renderer, using the given overall styles, size, and image.
-// It must be called whenever the image size changes.
+// InitImageRaster initializes the [State] and ensures that there is
+// at least one image-based renderer present, creating the default type if not,
+// using the [NewDefaultImageRenderer] function.
+// If renderers exist, then the size is updated for any image-based ones.
+// This must be called whenever the image size changes. Image may be nil
+// if an existing render target is not to be used.
 func (rs *State) InitImageRaster(sty *styles.Paint, width, height int, img *image.RGBA) {
 	sz := math32.Vec2(float32(width), float32(height))
-	rast := NewDefaultImageRenderer(sz, img)
-	rs.Renderers = append(rs.Renderers, rast)
-	rs.Stack = []*Context{NewContext(sty, NewBounds(0, 0, float32(width), float32(height), sides.Floats{}), nil)}
-	rs.Image = img
+	if len(rs.Renderers) == 0 {
+		rd := NewDefaultImageRenderer(sz, img)
+		rs.Renderers = append(rs.Renderers, rd)
+		rs.Stack = []*Context{NewContext(sty, NewBounds(0, 0, float32(width), float32(height), sides.Floats{}), nil)}
+		rs.Image = rd.Image()
+		return
+	}
+	gotImage := false
+	for _, rd := range rs.Renderers {
+		if !rd.IsImage() {
+			continue
+		}
+		rd.SetSize(units.UnitDot, sz, img)
+		if !gotImage {
+			rs.Image = rd.Image()
+			gotImage = true
+		}
+	}
 }
 
 // Context() returns the currently active [Context] state (top of Stack).

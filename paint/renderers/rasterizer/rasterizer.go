@@ -8,6 +8,7 @@
 package rasterizer
 
 import (
+	"fmt"
 	"image"
 
 	"cogentcore.org/core/math32"
@@ -25,7 +26,7 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 	var fill, stroke path.Path
 	var bounds math32.Box2
 	if sty.HasFill() {
-		fill = pt.Path.Clone() // .Transform(pc.Transform)
+		fill = pt.Path.Clone().Transform(pc.Transform)
 		if len(pc.Bounds.Path) > 0 {
 			fill = fill.And(pc.Bounds.Path)
 		}
@@ -37,12 +38,13 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 	if sty.HasStroke() {
 		tolerance := path.PixelTolerance
 		stroke = pt.Path
-		if 0 < len(sty.Stroke.Dashes) {
+		if len(sty.Stroke.Dashes) > 0 {
 			dashOffset, dashes := path.ScaleDash(sty.Stroke.Width.Dots, sty.Stroke.DashOffset, sty.Stroke.Dashes)
 			stroke = stroke.Dash(dashOffset, dashes...)
 		}
+		fmt.Println(sty.Stroke.Width.Dots, sty.Stroke.Width)
 		stroke = stroke.Stroke(sty.Stroke.Width.Dots, path.CapFromStyle(sty.Stroke.Cap), path.JoinFromStyle(sty.Stroke.Join), tolerance)
-		// stroke = stroke.Transform(pc.Transform)
+		stroke = stroke.Transform(pc.Transform)
 		if len(pc.Bounds.Path) > 0 {
 			stroke = stroke.And(pc.Bounds.Path)
 		}
@@ -57,7 +59,7 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 	}
 
 	dx, dy := 0, 0
-	ib := r.Image.Bounds()
+	ib := r.image.Bounds()
 	w := ib.Size().X
 	h := ib.Size().Y
 	// todo: could optimize by setting rasterizer only to the size to be rendered,
@@ -80,7 +82,7 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 
 		r.ras.Reset(w, h)
 		ToRasterizer(fill, r.ras)
-		r.ras.Draw(r.Image, r.Image.Bounds(), sty.Fill.Color, image.Point{dx, dy})
+		r.ras.Draw(r.image, ib, sty.Fill.Color, image.Point{dx, dy})
 	}
 	if sty.HasStroke() {
 		// if sty.Stroke.IsPattern() {
@@ -92,7 +94,7 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 
 		r.ras.Reset(w, h)
 		ToRasterizer(stroke, r.ras)
-		r.ras.Draw(r.Image, r.Image.Bounds(), sty.Stroke.Color, image.Point{dx, dy})
+		r.ras.Draw(r.image, ib, sty.Stroke.Color, image.Point{dx, dy})
 	}
 }
 

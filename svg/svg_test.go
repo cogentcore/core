@@ -25,9 +25,9 @@ func TestSVG(t *testing.T) {
 	files := fsx.Filenames(dir, ".svg")
 
 	for _, fn := range files {
-		// if fn != "zoom-in.svg" {
-		// 	continue
-		// }
+		if fn != "unit-line-widths.svg" {
+			continue
+		}
 		sv := NewSVG(640, 480)
 		svfn := filepath.Join(dir, fn)
 		err := sv.OpenXML(svfn)
@@ -89,15 +89,15 @@ func TestCoreLogo(t *testing.T) {
 	core := hct.New(hctOuter.Hue+180, hctOuter.Chroma, hctOuter.Tone+40) // #FBBD0E
 
 	x := float32(0.53)
-	sw := float32(0.27)
+	// sw := float32(0.27)
 
-	o := NewPath(sv.Root)
-	o.SetProperty("stroke", colors.AsHex(colors.ToUniform(outer)))
-	o.SetProperty("stroke-width", sw)
-	o.SetProperty("fill", "none")
-	o.AddPath(PcM, x, 0.5)
-	o.AddPathArc(0.35, 30, 330)
-	o.UpdatePathString()
+	// o := NewPath(sv.Root)
+	// o.SetProperty("stroke", colors.AsHex(colors.ToUniform(outer)))
+	// o.SetProperty("stroke-width", sw)
+	// o.SetProperty("fill", "none")
+	// o.AddPath(PcM, x, 0.5)
+	// o.AddPathArc(0.35, 30, 330)
+	// o.UpdatePathString()
 
 	c := NewCircle(sv.Root)
 	c.Pos.Set(x, 0.5)

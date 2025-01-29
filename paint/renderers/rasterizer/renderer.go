@@ -13,31 +13,43 @@ import (
 	"golang.org/x/image/vector"
 )
 
-// Renderer is the overall renderer for rasterizer.
 type Renderer struct {
-	// Size is the size of the render target.
-	Size math32.Vector2
-
-	// Image is the image we are rendering to.
-	Image *image.RGBA
-
-	ras *vector.Rasterizer // reuse
+	size  math32.Vector2
+	image *image.RGBA
+	ras   *vector.Rasterizer
 }
 
-// New returns a new rasterx Renderer, rendering to given image.
 func New(size math32.Vector2, img *image.RGBA) paint.Renderer {
-	rs := &Renderer{Size: size, Image: img}
-	// psz := size.ToPointCeil()
+	psz := size.ToPointCeil()
+	if img == nil {
+		img = image.NewRGBA(image.Rectangle{Max: psz})
+	}
+	rs := &Renderer{size: size, image: img}
 	rs.ras = &vector.Rasterizer{}
 	return rs
 }
 
-// RenderSize returns the size of the render target, in dots (pixels).
-func (rs *Renderer) RenderSize() (units.Units, math32.Vector2) {
-	return units.UnitDot, rs.Size
+func (rs *Renderer) IsImage() bool      { return true }
+func (rs *Renderer) Image() *image.RGBA { return rs.image }
+func (rs *Renderer) Code() []byte       { return nil }
+
+func (rs *Renderer) Size() (units.Units, math32.Vector2) {
+	return units.UnitDot, rs.size
 }
 
-// Render is the main rendering function.
+func (rs *Renderer) SetSize(un units.Units, size math32.Vector2, img *image.RGBA) {
+	if rs.size == size {
+		return
+	}
+	rs.size = size
+	if img != nil {
+		rs.image = img
+		return
+	}
+	psz := size.ToPointCeil()
+	rs.image = image.NewRGBA(image.Rectangle{Max: psz})
+}
+
 func (rs *Renderer) Render(r paint.Render) {
 	for _, ri := range r {
 		switch x := ri.(type) {

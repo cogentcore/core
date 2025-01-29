@@ -8,6 +8,7 @@ import (
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -21,7 +22,7 @@ type Rect struct {
 	// size of the rectangle
 	Size math32.Vector2 `xml:"{width,height}"`
 
-	// radii for curved corners, as a proportion of width, height
+	// radii for curved corners. only rx is used for now.
 	Radius math32.Vector2 `xml:"{rx,ry}"`
 }
 
@@ -63,8 +64,9 @@ func (g *Rect) Render(sv *SVG) {
 		pc.Rectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
 		// todo: only supports 1 radius right now -- easy to add another
-		// SidesTODO: also support different radii for each corner
-		pc.RoundedRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, styles.NewSideFloats(g.Radius.X))
+		// the Painter also support different radii for each corner but not rx, ry at this point,
+		// although that would be easy to add TODO:
+		pc.RoundedRectangleSides(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, sides.NewFloats(g.Radius.X))
 	}
 	pc.PathDone()
 	g.BBoxes(sv)

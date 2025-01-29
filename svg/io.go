@@ -875,7 +875,7 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 	switch nd := n.(type) {
 	case *Path:
 		nm = "path"
-		nd.DataStr = PathDataString(nd.Data)
+		nd.DataStr = nd.Data.ToSVG()
 		XMLAddAttr(&se.Attr, "d", nd.DataStr)
 	case *Group:
 		nm = "g"

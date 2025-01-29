@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
@@ -106,11 +107,11 @@ func (sv *SVG) Config(width, height int) {
 	sv.Geom.Size = sz
 	sv.Scale = 1
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	sv.RenderState.Init(width, height, sv.Pixels)
 	sv.Root = NewRoot()
 	sv.Root.SetName("svg")
 	sv.Defs = NewGroup()
 	sv.Defs.SetName("defs")
+	sv.RenderState.InitImageRaster(&sv.Root.Paint, width, height, sv.Pixels)
 }
 
 // Resize resizes the viewport, creating a new image -- updates Geom Size
@@ -130,7 +131,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 		}
 	}
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-	sv.RenderState.Init(nwsz.X, nwsz.Y, sv.Pixels)
+	sv.RenderState.InitImageRaster(&sv.Root.Paint, nwsz.X, nwsz.Y, sv.Pixels)
 	sv.Geom.Size = nwsz // make sure
 }
 
@@ -206,13 +207,12 @@ func (sv *SVG) Render() {
 	sv.Style()
 	sv.SetRootTransform()
 
-	rs := &sv.RenderState
-	rs.PushBounds(sv.Pixels.Bounds())
 	if sv.Background != nil {
 		sv.FillViewport()
 	}
 	sv.Root.Render(sv)
-	rs.PopBounds()
+	pc := &paint.Painter{&sv.RenderState, &sv.Root.Paint}
+	pc.RenderDone() // actually render..
 	sv.RenderMu.Unlock()
 	sv.IsRendering = false
 }

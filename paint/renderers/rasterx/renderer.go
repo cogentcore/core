@@ -16,13 +16,9 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// Renderer is the overall renderer for rasterx.
 type Renderer struct {
-	// Size is the size of the render target.
-	Size math32.Vector2
-
-	// Image is the image we are rendering to.
-	Image *image.RGBA
+	size  math32.Vector2
+	image *image.RGBA
 
 	// Path is the current path.
 	Path Path
@@ -37,19 +33,38 @@ type Renderer struct {
 	ImgSpanner *scan.ImgSpanner
 }
 
-// New returns a new rasterx Renderer, rendering to given image.
 func New(size math32.Vector2, img *image.RGBA) paint.Renderer {
-	rs := &Renderer{Size: size, Image: img}
 	psz := size.ToPointCeil()
+	if img == nil {
+		img = image.NewRGBA(image.Rectangle{Max: psz})
+	}
+	rs := &Renderer{size: size, image: img}
 	rs.ImgSpanner = scan.NewImgSpanner(img)
 	rs.Scanner = scan.NewScanner(rs.ImgSpanner, psz.X, psz.Y)
 	rs.Raster = NewDasher(psz.X, psz.Y, rs.Scanner)
 	return rs
 }
 
-// RenderSize returns the size of the render target, in dots (pixels).
-func (rs *Renderer) RenderSize() (units.Units, math32.Vector2) {
-	return units.UnitDot, rs.Size
+func (rs *Renderer) IsImage() bool      { return true }
+func (rs *Renderer) Image() *image.RGBA { return rs.image }
+func (rs *Renderer) Code() []byte       { return nil }
+
+func (rs *Renderer) Size() (units.Units, math32.Vector2) {
+	return units.UnitDot, rs.size
+}
+
+func (rs *Renderer) SetSize(un units.Units, size math32.Vector2, img *image.RGBA) {
+	if rs.size == size {
+		return
+	}
+	rs.size = size
+	// todo: update sizes of other scanner etc?
+	if img != nil {
+		rs.image = img
+		return
+	}
+	psz := size.ToPointCeil()
+	rs.image = image.NewRGBA(image.Rectangle{Max: psz})
 }
 
 // Render is the main rendering function.
@@ -66,20 +81,21 @@ func (rs *Renderer) RenderPath(pt *paint.Path) {
 	rs.Raster.Clear()
 	// todo: transform!
 	p := pt.Path.ReplaceArcs()
+	m := pt.Context.Transform
 	for s := p.Scanner(); s.Scan(); {
 		cmd := s.Cmd()
-		end := s.End()
+		end := m.MulVector2AsPoint(s.End())
 		switch cmd {
 		case path.MoveTo:
 			rs.Path.Start(end.ToFixed())
 		case path.LineTo:
 			rs.Path.Line(end.ToFixed())
 		case path.QuadTo:
-			cp1 := s.CP1()
+			cp1 := m.MulVector2AsPoint(s.CP1())
 			rs.Path.QuadBezier(cp1.ToFixed(), end.ToFixed())
 		case path.CubeTo:
-			cp1 := s.CP1()
-			cp2 := s.CP2()
+			cp1 := m.MulVector2AsPoint(s.CP1())
+			cp2 := m.MulVector2AsPoint(s.CP2())
 			rs.Path.CubeBezier(cp1.ToFixed(), cp2.ToFixed(), end.ToFixed())
 		case path.Close:
 			rs.Path.Stop(true)

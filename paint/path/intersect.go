@@ -2239,10 +2239,10 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRules) Path {
 					if first.open {
 						R.LineTo(cur.other.X, cur.other.Y)
 					} else {
-						fmt.Println(ps)
-						fmt.Println(op)
-						fmt.Println(qs)
-						panic("next node for result polygon is nil, probably buggy intersection code")
+						// fmt.Println(ps)
+						// fmt.Println(op)
+						// fmt.Println(qs)
+						// panic("next node for result polygon is nil, probably buggy intersection code")
 					}
 					break
 				} else if next == first {
