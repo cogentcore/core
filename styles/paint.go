@@ -8,7 +8,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/paint/path"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -27,7 +27,7 @@ type Paint struct { //types:add
 	TextStyle Text
 
 	//	ClipPath is a clipping path for this item.
-	ClipPath path.Path
+	ClipPath ppath.Path
 
 	//	Mask is a rendered image of the mask for this item.
 	Mask image.Image

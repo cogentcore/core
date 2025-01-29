@@ -8,7 +8,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/path"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 )
@@ -24,7 +24,7 @@ type Bounds struct {
 	Radius sides.Floats
 
 	// Path is the computed clipping path for the Rect and Radius.
-	Path path.Path
+	Path ppath.Path
 
 	// todo: probably need an image here for text
 }
@@ -61,7 +61,7 @@ type Context struct {
 	// ClipPath is the current shape-based clipping path,
 	// in addition to the Bounds, which is applied to the effective Path
 	// prior to adding to Render.
-	ClipPath path.Path
+	ClipPath ppath.Path
 
 	// Mask is the current masking element, as rendered to a separate image.
 	// This is composited with the rendering output to produce the final result.
@@ -92,7 +92,7 @@ func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
 		ctx.Transform = sty.Transform
 		bsz := bounds.Rect.Size()
 		ctx.Bounds = *bounds
-		ctx.Bounds.Path = path.RoundedRectangleSides(bounds.Rect.Min.X, bounds.Rect.Min.Y, bsz.X, bsz.Y, bounds.Radius)
+		ctx.Bounds.Path = ppath.RoundedRectangleSides(bounds.Rect.Min.X, bounds.Rect.Min.Y, bsz.X, bsz.Y, bounds.Radius)
 		ctx.ClipPath = sty.ClipPath
 		ctx.Mask = sty.Mask
 		return
@@ -105,7 +105,7 @@ func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
 		ctx.Bounds = *bounds
 		// todo: transform bp
 		bsz := bounds.Rect.Size()
-		bp := path.RoundedRectangleSides(bounds.Rect.Min.X, bounds.Rect.Min.Y, bsz.X, bsz.Y, bounds.Radius)
+		bp := ppath.RoundedRectangleSides(bounds.Rect.Min.X, bounds.Rect.Min.Y, bsz.X, bsz.Y, bounds.Radius)
 		ctx.Bounds.Path = bp.And(parent.Bounds.Path) // intersect
 	}
 	ctx.ClipPath = ctx.Style.ClipPath.And(parent.ClipPath)

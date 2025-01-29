@@ -7,15 +7,15 @@ package svg
 import (
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/path"
+	"cogentcore.org/core/paint/ppath"
 )
 
 // Path renders SVG data sequences that can render just about anything
 type Path struct {
 	NodeBase
 
-	// Path data using paint/path representation.
-	Data path.Path `xml:"-" set:"-"`
+	// Path data using paint/ppath representation.
+	Data ppath.Path `xml:"-" set:"-"`
 
 	// string version of the path data
 	DataStr string `xml:"d"`
@@ -36,7 +36,7 @@ func (g *Path) SetSize(sz math32.Vector2) {
 func (g *Path) SetData(data string) error {
 	g.DataStr = data
 	var err error
-	g.Data, err = path.ParseSVGPath(data)
+	g.Data, err = ppath.ParseSVGPath(data)
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (g *Path) WriteGeom(sv *SVG, dat *[]float32) {
 // the length and ordering of which is specific to each node type.
 func (g *Path) ReadGeom(sv *SVG, dat []float32) {
 	sz := len(g.Data)
-	g.Data = path.Path(dat)
+	g.Data = ppath.Path(dat)
 	g.ReadTransform(dat, sz)
 	g.GradientReadPts(sv, dat)
 }

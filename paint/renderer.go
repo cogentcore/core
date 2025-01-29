@@ -8,7 +8,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/path"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -73,7 +73,7 @@ type Path struct {
 	// like the SVG path element. The coordinates are in the original
 	// units as specified in the Paint drawing commands, without any
 	// transforms applied. See [Path.Transform].
-	Path path.Path
+	Path ppath.Path
 
 	// Context has the full accumulated style, transform, etc parameters
 	// for rendering the path, combining the current state context (e.g.,

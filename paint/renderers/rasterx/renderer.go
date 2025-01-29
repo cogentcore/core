@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/path"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/renderers/rasterx/scan"
 	"cogentcore.org/core/styles/units"
 )
@@ -86,18 +86,18 @@ func (rs *Renderer) RenderPath(pt *paint.Path) {
 		cmd := s.Cmd()
 		end := m.MulVector2AsPoint(s.End())
 		switch cmd {
-		case path.MoveTo:
+		case ppath.MoveTo:
 			rs.Path.Start(end.ToFixed())
-		case path.LineTo:
+		case ppath.LineTo:
 			rs.Path.Line(end.ToFixed())
-		case path.QuadTo:
+		case ppath.QuadTo:
 			cp1 := m.MulVector2AsPoint(s.CP1())
 			rs.Path.QuadBezier(cp1.ToFixed(), end.ToFixed())
-		case path.CubeTo:
+		case ppath.CubeTo:
 			cp1 := m.MulVector2AsPoint(s.CP1())
 			cp2 := m.MulVector2AsPoint(s.CP2())
 			rs.Path.CubeBezier(cp1.ToFixed(), cp2.ToFixed(), end.ToFixed())
-		case path.Close:
+		case ppath.Close:
 			rs.Path.Stop(true)
 		}
 	}
@@ -158,7 +158,7 @@ func (rs *Renderer) Fill(pt *paint.Path) {
 		return
 	}
 	rf := &rs.Raster.Filler
-	rf.SetWinding(sty.Fill.Rule == path.NonZero)
+	rf.SetWinding(sty.Fill.Rule == ppath.NonZero)
 	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
 	rs.Path.AddTo(rf)
 	fbox := rs.Scanner.GetPathExtent()
@@ -187,7 +187,7 @@ func (rs *Renderer) StrokeWidth(pt *paint.Path) float32 {
 	if dw == 0 {
 		return dw
 	}
-	if sty.VectorEffect == path.VectorEffectNonScalingStroke {
+	if sty.VectorEffect == ppath.VectorEffectNonScalingStroke {
 		return dw
 	}
 	scx, scy := pc.Transform.ExtractScale()
@@ -196,31 +196,31 @@ func (rs *Renderer) StrokeWidth(pt *paint.Path) float32 {
 	return lw
 }
 
-func capfunc(st path.Caps) CapFunc {
+func capfunc(st ppath.Caps) CapFunc {
 	switch st {
-	case path.CapButt:
+	case ppath.CapButt:
 		return ButtCap
-	case path.CapRound:
+	case ppath.CapRound:
 		return RoundCap
-	case path.CapSquare:
+	case ppath.CapSquare:
 		return SquareCap
 	}
 	return nil
 }
 
-func joinmode(st path.Joins) JoinMode {
+func joinmode(st ppath.Joins) JoinMode {
 	switch st {
-	case path.JoinMiter:
+	case ppath.JoinMiter:
 		return Miter
-	case path.JoinMiterClip:
+	case ppath.JoinMiterClip:
 		return MiterClip
-	case path.JoinRound:
+	case ppath.JoinRound:
 		return Round
-	case path.JoinBevel:
+	case ppath.JoinBevel:
 		return Bevel
-	case path.JoinArcs:
+	case ppath.JoinArcs:
 		return Arc
-	case path.JoinArcsClip:
+	case ppath.JoinArcsClip:
 		return ArcClip
 	}
 	return Arc

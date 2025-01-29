@@ -5,21 +5,27 @@
 package paint_test
 
 import (
+	"image"
 	"os"
+	"slices"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	. "cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/renderers/rasterizer"
+	"cogentcore.org/core/paint/renderers/rasterx"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
+	"cogentcore.org/core/styles/units"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
 	FontLibrary.InitFontPaths(FontPaths...)
-	// NewDefaultImageRenderer = rasterx.New
-	NewDefaultImageRenderer = rasterizer.New
+	NewDefaultImageRenderer = rasterx.New
+	// NewDefaultImageRenderer = rasterizer.New
 	os.Exit(m.Run())
 }
 
@@ -29,10 +35,10 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)
 	pc := NewPainter(width, height)
 	// pc.StartRender(pc.Image.Rect)
 	f(pc)
+	pc.RenderDone()
 	imagex.Assert(t, pc.Image, nm)
 }
 
-/*
 func TestRender(t *testing.T) {
 	RunTest(t, "render", 300, 300, func(pc *Painter) {
 		testimg, _, err := imagex.Open("test.png")
@@ -47,13 +53,13 @@ func TestRender(t *testing.T) {
 		bs := styles.Border{}
 		bs.Color.Set(imgs...)
 		bs.Width.Set(units.Dot(20), units.Dot(30), units.Dot(40), units.Dot(50))
-		bs.ToDots(&pc.UnitPaint)
+		bs.ToDots(&pc.UnitContext)
 
 		// first, draw a frame around the entire image
 		// pc.Stroke.Color = colors.C(blk)
 		pc.Fill.Color = colors.Uniform(colors.White)
 		// pc.Stroke.Width.SetDot(1) // use dots directly to render in literal pixels
-		pc.DrawBorder(0, 0, 300, 300, bs)
+		pc.Border(0, 0, 300, 300, bs)
 		pc.PathDone() // actually render path that has been setup
 
 		slices.Reverse(imgs)
@@ -63,8 +69,8 @@ func TestRender(t *testing.T) {
 		bs.Radius.Set(units.Dot(0), units.Dot(30), units.Dot(10))
 		pc.Fill.Color = colors.Uniform(colors.Lightblue)
 		pc.Stroke.Width.Dot(10)
-		bs.ToDots(&pc.UnitPaint)
-		pc.DrawBorder(60, 60, 150, 100, bs)
+		bs.ToDots(&pc.UnitContext)
+		pc.Border(60, 60, 150, 100, bs)
 		pc.PathDone()
 
 		tsty := &styles.Text{}
@@ -77,9 +83,9 @@ func TestRender(t *testing.T) {
 		tsty.Align = styles.Center
 
 		txt := &Text{}
-		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnitPaint, nil)
+		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnitContext, nil)
 
-		tsz := txt.Layout(tsty, fsty, &pc.UnitPaint, math32.Vec2(100, 60))
+		tsz := txt.Layout(tsty, fsty, &pc.UnitContext, math32.Vec2(100, 60))
 		if tsz.X != 100 || tsz.Y != 60 {
 			t.Errorf("unexpected text size: %v", tsz)
 		}
@@ -87,7 +93,6 @@ func TestRender(t *testing.T) {
 		txt.Render(pc, math32.Vec2(85, 80))
 	})
 }
-*/
 
 func TestPaintPath(t *testing.T) {
 	test := func(nm string, f func(pc *Painter)) {
@@ -98,7 +103,6 @@ func TestPaintPath(t *testing.T) {
 			pc.Stroke.Width.Dot(3)
 			f(pc)
 			pc.PathDone()
-			pc.RenderDone()
 		})
 	}
 	test("line-to", func(pc *Painter) {
@@ -149,7 +153,6 @@ func TestPaintPath(t *testing.T) {
 	})
 }
 
-/*
 func TestPaintFill(t *testing.T) {
 	test := func(nm string, f func(pc *Painter)) {
 		RunTest(t, nm, 300, 300, func(pc *Painter) {
@@ -187,13 +190,13 @@ func TestPaintFill(t *testing.T) {
 	test("fill", func(pc *Painter) {
 		pc.Fill.Color = colors.Uniform(colors.Purple)
 		pc.Stroke.Color = colors.Uniform(colors.Orange)
-		pc.DrawRectangle(50, 25, 150, 200)
+		pc.Rectangle(50, 25, 150, 200)
 		pc.PathDone()
 	})
 	test("stroke", func(pc *Painter) {
 		pc.Fill.Color = colors.Uniform(colors.Purple)
 		pc.Stroke.Color = colors.Uniform(colors.Orange)
-		pc.DrawRectangle(50, 25, 150, 200)
+		pc.Rectangle(50, 25, 150, 200)
 		pc.PathDone()
 	})
 
@@ -201,14 +204,13 @@ func TestPaintFill(t *testing.T) {
 	test("fill-stroke-clear-fill", func(pc *Painter) {
 		pc.Fill.Color = colors.Uniform(colors.Purple)
 		pc.Stroke.Color = nil
-		pc.DrawRectangle(50, 25, 150, 200)
+		pc.Rectangle(50, 25, 150, 200)
 		pc.PathDone()
 	})
 	test("fill-stroke-clear-stroke", func(pc *Painter) {
 		pc.Fill.Color = nil
 		pc.Stroke.Color = colors.Uniform(colors.Orange)
-		pc.DrawRectangle(50, 25, 150, 200)
+		pc.Rectangle(50, 25, 150, 200)
 		pc.PathDone()
 	})
 }
-*/

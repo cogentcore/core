@@ -9,7 +9,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/path"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
@@ -34,7 +34,7 @@ type State struct {
 	Render Render
 
 	// Path is the current path state we are adding to.
-	Path path.Path
+	Path ppath.Path
 
 	// todo: this needs to be removed and replaced with new Image Render recording.
 	Image *image.RGBA

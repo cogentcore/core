@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/path"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -35,7 +35,7 @@ type Path struct { //types:add
 	Transform math32.Matrix2
 
 	// VectorEffect has various rendering special effects settings.
-	VectorEffect path.VectorEffects
+	VectorEffect ppath.VectorEffects
 
 	// UnitContext has parameters necessary for determining unit sizes.
 	UnitContext units.Context `display:"-"`
@@ -108,13 +108,13 @@ type Fill struct {
 	Opacity float32
 
 	// Rule for how to fill more complex shapes with crossing lines.
-	Rule path.FillRules
+	Rule ppath.FillRules
 }
 
 // Defaults initializes default values for paint fill
 func (pf *Fill) Defaults() {
 	pf.Color = colors.Uniform(color.Black)
-	pf.Rule = path.NonZero
+	pf.Rule = ppath.NonZero
 	pf.Opacity = 1.0
 }
 
@@ -153,10 +153,10 @@ type Stroke struct {
 	DashOffset float32
 
 	// Cap specifies how to draw the end cap of stroked lines.
-	Cap path.Caps
+	Cap ppath.Caps
 
 	// Join specifies how to join line segments.
-	Join path.Joins
+	Join ppath.Joins
 
 	// MiterLimit is the limit of how far to miter: must be 1 or larger.
 	MiterLimit float32 `min:"1"`
@@ -168,8 +168,8 @@ func (ss *Stroke) Defaults() {
 	ss.Color = nil
 	ss.Width.Dp(1)
 	ss.MinWidth.Dot(.5)
-	ss.Cap = path.CapButt
-	ss.Join = path.JoinMiter
+	ss.Cap = ppath.CapButt
+	ss.Join = ppath.JoinMiter
 	ss.MiterLimit = 10.0
 	ss.Opacity = 1.0
 }
@@ -187,7 +187,7 @@ func (ss *Stroke) ApplyBorderStyle(bs BorderStyles) {
 		ss.Color = nil
 	case BorderDotted:
 		ss.Dashes = []float32{0, 12}
-		ss.Cap = path.CapRound
+		ss.Cap = ppath.CapRound
 	case BorderDashed:
 		ss.Dashes = []float32{8, 6}
 	}

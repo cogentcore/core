@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build not
-
-package paint
+package paint_test
 
 import (
 	"path/filepath"
@@ -13,6 +11,7 @@ import (
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
+	. "cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 )

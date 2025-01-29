@@ -1,4 +1,4 @@
-# paint/path
+# paint/ppath
 
 This is adapted from https://github.com/tdewolff/canvas, Copyright (c) 2015 Taco de Wolff, under an MIT License.
 

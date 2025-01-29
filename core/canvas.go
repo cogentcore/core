@@ -7,7 +7,7 @@ package core
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/path"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"golang.org/x/image/draw"
@@ -45,7 +45,7 @@ func (c *Canvas) Render() {
 	c.painter.Context().Transform = math32.Scale2D(sz.X, sz.Y)
 	c.painter.UnitContext = c.Styles.UnitContext
 	c.painter.ToDots()
-	c.painter.VectorEffect = path.VectorEffectNonScalingStroke
+	c.painter.VectorEffect = ppath.VectorEffectNonScalingStroke
 	c.Draw(c.painter)
 
 	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.painter.Image, c.Geom.ScrollOffset(), draw.Over)

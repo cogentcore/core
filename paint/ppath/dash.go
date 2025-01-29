@@ -5,7 +5,7 @@
 // This is adapted from https://github.com/tdewolff/canvas
 // Copyright (c) 2015 Taco de Wolff, under an MIT License.
 
-package path
+package ppath
 
 // Dash returns a new path that consists of dashes.
 // The elements in d specify the width of the dashes and gaps.

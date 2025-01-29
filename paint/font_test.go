@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build not
-
-package paint
+package paint_test
 
 import (
 	"fmt"
 	"testing"
 
+	. "cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 )
 

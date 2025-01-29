@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/path"
+	"cogentcore.org/core/paint/ppath"
 	"golang.org/x/image/vector"
 )
 
@@ -22,7 +22,7 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 	}
 	pc := &pt.Context
 	sty := &pc.Style
-	var fill, stroke path.Path
+	var fill, stroke ppath.Path
 	var bounds math32.Box2
 	if sty.HasFill() {
 		fill = pt.Path.Clone().Transform(pc.Transform)
@@ -35,13 +35,13 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 		bounds = fill.FastBounds()
 	}
 	if sty.HasStroke() {
-		tolerance := path.PixelTolerance
+		tolerance := ppath.PixelTolerance
 		stroke = pt.Path
 		if len(sty.Stroke.Dashes) > 0 {
-			dashOffset, dashes := path.ScaleDash(sty.Stroke.Width.Dots, sty.Stroke.DashOffset, sty.Stroke.Dashes)
+			dashOffset, dashes := ppath.ScaleDash(sty.Stroke.Width.Dots, sty.Stroke.DashOffset, sty.Stroke.Dashes)
 			stroke = stroke.Dash(dashOffset, dashes...)
 		}
-		stroke = stroke.Stroke(sty.Stroke.Width.Dots, path.CapFromStyle(sty.Stroke.Cap), path.JoinFromStyle(sty.Stroke.Join), tolerance)
+		stroke = stroke.Stroke(sty.Stroke.Width.Dots, ppath.CapFromStyle(sty.Stroke.Cap), ppath.JoinFromStyle(sty.Stroke.Join), tolerance)
 		stroke = stroke.Transform(pc.Transform)
 		if len(pc.Bounds.Path) > 0 {
 			stroke = stroke.And(pc.Bounds.Path)
@@ -97,46 +97,46 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 }
 
 // ToRasterizer rasterizes the path using the given rasterizer and resolution.
-func ToRasterizer(p path.Path, ras *vector.Rasterizer) {
+func ToRasterizer(p ppath.Path, ras *vector.Rasterizer) {
 	// TODO: smoothen path using Ramer-...
 
-	tolerance := path.PixelTolerance / 5
+	tolerance := ppath.PixelTolerance / 5
 	for i := 0; i < len(p); {
 		cmd := p[i]
 		switch cmd {
-		case path.MoveTo:
+		case ppath.MoveTo:
 			ras.MoveTo(p[i+1], p[i+2])
-		case path.LineTo:
+		case ppath.LineTo:
 			ras.LineTo(p[i+1], p[i+2])
-		case path.QuadTo, path.CubeTo, path.ArcTo:
+		case ppath.QuadTo, ppath.CubeTo, ppath.ArcTo:
 			// flatten
-			var q path.Path
+			var q ppath.Path
 			var start math32.Vector2
 			if 0 < i {
 				start = math32.Vec2(p[i-3], p[i-2])
 			}
-			if cmd == path.QuadTo {
+			if cmd == ppath.QuadTo {
 				cp := math32.Vec2(p[i+1], p[i+2])
 				end := math32.Vec2(p[i+3], p[i+4])
-				q = path.FlattenQuadraticBezier(start, cp, end, tolerance)
-			} else if cmd == path.CubeTo {
+				q = ppath.FlattenQuadraticBezier(start, cp, end, tolerance)
+			} else if cmd == ppath.CubeTo {
 				cp1 := math32.Vec2(p[i+1], p[i+2])
 				cp2 := math32.Vec2(p[i+3], p[i+4])
 				end := math32.Vec2(p[i+5], p[i+6])
-				q = path.FlattenCubicBezier(start, cp1, cp2, end, tolerance)
+				q = ppath.FlattenCubicBezier(start, cp1, cp2, end, tolerance)
 			} else {
 				rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
-				q = path.FlattenEllipticArc(start, rx, ry, phi, large, sweep, end, tolerance)
+				q = ppath.FlattenEllipticArc(start, rx, ry, phi, large, sweep, end, tolerance)
 			}
 			for j := 4; j < len(q); j += 4 {
 				ras.LineTo(q[j+1], q[j+2])
 			}
-		case path.Close:
+		case ppath.Close:
 			ras.ClosePath()
 		default:
 			panic("quadratic and cubic Béziers and arcs should have been replaced")
 		}
-		i += path.CmdLen(cmd)
+		i += ppath.CmdLen(cmd)
 	}
 	if !p.Closed() {
 		// implicitly close path

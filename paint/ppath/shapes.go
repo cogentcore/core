@@ -5,7 +5,7 @@
 // This is adapted from https://github.com/tdewolff/canvas
 // Copyright (c) 2015 Taco de Wolff, under an MIT License.
 
-package path
+package ppath
 
 import (
 	"cogentcore.org/core/math32"
@@ -153,7 +153,7 @@ func Ellipse(cx, cy, rx, ry float32) Path {
 	return p
 }
 
-// Arc returns a circular arc at given center coordinates with radius r
+// Arc returns a circular arc at given coordinates with radius r
 // and theta0 and theta1 as the angles in degrees of the ellipse
 // (before rot is applied) between which the arc will run.
 // If theta0 < theta1, the arc will run in a CCW direction.
@@ -161,11 +161,11 @@ func Ellipse(cx, cy, rx, ry float32) Path {
 // one full circle will be drawn and the remaining part of diff % 360,
 // e.g. a difference of 810 degrees will draw one full circle and an arc
 // over 90 degrees.
-func Arc(cx, cy, r, theta0, theta1 float32) Path {
-	return EllipticalArc(cx, cy, r, r, 0.0, theta0, theta1)
+func Arc(x, y, r, theta0, theta1 float32) Path {
+	return EllipticalArc(x, y, r, r, 0.0, theta0, theta1)
 }
 
-// EllipticalArc returns an elliptical arc at given center coordinates with
+// EllipticalArc returns an elliptical arc at given coordinates with
 // radii rx and ry, with rot the counter clockwise rotation in radians,
 // and theta0 and theta1 the angles in radians of the ellipse
 // (before rot is applied) between which the arc will run.
@@ -174,9 +174,9 @@ func Arc(cx, cy, r, theta0, theta1 float32) Path {
 // one full circle will be drawn and the remaining part of diff % 360,
 // e.g. a difference of 810 degrees will draw one full circle and an arc
 // over 90 degrees.
-func EllipticalArc(cx, cy, rx, ry, rot, theta0, theta1 float32) Path {
+func EllipticalArc(x, y, rx, ry, rot, theta0, theta1 float32) Path {
 	p := Path{}
-	p.MoveTo(cx+rx, cy)
+	p.MoveTo(x+rx, y)
 	p.Arc(rx, ry, rot, theta0, theta1)
 	return p
 }
