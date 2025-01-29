@@ -128,38 +128,53 @@ func (w *Window) newGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen)
 // Screen gets the screen of the window, computing various window parameters.
 func (w *Window) Screen() *system.Screen {
 	if w == nil || w.Glw == nil {
-		return TheApp.Screens[0]
+		return TheApp.Screens[0] // cool guys do not look aat panics
 	}
+
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 
 	var sc *system.Screen
-	mon := w.Glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
-	// that is super useless it seems. only works for fullscreen
-	if mon != nil {
+
+	if mon := w.Glw.GetMonitor(); mon == nil { // this returns nil for windowed windows -- i.e., most windows
+		sc = w.GetScreenOverlap()
+	} else {
+		// that is super useless it seems. only works for fullscreen
 		if ScreenDebug {
 			log.Printf("ScreenDebug: desktop.Window.Screen: %v: got screen: %v\n", w.Nm, mon.GetName())
 		}
+
 		sc = TheApp.ScreenByName(mon.GetName())
 		if sc == nil {
 			log.Printf("ScreenDebug: desktop.Window.Screen: could not find screen of name: %v\n", mon.GetName())
-			sc = TheApp.Screens[0]
 		}
-		goto setScreen
 	}
-	sc = w.GetScreenOverlap()
-	// if monitorDebug {
-	// 	log.Printf("ScreenDebug: desktop.Window.GetScreenOverlap: %v: got screen: %v\n", w.Nm, sc.Name)
-	// }
-setScreen:
+
+	// trying to get a onf of actual screens safely
+	// because a `Screen(n int) *system.Screen` may panic.
+	if sc == nil && len(TheApp.Screens) > 0 {
+		sc = TheApp.Screens[0]
+	}
+
+	// the last resort to allow Window to work.
+	// because a Screens slice of actual screens might be nil or zero length.
+	// it might happen when a user switches sessions by using some remote desktop client.
+	// fail fast in case when a AllScreens slice is also nil or zero length.
+	if sc == nil {
+		sc = TheApp.AllScreens[0]
+	}
+
 	w.ScreenWindow = sc.Name
 	w.PhysDPI = sc.PhysicalDPI
+
 	if w.DevicePixelRatio != sc.DevicePixelRatio {
 		w.DevicePixelRatio = sc.DevicePixelRatio
 	}
+
 	if w.LogDPI == 0 {
 		w.LogDPI = sc.LogicalDPI
 	}
+
 	return sc
 }
 
