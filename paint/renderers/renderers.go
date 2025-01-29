@@ -6,10 +6,10 @@ package renderers
 
 import (
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/renderers/rasterx"
+	"cogentcore.org/core/paint/renderers/rasterizer"
 )
 
 func init() {
-	// paint.NewDefaultImageRenderer = rasterizer.New
-	paint.NewDefaultImageRenderer = rasterx.New
+	paint.NewDefaultImageRenderer = rasterizer.New
+	// paint.NewDefaultImageRenderer = rasterx.New
 }

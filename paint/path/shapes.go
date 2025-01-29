@@ -146,7 +146,7 @@ func Ellipse(cx, cy, rx, ry float32) Path {
 	}
 
 	p := Path{}
-	p.MoveTo(cx+rx, cy)
+	p.MoveTo(cx+rx, cy+(ry*0.001))
 	p.ArcTo(rx, ry, 0.0, false, true, cx-rx, cy)
 	p.ArcTo(rx, ry, 0.0, false, true, cx+rx, cy)
 	p.Close()
@@ -166,8 +166,8 @@ func Arc(cx, cy, r, theta0, theta1 float32) Path {
 }
 
 // EllipticalArc returns an elliptical arc at given center coordinates with
-// radii rx and ry, with rot the counter clockwise rotation in degrees,
-// and theta0 and theta1 the angles in degrees of the ellipse
+// radii rx and ry, with rot the counter clockwise rotation in radians,
+// and theta0 and theta1 the angles in radians of the ellipse
 // (before rot is applied) between which the arc will run.
 // If theta0 < theta1, the arc will run in a CCW direction.
 // If the difference between theta0 and theta1 is bigger than 360 degrees,
@@ -177,7 +177,7 @@ func Arc(cx, cy, r, theta0, theta1 float32) Path {
 func EllipticalArc(cx, cy, rx, ry, rot, theta0, theta1 float32) Path {
 	p := Path{}
 	p.MoveTo(cx+rx, cy)
-	p.ArcDeg(rx, ry, rot, theta0, theta1)
+	p.Arc(rx, ry, rot, theta0, theta1)
 	return p
 }
 

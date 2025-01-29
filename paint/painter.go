@@ -244,7 +244,7 @@ func (pc *Painter) Arc(cx, cy, r, theta0, theta1 float32) {
 // e.g. a difference of 810 degrees will draw one full circle and an arc
 // over 90 degrees.
 func (pc *Painter) EllipticalArc(cx, cy, rx, ry, rot, theta0, theta1 float32) {
-	pc.EllipticalArc(cx, cy, rx, ry, rot, theta0, theta1)
+	pc.State.Path = pc.State.Path.Append(path.EllipticalArc(cx, cy, rx, ry, rot, theta0, theta1))
 }
 
 // Triangle adds a triangle of radius r pointing upwards.

@@ -138,6 +138,15 @@ func TestPaintPath(t *testing.T) {
 		pc.PathDone()
 		pc.PopContext()
 	})
+	test("circle", func(pc *Painter) {
+		pc.Circle(150, 150, 100)
+	})
+	test("ellipse", func(pc *Painter) {
+		pc.Ellipse(150, 150, 100, 80)
+	})
+	test("elliptical-arc", func(pc *Painter) {
+		pc.EllipticalArc(150, 150, 100, 80, 0, 0.0*math32.Pi, 1.5*math32.Pi)
+	})
 }
 
 /*
