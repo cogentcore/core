@@ -38,7 +38,9 @@ func (r *Renderer) RenderPath(pt *render.Path) {
 		tolerance := ppath.PixelTolerance
 		stroke = pt.Path
 		if len(sty.Stroke.Dashes) > 0 {
-			dashOffset, dashes := ppath.ScaleDash(sty.Stroke.Width.Dots, sty.Stroke.DashOffset, sty.Stroke.Dashes)
+			scx, scy := pc.Transform.ExtractScale()
+			sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
+			dashOffset, dashes := ppath.ScaleDash(sc, sty.Stroke.DashOffset, sty.Stroke.Dashes)
 			stroke = stroke.Dash(dashOffset, dashes...)
 		}
 		stroke = stroke.Stroke(sty.Stroke.Width.Dots, ppath.CapFromStyle(sty.Stroke.Cap), ppath.JoinFromStyle(sty.Stroke.Join), tolerance)

@@ -60,13 +60,15 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2, img *image.RGBA
 		return
 	}
 	rs.size = size
-	// todo: update sizes of other scanner etc?
+	psz := size.ToPointCeil()
 	if img != nil {
 		rs.image = img
-		return
+	} else {
+		rs.image = image.NewRGBA(image.Rectangle{Max: psz})
 	}
-	psz := size.ToPointCeil()
-	rs.image = image.NewRGBA(image.Rectangle{Max: psz})
+	rs.ImgSpanner = scan.NewImgSpanner(rs.image)
+	rs.Scanner = scan.NewScanner(rs.ImgSpanner, psz.X, psz.Y)
+	rs.Raster = NewDasher(psz.X, psz.Y, rs.Scanner)
 }
 
 // Render is the main rendering function.
@@ -85,7 +87,6 @@ func (rs *Renderer) Render(r render.Render) {
 
 func (rs *Renderer) RenderPath(pt *render.Path) {
 	rs.Raster.Clear()
-	// todo: transform!
 	p := pt.Path.ReplaceArcs()
 	m := pt.Context.Transform
 	for s := p.Scanner(); s.Scan(); {
