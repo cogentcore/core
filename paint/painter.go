@@ -12,12 +12,12 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"github.com/anthonynsimon/bild/clone"
 	"golang.org/x/image/draw"
-	"golang.org/x/image/math/f64"
 )
 
 /*
@@ -441,8 +441,6 @@ func (pc *Painter) RoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h float32
 
 //////// Image drawing
 
-// todo: need to update all these with a new api that records actions in Render
-
 // FillBox performs an optimized fill of the given
 // rectangular region with the given image.
 func (pc *Painter) FillBox(pos, size math32.Vector2, img image.Image) {
@@ -471,8 +469,7 @@ func (pc *Painter) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op
 	} else {
 		img = gradient.ApplyOpacity(img, pc.Fill.Opacity)
 	}
-	// todo: add a command, don't do directly
-	draw.Draw(pc.Image, b, img, b.Min, op)
+	pc.Render.Add(pimage.NewDraw(b, img, b.Min, op))
 }
 
 // BlurBox blurs the given already drawn region with the given blur radius.
@@ -484,7 +481,7 @@ func (pc *Painter) BlurBox(pos, size math32.Vector2, blurRadius float32) {
 	rect := math32.RectFromPosSizeMax(pos, size)
 	sub := pc.Image.SubImage(rect)
 	sub = GaussianBlur(sub, float64(blurRadius))
-	draw.Draw(pc.Image, rect, sub, rect.Min, draw.Src) // todo
+	pc.Render.Add(pimage.NewDraw(rect, sub, rect.Min, draw.Src))
 }
 
 // SetMask allows you to directly set the *image.Alpha to be used as a clipping
@@ -511,61 +508,49 @@ func (pc *Painter) AsMask() *image.Alpha {
 // Clear fills the entire image with the current fill color.
 func (pc *Painter) Clear() {
 	src := pc.Fill.Color
-	draw.Draw(pc.Image, pc.Image.Bounds(), src, image.Point{}, draw.Src)
+	pc.Render.Add(pimage.NewDraw(pc.Image.Bounds(), src, image.Point{}, draw.Src))
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
 func (pc *Painter) SetPixel(x, y int) {
-	pc.Image.Set(x, y, pc.Stroke.Color.At(x, y))
+	pc.Render.Add(pimage.NewSetPixel(image.Point{x, y}, pc.Stroke.Color))
 }
 
 // DrawImage draws the specified image at the specified point.
-func (pc *Painter) DrawImage(fmIm image.Image, x, y float32) {
-	pc.DrawImageAnchored(fmIm, x, y, 0, 0)
+func (pc *Painter) DrawImage(src image.Image, x, y float32) {
+	pc.DrawImageAnchored(src, x, y, 0, 0)
 }
 
 // DrawImageAnchored draws the specified image at the specified anchor point.
 // The anchor point is x - w * ax, y - h * ay, where w, h is the size of the
 // image. Use ax=0.5, ay=0.5 to center the image at the specified point.
-func (pc *Painter) DrawImageAnchored(fmIm image.Image, x, y, ax, ay float32) {
-	s := fmIm.Bounds().Size()
+func (pc *Painter) DrawImageAnchored(src image.Image, x, y, ax, ay float32) {
+	s := src.Bounds().Size()
 	x -= ax * float32(s.X)
 	y -= ay * float32(s.Y)
-	transformer := draw.BiLinear
 	m := pc.Transform.Translate(x, y)
-	s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 	if pc.Mask == nil {
-		transformer.Transform(pc.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, nil)
+		pc.Render.Add(pimage.NewTransform(m, src.Bounds(), src, draw.Over))
 	} else {
-		transformer.Transform(pc.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, &draw.Options{
-			DstMask:  pc.Mask,
-			DstMaskP: image.Point{},
-		})
+		pc.Render.Add(pimage.NewTransformMask(m, src.Bounds(), src, draw.Over, pc.Mask, image.Point{}))
 	}
 }
 
 // DrawImageScaled draws the specified image starting at given upper-left point,
 // such that the size of the image is rendered as specified by w, h parameters
 // (an additional scaling is applied to the transform matrix used in rendering)
-func (pc *Painter) DrawImageScaled(fmIm image.Image, x, y, w, h float32) {
-	s := fmIm.Bounds().Size()
+func (pc *Painter) DrawImageScaled(src image.Image, x, y, w, h float32) {
+	s := src.Bounds().Size()
 	isz := math32.FromPoint(s)
 	isc := math32.Vec2(w, h).Div(isz)
 
-	transformer := draw.BiLinear
 	m := pc.Transform.Translate(x, y).Scale(isc.X, isc.Y)
-	s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 	if pc.Mask == nil {
-		transformer.Transform(pc.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, nil)
+		pc.Render.Add(pimage.NewTransform(m, src.Bounds(), src, draw.Over))
 	} else {
-		transformer.Transform(pc.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, &draw.Options{
-			DstMask:  pc.Mask,
-			DstMaskP: image.Point{},
-		})
+		pc.Render.Add(pimage.NewTransformMask(m, src.Bounds(), src, draw.Over, pc.Mask, image.Point{}))
 	}
 }
-
-// todo: path functions now do this directly:
 
 // BoundingBox computes the bounding box for an element in pixel int
 // coordinates, applying current transform

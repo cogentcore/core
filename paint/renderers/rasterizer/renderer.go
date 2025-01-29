@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/styles/units"
 	"golang.org/x/image/vector"
 )
@@ -55,6 +56,8 @@ func (rs *Renderer) Render(r paint.Render) {
 		switch x := ri.(type) {
 		case *paint.Path:
 			rs.RenderPath(x)
+		case *pimage.Params:
+			x.Render(rs.image)
 		}
 	}
 }

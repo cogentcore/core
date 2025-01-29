@@ -48,7 +48,7 @@ type Render []Item
 
 // Item is a union interface for render items: Path, text.Text, or Image.
 type Item interface {
-	isRenderItem()
+	IsRenderItem()
 }
 
 // Add adds item(s) to render.
@@ -82,7 +82,7 @@ type Path struct {
 }
 
 // interface assertion.
-func (p *Path) isRenderItem() {
+func (p *Path) IsRenderItem() {
 }
 
 // ContextPush is a [Context] push render item, which can be used by renderers
@@ -92,7 +92,7 @@ type ContextPush struct {
 }
 
 // interface assertion.
-func (p *ContextPush) isRenderItem() {
+func (p *ContextPush) IsRenderItem() {
 }
 
 // ContextPop is a [Context] pop render item, which can be used by renderers
@@ -101,7 +101,7 @@ type ContextPop struct {
 }
 
 // interface assertion.
-func (p *ContextPop) isRenderItem() {
+func (p *ContextPop) IsRenderItem() {
 }
 
 // Registry of renderers

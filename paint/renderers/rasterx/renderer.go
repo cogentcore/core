@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/renderers/rasterx/scan"
 	"cogentcore.org/core/styles/units"
@@ -73,6 +74,8 @@ func (rs *Renderer) Render(r paint.Render) {
 		switch x := ri.(type) {
 		case *paint.Path:
 			rs.RenderPath(x)
+		case *pimage.Params:
+			x.Render(rs.image)
 		}
 	}
 }
