@@ -91,8 +91,6 @@ func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
 	}
 	ctx.Transform = parent.Transform.Mul(sty.Transform)
 	ctx.Style.InheritFields(&parent.Style)
-	ctx.Style.UnitContext = parent.Style.UnitContext
-	ctx.Style.ToDots() // update
 	if bounds == nil {
 		ctx.Bounds = parent.Bounds
 	} else {

@@ -25,9 +25,9 @@ func TestSVG(t *testing.T) {
 	files := fsx.Filenames(dir, ".svg")
 
 	for _, fn := range files {
-		if fn != "unit-line-widths.svg" {
-			continue
-		}
+		// if fn != "TestShapes4.svg" {
+		// 	continue
+		// }
 		sv := NewSVG(640, 480)
 		svfn := filepath.Join(dir, fn)
 		err := sv.OpenXML(svfn)

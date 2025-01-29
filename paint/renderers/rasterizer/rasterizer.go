@@ -8,7 +8,6 @@
 package rasterizer
 
 import (
-	"fmt"
 	"image"
 
 	"cogentcore.org/core/math32"
@@ -42,7 +41,6 @@ func (r *Renderer) RenderPath(pt *paint.Path) {
 			dashOffset, dashes := path.ScaleDash(sty.Stroke.Width.Dots, sty.Stroke.DashOffset, sty.Stroke.Dashes)
 			stroke = stroke.Dash(dashOffset, dashes...)
 		}
-		fmt.Println(sty.Stroke.Width.Dots, sty.Stroke.Width)
 		stroke = stroke.Stroke(sty.Stroke.Width.Dots, path.CapFromStyle(sty.Stroke.Cap), path.JoinFromStyle(sty.Stroke.Join), tolerance)
 		stroke = stroke.Transform(pc.Transform)
 		if len(pc.Bounds.Path) > 0 {

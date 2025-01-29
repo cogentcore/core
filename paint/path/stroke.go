@@ -84,7 +84,6 @@ const (
 	JoinRound
 	JoinBevel
 	JoinArcs
-	// rasterx extension
 	JoinArcsClip
 )
 
