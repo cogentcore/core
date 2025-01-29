@@ -150,7 +150,7 @@ func (w *Window) Screen() *system.Screen {
 		}
 	}
 
-	// trying to get a onf of actual screens safely
+	// trying to get a one of actual screens safely
 	// because a `Screen(n int) *system.Screen` may panic.
 	if sc == nil && len(TheApp.Screens) > 0 {
 		sc = TheApp.Screens[0]
