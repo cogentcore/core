@@ -484,7 +484,7 @@ func (w *Window) updateGeometry() {
 	w.updateMaximized()
 	var wsz image.Point
 	wsz.X, wsz.Y = w.Glw.GetSize()
-	w.WnSize = wsz
+	w.WnSize = sc.WindowSizeFromPixels(wsz)
 	var fbsz image.Point
 	fbsz.X, fbsz.Y = w.Glw.GetFramebufferSize()
 	w.PixelSize = fbsz
