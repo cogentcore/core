@@ -378,6 +378,7 @@ func (wb *WidgetBase) EndRender() {
 		}
 	}
 
+	pc.RenderDone()
 	pc.PopContext()
 	if wb.hasFlag(widgetFirstRender) {
 		pc.PopContext()

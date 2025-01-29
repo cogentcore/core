@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -157,9 +158,9 @@ func (txt *Text2D) RenderText() {
 	}
 	rs := &txt.RenderState
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {
-		rs.Init(szpt.X, szpt.Y, img)
+		rs.InitImageRaster(nil, szpt.X, szpt.Y, img)
 	}
-	rs.StartRender(bounds)
+	rs.PushContext(nil, paint.NewBoundsRect(bounds, sides.NewFloats()))
 	pt := styles.Paint{}
 	pt.Defaults()
 	pt.FromStyle(st)
@@ -168,7 +169,7 @@ func (txt *Text2D) RenderText() {
 		draw.Draw(img, bounds, st.Background, image.Point{}, draw.Src)
 	}
 	txt.TextRender.Render(ctx, txt.TextPos)
-	rs.PopBounds()
+	rs.PopContext()
 }
 
 // Validate checks that text has valid mesh and texture settings, etc
