@@ -628,7 +628,7 @@ func (tr *Tree) ApplyScenePos() {
 }
 
 func (tr *Tree) Render() {
-	pc := &tr.Scene.PaintContext
+	pc := &tr.Scene.Painter
 	st := &tr.Styles
 
 	pabg := tr.parentActualBackground()
@@ -640,7 +640,7 @@ func (tr *Tree) Render() {
 	}
 	tr.Styles.ComputeActualBackground(pabg)
 
-	pc.DrawStandardBox(st, tr.Geom.Pos.Total, tr.Geom.Size.Actual.Total, pabg)
+	pc.StandardBox(st, tr.Geom.Pos.Total, tr.Geom.Size.Actual.Total, pabg)
 
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0

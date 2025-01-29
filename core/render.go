@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -318,19 +319,19 @@ func (wb *WidgetBase) PushBounds() bool {
 		return false
 	}
 	wb.Styles.ComputeActualBackground(wb.parentActualBackground())
-	pc := &wb.Scene.PaintContext
+	pc := &wb.Scene.Painter
 	if pc.State == nil || pc.Image == nil {
 		return false
 	}
-	if len(pc.BoundsStack) == 0 && wb.Parent != nil {
+	if len(pc.Stack) == 0 && wb.Parent != nil {
 		wb.setFlag(true, widgetFirstRender)
 		// push our parent's bounds if we are the first to render
 		pw := wb.parentWidget()
-		pc.PushBoundsGeom(pw.Geom.TotalBBox, pw.Styles.Border.Radius.Dots())
+		pc.PushContext(nil, paint.NewBounds(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
 	} else {
 		wb.setFlag(false, widgetFirstRender)
 	}
-	pc.PushBoundsGeom(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots())
+	pc.PushContext(nil, paint.NewBounds(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
 	pc.Defaults() // start with default values
 	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
@@ -344,7 +345,7 @@ func (wb *WidgetBase) PopBounds() {
 	if wb == nil || wb.This == nil {
 		return
 	}
-	pc := &wb.Scene.PaintContext
+	pc := &wb.Scene.Painter
 
 	isSelw := wb.Scene.selectedWidget == wb.This
 	if wb.Scene.renderBBoxes || isSelw {
@@ -363,7 +364,7 @@ func (wb *WidgetBase) PopBounds() {
 			pc.Fill.Color = fc
 			pc.Fill.Opacity = 0.2
 		}
-		pc.DrawRectangle(pos.X, pos.Y, sz.X, sz.Y)
+		pc.Rectangle(pos.X, pos.Y, sz.X, sz.Y)
 		pc.PathDone()
 		// restore
 		pc.Fill.Opacity = pcop
@@ -378,9 +379,9 @@ func (wb *WidgetBase) PopBounds() {
 		}
 	}
 
-	pc.PopBounds()
+	pc.PopContext()
 	if wb.hasFlag(widgetFirstRender) {
-		pc.PopBounds()
+		pc.PopContext()
 		wb.setFlag(false, widgetFirstRender)
 	}
 }
@@ -468,14 +469,14 @@ func (wb *WidgetBase) Shown() {
 
 // RenderBoxGeom renders a box with the given geometry.
 func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs styles.Border) {
-	wb.Scene.PaintContext.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
+	wb.Scene.Painter.Border(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
 // RenderStandardBox renders the standard box model.
 func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
-	wb.Scene.PaintContext.DrawStandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
+	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
 }
 
 ////////	Widget position functions

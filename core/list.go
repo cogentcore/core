@@ -1920,7 +1920,7 @@ func (lg *ListGrid) renderStripes() {
 	}
 	lg.updateBackgrounds()
 
-	pc := &lg.Scene.PaintContext
+	pc := &lg.Scene.Painter
 	rows := lg.layout.Shape.Y
 	cols := lg.layout.Shape.X
 	st := pos

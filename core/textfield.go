@@ -1421,7 +1421,7 @@ func (tf *TextField) renderSelect() {
 
 	spos := tf.charRenderPos(effst, false)
 
-	pc := &tf.Scene.PaintContext
+	pc := &tf.Scene.Painter
 	tsz := tf.relCharPos(effst, effed)
 	if !tf.hasWordWrap() || tsz.Y == 0 {
 		pc.FillBox(spos, math32.Vec2(tsz.X, tf.fontHeight), tf.SelectColor)
@@ -1929,7 +1929,7 @@ func (tf *TextField) Render() {
 		}
 	}()
 
-	pc := &tf.Scene.PaintContext
+	pc := &tf.Scene.Painter
 	st := &tf.Styles
 
 	tf.autoScroll() // inits paint with our style

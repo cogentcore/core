@@ -367,5 +367,5 @@ func (tx *Text) SizeDown(iter int) bool {
 
 func (tx *Text) Render() {
 	tx.WidgetBase.Render()
-	tx.paintText.Render(&tx.Scene.PaintContext, tx.Geom.Pos.Content)
+	tx.paintText.Render(&tx.Scene.Painter, tx.Geom.Pos.Content)
 }

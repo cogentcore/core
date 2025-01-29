@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
@@ -45,7 +46,7 @@ type Scene struct { //core:no-new
 	// Bars are functions for creating control bars,
 	// attached to different sides of a [Scene]. Functions
 	// are called in forward order so first added are called first.
-	Bars styles.Sides[BarFuncs] `json:"-" xml:"-" set:"-"`
+	Bars sides.Sides[BarFuncs] `json:"-" xml:"-" set:"-"`
 
 	// Data is the optional data value being represented by this scene.
 	// Used e.g., for recycling views of a given item instead of creating new one.
@@ -55,7 +56,7 @@ type Scene struct { //core:no-new
 	SceneGeom math32.Geom2DInt `edit:"-" set:"-"`
 
 	// paint context for rendering
-	PaintContext paint.Painter `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
+	Painter paint.Painter `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// live pixels that we render into
 	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
@@ -269,11 +270,11 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 	if geom.Size.X <= 0 || geom.Size.Y <= 0 {
 		return false
 	}
-	if sc.PaintContext.State == nil {
-		sc.PaintContext.State = &paint.State{}
+	if sc.Painter.State == nil {
+		sc.Painter.State = &paint.State{}
 	}
-	if sc.PaintContext.Paint == nil {
-		sc.PaintContext.Paint = &styles.Paint{}
+	if sc.Painter.Paint == nil {
+		sc.Painter.Paint = &styles.Paint{}
 	}
 	sc.SceneGeom.Pos = geom.Pos
 	if sc.Pixels == nil || sc.Pixels.Bounds().Size() != geom.Size {
@@ -281,7 +282,7 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 	} else {
 		return false
 	}
-	sc.PaintContext.Init(geom.Size.X, geom.Size.Y, sc.Pixels)
+	sc.Painter.InitImageRaster(nil, pgeom.Size.X, geom.Size.Y, sc.Pixels)
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	sc.updateScene()

@@ -484,7 +484,7 @@ func (sr *Slider) scrollScale(del float32) float32 {
 func (sr *Slider) Render() {
 	sr.setPosFromValue(sr.Value)
 
-	pc := &sr.Scene.PaintContext
+	pc := &sr.Scene.Painter
 	st := &sr.Styles
 
 	dim := sr.Styles.Direction.Dim()
@@ -495,7 +495,7 @@ func (sr *Slider) Render() {
 	pabg := sr.parentActualBackground()
 
 	if sr.Type == SliderScrollbar {
-		pc.DrawStandardBox(st, pos, sz, pabg) // track
+		pc.StandardBox(st, pos, sz, pabg) // track
 		if sr.ValueColor != nil {
 			thsz := sr.slideThumbSize()
 			osz := sr.thumbSizeDots().Dim(od)

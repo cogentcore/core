@@ -311,7 +311,7 @@ func (ed *Editor) renderRegionBoxStyle(reg text.Region, sty *styles.Style, bg im
 		epos.X = ex
 	}
 
-	pc := &ed.Scene.PaintContext
+	pc := &ed.Scene.Painter
 	stsi, _, _ := ed.wrappedLineNumber(st)
 	edsi, _, _ := ed.wrappedLineNumber(end)
 	if st.Ln == end.Ln && stsi == edsi {
@@ -346,7 +346,7 @@ func (ed *Editor) renderRegionToEnd(st lexer.Pos, sty *styles.Style, bg image.Im
 	if vsz.X <= 0 || vsz.Y <= 0 {
 		return
 	}
-	pc := &ed.Scene.PaintContext
+	pc := &ed.Scene.Painter
 	pc.FillBox(spos, epos.Sub(spos), bg) // same line, done
 }
 
@@ -354,7 +354,7 @@ func (ed *Editor) renderRegionToEnd(st lexer.Pos, sty *styles.Style, bg image.Im
 // after PushBounds has already been called.
 func (ed *Editor) renderAllLines() {
 	ed.RenderStandardBox()
-	pc := &ed.Scene.PaintContext
+	pc := &ed.Scene.Painter
 	bb := ed.renderBBox()
 	pos := ed.renderStartPos()
 	stln := -1
@@ -419,7 +419,7 @@ func (ed *Editor) renderLineNumbersBoxAll() {
 	if !ed.hasLineNumbers {
 		return
 	}
-	pc := &ed.Scene.PaintContext
+	pc := &ed.Scene.Painter
 	bb := ed.renderBBox()
 	spos := math32.FromPoint(bb.Min)
 	epos := math32.FromPoint(bb.Max)
@@ -450,7 +450,7 @@ func (ed *Editor) renderLineNumber(ln int, defFill bool) {
 	sc := ed.Scene
 	sty := &ed.Styles
 	fst := sty.FontRender()
-	pc := &sc.PaintContext
+	pc := &sc.Painter
 
 	fst.Background = nil
 	lfmt := fmt.Sprintf("%d", ed.lineNumberDigits)

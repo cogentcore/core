@@ -117,7 +117,7 @@ func (m *Meter) WidgetTooltip(pos image.Point) (string, image.Point) {
 }
 
 func (m *Meter) Render() {
-	pc := &m.Scene.PaintContext
+	pc := &m.Scene.Painter
 	st := &m.Styles
 
 	prop := (m.Value - m.Min) / (m.Max - m.Min)
@@ -134,7 +134,7 @@ func (m *Meter) Render() {
 	}
 
 	pc.Stroke.Width = m.Width
-	sw := pc.StrokeWidth()
+	sw := m.Width.Dots // pc.StrokeWidth() // todo:
 	pos := m.Geom.Pos.Content.AddScalar(sw / 2)
 	size := m.Geom.Size.Actual.Content.SubScalar(sw)
 
@@ -151,12 +151,12 @@ func (m *Meter) Render() {
 		r := size.DivScalar(2)
 		c := pos.Add(r)
 
-		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, 0, 2*math32.Pi)
+		pc.Arc(c.X, c.Y, r.X, r.Y, 0, 2*math32.Pi)
 		pc.Stroke.Color = st.Background
 		pc.PathDone()
 
 		if m.ValueColor != nil {
-			pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, -math32.Pi/2, prop*2*math32.Pi-math32.Pi/2)
+			pc.Arc(c.X, c.Y, r.X, r.Y, -math32.Pi/2, prop*2*math32.Pi-math32.Pi/2)
 			pc.Stroke.Color = m.ValueColor
 			pc.PathDone()
 		}
@@ -169,12 +169,12 @@ func (m *Meter) Render() {
 	r := size.Mul(math32.Vec2(0.5, 1))
 	c := pos.Add(r)
 
-	pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, math32.Pi, 2*math32.Pi)
+	pc.Arc(c.X, c.Y, r.X, r.Y, math32.Pi, 2*math32.Pi)
 	pc.Stroke.Color = st.Background
 	pc.PathDone()
 
 	if m.ValueColor != nil {
-		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, math32.Pi, (1+prop)*math32.Pi)
+		pc.Arc(c.X, c.Y, r.X, r.Y, math32.Pi, (1+prop)*math32.Pi)
 		pc.Stroke.Color = m.ValueColor
 		pc.PathDone()
 	}

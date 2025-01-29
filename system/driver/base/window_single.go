@@ -14,7 +14,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/system"
 )
 
@@ -104,9 +104,9 @@ func (w *WindowSingle[A]) SetGeometry(fullscreen bool, pos image.Point, size ima
 	w.Flgs.SetFlag(fullscreen, system.Fullscreen)
 }
 
-func (w *WindowSingle[A]) ConstrainFrame(topOnly bool) styles.Sides[int] {
+func (w *WindowSingle[A]) ConstrainFrame(topOnly bool) sides.Sides[int] {
 	// no-op
-	return styles.Sides[int]{}
+	return sides.Sides[int]{}
 }
 
 func (w *WindowSingle[A]) RenderGeom() math32.Geom2DInt {

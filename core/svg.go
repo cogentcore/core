@@ -124,7 +124,7 @@ func (sv *SVG) renderSVG() {
 	// need to make the image again to prevent it from
 	// rendering over itself
 	sv.SVG.Pixels = image.NewRGBA(sv.SVG.Pixels.Rect)
-	sv.SVG.RenderState.Init(sv.SVG.Pixels.Rect.Dx(), sv.SVG.Pixels.Rect.Dy(), sv.SVG.Pixels)
+	sv.SVG.RenderState.InitImageRaster(nil, sv.SVG.Pixels.Rect.Dx(), sv.SVG.Pixels.Rect.Dy(), sv.SVG.Pixels)
 	sv.SVG.Render()
 	sv.prevSize = sv.SVG.Pixels.Rect.Size()
 }

@@ -7,6 +7,7 @@ package core
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/path"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"golang.org/x/image/draw"
@@ -23,8 +24,8 @@ type Canvas struct {
 	// so you should specify points on a 0-1 scale.
 	Draw func(pc *paint.Painter)
 
-	// context is the paint context used for drawing.
-	context *paint.Painter
+	// painter is the paint painter used for drawing.
+	painter *paint.Painter
 }
 
 func (c *Canvas) Init() {
@@ -39,12 +40,13 @@ func (c *Canvas) Render() {
 
 	sz := c.Geom.Size.Actual.Content
 	szp := c.Geom.Size.Actual.Content.ToPoint()
-	c.context = paint.NewContext(szp.X, szp.Y)
-	c.context.UnitContext = c.Styles.UnitContext
-	c.context.ToDots()
-	c.context.PushTransform(math32.Scale2D(sz.X, sz.Y))
-	c.context.VectorEffect = styles.VectorEffectNonScalingStroke
-	c.Draw(c.context)
+	c.painter = paint.NewPainter(szp.X, szp.Y)
+	c.painter.Paint.Transform = math32.Scale2D(sz.X, sz.Y)
+	c.painter.Context().Transform = math32.Scale2D(sz.X, sz.Y)
+	c.painter.UnitContext = c.Styles.UnitContext
+	c.painter.ToDots()
+	c.painter.VectorEffect = path.VectorEffectNonScalingStroke
+	c.Draw(c.painter)
 
-	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.context.Image, c.Geom.ScrollOffset(), draw.Over)
+	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.painter.Image, c.Geom.ScrollOffset(), draw.Over)
 }

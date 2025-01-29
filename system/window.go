@@ -15,7 +15,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 )
 
 // Window is a double-buffered OS-specific hardware window.
@@ -107,7 +107,7 @@ type Window interface {
 	// This will result in move and / or size events as needed.
 	// If topOnly is true, then only the top vertical axis is constrained, so that
 	// the window title bar does not go offscreen.
-	ConstrainFrame(topOnly bool) styles.Sides[int]
+	ConstrainFrame(topOnly bool) sides.Sides[int]
 
 	// Raise requests that the window be at the top of the stack of windows,
 	// and receive focus.  If it is iconified, it will be de-iconified.  This

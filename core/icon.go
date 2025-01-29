@@ -96,7 +96,7 @@ func (ic *Icon) renderSVG() {
 	// ensure that we have new pixels to render to in order to prevent
 	// us from rendering over ourself
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	sv.RenderState.Init(sz.X, sz.Y, sv.Pixels)
+	sv.RenderState.InitImageRaster(nil, sz.X, sz.Y, sv.Pixels)
 	sv.Geom.Size = sz // make sure
 
 	sv.Resize(sz) // does Config if needed
