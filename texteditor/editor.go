@@ -84,7 +84,8 @@ type Editor struct { //core:embedder
 	NumLines int `set:"-" display:"-" json:"-" xml:"-"`
 
 	// renders is a slice of ptext.Text representing the renders of the text lines,
-	// with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines).
+	// with one render per line (each line could visibly wrap-around,
+	// so these are logical lines, not display lines).
 	renders []ptext.Text
 
 	// offsets is a slice of float32 representing the starting render offsets for the top of each line.
@@ -96,8 +97,8 @@ type Editor struct { //core:embedder
 	// LineNumberOffset is the horizontal offset for the start of text after line numbers.
 	LineNumberOffset float32 `set:"-" display:"-" json:"-" xml:"-"`
 
-	// lineNumberRender is the render for line numbers.
-	lineNumberRender ptext.Text
+	// lineNumberRenders are the renderers for line numbers, per visible line.
+	lineNumberRenders []ptext.Text
 
 	// CursorPos is the current cursor position.
 	CursorPos lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`

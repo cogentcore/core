@@ -9,6 +9,7 @@ import (
 	"image"
 	"image/color"
 
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
@@ -386,8 +387,12 @@ func (ed *Editor) renderAllLines() {
 
 	if ed.hasLineNumbers {
 		ed.renderLineNumbersBoxAll()
+		nln := 1 + edln - stln
+		ed.lineNumberRenders = slicesx.SetLength(ed.lineNumberRenders, nln)
+		li := 0
 		for ln := stln; ln <= edln; ln++ {
-			ed.renderLineNumber(ln, false) // don't re-render std fill boxes
+			ed.renderLineNumber(li, ln, false) // don't re-render std fill boxes
+			li++
 		}
 	}
 
@@ -436,7 +441,7 @@ func (ed *Editor) renderLineNumbersBoxAll() {
 // renderLineNumber renders given line number; called within context of other render.
 // if defFill is true, it fills box color for default background color (use false for
 // batch mode).
-func (ed *Editor) renderLineNumber(ln int, defFill bool) {
+func (ed *Editor) renderLineNumber(li, ln int, defFill bool) {
 	if !ed.hasLineNumbers || ed.Buffer == nil {
 		return
 	}
@@ -467,9 +472,10 @@ func (ed *Editor) renderLineNumber(ln int, defFill bool) {
 	} else {
 		fst.Color = colors.Scheme.OnSurfaceVariant
 	}
-	ed.lineNumberRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
+	lnr := &ed.lineNumberRenders[li]
+	lnr.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
 
-	pc.Text(&ed.lineNumberRender, tpos)
+	pc.Text(lnr, tpos)
 
 	// render circle
 	lineColor := ed.Buffer.LineColors[ln]
@@ -485,7 +491,7 @@ func (ed *Editor) renderLineNumber(ln int, defFill bool) {
 		}
 
 		// starts at end of line number text
-		start.X = tpos.X + ed.lineNumberRender.BBox.Size().X
+		start.X = tpos.X + lnr.BBox.Size().X
 		// ends at end of line number offset
 		end.X = float32(bb.Min.X) + ed.LineNumberOffset
 
