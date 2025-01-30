@@ -443,6 +443,10 @@ func (pc *Painter) BlitBox(pos, size math32.Vector2, img image.Image) {
 // DrawBox performs an optimized fill/blit of the given rectangular region
 // with the given image, using the given draw operation.
 func (pc *Painter) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op) {
+	nilsize := size == (math32.Vector2{})
+	// if nilsize { // note: nil size == fill entire box -- make sure it is intentional
+	// 	fmt.Println("nil size")
+	// }
 	if img == nil {
 		img = colors.Uniform(color.RGBA{})
 	}
@@ -451,6 +455,9 @@ func (pc *Painter) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op
 	br := math32.RectFromPosSizeMax(pos, size)
 	cb := pc.Context().Bounds.Rect.ToRect()
 	b := cb.Intersect(br)
+	if !nilsize && b.Size() == (image.Point{}) { // we got nil from intersection, bail
+		return
+	}
 	if g, ok := img.(gradient.Gradient); ok {
 		g.Update(pc.Fill.Opacity, math32.B2FromRect(b), pc.Transform())
 	} else {
