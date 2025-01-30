@@ -90,7 +90,7 @@ func (sr *Span) RenderBg(ctx *render.Context, tpos math32.Vector2) {
 		ul := sp.Add(tx.MulVector2AsVector(math32.Vec2(0, szt.Y)))
 		lr := sp.Add(tx.MulVector2AsVector(math32.Vec2(szt.X, 0)))
 		nctx.Style.Fill.Color = rr.Background
-		p = p.Append(ppath.Polygon(sp, ul, ur, lr))
+		p.Polygon(sp, ul, ur, lr)
 		didLast = true
 	}
 	if didLast {

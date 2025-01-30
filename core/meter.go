@@ -151,12 +151,12 @@ func (m *Meter) Render() {
 		r := size.DivScalar(2)
 		c := pos.Add(r)
 
-		pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, 0, 2*math32.Pi)
+		pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, 2*math32.Pi)
 		pc.Stroke.Color = st.Background
 		pc.PathDone()
 
 		if m.ValueColor != nil {
-			pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, -math32.Pi/2, prop*2*math32.Pi-math32.Pi/2)
+			pc.EllipticalArc(c.X, c.Y, r.X, r.Y, -math32.Pi/2, prop*2*math32.Pi-math32.Pi/2)
 			pc.Stroke.Color = m.ValueColor
 			pc.PathDone()
 		}
@@ -169,12 +169,12 @@ func (m *Meter) Render() {
 	r := size.Mul(math32.Vec2(0.5, 1))
 	c := pos.Add(r)
 
-	pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, math32.Pi, 2*math32.Pi)
+	pc.EllipticalArc(c.X, c.Y, r.X, r.Y, math32.Pi, 2*math32.Pi)
 	pc.Stroke.Color = st.Background
 	pc.PathDone()
 
 	if m.ValueColor != nil {
-		pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, math32.Pi, (1+prop)*math32.Pi)
+		pc.EllipticalArc(c.X, c.Y, r.X, r.Y, math32.Pi, (1+prop)*math32.Pi)
 		pc.Stroke.Color = m.ValueColor
 		pc.PathDone()
 	}

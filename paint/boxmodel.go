@@ -21,10 +21,14 @@ func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32
 		return
 	}
 
+	encroach, pr := pc.boundsEncroachParent(pos, size)
 	tm := st.TotalMargin().Round()
 	mpos := pos.Add(tm.Pos())
 	msize := size.Sub(tm.Size())
 	radius := st.Border.Radius.Dots()
+	if encroach { // if we encroach, we must limit ourselves to the parent radius
+		radius = radius.Max(pr)
+	}
 
 	if st.ActualBackground == nil {
 		// we need to do this to prevent
@@ -38,12 +42,23 @@ func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32
 	pc.Fill.Opacity = 1
 
 	if st.FillMargin {
-		pc.Fill.Color = pabg
-		pc.RoundedRectangleSides(pos.X, pos.Y, size.X, size.Y, radius)
-		pc.PathDone()
-		// } else {
-		// 	pc.BlitBox(pos, size, pabg)
-		// }
+		// We need to fill the whole box where the
+		// box shadows / element can go to prevent growing
+		// box shadows and borders. We couldn't just
+		// do this when there are box shadows, as they
+		// may be removed and then need to be covered up.
+		// This also fixes https://github.com/cogentcore/core/issues/579.
+		// This isn't an ideal solution because of performance,
+		// so TODO: maybe come up with a better solution for this.
+		// We need to use raw geom data because we need to clear
+		// any box shadow that may have gone in margin.
+		if encroach { // if we encroach, we must limit ourselves to the parent radius
+			pc.Fill.Color = pabg
+			pc.RoundedRectangleSides(pos.X, pos.Y, size.X, size.Y, radius)
+			pc.PathDone()
+		} else {
+			pc.BlitBox(pos, size, pabg)
+		}
 	}
 
 	pc.Stroke.Opacity = st.Opacity
@@ -96,4 +111,38 @@ func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32
 	msize.SetAdd(st.Border.Offset.Dots().Size())
 	pc.Fill.Color = nil
 	pc.Border(mpos.X, mpos.Y, msize.X, msize.Y, st.Border)
+}
+
+// boundsEncroachParent returns whether the current box encroaches on the
+// parent bounds, taking into account the parent radius, which is also returned.
+func (pc *Painter) boundsEncroachParent(pos, size math32.Vector2) (bool, sides.Floats) {
+	if len(pc.Stack) == 1 {
+		return false, sides.Floats{}
+	}
+
+	ctx := pc.Stack[len(pc.Stack)-1]
+	pr := ctx.Bounds.Radius
+	if sides.AreZero(pr.Sides) {
+		return false, pr
+	}
+
+	pbox := ctx.Bounds.Rect.ToRect()
+	psz := ctx.Bounds.Rect.Size()
+	pr = ClampBorderRadius(pr, psz.X, psz.Y)
+
+	rect := math32.Box2{Min: pos, Max: pos.Add(size)}
+
+	// logic is currently based on consistent radius for all corners
+	radius := max(pr.Top, pr.Left, pr.Right, pr.Bottom)
+
+	// each of these is how much the element is encroaching into each
+	// side of the bounding rectangle, within the radius curve.
+	// if the number is negative, then it isn't encroaching at all and can
+	// be ignored.
+	top := radius - (rect.Min.Y - float32(pbox.Min.Y))
+	left := radius - (rect.Min.X - float32(pbox.Min.X))
+	right := radius - (float32(pbox.Max.X) - rect.Max.X)
+	bottom := radius - (float32(pbox.Max.Y) - rect.Max.Y)
+
+	return top > 0 || left > 0 || right > 0 || bottom > 0, pr
 }

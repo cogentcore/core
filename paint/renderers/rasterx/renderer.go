@@ -5,7 +5,6 @@
 package rasterx
 
 import (
-	"fmt"
 	"image"
 	"slices"
 
@@ -79,6 +78,7 @@ func (rs *Renderer) Render(r render.Render) {
 func (rs *Renderer) RenderPath(pt *render.Path) {
 	rs.Raster.Clear()
 	p := pt.Path.ReplaceArcs()
+	// p := pt.Path
 	m := pt.Context.Transform
 	for s := p.Scanner(); s.Scan(); {
 		cmd := s.Cmd()
@@ -94,15 +94,6 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		case ppath.CubeTo:
 			cp1 := m.MulVector2AsPoint(s.CP1())
 			cp2 := m.MulVector2AsPoint(s.CP2())
-			if cp1.X > 1.0e4 || cp1.Y > 1.0e4 || cp1.X < -1.0e4 || cp1.Y < -1.0e4 {
-				fmt.Println("cp1 extreme:", cp1, "end:", end)
-				break
-			}
-			if cp2.X > 1.0e4 || cp2.Y > 1.0e4 || cp2.X < -1.0e4 || cp2.Y < -1.0e4 {
-				fmt.Println("cp2 extreme:", cp2, "end:", end)
-				break
-			}
-			fmt.Println(cp1, cp2, end)
 			rs.Path.CubeBezier(cp1.ToFixed(), cp2.ToFixed(), end.ToFixed())
 		case ppath.Close:
 			rs.Path.Stop(true)
@@ -136,13 +127,12 @@ func (rs *Renderer) Stroke(pt *render.Path) {
 		math32.ToFixed(sty.Stroke.MiterLimit),
 		capfunc(sty.Stroke.Cap), nil, nil, joinmode(sty.Stroke.Join),
 		dash, 0)
-	fmt.Println(pc.Bounds.Rect)
 	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
 	rs.Path.AddTo(rs.Raster)
-	fbox := rs.Raster.Scanner.GetPathExtent()
-	lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
-		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if g, ok := sty.Stroke.Color.(gradient.Gradient); ok {
+		fbox := rs.Raster.Scanner.GetPathExtent()
+		lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+			Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 		g.Update(sty.Stroke.Opacity, math32.B2FromRect(lastRenderBBox), pc.Transform)
 		rs.Raster.SetColor(sty.Stroke.Color)
 	} else {
@@ -169,10 +159,10 @@ func (rs *Renderer) Fill(pt *render.Path) {
 	rf.SetWinding(sty.Fill.Rule == ppath.NonZero)
 	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
 	rs.Path.AddTo(rf)
-	fbox := rs.Scanner.GetPathExtent()
-	lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
-		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if g, ok := sty.Fill.Color.(gradient.Gradient); ok {
+		fbox := rs.Scanner.GetPathExtent()
+		lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+			Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 		g.Update(sty.Fill.Opacity, math32.B2FromRect(lastRenderBBox), pc.Transform)
 		rf.SetColor(sty.Fill.Color)
 	} else {

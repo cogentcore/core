@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/pimage"
-	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
@@ -122,26 +121,26 @@ func (pc *Painter) RenderDone() {
 
 // Line adds a separate line (MoveTo, LineTo).
 func (pc *Painter) Line(x1, y1, x2, y2 float32) {
-	pc.MoveTo(x1, y1)
-	pc.LineTo(x2, y2)
+	pc.State.Path.Line(x1, y1, x2, y2)
 }
 
 // Polyline adds multiple connected lines, with no final Close.
 func (pc *Painter) Polyline(points ...math32.Vector2) {
-	pc.State.Path = pc.State.Path.Append(ppath.Polyline(points...))
+	pc.State.Path.Polyline(points...)
 }
 
 // Polyline adds multiple connected lines, with no final Close,
 // with coordinates in Px units.
-func (pc *Painter) PolylinePx(points []math32.Vector2) {
+func (pc *Painter) PolylinePx(points ...math32.Vector2) {
 	pu := &pc.UnitContext
 	sz := len(points)
 	if sz < 2 {
 		return
 	}
-	pc.MoveTo(pu.PxToDots(points[0].X), pu.PxToDots(points[0].Y))
+	p := &pc.State.Path
+	p.MoveTo(pu.PxToDots(points[0].X), pu.PxToDots(points[0].Y))
 	for i := 1; i < sz; i++ {
-		pc.LineTo(pu.PxToDots(points[i].X), pu.PxToDots(points[i].Y))
+		p.LineTo(pu.PxToDots(points[i].X), pu.PxToDots(points[i].Y))
 	}
 }
 
@@ -153,34 +152,34 @@ func (pc *Painter) Polygon(points ...math32.Vector2) {
 
 // Polygon adds multiple connected lines with a final Close,
 // with coordinates in Px units.
-func (pc *Painter) PolygonPx(points []math32.Vector2) {
-	pc.PolylinePx(points)
+func (pc *Painter) PolygonPx(points ...math32.Vector2) {
+	pc.PolylinePx(points...)
 	pc.Close()
 }
 
 // Rectangle adds a rectangle of width w and height h at position x,y.
 func (pc *Painter) Rectangle(x, y, w, h float32) {
-	pc.State.Path = pc.State.Path.Append(ppath.Rectangle(x, y, w, h))
+	pc.State.Path.Rectangle(x, y, w, h)
 }
 
 // RoundedRectangle adds a rectangle of width w and height h
 // with rounded corners of radius r at postion x,y.
 // A negative radius will cast the corners inwards (i.e. concave).
 func (pc *Painter) RoundedRectangle(x, y, w, h, r float32) {
-	pc.State.Path = pc.State.Path.Append(ppath.RoundedRectangle(x, y, w, h, r))
+	pc.State.Path.RoundedRectangle(x, y, w, h, r)
 }
 
 // RoundedRectangleSides adds a standard rounded rectangle
 // with a consistent border and with the given x and y position,
 // width and height, and border radius for each corner.
 func (pc *Painter) RoundedRectangleSides(x, y, w, h float32, r sides.Floats) {
-	pc.State.Path = pc.State.Path.Append(ppath.RoundedRectangleSides(x, y, w, h, r))
+	pc.State.Path.RoundedRectangleSidesQuad(x, y, w, h, r)
 }
 
 // BeveledRectangle adds a rectangle of width w and height h
 // with beveled corners at distance r from the corner.
 func (pc *Painter) BeveledRectangle(x, y, w, h, r float32) {
-	pc.State.Path = pc.State.Path.Append(ppath.BeveledRectangle(x, y, w, h, r))
+	pc.State.Path.BeveledRectangle(x, y, w, h, r)
 }
 
 // Circle adds a circle at given center coordinates of radius r.
@@ -190,10 +189,10 @@ func (pc *Painter) Circle(cx, cy, r float32) {
 
 // Ellipse adds an ellipse at given center coordinates of radii rx and ry.
 func (pc *Painter) Ellipse(cx, cy, rx, ry float32) {
-	pc.State.Path = pc.State.Path.Append(ppath.Ellipse(cx, cy, rx, ry))
+	pc.State.Path.Ellipse(cx, cy, rx, ry)
 }
 
-// Arc adds a circular arc at given coordinates with radius r
+// CircularArc adds a circular arc at given coordinates with radius r
 // and theta0 and theta1 as the angles in degrees of the ellipse
 // (before rot is applied) between which the arc will run.
 // If theta0 < theta1, the arc will run in a CCW direction.
@@ -201,8 +200,8 @@ func (pc *Painter) Ellipse(cx, cy, rx, ry float32) {
 // one full circle will be drawn and the remaining part of diff % 360,
 // e.g. a difference of 810 degrees will draw one full circle and an arc
 // over 90 degrees.
-func (pc *Painter) Arc(x, y, r, theta0, theta1 float32) {
-	pc.EllipticalArc(x, y, r, r, 0.0, theta0, theta1)
+func (pc *Painter) CircularArc(x, y, r, theta0, theta1 float32) {
+	pc.EllipticalArc(x, y, r, r, theta0, theta1)
 }
 
 // EllipticalArc adds an elliptical arc at given coordinates with
@@ -214,13 +213,13 @@ func (pc *Painter) Arc(x, y, r, theta0, theta1 float32) {
 // one full circle will be drawn and the remaining part of diff % 360,
 // e.g. a difference of 810 degrees will draw one full circle and an arc
 // over 90 degrees.
-func (pc *Painter) EllipticalArc(x, y, rx, ry, rot, theta0, theta1 float32) {
-	pc.State.Path = pc.State.Path.Append(ppath.EllipticalArc(x, y, rx, ry, rot, theta0, theta1))
+func (pc *Painter) EllipticalArc(x, y, rx, ry, theta0, theta1 float32) {
+	pc.State.Path.EllipticalArc(x, y, rx, ry, theta0, theta1)
 }
 
 // Triangle adds a triangle of radius r pointing upwards.
 func (pc *Painter) Triangle(x, y, r float32) {
-	pc.State.Path = pc.State.Path.Append(ppath.RegularPolygon(3, r, true).Translate(x, y))
+	pc.State.Path.RegularPolygon(3, r, true).Translate(x, y) // todo: just make these take a position.
 }
 
 // RegularPolygon adds a regular polygon with radius r.
@@ -229,7 +228,7 @@ func (pc *Painter) Triangle(x, y, r float32) {
 // n must be 3 or more. The up boolean defines whether
 // the first point will point upwards or downwards.
 func (pc *Painter) RegularPolygon(x, y float32, n int, r float32, up bool) {
-	pc.State.Path = pc.State.Path.Append(ppath.RegularPolygon(n, r, up).Translate(x, y))
+	pc.State.Path.RegularPolygon(n, r, up).Translate(x, y)
 }
 
 // RegularStarPolygon adds a regular star polygon with radius r.
@@ -240,21 +239,32 @@ func (pc *Painter) RegularPolygon(x, y float32, n int, r float32, up bool) {
 // n must be 3 or more and d 2 or more. The up boolean defines whether
 // the first point will point upwards or downwards.
 func (pc *Painter) RegularStarPolygon(x, y float32, n, d int, r float32, up bool) {
-	pc.State.Path = pc.State.Path.Append(ppath.RegularStarPolygon(n, d, r, up).Translate(x, y))
+	pc.State.Path.RegularStarPolygon(n, d, r, up).Translate(x, y)
 }
 
 // StarPolygon returns a star polygon of n points with alternating
 // radius R and r. The up boolean defines whether the first point
 // will be point upwards or downwards.
 func (pc *Painter) StarPolygon(x, y float32, n int, R, r float32, up bool) {
-	pc.State.Path = pc.State.Path.Append(ppath.StarPolygon(n, R, r, up).Translate(x, y))
+	pc.State.Path.StarPolygon(n, R, r, up).Translate(x, y)
 }
 
 // Grid returns a stroked grid of width w and height h,
 // with grid line thickness r, and the number of cells horizontally
 // and vertically as nx and ny respectively.
 func (pc *Painter) Grid(x, y, w, h float32, nx, ny int, r float32) {
-	pc.State.Path.Append(ppath.Grid(w, y, nx, ny, r).Translate(x, y))
+	pc.State.Path.Grid(w, y, nx, ny, r).Translate(x, y)
+}
+
+// ClampBorderRadius returns the given border radius clamped to fit based
+// on the given width and height of the object.
+func ClampBorderRadius(r sides.Floats, w, h float32) sides.Floats {
+	min := math32.Min(w/2, h/2)
+	r.Top = math32.Clamp(r.Top, 0, min)
+	r.Right = math32.Clamp(r.Right, 0, min)
+	r.Bottom = math32.Clamp(r.Bottom, 0, min)
+	r.Left = math32.Clamp(r.Left, 0, min)
+	return r
 }
 
 // Border is a higher-level function that draws, strokes, and fills
@@ -288,6 +298,8 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 	pc.RoundedRectangleSides(x, y, w, h, r)
 	pc.PathDone()
 
+	r = ClampBorderRadius(r, w, h)
+
 	// position values
 	var (
 		xtl, ytl   = x, y                 // top left
@@ -315,7 +327,7 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 	pc.Stroke.Width = bs.Width.Top
 	pc.LineTo(xtri, ytr)
 	if r.Right != 0 {
-		pc.Arc(xtri, ytri, r.Right, math32.DegToRad(270), math32.DegToRad(360))
+		pc.CircularArc(xtri, ytri, r.Right, math32.DegToRad(270), math32.DegToRad(360))
 	}
 	// if the color or width is changing for the next one, we have to stroke now
 	if bs.Color.Top != bs.Color.Right || bs.Width.Top.Dots != bs.Width.Right.Dots {
@@ -329,7 +341,7 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 	pc.Stroke.Width = bs.Width.Right
 	pc.LineTo(xbr, ybri)
 	if r.Bottom != 0 {
-		pc.Arc(xbri, ybri, r.Bottom, math32.DegToRad(0), math32.DegToRad(90))
+		pc.CircularArc(xbri, ybri, r.Bottom, math32.DegToRad(0), math32.DegToRad(90))
 	}
 	if bs.Color.Right != bs.Color.Bottom || bs.Width.Right.Dots != bs.Width.Bottom.Dots {
 		pc.PathDone()
@@ -342,7 +354,7 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 	pc.Stroke.Width = bs.Width.Bottom
 	pc.LineTo(xbli, ybl)
 	if r.Left != 0 {
-		pc.Arc(xbli, ybli, r.Left, math32.DegToRad(90), math32.DegToRad(180))
+		pc.CircularArc(xbli, ybli, r.Left, math32.DegToRad(90), math32.DegToRad(180))
 	}
 	if bs.Color.Bottom != bs.Color.Left || bs.Width.Bottom.Dots != bs.Width.Left.Dots {
 		pc.PathDone()
@@ -355,7 +367,7 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 	pc.Stroke.Width = bs.Width.Left
 	pc.LineTo(xtl, ytli)
 	if r.Top != 0 {
-		pc.Arc(xtli, ytli, r.Top, math32.DegToRad(180), math32.DegToRad(270))
+		pc.CircularArc(xtli, ytli, r.Top, math32.DegToRad(180), math32.DegToRad(270))
 	}
 	pc.LineTo(xtli, ytl)
 	pc.PathDone()

@@ -32,6 +32,10 @@ import (
 // and end point.
 type Path []float32
 
+func New() *Path {
+	return &Path{}
+}
+
 // Commands
 const (
 	MoveTo float32 = 0

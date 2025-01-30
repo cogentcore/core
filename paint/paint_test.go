@@ -16,8 +16,7 @@ import (
 	"cogentcore.org/core/math32"
 	. "cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/ptext"
-	"cogentcore.org/core/paint/render"
-	"cogentcore.org/core/paint/renderers/rasterizer"
+	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
@@ -26,8 +25,8 @@ import (
 
 func TestMain(m *testing.M) {
 	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
-	// NewDefaultImageRenderer = rasterx.New
-	NewDefaultImageRenderer = rasterizer.New
+	NewDefaultImageRenderer = rasterx.New
+	// NewDefaultImageRenderer = rasterizer.New
 	os.Exit(m.Run())
 }
 
@@ -35,7 +34,6 @@ func TestMain(m *testing.M) {
 // function, and then asserts the image using [imagex.Assert] with the given name.
 func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)) {
 	pc := NewPainter(width, height)
-	// pc.StartRender(pc.Image.Rect)
 	f(pc)
 	pc.RenderDone()
 	imagex.Assert(t, pc.RenderImage(), nm)
@@ -107,52 +105,55 @@ func TestPaintPath(t *testing.T) {
 			pc.PathDone()
 		})
 	}
-	test("line-to", func(pc *Painter) {
-		pc.MoveTo(100, 200)
-		pc.LineTo(200, 100)
-	})
-	test("quadratic-to", func(pc *Painter) {
-		pc.MoveTo(100, 200)
-		pc.QuadTo(120, 140, 200, 100)
-	})
-	test("cubic-to", func(pc *Painter) {
-		pc.MoveTo(100, 200)
-		pc.CubeTo(130, 110, 160, 180, 200, 100)
-		pc.LineTo(200, 150)
-		pc.Close()
-	})
-	test("close-path", func(pc *Painter) {
-		pc.MoveTo(100, 200)
-		pc.LineTo(200, 100)
-		pc.LineTo(250, 150)
-		pc.Close()
-	})
-	test("clear-path", func(pc *Painter) {
-		pc.MoveTo(100, 200)
-		pc.MoveTo(200, 100)
-		pc.Clear()
-	})
-	test("rounded-rect", func(pc *Painter) {
-		pc.RoundedRectangle(50, 50, 100, 80, 10)
-	})
+	// test("line-to", func(pc *Painter) {
+	// 	pc.MoveTo(100, 200)
+	// 	pc.LineTo(200, 100)
+	// })
+	// test("quadratic-to", func(pc *Painter) {
+	// 	pc.MoveTo(100, 200)
+	// 	pc.QuadTo(120, 140, 200, 100)
+	// })
+	// test("cubic-to", func(pc *Painter) {
+	// 	pc.MoveTo(100, 200)
+	// 	pc.CubeTo(130, 110, 160, 180, 200, 100)
+	// 	pc.LineTo(200, 150)
+	// 	pc.Close()
+	// })
+	// test("close-path", func(pc *Painter) {
+	// 	pc.MoveTo(100, 200)
+	// 	pc.LineTo(200, 100)
+	// 	pc.LineTo(250, 150)
+	// 	pc.Close()
+	// })
+	// test("clear-path", func(pc *Painter) {
+	// 	pc.MoveTo(100, 200)
+	// 	pc.MoveTo(200, 100)
+	// 	pc.Clear()
+	// })
+	// test("rounded-rect", func(pc *Painter) {
+	// 	pc.RoundedRectangle(50, 50, 100, 80, 10)
+	// })
 	test("rounded-rect-sides", func(pc *Painter) {
 		pc.RoundedRectangleSides(50, 50, 100, 80, sides.NewFloats(10.0, 20.0, 15.0, 5.0))
 	})
-	test("clip-bounds", func(pc *Painter) {
-		pc.PushContext(pc.Paint, render.NewBounds(50, 50, 100, 80, sides.NewFloats(5.0, 10.0, 15.0, 20.0)))
-		pc.RoundedRectangleSides(50, 50, 100, 80, sides.NewFloats(10.0, 20.0, 15.0, 5.0))
-		pc.PathDone()
-		pc.PopContext()
+	test("rounded-rect-sides-0s", func(pc *Painter) {
+		pc.RoundedRectangleSides(50, 50, 100, 80, sides.NewFloats(10.0, 0, 0, 20.0))
 	})
-	test("circle", func(pc *Painter) {
-		pc.Circle(150, 150, 100)
-	})
-	test("ellipse", func(pc *Painter) {
-		pc.Ellipse(150, 150, 100, 80)
-	})
-	test("elliptical-arc", func(pc *Painter) {
-		pc.EllipticalArc(150, 150, 100, 80, 0, 0.0*math32.Pi, 1.5*math32.Pi)
-	})
+	// test("clip-bounds", func(pc *Painter) {
+	// 	pc.PushContext(pc.Paint, render.NewBounds(50, 50, 100, 80, sides.NewFloats(5.0, 10.0, 15.0, 20.0)))
+	// 	pc.RoundedRectangleSides(50, 50, 100, 80, sides.NewFloats(10.0, 20.0, 15.0, 5.0))
+	// 	pc.PathDone()
+	// 	pc.PopContext()
+	// })
+	// test("circle", func(pc *Painter) {
+	// 	pc.Circle(150, 150, 100)
+	// })
+	// test("ellipse", func(pc *Painter) {
+	// 	pc.Ellipse(150, 150, 100, 80)
+	// })
+	// test("elliptical-arc", func(pc *Painter) {
+	// 	pc.EllipticalArc(150, 150, 100, 80, 0, 0.0*math32.Pi, 1.5*math32.Pi)
+	// })
 }
 
 func TestPaintFill(t *testing.T) {

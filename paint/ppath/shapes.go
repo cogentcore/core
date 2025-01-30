@@ -12,22 +12,19 @@ import (
 	"cogentcore.org/core/styles/sides"
 )
 
-// Line returns a line segment of from (x1,y1) to (x2,y2).
-func Line(x1, y1, x2, y2 float32) Path {
+// Line adds a line segment of from (x1,y1) to (x2,y2).
+func (p *Path) Line(x1, y1, x2, y2 float32) *Path {
 	if Equal(x1, x2) && Equal(y1, y2) {
-		return Path{}
+		return p
 	}
-
-	p := Path{}
 	p.MoveTo(x1, y1)
 	p.LineTo(x2, y2)
 	return p
 }
 
-// Polyline returns multiple connected lines, with no final Close.
-func Polyline(points ...math32.Vector2) Path {
+// Polyline adds multiple connected lines, with no final Close.
+func (p *Path) Polyline(points ...math32.Vector2) *Path {
 	sz := len(points)
-	p := Path{}
 	if sz < 2 {
 		return p
 	}
@@ -38,19 +35,18 @@ func Polyline(points ...math32.Vector2) Path {
 	return p
 }
 
-// Polygon returns multiple connected lines with a final Close.
-func Polygon(points ...math32.Vector2) Path {
-	p := Polyline(points...)
+// Polygon adds multiple connected lines with a final Close.
+func (p *Path) Polygon(points ...math32.Vector2) *Path {
+	p.Polyline(points...)
 	p.Close()
 	return p
 }
 
-// Rectangle returns a rectangle of width w and height h.
-func Rectangle(x, y, w, h float32) Path {
+// Rectangle adds a rectangle of width w and height h.
+func (p *Path) Rectangle(x, y, w, h float32) *Path {
 	if Equal(w, 0.0) || Equal(h, 0.0) {
-		return Path{}
+		return p
 	}
-	p := Path{}
 	p.MoveTo(x, y)
 	p.LineTo(x+w, y)
 	p.LineTo(x+w, y+h)
@@ -59,14 +55,14 @@ func Rectangle(x, y, w, h float32) Path {
 	return p
 }
 
-// RoundedRectangle returns a rectangle of width w and height h
+// RoundedRectangle adds a rectangle of width w and height h
 // with rounded corners of radius r. A negative radius will cast
 // the corners inwards (i.e. concave).
-func RoundedRectangle(x, y, w, h, r float32) Path {
+func (p *Path) RoundedRectangle(x, y, w, h, r float32) *Path {
 	if Equal(w, 0.0) || Equal(h, 0.0) {
-		return Path{}
+		return p
 	} else if Equal(r, 0.0) {
-		return Rectangle(x, y, w, h)
+		return p.Rectangle(x, y, w, h)
 	}
 
 	sweep := true
@@ -77,7 +73,6 @@ func RoundedRectangle(x, y, w, h, r float32) Path {
 	r = math32.Min(r, w/2.0)
 	r = math32.Min(r, h/2.0)
 
-	p := Path{}
 	p.MoveTo(x, y+r)
 	p.ArcTo(r, r, 0.0, false, sweep, x+r, y)
 	p.LineTo(x+w-r, y)
@@ -90,10 +85,11 @@ func RoundedRectangle(x, y, w, h, r float32) Path {
 	return p
 }
 
-// RoundedRectangleSides draws a standard rounded rectangle
+// RoundedRectangleSidesArc draws a standard rounded rectangle
 // with a consistent border and with the given x and y position,
 // width and height, and border radius for each corner.
-func RoundedRectangleSides(x, y, w, h float32, r sides.Floats) Path {
+// This version uses the Arc elliptical arc function.
+func (p *Path) RoundedRectangleSidesArc(x, y, w, h float32, r sides.Floats) *Path {
 	// clamp border radius values
 	min := math32.Min(w/2, h/2)
 	r.Top = math32.Clamp(r.Top, 0, min)
@@ -116,33 +112,101 @@ func RoundedRectangleSides(x, y, w, h float32, r sides.Floats) Path {
 		xbli, ybli = x + r.Left, y + h - r.Left // bottom left inset
 	)
 
-	p := Path{}
 	p.MoveTo(xtl, ytli)
-	p.ArcTo(r.Top, r.Top, 0, false, true, xtli, ytl)
+	if r.Top != 0 {
+		p.ArcTo(r.Top, r.Top, 0, false, true, xtli, ytl)
+	}
 	p.LineTo(xtri, ytr)
-	p.ArcTo(r.Right, r.Right, 0, false, true, xbr, ytri)
+	if r.Right != 0 {
+		p.ArcTo(r.Right, r.Right, 0, false, true, xbr, ytri)
+	}
 	p.LineTo(xbr, ybri)
-	p.ArcTo(r.Bottom, r.Bottom, 0, false, true, xbri, ybl)
+	if r.Bottom != 0 {
+		p.ArcTo(r.Bottom, r.Bottom, 0, false, true, xbri, ybl)
+	}
 	p.LineTo(xbli, ybl)
-	p.ArcTo(r.Left, r.Left, 0, false, true, xtl, ybli)
+	if r.Left != 0 {
+		p.ArcTo(r.Left, r.Left, 0, false, true, xtl, ybli)
+	}
 	p.Close()
 	return p
 }
 
-// BeveledRectangle returns a rectangle of width w and height h
+// RoundedRectangleSides adds a standard rounded rectangle
+// with a consistent border and with the given x and y position,
+// width and height, and border radius for each corner.
+func (p *Path) RoundedRectangleSides(x, y, w, h float32, r sides.Floats) *Path {
+	return p.RoundedRectangleSidesQuad(x, y, w, y, r)
+}
+
+// RoundedRectangleSides adds a standard rounded rectangle
+// with a consistent border and with the given x and y position,
+// width and height, and border radius for each corner.
+// This version uses the Quad elliptical arc function.
+func (p *Path) RoundedRectangleSidesQuad(x, y, w, h float32, r sides.Floats) *Path {
+	// clamp border radius values
+	min := math32.Min(w/2, h/2)
+	r.Top = math32.Clamp(r.Top, 0, min)
+	r.Right = math32.Clamp(r.Right, 0, min)
+	r.Bottom = math32.Clamp(r.Bottom, 0, min)
+	r.Left = math32.Clamp(r.Left, 0, min)
+
+	// position values; some variables are missing because they are unused
+	var (
+		xtl, ytl   = x, y                 // top left
+		xtli, ytli = x + r.Top, y + r.Top // top left inset
+
+		ytr        = y                            // top right
+		xtri, ytri = x + w - r.Right, y + r.Right // top right inset
+
+		xbr        = x + w                              // bottom right
+		xbri, ybri = x + w - r.Bottom, y + h - r.Bottom // bottom right inset
+
+		ybl        = y + h                      // bottom left
+		xbli, ybli = x + r.Left, y + h - r.Left // bottom left inset
+	)
+
+	// SidesTODO: need to figure out how to style rounded corners correctly
+	// (in CSS they are split in the middle between different border side styles)
+
+	p.MoveTo(xtli, ytl)
+
+	p.LineTo(xtri, ytr)
+	if r.Right != 0 {
+		p.EllipticalArcQuad(xtri, ytri, r.Right, r.Right, math32.DegToRad(270), math32.DegToRad(360))
+	}
+
+	p.LineTo(xbr, ybri)
+	if r.Bottom != 0 {
+		p.EllipticalArcQuad(xbri, ybri, r.Bottom, r.Bottom, math32.DegToRad(0), math32.DegToRad(90))
+	}
+
+	p.LineTo(xbli, ybl)
+	if r.Left != 0 {
+		p.EllipticalArcQuad(xbli, ybli, r.Left, r.Left, math32.DegToRad(90), math32.DegToRad(180))
+	}
+
+	p.LineTo(xtl, ytli)
+	if r.Top != 0 {
+		p.EllipticalArcQuad(xtli, ytli, r.Top, r.Top, math32.DegToRad(180), math32.DegToRad(270))
+	}
+	p.Close()
+	return p
+}
+
+// BeveledRectangle adds a rectangle of width w and height h
 // with beveled corners at distance r from the corner.
-func BeveledRectangle(x, y, w, h, r float32) Path {
+func (p *Path) BeveledRectangle(x, y, w, h, r float32) *Path {
 	if Equal(w, 0.0) || Equal(h, 0.0) {
-		return Path{}
+		return p
 	} else if Equal(r, 0.0) {
-		return Rectangle(x, y, w, h)
+		return p.Rectangle(x, y, w, h)
 	}
 
 	r = math32.Abs(r)
 	r = math32.Min(r, w/2.0)
 	r = math32.Min(r, h/2.0)
 
-	p := Path{}
 	p.MoveTo(x, y+r)
 	p.LineTo(x+r, y)
 	p.LineTo(x+w-r, y)
@@ -155,18 +219,17 @@ func BeveledRectangle(x, y, w, h, r float32) Path {
 	return p
 }
 
-// Circle returns a circle at given center coordinates of radius r.
-func Circle(cx, cy, r float32) Path {
-	return Ellipse(cx, cy, r, r)
+// Circle adds a circle at given center coordinates of radius r.
+func (p *Path) Circle(cx, cy, r float32) *Path {
+	return p.Ellipse(cx, cy, r, r)
 }
 
-// Ellipse returns an ellipse at given center coordinates of radii rx and ry.
-func Ellipse(cx, cy, rx, ry float32) Path {
+// Ellipse adds an ellipse at given center coordinates of radii rx and ry.
+func (p *Path) Ellipse(cx, cy, rx, ry float32) *Path {
 	if Equal(rx, 0.0) || Equal(ry, 0.0) {
-		return Path{}
+		return p
 	}
 
-	p := Path{}
 	p.MoveTo(cx+rx, cy+(ry*0.001))
 	p.ArcTo(rx, ry, 0.0, false, true, cx-rx, cy)
 	p.ArcTo(rx, ry, 0.0, false, true, cx+rx, cy)
@@ -174,7 +237,7 @@ func Ellipse(cx, cy, rx, ry float32) Path {
 	return p
 }
 
-// Arc returns a circular arc at given coordinates with radius r
+// CircularArc adds a circular arc at given coordinates with radius r
 // and theta0 and theta1 as the angles in degrees of the ellipse
 // (before rot is applied) between which the arc will run.
 // If theta0 < theta1, the arc will run in a CCW direction.
@@ -182,11 +245,20 @@ func Ellipse(cx, cy, rx, ry float32) Path {
 // one full circle will be drawn and the remaining part of diff % 360,
 // e.g. a difference of 810 degrees will draw one full circle and an arc
 // over 90 degrees.
-func Arc(x, y, r, theta0, theta1 float32) Path {
-	return EllipticalArc(x, y, r, r, 0.0, theta0, theta1)
+func (p *Path) CircularArc(x, y, r, theta0, theta1 float32) *Path {
+	return p.EllipticalArc(x, y, r, r, theta0, theta1)
 }
 
-// EllipticalArc returns an elliptical arc at given coordinates with
+// EllipticalArc draws arc between angle1 and angle2 (radians)
+// along an ellipse. Because the y axis points down, angles are clockwise,
+// and the rendering draws segments progressing from angle1 to angle2
+// using quadratic bezier curves -- centers of ellipse are at cx, cy with
+// radii rx, ry.
+func (p *Path) EllipticalArc(cx, cy, rx, ry, angle1, angle2 float32) *Path {
+	return p.EllipticalArcQuad(cx, cy, rx, ry, angle1, angle2)
+}
+
+// EllipticalArcArc adds an elliptical arc at given coordinates with
 // radii rx and ry, with rot the counter clockwise rotation in radians,
 // and theta0 and theta1 the angles in radians of the ellipse
 // (before rot is applied) between which the arc will run.
@@ -195,37 +267,61 @@ func Arc(x, y, r, theta0, theta1 float32) Path {
 // one full circle will be drawn and the remaining part of diff % 360,
 // e.g. a difference of 810 degrees will draw one full circle and an arc
 // over 90 degrees.
-func EllipticalArc(x, y, rx, ry, rot, theta0, theta1 float32) Path {
-	p := Path{}
+func (p *Path) EllipticalArcArc(x, y, rx, ry, rot, theta0, theta1 float32) *Path {
 	p.MoveTo(x+rx, y)
 	p.Arc(rx, ry, rot, theta0, theta1)
 	return p
 }
 
-// Triangle returns a triangle of radius r pointing upwards.
-func Triangle(r float32) Path {
-	return RegularPolygon(3, r, true)
+// EllipticalArcQuad draws arc between angle1 and angle2 (radians)
+// along an ellipse. Because the y axis points down, angles are clockwise,
+// and the rendering draws segments progressing from angle1 to angle2
+// using quadratic bezier curves -- centers of ellipse are at cx, cy with
+// radii rx, ry.
+func (p *Path) EllipticalArcQuad(cx, cy, rx, ry, angle1, angle2 float32) *Path {
+	const n = 16
+	for i := 0; i < n; i++ {
+		p1 := float32(i+0) / n
+		p2 := float32(i+1) / n
+		a1 := angle1 + (angle2-angle1)*p1
+		a2 := angle1 + (angle2-angle1)*p2
+		x0 := cx + rx*math32.Cos(a1)
+		y0 := cy + ry*math32.Sin(a1)
+		x1 := cx + rx*math32.Cos((a1+a2)/2)
+		y1 := cy + ry*math32.Sin((a1+a2)/2)
+		x2 := cx + rx*math32.Cos(a2)
+		y2 := cy + ry*math32.Sin(a2)
+		ncx := 2*x1 - x0/2 - x2/2
+		ncy := 2*y1 - y0/2 - y2/2
+		p.QuadTo(ncx, ncy, x2, y2)
+	}
+	return p
 }
 
-// RegularPolygon returns a regular polygon with radius r.
+// Triangle adds a triangle of radius r pointing upwards.
+func (p *Path) Triangle(r float32) *Path {
+	return p.RegularPolygon(3, r, true)
+}
+
+// RegularPolygon adds a regular polygon with radius r.
 // It uses n vertices/edges, so when n approaches infinity
 // this will return a path that approximates a circle.
 // n must be 3 or more. The up boolean defines whether
 // the first point will point upwards or downwards.
-func RegularPolygon(n int, r float32, up bool) Path {
-	return RegularStarPolygon(n, 1, r, up)
+func (p *Path) RegularPolygon(n int, r float32, up bool) *Path {
+	return p.RegularStarPolygon(n, 1, r, up)
 }
 
-// RegularStarPolygon returns a regular star polygon with radius r.
+// RegularStarPolygon adds a regular star polygon with radius r.
 // It uses n vertices of density d. This will result in a
 // self-intersection star in counter clockwise direction.
 // If n/2 < d the star will be clockwise and if n and d are not coprime
 // a regular polygon will be obtained, possible with multiple windings.
 // n must be 3 or more and d 2 or more. The up boolean defines whether
 // the first point will point upwards or downwards.
-func RegularStarPolygon(n, d int, r float32, up bool) Path {
+func (p *Path) RegularStarPolygon(n, d int, r float32, up bool) *Path {
 	if n < 3 || d < 1 || n == d*2 || Equal(r, 0.0) {
-		return Path{}
+		return p
 	}
 
 	dtheta := 2.0 * math32.Pi / float32(n)
@@ -234,7 +330,6 @@ func RegularStarPolygon(n, d int, r float32, up bool) Path {
 		theta0 += dtheta / 2.0
 	}
 
-	p := Path{}
 	for i := 0; i == 0 || i%n != 0; i += d {
 		theta := theta0 + float32(i)*dtheta
 		sintheta, costheta := math32.Sincos(theta)
@@ -248,12 +343,12 @@ func RegularStarPolygon(n, d int, r float32, up bool) Path {
 	return p
 }
 
-// StarPolygon returns a star polygon of n points with alternating
+// StarPolygon adds a star polygon of n points with alternating
 // radius R and r. The up boolean defines whether the first point
 // will be point upwards or downwards.
-func StarPolygon(n int, R, r float32, up bool) Path {
+func (p *Path) StarPolygon(n int, R, r float32, up bool) *Path {
 	if n < 3 || Equal(R, 0.0) || Equal(r, 0.0) {
-		return Path{}
+		return p
 	}
 
 	n *= 2
@@ -263,7 +358,6 @@ func StarPolygon(n int, R, r float32, up bool) Path {
 		theta0 += dtheta
 	}
 
-	p := Path{}
 	for i := 0; i < n; i++ {
 		theta := theta0 + float32(i)*dtheta
 		sintheta, costheta := math32.Sincos(theta)
@@ -279,28 +373,28 @@ func StarPolygon(n int, R, r float32, up bool) Path {
 	return p
 }
 
-// Grid returns a stroked grid of width w and height h,
+// Grid adds a stroked grid of width w and height h,
 // with grid line thickness r, and the number of cells horizontally
 // and vertically as nx and ny respectively.
-func Grid(w, h float32, nx, ny int, r float32) Path {
+func (p *Path) Grid(w, h float32, nx, ny int, r float32) *Path {
 	if nx < 1 || ny < 1 || w <= float32(nx+1)*r || h <= float32(ny+1)*r {
-		return Path{}
+		return p
 	}
 
-	p := Rectangle(0, 0, w, h)
+	p.Rectangle(0, 0, w, h)
 	dx, dy := (w-float32(nx+1)*r)/float32(nx), (h-float32(ny+1)*r)/float32(ny)
-	cell := Rectangle(0, 0, dx, dy).Reverse()
+	cell := New().Rectangle(0, 0, dx, dy).Reverse()
 	for j := 0; j < ny; j++ {
 		for i := 0; i < nx; i++ {
 			x := r + float32(i)*(r+dx)
 			y := r + float32(j)*(r+dy)
-			p = p.Append(cell.Translate(x, y))
+			*p = p.Append(cell.Translate(x, y))
 		}
 	}
 	return p
 }
 
-// EllipsePos returns the position on the ellipse at angle theta.
+// EllipsePos adds the position on the ellipse at angle theta.
 func EllipsePos(rx, ry, phi, cx, cy, theta float32) math32.Vector2 {
 	sintheta, costheta := math32.Sincos(theta)
 	sinphi, cosphi := math32.Sincos(phi)

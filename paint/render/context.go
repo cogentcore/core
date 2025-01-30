@@ -105,14 +105,14 @@ func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
 		bounds = &parent.Bounds
 	}
 	ctx.SetBounds(bounds)
-	ctx.Bounds.Path = ctx.Bounds.Path.And(parent.Bounds.Path) // intersect
+	// ctx.Bounds.Path = ctx.Bounds.Path.And(parent.Bounds.Path) // intersect
 	ctx.ClipPath = ctx.Style.ClipPath.And(parent.ClipPath)
 	ctx.Mask = parent.Mask // todo: intersect with our own mask
 }
 
 // SetBounds sets the context bounds, and updates the Bounds.Path
 func (ctx *Context) SetBounds(bounds *Bounds) {
-	bsz := bounds.Rect.Size()
 	ctx.Bounds = *bounds
-	ctx.Bounds.Path = ppath.RoundedRectangleSides(bounds.Rect.Min.X, bounds.Rect.Min.Y, bsz.X, bsz.Y, bounds.Radius)
+	// bsz := bounds.Rect.Size()
+	// ctx.Bounds.Path = *ppath.New().RoundedRectangleSides(bounds.Rect.Min.X, bounds.Rect.Min.Y, bsz.X, bsz.Y, bounds.Radius)
 }
