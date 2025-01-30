@@ -5,6 +5,7 @@
 package rasterx
 
 import (
+	"fmt"
 	"image"
 	"slices"
 
@@ -93,6 +94,15 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		case ppath.CubeTo:
 			cp1 := m.MulVector2AsPoint(s.CP1())
 			cp2 := m.MulVector2AsPoint(s.CP2())
+			if cp1.X > 1.0e4 || cp1.Y > 1.0e4 || cp1.X < -1.0e4 || cp1.Y < -1.0e4 {
+				fmt.Println("cp1 extreme:", cp1, "end:", end)
+				break
+			}
+			if cp2.X > 1.0e4 || cp2.Y > 1.0e4 || cp2.X < -1.0e4 || cp2.Y < -1.0e4 {
+				fmt.Println("cp2 extreme:", cp2, "end:", end)
+				break
+			}
+			fmt.Println(cp1, cp2, end)
 			rs.Path.CubeBezier(cp1.ToFixed(), cp2.ToFixed(), end.ToFixed())
 		case ppath.Close:
 			rs.Path.Stop(true)
@@ -126,6 +136,7 @@ func (rs *Renderer) Stroke(pt *render.Path) {
 		math32.ToFixed(sty.Stroke.MiterLimit),
 		capfunc(sty.Stroke.Cap), nil, nil, joinmode(sty.Stroke.Join),
 		dash, 0)
+	fmt.Println(pc.Bounds.Rect)
 	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
 	rs.Path.AddTo(rs.Raster)
 	fbox := rs.Raster.Scanner.GetPathExtent()
