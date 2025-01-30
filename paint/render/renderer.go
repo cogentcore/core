@@ -34,9 +34,8 @@ type Renderer interface {
 	Size() (units.Units, math32.Vector2)
 
 	// SetSize sets the render size in given units. [units.UnitDot] is
-	// used for image-based rendering, and an existing image to use is passed
-	// if available (could be nil).
-	SetSize(un units.Units, size math32.Vector2, img *image.RGBA)
+	// used for image-based rendering.
+	SetSize(un units.Units, size math32.Vector2)
 
 	// Render renders the list of render items.
 	Render(r Render)

@@ -14,12 +14,12 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSVG(t *testing.T) {
-	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
+	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
 
 	dir := filepath.Join("testdata", "svg")
 	files := fsx.Filenames(dir, ".svg")
@@ -37,12 +37,12 @@ func TestSVG(t *testing.T) {
 		}
 		sv.Render()
 		imfn := filepath.Join("png", strings.TrimSuffix(fn, ".svg"))
-		imagex.Assert(t, sv.Pixels, imfn)
+		imagex.Assert(t, sv.RenderImage(), imfn)
 	}
 }
 
 func TestViewBox(t *testing.T) {
-	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
+	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
 
 	dir := filepath.Join("testdata", "svg")
 	sfn := "fig_necker_cube.svg"
@@ -62,7 +62,7 @@ func TestViewBox(t *testing.T) {
 		sv.Render()
 		fnm := fmt.Sprintf("%s_%s", fpre, ts)
 		imfn := filepath.Join("png", fnm)
-		imagex.Assert(t, sv.Pixels, imfn)
+		imagex.Assert(t, sv.RenderImage(), imfn)
 	}
 }
 
@@ -109,9 +109,9 @@ func TestCoreLogo(t *testing.T) {
 
 	sv.Background = colors.Uniform(colors.Black)
 	sv.Render()
-	imagex.Assert(t, sv.Pixels, "logo-black")
+	imagex.Assert(t, sv.RenderImage(), "logo-black")
 
 	sv.Background = colors.Uniform(colors.White)
 	sv.Render()
-	imagex.Assert(t, sv.Pixels, "logo-white")
+	imagex.Assert(t, sv.RenderImage(), "logo-white")
 }

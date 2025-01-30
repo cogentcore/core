@@ -5,7 +5,6 @@
 package paint
 
 import (
-	"errors"
 	"image"
 	"image/color"
 
@@ -18,7 +17,6 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
-	"github.com/anthonynsimon/bild/clone"
 	"golang.org/x/image/draw"
 )
 
@@ -46,34 +44,12 @@ type Painter struct {
 }
 
 // NewPainter returns a new [Painter] using default image rasterizer,
-// associated with a new [image.RGBA] with the given width and height.
+// with the given width and height.
 func NewPainter(width, height int) *Painter {
 	pc := &Painter{&State{}, styles.NewPaint()}
 	sz := image.Pt(width, height)
-	img := image.NewRGBA(image.Rectangle{Max: sz})
-	pc.InitImageRaster(pc.Paint, width, height, img)
-	pc.SetUnitContextExt(img.Rect.Size())
-	return pc
-}
-
-// NewPainterFromImage returns a new [Painter] associated with an [image.RGBA]
-// copy of the given [image.Image]. It does not render directly onto the given
-// image; see [NewPainterFromRGBA] for a version that renders directly.
-func NewPainterFromImage(img *image.RGBA) *Painter {
-	pc := &Painter{&State{}, styles.NewPaint()}
-	pc.InitImageRaster(pc.Paint, img.Rect.Dx(), img.Rect.Dy(), img)
-	pc.SetUnitContextExt(img.Rect.Size())
-	return pc
-}
-
-// NewPainterFromRGBA returns a new [Painter] associated with the given [image.RGBA].
-// It renders directly onto the given image; see [NewPainterFromImage] for a version
-// that makes a copy.
-func NewPainterFromRGBA(img image.Image) *Painter {
-	pc := &Painter{&State{}, styles.NewPaint()}
-	r := clone.AsRGBA(img)
-	pc.InitImageRaster(pc.Paint, r.Rect.Dx(), r.Rect.Dy(), r)
-	pc.SetUnitContextExt(r.Rect.Size())
+	pc.InitImageRaster(pc.Paint, width, height)
+	pc.SetUnitContextExt(sz)
 	return pc
 }
 
@@ -474,18 +450,16 @@ func (pc *Painter) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op
 // (see https://stackoverflow.com/questions/65454183/how-does-blur-radius-value-in-box-shadow-property-affect-the-resulting-blur).
 func (pc *Painter) BlurBox(pos, size math32.Vector2, blurRadius float32) {
 	rect := math32.RectFromPosSizeMax(pos, size)
-	sub := pc.Image.SubImage(rect)
-	sub = GaussianBlur(sub, float64(blurRadius))
-	pc.Render.Add(pimage.NewDraw(rect, sub, rect.Min, draw.Src))
+	pc.Render.Add(pimage.NewBlur(rect, blurRadius))
 }
 
 // SetMask allows you to directly set the *image.Alpha to be used as a clipping
 // mask. It must be the same size as the context, else an error is returned
 // and the mask is unchanged.
 func (pc *Painter) SetMask(mask *image.Alpha) error {
-	if mask.Bounds() != pc.Image.Bounds() {
-		return errors.New("mask size must match context size")
-	}
+	// if mask.Bounds() != pc.Image.Bounds() {
+	// 	return errors.New("mask size must match context size")
+	// }
 	pc.Mask = mask
 	return nil
 }
@@ -493,17 +467,17 @@ func (pc *Painter) SetMask(mask *image.Alpha) error {
 // AsMask returns an *image.Alpha representing the alpha channel of this
 // context. This can be useful for advanced clipping operations where you first
 // render the mask geometry and then use it as a mask.
-func (pc *Painter) AsMask() *image.Alpha {
-	b := pc.Image.Bounds()
-	mask := image.NewAlpha(b)
-	draw.Draw(mask, b, pc.Image, image.Point{}, draw.Src)
-	return mask
-}
+// func (pc *Painter) AsMask() *image.Alpha {
+// 	b := pc.Image.Bounds()
+// 	mask := image.NewAlpha(b)
+// 	draw.Draw(mask, b, pc.Image, image.Point{}, draw.Src)
+// 	return mask
+// }
 
 // Clear fills the entire image with the current fill color.
 func (pc *Painter) Clear() {
 	src := pc.Fill.Color
-	pc.Render.Add(pimage.NewDraw(pc.Image.Bounds(), src, image.Point{}, draw.Src))
+	pc.Render.Add(pimage.NewDraw(image.Rectangle{}, src, image.Point{}, draw.Src))
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
@@ -511,9 +485,12 @@ func (pc *Painter) SetPixel(x, y int) {
 	pc.Render.Add(pimage.NewSetPixel(image.Point{x, y}, pc.Stroke.Color))
 }
 
-// DrawImage draws the specified image at the specified point.
-func (pc *Painter) DrawImage(src image.Image, x, y float32) {
-	pc.DrawImageAnchored(src, x, y, 0, 0)
+// DrawImage draws the given image at the specified starting point,
+// using the bounds of the source image in rectangle rect, using
+// the given draw operration: Over = overlay (alpha blend with destination)
+// Src = copy source directly, overwriting destination pixels.
+func (pc *Painter) DrawImage(src image.Image, rect image.Rectangle, srcStart image.Point, op draw.Op) {
+	pc.Render.Add(pimage.NewDraw(rect, src, srcStart, op))
 }
 
 // DrawImageAnchored draws the specified image at the specified anchor point.

@@ -5,10 +5,12 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -81,16 +83,19 @@ func (ic *Icon) renderSVG() {
 
 	sv := &ic.svg
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
+	fmt.Println(ic.Name, sz, "renderSVG")
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
 	if !ic.NeedsRebuild() && sv.Pixels != nil { // if rebuilding then rebuild
 		isz := sv.Pixels.Bounds().Size()
 		// if nothing has changed, we don't need to re-render
-		if isz == sz && sv.Name == string(ic.Icon) && sv.Color == clr {
+		if isz == sz && sv.Name == string(ic.Name) && sv.Color == clr {
+			fmt.Println(ic.Name, sz, "done already")
 			return
 		}
 	}
 
 	if sz == (image.Point{}) {
+		fmt.Println(ic.Name, sz, "nil sz")
 		return
 	}
 	// ensure that we have new pixels to render to in order to prevent
@@ -100,12 +105,13 @@ func (ic *Icon) renderSVG() {
 	sv.Geom.Size = sz // make sure
 
 	sv.Resize(sz) // does Config if needed
-
 	sv.Color = clr
-
 	sv.Scale = 1
 	sv.Render()
 	sv.Name = string(ic.Icon)
+	fmt.Println(ic.Name, sz, "writing to file")
+	fmt.Printf("icon: %p\n", sv.Pixels)
+	imagex.Save(sv.Pixels, ic.Name+".png")
 }
 
 func (ic *Icon) Render() {
@@ -116,5 +122,5 @@ func (ic *Icon) Render() {
 	}
 	r := ic.Geom.ContentBBox
 	sp := ic.Geom.ScrollOffset()
-	draw.Draw(ic.Scene.Pixels, r, ic.svg.Pixels, sp, draw.Over)
+	ic.Scene.Painter.DrawImage(ic.svg.Pixels, r, sp, draw.Over)
 }

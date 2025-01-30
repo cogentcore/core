@@ -123,10 +123,11 @@ func (sv *SVG) renderSVG() {
 	}
 	// need to make the image again to prevent it from
 	// rendering over itself
-	sv.SVG.Pixels = image.NewRGBA(sv.SVG.Pixels.Rect)
-	sv.SVG.RenderState.InitImageRaster(nil, sv.SVG.Pixels.Rect.Dx(), sv.SVG.Pixels.Rect.Dy(), sv.SVG.Pixels)
+	// sv.SVG.Pixels = image.NewRGBA(sv.SVG.Pixels.Rect)
+	sz := sv.SVG.Geom.Bounds().Size()
+	sv.SVG.RenderState.InitImageRaster(nil, sz.X, sz.Y)
 	sv.SVG.Render()
-	sv.prevSize = sv.SVG.Pixels.Rect.Size()
+	sv.prevSize = sz
 }
 
 func (sv *SVG) Render() {
@@ -136,10 +137,11 @@ func (sv *SVG) Render() {
 	}
 	needsRender := !sv.IsReadOnly()
 	if !needsRender {
-		if sv.SVG.Pixels == nil {
+		img := sv.SVG.RenderImage()
+		if img == nil {
 			needsRender = true
 		} else {
-			sz := sv.SVG.Pixels.Bounds().Size()
+			sz := img.Bounds().Size()
 			if sz != sv.prevSize || sz == (image.Point{}) {
 				needsRender = true
 			}

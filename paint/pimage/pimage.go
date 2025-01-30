@@ -24,6 +24,11 @@ const (
 	// Draw Source image with transform. If Mask is non-nil, it is used.
 	Transform
 
+	// blurs the Rect region with the given blur radius.
+	// The blur radius passed to this function is the actual Gaussian
+	// standard deviation (σ).
+	Blur
+
 	// Sets pixel from Source image at Pos
 	SetPixel
 )
@@ -34,6 +39,7 @@ type Params struct {
 	Cmd Cmds
 
 	// Rect is the rectangle to draw into. This is the bounds for Transform source.
+	// If empty, the entire destination image Bounds() are used.
 	Rect image.Rectangle
 
 	// SourcePos is the position for the source image in Draw,
@@ -54,31 +60,44 @@ type Params struct {
 
 	// Transform for image transform.
 	Transform math32.Matrix2
+
+	// BlurRadius is the Gaussian standard deviation for Blur function
+	BlurRadius float32
 }
 
 func (pr *Params) IsRenderItem() {}
 
 // NewDraw returns a new Draw operation with given parameters.
-func NewDraw(r image.Rectangle, src image.Image, sp image.Point, op draw.Op) *Params {
-	pr := &Params{Cmd: Draw, Rect: r, Source: src, SourcePos: sp, Op: op}
+// If the target rect is empty then the full destination image is used.
+func NewDraw(rect image.Rectangle, src image.Image, sp image.Point, op draw.Op) *Params {
+	pr := &Params{Cmd: Draw, Rect: rect, Source: src, SourcePos: sp, Op: op}
 	return pr
 }
 
 // NewDrawMask returns a new DrawMask operation with given parameters.
-func NewDrawMask(r image.Rectangle, src image.Image, sp image.Point, op draw.Op, mask image.Image, mp image.Point) *Params {
-	pr := &Params{Cmd: Draw, Rect: r, Source: src, SourcePos: sp, Op: op, Mask: mask, MaskPos: mp}
+// If the target rect is empty then the full destination image is used.
+func NewDrawMask(rect image.Rectangle, src image.Image, sp image.Point, op draw.Op, mask image.Image, mp image.Point) *Params {
+	pr := &Params{Cmd: Draw, Rect: rect, Source: src, SourcePos: sp, Op: op, Mask: mask, MaskPos: mp}
 	return pr
 }
 
 // NewTransform returns a new Transform operation with given parameters.
-func NewTransform(m math32.Matrix2, r image.Rectangle, src image.Image, op draw.Op) *Params {
-	pr := &Params{Cmd: Transform, Transform: m, Rect: r, Source: src, Op: op}
+// If the target rect is empty then the full destination image is used.
+func NewTransform(m math32.Matrix2, rect image.Rectangle, src image.Image, op draw.Op) *Params {
+	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: src, Op: op}
 	return pr
 }
 
 // NewTransformMask returns a new Transform Mask operation with given parameters.
-func NewTransformMask(m math32.Matrix2, r image.Rectangle, src image.Image, op draw.Op, mask image.Image, mp image.Point) *Params {
-	pr := &Params{Cmd: Transform, Transform: m, Rect: r, Source: src, Op: op, Mask: mask, MaskPos: mp}
+// If the target rect is empty then the full destination image is used.
+func NewTransformMask(m math32.Matrix2, rect image.Rectangle, src image.Image, op draw.Op, mask image.Image, mp image.Point) *Params {
+	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: src, Op: op, Mask: mask, MaskPos: mp}
+	return pr
+}
+
+// NewBlur returns a new Blur operation with given parameters.
+func NewBlur(rect image.Rectangle, blurRadius float32) *Params {
+	pr := &Params{Cmd: Blur, Rect: rect, BlurRadius: blurRadius}
 	return pr
 }
 
@@ -92,6 +111,9 @@ func NewSetPixel(at image.Point, clr image.Image) *Params {
 func (pr *Params) Render(dest *image.RGBA) {
 	switch pr.Cmd {
 	case Draw:
+		if pr.Rect == (image.Rectangle{}) {
+			pr.Rect = dest.Bounds()
+		}
 		if pr.Mask != nil {
 			draw.DrawMask(dest, pr.Rect, pr.Source, pr.SourcePos, pr.Mask, pr.MaskPos, pr.Op)
 		} else {
@@ -109,6 +131,10 @@ func (pr *Params) Render(dest *image.RGBA) {
 		} else {
 			tdraw.Transform(dest, s2d, pr.Source, pr.Rect, pr.Op, nil)
 		}
+	case Blur:
+		sub := dest.SubImage(pr.Rect)
+		sub = GaussianBlur(sub, float64(pr.BlurRadius))
+		draw.Draw(dest, pr.Rect, sub, pr.Rect.Min, draw.Src)
 	case SetPixel:
 		x := pr.SourcePos.X
 		y := pr.SourcePos.Y

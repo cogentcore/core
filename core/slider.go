@@ -566,8 +566,7 @@ func (sr *Slider) ApplyScenePos() {
 		return
 	}
 	pwb := sr.parentWidget()
-	zr := image.Rectangle{}
-	if !pwb.IsVisible() || pwb.Geom.TotalBBox == zr {
+	if !pwb.IsVisible() || pwb.Geom.TotalBBox == (image.Rectangle{}) {
 		return
 	}
 	sbw := math32.Ceil(sr.Styles.ScrollbarWidth.Dots)

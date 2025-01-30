@@ -35,15 +35,9 @@ type Renderer struct {
 	ImgSpanner *scan.ImgSpanner
 }
 
-func New(size math32.Vector2, img *image.RGBA) render.Renderer {
-	psz := size.ToPointCeil()
-	if img == nil {
-		img = image.NewRGBA(image.Rectangle{Max: psz})
-	}
-	rs := &Renderer{size: size, image: img}
-	rs.ImgSpanner = scan.NewImgSpanner(img)
-	rs.Scanner = scan.NewScanner(rs.ImgSpanner, psz.X, psz.Y)
-	rs.Raster = NewDasher(psz.X, psz.Y, rs.Scanner)
+func New(size math32.Vector2) render.Renderer {
+	rs := &Renderer{}
+	rs.SetSize(units.UnitDot, size)
 	return rs
 }
 
@@ -55,17 +49,13 @@ func (rs *Renderer) Size() (units.Units, math32.Vector2) {
 	return units.UnitDot, rs.size
 }
 
-func (rs *Renderer) SetSize(un units.Units, size math32.Vector2, img *image.RGBA) {
+func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	if rs.size == size {
 		return
 	}
 	rs.size = size
 	psz := size.ToPointCeil()
-	if img != nil {
-		rs.image = img
-	} else {
-		rs.image = image.NewRGBA(image.Rectangle{Max: psz})
-	}
+	rs.image = image.NewRGBA(image.Rectangle{Max: psz})
 	rs.ImgSpanner = scan.NewImgSpanner(rs.image)
 	rs.Scanner = scan.NewScanner(rs.ImgSpanner, psz.X, psz.Y)
 	rs.Raster = NewDasher(psz.X, psz.Y, rs.Scanner)

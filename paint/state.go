@@ -17,7 +17,7 @@ import (
 )
 
 // NewDefaultImageRenderer is a function that returns the default image renderer
-var NewDefaultImageRenderer func(size math32.Vector2, img *image.RGBA) render.Renderer
+var NewDefaultImageRenderer func(size math32.Vector2) render.Renderer
 
 // The State holds all the current rendering state information used
 // while painting. The [Paint] embeds a pointer to this.
@@ -36,42 +36,45 @@ type State struct {
 
 	// Path is the current path state we are adding to.
 	Path ppath.Path
-
-	// todo: this needs to be removed and replaced with new Image Render recording.
-	Image *image.RGBA
 }
 
 // InitImageRaster initializes the [State] and ensures that there is
 // at least one image-based renderer present, creating the default type if not,
 // using the [NewDefaultImageRenderer] function.
 // If renderers exist, then the size is updated for any image-based ones.
-// This must be called whenever the image size changes. Image may be nil
-// if an existing render target is not to be used.
-func (rs *State) InitImageRaster(sty *styles.Paint, width, height int, img *image.RGBA) {
+// This must be called whenever the image size changes.
+func (rs *State) InitImageRaster(sty *styles.Paint, width, height int) {
 	sz := math32.Vec2(float32(width), float32(height))
 	if len(rs.Renderers) == 0 {
-		rd := NewDefaultImageRenderer(sz, img)
+		rd := NewDefaultImageRenderer(sz)
 		rs.Renderers = append(rs.Renderers, rd)
 		rs.Stack = []*render.Context{render.NewContext(sty, render.NewBounds(0, 0, float32(width), float32(height), sides.Floats{}), nil)}
-		rs.Image = rd.Image()
 		return
 	}
-	gotImage := false
 	for _, rd := range rs.Renderers {
 		if !rd.IsImage() {
 			continue
 		}
-		rd.SetSize(units.UnitDot, sz, img)
-		if !gotImage {
-			rs.Image = rd.Image()
-			gotImage = true
-		}
+		rd.SetSize(units.UnitDot, sz)
 	}
 }
 
 // Context() returns the currently active [render.Context] state (top of Stack).
 func (rs *State) Context() *render.Context {
 	return rs.Stack[len(rs.Stack)-1]
+}
+
+// RenderImage returns the current render image from the first
+// Image renderer present, or nil if none.
+// This may be somewhat expensive for some rendering types.
+func (rs *State) RenderImage() *image.RGBA {
+	for _, rd := range rs.Renderers {
+		if !rd.IsImage() {
+			continue
+		}
+		return rd.Image()
+	}
+	return nil
 }
 
 // PushContext pushes a new [render.Context] onto the stack using given styles and bounds.

@@ -6,16 +6,16 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _CmdsValues = []Cmds{0, 1, 2}
+var _CmdsValues = []Cmds{0, 1, 2, 3}
 
 // CmdsN is the highest valid value for type Cmds, plus one.
-const CmdsN Cmds = 3
+const CmdsN Cmds = 4
 
-var _CmdsValueMap = map[string]Cmds{`Draw`: 0, `Transform`: 1, `SetPixel`: 2}
+var _CmdsValueMap = map[string]Cmds{`Draw`: 0, `Transform`: 1, `Blur`: 2, `SetPixel`: 3}
 
-var _CmdsDescMap = map[Cmds]string{0: `Draw Source image using draw.Draw equivalent function, without any transformation. If Mask is non-nil it is used.`, 1: `Draw Source image with transform. If Mask is non-nil, it is used.`, 2: `Sets pixel from Source image at Pos`}
+var _CmdsDescMap = map[Cmds]string{0: `Draw Source image using draw.Draw equivalent function, without any transformation. If Mask is non-nil it is used.`, 1: `Draw Source image with transform. If Mask is non-nil, it is used.`, 2: `blurs the Rect region with the given blur radius. The blur radius passed to this function is the actual Gaussian standard deviation (σ).`, 3: `Sets pixel from Source image at Pos`}
 
-var _CmdsMap = map[Cmds]string{0: `Draw`, 1: `Transform`, 2: `SetPixel`}
+var _CmdsMap = map[Cmds]string{0: `Draw`, 1: `Transform`, 2: `Blur`, 3: `SetPixel`}
 
 // String returns the string representation of this Cmds value.
 func (i Cmds) String() string { return enums.String(i, _CmdsMap) }

@@ -65,7 +65,7 @@ func TestObjectFit(t *testing.T) {
 		test := func(of styles.ObjectFits, pos math32.Vector2) {
 			st.ObjectFit = of
 			fitimg := st.ResizeImage(img, box)
-			pc.DrawImage(fitimg, pos.X, pos.Y)
+			pc.DrawImageAnchored(fitimg, pos.X, pos.Y, 0, 0)
 			// trgsz := styles.ObjectSizeFromFit(of, obj, box)
 			// fmt.Println(of, trgsz)
 		}

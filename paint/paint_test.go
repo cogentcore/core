@@ -38,7 +38,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)
 	// pc.StartRender(pc.Image.Rect)
 	f(pc)
 	pc.RenderDone()
-	imagex.Assert(t, pc.Image, nm)
+	imagex.Assert(t, pc.RenderImage(), nm)
 }
 
 func TestRender(t *testing.T) {

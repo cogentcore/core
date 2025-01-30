@@ -66,15 +66,15 @@ func appIconImages() []image.Image {
 	}
 
 	sv.Render()
-	res[0] = sv.Pixels
+	res[0] = sv.RenderImage()
 
 	sv.Resize(image.Pt(32, 32))
 	sv.Render()
-	res[1] = sv.Pixels
+	res[1] = sv.RenderImage()
 
 	sv.Resize(image.Pt(48, 48))
 	sv.Render()
-	res[2] = sv.Pixels
+	res[2] = sv.RenderImage()
 	appIconImagesCache = res
 	return res
 }

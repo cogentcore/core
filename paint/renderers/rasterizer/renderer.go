@@ -21,12 +21,9 @@ type Renderer struct {
 	ras   *vector.Rasterizer
 }
 
-func New(size math32.Vector2, img *image.RGBA) render.Renderer {
-	psz := size.ToPointCeil()
-	if img == nil {
-		img = image.NewRGBA(image.Rectangle{Max: psz})
-	}
-	rs := &Renderer{size: size, image: img}
+func New(size math32.Vector2) render.Renderer {
+	rs := &Renderer{}
+	rs.SetSize(units.UnitDot, size)
 	rs.ras = &vector.Rasterizer{}
 	return rs
 }
@@ -39,15 +36,11 @@ func (rs *Renderer) Size() (units.Units, math32.Vector2) {
 	return units.UnitDot, rs.size
 }
 
-func (rs *Renderer) SetSize(un units.Units, size math32.Vector2, img *image.RGBA) {
+func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	if rs.size == size {
 		return
 	}
 	rs.size = size
-	if img != nil {
-		rs.image = img
-		return
-	}
 	psz := size.ToPointCeil()
 	rs.image = image.NewRGBA(image.Rectangle{Max: psz})
 }
