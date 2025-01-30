@@ -630,7 +630,10 @@ func (rc *renderContext) String() string {
 
 func (sc *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
 	unchanged := !sc.hasFlag(sceneImageUpdated) || sc.hasFlag(sceneUpdating)
-	drw.Copy(sc.SceneGeom.Pos, sc.Pixels, sc.Pixels.Bounds(), op, unchanged)
+	img := sc.Painter.RenderImage()
+	if img != nil {
+		drw.Copy(sc.SceneGeom.Pos, img, img.Bounds(), op, unchanged)
+	}
 	sc.setFlag(false, sceneImageUpdated)
 }
 

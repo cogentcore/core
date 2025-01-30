@@ -5,12 +5,10 @@
 package core
 
 import (
-	"fmt"
 	"image"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -60,7 +58,6 @@ func (ic *Icon) readIcon() {
 		return
 	}
 	if !ic.Icon.IsSet() {
-		ic.svg.Pixels = nil
 		ic.svg.DeleteAll()
 		ic.prevIcon = ic.Icon
 		return
@@ -82,45 +79,35 @@ func (ic *Icon) renderSVG() {
 	}
 
 	sv := &ic.svg
-	sz := ic.Geom.Size.Actual.Content.ToPoint()
-	fmt.Println(ic.Name, sz, "renderSVG")
+	sz := ic.Geom.Size.Alloc.Content.ToPoint()
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
-	if !ic.NeedsRebuild() && sv.Pixels != nil { // if rebuilding then rebuild
-		isz := sv.Pixels.Bounds().Size()
+	if !ic.NeedsRebuild() { // if rebuilding then rebuild
+		isz := sv.Geom.Size
 		// if nothing has changed, we don't need to re-render
 		if isz == sz && sv.Name == string(ic.Name) && sv.Color == clr {
-			fmt.Println(ic.Name, sz, "done already")
 			return
 		}
 	}
 
 	if sz == (image.Point{}) {
-		fmt.Println(ic.Name, sz, "nil sz")
 		return
 	}
-	// ensure that we have new pixels to render to in order to prevent
-	// us from rendering over ourself
-	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	sv.RenderState.InitImageRaster(nil, sz.X, sz.Y, sv.Pixels)
 	sv.Geom.Size = sz // make sure
-
-	sv.Resize(sz) // does Config if needed
+	sv.Resize(sz)     // does Config if needed
 	sv.Color = clr
 	sv.Scale = 1
 	sv.Render()
 	sv.Name = string(ic.Icon)
-	fmt.Println(ic.Name, sz, "writing to file")
-	fmt.Printf("icon: %p\n", sv.Pixels)
-	imagex.Save(sv.Pixels, ic.Name+".png")
 }
 
 func (ic *Icon) Render() {
 	ic.renderSVG()
 
-	if ic.svg.Pixels == nil {
+	img := ic.svg.RenderImage()
+	if img == nil {
 		return
 	}
 	r := ic.Geom.ContentBBox
 	sp := ic.Geom.ScrollOffset()
-	ic.Scene.Painter.DrawImage(ic.svg.Pixels, r, sp, draw.Over)
+	ic.Scene.Painter.DrawImage(img, r, sp, draw.Over)
 }

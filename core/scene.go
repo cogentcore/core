@@ -22,7 +22,7 @@ import (
 )
 
 // Scene contains a [Widget] tree, rooted in an embedded [Frame] layout,
-// which renders into its [Scene.Pixels] image. The [Scene] is set in a
+// which renders into its own [paint.Painter]. The [Scene] is set in a
 // [Stage], which the [Scene] has a pointer to.
 //
 // Each [Scene] contains state specific to its particular usage
@@ -58,9 +58,6 @@ type Scene struct { //core:no-new
 	// paint context for rendering
 	Painter paint.Painter `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
-	// live pixels that we render into
-	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
-
 	// event manager for this scene
 	Events Events `copier:"-" json:"-" xml:"-" set:"-"`
 
@@ -91,7 +88,7 @@ type Scene struct { //core:no-new
 	showIter int
 
 	// directRenders are widgets that render directly to the [RenderWindow]
-	// instead of rendering into the Scene Pixels image.
+	// instead of rendering into the Scene Painter.
 	directRenders []Widget
 
 	// flags are atomic bit flags for [Scene] state.
@@ -277,21 +274,21 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 		sc.Painter.Paint = &styles.Paint{}
 	}
 	sc.SceneGeom.Pos = geom.Pos
-	if sc.Pixels == nil || sc.Pixels.Bounds().Size() != geom.Size {
-		sc.Pixels = image.NewRGBA(image.Rectangle{Max: geom.Size})
-	} else {
+	isz := sc.Painter.State.RenderImageSize()
+	if isz == geom.Size {
 		return false
 	}
-	sc.Painter.InitImageRaster(nil, geom.Size.X, geom.Size.Y, sc.Pixels)
+	sc.Painter.InitImageRaster(nil, geom.Size.X, geom.Size.Y)
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	sc.updateScene()
 	sc.applyStyleScene()
 	// restart the multi-render updating after resize, to get windows to update correctly while
-	// resizing on Windows (OS) and Linux (see https://github.com/cogentcore/core/issues/584), to get
-	// windows on Windows (OS) to update after a window snap (see https://github.com/cogentcore/core/issues/497),
-	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered on both iOS
-	// and Android in different contexts.
+	// resizing on Windows (OS) and Linux (see https://github.com/cogentcore/core/issues/584),
+	// to get windows on Windows (OS) to update after a window snap (see
+	// https://github.com/cogentcore/core/issues/497),
+	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered
+	// on both iOS and Android in different contexts.
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.showIter = 0
 	sc.NeedsLayout()

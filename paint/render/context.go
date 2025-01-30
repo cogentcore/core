@@ -87,12 +87,14 @@ func NewContext(sty *styles.Paint, bounds *Bounds, parent *Context) *Context {
 // All the values from the style are used to update the Context,
 // accumulating anything from the parent.
 func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
-	ctx.Style = *sty
+	if sty != nil {
+		ctx.Style = *sty
+	} else {
+		ctx.Style.Defaults()
+	}
 	if parent == nil {
 		ctx.Transform = sty.Transform
-		bsz := bounds.Rect.Size()
-		ctx.Bounds = *bounds
-		ctx.Bounds.Path = ppath.RoundedRectangleSides(bounds.Rect.Min.X, bounds.Rect.Min.Y, bsz.X, bsz.Y, bounds.Radius)
+		ctx.SetBounds(bounds)
 		ctx.ClipPath = sty.ClipPath
 		ctx.Mask = sty.Mask
 		return
@@ -100,14 +102,17 @@ func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
 	ctx.Transform = parent.Transform.Mul(sty.Transform)
 	ctx.Style.InheritFields(&parent.Style)
 	if bounds == nil {
-		ctx.Bounds = parent.Bounds
-	} else {
-		ctx.Bounds = *bounds
-		// todo: transform bp
-		bsz := bounds.Rect.Size()
-		bp := ppath.RoundedRectangleSides(bounds.Rect.Min.X, bounds.Rect.Min.Y, bsz.X, bsz.Y, bounds.Radius)
-		ctx.Bounds.Path = bp.And(parent.Bounds.Path) // intersect
+		bounds = &parent.Bounds
 	}
+	ctx.SetBounds(bounds)
+	ctx.Bounds.Path = ctx.Bounds.Path.And(parent.Bounds.Path) // intersect
 	ctx.ClipPath = ctx.Style.ClipPath.And(parent.ClipPath)
 	ctx.Mask = parent.Mask // todo: intersect with our own mask
+}
+
+// SetBounds sets the context bounds, and updates the Bounds.Path
+func (ctx *Context) SetBounds(bounds *Bounds) {
+	bsz := bounds.Rect.Size()
+	ctx.Bounds = *bounds
+	ctx.Bounds.Path = ppath.RoundedRectangleSides(bounds.Rect.Min.X, bounds.Rect.Min.Y, bsz.X, bsz.Y, bounds.Radius)
 }

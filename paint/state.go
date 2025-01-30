@@ -45,12 +45,15 @@ type State struct {
 // This must be called whenever the image size changes.
 func (rs *State) InitImageRaster(sty *styles.Paint, width, height int) {
 	sz := math32.Vec2(float32(width), float32(height))
+	bounds := render.NewBounds(0, 0, float32(width), float32(height), sides.Floats{})
 	if len(rs.Renderers) == 0 {
 		rd := NewDefaultImageRenderer(sz)
 		rs.Renderers = append(rs.Renderers, rd)
-		rs.Stack = []*render.Context{render.NewContext(sty, render.NewBounds(0, 0, float32(width), float32(height), sides.Floats{}), nil)}
+		rs.Stack = []*render.Context{render.NewContext(sty, bounds, nil)}
 		return
 	}
+	ctx := rs.Context()
+	ctx.SetBounds(bounds)
 	for _, rd := range rs.Renderers {
 		if !rd.IsImage() {
 			continue
@@ -64,17 +67,36 @@ func (rs *State) Context() *render.Context {
 	return rs.Stack[len(rs.Stack)-1]
 }
 
+// ImageRenderer returns the first ImageRenderer present, or nil if none.
+func (rs *State) ImageRenderer() render.Renderer {
+	for _, rd := range rs.Renderers {
+		if rd.IsImage() {
+			return rd
+		}
+	}
+	return nil
+}
+
 // RenderImage returns the current render image from the first
 // Image renderer present, or nil if none.
 // This may be somewhat expensive for some rendering types.
 func (rs *State) RenderImage() *image.RGBA {
-	for _, rd := range rs.Renderers {
-		if !rd.IsImage() {
-			continue
-		}
-		return rd.Image()
+	rd := rs.ImageRenderer()
+	if rd == nil {
+		return nil
 	}
-	return nil
+	return rd.Image()
+}
+
+// RenderImageSize returns the size of the current render image
+// from the first Image renderer present.
+func (rs *State) RenderImageSize() image.Point {
+	rd := rs.ImageRenderer()
+	if rd == nil {
+		return image.Point{}
+	}
+	_, sz := rd.Size()
+	return sz.ToPoint()
 }
 
 // PushContext pushes a new [render.Context] onto the stack using given styles and bounds.

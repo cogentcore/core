@@ -81,7 +81,8 @@ func (sp *Sprite) grabRenderFrom(w Widget) {
 // If it returns nil, then the image could not be fetched.
 func grabRenderFrom(w Widget) *image.RGBA {
 	wb := w.AsWidget()
-	if wb.Scene.Pixels == nil {
+	scimg := wb.Scene.Painter.RenderImage()
+	if scimg == nil {
 		return nil
 	}
 	if wb.Geom.TotalBBox.Empty() { // the widget is offscreen
@@ -89,7 +90,7 @@ func grabRenderFrom(w Widget) *image.RGBA {
 	}
 	sz := wb.Geom.TotalBBox.Size()
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), wb.Scene.Pixels, wb.Geom.TotalBBox.Min, draw.Src)
+	draw.Draw(img, img.Bounds(), scimg, wb.Geom.TotalBBox.Min, draw.Src)
 	return img
 }
 
