@@ -52,6 +52,10 @@ func NewPainter(width, height int) *Painter {
 	return pc
 }
 
+func (pc *Painter) Transform() math32.Matrix2 {
+	return pc.Context().Transform.Mul(pc.Paint.Transform)
+}
+
 //////// Path basics
 
 // MoveTo starts a new subpath within the current path starting at the
@@ -442,13 +446,13 @@ func (pc *Painter) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op
 	if img == nil {
 		img = colors.Uniform(color.RGBA{})
 	}
-	pos = pc.Transform.MulVector2AsPoint(pos)
-	size = pc.Transform.MulVector2AsVector(size)
+	pos = pc.Transform().MulVector2AsPoint(pos)
+	size = pc.Transform().MulVector2AsVector(size)
 	br := math32.RectFromPosSizeMax(pos, size)
 	cb := pc.Context().Bounds.Rect.ToRect()
 	b := cb.Intersect(br)
 	if g, ok := img.(gradient.Gradient); ok {
-		g.Update(pc.Fill.Opacity, math32.B2FromRect(b), pc.Transform)
+		g.Update(pc.Fill.Opacity, math32.B2FromRect(b), pc.Transform())
 	} else {
 		img = gradient.ApplyOpacity(img, pc.Fill.Opacity)
 	}
@@ -512,7 +516,7 @@ func (pc *Painter) DrawImageAnchored(src image.Image, x, y, ax, ay float32) {
 	s := src.Bounds().Size()
 	x -= ax * float32(s.X)
 	y -= ay * float32(s.Y)
-	m := pc.Transform.Translate(x, y)
+	m := pc.Transform().Translate(x, y)
 	if pc.Mask == nil {
 		pc.Render.Add(pimage.NewTransform(m, src.Bounds(), src, draw.Over))
 	} else {
@@ -528,7 +532,7 @@ func (pc *Painter) DrawImageScaled(src image.Image, x, y, w, h float32) {
 	isz := math32.FromPoint(s)
 	isc := math32.Vec2(w, h).Div(isz)
 
-	m := pc.Transform.Translate(x, y).Scale(isc.X, isc.Y)
+	m := pc.Transform().Translate(x, y).Scale(isc.X, isc.Y)
 	if pc.Mask == nil {
 		pc.Render.Add(pimage.NewTransform(m, src.Bounds(), src, draw.Over))
 	} else {
@@ -543,8 +547,8 @@ func (pc *Painter) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	// if pc.Stroke.Color != nil {// todo
 	// 	sw = 0.5 * pc.StrokeWidth()
 	// }
-	tmin := pc.Transform.MulVector2AsPoint(math32.Vec2(minX, minY))
-	tmax := pc.Transform.MulVector2AsPoint(math32.Vec2(maxX, maxY))
+	tmin := pc.Transform().MulVector2AsPoint(math32.Vec2(minX, minY))
+	tmax := pc.Transform().MulVector2AsPoint(math32.Vec2(maxX, maxY))
 	tp1 := math32.Vec2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
 	tp2 := math32.Vec2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)

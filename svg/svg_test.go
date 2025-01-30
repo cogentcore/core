@@ -25,7 +25,7 @@ func TestSVG(t *testing.T) {
 	files := fsx.Filenames(dir, ".svg")
 
 	for _, fn := range files {
-		// if fn != "TestShapes4.svg" {
+		// if fn != "text-test.svg" {
 		// 	continue
 		// }
 		sv := NewSVG(640, 480)

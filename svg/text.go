@@ -166,9 +166,9 @@ func (g *Text) LayoutText() {
 
 func (g *Text) RenderText(sv *SVG) {
 	pc := &paint.Painter{&sv.RenderState, &g.Paint}
-	mat := &pc.Transform
+	mat := pc.Transform()
 	// note: layout of text has already been done in LocalBBox above
-	g.TextRender.Transform(*mat, &pc.FontStyle, &pc.UnitContext)
+	g.TextRender.Transform(mat, &pc.FontStyle, &pc.UnitContext)
 	pos := mat.MulVector2AsPoint(math32.Vec2(g.Pos.X, g.Pos.Y))
 	if pc.TextStyle.Align == styles.Center || pc.TextStyle.Anchor == styles.AnchorMiddle {
 		pos.X -= g.TextRender.BBox.Size().X * .5
