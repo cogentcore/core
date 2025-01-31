@@ -6,6 +6,8 @@ First, the original canvas impl used https://pkg.go.dev/golang.org/x/image/vecto
 
 Second, even when using the scanx rasterizer, it is slower than rasterx because the stroking component is much faster on rasterx. Canvas does the stroking via path-based operations, whereas rasterx does it in some more direct way that ends up being faster (no idea what that way is!)
 
+See: https://github.com/cogentcore/core/discussions/1453
+
 At this point, this package will be marked as unused.
 
 # TODO

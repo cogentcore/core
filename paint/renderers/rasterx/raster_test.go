@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/scan"
+	"cogentcore.org/core/paint/renderers/rasterx/scan"
 	"golang.org/x/image/math/fixed"
 )
 

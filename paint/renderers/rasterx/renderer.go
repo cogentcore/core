@@ -17,6 +17,8 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/paint/renderers/rasterx/scan"
 	"cogentcore.org/core/styles/units"
+	gvrx "github.com/srwiley/rasterx"
+	"github.com/srwiley/scanFT"
 )
 
 type Renderer struct {
@@ -34,6 +36,10 @@ type Renderer struct {
 
 	// scan spanner
 	ImgSpanner *scan.ImgSpanner
+
+	ScanGV *gvrx.ScannerGV
+	ScanFT *scanFT.ScannerFT
+	Ptr    *scanFT.RGBAPainter
 }
 
 func New(size math32.Vector2) render.Renderer {
@@ -59,7 +65,12 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	rs.image = image.NewRGBA(image.Rectangle{Max: psz})
 	rs.ImgSpanner = scan.NewImgSpanner(rs.image)
 	rs.Scanner = scan.NewScanner(rs.ImgSpanner, psz.X, psz.Y)
-	rs.Raster = NewDasher(psz.X, psz.Y, rs.Scanner)
+	rs.ScanGV = gvrx.NewScannerGV(psz.X, psz.Y, rs.image, rs.image.Bounds())
+	rs.Ptr = scanFT.NewRGBAPainter(rs.image)
+	rs.ScanFT = scanFT.NewScannerFT(psz.X, psz.Y, rs.Ptr)
+	// rs.Raster = NewDasher(psz.X, psz.Y, rs.Scanner)
+	// rs.Raster = NewDasher(psz.X, psz.Y, rs.ScanGV)
+	rs.Raster = NewDasher(psz.X, psz.Y, rs.ScanFT)
 }
 
 // Render is the main rendering function.

@@ -246,8 +246,8 @@ func (x *LinkListSpanner) SetBgColor(c image.Image) {
 }
 
 // SetColor sets the color of x to the first pixel of the given color
-func (x *LinkListSpanner) SetColor(c image.Image) {
-	x.FgColor = colors.AsRGBA(colors.ToUniform(c))
+func (x *LinkListSpanner) SetColor(c any) { // c image.Image) {
+	x.FgColor = colors.AsRGBA(colors.ToUniform(c.(image.Image)))
 }
 
 // NewImgSpanner returns an ImgSpanner set to draw to the given [*image.RGBA].
@@ -265,14 +265,14 @@ func (x *ImgSpanner) SetImage(img *image.RGBA) {
 }
 
 // SetColor sets the color of x to the given color image
-func (x *ImgSpanner) SetColor(c image.Image) {
+func (x *ImgSpanner) SetColor(c any) { // image.Image) {
 	if u, ok := c.(*image.Uniform); ok {
 		x.FgColor = colors.AsRGBA(u.C)
 		x.ColorImage = nil
 		return
 	}
 	x.FgColor = color.RGBA{}
-	x.ColorImage = c
+	x.ColorImage = c.(image.Image)
 }
 
 // GetSpanFunc returns the function that consumes a span described by the parameters.
