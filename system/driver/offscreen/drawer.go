@@ -5,7 +5,6 @@
 package offscreen
 
 import (
-	"fmt"
 	"image"
 
 	"cogentcore.org/core/system"
@@ -22,7 +21,6 @@ func (dw *Drawer) Start() {
 	rect := image.Rectangle{Max: dw.Window.PixelSize}
 	if dw.Image == nil || dw.Image.Rect != rect {
 		dw.Image = image.NewRGBA(rect)
-		fmt.Println("new img:", rect)
 	}
 	dw.DrawerBase.Start()
 }

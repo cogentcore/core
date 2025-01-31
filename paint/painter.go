@@ -177,7 +177,7 @@ func (pc *Painter) RoundedRectangle(x, y, w, h, r float32) {
 // with a consistent border and with the given x and y position,
 // width and height, and border radius for each corner.
 func (pc *Painter) RoundedRectangleSides(x, y, w, h float32, r sides.Floats) {
-	pc.State.Path.RoundedRectangleSidesQuad(x, y, w, h, r)
+	pc.State.Path.RoundedRectangleSides(x, y, w, h, r)
 }
 
 // BeveledRectangle adds a rectangle of width w and height h
@@ -205,7 +205,7 @@ func (pc *Painter) Ellipse(cx, cy, rx, ry float32) {
 // e.g. a difference of 810 degrees will draw one full circle and an arc
 // over 90 degrees.
 func (pc *Painter) CircularArc(x, y, r, theta0, theta1 float32) {
-	pc.EllipticalArc(x, y, r, r, theta0, theta1)
+	pc.State.Path.EllipticalArc(x, y, r, r, 0, theta0, theta1)
 }
 
 // EllipticalArc adds an elliptical arc at given coordinates with
@@ -217,8 +217,8 @@ func (pc *Painter) CircularArc(x, y, r, theta0, theta1 float32) {
 // one full circle will be drawn and the remaining part of diff % 360,
 // e.g. a difference of 810 degrees will draw one full circle and an arc
 // over 90 degrees.
-func (pc *Painter) EllipticalArc(x, y, rx, ry, theta0, theta1 float32) {
-	pc.State.Path.EllipticalArc(x, y, rx, ry, theta0, theta1)
+func (pc *Painter) EllipticalArc(x, y, rx, ry, rot, theta0, theta1 float32) {
+	pc.State.Path.EllipticalArc(x, y, rx, ry, rot, theta0, theta1)
 }
 
 // Triangle adds a triangle of radius r pointing upwards.

@@ -102,7 +102,7 @@ func (r *Renderer) RenderPath(pt *render.Path) {
 func ToRasterizer(p ppath.Path, ras *vector.Rasterizer) {
 	// TODO: smoothen path using Ramer-...
 
-	tolerance := ppath.PixelTolerance / 5
+	tolerance := ppath.PixelTolerance
 	for i := 0; i < len(p); {
 		cmd := p[i]
 		switch cmd {

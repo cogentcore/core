@@ -17,7 +17,7 @@ import (
 	. "cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/paint/render"
-	"cogentcore.org/core/paint/renderers/rasterx"
+	"cogentcore.org/core/paint/renderers/rasterizer"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
@@ -26,8 +26,8 @@ import (
 
 func TestMain(m *testing.M) {
 	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
-	NewDefaultImageRenderer = rasterx.New
-	// NewDefaultImageRenderer = rasterizer.New
+	// NewDefaultImageRenderer = rasterx.New
+	NewDefaultImageRenderer = rasterizer.New
 	os.Exit(m.Run())
 }
 
@@ -153,7 +153,7 @@ func TestPaintPath(t *testing.T) {
 		pc.Ellipse(150, 150, 100, 80)
 	})
 	test("elliptical-arc", func(pc *Painter) {
-		pc.EllipticalArc(150, 150, 100, 80, 0.0*math32.Pi, 1.5*math32.Pi)
+		pc.EllipticalArc(150, 150, 100, 80, 0, 0.0*math32.Pi, 1.5*math32.Pi)
 	})
 }
 

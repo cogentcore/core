@@ -31,18 +31,15 @@ func BenchmarkTable(bm *testing.B) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
 	b.AssertRender(bm, "table/benchmark", func() {
-		fmt.Println("fun")
 		b.AsyncLock()
-		startCPUMemoryProfile()
 		for range bm.N {
 			b.Scene.RenderWidget()
 		}
-		endCPUMemoryProfile()
 		b.AsyncUnlock()
 	})
 }
 
-func BenchmarkStyleForm(bm *testing.B) {
+func BenchmarkForm(bm *testing.B) {
 	b := NewBody()
 	s := styles.NewStyle()
 	s.SetState(true, states.Active)
@@ -51,11 +48,47 @@ func BenchmarkStyleForm(bm *testing.B) {
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
-	b.AssertRender(bm, "form/stylebenchmark", func() {
+	b.AssertRender(bm, "form/benchmark", func() {
+		b.AsyncLock()
+		for range bm.N {
+			b.Scene.RenderWidget()
+		}
+		b.AsyncUnlock()
+	})
+}
+
+func TestProfileForm(t *testing.T) {
+	b := NewBody()
+	s := styles.NewStyle()
+	s.SetState(true, states.Active)
+	s.SetAbilities(true, abilities.Checkable)
+	NewForm(b).SetStruct(s)
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(1280), units.Dp(720))
+	})
+	b.AssertRender(t, "form/profile", func() {
 		fmt.Println("fun")
 		b.AsyncLock()
 		startCPUMemoryProfile()
-		for range bm.N {
+		for range 200 {
+			b.Scene.RenderWidget()
+		}
+		endCPUMemoryProfile()
+		b.AsyncUnlock()
+	})
+}
+
+func TestProfileTable(t *testing.T) {
+	b := NewBody()
+	table := make([]benchTableStruct, 50)
+	NewTable(b).SetSlice(&table)
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(1280), units.Dp(720))
+	})
+	b.AssertRender(t, "table/profile", func() {
+		b.AsyncLock()
+		startCPUMemoryProfile()
+		for range 200 {
 			b.Scene.RenderWidget()
 		}
 		endCPUMemoryProfile()
