@@ -136,7 +136,7 @@ func (p *Path) RoundedRectangleSidesArc(x, y, w, h float32, r sides.Floats) *Pat
 // with a consistent border and with the given x and y position,
 // width and height, and border radius for each corner.
 func (p *Path) RoundedRectangleSides(x, y, w, h float32, r sides.Floats) *Path {
-	return p.RoundedRectangleSidesQuad(x, y, w, y, r)
+	return p.RoundedRectangleSidesArc(x, y, w, y, r)
 }
 
 // RoundedRectangleSides adds a standard rounded rectangle
@@ -255,7 +255,7 @@ func (p *Path) CircularArc(x, y, r, theta0, theta1 float32) *Path {
 // using quadratic bezier curves -- centers of ellipse are at cx, cy with
 // radii rx, ry.
 func (p *Path) EllipticalArc(cx, cy, rx, ry, angle1, angle2 float32) *Path {
-	return p.EllipticalArcQuad(cx, cy, rx, ry, angle1, angle2)
+	return p.EllipticalArcArc(cx, cy, rx, ry, 0, angle1, angle2)
 }
 
 // EllipticalArcArc adds an elliptical arc at given coordinates with

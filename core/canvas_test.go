@@ -23,8 +23,8 @@ func TestCanvas(t *testing.T) {
 		pc.FillBox(math32.Vec2(0.7, 0.3), math32.Vec2(0.2, 0.5), colors.Scheme.Success.Container)
 
 		pc.Fill.Color = colors.Uniform(colors.Orange)
-		pc.DrawCircle(0.4, 0.5, 0.15)
-		pc.Fill()
+		pc.Circle(0.4, 0.5, 0.15)
+		pc.PathDone()
 	})
 	b.AssertRender(t, "canvas/basic")
 }
