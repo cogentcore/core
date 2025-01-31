@@ -261,7 +261,6 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	}
 	sc := win.SystemWindow.Screen()
 	pos := win.SystemWindow.Position(sc)
-
 	ws.mu.Lock()
 	if ws.settingNoSave {
 		if DebugSettings.WindowGeometryTrace {
