@@ -10,6 +10,7 @@ package rasterizer
 import (
 	"image"
 
+	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
@@ -30,14 +31,16 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	}
 
 	if sty.HasFill() {
+		pr := profile.Start("canvas-transform")
 		fill = pt.Path.Clone().Transform(pc.Transform)
-		if len(pc.Bounds.Path) > 0 {
-			fill = fill.And(pc.Bounds.Path)
-		}
-		if len(pc.ClipPath) > 0 {
-			fill = fill.And(pc.ClipPath)
-		}
+		// if len(pc.Bounds.Path) > 0 {
+		// 	fill = fill.And(pc.Bounds.Path)
+		// }
+		// if len(pc.ClipPath) > 0 {
+		// 	fill = fill.And(pc.ClipPath)
+		// }
 		bounds = fill.FastBounds()
+		pr.End()
 	}
 	if sty.HasStroke() {
 		tolerance := ppath.PixelTolerance
@@ -48,6 +51,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 			dashOffset, dashes := ppath.ScaleDash(sc, sty.Stroke.DashOffset, sty.Stroke.Dashes)
 			stroke = stroke.Dash(dashOffset, dashes...)
 		}
+		pr := profile.Start("canvas-stroker")
 		stroke = stroke.Stroke(sty.Stroke.Width.Dots, ppath.CapFromStyle(sty.Stroke.Cap), ppath.JoinFromStyle(sty.Stroke.Join), tolerance)
 		stroke = stroke.Transform(pc.Transform)
 		if len(pc.Bounds.Path) > 0 {
@@ -61,6 +65,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		} else {
 			bounds = stroke.FastBounds()
 		}
+		pr.End()
 	}
 
 	dx, dy := 0, 0
@@ -90,7 +95,9 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		} else {
 			rs.ras.Reset(w, h)
 			ToRasterizer(fill, rs.ras)
+			pr := profile.Start("canvas-fill-ras-draw")
 			rs.ras.Draw(rs.image, ib, sty.Fill.Color, image.Point{dx, dy})
+			pr.End()
 		}
 	}
 	if sty.HasStroke() {
@@ -107,7 +114,9 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		} else {
 			rs.ras.Reset(w, h)
 			ToRasterizer(stroke, rs.ras)
+			pr := profile.Start("canvas-stroke-ras-draw")
 			rs.ras.Draw(rs.image, ib, sty.Stroke.Color, image.Point{dx, dy})
+			pr.End()
 		}
 	}
 }
@@ -115,6 +124,8 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 // ToRasterizer rasterizes the path using the given rasterizer and resolution.
 func ToRasterizer(p ppath.Path, ras *vector.Rasterizer) {
 	// TODO: smoothen path using Ramer-...
+	pr := profile.Start("canvas-to-rasterizer")
+	defer pr.End()
 
 	tolerance := ppath.PixelTolerance
 	for i := 0; i < len(p); {
@@ -163,6 +174,8 @@ func ToRasterizer(p ppath.Path, ras *vector.Rasterizer) {
 // ToRasterizerScan rasterizes the path using the given rasterizer and resolution.
 func (rs *Renderer) ToRasterizerScan(pc *render.Context, p ppath.Path, clr image.Image, opacity float32) {
 	// TODO: smoothen path using Ramer-...
+	pr := profile.Start("canvas-scan")
+	defer pr.End()
 
 	rf := rs.Filler
 	tolerance := ppath.PixelTolerance

@@ -8,6 +8,7 @@ import (
 	"image"
 	"slices"
 
+	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/pimage"
@@ -77,8 +78,11 @@ func (rs *Renderer) Render(r render.Render) {
 
 func (rs *Renderer) RenderPath(pt *render.Path) {
 	rs.Raster.Clear()
-	p := pt.Path.ReplaceArcs()
-	// p := pt.Path
+	// pr := profile.Start("rasterx-replace-arcs")
+	// p := pt.Path.ReplaceArcs()
+	// pr.End()
+	p := pt.Path
+	pr := profile.Start("rasterx-path")
 	m := pt.Context.Transform
 	for s := p.Scanner(); s.Scan(); {
 		cmd := s.Cmd()
@@ -99,8 +103,13 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 			rs.Path.Stop(true)
 		}
 	}
+	pr.End()
+	pr = profile.Start("rasterx-fill")
 	rs.Fill(pt)
+	pr.End()
+	pr = profile.Start("rasterx-stroke")
 	rs.Stroke(pt)
+	pr.End()
 	rs.Path.Clear()
 }
 
@@ -121,7 +130,6 @@ func (rs *Renderer) Stroke(pt *render.Path) {
 	}
 
 	sw := rs.StrokeWidth(pt)
-
 	rs.Raster.SetStroke(
 		math32.ToFixed(sw),
 		math32.ToFixed(sty.Stroke.MiterLimit),
@@ -129,22 +137,27 @@ func (rs *Renderer) Stroke(pt *render.Path) {
 		dash, 0)
 	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
 	rs.Path.AddTo(rs.Raster)
-	if g, ok := sty.Stroke.Color.(gradient.Gradient); ok {
-		fbox := rs.Raster.Scanner.GetPathExtent()
-		lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
-			Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-		g.Update(sty.Stroke.Opacity, math32.B2FromRect(lastRenderBBox), pc.Transform)
-		rs.Raster.SetColor(sty.Stroke.Color)
-	} else {
-		if sty.Stroke.Opacity < 1 {
-			rs.Raster.SetColor(gradient.ApplyOpacity(sty.Stroke.Color, sty.Stroke.Opacity))
-		} else {
-			rs.Raster.SetColor(sty.Stroke.Color)
-		}
-	}
-
+	rs.SetColor(rs.Raster, pc, sty.Stroke.Color, sty.Stroke.Opacity)
+	pr := profile.Start("rasterx-draw")
 	rs.Raster.Draw()
 	rs.Raster.Clear()
+	pr.End()
+}
+
+func (rs *Renderer) SetColor(sc Scanner, pc *render.Context, clr image.Image, opacity float32) {
+	if g, ok := clr.(gradient.Gradient); ok {
+		fbox := sc.GetPathExtent()
+		lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+			Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
+		g.Update(opacity, math32.B2FromRect(lastRenderBBox), pc.Transform)
+		sc.SetColor(clr)
+	} else {
+		if opacity < 1 {
+			sc.SetColor(gradient.ApplyOpacity(clr, opacity))
+		} else {
+			sc.SetColor(clr)
+		}
+	}
 }
 
 // Fill fills the current path with the current color. Open subpaths
@@ -159,21 +172,11 @@ func (rs *Renderer) Fill(pt *render.Path) {
 	rf.SetWinding(sty.Fill.Rule == ppath.NonZero)
 	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
 	rs.Path.AddTo(rf)
-	if g, ok := sty.Fill.Color.(gradient.Gradient); ok {
-		fbox := rs.Scanner.GetPathExtent()
-		lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
-			Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-		g.Update(sty.Fill.Opacity, math32.B2FromRect(lastRenderBBox), pc.Transform)
-		rf.SetColor(sty.Fill.Color)
-	} else {
-		if sty.Fill.Opacity < 1 {
-			rf.SetColor(gradient.ApplyOpacity(sty.Fill.Color, sty.Fill.Opacity))
-		} else {
-			rf.SetColor(sty.Fill.Color)
-		}
-	}
+	rs.SetColor(rf, pc, sty.Fill.Color, sty.Fill.Opacity)
+	pr := profile.Start("rasterx-draw")
 	rf.Draw()
 	rf.Clear()
+	pr.End()
 }
 
 // StrokeWidth obtains the current stoke width subject to transform (or not

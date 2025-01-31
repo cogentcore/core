@@ -15,6 +15,10 @@ import (
 	"cogentcore.org/core/math32"
 )
 
+// ArcToCubeImmediate causes ArcTo commands to be immediately converted into
+// corresponding CubeTo commands, instead of doing this later.
+var ArcToCubeImmediate = true
+
 // Path is a collection of MoveTo, LineTo, QuadTo, CubeTo, ArcTo, and Close
 // commands, each followed the float32 coordinate data for it.
 // To enable support bidirectional processing, the command verb is also added
@@ -518,7 +522,10 @@ func (p *Path) ArcTo(rx, ry, rot float32, large, sweep bool, x, y float32) {
 	} else if (*p)[len(*p)-1] == Close {
 		p.MoveTo((*p)[len(*p)-3], (*p)[len(*p)-2])
 	}
-	*p = append(*p, ArcTo, rx, ry, phi, fromArcFlags(large, sweep), end.X, end.Y, ArcTo)
+	// *p = append(*p, ArcTo, rx, ry, phi, fromArcFlags(large, sweep), end.X, end.Y, ArcTo)
+	for _, bezier := range ellipseToCubicBeziers(start, rx, ry, phi, large, sweep, end) {
+		p.CubeTo(bezier[1].X, bezier[1].Y, bezier[2].X, bezier[2].Y, bezier[3].X, bezier[3].Y)
+	}
 }
 
 // ArcToDeg is a version of [Path.ArcTo] with the angle in degrees instead of radians.

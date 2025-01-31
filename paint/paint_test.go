@@ -17,7 +17,7 @@ import (
 	. "cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/paint/render"
-	"cogentcore.org/core/paint/renderers/rasterizer"
+	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
@@ -26,8 +26,7 @@ import (
 
 func TestMain(m *testing.M) {
 	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
-	// NewDefaultImageRenderer = rasterx.New
-	NewDefaultImageRenderer = rasterizer.New
+	NewDefaultImageRenderer = rasterx.New
 	os.Exit(m.Run())
 }
 

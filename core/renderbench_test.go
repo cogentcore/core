@@ -5,7 +5,6 @@
 package core
 
 import (
-	"fmt"
 	"testing"
 
 	"cogentcore.org/core/icons"
@@ -67,13 +66,14 @@ func TestProfileForm(t *testing.T) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
 	b.AssertRender(t, "form/profile", func() {
-		fmt.Println("fun")
 		b.AsyncLock()
-		startCPUMemoryProfile()
-		for range 200 {
+		// startCPUMemoryProfile()
+		startTargetedProfile()
+		for range 1 {
 			b.Scene.RenderWidget()
 		}
-		endCPUMemoryProfile()
+		// endCPUMemoryProfile()
+		endTargetedProfile()
 		b.AsyncUnlock()
 	})
 }
@@ -87,11 +87,13 @@ func TestProfileTable(t *testing.T) {
 	})
 	b.AssertRender(t, "table/profile", func() {
 		b.AsyncLock()
-		startCPUMemoryProfile()
+		// startCPUMemoryProfile()
+		startTargetedProfile()
 		for range 200 {
 			b.Scene.RenderWidget()
 		}
-		endCPUMemoryProfile()
+		// endCPUMemoryProfile()
+		endTargetedProfile()
 		b.AsyncUnlock()
 	})
 }
