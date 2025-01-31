@@ -373,3 +373,4 @@ func (o *NewWindowOptions) Fixup() {
 		o.Pos, o.Size = sc.ConstrainWindowGeometry(o.Pos, o.Size) // make sure ok
 	}
 }
+

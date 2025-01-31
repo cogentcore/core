@@ -243,9 +243,13 @@ func (ws *windowGeometrySaver) settingEnd() {
 
 // record records current state of window as preference
 func (ws *windowGeometrySaver) record(win *renderWindow) {
-	if !ws.shouldSave() || !win.isVisible() || win.SystemWindow.Is(system.Fullscreen) {
+	if !ws.shouldSave() ||
+		!win.isVisible() ||
+		win.SystemWindow.Is(system.Fullscreen) ||
+		win.SystemWindow.Is(system.Minimized) {
 		return
 	}
+
 	win.SystemWindow.Lock()
 	wsz := win.SystemWindow.Size()
 	win.SystemWindow.Unlock()
@@ -257,13 +261,7 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	}
 	sc := win.SystemWindow.Screen()
 	pos := win.SystemWindow.Position(sc)
-	// TODO: come up with better name for a -32000 constant
-	if TheApp.Platform() == system.Windows && (pos.X == -32000 || pos.Y == -32000) { // windows badness
-		if DebugSettings.WindowGeometryTrace {
-			log.Printf("WindowGeometry: Record: NOT storing very negative pos: %v for win: %v\n", pos, win.name)
-		}
-		return
-	}
+
 	ws.mu.Lock()
 	if ws.settingNoSave {
 		if DebugSettings.WindowGeometryTrace {
