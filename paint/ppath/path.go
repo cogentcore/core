@@ -17,6 +17,9 @@ import (
 
 // ArcToCubeImmediate causes ArcTo commands to be immediately converted into
 // corresponding CubeTo commands, instead of doing this later.
+// This is faster than using [Path.ReplaceArcs], but when rendering to SVG
+// it might be better to turn this off in order to preserve the logical structure
+// of the arcs in the SVG output.
 var ArcToCubeImmediate = true
 
 // Path is a collection of MoveTo, LineTo, QuadTo, CubeTo, ArcTo, and Close
@@ -522,9 +525,12 @@ func (p *Path) ArcTo(rx, ry, rot float32, large, sweep bool, x, y float32) {
 	} else if (*p)[len(*p)-1] == Close {
 		p.MoveTo((*p)[len(*p)-3], (*p)[len(*p)-2])
 	}
-	// *p = append(*p, ArcTo, rx, ry, phi, fromArcFlags(large, sweep), end.X, end.Y, ArcTo)
-	for _, bezier := range ellipseToCubicBeziers(start, rx, ry, phi, large, sweep, end) {
-		p.CubeTo(bezier[1].X, bezier[1].Y, bezier[2].X, bezier[2].Y, bezier[3].X, bezier[3].Y)
+	if ArcToCubeImmediate {
+		for _, bezier := range ellipseToCubicBeziers(start, rx, ry, phi, large, sweep, end) {
+			p.CubeTo(bezier[1].X, bezier[1].Y, bezier[2].X, bezier[2].Y, bezier[3].X, bezier[3].Y)
+		}
+	} else {
+		*p = append(*p, ArcTo, rx, ry, phi, fromArcFlags(large, sweep), end.X, end.Y, ArcTo)
 	}
 }
 
