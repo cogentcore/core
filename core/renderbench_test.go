@@ -17,7 +17,7 @@ import (
 
 type benchTableStruct struct {
 	Icon  icons.Icon
-	Age   int `default:"2"`
+	Age   int
 	Score float32
 	Name  string
 	File  Filename

@@ -10,13 +10,14 @@ package rasterizer
 import (
 	"image"
 
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/render"
 	"golang.org/x/image/vector"
 )
 
-func (r *Renderer) RenderPath(pt *render.Path) {
+func (rs *Renderer) RenderPath(pt *render.Path) {
 	if pt.Path.Empty() {
 		return
 	}
@@ -24,6 +25,10 @@ func (r *Renderer) RenderPath(pt *render.Path) {
 	sty := &pc.Style
 	var fill, stroke ppath.Path
 	var bounds math32.Box2
+	if rs.useRasterx {
+		rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
+	}
+
 	if sty.HasFill() {
 		fill = pt.Path.Clone().Transform(pc.Transform)
 		if len(pc.Bounds.Path) > 0 {
@@ -59,7 +64,7 @@ func (r *Renderer) RenderPath(pt *render.Path) {
 	}
 
 	dx, dy := 0, 0
-	ib := r.image.Bounds()
+	ib := rs.image.Bounds()
 	w := ib.Size().X
 	h := ib.Size().Y
 	// todo: could optimize by setting rasterizer only to the size to be rendered,
@@ -80,9 +85,13 @@ func (r *Renderer) RenderPath(pt *render.Path) {
 		// 	}
 		// }
 
-		r.ras.Reset(w, h)
-		ToRasterizer(fill, r.ras)
-		r.ras.Draw(r.image, ib, sty.Fill.Color, image.Point{dx, dy})
+		if rs.useRasterx {
+			rs.ToRasterizerScan(pc, fill, sty.Fill.Color, sty.Fill.Opacity)
+		} else {
+			rs.ras.Reset(w, h)
+			ToRasterizer(fill, rs.ras)
+			rs.ras.Draw(rs.image, ib, sty.Fill.Color, image.Point{dx, dy})
+		}
 	}
 	if sty.HasStroke() {
 		// if sty.Stroke.IsPattern() {
@@ -92,9 +101,14 @@ func (r *Renderer) RenderPath(pt *render.Path) {
 		// 	}
 		// }
 
-		r.ras.Reset(w, h)
-		ToRasterizer(stroke, r.ras)
-		r.ras.Draw(r.image, ib, sty.Stroke.Color, image.Point{dx, dy})
+		if rs.useRasterx {
+			rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
+			rs.ToRasterizerScan(pc, stroke, sty.Stroke.Color, sty.Stroke.Opacity)
+		} else {
+			rs.ras.Reset(w, h)
+			ToRasterizer(stroke, rs.ras)
+			rs.ras.Draw(rs.image, ib, sty.Stroke.Color, image.Point{dx, dy})
+		}
 	}
 }
 
@@ -144,6 +158,71 @@ func ToRasterizer(p ppath.Path, ras *vector.Rasterizer) {
 		// implicitly close path
 		ras.ClosePath()
 	}
+}
+
+// ToRasterizerScan rasterizes the path using the given rasterizer and resolution.
+func (rs *Renderer) ToRasterizerScan(pc *render.Context, p ppath.Path, clr image.Image, opacity float32) {
+	// TODO: smoothen path using Ramer-...
+
+	rf := rs.Filler
+	tolerance := ppath.PixelTolerance
+	for i := 0; i < len(p); {
+		cmd := p[i]
+		switch cmd {
+		case ppath.MoveTo:
+			rf.Start(math32.Vec2(p[i+1], p[i+2]).ToFixed())
+		case ppath.LineTo:
+			rf.Line(math32.Vec2(p[i+1], p[i+2]).ToFixed())
+		case ppath.QuadTo, ppath.CubeTo, ppath.ArcTo:
+			// flatten
+			var q ppath.Path
+			var start math32.Vector2
+			if 0 < i {
+				start = math32.Vec2(p[i-3], p[i-2])
+			}
+			if cmd == ppath.QuadTo {
+				cp := math32.Vec2(p[i+1], p[i+2])
+				end := math32.Vec2(p[i+3], p[i+4])
+				q = ppath.FlattenQuadraticBezier(start, cp, end, tolerance)
+			} else if cmd == ppath.CubeTo {
+				cp1 := math32.Vec2(p[i+1], p[i+2])
+				cp2 := math32.Vec2(p[i+3], p[i+4])
+				end := math32.Vec2(p[i+5], p[i+6])
+				q = ppath.FlattenCubicBezier(start, cp1, cp2, end, tolerance)
+			} else {
+				rx, ry, phi, large, sweep, end := p.ArcToPoints(i)
+				q = ppath.FlattenEllipticArc(start, rx, ry, phi, large, sweep, end, tolerance)
+			}
+			for j := 4; j < len(q); j += 4 {
+				rf.Line(math32.Vec2(q[j+1], q[j+2]).ToFixed())
+			}
+		case ppath.Close:
+			rf.Stop(true)
+		default:
+			panic("quadratic and cubic Béziers and arcs should have been replaced")
+		}
+		i += ppath.CmdLen(cmd)
+	}
+	// if !p.Closed() {
+	// 	// implicitly close path
+	// 	rf.Stop(true)
+	// }
+
+	if g, ok := clr.(gradient.Gradient); ok {
+		fbox := rf.Scanner.GetPathExtent()
+		lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+			Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
+		g.Update(opacity, math32.B2FromRect(lastRenderBBox), pc.Transform)
+		rf.SetColor(clr)
+	} else {
+		if opacity < 1 {
+			rf.SetColor(gradient.ApplyOpacity(clr, opacity))
+		} else {
+			rf.SetColor(clr)
+		}
+	}
+	rf.Draw()
+	rf.Clear()
 }
 
 // RenderText renders a text object to the canvas using a transformation matrix.

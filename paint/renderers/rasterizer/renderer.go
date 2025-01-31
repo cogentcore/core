@@ -11,6 +11,8 @@ import (
 	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/paint/render"
+	"cogentcore.org/core/paint/renderers/rasterx"
+	"cogentcore.org/core/paint/renderers/rasterx/scan"
 	"cogentcore.org/core/styles/units"
 	"golang.org/x/image/vector"
 )
@@ -18,13 +20,27 @@ import (
 type Renderer struct {
 	size  math32.Vector2
 	image *image.RGBA
-	ras   *vector.Rasterizer
+
+	useRasterx bool
+
+	ras *vector.Rasterizer
+
+	// scan Filler
+	Filler *rasterx.Filler
+	// scan scanner
+	Scanner *scan.Scanner
+	// scan spanner
+	ImgSpanner *scan.ImgSpanner
 }
 
 func New(size math32.Vector2) render.Renderer {
 	rs := &Renderer{}
+	rs.useRasterx = true
+
 	rs.SetSize(units.UnitDot, size)
-	rs.ras = &vector.Rasterizer{}
+	if !rs.useRasterx {
+		rs.ras = &vector.Rasterizer{}
+	}
 	return rs
 }
 
@@ -43,6 +59,11 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	rs.size = size
 	psz := size.ToPointCeil()
 	rs.image = image.NewRGBA(image.Rectangle{Max: psz})
+	if rs.useRasterx {
+		rs.ImgSpanner = scan.NewImgSpanner(rs.image)
+		rs.Scanner = scan.NewScanner(rs.ImgSpanner, psz.X, psz.Y)
+		rs.Filler = rasterx.NewFiller(psz.X, psz.Y, rs.Scanner)
+	}
 }
 
 func (rs *Renderer) Render(r render.Render) {
