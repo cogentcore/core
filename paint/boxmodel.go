@@ -53,6 +53,8 @@ func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32
 		// We need to use raw geom data because we need to clear
 		// any box shadow that may have gone in margin.
 		if encroach { // if we encroach, we must limit ourselves to the parent radius
+			// rasterbench note: if we turn this path off, image/vector scan is still very slow!
+			// fmt.Println("encroach")
 			pc.Fill.Color = pabg
 			pc.RoundedRectangleSides(pos.X, pos.Y, size.X, size.Y, radius)
 			pc.PathDone()

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package rasterizer
+package canvasrast
 
 import (
 	"image"
@@ -35,11 +35,12 @@ type Renderer struct {
 
 func New(size math32.Vector2) render.Renderer {
 	rs := &Renderer{}
-	rs.useRasterx = true
+	rs.useRasterx = false
 
 	rs.SetSize(units.UnitDot, size)
 	if !rs.useRasterx {
 		rs.ras = &vector.Rasterizer{}
+		// rs.ras.DrawOp = draw.Src // makes no diff on performance
 	}
 	return rs
 }

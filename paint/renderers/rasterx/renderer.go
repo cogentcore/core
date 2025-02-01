@@ -68,9 +68,9 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	rs.ScanGV = gvrx.NewScannerGV(psz.X, psz.Y, rs.image, rs.image.Bounds())
 	rs.Ptr = scanFT.NewRGBAPainter(rs.image)
 	rs.ScanFT = scanFT.NewScannerFT(psz.X, psz.Y, rs.Ptr)
-	// rs.Raster = NewDasher(psz.X, psz.Y, rs.Scanner)
+	rs.Raster = NewDasher(psz.X, psz.Y, rs.Scanner)
 	// rs.Raster = NewDasher(psz.X, psz.Y, rs.ScanGV)
-	rs.Raster = NewDasher(psz.X, psz.Y, rs.ScanFT)
+	// rs.Raster = NewDasher(psz.X, psz.Y, rs.ScanFT)
 }
 
 // Render is the main rendering function.

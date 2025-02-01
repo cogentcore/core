@@ -14,5 +14,4 @@ At this point, this package will be marked as unused.
 
 * arcs-clip join is not working like it does on srwiley: TestShapes4 for example. not about the enum.
 * gradients not working, but are in srwiley: probably need the bbox updates
-* text not working in any case.
 

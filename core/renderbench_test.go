@@ -67,12 +67,12 @@ func TestProfileForm(t *testing.T) {
 	})
 	b.AssertRender(t, "form/profile", func() {
 		b.AsyncLock()
-		// startCPUMemoryProfile()
+		startCPUMemoryProfile()
 		startTargetedProfile()
 		for range 1 {
 			b.Scene.RenderWidget()
 		}
-		// endCPUMemoryProfile()
+		endCPUMemoryProfile()
 		endTargetedProfile()
 		b.AsyncUnlock()
 	})

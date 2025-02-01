@@ -11,4 +11,5 @@ import (
 
 func init() {
 	paint.NewDefaultImageRenderer = rasterx.New
+	// paint.NewDefaultImageRenderer = canvasrast.New
 }
