@@ -22,6 +22,12 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+// ScaleFramebuffer is a workaround for a GLFW_SCALE_FRAMEBUFFER window hint introduced in GLFW 3.4,
+// GLFW_COCOA_RETINA_FRAMEBUFFER is kept for compatibility reasons,
+// both have the same effect.
+// Use it while using GLFW 3.3.
+const ScaleFramebuffer = glfw.CocoaRetinaFramebuffer
+
 // Window is the implementation of [system.Window] for the desktop platform.
 type Window struct {
 	base.WindowMulti[*App, *gpudraw.Drawer]
@@ -96,7 +102,9 @@ func (w *Window) newGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen)
 		glfw.WindowHint(glfw.Decorated, glfw.True)
 	}
 	if sc.DevicePixelRatio > 1 {
-		glfw.WindowHint(glfw.CocoaRetinaFramebuffer, glfw.True)
+		glfw.WindowHint(ScaleFramebuffer, glfw.True)
+	} else {
+		glfw.WindowHint(ScaleFramebuffer, glfw.False)
 	}
 	// glfw.WindowHint(glfw.TransparentFramebuffer, glfw.True)
 	// todo: glfw.Floating for always-on-top -- could set for modal
