@@ -38,7 +38,8 @@ func NumColors(r rune) int {
 }
 
 // ToRunes returns the rune(s) that encode the given style
-// including any additional colors beyond the style and size runes.
+// including any additional colors beyond the style and size runes,
+// and the URL for a link.
 func (s *Style) ToRunes() []rune {
 	r := RuneFromStyle(s)
 	rs := []rune{r, rune(math.Float32bits(s.Size))}
@@ -53,6 +54,10 @@ func (s *Style) ToRunes() []rune {
 	}
 	if s.Decoration.HasFlag(Background) {
 		rs = append(rs, ColorToRune(s.Background))
+	}
+	if s.Decoration.HasFlag(Link) {
+		rs = append(rs, rune(len(s.URL)))
+		rs = append(rs, []rune(s.URL)...)
 	}
 	return rs
 }
@@ -75,6 +80,12 @@ func (s *Style) FromRunes(rs []rune) []rune {
 	if s.Decoration.HasFlag(Background) {
 		s.Background = ColorFromRune(rs[ci])
 		ci++
+	}
+	if s.Decoration.HasFlag(Link) {
+		ln := int(rs[ci])
+		ci++
+		s.URL = string(rs[ci : ci+ln])
+		ci += ln
 	}
 	return rs[ci:]
 }

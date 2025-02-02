@@ -24,7 +24,7 @@ func TestStyle(t *testing.T) {
 	s := NewStyle()
 	s.Family = Maths
 	s.Special = Math
-	s.Decoration.SetFlag(true, Link)
+	s.SetLink("https://example.com/readme.md")
 	s.SetBackground(colors.Blue)
 
 	sr := RuneFromSpecial(s.Special)
@@ -33,7 +33,7 @@ func TestStyle(t *testing.T) {
 
 	rs := s.ToRunes()
 
-	assert.Equal(t, 3, len(rs))
+	assert.Equal(t, 33, len(rs))
 	assert.Equal(t, 1, s.Decoration.NumColors())
 
 	ns := &Style{}

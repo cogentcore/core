@@ -62,6 +62,9 @@ type Style struct { //types:add
 	// Background flag is set. This will be encoded in a uint32 following the style rune,
 	// in rich.Text spans.
 	Background color.Color `set:"-"`
+
+	// URL is the URL for a link element. It is encoded in runes after the style runes.
+	URL string
 }
 
 func NewStyle() *Style {
@@ -237,9 +240,10 @@ const (
 	// DottedUnderline is used for abbr tag.
 	DottedUnderline
 
-	// Link indicates a hyperlink, which identifies this span for
-	// functional interactions such as hovering and clicking.
-	// It does not specify the styling.
+	// Link indicates a hyperlink, which is in the URL field of the
+	// style, and encoded in the runes after the style runes.
+	// It also identifies this span for functional interactions
+	// such as hovering and clicking. It does not specify the styling.
 	Link
 
 	// FillColor means that the fill color of the glyph is set to FillColor,
@@ -313,6 +317,14 @@ func (s *Style) SetStrokeColor(clr color.Color) *Style {
 func (s *Style) SetBackground(clr color.Color) *Style {
 	s.Background = clr
 	s.Decoration.SetFlag(true, Background)
+	return s
+}
+
+// SetLink sets this span style as a Link, setting the Decoration
+// flag for Link and the URL field to given link.
+func (s *Style) SetLink(url string) *Style {
+	s.URL = url
+	s.Decoration.SetFlag(true, Link)
 	return s
 }
 
