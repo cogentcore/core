@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/texteditor/text"
+	"cogentcore.org/core/text/text"
 )
 
 //////////////////////////////////////////////////////////

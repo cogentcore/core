@@ -3,88 +3,20 @@
 package coresymbols
 
 import (
-	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/styles/units"
-	"image"
 	"reflect"
 )
 
 func init() {
 	Symbols["cogentcore.org/core/paint/paint"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"ClampBorderRadius":       reflect.ValueOf(paint.ClampBorderRadius),
 		"EdgeBlurFactors":         reflect.ValueOf(paint.EdgeBlurFactors),
-		"FontAlts":                reflect.ValueOf(paint.FontAlts),
-		"FontExts":                reflect.ValueOf(&paint.FontExts).Elem(),
-		"FontFaceName":            reflect.ValueOf(paint.FontFaceName),
-		"FontFallbacks":           reflect.ValueOf(&paint.FontFallbacks).Elem(),
-		"FontInfoExample":         reflect.ValueOf(&paint.FontInfoExample).Elem(),
-		"FontLibrary":             reflect.ValueOf(&paint.FontLibrary).Elem(),
-		"FontPaths":               reflect.ValueOf(&paint.FontPaths).Elem(),
-		"FontSerifMonoGuess":      reflect.ValueOf(paint.FontSerifMonoGuess),
-		"FontStyleCSS":            reflect.ValueOf(paint.FontStyleCSS),
-		"GaussianBlur":            reflect.ValueOf(paint.GaussianBlur),
-		"GaussianBlurKernel1D":    reflect.ValueOf(paint.GaussianBlurKernel1D),
-		"NewBounds":               reflect.ValueOf(paint.NewBounds),
-		"NewBoundsRect":           reflect.ValueOf(paint.NewBoundsRect),
-		"NewContext":              reflect.ValueOf(paint.NewContext),
 		"NewDefaultImageRenderer": reflect.ValueOf(&paint.NewDefaultImageRenderer).Elem(),
 		"NewPainter":              reflect.ValueOf(paint.NewPainter),
-		"NewPainterFromImage":     reflect.ValueOf(paint.NewPainterFromImage),
-		"NewPainterFromRGBA":      reflect.ValueOf(paint.NewPainterFromRGBA),
-		"NextRuneAt":              reflect.ValueOf(paint.NextRuneAt),
-		"OpenFont":                reflect.ValueOf(paint.OpenFont),
-		"OpenFontFace":            reflect.ValueOf(paint.OpenFontFace),
-		"Renderers":               reflect.ValueOf(&paint.Renderers).Elem(),
-		"SetHTMLSimpleTag":        reflect.ValueOf(paint.SetHTMLSimpleTag),
-		"TextFontRenderMu":        reflect.ValueOf(&paint.TextFontRenderMu).Elem(),
-		"TextWrapSizeEstimate":    reflect.ValueOf(paint.TextWrapSizeEstimate),
 
 		// type definitions
-		"Bounds":      reflect.ValueOf((*paint.Bounds)(nil)),
-		"Context":     reflect.ValueOf((*paint.Context)(nil)),
-		"ContextPop":  reflect.ValueOf((*paint.ContextPop)(nil)),
-		"ContextPush": reflect.ValueOf((*paint.ContextPush)(nil)),
-		"FontInfo":    reflect.ValueOf((*paint.FontInfo)(nil)),
-		"FontLib":     reflect.ValueOf((*paint.FontLib)(nil)),
-		"Item":        reflect.ValueOf((*paint.Item)(nil)),
-		"Painter":     reflect.ValueOf((*paint.Painter)(nil)),
-		"Path":        reflect.ValueOf((*paint.Path)(nil)),
-		"Render":      reflect.ValueOf((*paint.Render)(nil)),
-		"Renderer":    reflect.ValueOf((*paint.Renderer)(nil)),
-		"Rune":        reflect.ValueOf((*paint.Rune)(nil)),
-		"Span":        reflect.ValueOf((*paint.Span)(nil)),
-		"State":       reflect.ValueOf((*paint.State)(nil)),
-		"Text":        reflect.ValueOf((*paint.Text)(nil)),
-		"TextLink":    reflect.ValueOf((*paint.TextLink)(nil)),
-
-		// interface wrapper definitions
-		"_Item":     reflect.ValueOf((*_cogentcore_org_core_paint_Item)(nil)),
-		"_Renderer": reflect.ValueOf((*_cogentcore_org_core_paint_Renderer)(nil)),
+		"Painter": reflect.ValueOf((*paint.Painter)(nil)),
+		"State":   reflect.ValueOf((*paint.State)(nil)),
 	}
 }
-
-// _cogentcore_org_core_paint_Item is an interface wrapper for Item type
-type _cogentcore_org_core_paint_Item struct {
-	IValue interface{}
-}
-
-// _cogentcore_org_core_paint_Renderer is an interface wrapper for Renderer type
-type _cogentcore_org_core_paint_Renderer struct {
-	IValue   interface{}
-	WCode    func() []byte
-	WImage   func() *image.RGBA
-	WIsImage func() bool
-	WRender  func(r paint.Render)
-	WSetSize func(un units.Units, size math32.Vector2, img *image.RGBA)
-	WSize    func() (units.Units, math32.Vector2)
-}
-
-func (W _cogentcore_org_core_paint_Renderer) Code() []byte          { return W.WCode() }
-func (W _cogentcore_org_core_paint_Renderer) Image() *image.RGBA    { return W.WImage() }
-func (W _cogentcore_org_core_paint_Renderer) IsImage() bool         { return W.WIsImage() }
-func (W _cogentcore_org_core_paint_Renderer) Render(r paint.Render) { W.WRender(r) }
-func (W _cogentcore_org_core_paint_Renderer) SetSize(un units.Units, size math32.Vector2, img *image.RGBA) {
-	W.WSetSize(un, size, img)
-}
-func (W _cogentcore_org_core_paint_Renderer) Size() (units.Units, math32.Vector2) { return W.WSize() }

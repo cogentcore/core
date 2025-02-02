@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/parser"
-	"cogentcore.org/core/texteditor/text"
+	"cogentcore.org/core/text/text"
 )
 
 // completeParse uses [parse] symbols and language; the string is a line of text

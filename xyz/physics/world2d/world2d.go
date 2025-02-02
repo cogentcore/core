@@ -75,7 +75,7 @@ func (vw *View) UpdateBodyView(bodyNames ...string) {
 
 // Image returns the current rendered image
 func (vw *View) Image() (*image.RGBA, error) {
-	img := vw.Scene.Pixels
+	img := vw.Scene.RenderImage()
 	if img == nil {
 		return nil, errors.New("eve2d.View Image: is nil")
 	}

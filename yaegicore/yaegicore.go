@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
-	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/yaegicore/basesymbols"
 	"cogentcore.org/core/yaegicore/coresymbols"
 	"github.com/cogentcore/yaegi/interp"

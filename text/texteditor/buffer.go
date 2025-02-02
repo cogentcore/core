@@ -24,8 +24,8 @@ import (
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/spell"
-	"cogentcore.org/core/texteditor/highlighting"
-	"cogentcore.org/core/texteditor/text"
+	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/text"
 )
 
 // Buffer is a buffer of text, which can be viewed by [Editor](s).

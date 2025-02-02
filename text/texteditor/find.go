@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/texteditor/text"
+	"cogentcore.org/core/text/text"
 )
 
 // findMatches finds the matches with given search string (literal, not regex)

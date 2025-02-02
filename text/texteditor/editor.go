@@ -23,8 +23,8 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/texteditor/highlighting"
-	"cogentcore.org/core/texteditor/text"
+	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/text"
 )
 
 // TODO: move these into an editor settings object

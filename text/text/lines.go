@@ -22,7 +22,7 @@ import (
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"
-	"cogentcore.org/core/texteditor/highlighting"
+	"cogentcore.org/core/text/highlighting"
 )
 
 const (

@@ -15,7 +15,7 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/texteditor/text"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 )
 

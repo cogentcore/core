@@ -24,7 +24,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/yaegicore"
 	"cogentcore.org/core/yaegicore/coresymbols"

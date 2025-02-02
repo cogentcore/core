@@ -14,8 +14,8 @@ import (
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/texteditor/text"
+	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/tree"
 )
 

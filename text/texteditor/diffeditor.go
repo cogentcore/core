@@ -25,7 +25,7 @@ import (
 	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/texteditor/text"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 )
 

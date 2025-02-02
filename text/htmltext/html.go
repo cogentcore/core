@@ -13,8 +13,8 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/styles/rich"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
 	"golang.org/x/net/html/charset"
 )
 

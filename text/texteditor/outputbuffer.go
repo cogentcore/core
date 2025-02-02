@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"cogentcore.org/core/texteditor/highlighting"
+	"cogentcore.org/core/text/highlighting"
 )
 
 // OutputBufferMarkupFunc is a function that returns a marked-up version of a given line of

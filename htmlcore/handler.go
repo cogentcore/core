@@ -21,7 +21,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
