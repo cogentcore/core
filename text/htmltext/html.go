@@ -13,29 +13,14 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"golang.org/x/net/html/charset"
 )
 
-// FontSizePoints maps standard font names to standard point sizes -- we use
-// dpi zoom scaling instead of rescaling "medium" font size, so generally use
-// these values as-is.  smaller and larger relative scaling can move in 2pt increments
-var FontSizes = map[string]float32{
-	"xx-small": 6.0 / 12.0,
-	"x-small":  8.0 / 12.0,
-	"small":    10.0 / 12.0, // small is also "smaller"
-	"smallf":   10.0 / 12.0, // smallf = small font size..
-	"medium":   1,
-	"large":    14.0 / 12.0,
-	"x-large":  18.0 / 12.0,
-	"xx-large": 24.0 / 12.0,
-}
-
-// AddHTML adds HTML-formatted rich text to given [rich.Text].
+// AddHTML adds HTML-formatted rich text to given [rich.Spans].
 // This uses the golang XML decoder system, which strips all whitespace
 // and therefore does not capture any preformatted text. See AddHTMLPre.
-func AddHTML(tx *rich.Text, str []byte) {
+func AddHTML(tx *rich.Spans, str []byte) {
 	sz := len(str)
 	if sz == 0 {
 		return
@@ -70,7 +55,7 @@ func AddHTML(tx *rich.Text, str []byte) {
 			fs := fstack[len(fstack)-1]
 			nm := strings.ToLower(se.Name.Local)
 			curLinkIndex = -1
-			if !SetHTMLSimpleTag(nm, &fs) {
+			if !fs.SetFromHTMLTag(nm) {
 				switch nm {
 				case "a":
 					fs.SetFillColor(colors.ToUniform(colors.Scheme.Primary.Base))
@@ -116,14 +101,14 @@ func AddHTML(tx *rich.Text, str []byte) {
 						if cssAgg != nil {
 							clnm := "." + attr.Value
 							if aggp, ok := rich.SubProperties(cssAgg, clnm); ok {
-								fs.SetStyleProperties(nil, aggp, nil)
+								fs.StyleFromProperties(nil, aggp, nil)
 							}
 						}
 					default:
 						sprop[attr.Name.Local] = attr.Value
 					}
 				}
-				fs.SetStyleProperties(nil, sprop, nil)
+				fs.StyleFromProperties(nil, sprop, nil)
 			}
 			if cssAgg != nil {
 				FontStyleCSS(&fs, nm, cssAgg, ctxt, nil)
@@ -182,7 +167,7 @@ func AddHTML(tx *rich.Text, str []byte) {
 // Only basic styling tags, including <span> elements with style parameters
 // (including class names) are decoded.  Whitespace is decoded as-is,
 // including LF \n etc, except in WhiteSpacePreLine case which only preserves LF's
-func (tr *Text) SetHTMLPre(str []byte, font *rich.FontRender, txtSty *rich.Text, ctxt *units.Context, cssAgg map[string]any) {
+func (tr *Text) SetHTMLPre(str []byte, font *rich.FontRender, txtSty *rich.Spans, ctxt *units.Context, cssAgg map[string]any) {
 	// errstr := "core.Text SetHTMLPre"
 
 	sz := len(str)
@@ -398,54 +383,3 @@ func (tr *Text) SetHTMLPre(str []byte, font *rich.FontRender, txtSty *rich.Text,
 }
 
 */
-
-// SetHTMLSimpleTag sets the styling parameters for simple html style tags
-// that only require updating the given font spec values -- returns true if handled
-// https://www.w3schools.com/cssref/css_default_values.asp
-func SetHTMLSimpleTag(tag string, fs *rich.Style) bool {
-	did := false
-	switch tag {
-	case "b", "strong":
-		fs.Weight = rich.Bold
-		did = true
-	case "i", "em", "var", "cite":
-		fs.Slant = rich.Italic
-		did = true
-	case "ins":
-		fallthrough
-	case "u":
-		fs.Decoration.SetFlag(true, rich.Underline)
-		did = true
-	case "s", "del", "strike":
-		fs.Decoration.SetFlag(true, rich.LineThrough)
-		did = true
-	case "sup":
-		fs.Special = rich.Super
-		fs.Size = 0.8
-		did = true
-	case "sub":
-		fs.Special = rich.Sub
-		fs.Size = 0.8
-		did = true
-	case "small":
-		fs.Size = 0.8
-		did = true
-	case "big":
-		fs.Size = 1.2
-		did = true
-	case "xx-small", "x-small", "smallf", "medium", "large", "x-large", "xx-large":
-		fs.Size = units.Pt(rich.FontSizes[tag])
-		did = true
-	case "mark":
-		fs.SetBackground(colors.Scheme.Warn.Container)
-		did = true
-	case "abbr", "acronym":
-		fs.Decoration.SetFlag(true, rich.DottedUnderline)
-		did = true
-	case "tt", "kbd", "samp", "code":
-		fs.Family = rich.Monospace
-		fs.SetBackground(colors.Scheme.SurfaceContainer)
-		did = true
-	}
-	return did
-}

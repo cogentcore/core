@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -31,7 +32,7 @@ func (pc *Path) styleFromProperties(parent *Path, properties map[string]any, cc 
 			continue
 		}
 		if key == "display" {
-			if inh, init := styleInhInit(val, parent); inh || init {
+			if inh, init := styleprops.InhInit(val, parent); inh || init {
 				if inh {
 					pc.Display = parent.Display
 				} else if init {
@@ -117,10 +118,10 @@ func (pc *Paint) styleFromProperties(parent *Paint, properties map[string]any, c
 ////////  Stroke
 
 // styleStrokeFuncs are functions for styling the Stroke object
-var styleStrokeFuncs = map[string]styleFunc{
+var styleStrokeFuncs = map[string]styleprops.Func{
 	"stroke": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Stroke)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				fs.Color = parent.(*Stroke).Color
 			} else if init {
@@ -130,15 +131,15 @@ var styleStrokeFuncs = map[string]styleFunc{
 		}
 		fs.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
-	"stroke-opacity": styleFuncFloat(float32(1),
+	"stroke-opacity": styleprops.Float(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
-	"stroke-width": styleFuncUnits(units.Dp(1),
+	"stroke-width": styleprops.Units(units.Dp(1),
 		func(obj *Stroke) *units.Value { return &(obj.Width) }),
-	"stroke-min-width": styleFuncUnits(units.Dp(1),
+	"stroke-min-width": styleprops.Units(units.Dp(1),
 		func(obj *Stroke) *units.Value { return &(obj.MinWidth) }),
 	"stroke-dasharray": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Stroke)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				fs.Dashes = parent.(*Stroke).Dashes
 			} else if init {
@@ -155,21 +156,21 @@ var styleStrokeFuncs = map[string]styleFunc{
 			math32.CopyFloat32s(&fs.Dashes, *vt)
 		}
 	},
-	"stroke-linecap": styleFuncEnum(ppath.CapButt,
+	"stroke-linecap": styleprops.Enum(ppath.CapButt,
 		func(obj *Stroke) enums.EnumSetter { return &(obj.Cap) }),
-	"stroke-linejoin": styleFuncEnum(ppath.JoinMiter,
+	"stroke-linejoin": styleprops.Enum(ppath.JoinMiter,
 		func(obj *Stroke) enums.EnumSetter { return &(obj.Join) }),
-	"stroke-miterlimit": styleFuncFloat(float32(1),
+	"stroke-miterlimit": styleprops.Float(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.MiterLimit) }),
 }
 
 ////////  Fill
 
 // styleFillFuncs are functions for styling the Fill object
-var styleFillFuncs = map[string]styleFunc{
+var styleFillFuncs = map[string]styleprops.Func{
 	"fill": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Fill)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				fs.Color = parent.(*Fill).Color
 			} else if init {
@@ -179,21 +180,21 @@ var styleFillFuncs = map[string]styleFunc{
 		}
 		fs.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
-	"fill-opacity": styleFuncFloat(float32(1),
+	"fill-opacity": styleprops.Float(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),
-	"fill-rule": styleFuncEnum(ppath.NonZero,
+	"fill-rule": styleprops.Enum(ppath.NonZero,
 		func(obj *Fill) enums.EnumSetter { return &(obj.Rule) }),
 }
 
 ////////  Paint
 
 // stylePathFuncs are functions for styling the Stroke object
-var stylePathFuncs = map[string]styleFunc{
-	"vector-effect": styleFuncEnum(ppath.VectorEffectNone,
+var stylePathFuncs = map[string]styleprops.Func{
+	"vector-effect": styleprops.Enum(ppath.VectorEffectNone,
 		func(obj *Path) enums.EnumSetter { return &(obj.VectorEffect) }),
 	"transform": func(obj any, key string, val any, parent any, cc colors.Context) {
 		pc := obj.(*Path)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				pc.Transform = parent.(*Path).Transform
 			} else if init {

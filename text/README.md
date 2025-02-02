@@ -32,6 +32,6 @@ This directory contains all of the text processing and rendering functionality, 
 
 * `text/lines`: manages Spans and Runs for line-oriented uses (texteditor, terminal). Need to move `parse/lexer/Pos` into lines, along with probably some of the other stuff from lexer, and move `parser/tokens` into `text/tokens` as it is needed to be our fully general token library for all markup. Probably just move parse under text too?
 
-* `text/text`: manages the general purpose text layout framework. TODO: do we make the most general-purpose LaTeX layout system with arbitrary textobject elements as in canvas? Is this just the `core.Text` guy? textobjects are just wrappers around `render.Render` items -- need an interface that gives the size of the elements, and how much detail does the layout algorithm need?
+* `text/text`: is the general unconstrained text layout framework: do we make the most general-purpose LaTeX layout system with arbitrary textobject elements as in canvas? Is this just the core.Text guy? textobjects are just wrappers around `render.Render` items -- need an interface that gives the size of the elements, and how much detail does the layout algorithm need? need to be able to put any Widget elements. This is all a bit up in the air. In the mean time, we can start with a basic go-text based text-only layout system that will get `core.Text` functionality working.
 
 
