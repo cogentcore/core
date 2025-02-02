@@ -136,7 +136,7 @@ func (t Text) Join() []rune {
 		}
 		rs := s[0]
 		nc := NumColors(rs)
-		sp = append(sp, s[1+nc:]...)
+		sp = append(sp, s[NStyleRunes+nc:]...)
 	}
 	return sp
 }
@@ -146,4 +146,15 @@ func (t *Text) Add(s *Style, r []rune) {
 	nr := s.ToRunes()
 	nr = append(nr, r...)
 	*t = append(*t, nr)
+}
+
+func (t Text) String() string {
+	str := ""
+	for _, rs := range t {
+		s := &Style{}
+		ss := s.FromRunes(rs)
+		sstr := s.String()
+		str += "[" + sstr + "]: " + string(ss) + "\n"
+	}
+	return str
 }

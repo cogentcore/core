@@ -4,9 +4,13 @@
 
 package rich
 
-import "image/color"
+import (
+	"fmt"
+	"image/color"
+	"strings"
+)
 
-//go:generate core generate -add-types
+//go:generate core generate -add-types -setters
 
 // Note: these enums must remain in sync with
 // "github.com/go-text/typesetting/font"
@@ -47,17 +51,29 @@ type Style struct { //types:add
 	//	FillColor is the color to use for glyph fill (i.e., the standard "ink" color)
 	// if the Decoration FillColor flag is set. This will be encoded in a uint32 following
 	// the style rune, in rich.Text spans.
-	FillColor color.Color
+	FillColor color.Color `set:"-"`
 
 	//	StrokeColor is the color to use for glyph stroking if the Decoration StrokeColor
 	// flag is set. This will be encoded in a uint32 following the style rune,
 	// in rich.Text spans.
-	StrokeColor color.Color
+	StrokeColor color.Color `set:"-"`
 
 	//	Background is the color to use for the background region if the Decoration
 	// Background flag is set. This will be encoded in a uint32 following the style rune,
 	// in rich.Text spans.
-	Background color.Color
+	Background color.Color `set:"-"`
+}
+
+func NewStyle() *Style {
+	s := &Style{}
+	s.Defaults()
+	return s
+}
+
+func (s *Style) Defaults() {
+	s.Size = 1
+	s.Weight = Normal
+	s.Stretch = StretchNormal
 }
 
 // FontFamily returns the font family name(s) based on [Style.Family] and the
@@ -275,3 +291,55 @@ const (
 	// Math indicates a LaTeX formatted math sequence.
 	Math
 )
+
+// SetFillColor sets the fill color to given color, setting the Decoration
+// flag and the color value.
+func (s *Style) SetFillColor(clr color.Color) *Style {
+	s.FillColor = clr
+	s.Decoration.SetFlag(true, FillColor)
+	return s
+}
+
+// SetStrokeColor sets the stroke color to given color, setting the Decoration
+// flag and the color value.
+func (s *Style) SetStrokeColor(clr color.Color) *Style {
+	s.StrokeColor = clr
+	s.Decoration.SetFlag(true, StrokeColor)
+	return s
+}
+
+// SetBackground sets the background color to given color, setting the Decoration
+// flag and the color value.
+func (s *Style) SetBackground(clr color.Color) *Style {
+	s.Background = clr
+	s.Decoration.SetFlag(true, Background)
+	return s
+}
+
+func (s *Style) String() string {
+	str := ""
+	if s.Size != 1 {
+		str += fmt.Sprintf("%5.2fx ", s.Size)
+	}
+	if s.Family != SansSerif {
+		str += s.Family.String() + " "
+	}
+	if s.Slant != SlantNormal {
+		str += s.Slant.String() + " "
+	}
+	if s.Weight != Normal {
+		str += s.Weight.String() + " "
+	}
+	if s.Stretch != StretchNormal {
+		str += s.Stretch.String() + " "
+	}
+	if s.Special != Nothing {
+		str += s.Special.String() + " "
+	}
+	for d := Underline; d <= Background; d++ {
+		if s.Decoration.HasFlag(d) {
+			str += d.BitIndexString() + " "
+		}
+	}
+	return strings.TrimSpace(str)
+}

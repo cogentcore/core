@@ -58,8 +58,9 @@ func (s *Style) ToRunes() []rune {
 }
 
 // FromRunes sets the Style properties from the given rune encodings
-// which must be the proper length including colors.
-func (s *Style) FromRunes(rs ...rune) {
+// which must be the proper length including colors. Any remaining
+// runes after the style runes are returned: this is the source string.
+func (s *Style) FromRunes(rs []rune) []rune {
 	RuneToStyle(s, rs[0])
 	s.Size = math.Float32frombits(uint32(rs[1]))
 	ci := NStyleRunes
@@ -75,6 +76,7 @@ func (s *Style) FromRunes(rs ...rune) {
 		s.Background = ColorFromRune(rs[ci])
 		ci++
 	}
+	return rs[ci:]
 }
 
 // ColorToRune converts given color to a rune uint32 value.
@@ -124,7 +126,7 @@ func RuneToDecoration(r rune) Decorations {
 
 // RuneFromSpecial returns the rune bit values for given special.
 func RuneFromSpecial(d Specials) rune {
-	return rune(d + 1<<SpecialStart)
+	return rune(d << SpecialStart)
 }
 
 // RuneToSpecial returns the Specials value from given rune.
@@ -134,7 +136,7 @@ func RuneToSpecial(r rune) Specials {
 
 // RuneFromStretch returns the rune bit values for given stretch.
 func RuneFromStretch(d Stretch) rune {
-	return rune(d + 1<<StretchStart)
+	return rune(d << StretchStart)
 }
 
 // RuneToStretch returns the Stretch value from given rune.
@@ -144,7 +146,7 @@ func RuneToStretch(r rune) Stretch {
 
 // RuneFromWeight returns the rune bit values for given weight.
 func RuneFromWeight(d Weights) rune {
-	return rune(d + 1<<WeightStart)
+	return rune(d << WeightStart)
 }
 
 // RuneToWeight returns the Weights value from given rune.
@@ -154,7 +156,7 @@ func RuneToWeight(r rune) Weights {
 
 // RuneFromSlant returns the rune bit values for given slant.
 func RuneFromSlant(d Slants) rune {
-	return rune(d + 1<<SlantStart)
+	return rune(d << SlantStart)
 }
 
 // RuneToSlant returns the Slants value from given rune.
@@ -164,7 +166,7 @@ func RuneToSlant(r rune) Slants {
 
 // RuneFromFamily returns the rune bit values for given family.
 func RuneFromFamily(d Family) rune {
-	return rune(d + 1<<FamilyStart)
+	return rune(d << FamilyStart)
 }
 
 // RuneToFamily returns the Familys value from given rune.
