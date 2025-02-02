@@ -4,13 +4,17 @@
 
 package rich
 
-import "image/color"
+import (
+	"image/color"
+	"math"
+)
 
 // srune is a uint32 rune value that encodes the font styles.
 // There is no attempt to pack these values into the Private Use Areas
 // of unicode, because they are never encoded into the unicode directly.
 // Because we have the room, we use at least 4 bits = 1 hex F for each
-// element of the style property.
+// element of the style property. Size and Color values are added after
+// the main style rune element.
 
 // RuneFromStyle returns the style rune that encodes the given style values.
 func RuneFromStyle(s *Style) rune {
@@ -34,10 +38,10 @@ func NumColors(r rune) int {
 }
 
 // ToRunes returns the rune(s) that encode the given style
-// including any additional colors beyond the first style rune.
+// including any additional colors beyond the style and size runes.
 func (s *Style) ToRunes() []rune {
 	r := RuneFromStyle(s)
-	rs := []rune{r}
+	rs := []rune{r, rune(math.Float32bits(s.Size))}
 	if s.Decoration.NumColors() == 0 {
 		return rs
 	}
@@ -53,6 +57,26 @@ func (s *Style) ToRunes() []rune {
 	return rs
 }
 
+// FromRunes sets the Style properties from the given rune encodings
+// which must be the proper length including colors.
+func (s *Style) FromRunes(rs ...rune) {
+	RuneToStyle(s, rs[0])
+	s.Size = math.Float32frombits(uint32(rs[1]))
+	ci := NStyleRunes
+	if s.Decoration.HasFlag(FillColor) {
+		s.FillColor = ColorFromRune(rs[ci])
+		ci++
+	}
+	if s.Decoration.HasFlag(StrokeColor) {
+		s.StrokeColor = ColorFromRune(rs[ci])
+		ci++
+	}
+	if s.Decoration.HasFlag(Background) {
+		s.Background = ColorFromRune(rs[ci])
+		ci++
+	}
+}
+
 // ColorToRune converts given color to a rune uint32 value.
 func ColorToRune(c color.Color) rune {
 	r, g, b, a := c.RGBA() // uint32
@@ -61,6 +85,16 @@ func ColorToRune(c color.Color) rune {
 	b8 := b >> 8
 	a8 := a >> 8
 	return rune(r8<<24) + rune(g8<<16) + rune(b8<<8) + rune(a8)
+}
+
+// ColorFromRune converts given color from a rune uint32 value.
+func ColorFromRune(r rune) color.RGBA {
+	ru := uint32(r)
+	r8 := uint8((ru & 0xFF000000) >> 24)
+	g8 := uint8((ru & 0x00FF0000) >> 16)
+	b8 := uint8((ru & 0x0000FF00) >> 8)
+	a8 := uint8((ru & 0x000000FF))
+	return color.RGBA{r8, g8, b8, a8}
 }
 
 const (
@@ -85,7 +119,7 @@ func RuneFromDecoration(d Decorations) rune {
 
 // RuneToDecoration returns the Decoration bit values from given rune.
 func RuneToDecoration(r rune) Decorations {
-	return Decorations(r & DecorationMask)
+	return Decorations(uint32(r) & DecorationMask)
 }
 
 // RuneFromSpecial returns the rune bit values for given special.
@@ -95,7 +129,7 @@ func RuneFromSpecial(d Specials) rune {
 
 // RuneToSpecial returns the Specials value from given rune.
 func RuneToSpecial(r rune) Specials {
-	return Specials((r & SpecialMask) >> SpecialStart)
+	return Specials((uint32(r) & SpecialMask) >> SpecialStart)
 }
 
 // RuneFromStretch returns the rune bit values for given stretch.
@@ -105,7 +139,7 @@ func RuneFromStretch(d Stretch) rune {
 
 // RuneToStretch returns the Stretch value from given rune.
 func RuneToStretch(r rune) Stretch {
-	return Stretch((r & StretchMask) >> StretchStart)
+	return Stretch((uint32(r) & StretchMask) >> StretchStart)
 }
 
 // RuneFromWeight returns the rune bit values for given weight.
@@ -115,7 +149,7 @@ func RuneFromWeight(d Weights) rune {
 
 // RuneToWeight returns the Weights value from given rune.
 func RuneToWeight(r rune) Weights {
-	return Weights((r & WeightMask) >> WeightStart)
+	return Weights((uint32(r) & WeightMask) >> WeightStart)
 }
 
 // RuneFromSlant returns the rune bit values for given slant.
@@ -125,7 +159,7 @@ func RuneFromSlant(d Slants) rune {
 
 // RuneToSlant returns the Slants value from given rune.
 func RuneToSlant(r rune) Slants {
-	return Slants((r & SlantMask) >> SlantStart)
+	return Slants((uint32(r) & SlantMask) >> SlantStart)
 }
 
 // RuneFromFamily returns the rune bit values for given family.
@@ -135,5 +169,5 @@ func RuneFromFamily(d Family) rune {
 
 // RuneToFamily returns the Familys value from given rune.
 func RuneToFamily(r rune) Family {
-	return Family((r & FamilyMask) >> FamilyStart)
+	return Family((uint32(r) & FamilyMask) >> FamilyStart)
 }

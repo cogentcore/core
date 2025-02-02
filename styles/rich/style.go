@@ -6,7 +6,7 @@ package rich
 
 import "image/color"
 
-//go:generate core generate
+//go:generate core generate -add-types
 
 // Note: these enums must remain in sync with
 // "github.com/go-text/typesetting/font"
@@ -16,6 +16,10 @@ import "image/color"
 // span of text. These are encoded into a uint32 rune value in [rich.Text].
 // See [Context] for additional context needed for full specification.
 type Style struct { //types:add
+
+	// Size is the font size multiplier relative to the standard font size
+	// specified in the Context.
+	Size float32
 
 	// Family indicates the generic family of typeface to use, where the
 	// specific named values to use for each are provided in the Context.
@@ -56,7 +60,19 @@ type Style struct { //types:add
 	Background color.Color
 }
 
-// Family indicates the generic family of typeface to use, where the
+// FontFamily returns the font family name(s) based on [Style.Family] and the
+// values specified in the given [Context].
+func (s *Style) FontFamily(ctx *Context) string {
+	return ctx.Family(s.Family)
+}
+
+// FontSize returns the font size in dot pixels based on [Style.Size] and the
+// Standard size specified in the given [Context].
+func (s *Style) FontSize(ctx *Context) float32 {
+	return ctx.SizeDots(s.Size)
+}
+
+// Family specifies the generic family of typeface to use, where the
 // specific named values to use for each are provided in the Context.
 type Family int32 //enums:enum -trim-prefix Family -transform kebab
 
@@ -103,6 +119,9 @@ const (
 	// serif-style Song and cursive-style Kai forms. This style is often used
 	// for government documents.
 	Fangsong
+
+	// Custom is a custom font name that can be set in Context.
+	Custom
 )
 
 // Slants (also called style) allows italic or oblique faces to be selected.
@@ -202,6 +221,11 @@ const (
 	// DottedUnderline is used for abbr tag.
 	DottedUnderline
 
+	// Link indicates a hyperlink, which identifies this span for
+	// functional interactions such as hovering and clicking.
+	// It does not specify the styling.
+	Link
+
 	// FillColor means that the fill color of the glyph is set to FillColor,
 	// which encoded in the rune following the style rune, rather than the default.
 	// The standard font rendering uses this fill color (compare to StrokeColor).
@@ -247,11 +271,6 @@ const (
 
 	// Sub indicates sub-scripted text.
 	Sub
-
-	// Link indicates a hyperlink, which must be formatted through
-	// the regular font styling properties, but this is used for
-	// functional interaction with the link element.
-	Link
 
 	// Math indicates a LaTeX formatted math sequence.
 	Math

@@ -11,7 +11,9 @@ import "slices"
 // by the first rune(s) in each span. If custom colors are used, they are encoded
 // after the first style rune.
 // This compact and efficient representation can be Join'd back into the raw
-// unicode source, and indexing by rune index in the original is fast and efficient.
+// unicode source, and indexing by rune index in the original is fast.
+// It provides a GPU-compatible representation, and is the text equivalent of
+// the [ppath.Path] encoding.
 type Text [][]rune
 
 // Index represents the [Span][Rune] index of a given rune.
@@ -21,6 +23,10 @@ type Text [][]rune
 type Index struct { //types:add
 	Span, Rune int
 }
+
+// NStyleRunes specifies the base number of style runes at the start
+// of each span: style + size.
+const NStyleRunes = 2
 
 // NumSpans returns the number of spans in this Text.
 func (t Text) NumSpans() int {
@@ -36,8 +42,8 @@ func (t Text) Len() int {
 			continue
 		}
 		rs := s[0]
-		nc := RuneToDecoration(rs).NumColors()
-		ns := max(0, sn-(1+nc))
+		nc := NumColors(rs)
+		ns := max(0, sn-(NStyleRunes+nc))
 		n += ns
 	}
 	return n
@@ -54,10 +60,10 @@ func (t Text) Index(li int) Index {
 			continue
 		}
 		rs := s[0]
-		nc := RuneToDecoration(rs).NumColors()
-		ns := max(0, sn-(1+nc))
+		nc := NumColors(rs)
+		ns := max(0, sn-(NStyleRunes+nc))
 		if li >= ci && li < ci+ns {
-			return Index{Span: si, Rune: 1 + nc + (li - ci)}
+			return Index{Span: si, Rune: NStyleRunes + nc + (li - ci)}
 		}
 		ci += ns
 	}
@@ -99,7 +105,7 @@ func (t Text) Split() [][]rune {
 		}
 		rs := s[0]
 		nc := NumColors(rs)
-		sp = append(sp, s[1+nc:])
+		sp = append(sp, s[NStyleRunes+nc:])
 	}
 	return sp
 }
@@ -115,7 +121,7 @@ func (t Text) SplitCopy() [][]rune {
 		}
 		rs := s[0]
 		nc := NumColors(rs)
-		sp = append(sp, slices.Clone(s[1+nc:]))
+		sp = append(sp, slices.Clone(s[NStyleRunes+nc:]))
 	}
 	return sp
 }
