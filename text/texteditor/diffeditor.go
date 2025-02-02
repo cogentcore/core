@@ -25,7 +25,7 @@ import (
 	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/tree"
 )
 
@@ -58,12 +58,12 @@ func DiffEditorDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf 
 		if fbuf != nil {
 			bstr = fbuf.Strings(false)
 		} else {
-			fb, err := text.FileBytes(file)
+			fb, err := lines.FileBytes(file)
 			if err != nil {
 				core.ErrorDialog(ctx, err)
 				return nil, err
 			}
-			bstr = text.BytesToLineStrings(fb, false) // don't add new lines
+			bstr = lines.BytesToLineStrings(fb, false) // don't add new lines
 		}
 	} else {
 		fb, err := repo.FileContents(file, rev_b)
@@ -71,14 +71,14 @@ func DiffEditorDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf 
 			core.ErrorDialog(ctx, err)
 			return nil, err
 		}
-		bstr = text.BytesToLineStrings(fb, false) // don't add new lines
+		bstr = lines.BytesToLineStrings(fb, false) // don't add new lines
 	}
 	fb, err := repo.FileContents(file, rev_a)
 	if err != nil {
 		core.ErrorDialog(ctx, err)
 		return nil, err
 	}
-	astr = text.BytesToLineStrings(fb, false) // don't add new lines
+	astr = lines.BytesToLineStrings(fb, false) // don't add new lines
 	if rev_a == "" {
 		rev_a = "HEAD"
 	}
@@ -145,10 +145,10 @@ type DiffEditor struct {
 	bufferB *Buffer
 
 	// aligned diffs records diff for aligned lines
-	alignD text.Diffs
+	alignD lines.Diffs
 
 	// diffs applied
-	diffs text.DiffSelected
+	diffs lines.DiffSelected
 
 	inInputEvent bool
 	toolbar      *core.Toolbar
@@ -334,7 +334,7 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 	chg := colors.Scheme.Primary.Base
 
 	nd := len(dv.diffs.Diffs)
-	dv.alignD = make(text.Diffs, nd)
+	dv.alignD = make(lines.Diffs, nd)
 	var ab, bb [][]byte
 	absln := 0
 	bspc := []byte(" ")
@@ -448,7 +448,7 @@ func (dv *DiffEditor) tagWordDiffs() {
 			fla := lna.RuneStrings(ra)
 			flb := lnb.RuneStrings(rb)
 			nab := max(len(fla), len(flb))
-			ldif := text.DiffLines(fla, flb)
+			ldif := lines.DiffLines(fla, flb)
 			ndif := len(ldif)
 			if nab > 25 && ndif > nab/2 { // more than half of big diff -- skip
 				continue

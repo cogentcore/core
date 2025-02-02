@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/tree"
 )
@@ -340,7 +340,7 @@ func (fn *Node) blameVCS() ([]byte, error) {
 		return nil, errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
 	fnm := string(fn.Filepath)
-	fb, err := text.FileBytes(fnm)
+	fb, err := lines.FileBytes(fnm)
 	if err != nil {
 		return nil, err
 	}

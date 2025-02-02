@@ -18,7 +18,7 @@ import (
 
 // RuneFromStyle returns the style rune that encodes the given style values.
 func RuneFromStyle(s *Style) rune {
-	return RuneFromDecoration(s.Decoration) | RuneFromSpecial(s.Special) | RuneFromStretch(s.Stretch) | RuneFromWeight(s.Weight) | RuneFromSlant(s.Slant) | RuneFromFamily(s.Family)
+	return RuneFromDecoration(s.Decoration) | RuneFromSpecial(s.Special) | RuneFromStretch(s.Stretch) | RuneFromWeight(s.Weight) | RuneFromSlant(s.Slant) | RuneFromFamily(s.Family) | RuneFromDirection(s.Direction)
 }
 
 // RuneToStyle sets all the style values decoded from given rune.
@@ -29,6 +29,7 @@ func RuneToStyle(s *Style, r rune) {
 	s.Weight = RuneToWeight(r)
 	s.Slant = RuneToSlant(r)
 	s.Family = RuneToFamily(r)
+	s.Direction = RuneToDirection(r)
 }
 
 // NumColors returns the number of colors for decoration style encoded
@@ -123,6 +124,8 @@ const (
 	SlantMask       = 0x00F00000
 	FamilyStart     = 24
 	FamilyMask      = 0x0F000000
+	DirectionStart  = 28
+	DirectionMask   = 0xF0000000
 )
 
 // RuneFromDecoration returns the rune bit values for given decoration.
@@ -183,4 +186,14 @@ func RuneFromFamily(d Family) rune {
 // RuneToFamily returns the Familys value from given rune.
 func RuneToFamily(r rune) Family {
 	return Family((uint32(r) & FamilyMask) >> FamilyStart)
+}
+
+// RuneFromDirection returns the rune bit values for given direction.
+func RuneFromDirection(d Directions) rune {
+	return rune(d << DirectionStart)
+}
+
+// RuneToDirection returns the Directions value from given rune.
+func RuneToDirection(r rune) Directions {
+	return Directions((uint32(r) & DirectionMask) >> DirectionStart)
 }

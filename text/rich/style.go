@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"image/color"
 	"strings"
+
+	"github.com/go-text/typesetting/di"
 )
 
 //go:generate core generate -add-types -setters
@@ -47,6 +49,9 @@ type Style struct { //types:add
 	// Decorations are underline, line-through, etc, as bit flags
 	// that must be set using [Decorations.SetFlag].
 	Decoration Decorations
+
+	// Direction is the direction to render the text.
+	Direction Directions
 
 	//	FillColor is the color to use for glyph fill (i.e., the standard "ink" color)
 	// if the Decoration FillColor flag is set. This will be encoded in a uint32 following
@@ -295,6 +300,28 @@ const (
 	// Math indicates a LaTeX formatted math sequence.
 	Math
 )
+
+// Directions specifies the text layout direction.
+type Directions int32 //enums:enum -transform kebab
+
+const (
+	// LTR is Left-to-Right text.
+	LTR Directions = iota
+
+	// RTL is Right-to-Left text.
+	RTL
+
+	// TTB is Top-to-Bottom text.
+	TTB
+
+	// BTT is Bottom-to-Top text.
+	BTT
+)
+
+// ToGoText returns the go-text version of direction.
+func (d Directions) ToGoText() di.Direction {
+	return di.Direction(d)
+}
 
 // SetFillColor sets the fill color to given color, setting the Decoration
 // flag and the color value.

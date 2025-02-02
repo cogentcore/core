@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"
-	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/lines"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -201,7 +201,7 @@ func (ed *Editor) iSpellKeyInput(kt events.Event) {
 
 // spellCheck offers spelling corrections if we are at a word break or other word termination
 // and the word before the break is unknown -- returns true if misspelled word found
-func (ed *Editor) spellCheck(reg *text.Edit) bool {
+func (ed *Editor) spellCheck(reg *lines.Edit) bool {
 	if ed.Buffer.spell == nil {
 		return false
 	}

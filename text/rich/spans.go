@@ -6,18 +6,18 @@ package rich
 
 import "slices"
 
-// Text is a rich text representation, with spans of []rune unicode characters
+// Spans is the basic rich text representation, with spans of []rune unicode characters
 // that share a common set of text styling properties, which are represented
 // by the first rune(s) in each span. If custom colors are used, they are encoded
-// after the first style rune.
+// after the first style and size runes.
 // This compact and efficient representation can be Join'd back into the raw
 // unicode source, and indexing by rune index in the original is fast.
 // It provides a GPU-compatible representation, and is the text equivalent of
 // the [ppath.Path] encoding.
-type Text [][]rune
+type Spans [][]rune
 
 // Index represents the [Span][Rune] index of a given rune.
-// The Rune index can be either the actual index for [Text], taking
+// The Rune index can be either the actual index for [Spans], taking
 // into account the leading style rune(s), or the logical index
 // into a [][]rune type with no style runes, depending on the context.
 type Index struct { //types:add
@@ -28,13 +28,13 @@ type Index struct { //types:add
 // of each span: style + size.
 const NStyleRunes = 2
 
-// NumSpans returns the number of spans in this Text.
-func (t Text) NumSpans() int {
+// NumSpans returns the number of spans in this Spans.
+func (t Spans) NumSpans() int {
 	return len(t)
 }
 
-// Len returns the total number of runes in this Text.
-func (t Text) Len() int {
+// Len returns the total number of runes in this Spans.
+func (t Spans) Len() int {
 	n := 0
 	for _, s := range t {
 		sn := len(s)
@@ -52,7 +52,7 @@ func (t Text) Len() int {
 // Index returns the span, rune slice [Index] for the given logical
 // index, as in the original source rune slice without spans or styling elements.
 // If the logical index is invalid for the text, the returned index is -1,-1.
-func (t Text) Index(li int) Index {
+func (t Spans) Index(li int) Index {
 	ci := 0
 	for si, s := range t {
 		sn := len(s)
@@ -74,7 +74,7 @@ func (t Text) Index(li int) Index {
 // source rune slice without any styling elements. Returns 0
 // if index is invalid. See AtTry for a version that also returns a bool
 // indicating whether the index is valid.
-func (t Text) At(li int) rune {
+func (t Spans) At(li int) rune {
 	i := t.Index(li)
 	if i.Span < 0 {
 		return 0
@@ -85,7 +85,7 @@ func (t Text) At(li int) rune {
 // AtTry returns the rune at given logical index, as in the original
 // source rune slice without any styling elements. Returns 0
 // and false if index is invalid.
-func (t Text) AtTry(li int) (rune, bool) {
+func (t Spans) AtTry(li int) (rune, bool) {
 	i := t.Index(li)
 	if i.Span < 0 {
 		return 0, false
@@ -94,9 +94,9 @@ func (t Text) AtTry(li int) (rune, bool) {
 }
 
 // Split returns the raw rune spans without any styles.
-// The rune span slices here point directly into the Text rune slices.
+// The rune span slices here point directly into the Spans rune slices.
 // See SplitCopy for a version that makes a copy instead.
-func (t Text) Split() [][]rune {
+func (t Spans) Split() [][]rune {
 	sp := make([][]rune, 0, len(t))
 	for _, s := range t {
 		sn := len(s)
@@ -111,8 +111,8 @@ func (t Text) Split() [][]rune {
 }
 
 // SplitCopy returns the raw rune spans without any styles.
-// The rune span slices here are new copies; see also [Text.Split].
-func (t Text) SplitCopy() [][]rune {
+// The rune span slices here are new copies; see also [Spans.Split].
+func (t Spans) SplitCopy() [][]rune {
 	sp := make([][]rune, 0, len(t))
 	for _, s := range t {
 		sn := len(s)
@@ -127,7 +127,7 @@ func (t Text) SplitCopy() [][]rune {
 }
 
 // Join returns a single slice of runes with the contents of all span runes.
-func (t Text) Join() []rune {
+func (t Spans) Join() []rune {
 	sp := make([]rune, 0, t.Len())
 	for _, s := range t {
 		sn := len(s)
@@ -141,14 +141,14 @@ func (t Text) Join() []rune {
 	return sp
 }
 
-// Add adds a span to the Text using the given Style and runes.
-func (t *Text) Add(s *Style, r []rune) {
+// Add adds a span to the Spans using the given Style and runes.
+func (t *Spans) Add(s *Style, r []rune) {
 	nr := s.ToRunes()
 	nr = append(nr, r...)
 	*t = append(*t, nr)
 }
 
-func (t Text) String() string {
+func (t Spans) String() string {
 	str := ""
 	for _, rs := range t {
 		s := &Style{}

@@ -61,6 +61,8 @@ github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a h1:vxnBhFDDT+
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-jose/go-jose/v4 v4.0.1 h1:QVEPDE3OluqXBQZDcnNvQrInro2h0e4eqNbnZSWqS6U=
 github.com/go-jose/go-jose/v4 v4.0.1/go.mod h1:WVf9LFMHh/QVrmqrOfqun0C45tMe3RoiKJMPvgWwLfY=
+github.com/go-text/typesetting v0.2.1 h1:x0jMOGyO3d1qFAPI0j4GSsh7M0Q3Ypjzr4+CEVg82V8=
+github.com/go-text/typesetting v0.2.1/go.mod h1:mTOxEwasOFpAMBjEQDhdWRckoLLeI/+qrQeBCTGEt6M=
 github.com/goki/freetype v1.0.5 h1:yi2lQeUhXnBgSMqYd0vVmPw6RnnfIeTP3N4uvaJXd7A=
 github.com/goki/freetype v1.0.5/go.mod h1:wKmKxddbzKmeci9K96Wknn5kjTWLyfC8tKOqAFbEX8E=
 github.com/gomarkdown/markdown v0.0.0-20240930133441-72d49d9543d8 h1:4txT5G2kqVAKMjzidIabL/8KqjIK71yj30YOeuxLn10=

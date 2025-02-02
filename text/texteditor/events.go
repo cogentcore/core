@@ -23,7 +23,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/lines"
 )
 
 func (ed *Editor) handleFocus() {
@@ -46,19 +46,19 @@ func (ed *Editor) handleKeyChord() {
 }
 
 // shiftSelect sets the selection start if the shift key is down but wasn't on the last key move.
-// If the shift key has been released the select region is set to text.RegionNil
+// If the shift key has been released the select region is set to lines.RegionNil
 func (ed *Editor) shiftSelect(kt events.Event) {
 	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
-		if ed.SelectRegion == text.RegionNil {
+		if ed.SelectRegion == lines.RegionNil {
 			ed.selectStart = ed.CursorPos
 		}
 	} else {
-		ed.SelectRegion = text.RegionNil
+		ed.SelectRegion = lines.RegionNil
 	}
 }
 
-// shiftSelectExtend updates the select region if the shift key is down and renders the selected text.
+// shiftSelectExtend updates the select region if the shift key is down and renders the selected lines.
 // If the shift key is not down the previously selected text is rerendered to clear the highlight
 func (ed *Editor) shiftSelectExtend(kt events.Event) {
 	hasShift := kt.HasAnyModifier(key.Shift)
@@ -479,8 +479,8 @@ func (ed *Editor) keyInputInsertRune(kt events.Event) {
 			np.Ch--
 			tp, found := ed.Buffer.BraceMatch(kt.KeyRune(), np)
 			if found {
-				ed.scopelights = append(ed.scopelights, text.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
-				ed.scopelights = append(ed.scopelights, text.NewRegionPos(np, lexer.Pos{cp.Ln, cp.Ch}))
+				ed.scopelights = append(ed.scopelights, lines.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
+				ed.scopelights = append(ed.scopelights, lines.NewRegionPos(np, lexer.Pos{cp.Ln, cp.Ch}))
 			}
 		}
 	}
@@ -527,7 +527,7 @@ func (ed *Editor) OpenLinkAt(pos lexer.Pos) (*ptext.TextLink, bool) {
 		rend := &ed.renders[pos.Ln]
 		st, _ := rend.SpanPosToRuneIndex(tl.StartSpan, tl.StartIndex)
 		end, _ := rend.SpanPosToRuneIndex(tl.EndSpan, tl.EndIndex)
-		reg := text.NewRegion(pos.Ln, st, pos.Ln, end)
+		reg := lines.NewRegion(pos.Ln, st, pos.Ln, end)
 		_ = reg
 		ed.HighlightRegion(reg)
 		ed.SetCursorTarget(pos)
@@ -647,7 +647,7 @@ func (ed *Editor) setCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 	defer ed.NeedsRender()
 
 	if !ed.selectMode && selMode == events.ExtendContinuous {
-		if ed.SelectRegion == text.RegionNil {
+		if ed.SelectRegion == lines.RegionNil {
 			ed.selectStart = ed.CursorPos
 		}
 		ed.setCursor(newPos)

@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/lines"
 )
 
 //////////////////////////////////////////////////////////
@@ -18,8 +18,8 @@ import (
 
 // HighlightRegion creates a new highlighted region,
 // triggers updating.
-func (ed *Editor) HighlightRegion(reg text.Region) {
-	ed.Highlights = []text.Region{reg}
+func (ed *Editor) HighlightRegion(reg lines.Region) {
+	ed.Highlights = []lines.Region{reg}
 	ed.NeedsRender()
 }
 
@@ -37,7 +37,7 @@ func (ed *Editor) clearScopelights() {
 	if len(ed.scopelights) == 0 {
 		return
 	}
-	sl := make([]text.Region, len(ed.scopelights))
+	sl := make([]lines.Region, len(ed.scopelights))
 	copy(sl, ed.scopelights)
 	ed.scopelights = ed.scopelights[:0]
 	ed.NeedsRender()
@@ -57,9 +57,9 @@ func (ed *Editor) HasSelection() bool {
 	return ed.SelectRegion.Start.IsLess(ed.SelectRegion.End)
 }
 
-// Selection returns the currently selected text as a text.Edit, which
+// Selection returns the currently selected text as a lines.Edit, which
 // captures start, end, and full lines in between -- nil if no selection
-func (ed *Editor) Selection() *text.Edit {
+func (ed *Editor) Selection() *lines.Edit {
 	if ed.HasSelection() {
 		return ed.Buffer.Region(ed.SelectRegion.Start, ed.SelectRegion.End)
 	}
@@ -87,7 +87,7 @@ func (ed *Editor) selectAll() {
 
 // wordBefore returns the word before the lexer.Pos
 // uses IsWordBreak to determine the bounds of the word
-func (ed *Editor) wordBefore(tp lexer.Pos) *text.Edit {
+func (ed *Editor) wordBefore(tp lexer.Pos) *lines.Edit {
 	txt := ed.Buffer.Line(tp.Ln)
 	ch := tp.Ch
 	ch = min(ch, len(txt))
@@ -169,7 +169,7 @@ func (ed *Editor) selectWord() bool {
 }
 
 // wordAt finds the region of the word at the current cursor position
-func (ed *Editor) wordAt() (reg text.Region) {
+func (ed *Editor) wordAt() (reg lines.Region) {
 	reg.Start = ed.CursorPos
 	reg.End = ed.CursorPos
 	txt := ed.Buffer.Line(ed.CursorPos.Ln)
@@ -231,8 +231,8 @@ func (ed *Editor) SelectReset() {
 	if !ed.HasSelection() {
 		return
 	}
-	ed.SelectRegion = text.RegionNil
-	ed.previousSelectRegion = text.RegionNil
+	ed.SelectRegion = lines.RegionNil
+	ed.previousSelectRegion = lines.RegionNil
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -302,7 +302,7 @@ func (ed *Editor) pasteHistory() {
 }
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
-func (ed *Editor) Cut() *text.Edit {
+func (ed *Editor) Cut() *lines.Edit {
 	if !ed.HasSelection() {
 		return nil
 	}
@@ -320,8 +320,8 @@ func (ed *Editor) Cut() *text.Edit {
 }
 
 // deleteSelection deletes any selected text, without adding to clipboard --
-// returns text deleted as text.Edit (nil if none)
-func (ed *Editor) deleteSelection() *text.Edit {
+// returns text deleted as lines.Edit (nil if none)
+func (ed *Editor) deleteSelection() *lines.Edit {
 	tbe := ed.Buffer.DeleteText(ed.SelectRegion.Start, ed.SelectRegion.End, EditSignal)
 	ed.SelectReset()
 	return tbe
@@ -329,7 +329,7 @@ func (ed *Editor) deleteSelection() *text.Edit {
 
 // Copy copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
-func (ed *Editor) Copy(reset bool) *text.Edit {
+func (ed *Editor) Copy(reset bool) *lines.Edit {
 	tbe := ed.Selection()
 	if tbe == nil {
 		return nil
@@ -359,7 +359,7 @@ func (ed *Editor) Paste() {
 func (ed *Editor) InsertAtCursor(txt []byte) {
 	if ed.HasSelection() {
 		tbe := ed.deleteSelection()
-		ed.CursorPos = tbe.AdjustPos(ed.CursorPos, text.AdjustPosDelStart) // move to start if in reg
+		ed.CursorPos = tbe.AdjustPos(ed.CursorPos, lines.AdjustPosDelStart) // move to start if in reg
 	}
 	tbe := ed.Buffer.insertText(ed.CursorPos, txt, EditSignal)
 	if tbe == nil {
@@ -380,11 +380,11 @@ func (ed *Editor) InsertAtCursor(txt []byte) {
 // editorClipboardRect is the internal clipboard for Rect rectangle-based
 // regions -- the raw text is posted on the system clipboard but the
 // rect information is in a special format.
-var editorClipboardRect *text.Edit
+var editorClipboardRect *lines.Edit
 
 // CutRect cuts rectangle defined by selected text (upper left to lower right)
-// and adds it to the clipboard, also returns cut text.
-func (ed *Editor) CutRect() *text.Edit {
+// and adds it to the clipboard, also returns cut lines.
+func (ed *Editor) CutRect() *lines.Edit {
 	if !ed.HasSelection() {
 		return nil
 	}
@@ -403,7 +403,7 @@ func (ed *Editor) CutRect() *text.Edit {
 
 // CopyRect copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
-func (ed *Editor) CopyRect(reset bool) *text.Edit {
+func (ed *Editor) CopyRect(reset bool) *lines.Edit {
 	tbe := ed.Buffer.RegionRect(ed.SelectRegion.Start, ed.SelectRegion.End)
 	if tbe == nil {
 		return nil
@@ -440,7 +440,7 @@ func (ed *Editor) PasteRect() {
 	ed.NeedsRender()
 }
 
-// ReCaseSelection changes the case of the currently selected text.
+// ReCaseSelection changes the case of the currently selected lines.
 // Returns the new text; empty if nothing selected.
 func (ed *Editor) ReCaseSelection(c strcase.Cases) string {
 	if !ed.HasSelection() {

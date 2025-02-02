@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/lines"
 )
 
 // Rendering Notes: all rendering is done in Render call.
@@ -248,7 +248,7 @@ func (ed *Editor) renderDepthBackground(stln, edln int) {
 				})
 
 				st := min(lsted, lx.St)
-				reg := text.Region{Start: lexer.Pos{Ln: ln, Ch: st}, End: lexer.Pos{Ln: ln, Ch: lx.Ed}}
+				reg := lines.Region{Start: lexer.Pos{Ln: ln, Ch: st}, End: lexer.Pos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed
 				lstdp = lx.Token.Depth
 				ed.renderRegionBoxStyle(reg, sty, bg, true) // full width alway
@@ -293,12 +293,12 @@ func (ed *Editor) renderScopelights(stln, edln int) {
 }
 
 // renderRegionBox renders a region in background according to given background
-func (ed *Editor) renderRegionBox(reg text.Region, bg image.Image) {
+func (ed *Editor) renderRegionBox(reg lines.Region, bg image.Image) {
 	ed.renderRegionBoxStyle(reg, &ed.Styles, bg, false)
 }
 
 // renderRegionBoxStyle renders a region in given style and background
-func (ed *Editor) renderRegionBoxStyle(reg text.Region, sty *styles.Style, bg image.Image, fullWidth bool) {
+func (ed *Editor) renderRegionBoxStyle(reg lines.Region, sty *styles.Style, bg image.Image, fullWidth bool) {
 	st := reg.Start
 	end := reg.End
 	spos := ed.charStartPosVisible(st)

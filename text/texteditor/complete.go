@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/parser"
-	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/lines"
 )
 
 // completeParse uses [parse] symbols and language; the string is a line of text
@@ -86,7 +86,7 @@ func lookupParse(data any, txt string, posLine, posChar int) (ld complete.Lookup
 		return ld
 	}
 	if ld.Filename != "" {
-		tx := text.FileRegionBytes(ld.Filename, ld.StLine, ld.EdLine, true, 10) // comments, 10 lines back max
+		tx := lines.FileRegionBytes(ld.Filename, ld.StLine, ld.EdLine, true, 10) // comments, 10 lines back max
 		prmpt := fmt.Sprintf("%v [%d:%d]", ld.Filename, ld.StLine, ld.EdLine)
 		TextDialog(nil, "Lookup: "+txt+": "+prmpt, string(tx))
 		return ld

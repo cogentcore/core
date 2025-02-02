@@ -8,6 +8,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/styles/units"
+	"github.com/go-text/typesetting/language"
 )
 
 // Context holds the global context for rich text styling,
@@ -15,9 +16,19 @@ import (
 // so it does not need to be redundantly encoded in each such element.
 type Context struct {
 
-	// Standard is the standard font size. The Style provides a multiplier
+	// Language is the preferred language used for rendering text.
+	Language language.Language
+
+	// Script is the specific writing system used for rendering text.
+	Script language.Script
+
+	// Direction is the default text rendering direction, based on language
+	// and script.
+	Direction Directions
+
+	// StandardSize is the standard font size. The Style provides a multiplier
 	// on this value.
-	Standard units.Value
+	StandardSize units.Value
 
 	// SansSerif is a font without serifs, where glyphs have plain stroke endings,
 	// without ornamentation. Example sans-serif fonts include Arial, Helvetica,
@@ -120,14 +131,14 @@ func (ctx *Context) Family(fam Family) string {
 
 // ToDots runs ToDots on unit values, to compile down to raw Dots pixels.
 func (ctx *Context) ToDots(uc *units.Context) {
-	if ctx.Standard.Unit == units.UnitEm || ctx.Standard.Unit == units.UnitEx || ctx.Standard.Unit == units.UnitCh {
-		slog.Error("girl/styles.Font.Size was set to Em, Ex, or Ch; that is recursive and unstable!", "unit", ctx.Standard.Unit)
-		ctx.Standard.Dp(16)
+	if ctx.StandardSize.Unit == units.UnitEm || ctx.StandardSize.Unit == units.UnitEx || ctx.StandardSize.Unit == units.UnitCh {
+		slog.Error("girl/styles.Font.Size was set to Em, Ex, or Ch; that is recursive and unstable!", "unit", ctx.StandardSize.Unit)
+		ctx.StandardSize.Dp(16)
 	}
-	ctx.Standard.ToDots(uc)
+	ctx.StandardSize.ToDots(uc)
 }
 
-// SizeDots returns the font size based on given multiplier * Standard.Dots
+// SizeDots returns the font size based on given multiplier * StandardSize.Dots
 func (ctx *Context) SizeDots(multiplier float32) float32 {
-	return ctx.Standard.Dots * multiplier
+	return ctx.StandardSize.Dots * multiplier
 }

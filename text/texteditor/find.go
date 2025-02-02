@@ -12,13 +12,13 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/lines"
 )
 
 // findMatches finds the matches with given search string (literal, not regex)
 // and case sensitivity, updates highlights for all.  returns false if none
 // found
-func (ed *Editor) findMatches(find string, useCase, lexItems bool) ([]text.Match, bool) {
+func (ed *Editor) findMatches(find string, useCase, lexItems bool) ([]lines.Match, bool) {
 	fsz := len(find)
 	if fsz == 0 {
 		ed.Highlights = nil
@@ -29,7 +29,7 @@ func (ed *Editor) findMatches(find string, useCase, lexItems bool) ([]text.Match
 		ed.Highlights = nil
 		return matches, false
 	}
-	hi := make([]text.Region, len(matches))
+	hi := make([]lines.Region, len(matches))
 	for i, m := range matches {
 		hi[i] = m.Reg
 		if i > viewMaxFindHighlights {
@@ -41,7 +41,7 @@ func (ed *Editor) findMatches(find string, useCase, lexItems bool) ([]text.Match
 }
 
 // matchFromPos finds the match at or after the given text position -- returns 0, false if none
-func (ed *Editor) matchFromPos(matches []text.Match, cpos lexer.Pos) (int, bool) {
+func (ed *Editor) matchFromPos(matches []lines.Match, cpos lexer.Pos) (int, bool) {
 	for i, m := range matches {
 		reg := ed.Buffer.AdjustRegion(m.Reg)
 		if reg.Start == cpos || cpos.IsLess(reg.Start) {
@@ -64,7 +64,7 @@ type ISearch struct {
 	useCase bool
 
 	// current search matches
-	Matches []text.Match `json:"-" xml:"-"`
+	Matches []lines.Match `json:"-" xml:"-"`
 
 	// position within isearch matches
 	pos int
@@ -252,7 +252,7 @@ type QReplace struct {
 	lexItems bool
 
 	// current search matches
-	Matches []text.Match `json:"-" xml:"-"`
+	Matches []lines.Match `json:"-" xml:"-"`
 
 	// position within isearch matches
 	pos int `json:"-" xml:"-"`
@@ -391,7 +391,7 @@ func (ed *Editor) qReplaceReplace(midx int) {
 	// last arg is matchCase, only if not using case to match and rep is also lower case
 	matchCase := !ed.QReplace.useCase && !lexer.HasUpperCase(rep)
 	ed.Buffer.ReplaceText(reg.Start, reg.End, pos, rep, EditSignal, matchCase)
-	ed.Highlights[midx] = text.RegionNil
+	ed.Highlights[midx] = lines.RegionNil
 	ed.setCursor(pos)
 	ed.savePosHistory(ed.CursorPos)
 	ed.scrollCursorToCenterIfHidden()
