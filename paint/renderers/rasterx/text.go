@@ -24,16 +24,16 @@ import (
 	_ "golang.org/x/image/tiff" // load image formats for users of the API
 )
 
-// TextRuns rasterizes the given text runs into the output image using the
-// font face referenced in the shaping.
-// The text will be drawn starting at the start pixel position.
+// TextRuns rasterizes the given text runs.
+// The text will be drawn starting at the start pixel position, which specifies the
+// left baseline location of the first text item..
 func (rs *Renderer) TextRuns(runs *runs.Runs, ctx *rich.Context, start math32.Vector2) {
 	for i := range runs.Runs {
 		run := &runs.Runs[i]
 		sp := runs.Spans[i]
 		sty, rns := rich.NewStyleFromRunes(sp)
 		clr := sty.Color(ctx)
-		rs.TextRun(run, rns, clr, start)
+		rs.TextRun(run, rns, clr, start) // todo: run needs an offset
 	}
 }
 
@@ -43,6 +43,7 @@ func (rs *Renderer) TextRuns(runs *runs.Runs, ctx *rich.Context, start math32.Ve
 func (rs *Renderer) TextRun(run *runs.Run, rns []rune, clr color.Color, start math32.Vector2) {
 	x := start.X
 	y := start.Y
+	// todo: render bg, render decoration
 	for i := range run.Subs {
 		sub := &run.Subs[i]
 		// txt := string(rns[sub.Runes.Offset : sub.Runes.Offset+sub.Runes.Count])
@@ -53,26 +54,25 @@ func (rs *Renderer) TextRun(run *runs.Run, rns []rune, clr color.Color, start ma
 			top := yPos - math32.FromFixed(g.YBearing)
 			bottom := top - math32.FromFixed(g.Height)
 			right := xPos + math32.FromFixed(g.Width)
-			rect := image.Rect(int(xPos)-2, int(top)-2, int(right)+2, int(bottom)+2)
+			rect := image.Rect(int(xPos)-2, int(top)-2, int(right)+2, int(bottom)+2) // don't cut off
 			data := sub.Face.GlyphData(g.GlyphID)
 			switch format := data.(type) {
 			case font.GlyphOutline:
-				rs.TextOutline(run, sub, g, format, clr, rect, xPos, yPos)
+				rs.GlyphOutline(run, sub, g, format, clr, rect, xPos, yPos)
 			case font.GlyphBitmap:
-				rs.TextBitmap(run, sub, g, format, clr, rect, xPos, yPos)
+				rs.GlyphBitmap(run, sub, g, format, clr, rect, xPos, yPos)
 			case font.GlyphSVG:
 				fmt.Println("svg", format)
-				// 	_ = rs.TextSVG(g, format, clr, xPos, yPos)
+				// 	_ = rs.GlyphSVG(g, format, clr, xPos, yPos)
 			}
 
 			x += math32.FromFixed(g.XAdvance)
 		}
 	}
-	// rs.Raster.Filler.Draw()
-	// return int(math.Ceil(float64(x)))
+	// todo: render strikethrough
 }
 
-func (rs *Renderer) TextOutline(run *runs.Run, sub *shaping.Output, g shaping.Glyph, bitmap font.GlyphOutline, clr color.Color, rect image.Rectangle, x, y float32) {
+func (rs *Renderer) GlyphOutline(run *runs.Run, sub *shaping.Output, g shaping.Glyph, bitmap font.GlyphOutline, clr color.Color, rect image.Rectangle, x, y float32) {
 	rs.Raster.SetColor(colors.Uniform(clr))
 	rf := &rs.Raster.Filler
 
@@ -101,7 +101,7 @@ func (rs *Renderer) TextOutline(run *runs.Run, sub *shaping.Output, g shaping.Gl
 	rf.Clear()
 }
 
-func (rs *Renderer) TextBitmap(run *runs.Run, sub *shaping.Output, g shaping.Glyph, bitmap font.GlyphBitmap, clr color.Color, rect image.Rectangle, x, y float32) error {
+func (rs *Renderer) GlyphBitmap(run *runs.Run, sub *shaping.Output, g shaping.Glyph, bitmap font.GlyphBitmap, clr color.Color, rect image.Rectangle, x, y float32) error {
 	// scaled glyph rect content
 	top := y - math32.FromFixed(g.YBearing)
 	switch bitmap.Format {
@@ -114,7 +114,7 @@ func (rs *Renderer) TextBitmap(run *runs.Run, sub *shaping.Output, g shaping.Gly
 		}
 		// todo: does it need scale? presumably not
 		// scale.NearestNeighbor.Scale(img, rect, sub, sub.Bounds(), int(top)}, draw.Over, nil)
-		draw.Draw(rs.image, rect, sub, image.Point{int(x), int(top)}, draw.Over)
+		draw.Draw(rs.image, sub.Bounds(), sub, image.Point{int(x), int(top)}, draw.Over)
 	case font.JPG, font.PNG, font.TIFF:
 		fmt.Println("img")
 		// todo: how often?
@@ -123,11 +123,11 @@ func (rs *Renderer) TextBitmap(run *runs.Run, sub *shaping.Output, g shaping.Gly
 			return err
 		}
 		// scale.BiLinear.Scale(img, rect, pix, pix.Bounds(), draw.Over, nil)
-		draw.Draw(rs.image, rect, pix, image.Point{int(x), int(top)}, draw.Over)
+		draw.Draw(rs.image, pix.Bounds(), pix, image.Point{int(x), int(top)}, draw.Over)
 	}
 
 	if bitmap.Outline != nil {
-		rs.TextOutline(run, sub, g, *bitmap.Outline, clr, rect, x, y)
+		rs.GlyphOutline(run, sub, g, *bitmap.Outline, clr, rect, x, y)
 	}
 	return nil
 }
