@@ -96,6 +96,15 @@ func (s *Style) FontSize(ctx *Context) float32 {
 	return ctx.SizeDots(s.Size)
 }
 
+// Color returns the FillColor for inking the font based on
+// [Style.Size] and the default color in [Context]
+func (s *Style) Color(ctx *Context) color.Color {
+	if s.Decoration.HasFlag(FillColor) {
+		return s.FillColor
+	}
+	return ctx.Color
+}
+
 // Family specifies the generic family of typeface to use, where the
 // specific named values to use for each are provided in the Context.
 type Family int32 //enums:enum -trim-prefix Family -transform kebab

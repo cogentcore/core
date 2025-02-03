@@ -5,9 +5,11 @@
 package rich
 
 import (
+	"image/color"
 	"log/slog"
 	"strings"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles/units"
 	"github.com/go-text/typesetting/language"
 )
@@ -30,6 +32,9 @@ type Context struct {
 	// StandardSize is the standard font size. The Style provides a multiplier
 	// on this value.
 	StandardSize units.Value
+
+	// Color is the default font fill color.
+	Color color.Color
 
 	// SansSerif is a font without serifs, where glyphs have plain stroke endings,
 	// without ornamentation. Example sans-serif fonts include Arial, Helvetica,
@@ -102,6 +107,7 @@ func (ctx *Context) Defaults() {
 	ctx.SansSerif = "Arial"
 	ctx.Serif = "Times New Roman"
 	ctx.StandardSize.Dp(16)
+	ctx.Color = colors.ToUniform(colors.Scheme.OnSurface)
 }
 
 // AddFamily adds a family specifier to the given font string,

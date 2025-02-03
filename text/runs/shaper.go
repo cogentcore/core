@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ptext
+package runs
 
 import (
 	"os"
@@ -62,7 +62,9 @@ func (sh *Shaper) Shape(sp rich.Spans, ctx *rich.Context) *Runs {
 		in.RunStart = start
 		in.RunEnd = end
 		in.Direction = sty.Direction.ToGoText()
-		in.Size = math32.ToFixed(sty.FontSize(ctx))
+		fsz := sty.FontSize(ctx)
+		run.FontSize = fsz
+		in.Size = math32.ToFixed(fsz)
 		in.Script = ctx.Script
 		in.Language = ctx.Language
 
@@ -71,9 +73,11 @@ func (sh *Shaper) Shape(sp rich.Spans, ctx *rich.Context) *Runs {
 		// inputs = s.splitByFaces(inputs, s.splitScratch1[:0])
 		// inputs = splitByScript(inputs, lcfg.Direction, s.splitScratch2[:0])
 		ins := shaping.SplitByFace(in, sh.FontMap) // todo: can't pass buffer here
+		// fmt.Println("nin:", len(ins))
 		for _, i := range ins {
 			o := sh.HarfbuzzShaper.Shape(i)
 			run.Subs = append(run.Subs, o)
+			run.Index = si
 		}
 		runs.Runs = append(runs.Runs, run)
 	}

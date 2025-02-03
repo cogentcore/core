@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ptext
+package runs
 
 import (
 	"cogentcore.org/core/paint/render"
@@ -31,6 +31,9 @@ type Runs struct {
 type Run struct {
 	// Subs contains the sub-spans that together represent the input.
 	Subs []shaping.Output
+
+	// FontSize is the target font size, needed for scaling during render.
+	FontSize float32
 
 	// Index is our index within the collection of Runs.
 	Index int
