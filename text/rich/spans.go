@@ -29,18 +29,15 @@ type Index struct { //types:add
 const NStyleRunes = 2
 
 // NumSpans returns the number of spans in this Spans.
-func (t Spans) NumSpans() int {
-	return len(t)
+func (sp Spans) NumSpans() int {
+	return len(sp)
 }
 
 // Len returns the total number of runes in this Spans.
-func (t Spans) Len() int {
+func (sp Spans) Len() int {
 	n := 0
-	for _, s := range t {
+	for _, s := range sp {
 		sn := len(s)
-		if sn == 0 {
-			continue
-		}
 		rs := s[0]
 		nc := NumColors(rs)
 		ns := max(0, sn-(NStyleRunes+nc))
@@ -49,12 +46,29 @@ func (t Spans) Len() int {
 	return n
 }
 
+// Range returns the start, end range of indexes into original source
+// for given span index.
+func (sp Spans) Range(span int) (start, end int) {
+	ci := 0
+	for si, s := range sp {
+		sn := len(s)
+		rs := s[0]
+		nc := NumColors(rs)
+		ns := max(0, sn-(NStyleRunes+nc))
+		if si == span {
+			return ci, ci + ns
+		}
+		ci += ns
+	}
+	return -1, -1
+}
+
 // Index returns the span, rune slice [Index] for the given logical
 // index, as in the original source rune slice without spans or styling elements.
 // If the logical index is invalid for the text, the returned index is -1,-1.
-func (t Spans) Index(li int) Index {
+func (sp Spans) Index(li int) Index {
 	ci := 0
-	for si, s := range t {
+	for si, s := range sp {
 		sn := len(s)
 		if sn == 0 {
 			continue
@@ -74,83 +88,83 @@ func (t Spans) Index(li int) Index {
 // source rune slice without any styling elements. Returns 0
 // if index is invalid. See AtTry for a version that also returns a bool
 // indicating whether the index is valid.
-func (t Spans) At(li int) rune {
-	i := t.Index(li)
+func (sp Spans) At(li int) rune {
+	i := sp.Index(li)
 	if i.Span < 0 {
 		return 0
 	}
-	return t[i.Span][i.Rune]
+	return sp[i.Span][i.Rune]
 }
 
 // AtTry returns the rune at given logical index, as in the original
 // source rune slice without any styling elements. Returns 0
 // and false if index is invalid.
-func (t Spans) AtTry(li int) (rune, bool) {
-	i := t.Index(li)
+func (sp Spans) AtTry(li int) (rune, bool) {
+	i := sp.Index(li)
 	if i.Span < 0 {
 		return 0, false
 	}
-	return t[i.Span][i.Rune], true
+	return sp[i.Span][i.Rune], true
 }
 
 // Split returns the raw rune spans without any styles.
 // The rune span slices here point directly into the Spans rune slices.
 // See SplitCopy for a version that makes a copy instead.
-func (t Spans) Split() [][]rune {
-	sp := make([][]rune, 0, len(t))
-	for _, s := range t {
+func (sp Spans) Split() [][]rune {
+	rn := make([][]rune, 0, len(sp))
+	for _, s := range sp {
 		sn := len(s)
 		if sn == 0 {
 			continue
 		}
 		rs := s[0]
 		nc := NumColors(rs)
-		sp = append(sp, s[NStyleRunes+nc:])
+		rn = append(rn, s[NStyleRunes+nc:])
 	}
-	return sp
+	return rn
 }
 
 // SplitCopy returns the raw rune spans without any styles.
 // The rune span slices here are new copies; see also [Spans.Split].
-func (t Spans) SplitCopy() [][]rune {
-	sp := make([][]rune, 0, len(t))
-	for _, s := range t {
+func (sp Spans) SplitCopy() [][]rune {
+	rn := make([][]rune, 0, len(sp))
+	for _, s := range sp {
 		sn := len(s)
 		if sn == 0 {
 			continue
 		}
 		rs := s[0]
 		nc := NumColors(rs)
-		sp = append(sp, slices.Clone(s[NStyleRunes+nc:]))
+		rn = append(rn, slices.Clone(s[NStyleRunes+nc:]))
 	}
-	return sp
+	return rn
 }
 
 // Join returns a single slice of runes with the contents of all span runes.
-func (t Spans) Join() []rune {
-	sp := make([]rune, 0, t.Len())
-	for _, s := range t {
+func (sp Spans) Join() []rune {
+	rn := make([]rune, 0, sp.Len())
+	for _, s := range sp {
 		sn := len(s)
 		if sn == 0 {
 			continue
 		}
 		rs := s[0]
 		nc := NumColors(rs)
-		sp = append(sp, s[NStyleRunes+nc:]...)
+		rn = append(rn, s[NStyleRunes+nc:]...)
 	}
-	return sp
+	return rn
 }
 
 // Add adds a span to the Spans using the given Style and runes.
-func (t *Spans) Add(s *Style, r []rune) {
+func (sp *Spans) Add(s *Style, r []rune) {
 	nr := s.ToRunes()
 	nr = append(nr, r...)
-	*t = append(*t, nr)
+	*sp = append(*sp, nr)
 }
 
-func (t Spans) String() string {
+func (sp Spans) String() string {
 	str := ""
-	for _, rs := range t {
+	for _, rs := range sp {
 		s := &Style{}
 		ss := s.FromRunes(rs)
 		sstr := s.String()

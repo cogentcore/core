@@ -6,6 +6,7 @@ package rich
 
 import (
 	"log/slog"
+	"strings"
 
 	"cogentcore.org/core/styles/units"
 	"github.com/go-text/typesetting/language"
@@ -95,6 +96,14 @@ type Context struct {
 	Custom string
 }
 
+func (ctx *Context) Defaults() {
+	ctx.Language = "en"
+	ctx.Script = language.Common
+	ctx.SansSerif = "Arial"
+	ctx.Serif = "Times New Roman"
+	ctx.StandardSize.Dp(16)
+}
+
 // AddFamily adds a family specifier to the given font string,
 // handling the comma properly.
 func AddFamily(s, fam string) string {
@@ -102,6 +111,20 @@ func AddFamily(s, fam string) string {
 		return fam
 	}
 	return s + ", " + fam
+}
+
+// FamiliesToList returns a list of the families, split by comma and space removed.
+func FamiliesToList(fam string) []string {
+	fs := strings.Split(fam, ",")
+	os := make([]string, 0, len(fs))
+	for _, f := range fs {
+		s := strings.TrimSpace(f)
+		if s == "" {
+			continue
+		}
+		os = append(os, s)
+	}
+	return os
 }
 
 // Family returns the font family specified by the given [Family] enum.

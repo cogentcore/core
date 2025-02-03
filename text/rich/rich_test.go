@@ -45,20 +45,20 @@ func TestStyle(t *testing.T) {
 func TestSpans(t *testing.T) {
 	src := "The lazy fox typed in some familiar text"
 	sr := []rune(src)
-	tx := Spans{}
+	sp := Spans{}
 	plain := NewStyle()
 	ital := NewStyle().SetSlant(Italic)
 	ital.SetStrokeColor(colors.Red)
 	boldBig := NewStyle().SetWeight(Bold).SetSize(1.5)
-	tx.Add(plain, sr[:4])
-	tx.Add(ital, sr[4:8])
+	sp.Add(plain, sr[:4])
+	sp.Add(ital, sr[4:8])
 	fam := []rune("familiar")
 	ix := runes.Index(sr, fam)
-	tx.Add(plain, sr[8:ix])
-	tx.Add(boldBig, sr[ix:ix+8])
-	tx.Add(plain, sr[ix+8:])
+	sp.Add(plain, sr[8:ix])
+	sp.Add(boldBig, sr[ix:ix+8])
+	sp.Add(plain, sr[ix+8:])
 
-	str := tx.String()
+	str := sp.String()
 	trg := `[]: The 
 [italic stroke-color]: lazy
 []:  fox typed in some 
@@ -67,11 +67,11 @@ func TestSpans(t *testing.T) {
 `
 	assert.Equal(t, trg, str)
 
-	os := tx.Join()
+	os := sp.Join()
 	assert.Equal(t, src, string(os))
 
 	for i := range fam {
-		assert.Equal(t, fam[i], tx.At(ix+i))
+		assert.Equal(t, fam[i], sp.At(ix+i))
 	}
 
 	// spl := tx.Split()

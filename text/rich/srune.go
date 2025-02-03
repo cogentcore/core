@@ -16,6 +16,14 @@ import (
 // element of the style property. Size and Color values are added after
 // the main style rune element.
 
+// NewStyleFromRunes returns a new style initialized with data from given runes,
+// returning the remaining actual rune string content after style data.
+func NewStyleFromRunes(rs []rune) (*Style, []rune) {
+	s := &Style{}
+	c := s.FromRunes(rs)
+	return s, c
+}
+
 // RuneFromStyle returns the style rune that encodes the given style values.
 func RuneFromStyle(s *Style) rune {
 	return RuneFromDecoration(s.Decoration) | RuneFromSpecial(s.Special) | RuneFromStretch(s.Stretch) | RuneFromWeight(s.Weight) | RuneFromSlant(s.Slant) | RuneFromFamily(s.Family) | RuneFromDirection(s.Direction)
