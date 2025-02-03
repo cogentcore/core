@@ -4,6 +4,8 @@
 
 package shaped
 
+import "cogentcore.org/core/text/textpos"
+
 // Link represents a hyperlink within shaped text.
 type Link struct {
 	// Label is the text label for the link.
@@ -20,5 +22,5 @@ type Link struct {
 	// in terms of shaped Lines within the containing [Lines], and Run
 	// index (not character!) within each line. Links should always be
 	// contained within their own separate Span in the original source.
-	Region Region
+	Region textpos.Region
 }
