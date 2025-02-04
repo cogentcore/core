@@ -82,6 +82,7 @@ func (s *Style) Defaults() {
 	s.Size = 1
 	s.Weight = Normal
 	s.Stretch = StretchNormal
+	s.Direction = Default
 }
 
 // FontFamily returns the font family name(s) based on [Style.Family] and the
@@ -322,6 +323,9 @@ const (
 
 	// BTT is Bottom-to-Top text.
 	BTT
+
+	// Default uses the [text.Style] default direction.
+	Default
 )
 
 // ToGoText returns the go-text version of direction.

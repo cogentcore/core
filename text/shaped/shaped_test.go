@@ -72,13 +72,14 @@ func TestBasic(t *testing.T) {
 func TestHebrew(t *testing.T) {
 	RunTest(t, "hebrew", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
 
+		// tsty.Direction = rich.RTL // note: setting this causes it to flip upright,
+		// due to incorrect progression default setting.
 		src := "אָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, וּבְכָל-נַפְשְׁךָ,"
 		sr := []rune(src)
 		sp := rich.Spans{}
 		plain := rich.NewStyle()
 		// plain.SetDirection(rich.RTL)
 		sp.Add(plain, sr)
-		// tsty.Direction = rich.RTL // note: setting this causes it to flip upright
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 60))
@@ -90,15 +91,15 @@ func TestVertical(t *testing.T) {
 	RunTest(t, "nihongo_ttb", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
 		rts.Language = "ja"
 		rts.Script = language.Hiragana
+		tsty.Direction = rich.TTB // rich.BTT
+
 		src := "国際化活動 W3C ワールド・ワイド・Hello!"
 		// src := "国際化活動"
 		sr := []rune(src)
 		sp := rich.Spans{}
 		plain := rich.NewStyle()
-		plain.Direction = rich.TTB // rich.BTT
 		sp.Add(plain, sr)
 
-		tsty.Direction = rich.TTB // rich.BTT
 		tsty.FontSize.Dots *= 1.5
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(150, 50))

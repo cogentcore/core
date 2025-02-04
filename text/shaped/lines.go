@@ -120,23 +120,23 @@ func OutputBounds(out *shaping.Output) fixed.Rectangle26_6 {
 		gapdec -= out.LineBounds.Gap
 	}
 	if out.Direction.IsVertical() {
-		fmt.Printf("vert: %#v %d\n", out.LineBounds, out.Advance)
 		// ascent, descent describe horizontal, advance is vertical
 		r.Max.X = -gapdec
 		r.Min.X = -out.LineBounds.Ascent
 		r.Max.Y = -out.Advance
 		r.Min.Y = 0
 	} else {
-		fmt.Printf("horiz: %#v\n", out.LineBounds)
 		r.Min.Y = -out.LineBounds.Ascent
 		r.Max.Y = -gapdec
 		r.Min.X = 0
 		r.Max.X = out.Advance
 	}
 	if r.Min.X > r.Max.X {
+		fmt.Println("backward X!")
 		r.Min.X, r.Max.X = r.Max.X, r.Min.X
 	}
 	if r.Min.Y > r.Max.Y {
+		fmt.Println("backward Y!")
 		r.Min.Y, r.Max.Y = r.Max.Y, r.Min.Y
 	}
 	return r

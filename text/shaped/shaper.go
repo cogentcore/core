@@ -85,7 +85,7 @@ func (sh *Shaper) shapeText(sp rich.Spans, tsty *text.Style, rts *rich.Settings,
 		in.Text = txt
 		in.RunStart = start
 		in.RunEnd = end
-		in.Direction = sty.Direction.ToGoText()
+		in.Direction = goTextDirection(sty.Direction, tsty)
 		fsz := tsty.FontSize.Dots * sty.Size
 		in.Size = math32.ToFixed(fsz)
 		in.Script = rts.Script
@@ -100,21 +100,29 @@ func (sh *Shaper) shapeText(sp rich.Spans, tsty *text.Style, rts *rich.Settings,
 	return sh.outBuff
 }
 
+// goTextDirection gets the proper go-text direction value from styles.
+func goTextDirection(rdir rich.Directions, tsty *text.Style) di.Direction {
+	dir := tsty.Direction
+	if rdir != rich.Default {
+		dir = rdir
+	}
+	return dir.ToGoText()
+}
+
 func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines {
 	if tsty.FontSize.Dots == 0 {
 		tsty.FontSize.Dots = 24
 	}
 	fsz := tsty.FontSize.Dots
-	dir := tsty.Direction.ToGoText()
+	dir := goTextDirection(rich.Default, tsty)
 	lht := tsty.LineHeight()
 	lgap := lht - fsz
-	fmt.Println("lgap:", lgap)
 	nlines := int(math32.Floor(size.Y / lht))
 	maxSize := int(size.X)
 	if dir.IsVertical() {
 		nlines = int(math32.Floor(size.X / lht))
 		maxSize = int(size.Y)
-		fmt.Println(lht, nlines, maxSize)
+		// fmt.Println(lht, nlines, maxSize)
 	}
 	brk := shaping.WhenNecessary
 	if !tsty.WhiteSpace.HasWordWrap() {
@@ -122,12 +130,11 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 	} else if tsty.WhiteSpace == text.WrapAlways {
 		brk = shaping.Always
 	}
-	_ = brk
 	cfg := shaping.WrapConfig{
 		Direction:                     dir,
 		TruncateAfterLines:            nlines,
-		TextContinues:                 true,          // todo! no effect if TruncateAfterLines is 0
-		BreakPolicy:                   shaping.Never, // or Never, Always
+		TextContinues:                 false, // todo! no effect if TruncateAfterLines is 0
+		BreakPolicy:                   brk,   // or Never, Always
 		DisableTrailingWhitespaceTrim: tsty.WhiteSpace.KeepWhiteSpace(),
 	}
 	// from gio:
@@ -141,15 +148,15 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 	// }
 	txt := sp.Join()
 	outs := sh.shapeText(sp, tsty, rts, txt)
+	// todo: WrapParagraph does NOT handle vertical text! file issue.
 	lines, truncate := sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
 	lns := &Lines{Color: tsty.Color}
 	lns.Truncated = truncate > 0
-	fmt.Println("trunc:", truncate)
 	cspi := 0
 	cspSt, cspEd := sp.Range(cspi)
 	var off math32.Vector2
-	for li, lno := range lines {
-		fmt.Println("line:", li, off)
+	for _, lno := range lines {
+		// fmt.Println("line:", li, off)
 		ln := Line{}
 		var lsp rich.Spans
 		var pos fixed.Point26_6
@@ -169,7 +176,7 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 			nr := cr[coff:cend] // note: not a copy!
 			nsp = append(nsp, nr...)
 			lsp = append(lsp, nsp)
-			fmt.Println(sty, string(nr))
+			// fmt.Println(sty, string(nr))
 			if cend > (cspEd - cspSt) { // shouldn't happen, to combine multiple original spans
 				fmt.Println("combined original span:", cend, cspEd-cspSt, cspi, string(cr), "prev:", string(nr), "next:", string(cr[cend:]))
 			}
@@ -180,30 +187,29 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 		ln.Source = lsp
 		ln.Runs = slices.Clone(lno)
 		ln.Offset = off
-		fmt.Println(ln.Bounds)
+		// fmt.Println(ln.Bounds)
 		lns.Bounds.ExpandByBox(ln.Bounds.Translate(ln.Offset))
 		// advance offset:
 		if dir.IsVertical() {
 			lwd := ln.Bounds.Size().X
 			if dir.Progression() == di.FromTopLeft {
-				fmt.Println("ftl lwd:", lwd, off.X)
+				// fmt.Println("ftl lwd:", lwd, off.X)
 				off.X += lwd + lgap
 			} else {
-				fmt.Println("!ftl lwd:", lwd, off.X)
+				// fmt.Println("!ftl lwd:", lwd, off.X)
 				off.X -= lwd + lgap
 			}
 		} else {
 			lht := ln.Bounds.Size().Y
-			if dir.Progression() == di.FromTopLeft {
-				off.Y += lht + lgap
-			} else {
-				off.Y -= lht + lgap
-			}
+			off.Y += lht + lgap // always top-down
+			// } else {
+			// 	off.Y -= lht + lgap
+			// }
 		}
 		// todo: rest of it
 		lns.Lines = append(lns.Lines, ln)
 	}
-	fmt.Println(lns.Bounds)
+	// fmt.Println(lns.Bounds)
 	return lns
 }
 
