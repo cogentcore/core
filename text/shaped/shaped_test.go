@@ -5,6 +5,7 @@
 package shaped_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -36,6 +37,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 	uc.Defaults()
 	tsty := text.NewStyle()
 	tsty.ToDots(&uc)
+	fmt.Println("fsz:", tsty.FontSize.Dots)
 	pc := paint.NewPainter(width, height)
 	pc.FillBox(math32.Vector2{}, math32.Vec2(float32(width), float32(height)), colors.Uniform(colors.White))
 	sh := NewShaper()
@@ -53,7 +55,7 @@ func TestBasic(t *testing.T) {
 		plain := rich.NewStyle()
 		// plain.SetDirection(rich.RTL)
 		ital := rich.NewStyle().SetSlant(rich.Italic)
-		// ital.SetFillColor(colors.Red)
+		ital.SetFillColor(colors.Red)
 		boldBig := rich.NewStyle().SetWeight(rich.Bold) // .SetSize(1.5)
 		sp.Add(plain, sr[:4])
 		sp.Add(ital, sr[4:8])
@@ -72,9 +74,10 @@ func TestBasic(t *testing.T) {
 func TestHebrew(t *testing.T) {
 	RunTest(t, "hebrew", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
 
-		// tsty.Direction = rich.RTL // note: setting this causes it to flip upright,
-		// due to incorrect progression default setting.
-		src := "אָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, וּבְכָל-נַפְשְׁךָ,"
+		tsty.Direction = rich.RTL
+		tsty.FontSize.Dots *= 1.5
+
+		src := "אָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, Let there be light וּבְכָל-נַפְשְׁךָ,"
 		sr := []rune(src)
 		sp := rich.Spans{}
 		plain := rich.NewStyle()
@@ -90,21 +93,47 @@ func TestHebrew(t *testing.T) {
 func TestVertical(t *testing.T) {
 	RunTest(t, "nihongo_ttb", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
 		rts.Language = "ja"
-		rts.Script = language.Hiragana
-		tsty.Direction = rich.TTB // rich.BTT
+		rts.Script = language.Han
+		tsty.Direction = rich.TTB // rich.BTT // note: apparently BTT is actually never used
+		tsty.FontSize.Dots *= 1.5
 
-		src := "国際化活動 W3C ワールド・ワイド・Hello!"
-		// src := "国際化活動"
+		// todo: word wrapping and sideways rotation in vertical not currently working
+		// src := "国際化活動 W3C ワールド・ワイド・Hello!"
+		// src := "国際化活動 Hello!"
+		src := "国際化活動"
 		sr := []rune(src)
 		sp := rich.Spans{}
 		plain := rich.NewStyle()
 		sp.Add(plain, sr)
 
-		tsty.FontSize.Dots *= 1.5
-
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(150, 50))
 		// pc.NewText(lns, math32.Vec2(100, 200))
-		pc.NewText(lns, math32.Vec2(40, 60))
+		pc.NewText(lns, math32.Vec2(60, 100))
+		pc.RenderDone()
+	})
+}
+
+func TestStrokeOutline(t *testing.T) {
+	RunTest(t, "stroke-outline", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+
+		src := "The lazy fox typed in some familiar text"
+		sr := []rune(src)
+		sp := rich.Spans{}
+		plain := rich.NewStyle()
+		// plain.SetDirection(rich.RTL)
+		ital := rich.NewStyle().SetSlant(rich.Italic)
+		ital.SetFillColor(colors.Red)
+		boldBig := rich.NewStyle().SetWeight(rich.Bold) // .SetSize(1.5)
+		sp.Add(plain, sr[:4])
+		sp.Add(ital, sr[4:8])
+		fam := []rune("familiar")
+		ix := runes.Index(sr, fam)
+		sp.Add(plain, sr[8:ix])
+		sp.Add(boldBig, sr[ix:ix+8])
+		sp.Add(plain, sr[ix+8:])
+
+		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
+		pc.NewText(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
 }

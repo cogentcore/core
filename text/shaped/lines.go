@@ -75,7 +75,7 @@ type Line struct {
 
 	// Runs are the shaped [Run] elements, in one-to-one correspondance with
 	// the Source spans.
-	Runs []shaping.Output
+	Runs []Run
 
 	// Offset specifies the relative offset from the Lines Position
 	// determining where to render the line in a target render image.
@@ -96,6 +96,21 @@ type Line struct {
 	Selections []textpos.Range
 }
 
+// Run is a span of text with the same font properties, with full rendering information.
+type Run struct {
+	shaping.Output
+
+	//	FillColor is the color to use for glyph fill (i.e., the standard "ink" color).
+	// Will only be non-nil if set for this run; Otherwise use default.
+	FillColor image.Image
+
+	//	StrokeColor is the color to use for glyph outline stroking, if non-nil.
+	StrokeColor image.Image
+
+	//	Background is the color to use for the background region, if non-nil.
+	Background image.Image
+}
+
 func (ln *Line) String() string {
 	return ln.Source.String() + fmt.Sprintf(" runs: %d\n", len(ln.Runs))
 }
@@ -110,34 +125,38 @@ func (ls *Lines) String() string {
 	return str
 }
 
-// OutputBounds returns the LineBounds for given output as rect bounding box.
-func OutputBounds(out *shaping.Output) fixed.Rectangle26_6 {
-	var r fixed.Rectangle26_6
-	gapdec := out.LineBounds.Descent
-	if gapdec < 0 && out.LineBounds.Gap < 0 || gapdec > 0 && out.LineBounds.Gap > 0 {
-		gapdec += out.LineBounds.Gap
-	} else {
-		gapdec -= out.LineBounds.Gap
+// GlyphBounds returns the tight bounding box for given glyph within this run.
+func (rn *Run) GlyphBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
+	if rn.Direction.IsVertical() {
+		if rn.Direction.IsSideways() {
+			fmt.Println("sideways")
+			return fixed.Rectangle26_6{Min: fixed.Point26_6{X: g.XBearing, Y: -g.YBearing}, Max: fixed.Point26_6{X: g.XBearing + g.Width, Y: -g.YBearing - g.Height}}
+		}
+		return fixed.Rectangle26_6{Min: fixed.Point26_6{X: -g.XBearing - g.Width/2, Y: g.Height - g.YOffset}, Max: fixed.Point26_6{X: g.XBearing + g.Width/2, Y: -(g.YBearing + g.Height) - g.YOffset}}
 	}
-	if out.Direction.IsVertical() {
+	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: g.XBearing, Y: -g.YBearing}, Max: fixed.Point26_6{X: g.XBearing + g.Width, Y: -g.YBearing - g.Height}}
+}
+
+// GlyphSelectBounds returns the maximal line-bounds level bounding box for given
+// glyph, suitable for selection.
+func (rn *Run) GlyphSelectBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
+	return fixed.Rectangle26_6{}
+}
+
+// Bounds returns the LineBounds for given Run as rect bounding box,
+// which can easily be converted to math32.Box2.
+func (rn *Run) Bounds() fixed.Rectangle26_6 {
+	gapdec := rn.LineBounds.Descent
+	if gapdec < 0 && rn.LineBounds.Gap < 0 || gapdec > 0 && rn.LineBounds.Gap > 0 {
+		gapdec += rn.LineBounds.Gap
+	} else {
+		gapdec -= rn.LineBounds.Gap
+	}
+	if rn.Direction.IsVertical() {
 		// ascent, descent describe horizontal, advance is vertical
-		r.Max.X = -gapdec
-		r.Min.X = -out.LineBounds.Ascent
-		r.Max.Y = -out.Advance
-		r.Min.Y = 0
-	} else {
-		r.Min.Y = -out.LineBounds.Ascent
-		r.Max.Y = -gapdec
-		r.Min.X = 0
-		r.Max.X = out.Advance
+		return fixed.Rectangle26_6{Min: fixed.Point26_6{X: -rn.LineBounds.Ascent, Y: 0},
+			Max: fixed.Point26_6{X: -gapdec, Y: -rn.Advance}}
 	}
-	if r.Min.X > r.Max.X {
-		fmt.Println("backward X!")
-		r.Min.X, r.Max.X = r.Max.X, r.Min.X
-	}
-	if r.Min.Y > r.Max.Y {
-		fmt.Println("backward Y!")
-		r.Min.Y, r.Max.Y = r.Max.Y, r.Min.Y
-	}
-	return r
+	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: 0, Y: -rn.LineBounds.Ascent},
+		Max: fixed.Point26_6{X: rn.Advance, Y: -gapdec}}
 }

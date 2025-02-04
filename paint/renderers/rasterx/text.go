@@ -36,14 +36,15 @@ func (rs *Renderer) TextLines(lns *shaped.Lines, ctx *render.Context, pos math32
 	start := pos.Add(lns.Offset)
 	// tbb := lns.Bounds.Translate(start)
 	// rs.DrawBounds(tbb, colors.Red)
+	clr := colors.Uniform(lns.Color)
 	for li := range lns.Lines {
 		ln := &lns.Lines[li]
-		rs.TextLine(ln, lns.Color, start) // todo: start + offset
+		rs.TextLine(ln, clr, start) // todo: start + offset
 	}
 }
 
 // TextLine rasterizes the given shaped.Line.
-func (rs *Renderer) TextLine(ln *shaped.Line, clr color.Color, start math32.Vector2) {
+func (rs *Renderer) TextLine(ln *shaped.Line, clr image.Image, start math32.Vector2) {
 	off := start.Add(ln.Offset)
 	// tbb := ln.Bounds.Translate(off)
 	// rs.DrawBounds(tbb, colors.Blue)
@@ -61,80 +62,101 @@ func (rs *Renderer) TextLine(ln *shaped.Line, clr color.Color, start math32.Vect
 // TextRun rasterizes the given text run into the output image using the
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
-func (rs *Renderer) TextRun(run *shaping.Output, clr color.Color, start math32.Vector2) {
-	x := start.X
-	y := start.Y
+func (rs *Renderer) TextRun(run *shaped.Run, clr image.Image, start math32.Vector2) {
 	// todo: render bg, render decoration
-	tbb := math32.B2FromFixed(shaped.OutputBounds(run)).Translate(start)
-	rs.DrawBounds(tbb, colors.Red)
-
+	// tbb := math32.B2FromFixed(shaped.OutputBounds(run)).Translate(start)
+	// rs.DrawBounds(tbb, colors.Red)
+	// dir := run.Direction
+	fill := clr
+	if run.FillColor != nil {
+		fill = run.FillColor
+	}
+	stroke := run.StrokeColor
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
-		xPos := x + math32.FromFixed(g.XOffset)
-		yPos := y - math32.FromFixed(g.YOffset)
-		top := yPos - math32.FromFixed(g.YBearing)
-		bottom := top - math32.FromFixed(g.Height)
-		right := xPos + math32.FromFixed(g.Width)
-		rect := image.Rect(int(xPos)-4, int(top)-4, int(right)+4, int(bottom)+4) // don't cut off
+		pos := start.Add(math32.Vec2(math32.FromFixed(g.XOffset), -math32.FromFixed(g.YOffset)))
+		// top := yPos - math32.FromFixed(g.YBearing)
+		// bottom := top - math32.FromFixed(g.Height)
+		// right := xPos + math32.FromFixed(g.Width)
+		// rect := image.Rect(int(xPos)-4, int(top)-4, int(right)+4, int(bottom)+4) // don't cut off
+		bb := math32.B2FromFixed(run.GlyphBounds(g)).Translate(start)
+		// rs.DrawBounds(bb, colors.Red)
+
 		data := run.Face.GlyphData(g.GlyphID)
 		switch format := data.(type) {
 		case font.GlyphOutline:
-			rs.GlyphOutline(run, g, format, clr, rect, xPos, yPos)
+			rs.GlyphOutline(run, g, format, fill, stroke, bb, pos)
 		case font.GlyphBitmap:
 			fmt.Println("bitmap")
-			rs.GlyphBitmap(run, g, format, clr, rect, xPos, yPos)
+			rs.GlyphBitmap(run, g, format, fill, stroke, bb, pos)
 		case font.GlyphSVG:
 			fmt.Println("svg", format)
-			// 	_ = rs.GlyphSVG(g, format, clr, xPos, yPos)
+			// 	_ = rs.GlyphSVG(g, format, fill, stroke, bb, pos)
 		}
-		x += math32.FromFixed(g.XAdvance)
-		y -= math32.FromFixed(g.YAdvance)
+		start.X += math32.FromFixed(g.XAdvance)
+		start.Y -= math32.FromFixed(g.YAdvance)
 	}
 	// todo: render strikethrough
 }
 
-func (rs *Renderer) GlyphOutline(run *shaping.Output, g *shaping.Glyph, bitmap font.GlyphOutline, clr color.Color, rect image.Rectangle, x, y float32) {
-	rs.Raster.SetColor(colors.Uniform(clr))
-	rf := &rs.Raster.Filler
-
+func (rs *Renderer) GlyphOutline(run *shaped.Run, g *shaping.Glyph, bitmap font.GlyphOutline, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) {
 	scale := math32.FromFixed(run.Size) / float32(run.Face.Upem())
-	// rs.Scanner.SetClip(rect) // todo: not good -- cuts off japanese!
-	rf.SetWinding(true)
+	x := pos.X
+	y := pos.Y
 
-	// todo: use stroke vs. fill color
+	rs.Path.Clear()
 	for _, s := range bitmap.Segments {
 		switch s.Op {
 		case opentype.SegmentOpMoveTo:
-			rf.Start(fixed.Point26_6{X: math32.ToFixed(s.Args[0].X*scale + x), Y: math32.ToFixed(-s.Args[0].Y*scale + y)})
+			rs.Path.Start(fixed.Point26_6{X: math32.ToFixed(s.Args[0].X*scale + x), Y: math32.ToFixed(-s.Args[0].Y*scale + y)})
 		case opentype.SegmentOpLineTo:
-			rf.Line(fixed.Point26_6{X: math32.ToFixed(s.Args[0].X*scale + x), Y: math32.ToFixed(-s.Args[0].Y*scale + y)})
+			rs.Path.Line(fixed.Point26_6{X: math32.ToFixed(s.Args[0].X*scale + x), Y: math32.ToFixed(-s.Args[0].Y*scale + y)})
 		case opentype.SegmentOpQuadTo:
-			rf.QuadBezier(fixed.Point26_6{X: math32.ToFixed(s.Args[0].X*scale + x), Y: math32.ToFixed(-s.Args[0].Y*scale + y)},
+			rs.Path.QuadBezier(fixed.Point26_6{X: math32.ToFixed(s.Args[0].X*scale + x), Y: math32.ToFixed(-s.Args[0].Y*scale + y)},
 				fixed.Point26_6{X: math32.ToFixed(s.Args[1].X*scale + x), Y: math32.ToFixed(-s.Args[1].Y*scale + y)})
 		case opentype.SegmentOpCubeTo:
-			rf.CubeBezier(fixed.Point26_6{X: math32.ToFixed(s.Args[0].X*scale + x), Y: math32.ToFixed(-s.Args[0].Y*scale + y)},
+			rs.Path.CubeBezier(fixed.Point26_6{X: math32.ToFixed(s.Args[0].X*scale + x), Y: math32.ToFixed(-s.Args[0].Y*scale + y)},
 				fixed.Point26_6{X: math32.ToFixed(s.Args[1].X*scale + x), Y: math32.ToFixed(-s.Args[1].Y*scale + y)},
 				fixed.Point26_6{X: math32.ToFixed(s.Args[2].X*scale + x), Y: math32.ToFixed(-s.Args[2].Y*scale + y)})
 		}
 	}
-	rf.Stop(true)
+	rs.Path.Stop(true)
+	rf := &rs.Raster.Filler
+	rf.SetWinding(true)
+	rf.SetColor(fill)
+	rs.Path.AddTo(rf)
 	rf.Draw()
 	rf.Clear()
+
+	if stroke != nil {
+		sw := math32.FromFixed(run.Size) / 16.0 // 1 for standard size font
+		rs.Raster.SetStroke(
+			math32.ToFixed(sw),
+			math32.ToFixed(10),
+			ButtCap, nil, nil, Miter, nil, 0)
+		rs.Path.AddTo(rs.Raster)
+		rs.Raster.SetColor(stroke)
+		rs.Raster.Draw()
+		rs.Raster.Clear()
+	}
+	rs.Path.Clear()
 }
 
-func (rs *Renderer) GlyphBitmap(run *shaping.Output, g *shaping.Glyph, bitmap font.GlyphBitmap, clr color.Color, rect image.Rectangle, x, y float32) error {
+func (rs *Renderer) GlyphBitmap(run *shaped.Run, g *shaping.Glyph, bitmap font.GlyphBitmap, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) error {
 	// scaled glyph rect content
+	x := pos.X
+	y := pos.Y
 	top := y - math32.FromFixed(g.YBearing)
 	switch bitmap.Format {
 	case font.BlackAndWhite:
 		rec := image.Rect(0, 0, bitmap.Width, bitmap.Height)
-		sub := image.NewPaletted(rec, color.Palette{color.Transparent, clr})
+		sub := image.NewPaletted(rec, color.Palette{color.Transparent, colors.ToUniform(fill)})
 
 		for i := range sub.Pix {
 			sub.Pix[i] = bitAt(bitmap.Data, i)
 		}
 		// todo: does it need scale? presumably not
-		// scale.NearestNeighbor.Scale(img, rect, sub, sub.Bounds(), int(top)}, draw.Over, nil)
+		// scale.NearestNeighbor.Scale(img, bb, sub, sub.Bounds(), int(top)}, draw.Over, nil)
 		draw.Draw(rs.image, sub.Bounds(), sub, image.Point{int(x), int(top)}, draw.Over)
 	case font.JPG, font.PNG, font.TIFF:
 		fmt.Println("img")
@@ -143,12 +165,12 @@ func (rs *Renderer) GlyphBitmap(run *shaping.Output, g *shaping.Glyph, bitmap fo
 		if err != nil {
 			return err
 		}
-		// scale.BiLinear.Scale(img, rect, pix, pix.Bounds(), draw.Over, nil)
+		// scale.BiLinear.Scale(img, bb, pix, pix.Bounds(), draw.Over, nil)
 		draw.Draw(rs.image, pix.Bounds(), pix, image.Point{int(x), int(top)}, draw.Over)
 	}
 
 	if bitmap.Outline != nil {
-		rs.GlyphOutline(run, g, *bitmap.Outline, clr, rect, x, y)
+		rs.GlyphOutline(run, g, *bitmap.Outline, fill, stroke, bb, pos)
 	}
 	return nil
 }

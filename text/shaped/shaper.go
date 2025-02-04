@@ -7,9 +7,9 @@ package shaped
 import (
 	"fmt"
 	"os"
-	"slices"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
@@ -162,7 +162,8 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 		var pos fixed.Point26_6
 		for oi := range lno {
 			out := &lno[oi]
-			for out.Runes.Offset >= cspEd {
+			run := Run{Output: *out}
+			for run.Runes.Offset >= cspEd {
 				cspi++
 				cspSt, cspEd = sp.Range(cspi)
 			}
@@ -171,8 +172,8 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 				lns.FontSize = sty.Size * fsz
 			}
 			nsp := sty.ToRunes()
-			coff := out.Runes.Offset - cspSt
-			cend := coff + out.Runes.Count
+			coff := run.Runes.Offset - cspSt
+			cend := coff + run.Runes.Count
 			nr := cr[coff:cend] // note: not a copy!
 			nsp = append(nsp, nr...)
 			lsp = append(lsp, nsp)
@@ -180,12 +181,21 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 			if cend > (cspEd - cspSt) { // shouldn't happen, to combine multiple original spans
 				fmt.Println("combined original span:", cend, cspEd-cspSt, cspi, string(cr), "prev:", string(nr), "next:", string(cr[cend:]))
 			}
-			bb := math32.B2FromFixed(OutputBounds(out).Add(pos))
+			if sty.Decoration.HasFlag(rich.FillColor) {
+				run.FillColor = colors.Uniform(sty.FillColor)
+			}
+			if sty.Decoration.HasFlag(rich.StrokeColor) {
+				run.StrokeColor = colors.Uniform(sty.StrokeColor)
+			}
+			if sty.Decoration.HasFlag(rich.Background) {
+				run.Background = colors.Uniform(sty.Background)
+			}
+			bb := math32.B2FromFixed(run.Bounds().Add(pos))
 			ln.Bounds.ExpandByBox(bb)
-			pos = DirectionAdvance(out.Direction, pos, out.Advance)
+			pos = DirectionAdvance(run.Direction, pos, run.Advance)
+			ln.Runs = append(ln.Runs, run)
 		}
 		ln.Source = lsp
-		ln.Runs = slices.Clone(lno)
 		ln.Offset = off
 		// fmt.Println(ln.Bounds)
 		lns.Bounds.ExpandByBox(ln.Bounds.Translate(ln.Offset))

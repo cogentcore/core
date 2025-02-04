@@ -58,9 +58,9 @@ type Style struct { //types:add
 	// the style rune, in rich.Text spans.
 	FillColor color.Color `set:"-"`
 
-	//	StrokeColor is the color to use for glyph stroking if the Decoration StrokeColor
-	// flag is set. This will be encoded in a uint32 following the style rune,
-	// in rich.Text spans.
+	//	StrokeColor is the color to use for glyph outline stroking if the
+	// Decoration StrokeColor flag is set. This will be encoded in a uint32
+	// following the style rune, in rich.Text spans.
 	StrokeColor color.Color `set:"-"`
 
 	//	Background is the color to use for the background region if the Decoration
