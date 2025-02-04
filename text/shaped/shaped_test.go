@@ -102,8 +102,8 @@ func TestVertical(t *testing.T) {
 		tsty.FontSize.Dots *= 1.5
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(150, 50))
-		pc.NewText(lns, math32.Vec2(100, 200))
-		// pc.NewText(lns, math32.Vec2(20, 60))
+		// pc.NewText(lns, math32.Vec2(100, 200))
+		pc.NewText(lns, math32.Vec2(40, 60))
 		pc.RenderDone()
 	})
 }

@@ -88,7 +88,7 @@ func (rs *Renderer) TextRun(run *shaping.Output, clr color.Color, start math32.V
 			// 	_ = rs.GlyphSVG(g, format, clr, xPos, yPos)
 		}
 		x += math32.FromFixed(g.XAdvance)
-		y += math32.FromFixed(g.YAdvance)
+		y -= math32.FromFixed(g.YAdvance)
 	}
 	// todo: render strikethrough
 }
