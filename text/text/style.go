@@ -5,126 +5,104 @@
 package text
 
 import (
+	"image"
+
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
 )
 
-// IMPORTANT: any changes here must be updated in style_properties.go StyleTextFuncs
+//go:generate core generate -add-types -setters
 
-// Style is used for layout-level (widget, html-style) text styling --
-// FontStyle contains all the lower-level text rendering info used in SVG --
-// most of these are inherited
+// IMPORTANT: any changes here must be updated in props.go
+
+// note: the go-text shaping framework does not support letter spacing
+// or word spacing. These are uncommonly adjusted and not compatible with
+// internationalized text in any case.
+
+// Style is used for text layout styling.
+// Most of these are inherited
 type Style struct { //types:add
 
-	// how to align text, horizontally (inherited).
+	// Align specifies how to align text along the default direction (inherited).
 	// This *only* applies to the text within its containing element,
-	// and is typically relevant only for multi-line text:
-	// for single-line text, if element does not have a specified size
-	// that is different from the text size, then this has *no effect*.
+	// and is relevant only for multi-line text.
 	Align Aligns
 
-	// vertical alignment of text (inherited).
+	// AlignV specifies "vertical" (orthogonal to default direction)
+	// alignment of text (inherited).
 	// This *only* applies to the text within its containing element:
 	// if that element does not have a specified size
 	// that is different from the text size, then this has *no effect*.
 	AlignV Aligns
 
-	// for svg rendering only (inherited):
-	// determines the alignment relative to text position coordinate.
-	// For RTL start is right, not left, and start is top for TB
-	Anchor TextAnchors
+	// FontSize is the default font size. The rich text styling specifies
+	// sizes relative to this value, with the normal text size factor = 1.
+	FontSize units.Value
 
-	// spacing between characters and lines
-	LetterSpacing units.Value
+	// LineSpacing is a multiplier on the default font size for spacing between lines.
+	// If there are larger font elements within a line, they will be accommodated, with
+	// the same amount of total spacing added above that maximum size as if it was all
+	// the same height. The default of 1.2 is typical for "single spaced" text.
+	LineSpacing float32 `default:"1.2"`
 
-	// extra space to add between words (inherited)
-	WordSpacing units.Value
-
-	// LineHeight is the height of a line of text (inherited).
-	// Text is centered within the overall line height.
-	// The standard way to specify line height is in terms of
-	// [units.Em] so that it scales with the font size.
-	LineHeight units.Value
+	// ParaSpacing is the line spacing between paragraphs (inherited).
+	// This will be copied from [Style.Margin] if that is non-zero,
+	// or can be set directly. Like [LineSpacing], this is a multiplier on
+	// the default font size.
+	ParaSpacing float32 `default:"1.5"`
 
 	// WhiteSpace (not inherited) specifies how white space is processed,
 	// and how lines are wrapped.  If set to WhiteSpaceNormal (default) lines are wrapped.
 	// See info about interactions with Grow.X setting for this and the NoWrap case.
 	WhiteSpace WhiteSpaces
 
-	// determines how to treat unicode bidirectional information (inherited)
-	UnicodeBidi UnicodeBidi
+	// Direction specifies the default text direction, which can be overridden if the
+	// unicode text is typically written in a different direction.
+	Direction rich.Directions
 
-	// bidi-override or embed -- applies to all text elements (inherited)
-	Direction TextDirections
-
-	// overall writing mode -- only for text elements, not span (inherited)
-	WritingMode TextDirections
-
-	// for TBRL writing mode (only), determines orientation of alphabetic characters (inherited);
-	// 90 is default (rotated); 0 means keep upright
-	OrientationVert float32
-
-	// for horizontal LR/RL writing mode (only), determines orientation of all characters (inherited);
-	// 0 is default (upright)
-	OrientationHoriz float32
-
-	// how much to indent the first line in a paragraph (inherited)
+	// Indent specifies how much to indent the first line in a paragraph (inherited).
 	Indent units.Value
 
-	// extra spacing between paragraphs (inherited); copied from [Style.Margin] per CSS spec
-	// if that is non-zero, else can be set directly with para-spacing
-	ParaSpacing units.Value
-
-	// tab size, in number of characters (inherited)
+	// TabSize specifies the tab size, in number of characters (inherited).
 	TabSize int
+
+	// SelectColor is the color to use for the background region of selected text.
+	SelectColor image.Image
 }
 
-// LineHeightNormal represents a normal line height,
-// equal to the default height of the font being used.
-var LineHeightNormal = units.Dp(-1)
-
 func (ts *Style) Defaults() {
-	ts.LineHeight = LineHeightNormal
 	ts.Align = Start
-	// ts.AlignV = Baseline // todo:
-	ts.Direction = LTR
-	ts.OrientationVert = 90
+	ts.AlignV = Start
+	ts.FontSize.Dp(16)
+	ts.LineSpacing = 1.2
+	ts.ParaSpacing = 1.5
+	ts.Direction = rich.LTR
 	ts.TabSize = 4
+	ts.SelectColor = colors.Scheme.Select.Container
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (ts *Style) ToDots(uc *units.Context) {
-	ts.LetterSpacing.ToDots(uc)
-	ts.WordSpacing.ToDots(uc)
-	ts.LineHeight.ToDots(uc)
+	ts.FontSize.ToDots(uc)
 	ts.Indent.ToDots(uc)
-	ts.ParaSpacing.ToDots(uc)
 }
 
 // InheritFields from parent
 func (ts *Style) InheritFields(parent *Style) {
 	ts.Align = parent.Align
 	ts.AlignV = parent.AlignV
-	ts.Anchor = parent.Anchor
-	ts.WordSpacing = parent.WordSpacing
-	ts.LineHeight = parent.LineHeight
-	// ts.WhiteSpace = par.WhiteSpace // todo: we can't inherit this b/c label base default then gets overwritten
-	ts.UnicodeBidi = parent.UnicodeBidi
-	ts.Direction = parent.Direction
-	ts.WritingMode = parent.WritingMode
-	ts.OrientationVert = parent.OrientationVert
-	ts.OrientationHoriz = parent.OrientationHoriz
-	ts.Indent = parent.Indent
+	ts.LineSpacing = parent.LineSpacing
 	ts.ParaSpacing = parent.ParaSpacing
+	// ts.WhiteSpace = par.WhiteSpace // todo: we can't inherit this b/c label base default then gets overwritten
+	ts.Direction = parent.Direction
+	ts.Indent = parent.Indent
 	ts.TabSize = parent.TabSize
 }
 
-// EffLineHeight returns the effective line height for the given
-// font height, handling the [LineHeightNormal] special case.
-func (ts *Style) EffLineHeight(fontHeight float32) float32 {
-	if ts.LineHeight.Value < 0 {
-		return fontHeight
-	}
-	return ts.LineHeight.Dots
+// LineHeight returns the effective line height .
+func (ts *Style) LineHeight() float32 {
+	return ts.FontSize.Dots * ts.LineSpacing
 }
 
 // AlignFactors gets basic text alignment factors
@@ -150,7 +128,8 @@ func (ts *Style) AlignFactors() (ax, ay float32) {
 	return
 }
 
-// Aligns has all different types of alignment and justification.
+// Aligns has the different types of alignment and justification for
+// the text.
 type Aligns int32 //enums:enum -transform kebab
 
 const (
@@ -167,90 +146,62 @@ const (
 	Justify
 )
 
-// UnicodeBidi determines the type of bidirectional text support.
-// See https://pkg.go.dev/golang.org/x/text/unicode/bidi.
-type UnicodeBidi int32 //enums:enum -trim-prefix Bidi -transform kebab
-
-const (
-	BidiNormal UnicodeBidi = iota
-	BidiEmbed
-	BidiBidiOverride
-)
-
-// TextDirections are for direction of text writing, used in direction and writing-mode styles
-type TextDirections int32 //enums:enum -transform lower
-
-const (
-	LRTB TextDirections = iota
-	RLTB
-	TBRL
-	LR
-	RL
-	TB
-	LTR
-	RTL
-)
-
-// TextAnchors are for direction of text writing, used in direction and writing-mode styles
-type TextAnchors int32 //enums:enum -trim-prefix Anchor -transform kebab
-
-const (
-	AnchorStart TextAnchors = iota
-	AnchorMiddle
-	AnchorEnd
-)
-
-// WhiteSpaces determine how white space is processed
+// WhiteSpaces determine how white space is processed and line wrapping
+// occurs, either only at whitespace or within words.
 type WhiteSpaces int32 //enums:enum -trim-prefix WhiteSpace
 
 const (
-	// WhiteSpaceNormal means that all white space is collapsed to a single
-	// space, and text wraps when necessary.  To get full word wrapping to
-	// expand to all available space, you also need to set GrowWrap = true.
-	// Use the SetTextWrap convenience method to set both.
-	WhiteSpaceNormal WhiteSpaces = iota
+	// WrapAsNeeded means that all white space is collapsed to a single
+	// space, and text wraps at white space except if there is a long word
+	// that cannot fit on the next line, or would otherwise be truncated.
+	// To get full word wrapping to expand to all available space, you also
+	// need to set GrowWrap = true. Use the SetTextWrap convenience method
+	// to set both.
+	WrapAsNeeded WhiteSpaces = iota
 
-	// WhiteSpaceNowrap means that sequences of whitespace will collapse into
-	// a single whitespace. Text will never wrap to the next line except
-	// if there is an explicit line break via a <br> tag.  In general you
-	// also don't want simple non-wrapping text labels to Grow (GrowWrap = false).
-	// Use the SetTextWrap method to set both.
-	WhiteSpaceNowrap
+	// WrapAlways is like [WrapAsNeeded] except that line wrap will always
+	// occur within words if it allows more content to fit on a line.
+	WrapAlways
 
-	// WhiteSpacePre means that whitespace is preserved. Text
-	// will only wrap on line breaks. Acts like the <pre> tag in HTML.  This
-	// invokes a different hand-written parser because the default Go
-	// parser automatically throws away whitespace.
+	// WrapSpaceOnly means that line wrapping only occurs at white space,
+	// and never within words. This means that long words may then exceed
+	// the available space and will be truncated. White space is collapsed
+	// to a single space.
+	WrapSpaceOnly
+
+	// WrapNever means that lines are never wrapped to fit. If there is an
+	// explicit line or paragraph break, that will still result in
+	// a new line. In general you also don't want simple non-wrapping
+	// text labels to Grow (GrowWrap = false). Use the SetTextWrap method
+	// to set both. White space is collapsed to a single space.
+	WrapNever
+
+	// WhiteSpacePre means that whitespace is preserved, including line
+	// breaks. Text will only wrap on explicit line or paragraph breaks.
+	// This acts like the <pre> tag in HTML.
 	WhiteSpacePre
-
-	// WhiteSpacePreLine means that sequences of whitespace will collapse
-	// into a single whitespace. Text will wrap when necessary, and on line
-	// breaks
-	WhiteSpacePreLine
 
 	// WhiteSpacePreWrap means that whitespace is preserved.
 	// Text will wrap when necessary, and on line breaks
 	WhiteSpacePreWrap
 )
 
-// HasWordWrap returns true if current white space option supports word wrap
-func (ts *Style) HasWordWrap() bool {
-	switch ts.WhiteSpace {
-	case WhiteSpaceNormal, WhiteSpacePreLine, WhiteSpacePreWrap:
-		return true
-	default:
+// HasWordWrap returns true if value supports word wrap.
+func (ws WhiteSpaces) HasWordWrap() bool {
+	switch ws {
+	case WrapNever, WhiteSpacePre:
 		return false
+	default:
+		return true
 	}
 }
 
-// HasPre returns true if current white space option preserves existing
-// whitespace (or at least requires that parser in case of PreLine, which is
-// intermediate)
-func (ts *Style) HasPre() bool {
-	switch ts.WhiteSpace {
-	case WhiteSpaceNormal, WhiteSpaceNowrap:
-		return false
-	default:
+// KeepWhiteSpace returns true if value preserves existing whitespace.
+func (ws WhiteSpaces) KeepWhiteSpace() bool {
+	switch ws {
+	case WhiteSpacePre, WhiteSpacePreWrap:
 		return true
+	default:
+		return false
 	}
 }

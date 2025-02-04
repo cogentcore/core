@@ -14,9 +14,9 @@ import (
 
 //go:generate core generate -add-types -setters
 
-// Note: these enums must remain in sync with
+// IMPORTANT: enums must remain in sync with
 // "github.com/go-text/typesetting/font"
-// see the ptext package for translation functions.
+// and props.go must be updated as needed.
 
 // Style contains all of the rich text styling properties, that apply to one
 // span of text. These are encoded into a uint32 rune value in [rich.Text].

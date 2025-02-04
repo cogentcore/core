@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build not
-
 package rich
 
 import (
@@ -15,6 +13,7 @@ import (
 	"cogentcore.org/core/styles/styleprops"
 )
 
+// StyleFromProperties sets style field values based on the given property list.
 func (s *Style) StyleFromProperties(parent *Style, properties map[string]any, ctxt colors.Context) {
 	for key, val := range properties {
 		if len(key) == 0 {
@@ -27,7 +26,7 @@ func (s *Style) StyleFromProperties(parent *Style, properties map[string]any, ct
 	}
 }
 
-// StyleFromProperty sets style field values based on the given property key and value
+// StyleFromProperty sets style field values based on the given property key and value.
 func (s *Style) StyleFromProperty(parent *Style, key string, val any, cc colors.Context) {
 	if sfunc, ok := styleFuncs[key]; ok {
 		if parent != nil {
