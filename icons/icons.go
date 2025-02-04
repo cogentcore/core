@@ -35,4 +35,4 @@ func (i Icon) IsSet() bool {
 
 // Used is a map containing all icons that have been used.
 // It is added to by [cogentcore.org/core/core.Icon].
-var Used = map[Icon]bool{}
+var Used = map[Icon]struct{}{}
