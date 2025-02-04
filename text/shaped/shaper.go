@@ -34,7 +34,7 @@ type Shaper struct {
 // DirectionAdvance advances given position based on given direction.
 func DirectionAdvance(dir di.Direction, pos fixed.Point26_6, adv fixed.Int26_6) fixed.Point26_6 {
 	if dir.IsVertical() {
-		pos.Y += adv
+		pos.Y += -adv
 	} else {
 		pos.X += adv
 	}
@@ -110,17 +110,24 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 	lgap := lht - fsz
 	fmt.Println("lgap:", lgap)
 	nlines := int(math32.Floor(size.Y / lht))
+	maxSize := int(size.X)
+	if dir.IsVertical() {
+		nlines = int(math32.Floor(size.X / lht))
+		maxSize = int(size.Y)
+		fmt.Println(lht, nlines, maxSize)
+	}
 	brk := shaping.WhenNecessary
 	if !tsty.WhiteSpace.HasWordWrap() {
 		brk = shaping.Never
 	} else if tsty.WhiteSpace == text.WrapAlways {
 		brk = shaping.Always
 	}
+	_ = brk
 	cfg := shaping.WrapConfig{
 		Direction:                     dir,
 		TruncateAfterLines:            nlines,
-		TextContinues:                 false, // todo! no effect if TruncateAfterLines is 0
-		BreakPolicy:                   brk,   // or Never, Always
+		TextContinues:                 true,          // todo! no effect if TruncateAfterLines is 0
+		BreakPolicy:                   shaping.Never, // or Never, Always
 		DisableTrailingWhitespaceTrim: tsty.WhiteSpace.KeepWhiteSpace(),
 	}
 	// from gio:
@@ -134,14 +141,15 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 	// }
 	txt := sp.Join()
 	outs := sh.shapeText(sp, tsty, rts, txt)
-	lines, truncate := sh.wrapper.WrapParagraph(cfg, int(size.X), txt, shaping.NewSliceIterator(outs))
+	lines, truncate := sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
 	lns := &Lines{Color: tsty.Color}
 	lns.Truncated = truncate > 0
+	fmt.Println("trunc:", truncate)
 	cspi := 0
 	cspSt, cspEd := sp.Range(cspi)
-	fmt.Println("st:", cspSt, cspEd)
 	var off math32.Vector2
-	for _, lno := range lines {
+	for li, lno := range lines {
+		fmt.Println("line:", li, off)
 		ln := Line{}
 		var lsp rich.Spans
 		var pos fixed.Point26_6
@@ -150,7 +158,6 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 			for out.Runes.Offset >= cspEd {
 				cspi++
 				cspSt, cspEd = sp.Range(cspi)
-				fmt.Println("nxt:", cspi, cspSt, cspEd, out.Runes.Offset)
 			}
 			sty, cr := rich.NewStyleFromRunes(sp[cspi])
 			if lns.FontSize == 0 {
@@ -163,7 +170,7 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 			nsp = append(nsp, nr...)
 			lsp = append(lsp, nsp)
 			fmt.Println(sty, string(nr))
-			if cend < (cspEd - cspSt) { // shouldn't happen, to combine multiple original spans
+			if cend > (cspEd - cspSt) { // shouldn't happen, to combine multiple original spans
 				fmt.Println("combined original span:", cend, cspEd-cspSt, cspi, string(cr), "prev:", string(nr), "next:", string(cr[cend:]))
 			}
 			bb := math32.B2FromFixed(OutputBounds(out).Add(pos))
@@ -179,8 +186,10 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 		if dir.IsVertical() {
 			lwd := ln.Bounds.Size().X
 			if dir.Progression() == di.FromTopLeft {
+				fmt.Println("ftl lwd:", lwd, off.X)
 				off.X += lwd + lgap
 			} else {
+				fmt.Println("!ftl lwd:", lwd, off.X)
 				off.X -= lwd + lgap
 			}
 		} else {

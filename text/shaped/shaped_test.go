@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	. "cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
+	"github.com/go-text/typesetting/language"
 )
 
 func TestMain(m *testing.M) {
@@ -68,20 +69,41 @@ func TestBasic(t *testing.T) {
 	})
 }
 
-func TestVertical(t *testing.T) {
-	RunTest(t, "nihongo_ttb", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
-		src := "国際化活動 W3C ワールド・ワイド・Hello!"
+func TestHebrew(t *testing.T) {
+	RunTest(t, "hebrew", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+
+		src := "אָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, וּבְכָל-נַפְשְׁךָ,"
 		sr := []rune(src)
 		sp := rich.Spans{}
 		plain := rich.NewStyle()
-		// plain.Direction = rich.TTB
+		// plain.SetDirection(rich.RTL)
 		sp.Add(plain, sr)
-
-		// tsty.Direction = rich.TTB
-		tsty.FontSize.Dots *= 1.5
+		// tsty.Direction = rich.RTL // note: setting this causes it to flip upright
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 60))
+		pc.RenderDone()
+	})
+}
+
+func TestVertical(t *testing.T) {
+	RunTest(t, "nihongo_ttb", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+		rts.Language = "ja"
+		rts.Script = language.Hiragana
+		src := "国際化活動 W3C ワールド・ワイド・Hello!"
+		// src := "国際化活動"
+		sr := []rune(src)
+		sp := rich.Spans{}
+		plain := rich.NewStyle()
+		plain.Direction = rich.TTB // rich.BTT
+		sp.Add(plain, sr)
+
+		tsty.Direction = rich.TTB // rich.BTT
+		tsty.FontSize.Dots *= 1.5
+
+		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(150, 50))
+		pc.NewText(lns, math32.Vec2(100, 200))
+		// pc.NewText(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
 }

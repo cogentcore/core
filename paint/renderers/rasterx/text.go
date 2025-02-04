@@ -34,6 +34,8 @@ func (rs *Renderer) RenderText(txt *render.Text) {
 // left baseline location of the first text item..
 func (rs *Renderer) TextLines(lns *shaped.Lines, ctx *render.Context, pos math32.Vector2) {
 	start := pos.Add(lns.Offset)
+	// tbb := lns.Bounds.Translate(start)
+	// rs.DrawBounds(tbb, colors.Red)
 	for li := range lns.Lines {
 		ln := &lns.Lines[li]
 		rs.TextLine(ln, lns.Color, start) // todo: start + offset
@@ -43,6 +45,8 @@ func (rs *Renderer) TextLines(lns *shaped.Lines, ctx *render.Context, pos math32
 // TextLine rasterizes the given shaped.Line.
 func (rs *Renderer) TextLine(ln *shaped.Line, clr color.Color, start math32.Vector2) {
 	off := start.Add(ln.Offset)
+	// tbb := ln.Bounds.Translate(off)
+	// rs.DrawBounds(tbb, colors.Blue)
 	for ri := range ln.Runs {
 		run := &ln.Runs[ri]
 		rs.TextRun(run, clr, off)
@@ -61,6 +65,9 @@ func (rs *Renderer) TextRun(run *shaping.Output, clr color.Color, start math32.V
 	x := start.X
 	y := start.Y
 	// todo: render bg, render decoration
+	tbb := math32.B2FromFixed(shaped.OutputBounds(run)).Translate(start)
+	rs.DrawBounds(tbb, colors.Red)
+
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
 		xPos := x + math32.FromFixed(g.XOffset)
@@ -81,6 +88,7 @@ func (rs *Renderer) TextRun(run *shaping.Output, clr color.Color, start math32.V
 			// 	_ = rs.GlyphSVG(g, format, clr, xPos, yPos)
 		}
 		x += math32.FromFixed(g.XAdvance)
+		y += math32.FromFixed(g.YAdvance)
 	}
 	// todo: render strikethrough
 }
@@ -148,4 +156,18 @@ func (rs *Renderer) GlyphBitmap(run *shaping.Output, g *shaping.Glyph, bitmap fo
 // bitAt returns the bit at the given index in the byte slice.
 func bitAt(b []byte, i int) byte {
 	return (b[i/8] >> (7 - i%8)) & 1
+}
+
+// DrawBounds draws a bounding box in the given color. Useful for debugging.
+func (rs *Renderer) DrawBounds(bb math32.Box2, clr color.Color) {
+	rs.Raster.Clear()
+	rs.Raster.SetStroke(
+		math32.ToFixed(1),
+		math32.ToFixed(4),
+		ButtCap, nil, nil, Miter,
+		nil, 0)
+	rs.Raster.SetColor(colors.Uniform(clr))
+	AddRect(bb.Min.X, bb.Min.Y, bb.Max.X, bb.Max.Y, 0, rs.Raster)
+	rs.Raster.Draw()
+	rs.Raster.Clear()
 }
