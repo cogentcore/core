@@ -35,7 +35,7 @@ func (rs *Renderer) RenderText(txt *render.Text) {
 func (rs *Renderer) TextLines(lns *shaped.Lines, ctx *render.Context, pos math32.Vector2) {
 	start := pos.Add(lns.Offset)
 	// tbb := lns.Bounds.Translate(start)
-	// rs.DrawBounds(tbb, colors.Red)
+	// rs.StrokeBounds(tbb, colors.Red)
 	clr := colors.Uniform(lns.Color)
 	for li := range lns.Lines {
 		ln := &lns.Lines[li]
@@ -47,7 +47,7 @@ func (rs *Renderer) TextLines(lns *shaped.Lines, ctx *render.Context, pos math32
 func (rs *Renderer) TextLine(ln *shaped.Line, clr image.Image, start math32.Vector2) {
 	off := start.Add(ln.Offset)
 	// tbb := ln.Bounds.Translate(off)
-	// rs.DrawBounds(tbb, colors.Blue)
+	// rs.StrokeBounds(tbb, colors.Blue)
 	for ri := range ln.Runs {
 		run := &ln.Runs[ri]
 		rs.TextRun(run, clr, off)
@@ -63,10 +63,11 @@ func (rs *Renderer) TextLine(ln *shaped.Line, clr image.Image, start math32.Vect
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
 func (rs *Renderer) TextRun(run *shaped.Run, clr image.Image, start math32.Vector2) {
-	// todo: render bg, render decoration
-	// tbb := math32.B2FromFixed(shaped.OutputBounds(run)).Translate(start)
-	// rs.DrawBounds(tbb, colors.Red)
+	// todo: render decoration
 	// dir := run.Direction
+	if run.Background != nil {
+		rs.FillBounds(math32.B2FromFixed(run.Bounds()).Translate(start), run.Background)
+	}
 	fill := clr
 	if run.FillColor != nil {
 		fill = run.FillColor
@@ -80,7 +81,7 @@ func (rs *Renderer) TextRun(run *shaped.Run, clr image.Image, start math32.Vecto
 		// right := xPos + math32.FromFixed(g.Width)
 		// rect := image.Rect(int(xPos)-4, int(top)-4, int(right)+4, int(bottom)+4) // don't cut off
 		bb := math32.B2FromFixed(run.GlyphBounds(g)).Translate(start)
-		// rs.DrawBounds(bb, colors.Red)
+		// rs.StrokeBounds(bb, colors.Yellow)
 
 		data := run.Face.GlyphData(g.GlyphID)
 		switch format := data.(type) {
@@ -129,7 +130,7 @@ func (rs *Renderer) GlyphOutline(run *shaped.Run, g *shaping.Glyph, bitmap font.
 	rf.Clear()
 
 	if stroke != nil {
-		sw := math32.FromFixed(run.Size) / 16.0 // 1 for standard size font
+		sw := math32.FromFixed(run.Size) / 32.0 // scale with font size
 		rs.Raster.SetStroke(
 			math32.ToFixed(sw),
 			math32.ToFixed(10),
@@ -180,8 +181,8 @@ func bitAt(b []byte, i int) byte {
 	return (b[i/8] >> (7 - i%8)) & 1
 }
 
-// DrawBounds draws a bounding box in the given color. Useful for debugging.
-func (rs *Renderer) DrawBounds(bb math32.Box2, clr color.Color) {
+// StrokeBounds strokes a bounding box in the given color. Useful for debugging.
+func (rs *Renderer) StrokeBounds(bb math32.Box2, clr color.Color) {
 	rs.Raster.Clear()
 	rs.Raster.SetStroke(
 		math32.ToFixed(1),
@@ -192,4 +193,14 @@ func (rs *Renderer) DrawBounds(bb math32.Box2, clr color.Color) {
 	AddRect(bb.Min.X, bb.Min.Y, bb.Max.X, bb.Max.Y, 0, rs.Raster)
 	rs.Raster.Draw()
 	rs.Raster.Clear()
+}
+
+// FillBounds fills a bounding box in the given color.
+func (rs *Renderer) FillBounds(bb math32.Box2, clr image.Image) {
+	rf := &rs.Raster.Filler
+	rf.Clear()
+	rf.SetColor(clr)
+	AddRect(bb.Min.X, bb.Min.Y, bb.Max.X, bb.Max.Y, 0, rf)
+	rf.Draw()
+	rf.Clear()
 }

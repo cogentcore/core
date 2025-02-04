@@ -53,7 +53,6 @@ func TestBasic(t *testing.T) {
 		sr := []rune(src)
 		sp := rich.Spans{}
 		plain := rich.NewStyle()
-		// plain.SetDirection(rich.RTL)
 		ital := rich.NewStyle().SetSlant(rich.Italic)
 		ital.SetFillColor(colors.Red)
 		boldBig := rich.NewStyle().SetWeight(rich.Bold) // .SetSize(1.5)
@@ -111,29 +110,38 @@ func TestVertical(t *testing.T) {
 		pc.NewText(lns, math32.Vec2(60, 100))
 		pc.RenderDone()
 	})
-}
 
-func TestStrokeOutline(t *testing.T) {
-	RunTest(t, "stroke-outline", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "nihongo_ltr", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+		rts.Language = "ja"
+		rts.Script = language.Han
+		tsty.FontSize.Dots *= 1.5
 
-		src := "The lazy fox typed in some familiar text"
+		// todo: word wrapping and sideways rotation in vertical not currently working
+		src := "国際化活動 W3C ワールド・ワイド・Hello!"
 		sr := []rune(src)
 		sp := rich.Spans{}
 		plain := rich.NewStyle()
-		// plain.SetDirection(rich.RTL)
-		ital := rich.NewStyle().SetSlant(rich.Italic)
-		ital.SetFillColor(colors.Red)
-		boldBig := rich.NewStyle().SetWeight(rich.Bold) // .SetSize(1.5)
-		sp.Add(plain, sr[:4])
-		sp.Add(ital, sr[4:8])
-		fam := []rune("familiar")
-		ix := runes.Index(sr, fam)
-		sp.Add(plain, sr[8:ix])
-		sp.Add(boldBig, sr[ix:ix+8])
-		sp.Add(plain, sr[ix+8:])
+		sp.Add(plain, sr)
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 60))
+		pc.RenderDone()
+	})
+}
+
+func TestStrokeOutline(t *testing.T) {
+	RunTest(t, "colors", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+
+		tsty.FontSize.Dots *= 4
+
+		src := "The lazy fox"
+		sr := []rune(src)
+		sp := rich.Spans{}
+		stroke := rich.NewStyle().SetStrokeColor(colors.Red).SetBackground(colors.ToUniform(colors.Scheme.Select.Container))
+		sp.Add(stroke, sr)
+
+		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
+		pc.NewText(lns, math32.Vec2(20, 80))
 		pc.RenderDone()
 	})
 }
