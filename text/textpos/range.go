@@ -8,18 +8,18 @@ package textpos
 // inclusive, as in standard slice indexing and for loop conventions.
 type Range struct {
 	// St is the starting index of the range.
-	St int
+	Start int
 
 	// Ed is the ending index of the range.
-	Ed int
+	End int
 }
 
 // Len returns the length of the range: Ed - St.
 func (r Range) Len() int {
-	return r.Ed - r.St
+	return r.End - r.Start
 }
 
 // Contains returns true if range contains given index.
 func (r Range) Contains(i int) bool {
-	return i >= r.St && i < r.Ed
+	return i >= r.Start && i < r.End
 }

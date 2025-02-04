@@ -5,36 +5,21 @@
 package rich
 
 import (
-	"image/color"
-	"log/slog"
 	"strings"
 
-	"cogentcore.org/core/colors"
-	"cogentcore.org/core/styles/units"
 	"github.com/go-text/typesetting/language"
 )
 
-// Context holds the global context for rich text styling,
-// holding properties that apply to a collection of [rich.Text] elements,
-// so it does not need to be redundantly encoded in each such element.
-type Context struct {
+// Settings holds the global settings for rich text styling,
+// including language, script, and preferred font faces for
+// each category of font.
+type Settings struct {
 
 	// Language is the preferred language used for rendering text.
 	Language language.Language
 
 	// Script is the specific writing system used for rendering text.
 	Script language.Script
-
-	// Direction is the default text rendering direction, based on language
-	// and script.
-	Direction Directions
-
-	// StandardSize is the standard font size. The Style provides a multiplier
-	// on this value.
-	StandardSize units.Value
-
-	// Color is the default font fill color.
-	Color color.Color
 
 	// SansSerif is a font without serifs, where glyphs have plain stroke endings,
 	// without ornamentation. Example sans-serif fonts include Arial, Helvetica,
@@ -101,22 +86,20 @@ type Context struct {
 	Custom string
 }
 
-func (ctx *Context) Defaults() {
-	ctx.Language = "en"
-	ctx.Script = language.Common
-	ctx.SansSerif = "Arial"
-	ctx.Serif = "Times New Roman"
-	ctx.StandardSize.Dp(16)
-	ctx.Color = colors.ToUniform(colors.Scheme.OnSurface)
+func (rts *Settings) Defaults() {
+	rts.Language = "en"
+	rts.Script = language.Latin
+	rts.SansSerif = "Arial"
+	rts.Serif = "Times New Roman"
 }
 
 // AddFamily adds a family specifier to the given font string,
 // handling the comma properly.
-func AddFamily(s, fam string) string {
-	if s == "" {
+func AddFamily(rts, fam string) string {
+	if rts == "" {
 		return fam
 	}
-	return s + ", " + fam
+	return rts + ", " + fam
 }
 
 // FamiliesToList returns a list of the families, split by comma and space removed.
@@ -124,50 +107,36 @@ func FamiliesToList(fam string) []string {
 	fs := strings.Split(fam, ",")
 	os := make([]string, 0, len(fs))
 	for _, f := range fs {
-		s := strings.TrimSpace(f)
-		if s == "" {
+		rts := strings.TrimSpace(f)
+		if rts == "" {
 			continue
 		}
-		os = append(os, s)
+		os = append(os, rts)
 	}
 	return os
 }
 
 // Family returns the font family specified by the given [Family] enum.
-func (ctx *Context) Family(fam Family) string {
+func (rts *Settings) Family(fam Family) string {
 	switch fam {
 	case SansSerif:
-		return AddFamily(ctx.SansSerif, "sans-serif")
+		return AddFamily(rts.SansSerif, "sans-serif")
 	case Serif:
-		return AddFamily(ctx.Serif, "serif")
+		return AddFamily(rts.Serif, "serif")
 	case Monospace:
-		return AddFamily(ctx.Monospace, "monospace")
+		return AddFamily(rts.Monospace, "monospace")
 	case Cursive:
-		return AddFamily(ctx.Cursive, "cursive")
+		return AddFamily(rts.Cursive, "cursive")
 	case Fantasy:
-		return AddFamily(ctx.Fantasy, "fantasy")
+		return AddFamily(rts.Fantasy, "fantasy")
 	case Maths:
-		return AddFamily(ctx.Math, "math")
+		return AddFamily(rts.Math, "math")
 	case Emoji:
-		return AddFamily(ctx.Emoji, "emoji")
+		return AddFamily(rts.Emoji, "emoji")
 	case Fangsong:
-		return AddFamily(ctx.Fangsong, "fangsong")
+		return AddFamily(rts.Fangsong, "fangsong")
 	case Custom:
-		return ctx.Custom
+		return rts.Custom
 	}
 	return "sans-serif"
-}
-
-// ToDots runs ToDots on unit values, to compile down to raw Dots pixels.
-func (ctx *Context) ToDots(uc *units.Context) {
-	if ctx.StandardSize.Unit == units.UnitEm || ctx.StandardSize.Unit == units.UnitEx || ctx.StandardSize.Unit == units.UnitCh {
-		slog.Error("girl/styles.Font.Size was set to Em, Ex, or Ch; that is recursive and unstable!", "unit", ctx.StandardSize.Unit)
-		ctx.StandardSize.Dp(16)
-	}
-	ctx.StandardSize.ToDots(uc)
-}
-
-// SizeDots returns the font size based on given multiplier * StandardSize.Dots
-func (ctx *Context) SizeDots(multiplier float32) float32 {
-	return ctx.StandardSize.Dots * multiplier
 }

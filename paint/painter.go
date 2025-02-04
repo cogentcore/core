@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
+	"cogentcore.org/core/text/shaped"
 	"golang.org/x/image/draw"
 )
 
@@ -582,4 +583,9 @@ func (pc *Painter) BoundingBoxFromPoints(points []math32.Vector2) image.Rectangl
 func (pc *Painter) Text(tx *ptext.Text, pos math32.Vector2) {
 	tx.PreRender(pc.Context(), pos)
 	pc.Render.Add(tx)
+}
+
+// NewText adds given text to the rendering list, at given baseline position.
+func (pc *Painter) NewText(tx *shaped.Lines, pos math32.Vector2) {
+	pc.Render.Add(render.NewText(tx, pc.Context(), pos))
 }

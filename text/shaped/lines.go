@@ -10,16 +10,18 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/shaping"
+	"golang.org/x/image/math/fixed"
 )
 
 // Lines is a list of Lines of shaped text, with an overall bounding
 // box and position for the entire collection. This is the renderable
-// unit of text, satisfying the [render.Item] interface.
+// unit of text, although it is not a [render.Item] because it lacks
+// a position, and it can potentially be re-used in different positions.
 type Lines struct {
+
 	// Source is the original input source that generated this set of lines.
 	// Each Line has its own set of spans that describes the Line contents.
 	Source rich.Spans
@@ -27,14 +29,14 @@ type Lines struct {
 	// Lines are the shaped lines.
 	Lines []Line
 
-	// Position specifies the absolute position within a target render image
-	// where the lines are to be rendered, specifying the
-	// baseline position (not the upper left: see Bounds for that).
-	Position math32.Vector2
+	// Offset is an optional offset to add to the position given when rendering.
+	Offset math32.Vector2
 
 	// Bounds is the bounding box for the entire set of rendered text,
-	// starting at Position. Use Size() method to get the size and ToRect()
-	// to get an [image.Rectangle].
+	// relative to a rendering Position (and excluding any contribution
+	// of Offset). This is centered at the baseline and the upper left
+	// typically has a negative Y. Use Size() method to get the size
+	// and ToRect() to get an [image.Rectangle].
 	Bounds math32.Box2
 
 	// FontSize is the [rich.Context] StandardSize from the Context used
@@ -59,19 +61,13 @@ type Lines struct {
 
 	// SelectionColor is the color to use for rendering selected regions.
 	SelectionColor image.Image
-
-	// Context is our rendering context
-	Context render.Context
-}
-
-// render.Item interface assertion.
-func (ls *Lines) IsRenderItem() {
 }
 
 // Line is one line of shaped text, containing multiple Runs.
 // This is not an independent render target: see [Lines] (can always
 // use one Line per Lines as needed).
 type Line struct {
+
 	// Source is the input source corresponding to the line contents,
 	// derived from the original Lines Source. The style information for
 	// each Run is embedded here.
@@ -86,10 +82,12 @@ type Line struct {
 	// This is the baseline position (not the upper left: see Bounds for that).
 	Offset math32.Vector2
 
-	// Bounds is the bounding box for the entire set of rendered text,
-	// starting at the effective render position based on Offset relative to
-	// [Lines.Position]. Use Size() method to get the size and ToRect()
-	// to get an [image.Rectangle].
+	// Bounds is the bounding box for the Line of rendered text,
+	// relative to the baseline rendering position (excluding any contribution
+	// of Offset). This is centered at the baseline and the upper left
+	// typically has a negative Y. Use Size() method to get the size
+	// and ToRect() to get an [image.Rectangle]. This is based on the output
+	// LineBounds, not the actual GlyphBounds.
 	Bounds math32.Box2
 
 	// Selections specifies region(s) within this line that are selected,
@@ -110,4 +108,36 @@ func (ls *Lines) String() string {
 		str += ln.String()
 	}
 	return str
+}
+
+// OutputBounds returns the LineBounds for given output as rect bounding box.
+func OutputBounds(out *shaping.Output) fixed.Rectangle26_6 {
+	var r fixed.Rectangle26_6
+	gapdec := out.LineBounds.Descent
+	if gapdec < 0 && out.LineBounds.Gap < 0 || gapdec > 0 && out.LineBounds.Gap > 0 {
+		gapdec += out.LineBounds.Gap
+	} else {
+		gapdec -= out.LineBounds.Gap
+	}
+	if out.Direction.IsVertical() {
+		fmt.Printf("vert: %#v\n", out.LineBounds)
+		// ascent, descent describe horizontal, advance is vertical
+		r.Max.X = gapdec
+		r.Min.X = out.LineBounds.Ascent
+		r.Min.Y = out.Advance
+		r.Max.Y = 0
+	} else {
+		fmt.Printf("horiz: %#v\n", out.LineBounds)
+		r.Max.Y = out.LineBounds.Ascent
+		r.Min.Y = gapdec
+		r.Min.X = 0
+		r.Max.X = out.Advance
+	}
+	if r.Min.X > r.Max.X {
+		r.Min.X, r.Max.X = r.Max.X, r.Min.X
+	}
+	if r.Min.Y > r.Max.Y {
+		r.Min.Y, r.Max.Y = r.Max.Y, r.Min.Y
+	}
+	return r
 }

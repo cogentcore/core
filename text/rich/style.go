@@ -20,15 +20,15 @@ import (
 
 // Style contains all of the rich text styling properties, that apply to one
 // span of text. These are encoded into a uint32 rune value in [rich.Text].
-// See [Context] for additional context needed for full specification.
+// See [text.Style] and [Settings] for additional context needed for full specification.
 type Style struct { //types:add
 
 	// Size is the font size multiplier relative to the standard font size
-	// specified in the Context.
+	// specified in the [text.Style].
 	Size float32
 
 	// Family indicates the generic family of typeface to use, where the
-	// specific named values to use for each are provided in the Context.
+	// specific named values to use for each are provided in the Settings.
 	Family Family
 
 	// Slant allows italic or oblique faces to be selected.
@@ -85,28 +85,13 @@ func (s *Style) Defaults() {
 }
 
 // FontFamily returns the font family name(s) based on [Style.Family] and the
-// values specified in the given [Context].
-func (s *Style) FontFamily(ctx *Context) string {
+// values specified in the given [Settings].
+func (s *Style) FontFamily(ctx *Settings) string {
 	return ctx.Family(s.Family)
 }
 
-// FontSize returns the font size in dot pixels based on [Style.Size] and the
-// Standard size specified in the given [Context].
-func (s *Style) FontSize(ctx *Context) float32 {
-	return ctx.SizeDots(s.Size)
-}
-
-// Color returns the FillColor for inking the font based on
-// [Style.Size] and the default color in [Context]
-func (s *Style) Color(ctx *Context) color.Color {
-	if s.Decoration.HasFlag(FillColor) {
-		return s.FillColor
-	}
-	return ctx.Color
-}
-
 // Family specifies the generic family of typeface to use, where the
-// specific named values to use for each are provided in the Context.
+// specific named values to use for each are provided in the Settings.
 type Family int32 //enums:enum -trim-prefix Family -transform kebab
 
 const (
@@ -153,7 +138,7 @@ const (
 	// for government documents.
 	Fangsong
 
-	// Custom is a custom font name that can be set in Context.
+	// Custom is a custom font name that can be set in Settings.
 	Custom
 )
 
@@ -203,6 +188,11 @@ const (
 	Black
 )
 
+// ToFloat32 converts the weight to its numerical 100x value
+func (w Weights) ToFloat32() float32 {
+	return float32((w + 1) * 100)
+}
+
 // Stretch is the width of a font as an approximate fraction of the normal width.
 // Widths range from 0.5 to 2.0 inclusive, with 1.0 as the normal width.
 type Stretch int32 //enums:enum -trim-prefix Stretch -transform kebab
@@ -236,6 +226,13 @@ const (
 	// Ultra-expanded width (200%), the widest possible.
 	UltraExpanded
 )
+
+var stretchFloatValues = []float32{0.5, 0.625, 0.75, 0.875, 1, 1.125, 1.25, 1.5, 2.0}
+
+// ToFloat32 converts the stretch to its numerical multiplier value
+func (s Stretch) ToFloat32() float32 {
+	return stretchFloatValues[s]
+}
 
 // Decorations are underline, line-through, etc, as bit flags
 // that must be set using [Font.SetDecoration].

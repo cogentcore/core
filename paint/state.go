@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/shaped"
 )
 
 // NewDefaultImageRenderer is a function that returns the default image renderer
@@ -36,6 +37,8 @@ type State struct {
 
 	// Path is the current path state we are adding to.
 	Path ppath.Path
+
+	TextShaper *shaped.Shaper
 }
 
 // InitImageRaster initializes the [State] and ensures that there is
@@ -50,6 +53,7 @@ func (rs *State) InitImageRaster(sty *styles.Paint, width, height int) {
 		rd := NewDefaultImageRenderer(sz)
 		rs.Renderers = append(rs.Renderers, rd)
 		rs.Stack = []*render.Context{render.NewContext(sty, bounds, nil)}
+		rs.TextShaper = shaped.NewShaper()
 		return
 	}
 	ctx := rs.Context()

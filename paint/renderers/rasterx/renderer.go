@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/paint/ppath"
-	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/paint/renderers/rasterx/scan"
 	"cogentcore.org/core/styles/units"
@@ -69,8 +68,8 @@ func (rs *Renderer) Render(r render.Render) {
 			rs.RenderPath(x)
 		case *pimage.Params:
 			x.Render(rs.image)
-		case *ptext.Text:
-			x.Render(rs.image, rs)
+		case *render.Text:
+			rs.RenderText(x)
 		}
 	}
 }

@@ -6,6 +6,7 @@ package text
 
 import (
 	"image"
+	"image/color"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles/units"
@@ -67,6 +68,10 @@ type Style struct { //types:add
 	// TabSize specifies the tab size, in number of characters (inherited).
 	TabSize int
 
+	// Color is the default font fill color, used for inking fonts unless otherwise
+	// specified in the [rich.Style].
+	Color color.Color
+
 	// SelectColor is the color to use for the background region of selected text.
 	SelectColor image.Image
 }
@@ -85,6 +90,7 @@ func (ts *Style) Defaults() {
 	ts.ParaSpacing = 1.5
 	ts.Direction = rich.LTR
 	ts.TabSize = 4
+	ts.Color = colors.ToUniform(colors.Scheme.OnSurface)
 	ts.SelectColor = colors.Scheme.Select.Container
 }
 

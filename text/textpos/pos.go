@@ -14,15 +14,15 @@ import (
 // representation. Ch positions are always in runes, not bytes, and can also
 // be used for other units such as tokens, spans, or runs.
 type Pos struct {
-	Ln int
-	Ch int
+	Line int
+	Char int
 }
 
 // String satisfies the fmt.Stringer interferace
 func (ps Pos) String() string {
-	s := fmt.Sprintf("%d", ps.Ln+1)
-	if ps.Ch != 0 {
-		s += fmt.Sprintf(":%d", ps.Ch)
+	s := fmt.Sprintf("%d", ps.Line+1)
+	if ps.Char != 0 {
+		s += fmt.Sprintf(":%d", ps.Char)
 	}
 	return s
 }
@@ -34,10 +34,10 @@ var PosErr = Pos{-1, -1}
 // IsLess returns true if receiver position is less than given comparison.
 func (ps *Pos) IsLess(cmp Pos) bool {
 	switch {
-	case ps.Ln < cmp.Ln:
+	case ps.Line < cmp.Line:
 		return true
-	case ps.Ln == cmp.Ln:
-		return ps.Ch < cmp.Ch
+	case ps.Line == cmp.Line:
+		return ps.Char < cmp.Char
 	default:
 		return false
 	}
@@ -52,15 +52,15 @@ func (ps *Pos) FromString(link string) bool {
 
 	switch {
 	case lidx >= 0 && cidx >= 0:
-		fmt.Sscanf(link, "L%dC%d", &ps.Ln, &ps.Ch)
-		ps.Ln-- // link is 1-based, we use 0-based
-		ps.Ch-- // ditto
+		fmt.Sscanf(link, "L%dC%d", &ps.Line, &ps.Char)
+		ps.Line-- // link is 1-based, we use 0-based
+		ps.Char-- // ditto
 	case lidx >= 0:
-		fmt.Sscanf(link, "L%d", &ps.Ln)
-		ps.Ln-- // link is 1-based, we use 0-based
+		fmt.Sscanf(link, "L%d", &ps.Line)
+		ps.Line-- // link is 1-based, we use 0-based
 	case cidx >= 0:
-		fmt.Sscanf(link, "C%d", &ps.Ch)
-		ps.Ch--
+		fmt.Sscanf(link, "C%d", &ps.Char)
+		ps.Char--
 	default:
 		// todo: could support other formats
 		return false
