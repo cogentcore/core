@@ -66,7 +66,7 @@ func (rs *Renderer) TextRun(run *shaped.Run, clr image.Image, start math32.Vecto
 	// todo: render decoration
 	// dir := run.Direction
 	if run.Background != nil {
-		rs.FillBounds(math32.B2FromFixed(run.Bounds()).Translate(start), run.Background)
+		rs.FillBounds(run.MaxBounds.Translate(start), run.Background)
 	}
 	fill := clr
 	if run.FillColor != nil {

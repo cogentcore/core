@@ -115,15 +115,31 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 	}
 	fsz := tsty.FontSize.Dots
 	dir := goTextDirection(rich.Default, tsty)
-	lht := tsty.LineHeight()
-	lgap := lht - fsz
-	nlines := int(math32.Floor(size.Y / lht))
+
+	// get the default font parameters including line height by rendering a standard char
+	sty := rich.NewStyle()
+	stdr := []rune("m")
+	stdsp := rich.Spans{}
+	stdsp.Add(sty, stdr)
+	stdOut := sh.shapeText(stdsp, tsty, rts, stdr)
+	stdRun := Run{Output: stdOut[0]}
+	stdBounds := math32.B2FromFixed(stdRun.Bounds())
+	lns := &Lines{Color: tsty.Color}
+	if dir.IsVertical() {
+		lns.LineHeight = stdBounds.Size().X
+	} else {
+		lns.LineHeight = stdBounds.Size().Y
+	}
+
+	lgap := tsty.LineSpacing*lns.LineHeight - lns.LineHeight
+	nlines := int(math32.Floor(size.Y / lns.LineHeight))
 	maxSize := int(size.X)
 	if dir.IsVertical() {
-		nlines = int(math32.Floor(size.X / lht))
+		nlines = int(math32.Floor(size.X / lns.LineHeight))
 		maxSize = int(size.Y)
 		// fmt.Println(lht, nlines, maxSize)
 	}
+	// fmt.Println("lht:", lns.LineHeight, lgap, nlines)
 	brk := shaping.WhenNecessary
 	if !tsty.WhiteSpace.HasWordWrap() {
 		brk = shaping.Never
@@ -150,7 +166,6 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 	outs := sh.shapeText(sp, tsty, rts, txt)
 	// todo: WrapParagraph does NOT handle vertical text! file issue.
 	lines, truncate := sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
-	lns := &Lines{Color: tsty.Color}
 	lns.Truncated = truncate > 0
 	cspi := 0
 	cspSt, cspEd := sp.Range(cspi)
@@ -195,27 +210,48 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 			pos = DirectionAdvance(run.Direction, pos, run.Advance)
 			ln.Runs = append(ln.Runs, run)
 		}
+		// go back through and give every run the expanded line-level box
+		for ri := range ln.Runs {
+			run := &ln.Runs[ri]
+			rb := math32.B2FromFixed(run.Bounds())
+			if dir.IsVertical() {
+				rb.Min.X, rb.Max.X = ln.Bounds.Min.X, ln.Bounds.Max.X
+				rb.Min.Y -= 2 // ensure some overlap along direction of rendering adjacent
+				rb.Max.Y += 2
+			} else {
+				rb.Min.Y, rb.Max.Y = ln.Bounds.Min.Y, ln.Bounds.Max.Y
+				rb.Min.X -= 2
+				rb.Max.Y += 2
+			}
+			run.MaxBounds = rb
+		}
 		ln.Source = lsp
-		ln.Offset = off
+		// offset has prior line's size built into it, but we need to also accommodate
+		// any extra size in _our_ line beyond what is expected.
+		ourOff := off
 		// fmt.Println(ln.Bounds)
-		lns.Bounds.ExpandByBox(ln.Bounds.Translate(ln.Offset))
 		// advance offset:
 		if dir.IsVertical() {
 			lwd := ln.Bounds.Size().X
+			extra := max(lwd-lns.LineHeight, 0)
 			if dir.Progression() == di.FromTopLeft {
 				// fmt.Println("ftl lwd:", lwd, off.X)
 				off.X += lwd + lgap
+				ourOff.X += extra
 			} else {
 				// fmt.Println("!ftl lwd:", lwd, off.X)
 				off.X -= lwd + lgap
+				ourOff.X -= extra
 			}
-		} else {
+		} else { // always top-down, no progression issues
 			lht := ln.Bounds.Size().Y
-			off.Y += lht + lgap // always top-down
-			// } else {
-			// 	off.Y -= lht + lgap
-			// }
+			extra := max(lht-lns.LineHeight, 0)
+			// fmt.Println("extra:", extra)
+			off.Y += lht + lgap
+			ourOff.Y += extra
 		}
+		ln.Offset = ourOff
+		lns.Bounds.ExpandByBox(ln.Bounds.Translate(ln.Offset))
 		// todo: rest of it
 		lns.Lines = append(lns.Lines, ln)
 	}

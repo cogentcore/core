@@ -5,7 +5,6 @@
 package shaped_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -37,7 +36,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 	uc.Defaults()
 	tsty := text.NewStyle()
 	tsty.ToDots(&uc)
-	fmt.Println("fsz:", tsty.FontSize.Dots)
+	// fmt.Println("fsz:", tsty.FontSize.Dots)
 	pc := paint.NewPainter(width, height)
 	pc.FillBox(math32.Vector2{}, math32.Vec2(float32(width), float32(height)), colors.Uniform(colors.White))
 	sh := NewShaper()
@@ -55,7 +54,7 @@ func TestBasic(t *testing.T) {
 		plain := rich.NewStyle()
 		ital := rich.NewStyle().SetSlant(rich.Italic)
 		ital.SetFillColor(colors.Red)
-		boldBig := rich.NewStyle().SetWeight(rich.Bold) // .SetSize(1.5)
+		boldBig := rich.NewStyle().SetWeight(rich.Bold).SetSize(1.5)
 		sp.Add(plain, sr[:4])
 		sp.Add(ital, sr[4:8])
 		fam := []rune("familiar")
@@ -129,16 +128,19 @@ func TestVertical(t *testing.T) {
 	})
 }
 
-func TestStrokeOutline(t *testing.T) {
+func TestColors(t *testing.T) {
 	RunTest(t, "colors", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
-
 		tsty.FontSize.Dots *= 4
 
 		src := "The lazy fox"
 		sr := []rune(src)
 		sp := rich.Spans{}
 		stroke := rich.NewStyle().SetStrokeColor(colors.Red).SetBackground(colors.ToUniform(colors.Scheme.Select.Container))
-		sp.Add(stroke, sr)
+		big := *stroke
+		big.SetSize(1.5)
+		sp.Add(stroke, sr[:4])
+		sp.Add(&big, sr[4:8])
+		sp.Add(stroke, sr[8:])
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 80))

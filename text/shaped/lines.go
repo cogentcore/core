@@ -73,6 +73,10 @@ type Line struct {
 	// each Run is embedded here.
 	Source rich.Spans
 
+	// SourceRange is the range of runes in the original [Lines.Source] that
+	// are represented in this line.
+	SourceRange textpos.Range
+
 	// Runs are the shaped [Run] elements, in one-to-one correspondance with
 	// the Source spans.
 	Runs []Run
@@ -90,7 +94,7 @@ type Line struct {
 	// LineBounds, not the actual GlyphBounds.
 	Bounds math32.Box2
 
-	// Selections specifies region(s) within this line that are selected,
+	// Selections specifies region(s) of runes within this line that are selected,
 	// and will be rendered with the [Lines.SelectionColor] background,
 	// replacing any other background color that might have been specified.
 	Selections []textpos.Range
@@ -99,6 +103,10 @@ type Line struct {
 // Run is a span of text with the same font properties, with full rendering information.
 type Run struct {
 	shaping.Output
+
+	// MaxBounds are the maximal line-level bounds for this run, suitable for region
+	// rendering and mouse interaction detection.
+	MaxBounds math32.Box2
 
 	//	FillColor is the color to use for glyph fill (i.e., the standard "ink" color).
 	// Will only be non-nil if set for this run; Otherwise use default.
