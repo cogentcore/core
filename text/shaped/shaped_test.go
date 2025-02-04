@@ -50,12 +50,10 @@ func TestBasic(t *testing.T) {
 
 		src := "The lazy fox typed in some familiar text"
 		sr := []rune(src)
-		sp := rich.Spans{}
 		plain := rich.NewStyle()
-		ital := rich.NewStyle().SetSlant(rich.Italic)
-		ital.SetFillColor(colors.Red)
+		ital := rich.NewStyle().SetSlant(rich.Italic).SetFillColor(colors.Red)
 		boldBig := rich.NewStyle().SetWeight(rich.Bold).SetSize(1.5)
-		sp.Add(plain, sr[:4])
+		sp := rich.NewSpans(plain, sr[:4]...)
 		sp.Add(ital, sr[4:8])
 		fam := []rune("familiar")
 		ix := runes.Index(sr, fam)
@@ -77,10 +75,8 @@ func TestHebrew(t *testing.T) {
 
 		src := "אָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, Let there be light וּבְכָל-נַפְשְׁךָ,"
 		sr := []rune(src)
-		sp := rich.Spans{}
 		plain := rich.NewStyle()
-		// plain.SetDirection(rich.RTL)
-		sp.Add(plain, sr)
+		sp := rich.NewSpans(plain, sr...)
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 60))
@@ -95,14 +91,14 @@ func TestVertical(t *testing.T) {
 		tsty.Direction = rich.TTB // rich.BTT // note: apparently BTT is actually never used
 		tsty.FontSize.Dots *= 1.5
 
+		plain := rich.NewStyle()
+
 		// todo: word wrapping and sideways rotation in vertical not currently working
 		// src := "国際化活動 W3C ワールド・ワイド・Hello!"
 		// src := "国際化活動 Hello!"
 		src := "国際化活動"
 		sr := []rune(src)
-		sp := rich.Spans{}
-		plain := rich.NewStyle()
-		sp.Add(plain, sr)
+		sp := rich.NewSpans(plain, sr...)
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(150, 50))
 		// pc.NewText(lns, math32.Vec2(100, 200))
@@ -132,15 +128,14 @@ func TestColors(t *testing.T) {
 	RunTest(t, "colors", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
 		tsty.FontSize.Dots *= 4
 
-		src := "The lazy fox"
-		sr := []rune(src)
-		sp := rich.Spans{}
 		stroke := rich.NewStyle().SetStrokeColor(colors.Red).SetBackground(colors.ToUniform(colors.Scheme.Select.Container))
 		big := *stroke
 		big.SetSize(1.5)
-		sp.Add(stroke, sr[:4])
-		sp.Add(&big, sr[4:8])
-		sp.Add(stroke, sr[8:])
+
+		src := "The lazy fox"
+		sr := []rune(src)
+		sp := rich.NewSpans(stroke, sr[:4]...)
+		sp.Add(&big, sr[4:8]).Add(stroke, sr[8:])
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 80))

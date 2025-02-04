@@ -65,8 +65,9 @@ func (rs *Renderer) TextLine(ln *shaped.Line, clr image.Image, start math32.Vect
 func (rs *Renderer) TextRun(run *shaped.Run, clr image.Image, start math32.Vector2) {
 	// todo: render decoration
 	// dir := run.Direction
+	rbb := run.MaxBounds.Translate(start)
 	if run.Background != nil {
-		rs.FillBounds(run.MaxBounds.Translate(start), run.Background)
+		rs.FillBounds(rbb, run.Background)
 	}
 	fill := clr
 	if run.FillColor != nil {

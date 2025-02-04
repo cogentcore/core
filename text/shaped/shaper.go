@@ -117,10 +117,8 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 	dir := goTextDirection(rich.Default, tsty)
 
 	// get the default font parameters including line height by rendering a standard char
-	sty := rich.NewStyle()
 	stdr := []rune("m")
-	stdsp := rich.Spans{}
-	stdsp.Add(sty, stdr)
+	stdsp := rich.NewSpans(rich.NewStyle(), stdr...)
 	stdOut := sh.shapeText(stdsp, tsty, rts, stdr)
 	stdRun := Run{Output: stdOut[0]}
 	stdBounds := math32.B2FromFixed(stdRun.Bounds())

@@ -16,6 +16,14 @@ import "slices"
 // the [ppath.Path] encoding.
 type Spans [][]rune
 
+// NewSpans returns a new spans starting with given style and runes string,
+// which can be empty.
+func NewSpans(s *Style, r ...rune) Spans {
+	sp := Spans{}
+	sp.Add(s, r)
+	return sp
+}
+
 // Index represents the [Span][Rune] index of a given rune.
 // The Rune index can be either the actual index for [Spans], taking
 // into account the leading style rune(s), or the logical index
@@ -156,10 +164,11 @@ func (sp Spans) Join() []rune {
 }
 
 // Add adds a span to the Spans using the given Style and runes.
-func (sp *Spans) Add(s *Style, r []rune) {
+func (sp *Spans) Add(s *Style, r []rune) *Spans {
 	nr := s.ToRunes()
 	nr = append(nr, r...)
 	*sp = append(*sp, nr)
+	return sp
 }
 
 func (sp Spans) String() string {
