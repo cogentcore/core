@@ -15,8 +15,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/text/rich"
-	"cogentcore.org/core/text/runs"
+	"cogentcore.org/core/text/shaped"
 	"github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/font/opentype"
 	"github.com/go-text/typesetting/shaping"
@@ -24,59 +23,62 @@ import (
 	_ "golang.org/x/image/tiff" // load image formats for users of the API
 )
 
-// TextRuns rasterizes the given text runs.
+// TextLines rasterizes the given shaped.Lines.
 // The text will be drawn starting at the start pixel position, which specifies the
 // left baseline location of the first text item..
-func (rs *Renderer) TextRuns(runs *runs.Runs, ctx *rich.Context, start math32.Vector2) {
-	for i := range runs.Runs {
-		run := &runs.Runs[i]
-		sp := runs.Spans[i]
-		sty, rns := rich.NewStyleFromRunes(sp)
-		clr := sty.Color(ctx)
-		rs.TextRun(run, rns, clr, start) // todo: run needs an offset
+func (rs *Renderer) TextLines(lns *shaped.Lines) {
+	start := lns.Position
+	for li := range lns.Lines {
+		ln := &lns.Lines[li]
+		rs.TextLine(ln, lns.FontSize, lns.Color, start) // todo: start + offset
+	}
+}
+
+// TextLine rasterizes the given shaped.Line.
+func (rs *Renderer) TextLine(ln *shaped.Line, fsz float32, clr color.Color, start math32.Vector2) {
+	off := start.Add(ln.Offset)
+	for ri := range ln.Runs {
+		run := &ln.Runs[ri]
+		rs.TextRun(run, fsz, clr, off)
 	}
 }
 
 // TextRun rasterizes the given text run into the output image using the
-// font face referenced in the shaping.
+// font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
-func (rs *Renderer) TextRun(run *runs.Run, rns []rune, clr color.Color, start math32.Vector2) {
+func (rs *Renderer) TextRun(run *shaping.Output, fsz float32, clr color.Color, start math32.Vector2) {
 	x := start.X
 	y := start.Y
 	// todo: render bg, render decoration
-	for i := range run.Subs {
-		sub := &run.Subs[i]
-		// txt := string(rns[sub.Runes.Offset : sub.Runes.Offset+sub.Runes.Count])
-		// fmt.Println("\nsub:", i, txt)
-		for _, g := range sub.Glyphs {
-			xPos := x + math32.FromFixed(g.XOffset)
-			yPos := y - math32.FromFixed(g.YOffset)
-			top := yPos - math32.FromFixed(g.YBearing)
-			bottom := top - math32.FromFixed(g.Height)
-			right := xPos + math32.FromFixed(g.Width)
-			rect := image.Rect(int(xPos)-2, int(top)-2, int(right)+2, int(bottom)+2) // don't cut off
-			data := sub.Face.GlyphData(g.GlyphID)
-			switch format := data.(type) {
-			case font.GlyphOutline:
-				rs.GlyphOutline(run, sub, g, format, clr, rect, xPos, yPos)
-			case font.GlyphBitmap:
-				rs.GlyphBitmap(run, sub, g, format, clr, rect, xPos, yPos)
-			case font.GlyphSVG:
-				fmt.Println("svg", format)
-				// 	_ = rs.GlyphSVG(g, format, clr, xPos, yPos)
-			}
-
-			x += math32.FromFixed(g.XAdvance)
+	for gi := range run.Glyphs {
+		g := &run.Glyphs[gi]
+		xPos := x + math32.FromFixed(g.XOffset)
+		yPos := y - math32.FromFixed(g.YOffset)
+		top := yPos - math32.FromFixed(g.YBearing)
+		bottom := top - math32.FromFixed(g.Height)
+		right := xPos + math32.FromFixed(g.Width)
+		rect := image.Rect(int(xPos)-2, int(top)-2, int(right)+2, int(bottom)+2) // don't cut off
+		data := run.Face.GlyphData(g.GlyphID)
+		switch format := data.(type) {
+		case font.GlyphOutline:
+			rs.GlyphOutline(run, g, format, fsz, clr, rect, xPos, yPos)
+		case font.GlyphBitmap:
+			rs.GlyphBitmap(run, g, format, fsz, clr, rect, xPos, yPos)
+		case font.GlyphSVG:
+			fmt.Println("svg", format)
+			// 	_ = rs.GlyphSVG(g, format, clr, xPos, yPos)
 		}
+
+		x += math32.FromFixed(g.XAdvance)
 	}
 	// todo: render strikethrough
 }
 
-func (rs *Renderer) GlyphOutline(run *runs.Run, sub *shaping.Output, g shaping.Glyph, bitmap font.GlyphOutline, clr color.Color, rect image.Rectangle, x, y float32) {
+func (rs *Renderer) GlyphOutline(run *shaping.Output, g *shaping.Glyph, bitmap font.GlyphOutline, fsz float32, clr color.Color, rect image.Rectangle, x, y float32) {
 	rs.Raster.SetColor(colors.Uniform(clr))
 	rf := &rs.Raster.Filler
 
-	scale := run.FontSize / float32(sub.Face.Upem())
+	scale := fsz / float32(run.Face.Upem())
 	rs.Scanner.SetClip(rect)
 	rf.SetWinding(true)
 
@@ -101,7 +103,7 @@ func (rs *Renderer) GlyphOutline(run *runs.Run, sub *shaping.Output, g shaping.G
 	rf.Clear()
 }
 
-func (rs *Renderer) GlyphBitmap(run *runs.Run, sub *shaping.Output, g shaping.Glyph, bitmap font.GlyphBitmap, clr color.Color, rect image.Rectangle, x, y float32) error {
+func (rs *Renderer) GlyphBitmap(run *shaping.Output, g *shaping.Glyph, bitmap font.GlyphBitmap, fsz float32, clr color.Color, rect image.Rectangle, x, y float32) error {
 	// scaled glyph rect content
 	top := y - math32.FromFixed(g.YBearing)
 	switch bitmap.Format {
@@ -127,7 +129,7 @@ func (rs *Renderer) GlyphBitmap(run *runs.Run, sub *shaping.Output, g shaping.Gl
 	}
 
 	if bitmap.Outline != nil {
-		rs.GlyphOutline(run, sub, g, *bitmap.Outline, clr, rect, x, y)
+		rs.GlyphOutline(run, g, *bitmap.Outline, fsz, clr, rect, x, y)
 	}
 	return nil
 }

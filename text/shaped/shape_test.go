@@ -17,7 +17,8 @@ import (
 	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
-	. "cogentcore.org/core/text/runs"
+	. "cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/text"
 )
 
 func TestMain(m *testing.M) {
@@ -56,15 +57,18 @@ func TestSpans(t *testing.T) {
 	uc := units.Context{}
 	uc.Defaults()
 	ctx.ToDots(&uc)
+	tsty := text.NewStyle()
+
 	sh := NewShaper()
-	runs := sh.Shape(sp, ctx)
+	lns := sh.WrapParagraph(sp, ctx, tsty, math32.Vec2(300, 300))
+	lns.Position = math32.Vec2(20, 60)
 	// fmt.Println(runs)
 
 	RunTest(t, "fox_render", 300, 300, func(pc *paint.Painter) {
 		pc.FillBox(math32.Vector2{}, math32.Vec2(300, 300), colors.Uniform(colors.White))
 		pc.RenderDone()
 		rnd := pc.Renderers[0].(*rasterx.Renderer)
-		rnd.TextRuns(runs, ctx, math32.Vec2(20, 60))
+		rnd.TextLines(lns)
 	})
 
 }

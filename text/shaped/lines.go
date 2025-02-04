@@ -5,12 +5,15 @@
 package shaped
 
 import (
+	"fmt"
 	"image"
+	"image/color"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
+	"github.com/go-text/typesetting/shaping"
 )
 
 // Lines is a list of Lines of shaped text, with an overall bounding
@@ -51,6 +54,9 @@ type Lines struct {
 	// Links holds any hyperlinks within shaped text.
 	Links []Link
 
+	// Color is the default fill color to use for inking text.
+	Color color.Color
+
 	// SelectionColor is the color to use for rendering selected regions.
 	SelectionColor image.Image
 
@@ -73,7 +79,7 @@ type Line struct {
 
 	// Runs are the shaped [Run] elements, in one-to-one correspondance with
 	// the Source spans.
-	Runs []Run
+	Runs []shaping.Output
 
 	// Offset specifies the relative offset from the Lines Position
 	// determining where to render the line in a target render image.
@@ -90,4 +96,18 @@ type Line struct {
 	// and will be rendered with the [Lines.SelectionColor] background,
 	// replacing any other background color that might have been specified.
 	Selections []textpos.Range
+}
+
+func (ln *Line) String() string {
+	return ln.Source.String() + fmt.Sprintf(" runs: %d\n", len(ln.Runs))
+}
+
+func (ls *Lines) String() string {
+	str := ""
+	for li := range ls.Lines {
+		ln := &ls.Lines[li]
+		str += fmt.Sprintf("#### Line: %d\n", li)
+		str += ln.String()
+	}
+	return str
 }

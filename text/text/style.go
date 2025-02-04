@@ -71,6 +71,12 @@ type Style struct { //types:add
 	SelectColor image.Image
 }
 
+func NewStyle() *Style {
+	s := &Style{}
+	s.Defaults()
+	return s
+}
+
 func (ts *Style) Defaults() {
 	ts.Align = Start
 	ts.AlignV = Start
