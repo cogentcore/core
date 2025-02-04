@@ -105,16 +105,31 @@ func (w *Window) SetTitleBarIsDark(isDark bool) {
 	if !w.IsVisible() {
 		return
 	}
-	hwnd := w.Glw.GetWin32Window()
 
-	dwm := syscall.NewLazyDLL("dwmapi.dll")
-	setAtt := dwm.NewProc("DwmSetWindowAttribute")
-	ret, _, err := setAtt.Call(uintptr(unsafe.Pointer(hwnd)), // window handle
-		20,                               // DWMWA_USE_IMMERSIVE_DARK_MODE
-		uintptr(unsafe.Pointer(&isDark)), // on or off
-		8)                                // sizeof(darkMode)
+	value := int32(0)
+	if isDark {
+		value = 1
+	}
 
-	if ret != 0 { // err is always non-nil, we check return value
-		slog.Error("failed to set window title bar color", "err", err)
+	dll := syscall.NewLazyDLL("dwmapi.dll")
+	fun := dll.NewProc("DwmSetWindowAttribute")
+
+	// set an DWMWA_USE_IMMERSIVE_DARK_MODE (20) attribute
+	// of type BOOL (typedef int BOOL, int is 32 bit integer here)
+	// to a value (on or off)
+	// that has size in bytes 4
+	// for a HWND window
+	ret, _, err := fun.Call(
+		uintptr(unsafe.Pointer(w.Glw.GetWin32Window())), // HWND
+		20,                              //DWMWA_USE_IMMERSIVE_DARK_MODE
+		uintptr(unsafe.Pointer(&value)), // on or off
+		4,                               // sizeof(BOOL) for Win32 API
+	)
+
+	// HRESULT S_OK = 0 (ret), everything else is an error
+	if ret != 0 {
+		slog.Error("failed to set window title bar color",
+			"hresult", ret,
+			"error", err)
 	}
 }
