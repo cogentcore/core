@@ -85,6 +85,18 @@ func (s *Style) Defaults() {
 	s.Direction = Default
 }
 
+// InheritFields from parent
+func (s *Style) InheritFields(parent *Style) {
+	// fs.Color = par.Color
+	s.Family = parent.Family
+	s.Slant = parent.Slant
+	if parent.Size != 0 {
+		s.Size = parent.Size
+	}
+	s.Weight = parent.Weight
+	s.Stretch = parent.Stretch
+}
+
 // FontFamily returns the font family name(s) based on [Style.Family] and the
 // values specified in the given [Settings].
 func (s *Style) FontFamily(ctx *Settings) string {

@@ -16,6 +16,8 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+// todo: split source at para boundaries and use wrap para on those.
+
 // Lines is a list of Lines of shaped text, with an overall bounding
 // box and position for the entire collection. This is the renderable
 // unit of text, although it is not a [render.Item] because it lacks
