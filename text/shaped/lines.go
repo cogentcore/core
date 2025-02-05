@@ -108,8 +108,8 @@ type Run struct {
 	// rendering and mouse interaction detection.
 	MaxBounds math32.Box2
 
-	// Deco are the decorations from the style to apply to this run.
-	Deco rich.Decorations
+	// Decoration are the decorations from the style to apply to this run.
+	Decoration rich.Decorations
 
 	//	FillColor is the color to use for glyph fill (i.e., the standard "ink" color).
 	// Will only be non-nil if set for this run; Otherwise use default.

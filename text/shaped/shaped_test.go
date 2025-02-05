@@ -50,16 +50,20 @@ func TestBasic(t *testing.T) {
 
 		src := "The lazy fox typed in some familiar text"
 		sr := []rune(src)
+
 		plain := rich.NewStyle()
 		ital := rich.NewStyle().SetSlant(rich.Italic).SetFillColor(colors.Red)
 		boldBig := rich.NewStyle().SetWeight(rich.Bold).SetSize(1.5)
+		ul := rich.NewStyle()
+		ul.Decoration.SetFlag(true, rich.Underline)
+
 		sp := rich.NewSpans(plain, sr[:4]...)
 		sp.Add(ital, sr[4:8])
 		fam := []rune("familiar")
 		ix := runes.Index(sr, fam)
-		sp.Add(plain, sr[8:ix])
+		sp.Add(ul, sr[8:ix])
 		sp.Add(boldBig, sr[ix:ix+8])
-		sp.Add(plain, sr[ix+8:])
+		sp.Add(ul, sr[ix+8:])
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 60))

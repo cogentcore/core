@@ -194,6 +194,7 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 			if cend > (cspEd - cspSt) { // shouldn't happen, to combine multiple original spans
 				fmt.Println("combined original span:", cend, cspEd-cspSt, cspi, string(cr), "prev:", string(nr), "next:", string(cr[cend:]))
 			}
+			run.Decoration = sty.Decoration
 			if sty.Decoration.HasFlag(rich.FillColor) {
 				run.FillColor = colors.Uniform(sty.FillColor)
 			}

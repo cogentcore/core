@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/render"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/font/opentype"
@@ -35,6 +36,7 @@ func (rs *Renderer) RenderText(txt *render.Text) {
 func (rs *Renderer) TextLines(lns *shaped.Lines, ctx *render.Context, pos math32.Vector2) {
 	start := pos.Add(lns.Offset)
 	// tbb := lns.Bounds.Translate(start)
+	// rs.Scanner.SetClip(tbb.ToRect())
 	// rs.StrokeBounds(tbb, colors.Red)
 	clr := colors.Uniform(lns.Color)
 	for li := range lns.Lines {
@@ -74,6 +76,22 @@ func (rs *Renderer) TextRun(run *shaped.Run, clr image.Image, start math32.Vecto
 		fill = run.FillColor
 	}
 	stroke := run.StrokeColor
+	fsz := math32.FromFixed(run.Size)
+	lineW := max(fsz/16, 1) // 1 at 16, bigger if biggerr
+
+	if run.Decoration.HasFlag(rich.Underline) || run.Decoration.HasFlag(rich.DottedUnderline) {
+		dash := []float32{2, 2}
+		if run.Decoration.HasFlag(rich.Underline) {
+			dash = nil
+		}
+		if run.Direction.IsVertical() {
+
+		} else {
+			dec := start.Y + 2
+			rs.StrokeTextLine(math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, dash)
+		}
+	}
+
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
 		pos := start.Add(math32.Vec2(math32.FromFixed(g.XOffset), -math32.FromFixed(g.YOffset)))
@@ -187,11 +205,27 @@ func (rs *Renderer) StrokeBounds(bb math32.Box2, clr color.Color) {
 	rs.Raster.Clear()
 	rs.Raster.SetStroke(
 		math32.ToFixed(1),
-		math32.ToFixed(4),
+		math32.ToFixed(10),
 		ButtCap, nil, nil, Miter,
 		nil, 0)
 	rs.Raster.SetColor(colors.Uniform(clr))
 	AddRect(bb.Min.X, bb.Min.Y, bb.Max.X, bb.Max.Y, 0, rs.Raster)
+	rs.Raster.Draw()
+	rs.Raster.Clear()
+}
+
+// StrokeTextLine strokes a line for text decoration.
+func (rs *Renderer) StrokeTextLine(sp, ep math32.Vector2, width float32, clr image.Image, dash []float32) {
+	rs.Raster.Clear()
+	rs.Raster.SetStroke(
+		math32.ToFixed(width),
+		math32.ToFixed(10),
+		ButtCap, nil, nil, Miter,
+		dash, 0)
+	rs.Raster.SetColor(clr)
+	rs.Raster.Start(sp.ToFixed())
+	rs.Raster.Line(ep.ToFixed())
+	rs.Raster.Stop(false)
 	rs.Raster.Draw()
 	rs.Raster.Clear()
 }
