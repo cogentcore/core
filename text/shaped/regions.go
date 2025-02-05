@@ -5,8 +5,6 @@
 package shaped
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -14,13 +12,10 @@ import (
 // the original source runes. Use SelectReset to clear first if desired.
 func (ls *Lines) SelectRegion(r textpos.Range) {
 	nr := ls.Source.Len()
-	fmt.Println(r, nr)
 	r = r.Intersect(textpos.Range{0, nr})
-	fmt.Println(r)
 	for li := range ls.Lines {
 		ln := &ls.Lines[li]
 		lr := r.Intersect(ln.SourceRange)
-		fmt.Println(li, lr, ln.SourceRange)
 		if lr.Len() > 0 {
 			ln.Selections = append(ln.Selections, lr)
 		}

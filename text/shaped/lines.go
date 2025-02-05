@@ -183,8 +183,12 @@ func (rn *Run) GlyphRegionBounds(st, ed int) math32.Box2 {
 	sg := &rn.Glyphs[st]
 	stb := math32.B2FromFixed(rn.GlyphBounds(sg))
 	mb := rn.MaxBounds
-	mb.Min.X = stb.Min.X - 2
 	off := float32(0)
+	for gi := 0; gi < st; gi++ {
+		g := &rn.Glyphs[gi]
+		off += math32.FromFixed(g.XAdvance)
+	}
+	mb.Min.X = off + stb.Min.X - 2
 	for gi := st; gi <= ed; gi++ {
 		g := &rn.Glyphs[gi]
 		gb := math32.B2FromFixed(rn.GlyphBounds(g))
