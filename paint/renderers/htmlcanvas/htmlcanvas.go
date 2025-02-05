@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/render"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -27,6 +28,10 @@ type Renderer struct {
 	canvas js.Value
 	ctx    js.Value
 	size   math32.Vector2
+
+	// style is a cached style of the most recently used styles for rendering,
+	// which allows for avoiding unnecessary JS calls.
+	style styles.Paint
 }
 
 // New returns an HTMLCanvas renderer.
@@ -119,109 +124,98 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	if pt.Path.Empty() {
 		return
 	}
-	rs.ctx.Set("strokeStyle", rs.toStyle(pt.Context.Style.Stroke.Color)) // TODO: remove
-	rs.writePath(pt)
-	rs.ctx.Call("stroke") // TODO: remove
 
-	// style := &pt.Context.Style
+	style := &pt.Context.Style
+	p := pt.Path
+	if !ppath.ArcToCubeImmediate {
+		p = p.ReplaceArcs() // TODO: should we do this in writePath?
+	}
+	m := pt.Context.Transform // TODO: do we need to do more transform handling of m?
 
-	// strokeUnsupported := false
-	// if m.IsSimilarity() {
-	// 	scale := math.Sqrt(math.Abs(m.Det()))
-	// 	style.StrokeWidth *= scale
-	// 	style.DashOffset, style.Dashes = canvas.ScaleDash(style.StrokeWidth, style.DashOffset, style.Dashes)
-	// } else {
-	// 	strokeUnsupported = true
-	// }
+	strokeUnsupported := false
+	// if m.IsSimilarity() { // TODO: implement
+	if true {
+		scale := math32.Sqrt(math32.Abs(m.Det()))
+		style.Stroke.Width.Dots *= scale
+		style.Stroke.DashOffset, style.Stroke.Dashes = ppath.ScaleDash(style.Stroke.Width.Dots, style.Stroke.DashOffset, style.Stroke.Dashes)
+	} else {
+		strokeUnsupported = true
+	}
 
-	/*
-		if style.HasFill() || style.HasStroke() && !strokeUnsupported {
-			rs.writePath(pt.Copy().Transform(m).ReplaceArcs())
+	if style.HasFill() || style.HasStroke() && !strokeUnsupported {
+		rs.writePath(pt)
+	}
+
+	if style.HasFill() {
+		if style.Fill.Color != rs.style.Fill.Color {
+			rs.ctx.Set("fillStyle", rs.toStyle(style.Fill.Color))
+			rs.style.Fill.Color = style.Fill.Color
+		}
+		rs.ctx.Call("fill")
+	}
+	if style.HasStroke() && !strokeUnsupported {
+		if style.Stroke.Cap != rs.style.Stroke.Cap {
+			rs.ctx.Set("lineCap", style.Stroke.Cap.String())
+			rs.style.Stroke.Cap = style.Stroke.Cap
 		}
 
-		if style.HasFill() {
-			if !style.Fill.Equal(rs.style.Fill) {
-				rs.ctx.Set("fillStyle", rs.toStyle(style.Fill))
-				rs.style.Fill = style.Fill
+		if style.Stroke.Join != rs.style.Stroke.Join {
+			rs.ctx.Set("lineJoin", style.Stroke.Join.String())
+			if style.Stroke.Join == ppath.JoinMiter && !math32.IsNaN(style.Stroke.MiterLimit) {
+				rs.ctx.Set("miterLimit", style.Stroke.MiterLimit)
 			}
-			rs.ctx.Call("fill")
+			rs.style.Stroke.Join = style.Stroke.Join
 		}
-		if style.HasStroke() && !strokeUnsupported {
-			if style.StrokeCapper != rs.style.StrokeCapper {
-				if _, ok := style.StrokeCapper.(canvas.RoundCapper); ok {
-					rs.ctx.Set("lineCap", "round")
-				} else if _, ok := style.StrokeCapper.(canvas.SquareCapper); ok {
-					rs.ctx.Set("lineCap", "square")
-				} else if _, ok := style.StrokeCapper.(canvas.ButtCapper); ok {
-					rs.ctx.Set("lineCap", "butt")
-				} else {
-					panic("HTML Canvas: line cap not support")
-				}
-				rs.style.StrokeCapper = style.StrokeCapper
-			}
 
-			if style.StrokeJoiner != rs.style.StrokeJoiner {
-				if _, ok := style.StrokeJoiner.(canvas.BevelJoiner); ok {
-					rs.ctx.Set("lineJoin", "bevel")
-				} else if _, ok := style.StrokeJoiner.(canvas.RoundJoiner); ok {
-					rs.ctx.Set("lineJoin", "round")
-				} else if miter, ok := style.StrokeJoiner.(canvas.MiterJoiner); ok && !math.IsNaN(miter.Limit) && miter.GapJoiner == canvas.BevelJoin {
-					rs.ctx.Set("lineJoin", "miter")
-					rs.ctx.Set("miterLimit", miter.Limit)
-				} else {
-					panic("HTML Canvas: line join not support")
-				}
-				rs.style.StrokeJoiner = style.StrokeJoiner
-			}
-
-			dashesEqual := len(style.Dashes) == len(rs.style.Dashes)
-			if dashesEqual {
-				for i, dash := range style.Dashes {
-					if dash != rs.style.Dashes[i] {
-						dashesEqual = false
-						break
-					}
+		// TODO: all of this could be more efficient
+		dashesEqual := len(style.Stroke.Dashes) == len(rs.style.Stroke.Dashes)
+		if dashesEqual {
+			for i, dash := range style.Stroke.Dashes {
+				if dash != rs.style.Stroke.Dashes[i] {
+					dashesEqual = false
+					break
 				}
 			}
-
-			if !dashesEqual {
-				dashes := []interface{}{}
-				for _, dash := range style.Dashes {
-					dashes = append(dashes, dash)
-				}
-				jsDashes := js.Global().Get("Array").New(dashes...)
-				rs.ctx.Call("setLineDash", jsDashes)
-				rs.style.Dashes = style.Dashes
-			}
-
-			if style.DashOffset != rs.style.DashOffset {
-				rs.ctx.Set("lineDashOffset", style.DashOffset)
-				rs.style.DashOffset = style.DashOffset
-			}
-
-			if style.StrokeWidth != rs.style.StrokeWidth {
-				rs.ctx.Set("lineWidth", style.StrokeWidth)
-				rs.style.StrokeWidth = style.StrokeWidth
-			}
-			//if !style.Stroke.Equal(r.style.Stroke) {
-			rs.ctx.Set("strokeStyle", rs.toStyle(style.Stroke))
-			rs.style.Stroke = style.Stroke
-			//}
-			rs.ctx.Call("stroke")
-		} else if style.HasStroke() {
-			// stroke settings unsupported by HTML Canvas, draw stroke explicitly
-			if style.IsDashed() {
-				pt = pt.Dash(style.DashOffset, style.Dashes...)
-			}
-			pt = pt.Stroke(style.StrokeWidth, style.StrokeCapper, style.StrokeJoiner, canvas.Tolerance)
-			rs.writePath(pt.Transform(m).ReplaceArcs())
-			if !style.Stroke.Equal(rs.style.Fill) {
-				rs.ctx.Set("fillStyle", rs.toStyle(style.Stroke))
-				rs.style.Fill = style.Stroke
-			}
-			rs.ctx.Call("fill")
 		}
-	*/
+
+		if !dashesEqual {
+			dashes := []any{}
+			for _, dash := range style.Stroke.Dashes {
+				dashes = append(dashes, dash)
+			}
+			jsDashes := js.Global().Get("Array").New(dashes...)
+			rs.ctx.Call("setLineDash", jsDashes)
+			rs.style.Stroke.Dashes = style.Stroke.Dashes
+		}
+
+		if style.Stroke.DashOffset != rs.style.Stroke.DashOffset {
+			rs.ctx.Set("lineDashOffset", style.Stroke.DashOffset)
+			rs.style.Stroke.DashOffset = style.Stroke.DashOffset
+		}
+
+		if style.Stroke.Width.Dots != rs.style.Stroke.Width.Dots {
+			rs.ctx.Set("lineWidth", style.Stroke.Width.Dots)
+			rs.style.Stroke.Width = style.Stroke.Width
+		}
+		if style.Stroke.Color != rs.style.Stroke.Color {
+			rs.ctx.Set("strokeStyle", rs.toStyle(style.Stroke.Color))
+			rs.style.Stroke.Color = style.Stroke.Color
+		}
+		rs.ctx.Call("stroke")
+	} else if style.HasStroke() {
+		// stroke settings unsupported by HTML Canvas, draw stroke explicitly
+		// TODO: check when this is happening, maybe remove or use rasterx?
+		if len(style.Stroke.Dashes) > 0 {
+			pt.Path = pt.Path.Dash(style.Stroke.DashOffset, style.Stroke.Dashes...)
+		}
+		pt.Path = pt.Path.Stroke(style.Stroke.Width.Dots, ppath.CapFromStyle(style.Stroke.Cap), ppath.JoinFromStyle(style.Stroke.Join), 1)
+		rs.writePath(pt)
+		if style.Stroke.Color != rs.style.Fill.Color {
+			rs.ctx.Set("fillStyle", rs.toStyle(style.Stroke.Color))
+			rs.style.Fill.Color = style.Stroke.Color
+		}
+		rs.ctx.Call("fill")
+	}
 }
 
 func (rs *Renderer) RenderText(text *render.Text) {
