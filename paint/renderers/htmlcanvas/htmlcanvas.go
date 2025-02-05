@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
 )
 
 // Renderer is an HTML canvas renderer.
@@ -222,7 +223,11 @@ func (rs *Renderer) RenderText(text *render.Text) {
 	// TODO: improve
 	rs.ctx.Set("font", "25px sans-serif")
 	rs.ctx.Set("fillStyle", "black")
-	rs.ctx.Call("fillText", string(text.Text.Source[0]), text.Position.X, text.Position.Y)
+	for _, span := range text.Text.Source {
+		st := &rich.Style{}
+		raw := st.FromRunes(span)
+		rs.ctx.Call("fillText", string(raw), text.Position.X, text.Position.Y)
+	}
 }
 
 func jsAwait(v js.Value) (result js.Value, ok bool) {
