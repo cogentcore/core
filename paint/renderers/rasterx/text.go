@@ -112,7 +112,7 @@ func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines,
 		// bottom := top - math32.FromFixed(g.Height)
 		// right := xPos + math32.FromFixed(g.Width)
 		// rect := image.Rect(int(xPos)-4, int(top)-4, int(right)+4, int(bottom)+4) // don't cut off
-		bb := math32.B2FromFixed(run.GlyphBounds(g)).Translate(start)
+		bb := run.GlyphBoundsBox(g).Translate(start)
 		// rs.StrokeBounds(bb, colors.Yellow)
 
 		data := run.Face.GlyphData(g.GlyphID)

@@ -146,6 +146,12 @@ func (ls *Lines) String() string {
 	return str
 }
 
+// GlyphBoundsBox returns the math32.Box2 version of [Run.GlyphBounds],
+// providing a tight bounding box for given glyph within this run.
+func (rn *Run) GlyphBoundsBox(g *shaping.Glyph) math32.Box2 {
+	return math32.B2FromFixed(rn.GlyphBounds(g))
+}
+
 // GlyphBounds returns the tight bounding box for given glyph within this run.
 func (rn *Run) GlyphBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
 	if rn.Direction.IsVertical() {
@@ -158,8 +164,14 @@ func (rn *Run) GlyphBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
 	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: g.XBearing, Y: -g.YBearing}, Max: fixed.Point26_6{X: g.XBearing + g.Width, Y: -g.YBearing - g.Height}}
 }
 
-// Bounds returns the LineBounds for given Run as rect bounding box,
-// which can easily be converted to math32.Box2.
+// BoundsBox returns the LineBounds for given Run as a math32.Box2
+// bounding box, converted from the Bounds method.
+func (rn *Run) BoundsBox() math32.Box2 {
+	return math32.B2FromFixed(rn.Bounds())
+}
+
+// Bounds returns the LineBounds for given Run as rect bounding box.
+// See [Run.BoundsBox] for a version returning the float32 [math32.Box2].
 func (rn *Run) Bounds() fixed.Rectangle26_6 {
 	gapdec := rn.LineBounds.Descent
 	if gapdec < 0 && rn.LineBounds.Gap < 0 || gapdec > 0 && rn.LineBounds.Gap > 0 {
@@ -174,28 +186,4 @@ func (rn *Run) Bounds() fixed.Rectangle26_6 {
 	}
 	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: 0, Y: -rn.LineBounds.Ascent},
 		Max: fixed.Point26_6{X: rn.Advance, Y: -gapdec}}
-}
-
-// GlyphRegionBounds returns the maximal line-bounds level bounding box
-// between two glyphs in this run, where the st comes before the ed.
-func (rn *Run) GlyphRegionBounds(st, ed int) math32.Box2 {
-	if rn.Direction.IsVertical() {
-		return math32.Box2{}
-	}
-	sg := &rn.Glyphs[st]
-	stb := math32.B2FromFixed(rn.GlyphBounds(sg))
-	mb := rn.MaxBounds
-	off := float32(0)
-	for gi := 0; gi < st; gi++ {
-		g := &rn.Glyphs[gi]
-		off += math32.FromFixed(g.XAdvance)
-	}
-	mb.Min.X = off + stb.Min.X - 2
-	for gi := st; gi <= ed; gi++ {
-		g := &rn.Glyphs[gi]
-		gb := math32.B2FromFixed(rn.GlyphBounds(g))
-		mb.Max.X = off + gb.Max.X + 2
-		off += math32.FromFixed(g.XAdvance)
-	}
-	return mb
 }

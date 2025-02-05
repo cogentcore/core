@@ -66,7 +66,7 @@ func TestBasic(t *testing.T) {
 		sp.Add(boldBig, sr[ix:ix+8])
 		sp.Add(ul, sr[ix+8:])
 
-		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(sp, plain, tsty, rts, math32.Vec2(250, 250))
 		lns.SelectRegion(textpos.Range{7, 30})
 		lns.SelectRegion(textpos.Range{34, 40})
 		pc.NewText(lns, math32.Vec2(20, 60))
@@ -85,7 +85,7 @@ func TestHebrew(t *testing.T) {
 		plain := rich.NewStyle()
 		sp := rich.NewSpans(plain, sr...)
 
-		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(sp, plain, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
@@ -107,7 +107,7 @@ func TestVertical(t *testing.T) {
 		sr := []rune(src)
 		sp := rich.NewSpans(plain, sr...)
 
-		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(150, 50))
+		lns := sh.WrapLines(sp, plain, tsty, rts, math32.Vec2(150, 50))
 		// pc.NewText(lns, math32.Vec2(100, 200))
 		pc.NewText(lns, math32.Vec2(60, 100))
 		pc.RenderDone()
@@ -125,7 +125,7 @@ func TestVertical(t *testing.T) {
 		plain := rich.NewStyle()
 		sp.Add(plain, sr)
 
-		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(sp, plain, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
@@ -144,7 +144,7 @@ func TestColors(t *testing.T) {
 		sp := rich.NewSpans(stroke, sr[:4]...)
 		sp.Add(&big, sr[4:8]).Add(stroke, sr[8:])
 
-		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(sp, stroke, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 80))
 		pc.RenderDone()
 	})

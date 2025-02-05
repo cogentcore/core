@@ -31,16 +31,6 @@ type Shaper struct {
 	outBuff []shaping.Output
 }
 
-// DirectionAdvance advances given position based on given direction.
-func DirectionAdvance(dir di.Direction, pos fixed.Point26_6, adv fixed.Int26_6) fixed.Point26_6 {
-	if dir.IsVertical() {
-		pos.Y += -adv
-	} else {
-		pos.X += adv
-	}
-	return pos
-}
-
 // //go:embed fonts/*.ttf
 // var efonts embed.FS // TODO
 
@@ -65,6 +55,30 @@ func NewShaper() *Shaper {
 	// }
 	sh.shaper.SetFontCacheSize(32)
 	return sh
+}
+
+// FontSize returns the font shape sizing information for given font and text style,
+// using given rune (often the letter 'm'). The GlyphBounds field of the [Run] result
+// has the font ascent and descent information, and the BoundsBox() method returns a full
+// bounding box for the given font, centered at the baseline.
+func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.Settings) *Run {
+	sp := rich.NewSpans(sty, r)
+	out := sh.shapeText(sp, tsty, rts, []rune{r})
+	return &Run{Output: out[0]}
+}
+
+// LineHeight returns the line height for given font and text style.
+// For vertical text directions, this is actually the line width.
+// It includes the [text.Style] LineSpacing multiplier on the natural
+// font-derived line height, which is not generally the same as the font size.
+func (sh *Shaper) LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32 {
+	run := sh.FontSize('m', sty, tsty, rts)
+	bb := run.BoundsBox()
+	dir := goTextDirection(rich.Default, tsty)
+	if dir.IsVertical() {
+		return tsty.LineSpacing * bb.Size().X
+	}
+	return tsty.LineSpacing * bb.Size().Y
 }
 
 // Shape turns given input spans into [Runs] of rendered text,
@@ -113,27 +127,25 @@ func goTextDirection(rdir rich.Directions, tsty *text.Style) di.Direction {
 	return dir.ToGoText()
 }
 
-func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines {
+// todo: do the paragraph splitting!  write fun in rich.Spans
+
+// WrapLines performs line wrapping and shaping on the given rich text source,
+// using the given style information, where the [rich.Style] provides the default
+// style information reflecting the contents of the source (e.g., the default family,
+// weight, etc), for use in computing the default line height. Paragraphs are extracted
+// first using standard newline markers, assumed to coincide with separate spans in the
+// source text, and wrapped separately.
+func (sh *Shaper) WrapLines(sp rich.Spans, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines {
 	if tsty.FontSize.Dots == 0 {
 		tsty.FontSize.Dots = 24
 	}
 	fsz := tsty.FontSize.Dots
 	dir := goTextDirection(rich.Default, tsty)
 
-	// get the default font parameters including line height by rendering a standard char
-	stdr := []rune("m")
-	stdsp := rich.NewSpans(rich.NewStyle(), stdr...)
-	stdOut := sh.shapeText(stdsp, tsty, rts, stdr)
-	stdRun := Run{Output: stdOut[0]}
-	stdBounds := math32.B2FromFixed(stdRun.Bounds())
-	lns := &Lines{Source: sp, Color: tsty.Color, SelectionColor: colors.Scheme.Select.Container, HighlightColor: colors.Scheme.Warn.Container}
-	if dir.IsVertical() {
-		lns.LineHeight = stdBounds.Size().X
-	} else {
-		lns.LineHeight = stdBounds.Size().Y
-	}
+	lht := sh.LineHeight(defSty, tsty, rts)
+	lns := &Lines{Source: sp, Color: tsty.Color, SelectionColor: colors.Scheme.Select.Container, HighlightColor: colors.Scheme.Warn.Container, LineHeight: lht}
 
-	lgap := tsty.LineSpacing*lns.LineHeight - lns.LineHeight
+	lgap := lns.LineHeight - (lns.LineHeight / tsty.LineSpacing) // extra added for spacing
 	nlines := int(math32.Floor(size.Y / lns.LineHeight))
 	maxSize := int(size.X)
 	if dir.IsVertical() {
@@ -223,7 +235,7 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 		// go back through and give every run the expanded line-level box
 		for ri := range ln.Runs {
 			run := &ln.Runs[ri]
-			rb := math32.B2FromFixed(run.Bounds())
+			rb := run.BoundsBox()
 			if dir.IsVertical() {
 				rb.Min.X, rb.Max.X = ln.Bounds.Min.X, ln.Bounds.Max.X
 				rb.Min.Y -= 2 // ensure some overlap along direction of rendering adjacent
@@ -267,6 +279,16 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 	}
 	// fmt.Println(lns.Bounds)
 	return lns
+}
+
+// DirectionAdvance advances given position based on given direction.
+func DirectionAdvance(dir di.Direction, pos fixed.Point26_6, adv fixed.Int26_6) fixed.Point26_6 {
+	if dir.IsVertical() {
+		pos.Y += -adv
+	} else {
+		pos.X += adv
+	}
+	return pos
 }
 
 // StyleToQuery translates the rich.Style to go-text fontscan.Query parameters.
