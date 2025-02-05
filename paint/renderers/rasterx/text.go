@@ -75,11 +75,11 @@ func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines,
 		for _, sel := range ln.Selections {
 			rsel := sel.Intersect(run.Runes())
 			if rsel.Len() > 0 {
-				fi, fg := run.FirstGlyphAt(rsel.Start)
-				li, lg := run.LastGlyphAt(rsel.End)
+				fi := run.FirstGlyphAt(rsel.Start)
+				li := run.LastGlyphAt(rsel.End)
 				fmt.Println("run:", rsel, sel, fi, li)
-				if fg != nil && lg != nil {
-					sbb := run.GlyphRegionBounds(fg, lg)
+				if fi >= 0 && li >= fi {
+					sbb := run.GlyphRegionBounds(fi, li)
 					fmt.Println(sbb)
 					rs.FillBounds(sbb.Translate(start), lns.SelectionColor)
 				}

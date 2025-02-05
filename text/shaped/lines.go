@@ -174,46 +174,22 @@ func (rn *Run) Bounds() fixed.Rectangle26_6 {
 		Max: fixed.Point26_6{X: rn.Advance, Y: -gapdec}}
 }
 
-// Runes returns our rune range using textpos.Range
-func (rn *Run) Runes() textpos.Range {
-	return textpos.Range{rn.Output.Runes.Offset, rn.Output.Runes.Offset + rn.Output.Runes.Count}
-}
-
-// FirstGlyphAt returns the first glyph at given original source rune index.
-// returns -1, nil if none found.
-func (rn *Run) FirstGlyphAt(i int) (int, *shaping.Glyph) {
-	for gi := range rn.Glyphs {
-		g := &rn.Glyphs[gi]
-		if g.ClusterIndex == i {
-			return gi, g
-		}
-	}
-	return -1, nil
-}
-
-// LastGlyphAt returns the last glyph at given original source rune index,
-// returns -1, nil if none found.
-func (rn *Run) LastGlyphAt(i int) (int, *shaping.Glyph) {
-	ng := len(rn.Glyphs)
-	for gi := ng - 1; gi >= 0; gi-- {
-		g := &rn.Glyphs[gi]
-		if g.ClusterIndex == i {
-			return gi, g
-		}
-	}
-	return -1, nil
-}
-
 // GlyphRegionBounds returns the maximal line-bounds level bounding box
 // between two glyphs in this run, where the st comes before the ed.
-func (rn *Run) GlyphRegionBounds(st, ed *shaping.Glyph) math32.Box2 {
+func (rn *Run) GlyphRegionBounds(st, ed int) math32.Box2 {
 	if rn.Direction.IsVertical() {
 		return math32.Box2{}
 	}
-	stb := math32.B2FromFixed(rn.GlyphBounds(st))
-	edb := math32.B2FromFixed(rn.GlyphBounds(ed))
+	sg := &rn.Glyphs[st]
+	stb := math32.B2FromFixed(rn.GlyphBounds(sg))
 	mb := rn.MaxBounds
 	mb.Min.X = stb.Min.X - 2
-	mb.Max.X = edb.Max.X + 2
+	off := float32(0)
+	for gi := st; gi <= ed; gi++ {
+		g := &rn.Glyphs[gi]
+		gb := math32.B2FromFixed(rn.GlyphBounds(g))
+		mb.Max.X = off + gb.Max.X + 2
+		off += math32.FromFixed(g.XAdvance)
+	}
 	return mb
 }
