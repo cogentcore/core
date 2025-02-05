@@ -5,6 +5,7 @@
 package shaped
 
 import (
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -27,6 +28,20 @@ func (ls *Lines) SelectReset() {
 	for li := range ls.Lines {
 		ln := &ls.Lines[li]
 		ln.Selections = nil
+	}
+}
+
+// GlyphAtPoint returns the glyph at given rendered location.
+func (ls *Lines) GlyphAtPoint(pt math32.Vector2, start math32.Vector2) {
+	start.SetAdd(ls.Offset)
+	for li := range ls.Lines {
+		ln := &ls.Lines[li]
+		off := start.Add(ln.Offset)
+		lbb := ln.Bounds.Translate(off)
+		if !lbb.ContainsPoint(pt) {
+			continue
+		}
+		// and so on.
 	}
 }
 

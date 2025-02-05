@@ -68,6 +68,7 @@ func TestBasic(t *testing.T) {
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
 		lns.SelectRegion(textpos.Range{7, 30})
+		lns.SelectRegion(textpos.Range{34, 40})
 		pc.NewText(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
