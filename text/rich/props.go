@@ -172,14 +172,6 @@ func (s *Style) SetFromHTMLTag(tag string) bool {
 	case "s", "del", "strike":
 		s.Decoration.SetFlag(true, LineThrough)
 		did = true
-	case "sup":
-		s.Special = Super
-		s.Size = 0.8
-		did = true
-	case "sub":
-		s.Special = Sub
-		s.Size = 0.8
-		did = true
 	case "small":
 		s.Size = 0.8
 		did = true

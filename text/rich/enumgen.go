@@ -166,16 +166,16 @@ func (i Stretch) MarshalText() ([]byte, error) { return []byte(i.String()), nil 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Stretch) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Stretch") }
 
-var _DecorationsValues = []Decorations{0, 1, 2, 3, 4, 5, 6, 7, 8}
+var _DecorationsValues = []Decorations{0, 1, 2, 3, 4, 5, 6, 7}
 
 // DecorationsN is the highest valid value for type Decorations, plus one.
-const DecorationsN Decorations = 9
+const DecorationsN Decorations = 8
 
-var _DecorationsValueMap = map[string]Decorations{`underline`: 0, `overline`: 1, `line-through`: 2, `dotted-underline`: 3, `link`: 4, `paragraph-start`: 5, `fill-color`: 6, `stroke-color`: 7, `background`: 8}
+var _DecorationsValueMap = map[string]Decorations{`underline`: 0, `overline`: 1, `line-through`: 2, `dotted-underline`: 3, `paragraph-start`: 4, `fill-color`: 5, `stroke-color`: 6, `background`: 7}
 
-var _DecorationsDescMap = map[Decorations]string{0: `Underline indicates to place a line below text.`, 1: `Overline indicates to place a line above text.`, 2: `LineThrough indicates to place a line through text.`, 3: `DottedUnderline is used for abbr tag.`, 4: `Link indicates a hyperlink, which is in the URL field of the style, and encoded in the runes after the style runes. It also identifies this span for functional interactions such as hovering and clicking. It does not specify the styling.`, 5: `ParagraphStart indicates that this text is the start of a paragraph, and therefore may be indented according to [text.Style] settings.`, 6: `FillColor means that the fill color of the glyph is set to FillColor, which encoded in the rune following the style rune, rather than the default. The standard font rendering uses this fill color (compare to StrokeColor).`, 7: `StrokeColor means that the stroke color of the glyph is set to StrokeColor, which is encoded in the rune following the style rune. This is normally not rendered: it looks like an outline of the glyph at larger font sizes, it will make smaller font sizes look significantly thicker.`, 8: `Background means that the background region behind the text is colored to Background, which is encoded in the rune following the style rune. The background is not normally colored.`}
+var _DecorationsDescMap = map[Decorations]string{0: `Underline indicates to place a line below text.`, 1: `Overline indicates to place a line above text.`, 2: `LineThrough indicates to place a line through text.`, 3: `DottedUnderline is used for abbr tag.`, 4: `ParagraphStart indicates that this text is the start of a paragraph, and therefore may be indented according to [text.Style] settings.`, 5: `FillColor means that the fill color of the glyph is set to FillColor, which encoded in the rune following the style rune, rather than the default. The standard font rendering uses this fill color (compare to StrokeColor).`, 6: `StrokeColor means that the stroke color of the glyph is set to StrokeColor, which is encoded in the rune following the style rune. This is normally not rendered: it looks like an outline of the glyph at larger font sizes, it will make smaller font sizes look significantly thicker.`, 7: `Background means that the background region behind the text is colored to Background, which is encoded in the rune following the style rune. The background is not normally colored.`}
 
-var _DecorationsMap = map[Decorations]string{0: `underline`, 1: `overline`, 2: `line-through`, 3: `dotted-underline`, 4: `link`, 5: `paragraph-start`, 6: `fill-color`, 7: `stroke-color`, 8: `background`}
+var _DecorationsMap = map[Decorations]string{0: `underline`, 1: `overline`, 2: `line-through`, 3: `dotted-underline`, 4: `paragraph-start`, 5: `fill-color`, 6: `stroke-color`, 7: `background`}
 
 // String returns the string representation of this Decorations value.
 func (i Decorations) String() string { return enums.BitFlagString(i, _DecorationsValues) }
@@ -225,16 +225,16 @@ func (i *Decorations) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "Decorations")
 }
 
-var _SpecialsValues = []Specials{0, 1, 2, 3}
+var _SpecialsValues = []Specials{0, 1, 2, 3, 4, 5, 6}
 
 // SpecialsN is the highest valid value for type Specials, plus one.
-const SpecialsN Specials = 4
+const SpecialsN Specials = 7
 
-var _SpecialsValueMap = map[string]Specials{`nothing`: 0, `super`: 1, `sub`: 2, `math`: 3}
+var _SpecialsValueMap = map[string]Specials{`nothing`: 0, `super`: 1, `sub`: 2, `link`: 3, `math`: 4, `quote`: 5, `end`: 6}
 
-var _SpecialsDescMap = map[Specials]string{0: `Nothing special.`, 1: `Super indicates super-scripted text.`, 2: `Sub indicates sub-scripted text.`, 3: `Math indicates a LaTeX formatted math sequence.`}
+var _SpecialsDescMap = map[Specials]string{0: `Nothing special.`, 1: `Super starts super-scripted text.`, 2: `Sub starts sub-scripted text.`, 3: `Link starts a hyperlink, which is in the URL field of the style, and encoded in the runes after the style runes. It also identifies this span for functional interactions such as hovering and clicking. It does not specify the styling, which therefore must be set in addition.`, 4: `Math starts a LaTeX formatted math sequence.`, 5: `Quote starts an indented paragraph-level quote.`, 6: `End must be added to terminate the last Special started. The renderer maintains a stack of special elements.`}
 
-var _SpecialsMap = map[Specials]string{0: `nothing`, 1: `super`, 2: `sub`, 3: `math`}
+var _SpecialsMap = map[Specials]string{0: `nothing`, 1: `super`, 2: `sub`, 3: `link`, 4: `math`, 5: `quote`, 6: `end`}
 
 // String returns the string representation of this Specials value.
 func (i Specials) String() string { return enums.String(i, _SpecialsMap) }

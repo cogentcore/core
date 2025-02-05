@@ -171,6 +171,73 @@ func (tx *Text) AddSpan(s *Style, r []rune) *Text {
 	return tx
 }
 
+// Span returns the [Style] and []rune content for given span index.
+// Returns nil if out of range.
+func (tx Text) Span(si int) (*Style, []rune) {
+	n := len(tx)
+	if si < 0 || si >= n || len(tx[si]) == 0 {
+		return nil, nil
+	}
+	return NewStyleFromRunes(tx[si])
+}
+
+// Peek returns the [Style] and []rune content for the current span.
+func (tx Text) Peek() (*Style, []rune) {
+	return tx.Span(len(tx) - 1)
+}
+
+// StartSpecial adds a Span of given Special type to the Text,
+// using given style and rune text. This creates a new style
+// with the special value set, to avoid accidentally repeating
+// the start of new specials.
+func (tx *Text) StartSpecial(s *Style, special Specials, r []rune) *Text {
+	ss := *s
+	ss.Special = special
+	return tx.AddSpan(&ss, r)
+}
+
+// EndSpeical adds an [End] Special to the Text, to terminate the current
+// Special. All [Specials] must be terminated with this empty end tag.
+func (tx *Text) EndSpecial() *Text {
+	s := NewStyle()
+	s.Special = End
+	return tx.AddSpan(s, nil)
+}
+
+// AddLink adds a [Link] special with given url and label text.
+// This calls StartSpecial and EndSpecial for you. If the link requires
+// further formatting, use those functions separately.
+func (tx *Text) AddLink(s *Style, url, label string) *Text {
+	ss := *s
+	ss.URL = url
+	tx.StartSpecial(&ss, Link, []rune(label))
+	return tx.EndSpecial()
+}
+
+// AddSuper adds a [Super] special with given text.
+// This calls StartSpecial and EndSpecial for you. If the Super requires
+// further formatting, use those functions separately.
+func (tx *Text) AddSuper(s *Style, text string) *Text {
+	tx.StartSpecial(s, Super, []rune(text))
+	return tx.EndSpecial()
+}
+
+// AddSub adds a [Sub] special with given text.
+// This calls StartSpecial and EndSpecial for you. If the Sub requires
+// further formatting, use those functions separately.
+func (tx *Text) AddSub(s *Style, text string) *Text {
+	tx.StartSpecial(s, Sub, []rune(text))
+	return tx.EndSpecial()
+}
+
+// AddMath adds a [Math] special with given text.
+// This calls StartSpecial and EndSpecial for you. If the Math requires
+// further formatting, use those functions separately.
+func (tx *Text) AddMath(s *Style, text string) *Text {
+	tx.StartSpecial(s, Math, []rune(text))
+	return tx.EndSpecial()
+}
+
 // AddRunes adds given runes to current span.
 // If no existing span, then a new default one is made.
 func (tx *Text) AddRunes(r []rune) *Text {

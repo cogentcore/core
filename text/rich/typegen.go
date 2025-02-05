@@ -146,7 +146,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Stretch",
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Decorations", IDName: "decorations", Doc: "Decorations are underline, line-through, etc, as bit flags\nthat must be set using [Font.SetDecoration]."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Specials", IDName: "specials", Doc: "Specials are special additional mutually exclusive formatting factors that are not\notherwise captured by changes in font rendering properties or decorations."})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Specials", IDName: "specials", Doc: "Specials are special additional mutually exclusive formatting factors that are not\notherwise captured by changes in font rendering properties or decorations.\nEach special must be terminated by an End span element, on its own, which\npops the stack on the last special that was started."})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Directions", IDName: "directions", Doc: "Directions specifies the text layout direction."})
 

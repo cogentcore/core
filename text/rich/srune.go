@@ -16,14 +16,6 @@ import (
 // element of the style property. Size and Color values are added after
 // the main style rune element.
 
-// NewStyleFromRunes returns a new style initialized with data from given runes,
-// returning the remaining actual rune string content after style data.
-func NewStyleFromRunes(rs []rune) (*Style, []rune) {
-	s := &Style{}
-	c := s.FromRunes(rs)
-	return s, c
-}
-
 // RuneFromStyle returns the style rune that encodes the given style values.
 func RuneFromStyle(s *Style) rune {
 	return RuneFromDecoration(s.Decoration) | RuneFromSpecial(s.Special) | RuneFromStretch(s.Stretch) | RuneFromWeight(s.Weight) | RuneFromSlant(s.Slant) | RuneFromFamily(s.Family) | RuneFromDirection(s.Direction)
@@ -64,7 +56,7 @@ func (s *Style) ToRunes() []rune {
 	if s.Decoration.HasFlag(Background) {
 		rs = append(rs, ColorToRune(s.Background))
 	}
-	if s.Decoration.HasFlag(Link) {
+	if s.Special == Link {
 		rs = append(rs, rune(len(s.URL)))
 		rs = append(rs, []rune(s.URL)...)
 	}
@@ -90,7 +82,7 @@ func (s *Style) FromRunes(rs []rune) []rune {
 		s.Background = ColorFromRune(rs[ci])
 		ci++
 	}
-	if s.Decoration.HasFlag(Link) {
+	if s.Special == Link {
 		ln := int(rs[ci])
 		ci++
 		s.URL = string(rs[ci : ci+ln])

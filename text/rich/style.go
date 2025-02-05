@@ -44,6 +44,8 @@ type Style struct { //types:add
 
 	// Special additional formatting factors that are not otherwise
 	// captured by changes in font rendering properties or decorations.
+	// See [Specials] for usage information: use [Text.StartSpecial]
+	// and [Text.EndSpecial] to set.
 	Special Specials
 
 	// Decorations are underline, line-through, etc, as bit flags
@@ -76,6 +78,14 @@ func NewStyle() *Style {
 	s := &Style{}
 	s.Defaults()
 	return s
+}
+
+// NewStyleFromRunes returns a new style initialized with data from given runes,
+// returning the remaining actual rune string content after style data.
+func NewStyleFromRunes(rs []rune) (*Style, []rune) {
+	s := &Style{}
+	c := s.FromRunes(rs)
+	return s, c
 }
 
 func (s *Style) Defaults() {
@@ -247,7 +257,7 @@ func (s Stretch) ToFloat32() float32 {
 	return stretchFloatValues[s]
 }
 
-// note: 11 bits reserved, 9 used
+// note: 11 bits reserved, 8 used
 
 // Decorations are underline, line-through, etc, as bit flags
 // that must be set using [Font.SetDecoration].
@@ -265,12 +275,6 @@ const (
 
 	// DottedUnderline is used for abbr tag.
 	DottedUnderline
-
-	// Link indicates a hyperlink, which is in the URL field of the
-	// style, and encoded in the runes after the style runes.
-	// It also identifies this span for functional interactions
-	// such as hovering and clicking. It does not specify the styling.
-	Link
 
 	// ParagraphStart indicates that this text is the start of a paragraph,
 	// and therefore may be indented according to [text.Style] settings.
@@ -310,20 +314,38 @@ func (d Decorations) NumColors() int {
 
 // Specials are special additional mutually exclusive formatting factors that are not
 // otherwise captured by changes in font rendering properties or decorations.
+// Each special must be terminated by an End span element, on its own, which
+// pops the stack on the last special that was started.
+// Use [Text.StartSpecial] and [Text.EndSpecial] to manage the specials,
+// avoiding the potential for repeating the start of a given special.
 type Specials int32 //enums:enum -transform kebab
 
 const (
 	// Nothing special.
 	Nothing Specials = iota
 
-	// Super indicates super-scripted text.
+	// Super starts super-scripted text.
 	Super
 
-	// Sub indicates sub-scripted text.
+	// Sub starts sub-scripted text.
 	Sub
 
-	// Math indicates a LaTeX formatted math sequence.
+	// Link starts a hyperlink, which is in the URL field of the
+	// style, and encoded in the runes after the style runes.
+	// It also identifies this span for functional interactions
+	// such as hovering and clicking. It does not specify the styling,
+	// which therefore must be set in addition.
+	Link
+
+	// Math starts a LaTeX formatted math sequence.
 	Math
+
+	// Quote starts an indented paragraph-level quote.
+	Quote
+
+	// End must be added to terminate the last Special started: use [Text.AddEnd].
+	// The renderer maintains a stack of special elements.
+	End
 )
 
 // Directions specifies the text layout direction.
@@ -372,14 +394,6 @@ func (s *Style) SetStrokeColor(clr color.Color) *Style {
 func (s *Style) SetBackground(clr color.Color) *Style {
 	s.Background = clr
 	s.Decoration.SetFlag(true, Background)
-	return s
-}
-
-// SetLink sets this span style as a Link, setting the Decoration
-// flag for Link and the URL field to given link.
-func (s *Style) SetLink(url string) *Style {
-	s.URL = url
-	s.Decoration.SetFlag(true, Link)
 	return s
 }
 
