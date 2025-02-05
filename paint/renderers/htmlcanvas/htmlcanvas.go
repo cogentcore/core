@@ -14,6 +14,7 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/paint/ppath"
@@ -94,34 +95,31 @@ func (rs *Renderer) writePath(pt *render.Path) {
 	}
 }
 
-/*
-func (rs *Renderer) toStyle(paint canvas.Paint) any {
-	if paint.IsPattern() {
-		// TODO
-	} else if paint.IsGradient() {
-		if g, ok := paint.Gradient.(*canvas.LinearGradient); ok {
-			grad := rs.ctx.Call("createLinearGradient", g.Start.X, rs.size.Y-g.Start.Y, g.End.X, rs.size.Y-g.End.Y)
-			for _, stop := range g.Stops {
-				grad.Call("addColorStop", stop.Offset, canvas.CSSColor(stop.Color).String())
+func (rs *Renderer) toStyle(clr image.Image) any {
+	if g, ok := clr.(gradient.Gradient); ok {
+		if gl, ok := g.(*gradient.Linear); ok {
+			grad := rs.ctx.Call("createLinearGradient", gl.Start.X, rs.size.Y-gl.Start.Y, gl.End.X, rs.size.Y-gl.End.Y) // TODO: are these params right?
+			for _, stop := range gl.Stops {
+				grad.Call("addColorStop", stop.Pos, colors.AsHex(stop.Color))
 			}
 			return grad
-		} else if g, ok := paint.Gradient.(*canvas.RadialGradient); ok {
-			grad := rs.ctx.Call("createRadialGradient", g.C0.X, rs.size.Y-g.C0.Y, g.R0, g.C1.X, rs.size.Y-g.C1.Y, g.R1)
-			for _, stop := range g.Stops {
-				grad.Call("addColorStop", stop.Offset, canvas.CSSColor(stop.Color).String())
+		} else if gr, ok := g.(*gradient.Radial); ok {
+			grad := rs.ctx.Call("createRadialGradient", gr.Center.X, rs.size.Y-gr.Center.Y, gr.Radius, gr.Focal.X, rs.size.Y-gr.Focal.Y, gr.Radius) // TODO: are these params right?
+			for _, stop := range gr.Stops {
+				grad.Call("addColorStop", stop.Pos, colors.AsHex(stop.Color))
 			}
 			return grad
 		}
 	}
-	return canvas.CSSColor(paint.Color).String()
+	// TODO: handle more cases for things like pattern functions and [image.RGBA] images?
+	return colors.AsHex(colors.ToUniform(clr))
 }
-*/
 
 func (rs *Renderer) RenderPath(pt *render.Path) {
 	if pt.Path.Empty() {
 		return
 	}
-	rs.ctx.Set("strokeStyle", colors.AsHex(colors.ToUniform(pt.Context.Style.Stroke.Color))) // TODO: remove
+	rs.ctx.Set("strokeStyle", rs.toStyle(pt.Context.Style.Stroke.Color)) // TODO: remove
 	rs.writePath(pt)
 	rs.ctx.Call("stroke") // TODO: remove
 
