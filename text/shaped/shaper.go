@@ -41,6 +41,9 @@ func DirectionAdvance(dir di.Direction, pos fixed.Point26_6, adv fixed.Int26_6) 
 	return pos
 }
 
+// //go:embed fonts/*.ttf
+// var efonts embed.FS // TODO
+
 // todo: per gio: systemFonts bool, collection []FontFace
 func NewShaper() *Shaper {
 	sh := &Shaper{}
@@ -55,6 +58,7 @@ func NewShaper() *Shaper {
 		errors.Log(err)
 		// shaper.logger.Printf("failed loading system fonts: %v", err)
 	}
+	// sh.fontMap.AddFont(errors.Log1(efonts.Open("fonts/Roboto-Regular.ttf")).(opentype.Resource), "Roboto", "Roboto") // TODO
 	// for _, f := range collection {
 	// 	shaper.Load(f)
 	// 	shaper.defaultFaces = append(shaper.defaultFaces, string(f.Font.Typeface))

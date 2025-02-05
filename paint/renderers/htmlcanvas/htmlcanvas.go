@@ -219,7 +219,10 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 }
 
 func (rs *Renderer) RenderText(text *render.Text) {
-	// text.RenderAsPath(r, m, canvas.DefaultResolution)
+	// TODO: improve
+	rs.ctx.Set("font", "25px sans-serif")
+	rs.ctx.Set("fillStyle", "black")
+	rs.ctx.Call("fillText", string(text.Text.Source[0]), text.Position.X, text.Position.Y)
 }
 
 func jsAwait(v js.Value) (result js.Value, ok bool) {
