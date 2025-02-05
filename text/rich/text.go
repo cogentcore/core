@@ -20,7 +20,7 @@ type Text [][]rune
 // which can be empty.
 func NewText(s *Style, r []rune) Text {
 	tx := Text{}
-	tx.Add(s, r)
+	tx.AddSpan(s, r)
 	return tx
 }
 
@@ -163,11 +163,22 @@ func (tx Text) Join() []rune {
 	return rn
 }
 
-// Add adds a span to the Text using the given Style and runes.
-func (tx *Text) Add(s *Style, r []rune) *Text {
+// AddSpan adds a span to the Text using the given Style and runes.
+func (tx *Text) AddSpan(s *Style, r []rune) *Text {
 	nr := s.ToRunes()
 	nr = append(nr, r...)
 	*tx = append(*tx, nr)
+	return tx
+}
+
+// AddRunes adds given runes to current span.
+// If no existing span, then a new default one is made.
+func (tx *Text) AddRunes(r []rune) *Text {
+	n := len(*tx)
+	if n == 0 {
+		return tx.AddSpan(NewStyle(), r)
+	}
+	(*tx)[n-1] = append((*tx)[n-1], r...)
 	return tx
 }
 
@@ -180,4 +191,13 @@ func (tx Text) String() string {
 		str += "[" + sstr + "]: " + string(ss) + "\n"
 	}
 	return str
+}
+
+// Join joins multiple texts into one text. Just appends the spans.
+func Join(txts ...Text) Text {
+	nt := Text{}
+	for _, tx := range txts {
+		nt = append(nt, tx...)
+	}
+	return nt
 }

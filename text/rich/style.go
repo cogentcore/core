@@ -247,6 +247,8 @@ func (s Stretch) ToFloat32() float32 {
 	return stretchFloatValues[s]
 }
 
+// note: 11 bits reserved, 9 used
+
 // Decorations are underline, line-through, etc, as bit flags
 // that must be set using [Font.SetDecoration].
 type Decorations int64 //enums:bitflag -transform kebab
@@ -269,6 +271,10 @@ const (
 	// It also identifies this span for functional interactions
 	// such as hovering and clicking. It does not specify the styling.
 	Link
+
+	// ParagraphStart indicates that this text is the start of a paragraph,
+	// and therefore may be indented according to [text.Style] settings.
+	ParagraphStart
 
 	// FillColor means that the fill color of the glyph is set to FillColor,
 	// which encoded in the rune following the style rune, rather than the default.
@@ -302,7 +308,7 @@ func (d Decorations) NumColors() int {
 	return nc
 }
 
-// Specials are special additional formatting factors that are not
+// Specials are special additional mutually exclusive formatting factors that are not
 // otherwise captured by changes in font rendering properties or decorations.
 type Specials int32 //enums:enum -transform kebab
 

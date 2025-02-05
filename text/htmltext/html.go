@@ -2,29 +2,40 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package richhtml
+package htmltext
 
 import (
 	"bytes"
 	"encoding/xml"
+	"errors"
+	"fmt"
 	"html"
 	"io"
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/text/rich"
 	"golang.org/x/net/html/charset"
 )
 
-// AddHTML adds HTML-formatted rich text to given [rich.Text].
+// HTMLToRich translates HTML-formatted rich text into a [rich.Text],
+// using given initial text styling parameters and css properties.
 // This uses the golang XML decoder system, which strips all whitespace
-// and therefore does not capture any preformatted text. See AddHTMLPre.
-func AddHTML(tx *rich.Text, str []byte) {
+// and therefore does not capture any preformatted text. See HTMLPre.
+// cssProps are a list of css key-value pairs that are used to set styling
+// properties for the text, and can include class names with a value of
+// another property map that is applied to elements of that class,
+// including standard elements like a for links, etc.
+func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text, error) {
 	sz := len(str)
 	if sz == 0 {
-		return
+		return nil, nil
 	}
+	var errs []error
+
 	spcstr := bytes.Join(bytes.Fields(str), []byte(" "))
 
 	reader := bytes.NewReader(spcstr)
@@ -37,9 +48,14 @@ func AddHTML(tx *rich.Text, str []byte) {
 	// set when a </p> is encountered
 	nextIsParaStart := false
 
-	fstack := make([]rich.Style, 1, 10)
-	fstack[0].Defaults()
-	curRunes := []rune{}
+	// stack of font styles
+	fstack := make(stack.Stack[*rich.Style], 0)
+	fstack.Push(sty)
+
+	// stack of rich text spans that are later joined for final result
+	spstack := make(stack.Stack[rich.Text], 0)
+	curSp := rich.NewText(sty, nil)
+	spstack.Push(curSp)
 
 	for {
 		t, err := decoder.Token()
@@ -47,14 +63,15 @@ func AddHTML(tx *rich.Text, str []byte) {
 			if err == io.EOF {
 				break
 			}
-			// log.Printf("%v parsing error: %v for string\n%v\n", errstr, err, string(str))
+			errs = append(errs, err)
 			break
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
-			fs := fstack[len(fstack)-1]
+			fs := rich.NewStyle() // new style for new element
+			*fs = *fstack.Peek()
 			nm := strings.ToLower(se.Name.Local)
-			curLinkIndex = -1
+			insertText := []rune{}
 			if !fs.SetFromHTMLTag(nm) {
 				switch nm {
 				case "a":
@@ -68,27 +85,25 @@ func AddHTML(tx *rich.Text, str []byte) {
 				case "span":
 					// just uses properties
 				case "q":
-					fs := fstack[len(fstack)-1]
-					atStart := len(curSp.Text) == 0
-					curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.Background, curf.Decoration)
+					atStart := curSp.Len() == 0
 					if nextIsParaStart && atStart {
-						curSp.SetNewPara()
+						fs.Decoration.SetFlag(true, rich.ParagraphStart)
 					}
 					nextIsParaStart = false
+					insertText = []rune{'“'}
 				case "dfn":
 					// no default styling
 				case "bdo":
 					// bidirectional override..
 				case "p":
-					if len(curRunes) > 0 {
-						// fmt.Printf("para start: '%v'\n", string(curSp.Text))
-						tx.Add(&fs, curRunes)
-					}
-					nextIsParaStart = true
+					fs.Decoration.SetFlag(true, rich.ParagraphStart)
+					nextIsParaStart = true // todo: redundant?
 				case "br":
-					// todo: add br
+					insertText = []rune{'\n'}
+					nextIsParaStart = false
 				default:
-					// log.Printf("%v tag not recognized: %v for string\n%v\n", errstr, nm, string(str))
+					err := fmt.Errorf("%q tag not recognized", nm)
+					errs = append(errs, err)
 				}
 			}
 			if len(se.Attr) > 0 {
@@ -96,11 +111,11 @@ func AddHTML(tx *rich.Text, str []byte) {
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
 					case "style":
-						rich.SetStylePropertiesXML(attr.Value, &sprop)
+						styleprops.FromXMLString(attr.Value, sprop)
 					case "class":
-						if cssAgg != nil {
+						if cssProps != nil {
 							clnm := "." + attr.Value
-							if aggp, ok := rich.SubProperties(cssAgg, clnm); ok {
+							if aggp, ok := SubProperties(clnm, cssProps); ok {
 								fs.StyleFromProperties(nil, aggp, nil)
 							}
 						}
@@ -110,53 +125,47 @@ func AddHTML(tx *rich.Text, str []byte) {
 				}
 				fs.StyleFromProperties(nil, sprop, nil)
 			}
-			if cssAgg != nil {
-				FontStyleCSS(&fs, nm, cssAgg, ctxt, nil)
+			if cssProps != nil {
+				FontStyleCSS(fs, nm, cssProps)
 			}
-			fstack = append(fstack, &fs)
+			fstack.Push(fs)
+			if curSp.Len() == 0 && len(spstack) > 0 { // we started something but added nothing to it.
+				spstack.Pop()
+			}
+			curSp = rich.NewText(fs, insertText)
+			spstack.Push(curSp)
 		case xml.EndElement:
 			switch se.Name.Local {
 			case "p":
-				tr.Spans = append(tr.Spans, Span{})
-				curSp = &(tr.Spans[len(tr.Spans)-1])
 				nextIsParaStart = true
 			case "br":
-				tr.Spans = append(tr.Spans, Span{})
-				curSp = &(tr.Spans[len(tr.Spans)-1])
+				curSp.AddRunes([]rune{'\n'}) // todo: different char?
+				nextIsParaStart = false
 			case "q":
-				curf := fstack[len(fstack)-1]
-				curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background, curf.Decoration)
-			case "a":
-				if curLinkIndex >= 0 && curLinkIndex < len(tr.Links) {
-					tl := &tr.Links[curLinkIndex]
-					tl.EndSpan = len(tr.Spans) - 1
-					tl.EndIndex = len(curSp.Text)
-					curLinkIndex = -1
-				}
+				curSp.AddRunes([]rune{'”'})
 			}
-			if len(fstack) > 1 {
-				fstack = fstack[:len(fstack)-1]
+
+			if len(fstack) > 0 {
+				fstack.Pop()
+				fs := fstack.Peek()
+				curSp = rich.NewText(fs, nil)
+				spstack.Push(curSp) // start a new span with previous style
+			} else {
+				err := fmt.Errorf("imbalanced start / end tags: %q", se.Name.Local)
+				errs = append(errs, err)
 			}
 		case xml.CharData:
-			curf := fstack[len(fstack)-1]
-			atStart := len(curSp.Text) == 0
+			atStart := curSp.Len() == 0
 			sstr := html.UnescapeString(string(se))
 			if nextIsParaStart && atStart {
 				sstr = strings.TrimLeftFunc(sstr, func(r rune) bool {
 					return unicode.IsSpace(r)
 				})
 			}
-			curSp.AppendString(sstr, curf.Face.Face, curf.Color, curf.Background, curf.Decoration, font, ctxt)
-			if nextIsParaStart && atStart {
-				curSp.SetNewPara()
-			}
-			nextIsParaStart = false
-			if curLinkIndex >= 0 && curLinkIndex < len(tr.Links) {
-				tl := &tr.Links[curLinkIndex]
-				tl.Label = sstr
-			}
+			curSp.AddRunes([]rune(sstr))
 		}
 	}
+	return rich.Join(spstack...), errors.Join(errs...)
 }
 
 /*
@@ -383,3 +392,32 @@ func (tr *Text) SetHTMLPre(str []byte, font *rich.FontRender, txtSty *rich.Text,
 }
 
 */
+
+// SubProperties returns a properties map[string]any from given key tag
+// of given properties map, if the key exists and the value is a sub props map.
+// Otherwise returns nil, false
+func SubProperties(tag string, cssProps map[string]any) (map[string]any, bool) {
+	tp, ok := cssProps[tag]
+	if !ok {
+		return nil, false
+	}
+	pmap, ok := tp.(map[string]any)
+	if !ok {
+		return nil, false
+	}
+	return pmap, true
+}
+
+// FontStyleCSS looks for "tag" name properties in cssProps properties, and applies those to
+// style if found, and returns true -- false if no such tag found
+func FontStyleCSS(fs *rich.Style, tag string, cssProps map[string]any) bool {
+	if cssProps == nil {
+		return false
+	}
+	pmap, ok := SubProperties(tag, cssProps)
+	if !ok {
+		return false
+	}
+	fs.StyleFromProperties(nil, pmap, nil)
+	return true
+}

@@ -9,13 +9,10 @@ package styles
 //go:generate core generate
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"log/slog"
-	"strings"
 
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
@@ -286,36 +283,6 @@ const (
 // visibility -- support more than just hidden
 
 // transition -- animation of hover, etc
-
-// SetStylePropertiesXML sets style properties from XML style string, which contains ';'
-// separated name: value pairs
-func SetStylePropertiesXML(style string, properties *map[string]any) {
-	st := strings.Split(style, ";")
-	for _, s := range st {
-		kv := strings.Split(s, ":")
-		if len(kv) >= 2 {
-			k := strings.TrimSpace(strings.ToLower(kv[0]))
-			v := strings.TrimSpace(kv[1])
-			if *properties == nil {
-				*properties = make(map[string]any)
-			}
-			(*properties)[k] = v
-		}
-	}
-}
-
-// StylePropertiesXML returns style properties for XML style string, which contains ';'
-// separated name: value pairs
-func StylePropertiesXML(properties map[string]any) string {
-	var sb strings.Builder
-	for k, v := range properties {
-		if k == "transform" {
-			continue
-		}
-		sb.WriteString(fmt.Sprintf("%s:%s;", k, reflectx.ToString(v)))
-	}
-	return sb.String()
-}
 
 // NewStyle returns a new [Style] object with default values.
 func NewStyle() *Style {

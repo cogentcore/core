@@ -121,15 +121,15 @@ func ColorFromRune(r rune) color.RGBA {
 
 const (
 	DecorationStart = 0
-	DecorationMask  = 0x000000FF
-	SpecialStart    = 8
-	SpecialMask     = 0x00000F00
-	StretchStart    = 12
-	StretchMask     = 0x0000F000
-	WeightStart     = 16
-	WeightMask      = 0x000F0000
-	SlantStart      = 20
-	SlantMask       = 0x00F00000
+	DecorationMask  = 0x000007FF // 11 bits reserved for deco
+	SlantStart      = 11
+	SlantMask       = 0x00000800 // 1 bit for slant
+	SpecialStart    = 12
+	SpecialMask     = 0x0000F000
+	StretchStart    = 16
+	StretchMask     = 0x000F0000
+	WeightStart     = 20
+	WeightMask      = 0x00F00000
 	FamilyStart     = 24
 	FamilyMask      = 0x0F000000
 	DirectionStart  = 28
