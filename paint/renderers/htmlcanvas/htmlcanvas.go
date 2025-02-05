@@ -72,7 +72,7 @@ func (rs *Renderer) Render(r render.Render) {
 		case *render.Path:
 			rs.RenderPath(x)
 		case *pimage.Params:
-			// x.Render(rs.image) TODO
+			rs.RenderImage(x)
 		case *render.Text:
 			rs.RenderText(x)
 		}
@@ -222,7 +222,6 @@ func (rs *Renderer) RenderText(text *render.Text) {
 	// text.RenderAsPath(r, m, canvas.DefaultResolution)
 }
 
-/*
 func jsAwait(v js.Value) (result js.Value, ok bool) {
 	// COPIED FROM https://go-review.googlesource.com/c/go/+/150917/
 	if v.Type() != js.TypeObject || v.Get("then").Type() != js.TypeFunction {
@@ -252,22 +251,23 @@ func jsAwait(v js.Value) (result js.Value, ok bool) {
 	return
 }
 
-// RenderImage renders an image to the canvas using a transformation matrix.
-func (r *HTMLCanvas) RenderImage(img image.Image, m canvas.Matrix) {
-	size := img.Bounds().Size()
-	sp := img.Bounds().Min // starting point
+func (rs *Renderer) RenderImage(pimg *pimage.Params) {
+	// TODO: images possibly comparatively not performant on web, so there
+	// might be a better path for things like FillBox.
+	size := pimg.Rect.Size() // TODO: is this right?
+	sp := pimg.SourcePos     // starting point
 	buf := make([]byte, 4*size.X*size.Y)
 	for y := 0; y < size.Y; y++ {
 		for x := 0; x < size.X; x++ {
 			i := (y*size.X + x) * 4
-			r, g, b, a := img.At(sp.X+x, sp.Y+y).RGBA()
-			alpha := float64(a>>8) / 256.0
-			buf[i+0] = byte(float64(r>>8) / alpha)
-			buf[i+1] = byte(float64(g>>8) / alpha)
-			buf[i+2] = byte(float64(b>>8) / alpha)
-			buf[i+3] = byte(a >> 8)
+			rgba := colors.AsRGBA(pimg.Source.At(sp.X+x, sp.Y+y)) // TODO: is this performant?
+			buf[i+0] = rgba.R
+			buf[i+1] = rgba.G
+			buf[i+2] = rgba.B
+			buf[i+3] = rgba.A
 		}
 	}
+	// TODO: clean this up
 	jsBuf := js.Global().Get("Uint8Array").New(len(buf))
 	js.CopyBytesToJS(jsBuf, buf)
 	jsBufClamped := js.Global().Get("Uint8ClampedArray").New(jsBuf)
@@ -278,10 +278,9 @@ func (r *HTMLCanvas) RenderImage(img image.Image, m canvas.Matrix) {
 		panic("error while waiting for createImageBitmap promise")
 	}
 
-	origin := m.Dot(canvas.Point{0, float64(img.Bounds().Size().Y)}).Mul(r.dpm)
-	m = m.Scale(r.dpm, r.dpm)
-	r.ctx.Call("setTransform", m[0][0], m[0][1], m[1][0], m[1][1], origin.X, r.height-origin.Y)
-	r.ctx.Call("drawImage", imageBitmap, 0, 0)
-	r.ctx.Call("setTransform", 1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
+	// origin := m.Dot(canvas.Point{0, float64(img.Bounds().Size().Y)}).Mul(rs.dpm)
+	// m = m.Scale(rs.dpm, rs.dpm)
+	// rs.ctx.Call("setTransform", m[0][0], m[0][1], m[1][0], m[1][1], origin.X, rs.height-origin.Y)
+	rs.ctx.Call("drawImage", imageBitmap, 0, 0)
+	// rs.ctx.Call("setTransform", 1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
 }
-*/
