@@ -61,6 +61,9 @@ type Lines struct {
 
 	// SelectionColor is the color to use for rendering selected regions.
 	SelectionColor image.Image
+
+	// HighlightColor is the color to use for rendering highlighted regions.
+	HighlightColor image.Image
 }
 
 // Line is one line of shaped text, containing multiple Runs.
@@ -98,6 +101,11 @@ type Line struct {
 	// and will be rendered with the [Lines.SelectionColor] background,
 	// replacing any other background color that might have been specified.
 	Selections []textpos.Range
+
+	// Highlights specifies region(s) of runes within this line that are highlighted,
+	// and will be rendered with the [Lines.HighlightColor] background,
+	// replacing any other background color that might have been specified.
+	Highlights []textpos.Range
 }
 
 // Run is a span of text with the same font properties, with full rendering information.
@@ -148,12 +156,6 @@ func (rn *Run) GlyphBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
 	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: g.XBearing, Y: -g.YBearing}, Max: fixed.Point26_6{X: g.XBearing + g.Width, Y: -g.YBearing - g.Height}}
 }
 
-// GlyphSelectBounds returns the maximal line-bounds level bounding box for given
-// glyph, suitable for selection.
-func (rn *Run) GlyphSelectBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
-	return fixed.Rectangle26_6{}
-}
-
 // Bounds returns the LineBounds for given Run as rect bounding box,
 // which can easily be converted to math32.Box2.
 func (rn *Run) Bounds() fixed.Rectangle26_6 {
@@ -170,4 +172,48 @@ func (rn *Run) Bounds() fixed.Rectangle26_6 {
 	}
 	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: 0, Y: -rn.LineBounds.Ascent},
 		Max: fixed.Point26_6{X: rn.Advance, Y: -gapdec}}
+}
+
+// Runes returns our rune range using textpos.Range
+func (rn *Run) Runes() textpos.Range {
+	return textpos.Range{rn.Output.Runes.Offset, rn.Output.Runes.Offset + rn.Output.Runes.Count}
+}
+
+// FirstGlyphAt returns the first glyph at given original source rune index.
+// returns -1, nil if none found.
+func (rn *Run) FirstGlyphAt(i int) (int, *shaping.Glyph) {
+	for gi := range rn.Glyphs {
+		g := &rn.Glyphs[gi]
+		if g.ClusterIndex == i {
+			return gi, g
+		}
+	}
+	return -1, nil
+}
+
+// LastGlyphAt returns the last glyph at given original source rune index,
+// returns -1, nil if none found.
+func (rn *Run) LastGlyphAt(i int) (int, *shaping.Glyph) {
+	ng := len(rn.Glyphs)
+	for gi := ng - 1; gi >= 0; gi-- {
+		g := &rn.Glyphs[gi]
+		if g.ClusterIndex == i {
+			return gi, g
+		}
+	}
+	return -1, nil
+}
+
+// GlyphRegionBounds returns the maximal line-bounds level bounding box
+// between two glyphs in this run, where the st comes before the ed.
+func (rn *Run) GlyphRegionBounds(st, ed *shaping.Glyph) math32.Box2 {
+	if rn.Direction.IsVertical() {
+		return math32.Box2{}
+	}
+	stb := math32.B2FromFixed(rn.GlyphBounds(st))
+	edb := math32.B2FromFixed(rn.GlyphBounds(ed))
+	mb := rn.MaxBounds
+	mb.Min.X = stb.Min.X - 2
+	mb.Max.X = edb.Max.X + 2
+	return mb
 }

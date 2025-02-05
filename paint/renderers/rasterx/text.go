@@ -41,18 +41,18 @@ func (rs *Renderer) TextLines(lns *shaped.Lines, ctx *render.Context, pos math32
 	clr := colors.Uniform(lns.Color)
 	for li := range lns.Lines {
 		ln := &lns.Lines[li]
-		rs.TextLine(ln, clr, start) // todo: start + offset
+		rs.TextLine(ln, lns, clr, start) // todo: start + offset
 	}
 }
 
 // TextLine rasterizes the given shaped.Line.
-func (rs *Renderer) TextLine(ln *shaped.Line, clr image.Image, start math32.Vector2) {
+func (rs *Renderer) TextLine(ln *shaped.Line, lns *shaped.Lines, clr image.Image, start math32.Vector2) {
 	off := start.Add(ln.Offset)
 	// tbb := ln.Bounds.Translate(off)
 	// rs.StrokeBounds(tbb, colors.Blue)
 	for ri := range ln.Runs {
 		run := &ln.Runs[ri]
-		rs.TextRun(run, clr, off)
+		rs.TextRun(run, ln, lns, clr, off)
 		if run.Direction.IsVertical() {
 			off.Y += math32.FromFixed(run.Advance)
 		} else {
@@ -64,12 +64,27 @@ func (rs *Renderer) TextLine(ln *shaped.Line, clr image.Image, start math32.Vect
 // TextRun rasterizes the given text run into the output image using the
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
-func (rs *Renderer) TextRun(run *shaped.Run, clr image.Image, start math32.Vector2) {
+func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines, clr image.Image, start math32.Vector2) {
 	// todo: render decoration
 	// dir := run.Direction
 	rbb := run.MaxBounds.Translate(start)
 	if run.Background != nil {
 		rs.FillBounds(rbb, run.Background)
+	}
+	if len(ln.Selections) > 0 {
+		for _, sel := range ln.Selections {
+			rsel := sel.Intersect(run.Runes())
+			if rsel.Len() > 0 {
+				fi, fg := run.FirstGlyphAt(rsel.Start)
+				li, lg := run.LastGlyphAt(rsel.End)
+				fmt.Println("run:", rsel, sel, fi, li)
+				if fg != nil && lg != nil {
+					sbb := run.GlyphRegionBounds(fg, lg)
+					fmt.Println(sbb)
+					rs.FillBounds(sbb.Translate(start), lns.SelectionColor)
+				}
+			}
+		}
 	}
 	fill := clr
 	if run.FillColor != nil {

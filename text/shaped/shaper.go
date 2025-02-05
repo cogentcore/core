@@ -122,7 +122,7 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 	stdOut := sh.shapeText(stdsp, tsty, rts, stdr)
 	stdRun := Run{Output: stdOut[0]}
 	stdBounds := math32.B2FromFixed(stdRun.Bounds())
-	lns := &Lines{Color: tsty.Color}
+	lns := &Lines{Source: sp, Color: tsty.Color, SelectionColor: colors.Scheme.Select.Container, HighlightColor: colors.Scheme.Warn.Container}
 	if dir.IsVertical() {
 		lns.LineHeight = stdBounds.Size().X
 	} else {
@@ -173,10 +173,17 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 		ln := Line{}
 		var lsp rich.Spans
 		var pos fixed.Point26_6
+		setFirst := false
 		for oi := range lno {
 			out := &lno[oi]
 			run := Run{Output: *out}
-			for run.Runes.Offset >= cspEd {
+			rns := run.Runes()
+			if !setFirst {
+				ln.SourceRange.Start = rns.Start
+				setFirst = true
+			}
+			ln.SourceRange.End = rns.End
+			for rns.Start >= cspEd {
 				cspi++
 				cspSt, cspEd = sp.Range(cspi)
 			}
@@ -185,8 +192,8 @@ func (sh *Shaper) WrapParagraph(sp rich.Spans, tsty *text.Style, rts *rich.Setti
 				lns.FontSize = sty.Size * fsz
 			}
 			nsp := sty.ToRunes()
-			coff := run.Runes.Offset - cspSt
-			cend := coff + run.Runes.Count
+			coff := rns.Start - cspSt
+			cend := coff + rns.Len()
 			nr := cr[coff:cend] // note: not a copy!
 			nsp = append(nsp, nr...)
 			lsp = append(lsp, nsp)

@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	. "cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/language"
 )
 
@@ -66,6 +67,7 @@ func TestBasic(t *testing.T) {
 		sp.Add(ul, sr[ix+8:])
 
 		lns := sh.WrapParagraph(sp, tsty, rts, math32.Vec2(250, 250))
+		lns.SelectRegion(textpos.Range{4, 20})
 		pc.NewText(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})

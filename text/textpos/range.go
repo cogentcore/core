@@ -14,7 +14,7 @@ type Range struct {
 	End int
 }
 
-// Len returns the length of the range: Ed - St.
+// Len returns the length of the range: End - Start.
 func (r Range) Len() int {
 	return r.End - r.Start
 }
@@ -22,4 +22,15 @@ func (r Range) Len() int {
 // Contains returns true if range contains given index.
 func (r Range) Contains(i int) bool {
 	return i >= r.Start && i < r.End
+}
+
+// Intersect returns the intersection of two ranges.
+// If they do not overlap, then the Start and End will be -1
+func (r Range) Intersect(o Range) Range {
+	o.Start = max(o.Start, r.Start)
+	o.End = min(o.End, r.End)
+	if o.Len() <= 0 {
+		return Range{-1, -1}
+	}
+	return o
 }
