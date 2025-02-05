@@ -58,15 +58,15 @@ func TestBasic(t *testing.T) {
 		ul := rich.NewStyle()
 		ul.Decoration.SetFlag(true, rich.Underline)
 
-		sp := rich.NewSpans(plain, sr[:4]...)
-		sp.Add(ital, sr[4:8])
+		tx := rich.NewText(plain, sr[:4])
+		tx.Add(ital, sr[4:8])
 		fam := []rune("familiar")
 		ix := runes.Index(sr, fam)
-		sp.Add(ul, sr[8:ix])
-		sp.Add(boldBig, sr[ix:ix+8])
-		sp.Add(ul, sr[ix+8:])
+		tx.Add(ul, sr[8:ix])
+		tx.Add(boldBig, sr[ix:ix+8])
+		tx.Add(ul, sr[ix+8:])
 
-		lns := sh.WrapLines(sp, plain, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
 		lns.SelectRegion(textpos.Range{7, 30})
 		lns.SelectRegion(textpos.Range{34, 40})
 		pc.NewText(lns, math32.Vec2(20, 60))
@@ -83,9 +83,9 @@ func TestHebrew(t *testing.T) {
 		src := "אָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, Let there be light וּבְכָל-נַפְשְׁךָ,"
 		sr := []rune(src)
 		plain := rich.NewStyle()
-		sp := rich.NewSpans(plain, sr...)
+		tx := rich.NewText(plain, sr)
 
-		lns := sh.WrapLines(sp, plain, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
@@ -105,9 +105,9 @@ func TestVertical(t *testing.T) {
 		// src := "国際化活動 Hello!"
 		src := "国際化活動"
 		sr := []rune(src)
-		sp := rich.NewSpans(plain, sr...)
+		tx := rich.NewText(plain, sr)
 
-		lns := sh.WrapLines(sp, plain, tsty, rts, math32.Vec2(150, 50))
+		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(150, 50))
 		// pc.NewText(lns, math32.Vec2(100, 200))
 		pc.NewText(lns, math32.Vec2(60, 100))
 		pc.RenderDone()
@@ -121,11 +121,10 @@ func TestVertical(t *testing.T) {
 		// todo: word wrapping and sideways rotation in vertical not currently working
 		src := "国際化活動 W3C ワールド・ワイド・Hello!"
 		sr := []rune(src)
-		sp := rich.Spans{}
 		plain := rich.NewStyle()
-		sp.Add(plain, sr)
+		tx := rich.NewText(plain, sr)
 
-		lns := sh.WrapLines(sp, plain, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
 		pc.NewText(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
@@ -141,7 +140,7 @@ func TestColors(t *testing.T) {
 
 		src := "The lazy fox"
 		sr := []rune(src)
-		sp := rich.NewSpans(stroke, sr[:4]...)
+		sp := rich.NewText(stroke, sr[:4])
 		sp.Add(&big, sr[4:8]).Add(stroke, sr[8:])
 
 		lns := sh.WrapLines(sp, stroke, tsty, rts, math32.Vec2(250, 250))

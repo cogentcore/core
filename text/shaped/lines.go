@@ -26,7 +26,7 @@ type Lines struct {
 
 	// Source is the original input source that generated this set of lines.
 	// Each Line has its own set of spans that describes the Line contents.
-	Source rich.Spans
+	Source rich.Text
 
 	// Lines are the shaped lines.
 	Lines []Line
@@ -76,7 +76,7 @@ type Line struct {
 	// Source is the input source corresponding to the line contents,
 	// derived from the original Lines Source. The style information for
 	// each Run is embedded here.
-	Source rich.Spans
+	Source rich.Text
 
 	// SourceRange is the range of runes in the original [Lines.Source] that
 	// are represented in this line.

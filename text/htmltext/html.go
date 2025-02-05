@@ -17,10 +17,10 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
-// AddHTML adds HTML-formatted rich text to given [rich.Spans].
+// AddHTML adds HTML-formatted rich text to given [rich.Text].
 // This uses the golang XML decoder system, which strips all whitespace
 // and therefore does not capture any preformatted text. See AddHTMLPre.
-func AddHTML(tx *rich.Spans, str []byte) {
+func AddHTML(tx *rich.Text, str []byte) {
 	sz := len(str)
 	if sz == 0 {
 		return
@@ -167,7 +167,7 @@ func AddHTML(tx *rich.Spans, str []byte) {
 // Only basic styling tags, including <span> elements with style parameters
 // (including class names) are decoded.  Whitespace is decoded as-is,
 // including LF \n etc, except in WhiteSpacePreLine case which only preserves LF's
-func (tr *Text) SetHTMLPre(str []byte, font *rich.FontRender, txtSty *rich.Spans, ctxt *units.Context, cssAgg map[string]any) {
+func (tr *Text) SetHTMLPre(str []byte, font *rich.FontRender, txtSty *rich.Text, ctxt *units.Context, cssAgg map[string]any) {
 	// errstr := "core.Text SetHTMLPre"
 
 	sz := len(str)

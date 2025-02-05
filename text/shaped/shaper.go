@@ -62,8 +62,8 @@ func NewShaper() *Shaper {
 // has the font ascent and descent information, and the BoundsBox() method returns a full
 // bounding box for the given font, centered at the baseline.
 func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.Settings) *Run {
-	sp := rich.NewSpans(sty, r)
-	out := sh.shapeText(sp, tsty, rts, []rune{r})
+	tx := rich.NewText(sty, []rune{r})
+	out := sh.shapeText(tx, tsty, rts, []rune{r})
 	return &Run{Output: out[0]}
 }
 
@@ -85,17 +85,17 @@ func (sh *Shaper) LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settin
 // using given context needed for complete styling.
 // The results are only valid until the next call to Shape or WrapParagraph:
 // use slices.Clone if needed longer than that.
-func (sh *Shaper) Shape(sp rich.Spans, tsty *text.Style, rts *rich.Settings) []shaping.Output {
-	return sh.shapeText(sp, tsty, rts, sp.Join())
+func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaping.Output {
+	return sh.shapeText(tx, tsty, rts, tx.Join())
 }
 
 // shapeText implements Shape using the full text generated from the source spans
-func (sh *Shaper) shapeText(sp rich.Spans, tsty *text.Style, rts *rich.Settings, txt []rune) []shaping.Output {
+func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaping.Output {
 	sty := rich.NewStyle()
 	sh.outBuff = sh.outBuff[:0]
-	for si, s := range sp {
+	for si, s := range tx {
 		in := shaping.Input{}
-		start, end := sp.Range(si)
+		start, end := tx.Range(si)
 		sty.FromRunes(s)
 		q := StyleToQuery(sty, rts)
 		sh.fontMap.SetQuery(q)
@@ -127,7 +127,7 @@ func goTextDirection(rdir rich.Directions, tsty *text.Style) di.Direction {
 	return dir.ToGoText()
 }
 
-// todo: do the paragraph splitting!  write fun in rich.Spans
+// todo: do the paragraph splitting!  write fun in rich.Text
 
 // WrapLines performs line wrapping and shaping on the given rich text source,
 // using the given style information, where the [rich.Style] provides the default
@@ -135,7 +135,7 @@ func goTextDirection(rdir rich.Directions, tsty *text.Style) di.Direction {
 // weight, etc), for use in computing the default line height. Paragraphs are extracted
 // first using standard newline markers, assumed to coincide with separate spans in the
 // source text, and wrapped separately.
-func (sh *Shaper) WrapLines(sp rich.Spans, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines {
+func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines {
 	if tsty.FontSize.Dots == 0 {
 		tsty.FontSize.Dots = 24
 	}
@@ -143,7 +143,7 @@ func (sh *Shaper) WrapLines(sp rich.Spans, defSty *rich.Style, tsty *text.Style,
 	dir := goTextDirection(rich.Default, tsty)
 
 	lht := sh.LineHeight(defSty, tsty, rts)
-	lns := &Lines{Source: sp, Color: tsty.Color, SelectionColor: colors.Scheme.Select.Container, HighlightColor: colors.Scheme.Warn.Container, LineHeight: lht}
+	lns := &Lines{Source: tx, Color: tsty.Color, SelectionColor: colors.Scheme.Select.Container, HighlightColor: colors.Scheme.Warn.Container, LineHeight: lht}
 
 	lgap := lns.LineHeight - (lns.LineHeight / tsty.LineSpacing) // extra added for spacing
 	nlines := int(math32.Floor(size.Y / lns.LineHeight))
@@ -176,18 +176,18 @@ func (sh *Shaper) WrapLines(sp rich.Spans, defSty *rich.Style, tsty *text.Style,
 	// 	// Just use the first one.
 	// 	wc.Truncator = s.shapeText(params.PxPerEm, params.Locale, []rune(params.Truncator))[0]
 	// }
-	txt := sp.Join()
-	outs := sh.shapeText(sp, tsty, rts, txt)
+	txt := tx.Join()
+	outs := sh.shapeText(tx, tsty, rts, txt)
 	// todo: WrapParagraph does NOT handle vertical text! file issue.
 	lines, truncate := sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
 	lns.Truncated = truncate > 0
 	cspi := 0
-	cspSt, cspEd := sp.Range(cspi)
+	cspSt, cspEd := tx.Range(cspi)
 	var off math32.Vector2
 	for _, lno := range lines {
 		// fmt.Println("line:", li, off)
 		ln := Line{}
-		var lsp rich.Spans
+		var lsp rich.Text
 		var pos fixed.Point26_6
 		setFirst := false
 		for oi := range lno {
@@ -201,9 +201,9 @@ func (sh *Shaper) WrapLines(sp rich.Spans, defSty *rich.Style, tsty *text.Style,
 			ln.SourceRange.End = rns.End
 			for rns.Start >= cspEd {
 				cspi++
-				cspSt, cspEd = sp.Range(cspi)
+				cspSt, cspEd = tx.Range(cspi)
 			}
-			sty, cr := rich.NewStyleFromRunes(sp[cspi])
+			sty, cr := rich.NewStyleFromRunes(tx[cspi])
 			if lns.FontSize == 0 {
 				lns.FontSize = sty.Size * fsz
 			}

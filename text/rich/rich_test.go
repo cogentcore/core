@@ -42,10 +42,10 @@ func TestStyle(t *testing.T) {
 	assert.Equal(t, s, ns)
 }
 
-func TestSpans(t *testing.T) {
+func TestText(t *testing.T) {
 	src := "The lazy fox typed in some familiar text"
 	sr := []rune(src)
-	sp := Spans{}
+	sp := Text{}
 	plain := NewStyle()
 	ital := NewStyle().SetSlant(Italic)
 	ital.SetStrokeColor(colors.Red)

@@ -28,13 +28,13 @@ This directory contains all of the text processing and rendering functionality, 
 
 ## Organization:
 
-* `text/rich`: the `rich.Spans` is a `[][]rune` type that encodes the local font-level styling properties (bold, underline, etc) for the basic chunks of text _input_. This is the input for harfbuzz shaping and all text rendering. Each `rich.Spans` typically represents either an individual line of text, for line-oriented uses, or a paragraph for unconstrained text layout. The SplitParagraphs method generates paragraph-level splits for this case.
+* `text/rich`: the `rich.Text` is a `[][]rune` type that encodes the local font-level styling properties (bold, underline, etc) for the basic chunks of text _input_. This is the input for harfbuzz shaping and all text rendering. Each `rich.Text` typically represents either an individual line of text, for line-oriented uses, or a paragraph for unconstrained text layout. The SplitParagraphs method generates paragraph-level splits for this case.
 
 * `text/shaped`: contains representations of shaped text, suitable for subsequent rendering, organized at multiple levels: `Lines`, `Line`, and `Run`. A `Run` is the shaped version of a Span, and is the basic unit of text rendering, containing `go-text` `shaping.Output` and `Glyph` data. A `Line` is a collection of `Run` elements, and `Lines` has multiple such Line elements, each of which has bounding boxes and functions for locating and selecting text elements at different levels. The actual font rendering is managed by `paint/renderer` types using these shaped representations. It looks like most fonts these days use outline-based rendering, which our rasterx renderer performs.
 
-* `text/lines`: manages `rich.Spans` and `shaped.Lines` for line-oriented uses (texteditor, terminal). TODO: Need to move `parse/lexer/Pos` into lines, along with probably some of the other stuff from lexer, and move `parser/tokens` into `text/tokens` as it is needed to be our fully general token library for all markup. Probably just move parse under text too?
+* `text/lines`: manages `rich.Text` and `shaped.Lines` for line-oriented uses (texteditor, terminal). TODO: Need to move `parse/lexer/Pos` into lines, along with probably some of the other stuff from lexer, and move `parser/tokens` into `text/tokens` as it is needed to be our fully general token library for all markup. Probably just move parse under text too?
 
 * `text/text`: is the general unconstrained text layout framework. It has a `Style` object containing general text layout styling parameters, used in shaped for wrapping text into lines. We may also want to leverage the tdewolff/canvas LaTeX layout system, with arbitrary textobject elements that can include Widgets etc, for doing `content` layout in an optimized way, e.g., doing direct translation of markdown into this augmented rich text format that is then just rendered directly.
 
-* `text/htmltext`: has functions for translating HTML formatted strings into corresponding `rich.Spans` rich text representations.
+* `text/htmltext`: has functions for translating HTML formatted strings into corresponding `rich.Text` rich text representations.
 
