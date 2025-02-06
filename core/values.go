@@ -12,8 +12,9 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"golang.org/x/exp/maps"
@@ -184,7 +185,7 @@ func (ib *IconButton) Init() {
 
 // FontName is used to specify a font family name.
 // It results in a [FontButton] [Value].
-type FontName string
+type FontName = rich.FontName
 
 // FontButton represents a [FontName] with a [Button] that opens
 // a dialog for selecting the font family.
@@ -200,18 +201,19 @@ func (fb *FontButton) Init() {
 	InitValueButton(fb, false, func(d *Body) {
 		d.SetTitle("Select a font family")
 		si := 0
-		fi := ptext.FontLibrary.FontInfo
+		fi := shaped.FontList()
 		tb := NewTable(d)
 		tb.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
 		tb.SetTableStyler(func(w Widget, s *styles.Style, row, col int) {
 			if col != 4 {
 				return
 			}
-			s.Font.Family = fi[row].Name
+			// TODO(text): this won't work here
+			// s.Font.Family = fi[row].Name
 			s.Font.Stretch = fi[row].Stretch
 			s.Font.Weight = fi[row].Weight
-			s.Font.Style = fi[row].Style
-			s.Font.Size.Pt(18)
+			s.Font.Slant = fi[row].Slant
+			s.Text.FontSize.Pt(18)
 		})
 		tb.OnChange(func(e events.Event) {
 			fb.Text = fi[si].Name

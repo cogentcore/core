@@ -36,8 +36,8 @@ type Index struct { //types:add
 // of each span: style + size.
 const NStyleRunes = 2
 
-// NumText returns the number of spans in this Text.
-func (tx Text) NumText() int {
+// NumSpans returns the number of spans in this Text.
+func (tx Text) NumSpans() int {
 	return len(tx)
 }
 

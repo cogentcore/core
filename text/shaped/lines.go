@@ -56,7 +56,7 @@ type Lines struct {
 	Direction rich.Directions
 
 	// Links holds any hyperlinks within shaped text.
-	Links []Link
+	Links []rich.LinkRec
 
 	// Color is the default fill color to use for inking text.
 	Color color.Color
@@ -144,6 +144,15 @@ func (ls *Lines) String() string {
 		str += ln.String()
 	}
 	return str
+}
+
+// GetLinks gets the links for these lines, which are cached in Links.
+func (ls *Lines) GetLinks() []rich.LinkRec {
+	if ls.Links != nil {
+		return ls.Links
+	}
+	ls.Links = ls.Source.GetLinks()
+	return ls.Links
 }
 
 // GlyphBoundsBox returns the math32.Box2 version of [Run.GlyphBounds],

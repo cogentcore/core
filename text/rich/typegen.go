@@ -3,11 +3,29 @@
 package rich
 
 import (
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/types"
 	"github.com/go-text/typesetting/language"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Settings", IDName: "settings", Doc: "Settings holds the global settings for rich text styling,\nincluding language, script, and preferred font faces for\neach category of font.", Fields: []types.Field{{Name: "Language", Doc: "Language is the preferred language used for rendering text."}, {Name: "Script", Doc: "Script is the specific writing system used for rendering text."}, {Name: "SansSerif", Doc: "SansSerif is a font without serifs, where glyphs have plain stroke endings,\nwithout ornamentation. Example sans-serif fonts include Arial, Helvetica,\nOpen Sans, Fira Sans, Lucida Sans, Lucida Sans Unicode, Trebuchet MS,\nLiberation Sans, and Nimbus Sans L.\nThis can be a list of comma-separated names, tried in order.\n\"sans-serif\" will be added automatically as a final backup."}, {Name: "Serif", Doc: "Serif is a small line or stroke attached to the end of a larger stroke\nin a letter. In serif fonts, glyphs have finishing strokes, flared or\ntapering ends. Examples include Times New Roman, Lucida Bright,\nLucida Fax, Palatino, Palatino Linotype, Palladio, and URW Palladio.\nThis can be a list of comma-separated names, tried in order.\n\"serif\" will be added automatically as a final backup."}, {Name: "Monospace", Doc: "Monospace fonts have all glyphs with he same fixed width.\nExample monospace fonts include Fira Mono, DejaVu Sans Mono,\nMenlo, Consolas, Liberation Mono, Monaco, and Lucida Console.\nThis can be a list of comma-separated names. serif will be added\nautomatically as a final backup.\nThis can be a list of comma-separated names, tried in order.\n\"monospace\" will be added automatically as a final backup."}, {Name: "Cursive", Doc: "Cursive glyphs generally have either joining strokes or other cursive\ncharacteristics beyond those of italic typefaces. The glyphs are partially\nor completely connected, and the result looks more like handwritten pen or\nbrush writing than printed letter work. Example cursive fonts include\nBrush Script MT, Brush Script Std, Lucida Calligraphy, Lucida Handwriting,\nand Apple Chancery.\nThis can be a list of comma-separated names, tried in order.\n\"cursive\" will be added automatically as a final backup."}, {Name: "Fantasy", Doc: "Fantasy fonts are primarily decorative fonts that contain playful\nrepresentations of characters. Example fantasy fonts include Papyrus,\nHerculanum, Party LET, Curlz MT, and Harrington.\nThis can be a list of comma-separated names, tried in order.\n\"fantasy\" will be added automatically as a final backup."}, {Name: "Math", Doc: "\tMath fonts are for displaying mathematical expressions, for example\nsuperscript and subscript, brackets that cross several lines, nesting\nexpressions, and double-struck glyphs with distinct meanings.\nThis can be a list of comma-separated names, tried in order.\n\"math\" will be added automatically as a final backup."}, {Name: "Emoji", Doc: "Emoji fonts are specifically designed to render emoji.\nThis can be a list of comma-separated names, tried in order.\n\"emoji\" will be added automatically as a final backup."}, {Name: "Fangsong", Doc: "Fangsong are a particular style of Chinese characters that are between\nserif-style Song and cursive-style Kai forms. This style is often used\nfor government documents.\nThis can be a list of comma-separated names, tried in order.\n\"fangsong\" will be added automatically as a final backup."}, {Name: "Custom", Doc: "Custom is a custom font name."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.LinkRec", IDName: "link-rec", Doc: "LinkRec represents a hyperlink within shaped text.", Fields: []types.Field{{Name: "Label", Doc: "Label is the text label for the link."}, {Name: "URL", Doc: "URL is the full URL for the link."}, {Name: "Range", Doc: "Range defines the starting and ending positions of the link,\nin terms of source rune indexes."}}})
+
+// SetLabel sets the [LinkRec.Label]:
+// Label is the text label for the link.
+func (t *LinkRec) SetLabel(v string) *LinkRec { t.Label = v; return t }
+
+// SetURL sets the [LinkRec.URL]:
+// URL is the full URL for the link.
+func (t *LinkRec) SetURL(v string) *LinkRec { t.URL = v; return t }
+
+// SetRange sets the [LinkRec.Range]:
+// Range defines the starting and ending positions of the link,
+// in terms of source rune indexes.
+func (t *LinkRec) SetRange(v textpos.Range) *LinkRec { t.Range = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.FontName", IDName: "font-name", Doc: "FontName is a special string that provides a font chooser.\nIt is aliased to [core.FontName] as well."})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Settings", IDName: "settings", Doc: "Settings holds the global settings for rich text styling,\nincluding language, script, and preferred font faces for\neach category of font.", Fields: []types.Field{{Name: "Language", Doc: "Language is the preferred language used for rendering text."}, {Name: "Script", Doc: "Script is the specific writing system used for rendering text.\ntodo: no idea how to set this based on language or anything else."}, {Name: "SansSerif", Doc: "SansSerif is a font without serifs, where glyphs have plain stroke endings,\nwithout ornamentation. Example sans-serif fonts include Arial, Helvetica,\nOpen Sans, Fira Sans, Lucida Sans, Lucida Sans Unicode, Trebuchet MS,\nLiberation Sans, and Nimbus Sans L.\nThis can be a list of comma-separated names, tried in order.\n\"sans-serif\" will be added automatically as a final backup."}, {Name: "Serif", Doc: "Serif is a small line or stroke attached to the end of a larger stroke\nin a letter. In serif fonts, glyphs have finishing strokes, flared or\ntapering ends. Examples include Times New Roman, Lucida Bright,\nLucida Fax, Palatino, Palatino Linotype, Palladio, and URW Palladio.\nThis can be a list of comma-separated names, tried in order.\n\"serif\" will be added automatically as a final backup."}, {Name: "Monospace", Doc: "Monospace fonts have all glyphs with he same fixed width.\nExample monospace fonts include Fira Mono, DejaVu Sans Mono,\nMenlo, Consolas, Liberation Mono, Monaco, and Lucida Console.\nThis can be a list of comma-separated names. serif will be added\nautomatically as a final backup.\nThis can be a list of comma-separated names, tried in order.\n\"monospace\" will be added automatically as a final backup."}, {Name: "Cursive", Doc: "Cursive glyphs generally have either joining strokes or other cursive\ncharacteristics beyond those of italic typefaces. The glyphs are partially\nor completely connected, and the result looks more like handwritten pen or\nbrush writing than printed letter work. Example cursive fonts include\nBrush Script MT, Brush Script Std, Lucida Calligraphy, Lucida Handwriting,\nand Apple Chancery.\nThis can be a list of comma-separated names, tried in order.\n\"cursive\" will be added automatically as a final backup."}, {Name: "Fantasy", Doc: "Fantasy fonts are primarily decorative fonts that contain playful\nrepresentations of characters. Example fantasy fonts include Papyrus,\nHerculanum, Party LET, Curlz MT, and Harrington.\nThis can be a list of comma-separated names, tried in order.\n\"fantasy\" will be added automatically as a final backup."}, {Name: "Math", Doc: "\tMath fonts are for displaying mathematical expressions, for example\nsuperscript and subscript, brackets that cross several lines, nesting\nexpressions, and double-struck glyphs with distinct meanings.\nThis can be a list of comma-separated names, tried in order.\n\"math\" will be added automatically as a final backup."}, {Name: "Emoji", Doc: "Emoji fonts are specifically designed to render emoji.\nThis can be a list of comma-separated names, tried in order.\n\"emoji\" will be added automatically as a final backup."}, {Name: "Fangsong", Doc: "Fangsong are a particular style of Chinese characters that are between\nserif-style Song and cursive-style Kai forms. This style is often used\nfor government documents.\nThis can be a list of comma-separated names, tried in order.\n\"fangsong\" will be added automatically as a final backup."}, {Name: "Custom", Doc: "Custom is a custom font name."}}})
 
 // SetLanguage sets the [Settings.Language]:
 // Language is the preferred language used for rendering text.
@@ -15,6 +33,7 @@ func (t *Settings) SetLanguage(v language.Language) *Settings { t.Language = v; 
 
 // SetScript sets the [Settings.Script]:
 // Script is the specific writing system used for rendering text.
+// todo: no idea how to set this based on language or anything else.
 func (t *Settings) SetScript(v language.Script) *Settings { t.Script = v; return t }
 
 // SetSansSerif sets the [Settings.SansSerif]:
@@ -24,7 +43,7 @@ func (t *Settings) SetScript(v language.Script) *Settings { t.Script = v; return
 // Liberation Sans, and Nimbus Sans L.
 // This can be a list of comma-separated names, tried in order.
 // "sans-serif" will be added automatically as a final backup.
-func (t *Settings) SetSansSerif(v string) *Settings { t.SansSerif = v; return t }
+func (t *Settings) SetSansSerif(v FontName) *Settings { t.SansSerif = v; return t }
 
 // SetSerif sets the [Settings.Serif]:
 // Serif is a small line or stroke attached to the end of a larger stroke
@@ -33,7 +52,7 @@ func (t *Settings) SetSansSerif(v string) *Settings { t.SansSerif = v; return t 
 // Lucida Fax, Palatino, Palatino Linotype, Palladio, and URW Palladio.
 // This can be a list of comma-separated names, tried in order.
 // "serif" will be added automatically as a final backup.
-func (t *Settings) SetSerif(v string) *Settings { t.Serif = v; return t }
+func (t *Settings) SetSerif(v FontName) *Settings { t.Serif = v; return t }
 
 // SetMonospace sets the [Settings.Monospace]:
 // Monospace fonts have all glyphs with he same fixed width.
@@ -43,7 +62,7 @@ func (t *Settings) SetSerif(v string) *Settings { t.Serif = v; return t }
 // automatically as a final backup.
 // This can be a list of comma-separated names, tried in order.
 // "monospace" will be added automatically as a final backup.
-func (t *Settings) SetMonospace(v string) *Settings { t.Monospace = v; return t }
+func (t *Settings) SetMonospace(v FontName) *Settings { t.Monospace = v; return t }
 
 // SetCursive sets the [Settings.Cursive]:
 // Cursive glyphs generally have either joining strokes or other cursive
@@ -54,7 +73,7 @@ func (t *Settings) SetMonospace(v string) *Settings { t.Monospace = v; return t 
 // and Apple Chancery.
 // This can be a list of comma-separated names, tried in order.
 // "cursive" will be added automatically as a final backup.
-func (t *Settings) SetCursive(v string) *Settings { t.Cursive = v; return t }
+func (t *Settings) SetCursive(v FontName) *Settings { t.Cursive = v; return t }
 
 // SetFantasy sets the [Settings.Fantasy]:
 // Fantasy fonts are primarily decorative fonts that contain playful
@@ -62,7 +81,7 @@ func (t *Settings) SetCursive(v string) *Settings { t.Cursive = v; return t }
 // Herculanum, Party LET, Curlz MT, and Harrington.
 // This can be a list of comma-separated names, tried in order.
 // "fantasy" will be added automatically as a final backup.
-func (t *Settings) SetFantasy(v string) *Settings { t.Fantasy = v; return t }
+func (t *Settings) SetFantasy(v FontName) *Settings { t.Fantasy = v; return t }
 
 // SetMath sets the [Settings.Math]:
 //
@@ -72,13 +91,13 @@ func (t *Settings) SetFantasy(v string) *Settings { t.Fantasy = v; return t }
 // expressions, and double-struck glyphs with distinct meanings.
 // This can be a list of comma-separated names, tried in order.
 // "math" will be added automatically as a final backup.
-func (t *Settings) SetMath(v string) *Settings { t.Math = v; return t }
+func (t *Settings) SetMath(v FontName) *Settings { t.Math = v; return t }
 
 // SetEmoji sets the [Settings.Emoji]:
 // Emoji fonts are specifically designed to render emoji.
 // This can be a list of comma-separated names, tried in order.
 // "emoji" will be added automatically as a final backup.
-func (t *Settings) SetEmoji(v string) *Settings { t.Emoji = v; return t }
+func (t *Settings) SetEmoji(v FontName) *Settings { t.Emoji = v; return t }
 
 // SetFangsong sets the [Settings.Fangsong]:
 // Fangsong are a particular style of Chinese characters that are between
@@ -86,13 +105,13 @@ func (t *Settings) SetEmoji(v string) *Settings { t.Emoji = v; return t }
 // for government documents.
 // This can be a list of comma-separated names, tried in order.
 // "fangsong" will be added automatically as a final backup.
-func (t *Settings) SetFangsong(v string) *Settings { t.Fangsong = v; return t }
+func (t *Settings) SetFangsong(v FontName) *Settings { t.Fangsong = v; return t }
 
 // SetCustom sets the [Settings.Custom]:
 // Custom is a custom font name.
-func (t *Settings) SetCustom(v string) *Settings { t.Custom = v; return t }
+func (t *Settings) SetCustom(v FontName) *Settings { t.Custom = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Style", IDName: "style", Doc: "Style contains all of the rich text styling properties, that apply to one\nspan of text. These are encoded into a uint32 rune value in [rich.Text].\nSee [text.Style] and [Settings] for additional context needed for full specification.", Directives: []types.Directive{{Tool: "go", Directive: "generate", Args: []string{"core", "generate", "-add-types", "-setters"}}, {Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Size", Doc: "Size is the font size multiplier relative to the standard font size\nspecified in the [text.Style]."}, {Name: "Family", Doc: "Family indicates the generic family of typeface to use, where the\nspecific named values to use for each are provided in the Settings."}, {Name: "Slant", Doc: "Slant allows italic or oblique faces to be selected."}, {Name: "Weight", Doc: "Weights are the degree of blackness or stroke thickness of a font.\nThis value ranges from 100.0 to 900.0, with 400.0 as normal."}, {Name: "Stretch", Doc: "Stretch is the width of a font as an approximate fraction of the normal width.\nWidths range from 0.5 to 2.0 inclusive, with 1.0 as the normal width."}, {Name: "Special", Doc: "Special additional formatting factors that are not otherwise\ncaptured by changes in font rendering properties or decorations."}, {Name: "Decoration", Doc: "Decorations are underline, line-through, etc, as bit flags\nthat must be set using [Decorations.SetFlag]."}, {Name: "Direction", Doc: "Direction is the direction to render the text."}, {Name: "FillColor", Doc: "\tFillColor is the color to use for glyph fill (i.e., the standard \"ink\" color)\nif the Decoration FillColor flag is set. This will be encoded in a uint32 following\nthe style rune, in rich.Text spans."}, {Name: "StrokeColor", Doc: "\tStrokeColor is the color to use for glyph outline stroking if the\nDecoration StrokeColor flag is set. This will be encoded in a uint32\nfollowing the style rune, in rich.Text spans."}, {Name: "Background", Doc: "\tBackground is the color to use for the background region if the Decoration\nBackground flag is set. This will be encoded in a uint32 following the style rune,\nin rich.Text spans."}, {Name: "URL", Doc: "URL is the URL for a link element. It is encoded in runes after the style runes."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Style", IDName: "style", Doc: "Style contains all of the rich text styling properties, that apply to one\nspan of text. These are encoded into a uint32 rune value in [rich.Text].\nSee [text.Style] and [Settings] for additional context needed for full specification.", Directives: []types.Directive{{Tool: "go", Directive: "generate", Args: []string{"core", "generate", "-add-types", "-setters"}}, {Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Size", Doc: "Size is the font size multiplier relative to the standard font size\nspecified in the [text.Style]."}, {Name: "Family", Doc: "Family indicates the generic family of typeface to use, where the\nspecific named values to use for each are provided in the Settings."}, {Name: "Slant", Doc: "Slant allows italic or oblique faces to be selected."}, {Name: "Weight", Doc: "Weights are the degree of blackness or stroke thickness of a font.\nThis value ranges from 100.0 to 900.0, with 400.0 as normal."}, {Name: "Stretch", Doc: "Stretch is the width of a font as an approximate fraction of the normal width.\nWidths range from 0.5 to 2.0 inclusive, with 1.0 as the normal width."}, {Name: "Special", Doc: "Special additional formatting factors that are not otherwise\ncaptured by changes in font rendering properties or decorations.\nSee [Specials] for usage information: use [Text.StartSpecial]\nand [Text.EndSpecial] to set."}, {Name: "Decoration", Doc: "Decorations are underline, line-through, etc, as bit flags\nthat must be set using [Decorations.SetFlag]."}, {Name: "Direction", Doc: "Direction is the direction to render the text."}, {Name: "FillColor", Doc: "\tFillColor is the color to use for glyph fill (i.e., the standard \"ink\" color)\nif the Decoration FillColor flag is set. This will be encoded in a uint32 following\nthe style rune, in rich.Text spans."}, {Name: "StrokeColor", Doc: "\tStrokeColor is the color to use for glyph outline stroking if the\nDecoration StrokeColor flag is set. This will be encoded in a uint32\nfollowing the style rune, in rich.Text spans."}, {Name: "Background", Doc: "\tBackground is the color to use for the background region if the Decoration\nBackground flag is set. This will be encoded in a uint32 following the style rune,\nin rich.Text spans."}, {Name: "URL", Doc: "URL is the URL for a link element. It is encoded in runes after the style runes."}}})
 
 // SetSize sets the [Style.Size]:
 // Size is the font size multiplier relative to the standard font size
@@ -121,6 +140,8 @@ func (t *Style) SetStretch(v Stretch) *Style { t.Stretch = v; return t }
 // SetSpecial sets the [Style.Special]:
 // Special additional formatting factors that are not otherwise
 // captured by changes in font rendering properties or decorations.
+// See [Specials] for usage information: use [Text.StartSpecial]
+// and [Text.EndSpecial] to set.
 func (t *Style) SetSpecial(v Specials) *Style { t.Special = v; return t }
 
 // SetDecoration sets the [Style.Decoration]:
@@ -146,7 +167,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Stretch",
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Decorations", IDName: "decorations", Doc: "Decorations are underline, line-through, etc, as bit flags\nthat must be set using [Font.SetDecoration]."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Specials", IDName: "specials", Doc: "Specials are special additional mutually exclusive formatting factors that are not\notherwise captured by changes in font rendering properties or decorations.\nEach special must be terminated by an End span element, on its own, which\npops the stack on the last special that was started."})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Specials", IDName: "specials", Doc: "Specials are special additional mutually exclusive formatting factors that are not\notherwise captured by changes in font rendering properties or decorations.\nEach special must be terminated by an End span element, on its own, which\npops the stack on the last special that was started.\nUse [Text.StartSpecial] and [Text.EndSpecial] to manage the specials,\navoiding the potential for repeating the start of a given special."})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Directions", IDName: "directions", Doc: "Directions specifies the text layout direction."})
 

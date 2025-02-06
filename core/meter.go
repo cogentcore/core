@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/text"
 )
 
 // Meter is a widget that renders a current value on as a filled
@@ -86,17 +87,17 @@ func (m *Meter) Init() {
 		case MeterCircle:
 			s.Min.Set(units.Dp(128))
 			m.Width.Dp(8)
-			s.Font.Size.Dp(32)
-			s.Text.LineHeight.Em(40.0 / 32)
-			s.Text.Align = styles.Center
-			s.Text.AlignV = styles.Center
+			s.Text.FontSize.Dp(32)
+			s.Text.LineSpacing = 40.0 / 32
+			s.Text.Align = text.Center
+			s.Text.AlignV = text.Center
 		case MeterSemicircle:
 			s.Min.Set(units.Dp(112), units.Dp(64))
 			m.Width.Dp(16)
-			s.Font.Size.Dp(22)
-			s.Text.LineHeight.Em(28.0 / 22)
-			s.Text.Align = styles.Center
-			s.Text.AlignV = styles.Center
+			s.Text.FontSize.Dp(22)
+			s.Text.LineSpacing = 28.0 / 22
+			s.Text.Align = text.Center
+			s.Text.AlignV = text.Center
 		}
 	})
 }
@@ -138,7 +139,7 @@ func (m *Meter) Render() {
 	size := m.Geom.Size.Actual.Content.SubScalar(sw)
 
 	// var txt *ptext.Text
-	var toff math32.Vector2
+	// var toff math32.Vector2
 	if m.Text != "" {
 		// TODO(text):
 		// txt = &ptext.Text{}

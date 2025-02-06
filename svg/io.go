@@ -1130,7 +1130,10 @@ func SetStandardXMLAttr(ni Node, name, val string) bool {
 		nb.Class = val
 		return true
 	case "style":
-		styleprops.FromXMLString(val, (map[string]any)(nb.Properties))
+		if nb.Properties == nil {
+			nb.Properties = make(map[string]any)
+		}
+		styleprops.FromXMLString(val, nb.Properties)
 		return true
 	}
 	return false

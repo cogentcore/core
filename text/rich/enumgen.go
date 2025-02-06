@@ -232,7 +232,7 @@ const SpecialsN Specials = 7
 
 var _SpecialsValueMap = map[string]Specials{`nothing`: 0, `super`: 1, `sub`: 2, `link`: 3, `math`: 4, `quote`: 5, `end`: 6}
 
-var _SpecialsDescMap = map[Specials]string{0: `Nothing special.`, 1: `Super starts super-scripted text.`, 2: `Sub starts sub-scripted text.`, 3: `Link starts a hyperlink, which is in the URL field of the style, and encoded in the runes after the style runes. It also identifies this span for functional interactions such as hovering and clicking. It does not specify the styling, which therefore must be set in addition.`, 4: `Math starts a LaTeX formatted math sequence.`, 5: `Quote starts an indented paragraph-level quote.`, 6: `End must be added to terminate the last Special started. The renderer maintains a stack of special elements.`}
+var _SpecialsDescMap = map[Specials]string{0: `Nothing special.`, 1: `Super starts super-scripted text.`, 2: `Sub starts sub-scripted text.`, 3: `Link starts a hyperlink, which is in the URL field of the style, and encoded in the runes after the style runes. It also identifies this span for functional interactions such as hovering and clicking. It does not specify the styling, which therefore must be set in addition.`, 4: `Math starts a LaTeX formatted math sequence.`, 5: `Quote starts an indented paragraph-level quote.`, 6: `End must be added to terminate the last Special started: use [Text.AddEnd]. The renderer maintains a stack of special elements.`}
 
 var _SpecialsMap = map[Specials]string{0: `nothing`, 1: `super`, 2: `sub`, 3: `link`, 4: `math`, 5: `quote`, 6: `end`}
 

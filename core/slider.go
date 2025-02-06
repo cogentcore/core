@@ -295,7 +295,7 @@ func (sr *Slider) Init() {
 		}
 		tree.AddAt(p, "icon", func(w *Icon) {
 			w.Styler(func(s *styles.Style) {
-				s.Font.Size.Dp(24)
+				s.Text.FontSize.Dp(24)
 				s.Color = sr.ThumbColor
 			})
 			w.Updater(func() {

@@ -109,7 +109,7 @@ func TestButtonFontSize(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetText("Hello")
 	bt.Styler(func(s *styles.Style) {
-		s.Font.Size.Dp(48)
+		s.Text.FontSize.Dp(48)
 	})
 	b.AssertRender(t, "button/font-size")
 }

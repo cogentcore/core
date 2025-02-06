@@ -23,7 +23,7 @@ func TestTextTypes(t *testing.T) {
 func TestTextRem(t *testing.T) {
 	b := NewBody()
 	NewText(b).SetText("Hello, world!").Styler(func(s *styles.Style) {
-		s.Font.Size = units.Rem(2)
+		s.Text.FontSize = units.Rem(2)
 	})
 	b.AssertRender(t, "text/rem")
 }

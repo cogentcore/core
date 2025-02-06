@@ -29,6 +29,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 )
 
@@ -637,7 +638,7 @@ func (lb *ListBase) MakeGridIndex(p *tree.Plan, i, si int, itxt string, invis bo
 			nd = max(nd, 3)
 			s.Min.X.Ch(nd + 2)
 			s.Padding.Right.Dp(4)
-			s.Text.Align = styles.End
+			s.Text.Align = text.End
 			s.Min.Y.Em(1)
 			s.GrowWrap = false
 		})

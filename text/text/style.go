@@ -115,9 +115,10 @@ func (ts *Style) InheritFields(parent *Style) {
 	ts.TabSize = parent.TabSize
 }
 
-// LineHeight returns the effective line height .
-func (ts *Style) LineHeight() float32 {
-	return ts.FontSize.Dots * ts.LineSpacing
+// FontHeight returns the effective font height based on
+// FontSize * [rich.Style] Size multiplier.
+func (ts *Style) FontHeight(sty *rich.Style) float32 {
+	return ts.FontSize.Dots * sty.Size
 }
 
 // AlignFactors gets basic text alignment factors

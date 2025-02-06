@@ -1,0 +1,47 @@
+// Copyright (c) 2025, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package shaped
+
+import (
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
+)
+
+// FontSize returns the font shape sizing information for given font and text style,
+// using given rune (often the letter 'm'). The GlyphBounds field of the [Run] result
+// has the font ascent and descent information, and the BoundsBox() method returns a full
+// bounding box for the given font, centered at the baseline.
+func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.Settings) *Run {
+	tx := rich.NewText(sty, []rune{r})
+	out := sh.shapeText(tx, tsty, rts, []rune{r})
+	return &Run{Output: out[0]}
+}
+
+// LineHeight returns the line height for given font and text style.
+// For vertical text directions, this is actually the line width.
+// It includes the [text.Style] LineSpacing multiplier on the natural
+// font-derived line height, which is not generally the same as the font size.
+func (sh *Shaper) LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32 {
+	run := sh.FontSize('m', sty, tsty, rts)
+	bb := run.BoundsBox()
+	dir := goTextDirection(rich.Default, tsty)
+	if dir.IsVertical() {
+		return tsty.LineSpacing * bb.Size().X
+	}
+	return tsty.LineSpacing * bb.Size().Y
+}
+
+// SetUnitContext sets the font-specific information in the given
+// units.Context, based on the given styles, using [Shaper.FontSize].
+func (sh *Shaper) SetUnitContext(uc *units.Context, sty *rich.Style, tsty *text.Style, rts *rich.Settings) {
+	fsz := tsty.FontHeight(sty)
+	xr := sh.FontSize('x', sty, tsty, rts)
+	ex := xr.GlyphBoundsBox(&xr.Glyphs[0]).Size().Y
+	zr := sh.FontSize('0', sty, tsty, rts)
+	ch := math32.FromFixed(zr.Advance)
+	uc.SetFont(fsz, ex, ch, uc.Dp(16))
+}

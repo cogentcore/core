@@ -129,7 +129,7 @@ func (bt *Button) Init() {
 				s.Padding.Right.Dp(16)
 			}
 		}
-		s.Font.Size.Dp(14) // Button font size is used for text font size
+		s.Text.FontSize.Dp(14) // Button font size is used for text font size
 		s.Gap.Zero()
 		s.CenterAll()
 
@@ -210,7 +210,7 @@ func (bt *Button) Init() {
 		if bt.Icon.IsSet() {
 			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
-					s.Font.Size.Dp(18)
+					s.Text.FontSize.Dp(18)
 				})
 				w.Updater(func() {
 					w.SetIcon(bt.Icon)
@@ -226,7 +226,7 @@ func (bt *Button) Init() {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 					s.FillMargin = false
-					s.Font.Size = bt.Styles.Font.Size // Directly inherit to override the [Text.Type]-based default
+					s.Text.FontSize = bt.Styles.Text.FontSize // Directly inherit to override the [Text.Type]-based default
 				})
 				w.Updater(func() {
 					if bt.Type == ButtonMenu {

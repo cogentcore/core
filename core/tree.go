@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 )
 
@@ -216,7 +217,7 @@ func (tr *Tree) Init() {
 		s.Padding.Left.Dp(ConstantSpacing(4))
 		s.Padding.SetVertical(units.Dp(4))
 		s.Padding.Right.Zero()
-		s.Text.Align = styles.Start
+		s.Text.Align = text.Start
 
 		// need to copy over to actual and then clear styles one
 		if s.Is(states.Selected) {
@@ -455,7 +456,7 @@ func (tr *Tree) Init() {
 		if tr.Icon.IsSet() {
 			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
-					s.Font.Size.Dp(24)
+					s.Text.FontSize.Dp(24)
 					s.Color = colors.Scheme.Primary.Base
 					s.Align.Self = styles.Center
 				})

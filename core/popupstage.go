@@ -93,15 +93,15 @@ func (st *Stage) runPopup() *Stage {
 		bigPopup = true
 	}
 	scrollWd := int(sc.Styles.ScrollbarWidth.Dots)
-	fontHt := 16
-	if sc.Styles.Font.Face != nil {
-		fontHt = int(sc.Styles.Font.Face.Metrics.Height)
+	fontHt := sc.Styles.Text.FontHeight(&sc.Styles.Font)
+	if fontHt == 0 {
+		fontHt = 16
 	}
 
 	switch st.Type {
 	case MenuStage:
 		sz.X += scrollWd * 2
-		maxht := int(SystemSettings.MenuMaxHeight * fontHt)
+		maxht := int(float32(SystemSettings.MenuMaxHeight) * fontHt)
 		sz.Y = min(maxht, sz.Y)
 	case SnackbarStage:
 		b := msc.SceneGeom.Bounds()

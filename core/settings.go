@@ -26,8 +26,8 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
 
@@ -261,11 +261,13 @@ type AppearanceSettingsData struct { //types:add
 	// text highlighting style / theme.
 	Highlighting HighlightingName `default:"emacs"`
 
-	// Font is the default font family to use.
-	Font FontName `default:"Roboto"`
+	// Text specifies text settings including the language and
+	// font families for different styles of fonts.
+	Text rich.Settings `display:"add-fields"`
+}
 
-	// MonoFont is the default mono-spaced font family to use.
-	MonoFont FontName `default:"Roboto Mono"`
+func (as *AppearanceSettingsData) Defaults() {
+	as.Text.Defaults()
 }
 
 // ConstantSpacing returns a spacing value (padding, margin, gap)
@@ -564,12 +566,13 @@ func (ss *SystemSettingsData) Defaults() {
 
 // Apply detailed settings to all the relevant settings.
 func (ss *SystemSettingsData) Apply() { //types:add
-	if ss.FontPaths != nil {
-		paths := append(ss.FontPaths, ptext.FontPaths...)
-		ptext.FontLibrary.InitFontPaths(paths...)
-	} else {
-		ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
-	}
+	// TODO(text):
+	// if ss.FontPaths != nil {
+	// 	paths := append(ss.FontPaths, ptext.FontPaths...)
+	// 	ptext.FontLibrary.InitFontPaths(paths...)
+	// } else {
+	// 	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
+	// }
 
 	np := len(ss.FavPaths)
 	for i := 0; i < np; i++ {

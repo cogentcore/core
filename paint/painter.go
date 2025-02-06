@@ -578,7 +578,7 @@ func (pc *Painter) BoundingBoxFromPoints(points []math32.Vector2) image.Rectangl
 
 /////// Text
 
-// Text adds given text to the rendering list, at given baseline position.
-func (pc *Painter) NewText(tx *shaped.Lines, pos math32.Vector2) {
+// TextLines adds given text lines to the rendering list, at given baseline position.
+func (pc *Painter) TextLines(tx *shaped.Lines, pos math32.Vector2) {
 	pc.Render.Add(render.NewText(tx, pc.Context(), pos))
 }

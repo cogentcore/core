@@ -22,12 +22,14 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
@@ -153,10 +155,10 @@ type TextField struct { //core:embedder
 	selectModeShift bool
 
 	// renderAll is the render version of entire text, for sizing.
-	renderAll ptext.Text
+	renderAll *shaped.Lines
 
 	// renderVisible is the render version of just the visible text.
-	renderVisible ptext.Text
+	renderVisible *shaped.Lines
 
 	// number of lines from last render update, for word-wrap version
 	numLines int
@@ -234,7 +236,7 @@ func (tf *TextField) Init() {
 		if tf.TrailingIcon.IsSet() {
 			s.Padding.Right.Dp(12)
 		}
-		s.Text.Align = styles.Start
+		s.Text.Align = text.Start
 		s.Align.Items = styles.Center
 		s.Color = colors.Scheme.OnSurface
 		switch tf.Type {
@@ -595,7 +597,8 @@ func (tf *TextField) cursorForward(steps int) {
 		inc := tf.cursorPos - tf.endPos
 		tf.endPos += inc
 	}
-	tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
+	// TODO(text):
+	// tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -646,7 +649,8 @@ func (tf *TextField) cursorForwardWord(steps int) {
 		inc := tf.cursorPos - tf.endPos
 		tf.endPos += inc
 	}
-	tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
+	// TODO(text):
+	// tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -663,7 +667,8 @@ func (tf *TextField) cursorBackward(steps int) {
 		dec := min(tf.startPos, 8)
 		tf.startPos -= dec
 	}
-	tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
+	// TODO(text):
+	// tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -717,7 +722,8 @@ func (tf *TextField) cursorBackwardWord(steps int) {
 		dec := min(tf.startPos, 8)
 		tf.startPos -= dec
 	}
-	tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
+	// TODO(text):
+	// tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -733,9 +739,11 @@ func (tf *TextField) cursorDown(steps int) {
 		return
 	}
 
-	_, ri, _ := tf.renderAll.RuneSpanPos(tf.cursorPos)
+	// TODO(text):
+	// _, ri, _ := tf.renderAll.RuneSpanPos(tf.cursorPos)
 	tf.cursorLine = min(tf.cursorLine+steps, tf.numLines-1)
-	tf.cursorPos, _ = tf.renderAll.SpanPosToRuneIndex(tf.cursorLine, ri)
+	// TODO(text):
+	// tf.cursorPos, _ = tf.renderAll.SpanPosToRuneIndex(tf.cursorLine, ri)
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -751,9 +759,11 @@ func (tf *TextField) cursorUp(steps int) {
 		return
 	}
 
-	_, ri, _ := tf.renderAll.RuneSpanPos(tf.cursorPos)
+	// TODO(text):
+	// _, ri, _ := tf.renderAll.RuneSpanPos(tf.cursorPos)
 	tf.cursorLine = max(tf.cursorLine-steps, 0)
-	tf.cursorPos, _ = tf.renderAll.SpanPosToRuneIndex(tf.cursorLine, ri)
+	// TODO(text):
+	// tf.cursorPos, _ = tf.renderAll.SpanPosToRuneIndex(tf.cursorLine, ri)
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -1239,19 +1249,21 @@ func (tf *TextField) completeText(s string) {
 
 // hasWordWrap returns true if the layout is multi-line word wrapping
 func (tf *TextField) hasWordWrap() bool {
-	return tf.Styles.Text.HasWordWrap()
+	return tf.Styles.Text.WhiteSpace.HasWordWrap()
 }
 
 // charPos returns the relative starting position of the given rune,
 // in the overall RenderAll of all the text.
 // These positions can be out of visible range: see CharRenderPos
 func (tf *TextField) charPos(idx int) math32.Vector2 {
-	if idx <= 0 || len(tf.renderAll.Spans) == 0 {
+	if idx <= 0 || len(tf.renderAll.Lines) == 0 {
 		return math32.Vector2{}
 	}
-	pos, _, _, _ := tf.renderAll.RuneRelPos(idx)
-	pos.Y -= tf.renderAll.Spans[0].RelPos.Y
-	return pos
+	// TODO(text):
+	// pos, _, _, _ := tf.renderAll.RuneRelPos(idx)
+	// pos.Y -= tf.renderAll.Spans[0].RelPos.Y
+	// return pos
+	return math32.Vector2{}
 }
 
 // relCharPos returns the text width in dots between the two text string
@@ -1429,22 +1441,27 @@ func (tf *TextField) renderSelect() {
 	}
 	ex := float32(tf.Geom.ContentBBox.Max.X)
 	sx := float32(tf.Geom.ContentBBox.Min.X)
-	ssi, _, _ := tf.renderAll.RuneSpanPos(effst)
-	esi, _, _ := tf.renderAll.RuneSpanPos(effed)
+	_ = ex
+	_ = sx
+	// TODO(text):
+	// ssi, _, _ := tf.renderAll.RuneSpanPos(effst)
+	// esi, _, _ := tf.renderAll.RuneSpanPos(effed)
 	ep := tf.charRenderPos(effed, false)
+	_ = ep
 
 	pc.FillBox(spos, math32.Vec2(ex-spos.X, tf.fontHeight), tf.SelectColor)
 
-	spos.X = sx
-	spos.Y += tf.renderAll.Spans[ssi+1].RelPos.Y - tf.renderAll.Spans[ssi].RelPos.Y
-	for si := ssi + 1; si <= esi; si++ {
-		if si < esi {
-			pc.FillBox(spos, math32.Vec2(ex-spos.X, tf.fontHeight), tf.SelectColor)
-		} else {
-			pc.FillBox(spos, math32.Vec2(ep.X-spos.X, tf.fontHeight), tf.SelectColor)
-		}
-		spos.Y += tf.renderAll.Spans[si].RelPos.Y - tf.renderAll.Spans[si-1].RelPos.Y
-	}
+	// TODO(text):
+	// spos.X = sx
+	// spos.Y += tf.renderAll.Spans[ssi+1].RelPos.Y - tf.renderAll.Spans[ssi].RelPos.Y
+	// for si := ssi + 1; si <= esi; si++ {
+	// 	if si < esi {
+	// 		pc.FillBox(spos, math32.Vec2(ex-spos.X, tf.fontHeight), tf.SelectColor)
+	// 	} else {
+	// 		pc.FillBox(spos, math32.Vec2(ep.X-spos.X, tf.fontHeight), tf.SelectColor)
+	// 	}
+	// 	spos.Y += tf.renderAll.Spans[si].RelPos.Y - tf.renderAll.Spans[si-1].RelPos.Y
+	// }
 }
 
 // autoScroll scrolls the starting position to keep the cursor visible
@@ -1459,7 +1476,7 @@ func (tf *TextField) autoScroll() {
 	if tf.hasWordWrap() { // does not scroll
 		tf.startPos = 0
 		tf.endPos = n
-		if len(tf.renderAll.Spans) != tf.numLines {
+		if len(tf.renderAll.Lines) != tf.numLines {
 			tf.NeedsLayout()
 		}
 		return
@@ -1563,12 +1580,13 @@ func (tf *TextField) pixelToCursor(pt image.Point) int {
 	}
 	n := len(tf.editText)
 	if tf.hasWordWrap() {
-		si, ri, ok := tf.renderAll.PosToRune(rpt)
-		if ok {
-			ix, _ := tf.renderAll.SpanPosToRuneIndex(si, ri)
-			ix = min(ix, n)
-			return ix
-		}
+		// TODO(text):
+		// si, ri, ok := tf.renderAll.PosToRune(rpt)
+		// if ok {
+		// 	ix, _ := tf.renderAll.SpanPosToRuneIndex(si, ri)
+		// 	ix = min(ix, n)
+		// 	return ix
+		// }
 		return tf.startPos
 	}
 	pr := tf.PointToRelPos(pt)
@@ -1807,20 +1825,24 @@ func (tf *TextField) Style() {
 }
 
 func (tf *TextField) configTextSize(sz math32.Vector2) math32.Vector2 {
+	pc := &tf.Scene.Painter
+	if pc.TextShaper == nil {
+		return math32.Vector2{}
+	}
 	st := &tf.Styles
 	txs := &st.Text
-	fs := st.FontRender()
-	st.Font = ptext.OpenFont(fs, &st.UnitContext)
+	// fs := st.FontRender()
+	// st.Font = ptext.OpenFont(fs, &st.UnitContext)
 	txt := tf.editText
 	if tf.NoEcho {
 		txt = concealDots(len(tf.editText))
 	}
 	align, alignV := txs.Align, txs.AlignV
-	txs.Align, txs.AlignV = styles.Start, styles.Start // only works with this
-	tf.renderAll.SetRunes(txt, fs, &st.UnitContext, txs, true, 0, 0)
-	tf.renderAll.Layout(txs, fs, &st.UnitContext, sz)
+	txs.Align, txs.AlignV = text.Start, text.Start // only works with this
+	tx := rich.NewText(&st.Font, txt)
+	tf.renderAll = pc.TextShaper.WrapLines(tx, &st.Font, txs, &AppearanceSettings.Text, sz)
 	txs.Align, txs.AlignV = align, alignV
-	rsz := tf.renderAll.BBox.Size().Ceil()
+	rsz := tf.renderAll.Bounds.Size().Ceil()
 	return rsz
 }
 
@@ -1859,7 +1881,7 @@ func (tf *TextField) SizeUp() {
 	rsz.SetAdd(icsz)
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
-	tf.fontHeight = tf.Styles.Font.Face.Metrics.Height
+	tf.fontHeight = tf.Styles.Text.FontHeight(&tf.Styles.Font)
 	tf.editText = tmptxt
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tf, "TextField SizeUp:", rsz, "Actual:", sz.Actual.Content)
@@ -1909,7 +1931,7 @@ func (tf *TextField) setEffPosAndSize() {
 	if trail := tf.trailingIconButton; trail != nil {
 		sz.X -= trail.Geom.Size.Actual.Total.X
 	}
-	tf.numLines = len(tf.renderAll.Spans)
+	tf.numLines = len(tf.renderAll.Lines)
 	if tf.numLines <= 1 {
 		pos.Y += 0.5 * (sz.Y - tf.fontHeight) // center
 	}
@@ -1918,6 +1940,10 @@ func (tf *TextField) setEffPosAndSize() {
 }
 
 func (tf *TextField) Render() {
+	pc := &tf.Scene.Painter
+	if pc.TextShaper == nil {
+		return
+	}
 	defer func() {
 		if tf.IsReadOnly() {
 			return
@@ -1929,13 +1955,12 @@ func (tf *TextField) Render() {
 		}
 	}()
 
-	pc := &tf.Scene.Painter
 	st := &tf.Styles
 
 	tf.autoScroll() // inits paint with our style
-	fs := st.FontRender()
+	fs := &st.Font
 	txs := &st.Text
-	st.Font = ptext.OpenFont(fs, &st.UnitContext)
+	// st.Font = ptext.OpenFont(fs, &st.UnitContext)
 	tf.RenderStandardBox()
 	if tf.startPos < 0 || tf.endPos > len(tf.editText) {
 		return
@@ -1946,7 +1971,6 @@ func (tf *TextField) Render() {
 	prevColor := st.Color
 	if len(tf.editText) == 0 && len(tf.Placeholder) > 0 {
 		st.Color = tf.PlaceholderColor
-		fs = st.FontRender() // need to update
 		cur = []rune(tf.Placeholder)
 	} else if tf.NoEcho {
 		cur = concealDots(len(cur))
@@ -1954,9 +1978,9 @@ func (tf *TextField) Render() {
 	sz := &tf.Geom.Size
 	icsz := tf.iconsSize()
 	availSz := sz.Actual.Content.Sub(icsz)
-	tf.renderVisible.SetRunes(cur, fs, &st.UnitContext, &st.Text, true, 0, 0)
-	tf.renderVisible.Layout(txs, fs, &st.UnitContext, availSz)
-	pc.Text(&tf.renderVisible, pos)
+	tx := rich.NewText(&st.Font, cur)
+	tf.renderVisible = pc.TextShaper.WrapLines(tx, fs, txs, &AppearanceSettings.Text, availSz)
+	pc.TextLines(tf.renderVisible, pos)
 	st.Color = prevColor
 }
 

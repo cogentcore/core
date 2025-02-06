@@ -8,17 +8,21 @@ import (
 	"fmt"
 	"image"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/htmltext"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/text"
 )
 
 // Text is a widget for rendering text. It supports full HTML styling,
@@ -34,8 +38,8 @@ type Text struct {
 	// It defaults to [TextBodyLarge].
 	Type TextTypes
 
-	// paintText is the [ptext.Text] for the text.
-	paintText ptext.Text
+	// paintText is the [shaped.Lines] for the text.
+	paintText *shaped.Lines
 
 	// normalCursor is the cached cursor to display when there
 	// is no link being hovered.
@@ -110,7 +114,7 @@ func (tx *Text) Init() {
 	tx.SetType(TextBodyLarge)
 	tx.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
-		if len(tx.paintText.Links) > 0 {
+		if tx.paintText != nil && len(tx.paintText.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
 		}
 		if !tx.IsReadOnly() {
@@ -122,91 +126,91 @@ func (tx *Text) Init() {
 		// We use Em for line height so that it scales properly with font size changes.
 		switch tx.Type {
 		case TextLabelLarge:
-			s.Text.LineHeight.Em(20.0 / 14)
-			s.Font.Size.Dp(14)
-			s.Text.LetterSpacing.Dp(0.1)
-			s.Font.Weight = styles.WeightMedium
+			s.Text.LineSpacing = 20.0 / 14
+			s.Text.FontSize.Dp(14)
+			// s.Text.LetterSpacing.Dp(0.1)
+			s.Font.Weight = rich.Medium
 		case TextLabelMedium:
-			s.Text.LineHeight.Em(16.0 / 12)
-			s.Font.Size.Dp(12)
-			s.Text.LetterSpacing.Dp(0.5)
-			s.Font.Weight = styles.WeightMedium
+			s.Text.LineSpacing = 16.0 / 12
+			s.Text.FontSize.Dp(12)
+			// s.Text.LetterSpacing.Dp(0.5)
+			s.Font.Weight = rich.Medium
 		case TextLabelSmall:
-			s.Text.LineHeight.Em(16.0 / 11)
-			s.Font.Size.Dp(11)
-			s.Text.LetterSpacing.Dp(0.5)
-			s.Font.Weight = styles.WeightMedium
+			s.Text.LineSpacing = 16.0 / 11
+			s.Text.FontSize.Dp(11)
+			// s.Text.LetterSpacing.Dp(0.5)
+			s.Font.Weight = rich.Medium
 		case TextBodyLarge:
-			s.Text.LineHeight.Em(24.0 / 16)
-			s.Font.Size.Dp(16)
-			s.Text.LetterSpacing.Dp(0.5)
-			s.Font.Weight = styles.WeightNormal
+			s.Text.LineSpacing = 24.0 / 16
+			s.Text.FontSize.Dp(16)
+			// s.Text.LetterSpacing.Dp(0.5)
+			s.Font.Weight = rich.Normal
 		case TextSupporting:
 			s.Color = colors.Scheme.OnSurfaceVariant
 			fallthrough
 		case TextBodyMedium:
-			s.Text.LineHeight.Em(20.0 / 14)
-			s.Font.Size.Dp(14)
-			s.Text.LetterSpacing.Dp(0.25)
-			s.Font.Weight = styles.WeightNormal
+			s.Text.LineSpacing = 20.0 / 14
+			s.Text.FontSize.Dp(14)
+			// s.Text.LetterSpacing.Dp(0.25)
+			s.Font.Weight = rich.Normal
 		case TextBodySmall:
-			s.Text.LineHeight.Em(16.0 / 12)
-			s.Font.Size.Dp(12)
-			s.Text.LetterSpacing.Dp(0.4)
-			s.Font.Weight = styles.WeightNormal
+			s.Text.LineSpacing = 16.0 / 12
+			s.Text.FontSize.Dp(12)
+			// s.Text.LetterSpacing.Dp(0.4)
+			s.Font.Weight = rich.Normal
 		case TextTitleLarge:
-			s.Text.LineHeight.Em(28.0 / 22)
-			s.Font.Size.Dp(22)
-			s.Text.LetterSpacing.Zero()
-			s.Font.Weight = styles.WeightNormal
+			s.Text.LineSpacing = 28.0 / 22
+			s.Text.FontSize.Dp(22)
+			// s.Text.LetterSpacing.Zero()
+			s.Font.Weight = rich.Normal
 		case TextTitleMedium:
-			s.Text.LineHeight.Em(24.0 / 16)
-			s.Font.Size.Dp(16)
-			s.Text.LetterSpacing.Dp(0.15)
-			s.Font.Weight = styles.WeightBold
+			s.Text.LineSpacing = 24.0 / 16
+			s.Text.FontSize.Dp(16)
+			// s.Text.LetterSpacing.Dp(0.15)
+			s.Font.Weight = rich.Bold
 		case TextTitleSmall:
-			s.Text.LineHeight.Em(20.0 / 14)
-			s.Font.Size.Dp(14)
-			s.Text.LetterSpacing.Dp(0.1)
-			s.Font.Weight = styles.WeightMedium
+			s.Text.LineSpacing = 20.0 / 14
+			s.Text.FontSize.Dp(14)
+			// s.Text.LetterSpacing.Dp(0.1)
+			s.Font.Weight = rich.Medium
 		case TextHeadlineLarge:
-			s.Text.LineHeight.Em(40.0 / 32)
-			s.Font.Size.Dp(32)
-			s.Text.LetterSpacing.Zero()
-			s.Font.Weight = styles.WeightNormal
+			s.Text.LineSpacing = 40.0 / 32
+			s.Text.FontSize.Dp(32)
+			// s.Text.LetterSpacing.Zero()
+			s.Font.Weight = rich.Normal
 		case TextHeadlineMedium:
-			s.Text.LineHeight.Em(36.0 / 28)
-			s.Font.Size.Dp(28)
-			s.Text.LetterSpacing.Zero()
-			s.Font.Weight = styles.WeightNormal
+			s.Text.LineSpacing = 36.0 / 28
+			s.Text.FontSize.Dp(28)
+			// s.Text.LetterSpacing.Zero()
+			s.Font.Weight = rich.Normal
 		case TextHeadlineSmall:
-			s.Text.LineHeight.Em(32.0 / 24)
-			s.Font.Size.Dp(24)
-			s.Text.LetterSpacing.Zero()
-			s.Font.Weight = styles.WeightNormal
+			s.Text.LineSpacing = 32.0 / 24
+			s.Text.FontSize.Dp(24)
+			// s.Text.LetterSpacing.Zero()
+			s.Font.Weight = rich.Normal
 		case TextDisplayLarge:
-			s.Text.LineHeight.Em(64.0 / 57)
-			s.Font.Size.Dp(57)
-			s.Text.LetterSpacing.Dp(-0.25)
-			s.Font.Weight = styles.WeightNormal
+			s.Text.LineSpacing = 64.0 / 57
+			s.Text.FontSize.Dp(57)
+			// s.Text.LetterSpacing.Dp(-0.25)
+			s.Font.Weight = rich.Normal
 		case TextDisplayMedium:
-			s.Text.LineHeight.Em(52.0 / 45)
-			s.Font.Size.Dp(45)
-			s.Text.LetterSpacing.Zero()
-			s.Font.Weight = styles.WeightNormal
+			s.Text.LineSpacing = 52.0 / 45
+			s.Text.FontSize.Dp(45)
+			// s.Text.LetterSpacing.Zero()
+			s.Font.Weight = rich.Normal
 		case TextDisplaySmall:
-			s.Text.LineHeight.Em(44.0 / 36)
-			s.Font.Size.Dp(36)
-			s.Text.LetterSpacing.Zero()
-			s.Font.Weight = styles.WeightNormal
+			s.Text.LineSpacing = 44.0 / 36
+			s.Text.FontSize.Dp(36)
+			// s.Text.LetterSpacing.Zero()
+			s.Font.Weight = rich.Normal
 		}
 	})
 	tx.FinalStyler(func(s *styles.Style) {
 		tx.normalCursor = s.Cursor
-		tx.paintText.UpdateColors(s.FontRender())
+		// tx.paintText.UpdateColors(s.FontRender()) TODO(text):
 	})
 
-	tx.HandleTextClick(func(tl *ptext.TextLink) {
+	tx.HandleTextClick(func(tl *rich.LinkRec) {
 		system.TheApp.OpenURL(tl.URL)
 	})
 	tx.OnDoubleClick(func(e events.Event) {
@@ -246,23 +250,24 @@ func (tx *Text) Init() {
 
 // findLink finds the text link at the given scene-local position. If it
 // finds it, it returns it and its bounds; otherwise, it returns nil.
-func (tx *Text) findLink(pos image.Point) (*ptext.TextLink, image.Rectangle) {
-	for _, tl := range tx.paintText.Links {
-		// TODO(kai/link): is there a better way to be safe here?
-		if tl.Label == "" {
-			continue
-		}
-		tlb := tl.Bounds(&tx.paintText, tx.Geom.Pos.Content)
-		if pos.In(tlb) {
-			return &tl, tlb
-		}
-	}
+func (tx *Text) findLink(pos image.Point) (*rich.LinkRec, image.Rectangle) {
+	// TODO(text):
+	// for _, tl := range tx.paintText.Links {
+	// 	// TODO(kai/link): is there a better way to be safe here?
+	// 	if tl.Label == "" {
+	// 		continue
+	// 	}
+	// 	tlb := tl.Bounds(&tx.paintText, tx.Geom.Pos.Content)
+	// 	if pos.In(tlb) {
+	// 		return &tl, tlb
+	// 	}
+	// }
 	return nil, image.Rectangle{}
 }
 
 // HandleTextClick handles click events such that the given function will be called
 // on any links that are clicked on.
-func (tx *Text) HandleTextClick(openLink func(tl *ptext.TextLink)) {
+func (tx *Text) HandleTextClick(openLink func(tl *rich.LinkRec)) {
 	tx.OnClick(func(e events.Event) {
 		tl, _ := tx.findLink(e.Pos())
 		if tl == nil {
@@ -303,10 +308,17 @@ func (tx *Text) Label() string {
 // using given size to constrain layout.
 func (tx *Text) configTextSize(sz math32.Vector2) {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
-	fs := tx.Styles.FontRender()
+	if tx.Scene == nil || tx.Scene.Painter.State == nil {
+		return
+	}
+	pc := &tx.Scene.Painter
+	if pc.TextShaper == nil {
+		return
+	}
+	fs := &tx.Styles.Font
 	txs := &tx.Styles.Text
-	tx.paintText.SetHTML(tx.Text, fs, txs, &tx.Styles.UnitContext, nil)
-	tx.paintText.Layout(txs, fs, &tx.Styles.UnitContext, sz)
+	ht := errors.Log1(htmltext.HTMLToRich([]byte(tx.Text), fs, nil))
+	tx.paintText = pc.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, sz)
 }
 
 // configTextAlloc is used for determining how much space the text
@@ -315,29 +327,38 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
 func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
+	pc := &tx.Scene.Painter
+	if pc.TextShaper == nil {
+		return math32.Vector2{}
+	}
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
-	fs := tx.Styles.FontRender()
+	fs := &tx.Styles.Font
 	txs := &tx.Styles.Text
 	align, alignV := txs.Align, txs.AlignV
-	txs.Align, txs.AlignV = styles.Start, styles.Start
-	tx.paintText.SetHTML(tx.Text, fs, txs, &tx.Styles.UnitContext, nil)
-	tx.paintText.Layout(txs, fs, &tx.Styles.UnitContext, sz)
-	rsz := tx.paintText.BBox.Size().Ceil()
+	txs.Align, txs.AlignV = text.Start, text.Start
+
+	ht := errors.Log1(htmltext.HTMLToRich([]byte(tx.Text), fs, nil))
+	tx.paintText = pc.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, sz)
+
+	rsz := tx.paintText.Bounds.Size().Ceil()
 	txs.Align, txs.AlignV = align, alignV
-	tx.paintText.Layout(txs, fs, &tx.Styles.UnitContext, rsz)
+	tx.paintText = pc.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, rsz)
 	return rsz
 }
 
 func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
-	if tx.Styles.Text.HasWordWrap() {
+	if tx.Styles.Text.WhiteSpace.HasWordWrap() {
 		// note: using a narrow ratio of .5 to allow text to squeeze into narrow space
-		tx.configTextSize(ptext.TextWrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), 0.5, &tx.Styles.Font))
+		tx.configTextSize(shaped.WrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), 0.5, &tx.Styles.Font, &tx.Styles.Text))
 	} else {
 		tx.configTextSize(sz.Actual.Content)
 	}
-	rsz := tx.paintText.BBox.Size().Ceil()
+	if tx.paintText == nil {
+		return
+	}
+	rsz := tx.paintText.Bounds.Size().Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {
@@ -346,7 +367,7 @@ func (tx *Text) SizeUp() {
 }
 
 func (tx *Text) SizeDown(iter int) bool {
-	if !tx.Styles.Text.HasWordWrap() || iter > 1 {
+	if !tx.Styles.Text.WhiteSpace.HasWordWrap() || iter > 1 {
 		return false
 	}
 	sz := &tx.Geom.Size
@@ -367,5 +388,5 @@ func (tx *Text) SizeDown(iter int) bool {
 
 func (tx *Text) Render() {
 	tx.WidgetBase.Render()
-	tx.Scene.Painter.Text(&tx.paintText, tx.Geom.Pos.Content)
+	tx.Scene.Painter.TextLines(tx.paintText, tx.Geom.Pos.Content)
 }
