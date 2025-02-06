@@ -7,6 +7,7 @@ package shaped
 import (
 	"embed"
 	"fmt"
+	"io/fs"
 	"os"
 
 	"cogentcore.org/core/base/errors"
@@ -33,6 +34,8 @@ type Shaper struct {
 	outBuff []shaping.Output
 }
 
+// TODO(text): support custom embedded fonts
+//
 //go:embed fonts/*.ttf
 var efonts embed.FS
 
@@ -40,6 +43,7 @@ var efonts embed.FS
 func NewShaper() *Shaper {
 	sh := &Shaper{}
 	sh.fontMap = fontscan.NewFontMap(nil)
+	// TODO(text): figure out cache dir situation (especially on mobile and web)
 	str, err := os.UserCacheDir()
 	if errors.Log(err) != nil {
 		// slog.Printf("failed resolving font cache dir: %v", err)
@@ -50,7 +54,28 @@ func NewShaper() *Shaper {
 		errors.Log(err)
 		// shaper.logger.Printf("failed loading system fonts: %v", err)
 	}
-	sh.fontMap.AddFont(errors.Log1(efonts.Open("fonts/Roboto-Regular.ttf")).(opentype.Resource), "Roboto", "Roboto") // TODO: add more fonts
+	errors.Log(fs.WalkDir(efonts, "fonts", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		f, err := efonts.Open(path)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		resource, ok := f.(opentype.Resource)
+		if !ok {
+			return fmt.Errorf("file %q cannot be used as an opentype.Resource", path)
+		}
+		err = sh.fontMap.AddFont(resource, path, "")
+		if err != nil {
+			return err
+		}
+		return nil
+	}))
 	// for _, f := range collection {
 	// 	shaper.Load(f)
 	// 	shaper.defaultFaces = append(shaper.defaultFaces, string(f.Font.Typeface))
