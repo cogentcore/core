@@ -230,7 +230,7 @@ func (rs *Renderer) RenderText(text *render.Text) {
 			st := &rich.Style{}
 			raw := st.FromRunes(span)
 
-			rs.applyTextStyle(st, run, text.Context)
+			rs.applyTextStyle(st, run, text)
 			// TODO: probably should do something better for pos
 			pos := run.MaxBounds.Max.Add(line.Offset).Add(text.Position)
 			rs.ctx.Call("fillText", string(raw), pos.X, pos.Y)
@@ -239,19 +239,19 @@ func (rs *Renderer) RenderText(text *render.Text) {
 }
 
 // applyTextStyle applies the given [rich.Style] to the HTML canvas context.
-func (rs *Renderer) applyTextStyle(s *rich.Style, run shaped.Run, ctx render.Context) {
+func (rs *Renderer) applyTextStyle(s *rich.Style, run shaped.Run, text *render.Text) {
 	// See https://developer.mozilla.org/en-US/docs/Web/CSS/font
 	// TODO: fix font size, line height, font family
-	parts := []string{s.Slant.String(), "normal", s.Weight.String(), s.Stretch.String(), fmt.Sprintf("%gpx/%s", s.Size*16, "normal"), s.Family.String()}
+	parts := []string{s.Slant.String(), "normal", s.Weight.String(), s.Stretch.String(), fmt.Sprintf("%gpx/%g", s.Size*text.Text.FontSize, text.Text.LineHeight), s.Family.String()}
 	rs.ctx.Set("font", strings.Join(parts, " "))
 
 	// TODO: use caching like in RenderPath?
 	if run.FillColor == nil {
-		run.FillColor = ctx.Style.Fill.Color
+		run.FillColor = colors.Uniform(text.Text.Color)
 	}
-	if run.StrokeColor == nil {
-		run.StrokeColor = ctx.Style.Stroke.Color
-	}
+	// if run.StrokeColor == nil {
+	// 	run.StrokeColor = ctx.Style.Stroke.Color
+	// }
 	rs.ctx.Set("fillStyle", rs.imageToStyle(run.FillColor))
 	rs.ctx.Set("strokeStyle", rs.imageToStyle(run.StrokeColor))
 }
