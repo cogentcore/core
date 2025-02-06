@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
 )
 
 // Renderer is an HTML canvas renderer.
@@ -222,21 +223,36 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 
 func (rs *Renderer) RenderText(text *render.Text) {
 	// TODO: improve
-	rs.ctx.Set("fillStyle", "black")
-	for _, span := range text.Text.Source {
-		st := &rich.Style{}
-		raw := st.FromRunes(span)
-		rs.applyTextStyle(st)
-		rs.ctx.Call("fillText", string(raw), text.Position.X, text.Position.Y)
+	for _, line := range text.Text.Lines {
+		for i, run := range line.Runs {
+			span := line.Source[i]
+			st := &rich.Style{}
+			raw := st.FromRunes(span)
+
+			rs.applyTextStyle(st, run, text.Context)
+			// TODO: probably should do something better for pos
+			pos := run.MaxBounds.Max.Add(line.Offset).Add(text.Position)
+			rs.ctx.Call("fillText", string(raw), pos.X, pos.Y)
+		}
 	}
 }
 
 // applyTextStyle applies the given [rich.Style] to the HTML canvas context.
-func (rs *Renderer) applyTextStyle(s *rich.Style) {
+func (rs *Renderer) applyTextStyle(s *rich.Style, run shaped.Run, ctx render.Context) {
 	// See https://developer.mozilla.org/en-US/docs/Web/CSS/font
 	// TODO: fix font size, line height, font family
 	parts := []string{s.Slant.String(), "normal", s.Weight.String(), s.Stretch.String(), "16px/" + "normal", s.Family.String()}
 	rs.ctx.Set("font", strings.Join(parts, " "))
+
+	// TODO: use caching like in RenderPath?
+	if run.FillColor == nil {
+		run.FillColor = ctx.Style.Fill.Color
+	}
+	if run.StrokeColor == nil {
+		run.StrokeColor = ctx.Style.Stroke.Color
+	}
+	rs.ctx.Set("fillStyle", rs.imageToStyle(run.FillColor))
+	rs.ctx.Set("strokeStyle", rs.imageToStyle(run.StrokeColor))
 }
 
 func jsAwait(v js.Value) (result js.Value, ok bool) { // TODO: use wgpu version
