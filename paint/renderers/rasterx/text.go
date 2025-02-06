@@ -215,7 +215,6 @@ func bitAt(b []byte, i int) byte {
 
 // StrokeBounds strokes a bounding box in the given color. Useful for debugging.
 func (rs *Renderer) StrokeBounds(bb math32.Box2, clr color.Color) {
-	rs.Raster.Clear()
 	rs.Raster.SetStroke(
 		math32.ToFixed(1),
 		math32.ToFixed(10),
@@ -229,7 +228,6 @@ func (rs *Renderer) StrokeBounds(bb math32.Box2, clr color.Color) {
 
 // StrokeTextLine strokes a line for text decoration.
 func (rs *Renderer) StrokeTextLine(sp, ep math32.Vector2, width float32, clr image.Image, dash []float32) {
-	rs.Raster.Clear()
 	rs.Raster.SetStroke(
 		math32.ToFixed(width),
 		math32.ToFixed(10),
@@ -246,7 +244,6 @@ func (rs *Renderer) StrokeTextLine(sp, ep math32.Vector2, width float32, clr ima
 // FillBounds fills a bounding box in the given color.
 func (rs *Renderer) FillBounds(bb math32.Box2, clr image.Image) {
 	rf := &rs.Raster.Filler
-	rf.Clear()
 	rf.SetColor(clr)
 	AddRect(bb.Min.X, bb.Min.Y, bb.Max.X, bb.Max.Y, 0, rf)
 	rf.Draw()

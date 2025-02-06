@@ -231,8 +231,12 @@ func (ts *Style) SetUnitContext(uc *units.Context, sty *rich.Style) {
 		// fmt.Println("fsz 0:", ts.FontSize.Dots, ts.FontSize.Value, sty.Size)
 		fsz = 16
 	}
-	ex := 0.56 * fsz
-	ch := 0.6 * fsz
+	// these numbers are from previous font system, Roboto measurements:
+	ex := 0.53 * fsz
+	ch := 0.46 * fsz
+	// this is what the current system says:
+	// ex := 0.56 * fsz
+	// ch := 0.6 * fsz
 	uc.SetFont(fsz, ex, ch, uc.Dp(16))
 }
 

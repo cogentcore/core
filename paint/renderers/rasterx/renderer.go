@@ -75,7 +75,6 @@ func (rs *Renderer) Render(r render.Render) {
 }
 
 func (rs *Renderer) RenderPath(pt *render.Path) {
-	rs.Raster.Clear()
 	p := pt.Path
 	if !ppath.ArcToCubeImmediate {
 		p = p.ReplaceArcs()
@@ -103,6 +102,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	rs.Fill(pt)
 	rs.Stroke(pt)
 	rs.Path.Clear()
+	rs.Raster.Clear()
 }
 
 func (rs *Renderer) Stroke(pt *render.Path) {
@@ -131,7 +131,6 @@ func (rs *Renderer) Stroke(pt *render.Path) {
 	rs.Path.AddTo(rs.Raster)
 	rs.SetColor(rs.Raster, pc, sty.Stroke.Color, sty.Stroke.Opacity)
 	rs.Raster.Draw()
-	rs.Raster.Clear()
 }
 
 func (rs *Renderer) SetColor(sc Scanner, pc *render.Context, clr image.Image, opacity float32) {
@@ -164,7 +163,6 @@ func (rs *Renderer) Fill(pt *render.Path) {
 	rs.Path.AddTo(rf)
 	rs.SetColor(rf, pc, sty.Fill.Color, sty.Fill.Opacity)
 	rf.Draw()
-	rf.Clear()
 }
 
 // StrokeWidth obtains the current stoke width subject to transform (or not
