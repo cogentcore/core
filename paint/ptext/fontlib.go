@@ -364,7 +364,7 @@ var altFontMap = map[string]string{
 	"verdana": "Verdana",
 }
 
-//go:embed fonts/*.ttf
+// //go:embed fonts/*.ttf TODO
 var defaultFonts embed.FS
 
 // FontFallbacks are a list of fallback fonts to try, at the basename level.

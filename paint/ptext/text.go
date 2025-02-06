@@ -323,7 +323,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
 					case "style":
-						styles.SetStylePropertiesXML(attr.Value, &sprop)
+						// styles.SetStylePropertiesXML(attr.Value, &sprop) TODO
 					case "class":
 						if cssAgg != nil {
 							clnm := "." + attr.Value
@@ -546,7 +546,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 						// fmt.Printf("nm: %v  val: %v\n", nm, vl)
 						switch nm {
 						case "style":
-							styles.SetStylePropertiesXML(vl, &sprop)
+							// styles.SetStylePropertiesXML(vl, &sprop) TODO
 						case "class":
 							if cssAgg != nil {
 								clnm := "." + vl
