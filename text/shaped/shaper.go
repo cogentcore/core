@@ -105,6 +105,9 @@ func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []sh
 
 // shapeText implements Shape using the full text generated from the source spans
 func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaping.Output {
+	if tx.Len() == 0 {
+		return nil
+	}
 	sty := rich.NewStyle()
 	sh.outBuff = sh.outBuff[:0]
 	for si, s := range tx {
@@ -125,6 +128,10 @@ func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 
 		ins := sh.splitter.Split(in, sh.fontMap) // this is essential
 		for _, in := range ins {
+			if in.Face == nil {
+				fmt.Printf("nil face for in: %#v\n", in)
+				continue
+			}
 			o := sh.shaper.Shape(in)
 			sh.outBuff = append(sh.outBuff, o)
 		}

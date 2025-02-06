@@ -514,6 +514,14 @@ func (tf *TextField) SetTypePassword() *TextField {
 	return tf
 }
 
+// textEdited must be called whenever the text is edited.
+// it sets the edited flag and ensures a new render of current text.
+func (tf *TextField) textEdited() {
+	tf.edited = true
+	tf.renderVisible = nil
+	tf.NeedsRender()
+}
+
 // editDone completes editing and copies the active edited text to the [TextField.text].
 // It is called when the return key is pressed or the text field goes out of focus.
 func (tf *TextField) editDone() {
@@ -807,10 +815,9 @@ func (tf *TextField) cursorBackspace(steps int) {
 	if steps <= 0 {
 		return
 	}
-	tf.edited = true
 	tf.editText = append(tf.editText[:tf.cursorPos-steps], tf.editText[tf.cursorPos:]...)
+	tf.textEdited()
 	tf.cursorBackward(steps)
-	tf.NeedsRender()
 }
 
 // cursorDelete deletes character(s) immediately after the cursor
@@ -825,9 +832,8 @@ func (tf *TextField) cursorDelete(steps int) {
 	if steps <= 0 {
 		return
 	}
-	tf.edited = true
 	tf.editText = append(tf.editText[:tf.cursorPos], tf.editText[tf.cursorPos+steps:]...)
-	tf.NeedsRender()
+	tf.textEdited()
 }
 
 // cursorBackspaceWord deletes words(s) immediately before cursor
@@ -838,9 +844,8 @@ func (tf *TextField) cursorBackspaceWord(steps int) {
 	}
 	org := tf.cursorPos
 	tf.cursorBackwardWord(steps)
-	tf.edited = true
 	tf.editText = append(tf.editText[:tf.cursorPos], tf.editText[org:]...)
-	tf.NeedsRender()
+	tf.textEdited()
 }
 
 // cursorDeleteWord deletes word(s) immediately after the cursor
@@ -852,9 +857,8 @@ func (tf *TextField) cursorDeleteWord(steps int) {
 	// note: no update b/c signal from buf will drive update
 	org := tf.cursorPos
 	tf.cursorForwardWord(steps)
-	tf.edited = true
 	tf.editText = append(tf.editText[:tf.cursorPos], tf.editText[org:]...)
-	tf.NeedsRender()
+	tf.textEdited()
 }
 
 // cursorKill deletes text from cursor to end of text
@@ -1035,7 +1039,6 @@ func (tf *TextField) deleteSelection() string {
 		return ""
 	}
 	cut := tf.selection()
-	tf.edited = true
 	tf.editText = append(tf.editText[:tf.selectStart], tf.editText[tf.selectEnd:]...)
 	if tf.cursorPos > tf.selectStart {
 		if tf.cursorPos < tf.selectEnd {
@@ -1044,8 +1047,8 @@ func (tf *TextField) deleteSelection() string {
 			tf.cursorPos -= tf.selectEnd - tf.selectStart
 		}
 	}
+	tf.textEdited()
 	tf.selectReset()
-	tf.NeedsRender()
 	return cut
 }
 
@@ -1080,7 +1083,6 @@ func (tf *TextField) insertAtCursor(str string) {
 	if tf.hasSelection() {
 		tf.cut()
 	}
-	tf.edited = true
 	rs := []rune(str)
 	rsl := len(rs)
 	nt := append(tf.editText, rs...)               // first append to end
@@ -1088,8 +1090,8 @@ func (tf *TextField) insertAtCursor(str string) {
 	copy(nt[tf.cursorPos:], rs)                    // copy into position
 	tf.editText = nt
 	tf.endPos += rsl
+	tf.textEdited()
 	tf.cursorForward(rsl)
-	tf.NeedsRender()
 }
 
 func (tf *TextField) contextMenu(m *Scene) {
@@ -1976,6 +1978,9 @@ func (tf *TextField) Render() {
 		return
 	}
 	tf.renderSelect()
+	if tf.renderVisible == nil {
+		tf.layoutCurrent()
+	}
 	tf.Scene.Painter.TextLines(tf.renderVisible, tf.effPos)
 }
 
