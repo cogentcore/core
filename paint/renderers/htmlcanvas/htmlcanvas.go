@@ -10,6 +10,7 @@
 package htmlcanvas
 
 import (
+	"fmt"
 	"image"
 	"strings"
 	"syscall/js"
@@ -241,7 +242,7 @@ func (rs *Renderer) RenderText(text *render.Text) {
 func (rs *Renderer) applyTextStyle(s *rich.Style, run shaped.Run, ctx render.Context) {
 	// See https://developer.mozilla.org/en-US/docs/Web/CSS/font
 	// TODO: fix font size, line height, font family
-	parts := []string{s.Slant.String(), "normal", s.Weight.String(), s.Stretch.String(), "16px/" + "normal", s.Family.String()}
+	parts := []string{s.Slant.String(), "normal", s.Weight.String(), s.Stretch.String(), fmt.Sprintf("%gpx/%s", s.Size*16, "normal"), s.Family.String()}
 	rs.ctx.Set("font", strings.Join(parts, " "))
 
 	// TODO: use caching like in RenderPath?
