@@ -85,7 +85,9 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		var maxAsc fixed.Int26_6
 		for oi := range lno {
 			out := &lno[oi]
-			maxAsc = max(out.GlyphBounds.Ascent, maxAsc)
+			if !dir.IsVertical() { // todo: vertical
+				maxAsc = max(out.LineBounds.Ascent, maxAsc)
+			}
 			run := Run{Output: *out}
 			rns := run.Runes()
 			if !setFirst {

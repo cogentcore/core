@@ -5,6 +5,7 @@
 package shaped_test
 
 import (
+	"image/color"
 	"os"
 	"testing"
 
@@ -69,7 +70,9 @@ func TestBasic(t *testing.T) {
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
 		lns.SelectRegion(textpos.Range{7, 30})
 		lns.SelectRegion(textpos.Range{34, 40})
-		pc.TextLines(lns, math32.Vec2(20, 60))
+		pos := math32.Vec2(20, 60)
+		pc.FillBox(pos, math32.Vec2(200, 50), colors.Uniform(color.RGBA{0, 128, 0, 128}))
+		pc.TextLines(lns, pos)
 		pc.RenderDone()
 	})
 }
