@@ -228,6 +228,7 @@ func (ws WhiteSpaces) KeepWhiteSpace() bool {
 func (ts *Style) SetUnitContext(uc *units.Context, sty *rich.Style) {
 	fsz := ts.FontHeight(sty)
 	if fsz == 0 {
+		// fmt.Println("fsz 0:", ts.FontSize.Dots, ts.FontSize.Value, sty.Size)
 		fsz = 16
 	}
 	ex := 0.56 * fsz
