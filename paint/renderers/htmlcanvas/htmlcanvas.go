@@ -241,7 +241,7 @@ func (rs *Renderer) RenderText(text *render.Text) {
 // applyTextStyle applies the given [rich.Style] to the HTML canvas context.
 func (rs *Renderer) applyTextStyle(s *rich.Style, run shaped.Run, text *render.Text) {
 	// See https://developer.mozilla.org/en-US/docs/Web/CSS/font
-	// TODO: fix font size, line height, font family
+	// TODO: fix font weight, font size, line height, font family
 	parts := []string{s.Slant.String(), "normal", s.Weight.String(), s.Stretch.String(), fmt.Sprintf("%gpx/%g", s.Size*text.Text.FontSize, text.Text.LineHeight), s.Family.String()}
 	rs.ctx.Set("font", strings.Join(parts, " "))
 
