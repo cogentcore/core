@@ -18,6 +18,8 @@ import (
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
 )
 
 /////// see style_properties.go for master version
@@ -77,41 +79,25 @@ func (pc *Path) styleFromProperties(parent *Path, properties map[string]any, cc 
 // styleFromProperties sets style field values based on map[string]any properties
 func (pc *Paint) styleFromProperties(parent *Paint, properties map[string]any, cc colors.Context) {
 	var ppath *Path
+	var pfont *rich.Style
+	var ptext *text.Style
 	if parent != nil {
 		ppath = &parent.Path
+		pfont = &parent.Font
+		ptext = &parent.Text
 	}
 	pc.Path.styleFromProperties(ppath, properties, cc)
+	pc.Font.StyleFromProperties(pfont, properties, cc)
+	pc.Text.StyleFromProperties(ptext, properties, cc)
 	for key, val := range properties {
+		_ = val
 		if len(key) == 0 {
 			continue
 		}
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
-		if sfunc, ok := styleFontFuncs[key]; ok {
-			if parent != nil {
-				sfunc(&pc.FontStyle.Font, key, val, &parent.FontStyle.Font, cc)
-			} else {
-				sfunc(&pc.FontStyle.Font, key, val, nil, cc)
-			}
-			continue
-		}
-		if sfunc, ok := styleFontRenderFuncs[key]; ok {
-			if parent != nil {
-				sfunc(&pc.FontStyle, key, val, &parent.FontStyle, cc)
-			} else {
-				sfunc(&pc.FontStyle, key, val, nil, cc)
-			}
-			continue
-		}
-		if sfunc, ok := styleTextFuncs[key]; ok {
-			if parent != nil {
-				sfunc(&pc.TextStyle, key, val, &parent.TextStyle, cc)
-			} else {
-				sfunc(&pc.TextStyle, key, val, nil, cc)
-			}
-			continue
-		}
+		// todo: add others here
 	}
 }
 

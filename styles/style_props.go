@@ -12,33 +12,27 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
 )
 
 // These functions set styles from map[string]any which are used for styling
 
 // StyleFromProperty sets style field values based on the given property key and value
 func (s *Style) StyleFromProperty(parent *Style, key string, val any, cc colors.Context) {
+	var pfont *rich.Style
+	var ptext *text.Style
+	if parent != nil {
+		pfont = &parent.Font
+		ptext = &parent.Text
+	}
+	s.Font.StyleFromProperty(pfont, key, val, cc)
+	s.Text.StyleFromProperty(ptext, key, val, cc)
 	if sfunc, ok := styleLayoutFuncs[key]; ok {
 		if parent != nil {
 			sfunc(s, key, val, parent, cc)
 		} else {
 			sfunc(s, key, val, nil, cc)
-		}
-		return
-	}
-	if sfunc, ok := styleFontFuncs[key]; ok {
-		if parent != nil {
-			sfunc(&s.Font, key, val, &parent.Font, cc)
-		} else {
-			sfunc(&s.Font, key, val, nil, cc)
-		}
-		return
-	}
-	if sfunc, ok := styleTextFuncs[key]; ok {
-		if parent != nil {
-			sfunc(&s.Text, key, val, &parent.Text, cc)
-		} else {
-			sfunc(&s.Text, key, val, nil, cc)
 		}
 		return
 	}
@@ -197,153 +191,7 @@ var styleLayoutFuncs = map[string]styleprops.Func{
 		func(obj *Style) *units.Value { return &obj.ScrollbarWidth }),
 }
 
-////////  Font
-
-// styleFontFuncs are functions for styling the Font object
-var styleFontFuncs = map[string]styleprops.Func{
-	"font-size": func(obj any, key string, val any, parent any, cc colors.Context) {
-		fs := obj.(*Font)
-		if inh, init := styleprops.InhInit(val, parent); inh || init {
-			if inh {
-				fs.Size = parent.(*Font).Size
-			} else if init {
-				fs.Size.Set(12, units.UnitPt)
-			}
-			return
-		}
-		switch vt := val.(type) {
-		case string:
-			if psz, ok := FontSizePoints[vt]; ok {
-				fs.Size = units.Pt(psz)
-			} else {
-				fs.Size.SetAny(val, key) // also processes string
-			}
-		default:
-			fs.Size.SetAny(val, key)
-		}
-	},
-	"font-family": func(obj any, key string, val any, parent any, cc colors.Context) {
-		fs := obj.(*Font)
-		if inh, init := styleprops.InhInit(val, parent); inh || init {
-			if inh {
-				fs.Family = parent.(*Font).Family
-			} else if init {
-				fs.Family = "" // font has defaults
-			}
-			return
-		}
-		fs.Family = reflectx.ToString(val)
-	},
-	"font-style": styleprops.Enum(FontNormal,
-		func(obj *Font) enums.EnumSetter { return &obj.Style }),
-	"font-weight": styleprops.Enum(WeightNormal,
-		func(obj *Font) enums.EnumSetter { return &obj.Weight }),
-	"font-stretch": styleprops.Enum(FontStrNormal,
-		func(obj *Font) enums.EnumSetter { return &obj.Stretch }),
-	"font-variant": styleprops.Enum(FontVarNormal,
-		func(obj *Font) enums.EnumSetter { return &obj.Variant }),
-	"baseline-shift": styleprops.Enum(ShiftBaseline,
-		func(obj *Font) enums.EnumSetter { return &obj.Shift }),
-	"text-decoration": func(obj any, key string, val any, parent any, cc colors.Context) {
-		fs := obj.(*Font)
-		if inh, init := styleprops.InhInit(val, parent); inh || init {
-			if inh {
-				fs.Decoration = parent.(*Font).Decoration
-			} else if init {
-				fs.Decoration = DecoNone
-			}
-			return
-		}
-		switch vt := val.(type) {
-		case string:
-			if vt == "none" {
-				fs.Decoration = DecoNone
-			} else {
-				fs.Decoration.SetString(vt)
-			}
-		case TextDecorations:
-			fs.Decoration = vt
-		default:
-			iv, err := reflectx.ToInt(val)
-			if err == nil {
-				fs.Decoration = TextDecorations(iv)
-			} else {
-				styleprops.SetError(key, val, err)
-			}
-		}
-	},
-}
-
-// styleFontRenderFuncs are _extra_ functions for styling
-// the FontRender object in addition to base Font
-var styleFontRenderFuncs = map[string]styleprops.Func{
-	"color": func(obj any, key string, val any, parent any, cc colors.Context) {
-		fs := obj.(*FontRender)
-		if inh, init := styleprops.InhInit(val, parent); inh || init {
-			if inh {
-				fs.Color = parent.(*FontRender).Color
-			} else if init {
-				fs.Color = colors.Scheme.OnSurface
-			}
-			return
-		}
-		fs.Color = errors.Log1(gradient.FromAny(val, cc))
-	},
-	"background-color": func(obj any, key string, val any, parent any, cc colors.Context) {
-		fs := obj.(*FontRender)
-		if inh, init := styleprops.InhInit(val, parent); inh || init {
-			if inh {
-				fs.Background = parent.(*FontRender).Background
-			} else if init {
-				fs.Background = nil
-			}
-			return
-		}
-		fs.Background = errors.Log1(gradient.FromAny(val, cc))
-	},
-	"opacity": styleprops.Float(float32(1),
-		func(obj *FontRender) *float32 { return &obj.Opacity }),
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-//  Text
-
-// styleTextFuncs are functions for styling the Text object
-var styleTextFuncs = map[string]styleprops.Func{
-	"text-align": styleprops.Enum(Start,
-		func(obj *Text) enums.EnumSetter { return &obj.Align }),
-	"text-vertical-align": styleprops.Enum(Start,
-		func(obj *Text) enums.EnumSetter { return &obj.AlignV }),
-	"text-anchor": styleprops.Enum(AnchorStart,
-		func(obj *Text) enums.EnumSetter { return &obj.Anchor }),
-	"letter-spacing": styleprops.Units(units.Value{},
-		func(obj *Text) *units.Value { return &obj.LetterSpacing }),
-	"word-spacing": styleprops.Units(units.Value{},
-		func(obj *Text) *units.Value { return &obj.WordSpacing }),
-	"line-height": styleprops.Units(LineHeightNormal,
-		func(obj *Text) *units.Value { return &obj.LineHeight }),
-	"white-space": styleprops.Enum(WhiteSpaceNormal,
-		func(obj *Text) enums.EnumSetter { return &obj.WhiteSpace }),
-	"unicode-bidi": styleprops.Enum(BidiNormal,
-		func(obj *Text) enums.EnumSetter { return &obj.UnicodeBidi }),
-	"direction": styleprops.Enum(LRTB,
-		func(obj *Text) enums.EnumSetter { return &obj.Direction }),
-	"writing-mode": styleprops.Enum(LRTB,
-		func(obj *Text) enums.EnumSetter { return &obj.WritingMode }),
-	"glyph-orientation-vertical": styleprops.Float(float32(1),
-		func(obj *Text) *float32 { return &obj.OrientationVert }),
-	"glyph-orientation-horizontal": styleprops.Float(float32(1),
-		func(obj *Text) *float32 { return &obj.OrientationHoriz }),
-	"text-indent": styleprops.Units(units.Value{},
-		func(obj *Text) *units.Value { return &obj.Indent }),
-	"para-spacing": styleprops.Units(units.Value{},
-		func(obj *Text) *units.Value { return &obj.ParaSpacing }),
-	"tab-size": styleprops.Int(int(4),
-		func(obj *Text) *int { return &obj.TabSize }),
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-//  Border
+////////  Border
 
 // styleBorderFuncs are functions for styling the Border object
 var styleBorderFuncs = map[string]styleprops.Func{

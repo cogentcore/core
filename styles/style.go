@@ -22,6 +22,8 @@ import (
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
 )
 
 // IMPORTANT: any changes here must be updated in style_properties.go StyleStyleFuncs
@@ -209,10 +211,10 @@ type Style struct { //types:add
 	ScrollbarWidth units.Value
 
 	// font styling parameters
-	Font Font
+	Font rich.Style
 
 	// text styling parameters
-	Text Text
+	Text text.Style
 
 	// unit context: parameters necessary for anchoring relative units
 	UnitContext units.Context
@@ -343,7 +345,6 @@ func (s *Style) InheritFields(parent *Style) {
 // ToDotsImpl runs ToDots on unit values, to compile down to raw pixels
 func (s *Style) ToDotsImpl(uc *units.Context) {
 	s.LayoutToDots(uc)
-	s.Font.ToDots(uc)
 	s.Text.ToDots(uc)
 	s.Border.ToDots(uc)
 	s.MaxBorder.ToDots(uc)
@@ -487,8 +488,8 @@ func (s *Style) CenterAll() {
 	s.Justify.Items = Center
 	s.Align.Content = Center
 	s.Align.Items = Center
-	s.Text.Align = Center
-	s.Text.AlignV = Center
+	s.Text.Align = text.Center
+	s.Text.AlignV = text.Center
 }
 
 // SettingsFont and SettingsMonoFont are pointers to Font and MonoFont in
@@ -501,19 +502,20 @@ var SettingsFont, SettingsMonoFont *string
 // and [SettingsMonoFont] pointers if possible, and falling back on "mono"
 // and "sans-serif" otherwise.
 func (s *Style) SetMono(mono bool) {
-	if mono {
-		if SettingsMonoFont != nil {
-			s.Font.Family = *SettingsMonoFont
-			return
-		}
-		s.Font.Family = "mono"
-		return
-	}
-	if SettingsFont != nil {
-		s.Font.Family = *SettingsFont
-		return
-	}
-	s.Font.Family = "sans-serif"
+	// todo: fixme
+	// if mono {
+	// 	if SettingsMonoFont != nil {
+	// 		s.Font.Family = *SettingsMonoFont
+	// 		return
+	// 	}
+	// 	s.Font.Family = "mono"
+	// 	return
+	// }
+	// if SettingsFont != nil {
+	// 	s.Font.Family = *SettingsFont
+	// 	return
+	// }
+	// s.Font.Family = "sans-serif"
 }
 
 // SetTextWrap sets the Text.WhiteSpace and GrowWrap properties in
@@ -522,10 +524,10 @@ func (s *Style) SetMono(mono bool) {
 // are typically the two desired stylings.
 func (s *Style) SetTextWrap(wrap bool) {
 	if wrap {
-		s.Text.WhiteSpace = WhiteSpaceNormal
+		s.Text.WhiteSpace = text.WrapAsNeeded
 		s.GrowWrap = true
 	} else {
-		s.Text.WhiteSpace = WhiteSpaceNowrap
+		s.Text.WhiteSpace = text.WrapNever
 		s.GrowWrap = false
 	}
 }

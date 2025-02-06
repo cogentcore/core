@@ -343,6 +343,8 @@ const (
 	// Quote starts an indented paragraph-level quote.
 	Quote
 
+	// todo: could add SmallCaps here?
+
 	// End must be added to terminate the last Special started: use [Text.AddEnd].
 	// The renderer maintains a stack of special elements.
 	End

@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
 )
 
 // ToCSS converts the given [Style] object to a semicolon-separated CSS string.
@@ -60,24 +61,25 @@ func ToCSS(s *Style, idName, htmlName string) string {
 	add("padding-bottom", s.Padding.Bottom.StringCSS())
 	add("padding-left", s.Padding.Left.StringCSS())
 	add("margin", s.Margin.Top.StringCSS())
-	if s.Font.Size.Value != 16 || s.Font.Size.Unit != units.UnitDp {
-		add("font-size", s.Font.Size.StringCSS())
+	if s.Text.FontSize.Value != 16 || s.Text.FontSize.Unit != units.UnitDp {
+		add("font-size", s.Text.FontSize.StringCSS())
 	}
-	if s.Font.Family != "" && s.Font.Family != "Roboto" {
-		ff := s.Font.Family
-		if strings.HasSuffix(ff, "Mono") {
-			ff += ", monospace"
-		} else {
-			ff += ", sans-serif"
-		}
-		add("font-family", ff)
-	}
-	if s.Font.Weight == WeightMedium {
+	// todo:
+	// if s.Font.Family != "" && s.Font.Family != "Roboto" {
+	// 	ff := s.Font.Family
+	// 	if strings.HasSuffix(ff, "Mono") {
+	// 		ff += ", monospace"
+	// 	} else {
+	// 		ff += ", sans-serif"
+	// 	}
+	// 	add("font-family", ff)
+	// }
+	if s.Font.Weight == rich.Medium {
 		add("font-weight", "500")
 	} else {
 		add("font-weight", s.Font.Weight.String())
 	}
-	add("line-height", s.Text.LineHeight.StringCSS())
+	add("line-height", fmt.Sprintf("%g", s.Text.LineHeight))
 	add("text-align", s.Text.Align.String())
 	if s.Border.Width.Top.Value > 0 {
 		add("border-style", s.Border.Style.Top.String())

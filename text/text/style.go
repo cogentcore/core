@@ -21,6 +21,8 @@ import (
 // or word spacing. These are uncommonly adjusted and not compatible with
 // internationalized text in any case.
 
+// todo: bidi override?
+
 // Style is used for text layout styling.
 // Most of these are inherited
 type Style struct { //types:add
@@ -218,3 +220,13 @@ func (ws WhiteSpaces) KeepWhiteSpace() bool {
 		return false
 	}
 }
+
+// UnicodeBidi determines the type of bidirectional text support.
+// See https://pkg.go.dev/golang.org/x/text/unicode/bidi.
+// type UnicodeBidi int32 //enums:enum -trim-prefix Bidi -transform kebab
+//
+// const (
+// 	BidiNormal UnicodeBidi = iota
+// 	BidiEmbed
+// 	BidiBidiOverride
+// )

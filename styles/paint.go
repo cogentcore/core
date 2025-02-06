@@ -10,6 +10,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
 )
 
 // Paint provides the styling parameters for SVG-style rendering,
@@ -18,13 +20,11 @@ import (
 type Paint struct { //types:add
 	Path
 
-	// FontStyle selects font properties and also has a global opacity setting,
-	// along with generic color, background-color settings, which can be copied
-	// into stroke / fill as needed.
-	FontStyle FontRender
+	// Font selects font properties.
+	Font rich.Style
 
-	// TextStyle has the text styling settings.
-	TextStyle Text
+	// Text has the text styling settings.
+	Text text.Style
 
 	//	ClipPath is a clipping path for this item.
 	ClipPath ppath.Path
@@ -41,21 +41,21 @@ func NewPaint() *Paint {
 
 func (pc *Paint) Defaults() {
 	pc.Path.Defaults()
-	pc.FontStyle.Defaults()
-	pc.TextStyle.Defaults()
+	pc.Font.Defaults()
+	pc.Text.Defaults()
 }
 
 // CopyStyleFrom copies styles from another paint
 func (pc *Paint) CopyStyleFrom(cp *Paint) {
 	pc.Path.CopyStyleFrom(&cp.Path)
-	pc.FontStyle = cp.FontStyle
-	pc.TextStyle = cp.TextStyle
+	pc.Font = cp.Font
+	pc.Text = cp.Text
 }
 
 // InheritFields from parent
 func (pc *Paint) InheritFields(parent *Paint) {
-	pc.FontStyle.InheritFields(&parent.FontStyle)
-	pc.TextStyle.InheritFields(&parent.TextStyle)
+	pc.Font.InheritFields(&parent.Font)
+	pc.Text.InheritFields(&parent.Text)
 }
 
 // SetStyleProperties sets paint values based on given property map (name: value
@@ -73,15 +73,15 @@ func (pc *Paint) SetStyleProperties(parent *Paint, properties map[string]any, ct
 
 func (pc *Paint) FromStyle(st *Style) {
 	pc.UnitContext = st.UnitContext
-	pc.FontStyle = *st.FontRender()
-	pc.TextStyle = st.Text
+	pc.Font = st.Font
+	pc.Text = st.Text
 }
 
 // ToDotsImpl runs ToDots on unit values, to compile down to raw pixels
 func (pc *Paint) ToDotsImpl(uc *units.Context) {
 	pc.Path.ToDotsImpl(uc)
-	pc.FontStyle.ToDots(uc)
-	pc.TextStyle.ToDots(uc)
+	// pc.Font.ToDots(uc)
+	pc.Text.ToDots(uc)
 }
 
 // SetUnitContextExt sets the unit context for external usage of paint
@@ -94,7 +94,8 @@ func (pc *Paint) SetUnitContextExt(size image.Point) {
 	}
 	// TODO: maybe should have different values for these sizes?
 	pc.UnitContext.SetSizes(float32(size.X), float32(size.Y), float32(size.X), float32(size.Y), float32(size.X), float32(size.Y))
-	pc.FontStyle.SetUnitContext(&pc.UnitContext)
+	// todo: need a shaper here to get SetUnitContext call
+	// pc.Font.SetUnitContext(&pc.UnitContext)
 	pc.ToDotsImpl(&pc.UnitContext)
 	pc.dotsSet = true
 }
