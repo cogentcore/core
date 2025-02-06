@@ -1825,6 +1825,9 @@ func (tf *TextField) Style() {
 }
 
 func (tf *TextField) configTextSize(sz math32.Vector2) math32.Vector2 {
+	if tf.Scene == nil || tf.Scene.Painter.State == nil {
+		return math32.Vector2{}
+	}
 	pc := &tf.Scene.Painter
 	if pc.TextShaper == nil {
 		return math32.Vector2{}
@@ -1931,7 +1934,11 @@ func (tf *TextField) setEffPosAndSize() {
 	if trail := tf.trailingIconButton; trail != nil {
 		sz.X -= trail.Geom.Size.Actual.Total.X
 	}
-	tf.numLines = len(tf.renderAll.Lines)
+	if tf.renderAll == nil {
+		tf.numLines = 0
+	} else {
+		tf.numLines = len(tf.renderAll.Lines)
+	}
 	if tf.numLines <= 1 {
 		pos.Y += 0.5 * (sz.Y - tf.fontHeight) // center
 	}
@@ -1940,6 +1947,9 @@ func (tf *TextField) setEffPosAndSize() {
 }
 
 func (tf *TextField) Render() {
+	if tf.Scene == nil || tf.Scene.Painter.State == nil {
+		return
+	}
 	pc := &tf.Scene.Painter
 	if pc.TextShaper == nil {
 		return

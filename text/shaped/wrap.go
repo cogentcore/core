@@ -47,6 +47,11 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	} else if tsty.WhiteSpace == text.WrapAlways {
 		brk = shaping.Always
 	}
+	if brk == shaping.Never {
+		maxSize = 1000
+		nlines = 1
+	}
+	// fmt.Println(brk, nlines, maxSize)
 	cfg := shaping.WrapConfig{
 		Direction:                     dir,
 		TruncateAfterLines:            nlines,
